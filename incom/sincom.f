@@ -594,6 +594,11 @@ c
          if(ip(3).ne.0) return
       endif
 C
+C RDBE.ctl
+C
+      call rdbe_equip(idcb,FS_ROOT//'/control/rdbe.ctl',ip,-231)
+      if(ip(3).ne.0) return
+C
 320   continue
 C
 C 3.2 Open the file with device LU information.

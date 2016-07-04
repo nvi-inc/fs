@@ -21,4 +21,8 @@ struct rdbe_dot_mon {
     char Actual_DOT_time[33];
     struct m5state state;
   } Actual_DOT_time ;
+  struct {
+    int vdif_epoch;
+    struct m5state state;
+  } vdif_epoch;
 };

@@ -282,6 +282,8 @@ loop:
 	  break;
 	case 20:
 	case 22:
+	case 23:
+	case 24:
 	  dbbc(&command,itask,ip);
 	  break;
     case 21:

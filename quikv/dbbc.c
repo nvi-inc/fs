@@ -41,7 +41,7 @@ parse:
       outbuf[0]=0;
 
       while( ptr != NULL) {
-	if(22 == itask)
+	if(22 == itask || 24 == itask)
 	  strcat(outbuf,"fila10g=");
 	strcat(outbuf,ptr);
 	strcat(outbuf,",");
@@ -53,13 +53,16 @@ parse:
       out_recs++;
 
 dbbcn:
-      if(22==itask)
+      if(22==itask || 24 == itask )
 	ip[0]=7;
       else
 	ip[0]=1;
       ip[1]=out_class;
       ip[2]=out_recs;
-      skd_run("dbbcn",'w',ip);
+      if(20 == itask || 22 == itask)
+	skd_run("dbbcn",'w',ip);
+      else
+	skd_run("dbbc2",'w',ip);
       skd_par(ip);
 
       dbbc_dis(command,itask,ip);

@@ -65,3 +65,7 @@ The counts output converts to linear power scale approximately using
 the (C-language) expression:
 
   power=pow(10.0,counts/19000.)
+
+Assuming a 512 MHz wide input bandpass, the nominal operating count
+level is 38000-45000 for the DDC personality, and 40000-45000 for tghe
+PFB the DDC personality.

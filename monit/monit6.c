@@ -65,9 +65,7 @@ main()
     refresh();
 
     rte_time(it,&iyear);
-    isleep=120-it[0];
-    isleep=isleep>100?100:isleep;
-    isleep=isleep<1?100:isleep;
+    isleep=125-it[0];
     rte_sleep((unsigned) isleep);
 
     if (nsem_test("fs   ") != 1) {

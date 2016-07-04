@@ -17,9 +17,10 @@ extern int s2type;
 extern char s2dev[2][3];
 extern int iRDBE;
 
-void setfmtime(formtime,delta)
+void setfmtime(formtime,delta,vdif_epoch)
 time_t formtime;
 int delta;
+int vdif_epoch;
 {
 
 if (nsem_test(NSEM_NAME) != 1) {
@@ -29,7 +30,7 @@ if (nsem_test(NSEM_NAME) != 1) {
   exit(0);
 }
   if (source == RDBE) 
-    setRDBEtime(formtime,delta);
+    setRDBEtime(formtime,delta,vdif_epoch);
   else if (source == MK5 )
     set5btime(formtime,delta);
   else if (source == DBBC

@@ -33,4 +33,5 @@ tpicd n tpicd &
 flagr n flagr &
 dscon n dscon &
 holog n holog &
-dbbcn n dbbcn &
+dbbcn n dbbcn cn &
+dbbc2 n dbbcn c2 &

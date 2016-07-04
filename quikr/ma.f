@@ -66,7 +66,7 @@ C
       nrec = 0
       iclass = 0
       ifc = 1+ieq
-      call upper(ibuf,1,nchar)
+      if(nsub.eq.1) call upper(ibuf,1,nchar)
 C      
 200   continue
       ichr=ifc

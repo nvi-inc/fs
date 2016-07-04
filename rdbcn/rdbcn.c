@@ -72,7 +72,7 @@ static char control_file[65];
 
 
 static void close_socket();
-static int read_response(char*, int, FILE*, int);
+static int read_response(char*, int, FILE*, int, int);
 static int drain_input_stream(FILE*);
 
 
@@ -118,6 +118,7 @@ int main(int argc, char * argv[])
     case 1:
     case 4:
     case 5:
+    case 6:
       if(!is_init) {
 	cls_clr(ip[1]);
 	ip[0]=ip[1]=0;
@@ -507,6 +508,7 @@ long ip[5];
   int msgflg;  /* argument for cls_rcv - unused */
   int save;    /* argument for cls_rcv - unused */
   char secho[3*BUFSIZE];
+  char lbuf[7+BUFSIZE];
 
   long in_class;
   long out_class=0;
@@ -523,11 +525,11 @@ long ip[5];
   int ierr, mode;
   int centisec[6];             /* arguments of rte_tick rte_cmpt */
   int itbefore[6];
+  int newline;
 
-#define  MAX_SAVE 20
   struct tms tms_buff;
   long end;
-  int kfound;
+  int kfound, kfirst;
 
   mode=ip[0];
   in_class=ip[1];
@@ -598,6 +600,8 @@ long ip[5];
 
     time_out_local=time_out;
 
+    newline = 6 == mode;
+
     if(iecho && strlen(secho)> 0) {
       logit(secho,0,NULL);
       secho[0]=0;
@@ -619,10 +623,12 @@ long ip[5];
       if(strlen(secho) < sizeof(secho)-1)
 	strcat(secho,"]");
     }
+
     if(mode==4) {
       rte_cmpt(centisec+2,centisec+4);
       rte_ticks (centisec);
     }
+    kfirst=TRUE;
     if (send(sock, inbuf, nchars, flags) < nchars) { /* Send to socket, OK? */ 
 #ifdef DEBUG
       (void) fprintf(stderr, /* Nope */ 
@@ -640,8 +646,9 @@ long ip[5];
 #endif
 
     /* * Read reply * */ 
-    outbuf[0]=0;
-    ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local);
+  read:
+    ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local,
+			  newline);
     if(mode==4) {
       rte_ticks (centisec+1);
       rte_cmpt(centisec+3,centisec+5);
@@ -668,7 +675,10 @@ long ip[5];
       secho[0]=0;
     }
 
-    if(outbuf[0]!=0) {
+    if(outbuf[0]!=0 && outbuf[strlen(outbuf)-1]=='\n')
+      outbuf[strlen(outbuf)-1]=0;
+
+    if(outbuf[0]!=0 && ip[2] <=0) {
       outbuf[511]=0; /* truncate to maximum class record size, cls_snd
 			can't do this because it doesn't know it is a string,
 			cls_rcv() calling should do it either since this 
@@ -677,7 +687,7 @@ long ip[5];
       out_recs++;
     }
 
-    if(ip[2]!=0) {
+    if(ip[2]<0) {
       close_socket();
       goto error;
     }
@@ -685,7 +695,6 @@ long ip[5];
     /* * Print reply * */ 
     (void) fputs(outbuf, stdout); /* Print to stdout */ 
 #endif
-
 
     if(mode==4) {
       cls_snd(&out_class, centisec, sizeof(centisec) , 0, 0);
@@ -697,45 +706,62 @@ long ip[5];
     if(mode==5)   /* no error report here */
       continue;
 
-    kfound=FALSE;
-    ptr=strchr(outbuf,'!');
-    if(ptr!=NULL &&  1==sscanf(ptr+1,"%d",&ierr))
-      kfound=TRUE;
-    if(!kfound) {
-      ptr=strchr(outbuf,'?');
-      if(ptr==NULL)
-	ptr=strchr(outbuf,'=');
-      if(ptr==NULL)
-	ptr=strchr(outbuf,':');
-    }
-    if(!kfound && (ptr==NULL ||  1!=sscanf(ptr+1,"%d",&ierr))){
-      ip[2]=-899;
-      goto error;
-    } else if(ierr != 0 && ierr != 1) {
-      /* is there a trailing parameter that could contain an error message */
-      ptr=strchr(outbuf,':');
-      if(ptr!=NULL) {
-	char *save, *ptr2;
-
-	ptr2=strchr(ptr+1,';'); /* terminate the string at the ; */
-
-	if(ptr2!=NULL)
-	  *ptr2=0;
-
-	while(*ptr!=0 && *ptr ==' ')
-	  ptr++;
-	if(*ptr!=0) {
-	  char save2[128];
-	  strcpy(save2,"rdb");
-	  strncat(save2,who,2);
-	  strcat(save2,": RDBE error information: ");
-	  strncat(save2,ptr,sizeof(save2)-strlen(save2));
-	  save2[sizeof(save2)-1]=0;
-	  logite(save2,-900,"ra");
-	}
+    if(kfirst) {
+      kfound=FALSE;
+      ptr=strchr(outbuf,'!');
+      if(ptr!=NULL &&  1==sscanf(ptr+1,"%d",&ierr))
+	kfound=TRUE;
+      if(!kfound) {
+	ptr=strchr(outbuf,'?');
+	if(ptr==NULL)
+	  ptr=strchr(outbuf,'=');
+	if(ptr==NULL)
+	  ptr=strchr(outbuf,':');
       }
-      ip[2]=-900-ierr;
-      goto error;
+      if(!kfound && (ptr==NULL ||  1!=sscanf(ptr+1,"%d",&ierr))){
+	ip[2]=-899;
+	goto error;
+      } else if(ierr != 0 && ierr != 1) {
+	/* is there a trailing parameter that could contain an error message */
+	ptr=strchr(outbuf,':');
+	if(ptr!=NULL) {
+	  char *save, *ptr2;
+	  
+	  ptr2=strchr(ptr+1,';'); /* terminate the string at the ; */
+	  
+	  if(ptr2!=NULL)
+	    *ptr2=0;
+	  
+	  while(*ptr!=0 && *ptr ==' ')
+	    ptr++;
+	  if(*ptr!=0) {
+	    char save2[128];
+	    strcpy(save2,"rdb");
+	    strncat(save2,who,2);
+	    strcat(save2,": RDBE error information: ");
+	    strncat(save2,ptr,sizeof(save2)-strlen(save2));
+	    save2[sizeof(save2)-1]=0;
+	    logite(save2,-900,"ra");
+	  }
+	}
+	ip[2]=-900-ierr;
+	goto error;
+      }
+    }
+    if(1==ip[2]) {
+      int i, is;
+
+      strcpy(lbuf,me);
+      strcat(lbuf,"/");
+      is=strlen(lbuf);
+      for(i=0;outbuf[i]!=0;i++)
+	if(isprint(outbuf[i]))
+	  lbuf[is++]=outbuf[i];
+      lbuf[is]=0;
+      logit(lbuf,0,NULL);
+      outbuf[0]=0;
+      kfirst=FALSE;
+      goto read;
     }
       
 
@@ -833,13 +859,13 @@ static void close_socket()
 
 ////////////////////////////////////////////////////////////////////////////////
 // read_response:
-//  Reads a single Rdbe response delimited by a newline.
+//  Reads a single Rdbe response delimited by a ';'.
 //  All characters are preserved.
 //  Underlying fd (or stream itself?) must be non-blocking
 //  On any error, the last (partial) response is returned.
 ////////////////////////////////////////////////////////////////////////////////
 // Features of this implementation:
-// (1) Does not us the dreaded fgets(), thanks to Jan Wagner
+// (1) Does not use the dreaded fgets(), thanks to Jan Wagner
 // (2) select() is never called unless there is no input available
 //     (but that is almost sure to happen on the first call)
 // (3) if there is no data available when a time-out is first detected
@@ -850,7 +876,7 @@ static void close_socket()
 //     loop. Oddly, "man select_tut" seems to think you should not use
 //     select() for time-outs if you can avoid it
 // (4) a server crash does not cause an infinite loop
-// (5) assumes anything after \n in the response is cleared by
+// (5) assumes anything after ';' in the response is cleared by
 //    draining the input buffer before the next write to the Mark 5
 //    (drain_input_stream() below).
 //
@@ -861,7 +887,7 @@ static void close_socket()
 ////////////////////////////////////////////////////////////////////////////////
 
 static int read_response(char *str, int num, FILE* stream,
-			 int time_out_local)
+			 int time_out_local, int newline)
 {
   int c, iret;
     char* cs = str;
@@ -927,8 +953,13 @@ static int read_response(char *str, int num, FILE* stream,
       /* Append */
       *cs++ = c;
       num--;
-      if(c=='\n')
+      if(c==';')
 	goto done;
+      else if(c =='\n' && newline) {
+	iret=1;
+	goto done;
+      }
+      
     }
     iret = -109; /* ended before newline */
    

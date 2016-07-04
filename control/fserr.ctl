@@ -6,16 +6,28 @@ Parameters must since single characters
 Parameters must be 'a', 'b', ...,  'd' (to maximum possible number of RDBEs).
 ""
 2B -201
-Error decoding attenuator 0 setting, must be auto, 0, 0.5, 1.0, ..., 31.0,31.5.
+Error decoding IF value, must be both, 0, or 1.
 ""
 2B -202
-Error decoding attenuator 1 setting, must be auto, 0, 0.5, 1.0, ..., 31.0,31.5.
+Error decoding attenuator value, must be auto, 0, 0.5, 1.0, ..., 31.0,31.5.
+""
+2B -203
+Error decoding target RMS value, must be between 0.0 and 128.0, inclusive.
 ""
 2B -301
-No active rdbes defined for parallel operaiton.
+No active rdbes defined for parallel operation.
 ""
 2B -302
-All arguments may not be NULL.
+IF 0 RMS too low, rdb?W
+""
+2B -303
+IF 1 RMS too low, rdb?W
+""
+2B -304
+IF 0 RMS too high, rdb?W
+""
+2B -305
+IF 1 RMS too high, rdb?W
 ""
 2B -401
 error retrieving class for IF0 query for dbe_atten, rdb?W
@@ -24,13 +36,25 @@ error retrieving class for IF0 query for dbe_atten, rdb?W
 error retrieving class for IF1 query for dbe_atten, rdb?W
 ""
 2B -501
-error decording for IF0 query for dbe_atten, rdb?W
+error decording first IF for dbe_atten, rdb?W
 ""
 2B -502
-error decording for IF1 query for dbe_atten, rdb?W
+error decording first attenuator for dbe_atten, rdb?W
+""
+2B -503
+error decording first RMS for dbe_atten, rdb?W
+""
+2B -504
+error decording second IF for dbe_atten, rdb?W
+""
+2B -502
+error decording second attenuator for dbe_atten, rdb?W
+""
+2B -503
+error decording second RMS for dbe_atten, rdb?W
 ""
 2B -901
-query response not received for dbe_atten
+response not received for dbe_atten
 ""
 2B -902
 program error: strdup() failed for dbe_atten
@@ -84,7 +108,7 @@ error decoding dot? OS_time parameter
 error decoding dot? DOT_OS_time_diff parameter
 ""
 3E -505
-error decoding dot? Actual_DOT_time parameter
+error decoding dot? vdif_epoch parameter
 ""
 3E -901
 query response not received
@@ -1191,12 +1215,15 @@ BO -194
 Error initiliazing dbbcn, internal error ?WWW
 ""
 BO -195
-Error initiliazing mk6ca, internal error ?WWW
+Error initiliazing dbbc2, internal error ?WWW
 ""
 BO -196
+Error initiliazing mk6ca, internal error ?WWW
+""
+BO -197
 Error initiliazing mk6cb, internal error ?WWW
 ""
-BO -199
+BO -198
 More than ?WWW Mark6s requires mods to binit.f (plus fspgm.ctl, fserr.ctl, and mk6cn.c).
 ""
 BO -201
@@ -1252,6 +1279,12 @@ Error opening head2.ctl ?FFF
 ""
 BO -230
 Error decoding head2.ctl line ?WWW
+""
+BO -231
+Error opening rdbe.ctl ?FFF 
+""
+BO -232
+Error decoding rdbe.ctl line ?WWW
 ""
 BO -251
 Internal error: time for secsnow invalid
@@ -1893,106 +1926,106 @@ CH -805
 Frequency Switching sequence has been changed.
 ""
 DB   -1
-dbbcn: error opening dbbad.ctl
+dbbc.: error opening dbb?W.ctl
 ""
 DB   -2
-dbbcn: error pushing back on dbbad.ctl
+dbbc.: error pushing back on dbb?W.ctl
 ""
 DB   -3
-dbbcn: first non-comment line in dbbad.ctl did not contain three tokens
+dbbc.: first non-comment line in dbb?W.ctl did not contain three tokens
 ""
 DB  -11
-dbbcn: error opening socket
+dbb?W: error opening socket
 ""
 DB  -13
-dbbcn: error from gethostbyname()
+dbb?W: error from gethostbyname()
 ""
 DB  -14
-dbbcn: host had NULL IP address
+dbb?W: host had NULL IP address
 ""
 DB  -15
-dbbcn: error connecting to host
+dbb?W: error connecting to host
 ""
 DB  -16
-dbbcn: error opening stream
+dbb?W: error opening stream
 ""
 DB  -17
-dbbcn: error gethostbyname(): HOST_NOT_FOUND
+dbb?W: error gethostbyname(): HOST_NOT_FOUND
 ""
 DB  -18
-dbbcn: error gethostbyname(): TRY_AGAIN
+dbb?W: error gethostbyname(): TRY_AGAIN
 ""
 DB  -19
-dbbcn: error gethostbyname(): NO_RECOVERY
+dbb?W: error gethostbyname(): NO_RECOVERY
 ""
 DB  -20
-dbbcn: error gethostbyname(): NO_ADDRESS
+dbb?W: error gethostbyname(): NO_ADDRESS
 ""
 DB  -21
-dbbcn: error connect(): dbbc device connection open timed-out
+dbb?W: error connect(): dbbc device connection open timed-out
 ""
 DB  -22
-dbbcn: error from getsockopt(), see above for error
+dbb?W: error from getsockopt(), see above for error
 ""
 DB  -23
-dbbcn: error opening, dbbc probably not running, see above for error
+dbb?W: error opening, dbbc probably not running, see above for error
 ""
 DB  -24
-dbbcn: select for connect() error, see above for error
+dbb?W: select for connect() error, see above for error
 ""
 DB  -25
-dbbcn: error gethostbyname(): DNS timed-out
+dbb?W: error gethostbyname(): DNS timed-out
 ""
 DB  -98
-dbbcn: no dbbc device defined
+dbb?W: no dbbc device defined
 ""
 DB  -99
-dbbcn: illegal mode
+dbb?W: illegal mode
 ""
 DB -101
-dbbcn: error getting class buffer
+dbb?W: error getting class buffer
 ""
 DB -102
-dbbcn: error sending data, connection closed
+dbb?W: error sending data, connection closed
 ""
 DB -103
-dbbcn: error on select reading data, see above for error, connection closed
+dbb?W: error on select reading data, see above for error, connection closed
 ""
 DB -104
-dbbcn: time-out, connection closed
+dbb?W: time-out, connection closed
 ""
 DB -105
-dbbcn: error on read, see above for error, connection closed
+dbb?W: error on read, see above for error, connection closed
 ""
 DB -106
-dbbcn: error and EOF on read, see above for error, connection closed
+dbb?W: error and EOF on read, see above for error, connection closed
 ""
 DB -107
-dbbcn: EOF on read, dbbc may have crashed, connection closed
+dbb?W: EOF on read, dbbc may have crashed, connection closed
 ""
 DB -108
-dbbcn: no data on read, but no EOF or error, connection closed
+dbb?W: no data on read, but no EOF or error, connection closed
 ""
 DB -109
-dbbcn: read too long for input buffer, only returning partial response
+dbb?W: read too long for input buffer, only returning partial response
 ""
 DB -110
-dbbcn: error pre-draining input, see above for error, connection closed
+dbb?W: error pre-draining input, see above for error, connection closed
 ""
 DB -111
-dbbcn: error and EOF pre-draining input, see above for error, connection closed
+dbb?W: error and EOF pre-draining input, see above for error, connection closed
 ""
 DB -112
-dbbcn: EOF pre-draining input, dbbc may have crashed, connection closed
+dbb?W: EOF pre-draining input, dbbc may have crashed, connection closed
 ""
 DB -113
-dbbcn: no data pre-draining input, but no EOF or error, connection closed
+dbb?W: no data pre-draining input, but no EOF or error, connection closed
 ""
 DB -114
-dbbcn: re-open after pre-drain error was okay, proceeding to transaction.
+dbb?W: re-open after pre-drain error was okay, proceeding to transaction.
 ""
 DB -201
-dbbcn: ERROR response from DBBC, see db -200 error for text.
+dbb?W: ERROR response from DBBC, see db -200 error for text.
 ""
 DC -101
 No default for frequency
@@ -3109,6 +3142,12 @@ Required DAS hardware not available, check equip.ctl.
 ""
 LF -904
 Fine Tuner is currently not available - see IFPnn settings.
+""
+LG   -1 Place Holder for lgerr Error
+
+""
+LG    1 Place Holder for lgerr Warning
+
 ""
 LI -101
 No default for frequency.
@@ -4497,10 +4536,10 @@ QH -202
 Elevation span must have an absolute value less than 90.
 ""
 QH -203
-Azimuth points must have an odd absolute value between 2 and 100.
+Azimuth points must have an odd absolute value less than 100.
 ""
 QH -204
-Elevation points must have odd absolute value between 2 and 100 and the same sign as azimuth points.
+Elevation points must have odd absolute value less than 100.
 ""
 QH -205
 Re-calibration period (seconds) must be "off" (0, default) or positive number less than 10001.

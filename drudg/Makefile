@@ -42,7 +42,7 @@ proc_patch.o proc_pcalf.o proc_s2_comments.o proc_sked_proc.o proc_setup.o \
 proc_tracks.o proc_trkf.o \
 proc_vcname.o proc_vc_cmd.o proc_vracks_bbc.o proc_lba_ifp.o proc_mracks_vc.o proc_dbbc_bbc.o \
 proc_write_define.o procintr.o procs.o \
-prtmp.o prtxt.o psbar.o read_broadband_section.o read_nolf.o read_snap1.o read_snap6.o \
+prtmp.o prtxt.o psbar.o read_broadband_section.o read_snap1.o read_snap6.o \
 setprint.o setup_name.o setup_printer.o skdshft.o snap.o \
 snap_bit_density.o snap_check.o snap_data_valid.o snap_disk_check.o \
 snap_disk_end.o snap_disk2file_abort.o snap_enable.o snap_et.o snap_fast.o \

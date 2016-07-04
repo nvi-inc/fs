@@ -11,11 +11,12 @@
 
 int daymy();
 
-get_fila10gtime(centisec,fm_tim,ip,to)
+get_fila10gtime(centisec,fm_tim,ip,to,iDBBC)
 long centisec[6];
 int fm_tim[6];
 long ip[5];                          /* ipc array */
 int to;
+int iDBBC;
 {
       int out_recs, nrecs, irec, ierr;
       long out_class, iclass;
@@ -45,7 +46,10 @@ int to;
 #endif
       if(to!=0) {
 	char *name;
-	name="dbbcn";
+	if(2!=iDBBC)
+	  name="dbbcn";
+	else
+	  name="dbbc2";
 	while(skd_run_to(name,'w',ip,120)==1) {
 	  if (nsem_test("fs   ") != 1) {
 	    return 1;

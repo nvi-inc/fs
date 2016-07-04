@@ -1,4 +1,11 @@
 This file contains a summary of changes made and why.
+2015Jun14 init_hardware_common.f. Removed RDBE rack.  
+          ../skdrincl/valid_hardware.ftni   Added space for BB rack on Jun10.  Removed space for RDBE rack on Jun14. Net effect is a wash. 
+          ../valid_hardware_blk.f           Initialized BB rack. 
+2016Jun10 procs.f     Updated to use $PROCS section in sked file if rack type is "BB".
+2015Dec01 ../skdrut/read_nolf.f New routine that strips LF from the end of a line. Put in because sometimes the skd file
+                      is transferred via ftp with the wrong settings. 
+          proc_from_sked.f, read_broadband_section.f.  Modified to use read_nolf.f
 2015Nov05 snap.f  Fixed a couple of bugs with Broadband. Bug with writing out 'rtime'. Index should be istn, was istnsk. 
                   Also setup name hardcoded to 'setupbb' if station has Mark6 disk. 
 2015Apr04 snap.f  Removed special treatment if two consecutive scans involve the same source. 

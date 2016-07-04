@@ -40,13 +40,12 @@
       logical kk3fmk4rack
       logical k8bbc
       logical kdbbc_rack 
-      logical krdbe_rack 
-
+ 
       common /hardware/knorack,km3rack,km4rack,km5rack,kmracks
       common /hardware/kvrack,kv4rack,kv5rack,kvracks
       common /hardware/kk41rack,kk42rack,klrack
       common /hardware/km4fmk4rack,kk3fmk4rack,k8bbc
-      common /hardware/kdbbc_rack,krdbe_rack 
+      common /hardware/kdbbc_rack
 ! Mark4 formatter.
       logical kvform,km3form,km4form,km5form 
       common /hardware/kvform,km3form,km4form,km5form

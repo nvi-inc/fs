@@ -20,7 +20,7 @@ extern int s2type;
 extern char s2dev[2][3];
 
 void getfmtime(unixtime,unixhs,fstime,fshs,formtime,formhs,m5sync,sz_m5sync,
-	       m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock)
+	       m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock,vdif_epoch)
 time_t *unixtime; /* computer time */
 int    *unixhs;
 time_t *fstime; /* field system time */
@@ -35,6 +35,7 @@ char *m5freq;
 int sz_m5freq;
 char *m5clock;
 int sz_m5clock;
+int *vdif_epoch;
 {
   static long phase =-1;
   long raw, sleep, rawch;
@@ -56,7 +57,7 @@ int sz_m5clock;
     if(sleep >=0) {
       rte_sleep(sleep); 
     }
-    getRDBEtime(unixtime,unixhs,fstime,fshs,formtime,formhs,&rawch);
+    getRDBEtime(unixtime,unixhs,fstime,fshs,formtime,formhs,&rawch,vdif_epoch);
     if(*formtime < 0) {
       phase = -2;
     } else if(*formhs > -1 && *formhs < 100) {

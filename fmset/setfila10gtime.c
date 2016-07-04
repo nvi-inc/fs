@@ -23,6 +23,7 @@ extern long inclass;         /* input class number */
 extern long outclass;        /* output class number */
 extern long ip[5];           /* parameters for fs communications */
 extern int rtn1, rtn2, msgflg, save; /* unused cls_get args */
+extern iDBBC;
 
 void setfila10gtime(formtime,delta)
 time_t formtime;
@@ -41,7 +42,12 @@ int count;
    (void) strftime(outbuf,sizeof(outbuf),
 		   "fila10g=timesync %Y-%m-%dT%H:%M:%S",formtm);
  }
- logit("Fila10G time-set/sync command sent.",0,NULL);
+ if(0==iDBBC)
+   logit("FiLa10G time-set/sync command sent.",0,NULL);
+ else if (1==iDBBC)
+   logit("FiLa10G#1 time-set/sync command sent.",0,NULL);
+ else
+   logit("FiLa10G#2 time-set/sync command sent.",0,NULL);
  
  count=strlen(outbuf);		
 
@@ -54,7 +60,12 @@ ip[1] = outclass; /* class number */
 ip[2] = 1;        /* only one buf */
 ip[3] = 0;
 ip[4] = 0;
- name="dbbcn";
+
+ if(2!=iDBBC)
+   name="dbbcn";
+ else
+   name="dbbc2";
+
 nsem_take("fsctl",0);
 
 	while(skd_run_to(name,'w',ip,200)==1) {

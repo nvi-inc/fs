@@ -23,7 +23,7 @@
       crack_type(16)=    'Mark5'
       crack_type(17)=    'VLBA5'
       crack_type(18)=    'DBBC'
-      crack_type(19)=    'RDBE'
+      crack_type(19)=    'BB'
       crack_type(20)=    'unknown'
 
 ! Valid recorder types

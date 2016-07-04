@@ -2,12 +2,33 @@
 
 struct rdbe_atten_cmd {
   struct {
-    int if0;
+    int ifc;
     struct m5state state;
-  }  if0;
+  }  ifc;
   struct {
-    int if1;
+    int atten;
     struct m5state state;
-  }  if1;
+  }  atten;
+  struct {
+    float target;
+    struct m5state state;
+  }  target;
+  
+};
+struct rdbe_atten_mon {
+  struct {
+    struct {
+      int ifc;
+      struct m5state state;
+    }  ifc;
+    struct {
+      int atten;
+      struct m5state state;
+    }  atten;
+    struct {
+      float RMS;
+      struct m5state state;
+    }  RMS;
+  } ifc[2];
   
 };

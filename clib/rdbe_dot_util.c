@@ -37,6 +37,7 @@ rdbe_2_dot(ptr_in,lclm,ip) /* return values:
 
   m5state_init(&lclm->time.state);
   m5state_init(&lclm->DOT_OS_time_diff.state);
+  m5state_init(&lclm->vdif_epoch.state);
 
   ptr=strchr(ptr+1,':');
   if(ptr!=NULL) {
@@ -69,6 +70,13 @@ rdbe_2_dot(ptr_in,lclm,ip) /* return values:
 			   sizeof(lclm->DOT_OS_time_diff.DOT_OS_time_diff),
 			   &lclm->DOT_OS_time_diff.state)) {
 	  ierr=-504;
+	  goto error2;
+	}
+	break;
+      case 3:
+        if(m5sscanf(ptr,"%d",&lclm->vdif_epoch.vdif_epoch,
+		    &lclm->vdif_epoch.state)) {
+	  ierr=-505;
 	  goto error2;
 	}
 	break;

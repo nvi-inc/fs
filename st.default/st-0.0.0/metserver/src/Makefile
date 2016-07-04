@@ -5,7 +5,7 @@ all: ../metserver diag
 #
 CC= cc
 LIBES = ../port/port.a
-OBJECT_S = ./metserver.o ./metget.o ./err_report.o
+OBJECT_S = ./metserver.o ./metget.o ./err_report.o ./nmea_wind.o
 #
 ../metserver: $(OBJECT_S)
 	$(CC) $(OBJECT_S) $(LIBES) -o ../metserver -lpthread

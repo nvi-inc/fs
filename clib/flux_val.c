@@ -16,14 +16,14 @@ float flux_val(name,flux,nu,epoch,fwhm,corr,size)
   float lognu,logflux,fluxv;
   float fac0,fac1,fac2,fac4,fac5,fac;
 
-  fluxv=1.0;
+  fluxv=-1.0;
   *corr=1.0;
   *size=0.0;
   
   for(i=0;i<MAX_FLUX;i++){
-    if((flux+i)->name[0]==0)
+    if((flux+i)->name[0]==0) {
       return fluxv/ *corr;
-		    
+    }
     if(strcmp(name,(flux+i)->name)==0
        && nu >= (flux+i)->fmin && nu <= (flux+i)->fmax) {
       lognu=log10(nu);
@@ -60,7 +60,5 @@ float flux_val(name,flux,nu,epoch,fwhm,corr,size)
       *size=(flux+i)->size;
     }
   }
-
   return fluxv/ *corr;
 }
-

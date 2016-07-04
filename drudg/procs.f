@@ -10,6 +10,10 @@ C Version 9.0 is supported with this routine.
       include '../skdrincl/skobs.ftni'
       include '../skdrincl/data_xfer.ftni'
       include 'bbc_freq.ftni'
+
+! Now put in history in reverse order.
+!
+! 2016Jun10  JMG. Trigger in RACK_TYPE="BB" to generate procs from sked file.
 C
 C History
 C 930714  nrv  created,copied from procs
@@ -390,8 +394,8 @@ C
       END IF
 ! Write out the header information.
       call procintr
-! For a Mark6 recorder generate the proc file from the schedule. 
-       if(cstrec(istn,1) .eq. "Mark6") then
+! For a BB rack generate the proc file from the schedule. 
+       if(cstrack(istn) .eq. "BB") then
         write(luscn,"(' Reading $PROC$ from sked file... ',$)") 
         call proc_from_sked(ierr)   
         call drchmod(prcname,ierr)    

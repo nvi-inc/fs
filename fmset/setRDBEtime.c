@@ -23,21 +23,21 @@ extern long ip[5];           /* parameters for fs communications */
 extern int rtn1, rtn2, msgflg, save; /* unused cls_get args */
 extern int iRDBE;
 
-void setRDBEtime(formtime,delta)
+void setRDBEtime(formtime,delta,vdif_epoch)
 time_t formtime;
 int delta;
 {
-struct tm *fmtime;  /* pointer to tm structure */
 int count;
  char *name;
 
 	if(delta == 0) {
 	  unsigned char *cp;
 	  struct tm *formtm;
-	  
+	  char frmbuf[80];
+
+	  sprintf(frmbuf,"%s:%d;\n","dbe_dot=%Y%j%H%M%S",vdif_epoch);
 	  formtm=gmtime(&formtime);
-	  (void) strftime(outbuf,sizeof(outbuf),
-			  "dbe_dot=%Y%j%H%M%S:force;\n",formtm);
+	  (void) strftime(outbuf,sizeof(outbuf),frmbuf,formtm);
 	} else if (delta <0)
 	  (void) strcpy(outbuf,"dbe_dot_inc=-1;\n");
 	else

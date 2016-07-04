@@ -1,23 +1,26 @@
 		    rdbe_atten - RDBE attenuation
 
-            Syntax:     rdbe_attenX=<value0>,<value1>
+            Syntax:     rdbe_attenX=<if>,<atten>,<target>
 
-            Response:   rdbe_attenX/<value0>,<value1>
+            Response:   rdbe_attenX/<if>,<atten>,<target>,<ifx>,<attenx>,<RMSx>,<ify>,<atteny>,<RMSy>
 
 
 Settable parameters:
         X          letter: 'a','b', 'c', 'd', or null for all active RDBEs
-        <value0>   attenutation value for IF0, 0-31.5 in 0.5 steps, or "auto"
+        <if>       IF to adjust: 0, 1, or "both". Default: both
+        <atten>    attenuation value , 0-31.5 in 0.5 steps, or "auto"
                    when commanding to cause the RDBE(s) to automatically
-                   adjust the level to get a raw sample RMS of 32, a null
-                   value when commanding means to not set the attenuation
-        <value1>   attenutation value for IF1, 0-31.5 in 0.5 steps, or "auto"
-                   when commanding to cause the RDBE(s) to automatically
-                   adjust the level to get a raw sample RMS of 32, a null
-                   value when commanding means to not set the attenuation
+                   adjust the level to get a raw sample RMS of <target>.
+		   Default: auto.
+        <target>   target RMS value: 0.0-128.0. Default 32.0.
 
-
-Monitor-only parameters: none
+Monitor-only parameters:
+        <ifx>      "0" or "1", the next two values are for that IF
+        <attenx>   attenuation value for this IF.
+        <RMSx>     RMS value for this IF.
+        <ify>      "1", the next two values are for that IF, if present
+        <atteny>   attenuation value for this IF, if present
+        <RMSy>     RMS value for this IF, if present
 
 Comments:
 Like all commands that start with "rdbe", this command can either
@@ -26,3 +29,6 @@ to the command, or all active RDBEs if no letter is appended.  The
 response always includes the letter of the RDBE the response came
 from.  Active RDBEs are defined by the "active_rdbes" command.  At
 start-up all configured RDBEs are considered active.
+
+On command, the response does not show the commanded values and shows
+the actual value for only the IFs adjusted.

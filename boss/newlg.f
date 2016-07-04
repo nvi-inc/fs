@@ -462,6 +462,18 @@ c
       nch = nch + ib2as(iapdflg,ib,nch,z'8005')
       call logit3(ib,nch-1,lsor)
 C
+      nch = 1
+      nch = ichmv_ch(ib,nch,'rdbe,')
+      call fs_get_rdbe_rms_t(rdbe_rms_t)
+      nch = nch + ir2as(rdbe_rms_t,ib,nch,5,1)
+      nch=mcoma(ib,nch)
+      call fs_get_rdbe_rms_min(rdbe_rms_min)
+      nch = nch + ir2as(rdbe_rms_min,ib,nch,5,1)
+      nch=mcoma(ib,nch)
+      call fs_get_rdbe_rms_max(rdbe_rms_max)
+      nch = nch + ir2as(rdbe_rms_max,ib,nch,5,1)
+      call logit3(ib,nch-1,lsor)
+c
       return
       end
 

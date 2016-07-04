@@ -174,15 +174,18 @@ C  FINALLY, GET THE SYSTEM TEMPEARTURE AND VSLOPE
 C
          vslope=calfp/(tpical-tpia)
          temps=(tpia-vbase)*vslope
-      else
-         if(icont.ne.0) then
-            tpia=(tpia+tpical)/2
-         endif
-         if(calfp.lt.0.0) then
-            temps=-calfp
+      else if(rack.eq.RDBE .or.
+     &        (rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.1)) then
+         if(calfp.gt.0) then
+            vslope=calfp/(tpical-tpia)
+            temps=(tpia-vbase)*vslope
          else
-            temps=100.0
+            tpia=(tpia+tpical)/2
+            temps=-calfp
+            vslope=temps/(tpia-vbase)
          endif
+      else
+         temps=-calfp
          vslope=temps/(tpia-vbase)
       endif
       sigts=sigts*vslope

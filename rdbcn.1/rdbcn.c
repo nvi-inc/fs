@@ -1,4 +1,4 @@
-/* dbbcn: based on mk5cn */
+/* rdbcn: based on mk5cn.c */
 
 /* FS Linux 1 is not supported. However, you can probably make it work
  * by finding and changing the call below:
@@ -35,8 +35,6 @@
 #include <unistd.h> /* For close() */ 
 #include <stdlib.h>
 
-clock_t rte_times(struct tms *);
-
 extern int h_errno; /* From gethostbyname() for herror() */ 
 extern void herror(const char * s); /* Needed on HP-UX */ 
     /* Why (!) isn't this in one of these includes on HP-UX? */ 
@@ -52,32 +50,31 @@ extern struct fscom *shm_addr;
  */
 static unsigned char inbuf[BUFSIZE];   /* input message buffer */
 static unsigned char outbuf[BUFSIZE];  /* output message buffer */
-static unsigned char saved[BUFSIZE];  /* copy of output message buffer for mode 4 */
-
 static char who[ ]="cn";
 static char what[ ]="ad";
 
-char me[]="dbbcn" ; /* My name */ 
-int iecho;
-long fail;
+static char me[]="rdbcn" ; /* My name */ 
+static int iecho;
+static long fail;
 
 static void nullfcn();
 static jmp_buf sig_buf;
 
-int sock; /* Socket */ 
-FILE * fsock; /* Socket also as a stream */ 
-char host[129]; /* maximum width plus one */
-int port;
-int is_open=FALSE;
-int first_transaction=FALSE;
-int time_out;
-int is_init=FALSE;
-
+static int sock; /* Socket */ 
+static FILE * fsock; /* Socket also as a stream */ 
+static char host[129]; /* maximum width plus one */
+static int port;
+static int is_open=FALSE;
+static int first_transaction=FALSE;
+static int time_out;
+static int is_init=FALSE;
 static char control_file[65];
 
+
 static void close_socket();
-static int read_response(char*, int, FILE*, int, int, int);
+static int read_response(char*, int, FILE*, int, int);
 static int drain_input_stream(FILE*);
+
 
 int main(int argc, char * argv[])
 {
@@ -89,16 +86,17 @@ int main(int argc, char * argv[])
   rte_prior(FS_PRIOR);
   host[0]=0;
 
+
   if(argc >= 2) {
     memcpy(me+3,argv[1],2);
     memcpy(who,argv[1],2);
     if(argv[1][1]!='n')
-      memcpy(what+1,argv[1]+1,1);
+      memcpy(what,argv[1],2);
   }
   putpname(me);
 
   strcpy(control_file,FS_ROOT);
-  strcat(control_file,"/control/dbb");
+  strcat(control_file,"/control/rdb");
   strcat(control_file,what);
   strcat(control_file,".ctl");
 
@@ -107,8 +105,8 @@ int main(int argc, char * argv[])
     iecho=shm_addr->KECHO;
 
 #ifdef DEBUG
-    fprintf(stderr,"entering dbbcn ip[0]=%d ip[1]=%d ip[2]=%d\n",
-	    ip[0],ip[1],ip[2]);
+    fprintf(stderr,"entering %s ip[0]=%d ip[1]=%d ip[2]=%d\n",
+	    me,ip[0],ip[1],ip[2]);
 #endif
     switch (ip[0]) {
     case 0:
@@ -121,7 +119,6 @@ int main(int argc, char * argv[])
     case 4:
     case 5:
     case 6:
-    case 7:
       if(!is_init) {
 	cls_clr(ip[1]);
 	ip[0]=ip[1]=0;
@@ -152,14 +149,14 @@ int main(int argc, char * argv[])
       break;
     }
     ip[2] = result;
-    memcpy(ip+3,"db",2);
+    memcpy(ip+3,"ra",2);
     if(result<-3||-1<result) 
       memcpy(ip+4,who,2);
     else
       memcpy(ip+4,what,2);
 #ifdef DEBUG
-    fprintf(stderr,"leaving dbbcn ip[0]=%d ip[1]=%d ip[2]=%d\n",
-	    ip[0],ip[1],ip[2]);
+    fprintf(stderr,"leaving %s ip[0]=%d ip[1]=%d ip[2]=%d\n",
+	    me,ip[0],ip[1],ip[2]);
 #endif
   }
 }
@@ -175,9 +172,9 @@ int doinit()
 
     if ( (fp = fopen(control_file,"r")) == NULL) {
 #ifdef DEBUG
-        printf("cannot open MK5 address file %s\n",control_file);
+        printf("cannot open RDBE address file %s\n",control_file);
 #endif
-        return -1 ;
+        return 0 ;
     }
 
     check=fgetc(fp);
@@ -197,6 +194,23 @@ int doinit()
     if ( fscanf(fp,"%80s %d %d",host,&port, &time_out)!=3) /* read a line */
       return -3;
 
+    else {
+      int i;
+      char lets[]="abcdefghijklm";
+      for(i=0;i<MAX_RDBE;i++)
+	if(me[4]==lets[i]) {
+	  strcpy(shm_addr->rdbehost[i],host);
+	  shm_addr->rdbe_units[i]=1;
+	  shm_addr->rdbe_active[i]=1;
+	}
+    }
+    {
+      char rdtcn[6];
+      long ip[5];
+      sprintf(rdtcn,"rdtc%1.1s",me+4);
+      skd_run(rdtcn,'n',ip);
+    }
+
     if(time_out <200)
       time_out= 200;
     
@@ -207,14 +221,9 @@ int doinit()
     fclose (fp);
  
     is_init=TRUE;
-    if(who[1]=='n')
-      shm_addr->dbbc_defined=1;
-    else
-      shm_addr->dbbc2_defined=1;
-
-    if (0 > (error = open_mk5(host,port))) { /* open mk5 unit */
+    if (0 > (error = open_rdbe(host,port))) { /* open rdbe unit */
 #ifdef DEBUG
-      printf ("Cannot open mk5 host %s port %d error %d\n",host,port,error);
+      printf ("Cannot open rdbe host %s port %d error %d\n",host,port,error);
 #endif
       fail=FALSE;
       return error;
@@ -223,7 +232,7 @@ int doinit()
 }
 
 /* ********************************************************************* */
-int open_mk5(char *host, int port)
+int open_rdbe(char *host, int port)
 {   
   struct servent * set; /* From getservbyname() */ 
   struct sockaddr_in socaddin; /* For connect() info */ 
@@ -245,7 +254,7 @@ int open_mk5(char *host, int port)
     perror("error"); 
 #endif
 
-    logit(NULL,errno,"un");
+    logita(NULL,errno,"un",who);
     return -11; /* Error */ } 
 
 #ifdef DEBUG
@@ -305,7 +314,7 @@ int open_mk5(char *host, int port)
 		   me, host);
 #endif
     (void) close(sock); 
-    logit(NULL,errno,"un");
+    logita(NULL,errno,"un",who);
     return -25 ; /* Error */ }
   else if (hostinfo == NULL) { /* Get IP, OK? */
 
@@ -348,7 +357,7 @@ int open_mk5(char *host, int port)
       return -20;
     } /* End of switch */ 
     (void) close(sock); 
-    logit(NULL,errno,"un");
+    logita(NULL,errno,"un",who);
     return -13 ; /* Error */
   } /* End of if hostinfo NULL */
     
@@ -429,7 +438,7 @@ int open_mk5(char *host, int port)
 #endif
     if(retval == -1) {
       close(sock);
-      logit(NULL,errno,"un");
+      logita(NULL,errno,"un",who);
       return -24; /* Error */ } 
     else if (!retval) {
       close(sock);
@@ -443,11 +452,11 @@ int open_mk5(char *host, int port)
     if(getsockopt(sock, SOL_SOCKET, SO_ERROR,
 		  (void *) &error,(socklen_t *) &serror) < 0) {
       close(sock);
-      logit(NULL,errno,"un");
+      logita(NULL,errno,"un",who);
       return -22; /* Error */ } 
     if(error!=0) {
       close(sock);
-      logit(NULL,error,"un");
+      logita(NULL,error,"un",who);
       return -23;
     }
   } else if (iret < 0) { /* Connect, errors? */ 
@@ -456,7 +465,7 @@ int open_mk5(char *host, int port)
 		   "%s ERROR: \007 connect() returned ", me);
     perror("error"); 
 #endif
-    logit(NULL,errno,"un");
+    logita(NULL,errno,"un",who);
     (void) close(sock); 
     return -15; /* Error */ } 
 
@@ -472,7 +481,7 @@ int open_mk5(char *host, int port)
 		   "%s ERROR: \007 fdopen() on sock %d returned ", me, sock);
     perror("error");
 #endif
-    logit(NULL,errno,"un");
+    logita(NULL,errno,"un",who);
 	(void) shutdown(sock, SHUT_RDWR);
     (void) close(sock); /* Error */ 
     return -16; /* Error */ } 
@@ -499,7 +508,8 @@ long ip[5];
   int msgflg;  /* argument for cls_rcv - unused */
   int save;    /* argument for cls_rcv - unused */
   char secho[3*BUFSIZE];
-  char lbuf[10+BUFSIZE];
+  char lbuf[7+BUFSIZE];
+
   long in_class;
   long out_class=0;
   int in_recs;
@@ -511,40 +521,26 @@ long ip[5];
   int flags;
 
   int time_out_local;
-  static struct {
-    char string[80];
-    int to;
-  } list[ ] = {
-    "",                0
-  };
   char *ptr,*ptrcolon;
   int ierr, mode;
   int centisec[6];             /* arguments of rte_tick rte_cmpt */
   int itbefore[6];
-  int fila10g;
   int newline;
 
   struct tms tms_buff;
-  int first, changed;
   long end;
+  int kfound;
 
-  unsigned long now;
-  static unsigned long last_dbbctrk;
-  static int dbbctrk=0;
-
-  secho[0]=0;
   mode=ip[0];
   in_class=ip[1];
   in_recs=ip[2];
 
   secho[0]=0;
     
-  i = 0; /* to detect unread class messages */
-
   if(!is_open) {
-    if (0 > (error = open_mk5(host,port))) { /* open mk5 unit */
+    if (0 > (error = open_rdbe(host,port))) { /* open rdbe unit */
 #ifdef DEBUG
-      printf ("Cannot open mk5 host %s port %d error %d\n",host,port,error);
+      printf ("Cannot open rdbe host %s port %d error %d\n",host,port,error);
 #endif
       ip[2]=error;
       goto error;
@@ -555,13 +551,14 @@ long ip[5];
 
   msgflg = save = 0;
   for (i=0;i<in_recs;i++) {
-    if ((nchars = cls_rcv(in_class,inbuf,BUFSIZE-2,&rtn1,&rtn2,msgflg,save)) <= 0) {
+    if ((nchars = cls_rcv(in_class,inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
 #ifdef DEBUG
       printf ("%s failed to get a request buffer\n",me);
 #endif
       ip[2] = -101;
       goto error;
     }
+    inbuf[nchars]=0;  /* terminate in case not string */
 #ifdef DEBUG
     { int j;
       (void) fprintf(stderr, /* Yes */ 
@@ -571,8 +568,6 @@ long ip[5];
       fprintf(stderr,"\n");
     }
 #endif
-    // not needed as v101    inbuf[nchars++]='\n';  /* new-line */
-    inbuf[nchars++]=0;  /* zero */
 
     /* * Send command * */ 
     flags=0;
@@ -585,181 +580,136 @@ long ip[5];
     if(!first_transaction) {
       ip[2] = drain_input_stream(fsock);
       if(ip[2]!=0) {
-	logita(NULL,ip[2],"db",who);
+	logita(NULL,ip[2],"ra",who);
 	close_socket();
-	if (0 > (error = open_mk5(host,port))) { /* open mk5 unit */
+	if (0 > (error = open_rdbe(host,port))) { /* open rdbe unit */
 	  ip[2]=error;
 	  goto error;
 	} else {
 	  rte_sleep(100); /* seem to need a 100 centisecond sleep here, is this
 			     a Mark 5 or Linux problem? */
-	  logita(NULL,-114,"db",who);
+	  logita(NULL,-114,"ra",who);
 	  first_transaction=FALSE;
 	}
       }
     } else {
       first_transaction=FALSE;
     }
-      
+
     /* determine time-out */
 
     time_out_local=time_out;
-    for (j=0;list[j].string[0]!=0;j++) {
-      if(NULL!=strstr(inbuf,list[j].string)) {
-	time_out_local+=list[j].to;
-      }
+
+    newline = 6 == mode;
+
+    if(iecho && strlen(secho)> 0) {
+      logit(secho,0,NULL);
+      secho[0]=0;
     }
-
-    /*check for ddctrk... to allow delay */
-
-    if(NULL != strstr(inbuf,"dbbctrk")) {
- /* make sure "dbbctrk" commands have at least a one second between
-    them, we might be able to save a little time by distinguishing
-    between dbbctrk1, dbbctrk2, abd dbbctrk commands, but it is very
-    little savings and a lot more complication (and testing), so not
-    for now, this may also need some adjustment if these commands get
-    a monitor form so that isn't too slow */
-      rte_ticks(&now);
-      if(dbbctrk) {
-	if(now-last_dbbctrk < 102) {
-	  rte_sleep(102-(now-last_dbbctrk));
-	}
-      }
-      last_dbbctrk=now;
-      dbbctrk=TRUE;
-    }
-    
-    if(6 == mode || 4 == mode | 7 == mode)
-      fila10g=TRUE;
-    else
-      fila10g=FALSE;
-
-    newline = 7 == mode;
-
-    first=TRUE;
-    changed=FALSE;
-    end=rte_times(&tms_buff)+130;  /* calculate ending time */
-    while(first ||
-	  (mode==4 && ip[2]==0 && end > rte_times(&tms_buff) && !changed) ) {
-      outbuf[0]=0;
-
-      if(iecho && strlen(secho)> 0) {
-	logit(secho,0,NULL);
-	secho[0]=0;
-      }
-      if(iecho) {
-	int in, out;
+    if(iecho) {
+      int in, out;
+      if(strlen(secho) < sizeof(secho)-1)
 	strcpy(secho,"[");
-	for(in=0,out=strlen(secho);in <nchars;in++) {
-	  if(inbuf[in]=='\n') {
-	    secho[out++]='\\';
-	    secho[out++]='n';
-	  } else if(inbuf[in]==0) {
-	    secho[out++]='\\';
-	    secho[out++]='0';
-	  } else
-	    secho[out++]=inbuf[in];
-	}
-	secho[out]=0;
+      for(in=0,out=strlen(secho);in <nchars && out<sizeof(secho)-1;in++) {
+	if(inbuf[in]=='\n') {
+	  secho[out++]='\\';
+	  if(out >= sizeof(secho)-1)
+	    break;
+	  secho[out++]='n';
+	} else
+	  secho[out++]=inbuf[in];
+      }
+      secho[out]=0;
+      if(strlen(secho) < sizeof(secho)-1)
 	strcat(secho,"]");
-      }
-
-      if(mode==4) {
-	rte_cmpt(centisec+2,centisec+4);
-	rte_ticks (centisec);
-      }
-
-      if (send(sock, inbuf, nchars, flags) < nchars) { /* Send to socket, OK? */ 
-#ifdef DEBUG
-	(void) fprintf(stderr, /* Nope */ 
-		       "%s ERROR: \007 send() on socket returned ",me); 
-	perror("error"); 
-#endif
-	logit(NULL,errno,"un");
-	ip[2] = -102; /* Error */
-	goto error0;
-      }
-#ifdef DEBUG
-      (void) fprintf(stderr, /* Yes */ 
-		     "%s DEBUG:  Sent inLine[%s] to socket\n",
-		     me, inbuf,sock); 
-#endif
-
-      /* * Read reply * */ 
-    read:
-      ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local,
-			    fila10g, newline);
-      
-      if(mode==4) {
-	rte_ticks (centisec+1);
-	rte_cmpt(centisec+3,centisec+5);
-      }
-
-      if(mode == 4)
-	if(first)
-	  strcpy(saved,outbuf);
-	else
-	  changed = strcmp(saved,outbuf);
-
-      first=FALSE;
-
-      if(iecho) {
-	int in, out;
-	strcat(secho,"<");
-	for(in=0,out=strlen(secho);outbuf[in]!=0;in++) {
-	  if(outbuf[in]=='\n') {
-	    secho[out++]='\\';
-	    secho[out++]='n';
-	  } else if(outbuf[in]=='\r') {
-	    secho[out++]='\\';
-	    secho[out++]='r';
-	  } else if(outbuf[in]==0) {
-	    secho[out++]='\\';
-	    secho[out++]='0';
-	  } else
-	    secho[out++]=outbuf[in];
-	}
-	secho[out]=0;
-	strcat(secho,">");
-	logit(secho,0,NULL);
-	secho[0]=0;
-      }
     }
 
+    if(mode==4) {
+      rte_cmpt(centisec+2,centisec+4);
+      rte_ticks (centisec);
+    }
+    if (send(sock, inbuf, nchars, flags) < nchars) { /* Send to socket, OK? */ 
 #ifdef DEBUG
-    /* * Print reply * */ 
-    (void) fputs(outbuf, stdout); /* Print to stdout */ 
+      (void) fprintf(stderr, /* Nope */ 
+		     "%s ERROR: \007 send() on socket returned ",me); 
+      perror("error"); 
+#endif
+      logita(NULL,errno,"un",who);
+      ip[2] = -102; /* Error */
+      goto error0;
+    }
+#ifdef DEBUG
+    (void) fprintf(stderr, /* Yes */ 
+		   "%s DEBUG:  Sent inLine[%s] to socket\n",
+		   me, inbuf,sock); 
 #endif
 
-    /*trim a trailing new-line */
+    /* * Read reply * */ 
+  read:
+    ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local,
+			  newline);
+    if(mode==4) {
+      rte_ticks (centisec+1);
+      rte_cmpt(centisec+3,centisec+5);
+    }
+
+    if(iecho) {
+      int in, out;
+      if(strlen(secho) < sizeof(secho)-1)
+	strcat(secho,"<");
+      for(in=0,out=strlen(secho);
+	  in<sizeof(outbuf)-1 && outbuf[in]!=0 && out<sizeof(secho)-1;in++) {
+	if(outbuf[in]=='\n') {
+	  secho[out++]='\\';
+	  if(out >= sizeof(secho)-1)
+	    break;
+	  secho[out++]='n';
+	} else
+	  secho[out++]=outbuf[in];
+      }
+      secho[out]=0; 
+      if(strlen(secho) < sizeof(secho)-1)
+	strcat(secho,">");
+      logit(secho,0,NULL);
+      secho[0]=0;
+    }
 
     if(outbuf[0]!=0 && outbuf[strlen(outbuf)-1]=='\n')
       outbuf[strlen(outbuf)-1]=0;
     if(1==ip[2]) {
       int i, is;
-      char *failed =strstr(outbuf,"Failed");
 
-      strcpy(lbuf,"fila10g/");
+      strcpy(lbuf,me);
+      strcat(lbuf,"/");
       is=strlen(lbuf);
       for(i=0;outbuf[i]!=0;i++)
 	if(isprint(outbuf[i]))
 	  lbuf[is++]=outbuf[i];
       lbuf[is]=0;
       logit(lbuf,0,NULL);
-      if(failed!=NULL) {
-	logite(failed,-200,"db");
-	logita(NULL,-201,"db",who);
-      }
       outbuf[0]=0;
       goto read;
     }
 
-    outbuf[1023]=0; /* truncate to maximum class record size, cls_snd
-                      can't do this because it doesn't know it is a string,
-                      cls_rcv() calling should do it either since this 
-                      would require many more changes */
-    cls_snd(&out_class, outbuf, strlen(outbuf)+1 , 0, 0);
-    out_recs++;
+    if(outbuf[0]!=0) {
+      outbuf[511]=0; /* truncate to maximum class record size, cls_snd
+			can't do this because it doesn't know it is a string,
+			cls_rcv() calling should do it either since this 
+			would require many more changes */
+      cls_snd(&out_class, outbuf, strlen(outbuf)+1 , 0, 0);
+      out_recs++;
+    }
+
+    if(ip[2]!=0) {
+      close_socket();
+      goto error;
+    }
+#ifdef DEBUG
+    /* * Print reply * */ 
+    (void) fputs(outbuf, stdout); /* Print to stdout */ 
+#endif
+
+
     if(mode==4) {
       cls_snd(&out_class, centisec, sizeof(centisec) , 0, 0);
       out_recs++;
@@ -767,50 +717,50 @@ long ip[5];
 
     /* check errors */
 
-    if(ip[2]!=0) {
-      if(ip[2]!=-109)
-	close_socket();
-      goto error;
-    }
-
     if(mode==5)   /* no error report here */
       continue;
 
-    if(7!= mode && 6 != mode &&
-       (index(outbuf,'/')==NULL || strstr(outbuf,"ERROR")!=NULL)) {
-      logite(outbuf,-200,"db");
-      ip[2]=-201;
+    kfound=FALSE;
+    ptr=strchr(outbuf,'!');
+    if(ptr!=NULL &&  1==sscanf(ptr+1,"%d",&ierr))
+      kfound=TRUE;
+    if(!kfound) {
+      ptr=strchr(outbuf,'?');
+      if(ptr==NULL)
+	ptr=strchr(outbuf,'=');
+      if(ptr==NULL)
+	ptr=strchr(outbuf,':');
+    }
+    if(!kfound && (ptr==NULL ||  1!=sscanf(ptr+1,"%d",&ierr))){
+      ip[2]=-899;
       goto error;
-    } else if ((7==mode || 6==mode) &&
-	       (strstr(outbuf,"Failed")!=NULL 
-		||strstr(outbuf,"ERROR")!=NULL
-		||strstr(outbuf,"WARNING")!=NULL)
-	       ) {
-      char *failed=strstr(outbuf,"Failed");
-      char *warning=strstr(outbuf,"WARNING");
-      int i;
+    } else if(ierr != 0 && ierr != 1) {
+      /* is there a trailing parameter that could contain an error message */
+      ptr=strchr(outbuf,':');
+      if(ptr!=NULL) {
+	char *save, *ptr2;
 
-      if(NULL==failed)
-	failed=strstr(outbuf,"ERROR");
-      if(NULL!=failed) {
-	for(i=0;failed[i]!=0;i++)
-	  if(index("\r\n",failed[i])!=NULL) {
-	    failed[i]=0;
-	    break;
-	  }
-	  logite(failed,-200,"db");
-      } else if(NULL!=warning) {
-	for(i=0;warning[i]!=0;i++)
-	  if(index("\r\n",warning[i])!=NULL) {
-	    warning[i]=0;
-	    break;
-	  }
-	  logite(warning,-200,"db");
-      } else
-	logite(outbuf,-200,"db"); /* for safety, just in case */
-      ip[2]=-201;
+	ptr2=strchr(ptr+1,';'); /* terminate the string at the ; */
+
+	if(ptr2!=NULL)
+	  *ptr2=0;
+
+	while(*ptr!=0 && *ptr ==' ')
+	  ptr++;
+	if(*ptr!=0) {
+	  char save2[128];
+	  strcpy(save2,"rdb");
+	  strncat(save2,who,2);
+	  strcat(save2,": RDBE error information: ");
+	  strncat(save2,ptr,sizeof(save2)-strlen(save2));
+	  save2[sizeof(save2)-1]=0;
+	  logite(save2,-900,"ra");
+	}
+      }
+      ip[2]=-900-ierr;
       goto error;
     }
+      
 
   } /* End of for loop  */ 
 
@@ -825,8 +775,7 @@ error0:
     secho[0]=0;
   }
 error:
-  if(i<in_recs)
-    cls_clr(in_class);
+  cls_clr(in_class);
   ip[0]=out_class;
   ip[1]=out_recs;
   return ip[2];
@@ -841,9 +790,9 @@ long ip[5];
 
   /* re-open */
   close_socket();
-  if (0 > (error = open_mk5(host,port))) { /* open mk5 unit */
+  if (0 > (error = open_rdbe(host,port))) { /* open rdbe unit */
 #ifdef DEBUG
-    printf ("Cannot open mk5 host %s port %d error %d\n",host,port,error);
+    printf ("Cannot open rdbe host %s port %d error %d\n",host,port,error);
 #endif
     ip[2]=error;
     return ip[2];
@@ -888,7 +837,7 @@ int sig;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-// close_socket: cleanly close the TCP socket, can be used _after_ a open_mk5()
+// close_socket: cleanly close the TCP socket, can be used _after_ a open_rdbe()
 ////////////////////////////////////////////////////////////////////////////////////
 
 static void close_socket()
@@ -907,13 +856,13 @@ static void close_socket()
 
 ////////////////////////////////////////////////////////////////////////////////
 // read_response:
-//  Reads a single Mk5 response delimited by a newline.
+//  Reads a single Rdbe response delimited by a ';'.
 //  All characters are preserved.
 //  Underlying fd (or stream itself?) must be non-blocking
 //  On any error, the last (partial) response is returned.
 ////////////////////////////////////////////////////////////////////////////////
 // Features of this implementation:
-// (1) Does not us the dreaded fgets(), thanks to Jan Wagner
+// (1) Does not use the dreaded fgets(), thanks to Jan Wagner
 // (2) select() is never called unless there is no input available
 //     (but that is almost sure to happen on the first call)
 // (3) if there is no data available when a time-out is first detected
@@ -924,7 +873,7 @@ static void close_socket()
 //     loop. Oddly, "man select_tut" seems to think you should not use
 //     select() for time-outs if you can avoid it
 // (4) a server crash does not cause an infinite loop
-// (5) assumes anything after \n in the response is cleared by
+// (5) assumes anything after ';' in the response is cleared by
 //    draining the input buffer before the next write to the Mark 5
 //    (drain_input_stream() below).
 //
@@ -935,18 +884,15 @@ static void close_socket()
 ////////////////////////////////////////////////////////////////////////////////
 
 static int read_response(char *str, int num, FILE* stream,
-			 int time_out_local, int fila10g, int newline)
+			 int time_out_local, int newline)
 {
   int c, iret;
     char* cs = str;
     struct timeval to;
     unsigned long start,end,now;
     fd_set rfds;
-    char fila10g_term[ ]= "FiLa10G % ";
-    int term_count;
-    char term_start;
+    int iretsel;
 
-    term_count=0;
     iret=0;
     rte_ticks(&start);
 
@@ -959,11 +905,6 @@ static int read_response(char *str, int num, FILE* stream,
       c=fgetc(stream);
       if(c==EOF && !feof(stream) && ferror(stream) && errno == 11) {
 
- /* some early firmwares has no \n terminator
-  * so we assume that once we have some data the next pause means we are done */
-
-        if(cs!=str)
-          goto done;
 	rte_ticks(&now);
 	if(end <= now)       /* poll one more time */
 	  time_out_local=0;
@@ -977,12 +918,12 @@ static int read_response(char *str, int num, FILE* stream,
 	FD_ZERO(&rfds);
 	FD_SET(fileno(stream), &rfds);
 
-	c = select(fileno(stream) + 1, &rfds, NULL, NULL, &to);
-	if (c < 0) { /* error */
-	  logit(NULL,errno,"un");
+	iretsel = select(fileno(stream) + 1, &rfds, NULL, NULL, &to);
+	if (iretsel < 0) { /* error */
+	  logita(NULL,errno,"un",who);
 	  iret = -103;
 	  goto done;
-	} else if(c == 0) {
+	} else if(iretsel == 0) {
 	  if(end <= now) {  /* last poll failed, we can be sure we are done */
 	    iret = -104;
 	    goto done;
@@ -993,10 +934,10 @@ static int read_response(char *str, int num, FILE* stream,
 
       } else if(c==EOF) {
 	if(!feof(stream) && ferror(stream)) { /* error */
-	  logit(NULL,errno,"un");
+	  logita(NULL,errno,"un",who);
 	  iret = -105;
 	} else if(feof(stream) && ferror(stream)) { /* error & EOF */
-	  logit(NULL,errno,"un");
+	  logita(NULL,errno,"un",who);
 	  iret = -106;
 	} else if(feof(stream)) { /* EOF, server probably crashed */
 	  iret = -107;
@@ -1009,21 +950,13 @@ static int read_response(char *str, int num, FILE* stream,
       /* Append */
       *cs++ = c;
       num--;
-
-      if(!fila10g) {
-	if(c=='\n')
-	  goto done;
-      }	else { /* fila10g comm ends with a string rather than a \n */
-	if(c=='\n' && newline) {
-	  iret=1;
-	  goto done;
-	}
- 	if(c==fila10g_term[term_count]) { /* got one */
-	  if(++term_count>=sizeof(fila10g_term)-1) /* if full match: done */
-	    goto done;
-	} else /* start over */
-	  term_count=0;
+      if(c==';')
+	goto done;
+      else if(c =='\n' && newline) {
+	iret=1;
+	goto done;
       }
+      
     }
     iret = -109; /* ended before newline */
    
@@ -1046,10 +979,10 @@ static int drain_input_stream(FILE* stream)
   if(!feof(stream) && ferror(stream) && errno == 11) {
     iret= 0;
   } else if(!feof(stream) && ferror(stream)) { /* error */
-    logit(NULL,errno,"un");
+    logita(NULL,errno,"un",who);
     iret = -110;
   } else if(feof(stream) && ferror(stream)) { /* error & EOF */
-    logit(NULL,errno,"un");
+    logita(NULL,errno,"un",who);
     iret = -111;
   } else if(feof(stream)) { /* EOF, server probably crashed */
     iret = -112;

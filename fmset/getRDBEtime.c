@@ -16,7 +16,7 @@ extern int iRDBE;
 
 void rte2secs();
 
-void getRDBEtime(unixtime,unixhs,fstime,fshs,formtime,formhs,raw)
+void getRDBEtime(unixtime,unixhs,fstime,fshs,formtime,formhs,raw,vdif_epoch)
 time_t *unixtime; /* computer time */
 int    *unixhs;
 time_t *fstime; /* field system time */
@@ -24,6 +24,7 @@ int    *fshs;
 time_t *formtime; /* formatter time received from mcbcn */
 int    *formhs;
 long *raw;
+int *vdif_epoch;
 {
 	long centisec[6], centiavg, centidiff, hsdiff;
         int it[6];
@@ -36,7 +37,7 @@ long *raw;
 	  out_recs=0;
 	  out_class=0;
 
-	  str="dbe_init=;\n";
+	  str="dbe_sync=;\n";
 	  cls_snd(&out_class, str, strlen(str) , 0, 0);
 	  out_recs++;
 	     
@@ -88,7 +89,7 @@ long *raw;
 
 
         nsem_take("fsctl",0);
-        if(get_RDBEtime(centisec,it,ip,1,iRDBE)!=0) {
+        if(get_RDBEtime(centisec,it,ip,1,iRDBE,vdif_epoch)!=0) {
 	  endwin();
 	  fprintf(stderr,"Field System not running - fmset aborting\n");
 	  exit(0);

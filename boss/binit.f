@@ -289,7 +289,7 @@ c
       ierr=ip(3)
       if (ierr.ne.0) then
         call logit7ci(0,0,0,1,-194,'bo',ierr)
-        call logit7(0,0,0,1,ip(3),ip(4),ip(5))
+        call logit7(0,0,0,0,ip(3),ip(4),ip(5))
         call fc_putln('dbbcn initialization failed')
         if(ip(5).eq.0) then
            ip(3)=0
@@ -297,6 +297,22 @@ c
         endif
       else
         call fc_putln('dbbcn initialized')
+      endif
+c
+c  initialize dbbc2
+c
+      ip(1)=0
+      ip(3)=0
+      call run_prog('dbbc2','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      call rmpar(ip)
+      ierr=ip(3)
+      if (ierr.ne.0) then
+        call logit7ci(0,0,0,1,-195,'bo',ierr)
+        call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call fc_putln('dbbc2 initialization failed')
+        ierr=0
+      else
+        call fc_putln('dbbc2 initialized')
       endif
 c
 c  initialize mk6ca
@@ -307,7 +323,7 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-195,'bo',ierr)
+        call logit7ci(0,0,0,1,-196,'bo',ierr)
         call logit7(0,0,0,0,ip(3),ip(4),ip(5))
         call fc_putln('mk6ca initialization failed')
         ierr=0
@@ -324,7 +340,7 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-196,'bo',ierr)
+        call logit7ci(0,0,0,1,-197,'bo',ierr)
         call logit7(0,0,0,0,ip(3),ip(4),ip(5))
         call fc_putln('mk6cb initialization failed')
         ierr=0
@@ -335,7 +351,7 @@ C
 C ultimate expansion max is 13.
 C
       if(MAX_MK6.gt.2) then
-        call logit7ci(0,0,0,1,-199,'bo',2)
+        call logit7ci(0,0,0,1,-198,'bo',2)
         ierr=-1
       endif
 c

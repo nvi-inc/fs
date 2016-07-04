@@ -8,12 +8,13 @@
 #include "../include/params.h"
 #include "../include/fs_types.h"
 
-get_RDBEtime(centisec,fm_tim,ip,to,iRDBE)
+get_RDBEtime(centisec,fm_tim,ip,to,iRDBE,vdif_epoch)
 long centisec[6];
 int fm_tim[6];
 long ip[5];                          /* ipc array */
 int to;
 int iRDBE;
+int *vdif_epoch;
 {
       int out_recs, nrecs, i, ierr;
       long out_class, iclass;
@@ -137,6 +138,8 @@ endwin ();
 	  }
 	}
       }
+
+      *vdif_epoch=lclm.vdif_epoch.vdif_epoch;
 
 #ifdef DEBUG
       printf(" get_RDBEtime: fm_tim[5] %d fm_tim[4] %d fm_tim[3] %d fm_tim[2] %d fm_tim[1] %d sfm_tim[0] %d\n",fm_tim[5],fm_tim[4],fm_tim[3],fm_tim[2],fm_tim[1],fm_tim[0]);

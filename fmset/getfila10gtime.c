@@ -1,4 +1,4 @@
-/* getvtime.c - get vlba formatter time */
+/* getfila10gtime.c - get fila10g formatter time */
 
 #include <ncurses.h>      /* ETI curses standard I/O header file */
 #include <memory.h>      /* for memcpy */
@@ -22,6 +22,8 @@ extern int source;
 
 extern dbbc_sync;
 extern WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
+
+extern iDBBC;
 
 void rte2secs();
 
@@ -64,14 +66,22 @@ int    *formhs;
 	    str="pps_sync";
 	    cls_snd(&out_class, str, strlen(str) , 0, 0);
 	    out_recs++;
-	    logit("DBBC sync command sent.",0,NULL);
+	    if(0==iDBBC)
+	      logit("DBBC sync command sent.",0,NULL);
+	    else if (1==iDBBC)
+	      logit("DBBC#1 sync command sent.",0,NULL);
+	    else
+	      logit("DBBC#2 sync command sent.",0,NULL);
 
 	    ip[0]=1;
 	    ip[1]=out_class;
 	    ip[2]=out_recs;
 	  
 	    nsem_take("fsctl",0);
-	    name="dbbcn";
+	    if(2!=iDBBC)
+	      name="dbbcn";
+	    else
+	      name="dbbc2";
 	    while(skd_run_to(name,'w',ip,120)==1) {
 	      if (nsem_test("fs   ") != 1) {
 		endwin();
@@ -140,8 +150,12 @@ int    *formhs;
 		 "fila10g=timesync %Y-%m-%dT%H:%M:%S",formtm);
 	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
 	  out_recs++;
-	     
-	  logit("FiLa10g sync command sent.",0,NULL);
+	  if(0==iDBBC) 
+	    logit("FiLa10G sync command sent.",0,NULL);
+	  else if(1==iDBBC)
+	    logit("FiLa10G#1 sync command sent.",0,NULL);
+	  else
+	    logit("FiLa10G#2 sync command sent.",0,NULL);
 	  ip[0]=6;
 	  ip[1]=out_class;
 	  ip[2]=out_recs;
@@ -152,7 +166,10 @@ int    *formhs;
 	  wrefresh ( maindisp );
 
 	  nsem_take("fsctl",0);
-	  name="dbbcn";
+	  if(2!=iDBBC)
+	    name="dbbcn";
+	  else
+	    name="dbbc2";
 	  while(skd_run_to(name,'w',ip,120)==1) {
 	    if (nsem_test("fs   ") != 1) {
 	      endwin();
@@ -186,7 +203,7 @@ int    *formhs;
 	sleep=(175-it[0])%100;
 	rte_sleep(sleep);
         nsem_take("fsctl",0);
-        if(get_fila10gtime(centisec,it,ip,1)!=0) {
+        if(get_fila10gtime(centisec,it,ip,1,iDBBC)!=0) {
 	  endwin();
 	  fprintf(stderr,"Field System not running - fmset aborting\n");
 	  exit(0);

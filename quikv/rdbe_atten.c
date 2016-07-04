@@ -53,13 +53,7 @@ long ip[5];                           /* ipc parameters */
 	    out_recs[i]=0;
 	    out_class[i]=0;
 	  }
-	str="dbe_atten?0;\n";
-	for (i=0;i<MAX_RDBE;i++)
-	  if(itask == i+1 || shm_addr->rdbe_active[i]!=0 && itask ==0 ) {
-	    cls_snd(&out_class[i], str, strlen(str) , 0, 0);
-	    out_recs[i]++;
-	  }
-	str="dbe_atten?1;\n";
+	str="dbe_atten?;\n";
 	for (i=0;i<MAX_RDBE;i++)
 	  if(itask == i+1 || shm_addr->rdbe_active[i]!=0 && itask ==0 ) {
 	    cls_snd(&out_class[i], str, strlen(str) , 0, 0);
@@ -89,11 +83,6 @@ parse:
         if(ierr !=0 ) goto error;
       }
 
-      if(lclc.if0.if0==-1 && lclc.if1.if1==-1) {
-	ierr=-302;
-	goto error;
-      }
-
       if(itask == 0) 
 	memcpy(&shm_addr->rdbe_atten[itask],&lclc,sizeof(lclc));
 
@@ -108,15 +97,7 @@ parse:
 	  out_class[i]=0;
 	}
 
-      rdbe_atten0_2_rdbe(outbuf,&lclc);
-      if(outbuf[0]!=0)
-	for (i=0;i<MAX_RDBE;i++)
-	  if(itask == i+1 || shm_addr->rdbe_active[i]!=0 && itask ==0 ) {
-	    cls_snd(&out_class[i], outbuf, strlen(outbuf) , 0, 0);
-	    out_recs[i]++;
-	  }
-
-      rdbe_atten1_2_rdbe(outbuf,&lclc);
+      rdbe_atten_2_rdbe(outbuf,&lclc);
       if(outbuf[0]!=0)
 	for (i=0;i<MAX_RDBE;i++)
 	  if(itask == i+1 || shm_addr->rdbe_active[i]!=0 && itask ==0 ) {

@@ -413,6 +413,12 @@ Ack:    ich = strtok(NULL, ",");
 	  if(ptrs != NULL) {
 	    iwm= irgb < iwl? irgb: iwl;
 	    memcpy(ptrs,iwhat,iwm);
+	  } else {
+	    dxpm(ibur, "?F", &ptrs, &irgb); 
+	    if(ptrs != NULL) {
+	      iwm= irgb < iwl? irgb: iwl;
+	      memcpy(ptrs,iwhat,iwm);
+	    }
 	  }
 	}
 	memcpy(iwhs,"  ",2);

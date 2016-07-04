@@ -258,10 +258,8 @@ while (1) {
   fd_set rfds;
   int iretsel;
   double x[1024],y[1024];
-  unsigned short usvalue,pcal_ifx,raw_ifx;
+  unsigned short usvalue,pcal_ifx,raw_ifx,epoch_vdif;
   double pcaloff;
-
-  int kecho=TRUE;
 
   memcpy(&rdtcn_control,
 	 &shm_addr->rdtcn[irdbe].control[shm_addr->rdtcn[irdbe].iping],
@@ -339,14 +337,18 @@ while (1) {
                                       15944
       */
       memcpy(&local.epoch,databuf,14);
-      if (shm_addr->KECHO) {
-	char epoch[16];
-	memcpy(epoch,"<",1);
-	memcpy(epoch+1,databuf,13);
-	strcpy(epoch+14,">");
-	logit(epoch,0,NULL);
-	  //	printf("<%14s>\n",local.epoch);
-      }
+      //      if (shm_addr->KECHO) {
+      //char epoch[16];
+      //memcpy(epoch,"<",1);
+      //memcpy(epoch+1,databuf,13);
+      //strcpy(epoch+14,">");
+      //logit(epoch,0,NULL);
+      //      }
+      memcpy(&usvalue,databuf+22,2);
+      epoch_vdif=xbe16toh(usvalue);
+      local.epoch_vdif=epoch_vdif;
+
+
       for (j=0;j<MAX_RDBE_IF;j++) {
 	avg_on[j]=0.0;
 	avg_off[j]=0.0;
@@ -393,14 +395,6 @@ while (1) {
 	} else 
 	  local.tsys[i%MAX_RDBE_CH][i/MAX_RDBE_CH]=-9e12;
 
-	//	if(kecho) {
-	//    sprintf(secho,"<%2d %15lu %15lu>",
-	//	    i,tpi[i][0],tpi[i][1]);
-	//    logit(secho,0,NULL);
-	//}
-	/*
-	printf("%s %d %d %2d %f %f\n",time,in,intg,ch2,(1./in)*on, (1./in)*off);
-	*/
       }
       for (j=0;j<MAX_RDBE_IF;j++) {
 	double diff;

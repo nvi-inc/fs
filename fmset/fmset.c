@@ -16,9 +16,13 @@
 #define ESC_KEY		0x1b
 #define INC_KEY		'+'
 #define DEC_KEY		'-'
+#define VDIF_INC_KEY	'>'
+#define VDIF_DEC_KEY	'<'
+#define VDIF_NOM_KEY	';'
 #define SET_KEY		'='
 #define EQ_KEY          '.'
 #define TOGGLE_KEY      't'
+#define TOGGLE2_KEY     'u'
 #define SYNCH_KEY       's'
 
 /* externals */
@@ -38,6 +42,7 @@ char s2dev[2][3] = {"r1","da"};
 int m5rec;
 int m5b_crate;
 int iRDBE;
+int iDBBC;
 
 WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
 
@@ -69,6 +74,7 @@ char   inc;
  int    flag;
 struct tm *disptm;
 int toggle= FALSE;
+int toggle2= FALSE;
 int other,temp, irow;
 int changedfm=0;
  int changeds2das=0;
@@ -86,6 +92,7 @@ char blank[ ] = {"                                                              
 int drive, drive_type;
  int nRDBE;
  int clear_area=0;
+ int vdif_epoch, vdif_should;
 
  putpname("fmset");
 setup_ids();         /* connect to shared memory segment */
@@ -131,9 +138,17 @@ m5b_crate=shm_addr->m5b_crate;
      exit(0);
    }
    source=RDBE;
-   if(shm_addr->dbbc_defined) {
+   if(shm_addr->dbbc_defined || shm_addr->dbbc2_defined) {
      toggle=TRUE;
      other=DBBC;
+     if(!shm_addr->dbbc2_defined)
+       iDBBC=0;
+     else if(shm_addr->dbbc_defined)
+       iDBBC=1;
+     else
+       iDBBC=2;
+     if(shm_addr->dbbc_defined && shm_addr->dbbc2_defined)
+       toggle2=TRUE;
    }
  } else if( drive==MK5 && (drive_type == MK5B || drive_type == MK5B_BS))
   source=drive;
@@ -154,6 +169,17 @@ else if (drive==S2) {
     toggle=TRUE;
     other=RDBE;
   }
+  if(shm_addr->dbbc_defined || shm_addr->dbbc2_defined) {
+     if(!shm_addr->dbbc2_defined)
+       iDBBC=0;
+     else     if(shm_addr->dbbc_defined)
+       iDBBC=1;
+     else
+      iDBBC=2;
+    if(shm_addr->dbbc_defined && shm_addr->dbbc2_defined)
+      toggle2=TRUE;
+  }
+
  } else if ((rack & MK3 || rack==0||rack==LBA) ||
 	    ((( rack == MK4 && rack_type != MK4) ||
 	      (rack == VLBA4 && rack_type != VLBA4)) &&
@@ -193,12 +219,14 @@ build:
  if(clear_area) 
    for (i=4;i<hint_row+irow;i++)
      mvwaddstr( maindisp, i, 1, blank);
+
  clear_area=0;
  column=10;
  hint_row=8;
 mvwaddstr( maindisp, 2, 3, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B/FiLa10G/RDBE time set" );
  if(source == RDBE) {
    column=6;
+   hint_row=10;
    if(1==iRDBE) {
      form="rdbe-A";
      mvwaddstr( maindisp, 4, column, "rdbe-A      " );
@@ -221,8 +249,16 @@ mvwaddstr( maindisp, 2, 3, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B
     /* we don't have these rack types yet */
     /*&& (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)*/
 	     ) {
-   mvwaddstr( maindisp, 4, column, "FiLa10G     " );
-   form="FiLa10g";
+   if(0==iDBBC) {
+     mvwaddstr( maindisp, 4, column, "FiLa10G     " );
+     form="FiLa10G";
+   } else if(1==iDBBC) {
+     mvwaddstr( maindisp, 4, column, "FiLa10G#1   " );
+     form="FiLa10G#1";
+   } else {
+     mvwaddstr( maindisp, 4, column, "FiLa10G#2   " );
+     form="FiLa10G#2";
+   }
  } else if(source == S2) {
    mvwaddstr( maindisp, 4, column, s2type ? "S2 DAS      " : "S2 RT       " );
    form=s2type ? "S2 DAS" : "S2 RT ";       
@@ -244,8 +280,16 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
  mvwaddstr( maindisp, hint_row+2, column, buffer);
  sprintf(buffer, "    '.'     to set %s time to Field System time.",form);
  mvwaddstr( maindisp, hint_row+3, column, buffer);
-
-irow=4;
+ irow=4;
+ if(source==RDBE) {
+   sprintf(buffer,"    '>'     to increment %s VDIF epoch." ,form);
+   mvwaddstr( maindisp, hint_row+4, column, buffer);
+   sprintf(buffer,"    '<'     to decrement %s VDIF epoch." ,form);
+   mvwaddstr( maindisp, hint_row+5, column, buffer);
+   sprintf(buffer,"    ';'     to set VDIF epoch to nominal." ,form);
+   mvwaddstr( maindisp, hint_row+6, column, buffer);
+   irow+=3;
+ }
  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
 		     (source==DBBC
      /* we don't have these rack types yet */
@@ -261,18 +305,22 @@ if(toggle) {
   else
     mvwaddstr( maindisp, hint_row+irow++, column,
  "    't'/'T' to toggle between RDBE or FiLa10G.");
-}
+ }
+ if(source==DBBC && toggle2)
+   mvwaddstr( maindisp, hint_row+irow++, column,
+ "    'u'/'U' to toggle between FiL10G#1 or FiLa10G#2.");
+
 if(source == RDBE && nRDBE > 1) {
-  if(shm_addr->rdbe_units[0])
+  if(shm_addr->rdbe_units[0] && 1!=iRDBE)
     mvwaddstr( maindisp, hint_row+irow++, column,
 	       "    'a'/'A' to select rdbe-A.");
-  if(shm_addr->rdbe_units[1])
+  if(shm_addr->rdbe_units[1] && 2!=iRDBE)
     mvwaddstr( maindisp, hint_row+irow++, column,
 	       "    'b'/'B' to select rdbe-B.");
-  if(shm_addr->rdbe_units[2])
+  if(shm_addr->rdbe_units[2] && 3!=iRDBE)
     mvwaddstr( maindisp, hint_row+irow++, column,
 	       "    'c'/'C' to select rdbe-C.");
-  if(shm_addr->rdbe_units[3])
+  if(shm_addr->rdbe_units[3] && 4!=iRDBE)
     mvwaddstr( maindisp, hint_row+irow++, column,
 	       "    'd'/'D' to select rdbe-D.");
 }
@@ -294,8 +342,10 @@ do 	{
 		  &formtime,&formhs,mk5b_sync,sizeof(mk5b_sync),
 		  mk5b_1pps,sizeof(mk5b_1pps),
 		  mk5b_clock_freq,sizeof(mk5b_clock_freq),
-		  mk5b_clock_source,sizeof(mk5b_clock_source)); /* get times */
+		  mk5b_clock_source,sizeof(mk5b_clock_source),
+		  &vdif_epoch); /* get times */
 
+	vdif_should=-1;
 	if(formtime>=0) {
 	  disptime=formtime;
 	  disphs=formhs+5;
@@ -303,13 +353,21 @@ do 	{
 	    disphs-=100;
 	    disptime++;
 	  }
-          
-	  sprintf(fmt,
-		  "%%H:%%M:%%S.%01d UT  %%d %%b (Day %%j) %%Y %s   ",disphs/10,
-		  mk5b_sync);
+          if(source!= RDBE)
+	    sprintf(fmt,"%%H:%%M:%%S.%01d UT  %%d %%b (Day %%j) %%Y %s   ",
+		    disphs/10, mk5b_sync);
+	  else
+	    sprintf(fmt,"%%H:%%M:%%S.%01d UT  %%d %%b (Day %%j) %%Y VDIF Epoch %d ",
+		    disphs/10, vdif_epoch);
 	  disptm = gmtime(&disptime);
 	  strftime ( buffer, sizeof(buffer), fmt, disptm );
 	  mvwaddstr( maindisp, 4, column+15, buffer );
+	  for(i=column+15+strlen(buffer); i<79;i++)
+	    mvwaddstr( maindisp, 4, i, " ");
+	  if(disptm->tm_year>99) {
+	    vdif_should=(disptm->tm_year-100)%32;
+	    vdif_should=vdif_should*2+disptm->tm_mon/6;
+	  }
 	} else {                           /* 123456789012345678901234567890123456789012345678901234 */
 	  wstandout(maindisp);
 	  mvwaddstr( maindisp, 4, column+15, "Error from device, see log for details.");
@@ -377,8 +435,12 @@ do 	{
 	  mvwaddstr( maindisp, 6, column+15, buffer );
 	} else                             /* 123456789012345678901234567890123456789012345678901234 */
 	  mvwaddstr( maindisp, 6, column+15, "                                                      ");
-
-	if(source != RDBE && source==MK5) {
+	if(source == RDBE) {
+	  sprintf(buffer,"Nominal VDIF Epoch for %s time is %d",
+		  form,vdif_should);
+	  mvwaddstr( maindisp, 8, column, buffer );
+	  
+	} else if(source==MK5) {
 	  char *pps_status,*freq_status,*source_status;
 	  if((rack == VLBA4 && rack_type == VLBA45) ||
 	    /* we don't have these rack types yet */
@@ -445,7 +507,7 @@ do 	{
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
 	  if(!m5rec ||asksure(maindisp,m5rec,0)) {
-	    setfmtime(formtime++,1);
+	    setfmtime(formtime++,1,vdif_epoch);
 	    if(source == S2 && s2type == 1)
 	      changeds2das=1;
 	    else
@@ -458,11 +520,36 @@ do 	{
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
 	  if(!m5rec ||asksure(maindisp,m5rec,0)) {
-	    setfmtime(formtime--,-1);
+	    setfmtime(formtime--,-1,vdif_epoch);
 	    if(source == S2 && s2type == 1)
 	      changeds2das=1;
 	    else
 	      changedfm=1;
+	  }
+	  goto build;
+	  break;
+	case VDIF_INC_KEY :  /* Increment VDIF Epoch */
+	  if(source=RDBE) {
+	    if(vdif_epoch < vdif_should) {
+	      vdif_epoch++;
+	      setfmtime(formtime,0,vdif_epoch);
+	    }
+	  }
+	  goto build;
+	  break;
+	case VDIF_DEC_KEY :  /* Decrement VDIF Epoch */
+	  if(source=RDBE) {
+	    if(0 < vdif_epoch) {
+	      vdif_epoch--;
+	      setfmtime(formtime,0,vdif_epoch);
+	    }
+	  }
+	  goto build;
+	  break;
+	case VDIF_NOM_KEY :  /* Nominal VDIF Epoch */
+	  if(source=RDBE) {
+	    vdif_epoch=vdif_should;
+	    setfmtime(formtime,0,vdif_epoch);
 	  }
 	  goto build;
 	  break;
@@ -475,7 +562,7 @@ do 	{
 	      mvwaddstr( maindisp, i, 1, blank);
 	    formtime = asktime( maindisp,&flag, formtime);
 	    if(flag) {
-	      setfmtime(formtime,0);
+	      setfmtime(formtime,0,vdif_epoch);
 	      if(source == S2 && s2type == 1)
 		changeds2das=1;
 	      else
@@ -489,7 +576,7 @@ do 	{
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
 	  if(!m5rec ||asksure(maindisp,m5rec,0)) {
-	    setfmtime(formtime=fstime+(fshs+50)/100,0);
+	    setfmtime(formtime=fstime+(fshs+50)/100,0,vdif_epoch);
 	    if(source == S2 && s2type == 1)
 	      changeds2das=1;
 	    else
@@ -509,8 +596,15 @@ do 	{
 	      s2type = 1-s2type;
 	    else
 	      clear_area=1;
-	    goto build;
 	  }
+	  goto build;
+	  break;
+	case TOGGLE2_KEY:
+	  if(toggle2) {
+	    iDBBC=3-iDBBC;
+	  }
+	  goto build;
+	  break;
 	case 'a':
 	  if(source== RDBE && shm_addr->rdbe_units[0])
 	    iRDBE=1;

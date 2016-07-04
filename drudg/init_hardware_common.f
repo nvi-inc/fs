@@ -111,7 +111,6 @@ C Racks
       k8bbc =   cstrack_cap(istn) .eq. "VLBA/8" .or.
      >          cstrack_cap(istn) .eq. "VLBA4/8"
       kdbbc_rack  = cstrack_cap(istn) .eq.  "DBBC" 
-      krdbe_rack  = cstrack_cap(istn)  .eq. "RDBE" 
      
       kvform  = kvrack
       km3form = Km3rack .or. kk3fmk4rack

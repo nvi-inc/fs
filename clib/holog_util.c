@@ -47,14 +47,12 @@ char *ptr;
       break;
     case 3:
       ierr=arg_int(ptr,&lcl->azp,0,FALSE);
-      if(ierr==0 && (abs(lcl->azp) < 3 || abs(lcl->azp) > 99 ||lcl->azp%2==0))
+      if(ierr==0 && (abs(lcl->azp) > 99 ||lcl->azp%2==0))
 	ierr=-200;
       break;
     case 4:
       ierr=arg_int(ptr,&lcl->elp,0,FALSE);
-      if(ierr==0 &&
-	 (abs(lcl->elp) < 3 || abs(lcl->elp) > 99 || lcl->elp%2==0 ||
-	  (lcl->elp > 0 != lcl->azp > 0)))
+      if(ierr==0 && (abs(lcl->elp) > 99 || lcl->elp%2==0))
 	ierr=-200;
       break;
     case 5:

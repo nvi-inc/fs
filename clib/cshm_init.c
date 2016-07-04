@@ -243,7 +243,7 @@ void cshm_init()
   shm_addr->onoff.setup=FALSE;
   shm_addr->onoff.rep=2;
   shm_addr->onoff.intp=1;
-  shm_addr->onoff.cutoff=75.*DEG2RAD;
+  shm_addr->onoff.cutoff=75.;
   shm_addr->onoff.step=3;
   shm_addr->onoff.wait=120;
   
@@ -441,6 +441,12 @@ void cshm_init()
   }
 
   for(i=0;i<MAX_RDBE;i++) {
+    m5state_init(&shm_addr->rdbe_atten[i].ifc.state);
+    m5state_init(&shm_addr->rdbe_atten[i].atten.state);
+    m5state_init(&shm_addr->rdbe_atten[i].target.state);
+  }
+
+  for(i=0;i<MAX_RDBE;i++) {
     for (j=0;j<2;j++) {
       shm_addr->rdtcn[i].control[j].continuous=0;
       shm_addr->rdtcn[i].control[j].cycle=0;
@@ -450,6 +456,7 @@ void cshm_init()
     shm_addr->rdtcn[i].iping=0;
   }
   shm_addr->dbbc_defined=0;
+  shm_addr->dbbc2_defined=0;
 
   return;
 }

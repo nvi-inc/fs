@@ -78,7 +78,7 @@ rdbcn:
       for (i=0;i<MAX_RDBE;i++)
 	if(itask == i+1 || shm_addr->rdbe_active[i]!=0 && itask == 0) {
 	  char name[6];
-	  ip[0]=1;
+	  ip[0]=6;
 	  ip[1]=out_class[i];
 	  ip[2]=out_recs[i];
 	  sprintf(name,"rdbc%c",unit_letters[i+1]);

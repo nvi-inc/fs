@@ -49,8 +49,17 @@ mout6()
     move(ROW_A+i,COL_DOT2GPS);
     printw("%11.3f",local.dot2gps*1e6);
     
+    move(ROW_A+i,COL_EPOCH);
+    printw("%3d",local.epoch_vdif);
+    
     move(ROW_A+i,COL_RAW);
-    printw("IF%.1d %4.1f",local.raw_ifx,local.sigma);
+    if(local.sigma < fs->rdbe_equip.rms_min ||
+       local.sigma > fs->rdbe_equip.rms_max) 
+      standout();
+    printw("%2d %4.1f",local.raw_ifx,local.sigma);
+    if(local.sigma < fs->rdbe_equip.rms_min ||
+       local.sigma > fs->rdbe_equip.rms_max) 
+      standend();
     
     if(local.tsys[MAX_RDBE_CH][0]>=-1e12) {
       move(ROW_A+i,COL_TSYS);

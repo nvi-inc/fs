@@ -371,7 +371,7 @@ main()
 	  i,  onscal.sig[i],ons.sig[i],ofscal.sig[i],ofs.sig[i],zero.sig[i]);
       logit(buff,0,NULL);
 #endif
-      if(use_cal || (cont[i] && use_cal)) {
+      if(onoff.devices[i].tcal>0.0 && (use_cal || cont[i])) {
       	gcmp[i]=(onscal.avg[i]-ons.avg[i])
 	  /(ofscal.avg[i]-ofs.avg[i]);
 	num=(onscal.avg[i]-ons.avg[i]);
@@ -383,7 +383,7 @@ main()
 			 +pow(ofs.sig[i]*num/(den*den),2.0)
 			 );
       } else {
-	gcmp[i]=1.0;
+	gcmp[i]=0.0;
 	gcmp_sig[i]=0.0;
       }
 	
@@ -392,7 +392,7 @@ main()
       else
 	ofsv=ofs.avg[i];
 
-      if(use_cal || (cont[i] && use_cal)) {
+      if(onoff.devices[i].tcal>0.0 && (use_cal || cont[i])) {
 	tsys[i]=(ofsv-zero.avg[i])*onoff.devices[i].tcal
 	  /(ofscal.avg[i]-ofs.avg[i]);
 	num=(ofsv-zero.avg[i])*onoff.devices[i].tcal;
@@ -419,7 +419,7 @@ main()
 		       +pow(zero.sig[i]*onoff.devices[i].flux/den,2.0)
 		       +pow(ons.sig[i]*num/(den*den),2.0));
       
-      if(use_cal || (cont[i] && use_cal)) {
+      if(onoff.devices[i].tcal>0.0 && (use_cal || cont[i])) {
 	tclj[i]=(ofscal.avg[i]-ofs.avg[i])*onoff.devices[i].flux
 	  /(ons.avg[i]-ofs.avg[i]);
 	num=(ofscal.avg[i]-ofs.avg[i])*onoff.devices[i].flux;

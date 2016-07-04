@@ -2530,3 +2530,40 @@ void fs_get_rdbe_active__(rdbe_active)
 		 shm_addr->rdbe_active,
 		 sizeof(shm_addr->rdbe_active));
 	}
+
+void fs_set_rdbe_rms_t__(rdbe_rms_t)
+	float *rdbe_rms_t;
+	{
+	    shm_addr->rdbe_equip.rms_t=*rdbe_rms_t;
+	}
+
+void fs_get_rdbe_rms_t__(rdbe_rms_t)
+	float *rdbe_rms_t;
+	{
+	    *rdbe_rms_t=shm_addr->rdbe_equip.rms_t;
+	}
+
+void fs_set_rdbe_rms_min__(rdbe_rms_min)
+	float *rdbe_rms_min;
+	{
+	    shm_addr->rdbe_equip.rms_min=*rdbe_rms_min;
+	}
+
+void fs_get_rdbe_rms_min__(rdbe_rms_min)
+	float *rdbe_rms_min;
+	{
+	    *rdbe_rms_min=shm_addr->rdbe_equip.rms_min;
+	}
+
+void fs_set_rdbe_rms_max__(rdbe_rms_max)
+	float *rdbe_rms_max;
+	{
+	    shm_addr->rdbe_equip.rms_max=*rdbe_rms_max;
+	}
+
+void fs_get_rdbe_rms_max__(rdbe_rms_max)
+	float *rdbe_rms_max;
+	{
+	    *rdbe_rms_max=shm_addr->rdbe_equip.rms_max;
+	}
+

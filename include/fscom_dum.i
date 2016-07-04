@@ -12,7 +12,8 @@ c
      . HORAZ(MAX_HOR), HOREL(MAX_HOR), motorv(2), inscint(2),inscsl(2),
      . outscint(2), outscsl(2), wrvolt(2), rateti_fs, POSNHD(2,2),
      . FREQVC(15), motorv2(2), wrvolt2(2), wrvolt4(2), wrvolt42(2),
-     $     extbwvc(15),cablevl
+     $     extbwvc(15),cablevl,
+     $ rdbe_rms_t, rdbe_rms_min, rdbe_rms_max
 
       integer*4 iclbox, iclopr, spanti_fs, epochti_fs, offsetti_fs,
      . secsoffti_fs,ichfm_cn_tm, cips(2), freqif3, fm4enable(2),
@@ -59,6 +60,7 @@ c
      . HORAZ, HOREL, motorv, inscint, inscsl, outscint,
      . outscsl, wrvolt, rateti_fs, POSNHD,  FREQVC, motorv2, wrvolt2,
      . wrvolt4,wrvolt42,extbwvc,cablevl,
+     $ rdbe_rms_t, rdbe_rms_min, rdbe_rms_max,
 c
      . iclbox, iclopr, spanti_fs, epochti_fs, offsetti_fs,
      . secsoffti_fs,ichfm_cn_tm, cips, freqif3, fm4enable,
