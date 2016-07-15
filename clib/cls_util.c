@@ -69,8 +69,6 @@ if ( msqid == -1 ) {
 	exit( -1);
 }
 
-sem_take( SEM_CLS);
-
 while ( -1 !=
  msgrcv( msqid, (struct msgbuf *) &msg, sizeof( msg.messg ), -LONG_MAX,
 	IPC_NOWAIT|MSG_NOERROR));
@@ -78,6 +76,12 @@ if( errno != ENOMSG){
     perror("cls_ini: error cleaning class numbers");
     exit(-1);
 }
+sem_take( SEM_CLS); /* hold the semaphore if and *only* if:
+                       i) manipulatig the class database directly
+                       ii) when calling cal_alc_s()
+                       iii) when call cls_chk()
+		    */
+
 for (i=0;i<MAX_CLS;i++)
     shm_addr->nums[i]=0;
 shm_addr->class_count=0;
@@ -124,7 +128,7 @@ void sem_take(), sem_put();
      fprintf(stderr,"cls_chk error in cls_snd()\n");
      exit(-1);
    }
-sem_put( SEM_CLS);
+   sem_put( SEM_CLS);
 
 msg.mtype = *class;
 msg.messg.parm[0]=parm3;
@@ -156,6 +160,15 @@ int    imod;
 
   class=0;
   for (i=0;i<MAX_CLS;i++) {
+
+    /* work cyclically through class numbers:
+       class_count is most recently allocated class number
+       nums[class-1] is the number of references:
+                     = 0 == unallocated
+                     = 1 == allocated
+                     > 1 == nums[]-1 is outstanding buffers or receives
+    */
+
     imod=(shm_addr->class_count+i)%MAX_CLS;
     if (shm_addr->nums[imod] == 0) {
        class=imod+1;
@@ -189,7 +202,6 @@ void sem_take(), sem_put();
    if(msgflg != 0 || nw) msgflg=IPC_NOWAIT;
    if(save   != 0 || sc) save = 1;
    
-   sem_take( SEM_CLS);
    nchars = msgrcv( msqid, (struct msgbuf *) &msg, sizeof( msg.messg),
 		   class+MAX_CLS,IPC_NOWAIT);
    if ( (nchars == -1) && (errno != ENOMSG)) {
@@ -201,6 +213,7 @@ void sem_take(), sem_put();
    }
 
    if(msgflg==0) {
+     sem_take( SEM_CLS);
      if(cls_chk( class, 1, 0)) {
 	fprintf(stderr,"cls_chk error 1 in cls_rcv()\n");
 	exit(-1);
@@ -215,7 +228,6 @@ void sem_take(), sem_put();
       perror("getting class");
       exit(-1);
    } else if (nchars == -1) {
-     sem_put( SEM_CLS);
      return( -1);
    }
    if(msgflg==0) {
@@ -224,21 +236,23 @@ void sem_take(), sem_put();
        fprintf(stderr,"cls_chk error 2 in cls_rcv()\n");
        exit(-1);
      }
+     sem_put( SEM_CLS);
    }
 copy:
    if( sb ) {
       msg.mtype = class + MAX_CLS;
-      if ( -1 == msgsnd( msqid, (struct msgbuf *) &msg, nchars, IPC_NOWAIT)) {
+      if ( -1 == msgsnd( msqid, (struct msgbuf *) &msg, nchars, 0)) {
          perror("cls_rcv: sending saved message");
          exit(-1);
       }
-   } else 
+   } else {
+     sem_take( SEM_CLS);
      if( cls_chk( class, -1, save)) {
 	fprintf(stderr,"cls_chk error 3 in cls_rcv()\n");
 	exit(-1);
      }
-
-   sem_put( SEM_CLS);
+     sem_put( SEM_CLS);
+   }
 
    *rtn1=msg.messg.parm[0];
    *rtn2=msg.messg.parm[1];
@@ -257,9 +271,7 @@ struct  cls_buf msg;
 void sem_take(), sem_put();
 
    class &= ~ 0160000;
-   if(class==0) return;
-
-   sem_take( SEM_CLS);
+   if(class<=0) return;
 
 while ( -1 !=
  msgrcv( msqid, (struct msgbuf *) &msg, sizeof( msg.messg ), class,
@@ -276,6 +288,8 @@ if( errno != ENOMSG){
     perror("cls_clr: error clearing saved class buffers");
     exit(-1);
 }
+
+ sem_take( SEM_CLS);
 
   shm_addr->nums[ class-1]=0;
 
