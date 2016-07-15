@@ -360,4 +360,9 @@ typedef struct fscom {
 
   struct dbbc_vsix_cmd dbbc_vsix[2];
 
+  struct fserr_cls {
+    char buf[125];
+    int nchars;
+  } fserr_cls;
+
 } Fscom;
