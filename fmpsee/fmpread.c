@@ -23,6 +23,12 @@ int *error,*len;
       ch=fgetc(*dcb);
   }
 
+  /* defense against DOS line terminaton */
+
+  if(clen>0 && buf[clen-1]=='\r') {
+    buf[--clen]=0;
+  }
+
   if(c == NULL) {
     if(clen 	== 0)
       return -1;

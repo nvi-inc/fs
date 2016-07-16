@@ -59,7 +59,12 @@ C
 200   continue
       iwait = 0
       ireg(2) = get_buf(iclopr+o'120000',ibuf,-iblen*2,idum,iwait)
-      nchar = iflch(ibuf,min0(ireg(2),iblen*2))
+      nchar=min0(ireg(2),iblen*2)
+c delete trsiling cr if there
+      if(nchar.gt.0) then
+         if(jchar(ibuf,nchar).eq.13) nchar=nchar-1
+      endif
+      nchar = iflch(ibuf,nchar)
       nchar = fblnk(ibuf,1,nchar)
       do i=1,nchar
          if(cjchar(ibuf,i).eq.'"') goto 201
