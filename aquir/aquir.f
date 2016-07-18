@@ -17,6 +17,8 @@ C
       data imsmax/36/
 c
       call setup_fscom
+      call fmperror_standalone_set(0)
+c
  1    continue
       call wait_prog('aquir',ip)
       if(0.ne.rn_take('aquir',1)) then

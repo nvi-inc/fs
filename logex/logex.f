@@ -190,6 +190,7 @@ C
 C 
 C
       call setup_fscom
+      call fmperror_standalone_set(1)
       call read_fscom
       luusr=6
       ludsp=luusr

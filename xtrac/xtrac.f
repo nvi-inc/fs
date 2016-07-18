@@ -64,6 +64,8 @@ C          terminating:         input points         good points
 C 
       data idcbos/144/,aofer/.0001/ 
 C
+      call fmperror_standalone_set(1)
+c
       if (kinit(lu,iibuf,iobuf,iapp,ipbuf,lst)) goto 10020
 C
       if (kgetp(lu,idcb,idcbz,ipbuf,jbuf,il,iedit,widmin,widmax,pkrlim,
