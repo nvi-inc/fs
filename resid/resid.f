@@ -28,6 +28,8 @@ C          too man input poinhts, limit is
 C          no input points
       data il/100/,mpts/500/,iwds/3072/,idcbos/784/,is/40/
 C
+      call fmperror_standalone_set(1)
+
       ic=ib2as(mpts,ldum,1,o'100000'+6)
 C
       if (kinit(lu,iibuf,iobuf,iapp,lstrng,is,ics,lst)) goto 10010

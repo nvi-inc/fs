@@ -4,6 +4,8 @@
 #include <sys/types.h>
 #define MAX_NAME 64
 
+extern int fmperror_standalone;
+
 void fmpopen_(dcb,filename,error,options,dcbb,len,leno)
 
   FILE **dcb;
@@ -30,8 +32,15 @@ void fmpopen_(dcb,filename,error,options,dcbb,len,leno)
   so=strchr(iopt,' ');
   if(so != NULL) *so='\0';
   if ((*dcb = fopen(iname, iopt)) == NULL) {
-    fprintf(stderr,"fmpopen: %s, %s\n",iname,strerror(errno));
-    *error=-1;
+    if(fmperror_standalone)
+      fprintf(stderr,"fmpopen: %s, %s\n",iname,strerror(errno));
+    else {
+      char mess[MAX_NAME+20];
+      strcpy(mess,"Opening file: ");
+      strcat(mess,iname);
+      logite(mess,-1,"fm");
+    }
+    *error=-errno;
   }
   return;
 }
