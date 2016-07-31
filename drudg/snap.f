@@ -102,7 +102,9 @@ C          3) force checks Y or N <<<<<<< removed
 ! Other variables dealing with next scan
       integer istnsk_next,isor_next,icod_next
 
-      integer istnsk,isor,icod
+      integer istnsk       !which station in current scan are we.
+                           !e.g., if our station is Wz, and the scan is wfwz, then istnsk=2
+      integer isor,icod
 
       integer*2 ldirp,lds
       character*2 cds,cdirp
@@ -134,7 +136,7 @@ C          3) force checks Y or N <<<<<<< removed
 
       integer nch,nch2,nch3
 
-      integer l,idirp,idurp,iftchk,idirn,iftrem,ilatestop
+      integer l,idirp,idurp,iftchk,idirn,ilatestop
       integer ic,ichk,iset,isppl,mjdpre
 
       real d,epoc,tslew,dum
@@ -710,6 +712,8 @@ C         Force new tape on the first scan on tape.
 
           if(knewtp .or. icod .ne. icod_old) then
             speed_ft=speed(icod,istn)
+! Don't need to do anything
+            if(.false.) then
             rmax_scan_time=maxtap(istn)/speed_ft        !time in seconds for scan
             if(krec) then
               call snap_recalc_speed(luscn,kvex,speed_ft,cs2speed(istn),
@@ -720,6 +724,7 @@ C         Force new tape on the first scan on tape.
                 stop
                endif
             endif
+            endif 
             icod_old=icod
           endif
 
@@ -755,11 +760,13 @@ C         Force new tape on the first scan on tape.
           call copy_time(itime_early,itime_tape_start)
 !     itime_tape_stop=itime_scan_end+itlate
           call TimeAdd(itime_scan_end,itlate(istn),itime_tape_stop)
-          call TimeAdd(itime_scan_beg,ioff(istnsk),itime_data_valid)
+          call TimeAdd(itime_scan_beg,ioff(istn),itime_data_valid)
+!          write(*,*) "Km6disk", km6disk, idata_mbps(istn)
+!          write(*,*) "istn: ",istn 
           if(km6disk) then 
              idata_mk6_scan_mb=
-     >       (itearl(istnsk)+itlate(istnsk)+idur(istnsk))
-     >          *idata_mbps(istnsk) 
+     >       (itearl(istn)+itlate(istn)+idur(istnsk))
+     >          *idata_mbps(istn) 
             rmk6_buf_time=
      >      float(idata_mk6_scan_mb_prev)/isink_mbps(istn)+imark6_off   
             call TimeAdd(itime_tape_start_prev,int(rmk6_buf_time),
@@ -814,11 +821,8 @@ C Use this section only for continuous
             call slewo(isorp,mjdpre,utpre,isor,istn,
      >        cwrap_pre,cwrap_now,tslew,0,dum)    
             if (tslew.lt.0) tslew=0.0
-            if (kNewPass) then ! New pass.
-              if(idirp .eq. +1) iftrem=ift(istnsk)-iftold
-              if(idirp .eq. -1) iftrem=iftold-ift(istnsk)
-!             iftrem= feet remaining on the pass from the ending footage of last scan
-              ilatestop=max(nint(float(iftrem)/speed_ft),1)
+            if (kNewPass) then ! New pass.  
+              ilatestop=1
               call TimeAdd(itime_scan_end_prev,ilatestop,itime_pass_end)
               call TimeSub(itime_scan_beg,itearl(istn),itime_tape_start)
             else ! Old pass.
@@ -996,6 +1000,7 @@ C           check against start-cal   for early=0.
             else
               idt=iTimeDifSec(iTime_cal,iTime_Check)
             endif
+             if(.false.) then
 C CHECK procedure 
 C Needs 55 sec at 80 ips = 4400 in = 366.667 f
 C NOTE: 55 sec should really be IPARTM
@@ -1006,6 +1011,7 @@ C NOTE: 55 sec should really be IPARTM
               else ! not enough time, so try later
                 icheck = 1 ! do a check after this obs (or at least try)
               endif ! enough time OR force
+            endif 
             ENDIF !do the check
           END IF !check procedure
         endif ! recording
@@ -1028,6 +1034,8 @@ C This is called on the first scan, if the setup is wanted on this
 C scan (flag 1=Y), if tape direction changes, or if a check was done
 C prior to this scan. Do only on a new pass for continuous. 
      
+!      write(*,*) "idata_....",idata_mk6_scan_mb
+!      stop 
       if(.not. (kPhaseRefPrev.or.krunning)) then    !issue SETUP          
         IF (iobs_this_stat.EQ.0.OR.KFLG(1).OR.LDIRP.NE.LDIR(ISTNSK)
      >       .OR.ICHK.EQ.1) THEN                
@@ -1197,9 +1205,7 @@ C Save information about this scan before going on to the next one
           iobs_this_stat_rec = iobs_this_stat_rec + 1
           LDIRP = LDIR(ISTNSK)
           idirp=idir
-          idurp=idur(istnsk)
-          IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ituse*ITEARL(istn)+
-     .        IDUR(ISTNSK))*speed_ft)
+          idurp=idur(istnsk)     
         endif ! update direction and footage
 C POSTOB    
 

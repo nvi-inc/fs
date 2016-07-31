@@ -13,7 +13,7 @@
 
 extern struct fscom *shm_addr;
 
-#define MAX_TEXT  512
+#define MAX_TEXT  1024
 
 struct  cls_buf {
 	long	mtype;

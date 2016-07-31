@@ -12,7 +12,9 @@ Settable parameters:
                    when commanding to cause the RDBE(s) to automatically
                    adjust the level to get a raw sample RMS of <target>.
 		   Default: auto.
-        <target>   target RMS value: 0.0-128.0. Default 32.0.
+        <target>   target RMS value: 0.0-128.0. Default is specified by the
+                   rdbe.ctl control file. A non-default <target> cannot
+                   be used with a numeric <atten>.
 
 Monitor-only parameters:
         <ifx>      "0" or "1", the next two values are for that IF

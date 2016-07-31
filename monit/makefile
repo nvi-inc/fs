@@ -37,7 +37,7 @@ mout5.o
 	cc -o ../bin/monit5 $(OBJECTS5) $(LIBES) -lm
 	strip ../bin/monit5
 #
-OBJECTS6 = monit6.o die.o m6init.o mout6.o
+OBJECTS6 = monit6.o die.o m6init.o mout6.o gmonit6.o
 #
 ../bin/monit6: $(OBJECTS6)
 	cc -o ../bin/monit6 $(OBJECTS6) $(LIBES) -lm

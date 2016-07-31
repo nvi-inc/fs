@@ -24,6 +24,12 @@ int *error,len;
       }
   }
 
+  /* defense against DOS line terminaton */
+
+  if(clen>0 && cbuf[clen-1]=='\r') {
+    cbuf[--clen]=0;
+  }
+
   if(c == NULL) {
     if(feof(*dcb)) {
       *error = 0;

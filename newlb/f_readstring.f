@@ -30,6 +30,13 @@ C Read in the buffer
 10    format(A)
  15   continue
       ILEN=trimlen(CBUF)
+c defend against DOS line termination, cr/lf, the lf was striped by read()
+      if(ilen.gt.0) then
+         if(cbuf(ilen:ilen).eq.char(13)) then
+            cbuf(ilen:ilen)=' '
+            ilen=ilen-1
+         endif
+      endif
 C If an error reset ilen to -1 since length is unknown
       if (IERR.ne.0) then
         ILEN=-1

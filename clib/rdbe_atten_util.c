@@ -70,14 +70,19 @@ char *ptr;
 	}
         break;
     case 3:
-      ierr=arg_float(ptr,&lcl->target.target,shm_addr->rdbe_equip.rms_t,TRUE);
-      if(ierr==0)
-	if(0.0 > lcl->target.target || lcl->target.target > 128.0)
-	  ierr=-200;
-	else {
-	  m5state_init(&lcl->atten.state);
-	  lcl->target.state.known=1;
-	}
+      ierr=arg_float(ptr,&lcl->target.target,shm_addr->rdbe_equip.rms_t,FALSE);
+      if(lcl->atten.atten!=-1 && ierr==0)
+	  ierr=-600;
+      else {
+	ierr=arg_float(ptr,&lcl->target.target,shm_addr->rdbe_equip.rms_t,TRUE);
+	if(ierr==0)
+	  if(0.0 > lcl->target.target || lcl->target.target > 128.0)
+	    ierr=-200;
+	  else{
+	    m5state_init(&lcl->target.state);
+	    lcl->target.state.known=1;
+	  }
+      }
       break;
 
       default:
@@ -122,7 +127,7 @@ struct rdbe_atten_cmd *lclc;
   case 3:
     if(lclc->target.state.known == 1)  {
       sprintf(output,"%.1f",lclc->target.target);
-      m5state_encode(output,&lclc->target);
+      m5state_encode(output,&lclc->target.state);
     }
     break;
   default:
@@ -200,10 +205,11 @@ struct rdbe_atten_cmd *lcl;
   strcat(ptr," : ");
   if(lcl->atten.atten >= 0 && lcl->atten.atten <NATTEN_KEY) {
     strcat(ptr,atten_key[lcl->atten.atten]);
+    strcat(ptr," : ");
+  } else {
+    strcat(ptr," : ");
+    sprintf(ptr+strlen(ptr),"%.01f",lcl->target.target);
   }
-
-  strcat(ptr," : ");
-  sprintf(ptr+strlen(ptr),"%.01f",lcl->target.target);
 
   strcat(ptr," ;\n");
 

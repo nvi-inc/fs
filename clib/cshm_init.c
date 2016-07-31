@@ -446,6 +446,9 @@ void cshm_init()
     m5state_init(&shm_addr->rdbe_atten[i].target.state);
   }
 
+  for (i=0;i<MAX_RDBE;i++) 
+    shm_addr->rdbe_tsys_data[i].iping=-1;
+
   for(i=0;i<MAX_RDBE;i++) {
     for (j=0;j<2;j++) {
       shm_addr->rdtcn[i].control[j].continuous=0;

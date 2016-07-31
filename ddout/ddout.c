@@ -355,9 +355,8 @@ Ack:    ich = strtok(NULL, ",");
     kp = (buf[FIRST_CHAR-1] == '$');
     kpcald = strncmp(buf+FIRST_CHAR-1,"#pcald#",7)==0 ||
       strncmp(buf+FIRST_CHAR-1,"#tpicd#",7)==0 ||
-      (strncmp(buf+FIRST_CHAR-1,"#rdtc",5)==0 &&
-       strncmp(buf+7+FIRST_CHAR-1,"<",1)!=0) ;
-;
+      strncmp(buf+FIRST_CHAR-1,"#rdtc",5)==0;
+
     knd= memcmp("nd",prtn1,2)==0;
     if( !kpcald && (kxd || (rtn2 == -1) || !kp && !kack && !kdebug && !knd )
 	|| kpcald && kpd){

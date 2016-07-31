@@ -53,6 +53,9 @@ error decording second attenuator for dbe_atten, rdb?W
 2B -503
 error decording second RMS for dbe_atten, rdb?W
 ""
+2B -603
+can't specific numberic attenuation and target
+""
 2B -901
 response not received for dbe_atten
 ""
@@ -3736,6 +3739,9 @@ mk6?W: Mark6 return code 8: parameter error
 ""
 M6 -909
 mk6?W: Mark6 return code 9: indeterminate state
+""
+MN   -1 Place Holder
+
 ""
 NF   -1
 Break Detected in ONOFF

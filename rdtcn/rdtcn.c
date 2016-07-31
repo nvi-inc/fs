@@ -144,10 +144,13 @@ int main(int argc, char *argv[])
   unsigned long long llvalue;
   double dot2pps,dot2gps, sigma;
   int multicast_error;
-  double avg_on[MAX_RDBE_IF];
-  double avg_off[MAX_RDBE_IF];
-  double avg_tcal[MAX_RDBE_IF];
+  double sum_on[MAX_RDBE_IF];
+  double sum_off[MAX_RDBE_IF];
+  double sum_tcal[MAX_RDBE_IF];
+  double rsum_tsys[MAX_RDBE_IF];
+  int tsys_count[MAX_RDBE_IF];
   int loop_count=-1;
+  double lo[MAX_LO];
 
   setup_ids();    /* attach to the shared memory */
   rte_prior(FS_PRIOR);
@@ -350,9 +353,15 @@ while (1) {
 
 
       for (j=0;j<MAX_RDBE_IF;j++) {
-	avg_on[j]=0.0;
-	avg_off[j]=0.0;
-	avg_tcal[j]=0.0;
+	int ifchain;
+
+	sum_on[j]=0.0;
+	sum_off[j]=0.0;
+	sum_tcal[j]=0.0;
+	rsum_tsys[j]=0.0;
+
+	ifchain=irdbe*MAX_RDBE_IF+j+1;
+	lo[ifchain-1]=shm_addr->lo.lo[ifchain-1];
       }
 
       for(i=0;i<MAX_RDBE_CH*MAX_RDBE_IF;i++) {
@@ -368,51 +377,73 @@ while (1) {
 	tpi[i][0]=xbe32toh(value); /* off */
 
 	ifchain=irdbe*MAX_RDBE_IF+i/MAX_RDBE_CH+1;
-	if(RDBE == shm_addr->equip.rack && shm_addr->lo.lo[ifchain-1] >= 0.0) {
-	  center=shm_addr->lo.lo[ifchain-1]+1024-32*(i%MAX_RDBE_CH);
+	if(RDBE == shm_addr->equip.rack && lo[ifchain-1] >= 0.0) {
+	  center=lo[ifchain-1]+1024-32*(i%MAX_RDBE_CH);
 	  get_gain_par(ifchain,center,
 		       &fwhm,&dpfu,NULL,&tcal);
 
-	  //	    printf(" irdbe %d i %d ifchan %d center %f tcal %f\n",
+	  //  	    printf(" irdbe %d i %d ifchan %d center %f tcal %f\n",
 	  //	   irdbe,i,ifchain,center,tcal);
 
-	  diff=(double) tpi[i][1]-(double) tpi[i][0];	
+	  diff=(double) tpi[i][1]-(double) tpi[i][0];
 	  if (tcal <=0.0)
 	    local.tsys[i%MAX_RDBE_CH][i/MAX_RDBE_CH]=-9e12;
 	  else if(diff <= 0.5)  /* no divide by zero or negative values */
 	    local.tsys[i%MAX_RDBE_CH][i/MAX_RDBE_CH]=-9e6;
-	  else 
+	  else {
 	    local.tsys[i%MAX_RDBE_CH][i/MAX_RDBE_CH]=
 	      (tcal/diff)*0.5*(tpi[i][1]+tpi[i][0]);
+	  }
 
-	  avg_on[i/MAX_RDBE_CH]+=tpi[i][1];
-	  avg_off[i/MAX_RDBE_CH]+=tpi[i][0];
+	  sum_on[i/MAX_RDBE_CH]+=tpi[i][1];
+	  sum_off[i/MAX_RDBE_CH]+=tpi[i][0];
+
 	  if(tcal <=0.0)
-	    avg_tcal[i/MAX_RDBE_CH]=-9e12;
-	  else if(avg_tcal[i/MAX_RDBE_CH] >=0.0)
-	    avg_tcal[i/MAX_RDBE_CH]+=tcal;
+	    sum_tcal[i/MAX_RDBE_CH]=-9e12;
+	  else if(sum_tcal[i/MAX_RDBE_CH] > -1e12)
+	    sum_tcal[i/MAX_RDBE_CH]+=tcal;
 
-	} else 
+	  if(tcal <=0.0)
+	    rsum_tsys[i/MAX_RDBE_CH]=-9e12;
+	  else if(rsum_tsys[i/MAX_RDBE_CH] > -1e12)
+	    rsum_tsys[i/MAX_RDBE_CH]+=diff/(tcal*0.5*(tpi[i][1]+tpi[i][0]));
+
+	} else {
 	  local.tsys[i%MAX_RDBE_CH][i/MAX_RDBE_CH]=-9e12;
-
+	  sum_tcal[i/MAX_RDBE_CH]=-9e12;
+	  rsum_tsys[i/MAX_RDBE_CH]=-9e12;
+	}  
       }
       for (j=0;j<MAX_RDBE_IF;j++) {
 	double diff;
 	int ifchain;
 
 	ifchain=irdbe*MAX_RDBE_IF+j+1;
-	if(RDBE == shm_addr->equip.rack && shm_addr->lo.lo[ifchain-1] >= 0.0) {
-	  diff=avg_on[j]-avg_off[j];
-	  if (avg_tcal[j] <= 0.0)
-	    local.tsys[MAX_RDBE_CH][j]=-9e12;
+	if(RDBE == shm_addr->equip.rack && lo[ifchain-1] >= 0.0) {
+	  diff=sum_on[j]-sum_off[j];
+
+	  if (sum_tcal[j] <= 0.0)
+	    local.tsys[MAX_RDBE_CH+1][j]=-9e12;
 	  else if(diff <= 0.5) /* no divide by zero or negative values */
+	    local.tsys[MAX_RDBE_CH+1][j]=-9e6;
+	  else {
+	    local.tsys[MAX_RDBE_CH+1][j]=
+	      (sum_tcal[j]/(MAX_RDBE_CH*diff))*0.5*(sum_on[j]+sum_off[j]);
+	  }
+
+	  if(rsum_tsys[j] < -1e12)
+	    local.tsys[MAX_RDBE_CH][j]=-9e12;
+	  else if(rsum_tsys[j] < 1e-6)
 	    local.tsys[MAX_RDBE_CH][j]=-9e6;
 	  else
-	    
-	    local.tsys[MAX_RDBE_CH][j]=
-	      (avg_tcal[j]/diff)*0.5*(avg_on[j]+avg_off[j])/MAX_RDBE_CH;
-	} else
+	    local.tsys[MAX_RDBE_CH][j]=MAX_RDBE_CH/rsum_tsys[j];
+
+	} else {
 	  local.tsys[MAX_RDBE_CH][j]=-9e12;
+	  local.tsys[MAX_RDBE_CH+1][j]=-9e12;
+	}
+	// printf(" irdbe %d j %d local.tsys[MAX_RDBE_CH][j] %f\n",
+	//       irdbe, j,  local.tsys[MAX_RDBE_CH][j]);
       }
     }
 
@@ -457,6 +488,7 @@ while (1) {
 		   shm_addr->lo.spacing[ifchain-1])*1e6;
     } /* take the first valid value */
   }
+  local.pcaloff=pcaloff;
 
   if(pcaloff > 0.1) {
     for(i=0;i<1024;i++) {
@@ -481,16 +513,17 @@ while (1) {
     //    printf(" epoch %14.14s i %d x %f y %f\n",databuf,i,x[i],y[i]);
 
     for(i=0;i<1024;i+=5) {
-      /*3.346e-8 = 60/1.7.93e9 =correlator/example_raw_amp */
-      local.pcal_amp[i]=3.346e-8*sqrt(pow(x[i],2.0)+pow(y[i],2.0));
+      int ibin; /* find channel of tone, critical cases round up */
+      ibin=fmod((pcaloff+i*1e6+16e6)/32e6+1e-12,(double)MAX_RDBE_CH);
+      // 1.25e-5 determimed empirically, independent of RMS level
+      local.pcal_amp[i]=1.25e-5*sqrt(pow(x[i],2.0)+pow(y[i],2.0))/
+	sqrt((double) tpi[ibin][0]+(double)tpi[ibin][1]);
+      // 3.346e-8 = 60/1.7.93e9 =correlator/(example_raw_amp at with RMS 32)
+      // local.pcal_amp[i]=3.346e-8*sqrt(pow(x[i],2.0)+pow(y[i],2.0));
       local.pcal_phase[i]=atan2(y[i],x[i])*180/M_PI;
-      //      printf(" epoch %14.14s i %4d amp %f phaase %f\n",databuf,i,amp,phase);
+      //  printf(" epoch %14.14s i %4d amp %f phase %f\n",databuf,i,amp,phase);
     }
-  } else
-    for(i=0;i<1024;i+=5) {
-      local.pcal_amp[i]=0.0;
-      local.pcal_phase[i]=0.0;
-    }
+  }
 
   memcpy(&llvalue,databuf+11824,8);
   llvalue=xbe64toh(llvalue);
@@ -574,9 +607,9 @@ while (1) {
   /* tsys */
   buf[0]=0;
   slen=0;
-  for (i=0;i<2*(MAX_RDBE_CH+1); i++ ) {
-    int ifchan=i/(MAX_RDBE_CH+1);
-    int ichan=i%(MAX_RDBE_CH+1);
+  for (i=0;i<2*(MAX_RDBE_CH+2); i++ ) {
+    int ifchan=i/(MAX_RDBE_CH+2);
+    int ichan=i%(MAX_RDBE_CH+2);
 
     if(strlen(buf) > 100 || 0==ichan && buf[0]!=0 ) {
       buf[strlen(buf)-1]=0;
@@ -592,10 +625,12 @@ while (1) {
     }
     
     start=buf+strlen(buf);
-    if(MAX_RDBE_CH!=ichan)
+    if(MAX_RDBE_CH>ichan)
       snprintf(start,sizeof(buf)-strlen(buf)," %02d%c%d,",ichan,letter,ifchan);
-    else
-      snprintf(start,sizeof(buf)-strlen(buf),"   %c%d,",letter,ifchan);
+    else if(MAX_RDBE_CH==ichan)
+      snprintf(start,sizeof(buf)-strlen(buf)," AV%c%d,",letter,ifchan);
+    else if(MAX_RDBE_CH+1==ichan)
+      snprintf(start,sizeof(buf)-strlen(buf)," SM%c%d,",letter,ifchan);
 
     flt2str(buf,local.tsys[ichan][ifchan],-5,1);
     strcat(buf,",");
@@ -607,28 +642,30 @@ while (1) {
 
 /* pcal */
 
-  //  if(irdbe==0) {
-  buf[0]=0;
-  for (i=0;i<512; i+=5 ) {
-    if(strlen(buf) > 100 || i == 16 && buf[0]!=0 ) {
+  if(pcaloff > 0.1) {
+    buf[0]=0;
+    for (i=0;i<512; i+=5 ) {
+      if(pcaloff+i*1e6>512e6)
+	break;
+      if(strlen(buf) > 100 || i == 16 && buf[0]!=0 ) {
+	buf[strlen(buf)-1]=0;
+	logit(buf,0,NULL);
+	buf[0]=0;
+      }
+      if(buf[0]==0) {
+	strcpy(buf,"pcal/");
+	slen=strlen(buf);
+      }
+      
+      start=buf+strlen(buf);
+      snprintf(start,sizeof(buf)-strlen(buf)," %hu%c%04d, %7.3f, %6.1f,",
+	       local.pcal_ifx,letter,i,local.pcal_amp[i],local.pcal_phase[i]);
+    }
+    if(strlen(buf)>slen){
       buf[strlen(buf)-1]=0;
       logit(buf,0,NULL);
-      buf[0]=0;
-    }
-    if(buf[0]==0) {
-      strcpy(buf,"pcal/");
-      slen=strlen(buf);
-    }
-    
-    start=buf+strlen(buf);
-    snprintf(start,sizeof(buf)-strlen(buf)," %hu%c%04d, %7.3f, %6.1f,",
-	     local.pcal_ifx,letter,i,local.pcal_amp[i],local.pcal_phase[i]);
+    } 
   }
-  if(strlen(buf)>slen){
-    buf[strlen(buf)-1]=0;
-    logit(buf,0,NULL);
-  } 
-  // }
  }
 return 0;
 }

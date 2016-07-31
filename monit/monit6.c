@@ -5,12 +5,13 @@
 #include <signal.h>
 #include <math.h>
 #include <sys/types.h>
+#include <string.h>
 
-#include "../../fs/include/dpi.h"
-#include "../../fs/include/params.h"
-#include "../../fs/include/fs_types.h"
-#include "../../fs/include/fscom.h"
-#include "../../fs/include/shm_addr.h"
+#include "../include/dpi.h"
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"
+#include "../include/shm_addr.h"
 
 #include "mon6.h"
 
@@ -30,6 +31,7 @@ main()
   void die();
   void resize();
   unsigned rte_sleep();
+  char buff[128];
 
   setup_ids();
   fs = shm_addr;
@@ -38,7 +40,16 @@ main()
 
   if (nsem_test("fs   ") != 1) {
     printf("monit6 terminating, Field System not running\n");
-    exit(0);
+    sleep(10);
+    exit(-1);
+  }
+
+  strcpy(buff,FS_ROOT);
+  strncat(buff,"/control/monit6.ctl",sizeof(buff)-strlen(buff)-1);
+  if(gmonit6(buff,&fs->monit6)) {
+    printf("error reading %s, see log for error\n", buff);
+    sleep(10);
+    exit(-1);
   }
 
   initscr();
@@ -65,7 +76,9 @@ main()
     refresh();
 
     rte_time(it,&iyear);
-    isleep=125-it[0];
+    isleep=120-it[0];
+    isleep=isleep>100?100:isleep;
+    isleep=isleep<1?100:isleep;
     rte_sleep((unsigned) isleep);
 
     if (nsem_test("fs   ") != 1) {
