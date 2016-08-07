@@ -28,7 +28,7 @@
    manually fill up the structure used for creating the connection.
    One line should be commented/uncommented to decide which one to be used,
    the line with '#define USE_GETADDRINFO'. */
-//#define USE_GETADDRINFO     /* Line to comment/uncomment */
+#define USE_GETADDRINFO     /* Line to comment/uncomment */
 #ifndef USE_GETADDRINFO
 #define USE_GETHOSTBYNAME
 #endif
@@ -183,7 +183,6 @@ int fsmetc_()
     err = -11;  /* Select call (i.e., server) timed out. */
     goto closer;
   }
-  
   if ((numbytes=recv(sockfd, buf, 29, 0)) == -1) {
     errno_save = errno;
     err = -12;        /* Did not successfully retreive data */

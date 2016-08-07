@@ -56,7 +56,7 @@ C
       iopt2 = 0 
       copt2 =' '
       if (nargs.gt.5) then
-        if (ierr.lt.0) copt2='b1'
+        copt2='b1'
       endif
       if (nargs.eq.5) then
         iopt2 = ierr

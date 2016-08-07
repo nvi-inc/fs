@@ -18,6 +18,7 @@
 #define LEXPER_N 8
 #define DBBCDDCVL_N 1
 #define DBBCDDCVS_N 16
+#define RDBE_PCAL_AMP_N 1
 #define SYSTMP_N MAX_DET
 #define LFREQV_N 90
 #define FREQVC_N 15
@@ -2566,4 +2567,18 @@ void fs_get_rdbe_rms_max__(rdbe_rms_max)
 	{
 	    *rdbe_rms_max=shm_addr->rdbe_equip.rms_max;
 	}
+void fs_set_rdbe_pcal_amp__(rdbe_pcal_amp)
+	char *rdbe_pcal_amp;
+	{
+          size_t N;
+	  N = RDBE_PCAL_AMP_N;
+	  memcpy(shm_addr->rdbe_equip.pcal_amp,rdbe_pcal_amp,N);
+	}
 
+void fs_get_rdbe_pcal_amp__(rdbe_pcal_amp)
+	char *rdbe_pcal_amp;
+	{
+          size_t N;
+	  N = RDBE_PCAL_AMP_N;
+	  memcpy(rdbe_pcal_amp,shm_addr->rdbe_equip.pcal_amp,N);
+	}

@@ -97,7 +97,8 @@ c
       CHARACTER*8 LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP
       character*16 dbbcddcvs
       character*1 dbbcddcvl
+      character*1 rdbe_pcal_amp
 c
       common/fscom_dum2/ LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP,
-     $                   dbbcddcvs, dbbcddcvl   
+     $                   dbbcddcvs, dbbcddcvl, rdbe_pcal_amp   
 

@@ -20,6 +20,8 @@
 
 extern struct fscom *shm_addr;
 
+double rdbe_freqz(double);
+
 struct mcast {
    char read_time[20];
    unsigned short pkt_size;
@@ -294,7 +296,7 @@ while (1) {
   }
   if(multicast_error) {
     multicast_error=0;
-    logita(NULL,-3,"rz",who);
+    logita(NULL,2,"rz",who);
   }
 
   if((len = read(sd, databuf, datalen)) < 0)
@@ -513,13 +515,30 @@ while (1) {
     //    printf(" epoch %14.14s i %d x %f y %f\n",databuf,i,x[i],y[i]);
 
     for(i=0;i<1024;i+=5) {
-      int ibin; /* find channel of tone, critical cases round up */
-      ibin=fmod((pcaloff+i*1e6+16e6)/32e6+1e-12,(double)MAX_RDBE_CH);
-      // 1.25e-5 determimed empirically, independent of RMS level
-      local.pcal_amp[i]=1.25e-5*sqrt(pow(x[i],2.0)+pow(y[i],2.0))/
-	sqrt((double) tpi[ibin][0]+(double)tpi[ibin][1]);
-      // 3.346e-8 = 60/1.7.93e9 =correlator/(example_raw_amp at with RMS 32)
+      if(shm_addr->rdbe_equip.pcal_amp[0]=='r'||
+	 shm_addr->rdbe_equip.pcal_amp[0]=='n'||
+	 shm_addr->rdbe_equip.pcal_amp[0]=='c')
+	local.pcal_amp[i]=1e-7*sqrt(pow(x[i],2.0)+pow(y[i],2.0));
+
+      if(shm_addr->rdbe_equip.pcal_amp[0]=='n'||
+	 shm_addr->rdbe_equip.pcal_amp[0]=='c') {
+	int ibin; /* find channel of tone, critical cases round up */
+	ibin=fmod((pcaloff+i*1e6+16e6)/32e6+1e-12,(double)MAX_RDBE_CH);
+	/* Brian determined 1.25e-5 empirically, independent of RMS level */
+	local.pcal_amp[i]*=1.25e2/
+	  sqrt((double) tpi[ibin][0]+(double)tpi[ibin][1]);
+      }
+      if(shm_addr->rdbe_equip.pcal_amp[0]=='c') {
+	float freq;
+	/* correct for 32 Mhz channel roll-off so reported value agrees
+	   with correlator, roll-off from Russ */
+	freq=fmod(pcaloff+i*1e6+16e6,32e6)-16e6; 
+	local.pcal_amp[i]*=rdbe_freqz(freq);
+      }
+      // old, agrees roughly with correlator for RMS 32:
+      // 3.346e-8 = 60/1.793e9 =correlator/(example_raw_amp at with RMS 32)
       // local.pcal_amp[i]=3.346e-8*sqrt(pow(x[i],2.0)+pow(y[i],2.0));
+
       local.pcal_phase[i]=atan2(y[i],x[i])*180/M_PI;
       //  printf(" epoch %14.14s i %4d amp %f phase %f\n",databuf,i,amp,phase);
     }
@@ -570,6 +589,9 @@ while (1) {
   logit(buf,0,NULL);
 
   sprintf(buf,"dot2gps/%12.9e",dot2gps);
+  logit(buf,0,NULL);
+
+  sprintf(buf,"sigma/%hu%c,%4.1f",raw_ifx,letter,sigma);
   logit(buf,0,NULL);
 
   buf[0]=0;

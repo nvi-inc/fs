@@ -5043,7 +5043,7 @@ Q* -105
 No default for LO pcal spacing
 ""
 Q* -201
-Channel must be loa-d: VLBA/4/5+DBBC, lo1-3: MK3/4/5+K4, loa0-lod1: RDBE, lo1-8: (no rack), lo1-4: LBA/4+all others
+Channel must be lo1-3:MK3/4/5+K4, loa-d:VLBA/4/5, lo1-4:LBA/4, loa-d,2a-2d:DBBC, loa0-d0,a1-d1:RDBE, lo1-8:all others
 ""
 Q* -202
 LO frequency must be a positive real number
@@ -6092,14 +6092,14 @@ No signal from bar code reader.
 RW   -2
 Successive readings from bar code reader differ.
 ""
+RZ    2
+rdt?W: receiving multicast messages again
+""
 RZ   -1
 rdt?W: Error from select(), see above message for details.
 ""
 RZ   -2
 rdt?W: multicast may not be running, no message received
-""
-RZ   -3
-rdt?W: receiving multicast messages again
 ""
 SC   -1
 setcl: incorrect number of class buffers.

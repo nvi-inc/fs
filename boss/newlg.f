@@ -472,6 +472,15 @@ C
       nch=mcoma(ib,nch)
       call fs_get_rdbe_rms_max(rdbe_rms_max)
       nch = nch + ir2as(rdbe_rms_max,ib,nch,5,1)
+      nch=mcoma(ib,nch)
+      call fs_get_rdbe_pcal_amp(rdbe_pcal_amp)
+      if(rdbe_pcal_amp.eq.'r') then
+         nch = ichmv_ch(ib,nch,'raw')
+      else if(rdbe_pcal_amp.eq.'n') then
+         nch = ichmv_ch(ib,nch,'normalized')
+      else if(rdbe_pcal_amp.eq.'c') then
+         nch = ichmv_ch(ib,nch,'correlator')
+      endif
       call logit3(ib,nch-1,lsor)
 c
       return

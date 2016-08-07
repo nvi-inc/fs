@@ -493,7 +493,7 @@ Append:           /* send message to station error program */
 	printf("%.8s",buf+9);
 /* not Y10K compliant */
 	printf("%s",buf+20);
-	if (*cp2 == 'b') {
+	if (*cp2 == 'b' && ierrnum < 0) {
 	  printf("\007");
 	  play_wav(1);
 	}

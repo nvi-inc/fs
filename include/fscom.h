@@ -401,6 +401,7 @@ typedef struct fscom {
     float rms_t;
     float rms_min;
     float rms_max;
+    char pcal_amp[1];
   } rdbe_equip;
 
   struct monit6 {
