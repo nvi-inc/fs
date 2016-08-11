@@ -28,7 +28,7 @@ long ip[5];                           /* ipc parameters */
       void skd_run(), skd_par();      /* program scheduling utilities */
 
       if (command->equal != '=') {           /* run pcald */
-	  for(i=0;i<MAX_DET;i++)
+	  for(i=0;i<MAX_GLOBAL_DET;i++)
 	    if(0!=shm_addr->tpicd.itpis[i])
 	      goto Start;
 	  ierr=-302;
@@ -63,7 +63,7 @@ long ip[5];                           /* ipc parameters */
 	    goto error;
 	  }
 
-	  for(i=0;i<MAX_DET;i++)
+	  for(i=0;i<MAX_GLOBAL_DET;i++)
 	    if(0!=shm_addr->tpicd.itpis[i])
 	      goto Tsys;
 	  ierr=-302;
