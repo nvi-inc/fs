@@ -6,7 +6,7 @@ syntax:   mk5b_mode=source,mask,decimation,sample,fpdp,okay
 
 Response:   mk5b_mode/source,mask,decimation,sample,fpdp
           bit_streams/source,mask,decimation,sample,fpdp
-            mk5c_mode/source,mask,decimation,sample,format,tracks,tbitrate,frame
+            mk5c_mode/source,mask,decimation,sample,,format,tracks,tbitrate,frame
 
 Settable parameters:
 source:     data source: ext, tvg, ramp, or vdif. Default: ext.
@@ -21,7 +21,7 @@ sample:     sample rate: must be greater than 0.124.  The value divided
             decimation factor.  Default is the clock rate from equip.ctl
             (decimation becomes "1") unless the specified rate is "none",
             in which case this command will report an error.
-fpdp:       fpdp mode: 1 or 2. Default: no command sent to Mark 5B
+fpdp:       fpdp mode: 1 or 2. Default: no command sent to recorder
 okay        overide to allow command while recording, literal ascii:
             disk_record_ok
 
@@ -33,31 +33,44 @@ frame       frame size in bytes
 
 Comments:
 
-"bit_streams" is an alias for the "mk5b_mode" and "mk5c_mode" commands
-that does not communicate with the recorder.  All other aspects of its
-operation are identical for the first four parameters.  The main
-purpose of "bit_streams" is to provide a way to set the bitstream mask
-for correct sampling of Tsys when no recorder is being used (typically
-during eVLBI) when a Mark 5B/C compatible rack, such as a Mark 5,
-VLBA5, DBBC_DDC, or DDBC_DDC/FiLA10G (or none) is in use.  For such
-racks, if the recorder is set to "none" in DRUDG, the "bit_stream"
-command will be generated instead of mk5b_mode or mk5c_mode.
+The "mk5c_mode" command is an alias for the "mk5b_mode" command, but
+is used with Mark 5C/FlexBuff recorders only.  The recorder must be
+controlled by the "jive5ab" control program for this command to work.
+When the "mk5b_mode=..." or "mk5c_mode=..."  command is used for
+non-VDIF recording, a "clock_set" command specifying the actual sample
+rate of the data is sent to the recorder.  The decimation factor,
+regardless of the SNAP command value specified, sent to the recorder
+is always "1" for the Mark 5C/FlexBuff since there is no decimation.
+The sample rate can be specified in the SNAP command either explicitly
+with the "sample" parameter or implicitly with the "decimate"
+parameter.  In the latter case, the actual sample rate (of the
+recorded data) is calculated using the Mark 5B clock rate specified in
+"equip.ctl".  If the specified clock rate is "none", the "clock_set"
+command is suppressed.  The use of "clock_set" is necessary for the
+"bank_check" SNAP command (which uses the low-level Mark 5 command
+"rtime?") to work for Mark 5C.  For VDIF recording the "mk5c_mode"
+command also sends the "packet" command; for FlexBuff, it also set the
+"mtu" and "net_protocol" commands.
 
-"mk5c_mode" is an alias for the "mk5b_mode" command, but is used with
-Mark 5C recorders only.  The recorder must be controlled by the
-"jive5ab" control program for this command to work.  When the
-"mk5c_mode=..."  command is used, a "clock_set" command specifying the
-actual sample rate of the data is sent to the recorder.  The
-decimation factor, regardless of the SNAP command value specified,
-sent to the recorder is always "1" for the Mark 5C since there is no
-decimation.  The sample rate can be specified in the SNAP command
-either explicitly with the "sample" parameter or implicitly with the
-"decimate" parameter.  In the latter case, the actual sample rate (of
-the recorded data) is calculated using the Mark 5B clock rate
-specified in "equip.ctl".  If the specified clock rate is "none", the
-"clock_set" command is suppressed.  The use of "clock_set" is
-necessary for the "bank_check" SNAP command (which uses the low-level
-Mark 5 command "rtime?") to work for for Mark 5C.
+The "bit_streams" is an alias for the "mk5b_mode" and "mk5c_mode"
+commands that does not communicate with the recorder.  All other
+aspects of its operation are identical for the first four parameters.
+The main purpose of "bit_streams" is to provide a way to set the bit
+stream mask for correct sampling of Tsys when no recorder is being
+used (typically during eVLBI) when a Mark 5B/C/Flexbuff compatible
+rack, such as a Mark 5, VLBA5, DBBC_DDC, DDBC_DDC/FiLA10G, DBBC_PFB,
+or DBBC_PFB/FiLa10G (or none) is in use.
+
+To get correct Tsys data for eVLBI with a DBBC, the user, in DRUDG,
+should select "none" for the recorder and the approrpiate non-FiLa10G
+rack type.  Since there is no recorder, DRUDG will use the bit_streams
+command.  This will set the bit mask in place of the mk5b_mode or
+mk5c_mode command.  The absence of the mk5b_mode command and the
+fila10g_mode commands means that the FS will not interfere with eVLBI
+remote control of the 5B or FiLa10G.  For the FiLa10G, getting the
+correct bit mask for recording tsys data depends on the fact that
+DRUDG always use equivalent bit masks for fila10g and mk5c_mode (or
+bit_streams) commands.
 
 In query response for these commands, if the sample rate is not known
 and the bitrate is not available, the commanded sample rate is shown
@@ -69,7 +82,7 @@ is implied by the commanded sample rate given the defined Mark 5B
 clock rate, even though the decimation is actually "1" and the clock
 rate commanded to the recorder is actually the requested sample rate.
 For VDIF format the mask, decimation, and sample are not returned by
-the Mark 5C.
+the jive5ab.
 
 Bitmask LSB is VSI bit-stream 0, e.g. 0x1 selects bit-stream 0, etc.
 The number of bits turned on in the bit-stream mask must be 2^n where
