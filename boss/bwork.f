@@ -26,8 +26,8 @@ C
       integer*4 lproc1(4,1),lproc2(4,1)
 C                   Command names list, and procedure lists
       integer*4 itscb(13,1)          !  time scheduling control block
-      integer*2 ibuf(512)         !  input buffer containing command
-      integer*2 ibuf2(512),ibufd(3)
+      integer*2 ibuf(513)         !  input buffer containing command
+      integer*2 ibuf2(513),ibufd(3)
       character*1024 ibc
       equivalence (ibc,ibuf)
       dimension itime(9)         !  time array returned from spars
@@ -45,7 +45,7 @@ C                         Ref times for operator and schedule streams
       dimension lnamef(10),tmpchr(10) !  file name, general use
       equivalence (lnamef,cnamef),(tmpchr,tmpstr)
       character*28 pathname
-      integer idcbp1(2),idcbp2(2),fc_system,fc_skd_end_insnp
+      integer idcbp1(2),idcbp2(2),fc_system,fc_skd_end_insnp,fc_if_cmd
       save idcbp1,idcbp2
 C                         DCB's for procedures from lists 1 and 2
       dimension istksk(42),istkop(42)        !  stacks for nested procedures
@@ -134,7 +134,6 @@ c      write(6,*) 'iwait',iwait
      .nproc2,ibuf,iblen,istkop,istksk)
       call getts(itscb,ntscb,itime,itype,index,iclass,lsor,indts,klast,
      .istksk,istkop)
-      chsor = cjchar(lsor,2)
 C
 C     2.1 If there's nothing to do (INDTS empty) go try
 C     getting a command from one of the main streams.
@@ -146,6 +145,7 @@ C     2.2 If the time of a ! command has arrived, unblock
 C     the appropriate command stream.
 C
         if (cjchar(itype,1).eq.'!') then
+          chsor = cjchar(lsor,2)
           if (chsor.eq.';') kopblk = .false.
           if (chsor.eq.':') kskblk = .false.
           goto 200
@@ -220,7 +220,6 @@ C                     Check one last time to see if perchance the stacks
 C                     were flushed with the last call to GETCM
         call getts(itscb,ntscb,itime,itype,index,iclass,lsor,indts,
      &             klast,istksk,istkop)
-        chsor = cjchar(lsor,2)
 C                     Also, check one last time for time-scheduled
 C                     procs for the same reason
         if (indts.ne.0) goto 220
@@ -314,6 +313,7 @@ C     If a time was specified, put command into time list.
 C
       char2 = cjchar(itype,2)
       if (cjchar(itype,1).eq.'!') then
+        chsor = cjchar(lsor,2)
         if (char2.ne.' ') then
           if (chsor.eq.':') call reftm(istref,itime,char2)
           if (chsor.eq.';') call reftm(iotref,itime,char2)
@@ -358,6 +358,7 @@ C
         indexp = index
         if (cjchar(itype,2).eq.'Q') indexp = -indexp
 C                   Indicate the second list by <0
+        chsor = cjchar(lsor,2)
         if ( (chsor.ne.';' .or. krcur(istkop,indexp)) .and.
      &       (chsor.ne.':' .or. krcur(istksk,indexp)) ) then
 C                   Recursion is not allowed
@@ -389,6 +390,7 @@ C                   Get the command <name>=<parm>
           ncparm = 0
           ich = nchar+1
         endif
+        chsor = cjchar(lsor,2)
         if (chsor.eq.';') then         !  get the operator stream procedure
           call ifill_ch(lproco,1,12,' ')
           idummy = ichmv(lproco,1,ibuf,1,ich-1)
@@ -1126,6 +1128,22 @@ c
                  endif
               endif
            endif
+        endif
+      else if (mbranch.eq.22) then
+c
+c if= command
+c
+        ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
+        nchar = min0(ireg(2),iblen*2)
+        call pchar(ibuf,nchar+1,0)
+        iret=fc_if_cmd(ibuf,nchar)
+        if(iret.lt.0) then
+           call logit7ci(0,0,0,0,-312+iret,'bo',0)
+        else if(iret.gt.0) then
+           nchar=iret
+           if (.not.kts) call clrcl(iclass)
+           if (kts.and.klast) call cants(itscb,ntscb,5,index,indts)
+           goto 320
         endif
       endif
       mbranch = 0
