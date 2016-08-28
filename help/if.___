@@ -1,0 +1,43 @@
+		      if - conditional execution
+
+            Syntax:     if=condition,true-command,false-command
+
+            Response:   none
+
+
+Settable parameters:
+          condition     condition to test, see list in comments, case
+                        insensitive, leading and trailing spaces are trimmed,
+                        no default
+          true-command  SNAP command to execute if condition is true,
+                        leading spaces are trimmed, default is null
+          false-command SNAP command to execute if condition is false,
+                        leading spaces are trimmed, default is null
+
+Comments:
+The backslash '\' characater can be used to escape any character
+before the end of the command. This is particularly useful for commas
+',' and at signs '@' used in the true-command or false-command.
+
+This command provides conditional execution of SNAP commands based on
+whether a "condition" true or false.  If the value of the condition is
+true, the "true-command" is executed; if false, the "false-command".
+If the command that would be eexecuted, the "if" command is
+essentially a no-op. The available conditions and their values given
+in the following table.
+
+condition  value
+---------  -----
+ true      always true
+ false     always false
+ ddc       true iff DDC personality is in use
+ pfb       true iff PFB personality is in use
+ cont_cal  true iff continuous cal is selected
+ core1     true iff any channels from core1 are selected for recording 
+ core2     true iff any channels from core2 are selected for recording 
+ core3     true iff any channels from core3 are selected for recording 
+ core4     true iff any channels from core1 are selected for recording
+ ifa       true iff any channels from ifa are selected for recording
+ ifb       true iff any channels from ifb are selected for recording
+ ifc       true iff any channels from ifc are selected for recording
+ ifd       true iff any channels from ifd are selected for recording
