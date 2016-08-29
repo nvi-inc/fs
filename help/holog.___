@@ -8,14 +8,24 @@
 
 Settable parameters:
           azs       Azimuth   Span: -360. to +360, non-inclusive. No default.
+
           els       Elevation Span:  -90. to  +90, non-inclusive. No default.
-          azp       Azimuth   Points: positive or negative odd values 3-99.
-	            No default.
-          elp       Elevation Points: positive or negative odd values 3-99.
-	            Sign must agree with azp. See comments. No default. 
+
+          azp       Azimuth Points: positive or negative odd values 1-99.
+	            Magnitude of one does a single cut in elevation.
+                    Negative values cause the "furrows" to be in
+                    elevation. See comments. No default.
+
+          elp       Elevation Points: positive or negative odd values 1-99.
+	            Magnitude of one does a single cut in azimuth.
+                    Negative values turn off the secant(elevation)
+                    correction for azimuth.  No default.
+
           recal     Re-calibration period. Seconds: 0-10000 or "off".
                     0="off", Default is "off".
+
           proc      Snap procedure base name. See comments. No default.
+
           wait      Seconds to wait for onsource for each point, 1-1000
                     seconds allowed, default 120.
 
@@ -55,7 +65,14 @@ elevation point.
 
 The starting and ending points of the scan can be switched to
 different corners of the grid by using a negative span for either or
-both axes.  The long "furrows" of the scan are always along azimuth.
+both axes.  The long "furrows" of the scan are along azimuth, unless
+the number of azimuth points is negative, in which case they are in
+elevation.
+
+Normally, the azimuth span and steps are adjusted by 1/cos(El)
+according to the elevation of central point to space the azimuth grid
+points in anglar rather than coordinate units.  If the number of
+elevation points is negative, this correct is not made.
 
 This command must be set-up, i.e., commanded with parameters
 ("holog=...") before the scan be run.  The scan is initated by
@@ -70,14 +87,6 @@ is intended to provide periodic re-calibration points for antenna
 holography.  The center point of the grid is omitted during the actual
 scan.  If "recal" is "off" (0), the initial and final center point
 scans are omitted and the center point of the grid is not omitted.
-
-If the number of points for both axes are negative, a single cut is
-done in each azimuth and elevation with the specified span and the
-absolute value of number of points for the respective axes.
-
-The azimuth span is adjusted by 1/cos(El) of the center point of the
-scan to space the azimuth grid points in anglar rather than coordinate
-units.
 
 It is recommended that nothing else be done, e.g. running a 
 schedule, while this command is executing. Since this command
@@ -103,7 +112,7 @@ where:
 This argument can be used in the procedure by specifying a dollar sign
 "$" where it should be used.
 
-The following is an example of a procedure, perhaps called "hologp"
+The following is an example of a procedure, called "hologp"
 ("holog"+"p"), that might be useful for holography. It runs a script
 on a remote computer and records s small amount of data with a Mark
 5A/B recorder:
@@ -120,8 +129,8 @@ HOLOGP:   scan_name=$
 where "scriptp" is a shell script to run on the remote host.  Note
 that since there is no ampersand "&" at the end of the "sy=ssh ..."
 command the FS will wait for the ssh command to complete before
-continuing.  Please note that if the actually used is script takes
-less than one second to execute, a line:
+continuing.  Please note that if the actually used script takes less
+than one second to execute, a line:
 
           !+1s
 
