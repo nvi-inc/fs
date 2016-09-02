@@ -51,7 +51,7 @@ struct error_struct *error_base=NULL;
 FILE *dcbfs;
 
 main(){
-  int cls_rcv();
+  int fserr_rcv();
   long class, ip[5];
   int rtn1, rtn2;
   char inbuf[120];
@@ -80,7 +80,7 @@ main(){
     fprintf(stderr,"fserr: error opening %s\n",CTLST);
     perror("fserr");
   } else {
-    listinit(dcbfs,&list);
+    listinit(dcbfs,&list,CTLST);
     fclose(dcbfs);
   }
 
@@ -90,7 +90,7 @@ main(){
     fprintf(stderr,"fserr: error opening %s\n",CTLFS);
     perror("fserr");
   } else {
-    listinit(dcbfs,&list);
+    listinit(dcbfs,&list,CTLFS);
     fclose(dcbfs);
   }
 
@@ -98,7 +98,7 @@ main(){
   if(ip[0]==-1) exit(-1);
 
 /* call to retrieve parameter string */
-  cls_rcv(ip[0], inbuf, 80, &rtn1, &rtn2, 0, 0);
+  fserr_rcv(inbuf, 80);
   inbuf[80]='\0';   /* make sure it is null terminated */
 
 /* main rept-until loop done once for each err reported */
@@ -233,14 +233,14 @@ found:
 
 done:
   class = 0;
-  cls_snd(&class,inbuf,len,0,0);
+  fserr_snd(inbuf,len);
 
 Suspend:
 
   ip[0] = class;
   skd_wait("fserr", ip, 0);
   if(ip[0]!=-1) {
-    cls_rcv(ip[0], inbuf, 80, &rtn1, &rtn2, 0, 0);
+    fserr_rcv(inbuf, 80);
     goto Repeat; 
   }
 
