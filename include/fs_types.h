@@ -80,3 +80,4 @@
 #include "dbbcgain_ds.h"
 #include "fila10g_mode_ds.h"
 #include "dbbc_vsix_ds.h"
+#include "dbbc_pfbx_ds.h"

@@ -391,6 +391,9 @@ loop:
       case 97:
 	dbbc_vsix(&command,itask,ip);
 	break;
+      case 98:
+	dbbc_pfbx(&command,itask,ip);
+	break;
 /* end modified mb */
       default:
 	ierr=-4;

@@ -405,6 +405,10 @@ ifd          qkr 9504 01 0800FFFFFFFF
 bbc_gain     qkr 9600 01 0800FFFFFFFF
 vsi1         qkr 9700 01 0800FFFFFFFF
 vsi2         qkr 9701 01 0800FFFFFFFF
+pfb1         qkr 9801 01 0800FFFFFFFF
+pfb2         qkr 9802 01 0800FFFFFFFF
+pfb3         qkr 9803 01 0800FFFFFFFF
+pfb4         qkr 9804 01 0800FFFFFFFF
 * boss internal
 cont         *xx 0000 02 FFFFFFFFFFFF
 halt         *xx 0000 03 FFFFFFFFFFFF
@@ -426,3 +430,4 @@ help         *xx 0000 18 FFFFFFFFFFFF
 date         *xx 0000 19 FFFFFFFFFFFF
 op_stream    *xx 0000 20 FFFFFFFFFFFF
 tnx          *xx 0000 21 FFFFFFFFFFFF
+if           *xx 0000 22 FFFFFFFFFFFF
