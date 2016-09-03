@@ -503,10 +503,6 @@ long ip[5];
   int first, changed;
   long end;
 
-  unsigned long now;
-  static unsigned long last_dbbctrk;
-  static int dbbctrk=0;
-
   secho[0]=0;
   mode=ip[0];
   in_class=ip[1];
@@ -584,24 +580,6 @@ long ip[5];
 	time_out_local+=list[j].to;
       }
     }
-
-    /*check for ddctrk... to allow delay */
-
-    if(NULL != strstr(inbuf,"dbbctrk=")) {
- /* make sure "dbbctrk=" commands have at least a one second between them
-    there is another section related to this to get the time at the
-    end of the response below after read_response()
- */
-      rte_ticks(&now);
-      if(dbbctrk) {
-	if(now-last_dbbctrk < 101) {
-	  rte_sleep(101-(now-last_dbbctrk));
-	}
-      }
-      rte_ticks(&now);
-      last_dbbctrk=now;
-      dbbctrk=TRUE;
-    }
     
     if(6 == mode || 4 == mode | 7 == mode)
       fila10g=TRUE;
@@ -663,10 +641,6 @@ long ip[5];
     read:
       ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local,
 			    fila10g, newline);
-      if(NULL != strstr(inbuf,"dbbctrk=")) {
-	rte_ticks(&now);
-	last_dbbctrk=now;
-      }
       if(mode==4) {
 	rte_ticks (centisec+1);
 	rte_cmpt(centisec+3,centisec+5);
