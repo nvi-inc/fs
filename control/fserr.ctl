@@ -1,4 +1,4 @@
-"
+""
 4F -101
 No default for mode.
 ""
@@ -771,7 +771,7 @@ BD -401
 error retrieving class
 ""
 BO -101
-Error getting next command FMGR ?FFF
+Error getting next command, UNIX ?FFF
 ""
 BO -102
 Not enough room in time-scheduling block.  Max entries ?WWW
@@ -783,7 +783,7 @@ BO -104
 Procedure stack is full (5 levels allowed)
 ""
 BO -105
-Error opening schedule file FMP ?FFF
+Error opening schedule file, UNIX ?FFF
 ""
 BO -106
 Error specifying line number ?WWW
@@ -798,10 +798,10 @@ BO -109
 Common too big
 ""
 BO -110
-Error opening FSCMD.CTL or STCMD.CTL FMGR ?FFF
+Error opening FSCMD.CTL or STCMD.CTL, UNIX ?FFF
 ""
 BO -111
-Error reading FSCMD.CTL or STCMD.CTL FMGR ?FFF
+Error reading FSCMD.CTL or STCMD.CTL, UNIX ?FFF
 ""
 BO -112
 Too many commands in FSCMD.CTL and STCMD.CTL.  Max is ?WWW
@@ -819,58 +819,58 @@ BO -116
 Error initializing ANTCN ?WWW
 ""
 BO -117
-Error opening LOCATION.CTL FMP ?FFF
+Error opening LOCATION.CTL, UNIX ?FFF
 ""
 BO -118
-Error reading LOCATION.CTL FMP ?FFF
+Error reading LOCATION.CTL, UNIX ?FFF
 ""
 BO -119
 Error decoding LOCATION.CTL line ?WWW
 ""
 BO -120
-Error opening MUX.CTL FMP ?WWW
+Error opening MUX.CTL, UNIX ?WWW
 ""
 BO -121
-Error reading DEV.CTL FMP ?WWW
+Error reading DEV.CTL, UNIX ?WWW
 ""
 BO -122
 Error decoding DEV.CTL line ?WWW
 ""
 BO -123
-Error positioning in schedule.  FMP ?FFF
+Error positioning in schedule, UNIX ?FFF
 ""
 BO -124
 No (scan_name=...) observation starting at a future time found in schedule.
 ""
 BO -125
-Reading procedure file, error FMP ?FFF
+Reading procedure file, error, UNIX ?FFF
 ""
 BO -126
 Too many procedures.  Maximum is ?WWW
 ""
 BO -127
-Call to NAMF establishing new procedure library FMP ?FFF
+Call to NAMF establishing new procedure library, UNIX ?FFF
 ""
 BO -128
 Error in new proc routine, stack is flushed.
 ""
 BO -129
-Error in new proc routine, stack is flushed. FMP ?FFF
+Error in new proc routine, stack is flushed, UNIX ?FFF
 ""
 BO -130
-Reading edited proc file. FMP ?FFF
+Reading edited proc file, UNIX ?FFF
 ""
 BO -131
-Reading new procedure library FMP ?FFF
+Reading new procedure library, UNIX ?FFF
 ""
 BO -132
 No SOURCE command found in schedule.
 ""
 BO -133
-Error opening procedure library
+Error opening procedure library, UNIX ?FFF
 ""
 BO -134
-Positioning in schedule file error FMP ?FFFF
+Positioning in schedule file error, UNIX ?FFF
 ""
 BO -135
 Maximum number of characters in procedure parameter is ?WWW.
@@ -897,7 +897,7 @@ BO -142
 No 'nominal' rate for that DBBC version number, rate in EQUIP.CTL line ?WWW
 ""
 BO -143
-Error opening RXDEF.CTL FMP ?FFF
+Error opening RXDEF.CTL, UNIX ?FFF
 ""
 BO -144
 Error trying to read RXDEF.CTL line ?WWW
@@ -906,7 +906,7 @@ BO -145
 Non-numeric conversion factor in RXDEF.CTL line ?WWW
 ""
 BO -146
-Error opening TEDEF.CTL FMP ?FFF
+Error opening TEDEF.CTL, UNIX ?FFF
 ""
 BO -147
 Error trying to read first line of TEDEF.CTL
@@ -921,19 +921,19 @@ BO -150
 Illegal floating point number in first line of TEDEF.CTL
 ""
 BO -151
-Error opening HEAD.CTL, FMGR ?FFF
+Error opening HEAD.CTL, UNIX ?FFF
 ""
 BO -152
-Error reading HEAD.CTL, FMGR ?FFF
+Error reading HEAD.CTL, UNIX ?FFF
 ""
 BO -153
 Error decoding line # ?WWW in HEAD.CTL
 ""
 BO -154
-Error opening ANTENNA.CTL, FMGR ?FFF
+Error opening ANTENNA.CTL, UNIX ?FFF
 ""
 BO -155
-Error reading ANTENNA.CTL, FMGR ?FFF
+Error reading ANTENNA.CTL, UNIX ?FFF
 ""
 BO -156
 Error decoding line # ?WWW in ANTENNA.CTL
@@ -948,7 +948,7 @@ BO -159
 Can't change schedule library because resource is locked.
 ""
 BO -160
-Error opening RXDIODE.CTL FMP ?FFF
+Error opening RXDIODE.CTL, UNIX ?FFF
 ""
 BO -161
 Error trying to read RXDIODE.CTL line ?WWW
@@ -987,7 +987,7 @@ BO -173
 Don't terminate while recording, either use disk_record=off first or (dangerous) terminate=disk_record_ok.
 ""
 BO -180
-Error opening TIME.CTL FMP ?FFF
+Error opening TIME.CTL, UNIX ?FFF
 ""
 BO -181
 Error decoding rate field in TIME.CTL
@@ -999,7 +999,7 @@ BO -183
 Error decoding model field in TIME.CTL
 ""
 BO -189
-Error reading TIME.CTL FMP ?FFF
+Error reading TIME.CTL, UNIX ?FFF
 ""
 BO -190
 Error initiliazing mcbcn, internal error ?WWW
@@ -1023,7 +1023,7 @@ BO -202
 Error reading decoder field (line 2) in SW.CTL
 ""
 BO -209
-Error reading SW.CTL FMP ?FFF
+Error reading SW.CTL, UNIX ?FFF
 ""
 BO -210
 Procedure library is too big, trailing procedures ignored.
@@ -1145,11 +1145,20 @@ Error already "on", for TNX.
 BO -312
 Error already "off", for TNX.
 ""
+BO -313
+IF command must have an equals.
+""
+BO -314
+No default for IF command condition.
+""
+BO -315
+Unknown condition in IF command.
+""
 BO -400
-Error opening flagr.ctl FMP ?FFF
+Error opening flagr.ctl, UNIX ?FFF
 ""
 BO -401
-Error reading flagr.ctl FMP ?FFF
+Error reading flagr.ctl, UNIX ?FFF
 ""
 BO -402
 Error antenna check period in TIME.CTL
@@ -1164,7 +1173,7 @@ BO -405
 Error opening TACD.CTL ?FFF
 ""
 BO -406
-Error reading TACD.CTL FMP ?FFF
+Error reading TACD.CTL, UNIX ?FFF
 ""
 BO -407
 Error decoding TACD.CTL line ?WWW
@@ -1883,8 +1892,11 @@ Samples must be a positive integer.
 DD -401
 Class buffer error from monitor response.
 ""
+DD -402 Place holder
+
+""
 DD -403
-Error decoding cont_cal/ response, could be a DBBC version mis-match, see error DF -402 for text.
+Error decoding cont_cal/ response, could be a DBBC version mis-match, see error DD -402 for tet.
 ""
 DD -451
 Class buffer error from command response.
@@ -1921,6 +1933,9 @@ Above error probably caused by a DBBC version mismatch, check equip.ctl and a db
 ""
 DF -401
 Class buffer error from monitor response.
+""
+DF -402 Place Holder
+
 ""
 DF -403
 Error decoding dbbcform/ response, could be a DBBC version mis-match, see error DF -402 for text.
@@ -1997,9 +2012,6 @@ Class buffer error from command response.
 DG -501
 Only DBBC DDC rack types supported in bbc_gain command.
 ""
-DG  502
-bbc_gain is a no-op for DBBC PFB rack types.
-""
 DH -104
 No default sample rate if clock rate (from equip.ctl) is "none".
 ""
@@ -2020,6 +2032,12 @@ okay parameter must be disk_record_ok or null
 ""
 DH -214
 Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255 within 0.1 percent.
+""
+DH -301
+Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the fifth parameter.
+""
+DH -302
+Mask width, greater than 16 bits, incompatible with inputselect from equip.ctl.
 ""
 DH -304
 Can't specify sample rate and decimate parameters simultaneously
@@ -2074,6 +2092,24 @@ Error decoding dbbcifX/ response, could be a DBBC version mis-match, see error D
 ""
 DI -451
 Class buffer error from command response.
+""
+DP -301
+No command form of pfbX command.
+""
+DP -302
+Error response from DBBC in pfbX command.
+""
+DP -401
+Class buffer error from monitor response.
+""
+DP -402 Place Holder
+
+""
+DP -403
+Error decoding power/ response, could be a DBBC version mis-match, see error DP -402 for text.
+""
+DP -501
+Only DBBC PFB rack types supported in pfbX commands.
 ""
 DQ -1
 Invalid state number for bbc (0 to 64).
@@ -2369,6 +2405,9 @@ Maximum 16 parameters for vsiX command.
 DV -301
 No monitor form of vsiX command.
 ""
+DV -302
+Error response from DBBC in vsiX command.
+""
 DV -451
 Class buffer error from command response.
 ""
@@ -2384,59 +2423,8 @@ Previous source in this schedule not reached before new source was commanded
 FL   -2
 FLAGR detected error in ANTCN, see above for error.
 ""
-FM  007
-Checksum error
-""
-FM  010
-Error in input
-""
-FM  012
-Duplicate disc label or lu
-""
-FM  014
-Not enough ID segments
-""
-FM  054
-Disk not mounted
-""
-FM   -2
-Duplicate file name
-""
-FM   -5
-Illegal record length in a file
-""
-FM   -6
-File not found
-""
-FM   -7
-File security code improperly specified
-""
-FM   -8
-File open or locked
-""
-FM  -11
-File is not open
-""
-FM  -12
-End-of-file or start-of-file error
-""
-FM  -13
-Disk is locked
-""
-FM  -14
-No more room in disk directory
-""
-FM  -15
-Illegal name for a file
-""
-FM  -16
-Illegal type for a file
-""
-FM  -32
-Cartridge not found (RTE-IVB)
-""
-FM  -33
-Not enough room on disc cartridge
+FM   -1 FMPSEE Place Holder
+
 ""
 FP   -1
 Break Detected in FIVPT
@@ -2560,6 +2548,9 @@ fmset: Error from DBBCN, please see messages above.
 ""
 FV  -10
 fmset: Error from MATCN, please see messages above.
+""
+FV  -11 FMSET place holder
+
 ""
 FV -401
 Program error: prematurely out of rclcn response_buffer for device ?W
@@ -3106,6 +3097,12 @@ Required DAS hardware not available, check equip.ctl.
 ""
 LF -904
 Fine Tuner is currently not available - see IFPnn settings.
+""
+LG   -1 Place Holder for lgerr Error
+
+""
+LG    1 Place Holder for lgerr Warning
+
 ""
 LI -101
 No default for frequency.
@@ -4356,10 +4353,10 @@ QH -202
 Elevation span must have an absolute value less than 90.
 ""
 QH -203
-Azimuth points must have an odd absolute value between 2 and 100.
+Azimuth points must have an odd absolute value less than 100.
 ""
 QH -204
-Elevation points must have odd absolute value between 2 and 100 and the same sign as azimuth points.
+Elevation points must have odd absolute value less than 100.
 ""
 QH -205
 Re-calibration period (seconds) must be "off" (0, default) or positive number less than 10001.
@@ -4799,7 +4796,7 @@ Total Power selection in disagreement with common.
 QV -304
 Attenuator upper in disagreement with common.
 ""
-QV - 305
+QV -305
 Attenuator lower in disagreement with common.
 ""
 QX -301
