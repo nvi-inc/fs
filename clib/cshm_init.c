@@ -251,7 +251,7 @@ void cshm_init()
   shm_addr->onoff.setup=FALSE;
   shm_addr->onoff.rep=2;
   shm_addr->onoff.intp=1;
-  shm_addr->onoff.cutoff=75.*DEG2RAD;
+  shm_addr->onoff.cutoff=75.;
   shm_addr->onoff.step=3;
   shm_addr->onoff.wait=120;
   
@@ -425,10 +425,10 @@ void cshm_init()
     shm_addr->dbbcnn[i].avper=0;
   }
   for (i=0;i<MAX_DBBCIFX;i++) {
-    shm_addr->dbbcifx[i].input=1;
+    shm_addr->dbbcifx[i].input=-1;
     shm_addr->dbbcifx[i].att=-1;
-    shm_addr->dbbcifx[i].agc=1;
-    shm_addr->dbbcifx[i].filter=1;
+    shm_addr->dbbcifx[i].agc=-1;
+    shm_addr->dbbcifx[i].filter=-1;
     shm_addr->dbbcifx[i].target_null=1;
     shm_addr->dbbcifx[i].target=0;
   }
