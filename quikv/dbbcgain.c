@@ -28,12 +28,9 @@ long ip[5];                           /* ipc parameters */
       void dbbcgain_dis();
       void skd_run(), skd_par();      /* program scheduling utilities */
 
-      if(DBBC_PFB == shm_addr->equip.rack_type ||
-	 DBBC_PFB_FILA10G == shm_addr->equip.rack_type) {
-	ierr=502;
-	goto error;
-      }else if(DBBC_DDC != shm_addr->equip.rack_type &&
-	 DBBC_DDC_FILA10G != shm_addr->equip.rack_type) {
+      if((DBBC_DDC != shm_addr->equip.rack_type &&
+	  DBBC_DDC_FILA10G != shm_addr->equip.rack_type)||
+	 DBBC != shm_addr->equip.rack) {
 	ierr=-501;
 	goto error;
       }
