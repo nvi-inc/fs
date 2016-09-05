@@ -28,8 +28,9 @@ long ip[5];                           /* ipc parameters */
   void dbbc_vsix_dis();
   void skd_run(), skd_par();      /* program scheduling utilities */
   
-  if(DBBC_PFB != shm_addr->equip.rack_type &&
-     DBBC_PFB_FILA10G != shm_addr->equip.rack_type) {
+  if(DBBC!=shm_addr->equip.rack ||
+     (DBBC_PFB != shm_addr->equip.rack_type &&
+      DBBC_PFB_FILA10G != shm_addr->equip.rack_type)) {
     ierr=-501;
     goto error;
   }
@@ -70,7 +71,7 @@ long ip[5];                           /* ipc parameters */
       
   /* format buffer for dbbcn */
   
-  iend=0;
+  iend=1; /* maske sure we stop at 1 if nothing is selected */
   for(i=1;i<=shm_addr->dbbc_cores;i++) { /*find lowest core with data */
     for(j=0;j<16 &&!(found=i==lcl.core[j]);j++) 
       ;
@@ -89,10 +90,6 @@ long ip[5];                           /* ipc parameters */
     out_recs++;
   }
   
-  if(!out_recs) { /* nothing to do, no-op */
-    ierr=0;
-    goto error;
-  }
   
 dbbcn:
   ip[0]=1;
