@@ -137,6 +137,7 @@ mout3()
   char outarr[80];
   char *outpt;
   void preflt();
+  int ifs[4];
 
     outpt = &outarr[0];
     ptfreq= &freq[0];
@@ -171,39 +172,6 @@ mout3()
       move(ROW1+1,COL1+20);
       preflt(outpt,shm_addr->systmp[2*MAX_BBC+3],-5,1);
       printw("%s",outarr);
-    } else if(shm_addr->equip.rack == DBBC) {
-      int istart;
-
-      if (shm_addr->equip.rack_type == DBBC_DDC ||
-	  shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
-	istart=2*MAX_DBBC_BBC;
-      else if (shm_addr->equip.rack_type == DBBC_PFB ||
-	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)
-	istart=MAX_DBBC_PFB;
-      else
-	goto BBCS;
-
-      move(ROW1,COL1+7);
-      preflt(outpt,shm_addr->systmp[istart+0],-5,1);
-      printw("%s",outarr);
-
-      if(shm_addr->dbbc_cond_mods > 1) {
-	move(ROW1,COL1+20);
-	preflt(outpt,shm_addr->systmp[istart+1],-5,1);
-	printw("%s",outarr);
-      }
-
-      if(shm_addr->dbbc_cond_mods > 2) {
-	move(ROW1+1,COL1+7);
-	preflt(outpt,shm_addr->systmp[istart+2],-5,1);
-	printw("%s",outarr);
-      }
-
-      if(shm_addr->dbbc_cond_mods > 3) {
-	move(ROW1+1,COL1+20);
-	preflt(outpt,shm_addr->systmp[istart+3],-5,1);
-	printw("%s",outarr);
-      }
     }
 
  BBCS:
@@ -211,6 +179,16 @@ mout3()
        (shm_addr->equip.rack == DBBC &&
 	  (shm_addr->equip.rack_type == DBBC_DDC ||
 	   shm_addr->equip.rack_type == DBBC_DDC_FILA10G))) {
+      int itpis[MAX_GLOBAL_DET];
+      int ifreq[MAX_BBC];
+
+      for(i=0;i<MAX_BBC;i++)
+	itpis[i]=itpis[i+MAX_BBC]=ifreq[i]=0;
+      mk5dbbcd(itpis); 
+
+      for(i=0;i<4;i++)
+	ifs[i]=0;
+
       for (i=1;i<=MAX_BBC;i++) {
 	if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4) {
 	  long bbc2freq(),freqv;
@@ -224,8 +202,12 @@ mout3()
 	} else if(shm_addr->equip.rack == DBBC) {
 	  if(MAX_DBBC_BBC < i)
 	    continue;
-	  snprintf(ptfreq,sizeof(freq),"%7.2f",
-		   ((float)(shm_addr->dbbcnn[i-1].freq/10000)/100));
+	  if(0!=shm_addr->dbbcnn[i-1].freq) {
+	    ifreq[i-1]=1;
+	    snprintf(ptfreq,sizeof(freq),"%7.2f",
+		     ((float)(shm_addr->dbbcnn[i-1].freq/10000)/100));
+	  } else
+	    strcpy(ptfreq,"       ");
 	} else {
 	  if(14 < i)
 	    continue;
@@ -236,23 +218,40 @@ mout3()
 	}
 	move(ROW1+2+i,COL1+5);
 	printw("%7s",ptfreq);
+
 	if(shm_addr->equip.rack == DBBC &&
 	   shm_addr->dbbcnn[i-1].freq%10000 !=0)
 	  printw("+");
 	else
 	  printw(" ");
+
 	move(ROW1+2+i,COL1+15);
-	if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4 ||
-	   shm_addr->equip.rack == DBBC) 
+	if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4)
 	  preflt(outpt,shm_addr->systmp[i+MAX_BBC-1],-6,1);
-	else
+	else if (shm_addr->equip.rack == DBBC) {
+	  if(itpis[i+MAX_BBC-1] && ifreq[i-1]) {
+	    if(shm_addr->dbbcnn[i-1].source >=0 && /* just being save */
+	       shm_addr->dbbcnn[i-1].source < shm_addr->dbbc_cond_mods)
+	      ifs[shm_addr->dbbcnn[i-1].source]=1;
+	    preflt(outpt,shm_addr->systmp[i+MAX_BBC-1],-6,1);
+	  } else
+	    strcpy(outpt,"      ");
+	} else
 	  preflt(outpt,shm_addr->systmp[i+13],-6,1);
 	printw("%s",outarr);
+
 	move(ROW1+2+i,COL1+23);
-	if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4 ||
-	   shm_addr->equip.rack == DBBC) 
+	if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4)
 	  preflt(outpt,shm_addr->systmp[i-1],-6,1);
-	else
+	else if(shm_addr->equip.rack == DBBC) {
+	  if(itpis[i-1] && ifreq[i-1]) {
+	    if(shm_addr->dbbcnn[i-1].source >=0 && /* just being save */
+	       shm_addr->dbbcnn[i-1].source < shm_addr->dbbc_cond_mods)
+	      ifs[shm_addr->dbbcnn[i-1].source]=1;
+	    preflt(outpt,shm_addr->systmp[i-1],-6,1);
+	  } else
+	    strcpy(outpt,"      ");
+	} else
 	  preflt(outpt,shm_addr->systmp[i-1],-6,1);
 	printw("%s",outarr);
       }
@@ -267,13 +266,18 @@ mout3()
       static int zone_table[] = {2, 1, 4,3}; /* DBBC filter Nyquist zones */
       static char sb[ ]= "lu";
 
+      for(i=0;i<4;i++)
+	ifs[i]=0;
+
       for(i=0;i<16;i++) {
 
 	/* vsi1 */
-	core=shm_addr->dbbc_vsix[0].core[i];
-	ifc=1;
 	move(ROW1+3+i,COL1);
 	clrtoeol();
+
+	core=shm_addr->dbbc_vsix[0].core[i];
+	ifc=1;
+
 	ik=shm_addr->dbbc_vsix[0].chan[i]+(core-1)*16;
 	if(core>0) {
 	  for(j=1;j<=shm_addr->dbbc_cond_mods &&
@@ -290,25 +294,38 @@ mout3()
 
 	  freqv=(chan%16)*32-16; /* center */
 	  filter=shm_addr->dbbcifx[ifc-1].filter;
-	  if(filter >0 &&  filter < 4) {
-	    zone=zone_table[filter-1];
-	    if(1==zone%2) /*odd zone */
-	      freqv=(zone-1)*512+freqv;
-	    else /* even */
-	      freqv=zone*512-freqv;
-	    snprintf(ptfreq,sizeof(freq)," %4.0f%c",freqv,sb[zone%2]);
-	    move(ROW1+3+i,COL1+3);
-	    printw("%5s",ptfreq); 
-	  }
+
+	  if(filter < 1 || filter>4)
+	    continue;
+
+	  zone=zone_table[filter-1];
+	  if(1==zone%2) /*odd zone */
+	    freqv=(zone-1)*512+freqv;
+	  else /* even */
+	    freqv=zone*512-freqv;
+	  snprintf(ptfreq,sizeof(freq)," %4.0f%c",freqv,sb[zone%2]);
+	  move(ROW1+3+i,COL1+3);
+	  printw("%5s",ptfreq); 
+	  
+	  if(shm_addr->mk5b_mode.mask.state.known == 0 ||
+	     shm_addr->dbbcform.mode!=0)
+	    continue;
+	  
+	  if(!(shm_addr->mk5b_mode.mask.mask & (0x3ULL << (i*2))))
+	    continue;
+	  
+	  ifs[ifc-1]=1;
 	  move(ROW1+3+i,COL1+10);
 	  preflt(outpt,shm_addr->systmp[ik],-5,1);
 	  printw("%s",outpt);
 	}
+      }
+      for(i=0;i<16;i++) {
+
 	/* vsi2 */
+
 	core=shm_addr->dbbc_vsix[1].core[i];
 	ifc=1;
-	move(ROW1+3+i,COL1+17);
-	clrtoeol();
 	ik=shm_addr->dbbc_vsix[1].chan[i]+(core-1)*16;
 	if(core>0) {
 	  for(j=1;j<=shm_addr->dbbc_cond_mods &&
@@ -325,16 +342,27 @@ mout3()
 
 	  freqv=(chan%16)*32-16; /* center */
 	  filter=shm_addr->dbbcifx[ifc-1].filter;
-	  if(filter >0 &&  filter < 4) {
-	    zone=zone_table[filter-1];
-	    if(1==zone%2) /*odd zone */
-	      freqv=(zone-1)*512+freqv;
-	    else /* even */
-	      freqv=zone*512-freqv;
-	    snprintf(ptfreq,sizeof(freq)," %4.0f%c",freqv,sb[zone%2]);
-	    move(ROW1+3+i,COL1+20);
-	    printw("%5s",ptfreq); 
-	  }
+
+	  if(filter < 1 || filter>4)
+	    continue;
+
+	  zone=zone_table[filter-1];
+	  if(1==zone%2) /*odd zone */
+	    freqv=(zone-1)*512+freqv;
+	  else /* even */
+	    freqv=zone*512-freqv;
+	  snprintf(ptfreq,sizeof(freq)," %4.0f%c",freqv,sb[zone%2]);
+	  move(ROW1+3+i,COL1+20);
+	  printw("%5s",ptfreq); 
+
+	  if(shm_addr->mk5b_mode.mask.state.known == 0 ||
+	     shm_addr->dbbcform.mode!=0)
+	    continue;
+	  
+	  if(!(shm_addr->mk5b_mode.mask.mask & (0x3ULL << (32+i*2))))
+	    continue;
+	  
+	  ifs[ifc-1]=1;
 	  move(ROW1+3+i,COL1+27);
 	  preflt(outpt,shm_addr->systmp[ik],-5,1);
 	  printw("%s",outpt);
@@ -342,6 +370,53 @@ mout3()
 
       }
     }
+    if(shm_addr->equip.rack == DBBC) {
+      int istart;
+
+      if (shm_addr->equip.rack_type == DBBC_DDC ||
+	  shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
+	istart=2*MAX_DBBC_BBC;
+      else if (shm_addr->equip.rack_type == DBBC_PFB ||
+	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)
+	istart=MAX_DBBC_PFB;
+      else
+	goto END;
+
+      move(ROW1,COL1+7);
+      if(ifs[0]) {
+	preflt(outpt,shm_addr->systmp[istart+0],-5,1);
+	printw("%s",outarr);
+      }	else
+	printw("%s","     ");
+
+      if(shm_addr->dbbc_cond_mods > 1) {
+	move(ROW1,COL1+20);
+	if(ifs[1]) {
+	  preflt(outpt,shm_addr->systmp[istart+1],-5,1);
+	  printw("%s",outarr);
+	} else
+	  printw("%s","     ");
+      }
+
+      if(shm_addr->dbbc_cond_mods > 2) {
+	move(ROW1+1,COL1+7);
+	if(ifs[2]) {
+	  preflt(outpt,shm_addr->systmp[istart+2],-5,1);
+	  printw("%s",outarr);
+	} else
+	  printw("%s","     ");
+      }
+
+      if(shm_addr->dbbc_cond_mods > 3) {
+	move(ROW1+1,COL1+20);
+	if(ifs[3]) {
+	  preflt(outpt,shm_addr->systmp[istart+3],-5,1);
+	  printw("%s",outarr);
+	} else
+	  printw("%s","     ");
+      }
+    }
+ END:
     move(ROW1+4,COL1);
     curs_set(0);
     refresh();
