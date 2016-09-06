@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 # for IDE (PATA) RAID arrays, adds a "stale" secondary disk into the array
 if [[ -n `mdadm --detail /dev/md0 /dev/md2 | grep /dev/hdc` ]]; then
         echo "ERROR: \"Secondary\" disk /dev/hdc is already active !!"
