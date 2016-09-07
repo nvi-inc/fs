@@ -54,6 +54,7 @@ parse:
       m5state_init(&lcl.mask1.state);
       m5state_init(&lcl.decimate.state);
 
+
       ilast=0;                                      /* last argv examined */
       memcpy(&lcl,&shm_addr->mk5b_mode,sizeof(lcl));
 
@@ -70,6 +71,16 @@ parse:
 	  ierr=-301;
 	  goto error;
 	}
+
+      if(lcl.mask2.state.known && lcl.mask2.mask2){
+	if(strncmp(shm_addr->fila10gvsi_in,"vsi1-2",6) &&
+	   strncmp(shm_addr->fila10gvsi_in,"gps",3) &&
+	   strncmp(shm_addr->fila10gvsi_in,"tvg",3) ) {
+	  ierr=-302;
+	  goto error;
+	}
+      }
+
 	  
       memcpy(&shm_addr->fila10g_mode,&lcl,sizeof(lcl));
       
