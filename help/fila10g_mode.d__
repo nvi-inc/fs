@@ -6,7 +6,7 @@ Response: fila10g_mode/mask2,mask1,decimation,sample,sps
 Settable parameters:
 
 mask2:      VSI2 input bit-stream mask, hex, non-zero 32-bit wide maximum,
-            for example: 0xf, default 0, null on display iif zero.
+            for example: 0xf, default 0, null on display if zero.
 mask1:      VSI1 input bit-stream mask, hex, non-zero 32-bit wide maximum,
             for example: 0xf, default 0xffffffff
 decimation: decimation factor: 1, 2, 4, 8, or 16. No default unless sample
@@ -27,3 +27,5 @@ Monitor only parameter:
 sps         actual sample rate in samples per second
 
 Comments:
+To use a non-zero mask2, the inputselect is in equip.ctl must be
+something other than 'vsi1' or 'vsi2'.
