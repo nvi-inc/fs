@@ -11,6 +11,7 @@
 #include "../include/shm_addr.h"
 
 #include "fmset.h"
+#include "fila10g_cfg.h"
 
 #define ESC_KEY		0x1b
 #define INC_KEY		'+'
@@ -38,6 +39,8 @@ int  s2type=0;
 char s2dev[2][3] = {"r1","da"};
 int m5rec;
 int m5b_crate;
+struct fila10g_cfg *fila10g_cfg_use = NULL;
+struct fila10g_cfg *ask_fila10g_cfg();
 
 WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
 
@@ -84,6 +87,7 @@ char mk5b_clock_freq[10] ="";
 char mk5b_clock_source[10] ="";
 char blank[ ] = {"                                                                              "};
 int drive, drive_type;
+struct fila10g_cfg *fila10g_cfg=NULL;
 
  putpname("fmset");
 setup_ids();         /* connect to shared memory segment */
@@ -119,7 +123,14 @@ else if (drive==S2) {
     other=rack;
   }
  } else if (rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)) {
-  ;
+  char buff[80];
+  strcpy(buff,FS_ROOT);
+  strncat(buff,"/control/fila10g_cfg.ctl",sizeof(buff)-strlen(buff)-1);
+  if(gfila10g_cfg(buff,&fila10g_cfg)) {
+    fprintf( stderr,"fmset: error reading fila10g_cfg.ctl file, see log for error\n");
+    rte_sleep(SLEEP_TIME);
+    exit(0);
+  }
  } else if ((rack & MK3 || rack==0||rack==LBA) ||
 	    ((( rack == MK4 && rack_type != MK4) ||
 	      (rack == VLBA4 && rack_type != VLBA4)) &&
@@ -441,6 +452,13 @@ do 	{
 	      changeds2das=1;
 	    else
 	      changedfm=1;
+	  }
+	  if (synch && rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||
+			     rack_type==DBBC_PFB_FILA10G) &&
+	      NULL!=fila10g_cfg) {
+	    for (i=hint_row;i<hint_row+irow;i++)
+	      mvwaddstr( maindisp, i, 1, blank);
+	    fila10g_cfg_use=ask_fila10g_cfg(maindisp,fila10g_cfg);
 	  }
 	  goto build;
 	  break;
