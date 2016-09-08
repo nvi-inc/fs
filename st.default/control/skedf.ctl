@@ -259,6 +259,15 @@ $misc
 * tpicd  YES     500   <<<<<<< prompt for period, default is 5 sec
 *--------------------------------------------------------------
 *
+* vsi_align setup
+* Applicable only for PFB DBBCs,
+* default is "NONE" if not present
+* vsi_align NONE   !never use  dbbc=vsi_align=...
+* vsi_align 0       !always use dbbc=vsi_align=0
+* vsi_align 1       !always use dbbc=vsi_align=1
+* vsi_align ASK     !prompt per schedule
+*--------------------------------------------------------------
+*
 * Cont_cal setup
 * Applicable only for DBBCs,
 * default is "off" if not present
