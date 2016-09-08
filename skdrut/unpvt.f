@@ -38,6 +38,7 @@ C 011011 nrv If the second recorder field doesn't match a recorder type
 C            and the first recorder is S2, then the second field is mode.
 ! 2007Aug07  JMG. Converted all hollerith to ASCII
 ! 2015Jun30  JMG. Changed Rack, recorder length from 8-->12 chars.
+! 2016Jul28  JMG. Changed Rack length to 20 characters
 C
 C  INPUT:
       integer*2 IBUF_in(*)
@@ -59,7 +60,8 @@ C     mxtap - maximum tape length for this station
       character*2 cb(*) !bands
       real*4 sefd(*),par(max_sefdpar,*)
       integer npar(*)   ! sefds
-      character*12 crack,creca,crecb  !rack, recorder, names
+      character*20 crack
+      character*12 creca,crecb  !rack, recorder, names
       character*4 cs2sp
 C
 
@@ -313,7 +315,7 @@ C     GTFLD has already been done above if there were no SEFD parameters.
       if (npar(1).gt.0) CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
 C Rack field
       if (ic1.ne.0) then ! rack field
-        nch = min0(ic2-ic1+1,12)
+        nch = min0(ic2-ic1+1,20)
         crack=cbuf(ic1:ic1+nch-1)
         call capitalize(crack)
         iwhere=iwhere_in_string_list(crack_type_cap,max_rack_type,crack)

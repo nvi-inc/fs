@@ -8,8 +8,8 @@ readt.o redsk.o unpsk.o writestr.o
 FFLAGS = -c 
 #
 LIBES = ../bosslb/bosslb.a ../fslb/fslb.a ../polb/polb.a ../lnfch/lnfch.a\
-../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a \
-../fmpsee/fmpsee.a ../vis/vis.a ../rtelb/rtelb.a
+../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../fmpsee/fmpsee.a \
+../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a
 #
 ../bin/logex: logex.o $(OBJECTS)
 	$(FC)  -o ../bin/logex $(OBJECTS) $(LIBES)
