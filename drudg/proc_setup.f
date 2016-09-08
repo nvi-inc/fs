@@ -26,7 +26,8 @@
 ! 2015Jul20 JMG. Only write cont_cal_polarity if "cont_cal=on"
 ! 2015Jul21 JMg. If cont_cal_polarity is "ASK" then do ask. 
 ! 2016Jan19 JMG. Distinguish between DBBC_DDC and DBBC_PFB
-   
+! 2016May24 PdV  check first 8 (not 10) characters of rack for continuous cal
+!                    
 
 ! local
       character*12 cnamep
@@ -100,7 +101,7 @@ c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
 
 
 ! Initialize cont_cal_out
-      if(cstrack_cap(istn)(1:10) .eq. "DBBC_DDC") then
+      if(cstrack_cap(istn)(1:8) .eq. "DBBC_DDC") then
         cont_cal_out=cont_cal_prompt
         call lowercase(cont_cal_out)
         write(*,*) "cont_cal: ",cont_cal_out

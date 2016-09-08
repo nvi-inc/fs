@@ -19,6 +19,7 @@ struct skd_buf {
 	    long    rtype;
 	    int     dad;
 	    int timed_out;
+            int run_index;
 	    char arg[MAX_BUF+1];
         } messg;
 
@@ -27,9 +28,11 @@ struct skd_buf {
 static int msqid;
 static long rtype=0;
 static int dad=0;
+static int run_index=0;
 static char prog_name[5];
 static long save_ip[5];
 static char arg[MAX_BUF+1];
+static char arg_buff[MAX_BUF+1];
 static char *argv[(MAX_BUF+1)/2];
 static int  argc = -1;
 static long wait_rtype=0;
@@ -40,7 +43,7 @@ static void nullfcn();
 static void skd_end_to();
 void skd_end();
 static skd_run_arg_cls_to(char *name, char w, long ip[5], char *arg,
-		       char nsem[6],unsigned to);
+			  char nsem[6],unsigned to, int *run_index);
 
 int skd_get( key, size)
 key_t key;
@@ -125,7 +128,8 @@ int	length;	/* length of buffer in bytes */
   /* Execute this SNAP command via "boss". */
   
   cls_snd( iclass, buffer, length, 0, 1);
-  skd_run_arg_cls_to("boss ",'w',ipr,(char *) NULL,insnp,(unsigned) 0);
+  skd_run_arg_cls_to("boss ",'w',ipr,(char *) NULL,insnp,
+		     (unsigned) 0, (int *) NULL);
 
 
 }
@@ -133,14 +137,25 @@ void skd_run( name, w, ip)
 char    name[5], w;
 long    ip[5];
 {
-  skd_run_arg_cls_to( name, w, ip, (char *) NULL, (char *) NULL, (unsigned) 0);
+  skd_run_arg_cls_to( name, w, ip, (char *) NULL, (char *) NULL,
+		      (unsigned) 0, (int *) NULL);
+}
+
+void skd_run_p( name, w, ip, run_index)
+     char    name[5], w;
+long    ip[5];
+int *run_index;
+{
+  skd_run_arg_cls_to( name, w, ip, (char *) NULL, (char *) NULL,
+		      (unsigned) 0, run_index);
 }
 
 void skd_run_arg( name, w, ip, arg)
 char	name[5], w, *arg;	
 long	ip[5];
 {
-  skd_run_arg_cls_to( name, w, ip, arg, NULL,(unsigned) 0);
+  skd_run_arg_cls_to( name, w, ip, arg, (char *) NULL,
+		      (unsigned) 0, (int *) NULL);
 }
 
 int skd_run_to( name, w, ip, to)
@@ -148,22 +163,31 @@ char    name[5], w;
 long    ip[5];
 unsigned to;
 {  
-  return skd_run_arg_cls_to( name, w, ip, (char *) NULL, (char *) NULL, to);
+  return skd_run_arg_cls_to( name, w, ip, (char *) NULL, (char *) NULL,
+			     to, (int *) NULL);
 }
 
-static skd_run_arg_cls_to( name, w, ip, arg, nsem,to)
+static skd_run_arg_cls_to( name, w, ip, arg, nsem,to, run_index)
 char	name[5], w, *arg;	
 long	ip[5];
 char nsem[6];
 unsigned to;
+int *run_index;
 {
 int	status, i, n;
 struct skd_buf sched;
 
- if( w == 'w') sched.messg.rtype=(1<<30)|getpid();
- else          sched.messg.rtype=0;
- 
-if(name!=NULL) {
+ if( w == 'w'|| w == 'p')
+   sched.messg.rtype=(1<<30)|getpid();
+ else
+   sched.messg.rtype=0;
+
+ if( run_index!=NULL)
+   sched.messg.run_index=*run_index;
+ else
+   sched.messg.run_index=0;
+
+ if(name!=NULL) {
    sched.mtype=mtype(name);
    
    for (i=0;i<5;i++) {
@@ -197,38 +221,42 @@ if(name!=NULL) {
 if(nsem!=NULL && nsem[0]!=0)
   nsem_put(nsem);
 
-if(w != 'w') return;
+if(w != 'w')
+  return;
 
  if(to !=0) {
    if(signal(SIGALRM,nullfcn) == SIG_ERR){
-     fprintf( stderr,"skd_wait: setting up signals\n");
+     fprintf( stderr,"skd_run: setting up signals\n");
      exit(-1);
    }
    wait_rtype=sched.messg.rtype;
    rte_alarm( to);
  }
 
-waitr:
-status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof(sched.messg),
-		 sched.messg.rtype, 0);
-
-if(status == -1) {
-  if(errno == EINTR)
-    goto waitr;
-  else {
-    perror("skd_run: receiving return message");
-    exit( -1);
-  }
-}
+ waitr:
+ status = msgrcv( msqid, (struct msgbuf *) &sched, sizeof(sched.messg),
+		  sched.messg.rtype, 0);
+ 
+ if(status == -1) {
+   if(errno == EINTR)
+     goto waitr;
+   else {
+     perror("skd_run: receiving return message");
+     exit( -1);
+   }
+ }
 
  if (to !=0) {
    rte_alarm((unsigned) 0);
    if(signal(SIGALRM,SIG_DFL) == SIG_ERR){
-     fprintf( stderr,"skd_wait: setting default signals\n");
+     fprintf( stderr,"skd_run: setting default signals\n");
      exit(-1);
    }
    to=0;
-   }
+ }
+
+ if(run_index!=NULL)
+   *run_index=sched.messg.run_index;
 
  for (i=0;i<5;i++)
    save_ip[i]=sched.messg.ip[i];
@@ -245,14 +273,38 @@ for (i=0;i<5;i++)
     ip[i]=save_ip[i];
 
 }
+void skd_arg_buff(buff,len)
+char *buff;
+int len;
+{
+  /* return arg (arg_buff is a copy) as one unparsed buffer
+  */
+
+  int slen;
+
+  if(len <= 0)   /* defensive */
+    return;
+
+  slen = strlen(arg_buff);
+  slen = slen > len-1 ? len-1: slen;
+  strncpy(buff,arg_buff,slen);
+  buff[slen]='\0';
+
+  return;
+}
 void skd_arg(n,buff,len)
 char *buff;
 int  n,len;
 {
-  char *ptr;
-  int n1;
+  /* return n-th arg from passed arg buffer
+  */
+
+  if(len <= 0)   /* defensive */
+    return;
 
   if (argc < 0) {
+    char *ptr;
+
     argc = 0;
     ptr = strtok(arg," ");
     while ( NULL != (argv[argc++] = ptr) ) {
@@ -261,12 +313,13 @@ int  n,len;
   }
 
   if (n < argc && argv[n] != NULL) {
-    n1=strlen(argv[n])+1;
-    n1 = n1 > len? len: n1;
-    strncpy(buff,argv[n],n1);
-    if(n1==n && len > 0)
-      buff[n-1]='\0';
-  } else if (len > 0)
+    int slen;
+
+    slen = strlen(argv[n]);
+    slen = slen > len-1 ? len-1: slen;
+    strncpy(buff,argv[n],slen);
+    buff[slen]='\0';
+  } else
     buff[0]='\0';
 
 }
@@ -313,6 +366,9 @@ else
 
 strcpy(arg,sched.messg.arg);
 argc=-1;
+strcpy(arg_buff,arg);
+
+ run_index=sched.messg.run_index;
 
 return 1;
 }
@@ -378,6 +434,9 @@ else
 
 strcpy(arg,sched.messg.arg);
 argc=-1;
+strcpy(arg_buff,arg);
+
+  run_index=sched.messg.run_index;
 
   skd_end(ip);
 
@@ -461,19 +520,22 @@ else
 
 strcpy(arg,sched.messg.arg);
 argc=-1;
+strcpy(arg_buff,arg);
 
+ run_index=sched.messg.run_index;
 }
 
 void skd_end(ip)
 long ip[5];
 {
-  skd_end_to(ip,&rtype,0);
+  skd_end_to(ip,&rtype,0,run_index);
 }
 
-static void skd_end_to(ip,rtype_in,timed_out)
+static void skd_end_to(ip,rtype_in,timed_out,run_index)
 long ip[5];
 long *rtype_in;
 int timed_out;
+int run_index;
 {
   int i, status;
   struct skd_buf sched;
@@ -484,6 +546,7 @@ int timed_out;
     }
     sched.messg.timed_out=timed_out;
     sched.mtype=*rtype_in;
+    sched.messg.run_index=run_index;
   waits:
     status = msgsnd( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
 		      0 );
@@ -538,11 +601,15 @@ char name[5];
 {
     int i;
     long val;
+    char list[]=" abcdefghijklmnopqrstuvwxyz0123456789"; /* empty must be 0 */
+    char *ptr;
 
     val=0;
     for (i=0;i<5;i++) {
        if(name[i] != ' ' && name[i] != 0 ) {
-           val+=(tolower(name[i])-'a')<<(5*i);
+	 ptr=index(list,tolower(name[i]));
+	 if(ptr!=NULL)
+	   val+=(ptr-list)<<(6*i);
        }
     }
     return(val);
@@ -561,7 +628,7 @@ int sig;
     if(wait_rtype==0)
       skd_run(prog_name,'n',ipr);
     else
-      skd_end_to(ipr,&wait_rtype,1);
+      skd_end_to(ipr,&wait_rtype,1,run_index);
 
     return;
 }

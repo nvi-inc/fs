@@ -11,8 +11,8 @@ get_flux_file.o
 #
 FFLAGS = -cpp -DVERSION=$(VERSION) -DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL)
 LIBES = ../bosslb/bosslb.a ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a\
-../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../fmpsee/fmpsee.a\
-../rtelb/rtelb.a
+../flib/flib.a ../fclib/fclib.a ../fmpsee/fmpsee.a ../poclb/poclb.a \
+../clib/clib.a ../rtelb/rtelb.a
 #
 ../bin/incom: $(OBJECTS)
 	$(FC)  -o ../bin/incom $(OBJECTS) $(LIBES)

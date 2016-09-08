@@ -1,4 +1,14 @@
 This file contains a summary of changes made and why.
+2016Sep08 New keyword "vsi_align" in skedf.ctl. Following files changed: proc_dbbc_pfb_tracks.f, drudg_rdctl.f, drcom.ftni.
+2016Sep08  proc_mk5_init2.f:  Output 'jiveab' commands if >2GBS
+2016Sep06  proc_exper_initi.f:  Replace 'mk5=status?' with 'mk5_status'
+2016Aug23  ../skdrut/stinp.f. 2016Jul28 fix did not work. (index of cfirstrec(i) was unitialized). This fixes it.  
+2016Jul28
+1. drudg_rdctl.f  Added 'cfirstrec_def' to capture default recorder if 'equipment override' is on in skedf.ctl
+2. fdrudg.f       Use 'cfirstrec_def' if 'equipment override' is on in skedf.ctl.
+3. ../skdrut/stinp.f   Initialize cfirstrec="1 " even if you  have an error in reading in terminal line. Changed dimension of crack to char*20
+4. ../skdrut/unpvt.f   Changed dimension ofrack_type to char*20.
+
 2016Apr07.
 1. Fixed typographic bug in proc_disk_tracks with filag10 mode. 
 

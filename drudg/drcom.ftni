@@ -47,6 +47,7 @@ C 2003Jul11 JMG added itctim
 ! 2013Sep19 JMG. Added klo_config, ktarget_time
 ! 2015Jan30 JMG. Added kignore_bad_mask 
 ! 2015Jul17 JMG. Added  cont_calPolarity
+! 2016Sep08 JMG. Added lvsi_prompt
 c
       logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
      .          kprepass,kdr_type,kgeo,kpostpass
@@ -66,7 +67,7 @@ c
      .  lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .  cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,cversion
 
-      character*4 tpid_prompt, cont_cal_prompt
+      character*4 tpid_prompt, cont_cal_prompt,lvsi_align_prompt
       character*4 cont_cal_Polarity
 
       character*2 cpaper_size
@@ -81,7 +82,8 @@ c
      .    lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .    cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,
      >    cpaper_size,coption(3),ctextname,cversion,
-     >    tpid_prompt,cont_cal_prompt,cont_cal_polarity
+     >    tpid_prompt,cont_cal_prompt,cont_cal_polarity,
+     >    lvsi_align_prompt
 
 
       double precision RA50(max_cel),DEC50(max_cel)

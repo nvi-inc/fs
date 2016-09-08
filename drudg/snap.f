@@ -934,7 +934,7 @@ C               SOURCE=name,ra,dec,epoch
         if(iobs_this_stat .eq. 0 .and. kk5) then
            write(lufile,'("ready_k5")')
         endif
-
+   
         if((iobs_this_stat_rec.ne.0).and.(idir.ne.0) .and.
      >     (km5disk.or.km5a_piggy.or.km5p_piggy.or.kk5).and.
      >     .not. (krunning .or. kdata_xfer_prev))  then
@@ -992,8 +992,7 @@ C NOTE: 55 sec should really be IPARTM
               endif ! enough time OR force
             ENDIF !do the check
           END IF !check procedure
-        endif ! recording
-
+        endif ! recording 
 
 ! Do READY 
         IF (KNEWTP.and.krec) THEN ! new tape

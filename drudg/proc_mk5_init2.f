@@ -5,6 +5,7 @@
 !  2014Dec06. Added Mark5C support
 !  2015Jun05 JMG. Repalced drudg_write by drudg_write. 
 !  2016May07 WEH. bank_check if only 2 Gbps or less
+!  2016Sep08 JMG.  For Mark5c and >2GBS output jiveab commands
 ! passed
       character*5 lform        !Form descriptor
       integer ifan              !fanout
@@ -39,7 +40,11 @@
       endif
       if(.not. kflexbuff .and. .not.
      &     (km5c .and. idrate*ntrack_rec_mk5.gt.2048)) then 
-      write(lufile,'("bank_check")')
+         write(lufile,'("bank_check")')
+      endif 
+      if(km5c .and. idrate*ntrack_rec_mk5.gt.2048) then
+         write(lufile,'("jive5ab=vsn?")')
+         write(lufile,'("jive5ab=disk_serial?")') 
       endif 
       end
 

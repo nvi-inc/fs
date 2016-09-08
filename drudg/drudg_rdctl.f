@@ -1,15 +1,17 @@
       SUBROUTINE drudg_rdctl(csked,csnap,cproc,cscratch,
-     >   dr_rack_type,crec_default,  kequip_over)
+     >   crack_type_def,crec_default,cfirstrec_def, kequip_over)
       
 C
 ! This routine will open the default control file for drudg. 
 ! Based on old routine rdctl that handlled both sked and drudg.
 ! This just handles handles drudg.
 
-! 2015Jun05. JMGipson. Size of dr_rack_type, crec_default set by calling program. Previously hardwired. 
-! 2015Jul06  JMGipson. Initialized "dr_rack_Type, crec_default to " ". 
+! 2015Jun05. JMGipson. Size of crack_type_def, crec_default set by calling program. Previously hardwired. 
+! 2015Jul06  JMGipson. Initialized "crack_type_def, crec_default to " ". 
 ! 2015Jul17 JMG. Added cont_cal_polarity.
 ! 2015Jul21 JMG. Made "ASK" valid option ofr cont_cal_polarity 
+! 2016Jul28 JMG. Now also set cfirstrec_def in 'equipment override'
+! 2016Sep08 JMG. New keyword 'vsi_align' 
 
 C
 C   parameter file
@@ -22,7 +24,7 @@ C   parameter file
 
 ! Passed
       character*128 csked,csnap,cproc,cscratch     !Various directories. 
-      character*(*) dr_rack_type,crec_default(2)
+      character*(*) crack_type_def,crec_default(2),cfirstrec_def
       logical kequip_over    
           
 ! functions
@@ -59,6 +61,7 @@ C  LOCAL VARIABLES
       logical kfirst_skip    
 
       character*4 lvalid_polarity(6)
+      character*6 lvalid_vsi_align(4)
 
       character*32 cskedf(3)   
       data cskedf/
@@ -67,6 +70,7 @@ C  LOCAL VARIABLES
 
       data lvalid_dbbc_if_inputs/"1","2","3","4"/ 
       data lvalid_polarity/"0","1","2","3","NONE","ASK"/     
+      data lvalid_vsi_align/"0","1","NONE","ASK"/
        
       
 C  1. Open the default control file if it exists.   
@@ -81,6 +85,7 @@ C  1. Open the default control file if it exists.
 
       cont_cal_prompt="off" 
       cont_cal_polarity=" "    !default is none!
+      lvsi_align_prompt= " "   !default is none!
       ktarget_time=.false.
       klo_config=.false. 
       kignore_mark5b_bad_mask=.false.
@@ -100,7 +105,7 @@ C  1. Open the default control file if it exists.
       ierr = 0
       lu = 11
       kequip_over=.false.         !initialize
-      dr_rack_type    = " "
+      crack_type_def    = " "
       crec_default(1) = " "
       crec_default(2) = " "
    
@@ -329,26 +334,31 @@ C  $MISC
 
 C         EQUIPMENT
               else if (lkeyword  .eq.'EQUIPMENT') then          
-                dr_rack_type=lvalue
+                crack_type_def=lvalue
                 crec_default(1)=ltoken(3)
                 if(NumToken .eq. 3) then
-                   crec_default(2)="NONE"
+                   crec_default(2)="NONE"                
                 else
                    crec_default(2)=ltoken(4)
                 endif 
+                if(NumToken .eq. 5) then
+                   cfirstrec_def=ltoken(5)
+                else
+                   cfirstrec_def="1 "
+                endif 
               
-                call capitalize(dr_rack_type)
+                call capitalize(crack_type_def)
                 call capitalize(crec_default(1))
                 call capitalize(crec_default(2))         
 ! Now check to see if valid types.
                 itemp=iwhere_in_string_list(crack_type_cap,
-     >                 max_rack_type, dr_rack_type)
+     >                 max_rack_type, crack_type_def)
                 if(itemp .eq. 0) then
                    write(*,*) "Error in line: "//cbuf(1:60) 
-                   write(*,*) "Invalid rack_type: ",dr_rack_type
+                   write(*,*) "Invalid rack_type: ",crack_type_def
                    write(*,*) "Please fix in control file!"                   
                 else
-                  dr_rack_type=crack_type(itemp)
+                  crack_type_def=crack_type(itemp)
                 endif
                 do i=1,2
                   ltoken(2)=crec_default(i)
@@ -406,6 +416,7 @@ C         TPICD
      >              lvalue
                   write(*,*) "  valid options are: ", 
      >              lvalid_polarity
+                   cont_cal_polarity="ASK"
                 else if(itemp .le. 4) then
                     cont_cal_polarity=lvalue
                 else if(lvalue .eq. "NONE") then    !value set to "NONE"
@@ -413,7 +424,18 @@ C         TPICD
                 else if(lvalue .eq. "ASK") then
                     cont_cal_polarity="ASK"
                 endif 
-                                    
+
+             elseif (lkeyword .eq. 'VSI_ALIGN') then
+                call capitalize(lvalue)
+                itemp=iwhere_in_string_list(lvalid_vsi_align,4,lvalue)
+                if(itemp .eq. 0) then
+                  write(*,*) "drudg_rdctl: Invalid vsi_align: ",
+     >              lvalue
+                  write(*,*) "  valid options are: ", 
+     >              lvalid_vsi_align
+                   lvalue="ASK"           !set to ask if not valid. 
+                endif
+                lvsi_align_prompt=lvalue                                    
         
               elseif(lkeyword .eq. "DEFAULT_DBBC_IF_INPUTS") then
                 if(NumToken .gt. 5) then 
@@ -532,7 +554,7 @@ C         TPICD
       lautoftp_string=lautoFTP_string0
 
       if(kequip_over) then
-        if(dr_rack_type .eq. 'UNKNOWN' .or.
+        if(crack_type_def .eq. 'UNKNOWN' .or.
      >      crec_default(1) .eq. 'UNKNOWN') then
          write(*,*)
      >    "If EQUIPMENT_OVERRIDE is on, must set rack and recoders!"

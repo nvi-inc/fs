@@ -541,8 +541,7 @@ C    Store head positions and subpases
               ix=iwhere_in_string_list(csubpass,nsubpass,csubpassl(ip))
               do ih=1,nhd ! store the head offsets
                 ihdpos(ih,ip,istn,icode)=posh(indexl(ip),ih)
-                ihddir(ih,ip,istn,icode)=ix
-                write(*,*) "HERE~!!!!" 
+                ihddir(ih,ip,istn,icode)=ix   
               enddo
             enddo  ! number of passes in list
           endif ! m3/4 or v rec
