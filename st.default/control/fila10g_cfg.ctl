@@ -38,7 +38,7 @@ vdif_enc on
 *The destinaton port must agree with the FlexBuff, which uses 2630 by default.
 * If you change this you will need to program the Flexbuff with
 * "mk5=net_port = y;" where "y" is the port you used. You could put
-" that command in "initi" and "sched_initi" to try to make it reliable
+* that command in "initi" and "sched_initi" to try to make it reliable
 * but it would better to just not change the port.
 *
 *eth0 follows
