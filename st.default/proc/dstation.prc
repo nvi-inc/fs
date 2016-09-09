@@ -89,7 +89,7 @@ if=cont_cal,tpicd=tsys,!*
 onsource
 "more commands can be added until total execution times between first two if's is just under four seconds
 if=cont_cal,,!*+4s
-if_cont_cal,,caltsys_man
+if=cont_cal,,caltsys_man
 enddef
 define  ready_disk    00000000000
 mk5close
@@ -181,10 +181,10 @@ if=bbc13,bbc13
 if=bbc14,bbc14
 if=bbc15,bbc15
 if=bbc16,bbc16
-if=core1,pfb1
-if=core2,pfb2
-if=core3,pfb3
-if=core4,pfb4
+if=pfb,if=core1\\\,pfb1
+if=pfb,if=core2\\\,pfb2
+if=pfb,if=core3\\\,pfb3
+if=pfb,if=core4\\\,pfb4
 enddef
 define  pcalon        00000000000
 "no phase cal control is implemented here
