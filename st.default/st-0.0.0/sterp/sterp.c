@@ -7,9 +7,20 @@
  * stpgm.ctl file: "sterp n xterm -g +75+75 -e sterp &"
  *
  * Input:
- *       IP(0) = class number to retrieve message from
+ *       The error message to be processed is transmitted by ddout and
+ *       retrieved with the get_err() call.
  *
  * Output: None 
+ *
+ * VERY IMPORTANT:
+ *
+ *   It is mandatory that this program _not_ use the FS class-I/O system,
+ *   particularly cls_snd() and any other calls that use it, including the
+ *   logit*() family of calls. Not following this rule could cause a
+ *   deadlock situation.
+ *
+ *   If this program encounters any error internally, it should use its
+ *   own independent error reporting system and not report via the FS.
  */
 
 #include <stdio.h>
