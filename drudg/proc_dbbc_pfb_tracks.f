@@ -15,6 +15,7 @@
 !  2016May07 WEH        reorder vsi1/vsi2, remove unitialized ichan bug
 !  2016Sep08 JMG.  Added in vsi_align command.  To get 'lvsi_prompt' had to include drcom.ftni.
 !                 Including drcom.ftni meant I had to rename some variables because of collisions. 
+!  2016Sep11 JMG. Make vsi_align input appear on same line as prompt
 
 ! local
       integer ic   
@@ -116,7 +117,7 @@
        do while(lvsi_align .ne. "0" .and. 
      &          lvsi_align .ne. "1" .and.
      &          lvsi_align .ne. "NONE")   
-        write(*,*) "Enter in vsi_align (0,1,none):"
+        write(*,'(a,$)' ) "Enter in vsi_align (0,1,none): "
         read(*, '(a)') lvsi_align
         call capitalize(lvsi_align)
       end do 

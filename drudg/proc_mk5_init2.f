@@ -42,9 +42,12 @@
      &     (km5c .and. idrate*ntrack_rec_mk5.gt.2048)) then 
          write(lufile,'("bank_check")')
       endif 
-      if(km5c .and. idrate*ntrack_rec_mk5.gt.2048) then
-         write(lufile,'("jive5ab=vsn?")')
-         write(lufile,'("jive5ab=disk_serial?")') 
+  
+      if(km5c .and. .not.kflexbuff) then
+        if(idrate*ntrack_rec_mk5.gt.2048) then
+          write(lufile,'("jive5ab=vsn?")')
+          write(lufile,'("jive5ab=disk_serial?")') 
+        endif
       endif 
       end
 

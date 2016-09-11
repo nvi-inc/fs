@@ -21,13 +21,13 @@
       integer ierr
 ! functions
       integer iwhere_in_string_list
-! 2015Jun05 JMG. Repalced squeezewrite by drudg_write. 
+! 2015Jun05 JMG. Replaced squeezewrite by drudg_write. 
 ! 2015Jul17 JMG. Added cont_cal_polarity.
 ! 2015Jul20 JMG. Only write cont_cal_polarity if "cont_cal=on"
 ! 2015Jul21 JMg. If cont_cal_polarity is "ASK" then do ask. 
 ! 2016Jan19 JMG. Distinguish between DBBC_DDC and DBBC_PFB
 ! 2016May24 PdV  check first 8 (not 10) characters of rack for continuous cal
-!                    
+! 2016Sep11 JMG. For cont_cal prompt, make input appear on same line as prompt.                    
 
 ! local
       character*12 cnamep
@@ -92,7 +92,7 @@ c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
      >        " This is a Mode A or C experiment at an 8-BBC station."
          lwhich8=" "
          do while (lwhich8 .ne. "F" .or. lwhich8 .ne. "L")
-           write(luscn,'(a)')
+           write(luscn,'(a,$)')
      >          " Do you want the first or last 8 channels(F/L) ? "
            read(luusr,'(A)') lwhich8
            call capitalize(lwhich8)          
@@ -109,7 +109,7 @@ c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
      >                  cont_cal_out .eq. "off".or.
      >                  cont_cal_out .eq. "no" .or. 
      >                  cont_cal_out .eq. " "))      
-          write(*,*) "Enter in cont_cal action: (on/off)"
+          write(*,'(a,$)') "Enter in cont_cal action: (on/off) "
           read(*,*) cont_cal_out
           call lowercase(cont_cal_out)
         end do
@@ -117,7 +117,8 @@ c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
      &     cont_cal_polarity .eq. "ASK") then
           iwhere=0
           do while(iwhere .eq. 0)       
-            write(*,*) "Enter in cont_cal_polarity (0-3, or none): "
+            write(*,'(a, $)')
+     >       "Enter in cont_cal_polarity (0-3, or none): "
             read(*,*) cont_cal_polarity
             call capitalize(cont_cal_polarity)
             iwhere = iwhere_in_string_list(lvalid_polarity,5,

@@ -36,6 +36,7 @@
 ! 2015Jul28 JMG. Emit 'fila10g_mode' after 'fila10g_mode=...."
 ! 2016Jan18 JMG. Added extra parameter for fila10g with DBBC
 ! 2016Apr07 JMG. Fixed format in writing out fila10g. Was writing, ",=" instead of "=," 
+! 2016Sep11 JMG. Increased dim lsked_csb: max_csb-->2*max_csb.  Schedule fr036 HH caused problems
 
 ! local
       integer ipass
@@ -63,7 +64,7 @@
       parameter (max_csb=32)
       logical kdebug
 
-      character*4 lsked_csb(max_csb)     !Channel,sideband,bit in sked file
+      character*4 lsked_csb(2*max_csb)     !Channel,sideband,bit in sked file
 
       logical kastro3_mode               !True if valid astro3 mode. 
 
@@ -178,7 +179,7 @@
       data lul/"U","L"/
       data lsm/"S","M"/
 
-!      kdebug=.true.  
+      kdebug=.true.  
       kdebug=.false.   
       kastro3_mode=.false. 
 
@@ -220,10 +221,10 @@
       if(kdebug) then              
         write(*,'(a)') "  sb   sbo   bit  hd  chan pass stn  code  CSB"
       endif
-      num_tracks=0
+      num_tracks=0 
       do ic=1,max_chan
          do isb=1,2    
-               isb_out=isb 
+            isb_out=isb 
             if(abs(freqrf(ic,istn,icode)).lt.freqlo(ic,istn,icode)) then 
               isb_out=3-isb    !swap the sidebands
             endif ! reverse sidebands
@@ -232,8 +233,9 @@
               if (itras(isb,ibit,ihd,ic,ipass,istn,icode).ne.-99) then         !number of tracks set.                         
                 ib=ibbcx(ic,istn,icode)   !this is the BBC#
                 num_tracks=num_tracks+1    
+  
                 write(lsked_csb(num_tracks),'(i2.2,a1,a1)')
-     >            ib, lul(isb_out), lsm(ibit)    
+     >            ib, lul(isb_out), lsm(ibit)   
                 if(kdebug) then 
                   write(*,'(8i5,1x,a)')  isb,isb_out,ibit,ihd,ic,
      >                   ipass,istn,icode,lsked_csb(num_tracks) 
@@ -247,7 +249,7 @@
       if(num_tracks .gt. max_csb) then
          write(*,"('Proc_disk_tracks Error! max_tracks is: ',i3)")
      >        max_csb
-         write(*,"('But specfied ', i3)") num_tracks
+         write(*,"('But specified ', i3)") num_tracks
          goto 900
 !         if(kcomment_only) then
 !           return

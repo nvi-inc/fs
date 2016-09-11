@@ -1,4 +1,7 @@
 This file contains a summary of changes made and why.
+2016Sep11 proc_setup.f.  Made input for cont_cal, cont_cal_parity appear on same line as prompt.
+2016Sep11 proc_dbbc_pfb_tracks.f  Made input for proc_dbbc_pfb_tracks.f appear on same line as prompt.
+2016Sep11 proc_disk_tracks.  Doubled size of lsked_csb to 64. Was running out of space.
 2016Sep08 New keyword "vsi_align" in skedf.ctl. Following files changed: proc_dbbc_pfb_tracks.f, drudg_rdctl.f, drcom.ftni.
 2016Sep08  proc_mk5_init2.f:  Output 'jiveab' commands if >2GBS
 2016Sep06  proc_exper_initi.f:  Replace 'mk5=status?' with 'mk5_status'
