@@ -64,6 +64,7 @@ C Equipment type has been set by schedule file, Option 11, or control file.
       if(kflexbuff) then
         km5crec(1)=.true.
       endif
+! Note: Flexbuff is like Mark5C, but is not a disk. Hence no bankcheck, etc. 
 
       cstrack_cap(istn)=cstrack(istn)
       call capitalize(cstrack_cap(istn))
