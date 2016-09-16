@@ -11324,15 +11324,9 @@ Version 9.11.8 150920
 160406 WEH include/fscom.h
 160406 WEH include/fscom_dum.i
 160406 WEH newlb/prog.c
-160406 WEH incom/sincom.f
 160406 WEH fclib/fc_mk5dbbcd_pfb.c
-160406 WEH clib/Makefile
-160407 WEH drudg/proc_disk_tracks.f
-160407 WEH drudg/fdrudg_date.ftni
-160407 WEH drudg/change_log.txt
 160409 WEH Makefile
 160409 WEH fclib/fc_tpi_dbbc_pfb.c
-160409 WEH fclib/Makefile
 160410 WEH fserr/fserr.c
 160411 WEH quikr/tpi.f
 160413 WEH quikr/tsys.f
@@ -11354,43 +11348,185 @@ Version 9.11.8 150920
 160422 WEH onoff/wcounts.c
 160422 WEH onoff/Makefile
 160422 WEH onoff/tpget_dbbc_pfb.c
-160423 WEH clib/onoff_util.c
 160423 WEH clib/get_tcal_fwhm.c
 160423 WEH clib/tpi_dbbc_pfb.c
-160423 WEH ddout/ddout.c
-160423 WEH control/fserr.ctl
 160423 WEH quikv/onoff.c
 160423 WEH misc/dbbc_equip
+160423 WEH misc/changes.txt
+160423 WEH incom/sincom.f
+160424 WEH help/tnx.___
+160424 WEH clib/onoff_util.c
+160424 WEH include/fscom_quik.i
+160424 WEH quikr/fpdis.f
+160424 WEH fivpt/fivpt.f
+160424 WEH fivpt/dbbcn_pfb.f
+160424 WEH fclib/fc_dbbcn_pfb_v.c
+160424 WEH control/fserr.ctl
+160424 WEH clib/Makefile
+160424 WEH clib/dbbcn_pfb_v.c
+160424 WEH fclib/Makefile
+160424 WEH fivpt/Makefile
+160424 WEH ddout/ddout.c
+160424 WEH quikr/fvpnt.f
+160424 WEH fivpt/volts.f
 
-Version 9.11.10 1604xx
+Version 9.11.10 160424
 
-...stuff is missing ...
+160426 WEH dbbcn/dbbcn.c
+160427 WEH fmset/getfila10gtime.c
+160427 WEH ddout/ddout.c
+160428 WEH Makefile
+160428 WEH clib/dbbcn_v.c
+160428 WEH fivpt/volts.f
+160428 WEH fivpt/fivpt.f
+160428 WEH clib/dbbcn_pfb_v.c
+160428 WEH onoff/onoff.c
+160428 WEH onoff/Makefile
+160428 WEH onoff/agc_dbbc_pfb.c
+160429 WEH onoff/get_samples.c
+160429 WEH onoff/wcounts.c
+160429 WEH onoff/tpget_dbbc_pfb.c
+160430 WEH quikv/dbbcgain.c
+160430 WEH fslb/logit.f
+160430 WEH control/fserr.ctl
+160430 WEH clib/tpi_dbbc_pfb.c
+160430 WEH fivpt/tsys.f
+160430 WEH onoff/tzero.c
+160430 WEH misc/fix_define
+160430 WEH clib/get_tcal_fwhm.c
+160430 WEH quikv/onoff.c
+160501 WEH clib/cshm_init.c
+160501 WEH help/ifx.d__
+160501 WEH help/bbc_gain.d__
 
+Version 9.11.11 160501
+
+160502 WEH Makefile
+160502 WEH misc/fix_define
+160503 WEH dbbcn/dbbcn.c
+
+Version 9.11.12 160503
+
+160506 WEH Makefile
+160506 WEH clib/dbbc_vsix_util.c
+160507 WEH quikv/dbbc_vsix.c
+160507 WEH quikr/fvpnt.f
+160507 WEH dbbcn/dbbcn.c
+
+Version 9.11.13 160508
+
+160510 WEH st.default/prog/.cshrc
+160615 WEH clib/onoff_util.c
+160626 WEH lgerr/Makefile
+160627 WEH lgerr/lgerr.c
+160628 WEH s_client/s_client
+160701 WEH clib/holog_util.c
+160701 WEH holog/holog.c
+160704 WEH holog/MASK/holog_rdbe
+160707 WEH holog/MASK/plot_mask.m
+160709 WEH holog/MASK/m2n.m
+160709 WEH holog/MASK/n2m.m
+160710 WEH holog/MASK/contour_holog.m
+160710 WEH holog/MASK/find_mask.m
+160710 WEH holog/MASK/holog.m
+160710 WEH holog/MASK/mask-HOWTO.txt
 160715 WEH misc/cddis
-           created example upload script for new cddis
-
 160715 WEH clib/cls_util.c
-           clib/Makefile
-           include/fscom.h
-           ddout/ddout.c
-           fserr/fserr.c
-           fix class-I/O deadlock issue
-
+160715 WEH include/fscom.h
 160715 WEH fmpsee/fmpreadstr.c
-           fmpsee/fmpread.c
-           defend against DOS line terminations in BOSS
-
+160715 WEH fmpsee/fmpread.c
 160715 WEH newlb/f_readstring.f
-           defend against DOS line terminations in PFMED
-
+160716 WEH boss/getcm.f
+160717 WEH logex/logex.f
+160717 WEH fmpsee/fmpopen.c
+160717 WEH error/error.f
+160717 WEH fmpsee/fmperror_standalone_set.c
+160717 WEH fmpsee/Makefile
+160717 WEH boss/boss.f
+160717 WEH resid/resid.f
+160717 WEH incom/incom.f
+160717 WEH boss/Makefile
+160717 WEH incom/Makefile
+160717 WEH logex/Makefile
+160717 WEH error/Makefile
+160718 WEH xtrac/xtrac.f
+160718 WEH xtrac/Makefile
+160718 WEH aquir/aquir.f
+160718 WEH aquir/Makefile
+160718 WEH sigma/sigma.f
+160718 WEH sigma/Makefile
+160718 WEH resid/Makefile
+160718 WEH moon/Makefile
+160718 WEH pcalr/pcalr.f
+160718 WEH pcalr/Makefile
+160720 WEH ddout/ddout.c
+160811 WEH quikv/tpicd.c
+160818 WEH fclib/Makefile
+160821 WEH fclib/fc_if_cmd.c
+160821 WEH help/if.___
+160825 WEH help/ifx.d__
+160828 WEH help/mk5b_mode.___
+160828 WEH boss/bwork.f
+160828 WEH clib/if_cmd.c
+160829 WEH help/holog.___
+160829 WEH control/fscmd.ctl
+160829 WEH quikv/quikv.c
+160829 WEH quikv/Makefile
+160830 WEH quikv/dbbc_pfbx.c
+160902 WEH include/fs_types.h
+160902 WEH clib/Makefile
+160902 WEH include/dbbc_pfbx_ds.h
+160902 WEH quikv/dbbc_pfbx_dis.c
+160902 WEH fserr/fserr.c
+160902 WEH fserr/listinit.c
+160902 WEH fs/statusprt.c
+160902 WEH Makefile
+160902 WEH clib/dbbc_pfbx_util.c
 160902 WEH st.default/proc/dstation.prc
-           unify procedures for continuous/non-continuous cal and DDC/PFB
+160903 WEH dbbcn/dbbcn.c
+160903 WEH quikv/dbbc_vsix.c
+160904 WEH fmset/fila10g_cfg.h
+160904 WEH fmset/Makefile
+160905 WEH help/vsin.d__
+160905 WEH fmset/ask_fila10g_cfg.c
+160905 WEH fmset/gfila10g_cfg.c
+160905 WEH fmset/getfila10gtime.c~
+160905 WEH fmset/fmset.c
+160905 WEH st.default/control/fila10g_cfg.ctl~
+160905 WEH quikv/fila10g_mode.c
+160905 WEH help/fila10g_mode.d__~
+160905 WEH quikv/dbbcgain.c
+160905 WEH control/fserr.ctl
+160905 WEH quikv/scan_check_dis.c
+160905 WEH clib/cshm_init.c
+160906 WEH misc/refresh_secondary.sd156
+160906 WEH misc/refresh_secondary.sd234
+160906 WEH misc/refresh_spare_usr2.9
+160906 WEH misc/refresh_secondary.hdc
+160906 WEH misc/refresh_secondary.sdb
+160906 WEH misc/refresh_spare_usr2
+160906 WEH monit/monit3.c
+160907 WEH help/fila10g_mode.d__
+160908 WEH st.default/control/fila10g_cfg.ctl
+160908 WEH fmset/getfila10gtime.c
+160908 WEH st.default/control/skedf.ctl
 
-160902 WEH st.default/proc/dstationcc.prc
-           deleted
+Version 9.11.14 160908
 
-160905 WEH st.default/proc/fila10g.prc
-           deleted
+160909 WEH st.default/proc/dstation.prc
+160909 WEH st.default/control/fila10g_cfg.ctl
+160910 WEH erchk/erchk.c
+160910 WEH st.default/st-0.0.0/sterp/sterp.c
+160911 WEH Makefile
 
-160905 WEH st.default/control/fila10g_cfg.ctl
-           created
+Version 9.11.15 160911
+
+160914 WEH help/if.___
+160915 WEH include/dbbc_pfbx_ds.h
+160915 WEH clib/dbbc_pfbx_util.c
+160915 WEH fivpt/volts.f
+160916 WEH clib/dbbcn_pfb_v.c
+160916 WEH clib/tpi_dbbc_pfb.c
+160916 WEH onoff/tpget_dbbc_pfb.c
+
+Version 9.11.16 1609xx
