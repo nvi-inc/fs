@@ -7,6 +7,8 @@
 #include <math.h>
 #include "../include/params.h"
 #include "../include/fs_types.h"
+#include "../include/fscom.h"         /* shared memory definition */
+#include "../include/shm_addr.h"      /* shared memory pointer */
 
 void dbbc_pfbx_mon(output,count,lclm)
 char *output;
@@ -18,16 +20,28 @@ struct dbbc_pfbx_mon *lclm;
   output=output+strlen(output);
 
   switch (*count) {
-  case 16:
+  case 17:
     if(lclm->overflow)
       strcpy(output,"OVERFLOW");
     break;
+  case 16:
+    if(shm_addr->dbbcpfbv<=15) {
+      if(lclm->overflow)
+	strcpy(output,"OVERFLOW");
+      break;
+    }
   default:
-    if(*count>16)
-      *count=-1;
-    else
-      sprintf(output,"%d.%03d",lclm->counts[*count-1]/1000,
-	      lclm->counts[*count-1]%1000);
+    if(shm_addr->dbbcpfbv<=15) {
+      if(*count>16)
+	*count=-1;
+      else
+	sprintf(output,"%d.%03d",lclm->counts[*count-1]/1000,
+		lclm->counts[*count-1]%1000);
+    } else
+      if(*count>17)
+	*count=-1;
+      else
+	sprintf(output,"%d",lclm->counts[*count-1]);
   }
   
   if(*count>0) *count++;
@@ -48,12 +62,19 @@ char *buff;
   if(NULL==sptr)
     return -1;
 
-  for(k=0;k<15;k++) {
-    sptr=strtok(NULL," ,");
-    if(NULL==sptr || 1!=sscanf(sptr,"%lf",&dvalue))
-      return -2;
-    lclm->counts[k]=dvalue*1000+.5;
-  }
-
+  if(shm_addr->dbbcpfbv<=15)
+    for(k=0;k<15;k++) {
+      sptr=strtok(NULL," ,");
+      if(NULL==sptr || 1!=sscanf(sptr,"%lf",&dvalue))
+	return -2;
+      lclm->counts[k]=dvalue*1000+.5;
+    }
+  else
+    for(k=0;k<16;k++) {
+      sptr=strtok(NULL," ;");
+      if(NULL==sptr || 1!=sscanf(sptr,"%d",&lclm->counts[k]))
+	return -2;
+    }
+  
   return 0;
 }

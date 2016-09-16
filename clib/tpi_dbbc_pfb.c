@@ -96,6 +96,7 @@ int ilen;                /* number of characters ibuf can hold, ignored */
   int icore, ik;
   int overflow;
   double dvalue;
+  int ivalue;
 
   isub=abs(isubin);
 
@@ -142,22 +143,44 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 	  return;
 	}
 
-	for(k=1;k<16;k++) {
-	  ik=k+(icore-1)*16;
-	  sptr=strtok(NULL," ,");
-	  if(NULL==sptr || 1!=sscanf(sptr,"%lf",&dvalue)) {
-	    if(i<ip[1]-1) 
-	      cls_clr(ip[0]);
-	    ip[0]=ip[1]=0;
-	    ip[2]=-402;
-	    memcpy(ip+3,"qk",2);
-	    return;
+	if(shm_addr->dbbcpfbv<=15) {
+	  for(k=1;k<16;k++) {
+	    ik=k+(icore-1)*16;
+	    sptr=strtok(NULL," ,");
+	    if(NULL==sptr || 1!=sscanf(sptr,"%lf",&dvalue)) {
+	      if(i<ip[1]-1) 
+		cls_clr(ip[0]);
+	      ip[0]=ip[1]=0;
+	      ip[2]=-402;
+	      memcpy(ip+3,"qk",2);
+	      return;
+	    }
+	    if(itpis_dbbc_pfb[ik]) {
+	      if(overflow) {
+		ptr[ik]=1600001;
+	      } else
+		ptr[ik]=dvalue*1000+.5;
+	    }
 	  }
-	  if(itpis_dbbc_pfb[ik]) {
-	    if(overflow) {
-	      ptr[ik]=1600001;
-	    } else
-	      ptr[ik]=dvalue*1000+.5;
+	} else {
+	  sptr=strtok(NULL," ;");
+	  for(k=1;k<16;k++) {
+	    ik=k+(icore-1)*16;
+	    sptr=strtok(NULL," ;");
+	    if(NULL==sptr || 1!=sscanf(sptr,"%d",&ivalue)) {
+	      if(i<ip[1]-1) 
+		cls_clr(ip[0]);
+	      ip[0]=ip[1]=0;
+	      ip[2]=-402;
+	      memcpy(ip+3,"qk",2);
+	      return;
+	    }
+	    if(itpis_dbbc_pfb[ik]) {
+	      if(overflow) {
+		ptr[ik]=1600001;
+	      } else
+		ptr[ik]=ivalue*10;
+	    }
 	  }
 	}
       }
@@ -228,7 +251,7 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 	    strcat(ibuf,",");
 	  }
 	  if(isub==11)
-	    if(ptr2[ik] >1600000) {
+	    if(ptr2[ik] > 1600000) {
 	      strcat(ibuf,"$$$$$,");
 	    } else {
 	      int2str(ibuf,ptr2[ik],7);
@@ -310,7 +333,7 @@ int itask;               /* 5=tsys, 6=tpidiff, 10=caltemps */
 	  tpid=shm_addr->tpidiff[ik];
 	  if(itask==5) {
 	    
-	    if(tpic<0.5 || tpic > 1599999.5 || tpi > 1599999.5|| tpi < 0.5|
+	    if(tpic<0.5 || tpic > 1600000.5 || tpi > 1600000.5|| tpi < 0.5|
 	       tpiz < -1 || tpid > 1600000.5 )
 	      shm_addr->systmp[ik]=1e9;
 	    else
@@ -320,7 +343,7 @@ int itask;               /* 5=tsys, 6=tpidiff, 10=caltemps */
 	    if(shm_addr->systmp[ik]>999999.95 || shm_addr->systmp[ik] <0.0)
 	      logita(NULL,-215-i,"qk",lwhatn[k]);
 	  } else if(itask==6) {
-	    if(tpic< 0.5 || tpic>1599999.5|| tpi < 0.5 || tpi > 1599999.5)
+	    if(tpic< 0.5 || tpic>1600000.5|| tpi < 0.5 || tpi > 1600000.5)
 	      shm_addr->tpidiff[ik]=1600001;
 	    else
 	      shm_addr->tpidiff[ik]=shm_addr->tpical[ik]-shm_addr->tpi[ik];

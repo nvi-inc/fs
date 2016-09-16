@@ -35,6 +35,7 @@ int *ierr;
   int icore;
   int overflow;
   double dvalue;
+  int ivalue;
 
   /* retrieve device responses */
 
@@ -59,8 +60,6 @@ int *ierr;
 	}
 	inbuf[nchars]=0;
 
-	/* 'power/ 1=     0.504,     6.255,    31.249,    57.892,    83.805,    87.756,    27.523,     0.434,     2.872,    15.428,    37.493,    57.326,    68.687,    27.936,     0.129' optionally with ' OVERFLOW' at end */
-
 	overflow=NULL!=strstr(inbuf,"OVERFLOW"); /* overflowed */
 	sptr=strtok(inbuf,"=");
 	if(NULL==sptr) {
@@ -71,20 +70,43 @@ int *ierr;
 	  return -1;
 	}
 
-	for(k=1;k<16;k++) {
-	  sptr=strtok(NULL," ,");
-	  if(NULL==sptr || 1!=sscanf(sptr,"%lf",&dvalue)) {
-	    if(ip[1]>0) 
-	      cls_clr(ip[0]);
-	    ip[0]=ip[1]=0;
-	    *ierr=-18;
-	    return -1;
+	if(shm_addr->dbbcpfbv<=15) {
+	/* 'power/ 1=     0.504,     6.255,    31.249,    57.892,    83.805,    87.756,    27.523,     0.434,     2.872,    15.428,    37.493,    57.326,    68.687,    27.936,     0.129' optionally with ' OVERFLOW' at end */
+
+	  for(k=1;k<16;k++) {
+	    sptr=strtok(NULL," ,");
+	    if(NULL==sptr || 1!=sscanf(sptr,"%lf",&dvalue)) {
+	      if(ip[1]>0) 
+		cls_clr(ip[0]);
+	      ip[0]=ip[1]=0;
+	      *ierr=-18;
+	      return -1;
+	    }
+	    if(itpis_dbbc_pfb[k+(icore-1)*16]) {
+	      if(overflow) {
+		dtpi[k+(icore-1)*16]=1600001;
+	      } else
+		dtpi[k+(icore-1)*16]=dvalue;
+	    }
 	  }
-	  if(itpis_dbbc_pfb[k+(icore-1)*16]) {
-	    if(overflow) {
-	      dtpi[k+(icore-1)*16]=1e9;
-	    } else
-	      dtpi[k+(icore-1)*16]=dvalue;
+	} else {
+	  /* 'power/ 1= 26888;   671;  1198;  1939;  2708;  3710;  3652;  3697;  5286;  6315;  5763;  5688;  7497;  6597;  6395;  3507' optionally with ' OVERFLOW' at end, first value is not a channel */
+	  sptr=strtok(NULL," ;");
+	  for(k=1;k<16;k++) {
+	    sptr=strtok(NULL," ;");
+	    if(NULL==sptr || 1!=sscanf(sptr,"%d",&ivalue)) {
+	      if(ip[1]>0) 
+		cls_clr(ip[0]);
+	      ip[0]=ip[1]=0;
+	      *ierr=-18;
+	      return -1;
+	    }
+	    if(itpis_dbbc_pfb[k+(icore-1)*16]) {
+	      if(overflow) {
+		dtpi[k+(icore-1)*16]=1600001;
+	      } else
+		dtpi[k+(icore-1)*16]=ivalue*10;
+	    }
 	  }
 	}
       }
