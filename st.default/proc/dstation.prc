@@ -125,11 +125,11 @@ enddef
 define  caltsys       00000000000
 if=cont_cal,tpicd=tsys,caltsys_man
 if=cont_cal,,ifagc
-if=cont_cal,,if=ddc,bbc_gain=all\\\,agc
+if=cont_cal,,if=ddc\,bbc_gain=all\\\,agc
 enddef
 define  caltsys_man   00000000000
 ifman
-bbc_gain=all,man
+if=ddc,bbc_gain=all\,man
 !+2s
 tpi=formbbc,formif
 calon
@@ -181,10 +181,10 @@ if=bbc13,bbc13
 if=bbc14,bbc14
 if=bbc15,bbc15
 if=bbc16,bbc16
-if=pfb,if=core1\\\,pfb1
-if=pfb,if=core2\\\,pfb2
-if=pfb,if=core3\\\,pfb3
-if=pfb,if=core4\\\,pfb4
+if=pfb,if=core1\,pfb1
+if=pfb,if=core2\,pfb2
+if=pfb,if=core3\,pfb3
+if=pfb,if=core4\,pfb4
 enddef
 define  pcalon        00000000000
 "no phase cal control is implemented here
