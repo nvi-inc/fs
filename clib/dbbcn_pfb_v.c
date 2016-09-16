@@ -188,8 +188,7 @@ long ip[5];
     int overflow, k;
     char *sptr;
     double dvalue;
-
-	/* 'power/ 1=     0.504,     6.255,    31.249,    57.892,    83.805,    87.756,    27.523,     0.434,     2.872,    15.428,    37.493,    57.326,    68.687,    27.936,     0.129' optionally with ' OVERFLOW' at end */
+    int ivalue;
 
     overflow=NULL!=strstr(buf,"OVERFLOW"); /* overflowed */
     sptr=strtok(buf,"=");
@@ -198,17 +197,37 @@ long ip[5];
       goto error;
     }
     
-    for(k=1;k<16;k++) {
-      sptr=strtok(NULL," ,");
-      if(NULL==sptr || 1!=sscanf(sptr,"%lf",&dvalue)) {
-	ierr=-406;
-	goto error;
+    if(shm_addr->dbbcpfbv<=15) {
+
+	/* 'power/ 1=     0.504,     6.255,    31.249,    57.892,    83.805,    87.756,    27.523,     0.434,     2.872,    15.428,    37.493,    57.326,    68.687,    27.936,     0.129' optionally with ' OVERFLOW' at end */
+
+      for(k=1;k<16;k++) {
+	sptr=strtok(NULL," ,");
+	if(NULL==sptr || 1!=sscanf(sptr,"%lf",&dvalue)) {
+	  ierr=-406;
+	  goto error;
+	}
+	if(k==det%16) {
+	  if(overflow) {
+	    *dtpi=1600001;
+	  } else
+	    *dtpi=dvalue*1000+.5;
+	}
       }
-      if(k==det%16) {
-	if(overflow) {
-	  *dtpi=1600001;
-	} else
-	  *dtpi=dvalue*1000+.5;
+    } else {
+      sptr=strtok(NULL," ;");
+      for(k=1;k<16;k++) {
+	sptr=strtok(NULL," ;");
+	if(NULL==sptr || 1!=sscanf(sptr,"%d",&ivalue)) {
+	  ierr=-406;
+	  goto error;
+	}
+	if(k==det%16) {
+	  if(overflow) {
+	    *dtpi=1600001;
+	  } else
+	    *dtpi=ivalue*10;
+	}
       }
     }
   } else {

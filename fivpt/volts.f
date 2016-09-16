@@ -206,7 +206,7 @@ C
         if(DBBC.eq.rack.and.
      &       (rack_type.eq.DBBC_PFB.or.rack_type.eq.DBBC_PFB_FILA10G)
      &       ) then
-           if(dpti.lt.160000.5d0) goto 16
+           if(dpti.lt.1600000.5d0) goto 16
         else
            if (dtpi.lt.65534.5d0) goto 16 
         endif
