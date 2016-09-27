@@ -131,7 +131,7 @@ else if (drive==S2) {
     rte_sleep(SLEEP_TIME);
     exit(0);
   }
- } else if ((rack & MK3 || rack==0||rack==LBA) ||
+ } else if ((rack & MK3 || rack==0||rack==LBA ||rack==DBBC) ||
 	    ((( rack == MK4 && rack_type != MK4) ||
 	      (rack == VLBA4 && rack_type != VLBA4)) &&
 	     ( drive = MK5 && drive_type != MK5B && drive_type != MK5B_BS))
