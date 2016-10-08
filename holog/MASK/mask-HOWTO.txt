@@ -9,8 +9,8 @@
 
        Please be sure that offsets +/ half the span values in the
        holog=... command can reached from the position commanded with
-       source=... command. Use positive spans and azimuth points for
-       agreement with later processing.
+       source=... command.  Use positive spans and azimuth points and
+       negative elevation points for agreement with later processing.
 
    with SNAP procedures for RDBEs like:
 
