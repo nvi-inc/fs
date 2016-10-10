@@ -524,6 +524,9 @@ SCAN_CHECK failed
 5K -602
 SCAN_CHECK missing bytes is not zero.
 ""
+5K  602
+Warning: SCAN_CHECK missing bytes is not zero, but recorder is Mark 5C or FlexBuff.
+""
 5K -901
 query response not received
 ""
@@ -2037,7 +2040,7 @@ DH -301
 Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the fifth parameter.
 ""
 DH -302
-Mask width, greater than 16 bits, incompatible with inputselect from equip.ctl.
+mask2 cannot be used with only one VSI input selected in equip.ctl.
 ""
 DH -304
 Can't specify sample rate and decimate parameters simultaneously
