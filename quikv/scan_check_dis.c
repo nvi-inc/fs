@@ -111,18 +111,22 @@ long ip[5];
 	  return;
 	}
       }
-      if(!(shm_addr->equip.drive[0] == MK5 &&
-	 (shm_addr->equip.drive_type[0] == MK5C_BS ||
-	  shm_addr->equip.drive_type[0] == FLEXBUFF))
-	 ) {
-	if(lclm.missing.state.error || (!lclm.missing.state.known)
-	   || lclm.missing.missing !=0 ) {
+      if(lclm.missing.state.error || (!lclm.missing.state.known)
+	 || lclm.missing.missing !=0 ) {
+	if(!(shm_addr->equip.drive[0] == MK5 &&
+	     (shm_addr->equip.drive_type[0] == MK5C ||
+	      shm_addr->equip.drive_type[0] == MK5C_BS ||
+	      shm_addr->equip.drive_type[0] == FLEXBUFF))
+	   ) {
 	  logit(NULL,-602,"5k");
 	  shm_addr->last_check.ip2=-602;
-	  strncpy(shm_addr->last_check.who,"5k",
-		  sizeof(shm_addr->last_check.who));
-	  shm_addr->last_check.who[sizeof(shm_addr->last_check.who)-1]=0;
+	} else {
+	  logit(NULL,602,"5k");
+	  shm_addr->last_check.ip2=602;
 	}
+	strncpy(shm_addr->last_check.who,"5k",
+		sizeof(shm_addr->last_check.who));
+	shm_addr->last_check.who[sizeof(shm_addr->last_check.who)-1]=0;
       }
 
       return;
