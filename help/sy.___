@@ -59,3 +59,18 @@ out what command the entries came from.  If the '-n' option is omitted
 used as an argument for the popen progam, the result is logged only,
 and not displayed to the operator.  See 'man popen' for more details
 on the popen() call.
+
+If python 2.7 is available, an external program 's_client' can be used
+in 'sy=...' commands for simple ASCII transactions with devices over
+Ethernet sockets. It accepts arguments:
+
+  -h host      host or IP to access, default 127.0.0.1
+  -p port      port to access, default 5000
+  -t time-out  time-out in seconds, default 1
+  -c command   command to send, default 'dbe_atten?;'
+  -n name      name for error reports, default program name, typically 's_client'
+
+The following is an example of using 's_client' with 'popen' to log
+the results (including any errors with '2>&1' I/O redirection):
+
+sy=popen 's_client -h hubpc -c "mci_data? pmc_vacuum" -t 20 2>&1' -n hpccn &
