@@ -48,8 +48,12 @@ Monitor-only parameters:
                         format is 'simple' VDIF, then the frame size,
                         typically 8032.
 
-Comments: 
-If format is ?, the remaining fields are not valid.
+Comments: If format is ?, the remaining fields are not valid and an
+error is reported.
+
+If the number of missing bytes is non-zero, an error is reported
+unless the recorder type is Mark 5C or FlexBuff, in which case only a
+warning is reported.
 
 This uses the low-level Mark 5 scan_check? command. The displayed
 parameters are the output of this command. More information on the
