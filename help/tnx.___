@@ -56,8 +56,8 @@ If the displayed error string is null (empty) but when the error
 occurs a string is displayed that may because the programmer is
 supplying the string in a call to logite() along with the error
 code,number.  This may be because the string contents are variable.
-Note that in this case TNX will not distiguish between such variable
-strings.  It can only suppress all errors with that error code,number.
+Note that in this case TNX will not distinguish between such variable
+strings.  It will suppress all errors with that error code,number.
 This is different from how it handles different error strings from
 fserr.ctl and sterr.ctl, all of which are individually suppressable,
 but have a more limited range of variation.  For the code,number with

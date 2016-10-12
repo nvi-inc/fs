@@ -11272,7 +11272,7 @@ Version 9.11.8 150920
            created
 
 160118 WEH include/fila10g_mode_ds.h
-160118 WEH quikv/fila10g_mode.c
+           quikv/fila10g_mode.c
            add second mask
 
 160118 WEH dbbcn/dbbcn.c
@@ -11285,6 +11285,8 @@ Version 9.11.8 150920
 
 160120 WEH clib/dbbc_vsix_util.c
            created
+
+Version 9.11.9 160120
 
 160330 WEH control/fscmd.ctl
            quikv/mk5relink.c
@@ -11319,214 +11321,469 @@ Version 9.11.8 150920
            add scan_check interlock based on previous value of scan_name
 
 160402 WEH quikr/Makefile
+           add PFB support
+
 160403 WEH quikr/tplisd.f
+           use actual cond modules instead of max
+ 
 160405 WEH include/params.i
 160406 WEH include/fscom.h
+           include/fscom_dum.i
+           newlb/prog.c
+160421 WEH include/params.h
+160414 WEH include/tpicd_ds.h
+           add _MAX_DBBC_PFB and, MAX_DBBC_PFB_DET, and MAX_GLOBAL_DET
+
 160406 WEH include/fscom_dum.i
-160406 WEH newlb/prog.c
+       WEH newlb/prog.c
+           add scan_name_ and scan_name_old to fscom_dum
+
 160406 WEH fclib/fc_mk5dbbcd_pfb.c
-160409 WEH Makefile
 160409 WEH fclib/fc_tpi_dbbc_pfb.c
-160410 WEH fserr/fserr.c
 160411 WEH quikr/tpi.f
 160413 WEH quikr/tsys.f
-160414 WEH include/tpicd_ds.h
-160414 WEH clib/cshm_init.c
-160416 WEH clib/tpi_dbbc.c
 160418 WEH tpicd/tpicd.c
-160418 WEH quikv/tpicd.c
 160419 WEH monit/monit3.c
 160421 WEH clib/tpicd_util.c
-160421 WEH include/params.h
-160421 WEH include/onoff_ds.h
 160422 WEH clib/mk5dbbcd_pfb.c
-160422 WEH quikr/tplisd_pfb.f
-160422 WEH onoff/onoff.c
-160422 WEH onoff/tpget_dbbc.c
-160422 WEH onoff/matcn.c
-160422 WEH onoff/get_samples.c
-160422 WEH onoff/wcounts.c
-160422 WEH onoff/Makefile
-160422 WEH onoff/tpget_dbbc_pfb.c
+           quikr/tplisd_pfb.f
+           onoff/get_samples.c
+           onoff/wcounts.c
+           onoff/Makefile
+           onoff/tpget_dbbc_pfb.c
 160423 WEH clib/get_tcal_fwhm.c
-160423 WEH clib/tpi_dbbc_pfb.c
-160423 WEH quikv/onoff.c
-160423 WEH misc/dbbc_equip
-160423 WEH misc/changes.txt
-160423 WEH incom/sincom.f
-160424 WEH help/tnx.___
-160424 WEH clib/onoff_util.c
-160424 WEH include/fscom_quik.i
-160424 WEH quikr/fpdis.f
+           clib/tpi_dbbc_pfb.c
+           quikv/onoff.c
 160424 WEH fivpt/fivpt.f
-160424 WEH fivpt/dbbcn_pfb.f
-160424 WEH fclib/fc_dbbcn_pfb_v.c
-160424 WEH control/fserr.ctl
-160424 WEH clib/Makefile
-160424 WEH clib/dbbcn_pfb_v.c
-160424 WEH fclib/Makefile
-160424 WEH fivpt/Makefile
+           fivpt/dbbcn_pfb.f
+           fclib/fc_dbbcn_pfb_v.c
+           control/fserr.ctl
+           clib/Makefile
+           clib/dbbcn_pfb_v.c
+           fclib/Makefile
+           fivpt/Makefile
+           quikr/fvpnt.f
+           fivpt/volts.f
+           add PFB support
+
+160409 WEH Makefile
+           now 9.11.10
+
+160410 WEH fserr/fserr.c
+           initialize to avoid reusing error if scan fails
+ 
+160414 WEH clib/cshm_init.c
+          mask initial ifX values as bad
+
+160416 WEH clib/tpi_dbbc.c
+160418 WEH tpicd/tpicd.c
+160422 WEH onoff/tpget_dbbc.c
+           onoff/matcn.c
+160423 WEH clib/get_tcal_fwhm.c
+           correct error handling
+
+160418 WEH quikv/tpicd.c
+           Tsys not allowe for DDC non-continuous or PFB ever
+
+160421 WEH include/onoff_ds.h
+           four character wide device names
+
+160422 WEH onoff/onoff.c
+           improve station detector logic, use four character detector  names
+
+160423 WEH misc/dbbc_equip
+           created to update equip.ctl for new DBBC racks names and Cores/IF
+
+160423 WEH incom/sincom.f
+          new larger number of detector devices and fivpt device now can have
+            4 characters
+
+160424 WEH help/tnx.___
+           improve text
+
+160424 WEH clib/onoff_util.c
+           increase size of detector string, add PFB, fix cut-off angle display
+
+160424 WEH include/fscom_quik.i
+           quikr/fpdis.f
+           four character detectors
+
 160424 WEH ddout/ddout.c
-160424 WEH quikr/fvpnt.f
-160424 WEH fivpt/volts.f
+           clean-up and add comments
 
 Version 9.11.10 160424
 
 160426 WEH dbbcn/dbbcn.c
+           add missing goto in error clause
+
 160427 WEH fmset/getfila10gtime.c
+           correct error handling
+
 160427 WEH ddout/ddout.c
+           clean-up error message handling of "()"
+
 160428 WEH Makefile
+           9.11.11
+
 160428 WEH clib/dbbcn_v.c
+           initialize savec.agc in case of error
+
 160428 WEH fivpt/volts.f
+
 160428 WEH fivpt/fivpt.f
+           correct nesting of DDC case in clean-up at end
+
 160428 WEH clib/dbbcn_pfb_v.c
+           turn off AGC if on, fix ifchain numbering
+
 160428 WEH onoff/onoff.c
-160428 WEH onoff/Makefile
-160428 WEH onoff/agc_dbbc_pfb.c
+       WEH onoff/Makefile
+       WEH onoff/agc_dbbc_pfb.c
+           missing AGC handling for PFB added
+
 160429 WEH onoff/get_samples.c
+           correct number of devices and arguments of tpget_dbbc_pfb()
+
 160429 WEH onoff/wcounts.c
+           fix PFB count formating
+
 160429 WEH onoff/tpget_dbbc_pfb.c
+           corret class count decrement, fix overflow to 1600001, save linear
+             IF power. use double instead of float for counts
+
 160430 WEH quikv/dbbcgain.c
+           control/fserr.ctl
+160501 WEH help/bbc_gain.d__
+           add error trap for PFB, but warning only
+
 160430 WEH fslb/logit.f
-160430 WEH control/fserr.ctl
+           always use 'b1' for error, + or -
+
 160430 WEH clib/tpi_dbbc_pfb.c
+           use double instead of float for counts
+
 160430 WEH fivpt/tsys.f
+           include station detectors in getting zero level
+
 160430 WEH onoff/tzero.c
+           correct number of detectors, need to get zero for station detectors
+             even with other racks
+
 160430 WEH misc/fix_define
+           create to fix define statements in .prc files
+
 160430 WEH clib/get_tcal_fwhm.c
+           quikv/onoff.c
+160501 WEH help/ifx.d__
+           swap DBBC filters 5 and 6 limits to be correct
+
+
 160430 WEH quikv/onoff.c
+           fix bug to use lcl.devices[ik].center instead of center, fix
+             PFB IF detectors
+
 160501 WEH clib/cshm_init.c
 160501 WEH help/ifx.d__
-160501 WEH help/bbc_gain.d__
+           restore legitimate values for DBBC IFx command parameters
 
 Version 9.11.11 160501
 
 160502 WEH Makefile
+           9.11.12
+
 160502 WEH misc/fix_define
+           improve help output, add -o option
+
 160503 WEH dbbcn/dbbcn.c
+           remember time of last response for dbbctrk to be more correct
 
 Version 9.11.12 160503
 
 160506 WEH Makefile
+           9.11.13
+
 160506 WEH clib/dbbc_vsix_util.c
+           change from dbbctrkVSI,core to dbbctrk=core,VSI
+ 
 160507 WEH quikv/dbbc_vsix.c
+           send dbbctrk command in decending order of Cores
+
 160507 WEH quikr/fvpnt.f
+           simplify decoding of PFB channel number for range checking
+
 160507 WEH dbbcn/dbbcn.c
+           trigger dbbctrk delay only for dbbctrk=
 
 Version 9.11.13 160508
 
 160510 WEH st.default/prog/.cshrc
+           add xterm alias with host name in title
+
 160615 WEH clib/onoff_util.c
+           switch back to cut-off in degress
+
 160626 WEH lgerr/Makefile
 160627 WEH lgerr/lgerr.c
+           control/fserr.ctl
+           Makefile
+           external error logging porgram created
+
+160329 WEH Makefile
 160628 WEH s_client/s_client
+           socket client created
+
 160701 WEH clib/holog_util.c
+           update use of az and points to allow +/-1 and different signs
+
 160701 WEH holog/holog.c
+160829 WEH help/holog.___
+           add az steps without cos(el) correction, single pass on either,
+             and furrowing in el
+ 
 160704 WEH holog/MASK/holog_rdbe
 160707 WEH holog/MASK/plot_mask.m
 160709 WEH holog/MASK/m2n.m
-160709 WEH holog/MASK/n2m.m
+           holog/MASK/n2m.m
 160710 WEH holog/MASK/contour_holog.m
-160710 WEH holog/MASK/find_mask.m
-160710 WEH holog/MASK/holog.m
-160710 WEH holog/MASK/mask-HOWTO.txt
+           holog/MASK/find_mask.m
+           holog/MASK/holog.m
+           holog/MASK/mask-HOWTO.txt
+           add mask making tools
+
 160715 WEH misc/cddis
+           add example script for sending a file to new cddis server
+
 160715 WEH clib/cls_util.c
+           fixed to prevent full message queue from causing error, will wait
+             now
+
 160715 WEH include/fscom.h
+           add shared memory buffer for fserr messages to avoid deadlock with
+              full message queues
+
 160715 WEH fmpsee/fmpreadstr.c
-160715 WEH fmpsee/fmpread.c
-160715 WEH newlb/f_readstring.f
+           fmpsee/fmpread.c
+           newlb/f_readstring.f
+           tolerate DOS line terminations: remove returns
+
 160716 WEH boss/getcm.f
+           tolerate DOS line terminations: remove returns
+
 160717 WEH logex/logex.f
-160717 WEH fmpsee/fmpopen.c
-160717 WEH error/error.f
-160717 WEH fmpsee/fmperror_standalone_set.c
-160717 WEH fmpsee/Makefile
-160717 WEH boss/boss.f
-160717 WEH resid/resid.f
-160717 WEH incom/incom.f
-160717 WEH boss/Makefile
-160717 WEH incom/Makefile
-160717 WEH logex/Makefile
-160717 WEH error/Makefile
+           fmpsee/fmpopen.c
+           error/error.f
+           fmpsee/fmperror_standalone_set.c
+           fmpsee/Makefile
+           boss/boss.f
+           resid/resid.f
+           incom/incom.f
+           boss/Makefile
+           incom/Makefile
+           logex/Makefile
+           error/Makefile
 160718 WEH xtrac/xtrac.f
-160718 WEH xtrac/Makefile
-160718 WEH aquir/aquir.f
-160718 WEH aquir/Makefile
-160718 WEH sigma/sigma.f
-160718 WEH sigma/Makefile
-160718 WEH resid/Makefile
-160718 WEH moon/Makefile
-160718 WEH pcalr/pcalr.f
-160718 WEH pcalr/Makefile
+           xtrac/Makefile
+           aquir/aquir.f
+           aquir/Makefile
+           sigma/sigma.f
+           sigma/Makefile
+           resid/Makefile
+           moon/Makefile
+           pcalr/pcalr.f
+           pcalr/Makefile
+           distinguish between fmpopen calls within the FS: BOSS, INCOM, PCALR,
+             AQUIR, and those that  are standalone: LOGEX, XTRAC, ERROR, RESID,
+             SIGMA, so that internal programs will use ddout to report errors
+             abd standalone report errors directly
+
 160720 WEH ddout/ddout.c
+           fixed to prevent class-I/O deadlock
+           don't sync on every write to disk, but at least once a second
+           clean up some error case where the .wav files was not being used
+           re-enable FMGR/FNP errror messages as part of other errors, but
+             using UNIX errors
+           RDBE 'ready' with default to not display rdtcX program output
+           trim trailing blanks off of output
+
+160720 WEH control/fserr.ctl
+           change FMGR/FMP errors to UNIX errors
+
 160811 WEH quikv/tpicd.c
+           expanded detectors for max PFB detectors
+
 160818 WEH fclib/Makefile
 160821 WEH fclib/fc_if_cmd.c
-160821 WEH help/if.___
-160825 WEH help/ifx.d__
-160828 WEH help/mk5b_mode.___
+           help/if.___
 160828 WEH boss/bwork.f
-160828 WEH clib/if_cmd.c
-160829 WEH help/holog.___
+           clib/if_cmd.c
+           control/fserr.ctl
+           'if' SNAP command
+
+160825 WEH help/ifx.d__
+           add nominal operating count level information
+
+160828 WEH help/mk5b_mode.___
+           improved documentation
+
 160829 WEH control/fscmd.ctl
-160829 WEH quikv/quikv.c
-160829 WEH quikv/Makefile
+           quikv/quikv.c
+           quikv/Makefile
 160830 WEH quikv/dbbc_pfbx.c
 160902 WEH include/fs_types.h
-160902 WEH clib/Makefile
-160902 WEH include/dbbc_pfbx_ds.h
-160902 WEH quikv/dbbc_pfbx_dis.c
+           clib/Makefile
+           include/dbbc_pfbx_ds.h
+           quikv/dbbc_pfbx_dis.c
+           clib/dbbc_pfbx_util.c
+           control/fserr.ctl
+           add pfbX commands
+
 160902 WEH fserr/fserr.c
-160902 WEH fserr/listinit.c
+           fixed to prevent class-I/O deadlock
+
+160902 WEH fserr/fserr.c
+           fserr/listinit.c
+           improve error reporting on start-up, ddout error reporting doesn't
+            isn't avaiulable yet, and particularly if fserr start-up fails
+
 160902 WEH fs/statusprt.c
+           format of unrecognized "Signal" termination message
+
 160902 WEH Makefile
-160902 WEH clib/dbbc_pfbx_util.c
+           9.11.14
+           add lgerr and s_client
+
 160902 WEH st.default/proc/dstation.prc
+           add use of 'if' command to unify PFB/DDC and cont./non-cont. cal
+
+160902 WEH st.default/proc/dstationcc.prc
+           deleted
+
 160903 WEH dbbcn/dbbcn.c
+           remove delay for dbbctrk= commands
+
 160903 WEH quikv/dbbc_vsix.c
-160904 WEH fmset/fila10g_cfg.h
-160904 WEH fmset/Makefile
 160905 WEH help/vsin.d__
+           correct condition for not support: not PFB
+           stop at 1 and always do something, there is no no-op
+
+160904 WEH fmset/fila10g_cfg.h
+           fmset/Makefile
 160905 WEH fmset/ask_fila10g_cfg.c
-160905 WEH fmset/gfila10g_cfg.c
-160905 WEH fmset/getfila10gtime.c~
-160905 WEH fmset/fmset.c
-160905 WEH st.default/control/fila10g_cfg.ctl~
-160905 WEH quikv/fila10g_mode.c
-160905 WEH help/fila10g_mode.d__~
-160905 WEH quikv/dbbcgain.c
-160905 WEH control/fserr.ctl
-160905 WEH quikv/scan_check_dis.c
-160905 WEH clib/cshm_init.c
-160906 WEH misc/refresh_secondary.sd156
-160906 WEH misc/refresh_secondary.sd234
-160906 WEH misc/refresh_spare_usr2.9
-160906 WEH misc/refresh_secondary.hdc
-160906 WEH misc/refresh_secondary.sdb
-160906 WEH misc/refresh_spare_usr2
-160906 WEH monit/monit3.c
-160907 WEH help/fila10g_mode.d__
+           fmset/gfila10g_cfg.c
+           fmset/getfila10gtime.c
+           fmset/fmset.c
+           st.default/control/fila10g_cfg.ctl
 160908 WEH st.default/control/fila10g_cfg.ctl
-160908 WEH fmset/getfila10gtime.c
+           fmset/getfila10gtime.c
+           add fila10g config to FMSET 's' command
+
+160905 WEH quikv/fila10g_mode.c
+           help/fila10g_mode.d__
+160907 WEH help/fila10g_mode.d__
+           control/fserr.ctl
+           complain if mask is wider than 16 bits and input is not vsi1-2,
+             gps or tvg
+
+160905 WEH quikv/dbbcgain.c
+           control/fserr.ctl
+           no more warning for PFB rack, it is an error
+
+160905 WEH quikv/scan_check_dis.c
+           don't complain about missing bytes for 5C or FlexBuff
+
+160905 WEH clib/cshm_init.c
+           ONOFF cutoff in degrees
+           illegal values for DBBC ifX command initial values, again
+
+160906 WEH misc/refresh_secondary.sd156
+           misc/refresh_secondary.sd234
+           misc/refresh_spare_usr2.9
+           misc/refresh_secondary.hdc
+           misc/refresh_secondary.sdb
+           misc/refresh_spare_usr2
+           add set -e to stop on errors
+
+160906 WEH misc/refresh_secondary.sd156
+           misc/refresh_secondary.sd234
+           add --recheck to grub-install to update /boot/grub/device.map
+             thanks to DEH and JHFQ
+  
+160906 WEH misc/refresh_spare_usr2.9
+           added check to stop if /usr2/ is not mounted
+             extract existing UUID for new /dev/md2
+             both thanks to JHFQ!
+
+160906 WEH monit/monit3.c
+           only show DBBC BBC DDC channel frequencies that are setup
+             only show Tsys if DBBC DDC BBC channels setup and being recorded
+             only show DBBC PFB channels being recorded with IFs setup
+             only show DBBC IF Tsys for channels being recorded
+
+160905 WEH control/fserr.ctl
+           fix typo in QV - 305 to QV -305
+
 160908 WEH st.default/control/skedf.ctl
+           add vsi_align example
 
 Version 9.11.14 160908
 
 160909 WEH st.default/proc/dstation.prc
-160909 WEH st.default/control/fila10g_cfg.ctl
+           st.default/control/fila10g_cfg.ctl
+           correct errors
+
 160910 WEH erchk/erchk.c
-160910 WEH st.default/st-0.0.0/sterp/sterp.c
+           st.default/st-0.0.0/sterp/sterp.c
+           add comments about not using class-I/O to avoid deadlock
+
 160911 WEH Makefile
+           9.11.15
 
 Version 9.11.15 160911
 
 160914 WEH help/if.___
+           improve text
+           add exaplanation and examples of nested quoting
+
+160914 WEH Makefile
+           9.11.16
+
 160915 WEH include/dbbc_pfbx_ds.h
 160915 WEH clib/dbbc_pfbx_util.c
 160915 WEH fivpt/volts.f
 160916 WEH clib/dbbcn_pfb_v.c
 160916 WEH clib/tpi_dbbc_pfb.c
 160916 WEH onoff/tpget_dbbc_pfb.c
+           avoid new "0th" (IF) channel in power/ response for v16
+           support both v15 and v16
 
-Version 9.11.16 1609xx
+Version 9.11.16 160916
+
+160927 WEH fmset/fmset.c
+           correct error message when DBBC (no Fila10G) and 5C or FlexBuff
+
+160108 WEH misc/fix_define
+           add -t 'test' mode
+
+161008 WEH holog/MASK/mask-HOWTO.txt
+           note that elevation points in holog=... should be negative
+
+161008 WEH help/tnx.__
+161010 WEH control/fserr.ctl
+           correct typos
+
+161010 WEH help/sy.___
+           add information and example of 's_client'
+
+161010 WEH pcalr/pcalr.f
+           changed to 'standalone' fmp error processing since files are only
+             read standalone
+
+161010 WEH quikv/scan_check_dis.c
+           control/fserr.ctl
+           check for missing bytes for 5C/FlexBuff, but only issue warning
+
+161012 WEH help/scan_check.___
+           include information about '?' missing bytes error/warning
+
+Version 9.11.17 161012
+     
