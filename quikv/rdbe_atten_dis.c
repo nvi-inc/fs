@@ -93,7 +93,7 @@ int *out_recs;
           count++;
           rdbe_atten_mon(output,&count,&lclm);
         }
-	for(i=1;i<-1;i--) {
+	for(i=1;i>-1;i--) {
 	  if(lclm.ifc[i].RMS.state.known == 1)  {
 	    if(shm_addr->rdbe_equip.rms_min > lclm.ifc[i].RMS.RMS){
 	      if(0!=ierr)

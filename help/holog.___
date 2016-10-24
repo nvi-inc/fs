@@ -66,13 +66,13 @@ elevation point.
 The starting and ending points of the scan can be switched to
 different corners of the grid by using a negative span for either or
 both axes.  The long "furrows" of the scan are along azimuth, unless
-the number of azimuth points is negative, in which case they
+the number of azimuth points is negative, in which case they are in
 elevation.
 
 Normally, the azimuth span and steps are adjusted by 1/cos(El)
-according to the elevation of each point to space the azimuth grid
+according to the elevation of central point to space the azimuth grid
 points in anglar rather than coordinate units.  If the number of
-elevation points is turned off, this correct is not made.
+elevation points is negative, this correct is not made.
 
 This command must be set-up, i.e., commanded with parameters
 ("holog=...") before the scan be run.  The scan is initated by
@@ -129,8 +129,8 @@ HOLOGP:   scan_name=$
 where "scriptp" is a shell script to run on the remote host.  Note
 that since there is no ampersand "&" at the end of the "sy=ssh ..."
 command the FS will wait for the ssh command to complete before
-continuing.  Please note that if the actually used is script takes
-less than one second to execute, a line:
+continuing.  Please note that if the actually used script takes less
+than one second to execute, a line:
 
           !+1s
 

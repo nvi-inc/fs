@@ -28,7 +28,7 @@ while (my $line = <$pipe>) {
 }
 $fact=8e-9/(1e-6*$slept);
 foreach $key (sort(keys %{ $bytes{0}})) {
-    if($key ne "eth0" && $key ne "lo") {
+    if($key ne "eth0" && $key ne "lo" && $key ne "eth1") {
 	if(!defined($bytes{1}{$key})) {
 	    print "second measurement missing interface $key\n";
 	    exit;
@@ -36,7 +36,7 @@ foreach $key (sort(keys %{ $bytes{0}})) {
     }
 }
 foreach $key (sort(keys %{ $bytes{1}})) {
-    if($key ne "eth0" && $key ne "lo") {
+    if($key ne "eth0" && $key ne "lo" && $key ne "eth1") {
 	if(!defined($bytes{0}{$key})) {
 	    print "first measurement missing interface $key\n";
 	    exit;
@@ -44,7 +44,7 @@ foreach $key (sort(keys %{ $bytes{1}})) {
     }
 }
 foreach $key (sort(keys %{ $bytes{1}})) {
-    if($key ne "eth0" && $key ne "lo") {
+    if($key ne "eth0" && $key ne "lo" && $key ne "eth1") {
         print "$key ";
         printf "%.3f",$fact*($bytes{1}{$key}-$bytes{0}{$key});
         print " ";

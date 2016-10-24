@@ -13,6 +13,7 @@
 #include "../include/shm_addr.h"
 
 #include "fmset.h"
+#include "fila10g_cfg.h"
 
 extern long ip[5];           /* parameters for fs communications */
 extern unsigned char outbuf[512];     /* class i-o buffer */
@@ -22,6 +23,7 @@ extern int source;
 
 extern dbbc_sync;
 extern WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
+extern struct fila10g_cfg *fila10g_cfg_use;
 
 extern iDBBC;
 
@@ -58,6 +60,7 @@ int    *formhs;
 	  mvwaddstr( maindisp, 6, 10+15,
 		     "                                       ");
 	  mvwaddstr( maindisp, 6, 10+15+39 , "               ");
+
 	  if(source == DBBC && dbbc_sync) {
 	    dbbc_sync=0;
 	    out_recs=0;
@@ -91,6 +94,7 @@ int    *formhs;
 	      }
 	      name=NULL;
 	    }
+
 	    skd_par(ip);
 	    nsem_put("fsctl");
 	    if(ip[1]!=0)
@@ -101,6 +105,7 @@ int    *formhs;
 	      *formtime=-1;
 	      return;
 	    }
+
 	    wstandout(maindisp);
 	    mvwaddstr( maindisp, 4, 25, "Waiting for DBBC ");
 	    leaveok ( maindisp, FALSE); /* leave cursor in place */
@@ -116,6 +121,84 @@ int    *formhs;
 	    iwait=1;
 
 	  }
+
+	  /* set config */
+
+	  if(NULL==fila10g_cfg_use)
+	  if(0==iDBBC) 
+	    logit("No Fila10G configuration selected",0,NULL);
+	  else if(1==iDBBC)
+	    logit("No Fila10G#1 configuration selected",0,NULL);
+	  else
+	    logit("No Fila10G#2 configuration selected",0,NULL);
+	  else {
+	    struct fila10g_cmd *cmd;
+	    int start;
+	    if(0==iDBBC) 
+	      sprintf(outbuf,"Fila10G configuration '%s' selected",
+		      fila10g_cfg_use->name);
+	    else if(1==iDBBC)
+	      sprintf(outbuf,"Fila10G#1 configuration '%s' selected",
+		      fila10g_cfg_use->name);
+	    else
+	      sprintf(outbuf,"Fila10G#2 configuration '%s' selected",
+		      fila10g_cfg_use->name);
+
+	    logit(outbuf,0,NULL);
+
+	    cmd=fila10g_cfg_use->cmd;
+	    fila10g_cfg_use=NULL;
+
+	    while(NULL!=cmd) {
+	      out_recs=0;
+	      out_class=0;
+	      if(0==iDBBC) 
+		strcpy(outbuf,"Sending: '");
+	      else if(1==iDBBC)
+		strcpy(outbuf,"Sending FiLa10G#1: '");
+	      else
+		strcpy(outbuf,"Sending FiLa10G#2: '");
+	      start=strlen(outbuf);
+	      strcat(outbuf,"fila10g=");
+	      strcat(outbuf,cmd->cmd);
+	      strcat(outbuf,"'");
+	      logit(outbuf,0,NULL);
+	      cls_snd(&out_class, outbuf+start, strlen(outbuf+start)-1 , 0, 0);
+	      out_recs++;
+
+	      ip[0]=6;
+	      ip[1]=out_class;
+	      ip[2]=out_recs;
+	      nsem_take("fsctl",0);
+	      if(2!=iDBBC)
+		name="dbbcn";
+	      else
+		name="dbbc2";
+	      while(skd_run_to(name,'w',ip,120)==1) {
+		if (nsem_test("fs   ") != 1) {
+		  endwin();
+		  fprintf(stderr,"Field System not running - fmset aborting\n");
+		  rte_sleep(SLEEP_TIME);
+		  exit(0);
+		}
+		name=NULL;
+	      }
+	      skd_par(ip);
+	      nsem_put("fsctl");
+	      
+	      if(ip[1]!=0)
+		cls_clr(ip[0]);
+	      if(ip[2] != 0) {
+		logita(NULL,ip[2],ip+3,ip+4);
+		logit(NULL,-9,"fv");
+		*formtime=-1;
+		return;
+	      }
+	      cmd=cmd->next;
+	    }
+
+	  }
+
 	  /* now set time */
 
 	  out_recs=0;
@@ -211,12 +294,10 @@ int    *formhs;
         nsem_put("fsctl");
 	if( ip[2] != 0 )
 		{
-		endwin();
-		fprintf(stderr,"Error %d from formatter\n",ip[2]);
                 logita(NULL,ip[2],ip+3,ip+4);
 		logit(NULL,-9,"fv");
-                rte_sleep(SLEEP_TIME);
-		exit(0);
+		*formtime=-1;
+		return;
 		}
 
 	/* time before is more accurate */
@@ -241,3 +322,4 @@ int    *formhs;
         rte2secs(it,formtime);
         *formhs=0;
 }
+

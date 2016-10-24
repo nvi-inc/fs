@@ -1,0 +1,193 @@
+#!/usr/bin/perl
+
+sub time_diff {
+#
+# calculate dot time difference in seconds
+#
+    local ($old,$new) = @_;
+#0123456789012
+#yyyydddhhmmss
+#2005123122356
+    $old_year=substr($old,0,4);
+    $old_day=substr($old,4,3);
+    $old_hour=substr($old,7,2);
+    $old_minute=substr($old,9,2);
+    $old_second=substr($old,11,2);
+
+    $new_year=substr($new,0,4);
+    $new_day=substr($new,4,3);
+    $new_hour=substr($new,7,2);
+    $new_minute=substr($new,9,2);
+    $new_second=substr($new,11,2);
+
+    if($old_year ne $new_year) {
+	die "change of year not supported:, $old_year to $new_year\n";
+    }
+
+    $diff=$new_second-$old_second;
+    $diff=$diff+($new_minute-$old_minute)*60;
+    $diff=$diff+($new_hour-$old_hour)*3600;
+    $diff=$diff+($new_day-$old_day)*86400;
+
+    return $diff;
+}
+# 1.0 Initialize
+
+require "getopts.pl";
+
+&Getopts("vghrf:");
+
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
+    print STDERR "Try: 'holog_rdbe -h'\n";
+    exit -1;
+}
+
+if(defined($opt_v)) {
+    print "[tpcon_rdbe 1.0]\n";
+    exit -1;
+}
+
+if (defined($opt_h)) {
+    print "Usage: tpcont_rdbe input ifc output\n";
+    print "Synopsis: extracts rdbe tsys data from a FS log\n";
+
+    print "This script processes log files to an space delimited file if the dbe_tsys data for an RDBE.\n";
+    print "It will abort if any of the selected rdbe's dbe_tsys has noin-zero return code or if the IF\n";
+    print "channel changes in the log file. This script is useful for extracting data from the FS program";
+    print "HOLOG if is using dbe_tsys? commands for sampling.\n";
+
+    print "\nArguments:\n";
+    print "  input  - FS log file to process, must exist:\n";
+    print "  rdbe   - ifc to extract data for 'a0', 'a1', ..., 'd0', 'd1'\n";
+    print "  output - Output file, must not exist, if omitted no output\n";
+
+    print "\nOption:\n";
+    print " -g print each unexpected time gap in the multicast\n";
+    print " -h print this help information and stop\n";
+    print " -v print program version information\n";
+    exit -1;
+}
+
+# 2.0 extract data
+
+my ($file,$ifc,$out)= @ARGV;
+
+#print "args '$file' '$ifc' '$out'\n";
+
+if(not defined $out) {
+    print "no output specified, not processing Tsys data\n";
+}
+if(!($ifc =~ /^[abcd][01]$/)) {
+    die "Second argument must be 'a0', 'a1', ..., 'd0' or 'd1', not '$rdbe', giving up.\n";
+}
+
+open(FILE,$file) || do {
+    print STDERR "Can't open input $file: '$file', giving up.\n";
+    exit -1;
+};
+
+if(defined $out) {
+    if (-e $out) {
+	die "Output file '$out' already exists, giving up.\n";
+    }
+
+    open(OUT,'>',$out) || do {
+	print STDERR "Can't open output '$file', giving up.$!\n";
+	exit -1;
+    };
+}
+
+$rdbe=substr($ifc,0,1);
+$ifn=substr($ifc,1,1);
+$lines = 0;
+$save='';
+$total=0;
+$sum=0;
+$scale=1;
+$#values=-1;
+while (<FILE>) {
+    $lines = $lines + 1;
+    
+    if(/data_valid=on/) {
+	$save='';
+	next;
+    }
+
+    if(/rdtc$rdbe#dot\/(.*)$/) {
+	$time=$1;
+	if(defined $out) {
+	    if($#values!=31 && $#values!=-1) {
+		die "incorrect values count $#values at line $lines, time $time\n";
+	    }
+	    if($#values!=-1) {
+		print OUT "@values\n";
+		$#values=-1;
+	    }
+	}
+	$total=$total+1;
+	if($save ne "") {
+	    $diff=&time_diff($save,$time);
+	    if($diff > 1) {
+		$sum=$sum+$diff-1;
+		if (defined($opt_g)) {
+		    print "gap: start $save seconds $diff\n";
+		}
+	    }
+	}
+	$save=$time;
+	next;
+    }
+       
+    if(not defined $out) {
+	next;
+    }
+
+    if(/rdbe_atten$rdbe\/(.*)$/) {
+	@atten=split(/,/,$1);
+	@atten=@atten[ 4 .. $#atten];
+	$at0=shift(@atten);
+	@atten=@atten[ 2 .. $#atten];
+	$at1=shift(@atten);
+	if($ifn eq '0') {
+	    $at=$at0;
+	} else {
+	    $at=$at1;
+	}
+	if(!defined($atstart)) {
+	    $atstart=$at;
+	} else {
+	    $dat=$at-$atstart;
+	    $scale=10**($dat*0.1);
+	}
+    }
+
+    if(!/rdtc$rdbe#tpcont?\//) {
+	next;
+    }
+    if(!/$ifc,/) {
+	next;
+    }
+    chomp;
+    $line = $_;
+    $line =~ s/^.*tpcont?\/ *//;
+    @fields=split(/,[ ]*/,$line);
+
+    while($#fields>=2) {
+	$device=shift(@fields);
+	push @values,int (0.5+shift(@fields)*$scale);
+	push @values,int (0.5+shift(@fields)*$scale);
+    }
+    if($#fields!=-1) {
+	die "incorrect fields count $#fields at line $lines\n";
+    }
+}
+if(defined $out) {
+    if($#values!=31 && $#values!=-1) {
+	die "incorrect values count $#values at line $lines\n";
+    }
+    if($#values!=-1) {
+	print OUT "@values\n";
+	$#values=-1;
+    }
+}
+print "multicast from rdbe$rdbe: found $total, missing $sum\n";

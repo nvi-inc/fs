@@ -12,6 +12,7 @@
 #include "../include/shm_addr.h"
 
 #include "fmset.h"
+#include "fila10g_cfg.h"
 
 #define ESC_KEY		0x1b
 #define INC_KEY		'+'
@@ -41,6 +42,8 @@ int  s2type=0;
 char s2dev[2][3] = {"r1","da"};
 int m5rec;
 int m5b_crate;
+struct fila10g_cfg *fila10g_cfg_use = NULL;
+struct fila10g_cfg *ask_fila10g_cfg();
 int iRDBE;
 int iDBBC;
 
@@ -90,6 +93,7 @@ char mk5b_clock_freq[10] ="";
 char mk5b_clock_source[10] ="";
 char blank[ ] = {"                                                                              "};
 int drive, drive_type;
+struct fila10g_cfg *fila10g_cfg=NULL;
  int nRDBE;
  int clear_area=0;
  int vdif_epoch, vdif_should;
@@ -164,6 +168,14 @@ else if (drive==S2) {
 	    /* we don't have these rack types yet */
 	    /*&& (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)*/
 	    ) {
+  char buff[80];
+  strcpy(buff,FS_ROOT);
+  strncat(buff,"/control/fila10g_cfg.ctl",sizeof(buff)-strlen(buff)-1);
+  if(gfila10g_cfg(buff,&fila10g_cfg)) {
+    fprintf( stderr,"fmset: error reading fila10g_cfg.ctl file, see log for error\n");
+    rte_sleep(SLEEP_TIME);
+    exit(0);
+  }
   source=DBBC;
   if(nRDBE!=0) {
     toggle=TRUE;
@@ -280,15 +292,17 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
  mvwaddstr( maindisp, hint_row+2, column, buffer);
  sprintf(buffer, "    '.'     to set %s time to Field System time.",form);
  mvwaddstr( maindisp, hint_row+3, column, buffer);
- irow=4;
+ irow=3;
  if(source==RDBE) {
-   sprintf(buffer,"    '>'     to increment %s VDIF epoch." ,form);
-   mvwaddstr( maindisp, hint_row+4, column, buffer);
+   if(vdif_epoch < vdif_should) {
+     sprintf(buffer,"    '>'     to increment %s VDIF epoch." ,form);
+     irow++;
+   }
+   mvwaddstr( maindisp, hint_row+irow++, column, buffer);
    sprintf(buffer,"    '<'     to decrement %s VDIF epoch." ,form);
-   mvwaddstr( maindisp, hint_row+5, column, buffer);
-   sprintf(buffer,"    ';'     to set VDIF epoch to nominal." ,form);
-   mvwaddstr( maindisp, hint_row+6, column, buffer);
-   irow+=3;
+   mvwaddstr( maindisp, hint_row+irow++, column, buffer);
+   sprintf(buffer,"    ';'     to set VDIF epoch to nominal.      " ,form);
+   mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  }
  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
 		     (source==DBBC
@@ -327,6 +341,9 @@ if(source == RDBE && nRDBE > 1) {
 
  mvwaddstr( maindisp, hint_row+irow++, column,
 	    "    <esc>   to quit: DON'T LEAVE FMSET RUNNING FOR LONG.");
+
+ if(source==RDBE && vdif_epoch == vdif_should)
+   mvwaddstr( maindisp, hint_row+irow, 1, blank);
 
 leaveok ( maindisp, FALSE); /* leave cursor in place */
 wrefresh ( maindisp );
@@ -635,6 +652,15 @@ do 	{
 	      changeds2das=1;
 	    else
 	      changedfm=1;
+	  }
+	  if (synch && rack==DBBC
+	    /* we don't have these rack types yet */
+	      /* && (rack_type==DBBC_DDC_FILA10G ||
+		 rack_type==DBBC_PFB_FILA10G) */ &&
+	      NULL!=fila10g_cfg) {
+	    for (i=hint_row;i<hint_row+irow;i++)
+	      mvwaddstr( maindisp, i, 1, blank);
+	    fila10g_cfg_use=ask_fila10g_cfg(maindisp,fila10g_cfg);
 	  }
 	  goto build;
 	  break;

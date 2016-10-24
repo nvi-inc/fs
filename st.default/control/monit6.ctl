@@ -8,7 +8,7 @@
 *                    sum   sums  counts (and Tcal) from all channels
 *     pcal tones: 0-1023
 *                 number is tone in MHz relative to fundamental in the band
-*                        currently only multiples of 5 are calculated       
+*                        currently only multiples of 5 are available
 *
 *RDBE-A:    
  avg avg 30 30

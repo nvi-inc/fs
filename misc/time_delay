@@ -1,0 +1,177 @@
+#!/usr/bin/perl
+
+sub late {
+#
+# calculate jow late we are for the expected wait until time
+#
+    local ($date) = @_;
+#2005.123.12:23:56.21:!2006.123.12:23:56
+#012345678901234567890123456789012345678
+    $lyear=substr($date,0,4);
+    $lday=substr($date,5,3);
+    $lhour=substr($date,9,2);
+    $lminute=substr($date,12,2);
+    $lsecond=substr($date,15,5);
+
+    $wyear=substr($date,22,4);
+    $wday=substr($date,27,3);
+    $whour=substr($date,31,2);
+    $wminute=substr($date,34,2);
+    $wsecond=substr($date,37,2);
+
+    if($wyear==$lyear-1) {
+	$days_in_year=365;
+	$days_in_year=366 if $wyear%4==0;
+	$time=(((($lyear-$wyear)*$days_in_year
+		 +$lday-$wday)*24.0
+		+$lhour-$whour)*60.0
+	       +$lminute-$wminute)*60.0
+	       +$lsecond-$wsecond;
+    } elsif($lyear==$wyear-1) {
+	$days_in_year=365;
+	$days_in_year=366 if $lyear%4==0;
+	$time=-(((($wyear-$lyear)*$days_in_year
+		 +$wday-$lday)*24.0
+		+$whour-$lhour)*60.0
+	       +$wminute-$lminute)*60.0
+	       +$wsecond-$lsecond;
+    } elsif ($wyear==$lyear) {
+	$time=((($lday-$wday)*24.0
+		+$lhour-$whour)*60.0
+	       +$lminute-$wminute)*60.0
+	       +$lsecond-$wsecond;
+    } else {
+	die "years differ by more than one: $lyear, $wyear at line $lines\n";
+    }
+#	    print "log  $lday $lhour $lminute $lsecond\n";
+#	    print "wait $wday $whour $wminute $wsecond\n";
+#           print "diff $time\n";
+    return $time;
+}
+# 1.0 Initialize
+
+require "getopts.pl";
+
+&Getopts("vhts");
+
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
+    print STDERR "Try: 'time_delay -h'\n";
+    exit -1;
+}
+
+if(defined($opt_v)) {
+    print "[time_delay 1.0]\n";
+    exit -1;
+}
+
+if (defined($opt_h)) {
+    print "\nUsage: time_delay [options] input\n";
+    print "Synopsis: estimate schedule delays\n";
+    print "\nPrints number of source commands, if an 'acquired' indication appears, then\n";
+    print "the number missed and late is reported\n";
+    print "Prints each statement following a !time wait with count, number late,\n";
+    print "and the maximum delay and its !time line number in log.\n";
+    print "If the log contains any DOS line terminations, that is reported.\n";
+
+    print "\nArguments:\n";
+    print "  input  - FS log file to process, must exist\n";
+
+    print "\nOptions:\n";
+    print " -v print program version information\n";
+    print " -t print for each late !time wait: command, delay, log line\n";
+    print " -s print for each source, the log line with: source=, preob, acquired\n";
+    print " -h print this help information and stop\n";
+    print "\n";
+    exit -1;
+}
+
+# 2.0 extract data
+
+my ($file)= @ARGV;
+
+#print "args '$file' '$ifc' '$out'\n";
+
+open(FILE,$file) || do {
+    print STDERR "Can't open input $file: '$file', giving up.\n";
+    exit -1;
+};
+
+
+$lines = 0;
+$have_time=0;
+$have_source=0;
+while (<FILE>) {
+    $lines = $lines + 1;
+    if(!defined($cr) && /\r$/) {
+	$cr=1;
+    }
+    if(/^.{20}:source=/) {
+	$sources++;
+	if(defined($opt_s)) {
+	    print;
+	}
+	if($have_source) {
+	    $missed++;
+	}
+	$have_source=1;
+	$have_preob=0;
+    } elsif(/^.{20}:preob/) {
+	$have_preob=1;
+	if(defined($opt_s)) {
+	    print;
+	}
+    } elsif(/flagr\/antenna,acquired/||/#trakl# *Source acquired/) {
+        $acqfound=1;
+	if(defined($opt_s)) {
+	    print;
+	}
+	if($have_source && $have_preob) {
+	    $srclate++;
+	}
+	$have_source=0; 
+	$have_preob=0; 
+   }
+
+    if(/^.{20}:!\d\d\d\d\./) {
+	$diff=&late($_);
+	$have_time=1;
+	$time_line=$lines;
+	next;
+    } elsif($have_time && /^.{20}:(.*)$/) {
+	$command=$1;
+	$command=~s/\r//;
+	$count{$command}++;
+	if($diff >0) {
+	    $late{$command}++;
+	    if($diff > $maxv{$command}) {
+		$maxv{$command}=$diff;
+		$maxv_line{$command}=$time_line;
+	    }
+	    if(defined($opt_t)) {
+		printf "%s %.2f %d\n",$command,$diff,$time_line;
+	    }
+	}
+	$have_time=0;
+    }
+
+}
+print "sources $sources";
+if(defined($acqfound)) {
+    $srclate = 0 if !defined($srclate);
+    $missed = 0 if !defined($missed);
+    print " missed $missed late $srclate";
+}
+print "\n";
+
+foreach $key (sort keys %count)
+{
+    $late{$key} = 0 if !defined($late{$key});
+    print "$key count $count{$key} late $late{$key}";
+    if(defined($maxv{$key})) {
+	print " max $maxv{$key} line $maxv_line{$key}";
+    }
+    print "\n";
+}
+if(defined($cr)) {
+    print "file contains DOS line terminations\n";
+}

@@ -379,7 +379,7 @@ while (1) {
 	tpi[i][0]=xbe32toh(value); /* off */
 
 	ifchain=irdbe*MAX_RDBE_IF+i/MAX_RDBE_CH+1;
-	if(RDBE == shm_addr->equip.rack && lo[ifchain-1] >= 0.0) {
+	if(lo[ifchain-1] >= 0.0) {
 	  center=lo[ifchain-1]+1024-32*(i%MAX_RDBE_CH);
 	  get_gain_par(ifchain,center,
 		       &fwhm,&dpfu,NULL,&tcal);
@@ -421,7 +421,7 @@ while (1) {
 	int ifchain;
 
 	ifchain=irdbe*MAX_RDBE_IF+j+1;
-	if(RDBE == shm_addr->equip.rack && lo[ifchain-1] >= 0.0) {
+	if(lo[ifchain-1] >= 0.0) {
 	  diff=sum_on[j]-sum_off[j];
 
 	  if (sum_tcal[j] <= 0.0)
@@ -483,7 +483,7 @@ while (1) {
   pcaloff=0.0;
   for (j=0;j<MAX_RDBE_IF;j++) {
     int ifchain=irdbe*MAX_RDBE_IF+j+1;
-    if(RDBE == shm_addr->equip.rack && pcaloff < 0.1
+    if(pcaloff < 0.1
        && shm_addr->lo.lo[ifchain-1] >= 0.0
        && shm_addr->lo.spacing[ifchain-1] > 0 ) {
       pcaloff=fmod(shm_addr->lo.lo[ifchain-1]+1024.0,
@@ -602,7 +602,7 @@ while (1) {
       buf[0]=0;
     }
     if(buf[0]==0) {
-      strcpy(buf,"tpcon/");
+      strcpy(buf,"tpcont/");
       slen=strlen(buf);
     }
     

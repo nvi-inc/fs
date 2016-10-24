@@ -200,6 +200,7 @@ $misc
 *  LBA     | unknown
 *  Mark5   |
 *  VLBA5   |
+*  BB      |
 *  unknown |
 *
 * Relationship between skedf.ctl and equip.ctl file names:

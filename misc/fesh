@@ -1,0 +1,109 @@
+#!/bin/bash
+set -e
+
+if [[ -z "$SCHEDPATH" ]]; then
+    SCHEDPATH=/usr2/sched # Where to put and process schedule files
+fi
+
+if [[ -z "$FSPATH" ]]; then
+    FSPATH=/usr2/fs
+fi
+
+if [[ -z "$PROCPATH" ]]; then
+    PROCPATH=/usr2/proc
+fi
+
+
+usage() {
+    cat <<EOF
+Usage: $0 [-n] [-d] [-h] OBSERVATION
+Fetch schedule file for OBSERVATION from CDDIS
+
+    -n     Fetch next observation in master schedule
+    -d     DRUDG schedule with default settings 
+           (needs STATION enviroment variable set to two letter id)
+    -f     Force fetching and drudging
+    -h     Print this message
+
+EOF
+    exit 1
+}
+
+run_drudg=
+force=
+
+while getopts 'ndhf' opt; do
+    case $opt in
+        n)
+            echo "next" not implimented.
+            exit 1
+            ;;
+        d)
+            run_drudg=1
+            ;;
+        f)
+            force=1
+            ;;
+        h)
+            usage
+            ;;
+        *)
+            usage >&2
+    esac
+done
+shift $(($OPTIND - 1))
+
+if [[ -z "$sched" ]]; then
+    if [[ $# -eq 0 ]] ; then
+        usage
+    fi
+    sched=$1
+fi
+
+
+cd "$SCHEDDIR"
+year=$(date +%Y)
+if [[ -e $SCHEDPATH/$sched.skd && -z "$force" ]]; then
+    echo $SCHEDPATH/$sched.skd exits, delete to continue >&2
+    exit 1
+fi
+
+#TODO: if not found, maybe check next or previous years?
+wget ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd
+
+
+if [[ -n "$run_drudg" ]]; then
+    if [[ -e $SCHEDPATH/$sched$STATION.snp ]]; then
+        if [[ -z "$force" ]]; then
+            echo $SCHEDPATH/$sched$STATION.snp exists, delete to re-drudg >&2
+            exit 1
+        fi
+        rm $SCHEDPATH/$sched$STATION.snp
+    fi
+    if [[ -e $PROCPATH/$sched$STATION.prc ]]; then
+        if [[ -z "$force" ]]; then
+            echo $PROCPATH/$sched$STATION.prc exists, delete to re-drudg >&2
+            exit 1
+        fi
+        rm $PROCPATH/$sched$STATION.prc
+    fi
+    #STATION = Two letter station code, eg "gs"
+    if [[ -z "$STATION" ]]; then
+        >&2 echo "$0: ERROR: STATION enviroment variable not set; should be set to two-letter station code."
+        exit 1
+    fi
+cat <<EOF | $FSPATH/bin/drudg $sched.skd
+$STATION
+3
+12
+9
+$sched$STATION.lst
+
+
+
+5
+0
+
+EOF
+
+fi
