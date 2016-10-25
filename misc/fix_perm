@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 # Usage: fix_perm [-h]
 
+use Cwd qw(realpath);
+
 sub y_or_n {
     local($prompt) = @_;
     print STDOUT $prompt;
@@ -9,9 +11,13 @@ sub y_or_n {
 }
 
 sub fix {
+    if (-l "@_") {
+	@_ = realpath(@_);
+    }
+
     local($directory)= @_;
     $directory =~ /^(.*)\/[^\/]+/;
-	
+
     if(!-w "$1") {
 	print "no write permission for $1, run script as 'root'\n";
     } elsif (-l "@_") {
@@ -29,6 +35,8 @@ if ($#ARGV >= 0) {
     print "\n";
     print "Fixes permissions for operator files in /usr2/control,\n";
     print "/usr2/proc, /usr2/log/, /usr2/sched \n";
+    print "\n";
+    print "Symbolic links are resolved.\n";
     print "\n";
     print "Prompts for permssion before proceeding.\n";
     print "\n";
