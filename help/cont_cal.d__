@@ -11,8 +11,9 @@ Settable parameters:
             polarity    0, 1, 2, or 3. Default is the previous value. For
                         DBBC versions less than v105X_1, numeric values are
                         not permitted.
-            samples     number of samples to use for Tsys, positive integer,
-                        Default is 10.
+
+            samples     number of samples to average for Tsys, positive
+                        integer, Default is 10.
 
 Monitor-only parameters: None.
 
@@ -37,4 +38,10 @@ values in the device responses:
    2     no change              swapped
    3        changed             swapped
 
-The number of samples is used internally by the FS to form Tsys.
+
+Note that the setting of the polarity does not affect the FS's
+interpretation off the on and off values returned, only how the DBBC
+populates the returned values.
+
+The number of samples to average is used internally by the FS to form
+Tsys.
