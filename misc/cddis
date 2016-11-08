@@ -1,23 +1,29 @@
-#/bin/bash
-# Script to upload a VLBI file to cddis
+#!/bin/bash
+# Script to upload a VLBI file to cddis (Version 2: depot.cddis.eosdis.nasa.gov)
 #
 # Usage: cddis file
 #   where file is a file to uploaded
 #
 # See:
-#   http://cddis.gsfc.nasa.gov/Data_and_Derived_Products/CDDIS_File_Upload_Documentation.html
-#   for more details.
+#   https://depot.cddis.eosdis.nasa.gov/CDDIS_File_Upload_Documentation.html
+#
+#     or
+#
+#   http://cddis.gsfc.nasa.gov/About/CDDIS_File_Upload_Documentation.html
+#
+#  for more details.
 #
 # After establishing an account and following "initial use" instructions,
-#   the following commands automate uploading one file according to option 2
+#   the automates uploading one file according to Option 2.  You must also
+#   have first set-up the .netrc file as described in step 1 of Option 2.
 #
-# Add option -k to the first curl command only if you have an old OPENSSL
-#   version that rejects cddis's certificate
+# It may be necessary to add option -k to the curl commands if you have
+# an old OPENSSL version that rejects the server's certificate.
 #
-#Login (expires after 10 minutes of no activity:
+# First, login (expires after 10 minutes of no activity):
 #
-curl -c .urs_cookies -n -L http://cddis-basin.gsfc.nasa.gov/CDDIS_FileUpload/login/
+curl -c ~/.urs_cookies -n -L https://depot.cddis.eosdis.nasa.gov/CDDIS_FileUpload/login/
 #
-# Unload file:
+# Second, unload file:
 #
-curl -X POST -b .urs_cookies -F "fileType=VLBI" -F "file[]=@$1" http://cddis-basin.gsfc.nasa.gov/CDDIS_FileUpload/upload/
+curl -X POST -b ~/.urs_cookies -F "fileType=VLBI" -F "file[]=@$1" https://depot.cddis.eosdis.nasa.gov//CDDIS_FileUpload/upload/
