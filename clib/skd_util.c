@@ -153,6 +153,7 @@ int *run_index;
 void skd_run_arg( name, w, ip, arg)
 char	name[5], w, *arg;	
 long	ip[5];
+/* arg maximum length is 256 characters, longer values are truncated */
 {
   skd_run_arg_cls_to( name, w, ip, arg, (char *) NULL,
 		      (unsigned) 0, (int *) NULL);
@@ -202,10 +203,13 @@ struct skd_buf sched;
    n=strlen(arg)+1;
    n = n > MAX_BUF + 1 ? MAX_BUF + 1: n;
    strncpy(sched.messg.arg,arg,n);
-   
+   if(n == MAX_BUF+1)
+     sched.messg.arg[n-1]=0;
+
  waits:
    status = msgsnd(msqid, (struct msgbuf *) &sched,
-		  sizeof(sched.messg)+strlen(sched.messg.arg)-(MAX_BUF+1), 0 );
+		   sizeof(sched.messg)+strlen(sched.messg.arg)+1-
+		   sizeof(sched.messg.arg), 0 );
 
    if (status == -1) {
      if(errno == EINTR)
@@ -494,7 +498,8 @@ if (status == -1) {
    sched.mtype=mtype("bossx");
  waits:
    status = msgsnd(msqid, (struct msgbuf *) &sched,
-		   sizeof(sched.messg)+strlen(sched.messg.arg)-(MAX_BUF+1), 0);
+		   sizeof(sched.messg)+strlen(sched.messg.arg)+1-
+		   sizeof(sched.messg.arg), 0 );
    
    if (status == -1) {
      if(errno == EINTR)
@@ -547,9 +552,11 @@ int run_index;
     sched.messg.timed_out=timed_out;
     sched.mtype=*rtype_in;
     sched.messg.run_index=run_index;
+    sched.messg.arg[0]=0;
   waits:
-    status = msgsnd( msqid, (struct msgbuf *) &sched, sizeof( sched.messg),
-		      0 );
+    status = msgsnd( msqid, (struct msgbuf *) &sched,
+		   sizeof(sched.messg)+strlen(sched.messg.arg)+1-
+		   sizeof(sched.messg.arg), 0 );
     if (status == -1) {
       if(errno == EINTR)
 	goto waits;
