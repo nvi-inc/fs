@@ -1,4 +1,10 @@
 This file contains a summary of changes made and why.
+2016Nov29 ../skdrut/kvalid_rack.f.  Fixed sleeping bug. In second check of valid rack type was using unitialized variable. Corrected and added 'implicit none'.
+2016Nov29 ../skdrut/kvalid_rec.f.  Added 'implicit none' for consistency with kvalid_rack.f 
+2016Nov29 ../skdrut/vstinp.f, vunpdas.f. Changed crack from character*8 to character*10 to handle longer rack names. 
+2016Nov29 ../skdrut/unpvt.f, skdrut/vunpdas.f  Map rack DBBC -->DBBC_DDC, DBBC/FILA10G-->DBBC_DDC/FILA10G upon input. Done for backwards compatibility. 
+2016Nov21 ../skdrut/stinp.f  Set default RACK, RECORDER types before checking for error condition. Previously if there was an error these would not be set.
+2016Nov21 proc_dbbc_bbc.f. Don't check what the ORIGINAL (in schedule) rack type was. Should not matter
 2016Sep11 proc_setup.f.  Made input for cont_cal, cont_cal_parity appear on same line as prompt.
 2016Sep11 proc_dbbc_pfb_tracks.f  Made input for proc_dbbc_pfb_tracks.f appear on same line as prompt.
 2016Sep11 proc_disk_tracks.  Doubled size of lsked_csb to 64. Was running out of space.

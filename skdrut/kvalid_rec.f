@@ -1,4 +1,5 @@
       logical function kvalid_rec(crec)
+      implicit none 
       include '../skdrincl/valid_hardware.ftni'
 
 ! Passed.

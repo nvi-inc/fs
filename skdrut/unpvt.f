@@ -39,6 +39,7 @@ C            and the first recorder is S2, then the second field is mode.
 ! 2007Aug07  JMG. Converted all hollerith to ASCII
 ! 2015Jun30  JMG. Changed Rack, recorder length from 8-->12 chars.
 ! 2016Jul28  JMG. Changed Rack length to 20 characters
+! 2016Nov21  JMG.  Map DBBC to DBBC_DDC on input
 C
 C  INPUT:
       integer*2 IBUF_in(*)
@@ -318,8 +319,13 @@ C Rack field
         nch = min0(ic2-ic1+1,20)
         crack=cbuf(ic1:ic1+nch-1)
         call capitalize(crack)
+! Map DBBC rack to DBBC_DDC 
+        if(crack .eq. "DBBC") crack = "DBBC_DDC" 
+        if(crack .eq. "DBBC/FILA10G") crack ="DBBC_DDC/FILA10G"
+! 
         iwhere=iwhere_in_string_list(crack_type_cap,max_rack_type,crack)
         if(iwhere .eq. 0) then
+          crack="unknown"
           ierr=-10-2*npar(1)
           return
         else

@@ -17,6 +17,7 @@ C 991123 nrv Recorder 1 and 2, not a and b.
 C 001114 nrv For two recorders save second type same as first.
 C 010615 nrv Initialize lstrec2 to blanks.
 ! 2006Nov30 JMGipson. Modified to check recorder type.
+! 2016Nov29 JMG. Rack changed to character*20 from character*8 
 C
 C INPUT:
       integer ivexnum ! vex file number 
@@ -36,7 +37,8 @@ C LOCAL:
       integer ierr1
       real SLRATE(2),ANLIM1(2),ANLIM2(2)
       character*4 cs2sp
-      character*8 cocc,crec,crack
+      character*8 cocc,crec
+      character*20 crack
       character*8 cant,cter,csit
       character*4 caxis
 
@@ -104,8 +106,8 @@ C     2. Now call routines to retrieve all the station information.
 
         CALL vunpdas(stndefnames(i),ivexnum,iret,IERR,lu,
      .    cIDT,cter,nstack,maxt,nr,lb,sefd,par,npar,
-     .    crec,crack,ctapemo,ite,itl,itg,cs2sp,ns2tp,
-     .    ctlc)
+     .    crec,crack,ctapemo,ite,itl,itg,cs2sp,ns2tp,ctlc)
+   
         if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,'(a,a,/,"iret=",i5," ierr=",i5)')
      >    "VSTINP03 - Error getting $DAS information for ",
