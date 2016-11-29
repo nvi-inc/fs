@@ -5,6 +5,7 @@
 ! History
 !  2012Sep12 JMGipson. First version. Modeled proc_vracks_bbc.
 !  2016Jan19 JMGipson. Modified for new DBBC versions. 
+!  2016Nov21 JMGipson. Don't check original rack type anymore. 
 !
 ! Write out VC commands.
       include 'hardware.ftni'
@@ -43,9 +44,11 @@
 
       write(cbbc,'("bbc",i2.2)') ib 
   
-      if(cstrack_orig(istn)(1:4) .eq. "DBBC" .or.  
-     >   cstrack_orig(istn) .eq. "NONE") then
-         kdbbc=.true.
+! Commented out 2016Nov21 
+!      if(cstrack_orig(istn)(1:4) .eq. "DBBC" .or.  
+!     >   cstrack_orig(istn) .eq. "NONE") then
+       if(.true.) then
+         kdbbc=.true. 
 !        Check to see if the IF is valid. Should be of the form:
 !        A1,A2...A4,  B1,B2...B4, .... D1...D4 
         cif=cifinp(ic,istn,icode)  

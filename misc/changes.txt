@@ -11787,3 +11787,29 @@ Version 9.11.16 160916
 
 Version 9.11.17 161012
      
+161013 WEH Makefile
+           9.11.18
+
+161025 WEH misc/fix_perm
+           Now handles symbolics links for top level directories
+
+161031 WEH help/cont_cal.d__
+           wording improvements
+
+161108 WEH misc/cddis
+           Updated for the cddis upload method
+
+161122 WEH clib/skd_util.c
+           truncate "arg" arguments to 256 characters if longer
+
+161125 WEH misc/dbbc_equip
+           fixed previous version
+           add warning if number of IF conversion factors is wrong
+
+161129 WEH gnplt/Makefile
+           prevent extraneous re-Make-ing
+
+161129 WEH misc/fs91118up.txt
+           reoranized to improve flow for experienced users
+
+Version 9.11.18 161129

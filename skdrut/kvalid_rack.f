@@ -1,4 +1,5 @@
       logical function kvalid_rack(crack)
+      implicit none 
       include '../skdrincl/valid_hardware.ftni'
 
 ! Passed.
@@ -12,12 +13,14 @@
 ! History
 !  2006Nov30 JMGIpson. First version.
 !  2013Sep25 JMGipson. Modeled on check_rack_type. But bug fixed and made funciton. 
+!  2016Nov29 JMGipson. Changed cracktmp from character*8 to character*20 
+!  2016Nov29 JMGipson. Also fixed bug in second try at recognizing. 
 
 ! functions
       integer iwhere_in_string_list
 ! local
       integer i
-      character*8 cracktmp
+      character*20 cracktmp
 
       kvalid_rack=.true.
       i=iwhere_in_string_list(crack_type, max_rack_type,crack)
@@ -27,8 +30,9 @@
       cracktmp=crack
       call capitalize(cracktmp)
       i=iwhere_in_string_list(crack_type_cap,max_rack_type,cracktmp)
+ 
       if(i .ne. 0) then
-         crack=crack_type(iwhere)         
+         crack=crack_type(i)         
       else
          kvalid_rack=.false.
       endif

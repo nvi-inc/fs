@@ -377,10 +377,15 @@ C
           goto 910
         END IF  !matching entry not found
 
-! This ierr is from unpvt and indicates a problem in parsing the line.
+! Initialize to default values. Must do here before error exit. 
         cfirstrec(i)="1 " 
-        if(ierr .ne. 0) goto 910
 
+        cstrack(i)="UNKNOWN"
+        cstrec(i,1)="UNKNOWN"
+        cstrec(i,2)="NONE"
+        cs2speed(i)=" "
+! This ierr is from unpvt and indicates a problem in parsing the line.
+        if(ierr .ne. 0) goto 910   
 
 ! Assume the terminal id line is correct.
         if(cidt .ne. " " .and. cidt .ne. "--") then
@@ -389,20 +394,16 @@ C
 C  Got a match. Initialize names.
         cterna(i)=cname
 
-        cstrack(i)="unknown"
-        cstrec(i,1)="unknown"
-        cstrec(i,2)="none"
-        cs2speed(i)=" "
 
 C  Store equipment names.
         if (crack .ne. " ") then
-          if(.not.kvalid_rack(crack)) crack='none'
+          if(.not.kvalid_rack(crack)) crack='UNKNOWN'
           cstrack(i)=crack
         endif       
         if (crec1 .ne. " ") then
-           if(.not.kvalid_rec(crec1)) crec1='none'  
+           if(.not.kvalid_rec(crec1)) crec1='UNKNOWN'  
            cstrec(i,1)=crec1               
-        endif
+        endif   
             
 C       If second recorder is specified and the first recorder was S2
 C       then save the second recorder field as the S2 mode.  

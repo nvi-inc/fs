@@ -2,7 +2,11 @@
 C     Number of defined rack and recorder names.
       integer max_rack_type, max_rec_type, max_rec2_type
 ! Note:
-! If you change length of character strings, also need to make changes in statn.ftni
+! If you change length of character strings, also need to make changes in:
+!    statn.ftni, skdrut/kvalid_rack.f, skdrut/kvalid_rec.f, and other places.
+!
+! Valid hardwrae is defined in skdrut/valid_hardware_blk.f 
+!
 
 
 ! History in reverse order. 
