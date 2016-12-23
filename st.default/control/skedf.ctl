@@ -201,8 +201,10 @@ $misc
 *  LBA          | Mark5C
 *  Mark5        | Flexbuff
 *  VLBA5        | 
-*  DBBC         |
-*  DBBC/FILA10G |
+*  DBBC_ddc     |
+*  DBBC_ddc/FILA10G |
+*  DBBC_pfb     |
+*  DBBC_pfb/FILA10G |
 *  VLABC        |
 *  CDAS         |
 *
