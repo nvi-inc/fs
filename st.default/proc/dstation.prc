@@ -32,14 +32,8 @@ define  midob         00000000000
 onsource
 wx
 cable
-ifa
-ifb
-ifc
-ifd
-bbc01
-bbc05
-bbc09
-bbc13
+iread
+bread
 " the shown order of the commands from here to the end of this procedure is
 " strongly recommended
 "add your station command to measure the gps to fm output clock offset
