@@ -36,9 +36,10 @@ except socket.timeout:
          name+': '+host+': '+"Connection time-out"])
 #    print "Connection time-out"
     sys.exit()
-except socket.error as e:
+except socket.error, e:
     call(["lgerr","lg","-1",
-          name+': '+host+': '+"error {0}: {1}".format(e.errno, e.strerror)])
+          name+': '+host+': '+"error %s"%(e)])
+#          name+': '+host+': '+"error {0}: {1}".format(e.errno, e.strerror)])
 #    print host+': '+"error {0}:{1}".format(e.errno, e.strerror)
     sys.exit()
 
