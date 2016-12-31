@@ -77,12 +77,17 @@ per track of 0.125 Mbit/sec or less for is not supported.
 For a fan of 1:4, the magnitude bits of VC9-14 are not
 available.
  
-The rate of 0.25 Mbit/sec is supported by the formatter, but
-for this rate to generate correct time tags, the formatter
-requires the "/con 0" configuration command that sets it up to
-be issued during an odd second of the time of day, e.g.
-00:00:01 and 09:23:35, but not 09:23:36. No provision is made
-by the form command to meet this timing requirement.
+The rate of 0.25 Mbit/sec is supported by the formatter, but for this
+rate to generate correct time tags, the formatter requires the "/con
+0" configuration command that sets it up to be issued during an odd
+second of the time of day, e.g.  00:00:01 and 09:23:35, but not
+09:23:36. No provision is made by the form command to meet this timing
+requirement. So this rate is not a supported for routine operations.
+
+Use of 16 Mbit/sec track is discouraged since the cables between the
+formatter and the recorder are not designed to support this rate. As a
+result, the there may be a high error rate due to interference between
+the tracks.  This may be very sensitive to placement of the cables.
 
 For longitudinal drives, the correlators can not reproduce
 recordings made at speeds below 40 ips, but this limitation is
