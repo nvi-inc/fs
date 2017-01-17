@@ -27,7 +27,7 @@ long ip[5];
   iclass=ip[0];
   nrec=ip[1];
 
-  ip[0]=ip[1]=0;
+  ip[0]=ip[1]=ip[2]=0;
 
   iack=0;
   for (i=0;i<nrec;i++) {
