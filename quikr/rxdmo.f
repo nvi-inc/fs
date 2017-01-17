@@ -76,6 +76,7 @@ C
       ierr = ip(3)
 C 
       if (.not.kcom.and.(ierr.lt.0.or.iclass.eq.0.or.iclcm.eq.0)) return
+      ierr=0
 C 
 C     2. Get class buffer with command in it.  Set up first part
 C     of output buffer.  Get buffer from MATCN. 
