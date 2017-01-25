@@ -6,9 +6,11 @@
 *                    0     is the "split" channel
 *                    avg   1/average(1/Tsys_per_chan)
 *                    sum   sums  counts (and Tcal) from all channels
-*     pcal tones: 0-1023
+*     pcal tones: 0-511
 *                 number is tone in MHz relative to fundamental in the band
-*                        currently only multiples of 5 are available
+*                        typically only multiples of 5 are available
+*                        The upper end is limited to:
+*                            512 minus (pcal offset frequency)
 *
 *RDBE-A:    
  avg avg 30 30
@@ -18,3 +20,5 @@
  avg avg 30 30
 *RDBE-D:
  avg avg 30 30
+*pps tolerance for inverse video, nanoseconds, <=0 disable inverse video
+ 100

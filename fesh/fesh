@@ -1,0 +1,125 @@
+#!/bin/bash
+
+#'strict' mode
+set -euo pipefail
+
+FS_BASE=${FS_BASE:-'/usr2'}
+FS_PATH=${FS_PATH:-"${FS_BASE}/fs"}
+LOG_PATH=${LOG_PATH:-"${FS_BASE}/log"}
+PROC_PATH=${PROC_PATH:-"${FS_BASE}/proc"}
+SCHED_PATH=${SCHED_PATH:-"${FS_BASE}/sched"}
+
+usage() {
+    cat <<EOF
+Usage: $0 [-n] [-d] [-h] OBSERVATION
+Fetch schedule file for OBSERVATION from CDDIS
+
+    -n     Fetch next observation in master schedule
+    -d     DRUDG schedule with default settings 
+           (needs STATION enviroment variable set to two letter id)
+    -v     verbose mode.
+    -f     Force downloading of schedule from server and, if given 
+           with '-d', re-run drudg
+    -h     Print this message
+
+fesh requires the STATION environment variable be set to the lower case
+two-letter station code in. E.g. add the following ~/.login:
+
+    setenv STATION gs #tcsh or
+    export STATION=gs #bash
+
+EOF
+}
+
+run_drudg=
+force=
+while getopts 'ndhf' opt; do
+    case $opt in
+        n)
+            echo "next" not implimented.
+            exit 1
+            ;;
+        d)
+            run_drudg=1
+            ;;
+        f)
+            force=1
+            ;;
+        h)
+            usage
+            exit 0
+            ;;
+        v)
+            verbose=1
+            ;;
+        *)
+            usage >&2
+            exit 1
+    esac
+done
+shift $(($OPTIND - 1))
+
+if [[ $# -eq 0 ]] ; then
+    usage >&2
+    exit 1
+fi
+
+sched=$1
+
+## Conflict check
+if [[ -e $SCHED_PATH/$sched.skd && -z "$force" ]]; then
+    echo "$SCHED_PATH/$sched.skd exits, delete or use '-f' to get fresh schedule" >&2
+    exit 1
+fi
+
+if [[ -n "$run_drudg" ]]; then
+    set +u
+    if [[ -z "$STATION" ]]; then
+        >&2 echo "$0: ERROR: STATION enviroment variable not set; should be set to two-letter station code if using drudg."
+        exit 1
+    fi
+    set -u
+    if [[ -e $SCHED_PATH/$sched$STATION.snp ]]; then
+        if [[ -z "$force" ]]; then
+            echo "$SCHED_PATH/$sched$STATION.snp exists, delete or use '-f' to re-drudg >&2"
+            exit 1
+        fi
+        rm $SCHED_PATH/$sched$STATION.snp
+    fi
+    if [[ -e $PROC_PATH/$sched$STATION.prc ]]; then
+        if [[ -z "$force" ]]; then
+            echo $PROC_PATH/$sched$STATION.prc exists, delete or use '-f' to re-drudg >&2
+            exit 1
+        fi
+        rm $PROC_PATH/$sched$STATION.prc
+    fi
+fi
+
+
+
+year=$(date +%Y)
+cd "$SCHED_PATH"
+echo -n Fetching schedule from server...
+#TODO: if not found, maybe check next or previous years?
+wget -nv  --backups=1 ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd
+echo Done
+
+
+if [[ -n "$run_drudg" ]]; then
+echo -n Drudging schedule... >&2
+cat <<EOF | $FS_PATH/bin/drudg $sched.skd > /dev/null
+$STATION
+3
+12
+9
+$sched$STATION.lst
+
+
+
+5
+0
+
+EOF
+
+echo Done. >&2
+fi

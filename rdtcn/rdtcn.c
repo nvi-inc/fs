@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
   char buf[512], *start, slen;
   int i,j;
   unsigned long long llvalue;
-  double dot2pps,dot2gps, sigma;
+  double dot2pps,dot2gps, sigma, mu;
   int multicast_error;
   double sum_on[MAX_RDBE_IF];
   double sum_off[MAX_RDBE_IF];
@@ -153,6 +153,7 @@ int main(int argc, char *argv[])
   int tsys_count[MAX_RDBE_IF];
   int loop_count=-1;
   double lo[MAX_LO];
+  char epoch[14];
 
   setup_ids();    /* attach to the shared memory */
   rte_prior(FS_PRIOR);
@@ -264,7 +265,7 @@ while (1) {
   int iretsel;
   double x[1024],y[1024];
   unsigned short usvalue,pcal_ifx,raw_ifx,epoch_vdif;
-  double pcaloff;
+  double pcaloff,pcal_spacing;
 
   memcpy(&rdtcn_control,
 	 &shm_addr->rdtcn[irdbe].control[shm_addr->rdtcn[irdbe].iping],
@@ -288,9 +289,15 @@ while (1) {
     }
     continue;
   } else if(iretsel == 0) {
-    multicast_error=multicast_error%5 + 1;
-    if(1==multicast_error) {
+    long now_raw;
+    rte_rawt(&now_raw);
+    if(shm_addr->rdbe_sync[irdbe]==0 ||
+       shm_addr-> rdbe_sync[irdbe]+4500< now_raw) {/* wait 45 seconds after a
+						      sync */
+      multicast_error=multicast_error%5 + 1;
+      if(1==multicast_error) {
 	logita(NULL,-2,"rz",who);
+      }
     }
     continue;
   }
@@ -341,6 +348,7 @@ while (1) {
    unsigned char raw_samples_pad[6];
                                       15944
       */
+      memcpy(epoch,databuf,14);
       memcpy(&local.epoch,databuf,14);
       //      if (shm_addr->KECHO) {
       //char epoch[16];
@@ -352,7 +360,6 @@ while (1) {
       memcpy(&usvalue,databuf+22,2);
       epoch_vdif=xbe16toh(usvalue);
       local.epoch_vdif=epoch_vdif;
-
 
       for (j=0;j<MAX_RDBE_IF;j++) {
 	int ifchain;
@@ -457,6 +464,10 @@ while (1) {
     raw_ifx=xbe16toh(usvalue);
     local.raw_ifx=raw_ifx;
 
+    memcpy(&llvalue,databuf+11808,8);
+    llvalue=xbe64toh(llvalue);
+    memcpy(&mu,&llvalue,8);
+
     memcpy(&llvalue,databuf+11816,8);
     llvalue=xbe64toh(llvalue);
     memcpy(&sigma,&llvalue,8);
@@ -488,9 +499,11 @@ while (1) {
        && shm_addr->lo.spacing[ifchain-1] > 0 ) {
       pcaloff=fmod(shm_addr->lo.lo[ifchain-1]+1024.0,
 		   shm_addr->lo.spacing[ifchain-1])*1e6;
+      pcal_spacing=shm_addr->lo.spacing[ifchain-1]*1e6;
     } /* take the first valid value */
   }
   local.pcaloff=pcaloff;
+  local.pcal_spacing=pcal_spacing;
 
   if(pcaloff > 0.1) {
     for(i=0;i<1024;i++) {
@@ -514,7 +527,11 @@ while (1) {
     //  i=1;
     //    printf(" epoch %14.14s i %d x %f y %f\n",databuf,i,x[i],y[i]);
 
-    for(i=0;i<1024;i+=5) {
+    for(i=0;i<512;i+=1) {
+
+      if(pcaloff+i*1e6>512e6)
+	break;
+
       if(shm_addr->rdbe_equip.pcal_amp[0]=='r'||
 	 shm_addr->rdbe_equip.pcal_amp[0]=='n'||
 	 shm_addr->rdbe_equip.pcal_amp[0]=='c')
@@ -547,6 +564,7 @@ while (1) {
   memcpy(&llvalue,databuf+11824,8);
   llvalue=xbe64toh(llvalue);
   memcpy(&dot2pps,&llvalue,8);
+  local.dot2pps=dot2pps;
 
   memcpy(&llvalue,databuf+11832,8);
   llvalue=xbe64toh(llvalue);
@@ -580,9 +598,7 @@ while (1) {
   if(loop_count!=0)
      continue;
 
-  strcpy(buf,"dot/");
-  strncat(buf,databuf,20);
-  buf[20]=0;
+  sprintf(buf,"dot/%.14s,%hu",epoch,epoch_vdif);
   logit(buf,0,NULL);
 
   sprintf(buf,"dot2pps/%12.9e",dot2pps);
@@ -591,7 +607,7 @@ while (1) {
   sprintf(buf,"dot2gps/%12.9e",dot2gps);
   logit(buf,0,NULL);
 
-  sprintf(buf,"sigma/%hu%c,%4.1f",raw_ifx,letter,sigma);
+  sprintf(buf,"sigma/%hu%c,%4.1f,%4.1f",raw_ifx,letter,sigma,mu);
   logit(buf,0,NULL);
 
   buf[0]=0;
@@ -686,7 +702,7 @@ while (1) {
     if(strlen(buf)>slen){
       buf[strlen(buf)-1]=0;
       logit(buf,0,NULL);
-    } 
+    }
   }
  }
 return 0;

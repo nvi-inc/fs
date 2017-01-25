@@ -19,7 +19,7 @@
 
 #include "mon6.h"
 
-#define MAXLINE   4
+#define MAXLINE   5
 
 int gmonit6(monit6_file, monit6)
      char *monit6_file;
@@ -106,6 +106,17 @@ int gmonit6(monit6_file, monit6)
 	  iline--;
 	  logite("Must be non-negative and less than 1024",-1,"mn");
 	  goto Derror;
+	}
+	break;
+      case 5:
+        if (1!= (nc= fscanf(file," %d",
+			    &monit6->dot2pps_ns
+			    ))) {
+	  iline--;
+	  if(nc==EOF)
+	    goto Ferror;
+	  else
+	    goto Derror;
 	}
 	break;
       default:

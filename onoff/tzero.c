@@ -29,10 +29,10 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
   ifc[0]=ifc[1]=ifc[2]=ifc[3]=FALSE;
   ierr2=0;
 
-  kst1=onoff->itpis[MAX_DET+4];
-  kst2=onoff->itpis[MAX_DET+5];
+  kst1=onoff->itpis[MAX_RDBE_DET+4];
+  kst2=onoff->itpis[MAX_RDBE_DET+5];
 
-  for(i=0;i<MAX_DET;i++)
+  for(i=0;i<MAX_DET;i++)  /* only for non-RDBE */
     if(onoff->itpis[i]!=0)
       ifc[onoff->devices[i].ifchain-1]=TRUE;
 
@@ -146,7 +146,7 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
 
   if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4||
      shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4||
-     onoff->itpis[MAX_DET+4]!=0||onoff->itpis[MAX_DET+5]!=0) {
+     onoff->itpis[MAX_RDBE_DET+4]!=0||onoff->itpis[MAX_RDBE_DET+5]!=0) {
 
     get_samples(cont,ip,onoff->itpis,onoff->intp,rut,accum,&acdum,&ierr2);
 

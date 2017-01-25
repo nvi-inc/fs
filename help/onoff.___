@@ -20,7 +20,9 @@ Settable parameters:
                     Mark III/IV/5, VLBA/4/5 and DBBC, plus all, allvc,
                     formvc, and formif for Mark III/IV/5, plus allbbc,
                     allu, alll, formbbc, and formif for VLBA/4/5 and
-                    DBBC. For all racks: station defined detectors u5
+                    DBBC. For RDBE, each detector can be named, or each IF,
+                    or all detectors (see comments for details).
+                    For all racks: station defined detectors u5
                     and u6 are supported if the station has them
                     implemented.
 
@@ -71,6 +73,22 @@ detector, the appropriate "patch=..." command have been issued, and
 detector, the appropriate BBC IF input have be selected with a bbcXX=
 command.
 
+For RDBEs the following devices are supported:
+
+- each detector can be individually named in the form 'ccri', where
+  'cc' is the channel numner (0-15), 'r' is RDBE (a, b, c, or d), and
+  'i' is the IF (0, or 1)
+
+- all the detectors for a given IF, can be specified ('a0', 'a1',
+  'b0', 'b1', 'c0', 'c1', 'd0', or 'd1').
+
+- all detectors on all acitve RDBEs with defined LOs can be selected
+  with 'all'
+
+For RDBEs devices 'all' and all the detectors on a given IF, all
+channels '00' are omitted since they are not usually useful. They can
+be added by specifying them as additional devices.
+ 
 If a noise diode temperature is less than zero, it is assumed that
 there is no noise diode to use for that detector. All measurements for
 that detector will be made assuming the absolute value of the diode

@@ -27,9 +27,9 @@ mout6()
   int tone, chan;
   int iping[4];
   int it[6];
-  long seconds;
+  long seconds,dot2pps;
   struct tm *tm;
-  int inv_vdif[4],vdif_should;
+  int inv_vdif[4],vdif_should,inv_pps;
 
   for (i=0;i<MAX_RDBE;i++) {
     inv_vdif[i]=0;
@@ -112,9 +112,6 @@ mout6()
 	   local[i].epoch+9,
 	   local[i].epoch+11);
 
-    move(ROW_A+i,COL_DOT2GPS);
-    printw("%11.3f",local[i].dot2gps*1e6);
-
     if(local[i].epoch_vdif<100)
     if(inv_vdif[i])
       standout();
@@ -128,6 +125,36 @@ mout6()
     if(inv_vdif[i])
       standend();
     
+    move(ROW_A+i,COL_DOT2GPS);
+    printw("%11.3f",local[i].dot2gps*1e6);
+
+    if(fs->monit6.dot2pps_ns > 0 &&
+       (local[i].dot2pps < -1e-9*fs->monit6.dot2pps_ns ||
+	local[i].dot2pps > +1e-9*fs->monit6.dot2pps_ns))
+      inv_pps=1;
+    else
+      inv_pps=0;
+
+    if(local[i].dot2pps>=0)
+      dot2pps=local[i].dot2pps*1e6+0.5;
+    else
+      dot2pps=local[i].dot2pps*1e6-0.5;
+    move(ROW_A+i,COL_DOT2PPS);
+    if(inv_pps)
+      standout();
+
+    if(dot2pps<=-1000000)
+      printw("<=-1sec");
+    else if(dot2pps>=1000000)
+      printw(">=+1sec");
+    else
+      printw("%7.3f",local[i].dot2pps*1e6);
+    if(inv_pps)
+      standend();
+
+    move(ROW_A+i,COL_DOT2PPS+7);
+    printw(" ");
+
     move(ROW_A+i,COL_RAW);
     printw("%2d ",local[i].raw_ifx);
     if(local[i].sigma < fs->rdbe_equip.rms_min ||

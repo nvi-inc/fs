@@ -475,6 +475,21 @@ char *ptr;
 	int iscan, irdbe=-1, ichan, ifc,idet;
 	char crdbe,*prdbe;
 
+	if(strcmp(ptr,"all")==0) {
+	  char buf[80];
+	  for(i=0;i<MAX_RDBE;i++)
+	    if(shm_addr->rdbe_active[i]) {
+	      for(j=0;j<MAX_RDBE_IF;j++)
+		if(shm_addr->lo.lo[j+i*MAX_RDBE_IF]>=0)
+		  for(k=1;k<MAX_RDBE_CH;k++) {
+		    idet=i*MAX_RDBE_CH*MAX_RDBE_IF+j*MAX_RDBE_CH+k;
+		    lcl->itpis[idet]=1;
+		    sprintf(buf,"%.2d%c%.1d",k,chanv[i+1],j);
+		    memcpy(lcl->devices[idet].lwhat,buf,4);
+		  }
+	    }
+	  goto done;
+	}
 	iscan=sscanf(ptr,"%2d%c%1d",&ichan,&crdbe,&ifc);
 	if(iscan != 3)
 	  iscan=sscanf(ptr,"%c%1d",&crdbe,&ifc);
@@ -492,7 +507,7 @@ char *ptr;
 	} else if(iscan == 2 && strlen(ptr) == 2 &&
 		  (irdbe >= 0 && irdbe < MAX_RDBE) &&
 		  (ifc >= 0 && ifc < MAX_RDBE_IF)){
-	  for(i=0;i<MAX_RDBE_CH;i++) {
+	  for(i=1;i<MAX_RDBE_CH;i++) {
 	    char lwhat[5];
 	    lcl->itpis[i+irdbe*MAX_RDBE_CH*MAX_RDBE_IF+ifc*MAX_RDBE_CH]=1;
 	    snprintf(lwhat,5,"%02d%c%d",i,unit_letters[irdbe+1],ifc);

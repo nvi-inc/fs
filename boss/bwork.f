@@ -134,7 +134,6 @@ c      write(6,*) 'iwait',iwait
      .nproc2,ibuf,iblen,istkop,istksk)
       call getts(itscb,ntscb,itime,itype,index,iclass,lsor,indts,klast,
      .istksk,istkop)
-      chsor = cjchar(lsor,2)
 C
 C     2.1 If there's nothing to do (INDTS empty) go try
 C     getting a command from one of the main streams.
@@ -146,6 +145,7 @@ C     2.2 If the time of a ! command has arrived, unblock
 C     the appropriate command stream.
 C
         if (cjchar(itype,1).eq.'!') then
+          chsor = cjchar(lsor,2)
           if (chsor.eq.';') kopblk = .false.
           if (chsor.eq.':') kskblk = .false.
           goto 200
@@ -220,7 +220,6 @@ C                     Check one last time to see if perchance the stacks
 C                     were flushed with the last call to GETCM
         call getts(itscb,ntscb,itime,itype,index,iclass,lsor,indts,
      &             klast,istksk,istkop)
-        chsor = cjchar(lsor,2)
 C                     Also, check one last time for time-scheduled
 C                     procs for the same reason
         if (indts.ne.0) goto 220
@@ -314,6 +313,7 @@ C     If a time was specified, put command into time list.
 C
       char2 = cjchar(itype,2)
       if (cjchar(itype,1).eq.'!') then
+        chsor = cjchar(lsor,2)
         if (char2.ne.' ') then
           if (chsor.eq.':') call reftm(istref,itime,char2)
           if (chsor.eq.';') call reftm(iotref,itime,char2)
@@ -358,6 +358,7 @@ C
         indexp = index
         if (cjchar(itype,2).eq.'Q') indexp = -indexp
 C                   Indicate the second list by <0
+        chsor = cjchar(lsor,2)
         if ( (chsor.ne.';' .or. krcur(istkop,indexp)) .and.
      &       (chsor.ne.':' .or. krcur(istksk,indexp)) ) then
 C                   Recursion is not allowed
@@ -389,6 +390,7 @@ C                   Get the command <name>=<parm>
           ncparm = 0
           ich = nchar+1
         endif
+        chsor = cjchar(lsor,2)
         if (chsor.eq.';') then         !  get the operator stream procedure
           call ifill_ch(lproco,1,12,' ')
           idummy = ichmv(lproco,1,ibuf,1,ich-1)

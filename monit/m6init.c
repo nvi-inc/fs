@@ -21,6 +21,7 @@ m6init()
   mvaddstr(ROW_TITLE0,COL_DOT,      "     DOT");
   mvaddstr(ROW_TITLE0,COL_EPOCH-1,    "EPOCH");
   mvaddstr(ROW_TITLE0,COL_DOT2GPS+4,  "DOT2GPS");
+  mvaddstr(ROW_TITLE0,COL_DOT2PPS,    "DOT2PPS");
   mvaddstr(ROW_TITLE0,COL_RAW,      "IF  RMS");
   mvaddstr(ROW_TITLE0,COL_TSYS,     "IF0  TSys IF1  TSys");
   mvaddstr(ROW_TITLE0,COL_PCAL,     " Tone    Amp  Phase");

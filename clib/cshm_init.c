@@ -461,6 +461,9 @@ void cshm_init()
   shm_addr->dbbc_defined=0;
   shm_addr->dbbc2_defined=0;
 
+  for(i=0;i<MAX_RDBE;i++)
+    shm_addr->rdbe_sync[i]=0;
+
   return;
 }
 

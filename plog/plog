@@ -1,0 +1,357 @@
+#!/bin/bash
+#NB "strict" mode is used if run as a script
+
+FS_BASE=${FS_BASE:-'/usr2'}
+FS_PATH=${FS_PATH:-"${FS_BASE}/fs"}
+LOG_PATH=${LOG_PATH:-"${FS_BASE}/log"}
+PROC_PATH=${PROC_PATH:-"${FS_BASE}/proc"}
+SCHED_PATH=${SCHED_PATH:-"${FS_BASE}/sched"}
+
+# Lines to remove from log file to make "reduced" logs
+# Use egrep syntax
+REDUCE_PATTERN='^[:.0-9]*#rdtc'
+
+FULL_LOG_EXT='_full.log.gz'
+
+usage_long() {
+    cat <<EOF
+Push log files to the data centers.
+
+Usage: plog [-l] [-t] [-h] [-c CENTER] ARG [ARG...]
+
+ARG can be an experiment ID or the path of a file.
+
+
+Options:
+    -l            Use latest log in $LOG_PATH (other than 'station.log'
+                  or 'point.log')
+    -t            Test run, print commands, do not actually push files to server
+    -h            Print this message
+    -c CENTER     Push files to data CENTER. Overrides the DATA_CENTERS
+                  environment variable. Flag can be given multiple times.
+    -p            Also push proc file
+    -z            Push full log (compressed if contains multicast) 
+
+If the log containing RDBE multicast data:
+
+1.  If not already done so, the original log file is compressed 
+    to '$LOG_PATH/*$FULL_LOG_EXT' 
+
+2.  If '-z' is supplied, the full compressed log is pushed to the server,
+    otherwise a reduced log, without multicast data, is created in /tmp and
+    this is transferred to the data center.
+
+To see progress on compressing and reducing, install the 'pv' package.
+
+plog requires the STATION environment variable be set to the lower case
+two-letter station code in. E.g. add the following ~/.login (tcsh) or
+~/.profile (bash):
+
+    setenv STATION gs #tcsh
+    export STATION=gs #bash
+
+Data centers are specified in the DATA_CENTERS environment variable which can
+contain CDDIS, OPAR, BKG, HAYSTACK (VGOS only). Multiple centers are separated
+with a space. E.g. add the following to your login script
+
+    setenv DATA_CENTERS "CDDIS HAYSTACK" #tcsh
+    export DATA_CENTERS="CDDIS HAYSTACK" #bash
+
+If DATA_CENTERS is empty, plog defaults to CDDIS.
+
+Data center login must be configured in "~/.netrc".  For example, for CDDIS
+
+    machine urs.earthdata.nasa.gov
+        login mycddisuser
+        password secret
+
+See NETRC(5) for more details.
+
+
+Examples: 
+    # push log for latest session, compressing and sending reduced if needed 
+    plog -l 
+    # push log and proc files for session vgp007
+    plog -p vgp007
+    # push full log session vgp007
+    plot -z vgp007
+    # push everything in /usr2/log to Haystack
+    plog -c HAYSTACK /usr2/log/*.log
+
+EOF
+}
+
+fatal(){
+    echo -e "plog: ERROR:" $@ >&2
+    exit 1
+}
+
+# Check if pv (Pipe Viewer) is installed.
+# Used for progress meters
+PV=$(which pv)
+if [[ $? -ne 0 ]]; then
+    PV="cat"
+fi
+
+## Put Commands
+# Helper functions for data center commands
+# follow signatures
+# f URL file [file...]
+pftp() {
+    if ! which curl > /dev/null; then
+        fatal "'curl' not found"
+    fi
+    URL="$1"; shift
+    local F=($@) #Turn into an array so IFS is used in expansion
+    local IFS=","
+    $DRY curl -n -T "{${F[*]}}" "ftp://$URL/"
+}
+
+pscp() {
+    URL="$1"; shift
+    $DRY scp $@ "$URL"
+}
+
+## Format an array with first arg as template. Used for curl
+fmtarray() {
+    local FMT="$1"; shift
+    for f in $@; do
+        printf "$FMT" "$f"
+    done
+}
+
+CDDIS_URL="https://depot.cddis.eosdis.nasa.gov/CDDIS_FileUpload"
+cddis() {
+    # Check if curl is installed.
+    if ! which curl > /dev/null; then
+        fatal "'curl' not found"
+    fi
+
+    if [[ ! -e "$HOME/.netrc" ]]; then
+        fatal "$HOME/.netrc not found, see usage"
+    fi
+
+    if ! grep -q urs.earthdata.nasa.gov "$HOME/.netrc"; then
+        fatal "$HOME/.netrc does not contain CDDIS login information, see usage"
+    fi
+
+    local DRY=${DRY:-" >/dev/null"}
+
+    >&2 echo -n "Logging into CDDIS..."
+    eval $DRY curl\
+        -c .urs_cookies \
+        -n \
+        -k \
+        -f -s -S \
+        -L \
+        $CDDIS_URL/login \
+
+    >&2 echo " Done"
+
+    >&2 echo "Copying file to CDDIS..."
+    eval $DRY curl -X POST \
+        -b .urs_cookies \
+        -k \
+        -f \
+        -F "fileType=VLBI" \
+        $(fmtarray ' -F "file[]=@%s"' $@) \
+        $CDDIS_URL/upload/
+    >&2 echo "Done"
+}
+
+
+## Commands for Data Centers
+CTR_CDDIS="cddis"
+CTR_OPAR="pftp ivsopar.obspm.fr"
+CTR_BKG="pftp ivs.bkg.bund.de"
+CTR_HAYSTACK="pscp evlbi1.haystack.mit.edu:/data-st12/vgos/logs"
+
+# Hack to work around older versions of bash not having asoc arrays
+# gets all env variables that start with "CTR_" and assume the rest of
+# the name is the key.
+CTRS=$(compgen -A variable | grep CTR | cut -c 5- | paste -s -d" ")
+
+# Default Data center
+DATA_CENTERS=${DATA_CENTERS:-"CDDIS"}
+
+usage(){
+    cat <<EOF
+Usage: $0 [-l] [-t] [-h] [-c CENTER] ARG ...
+Push log file(s) to the data centers.
+EOF
+}
+
+joinlst () {
+    local IFS=" "
+    echo "$*" | sed 's/ /, /g' | sed 's/, \(\S*\)$/ or \1/g'
+}
+
+# Compress the log to *$FULL_LOG_EXT 
+compress() {
+    local name=$(basename "$1" .log)
+    local full="$(dirname "$1")/$name$FULL_LOG_EXT"
+    echo "Compressing log file..." >&2 
+    $PV "$1" | gzip --best > "$full" && rm "$1"
+    echo "$full"
+}
+
+# Return a reduced log in /tmp can either be raw or compressed log
+reduce() {
+    local name=$(basename "$1" .log)
+    name=$(basename "$name" $FULL_LOG_EXT)
+    local tmp="/tmp/${name}.log"
+    echo "Creating reduced log file..." >&2 
+    if [[ "$1" =~ \.gz$ ]]; then
+        $PV "$1" | zegrep -v "$REDUCE_PATTERN" > "$tmp"
+    else
+        $PV "$1" | egrep -v "$REDUCE_PATTERN" > "$tmp"
+    fi
+    echo "$tmp"
+}
+
+# Find latest modified log in $LOG_PATH which isn't station or point
+get_latest_exp() {
+    local log=$(ls -t $LOG_PATH\
+                | grep "$STATION\\.log\$"\
+                | egrep -v '(station|point)'\
+                | head -1)
+    local expname=$(basename $log "${STATION}.log")
+    echo $expname
+}
+
+main () {
+    #STATION = Two letter station code, eg "gs"
+    CENTERS_OVER=
+    LATEST=
+    DRY=
+    PUSH_PROC=
+    PUSH_FULL=
+    while getopts hltpzc: opt; do
+        case $opt in
+            l)
+                LATEST=1
+                ;;
+            t)
+                DRY=echo
+                ;;
+            c)
+                if [[ ! $CTRS =~ $OPTARG ]]; then
+                    fatal "Unknown data center '$OPTARG'"
+                fi
+                CENTERS_OVER="$CENTERS_OVER $OPTARG"
+                ;;
+            p)
+                PUSH_PROC=1
+                ;;
+            z)
+                PUSH_FULL=1
+                ;;
+            h)
+                usage_long
+                exit
+                ;;
+            *)
+                usage >&2
+                exit 1
+                ;;
+            :)
+              fatal "Option -$OPTARG requires an argument."
+              ;;
+        esac
+    done
+    shift $(($OPTIND - 1))
+
+
+    set +u
+    if [[ -z "$STATION" ]]; then
+        fatal "STATION environment variable not set. Set to lower case two-letter station id."
+    fi
+    set -u
+
+    # Default DATA_CENTERS overridden by flag
+    if [[ -n "$CENTERS_OVER" ]]; then
+        DATA_CENTERS=$CENTERS_OVER
+    fi
+
+    # If LATEST not set and no arguments, exit
+    if [[ -z "$LATEST" && "$#" -eq 0 ]]; then
+        usage >&2
+        exit 1
+    fi
+
+    # List of files or experiment names
+    REFS=($@)
+
+    if [[ -n "$LATEST" ]]; then
+        REFS+=( $(get_latest_exp) )
+    fi
+
+    FILES=() # List of actual files that will be pushed
+    for ref in ${REFS[@]}; do
+        # If ref is a file, do not process the file, just add it to the list
+        if [[ -f "$ref" ]]; then
+            FILES+=($ref)
+            continue
+        fi
+
+        # Should we add the proc file?
+        if [[ -n "$PUSH_PROC" ]]; then
+            proc="$PROC_PATH/$ref$STATION.prc"
+            if [[ ! -f "$proc" ]]; then
+                fatal "$proc not found"
+            fi
+            FILES+=("$proc")
+        fi
+
+        # If it's not a file, assume it's an observation name and look for it
+        # in log path
+        log="$LOG_PATH/$ref$STATION.log"
+        full="$LOG_PATH/$ref$STATION$FULL_LOG_EXT"
+
+        if [[ (! -f "$full") && (! -f "$log") ]]; then
+            fatal "log file for $ref not found"
+        fi
+
+        if [[ -f "$full" && -f "$log" ]]; then
+            fatal "Both $log and $full exists.\
+                   \n\nEither the log was reopened by FS after a transfer or the compression process\
+                   was cancelled.\n\nInspect the files and either concatenate them or removed the\
+                   invalid one."
+        fi
+
+        if [[ -f "$log" ]]; then
+            # If log doesn't contains data that should be excluded in reduced log,
+            # add it to queue and move on. Otherwise compress
+            if ! egrep -q "$REDUCE_PATTERN" "$log"; then
+                FILES+=("$log")
+                continue
+            fi
+            # Compressed file doesn't exist so this is safe
+            full=$(compress "$log")
+        fi
+        # Compressed file must now exist by here
+
+        # If given '-z' command, add compressed file to queue and move on
+        if [[ -n "$PUSH_FULL" ]]; then
+            FILES+=("$full")
+            continue
+        fi
+        # Otherwise generate reduced log and add it to the queue
+        FILES+=($(reduce "$full"))
+    done
+
+    for center in $DATA_CENTERS; do
+        eval \$CTR_$center ${FILES[@]}
+    done
+}
+
+# Don't run main if file is being "source"d
+# Useful for testing
+if [[ $0 == "$BASH_SOURCE" ]]; then
+    #'strict' mode
+    # "-e" exits on error
+    # "-u" error on undef variable
+    # "-o pipefail" error if any command in a pipe fails
+    set -euo pipefail
+    main "$@"
+fi
