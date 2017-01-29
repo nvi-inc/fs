@@ -1,4 +1,6 @@
 This file contains a summary of changes made and why.
+2016Dec05 ../skdrut/frinp.f.  Was not correctly applyint sample rate from "R" line to all stations 
+2016Dec05 ../skdrut/change_freq_tracks.f. Fixed bug in how it was setting the sample-rate if it was absent in the schedule. 
 2016Nov29 ../skdrut/kvalid_rack.f.  Fixed sleeping bug. In second check of valid rack type was using unitialized variable. Corrected and added 'implicit none'.
 2016Nov29 ../skdrut/kvalid_rec.f.  Added 'implicit none' for consistency with kvalid_rack.f 
 2016Nov29 ../skdrut/vstinp.f, vunpdas.f. Changed crack from character*8 to character*10 to handle longer rack names. 
