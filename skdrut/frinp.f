@@ -23,7 +23,7 @@ C     IERR - error number
       integer igetstatnum
       integer ias2b,igtfr
 
-C
+
 C  LOCAL:
       integer ix,n
 
@@ -104,6 +104,7 @@ C 2003Jul25 JMG  ITRAS changed to function
 ! 2011Aug11  JMG. Reformatted some warning messages
 ! 2013Sep19  JMGipson made sample rate station dependent
 ! 2015Jun05 JMG Modified to use new version of itras. 
+! 2016Dec05 JMG. Fixed bug in reading in samplate rate. Previously  applied the sample rate to "1,ns". Now to "1,nstatn" 
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -362,7 +363,7 @@ C     4. This is the name type entry section.
 C        Index for icode has already been found above.
 C
       IF (lchar.eq. "F") THEN  !name entry
-C       Check the list of station names.
+C       Check the list of station names.  
         ibad=0
         if (ns.gt.0) then ! station names on "F" line
           do is=1,ns ! for each station name found on the line
@@ -377,7 +378,7 @@ C       Check the list of station names.
 C            idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
             endif
           enddo
-          nstsav=ns ! 
+          nstsav=ns !           
         else ! no stations listed, assume all
           nstsav=nstatn
           do i=1,nstatn
@@ -391,10 +392,10 @@ C           idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
 C
 C 5. This is the sample rate line.
 
-      if (lchar.eq. "R") then ! sample rate
-        do is=1,ns
+      if (lchar.eq. "R") then ! sample rate  
+        do is=1,nstatn 
           samprate(is,icode)=srate
-         end do 
+        end do 
       endif ! sample rate
 
 C 6. This section for the barrel roll line.

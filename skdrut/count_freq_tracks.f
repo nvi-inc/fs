@@ -13,6 +13,7 @@ C   COMMON BLOCKS USED
 !  2006Oct06  Assume cbarrel=" " is valid.
 !  2008Jun10  Wasn't counting tracks if recorder was S2?
 ! 2013Sep19  JMGipson made sample rate station dependent
+! 2016Dec05 JMGipson. Error in setting the sample rate. Used first stations VC BW. Now uses stations BW. 
 
 ! functions
       integer itras
@@ -121,7 +122,7 @@ C  1.5 Calculate sample rate if not specified.
 C
       do is=1,nstatn
         do ic=1,ncodes
-          if (samprate(is,ic).eq.0) samprate(is,ic)=2.0*vcband(1,1,ic)
+          if (samprate(is,ic).eq.0) samprate(is,ic)=2.0*vcband(is,1,ic)
         enddo
       end do 
 

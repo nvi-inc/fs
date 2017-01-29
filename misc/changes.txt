@@ -11813,3 +11813,40 @@ Version 9.11.17 161012
            reoranized to improve flow for experienced users
 
 Version 9.11.18 161129
+
+161129 WEH Makefile
+           9.11.19
+
+161221 WEH misc/fs9118up.txt
+           added accidently omitted file
+
+161223 WEH s_client/s_client
+           patched to be Python 2.5 (woody) compatible
+
+161223 WEH st.default/control/skedf.ctl
+           corrected DBBC equipment examples
+
+161223 WEH st.default/proc/dstation.prc
+           updated MIDOB for unified DBBC procedures
+
+161223 WEH misc/fs91119up.txt
+           added link for old FS source archives
+
+161231 WEH help/form.h__
+           added explanation abour avoiding 16 Mb/sec track rates
+
+170117 WEH quikv/logmatmsg.c
+           quikv/logmatmsgfm.c
+           quikr/rxdmo.f
+           fixed spurious "error" warning values reported by Wettzell
+
+170126 WEH Makefile
+           fesh/
+           plog/
+           added plog and fesh
+
+170127 DEH fesh/fesh
+           plog/plog
+           first distribution version
+
+Version 9.11.19 170129
