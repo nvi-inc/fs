@@ -2430,6 +2430,7 @@ class LineReader:
                     else:
                         position = position1 + match_length 
                     _sdata = line[position:-1].split(splitsign)
+                    _sdata[-1] = _sdata[-1].strip(';')
                     no_match = 0
                     #if pair command:
                     if key[-1]=='$':
