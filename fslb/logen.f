@@ -8,6 +8,8 @@ C  For normal Field System messages, only 6 parameters need be input.
 C  For external messages, only 4 parameters are needed.
 C  For error messages, all 8 (9 if LWHAT is present) parameters are
 C  required although the message and procedure name are ignored for now. 
+C
+      include '../include/params.i'
 C 
 C  INPUT: 
 C 
@@ -30,7 +32,7 @@ C
 C      - a buffer to hold the output entry
 C     **NOTE** We assume that IBUF has at least enough room to
 C              hold the message sent to us plus up to 16 more characters. 
-C     NCH - number of characters in IBUF
+C     NCH - number of characters in IBUF plus 1
 C 
 C  LOCAL: 
 C 
@@ -51,6 +53,7 @@ c
       nargs=abs(nargsin)
 c
 c not Y10K compliant
+
       nch = 1 + ib2as(iyear,ibuf,1,o'41000'+4)
       nch = ichmv_ch(ibuf,nch,'.')
       nch = nch + ib2as(itime(5),ibuf,nch,o'41000'+3) 
@@ -99,7 +102,9 @@ C                   Find last non-blank character in proc name
 C                   Move proc name into output buffer 
       nch = ichmv_ch(ibuf,nch,'/')
 C                   Put a / after proc name 
-350   nch = ichmv(ibuf,nch,lmessg,1,nchar)
+350   continue
+      inchar=min(nchar,MAX_CLS_MSG_BYTES-nch+1)
+      nch = ichmv(ibuf,nch,lmessg,1,inchar)
 C                   Finally move the log entry in 
 cxx      write(6,9200) (ibuf(i),i=1,15)
 cxx9200  format(1x,"LOGEN: ibuf=",15a2)
@@ -126,7 +131,8 @@ C                   Search the name for trailing blanks
 C                   Move the program name into the bufer
       nch = ichmv_ch(ibuf,nch,'#')
 C                   Put a # after the program name
-      nch = ichmv(ibuf,nch,lmessg,1,nchar)
+      inchar=min(nchar,MAX_CLS_MSG_BYTES-nch+1)
+      nch = ichmv(ibuf,nch,lmessg,1,inchar)
 C                   Finally, move in the message part itself
 900   return
       end 
