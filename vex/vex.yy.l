@@ -25,6 +25,7 @@ static trailing=0;
 int lines=1;
 static int version=1;
 %}
+%option noyywrap
 
 %x VERSION DEF LINE REF
 
