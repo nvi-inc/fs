@@ -226,8 +226,8 @@ rdbe_2_rdbe_atten(ptr_in,lclm,ip) /* return values:
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr;
-  int tvgss, i, ifc;
-  char string[33];
+  static int ifc;
+  char ch;
 
   ptr=strchr(ptr_in,'?');
   if(ptr == NULL)
@@ -265,25 +265,29 @@ rdbe_2_rdbe_atten(ptr_in,lclm,ip) /* return values:
       switch (++count) {
       case 1:
       case 4:
-	if(m5key_decode(ptr,&lclm->ifc[(count-1)/3].ifc.ifc,if_key,NIF_KEY,
-			&lclm->ifc[(count-1)/3].ifc.state)) {
+	if(1!=sscanf(ptr,"%d%c",&ifc,&ch)|| ifc<0 || ifc>=NIF_KEY ||
+	   m5key_decode(ptr,
+			&lclm->ifc[ifc].ifc.ifc,if_key,NIF_KEY,
+			&lclm->ifc[ifc].ifc.state)) {
 	  ierr=-500-count;
 	  goto error2;
 	}
 	break;
       case 2:
       case 5:
-	if(m5key_decode(ptr,&lclm->ifc[(count-1)/3].atten.atten,
-			atten_key,NATTEN_KEY,
-			&lclm->ifc[(count-1)/3].atten.state)) {
+	if(m5key_decode(ptr,
+			&lclm->ifc[ifc].atten.atten,atten_key,NATTEN_KEY,
+			&lclm->ifc[ifc].atten.state)
+			) {
 	  ierr=-500-count;
 	  goto error2;
 	}
 	break;
       case 3:
       case 6:
-	if(m5sscanf(ptr,"%f",&lclm->ifc[(count-1)/3].RMS.RMS,
-		       &lclm->ifc[(count-1)/3].RMS.state)) {
+	   if(m5sscanf(ptr,"%f",
+		       &lclm->ifc[ifc].RMS.RMS,
+		       &lclm->ifc[ifc].RMS.state)) {
 	  ierr=-500-count;
 	  goto error2;
 	}

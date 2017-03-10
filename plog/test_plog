@@ -1,0 +1,119 @@
+#!/bin/bash
+
+
+export DATA_CENTERS="DUMMY"
+export LOG_PATH=$(pwd)/tmp
+export EXP='r1234'
+export STATION='ts'
+
+# PLOG="./plog -t"
+PLOG="./plog"
+
+mkdir -p $LOG_PATH
+
+log=$LOG_PATH/$EXP$STATION.log
+logs=$(echo $LOG_PATH/$EXP${STATION}{,_full}.log{,.gz})
+rm $LOG_PATH/*
+
+echo test > $log
+
+
+echo 
+echo
+echo plain log
+echo ============
+
+echo $PLOG $EXP
+$PLOG $EXP
+echo $PLOG -l
+$PLOG -l
+echo $PLOG -z $EXP
+$PLOG -z $EXP
+echo $PLOG -l -z
+$PLOG -l -z
+
+echo 
+echo
+echo compressed file
+echo ===============
+echo
+
+gzip $log
+echo $PLOG $EXP
+$PLOG $EXP
+echo $PLOG -l
+$PLOG -l
+echo $PLOG -z $EXP
+$PLOG -z $EXP
+echo $PLOG -l -z
+$PLOG -l -z
+
+
+rm $log.gz
+
+echo 
+echo
+echo multicast
+echo =========
+
+echo "2016.243.18:00:00.08#rdtca#" >> $log
+echo $PLOG $EXP
+$PLOG $EXP
+rm $LOG_PATH/*
+echo "2016.243.18:00:00.08#rdtca#" >> $log
+echo $PLOG -l
+$PLOG -l
+rm $LOG_PATH/*
+echo "2016.243.18:00:00.08#rdtca#" >> $log
+echo $PLOG -z $EXP
+$PLOG -z $EXP
+rm $LOG_PATH/*
+echo "2016.243.18:00:00.08#rdtca#" >> $log
+echo $PLOG -l -z
+$PLOG -l -z
+rm $LOG_PATH/*
+
+
+echo 
+echo
+echo different files
+echo ==============
+
+echo plain
+echo -----
+
+for l in $logs; do
+    if [[ $l =~ gz$ ]]; then
+        echo "OK" | gzip > $l
+    else
+        echo "OK" > $l
+    fi
+    echo $l:
+    $PLOG $EXP
+    rm $l
+done
+
+echo mcast
+echo -----
+
+for l in $logs; do
+    if [[ $l =~ gz$ ]]; then
+        echo -e "OK\n2016.243.18:00:00.08#rdtca#" | gzip > $l
+    else
+        echo -e "OK\n2016.243.18:00:00.08#rdtca#" > $l
+    fi
+    echo $l:
+    $PLOG $EXP
+    rm $LOG_PATH/*
+done
+
+echo 
+echo
+echo conflicts
+echo =========
+
+echo "" > $log
+for l in $logs; do
+    echo "" > $l
+    $PLOG $EXP
+done

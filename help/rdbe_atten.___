@@ -2,7 +2,7 @@
 
             Syntax:     rdbe_attenX=<if>,<atten>,<target>
 
-            Response:   rdbe_attenX/<if>,<atten>,<target>,<ifx>,<attenx>,<RMSx>,<ify>,<atteny>,<RMSy>
+            Response:   rdbe_attenX/<if>,<atten>,<target>,<0>,<atten0>,<RMS0>,<1>,<atten1>,<RMS1>
 
 
 Settable parameters:
@@ -17,12 +17,9 @@ Settable parameters:
                    be used with a numeric <atten>.
 
 Monitor-only parameters:
-        <ifx>      "0" or "1", the next two values are for that IF
+        <x>        "0" or "1", the next two values are for that IF
         <attenx>   attenuation value for this IF.
         <RMSx>     RMS value for this IF.
-        <ify>      "1", the next two values are for that IF, if present
-        <atteny>   attenuation value for this IF, if present
-        <RMSy>     RMS value for this IF, if present
 
 Comments:
 Like all commands that start with "rdbe", this command can either

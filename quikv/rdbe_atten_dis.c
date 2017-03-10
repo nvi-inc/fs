@@ -102,8 +102,8 @@ int *out_recs;
 	    }
 	    if(shm_addr->rdbe_equip.rms_max < lclm.ifc[i].RMS.RMS) {
 	      if(0!=ierr)
-		logit(NULL,ierr,"2b",who);
-	      ierr=-302-i;
+		logita(NULL,ierr,"2b",who);
+	      ierr=-304-i;
 	    }
 	  }
 	}
