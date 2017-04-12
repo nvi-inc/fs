@@ -71,7 +71,7 @@ C                   Set up for MAT mode 9
 C                   Place fm mnemonics in buffer.
       else if(itask.eq.3) then
          ibuf2(1) = 10
-C                   Set up for MAT mode 9
+C                   Set up for MAT mode 10
          idumm1 = ichmv_ch(ibuf2(2),1,'de')
 C                   Place de mnemonics in buffer.
       endif
