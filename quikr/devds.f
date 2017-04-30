@@ -73,11 +73,11 @@ C                   Delete CR and LF from the ends
         endif
 200     continue
         if (nsub.ne.8) then
-           nchar=min(nchar-2,ilen2-(nch-1))
+           nchar=max(0,min(nchar-2,ilen2-(nch-1)))
            nch = ichmv(ibuf2,nch,ibuf(2),1,nchar) 
 C                   For MA and IB responses, skip word 1
         else
-           nchar=min(nchar,ilen2-(nch-1))
+           nchar=max(0,min(nchar,ilen2-(nch-1)))
            nch = ichmv(ibuf2,nch,ibuf,1,nchar)
 C                   For antenna responses, use word 1 
         endif
