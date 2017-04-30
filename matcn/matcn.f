@@ -63,7 +63,12 @@ C                 -3 - unrecognized device
 C                 -4 - device time-out on response
 C                 -5 - improper response (wrong number of chars)
 C                 -6 - verify error 
-C                 -7 - error setting baud
+C                 -7 - MAT device /dev/null (was error setting baud)
+C                 -8 - Did not get Mark IV formatter prompt.
+C                 -9 - MAT not open
+C                -10 - bad buffer length used on read
+C                -11 - read error
+C                -12 - error setting BAUD
 C        IP4    - who we are "MA" 
 C        IP5    - not used
 C 
@@ -347,7 +352,10 @@ C
              call logit7ci(0,0,0,1,-102,'ma',ierr)
           endif
           ierr=portbaud(lumat,ibmat)
-          if(ierr.ne.0) goto 899
+          if(ierr.ne.0) then
+             ierr=-12
+             goto 899
+             endif
           itn=modtbl(3,i)+1.5*10.*100./float(ibdrt(ibx))+5.5
        else
           nch=iscn_ch(ibuf(2),1,nchar-2,'#')

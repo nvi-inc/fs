@@ -224,7 +224,11 @@ C  8. Now check for errors.  If time-out or wrong number of characters,
 C     try communications all over again.
 C     If we got a o'6' (ack) or o'25' (nak) substitute readable ACK or NAK.
 C
-      if (ireg(1).eq.-2) then          ! timeout
+      if(ireg(1).eq.-1) then !bad buffer length on read
+         ierr=-10
+      else if(ireg(1).eq.-3) then !read error
+         ierr=-11
+      else if (ireg(1).eq.-2) then ! timeout
          if (imode.eq.9.or.imode.eq.10.or.imode.eq.11.or.
      &        imode.eq.-54) then
             call echoe(itran,iebuf,nctran,iecho,maxech)
