@@ -34,6 +34,25 @@ lognm pcald msg fsvue fs.prompt inject_snap erchk mk5cn tpicd flagr \
 gnfit gndat gnplt dscon systests autoftp monpcal logpl1 holog gnplt1 predict \
 dbbcn popen s_client lgerr fesh plog
 #
+
+# If environment variable FS_NO_DISPLAY_SERVER is defined with a non-empty value
+# the FS will not be build with the display client/server feature. This includes
+# changes in oprin, fs, and erchk.
+
+ifndef FS_NO_DISPLAY_SERVER
+
+ifeq "$(shell which cmake)" ""
+$(error cmake is required to build the display server. \
+Install cmake or disable the display server by setting the \
+enviroment variable FS_NO_DISPLAY_SERVER=1 )
+endif
+
+EXEC_DIR += spubsub fsclient
+
+else
+export FS_NO_DISPLAY_SERVER
+endif
+
 all:	libs execs
 #
 dist:
@@ -48,6 +67,7 @@ dist:
 	cd /; find usr2/fs-$(FS_VERSION)/bin -mindepth 1 -name '*' -print >> /tmp/fsdist-exclude
 	echo usr2/fs-$(FS_VERSION)/oprin/readline-2.0            >> /tmp/fsdist-exclude
 	echo usr2/fs-$(FS_VERSION)/rclco/rcl/all                 >> /tmp/fsdist-exclude
+	echo usr2/fs-$(FS_VERSION)/spubsub/build                 >> /tmp/fsdist-exclude
 	cd /; tar -czf /tmp/fs-$(FS_VERSION).tgz -X /tmp/fsdist-exclude usr2/fs-$(FS_VERSION)
 	chmod a+rw /tmp/fs-$(FS_VERSION).tgz
 #
@@ -65,6 +85,7 @@ rmdoto:
 	rm -f `find . -name '*.[oas]' -print`
 	rm -rf oprin/readline-2.0
 	rm -f `find . -name '*.pyc' -print`
+	rm -rf spubsub/build
 #
 libs:
 	for dir in $(LIB_DIR); do\
