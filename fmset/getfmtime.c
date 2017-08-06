@@ -20,7 +20,7 @@ extern int s2type;
 extern char s2dev[2][3];
 
 void getfmtime(unixtime,unixhs,fstime,fshs,formtime,formhs,m5sync,sz_m5sync,
-	       m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock)
+	       m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock,ierr)
 time_t *unixtime; /* computer time */
 int    *unixhs;
 time_t *fstime; /* field system time */
@@ -35,10 +35,13 @@ char *m5freq;
 int sz_m5freq;
 char *m5clock;
 int sz_m5clock;
+int *ierr;
 {
   static long phase =-1;
   long raw, sleep, rawch;
   int it[6];
+
+  *ierr=0;
 
   if (nsem_test(NSEM_NAME) != 1) {
     endwin();
@@ -58,7 +61,8 @@ int sz_m5clock;
       rte_sleep(sleep); 
     }
     get5btime(unixtime,unixhs,fstime,fshs,formtime,formhs,&rawch,m5sync,
-	      sz_m5sync,m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock);
+	      sz_m5sync,m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock,
+	      ierr);
     if(*formtime < 0) {
       phase = -2;
     } else if(*formhs > -1 && *formhs < 100) {

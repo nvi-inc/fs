@@ -88,6 +88,7 @@ char mk5b_clock_source[10] ="";
 char blank[ ] = {"                                                                              "};
 int drive, drive_type;
 struct fila10g_cfg *fila10g_cfg=NULL;
+int ierr;
 
  putpname("fmset");
 setup_ids();         /* connect to shared memory segment */
@@ -203,7 +204,7 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
 irow=4;
  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
 		     (rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)))) {
-   sprintf(buffer, "    's'/'S' to SYNC %s (VERY rarely needed)",form);
+   sprintf(buffer, "    's'/'S' to sync %s (VERY rarely needed)",form);
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  } 
 if(toggle) {
@@ -228,7 +229,8 @@ do 	{
 		  &formtime,&formhs,mk5b_sync,sizeof(mk5b_sync),
 		  mk5b_1pps,sizeof(mk5b_1pps),
 		  mk5b_clock_freq,sizeof(mk5b_clock_freq),
-		  mk5b_clock_source,sizeof(mk5b_clock_source)); /* get times */
+		  mk5b_clock_source,sizeof(mk5b_clock_source),&ierr);
+	/* get times */
 
 	if(formtime>=0) {
 	  disptime=formtime;
@@ -244,6 +246,13 @@ do 	{
 	  disptm = gmtime(&disptime);
 	  strftime ( buffer, sizeof(buffer), fmt, disptm );
 	  mvwaddstr( maindisp, 4, column+15, buffer );
+	} else if (ierr==-898 &&   source==MK5) {
+                                          /* 123456789012345678901234567890123456789012345678901234 */
+	  wstandout(maindisp);
+	  mvwaddstr( maindisp, 4, column+15, "Mark 5B sync required, use 's'.");
+	  wstandend(maindisp);
+	  mvwaddstr( maindisp, 4, column+15+31, "                       ");
+ 
 	} else {                           /* 123456789012345678901234567890123456789012345678901234 */
 	  wstandout(maindisp);
 	  mvwaddstr( maindisp, 4, column+15, "Error from device, see log for details.");
