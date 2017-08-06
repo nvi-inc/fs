@@ -690,12 +690,17 @@ long ip[5];
 	if(ptr2!=NULL)
 	  *ptr2=0;
 
+	ptr++;
 	while(*ptr!=0 && *ptr==' ')
 	  ptr++;
 	if(*ptr!=0)
 	  logite(ptr,-900,"m5");
       }
-      ip[2]=-900-ierr;
+      if(ierr==6 && strstr(ptr,"dot_set=...")) {
+	logit(NULL,-900-ierr,"m5");
+	ip[2]=-898;
+      } else 
+	ip[2]=-900-ierr;
       goto error;
     }
       
