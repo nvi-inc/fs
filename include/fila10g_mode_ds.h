@@ -21,7 +21,7 @@ struct fila10g_mode_cmd {
 
 struct fila10g_mode_mon {
   struct {
-    int samplerate;
+    int clockrate;
     struct m5state state;
-  } samplerate;
+  } clockrate;
 };
