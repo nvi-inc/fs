@@ -79,12 +79,12 @@ long ip[5];
         fila10g_mode_enc(output,&count,&lclc);
       }
 
-      /* this a rare command that has a monitor value from shared memory */
+      /* this a rare command that has a monitor '?' value from shared memory */
 	 
       if(kcom) {
-	m5state_init(&lclm.samplerate.state);
-	lclm.samplerate.samplerate=shm_addr->m5b_crate*1.0e6+0.5;
-	lclm.samplerate.state.known=1;
+	m5state_init(&lclm.clockrate.state);
+	lclm.clockrate.clockrate=shm_addr->m5b_crate*1.0e6+0.5;
+	lclm.clockrate.state.known=1;
       }
       count=0;
       while( count>= 0) {

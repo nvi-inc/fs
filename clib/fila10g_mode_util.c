@@ -144,12 +144,12 @@ struct fila10g_mode_cmd *lclc;
     case 3:
       m5sprintf(output,"%d",&lclc->decimate.decimate,&lclc->decimate.state);
       break;
-    case 4:
+    case 4:  /* commanded value only */
       if(shm_addr->fila10g_mode.decimate.state.known &&
 	 shm_addr->fila10g_mode.decimate.decimate!=0) {
 	sprintf(output,"(%.3f)",
-		(float) (shm_addr->m5b_crate/
-			 shm_addr->fila10g_mode.decimate.decimate) );
+		((float) shm_addr->m5b_crate)/
+			 shm_addr->fila10g_mode.decimate.decimate+0.0001 );
 	m5state_encode(output,&lclc->decimate.state);
       }
       break;
@@ -172,8 +172,8 @@ struct fila10g_mode_mon *lclm;
 
     switch (*count) {
     case 1:
-      m5sprintf(output,"%d",&lclm->samplerate.samplerate,
-		&lclm->samplerate.state);
+      m5sprintf(output,"%d",&lclm->clockrate.clockrate,
+		&lclm->clockrate.state);
       break;
     default:
       *count=-1;
@@ -279,9 +279,10 @@ int fila10g_2_vsi_samplerate(ptr,lclc,lclm) /* return values:
      struct fila10g_mode_mon *lclm;  /* result structure with parameters */
 {
   char string[]= "VSI sample rate :";
+  char string2[]= "Hz /";
 
   m5state_init(&lclc->decimate.state);
-  m5state_init(&lclm->samplerate.state);
+  m5state_init(&lclm->clockrate.state);
 
   ptr=strstr(ptr,string);
   if(ptr == NULL) {
@@ -289,7 +290,15 @@ int fila10g_2_vsi_samplerate(ptr,lclc,lclm) /* return values:
   }
 
   if(m5sscanf(ptr+sizeof(string),"%d",
-	      &lclm->samplerate.samplerate,&lclm->samplerate.state)) {
+	      &lclm->clockrate.clockrate,&lclm->clockrate.state)) {
+    return -1;
+  }
+  ptr=strstr(ptr+sizeof(string),string2);
+  if(ptr == NULL)
+    return 0;
+
+  if(m5sscanf(ptr+sizeof(string2),"%d",
+	      &lclc->decimate.decimate,&lclc->decimate.state)) {
     return -1;
   }
 
