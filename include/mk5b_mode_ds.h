@@ -8,15 +8,18 @@ struct mk5b_mode_cmd {
   } source;
   struct {
     unsigned long long mask;
+    int bits;
     struct m5state state;
   } mask;
   struct {
     int decimate;
+    unsigned long long datarate;
     struct m5state state;
   } decimate;
   struct {
-    float samplerate;
+    unsigned long long samplerate;
     int decimate;
+    unsigned long long datarate;
     struct m5state state;
   } samplerate;
   struct {
@@ -39,7 +42,7 @@ struct mk5b_mode_mon {
     struct m5state state;
   } tracks;
   struct {
-    float tbitrate;
+    double tbitrate;
     struct m5state state;
   } tbitrate;
   struct {
