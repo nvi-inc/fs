@@ -11,7 +11,7 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
 static char *mode_key[ ]={"astro","geo","wastro","test","lba","astro2","astro3"};
-static char *pfb_key[ ]={"flex"};
+static char *pfb_key[ ]={"flex","full","full_auto", "spol"};
 static char *test_key[ ]={"0","1","bin","tvg"};
 
 #define NMODE_KEY sizeof(mode_key)/sizeof( char *)
