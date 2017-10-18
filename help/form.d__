@@ -5,16 +5,16 @@
 
 Settable Parameters:
 
-            mode      output mode (DDC): astro, geo, wastro, test, lba,
-                      astro2, or astro3, (PFB): flex. No default. The
-                      "astro2" mode is not available for DDC versions
-                      before 104. The "astro3" mode is only available
-                      on E/F DDC versions, which start with version
-                      105.  For E/F DDC versions only ""astro3" and
-                      "test" modes are available and there is no
-                      output on VSI2.  DDC Output pin assignments
-                      described in the comments below. See comments for
-                      PFB output.
+            mode      output mode (DDC): astro, geo, wastro, test,
+                      lba, astro2, or astro3, (PFB): flex, full,
+                      full_auto, or spol.  No default.  The "astro2"
+                      mode is not available for DDC versions before
+                      104. The "astro3" mode is only available on E/F
+                      DDC versions, which start with version 105.  For
+                      E/F DDC versions only ""astro3" and "test" modes
+                      are available and there is no output on VSI2.
+                      DDC Output pin assignments described in the
+                      comments below. See comments for PFB output.
 
             test      DDC only Test mode: 0, 1, bin, tvg. No default.
                       Ignored unless mode=test. Not available for
@@ -34,8 +34,10 @@ Only DBBC DDC vXXXe/f (XXX=105 or greater) support "astro3".
 DBBC versions vXXXe/f (XXX=105 or greater) use only VSI1 and support
 only "astro3" and "test" modes.
 
-For the PFB "flex" mode.  The output is determined by the preceeding
-vsi1=... and vsi2=... commands.
+For the PFB "flex" mode is supported by the FS.  The output is
+determined by preceeding "vsi1=..." and "vsi2=..." commands.  Although
+the modes are not suppported by the FS, the "form" command will accept
+the "full", "full_auto", and "spol" modes for 'off-label use'.
 
 The output pin assignments for the DDC modes are:
 
