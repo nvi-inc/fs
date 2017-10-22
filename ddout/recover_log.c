@@ -12,7 +12,7 @@
 extern struct fscom *shm_addr;
 
 #define PERMISSIONS 0666
-#define BUFFSIZE 8192
+#define BUFFSIZE 131072
 
 int recover_log(lnamef,fd)
 char lnamef[];
@@ -26,7 +26,7 @@ int fd;
   fd2=open(lnamef,O_RDONLY);  /* check to see if the file exists */
   if(fd2<0 && errno == ENOENT) {
     shm_addr->abend.other_error=1;
-    fprintf(stderr,"\007!! help! ** log file '%s' doesn't exist, attempting to recover by re-copying\n",
+    fprintf(stderr,"\007!! help! ** log file '%s' doesn't exist, attempting to recover by copying.\n",
 	    lnamef);
 
     fd2 = open(lnamef, O_RDWR|O_SYNC|O_CREAT,PERMISSIONS); /* try to create it */
@@ -51,29 +51,34 @@ int fd;
 	cum=0;
 	rte_rawt(&before);
 	seconds=2;
-	fprintf(stderr,"\007!! help! ** please wait ...    ");
+	fprintf(stderr,
+		"\007!! help! ** copying to recover log file '%s', please wait ... starting.\n",
+		lnamef);
 	while(count==countw && 0 < (count= read(fd,buf_copy,BUFFSIZE))) {
 	  countw= write(fd2,buf_copy,count);
 	  if(size >0) {
 	    cum+=count;
 	    rte_rawt(&after);
 	    if((after-before)>seconds*100) {
-	      fprintf(stderr,"\b\b\b%2d%%",(int) (cum*100./size));
+	      fprintf(stderr,
+		      "\007!! help! ** copying to recover log file '%s', please wait ... %2d%%\n",
+		      lnamef, (int) (cum*100./size));
 	      seconds=seconds+2;
 	    }
 	  }
 	}
 	if(count < 0) {
-	  fprintf(stderr,"\b\b\bfailed\n\007!! help! ** error reading original file, giving up\n",lnamef);
+	  fprintf(stderr,"\007!! help! ** failed, error reading original file, giving up\n",lnamef);
 	  perror("!! help! ** ddout");
 	  fail=TRUE;
 	} else if (count!=0 && count!=countw) {
-	  fprintf(stderr,"\b\b\bfailed\n\007!! help! ** error writing to '%s', giving up\n",lnamef);
+	  fprintf(stderr,"\007!! help! ** failed, error writing to '%s', giving up\n",lnamef);
 	  perror("!! help! ** ddout");
 	  fail=TRUE;
 	} else 
-	  fprintf(stderr,"\b\b\bdone\n");
-	
+	  fprintf(stderr,
+		"\007!! help! ** copying to recover log file '%s', done.\n",
+		lnamef);
       }
     }
 
@@ -84,7 +89,7 @@ int fd;
       fprintf(stderr,"\007!! help! ** do as little as possible to the file system until you\n");
       fprintf(stderr,"\007!! help! ** dismount it. Please see /usr2/fs/misc/logrecovery for details.\n");
     } else {
-      fprintf(stderr,"\007!! help! ** good news, log file '%s' seems to be recovered, please check it\n",lnamef);
+      fprintf(stderr,"\007!! help! ** good news, log file '%s' seems to be recovered, please check it.\n",lnamef);
       fd_temp=fd;
       fd=fd2;
       fd2=fd_temp;
