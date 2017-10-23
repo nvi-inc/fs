@@ -31,6 +31,10 @@ Monitor-only parameters:
         line    The line number to be executed next.
 
 Comments:
+You can specify a name of an actual schedule as "none".  However, this
+can be confusing and doing so may cause some aspects of the FS to
+misbehave since "none" is used internally to indicate there is no
+schedule.
 
 If the schedule is started successfully, a log file having the same
 name as the schedule is automatically opened (if not already open). It
