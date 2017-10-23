@@ -202,7 +202,23 @@ int if_cmd(ibuf,nchar)
     } else
       strcpy(ibuf,ptr_false);
 
-  else 
+  else if(!strncmp("schedule",ptr_cond,strlen("schedule"))) {
+    char *ptr, *ptr2;
+
+    ptr=strtok(ptr_cond,":");
+    if(NULL!=ptr)
+      ptr2=strtok(NULL,":");
+    if(NULL==ptr || NULL==ptr2)
+      if(!strncmp(shm_addr->LSKD,"none    ",8))
+	strcpy(ibuf,ptr_false);
+      else
+	strcpy(ibuf,ptr_true);
+    else
+      if(!strncmp(shm_addr->LSKD,ptr2,strlen(ptr2)))
+	strcpy(ibuf,ptr_true);
+      else
+	strcpy(ibuf,ptr_false);
+  } else 
     return -3;  /*unknown condition*/
 
   return(strlen(ibuf));

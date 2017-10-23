@@ -25,21 +25,42 @@ null (empty), the "if" command is essentially a no-op.  Nesting of
 The available "condition"s and their values are given in the following
 table.
 
-condition  value
----------  -----
- true      always true
- false     always false
- ddc       true iff DDC personality is in use
- pfb       true iff PFB personality is in use
- cont_cal  true iff continuous cal is selected
- core1     true iff any channels from core1 are selected for recording 
- core2     true iff any channels from core2 are selected for recording 
- core3     true iff any channels from core3 are selected for recording 
- core4     true iff any channels from core1 are selected for recording
- ifa       true iff any channels from ifa are selected for recording
- ifb       true iff any channels from ifb are selected for recording
- ifc       true iff any channels from ifc are selected for recording
- ifd       true iff any channels from ifd are selected for recording
+condition        value
+---------        -----
+ true            always true
+ false           always false
+ ddc             true iff DDC personality is in use
+ pfb             true iff PFB personality is in use
+ cont_cal        true iff continuous cal is selected
+ core1           true iff any channels from core1 are selected for recording 
+ core2           true iff any channels from core2 are selected for recording 
+ core3           true iff any channels from core3 are selected for recording 
+ core4           true iff any channels from core1 are selected for recording
+ ifa             true iff any channels from ifa are selected for recording
+ ifb             true iff any channels from ifb are selected for recording
+ ifc             true iff any channels from ifc are selected for recording
+ ifd             true iff any channels from ifd are selected for recording
+ schedule:string true iff string matches the leading subsrting of the schedule,
+                   see below
+
+If the "schedule:string" condition, the string is compare to the
+leading characters of the current schedule name.  If and only if (iff)
+they match, the condition is true. For example:
+
+  if=schedule:r1,yes,no
+
+executes "yes" if the schedule name starts with "r1".  If ":" or
+":string" is omitted, the command is true iff any schedule is
+executing.  Trailing spaces in "string" are ignored unless they are
+followed by a colon (which is discarded).  If no schedule is executing
+(schedule=) all of the follow lines will all execute "no":
+
+  if=schedule,yes,no
+  if=schedule:none,no,yes
+  if=schedule=:none    :,no,yes
+
+Please note that if a schedule named "none" is executing
+(schedule=none), the above commands will also all execute "no".
 
 It is necessary to use backslash ("\") to "escape" any commas (",")
 and at-signs ("@") within the "true-command" and "false-command". For
