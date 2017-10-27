@@ -7,10 +7,10 @@
      source=azel,180d,12d
      holog=360,16,73,-17,,mask
 
-       Please be sure that offsets +/ half the span values in the
+       Please be sure that offsets +/- half the span values in the
        holog=... command can reached from the position commanded with
-       source=... command.  Use positive spans and azimuth points and
-       negative elevation points for agreement with later processing.
+       source=... command.  Use positive spans and azimuth points for
+       agreement with later processing.
 
    with SNAP procedures for RDBEs like:
 
@@ -67,26 +67,31 @@
                   data to be extracted
        columns  is the number of azimuth points from the holog=... command,
                 
-    The result is a matrix of the data with azimuth increasing along
-    the columns, lowest azimuth data in column one, elevation increasing up
-    the rows, lowest elevation data in row one. It can be plotted with:
+   The result is a matrix of the data with azimuth increasing along
+   the columns, lowest azimuth data in column one, elevation
+   increasing up the rows, lowest elevation data in row one.  It can
+   be plotted with:
 
-      contour_holog(gird,azc,azs,elc,els,levels)
+     contour_holog(gird,azc,azs,elc,els,levels)
 
-        grid   is the rectangular matrix of data
-        azc    is the center of the scan in azimuth, 180 from the example above
-        azs    is the azimuth step size span/(points-1), 5 from the example
-                  above
-        elc    is the center of the scan in elevation, 12 from the example above
-        els    is the elevation step size span/(points-1), 5 from the example
-                  above
-        levels is an optipnal argument that can be used to specify contour
-                  levels, otherwise the MATLAB default levels are used
+       grid   is the rectangular matrix of data
+       azc    is the center of the scan in azimuth, 180 from the example above
+       azs    is the azimuth step size span/(points-1), 5 from the example
+                 above
+       elc    is the center of the scan in elevation, 12 from the example above
+       els    is the elevation step size span/(points-1), 5 from the example
+                 above
+       levels is an optional argument that can be used to specify contour
+                 levels, otherwise the MATLAB default levels are used
 
+   You can add a title to the plot, for example:
+
+       title('GGAO Detector 15d0 Sept 21, 2017')    
+   
 4. Look at rectangular matrix to find normal Tsys levels.
 
-   This can usually be found from the matrix in an area away from
-   obstruction. If the highest elevation row is only seeing "blank"
+   This can usually be found from the matrix in an area away from any
+   obstructions.  If the highest elevation row is only seeing "blank"
    sky, then a reasonable value may be:
 
      tsys=mean(grid(end,:))
