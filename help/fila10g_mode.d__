@@ -1,31 +1,43 @@
 fila10g_mode - set fila10g recording mode
 
 syntax:   fila10g_mode=mask2,mask1,decimation,sample,okay
-Response: fila10g_mode/mask2,mask1,decimation,sample,sps
+Response: fila10g_mode/mask2,mask1,decimation,sample,clock
 
 Settable parameters:
 
 mask2:      VSI2 input bit-stream mask, hex, non-zero 32-bit wide maximum,
             for example: 0xf, default 0, null on display if zero.
+
 mask1:      VSI1 input bit-stream mask, hex, non-zero 32-bit wide maximum,
             for example: 0xf, default 0xffffffff
-decimation: decimation factor: 1, 2, 4, 8, or 16. No default unless sample
-            (next parameter) is specified. On monitor, not displayed.
-sample:     sample rate: must be greater than 0.124.  The value divided 
-            into the Mark 5B clock rate (from equip.ctl) must yield a valid
-            decimation factor.  Default is the clock rate from equip.ctl
-            (decimation becomes "1") unless the specified rate is "none",
-            in which case this command will report an error. On monitor, no
-            output unless the decimation factor was most recently specifed,
-            in which case the implied commanded sample rate is shown in
-            parenthesizes for reference. The actual sample rate is shown
-            as monitor only parameter "sps".
+
+decimation: decimation factor: 1, 2, 4, 8, or 16. No default unless
+            sample (next parameter) is specified. On monitor,
+            displayed if available; depending on the FiL10G version,
+            it may also not be displayed if '1'.
+
+sample:     sample rate: must be greater than 0.124.  The value divided
+            into the VSI-H/Mark5B clock rate (specified in equip.ctl)
+            must yield a valid decimation factor.  Default sample rate
+            is the VSI-H/Mark5B clock rate unless a decimation factor
+            was specified for or the VSI-H/Mark5B clock rate is
+            "none".  On monitor, no output if the decimation factor
+            was most recently specified; otherwise the commanded
+            sample rate is shown in parenthesizes for reference.
+
 okay        overide to allow command while recording, literal ascii:
             disk_record_ok
 
 Monitor only parameter:
-sps         actual sample rate in samples per second
+clock       input clock rate in Hz
 
 Comments:
 To use a non-zero mask2, the inputselect is in equip.ctl must be
 something other than 'vsi1' or 'vsi2'.
+
+The effective sample rate can be specified in the SNAP command either
+explicitly with the "sample" parameter or implicitly with the "decimatation"
+parameter.  Only one of "sample" and "decimation" may be specified.  The device
+does not respond with the commanded effective sample rate.  In the query
+response for this command, the commanded sample rate, if it was explicitly
+commanded, is shown in parentheses for informational purposes only.
