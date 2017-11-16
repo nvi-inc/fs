@@ -15,7 +15,9 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "../include/params.h" /* FS parameters            */
 #include "../include/fs_types.h" /* FS header files        */
@@ -33,62 +35,126 @@ void skd_wait();
 void get_err();
 void display_it();
 
-main()
-{
-  int i,irow,icol;
-  long ip[5];
-  char buffer[MAX_LEN];
-  char chk_message[MAX_LEN];
 
-/* Initialize:
- *
- * set up IDs for shared memory
- * copy pointer to fs for readability
- * set erchk variable
- */
+// I always forget which end of the pipe is which
+#define READ_END 0
+#define WRITE_END 1
+
+int read_ssub() {
+  int pipefd[2];
+  if (pipe(pipefd) < 0) {
+    perror("erchk: error creating pipe");
+    exit(EXIT_FAILURE);
+  }
+
+  pid_t pid = fork();
+  if (pid < 0) {
+    perror("erchk: error forking");
+    exit(EXIT_FAILURE);
+  }
+
+  if (pid == 0) {
+    close(pipefd[WRITE_END]);
+    return pipefd[READ_END];
+  }
+
+  close(pipefd[READ_END]);
+  dup2(pipefd[WRITE_END], STDOUT_FILENO);
+  execlp("ssub", "ssub", "-w", FS_DISPLAY_PUBADDR, FS_DISPLAY_REPADDR, NULL);
+  perror("erchk: error starting ssub");
+  exit(EXIT_FAILURE);
+
+}
+
+int read_skd() {
+  long ip[5];
+  char buffer[MAX_LEN] = {0};
+
+  int pipefd[2];
+  if (pipe(pipefd) < 0) {
+    perror("erchk: error creating pipe");
+    exit(EXIT_FAILURE);
+  }
+
+  pid_t pid = fork();
+  if (pid < 0) {
+    perror("erchk: error forking");
+    exit(EXIT_FAILURE);
+  }
+
+  if (pid == 0) {
+    close(pipefd[WRITE_END]);
+    return pipefd[READ_END]; 
+  }
+  close(pipefd[READ_END]);
+  dup2(pipefd[WRITE_END], STDOUT_FILENO);
+
+  /* Initialize:
+   *
+   * set up IDs for shared memory
+   * copy pointer to fs for readability
+   * set erchk variable
+   */
 
   setup_ids();
   fs = shm_addr;
-
   fs->erchk = -1;
+  for (;;) {
+    skd_wait("erchk", ip, (unsigned)0); /* waiting */
+    get_err(buffer, MAX_LEN, ip);       /* retrieve error */
+    printf("%s\n", buffer);
+  }
+}
+
+main()
+{
+  int i,irow,icol,fd;
+  char chk_message[MAX_LEN];
+  size_t n;
+  char *buffer = NULL;
+
+#ifdef FS_NO_DISPLAY_SERVER
+  fd = read_skd();
+#else
+  fd = read_ssub();
+#endif
+
+  FILE* pipe = fdopen(fd, "r");
+
 
 /* Now loop waiting for errors */
   i=0;
   irow=0;
   icol=0;
-Loop:
-  skd_wait("erchk",ip,(unsigned)0);     /* waiting */
-  get_err(buffer,MAX_LEN,ip);           /* retrieve error */
-  if(strcmp(chk_message,buffer)) {
-    strcpy(chk_message,buffer);
-    if(strstr(buffer," bo ") ||
-       strstr(buffer," ch ") ||
-       strstr(buffer," ma ")) {
-      printf("**** ");
-      display_it(irow,icol,"M",buffer);
-      printf("\n");
-    } else if(strstr(buffer," m5 ") ||
-	      strstr(buffer," 5m ") ||
-	      strstr(buffer," mc ") ||
-	      strstr(buffer," an ")){
-      printf("*** ");
-      display_it(irow,icol,"R",buffer);
-      printf("\n");
-    } else if(strstr(buffer," fm ")) {
-      printf("** ");
-      display_it(irow,icol,"Y",buffer);
-      printf("\n");
-    } else if(strstr(buffer," sp ")) {
-    } else {
-      printf("* ");
-      display_it(irow,icol,"B",buffer);
-      printf("\n");
+  while (getline(&buffer, &n, pipe) >= 0 &&  n > 0) { /* retrieve error from the pipe */
+    if (!strstr(buffer, "ERROR")) continue;
+
+    if(strcmp(chk_message,buffer)) {
+      strcpy(chk_message,buffer);
+      if(strstr(buffer," bo ") ||
+          strstr(buffer," ch ") ||
+          strstr(buffer," ma ")) {
+        printf("**** ");
+        display_it(irow,icol,"M",buffer);
+      } else if(strstr(buffer," m5 ") ||
+          strstr(buffer," 5m ") ||
+          strstr(buffer," mc ") ||
+          strstr(buffer," an ")){
+        printf("*** ");
+        display_it(irow,icol,"R",buffer);
+      } else if(strstr(buffer," fm ")) {
+        printf("** ");
+        display_it(irow,icol,"Y",buffer);
+      } else if(strstr(buffer," sp ")) {
+      } else {
+        printf("* ");
+        display_it(irow,icol,"B",buffer);
+      }
     }
   }
-  goto Loop;
-  /* we never exit, the field system program 'fs' will kill us if the 
-   * operator terminates.
-   */
+  if (buffer)
+    free(buffer);
+  return 0;
 }
 /************************************************************************
 examples:
