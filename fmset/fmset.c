@@ -99,6 +99,8 @@ struct fila10g_cfg *fila10g_cfg=NULL;
  int vdif_epoch, vdif_should;
 
  putpname("fmset");
+skd_set_return_name("fmset");
+skd_clr_ret();
 setup_ids();         /* connect to shared memory segment */
 
 if (nsem_test(NSEM_NAME) != 1) {

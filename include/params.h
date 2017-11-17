@@ -36,6 +36,10 @@
 #define FSPGM_CTL "/usr2/fs/control/fspgm.ctl"
 #define STPGM_CTL "/usr2/control/stpgm.ctl"
 
+#define FS_DISPLAY_PUBADDR "tcp://127.0.0.1:7083"
+#define FS_DISPLAY_REPADDR "tcp://127.0.0.1:7084"
+#define FS_DISPLAY_SCROLLBACK_LEN "1024"
+
 #define ADDR_ST   "addr"              
 #define TEST      "test"
 #define REBOOT    "reboot"

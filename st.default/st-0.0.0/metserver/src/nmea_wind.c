@@ -34,14 +34,18 @@
  *    -15  = data not valid
  */
 
-int nmea_wind(char *str, int *wdir, float *wsp)
+int nmea_wind(char *strin, int *wdir, float *wsp)
 {
   int len, i;
   char checksum, *ptr;
   unsigned int check;
 
-  if(strncmp(str,"$WIMWV",6)!=0)
+  if(strncmp(strin,"$WIMWV",6)!=0)
     return -1;
+
+  char str[512];
+  strncpy(str,strin,sizeof(str));
+  str[sizeof(str)-1]=0;
 
   len=strlen(str);
   checksum=0;

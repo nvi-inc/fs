@@ -4,11 +4,12 @@
 all: ../metserver diag
 #
 CC= cc
+CFLAGS += -g
 LIBES = ../port/port.a
 OBJECT_S = ./metserver.o ./metget.o ./err_report.o ./nmea_wind.o
 #
 ../metserver: $(OBJECT_S)
-	$(CC) $(OBJECT_S) $(LIBES) -o ../metserver -lpthread
+	$(CC) $(CFLAGS) $(OBJECT_S) $(LIBES) -o ../metserver -lpthread -lrt
 #
 diag: 
 	$(MAKE) -f MakeDiag

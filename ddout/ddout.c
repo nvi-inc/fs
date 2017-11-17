@@ -505,9 +505,23 @@ Append:           /* send message to station error program */
 /*  write information to the log file if conditions are met */
 
     if (kxl || (!kp && !kack) || memcmp(cp2,"nl",2)==0) {
-      int ret;
+      int ret, i, to;
       if (fd <0)
 	goto Trouble;
+      if(NULL!=strchr(buf,'\e')) { /* remove reverse video escapes */
+        bull=strlen(buf);
+        for (i=to=0;i<=bull;i++) {
+          if(i+3 < bull && !strncmp(buf+i,"\e[7m",4)) {
+            buf[to]='(';
+            i+=3;
+          } else if(i+2 < bull && !strncmp(buf+i,"\e[m",3)) {
+            buf[to]=')';
+            i+=2;
+          } else if (to!=i)
+            buf[to]=buf[i];
+	  to++;
+	}
+      }
       strcat(buf,"\n");
       bull = strlen(buf);
       ret = write(fd, buf, bull);

@@ -6,6 +6,8 @@
 ifdef NO_FTOK_FS
 override CFLAGS +=  -DNO_FTOK_FS
 endif
+
+CFLAGS += -g
 #
 #  Note that the backslash character has been used at the end of each line
 #  to indicate continuation.

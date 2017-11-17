@@ -30,3 +30,5 @@ else
 end
 box on
 clabel(Z,h);
+xlabel('Azimuth');
+ylabel('Elevation');

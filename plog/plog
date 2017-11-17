@@ -1,45 +1,58 @@
 #!/bin/bash
 #NB "strict" mode is used if run as a script
+SHA1SUM=66d794e8ac80e2115e6697b15548522309a8b76a
+PLOG_VERSION=2017-10-23
 
-FS_BASE=${FS_BASE:-'/usr2'}
-FS_PATH=${FS_PATH:-"${FS_BASE}/fs"}
-LOG_PATH=${LOG_PATH:-"${FS_BASE}/log"}
-PROC_PATH=${PROC_PATH:-"${FS_BASE}/proc"}
-SCHED_PATH=${SCHED_PATH:-"${FS_BASE}/sched"}
+version(){
+    local sha=$(tail -n+4 $0 | sha1sum | cut -f1 -d' ')
+
+    if [[ $SHA1SUM =~ $sha ]]; then
+        echo "plog $PLOG_VERSION"
+    else
+        echo "plog $PLOG_VERSION (modified)"
+    fi
+}
+
+FS_BASE="${FS_BASE:-/usr2}"
+FS_PATH="${FS_PATH:-${FS_BASE}/fs}"
+FS_LOG_PATH="${FS_LOG_PATH:-${FS_BASE}/log}"
+FS_PROC_PATH="${FS_PROC_PATH:-${FS_BASE}/proc}"
+FS_SCHED_PATH="${FS_SCHED_PATH:-${FS_BASE}/sched}"
 
 # Lines to remove from log file to make "reduced" logs
 # Use egrep syntax
-REDUCE_PATTERN='^[:.0-9]*#rdtc'
+PLOG_REDUCE_PATTERN="${PLOG_REDUCE_PATTERN:-^[:.0-9]*#rdtc}"
 
 # Added to filename before extension of log files with all data
-FULL_SUFFIX='_full'
+PLOG_FULL_SUFFIX="${PLOG_FULL_SUFFIX:-_full}"
 # Check for compressed logs
-COMPRESSED_EXT='gz'
+PLOG_COMPRESSED_EXT="${PLOG_COMPRESSED_EXT:-gz}"
 
 usage_long() {
     cat <<EOF
 Push log files to the data centers.
 
-USAGE: 
+USAGE:
     ${black}$0 [options] ARG [ARG...]${normal}
 
 ARG can be an experiment ID or the path of a file.
 
 ${underline}Options:${normal}
-    ${black}-l${normal}            Use latest log in $LOG_PATH (other than 'station.log'
+    ${black}-l${normal}            Use latest log in $FS_LOG_PATH (other than 'station.log'
                   or 'point.log')
-    ${black}-t${normal}            Test run. Print commands, do not actually push files to server
+    ${black}-t${normal}            Test run: print commands, do not actually push files to server
     ${black}-h${normal}            Print this message
     ${black}-c CENTER${normal}     Push files to data CENTER. Overrides the DATA_CENTERS
                   environment variable. Flag can be given multiple times.
     ${black}-p${normal}            Also push proc file
-    ${black}-q${normal}            Quiet mode.
+    ${black}-q${normal}            Quiet mode
     ${black}-z${normal}            Push compressed log (full if contains multicast data)
+    ${black}-v${normal}            Print plog version and exit
 
 If the log containing RDBE multicast data:
 
 1.  If not already done so, the log file will be renamed to
-    '$LOG_PATH/<log>_full.log'
+    '$FS_LOG_PATH/<log>_full.log'
 
 2.  Unless '-z' is supplied, a reduced log file, without multicast data, is
     created in /tmp and this is transferred to the data center.
@@ -83,11 +96,23 @@ Examples of usage:
 EOF
 }
 
+bold=
+underline=
+standout=
+normal=
+black=
+red=
+green=
+yellow=
+blue=
+magenta=
+cyan=
+white=
 # Check if stdout is a terminal
 if test -t 1; then
     # see if it supports colors...
     ncolors=$(tput colors)
-    if test -n "$ncolors" && test $ncolors -ge 8; then
+    if [[ -n "$ncolors" ]] && [[ $ncolors -ge 8 ]]; then
         bold="$(tput bold)"
         underline="$(tput smul)"
         standout="$(tput smso)"
@@ -101,19 +126,6 @@ if test -t 1; then
         cyan="$(tput setaf 6)"
         white="$(tput setaf 7)"
     fi
-else
-        bold=
-        underline=
-        standout=
-        normal=
-        black=
-        red=
-        green=
-        yellow=
-        blue=
-        magenta=
-        cyan=
-        white=
 fi
 
 
@@ -142,10 +154,15 @@ info(){
 
 # Check if pv (Pipe Viewer) is installed.
 # Used for progress meters
-PV=$(which pv)
-if [[ $? -ne 0 ]]; then
-    PV="cat"
-fi
+
+safe_pv() {
+    PV=$(which pv)
+    if [[ -n "$QUIET" || $? -ne 0 ]]; then
+        cat $@
+        return
+    fi
+    $PV $@
+}
 
 ## Put Commands
 # Helper functions for data center commands
@@ -201,39 +218,92 @@ cddis() {
     local DRY=${DRY:-" >/dev/null"}
 
     info "Logging into CDDIS..."
+    # Curl flags used:
+    # -c     -- cookie jar (write)
+    # -b     -- cookie jar (read)
+    # -n     -- use netrc file for logins
+    # -f     -- set return flag to 22 on HTTP error
+    # -F     -- form data
+    # -k     -- insecure mode (required on older versions of Debian), should 
+    #           be removed eventually
+    # -s -S  -- silent except on errors
+    
+    # Disallow reading cookie file for other users
+    local mask=$(umask)
+    umask 0077
+
     eval $DRY curl\
-        -c .urs_cookies \
+        -c $HOME/.urs_cookies \
         -n \
         -k \
         -f -s -S \
         -L \
-        $CDDIS_URL/login \
+        $CDDIS_URL/login 
 
-        info "Done"
+    info "Done"
 
     info "Copying file to CDDIS..."
+
+    local quiet=""
+    if [[ -z "$QUIET" ]]; then 
+        local quiet="-s -S"
+    fi
+
+
     eval $DRY curl -X POST \
-        -b .urs_cookies \
+        -b $HOME/.urs_cookies \
         -k \
         -f \
+        $quiet \
         -F "fileType=VLBI" \
         $(fmtarray ' -F "file[]=@%s"' $@) \
         $CDDIS_URL/upload/
     info "Done"
+
+    # Restore previous umask
+    umask $mask
 }
 
+OPAR_URL="https://ivsopar.obspm.fr/upload/scripts/upload.php"
+opar() {
+    # Check if curl is installed.
+    if ! which curl > /dev/null; then
+        fatal "'curl' not found"
+    fi
+
+    if [[ ! -e "$HOME/.netrc" ]]; then
+        fatal "$HOME/.netrc not found, see usage"
+    fi
+
+    if ! grep -q ivsopar.obspm.fr "$HOME/.netrc"; then
+        fatal "$HOME/.netrc does not contain OPAR login information, see usage"
+    fi
+
+    local DRY=${DRY:-" >/dev/null"}
+
+    info "Copying files to OPAR..."
+    while (( "$#" )); do
+        eval $DRY curl \
+            -n \
+            -k \
+            -F "fichier=@$1" -F 'mode=upload' $OPAR_URL
+        shift
+    done
+    info "Done"
+}
 
 ## Commands for Data Centers
-CTR_CDDIS="cddis"
-CTR_OPAR="pftp ivsopar.obspm.fr"
-CTR_BKG="pftp ivs.bkg.bund.de"
-CTR_HAYSTACK="pscp evlbi1.haystack.mit.edu:/data-st12/vgos/logs"
-CTR_DUMMY="dummy"
+PLOG_CTR_CDDIS="cddis"
+PLOG_CTR_OPAR="opar"
+PLOG_CTR_BKG="pftp ivs.bkg.bund.de"
+PLOG_CTR_HAYSTACK="pscp evlbi1.haystack.mit.edu:/data-st12/vgos/logs"
+PLOG_CTR_DUMMY="dummy"
 
 # Hack to work around older versions of bash not having asoc arrays
-# gets all env variables that start with "CTR_" and assume the rest of
+# gets all env variables that start with "PLOG_CTR_" and assume the rest of
 # the name is the key.
-CTRS=$(compgen -A variable | grep CTR | cut -c 5- | paste -s -d" ")
+CTRS=$(compgen -A variable | grep PLOG_CTR_ | cut -c $(echo "PLOG_CTR_" | wc -c)- | paste -s -d" ")
+
 
 # Default Data center
 DATA_CENTERS=${DATA_CENTERS:-"CDDIS"}
@@ -244,36 +314,44 @@ joinlst () {
     echo "$*" | sed 's/ /, /g' | sed 's/, \(\S*\)$/ or \1/g'
 }
 
+opening_process_name() {
+    local pid=$(fuser $1 2>/dev/null  | sed -e 's/^[[:space:]]*//' | head -n1)
+    if [[ -z "$pid" ]]; then
+        return
+    fi
+    ps -o comm= -p $pid
+}
+
 # Compress the log to a temp directory
 # Do not compress already compressed files
 compress() {
-    if [[ ${1##*.} == $COMPRESSED_EXT ]]; then
+    if [[ ${1##*.} == $PLOG_COMPRESSED_EXT ]]; then
         echo "$1"
         return
     fi
 
     local ext=${1#*.}
     local name=$(basename "$1")
-    local out="/tmp/$name.$COMPRESSED_EXT"
+    local out="/tmp/$name.$PLOG_COMPRESSED_EXT"
 
     info Compressing log file...
     if [[ -n "$DRY" ]]; then
         >&2 echo "gzip --best -c $1 >  $out"
     else
-        $PV "$1" | gzip --best > "$out"
+        safe_pv "$1" | gzip --best > "$out"
     fi
     echo "$out"
 }
 # Uncompress the log to a temp directory
 uncompress() {
-    local name=$(basename $1 .$COMPRESSED_EXT)
+    local name=$(basename $1 .$PLOG_COMPRESSED_EXT)
     local out="/tmp/$name"
 
     info Uncompressing log file...
     if [[ -n "$DRY" ]]; then
         >&2 echo "gunzip -c $1 >  $out"
     else
-        $PV "$1" | gunzip > "$out"
+        safe_pv "$1" | gunzip > "$out"
     fi
     echo "$out"
 }
@@ -281,28 +359,28 @@ uncompress() {
 # Return a reduced log in /tmp can either be raw or compressed log
 reduce() {
     local ext=${1#*.}
-    local name=$(basename $(basename "$1" .$ext) $FULL_SUFFIX)
+    local name=$(basename $(basename "$1" .$ext) $PLOG_FULL_SUFFIX)
     local out="/tmp/$name.log"
     info Creating reduced log file...
     if [[ -n "$DRY" ]]; then
-        >&2 echo "zegrep -v "$REDUCE_PATTERN" $1 > $out"
+        >&2 echo "zegrep -v "$PLOG_REDUCE_PATTERN" $1 > $out"
     else
-        $PV "$1" | zegrep -v "$REDUCE_PATTERN" > "$out"
+        safe_pv "$1" | zegrep -v "$PLOG_REDUCE_PATTERN" > "$out"
     fi
     echo "$out"
 }
 
-# Find latest modified log in $LOG_PATH which isn't station or point
+# Find latest modified log in $FS_LOG_PATH which isn't station or point
 get_latest_exp() {
-    local log=$(ls -t $LOG_PATH\
-        | grep "$STATION\($FULL_SUFFIX\)\?\\.log\(.$COMPRESSED_EXT\)\?\$"\
+    local log=$(ls -t $FS_LOG_PATH\
+        | grep "$STATION\($PLOG_FULL_SUFFIX\)\?\\.log\(.$PLOG_COMPRESSED_EXT\)\?\$"\
         | egrep -v '(station|point)'\
         | head -1)
 
     local ext=${log#*.}
     local expname
     expname=$(basename "$log" .$ext)
-    expname=$(basename $expname $FULL_SUFFIX)
+    expname=$(basename $expname $PLOG_FULL_SUFFIX)
     expname=$(basename $expname $STATION)
     echo $expname
 }
@@ -315,7 +393,7 @@ main () {
     PUSH_PROC=
     COMPRESS=
     QUIET=
-    while getopts hltpzc: opt; do
+    while getopts hltqpzvc: opt; do
         case $opt in
             l)
                 LATEST=1
@@ -342,6 +420,10 @@ main () {
                 usage_long
                 exit
                 ;;
+            v) 
+                version $0
+                exit
+                ;;
             *)
                 usage >&2
                 exit 1
@@ -354,11 +436,6 @@ main () {
     shift $(($OPTIND - 1))
 
 
-    set +u
-    if [[ -z "$STATION" ]]; then
-        fatal "STATION environment variable not set. Set to lower case two-letter station id."
-    fi
-    set -u
 
     # Default DATA_CENTERS overridden by flag
     if [[ -n "$CENTERS_OVER" ]]; then
@@ -367,8 +444,8 @@ main () {
 
     for center in $DATA_CENTERS; do
         set +u
-        if [[ -z  "$(eval echo \$CTR_$center)" ]]; then
-            fatal "unknown data center center '$center'"
+        if [[ -z  "$(eval echo \$PLOG_CTR_$center)" ]]; then
+            fatal "unknown data center '$center'"
         fi
         set -u
     done
@@ -403,20 +480,28 @@ main () {
             fi
         fi
 
+        # If it's not a file, assume it's the name of an observation.
+        
+        # we need the name of the station if we're going to lookup by observation name
+        set +u
+        if [[ -z "$STATION" ]]; then
+            fatal "STATION environment variable not set. Set to lower case two-letter station id."
+        fi
+        set -u
+
         # Should we add the proc file?
         if [[ -n "$PUSH_PROC" ]]; then
-            proc="$PROC_PATH/$ref$STATION.prc"
+            proc="$FS_PROC_PATH/$ref$STATION.prc"
             if [[ ! -f "$proc" ]]; then
                 fatal "$proc not found"
             fi
             add $proc
         fi
 
-        # If it's not a file, assume it's an observation.
         # Look for a regular log, a full log, or a compressed version of either.
         # If more than one exists, abort and ask the user to deal with it
         log=()
-        for f in $LOG_PATH/$ref${STATION}{,$FULL_SUFFIX}.log{,.$COMPRESSED_EXT}; do
+        for f in $FS_LOG_PATH/$ref${STATION}{,$PLOG_FULL_SUFFIX}.log{,.$PLOG_COMPRESSED_EXT}; do
             if [[ -f $f ]]; then
                 info found $f
                 log+=( $f )
@@ -431,16 +516,21 @@ main () {
                   "\n$(IFS=$'\n';echo -e "${log[*]}")\n"\
                   "Inspect the files and either concatenate them or removed the invalid one(s)."
         fi
-        
+
         # If log contains multicast data, rename to _full.* since we will upload a reduced file
         FULL=
-        if zegrep -q "$REDUCE_PATTERN" $log; then
+        if zegrep -q "$PLOG_REDUCE_PATTERN" $log; then
             FULL=1
-            logext=${log#*.}
-            full=$LOG_PATH/$ref$STATION$FULL_SUFFIX.$logext
+            logext=${log#*.} # extension, preserving .gz if it exists
+            full=$FS_LOG_PATH/$ref$STATION$PLOG_FULL_SUFFIX.$logext
             if [[ $log != $full ]]; then
+                pname=$(opening_process_name $log)
+                if [[ -n $pname ]]; then
+                    fatal $log is open by $pname, aborting
+                fi
+                # This should be safe, because we checked if file exists earlier. Use "-n" just in case.
                 warn file contains multicast, renaming $(basename $log) to $(basename $full)
-                $DRY mv $log $full
+                $DRY mv -n $log $full
             fi
             log=$full
         fi
@@ -454,7 +544,7 @@ main () {
         # If log doesn't contains data that should be excluded in reduced log, add it to queue and move on.
         if [[ -z "$FULL" ]]; then
             # If log is compressed, extract in a tmp dir upload
-            if [[ $log =~ $COMPRESSED_EXT$ ]]; then
+            if [[ $log =~ $PLOG_COMPRESSED_EXT$ ]]; then
                 add $(uncompress $log)
                 continue
             fi
@@ -464,13 +554,13 @@ main () {
 
         # The log must now contain multicast data, and we haven't been told to upload
         # the full compressed file so generate reduced log and add it to the queue
+        # To avoid a name conflict, this renames the file while preserving the extension.
         add $(reduce $log)
-        # To avoid a name conflict, rename the file preserving the extension.
     done
 
     for center in $DATA_CENTERS; do
         info uploading to $center
-        eval \$CTR_$center ${FILES[@]}
+        eval \$PLOG_CTR_$center ${FILES[@]}
     done
 }
 

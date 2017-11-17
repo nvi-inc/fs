@@ -1,19 +1,19 @@
 #!/bin/bash
-
+set -u 
 
 export DATA_CENTERS="DUMMY"
-export LOG_PATH=$(pwd)/tmp
+export FS_LOG_PATH=$(pwd)/tmp
 export EXP='r1234'
 export STATION='ts'
 
 # PLOG="./plog -t"
 PLOG="./plog"
 
-mkdir -p $LOG_PATH
+mkdir -p $FS_LOG_PATH
 
-log=$LOG_PATH/$EXP$STATION.log
-logs=$(echo $LOG_PATH/$EXP${STATION}{,_full}.log{,.gz})
-rm $LOG_PATH/*
+log=$FS_LOG_PATH/$EXP$STATION.log
+logs=$(echo $FS_LOG_PATH/$EXP${STATION}{,_full}.log{,.gz})
+rm $FS_LOG_PATH/*
 
 echo test > $log
 
@@ -59,19 +59,19 @@ echo =========
 echo "2016.243.18:00:00.08#rdtca#" >> $log
 echo $PLOG $EXP
 $PLOG $EXP
-rm $LOG_PATH/*
+rm $FS_LOG_PATH/*
 echo "2016.243.18:00:00.08#rdtca#" >> $log
 echo $PLOG -l
 $PLOG -l
-rm $LOG_PATH/*
+rm $FS_LOG_PATH/*
 echo "2016.243.18:00:00.08#rdtca#" >> $log
 echo $PLOG -z $EXP
 $PLOG -z $EXP
-rm $LOG_PATH/*
+rm $FS_LOG_PATH/*
 echo "2016.243.18:00:00.08#rdtca#" >> $log
 echo $PLOG -l -z
 $PLOG -l -z
-rm $LOG_PATH/*
+rm $FS_LOG_PATH/*
 
 
 echo 
@@ -104,7 +104,7 @@ for l in $logs; do
     fi
     echo $l:
     $PLOG $EXP
-    rm $LOG_PATH/*
+    rm $l
 done
 
 echo 
@@ -117,3 +117,27 @@ for l in $logs; do
     echo "" > $l
     $PLOG $EXP
 done
+rm $FS_LOG_PATH/*
+
+
+
+echo 
+echo
+echo Open file
+echo =========
+
+echo "2016.243.18:00:00.08#rdtca#" >> $log
+tail -f $log >/dev/null & 
+echo $PLOG $EXP
+$PLOG $EXP
+rm $FS_LOG_PATH/*
+
+
+echo 
+echo
+echo Quiet mode
+echo ===========
+echo "2016.243.18:00:00.08#rdtca#" >> $log
+echo $PLOG -q $EXP
+$PLOG -q $EXP
+rm $FS_LOG_PATH/*

@@ -94,7 +94,10 @@ int *out_recs;
           rdbe_atten_mon(output,&count,&lclm);
         }
 	for(i=1;i>-1;i--) {
-	  if(lclm.ifc[i].RMS.state.known == 1)  {
+	  if ((command->equal != '=' ||
+	      !lclm.ifc[i].atten.state.known ||
+	       lclm.ifc[i].atten.atten != 63) &&
+	      lclm.ifc[i].RMS.state.known == 1)  {
 	    if(shm_addr->rdbe_equip.rms_min > lclm.ifc[i].RMS.RMS){
 	      if(0!=ierr)
 		logita(NULL,ierr,"2b",who);
@@ -107,7 +110,7 @@ int *out_recs;
 	    }
 	  }
 	}
-      }	  
+      }  
 
       if(strlen(output)>0) output[strlen(output)-1]='\0';
 

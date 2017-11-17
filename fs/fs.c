@@ -11,6 +11,8 @@
 #include <sys/wait.h>
 #include <sys/ipc.h>
 #include <fcntl.h>
+#include <getopt.h>
+#include <stdbool.h>
 
 #include "../include/ipckeys.h"
 #include "../include/params.h"
@@ -45,10 +47,33 @@ char *fgets();
 FILE *fopen(), *tee;
 static void nullfcn();
 
+void setup_ids();
+void skd_ini(int);
+
 static int npids, pids[ MAX_PIDS], ipids;
 static char p_names[MAX_PIDS][6];
 extern struct fscom *shm_addr;
 static long ip[]={0,0,0,0,0};
+
+
+#ifndef NO_SERVER
+void start_server(bool, bool);
+#endif
+
+#ifdef NO_SERVER
+#define USAGE_SHORT "Usage: %s [-xh]"
+#else
+#define USAGE_SHORT "Usage: %s [-bxh]"
+#endif
+
+const char *usage_long_str = USAGE_SHORT "\n"
+"Start the VLBI Field System and programs listed in and stnpgm.ctl\n"
+"  -x, --no-x          Do not start programs requiring X11\n"
+"  -h, --help          print this message\n"
+#ifndef NO_SERVER
+"  -b, --background    run the Field System in background/daemon mode\n"
+#endif
+;
 
 main(int argc_in,char *argv_in[])
 {
@@ -65,8 +90,19 @@ main(int argc_in,char *argv_in[])
     int kfirst=TRUE;
     int normal=FALSE;
     int iret;
-    int no_X;
     int val;
+
+	bool arg_background = false;
+	bool arg_no_x11 = false;
+
+	static struct option long_options[] = {
+	    {"background", no_argument, NULL, 'b'},
+	    {"no-x",       no_argument, NULL, 'x'},
+	    {"help",       no_argument, NULL, 'h'},
+
+	    {NULL, 0, NULL, 0},
+	};
+
     /*
     if( (val = fcntl(STDERR_FILENO, F_GETFL, 0)) <0) {
       perror("STDERR F_GETFL");
@@ -78,16 +114,37 @@ main(int argc_in,char *argv_in[])
       exit(-1);
     }
     */
-    no_X=FALSE;
-    if(argc_in > 2 ) {
-      fprintf(stderr,"only one argument (-No_X) is allow to fs\n");
-      exit(-1);
-    } else if (argc_in == 2 && 0 != strcmp("-No_X",argv_in[1])) {
-      fprintf(stderr,"only '-No_X' is allowed as an argument to fs\n");
-      exit(-1);
-    } else if (argc_in == 2) {
-      no_X=TRUE;
-    }
+
+	int opt;
+	int option_index;
+	while ((opt = getopt_long(argc_in, argv_in, "bxh", long_options,
+	                          &option_index)) != -1) {
+		switch (opt) {
+		case 0:
+			// All long options are handled by their short form
+			break;
+		case 'b':
+#ifdef NO_SERVER
+            fprintf(stderr, "fs build without server, background option not available");
+			exit(EXIT_FAILURE);
+#endif
+			arg_background = true;
+			arg_no_x11     = true;
+			break;
+		case 'x':
+			arg_no_x11 = true;
+			break;
+		case 'h':
+			fprintf(stderr, usage_long_str, argv_in[0]);
+			exit(EXIT_SUCCESS);
+			break;
+		default: /* '?' */
+			fprintf(stderr, USAGE_SHORT, argv_in[0]);
+			exit(EXIT_FAILURE);
+		}
+	}
+
+
     ti=time(NULL);
     tm=gmtime(&ti);
     (void) strftime(file,MAX_LINE,"~/fs_%Y_%j_%H:%M:%S.err",tm);
@@ -145,6 +202,16 @@ main(int argc_in,char *argv_in[])
     }
     //    exit(-1);
 
+#ifndef NO_SERVER
+	if (nsem_test("fs   ")) {
+		printf("fs already running, reconnect with `fsclient`\n");
+		exit(EXIT_FAILURE);
+	}
+	start_server(arg_background, arg_no_x11);
+    // With the server, "fs" should not start any X11 programs itself
+    arg_no_x11 = true;
+#endif
+
     if ( 1 == nsem_take("fs   ",1)) {
        fprintf( stderr,"fs already running\n");
          exit( -1);
@@ -197,7 +264,7 @@ main(int argc_in,char *argv_in[])
 	if(0 != parse(&line2[5],MAX_LINE,line, &ampr,&les,&name))
 	  goto cleanup;
 	if(les==2) {
-	  if(no_X) {
+	  if(arg_no_x11) {
 	    fprintf( stderr,"skipping %5.5s, the -No_X option selected\n",name);
 	    continue;
 	  } else
@@ -257,7 +324,7 @@ main(int argc_in,char *argv_in[])
 	  if(0!= parse(&line2[5],MAX_LINE,line, &ampr,&les,&name))
 	    goto cleanup;
 	  if(les==2) {
-	    if(no_X) {
+	    if(arg_no_x11) {
 	      fprintf( stderr,"skipping %5.5s, the -No_X option was selected\n",name);
 	      continue;
 	    } else
