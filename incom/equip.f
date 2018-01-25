@@ -579,8 +579,24 @@ C **** MET3 Sensor line 16
             call logit7ci(0,0,0,1,-140,'bo',16)
             goto 990
          endif
+      else
+         call gtfld(ibuf,ich,ilen,ic1,ic2)
+         if (ic1.eq.0) then
+            call logit7ci(0,0,0,1,-140,'bo',16)
+            goto 990
+         else
+            il=ic2-ic1+1
+            if(il.gt.64) then
+               call logit7ci(0,0,0,1,-140,'bo',16)
+               goto 990
+            else
+               idum=ichmv(wx_host,1,ibuf,ic1,il)
+               call pchar(wx_host,idum,0)
+            endif
+         endif
       endif
       call fs_set_wx_met(wx_met)
+      call fs_set_wx_host(wx_host)
 C **** end modify rdg
 C mk4 synch test parameter
       call readg(idcb,ierr,ibuf,ilen)
