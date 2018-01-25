@@ -36,8 +36,9 @@ none    type of phase cal control (if3 or none)
    1    No of LBA DAS installed (up to MAX_DAS - see "params.h")
    in   160MHz IF input filters (in or out)
   8bit	Digital input setting (8bit internal sampler or 4bit external at ATCA)
-* met sensor type
-cdp     cdp or met3 server port, use cdp if you don't have either
+*met sensor type: cdp or two fields for metserver: port hostname 
+*default choice for metserver is  50001 localhost      
+cdp     cdp or metserver port & host, use cdp if you don't have either
 * default mk4 form command synch test value
   3     off or 0, 1, ..., 16
 *mk4 decoder transmission terminator
@@ -51,15 +52,18 @@ cdp     cdp or met3 server port, use cdp if you don't have either
   1 1 1 1    
 *DBBC IF power conversion factors, one for each module specified above, no trailing comments or extra fields
   15000 15000 15000 15000
-*Mark5B clock rate (MHz): "nominal" is 32 for rack=Mark5 or VLBA5,
-*                                             rack=DBBC DDC, letter ' '
-*                                             rack=VLBAC
-*                                      64 for rack=DBBC DDC, letters E/F,
-*                                             rack-CDAS
-*                                       0 otherwise except rack=none
-*                         "nominal" is not allow for rack=none
+*VSI-H/Mark5B clock rate (MHz): "nominal" is 32 for rack=Mark5 or VLBA5,
+*                                                   rack=DBBC DDC, letter ' ',
+*                                                        with and without
+*                                                        FiLa10G
+*                                                   rack=VLBAC
+*                                            64 for rack=DBBC DDC, letters E/F,
+*                                                        with and without
+*                                                        FiLa10G
+*                                                   rack=CDAS
+*                                             0 otherwise except rack=none
+*                                     "nominal" is not allow for rack=none
 * a clock rate value of "none" will suppress clock_set command in FMSET
-*                                            and mk5c_mode command
    32   one of: none, nominal, 2, 4, 8, 16, 32, 64
 *FiLa10G input select, one of: vsi1, vsi2, vsi1-2, vsi1-2-3-4, gps, tvg
 vsi1
