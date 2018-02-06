@@ -2,13 +2,13 @@
 #include <string.h>
 
 #include <memory.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <termio.h>
 #include <linux/serial.h>
 #include <sys/errno.h>
-/*
 /*  */
 
 #define MAXLEN 4095
@@ -75,7 +75,8 @@ main(int argc, char *argv[])
   int termch, err, nerr, count, to;
   int i, j, k, metcnt, cnt, loopcnt, windcnt;
   int status, error, which, used;
-  float temp,pres,humi,wsp,wmax,wdir;
+  float temp,pres,humi,wsp,wmax;
+  int wdir;
   char *sn, *longi, *lati, *elev;
   char *logfile;
   char wind_cmd_str[10],met_cmd_str[80];
@@ -99,7 +100,7 @@ main(int argc, char *argv[])
     } else {
       strcpy(met_cmd_str,argv[1]);
       cmdlen=strlen(met_cmd_str);
-      strcpy(&met_cmd_str[cmdlen],"\r\n");
+      strcat(met_cmd_str,"\r\n");
       if(strstr(met_cmd_str,"temp")) metcnt=0;
       else if(strstr(met_cmd_str,"pres")) metcnt=1;
       else if(strstr(met_cmd_str,"humi")) metcnt=2;
@@ -192,8 +193,10 @@ main(int argc, char *argv[])
     err = portflush_(&ttynum);
     if(metcnt==-1) {
       len = strlen(met_cmd_str);
+      if(len>2) {
       err = portwrite_(&ttynum, met_cmd_str, &len);
        printf(" command sent '%s'\n",met_cmd_str);
+}
    } else {
       len = strlen(metcmd[metcnt]);
       err = portwrite_(&ttynum, metcmd[metcnt], &len);
@@ -210,13 +213,37 @@ main(int argc, char *argv[])
     loopcnt=atoi(location_str[4]);
     logfile=location_str[5];
     len2 = strlen(buff2);
-    buff2[len2]='\0';
-    printf("cmd: %sresponse: '%s'\n chars %d\n", met_cmd_str,
-    	   &buff2[5],count);
-    //    {int i;
-    //  for (i=0;i<count;i++)
-    //	printf(" buff2[%d] %d %x '%c'\n",i,buff2[i],buff2[i],buff2[i]);
-    //}
+    //    buff2[len2]='\0';
+    buff2[count]='\0';
+    printf("cmd: '%s'\nresponse: '%s'\nchars %d\n", met_cmd_str,
+    	   buff,count);
+    if(len ==2 ) { /*for NMEA message 19 */
+      int i, iret; char checksum,*pstar;
+      unsigned int check;
+      checksum=0;
+      for (i=0;i<count;i++) {
+	printf(" buff2[%d] %d %x '%c'\n",i,buff2[i],buff2[i],buff2[i]);
+	if(i>0&& i< 22) {
+	  checksum^=buff2[i];
+	}
+      }
+      printf(" checksum %x\n",checksum);
+      pstar=strchr(buff2,'*');
+      if(pstar!=NULL) {
+	errno=0;
+	check=strtol(pstar+1,NULL,16);
+	if(errno==0) {
+	  printf(" check '%.2s' check from response '%x' agree? %d\n",
+		 pstar+1,check,check==checksum);
+	} else
+	  printf(" error decoding checksum response\n");
+      } else 
+	printf(" '*' not found in response\n");
+      iret=nmea_wind(buff2,&wdir,&wsp);
+      printf(" nema_wind returned %d wdir %d wsp %f\n",iret,wdir,wsp);
+    }
+    printf("buff2 '%.25s'\n",buff2);
+    
     if(metcnt==13) {
       nema(buff2,&pres,&temp,&humi);
       printf("pres %f, temp %f humi %f\n",pres,temp,humi);
@@ -247,14 +274,17 @@ main(int argc, char *argv[])
   return 0;
 }
 
-nema(buf,pres,tmp,humi)
-char *buf;
+nema(bufin,pres,tmp,humi)
+char *bufin;
 float *pres, *tmp, *humi;
 {
   char *p,comma[]=",";
+  char buf[256];
+  strncpy(buf,bufin,sizeof(buf));
+  buf[sizeof(buf)-1]=0;
 
   *pres=-1;
-  *tmp==51;
+  *tmp=-51;
   *humi=-1;
 
   p=strtok(buf,comma);

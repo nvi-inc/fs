@@ -1,10 +1,14 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 #include <errno.h>
 #include <string.h>
 #include <syslog.h>
+#include <unistd.h>
 
-#define MAX_BUF 160
+#define LGERR_FMT "/usr2/fs/bin/lgerr lg -1 '%s'"
+
+#define MAX_BUF 512
 
 void fc_err_report(str1,str2,flag,ierr,len1,len2)
 int *flag,*ierr,len1,len2;
@@ -21,8 +25,8 @@ int flag,ierr;
   time_t t;
   static time_t old=-1;
   char buff[MAX_BUF];
-
   buff[0]=0;
+  char cmd_buff[MAX_BUF] = {0};
 
   if(old==-1)
 #if 1
@@ -54,6 +58,12 @@ int flag,ierr;
     int fd;
     
     old=t;
+
+    if (snprintf(cmd_buff, sizeof(cmd_buff), LGERR_FMT, buff) < 0) {
+        syslog(LOG_DAEMON | LOG_ERR, "lgerr command truncated");
+        goto done0;
+    }
+    system(cmd_buff);
 
     fd=mkstemp(message_file);
     if(fd==-1) {
