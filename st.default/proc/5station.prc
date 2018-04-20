@@ -53,7 +53,6 @@ vc09
 mk5b_mode
 !+1s
 mk5=dot?
-mk5=bank_set?
 sy=run setcl adapt &
 enddef
 define  midtp         00000000000
