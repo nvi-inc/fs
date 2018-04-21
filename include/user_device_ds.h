@@ -6,4 +6,5 @@ struct user_device_cmd {     /* command parameters */
   int sideband[6];  /* net sideband 0=unknown, 1=USB, 2=LSB */
   int pol[6];       /* polarization 0=unknown, 1=RCP, 2=LCP */
   double center[6]; /* detector center frequency */
+  int zero[6];      /* non-zero, zeroing supported, 0 no zeroing */
 };

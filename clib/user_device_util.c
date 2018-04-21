@@ -16,11 +16,13 @@ static char *dev_key[ ]={"u1","u2","u3","u4","u5","u6"};
 static char *sb_key[ ]={"unknown","usb","lsb"};
 static char *pol_key[ ]={"unknown","rcp","lcp"};
 static char *star_key[ ]={"*"};
+static char *zero_key[ ]={"no","yes"};
 
 #define DEV_KEY sizeof(dev_key)/sizeof( char *)
 #define SB_KEY  sizeof(sb_key)/sizeof( char *)
 #define POL_KEY sizeof(pol_key)/sizeof( char *)
 #define STAR_KEY sizeof(star_key)/sizeof( char *)
+#define ZERO_KEY sizeof(zero_key)/sizeof( char *)
 
 int user_device_dec(lcl,count,ptr)
 struct user_device_cmd *lcl;
@@ -80,6 +82,13 @@ char *ptr;
 	ierr=-300;
       else
 	ierr=arg_dble(ptr,&lcl->center[dev],0.0,FALSE);
+      break;
+    case 6:
+      ierr=arg_key(ptr,star_key,STAR_KEY,&dum,0,FALSE);
+      if(ierr == 0 && dum == 0)
+	ierr=-300;
+      else
+	ierr=arg_key(ptr,zero_key,ZERO_KEY,&lcl->zero[dev],1,TRUE);
       break;
     default:
       *count=-1;
@@ -158,6 +167,13 @@ struct user_device_cmd *lcl;
   pos=strlen(output)-1;
   if(output[pos]=='.')
     output[pos]='\0';
+  strcat(output,",");
+
+  ivalue = lcl->zero[idev];
+  if (ivalue >=0 && ivalue <ZERO_KEY)
+    strcat(output,zero_key[ivalue]);
+  else
+    strcat(output,BAD_VALUE);
   
   if(*count>0)
     *count++;
