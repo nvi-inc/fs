@@ -95,9 +95,10 @@ CALOFFNF: caloff
 calon and caloff are local procedures that do whatever is necessary to
 turn the noise source on and off, respectively.
 
-If station dependent detectors u5 and/or u6 are used, two additional
-procedures must be available to turn the signal on and off to the
-detectors. The recommended form of this procedures is:
+If station dependent detectors, u5 and/or u6, are used that support zero
+level measurement (see 'help=user_device'), two additional procedures
+must be available to turn the signal on and off to the detectors. The
+recommended form of this procedures is:
 
 SIGONNF:  sigon
           !+1s 
@@ -110,7 +111,15 @@ SIGOFFNF: sigoff
 sigon and sigoff are local procedures that do whatever is necessary to
 turn the signal to the station dependent detectors on and off,
 respectively.  The signal needs to be turned off to determine the
-"zero" signal level.
+"zero" signal level. 
+
+Please note that if both u5 and u6 are used and only one supports
+measuring a zero level, both devices will be sampled, but the "zero"
+measurement for the device not supporting a zero level will be
+discarded.  Similiarly, if other devices supporting a zero level are
+being used, e.g., Mark IV or VLBA4 racks, any station specific
+detector used will have its "zero" level sampled, but the
+measurement will be discarded if a zero level is not supported.
 
 There is a known bug in the use of these procedures: calonnf,
 caloffnf, sigonnf, and sigoffnf, that may require the last two lines
