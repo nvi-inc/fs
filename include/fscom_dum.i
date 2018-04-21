@@ -38,14 +38,14 @@ c
      $ icomputer, satellite, dbbcddcv, dbbcpfbv, dbbc_cond_mods,
      $ dbbc_if_factors(MAX_DBBC_IF), dbbc_cont_cal_mode, m5b_crate,
      $ dbbcddcvc, dbbcddcsubv, dbbccontcalpol, dbbcpfbvc, dbbcpfbsubv,
-     $ dbbc_como_cores(4),dbbc_cores, ichdbbcfm
+     $ dbbc_como_cores(4),dbbc_cores, ichdbbcfm, user_device_zero(6)
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3,2), lgen(2,2),
      . lnaant(4), lsorna(5), lfreqv(3,15), idevant(32), idevgpib(32),
      . idevlog(5,32), idevmcb(32), hwid, modelti_fs, stcnm(1,4),
      . cwrap(4), user_dev1_name(2), user_dev2_name(2),
-     . idevds(32), hostpc_fs(40)
+     . idevds(32), hostpc_fs(40), wx_host(33)
 
       common/fscom_dum/
      . ra50, dec50, radat, decdat, alat, wlong,
@@ -82,21 +82,23 @@ c
      $ icomputer, satellite, dbbcddcv, dbbcpfbv, dbbc_cond_mods,
      $ dbbc_if_factors, dbbc_cont_cal_mode, m5b_crate, dbbcddcvc,
      $ dbbcddcsubv, dbbccontcalpol, dbbcpfbvc, dbbcpfbsubv,
-     $ dbbc_como_cores,dbbc_cores, ichdbbcfm,
+     $ dbbc_como_cores,dbbc_cores, ichdbbcfm, user_device_zero,
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 
      . lfreqv, idevant, idevgpib, idevlog, idevmcb, hwid, 
      . modelti_fs, stcnm, cwrap, user_dev1_name, user_dev2_name,
-     . idevds, hostpc_fs
+     . idevds, hostpc_fs, wx_host
 c
       CHARACTER*8 LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP
       character*16 dbbcddcvs, dbbcpfbvs
       character*1 dbbcddcvl, dbbcpfbvl
       character*16 fila10gvsi_in
       character*17 scan_name,scan_name_old
+      character*32 sVerRelease_FS
 c
       common/fscom_dum2/ LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP,
      $                   dbbcddcvs, dbbcpfbvs, fila10gvsi_in, dbbcddcvl,
-     $			 dbbcpfbvl,scan_name,scan_name_old
+     $			 dbbcpfbvl,scan_name,scan_name_old,
+     $                   sVerRelease_FS
 
