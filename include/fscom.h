@@ -126,6 +126,7 @@ typedef struct fscom {
 	   int drive_type[2];
 	   int rack_type;
 	   int wx_met;
+	   char wx_host[65];
 	  int mk4sync_dflt;
         } equip; 
 
@@ -364,5 +365,7 @@ typedef struct fscom {
     char buf[125];
     int nchars;
   } fserr_cls;
+
+  char sVerRelease_FS[33];
 
 } Fscom;
