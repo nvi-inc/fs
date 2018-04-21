@@ -626,35 +626,50 @@ program error: too many serial numbers
 5T -104
 No default sample rate if clock rate (from equip.ctl) is "none".
 ""
+5T -114
+No default sample rate for Ethernet recorders unless decimate was specified with mark5b.
+""
 5T -201
-source parameter must be 'ext', 'tvg', 'ramp', or "vdif".
+source parameter must be 'vdif' or 'mark5b' for Mark 5C/FlexBuff.
 ""
 5T -202
-mask parameter, must specify a non-zero integer, maximum 32 bits, usually as a hex value, e.g., 0xf
+mask parameter must specify a non-zero integer, maximum 64 bits, usually as a hex value, e.g., 0xf
 ""
 5T -203
-decimate parameter, must be one of 1, 2, 4, 8, or 16
+decimate parameter must be one of 1, 2, 4, 8, or 16
 ""
 5T -204
-Sample rate must be a number greater than 0.124
+Mark 5B recorder sample rate must be integer 2, 4, 8, 16, 32, or 64 (MHz).
 ""
 5T -205
 fpdp parameter, if specified, must be 1 or 2.
 ""
 5T -206
-okay parameter, must be 'disk_record_ok' or null.
+okay parameter must be 'disk_record_ok' or null.
 ""
-5T -221
-source parameter must be 'ext', 'tvg', or 'ramp'.
+5T -211
+Source parameter must be 'ext', 'tvg', or 'ramp' for Mark 5B.
+""
+5T -213
+For Mark 5B recorder minimum implied sample rate is 2 MHz. Check Mark 5B clock rate in equip.ctl.
 ""
 5T -214
-Clock rate (from equip.ctl) divided by sample rate must be integer 1, 2, 4, 8, or 16 within 0.1 percent.
+For Mark 5B recorder implied decimation must be integer 1, 2, 4, 8, or 16. Check Mark 5B clock rate in equip.ctl.
+""
+5T -223
+Decimation not supported for VDIF.
+""
+5T -224
+For Ethernet recorders, total date rate must be an integer multiple of 1 Mbps.
+""
+5T -234
+Can't specify sample rate and decimate parameters simultaneously
+""
+5T -244
+Sample rate must be a positive integer Hz.
 ""
 5T -301
 Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the sixth parameter.
-""
-5T -304
-Can't specify sample rate and decimate parameters simultaneously
 ""
 5T -400
 error retrieving acknowledgement of command
@@ -1914,7 +1929,7 @@ DF -102
 No default for test parameter if mode=test.
 ""
 DF -201
-Mode must be one of (DDC): astro, geo, wastro, test, lba, astro2, or astro3, (PFB): flex.
+Mode must be one of (DDC): astro, geo, wastro, test, lba, astro2, astro3, (PFB): flex, full, full_auto, spol.
 ""
 DF -202
 Test must be one of:  0, 1, bin, tvg.
@@ -2034,7 +2049,7 @@ DH -205
 okay parameter must be disk_record_ok or null
 ""
 DH -214
-Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255 within 0.1 percent.
+Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255.
 ""
 DH -301
 Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the fifth parameter.
@@ -3236,6 +3251,15 @@ Did not get Mark IV formatter prompt.
 MA   -9
 MAT not open.
 ""
+MA  -10
+MAT had bad buffer length for read (programming error).
+""
+MA  -11
+MAT read error from UNIX, see error message above.
+""
+MA  -12
+MAT error setting BAUD.
+""
 MA -100
 Unable to open MAT device, ?WWW
 ""
@@ -3536,8 +3560,14 @@ mk5cn: no data pre-draining input, but no EOF or error, connection closed
 M5 -114
 mk5cn: re-open after pre-drain error was okay, proceeding to transaction.
 ""
+M5 -898
+Mark 5B sync required, use FMSET 's'.
+""
 M5 -899
 unable to find or decode return code
+""
+M5 -900 place holder for Mark 5 error string
+
 ""
 M5 -901
 MARK5 return code 1: action initiated or enabled, but not completed
@@ -4952,6 +4982,9 @@ User Device polarization must be one of unknown, rcp, or lcp.
 Q- -205
 User Device center frequency must be a positive real number
 ""
+Q- -206
+User Device zero must be yes or no.
+""
 Q- -301
 Previous value not permitted for User Device channel.
 ""
@@ -4966,6 +4999,9 @@ Previous value not permitted for User Device polarization.
 ""
 Q- -305
 Previous value not permitted for User Device center frequency.
+""
+Q- -306
+Previous value not permitted for User Device zero
 ""
 Q# -201
 An invalid number was specified for an LU
