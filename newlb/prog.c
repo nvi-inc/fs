@@ -36,6 +36,8 @@
 #define HOREL_N  4*MAX_HOR
 #define CWRAP_N 8
 #define IDEVDS_N 64
+#define UD_ZERO_N 4*6
+#define SVERRELEASE 32
 
 extern struct fscom *shm_addr;
 
@@ -2576,6 +2578,20 @@ void fs_get_m5b_crate__(m5b_crate)
 	  *m5b_crate=shm_addr->m5b_crate;
 	}
 
+void fs_set_wx_host__(wx_host)
+        char *wx_host;
+        {
+          memcpy(shm_addr->equip.wx_host,wx_host,
+		 sizeof(shm_addr->equip.wx_host));
+        }
+
+void fs_get_wx_host__(wx_host)
+        char *wx_host;
+        {
+          memcpy(wx_host,shm_addr->equip.wx_host,
+		 sizeof(shm_addr->equip.wx_host));
+        }
+
 void fs_set_fila10gvsi_in__(fila10gvsi_in)
 	char *fila10gvsi_in;
 	{
@@ -2619,3 +2635,23 @@ void fs_get_dbbc_cores__(dbbc_cores)
 	{
 	  *dbbc_cores=shm_addr->dbbc_cores;
 	}
+
+void fs_set_user_device_zero__(zero)
+     int *zero;
+	{
+	  memcpy(shm_addr->user_device.zero,zero,UD_ZERO_N);
+        }
+
+void fs_get_user_device_zero__(zero)
+	int *zero;
+	{
+	  memcpy(zero,shm_addr->user_device.zero,UD_ZERO_N);
+	}
+void fs_get_sverrelease_fs__(sVerRelease_FS)
+	int *sVerRelease_FS;
+	{
+          size_t N;
+	  N = SVERRELEASE;
+	  memcpy(sVerRelease_FS,shm_addr->sVerRelease_FS,N);
+	}
+
