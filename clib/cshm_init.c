@@ -14,6 +14,16 @@ void cshm_init()
 {
   int i,j,k;
 
+#define xstr(a) str(a)
+#define str(a) #a
+#define RELV xstr(RELEASE)
+
+  strncpy(shm_addr->sVerRelease_FS,RELV,sizeof(shm_addr->sVerRelease_FS));
+  j=strlen(shm_addr->sVerRelease_FS);
+  for(i=j;i<sizeof(shm_addr->sVerRelease_FS)-1;i++)
+    shm_addr->sVerRelease_FS[i]=' ';
+  shm_addr->sVerRelease_FS[sizeof(shm_addr->sVerRelease_FS)-1]=0;
+
   for (i=0; i< 32; i++)
     shm_addr->vform.codes[i]=-1;
 
@@ -328,6 +338,13 @@ void cshm_init()
   shm_addr->user_device.sideband[3]=0;
   shm_addr->user_device.sideband[4]=0;
   shm_addr->user_device.sideband[5]=0;
+
+  shm_addr->user_device.zero[0]=1;
+  shm_addr->user_device.zero[1]=1;
+  shm_addr->user_device.zero[2]=1;
+  shm_addr->user_device.zero[3]=1;
+  shm_addr->user_device.zero[4]=1;
+  shm_addr->user_device.zero[5]=1;
 
   shm_addr->disk_record.record.record=-1;
   m5state_init(&shm_addr->disk_record.record.state);
