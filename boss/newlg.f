@@ -54,6 +54,28 @@ C
       logchg=mod(logchg+1,2147483647)
       call fs_set_logchg(logchg)
 C
+C     Add release info to log
+C
+      nch = 1
+      nch=ichmv_ch(ibuf,nch,'release')
+      nch=mcoma(ibuf,nch)
+      idum=sVerMajor_FS
+      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = ichmv_ch(ibuf,nch,'.')
+      idum=sVerMinor_FS
+      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = ichmv_ch(ibuf,nch,'.')
+      idum=sVerPatch_FS
+      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      call fs_get_sVerrelease_fs(sVerRelease_FS)
+      idum=iflch(sVerRelease_FS,32)
+      if(idum.ne.0) then
+         nch = ichmv_ch(ibuf,nch,'-')
+         nch = ichmv(ibuf,nch,sVerRelease_FS,1,idum)
+      endif
+      nch = nch-1
+      call logit3(ibuf,nch,lsor)
+C
 C     Send configuration info from control files to log
 C
       nch = 1
@@ -366,7 +388,16 @@ c
       if (wx_met.eq.0) then
          nch=ichmv_ch(ib,nch,'cdp')
       else
-         nch = nch + ib2as(wx_met,ib,nch,z'8006')
+         call fs_get_wx_host(wx_host)
+         nch = nch + ib2as(wx_met,ib,nch,z'8005')
+         nch=ichmv_ch(ib,nch,':')
+         do i=1,65
+            if(jchar(wx_host,i).eq.0) then
+               nch=ichmv(ib,nch,wx_host,1,i-1)
+               goto 1000
+            endif
+         enddo
+ 1000    continue
       endif
 
       nch=mcoma(ib,nch)
