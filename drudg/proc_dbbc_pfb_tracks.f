@@ -11,11 +11,12 @@
       integer lu_file,istat,icode    
 
 ! History
-!  2016Jan18 JMGipson.  First working version.
-!  2016May07 WEH        reorder vsi1/vsi2, remove unitialized ichan bug
-!  2016Sep08 JMG.  Added in vsi_align command.  To get 'lvsi_prompt' had to include drcom.ftni.
+! 2016Jan18 JMGipson.  First working version.
+! 2016May07 WEH        reorder vsi1/vsi2, remove unitialized ichan bug
+! 2016Sep08 JMG.  Added in vsi_align command.  To get 'lvsi_prompt' had to include drcom.ftni.
 !                 Including drcom.ftni meant I had to rename some variables because of collisions. 
-!  2016Sep11 JMG. Make vsi_align input appear on same line as prompt
+! 2016Sep11 JMG. Make vsi_align input appear on same line as prompt
+! 2017Oct24 JMG. If 'bit_streams' then only care about mask. Everything else is null.
 
 ! local
       integer ic   
@@ -35,24 +36,22 @@
       character*3  ltmp_array(32)
       integer      ikey(32)
 
+      lext_vdif="ext"
       if(km5brec(1)) then
          lmode_cmd="mk5b_mode"
       else if(km5Crec(1)) then 
          lmode_cmd="mk5c_mode"
+         if(kfila10g_rack) lext_vdif="vdif"       
       else
          lmode_cmd="bit_streams"
-      endif 
-      lext_vdif="ext"
-      if(kfila10g_rack.and.km5crec(1)) then
-        lext_vdif="vdif" 
-      endif             
-    
+      endif
+               
 ! 
 ! Make the bit-mask.
 ! Initialize mask. 
        imask(1)=0
        imask(2)=0 
-       write(*,*) "nchan= ", nchan(istat,icode)
+!       write(*,*) "nchan= ", nchan(istat,icode)
        do i=1,nchan(istat,icode) 
          itemp=3             !always set 2 bits.
          if(i .le. 16) then 
@@ -89,6 +88,14 @@
       else 
         write(cbuf,'(a,"=",a,",0x",2Z8.8,",,",f9.3)')
      >    lmode_cmd,lext_vdif, imask(1:2),samprate(istat,icode)
+      endif 
+
+      if(lmode_cmd .eq. "bit_streams") then
+        if(imask(1) .eq. 0) then 
+          write(cbuf,'(a,"=",",0x",Z8.8,",,,")')lmode_cmd, imask(2)
+        else
+          write(cbuf,'(a,"=",",0x",Z8.8,",,,")') lmode_cmd, imask(1:2)
+        endif
       endif 
     
       call drudg_write(lu_file,cbuf)

@@ -48,6 +48,7 @@ C 2003Jul11 JMG added itctim
 ! 2015Jan30 JMG. Added kignore_bad_mask 
 ! 2015Jul17 JMG. Added  cont_calPolarity
 ! 2016Sep08 JMG. Added lvsi_prompt
+! 2016Dec23 JMG. Added ical_time_staggered, kcont_cal
 c
       logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
      .          kprepass,kdr_type,kgeo,kpostpass
@@ -56,12 +57,14 @@ c
 
       logical klo_config, ktarget_time
       logical kignore_Mark5B_bad_mask 
+      logical kcont_cal
 
       common/drcom_logical/
      .       kvex,klab,KSPINT,KFLG(4),kbatch,kmissing,kparity,
      .       kdrg_infile,kprepass,kdr_type,kgeo,
      .       kpostpass,klabel_ps,ksked_proc,
-     >       klo_config,ktarget_time,kignore_Mark5b_bad_mask 
+     >       klo_config,ktarget_time,kignore_Mark5b_bad_mask,
+     >       kcont_cal 
 
       CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .  lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
@@ -105,6 +108,8 @@ C
       integer ibbclen(2,3)
       integer nbbcbuf(2)
 
+      integer ical_time_staggered           !override time for the calibration.
+
       COMMON/DRCOM_int/
      .       iVerMajor_FS, iVerMinor_FS, iVerPatch_FS,
      .       ISKLEN,LUUSR,
@@ -117,7 +122,7 @@ C
      .       ilabrow,ilabcol,inewpage,
      .       luscn,itpid_period,
      .       nchanr,iperm,fileptr,
-     .       ibbcbuf,ibbclen,nbbcbuf
+     .       ibbcbuf,ibbclen,nbbcbuf,ical_time_staggered
 
       common/drcom_real/
      >       RA50,DEC50,rlabsize

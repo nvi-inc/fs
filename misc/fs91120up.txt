@@ -1,0 +1,1034 @@
+File: /usr2/fs/misc/fs91120up.txt        Version: 7.7  Date: 180421
+
+		       FS 9.11.20 Update Notice
+
+
+I. Introduction
+
+This document is divided into four sections:
+
+  I.   Introduction
+  II.  Installation
+  III. Changes Since Version 9.11.19
+  A.   Reference Appendix for Installation
+
+This update is intended for all stations.  In addition to several
+small improvements, the main change in this version is support in
+'drudg' for 'sched' staggered start mode which schedules different
+recording start times at different stations.  This cannot work
+optimally because it does not follow the 'sked' observation time-line
+that 'drudg' assumes.  However, the new support will reduce wasted
+recording time, improve the quality of the Tsys measurements, and
+maximize the time that the data is marked valid after the Tsys
+measurements.
+
+We encourage all stations to upgrade now even if they do not need the
+new features and bugs fixes because doing so will make future upgrades
+easier.  Upgrading from 9.11.19 is very easy.
+
+The most significant changes in version 9.11.20 were:
+
+   (i) Ad hoc support in 'drudg' for 'sched' stagger start mode.  In
+       this mode there are different recording start times at
+       different stations.  The data valid time for a station is the
+       time that the antenna is expected to reach the source at that
+       station.  This violates the 'sked' observation timeline that
+       'drudg' assumes.  However, with advice from Jon Quick
+       (HartRAO), we have tried to make the best possible work around
+       that will support this mode.  In this case, 'drudg' will start
+       recording at the indicated data valid time, then execute
+       'preob', then mark the data valid, then run 'midob'.  This
+       minimizes the wasted recording time and maximizes the chances
+       that a good calibration will be possible when 'preob' is run.
+       It also maximizes the amount of time the data is marked valid
+       after 'preob' completes because there are no time sequencing
+       commands in the schedule between the start of recording through
+       'midob'.  This accomodates continuous or non-continuous
+       calibration 'preob' procedures automatically.
+ 
+  (ii) Improvements to 'mk5c_mode' to fully support Mark 5C and
+       FlexBuff recording for both 5B/Ethernet and VDIF recording with
+       jive5ab.  This change consists primarily of accepting any
+       effective sample rate and total bit rate that will fit in an
+       unsigned 64-bit integer, i.e., 18446744073709551615 Hz or Mbps.
+       Rates that do not correpond to integer Hz sample rates and
+       integer MHz total bit rates are not supported.  This has no
+       impact on current usage of the 'mk5c_mode' command and goes
+       significantly beyond any capability that is needed now.  This
+       change cleaned up several internal aspects of the
+       implementation, including using only integer arithmetic for the
+       rates, and provides complete compatibilty with jive5ab in this
+       area.  Thanks to Harro Verkoutor (JIVE) for motivation, help
+       with implementation details, and help with testing this change.
+
+       As part of this change, the 'bit_streams=...' command now
+       ignores all parameters except the bit mask.
+
+       Please see 'help=mk5c_mode' for more details.  This help page
+       also includes a description of how to enable 5B/Ethernet
+       recording, which the FS does not directly support, in case it
+       is needed in an unusual situation.
+
+ (iii) The FMST program for Mark 5B recorders was improved to give a
+       specific error message for the case where it is run right after
+       the jive5ab control program is started.  In this case, jive5ab
+       reports an error rather than reporting the time, since there
+       has been no 'dot_set=...' command (DIMino does not report an
+       error in this case).  Although FMSET already reported an error
+       and still allowed the time to be set, it seemed worthwhile to
+       have a more specific message in this case.  This should also
+       help ease the transition for stations that are moving from
+       DIMino to jive5ab.
+
+  (iv) Several small improvements were made to plog and fesh.
+
+   (v) The VEX parser now support units for the rate in clock_early
+       statements.
+
+  (vi) Improved example versions of the station 'metserver' and
+       'metclient' programs.  The improvements include trapping more
+       error and support for WMT70x wind sensors.  The FS now supports
+       acces to local or remote instances of 'metserver'.
+
+ (vii) Small improvements were made to gnplt: more Tcal points pre
+       band and non-default font sizes.
+
+(viii) Support for user devices in 'tsys', 'onoff', and 'fivept'
+       commands that don't support measurements of zero level.
+
+As always, we are deeply indebted to Jonathan Quick (HartRAO) for his
+many significant contributions that go far beyond what is explicitly
+mentioned.
+
+
+II. Installation
+
+Detailed instructions are provided below for installing 9.11.20 as an
+upgrade to 9.11.19, the previous stable release.  If you have an older
+version than 9.11.17, please refer to the appendix, which is described
+next, for more information.
+
+A section 'A. Reference Appendix for Installation' is provided at the
+end of this document.  It includes seven sub-sections:
+
+ A.1. Upgrading from FS versions before the previous stable
+ A.2. Example standard procedure libraries
+ A.3. Cut-and-paste installation tips
+ A.4. Making a back-up before installing
+ A.5. Disk space requirements
+ A.6. Set operations file permissions
+ A.7.  Fix .prc file 'define' lines
+
+If you haven't upgraded or installed the FS before, you may want to
+review the appendix.  It is STRONGLY recommended that you back-up your
+operational system before upgrading.
+
+The installation steps for upgrading from 9.11.19 are listed below.
+
+ (0) Back-up your operational system.  Having a back-up to return to
+     will allow you to continue operations in case something goes
+     wrong with the installation.  For more detail, please see
+     sub-section 'A.4. Making a back-up before installing'.
+
+ (1) Place a copy of the fs-9.11.20 archive in your FS machine's
+     '/tmp' directory.  For example, you might do the following:
+
+       a. navigate to URL https://vlbi.gsfc.nasa.gov/software/fs
+       b. enter your FS account name and password at the prompt
+       c. click on the 'dist' link
+       d. download fs-9.11.20.tgz
+       e. scp transfer fs-9.11.20.tgz to your FS machine, placing it
+          in '/tmp' directory
+
+     Another FS server is available at: http://www.metsahovi.fi/fs/.
+
+     Your institution must have an account on the servers in order to
+     download files.  Please contact Ed (ed.himwich@nasa.gov), if you
+     need an account or can't find your password.
+
+ (2) Log-in as 'root'.
+
+ (3) Extract the source from the archive:
+
+       cd /
+       tar xzpf /tmp/fs-9.11.20.tgz
+
+ (4) Set the link for the new FS version:
+
+       cd /usr2
+       ln -sfn fs-9.11.20 fs
+
+ (5) Having the wrong ownership and/or permissions on the operational
+     files can cause errors during FS operations.  If this needs to be
+     fixed, please refer to sub-section: 'A.6. Set operations file
+     permissions' to make sure they are all set to the correct
+     values.
+
+ (6) ** VERY IMPORTANT **  Log-out as 'root', and log-in as 'prog'.
+
+ (7) Make the FS:
+
+       cd /usr2/fs
+       make 
+
+ (8) This step is for modifying your local programs. That should not
+     be necesary for this update, but we do recommend that recompile
+     and relink your programs against the new FS version as described
+     in the next step.
+
+     However, if you use 'metserver' and/or 'metclient', we recommend
+     that you update yout local copies with the new versions.  You can
+     defer this until the FS itself has been updated successfully.
+     The new FS will work with the old version of 'metserver' if you
+     update your 'equip.ctl' as described in step (12) below.
+
+ (9) Remake your local software.  If '/usr2/st/Makefile' is set-up in
+     the standard way, you can do this with:
+
+       cd /usr2/st   
+       make rmdoto rmexe all
+
+(10) ** VERY IMPORTANT **
+
+     Reboot the computer.  This is important for re-initializing
+     shared memory with the new version.
+
+     ** VERY IMPORTANT **
+
+(11) Log-in as 'oper'.
+     
+(12) This step is for updates to the local control files.  The only
+     change in the control files is in 'equip.ctl'.  An update is only
+     required if you use the 'metserver' program for meteorological
+     data in the FS.  However, even if you don't use it, it is
+     recommended that you update the comments so there won't be
+     confusion in the future.
+
+     The change is in the line for met. sensor type (non-comment line
+     16).  Previously for use with 'metserver' only a number port
+     number was supplied on this line.  In the new version the port
+     number must be followed by a hostname. The nominal values for
+     these parameters are:
+
+       50001 localhost
+
+     However, other port numbers can be used and other hosts depending
+     on how 'metserver' is configured.  The hostname may be up to 64
+     characters in length.  The change to the comments, which all
+     stations should implement, before this non-comment line, are:
+
+       *met sensor type: cdp or two fields for metserver: port hostname 
+       *default choice for metserver is  50001 localhost      
+
+     Please see '/usr2/fs/st.default/control/equip.ctl' for an
+     example.
+
+(13) This step is for updates to your SNAP procedure files.  There are
+     two changes.  The first (i) is required if you use a Mark 5
+     recorder.  The second (ii) is optional and only needed if you
+     want the 'sched_end' procedure to push experiment logs for you.
+
+      i.  If you use a Mark 5 recorder, the previous standard was to
+          record the bank in use in the 'midob' procedure.  It is now
+          recognized that this may fail.  Instead the set-up procedure
+          generated by 'drudg' includes:
+
+            mk5=bank_set?
+
+          command after the 'bank_check' commmand if (and only if) a
+          Mark 5 recorder is in use.
+
+          Previous instructions sent on the FS mail list recommended
+          that the above command be removed from 'midob' and for
+          stations using Mark 5 recorders only, to place it in the
+          'checkmk5' procedure.  For stations that switch between Mark
+          5 and FLeBuff, it was recommended that they manage it as
+          they wished, but if the above command was used with
+          FlexBuff, it would fail.
+
+          Accordingly, please review your 'midob' and 'checkmk5'
+          procedures in any versions of your station procedure library
+          that you maintain and remove any instances of the above
+          command.  
+
+     ii.  If you wish you can update your 'sched_end' procedures to
+          auotmatically push logs as described below in the FS changes
+          section under item 12.  Please refer to that item for a
+          description of the changes.
+
+(14) This step is for miscellaneous FS related changes.  There are
+     two.  One (i) is recommended if you have been using 'plog'.  The
+     other (ii) is optional, to be used if you want a non-default size
+     font in 'gnplt'
+
+      i.  If you have been using 'plog' to push logs, it is
+          recommended that you clean-up any existing cookie files.
+          You can find them using:
+
+            find /usr2 -name '.urs_cookies'
+
+          They can be deleted individually using the login of the
+          account that owns them, typically 'oper'.
+
+     ii.  If you want to use a font size other than the default (8) in
+          'gnplt', you set an enviroment variable in your shell
+          session before running 'gnplt'.  A possible larger more
+          readable font size might be '12'.  If your shell is 'tcsh',
+          you can use '12' issuing the following command before
+          running 'gnplt' by issuing:
+
+            setenv FS_GNPLT_FONTSIZE 12
+
+          for 'bash', use:
+
+            export FS_GNPLT_FONTIZE=12
+
+          To make this the default whenever you login, you can add the
+          appropriate command to your '~/.loginrc' ('tcsh') or
+          '~/.profile' ('bash') file as appropriate.
+
+(15) Test the FS as 'oper'.  Generally speaking a fairly thorough test
+     is to run a test experiment.  Start with using 'drudg' to rotate
+     a schedule, 'drudg'-ing it to make '.snp' and '.prc' files,
+     making listings, and any other pre-experiment preparation you
+     normally do, then execute part of schedule, and perform any
+     normal post-experiment plotting and clean-up that you do.  The
+     idea here is to verify that everything works as you expect for
+     normal operations.  In particular for this upgrade you should
+     test that Mark 5 operations work as expected.
+
+(16) This step is for miscellaneous FSLx changes. None are required
+     for this update.
+
+(17) Consider when to update your back-ups.  You certainly should not
+     update them until you have performed the tests described above.
+     It would be prudent to wait until you have successfully run an
+     experiment or two and preferably received word that the
+     experiment(s) produced good data.  The chances of needing to use
+     your back-up should be small.  If something does happen, you can
+     copy the back-up to the (now assumed bad) updated disk.  You can
+     then either use the restored disk or apply the FS update again.
+     Managing this is a lot safer if you have a third disk.
+
+
+III. Changes Since Version 9.11.19
+
+This section is divided into three sub-sections: A. Changes in the FS,
+B. Changes in 'drudg', and C. Known FS Bugs.  Each sub-section starts
+with a summary of the items covered followed by a more detailed
+description.
+
+			 A. Changes in the FS
+
+The following is a summary of FS changes since 9.11.19.
+
+ 1. Full support of jive5ab sample/bit-rate capabilities for Mark 5C
+    and FlexBuff.
+ 2. FMSET program improved for use with jive5ab on Mark 5B recorders.
+ 3. Improvements to plog.
+ 4. Improvements in fesh.
+ 5. logpl now plots values that proceed a trailing semi-colon.
+ 6. An internal error that could cause very long log entries to
+    overwrite buffer limits was fixed.
+ 7. The VEX parser was fixed to work on 64-bit system.
+ 8. The VEX parser now supports optional units for the clock rate
+    field in the clock_early parameter.
+ 9. MATCN was fixed to report some previously ignored error
+    conditions.
+10. The DBBC PFB 'form=...' command now accepts codes 'spol', 'full'
+    and 'full_auto'.
+11. Recovery of log files that were deleted while the FS was still
+    writing to them was made faster.
+12. The 'if' command can now test on the schedule name, including
+    just leading substrings.
+13. Improved versions of station 'metserver' and metclient' programs
+    are included.
+14. The 'mk5b_mode' command now uses "updsnor" for 'net_protocol' in
+    all cases for FlexBuff.
+15. The maximum size of the Tcal table as a function of frequency was
+    increased to 1200.
+16. Added environment variable 'FS_GNPLT_FONTSIZE' to select
+    non-default font sizes.
+17. Support for user devices in 'tsys', 'onoff', and 'fivept' commands
+    that don't support measurements of zero level.
+18. New 'release' string for version number.
+19. Optional Makefile enviroment variable FS_MONIT_ADD_LIB for monit
+    family of programs
+
+A more detailed discussion of these changes follows.
+
+ 1. Full support of jive5ab sample/bit-rate capabilities for Mark 5C
+    and FlexBuff.  This change consists primarily of supporting any
+    effective sample rate and total bit rate that will fit in an
+    unsigned 64-bit integer, i.e., 18446744073709551615 Hz or Mbps.
+    Rates that do not correpond to integer Hz sample rates and integer
+    MHz total bit rates are not supported.  This has no impact on
+    current usage of the 'mk5c_mode' command and goes significantly
+    beyond any capability that is needed now.  This change cleaned
+    up several internal aspects of the implementation, including
+    using only integer arithmetic for the rates, and provides complete
+    compatibilty with jive5ab in this area.  Thanks to Harro Verkouter
+    (JIVE) for instigating this improvement and his support in the
+    implementationn and testing.
+
+    Ask part of this change, the 'bit_streams=...' command now ignores
+    all parameters except the bit mask.
+
+    Please see 'help=mk5c_mode' for more details.  This help page also
+    includes a description of how to enable 5B/Ethernet recording,
+    which the FS does not directly support, in case it is needed in an
+    unusual situation.
+
+ 2. FMSET program improved for use with jive5ab on Mark 5B recorders.
+    FMSET now gives a specific error message for the case where it is
+    run right after the jive5ab control program is started.  In this
+    case, jive5ab reports an error rather than reporting the time,
+    since there has been no 'dot_set=...' command (DIMino does not
+    report an error in this case).  Although FMSET already reported an
+    error and still allowed the time to be set, it seemed worthwhile
+    to have a more specific message in this case.  This should also
+    help ease the transition for stations that are moving from DIMino
+    to jive5ab.
+
+ 3. Improvements to plog. Plog now checks if a log file is open by
+    another program before moving it.  Before this checked was added,
+    there could be a bad interaction when a log was still open in
+    the Field System and log reduction was to be performed by plog
+
+    Plog now checks for the STATION environment variable only when
+    needed.  This improves the utility of plog on non-FS machines.
+
+    Plog now supports OPAR's HTTP method.  The password must be
+    requested from the data center and placed in '~/.netrc'.  The old
+    OPAR FTP method has been removed.
+
+    Bug fixed for plog's quiet (-q) flag not suppressing certain
+    messages.  In particular, progress bars now honour this flag.
+    Note that progress bars are not shown if the output is not a
+    terminal, for example when plog is opened with popen.
+
+    Bug fix for cookie files being written to the current directory
+    rather than the users home.  Cookies are also now created with a
+    umask of 007.  Stations may like to look for the extraneous cookie
+    files to remove on the file system with, for example, `find /usr2
+    -name '.urs_cookies'`.
+
+    Plog now has a version flag to aid debugging.
+
+ 4. Improvements in fesh. Fesh's quiet flag now behaves as expected.
+    
+    Fesh now has a version flag to aid debugging.
+
+ 5. logpl now plots values that proceed a trailing semi-colon.  This
+    situation might occur in log entries for a low-level VSI-S device
+    response.  Thanks to Pablo de Vicente and Javier González García
+    at Yebes for contributing this improvement.
+
+ 6. An internal error that could cause very long log entries to
+    overwrite buffer limits was fixed.  The maximum length of log
+    messages (and class messags in general) is 1024 bytes, including
+    the time tags.  Longer entries are truncated.
+
+ 7. The VEX parser was fixed to work on 64-bit system.
+
+ 8. The VEX parser now supports optional units for the clock rate
+    field in the clock_early parameter.  Technically, units should be
+    required, but for backward compatibility with existing usage they
+    are optional.
+
+ 9. MATCN was fixed to report some previously ignored error
+    conditions.
+
+10. The DBBC PFB 'form=...' command now accepts codes 'spol', 'full'
+    and 'full_auto'.  Although the FS does not provide full support
+    for operations with these codes, this change should eliminate
+    error messages for 'off-label' use of the FS with these codes.
+
+11. Recovery of log files that were deleted while the FS was still
+    writing to them was made faster.  Additionally, the formating of
+    the progress meter messages was improved to make it clearer that
+    the user should wait for this recovery process to finish before
+    proceeding.  The latter may help particularly if there is other
+    information being output to the display in parallel.
+
+12. The 'if' command can now test on the schedule name, including just
+    leading substrings.  A 'schedule:string' condition was added to
+    the 'if' command.  The 'string' can either be the entire schedule
+    name or a leading substring.  This can be used to make conditional
+    commands that depend on the schedule name or a leading substring
+    of the name.  Please see 'help=if' for more details. 
+
+    As an example of how this might be used, consider a station that
+    participates in both IVS and EVN experiments.  They might want to
+    use this feature to set-up have the 'sched_end' procedure to
+    automatically and selectively push logs from IVS experiments to
+    their selected IVS data center using 'plog'.  The following
+    example procedures show how this might be set-up.
+
+    The 'sched_end' procedure could contain:
+      if=schedule:aov,push_log
+      if=schedule:aps,push_log
+      if=schedule:aua,push_log
+      if=schedule:crd,push_log
+      if=schedule:crf,push_log
+      if=schedule:eur,push_log
+      if=schedule:ohg,push_log
+      if=schedule:r1,push_log
+      if=schedule:r4,push_log
+      if=schedule:rd,push_log
+      if=schedule:rv,push_log
+      if=schedule:t2,push_log
+
+    The 'push_log' procedure could contain:
+      log=station
+      sy=popen 'plog -l 2>&1' &
+
+    There are a few things to note about this example:
+
+      i. The above commands cover all schedules in the 2018 IVS master
+         schedule.  Most stations will only need a subset.  The
+         strings shown may need to be updated in the future.
+
+     ii. If a station particapates in only IVS experments, 'sched_end'
+         can just call 'push_log' without using 'if' or the commands
+         from 'push_log' can be incorporated directly.
+
+    iii. Be careful to be sure there are no naming conflicts with
+         other non-IVS experiments.  Some IVS experiments could be
+         identified by longer leading strings, although in some cases,
+         this may mean that they may need to updated more frequently.
+
+     iv. The STATION and DATA_CENTER environment variables have to
+         have been set-up for 'plog'.
+
+      v. The use of 'popen' and the '2>&1' is highly recommended.  It
+         allows the output of 'plog', including any error messages, to
+         be recorded in the log for information and troubleshooting.
+
+13. Improved example versions of station 'metserver' and metclient'
+    programs are included.  The main changes in 'metserver' program is
+    detection and reporting if the device reading loop is stuck and
+    support for WMT70x (only) wind sensors.  If you use 'metserver'
+    and/or 'metclient' programs, it is recommended that you update to
+    the new versions.  The new FS version can communicate with either
+    the old or new 'metserver' programs. The new FS version can use
+    either local or remote instances of 'metserver'.  It is necessary
+    to update the 'equip.ctl' if you use 'metserver' for
+    meteorological data in the FS.
+
+14. The 'mk5b_mode' command now uses "updsnor" for 'net_protocol' in
+    all cases for FlexBuff.  This change was requested/recommended by
+    Harro Verkouter (JIVE).  It helps 'scan_check' recognize dropped
+    packets as a clue to their being Ethernet issues.
+
+15. The maximum size of the Tcal table as a function of frequency was
+    increased to 1200.  This allows 2 MHz spacing of Tcal values for a
+    dual polarization 1 GHz bandwidth receiver, with room to spare.
+    This change was requested by Jun Yang (Onsala).
+
+16. Added environment variable 'FS_GNPLT_FONTSIZE' to select
+    non-default font sizes.  The user can add the environment variable
+    (exported) before running 'gnplt' to select non-default font
+    sizes.  The default size is '8'.  A possible larger more readable
+    font size might be '12'.
+
+17. Support for user devices in 'tsys', 'onoff', and 'fivept' commands
+    that don't support measurements of zero level.  This allows
+    devices for which 'zero' or baseline signal can't be measured
+    conveniently under computer control.  This works best for devices
+    that return zero of there is no input, e.g., digital detectors.
+    Please see 'help=user_device' for more details.
+
+18. New 'release' string for version number.  With this version of the
+    FS it is possible to specify a 'release' string that is appended
+    to the FS version number.  It is displayed in the log "Log Opened"
+    line and in the output of the FSVERSION command.  The 'drudg'
+    opening message does not display the 'release' string at this
+    time.
+
+    The release string is derived from the directory name of the FS
+    source, which must be of the form:
+
+      fs-VERSION.SUBLEVEL.PATCHLEVEL-string
+
+    e.g.,
+
+      fs-9.11.20-rc1
+
+    For standard releases, the trailing '.string' is omitted.
+
+    The use of '-string' can be used to distinguish between different
+    test releases and for other purposes.  The 'string' can up to 32
+    characters, but it is desirable to keep it short.  The top-level
+    Makefile will extract the FS version and release information from
+    the top-level directory that the Makefile is in.  As a result it
+    is no longer necessary to update the Makefile for a new directory
+    name.
+
+19. Optional Makefile enviroment variable FS_MONIT_ADD_LIB for monit
+    family of programs.  This variable can be used specified
+    additional local libraries that may be needed for the LIBES
+    variable in monit/Makefile.  This variable can be set the 'prog'
+    user's environment on login so that it is always available.
+    Examples can be found in the .login' and '.profile' files in
+    /usr2/fs/st.default/prog for the 'tcsh' and 'bash; shells,
+    respectively.  This only needs to be used if the contents of the
+    default LIBES variable in the exisiting Makefile is not complete
+    for the Linux distribution being used.
+
+A complete history of the various changes and the routines they affect
+is in /usr2/fs/misc/changes.txt.
+
+			B. Changes in 'drudg'
+				   
+'drudg' opening message date is 2018Apr20.
+
+The following is a summary of 'drudg' changes since 9.11.19.
+
+ 1. Ad hoc support for 'sched' stagger start mode.
+ 2. the 'mk5=bank_set?' query was added to the setup procedure for
+    Mark 5 recorders.
+
+A more detailed discussion of these changes follows.
+
+ 1. Ad hoc support for 'sched' stagger start mode.  In this mode there
+    are different recording start times at different stations.  The
+    data valid time for a station is the time that the antenna is
+    expected to reach the source at that station.  This violates the
+    'sked' observation timeline that 'drudg' assumes.  However, with
+    advice from Jon Quick (HartRAO), we have tried to make the best
+    possible work around that will support this mode.  In this case,
+    'drudg' will start recording at the indicated data valid time,
+    then execute 'preob', then mark the data valid, then run 'midob'.
+    This minimizes the wasted recording time and maximizes the chances
+    that a good calibration will be possible when 'preob' is run.  It
+    also maximizes the amount of time the data is marked valid after
+    'preob' completes because there are no time sequencing commands in
+    the schedule between the start of recording through 'midob'.  This
+    accomodates continuous or non-continuous calibration 'preob'
+    procedures automatically.
+
+ 2. the 'mk5=bank_set?' query was added to the setup procedure for
+    Mark 5 recorders.  This change was made to support the removal of
+    the same query from local 'midob' and 'checkmk5' procedures.
+    Originally the command was included in the local 'midob'
+    procedure, but it was later recognized that it may fail.  The
+    command is added to the setup procedure only if the selected
+    recorded is a Mark 5. As a resultq the station procedures can be
+    independent of whether a Mark 5 or FlexBuff recorder is in use.
+
+A complete history of the various changes and the routines they affect
+is in /usr2/fs/drudg/change_log.txt.
+
+			   C. Known FS Bugs
+
+(The only change in this section since the previous version is the
+addition of items #13 and #14.)
+
+The following is a summary list of known bugs. They are described in more
+detail after the list.
+
+ 1. Do not run 'fmset' for extended periods.
+ 2. 'odd' and 'even' head types not supported for Mark IV & VLBA4.
+ 3. 'odd'/'even' head types not supported for VLBA style tapeforms.
+ 4. CHEKR does not check the status of the Mark IV formatter or Mark 5
+    recorder.
+ 5. Extraneous errors when tape is stopped by low tape sensor.
+ 6. 'Comm=' command in logex extracts only the first command.
+ 7. S2 error scheme clumsy.
+ 8. No extra spaces allowed in 'ibad.ctl' file.
+ 9. ONOFF and FIVPT programs hang.
+10. FS SNAP command pages don't list tape drive suffix numbers.
+11. LBA rack TPI detector is not usable.
+12. mk5b_mode and bit_stream commands only report the expected sample
+    rate.
+13. Some fmpsee routines do not report file I/O error through the log
+    system.
+14. Some systems calls, particularly in mk5cn and dbbcn, use separate
+    UN errors to elaborate on errors in system calls.
+
+A more detailed discussion of these bugs follows.
+
+ 1. Do not run 'fmset' for extended periods.  For stations that have
+    formatter that can be set with 'fmset', the program should not be
+    run for extended periods of time.  The 'fmset' program should be
+    used only to set or briefly verify that the formatter time is
+    correct.  Do not leave 'fmset' running after completing either of
+    these tasks, especially during an experiment.
+
+    The 'fmset' program dominates the Field System when it is running
+    and this is likely to interfere with the running of an experiment
+    or other activities.  The only way to detect the time from the
+    VLBA formatter with greater precision than one second it to wait
+    for the seconds response from the formatter to change.  This
+    requires the FS to communicate with the formatter almost
+    continuously.  A similar problem exists for the S2 recorder.  This
+    problem is less severe for other formatters, but extended use of
+    'fmset' in this case should be avoided as well.  A reminder about
+    this is included in the 'fmset' menu.
+
+ 2. 'odd'/'even' head types not supported for Mark IV & VLBA4.  The
+    Mark IV and VLBA4 rack version of the 'form' command and the Mark
+    IV and VLBA4 recorder versions of the 'repro' and 'parity'
+    commands do not support the 'odd' and 'even' parameters for the
+    read and write head types and reproduce electronics in the
+    'head.ctl' control file.  This means that automatic substitution
+    of odd or even head in passes that use only even or odd heads
+    respectively does not occur.  The only correct settings for the
+    read and write head parameters and reproduce electronics is 'all'.
+    This will be fixed in a future revision.  Please let Ed know if
+    you are missing some tracks and need to work around this
+    limitation.
+
+ 3. 'odd'/'even' head types not supported for VLBA style tapeforms.
+    For any mode recorded with VLBA style tapeform (14 index
+    positions), the only correct setting of the read and write head
+    types on the 'head.ctl' is 'all'.  This will be fixed in a future
+    revision.  Please let Ed know if you are missing some tracks and
+    need to work around this limitation.
+
+ 4. 'chekr' does not check the status of the Mark IV formatter or Mark
+    5 recorder.  Now that most communication problems with the Mark IV
+    formatter have been solved, this will be possible and will be done
+    in the future.  'chekr' support will be implemented for Mark 5
+    despite communication problems, they will have to be ignored
+    unless they extend beyond a certain amount of time.
+
+ 5. Extraneous errors when tape is stopped by low tape sensor.  When a
+    tape drive has been commanded to move the tape and then stops
+    because it hit the low tape sensor (or when S2 recorders hit the
+    BOT or EOT), 'chekr' will complain periodically that the tape
+    drive is not in the correct state.  In principle the FS should be
+    smarter about this.  However, if the tape is managed correctly by
+    the schedule this error message should never occur.  If it does,
+    then it it an indication that there is either a problem with: (1)
+    the schedule, (2) the check procedures, (3) the recorder, or (4)
+    the tape is too short.  If any of these cases apply they should be
+    corrected.  It is more likely that this error message will occur
+    when the tape is being controlled manually.  In this case, issuing
+    an 'ET' command will convince the FS that the tape drive should be
+    stopped and the error message will cease.
+
+ 6. 'comm=' command in 'logex' extracts only the first command.  The
+    'comm=' command in 'logex' extracts only the first command
+    commanded and displayed.  This problem was noted by Giuseppe
+    Maccaferri (Medicina).
+
+ 7. S2 error scheme clumsy.  The error and status response number
+    reporting scheme for S2 recorders is clumsy.  FS errors that have
+    mnemonic 'rl' are mostly error responses from the recorder or the
+    RCL interface library that is used to communicate with the
+    recorder.  If the numeric part of an 'rl' error is greater than
+    -130, then it is the error code returned by the recorder.  If the
+    numeric part is less than -130, but greater than -300, then add
+    130 to the value, the absolute value of the result is the error
+    response code from the RCL library.  For values less than or equal
+    to -300, a FS error has been detected.  Status response codes are
+    all reported with mnemonic 'rz' and the numeric value is the
+    negative of the status response code.  In all cases an appropriate
+    error or status message is displayed.  These messages are retained
+    in the log.
+
+ 8. No extra spaces allowed in 'ibad.ctl' file.  The format of the
+    'ibad.ctl' must not contain any leading or embedded spaces.  In
+    systems that use the LLP AT-GPIB driver (pre-FS Linux 4), if
+    either the option 'no_untalk/unlisten_after' is misspelled or an
+    incorrect device name is supplied, the driver will cause a
+    segmentation violation when it is initialized and the FS will
+    terminate.  Unfortunately there is no way to prevent this problem
+    in a general way; it reflects a limitation in the driver.
+
+ 9. 'onoff' and 'fivpt' programs hang.  The 'onoff' and 'fivpt'
+    programs have been known to 'hang' mysteriously.  This seems to be
+    caused by some problem with the 'go' mechanism that is used to
+    restart the program when it pauses to allow a SNAP procedure, such
+    as 'calon' or 'caloff' to execute.  The 'go' that is used to
+    restart the program fails for some reason.  This has been
+    exceedingly difficult to debug because it is intermittent and
+    fairly rare.  There is however a good work around for it.  The
+    'calon' and 'caloff' procedures are called by procedures 'calonfp'
+    and 'calofffp' for 'fivpt' and 'calonnf' and 'caloffnf' for
+    'onoff'.  'fivpt' and 'onoff' may hang during (or actually just
+    after) the execution of one these procedures that FIVPT and ONOFF
+    will typically hang.  If this happens, you will have to terminate
+    the FS to recover.  You can prevent it from happening again (for
+    this procedure) by adding the lines:
+
+      !+1s
+      sy=go fivpt &
+
+    to the end of 'calonfp' and 'calonfffp'.  For 'calonnf' and
+    'caloffnf', please add:
+
+      !+1s
+      sy=go onoff &
+
+    If you see other situations where 'fivpt' and 'onoff' hang, please
+    let Ed know.
+
+10. FS SNAP command pages don't list tape drive suffix numbers.  The
+    FS SNAP manual pages and the help pages available through the
+    'help=' command do not reflect when multiple versions are
+    available with different suffixes depending on the number of drive
+    specified in the control files.  For example, there is only a
+    'tape' page, no 'tape1' or 'tape2' page.  However, the help
+    facility will display the version of the command with no suffix
+    when an available command with a suffix is used.  For example, if
+    two drives are defined, then 'help=tape1' and 'help=tape2' will
+    work, but 'help=tape' will not and vice-versa if only one drive is
+    defined.
+
+11. LBA rack TPI detector is not usable.  The Australian LBA Data
+    Acquisition System currently lacks a functional total power
+    detector though support has been included.  To allow approximate
+    system temperature calibration, all the setup commands and the TPI
+    detectors of the modules of a co-existing Mark IV rack are
+    currently also available when the rack type is specified to be
+    LBA4.
+
+12. 'mk5b_mode' and 'bit_streams' commands only report the expected
+    sample rate.  The value of the actual clock rate is not read back
+    from the recorder in order to calculate the actual effective
+    sample rate.  Consequently, the query log output includes
+    parenthesis around the sample rate as indication that it is not
+    read, but expected.  The 'mk5c_mode' command does report the
+    actual sample sample rate.
+
+13. Some 'fmpsee' routines do not generally report file I/O error
+    through the log system for programs within the FS, specifically
+    'boss', 'incom', and 'aquir'.  The 'fmpopen()' routine does use
+    the log system to report errors.  Those are the most common
+    errors.  However other routines report errors with terminal
+    output.  These other routines should eventually use the log
+    system.
+
+14. Some systems calls, particularly in 'mk5cn' and 'dbbcn', use
+    separate UN errors to elaborate on errors in system calls.  These
+    should eventually be integrated into the main error message, but
+    whether this makes the errors messages too long (maximum 120
+    characters) should be considered.
+
+
+A. Reference Appendix for Installation
+
+This appendix collects several topics that are useful for installation
+in general, but are usually not needed for routine updates.
+
+      A.1. Upgrading from FS versions before the previous stable
+
+If you are installing FS9 for the first time with this version, please
+follow the installation instructions in Section 4.5 of the FS9
+'Computer Reference' manual.  In this case you should also get a copy
+of the current FS9 'Control Files and Field System Initialization'
+manual.
+
+For reference, the list of the most recent 'critical updates,' since
+version 9.3.13, is given below.  These are updates that must be
+applied sequentially.  Please start with the next update with a later
+version number than what you have and apply it and the following
+listed versions before upgrading to 9.11.19.  You can find the latest
+versions of installation notes for these FS versions in the
+'/usr2/fs/misc' directory.  The list of critical updates is:
+
+  9.4.0
+  9.5.3
+  9.5.12
+  9.6.9
+  9.7.7
+  9.9.2
+  9.10.4
+  9.11.6
+  9.11.8
+  9.11.19
+
+Strictly speaking you do not need to actually use the source archives
+(.tgz files) of the previous versions.  You can just follow the steps
+in the upgrade notices for the corresponding FS versions.  However, it
+can be very helpful to actually install each version to help make sure
+that all of the upgrade steps have been completed and that the FS will
+run *and* to test it as described.  This can be particularly helpful
+when the upgrade requires some modifications to your local programs.
+So it probably best to actually install *and* test each version along
+the way.  This is especially true if you have to upgrade through more
+than one previous version.  Otherwise if a step was overlooked, it
+might be hard to identify for which version the error was made.
+
+You can find the archives for old versions at:
+
+  http://lupus.gsfc.nasa.gov/fs/dist/old/
+
+or
+
+  http://www.metsahovi.fi/fs/dist/old/
+
+If you have a version older than 9.3.13, please contact Ed
+(Ed.Himwich@nasa.gov).
+
+	      A.2. Example standard procedure libraries
+
+For reference purposes, information about the example station
+libraries for different equipment configurations is given here.  The
+files are found in /usr2/fs/st.default/proc.  They can be referred to
+and compared to what you have in '/usr2/proc/station.prc'.
+
+**ONLY** for new installations (or complete re-installs), you can copy
+the default version for your equipment to '/usr2/proc' renaming it to
+'station.prc' in the process, e.g.:
+
+  cd /usr2/proc
+  cp -i /usr2/fs/st.default/proc/3station.prc station.prc
+  chmod a+rw station.prc
+
+The '-i' option will prompt before overwriting an existing
+'station.prc' to give you a chance to recover if you did not realize
+you already had a station.prc file.  The table of correspondence
+between equipment types and default library names is given next.
+
+      Equipment        Prefix letters  Station Library
+      Rack/Drive1/Drive2
+
+      k42/k42              k42         k42station.prc
+      k42k3/vlba           k42k3v      k42k3vstation.prc
+      k42mk4/vlba          k42mk4v     k42mk4vstation.prc
+      k42mk4/vlbab/vlbab   k42mk4vb    k42mk4vstation2.prc
+      k42/k5               k42k5       k42k5station.prc
+      lba/s2               ls2         ls2station.prc
+      lba4/s2              l4s2        l4s2station.prc
+      mk3/mk3a             3           3station.prc
+      mk4/mk4              4           4station.prc
+      mk4/mk5a             45          45station.prc
+      mk4/vlba4            4v4         4v4station.prc
+      mk5/mk5b             5           5station.prc
+      none/s2              s2          s2station.prc
+      vlba/s2              vs2         vs2station.prc
+      vlba/vlba            v           vstation.prc
+      vlba/vlba2           v2          v2station.prc
+      vlba/vlba/vlba       v           vstation2.prc
+      vlba4/vlba4          v4          v4station.prc
+      vlba4/mk5a           v45         v45station.prc
+      vlba4/vlba42         v42         v42station.prc
+      vlba5/mk5b           v5          v5station.prc
+      dbbc/mk5b            d           dstation.prc
+
+If an example for your equipment type is listed, please let Ed
+(Ed.Himwich@nasa.gov) know so that it can be added.
+
+		 A.3. Cut-and-paste installation tips
+
+You can use cut-and-paste to reduce the amount of typing involved in
+the installation.  This reduces the chances of missing required spaces
+and other easily missed characters (like '.') in the commands.  The
+basic idea is to have two different terminals open, EITHER (preferred)
+two different xterm terminals either on the local X display or
+remotely logged in OR (more cumbersome) two different VT text
+terminals (Control-Alt-F*, where * is 1-6) on the FS computer you are
+upgrading.  You can then switch back and forth between the terminals,
+reading the instructions as you scroll through them (with 'more' or
+'less') on one terminal and entering commands on the other.  You can
+cut-and-paste complicated commands from the terminal with the
+instructions to the terminal where you are entering commands as
+needed.  You can use 'ssh' or 'su' to 'switch' to users as needed on
+the terminal where you are entering commands. For example, you can
+change to being 'prog' by executing:
+
+ ssh -X prog@localhost
+
+or
+
+ su - prog
+
+Please don't forget to log back out when you need to change users
+again or you may develop a series of 'nested' logins.  Any steps that
+require rebooting will of course completely log out all of your
+terminals; you will need to re-login again from scratch to continue.
+At the end of the update, it is recommended that you login as 'oper'
+on the local X display for the final testing.  Please also note that
+in order to paste into the X display login shell window for 'oper' and
+'prog', you typically must use Shift-Insert.  If you have any
+questions about how to cut-and-paste please contact Ed
+(Ed.Himwich@nasa.gov).
+
+	       A.4. Making a back-up before installing
+
+Before you begin the upgrade make sure you have a current back-up of
+your system in case something goes wrong.  If you are use FS Linux 5
+(FSL5), we recommend you use the tar based back-up that is part of the
+rotating disk back-up scheme.  A draft document that describes this
+method is available in the 'docs' sub-directory on the FS file servers
+as 'backups2.pdf'.  If you have an older FS Linux distribution, please
+use the disk-to-disk back scheme described in Section 5.8 of the FS9
+'Computer Reference' manual.  If you have an FSL6 (sarge), FSL7 (etch)
+FSL8 (lenny) configured to run a RAID, please see
+/usr2/fs/misc/RAID.pdf section APPLYING AN UPDATE for directions for
+applying an update.  If you have FSL9 (wheezy) system configured to
+run a RAID, see /usr2/fs/misc/FSL9_RAID.pdf section APPLYING AN UPDATE
+for directions for applying an update.  If you are running one of the
+FSL distributions and do not have documentation on how to make a
+back-up, please contact Ed.  If you have SCSI disks, Section 5.7 of
+the FS9 'Computer Reference' manual has a discussion of drive ID
+numbers if you are unsure about these.
+
+Normally you should choose to install the update on your primary disk
+after having made and verified your back-up.  Once the installation is
+complete, has been tested, and used for a little while, you can copy
+over your back-up with the upgraded primary.  If the upgrade fails,
+you should restore the back-up to the primary for operations.  You can
+then try to upgrade again when it is convenient.  In a desperate
+situation, you can use the back-up for operations.  You may choose to
+install the FS on your back-up disk for testing and then later copy
+the back-up onto the primary once you are satisfied with the new
+version.  In any event, please be sure to make a fresh back-up (and
+put it safely away) before continuing with the installation.
+
+		     A.5. Disk space requirements
+
+Please be sure that you have at least 50 MB of free space (use the
+'df' UNIX command to check free space) on your '/usr2' partition
+before starting the upgrade.  This would probably only be an issue for
+stations with 200 MB disks.  If you are tight on space, you may want
+to delete old log files and old versions of the FS (except your most
+recent one if you can avoid it of course).  Since you should have
+backed-up your system, you can even delete the '*.[oas]' and
+executable files of your old versions with no risk.  You might want to
+keep the source of the previous versions around for reference if you
+have room.  You can eliminate the non-source files by 'cd'-ing to each
+of the old FS directories in turn as 'prog' and executing:
+
+  make rmdoto rmexe
+
+as shell command.  If you have any questions about how to do this,
+please contact Ed.
+
+		 A.6. Set operations file permissions
+
+It is recommended that your local files for operations (control, proc,
+log, and sched directories and their contents) have the default
+ownership ('oper.rtx') and permissions ('rw-rw-rw', for directories
+'rwxrwxrwx').  To force this, please execute the script (as 'root'):
+
+  /usr2/fs/misc/fix_perm
+
+Answer 'y' to the prompt if you wish to proceed.  It is a good idea to
+do this, unless you have purposely changed the ownership and
+permissions to some other values.  If you don't want to restore the
+defaults, answer 'n' (this is the last chance to abort the execution
+of the script).
+
+		  A.7. Fix .prc file 'define' lines
+
+Sometimes due to errors (possibly caused during manual editing,
+instead of using PFMED), the 'define' statements in .prc files can be
+damaged.  This can lead to other problems including causing the
+contents of procedures being logged every time they are executed
+rather than just the first time they are used in a given log file.
+You can use the utility, /usr2/fs/misc/fix_define to fix this. You can
+run it when the FS is *not active* (as 'oper'):
+
+  cd /usr2/proc
+  /usr2/fs/misc/fix_define -t *.prc
+
+in 'test' mode to see if there any 'define' statements that need to be
+fixed.  If there are, they will be displayed.  If you choose to fix
+them, you can re-run the second command above without the '-t' flag to
+apply the fix.  An original of each .prc file that is changed is
+retained with an added .bak extension.

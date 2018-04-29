@@ -11,7 +11,11 @@ C           max_frq from 20 to 17
 C so that drudg will compile and load.
 C********************************************************************
 C
-C  Last modified:  890623 by NRV to add windows parameters
+! Now put in recent changes at the top.
+!
+! 2017Oct24 JMG MAX_SOR-->5000, MAX_CEL-->4990
+!
+C 890623 by NRV to add windows parameters
 C 891113 NRV Add max base/flux parameter
 C 900125 NRV added max tape length parameter
 C 900206 NRV Modified to remove SOCAT, STCAT
@@ -103,7 +107,7 @@ C *** NOTE: If this value is changed, then at least one of MAX_CEL
 C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
 C
       integer max_sor,max_cel,max_sat,max_frq
-      PARAMETER (MAX_SOR = 1000)
+      PARAMETER (MAX_SOR = 5000)
 
 C     The maximum number of CHARACTERS in a source name. Should be
 C     an even integer. Maximum size now is 26, to be cmpatible with
@@ -117,7 +121,7 @@ C     be selected for an experiment at one time. Used in SKED,SOCAT,DRUDG.
 C *** NOTE: If this value is changed at least one of MAX_SOR
 C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
 C
-      PARAMETER (MAX_CEL = 990)
+      PARAMETER (MAX_CEL = 4990)
 C
 C     The maximum number of satellite (orbital element) sources which
 C     can be selected for an experiment at one time. Used in SKED

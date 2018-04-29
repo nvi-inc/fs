@@ -37,6 +37,7 @@
 ! 2016Jan18 JMG. Added extra parameter for fila10g with DBBC
 ! 2016Apr07 JMG. Fixed format in writing out fila10g. Was writing, ",=" instead of "=," 
 ! 2016Sep11 JMG. Increased dim lsked_csb: max_csb-->2*max_csb.  Schedule fr036 HH caused problems
+! 2017Oct24 JMG. If 'bit_streams' then only care about mask. Everything else is null.
 
 ! local
       integer ipass
@@ -183,17 +184,16 @@
       kdebug=.false.   
       kastro3_mode=.false. 
 
+      lext_vdif="ext" 
       if(km5brec(1)) then
          lmode_cmd="mk5b_mode"
       else if(km5Crec(1)) then 
          lmode_cmd="mk5c_mode"
+         if(kfila10g_rack) lext_vdif="vdif"
       else
          lmode_cmd="bit_streams"
       endif 
-      lext_vdif="ext"
-      if(kfila10g_rack.and.km5crec(1)) then
-        lext_vdif="vdif" 
-       endif        
+      
 
 ! If we don't have a VSI4 formatter or a DBBC write out comments.
       kcomment_only=.false.   
@@ -431,11 +431,16 @@
         endif
         call drudg_write(lu_outfile,cbuf)
         write(lu_outfile,'("fila10g_mode")') 
+       endif     
+
+       if(lmode_cmd .eq. 'bit_streams') then
+! Only output mask.      
+         write(cbuf,'(a,"=",",0x",Z8.8,",,,")') lmode_cmd,imask
+       else
+         write(cbuf,'(a,"=",a,",0x",Z8.8,",,",f9.3)')
+     >    lmode_cmd,lext_vdif, imask,samprate(istn,icode)
        endif 
 
-        write(cbuf,'(a,"=",a,",0x",Z8.8,",,",f9.3)')
-     >    lmode_cmd,lext_vdif, imask,samprate(istn,icode)
-  
       call drudg_write(lu_outfile,cbuf)
       call drudg_write(lu_outfile,lmode_cmd)     
       if(kcomment_only) return

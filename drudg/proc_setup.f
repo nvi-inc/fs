@@ -27,7 +27,9 @@
 ! 2015Jul21 JMg. If cont_cal_polarity is "ASK" then do ask. 
 ! 2016Jan19 JMG. Distinguish between DBBC_DDC and DBBC_PFB
 ! 2016May24 PdV  check first 8 (not 10) characters of rack for continuous cal
-! 2016Sep11 JMG. For cont_cal prompt, make input appear on same line as prompt.                    
+! 2016Sep11 JMG. For cont_cal prompt, make input appear on same line as prompt. 
+! 2017Dec23 JMG. Updating handling of cont_cal prompt   
+! 2018Apr20 JMG. Fixed bug introduced in the above.                 
 
 ! local
       character*12 cnamep
@@ -101,6 +103,7 @@ c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
 
 
 ! Initialize cont_cal_out
+      write(*,*) "RACK ", cstrack_cap(istn),kcont_cal 
       if(cstrack_cap(istn)(1:8) .eq. "DBBC_DDC") then
         cont_cal_out=cont_cal_prompt
         call lowercase(cont_cal_out)
@@ -112,9 +115,9 @@ c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
           write(*,'(a,$)') "Enter in cont_cal action: (on/off) "
           read(*,*) cont_cal_out
           call lowercase(cont_cal_out)
-        end do
-        if(cont_cal_out .eq. "on" .and. 
-     &     cont_cal_polarity .eq. "ASK") then
+          kcont_cal = cont_cal_out .eq. "on"
+        end do     
+        if(kcont_cal .and. cont_cal_polarity .eq. "ASK") then
           iwhere=0
           do while(iwhere .eq. 0)       
             write(*,'(a, $)')
@@ -259,7 +262,7 @@ C  BBCffb, IFPffb  or VCffb
        endif ! kbbc kvc kfid
 
        if(cstrack_cap(istn)(1:8) .eq. "DBBC_DDC") then   
-          if(cont_cal_out .eq. "on") then 
+          if(kcont_cal) then 
              write(lu_outfile,'("cont_cal=on,",a)') cont_cal_polarity
           else if(cont_cal_out .eq. "off") then
              write(lu_outfile,'("cont_cal=off")')

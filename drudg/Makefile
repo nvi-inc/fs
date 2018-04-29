@@ -70,7 +70,7 @@ CFLAGS= -c  -DF2C
 #
 LIBS=$(UT)skdrut.a ../lnfch/lnfch.a ../fslb/fslb.a \
 ../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a \
-../vex/vex.a -lf2c -lfl
+../vex/vex.a -lf2c
 #
 ../bin/$(PROGRAM): $(OBJECTS) 
 	rm -f ./core

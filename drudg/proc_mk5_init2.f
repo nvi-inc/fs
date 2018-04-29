@@ -2,10 +2,11 @@
      >   ifan,samprate,ntrack_rec_mk5,luscn,ierr)
       include 'hardware.ftni'
 ! History:
-!  2014Dec06. Added Mark5C support
-!  2015Jun05 JMG. Repalced drudg_write by drudg_write. 
-!  2016May07 WEH. bank_check if only 2 Gbps or less
-!  2016Sep08 JMG.  For Mark5c and >2GBS output jiveab commands
+!  2014Dec06 JMG  Added Mark5C support
+!  2015Jun05 JMG  Replaced drudg_write by drudg_write. 
+!  2016May07 WEH  Bank_check if only 2 Gbps or less
+!  2016Sep08 JMG  For Mark5c and >2GBS output jiveab commands
+!  2017Dec20 JMG  Added 'mk5=bank_set?' after bank_check. 
 ! passed
       character*5 lform        !Form descriptor
       integer ifan              !fanout
@@ -41,6 +42,7 @@
       if(.not. kflexbuff .and. .not.
      &     (km5c .and. idrate*ntrack_rec_mk5.gt.2048)) then 
          write(lufile,'("bank_check")')
+         write(lufile,'("mk5=bank_set?")') 
       endif 
   
       if(km5c .and. .not.kflexbuff) then
