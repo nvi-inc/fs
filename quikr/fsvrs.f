@@ -42,6 +42,12 @@ C                   Put / to indicate a response
       nch = ichmv_ch(ibuf,nch,'.')
       idum=sVerPatch_FS
       nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      call fs_get_sVerrelease_fs(sVerRelease_FS)
+      idum=iflch(sVerRelease_FS,32)
+      if(idum.ne.0) then
+         nch = ichmv_ch(ibuf,nch,'-')
+         nch = ichmv(ibuf,nch,sVerRelease_FS,1,idum)
+      endif
       nch = nch-1
 C
       iclass = 0
