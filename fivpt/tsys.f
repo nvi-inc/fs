@@ -31,13 +31,23 @@ C
       integer*2 icmnd(3),iques,idolr,indata(12),isav(10),izero(10)
       integer*2 lwho
       character*5 name
-      logical kst
+      logical kst, kzero
       data icmnd/ 2H#9,2H3%,2H__/,iques/2H??/,idolr/2H$$/
       data isav/2h#9,2H3=,0,0,0,0,2H__,0,0,0/
       data izero/2H#9,2H3=,2H00,2H00,2H3f,2H3f,2H__,0,0,0/
       data nin/-20/,lwho/2hfp/,name/'fivpt'/
 C
       kst=ichcm_ch(ldevfp,1,'u').eq.0
+      if(kst) then
+         call fs_get_user_device_zero(user_device_zero)
+         if(ichcm_ch(ldevfp,2,'5').eq.0) then
+            kzero=user_device_zero(5).ne.0
+         else if(ichcm_ch(ldevfp,2,'6').eq.0) then
+            kzero=user_device_zero(6).ne.0
+         else
+            kzero=.true.
+         endif
+      endif
 C
 C MAKE SURE THE CAL IS OFF
 C
@@ -86,7 +96,9 @@ C
 C  TURN ON ALL THE ATTENUATORS
 C
       if (kst) then
-         call scmds('sigofffp',1)
+         if(kzero) then
+            call scmds('sigofffp',1)
+         endif
          ierr=0
       else if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
          if(ichfp_fs.ne.3) then
@@ -115,11 +127,17 @@ c       digital detector - assume tpzero=0
 C
 C  OKAY GET THE VOLTS
 C
-      if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack.or.
-     .   VLBA.eq.rack.or.VLBA4.eq.rack.or.kst) then
+      if((MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack.or.
+     .   VLBA.eq.rack.or.VLBA4.eq.rack.or.(kst.and.kzero)) .and.
+     .   .not.(kst.and..not.kzero)) then
         call volts(0,vbase,sig,vdum,sigdum,tdum,intp,rut,ierr,icont)
       else if(LBA.eq.rack.or.rack.eq.DBBC) then
 c       digital detector - assume tpzero=0
+	vbase=0.0
+	sig=0.0
+	tdum=0
+	ierr=0
+      else if(kst.and..not.kzero) then
 	vbase=0.0
 	sig=0.0
 	tdum=0
@@ -130,7 +148,9 @@ C
 C  RESET THE ATTENUATORS
 C
       if (kst) then
-         call scmds('sigonfp',1)
+         if(kzero) then
+            call scmds('sigonfp',1)
+         endif
          ierr=0
       else if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
          call matcn(isav,-13,idolr,indata,nin,2,ierr)
@@ -200,7 +220,9 @@ C
 8001  continue
       jerr=0
       if (kst) then
-         call scmds('sigonfp',1)
+         if(kzero) then
+            call scmds('sigonfp',1)
+         endif
          jerr=0
       else if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
          call matcn(isav,-13,idolr,indata,nin,2,jerr)
