@@ -1,9 +1,22 @@
 #
-VERSION = 9
-SUBLEVEL = 11
-PATCHLEVEL = 19
-FS_VERSION = $(VERSION).$(SUBLEVEL).$(PATCHLEVEL)
-export VERSION SUBLEVEL PATCHLEVEL FS_VERSION
+FS_VERSION := $(shell basename `pwd -P` | cut -d- -f2-)
+VERSION    := $(shell echo $(FS_VERSION) | cut -d. -f1 )
+SUBLEVEL   := $(shell echo $(FS_VERSION) | cut -d. -f2 )
+PATCHLEVEL := $(shell echo $(FS_VERSION) | cut -d. -f3 | cut -d- -f1)
+RELEASE    := $(shell echo $(FS_VERSION) | cut -d- -f2- -s)
+#
+ifeq ($(VERSION),)
+$(error no VERSION value)
+endif
+ifeq ($(SUBLEVEL),)
+$(error no SUBLEVEL value)
+endif
+ifeq ($(PATCHLEVEL),)
+$(error no PATCHLEVEL value)
+endif
+export VERSION SUBLEVEL PATCHLEVEL FS_VERSION RELEASE
+# print variable,  use 'make print-version' to print VERSION
+print-%  : ; @echo $* = $($*)
 #
 # If environment variable FS_SERIAL_CLOCAL is define with a non-empty value
 #  the port library and mcbcn program will be compiled with a O_NONBLOCK
