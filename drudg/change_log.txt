@@ -1,6 +1,20 @@
 This file contains a summary of changes made and why.
-2016Dec05 ../skdrut/frinp.f.  Was not correctly applyint sample rate from "R" line to all stations 
-2016Dec05 ../skdrut/change_freq_tracks.f. Fixed bug in how it was setting the sample-rate if it was absent in the schedule. 
+2018Apr02 snap.f: Fixed staggered start. I hope. 
+2017Dec23 snap.f:  If staggered start (different stations start at different times) then change handling of 
+          calibrations.  A.) Uses nomimal data_valid_time to start recording data and do calibration. 
+          B.) ical_time later sets data valid flag.  
+          ical_time is either nominal cal_time (10 sec) or ical_time_staggered, or if cont_cal is on, then 1.
+2017Dec20 proc_dbbc_pfb_tracks.f, proc_disk_tracks.f.  Got rid of extra "," before mask in 'bit_streams=' command. 
+2017Dec20 proc_mk5_init2.f.  Changed 'bank_set?' to 'mk5=bank_set?'
+2017Oct24 proc_dbbc_pfb_tracks.f, proc_disk_tracks.f 
+          If 'bit_streams' then only care about mask. Everything else is null.
+20178ct24 proc_mk5_int2.f:  Added 'bank_set?'  after bank_check
+2017Oct24 MAX_SOR-->5000, MAX_CEL-->4990
+2017Oct24 vlbah.f  Fixed output bugs in writing vlba pointing file. 
+2017Oct24 wrsos.f  Fixed bug in vlba pointing file. if RA seconds is >59.65s, then used to write out as 60.0s. 
+!********************************
+2016Dec05 ../skdrut/frinp.f.  Was not correctly applying sample rate from "R" line to all stations 
+2016Dec05 ../skdrut/count_freq_tracks.f. Fixed bug in how it was setting the sample-rate if it was absent in the schedule. 
 2016Nov29 ../skdrut/kvalid_rack.f.  Fixed sleeping bug. In second check of valid rack type was using unitialized variable. Corrected and added 'implicit none'.
 2016Nov29 ../skdrut/kvalid_rec.f.  Added 'implicit none' for consistency with kvalid_rack.f 
 2016Nov29 ../skdrut/vstinp.f, vunpdas.f. Changed crack from character*8 to character*10 to handle longer rack names. 

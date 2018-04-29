@@ -47,7 +47,6 @@ C 020103 nrv Change 7010 to 5010 for phase cal freqs.
 ! 2009Sep15 JMG. Had error when computing how many bits.  Fixed.
 ! 2009Sep22 JMG. Got rid of unused variables
 ! 2014Feb04 JMG. Modified to be in the same order as SCHED output
-! 2017Oct24 JMG. fixed minor bugs in  output (VLBA1:2-->vlba1:4, pcalxfreq1-->pcalcxfre2
 
 C
 C
@@ -221,8 +220,7 @@ C format = <mode>
           write(lu,'("format = ",a)') cmode(istn,icod)
         endif
         else
-! 2017Oct24. Was vlba1:2
-          write(lu,'("format = vlba1:4")')
+          write(lu,'("format = vlba1:2")')
         endif 
 
 C ifdistr = (1,0),(2,0),(3,0),(4,0)   for all codes
@@ -412,9 +410,8 @@ C   These lines allow the use of the pcal extractors on the DS board.
         write(lu,'(a)') 
      >   'pcalxfreq1=(1,250),(2,250),(3,6250),(4,6250),'//
      >       '(5,0),(6,0),(7,0),(8,0)'
-! 2017Oct24.  Was pcalxfreq1
          write(lu,'(a)') 
-     >    'pcalxfreq2=(1,250),(2,250),(3,6250),(4,6250),'//
+     >    'pcalxfreq1=(1,250),(2,250),(3,6250),(4,6250),'//
      >       '(5,0),(6,0),(7,0),(8,0)'
 C   If nchan=14 use these lines.
         else if (nchan(istn,icod).eq.14) then

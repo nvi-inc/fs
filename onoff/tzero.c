@@ -23,20 +23,24 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
   struct req_rec request;
   struct res_buf buff_res;
   struct res_rec response;
-  int atten[4], kst1, kst2;
+  int atten[4], kst1, kst2, kst1z, kst2z;
   struct sample acdum;
 
   ifc[0]=ifc[1]=ifc[2]=ifc[3]=FALSE;
   ierr2=0;
 
   kst1=onoff->itpis[MAX_GLOBAL_DET+4];
+  if(kst1)
+    kst1z=shm_addr->user_device.zero[4];
   kst2=onoff->itpis[MAX_GLOBAL_DET+5];
+  if(kst2)
+    kst2z=shm_addr->user_device.zero[5];
 
   for(i=0;i<MAX_GLOBAL_DET;i++)
     if(onoff->itpis[i]!=0)
       ifc[onoff->devices[i].ifchain-1]=TRUE;
 
-  if(kst1||kst2)
+  if((kst1 && kst1z)||(kst2 && kst2z))
     scmds("sigoffnf");
 
   if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||
@@ -148,8 +152,8 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
      shm_addr->equip.rack==LBA4||
      shm_addr->equip.rack==VLBA||
      shm_addr->equip.rack==VLBA4||
-     kst1 || kst2) {
-    int itpis[MAX_ONOFF_DET]; /* if it is digital detector don't sample zero */
+     (kst1 && kst1z) || (kst2 && kst2z)) {
+    int itpis[MAX_ONOFF_DET]; /* if it is not a digital detector, sample zero */
 
     for(i=0;i<MAX_ONOFF_DET;i++)
       itpis[i]=onoff->itpis[i];
@@ -198,10 +202,17 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
       }
     accum->count=1;
 
+  } else if (kst1 && !kst1z) {
+    accum->avg[MAX_GLOBAL_DET+4] = 0.0;
+    accum->count=1;
+    
+  } else if (kst2 && !kst2z) {
+    accum->avg[MAX_GLOBAL_DET+5] = 0.0;
+    accum->count=1;
   }
 
  restore:
-  if(kst1||kst2)
+  if((kst1 && kst1z)||(kst2 && kst2z))
     scmds("sigonnf");
 
   if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {

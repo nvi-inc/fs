@@ -16,6 +16,8 @@ a po	'popd \!*;set prompt="`hostname`:`pwd`/:> "'
 a d	dirs
 a j	jobs
 a rm	'rm -i'
+a mv	'mv -i'
+a cp	'cp -i'
 a rl	'source ~/.login'
 a rc	'source ~/.cshrc'
 a rlxr	'xrdb -merge ~/.Xresources'

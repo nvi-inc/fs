@@ -11850,3 +11850,225 @@ Version 9.11.18 161129
            first distribution version
 
 Version 9.11.19 170129
+
+170129 WEH Makefile
+           9.11.20
+170209 PdV logpl/MainGUI.py
+           ignore trailing ';' for VSI-S output log records
+
+170224 WEH include/params.h
+           include/params.i
+           fslb/logit.f
+           fslb/logen.f
+           increase internal buffer for logit to class message max
+           prevent overwritting with trucnacion if message too long
+           properly trim end of buffer
+           fix output comment for logen
+
+170227 WEH vex/vex.yy.l
+           fix noyywrap problem for 64-bit
+
+170412 WEH quikr/form4.f
+           correct MAT mode 10 comment
+
+170430 WEH matcn/iat.f
+           matcn/matcn.f
+           control/fserr.ctl
+           report read: bad buffer length and UNIX read errors
+           report BAUD setting errors
+
+170430 WEH quikr/devds.f
+           don't generate negative character counts for short messages
+
+170620 WEH help/halt.___
+           Added explanation of interaction of "halt" with the procedure
+           stack and suggestions for correctly "halt"ing a schedule.
+
+170716 WEH clib/arg_util.c
+           addd long_long_uns_scal for parsing numbers with decimal points
+           as int
+
+170723 WEH include/mk5b_mode_ds.h
+170728 WEH quikv/mk5b_mode.c
+170823 WEH clib/mk5b_mode_util.c
+170828 WEH help/mk5b_mode.___
+           properly handle VDIF and 5B/Ethernet to Mark 5C and FlexBuff
+           bit_streams now ignores all parameters except the bit mask
+
+170730 WEH include/fila10g_mode_ds.h
+170730 WEH quikv/fila10g_mode_dis.c
+170730 WEH clib/fila10g_mode_util.c
+170823 WEH help/fila10g_mode.d__
+           corrected to report sps monitor (instead of "clock") value
+           and decimation monitor if available
+           report properly rounded commanded sample rate
+
+170804 WEH fmset/getfmtime.c
+           fmset/get5btime.c
+170806 WEH mk5cn/mk5cn.c
+           fmset/fmset.c
+           handle jive5ab dot_set=... start-up error with specific error message
+
+170806 WEH ddout/ddout.c
+           get rid of non-empty "()" only if ?W or ?F found in error string
+           improve write error message to include possible disk full error
+
+170823 WEH st.default/control/equip.ctl
+           improve "nominal" Mark 5B clock rate value description
+
+171010 DEH plog/plog
+171010 DEH plog/test_plog
+171010 DEH fesh/fesh
+           check if log is open before moving
+           add open file check to tests
+           add version to "-h"
+
+171018 WEH clib/dbbcform_util.c
+           help/form.d__
+           control/fserr.ctl
+           added "unsupported" spol, full, and full_auto for PFB
+           
+171020 WEH help/halt.___
+           help/fila10_mode.d__
+           fix typos
+
+171022 WEH ddout/recover_log.c
+           speed up recovery, particularly for very large logs
+           emphasize error message asking operator to wait
+
+171025 WEH vex/vex.y
+           vex/test_parser/wh1
+           vex/vexf.c
+           add optional units to clock_early rate and support time/time units
+
+171027 WEH holog/MASK/contour_holog.m
+           add axis titles
+
+171027 WEH holog/MASK/mask-HOWTO.txt
+           correct typos, add suggest for plot title
+
+171106 WEH ddout/ddout.c
+           replace display inverse video escapes with parenthesis in file
+
+171106 WEH help/fila10g_mode.d__
+           fix typos
+
+171114 WEH help/mk5_status.___
+           add Status word documentation from jive5ab
+
+171130 DEH plog/plog
+	   progress bars honour "-q" flag
+	   fixed colour support detection
+	   fixed "pv" fallback
+   
+180112 WEH misc/ntp.txt
+           new, recommended ntp configuration
+
+180125 WEH incom/equip.f
+           include/fscom.h
+           newlb/prog.c
+           include/fscom_dum.i
+           st.default/control/equip.ctl
+           boss/newlg.f
+           clib/fsmetc.c
+           add support for access to remote metserver
+
+180126 WEH clib/fsmetc.c
+           handle NULL fields from metserver
+
+141218 WEH st.default/st-0.0.0/metserver/port/portopen.c
+           updated to support FS_SERIAL_CLOCAL, copied from /usr2/fs/port
+
+160630 WEH st.default/st-0.0.0/metserver/README
+           updated for MET4x/WMT7xx
+
+160630 WEH st.default/st-0.0.0/metserver/src/MakeDiag
+           add WMT7xx suppport
+
+170928 DEH st.default/st-0.0.0/metserver/src/Makefile
+170928 DEH st.default/st-0.0.0/metserver/src/err_report.c
+170928 DEH st.default/st-0.0.0/metserver/port/Makefile
+170928 DEH st.default/st-0.0.0/metserver/src/metget.c
+170928 DEH st.default/st-0.0.0/metserver/src/metwind.c
+171201 DEH st.default/st-0.0.0/metserver/src/metserver.c
+           detect if reading loop is stuck
+
+180206 WEH st.default/st-0.0.0/metserver/INSTALL
+           add WMT7xx
+
+160630 WEH st.default/st-0.0.0/metclient/src/metclient.c
+           don't close control file after an error opening it
+           don't decode and re-encode the values returned by the
+             server, trust it to have formatted them correctly, just
+             make sure there are enough commas since some fields
+             can be blank
+
+169630 WEH st.default/st-0.0.0/metclient/src/logwx.c
+           set the permissions to rw-rw-rw- when creating a new file
+
+180821 WEH quikv/mk5b_mode.c
+           Harro says only use "updsnor" for FlexBuff net_protocol=
+
+180416 WEH include/rx_gain_ds.h
+           include/params.h
+           increase max TCAL table size to 1200 for 2 MHz spacing in
+             dual polorization 1 GHz band
+
+180417 DEH gnplt/main.py
+           add FS_GNPLT_FONT environment for non-default font size
+
+180420 WEH st.default/proc/45station.prc
+           st.default/proc/5station.prc
+           st.default/proc/dstation.prc
+           st.default/proc/v45station.prc
+           st.default/proc/v5station.prc
+           remove mk5=bank_set? from 'midob'
+
+180420 WEH include/fscom_dum.i
+           clib/cshm_init.c
+           help/user_device.___
+           include/user_device_ds.h
+           clib/user_device_util.c
+           control/fserr.ctl
+           newlb/prog.c
+180421 WEH help/onoff.___
+           fivpt/tsys.f
+           allow user devices that don't need zero levels
+
+180421 WEH include/fscom.h
+           clib/Makefile
+           clib/cshm_init.c
+           include/fscom_dum.i
+           newlb/prog.c
+           quikr/fsvrs.f
+           vex/y.tab.h
+           rclco/rcl/all
+           boss/newlg.f
+           Makefile
+           added release string to release version
+
+Version 9.11.20.rc1_no_pubsub 180421
+
+180429 WEH fivpt/tsys.f
+           fix typo
+
+180429 WEH clib/tpi_norack.c
+           add no zero suport to Tsys for user devices
+
+180429 WEH boss/newlg.f
+           move release info to new 'release' record
+
+180429 WEH quikr/fsvrs.f
+           use '-' before release info
+
+180429 WEH Makefile
+           use DEH shellcut commands, add -s to RELEASE
+
+180429 WEH st.default/prog/.login
+           st.default/prog/.profle
+           examples of setting FS_MONIT_ADD_LIBES
+
+180429 WEH monit/Makefile
+           add FS_MONIT_ADD_LIBES variable for optional libraries
+
+Version 9.11.20.rc2_no_pubsub 180429

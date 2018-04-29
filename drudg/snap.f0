@@ -603,7 +603,6 @@ C  Precess the sources to today's date for slewing calculations.
   
       DO WHILE (ILEN.GT.0.AND.KERR.EQ.0.and.ierr.eq.0 .AND.
      >             cbuf(1:1) .ne. "$")  
-100     continue 
         istnsk_next=0
         iobs_now = iobs ! save current obs number for scan ID
         do while (istnsk_next.eq.0) ! Get NEXT scan for this station into ibuf_next
@@ -768,24 +767,17 @@ C         Force new tape on the first scan on tape.
 
 ! Things are slightly different for staggered start. This is from a VEX schedule.
 !          if(.false.) then
-          if(kstaggered_start .and. 
-     >      tape_motion_type(istn) .eq. "START&STOP") then           
+          if(kstaggered_start) then            
             call copy_time(itime_data_valid, itime_tape_start)    ! copy itime_data_valid to itime_scan_beg
             call copy_time(itime_tape_start, itime_scan_beg) 
-            call copy_time(itime_data_valid, itime_cal)           !this is the calibration time           
-            call TimeAdd(itime_cal,ical,itime_data_valid) 
-! *** check to see if have AT least ical time left. 
-            idt= itimeDifSec(Itime_scan_end,itime_cal)
-            if(idt .lt. 0) then  
-              nch=trimlen(scan_name(iskrec(iobs_now)))      
-              write(lufile,
-     >     '("* Scan ",a," dropped because not enough time to record")')
-     >       scan_name(iskrec(iobs_now))(1:nch)
-    
-! skip everything else and get next scan...              
-              goto 100
-            endif                
- 
+            call copy_time(itime_data_valid, itime_cal)           !this is the calibration time
+            if(ical_time_staggered .eq.-1) then
+               itemp=ical
+            else
+               itemp=ical_time_staggered
+            endif 
+!            if(kcont_cal) itemp=1
+            call TimeAdd(itime_cal,itemp,itime_data_valid) 
           endif 
           
 !      kdebug=.true.
@@ -985,7 +977,7 @@ C               SOURCE=name,ra,dec,epoch
            call snap_disk2file_abort(lufile)
            kdisk2file_prev=.false.
         endif
-           
+    
 C
 C Check procedure
 C For continuous tape motion, check after tape stops at end of a pass
@@ -1047,22 +1039,23 @@ C This is called on the first scan, if the setup is wanted on this
 C scan (flag 1=Y), if tape direction changes, or if a check was done
 C prior to this scan. Do only on a new pass for continuous. 
 
+      
       if(.not. (kPhaseRefPrev.or.krunning)) then    !issue SETUP          
         IF (iobs_this_stat.EQ.0.OR.KFLG(1).OR.LDIRP.NE.LDIR(ISTNSK)
      >       .OR.ICHK.EQ.1) THEN                
-            if(kin2net) then
+           if(kin2net) then
               call snap_in2net_connect(lufile,
      >           ldest,lxfer_options(ixfer_ptr))
             endif        
-            if(kdisk2file_prev) then             
+            if(kdisk2file_prev) then
               call snap_wait_time(lufile,itime_disk_abort)
               call snap_disk2file_abort(lufile)
               kdisk2file_prev=.false.
-            endif               
+            endif      
             call setup_name(ccode(icod),csetup_name)
             call drudg_write(lufile,csetup_name)           
          END IF
-      endif
+       endif
 !        pause 
 
 C Early start 
@@ -1072,9 +1065,8 @@ C Early start
 C       always do unless continuous and already running
        
 C  Wait until ITEARL before start time
-          if (.not.krunning) ituse=1 ! Don't use early start if already running              
+          if (.not.krunning) ituse=1 ! Don't use early start if already running
           call snap_wait_time(lufile,itime_tape_start)
-              
           call snap_monitor(kin2net)
           if(.not. krunning) then
             call snap_start_recording(kin2net)
@@ -1084,20 +1076,12 @@ C  Wait until ITEARL before start time
         endif !non-zero scan
 
 C Wait until CAL time. Antenna is on-source as of this time.
-!        if(.false.) then 
-! If doing staggered start, change where Cal is put
-        if(kstaggered_start) then
-           continue           
-        else 
-          IF (ICAL.GE.1.and. .not. 
-     >      (kPhaseRefPrev.or.krunning)) then ! PREOB          
-            
+        IF (ICAL.GE.1.and. .not. 
+     >      (kPhaseRefPrev.or.krunning)) then ! PREOB
            call snap_wait_time(lufile,itime_cal)
 C PREOB procedure       
-           call drudg_write(lufile,cpre)  
-                 
-          ENDIF ! cal and preob
-        endif 
+           call drudg_write(lufile,cpre)          
+        ENDIF ! cal and preob
 
 !--------------------- Begin  DATA_VALID   -------------------------------------
 ! write out 
@@ -1108,12 +1092,7 @@ C PREOB procedure
             continue 
           else ! do write it             
 !  Write out monitor command. 
-! If doing staggered start, wait until we are on source. 
-            if(kstaggered_start) then 
-              call snap_wait_time(lufile,itime_data_valid)
-            else
-              call snap_wait_time(lufile,itime_scan_beg)          
-            endif 
+            call snap_wait_time(lufile,itime_scan_beg)          
           endif ! don't/do write
 !Turn on running if necessary. 
           kdo_monitor=.true.                  !indicate that we should issue monitor command before data_valid
@@ -1122,12 +1101,7 @@ C PREOB procedure
 ! This also means that we do not need to insert it later. 
             call snap_monitor(kin2net)       
             kdo_monitor=.false. 
-            call snap_start_recording(kin2net)   
-            if(kstaggered_start) then
-! Insert preob procedure     
-              call drudg_write(lufile,cpre)   
-              call snap_monitor(kin2net)       
-            endif 
+            call snap_start_recording(kin2net)    
           endif     
         endif
 ! Turn on flag indicating 

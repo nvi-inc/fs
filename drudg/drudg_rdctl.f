@@ -13,6 +13,7 @@ C
 ! 2016Jul28 JMG. Now also set cfirstrec_def in 'equipment override'
 ! 2016Sep08 JMG. New keyword 'vsi_align' 
 
+
 C
 C   parameter file
       include '../skdrincl/skparm.ftni'
@@ -70,7 +71,7 @@ C  LOCAL VARIABLES
 
       data lvalid_dbbc_if_inputs/"1","2","3","4"/ 
       data lvalid_polarity/"0","1","2","3","NONE","ASK"/     
-      data lvalid_vsi_align/"0","1","NONE","ASK"/
+      data lvalid_vsi_align/"0","1","NONE","ASK"/     
        
       
 C  1. Open the default control file if it exists.   
@@ -89,9 +90,7 @@ C  1. Open the default control file if it exists.
       ktarget_time=.false.
       klo_config=.false. 
       kignore_mark5b_bad_mask=.false.
-
-
-
+      
       kfound_global_file=.false. 
 ! Avery 5160. ht,wid,rows,cols,top,left
       rlabsize(1)=1.0
@@ -286,7 +285,6 @@ C  $PRINT
              else if (lkeyword .eq.'LABEL_SIZE') then
 C              label_size ht wid nrows ncols topoff leftoff
                read(cbuf,*,err=92140) lkeyword,rlabsize
-               goto 9216
 92140          write(luscn,'(a)') "RDCTL12 ERROR: Label Size error"
              else
                  write(luscn,'(a)') "Error in $PRINT section"
@@ -330,7 +328,8 @@ C  $MISC
                     write(*,*) "Should be: AUTOFTP [ON|OFF] <String>"
                 endif
               else if(lkeyword .eq. 'AUTOFTP_ABORT_TIME') then
-                 read(ltoken(2),*) iautoftp_abort_time                
+                 read(ltoken(2),*) iautoftp_abort_time  
+               
 
 C         EQUIPMENT
               else if (lkeyword  .eq.'EQUIPMENT') then          
@@ -401,9 +400,14 @@ C         TPICD
               elseif (lkeyword .eq. 'CONT_CAL') then
                 lprompt=lvalue(1:3)
                 call capitalize(lprompt)
-                if(lprompt .eq. "ON" .or. lprompt .eq. "OFF" .or. 
-     >             lprompt .eq. "ASK") then
-                   cont_cal_prompt=lprompt
+                cont_cal_prompt=" "
+                kcont_cal=.false.
+                if(lprompt .eq. "ON") then 
+                  kcont_cal=.true.
+                else if(lprompt .eq. "OFF") then
+                  continue 
+                else if(lprompt .eq. "ASK") then
+                  cont_cal_prompt="ASK"
                 else
                    write(luscn, *)
      >              "Error:  Valid CONT_CAL options are ON, OFF, ASK."
