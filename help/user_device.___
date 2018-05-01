@@ -1,8 +1,8 @@
-                 user_dev - define User Detector Device (all racks)
+	user_device - define User Detector Device (all racks)
 
-            Syntax:     user_dev=chan,freq,sb,pol,ifcenter,zero
+            Syntax:     user_device=chan,freq,sb,pol,ifcenter,zero
 
-            Response:   user_dev/chan,freq,sb,pol,ifcenter,zero
+            Response:   user_device/chan,freq,sb,pol,ifcenter,zero
 
 
 Settable parameters:

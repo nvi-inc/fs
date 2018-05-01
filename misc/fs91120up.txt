@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/fs91120up.txt        Version: 7.7  Date: 180421
+File: /usr2/fs/misc/fs91120up.txt        Version: 7.8  Date: 180429
 
 		       FS 9.11.20 Update Notice
 
@@ -28,7 +28,31 @@ easier.  Upgrading from 9.11.19 is very easy.
 
 The most significant changes in version 9.11.20 were:
 
-   (i) Ad hoc support in 'drudg' for 'sched' stagger start mode.  In
+   (i) Availability of a display server for the user interface.  This
+       allows multiple independent user interfaces to be used with the
+       FS.  Each user interface requires an X server display and
+       essentially identical to the normal FS user interface.
+       Typically, the interface would be used on the FS computer X
+       display, but can also be used through a 'ssh' connecton from
+       another computer.  A text-only interface is available as well.
+       The interfaces can be started or stopped independently of the
+       FS.  The FS runs in background regardless of whether a user
+       interface is in use.  There is also a programmatic capability
+       to view all of the user output, including non-logged error
+       messages, not just the log file.  The displayed output
+       automatically follows the log, i.e., it is not necessary to
+       change which log is viewed by changing which file is 'tail'ed.
+
+       This feature is included as the default in the source code.
+       However, the installation instructions below will disable this
+       feature.  Please note that step (7) of the installation
+       instructions hs been moified from its usual form to disable
+       this feature.  We recommend that install the FS without this
+       feature initially, then when you test the display server
+       functionality.  Instructions are provided for enabling and
+       disabling the feature as well a description of how to use it.
+
+  (ii) Ad hoc support in 'drudg' for 'sched' stagger start mode.  In
        this mode there are different recording start times at
        different stations.  The data valid time for a station is the
        time that the antenna is expected to reach the source at that
@@ -46,7 +70,7 @@ The most significant changes in version 9.11.20 were:
        'midob'.  This accomodates continuous or non-continuous
        calibration 'preob' procedures automatically.
  
-  (ii) Improvements to 'mk5c_mode' to fully support Mark 5C and
+ (iii) Improvements to 'mk5c_mode' to fully support Mark 5C and
        FlexBuff recording for both 5B/Ethernet and VDIF recording with
        jive5ab.  This change consists primarily of accepting any
        effective sample rate and total bit rate that will fit in an
@@ -69,7 +93,7 @@ The most significant changes in version 9.11.20 were:
        recording, which the FS does not directly support, in case it
        is needed in an unusual situation.
 
- (iii) The FMST program for Mark 5B recorders was improved to give a
+  (iv) The FMSET program for Mark 5B recorders was improved to give a
        specific error message for the case where it is run right after
        the jive5ab control program is started.  In this case, jive5ab
        reports an error rather than reporting the time, since there
@@ -80,21 +104,21 @@ The most significant changes in version 9.11.20 were:
        help ease the transition for stations that are moving from
        DIMino to jive5ab.
 
-  (iv) Several small improvements were made to plog and fesh.
+   (v) Several small improvements were made to plog and fesh.
 
-   (v) The VEX parser now support units for the rate in clock_early
+  (vi) The VEX parser now support units for the rate in clock_early
        statements.
 
-  (vi) Improved example versions of the station 'metserver' and
+ (vii) Improved example versions of the station 'metserver' and
        'metclient' programs.  The improvements include trapping more
        error and support for WMT70x wind sensors.  The FS now supports
        acces to local or remote instances of 'metserver'.
 
- (vii) Small improvements were made to gnplt: more Tcal points pre
+(viii) Small improvements were made to gnplt: more Tcal points pre
        band and non-default font sizes.
 
-(viii) Support for user devices in 'tsys', 'onoff', and 'fivept'
-       commands that don't support measurements of zero level.
+  (ix) Support for user devices in 'onoff' and 'fivpt' that don't support
+       measurements of zero level. 
 
 As always, we are deeply indebted to Jonathan Quick (HartRAO) for his
 many significant contributions that go far beyond what is explicitly
@@ -166,7 +190,26 @@ The installation steps for upgrading from 9.11.19 are listed below.
 
  (6) ** VERY IMPORTANT **  Log-out as 'root', and log-in as 'prog'.
 
- (7) Make the FS:
+ (7) Make the FS.
+
+     For the initial installation and testing we recommend that you
+     disable the display server functionality.  To do this please
+     modify the login environment of 'prog' by setting the environment
+     variable FS_NO_DISPLAY_SERVER.  This can be done in '.login' (if
+     'tcsh' is the login shell) or '.profile' (for 'bash').  For
+     'tcsh', add the following command to '.login':
+
+       setenv FS_NO_DISPLAY_SERVER
+
+     For 'bash', add the following command to '.profile':
+ 
+       export FS_NO_DISPLAY_SERVER=
+
+     Examples of how to do this cna be found the corresponding files
+     in '/usr2/fs/st,default/prog'.
+
+     After making the above change, log-out and then back in as
+     'prog'. Then execute:
 
        cd /usr2/fs
        make 
@@ -310,6 +353,8 @@ The installation steps for upgrading from 9.11.19 are listed below.
      then either use the restored disk or apply the FS update again.
      Managing this is a lot safer if you have a third disk.
 
+(18) We encourage you the enable the display server interface of the
+     FS.  Please see FS change item (20) for a more information.
 
 III. Changes Since Version 9.11.19
 
@@ -352,8 +397,9 @@ The following is a summary of FS changes since 9.11.19.
 17. Support for user devices in 'tsys', 'onoff', and 'fivept' commands
     that don't support measurements of zero level.
 18. New 'release' string for version number.
-19. Optional Makefile enviroment variable FS_MONIT_ADD_LIB for monit
+19. Optional Makefile enviroment variable FS_MONIT_ADD_LIBES for monit
     family of programs
+20. Display server. ...
 
 A more detailed discussion of these changes follows.
 
@@ -541,10 +587,10 @@ A more detailed discussion of these changes follows.
 
 18. New 'release' string for version number.  With this version of the
     FS it is possible to specify a 'release' string that is appended
-    to the FS version number.  It is displayed in the log "Log Opened"
-    line and in the output of the FSVERSION command.  The 'drudg'
-    opening message does not display the 'release' string at this
-    time.
+    to the FS version number.  It is displayed in a 'release' line
+    following the log "Log Opened" line when a log is opened.  It is
+    also in the output of the FSVERSION command.  The 'drudg' opening
+    message does not display the 'release' string at this time.
 
     The release string is derived from the directory name of the FS
     source, which must be of the form:
@@ -555,7 +601,7 @@ A more detailed discussion of these changes follows.
 
       fs-9.11.20-rc1
 
-    For standard releases, the trailing '.string' is omitted.
+    For standard releases, the trailing '-string' is omitted.
 
     The use of '-string' can be used to distinguish between different
     test releases and for other purposes.  The 'string' can up to 32
@@ -565,7 +611,7 @@ A more detailed discussion of these changes follows.
     is no longer necessary to update the Makefile for a new directory
     name.
 
-19. Optional Makefile enviroment variable FS_MONIT_ADD_LIB for monit
+19. Optional Makefile enviroment variable FS_MONIT_ADD_LIBES for monit
     family of programs.  This variable can be used specified
     additional local libraries that may be needed for the LIBES
     variable in monit/Makefile.  This variable can be set the 'prog'
@@ -576,8 +622,20 @@ A more detailed discussion of these changes follows.
     default LIBES variable in the exisiting Makefile is not complete
     for the Linux distribution being used.
 
+20. Display server.
+    ...
+
+    Instruction for enabling this feature (and disabling it, if that
+    should become necessary) can be found in
+    /usr2/fs/misc/display_server.txt.  This file also includes a
+    explanantion of how the user interface is different from the
+    non-display server
+ 
+    ...
+
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/misc/changes.txt.
+
 
 			B. Changes in 'drudg'
 				   
