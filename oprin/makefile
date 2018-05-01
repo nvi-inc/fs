@@ -25,7 +25,7 @@ ifneq ($(READLINE),0)
 CPPFLAGS = -Ireadline-2.0
 
 # Flags for default $(CC) compilations.
-CFLAGS = -Wall -pipe -O2 -fomit-frame-pointer -DREADLINE
+CFLAGS =  -Wall -pipe #-O2 -fomit-frame-pointer -DREADLINE
 # debugging CFLAGS =  -Wall -pipe -g
 endif
 
@@ -51,12 +51,17 @@ ifeq (${NOTSETUTC},0)
 SETUTC=--set-utc
 endif
 
+ifdef FS_NO_DISPLAY_SERVER
+CPPFLAGS += -DFS_NO_DISPLAY_SERVER
+endif
+
+CFLAGS += -g
+
 # The main target, 'oprin'.  Both new/updated object files and libraries
 # cause relinking; if libraries are missing, this makefile cannot
 # create them on its own, it says "don't know how to make $(LIBS)".
 ../bin/oprin : $(OBJECTS) $(LIBS)
-	gcc -o ../bin/oprin $(OBJECTS) $(LIBS) $(TERMLIB)
-	strip ../bin/oprin
+	gcc -g -o ../bin/oprin $(OBJECTS) $(LIBS) $(TERMLIB)
 
 # Actually 'oprin.c' is not dependent on the lib archive file
 # but the include files in 'readline-2.0' directory, but still:

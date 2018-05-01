@@ -6,13 +6,22 @@
 ifdef NO_FTOK_FS
 CFLAGS :=  -DNO_FTOK_FS
 endif
-LIBS = ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a
-OBJECTS = statusprt.o
 
-../bin/fs : fs.o $(OBJECTS)
-	cc -o ../bin/fs fs.o $(OBJECTS) $(LIBS)
-	strip ../bin/fs
-#
-fs:
-	rm -f ../bin/fs
-	make
+LDLIBS = -lutil
+OBJECTS = fs.o statusprt.o 
+LIBS = ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a
+
+all: ../bin/fs
+
+ifdef FS_NO_DISPLAY_SERVER
+CPPFLAGS += -DFS_NO_DISPLAY_SERVER
+else
+OBJECTS += start_server.o
+endif
+
+../bin/fs: $(OBJECTS) $(LIBS)
+	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+
+.PHONEY: fs
+fs: ../bin/fs
