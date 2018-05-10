@@ -141,3 +141,10 @@ echo "2016.243.18:00:00.08#rdtca#" >> $log
 echo $PLOG -q $EXP
 $PLOG -q $EXP
 rm $FS_LOG_PATH/*
+
+echo
+echo
+echo Direct File mode
+echo ===============
+echo test > $log
+$PLOG $log

@@ -1,7 +1,8 @@
 #!/bin/bash
 #NB "strict" mode is used if run as a script
-SHA1SUM=66d794e8ac80e2115e6697b15548522309a8b76a
-PLOG_VERSION=2017-10-23
+SHA1SUM=101a86eabc9744603665e1485e710acd6b022ebd
+PLOG_VERSION=2018-05-08
+
 
 version(){
     local sha=$(tail -n+4 $0 | sha1sum | cut -f1 -d' ')
@@ -472,7 +473,7 @@ main () {
         # If it's a file, do not process it, just add it to
         # the list; if it isn't, complain and exit.
         if [[ "$ref" =~ /  ]]; then
-            if [[-f "$ref" ]]; then
+            if [[ -f "$ref" ]]; then
                 add $ref
                 continue
             else
