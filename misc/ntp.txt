@@ -1,17 +1,32 @@
-File: /usr2/fs/misc/ntp.txt                  Version: 0.1  Date: 180112
+File: /usr2/fs/misc/ntp.txt                  Version: 0.2  Date: 180510
 
 			 NTP recommendations
 
 This document contains recommendations for set-up and use of NTP for
-robust FS operations.  The last item (5) is the most important.
+robust FS operations.  This is appropriate, and recommended, if you
+have reliable NTP time available.  Please see section (2) for an
+appropriate NTP configuration for your FS computer.  Please note that
+section (7) is critical.
+
+Please also see '/usr2/fs/misc/fstime.txt' for more explanation about
+time in the FS.  That document is a little out of date because it was
+written at a time when the best model was 'rate'.  It still provides
+useful details and an explanation about time in the FS.  The current
+document (ntp.txt), provides all the information needed to set-up your
+system for NTP.
+
 
 1. Use the 'computer' model in 'time.ctl':
 
 * rate (secs/day)  span (hours)  model (none/offset/rate/computer)
-*                                      (use "rate"; only use "computer"
-*                                       if FS can't read time from
-*                                       rack/recorder)
+*                                      -use 'computer' if you have reliable
+*                                         NTP available; if not, use 'rate'
+*                                      -to be safe, reboot if changing the model
     0.000          1.000         computer
+
+   If you use the 'computer' model, the FS time becomes the computer
+   time.
+
 
 2. In 'ntp.conf':
 
@@ -54,7 +69,36 @@ restrict    192.5.41.209 kod notrap nomodify nopeer noquery
 # serve this private subnet
 restrict 192.168.1.0 mask 255.255.255.0 nomodify notrap
 
-3. 'ntpd' vs 'ntpdate'
+
+3. Other devices at the station that support NTP
+
+   For other devices that use NTP, point them to the FS as the only
+   NTP server.  This will make sure that the other devices do not
+   somehow get on a different time than the FS. 
+
+   If you have a backup FS computer point the other devices to both FS
+   computers.  Use exactly the same NTP set-up on both FS comoputers.
+   Be sure each FS computer is monitoring the other as 'noselect' (see
+   2e.).  This will make the station more robust if the operational
+   computer fails.  This will also make it possible to monitor the
+   agreement between the two computers with 'ntpq -c pe'.  If the
+   other devices use only the FS computers as NTP servers and there is
+   no descrepency between the FS computers, all the other local
+   devices should agree.
+
+   You can make a script similiar to 'check_ntp' in (6a.) below to
+   monitor and log the time of other devices (and possibly a backup FS
+   computer).  You will probably want to filter the 'ntpq' output on
+   the nodes that you want displayed.
+
+
+4. Use 'sy=run setcl &' in 'midob' to monitor the difference between
+   the FS and the formatter.  This will make it possible to detect if
+   the formtter is different from the FS time including if one second
+   jump occirs.
+
+
+5. 'ntpd' vs 'ntpdate'
 
    In the old days if the time from the hardware clock was very far
    off, NTP would not adjust the time. 'ntpdate' was used to get close
@@ -63,12 +107,17 @@ restrict 192.168.1.0 mask 255.255.255.0 nomodify notrap
    configuration for most systems now, but it might be worth checking
    if your system is set-up this way.  A big advantage of '-g' over
    early versions of 'ntpdate' is that it will use the servers already
-   configured in 'ntp.conf'. Some later versions of 'ntpdate' may also
+   configured in 'ntp.conf'.  Some later versions of 'ntpdate' may also
    do that.
 
-4. 'check_ntp' SNAP procedure
+   You check the options that 'ntpd' was started with using the command:
 
-   4a. Have the 'check_ntp' procedure in the 'station' procedure
+     ps aux | grep ntpd     
+
+
+6. 'check_ntp' SNAP procedure
+
+   6a. Have the 'check_ntp' procedure in the 'station' procedure
        library:
 
 sy=popen 'uptime 2>&1' -n uptime &
@@ -77,21 +126,21 @@ sy=popen 'ntpq -np 2>&1|grep -v "^[- x#]" 2>&1' -n ntpq &
        'popen' is available in all FS versions starting with
        9.11.9. See 'help=sy' for details on its use.
 
-   4b. Put a call to 'check_ntp' at the end of 'initi' for a visible
+   6b. Put a call to 'check_ntp' at the end of 'initi' for a visible
        initial check at FS start up.
 
-   4c. Put a call to 'check_ntp' at the start of 'exper_initi' to
+   6c. Put a call to 'check_ntp' at the start of 'exper_initi' to
        record the ntp state in the experiment log at the experiment
        start (and restarts) for troubleshooting.
 
-5. Make sure NTP is synced before operations are started.
+
+7. Make sure NTP is synced before operations are started.
 
    After a FS start, particularly after a computer boot, operations
    should not start until the 'check_ntp' output shows a server with a
    '*' in column one of the 'ntpq' output.  That is the server the
    daemon is synced with.  The operator can run 'check_ntp' manually
-   as many times as necessary if the output of 'initi' does not show
-   an initial sync.  It should sync quickly if 'ntp.conf' is
-   configured as described above.  Ideally the offsets, the next to
-   last column of the 'ntpq' output, should all be a few milliseconds
-   or less.
+   as many times as necessary until the output of 'initi' shows a
+   sync.  It should sync quickly if 'ntp.conf' is configured as
+   described above.  Ideally the offsets, the next to last column of
+   the 'ntpq' output, should all be a few milliseconds or less.
