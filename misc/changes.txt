@@ -11917,8 +11917,8 @@ Version 9.11.19 170129
            improve "nominal" Mark 5B clock rate value description
 
 171010 DEH plog/plog
-171010 DEH plog/test_plog
-171010 DEH fesh/fesh
+           plog/test_plog
+           fesh/fesh
            check if log is open before moving
            add open file check to tests
            add version to "-h"
@@ -11986,10 +11986,10 @@ Version 9.11.19 170129
            add WMT7xx suppport
 
 170928 DEH st.default/st-0.0.0/metserver/src/Makefile
-170928 DEH st.default/st-0.0.0/metserver/src/err_report.c
-170928 DEH st.default/st-0.0.0/metserver/port/Makefile
-170928 DEH st.default/st-0.0.0/metserver/src/metget.c
-170928 DEH st.default/st-0.0.0/metserver/src/metwind.c
+           st.default/st-0.0.0/metserver/src/err_report.c
+           st.default/st-0.0.0/metserver/port/Makefile
+           st.default/st-0.0.0/metserver/src/metget.c
+           st.default/st-0.0.0/metserver/src/metwind.c
 171201 DEH st.default/st-0.0.0/metserver/src/metserver.c
            detect if reading loop is stuck
 
@@ -12072,3 +12072,53 @@ Version 9.11.20.rc1_no_pubsub 180421
            add FS_MONIT_ADD_LIBES variable for optional libraries
 
 Version 9.11.20.rc2_no_pubsub 180429
+
+180510 WEH misc/ntp.txt
+           st.default/control/time.ctl
+           updated for NTP
+
+170727 DEH spubsub
+	   first version spubsub 
+
+170727 DEH fs/fs.c
+           fs/start_server.c
+           fsclient/fsclient.c
+           st.default/control/stpgm.ctl
+           include/params.h
+           Makefile
+	   added client/server
+
+170809 DEH clib/skd_util.c
+	   added skd_set_return_name and skd_clr_ret
+	   changed mtype algorithm to free-up bit for named return type
+
+170809 DEH fmset/fmset.c
+           use skd_clr_ret to cleanup skd queue after a bad shutdown
+
+180424 DEH spubsub/third_party
+	   vendored nanomsg library
+           
+171116 DEH erchk/erchk.c
+	   erchk/Makefile
+	   use ssub to get messages when built with server
+
+180501 DEH fsclient/fsclient.c
+           oprin/oprin.c
+           st.default/control/clpgm.ctl
+	   added client commands
+
+Version 9.11.20.rc3 180501
+
+180507 WEH monit/Makefile
+           adjusted use of FS_MONIT_ADD_LIBES to support other distros
+
+180510 DEH plog/plog
+           plog/test_plog
+	   fixed typo which caused specifying paths to fail.
+	   added test
+
+180510 WEH st.default/control/time.ctl
+           misc/ntp.txt
+           Make 'computer' the recommended time model
+
+180519 Version 9.11.20.rc4
