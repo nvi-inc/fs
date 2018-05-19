@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/fs91120up.txt        Version: 7.8  Date: 180429
+File: /usr2/fs/misc/fs91120up.txt        Version: 8.1  Date: 180519
 
 		       FS 9.11.20 Update Notice
 
@@ -34,7 +34,9 @@ The most significant changes in version 9.11.20 were:
        essentially identical to the normal FS user interface.
        Typically, the interface would be used on the FS computer X
        display, but can also be used through a 'ssh' connecton from
-       another computer.  A text-only interface is available as well.
+       another computer.  There is a 'client=' command to allow
+       running of utilities, such as 'fmset' and 'pfmed' on the
+       client's display.  A text-only interface is available as well.
        The interfaces can be started or stopped independently of the
        FS.  The FS runs in background regardless of whether a user
        interface is in use.  There is also a programmatic capability
@@ -70,20 +72,21 @@ The most significant changes in version 9.11.20 were:
        'midob'.  This accomodates continuous or non-continuous
        calibration 'preob' procedures automatically.
  
- (iii) Improvements to 'mk5c_mode' to fully support Mark 5C and
-       FlexBuff recording for both 5B/Ethernet and VDIF recording with
-       jive5ab.  This change consists primarily of accepting any
-       effective sample rate and total bit rate that will fit in an
-       unsigned 64-bit integer, i.e., 18446744073709551615 Hz or Mbps.
-       Rates that do not correpond to integer Hz sample rates and
-       integer MHz total bit rates are not supported.  This has no
-       impact on current usage of the 'mk5c_mode' command and goes
-       significantly beyond any capability that is needed now.  This
-       change cleaned up several internal aspects of the
-       implementation, including using only integer arithmetic for the
-       rates, and provides complete compatibilty with jive5ab in this
-       area.  Thanks to Harro Verkoutor (JIVE) for motivation, help
-       with implementation details, and help with testing this change.
+ (iii) Improvements to the 'mk5c_mode' command to fully support Mark
+       5C and FlexBuff recording for both 5B/Ethernet and VDIF
+       recording with jive5ab.  This change consists primarily of
+       accepting any effective sample rate and total bit rate that
+       will fit in an unsigned 64-bit integer, i.e.,
+       18446744073709551615 Hz or Mbps.  Rates that do not correpond
+       to integer Hz sample rates and integer MHz total bit rates are
+       not supported.  This has no impact on current usage of the
+       'mk5c_mode' command and goes significantly beyond any
+       capability that is needed now.  This change cleaned up several
+       internal aspects of the implementation, including using only
+       integer arithmetic for the rates, and provides complete
+       compatibilty with jive5ab in this area.  Thanks to Harro
+       Verkoutor (JIVE) for motivation, help with implementation
+       details, and help with testing this change.
 
        As part of this change, the 'bit_streams=...' command now
        ignores all parameters except the bit mask.
@@ -106,18 +109,24 @@ The most significant changes in version 9.11.20 were:
 
    (v) Several small improvements were made to plog and fesh.
 
-  (vi) The VEX parser now support units for the rate in clock_early
+  (vi) If a station has reliable NTP available for its FS computer,
+       the recommended time model is now 'computer'.  Please see
+       /usr2/fs/misc/ntp.txt for more details.  Please note that the
+       use of 'stcl' in 'midob' is still required to monitor the
+       formatter time.
+
+ (vii) The VEX parser now support units for the rate in clock_early
        statements.
 
- (vii) Improved example versions of the station 'metserver' and
+(viii) Improved example versions of the station 'metserver' and
        'metclient' programs.  The improvements include trapping more
        error and support for WMT70x wind sensors.  The FS now supports
        acces to local or remote instances of 'metserver'.
 
-(viii) Small improvements were made to gnplt: more Tcal points pre
+  (ix) Small improvements were made to gnplt: more Tcal points pre
        band and non-default font sizes.
 
-  (ix) Support for user devices in 'onoff' and 'fivpt' that don't support
+   (x) Support for user devices in 'onoff' and 'fivpt' that don't support
        measurements of zero level. 
 
 As always, we are deeply indebted to Jonathan Quick (HartRAO) for his
@@ -141,7 +150,7 @@ end of this document.  It includes seven sub-sections:
  A.4. Making a back-up before installing
  A.5. Disk space requirements
  A.6. Set operations file permissions
- A.7.  Fix .prc file 'define' lines
+ A.7. Fix .prc file 'define' lines
 
 If you haven't upgraded or installed the FS before, you may want to
 review the appendix.  It is STRONGLY recommended that you back-up your
@@ -209,7 +218,7 @@ The installation steps for upgrading from 9.11.19 are listed below.
      in '/usr2/fs/st,default/prog'.
 
      After making the above change, log-out and then back in as
-     'prog'. Then execute:
+     'prog'.  Then execute:
 
        cd /usr2/fs
        make 
@@ -240,31 +249,49 @@ The installation steps for upgrading from 9.11.19 are listed below.
 
 (11) Log-in as 'oper'.
      
-(12) This step is for updates to the local control files.  The only
-     change in the control files is in 'equip.ctl'.  An update is only
-     required if you use the 'metserver' program for meteorological
-     data in the FS.  However, even if you don't use it, it is
-     recommended that you update the comments so there won't be
-     confusion in the future.
+(12) This step is for updates to the local control files.  There two
+     possible changes that may be needed.  The first change (i) is
+     only required if you are use 'metserver' to serve meteorological
+     data to the FS.  However, it is still recommended that you make
+     the correspondng changes in the comments in 'equip.ctl' to keep
+     them up to date.  The second change (ii) is if you wish to change
+     to use NTP for the FS time.  This second change is recommended if
+     you have reliable NTP available.  It can be deferred until after
+     the rest of the upgrade is complete.
 
-     The change is in the line for met. sensor type (non-comment line
-     16).  Previously for use with 'metserver' only a number port
-     number was supplied on this line.  In the new version the port
-     number must be followed by a hostname. The nominal values for
-     these parameters are:
+      (i) This change is only needed if you use 'metsever' to serve
+          meteorological data to the FS.  An update is only required
+          if you use the 'metserver' program for meteorological data
+          in the FS.  However, even if you don't use it, it is
+          recommended that you update the comments so there won't be
+          confusion in the future.
 
-       50001 localhost
+          The change is in the line for met. sensor type (non-comment
+          line 16).  Previously for use with 'metserver' only a number
+          port number was supplied on this line.  In the new version
+          the port number must be followed by a hostname. The nominal
+          values for these parameters are:
 
-     However, other port numbers can be used and other hosts depending
-     on how 'metserver' is configured.  The hostname may be up to 64
-     characters in length.  The change to the comments, which all
-     stations should implement, before this non-comment line, are:
+            50001 localhost
 
-       *met sensor type: cdp or two fields for metserver: port hostname 
-       *default choice for metserver is  50001 localhost      
+          However, other port numbers can be used and other hosts
+          depending on how 'metserver' is configured.  The hostname
+          may be up to 64 characters in length.  The change to the
+          comments, which all stations should implement, before this
+          non-comment line, are:
 
-     Please see '/usr2/fs/st.default/control/equip.ctl' for an
-     example.
+          *met sensor type: cdp or two fields for metserver: port hostname 
+          *default choice for metserver is  50001 localhost      
+
+          Please see '/usr2/fs/st.default/control/equip.ctl' for an
+          example.
+
+     (ii) This change is to convert the FS to use NTP time internally.
+          This change is recommended if you have reliable NTP
+          available.  This can can be deferred until the rest of the
+          installation of 9.11.20 is complete.  When you make this
+          change, please refer to '/usr2/fs/misc/ntp.txt' for
+          requiremennts and instructions.
 
 (13) This step is for updates to your SNAP procedure files.  There are
      two changes.  The first (i) is required if you use a Mark 5
@@ -639,7 +666,7 @@ is in /usr2/fs/misc/changes.txt.
 
 			B. Changes in 'drudg'
 				   
-'drudg' opening message date is 2018Apr20.
+'drudg' opening message date is 2018May18.
 
 The following is a summary of 'drudg' changes since 9.11.19.
 

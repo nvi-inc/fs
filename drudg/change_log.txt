@@ -1,4 +1,6 @@
 This file contains a summary of changes made and why.
+2018May02 snap.f: Fine tuning staggered start. If the station offset for OUR station is zero, assume non-staggered.
+2018May02 snap.f: Take account of staggered start in calculating recording 
 2018Apr02 snap.f: Fixed staggered start. I hope. 
 2017Dec23 snap.f:  If staggered start (different stations start at different times) then change handling of 
           calibrations.  A.) Uses nomimal data_valid_time to start recording data and do calibration. 

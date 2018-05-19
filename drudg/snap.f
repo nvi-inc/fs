@@ -181,6 +181,7 @@ C        beginning the current observation
       integer itime_early(5)                !early start    =istart-itearl
       integer itime_tape_stop(5)            !late end       =iend+ilate
       integer itime_cal(5)         	    !cal		=istart-ical
+      integer itime_tmp(5)                 !temporary variable to hold time
       integer itime_check(5)                !time to do a check.
       integer itime_tape_start(5)           !
       integer itime_data_valid(5)           !when is the scan valid?
@@ -239,6 +240,17 @@ C     data cpass  /'123456789ABCDEFGHIJKLMNOPQRS'/
 C     data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
 C
 C History:
+! Now put in most recent first. 
+
+! 2018May02 snap.f: Fine tuning staggered start. If the station offset for OUR station is zero, assume non-staggered.
+!2018May02 snap.f: Take account of staggered start in calculating recording media. 
+! 2018Apr02 snap.f: Fixed staggered start. I hope. 
+! 2018May18 JMG. Staggered start stuff. 
+!2017Dec23 snap.f:  If staggered start (different stations start at different times) then change handling of 
+!          calibrations.  A.) Uses nomimal data_valid_time to start recording data and do calibration. 
+!          B.) ical_time later sets data valid flag.  
+!          ical_time is either nominal cal_time (10 sec) or ical_time_staggered, or if cont_cal is on, then 1.
+
 C     NRV 830818 ADDED SATELLITE ORBIT COMMAND OUTPUT
 C     NRV 840501 ADDED CHECK PROCEDURE, ADDED INTRO LINE
 C     MWH 840813 FIXED ERROR CHECKING DURING SNAP FILE WRITING
@@ -463,6 +475,7 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
 ! 2015Mar31 JMG. More changes to fix issues with phase_reference.
 ! 2015Apr04 JMG. Removed special handling if same source in consecutive scans. 
 ! 2015Jun05 JMG. Replaced squeezewrite by drudg_write. 
+
     
       kdebug=.false.
       kfirst_obs=.true. 
@@ -633,10 +646,13 @@ C  Precess the sources to today's date for slewing calculations.
         enddo ! get NEXT scan for this station into ibuf_next
  
 ! figure out if staggered start....
-        kstaggered_start=.false.
-        do itemp=2,nstnsk
-          if(ioff(itemp) .ne. ioff(1)) kstaggered_start=.true.
-        end do           
+        kstaggered_start=.false.  
+        if(ioff(istnsk) .ne. 0) then 
+          do itemp=2,nstnsk
+            if(ioff(itemp) .ne. ioff(1)) kstaggered_start=.true.
+          end do     
+        endif      
+!        write(*,*) iobs, nstnsk, kstaggered_start  
      
        
 ! Here we see if we have a data transfer scan.
@@ -1184,7 +1200,7 @@ C Stop data flag
               else
                 write(lufile,'(a)') 'disk_record=off'
               endif
-            endif          
+            endif        
           endif! ET command
           call snap_monitor(kin2net)
         endif ! non-zero recording scan     
@@ -1196,7 +1212,16 @@ C Save information about this scan before going on to the next one
         icheckp=icheck
         lcbpre = lcable(istnsk)
         iobs_this_stat = iobs_this_stat + 1
-        call copy_time(itime_scan_beg,itime_beg(1,iobs_this_stat))
+! Find out when the scan starts for this station. 
+        call TimeSub(itime_scan_beg,itearl(istnsk),itime_tmp)
+        call TimeAdd(itime_tmp,ioff(istnsk),itime_beg(1,iobs_this_stat))
+
+        if(.false.) then
+        write(*,*) "Delta: ", -itearl(istnsk)+ioff(istnsk)
+        write(*,*) "Beg:   ", itime_scan_beg
+        write(*,*) "This:  ", (itime_beg(j,iobs_this_stat),j=1,5)
+        endif            
+
             
         if(kstop_tape) then
            krunning=.false.      
@@ -1212,7 +1237,7 @@ C Save information about this scan before going on to the next one
           LDIRP = LDIR(ISTNSK)
           idirp=idir
           idurp=idur(istnsk)
-          IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ituse*ITEARL(istn)+
+          IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ituse*ITEARL(istnsk)+
      &        IDUR(ISTNSK))*speed_ft)
         endif ! update direction and footage
 
@@ -1334,7 +1359,7 @@ C End of schedule
         if(ldum(1:9) .eq. "scan_name") then
           iobs_this_stat=iobs_this_stat+1
           i=trimlen(ldum)+1
-          itemp=itime_total_record(iobs_this_stat)+itearl(istn)        
+          itemp=itime_total_record(iobs_this_stat)      
           write(ldum(i:),'(",",i10)') itemp
           call drudg_write(lufile,ldum)
         else
