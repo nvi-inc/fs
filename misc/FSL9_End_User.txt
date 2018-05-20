@@ -2,7 +2,7 @@ File: /usr2/fs/misc/FSL9_End_User.txt  Version: 2.9  Date: 171113
 
 	     End User Set-up for GSFC Checked-out FS PC
 
-		    Ed Himwich, Jonathan Quick and Dave Horsley
+	     Ed Himwich, Jonathan Quick and Dave Horsley
 
 This document is intended primarily for users receiving a GSFC
 checked-out FS PC.  It also useful for stations that have upgraded an

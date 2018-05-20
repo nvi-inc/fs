@@ -31,7 +31,7 @@ procedure is exited early.
 If a graceful halt or (re-)start of a schedule is needed, it is
 recommended that the operator enter "halt" during a wait for a
 time-flow control ("!<time>") or a timed wait ("!+<time to wait>")
-command.  If halted during such a wait, a new "scehdule=..." command
+command.  If halted during such a wait, a new "schedule=..." command
 can be executed.
 
 If it is not possible to find a suitable wait, the "terminate" command

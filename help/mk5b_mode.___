@@ -28,6 +28,7 @@ decimation: decimation factor
 	    For mk5b_mode: 1, 2, 4, 8, or 16.  No default unless
             sample (next parameter) is specified.
             For mk5c_mode: only available for source "mark5b".
+            There is no monitor value for Ethernet recorders.
 	    Ignored for bit_streams.
 
             For mk5b_mode, and mk5c_mode with 5b/Ethernet, the minimum
@@ -120,7 +121,7 @@ there is no recorder, DRUDG will use the "bit_streams=..." command.
 This will set the bit mask in place of the "mk5b_mode=..." or
 "mk5c_mode=..." command.  If a non-FiLa10G rack is specified, DRUDG
 will also not use the "filag_mode=..."  command.  The result of having
-no "mk5b_mode=..."/"mak5c_mode=..." and "fila10g_mode=..." commands is
+no "mk5b_mode=..."/"mk5c_mode=..." and "fila10g_mode=..." commands is
 that the FS will not interfere with eVLBI remote control of the Mark
 5B/5C/FlexBuff and or a "FiLa10G".  The FS should still have the
 correct rack and recorder selected in equip.ctl.
@@ -131,7 +132,7 @@ a FiLa10G is in use, DRUDG always uses equivalent bit masks for
 has no effect on the Tsys data reported
 
 When an Ethernet recorder is in use, the mask, decimation, and sample
-are not returned by "jive5ab".
+values are not returned by "jive5ab".
 
 Bitmask LSB is VSI bit-stream 0, e.g. 0x1 selects bit-stream 0, etc.
 The number of bits turned on in the bit-stream mask must be 2^n where
