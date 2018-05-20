@@ -11936,6 +11936,11 @@ Version 9.11.19 170129
            speed up recovery, particularly for very large logs
            emphasize error message asking operator to wait
 
+171023 WEH clib/if_cmd.c
+           help/if.___
+           help/schedule.___
+           Implementing new if schedule:text conditional.
+
 171025 WEH vex/vex.y
            vex/test_parser/wh1
            vex/vexf.c
@@ -11990,11 +11995,11 @@ Version 9.11.19 170129
            st.default/st-0.0.0/metserver/port/Makefile
            st.default/st-0.0.0/metserver/src/metget.c
            st.default/st-0.0.0/metserver/src/metwind.c
-171201 DEH st.default/st-0.0.0/metserver/src/metserver.c
-           detect if reading loop is stuck
-
 180206 WEH st.default/st-0.0.0/metserver/INSTALL
            add WMT7xx
+
+171201 DEH st.default/st-0.0.0/metserver/src/metserver.c
+           detect if reading loop is stuck
 
 160630 WEH st.default/st-0.0.0/metclient/src/metclient.c
            don't close control file after an error opening it
@@ -12122,3 +12127,20 @@ Version 9.11.20.rc3 180501
            Make 'computer' the recommended time model
 
 180519 Version 9.11.20.rc4
+
+170928 WEH st.default/st-0.0.0/metserver/src/nmea_wind.c
+           was missing, TNX JHFQ
+
+180520 WEH help/mk5b_mode.___
+           help/fila10g_mode.d__
+           help/halt.___
+           misc/FSL9_End_User.txt
+           st.default/control/equip.ctl
+           st.default/st-0.0.0/metserver/INSTALL
+           typos and clarifications, more TNX for Jon
+
+180520 WEH onoff/tzero.c
+           no Tzero for station detectors now works for u6
+              and for u5/u6 independently of rack type 
+
+1805xx Version 9.11.20.rc5
