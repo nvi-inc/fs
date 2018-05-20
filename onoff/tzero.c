@@ -201,13 +201,17 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
         accum->sig[i]=0.0;
       }
     accum->count=1;
+  }
 
-  } else if (kst1 && !kst1z) {
+  if (kst1 && !kst1z) {
     accum->avg[MAX_GLOBAL_DET+4] = 0.0;
+    accum->sig[MAX_GLOBAL_DET+4] = 0.0;
     accum->count=1;
     
-  } else if (kst2 && !kst2z) {
+  }
+  if (kst2 && !kst2z) {
     accum->avg[MAX_GLOBAL_DET+5] = 0.0;
+    accum->sig[MAX_GLOBAL_DET+5] = 0.0;
     accum->count=1;
   }
 
@@ -324,7 +328,3 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
   *ierr=-6;
   return -1;
 }
-
-
-
-
