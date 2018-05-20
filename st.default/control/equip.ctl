@@ -62,7 +62,7 @@ cdp     cdp or metserver port & host, use cdp if you don't have either
 *                                                        FiLa10G
 *                                                   rack=CDAS
 *                                             0 otherwise except rack=none
-*                                     "nominal" is not allow for rack=none
+*                                     "nominal" is not allowed for rack=none
 * a clock rate value of "none" will suppress clock_set command in FMSET
    32   one of: none, nominal, 2, 4, 8, 16, 32, 64
 *FiLa10G input select, one of: vsi1, vsi2, vsi1-2, vsi1-2-3-4, gps, tvg

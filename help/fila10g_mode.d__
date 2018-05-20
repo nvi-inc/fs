@@ -13,7 +13,7 @@ mask1:      VSI1 input bit-stream mask, hex, non-zero 32-bit wide maximum,
 
 decimation: decimation factor: 1, 2, 4, 8, or 16. No default unless
             sample (next parameter) is specified. On monitor,
-            displayed if available; depending on the FiL10G version,
+            displayed if available; depending on the FiLa10G version,
             it may also not be displayed if '1'.
 
 sample:     sample rate: must be greater than 0.124.  The value divided

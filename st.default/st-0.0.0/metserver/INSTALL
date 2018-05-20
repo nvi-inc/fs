@@ -54,7 +54,7 @@ Field System software.
          `-- metserver.c  - Weather Server source.
 
 
-2.) Harware set-up
+2.) Hardware set-up
 
    The devices should be set for 9600 BAUD, no parity, 8 data bits,
    and 1 stop bit. The should be conected to a serial port as DCD (PC
@@ -64,7 +64,7 @@ Field System software.
    A WMT70x should be set to autosend the NMEA message (#19) with 1
    second or less interval.
 
-2.) Getting the metserver and producing an executable.
+3.) Getting the metserver and producing an executable.
    
    prompt> log in as prog
    prompt> cd /usr2/fs/st.default/st-0.0.0
