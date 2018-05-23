@@ -12119,7 +12119,7 @@ Version 9.11.20.rc3 180501
 
 180510 DEH plog/plog
            plog/test_plog
-	   fixed typo which caused specifying paths to fail.
+	   fixed typo which caused specifying paths to fail
 	   added test
 
 180510 WEH st.default/control/time.ctl
@@ -12144,3 +12144,13 @@ Version 9.11.20.rc3 180501
               and for u5/u6 independently of rack type 
 
 1805xx Version 9.11.20.rc5
+
+180522 DEH Makefile
+           spubsub/Makefile
+           spubsub/third_party/Makefile
+           spubsub/third_party/include
+           remove cmake build dependency for nanomsg and add support
+	     for FSL8
+
+180523 DEH Makefile
+           Fixed dist target 
