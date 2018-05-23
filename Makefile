@@ -40,15 +40,7 @@ dbbcn popen s_client lgerr fesh plog
 # changes in oprin, fs, and erchk.
 
 ifndef FS_NO_DISPLAY_SERVER
-
-ifeq "$(shell which cmake)" ""
-$(error cmake is required to build the display server. \
-Install cmake or disable the display server by setting the \
-enviroment variable FS_NO_DISPLAY_SERVER=1 )
-endif
-
 EXEC_DIR += spubsub fsclient
-
 else
 export FS_NO_DISPLAY_SERVER
 endif
@@ -57,22 +49,21 @@ all:	libs execs
 #
 dist:
 	rm -rf /tmp/fs-$(FS_VERSION).tgz /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name 'core'     -print >  /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name '#*#'      -print >> /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name '*~'       -print >> /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name '.*~'      -print >> /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name '*.[oas]'  -print >> /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name '*.pyc'  -print >> /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name 'y.tab.h'  -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name 'core' -type f -print >  /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name '#*#'          -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name '*~'           -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name '.*~'          -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name '*.[oas]'      -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name '*.pyc'        -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name 'y.tab.h'      -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION)/bin -mindepth 1 -name '*' -print >> /tmp/fsdist-exclude
-	echo usr2/fs-$(FS_VERSION)/oprin/readline-2.0            >> /tmp/fsdist-exclude
-	echo usr2/fs-$(FS_VERSION)/rclco/rcl/all                 >> /tmp/fsdist-exclude
-	echo usr2/fs-$(FS_VERSION)/spubsub/build                 >> /tmp/fsdist-exclude
+	echo usr2/fs-$(FS_VERSION)/oprin/readline-2.0                >> /tmp/fsdist-exclude
+	echo usr2/fs-$(FS_VERSION)/rclco/rcl/all                     >> /tmp/fsdist-exclude
 	cd /; tar -czf /tmp/fs-$(FS_VERSION).tgz -X /tmp/fsdist-exclude usr2/fs-$(FS_VERSION)
 	chmod a+rw /tmp/fs-$(FS_VERSION).tgz
 #
 clean:
-	rm -f `find . -name 'core' -print`
+	rm -f `find . -name 'core' -type f -print`
 	rm -f `find . -name '#*#' -print`
 	rm -f `find . -name '*~' -print`
 	rm -f `find . -name '.*~' -print`
@@ -85,7 +76,6 @@ rmdoto:
 	rm -f `find . -name '*.[oas]' -print`
 	rm -rf oprin/readline-2.0
 	rm -f `find . -name '*.pyc' -print`
-	rm -rf spubsub/build
 #
 libs:
 	for dir in $(LIB_DIR); do\
