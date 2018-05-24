@@ -93,24 +93,24 @@ void run_snap(char *cmd) {
 /* Oprin commands */
 
 void client_command(const char *cmd) {
-    static FILE* f = NULL;
+	static FILE *f = NULL;
 
-    if (!f) {
-        char* fdstr = getenv("FS_CLIENT_PIPE_FD");
+	if (!f) {
+		char *fdstr = getenv("FS_CLIENT_PIPE_FD");
 
-        if (!fdstr || !*fdstr ) {
-            fprintf(stderr, "oprin: connected to fsclient");
-            return;
-        }
-        f = fdopen(atoi(fdstr), "w");
-        if (!f) {
-            perror("oprin: error opening pipe");
-            return;
-        }
-    }
+		if (!fdstr || !*fdstr) {
+			fprintf(stderr, "oprin: connected to fsclient");
+			return;
+		}
+		f = fdopen(atoi(fdstr), "w");
+		if (!f) {
+			perror("oprin: error opening pipe");
+			return;
+		}
+	}
 
-    fprintf(f, "%s\n", cmd);
-    fflush(f);
+	fprintf(f, "%s\n", cmd);
+	fflush(f);
 }
 
 void end_oprin(const char *arg) {
@@ -124,25 +124,45 @@ void end_oprin(const char *arg) {
 	exit(EXIT_SUCCESS);
 }
 
+void help_command(const char *arg) {
+	size_t len    = strlen(arg) + 5 + 1;
+	char *command = malloc(len);
+
+	if (!command) {
+		perror("help command");
+		exit(1);
+	}
+	command[0] = '\0';
+
+	strcat(command, "help=");
+	strcat(command, arg);
+
+	if (getenv("FS_CLIENT_PIPE_FD")) {
+		client_command(command);
+	} else {
+		run_snap(command);
+	}
+	free(command);
+}
+
 void terminate(const char *arg) {
-    /* without the display server, run this command as usual */
+	/* without the display server, run this command as usual */
 #ifdef FS_NO_DISPLAY_SERVER
-        run_snap("terminate");
+	run_snap("terminate");
 #endif
 
 	if (!arg || !arg[0]) {
-		fprintf(stderr,
-		        "You are running FS client. Use \"terminate=fs\" or \"terminate=client\"\n");
+		fprintf(stderr, "You are running FS client. Use "
+		                "\"terminate=fs\" or \"terminate=client\"\n");
 		return;
 	}
 
 	if (strcmp(arg, "client") == 0) {
-        /* TODO: actually kill the client here */
-		exit(EXIT_SUCCESS);
+		client_command("exit");
 	}
 
 	if (strcmp(arg, "fs") == 0) {
-            run_snap("terminate");
+		run_snap("terminate");
 	}
 }
 
@@ -151,7 +171,8 @@ void terminate(const char *arg) {
 static const struct cmd local_commands[] = {
     {"end_oprin", end_oprin},
     {"client", client_command},
-/*    {"terminate", terminate}, */
+    {"help", help_command},
+    /*    {"terminate", terminate}, */
     {NULL, NULL},
 };
 
@@ -160,15 +181,17 @@ int try_local_command(const char *s) {
 	char *str = strdup(s);
 
 	char *cmd = str;
-	while (isspace(*cmd)) cmd++;
+	while (isspace(*cmd))
+		cmd++;
 
 	char *arg = strchr(cmd, '=');
-	if (arg) *arg++ = '\0';
+	if (arg)
+		*arg++ = '\0';
 
 	int ret = 0;
 	unsigned int i;
 
-	const struct cmd* lcmd = local_commands;
+	const struct cmd *lcmd = local_commands;
 
 	for (lcmd = local_commands; lcmd->name; lcmd++) {
 		if (strcmp(lcmd->name, cmd) == 0) {
