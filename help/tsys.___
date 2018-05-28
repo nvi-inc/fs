@@ -5,8 +5,6 @@
                         tsys6=list
 
             Response:   tsys/systemps
-                        tsys5/systemps
-                        tsys6/systemps
 
 
 Settable parameters:
@@ -42,7 +40,7 @@ For VLBA/4 the formula is:
  
 For station specific detectors, the formula is
 
-          tsys = (tpi - tpzero) * (caltemp/(tpical-tpi))
+          tsys = (tpi - tpzero) * (caltemp/(tpdiff))
 
 where:
 tsys          system temperature, as reported in tsys command
@@ -51,51 +49,50 @@ tpzero        zero-level reading, from tpzero command
 tpical        cal-on reading, from tpical command
 caltemp       noise calibration source temperature, from
               caltemp command.
- tpgain       VLBA TPI gain reading, from tpgain command
- tpdiff       TPICAL-TPI reading, from tpdiff command
- tpdiffgain   VLBA TPDIFF gain reading, from tpdiffgain
-              command
+tpgain        VLBA TPI gain reading, from tpgain command
+tpdiff        TPICAL-TPI reading, from tpdiff command
+tpdiffgain    VLBA TPDIFF gain reading, from tpdiffgain command
 
-For VLBA/4/5 tpgain must be a measurement of the gain level 
-when tpi is measured and likewise tpdiffgain must be a
-measurement of the gain level when tpzero and tpdiff are
-measured. However, if tpgain  and/or tpidffgain return
-incorrect values when used because of some problem, they  can
-be omitted as long as the gain level is the same for all of
+For VLBA/4/5 tpgain must be a measurement of the gain level when tpi
+is measured and likewise tpdiffgain must be a measurement of the gain
+level when tpzero and tpdiff are measured. However, if tpgain and/or
+tpidffgain return incorrect values when used because of some problem,
+they can be omitted as long as the gain level is the same for all of
 tpi, tpzero, and tpdiff.
 
-Except for station specific detectors, the tpi value used for
-tpidff may be different from the tpi values used for tsys. The
-tpidiff is used to define the conversion factor from counts to
-degrees (according to caltemp) only. Please see the default
-CALTSYS, PREOB, and MIDOB procedures for examples of how TSYS
-is used.
+Except for station specific detectors, the tpi value used for tpidff
+may be different from the tpi values used for tsys. The tpidiff is
+used to define the conversion factor from counts to degrees (according
+to caltemp) only. Please see the default CALTSYS, PREOB, and MIDOB
+procedures for examples of how TSYS is used.
 
-Except for station defined detectors, the results are returned
-grouped in pairs of detector mnemonic,value, the output is
-collected into lines by IF channel. Detectors that have no IF
-assigned are displayed first followed by Ifs 1-3 (Mark III/IV
-and LBA4), 1-4 (LBA), and a-d (VLBA/4). If the output for an
-IF would make a long output line, the output is split into
-more than one line. For station defined detectors, accessed by
-the tsys5 and tsys6 commands, the results are just displayed
-in order: u5, u6.
+For station detectors, if the "zero" parameter in the "user_device"
+command, is set to "no", the value of tpzero is assumed to be zero.
+The tpzero measurement can, and should, be omitted in this case.  If
+it is not omitted, the returned value is ignored.
+
+The results are returned grouped in pairs of detector mnemonic,value,
+the output is collected into lines by IF channel. Detectors that have
+no IF assigned are displayed first followed by Ifs 1-3 (Mark III/IV
+and LBA4), 1-4 (LBA), and a-d (VLBA/4). If the output for an IF would
+make a long output line, the output is split into more than one
+line.
 
 For Mark III/IV5 and LBA, additional mnemonics formif and formvc are
-permitted in the list. These select the detectors for the IF channels
-and VC sidebands currently being recorded by the formatter. For VC
+permitted in the list.  These select the detectors for the IF channels
+and VC sidebands currently being recorded by the formatter.  For VC
 detectors, the appropriate sideband or sideband combination must be
 already selected for the device.
 
 For VLBA/4/5 and DBBC, additional mnemonics formif and formbbcc are
-permitted in the list. These select the detectors for the IF channels
+permitted in the list.  These select the detectors for the IF channels
 and BBC sidebands currently being recorded by the formatter.
 
 A time-out or other error on one more devices for a Mark III/IV/5,
 LBA, VLBA/4/5 or DBBC detector will not prevent results from other
-detectors from being displayed. A negative integer will be shown for
+detectors from being displayed.  A negative integer will be shown for
 each channel that had an error that prevented an actual measurement
-from being displayed. An overflow value, larger than 999999.9 is
+from being displayed.  An overflow value, larger than 999999.9 is
 displayed as dollar signs, $$$$$$$$.
 
 For Mark III/IV/5 and LBA4 racks the detector mnemonics for the
@@ -103,7 +100,3 @@ VCs are displayed as hs, where h is the VC number as hex and s
 is for the detector is use: d (dual for upper/lower), u
 (upper), l (lower), a digit 3-7 for other detectors or 'x' for
 unknown.
-
-For station dependent detectors, the tsys5 and tsys6 commands
-are used to match the detectors to the corresponding caltemp5
-and caltemp6.
