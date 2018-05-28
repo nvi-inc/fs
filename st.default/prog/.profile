@@ -44,4 +44,4 @@ fi
 export FC
 #export FS_CHECK_NTP=
 #export FS_SERIAL_CLOCAL=1
-#export FS_MONIT_ADD_LIB=-ltinfo
+#export FS_TINFO_LIB=1

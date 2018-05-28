@@ -56,5 +56,5 @@ endif
 test ! -f /var/mail/prog || from
 #setenv FS_CHECK_NTP
 #setenv FS_SERIAL_CLOCAL 1
-#setenv FS_MONIT_ADD_LIB -ltinfo
+#setenv FS_TINFO_LIB 1
 #
