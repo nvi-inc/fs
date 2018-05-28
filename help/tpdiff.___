@@ -6,42 +6,41 @@
 
 
 Settable parameters:
-            list        List of total power integrators to read back.
-            Standard detector mnemonics allowed.  In addition for VLBA/4/5
-            formif and formbbc are permitted, for Mark III/IV/5,
-            formif and formvc are permitted.
+            list         List of total power integrators to read back.
+                         Standard detector mnemonics allowed.  In
+                         addition for VLBA/4/5 formif and formbbc are
+                         permitted, for Mark III/IV/5, formif and
+                         formvc are permitted.
 
 Monitor-only parameters:
-            differences List of readings, counts. These values are stored
-            for use by the tsys/5/6 commands.
+
+            differences  List of readings, counts. These values are
+                         stored for use by the tsys/5/6 commands.
 
 Comments:
-Except for station defined detectors, the results are returned
-grouped in pairs of detector mnemonic,value, the output is
-collected into lines by IF channel. Detectors that have no IF
-assigned are displayed first followed by  IFs 1-3 (Mark III/IV
-or LBA4), 1-4 (LBA) and a-d (VLBA/4). If the output for an IF
-would make a long output line, the output is split into more
-than one line. For station defined detectors the results are
-just displayed in order: u5, u6.
 
-A time-out or other error on one more devices for a Mark
-III/IV, LBA, or VLBA/VLBA4 detector will not prevent results
-from other detectors from being displayed.  A negative integer
-will be shown for each channel that had an error that
-prevented an actual measurement from being displayed. An
-overflow value, 65535, is displayed as dollar signs, $$$$$.
+The results are returned grouped in pairs of detector mnemonic,value,
+the output is collected into lines by IF channel. Detectors that have
+no IF assigned are displayed first followed by IFs 1-3 (Mark III/IV or
+LBA4), 1-4 (LBA) and a-d (VLBA/4). If the output for an IF would make
+a long output line, the output is split into more than one line.
 
-For Mark III/IV and LBA4 racks the detector mnemonics for the
-VCs are displayed as hs, where h is the VC number as hex and s
-is for the detector is use: d (dual for upper/lower), u
-(upper), l (lower), a digit 3-7 for other detectors or 'x' for
-unknown.
+A time-out or other error on one more devices for a Mark III/IV, LBA,
+or VLBA/VLBA4 detector will not prevent results from other detectors
+from being displayed.  A negative integer will be shown for each
+channel that had an error that prevented an actual measurement from
+being displayed. An overflow value, 65535, is displayed as dollar
+signs, $$$$$.
+
+For Mark III/IV and LBA4 racks the detector mnemonics for the VCs are
+displayed as hs, where h is the VC number as hex and s is for the
+detector is use: d (dual for upper/lower), u (upper), l (lower), a
+digit 3-7 for other detectors or 'x' for unknown.
 
 For VLBA/4/5, additional mnemonics formif and formbbcc are permitted
 in the list.  These select the detectors for the IF channels and BBC
 sidebands currently being recorded by the formatter.  For Mark
 III/IV/5, formvc is accepted instead of formbbc, as well as formif.
 
-This command forms the difference between tpical and tpi
-measurements for use in the tsys/5/6 command.
+This command forms the difference between tpical and tpi measurements
+for use in the tsys command.
