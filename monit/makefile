@@ -3,7 +3,10 @@ all: ../bin/monit1 ../bin/monit2 ../bin/monit3 ../bin/monit4 ../bin/monit5
 FFLAGS = -c
 CFLAGS =  -I/usr/include/ncurses
 #LIBES= ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a  -lcurses -ltermlib
-LIBES= ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a  $(FS_MONIT_ADD_LIBES)
+LIBES = ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a
+ifdef FS_TINFO_LIB
+LIBES := $(LIBES) -ltinfo
+endif
 #
 OBJECTS1 = monit1.o die.o
 #

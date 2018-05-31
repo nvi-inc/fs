@@ -12143,7 +12143,7 @@ Version 9.11.20.rc3 180501
            no Tzero for station detectors now works for u6
               and for u5/u6 independently of rack type 
 
-1805xx Version 9.11.20.rc5
+180520 Version 9.11.20.rc5
 
 180522 DEH Makefile
            spubsub/Makefile
@@ -12154,3 +12154,36 @@ Version 9.11.20.rc3 180501
 
 180523 DEH Makefile
            Fixed dist target 
+
+180524 DEH clib/Makefile
+	   boss/Makefile
+           clib/helpstr.c
+	   fsclient/fsclient.c
+	   oprin/oprin.c
+	   moved helpstr from boss to clib
+	   added "help" support fsclient
+
+1805xx Version 9.11.20.rc6
+
+180520 Version 9.11.20.rc5
+
+180528 WEH help/user_device.___
+           help/tpzero.___
+           help/tpi.___
+           help/tpical.___
+           help/tpdiff.___
+           help/tsys.___
+           help/tpgain.w__
+           help/tpdiffgain.w__
+           fixed old u5/us issues and
+             added 'no' zero option for station devices
+
+180528 WEH monit/Makefile
+           predict/Makefile
+           fmset/Makefile
+           use FS_TINFO_LIB variable
+
+180531 DEH fsclient/fsclient.c
+	   fs/start_server.c
+	   spubsub/ssub.c
+	   improved signal handling of fsclient
