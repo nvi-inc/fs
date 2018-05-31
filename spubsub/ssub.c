@@ -13,11 +13,6 @@
 
 #include "msg.h"
 
-static volatile int terminate = 0;
-void term_handler(int i) {
-	terminate = i;
-}
-
 void nn_perror(const char *msg) {
 	fprintf(stderr, "ssub: %s: %s\n", msg, nn_strerror(nn_errno()));
 	fflush(stderr);
@@ -170,12 +165,6 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
-	if (signal(SIGTERM, term_handler) == SIG_ERR ||
-	    signal(SIGINT, term_handler) == SIG_ERR) {
-		nn_perror("error setting signal handler");
-		exit(1);
-	}
-
 	if (nn_connect(sub, pubaddr) < 0) {
 		nn_perror("error connecting to pub socket");
 		exit(1);
@@ -199,11 +188,6 @@ int main(int argc, char **argv) {
 			buf = NULL;
 		}
 		nbytes = nn_recv(sub, &buf, NN_MSG, 0);
-
-		if (terminate) {
-			fprintf(stderr, "\nclient exiting...\n");
-			break;
-		}
 
 		if (nbytes < 0) {
 			if (nn_errno() == ETIMEDOUT) {

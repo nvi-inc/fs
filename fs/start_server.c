@@ -1,12 +1,12 @@
 #include <fcntl.h>
+#include <pty.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-#include <pty.h>
 #include <utmp.h>
 
 #include "../include/params.h"
@@ -62,9 +62,14 @@ void start_server(bool background, bool no_x) {
 		exit(EXIT_FAILURE);
 	}
 
+	sigset_t set, oldset;
+	sigemptyset(&set);
+	sigaddset(&set, SIGCHLD);
+	sigprocmask(SIG_BLOCK, &set, &oldset);
+
 	if (spid > 0) {
 		if (background) {
-			exit(0);
+			exit(EXIT_SUCCESS);
 		}
 		if (no_x) {
 			execlp("fsclient", "fsclient", "-sf", "-n", NULL);
@@ -73,14 +78,24 @@ void start_server(bool background, bool no_x) {
 		}
 		perror("fs: error starting fsclient");
 		exit(EXIT_FAILURE);
-        // TODO: wait to check if fsclient has successfully started?
+		// TODO: wait to check if fsclient has successfully started?
 	}
+	sigprocmask(SIG_SETMASK, &oldset, NULL);
 
-
-    // Start a new session
 	if (setsid() < 0) {
 		perror("fs: error creating a new session");
 		exit(EXIT_FAILURE);
+	}
+
+    // fork again so we become a child of pid 1
+	switch (fork()) {
+	default:
+		exit(EXIT_SUCCESS);
+	case -1:
+		perror("fs: error creating a new session");
+		exit(EXIT_FAILURE);
+	case 0:
+		break;
 	}
 
 	// Server forks calling program in a pty
@@ -91,23 +106,29 @@ void start_server(bool background, bool no_x) {
 		exit(EXIT_FAILURE);
 	}
 	if (cpid == 0) {
-        // Calling process runs as usual in child
+		// Calling process runs as usual in child
 		return;
 	}
 
-    // Set stderr and stdout to close on successful exec, this way we can 
-    // still report errors to the calling terminal, but disconnect from it
-    // on success.
-    fcntl(STDERR_FILENO, F_SETFD, FD_CLOEXEC);
-    fcntl(STDOUT_FILENO, F_SETFD, FD_CLOEXEC);
+	// setup_ids messes with the signals, set them back
+	if (signal(SIGINT, SIG_DFL) == SIG_ERR ||
+	    signal(SIGFPE, SIG_DFL) == SIG_ERR ||
+	    signal(SIGQUIT, SIG_DFL) == SIG_ERR ||
+	    signal(SIGTERM, SIG_DFL) == SIG_ERR) {
+		perror("fs-server: error setting signals");
+		exit(EXIT_FAILURE);
+	}
 
+	// Set stderr and stdout to close on successful exec, this way we can
+	// still report errors to the calling terminal, but disconnect from it
+	// on success.
+	fcntl(STDERR_FILENO, F_SETFD, FD_CLOEXEC);
+	fcntl(STDOUT_FILENO, F_SETFD, FD_CLOEXEC);
 	// spub expects data on stdin, redirect master end of pty to stdin
 	dup2(pty_master, STDIN_FILENO);
 
-	execlp("spub", "spub", "-b",
-            FS_DISPLAY_SCROLLBACK_LEN,
-            FS_DISPLAY_PUBADDR,
-            FS_DISPLAY_REPADDR, NULL);
+	execlp("spub", "spub", "-b", FS_DISPLAY_SCROLLBACK_LEN,
+	       FS_DISPLAY_PUBADDR, FS_DISPLAY_REPADDR, NULL);
 	perror("fs: error calling spub");
-    exit(EXIT_FAILURE);
+	exit(EXIT_FAILURE);
 }
