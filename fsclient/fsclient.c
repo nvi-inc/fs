@@ -1,27 +1,45 @@
+#include <assert.h>
 #include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <getopt.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-
-#include <errno.h>
-
-#include <assert.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <unistd.h>
-
+#include <sys/select.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
-#include <getopt.h>
-#include <pthread.h>
+#include <unistd.h>
 
 #include "../include/ipckeys.h"
 #include "../include/params.h"
 
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
+
+extern struct fscom *shm_addr;
+void helpstr_(const char *cnam, int *clength, char *runstr, int *rack,
+              int *drive1, int *drive2, int *ierr, int clen, int rlen);
+
+volatile sig_atomic_t die   = 0;
+volatile sig_atomic_t child = 0;
+
+void handler(int sig) {
+	switch (sig) {
+	case SIGTERM:
+	case SIGINT:
+	case SIGQUIT:
+		die = sig;
+		break;
+	case SIGCHLD:
+		child = 1;
+		break;
+	}
+}
 
 /* split string into two, adding null terminator
  * to input and returning second half (if any)*/
@@ -34,24 +52,112 @@ char *strsplit(char *in, char delim) {
 	return out;
 }
 
-/* Kill all children processes with SIGTERM */
-void kill_children() {
-	/* Ignore SIGTERM so fsclient can shutdown cleanly */
-	sigset_t signal_set;
-	sigemptyset(&signal_set);
-	sigaddset(&signal_set, SIGQUIT);
-	sigprocmask(SIG_BLOCK, &signal_set, NULL);
-	killpg(0, SIGQUIT);
+void fatal(const char *msg) {
+	perror(msg);
+	exit(EXIT_FAILURE);
 }
 
-/* watch a child pid and exit. Also reaps zombie processes.  */
-void *exit_with(void *arg) {
-	pid_t pid = *((pid_t *)arg);
-	pid_t child;
-	while ((child = wait(NULL)) > 0) {
-		if (child == pid) {
-			break;
+/* Kill all children processes with SIGINT */
+void kill_children() {
+	/* Ignore SIGINT so fsclient can shutdown cleanly */
+	__sighandler_t p;
+	if ((p = signal(SIGINT, SIG_IGN)) == SIG_ERR)
+		fatal("fsclient: error killing children");
+	if (killpg(0, SIGINT) < 0)
+		fatal("fsclient: error killing children");
+	if (signal(SIGINT, p) == SIG_ERR)
+		fatal("fsclient: error killing children");
+}
+
+void help(const char *arg) {
+	char help_file[256] = {0};
+
+	int err = 0;
+	int i   = (int)(strlen(arg));
+	/* TODO: this may cause problems on 64 bit */
+
+	helpstr_(arg, &i, help_file, &shm_addr->equip.rack,
+	         &shm_addr->equip.drive[0], &shm_addr->equip.drive[1], &err, 0,
+	         0);
+
+	if (err == -3) {
+		fprintf(stderr, "fsclient: could not find help for \"%s\"\n",
+		        arg);
+		return;
+	}
+
+	if (err == -2) {
+		fprintf(stderr, "fsclient: help string too long");
+		return;
+	}
+
+	if (err < 0) {
+		fprintf(stderr, "fsclient: unknown error %d", err);
+		return;
+	}
+
+	sigset_t set;
+
+	switch (fork()) {
+	case -1:
+		fatal("fsclient: error forking");
+	case 0:
+
+		sigemptyset(&set);
+		sigprocmask(SIG_SETMASK, &set, NULL);
+
+		execlp("helpsh", "helpsh", help_file, NULL);
+		perror("fsclient: error opening helpsh");
+		_exit(EXIT_FAILURE);
+	default:
+		return;
+	}
+}
+
+/* Signal handler thread.
+ * Watches the pid given in arg and executes a clean shutdown if it dies.
+ * Also reaps zombie processes and handles terminate signals.
+ */
+void *signal_thread_fn(void *arg) {
+	pid_t shudown_pid = *((pid_t *)arg);
+
+	// Assuming mask inherited from main thread is totally blocked
+
+	sigset_t set, emptyset;
+
+	sigfillset(&set);
+	pthread_sigmask(SIG_SETMASK, &set, NULL);
+	while (!die) {
+		sigemptyset(&emptyset);
+		int ret = pselect(0, NULL, NULL, NULL, NULL, &emptyset);
+
+		if (ret == -1 && errno != EINTR) {
+			fatal("fsclient pselect error");
 		}
+
+		if (child) {
+			child = 0;
+			if (signal(SIGCHLD, handler) == SIG_IGN)
+				fatal("fsclient: error setting signal handler");
+			for (;;) {
+				pid_t pid = waitpid(-1, NULL, WNOHANG);
+				if (pid < 0 && errno != ECHILD) {
+					fatal("poll");
+				}
+
+				if (pid <= 0) {
+					break;
+				}
+
+				if (pid == shudown_pid) {
+					die = -1;
+				}
+			}
+		}
+	}
+	if (die > 0) {
+		// Killed by a signal, not main child
+		fprintf(stderr, "\nclient exiting...\n");
 	}
 	kill_children();
 	exit(EXIT_SUCCESS);
@@ -62,7 +168,7 @@ void print_client_commands() {
 	size_t len = 0;
 	FILE *fp   = fopen(CLPGM_CTL, "r");
 	if (!fp) {
-		fprintf(stderr, "oprin: error opening %s: %s\n", CLPGM_CTL,
+		fprintf(stderr, "fsclient: error opening %s: %s\n", CLPGM_CTL,
 		        strerror(errno));
 		return;
 	}
@@ -73,7 +179,7 @@ void print_client_commands() {
 		while (!isspace(*ptr))
 			ptr++;
 		*ptr = '\0';
-		fprintf(stderr, "%s\n", line);
+		printf("%s\n", line);
 	}
 
 	free(line);
@@ -91,7 +197,7 @@ void print_client_commands() {
  * */
 void run_clpgm_ctl(const char *cmd) {
 	if (!cmd || cmd[0] == '\0') {
-		fprintf(stderr, "fsclient: commands are\n");
+		printf("fsclient commands are:\n");
 		print_client_commands();
 		return;
 	}
@@ -144,31 +250,45 @@ void run_clpgm_ctl(const char *cmd) {
 	}
 
 	switch (fork()) {
-	case -1:
-		perror("fsclient: error creating new process");
-	/* fall-through */
-	case 0:
-		break;
 	default:
 		free(line);
 		return;
+	case 0:
+		break;
+	case -1:
+		fatal("fsclient: error creating new process");
 	}
 
 	switch (flags[0]) {
 	case 'd':
-		if(fork()) _exit(EXIT_SUCCESS);
 		if (setsid() < 0) {
 			perror("fsclient: error starting a new session");
+			_exit(EXIT_FAILURE);
 		}
+		switch (fork()) {
+		default:
+			_exit(EXIT_SUCCESS);
+		case 0:
+			break;
+		case -1:
+			fatal("fsclient: error creating new process");
+		}
+
 		break;
 	case 'a':
 		break;
 	default:
-		fprintf(stderr, "unknown flag %c", flags[0]);
-		exit(EXIT_SUCCESS);
+		fprintf(stderr, "fsclient: error starting command %s, unknown flag '%c'", command, flags[0]);
+		_exit(EXIT_SUCCESS);
 	}
 
+	sigset_t set;
+	sigemptyset(&set);
+	sigprocmask(SIG_SETMASK, &set, NULL);
+
 	execl("/bin/sh", "sh", "-c", command, NULL);
+	perror("fsclient: error running command");
+	_exit(EXIT_FAILURE);
 }
 
 const char *delim = " \t";
@@ -213,9 +333,13 @@ int run_pgm_ctl(char *path) {
 		if (pid < 0)
 			return -1;
 		if (pid == 0) {
+
+			sigset_t set;
+			sigemptyset(&set);
+			sigprocmask(SIG_SETMASK, &set, NULL);
 			execlp("sh", "sh", "-c", cmd, NULL);
 			perror("fsclient: error on exec");
-			return -1;
+			_exit(EXIT_FAILURE);
 		}
 		i++;
 	}
@@ -230,30 +354,32 @@ int run_pgm_ctl(char *path) {
 int nsem_test(char *);
 void setup_ids();
 
-const char *usage_short_str = "Usage: %s [-snwfh] \n";
+const char *usage_short_str = "Usage: %s [-swfnh] \n";
 const char *usage_long_str =
-    "Usage: %s [-sxwfh] \n"
+    "Usage: %s [-swfnh] \n"
     "Connect to local Field System server, starting any X11 programs\n"
     "in fspgm.ctl or stpgm.ctl\n"
     "  -s, --scrollback      print full scrollback buffer on connect\n"
-    "  -n, --no-x            do not start programs requring X11\n"
     "  -w, --wait            wait for Field System to restart on exit\n"
     "  -f, --force           start even if Field System is not running\n"
+    "  -n, --no-x            do not start programs requring X11\n"
     "  -h, --help            print this message\n";
+
+// clang-format off
+static struct option long_options[] = {
+    {"scrollback", no_argument, NULL, 's'},
+    {"wait",       no_argument, NULL, 'w'},
+    {"force",      no_argument, NULL, 'f'},
+    {"no-x",       no_argument, NULL, 'n'},
+    {"help",       no_argument, NULL, 'h'},
+    {NULL, 0, NULL, 0}};
+// clang-format on
 
 int main(int argc, char **argv) {
 	bool arg_scrollback = false;
 	bool arg_wait       = false;
 	bool arg_force      = false;
 	bool arg_no_x       = false;
-
-	static struct option long_options[] = {
-	    {"scrollback", no_argument, NULL, 's'},
-	    {"wait",       no_argument, NULL, 'w'},
-	    {"force",      no_argument, NULL, 'f'},
-	    {"no-x",       no_argument, NULL, 'n'},
-	    {"help",       no_argument, NULL, 'h'},
-	    {NULL, 0, NULL, 0}};
 
 	// TODO: check if X11 available
 	// TODO: todo add CLI flag
@@ -280,8 +406,8 @@ int main(int argc, char **argv) {
 			arg_no_x = true;
 			break;
 		case 'h':
-			fprintf(stderr, usage_long_str, argv[0]);
-			exit(0);
+			printf(usage_long_str, argv[0]);
+			exit(EXIT_SUCCESS);
 			break;
 		default: /* '?' */
 			fprintf(stderr, usage_short_str, argv[0]);
@@ -289,52 +415,53 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	if (!arg_force) {
-		setup_ids();
-		if (!nsem_test("fs   ")) {
-			fprintf(stderr,
-			        "Field System not running, run \"fs\" first\n");
-			exit(1);
-		}
+	setup_ids();
+	if (!arg_force && !nsem_test("fs   ")) {
+		fprintf(stderr, "Field System not running, run \"fs\" first\n");
+		exit(EXIT_FAILURE);
 	}
 
-	// Start ssub
+	if (signal(SIGINT, handler) == SIG_ERR ||
+	    signal(SIGQUIT, handler) == SIG_ERR ||
+	    signal(SIGTERM, handler) == SIG_ERR ||
+	    signal(SIGCHLD, handler) == SIG_ERR) {
+		fatal("fsclient: error setting signals");
+	}
+
 	int ssub_nargs     = 0;
 	char *ssub_argv[6] = {NULL};
 
 	ssub_argv[ssub_nargs++] = "ssub";
-	if (arg_scrollback) ssub_argv[ssub_nargs++] = "-s";
-	if (arg_wait)       ssub_argv[ssub_nargs++] = "-w";
+	if (arg_scrollback)
+		ssub_argv[ssub_nargs++] = "-s";
+	if (arg_wait)
+		ssub_argv[ssub_nargs++] = "-w";
 
 	ssub_argv[ssub_nargs++] = FS_DISPLAY_PUBADDR;
 	ssub_argv[ssub_nargs++] = FS_DISPLAY_REPADDR;
 
 	pid_t ssub_pid = fork();
 	if (ssub_pid < 0) {
-		perror("fsclient: error forking");
-		exit(1);
+		fatal("fsclient: error forking");
 	}
 	if (ssub_pid == 0) {
 		execvp("ssub", ssub_argv);
 		perror("fsclient: error starting ssub");
-		exit(1);
+		_exit(EXIT_FAILURE);
 	}
 
-	// If ssub terminates, terminate client
-	pthread_t wait_thread;
-	if (pthread_create(&wait_thread, NULL, exit_with, &ssub_pid) != 0) {
-		perror("fsclient: error on pthread_create");
-		exit(EXIT_FAILURE);
-	}
-
-	char buf[256];
 	int fds[2];
 
 	if (pipe(fds) < 0) {
-		perror("fsclient: error pipe");
-		exit(EXIT_FAILURE);
+		fatal("fsclient: error on pipe");
 	}
 
+	// children shouldn't be reading from the pipe
+	if (fcntl(fds[0], F_SETFD, fcntl(fds[0], F_GETFD) | FD_CLOEXEC) < 0) {
+		fatal("fsclient: error setting close-on-exec flag");
+	}
+
+	char buf[256];
 	snprintf(buf, sizeof(buf), "%d", fds[1]);
 	if (setenv("FS_CLIENT_PIPE_FD", buf, 1) < 0) {
 		perror("fsclient: error setenv");
@@ -344,18 +471,29 @@ int main(int argc, char **argv) {
 	if (!arg_no_x) {
 		// Start other programs
 		int ret;
-		ret = run_pgm_ctl(STPGM_CTL);
-		if (ret < 0)
-			exit(EXIT_FAILURE);
 		ret = run_pgm_ctl(FSPGM_CTL);
 		if (ret < 0)
-			exit(EXIT_FAILURE);
-
+			fatal("fsclient: error starting fs programs");
+		ret = run_pgm_ctl(STPGM_CTL);
+		if (ret < 0)
+			fatal("fsclient: error starting station programs");
 	}
 
 	close(fds[1]);
 
+	// signals are handled by other thread, block in this thread
+	sigset_t set;
+	sigfillset(&set);
+	pthread_sigmask(SIG_BLOCK, &set, NULL);
+
+	// setup signal  ssub terminates, terminate client
+	pthread_t signal_thread;
+	if (pthread_create(&signal_thread, NULL, signal_thread_fn, &ssub_pid)) {
+		fatal("fsclient: error on pthread_create");
+	}
+
 	char *command = NULL;
+	char *arg     = NULL;
 	ssize_t len;
 	size_t n;
 	FILE *f = fdopen(fds[0], "r");
@@ -366,10 +504,20 @@ int main(int argc, char **argv) {
 			len--;
 		}
 
+		arg = strsplit(command, '=');
+
 		if (strcasecmp(command, "exit") == 0) {
 			kill_children();
 			exit(EXIT_SUCCESS);
 		}
+
+		if (strcasecmp(command, "help") == 0) {
+			help(arg);
+			continue;
+		}
+
+		// Lookup in clpgm.ctl
+		// args aren't used here. Perhaps in the future?
 		run_clpgm_ctl(command);
 	}
 	free(command);
@@ -378,6 +526,6 @@ int main(int argc, char **argv) {
 	 * children other than ssub exited.
 	 *
 	 * Keep running until ssub exits */
-	pthread_join(wait_thread, NULL);
+	pthread_join(signal_thread, NULL);
 	exit(EXIT_SUCCESS);
 }
