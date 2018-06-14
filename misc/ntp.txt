@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/ntp.txt                  Version: 0.2  Date: 180523
+File: /usr2/fs/misc/ntp.txt                  Version: 0.4  Date: 180614
 
 			 NTP recommendations
 
@@ -29,7 +29,7 @@ information needed to set-up your system for NTP.
    time.
 
 
-2. In 'ntp.conf':
+2. In 'ntp.conf' (IPv4 assumed):
 
    2a. Use a mix of local and remote servers, as many as you can, up
        to 10.  These are preferably stratum 1 servers, but
@@ -54,7 +54,7 @@ information needed to set-up your system for NTP.
        thing that has been noticed is that it prefers local servers at
        start-up, but will eventually sync to a better remote server.
 
-   2d. Use 'restrict' with 'kod notrap nomodify nopeer noquery' with
+   2d. Use 'restrict' with 'notrap nomodify nopeer noquery' with
        each server for security.
 
        The overall result for a server is typically something like
@@ -62,9 +62,9 @@ information needed to set-up your system for NTP.
 
 #  node.domain
 server      192.5.41.209 iburst minpoll 4
-restrict    192.5.41.209 kod notrap nomodify nopeer noquery
+restrict    192.5.41.209 notrap nomodify nopeer noquery
 
-   2e. Use 'noselect' instead of 'iburst minpoll 4' for monitoring
+   2e. Use 'noselect' after 'iburst minpoll 4' for monitoring
        (only) of local devices.
 
    2f. Serve other devices on the local network, with something like:
@@ -72,6 +72,10 @@ restrict    192.5.41.209 kod notrap nomodify nopeer noquery
 # serve this private subnet
 restrict 192.168.1.0 mask 255.255.255.0 nomodify notrap
 
+   2g. Block access from all other nodes (especially remote) with:
+
+restrict -4 default ignore
+restrict -6 default ignore
 
 3. Other devices at the station that support NTP
 
@@ -147,4 +151,4 @@ sy=popen 'ntpq -np 2>&1|grep -v "^[- x#]" 2>&1' -n ntpq &
    sync.  It should sync quickly if 'ntp.conf' is configured as
    described above.  Ideally the offsets, the next to last column of
    the 'ntpq' output, should be a few milliseconds or less for several
-   serves, hopefully all.
+   servers, hopefully all.
