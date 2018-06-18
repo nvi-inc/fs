@@ -699,29 +699,37 @@ void skd_set_return_name(char *name) {
 
 // skd_clr_ret clears all elements of the skd queue with named return
 // values set to the value specified with `skd_set_return_name`.
-void skd_clr_ret() {
-	struct skd_buf sched;
-
-	if (!return_name[0]) {
-		fprintf(stderr, "skd_clr_ret: called without return_name set\n");
-		exit(EXIT_FAILURE);
-	}
-
-	long rtype = FS_SKD_WAIT | FS_SKD_NAMED | mtype(return_name);
-
-	for (;;) {
-		int status = msgrcv(msqid, (struct msgbuf *)&sched,
-		                    sizeof(sched.messg), rtype, IPC_NOWAIT);
-
-		if (status >= 0 || errno == EINTR)
-			continue;
-		if (errno == ENOMSG)
-			break;
-
-		// Unknown error
-		perror("skd_clr_ret: receiving message");
-		exit(EXIT_FAILURE);
-	}
+int skd_clr_ret(ip)
+     long ip[5];
+{
+  struct skd_buf sched;
+  int status, i;
+  
+  if (!return_name[0]) {
+    fprintf(stderr, "skd_clr_ret: called without return_name set\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  long rtype = FS_SKD_WAIT | FS_SKD_NAMED | mtype(return_name);
+  
+ waitr:
+  status = msgrcv(msqid, (struct msgbuf *)&sched,
+		      sizeof(sched.messg), rtype, IPC_NOWAIT);
+  
+  if (status < 0)
+    if(errno == EINTR)
+      goto waitr;
+    else if (errno == ENOMSG)
+      return 0;
+    else {
+      // Unknown error
+      perror("skd_clr_ret: receiving message");
+      exit(EXIT_FAILURE);
+    }
+  // goto it, return ip array
+  for (i=0;i<5;i++)
+    ip[i]=sched.messg.ip[i];
+  return 1;
 }
 
 
