@@ -90,10 +90,12 @@ int drive, drive_type;
 struct fila10g_cfg *fila10g_cfg=NULL;
 int ierr;
 
- putpname("fmset");
-skd_set_return_name("fmset");
-skd_clr_ret();
+rte_prior(CL_PRIOR); /* set our priority */
+
 setup_ids();         /* connect to shared memory segment */
+
+putpname("fmset");
+skd_set_return_name("fmset");
 
 if (nsem_test(NSEM_NAME) != 1) {
   fprintf(stderr,"Field System not running - fmset aborting\n");
@@ -107,7 +109,14 @@ if ( 1 == nsem_take("fmset",1)) {
   exit(0);
 }
 
-rte_prior(CL_PRIOR); /* set our priority */
+ // clear old messages, after semaphore lock so there can only be one 'fmset'
+
+ while (skd_clr_ret(ip)) // only one should be possible, but just  in case 
+   if(ip[1]!=0)
+     cls_clr(ip[0]);
+ // note that the above will not clear a partially read set of clase buffers
+ // it only handles if 'fmset' is aborted while a ...cn is running
+ // so not bullet proof, but more robust
 
 rack=shm_addr->equip.rack;
 rack_type=shm_addr->equip.rack_type;
