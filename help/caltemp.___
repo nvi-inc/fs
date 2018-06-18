@@ -1,49 +1,49 @@
                caltemp - set noise cal temperatures
 
             Syntax:     caltemp=list
-          caltemp5=temp
-          caltemp6=temp
 
             Response:   caltemp/values
-          caltemp5/temp
-          caltemp6/temp
-
 
 Settable parameters:
-            list        List of total power integrators to read back.
-            Standard detector mnemonics allowed.  In addition for VLBA/4/5
-            formif and formbbc are permitted, for Mark III/IV/5,
-            formif and formvc are permitted.
-          temp      temperature of cal signal, in degrees K. These
-          values are stored for use by the tsys5/6 commands.
 
+            list        List of total power integrators to report the
+                        noise cal temperatures for.  Standard detector
+                        mnemonics allowed.  In addition: for
+                        VLBA/4/5/DBBC 'formif' and 'formbbc' are
+                        permitted; for Mark III/IV/5, 'formif' and
+                        'formvc' are permitted; station detectors 'u5'
+                        and 'u6' are permitted.
 
 Monitor-only parameters:
-            values      List of values, degrees K. These values are stored
-            for use by the tsys command.
+
+            values     List of detector & noise cal temperature pairs.
+                       Temperatures are in degrees Kelvin.  A
+                       temperature of -1.0 means no 'caltemp' value
+                       could be found for this detector.  These values
+                       are stored for use by the 'tsys' command.
 
 Comments:
-Except for station defined detectors, the results are returned
-grouped in pairs of detector mnemonic,value, the output is
-collected into lines by IF channel. Detectors that have no IF
-assigned are displayed first followed by IFs 1-3 (Mark III/IV
-or LBA4), 1-4 (LBA) and a-d (VLBA/4). If the output for an IF
-would make a long output line, the output is split into more
-than one line. For station defined detectors the results are
-just displayed in order: u5, u6.
 
-For Mark III/IV and LBA4 racks the detector mnemonics for the
-VCs are displayed as hs, where h is the VC number as hex and s
-is for the detector is use: d (dual for upper/lower), u
-(upper), l (lower), a digit 3-7 for other detectors or 'x' for
-unknown.
+The results are returned grouped in pairs of 'mnemonic,value' for each
+detector.  The output is collected into lines by IF channel.
+Detectors that have no IF assigned are displayed first followed by
+those for IFs '1'-'3' (Mark III/IV) or 'a'-'d' (VLBA/4/5/DBBC).  If
+the output for an IF would make a long output line, the output is
+split into more than one line.  For station detectors, the values are
+displayed on one line.
 
+For Mark III/IV and LBA4 racks the detector mnemonics for the VCs are
+displayed as 'hs', where 'h' is the VC number as hex and 's' is for
+the sideband: 'd' (dual for upper/lower), 'u' (upper), 'l' (lower), a
+digit '3'-'7' for other VC detectors or 'x' for unknown.
 
-For VLBA/4/5, additional mnemonics formif and formbbcc are permitted
-in the list.  These select the detectors for the IF channels and BBC
-sidebands currently being recorded by the formatter.  For Mark
-III/IV/5, formvc is accepted instead of formbbc, as well as formif.
+For VLBA/4/5/DBBC, additional mnemonics 'formif' and 'formbbc' are
+permitted in the 'list'.  These select the detectors for the IF channels
+and BBC sidebands currently being recorded by the formatter.  For Mark
+III/IV/5, 'formvc' is accepted instead of 'formbbc', as well as
+'formif'.
 
-The caltemp5/6 commands are used for defining the calibration
-temperatures used with station dependent detectors u5 and u6.
-
+The noise cal value is determined from the channel IF, frequency, and
+sideband using the information from the '.rxg' files.  For station
+detectors, the 'user_device' command defines the parameters used with
+the '.rxg' file data.

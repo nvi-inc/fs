@@ -1,44 +1,43 @@
-        tpdiffgain - diff gain levels (VLBA, VLBA4, VLBA5 racks)
+        tpdiffgain - diff gain levels (VLBA, VLBA4, VLBA5  racks)
 
             Syntax:     tpdiffgain=list
 
             Response:   tpdiffgain/gain levels
 
 
-Settable parameters: 
-            list         List of modules for which gain levels are to be
-                         measured. Standard detector mnemonics allowed,
-                         but no station detectors.  In addition for
-                         VLBA/4/5 formif and formbbc are permitted.
+Settable parameters:
+
+            list         List of total power integrators gains to read
+                         back.  Standard detector mnemonics allowed.
+                         In addition 'formif' and 'formbbc' are permitted.
 
 Monitor-only parameters:
-            gain levels List of gain levels, counts. These values are
-                         needed for post processing of stored for use
-                         by the tsys command..
+
+            gain levels  List of detector & gain level pairs.  Gain
+                         levels are in counts.  These values are
+                         stored for use by the 'tsys' command.
 
 Comments: 
 
 This command saves the AGC level associated with the value of
-tpdiff. The same gain level must also be used for tpzero. In other
-words, the tpdiffgain must sampled when the AGCs are locked for the
-tpi and tpical measurements that will form tpdiff and the tpzero
-measurement should be taken before they are unlocked.
+'tpdiff'.  The same gain level must also be used for 'tpzero'.  In
+other words, the 'tpdiffgain' must sampled when the AGCs are locked
+for the 'tpi' and 'tpical' measurements that will form 'tpdiff' and
+the 'tpzero' measurement should be taken before they are unlocked.
 
-The results are returned grouped in pairs of detector mnemonic,value,
-the output is collected into lines by IF channel. Detectors that have
-no IF assigned are displayed first followed by Ifs a-d (VLBA/VLBA4).
-If the output for an IF would make a long output line, the output is
-split into more than one line.
+The results are returned grouped in pairs of 'mnemonic,value' per
+detector.  The output is collected into lines by IF channel.
+Detectors that have no IF assigned are displayed first followed by
+those for IFs 'a'-'d'.  If the output for an IF would make a long
+output line, the output is split into more than one line.
 
-A time-out or other error on one more devices for a VLBA/VLBA4
-detector will not prevent results from other detectors from
-being displayed.  A negative integer will be shown for each
-channel that had an error that prevented an actual measurement
-from being displayed. An overflow value, 255, is displayed as
-dollar signs, $$$.
+Additional mnemonics 'formif' and 'formbbc' are permitted in the
+'list'.  These select the detectors for the IF channels and BBC
+sidebands currently being recorded by the formatter.
+
+A time-out or other error on one more devices will not prevent results
+from other detectors from being displayed.  A negative integer will be
+shown for each channel that had an error that prevented an actual
+value from being reported.
 
 It is assumed that the gain is locked in manual to get a stable level.
-
-For VLBA/4/5, additional mnemonics formif and formbbcc are permitted
-in the list.  These select the detectors for the IF channels and BBC
-sidebands currently being recorded by the formatter.

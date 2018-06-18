@@ -1,41 +1,41 @@
-         tpgain - measure gain levels (VLBA, VLBA4 racks)
+         tpgain - measure gain levels (VLBA, VLBA4, VLBA5 racks)
 
             Syntax:     tpgain=list
 
             Response:   tpgain/gain levels
 
 
-Settable parameters: 
-            list         List of modules for which gain levels are to be
-                         measured. Standard detector mnemonics allowed,
-                         but no station detectors.  In addition for
-                         VLBA/4/5 formif and formbbc are permitted, for
-                         Mark III/IV/5, formif and formvc are
-                         permitted.
+Settable parameters:
+
+            list         List of total power integrators gains to read
+                         back.  Standard detector mnemonics allowed.
+                         In addition 'formif' and 'formbbc' are permitted.
 
 Monitor-only parameters:
-            gain levels  List of gain levels, counts. These values are
-                         needed for post processing of stored for use
-                         by the tsys command..
+
+            gain levels  List of detector & gain level pairs.  Gain
+                         levels are in counts.  These values are
+                         stored for use by the 'tsys' command.
 
 Comments: 
 
-The results are returned grouped in pairs of detector mnemonic,value,
-the output is collected into lines by IF channel. Detectors that have
-no IF assigned are displayed first followed by IFs a-d (VLBA/VLBA4).
-If the output for an IF would make a long output line, the output is
-split into more than one line
+The results are returned grouped in pairs of 'mnemonic,value' per
+detector.  The output is collected into lines by IF channel.
+Detectors that have no IF assigned are displayed first followed those
+for IFs 'a'-'d'.  If the output for an IF would make a long output
+line, the output is split into more than one line.
 
-A time-out or other error on one more devices for a VLBA/VLBA4
-detector will not prevent results from other detectors from being
-displayed.  A negative integer will be shown for each channel that had
-an error that prevented an actual measurement from being displayed. An
-overflow value, 255, is displayed as dollar signs, $$$.
+Additional mnemonics 'formif' and 'formbbc' are permitted in the
+'list'.  These select the detectors for the IF channels and BBC
+sidebands currently being recorded by the formatter.
 
-It is assumed that the gain is locked in manual to get a stable level.
+A time-out or other error on one more devices for a detector will not
+prevent results from other detectors from being displayed.  A negative
+integer will be shown for each channel that had an error that
+prevented an actual measurement from being displayed. An overflow
+value, 255, is displayed as dollar signs, '$$$'.
 
-For VLBA/4/5, additional mnemonics formif and formbbcc are permitted
-in the list.  These select the detectors for the IF channels and BBC
-sidebands currently being recorded by the formatter.  For Mark
-III/IV/5, formvc is accepted instead of formbbc, as well as formif.
-
+This command saves the AGC level associated with the value of 'tpi'.
+In other words, the 'tpgain' must sampled when the AGCs are locked for
+a 'tpi' (which may be different than the 'tpi' used for 'tpdiff'). It
+is assumed that the gain is locked in manual to get a stable level.

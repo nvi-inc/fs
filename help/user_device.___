@@ -54,7 +54,7 @@ not a way around the need to measure the level.  However a small bias
 may be tolerable. An uncorrected 1% bias makes a 1% error in the
 measured Tsys level.  If "no" is selected, there is no need to measure
 "tpzero" when measuring Tsys (typically in the "caltsys" procedure).
-Further if "tpzero" is measured in this case, the value is ignore.
+Further if "tpzero" is measured in this case, the value is ignored.
 
 An user_device= with no parameters clears all user_device values.
 
