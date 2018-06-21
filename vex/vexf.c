@@ -1224,8 +1224,8 @@ doublereal *double__;
 /*                              -8 = units contained unknown units */
 {
 
-  char num[5], denom[5], *slash;
-  int found, num_found, denom_found;
+  char num[16], denom[16], *slash;
+  int found, num_found, denom_found, iexp;
   double factor, num_factor, denom_factor;
 
   static struct {
@@ -1337,6 +1337,7 @@ doublereal *double__;
   num[slash-*units]='\0';
 
   if(strlen(slash) > sizeof(denom)) {
+    fprintf(stderr," slash '%s' strlen(slash) %d\n",slash,strlen(slash));
     fprintf(stderr,"denom too small in fvex_double %.24s",*units);
     return -8;
   }
@@ -1347,11 +1348,27 @@ doublereal *double__;
   LOOKUP(num_found,num,length,num_factor);
   LOOKUP(num_found,num,time,num_factor);
 
+  iexp=1;
+  if(strlen(denom)>2) {
+    if(strcmp(denom+strlen(denom)-2,"^2")==0) {
+      iexp=2;
+      denom[strlen(denom)-2]=0;
+    } else if(strcmp(denom+strlen(denom)-2,"^3")==0) {
+      iexp=3;
+      denom[strlen(denom)-2]=0;
+    }
+  }
+
   denom_found=0;
   LOOKUP(denom_found,denom,time,denom_factor);
 
   if(num_found && denom_found) {
-    *double__*=(num_factor/denom_factor);
+    double dfact=denom_factor;
+    if(iexp>1)
+      dfact*=denom_factor;
+    if(iexp==3)
+      dfact*=denom_factor;
+    *double__*=(num_factor/dfact);
     return 0;
   }
 
