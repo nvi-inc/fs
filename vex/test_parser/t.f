@@ -19,7 +19,7 @@
 *
       program t
       implicit none
-      character*129 buffer,mode,units
+      character*129 buffer,mode,units,scanid
       integer ierr,vex,lenn,i, iarray(4),int
       double precision double, seconds
 c
@@ -30,7 +30,7 @@ c
       integer fvex_scan_source
       integer fvex_double,fvex_date,fvex_int,fvex_ra,fvex_dec
 c
-      ierr=fvex_open(ptr_ch("vex13.skd"//char(0)),vex)
+      ierr=fvex_open(ptr_ch("wh2"//char(0)),vex)
 
       write(6,*) "ierr from fvex_open=",ierr," vex=",vex
 
@@ -159,7 +159,8 @@ C
 
       enddo
       ierr=fget_station_lowl(ptr_ch("EF"//char(0)),
-     &     ptr_ch("ant_motion"//char(0)),ptr_ch("ANTENNA"//char(0)),vex)
+     &     ptr_ch("antenna_motion"//char(0)),ptr_ch("ANTENNA"//char(0)),
+     &     vex)
       write(6,*) "ierr from fget_station_lowl=",ierr
 
       do i=1,9
@@ -255,10 +256,12 @@ c
       enddo
 c
       ierr=fget_scan_station(ptr_ch(buffer),len(buffer),
-     &     ptr_ch(mode),len(mode),ptr_ch("JB"//char(0)),vex)
+     &     ptr_ch(mode),len(mode),ptr_ch(scanid),len(scanid),
+     &     ptr_ch("JB"//char(0)),vex)
       write(6,*) "ierr from fget_scan_station=",ierr
-      write(6,*) "start=",buffer(1:fvex_len(buffer))
-      write(6,*) "mode =",mode(1:fvex_len(mode))
+      write(6,*) "start =",buffer(1:fvex_len(buffer))
+      write(6,*) "mode  =",mode(1:fvex_len(mode))
+      write(6,*) "scanid=",scanid(1:fvex_len(scanid))
 
       do i=1,9
       ierr=fvex_field(i,ptr_ch(buffer),len(buffer))
@@ -281,11 +284,13 @@ c
       enddo
 c
       ierr=fget_scan_station(ptr_ch(buffer),len(buffer),
-     &     ptr_ch(mode),len(mode),ptr_ch("JB"//char(0)),0)
+     &     ptr_ch(mode),len(mode),ptr_ch(scanid),len(scanid),
+     &     ptr_ch("JB"//char(0)),0)
       write(6,*) "ierr from fget_scan_station=",ierr
       write(6,*) "start=",buffer(1:fvex_len(buffer))
       write(6,*) "mode =",mode(1:fvex_len(mode))
-
+      write(6,*) "scanid=",scanid(1:fvex_len(scanid))
+c
       do i=1,9
       ierr=fvex_field(i,ptr_ch(buffer),len(buffer))
       write(6,*) "i=",i," ierr from fvex_field=",ierr
@@ -306,10 +311,12 @@ c
       enddo
 c
       ierr=fget_scan_station(ptr_ch(buffer),len(buffer),
-     &     ptr_ch(mode),len(mode),ptr_ch("JB"//char(0)),0)
+     &     ptr_ch(mode),len(mode),ptr_ch(scanid),len(scanid),
+     &     ptr_ch("JB"//char(0)),0)
       write(6,*) "ierr from fget_scan_station=",ierr
       write(6,*) "start=",buffer(1:fvex_len(buffer))
       write(6,*) "mode =",mode(1:fvex_len(mode))
+      write(6,*) "scanid=",scanid(1:fvex_len(scanid))
 
       ierr=fvex_date(ptr_ch(buffer),iarray,seconds)
       write(6,*) "ierr from fvex_date=",ierr
@@ -380,4 +387,36 @@ c
          write(6,*) " ierr from fvex_dec=",ierr," doube=",double
       endif
 c
+      ierr=fget_station_lowl(ptr_ch("JB"//char(0)),
+     &     ptr_ch("clock_early"//char(0)),ptr_ch("CLOCK"//char(0)),
+     &     vex)
+      write(6,*) "ierr from fget_station_lowl=",ierr
+
+      do while (ierr.eq.0)
+      do i=1,9
+      ierr=fvex_field(i,ptr_ch(buffer),len(buffer))
+      write(6,*) "i=",i," ierr from fvex_field=",ierr
+
+      if(fvex_len(buffer).gt.0)
+     &write(6,*) "buffer='",buffer(1:fvex_len(buffer)),
+     & "' len=",fvex_len(buffer)
+
+      ierr=fvex_units(ptr_ch(units),len(units))
+      write(6,*) "i=",i," ierr from fvex_units=",ierr
+
+      if(fvex_len(units).gt.0) then
+         write(6,*) "units='",units(1:fvex_len(units)),
+     &        "' len=",fvex_len(units)
+         ierr=fvex_double(ptr_ch(buffer),ptr_ch(units),double)
+         write(6,*) " ierr from fvex_double=",ierr," doube=",double
+      endif
+
+      enddo
+      ierr=fget_station_lowl(ptr_ch("JB"//char(0)),
+     &     ptr_ch("clock_early"//char(0)),ptr_ch("CLOCK"//char(0)),
+     &     0)
+      write(6,*) "ierr from fget_station_lowl=",ierr
+
+      enddo
+C
       end
