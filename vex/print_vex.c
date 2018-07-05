@@ -124,7 +124,7 @@ void print_def_block(struct llist *items,void func())
       print_comment_trailing((char *)this->item);
       break;
     default:
-      fprintf(stderr,"Unknown def_lowl %d",this->statement);
+      fprintf(stderr,"Unknown def_lowl %d\n",this->statement);
       exit(1);
     }
     items=items->next;
@@ -152,7 +152,7 @@ void print_qref_block(struct llist *items)
       print_comment_trailing((char *)this->item);
       break;
     default:
-      fprintf(stderr,"Unknown def_lowl %d",this->statement);
+      fprintf(stderr,"Unknown def_lowl %d\n",this->statement);
       exit(1);
     }
     items=items->next;
