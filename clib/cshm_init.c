@@ -19,10 +19,10 @@ void cshm_init()
 #define RELV xstr(RELEASE)
 
   strncpy(shm_addr->sVerRelease_FS,RELV,sizeof(shm_addr->sVerRelease_FS));
+  shm_addr->sVerRelease_FS[sizeof(shm_addr->sVerRelease_FS)-1]=0;
   j=strlen(shm_addr->sVerRelease_FS);
   for(i=j;i<sizeof(shm_addr->sVerRelease_FS)-1;i++)
     shm_addr->sVerRelease_FS[i]=' ';
-  shm_addr->sVerRelease_FS[sizeof(shm_addr->sVerRelease_FS)-1]=0;
 
   for (i=0; i< 32; i++)
     shm_addr->vform.codes[i]=-1;
