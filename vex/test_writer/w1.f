@@ -111,6 +111,7 @@ c     &                       ptr_ch(char(0)))
       call fend_def
       call fcreate_block(ptr_ch('CLOCK'//char(0)))
       call fcreate_def(ptr_ch('Hb'//char(0)))
+
       call fcreate_clock(ptr_ch('1995y263d06h00m'//char(0)),
      &     ptr_ch('2.5'//char(0)),
      &     ptr_ch('usec'//char(0)),
@@ -122,6 +123,22 @@ c     &                       ptr_ch(char(0)))
      &     ptr_ch(char(0)),
      &     ptr_ch(char(0)))
       call fcreate_clock(ptr_ch('1995y263d05h00m'//char(0)),
+     &     ptr_ch('2.5'//char(0)),
+     &     ptr_ch('usec'//char(0)),
+     &     ptr_ch('1995y263d06h20m'//char(0)),
+     &     ptr_ch('1e-12'//char(0)))
+
+      call fcreate_clock_early(ptr_ch('1995y263d06h00m'//char(0)),
+     &     ptr_ch('2.5'//char(0)),
+     &     ptr_ch('usec'//char(0)),
+     &     ptr_ch(char(0)),
+     &     ptr_ch(char(0)))
+      call fcreate_clock_early(ptr_ch(char(0)),
+     &     ptr_ch('3.5'//char(0)),
+     &     ptr_ch('usec'//char(0)),
+     &     ptr_ch(char(0)),
+     &     ptr_ch(char(0)))
+      call fcreate_clock_early(ptr_ch('1995y263d05h00m'//char(0)),
      &     ptr_ch('2.5'//char(0)),
      &     ptr_ch('usec'//char(0)),
      &     ptr_ch('1995y263d06h20m'//char(0)),
