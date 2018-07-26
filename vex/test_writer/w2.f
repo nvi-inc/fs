@@ -55,15 +55,18 @@ c
 
       call fcreate_block(ptr_ch('ANTENNA'//char(0)))
       call fcreate_def(ptr_ch('Hb'//char(0)))
-      call fcreate_axis_type(ptr_ch('az'//char(0)),
+
+      call fcreate_axis_type(ptr_ch('x'//char(0)),
+     &                       ptr_ch('yns'//char(0)))
+      call fcreate_axis_type2(ptr_ch('az'//char(0)),
      &                       ptr_ch('el'//char(0)),
      &                       ptr_ch(char(0)),
      &                       ptr_ch(char(0)))
-      call fcreate_axis_type(ptr_ch('az'//char(0)),
+      call fcreate_axis_type2(ptr_ch('az'//char(0)),
      &                       ptr_ch('el'//char(0)),
      &                       ptr_ch('1'//char(0)),
      &                       ptr_ch('deg'//char(0)))
-      call fcreate_axis_type(ptr_ch('az'//char(0)),
+      call fcreate_axis_type2(ptr_ch('az'//char(0)),
      &                       ptr_ch(char(0)),
      &                       ptr_ch(char(0)),
      &                       ptr_ch(char(0)))

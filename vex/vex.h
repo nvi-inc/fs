@@ -907,7 +907,10 @@ void *
 create_antenna_diam(char *str, char *str2);
 
 void *
-create_axis_type(char *str, char *str2, char *str3, char *str4);
+create_axis_type2(char *str, char *str2, char *str3, char *str4);
+
+void *
+create_axis_type(char *str, char *str2);
 
 void *
 create_axis_offset(char *str, char *str2);

@@ -593,7 +593,7 @@ create_antenna_diam(char *str, char *str2)
 }  
 /*-------------------------------------------------------------------*/
 void *
-create_axis_type(char *str, char *str2, char *str3, char *str4)
+create_axis_type2(char *str, char *str2, char *str3, char *str4)
 {
   char *axis_type_az,*axis_type_el;
   char *axis_type_orientation_value;
@@ -629,6 +629,12 @@ create_axis_type(char *str, char *str2, char *str3, char *str4)
 							      dvp)));
     }
 }  
+/*-------------------------------------------------------------------*/
+void *
+create_axis_type(char *str, char *str2)
+{
+  create_axis_type2(str, str2, NULL, NULL);
+}
 /*-------------------------------------------------------------------*/
 void *
 create_axis_offset(char *str, char *str2)
