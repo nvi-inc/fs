@@ -123,6 +123,19 @@ static
 get_nut_origin_field(Nut_origin *nutp_origin,int n,
 		     int *link,  int *name, char **value, char **units);
 static int
+get_exper_name_field(Exper_name *exper_name,int n,
+		     int *link,  int *name, char **value, char **units);
+static int
+get_scheduling_software_field(Scheduling_software *scheduling_software,
+			      int n, int *link,  int *name, char **value,
+			      char **units);
+
+static int
+get_vex_file_writer_field(Vex_file_writer *vex_file_writer,
+			  int n, int *link,  int *name, char **value,
+			  char **units);
+
+static int
 get_headstack_pos_field(Headstack_pos *headstack_pos,int n,int *link,
 			  int *name, char **value, char **units);
 static int
@@ -327,6 +340,8 @@ static  struct {
   {"scheduler_name", T_SCHEDULER_NAME},
   {"scheduler_email", T_SCHEDULER_EMAIL},
   {"target_correlator", T_TARGET_CORRELATOR},
+  {"scheduling_software", T_SCHEDULING_SOFTWARE},
+  {"VEX_file_writer", T_VEX_FILE_WRITER},
     
   {"headstack_pos", T_HEADSTACK_POS},
   
@@ -863,6 +878,39 @@ struct nut_origin *make_nut_origin(char *source, char *version)
 
   return new;
 }
+struct exper_name *make_exper_name(char *name, char *segment)
+{
+  NEWSTRUCT(new,exper_name);
+
+  new->name=name;
+  new->segment=segment;
+
+  return new;
+}
+struct scheduling_software *make_scheduling_software(char *program,
+						     char *version,
+						     char *epoch)
+{
+  NEWSTRUCT(new,scheduling_software);
+
+  new->program=program;
+  new->version=version;
+  new->epoch=epoch;
+
+  return new;
+}
+struct vex_file_writer *make_vex_file_writer(char *program,
+						     char *version,
+						     char *epoch)
+{
+  NEWSTRUCT(new,vex_file_writer);
+
+  new->program=program;
+  new->version=version;
+  new->epoch=epoch;
+
+  return new;
+}
 struct headstack_pos *make_headstack_pos(struct dvalue *index,
 					 struct llist *positions)
 {
@@ -1221,7 +1269,6 @@ char **units)
   case T_TAPE_CONTROL:
   case T_RECORD_CONTROL:
   case T_NUT_MODEL:
-  case T_EXPER_NAME:
   case T_EXPER_DESCRIPTION:
   case T_PI_NAME:
   case T_PI_EMAIL:
@@ -1338,6 +1385,15 @@ char **units)
     break;
   case T_NUT_ORIGIN:
     ierr=get_nut_origin_field(ptr,n,link,name,value,units);
+    break;
+  case T_EXPER_NAME:
+    ierr=get_exper_name_field(ptr,n,link,name,value,units);
+    break;
+  case T_SCHEDULING_SOFTWARE:
+    ierr=get_scheduling_software_field(ptr,n,link,name,value,units);
+    break;
+  case T_VEX_FILE_WRITER:
+    ierr=get_vex_file_writer_field(ptr,n,link,name,value,units);
     break;
   case T_HEADSTACK_POS:
     ierr=get_headstack_pos_field(ptr,n,link,name,value,units);
@@ -2450,6 +2506,99 @@ get_nut_origin_field(Nut_origin *nut_origin,int n,int *link,
     if(nut_origin->version==NULL)
       return -1;
     *value=nut_origin->version;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static int
+get_exper_name_field(Exper_name *exper_name,int n,int *link,
+		     int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=exper_name->name;
+    break;
+  case 2:
+    if(exper_name->segment==NULL)
+      return -1;
+    *value=exper_name->segment;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static int
+get_scheduling_software_field(Scheduling_software *scheduling_software,
+                              int n,int *link,int *name, char **value,
+			      char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=scheduling_software->program;
+    break;
+  case 2:
+    if(scheduling_software->version==NULL)
+      if(scheduling_software->epoch==NULL)
+	return -1;
+      else
+	return 0;
+    *value=scheduling_software->version;
+    break;
+  case 3:
+    if(scheduling_software->epoch==NULL)
+      return -1;
+    *value=scheduling_software->epoch;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static int
+get_vex_file_writer_field(Vex_file_writer *vex_file_writer,
+			  int n,int *link,int *name, char **value,
+			  char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=vex_file_writer->program;
+    break;
+  case 2:
+    if(vex_file_writer->version==NULL)
+      if(vex_file_writer->epoch==NULL)
+	return -1;
+      else
+	return 0;
+    *value=vex_file_writer->version;
+    break;
+  case 3:
+    if(vex_file_writer->epoch==NULL)
+      return -1;
+    *value=vex_file_writer->epoch;
     break;
   default:
     return -1;

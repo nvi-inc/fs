@@ -366,6 +366,42 @@ C
       call fcreate_nut_model(ptr_ch('IAU2000A'//char(0)))
       call fend_def
 c
+      call fcreate_block(ptr_ch('EXPER'//char(0)))
+      call fcreate_def(ptr_ch('VEX2'//char(0)))    
+
+      call fcreate_exper_name(ptr_ch('b17mt'//char(0)))
+      call fcreate_exper_name2(ptr_ch('b17mt'//char(0)),
+     &                         ptr_ch(char(0)))
+      call fcreate_exper_name2(ptr_ch('b17mta'//char(0)),
+     &                         ptr_ch('a'//char(0)))
+
+      call fcreate_scheduling_software(ptr_ch('SKED'//char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch(char(0)))
+      call fcreate_scheduling_software(ptr_ch('SKED'//char(0)),
+     &                         ptr_ch('1.1.1'//char(0)),
+     &                         ptr_ch(char(0)))
+      call fcreate_scheduling_software(ptr_ch('SKED'//char(0)),
+     &                         ptr_ch('1.1.2'//char(0)),
+     &                         ptr_ch('2017y130d'//char(0)))
+      call fcreate_scheduling_software(ptr_ch('SKED'//char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch('2017y131d'//char(0)))
+
+      call fcreate_vex_file_writer(ptr_ch('SKEDv'//char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch(char(0)))
+      call fcreate_vex_file_writer(ptr_ch('SKEDv1'//char(0)),
+     &                         ptr_ch('1.1.1'//char(0)),
+     &                         ptr_ch(char(0)))
+      call fcreate_vex_file_writer(ptr_ch('SKEDv2'//char(0)),
+     &                         ptr_ch('1.1.2'//char(0)),
+     &                         ptr_ch('2017y130d'//char(0)))
+      call fcreate_vex_file_writer(ptr_ch('SKEDv3'//char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch('2017y131d'//char(0)))
+      call fend_def
+c
       call fcreate_vex(ptr_ch(char(0)))
 c
       END

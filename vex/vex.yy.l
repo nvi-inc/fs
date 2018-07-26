@@ -422,6 +422,8 @@ char *quote()
 <LINE>scheduler_name		{BEGIN(INITIAL);return T_SCHEDULER_NAME;}
 <LINE>scheduler_email		{BEGIN(INITIAL);return T_SCHEDULER_EMAIL;}
 <LINE>target_correlator	{BEGIN(INITIAL);return T_TARGET_CORRELATOR;}
+<LINE>scheduling_software	{BEGIN(INITIAL);return T_SCHEDULING_SOFTWARE;}
+<LINE>VEX_file_writer	{BEGIN(INITIAL);return T_VEX_FILE_WRITER;}
 
 <LINE>headstack_pos		{BEGIN(INITIAL);return T_HEADSTACK_POS;}
 

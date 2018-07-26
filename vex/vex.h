@@ -338,6 +338,29 @@ struct nut_origin {
 
 typedef struct nut_origin Nut_origin; 
 
+struct exper_name {
+  char *name;
+  char *segment;
+};
+
+typedef struct exper_name Exper_name;
+ 
+struct scheduling_software {
+  char *program;
+  char *version;
+  char *epoch;
+};
+
+typedef struct scheduling_software Scheduling_software;
+ 
+struct vex_file_writer {
+  char *program;
+  char *version;
+  char *epoch;
+};
+
+typedef struct vex_file_writer Vex_file_writer;
+ 
 struct headstack_pos {
   struct dvalue *index;
   struct llist *positions;
@@ -576,6 +599,16 @@ struct merged_datastream *make_merged_datastream(char *merged_link,
 
 struct eop_origin *make_eop_origin(char *source, char *version);
 struct nut_origin *make_nut_origin(char *source, char *version);
+
+struct exper_name *make_exper_name(char *name, char *segment);
+
+struct scheduling_software *make_scheduling_software(char *program,
+						     char *version,
+						     char *epoch);
+
+struct vex_file_writer *make_vex_file_writer(char *program,
+					     char *version,
+					     char *epoch);
 
 struct headstack_pos *make_headstack_pos(struct dvalue *index,
 					 struct llist *positions);
@@ -1023,6 +1056,9 @@ void *
 create_exper_name(char *str);
 
 void *
+create_exper_name2(char *str, char *str2);
+
+void *
 create_exper_description(char *str);
 
 void *
@@ -1051,6 +1087,13 @@ create_scheduler_email(char *str);
 
 void *
 create_target_correlator(char *str);
+
+void *
+create_scheduling_software(char *str, char *str2, char *str3);
+
+void *
+create_vex_file_writer(char *str, char *str2, char *str3);
+
 /*---------------------------------------------------------------------------*/
 /* FREQ block builders */
 /*---------------------------------------------------------------------------*/

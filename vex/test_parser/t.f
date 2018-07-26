@@ -419,4 +419,49 @@ c
 
       enddo
 C
+      write(6,*) 'scheduling software'
+      ierr=fget_global_lowl(
+     &     ptr_ch("scheduling_software"//char(0)),
+     &     ptr_ch("EXPER"//char(0)),vex)
+      write(6,*) "ierr from fget_global_lowl=",ierr
+      do while(ierr.eq.0)
+c
+      call gfields
+c
+      ierr=fget_global_lowl(
+     &     ptr_ch("scheduling_software"//char(0)),
+     &     ptr_ch("EXPER"//char(0)),0)
+      write(6,*) "ierr from fget_global_lowl=",ierr
+      enddo
+C
+      write(6,*) 'VEX_file_writer'
+      ierr=fget_global_lowl(
+     &     ptr_ch("VEX_file_writer"//char(0)),
+     &     ptr_ch("EXPER"//char(0)),vex)
+      write(6,*) "ierr from fget_global_lowl=",ierr
+      do while(ierr.eq.0)
+c
+      call gfields
+c
+      ierr=fget_global_lowl(
+     &     ptr_ch("VEX_file_writer"//char(0)),
+     &     ptr_ch("EXPER"//char(0)),0)
+      write(6,*) "ierr from fget_global_lowl=",ierr
+      enddo
+C
+      write(6,*) 'exper_name'
+      ierr=fget_global_lowl(
+     &     ptr_ch("exper_name"//char(0)),
+     &     ptr_ch("EXPER"//char(0)),vex)
+      write(6,*) "ierr from fget_global_lowl=",ierr
+      do while(ierr.eq.0)
+c
+      call gfields
+c
+      ierr=fget_global_lowl(
+     &     ptr_ch("exper_name"//char(0)),
+     &     ptr_ch("EXPER"//char(0)),0)
+      write(6,*) "ierr from fget_global_lowl=",ierr
+      enddo
+C
       end

@@ -82,6 +82,10 @@ struct merged_datastream *mdptr;
 struct eop_origin      *eoptr;
 struct nut_origin      *noptr;
 
+struct exper_name      *enptr;
+struct scheduling_software  *schsptr;
+struct vex_file_writer *vfwptr;
+
 struct headstack_pos   *hpptr;
 
 struct if_def          *ifptr;
@@ -145,7 +149,8 @@ struct s2_data_source  *dsptr;
 %token <ival>   T_EXPER_NUM T_EXPER_NAME T_EXPER_NOMINAL_START 
 %token <ival>   T_EXPER_NOMINAL_STOP T_PI_NAME T_PI_EMAIL T_CONTACT_NAME 
 %token <ival>   T_CONTACT_EMAIL T_SCHEDULER_NAME T_SCHEDULER_EMAIL 
-%token <ival>   T_TARGET_CORRELATOR T_EXPER_DESCRIPTION
+%token <ival>   T_TARGET_CORRELATOR T_EXPER_DESCRIPTION T_SCHEDULING_SOFTWARE
+%token <ival>   T_VEX_FILE_WRITER
 
 %token <ival>   T_HEADSTACK_POS
 
@@ -298,10 +303,13 @@ struct s2_data_source  *dsptr;
 %type  <dfptr>  exper_def
 %type  <lwptr>  exper_lowl exper_defx
 %type  <dvptr>  exper_num
-%type  <sval>   exper_name exper_nominal_start exper_description
+%type  <enptr>  exper_name
+%type  <sval>   exper_nominal_start exper_description
 %type  <sval>   exper_nominal_stop pi_name pi_email contact_name 
 %type  <sval>   contact_email scheduler_name scheduler_email 
 %type  <sval>   target_correlator
+%type  <schsptr>  scheduling_software
+%type  <vfwptr>  vex_file_writer
 
 %type  <llptr>  freq_block freq_defs freq_lowls
 %type  <dfptr>	freq_def
@@ -1082,13 +1090,18 @@ exper_lowl:	exper_num		{$$=make_lowl(T_EXPER_NUM,$1);}
    		| scheduler_email	{$$=make_lowl(T_SCHEDULER_EMAIL,$1);}
    		| target_correlator
 				{$$=make_lowl(T_TARGET_CORRELATOR,$1);}
+   		| scheduling_software	{$$=make_lowl(T_SCHEDULING_SOFTWARE,$1);}
+                | vex_file_writer	{$$=make_lowl(T_VEX_FILE_WRITER,$1);}
 		| external_ref		{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 ;
 exper_num:	T_EXPER_NUM '=' value ';' {$$=$3;}
 ;
-exper_name:	T_EXPER_NAME '=' T_NAME ';'	{$$=$3;}
+exper_name:	T_EXPER_NAME '=' T_NAME ';'
+                {$$=make_exper_name($3,NULL);}
+                | T_EXPER_NAME '=' T_NAME ':' T_NAME ';'
+                {$$=make_exper_name($3,$5);}
 ;
 exper_description:	T_EXPER_DESCRIPTION '=' T_NAME ';'	{$$=$3;}
 ;
@@ -1110,6 +1123,25 @@ scheduler_email:	T_SCHEDULER_EMAIL '=' T_NAME ';'	{$$=$3;}
 ;
 target_correlator:	T_TARGET_CORRELATOR '=' T_NAME ';'	{$$=$3;}
 ;
+scheduling_software:	T_SCHEDULING_SOFTWARE '=' T_NAME ';'
+                        {$$=make_scheduling_software($3,NULL,NULL);}
+                        | T_SCHEDULING_SOFTWARE '=' T_NAME ':' T_NAME ';'
+                        {$$=make_scheduling_software($3,$5,NULL);}
+                    | T_SCHEDULING_SOFTWARE '=' T_NAME ':' T_NAME ':' T_NAME ';'
+                        {$$=make_scheduling_software($3,$5,$7);}
+                    | T_SCHEDULING_SOFTWARE '=' T_NAME ':'  ':' T_NAME ';'
+                        {$$=make_scheduling_software($3,NULL,$6);}
+;
+vex_file_writer:        T_VEX_FILE_WRITER '=' T_NAME ';'
+                        {$$=make_vex_file_writer($3,NULL,NULL);}
+                        | T_VEX_FILE_WRITER '=' T_NAME ':' T_NAME ';'
+                        {$$=make_vex_file_writer($3,$5,NULL);}
+                    | T_VEX_FILE_WRITER '=' T_NAME ':' T_NAME ':' T_NAME ';'
+                        {$$=make_vex_file_writer($3,$5,$7);}
+                    | T_VEX_FILE_WRITER '=' T_NAME ':'  ':' T_NAME ';'
+                        {$$=make_vex_file_writer($3,NULL,$6);}
+;
+
 /* $FREQ block */
 
 freq_block:	B_FREQ ';' freq_defs	{$$=$3;}

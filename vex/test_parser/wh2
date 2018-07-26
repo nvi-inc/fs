@@ -1075,6 +1075,15 @@ $EXPER; *general experiment information
     scheduler_name = C._Thomas;
     scheduler_email = cct@bootes.gsfc.nasa.gov;
     target_correlator = EVN;
+    exper_name = RDWPS1 : a;
+    scheduling_software = SKED;
+    scheduling_software = SKED1 : verision1;
+    scheduling_software = SKED2 : : 2017y345d;
+    scheduling_software = SKED3 : version2 : 2017y145d;
+    VEX_file_writer = SKED;
+    VEX_file_writer = SKED1 : verision1;
+    VEX_file_writer = SKED2 : : 2017y345d;
+    VEX_file_writer = SKED3 : version2 : 2017y145d;
   enddef;
 *
 *----------------------------------------------------------------------------------------------------------------------

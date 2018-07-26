@@ -2450,6 +2450,35 @@ char **str;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_exper_name2__
+#else
+fcreate_exper_name2
+#endif
+(str, str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_exper_name2(ptr_ch(str)//(char *)0, >*/
+/*<                                 ptr_ch(str2)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_exper_name2(*str,*str2);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_exper_name__
 #else
 fcreate_exper_name
@@ -2720,6 +2749,72 @@ char **str;
 /* */
 {
   create_target_correlator(*str);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_scheduling_software__
+#else
+fcreate_scheduling_software
+#endif
+(str, str2, str3)
+char **str;
+char **str2;
+char **str3;
+/*<      subroutine fcreate_scheduling_software(ptr_ch(str)//(char *)0, >*/
+/*<                                 ptr_ch(str2)//(char *)0, >*/
+/*<                                 ptr_ch(str3)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2       - string */
+/*   character*(*) str3       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_scheduling_software(*str,*str2,*str3);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_vex_file_writer__
+#else
+fcreate_vex_file_writer
+#endif
+(str, str2, str3)
+char **str;
+char **str2;
+char **str3;
+/*<      subroutine fcreate_vex_file_writer(ptr_ch(str)//(char *)0, >*/
+/*<                                 ptr_ch(str2)//(char *)0, >*/
+/*<                                 ptr_ch(str3)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2       - string */
+/*   character*(*) str3       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_vex_file_writer(*str,*str2,*str3);
   return;
 }
 /* ----------------------------------------------------------------------- */

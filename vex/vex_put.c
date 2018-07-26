@@ -2044,9 +2044,9 @@ create_nut_origin(char *str, char *str2)
 /* EXPER block builders                                              */
 /*-------------------------------------------------------------------*/
 void *
-create_exper_name(char *str)
+create_exper_name2(char *str, char *str2)
 {
-  char *s1;
+  char *s1, *s2;
 
   if(str==NULL || strlen(str)==0)
     {
@@ -2056,7 +2056,76 @@ create_exper_name(char *str)
   else
     {
       s1=(char *)strdup(str);
-      qref_list = add_list(qref_list,make_lowl(T_EXPER_NAME,s1));
+      if(str2==NULL || strlen(str2)==0)
+	s2=NULL;
+      else
+	s2=(char *)strdup(str2);
+      qref_list = add_list(qref_list,make_lowl(T_EXPER_NAME,
+					       make_exper_name(s1,s2)));
+    }
+}
+/*-------------------------------------------------------------------*/
+void *
+create_exper_name(char *str)
+{
+  create_exper_name2(str,NULL);
+}
+/*-------------------------------------------------------------------*/
+void *
+create_scheduling_software(char *str, char *str2, char *str3)
+{
+  char *s1, *s2, *s3;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'scheduling_software\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      if(str2==NULL || strlen(str2)==0)
+	s2=NULL;
+      else
+	s2=(char *)strdup(str2);
+
+      if(str3==NULL || strlen(str3)==0)
+	s3=NULL;
+      else
+	s3=(char *)strdup(str3);
+
+      qref_list = add_list(qref_list,
+			   make_lowl(T_SCHEDULING_SOFTWARE,
+				     make_scheduling_software(s1,s2,s3)));
+    }
+}
+/*-------------------------------------------------------------------*/
+void *
+create_vex_file_writer(char *str, char *str2, char *str3)
+{
+  char *s1, *s2, *s3;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'vex_file_writer\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      if(str2==NULL || strlen(str2)==0)
+	s2=NULL;
+      else
+	s2=(char *)strdup(str2);
+
+      if(str3==NULL || strlen(str3)==0)
+	s3=NULL;
+      else
+	s3=(char *)strdup(str3);
+
+      qref_list = add_list(qref_list,
+			   make_lowl(T_VEX_FILE_WRITER,
+				     make_vex_file_writer(s1,s2,s3)));
     }
 }
 /*-------------------------------------------------------------------*/
