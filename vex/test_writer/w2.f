@@ -343,6 +343,13 @@ C
      &                       ptr_ch('2001y012d'//char(0)))
       call fcreate_eop_origin(ptr_ch('FINAL'//char(0)),
      &                       ptr_ch(char(0)))
+      call fcreate_nut_ref_epoch(ptr_ch('2001y012d'//char(0)))
+c
+      call fcreate_num_nut_points(ptr_ch('3'//char(0)))
+c
+      call fcreate_nut_interval(ptr_ch('3'//char(0)),
+     &                          ptr_ch('day'//char(0)))
+c
       call fcreate_dvalue_list(ptr_ch('330'//char(0)),
      &     ptr_ch('masec'//char(0)) )
       call fcreate_dvalue_list(ptr_ch('0.330'//char(0)),
