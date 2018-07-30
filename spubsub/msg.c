@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <nanomsg/nn.h>
+#include <nng/compat/nanomsg/nn.h>
 #include "msg.h"
 
 // Output little-endian encoded uint64 to buffer,
