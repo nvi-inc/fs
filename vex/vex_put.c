@@ -2330,6 +2330,32 @@ create_target_correlator(char *str)
     }
 }  
 /*-------------------------------------------------------------------*/
+/* EXTENSIONS block builders                                               */
+/*-------------------------------------------------------------------*/
+void *
+create_extension(char *str, char *str2)
+{
+
+  char *s1, *s2;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     q_list==NULL)
+    {
+      printf("%s \'extension\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      s2=(char *)strdup(str2);
+      qref_list = add_list(qref_list,make_lowl(T_EXTENSION,
+					       make_extension(s1,s2,
+							      q_list)));
+      q_list=NULL;
+    }
+} 
+/*-------------------------------------------------------------------*/
 /* FREQ block builders                                               */
 /*-------------------------------------------------------------------*/
 void *

@@ -412,6 +412,19 @@ c
      &                         ptr_ch('2017y131d'//char(0)))
       call fend_def
 c
+      call fcreate_block(ptr_ch('EXTENSIONS'//char(0)))
+      call fcreate_def(ptr_ch('VEX2'//char(0)))    
+c
+      call fcreate_dvalue_list(ptr_ch('1'//char(0)),
+     &     ptr_ch('sec'//char(0)) )
+      call fcreate_dvalue_list(ptr_ch('2'//char(0)),
+     &     ptr_ch(char(0)) )
+      call fcreate_dvalue_list(ptr_ch('3'//char(0)),
+     &     ptr_ch('m'//char(0)) )
+      call fcreate_extension(ptr_ch('nrao'//char(0)),
+     &     ptr_ch('settings'//char(0)) )
+      call fend_def
+c
       call fcreate_vex(ptr_ch(char(0)))
 c
       END

@@ -2904,6 +2904,36 @@ char **str3;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_extension__
+#else
+fcreate_extension
+#endif
+(str, str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_extension(ptr_ch(str)//(char *)0, >*/
+/*<                                 ptr_ch(str2)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_extension(*str,
+		   *str2);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_chan_def__
 #else
 fcreate_chan_def

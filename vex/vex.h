@@ -361,6 +361,14 @@ struct vex_file_writer {
 
 typedef struct vex_file_writer Vex_file_writer;
  
+struct extension {
+  char *owner;
+  char *name;
+  struct llist *values;
+};
+
+typedef struct extension Extension;
+
 struct headstack_pos {
   struct dvalue *index;
   struct llist *positions;
@@ -609,6 +617,9 @@ struct scheduling_software *make_scheduling_software(char *program,
 struct vex_file_writer *make_vex_file_writer(char *program,
 					     char *version,
 					     char *epoch);
+
+struct extension *make_extension(char *owner, char *name,
+				 struct llist *values);
 
 struct headstack_pos *make_headstack_pos(struct dvalue *index,
 					 struct llist *positions);
@@ -942,6 +953,7 @@ create_bbc_assign(char *str, char *str2, char *str3);
 void *
 create_clock(char *str, char *str2, char *str3, char *str4, char *str5);
 /* wrong name above for backward compatibility, should have been clock_early*/
+
 void *
 create_clock_early(char *str, char *str2, char *str3, char *str4, char *str5);
 
@@ -1102,6 +1114,12 @@ create_scheduling_software(char *str, char *str2, char *str3);
 
 void *
 create_vex_file_writer(char *str, char *str2, char *str3);
+
+/*---------------------------------------------------------------------------*/
+/* EXTENSION block builders */
+/*---------------------------------------------------------------------------*/
+void *
+create_extension(char *str,char *str2);
 
 /*---------------------------------------------------------------------------*/
 /* FREQ block builders */

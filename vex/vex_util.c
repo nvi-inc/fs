@@ -136,6 +136,9 @@ get_vex_file_writer_field(Vex_file_writer *vex_file_writer,
 			  char **units);
 
 static int
+get_extension_field(Extension *extension,int n,int *link,
+			  int *name, char **value, char **units);
+static int
 get_headstack_pos_field(Headstack_pos *headstack_pos,int n,int *link,
 			  int *name, char **value, char **units);
 static int
@@ -232,6 +235,7 @@ static struct {
   {"MODE", B_MODE},
   {"SCHED", B_SCHED},
   {"EXPER", B_EXPER},
+  {"EXTENSIONS", B_EXTENSIONS},
   {"SCHEDULING_PARAMS", B_SCHEDULING_PARAMS},
   {"PROCEDURES", B_PROCEDURES},
   {"EOP", B_EOP},
@@ -343,6 +347,8 @@ static  struct {
   {"scheduling_software", T_SCHEDULING_SOFTWARE},
   {"VEX_file_writer", T_VEX_FILE_WRITER},
     
+  {"extension", T_EXTENSION},
+
   {"headstack_pos", T_HEADSTACK_POS},
   
   {"if_def", T_IF_DEF},
@@ -911,6 +917,17 @@ struct vex_file_writer *make_vex_file_writer(char *program,
 
   return new;
 }
+struct extension *make_extension(char *owner, char *name,
+				 struct llist *values)
+{
+  NEWSTRUCT(new,extension);
+ 
+  new->owner=owner;
+  new->name=name;
+  new->values=values;
+
+  return new;
+}
 struct headstack_pos *make_headstack_pos(struct dvalue *index,
 					 struct llist *positions)
 {
@@ -1394,6 +1411,9 @@ char **units)
     break;
   case T_VEX_FILE_WRITER:
     ierr=get_vex_file_writer_field(ptr,n,link,name,value,units);
+    break;
+  case T_EXTENSION:
+    ierr=get_extension_field(ptr,n,link,name,value,units);
     break;
   case T_HEADSTACK_POS:
     ierr=get_headstack_pos_field(ptr,n,link,name,value,units);
@@ -2602,6 +2622,37 @@ get_vex_file_writer_field(Vex_file_writer *vex_file_writer,
     break;
   default:
     return -1;
+  }
+  return 0;
+}
+static int
+get_extension_field(Extension *extension,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=extension->owner;
+    break;
+  case 2:
+    *value=extension->name;
+    break;
+  default:
+    if(n < 1 )
+      return -1;
+    ierr=get_dvalue_list_field(extension->values,n-2,link,name,value,units);
+    if(ierr==-1)
+      return -1;
+    else if (ierr!=0) {
+      fprintf(stderr,"unknown error in get_extension_field %d\n",ierr);
+      exit(1);
+    }
   }
   return 0;
 }

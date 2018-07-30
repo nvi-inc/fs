@@ -86,6 +86,8 @@ struct exper_name      *enptr;
 struct scheduling_software  *schsptr;
 struct vex_file_writer *vfwptr;
 
+struct extension       *etptr;
+
 struct headstack_pos   *hpptr;
 
 struct if_def          *ifptr;
@@ -152,6 +154,8 @@ struct s2_data_source  *dsptr;
 %token <ival>   T_TARGET_CORRELATOR T_EXPER_DESCRIPTION T_SCHEDULING_SOFTWARE
 %token <ival>   T_VEX_FILE_WRITER
 
+%token <ival>   T_EXTENSION
+
 %token <ival>   T_HEADSTACK_POS
 
 %token <ival>   T_IF_DEF
@@ -192,7 +196,7 @@ struct s2_data_source  *dsptr;
 %token <ival>	B_EXPER B_SCHEDULING_PARAMS B_PROCEDURES B_EOP B_FREQ B_CLOCK
 %token <ival>	B_ANTENNA B_BBC B_CORR B_DAS B_HEAD_POS B_PASS_ORDER
 %token <ival>	B_PHASE_CAL_DETECT B_ROLL B_IF B_SEFD B_SITE B_SOURCE B_TRACKS
-%token <ival>   B_TAPELOG_OBS B_BITSTREAMS B_DATASTREAMS
+%token <ival>   B_TAPELOG_OBS B_BITSTREAMS B_DATASTREAMS B_EXTENSIONS
 
 %token <llptr>	T_LITERAL
 
@@ -310,6 +314,11 @@ struct s2_data_source  *dsptr;
 %type  <sval>   target_correlator
 %type  <schsptr>  scheduling_software
 %type  <vfwptr>  vex_file_writer
+
+%type  <llptr>  extensions_block extensions_defs extensions_lowls 
+%type  <dfptr>	extensions_def
+%type  <lwptr>  extensions_lowl extensions_defx
+%type  <etptr>  extension
 
 %type  <llptr>  freq_block freq_defs freq_lowls
 %type  <dfptr>	freq_def
@@ -455,6 +464,7 @@ block:	global_block			{$$=make_block(B_GLOBAL,$1);}
  	| datastreams_block		{$$=make_block(B_DATASTREAMS,$1);}
  	| eop_block			{$$=make_block(B_EOP,$1);}
  	| exper_block			{$$=make_block(B_EXPER,$1);}
+ 	| extensions_block		{$$=make_block(B_EXTENSIONS,$1);}
  	| head_pos_block		{$$=make_block(B_HEAD_POS,$1);}
  	| if_block			{$$=make_block(B_IF,$1);}
  	| pass_order_block		{$$=make_block(B_PASS_ORDER,$1);}
@@ -528,6 +538,7 @@ primitive:	B_EXPER			{$$=B_EXPER;}
 		| B_CORR		{$$=B_CORR;}
 		| B_DAS			{$$=B_DAS;}
 		| B_DATASTREAMS		{$$=B_DATASTREAMS;}
+		| B_EXTENSIONS		{$$=B_EXTENSIONS;}
 		| B_HEAD_POS		{$$=B_HEAD_POS;}
 		| B_PASS_ORDER		{$$=B_PASS_ORDER;}
 		| B_PHASE_CAL_DETECT	{$$=B_PHASE_CAL_DETECT;}
@@ -1140,6 +1151,34 @@ vex_file_writer:        T_VEX_FILE_WRITER '=' T_NAME ';'
                         {$$=make_vex_file_writer($3,$5,$7);}
                     | T_VEX_FILE_WRITER '=' T_NAME ':'  ':' T_NAME ';'
                         {$$=make_vex_file_writer($3,NULL,$6);}
+;
+
+/* $EXTENSIONS block */
+
+extensions_block:	B_EXTENSIONS ';' extensions_defs	{$$=$3;}
+		| B_EXTENSIONS ';'		{$$=NULL;}
+;
+extensions_defs:	extensions_defs extensions_defx	{$$=add_list($1,$2);}
+		| extensions_defx		{$$=add_list(NULL,$1);}
+;
+extensions_defx:	extensions_def			{$$=make_lowl(T_DEF,$1);}
+		| T_COMMENT		{$$=make_lowl(T_COMMENT,$1);}
+		| T_COMMENT_TRAILING    {$$=make_lowl(T_COMMENT_TRAILING,$1);}
+;
+extensions_def:	T_DEF T_NAME ';' extensions_lowls T_ENDDEF ';' {$$=make_def($2,$4);}
+		| T_DEF T_NAME ';' T_ENDDEF ';'
+						{$$=make_def($2,NULL);}
+;
+extensions_lowls:	extensions_lowls extensions_lowl	{$$=add_list($1,$2);}
+		| extensions_lowl		{$$=add_list(NULL,$1);}
+;
+extensions_lowl:	extension		{$$=make_lowl(T_EXTENSION,$1);}
+		| external_ref		{$$=make_lowl(T_REF,$1);}
+		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
+		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
+;
+extension:      T_EXTENSION '=' T_NAME ':' T_NAME ':' unit_more ';'
+                {$$=make_extension($3,$5,$7);}
 ;
 
 /* $FREQ block */
