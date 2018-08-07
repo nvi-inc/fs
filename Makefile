@@ -1,5 +1,6 @@
 #
-FS_VERSION := $(shell basename `pwd -P` | cut -d- -f2-)
+pwd = $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
+FS_VERSION := $(shell echo $(pwd) | cut -d- -f2-)
 VERSION    := $(shell echo $(FS_VERSION) | cut -d. -f1 )
 SUBLEVEL   := $(shell echo $(FS_VERSION) | cut -d. -f2 )
 PATCHLEVEL := $(shell echo $(FS_VERSION) | cut -d. -f3 | cut -d- -f1)
@@ -35,14 +36,14 @@ gnfit gndat gnplt dscon systests autoftp monpcal logpl1 holog gnplt1 predict \
 dbbcn popen s_client lgerr fesh plog
 #
 
-# If environment variable FS_NO_DISPLAY_SERVER is defined with a non-empty value
-# the FS will not be build with the display client/server feature. This includes
-# changes in oprin, fs, and erchk.
+# If environment variable FS_DISPLAY_SERVER is defined with a non-empty value
+# the FS will be build with the display client/server.
 
-ifndef FS_NO_DISPLAY_SERVER
-EXEC_DIR += spubsub fsclient
-else
-export FS_NO_DISPLAY_SERVER
+ifdef FS_DISPLAY_SERVER
+export LDFLAGS += -L$(shell pwd)/third_party/lib
+export CPPFLAGS += -I$(shell pwd)/third_party/include
+LIB_DIR += third_party
+EXEC_DIR += spubsub fsclient fsserver
 endif
 
 all:	libs execs
@@ -56,8 +57,13 @@ dist:
 	cd /; find usr2/fs-$(FS_VERSION) -name '*.[oas]'      -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION) -name '*.pyc'        -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION) -name 'y.tab.h'      -print >> /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION)/bin -mindepth 1 -name '*' -print >> /tmp/fsdist-exclude
-	echo usr2/fs-$(FS_VERSION)/oprin/readline-2.0                >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION)/bin -mindepth 1 \
+	                                            -name '*' -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION)/third_party/src/* \
+			! -iname '*.tar.gz' \
+			! -iname '*.make'                     -print >> /tmp/fsdist-exclude 
+	echo usr2/fs-$(FS_VERSION)/third_party/lib                   >> /tmp/fsdist-exclude
+	echo usr2/fs-$(FS_VERSION)/third_party/include               >> /tmp/fsdist-exclude
 	echo usr2/fs-$(FS_VERSION)/rclco/rcl/all                     >> /tmp/fsdist-exclude
 	cd /; tar -czf /tmp/fs-$(FS_VERSION).tgz -X /tmp/fsdist-exclude usr2/fs-$(FS_VERSION)
 	chmod a+rw /tmp/fs-$(FS_VERSION).tgz
