@@ -2,25 +2,26 @@ Field System Display Client/Server User Guide
 =============================================
 
 D. Horsley
-May 2018
+Aug 2018
 
 Introduction
 ------------
 
 The Field System has the capability to be run in server mode. This
 allows the operational part of the FS to be detached from the user
-interface, and the display usually only seen in the calling terminal to
-be replicated to multiple users. Or in a picture:
+interface. An operator, or multiple operators, can then freely attach
+and detach with the use of the FS client.
 
-              +-------------+
-              |             |
-              |     fs      |
-              |             |
-              +------|------+
+
+          +--------------------+
+          |  +--+ +---------+  |
+          |  |fs| | autoftp |  |
+          |  +--+ +---------+  |
+          +----------|---------+
                      |
                      |
     +----------+     |     +----------+
-    | fsclient <----' `----> fsclient |
+    | fsclient <----/ \----> fsclient |
     +----------+           +----------+
 
 This separation of the user interface programs from the operational
@@ -36,18 +37,16 @@ FS client has advantages over a simple `tail -f /usr2/<log>.log`:
     This is important as some fatal errors are not printed to the FS log
 -   No intervention required if the log changes
 
-To confirm you have the server built-in, run the command:
+To confirm the FS server has been built, run the command:
 
-    fs -h
+    which fsserver
 
-If the server has been built-in, you will see the option
-
-    -b, --background    start the FS, but do not attach to the display.
 
 Usage
 -----
 
-Using the FS should be identical to the Field System without the server.
+Generally using the FS should be identical to the Field System without the server.
+
 
 Start the Field System use the usual command:
 
@@ -93,20 +92,36 @@ with X forwarding.
 Installation
 ------------
 
-To build the dependency library you will need to install cmake. For
-example, on Debian root
+For FS 9.11.20, the display server functionality is disabled by
+default. To enable it, modify the login environment of 'prog' by
+setting the environment variable FS_NO_DISPLAY_SERVER and rebuild the
+FS. This can be done in '.login' (if 'tcsh' is the login shell) or
+'.profile' (for 'bash'). For 'tcsh', add the following command to
+'.login':
 
-    apt-get install cmake
+    setenv FS_DISPLAY_SERVER 1
 
-With cmake installed the client/server feature should build by default.
+For 'bash', add the following command to '.profile':
+
+    export FS_NO_DISPLAY_SERVER=1
+
+Examples of how to do this cna be found the corresponding files
+in '/usr2/fs/st.default/prog'.
+
+After making the above change, log-out and then back in as 'prog'.
+Then execute:
+
+   cd /usr2/fs
+   make 
+
 However, if you are upgrading from a pre v9.11.20 version of the FS,
 some control files will need to be modified for correct operation of the
 display client/server.
 
 The first control file you will need to create or change is the client
-programs control file `clpgm.ctl`. This determines the commands that are
-available in fsclient. You can copy the default into your local control
-file folder:
+programs control file `clpgm.ctl`. This determines the commands that
+are available in fsclient. You can copy the default into your local
+control file folder:
 
     cp /usr2/fs/st.default/control/clpgm.ctl /usr2/control/
 
@@ -134,21 +149,17 @@ it should be changed to:
 
     erchk x xterm -geom 99x16+0+518 -title ERRORS -e erchk &
 
-If you have essential programs that should be started with by the FS
-server (not the client) and must be run in a separate terminal emulator,
-you can use `screen` to create a multiplex terminal at fs start-up and
-attach to it in a new terminal emulator at fsclient start. For example
-adding this to stpgm.ctl:
+If you have an essential terminal program that should be started with
+by the FS server (not the client) and must be run in a separate
+terminal emulator, you can use `screen` to create a multiplex terminal
+at fs start-up and attach to it in a new terminal emulator at fsclient
+start. For example adding this to stpgm.ctl:
 
     prgrm n screen -D -m -S prgrm command &
     prgrm x xterm -e screen -x prgrm command &
 
 (replace "prgrm" with something meaningful and "command" with the shell
-command you want to execute). This can also be done with a "singleton"
-program that you would like started with the client. By "singleton" we
-mean a program that only allows one copy to be running, such an example
-may be a station error checker or antenna monitor. It is likely worth
-putting the second command in your "clpgm.ctl" also.
+command you want to execute). 
 
 Customization
 -------------
@@ -173,33 +184,34 @@ clients can access with the "-s" flag. By default the scroll-back buffer
 is 1024 lines long. This can be customized by editing
 `FS_DISPLAY_SCROLLBACK_LEN` in `fs/include/params.h`
 
-By default the stream of log messages is only available locally, however
-it can be made accessible via the network by editing
-`FS_DISPLAY_PUBADDR` and `FS_DISPLAY_REPADDR`, eg:
-
-    #define FS_DISPLAY_PUBADDR "tcp://*:7083"
-    #define FS_DISPLAY_REPADDR "tcp://*:7084"
-
-You can then access these by using the `ssub` command found with the FS
-distribution, which can be compiled independently of the Field System.
 
 Disabling
 ---------
 
+To start the fs without the display server, use 
+
+    fs --foreground
+
+or 
+
+    fs -f
+
+To perminently disable it unset the FS_DISPLAY_SERVER  enviroment
+variable, eg: 
+
 For tcsh
 
-    setenv FS_NO_DISPLAY_SERVER 1
+    unsetenv FS_DISPLAY_SERVER 
 
 For bash
 
-    export FS_NO_DISPLAY_SERVER=1
+    unset FS_DISPLAY_SERVER
 
-Or temporarily use
-
-    make FS_NO_DISPLAY_SERVER=1 rmdoto rmexe all
 
 Technical Details
 =================
+
+TODO: this needs to include FS server
 
 spub & ssub
 -----------
@@ -227,8 +239,8 @@ with an upcoming version of nanomsg. In principle, these can stream to a
 websocket and be accessed through a browser.
 
 When shutting down, spub sends a special end-of-transmission message
-which triggers client `ssub` instances to exit, unless they are started with the
-`-w/--wait` flag.
+which triggers client `ssub` instances to exit, unless they are
+started with the `-w/--wait` flag.
 
 Server
 ------

@@ -13,12 +13,6 @@ LIBS = ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a
 
 all: ../bin/fs
 
-ifdef FS_NO_DISPLAY_SERVER
-CPPFLAGS += -DFS_NO_DISPLAY_SERVER
-else
-OBJECTS += start_server.o
-endif
-
 ../bin/fs: $(OBJECTS) $(LIBS)
 	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@
 

@@ -11,6 +11,7 @@ ifndef VERSION
 VERSION = 0
 PATCHLEVEL = 0
 SUBLEVEL = 0
+RELEASE = " "
 endif
 #
 # Set paths
@@ -29,9 +30,9 @@ OBJECTS=\
 b3of9.o bar1.o bbbuf.o bbsyn.o bcode.o blabl.o \
 cazel.o cband_char.o cbinf.o checkmk5xlat.o check_dbbc_setup.o check_csb_list.o \
 chkgrpandwrite.o ckobs.o clist.o \
-copen.o copy_time.o counter_init.o \
+copen.o copy_time.o counter_init.o crelease.o \
 delete_comma_and_write.o drchmod.o drprrd.o drset.o drudg.o drudg_rdctl.o drudg_write.o dsnout.o \
-equip_type.o fakesum.o fc_chmod.o fdrudg.o find_num_chans_rec.o find_recorder_speed.o \
+equip_type.o fakesum.o fc_chmod.o fc_getenv.o fdrudg.o find_num_chans_rec.o find_recorder_speed.o \
 get_version.o getqual.o getstr.o gtsnp.o \
 iaddpc.o iaddtr.o init_hardware_common.o k4proc_type.o kcheckgrpor.o \
 label.o lablog.o labsnp.o lists.o lspin.o lstsum.o lstsum_info.o lstsumo.o \
@@ -55,16 +56,16 @@ snap_start_recording.o snap_systracks.o snap_tpicd.o \
 snap_wait_sec.o snap_wait_time.o snapintr.o \
 spdstr.o squeezeleft.o squeezewrite.o sread.o strip_path.o \
 timin.o timout.o trkall.o unpsk.o vlbah.o vlbat.o \
-wrdate.o wrday.o wrdur.o wrhead.o wrsor.o wrtap.o wrtrack.o xfer_override.o
+wrdate.o wrday.o wrdur.o wrhead.o write_drudg_version_line.o wrsor.o wrtap.o wrtrack.o xfer_override.o
 
 #
 # Set compiling and linking flags
 #
 # -C checks for out of bounds during execution and aborts if found
 FFLAGS= -C -c -cpp -DVERSION=$(VERSION) \
--DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL)
+-DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL) -DRELEASE=$(RELEASE)
 # f2c needs this others don't
-CFLAGS= -c  -DF2C
+CFLAGS= -c  -DF2C -DRELEASE=$(RELEASE)
 #
 
 #

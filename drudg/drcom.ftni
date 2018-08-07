@@ -49,6 +49,7 @@ C 2003Jul11 JMG added itctim
 ! 2015Jul17 JMG. Added  cont_calPolarity
 ! 2016Sep08 JMG. Added lvsi_prompt
 ! 2016Dec23 JMG. Added ical_time_staggered, kcont_cal
+! 2018Jul20 JMG. removed cversion and put in drver_com.ftni 
 c
       logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
      .          kprepass,kdr_type,kgeo,kpostpass
@@ -68,7 +69,7 @@ c
 
       CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .  lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
-     .  cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,cversion
+     .  cprttyp,cprport,cprtlab,clabtyp,labname,ctextname
 
       character*4 tpid_prompt, cont_cal_prompt,lvsi_align_prompt
       character*4 cont_cal_Polarity
@@ -80,11 +81,12 @@ c
       integer*2 IBUF(ibuf_len)
       character*(2*ibuf_len) cbuf
       equivalence (cbuf,ibuf)
+    
 
       COMMON/DRCOM_CH/cbuf, LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .    lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .    cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,
-     >    cpaper_size,coption(3),ctextname,cversion,
+     >    cpaper_size,coption(3),ctextname,
      >    tpid_prompt,cont_cal_prompt,cont_cal_polarity,
      >    lvsi_align_prompt
 
@@ -92,7 +94,7 @@ c
       double precision RA50(max_cel),DEC50(max_cel)
       real rlabsize(6)
 c
-      integer iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
+     
       INTEGER ireccv,IRECSK,IRECST,IRECEL,isklen,luusr,
      .  lu_infile,istn,
      .  nlab,nllab,
@@ -111,7 +113,7 @@ C
       integer ical_time_staggered           !override time for the calibration.
 
       COMMON/DRCOM_int/
-     .       iVerMajor_FS, iVerMinor_FS, iVerPatch_FS,
+  
      .       ISKLEN,LUUSR,
      .       LU_INFILE, LU_OUTFILE,LUPRT,
      >       ISTN,

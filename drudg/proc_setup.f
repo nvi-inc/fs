@@ -29,7 +29,8 @@
 ! 2016May24 PdV  check first 8 (not 10) characters of rack for continuous cal
 ! 2016Sep11 JMG. For cont_cal prompt, make input appear on same line as prompt. 
 ! 2017Dec23 JMG. Updating handling of cont_cal prompt   
-! 2018Apr20 JMG. Fixed bug introduced in the above.                 
+! 2018Apr20 JMG. Fixed bug introduced in the above.   
+! 2018Jun18 JMG. Yet another attempt to fix cont_cal. In skedf.ctl, if 'cont_cal off' then emit cont_cal=off              
 
 ! local
       character*12 cnamep
@@ -102,8 +103,7 @@ c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
       endif
 
 
-! Initialize cont_cal_out
-      write(*,*) "RACK ", cstrack_cap(istn),kcont_cal 
+! Initialize cont_cal_out   
       if(cstrack_cap(istn)(1:8) .eq. "DBBC_DDC") then
         cont_cal_out=cont_cal_prompt
         call lowercase(cont_cal_out)
@@ -264,7 +264,7 @@ C  BBCffb, IFPffb  or VCffb
        if(cstrack_cap(istn)(1:8) .eq. "DBBC_DDC") then   
           if(kcont_cal) then 
              write(lu_outfile,'("cont_cal=on,",a)') cont_cal_polarity
-          else if(cont_cal_out .eq. "off") then
+          else 
              write(lu_outfile,'("cont_cal=off")')
           endif   
             

@@ -12046,8 +12046,6 @@ Version 9.11.19 170129
            include/fscom_dum.i
            newlb/prog.c
            quikr/fsvrs.f
-           vex/y.tab.h
-           rclco/rcl/all
            boss/newlg.f
            Makefile
            added release string to release version
@@ -12155,6 +12153,11 @@ Version 9.11.20.rc3 180501
 180523 DEH Makefile
            Fixed dist target 
 
+180523 WEH misc/ntp.txt
+           improve wording
+
+180523 Version 9.11.20.rc6
+
 180524 DEH clib/Makefile
 	   boss/Makefile
            clib/helpstr.c
@@ -12162,10 +12165,6 @@ Version 9.11.20.rc3 180501
 	   oprin/oprin.c
 	   moved helpstr from boss to clib
 	   added "help" support fsclient
-
-1805xx Version 9.11.20.rc6
-
-180520 Version 9.11.20.rc5
 
 180528 WEH help/user_device.___
            help/tpzero.___
@@ -12175,15 +12174,78 @@ Version 9.11.20.rc3 180501
            help/tsys.___
            help/tpgain.w__
            help/tpdiffgain.w__
-           fixed old u5/us issues and
+           fixed old u5/u6 issues and
              added 'no' zero option for station devices
 
 180528 WEH monit/Makefile
            predict/Makefile
            fmset/Makefile
+	   st.default/prog/.login
+	   st.default/prog/.profile
            use FS_TINFO_LIB variable
 
 180531 DEH fsclient/fsclient.c
-	   fs/start_server.c
-	   spubsub/ssub.c
-	   improved signal handling of fsclient
+           fs/start_server.c
+           spubsub/ssub.c
+           improved signal handling of fsclient
+
+180531 Version 9.11.20.rc7
+
+180604 DEH Makefile
+           use path of Makefile (rather than pwd) to determine version
+
+180614 WEH misc/ntp.txt
+          no 'kod' add default 'ignore'
+
+180614 WEH help/user_device.___
+180615 WEH help/tpi.___
+           help/tpical.___
+           help/tpdiffgain.w__
+180618 WEH help/tsys.___
+           help/caltemp.___
+           help/tpdiff.___
+           help/tpgain.w__
+           help/tpzero.___
+           clean-up
+
+180618 WEH clib/skd_util.c
+           restructure skd_clr_ret to allow clearing of class records
+
+180618 WEH fmset/fmset.c
+           clear any class records left from an untimely abort, while
+             ...cn program was running
+
+180706 DEH fsserver
+           initial version of fsserver
+
+180725 DEH third_party/Makefile
+           third_party/src/nng.make
+           third_party/src/jansson-2.11.tar.gz
+           third_party/src/nng-1.0.1.tar.gz
+           Makefile
+           vendored server dependencies
+
+180726 DEH fs/fs.c
+           fsalloc/fsalloc.c
+           fsclient/fsclient.c
+           fsserver/main.c
+           fsserver/server.c
+           bug fixes
+           create /run/fsserver
+
+180726 DEH spubsub/msg.c
+180730 DEH spubsub/ssub.c
+           spubsub/Makefile
+           add wait feature to help fix problems around shutdown
+           converted ssub to use new library
+
+180807 DEH ./spubsub/spub.c
+           increased heartbeat at shutdown, set default timeout to 0.5
+
+180807 DEH oprin/oprin.c 
+           erchk/erchk.c 
+           fs/fs.c
+           Makefile 
+           use FS_DISPLAY_SERVER env var
+
+1806xx Version 9.11.20*
