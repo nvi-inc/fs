@@ -28,12 +28,12 @@ easier.  Upgrading from 9.11.19 is very easy.
 
 The most significant changes in version 9.11.20 were:
 
-   (i) Availability of a display server for the user interface.  This
+   (i) Availability of a server for the user interface.  This
        allows multiple independent user interfaces to be used with the
        FS.  Each user interface requires an X server display and
        essentially identical to the normal FS user interface.
        Typically, the interface would be used on the FS computer X
-       display, but can also be used through a 'ssh' connecton from
+       display, but can also be used through a 'ssh' connector from
        another computer.  There is a 'client=' command to allow
        running of utilities, such as 'fmset' and 'pfmed' on the
        client's display.  A text-only interface is available as well.
@@ -45,14 +45,11 @@ The most significant changes in version 9.11.20 were:
        automatically follows the log, i.e., it is not necessary to
        change which log is viewed by changing which file is 'tail'ed.
 
-       This feature is included as the default in the source code.
-       However, the installation instructions below will disable this
-       feature.  Please note that step (7) of the installation
-       instructions hs been moified from its usual form to disable
-       this feature.  We recommend that install the FS without this
-       feature initially, then when you test the display server
-       functionality.  Instructions are provided for enabling and
-       disabling the feature as well a description of how to use it.
+       This feature is opt-in for this version of the FS. We recommend
+       that you install the FS without this feature initially, then test
+       the display server functionality separately. Instructions are
+       provided for enabling and disabling the feature as well a
+       description of how to use it.
 
   (ii) Ad hoc support in 'drudg' for 'sched' "stagger start mode".  In
        this mode there are different recording start times at
@@ -69,7 +66,7 @@ The most significant changes in version 9.11.20 were:
        It also maximizes the amount of time the data is marked valid
        after 'preob' completes because there are no time sequencing
        commands in the schedule between the start of recording through
-       'midob'.  This accomodates continuous or non-continuous
+       'midob'.  This accommodates continuous or non-continuous
        calibration 'preob' procedures automatically.
  
  (iii) Improvements to the 'mk5c_mode' command to fully support Mark
@@ -77,14 +74,14 @@ The most significant changes in version 9.11.20 were:
        recording with 'jive5ab'.  This change consists primarily of
        accepting any effective sample rate and total bit rate that
        will fit in an unsigned 64-bit integer, i.e.,
-       18446744073709551615 Hz or Mbps.  Rates that do not correpond
+       18446744073709551615 Hz or Mbps.  Rates that do not correspond
        to integer Hz sample rates and integer MHz total bit rates are
        not supported.  This has no impact on current usage of the
        'mk5c_mode' command and goes significantly beyond any
        capability that is needed now.  This change cleaned up several
        internal aspects of the implementation, including using only
        integer arithmetic for the rates, and provides complete
-       compatibilty with 'jive5ab' in this area.  Thanks to Harro
+       compatibility with 'jive5ab' in this area.  Thanks to Harro
        Verkoutor (JIVE) for motivation, help with implementation
        details, and help with testing this change.
 
@@ -199,37 +196,24 @@ The installation steps for upgrading from 9.11.19 are listed below.
 
  (6) ** VERY IMPORTANT **  Log-out as 'root', and log-in as 'prog'.
 
- (7) Make the FS.
+ (7) Make the FS itself:
 
-     For the initial installation and testing we recommend that you
-     disable the display server functionality.  To do this please
-     modify the login environment of 'prog' by setting the environment
-     variable FS_NO_DISPLAY_SERVER.  This can be done in '.login' (if
-     'tcsh' is the login shell) or '.profile' (for 'bash').  For
-     'tcsh', add the following command to '.login':
+      cd /usr2/fs
+      make >& /dev/null
 
-       setenv FS_NO_DISPLAY_SERVER
+    and then
 
-     For 'bash', add the following command to '.profile':
- 
-       export FS_NO_DISPLAY_SERVER=
-
-     Examples of how to do this cna be found the corresponding files
-     in '/usr2/fs/st,default/prog'.
-
-     After making the above change, log-out and then back in as
-     'prog'.  Then execute:
-
-       cd /usr2/fs
-       make 
+      make
+    
+    to confirm that everything compiled correctly.
 
  (8) This step is for modifying your local programs. That should not
-     be necesary for this update, but we do recommend that recompile
+     be necessary for this update, but we do recommend that recompile
      and relink your programs against the new FS version as described
      in the next step.
 
      However, if you use 'metserver' and/or 'metclient', we recommend
-     that you update yout local copies with the new versions.  You can
+     that you update your local copies with the new versions.  You can
      defer this until the FS itself has been updated successfully.
      The new FS will work with the old version of 'metserver' if you
      update your 'equip.ctl' as described in step (12) below.
@@ -253,7 +237,7 @@ The installation steps for upgrading from 9.11.19 are listed below.
      possible changes that may be needed.  The first change (i) is
      only required if you are use 'metserver' to serve meteorological
      data to the FS.  However, it is still recommended that you make
-     the correspondng changes in the comments in 'equip.ctl' to keep
+     the corresponding changes in the comments in 'equip.ctl' to keep
      them up to date.  The second change (ii) is if you wish to change
      to use NTP for the FS time.  This second change is recommended if
      you have reliable NTP available.  It can be deferred until after
@@ -291,7 +275,7 @@ The installation steps for upgrading from 9.11.19 are listed below.
           available.  This can can be deferred until the rest of the
           installation of 9.11.20 is complete.  When you make this
           change, please refer to '/usr2/fs/misc/ntp.txt' for
-          requiremennts and instructions.
+          requirements and instructions.
 
 (13) This step is for updates to your SNAP procedure files.  There are
      two changes.  The first (i) is required if you use a Mark 5
@@ -305,7 +289,7 @@ The installation steps for upgrading from 9.11.19 are listed below.
 
             mk5=bank_set?
 
-          command after the 'bank_check' commmand if (and only if) a
+          command after the 'bank_check' command if (and only if) a
           Mark 5 recorder is in use.
 
           Previous instructions sent on the FS mail list recommended
@@ -425,7 +409,7 @@ The following is a summary of FS changes since 9.11.19.
 17. Support in 'tsys', 'onoff', and 'fivpt' for user devices that
     can't have a "zero" level measured.
 18. New 'release' string for version number.
-19. Optional 'Makefile' enviroment variable 'FS_TINFO_LIB' for programs
+19. Optional 'Makefile' environment variable 'FS_TINFO_LIB' for programs
     use 'ncurses.
 20. Display server. ...
 
@@ -435,15 +419,15 @@ A more detailed discussion of these changes follows.
     and FlexBuff.  This change consists primarily of supporting any
     effective sample rate and total bit rate that will fit in an
     unsigned 64-bit integer, i.e., 18446744073709551615 Hz or Mbps.
-    Rates that do not correpond to integer Hz sample rates and integer
+    Rates that do not correspond to integer Hz sample rates and integer
     MHz total bit rates are not supported.  This has no impact on
     current usage of the 'mk5c_mode' command and goes significantly
     beyond any capability that is needed now.  This change cleaned up
     several internal aspects of the implementation, including using
     only integer arithmetic for the rates, and provides complete
-    compatibilty with 'jive5ab' in this area.  Thanks to Harro
+    compatibility with 'jive5ab' in this area.  Thanks to Harro
     Verkouter (JIVE) for instigating this improvement and his support
-    in the implementationn and testing.
+    in the implementation and testing.
 
     Ask part of this change, the 'bit_streams=...' command now ignores
     all parameters except the bit mask.
@@ -564,7 +548,7 @@ A more detailed discussion of these changes follows.
          schedule.  Most stations will only need a subset.  The
          strings shown may need to be updated in the future.
 
-     ii. If a station particapates in only IVS experments, 'sched_end'
+     ii. If a station participates in only IVS experiments, 'sched_end'
          can just call 'push_log' without using 'if' or the commands
          from 'push_log' can be incorporated directly.
 
@@ -660,15 +644,14 @@ A more detailed discussion of these changes follows.
     a program can be the cause of the problem.  Thanks to Mamoru
     Sekido at Kashima for reporting this issue.
 
-    20. Display server.  ...
-
+20. Optional support for FS display server. This allows the FS
+    user interface to be detached from the operation components.
     Instruction for enabling this feature (and disabling it, if that
     should become necessary) can be found in
     /usr2/fs/misc/display_server.txt.  This file also includes a
-    explanantion of how the user interface is different from the
-    non-display server
- 
-    ...
+    explanation of how the user interface is different from the
+    non-display server.
+
 
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/misc/changes.txt.

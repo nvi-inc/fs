@@ -1,4 +1,21 @@
 This file contains a summary of changes made and why.
+2018Jul20 New subroutine write_drudge_release_line for use by procintr.f and snapintf.f. Removed this functionality from both.
+          Put all version information in common file  drver_com.ftni. Added this include file to fdrudg.f.
+          Introduced  new char*32  string crel_FS which contains release info. 
+          Modified get_version to get crel_fs (which is specified at compile time).  
+          New function crelease.c gets RELEASE string at compile time. 
+          fdrudg.f and write_drudge_release_line.f will include crel_fs if it is non-blank.  
+          Makefile was modified to correctly get the RELEASE      
+2018Jun19 proc_setup.f: Fixed bug in cont_cal. If Rack is DBBC_DDC and 'cont_cal off' emit cont_cal=off;
+2018Jun17 sread.f: When reading in a VEX file printed an extra blank line when it was done reading in the schedule. 
+          This showed up as a blank line between "$SOURCES" and "Experiment name: ",
+          drudg_rdctl.f:  Removed erroneous report of error in label command.
+          Also made sure there were spaces between all sections when it was writing out progrees of reading skedf.ctl. 
+	  fdrudg.f: Removed debugging statement that wrote out first recorder
+2018Jun05 vobinp.f: Modified so if a station in the scan is not in the station list, then program 
+          aborts with warning message.
+2018Jun05 ivgtst.f: Version in drudg had bug where if station were missing in station list, set the value 
+          to # of stations. This had been fixed in 2014 in sked, but not propagated here. Now it is.           
 2018May02 snap.f: Fine tuning staggered start. If the station offset for OUR station is zero, assume non-staggered.
 2018May02 snap.f: Take account of staggered start in calculating recording 
 2018Apr02 snap.f: Fixed staggered start. I hope. 

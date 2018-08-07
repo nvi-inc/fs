@@ -133,7 +133,13 @@ C       Now get each station line that is part of this scan.
           endif
                 il = fvex_len(cout)
           if (ivgtst(cout,istn).le.0) then
-            write(lu,*) "VOBINP04 - Station ",cout(1:il)," not found!"
+            write(lu,*) " " 
+            write(lu,'(a)')
+     >    "  ERROR:  VOBINP04 - While processing scans. Station >> "//
+     >     cout(1:il)//" << not found in station list!"
+            write(lu,*) " Fix the schedule and restart program. "
+            stop
+ 
             return
           endif
           if (nchan(istn,icod).eq.0) then ! code not defined          
@@ -244,10 +250,14 @@ C  Make the new scan if this is the first source.
 ! Check to see if a valid station.
 ! Should check to see if this station is in this scan?
           il = fvex_len(cout)
-          istat= ivgtst(cout,istn)
+          istat= ivgtst(cout,istn)        
 
           if(istat .le. 0) then
-            write(lu,*) "VOBINP14 - Station ",cout(1:il)," not found!"
+            write(lu,*) " "
+            write(lu,*) "*****VOBINP14 - Station ",cout(1:il),
+     >          " not found in station list!"
+            write(lu,*) "Fix problem and restart. Program will abort."
+            stop 
             return
           endif
           ixfer_stat(ixfer_cnt)=istat

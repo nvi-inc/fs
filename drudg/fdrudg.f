@@ -3,6 +3,7 @@ C
 C     DRUDG HANDLES ALL OF THE DRUDGE WORK FOR SKED
 C
 C  Common blocks:
+      include 'drver_com.ftni'
       include 'hardware.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
@@ -218,10 +219,11 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2015Aug31 JMG.      Don't quit on "q"
 ! 2016May07 WEH.      Increased size of crack_type_def, crack_tmp_cap from Char*12-->char*20
 ! 2016Jul28 JMG.      Now also set cfirstrec_def in 'equipment override'
+! 2018Jun17 JMG.      Removed debugging statement whichr wrote out first recorder
 ! Get the version
       include 'fdrudg_date.ftni'
-      call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS)
-
+      call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS,crel_FS)
+ 
 C Initialize FS version
 
 C PeC Permissions on output files
@@ -347,10 +349,17 @@ C 3. Get the schedule file name
           endif
 C       Opening message
           WRITE(LUSCN,'(a)')
-     >   ' DRUDG: Experiment Preparation Drudge Work (NRV & JMGipson '//
+     >   ' DRUDG: Experiment Preparation Drudge Work (JMGipson '//
      >    cversion(1:trimlen(cversion))//')'
-	  write(luscn,'("Version: ",i2,2(".",i2.2))') iverMajor_fs,
+       
+ 	  write(luscn,'("Version: ",i2,2(".",i2.2), $)') iverMajor_fs,
      >     iverMinor_fs,iverpatch_fs
+          if(crel_FS .eq. " ") then
+            write(luscn, '(a)') " "
+          else 
+            write(luscn,'(a)') "-"//Crel_FS
+          endif
+  
 
           nch = trimlen(cfile)
           if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
@@ -662,7 +671,6 @@ C  if it was not set by the schedule.
               cstrack(istn) =crack_type_def
               cstrec(istn,1)=crec_def(1)
               cstrec(istn,2)=crec_def(2)
-              write(*,*) ">",cfirstrec(istn),"<"  
               cfirstrec(istn)=cfirstrec_def    
             endif
 !This keeps us from only doing the override when the schedlue is read in.

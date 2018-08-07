@@ -21,6 +21,7 @@ C 991210 nrv Write equipment name from common.
 C 991214 nrv Remove calling parameters, not nneeded.
 ! 2005Aug08 JMGipson.  Simplified.
 ! 2006Nov30 Use cstrec(istn,irec) instead of 2 different arrays
+! 2018Jul20 Moved writing of drudg version to subrotine. 
 
 C Input
 !    None.
@@ -38,9 +39,8 @@ C
       write(lu_outfile,'(a,a,3x,a,2x,a)')
      > cprfx,cexper,cstnna(istn),cpocod(istn)
 
-      write(lu_outfile,
-     >   "(a,'drudg version ',a9,' compiled under FS ',i2,2('.',i2.2))")
-     >    cprfx,cversion,iVerMajor_FS,iverMinor_FS,iverPatch_FS
+      call write_drudg_version_line(lu_outfile)
+   
 
       write(lu_outfile,'(5a,$)')
      >   '"< ',cstrack(istn),' rack >< ',cstrec(istn,1), ' recorder 1>'

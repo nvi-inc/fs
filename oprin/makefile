@@ -51,12 +51,6 @@ ifeq (${NOTSETUTC},0)
 SETUTC=--set-utc
 endif
 
-ifdef FS_NO_DISPLAY_SERVER
-CPPFLAGS += -DFS_NO_DISPLAY_SERVER
-endif
-
-CFLAGS += -g
-
 # The main target, 'oprin'.  Both new/updated object files and libraries
 # cause relinking; if libraries are missing, this makefile cannot
 # create them on its own, it says "don't know how to make $(LIBS)".

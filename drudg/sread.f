@@ -75,6 +75,7 @@ C 021021 nrv Don't set default tape motion parameters for VEX files
 C            because they have already been read in.
 C
 ! 2006Jul24 JMGipson. Got rid of ilocf, reio. (Remnants of old operating system no longer used.)
+! 2018Jun17 JMGipson. Got rid of extra space in output after return from vread. 
 
       close(unit=LU_INFILE)
       open(unit=LU_INFILE,file=LSKDFI,status='old',iostat=IERR)
@@ -118,7 +119,7 @@ C       read stations, codes, sources
 9009      format(' from VREAD iret=',i5,' ierr=',i5)
         endif
 C       Write out experiment information now.
-        write(luscn,'(/"Experiment name: ",a)') cexper
+        write(luscn,'("Experiment name: ",a)') cexper
         i=trimlen(cexperdes)
         if (i.gt.0) write(luscn,'("Experiment description: ",a)') 
      .  cexperdes(1:i)

@@ -97,6 +97,7 @@ C  TURN ON ALL THE ATTENUATORS
 C
       if (kst) then
          if(kzero) then
+            call susp(1,202)
             call scmds('sigofffp',1)
          endif
          ierr=0

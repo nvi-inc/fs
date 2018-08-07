@@ -12,6 +12,8 @@ C
 ! 2015Jul21 JMG. Made "ASK" valid option ofr cont_cal_polarity 
 ! 2016Jul28 JMG. Now also set cfirstrec_def in 'equipment override'
 ! 2016Sep08 JMG. New keyword 'vsi_align' 
+! 2018Jun17 JMG. Father's day. Make sure always a space " " between sections of snap file.
+!                Also fix reported error in label size.  Was reporting error when there was not one. 
 
 
 C
@@ -51,7 +53,7 @@ C  LOCAL VARIABLES
       parameter(MaxToken=6)
       character*128 ltoken(MaxToken)
       equivalence (lkeyword,ltoken(1))
-      equivalence (lvalue,ltoken(2))
+      equivalence (lvalue,ltoken(2))    
 
       integer lu          !open lu
       integer ic,i,j,ilen,ierr
@@ -119,12 +121,15 @@ C  2. Process the control file if it exists. Loop throug 3 times.
 !     The last time for the local file. 
 
       kfirst_skip=.true.
-      do j=1,3      
+      do j=1,3    
+  ! If already found the global file, don't need to check the alternative.
+! this prevents us from writting out a " "
+         if(j .eq. 2 .and. kfound_global_file) goto 500    !quick exit. 
+
          if(.not.kfirst_skip) write(*,*) " "   !close out 'skipping non-sked' line  
          kfirst_skip=.true. 
      
-! If already found the global file, don't need to check the alternative.
-        if(j .eq. 2 .and. kfound_global_file) goto 500    !quick exit. 
+
 ! If we are the start of the third round and haven't found the global file, 
 ! write a warning message but try to read the local file. 
         if(j .eq. 3 .and. .not.kfound_global_file) then
@@ -171,7 +176,7 @@ C  2. Process the control file if it exists. Loop throug 3 times.
             if(keof) goto 500
           end do     
 C  $SCHEDULES
-          write(*,'(a,$)') lsecname(1:trimlen(lsecname)+1) 
+          write(*,'(a," ",$)') lsecname(1:trimlen(lsecname)) 
           if (lsecname .eq.'$SCHEDULES') then                  
              if ((cbuf(1:1) .ne. '$').and..not.keof) then
                 read(cbuf,'(a)') csked
@@ -283,9 +288,10 @@ C  $PRINT
                     endif
                   endif
              else if (lkeyword .eq.'LABEL_SIZE') then
-C              label_size ht wid nrows ncols topoff leftoff
+C              label_size ht wid nrows ncols topoff leftoff              
                read(cbuf,*,err=92140) lkeyword,rlabsize
-92140          write(luscn,'(a)') "RDCTL12 ERROR: Label Size error"
+               goto 9216    !Skip emitting error message
+92140          write(luscn,'(a)') "RDCTL12 ERROR: Label Size error"               
              else
                  write(luscn,'(a)') "Error in $PRINT section"
                  write(luscn,'(a)') cbuf(1:trimlen(cbuf))

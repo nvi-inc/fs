@@ -1,0 +1,7 @@
+!  This contains information about the drudg version
+       character*32 crel_FS    
+       character*10 cversion
+       integer iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
+
+       common /DRVER_CH/crel_FS,cversion
+       common /DRVER_INT/iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
