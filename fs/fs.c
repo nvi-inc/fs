@@ -56,23 +56,36 @@ extern struct fscom *shm_addr;
 static long ip[]={0,0,0,0,0};
 
 
-#ifndef FS_NO_DISPLAY_SERVER
-void start_server(bool, bool);
-#endif
+void start_server() {
+    if (system("fsserver status > /dev/null") > 0)
+        system("fsserver start > /dev/null");
+    if (system("fsserver fs status > /dev/null") > 0)
+        system("fsserver fs start > /dev/null");
+}
 
-#ifdef FS_NO_DISPLAY_SERVER
-#define USAGE_SHORT "Usage: %s [-nh]\n"
-#else
-#define USAGE_SHORT "Usage: %s [-bnh]\n"
-#endif
+void exec_client(int argc, char *argv[]) {
+    char **argv_new = calloc(argc+2, sizeof(char*));
+    int i;
+    for (i = 0; i < argc; i++) {
+    	argv_new[i] = argv[i];
+    }
+    argv_new[i++] = "-s";
+    argv_new[i++] = NULL;
+    
+    execvp("fsclient", argv_new);
+    perror("error starting fsclient");
+    exit(EXIT_FAILURE);
+
+}
+
+#define USAGE_SHORT "Usage: %s [-bnhf]\n"
 
 const char *usage_long_str = USAGE_SHORT "\n"
 "Start the VLBI Field System and programs listed in and stnpgm.ctl\n"
-"  -n, --no-x          Do not start programs requiring X11\n"
+"  -n, --no-x          do not start programs requiring X11\n"
 "  -h, --help          print this message\n"
-#ifndef FS_NO_DISPLAY_SERVER
-"  -b, --background    run the Field System in background/daemon mode\n"
-#endif
+"  -b, --background    run the Field System in background/daemon mode\n" 
+"  -f, --foreground    run the Field System in foreground without server\n" 
 ;
 
 main(int argc_in,char *argv_in[])
@@ -94,11 +107,20 @@ main(int argc_in,char *argv_in[])
 
 	bool arg_background = false;
 	bool arg_no_x11 = false;
+	bool arg_no_server = true;
+	bool arg_internal = false;
+
+    if(getenv("FS_DISPLAY_SERVER") != NULL) {
+        arg_no_server = false;
+    }
 
 	static struct option long_options[] = {
 	    {"background", no_argument, NULL, 'b'},
 	    {"no-x",       no_argument, NULL, 'n'},
 	    {"help",       no_argument, NULL, 'h'},
+	    {"foreground", no_argument, NULL, 'f'},
+        // undocumented for server use
+	    {"internal",   no_argument, NULL, 'i'},
 
 	    {NULL, 0, NULL, 0},
 	};
@@ -115,21 +137,17 @@ main(int argc_in,char *argv_in[])
     }
     */
 
+
 	int opt;
 	int option_index;
-	while ((opt = getopt_long(argc_in, argv_in, "bnh", long_options,
+	while ((opt = getopt_long(argc_in, argv_in, "bnhfi", long_options,
 	                          &option_index)) != -1) {
 		switch (opt) {
 		case 0:
 			// All long options are handled by their short form
 			break;
 		case 'b':
-#ifdef FS_NO_DISPLAY_SERVER
-            fprintf(stderr, "fs build without server, background option not available");
-			exit(EXIT_FAILURE);
-#endif
 			arg_background = true;
-			arg_no_x11     = true;
 			break;
 		case 'n':
 			arg_no_x11 = true;
@@ -138,11 +156,38 @@ main(int argc_in,char *argv_in[])
 			fprintf(stderr, usage_long_str, argv_in[0]);
 			exit(EXIT_SUCCESS);
 			break;
+		case 'f':
+            arg_no_server = true;
+			break;
+		case 'i':
+			arg_no_x11 = true;
+            arg_no_server = true;
+            arg_internal = true;
+			break;
 		default: /* '?' */
 			fprintf(stderr, USAGE_SHORT, argv_in[0]);
 			exit(EXIT_FAILURE);
 		}
 	}
+
+
+    setup_ids();
+
+	if (!arg_no_server) {
+		if (nsem_test("fs   ")) {
+			printf("fs already running, reconnect with `fsclient`\n");
+			exit(EXIT_FAILURE);
+		}
+		start_server();
+        if (!arg_background)
+            exec_client(argc_in, argv_in);
+        exit(EXIT_SUCCESS);
+	}
+
+    if (arg_background) {
+        fprintf(stderr, "fs: cannot run in background without server\n");
+        exit(EXIT_FAILURE);
+    }
 
 
     ti=time(NULL);
@@ -154,14 +199,16 @@ main(int argc_in,char *argv_in[])
              /* ignore signals that might accidently abort */
              /* note this behaviour trickles down by default to all children */
 
-    if (SIG_ERR==signal(SIGINT,SIG_IGN)) {
-      perror("fs: ignoring SIGINT");
-      exit(-1);
-    }
+    if (!arg_internal) {
+        if (SIG_ERR==signal(SIGINT,SIG_IGN)) {
+            perror("fs: ignoring SIGINT");
+            exit(-1);
+        }
 
-    if (SIG_ERR==signal(SIGQUIT,SIG_IGN)) {
-      perror("fs: ignoring SIGQUIT");
-      exit(-1);
+        if (SIG_ERR==signal(SIGQUIT,SIG_IGN)) {
+            perror("fs: ignoring SIGQUIT");
+            exit(-1);
+        }
     }
 
     tee = popen(line,"w");
@@ -171,16 +218,13 @@ main(int argc_in,char *argv_in[])
     } else
       perror("opening tee to fs.err file");
 
-    strncpy((char *)&fs,"fs",2);
 
+    strncpy((char *)&fs,"fs",2);
 
     klesam=FALSE;
     okay = FALSE;
     npids=0;
     ipids=-1;
-
-    setup_ids();
-
 
     if(100!=sysconf(_SC_CLK_TCK)) {
       printf("sysconf(_SC_CLK_TCK) not equal to 100 on this system,");
@@ -202,15 +246,6 @@ main(int argc_in,char *argv_in[])
     }
     //    exit(-1);
 
-#ifndef FS_NO_DISPLAY_SERVER
-	if (nsem_test("fs   ")) {
-		printf("fs already running, reconnect with `fsclient`\n");
-		exit(EXIT_FAILURE);
-	}
-	start_server(arg_background, arg_no_x11);
-    // With the server, "fs" should not start any X11 programs itself
-    arg_no_x11 = true;
-#endif
 
     if ( 1 == nsem_take("fs   ",1)) {
        fprintf( stderr,"fs already running\n");
@@ -265,9 +300,8 @@ main(int argc_in,char *argv_in[])
 	  goto cleanup;
 	if(les==2) {
 	  if(arg_no_x11) {
-#ifdef FS_NO_DISPLAY_SERVER
-	    fprintf(stderr, "skipping %5.5s, the -No_X option selected\n",name);
-#endif
+        if (!arg_internal)
+            fprintf(stderr, "skipping %5.5s, the -No_X option selected\n",name);
 	    continue;
 	  } else
 	    les=0;
@@ -327,9 +361,8 @@ main(int argc_in,char *argv_in[])
 	    goto cleanup;
 	  if(les==2) {
 	    if(arg_no_x11) {
-#ifdef FS_NO_DISPLAY_SERVER
-	      fprintf( stderr,"skipping %5.5s, the -No_X option was selected\n",name);
-#endif
+        if (!arg_internal)
+            fprintf(stderr, "skipping %5.5s, the -No_X option selected\n",name);
 	      continue;
 	    } else
 	      les=0;
@@ -550,4 +583,3 @@ int sig;
   }
   return;
 }
-
