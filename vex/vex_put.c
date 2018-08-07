@@ -2404,11 +2404,11 @@ create_chan_def_states(char *str)
 	  s9=string[7];
 	  s10=string[8];
 	  qref_list = add_list(qref_list,make_lowl(T_CHAN_DEF,
-				         make_chan_def(NULL,
+					 make_chan_def(0,NULL,
 				         make_dvalue(s3,s4),
 				         s5,
 				         make_dvalue(s6,s7),
-				         s8, s9, s10,
+					 s8, s9, NULL, s10,
 				         q_list)));
 	  q_list=NULL;
 	}
@@ -2424,11 +2424,11 @@ create_chan_def_states(char *str)
 	  s9=string[7];
 	  s10=string[8];
 	  qref_list = add_list(qref_list,make_lowl(T_CHAN_DEF,
-				         make_chan_def(s2,
+					 make_chan_def(0,s2,
 				         make_dvalue(s3,s4),
 				         s5,
 				         make_dvalue(s6,s7),
-				         s8, s9, s10,
+					 s8, s9, NULL, s10,
 				         q_list)));
 	  q_list=NULL;
 	}

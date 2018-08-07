@@ -1118,20 +1118,20 @@ $FREQ; *frequency and channel parameters
   def X4;
 *          Band    Sky freq     Net      chan    Trks    BBC     Phase-cal
 *           ID    at 0Hz BBC     SB       BW      ID      ID        ID
-    chan_def = &X : 8210.99 MHz : U : 2 MHz : &CH1 : &BBCa : &USB_CAL;
-    chan_def = &X : 8210.99 MHz : L : 2 MHz : &CH2 : &BBCa : &LSB_CAL;
-    chan_def = &X : 8212.99 MHz : U : 2 MHz : &CH3 : &BBCb : &USB_CAL;
-    chan_def = &X : 8212.99 MHz : L : 2 MHz : &CH4 : &BBCb : &LSB_CAL;
+    chan_def = &X : 8210.99 MHz : U : 2 MHz : &CH1 : &BBCa : : &USB_CAL;
+    chan_def = &X : 8210.99 MHz : L : 2 MHz : &CH2 : &BBCa : : &LSB_CAL;
+    chan_def = &X : 8212.99 MHz : U : 2 MHz : &CH3 : &BBCb : : &USB_CAL;
+    chan_def = &X : 8212.99 MHz : L : 2 MHz : &CH4 : &BBCb : : &LSB_CAL;
     sample_rate = 4 Ms/sec;
   enddef;
 * 
   def S4;
 *          Band    Sky freq     Net      chan    Trks    BBC     Phase-cal
 *           ID    at 0Hz BBC     SB       BW      ID      ID        ID
-    chan_def = &S : 2210.99 MHz : U : 2 MHz : &CH5 : &BBCc : &USB_CAL;
-    chan_def = &S : 2210.99 MHz : L : 2 MHz : &CH6 : &BBCc : &LSB_CAL;
-    chan_def = &S : 2212.99 MHz : U : 2 MHz : &CH7 : &BBCd : &USB_CAL;
-    chan_def = &S : 2212.99 MHz : L : 2 MHz : &CH8 : &BBCd : &LSB_CAL;
+    chan_def = &S : 2210.99 MHz : U : 2 MHz : &CH5 : &BBCc : : &USB_CAL;
+    chan_def = &S : 2210.99 MHz : L : 2 MHz : &CH6 : &BBCc : : &LSB_CAL;
+    chan_def = &S : 2212.99 MHz : U : 2 MHz : &CH7 : &BBCd : : &USB_CAL;
+    chan_def = &S : 2212.99 MHz : L : 2 MHz : &CH8 : &BBCd : : &LSB_CAL;
     sample_rate = 4 Ms/sec;
   enddef;
 *
@@ -1149,32 +1149,32 @@ $FREQ; *frequency and channel parameters
 *
 *          Band    Sky freq     Net      chan    Trks    BBC     Phase-cal   State#(s)
 *           ID    at 0Hz BBC     SB       BW      ID      ID        ID
-    chan_def = &X : 8212.99 MHz : U : 2 MHz : &CH1 : &BBCa : &USB_CAL : 1 : 2;
-    chan_def = &X : 8252.99 MHz : U : 2 MHz : &CH2 : &BBCb : &LSB_CAL : 1;
-    chan_def = &X : 8352.99 MHz : U : 2 MHz : &CH2 : &BBCb : &USB_CAL : 2;
-    chan_def = &X : 8732.99 MHz : U : 2 MHz : &CH3 : &BBCc : &LSB_CAL : 1;
-    chan_def = &X : 8912.99 MHz : U : 2 MHz : &CH3 : &BBCc : &USB_CAL : 2;
-    chan_def = &X : 8932.99 MHz : U : 2 MHz : &CH4 : &BBCd : &LSB_CAL : 1 : 2;
+    chan_def = &X : 8212.99 MHz : U : 2 MHz : &CH1 : &BBCa : : &USB_CAL : 1 : 2;
+    chan_def = &X : 8252.99 MHz : U : 2 MHz : &CH2 : &BBCb : : &LSB_CAL : 1;
+    chan_def = &X : 8352.99 MHz : U : 2 MHz : &CH2 : &BBCb : : &USB_CAL : 2;
+    chan_def = &X : 8732.99 MHz : U : 2 MHz : &CH3 : &BBCc : : &LSB_CAL : 1;
+    chan_def = &X : 8912.99 MHz : U : 2 MHz : &CH3 : &BBCc : : &USB_CAL : 2;
+    chan_def = &X : 8932.99 MHz : U : 2 MHz : &CH4 : &BBCd : : &LSB_CAL : 1 : 2;
     sample_rate = 4 Ms/sec;
   enddef;
 *
   def SX14; *example of standard Mark IIIA geodetic 14-frequency setup
 *          Band    Sky freq     Net      chan    Trks    BBC     Phase-cal
 *           ID    at 0Hz BBC     SB       BW      ID      ID        ID
-    chan_def = &X : 8212.99 MHz : U : 2 MHz : &CH1 : &BBCa : &USB_CAL;
-    chan_def = &X : 8252.99 MHz : U : 2 MHz : &CH2 : &BBCb : &LSB_CAL;
-    chan_def = &X : 8352.99 MHz : U : 2 MHz : &CH3 : &BBCc : &USB_CAL;
-    chan_def = &X : 8512.99 MHz : U : 2 MHz : &CH4 : &BBCd : &LSB_CAL;
-    chan_def = &X : 8732.99 MHz : U : 2 MHz : &CH5 : &BBCe : &USB_CAL;
-    chan_def = &X : 8852.99 MHz : U : 2 MHz : &CH6 : &BBCf : &LSB_CAL;
-    chan_def = &X : 8912.99 MHz : U : 2 MHz : &CH7 : &BBCg : &USB_CAL;
-    chan_def = &X : 8932.99 MHz : U : 2 MHz : &CH8 : &BBCh : &LSB_CAL;
-    chan_def = &S : 2220.99 MHz : U : 2 MHz : &CH9 : &BBCi : &USB_CAL;
-    chan_def = &S : 2230.99 MHz : U : 2 MHz : &CH10 : &BBCj : &LSB_CAL;
-    chan_def = &S : 2250.99 MHz : U : 2 MHz : &CH11 : &BBCk : &USB_CAL;
-    chan_def = &S : 2305.99 MHz : U : 2 MHz : &CH12 : &BBCl : &LSB_CAL;
-    chan_def = &S : 2340.99 MHz : U : 2 MHz : &CH13 : &BBCm : &USB_CAL;
-    chan_def = &S : 2345.99 MHz : U : 2 MHz : &CH14 : &BBCn : &LSB_CAL;
+    chan_def = &X : 8212.99 MHz : U : 2 MHz : &CH1 : &BBCa : : &USB_CAL;
+    chan_def = &X : 8252.99 MHz : U : 2 MHz : &CH2 : &BBCb : : &LSB_CAL;
+    chan_def = &X : 8352.99 MHz : U : 2 MHz : &CH3 : &BBCc : : &USB_CAL;
+    chan_def = &X : 8512.99 MHz : U : 2 MHz : &CH4 : &BBCd : : &LSB_CAL;
+    chan_def = &X : 8732.99 MHz : U : 2 MHz : &CH5 : &BBCe : : &USB_CAL;
+    chan_def = &X : 8852.99 MHz : U : 2 MHz : &CH6 : &BBCf : : &LSB_CAL;
+    chan_def = &X : 8912.99 MHz : U : 2 MHz : &CH7 : &BBCg : : &USB_CAL;
+    chan_def = &X : 8932.99 MHz : U : 2 MHz : &CH8 : &BBCh : : &LSB_CAL;
+    chan_def = &S : 2220.99 MHz : U : 2 MHz : &CH9 : &BBCi : : &USB_CAL;
+    chan_def = &S : 2230.99 MHz : U : 2 MHz : &CH10 : &BBCj : : &LSB_CAL;
+    chan_def = &S : 2250.99 MHz : U : 2 MHz : &CH11 : &BBCk : : &USB_CAL;
+    chan_def = &S : 2305.99 MHz : U : 2 MHz : &CH12 : &BBCl : : &LSB_CAL;
+    chan_def = &S : 2340.99 MHz : U : 2 MHz : &CH13 : &BBCm : : &USB_CAL;
+    chan_def = &S : 2345.99 MHz : U : 2 MHz : &CH14 : &BBCn : : &LSB_CAL;
     sample_rate = 4 Ms/sec;
   enddef;
 *----------------------------------------------------------------------------------------------------------------------

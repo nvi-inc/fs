@@ -515,11 +515,18 @@ struct lowl *make_lowl(int statement,void *item)
   return new;
 }
 
-struct chan_def  *make_chan_def(char *band_id, struct dvalue *sky_freq,
+struct chan_def  *make_chan_def(int ver, char *band_id, struct dvalue *sky_freq,
 				char *net_sb, struct dvalue *bw,
-				char *chan_id, char *bbc_id, char *pcal_id,
-				struct llist *states)
+				char *chan_id, char *bbc_id, char *chan_name, 
+				char *pcal_id, struct llist *states)
 {
+  if(ver < 2 && !vex_version.lessthan2) {
+    yyerror("VEX1 chan_def present");
+  } else if(ver > 1 && vex_version.lessthan2) {
+    yyerror("VEX2 chan_def present");
+    exit(1);
+  }
+
   NEWSTRUCT(new,chan_def);
 
   new->band_id=band_id;
@@ -528,6 +535,7 @@ struct chan_def  *make_chan_def(char *band_id, struct dvalue *sky_freq,
   new->bw=bw;
   new->chan_id=chan_id;
   new->bbc_id=bbc_id;
+  new->chan_name=chan_name;
   new->pcal_id=pcal_id;
   new->states=states;
 
@@ -1512,6 +1520,11 @@ get_chan_def_field(Chan_def *chan_def,int n,int *link, int *name,
   *units=NULL;
   *value=NULL;
 
+
+  if(vex_version.lessthan2 && n>= 7) {
+    n++;
+  }
+
   switch(n) {
   case 1:
     *value=chan_def->band_id;
@@ -1539,13 +1552,16 @@ get_chan_def_field(Chan_def *chan_def,int n,int *link, int *name,
     *link=1;
     break;
   case 7:
+    *value=chan_def->chan_name;
+    break;
+  case 8:
     *value=chan_def->pcal_id;
     *link=1;
     break;
   default:
     if(n < 1 )
       return -1;
-    ierr=get_dvalue_list_field(chan_def->states,n-7,link,name,value,units);
+    ierr=get_dvalue_list_field(chan_def->states,n-8,link,name,value,units);
     if(ierr==-1)
       return -1;
     else if (ierr!=0) {

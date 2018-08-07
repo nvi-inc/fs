@@ -81,6 +81,7 @@ struct chan_def {
   struct dvalue *bw;
   char *chan_id;
   char *bbc_id;
+  char *chan_name;
   char *pcal_id;
   struct llist *states;
 };
@@ -537,10 +538,10 @@ struct def       *make_def(char *name, struct llist *refs);
 struct block     *make_block(int block,struct llist *items);
 struct vex *make_vex(struct llist *version, struct llist *blocks);
 struct lowl 	 *make_lowl(int statement,void *items);
-struct chan_def  *make_chan_def(char *band_id, struct dvalue *sky_freq,
+struct chan_def  *make_chan_def(int ver, char *band_id, struct dvalue *sky_freq,
 				char *net_sb, struct dvalue *bw,
 				char *chan_id, char *bbc_id, char *pcal_id,
-				struct llist *states);
+				char *chan_name, struct llist *states);
 struct dvalue *make_dvalue(char *value, char *units);
 struct external *make_external(char *file, int primitive, char *name);
 struct switching_cycle *make_switching_cycle(char *origin,
