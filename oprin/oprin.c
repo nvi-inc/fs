@@ -11,6 +11,7 @@
  * $Log$
  */
 
+
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -47,14 +48,14 @@ extern struct fscom *shm_addr;
 /* External FS functions, perhaps these should eventually go into a '.h'? */
 extern void setup_ids(void);
 extern void sig_ignore(void);
-extern void cls_snd(long *class,
-		    char *buffer,
-		    int length,
-		    int parm3,
-		    int parm4);
+extern void cls_snd(long *class, char *buffer, int length, int parm3,
+                    int parm4);
 extern void skd_run(char name[5], char w, long ip[5]);
 
-static long ipr[5] = { 0, 0, 0, 0, 0};
+unsigned rte_sleep(unsigned);
+int nsem_test(char name[5]);
+
+static long ipr[5] = {0, 0, 0, 0, 0};
 
 /* Our prompt at the beginning of a line. */
 static char prompt[] = ">";
@@ -64,17 +65,33 @@ static char prompt[] = ">";
       of input line to "logout" ie. quit */
 static char termination_command[] = "end_oprin";
 
-
-/* Set by command line flag. Determines if oprin is started with the field system or 
- * later.
- * 
+/* Set by command line flag. Determines if oprin is started with the field
+ * system or later.
+ *
  * Always == 0 when FS build with server/client
  */
 int fs_internal = 0;
 
-
 /* sent to boss */
-void run_snap(char *cmd) {
+void run_snap(const char *arg0, const char *arg) {
+	char *cmd = strdup(arg0);
+
+	if (!cmd) {
+		perror("oprin");
+		exit(EXIT_FAILURE);
+	}
+
+	if (arg) {
+		size_t len = strlen(cmd) + strlen(arg) + 1 + 1;
+		cmd        = realloc(cmd, len);
+		if (!cmd) {
+			perror("oprin");
+			exit(EXIT_FAILURE);
+		}
+		strcat(cmd, "=");
+		strcat(cmd, arg);
+	}
+
 	static int kfirst = 1;
 	while (kfirst && shm_addr->iclopr == -1)
 		rte_sleep(2);
@@ -87,19 +104,25 @@ void run_snap(char *cmd) {
 	int len = strlen(cmd);
 	cls_snd(&(shm_addr->iclopr), cmd, len, 0, 0);
 	skd_run("boss ", 'n', ipr);
+	free(cmd);
 	return;
 }
 
 /* Oprin commands */
 
-void client_command(const char *cmd) {
+/* client_cmd passes commands to fsclient over a pipe.
+ * If not called with arg0 == "client", client_cmd 
+ * passs arg0 on to fsclient with "$arg0=$cmd" syntax
+ */
+void client_cmd(const char *arg0, const char *cmd) {
 	static FILE *f = NULL;
 
 	if (!f) {
 		char *fdstr = getenv("FS_CLIENT_PIPE_FD");
 
 		if (!fdstr || !*fdstr) {
-			fprintf(stderr, "oprin: connected to fsclient");
+			fprintf(stderr,
+			        "ERROR: client command not available\n");
 			return;
 		}
 		f = fdopen(atoi(fdstr), "w");
@@ -109,11 +132,16 @@ void client_command(const char *cmd) {
 		}
 	}
 
+	if (strcmp(arg0, "client") != 0) {
+		fprintf(f, "%s=", arg0);
+	}
+
 	fprintf(f, "%s\n", cmd);
 	fflush(f);
 }
 
-void end_oprin(const char *arg) {
+void end_oprin(const char *arg0 __attribute__((unused)),
+               const char *arg __attribute__((unused))) {
 	if (fs_internal) {
 		fprintf(stderr,
 		        "The '%s' command is only available from a stand-alone "
@@ -124,55 +152,22 @@ void end_oprin(const char *arg) {
 	exit(EXIT_SUCCESS);
 }
 
-void help_command(const char *arg) {
-	size_t len    = strlen(arg) + 5 + 1;
-	char *command = malloc(len);
-
-	if (!command) {
-		perror("help command");
-		exit(1);
-	}
-	command[0] = '\0';
-
-	strcat(command, "help=");
-	strcat(command, arg);
-
+/* If running as part of fsclient, treat as a client command
+ * otherwise treat as a SNAP command
+ */
+void client_or_snap_cmd(const char *arg0, const char *arg) {
 	if (getenv("FS_CLIENT_PIPE_FD")) {
-		client_command(command);
+		client_cmd(arg0, arg);
 	} else {
-		run_snap(command);
-	}
-	free(command);
-}
-
-void terminate(const char *arg) {
-	/* without the display server, run this command as usual */
-#ifdef FS_NO_DISPLAY_SERVER
-	run_snap("terminate");
-#endif
-
-	if (!arg || !arg[0]) {
-		fprintf(stderr, "You are running FS client. Use "
-		                "\"terminate=fs\" or \"terminate=client\"\n");
-		return;
-	}
-
-	if (strcmp(arg, "client") == 0) {
-		client_command("exit");
-	}
-
-	if (strcmp(arg, "fs") == 0) {
-		run_snap("terminate");
+		run_snap(arg0, arg);
 	}
 }
 
 /* contents of cmd after first '=' are handed to the function in arg */
-
 static const struct cmd local_commands[] = {
     {"end_oprin", end_oprin},
-    {"client", client_command},
-    {"help", help_command},
-    /*    {"terminate", terminate}, */
+    {"client", client_cmd},
+    {"help", client_or_snap_cmd},
     {NULL, NULL},
 };
 
@@ -189,13 +184,12 @@ int try_local_command(const char *s) {
 		*arg++ = '\0';
 
 	int ret = 0;
-	unsigned int i;
 
 	const struct cmd *lcmd = local_commands;
 
 	for (lcmd = local_commands; lcmd->name; lcmd++) {
 		if (strcmp(lcmd->name, cmd) == 0) {
-			lcmd->cmd(arg);
+			lcmd->cmd(cmd, arg);
 			ret = 1;
 			break;
 		}
@@ -217,9 +211,10 @@ main(int argc, char **argv)
   setup_ids();
   sig_ignore();
 
-#ifdef FS_NO_DISPLAY_SERVER
   fs_internal = argc == 2 && 0 == strcmp("-fs_internal", argv[1]);
-#endif
+  if (getenv("FS_DISPLAY_SERVER") != NULL) {
+      fs_internal = 0;
+  }
 
   if(nsem_test("fs   ") != 1 && !fs_internal) {
     fprintf(stderr, "FS not running.\n");
@@ -265,16 +260,16 @@ main(int argc, char **argv)
     if (input == NULL) {
       /* EOF-warning at interactive terminals only. */
       if (isatty(STDERR_FILENO)) {
-	if(!fs_internal) {
-	  fprintf(stderr, "Use '%s' to stop this instance of oprin.\n",
-		 termination_command);
-	}
-	fprintf(stderr, "Use 'terminate' to stop the field system.\n");
+          if(!fs_internal) {
+              fprintf(stderr, "Use '%s' to stop this instance of oprin.\n",
+                      termination_command);
+          }
+          fprintf(stderr, "Use 'terminate' to stop the field system.\n");
       }
       continue;  /* no further actions (ie. 'free()') required */
     }
-    
-    
+
+
     /* Now we have got something that's not EOF,
        perhaps an empty line or a real command. */
 

@@ -40,6 +40,9 @@ void display_it();
 #define READ_END 0
 #define WRITE_END 1
 
+#define FS_DISPLAY_PUBADDR "ipc:///run/fsserver/windows/fs/pub"
+#define FS_DISPLAY_REPADDR "ipc:///run/fsserver/windows/fs/rep"
+
 int read_ssub() {
   int pipefd[2];
   if (pipe(pipefd) < 0) {
@@ -113,11 +116,10 @@ main()
   size_t n;
   char *buffer = NULL;
 
-#ifdef FS_NO_DISPLAY_SERVER
-  fd = read_skd();
-#else
-  fd = read_ssub();
-#endif
+  if(getenv("FS_DISPLAY_SERVER") != NULL)
+    fd = read_ssub();
+  else
+    fd = read_skd();
 
   FILE* pipe = fdopen(fd, "r");
 
