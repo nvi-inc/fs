@@ -10,7 +10,8 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char *mode_key[ ]={"astro","geo","wastro","test","lba","astro2","astro3"};
+static char *mode_key[ ]={"astro","geo","wastro","test","lba","astro2",
+			  "astro3", "geo2"};
 static char *pfb_key[ ]={"flex","full","full_auto", "spol"};
 static char *test_key[ ]={"0","1","bin","tvg"};
 
@@ -43,6 +44,8 @@ char *ptr;
 	    else if(NULL != index("ef",shm_addr->dbbcddcvl[0]) &&
 		    3!=lcl->mode && 6!=lcl->mode)
 	      ierr=-230;
+	    else if(7==lcl->mode && shm_addr->dbbcddcv < 106)
+	      ierr=-240;
 	} else if(DBBC_PFB == shm_addr->equip.rack_type ||
 		  DBBC_PFB_FILA10G == shm_addr->equip.rack_type) {
 	  ierr=arg_key(ptr,pfb_key,NPFB_KEY,&lcl->mode,0,FALSE);

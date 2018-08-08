@@ -1929,7 +1929,7 @@ DF -102
 No default for test parameter if mode=test.
 ""
 DF -201
-Mode must be one of (DDC): astro, geo, wastro, test, lba, astro2, astro3, (PFB): flex, full, full_auto, spol.
+Mode must be one of (DDC): astro, geo, wastro, test, lba, astro2, astro3, geo2, (PFB): flex, full, full_auto, spol.
 ""
 DF -202
 Test must be one of:  0, 1, bin, tvg.
@@ -1942,6 +1942,9 @@ Mode astro3 cannot be used with non-lettered (NOT e/f) DDC versions.
 ""
 DF -231
 Lettered DDC versions (e/f) only support modes astro3 and test modes.
+""
+DF -241
+Mode geo2 not supported before DBBC version 106.
 ""
 DF -301
 astro2 mode not supppored for DBBC DDC version less than 104
