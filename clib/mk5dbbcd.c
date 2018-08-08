@@ -166,6 +166,14 @@ int itpis[MAX_DBBC_BBC*2];
 	  itpis[vc+MAX_DBBC_BBC]=1; /* usb */
       }
     }
+  } else if(shm_addr->dbbcform.mode == 7 ) { /*geo2 */
+    for (i=0;i<32;i++) {
+      if(shm_addr->mk5b_mode.mask.mask & (1<<i)) {
+	vc=i/2;
+	if(-1 < vc && vc <16)
+	  itpis[vc+MAX_DBBC_BBC]=1;  /* usb */
+      }
+    }
   }
 }
 
