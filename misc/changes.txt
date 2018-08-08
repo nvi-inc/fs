@@ -12213,7 +12213,10 @@ Version 9.11.20.rc3 180501
 
 180618 WEH fmset/fmset.c
            clear any class records left from an untimely abort, while
-             ...cn program was running
+           a  ...cn program was running
+
+180719 WEH clib/cshm_init.c
+           fix error terminating release string variable
 
 180706 DEH fsserver
            initial version of fsserver
@@ -12248,4 +12251,11 @@ Version 9.11.20.rc3 180501
            Makefile 
            use FS_DISPLAY_SERVER env var
 
-1806xx Version 9.11.20*
+180808 WEH help/form.d__
+           clib/mk5dbbcd.c
+           clib/dbbcform_util.c
+           control/fserr.ctl
+           add geo2 mode
+
+
+180808 Version 9.11.20-rc9

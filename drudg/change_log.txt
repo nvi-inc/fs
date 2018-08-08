@@ -1,11 +1,14 @@
 This file contains a summary of changes made and why.
-2018Jul20 New subroutine write_drudge_release_line for use by procintr.f and snapintf.f. Removed this functionality from both.
-          Put all version information in common file  drver_com.ftni. Added this include file to fdrudg.f.
-          Introduced  new char*32  string crel_FS which contains release info. 
-          Modified get_version to get crel_fs (which is specified at compile time).  
-          New function crelease.c gets RELEASE string at compile time. 
-          fdrudg.f and write_drudge_release_line.f will include crel_fs if it is non-blank.  
-          Makefile was modified to correctly get the RELEASE      
+2018Aug089
+  Introduced new 'geo2' mode in proc_disk_tracks.f 
+2018Jul20 
+  New subroutine write_drudge_release_line for use by procintr.f and snapintf.f. Removed this functionality from both.
+  Put all version information in common file  drver_com.ftni. Added this include file to fdrudg.f.
+  Introduced  new char*32  string crel_FS which contains release info. 
+  Modified get_version to get crel_fs (which is specified at compile time).  
+  New function crelease.c gets RELEASE string at compile time. 
+  fdrudg.f and write_drudge_release_line.f will include crel_fs if it is non-blank.  
+  Makefile was modified to correctly get the RELEASE      
 2018Jun19 proc_setup.f: Fixed bug in cont_cal. If Rack is DBBC_DDC and 'cont_cal off' emit cont_cal=off;
 2018Jun17 sread.f: When reading in a VEX file printed an extra blank line when it was done reading in the schedule. 
           This showed up as a blank line between "$SOURCES" and "Experiment name: ",

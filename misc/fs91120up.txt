@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/fs91120up.txt        Version: 8.3  Date: 180530
+File: /usr2/fs/misc/fs91120up.txt        Version: 8.4  Date: 180808
 
 		       FS 9.11.20 Update Notice
 
@@ -125,6 +125,9 @@ The most significant changes in version 9.11.20 were:
 
    (x) Support in 'tsys', 'onoff', and 'fivpt' for user devices that
        can't have a "zero" level measured.
+
+  (xi) Support for DBBC DDC output mode 'geo2' for DDC firmware
+       versions 106 and later.
        
 As always, we are deeply indebted to Jonathan Quick (HartRAO) for his
 many significant contributions that go far beyond what is explicitly
@@ -198,14 +201,14 @@ The installation steps for upgrading from 9.11.19 are listed below.
 
  (7) Make the FS itself:
 
-      cd /usr2/fs
-      make >& /dev/null
+       cd /usr2/fs
+       make >& /dev/null
 
-    and then
+     and then
 
-      make
+       make
     
-    to confirm that everything compiled correctly.
+     to confirm that everything compiled correctly.
 
  (8) This step is for modifying your local programs. That should not
      be necessary for this update, but we do recommend that recompile
@@ -411,7 +414,10 @@ The following is a summary of FS changes since 9.11.19.
 18. New 'release' string for version number.
 19. Optional 'Makefile' environment variable 'FS_TINFO_LIB' for programs
     use 'ncurses.
-20. Display server. ...
+20. Support for DBBC DDC format code 'geo2' for DDC firmware versions 106
+    and later.
+21. Optional support for FS display server.
+
 
 A more detailed discussion of these changes follows.
 
@@ -637,18 +643,22 @@ A more detailed discussion of these changes follows.
     non-empty value to include 'tinfo'.  This variable can be set the
     'prog' user's environment on login so that it is always available.
     Examples of how to do this can be found in the .login' and
-    '.profile' files in /usr2/fs/st.default/prog for the 'tcsh' and
-    'bash; shells, respectively.  This only needs to be used if the
+    '.profile' files in '/usr2/fs/st.default/prog' for the 'tcsh' and
+    'bash' shells, respectively.  This only needs to be used if the
     'ncurses' library does not include the 'tinfo' library in your the
     Linux distribution.  On such systems, a reference to 'stdcscr' in
     a program can be the cause of the problem.  Thanks to Mamoru
     Sekido at Kashima for reporting this issue.
 
-20. Optional support for FS display server. This allows the FS
-    user interface to be detached from the operation components.
+20. Support for DBBC DDC format code 'geo2' for DDC firmware versions
+    106 and later.  This allows use of USB channels from all BBCs,
+    1-16, on VSI1.
+
+21. Optional support for FS display server. This allows the FS user
+    interface to be detached from the operation components.
     Instruction for enabling this feature (and disabling it, if that
     should become necessary) can be found in
-    /usr2/fs/misc/display_server.txt.  This file also includes a
+    '/usr2/fs/misc/display_server.txt'.  This file also includes a
     explanation of how the user interface is different from the
     non-display server.
 
@@ -659,13 +669,14 @@ is in /usr2/fs/misc/changes.txt.
 
 			B. Changes in 'drudg'
 				   
-'drudg' opening message date is 2018May18.
+'drudg' opening message date is 2018Aug07.
 
 The following is a summary of 'drudg' changes since 9.11.19.
 
  1. Ad hoc support for 'sched' stagger start mode.
  2. the 'mk5=bank_set?' query was added to the setup procedure for
     Mark 5 recorders.
+ 3. Support for DBBC DDC format mode 'geo2'.
 
 A more detailed discussion of these changes follows.
 
@@ -694,6 +705,9 @@ A more detailed discussion of these changes follows.
     command is added to the setup procedure only if the selected
     recorded is a Mark 5. As a resultq the station procedures can be
     independent of whether a Mark 5 or FlexBuff recorder is in use.
+
+ 3. Support for DBBC DDC format mode 'geo2'.  This allows use of USB
+    channels from all BBCs, 1-16, on VSI1.
 
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/drudg/change_log.txt.

@@ -13,7 +13,13 @@
 ! function
       integer iwhere_in_string_list
 
-! History
+! History.
+! Now put in changes in reverse order.
+!
+! 2018Aug08 JMG. Support for geo2. Made it the last mode checked.
+! 2017Oct24 JMG. If 'bit_streams' then only care about mask. Everything else is null.
+!
+! Older entries.
 !  2007Jul27 JMGipson.  First working version.
 !  2012Aug29 JMGipson.  Modified to reduce minimum number of tracks.
 !  2012Sep04 JMGipson.  Fixed bug in checking whether GEO or VLBA mode. 
@@ -37,7 +43,7 @@
 ! 2016Jan18 JMG. Added extra parameter for fila10g with DBBC
 ! 2016Apr07 JMG. Fixed format in writing out fila10g. Was writing, ",=" instead of "=," 
 ! 2016Sep11 JMG. Increased dim lsked_csb: max_csb-->2*max_csb.  Schedule fr036 HH caused problems
-! 2017Oct24 JMG. If 'bit_streams' then only care about mask. Everything else is null.
+
 
 ! local
       integer ipass
@@ -70,7 +76,6 @@
       logical kastro3_mode               !True if valid astro3 mode. 
 
 ! Have many possible mappings.
-
       character*4 lvlba_csb(max_csb),    lgeo_csb(max_csb)
 ! Below added 2012Sep07.  
       character*4  lwastro_csb(max_csb), llba_csb(max_csb)
@@ -86,7 +91,9 @@
 ! Below added 2015Jun17
       character*4 lcdas_vlba4(max_csb)
       character*4 lcdas_vlba_l(max_csb)
-      character*4 lcdas_vlba_u(max_csb)       
+      character*4 lcdas_vlba_u(max_csb)     
+! Below added 2018Aug08
+      character*4 lgeo2_csb(max_csb)  
 
 ! The order determines what bit is set.
 ! NOTE: This is the same astro mode.
@@ -102,6 +109,12 @@
      >   "05US","05UM","06US","06UM","07US","07UM","08US","08UM",
      >   "01LS","01LM","08LS","08LM","09US","09UM","10US","10UM",
      >   "11US","11UM","12US","12UM","13US","13UM","14US","14UM"/
+
+      data lgeo2_csb/
+     >   "01US","01UM","02US","02UM","03US","03UM","04US","04UM",
+     >   "05US","05UM","06US","06UM","07US","07UM","08US","08UM",
+     >   "09US","09UM","10US","10UM","11US","11UM","12US","12UM",
+     >   "13US","13UM","14US","14UM","15US","15UM","16US","16UM"/
 
 ! Note: 1st half of WASTRO is the same as ASTRO. This is for second 
       data lwastro_csb/
@@ -329,6 +342,7 @@
      
 100   continue
 ! Pre-check to see if a valid astro3 mode, but only for DBBC/Unknown racks
+      
       if(.not.(kdbbc_rack .or. kcomment_only)) goto 110
       lbit_mask_mode="astro3"
       write(*,'(1x,a,$)') lbit_mask_mode
@@ -359,8 +373,7 @@
       write(*,'(1x,a,$)') lbit_mask_mode
       call check_csb_list(lgeo_csb, max_csb,
      >                    lsked_csb,num_tracks,imask,ierr)
-      if(ierr .eq. 0) goto 300 
-           
+      if(ierr .eq. 0) goto 300           
       
 200   continue 
       lbit_mask_mode="astro"
@@ -380,6 +393,15 @@
          lbit_mask_mode="astro3"
          goto 300
       endif 
+
+! Check to see if a valid geo2 mode. 
+      lbit_mask_mode="geo2" 
+      write(*,'(1x,a,$)') lbit_mask_mode
+      call check_csb_list(lgeo2_csb, max_csb,
+     >                    lsked_csb,num_tracks,imask,ierr)
+      if(ierr .eq. 0) goto 300 
+
+
       if(.not.kcomment_only) goto 900         
   
 !
@@ -468,6 +490,7 @@
       return
 
 900   continue
+      write(*,*) " " 
       write(*,*) 
      > "*********************************************************"
       write(*,*)
