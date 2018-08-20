@@ -37,7 +37,8 @@
 
 #include "msg.h"
 
-const int heartbeat_millis = 200;
+const int heartbeat_millis = 500;
+const int shutdown_heartbeat_millis = 200;
 
 uint64_t seq          = 0; // Next message sequence ID to send
 size_t msg_buffer_len = 1024;
@@ -167,7 +168,7 @@ static const char *usage_long_str =
 "create to a reliable pubsub stream\n"
 "  pubaddr, syncaddr    nanomsg addresses of publish and resync sockets\n"
 "  -b, --buffer         number of previous messages (usually lines) to keep\n"
-"  -w, --wait           number of seconds to wait for after stream closes (default 0) \n";
+"  -w, --wait           number of seconds to wait for after stream closes (default 0.5) \n";
 
 
 static struct option long_options[] = {
@@ -181,7 +182,7 @@ static struct option long_options[] = {
 int main(int argc, char *argv[]) {
 	char *pubaddr      = "tcp://*:4444";
 	char *repaddr      = "tcp://*:4445";
-	float wait_seconds = 0.0;
+	float wait_seconds = 0.5;
 
 	int opt;
 	int option_index;
@@ -315,23 +316,17 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	// Send end of session to subscribers
 	msg_t m = {END_OF_SESSION, seq, 0, NULL};
 
 	for (;;) {
 		if (send_msg(pub, &m) < 0)
 			fatal("sending end of transmission message", errno);
-
-		// Really we should check if wait_seconds is less than heartbeat_millis
-		// but we don't need to be too accurate here.
-		if (wait_seconds > 0) {
-			tv.tv_sec  = heartbeat_millis / 1000;
-			tv.tv_usec = (heartbeat_millis % 1000) * 1000;
-			select(0, NULL, NULL, NULL, &tv);
-			wait_seconds -= heartbeat_millis / 1000.0;
-			continue;
-		}
-		break;
+		if (wait_seconds <= 0.0)
+			break;
+		tv.tv_sec  = shutdown_heartbeat_millis / 1000;
+		tv.tv_usec = (shutdown_heartbeat_millis % 1000) * 1000;
+		select(0, NULL, NULL, NULL, &tv);
+		wait_seconds -= shutdown_heartbeat_millis / 1000.0;
 	}
 
 	nn_close(pub);
