@@ -99,28 +99,47 @@ parse:
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
       out_recs++;
 
-      if(lcl.source.state.known && lcl.source.source != 3) {
-	if(15 == itask && shm_addr->m5b_crate != 0) {
-	  mk5c_clock_set_2_m5(outbuf,&lcl);
-	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-	  out_recs++;
-	}
-      } else { /* VDIF */
-	if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
-	   shm_addr->equip.drive_type[shm_addr->select] == FLEXBUFF) {
-	  strcpy(outbuf,"mtu = 8192 ; \n");
+      if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
+	 shm_addr->equip.drive_type[shm_addr->select] == FLEXBUFF) {	
+	if(lcl.source.state.known && lcl.source.source == 3) { /* VDIF */
+	  strcpy(outbuf,"mtu = 9000 ; \n");
 	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
 	  out_recs++;
 
-	  strcpy(outbuf,"net_protocol = udps : 32000000 : 256000000 : 4 ;\n");
+	  /* check if this should be "pudp" for RDBE, when supported */
+
+	  strcpy(outbuf,"net_protocol = udpsnor : 32000000 : 256000000 : 4 ;\n");
+	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+	  out_recs++;
+
+	} else if(lcl.source.state.known && lcl.source.source == 4) { /* mk5b */
+	  strcpy(outbuf,"mtu = 6000 ; \n");
+	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+	  out_recs++;
+
+	  strcpy(outbuf,"net_protocol = udpsnor : 32000000 : 256000000 : 4 ;\n");
 	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
 	  out_recs++;
 	}
+      }
 
-	if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
-	   (shm_addr->equip.drive_type[shm_addr->select] == MK5C ||
-	    shm_addr->equip.drive_type[shm_addr->select] == MK5C_BS)) {
+      if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
+	 (shm_addr->equip.drive_type[shm_addr->select] == MK5C ||
+	  shm_addr->equip.drive_type[shm_addr->select] == MK5C_BS)) {
+
+	/* make sure there are no left over net_protocols that might cause a
+	   problem if memory buffering is enabled on the 5C */
+
+        strcpy(outbuf,"net_protocol = : 128k : 2M : 4;\n");
+        cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+        out_recs++;
+
+	if(lcl.source.state.known && lcl.source.source == 3) { /* VDIF */
 	  strcpy(outbuf,"packet = 36 : 0 : 8032 : 0 : 0 ;\n");
+	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+	  out_recs++;
+	} else if(lcl.source.state.known && lcl.source.source == 4) { /* mk5b */
+	  strcpy(outbuf,"packet = 36 : 0 : 5008 : 0 : 0 ;\n");
 	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
 	  out_recs++;
 	}
