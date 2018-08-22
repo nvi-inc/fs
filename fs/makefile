@@ -18,4 +18,6 @@ all: ../bin/fs
 
 
 .PHONEY: fs
-fs: ../bin/fs
+fs:
+	rm -f ../bin/fs
+	make
