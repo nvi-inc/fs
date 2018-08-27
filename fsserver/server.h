@@ -1,9 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define FS_SERVER_BASE_PATH "/run/fsserver"
-
-
 typedef struct server server_t;
 
 int server_new(server_t**);
