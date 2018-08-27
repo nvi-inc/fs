@@ -42,6 +42,9 @@
 #define STPGM_CTL "/usr2/control/stpgm.ctl"
 #define CLPGM_CTL "/usr2/control/clpgm.ctl"
 
+#define FS_SERVER_SOCKET_PATH "/var/run/fsserver"
+#define FS_SERVER_URL_BASE "ipc:///var/run/fsserver"
+
 #define ADDR_ST   "addr"              
 #define TEST      "test"
 #define REBOOT    "reboot"

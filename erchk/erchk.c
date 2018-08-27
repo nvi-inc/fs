@@ -40,9 +40,6 @@ void display_it();
 #define READ_END 0
 #define WRITE_END 1
 
-#define FS_DISPLAY_PUBADDR "ipc:///run/fsserver/windows/fs/pub"
-#define FS_DISPLAY_REPADDR "ipc:///run/fsserver/windows/fs/rep"
-
 int read_ssub() {
   int pipefd[2];
   if (pipe(pipefd) < 0) {
@@ -63,7 +60,7 @@ int read_ssub() {
 
   close(pipefd[READ_END]);
   dup2(pipefd[WRITE_END], STDOUT_FILENO);
-  execlp("ssub", "ssub", "-w", FS_DISPLAY_PUBADDR, FS_DISPLAY_REPADDR, NULL);
+  execlp("ssub", "ssub", "-w", FS_SERVER_URL_BASE "/windows/fs/pub", FS_SERVER_URL_BASE "/windows/fs/rep", NULL);
   perror("erchk: error starting ssub");
   exit(EXIT_FAILURE);
 

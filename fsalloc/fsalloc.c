@@ -12,9 +12,9 @@
 #include "../include/shm_addr.h"
 
 void setupdirs(void) {
-    system("mkdir -p /run/fsserver");
-    system("chgrp rtx /run/fsserver");
-    system("chmod 770 /run/fsserver");
+    system("mkdir -p " FS_SERVER_SOCKET_PATH);
+    system("chgrp rtx " FS_SERVER_SOCKET_PATH);
+    system("chmod 770 " FS_SERVER_SOCKET_PATH);
 }
 
 main()
