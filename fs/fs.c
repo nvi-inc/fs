@@ -57,22 +57,22 @@ static long ip[]={0,0,0,0,0};
 
 
 void start_server() {
-    if (system("fsserver status > /dev/null") > 0)
-        system("fsserver start > /dev/null");
-    if (system("fsserver fs status > /dev/null") > 0)
-        system("fsserver fs start > /dev/null");
+    if (system("fsserver status    > /dev/null 2>/dev/null ") > 0)
+        system("fsserver start     > /dev/null 2>/dev/null");
+    if (system("fsserver fs status > /dev/null 2>/dev/null") > 0)
+        system("fsserver fs start  > /dev/null 2>/dev/null");
 }
 
-void exec_client(int argc, char *argv[]) {
-    char **argv_new = calloc(argc+2, sizeof(char*));
-    int i;
-    for (i = 0; i < argc; i++) {
-    	argv_new[i] = argv[i];
-    }
-    argv_new[i++] = "-s";
-    argv_new[i++] = NULL;
-    
-    execvp("fsclient", argv_new);
+void exec_client(int no_x) {
+    char **argv = calloc(5, sizeof(char*));
+    int i = 0;
+    argv[i++] = "fsclient";
+    argv[i++] = "-s";
+    argv[i++] = "-f";
+    if (no_x) 
+        argv[i++] = "-n";
+    argv[i++] = NULL;
+    execvp("fsclient", argv);
     perror("error starting fsclient");
     exit(EXIT_FAILURE);
 
@@ -175,12 +175,12 @@ main(int argc_in,char *argv_in[])
 
 	if (!arg_no_server) {
 		if (nsem_test("fs   ")) {
-			printf("fs already running, reconnect with `fsclient`\n");
+			fprintf(stderr, "fs already running, reconnect with `fsclient`\n");
 			exit(EXIT_FAILURE);
 		}
 		start_server();
         if (!arg_background)
-            exec_client(argc_in, argv_in);
+            exec_client(arg_no_x11);
         exit(EXIT_SUCCESS);
 	}
 
