@@ -3,38 +3,48 @@
 import os
 import sys
 import re
+from subprocess import call
 
-WHITELIST = ["autoftp",  "monit\d"]
+WHITELIST = ["autoftp", r"monit\d", "monan"]
 
-RED   = '\033[31m'
-RESET = '\033[0m'
 
 def fullmatch(regex, string, flags=0):
     """Emulate python-3.4 re.fullmatch()."""
     return re.match("(?:" + regex + r")\Z", string, flags=flags)
 
+
 def in_whitelist(s):
     return any(fullmatch(e, s) for e in WHITELIST)
+
 
 def pairs(l):
     return zip(l, l[1:])
 
+
 def e_argument_in_whitelist(args):
     return any(flag == '-e' and in_whitelist(arg) for flag, arg in pairs(args))
 
+
 def strip_dir_from_path(dir):
-    os.environ['PATH'] = ":".join(s for s in os.environ['PATH'].split(':') if s != dir)
+    os.environ['PATH'] = ":".join(
+        s for s in os.environ['PATH'].split(':') if s != dir)
+
 
 def main():
     if e_argument_in_whitelist(sys.argv):
-        args = "fsserver window new".split() + sys.argv[1:]
+        args = "fsserver window open".split() + sys.argv[1:]
         try:
+            devnull = os.open(os.devnull, os.O_WRONLY)
+            os.dup2(devnull, 1)
             os.execvp(args[0], args)
         except OSError:
-            print ("error making new window: %s not found" % args[0])
+            print("error making new window: %s not found" % args[0])
             sys.exit(1)
 
-    print (RED + "WARNING: " + RESET + "starting an xterm within FS in server mode not recommended")
+    call([
+        "lgerr", "lg", "-1",
+        "starting an xterm with the fs while using fsserver not recommended"
+    ])
 
     # strip out the shim directory from the path so execp will find the real xterm
     shim_dir = os.path.dirname(os.path.realpath(__file__))
@@ -44,8 +54,9 @@ def main():
         sys.argv[0] = 'xterm'
         os.execvpe(sys.argv[0], sys.argv, os.environ)
     except OSError:
-        print ("error starting %s: not found" % sys.argv[0])
+        print("error starting %s: not found" % sys.argv[0])
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
