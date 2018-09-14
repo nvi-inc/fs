@@ -25,32 +25,48 @@
 
 #include <jansson.h>
 
+#include "../include/params.h"
+#include "list.h"
+#include "prompt.h"
 #include "server.h"
 #include "window.h"
 
-char const *fs_command[] = {"fs", "-i", NULL};
+enum { JSONRCP_STATUS_PARSE_ERROR      = -32700,
+       JSONRCP_STATUS_INVALID_REQUEST  = -32600,
+       JSONRCP_STATUS_METHOD_NOT_FOUND = -32601,
+       JSONRCP_STATUS_INVALID_PARAMS   = -32702,
+       JSONRCP_STATUS_INTERNAL_ERROR   = -32703,
+};
 
-int msgprintf(nng_msg *msg, char *format, ...) {
-	va_list args;
-	char *buf;
-	size_t sz;
-	va_start(args, format);
-	sz = vasprintf(&buf, format, args);
-	va_end(args);
-	if (sz < 0)
-		return NNG_ENOMEM;
-	if (nng_msg_append(msg, buf, sz) != 0)
-		return NNG_ENOMEM;
-	free(buf);
-	return 0;
-}
+struct server {
+	nng_mtx *mtx;
+	bool running;
+	int finished_pipe[2];
+
+	nng_aio *aio;
+
+	char *server_cmd_url;
+	char *clients_cmd_url;
+	nng_socket server_cmd_sock;
+	nng_socket clients_cmd_sock;
+
+	unsigned next_window_id;
+	list_t *windows;
+	window_t *fs;
+
+	unsigned next_prompt_id;
+	list_t *prompts;
+};
+
+char const *fs_command[] = {"fs", "-i", NULL};
 
 int json_object_sprintf(json_t *obj, const char *key, char *const format, ...) {
 	va_list args;
 	char *buf;
-	size_t sz;
 	va_start(args, format);
-	sz = vasprintf(&buf, format, args);
+	int sz = vasprintf(&buf, format, args);
+	if (sz < 0)
+		return NNG_ENOMEM;
 	va_end(args);
 	json_t *jstr = json_string(buf);
 	json_object_set_new(obj, key, jstr);
@@ -64,33 +80,26 @@ static int mkdir_p(char *const path) {
 	char _path[PATH_MAX];
 	char *p;
 
-	errno = 0;
-
 	if (len > sizeof(_path) - 1) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
+
 	strcpy(_path, path);
 
-	/* Iterate the string */
 	for (p = _path + 1; *p; p++) {
 		if (*p == '/') {
-			/* Temporarily truncate */
 			*p = '\0';
-
-			if (mkdir(_path, S_IRWXU) != 0) {
+			if (mkdir(_path, S_IRWXU | S_IRWXG | S_IRWXO) != 0)
 				if (errno != EEXIST)
 					return -1;
-			}
-
 			*p = '/';
 		}
 	}
 
-	if (mkdir(_path, S_IRWXU) != 0) {
+	if (mkdir(_path, S_IRWXU | S_IRWXG | S_IRWXO) != 0)
 		if (errno != EEXIST)
 			return -1;
-	}
 
 	return 0;
 }
@@ -98,37 +107,15 @@ static int mkdir_p(char *const path) {
 static char *addr_by_id(unsigned id) {
 	char *s;
 
-	/* TODO: handle this better */
-	if (asprintf(&s, FS_SERVER_BASE_PATH "/windows/%d", id) < 0)
+#ifdef FS_SERVER_SOCKET_PATH
+	if (asprintf(&s, FS_SERVER_SOCKET_PATH "/windows/%d", id) < 0)
 		return NULL;
 	mkdir_p(s);
 	free(s);
+#endif
 
-	if (asprintf(&s, "ipc://" FS_SERVER_BASE_PATH "/windows/%d", id) < 0)
+	if (asprintf(&s, FS_SERVER_URL_BASE "/windows/%d", id) < 0)
 		return NULL;
-	return s;
-}
-
-static char *strjoin(int argc, const char *const argv[]) {
-	if (argc <= 0) {
-		return NULL;
-	}
-
-	size_t len = 0;
-	for (int i = 0; i < argc; i++)
-		len += strlen(argv[i]) + 1;
-
-	char *s = malloc(len);
-
-	char *to = s;
-	const char *from;
-	for (int i = 0; i < argc; i++) {
-		from = argv[i];
-		while (*from)
-			*to++ = *from++;
-		*to++ = ' ';
-	}
-	*--to = '\0';
 	return s;
 }
 
@@ -254,51 +241,65 @@ cleanup:
 }
 
 /*
- * Make a window command for the clients
+ * prompt_open_msg creates an nng_msg containing the json rpc client call
+ * for opening prompt p.
  */
-static nng_msg *window_cmd_msg(window_t *w) {
-	const char windowstr[] = "window ";
+
+nng_msg *json_dumpmsg(json_t *j) {
+    size_t size = json_dumpb(j, NULL, 0, 0);
+    if (size == 0)
+        return NULL;
 	nng_msg *msg;
-	int rv;
-	rv = nng_msg_alloc(&msg, 0);
-	if (rv < 0)
-		return NULL;
-
-	nng_msg_append(msg, windowstr, strlen(windowstr));
-	nng_msg_append(msg, w->addr, strlen(w->addr));
-	nng_msg_append(msg, "/pub", 4);
-	nng_msg_append(msg, " ", 1);
-	nng_msg_append(msg, w->addr, strlen(w->addr));
-	nng_msg_append(msg, "/rep", 4);
-
-	if (w->window_flags) {
-		char **ptr = w->window_flags;
-		while (*ptr) {
-			nng_msg_append(msg, " ", 1);
-			nng_msg_append(msg, *ptr, strlen(*ptr));
-			ptr++;
-		}
+	int rv = nng_msg_alloc(&msg, size);
+	if (rv != 0) {
+		fprintf(stderr, "unable to allocate a new message\n");
+		exit(EXIT_FAILURE);
 	}
-
+    json_dumpb(j, nng_msg_body(msg), size, 0);
 	return msg;
 }
 
-struct server {
-	bool running;
-	nng_mtx *mtx;
-	unsigned next_window_id;
-	int finished_pipe[2];
-	char *server_cmd_url;
-	char *clients_cmd_url;
-	nng_socket server_cmd_sock;
-	nng_socket clients_cmd_sock;
-	nng_aio *aio;
-	window_t *fs;
-	window_list_t *windows;
-	bool prompt_open;
-	char *prompt_msg;
-};
+static nng_msg *prompt_open_msg(prompt_t *p) {
+	json_t *j = json_object();
+	json_object_set_new(j, "jsonrpc", json_string("2.0"));
+	json_object_set_new(j, "method", json_string("prompt_open"));
+	json_object_set_new(j, "params", prompt_marshal_json(p));
+    nng_msg *msg = json_dumpmsg(j);
+    json_decref(j);
+    return msg;
+}
 
+/*
+ * prompt_close_msg creates an nng_msg containing the json rpc client call
+ * for closing prompt p.
+ */
+static nng_msg *prompt_close_msg(prompt_t *p) {
+	json_t *j = json_object();
+	json_object_set_new(j, "jsonrpc", json_string("2.0"));
+	json_object_set_new(j, "method", json_string("prompt_close"));
+	json_object_set_new(j, "params", prompt_marshal_json(p));
+    nng_msg *msg = json_dumpmsg(j);
+    json_decref(j);
+    return msg;
+}
+
+/*
+ * window_cmd_msg generates a nng allocated buffer conisting of the client command to open window w.
+ */
+static nng_msg *window_open_msg(window_t *w) {
+	json_t *j = json_object();
+	json_object_set_new(j, "jsonrpc", json_string("2.0"));
+	json_object_set_new(j, "method", json_string("window_open"));
+	json_object_set_new(j, "params", window_marshal_json(w));
+    nng_msg *msg = json_dumpmsg(j);
+    json_decref(j);
+    return msg;
+}
+
+/*
+ * server_finished_fd returns a file descriptor that will be closed
+ * when the server goes into shutdown.
+ */
 int server_finished_fd(server_t *s) {
 	nng_mtx_lock(s->mtx);
 	if (s->finished_pipe[1] == -1 && pipe(s->finished_pipe) < 0) {
@@ -330,23 +331,28 @@ int server_cmd_window_list(server_t *s, json_t *rep_msg, int argc, const char *c
 	}
 
 	nng_mtx_lock(s->mtx);
-	window_list_t *wl = s->windows;
-
-	json_t *windows = window_list_marshal_json(&wl);
+	json_t *windows = json_array();
+	list_t *ptr     = s->windows;
+	while (ptr != NULL) {
+		json_array_append_new(windows, window_marshal_json((window_t *)ptr->data));
+		ptr = ptr->next;
+	}
 	json_object_set_new(rep_msg, "windows", windows);
 	nng_mtx_unlock(s->mtx);
 	return 0;
 }
 
 /*
- * server_cmd_window_new starts a new window with command given in args.
- * arguments are the same as xterms, including "-e" to specify the command.
+ * server_cmd_window_open starts a new window with command given in args. Arguments before "-e" are
+ * passed to the clients unmodified, arguments after "-e" specify the command to start in the
+ * window. This allows xterm arguments can be passed to the clients.
  */
-int server_cmd_window_new(server_t *s, json_t *rep_msg, int argc, const char *const argv[]) {
+int server_cmd_window_open(server_t *s, json_t *rep_msg, int argc, const char *const argv[]) {
 	int rv;
 	window_t *w = NULL;
+
 	if (argc <= 1) {
-		json_object_sprintf(rep_msg, "message", "new window usage here");
+		json_object_sprintf(rep_msg, "message", "usage: window new [args...] -e cmd");
 		return 1;
 	}
 
@@ -364,7 +370,7 @@ int server_cmd_window_new(server_t *s, json_t *rep_msg, int argc, const char *co
 
 	nng_mtx_lock(s->mtx);
 	w->id = s->next_window_id++;
-	window_list_append(&s->windows, w);
+	list_append(&s->windows, w);
 	/* TODO handle EOM here */
 
 	w->addr           = addr_by_id(w->id);
@@ -385,12 +391,10 @@ int server_cmd_window_new(server_t *s, json_t *rep_msg, int argc, const char *co
 		goto error;
 	}
 
-	json_t *window_json = window_marshal_json(w);
-	json_object_set_new(rep_msg, "window", window_json);
-
+	json_object_set_new(rep_msg, "window", window_marshal_json(w));
 	nng_mtx_unlock(s->mtx);
 
-	nng_msg *clients_msg = window_cmd_msg(w);
+	nng_msg *clients_msg = window_open_msg(w);
 	if (clients_msg == NULL)
 		goto error;
 
@@ -428,7 +432,7 @@ int server_cmd_window_kill(server_t *s, json_t *rep_msg, int argc, const char *c
 	}
 
 	nng_mtx_lock(s->mtx);
-	window_t *w = window_list_pop_by_id(&s->windows, id);
+	window_t *w = list_pop(&s->windows, window_by_id, &id);
 	nng_mtx_unlock(s->mtx);
 	if (w == NULL) {
 		json_object_sprintf(rep_msg, "message", "window %li is not running", id);
@@ -443,12 +447,12 @@ int server_cmd_window_kill(server_t *s, json_t *rep_msg, int argc, const char *c
 
 int server_cmd_window(server_t *s, json_t *rep_msg, int argc, const char *const argv[]) {
 	if (argc <= 1) {
-		json_object_sprintf(rep_msg, "message", "window usage here");
+		json_object_sprintf(rep_msg, "message", "window new|list|kill");
 		return 1;
 	}
 
-	if (strcmp(argv[1], "new") == 0) {
-		return server_cmd_window_new(s, rep_msg, argc - 1, argv + 1);
+	if (strcmp(argv[1], "open") == 0) {
+		return server_cmd_window_open(s, rep_msg, argc - 1, argv + 1);
 	}
 
 	if (strcmp(argv[1], "list") == 0) {
@@ -459,41 +463,63 @@ int server_cmd_window(server_t *s, json_t *rep_msg, int argc, const char *const 
 		return server_cmd_window_kill(s, rep_msg, argc - 1, argv + 1);
 	}
 
-	json_object_sprintf(rep_msg, "message", "unknown command \"%s\"", argv[0]);
+	json_object_sprintf(rep_msg, "message", "unknown command \"window %s\"", argv[1]);
+	json_object_set_new(rep_msg, "code", json_integer(JSONRCP_STATUS_METHOD_NOT_FOUND));
 	return 1;
 };
 
+/*
+ * server_cmd_status_commands returns the status as client commands. This can be used to
+ * synchronize a client at startup
+ */
+/*
 int server_cmd_status_commands(server_t *s, json_t *rep_msg, int argc, const char *const argv[]) {
-	if (argc > 1) {
-		json_object_sprintf(rep_msg, "message",
-		                    "unknown argument to status commands \"%s\"", argv[1]);
+        if (argc > 1) {
+                json_object_sprintf(rep_msg, "message",
+                                    "unknown argument to status commands \"%s\"", argv[1]);
+                return 1;
+        }
+
+    list_t *l;
+        // TODO: handle windows?
+        if (s->prompt_open) {
+                json_object_sprintf(rep_msg, "message", "prompt open \"%s\"\n", s->prompt_msg);
+        } else {
+                json_object_sprintf(rep_msg, "message", "");
+        }
+        return 0;
+}
+*/
+
+int server_cmd_status(server_t *s, json_t *rep, int argc, const char *const argv[]) {
+	if (argc > 1 && strcmp("commands", argv[1]) == 0) {
+		// return server_cmd_status_commands(s, rep_msg, argc - 1, argv + 1);
 		return 1;
 	}
-	if (s->prompt_open) {
-		json_object_sprintf(rep_msg, "message", "prompt open \"%s\"\n", s->prompt_msg);
-	} else {
-		json_object_sprintf(rep_msg, "message", "");
-	}
-	return 0;
-}
-
-int server_cmd_status(server_t *s, json_t *rep_msg, int argc, const char *const argv[]) {
-	if (argc > 1 && strcmp("commands", argv[1]) == 0) {
-		return server_cmd_status_commands(s, rep_msg, argc - 1, argv + 1);
-	}
 	nng_mtx_lock(s->mtx);
-	json_t *status = json_object();
-	json_object_set_new(status, "running", json_true());
 
-	json_object_set_new(status, "fs_running", json_boolean(s->fs != NULL && s->fs->pid != 0));
-	int nwindows = window_list_len(&s->windows);
-	json_object_set_new(status, "nwinows", json_integer(nwindows));
+	json_object_set_new(rep, "fs_running", json_boolean(s->fs != NULL && s->fs->pid != 0));
 
-	if (s->prompt_open) {
-		json_object_set_new(rep_msg, "prompt", json_string(s->prompt_msg));
+	json_t *prompts = json_array();
+	prompt_t *prompt;
+	list_t *l = s->prompts;
+	while (l != NULL) {
+		prompt = l->data;
+		json_array_append_new(prompts, prompt_marshal_json(prompt));
+		l = l->next;
 	}
+	json_object_set_new(rep, "prompts", prompts);
 
-	json_object_set_new(rep_msg, "status", status);
+	json_t *windows = json_array();
+	window_t *window;
+	l = s->windows;
+	while (l != NULL) {
+		window = l->data;
+		json_array_append_new(windows, window_marshal_json(window));
+		l = l->next;
+	}
+	json_object_set_new(rep, "windows", windows);
+
 	nng_mtx_unlock(s->mtx);
 	return 0;
 }
@@ -518,8 +544,6 @@ int server_cmd_fs_start(server_t *s, json_t *rep_msg, int argc, const char *cons
 		window_free(s->fs);
 	}
 
-	s->prompt_open = false;
-
 	s->fs = window_new();
 
 	if (s->fs == NULL) {
@@ -527,10 +551,11 @@ int server_cmd_fs_start(server_t *s, json_t *rep_msg, int argc, const char *cons
 		goto error;
 	}
 
-	/* TODO: make these settings configurable */
-	mkdir_p(FS_SERVER_BASE_PATH "/windows/fs");
+#ifdef FS_SERVER_SOCKET_PATH
+	mkdir_p(FS_SERVER_SOCKET_PATH "/windows/fs");
+#endif
 	s->fs->command_args   = strandup(3, fs_command);
-	s->fs->addr           = strdup("ipc://" FS_SERVER_BASE_PATH "/windows/fs");
+	s->fs->addr           = strdup(FS_SERVER_URL_BASE "/windows/fs");
 	s->fs->scrollback_len = 3000;
 
 	int pty = window_start_child(s->fs);
@@ -570,7 +595,7 @@ int server_cmd_fs_status(server_t *s, json_t *rep_msg, int argc, const char *con
 int server_cmd_fs(server_t *s, json_t *rep_msg, int argc, const char *const argv[]) {
 	if (argc <= 1) {
 		/* TODO: usage */
-		json_object_set_new(rep_msg, "message", json_string("usage: fs [start|status]"));
+		json_object_set_new(rep_msg, "message", json_string("usage: fs start|status"));
 		return 1;
 	}
 
@@ -582,97 +607,128 @@ int server_cmd_fs(server_t *s, json_t *rep_msg, int argc, const char *const argv
 	}
 
 	json_object_sprintf(rep_msg, "message", "unknown command \"%s\"", argv[1]);
+	json_object_set_new(rep_msg, "code", json_integer(JSONRCP_STATUS_METHOD_NOT_FOUND));
 	return 1;
 }
 
 int server_cmd_prompt(server_t *s, json_t *rep_msg, int argc, const char *const argv[]) {
 	if (argc <= 1) {
-		json_object_sprintf(rep_msg, "message", "usage: prompt [open msg|close]", argv[0]);
+		json_object_sprintf(rep_msg, "message",
+		                    "usage:\n\tprompt open msg\n\tprompt close]", argv[0]);
 	}
 	int rv;
 
 	if (strcmp(argv[1], "open") == 0) {
+		if (argc < 3) {
+			json_object_set_new(rep_msg, "message",
+			                    json_string("prompt requires a message"));
+			json_object_set_new(rep_msg, "code",
+			                    json_integer(JSONRCP_STATUS_INVALID_PARAMS));
+			return 1;
+		}
+
+		prompt_t *p = prompt_new();
+		p->message  = strdup(argv[2]);
+
 		nng_mtx_lock(s->mtx);
+		p->id = s->next_prompt_id++;
+		nng_mtx_unlock(s->mtx);
 
-		if (s->prompt_open) {
-			json_object_sprintf(rep_msg, "message", "prompt already open");
+		if (argc > 3) {
+			p->cont = (*argv[3] == '1');
+		}
+
+		nng_msg *msg = prompt_open_msg(p);
+		if (!msg) {
+			json_object_sprintf(rep_msg, "message", "error allocating new msg");
+			json_object_set_new(rep_msg, "code",
+			                    json_integer(JSONRCP_STATUS_INTERNAL_ERROR));
 			nng_mtx_unlock(s->mtx);
 			return 1;
 		}
 
-		if (s->fs == NULL || s->fs->pid == 0) {
-			json_object_sprintf(rep_msg, "message", "fs not running");
-			nng_mtx_unlock(s->mtx);
-			return 1;
-		}
-
-		if (s->prompt_msg != NULL) {
-			free(s->prompt_msg);
-			s->prompt_msg = NULL;
-		}
-		s->prompt_msg  = strjoin(argc - 2, argv + 2);
-		s->prompt_open = true;
-		system("inject_snap halt");
-
-		nng_msg *msg;
-		rv = nng_msg_alloc(&msg, 0);
-		if (rv != 0) {
-			json_object_sprintf(rep_msg, "message", "error allocating new msg: %s",
-			                    nng_strerror(rv));
-			nng_mtx_unlock(s->mtx);
-			return 1;
-		}
-		msgprintf(msg, "prompt open \"%s\"", s->prompt_msg);
 		rv = nng_sendmsg(s->clients_cmd_sock, msg, 0);
 		if (rv != 0) {
 			json_object_sprintf(rep_msg, "message",
 			                    "error sending message to clients: %s",
 			                    nng_strerror(rv));
+			json_object_set_new(rep_msg, "code",
+			                    json_integer(JSONRCP_STATUS_INTERNAL_ERROR));
 			nng_mtx_unlock(s->mtx);
 			return 1;
 		}
+
+		nng_mtx_lock(s->mtx);
+		list_append(&s->prompts, p);
 		nng_mtx_unlock(s->mtx);
 
+		json_object_set_new(rep_msg, "prompt", prompt_marshal_json(p));
 		return 0;
 	}
 
 	if (strcmp(argv[1], "close") == 0) {
+		if (argc < 3) {
+			json_object_set_new(rep_msg, "message",
+			                    json_string("close requires a prompt id"));
+			json_object_set_new(rep_msg, "code",
+			                    json_integer(JSONRCP_STATUS_INVALID_PARAMS));
+			return 1;
+		}
+
+		char *end;
+		unsigned id = strtoul(argv[2], &end, 0);
+		// if end is not '\0', there is trailing character so return an error
+		if (!*argv[2] || *end) {
+			json_object_sprintf(rep_msg, "message", "invalid prompt id \"%s\"",
+			                    argv[2]);
+			json_object_set_new(rep_msg, "code",
+			                    json_integer(JSONRCP_STATUS_INVALID_PARAMS));
+			return 1;
+		}
+
 		nng_mtx_lock(s->mtx);
-		if (!s->prompt_open) {
-			json_object_sprintf(rep_msg, "message", "prompt not running");
-			nng_mtx_unlock(s->mtx);
-			return 1;
-		}
-		if (s->prompt_msg != NULL) {
-			free(s->prompt_msg);
-			s->prompt_msg = NULL;
-		}
-		s->prompt_open = false;
-		system("inject_snap cont");
+		prompt_t *p = list_pop(&s->prompts, prompt_by_id, &id);
+		nng_mtx_unlock(s->mtx);
 
-		nng_msg *msg;
-		rv = nng_msg_alloc(&msg, 0);
-		if (rv != 0) {
-			json_object_sprintf(rep_msg, "message", "error allocating new msg: %s",
-			                    nng_strerror(rv));
-			nng_mtx_unlock(s->mtx);
+		if (!p) {
+			json_object_sprintf(rep_msg, "message", "prompt with id \"%s\" not open",
+			                    argv[2]);
+			json_object_set_new(rep_msg, "code",
+			                    json_integer(JSONRCP_STATUS_INVALID_PARAMS));
 			return 1;
 		}
 
-		msgprintf(msg, "prompt close");
+		if (p->cont) {
+			system("inject_snap cont");
+		}
+
+		json_object_set_new(rep_msg, "prompt", prompt_marshal_json(p));
+
+		nng_msg *msg = prompt_close_msg(p);
+		if (!msg) {
+			/* this probably should be fatal since it means OOM*/
+			json_object_sprintf(rep_msg, "message", "error allocating msg to clients");
+			json_object_set_new(rep_msg, "code",
+			                    json_integer(JSONRCP_STATUS_INTERNAL_ERROR));
+			return 1;
+		}
+
 		rv = nng_sendmsg(s->clients_cmd_sock, msg, 0);
 		if (rv != 0) {
 			json_object_sprintf(rep_msg, "message",
 			                    "error sending message to clients: %s",
 			                    nng_strerror(rv));
-			nng_mtx_unlock(s->mtx);
+			json_object_set_new(rep_msg, "code",
+			                    json_integer(JSONRCP_STATUS_INTERNAL_ERROR));
 			return 1;
 		}
-		nng_mtx_unlock(s->mtx);
+
+		prompt_free(p);
 		return 0;
 	}
 
 	json_object_sprintf(rep_msg, "message", "unknown command \"prompt %s\"", argv[1]);
+	json_object_set_new(rep_msg, "code", json_integer(JSONRCP_STATUS_METHOD_NOT_FOUND));
 	return 1;
 }
 
@@ -704,10 +760,12 @@ int server_cmd(server_t *s, json_t *rep_msg, int argc, const char **const argv) 
 	}
 
 	json_object_sprintf(rep_msg, "message", "unknown command \"%s\"", argv[0]);
+	json_object_set_new(rep_msg, "code", json_integer(JSONRCP_STATUS_METHOD_NOT_FOUND));
 	return 1;
 }
 
 void server_cmd_cb(void *arg) {
+	char const **args = NULL;
 	nng_msg *msg, *reply_msg;
 	server_t *s = arg;
 	int cmd_rv;
@@ -720,53 +778,69 @@ void server_cmd_cb(void *arg) {
 
 	msg = nng_aio_get_msg(s->aio);
 
-	char *body = nng_msg_body(msg);
-
-	if (body[nng_msg_len(msg)] != '\0') {
-		nng_msg_append(msg, "\0", 1);
-		body = nng_msg_body(msg);
-	}
-
 	rv = nng_msg_alloc(&reply_msg, 0);
 	if (rv != 0) {
 		exit(1);
 	}
 
+	json_t *method  = NULL;
+	json_t *params  = NULL;
+	json_t *request = NULL;
+	json_t *value   = NULL;
+	json_t *error   = NULL;
+
+	json_t *reply = json_object();
+	json_object_set_new(reply, "jsonrpc", json_string("2.0"));
+	json_object_set_new(request, "id", json_null());
+
 	json_error_t err;
-	json_t *method    = NULL;
-	json_t *params    = NULL;
-	json_t *json      = NULL;
-	json_t *value     = NULL;
-	json_t *error     = NULL;
-	char const **args = NULL;
-	char const **pos;
+	request = json_loadb(nng_msg_body(msg), nng_msg_len(msg), 0, &err);
+	nng_msg_free(msg);
 
-	json = json_loads(body, 0, &err);
-	if (!json_is_object(json)) {
-		printf("TODO: error decoding\n");
-		goto end;
+	if (!request) {
+		error = json_object();
+		json_object_set_new(error, "message", json_string(err.text));
+		json_object_set_new(error, "code", json_integer(JSONRCP_STATUS_PARSE_ERROR));
+		goto error;
 	}
 
-	method = json_object_get(json, "method");
+	if (!json_is_object(request)) {
+		/* TODO: check err */
+		/* TODO: handled batch requets */
+		error = json_object();
+		json_object_set_new(error, "message", json_string("request must be an object"));
+		json_object_set_new(error, "code", json_integer(JSONRCP_STATUS_INVALID_REQUEST));
+		goto error;
+	}
+
+	json_t *id = json_object_get(request, "id");
+	if (!id || json_is_null(id)) {
+		error = json_object();
+		json_object_set_new(error, "message",
+		                    json_string("Invalid Request: id not speficied"));
+		json_object_set_new(error, "code", json_integer(JSONRCP_STATUS_INVALID_REQUEST));
+	}
+
+	method = json_object_get(request, "method");
 	if (!json_is_string(method)) {
-		error = json_string("method is not a string");
+		error = json_object();
+		json_object_set_new(error, "message",
+		                    json_string("Invalid Request: method not a string"));
+		json_object_set_new(error, "code", json_integer(JSONRCP_STATUS_INVALID_REQUEST));
 		goto error;
 	}
-	params = json_object_get(json, "params");
 
+	params = json_object_get(request, "params");
 	if (!json_is_array(params)) {
-		error = json_string("params is not an array");
+		error = json_object();
+		json_object_set_new(error, "message",
+		                    json_string("Invalid Request: params not an array"));
+		json_object_set_new(error, "code", json_integer(JSONRCP_STATUS_INVALID_REQUEST));
 		goto error;
 	}
 
-	char *params_str = json_dumps(params, 0);
-	free(params_str);
-
-	args = calloc(json_array_size(params) + 2, sizeof(char *));
-
-	pos = args;
-
-	*pos++ = json_string_value(method);
+	args    = calloc(json_array_size(params) + 2, sizeof(char *));
+	args[0] = json_string_value(method);
 
 	size_t index;
 	json_array_foreach(params, index, value) {
@@ -774,13 +848,12 @@ void server_cmd_cb(void *arg) {
 			error = json_string("non string found in params array");
 			goto error;
 		}
-		*pos++ = json_string_value(value);
+		args[index + 1] = json_string_value(value);
 	}
-
-	json_t *reply = json_object();
 
 	json_t *ret = json_object();
 	cmd_rv      = server_cmd(s, ret, json_array_size(params) + 1, args);
+	free(args);
 
 	if (cmd_rv > 0) {
 		json_object_set_new(reply, "error", ret);
@@ -796,18 +869,19 @@ void server_cmd_cb(void *arg) {
 	rv = nng_sendmsg(s->server_cmd_sock, reply_msg, 0);
 	if (rv != 0) {
 		nng_msg_free(reply_msg);
+		/* TODO: we should report an error here*/
 		return;
 	}
 
 end:
-	json_decref(json);
-	nng_msg_free(msg);
-	free(args);
+	json_decref(request);
 	nng_recv_aio(s->server_cmd_sock, s->aio);
 	return;
 
 error:
-	reply = json_object();
+    if (request){
+        json_decref(request);
+    }
 	json_object_set_new(reply, "error", error);
 	reply_str = json_dumps(reply, 0);
 	nng_msg_append(reply_msg, reply_str, strlen(reply_str));
@@ -823,22 +897,21 @@ error:
 void server_sigchld_cb(server_t *s, pid_t pid, int status) {
 	nng_mtx_lock(s->mtx);
 	if (s->fs != NULL && pid == s->fs->pid) {
-		s->fs->status  = status;
-		s->fs->pid     = 0;
-		s->prompt_open = false;
-
-		nng_mtx_unlock(s->mtx);
-		return;
+		s->fs->status = status;
+		s->fs->pid    = 0;
+        nng_mtx_unlock(s->mtx);
+        server_shutdown(s);
+        return;
 	}
-	window_t *w = window_list_find_by_pid(&s->windows, pid);
+	window_t *w = list_find(s->windows, window_by_pid, &pid);
 	if (w == NULL) {
-		nng_mtx_unlock(s->mtx);
-		return;
+        nng_mtx_unlock(s->mtx);
+        return;
 	}
 	w->status = status;
 	w->pid    = 0;
-
 	nng_mtx_unlock(s->mtx);
+	return;
 }
 
 void server_sigterm_cb(server_t *s) {
@@ -894,8 +967,8 @@ int server_new(server_t **new) {
 		return ENOMEM;
 	}
 
-	s->server_cmd_url   = strdup("ipc://" FS_SERVER_BASE_PATH "/cmd");
-	s->clients_cmd_url  = strdup("ipc://" FS_SERVER_BASE_PATH "/clicmd");
+	s->server_cmd_url   = strdup(FS_SERVER_URL_BASE "/cmd");
+	s->clients_cmd_url  = strdup(FS_SERVER_URL_BASE "/clicmd");
 	s->running          = false;
 	s->finished_pipe[0] = -1;
 	s->finished_pipe[1] = -1;
@@ -942,9 +1015,14 @@ void server_destroy(server_t *s) {
 
 	nng_mtx_lock(s->mtx);
 	window_t *w;
-	while ((w = window_list_pop(&s->windows)) != NULL) {
+	while ((w = list_pop(&s->windows, NULL, NULL)) != NULL) {
 		window_kill(w);
 		window_free(w);
+	}
+
+	prompt_t *p;
+	while ((p = list_pop(&s->prompts, NULL, NULL)) != NULL) {
+		prompt_free(p);
 	}
 
 	/* TODO maybe send terminate to fs */
