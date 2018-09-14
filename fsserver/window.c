@@ -3,24 +3,14 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
-#ifdef __APPLE__
-#include <util.h>
-#elif __linux__
 #include <pty.h>
-#include <utmp.h>
-#elif __unix__ // all unices not caught above
-#include <util.h>
-#elif defined(_POSIX_VERSION)
-// POSIX
-#else
-#error "Unknown compiler"
-#endif
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <utmp.h>
 #include <wordexp.h>
 
 #include "window.h"
@@ -119,107 +109,12 @@ error:
 	exit(EXIT_FAILURE);
 }
 
-size_t window_list_len(window_list_t **head) {
-	assert(head != NULL);
-	size_t len         = 0;
-	window_list_t *ptr = *head;
-	while (ptr != NULL) {
-		len++;
-		ptr = ptr->next;
-	}
-	return len;
+bool window_by_pid(void *w, void *pid) {
+	return ((window_t *)w)->pid == *(pid_t *)pid;
 }
 
-void window_list_append(window_list_t **head, window_t *w) {
-	window_list_t **prev_next = head;
-	window_list_t *ptr        = *head;
-	while (ptr != NULL) {
-		prev_next = &ptr->next;
-		ptr       = ptr->next;
-	}
-
-	window_list_t *new = calloc(sizeof(window_list_t), 1);
-	new->window        = w;
-
-	*prev_next = new;
-}
-
-window_t *window_list_pop(window_list_t **head) {
-	assert(head != NULL);
-	if (*head == NULL)
-		return NULL;
-
-	window_list_t *old_head = *head;
-	window_t *w             = old_head->window;
-	*head                   = (*head)->next;
-	free(old_head);
-	return w;
-}
-
-window_t *window_list_pop_by_id(window_list_t **head, window_id_t id) {
-	assert(head != NULL);
-
-	if (*head == NULL)
-		return NULL;
-
-	window_list_t **prev_next = head;
-	window_list_t *ptr        = *head;
-
-	while (ptr->window->id != id) {
-		prev_next = &ptr->next;
-		ptr       = ptr->next;
-		if (ptr == NULL)
-			return NULL;
-	}
-
-	*prev_next = ptr->next;
-
-	window_t *w = ptr->window;
-	free(ptr);
-	return w;
-}
-
-window_t *window_list_pop_by_pid(window_list_t **head, pid_t pid) {
-	assert(head != NULL);
-
-	if (*head == NULL)
-		return NULL;
-
-	window_list_t **prev_next = head;
-	window_list_t *ptr        = *head;
-
-	while (ptr->window->pid != pid) {
-		prev_next = &ptr->next;
-		ptr       = ptr->next;
-		if (ptr == NULL)
-			return NULL;
-	}
-
-	*prev_next = ptr->next;
-
-	window_t *s = ptr->window;
-	free(ptr);
-	return s;
-}
-
-window_t *window_list_find_by_id(window_list_t **head, window_id_t id) {
-	assert(head != NULL);
-	window_list_t *ptr = *head;
-	while (ptr != NULL && ptr->window->id != id)
-		ptr = ptr->next;
-	if (ptr == NULL)
-		return NULL;
-	return ptr->window;
-}
-
-window_t *window_list_find_by_pid(window_list_t **head, pid_t pid) {
-	assert(head != NULL);
-	window_list_t *ptr = *head;
-	while (ptr != NULL && ptr->window->pid != pid)
-		ptr = ptr->next;
-	if (ptr == NULL)
-		return NULL;
-	return ptr->window;
+bool window_by_id(void *w, void *id) {
+	return ((window_t *)w)->id == *(window_id_t *)id;
 }
 
 void window_kill(window_t *w) {
@@ -320,7 +215,7 @@ json_t *window_marshal_json(window_t *w) {
 		json_object_set_new(ret, "command", command_args);
 	}
 
-	if (w->window_flags != NULL) {
+	if (w->window_flags) {
 		json_t *window_flags = json_array();
 		ptr                  = w->window_flags;
 		while (*ptr) {
@@ -343,13 +238,39 @@ json_t *window_marshal_json(window_t *w) {
 	return ret;
 }
 
-json_t *window_list_marshal_json(window_list_t **head) {
-	json_t *ret = json_array();
+int window_unmarshal_json(window_t *w, json_t *j) {
+	size_t i;
+	json_t *v;
+	if (w == NULL)
+		return -1;
 
-	window_list_t *ptr = *head;
-	while (ptr != NULL) {
-		json_array_append_new(ret, window_marshal_json(ptr->window));
-		ptr = ptr->next;
+	int rv = json_unpack(j, "{s:i, s:i, s:i, s:s}", "id", &w->id, "pid", &w->pid,
+	                     "scrollback_length", &w->scrollback_len, "address", &w->addr);
+
+	if (rv < 0)
+		return -1;
+
+    w->addr = strdup(w->addr);
+
+	json_t *command = json_object_get(j, "command");
+	if (json_is_array(command)) {
+		w->command_args = calloc(json_array_size(command) + 1, sizeof(*w->command_args));
+		json_array_foreach(command, i, v) {
+			if (!json_is_string(v))
+				continue;
+			w->command_args[i] = strdup(json_string_value(v));
+		}
 	}
-	return ret;
+
+	json_t *window_flags = json_object_get(j, "window_flags");
+	if (json_is_array(window_flags)) {
+		w->window_flags =
+		    calloc(json_array_size(window_flags) + 1, sizeof(*w->window_flags));
+		json_array_foreach(window_flags, i, v) {
+			if (!json_is_string(v))
+				continue;
+			w->window_flags[i] = strdup(json_string_value(v));
+		}
+	}
+	return 0;
 }
