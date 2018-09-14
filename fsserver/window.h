@@ -18,22 +18,11 @@ typedef struct window {
 	int (*master_handler)(struct window *, int);
 } window_t;
 
-typedef struct window_list {
-	window_t *window;
-	struct window_list *next;
-} window_list_t;
-
-/* caller is owner or returned value and must free*/
-void window_list_append(window_list_t **head, window_t *new);
-window_t *window_list_pop(window_list_t **head);
-window_t *window_list_pop_by_id(window_list_t **head, window_id_t id);
-window_t *window_list_pop_by_pid(window_list_t **head, pid_t pid);
-window_t *window_list_find_by_id(window_list_t **head, window_id_t id);
-window_t *window_list_find_by_pid(window_list_t **head, pid_t pid);
-size_t window_list_len(window_list_t **head);
+bool window_by_pid(void *, void *);
+bool window_by_id(void *, void *);
 
 json_t *window_marshal_json(window_t *w);
-json_t *window_list_marshal_json(window_list_t **head);
+int window_unmarshal_json(window_t *w, json_t *j);
 
 window_t *window_new();
 void window_kill(window_t *s);
