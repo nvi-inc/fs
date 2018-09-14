@@ -43,7 +43,7 @@ ifdef FS_DISPLAY_SERVER
 export LDFLAGS += -L$(shell pwd)/third_party/lib
 export CPPFLAGS += -I$(shell pwd)/third_party/include
 LIB_DIR += third_party
-EXEC_DIR += spubsub fsclient fsserver
+EXEC_DIR += spubsub fsserver
 endif
 
 all:	libs execs
@@ -82,6 +82,8 @@ rmdoto:
 	rm -f `find . -name '*.[oas]' -print`
 	rm -rf oprin/readline-2.0
 	rm -f `find . -name '*.pyc' -print`
+	rm -rf third_party/include third_party/lib third_party/bin
+	find third_party/src/* ! -iname '*.tar.gz' ! -iname '*.make' -delete
 #
 libs:
 	for dir in $(LIB_DIR); do\
