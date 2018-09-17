@@ -650,6 +650,9 @@ okay parameter must be 'disk_record_ok' or null.
 5T -211
 Source parameter must be 'ext', 'tvg', or 'ramp' for Mark 5B.
 ""
+5T -212
+Upper or lower 32 bits of mask must be zero for Mark 5B.
+""
 5T -213
 For Mark 5B recorder minimum implied sample rate is 2 MHz. Check Mark 5B clock rate in equip.ctl.
 ""
@@ -2037,7 +2040,7 @@ DH -104
 No default sample rate if clock rate (from equip.ctl) is "none".
 ""
 DH -201
-mask2 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
+mask2 parameter, must specify an integer, usually as a hex value, e.g., 0xf
 ""
 DH -202
 mask1 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
@@ -2051,6 +2054,9 @@ Sample rate must be a number greater than 0.124
 DH -205
 okay parameter must be disk_record_ok or null
 ""
+DH -211
+mask2 parameter cannot be non-zero unless FiLa10G input select in 'equip.ctl' is 'vsi1-2'.
+""
 DH -214
 Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255.
 ""
@@ -2058,7 +2064,7 @@ DH -301
 Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the fifth parameter.
 ""
 DH -302
-mask2 cannot be used with only one VSI input selected in equip.ctl.
+mask2 cannot be used unless VSI1-2 input is selected in equip.ctl.
 ""
 DH -304
 Can't specify sample rate and decimate parameters simultaneously

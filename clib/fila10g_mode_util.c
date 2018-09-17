@@ -34,6 +34,10 @@ char *ptr;
     switch (*count) {
     case 1:
       ierr=arg_uns(ptr,&lcl->mask2.mask2 ,0x0,TRUE);
+      /*                                 1234567812345678 */
+      if(ierr==0 && lcl->mask2.mask2 & 0xffffffff00000000ULL &&
+	 strcmp(shm_addr->fila10gvsi_in,"vsi1-2"))
+	ierr=-210;
       m5state_init(&lcl->mask2.state);
       if(ierr==0) {
 	lcl->mask2.state.known=1;

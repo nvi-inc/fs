@@ -23,6 +23,7 @@ source:     data source or format
 mask:       bit-stream mask, hex, non-zero 64-bit wide maximum,
             default 0xffffffff (least 32 bits on).
             There is no monitor value for Ethernet recorders.
+            See comments for notes about the mask for 'mk5b_mode'.
 
 decimation: decimation factor
 	    For mk5b_mode: 1, 2, 4, 8, or 16.  No default unless
@@ -131,6 +132,31 @@ a FiLa10G is in use, DRUDG always uses equivalent bit masks for
 "fila10g_mode=..." and "mk5c_mode=..." commands, but the FiLa10G mask
 has no effect on the Tsys data reported
 
+For mk5b_mode, only the upper or lower 32 bits of the mask may be
+non-zero.  The lower 32 bits select DBBC2 VSI1 bitstreams and the
+upper 32 bits select VSI2 bitstreams.  For these cases, the Mark 5B
+recorder can be connected to either VSI1 or VSI2.  However, there is
+no detection if an incompatable connection is being used.  Possible
+ncompatable connections include: (1) connected to VSI2 when the VSI1
+bitsreams for 'wastro' or 'geo2' are to be recorded, (2) connected to
+VSI2 when 'astro3' is to be recorded, (3) connection to VSI2 when
+'astro2' will be used with a DBBC2 firmware version earlier than v105,
+(4) connected to VSI1 when the VSI2 bitsreams for 'wastro' or 'geo2'
+are to be recorded.  Please see comments inserted by 'drudg' in the
+experiment procedures for *each* mode to verify what wiring maybe be
+required for an experiment.
+
+Stating the 'mk5b_mode' bitmask/VSI connections requirements
+positively: if mode is 'wastro' or 'geo2' and (i) the upper 32 bits
+are non-zero then the recorder must be plugged into 'VSI2', and (ii)
+if the lower 32 are non-zero, it must be plugged into 'VSI1'.  For
+'astro2' and firmware before 105, the recorder must be plugged into
+VSI1. For 'astro3', the recorder must be plugged into VSI1.  For all
+other modes either VSI can be used.  Note that for modes where either
+VSI can be used, the station has the option of working around bad bit
+streams on VSI1 by connecting the recorder to VSI2.  For these modes`,
+no change in the 'mk5b_mode' bit mask is required for the change.
+
 When an Ethernet recorder is in use, the mask, decimation, and sample
 values are not returned by "jive5ab".
 
@@ -157,10 +183,12 @@ from the recorder and will not be effective.  The override is not
 available for "mk5c_mode=...".  Changing the mode while recording will
 probably cause problems with the recording and is not recommended.
 
-Notes on Mark5B-over-Ethernet (5B/Ethernet): Only VDIF recording is
-  recommended for use with the Ethernet recorders.  5B/Ethernet is not
-  fully supported by the FS.  However, there is a path to recording it
-  if it is needed in an unusual situation.  Please follow these steps:
+Notes on Mark5B-over-Ethernet (5B/Ethernet):
+
+  Only VDIF recording is recommended for use with the Ethernet
+  recorders.  5B/Ethernet is not fully supported by the FS.  However,
+  there is a path to recording it if it is needed in an unusual
+  situation.  Please follow these steps:
 
      1. DRUDG the experiment observing schedule normally.
 
