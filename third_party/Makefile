@@ -9,7 +9,7 @@ lib/libjansson.a: src/jansson-2.11.tar.gz
 	cd src &&\
 	tar xzf jansson-2.11.tar.gz  &&\
 	cd jansson-2.11 &&\
-	./configure --enable-static --disable-shared --prefix=$(PREFIX) &&\
+	./configure -q --enable-static --disable-shared --prefix=$(PREFIX) &&\
 	make install
 
 clean: 
