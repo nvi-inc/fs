@@ -5,11 +5,12 @@ Response: fila10g_mode/mask2,mask1,decimation,sample,clock
 
 Settable parameters:
 
-mask2:      VSI2 input bit-stream mask, hex, non-zero 32-bit wide maximum,
-            for example: 0xf, default 0, null on display if zero.
+mask2:      VSI2 input bit-stream mask, usually hex, 32-bit wide maximum,
+            for example: 0xf, default 0, null on display if zero. See
+            the 'Comments' section for more details.
 
-mask1:      VSI1 input bit-stream mask, hex, non-zero 32-bit wide maximum,
-            for example: 0xf, default 0xffffffff
+mask1:      VSI1 input bit-stream mask, usually hex, non-zero 32-bit wide
+            maximum, for example: 0xf, default 0xffffffff
 
 decimation: decimation factor: 1, 2, 4, 8, or 16. No default unless
             sample (next parameter) is specified. On monitor,
@@ -32,12 +33,41 @@ Monitor only parameter:
 clock       input clock rate in Hz
 
 Comments:
-To use a non-zero mask2, the inputselect is in equip.ctl must be
-something other than 'vsi1' or 'vsi2'.
-
 The effective sample rate can be specified in the SNAP command either
-explicitly with the "sample" parameter or implicitly with the "decimatation"
-parameter.  Only one of "sample" and "decimation" may be specified.  The device
-does not respond with the commanded effective sample rate.  In the query
-response for this command, the commanded sample rate, if it was explicitly
-commanded, is shown in parentheses for informational purposes only.
+explicitly with the "sample" parameter or implicitly with the
+"decimatation" parameter.  Only one of "sample" and "decimation" may
+be specified.  The device does not respond with the commanded
+effective sample rate.  In the query response for this command, the
+commanded sample rate, if it was explicitly commanded, is shown in
+parentheses for informational purposes only.
+
+To use a non-zero 'mask2', the FiLa10G 'inputselect' is in 'equip.ctl'
+must be 'vsi1-2'. Use of 'vsi1-2' is strongly encouraged and will work
+for all normal DDC and PFB usage.  Other values can help support
+work-arounds for hardware issues, particularly 'vsi2' for a bad 'vsi1'
+connection for single VSI output moces (more on this below).  Note
+that if the 'inputselect' in 'equip.ctl' is changed the FS must be
+restarted and the FiLa10G re-synced in 'fmset' before it becomes
+effective.  For DDC usage, please see comments inserted by 'drudg' in
+the experiment procedures for *each* mode to verify what wiring maybe
+be required for an experiment.
+
+For DBBC DDC usage, if one DBBC VSI output is bad, and/or one FiLa10G
+VSI input is bad, it may be possible to recover for *some* single VSI
+modes by cross wiring between DDBC and FiLa10G and setting the
+appropriate *FiLa10G* input in 'equip.ctl'.  For some bit mask values,
+this will require moving the bits from 'mask2' to 'mask1'.  However,
+if only 'mask1' would be non-zero normally, this will work with no
+re-arrangement of the masks if DBBC VSI1 is cross wired to FiLa10G
+input VSI2 and that input is selected in 'equip.ctl'.  It is up to the
+station to determine the correct bit masks for such ad hoc situations.
+The lay-out of the bit-streams described in the 'help' page for the
+DBBC 'form' command ('form.d__') and the discussion of useful
+cross-wirings in the 'help' page for the 'mk5b_mode' command
+('mk5b_mode.___') maybe helpful in such situations.  You can also
+reach out for advice to Ed (Ed.Himwich@nasa.gov).
+
+For single VSI modes, mismatches in using 'vsi2' (or 'vsi1') input for
+modes 'wastro'/'geo2'/'astro2'(<v105)/'astro3' when VSI1 (or VSI2) is
+required are not detected, in part to support possible cross wiring to
+work around a bad DBBC output and/or FiLa10G input.

@@ -71,8 +71,14 @@ int itask;
       break;
     case 2:
       ierr=arg_long_long_uns(ptr,&lcl->mask.mask , 0xffffffffULL,TRUE);
-      if(0==lcl->mask.mask)
-	ierr=-200;   
+      if(0==lcl->mask.mask) {
+	ierr=-200;
+      } else if((shm_addr->equip.drive[shm_addr->select] == MK5 &&
+		 (shm_addr->equip.drive_type[shm_addr->select] == MK5B ||
+		  shm_addr->equip.drive_type[shm_addr->select] == MK5B_BS)) &&
+		lcl->mask.mask & 0xffffffffULL &&
+		lcl->mask.mask & 0xffffffff00000000ULL)
+	ierr=-210;
       m5state_init(&lcl->mask.state);
       if(ierr==0) {
 	lcl->mask.bits=0;
@@ -339,7 +345,10 @@ int itask;
     strcat(ptr,source_key[lclc->source.source]);
     strcat(ptr," : ");
 
-    sprintf(ptr+strlen(ptr),"0x%llx",lclc->mask.mask);
+    if(lclc->mask.mask & 0xffffffffULL)
+      sprintf(ptr+strlen(ptr),"0x%llx",lclc->mask.mask);
+    else
+      sprintf(ptr+strlen(ptr),"0x%llx",lclc->mask.mask>>32);
     strcat(ptr," : ");
 
     if(lclc->decimate.state.known)
