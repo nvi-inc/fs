@@ -79,11 +79,11 @@ For VLBA/4/5 'tpgain' must be a measurement of the gain level when
 'tpi' (often independent of the 'tpi' used for 'tpdiff') is measured
 and likewise 'tpdiffgain' must be a measurement of the gain level when
 'tpzero' and 'tpdiff' are measured.  However, if 'tpgain' and/or
-'tpdffgain' return incorrect values when used because of some
+'tpdiffgain' return incorrect values when used because of some
 persistant problem, they can be omitted as long as the gain level is
 the same for all of 'tpi', 'tpzero', and 'tpdiff'.
 
-The 'tpi' value used for 'tpdff' may be different from the 'tpi'
+The 'tpi' value used for 'tpdiff' may be different from the 'tpi'
 values used for 'tsys'.  The 'tpdiff' is used to define the conversion
 factor from counts to degrees (according to 'caltemp') only.
 Subsequent 'tpi' values can be used to track variations in the system
