@@ -357,7 +357,7 @@ C       Opening message
           if(crel_FS .eq. " ") then
             write(luscn, '(a)') " "
           else 
-            write(luscn,'(a)') "-"//Crel_FS
+            write(luscn,'(a)') "-"//Crel_FS(1:trimlen(Crel_FS))
           endif
   
 

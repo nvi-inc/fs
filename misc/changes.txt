@@ -12148,7 +12148,7 @@ Version 9.11.20.rc3 180501
            spubsub/third_party/Makefile
            spubsub/third_party/include
            remove cmake build dependency for nanomsg and add support
-	     for FSL8
+             for FSL8
 
 180523 DEH Makefile
            Fixed dist target 
@@ -12159,12 +12159,12 @@ Version 9.11.20.rc3 180501
 180523 Version 9.11.20.rc6
 
 180524 DEH clib/Makefile
-	   boss/Makefile
+           boss/Makefile
            clib/helpstr.c
-	   fsclient/fsclient.c
-	   oprin/oprin.c
-	   moved helpstr from boss to clib
-	   added "help" support fsclient
+           fsclient/fsclient.c
+           oprin/oprin.c
+           moved helpstr from boss to clib
+           added "help" support fsclient
 
 180528 WEH help/user_device.___
            help/tpzero.___
@@ -12257,5 +12257,75 @@ Version 9.11.20.rc3 180501
            control/fserr.ctl
            add geo2 mode
 
-
 180808 Version 9.11.20-rc9
+
+180820 DEH spubsub/spub.c
+           cleanup shutdown mode code
+
+180822 DEH fs/Makefile
+           fixed "make fs" command
+
+180823 DEH fs/fs.c
+           fixed race with client
+           fixed exec to client
+
+180823 DEH fsserver/server.c
+           fsserver/Makefile
+           strict compiler flags, fixed some minor bugs
+
+180827 DEH include/params.h
+           fs/fs.c
+           fsserver/main.c
+           fsserver/server.h
+           fsclient/fsclient.c
+           fsalloc/fsalloc.c
+           erchk/erchk.c
+           added fsserver path/url to params.h, updated files that use it
+
+180827 DEH st.default/control/clpgm.ctl
+           set '-name' flag and add monit5
+
+180828 DEH fsserver/server.c
+           fsserver/window.h
+           fsserver/window.c
+           fsserver/list.h
+           fsserver/list.c
+           abstract list data structure
+
+180906 WEH help/form.d__
+           correct errors in VSI mode table
+
+180914 DEH fsserver/Makefile
+           fsserver/server.c
+           fsserver/shims/xterm
+           fsserver/shims/fs.prompt.c
+           fsserver/prompt.h
+           fsserver/prompt.c
+           fsserver/list.h
+           fsserver/main.c
+           fsserver/window.c
+           fsserver/window.h
+           fsserver/fsclient.c
+           comply to json-rpc, support for multiple prompts,
+             client opens all windows on startup.
+
+180914 DEH Makefile
+           fsserver/fsclient.c
+           moved fsclient into fsserver dir to share code with server
+
+180917 WEH help/tsys.___
+           typos fixed
+
+180914 WEH clib/mk5b_mode_util.c
+           clib/fila10g_mode_util.c
+180917 WEH help/mk5b_mode.___
+           help/fila10g_mode.d__
+           clib/mk5dbbcd.c
+           control/fserr.ctl
+           dual VSI support for DBBC2 DDC
+
+180917 DEH third_party/Makefile
+           quieten "configure" script.
+
+180917 Version 9.11.20-rc10
+

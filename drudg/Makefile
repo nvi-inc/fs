@@ -31,7 +31,8 @@ b3of9.o bar1.o bbbuf.o bbsyn.o bcode.o blabl.o \
 cazel.o cband_char.o cbinf.o checkmk5xlat.o check_dbbc_setup.o check_csb_list.o \
 chkgrpandwrite.o ckobs.o clist.o \
 copen.o copy_time.o counter_init.o crelease.o \
-delete_comma_and_write.o drchmod.o drprrd.o drset.o drudg.o drudg_rdctl.o drudg_write.o dsnout.o \
+delete_comma_and_write.o drchmod.o drprrd.o drset.o drudg.o drudg_rdctl.o \
+drudg_write.o drudg_write_comment.o dsnout.o \
 equip_type.o fakesum.o fc_chmod.o fc_getenv.o fdrudg.o find_num_chans_rec.o find_recorder_speed.o \
 get_version.o getqual.o getstr.o gtsnp.o \
 iaddpc.o iaddtr.o init_hardware_common.o k4proc_type.o kcheckgrpor.o \
@@ -41,6 +42,7 @@ point.o port.o prcov.o prcov_vex.o proc_check8bbc.o \
 proc_exper_initi.o proc_form.o proc_ifd.o proc_lo.o  \
 proc_mk5_init1.o proc_mk5_init2.o proc_dbbc_pfb_tracks.o proc_disk_tracks.o proc_norack.o \
 proc_patch.o proc_pcalf.o proc_s2_comments.o proc_sked_proc.o proc_setup.o \
+proc_track_mask_lines.o \
 proc_tracks.o proc_trkf.o \
 proc_vcname.o proc_vc_cmd.o proc_vracks_bbc.o proc_lba_ifp.o proc_mracks_vc.o proc_dbbc_bbc.o \
 proc_write_define.o procintr.o procs.o \

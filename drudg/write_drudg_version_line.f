@@ -3,6 +3,7 @@
       integer lu_out
       include 'drver_com.ftni'
        character*2 cprfx
+       integer trimlen
 ! 2018Jul20 First version
 
       cprfx='" '
@@ -14,7 +15,7 @@
       if(crel_FS .eq. " ") then
         write(lu_out, '(a)') " "
       else 
-        write(lu_out,'(a)') "-"//Crel_FS
+        write(lu_out,'(a)') "-"//Crel_FS(1:trimlen(Crel_FS))
        endif
        return
        end

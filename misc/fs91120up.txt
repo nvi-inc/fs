@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/fs91120up.txt        Version: 8.4  Date: 180808
+File: /usr2/fs/misc/fs91120up.txt        Version: 8.5  Date: 180917
 
 		       FS 9.11.20 Update Notice
 
@@ -20,7 +20,8 @@ optimally because it does not follow the 'sked' observation time-line
 that 'drudg' assumes.  However, the new support will reduce wasted
 recording time, improve the quality of the Tsys measurements, and
 maximize the time that the data is marked valid after the Tsys
-measurements.
+measurements.  This version also provids support for modes using two
+DBBC2 VSI outputs when used with a FiLa10G and Ethernet recorder.
 
 We encourage all stations to upgrade now even if they do not need the
 new features and bugs fixes because doing so will make future upgrades
@@ -28,9 +29,9 @@ easier.  Upgrading from 9.11.19 is very easy.
 
 The most significant changes in version 9.11.20 were:
 
-   (i) Availability of a server for the user interface.  This
-       allows multiple independent user interfaces to be used with the
-       FS.  Each user interface requires an X server display and
+   (i) Availability of a server for the user interface.  This allows
+       multiple independent user interfaces to be used with the FS.
+       Each user interface requires an X server display and
        essentially identical to the normal FS user interface.
        Typically, the interface would be used on the FS computer X
        display, but can also be used through a 'ssh' connector from
@@ -45,11 +46,12 @@ The most significant changes in version 9.11.20 were:
        automatically follows the log, i.e., it is not necessary to
        change which log is viewed by changing which file is 'tail'ed.
 
-       This feature is opt-in for this version of the FS. We recommend
-       that you install the FS without this feature initially, then test
-       the display server functionality separately. Instructions are
-       provided for enabling and disabling the feature as well a
-       description of how to use it.
+       This feature is opt-in for this version of the FS.  We
+       recommend that you install the FS without this feature
+       initially, then test the display server functionality
+       separately.  Instructions are provided for enabling and
+       disabling the feature as well as a description of how to use
+       it.
 
   (ii) Ad hoc support in 'drudg' for 'sched' "stagger start mode".  In
        this mode there are different recording start times at
@@ -109,7 +111,7 @@ The most significant changes in version 9.11.20 were:
   (vi) If a station has reliable NTP available for its FS computer,
        the recommended time model is now 'computer'.  Please see
        '/usr2/fs/misc/ntp.txt' for more details.  Please note that the
-       use of 'stcl' in 'midob' is still required to monitor the
+       use of 'setcl' in 'midob' is still required to monitor the
        formatter time.
 
  (vii) The VEX parser now support units for the rate in 'clock_early'
@@ -117,8 +119,9 @@ The most significant changes in version 9.11.20 were:
 
 (viii) Improved example versions of the station 'metserver' and
        'metclient' programs.  The improvements include trapping more
-       error and support for WMT70x wind sensors.  The FS now supports
-       acces to local or remote instances of 'metserver'.
+       errors being reported and support for WMT70x wind sensors.  The
+       FS now supports acces to local or remote instances of
+       'metserver'.
 
   (ix) Small improvements were made to 'gnplt': more Tcal points per
        band and non-default font sizes.
@@ -126,8 +129,12 @@ The most significant changes in version 9.11.20 were:
    (x) Support in 'tsys', 'onoff', and 'fivpt' for user devices that
        can't have a "zero" level measured.
 
-  (xi) Support for DBBC DDC output mode 'geo2' for DDC firmware
-       versions 106 and later.
+  (xi) Support for DBBC DDC for all two VSI output modes for racks
+       types that include a FiLa10G used with an Ethernet recorder.
+       Support was also added for 'geo2' DDC firmware versions 106 and
+       later.  Single VSI output on VSI2 for modes 'wastro' and 'geo2'
+       was added.  Please see both the FS (#22) and 'drudg' (#4)
+       change notes for more details.
        
 As always, we are deeply indebted to Jonathan Quick (HartRAO) for his
 many significant contributions that go far beyond what is explicitly
@@ -138,7 +145,7 @@ II. Installation
 
 Detailed instructions are provided below for installing 9.11.20 as an
 upgrade to 9.11.19, the previous stable release.  If you have an older
-version than 9.11.17, please refer to the appendix, which is described
+version than 9.11.19, please refer to the appendix, which is described
 next, for more information.
 
 A section 'A. Reference Appendix for Installation' is provided at the
@@ -367,7 +374,7 @@ The installation steps for upgrading from 9.11.19 are listed below.
      then either use the restored disk or apply the FS update again.
      Managing this is a lot safer if you have a third disk.
 
-(18) We encourage you the enable the display server interface of the
+(18) We encourage you to enable the display server interface of the
      FS.  Please see FS change item (20) for a more information.
 
 III. Changes Since Version 9.11.19
@@ -413,11 +420,11 @@ The following is a summary of FS changes since 9.11.19.
     can't have a "zero" level measured.
 18. New 'release' string for version number.
 19. Optional 'Makefile' environment variable 'FS_TINFO_LIB' for programs
-    use 'ncurses.
+    use 'ncurses'.
 20. Support for DBBC DDC format code 'geo2' for DDC firmware versions 106
     and later.
 21. Optional support for FS display server.
-
+22. Support for two VSI output DBBC2 DDC modes.
 
 A more detailed discussion of these changes follows.
 
@@ -455,7 +462,7 @@ A more detailed discussion of these changes follows.
     are moving from 'DIMino' to 'jive5ab'.
 
  3. Improvements to 'plog'. 'plog' now checks if a log file is open by
-    another program before moving it.  Before this checked was added,
+    another program before moving it.  Before this check was added,
     there could be a bad interaction when a log was still open in the
     Field System and log reduction was to be performed by 'plog'
 
@@ -584,7 +591,7 @@ A more detailed discussion of these changes follows.
 14. The 'mk5b_mode' command now uses "updsnor" for 'net_protocol' in
     all cases for FlexBuff.  This change was requested/recommended by
     Harro Verkouter (JIVE).  It helps 'scan_check' recognize dropped
-    packets as a clue to their being Ethernet issues.
+    packets as a clue to there being Ethernet issues.
 
 15. The maximum size of the Tcal table as a function of frequency was
     increased to 1200.  This allows 2 MHz spacing of Tcal values for a
@@ -613,8 +620,8 @@ A more detailed discussion of these changes follows.
     FS it is possible to specify a 'release' string that is appended
     to the FS version number.  It is displayed in a 'release' line
     following the log "Log Opened" line when a log is opened.  It is
-    also in the output of the FSVERSION command.  The 'drudg' opening
-    message does not display the 'release' string at this time.
+    also in the output of the FSVERSION command.  The 'drudg' program
+    also supports the 'release' string.
 
     The release string is derived from the directory name of the FS
     source, which must be of the form:
@@ -645,7 +652,7 @@ A more detailed discussion of these changes follows.
     Examples of how to do this can be found in the .login' and
     '.profile' files in '/usr2/fs/st.default/prog' for the 'tcsh' and
     'bash' shells, respectively.  This only needs to be used if the
-    'ncurses' library does not include the 'tinfo' library in your the
+    'ncurses' library does not include the 'tinfo' library in your
     Linux distribution.  On such systems, a reference to 'stdcscr' in
     a program can be the cause of the problem.  Thanks to Mamoru
     Sekido at Kashima for reporting this issue.
@@ -662,6 +669,25 @@ A more detailed discussion of these changes follows.
     explanation of how the user interface is different from the
     non-display server.
 
+22. Support for two VSI output DBBC2 DDC modes.  This provides
+    complete support for all modes that can use two VSI outputs when
+    the DBBC2 rack includes a FiLa10G and an Ethernet recorder is ine
+    use.  There is limited support of VSI2 as a replacement for VSI1
+    for some modes for both Mark 5B and FiLa10G.  Additionally, it is
+    possible to recover from some problems when only the one DBBC VSI
+    output is required by cross-wiring between the DBBC output and
+    FiLa10G inputs.  In this case, the station needs to determine the
+    correct bit masks to use, but any configuration should be
+    possible,
+
+    The 'mk5b_mode', 'mk5c_mode', 'fila10g_mode' commands now support
+    bitmask selections in the upper 32 bits of the mask for DDC usage.
+    For 'mk5b__mode' only the upper (VSI2) or lower 32 bits (VSI1) may
+    be non-zero (use of only one Mark 5B recorder at a time is
+    supported; however, it would in princple be possible to support a
+    second recorder with a second FS and dividing the bit mask
+    appropriately).  For 'fila10g_mode', the upper 32 bits can only be
+    used if the FiLa10G input mode in 'equip.ctl' is set to 'vsi1-2'.
 
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/misc/changes.txt.
@@ -669,14 +695,16 @@ is in /usr2/fs/misc/changes.txt.
 
 			B. Changes in 'drudg'
 				   
-'drudg' opening message date is 2018Aug07.
+'drudg' opening message date is 2018Sep14.
 
 The following is a summary of 'drudg' changes since 9.11.19.
 
  1. Ad hoc support for 'sched' stagger start mode.
  2. the 'mk5=bank_set?' query was added to the setup procedure for
     Mark 5 recorders.
- 3. Support for DBBC DDC format mode 'geo2'.
+ 3. Support for DBBC2 DDC format mode 'geo2'.
+ 4. Support for DBBC2 DDC use of VSI2 and VSI1+VSI2.
+ 5. Support for the FS release string.
 
 A more detailed discussion of these changes follows.
 
@@ -706,16 +734,42 @@ A more detailed discussion of these changes follows.
     recorded is a Mark 5. As a resultq the station procedures can be
     independent of whether a Mark 5 or FlexBuff recorder is in use.
 
- 3. Support for DBBC DDC format mode 'geo2'.  This allows use of USB
-    channels from all BBCs, 1-16, on VSI1.
+ 3. Support for DBBC2 DDC format mode 'geo2'.  This allows use of USB
+    channels from all BBCs, 1-16, on VSI1.  This mode is checked for
+    last since it is the newest.  A previously existing mode is used
+    if possible.
+
+ 4. Support for DBBC2 DDC use of VSI2 and VSI1+VSI2. When generating
+    the '.prc' file, 'drudg' will select modes by matching the
+    bit-streams with the following precedence:
+
+        (i) Any mode that fit into VSI1 with the existing precedence.
+       (ii) Either 'wastro' or 'geo2' (in that order) for VSI2.
+      (iii) "wastro' for VSI1 and VSI2
+
+    Note that option (iii) is only supported for racks with FiLA10Gs
+    (and are being used with an Ethernet recorder).  Options (ii) and
+    (iii) will cause a 64 bit bitmask to be used. Comments are added
+    to the procedures to indicate what wirings are recommended or
+    required.  It is important to check all the modes for an
+    experiment to determine a compatible wiring for the experiment.
+
+    It is assumed that if the rack type does not include a FiLA10G,
+    then a single Mark 5B is being used.  Note that the FS does not
+    support using two Mark 5B recorders in parallel for recording dual
+    VSI output data.  If a FiLa10G is included, an Ethernet recorder
+    is assumed.
+  
+ 5. Support for the FS 'release' string. The 'release' string, if
+    defined, is included in the version number printed at start-up and
+    in version number comments in '.snp' and '.prc' files.  Please see
+    FS change #18 above for more details on the meaning and use of
+    this string.
 
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/drudg/change_log.txt.
 
 			   C. Known FS Bugs
-
-(The only change in this section since the previous version is the
-addition of items #13 and #14.)
 
 The following is a summary list of known bugs. They are described in more
 detail after the list.
@@ -918,8 +972,8 @@ For reference, the list of the most recent 'critical updates,' since
 version 9.3.13, is given below.  These are updates that must be
 applied sequentially.  Please start with the next update with a later
 version number than what you have and apply it and the following
-listed versions before upgrading to 9.11.19.  You can find the latest
-versions of installation notes for these FS versions in the
+listed versions before upgrading to the current version.  You can find
+the latest versions of installation notes for these FS versions in the
 '/usr2/fs/misc' directory.  The list of critical updates is:
 
   9.4.0

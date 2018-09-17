@@ -10,6 +10,7 @@
 ! 2007Dec11 JMGipson.  Fixed  bug in format statement
 ! 2014Jan30 JMGipson.  Removed some piggyback stuff. 
 ! 2014Dec06 JMGipson. Support Mark5C
+! 2018Sep05 JMGipson. Got rid of trailing '"' on comments. 
 
       ierr=0  
 
@@ -47,5 +48,5 @@
         endif
       endif
       return
-90    format('"',a,'"')
+90    format('"',a)
       end

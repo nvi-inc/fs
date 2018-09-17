@@ -12,14 +12,10 @@
       logical kignore_mark5b_bad_mask
 ! function
       integer iwhere_in_string_list
-      integer trimlen
 
 ! History.
 ! Now put in changes in reverse order.
-! 2018Sep14 JMG. Check wastro before geo2.
-! 2018Sep09 JMG. Modified comments and some logic based on 2018Sep06 email from Ed. 
-! 2018Sep05 JMG. Better error messages. Fixed wastro which was wrong (source had a typo which propagated here).
-!        
+!
 ! 2018Aug08 JMG. Support for geo2. Made it the last mode checked.
 ! 2017Oct24 JMG. If 'bit_streams' then only care about mask. Everything else is null.
 !
@@ -47,7 +43,6 @@
 ! 2016Jan18 JMG. Added extra parameter for fila10g with DBBC
 ! 2016Apr07 JMG. Fixed format in writing out fila10g. Was writing, ",=" instead of "=," 
 ! 2016Sep11 JMG. Increased dim lsked_csb: max_csb-->2*max_csb.  Schedule fr036 HH caused problems
-! 2018Aug18 JMG. Increased size of mask to 64 bits. Added support for wastro, geo2 for vsi1 and vsi2. 
 
 
 ! local
@@ -57,21 +52,14 @@
       integer ib
       integer num_tracks
       integer nchan_rec
-      integer i                      !counter
-      integer icnt 
     
       integer*4 itemp
-      integer*4 imask(2)  
-      integer*4 imask_hi, imask_lo
-      equivalence (imask_hi, imask(2))
-      equivalence (imask_lo, imask(1))  
+      integer*4 imask
       integer ierr 
-      integer nch 
-
-      integer isamp_rate
     
-      character*10 lbit_mask_mode     
-    
+      character*10 lbit_mask_mode
+      
+      integer idiv
       character*80 cbuf
       character*20 lmode_cmd
       character*6 lext_vdif
@@ -80,18 +68,17 @@
       character*1 lul(2)            !ASCII "U","L"
       character*1 lsm(2)            !ASCII "S","M"
       integer max_csb
-      parameter (max_csb=32)        !32 is enough to fill one VSI. 
+      parameter (max_csb=32)
       logical kdebug
 
       character*4 lsked_csb(2*max_csb)     !Channel,sideband,bit in sked file
 
       logical kastro3_mode               !True if valid astro3 mode. 
-      logical kgeo2, kwastro            
 
 ! Have many possible mappings.
       character*4 lvlba_csb(max_csb),    lgeo_csb(max_csb)
-! Below added 2012Sep07.      
-      character*4  llba_csb(max_csb)
+! Below added 2012Sep07.  
+      character*4  lwastro_csb(max_csb), llba_csb(max_csb)
 ! Below added 2013Jun17   
       character*4 lastro2_csb(max_csb)
 ! Below added 2015Jan13   
@@ -105,18 +92,8 @@
       character*4 lcdas_vlba4(max_csb)
       character*4 lcdas_vlba_l(max_csb)
       character*4 lcdas_vlba_u(max_csb)     
-  
-
-! Below added 2018Aug18. These modes can use both VSIs
-      character*4 lgeo2_csb(2*max_csb) 
-      character*4 lwastro_csb(2*max_csb)           !factor of 2 because it can use both VSIs
-
-      character*4 lastro_csb(max_csb)              !This corresponds to first half of wastro.
-      equivalence (lwastro_csb,lastro_csb) 
- 
-
-! Many of these modes are given in:
-!/usr2/fs/help/form.d__
+! Below added 2018Aug08
+      character*4 lgeo2_csb(max_csb)  
 
 ! The order determines what bit is set.
 ! NOTE: This is the same astro mode.
@@ -133,24 +110,14 @@
      >   "01LS","01LM","08LS","08LM","09US","09UM","10US","10UM",
      >   "11US","11UM","12US","12UM","13US","13UM","14US","14UM"/
 
-! Added 2018Aug18
       data lgeo2_csb/
      >   "01US","01UM","02US","02UM","03US","03UM","04US","04UM",
      >   "05US","05UM","06US","06UM","07US","07UM","08US","08UM",
      >   "09US","09UM","10US","10UM","11US","11UM","12US","12UM",
-     >   "13US","13UM","14US","14UM","15US","15UM","16US","16UM",
-     >   "01LS","01LM","02LS","02LM","03LS","03LM","04LS","04LM",
-     >   "05LS","05LM","06LS","06LM","07LS","07LM","08LS","08LM",
-     >   "09LS","09LM","10LS","10LM","11LS","11LM","12LS","12LM",
-     >   "13LS","13LM","14LS","14LM","15LS","15LM","16LS","16LM"/
+     >   "13US","13UM","14US","14UM","15US","15UM","16US","16UM"/
 
-! Added 2018Aug18. 2nd half was wrong, and fixed on 2018Sep05
-! Note: astro is the same as the first half of astro. 
+! Note: 1st half of WASTRO is the same as ASTRO. This is for second 
       data lwastro_csb/
-     >   "01US","01UM","02US","02UM","03US","03UM","04US","04UM",
-     >   "05US","05UM","06US","06UM","07US","07UM","08US","08UM",
-     >   "01LS","01LM","02LS","02LM","03LS","03LM","04LS","04LM",
-     >   "05LS","05LM","06LS","06LM","07LS","07LM","08LS","08LM",
      >   "09US","09UM","10US","10UM","11US","11UM","12US","12UM",
      >   "13US","13UM","14US","14UM","15US","15UM","16US","16UM",
      >   "09LS","09LM","10LS","10LM","11LS","11LM","12LS","12LM",
@@ -226,10 +193,10 @@
       data lul/"U","L"/
       data lsm/"S","M"/
 
-!      kdebug=.true.  
+      kdebug=.true.  
       kdebug=.false.   
       kastro3_mode=.false. 
- 
+
       lext_vdif="ext" 
       if(km5brec(1)) then
          lmode_cmd="mk5b_mode"
@@ -240,6 +207,7 @@
          lmode_cmd="bit_streams"
       endif 
       
+
 ! If we don't have a VSI4 formatter or a DBBC write out comments.
       kcomment_only=.false.   
       if(.not.(km5rack .or. kv5rack .or. kdbbc_rack .or.
@@ -253,7 +221,7 @@
 !         call drudg_write(lu_outfile,lmode_cmd)     
       endif
 
-      isamp_rate= nint(samprate(istn,icode))
+      idiv = 32/nint(samprate(istn,icode))
 
 ! Remainder of code assumes that we have VSI4 formatter.
       ipass=1            !only 1 pass for Mark5B (or any disk)
@@ -291,9 +259,7 @@
         enddo
       enddo
 
-! 2018Aug18. Commented out. Since we can now  use two VSIs this limit is no longer valid. 
-      if(.false.) then 
-!      if(num_tracks .gt. max_csb) then
+      if(num_tracks .gt. max_csb) then
          write(*,"('Proc_disk_tracks Error! max_tracks is: ',i3)")
      >        max_csb
          write(*,"('But specified ', i3)") num_tracks
@@ -303,7 +269,7 @@
 !         else
 !          stop
 !         endif 
-       endif   
+       endif
 
        write(*,'(a,$)') "Checking bit_masks: "
 
@@ -313,16 +279,14 @@
       if(kvlbac_rack) then
 ! Check vlba mode.    
         lbit_mask_mode="vlba" 
-        nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
+        write(*,'(1x,a,$)') lbit_mask_mode
         call check_csb_list(lvlba_csb,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300   
      
 ! check vlbac_geo mode. 
         lbit_mask_mode="geo"
-        nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
+        write(*,'(1x,a,$)') lbit_mask_mode
         call check_csb_list(lvlbac_geo,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300 
@@ -333,69 +297,61 @@
 !******* Chinese CDAS RACK********************************************
       if(kcdas_rack) then 
         lbit_mask_mode="geo"
-        nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch)  
+        write(*,'(1x,a,$)') lbit_mask_mode
         call check_csb_list(lgeo_csb,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300       
 
 
         lbit_mask_mode="vlba"
-        nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
+        write(*,'(1x,a,$)') lbit_mask_mode
         call check_csb_list(lvlba_csb,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300       
       
 
         lbit_mask_mode="geo_t"
-        nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch)  
+        write(*,'(1x,a,$)') lbit_mask_mode
         call check_csb_list(lcdas_geo_t,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300 
       
         lbit_mask_mode="geo_r"
-        nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
+        write(*,'(1x,a,$)') lbit_mask_mode
         call check_csb_list(lcdas_geo_r,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300 
         
     
         lbit_mask_mode="vlba_l"
-        nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
+        write(*,'(1x,a,$)') lbit_mask_mode
         call check_csb_list(lcdas_vlba_l,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300        
   
 
         lbit_mask_mode="vlba_u" 
-        nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch)  
+        write(*,'(1x,a,$)') lbit_mask_mode
         call check_csb_list(lcdas_vlba_u,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300           
         goto 900 
       end if 
 
-!***********************************************************************************
-! Ckeck DBBC racks....     
+! Ckeck DBBC racks....
+     
 100   continue
 ! Pre-check to see if a valid astro3 mode, but only for DBBC/Unknown racks
       
       if(.not.(kdbbc_rack .or. kcomment_only)) goto 110
       lbit_mask_mode="astro3"
-      nch=trimlen(lbit_mask_mode)
-      write(*,'(1x,a,$)') lbit_mask_mode(1:nch)   
+      write(*,'(1x,a,$)') lbit_mask_mode
       call check_csb_list(lastro3_csb,max_csb,  
      >                    lsked_csb,  num_tracks,imask,ierr)
       if(ierr .ne. 0) goto 110
       kastro3_mode=.true. 
-   
-      if(isamp_rate.gt. 32) goto 300          !Valid astro3 mode & 32 MHz channels. 
-                                              !Other possible modes do not support 32 MHz==isamp_rate=64Mhz
+      if(idiv .lt. 1) goto 300          !Valid astro3 mode & 32 MHz channels. 
+                                        !Other possible modes do not support 32 MHz. 
     
 !     But don't use astro3 mode for BBC01/05/09 only or in combination
       do ic=1,num_tracks
@@ -407,33 +363,29 @@
       goto 200      
  
 110   continue
-      if(kdbbc_rack .and. (isamp_rate .gt. 32)) then
+      if(kdbbc_rack .and. (idiv.lt.1)) then
           write(*,*) "Only astro3 mode supports 32 MHz channels."
           goto 900
       endif
 
 ! Check to see if a valid geo mode.
       lbit_mask_mode="geo" 
-      nch=trimlen(lbit_mask_mode)
-      write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
+      write(*,'(1x,a,$)') lbit_mask_mode
       call check_csb_list(lgeo_csb, max_csb,
      >                    lsked_csb,num_tracks,imask,ierr)
       if(ierr .eq. 0) goto 300           
       
 200   continue 
-! Note: astro is the same as the first half of wastro. 
       lbit_mask_mode="astro"
-      nch=trimlen(lbit_mask_mode)
-      write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
-      call check_csb_list(lastro_csb, max_csb,
+      write(*,'(1x,a,$)') lbit_mask_mode
+      call check_csb_list(lvlba_csb, max_csb,
      >                    lsked_csb,num_tracks,imask,ierr)
       if(ierr .eq. 0) goto 300         
       if(.not.(kdbbc_rack .or. kcomment_only)) goto 900        
     
 ! Check to see if a valid astro2 mode.
       lbit_mask_mode="astro2" 
-      nch=trimlen(lbit_mask_mode)
-      write(*,'(1x,a,$)') lbit_mask_mode(1:nch)   
+      write(*,'(1x,a,$)') lbit_mask_mode
       call check_csb_list(lastro2_csb, max_csb,
      >                    lsked_csb,num_tracks,imask,ierr)   
       if(ierr .eq. 0) goto 300             
@@ -442,58 +394,19 @@
          goto 300
       endif 
 
-! Now check to see if valid geo2 mode or wastro or both.  
-
-! Check to see if a valid geo2 mode with VSI1
+! Check to see if a valid geo2 mode. 
       lbit_mask_mode="geo2" 
-      nch=trimlen(lbit_mask_mode)
-      write(*,'(1x,a,$)') lbit_mask_mode(1:nch)//"-vsi1-2"
-      call check_csb_list(lgeo2_csb, max_csb*2,
-     >                    lsked_csb,num_tracks,imask,ierr)   
-
-! If all fits on VSI1 and valid geo2, then done. 
-      if(imask_hi .eq. 0 .and. ierr .eq. 0) goto 300
-      kgeo2 = ierr .eq. 0 
-
-! check wastro mode in vsi1-2    
-      lbit_mask_mode="wastro"
-      nch=trimlen(lbit_mask_mode)  
-      write(*,'(1x,a,$)') lbit_mask_mode(1:nch)//"-vsi1-2"
-      call check_csb_list(lwastro_csb, 2*max_csb,
+      write(*,'(1x,a,$)') lbit_mask_mode
+      call check_csb_list(lgeo2_csb, max_csb,
      >                    lsked_csb,num_tracks,imask,ierr)
-      kwastro = ierr .eq. 0
+      if(ierr .eq. 0) goto 300 
 
-      if(.not. (kwastro .or. kgeo2)) goto 900
 
-! Look at case where is on VSI2
-      if(imask_lo .eq. 0) then
-         if(kwastro) then
-            lbit_mask_mode="wastro"
-         else
-            lbit_mask_mode="geo2"
-         endif
-         goto 300
-      endif 
-
-! Have stuff on both VSI1 and VSI2
-      if(kwastro) then 
-! For DBBC_DDC racks & WASTRO all must be in VSI2.
-!      write(*,*) "did not find ", lsked_csb(ierr) 
-       if(cstrack_cap(istn).eq."DBBC_DDC" .and. imask_lo.ne.0) then
-          write(*,*) " " 
-          write(*,*) "ERROR! Rack is DBBC_DDC and some channels in VSI1"      
-       endif 
-       if(ierr .eq. 0) goto 300 
-      else 
-        write(*,*) " "
-        write(*,*) "geo2 mode valid only if on VSI1 or VSI2"    
-      endif       
-   
-      if(.not.kcomment_only) goto 900          
+      if(.not.kcomment_only) goto 900         
+  
 !
 ! A little bit of cleanup.
 300   continue
-      write(*,*) " " 
       write(*,'(a)') " Success! mode="//lbit_mask_mode 
 !      write(*,'(a)') " Using: ",lbit_mask_mode
 
@@ -513,73 +426,45 @@
 ! If we need to, turn on extra bits until we get to 1,2, 4, 8, 16, or 32 channels.
       itemp=1
       do while(num_tracks .lt. nchan_rec)
-        if(iand(itemp,imask(1)) .eq. 0) then
-          imask(1)=ior(itemp,imask(1))             !bit not set. Set it.
+        if(iand(itemp,imask) .eq. 0) then
+          imask=ior(itemp,imask)             !bit not set. Set it.
           num_tracks=num_tracks+1
         endif
         itemp=ishft(itemp,1)            !shift the bit.
       end do
 
       if(kcomment_only) then             
-        call drudg_write_comment(lu_outfile,
-     >   " Channel assignments consistent with vsi4="//lbit_mask_mode)
-        call drudg_write_comment(lu_outfile,
-     >   " Following command assumes VSi4/DBBC input")
-        call drudg_write_comment(lu_outfile,
-     >   " Please check and change if necessary")    
+        write(lu_outfile,'(a)')
+     >   '" Channel assignments consistent with vsi4='//lbit_mask_mode
+        write(lu_outfile,'(a)') 
+     >   '" Following command assumes VSi4/DBBC input'
+        write(lu_outfile,'(a)') 
+     >   '" Please check and change if necessary'
       endif
-    
-! *****Everything fits on VSI1. 
-      if(imask(2) .eq. 0) then           !everything fits on VSI1.
-        if(cstrack_cap(istn) .eq. "DBBC_DDC") then
-          if(lbit_mask_mode.eq."geo2" .or. 
-     >       lbit_mask_mode .eq. "astro3") then
-             call drudg_write_comment(lu_outfile,
-     >        "Recorder must be wired to vsi1")
-          else if(lbit_mask_mode .eq. "astro2") then
-             call drudg_write_comment(lu_outfile,
-     >     "Recorder must be wired to vsi1 if firmware is before v105")               
-          else
-             call drudg_write_comment(lu_outfile,
-     >     "Recorder may be wired to vsi1 or vsi2")
-          endif      
-        else if(cstrack_cap(istn) .eq. "DBBC_DDC/FILA10G") then
-          call drudg_write_comment(lu_outfile,
-     >        "vsi-12 input should be used in 'equip.ctl'")
-          if(lbit_mask_mode.eq."geo2" .or. 
-     >       lbit_mask_mode .eq. "astro3") then
-            call drudg_write_comment(lu_outfile,             
-     >        "... vsi1 is also supported")
-          elseif(lbit_mask_mode .eq. "astro2") then
-            call drudg_write_comment(lu_outfile,
-     >        "... vsi1 is also supported")
-            call drudg_write_comment(lu_outfile,
-     >        "... vsi2 is supported if firmware is v105 or later")
-          else 
-            call drudg_write_comment(lu_outfile,
-     >        "... vsi1 or vsi2 are also supported")
-          endif   
-        endif        
 
-      else 
-! Some stuff on VSI2
-        if(cstrack_cap(istn) .eq. "DBBC_DDC") then
-          if(imask(1) .ne. 0) then
-            write(*,*) "DBBC_DDC can not use both vsi1 and vsi2"
-            goto 900
-          endif 
-          call drudg_write_comment(lu_outfile, 
-     >      "Recorder must be wired to vsi2")
-        else if(cstrack_cap(istn) .eq. "DBBC_DDC/FILA10G") then
-          call drudg_write_comment(lu_outfile,
-     >      "Fila10G VSI1-2 must be selected in 'equip.ctl'") 
-        endif 
-      endif 
+       if(kfila10g_rack) then
+! put in a null argument if kddbc_rack before mask 
+         if(kdbbc_rack) then  
+          write(cbuf,'(a,"=,0x",Z8.8,",,",f9.3)')
+     >    'fila10g_mode', imask,samprate(istn,icode)                   
+        else
+           write(cbuf,'(a,"=0x",Z8.8,",,",f9.3)')
+     >     'fila10g_mode', imask,samprate(istn,icode)                   
+        endif
+        call drudg_write(lu_outfile,cbuf)
+        write(lu_outfile,'("fila10g_mode")') 
+       endif     
 
-       call proc_track_mask_lines(lu_outfile, imask_hi,imask_lo,
-     >   kfila10g_rack,samprate(istn,icode), lmode_cmd,lext_vdif)
+       if(lmode_cmd .eq. 'bit_streams') then
+! Only output mask.      
+         write(cbuf,'(a,"=",",0x",Z8.8,",,,")') lmode_cmd,imask
+       else
+         write(cbuf,'(a,"=",a,",0x",Z8.8,",,",f9.3)')
+     >    lmode_cmd,lext_vdif, imask,samprate(istn,icode)
+       endif 
 
-  
+      call drudg_write(lu_outfile,cbuf)
+      call drudg_write(lu_outfile,lmode_cmd)     
       if(kcomment_only) return
 
       if(kdbbc_rack) then
@@ -610,34 +495,16 @@
      > "*********************************************************"
       write(*,*)
      > "ERROR(proc_disk_tracks)! No valid Mark5B mask/mode found."
-
-      write(*,*) "Tracks in schedule file are: "
-      icnt=0 
-      do i=1,num_tracks
-        write(*,'(a," ",$)') lsked_csb(i)
-        icnt=icnt+1
-        if(icnt .gt. 15) then
-          icnt=0
-          write(*,*)
-        endif
-      end do 
-      if(icnt .ne. 0) write(*,*)  
-      if(ierr .ne. 0) then 
-          write(*,'("First track not found is ",a)') lsked_csb(ierr)  
-      endif 
-      write(*,'("Bit masks ", 2("0x",z8.8,  " "))') imask(2), imask(1) 
-
+     >
       if(.not.kignore_mark5b_bad_mask) then
           write(*,*) "Please fix file and start again."
         stop
       endif
       write(*,*) "You will need to edit the PRC file."
-      call drudg_write_comment(lu_outfile,
-     >  "Please change the following command to reflect")
-      call drudg_write_comment(lu_outfile,
-     >  "the desired channel assignments and effective sample rate:")
-
-      cbuf=lmode_cmd//'=ext,0xffffffff,,1.000'
+      write(lu_outfile,'(a,/,a)')
+     >  '"Please change the following command to reflect',
+     >  '"the desired channel assignments and effective sample rate:'
+         cbuf=lmode_cmd//'=ext,0xffffffff,,1.000'
       call drudg_write(lu_outfile,cbuf)
       call drudg_write(lu_outfile,lmode_cmd) 
       write(lu_outfile,'(a)') "form=UNKNOWN"

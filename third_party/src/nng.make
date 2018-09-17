@@ -169,7 +169,7 @@ $(SOURCES): $(NNG_ARCHIVE)
 	tar xzmf $(NNG_ARCHIVE)
 
 
-CFLAGS +=  -Wall -Wextra -fno-omit-frame-pointer -std=gnu99 -isystem $(NNG_DIR)/src
+CFLAGS +=  -g -Wall -Wextra -fno-omit-frame-pointer -std=gnu99 -isystem $(NNG_DIR)/src
 CPPFLAGS += \
 			-DNNG_HAVE_ALLOCA=1 \
 			-DNNG_HAVE_BACKTRACE=1 \
