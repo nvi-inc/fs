@@ -1,6 +1,20 @@
 This file contains a summary of changes made and why.
-2018Aug089
-  Introduced new 'geo2' mode in proc_disk_tracks.f 
+2018Sep11
+   proc_disk_tracks.f: Comments modified based on email from WEH 2018Sep06. Also if fila10g, use 64 bit mask for Mark5C.  
+   proc_dbbc_pfb_tracks.f: Fixed an error in writing out a mask. 
+   proc_track_mask_lines.f: New routine.  writes out the mask lines for the proc_disk_tracks.f and proc_dbbc_pfb_tracks.f
+2018Sep05 
+   New routine: drudg_write_comment.f.  This outputs comment lines in files. 
+   proc_mk5_init1.f:  Got rid of extraneous '"'  (double quotes) at end of comment lines.           
+   proc_disk_tracks.f: Better debug info. Now if it doesn't find a valid mode, will write 
+   all the "CSB" info (Channel-Sideband-Bit) info that was in the sked file. 
+2018Sep04 
+   get_version.f Removed line that wrote debug info. This was printing spurious "32". 
+2018Aug18 
+   Added support for modes that vsi2
+   check_csb_list.f:    Increased mask from 32 bits to 64 bits
+   proc_disk_tracks.f:  Added wastro2 and geo2 modes which can use 64 tracks. Also output comments 
+   if DBBC_DDC or  DBBC_DDC/FILA10G saying how things should be setup for recorder. 
 2018Jul20 
   New subroutine write_drudge_release_line for use by procintr.f and snapintf.f. Removed this functionality from both.
   Put all version information in common file  drver_com.ftni. Added this include file to fdrudg.f.
@@ -9,12 +23,14 @@ This file contains a summary of changes made and why.
   New function crelease.c gets RELEASE string at compile time. 
   fdrudg.f and write_drudge_release_line.f will include crel_fs if it is non-blank.  
   Makefile was modified to correctly get the RELEASE      
-2018Jun19 proc_setup.f: Fixed bug in cont_cal. If Rack is DBBC_DDC and 'cont_cal off' emit cont_cal=off;
-2018Jun17 sread.f: When reading in a VEX file printed an extra blank line when it was done reading in the schedule. 
-          This showed up as a blank line between "$SOURCES" and "Experiment name: ",
-          drudg_rdctl.f:  Removed erroneous report of error in label command.
-          Also made sure there were spaces between all sections when it was writing out progrees of reading skedf.ctl. 
-	  fdrudg.f: Removed debugging statement that wrote out first recorder
+2018Jun19 
+  proc_setup.f: Fixed bug in cont_cal. If Rack is DBBC_DDC and 'cont_cal off' emit cont_cal=off;
+2018Jun17 
+  sread.f: When reading in a VEX file printed an extra blank line when it was done reading in the schedule. 
+  his showed up as a blank line between "$SOURCES" and "Experiment name: ",
+  drudg_rdctl.f:  Removed erroneous report of error in label command.
+  Also made sure there were spaces between all sections when it was writing out progrees of reading skedf.ctl. 
+  fdrudg.f: Removed debugging statement that wrote out first recorder
 2018Jun05 vobinp.f: Modified so if a station in the scan is not in the station list, then program 
           aborts with warning message.
 2018Jun05 ivgtst.f: Version in drudg had bug where if station were missing in station list, set the value 

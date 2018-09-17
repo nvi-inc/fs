@@ -11,6 +11,11 @@
       integer lu_file,istat,icode    
 
 ! History
+! Now most recent at the top.
+!
+! 2018Sep10 JMGipson. Changed logic to make more transparent. 
+!
+!
 ! 2016Jan18 JMGipson.  First working version.
 ! 2016May07 WEH        reorder vsi1/vsi2, remove unitialized ichan bug
 ! 2016Sep08 JMG.  Added in vsi_align command.  To get 'lvsi_prompt' had to include drcom.ftni.
@@ -26,6 +31,9 @@
     
       integer*4 itemp
       integer*4 imask(2)  !Mask can be 64 bits long. 
+      integer*4 imask_lo, imask_hi     
+      equivalence(imask(1),imask_hi)
+      equivalence(imask(2),imask_lo)
      
 !      character*80 cbuf
       character*20 lmode_cmd
@@ -56,50 +64,16 @@
          itemp=3             !always set 2 bits.
          if(i .le. 16) then 
            itemp=ishft(itemp,(i-1)*2)     !shift the bits into the appropriate place
-           imask(2)=ior(imask(2),itemp)
+           imask(2)=ior(imask(2),itemp)   !this is low order bits
          else
            itemp=ishft(itemp,(i-17)*2)
-           imask(1)=ior(imask(1),itemp)
+           imask(1)=ior(imask(1),itemp)  !this is high order bits. 
          endif
        end do
-! Note imask(1) is the high-order which gets written out first. 
-! write out commands that look something like this:
-!>>    fila10g_mode=0x0000000055555555,,16.00
-!>>     fila10g_mode
-!>>     mk5c_mode=vdif,0x0000000055555555,,16.00
-!>>     mk5c_mode 
 
-!For fila10g, then have 64 bit masks. Else it is 32 bit. 
-      if(kfila10g_rack) then
-        if(imask(1) .eq. 0) then
-          write(cbuf,'(a,"=,0x",z8.8,",,",f9.3)')
-     >      'fila10g_mode', imask(2),samprate(istat,icode)                   
-        else
-          write(cbuf,'(a,"=0x",Z8.8,",0x",z8.8,",,",f9.3)')
-     >      'fila10g_mode', imask(1:2),samprate(istat,icode)                   
-        endif
-        call drudg_write(lu_file,cbuf)
-        write(lu_file,'("fila10g_mode")') 
-      endif
-
-      if(imask(1) .eq. 0) then 
-        write(cbuf,'(a,"=",a,",0x",Z8.8,",,",f9.3)')
-     >    lmode_cmd,lext_vdif, imask(2),samprate(istat,icode)
-      else 
-        write(cbuf,'(a,"=",a,",0x",2Z8.8,",,",f9.3)')
-     >    lmode_cmd,lext_vdif, imask(1:2),samprate(istat,icode)
-      endif 
-
-      if(lmode_cmd .eq. "bit_streams") then
-        if(imask(1) .eq. 0) then 
-          write(cbuf,'(a,"=",",0x",Z8.8,",,,")')lmode_cmd, imask(2)
-        else
-          write(cbuf,'(a,"=",",0x",Z8.8,",,,")') lmode_cmd, imask(1:2)
-        endif
-      endif 
-    
-      call drudg_write(lu_file,cbuf)
-      call drudg_write(lu_file,lmode_cmd)     
+      call proc_track_mask_lines(lu_file, imask_hi,imask_lo,
+     >   kfila10g_rack,samprate(istat,icode), lmode_cmd,lext_vdif)
+  
 ! Now we have to write out the vsi1 and vsi2 commands. These look like...
 !>>   form=flex 
 !>>   vsi2=a02,a03,a04,a05,a06, c04,c05,c06    ....upto 16 channels.

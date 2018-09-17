@@ -3,7 +3,7 @@
       integer*2 iverMajor,iverMinor,iverPatch
       character*32 crel_FS
 ! local
-      integer j
+     
       integer ind
 
 ! below is set at compiletime on Unix systems. must be set by hand on HPUX
@@ -15,7 +15,6 @@
 
 ! Replace NULL with space 
       ind=index(crel_fs,char(0))
-      write(*,*) ind 
       do while(ind .ne. 0) 
          crel_fs(ind:ind)=" "
          ind=index(crel_fs,char(0))
