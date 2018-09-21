@@ -1,6 +1,6 @@
-File: /usr2/fs/misc/fs91120up.txt        Version: 8.5  Date: 180917
+File: /usr2/fs/misc/fs9130up.txt         Version: 8.7  Date: 180919
 
-		       FS 9.11.20 Update Notice
+		       FS 9.13.0 Update Notice
 
 
 I. Introduction
@@ -13,21 +13,28 @@ This document is divided into four sections:
   A.   Reference Appendix for Installation
 
 This update is intended for all stations.  In addition to several
-small improvements, the main change in this version is support in
-'drudg' for 'sched' staggered start mode which schedules different
-recording start times at different stations.  This cannot work
-optimally because it does not follow the 'sked' observation time-line
-that 'drudg' assumes.  However, the new support will reduce wasted
-recording time, improve the quality of the Tsys measurements, and
-maximize the time that the data is marked valid after the Tsys
-measurements.  This version also provids support for modes using two
-DBBC2 VSI outputs when used with a FiLa10G and Ethernet recorder.
+small improvements, the main change in this version is support for
+client/server split between the user interface and the core of the
+FS. Another major change is support in 'drudg' for 'sched' staggered
+start mode which schedules different recording start times at
+different stations.  This cannot work optimally because it does not
+follow the 'sked' observation time-line that 'drudg' assumes.
+However, the new support will reduce wasted recording time, improve
+the quality of the Tsys measurements, and maximize the time that the
+data is marked valid after the Tsys measurements.  This version also
+provids support for modes using two DBBC2 VSI outputs when used with a
+FiLa10G and Ethernet recorder.
 
 We encourage all stations to upgrade now even if they do not need the
 new features and bugs fixes because doing so will make future upgrades
 easier.  Upgrading from 9.11.19 is very easy.
 
-The most significant changes in version 9.11.20 were:
+Please note that we have skipped version number 9.12, which is in use
+for a separate branch of the FS that is only for VGOS operations.
+That branch will be merged into the 9.13 branch, the main branch, in
+the future.
+
+The most significant changes in version 9.13.0 were:
 
    (i) Availability of a server for the user interface.  This allows
        multiple independent user interfaces to be used with the FS.
@@ -47,8 +54,8 @@ The most significant changes in version 9.11.20 were:
        change which log is viewed by changing which file is 'tail'ed.
 
        This feature is opt-in for this version of the FS.  We
-       recommend that you install the FS without this feature
-       initially, then test the display server functionality
+       recommend that you install the FS with this feature compiled
+       in, initially, then test the display server functionality
        separately.  Instructions are provided for enabling and
        disabling the feature as well as a description of how to use
        it.
@@ -71,7 +78,15 @@ The most significant changes in version 9.11.20 were:
        'midob'.  This accommodates continuous or non-continuous
        calibration 'preob' procedures automatically.
  
- (iii) Improvements to the 'mk5c_mode' command to fully support Mark
+ (iii) Support for DBBC DDC for two VSI output modes for racks types
+       that include a FiLa10G used with an Ethernet recorder.  Support
+       was also added for 'geo2' DDC firmware versions 106 and later
+       for single VSI output on VSI1 output.  Single VSI output on
+       VSI2 for modes 'wastro' and 'geo2' was added.  Please see both
+       the FS (item #22) and 'drudg' (item #4) change notes for more
+       details.
+
+  (iv) Improvements to the 'mk5c_mode' command to fully support Mark
        5C and FlexBuff recording for both 5B/Ethernet and VDIF
        recording with 'jive5ab'.  This change consists primarily of
        accepting any effective sample rate and total bit rate that
@@ -95,7 +110,7 @@ The most significant changes in version 9.11.20 were:
        recording, which the FS does not directly support, in case it
        is needed in an unusual situation.
 
-  (iv) The 'fmset' program for Mark 5B recorders was improved to give
+   (v) The 'fmset' program for Mark 5B recorders was improved to give
        a specific error message for the case where it is run right
        after the 'jive5ab' control program is started.  In this case,
        'jive5ab' reports an error rather than reporting the time,
@@ -106,35 +121,28 @@ The most significant changes in version 9.11.20 were:
        This should also help ease the transition for stations that are
        moving from 'DIMino' to 'jive5ab'.
 
-   (v) Several small improvements were made to 'plog' and 'fesh'.
+  (vi) Several small improvements were made to 'plog' and 'fesh'.
 
-  (vi) If a station has reliable NTP available for its FS computer,
+ (vii) If a station has reliable NTP available for its FS computer,
        the recommended time model is now 'computer'.  Please see
        '/usr2/fs/misc/ntp.txt' for more details.  Please note that the
        use of 'setcl' in 'midob' is still required to monitor the
        formatter time.
 
- (vii) The VEX parser now support units for the rate in 'clock_early'
+(viii) The VEX parser now support units for the rate in 'clock_early'
        statements.
 
-(viii) Improved example versions of the station 'metserver' and
+  (ix) Improved example versions of the station 'metserver' and
        'metclient' programs.  The improvements include trapping more
        errors being reported and support for WMT70x wind sensors.  The
        FS now supports acces to local or remote instances of
        'metserver'.
 
-  (ix) Small improvements were made to 'gnplt': more Tcal points per
+   (x) Small improvements were made to 'gnplt': more Tcal points per
        band and non-default font sizes.
 
-   (x) Support in 'tsys', 'onoff', and 'fivpt' for user devices that
-       can't have a "zero" level measured.
-
-  (xi) Support for DBBC DDC for all two VSI output modes for racks
-       types that include a FiLa10G used with an Ethernet recorder.
-       Support was also added for 'geo2' DDC firmware versions 106 and
-       later.  Single VSI output on VSI2 for modes 'wastro' and 'geo2'
-       was added.  Please see both the FS (#22) and 'drudg' (#4)
-       change notes for more details.
+  (xi) Support in the 'tsys', 'onoff', and 'fivept' commands for user
+       devices that can't have a "zero" level measured.
        
 As always, we are deeply indebted to Jonathan Quick (HartRAO) for his
 many significant contributions that go far beyond what is explicitly
@@ -143,7 +151,7 @@ mentioned.
 
 II. Installation
 
-Detailed instructions are provided below for installing 9.11.20 as an
+Detailed instructions are provided below for installing 9.13.0 as an
 upgrade to 9.11.19, the previous stable release.  If you have an older
 version than 9.11.19, please refer to the appendix, which is described
 next, for more information.
@@ -170,20 +178,20 @@ The installation steps for upgrading from 9.11.19 are listed below.
      wrong with the installation.  For more detail, please see
      sub-section 'A.4. Making a back-up before installing'.
 
- (1) Place a copy of the fs-9.11.20 archive in your FS machine's
+ (1) Place a copy of the fs-9.13.0 archive in your FS machine's
      '/tmp' directory.  For example, you might do the following:
 
        a. navigate to URL https://vlbi.gsfc.nasa.gov/software/fs
        b. enter your FS account name and password at the prompt
        c. click on the 'dist' link
-       d. download fs-9.11.20.tgz
-       e. scp transfer fs-9.11.20.tgz to your FS machine, placing it
+       d. download fs-9.13.0.tgz
+       e. scp transfer fs-9.13.0.tgz to your FS machine, placing it
           in '/tmp' directory
 
      Another FS server is available at: http://www.metsahovi.fi/fs/.
 
      Your institution must have an account on the servers in order to
-     download files.  Please contact Ed (ed.himwich@nasa.gov), if you
+     download files.  Please contact Ed (Ed.Himwich@nasa.gov), if you
      need an account or can't find your password.
 
  (2) Log-in as 'root'.
@@ -191,12 +199,12 @@ The installation steps for upgrading from 9.11.19 are listed below.
  (3) Extract the source from the archive:
 
        cd /
-       tar xzpf /tmp/fs-9.11.20.tgz
+       tar xzpf /tmp/fs-9.13.0.tgz
 
  (4) Set the link for the new FS version:
 
        cd /usr2
-       ln -sfn fs-9.11.20 fs
+       ln -sfn fs-9.13.0 fs
 
  (5) Having the wrong ownership and/or permissions on the operational
      files can cause errors during FS operations.  If this needs to be
@@ -217,10 +225,16 @@ The installation steps for upgrading from 9.11.19 are listed below.
     
      to confirm that everything compiled correctly.
 
+     Note that if you have problems loading programs that use
+     'ncurses' (e.g., the 'monit' family of programs, 'fmset', and
+     'predict'), using the 'FS_TINFO_LIB' environment variable may fix
+     the problem.  Please see FS change item #19 for details on its
+     use.
+
  (8) This step is for modifying your local programs. That should not
-     be necessary for this update, but we do recommend that recompile
-     and relink your programs against the new FS version as described
-     in the next step.
+     be necessary for this update, but we do recommend that you
+     recompile and relink your programs against the new FS version as
+     described in the next step.
 
      However, if you use 'metserver' and/or 'metclient', we recommend
      that you update your local copies with the new versions.  You can
@@ -283,7 +297,7 @@ The installation steps for upgrading from 9.11.19 are listed below.
      (ii) This change is to convert the FS to use NTP time internally.
           This change is recommended if you have reliable NTP
           available.  This can can be deferred until the rest of the
-          installation of 9.11.20 is complete.  When you make this
+          installation of 9.13.0 is complete.  When you make this
           change, please refer to '/usr2/fs/misc/ntp.txt' for
           requirements and instructions.
 
@@ -317,39 +331,70 @@ The installation steps for upgrading from 9.11.19 are listed below.
 
      ii.  If you wish you can update your 'sched_end' procedures to
           auotmatically push logs as described below in the FS changes
-          section under item 12.  Please refer to that item for a
+          section under item #12.  Please refer to that item for a
           description of the changes.
 
 (14) This step is for miscellaneous FS related changes.  There are
-     two.  One (i) is recommended if you have been using 'plog'.  The
-     other (ii) is optional, to be used if you want a non-default size
-     font in 'gnplt'
+     three.  The first (i) is recommended if you have been using
+     'plog'.  The second (ii) is recommended to reduce the risk of
+     accidentally overwriting files with 'cp' and 'mv'.  The third
+     (iii) is optional, to be used if you want a non-default size font
+     in 'gnplt'. The third is
 
-      i.  If you have been using 'plog' to push logs, it is
-          recommended that you clean-up any existing cookie files.
-          You can find them using:
+       i.  If you have been using 'plog' to push logs, it is
+           recommended that you clean-up any existing cookie files.
+           You can find them using:
 
-            find /usr2 -name '.urs_cookies'
+             find /usr2 -name '.urs_cookies'
 
-          They can be deleted individually using the login of the
-          account that owns them, typically 'oper'.
+           They can be deleted individually using the login of the
+           account that owns them, typically 'oper'.
+ 
+           If you have not been using 'plog' to push your IVS logs or
+           'fesh' to download (and 'drudg') your IVS schedules, we
+           recommend that you do so.  You can use 'plog -h' and 'fesh
+           -h' to get information on configuring them.
 
-     ii.  If you want to use a font size other than the default (8) in
-          'gnplt', you set an enviroment variable in your shell
-          session before running 'gnplt'.  A possible larger more
-          readable font size might be '12'.  If your shell is 'tcsh',
-          you can use '12' issuing the following command before
-          running 'gnplt' by issuing:
+      ii.  If you are using 'tcsh' as the shell of 'oper' and 'prog'
+           (which is the default), it is recommended that the
+           following lines be added to the end of the '~oper/.cshrc'
+           and '~prog/.cshrc' files:
 
-            setenv FS_GNPLT_FONTSIZE 12
+             a mv	'mv -i'
+             a cp	'cp -i'
 
-          for 'bash', use:
+           You can refer to '/usr2/fs/st.default/proc/.cshrc' and
+           '/usr2/fs/st.default/oper/.cshrc' for example.
 
-            export FS_GNPLT_FONTIZE=12
+           This change will cause casual use of the 'mv' (move or
+           rename) and 'cp' (copy) commands to prompt interactively
+           before overwritting an existing file.  This may help avoid
+           accidental overwriting of files.  The 'rm' (remove) command
+           is already set-up this way by default.  (You will have to
+           log-out and back in or reread the .cshrc file in each open
+           shell to make the change active.)  The interactive prompt
+           can be suppressed for an individual command by preceeding
+           it with a backslash, e.g., '\mv'.
 
-          To make this the default whenever you login, you can add the
-          appropriate command to your '~/.loginrc' ('tcsh') or
-          '~/.profile' ('bash') file as appropriate.
+           If you are using a different shell (possibly 'bash'), you
+           might want to consider making similar changes for it.
+
+     iii.  If you want to use a font size other than the default (8)
+           in 'gnplt', you set an enviroment variable in your shell
+           session before running 'gnplt'.  A possible larger more
+           readable font size might be '12'.  If your shell is 'tcsh',
+           you can use '12' issuing the following command before
+           running 'gnplt' by issuing:
+
+             setenv FS_GNPLT_FONTSIZE 12
+
+           for 'bash', use:
+
+             export FS_GNPLT_FONTIZE=12
+
+           To make this the default whenever you login, you can add
+           the appropriate command to your '~/.loginrc' ('tcsh') or
+           '~/.profile' ('bash') file as appropriate.
 
 (15) Test the FS as 'oper'.  Generally speaking a fairly thorough test
      is to run a test experiment.  Start with using 'drudg' to rotate
@@ -375,7 +420,7 @@ The installation steps for upgrading from 9.11.19 are listed below.
      Managing this is a lot safer if you have a third disk.
 
 (18) We encourage you to enable the display server interface of the
-     FS.  Please see FS change item (20) for a more information.
+     FS.  Please see FS change item #20 for a more information.
 
 III. Changes Since Version 9.11.19
 
@@ -394,7 +439,7 @@ The following is a summary of FS changes since 9.11.19.
     recorders.
  3. Improvements to 'plog'.
  4. Improvements in 'fesh'.
- 5. logpl now plots values that proceed a trailing semi-colon.
+ 5. 'logpl' now plots values that proceed a trailing semi-colon.
  6. An internal error that could cause very long log entries to
     overwrite buffer limits was fixed.
  7. The VEX parser was fixed to work on 64-bit system.
@@ -416,8 +461,8 @@ The following is a summary of FS changes since 9.11.19.
     increased to 1200.
 16. Added environment variable 'FS_GNPLT_FONTSIZE' to select
     non-default font sizes.
-17. Support in 'tsys', 'onoff', and 'fivpt' for user devices that
-    can't have a "zero" level measured.
+17. Support in the 'tsys', 'onoff', and 'fivept' commands for user
+    devices that can't have a "zero" level measured.
 18. New 'release' string for version number.
 19. Optional 'Makefile' environment variable 'FS_TINFO_LIB' for programs
     use 'ncurses'.
@@ -455,7 +500,7 @@ A more detailed discussion of these changes follows.
     case where it is run right after the 'jive5ab' control program is
     started.  In this case, 'jive5ab' reports an error rather than
     reporting the time, since there has been no 'dot_set=...' command
-    ('DIMino' does not report an error in this case).  Although
+    yet.  ('DIMino' does not report an error in this case).  Although
     'fmset' already reported an error and still allowed the time to be
     set, it seemed worthwhile to have a more specific message in this
     case.  This should also help ease the transition for stations that
@@ -479,11 +524,13 @@ A more detailed discussion of these changes follows.
     terminal, for example when 'plog' is opened with 'popen'.
 
     Bug fix for cookie files being written to the current directory
-    rather than the users home.  Cookies are also now created with a
+    rather than the user's home.  Cookies are also now created with a
     umask of 007.  Stations may like to look for the extraneous cookie
     files to remove on the file system with, for example:
 
        find /usr2 -name '.urs_cookies'
+
+    This step is included in the installation instructions for 9.13.0.
 
     'plog' now has a version flag to aid debugging.
 
@@ -491,7 +538,7 @@ A more detailed discussion of these changes follows.
     
     'fesh' now has a version flag to aid debugging.
 
- 5. logpl now plots values that proceed a trailing semi-colon.  This
+ 5. 'logpl' now plots values that proceed a trailing semi-colon.  This
     situation might occur in log entries for a low-level VSI-S device
     response.  Thanks to Pablo de Vicente and Javier González García
     at Yebes for contributing this improvement.
@@ -514,7 +561,7 @@ A more detailed discussion of these changes follows.
 10. The DBBC PFB 'form=...' command now accepts codes 'spol', 'full'
     and 'full_auto'.  Although the FS does not provide full support
     for operations with these codes, this change should eliminate
-    error messages for 'off-label' use of the FS with these codes.
+    error messages for "off-label" use of the FS with these codes.
 
 11. Recovery of log files that were deleted while the FS was still
     writing to them was made faster.  Additionally, the formating of
@@ -582,10 +629,10 @@ A more detailed discussion of these changes follows.
     detection and reporting if the device reading loop is stuck and
     support for WMT70x (only) wind sensors.  If you use 'metserver'
     and/or 'metclient' programs, it is recommended that you update to
-    the new versions.  The new FS version can communicate with either
-    the old or new 'metserver' programs. The new FS version can use
-    either local or remote instances of 'metserver'.  It is necessary
-    to update the 'equip.ctl' if you use 'metserver' for
+    the new versions.  The 9.11.30 FS version can communicate with
+    either the old or new 'metserver' programs. The new FS version can
+    use either local or remote instances of 'metserver'.  It is
+    necessary to update the 'equip.ctl' if you use 'metserver' for
     meteorological data in the FS.
 
 14. The 'mk5b_mode' command now uses "updsnor" for 'net_protocol' in
@@ -602,11 +649,12 @@ A more detailed discussion of these changes follows.
     non-default font sizes.  The user can add the environment variable
     (exported) before running 'gnplt' to select non-default font
     sizes.  The default size is '8'.  A possible larger more readable
-    font size might be '12'.
+    font size might be '12'.  This helpful change was requested by Jun
+    Yang (Onsala).
 
-17. Support in 'tsys', 'onoff', and 'fivpt' for user devices that
-    can't have a "zero" level measured.  This allows use of devices
-    for which a "zero" or baseline signal can't be measured
+17. Support in the 'tsys', 'onoff', and 'fivept' commands for user
+    devices that can't have a "zero" level measured.  This allows use
+    of devices for which a "zero" or baseline signal can't be measured
     conveniently under computer control.  This works best for devices
     that would return zero counts if there were no input, e.g.,
     digital detectors.  This is enabled by specifying 'no' in a new
@@ -614,7 +662,7 @@ A more detailed discussion of these changes follows.
     that when this option is used for 'tsys' any measured value for
     'tpzero' will be ignored and a zero value will be used.  Please
     see 'help=user_device' for more details.  This change was
-    suggested by Mamoru Sekido at Kashima.
+    suggested by Mamoru Sekido (Kashima).
 
 18. New 'release' string for version number.  With this version of the
     FS it is possible to specify a 'release' string that is appended
@@ -630,39 +678,39 @@ A more detailed discussion of these changes follows.
 
     e.g.,
 
-      fs-9.11.20-rc1
+      fs-9.13.0-rc1
 
     For standard releases, the trailing '-string' is omitted.
 
     The use of '-string' can be used to distinguish between different
-    test releases and for other purposes.  The 'string' can up to 32
+    test releases and for special versions.  The 'string' can up to 32
     characters, but it is desirable to keep it short.  The top-level
-    Makefile will extract the FS version and release information from
-    the top-level directory that the Makefile is in.  As a result it
-    is no longer necessary to update the Makefile for a new directory
-    name.
+    'Makefile' will extract the FS version and release information
+    from the top-level directory that the 'Makefile' is in.  As a
+    result it is no longer necessary to update the 'Makefile' for a
+    new directory name.
 
 19. Optional 'Makefile' enviroment variable 'FS_TINFO_LIB' for
-    programs using 'ncurses'.  This variable can be used to specify
-    that the 'tinfo' library is include in the libraries that are
-    searched at load time for the 'fmset' and 'predict' programs and
-    the 'monit' family of programs.  The variable should have a
-    non-empty value to include 'tinfo'.  This variable can be set the
-    'prog' user's environment on login so that it is always available.
-    Examples of how to do this can be found in the .login' and
-    '.profile' files in '/usr2/fs/st.default/prog' for the 'tcsh' and
-    'bash' shells, respectively.  This only needs to be used if the
-    'ncurses' library does not include the 'tinfo' library in your
-    Linux distribution.  On such systems, a reference to 'stdcscr' in
-    a program can be the cause of the problem.  Thanks to Mamoru
-    Sekido at Kashima for reporting this issue.
+    programs using 'ncurses'.  This variable can be used to cause the
+    'tinfo' library to be explicitly included in the libraries that
+    are searched at load time for the 'fmset' and 'predict' programs
+    and the 'monit' family of programs.  The variable should have a
+    non-empty value to cause 'tinfo' to be explicitly included.  This
+    variable can be set the 'prog' user's environment on login so that
+    it is always available.  Examples of how to do this can be found
+    in the .login' and '.profile' files in '/usr2/fs/st.default/prog'
+    for the 'tcsh' and 'bash' shells, respectively.  This only needs
+    to be used if the 'ncurses' library does not include the 'tinfo'
+    library in your Linux distribution.  On such systems, a reference
+    to 'stdcscr' in a program can be the cause of the problem.  Thanks
+    to Mamoru Sekido at Kashima for reporting this issue.
 
 20. Support for DBBC DDC format code 'geo2' for DDC firmware versions
     106 and later.  This allows use of USB channels from all BBCs,
     1-16, on VSI1.
 
 21. Optional support for FS display server. This allows the FS user
-    interface to be detached from the operation components.
+    interface to be detached from the internal components.
     Instruction for enabling this feature (and disabling it, if that
     should become necessary) can be found in
     '/usr2/fs/misc/display_server.txt'.  This file also includes a
@@ -677,17 +725,25 @@ A more detailed discussion of these changes follows.
     possible to recover from some problems when only the one DBBC VSI
     output is required by cross-wiring between the DBBC output and
     FiLa10G inputs.  In this case, the station needs to determine the
-    correct bit masks to use, but any configuration should be
-    possible,
+    correct bit masks to use, but any workable configuration is
+    possible.
 
     The 'mk5b_mode', 'mk5c_mode', 'fila10g_mode' commands now support
-    bitmask selections in the upper 32 bits of the mask for DDC usage.
-    For 'mk5b__mode' only the upper (VSI2) or lower 32 bits (VSI1) may
-    be non-zero (use of only one Mark 5B recorder at a time is
-    supported; however, it would in princple be possible to support a
-    second recorder with a second FS and dividing the bit mask
-    appropriately).  For 'fila10g_mode', the upper 32 bits can only be
-    used if the FiLa10G input mode in 'equip.ctl' is set to 'vsi1-2'.
+    bit mask selections in the upper 32 bits of the mask for DDC
+    usage.  For 'mk5b__mode' only the upper (VSI2) or lower 32 bits
+    (VSI1) may be non-zero.  For 'fila10g_mode', the upper 32
+    bits can only be used if the FiLa10G input mode in 'equip.ctl' is
+    set to 'vsi1-2'.
+
+    Use of only one Mark 5B recorder at a time is supported.  However,
+    it would in princple be possible to support a second recorder with
+    a second FS and dividing the bit mask appropriately.  In this
+    case, the FS controlling the rack will only be able to collect the
+    TPI data with 'tpicd' for the channels in the portion of that mask
+    being use by that FS.  It would be possible to collect
+    non-continuous (on-off) calibration diode Tsys data for all
+    channels with 'caltsys' by explicitly specifying the detectors in
+    the procedure.
 
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/misc/changes.txt.
@@ -769,7 +825,10 @@ A more detailed discussion of these changes follows.
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/drudg/change_log.txt.
 
+
 			   C. Known FS Bugs
+
+(There have been no changes in this section since the previous version.)
 
 The following is a summary list of known bugs. They are described in more
 detail after the list.
@@ -972,7 +1031,7 @@ For reference, the list of the most recent 'critical updates,' since
 version 9.3.13, is given below.  These are updates that must be
 applied sequentially.  Please start with the next update with a later
 version number than what you have and apply it and the following
-listed versions before upgrading to the current version.  You can find
+listed versions before upgrading to the newt version.  You can find
 the latest versions of installation notes for these FS versions in the
 '/usr2/fs/misc' directory.  The list of critical updates is:
 
@@ -989,19 +1048,20 @@ the latest versions of installation notes for these FS versions in the
 
 Strictly speaking you do not need to actually use the source archives
 (.tgz files) of the previous versions.  You can just follow the steps
-in the upgrade notices for the corresponding FS versions.  However, it
-can be very helpful to actually install each version to help make sure
-that all of the upgrade steps have been completed and that the FS will
-run *and* to test it as described.  This can be particularly helpful
-when the upgrade requires some modifications to your local programs.
-So it probably best to actually install *and* test each version along
-the way.  This is especially true if you have to upgrade through more
-than one previous version.  Otherwise if a step was overlooked, it
-might be hard to identify for which version the error was made.
+in the upgrade notices for your local files for the corresponding FS
+versions.  However, it can be very helpful to actually install each
+version to help make sure that all of the upgrade steps have been
+completed and that the FS will run *and* to test it as described.
+This can be particularly helpful when the upgrade requires some
+modifications to your local programs.  So it probably best to actually
+install *and* test each version along the way.  This is especially
+true if you have to upgrade through more than one previous version.
+Otherwise if a step was overlooked, it might be hard to identify for
+which version the error was made.
 
 You can find the archives for old versions at:
 
-  http://lupus.gsfc.nasa.gov/fs/dist/old/
+  https://vlbi.gsfc.nasa.gov/software/fs/dist/old/
 
 or
 

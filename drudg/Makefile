@@ -33,7 +33,7 @@ chkgrpandwrite.o ckobs.o clist.o \
 copen.o copy_time.o counter_init.o crelease.o \
 delete_comma_and_write.o drchmod.o drprrd.o drset.o drudg.o drudg_rdctl.o \
 drudg_write.o drudg_write_comment.o dsnout.o \
-equip_type.o fakesum.o fc_chmod.o fc_getenv.o fdrudg.o find_num_chans_rec.o find_recorder_speed.o \
+equip_type.o fakesum.o fc_chmod.o fdrudg.o find_num_chans_rec.o find_recorder_speed.o \
 get_version.o getqual.o getstr.o gtsnp.o \
 iaddpc.o iaddtr.o init_hardware_common.o k4proc_type.o kcheckgrpor.o \
 label.o lablog.o labsnp.o lists.o lspin.o lstsum.o lstsum_info.o lstsumo.o \

@@ -26,25 +26,18 @@ print-%  : ; @echo $* = $($*)
 #  portopen(), including ibcon.
 #
 LIB_DIR = clib flib bosslb fclib fmpsee fslb lnfch newlb polb port rtelb vis \
-poclb skdrut vex rclco/rcl s2das
+poclb skdrut vex rclco/rcl s2das third_party
 #
 EXEC_DIR = rwand chekr fserr ddout fs fsalloc incom matcn oprin pcalr onoff \
 fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \
 quikv mcbcn brk moon logex headp fmset ibcon quikr go drudg rclcn pdplt logpl \
 lognm pcald msg fsvue fs.prompt inject_snap erchk mk5cn tpicd flagr \
 gnfit gndat gnplt dscon systests autoftp monpcal logpl1 holog gnplt1 predict \
-dbbcn popen s_client lgerr fesh plog
+dbbcn popen s_client lgerr fesh plog spubsub fsserver
 #
 
-# If environment variable FS_DISPLAY_SERVER is defined with a non-empty value
-# the FS will be build with the display client/server.
-
-ifdef FS_DISPLAY_SERVER
 export LDFLAGS += -L$(shell pwd)/third_party/lib
 export CPPFLAGS += -I$(shell pwd)/third_party/include
-LIB_DIR += third_party
-EXEC_DIR += spubsub fsserver
-endif
 
 all:	libs execs
 #

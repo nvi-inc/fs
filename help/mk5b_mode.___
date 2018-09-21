@@ -14,9 +14,9 @@ source:     data source or format
 	    Ignored for bit_streams.
 
             For mark5c_mode, the monitor value is the "magic"
-            recording mode specifier used by "jive5ab".
+            recording mode specifier used by 'jive5ab'.
 
-            See the comments for information on using "mark5b" for
+            See the comments for information on using 'mark5b' for
             Mark5B-over-Ethernet, which is not fully supported by the
             FS.
 
@@ -28,7 +28,7 @@ mask:       bit-stream mask, hex, non-zero 64-bit wide maximum,
 decimation: decimation factor
 	    For mk5b_mode: 1, 2, 4, 8, or 16.  No default unless
             sample (next parameter) is specified.
-            For mk5c_mode: only available for source "mark5b".
+            For mk5c_mode: only available for source 'mark5b'.
             There is no monitor value for Ethernet recorders.
 	    Ignored for bit_streams.
 
@@ -41,7 +41,7 @@ sample:     sample rate: in MHz.  For mk5b_mode: the possible range of
             more limited due to the available decimation factors; see
             comments; default sample rate is the VSI-H/Mark5B clock
             rate (from equip.ctl) unless a decimation factor was
-            specified or the VSI-H/Mark5B clock rate is "none".  For
+            specified or the VSI-H/Mark5B clock rate is 'none'.  For
             mk5c_mode, the value when considered with the track mask
             must yield a multiple of 1 Mbps for the total rate; see
             comments; no default.  Ignored for bit_streams.
@@ -54,97 +54,97 @@ okay        overide to allow command while recording, literal ascii:
 	    Ignored for mk5c_mode and bit_streams.
 
 Monitor only parameter:
-format      VDIF or possibly others (see "jive5ab" mode? query response)
+format      VDIF or possibly others (see 'jive5ab' mode? query response)
 tracks      number of tracks, Ethernet recorders only
 bitrate     track bit rate (Mbps), Ethernet recorders only
 frame       VDIF frame size in bytes, VDIF format only
 
 Comments:
 The effective sample rate can be specified in the SNAP command either
-explicitly with the "sample" parameter or implicitly with the
-"decimate" parameter.  Only one of "decimation" and "sample" may be
-specified.  For VDIF, "decimation" cannot be specified.  The recorders
+explicitly with the 'sample' parameter or implicitly with the
+'decimation' parameter.  Only one of 'decimation' and 'sample' may be
+specified.  For VDIF, 'decimation' cannot be specified.  The recorders
 do not respond with the effective sample rate.  In the query response
 for these commands, the commanded sample rate, if it was explicitly
 commanded, is shown in parentheses for informational purposes only.
 
-The "mk5c_mode" command is an alias for the "mk5b_mode" command, but
+The 'mk5c_mode' command is an alias for the 'mk5b_mode' command, but
 is used with Mark 5C/FlexBuff recorders only and with slightly
 different parameters.  The recorder must be controlled by the
-"jive5ab" control program for this command to work.
+'jive5ab' control program for this command to work.
 
-For the "mk5b_mode=..." and "mk5c_mode=mark5b,...", the minimum sample
-rate is 2 Mbps.  As a result the decimation factor may not yield an
-effective sample rate less than 2 Mbps when divided into the
-VSI-H/Mark5B clock rate (from equip.ctl).  When specifying the
+For the 'mk5b_mode=...' and 'mk5c_mode=mark5b,...' commands, the
+minimum sample rate is 2 MHz.  As a result the decimation factor may
+not yield an effective sample rate less than 2 MHz when divided into
+the VSI-H/Mark5B clock rate (from 'equip.ctl').  When specifying the
 decimation implicitly via a sample rate, the range of available sample
 rates is similarly limited by the range of decimation factors
 available.  As a result, the sample rate must be one of the powers of
-2 (MHz) starting with the VSI-H/Mark5B clock rate divided by 16 up to
-the VSI-H/Mark5B clock rate itself.
+2 MHz starting with the greater of 2 MHz and VSI-H/Mark5B clock rate
+divided by 16 up to the VSI-H/Mark5B clock rate itself.
 
-For Ethernet recording, either VDIF (via "mk5c_mode=vdif,...") or
-5b-over-Ethernet (via "mk5c_mode=mark5b,..."), the limitations on
+For Ethernet recording, either VDIF (via 'mk5c_mode=vdif,...') or
+5b-over-Ethernet (via 'mk5c_mode=mark5b,...'), the limitations on
 sample rates are described in next paragraph.
 
 The sample rate parameter is in units of MHz.  More resolution, down
 to 1 Hz, can obtained for Ethernet recorders by appending a decimal
 point and trailing digits. e.g. a sample rate of 15625 Hz (the lowest
-possible with a 64-bit mask) can be specified as "0.015625".  In
-principle the maximum value of the sample rate is the maximum value
+possible with a 64-bit mask) can be specified as '0.015625'.  In
+principle, the maximum value of the sample rate is the maximum value
 that will fit in an unsigned 64-bit integer, or 18446744073709551615
-Hz.  However, the possible values are futher limited by the fact that
+Hz.  However, the possible values are further limited by the fact that
 the total date rate must fit in a unsigned 64-bit value and be a
-multiple of 1 Mbps (for "mk5c_mode=...") , i.e., 18446744073709 Mbps
+multiple of 1 Mbps (for 'mk5c_mode=...') , i.e., 18446744073709 Mbps
 is the maximum.  Therefore the maximum effective sample rate is
-18446744073709. MHz (using only one track).  No limit checking is
+18446744073709 MHz (using only one track).  No limit checking is
 performed, so values that exceed these limits may produce erroneous
 results with no warning.  However, any unallowed values below these
 limits will return an error.
 
-For Ethernet recording, the "mk5c_mode=..." command in addition to
-defining the mode, also sends a "net_protocol=..." command.  For Mark
-5C, it also sends "packet=..." command.  For FlexBuff, it also sends
-an "mtu=..." command.  The operator can manually include
-"net_port=..."  commands if they are needed.
+For Ethernet recording, the 'mk5c_mode=...' command in addition to
+defining the mode, also sends a 'net_protocol=...' command.  For Mark
+5C, it also sends 'packet=...' command.  For FlexBuff, it also sends
+an 'mtu=...' command.  The operator can manually include
+'net_port=...'  commands if they are needed.
 
-The "bit_streams" commands is an alias for the "mk5b_mode" and
-"mk5c_mode" commands that does not communicate with the recorder.  All
+The 'bit_streams' commands is an alias for the 'mk5b_mode' and
+'mk5c_mode' commands that does not communicate with the recorder.  All
 parameters except the bit mask are ignored.  The main purpose of
-"bit_streams" is to provide a way to set the bit stream mask for
+'bit_streams' is to provide a way to set the bit stream mask for
 correct sampling of Tsys when no recorder is being used (typically
 during eVLBI) when a rack compatible with a Mark 5B/5C/FlexBuff (or
 none) recorder is in use.
 
-To get Tsys data for eVLBI, the user, in DRUDG, should select "none"
+To get Tsys data for eVLBI, the user, in 'drudg', should select 'none'
 for the recorder and the appropriate *non-FiLa10G* rack type.  Since
-there is no recorder, DRUDG will use the "bit_streams=..." command.
-This will set the bit mask in place of the "mk5b_mode=..." or
-"mk5c_mode=..." command.  If a non-FiLa10G rack is specified, DRUDG
-will also not use the "filag_mode=..."  command.  The result of having
-no "mk5b_mode=..."/"mk5c_mode=..." and "fila10g_mode=..." commands is
+there is no recorder, 'drudg' will use the 'bit_streams=...' command.
+This will set the bit mask in place of the 'mk5b_mode=...' or
+'mk5c_mode=...' command.  If a non-FiLa10G rack is specified, 'drudg'
+will also not use the 'filag_mode=...'  command.  The result of having
+no 'mk5b_mode=...'/'mk5c_mode=...' and 'fila10g_mode=...' commands is
 that the FS will not interfere with eVLBI remote control of the Mark
-5B/5C/FlexBuff and or a "FiLa10G".  The FS should still have the
+5B/5C/FlexBuff and or a FiLa10G.  The FS should still have the
 correct rack and recorder selected in equip.ctl.
 
 The recorder bit mask, only, determines the Tsys data reporting.  When
-a FiLa10G is in use, DRUDG always uses equivalent bit masks for
-"fila10g_mode=..." and "mk5c_mode=..." commands, but the FiLa10G mask
+a FiLa10G is in use, 'drudg' always uses equivalent bit masks for
+'fila10g_mode=...' and 'mk5c_mode=...' commands, but the FiLa10G mask
 has no effect on the Tsys data reported
 
-For mk5b_mode, only the upper or lower 32 bits of the mask may be
-non-zero.  The lower 32 bits select DBBC2 VSI1 bitstreams and the
-upper 32 bits select VSI2 bitstreams.  For these cases, the Mark 5B
-recorder can be connected to either VSI1 or VSI2.  However, there is
-no detection if an incompatable connection is being used.  Possible
-ncompatable connections include: (1) connected to VSI2 when the VSI1
-bitsreams for 'wastro' or 'geo2' are to be recorded, (2) connected to
-VSI2 when 'astro3' is to be recorded, (3) connection to VSI2 when
-'astro2' will be used with a DBBC2 firmware version earlier than v105,
-(4) connected to VSI1 when the VSI2 bitsreams for 'wastro' or 'geo2'
-are to be recorded.  Please see comments inserted by 'drudg' in the
-experiment procedures for *each* mode to verify what wiring maybe be
-required for an experiment.
+For the 'mk5b_mode' command, only the upper or lower 32 bits of the
+mask may be non-zero.  The lower 32 bits select DBBC2 VSI1 bitstreams
+and the upper 32 bits select VSI2 bitstreams.  For these cases, the
+Mark 5B recorder can be connected to either VSI1 or VSI2.  However,
+there is no detection if an incompatable connection is being used.
+Possible ncompatable connections include: (1) connected to VSI2 when
+the VSI1 bitsreams for 'wastro' or 'geo2' are to be recorded, (2)
+connected to VSI2 when 'astro3' is to be recorded, (3) connection to
+VSI2 when 'astro2' will be used with a DBBC2 firmware version earlier
+than v105, (4) connected to VSI1 when the VSI2 bitsreams for 'wastro'
+or 'geo2' are to be recorded.  Please see comments inserted by 'drudg'
+in the experiment procedures for *each* mode to verify what wiring
+maybe be required for an experiment.
 
 Stating the 'mk5b_mode' bitmask/VSI connections requirements
 positively: if mode is 'wastro' or 'geo2' and (i) the upper 32 bits
@@ -158,29 +158,29 @@ streams on VSI1 by connecting the recorder to VSI2.  For these modes`,
 no change in the 'mk5b_mode' bit mask is required for the change.
 
 When an Ethernet recorder is in use, the mask, decimation, and sample
-values are not returned by "jive5ab".
+values are not returned by 'jive5ab'.
 
 Bitmask LSB is VSI bit-stream 0, e.g. 0x1 selects bit-stream 0, etc.
 The number of bits turned on in the bit-stream mask must be 2^n where
 0 <= n <= 5, or a Mark5B will reject the command with an error.
 
-Non-default values of "fpdp" are for diagnostic use only.  The default
+Non-default values of 'fpdp' are for diagnostic use only.  The default
 is that the parameter is not sent to the recorder which causes the
 device to use its own default, which is different for 5B and 5B+.
 Value 2 is not supported by Mark 5B recorders, but is by Mark 5B+
 recorders.
 
-The "mk5b_mode=" and "mk5c_mode=" command will not succeed if
-recording has been commanded with the "disk_record=on" command.
-Either recording must be stopped using "disk_record=off" command first
-or (only for Mark 5B recorders controlled by "DIMino") if you wish to
+The 'mk5b_mode=' and 'mk5c_mode=' commands will not succeed if
+recording has been commanded with the 'disk_record=on' command.
+Either recording must be stopped using 'disk_record=off' command first
+or (only for Mark 5B recorders controlled by 'DIMino') if you wish to
 continue to set the mode despite recording being recording being
-active (not recommended), you can use "disk_record_ok" as the sixth
-parameter of the "mk5b_mode=..." command as an override.  If "jive5ab"
+active (not recommended), you can use 'disk_record_ok' as the sixth
+parameter of the 'mk5b_mode=...' command as an override.  If 'jive5ab'
 is being used to run the Mark 5B recorder and the override is used
 while recording is active, the command will cause an error response
 from the recorder and will not be effective.  The override is not
-available for "mk5c_mode=...".  Changing the mode while recording will
+available for 'mk5c_mode=...'.  Changing the mode while recording will
 probably cause problems with the recording and is not recommended.
 
 Notes on Mark5B-over-Ethernet (5B/Ethernet):
@@ -190,16 +190,16 @@ Notes on Mark5B-over-Ethernet (5B/Ethernet):
   there is a path to recording it if it is needed in an unusual
   situation.  Please follow these steps:
 
-     1. DRUDG the experiment observing schedule normally.
+     1. 'drudg' the experiment observing schedule normally.
 
      2. Use PFMED to edit all the setup procedures in the experiment
         .prc file. In each:
 
-        a. Change the "vdif" parameter in the "mk5c_mode=vdif,..."
-           command to "mark5b".
+        a. Change the 'vdif' parameter in the 'mk5c_mode=vdif,...'
+           command to 'mark5b'.
 
-        b. Insert the command "fila10g=start mk5b" immediately after
-           the "fila10g_mode=..." command.
+        b. Insert the command 'fila10g=start mk5b' immediately after
+           the 'fila10g_mode=...' command.
    
      3. Run the experiment with these changes.
 
@@ -213,15 +213,15 @@ Notes on Mark5B-over-Ethernet (5B/Ethernet):
    5B/Ethernet and for data sources other than a FiLa10G.  In addition
    for a FlexBuff recorder the following item may help:
 
-     For a FlexBuff recorder, you can recompile "jive5ab" with the
-     "FILA=1" make option.  If this option was used, it will be
-     visible in the "version?"  query response from "jive5ab".  This
-     will change "jive5ab" to use the FiLa10G style Mark 5B packet
+     For a FlexBuff recorder, you can recompile 'jive5ab' with the
+     'FILA=1' make option.  If this option was used, it will be
+     visible in the 'version?'  query response from 'jive5ab'.  This
+     will change 'jive5ab' to use the FiLa10G style Mark 5B packet
      sequence numbers.  **The resulting executable should not be used
      for VDIF recording**.  Please see the installation instructions
-     in the "jive5ab" source distribution for more information or
+     in the 'jive5ab' source distribution for more information or
      contact Harro Verkouter (verkouter@jive.eu) for additional
      assistance.
 
-     Please note that for Mark 5C recorders, the "FILA=1" option will
+     Please note that for Mark 5C recorders, the 'FILA=1' option will
      not improve the situation.
