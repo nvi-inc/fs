@@ -41,30 +41,24 @@ FS client has advantages over a simple `tail -f /usr2/<log>.log`:
 Installation
 ------------
 
-For FS 9.11.20, the display server functionality is disabled by
-default. It can be built by setting the FS_DISPLAY_SERVER
-environment variable and rebuilding the FS.
+In FS 9.13.0, by default the display server and client are build
+but their functionality is disabled. It can be enabled by setting the
+FS_DISPLAY_SERVER environment variable.
 
-To do this edit '.login' (if 'tcsh' is the login shell) or '.profile'
-(for 'bash') For 'tcsh', add the following command to '.login':
+For example, using tcsh with the command 
 
     setenv FS_DISPLAY_SERVER 1
 
-For 'bash', add the following command to '.profile':
+or with bash:
 
     export FS_DISPLAY_SERVER=1
 
-This must be done for both prog and oper users, since the variable is
-also checked at run time by the "fs" command.
+If you wish to use the server by default, add the command above
+command to the '.login' (tcsh) or ".profile" (bash) file in the oper
+home directory.
 
-After making the above change, log-out and then back in as 'prog'.
-Then execute:
-
-   cd /usr2/fs
-   make 
-
-If you are upgrading from a pre v9.11.20 version of the FS,
-some control files will need to be modified for correct operation of
+If you are upgrading from a pre v9.13.0 version of the FS, some
+control files will need to be modified for correct operation of
 the display client/server.
 
 The first control file you will need to create or change is the client
@@ -102,14 +96,12 @@ it should be changed to:
 Usage
 -----
 
-Generally using the FS should be identical to the Field System without the server.
-
-
-Start the Field System use the usual command:
+Generally using the FS should be identical to the Field System without
+the server. If you start the Field System use the usual command:
 
     fs
 
-At this point you should see the Field System startup and all interface
+you will see the Field System startup and all interface
 windows displayed as normal and you can now interact with the FS as
 usual.
 
@@ -119,16 +111,15 @@ connected to it. You can close the client by pressing the keys Ctrl+C in
 the main terminal or typing `client=exit` in the oprin window.
 
 The FS will continue running in the background without a client
-attached, and you can even log out. Care has been taken to be sure an
-unintentional termination of an FS client will not harm the running FS.
+attached. You can even log out. Care has been taken to be sure an
+unintentional termination of a client will not harm the running FS.
 
 To reconnect to the Field System, start a new client with:
 
     fsclient
 
 When you first connect you will notice fsclient will only show new log
-messages, however you can print historical messages with the scrollback
-flag:
+messages; you can print historical messages with the scrollback flag:
 
     fsclient -s
 
@@ -197,13 +188,9 @@ and in '.bashrc', remove:
 
     export FS_DISPLAY_SERVER=1
 
-You will need to logout for this to take effect. You do not
-need to rebuild the FS.
 
-Technical Details
+Technical Details (**DRAFT**)
 =================
-
-EARLY DRAFT 
 
 Server
 ------
