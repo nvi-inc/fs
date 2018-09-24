@@ -178,9 +178,9 @@ static int window_open_cmd(json_t *params) {
 		exec_argv[exec_argc++] = *(ptr++);
 
 	char *pubaddr = NULL;
-    asprintf(&pubaddr, "%s%s", w->addr, pubaddr_suffix);
+	asprintf(&pubaddr, "%s%s", w->addr, pubaddr_suffix);
 	char *repaddr = NULL;
-    asprintf(&repaddr, "%s%s", w->addr, repaddr_suffix);
+	asprintf(&repaddr, "%s%s", w->addr, repaddr_suffix);
 
 	exec_argv[exec_argc++] = "-e";
 
@@ -203,11 +203,12 @@ struct cmd {
 	int (*cmd)(json_t *);
 };
 
-static const struct cmd commands[] = {{"window_open", window_open_cmd},
-                                      {"window_close", NULL},
-                                      {"prompt_open", prompt_open_cmd},
-                                      {"prompt_close", prompt_close_cmd},
-                                      {NULL, NULL}};
+static const struct cmd commands[] = {
+    {"window_open", window_open_cmd},
+    //                                      {"window_close", NULL},
+    {"prompt_open", prompt_open_cmd},
+    {"prompt_close", prompt_close_cmd},
+    {NULL, NULL}};
 
 /*
  * ret -1 indicates internal error
@@ -840,6 +841,11 @@ int main(int argc, char **argv) {
 
 		if (strcasecmp(command, "help") == 0 || strcasecmp(command, "?") == 0) {
 			help(arg);
+			continue;
+		}
+
+		if (strcasecmp(command, "sy") == 0) {
+			system(arg);
 			continue;
 		}
 
