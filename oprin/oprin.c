@@ -168,6 +168,7 @@ static const struct cmd local_commands[] = {
     {"end_oprin", end_oprin},
     {"client", client_cmd},
     {"help", client_or_snap_cmd},
+    {"?", client_or_snap_cmd},
     {NULL, NULL},
 };
 
