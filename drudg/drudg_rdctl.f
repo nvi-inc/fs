@@ -14,9 +14,9 @@ C
 ! 2016Sep08 JMG. New keyword 'vsi_align' 
 ! 2018Jun17 JMG. Father's day. Make sure always a space " " between sections of snap file.
 !                Also fix reported error in label size.  Was reporting error when there was not one. 
+! 2018Sep25 JMG. skedf.ctl has different locations depending on wheater PC-FS computer or not. This is set in makefile. 
 
 
-C
 C   parameter file
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/data_xfer.ftni'   !This includes info about data transfer
@@ -65,18 +65,46 @@ C  LOCAL VARIABLES
 
       character*4 lvalid_polarity(6)
       character*6 lvalid_vsi_align(4)
+      integer ifs_PC
+      logical kexist
 
+
+      integer ifile_beg,ifile_end
       character*32 cskedf(3)   
       data cskedf/
-     > "/usr/local/bin/skedf.ctl",  "/usr2/control/skedf.ctl",
-     > "skedf.ctl"/ 
-
+     > "/usr/local/bin/skedf.ctl",  "skedf.ctl",
+     > "/usr2/control/skedf.ctl"/
+  
       data lvalid_dbbc_if_inputs/"1","2","3","4"/ 
       data lvalid_polarity/"0","1","2","3","NONE","ASK"/     
       data lvalid_vsi_align/"0","1","NONE","ASK"/     
-       
-      
-C  1. Open the default control file if it exists.   
+
+! this is set in makefile. if it is set to 1, then on FS_PC.
+
+      ifs_PC=FS_PC
+
+      if(ifs_PC .eq. 1) then
+        ifile_beg=3
+        ifile_end=3   
+        inquire(exist=kexist,file=cskedf(3))
+        if(.not.kexist) then
+          write(*,*) "Aborting because we did not find "//cskedf(3)
+          stop
+        endif                    
+      else
+        ifile_beg=1
+        ifile_end=2
+        inquire(exist=kexist,file=cskedf(1))
+        if(.not.kexist) then
+           inquire(exist=kexist,file=cskedf(2))
+           if(.not.kexist) then
+             writE(*,*) "Did not find primary file "//cskedf(1)
+             write(*,*) "or secondary file "//cskedf(2)
+             write(*,*) "aborting!"
+             stop
+           endif 
+        endif 
+      endif         
       
 ! Initialization
 ! Stuff for DBBC
@@ -121,32 +149,19 @@ C  2. Process the control file if it exists. Loop throug 3 times.
 !     The last time for the local file. 
 
       kfirst_skip=.true.
-      do j=1,3    
-  ! If already found the global file, don't need to check the alternative.
-! this prevents us from writting out a " "
-         if(j .eq. 2 .and. kfound_global_file) goto 500    !quick exit. 
-
-         if(.not.kfirst_skip) write(*,*) " "   !close out 'skipping non-sked' line  
-         kfirst_skip=.true. 
-     
-
-! If we are the start of the third round and haven't found the global file, 
-! write a warning message but try to read the local file. 
-        if(j .eq. 3 .and. .not.kfound_global_file) then
-          write(luscn,
-     >'("WARNING! drudg_rdctl: Did not find global skedf.ctl file:",a)')
-     >       cskedf(1)(1:trimlen(cskedf(1)))
-         write(luscn,
-     > '("                or alternate global skedf.ctl file:",a)') 
-     >       cskedf(2)(1:trimlen(cskedf(2)))                 
-        end if
+      do j=ifile_beg, ifile_end   
+        if(.not.kfirst_skip) write(*,*) " "   !close out 'skipping non-sked' line  
+         kfirst_skip=.true.     
 
         itmplen = trimlen(cskedf(j))
         kexist = .false.
         inquire(file=cskedf(j),exist=kexist)      
         if(.not.kexist) goto 500                !quick exit. 
 
+ 
         open(lu,file=cskedf(j),iostat=ierr,status='old')
+
+
         if (ierr.ne.0) then
           write(luscn,9100) cskedf(j)(1:itmplen)
 9100      format("drudg_rdctl ERROR: Error opening control file ",A)
@@ -154,16 +169,10 @@ C  2. Process the control file if it exists. Loop throug 3 times.
           return
         end if
 
-       if(j .le. 2) then
-         write(luscn,'("drudg_rdctl: Reading system control file ",A)')
-     >       cskedf(j)(1:itmplen)
-             kfound_global_file=.true. 
-        else
-          write(luscn,'("drudg_rdctl: Reading local control file ",A)')
-     >       cskedf(j)(1:itmplen)
-        endif
-        write(*,'(a,$)') "   "
-   
+        write(luscn,'("drudg_rdctl: Reading system control file ",A)')
+     >       cskedf(j)(1:itmplen)   
+
+    
 ! File exists, and we have opened it.    
         call readline_skdrut(lu,cbuf,keof,ierr,1) !read first $           
         do while (.not.keof)
@@ -572,7 +581,7 @@ C         TPICD
          stop
        endif
       endif
-!      write(*,*) " " 
+      write(*,*) " " 
       RETURN
 
 ! Come here on error parsing line
