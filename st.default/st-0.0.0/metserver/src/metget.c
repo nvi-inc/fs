@@ -16,7 +16,12 @@ extern char metdevice[20];
 
 char *metget(
 char terminal[], /* connection for getting temp,humidity,pressure */ 
-char terminal2[]) /* connection for get wind parameters. */
+char terminal2[], /* connection for get wind parameters. */
+unsigned int flags) /* error reporting flags:
+                      0x1   ignore humidity errors
+                      0x2   ignore temperature errors
+                      0x4   ignore pressure errors
+		    */
 {
 
   /* Passed arguments */
@@ -41,7 +46,7 @@ static  int ttynum2;        /* read from com port: 1-2 or Vikom: 16-23 */
   char buff2[MAXBUF];
 static  char log_str[MAXLOG];
   int len, ierr;
-  int kmet, kwind, iret;
+  int kwind, iret;
 
   /* ttynum = MET, ttynum2 = Wind Sensor */
   met_baud_rate = 9600;
@@ -61,7 +66,7 @@ static  char log_str[MAXLOG];
   wdir=-1;
 
   /* OPEN devices terminal and terminal2. */
-  kmet=0;
+
   if (ttynum==0 && !strstr(terminal,"/dev/null")) {
     len = strlen(terminal);
     open_err = portopen_(&ttynum, terminal, &len,
@@ -102,10 +107,10 @@ static  char log_str[MAXLOG];
     }  else {
       buff[count]=0;
       nmea(buff,&pres,&temp,&humi);
-      if(pres < 0 || temp <-50 || humi < 0)
+      if(pres < 0  && ~flags & 0x4u ||
+	 temp <-50 && ~flags & 0x2u ||
+	 humi < 0  && ~flags & 0x1u)
 	err_report("error decoding met nmea string", buff,0,0);
-      else
-	kmet=1;
       pres*=1000;
     }
     if(0==strcmp(metdevice,"MET4A")){  /* check on fan */
@@ -198,17 +203,27 @@ static  char log_str[MAXLOG];
     }
   }
 
-  if(kmet && kwind)
-    snprintf(log_str,sizeof(log_str),
-	     "%.1f,%.1f,%.1f,%.1f,%d,",temp,pres,humi,wsp,wdir);
-  else if(kmet)
-    snprintf(log_str,sizeof(log_str),
-	     "%.1f,%.1f,%.1f,,,",temp,pres,humi);
-  else if(kwind)
-    snprintf(log_str,sizeof(log_str),
-	     ",,,%.1f,%d,",wsp,wdir);
+  log_str[0]=0;
+  if(temp>=-50.0)
+    snprintf(log_str+strlen(log_str),sizeof(log_str)-1-strlen(log_str),
+	     "%.1f,",temp);
   else
-    strcpy(log_str,",,,,,");
+    snprintf(log_str+strlen(log_str),sizeof(log_str)-1-strlen(log_str),",");
+  if(pres>0)
+    snprintf(log_str+strlen(log_str),sizeof(log_str)-1-strlen(log_str),
+	     "%.1f,",pres);
+  else
+    snprintf(log_str+strlen(log_str),sizeof(log_str)-1-strlen(log_str),",");
+  if(humi>=0)
+    snprintf(log_str+strlen(log_str),sizeof(log_str)-1-strlen(log_str),
+	     "%.1f,",humi);
+  else
+    snprintf(log_str+strlen(log_str),sizeof(log_str)-1-strlen(log_str),",");
+  if(kwind)
+    snprintf(log_str+strlen(log_str),sizeof(log_str)-1-strlen(log_str),
+	     "%.1f,%d,",wsp,wdir);
+  else
+    snprintf(log_str+strlen(log_str),sizeof(log_str)-1-strlen(log_str),",,");
 
   return log_str;
 }
@@ -219,6 +234,9 @@ float *pres, *tmp, *humi;
 {
   char *p,comma[]=",";
   char buf[256];
+
+  /* $WIXDR,P,.884255,B,DQ 89768,C,20.56,C,DQRHT473,H,96.9,P,DQRHT473 */
+  /* $WIXDR,P,.888007,B,DQ140743,C,-----,C,DQ--------,H,-----,P,DQ-------- */
 
   strncpy(buf,bufin,sizeof(buf));
   buf[sizeof(buf)-1]=0;
