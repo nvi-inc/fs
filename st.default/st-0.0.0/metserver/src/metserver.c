@@ -61,6 +61,7 @@ static struct met_data metstr;
 static char temp_buf[2][METBUF]; /* Will contain met data string from function metget */
 static char port1[20];
 static char port2[20];
+static unsigned int flags;
 char metdevice[20];
 
 void *threadFunc(void *arg) {
@@ -74,7 +75,7 @@ void *threadFunc(void *arg) {
   int iping = 0;
 
   while(1) {
-    sprintf(temp_buf[iping], "%s", (char *)metget(port1, port2));
+    sprintf(temp_buf[iping], "%s", (char *)metget(port1, port2,flags));
     pthread_mutex_lock(&metstr.mutex); /* Lock the mutex, will cause main thread to block
 				          if trying to lock mutex protecting 'metstr.buf'. */
     metstr.buf = temp_buf[iping];
@@ -108,7 +109,6 @@ main(argc, argv)
   char buf[METBUF], send_buf[METBUF];
   fd_set ready;
   struct timeval to;
-  int   flags;
   int sockcnt;                   /* counter for testing connections */
   pid_t pid;
   unsigned int myport;
@@ -129,6 +129,7 @@ main(argc, argv)
      'remote'. */
   use_remote = 0;
   metdevice[0] = 0; 
+  flags = 0;
 
   if( argc <= 1) {
     err_report("metserver: ports NOT specifed, check INSTALL", NULL,0,0);
@@ -158,6 +159,13 @@ main(argc, argv)
     myport=atoi(argv[3]);
     if (strstr(argv[4], "remote") != NULL) use_remote = 1;
     strcpy(metdevice,argv[5]);   
+  } else if (argc == 7) {
+    strcpy(port1,argv[1]);
+    strcpy(port2,argv[2]);
+    myport=atoi(argv[3]);
+    if (strstr(argv[4], "remote") != NULL) use_remote = 1;
+    strcpy(metdevice,argv[5]);   
+    flags=strtol(argv[6],NULL,0);
   }
   if(myport <= 0) {
     err_report("metserver: socket invalid value, check INSTALL", NULL,0,0);

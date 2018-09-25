@@ -109,6 +109,13 @@ IMPORTANT NOTE: You must supply values (even if the default) for all
                   the fan is monitored and an error is reported. Any other
                   values are currently equivalent to MET4, which also supports
                   MET3.
+		The sixth parameter is an error suppression flagR. If the MET
+                  device consistently returns a bad value for a field, the
+                  error can be suppressed. It is an integer value, usually hex.
+                  It is an "OR" of the individual flags:
+                      0x1   ignore humidity errors
+                      0x2   ignore temperature errors
+                      0x4   ignore pressure errors
 
     prompt> log in as root
     prompt> /usr2/st/metserver/metserver /dev/ttyS19 /dev/ttyS18 50001 &
