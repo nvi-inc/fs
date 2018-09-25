@@ -11,8 +11,9 @@ ifndef VERSION
 VERSION = 0
 PATCHLEVEL = 0
 SUBLEVEL = 0
-RELEASE = " "
 endif
+# If this is 1, then we are using the FS_PC
+FS_PC = 1
 #
 # Set paths
 #
@@ -65,7 +66,7 @@ wrdate.o wrday.o wrdur.o wrhead.o write_drudg_version_line.o wrsor.o wrtap.o wrt
 #
 # -C checks for out of bounds during execution and aborts if found
 FFLAGS= -C -c -cpp -DVERSION=$(VERSION) \
--DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL) -DRELEASE=$(RELEASE)
+-DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL) -DRELEASE=$(RELEASE) -DFS_PC=$(FS_PC) 
 # f2c needs this others don't
 CFLAGS= -c  -DF2C -DRELEASE=$(RELEASE)
 #

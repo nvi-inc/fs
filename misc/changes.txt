@@ -12050,7 +12050,7 @@ Version 9.11.19 170129
            Makefile
            added release string to release version
 
-Version 9.11.20.rc1_no_pubsub 180421
+Version 9.11.20-rc1_no_pubsub 180421
 
 180429 WEH fivpt/tsys.f
            fix typo
@@ -12074,7 +12074,7 @@ Version 9.11.20.rc1_no_pubsub 180421
 180429 WEH monit/Makefile
            add FS_MONIT_ADD_LIBES variable for optional libraries
 
-Version 9.11.20.rc2_no_pubsub 180429
+Version 9.11.20-rc2_no_pubsub 180429
 
 180510 WEH misc/ntp.txt
            st.default/control/time.ctl
@@ -12110,7 +12110,7 @@ Version 9.11.20.rc2_no_pubsub 180429
            st.default/control/clpgm.ctl
 	   added client commands
 
-Version 9.11.20.rc3 180501
+Version 9.11.20-rc3 180501
 
 180507 WEH monit/Makefile
            adjusted use of FS_MONIT_ADD_LIBES to support other distros
@@ -12124,7 +12124,7 @@ Version 9.11.20.rc3 180501
            misc/ntp.txt
            Make 'computer' the recommended time model
 
-180519 Version 9.11.20.rc4
+Version 9.11.20-rc4 180519
 
 170928 WEH st.default/st-0.0.0/metserver/src/nmea_wind.c
            was missing, TNX JHFQ
@@ -12141,7 +12141,7 @@ Version 9.11.20.rc3 180501
            no Tzero for station detectors now works for u6
               and for u5/u6 independently of rack type 
 
-180520 Version 9.11.20.rc5
+Version 9.11.20-rc5 180520
 
 180522 DEH Makefile
            spubsub/Makefile
@@ -12156,7 +12156,7 @@ Version 9.11.20.rc3 180501
 180523 WEH misc/ntp.txt
            improve wording
 
-180523 Version 9.11.20.rc6
+Version 9.11.20-rc6 180523
 
 180524 DEH clib/Makefile
            boss/Makefile
@@ -12189,7 +12189,7 @@ Version 9.11.20.rc3 180501
            spubsub/ssub.c
            improved signal handling of fsclient
 
-180531 Version 9.11.20.rc7
+Version 9.11.20-rc7 180531
 
 180604 DEH Makefile
            use path of Makefile (rather than pwd) to determine version
@@ -12251,13 +12251,15 @@ Version 9.11.20.rc3 180501
            Makefile 
            use FS_DISPLAY_SERVER env var
 
+Version 9.11.20-rc8 180807
+
 180808 WEH help/form.d__
            clib/mk5dbbcd.c
            clib/dbbcform_util.c
            control/fserr.ctl
            add geo2 mode
 
-180808 Version 9.11.20-rc9
+Version 9.11.20-rc9 180808
 
 180820 DEH spubsub/spub.c
            cleanup shutdown mode code
@@ -12307,7 +12309,7 @@ Version 9.11.20.rc3 180501
            fsserver/window.h
            fsserver/fsclient.c
            comply to json-rpc, support for multiple prompts,
-             client opens all windows on startup.
+             client opens all windows + prompts on startup.
 
 180914 DEH Makefile
            fsserver/fsclient.c
@@ -12327,5 +12329,27 @@ Version 9.11.20.rc3 180501
 180917 DEH third_party/Makefile
            quieten "configure" script.
 
-180917 Version 9.11.20-rc10
+Version 9.11.20-rc10 180917
 
+Version 9.13.0-rc1 180921
+
+180924 DEH fsserver/server.c
+           cleanup windows after exit
+
+180924 DEH oprin/oprin.c
+           support "?=" as alias for "help="
+
+180924 DEH fsserver/fsclient.c
+           add "client=sy=" for local system commands
+
+180924 WEH st.default/st-0.0.0/metserver/src/metserver.c
+180925 WEH st.default/st-0.0.0/metserver/INSTALL
+           st.default/st-0.0.0/metserver/metserver.sh.example
+           st.default/st-0.0.0/metserver/metserver.sh
+           st.default/st-0.0.0/metserver/src/metget.c
+           add FLAGS parameter for error message suppression
+
+180925 WEH help/mk5b_mode.___
+           clarify sample rates allowed for 5B/Ethernet
+
+Version 9.13.0-rc2 180925
