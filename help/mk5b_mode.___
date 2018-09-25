@@ -73,19 +73,22 @@ is used with Mark 5C/FlexBuff recorders only and with slightly
 different parameters.  The recorder must be controlled by the
 'jive5ab' control program for this command to work.
 
-For the 'mk5b_mode=...' and 'mk5c_mode=mark5b,...' commands, the
-minimum sample rate is 2 MHz.  As a result the decimation factor may
-not yield an effective sample rate less than 2 MHz when divided into
-the VSI-H/Mark5B clock rate (from 'equip.ctl').  When specifying the
-decimation implicitly via a sample rate, the range of available sample
-rates is similarly limited by the range of decimation factors
-available.  As a result, the sample rate must be one of the powers of
-2 MHz starting with the greater of 2 MHz and VSI-H/Mark5B clock rate
-divided by 16 up to the VSI-H/Mark5B clock rate itself.
+For the 'mk5b_mode=...' command, the minimum sample rate is 2 MHz.  As
+a result the decimation factor may not yield an effective sample rate
+less than 2 MHz when divided into the VSI-H/Mark5B clock rate (from
+'equip.ctl').  When specifying the decimation implicitly via a sample
+rate, the range of available sample rates is similarly limited by the
+range of decimation factors available.  As a result, the sample rate
+must be one of the powers of 2 MHz starting with the greater of 2 MHz
+and VSI-H/Mark5B clock rate divided by 16 up to the VSI-H/Mark5B clock
+rate itself.
 
 For Ethernet recording, either VDIF (via 'mk5c_mode=vdif,...') or
 5b-over-Ethernet (via 'mk5c_mode=mark5b,...'), the limitations on
-sample rates are described in next paragraph.
+sample rates are described in next paragraph.  Note that for
+'mk5c_mode=mark5b,...', i.e., 5B/Ethernet, total bit rates of a little
+above 2 Gbps are not supported.  There may not be an error message in
+such a case, but it won't work.
 
 The sample rate parameter is in units of MHz.  More resolution, down
 to 1 Hz, can obtained for Ethernet recorders by appending a decimal
