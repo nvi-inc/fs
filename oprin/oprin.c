@@ -152,6 +152,28 @@ void end_oprin(const char *arg0 __attribute__((unused)),
 	exit(EXIT_SUCCESS);
 }
 
+void terminate(const char *arg0, const char *arg) {
+	if (!getenv("FS_CLIENT_PIPE_FD")) {
+        run_snap(arg0, arg);
+        return;
+    }
+
+    while (1) {
+        char *input = readline("This will terminate the whole Field System. To exit just this client use 'client=exit'.\nDo you really want to terminate the FS? [yN]:");
+        if (*input == 'y' || *input == 'Y') {
+            free(input);
+            break;
+        }
+
+        if (!*input || *input == 'n' || *input == 'N') {
+            free(input);
+            return;
+        }
+    }
+
+    run_snap(arg0, arg);
+}
+
 /* If running as part of fsclient, treat as a client command
  * otherwise treat as a SNAP command
  */
@@ -169,6 +191,7 @@ static const struct cmd local_commands[] = {
     {"client", client_cmd},
     {"help", client_or_snap_cmd},
     {"?", client_or_snap_cmd},
+    {"terminate", terminate},
     {NULL, NULL},
 };
 
