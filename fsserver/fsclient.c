@@ -521,6 +521,7 @@ void print_client_commands() {
 void run_clpgm_ctl(const char *cmd) {
 	if (!cmd || cmd[0] == '\0') {
 		printf("fsclient commands are:\n");
+		printf("sy\n");
 		print_client_commands();
 		return;
 	}
