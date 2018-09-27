@@ -67,6 +67,8 @@ clean:
 	rm -f `find . -name '*~' -print`
 	rm -f `find . -name '.*~' -print`
 	rm -f `find . -name '*.pyc' -print`
+	rm -rf third_party/include third_party/lib third_party/bin
+	find third_party/src/* ! -iname '*.tar.gz' ! -iname '*.make' -delete
 #
 rmexe:
 	rm -fr bin/*
