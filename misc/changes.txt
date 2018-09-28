@@ -12353,3 +12353,23 @@ Version 9.13.0-rc1 180921
            clarify sample rates allowed for 5B/Ethernet
 
 Version 9.13.0-rc2 180925
+
+180927 DEH oprin/oprin.c
+           add prompt for confirmation on 'terminate'
+
+180927 DEH fsserver/fsclient.c
+           add 'sy' to listed commands of 'client='
+           
+180927 DEH st.default/control/clpgm.ctl
+           removed monit6
+
+180927 DEH Makefile
+           add 'third_party' to 'clean'
+
+180928 DEH misc/display_server.txt
+           improvements
+
+180928 WEH misc/fs9130up.txt
+           final version
+
+Version 9.13.0 180928
