@@ -31,3 +31,7 @@ start-up all configured RDBEs are considered active.
 
 On command, the response does not show the commanded values and shows
 the actual value for only the IFs adjusted.
+
+If an RMS value is outside the range specified in rdbe.ctl control
+file an error will be reported, except on a command (i.e., an
+rdbe_attenX=...)  that explicitly sets the attenuation was to 31.5.

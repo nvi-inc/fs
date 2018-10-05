@@ -353,22 +353,80 @@ long ip[5];                           /* ipc parameters */
 	    lcl.devices[i].ifchain=ifchain;
 	    lcl.devices[i].center=shm_addr->lo.lo[ifchain-1]+1024-32*ichan;
 	  }
+	} else if(shm_addr->equip.rack==DBBC3) {
+	  for (i=0;i<MAX_DBBC3_BBC*2;i++) {
+	    if(lcl.itpis[i]!=0) {
+	      lcl.devices[i].ifchain=
+		shm_addr->dbbc3_bbcnn[i%MAX_DBBC3_BBC].source+1;
+	      if(lcl.devices[i].ifchain<1||lcl.devices[i].ifchain>MAX_DBBC3_IF)
+		lcl.devices[i].ifchain=0;
+	      if(lcl.devices[i].ifchain!=0) {
+		float freq, bbcbw;
+		
+		freq=shm_addr->dbbc3_bbcnn[i%MAX_DBBC3_BBC].freq/1.0e6;
+		bbcbw=32.;
+		if(i<MAX_DBBC3_BBC)
+		  freq-=bbcbw*.5;
+		else
+		  freq+=bbcbw*.5;
+		switch(shm_addr->lo.sideband[lcl.devices[i].ifchain-1]) {
+		case 1:
+		  lcl.devices[i].center=
+		    shm_addr->lo.lo[lcl.devices[i].ifchain-1]+freq;
+		  break;
+		case 2:
+		  lcl.devices[i].center=
+		    shm_addr->lo.lo[lcl.devices[i].ifchain-1]-freq;
+		  break;
+		default:
+		  ierr=-302;
+		  goto error;
+		  break;
+		}
+	      } else {
+		ierr=-306;
+		goto error;
+	      }
+	    }
+	  }
+	  for (i=MAX_DBBC3_BBC*2;i<MAX_DBBC3_DET;i++) {
+	    if(lcl.itpis[i]!=0) {
+	      float upper, lower;
+
+	      lcl.devices[i].ifchain=i-MAX_DBBC3_BBC*2+1;
+
+	      switch (shm_addr->lo.sideband[lcl.devices[i].ifchain-1]) {
+	      case 1:
+		lcl.devices[i].center=shm_addr->lo.lo[lcl.devices[i].ifchain-1]+
+		  4096.*0.5;
+		break;
+	      case 2:
+		lcl.devices[i].center=shm_addr->lo.lo[lcl.devices[i].ifchain-1]-
+		  4096.0*0.5;
+		break;
+	      default:
+		ierr=-302;
+		goto error;
+		break;
+	      }
+	    }
+	  }
 	}
 	/* user devices */
-	for (i=MAX_RDBE_DET;i<MAX_ONOFF_DET;i++)
+	for (i=MAX_DBBC3_DET;i<MAX_ONOFF_DET;i++)
 	    if(lcl.itpis[i]!=0) {
-	      lcl.devices[i].ifchain=i-MAX_RDBE_DET+MAX_LO+1;
+	      lcl.devices[i].ifchain=i-MAX_DBBC3_DET+1;
 	      lcl.devices[i].center=
-		shm_addr->user_device.center[i-MAX_RDBE_DET];
-	      switch(shm_addr->user_device.sideband[i-MAX_RDBE_DET]) {
+		shm_addr->user_device.center[i-MAX_DBBC3_DET];
+	      switch(shm_addr->user_device.sideband[i-MAX_DBBC3_DET]) {
 	      case 1:
 		lcl.devices[i].center=
-		  shm_addr->user_device.lo[i-MAX_RDBE_DET]
+		  shm_addr->user_device.lo[i-MAX_DBBC3_DET]
 		  +lcl.devices[i].center;
 		break;
 	      case 2:
 		lcl.devices[i].center=
-		  shm_addr->user_device.lo[i-MAX_RDBE_DET]
+		  shm_addr->user_device.lo[i-MAX_DBBC3_DET]
 		  -lcl.devices[i].center;
 		break;
 	      default:

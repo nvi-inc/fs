@@ -163,7 +163,7 @@ C
 
       if (cjchar(iprm,1).ne.'*'.and.cjchar(iprm,1).ne.',') then
          call fs_get_rack(rack)
-         if(RDBE.ne.rack) then
+         if(RDBE.ne.rack.and.DBBC3.ne.rack) then
             ldev(1)=dtnam(iprm,1,inumb)
             call char2hol(' ',ldev,3,4)
          else
@@ -209,7 +209,8 @@ CC
       else if(RDBE .eq. rack) then
          if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'01a0')
          if(index('abcd',cjchar(ldev,3)).ne.0) goto 270
-         goto 270
+      else if(DBBC3 .eq. rack) then
+         if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'001u')
       endif
 C
       ierr = -206
@@ -291,7 +292,7 @@ c
           ichain=3
         else if(ichcm_ch(ldevfp,1,'id').eq.0) then
           ichain=4
-        else if(indbc.ge.1.and.indbx.le.MAX_DBBC_BBC) then
+        else if(indbc.ge.1.and.indbc.le.MAX_DBBC_BBC) then
           call fs_get_dbbc_source(source,indbc)
           ichain=source+1
           if(ichain.lt.1.or.ichain.gt.4) then
@@ -311,6 +312,48 @@ c
      *        ichan.lt.0.or.ichan.ge.MAX_RDBE_CH) then
             ierr=-218
             goto 990
+         endif
+      else if(DBBC3.eq.rack) then
+         if('i'.eq.cjchar(ldevfp,1,1)) then
+            ifc=index('abcdefgh',cjchar(ldevfp,2))
+            if(ifc.eq.0.or.0.ne.ichcm_ch(ldevfp,3,'  ')) then
+               ierr=-219
+               goto 990
+            endif
+            ichain=ifc
+         else
+            ibbc=0
+            id=0
+            do i=1,4
+               if(id.lt.11) then
+                  id=index('0123456789ul',cjchar(ldevfp,i))
+                  if(id.eq.0) then
+                     ierr=-219
+                     goto 990
+                  else if(id.lt.11) then
+                     ibbc=ibbc*10+id-1
+                  endif
+               else if(cjchar(ldevfp,i).ne.' ') then
+                  ierr=-219
+                  goto 990
+               endif
+            enddo
+            if(ibbc.lt.1.or.ibbc.gt.MAX_DBBC3_BBC) then
+               ierr=-219
+               goto 990
+            endif
+            nch=ib2as(ibbc,ldevfp,1,z'4303')
+            if(id.eq.11) then
+               call char2hol('u',ldevfp,4,4)
+            else
+               call char2hol('l',ldevfp,4,4)
+            endif
+          call fs_get_dbbc3_bbcnn_source(source,ibbc)
+          ichain=source+1
+          if(ichain.lt.1.or.ichain.gt.MAX_DBBC3_IF) then
+            ierr=-217
+            goto 990
+          endif
          endif
       else    !VLBA
         indbc=ia2hx(ldevfp,1)

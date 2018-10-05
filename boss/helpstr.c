@@ -102,6 +102,7 @@ int rlen;
 			  K4    == *rack)) ||
 	  (ch1 == 'l' && (LBA   == *rack || LBA4 == *rack)) ||
 	  (ch1 == 'd' &&  DBBC  == *rack) ||
+	  (ch1 == 'j' &&  DBBC3  == *rack) ||
 	  (ch1 == 'a' &&  0     != *rack)) &&
 	 (ch2 == '_' || ch2 == '+' ||
 	  (ch2 == 'k' &&  K4    == *drive1) ||

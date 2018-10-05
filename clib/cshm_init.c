@@ -234,7 +234,7 @@ void cshm_init()
   shm_addr->tpicd.stop_request=1;
   shm_addr->tpicd.tsys_request=0;
   shm_addr->tpicd.cycle=0;
-  for(i=0;i<MAX_DET;i++)
+  for(i=0;i<MAX_TSYS_DET;i++)
      shm_addr->tpicd.itpis[i]=0;
 
   for(i=0;i<MAX_ONOFF_DET;i++)
@@ -463,6 +463,28 @@ void cshm_init()
 
   for(i=0;i<MAX_RDBE;i++)
     shm_addr->rdbe_sync[i]=0;
+
+  for (i=0;i<MAX_DBBC3_IF;i++) {
+    shm_addr->dbbc3_ifx[i].input=1;
+    shm_addr->dbbc3_ifx[i].att=-1;
+    shm_addr->dbbc3_ifx[i].agc=1;
+    shm_addr->dbbc3_ifx[i].target_null=1;
+    shm_addr->dbbc3_ifx[i].target=0;
+  }
+
+  for (i=0;i<MAX_DBBC3_BBC;i++) {
+    shm_addr->dbbc3_bbcnn[i].freq=0;
+    shm_addr->dbbc3_bbcnn[i].source=-1;
+    shm_addr->dbbc3_bbcnn[i].bw=-1;
+    shm_addr->dbbc3_bbcnn[i].avper=0;
+  }
+
+  shm_addr->dbbc3_cont_cal.mode=0;
+  shm_addr->dbbc3_cont_cal.polarity=-1;
+  shm_addr->dbbc3_cont_cal.freq=-1;
+  shm_addr->dbbc3_cont_cal.option=-1;
+  shm_addr->dbbc3_cont_cal.samples=10;
+
 
   return;
 }

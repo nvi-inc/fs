@@ -83,3 +83,7 @@
 #include "mk6_scan_check_ds.h"
 #include "rdbe_dot_ds.h"
 #include "rdbe_atten_ds.h"
+#include "dbbc3_ifx_ds.h"
+#include "dbbc3_bbcnn_ds.h"
+#include "dbbc3_cont_cal_ds.h"
+#include "dbbc3_iftpx_ds.h"

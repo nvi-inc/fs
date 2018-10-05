@@ -31,6 +31,7 @@ C 3.  LOCAL VARIABLES
       integer itpis(17)
       integer itpis_vlba(MAX_DET)
       integer itpis_dbbc(MAX_DBBC_DET)
+      integer itpis_dbbc3(MAX_DBBC3_DET)
       integer itpis_lba(2*MAX_DAS)
       integer itpis_norack(2)
 C      - which TPIs to read back
@@ -73,6 +74,8 @@ C                     Retain class for later response
         call tplisl(ip,itpis_lba)
       else if (DBBC.eq.rack) then
         call tplisd(ip,itpis_dbbc)
+      else if (DBBC3.eq.rack) then
+        call tplisd3(ip,itpis_dbbc3)
       else
          call tplisn(ip,itpis_norack)
       endif
@@ -120,6 +123,9 @@ C
       else if (DBBC.eq.rack) then
         call fc_tpi_dbbc(ip,itpis_dbbc)
         if(ip(3).lt.0) return
+      else if (DBBC3.eq.rack) then
+        call fc_tpi_dbbc3(ip,itpis_dbbc3)
+        if(ip(3).lt.0) return
       else
          call fc_tpi_norack(ip,itpis_norack)
          if(ip(3).lt.0) return
@@ -146,6 +152,9 @@ C                     Get the command part of the response set up
         return
       else if (DBBC.eq.rack) then
         call fc_tpput_dbbc(ip,itpis_dbbc,isub,ibuf,nch,ilen)
+        return
+      else if (DBBC3.eq.rack) then
+        call fc_tpput_dbbc3(ip,itpis_dbbc3,isub,ibuf,nch,ilen)
         return
       else
         call fc_tpput_norack(ip,itpis_norack,isub,ibuf,nch,ilen)

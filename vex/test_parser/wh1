@@ -760,6 +760,7 @@ $CLOCK; *clock parameters
   def EF;
 *                   Valid from     clock_early  clock_early_epoch    rate
     clock_early = 1995y263d06h00m : 2.5 usec : 1995y132d00h08m0s : 1.2e-12;
+    clock_early = 1995y263d09h00m : 2.5 usec : 1995y132d00h08m0s : 1.2e-6 usec/sec;
     clock_early = 1995y263d12h00m : 1.5 usec; *clock ‘break’
   enddef;
 *

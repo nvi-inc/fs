@@ -7,8 +7,8 @@ c
 
       REAL AZOFF, DECOFF, ELOFF, ISTPTP(2), ITACTP(2), RAOFF,
      . XOFF, YOFF, ep1950, tempwx, preswx, humiwx, speedwx,
-     . cablev, systmp(MAX_DET), epoch, height, diaman, slew1, slew2,
-     . lolim1, lolim2, uplim1, uplim2,
+     . cablev, systmp(MAX_TSYS_DET), epoch, height, diaman, slew1,
+     . slew2, lolim1, lolim2, uplim1, uplim2,
      . HORAZ(MAX_HOR), HOREL(MAX_HOR), motorv(2), inscint(2),inscsl(2),
      . outscint(2), outscsl(2), wrvolt(2), rateti_fs, POSNHD(2,2),
      . FREQVC(15), motorv2(2), wrvolt2(2), wrvolt4(2), wrvolt42(2),
@@ -40,8 +40,9 @@ c
      $ dbbc_if_factors(MAX_DBBC_IF), dbbc_cont_cal_mode, m5b_crate,
      $ dbbcddcvc,
      $  mk6_units(MAX_MK6), mk6_active(MAX_MK6),
-     $  rdbe_units(MAX_RDBE), rdbe_active(MAX_RDBE)
-
+     $  rdbe_units(MAX_RDBE), rdbe_active(MAX_RDBE),
+     $  dbbc3_ddc_v, dbbc3_ddc_vc, dbbc3_ddc_bbcs_per_if, dbbc3_ddc_ifs,
+     $  dbbc3_cont_cal_mode
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3,2), lgen(2,2),
@@ -87,6 +88,9 @@ c
      $ dbbc_if_factors, dbbc_cont_cal_mode, m5b_crate, dbbcddcvc,
      $ mk6_units, mk6_active,
      $ rdbe_units, rdbe_active,
+     $ dbbc3_ddc_v, dbbc3_ddc_vc, dbbc3_ddc_bbcs_per_if, dbbc3_ddc_ifs,
+     $ dbbc3_cont_cal_mode,
+
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 
@@ -98,7 +102,8 @@ c
       character*16 dbbcddcvs
       character*1 dbbcddcvl
       character*1 rdbe_pcal_amp
+      character*16 dbbc3_ddc_vs
 c
       common/fscom_dum2/ LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP,
-     $                   dbbcddcvs, dbbcddcvl, rdbe_pcal_amp   
-
+     $                   dbbcddcvs, dbbcddcvl, rdbe_pcal_amp,   
+     $                   dbbc3_ddc_vs

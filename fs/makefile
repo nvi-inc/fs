@@ -4,15 +4,29 @@
 # and log-out and back in
 #
 ifdef NO_FTOK_FS
-CFLAGS :=  -DNO_FTOK_FS
+CFLAGS +=  -DNO_FTOK_FS
 endif
-LIBS = ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a
-OBJECTS = statusprt.o
 
-../bin/fs : fs.o $(OBJECTS)
-	cc -o ../bin/fs fs.o $(OBJECTS) $(LIBS)
-	strip ../bin/fs
-#
-fs:
-	rm -f ../bin/fs
-	make
+LDLIBS = -lutil
+OBJECTS = fs.o statusprt.o 
+LIBS = ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a
+
+all: ../bin/fs
+
+ifeq "$(FS_DISPLAY_SERVER)" "no"  
+CPPFLAGS += -DNO_SERVER
+else
+all: ../bin/fsclient
+OBJECTS += start_server.o
+endif
+
+../bin/fs: $(OBJECTS) $(LIBS)
+	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+../bin/fsclient: CFLAGS += -D_XOPEN_SOURCE=700 
+../bin/fsclient: LDLIBS += -lnanomsg
+../bin/fsclient: fsclient.o $(LIBS)
+	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+.PHONEY: fs
+fs: ../bin/fs

@@ -29,7 +29,7 @@ long ip[5];                           /* ipc parameters */
 
       if (command->equal != '=') {           /* run pcald */
 	if(RDBE!=shm_addr->equip.rack) {
-	  for(i=0;i<MAX_DET;i++)
+	  for(i=0;i<MAX_TSYS_DET;i++)
 	    if(0!=shm_addr->tpicd.itpis[i])
 	      goto Start;
 	  ierr=-302;
@@ -53,12 +53,13 @@ long ip[5];                           /* ipc parameters */
 	  ip[0]=ip[1]=ip[2]=0;
           return;
 	} else if(0==strcmp(command->argv[0],"tsys")){
-	  if(0==shm_addr->dbbc_cont_cal.mode) {
+	  if(DBBC==shm_addr->equip.rack && 0==shm_addr->dbbc_cont_cal.mode||
+	     DBBC3==shm_addr->equip.rack && 0==shm_addr->dbbc3_cont_cal.mode) {
 	    ierr=-301;
 	    goto error;
 	  }
 	  if(RDBE!=shm_addr->equip.rack) {
-	    for(i=0;i<MAX_DET;i++)
+	    for(i=0;i<MAX_TSYS_DET;i++)
 	      if(0!=shm_addr->tpicd.itpis[i])
 		goto Tsys;
 	    ierr=-302;

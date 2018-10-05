@@ -59,7 +59,7 @@ long ip[5];
 	    if(i<ip[1]-1) 
 	      cls_clr(ip[0]);
 	    ierr=-403;
-	    logite(inbuf2,-402,"df");
+	    logite(inbuf2,-402,"dd");
 	    goto error;
 	  }
 	}

@@ -89,6 +89,9 @@ c       do nothing
       else if(RDBE.eq.rack) then
         id=-1
         goto 11
+      else if(DBBC3.eq.rack) then
+        id=-1
+        goto 11
       endif
 c
 c  check M3 devices
@@ -183,6 +186,13 @@ C
               endif
            endif
 c           write(6,*) 'volts ',dtpi,dtpi2
+        else if(DBBC3.eq.rack) then
+           call dbbc3n(dtpi,dtpi2,ierr,icont,isamples)
+           if(imode.ne.0.and.i.eq.1.and.icont.ne.0) then
+              if(isamples.gt.intp) then
+                 intp=isamples
+              endif
+           endif
         endif
         call fc_rte_time(iti,idum)
         if (ierr.ne.0) return 

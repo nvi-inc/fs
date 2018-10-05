@@ -4,7 +4,7 @@ c
       include '../include/fscom.i'
 c
       integer ifsnum
-      parameter (ifsnum=512)
+      parameter (ifsnum=1024)
       integer*4 ip(5)
       dimension lnames(13,ifsnum)
       integer*4 lproc1(10,MAX_PROC1),lproc2(10,MAX_PROC2)

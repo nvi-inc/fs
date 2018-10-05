@@ -36,6 +36,10 @@
 #define FSPGM_CTL "/usr2/fs/control/fspgm.ctl"
 #define STPGM_CTL "/usr2/control/stpgm.ctl"
 
+#define FS_DISPLAY_PUBADDR "tcp://127.0.0.1:7083"
+#define FS_DISPLAY_REPADDR "tcp://127.0.0.1:7084"
+#define FS_DISPLAY_SCROLLBACK_LEN "1024"
+
 #define ADDR_ST   "addr"              
 #define TEST      "test"
 #define REBOOT    "reboot"
@@ -51,11 +55,16 @@
 #define MAX_RDBE_DET    (MAX_RDBE_CH*MAX_RDBE_IF*MAX_RDBE)
 #define MAX_USER_DEV    6
 //#define MAX_ONOFF_DET    (MAX_DET+MAX_USER_DEV)
-#define MAX_ONOFF_DET    (MAX_RDBE_DET+MAX_USER_DEV)
+#define MAX_ONOFF_DET    (MAX_DBBC3_DET+MAX_USER_DEV)
+#define MAX_TSYS_DET     MAX_DBBC3_DET
 
 #define MAX_DBBC_BBC   16
 #define MAX_DBBC_IF     4
 #define MAX_DBBC_DET    (2*MAX_DBBC_BBC+MAX_DBBC_IF)
+
+#define MAX_DBBC3_BBC   128
+#define MAX_DBBC3_IF    8     
+#define MAX_DBBC3_DET    (2*MAX_DBBC3_BBC+MAX_DBBC3_IF)
 
 #define DEV_VFM     "fm"
 #define DEV_VIA     "ia"
@@ -67,6 +76,8 @@
 /* rack/drive, some are also _types.
    Hierarchy: rack/drive, then rack_type/drive_type
    "*_type" must be unique within each "equip" */ 
+#define DBBC3       0x4000
+  /* rack_types: DBBC3, drive_types: none  */
 #define RDBE        0x2000
   /* rack_types: RDBE, drive_types: none  */
 #define MK6        0x1000

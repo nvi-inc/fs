@@ -1,9 +1,18 @@
 #
 VERSION = 9
 SUBLEVEL = 12
-PATCHLEVEL = 11
+PATCHLEVEL = 12
 FS_VERSION = $(VERSION).$(SUBLEVEL).$(PATCHLEVEL)
 export VERSION SUBLEVEL PATCHLEVEL FS_VERSION
+
+
+FS_DISPLAY_SERVER = yes
+#ifeq '$(strip $(shell /sbin/ldconfig -p | grep libnanomsg))' ''
+#$(info libnanomsg not found, building without display server/client support)
+#override FS_DISPLAY_SERVER = no
+#endif
+export FS_DISPLAY_SERVER
+
 #
 # If environment variable FS_SERIAL_CLOCAL is define with a non-empty value
 #  the port library and mcbcn program will be compiled with a O_NONBLOCK
@@ -21,6 +30,11 @@ lognm pcald msg fsvue fs.prompt inject_snap erchk mk5cn tpicd flagr \
 gnfit gndat gnplt dscon systests autoftp monpcal logpl1 holog gnplt1 predict \
 dbbcn rdbcn rdtcn mk6cn popen udceth0 rack mcicn be_client s_client lgerr fesh\
 plog
+
+ifeq "$(FS_DISPLAY_SERVER)"  "yes"
+EXEC_DIR += spubsub
+endif
+
 #
 all:	libs execs
 #

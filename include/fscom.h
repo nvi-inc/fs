@@ -50,7 +50,7 @@ typedef struct fscom {
         double decdat;
         double alat;
         double wlong;
-	float systmp[MAX_DET];
+	float systmp[MAX_TSYS_DET];
         int ldsign;
 	char lfreqv[90];
         char lnaant[8];
@@ -115,9 +115,9 @@ typedef struct fscom {
 
         struct bbc_cmd bbc[ MAX_BBC];
 
-        long tpi[ MAX_DET];
-        long tpical[ MAX_DET];
-        long tpizero[ MAX_DET];
+        long tpi[ MAX_TSYS_DET];
+        long tpical[ MAX_TSYS_DET];
+        long tpizero[ MAX_TSYS_DET];
 
         struct {
            int rack;
@@ -247,7 +247,7 @@ typedef struct fscom {
         int imk4fmv;
         struct tpicd_cmd tpicd;
         int ITPIVC[15];
-        long tpigain[ MAX_DET];
+        long tpigain[ MAX_TSYS_DET];
         int iapdflg;
         int k4rec_mode_stat; /* should be moved after k4rec_mode next chance */
         struct onoff_cmd onoff;
@@ -256,9 +256,9 @@ typedef struct fscom {
   int ipcalif3;
   struct flux_ds flux[MAX_FLUX];
 
-  long tpidiff[ MAX_DET];
-  long tpidiffgain[ MAX_DET];
-  float caltemps[ MAX_DET];
+  long tpidiff[ MAX_TSYS_DET];
+  long tpidiffgain[ MAX_TSYS_DET];
+  float caltemps[ MAX_TSYS_DET];
   struct calrx_cmd calrx;
 
        int ibds;
@@ -413,5 +413,17 @@ typedef struct fscom {
   } monit6;
 
   long rdbe_sync[MAX_RDBE];
+
+  int  dbbc3_ddc_v;
+  char dbbc3_ddc_vs[16];
+  int  dbbc3_ddc_vc;
+  int  dbbc3_ddc_bbcs_per_if;
+  int  dbbc3_ddc_ifs;
+
+  struct dbbc3_ifx_cmd dbbc3_ifx[ MAX_DBBC3_IF];
+
+  struct dbbc3_bbcnn_cmd dbbc3_bbcnn[ MAX_DBBC3_BBC];
+
+  struct dbbc3_cont_cal_cmd dbbc3_cont_cal;
 
 } Fscom;

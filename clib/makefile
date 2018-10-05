@@ -43,7 +43,9 @@ holog_util.o satellite_util.o satoff_util.o dbbcnn_util.o dbbcifx_util.o\
 dbbcform_util.o tpi_dbbc.o mk5dbbcd.o dbbcn_v.o dbbc_cont_cal_util.o\
 dbbc_if_power.o dbbcgain_util.o mk6_disk_pos_util.o\
 mk6_scan_check_util.o get_RDBEtime.o rdbe_dot_util.o rdbcn_v.o\
-rdbe_atten_util.o fserr_cls.o rdbe_2_tsysx.o get_fila10gtime.o daymy.o
+rdbe_atten_util.o fserr_cls.o rdbe_2_tsysx.o get_fila10gtime.o daymy.o\
+dbbc3_ifx_util.o dbbc3_bbcnn_util.o dbbc3n_v.o dbbc3_if_power.o tpi_dbbc3.o\
+dbbc3_cont_cal_util.o dbbc3_iftpx_util.o
 # mk6_record_util.o 
 #
 #FFLAGS = 

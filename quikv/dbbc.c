@@ -55,11 +55,13 @@ parse:
 dbbcn:
       if(22==itask || 24 == itask )
 	ip[0]=7;
+      else if(25==itask)
+        ip[0]=8;
       else
 	ip[0]=1;
       ip[1]=out_class;
       ip[2]=out_recs;
-      if(20 == itask || 22 == itask)
+      if(20 == itask || 22 == itask || 25==itask)
 	skd_run("dbbcn",'w',ip);
       else
 	skd_run("dbbc2",'w',ip);

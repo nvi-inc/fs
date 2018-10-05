@@ -43,9 +43,11 @@ C MAKE SURE THE CAL IS OFF
 C
       call fs_get_rack(rack)
       call fs_get_dbbc_cont_cal_mode(dbbc_cont_cal_mode)
+      call fs_get_dbbc3_cont_cal_mode(dbbc3_cont_cal_mode)
       if(calfp.gt.0.0.and.
-     &     ((rack.ne.DBBC.and.rack.ne.RDBE).or.
-     &     (rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.0))) then
+     &     ((rack.ne.DBBC.and.rack.ne.RDBE.and.rack.ne.DBBC3).or.
+     &     (rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.0).or.
+     &     (rack.eq.DBBC3.and.dbbc3_cont_cal_mode.eq.0))) then
 c     &     (rack.eq.RDBE.and.dbbc_cont_cal_mode.eq.0))) then
          call scmds('calofffp',1)
       endif
@@ -74,7 +76,8 @@ c9954 format(' nin',i10,' indata "',6a2,'"')
          else if(VLBA.eq.rack.or.VLBA4.eq.rack) then
             call get_vatt(name,lwho,ierr,ichfp_fs,0)
             if (ierr.ne.0) return
-         else if(LBA.eq.rack.or.DBBC.eq.rack.or.RDBE.eq.rack) then
+         else if(LBA.eq.rack.or.DBBC.eq.rack.or.RDBE.eq.rack.or.
+     &           DBBC3.eq.rack) then
 c           digital detector - assume tpzero=0
          endif
       endif
@@ -104,7 +107,8 @@ C
          call matcn(izero,-13,idolr,indata,nin,2,ierr)
       else if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         call zero_vatt(name,lwho,ierr)
-      else if(LBA.eq.rack.or.DBBC.eq.rack.or.RDBE.eq.rack) then
+      else if(LBA.eq.rack.or.DBBC.eq.rack.or.RDBE.eq.rack.or.
+     &           DBBC3.eq.rack) then
 c       digital detector - assume tpzero=0
       endif
       if (ierr.ne.0) goto 8000
@@ -114,7 +118,8 @@ C
       if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack.or.
      .   VLBA.eq.rack.or.VLBA4.eq.rack) then
         call volts(0,vbase,sig,vdum,sigdum,tdum,intp,rut,ierr,icont)
-      else if(LBA.eq.rack.or.rack.eq.DBBC.or.rack.eq.RDBE) then
+      else if(LBA.eq.rack.or.rack.eq.DBBC.or.rack.eq.RDBE.or.
+     &           DBBC3.eq.rack) then
 c       digital detector - assume tpzero=0
 	vbase=0.0
 	sig=0.0
@@ -132,7 +137,8 @@ C
          call matcn(isav,-13,idolr,indata,nin,2,ierr)
       else if(VLBA.eq.rack.or.VLBA4.eq.rack) then
          call rst_vatt(name,lwho,ierr)
-      else if(LBA.eq.rack.or.DBBC.eq.rack.or.RDBE.eq.rack) then
+      else if(LBA.eq.rack.or.DBBC.eq.rack.or.RDBE.eq.rack.or.
+     &           DBBC3.eq.rack) then
 c        digital detector - assume tpzero=0
       endif
       if (ierr.ne.0) goto 8000
@@ -147,9 +153,11 @@ C
 c      write(6,*) 'icont',icont
       call fs_get_rack(rack)
       call fs_get_dbbc_cont_cal_mode(dbbc_cont_cal_mode)
+      call fs_get_dbbc3_cont_cal_mode(dbbc3_cont_cal_mode)
       if(calfp.gt.0.0.and.
-     &     ((rack.ne.DBBC.and.rack.ne.RDBE).or.
-     &     (rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.0))) then
+     &     ((rack.ne.DBBC.and.rack.ne.RDBE.and.rack.ne.DBBC3).or.
+     &     (rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.0).or.
+     &     (rack.eq.DBBC3.and.dbbc3_cont_cal_mode.eq.0))) then
 c     &     (rack.eq.RDBE.and.dbbc_cont_cal_mode.eq.0))) then
 C
 C       TURN CAL ON
@@ -175,7 +183,8 @@ C
          vslope=calfp/(tpical-tpia)
          temps=(tpia-vbase)*vslope
       else if(rack.eq.RDBE .or.
-     &        (rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.1)) then
+     &        ((rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.1).or.
+     &        (rack.eq.DBBC3.and.dbbc3_cont_cal_mode.eq.1))) then
          if(calfp.gt.0) then
             vslope=calfp/(tpical-tpia)
             temps=(tpia-vbase)*vslope
@@ -205,7 +214,8 @@ C
          call matcn(isav,-13,idolr,indata,nin,2,jerr)
       else if(VLBA.eq.rack.or.VLBA4.eq.rack) then
          call rst_vatt(name,lwho,jerr)
-      else if(LBA.eq.rack.or.DBBC.eq.rack.or.rack.eq.RDBE) then
+      else if(LBA.eq.rack.or.DBBC.eq.rack.or.rack.eq.RDBE.or.
+     &           DBBC3.eq.rack) then
 c       digital detector - assume tpzero=0
       endif
       jtry=jtry-1

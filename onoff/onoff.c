@@ -82,6 +82,10 @@ main()
     kagc=TRUE;
     if(agc_dbbc(onoff.itpis,0,&ierr))
       goto error_recover;
+  } else if(shm_addr->equip.rack==DBBC3) {
+    kagc=TRUE;
+    if(agc_dbbc3(onoff.itpis,0,&ierr))
+      goto error_recover;
   }
 
   if(local(&az,&el,"azel",&ierr))
@@ -103,11 +107,13 @@ main()
   non_station_det=FALSE;
   station_det=FALSE;
   cont0=shm_addr->equip.rack==DBBC && shm_addr->dbbc_cont_cal.mode == 1;
+  cont0=cont0 ||
+    shm_addr->equip.rack==DBBC3 && shm_addr->dbbc3_cont_cal.mode == 1;
   cont0=cont0 || shm_addr->equip.rack==RDBE;
   for(j=0;j<MAX_ONOFF_DET;j++) {
     if(onoff.itpis[j]!=0) {
       use_cal=use_cal ||onoff.devices[j].tcal>0.0;
-      if(j<MAX_RDBE_DET) {
+      if(j<MAX_DBBC3_DET) {
 	station_det=TRUE;
 	cont[j]=cont0;
       } else {
@@ -162,17 +168,17 @@ main()
 
      ifchain=onoff.devices[i].ifchain;
      if(1 <= ifchain && ifchain <=MAX_LO)
-       sprintf(buff+strlen(buff)," %.2f %c %.5f",
+       sprintf(buff+strlen(buff)," %8.2f %c %.5f",
 	       shm_addr->lo.lo[onoff.devices[i].ifchain-1],
 	       source_type[i],
 	       onoff.devices[i].fwhm*RAD2DEG);
      else if(MAX_LO+1 <= ifchain && ifchain <= MAX_LO+6)
-       sprintf(buff+strlen(buff)," %.2f %c %.5f",
+       sprintf(buff+strlen(buff)," %8.2f %c %.5f",
 	       shm_addr->user_device.lo[onoff.devices[i].ifchain-(1+MAX_LO)],
 	       source_type[i],
 	       onoff.devices[i].fwhm*RAD2DEG);
      else
-       sprintf(buff+strlen(buff)," %.2f %c %.5f",
+       sprintf(buff+strlen(buff)," %8.2f %c %.5f",
 	       0.0,'x',0.0);
 
       logit(buff,0,NULL);
@@ -471,6 +477,14 @@ main()
       }
     } else if(shm_addr->equip.rack==DBBC) {
       if(agc_dbbc(onoff.itpis,1,&ierr2)) {
+	ip2[0]=0;
+	ip2[1]=0;
+	ip2[2]=ierr2;
+	ip2[4]=0;
+	memcpy(ip2+3,"nf",2);
+      }
+    } else if(shm_addr->equip.rack==DBBC3) {
+      if(agc_dbbc3(onoff.itpis,1,&ierr2)) {
 	ip2[0]=0;
 	ip2[1]=0;
 	ip2[2]=ierr2;

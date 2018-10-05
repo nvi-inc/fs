@@ -2076,9 +2076,33 @@ DD -401
 Class buffer error from monitor response.
 ""
 DD -403
-Error decoding cont_cal/ response, could be a DBBC version mis-match, see error DF -402 for text.
+Error decoding cont_cal/ response, could be a DBBC version mis-match, see error DD -402 for text.
 ""
 DD -451
+Class buffer error from command response.
+""
+DE -201
+Mode must be one of: off, on.
+""
+DE -202
+Polarity must be one of 0, 1, 2, or 3.
+""
+DE -203
+Frequency must be 8-300000.
+""
+DE -204
+Option must be 0 or 1.
+""
+DE -205
+Samples must be a positive integer.
+""
+DE -401
+Class buffer error from monitor response.
+""
+DE -403
+Error decoding cont_cal/ response, could be a DBBC version mis-match, see error DF -402 for text.
+""
+DE -451
 Class buffer error from command response.
 ""
 DF -101
@@ -2156,6 +2180,9 @@ Error decoding state/gainU, should be null or state: "man", "agc", or gainU: 1-2
 DG -203
 Error decoding target/gainL, should be null or target: 0-65525, or gainL: 1-255.
 ""
+DG -211
+Error decoding bbc, should be "all" or 1,2,..,128.
+""
 DG -300
 Monitor form requires bbc to read as a parameter, e.g., bbc_gain=1
 ""
@@ -2205,6 +2232,60 @@ DI -403
 Error decoding dbbcifX/ response, could be a DBBC version mis-match, see error DI -402 for text.
 ""
 DI -451
+Class buffer error from command response.
+""
+DJ -101
+No default for IF input.
+""
+DJ -102
+No default for gain.
+""
+DJ -103
+No default for AGC target.
+""
+DJ -201
+IF input must be 1-2.
+""
+DJ -202
+Attenuation must be "man", "agc", or 0 to 63.
+""
+DJ -203
+AGC target must 0-65535.
+""
+DJ -300
+IF module position exceeds number of conditioning modules
+""
+DJ -401
+Class buffer error from monitor response.
+""
+DJ -403
+Error decoding dbbcifX/ response, could be a DBBC3 version mis-match, see error DJ -402 for text.
+""
+DJ -451
+Class buffer error from command response.
+""
+DK -101
+No default for frequency
+""
+DK -201
+Error decoding frequency, must be less than or equal to 4096
+""
+DK -202
+Error decoding IF source, must be A, B, C, D, E, F, G, or H.
+""
+DK -203
+Error decoding bandwidth, must be one of: 2, 4, 8, 16, or 32.
+""
+DK -204
+Averaging period must be a positive integer 60 or less.
+""
+DK -401
+Class buffer error from monitor response.
+""
+DK -403
+Error decoding dbbcNN/ response, could be a DBBC version mis-match, see error DC -402 for text.
+""
+DK -451
 Class buffer error from command response.
 ""
 DQ -1
@@ -2398,6 +2479,21 @@ Dataset ?W ERROR: the previous function is still executing, request ignored.
 ""
 DS -908
 Dataset ?W ERROR: an internal program error has been detected (xpaderr).
+""
+DT -300
+IF module position exceeds number of conditioning modules
+""
+DT -301
+Command does accept parameters,
+""
+DT -401
+Class buffer error from monitor response.
+""
+DT -403
+Error decoding dbbctpifX/ response, could be a DBBC3 version mis-match, see error DT -402 for text.
+""
+DT -451
+Class buffer error from command response.
 ""
 ER -902
 Unable to find ":" in S2 error decode response.
@@ -4133,6 +4229,9 @@ WARNING: Source structure correction greater than 20% for detector ?W.
 Q1 -308
 Unknown IF filter.
 ""
+Q1 -309
+formbbc and formif not currently supported for DBBC3.
+""
 Q2 -201
 Satellite name longer than 24 characters.
 ""
@@ -4631,6 +4730,12 @@ No detectors selected
 QK -205
 TPIs are ALL,EVENU,ODDU,EVENL,ODDL,IFA-D,1u,1l,...16u,16l,FORMBBC,FORMIF.
 ""
+QK -206
+TPIs are ALL,EVENU,ODDU,EVENL,ODDL,IA-IH(IFA-IFH),1u,1l,...128u,128l,FORMBBC,FORMIF.
+""
+QK -207
+FORMBBC and FORMIF are not implemented for DBBC3.
+""
 QK -211
 Tsys value for device ?W overflowed or was less than zero.
 ""
@@ -5022,7 +5127,10 @@ QZ -217
 bbc not set-up.
 ""
 QZ -218
-Unrecognizd RDBE detector.
+Unrecognized RDBE detector.
+""
+QZ -219
+Unrecognized DBBC3 detector.
 ""
 QZ -301
 FIVPT is not dormant.
@@ -5043,7 +5151,7 @@ Q* -105
 No default for LO pcal spacing
 ""
 Q* -201
-Channel must be lo1-3:MK3/4/5+K4, loa-d:VLBA/4/5, lo1-4:LBA/4, loa-d,2a-2d:DBBC, loa0-d0,a1-d1:RDBE, lo1-8:all others
+Chan is lo1-3:MK3/4/5+K4, loa-d:VLBA/4/5, lo1-4:LBA/4, loa-d,2a-2d:DBBC, loa0-d0,a1-d1:RDBE, loa-h:DBBC3, lo1-8:others
 ""
 Q* -202
 LO frequency must be a positive real number

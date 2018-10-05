@@ -284,6 +284,7 @@ loop:
 	case 22:
 	case 23:
 	case 24:
+	case 25:
 	  dbbc(&command,itask,ip);
 	  break;
     case 21:
@@ -313,7 +314,13 @@ loop:
         }
 	break;
       case 82:
-        dbbc_cont_cal(&command,ip);
+        switch (itask) {
+	case 0: dbbc_cont_cal(&command,ip); break;
+	case 1: dbbc3_cont_cal(&command,ip); break;
+        default:
+	  ierr=-4;
+	  goto error;
+        }
         break;
       case 83:
         ds(&command,itask,ip);
@@ -387,6 +394,24 @@ loop:
 	break;
       case 96:
 	dbbcgain(&command,itask,ip);
+	break;
+      case 97:
+	switch (itask) {
+	case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
+	  dbbc3_ifx(&command,itask,ip);
+	  break;
+	case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18:
+	  dbbc3_iftpx(&command,itask,ip);
+	  break;
+	default:
+	  ierr=-4;
+	  goto error;
+	}
+	break;
+      case 99:
+	itask+=60;
+      case 98:
+	dbbc3_bbcnn(&command,itask,ip);
 	break;
       case 100:
 	mk6(&command,itask,ip);

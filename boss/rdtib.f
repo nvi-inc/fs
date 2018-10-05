@@ -19,11 +19,11 @@ C 3.  LOCAL VARIABLES
 C
       dimension ip(5)
 C                   for RMPAR
-      integer*2 ibuf(40)
+      integer*2 ibuf(100)
 C                   buffer to hold input records
       integer fmpread,ichcm_ch
 C     ibadrd - max length of line in ibad.ctl to read
-      data ibadrd /80/
+      data ibadrd /200/
 C     ICLASS - class to send to IBCON
 C     NREC   - number of records in class
 C
@@ -36,6 +36,7 @@ C 6.  PROGRAMMER: NRV
 C     LAST MODIFIED: 800224
 C  WHO  WHEN    DESCRIPTION
 C  GAG  901220  Restructured loop and added call to logit.
+C  Lerner 120723 Increased buffer length to support Prologix-boxes
 c
 C# LAST COMPC'ED  870115:04:18 #
 C
@@ -45,7 +46,7 @@ C     1. Open up the file with the name/address correspondences.
 C
       call fmpopen(idcb,FS_ROOT//'/control/ibad.ctl',ierr,'r',id)
       if (ierr.lt.0) return
-      call ifill_ch(ibuf,1,80,' ')
+      call ifill_ch(ibuf,1,200,' ')
       ilen = fmpread(idcb,ierr,ibuf,ibadrd)
       call lower(ibuf,ilen)
       iclass = 0
@@ -60,8 +61,8 @@ C
            nrec = nrec + 1
            call put_buf(iclass,ibuf,-iflch(ibuf,ilen),'  ','  ')
 C                   Put record into class record
-           call ifill_ch(ibuf,1,80,' ')
         endif
+        call ifill_ch(ibuf,1,200,' ')
         ilen = fmpread(idcb,ierr,ibuf,ibadrd)
         call lower(ibuf,ilen)
       end do

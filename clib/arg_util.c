@@ -262,6 +262,9 @@ int flag;                            /* TRUE if default is okay */
     int ierr, icount;
 
     ierr=0;
+    if(ptr!=NULL)   /* chew any leading spaces */
+        while(' '==*ptr)
+           ptr++;
 
     if(ptr == NULL || *ptr == '\0') {
       if (flag)

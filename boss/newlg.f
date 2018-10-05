@@ -196,6 +196,8 @@ c
         nch=ichmv_ch(ib,nch,'dbbc')
       else if(rack.eq.RDBE) then
         nch=ichmv_ch(ib,nch,'rdbe')
+      else if(rack.eq.DBBC3) then
+        nch=ichmv_ch(ib,nch,'dbbc3')
       else if(rack.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -412,6 +414,21 @@ c
       nch=mcoma(ib,nch)
       call fs_get_m5b_crate(m5b_crate)
       nch = nch + ib2as(m5b_crate,ib,nch,z'8002')
+c
+      nch=mcoma(ib,nch)
+      nch=ichmv_ch(ib,nch,'v')
+      call fs_get_dbbc3_ddc_vs(dbbc3_ddc_vs)
+      call fs_get_dbbc3_ddc_vc(dbbc3_ddc_vc)
+      call char2hol(dbbc3_ddc_vs,ib,nch,nch+dbbc3_ddc_vc-1)
+      nch=nch+dbbc3_ddc_vc
+c
+      nch=mcoma(ib,nch)
+      call fs_get_dbbc3_ddc_bbcs_per_if(dbbc3_ddc_bbcs_per_if)
+      nch = nch + ib2as(dbbc3_ddc_bbcs_per_if,ib,nch,z'8002')
+c
+      nch=mcoma(ib,nch)
+      call fs_get_dbbc3_ddc_ifs(dbbc3_ddc_ifs)
+      nch = nch + ib2as(dbbc3_ddc_ifs,ib,nch,z'8002')
 c
       call logit3(ib,nch-1,lsor)
 c

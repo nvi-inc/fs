@@ -2,7 +2,7 @@
 
             Syntax:   fivept=axis,rep,pts,stp,intp,dev,wait
 
-          Response:   fivept/axis,rep,pts,stp,intp,dev,cal,wait,beam,flux,chain
+          Response:   fivept/axis,rep,pts,stp,intp,dev,wait,cal,beam,flux,chain
 
 
 Settable parameters:

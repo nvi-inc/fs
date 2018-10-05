@@ -135,6 +135,17 @@ C           do nothing ...
                ierr=-81
                goto 80010
             endif
+         else if(DBBC3.eq.rack) then
+            call fc_dbbc3n_d(ldevfp,ierr,ip)
+            if(ierr.ne.0) then
+               ierr=-81
+               goto 80010
+            endif
+            if(ip(3).lt.0) then
+               call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+               ierr=-111
+               goto 80010
+            endif
          endif
       endif
 C 
@@ -477,7 +488,7 @@ C
       if(.NOT.kon) goto 80015
       call gooff(lonosv,latosv,caxfp,nwait,jerr)
       itry=itry-1
-      if (jerr.gt.o.and.itry.gt.0) goto 80011
+      if (jerr.gt.0.and.itry.gt.0) goto 80011
 C
 80015 continue
       if (ierr.gt.0) goto 89990
@@ -505,6 +516,12 @@ C
             endif
          else if(DBBC.eq.rack) then
             call fc_dbbcn_r(ip)
+            if(ip(3).lt.0) then
+               call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+               call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
+            endif
+         else if(DBBC3.eq.rack) then
+            call fc_dbbc3n_r(ip)
             if(ip(3).lt.0) then
                call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
                call logit7ic(idum,idum,idum,-1,-112,lwho,'er')

@@ -182,13 +182,15 @@ static  char log_str[MAXLOG];
 	  buff[count]=0;
 	  iret=nmea_wind(buff,&wdir,&wsp);
 	  if(iret==-1) /* explicit messages for the most useful cases */
-	    err_report("windsensor sent wrong data message", terminal2,0,iret);
+	    err_report("windsensor sent wrong data message", buff,0,iret);
 	  else if(iret==-13) 
-	    err_report("windsensor has wrong units", terminal2,0,iret);
+	    err_report("windsensor has wrong units", buff,0,iret);
 	  else if(iret==-15) 
-	    err_report("windsensor data not valid", terminal2,0,iret);
-	  else if(iret!=0)
-	    err_report("error decoding wind data", terminal2,iret,0);
+	    err_report("windsensor data not valid", buff,0,iret);
+	  else if(iret<0) 
+	    err_report("other error decoding wind data", buff,0,iret);
+	  else if(iret>1)
+	    err_report("error from strtol() decoding wind data", buff,iret,0);
 	  else
 	    kwind=1;
 	}
@@ -222,7 +224,7 @@ float *pres, *tmp, *humi;
   buf[sizeof(buf)-1]=0;
 
   *pres=-1;
-  *tmp==51;
+  *tmp=-51;
   *humi=-1;
 
   p=strtok(buf,comma);

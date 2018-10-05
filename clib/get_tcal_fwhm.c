@@ -16,6 +16,7 @@ static float bw4[ ]={0.0,0.125,16.0,0.50,8.0,2.0,4.0};
 static float bw_vlba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0, 32.0};
 static float bw_lba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0,64.0};
 static float bw_dbbc[ ]={1.0,2.0,4.0,8.0,16.0,32.0};
+static float bw_dbbc3[ ]={2.0,4.0,8.0,16.0,32.0};
 static char *lwhat[ ]={
   "1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el","fl","gl",
   "1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu","fu","gu",
@@ -25,6 +26,8 @@ static char *lwhatm[ ]={
 "i1","i2","i3"};
 static char *lwhatl[ ]={
 "p1","p2","p3","p4","p5","p6","p7","p8","p9","pa","pb","pc","pd","pe","pf"};
+static char *lwhat3if[ ]={
+  "ia","ib","ic","id","ie","if","ig","ih"};
 
 static char lets[]="abcdefghijklm";
 
@@ -42,6 +45,7 @@ int *ierr;
   double center;
   float vcf,vcbw,dpfu,gain;
   char lsorna[10];
+  int det;
 
   ifchain=0;
   *ierr=0;
@@ -347,8 +351,71 @@ int *ierr;
       *ierr=-306;
       goto error;
     }
+  } else if(shm_addr->equip.rack==DBBC3) {
+    det=-1;
+    for(i=0;i<sizeof(lwhat3if)/sizeof(char *);i++) {
+      if(strncmp(device,lwhat3if[i],2)==0) {
+	det=2*MAX_DBBC3_BBC+i;
+	break;
+      }
+    }
+    if(det<0) {
+      det=atoi(device);
+      if(det<1||det>MAX_DBBC3_BBC)
+	det=-1;
+      else if(device[3]=='u')
+	det+=MAX_DBBC3_BBC;
+      det--;
+    }
+    if(-1 < det && det<2*MAX_DBBC3_BBC) {
+      ifchain=shm_addr->dbbc3_bbcnn[det%MAX_DBBC3_BBC].source+1;
+      if(ifchain<1||ifchain>8)
+	ifchain=0;
+      if(ifchain!=0) {
+	float freq, bbcbw;
+	
+	freq=shm_addr->dbbcnn[det%MAX_DBBC3_BBC].freq/1.e6;
+	bbcbw=bw_dbbc3[shm_addr->dbbc3_bbcnn[det%MAX_DBBC3_BBC].bw];
+	if(det<MAX_DBBC3_BBC)
+	  freq-=bbcbw*.5;
+	else
+	  freq+=bbcbw*.5;
+	switch(shm_addr->lo.sideband[ifchain-1]) {
+	case 1:
+	  center=shm_addr->lo.lo[ifchain-1]+freq;
+	  break;
+	case 2:
+	  center=shm_addr->lo.lo[ifchain-1]-freq;
+	  break;
+	default:
+	  *ierr=-302;
+	  goto error;
+	  break;
+	}
+      } else {
+	*ierr=-306;
+	goto error;
+      }
+    } else if(MAX_DBBC3_BBC*2 <= det && det< MAX_DBBC3_DET) {
+      float upper, lower;
+      
+      ifchain=det-MAX_DBBC3_BBC*2+1;
+      
+      switch (shm_addr->lo.sideband[ifchain-1]) {
+      case 1:
+	center=shm_addr->lo.lo[ifchain-1]+4096.0*0.5;
+	break;
+      case 2:
+	center=shm_addr->lo.lo[ifchain-1]-4096.0*0.5;
+	break;
+      default:
+	*ierr=-302;
+	goto error;
+	break;
+      }
+    }
   }
-//  printf(" ifchain2 %d center %f\n",ifchain, center );
+// printf(" ifchain2 %d center %f\n",ifchain, center );
   if(ifchain!=0) {
     get_gain_par(ifchain,center,fwhm,&dpfu,NULL,tcal);
   } else {

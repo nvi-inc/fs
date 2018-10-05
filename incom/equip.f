@@ -130,6 +130,9 @@ C **** end modify mb
       else if (ichcm_ch(ibuf,ic1,'rdbe').eq.0.and.il.eq.4) then
         rack = RDBE
         rack_type = RDBE
+      else if (ichcm_ch(ibuf,ic1,'dbbc3').eq.0.and.il.eq.5) then
+        rack = DBBC3
+        rack_type = DBBC3
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then
         rack = 0
         rack_type = 0
@@ -818,6 +821,84 @@ c      so only DBBC matters for 5C
       endif
  2300 continue
       call fs_set_m5b_crate(m5b_crate)
+c
+c DBBC3 DDC firmware version
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-140,'bo',24)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      ifc=1
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',24)
+        goto 990
+      endif
+C
+      call hol2char(ibuf,ic1,ic2,dbbcv)
+      kmove=dbbcv(1:1).eq.'v'
+      do i=1,17
+         if(kmove) then
+            dbbcv(i:i)=dbbcv(i+1:i+1)
+         endif
+         if(dbbcv(i:i).ne.' ') idbbcvc=i
+      enddo
+      if(idbbcvc.gt.16) then
+         call logit7ci(0,0,0,1,-141,'bo',24)
+         goto 990
+      endif
+      idbbcv=0
+      do i=1,3
+        ind=index('01234567890',dbbcv(i:i))
+        if(ind.eq.0) then
+           call logit7ci(0,0,0,1,-141,'bo',24)
+           goto 990
+        endif
+        idbbcv=idbbcv*10+(ind-1)
+      enddo
+      if(idbbcv.lt.121) then
+         call logit7ci(0,0,0,1,-141,'bo',24)
+         goto 990
+      endif
+c
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',24)
+        goto 990
+      else
+         il=ic2-ic1+1
+      endif
+      dbbc3_ddc_bbcs_per_if = ias2b(ibuf,ic1,ic2-ic1+1)
+      if (dbbc3_ddc_bbcs_per_if.ne.8.and.
+     &     dbbc3_ddc_bbcs_per_if.ne.12.and.
+     &     dbbc3_ddc_bbcs_per_if.ne.16) then
+         call logit7ci(0,0,0,1,-140,'bo',24)
+         goto 990
+      endif
+c
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-140,'bo',24)
+        goto 990
+      else
+         il=ic2-ic1+1
+      endif
+      dbbc3_ddc_ifs = ias2b(ibuf,ic1,ic2-ic1+1)
+      if ( dbbc3_ddc_ifs.lt.1.or.
+     &     dbbc3_ddc_ifs.gt.8) then
+         call logit7ci(0,0,0,1,-140,'bo',24)
+         goto 990
+      endif
+
+      dbbc3_ddcv =idbbcv
+      dbbc3_ddc_vs= dbbcv
+      dbbc3_ddc_vc=idbbcvc
+      call fs_set_dbbc3_ddc_v(dbbc3_ddc_v)
+      call fs_set_dbbc3_ddc_vs(dbbc3_ddc_vs)
+      call fs_set_dbbc3_ddc_vc(dbbc3_ddc_vc)
+      call fs_set_dbbc3_ddc_bbcs_per_if(dbbc3_ddc_bbcs_per_if)
+      call fs_set_dbbc3_ddc_ifs(dbbc3_ddc_ifs)
 c
       return
 c

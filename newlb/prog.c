@@ -19,7 +19,7 @@
 #define DBBCDDCVL_N 1
 #define DBBCDDCVS_N 16
 #define RDBE_PCAL_AMP_N 1
-#define SYSTMP_N MAX_DET
+#define SYSTMP_N MAX_TSYS_DET
 #define LFREQV_N 90
 #define FREQVC_N 15
 #define LNAANT_N 8
@@ -32,6 +32,7 @@
 #define HOREL_N  4*MAX_HOR
 #define CWRAP_N 8
 #define IDEVDS_N 64
+#define DBBC3_DDC_VS_N 16
 
 extern struct fscom *shm_addr;
 
@@ -2582,3 +2583,86 @@ void fs_get_rdbe_pcal_amp__(rdbe_pcal_amp)
 	  N = RDBE_PCAL_AMP_N;
 	  memcpy(rdbe_pcal_amp,shm_addr->rdbe_equip.pcal_amp,N);
 	}
+
+void fs_set_dbbc3_ddc_v__(dbbc3_ddc_v)
+	int *dbbc3_ddc_v;
+	{
+          shm_addr->dbbc3_ddc_v = *dbbc3_ddc_v;
+        }
+
+void fs_get_dbbc3_ddc_v__(dbbc3_ddc_v)
+	int *dbbc3_ddc_v;
+	{
+          *dbbc3_ddc_v = shm_addr->dbbc3_ddc_v;
+	}
+
+void fs_set_dbbc3_ddc_vs__(dbbc3_ddc_vs)
+	char *dbbc3_ddc_vs;
+	{
+          size_t N;
+	  N = DBBC3_DDC_VS_N;
+	  memcpy(shm_addr->dbbc3_ddc_vs,dbbc3_ddc_vs,N);
+	}
+
+void fs_get_dbbc3_ddc_vs__(dbbc3_ddc_vs)
+	char *dbbc3_ddc_vs;
+	{
+          size_t N;
+	  N = DBBC3_DDC_VS_N;
+	  memcpy(dbbc3_ddc_vs,shm_addr->dbbc3_ddc_vs,N);
+	}
+
+void fs_set_dbbc3_ddc_vc__(dbbc3_ddc_vc)
+	int *dbbc3_ddc_vc;
+	{
+          shm_addr->dbbc3_ddc_vc = *dbbc3_ddc_vc;
+        }
+
+void fs_get_dbbc3_ddc_vc__(dbbc3_ddc_vc)
+	int *dbbc3_ddc_vc;
+	{
+          *dbbc3_ddc_vc = shm_addr->dbbc3_ddc_vc;
+	}
+
+void fs_set_dbbc3_ddc_bbcs_per_if__(dbbc3_ddc_bbcs_per_if)
+	int *dbbc3_ddc_bbcs_per_if;
+	{
+          shm_addr->dbbc3_ddc_bbcs_per_if = *dbbc3_ddc_bbcs_per_if;
+        }
+
+void fs_get_dbbc3_ddc_bbcs_per_if__(dbbc3_ddc_bbcs_per_if)
+	int *dbbc3_ddc_bbcs_per_if;
+	{
+          *dbbc3_ddc_bbcs_per_if = shm_addr->dbbc3_ddc_bbcs_per_if;
+	}
+
+void fs_set_dbbc3_ddc_ifs__(dbbc3_ddc_ifs)
+	int *dbbc3_ddc_ifs;
+	{
+          shm_addr->dbbc3_ddc_ifs = *dbbc3_ddc_ifs;
+        }
+
+void fs_get_dbbc3_ddc_ifs__(dbbc3_ddc_ifs)
+	int *dbbc3_ddc_ifs;
+	{
+          *dbbc3_ddc_ifs = shm_addr->dbbc3_ddc_ifs;
+	}
+
+void fs_get_dbbc3_bbcnn_source__(source,n)
+	int *source, *n;
+	{
+          *source=shm_addr->dbbc3_bbcnn[*n-1].source;
+	}
+
+void fs_set_dbbc3_cont_cal_mode__(dbbc3_cont_cal_mode)
+	int *dbbc3_cont_cal_mode;
+	{
+	  shm_addr->dbbc3_cont_cal.mode=*dbbc3_cont_cal_mode;
+        }
+
+void fs_get_dbbc3_cont_cal_mode__(dbbc3_cont_cal_mode)
+	int *dbbc3_cont_cal_mode;
+	{
+	  *dbbc3_cont_cal_mode=shm_addr->dbbc3_cont_cal.mode;
+	}
+

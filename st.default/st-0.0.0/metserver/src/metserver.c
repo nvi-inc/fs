@@ -17,9 +17,14 @@
 #include <fcntl.h>
 #include <pthread.h>    /* For multithreading. */
 #include <netdb.h>      /* For structure addrinfo. */
+#include <time.h>
 
 
 #define MYPORT 50001    /* the port users will be connecting to */
+
+/* STALE_AGE determines how old, in seconds, data must be
+ * to be considered stale. Stale data results in an error. */
+#define STALE_AGE 300
 
 #define BACKLOG 5       /* how many pending connections queue will hold */
 #define TRUE 1
@@ -35,8 +40,19 @@
 /* Need a structure to pass to the thread that will get new met data. */
 struct met_data{
   char *buf;
+  struct timespec last_updated;
   pthread_mutex_t mutex; /* Mutex for locking the met data for reading/writing. */
 };
+
+int met_data_age(struct met_data *md) {
+	struct timespec now;
+	if (clock_gettime(CLOCK_MONOTONIC, &now) < 0) {
+		err_report("clock_gettime", 0, errno, 0);
+		return 0;
+	}
+	return now.tv_sec - md->last_updated.tv_sec;
+}
+
 
 /* Define  globally accessible variables. */
 static struct met_data metstr;
@@ -60,6 +76,9 @@ void *threadFunc(void *arg) {
     pthread_mutex_lock(&metstr.mutex); /* Lock the mutex, will cause main thread to block
 				          if trying to lock mutex protecting 'metstr.buf'. */
     metstr.buf = temp_buf[iping];
+    if (clock_gettime(CLOCK_MONOTONIC, &metstr.last_updated) < 0) {
+        err_report("clock_gettime", 0, errno, 0);
+    }
     pthread_mutex_unlock(&metstr.mutex); /* Time to unlock. */
     /* Now change the value of iping so we save metget string on the other
       index the next time. */
@@ -245,10 +264,14 @@ main(argc, argv)
     FD_ZERO(&ready);
     FD_SET(sockfd,&ready);
 
-    if (select(sockfd + 1, &ready, (fd_set *)0,
-	       (fd_set *)0, &to) < 0) {
+    int ret = select(sockfd + 1, &ready, NULL, NULL, &to);
+    if (ret <0) {
       err_report("socket select error", NULL,errno,0);
       continue;
+    }
+
+    if (met_data_age(&metstr) > STALE_AGE) {
+      err_report("data stale", NULL, 0, 0);
     }
 
     if(FD_ISSET(sockfd, &ready)) {

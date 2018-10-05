@@ -43,6 +43,7 @@ c
       integer MAX_DAS       ! Max number of LBA DAS allowed
       integer RDBE          ! RDBE comparison bit variable
       integer MK6           ! MK6 comparison bit variable
+      integer DBBC3         ! DBBC3 comparison bit variable
       character*5 FS_ROOT
       integer MAX_BBC
       integer MAX_VLBA_BBC
@@ -57,6 +58,10 @@ c
       integer MAX_RDBE_IF
       integer MAX_RDBE_CH
       integer MAX_RDBE
+      integer MAX_DBBC3_BBC
+      integer MAX_DBBC3_IF
+      integer MAX_DBBC3_DET
+      integer MAX_TSYS_DET
       integer CH_PRIOR      ! chekr        realtime priority
       integer CL_PRIOR      ! clock func.  realtime priority
       integer FS_PRIOR      ! Field System realtime priority
@@ -92,6 +97,7 @@ C rack/drive
       parameter ( DBBC = z'800'   )
       parameter ( MK6 = z'1000'   )
       parameter ( RDBE = z'2000'   )
+      parameter ( DBBC3 = z'4000'   )
 C rack/drive _types
       parameter ( VLBAG    = z'1000' )
       parameter ( VLBA2    = z'2000' )
@@ -132,6 +138,11 @@ C
       parameter ( MAX_DBBC_BBC  =16)
       parameter ( MAX_DBBC_IF   = 4)
       parameter ( MAX_DBBC_DET  = 2*MAX_DBBC_BBC+MAX_DBBC_IF)
+C
+      parameter ( MAX_DBBC3_BBC  =128)
+      parameter ( MAX_DBBC3_IF   = 8)
+      parameter ( MAX_DBBC3_DET  = 2*MAX_DBBC3_BBC+MAX_DBBC3_IF)
+      parameter ( MAX_TSYS_DET = MAX_DBBC3_DET)
 C
       parameter ( CH_PRIOR=-04)
       parameter ( CL_PRIOR=-08)

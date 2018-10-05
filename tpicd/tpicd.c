@@ -27,6 +27,7 @@ main()
   struct tpicd_cmd tpicd;
   struct data_valid_cmd data_valid[2];
   struct dbbc_cont_cal_cmd dbbc_cont_cal;
+  struct dbbc3_cont_cal_cmd dbbc3_cont_cal;
   int i,j,k,l,idata,nch,ilen, nchstart, nchar;
   char buff[120];
   unsigned before,after,isleep;
@@ -38,6 +39,7 @@ main()
 
   int samples;
   double dbbc_tpi[MAX_DBBC_DET],dbbc_tpical[MAX_DBBC_DET];
+  double dbbc3_tpi[MAX_DBBC3_DET],dbbc3_tpical[MAX_DBBC3_DET];
 
   struct rdtcn_control rdtcn_control[MAX_RDBE];
   int iping[MAX_RDBE];
@@ -74,6 +76,7 @@ main()
   shm_addr->tpicd.tsys_request=0;
   memcpy(&data_valid,&shm_addr->data_valid,sizeof(data_valid));
   memcpy(&dbbc_cont_cal,&shm_addr->dbbc_cont_cal,sizeof(dbbc_cont_cal));
+  memcpy(&dbbc3_cont_cal,&shm_addr->dbbc3_cont_cal,sizeof(dbbc3_cont_cal));
 
   if(RDBE == shm_addr->equip.rack) {
     for(i=0;i<MAX_RDBE;i++) {
@@ -92,16 +95,28 @@ main()
     goto loop;
   }
 
-  if(dbbc_cont_cal.mode==1) {
-    samples=0;
-    for(i=0;i<MAX_DBBC_DET;i++) {
-      dbbc_tpi[i]=0.0;
-      dbbc_tpical[i]=0.0;
-    }
-  }
-
   if(shm_addr->equip.rack==DBBC) {
+    if(dbbc_cont_cal.mode==1) {
+      samples=0;
+      for(i=0;i<MAX_DBBC_DET;i++) {
+	dbbc_tpi[i]=0.0;
+	dbbc_tpical[i]=0.0;
+      }
+    }
     if(dbbc_cont_cal.mode==1)
+      strcpy(buff,"tpcont/");
+    else
+      strcpy(buff,"tpi/");
+    nchstart=nch=strlen(buff)+1;
+  } else if(shm_addr->equip.rack==DBBC3) {
+    if(dbbc3_cont_cal.mode==1) {
+      samples=0;
+      for(i=0;i<MAX_DBBC3_DET;i++) {
+	dbbc3_tpi[i]=0.0;
+	dbbc3_tpical[i]=0.0;
+      }
+    }
+    if(dbbc3_cont_cal.mode==1)
       strcpy(buff,"tpcont/");
     else
       strcpy(buff,"tpi/");
@@ -132,10 +147,25 @@ main()
 #endif
 
   idata=0;
-  for(i=0;i<2*MAX_BBC+4;i++)
-    if(tpicd.itpis[i]!=0)
-      idata=1;
 
+  if(shm_addr->equip.rack==VLBA || shm_addr->equip.rack==VLBA4) {
+    for(i=0;i<2*MAX_DET;i++)
+      if(tpicd.itpis[i]!=0)
+	idata=1;
+  } else if(shm_addr->equip.rack==MK3 || shm_addr->equip.rack==MK4 ||
+	    shm_addr->equip.rack==LBA4||shm_addr->equip.rack==LBA) {
+    for(i=0;i<2*MAX_VC+3;i++)
+      if(tpicd.itpis[i]!=0)
+	idata=1;
+  } else if(shm_addr->equip.rack==DBBC) {  
+    for(i=0;i<2*MAX_DBBC_DET;i++)
+      if(tpicd.itpis[i]!=0)
+	idata=1;
+  } else if(shm_addr->equip.rack==DBBC3) {  
+    for(i=0;i<2*MAX_DBBC3_DET;i++)
+      if(tpicd.itpis[i]!=0)
+	idata=1;
+  }
   if (!idata)
     goto loop;
   
@@ -293,6 +323,61 @@ main()
 	  for(i=0;i<MAX_DBBC_DET;i++) {
 	    dbbc_tpi[i]=0.0;
 	    dbbc_tpical[i]=0.0;
+	  }
+	  if(tsys_disp)
+	    goto wakeup_block;
+	}
+      }
+    } else if(shm_addr->equip.rack==DBBC3) {
+#ifdef TESTX
+    printf(" collecting dBBC3 data \n");
+#endif
+      tpi_dbbc3(ip,tpicd.itpis);   /* sample tpi(s) */
+      if(ip[2]<0) {
+	logit(NULL,ip[2],ip+3);
+	if(ip[0]!=0) {
+	  cls_clr(ip[0]);
+	  ip[0]=ip[1]=0;
+	}
+	logit(NULL,-1,"cd");
+	goto while_end;
+      }
+      if(dbbc3_cont_cal.mode!=1) {
+#ifdef TESTX
+    printf(" put non-cont dBBC3 data \n");
+#endif
+	tpput_dbbc3(ip,tpicd.itpis,-3,buff,&nch,ilen); /* put results of tpi */
+      } else {
+#ifdef TESTX
+    printf(" put cont dBBC3 data \n");
+#endif
+	tpput_dbbc3(ip,tpicd.itpis,-11,buff,&nch,ilen); /* put tpcont */
+	for(k=0;k<MAX_DBBC3_DET;k++) {
+	  if(1==tpicd.itpis[k]) {
+	    if(dbbc3_tpi[k]<-0.5 ||shm_addr->tpi[k]<=0 ||
+	       shm_addr->tpi[k]>65534.5)
+	      dbbc3_tpi[k]=-1.0;
+	    else {
+	      dbbc3_tpi[k]+=shm_addr->tpi[k];
+	    }
+	    if(dbbc3_tpical[k]<-0.5 ||shm_addr->tpical[k]<=0
+	       || shm_addr->tpical[k]>65534.5)
+	      dbbc3_tpical[k]=-1.0;
+	    else
+	      dbbc3_tpical[k]+=shm_addr->tpical[k];
+	  }
+	}
+	if(++samples >= dbbc3_cont_cal.samples) {
+	  int tsys_disp=tpicd.tsys_request;
+	  tpicd.tsys_request=0;
+	  cont_dbbc3(tpicd.itpis,dbbc3_tpi,dbbc3_tpical,samples,3,tsys_disp);
+	  cont_dbbc3(tpicd.itpis,dbbc3_tpi,dbbc3_tpical,samples,4,tsys_disp);
+	  cont_dbbc3(tpicd.itpis,dbbc3_tpi,dbbc3_tpical,samples,10,tsys_disp);
+	  cont_dbbc3(tpicd.itpis,dbbc3_tpi,dbbc3_tpical,samples,5,tsys_disp);
+	  samples=0;
+	  for(i=0;i<MAX_DBBC3_DET;i++) {
+	    dbbc3_tpi[i]=0.0;
+	    dbbc3_tpical[i]=0.0;
 	  }
 	  if(tsys_disp)
 	    goto wakeup_block;

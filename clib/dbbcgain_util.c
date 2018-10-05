@@ -29,9 +29,12 @@ char *ptr;
     switch (*count) {
       case 1:
         ierr=arg_int(ptr,&lcl->bbc,0,FALSE);
-	if(ierr == 0 && (lcl->bbc < 1 || lcl->bbc > 16))
-	  ierr=-200;
-	else if(ierr == -200)
+	if(ierr==0) {
+          if(DBBC==shm_addr->equip.rack && (lcl->bbc < 1 || lcl->bbc > 16))
+	    ierr=-200;
+          else if(DBBC3==shm_addr->equip.rack && (lcl->bbc < 1 || lcl->bbc > MAX_DBBC3_BBC))
+	    ierr=-210;
+	} else if(ierr == -200)
 	  if(strcmp(ptr,"all")==0) {
 	    lcl->bbc=0;
 	    ierr=0;

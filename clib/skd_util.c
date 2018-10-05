@@ -9,8 +9,12 @@
 #include <memory.h>    /* shared memory IPC header file */
 #include <ctype.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define  MAX_BUF       256
+
+#define FS_SKD_WAIT (1 << 30)
+#define FS_SKD_NAMED (1 << 29)
 
 struct skd_buf {
 	long	mtype;
@@ -30,6 +34,7 @@ static long rtype=0;
 static int dad=0;
 static int run_index=0;
 static char prog_name[5];
+static char return_name[5];
 static long save_ip[5];
 static char arg[MAX_BUF+1];
 static char arg_buff[MAX_BUF+1];
@@ -178,10 +183,16 @@ int *run_index;
 int	status, i, n;
 struct skd_buf sched;
 
- if( w == 'w'|| w == 'p')
-   sched.messg.rtype=(1<<30)|getpid();
- else
-   sched.messg.rtype=0;
+  if (w == 'w' || w == 'p') {
+      if (return_name[0]) {
+          sched.messg.rtype =
+              FS_SKD_WAIT | FS_SKD_NAMED | mtype(return_name);
+      } else {
+          sched.messg.rtype = FS_SKD_WAIT | getpid();
+      }
+  } else {
+      sched.messg.rtype = 0;
+  }
 
  if( run_index!=NULL)
    sched.messg.run_index=*run_index;
@@ -603,24 +614,117 @@ if(-1==msgctl( msqid, IPC_RMID, 0 )) {
 return( 0);
 }
 
-static long mtype(name)
-char name[5];
-{
-    int i;
-    long val;
-    char list[]=" abcdefghijklmnopqrstuvwxyz0123456789"; /* empty must be 0 */
-    char *ptr;
+/*
+  mtype is a bijection to integers from strings of length 5 consiting
+  of characters in [A-Za-z0-9] and ignoring case. Character in the string
+  that are outside this set, including space, are ignored.
 
-    val=0;
-    for (i=0;i<5;i++) {
-       if(name[i] != ' ' && name[i] != 0 ) {
-	 ptr=index(list,tolower(name[i]));
-	 if(ptr!=NULL)
-	   val+=(ptr-list)<<(6*i);
-       }
-    }
-    return(val);
+  It can be used as a replacement for a hash function when a collision
+  cannot be handled easily. Largest number produced is (36^6-1)/(36-1)-1 =
+  62193780
+
+  Mapping is as follows:
+
+       "": 0
+      "a": 1
+      "b": 2
+        ...
+      "9": 36
+     "aa": 37
+     "ab": 38
+        ...
+     "a9": 72
+        ...
+     "99": 1332
+    "aaa": 1333
+    "999": 47988
+        ...
+  "99999": 62193780
+
+*/
+
+static long mtype(char name[5]) {
+	/*
+      The algorithm treats the string as base b numbers. However, we can simply
+      do this as, for eg, "aa" would then be treated as the same as "a". We
+      instead list all numbers of a fixed length together, and calculate the
+      offset based on how many strings came before this group.
+
+	  If b == number of character, then there are
+
+      -   b^0 strings of length 0
+      -   b^1 strings of length 1
+      -   b^2 strings of length 2
+      -   et c.
+
+      so
+
+	     offset = 1 + base + base^2 + ... base^(i-1)
+
+      For example, "aab" would represent 1 in base 36 as listed below, and there
+      are 1 + 36 + 36^2 = 1333 strings of length less than 3, so it is mapped to
+      1333 + 1 = 1334
+
+      The number in base b and the offset are evaluated with Horner's scheme.
+
+	 */
+	long val    = 0;
+	long offset = 0;
+	int i;
+	char *ptr;
+	char symbols[] = "abcdefghijklmnopqrstuvwxyz0123456789";
+	size_t base    = strlen(symbols);
+
+	for (i = 0; i < 5; i++) {
+		if (name[i] == '\0')
+			break;
+
+		ptr = strchr(symbols, tolower(name[i]));
+		if (ptr == NULL)
+			continue;
+
+		val    = base * val + (ptr - symbols);
+		offset = base * offset + 1;
+	}
+
+	return (val + offset);
 }
+
+//  skd_set_return_name sets return field of skd to that of the "name"
+//  rather than PID.
+void skd_set_return_name(char *name) {
+	// TODO: check valid name?
+    memcpy(return_name, name, sizeof(return_name));
+}
+
+// skd_clr_ret clears all elements of the skd queue with named return
+// values set to the value specified with `skd_set_return_name`.
+void skd_clr_ret() {
+	struct skd_buf sched;
+
+	if (!return_name[0]) {
+		fprintf(stderr, "skd_clr_ret: called without return_name set\n");
+		exit(EXIT_FAILURE);
+	}
+
+	long rtype = FS_SKD_WAIT | FS_SKD_NAMED | mtype(return_name);
+
+	for (;;) {
+		int status = msgrcv(msqid, (struct msgbuf *)&sched,
+		                    sizeof(sched.messg), rtype, IPC_NOWAIT);
+
+		if (status >= 0 || errno == EINTR)
+			continue;
+		if (errno == ENOMSG)
+			break;
+
+		// Unknown error
+		perror("skd_clr_ret: receiving message");
+		exit(EXIT_FAILURE);
+	}
+}
+
+
 static void nullfcn(sig)
 int sig;
 {

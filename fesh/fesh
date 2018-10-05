@@ -1,6 +1,18 @@
 #!/bin/bash
+SHA1SUM=acb6e660470fa83eb24f4dcb38e93a425e931f63
+VERSION=2017-10-10
 
-#'strict' mode
+version(){
+    local sha=$(tail -n+3 $0 | sha1sum | cut -f1 -d' ')
+
+    if [[ $SHA1SUM =~ $sha ]]; then
+        echo "fesh $VERSION"
+    else
+        echo "fesh $VERSION (modified)"
+    fi
+}
+
+#enable 'strict' mode
 set -euo pipefail
 
 FS_BASE=${FS_BASE:-'/usr2'}
@@ -11,13 +23,15 @@ SCHED_PATH=${SCHED_PATH:-"${FS_BASE}/sched"}
 
 usage() {
     cat <<EOF
-Usage: $0 [-n] [-d] [-h] OBSERVATION
+Usage: $0 [options] OBSERVATION
 Fetch schedule file for OBSERVATION from CDDIS
 
+Options:
     -n     Fetch next observation in master schedule
     -d     DRUDG schedule with default settings 
            (needs STATION enviroment variable set to two letter id)
-    -v     verbose mode.
+    -v     Verbose mode, drudg output printed to stdout
+    -V     Print version and exit.
     -f     Force downloading of schedule from server and, if given 
            with '-d', re-run drudg
     -h     Print this message
@@ -33,7 +47,8 @@ EOF
 
 run_drudg=
 force=
-while getopts 'ndhf' opt; do
+verbose=
+while getopts 'ndhfvV' opt; do
     case $opt in
         n)
             echo "next" not implimented.
@@ -51,6 +66,10 @@ while getopts 'ndhf' opt; do
             ;;
         v)
             verbose=1
+            ;;
+        V)
+            version $0
+            exit 0
             ;;
         *)
             usage >&2
@@ -104,10 +123,14 @@ echo -n Fetching schedule from server...
 wget -nv  --backups=1 ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd
 echo Done
 
+drudg_out="/dev/null"
+if [[ -n "$verbose" ]]; then
+    drudg_out="/dev/stdout"
+fi
 
 if [[ -n "$run_drudg" ]]; then
 echo -n Drudging schedule... >&2
-cat <<EOF | $FS_PATH/bin/drudg $sched.skd > /dev/null
+cat <<EOF | $FS_PATH/bin/drudg $sched.skd > $drudg_out
 $STATION
 3
 12

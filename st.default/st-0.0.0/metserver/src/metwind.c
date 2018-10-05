@@ -9,7 +9,6 @@
 #include <termio.h>
 #include <linux/serial.h>
 #include <sys/errno.h>
-/*
 /*  */
 
 #define MAXLEN 4095
@@ -275,14 +274,17 @@ main(int argc, char *argv[])
   return 0;
 }
 
-nema(buf,pres,tmp,humi)
-char *buf;
+nema(bufin,pres,tmp,humi)
+char *bufin;
 float *pres, *tmp, *humi;
 {
   char *p,comma[]=",";
+  char buf[256];
+  strncpy(buf,bufin,sizeof(buf));
+  buf[sizeof(buf)-1]=0;
 
   *pres=-1;
-  *tmp==51;
+  *tmp=-51;
   *humi=-1;
 
   p=strtok(buf,comma);

@@ -21,6 +21,7 @@ static char *pol_key[ ]={"unknown","rcp","lcp"};
 static char *pcal_key[ ]={"unknown","off"};
 static char *star_key[ ]={"*"};
 static char lets[]="abcdefghijklm";
+static char *lo3_key[ ]={"loa","lob","loc","lod","loe","lof","log","loh"};
 
 #define LOM_KEY sizeof(lom_key)/sizeof( char *)
 #define LOV_KEY sizeof(lov_key)/sizeof( char *)
@@ -30,6 +31,7 @@ static char lets[]="abcdefghijklm";
 #define POL_KEY sizeof(pol_key)/sizeof( char *)
 #define PCAL_KEY sizeof(pcal_key)/sizeof( char *)
 #define STAR_KEY sizeof(star_key)/sizeof( char *)
+#define LO3_KEY sizeof(lo3_key)/sizeof( char *)
 
 int lo_dec(lcl,count,ptr)
 struct lo_cmd *lcl;
@@ -69,7 +71,9 @@ char *ptr;
 	  //	  if(ierr==0 && lo >= shm_addr->dbbc_cond_mods)
 	  if(ierr==0 && lo >= MAX_LO)
 	    ierr=-400;
-	} else if(shm_addr->equip.rack==RDBE) {
+	} else if(shm_addr->equip.rack==DBBC3)
+	  ierr=arg_key(ptr,lo3_key,LO3_KEY,&lo,0,FALSE);
+	else if(shm_addr->equip.rack==RDBE) {
 	  int iscan, ifc, irdbe;
 	  char *prdbe, crdbe;
 
@@ -187,11 +191,13 @@ struct lo_cmd *lcl;
     strcpy(output,lov_key[ilo]);
   else if(shm_addr->equip.rack==LBA || shm_addr->equip.rack==LBA4)
     strcpy(output,lol_key[ilo]);
-  else if(shm_addr->equip.rack==DBBC) {
+  else if(shm_addr->equip.rack==DBBC)
     strcpy(output,lod_key[ilo]);
-  } else if(shm_addr->equip.rack==RDBE) {
+  else if(shm_addr->equip.rack==RDBE)
     sprintf(output,"lo%c%d",lets[ilo/MAX_RDBE_IF],ilo%MAX_RDBE_IF);
-  } else
+  else if(shm_addr->equip.rack==DBBC3)
+    strcpy(output,lo3_key[ilo]);
+  else
     sprintf(output,"lo%d",ilo+1);
   strcat(output,",");
   

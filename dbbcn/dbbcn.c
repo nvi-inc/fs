@@ -76,7 +76,7 @@ int is_init=FALSE;
 static char control_file[65];
 
 static void close_socket();
-static int read_response(char*, int, FILE*, int, int, int);
+static int read_response(char*, int, FILE*, int, int, int, int);
 static int drain_input_stream(FILE*);
 
 int main(int argc, char * argv[])
@@ -122,6 +122,7 @@ int main(int argc, char * argv[])
     case 5:
     case 6:
     case 7:
+    case 8:
       if(!is_init) {
 	cls_clr(ip[1]);
 	ip[0]=ip[1]=0;
@@ -523,6 +524,7 @@ long ip[5];
   int itbefore[6];
   int fila10g;
   int newline;
+  int dbbc3;
 
   struct tms tms_buff;
   int first, changed;
@@ -634,7 +636,12 @@ long ip[5];
     else
       fila10g=FALSE;
 
-    newline = 7 == mode;
+    if(8 == mode)
+      dbbc3=TRUE;
+    else
+      dbbc3=FALSE;
+
+    newline = 7 == mode || 8 == mode;
 
     first=TRUE;
     changed=FALSE;
@@ -688,7 +695,7 @@ long ip[5];
       /* * Read reply * */ 
     read:
       ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local,
-			    fila10g, newline);
+			    fila10g, newline, dbbc3);
       
       if(mode==4) {
 	rte_ticks (centisec+1);
@@ -739,7 +746,10 @@ long ip[5];
       int i, is;
       char *failed =strstr(outbuf,"Failed");
 
-      strcpy(lbuf,"fila10g/");
+      if(8==mode)
+        strcpy(lbuf,"dbbc3/");
+      else
+        strcpy(lbuf,"fila10g/");
       is=strlen(lbuf);
       for(i=0;outbuf[i]!=0;i++)
 	if(isprint(outbuf[i]))
@@ -776,12 +786,12 @@ long ip[5];
     if(mode==5)   /* no error report here */
       continue;
 
-    if(7!= mode && 6 != mode &&
+    if(7!= mode && 6 != mode && 8!= mode &&
        (index(outbuf,'/')==NULL || strstr(outbuf,"ERROR")!=NULL)) {
       logite(outbuf,-200,"db");
       ip[2]=-201;
       goto error;
-    } else if ((7==mode || 6==mode) &&
+    } else if ((7==mode || 6==mode || 8==mode) &&
 	       (strstr(outbuf,"Failed")!=NULL 
 		||strstr(outbuf,"ERROR")!=NULL
 		||strstr(outbuf,"WARNING")!=NULL)
@@ -935,7 +945,8 @@ static void close_socket()
 ////////////////////////////////////////////////////////////////////////////////
 
 static int read_response(char *str, int num, FILE* stream,
-			 int time_out_local, int fila10g, int newline)
+			 int time_out_local, int fila10g, int newline,
+                         int dbbc3)
 {
   int c, iret;
     char* cs = str;
@@ -1010,9 +1021,15 @@ static int read_response(char *str, int num, FILE* stream,
       *cs++ = c;
       num--;
 
-      if(!fila10g) {
+      if(!fila10g && !dbbc3) {
 	if(c=='\n')
 	  goto done;
+      } else if (dbbc3) {
+	if(c=='\n' && newline) {
+          iret=1;
+          goto done;
+	} else if (c==';')
+          goto done;
       }	else { /* fila10g comm ends with a string rather than a \n */
 	if(c=='\n' && newline) {
 	  iret=1;
