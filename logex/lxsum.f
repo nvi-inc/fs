@@ -97,7 +97,9 @@ C     .'stop    feet  status'/
      .2H t,2Hap,2He ,2H# ,2H f,2Hee,2Ht ,
      .2H  ,2H  ,2H  ,2Hst,2Har,2Ht ,2H  ,
      .2H  ,2H  ,2H s,2Hto,2Hp ,2H  ,2Hfe,2Het,2H  ,2Hst,2Hat,2Hus/
-      data star/1,'*'/
+C     data star/1,'*'/
+      star(1) = 1
+      call char2hol('*',star(2),1,1)
 C
 C INITIALIZED VARIABLES:
 C

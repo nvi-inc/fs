@@ -21,7 +21,7 @@ C
       call setup_fscom
       call read_fscom
       call fmperror_standalone_set(0)
-      call wait_prog('boss',ip)
+      call wait_prog('boss ',ip)
       idum=fc_rte_prior(FS_PRIOR)
 C
       call binit(ip,lnames,nnames,itscb,ntscb,idcbsk,ierr)

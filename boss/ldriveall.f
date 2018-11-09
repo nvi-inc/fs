@@ -2,7 +2,6 @@
       integer*2 ib(1)
       integer nch,indxtp
 c
-      integer nch
 c
       include '../include/fscom.i'
 

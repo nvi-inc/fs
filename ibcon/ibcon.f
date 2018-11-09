@@ -87,7 +87,7 @@ C        maximum number of devices on IEEE board
       integer iscn_ch, ichmv, icomma, iend, iflch
       integer idlen,it(6)
       integer rddev, opbrd, iserial,opdev, wrdev, idum,statbrd,rspdev
-      integer idum,fc_rte_prior, no_after, no_online, no_write_ren
+      integer fc_rte_prior, no_after, no_online, no_write_ren
       integer no_w_ren_glbl
       integer set_remote_enable,no_interface_clear_board
       integer interface_clear_converter,interface_clear_after_read
