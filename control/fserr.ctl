@@ -1869,7 +1869,7 @@ DC -202
 Error decoding IF source, must be A, B, C, or D.
 ""
 DC -203
-Error decoding bandwidth, must be one of: 1, 2, 4, 8, 16, or 32.
+Error decoding bandwidth, must be one of: 1, 2, 4, 8, 16, 32, or 64.
 ""
 DC -204
 Averaging period must be a positive integer 60 or less.
@@ -1878,7 +1878,13 @@ DC -213
 BW 1 can only be used with non-lettered (NOT e/f) DDC versions.
 ""
 DC -223
-BW 32 can only be used with lettered (e/f) DDC versions.
+BW 32 can only be used with lettered (e/f) DDC versions or v107 or later.
+""
+DC -233
+BW 1 and 2 cannot be used with v107 or later.
+""
+DC -243
+BW 64 can only be used with v107 or later.
 ""
 DC -301
 Even BBCs not supported for DDC firmware E/F.
