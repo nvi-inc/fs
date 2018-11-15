@@ -16,6 +16,7 @@
 
 ! History.
 ! Now put in changes in reverse order.
+! 2018Nov13 JMG. Removed check of bandwidth. This will now be caught by FS. 
 ! 2018Sep14 JMG. Check wastro before geo2.
 ! 2018Sep09 JMG. Modified comments and some logic based on 2018Sep06 email from Ed. 
 ! 2018Sep05 JMG. Better error messages. Fixed wastro which was wrong (source had a typo which propagated here).
@@ -226,7 +227,7 @@
       data lul/"U","L"/
       data lsm/"S","M"/
 
-!      kdebug=.true.  
+      kdebug=.true.  
       kdebug=.false.   
       kastro3_mode=.false. 
  
@@ -393,8 +394,9 @@
      >                    lsked_csb,  num_tracks,imask,ierr)
       if(ierr .ne. 0) goto 110
       kastro3_mode=.true. 
-   
-      if(isamp_rate.gt. 32) goto 300          !Valid astro3 mode & 32 MHz channels. 
+
+! 2018Nov13. Remove checking BW/sample rate.   
+!      if(isamp_rate.gt. 64) goto 300          !Valid astro3 mode & 32 MHz channels. 
                                               !Other possible modes do not support 32 MHz==isamp_rate=64Mhz
     
 !     But don't use astro3 mode for BBC01/05/09 only or in combination
@@ -405,12 +407,13 @@
 ! At this point all of lsked_csb use BBCs 01, 05, or 09.  
 ! See if consistent with astro or astro2
       goto 200      
- 
+
+! 2018Nov13. Remove checking BW/sample rate.    
 110   continue
-      if(kdbbc_rack .and. (isamp_rate .gt. 32)) then
-          write(*,*) "Only astro3 mode supports 32 MHz channels."
-          goto 900
-      endif
+!      if(kdbbc_rack .and. (isamp_rate .gt. 32)) then
+!          write(*,*) "Only astro3 mode supports 32 MHz channels."
+!          goto 900
+!      endif
 
 ! Check to see if a valid geo mode.
       lbit_mask_mode="geo" 
