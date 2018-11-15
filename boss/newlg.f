@@ -13,6 +13,7 @@ C      - buffer to use, assumed to be at least 50 characters long
       integer*2 ib(128)
       integer*2 lprocdumm(6)
       character*1 model,cjchar
+      character*256 display_server_envar
 C     LSOR - source of this message
 C
 C  OUTPUT: NONE
@@ -447,7 +448,7 @@ c
 c
       nch=mcoma(ib,nch)
       call fs_get_m5b_crate(m5b_crate)
-      nch = nch + ib2as(m5b_crate,ib,nch,z'8002')
+      nch = nch + ib2as(m5b_crate,ib,nch,z'8003')
 c
       nch=mcoma(ib,nch)
       call fs_get_fila10gvsi_in(fila10gvsi_in)
@@ -505,6 +506,15 @@ c
       nch = nch + ib2as(iapdflg,ib,nch,z'8005')
       call logit3(ib,nch-1,lsor)
 C
+      nch = 1
+      nch = ichmv_ch(ib,nch,'fsserver,')
+      call getenv('FS_DISPLAY_SERVER', display_server_envar)
+      if (display_server_envar == "") then
+          nch = ichmv_ch(ib,nch,'disabled')
+      else
+          nch = ichmv_ch(ib,nch,'enabled')
+      endif
+      call logit3(ib,nch-1,lsor)
       return
       end
 
