@@ -131,12 +131,7 @@ static int prompt_open_cmd(json_t *params) {
 
 	exec_argv[exec_argc++] = "fs.prompt";
 	exec_argv[exec_argc++] = p->message;
-	/*
-	 * handled by server
-	    if (p->cont)
-	            exec_argv[exec_argc++] = "1";
-	*/
-	exec_argv[exec_argc] = NULL;
+	exec_argv[exec_argc]   = NULL;
 
 	clear_sigmask();
 	execvp(exec_argv[0], exec_argv);
@@ -228,11 +223,14 @@ int client_cmd(const char *method, json_t *params) {
 
 void handler(int sig) {
 	switch (sig) {
-	case SIGSEGV:
 	case SIGTERM:
+		fprintf(stderr, "seg fault, attempting clean shutdown...\n");
+		/* fallthrough */
+	case SIGSEGV:
 	case SIGINT:
 	case SIGQUIT:
 		die = sig;
+		fprintf(stderr, "\nclient exiting...\n");
 		break;
 	case SIGCHLD:
 		child = 1;
@@ -325,7 +323,6 @@ void *signal_thread_fn(void *arg) {
 					die = -1;
 				}
 
-				/* TODO need to handle multiple prompts here */
 				nng_mtx_lock(prompt_list_mux);
 				prompt_t *p = list_pop(&prompt_list, prompt_by_pid, &pid);
 				nng_mtx_unlock(prompt_list_mux);
@@ -338,13 +335,6 @@ void *signal_thread_fn(void *arg) {
 				}
 			}
 		}
-	}
-	if (die > 0) {
-		// Killed by a signal, not main child
-		if (die == SIGSEGV) {
-			fprintf(stderr, "seg fault, attempting clean shutdown...\n");
-		}
-		fprintf(stderr, "\nclient exiting...\n");
 	}
 	kill_children();
 	exit(EXIT_SUCCESS);
