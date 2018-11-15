@@ -12373,3 +12373,22 @@ Version 9.13.0-rc2 180925
            final version
 
 Version 9.13.0 180928
+
+181115 DEH boss/newlg.f
+           add fsserver enabled status to log
+
+181115 DEH fsserver/fsclient.c
+           print exiting message on "Ctrl+C"
+
+181115 DEH plog/plog
+           fix typo in help message
+
+181115 WEH st.default/control/equip.ctl
+           control/fserr.ctl
+           clib/dbbcnn_util.c
+           incom/equip.f
+           boss/newlg.f
+           add support for DBBC DDC v107
+
+Version 9.13.1-rc1 181115
+

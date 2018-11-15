@@ -1,6 +1,6 @@
-File: /usr2/fs/misc/fs9130up.txt         Version: 9.0  Date: 180928
+File: /usr2/fs/misc/fs9131up.txt         Version: 9.1  Date: 181115
 
-		       FS 9.13.0 Update Notice
+		       FS 9.13.1 Update Notice
 
 
 I. Introduction
@@ -37,7 +37,7 @@ We encourage all non-VGOS stations to upgrade now even if they do not
 need the new features and bug fixes because doing so will make future
 upgrades easier.  Upgrading from 9.11.19 is relatively easy.
 
-The most significant changes in version 9.13.0 are:
+The most significant changes in version 9.13.1 are:
 
    (i) Availability of a server for the user interface.  This allows
        multiple independent user interfaces to be used with the FS.
@@ -151,6 +151,9 @@ The most significant changes in version 9.13.0 are:
 
   (xi) Support in the 'tsys', 'onoff', and 'fivept' commands for user
        devices that can't have a "zero" level measured.
+
+ (xii) Support for DBBC2 DDC v107 with 32 and 64 MHz channel
+       bandwidth.
        
 As always, we are deeply indebted to Jonathan Quick (HartRAO) for his
 many significant contributions that go far beyond what is explicitly
@@ -159,10 +162,14 @@ mentioned.
 
 II. Installation
 
-Detailed instructions are provided below for installing 9.13.0 as an
-upgrade to 9.11.19, the previous stable release.  If you have an older
-version than 9.11.19, please refer to the appendix, which is described
-next, for more information.
+Detailed instructions are provided below for installing 9.13.1 as an
+upgrade to 9.11.19, the previous stable release.  If you are upgrading
+from verison 9.13.0, you only need to use steps (1)-(7) and (10);
+testing in step (15) and backing up in step (17) are highly
+recommended.
+
+If you have an older version than 9.11.19, please refer to the
+appendix, which is described next, for more information.
 
 A section 'A. Reference Appendix for Installation' is provided at the
 end of this document.  It includes seven sub-sections:
@@ -186,14 +193,14 @@ The installation steps for upgrading from 9.11.19 are listed below.
      wrong with the installation.  For more details, please see
      sub-section 'A.4. Making a back-up before installing'.
 
- (1) Place a copy of the fs-9.13.0 archive in your FS machine's
+ (1) Place a copy of the fs-9.13.1 archive in your FS machine's
      '/tmp' directory.  For example, you might do the following:
 
        a. navigate to URL 'https://vlbi.gsfc.nasa.gov/software/fs'
        b. enter your FS account name and password at the prompt
        c. click on the 'dist' link
-       d. download 'fs-9.13.0.tgz'
-       e. 'scp' transfer 'fs-9.13.0.tgz' to your FS machine, placing
+       d. download 'fs-9.13.1.tgz'
+       e. 'scp' transfer 'fs-9.13.1.tgz' to your FS machine, placing
           it in the '/tmp' directory
 
      Another FS server is available at: 'http://www.metsahovi.fi/fs/'.
@@ -207,12 +214,12 @@ The installation steps for upgrading from 9.11.19 are listed below.
  (3) Extract the source from the archive:
 
        cd /
-       tar xzpf /tmp/fs-9.13.0.tgz
+       tar xzpf /tmp/fs-9.13.1.tgz
 
  (4) Set the link for the new FS version:
 
        cd /usr2
-       ln -sfn fs-9.13.0 fs
+       ln -sfn fs-9.13.1 fs
 
  (5) Having the wrong ownership and/or permissions on the operational
      files (procedure libraries, control files, schedules, and logs)
@@ -304,7 +311,7 @@ The installation steps for upgrading from 9.11.19 are listed below.
      (ii) This change is to convert the FS to use NTP time internally.
           This change is recommended if you have reliable NTP
           available.  This can can be deferred until the rest of the
-          installation of 9.13.0 is complete.  When you make this
+          installation of 9.13.1 is complete.  When you make this
           change, please refer to '/usr2/fs/misc/ntp.txt' for
           requirements and instructions.
 
@@ -439,7 +446,8 @@ description.
 
 			 A. Changes in the FS
 
-The following is a summary of FS changes since 9.11.19.
+The following is a summary of FS changes since 9.11.19. Items up to
+(22) were part of 9.13.0.
 
  1. Full support of 'jive5ab' sample/bit-rate capabilities for Mark 5C
     and FlexBuff.
@@ -478,6 +486,8 @@ The following is a summary of FS changes since 9.11.19.
     106 and later.
 21. Optional support for FS display server.
 22. Support for two VSI output DBBC2 DDC modes.
+23. Support for DBBC DDC v107 with 32 and 64 MHz channel BWs.
+24. Minor improvements in display server.
 
 A more detailed discussion of these changes follows.
 
@@ -538,7 +548,7 @@ A more detailed discussion of these changes follows.
 
        find /usr2 -name '.urs_cookies'
 
-    This step is included in the installation instructions for 9.13.0.
+    This step is included in the installation instructions for 9.13.1.
 
     'plog' now has a version flag to aid debugging.
 
@@ -702,7 +712,7 @@ A more detailed discussion of these changes follows.
 
     e.g.,
 
-      fs-9.13.0-rc1
+      fs-9.13.1-rc1
 
     For standard releases, the trailing '-string' is omitted.
 
@@ -773,15 +783,28 @@ A more detailed discussion of these changes follows.
     channels with 'caltsys' by explicitly specifying the detectors in
     the procedure.
 
+23. Support for DBBC DDC v107 with 32 and 64 MHz channel BWs.  The
+    changes included allow a maximum clock rate in equip.ctl of 128
+    MHz.  The 'nominal' clock rate for v107 is 64 MHz for VSI (Mark
+    5B) recording and 128 MHz for Ethernet recording.  The BWs of 1
+    and 2 MHz are not allowed in the 'bbcnn' commands for v107.
+
+24. Minor improvements in display server. The client now prints
+    "client exited" when Ctrl+C pressed in main window. This was the
+    intended behaviour, but a race-condition caused it to usually be
+    suppressed in the 9.13.0 release.  Whether the display server is
+    enabled is recorded in the header lines of the log.
+
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/misc/changes.txt.
 
 
 			B. Changes in 'drudg'
 				   
-'drudg' opening message date is 2018Sep25.
+'drudg' opening message date is 2018Nov18.
 
-The following is a summary of 'drudg' changes since 9.11.19.
+The following is a summary of 'drudg' changes since 9.11.19.  Items up
+to (7) were part of 9.13.0.
 
  1. Ad hoc support for 'sched' stagger start mode.
  2. The 'mk5=bank_set?' query was added to the setup procedure for
@@ -790,6 +813,7 @@ The following is a summary of 'drudg' changes since 9.11.19.
  4. Support for DBBC2 DDC use of VSI2 and VSI1+VSI2.
  5. Support for the FS release string.
  6. Only the 'skedf.ctl' control file in /usr2/control is used.
+ 7. Support for higher channel BWs for DBBC DDC.
 
 A more detailed discussion of these changes follows.
 
@@ -863,6 +887,18 @@ A more detailed discussion of these changes follows.
     if it wasn't realized there was a copy in the current directory.
     To make this simpler and easier to understand, only the copy of
     the control file '/usr2/control' is now used.
+
+ 7. Support for higher channel BWs for DBBC DDC.  The upper limit on
+    BWs from schedules was removed.  This will allow 32 and 64 MHz BWs
+    to be used with DBBC DDC v107 and possibly higher BWs to be used
+    in the future without further changes to 'drudg'.  The BWs
+    available for the DBBC depend on the firmware in use, which
+    'drudg' has no knowledge of, so it can't verify that they are
+    correct.  The FS does know what firmware is in use and does check
+    that the BW selected is correct and the decimation is correct.  As
+    has always been the csase, it is necessary to make sure that all
+    the setup procedures for an experiment run without errors to
+    verify that the schedule is correct for the equipment in use.
 
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/drudg/change_log.txt.
