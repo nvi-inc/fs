@@ -1,7 +1,7 @@
 #!/bin/bash
 #NB "strict" mode is used if run as a script
-SHA1SUM=101a86eabc9744603665e1485e710acd6b022ebd
-PLOG_VERSION=2018-05-08
+SHA1SUM=9727578f8e158490091b3869cc5b442c50fbdc37
+PLOG_VERSION=2018-11-14
 
 
 version(){
@@ -90,7 +90,7 @@ Examples of usage:
     ${blue}# push log and proc files for session vgp007${normal}
     plog -p vgp007
     ${blue}# push (full) compressed log for vgp007${normal}
-    plot -z vgp007
+    plog -z vgp007
     ${blue}# push everything in /usr2/log to Haystack${normal}
     plog -c HAYSTACK /usr2/log/*.log
 
