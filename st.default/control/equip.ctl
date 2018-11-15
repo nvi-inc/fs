@@ -44,7 +44,7 @@ cdp     cdp or metserver port & host, use cdp if you don't have either
 *mk4 decoder transmission terminator
  return return, $, or %
 *DBBC DDC version (v optional,then max 16 characters, no trailing _x until v105)
- v101   v100, v101, v102, v104, v105, v105e, v105f, ...
+ v107   v100, v101, v102, v104, v105, v105e, v105f, ...
 *DBBC PFB version
  v15_1    v15_1 or later
 *DBBC Cores per CoMo, Max of 4 values, range of values 0-4,
@@ -54,16 +54,24 @@ cdp     cdp or metserver port & host, use cdp if you don't have either
   15000 15000 15000 15000
 *VSI-H/Mark5B clock rate (MHz): "nominal" is 32 for rack=Mark5 or VLBA5,
 *                                                   rack=DBBC DDC, letter ' ',
+*                                                        v104 or less,
 *                                                        with and without
 *                                                        FiLa10G
 *                                                   rack=VLBAC
 *                                            64 for rack=DBBC DDC, letters E/F,
+*                                                        v105 or greater,
 *                                                        with and without
 *                                                        FiLa10G
 *                                                   rack=CDAS
+*                                                   rack=DBBC DDC, letter ' ',
+*                                                        v107 or later,
+*                                                        without FiLa10G
+*                                           128 for rack=DBBC DDC, letter ' ',
+*                                                        v107 or later,
+*                                                        with FiLa10G
 *                                             0 otherwise except rack=none
 *                                     "nominal" is not allowed for rack=none
 * a clock rate value of "none" will suppress clock_set command in FMSET
-   32   one of: none, nominal, 2, 4, 8, 16, 32, 64
+  nominal   one of: none, nominal, 2, 4, 8, 16, 32, 64, 128
 *FiLa10G input select, one of: vsi1, vsi2, vsi1-2, vsi1-2-3-4, gps, tvg
-vsi1
+vsi1-2
