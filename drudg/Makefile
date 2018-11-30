@@ -65,33 +65,27 @@ wrdate.o wrday.o wrdur.o wrhead.o write_drudg_version_line.o wrsor.o wrtap.o wrt
 # Set compiling and linking flags
 #
 # -C checks for out of bounds during execution and aborts if found
+<<<<<<< HEAD
 FFLAGS= -C -c -cpp -DVERSION=$(VERSION) \
 -DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL) -DRELEASE=$(RELEASE) -DFS_PC=$(FS_PC) 
 # f2c needs this others don't
 CFLAGS= -c  -DF2C -DRELEASE=$(RELEASE)
 #
+=======
+FFLAGS += -C 
+CPPFLAGS += -DF2C -DVERSION=$(VERSION) -DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL)
+>>>>>>> fixed drudg makefiles
 
-#
 LIBS=$(UT)skdrut.a ../lnfch/lnfch.a ../fslb/fslb.a \
 ../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a \
-../vex/vex.a -lf2c
-#
-../bin/$(PROGRAM): $(OBJECTS) 
-	rm -f ./core
-	@echo Linking $(PROGRAM)...
-	@$(FC) -o ../bin/$(PROGRAM) $(OBJECTS) $(LIBS)
-	@strip ../bin/$(PROGRAM)
-	@echo done.
+../vex/vex.a
+
+LDLIBS += $(FLIBS) -lfl
+
+../bin/$(PROGRAM): $(OBJECTS) $(LIBS)
 
 ../bin/ifvlbafix: ifvlbafix
 	rm -f ../bin/ifvlbafix
 	ln -s ../drudg/ifvlbafix ../bin/ifvlbafix
 
-#  The following are special dependency lines for compiling.
-
-.f.o:
-	cd $(<D); $(FC) $(FFLAGS) $<
-.c.o:
-	cd $(<D); cc $(CFLAGS) $<
-
-
+include ../include.mk
