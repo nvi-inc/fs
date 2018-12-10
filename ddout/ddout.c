@@ -42,7 +42,6 @@ main()
     char *ich, *cp1, *cp2, ch, iwhat[5], *ptrs, *prtn1;
     long class;
     long offset;
-    long lseek();
     void dxpm();
     int kdebug;
     char *st;
