@@ -41,7 +41,7 @@ write_error_and_pause.o write_return_if_needed.o writf_asc.o writf_asc_ch.o \
 xat.o xyz2latlon.o ydjul.o ymday.o
 
 
-FFLAGS + =-C
+FFLAGS += -C
 CPPFLAGS += -DF2C
 
 $(ARC).a: $(OBJECTS)
