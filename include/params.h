@@ -12,7 +12,7 @@
 /* for C_RES */
 /* take 'x' size from " setup_ids: Fscom C structure too large: x bytes */
 /* divide by PAGE_SIZE, round up to next integer */
-#define SHM_SIZE    C_RES+2*PAGE_SIZE /* should be a multiple of 4096 */
+#define SHM_SIZE    C_RES+4*PAGE_SIZE /* should be a multiple of 4096 */
 
 #define CLS_SIZE    20480
 #define MAX_CLS     40
