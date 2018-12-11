@@ -5,7 +5,7 @@ rstat.o scaler.o unget.o unscaler.o kpout_ch.o kpdat2.o apost.o indx.o
 
 LIBS = ../port/port.a ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a \
 ../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../fmpsee/fmpsee.a \
-../poclb/poclb.a ../vis/vis.a ../rtelb/rtelb.a ../clib/clib.a
+../poclb/poclb.a ../vis/vis.a ../clib/clib.a ../rtelb/rtelb.a
 
 LDLIBS += $(FLIBS)
 
