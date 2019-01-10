@@ -7,7 +7,7 @@ FC = f95
 ifeq ($(FC),fort77)
 FLIBS   += -lf2c -lm
 else
-FFLAGS  += -ff2c -I$(ROOT)/include -fno-range-check -finit-local-zero
+FFLAGS  += -ff2c -I$(ROOT)/include -fno-range-check -finit-local-zero -fno-automatic
 FLIBS   += -lgfortran -lm
 endif
 
