@@ -19,6 +19,7 @@
 #include <netdb.h>      /* For structure addrinfo. */
 #include <time.h>
 
+char *metget(char*, char*); 
 
 #define MYPORT 50001    /* the port users will be connecting to */
 
@@ -75,7 +76,7 @@ void *threadFunc(void *arg) {
   int iping = 0;
 
   while(1) {
-    sprintf(temp_buf[iping], "%s", (char *)metget(port1, port2,flags));
+    sprintf(temp_buf[iping], "%s", metget(port1, port2, flags));
     pthread_mutex_lock(&metstr.mutex); /* Lock the mutex, will cause main thread to block
 				          if trying to lock mutex protecting 'metstr.buf'. */
     metstr.buf = temp_buf[iping];
