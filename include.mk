@@ -4,10 +4,12 @@ ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 FC = f95
 
+CFLAGS += -Werror=int-conversion -Werror=int-to-pointer-cast
+
 ifeq ($(FC),fort77)
 FLIBS   += -lf2c -lm
 else
-FFLAGS  += -ff2c -I$(ROOT)/include -fno-range-check -finit-local-zero -fno-automatic
+FFLAGS  += -ff2c -I$(ROOT)/include -fno-range-check -finit-local-zero -fno-automatic -fbackslash
 FLIBS   += -lgfortran -lm
 endif
 
