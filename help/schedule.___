@@ -6,15 +6,16 @@
 
 
 Settable parameters:
-        name    Name of schedule file to be started. If no directory
-                path is specified, /usr2/sched assumed. If no
-                extension is specified, .snp is assumed. Any
+        name    Name of schedule file to be started.  If no directory
+                path is specified, /usr2/sched assumed.  If no
+                extension is specified, .snp is assumed.  Any
                 currently-executing schedule file is closed, and the
-                new schedule file is opened. If the new file cannot be
-                opened, there will be no schedule active. When a valid
-                schedule is started, a cont command may be necessary if
-                the schedule stream is halted by use of the #lines
-                parameter.
+                new schedule file is opened.  If the new file cannot
+                be opened or 'name' is null, there will be no schedule
+                active.  When a valid schedule is started, a 'cont'
+                command may be necessary if the schedule stream is
+                halted by use of the 'lines' parameter.
+
         start   Place in the schedule to begin executing. May be one
                 of the following:
                     null  to start with the observation beginning no
@@ -22,10 +23,11 @@ Settable parameters:
                     #line for a line number in the file, should be a
                           scan_name=... command
                     time  to start with the observation beginning no
-                          earlier than this time. time is in standard SNAP
-                          format.
+                          earlier than this time. 'time' is in standard
+                          SNAP format.
+
         lines   Number of lines to execute before automatically
-                halting. Default is the remainder of the schedule.
+                halting.  Default is the remainder of the schedule.
 
 Monitor-only parameters:
         line    The line number to be executed next.
@@ -39,9 +41,11 @@ schedule.
 If the schedule is started successfully, a log file having the same
 name as the schedule is automatically opened (if not already open). It
 will be created if not already existing.  A procedure file having the
-same name as the schedule is automatically opened as the schedule
+same name as the schedule is automatically opened as the "schedule"
 procedure library.  Any previously time-scheduled procedures from the
-previous eexperiment libray (if any) are cancelled.
+previous schedule libray (if any) are cancelled.  If a schedule is
+closed with a 'schedule=' command, the schedule procedure file, if
+any, remains open.
 
 If lines is specified, an automatic halt will be issued after
 execution of that many lines. The schedule may then be continued using
