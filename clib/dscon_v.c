@@ -13,7 +13,7 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-long lba_tpi_from_level(unsigned short level);
+int lba_tpi_from_level(unsigned short level);
 
 static struct ds_cmd lcl;                 /* request record set-up by _d */
                                           /* and used _v */
@@ -24,7 +24,7 @@ void dscon_d(device, ierr,ip)
 char device[2];                        /* device mnemonic */
 int *ierr;                             /* error return, -1 if no such device */
                                        /*                0 okay              */
-long ip[5];
+int ip[5];
 {
      if (device[0]!='p'||!isxdigit(device[1])) {
         *ierr = -1;
@@ -44,7 +44,7 @@ long ip[5];
 
 void dscon_v(dtpi,ip)
 double *dtpi;                      /* return counts */
-long ip[5];
+int ip[5];
 {
     struct ds_mon lclm;
 

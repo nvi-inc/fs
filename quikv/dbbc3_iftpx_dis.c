@@ -17,7 +17,7 @@ int logmsg_dbbc3();
 void dbbc3_iftpx_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
       struct dbbc3_iftpx_mon lclm;
       int ind,i,ich, ierr, count;

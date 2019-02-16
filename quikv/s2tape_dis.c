@@ -15,7 +15,7 @@
 
 void s2tape_dis(command,ip)
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 {
       int kcom, i, ierr, count, start;
       struct res_buf buffer;

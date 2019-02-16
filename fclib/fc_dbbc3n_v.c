@@ -1,7 +1,7 @@
 void fc_dbbc3n_d__(device,ierr,ip)
 char device[2];
 int *ierr;
-long ip[5];
+int ip[5];
 {
     void dbbc3n_d();
 
@@ -10,7 +10,7 @@ long ip[5];
 }
 void fc_dbbc3n_v__(dtpi,dtpi2,ip,icont,isamples)
 double *dtpi,*dtpi2;
-long ip[5];
+int ip[5];
 int *icont, *isamples;
 {
     void dbbc3n_v();
@@ -19,7 +19,7 @@ int *icont, *isamples;
     return;
 }
 void fc_dbbc3n_r__(ip)
-long ip[5];
+int ip[5];
 {
     void dbbc3n_r();
 

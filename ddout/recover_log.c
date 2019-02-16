@@ -19,7 +19,7 @@ char lnamef[];
 int fd;
 {
   int fail, fd2, fd_temp;
-  long count, countw, cum, size, before, after, seconds, offset;
+  int count, countw, cum, size, before, after, seconds, offset;
   char buf_copy[BUFFSIZE];
 
   fail=FALSE;

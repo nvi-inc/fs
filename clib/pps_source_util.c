@@ -22,7 +22,7 @@ m5_2_pps_source(ptr_in,lclc,ip) /* return values:
      char *ptr_in;           /* input buffer to be parsed */
 
      struct pps_source_cmd *lclc;  /* result structure with parameters */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr;

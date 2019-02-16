@@ -222,7 +222,7 @@ rdbe_2_rdbe_atten(ptr_in,lclm,ip) /* return values:
      char *ptr_in;           /* input buffer to be parsed */
 
      struct rdbe_atten_mon *lclm;  /* result structure with parameters */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr;

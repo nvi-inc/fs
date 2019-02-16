@@ -178,7 +178,7 @@ struct k3fm_mon *lcl;
 }
 
 k3fm_req_q(ip)
-long ip[5];
+int ip[5];
 {
  ib_req7(ip,device,20,"INP?");
  ib_req7(ip,device,20,"MOD?");
@@ -192,7 +192,7 @@ long ip[5];
 
 }
 k3fm_req_c(ip,lclc,new_aux)
-long ip[5];
+int ip[5];
 struct k3fm_cmd *lclc;
 int new_aux;
 {
@@ -305,7 +305,7 @@ int new_aux;
 k3fm_res_q(lclc,lclm,ip)
 struct k3fm_cmd *lclc;
 struct k3fm_mon *lclm;
-long ip[5];
+int ip[5];
 {
   char buffer[MAX_BUF];
   int max,i;

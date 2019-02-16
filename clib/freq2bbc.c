@@ -3,13 +3,13 @@
 /* the calculation works for 0.10-6553.69 MHz, but the LO locks over */
 /* a range more like 470.-1050. MHz */
 
-long freq2bbc(freq)        /* frequency to bits conversion */
-long freq;                 /* frequency in 10's of KHz, 45000-105000 typical */
+int freq2bbc(freq)        /* frequency to bits conversion */
+int freq;                 /* frequency in 10's of KHz, 45000-105000 typical */
 {
     return 0xFFFFF & (-(freq/10) << 4 | 0xF & ~(freq%10));
 }
-long bbc2freq(bits)           /* bits to frequency */
-long unsigned bits;
+int bbc2freq(bits)           /* bits to frequency */
+unsigned int bits;
 {
      return -(~0xFFFF | bits>>4)*10+ (0xF & ~bits);
 

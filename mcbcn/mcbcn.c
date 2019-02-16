@@ -60,7 +60,7 @@ clock_t rte_times(struct tms *);
 
 /* function prototypes */
 struct MCBAD *get_mcbad (); /* read the mcbad.ctl file */
-long fjuldat(); /* get Julian date - 0.5 */
+int fjuldat(); /* get Julian date - 0.5 */
 int getad ();
 int doinit(); /* process rmpar case 0 */
 int doproc(); /* process rmpar case 1 */
@@ -109,9 +109,9 @@ static int inptr;             /* input message buffer pointer */
 static int outptr;            /* output message buffer pointer */
 static int initialized; /* has program been initialized? */
 static int mcb_fildes;  /* mcb file descriptor */
-static long outclass;   /* output class number */
-static long inclass;    /* input class number */
-static long ip[5];      /* scheduling parameters */
+static int outclass;   /* output class number */
+static int inclass;    /* input class number */
+static int ip[5];      /* scheduling parameters */
 static int nbufout;     /* number of output buffers */
 static unsigned char secho[80];
 static int necho;
@@ -364,7 +364,7 @@ int doinit()
 /* ********************************************************************* */
 
 int doproc(ip4)    /* process the input class buffers */
-long *ip4;
+int *ip4;
 {
     time_t fmt1; /* formatter time first try */
     int cnt;     /* general purpose counter */
@@ -388,7 +388,7 @@ long *ip4;
     unsigned short devdatap;      /* temporary for TIMEW command */
     int done;                    /* TIMEW has completed */
     struct tms tms_buff;
-    long end;
+    int end;
     int imode;
 
     inptr = outptr = msgflg = save = outclass = nbufout = 0;
@@ -701,7 +701,7 @@ int nch;  /* number of characters to read */
 {
     int cnt; /* character counter */
     struct tms tms_buff;
-    long end;
+    int end;
     int iret;
     unsigned char inch;
 
@@ -741,7 +741,7 @@ int mode;            /* command or monitor */
     int nch;                  /* number of char to send */
     int i;                    /* general purpose counter */
     int iret;
-    unsigned long statusReg;
+    unsigned int statusReg;
 
     /* prepare the buffer */
     messo1[0] = SYN;

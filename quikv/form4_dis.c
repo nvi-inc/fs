@@ -15,12 +15,12 @@
 void form4_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
       struct form4_cmd lclc;
       struct form4_mon lclm;
       int ind,kcom,i,j,ich, ierr, count, nrec, nchar, idum, icount;
-      long iclass;
+      int iclass;
 
       char output[MAX_OUT];
       char buff[MAX_BUF];

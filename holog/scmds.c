@@ -15,7 +15,7 @@ void scmds(mess,azo,elo)
      char *mess;
      double azo,elo;
 {
-  long ip[5];
+  int ip[5];
   char buff[512];
   int ic;
 

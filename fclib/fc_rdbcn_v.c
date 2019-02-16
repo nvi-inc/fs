@@ -1,7 +1,7 @@
 void fc_rdbcn_d__(device,ierr,ip)
 char device[2];
 int *ierr;
-long ip[5];
+int ip[5];
 {
     void rdbcn_d();
 

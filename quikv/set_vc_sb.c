@@ -22,8 +22,8 @@ char *vc_parms_save[14][10]
   int ierr=0, nrec, i, j;
   int nchar,idum;
   char lvcn[] = {"v1v2v3v4v5v6v7v8v9vavbvcvdve"};
-  long ip[5];
-  long iclass;
+  int ip[5];
+  int iclass;
 
 
   for (i=0;(*vcnum != -1) && i<14;i++) {

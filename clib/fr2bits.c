@@ -1,7 +1,7 @@
 main()
 {
-    long i,freq, bits, bits2, freq2;
-    long freq2bits();bits2freq();
+    int i,freq, bits, bits2, freq2;
+    int freq2bits();bits2freq();
 
     for (i=1;i<=0xFFFFF;i++) {
         bits=freq2bits(i);
@@ -13,23 +13,23 @@ main()
             bits2, freq2);
     }
 }
-long freq2bits(freq)
-long freq;                    /* frequency in 10's of KHz, 50000-99999 legal */
+int freq2bits(freq)
+int freq;                    /* frequency in 10's of KHz, 50000-99999 legal */
 {
     return( 0xFFFFF & ((~freq)+0x10) );
 }
-long freq2bitsx(freq)
-long freq;                    /* frequency in 10's of KHz, 50000-99999 legal */
+int freq2bitsx(freq)
+int freq;                    /* frequency in 10's of KHz, 50000-99999 legal */
 {
-    long bits;
+    int bits;
 
 /*  return( 0xFFFFF & ((~freq)+0x10) );*/
     bits= ((0xFFFFF &~freq)+0x10);
     return (bits);
 
 }
-long bits2freq(bits)
-long unsigned bits;
+int bits2freq(bits)
+unsigned int bits;
 {
      return( 0xFFFFF & ~(bits-0x10));
 }

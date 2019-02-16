@@ -28,7 +28,7 @@ main()
     int iwl, iw1, iwm;
     char *llogndx;
     int irga;
-    long ip[5];
+    int ip[5];
     char lnamef[65];
     char ibur[120];
     char buf[MAX_BUF+2];
@@ -40,9 +40,8 @@ main()
     int rtn1, rtn2, status, bufl, bull, rtn1f, rtn2f;
     int irgb, iburl;
     char *ich, *cp1, *cp2, ch, iwhat[5], *ptrs, *prtn1;
-    long class;
-    long offset;
-    long lseek();
+    int class;
+    int offset;
     void dxpm();
     int kdebug;
     char *st;

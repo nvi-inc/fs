@@ -1,7 +1,7 @@
 /* vlba bbc data structures */
 
 struct bbc_cmd {
-     long freq;        /* bits sent to bbc to command frequency */
+     int freq;        /* bits sent to bbc to command frequency */
      int source;       /* if source, 0=A, 1=B, 2=C, 3=D */
      int bw[2];        /* bandwidth selection */
      int bwcomp[2];    /* bandwidth gain compensation USB & LSB */

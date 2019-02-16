@@ -6,14 +6,14 @@
 
 void dqa4_cnvrt(ibuf,jfrms,jperr,jsync,ierr)
 char *ibuf;               /* string to decode */
-long jfrms[2];            /* returned frames errors */
-long jperr[2];            /* returned parity errors */
-long jsync[2];            /* returned re-sync counts */
+int jfrms[2];            /* returned frames errors */
+int jperr[2];            /* returned parity errors */
+int jsync[2];            /* returned re-sync counts */
 int *ierr;
 {
-  long jrsyn[2];
-  long jnsyn[2];
-  long jcrc[2];
+  int jrsyn[2];
+  int jnsyn[2];
+  int jcrc[2];
   int icount;
 
   icount=sscanf(ibuf,"dqa %x %x %x %x %x %x %x %x %x %x",

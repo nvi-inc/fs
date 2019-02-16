@@ -1,7 +1,6 @@
-CFLAGS = 
 LIBS = ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a
-OBJECTS = 
+OBJECTS = popen.o 
 
-../bin/popen : popen.o $(OBJECTS)
-	cc -o ../bin/popen popen.o $(OBJECTS) $(LIBS)
-	strip ../bin/popen
+../bin/popen : $(OBJECTS) $(LIBS)
+
+include ../include.mk

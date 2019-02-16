@@ -82,18 +82,18 @@ struct k4st_cmd *lcl;
 }
 
 k4st_req_q(ip)
-long ip[5];
+int ip[5];
 {
  ib_req7(ip,device,10,"DRC?");
 }
 k4st_reqs_q(ip)
-long ip[5];
+int ip[5];
 {
  ib_req7(ip,device,20,"SQN?");
 }
 
 k4st_req_c(ip,lclc,tcoff,sqn)
-long ip[5],sqn;
+int ip[5],sqn;
 struct k4st_cmd *lclc;
 int tcoff;
 {
@@ -120,7 +120,7 @@ int tcoff;
 
 k4st_res_q(lclc,ip)
 struct k4st_cmd *lclc;
-long ip[5];
+int ip[5];
 {
   char buffer[MAX_BUF];
   int max;
@@ -158,8 +158,8 @@ long ip[5];
    
 }
 k4st_ress_q(ip,sqn)
-long *sqn;
-long ip[5];
+int *sqn;
+int ip[5];
 {
   char buffer[MAX_BUF];
   int max;

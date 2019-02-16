@@ -4,9 +4,9 @@
 #include <sys/times.h>
 
 void rte_rawt(lRawTime)
-long *lRawTime;
+int *lRawTime;
 {
-     long times();
+     int times();
      struct tms buffer;
 
      *lRawTime=times(&buffer);

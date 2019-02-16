@@ -5,25 +5,25 @@
 // returns:
 //         - number of bytes written on success,
 //         - -1 on error and sets errno
-ssize_t uint64_marshal_le(uint64_t n, uint8_t *buf, size_t max);
+ssize_t uint64_marshal_le(unsigned long long n, uint8_t *buf, size_t max);
 
 // Output big-endian encoded uint64 to buffer, consuming at most `max` bytes.
 // returns:
 //         - number of bytes written on success,
 //         - -1 on error and sets errno
-ssize_t uint64_marshal_be(uint64_t n, uint8_t *buf, size_t max);
+ssize_t uint64_marshal_be(unsigned long long n, uint8_t *buf, size_t max);
 
 // Read little-endian encoded uint64 to buffer, reading at most `max` bytes. 
 // returns:
 //         - number of bytes written on success,
 //         - -1 on error and sets errno
-ssize_t uint64_unmarshal_le(uint64_t* out,  uint8_t* buf, size_t max);
+ssize_t uint64_unmarshal_le(unsigned long long* out,  uint8_t* buf, size_t max);
 
 // Reads big-endian encoded uint64 to `buf`, reading at most `max` bytes 
 // returns:
 //         - number of bytes written on success,
 //         - -1 on error and sets errno
-ssize_t uint64_unmarshal_be(uint64_t* out,  uint8_t* buf, size_t max);
+ssize_t uint64_unmarshal_be(unsigned long long* out,  uint8_t* buf, size_t max);
 
 
 // Type of msg
@@ -37,8 +37,8 @@ typedef enum {
 // `data` should be set to NULL after free.
 typedef struct {
     msgtype_t type;
-    uint64_t seq;
-    uint64_t len;
+    unsigned long long seq;
+    unsigned long long len;
     uint8_t *data; 
 } msg_t;
 

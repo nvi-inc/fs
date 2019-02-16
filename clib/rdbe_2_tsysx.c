@@ -5,10 +5,10 @@
 
 #include "../include/params.h"
 
-int rdbe_2_tsysx(char *buf, int *ifc, long ip[5], long on[],long off[], char *who)
+int rdbe_2_tsysx(char *buf, int *ifc, int ip[5], int on[],int off[], char *who)
 {
   char *ptr;
-  long value;
+  int value;
   int i, ierr;
 
   ptr=strtok(buf,"?");

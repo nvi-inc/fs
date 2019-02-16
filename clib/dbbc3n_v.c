@@ -27,7 +27,7 @@ void dbbc3n_d(device, ierr,ip)
 char device[2];                        /* device mnemonic */
 int *ierr;                             /* error return, -1 if no such device */
                                        /*                0 okay              */
-long ip[5];
+int ip[5];
 {
   struct dbbc3_ifx_cmd lclc;
   struct dbbc3_ifx_mon lclm;
@@ -142,7 +142,7 @@ long ip[5];
 
 void dbbc3n_v(dtpi,dtpi2,ip,icont,isamples)
 double *dtpi,*dtpi2;                      /* return counts */
-long ip[5];
+int ip[5];
 int *icont, *isamples;
 {
   int rtn1;    /* argument for cls_rcv - unused */
@@ -239,7 +239,7 @@ int *icont, *isamples;
 /* restore if gain */
 
 void dbbc3n_r(ip)
-long ip[5];
+int ip[5];
 {
   if(savec.agc!=0 || det < 2*MAX_DBBC3_BBC) {
     int out_recs, out_class;

@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 int matcn(ip,iclass,nrec,ierr)
-     long ip[5];
+     int ip[5];
      int iclass, nrec, *ierr;
 {
   if(brk_chk("onoff")!=0) {

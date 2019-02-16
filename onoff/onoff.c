@@ -21,7 +21,7 @@ extern struct fscom *shm_addr;
 
 main()
 {
-  long ip[5],ip1[5],ip2[5];
+  int ip[5],ip1[5],ip2[5];
   struct onoff_cmd onoff;
   int i,it[6],isgn, ierr, ksem, kresult,j, ierr1, ierr2, nwt, kagc, koff;
   double az,el, xoff, yoff, azoff, eloff, haoff, decoff;

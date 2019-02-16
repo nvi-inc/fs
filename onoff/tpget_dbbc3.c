@@ -15,7 +15,7 @@
     
 int tpget_dbbc3(cont,ip,itpis_dbbc3,ierr,tpi,tpi2)/* put results of tpi & tpi2 */
 int cont[MAX_DBBC3_DET];                          /* non-zero is continuous */
-long ip[5];                                    /* ipc array */
+int ip[5];                                    /* ipc array */
 int itpis_dbbc3[MAX_DBBC3_DET]; /* device selection array, see tpi_dbbc for details */
 int *ierr;
 float tpi[MAX_DBBC3_DET],tpi2[MAX_DBBC3_DET];

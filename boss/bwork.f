@@ -89,6 +89,8 @@ C     MAXPR1,2 - Maximum number of procs allowed in each lists
       data lstkop/MAX_PROC_PARAM_COUNT,2,MAX_PROC_PARAM_COUNT*0/
       data nproc1/0/, nproc2/0/
       data lsors/2h::/
+
+      external stat
 C
 C**********************************************************************
 C

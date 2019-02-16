@@ -14,7 +14,7 @@
 void last_check(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task */
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ierr, i;
       char output[MAX_OUT];

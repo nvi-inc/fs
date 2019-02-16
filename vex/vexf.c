@@ -9,7 +9,7 @@
 #ifdef F2C
 #include "f2c.h"
 #else
-typedef long int integer;
+typedef int integer;
 typedef int ftnlen;
 typedef double doublereal;
 #endif

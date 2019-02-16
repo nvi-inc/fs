@@ -1,5 +1,5 @@
 void fc_rte_ticks__(plTicks)
-long *plTicks;
+int *plTicks;
 {
      void rte_ticks();
 

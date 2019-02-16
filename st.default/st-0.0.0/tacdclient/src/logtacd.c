@@ -22,7 +22,7 @@ logtacd(
   char buffer[MAX_BUF];
   char ch;
   static FILE *fildes= (FILE *) NULL;
-  long offset;
+  int offset;
 
   t=time(NULL);
   if(((time_t) -1) == t) {
@@ -61,12 +61,12 @@ logtacd(
 
     strncpy(file,new,sizeof(file));
     offset=ftell(fildes);
-    if(offset==(long)-1) {
+    if(offset==(int)-1) {
       err_report("Opening checking log position in logtacd",new,1,0);
       return;
     }
-    if(offset!=(long)0){
-      if(EOF==fseek(fildes, (long) -1,SEEK_END)) {
+    if(offset!=(int)0){
+      if(EOF==fseek(fildes, (int) -1,SEEK_END)) {
 	err_report("Error positioning log in logtacd",new,1,0);
 	return;
       }

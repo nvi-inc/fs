@@ -7,9 +7,9 @@ unsigned centisec;
 {
     unsigned sleep();
 
-     long times();
+     int times();
      struct tms buffer;
-     long start, end, remain;
+     int start, end, remain;
 
      start=times(&buffer);
      remain=100-((start-1)%100);

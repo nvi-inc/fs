@@ -1,5 +1,5 @@
 void fc_mvdis_v__(ip,ibuf,nch)
-long ip[5];
+int ip[5];
 char *ibuf;
 int *nch;
 {

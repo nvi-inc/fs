@@ -16,7 +16,7 @@ int vacuum(ierr,indx)
 int *ierr, indx;
 {
   int lierr;
-  long ip[5];
+  int ip[5];
   struct req_rec request;       /* mcbcn request record */
   struct req_buf buffer;        /* mcbcn request buffer */
   struct res_buf rbuffer;

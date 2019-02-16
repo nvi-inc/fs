@@ -7,9 +7,9 @@ main()
 {
   time_t clock1, clock2, clock1_old, clock2_old;
      struct timeval tv;
-     long times();
+     int times();
      struct tms buffer;
-     long lRawTime,lRawTime_old, tv_sec_old;
+     int lRawTime,lRawTime_old, tv_sec_old;
 
      clock1=0;
      clock2=1;

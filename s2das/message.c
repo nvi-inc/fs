@@ -10,7 +10,7 @@ static char Buffer[256];
 static int  length = MAX_BUFFER;
 
 /* --------------------------------------------------------------------------*/
-void init_message( long *ip , char *title )
+void init_message( int *ip , char *title )
 {
  int i;
  for( i = 0 ; i < 5 ; i++ )
@@ -22,12 +22,12 @@ void init_message( long *ip , char *title )
  strcpy( Title , title );
 }
 /* --------------------------------------------------------------------------*/
-void clear_message( long *ip )
+void clear_message( int *ip )
 {
  cls_clr( ip[0] );
 }
 /* --------------------------------------------------------------------------*/
-void send_message( long *ip )
+void send_message( int *ip )
 {
  int len = strlen( Buffer );
 
@@ -38,7 +38,7 @@ void send_message( long *ip )
    }
 }
 /* --------------------------------------------------------------------------*/
-void reset_message( long *ip , char *title )
+void reset_message( int *ip , char *title )
 {
  send_message( ip );
  length = MAX_BUFFER;
@@ -47,7 +47,7 @@ void reset_message( long *ip , char *title )
  strcpy( Title , title );
 } 
 /* --------------------------------------------------------------------------*/
-void add_message( long *ip , char *text )
+void add_message( int *ip , char *text )
 {
  if( length + strlen( text ) > MAX_BUFFER )
    {

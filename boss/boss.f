@@ -20,7 +20,7 @@ C                     Maximum number of entries available in LNAMES
 C
       call setup_fscom
       call read_fscom
-      call wait_prog('boss',ip)
+      call wait_prog('boss ',ip)
       idum=fc_rte_prior(FS_PRIOR)
 C
       call binit(ip,lnames,nnames,itscb,ntscb,idcbsk,ierr)

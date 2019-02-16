@@ -17,7 +17,7 @@ struct disk_record_mon {
     struct m5state state;
   } status ;
   struct {
-    long scan;
+    int scan;
     struct m5state state;
   } scan;
 };

@@ -17,7 +17,7 @@ static char unit_letters[ ] = {" abcdefghijklm"}; /* mk6/rdbe unit letters */
     
 int tpget_rdbe(cont,ip,itpis_rdbe,ierr,dtpi,dtpi2) /* put results of tpi & tpi2 */
 int cont[MAX_RDBE_DET];                          /* non-zero is continuous */
-long ip[5];                                    /* ipc array */
+int ip[5];                                    /* ipc array */
 int itpis_rdbe[MAX_RDBE_DET]; /* device selection array, see tpi_dbbc for details */
 int *ierr;
 double dtpi[MAX_RDBE_DET],dtpi2[MAX_RDBE_DET];
@@ -33,8 +33,8 @@ double dtpi[MAX_RDBE_DET],dtpi2[MAX_RDBE_DET];
   char inbuf[BUFSIZE];
   int out_recs[MAX_RDBE],out_class[MAX_RDBE];
   char name[6], who[3];
-  long iplast[5];
-  long on[MAX_RDBE_CH],off[MAX_RDBE_CH];
+  int iplast[5];
+  int on[MAX_RDBE_CH],off[MAX_RDBE_CH];
 
   for(i=0;i<MAX_RDBE;i++)
     for(j=0;j<MAX_RDBE_IF;j++)

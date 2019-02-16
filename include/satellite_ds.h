@@ -18,7 +18,7 @@ struct satoff_cmd {
 };
 
 struct satellite_ephem {
-  long t;             /* unix time of position, seconds resolution */
+  int t;             /* unix time of position, seconds resolution */
   double az;          /* azimuth */
   double el;          /* elevation */
 };
@@ -27,5 +27,5 @@ struct tle_cmd {
   char tle0[25];      /* common name */
   char tle1[70];      /* TLE Line 1 */
   char tle2[70];      /* TLE Line 1 */
-  long catnum[3];     /* catalog number for each line */
+  int catnum[3];     /* catalog number for each line */
 };

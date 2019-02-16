@@ -59,7 +59,7 @@ static char what[ ]="ad";
 
 char me[]="dbbcn" ; /* My name */ 
 int iecho;
-long fail;
+int fail;
 
 static void nullfcn();
 static jmp_buf sig_buf;
@@ -83,7 +83,7 @@ int main(int argc, char * argv[])
 {
 
   int i, len, result;
-  long ip[5];
+  int ip[5];
   
   setup_ids();    /* attach to the shared memory */
   rte_prior(FS_PRIOR);
@@ -235,7 +235,7 @@ int open_mk5(char *host, int port)
   struct timeval tv;
   int retval, iret;
   int error,serror;
-  long flags;
+  int flags;
 
   /* * Create a socket * */ 
   if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) { /* Errors? */ 
@@ -374,7 +374,7 @@ int open_mk5(char *host, int port)
   (void) printf("] \n");
 #endif
   
-  socaddin.sin_addr.s_addr = *((unsigned long *) hostinfo->h_addr_list[0]); 
+  socaddin.sin_addr.s_addr = *((unsigned int *) hostinfo->h_addr_list[0]); 
   /* Use first address */ 
   /* * Connect this socket to Mark5A on host * */ 
 #ifdef DEBUG
@@ -492,7 +492,7 @@ int open_mk5(char *host, int port)
   return 0;
 }
 int doproc(ip)
-long ip[5];
+int ip[5];
 {
 
   int rtn1;    /* argument for cls_rcv - unused */
@@ -501,8 +501,8 @@ long ip[5];
   int save;    /* argument for cls_rcv - unused */
   char secho[3*BUFSIZE];
   char lbuf[10+BUFSIZE];
-  long in_class;
-  long out_class=0;
+  int in_class;
+  int out_class=0;
   int in_recs;
   int out_recs=0;
   int i, j, nchars;
@@ -528,10 +528,10 @@ long ip[5];
 
   struct tms tms_buff;
   int first, changed;
-  long end;
+  int end;
 
-  unsigned long now;
-  static unsigned long last_dbbctrk;
+  unsigned int now;
+  static unsigned int last_dbbctrk;
   static int dbbctrk=0;
 
   secho[0]=0;
@@ -842,7 +842,7 @@ error:
   return ip[2];
 }
 int dorelink(ip)
-long ip[5];
+int ip[5];
 {
 
   int error;
@@ -864,7 +864,7 @@ long ip[5];
 
 }
 int doclose(ip)
-long ip[5];
+int ip[5];
 {
 
   ip[0]=ip[1]=0;
@@ -951,7 +951,7 @@ static int read_response(char *str, int num, FILE* stream,
   int c, iret;
     char* cs = str;
     struct timeval to;
-    unsigned long start,end,now;
+    unsigned int start,end,now;
     fd_set rfds;
     char fila10g_term[ ]= "FiLa10G % ";
     int term_count;

@@ -9,7 +9,7 @@
 
 #include "../rclco/rcl/rcl_def.h"
 
-int get_s2speed(long ip[], char *lwho)
+int get_s2speed(int ip[], char *lwho)
 {
   struct rclcn_req_buf req_buf;        /* rclcn request buffer */
   struct rclcn_res_buf res_buf;

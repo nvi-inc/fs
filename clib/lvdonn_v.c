@@ -8,7 +8,7 @@
 
 void lvdonn_v(okay,ip,indxtp)
 int okay;
-long ip[5];
+int ip[5];
 int indxtp;
 {
       struct req_buf buffer;

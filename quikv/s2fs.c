@@ -21,7 +21,7 @@ static char *fs_status( char code )
  return list[code];
 }
 /* S2 fs SNAP command */
-void s2fs(struct cmd_ds *command , int itask , long *ip )
+void s2fs(struct cmd_ds *command , int itask , int *ip )
 {
  int    err = 0;
  int    i, j, rec;
@@ -29,7 +29,7 @@ void s2fs(struct cmd_ds *command , int itask , long *ip )
  char   output[MAX_OUT], StateId, BBCid, IFswt, Id, src[4], attn[4], swt;
  char   FSstatus, CurrentState, NumStates;
  char   SeqName[25], CurName[25];
- unsigned long LOfreq, LOnew, TPI[2];
+ unsigned int LOfreq, LOnew, TPI[2];
  unsigned short FSperiod, TPIavg;
  char   DoNotChange[4] = { -128, -128, -128, -128 };
  char          IFnew, BWcode[2], AGCmode, LOlock, AGClock;

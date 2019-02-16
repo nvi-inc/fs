@@ -44,7 +44,8 @@ static int ascii_last=-1;
 
 /*-------------------------------------------------------------------------*/
 
-int rddev_(mode,devid,buf,buflen,error, ipcode, timeout, no_after, kecho)
+int rddev_(mode,devid,buf,buflen,error, ipcode, timeout, no_after, kecho,
+	   interface_clear_after_read)
 
 /* rddev returns the count of the number of bytes read, if there are
    no errors.
@@ -55,19 +56,20 @@ int rddev_(mode,devid,buf,buflen,error, ipcode, timeout, no_after, kecho)
    error. If a bus error occurs, rddev returns the system error variable.
 */
 int *mode,*devid;
-long *ipcode;
+int *ipcode;
 unsigned char *buf;
 int *buflen;  /* buffer length in characters */
 int *error;
 int *timeout;
 int *no_after;
 int *kecho;
+int *interface_clear_after_read;
 {
   int i;
   int iret, ierr;
   unsigned char lret;
   int val, icopy;
-  long centisec[2];
+  int centisec[2];
 
   *error = 0;
   *ipcode = 0;
@@ -279,6 +281,40 @@ int *kecho;
       return -1;
     }
 #endif
+  }
+/* send an interface clear, making the hpib controller-in-chage */
+
+  if (!serial && (*interface_clear_after_read)) {
+#ifdef CONFIG_GPIB
+/* this is the only way to become CIC */
+    if (ibsic(ID_hpib)&ERR) {
+      if(iberr==0)
+	logit(NULL,errno,"un");
+      *error = -(IBCODE + iberr);
+      memcpy((char *)ipcode,"RI",2);
+      return -1;
+    }
+#else
+    *error = -(IBCODE + 22);
+    return -1;
+#endif
+  } else if (*interface_clear_after_read){
+  /* some devices don't like this */
+    ierr=sib(ID_hpib,"si\r",-1,0,200,0,centisec);
+    if(ierr<0) {
+      if(ierr==-1 || ierr==-2 || ierr==-5)
+	logit(NULL,errno,"un");
+      *error = -520+ierr;
+      memcpy((char *)ipcode,"RI",2);
+      return -1;
+    } else if(ibsta&S_ERR) {
+      if(iberr==0)
+      if(ibser!=0)
+	logita(NULL,-(540 + ibser),"ib","RI");
+      *error = -(IBSCODE + iberr);
+      memcpy((char *)ipcode,"RI",2);
+      return -1;
+    }
   }
 
   if (*mode == 0) {  

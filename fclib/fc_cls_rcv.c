@@ -1,5 +1,5 @@
 int fc_cls_rcv__( iclass, buffer, nchars, rtn1, rtn2)
-long *iclass;
+int *iclass;
 char *buffer;
 int *nchars, *rtn1, *rtn2;
 {

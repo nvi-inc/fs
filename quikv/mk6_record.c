@@ -15,7 +15,7 @@ extern char unit_letters[];
 void mk6_record(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
   int ilast, ierr, ind, i, count, j;
       char *ptr;
@@ -24,9 +24,9 @@ long ip[5];                           /* ipc parameters */
       char outbuf[BUFSIZE];
       struct mk6_record_cmd lcl;
       int increment;
-      long iplast[5];
+      int iplast[5];
       int iwhich;
-      long rtn_class=0;
+      int rtn_class=0;
       int rtn_recs=0;
       int some;
 

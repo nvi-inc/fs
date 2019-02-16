@@ -1,6 +1,6 @@
 int fc_skd_end_insnp__( name, ip)
 char name[5];
-long *ip;
+int *ip;
 {
       int skd_end_inject_snap();
 

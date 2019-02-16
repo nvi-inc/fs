@@ -12,7 +12,7 @@
 #define MAX_OUT  2048
 
 /* S2 encode SNAP command */
-void s2encode( struct cmd_ds *command , int itask , long *ip )
+void s2encode( struct cmd_ds *command , int itask , int *ip )
 {
  char output[MAX_OUT];
  char *parm;

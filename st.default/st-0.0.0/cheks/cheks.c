@@ -30,7 +30,7 @@ void skd_run(), skd_par();            /* program scheduling utilities */
 
 main()
 {
-  long ip[5];
+  int ip[5];
   int nreport, checks, i, j;
   int ierr[MAX_ERR];
 

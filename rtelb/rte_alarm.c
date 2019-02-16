@@ -17,8 +17,8 @@ unsigned centisec;
 
     value.it_interval.tv_sec=0L;
     value.it_interval.tv_usec=0L;
-    value.it_value.tv_sec=(long) (time/100);
-    value.it_value.tv_usec=(long) ((time%100)*10000);
+    value.it_value.tv_sec=(int) (time/100);
+    value.it_value.tv_usec=(int) ((time%100)*10000);
 
     if(-1==setitimer(ITIMER_REAL,&value,0)) {
       perror("rte_alarm");

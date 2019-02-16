@@ -26,11 +26,11 @@ struct mcast {
    char read_time[20];
    unsigned short pkt_size;
    unsigned short epoch_ref;
-   unsigned long epoch_sec;
+   unsigned int epoch_sec;
    unsigned int interval;
    char tsys_header[20];
-   unsigned long tsys_on[64];
-   unsigned long tsys_off[64];
+   unsigned int tsys_on[64];
+   unsigned int tsys_off[64];
    char pcal_header[20];
    unsigned short pcal_ifx;
    unsigned short pcal_ifx_pad;
@@ -70,7 +70,7 @@ static unsigned short xbe16toh(unsigned short big_endian)
   } else
     return big_endian;
 }
-static unsigned long xbe32toh(unsigned long big_endian)
+static unsigned int xbe32toh(unsigned int big_endian)
 {
    static union {
 //     uint32_t i;
@@ -79,7 +79,7 @@ static unsigned long xbe32toh(unsigned long big_endian)
    } bint = {0x01020304};
 
   static union {
-    unsigned long ul;
+    unsigned int ul;
     char c[4];
   } result, temp;
 
@@ -136,10 +136,10 @@ int main(int argc, char *argv[])
 {
 
   struct rdbe_tsys_cycle local;
-  unsigned long tpi[MAX_RDBE_CH*MAX_RDBE_IF][2];
+  unsigned int tpi[MAX_RDBE_CH*MAX_RDBE_IF][2];
   int iping;
   char multicast_addr[129];
-  long ip[5];
+  int ip[5];
   char secho[512];
   char buf[512], *start, slen;
   int i,j;
@@ -289,7 +289,7 @@ while (1) {
     }
     continue;
   } else if(iretsel == 0) {
-    long now_raw;
+    int now_raw;
     rte_rawt(&now_raw);
     if(shm_addr->rdbe_sync[irdbe]==0 ||
        shm_addr-> rdbe_sync[irdbe]+4500< now_raw) {/* wait 45 seconds after a
@@ -374,7 +374,7 @@ while (1) {
       }
 
       for(i=0;i<MAX_RDBE_CH*MAX_RDBE_IF;i++) {
-        unsigned long value;
+        unsigned int value;
 	double diff;
 	int ifchain;
 	double center;

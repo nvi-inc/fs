@@ -18,7 +18,7 @@ void skd_run(), skd_par();
 
 void dscon_snd(lcl,ip)
   struct ds_cmd *lcl;
-  long ip[5];
+  int ip[5];
 {
   unsigned char buf[6];
   unsigned short header;
@@ -41,7 +41,7 @@ void dscon_snd(lcl,ip)
 
 int dscon_rcv(lclm,ip)
   struct ds_mon *lclm;
-  long int ip[5];
+  int ip[5];
 {
    unsigned char buf[3];
    int nchar, dum;
@@ -55,7 +55,7 @@ int dscon_rcv(lclm,ip)
 }
 
 int run_dscon(ip)		/* runs DSCON via field system scheduling */
-  long ip[5];
+  int ip[5];
 {
 /* Launch DSCON via Field System scheduling environment, passing class buffer
    commands via IP[].  Wait until DSCON completes, pick up the IP[] class

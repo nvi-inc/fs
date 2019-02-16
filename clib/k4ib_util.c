@@ -18,7 +18,7 @@
 
 char *arg_next(struct cmd_ds *command,int *ilast);  /* traverse argv array */
 
-int k4ib_dec(struct cmd_ds *command,long int ip[5], int *ireq)
+int k4ib_dec(struct cmd_ds *command,int ip[5], int *ireq)
 {
   int ilast,i;
   char *ptr;

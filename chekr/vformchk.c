@@ -13,9 +13,9 @@ void vformchk_(icherr,ierr)
 int icherr[5];
 int *ierr;
 {
-  long ip[5];                           /* ipc parameters */
+  int ip[5];                           /* ipc parameters */
   int i, j;
-  unsigned long iptr;
+  unsigned int iptr;
   struct req_rec request;        /* mcbcn request record */
   struct req_buf buffer;         /* mcbcn request buffer */
 

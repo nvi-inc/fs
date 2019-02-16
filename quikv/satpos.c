@@ -13,7 +13,7 @@ int satpos(itcmd,azcmd,elcmd)
      double *azcmd,*elcmd;
 {
   int i, iret;
-  long seconds;
+  int seconds;
 
   iret=0;
 

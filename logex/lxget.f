@@ -56,7 +56,7 @@ C
 C  *****************************************************************
 C
 C
-      integer fmpread,answer
+      integer fmpread
       character*79 outbuf
       integer answer, trimlen
       integer*2 ibuf2(512)

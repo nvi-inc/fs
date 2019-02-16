@@ -27,7 +27,7 @@
 
 /* functions not defined by Unix non-ansi headers */
 extern int connect();
-extern unsigned long inet_addr(const char* cp);
+extern unsigned int inet_addr(const char* cp);
 
 
 /* variables local to this module */

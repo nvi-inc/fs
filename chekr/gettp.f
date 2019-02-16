@@ -68,8 +68,8 @@ C
          enddo
       else if(MK4.eq.drive(indxtp)) then
          call fs_get_kenastk(kenastk,indxtp)
-         if(kena(1).ne.kenastk(1,indxtp) .or.
-     $        kena(2).ne.kenastk(2,indxtp)) ierr=-1
+         if(kena(1).neqv.kenastk(1,indxtp) .or.
+     $        kena(2).neqv.kenastk(2,indxtp)) ierr=-1
          if(kena(1)) ntrks=ntrks+1
          if(kena(2)) ntrks=ntrks+1
       endif

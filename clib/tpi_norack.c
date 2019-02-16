@@ -15,7 +15,7 @@
 static char *lwhat[ ]={"u5","u6"};
 
 void tpi_norack(ip,itpis_norack)                    /* sample tpi(s) */
-long ip[5];                                     /* ipc array */
+int ip[5];                                     /* ipc array */
 int itpis_norack[2]; /* detector selection array */
                       /* in order: u5, u6 */
 {
@@ -37,7 +37,7 @@ int itpis_norack[2]; /* detector selection array */
 }
     
 void tpput_norack(ip,itpis_norack,isub,ibuf,nch,ilen) /* put results of tpi */
-long ip[5];                                    /* ipc array */
+int ip[5];                                    /* ipc array */
 int itpis_norack[2]; /* device selection array, see tpi_norack for details */
 int isub;                /* which task: 3=tpi, 4=tpical, 7=tpzero */
 char *ibuf;              /* out array, formatted results placed here */
@@ -45,7 +45,7 @@ int *nch;                /* next available char index in ibuf on entry */
                          /* the total count on exit, counts from 1 , not 0 */
 int ilen;                /* number of characters ibuf can hold, ignored */
 {
-    long *ptr;
+    int *ptr;
     int i, iclass, nrec, lenstart;
 
     switch (isub) {                        /* set the pointer for the type */
@@ -109,7 +109,7 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 }
 
 void tsys_norack(ip,itpis_norack,ibuf,nch,itask)
-long ip[5];
+int ip[5];
 int itpis_norack[2]; /* device selection array, see tpi_norack for details */
 char *ibuf;              /* out array, formatted results placed here */
 int *nch;                /* next available char index in ibuf on entry */

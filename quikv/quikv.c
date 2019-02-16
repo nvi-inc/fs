@@ -12,7 +12,7 @@ char unit_letters[ ] = {" abcdefghijklm"}; /* mk6/rdbe unit letters */
 
 main()
 {
-    long ip[5];
+    int ip[5];
     struct cmd_ds command;
     int isub,itask,idum,ierr,nchars,i;
     char buf[MAX_BUF];

@@ -5,7 +5,7 @@ struct scan_check_mon {
   /* command M5a and m5B parameters */
 
   struct {
-    long scan;
+    int scan;
     struct m5state state;
   } scan;
   struct {

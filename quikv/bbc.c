@@ -15,7 +15,7 @@ static char device[]={"b1b2b3b4b5b6b7b8b9babbbcbdbebf"};
 void bbc(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, ind, ichold, count;
       char *ptr;

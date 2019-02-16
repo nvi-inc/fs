@@ -39,7 +39,9 @@ C
       integer star(2)
       character*12 ibc1,ibc2
       character cjchar
-      data star/1,'*'/
+C     data star/1,'*'/
+      star(1) = 1
+      call char2hol('*',star(2),1,1)
 C
 C  *****************************************************************
 C

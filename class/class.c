@@ -27,7 +27,7 @@ static int msqid;
 main()
 {
 key_t key;
-long    class;
+int    class;
 struct  cls_buf msg;
 void sem_take(), sem_put();
 int nchars,i;

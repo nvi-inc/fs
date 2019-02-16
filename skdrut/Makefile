@@ -41,15 +41,9 @@ write_error_and_pause.o write_return_if_needed.o writf_asc.o writf_asc_ch.o \
 xat.o xyz2latlon.o ydjul.o ymday.o
 
 
-#
-FFLAGS=-C -c
-# f2c needs this others don't
-CFLAGS= -DF2C
-CFLAGS= -c -DF2C
-#
+FFLAGS += -C
+CPPFLAGS += -DF2C
+
 $(ARC).a: $(OBJECTS)
-	touch $(LIB)$(ARC).a
-	rm $(LIB)$(ARC).a
-	ar -qc $(LIB)$(ARC).a $(OBJECTS)
-# The following command indexes the archive for Linux. Not needed for HP.
-	ar s $(LIB)$(ARC).a
+
+include ../include.mk

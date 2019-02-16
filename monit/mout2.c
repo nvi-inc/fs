@@ -70,7 +70,7 @@ int iyear;
   void preint();
   int len;
   int inuse, rstate, rstate_valid, position_valid;
-  long int position,posvar;
+  int position,posvar;
 
   ptfeet = &feet[0];
   checkln = &checkarr[0];

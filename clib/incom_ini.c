@@ -9,7 +9,7 @@
 extern struct fscom *shm_addr;
 
 void incom_ini( iclbox, iclopr)
-long *iclbox,*iclopr;
+int *iclbox,*iclopr;
 {
 
    *iclbox=shm_addr->iclbox;

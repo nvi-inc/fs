@@ -13,7 +13,7 @@
 
 void data_valid_dis(command,ip,indx,kS2drive)
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 int indx, kS2drive;
 {
       struct data_valid_cmd lclc;

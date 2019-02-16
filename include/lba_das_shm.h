@@ -93,10 +93,10 @@ struct das {
 		       } bs;
 		struct ft {		/* Fine Tuner */
 			enum sync {_SYNC=0, _1PPS_AUX} sync;
-			unsigned long nco_centre_value;
-			unsigned long nco_offset_value;
-			unsigned long nco_phase_value;
-			unsigned long nco_timer_value;
+			unsigned int nco_centre_value;
+			unsigned int nco_offset_value;
+			unsigned int nco_phase_value;
+			unsigned int nco_timer_value;
 			enum enable {_OFF=0, _ON} nco_test;
 			enum enable nco_use_offset;
 			enum enable nco_sync_reset;

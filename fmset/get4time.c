@@ -7,10 +7,10 @@
 
 #include "fmset.h"
 
-extern long ip[5];
+extern int ip[5];
 extern char inbuf[512];
-extern long outclass;
-extern long inclass;
+extern int outclass;
+extern int inclass;
 extern int rtn1, rtn2, msgflg, save, synch;
 
 void cls_clr();
@@ -30,10 +30,10 @@ time_t *fstime; /* fs time */
 int *fshs;
 time_t *formtime; /* formatter time */
 int *formhs;
-long *raw;
+int *raw;
 {
 	int it[6],ms,nbytes,nrecs,ierr;
-        long centisec[6], centiavg, centidiff;
+        int centisec[6], centiavg, centidiff;
 	char *name;
 	char buff[80];
 	int isynch;

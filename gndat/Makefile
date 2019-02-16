@@ -1,11 +1,12 @@
-LIBES = ../clib/clib.a
-OBJECTS= get_rxgain_files.o get_gain_par2.o
-#
-../bin/gndat: gndat.o $(OBJECTS)
-	cc  -o ../bin/gndat gndat.o $(OBJECTS) $(LIBES) -lm
-	strip ../bin/gndat
+LIBS = ../clib/clib.a
+OBJECTS = gndat.o get_rxgain_files.o get_gain_par2.o
+LDLIBS += -lm
+
+all: ../bin/gndat ../bin/gndat2
+
+../bin/gndat: $(OBJECTS) $(LIBS)
+
+../bin/gndat2:
 	ln -sfn ../bin/gndat ../bin/gndat2
-gndat:
-	rm -f ../bin/gndat ../bin/gndat2
-	make
-#
+
+include ../include.mk

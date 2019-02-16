@@ -1,5 +1,5 @@
 void fc_rte_rawt__(plCentiSec)
-long *plCentiSec;
+int *plCentiSec;
 {
      void rte_rawt();
 

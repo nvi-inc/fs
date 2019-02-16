@@ -49,7 +49,7 @@ int rspdev_(devid,buf,error, ipcode, timeout, kecho)
 */
 int *devid;
 unsigned char *buf; /* at least sizeof(int) in extent */
-long *ipcode;
+int *ipcode;
 int *error;
 int *timeout;
 int *kecho;
@@ -60,7 +60,7 @@ int *kecho;
   int val, icopy;
   int ibsta1;
   int value;
-  long centisec[2];
+  int centisec[2];
 
   *error = 0;
   *ipcode = 0;

@@ -13,7 +13,7 @@ clock_t rte_times(struct tms *);
 void v2_head_vmov(ihead,volt,ip,indxtp)
 int ihead;                     /* head 1-4 */
 float volt;                    /* voltage to set head to */
-long ip[5];                    /* ipc array */
+int ip[5];                    /* ipc array */
 int indxtp;
 {
       struct req_buf buffer;           /* request buffer */
@@ -21,7 +21,7 @@ int indxtp;
       struct res_buf buffer_out;       /* response buffer */
       struct res_rec response;         /* respones record */
       struct tms tms_buff;
-      long end;
+      int end;
       int indx;
 
       if(indxtp == 1) {

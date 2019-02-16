@@ -60,33 +60,19 @@ wrdate.o wrday.o wrdur.o wrhead.o wrsor.o wrtap.o wrtrack.o xfer_override.o
 # Set compiling and linking flags
 #
 # -C checks for out of bounds during execution and aborts if found
-FFLAGS= -C -c -cpp -DVERSION=$(VERSION) \
--DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL)
-# f2c needs this others don't
-CFLAGS= -c  -DF2C
-#
+FFLAGS += -C 
+CPPFLAGS += -DF2C -DVERSION=$(VERSION) -DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL)
 
-#
 LIBS=$(UT)skdrut.a ../lnfch/lnfch.a ../fslb/fslb.a \
 ../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a \
-../vex/vex.a -lf2c -lfl
-#
-../bin/$(PROGRAM): $(OBJECTS) 
-	rm -f ./core
-	@echo Linking $(PROGRAM)...
-	@$(FC) -o ../bin/$(PROGRAM) $(OBJECTS) $(LIBS)
-	@strip ../bin/$(PROGRAM)
-	@echo done.
+../vex/vex.a
+
+LDLIBS += $(FLIBS) -lfl
+
+../bin/$(PROGRAM): $(OBJECTS) $(LIBS)
 
 ../bin/ifvlbafix: ifvlbafix
 	rm -f ../bin/ifvlbafix
 	ln -s ../drudg/ifvlbafix ../bin/ifvlbafix
 
-#  The following are special dependency lines for compiling.
-
-.f.o:
-	cd $(<D); $(FC) $(FFLAGS) $<
-.c.o:
-	cd $(<D); cc $(CFLAGS) $<
-
-
+include ../include.mk

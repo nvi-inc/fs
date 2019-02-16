@@ -43,7 +43,7 @@ extern char* m5trim(char*);
 
 /* Little helper to set error return.
  * 'modnm' MUST be a NTBS of at least 2 characters long */
-long mk5_status_set_error_rtn(long* ip, long eno, const char* modnm) {
+int mk5_status_set_error_rtn(int* ip, int eno, const char* modnm) {
     ip[ 0 ] = 0;
     ip[ 1 ] = 0;
     ip[ 2 ] = eno;
@@ -101,8 +101,8 @@ void mk5_status_replace_colons(char* ptr) {
 
 
 /* Execute 1 Mark5 command and get its reply */
-long mk5_status_mk5cn_exec(long* ip, const char* cmd, char* buf, const size_t bufsz) {
-    long   class = 0;
+int mk5_status_mk5cn_exec(int* ip, const char* cmd, char* buf, const size_t bufsz) {
+    int   class = 0;
     void   skd_run(), skd_par();      /* program scheduling utilities */
 
     /* put command in shmem and prepare ip array for mk5cn */
@@ -153,10 +153,10 @@ long mk5_status_mk5cn_exec(long* ip, const char* cmd, char* buf, const size_t bu
     return ip[ 2 ];
 }
 
-long mk5_status_get_status(long* ip, unsigned int* statusword) {
+int mk5_status_get_status(int* ip, unsigned int* statusword) {
     char          buf[ 128 ], *question, *colon, *eptr;
-    const long    ierr = mk5_status_mk5cn_exec(ip, "status?\n", buf, sizeof(buf));
-    unsigned long word;
+    const int    ierr = mk5_status_mk5cn_exec(ip, "status?\n", buf, sizeof(buf));
+    unsigned int word;
 
     /* If the execution failed, not much we can do about it eh? */
     if( ierr<0 )
@@ -182,7 +182,7 @@ long mk5_status_get_status(long* ip, unsigned int* statusword) {
     if( (word==ULONG_MAX && errno==ERANGE) /* overflow - see strtoul(3) */ ||
         eptr==colon+1 /* "no digits at all" - see strtoul(3) */ ||
         (strchr(" :", *eptr)==NULL && *eptr!='\0') /* not an acceptable final character */ ||
-        word>(unsigned long)UINT_MAX /* too big for unsigned int */ )
+        word>(unsigned int)UINT_MAX /* too big for unsigned int */ )
             return mk5_status_set_error_rtn(ip, ESTATUSWORD, "5h");
 
     /* Done! */
@@ -190,9 +190,9 @@ long mk5_status_get_status(long* ip, unsigned int* statusword) {
     return 0; /* success */
 }
 
-long mk5_status_get_error(long* ip, char* buf, const size_t bufsz) {
+int mk5_status_get_error(int* ip, char* buf, const size_t bufsz) {
     char*  tmp  = (char*)malloc( bufsz );
-    long   ierr = (tmp==NULL) ? ESTRDUP_ERROR : mk5_status_mk5cn_exec(ip, "error?\n", tmp, bufsz);
+    int   ierr = (tmp==NULL) ? ESTRDUP_ERROR : mk5_status_mk5cn_exec(ip, "error?\n", tmp, bufsz);
 
     /* only process reply if succesfull.
      * the reply looks like:

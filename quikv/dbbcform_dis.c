@@ -16,7 +16,7 @@ int logmsg_dbbc();
 
 void dbbcform_dis(command,ip)
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 {
       struct dbbcform_cmd lclc;
       int kcom,i,ich, ierr, count;

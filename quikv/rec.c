@@ -15,7 +15,7 @@ static float spd[ ]={0,3.375,7.875,16.875,33.75,67.5,135.,270.};
 void rec(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, indx, i, count, ichold;
       int kenable, klowtape, kmove, kload;

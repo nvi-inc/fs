@@ -12,10 +12,10 @@ void skd_par();
 
 int get_s2time(dev,centisec,it,nanosec,ip,to)
 char dev[];
-long centisec[6];
+int centisec[6];
 int it[6];
-long *nanosec;
-long ip[5];                          /* ipc array */
+int *nanosec;
+int ip[5];                          /* ipc array */
 {
   int ierr;
   struct rclcn_req_buf reqbuf;

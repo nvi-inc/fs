@@ -12,7 +12,7 @@
 int logmsg_dbbc(output,command,ip)
 char *output;
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 {
    void cls_snd();
    int i,ierr;

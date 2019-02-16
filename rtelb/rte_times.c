@@ -5,7 +5,7 @@
 
 clock_t rte_times(struct tms *buf)
 {
-  long lRawTicks;
+  int lRawTicks;
   
   rte_ticks(&lRawTicks);
   return lRawTicks;

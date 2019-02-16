@@ -1,1 +1,25 @@
-iftpx.j__
+          iftpx - IF distributor total power (DBBC3 racks)
+
+            Syntax:     iftpx
+            Response:   iftpx/tp,off,on
+
+
+'x' is the IFD index letter corresponding to its order in position in
+the DBBC3 rack, 'a' to 'h'
+
+Settable Parameters:
+
+           none
+
+Monitor-only Parameters:
+
+            tp        total power, 0-65535 counts
+            off       non-switched total power or
+	              switched total power cal off, 0-65535 counts
+            on        switched total power cal on, 0-65535 counts
+
+Comments:
+This command has no settable parameters.
+
+The 'off' parameter is the total power when continuous power ("switched") is
+not in use.

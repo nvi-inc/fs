@@ -12,11 +12,11 @@
 
 /* S2 ping SNAP command */
 
-void s2ping(struct cmd_ds *command , int itask , long *ip )
+void s2ping(struct cmd_ds *command , int itask , int *ip )
 {
  struct timeval t1, t2;
  char output[128];
- long dt;
+ int dt;
  int  ierr;
  int  i;
  int  last = 0;

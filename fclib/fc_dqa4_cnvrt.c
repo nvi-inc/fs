@@ -1,8 +1,8 @@
 void fc_dqa4_cnvrt__(ibuf,jfrms,jperr,jsync,ierr)
 char *ibuf;
-long jfrms[2];
-long jperr[2];
-long jsync[2];
+int jfrms[2];
+int jperr[2];
+int jsync[2];
 int *ierr;
 {
   void dqa4_cnvrt();

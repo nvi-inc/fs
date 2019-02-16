@@ -11,7 +11,7 @@
 
 void set_vaux(lauxfm,ip)
 char lauxfm[12];
-long ip[5];
+int ip[5];
 {
   int i,j;
   struct req_rec request;        /* mcbcn request record */

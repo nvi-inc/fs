@@ -1,5 +1,5 @@
 void fc_cls_clr__( iclass)
-long *iclass;
+int *iclass;
 {
    int cls_clr(),idum;
 

@@ -14,16 +14,16 @@
 void mk6_scan_check(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
   int ilast, ierr, ind, i, count, j;
       char *ptr;
       char *arg_next();
       int out_recs[MAX_MK6], out_class[MAX_MK6];
       char outbuf[BUFSIZE];
-      long iplast[5];
+      int iplast[5];
       int iwhich;
-      long rtn_class=0;
+      int rtn_class=0;
       int rtn_recs=0;
       int some;
 

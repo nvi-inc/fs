@@ -1,7 +1,7 @@
-long fc_bbc2freq__(bits)
-long *bits;
+int fc_bbc2freq__(bits)
+int *bits;
 {
-    long bbc2freq();
+    int bbc2freq();
 
     return bbc2freq(*bits);
 }

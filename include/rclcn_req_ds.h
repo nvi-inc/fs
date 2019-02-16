@@ -7,7 +7,7 @@
 
 struct rclcn_req_buf {            /* buffer structure */
   int count;                 /* number of buffers in class */
-  long class_fs;                /* class number containing buffers */
+  int class_fs;                /* class number containing buffers */
   int nchars;                /* number of characters in buf */
   int prev_nchars;
   unsigned char buf[ RCLCN_REQ_BUF_MAX];    /* actual buffer */

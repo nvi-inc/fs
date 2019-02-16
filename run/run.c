@@ -9,7 +9,7 @@
 
 #define MAX_BUF     256
 
-static long ipr[5] = { 0, 0, 0, 0, 0};
+static int ipr[5] = { 0, 0, 0, 0, 0};
 extern struct fscom *shm_addr;
 
 main(argc, argv)

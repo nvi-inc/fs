@@ -15,7 +15,7 @@ int rec_dec(ptr,request,buffer,ip,indx)
 char *ptr;
 struct req_rec *request;
 struct req_buf *buffer;
-long ip[5];
+int ip[5];
 int indx;
 {
   struct res_rec response;
@@ -32,8 +32,8 @@ int indx;
   int ierr;
   int lerr;
   int verr;
-  long atoi();
-  long feet;
+  int atoi();
+  int feet;
 
   ierr=0;
   if(ptr == NULL) ptr="";

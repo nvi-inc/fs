@@ -10,7 +10,7 @@ unsigned rte_sleep( centisec)
 unsigned centisec;
 {
      struct tms buffer;
-     unsigned long wait, end, now;
+     unsigned int wait, end, now;
      unsigned int usecs;
 
      end=rte_times(&buffer)+centisec+1;

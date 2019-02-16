@@ -20,7 +20,7 @@ void mcbcn_d(device, ierr,ip)
 char device[2];                        /* device mnemonic */
 int *ierr;                             /* error return, -1 if no such device */
                                        /*                0 okay              */
-long ip[5];
+int ip[5];
 {
     struct req_rec request1;
     struct req_buf buffer;
@@ -89,7 +89,7 @@ long ip[5];
 
 void mcbcn_v(dtpi,ip)
 double *dtpi;                      /* return counts */
-long ip[5];
+int ip[5];
 {
     struct req_buf buffer;
     struct res_buf buff_res;
@@ -119,7 +119,7 @@ long ip[5];
 /* restore bbc gain */
 
 void mcbcn_r(ip)
-long ip[5];
+int ip[5];
 {
     struct req_buf buffer;
     struct res_buf buff_res;

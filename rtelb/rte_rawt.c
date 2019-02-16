@@ -12,7 +12,7 @@
 #include "../include/shm_addr.h"
 
 void rte_rawt(lRawTime)
-long *lRawTime;
+int *lRawTime;
 {
      struct tms buffer;
      struct timeval tv;

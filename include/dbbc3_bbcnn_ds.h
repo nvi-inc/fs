@@ -1,7 +1,7 @@
 /* dbbc3 bbcnn data structures */
 
 struct dbbc3_bbcnn_cmd {
-     unsigned long freq;  /* frequency (Hz) */
+     unsigned int freq;  /* frequency (Hz) */
      int source;          /* if source, 0=A, 1=B, 2=C, 3=D */
      int bw;              /* bandwidth selection */
      int avper;           /* averaging period for TPI seconds*/

@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <nanomsg/nn.h>
+#include <nng/compat/nanomsg/nn.h>
 #include "msg.h"
 
 // Output little-endian encoded uint64 to buffer,
 // returns:
 //         - number of bytes written on success,
 //         - -1 on error and sets errno
-ssize_t uint64_marshal_le(uint64_t n, uint8_t *buf, size_t max) {
+ssize_t uint64_marshal_le(unsigned long long n, uint8_t *buf, size_t max) {
     if (max < 8) {
         errno = EOVERFLOW;     
         return -1;
@@ -31,7 +31,7 @@ ssize_t uint64_marshal_le(uint64_t n, uint8_t *buf, size_t max) {
 // returns:
 //         - number of bytes written on success,
 //         - -1 on error and sets errno
-ssize_t uint64_marshal_be(uint64_t n, uint8_t *buf, size_t max) {
+ssize_t uint64_marshal_be(unsigned long long n, uint8_t *buf, size_t max) {
     if (max < 8) {
         errno = EOVERFLOW;     
         return -1;
@@ -54,22 +54,22 @@ ssize_t uint64_marshal_be(uint64_t n, uint8_t *buf, size_t max) {
 // returns:
 //         - number of bytes written on success,
 //         - -1 on error and sets errno
-ssize_t uint64_unmarshal_le(uint64_t *out,  uint8_t *buf, size_t max) {
+ssize_t uint64_unmarshal_le(unsigned long long *out,  uint8_t *buf, size_t max) {
     if (max < 8) {
         errno = EOVERFLOW;     
         return -1;
     }
 
     *out = 0;
-    *out |= (uint64_t)buf[0]<<000;
-    *out |= (uint64_t)buf[1]<<010;
-    *out |= (uint64_t)buf[2]<<020;
-    *out |= (uint64_t)buf[3]<<030;
+    *out |= (unsigned long long)buf[0]<<000;
+    *out |= (unsigned long long)buf[1]<<010;
+    *out |= (unsigned long long)buf[2]<<020;
+    *out |= (unsigned long long)buf[3]<<030;
 
-    *out |= (uint64_t)buf[4]<<040;
-    *out |= (uint64_t)buf[5]<<050;
-    *out |= (uint64_t)buf[6]<<060;
-    *out |= (uint64_t)buf[7]<<070;
+    *out |= (unsigned long long)buf[4]<<040;
+    *out |= (unsigned long long)buf[5]<<050;
+    *out |= (unsigned long long)buf[6]<<060;
+    *out |= (unsigned long long)buf[7]<<070;
     return 8;
 }
 
@@ -77,22 +77,22 @@ ssize_t uint64_unmarshal_le(uint64_t *out,  uint8_t *buf, size_t max) {
 // returns:
 //         - number of bytes written on success,
 //         - -1 on error and sets errno
-ssize_t uint64_unmarshal_be(uint64_t *out,  uint8_t *buf, size_t max) {
+ssize_t uint64_unmarshal_be(unsigned long long *out,  uint8_t *buf, size_t max) {
     if (max < 8) {
         errno = EOVERFLOW;     
         return -1;
     }
 
     *out = 0;
-    *out |= (uint64_t)buf[0]<<070;
-    *out |= (uint64_t)buf[1]<<060;
-    *out |= (uint64_t)buf[2]<<050;
-    *out |= (uint64_t)buf[3]<<040;
+    *out |= (unsigned long long)buf[0]<<070;
+    *out |= (unsigned long long)buf[1]<<060;
+    *out |= (unsigned long long)buf[2]<<050;
+    *out |= (unsigned long long)buf[3]<<040;
 
-    *out |= (uint64_t)buf[4]<<030;
-    *out |= (uint64_t)buf[5]<<020;
-    *out |= (uint64_t)buf[6]<<010;
-    *out |= (uint64_t)buf[7]<<000;
+    *out |= (unsigned long long)buf[4]<<030;
+    *out |= (unsigned long long)buf[5]<<020;
+    *out |= (unsigned long long)buf[6]<<010;
+    *out |= (unsigned long long)buf[7]<<000;
 
     return 8;
 }
@@ -166,7 +166,7 @@ ssize_t msg_unmarshal(msg_t* m, uint8_t* buf, size_t max) {
     nbytes++;
     buf++;
 
-    uint64_t seq;
+    unsigned long long seq;
     n = uint64_unmarshal_le(&seq, buf, max-nbytes);
     if (n < 0){
         return -1;
@@ -179,7 +179,7 @@ ssize_t msg_unmarshal(msg_t* m, uint8_t* buf, size_t max) {
         return nbytes;
     }
 
-    uint64_t len;
+    unsigned long long len;
     n = uint64_unmarshal_le(&len, buf, max-nbytes);
     if (n < 0) {
         return -1;

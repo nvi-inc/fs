@@ -4,7 +4,7 @@
 
 void fc_rte_fixt__(poClock,plCentiSec)
 time_t *poClock;
-long *plCentiSec;
+int *plCentiSec;
 {
      void rte_fixt();
 

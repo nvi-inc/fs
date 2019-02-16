@@ -12,14 +12,14 @@
 int daymy();
 
 get_fila10gtime(centisec,fm_tim,ip,to,iDBBC)
-long centisec[6];
+int centisec[6];
 int fm_tim[6];
-long ip[5];                          /* ipc array */
+int ip[5];                          /* ipc array */
 int to;
 int iDBBC;
 {
       int out_recs, nrecs, irec, ierr;
-      long out_class, iclass;
+      int out_class, iclass;
       char *str;
       char inbuf[BUFSIZE];
       int rtn1;    /* argument for cls_rcv - unused */

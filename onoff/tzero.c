@@ -11,7 +11,7 @@ extern struct fscom *shm_addr;
 
 int tzero(cont,ip,onoff,rut,accum,ierr)
      int cont[MAX_ONOFF_DET];
-     long ip[5];
+     int ip[5];
      struct onoff_cmd *onoff;
      float rut;
      struct sample *accum;

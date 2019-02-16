@@ -20,8 +20,8 @@ int vcnum_u[14]
 {
   short int buff[MAX_BUF];
   int ierr=0, nrec, i, j;
-  long ip[5];
-  long iclass;
+  int ip[5];
+  int iclass;
 
   for (i=0;i<14;i++) {
     int j;

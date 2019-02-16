@@ -23,7 +23,7 @@ logwx(
   time_t t;
   char ch;
   static FILE *fildes= (FILE *) NULL;
-  long offset;
+  int offset;
   int kopen;
   int len;
   size_t size;
@@ -89,19 +89,19 @@ logwx(
     strncpy(file,new,sizeof(file));
 
     /* position to end for our reading here */
-    if(EOF==fseek(fildes, (long) 0,SEEK_END)) {
+    if(EOF==fseek(fildes, (int) 0,SEEK_END)) {
       err_report("Error positioning to EOF in logwx",new,errno,0);
       return;
     }
 
     offset=ftell(fildes);
-    if(offset==(long)-1) {
+    if(offset==(int)-1) {
       err_report("Opening checking log position in logwx",new,errno,0);
       return;
     }
 
-    if(offset!=(long)0){
-      if(EOF==fseek(fildes, (long) -1,SEEK_END)) {
+    if(offset!=(int)0){
+      if(EOF==fseek(fildes, (int) -1,SEEK_END)) {
 	err_report("Error positioning log in logwx",new,errno,0);
 	return;
       }
@@ -110,7 +110,7 @@ logwx(
 	return;
       }
       /* must seek between reads and writes */
-      if(EOF==fseek(fildes, (long) 0,SEEK_END)) { 
+      if(EOF==fseek(fildes, (int) 0,SEEK_END)) { 
 	err_report("Error positioning to EOF2 in logwx",new,errno,0);
 	return;
       }

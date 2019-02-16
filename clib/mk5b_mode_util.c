@@ -231,7 +231,7 @@ m5_2_mk5b_mode(ptr_in,lclc,ip) /* return values:
      char *ptr_in;           /* input buffer to be parsed */
 
      struct mk5b_mode_cmd *lclc;  /* result structure with parameters */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr;

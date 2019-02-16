@@ -43,7 +43,7 @@ C                   0 = a fixed zero
 C                   a = mixer sw. state (2 bits), upper 2 bits of atten.
 C                   t = lower 4 bits of atten.
 C
-      integer*4 fc_bbc2freq,bits,freq
+      integer*4 fc_bbc2freq,bits
 C
 C  Atten: upper 2 bits from char 9, lower 4 from char 10
 C

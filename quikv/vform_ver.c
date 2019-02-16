@@ -11,7 +11,7 @@
 
 void vform_ver(version,ip)
 int *version;
-long ip[5];
+int ip[5];
 {
   struct vform_mon lclm;
   struct req_rec request;

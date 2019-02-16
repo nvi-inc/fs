@@ -58,7 +58,7 @@ m5_2_mk6_scan_check(ptr_in,lclm,ip,what) /* return values:
      char *ptr_in;           /* input buffer to be parsed */
 
      struct mk6_scan_check_mon *lclm;  /* result structure with parameters */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
      char *what;
 {
   char *new_str, *ptr, *ptr2, *ptr_save;

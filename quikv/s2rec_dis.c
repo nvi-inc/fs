@@ -15,7 +15,7 @@
 
 void s2rec_dis(command,ip)
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 {
       struct rec_mode_cmd lclc;
       int kcom, i, ierr, count, start;
@@ -39,7 +39,7 @@ long ip[5];
 	char version[RCL_MAXSTRLEN_VERSION];
 	int year, day, hour, min, sec;
 	ibool validated;
-	long centisec[6];
+	int centisec[6];
 
 	/* format output buffer */
 

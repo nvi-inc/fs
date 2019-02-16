@@ -16,7 +16,7 @@ int  *n_ifp;
   unsigned char chan, n_das;
   struct ds_cmd lcl;
   struct ds_mon lclm;
-  long ip[5];
+  int ip[5];
   int i, ierr;
 
   n_das = (*n_ifp-1) / 2;

@@ -12,7 +12,6 @@ c  arg is set to blank if n exceeds the actual number of supplied
 c     arguments OR the argument is blank or empty
 c
       integer iargc
-      external iargc
 c
       if(n.lt.0) return
 c

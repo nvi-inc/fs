@@ -103,7 +103,9 @@ c
       character*1 dbbcddcvl
       character*1 rdbe_pcal_amp
       character*16 dbbc3_ddc_vs
+      character*32 sVerRelease_FS
 c
       common/fscom_dum2/ LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP,
      $                   dbbcddcvs, dbbcddcvl, rdbe_pcal_amp,   
-     $                   dbbc3_ddc_vs
+     $                   dbbc3_ddc_vs,
+     $                   sVerRelease_FS

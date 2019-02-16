@@ -123,7 +123,7 @@ struct k4vcbw_cmd *lcl;
 }
 
 k4vcbw_req_q(ip,itask)
-long ip[5];
+int ip[5];
 int itask;
 {
  char *device;
@@ -151,7 +151,7 @@ int itask;
 
 }
 k4vcbw_req_c(ip,lclc,itask)
-long ip[5];
+int ip[5];
 struct k4vcbw_cmd *lclc;
 int itask;
 {
@@ -194,7 +194,7 @@ int itask;
 
 k4vcbw_res_q(lclc,ip,itask)
 struct k4vcbw_cmd *lclc;
-long ip[5];
+int ip[5];
 int itask;
 {
   char buffer[MAX_BUF];

@@ -164,7 +164,7 @@ int rcl_packet_read(int addr, int* code, char* data, int maxlength,
    int junk_chars;        /* count of junk characters (not precise) */
    unsigned char c;
    unsigned char ch,cl;   /* hi/low byte of 16-bit quantity */
-   long int chksum;       /* accumulator for checksum */
+   int chksum;       /* accumulator for checksum */
    static unsigned char packet[RCL_PKT_MAX+2];
                           /* entire packet, incl SOT & EOT (static so we don't
                                use up too much stack space) */
@@ -300,7 +300,7 @@ int rcl_packet_write(int addr, int code, const char* data, int length)
    int pos;
    int len;                   /* length of packet, not including SOT and EOT */
    unsigned char c;
-   long int chksum;           /* accumulator for checksum */
+   int chksum;           /* accumulator for checksum */
    int addr_send;             /* address to put in packet */
    static unsigned char packet[RCL_PKT_MAX+2];
                               /* entire packet, incl SOT & EOT. We make it

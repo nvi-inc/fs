@@ -12,7 +12,7 @@
 #define MAX_OUT  2048
 
 /* S2 agc SNAP command */
-void s2agc( struct cmd_ds *command , int itask , long *ip )
+void s2agc( struct cmd_ds *command , int itask , int *ip )
 {
  int  ierr = 0;
  int  i, last = 0;

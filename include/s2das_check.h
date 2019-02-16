@@ -1,7 +1,7 @@
 /* s2-DAS error checking structure */
 
 struct s2das_check {
-  unsigned long check;
+  unsigned int check;
   char agc;
   char encode;
   char mode[21];

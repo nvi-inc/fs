@@ -1,1 +1,48 @@
-ifx.j__
+          ifx - IF distributor (DBBC3 racks)
+
+            Syntax:     ifx=input,att,target
+            Response:   ifx/input,att,target,attV,counts
+
+
+'x' is the IFD index letter corresponding to its order in position in
+the DBBC3 rack, 'a' to 'h'
+
+Settable Parameters:
+
+            input     input, 1 to 2, No default.
+
+            att       attenuation, "man" for manual control at current
+                      level, "agc" for automatic gain control, or 0-63
+                      which represent steps of 0.5 dB. A numeric value
+                      implies manual control. On monitor, only "agc"
+                      or "man" are displayed (attV monitor parameter
+                      is the current value).  Default is "agc".
+
+            target    level target for AGC, 0-65535. No default
+                      This normally is not set here, but by the DBBC3
+                      configuration file.
+
+Monitor-only Parameters:
+
+            attV      attenuation value, 0-63 which represent
+		      steps of 0.5 dB. The value adjusts as the DBBC3
+                      tracks the target in AGC mode.
+
+            counts    Level in the bandpass for one second integration
+                      in counts. Range 0 to 65535. The value tracks the
+                      target level in AGC mode. Nominal operating level is
+                      system dependent and can be found in the dbbc
+                      configuration file. See notes for units.
+
+Comments:
+Each IF module has two inputs: input '1' does not include down
+conversion, input '2' includes down conversion.
+
+The counts output converts to linear power scale approximately using
+the (C-language) expression:
+
+  power=pow(10.0,counts/19000.)
+
+Assuming a 512 MHz wide input bandpass, the nominal operating count
+level is 38000-45000 for the DDC personality, and 40000-45000 for the
+PFB personality.

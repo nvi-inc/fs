@@ -18,7 +18,7 @@ extern struct fscom *fs;
 void
 tacd_dis(command,itask,ip)
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 {
   char  output[MAX_OUT];
   int i, ierr;

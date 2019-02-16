@@ -15,7 +15,7 @@
 #include "../rclco/rcl/rcl.h"
 
 int s2rec_dec(position,count,ptr)
-long int position[8];
+int position[8];
 int *count;
 char *ptr;
 {

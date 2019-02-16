@@ -15,7 +15,7 @@
 
 void k4rec_dis(command,ip)
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 {
   int data[3];
   int i, ierr, count;

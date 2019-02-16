@@ -19,7 +19,7 @@ static char *lwhat[ ]={
 "ia","ib","ic","id"};
 
 void tpi_vlba(ip,itpis_vlba,isub)                    /* sample tpi(s) */
-long ip[5];                                     /* ipc array */
+int ip[5];                                     /* ipc array */
 int itpis_vlba[MAX_DET]; /* detector selection array */
                       /* in order: L: bbc1...bbc16, U: bbc1...bbc16(U)       */
                       /*           ia, ib, ic, id; value: 0=don't use, 1=use */
@@ -87,7 +87,7 @@ int isub;
 }
     
 void tpput_vlba(ip,itpis_vlba,isubin,ibuf,nch,ilen) /* put results of tpi */
-long ip[5];                                    /* ipc array */
+int ip[5];                                    /* ipc array */
 int itpis_vlba[MAX_DET]; /* device selection array, see tpi_vlba for details */
 int isubin;                /* which task: 3=tpi, 4=tpical, 7=tpzero */
 char *ibuf;              /* out array, formatted results placed here */
@@ -97,9 +97,9 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 {
     struct res_buf buffer_out;
     struct res_rec response;
-    long *ptr;
+    int *ptr;
     int i,j,iclass,nrec,lenstart,isub;
-    long tpigainlocal[MAX_DET];
+    int tpigainlocal[MAX_DET];
 
     isub=abs(isubin);
 
@@ -240,7 +240,7 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 }
 
 void tsys_vlba(ip,itpis_vlba,ibuf,nch,itask)
-long ip[5];                                    /* ipc array */
+int ip[5];                                    /* ipc array */
 int itpis_vlba[MAX_DET]; /* device selection array, see tpi_vlba for details */
 char *ibuf;              /* out array, formatted results placed here */
 int *nch;                /* next available char index in ibuf on entry */

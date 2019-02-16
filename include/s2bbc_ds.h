@@ -1,7 +1,7 @@
 /* S2 BBC data structure */
 struct s2bbc_data
       {
-       unsigned long  freq;
+       unsigned int  freq;
        unsigned short tpiavg;
        char ifsrc;
        char bw[2];

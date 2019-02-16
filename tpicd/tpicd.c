@@ -23,7 +23,7 @@ double dbbc_if_power(unsigned counts, int como);
 
 main()
 {
-  long ip[5];
+  int ip[5];
   struct tpicd_cmd tpicd;
   struct data_valid_cmd data_valid[2];
   struct dbbc_cont_cal_cmd dbbc_cont_cal;
@@ -32,7 +32,7 @@ main()
   char buff[120];
   unsigned before,after,isleep;
 
-  long int ierr;
+  int ierr;
   int iclass,nrec,idum,nr;
   short int buf2[80];
   char buf3[MAX_BUF];
@@ -215,7 +215,7 @@ main()
       iclass = ip[0];
       nr=0;
       for(i=0;i<17;i++) {
-	long ipwr;
+	int ipwr;
 	if (tpicd.itpis[i]==0)
 	  continue;
 	if(i!=15||tpicd.itpis[14]==0) {

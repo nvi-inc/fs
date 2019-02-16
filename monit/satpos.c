@@ -11,7 +11,7 @@ satpos(itcmd,azcmd,elcmd)
      double *azcmd,*elcmd;
 {
   int i;
-  long seconds;
+  int seconds;
 
   rte2secs(itcmd,&seconds);
   if(seconds < shm_addr->ephem[0].t) {

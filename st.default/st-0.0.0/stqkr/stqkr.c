@@ -19,7 +19,7 @@ struct fscom *fs;
 
 main()
 {
-    long ip[5];
+    int ip[5];
     int isub,itask,idum,ierr,nchars,i;
     char buf[MAX_BUF];
     struct cmd_ds command;

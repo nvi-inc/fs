@@ -45,7 +45,7 @@ int *dev;
 int *devlen;
 int *devid;
 int *error;
-long *ipcode;
+int *ipcode;
 short *tmo;
 
 {

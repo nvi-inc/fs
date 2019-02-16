@@ -17,7 +17,7 @@ double dbbc_if_power(unsigned counts, int como);
     
 int tpget_dbbc(cont,ip,itpis_dbbc,ierr,tpi,tpi2) /* put results of tpi & tpi2 */
 int cont[MAX_DBBC_DET];                          /* non-zero is continuous */
-long ip[5];                                    /* ipc array */
+int ip[5];                                    /* ipc array */
 int itpis_dbbc[MAX_DBBC_DET]; /* device selection array, see tpi_dbbc for details */
 int *ierr;
 float tpi[MAX_DBBC_DET],tpi2[MAX_DBBC_DET];

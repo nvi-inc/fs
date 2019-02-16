@@ -14,7 +14,7 @@ int portopen_(port, name, len, baud, parity, bits, stop)
 int *port;
 char *name;   /* hollerith */
 int *len;
-long *baud;
+int *baud;
 int *parity;
 int *bits;
 int *stop;

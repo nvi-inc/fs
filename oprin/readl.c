@@ -43,7 +43,7 @@
 
 /* Return an allocated duplicate of a given string S. */
 char *
-dupstr(char *s)
+dupstr(const char *s)
 {
   char *r;
 
@@ -63,7 +63,7 @@ static char *commands = NULL;
 static size_t commands_size = 0;
 
 /* Pointers to the start of each command in the previous 'commands'. */
-static char **command_table = NULL;
+static const char **command_table = NULL;
 
 
 /* Load the file containing commands. */
@@ -136,7 +136,7 @@ prepare_command_pointer_table(void)
   }
 
   /* Allocate pointer table (pointer to start of each SNAP command word. */
-  if ((command_table = malloc(num_of_commands*sizeof(char *))) == NULL) {
+  if ((command_table = malloc((num_of_commands+1)*sizeof(char *))) == NULL) {
     fprintf(stderr, "prepare_command_pointer_table: out of memory when allocating SNAP command pointer table (%d bytes)\n", (int)(num_of_commands*sizeof(char *)));
     exit(1);
   }
@@ -184,7 +184,7 @@ rl_compentry_func_t *
 snap_command_generator(char *text, int state)
 {
   static int list_index, len;
-  char *name;
+  const char *name;
 
   /* If this is a new word to complete, initialize now.  This includes
      saving the length of TEXT for efficiency, and initializing the index
@@ -276,29 +276,40 @@ oprin_completion(char *text, int start, int end)
    on command names if this is the first word in the line, or on filenames
    if not. */
 void
-initialize_readline(int fs_internal)
+initialize_readline(const struct cmd* local_commands)
 {
   /* Gee, I didn't know before that one can concatenate constant strings
      by just putting them one after another. */
   static char stcmd_name[] = FS_ROOT "/control/stcmd.ctl";
   static char fscmd_name[] = FS_ROOT "/fs/control/fscmd.ctl";
-  static char end_oprin[]  = "end_oprin \n";
+
 
   /* Allow conditional parsing of the ~/.inputrc file. */
   rl_readline_name = "oprin";
 
+
   /* Load SNAP command tables for our completion function. */
-  if(!fs_internal) {
-    commands_size += strlen(end_oprin);
-    if ((commands = realloc(commands, commands_size)) == NULL) {
-      fprintf(stderr, "load_snap_commands: out of memory when allocating SNAP command table 'end_oprin' (%d bytes more)\n", strlen(end_oprin));
-      exit(1);
-    }
-    memcpy(commands,end_oprin,strlen(end_oprin));
-  }
   load_snap_commands(stcmd_name, /*file_must_exist=>*/0);
   load_snap_commands(fscmd_name, 1);
   prepare_command_pointer_table();
+
+
+  /* Add additional commands to table */
+   const struct cmd* cmd;
+   const char** ptr;
+   int num_commands = 0;
+   for(ptr = command_table; *ptr; ptr++) num_commands++;
+   for(cmd = local_commands; (cmd && cmd->name); cmd++) num_commands++;
+
+   command_table = realloc(command_table, (num_commands+1)*sizeof(char *));
+   if (!command_table){
+	   fprintf(stderr, "initialize_readline: out of memory when allocating command table");
+	   exit(1);
+   }
+
+   for(cmd = local_commands; (cmd && cmd->name); cmd++) *ptr++ = cmd->name;
+   command_table[num_commands] = NULL;
+
 
   /* Tell the completer that we want a crack first. */
   rl_attempted_completion_function = (CPPFunction *)oprin_completion;

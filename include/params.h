@@ -8,8 +8,8 @@
 #define WORD_BIT    32
 #define PAGE_SIZE   4096
 
-#define C_RES       136*PAGE_SIZE /* reserves bytes for Fscom     */
-#define SHM_SIZE    C_RES+2*PAGE_SIZE /* should be a multiple of 4096 */
+#define C_RES       170*PAGE_SIZE /* reserves bytes for Fscom     */
+#define SHM_SIZE    C_RES+4*PAGE_SIZE /* should be a multiple of 4096 */
 
 #define CLS_SIZE    20480
 #define MAX_CLS     40
@@ -35,10 +35,10 @@
 
 #define FSPGM_CTL "/usr2/fs/control/fspgm.ctl"
 #define STPGM_CTL "/usr2/control/stpgm.ctl"
+#define CLPGM_CTL "/usr2/control/clpgm.ctl"
 
-#define FS_DISPLAY_PUBADDR "tcp://127.0.0.1:7083"
-#define FS_DISPLAY_REPADDR "tcp://127.0.0.1:7084"
-#define FS_DISPLAY_SCROLLBACK_LEN "1024"
+#define FS_SERVER_SOCKET_PATH "/var/run/fsserver"
+#define FS_SERVER_URL_BASE "ipc:///var/run/fsserver"
 
 #define ADDR_ST   "addr"              
 #define TEST      "test"

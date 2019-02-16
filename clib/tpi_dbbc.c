@@ -24,7 +24,7 @@ static char *lwhat[ ]={
 "ia","ib","ic","id"};
 
 void tpi_dbbc(ip,itpis_dbbc)                    /* sample tpi(s) */
-long ip[5];                                     /* ipc array */
+int ip[5];                                     /* ipc array */
 int itpis_dbbc[MAX_DBBC_DET]; /* detector selection array */
                       /* in order: L: bbc1...bbc16, U: bbc1...bbc16(U)       */
                       /*           ia, ib, ic, id; value: 0=don't use, 1=use */
@@ -62,7 +62,7 @@ int itpis_dbbc[MAX_DBBC_DET]; /* detector selection array */
 }
     
 void tpput_dbbc(ip,itpis_dbbc,isubin,ibuf,nch,ilen) /* put results of tpi */
-long ip[5];                                    /* ipc array */
+int ip[5];                                    /* ipc array */
 int itpis_dbbc[MAX_DBBC_DET]; /* device selection array, see tpi_dbbc for details */
 int isubin;              /* which task: 3=tpi, 4=tpical, 7=tpzero. 11=tpcont  */
 char *ibuf;              /* out array, formatted results placed here */
@@ -70,9 +70,9 @@ int *nch;                /* next available char index in ibuf on entry */
                          /* the total count on exit, counts from 1 , not 0 */
 int ilen;                /* number of characters ibuf can hold, ignored */
 {
-    long *ptr,*ptr2;
+    int *ptr,*ptr2;
     int i,j,iclass,nrec,lenstart,isub;
-    long tpigainlocal[MAX_DBBC_DET];
+    int tpigainlocal[MAX_DBBC_DET];
     int rtn1;    /* argument for cls_rcv - unused */
     int rtn2;    /* argument for cls_rcv - unused */
     int msgflg=0;  /* argument for cls_rcv - unused */
@@ -248,7 +248,7 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 }
 
 void tsys_dbbc(ip,itpis_dbbc,ibuf,nch,itask)
-long ip[5];                                    /* ipc array */
+int ip[5];                                    /* ipc array */
 int itpis_dbbc[MAX_DBBC_DET]; /* device selection array, see tpi_dbbc for details */
 char *ibuf;              /* out array, formatted results placed here */
 int *nch;                /* next available char index in ibuf on entry */

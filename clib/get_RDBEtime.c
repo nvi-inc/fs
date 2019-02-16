@@ -9,15 +9,15 @@
 #include "../include/fs_types.h"
 
 get_RDBEtime(centisec,fm_tim,ip,to,iRDBE,vdif_epoch)
-long centisec[6];
+int centisec[6];
 int fm_tim[6];
-long ip[5];                          /* ipc array */
+int ip[5];                          /* ipc array */
 int to;
 int iRDBE;
 int *vdif_epoch;
 {
       int out_recs, nrecs, i, ierr;
-      long out_class, iclass;
+      int out_class, iclass;
       char *str;
       struct rdbe_dot_mon lclm;
       char inbuf[BUFSIZE];

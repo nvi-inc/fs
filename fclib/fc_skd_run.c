@@ -5,7 +5,7 @@
 void fc_skd_run__( name, wait, ip,lenn,lenw)
 char	name[5], *wait;	
 int     lenn, lenw;
-long	ip[5];
+int	ip[5];
 {
     void skd_run();
 

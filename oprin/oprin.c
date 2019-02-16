@@ -11,10 +11,12 @@
  * $Log$
  */
 
+
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 
-/* For tolower. */
+/* For tolower, etc. */
 #include <ctype.h>
 
 /* For assert. */
@@ -27,6 +29,8 @@
 
 /* For malloc, free. */
 #include <stdlib.h>
+
+#include <errno.h>
 
 /* For GNU Readline. */
 #include <readline/readline.h>
@@ -44,14 +48,14 @@ extern struct fscom *shm_addr;
 /* External FS functions, perhaps these should eventually go into a '.h'? */
 extern void setup_ids(void);
 extern void sig_ignore(void);
-extern void cls_snd(long *class,
-		    char *buffer,
-		    int length,
-		    int parm3,
-		    int parm4);
-extern void skd_run(char name[5], char w, long ip[5]);
+extern void cls_snd(int *class, char *buffer, int length, int parm3,
+                    int parm4);
+extern void skd_run(char name[5], char w, int ip[5]);
 
-static long ipr[5] = { 0, 0, 0, 0, 0};
+unsigned rte_sleep(unsigned);
+int nsem_test(char name[5]);
+
+static int ipr[5] = {0, 0, 0, 0, 0};
 
 /* Our prompt at the beginning of a line. */
 static char prompt[] = ">";
@@ -61,8 +65,162 @@ static char prompt[] = ">";
       of input line to "logout" ie. quit */
 static char termination_command[] = "end_oprin";
 
+/* Set by command line flag. Determines if oprin is started with the field
+ * system or later.
+ *
+ * Always == 0 when FS build with server/client
+ */
+int fs_internal = 0;
 
-/* The dynamically allocated SNAP command table. */
+/* sent to boss */
+void run_snap(const char *arg0, const char *arg) {
+	char *cmd = strdup(arg0);
+
+	if (!cmd) {
+		perror("oprin");
+		exit(EXIT_FAILURE);
+	}
+
+	if (arg) {
+		size_t len = strlen(cmd) + strlen(arg) + 1 + 1;
+		cmd        = realloc(cmd, len);
+		if (!cmd) {
+			perror("oprin");
+			exit(EXIT_FAILURE);
+		}
+		strcat(cmd, "=");
+		strcat(cmd, arg);
+	}
+
+	static int kfirst = 1;
+	while (kfirst && shm_addr->iclopr == -1)
+		rte_sleep(2);
+	kfirst = 0;
+
+	if (nsem_test("fs   ") != 1 && !fs_internal) {
+		fprintf(stderr, "FS no longer running.\n");
+		exit(0);
+	}
+	int len = strlen(cmd);
+	cls_snd(&(shm_addr->iclopr), cmd, len, 0, 0);
+	skd_run("boss ", 'n', ipr);
+	free(cmd);
+	return;
+}
+
+/* Oprin commands */
+
+/* client_cmd passes commands to fsclient over a pipe.
+ * If not called with arg0 == "client", client_cmd 
+ * passs arg0 on to fsclient with "$arg0=$cmd" syntax
+ */
+void client_cmd(const char *arg0, const char *cmd) {
+	static FILE *f = NULL;
+
+	if (!f) {
+		char *fdstr = getenv("FS_CLIENT_PIPE_FD");
+
+		if (!fdstr || !*fdstr) {
+			fprintf(stderr,
+			        "ERROR: client command not available\n");
+			return;
+		}
+		f = fdopen(atoi(fdstr), "w");
+		if (!f) {
+			perror("oprin: error opening pipe");
+			return;
+		}
+	}
+
+	if (strcmp(arg0, "client") != 0) {
+		fprintf(f, "%s=", arg0);
+	}
+
+	fprintf(f, "%s\n", cmd);
+	fflush(f);
+}
+
+void end_oprin(const char *arg0 __attribute__((unused)),
+               const char *arg __attribute__((unused))) {
+	if (fs_internal) {
+		fprintf(stderr,
+		        "The '%s' command is only available from a stand-alone "
+		        "'oprin'.\nUse 'terminate' to stop the field system.\n",
+		        termination_command);
+		return;
+	}
+	exit(EXIT_SUCCESS);
+}
+
+void terminate(const char *arg0, const char *arg) {
+	if (!getenv("FS_CLIENT_PIPE_FD")) {
+        run_snap(arg0, arg);
+        return;
+    }
+
+    while (1) {
+        char *input = readline("This will terminate the whole Field System. To exit just this client use 'client=exit'.\nDo you really want to terminate the FS? [yN]:");
+        if (*input == 'y' || *input == 'Y') {
+            free(input);
+            break;
+        }
+
+        if (!*input || *input == 'n' || *input == 'N') {
+            free(input);
+            return;
+        }
+    }
+
+    run_snap(arg0, arg);
+}
+
+/* If running as part of fsclient, treat as a client command
+ * otherwise treat as a SNAP command
+ */
+void client_or_snap_cmd(const char *arg0, const char *arg) {
+	if (getenv("FS_CLIENT_PIPE_FD")) {
+		client_cmd(arg0, arg);
+	} else {
+		run_snap(arg0, arg);
+	}
+}
+
+/* contents of cmd after first '=' are handed to the function in arg */
+static const struct cmd local_commands[] = {
+    {"end_oprin", end_oprin},
+    {"client", client_cmd},
+    {"help", client_or_snap_cmd},
+    {"?", client_or_snap_cmd},
+    {"terminate", terminate},
+    {NULL, NULL},
+};
+
+/* Tries to run a local command. Returns true on if the command exists */
+int try_local_command(const char *s) {
+	char *str = strdup(s);
+
+	char *cmd = str;
+	while (isspace(*cmd))
+		cmd++;
+
+	char *arg = strchr(cmd, '=');
+	if (arg)
+		*arg++ = '\0';
+
+	int ret = 0;
+
+	const struct cmd *lcmd = local_commands;
+
+	for (lcmd = local_commands; lcmd->name; lcmd++) {
+		if (strcmp(lcmd->name, cmd) == 0) {
+			lcmd->cmd(cmd, arg);
+			ret = 1;
+			break;
+		}
+	}
+	free(str);
+	return ret;
+}
 
 /* 'oprin' main. */
 
@@ -73,19 +231,39 @@ main(int argc, char **argv)
   char *previous_input;
   int length;
   int kfirst=1;
-  int fs_internal;
 
   setup_ids();
   sig_ignore();
 
   fs_internal = argc == 2 && 0 == strcmp("-fs_internal", argv[1]);
+  if (getenv("FS_DISPLAY_SERVER") != NULL) {
+      fs_internal = 0;
+  }
 
-  initialize_readline(fs_internal);
+  if(nsem_test("fs   ") != 1 && !fs_internal) {
+    fprintf(stderr, "FS not running.\n");
+    exit(0);
+  }
+
+  initialize_readline(local_commands);
+  /* TODO: add local commands to readline tab completetion */
 
   previous_input = NULL;
   while (1) {
 
+    if(nsem_test("fs   ") != 1 && !fs_internal) {
+      fprintf(stderr, "FS no longer running.\n");
+      exit(0);
+    }
+
     input = readline(prompt);
+
+    if(nsem_test("fs   ") != 1 && !fs_internal) {
+      if(input == NULL)
+      fprintf(stderr, "\n");
+      fprintf(stderr, "FS no longer running.\n");
+      exit(0);
+    }
 
     /* After a user has completed a new input line,
        get rid of the previous one (if it exists). */
@@ -106,21 +284,15 @@ main(int argc, char **argv)
     if (input == NULL) {
       /* EOF-warning at interactive terminals only. */
       if (isatty(STDERR_FILENO)) {
-	if(!fs_internal) {
-	  fprintf(stderr, "Use '%s' to stop this instance of oprin.\n",
-		 termination_command);
-	}
-	fprintf(stderr, "Use 'terminate' to stop the field system.\n");
+          if(!fs_internal) {
+              fprintf(stderr, "Use '%s' to stop this instance of oprin.\n",
+                      termination_command);
+          }
+          fprintf(stderr, "Use 'terminate' to stop the field system.\n");
       }
       continue;  /* no further actions (ie. 'free()') required */
     }
 
-    if(fs_internal && 0 == strcmp(input,termination_command)) {
-      fprintf(stderr,"The '%s' command is only available from a stand-alone 'oprin'.\nUse 'terminate' to stop the field system.\n",termination_command);
-      continue;
-    }
-    if(0 == strcmp(input,termination_command) && !fs_internal)
-      exit(0);
 
     /* Now we have got something that's not EOF,
        perhaps an empty line or a real command. */
@@ -132,13 +304,21 @@ main(int argc, char **argv)
 
       add_history(input);
 
+      /* oprin commands override fs commands */
+      if (try_local_command(input)) {
+          previous_input = input;
+          continue;
+      }
+
       /* Execute this SNAP command via "boss". */
       /* wait for iclopr to be defined on the first time through */
       while (kfirst && shm_addr->iclopr==-1)
 	rte_sleep(2);
       kfirst=0;
-      if(nsem_test("fs   ") != 1)
-	 exit(0);
+      if(nsem_test("fs   ") != 1 && !fs_internal) {
+	fprintf(stderr, "FS no longer running.\n");
+	exit(0);
+      }
       cls_snd( &(shm_addr->iclopr), input, length, 0, 0);
       skd_run("boss ",'n',ipr);
 

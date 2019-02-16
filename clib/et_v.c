@@ -10,7 +10,7 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
 void et_v(ip,indxtp)
-long ip[5];
+int ip[5];
 int indxtp;
 {
       struct req_buf buffer;

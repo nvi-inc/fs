@@ -92,7 +92,7 @@ struct k4tape_mon *lcl;
 }
 
 k4tape_req_q(ip)
-long ip[5];
+int ip[5];
 {
   if(shm_addr->k4tape_sqn[0]==0)
     ib_req7(ip,device,20,"SQN?");
@@ -104,7 +104,7 @@ long ip[5];
 }
 
 k4tape_req_c(ip,reset)
-long ip[5];
+int ip[5];
 int *reset;
 {
   ib_req2(ip,device,"REC=0,50");
@@ -113,7 +113,7 @@ int *reset;
 
 k4tape_res_q(lcl,ip)
 struct k4tape_mon *lcl;
-long ip[5];
+int ip[5];
 {
   unsigned char buffer[MAX_BUF];
   int max;

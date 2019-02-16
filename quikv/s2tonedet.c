@@ -18,7 +18,7 @@ static char  SB[] = { 0 , 0 };
 static char *SBname[3]   = { "na" , "usb" , "lsb" };
 
 /* **************************************************************** */
-static unsigned long get_freq( char *string )
+static unsigned int get_freq( char *string )
 {
  double Freq = -1.0; /* do not change */
 
@@ -59,13 +59,13 @@ static char get_sb( char *string )
  return 0;
 }
 /* **************************************************************** */
-void s2tonedet(struct cmd_ds *command , int itask , long *ip )
+void s2tonedet(struct cmd_ds *command , int itask , int *ip )
 {
  int  ierr = 0;
  int  i, last = 0;
  char sb[2];
  unsigned short int avep;
- unsigned long freq[2];
+ unsigned int freq[2];
  char output[MAX_OUT];
 
  if( command->equal == '=' ) /* Set encode */
@@ -103,15 +103,15 @@ void s2tonedet(struct cmd_ds *command , int itask , long *ip )
  return;
 }
 /* **************************************************************** */
-void s2tonedetmeas( struct cmd_ds *command , int itask , long *ip )
+void s2tonedetmeas( struct cmd_ds *command , int itask , int *ip )
 {
  char      SBtxt[] = { '?','u','l' };
  int       ierr = 0;
  int       i;
  char      bbc, TimeStamp[4];
  double    Amplitude[2], Phase[2];
- unsigned long Amp[2];
- long          Pha[2];
+ unsigned int Amp[2];
+ int          Pha[2];
  char      output[MAX_OUT], StateTxt[10];
  int       last = 0;
  char state = 0;

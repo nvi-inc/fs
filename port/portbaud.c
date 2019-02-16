@@ -4,7 +4,7 @@
 
 int portbaud_(port, baud)   /* only to reset MAT BAUD */
 int *port;
-long *baud;
+int *baud;
 {
   struct termio term;
 

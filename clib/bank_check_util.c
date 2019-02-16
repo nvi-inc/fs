@@ -17,7 +17,7 @@
 rtime_decode(rtime_mon,bank_set_mon,ip)
 struct rtime_mon *rtime_mon;
 struct bank_set_mon *bank_set_mon;
-long ip[5];
+int ip[5];
 {
       int ierr, count, i;
       char output[MAX_OUT],*start;
@@ -26,10 +26,10 @@ long ip[5];
       int msgflg=0;  /* argument for cls_rcv - unused */
       int save=0;    /* argument for cls_rcv - unused */
       int nchars;
-      long out_class=0;
+      int out_class=0;
       int out_recs=0;
       char inbuf[BUFSIZE];
-      long iclass, nrecs;
+      int iclass, nrecs;
 
    /* decode buffers */
 
@@ -68,7 +68,7 @@ error:
 }
 bank_set_check(done,ip)
 int *done;
-long ip[5];
+int ip[5];
 {
   int out_recs,out_class;
   char outbuf[80];
@@ -79,7 +79,7 @@ long ip[5];
   int save=0;    /* argument for cls_rcv - unused */
   int nchars;
   char inbuf[BUFSIZE];
-  long iclass, nrecs;
+  int iclass, nrecs;
 
   *done=0;
 
@@ -138,7 +138,7 @@ m5_2_rtime(ptr_in,lclm,ip) /* return values:
 				    * blank means empty response
 				    * null means no response
 				    */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr, mk5b;
@@ -295,7 +295,7 @@ m5_2_bank_set(ptr_in,lclm,ip) /* return values:
 				    * blank means empty response
 				    * null means no response
 				    */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save, *ptrd;
   int count, ierr;
@@ -396,7 +396,7 @@ m5_2_vsn(ptr_in,lclm,ip) /* return values:
 
      struct vsn_mon *lclm; /* result structure with vsn */
 
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save, *ptrd;
   int count, ierr;

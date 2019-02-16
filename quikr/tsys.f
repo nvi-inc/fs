@@ -38,7 +38,7 @@ c                          197=(10+32x12)/2
       integer*2 lwho,lwhat(17)
       integer get_buf
       logical kskip
-      real epoch, flux, corr
+      real flux, corr
       equivalence (reg,ireg(1)) 
 C 
 C 5.  INITIALIZED VARIABLES 

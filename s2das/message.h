@@ -1,6 +1,6 @@
 
-void init_message(  long *ip , char *title );
-void clear_message( long *ip );
-void send_message(  long *ip );
-void reset_message( long *ip , char *title );
-void add_message( long *ip , char *text );
+void init_message(  int *ip , char *title );
+void clear_message( int *ip );
+void send_message(  int *ip );
+void reset_message( int *ip , char *title );
+void add_message( int *ip , char *text );

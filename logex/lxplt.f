@@ -558,7 +558,7 @@ C
 C
 1100  continue
       outbuf=' error '
-      call ib2as(ierr,answer,1,4)
+      nc = ib2as(ierr,answer,1,4)
       call hol2char(answer,1,4,outbuf(8:))
       nchar = trimlen(outbuf) + 1
       outbuf(nchar:)=' in scratch file - plot deleted.'

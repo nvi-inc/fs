@@ -27,8 +27,8 @@ extern struct fscom *shm_addr;
 
 main()
 {
-  long ip[5],ipr[5];
-  long ipa[5] ={ 5, 0, 0, 0, 0};
+  int ip[5],ipr[5];
+  int ipa[5] ={ 5, 0, 0, 0, 0};
   int new, acquired, lost;
   double last_ra, last_dec;
   char last_lsorna[10];

@@ -21,9 +21,9 @@ June 1993
    dir =  1 gives forward transform
    dir = -1 gives reverse transform 
 */
-short FFT(short int dir,long m,double *x,double *y)
+short FFT(short int dir,int m,double *x,double *y)
 {
-   long n,i,i1,j,k,i2,l,l1,l2;
+   int n,i,i1,j,k,i2,l,l1,l2;
    double c1,c2,tx,ty,t1,t2,u1,u2,z;
 
    /* Calculate the number of points */

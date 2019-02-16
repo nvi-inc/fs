@@ -17,17 +17,17 @@ struct data_check_mon {
   } mode;
   struct {
     char submode[33]; /* if mode is not tvg or SS */
-    long first;      /* if mode is     tvg or SS */
+    int first;      /* if mode is     tvg or SS */
     struct m5state state;
   } submode ;
   struct {
     struct m5time time;     /* if mode is not tvg or SS */
-    long bad;        /* if mode is     tvg or SS */
+    int bad;        /* if mode is     tvg or SS */
     struct m5state state;
   } time;
   struct {
-    long offset;     /* if mode is not tvg or SS */
-    long size;       /* if mode is     tvg or SS */
+    int offset;     /* if mode is not tvg or SS */
+    int size;       /* if mode is     tvg or SS */
     struct m5state state;
   } offset;
   struct {
@@ -35,7 +35,7 @@ struct data_check_mon {
     struct m5state state;
   } period;
   struct {
-    long bytes;
+    int bytes;
     struct m5state state;
   } bytes;
 
@@ -66,7 +66,7 @@ struct data_check_mon {
     struct m5state state;
   } total;
   struct {
-    long byte;
+    int byte;
     struct m5state state;
   } byte;
 

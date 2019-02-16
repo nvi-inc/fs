@@ -12,7 +12,7 @@
 void rec_brk(icherr,ierr,ip,indx,stat)
 int icherr[];
 int *ierr;
-long ip[5];
+int ip[5];
 int indx, stat;
 {
   int i;
@@ -25,7 +25,7 @@ int indx, stat;
   struct res_buf buffer;
   struct res_rec response;
   void get_res();
-  long time;
+  int time;
   int kmove_time, kload_time, iend;
 
   opn_res(&buffer,ip);

@@ -13,7 +13,7 @@
 
 void dbbc3_cont_cal(command,ip)
 struct cmd_ds *command;                /* parsed command structure */
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ilast, ierr,count;
       char *ptr;

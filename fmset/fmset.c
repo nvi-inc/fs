@@ -51,13 +51,13 @@ WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
 
 unsigned char inbuf[512];      /* class i-o buffer */
 unsigned char outbuf[512];     /* class i-o buffer */
-long ip[5];           /* parameters for fs communications */
-long inclass;         /* input class number */
-long outclass;        /* output class number */
+int ip[5];           /* parameters for fs communications */
+int inclass;         /* input class number */
+int outclass;        /* output class number */
 int rtn1, rtn2, msgflg, save; /* unused cls_get args */
 int synch=0;
-long nanosec=-1;
-static long ipr[5] = { 0, 0, 0, 0, 0};
+int nanosec=-1;
+static int ipr[5] = { 0, 0, 0, 0, 0};
 int dbbc_sync=0;
 
 main()  
@@ -84,7 +84,7 @@ int changedfm=0;
  char *ntp;
  int intp;
  char *model;
- long epoch;
+ int epoch;
  int index,icomputer;
  int column,i;
 char mk5b_sync[13] ="";
@@ -100,7 +100,6 @@ struct fila10g_cfg *fila10g_cfg=NULL;
 
  putpname("fmset");
 skd_set_return_name("fmset");
-skd_clr_ret();
 setup_ids();         /* connect to shared memory segment */
 
 if (nsem_test(NSEM_NAME) != 1) {
@@ -114,6 +113,13 @@ if ( 1 == nsem_take("fmset",1)) {
   rte_sleep(SLEEP_TIME);
   exit(0);
 }
+
+while (skd_clr_ret(ip)) // only one should be possible, but just  in case 
+    if(ip[1]!=0)
+     cls_clr(ip[0]);
+// note that the above will not clear a partially read set of clase buffers
+// it only handles if 'fmset' is aborted while a ...cn is running
+// so not bullet proof, but more robust
 
 rte_prior(CL_PRIOR); /* set our priority */
 

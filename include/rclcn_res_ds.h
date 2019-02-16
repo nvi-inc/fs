@@ -12,11 +12,11 @@ struct rclcn_res_buf {
 
 union pos_union {
   struct {
-    long int position;
-    long int posvar;
+    int position;
+    int posvar;
   } overall;
   struct {
     int num_entries;
-    long int position[8];
+    int position[8];
   } individual;
 };

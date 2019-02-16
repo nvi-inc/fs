@@ -9,9 +9,9 @@
 #include "../include/shm_addr.h"
 
 void get_k3time(centisec,fm_tim,ip)
-long centisec[2];
+int centisec[2];
 int fm_tim[6];
-long ip[5];                          /* ipc array */
+int ip[5];                          /* ipc array */
 {
   int year, ms, ilen, icount, ileap, it[6], iyrctl_fs;
   char buf[30];

@@ -10,14 +10,14 @@
 logm5msg(output,command,ip)
 char *output;
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 {
   int rtn1;    /* argument for cls_rcv - unused */
   int rtn2;    /* argument for cls_rcv - unused */
   int msgflg=0;  /* argument for cls_rcv - unused */
   int save=0;    /* argument for cls_rcv - unused */
   int nchars;
-  long out_class=0;
+  int out_class=0;
   int out_recs=0;
   char inbuf[BUFSIZE];
   int i;

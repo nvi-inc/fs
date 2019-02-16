@@ -37,7 +37,7 @@ m5_2_disk_serial(ptr_in,lclm,ip) /* return values:
 				    * blank means empty response
 				    * null means no response
 				    */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr;

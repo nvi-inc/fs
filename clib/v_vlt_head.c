@@ -11,7 +11,7 @@
 void v_vlt_head__(ihead,volt,ip,indxtp)
 int *ihead;                     /* head 1-4 */
 float *volt;                   /* voltage of head */
-long ip[5];                    /* ipc array */
+int ip[5];                    /* ipc array */
 int *indxtp;
 {
       struct req_buf buffer;           /* request buffer */
@@ -20,7 +20,7 @@ int *indxtp;
       struct res_rec response;         /* respones record */
       struct tms tms_buff;
       int motion, time_out, counts;
-      long end;
+      int end;
       int indx;
 
       if(*indxtp == 1) {

@@ -13,10 +13,10 @@
 
 void rte_cmpt( poClock, plCentiSec)
 time_t *poClock;
-long *plCentiSec;
+int *plCentiSec;
 {
      struct timeval tv;
-     long lRawTime;
+     int lRawTime;
 
      if(0!= gettimeofday(&tv, NULL)) {
        perror("getting timeofday, fatal\n");

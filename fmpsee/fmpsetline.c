@@ -6,7 +6,7 @@ int fmpsetline_(dcb,error,position)
 
 FILE **dcb;
 int *error;
-long *position;
+int *position;
 
 {
   int readstr();

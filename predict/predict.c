@@ -127,8 +127,8 @@ char *predictpath={"/usr2/fs/predictFS/"}, soundcard=0, *version={"2.2.3"};
 struct	{  char line1[70];
 	   char line2[70];
 	   char name[25];
- 	   long catnum;
-	   long setnum;
+ 	   int catnum;
+	   int setnum;
 	   char designator[10];
  	   int year;
 	   double refepoch;
@@ -141,7 +141,7 @@ struct	{  char line1[70];
 	   double drag;
 	   double nddot6;
   	   double bstar;
-	   long orbitnum;
+	   int orbitnum;
 	}  sat[24];
 
 struct	{  char callsign[17];
@@ -151,7 +151,7 @@ struct	{  char callsign[17];
 	}  qth;
 
 struct	{  char name[25];
-	   long catnum;
+	   int catnum;
 	   char squintflag;
 	   double alat;
 	   double alon;
@@ -184,7 +184,7 @@ char	qthfile[50], tlefile[50], dbfile[50], temp[80], output[25],
 int	indx, antfd, iaz, iel, ma256, isplat, isplong, socket_flag=0,
 	Flags=0;
 
-long	rv, irk;
+int	rv, irk;
 
 unsigned char val[256];
 
@@ -200,7 +200,7 @@ float	az_array[24], el_array[24], long_array[24], lat_array[24],
 
 double	doppler[24], nextevent[24];
 
-long	aos_array[24], orbitnum_array[24];
+int	aos_array[24], orbitnum_array[24];
 
 unsigned short portbase=0;
 
@@ -499,7 +499,7 @@ double Julian_Date_of_Year(double year)
 	/* Astronomical Formulae for Calculators, Jean Meeus, */
 	/* pages 23-25. Calculate Julian Date of 0.0 Jan year */
 
-	long A, B, i;
+	int A, B, i;
 	double jdoy;
 
 	year=year-1;
@@ -2049,7 +2049,7 @@ char *predict_name;
 	struct sockaddr_in fsin;
 	char buf[80], buff[1000], satname[50], tempname[30], ok;
 	time_t t;
-	long nxtevt;
+	int nxtevt;
 	FILE *fd=NULL;
 
 	/* Open a socket port at "predict" or netport if defined */
@@ -2090,7 +2090,7 @@ char *predict_name;
 			{
 				if ((strncmp(satname,sat[i].name,25)==0) || (atol(satname)==sat[i].catnum))
 				{
-					nxtevt=(long)rint(86400.0*(nextevent[i]+3651.0));
+					nxtevt=(int)rint(86400.0*(nextevent[i]+3651.0));
 
 					/* Build text buffer with satellite data */
 					sprintf(buff,"%s\n%-7.2f\n%+-6.2f\n%-7.2f\n%+-6.2f\n%ld\n%-7.2f\n%-7.2f\n%-7.2f\n%-7.2f\n%ld\n%c\n%-7.2f\n%-7.2f\n%-7.2f\n",sat[i].name,long_array[i],lat_array[i],az_array[i],el_array[i],nxtevt,footprint_array[i],range_array[i],altitude_array[i],velocity_array[i],orbitnum_array[i],visibility_array[i],phase_array[i],eclipse_depth_array[i],squint_array[i]);
@@ -2239,7 +2239,7 @@ char *predict_name;
 		{
 			buff[0]=0;
 			t=time(NULL);
-			sprintf(buff,"%lu\n",(unsigned long)t);
+			sprintf(buff,"%lu\n",(unsigned int)t);
 			sendto(sock,buff,strlen(buff),0,(struct sockaddr *)&fsin,sizeof(fsin));
 			ok=1;
 		}
@@ -2712,7 +2712,7 @@ char ReadDataFiles()
 	   3: The qth and tle files were loaded successfully */
 
 	FILE *fd;
-	long catnum;
+	int catnum;
 	unsigned char dayofweek;
 	int x=0, y, entry=0, max_entries=10, transponders=0;
 	char flag=0, match, name[80], line1[80], line2[80];
@@ -3262,12 +3262,12 @@ int Select()
 	return(key-'A');
 }
 
-long DayNum(m,d,y)
+int DayNum(m,d,y)
 int  m, d, y;
 {
 	/* This function calculates the day number from m/d/y. */
 
-	long dn;
+	int dn;
 	double mm, yy;
 
 	if (m<3)
@@ -3281,8 +3281,8 @@ int  m, d, y;
 
 	yy=(double)y;
 	mm=(double)m;
-	dn=(long)(floor(365.25*(yy-80.0))-floor(19.0+yy/100.0)+floor(4.75+yy/400.0)-16.0);
-	dn+=d+30*m+(long)floor(0.6*mm-0.3);
+	dn=(int)(floor(365.25*(yy-80.0))-floor(19.0+yy/100.0)+floor(4.75+yy/400.0)-16.0);
+	dn+=d+30*m+(int)floor(0.6*mm-0.3);
 	return dn;
 }
 
@@ -3854,12 +3854,12 @@ void Calc()
 	fk=12756.33*acos(xkmper/(xkmper+sat_alt));
 	fm=fk/1.609344;
 
-	rv=(long)floor((tle.xno*xmnpda/twopi+age*tle.bstar*ae)*age+tle.xmo/twopi)+tle.revnum;
+	rv=(int)floor((tle.xno*xmnpda/twopi+age*tle.bstar*ae)*age+tle.xmo/twopi)+tle.revnum;
 
 	sun_azi=Degrees(solar_set.x); 
 	sun_ele=Degrees(solar_set.y);
 
-	irk=(long)rint(sat_range);
+	irk=(int)rint(sat_range);
 	isplat=(int)rint(sat_lat);
 	isplong=(int)rint(360.0-sat_lon);
 	iaz=(int)rint(sat_azi);
@@ -4921,7 +4921,7 @@ char speak;
 		downlink=0.0, uplink=0.0, downlink_start=0.0,
 		downlink_end=0.0, uplink_start=0.0, uplink_end=0.0,
 		dopp, doppler100=0.0, delay, loss, shift;
-	long	newtime, lasttime=0;
+	int	newtime, lasttime=0;
 
 	PreCalc(x);
 	indx=x;
@@ -5226,7 +5226,7 @@ char speak;
 
 		if (sat_ele>=0.0 && antfd!=-1)
 		{
-			newtime=(long)time(NULL);
+			newtime=(int)time(NULL);
 
 			if ((oldel!=iel || oldaz!=iaz) || (once_per_second && newtime>lasttime))
 			{
@@ -5924,7 +5924,7 @@ int QuickFind(string, outputfile)
 char *string, *outputfile;
 {
 	int x, y, z, step=1;
-	long start, now, end, count;
+	int start, now, end, count;
 	char satname[50], startstr[20], endstr[20];
 	time_t t;
 	FILE *fd;
@@ -5971,14 +5971,14 @@ char *string, *outputfile;
 			}
 			
 			if (endstr[0]=='+')
-				end=start+((long)step)*atol(endstr);
+				end=start+((int)step)*atol(endstr);
 			else
 				end=atol(endstr);
 
 			indx=z;
 
 			t=time(NULL);
-			now=(long)t;
+			now=(int)t;
 
 			if (start==0)
 				start=now;
@@ -5993,7 +5993,7 @@ char *string, *outputfile;
 					startstr[strlen(startstr)-1]=0;
 				}
 
-				end=start+((long)step)*atol(startstr);
+				end=start+((int)step)*atol(startstr);
 
 				/* Prevent a list greater than
 				   24 hours from being produced */
@@ -6046,7 +6046,7 @@ int QuickPredict(string, outputfile)
 char *string, *outputfile;
 {
 	int x, y, z, lastel=0;
-	long start, now;
+	int start, now;
 	char satname[50], startstr[20];
 	time_t t;
 	FILE *fd;
@@ -6082,7 +6082,7 @@ char *string, *outputfile;
 			indx=z;
 
 			t=time(NULL);
-			now=(long)t;
+			now=(int)t;
 
 			if (start==0)
 				start=now;

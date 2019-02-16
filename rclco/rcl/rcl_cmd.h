@@ -46,27 +46,27 @@ int rcl_group_read(int addr, int* group, int* num_groups);
 
 int rcl_tapeinfo_read_pb(int addr, unsigned char* table);
 
-int rcl_delay_set(int addr, ibool relative, long int nanosec);
-int rcl_delay_read(int addr, long int* nanosec);
-int rcl_delaym_read(int addr, long int* nanosec);
+int rcl_delay_set(int addr, ibool relative, int nanosec);
+int rcl_delay_read(int addr, int* nanosec);
+int rcl_delaym_read(int addr, int* nanosec);
 
 int rcl_barrelroll_set(int addr, ibool barrelroll);
 int rcl_barrelroll_read(int addr, ibool* barrelroll);
 
-int rcl_errmes(int addr, long int error);
+int rcl_errmes(int addr, int error);
 
 int rcl_align_abs(int addr, int year, int day, int hour, int min, int sec,
-                  long int nanosec);
+                  int nanosec);
 int rcl_align_rel(int addr, ibool negative, int hour, int min, int sec,
-                  long int nanosec);
+                  int nanosec);
 int rcl_align_realign(int addr);
 int rcl_align_selfalign(int addr);
 
-int rcl_position_set(int addr, int code, long int position);
-int rcl_position_set_ind(int addr, int code, long int position[]);
+int rcl_position_set(int addr, int code, int position);
+int rcl_position_set_ind(int addr, int code, int position[]);
 int rcl_position_reestablish(int addr);
-int rcl_position_read(int addr, long int* position, long int* posvar);
-int rcl_position_read_ind(int addr, int* num_entries, long int position[]);
+int rcl_position_read(int addr, int* position, int* posvar);
+int rcl_position_read_ind(int addr, int* num_entries, int position[]);
 
 int rcl_esterr_read(int addr, ibool order_chantran, int* num_entries,
                     char* esterr_list);
@@ -84,18 +84,18 @@ int rcl_mk3_form_read(int addr, ibool* mk3);
 
 int rcl_transport_times(int addr, int* num_entries,
                         unsigned short serial[],
-                        unsigned long tot_on_time[],
-                        unsigned long tot_head_time[],
-                        unsigned long head_use_time[],
-                        unsigned long in_service_time[]);
+                        unsigned int tot_on_time[],
+                        unsigned int tot_head_time[],
+                        unsigned int head_use_time[],
+                        unsigned int in_service_time[]);
 
-int rcl_station_info_read(int addr, int* station, long int* serialnum,
+int rcl_station_info_read(int addr, int* station, int* serialnum,
                           char* nickname);
 
 int rcl_consolecmd(int addr, const char* command);
 
 int rcl_postime_read(int addr, int tran, int* year, int* day, int* hour,
-                     int* min, int* sec, int* frame, long int* position);
+                     int* min, int* sec, int* frame, int* position);
 
 int rcl_status(int addr, int* summary, int* num_entries,
                unsigned char* status_list);
@@ -109,7 +109,7 @@ int rcl_error_decode(int addr, int err_code, char* err_msg);
 int rcl_diag(int addr, int type);
 
 int rcl_berdcb(int addr, int op_type, int chan, int meas_time,
-               unsigned long* err_bits, unsigned long* tot_bits);
+               unsigned int* err_bits, unsigned int* tot_bits);
 
 int rcl_ident(int addr, char* devtype);
 int rcl_version(int addr, char* version);

@@ -32,7 +32,7 @@ void get_err();
 
 main()
 {
-  long ip[5];
+  int ip[5];
   char buffer[MAX_LEN];
 
 /* Initialize:

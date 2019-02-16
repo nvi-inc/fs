@@ -127,7 +127,7 @@ const char* strapp5(const char* a, const char* b, const char* c,
    return(result);
 }
 
-long int str_to_int(const char* a)
+int str_to_int(const char* a)
 /*
  * This function converts a string to integer format, returning the resulting
  * integer. The string must be interpretable as an integer by sscanf,
@@ -140,7 +140,7 @@ long int str_to_int(const char* a)
  */
 {
    int err;
-   long int result;
+   int result;
 
    if (strneq(a,"0x",2))
       err=sscanf((char*) a+2,"%lx",&result);  /* (cast: sscanf defined wrong) */
@@ -156,7 +156,7 @@ long int str_to_int(const char* a)
    return(result);
 }
 
-const char* int_to_str(long int a, int f)
+const char* int_to_str(int a, int f)
 /*
  * Keywords: FS, lib, misc
  * Imports: sprintf()
@@ -198,7 +198,7 @@ double str_to_double(const char* a)
 {
    int err;
    double result;
-   long int iresult;
+   int iresult;
 
    if (strneq(a,"0x",2))  {
       err=sscanf((char*) a+2,"%lx",&iresult); /* (cast: sscanf defined wrong) */
@@ -459,8 +459,8 @@ void malloc_out_of_space(char* routine, int code)
 #ifdef UNIX
 /* Provide replacement routines for some of the things in the DOS Borland C++
      console I/O library for Unix, using curses instead. */
-int cprintf(const char* format, long int arg1, long int arg2, long int arg3,
-                                long int arg4, long int arg5, long int arg6)
+int cprintf(const char* format, int arg1, int arg2, int arg3,
+                                int arg4, int arg5, int arg6)
 {
    int result;
 

@@ -21,8 +21,8 @@ int iuse[]
   int ierr=0, nrec, i, j;
   int nchar,idum, *vcnum_tmp;
   char lvcn[] = {"v1v2v3v4v5v6v7v8v9vavbvcvdve"};
-  long ip[5];
-  long iclass;
+  int ip[5];
+  int iclass;
 
   iclass=0;
   nrec = 0;

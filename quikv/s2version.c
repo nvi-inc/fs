@@ -13,7 +13,7 @@
 #define ATTN_MAX   30
 
 /* S2 mode SNAP command */
-void s2version( struct cmd_ds *command , int task , long *ip )
+void s2version( struct cmd_ds *command , int task , int *ip )
 {
  int   ierr = 0;
  char  id[61], ver[61];

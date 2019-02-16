@@ -39,7 +39,7 @@ C
       if (luout.eq.' ') then
         lst=0
       else
-        lst = ichar(luout) - 48
+        lst = ichar(luout(1:1)) - 48
         if (lst.le.0) then
           cbuf= ' not an lu: ' // luout
           call po_put_c(cbuf)

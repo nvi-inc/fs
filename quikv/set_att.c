@@ -24,8 +24,8 @@ char *isave3
 {
   short int buff[MAX_BUF];
   int ierr=0, nrec, i, j;
-  long ip[5];
-  long iclass;
+  int ip[5];
+  int iclass;
 
   iclass=0;
   nrec=0;

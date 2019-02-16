@@ -313,7 +313,7 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
 
   } else if(strcmp(ptr,"delay_set")==0) {
     ibool relative;
-    long int nanosec;
+    int nanosec;
     *icmd=RCL_CMD_DELAY_SET;
     ptr=arg_next(command,&ilast);
     if(ptr==NULL)
@@ -378,7 +378,7 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
 
     if(strcmp(ptr,"absolute")==0 || (idecode && type==0)) {
       int year, day, hour, min, sec;
-      long int nanosec;
+      int nanosec;
 
       ptr=arg_next(command,&ilast);
       if(ptr==NULL || 1!=sscanf(ptr,"%i",&year))
@@ -408,7 +408,7 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
     } else if(strcmp(ptr,"relative")==0 || (idecode && type==1)) {
       ibool negative;
       int hour, min, sec;
-      long int nanosec;
+      int nanosec;
 
       ptr=arg_next(command,&ilast);
       if(ptr==NULL)
@@ -467,7 +467,7 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
 
     if(-1 < code && code < 3) {
       int num,i;
-      long int position[8];
+      int position[8];
 
       ptr=arg_next(command,&ilast);
       if(ptr==NULL)
@@ -524,7 +524,7 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
     return 0;
 
   } else if(strcmp(ptr,"errmes")==0) {
-    long int error;
+    int error;
     *icmd=RCL_CMD_ERRMES;
     ptr=arg_next(command,&ilast);
     if(ptr==NULL || 1!=sscanf(ptr,"%li",&error))

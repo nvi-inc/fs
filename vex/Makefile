@@ -6,7 +6,7 @@ OBJECTS=vex.o vexf.o vexf_put.o vex.yy.o vex_util.o print_vex.o vex_get.o vex_pu
 CC=gcc
 #
 # F2C needs this others don't
-CFLAGS=-DF2C
+CPPFLAGS +=-DF2C
 #
 
 vex.a: $(OBJECTS)

@@ -24,7 +24,7 @@ extern struct fscom *shm_addr;
 
 main()
 {
-  long ip[5];
+  int ip[5];
   struct pcald_cmd pcald;
   struct data_valid_cmd data_valid[2];
   int i,j,k,l,idata;

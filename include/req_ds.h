@@ -8,7 +8,7 @@
 
 struct req_buf {                /* buffer structure */
      int count;                 /* number of buffers in class */
-     long class_fs;                /* class number containing buffers */
+     int class_fs;                /* class number containing buffers */
      int nchars;                /* number of characters in buf */
      unsigned char buf[ REQ_BUF_MAX];    /* actual buffer */
      };

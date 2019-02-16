@@ -16,9 +16,9 @@
 
 /* --------------------------------------------------------------------------*/
 /* S2 bbc SNAP command */
-void s2bbc( struct cmd_ds *command, int id, long *ip )
+void s2bbc( struct cmd_ds *command, int id, int *ip )
 {
- unsigned long  lofreq, tpi[2];
+ unsigned int  lofreq, tpi[2];
  unsigned short tpiavg  = 0;
  short gain[2];
  char  ifsrc, bw[2], agcmode, lolock, agclock, index, state;

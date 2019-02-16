@@ -16,8 +16,8 @@ extern char unit_letters[];
 void rdbe_dis(command,itask,iwhich,ip,out_class,out_recs)
 struct cmd_ds *command;
 int itask,iwhich;
-long ip[5];
-long *out_class;
+int ip[5];
+int *out_class;
 int *out_recs;
 {
       int ierr, count, i;

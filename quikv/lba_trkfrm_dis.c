@@ -14,7 +14,7 @@
 void lba_trkfrm_dis(command,lclc,ip)
 struct cmd_ds *command;
 struct das *lclc;
-long ip[5];
+int ip[5];
 {
       int i, count, start_len;
       char output[MAX_OUT];

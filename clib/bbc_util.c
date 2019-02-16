@@ -30,11 +30,11 @@ char *ptr;
     int ierr, ind, arg_key();
     int arg_key_flt();
     double atof(), gain;
-    long bblvcode();
+    int bblvcode();
     char buffer[80];
     int ilen, jlen, klen, mlen;
     char *decloc, *ctemp;
-    long freq, ifreq, freq2bbc();
+    int freq, ifreq, freq2bbc();
     int i;
 
     ierr=0;
@@ -155,7 +155,7 @@ int *count;
 struct bbc_cmd *lcl;
 {
     int ind, ivalue, ivalue2;
-    long bbc2freq(),freq;
+    int bbc2freq(),freq;
     double bblvdB();
 
     output=output+strlen(output);

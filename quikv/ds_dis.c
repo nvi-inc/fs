@@ -14,7 +14,7 @@ void ds_mon();
 void ds_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
       int ierr, count, i;
       struct ds_mon lclm;

@@ -1,5 +1,5 @@
 void fc_incom_ini__( iclbox, iclopr)
-long *iclbox, *iclopr;
+int *iclbox, *iclopr;
 {
      void incom_ini();
 

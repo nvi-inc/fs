@@ -1,10 +1,10 @@
 #include <stdio.h>
 
 int antcn(ip1,ierr)
-     long ip1;
+     int ip1;
      int *ierr;
 {
-  long ip[5] = {0,0,0,0,0};
+  int ip[5] = {0,0,0,0,0};
   int i;
 
   ip[0]=ip1;

@@ -44,7 +44,7 @@
 C       If both recorders are in use then do the check to see if
 C       we should do one or both procs
         
-        if((kuse(1).ne.kuse(2).and.kuse(irec)).or.
+        if((kuse(1).neqv.kuse(2).and.kuse(irec)).or.
      .     ((kuse(1).and.kuse(2)).and.(irec.eq.1.or.
      .                (irec.eq.2.and.kk4vcab)))) then ! do this
 

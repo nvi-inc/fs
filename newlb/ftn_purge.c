@@ -112,7 +112,7 @@ int *ierr,len;
 ftn_upd_time__(path,time,ierr,len)
 char *path;
 int len,*ierr;
-long *time;
+int *time;
 {
      struct stat sb;
      char iname[MAX_NAME+1],*s1;
@@ -134,7 +134,7 @@ long *time;
         *ierr=-1;
         return;
      }
-     *time=(long) sb.st_mtime;
+     *time=(int) sb.st_mtime;
      *ierr=0;
      return;
 }

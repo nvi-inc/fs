@@ -15,7 +15,7 @@
 void disk_serial_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
       int ierr, count, i;
       char output[MAX_OUT],*start;
@@ -26,7 +26,7 @@ long ip[5];
       int nchars;
       char inbuf[BUFSIZE];
       struct disk_serial_mon lclm;
-      long class, nrecs;
+      int class, nrecs;
       int lenout;
 
    /* get data */

@@ -37,8 +37,8 @@ char *m5clock;
 int sz_m5clock;
 int *vdif_epoch;
 {
-  static long phase =-1;
-  long raw, sleep, rawch;
+  static int phase =-1;
+  int raw, sleep, rawch;
 
   if (nsem_test(NSEM_NAME) != 1) {
     endwin();

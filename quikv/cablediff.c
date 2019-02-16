@@ -15,12 +15,12 @@
 void cablediff(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ierr, i;
       char output[MAX_OUT],*start, csign;
       float diff;
-      unsigned long ldiff;
+      unsigned int ldiff;
 
       if (command->equal == '=') {
 	ierr=-100;

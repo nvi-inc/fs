@@ -97,7 +97,7 @@ int main(int argc, char * argv[]) { /* tstMark5A */
         (void) printf("."); 
       (void) printf("%u", uc[i]); } 
     (void) printf("] \n"); } 
-  socaddin.sin_addr.s_addr = *((unsigned long *) hostinfo->h_addr_list[0]); 
+  socaddin.sin_addr.s_addr = *((unsigned int *) hostinfo->h_addr_list[0]); 
       /* Use first address */ 
   /* * Connect this socket to Mark5A on machine * */ 
   if (msglev < 1) /* Debuggery? */ 

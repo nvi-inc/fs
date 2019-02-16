@@ -18,7 +18,7 @@ int *ierr;
   int ind;
   struct ds_cmd lcl;
   struct ds_mon lclm;
-  long ip[5];
+  int ip[5];
   int i;
 
   ind=(*imod-1)/2;

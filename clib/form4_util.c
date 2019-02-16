@@ -599,7 +599,7 @@ int start;
 {
   int count=0;
   int first=1;
-  unsigned long enable;
+  unsigned int enable;
   int i;
 
   buff+=4;

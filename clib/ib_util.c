@@ -5,7 +5,7 @@
 #define MAX_BUF 512
 
 ib_req1(ip,device)
-long int ip[5];
+int ip[5];
 char device[2];
 /* read ASCII */
 {
@@ -19,7 +19,7 @@ char device[2];
 }
 
 ib_req2(ip,device,ptr)
-long int ip[5];
+int ip[5];
 char device[2];
 char ptr[];
 /* write ASCII */
@@ -38,7 +38,7 @@ char ptr[];
 }
 
 ib_req3(ip,device)
-long int ip[5];
+int ip[5];
 char device[2];
 /* read binary */
 {
@@ -52,7 +52,7 @@ char device[2];
 }
 
 ib_req4(ip,device,ptr,n)
-long int ip[5];
+int ip[5];
 char device[2];
 char ptr[];
 int n;
@@ -70,7 +70,7 @@ int n;
 }
 
 ib_req5(ip,device,ilen)
-long int ip[5];
+int ip[5];
 char device[2];
 int ilen;
 /* read ASCII with a max length */
@@ -86,7 +86,7 @@ int ilen;
 }
 
 ib_req6(ip,device,ilen)
-long int ip[5];
+int ip[5];
 char device[2];
 int ilen;
 /* read BINARY with a max length */
@@ -102,7 +102,7 @@ int ilen;
 }
 
 ib_req7(ip,device,ilen,ptr)
-long int ip[5];
+int ip[5];
 char device[2];
 int ilen;
 char ptr[];
@@ -123,7 +123,7 @@ char ptr[];
 }
 
 ib_req8(ip,device,ilen,ptr)
-long int ip[5];
+int ip[5];
 char device[2];
 int ilen;
 char ptr[];
@@ -144,7 +144,7 @@ char ptr[];
 }
 
 ib_req9(ip,device)
-long int ip[5];
+int ip[5];
 char device[2];
 /* bus status */
 {
@@ -157,7 +157,7 @@ char device[2];
   ip[1]++;
 }
 ib_req10(ip,device)
-long int ip[5];
+int ip[5];
 char device[2];
 /* poll for SRQ */
 {
@@ -171,7 +171,7 @@ char device[2];
 }
 
 ib_req11(ip,device,ilen,ptr)
-long int ip[5];
+int ip[5];
 char device[2];
 int ilen;
 char ptr[];
@@ -191,7 +191,7 @@ char ptr[];
   ip[1]++;
 }
 ib_req12(ip,device)
-long int ip[5];
+int ip[5];
 char device[2];
 /* device clear */
 {
@@ -208,7 +208,7 @@ char device[2];
 ib_res_ascii(out,max,ip)
 char *out;
 int *max;
-long ip[5];
+int ip[5];
 {
   short int buffer[MAX_BUF];
   int nch,idum;
@@ -225,7 +225,7 @@ long ip[5];
 }
 ib_res_bin(out,max,ip)
 char *out;
-long ip[5];
+int ip[5];
 int *max;
 {
   short int buffer[MAX_BUF];
@@ -240,15 +240,15 @@ int *max;
   }
 }
 ib_res_time(centisec,ip)
-long centisec[2];
-long ip[5];
+int centisec[2];
+int ip[5];
 {
   short int buffer[MAX_BUF];
   int nch,idum;
 
   if(ip[1]>0) {
     nch=cls_rcv(ip[0],buffer,MAX_BUF,&idum,&idum,0,0);
-    memcpy(centisec,buffer,2*sizeof(long));
+    memcpy(centisec,buffer,2*sizeof(int));
     ip[1]--;
   }
 }

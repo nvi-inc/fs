@@ -54,7 +54,7 @@ static char what[ ]="ad";
 
 static char me[]="mk6cn" ; /* My name */ 
 static int iecho;
-static long fail;
+static int fail;
 
 static void nullfcn();
 static jmp_buf sig_buf;
@@ -79,7 +79,7 @@ int main(int argc, char * argv[])
 {
 
   int i, len, result;
-  long ip[5];
+  int ip[5];
   
   setup_ids();    /* attach to the shared memory */
   rte_prior(FS_PRIOR);
@@ -234,7 +234,7 @@ int open_mk6(char *host, int port)
   struct timeval tv;
   int retval, iret;
   int error,serror;
-  long flags;
+  int flags;
 
   /* * Create a socket * */ 
   if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) { /* Errors? */ 
@@ -373,7 +373,7 @@ int open_mk6(char *host, int port)
   (void) printf("] \n");
 #endif
   
-  socaddin.sin_addr.s_addr = *((unsigned long *) hostinfo->h_addr_list[0]); 
+  socaddin.sin_addr.s_addr = *((unsigned int *) hostinfo->h_addr_list[0]); 
   /* Use first address */ 
   /* * Connect this socket to Mark6 on host * */ 
 #ifdef DEBUG
@@ -491,7 +491,7 @@ int open_mk6(char *host, int port)
   return 0;
 }
 int doproc(ip)
-long ip[5];
+int ip[5];
 {
 
   int rtn1;    /* argument for cls_rcv - unused */
@@ -500,8 +500,8 @@ long ip[5];
   int save;    /* argument for cls_rcv - unused */
   char secho[3*BUFSIZE];
 
-  long in_class;
-  long out_class=0;
+  int in_class;
+  int out_class=0;
   int in_recs;
   int out_recs=0;
   int i, j, nchars;
@@ -758,7 +758,7 @@ error:
   return ip[2];
 }
 int dorelink(ip)
-long ip[5];
+int ip[5];
 {
 
   int error;
@@ -780,7 +780,7 @@ long ip[5];
 
 }
 int doclose(ip)
-long ip[5];
+int ip[5];
 {
 
   ip[0]=ip[1]=0;
@@ -866,7 +866,7 @@ static int read_response(char *str, int num, FILE* stream,
   int c, iret;
     char* cs = str;
     struct timeval to;
-    unsigned long start,end,now;
+    unsigned int start,end,now;
     fd_set rfds;
 
     iret=0;

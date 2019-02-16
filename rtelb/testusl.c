@@ -9,7 +9,7 @@ main()
 {
      clock_t times();
      struct tms buffer;
-     long start, end;
+     int start, end;
      int i;
 
      for(i=0;i<100;i++){

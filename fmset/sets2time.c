@@ -14,8 +14,8 @@
 
 #include "fmset.h"
 
-extern long ip[5];           /* parameters for fs communications */
-extern long nanosec;
+extern int ip[5];           /* parameters for fs communications */
+extern int nanosec;
 
 void skd_run();
 void skd_par();
@@ -33,7 +33,7 @@ time_t formtime;
   struct rclcn_res_buf resbuf;
   int year, day, hour, min, sec;
   ibool relative;
-  long int dnanosec;
+  int dnanosec;
   char *name;
 
   time_t unixtime; /* computer time */
@@ -42,7 +42,7 @@ time_t formtime;
   int    fshs;
   time_t formtime2; /* formatter time received from mcbcn */
   int    formhs;
-  long before,after;
+  int before,after;
 
   if(nanosec==0)
     goto set;

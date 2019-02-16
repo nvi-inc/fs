@@ -17,7 +17,7 @@
 void satellite(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, count;
       char *ptr;
@@ -27,7 +27,7 @@ long ip[5];                           /* ipc parameters */
 		   +sizeof(FS_ROOT)];
       FILE *fd,*fdqth, *fdtle;
       int id, idqth, idtle, iret, i, it[6], idinyr;
-      long seconds;
+      int seconds;
       char tempname[30],qthfile[30];
       char tle0[75], tle1[75],tle2[75], name[25], *pret;
       double azcmd,elcmd;
