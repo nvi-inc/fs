@@ -24,6 +24,7 @@ void dbbcchk_( char *lwho )
   int out_recs, out_class;
   char outbuf[BUFSIZE];
   int ichold;
+  struct dbbcvsi_clk_mon lclm;
 
   ichold=shm_addr->check.dbbc_form;
   if(ichold<=0 )
@@ -70,10 +71,59 @@ dbbcn:
 	goto end;
       }
     } else {
-      logit(NULL,-813,lwho);
+      logit(NULL,-814,lwho);
       goto end;
     }
   }
+
+  /* only check vsi_clk if we verified the vesion number and is >= 107 */
+
+  if(shm_addr->dbbcddcv>=107) {
+    out_recs=0;
+    out_class=0;
+    strcpy(outbuf,"vsi_clk");
+    cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+    out_recs++;
+    
+dbbcn1:
+
+    ip[0]=1;
+    ip[1]=out_class;
+    ip[2]=out_recs;
+    
+    nsem_take( "fsctl" , 0 );
+    skd_run("dbbcn",'w',ip);
+    nsem_put( "fsctl" );
+    
+    skd_par(ip);
+
+
+    if(ip[2]<0) {
+      logitn(NULL,ip[2],ip+3,ip[4]);
+      logit(NULL,-810,lwho);
+      return;
+    }
+
+    ierr=0;
+    for (i=0;i<ip[1];i++) {
+      if ((nchars =
+	   cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
+	logit(NULL,-811,lwho);
+	goto end;
+      }
+      inbuf[nchars]=0;
+      if(dbbc_2_vsi_clk(&lclm,inbuf)
+	 || !lclm.vsi_clk.state.known || lclm.vsi_clk.state.error) {
+	logit(NULL,-815,lwho);
+	goto end;
+      }
+      if(lclm.vsi_clk.vsi_clk!=shm_addr->m5b_crate) {
+	logit(NULL,-816,lwho);
+	goto end;
+      }
+    }
+  }	
+
   return;
 
   end:
