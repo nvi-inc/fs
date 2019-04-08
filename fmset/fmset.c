@@ -39,6 +39,7 @@ int  s2type=0;
 char s2dev[2][3] = {"r1","da"};
 int m5rec;
 int m5b_crate;
+int dbbcddcv;
 struct fila10g_cfg *fila10g_cfg_use = NULL;
 struct fila10g_cfg *ask_fila10g_cfg();
 
@@ -123,6 +124,7 @@ rack_type=shm_addr->equip.rack_type;
 drive=shm_addr->equip.drive[0];
 drive_type=shm_addr->equip.drive_type[0];
 m5b_crate=shm_addr->m5b_crate;
+dbbcddcv=shm_addr->dbbcddcv;
 
  if( drive==MK5 && (drive_type == MK5B || drive_type == MK5B_BS))
   source=drive;
@@ -189,7 +191,7 @@ mvwaddstr( maindisp, 2, 5, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B
   mvwaddstr( maindisp, 4, column, "Mark 5B     " );
  }  else if (rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)) {
    mvwaddstr( maindisp, 4, column, "FiLa10G     " );
-   form="FiLa10g";
+   form="FiLa10G";
  } else if(source == S2) {
    mvwaddstr( maindisp, 4, column, s2type ? "S2 DAS      " : "S2 RT       " );
    form=s2type ? "S2 DAS" : "S2 RT ";       
