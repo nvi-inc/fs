@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/fs9131up.txt         Version: 9.1  Date: 181115
+1File: /usr2/fs/misc/fs9131up.txt         Version: 9.6  Date: 190412
 
 		       FS 9.13.1 Update Notice
 
@@ -13,10 +13,11 @@ This document is divided into four sections:
   A.   Reference Appendix for Installation
 
 This update is intended for all stations using a FS with a version
-number of 9.11.19 or earlier.  It is not for stations using one of the
-9.12 versions.  The 9.12 branch of the FS is for VGOS operations only.
-In the future, the VGOS branch will be merged into the 9.13 branch,
-which is the main branch.
+number of 9.11.19 or earlier or 9.13.0.  Installing this update is
+trivial for stations already running 9.13.0.  It is not for stations
+using one of the 9.12 versions.  The 9.12 branch of the FS is for VGOS
+operations only.  In the future, the VGOS branch will be merged into
+the 9.13 branch, which is the main branch.
 
 In addition to several small improvements, the most important change
 in this version is support for client/server split between the user
@@ -282,7 +283,7 @@ The installation steps for upgrading from 9.11.19 are listed below.
      recommended if you have reliable NTP available.  It can be
      deferred until after the rest of the upgrade is complete.
 
-      (i) This change is only needed if you use 'metsever' to serve
+      (i) This change is only needed if you use 'metserver' to serve
           meteorological data to the FS.  If you aren't, it is
           recommended that you update the comments so there won't be
           confusion in the future.
@@ -487,7 +488,10 @@ The following is a summary of FS changes since 9.11.19. Items up to
 21. Optional support for FS display server.
 22. Support for two VSI output DBBC2 DDC modes.
 23. Support for DBBC DDC v107 with 32 and 64 MHz channel BWs.
-24. Minor improvements in display server.
+24. Improvements in display server.
+25. The FS 'cont_cal' command now fully implemnents support for the
+    DBBC DDC v106 and v107 (or later) 'cont_cal' command.
+26. Fixed two bugs in the 'schedule' command.
 
 A more detailed discussion of these changes follows.
 
@@ -785,15 +789,37 @@ A more detailed discussion of these changes follows.
 
 23. Support for DBBC DDC v107 with 32 and 64 MHz channel BWs.  The
     changes included allow a maximum clock rate in equip.ctl of 128
-    MHz.  The 'nominal' clock rate for v107 is 64 MHz for VSI (Mark
-    5B) recording and 128 MHz for Ethernet recording.  The BWs of 1
-    and 2 MHz are not allowed in the 'bbcnn' commands for v107.
+    MHz.  The 'nominal' clock rate for v107 is 64 MHz for a DBBC_DDC
+    rack type without a FiLa10G, and 128 MHZ with a FiLa10G.  The
+    'fmset' program will set the DBBC 'vsi_clk' to the requested clock
+    rate for v107 or later.  The 'chekr' will check that the 'vsi_clk'
+    rate for v107 or later and report an error if it does not match
+    the value in 'equip.ctl'
 
-24. Minor improvements in display server. The client now prints
-    "client exited" when Ctrl+C pressed in main window. This was the
-    intended behaviour, but a race-condition caused it to usually be
-    suppressed in the 9.13.0 release.  Whether the display server is
-    enabled is recorded in the header lines of the log.
+24. Improvements in display server.  The client now prints "client
+    exited" when Ctrl+C pressed in main window.  This was the intended
+    behaviour, but a race-condition caused it to usually be suppressed
+    in the 9.13.0 release.  Additionally, whether the display server
+    is enabled is recorded in the header lines of the log file.
+
+25. The FS 'cont_cal' command now fully implements support for the
+    DBBC DDC v106 and v107 (or later) 'cont_cal' command.  For
+    backward compatibility, this command remembers the previously
+    commanded state of the 'polarity', 'frequency', and 'option'
+    parameters and uses them as the defaults. Until defaults are set
+    in this waym these parameters are not sent the device.  Thus if a
+    station requires a particular value for 'frequency' or 'option',
+    they can put a command in 'initi' that commands those values and
+    those values will used in all subsequent uses of the 'cont_cal'
+    command until different values are commanded.  It would also be
+    possible to change the values from those in 'initi' when a
+    different receiver is used.  Care would be required in this case
+    to make sure 'initi' is updated as well.  This approach also
+    allows compatibility with 'drudg' which will only issue the
+    'polarity' value selected when the schedule procedures are
+    generated.  Please see 'help=cont_cal' for more information.
+
+26. Fixed two bugs in the 'schedule' command.
 
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/misc/changes.txt.
@@ -801,7 +827,7 @@ is in /usr2/fs/misc/changes.txt.
 
 			B. Changes in 'drudg'
 				   
-'drudg' opening message date is 2018Nov18.
+'drudg' opening message date is 2018Nov13.
 
 The following is a summary of 'drudg' changes since 9.11.19.  Items up
 to (7) were part of 9.13.0.
@@ -859,11 +885,17 @@ A more detailed discussion of these changes follows.
 
     Note that option (iii) is only supported for racks with FiLa10Gs
     (and are being used with an Ethernet recorder).  Options (ii) and
-    (iii) will cause a 64 bit bit-mask to be used. Comments are added
-    to the procedures to indicate what wirings are recommended or
-    required.  It is important to check all the modes for an
-    experiment to determine a compatible configuration for the
-    experiment.
+    (iii) will cause a 64 bit bit-mask to be used.
+
+    Comments are added to the procedures to indicate what wirings are
+    recommended or required.  It is important to check all the modes
+    for an experiment to determine a compatible configuration for the
+    experiment.  In general, the preferred wiring (and input selection
+    in 'equip.ctl') is 'vsi1-2'.  This will provide support for all
+    possible modes.  The comments indicate what other wirings will
+    also work with the 'drudg' output "as is" for a given mode.  This
+    may be useful in cases where VSI1 or VSI2 is broken or otherwise
+    unavailable.
 
     It is assumed that if the rack type does not include a FiLa10G,
     then a single Mark 5B is being used.  Note that the FS does not

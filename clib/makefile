@@ -44,7 +44,8 @@ holog_util.o satellite_util.o satoff_util.o dbbcnn_util.o dbbcifx_util.o\
 dbbcform_util.o tpi_dbbc.o mk5dbbcd.o dbbcn_v.o dbbc_cont_cal_util.o\
 dbbc_if_power.o dbbcgain_util.o fila10g_mode_util.o daymy.o get_fila10gtime.o\
 antcn_term.o dbbc_vsix_util.o dbbc_version_check.o mk5dbbcd_pfb.o\
-tpi_dbbc_pfb.o dbbcn_pfb_v.o fserr_cls.o if_cmd.o dbbc_pfbx_util.o helpstr.o
+tpi_dbbc_pfb.o dbbcn_pfb_v.o fserr_cls.o if_cmd.o dbbc_pfbx_util.o helpstr.o\
+dbbcvsi_clk_util.o
 #
 #FFLAGS = 
 #

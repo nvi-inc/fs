@@ -548,7 +548,7 @@
           endif      
         else if(cstrack_cap(istn) .eq. "DBBC_DDC/FILA10G") then
           call drudg_write_comment(lu_outfile,
-     >        "vsi-12 input should be used in 'equip.ctl'")
+     >        "vsi1-2 input should be used in 'equip.ctl'")
           if(lbit_mask_mode.eq."geo2" .or. 
      >       lbit_mask_mode .eq. "astro3") then
             call drudg_write_comment(lu_outfile,             
