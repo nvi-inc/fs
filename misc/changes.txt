@@ -12392,3 +12392,46 @@ Version 9.13.0 180928
 
 Version 9.13.1-rc1 181115
 
+190201 WEH boss/bwork.f
+           help/schedule.___
+           leave schedule proc available after 'schedule='
+
+190201 WEH boss/bwork.f
+           fix bug that caused a crash if attempting to execute a procedure
+           in a now closed schedule proc library
+
+190201 WEH boss/bwork.f
+           fix bug that caused 'exper_initi' to execute if opening a 
+           schedule failed because PFMED was running
+
+190408 WEH include/fs_types.h
+           clib/Makefile
+           include/dbbcvsi_clk_ds.h
+           clib/dbbcvsi_clk_util.c
+           chekr/dbbcchk.c
+           add DBBC vsi_clk checking to chekr
+
+190408 WEH fmset/getfila10gtime.c
+           fmset/get5btime.c
+           fmset/fmset.c
+           add DBBC vsi_clk setting
+
+190408 WEH clib/dbbcnn_util.c
+           reallow 1 and 2 MHz BW fof v107
+
+190411 WEH control/fserr.ctl
+           fix boss error messages about the schedule procedure library
+             to not mention experiment procedure library
+           fix station procedure file symbolic link error message to
+             mention station procedure library
+
+190411 WEH include/dbbc_cont_cal_ds.h
+           clib/cshm_init.c
+           incom/equip.f
+           control/fserr.ctl
+190412 WEH help/cont_cal.d__
+           clib/dbbc_cont_cal_util.c
+           add support for v106 and v107 cont_cal control
+
+Version 9.13.1-rc2 190412
+
