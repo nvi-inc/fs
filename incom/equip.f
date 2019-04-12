@@ -714,7 +714,10 @@ c                    12345678901234567890123456
       endif
       icont_cal_pol=0
       if(idbbcv.ge.106 .or.(idbbcv.eq.105.and.idbbcddc_subv.ge.1)) then
-         icont_cal_pol=1
+         icont_cal_pol=icont_cal_pol+1
+      endif
+      if(idbbcv.ge.106) then
+         icont_cal_pol=icont_cal_pol+2
       endif
 c
       dbbcddcv =idbbcv

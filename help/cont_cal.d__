@@ -1,19 +1,27 @@
 	cont_cal - continuous calibration control (DBBC racks)
 
 
-            Syntax:     cont_cal=state,polarity,samples
+            Syntax:     cont_cal=state,polarity,samples,frequency,option
 
-            Response:   cont_cal/state,polarity,samples
+            Response:   cont_cal/state,polarity,samples,frequency,option
 
 
 Settable parameters:
-            state       off or on, Default is off.
-            polarity    0, 1, 2, or 3. Default is the previous value. For
-                        DBBC versions less than v105X_1, numeric values are
-                        not permitted.
-
+            state       off or on. Default is off.
+            polarity    0, 1, 2, 3, but -1 is allowed to not command; please
+                        see the comments.  Non-null values are not permitted
+                        for DBBC versions less than v105X_1.  Default is the
+                        previous value; please see the comments.
             samples     number of samples to average for Tsys, positive
                         integer, Default is 10.
+            frequency   8 to 300000, but -1 is allowed to not command; please
+                        see the comments.  Non-null values are not permitted 
+                        for DBBC versions less than v106.  Default is the
+                        previous value; please see the comments.
+            option      0 or 1, but -1 is allowed to not command;  please
+                        see the comments.  Non-null values are not permitted 
+                        for DBBC versions less than v106.  Default is the
+                        previous value; please see the comments.
 
 Monitor-only parameters: None.
 
@@ -23,14 +31,15 @@ in the front-end receiver. It only commands the state of the DBBC. The
 receiver must inject a switched calibration signal for this to be
 useful.
 
-For polarity, the previous value is used as the default to have
-parallelism with how the device works if no value is sent to it.  This
-is atypical for how FS commands normally work; they normally have a
-specific value for any default.  On FS start-up, the default for
-polarity is to send no value.
+Polarity values affect cont_cal signal and the order of on/off values
+in the device responses. The behavior is differnt for different firmware
+versions. As of v105x_1:
 
-Polarity values affect cont_cal signal polarity and the order of on/off
-values in the device responses:
+ Value    Polarity
+   0     no change
+   1        changed
+
+As of version v106:
 
  Value    Polarity        On/Off Response
    0     no change          not swapped
@@ -38,10 +47,27 @@ values in the device responses:
    2     no change              swapped
    3        changed             swapped
 
+As of version v107:
+
+ Value    1 PPS           On/Off Response
+   0     not embedded       not swapped
+   1         embedded       not swapped
+   2     not embedded           swapped
+   3         embedded           swapped
 
 Note that the setting of the polarity does not affect the FS's
 interpretation off the on and off values returned, only how the DBBC
 populates the returned values.
+
+For polarity, frequency, and option, the default is the last value
+commanded.  On FS start-up, these default to not sending a value.  Not
+commanding presists until a new non-negative values is used.  A value
+of -1 can be used to disable commanding of that parameter after a
+non-negative value has been used.  This behavior is atypical of how FS
+commands normally work; they normally have a specific value for any
+default and a '*' would be used for the previous value.  The current
+behavior is to simplify operations, including interactions with
+'drudg', until a more comprehensive solution is implemented.
 
 The number of samples to average is used internally by the FS to form
 Tsys.
