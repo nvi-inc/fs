@@ -1,4 +1,4 @@
-      real function gtdbl(jbuf,ifc,ilc,ifield,iferr)
+      double precision function gtdbl(jbuf,ifc,ilc,ifield,iferr)
 C
       integer*2 jbuf(1)
 C
