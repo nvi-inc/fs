@@ -27,7 +27,7 @@ int     i;
 union semun arg;
 
                                           /* create, new key, permit all */
-*semid = semget ( key, nsems, 0666|IPC_CREAT);
+*semid = semget ( key, nsems, 0664|IPC_CREAT);
 if ( *semid == -1 ) {
         perror("semid_get: create failed");
 	return ( -1);

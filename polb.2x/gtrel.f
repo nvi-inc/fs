@@ -1,4 +1,4 @@
-      double precision function gtdbl(jbuf,ifc,ilc,ifield,iferr)
+      real function gtrel(jbuf,ifc,ilc,ifield,iferr)
 C
       integer*2 jbuf(1)
 C
@@ -9,7 +9,7 @@ C
       if(ic1.le.0) then
         jerr=1
       else
-        gtdbl=das2b(jbuf,ic1,ic2-ic1+1,jerr)
+        gtrel=sngl(das2b(jbuf,ic1,ic2-ic1+1,jerr))
       endif
       if ((ic1.le.0.or.jerr.ne.0).and.iferr.ge.0) iferr=-ifield
 C

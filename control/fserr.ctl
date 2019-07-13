@@ -1422,7 +1422,7 @@ BO -508
 Final procedure library link does contain '.prc'.
 ""
 BO -999
-WARNING: Log file just opened is already larger than 10 MB.
+WARNING: Log file just opened is already larger than 100 MB.
 ""
 CD  -1
 Error from DBBCN in TPICD, see above for error.

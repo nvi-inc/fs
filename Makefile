@@ -58,6 +58,7 @@ dist:
 	cd /; find usr2/fs-$(FS_VERSION) -name '*.[oas]'      -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION) -name '*.pyc'        -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION) -name 'y.tab.h'      -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name 'venv'         -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION)/bin -mindepth 1 \
 	                                            -name '*' -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION)/third_party/src/* \
@@ -75,6 +76,7 @@ clean:
 	rm -f `find . -name '*~' -print`
 	rm -f `find . -name '.*~' -print`
 	rm -f `find . -name '*.pyc' -print`
+	find . -name '.d' -type d -exec rm -r {} \;
 	rm -rf third_party/include third_party/lib third_party/bin
 	find third_party/src/* ! -iname '*.tar.gz' ! -iname '*.make' -delete
 #

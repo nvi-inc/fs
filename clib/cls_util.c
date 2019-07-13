@@ -34,7 +34,7 @@ int size;
 {
 struct msqid_ds str_msqid;  /* message queue id struct */
 
-msqid = msgget( key, ( IPC_CREAT | 0666 ));
+msqid = msgget( key, ( IPC_CREAT | 0664 ));
 if ( msqid == -1 ) {
         perror("cls_get: creating cls queue");
 	return( -1);

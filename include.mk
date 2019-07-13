@@ -18,12 +18,12 @@ CPPFLAGS += -I$(ROOT)/third_party/include
 
 DEBUG_FLAGS = -g3 -ggdb -Og
 
-ifeq ($(DEBUG),1)
+#ifeq ($(DEBUG),1)
 FFLAGS  += $(DEBUG_FLAGS)
 CFLAGS  += $(DEBUG_FLAGS)
 CPPFLAGS  += $(DEBUG_FLAGS)
 LDFLAGS += $(DEBUG_FLAGS)
-endif
+#endif
 
 
 # Dependency generation, see http://make.mad-scientist.net/papers/advanced-auto-dependency-generation
