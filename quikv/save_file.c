@@ -95,7 +95,7 @@ long ip[5];                           /* ipc parameters */
 	  ierr=-305;
 	  goto error;
 	}
-	if ( 0 != chmod(file,0666)) {
+	if ( 0 != chmod(file,0664)) {
 	  logit(NULL,errno,"un");
 	  ierr=-306;
 	  goto error;
