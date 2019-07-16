@@ -227,7 +227,7 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 C Initialize FS version
 
 C PeC Permissions on output files
-      iperm=o'0666'
+      iperm=o'0664'
 C Initialize LU's
       LU_INFILE = 20
       LU_OUTFILE =21
