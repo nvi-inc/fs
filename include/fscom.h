@@ -148,4 +148,5 @@ typedef struct fscom {
         int iw_motion;
         int lowtp;
         int form_version;
+        int sterp;
 } Fscom;

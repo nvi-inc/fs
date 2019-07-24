@@ -1,3 +1,215 @@
+define  ifdas         00000000000
+ifdab=0,0,nor,nor
+ifdcd=0,0,nor,nor
+lo=8080.00,2020.00
+upconv=479.9,479.9
+enddef
+define  as4c2         00000000000
+form=c,8.000
+!*
+tapeformc
+pass=$
+bbcas4
+ifdas
+enable=g2,g4
+tape=low
+repro=byp,6,18
+!*+8s
+enddef
+define  as4c1         00000000000
+form=c,8.000
+!*
+tapeformc
+pass=$
+bbcas4
+ifdas
+enable=g1,g3
+tape=low
+repro=byp,5,17
+!*+8s
+enddef
+define  as4a1         00000000000
+form=a,8.000
+!*
+tapeforma
+pass=$,,none
+bbcas4
+ifdas
+enable=g1,g2,g3,g4
+tape=low
+repro=byp,5,17
+!*+8s
+enddef
+define  as2c2         00000000000
+form=c,4.000
+!*
+tapeformc
+pass=$
+bbcas2
+ifdas
+enable=g2,g4
+tape=low
+repro=byp,6,18
+!*+8s
+enddef
+define  as2c1         00000000000
+form=c,4.000
+!*
+tapeformc
+pass=$
+bbcas2
+ifdas
+enable=g1,g3
+tape=low
+repro=byp,5,17
+!*+8s
+enddef
+define  as2a1         00000000000
+form=a,4.000
+!*
+tapeforma
+pass=$,,none
+bbcas2
+ifdas
+enable=g1,g2,g3,g4
+tape=low
+repro=byp,5,17
+!*+8s
+enddef
+define  bbcas4        00000000000
+bbc01=610.89,a,4.0,4.0
+bbc02=620.89,a,4.0,4.0
+bbc03=650.89,a,4.0,4.0
+bbc04=700.89,a,4.0,4.0
+bbc05=820.89,a,4.0,4.0
+bbc06=940.89,a,4.0,4.0
+bbc07=950.89,a,4.0,4.0
+bbc08=970.89,a,4.0,4.0
+bbc09=680.89,b,4.0,4.0
+bbc10=690.89,b,4.0,4.0
+bbc11=710.89,b,4.0,4.0
+bbc12=770.89,b,4.0,4.0
+bbc13=800.89,b,4.0,4.0
+bbc14=805.89,b,4.0,4.0
+enddef
+define  bbcas2        00000000000
+bbc01=610.89,a,2.0,2.0
+bbc02=620.89,a,2.0,2.0
+bbc03=650.89,a,2.0,2.0
+bbc04=700.89,a,2.0,2.0
+bbc05=820.89,a,2.0,2.0
+bbc06=940.89,a,2.0,2.0
+bbc07=950.89,a,2.0,2.0
+bbc08=970.89,a,2.0,2.0
+bbc09=680.89,b,2.0,2.0
+bbc10=690.89,b,2.0,2.0
+bbc11=710.89,b,2.0,2.0
+bbc12=770.89,b,2.0,2.0
+bbc13=800.89,b,2.0,2.0
+bbc14=805.89,b,2.0,2.0
+enddef
+define  wb4a1         00000000000
+form=a,8.000
+!*
+tapeforma
+pass=$,,none
+bbcwb4
+ifdwb
+enable=g1,g2,g3,g4
+tape=low
+repro=byp,5,17
+!*+8s
+enddef
+define  wb2a1         00000000000
+form=a,4.000
+!*
+tapeforma
+pass=$,,none
+bbcwb2
+ifdwb
+enable=g1,g2,g3,g4
+tape=low
+repro=byp,5,17
+!*+8s
+enddef
+define  rxmon         000000000000
+rx=lo,*,*,*,*,*,*
+rx
+rx=dcal,*,*,*,*,*,*
+rx
+rx=lo5mhz,*,*,*,*,*,*
+rx
+rx=pres,*,*,*,*,*,*
+rx
+rx=20k,*,*,*,*,*,*
+rx
+rx=70k,*,*,*,*,*,*
+rx
+enddef
+define  rxall         000000000000
+rx=00,*,*,*,*,*,*
+rx
+rx=01,*,*,*,*,*,*
+rx
+rx=02,*,*,*,*,*,*
+rx
+rx=03,*,*,*,*,*,*
+rx
+rx=04,*,*,*,*,*,*
+rx
+rx=05,*,*,*,*,*,*
+rx
+rx=06,*,*,*,*,*,*
+rx
+rx=07,*,*,*,*,*,*
+rx
+rx=08,*,*,*,*,*,*
+rx
+rx=09,*,*,*,*,*,*
+rx
+rx=0a,*,*,*,*,*,*
+rx
+rx=0b,*,*,*,*,*,*
+rx
+rx=0c,*,*,*,*,*,*
+rx
+rx=0d,*,*,*,*,*,*
+rx
+rx=0e,*,*,*,*,*,*
+rx
+rx=0f,*,*,*,*,*,*
+rx
+rx=10,*,*,*,*,*,*
+rx
+rx=11,*,*,*,*,*,*
+rx
+rx=12,*,*,*,*,*,*
+rx
+rx=13,*,*,*,*,*,*
+rx
+rx=14,*,*,*,*,*,*
+rx
+rx=15,*,*,*,*,*,*
+rx
+rx=16,*,*,*,*,*,*
+rx
+rx=17,*,*,*,*,*,*
+rx
+rx=18,*,*,*,*,*,*
+rx
+rx=19,*,*,*,*,*,*
+rx
+rx=1a,*,*,*,*,*,*
+rx
+rx=1b,*,*,*,*,*,*
+rx
+rx=1c,*,*,*,*,*,*
+rx
+rx=1d,*,*,*,*,*,*
+rx
+rx=1e,*,*,*,*,*,*
+rx
+enddef
 define  bbcagc        000000000000
 bbc01=*,*,*,*,*,agc
 bbc02=*,*,*,*,*,agc
@@ -127,7 +339,8 @@ enddef
 define  check2a2        000000000000
 check2c2
 enddef
-define  check2c1        000000000000
+define  check2c1      00000000000
+form=c,4
 check=*,-rc
 enable=
 parity=,,ab,off,g1,g3
@@ -144,7 +357,8 @@ et
 !+3s
 check=*,rc
 enddef
-define  check2c2        000000000000
+define  check2c2      00000000000
+form=c,4
 check=*,-rc
 enable=
 parity=,,ab,off,g2,g4
@@ -239,13 +453,15 @@ wx
 cable
 ifdab
 ifdcd
+bbc02
 bbc06
 bbc11
+sy=setcl
 enddef
-define  midtp        000000000000
+define  midtp         00000000000
 bbcman
-ifdab=max,max,*,*
-ifdcd=max,max,*,*
+ifdab=20,20,*,*
+ifdcd=20,20,*,*
 !+2s
 tpzero=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tpzero=9u,10u,11u,12u,13u,14u,ifb
@@ -325,84 +541,6 @@ et
 label
 check=*,rc
 enddef
-define  rxall         00000000000x
-rx=front,*,*,*,*,*,*
-rx
-rx=rear,*,*,*,*,*,*
-rx
-rx=lo,*,*,*,*,*,*
-rx
-rx=dcal,*,*,*,*,*,*
-rx
-rx=inlet,*,*,*,*,*,*
-rx
-rx=ret,*,*,*,*,*,*
-rx
-rx=sup,*,*,*,*,*,*
-rx
-rx=2.73v,*,*,*,*,*,*
-rx
-rx=sif,*,*,*,*,*,*
-rx
-rx=xif,*,*,*,*,*,*
-rx
-rx=kif,*,*,*,*,*,*
-rx
-rx=slo,*,*,*,*,*,*
-rx
-rx=xlo,*,*,*,*,*,*
-rx
-rx=klo,*,*,*,*,*,*
-rx
-rx=lo5mhz,*,*,*,*,*,*
-rx
-rx=28v,*,*,*,*,*,*
-rx
-rx=24v,*,*,*,*,*,*
-rx
-rx=20v,*,*,*,*,*,*
-rx
-rx=15v,*,*,*,*,*,*
-rx
-rx=5v,*,*,*,*,*,*
-rx
-rx=-15v,*,*,*,*,*,*
-rx
-rx=ground,*,*,*,*,*,*
-rx
-rx=pres,*,*,*,*,*,*
-rx
-rx=x1bias,*,*,*,*,*,*
-rx
-rx=x2bias,*,*,*,*,*,*
-rx
-rx=x3bias,*,*,*,*,*,*
-rx
-rx=s1bias,*,*,*,*,*,*
-rx
-rx=s2bias,*,*,*,*,*,*
-rx
-rx=s3bias,*,*,*,*,*,*
-rx
-rx=20k,*,*,*,*,*,*
-rx
-rx=70k,*,*,*,*,*,*
-rx
-enddef
-define  rxmon         00000000000x
-rxx=lo
-rx
-rxx=dcal
-rx
-rxx=lo5mhz
-rx
-rxx=pres
-rx
-rxx=20k
-rx
-rxx=70k
-rx
-enddef
 define  rxx           00000000000x
 rx=$,*,*,*,*,*,*
 enddef
@@ -425,13 +563,13 @@ define  sx2a1         00000000000x
 form=a,4.000
 !*
 tapeforma
-pass=$
+pass=$,,none
 bbcsx2
 ifdsx
 enable=g1,g2,g3,g4
 tape=low
 repro=byp,5,17
-!*+7s
+!*+8s
 enddef
 define  sx2c1         00000000000
 form=c,4.000
@@ -443,7 +581,7 @@ ifdsx
 enable=g1,g3
 tape=low
 repro=byp,5,17
-!*+7s
+!*+8s
 enddef
 define  sx2c2         00000000000x
 form=c,4.000
@@ -455,19 +593,19 @@ ifdsx
 enable=g2,g4
 tape=low
 repro=byp,6,18
-!*+7s
+!*+8s
 enddef
 define  sx4a1         00000000000x
 form=a,8.000
 !*
 tapeforma
-pass=$
+pass=$,,none
 bbcsx4
 ifdsx
 enable=g1,g2,g3,g4
 tape=low
 repro=byp,5,17
-!*+7s
+!*+8s
 enddef
 define  sx4c1         00000000000x
 form=c,8.000
@@ -479,7 +617,7 @@ ifdsx
 enable=g1,g3
 tape=low
 repro=byp,5,17
-!*+7s
+!*+8s
 enddef
 define  sx4c2         00000000000x
 form=c,8.000
@@ -491,7 +629,7 @@ ifdsx
 enable=g2,g4
 tape=low
 repro=byp,6,18
-!*+7s
+!*+8s
 enddef
 define  sxcts         00000000000x
 bbcman
@@ -524,90 +662,8 @@ tapeform=7,-165,8,-165,9,-110,10,-110,11,-55,12,-55
 tapeform=13,0,14,0,15,55,16,55,17,110,18,110
 tapeform=19,165,20,165,21,220,22,220,23,275,24,275
 enddef
-define  ucall         00000000000x
-uc=front,*,*,*,*,*,*
-uc
-uc=rear,*,*,*,*,*,*
-uc
-uc=lo,*,*,*,*,*,*
-uc
-uc=dcal,*,*,*,*,*,*
-uc
-uc=+12v,*,*,*,*,*,*
-uc
-uc=sense+,*,*,*,*,*,*
-uc
-uc=lolock,*,*,*,*,*,*
-uc
-uc=-2.73v,*,*,*,*,*,*
-uc
-uc=prisif,*,*,*,*,*,*
-uc
-uc=xif,*,*,*,*,*,*
-uc
-uc=secsif,*,*,*,*,*,*
-uc
-uc=prislo,*,*,*,*,*,*
-uc
-uc=xlo,*,*,*,*,*,*
-uc
-uc=secslo,*,*,*,*,*,*
-uc
-uc=lo5mhz,*,*,*,*,*,*
-uc
-uc=+15ps2,*,*,*,*,*,*
-uc
-uc=28v,*,*,*,*,*,*
-uc
-uc=-15ps1,*,*,*,*,*,*
-uc
-uc=20v,*,*,*,*,*,*
-uc
-uc=+15ps1,*,*,*,*,*,*
-uc
-uc=+5ps1,*,*,*,*,*,*
-uc
-uc=-15ps2,*,*,*,*,*,*
-uc
-uc=+5ps2,*,*,*,*,*,*
-uc
-uc=secs3b,*,*,*,*,*,*
-uc
-uc=x1bias,*,*,*,*,*,*
-uc
-uc=x2bias,*,*,*,*,*,*
-uc
-uc=x3bias,*,*,*,*,*,*
-uc
-uc=pris1b,*,*,*,*,*,*
-uc
-uc=pris2b,*,*,*,*,*,*
-uc
-uc=pris3b,*,*,*,*,*,*
-uc
-uc=secs1b,*,*,*,*,*,*
-uc
-uc=secs2b,*,*,*,*,*,*
-uc
-enddef
-define  ucmon         00000000000x
-ucx=front
-uc
-ucx=rear
-uc
-ucx=lo
-uc
-ucx=dcal
-uc
-ucx=lo5mhz
-uc
-ucx=sense+
-uc
-enddef
-define  ucx           00000000000x
-uc=$,*,*,*,*,*,*
-enddef
 define  unlod         00000000000x
+!+5s
 enable=,
 check=*,-rc
 tape=off
@@ -627,7 +683,7 @@ ifdwb
 enable=g1,g3
 tape=low
 repro=byp,5,17
-!*+7s
+!*+8s
 enddef
 define  wb2c2         00000000000x
 form=c,4.000
@@ -639,7 +695,7 @@ ifdwb
 enable=g2,g4
 tape=low
 repro=byp,6,18
-!*+7s
+!*+8s
 enddef
 define  wb4c1         00000000000x
 form=c,8.000
@@ -651,7 +707,7 @@ ifdwb
 enable=g1,g3
 tape=low
 repro=byp,5,17
-!*+7s
+!*+8s
 enddef
 define  wb4c2         00000000000x
 form=c,8.000
@@ -663,9 +719,9 @@ ifdwb
 enable=g2,g4
 tape=low
 repro=byp,6,18
-!*+7s
+!*+8s
 enddef
-define  vlbainit      00000000000 
+define  vlbainit      00000000000
 bbc01=addr
 bbc02=addr
 bbc03=addr
@@ -684,4 +740,9 @@ form=addr
 rec=addr
 ifdab=addr
 ifdcd=addr
+enddef
+define  rel           00000000000 
+rec=release
+!+3s
+rec=release
 enddef

@@ -16,6 +16,7 @@ C
 C  COMMON:
 C
       include '../include/fscom.i'
+      include 'bosscm.i'
 C
 C
 C  LOCAL:

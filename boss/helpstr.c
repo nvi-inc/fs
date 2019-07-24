@@ -88,7 +88,8 @@ int rlen;
       ch1=*(decloc+1);
       ch2=*(decloc+2);
  
-      if ((ch1==equip1 || ch1=='_') && (ch2==equip2 || ch2=='_')) {
+      if ((ch1==equip1 || ch1=='_' || (ch1 =='m' && equip1 == '4')) &&
+          (ch2==equip2 || ch2=='_' || (ch2 =='m' && equip2 == '4'))   ) {
         strcpy(runstr,outbuf);
         *ierr = 0;
         break;

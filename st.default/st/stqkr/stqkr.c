@@ -1,6 +1,5 @@
-/* stqkr - C version of station command controller
-   NRV 920527  Stub version
-*/
+/* stqkr - C version of station command controller */
+
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -28,8 +27,9 @@ main()
     void skd_wait();
 
 /* Set up IDs for shared memory, then assign the pointer to
-   "fs", for readability.
-*/
+ * "fs", for readability.
+ */
+
   setup_ids();
   fs = shm_addr;
   setup_st();

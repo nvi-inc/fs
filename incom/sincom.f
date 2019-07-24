@@ -134,6 +134,9 @@ c
       call fs_set_stchk(stchk(3),1)
       stchk(4)=0
       call fs_set_stchk(stchk(4),1)
+c
+      sterp=0
+      call fs_set_sterp(sterp)
 C
 C     2. Now initialize everything which is non-zero.
 C
@@ -141,7 +144,7 @@ C
         horaz(i) = -1.0
         horel(i) = -1.0
       enddo
-      fsver = 8.20
+      fsver = 8.21
 C                   Initialize the time-like variables
 C                   Initialize previous segment name for LINKP
       do i=1,15

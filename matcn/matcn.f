@@ -222,7 +222,7 @@ C
         itimeout=modtbl(3,i)
         call fs_get_ibmat(ibmat)
         itn=modtbl(3,i)+1.5*10.*1100./float(ibmat)+5.0001
-        if (ichcm_ch(modtbl(1,idev),1,'tp').eq.0) ktp=.true.
+        ktp=ichcm_ch(modtbl(1,idev),1,'tp').eq.0
 C
         idum=ichmv(ibuf,1,2h# ,1,1)
         idum=ichmv(ibuf,2,modtbl(2,idev),1,2)

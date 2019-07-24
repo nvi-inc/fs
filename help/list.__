@@ -1,24 +1,25 @@
-list - display currently active schedule
-Syntax:      list=start,#lines
+list - display portion of currently active schedule
+Syntax:         list=start,#lines
 
-Response:    display of 10 lines of schedule
+Response:       display of 10 lines of schedule
 
 
 Settable parameters:
-start          place in the schedule to begin listing. May be one of the
-               following:
-                  null to start two lines before the current line 
-                  #line, where line is the starting line number, to start
-                  at a particular line number in a schedule
-                  time, in standard SNAP time format, to start at the line
-                  which has a time equal to or later than time
-#lines         number of lines to list, default 10
+start           place in the schedule to begin listing. May be one of the
+                following:
+                   null to start two lines before the line currently being executed
+
+                   #line, where line is the starting line number, to start at a
+                   particular line number in a schedule
+                   time, in standard SNAP time format, to start at the line which
+                   has a time equal to or later than time
+#lines          number of lines to list, default 10
 
 Monitor-only parameters: none
 
-Comments: Ten lines of the current schedule, with line numbers, are listed on
-the terminal. If the current executing line of the schedule is included in the
-range listed, it is identified by a leading right arrow >. Only the active
-schedule may be listed with this command. This is a display-only response -
-no information is logged.
+Comments: Ten lines of the current schedule, with line numbers, are listed on the
+terminal. If the current executing line of the schedule is included in the range
+listed, it is identified by a leading right arrow >. Only the active schedule
+may be listed with this command. This is a display-only response - no information
+is logged.
 

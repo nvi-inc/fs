@@ -210,7 +210,13 @@ Move:
 
 /* append bell if an error */
 
-Append:
+Append:           /* send message to station error program */
+      if(*cp2 == 'b' && shm_addr->sterp !=0) {
+        class=0;
+        cls_snd(&class, buf, strlen(buf), 0, 0);
+        ip[0]=class;
+        skd_run("sterp", 'n', ip); 
+      }
       if (*cp2 == 'b') strcat(buf, "\007");
       printf("%s\n", buf);
     }

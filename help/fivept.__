@@ -1,8 +1,7 @@
 fivept - five or more point source scan
-Syntax:      fivept=axis,rep,pts,stp,intp,dev
+Syntax:         fivept=axis,rep,pts,stp,intp,dev
 
-Response:    fivept/axis,rep,pts,stp,intp,dev,cal,beam,f
-             lux
+Response:       fivept/axis,rep,pts,stp,intp,dev,cal,beam,flux
 
 
 Settable parameters:
@@ -11,73 +10,69 @@ axis            Axis system for scan.
                    azel = Azimuth/Elevation
                    xyns = X/Y, +X East
                    xyew = X/Y, +X South  (unimplemented)
-rep             number of repetitions: -10 to -1 and 1 to 10 allowed.
-                Default is -2. Negative repetition counts are described in the
-                fivpt manual.
-pts             number of points on each axis, if even, it is increased by 1.
-                pts must be between 3 and 31. Default is 7. 
+rep             number of repetitions: -10 to -1 and 1 to 10 allowed. Default is
+                -2. Negative repetition counts are described in the fivpt manual.
+pts             number of points on each axis, if even, it is increased by 1. pts
+                must be between 3 and 31. Default is 7. 
 stp             Step size for distance between points, in multiples of a
                 beamwidth. Default is 0.5. 
 intp            integration period, 1 to 10 seconds.
 dev             mnemonic for the device to be used as the detector. Standard
-                devices are allowed. Note that for Mark III equipment, the
-                video converter USB or LSB was set up with the vc
-                command. The module which has the specified detector 
-                must have been set up. The IF distributor must be set up
-                and, for Mark III, must be in remote. Default detector is i1
-                for Mark III, ia for VLBA.
+                devices are allowed. Note that for Mark III equipment, the video
+                converter USB or LSB was set up with the vc command. The module
+                which has the specified detector  must have been set up. The IF
+                distributor must be set up and, for Mark III, must be in remote.
+                Default detector is i1 for Mark III, ia for VLBA.
 
 Display-only parameters:
 cal             calibration noise source temperature in degrees K. This is
-                determined from the last caltempx commands in
-                conjunction with the patch (Mark III) or bbc (VLBA)
-                command for the specified device.
-beam            The full width half maximum beam size degrees. This is
-                determined from the last beamx commands in conjunction
-                with the patch (Mark III) or bbc command.
-flux            The apparent flux of the source. This is determined from the
-                last fluxx commands in conjunction with the patch
-                command.
+                determined from the last caltempx commands in conjunction with
+                the patch (Mark III) or bbc (VLBA) command for the specified
+                device.
+beam            The full width half maximum beam size degrees. This is determined
+                from the last beamx commands in conjunction with the patch (Mark
+                III) or bbc (VLBA) command.
+flux            The apparent flux of the source. This is determined from the last
+                fluxx commands in conjunction with the patch (Mark III) or bbc
+                (VLBA) command.
 
 Comments: 
-The parameters should be setup with a fivept=... command. A scan is
-started by issuing a simple fivept command (i.e. with no parameters), this
-will determine the current values of the display only parameters and then
-schedule an external program, fivpt, which then uses the Field System to
-perform the necessary measurements. fivpt must be included in the fspgm.ctl
-control file so that it will automatically be initialized when the Field System
-is started. See the fivept manual in Volume 2.
+The parameters should be setup with a fivept=... command. A scan is started by
+issuing a simple fivept command (i.e. with no parameters), this will determine
+the current values of the display only parameters and then schedule an external
+program, fivpt, which then uses the Field System to perform the necessary
+measurements. fivpt must be included in the fspgm.ctl control file so that it
+will automatically be initialized when the Field System is started. See the
+fivept manual in Volume 2.
 
-The scan is performed about the current commanded position. Any offsets that
-are in use are included. If the scan is successful the total offsets for the
-selected axis type are updated.
+The scan is performed about the current commanded position. Any offsets that are
+in use are included. If the scan is successful the total offsets for the selected
+axis type are updated.
 
-It is recommended that nothing else be done, e.g. running a schedule, while
-this command is executing. Since this command may run for an extended
-period of time, a mechanism has been supplied for aborting: enter sy=br
-fivpt. The program will then return the antenna to the last good offset for
-each axis. If there was no good offset measurement on an axis, then the
-original offset is used.
+It is recommended that nothing else be done, e.g. running a schedule, while this
+command is executing. Since this command may run for an extended period of time,
+a mechanism has been supplied for aborting: enter sy=brk fivpt. The program
+will then return the antenna to the last good offset for each axis. If there was
+no good offset measurement on an axis, then the original offset is used.
 
-In order for this command to work, the following conditions must be met: (1)
-the detector device have been setup by the Field System, (2) the lo and
-upconv commands have been issued, (3) the IF distributor has been setup by
-the Field System and is in remote (Mark III only), (4) the appropriate
-beamx=... and caltempx=.... must have been issued. If a Mark III
-video converter is used as the detector then the patch command must have
-been issued as well. If estimates of performance based on the source flux are
-desired, then the appropriate fluxx=... command must have been issued as
-well.
+In order for this command to work, the following conditions must be met: (1) the
+detector device have been setup by the Field System, (2) the lo and upconv
+commands have been issued, (3) the IF distributor or IF3 module has been setup
+by the Field System and is in remote (Mark III only), (4) the appropriate
+beamx=... and caltempx=.... must have been issued. If a Mark III video
+converter is used as the detector then the patch command must have been issued
+as well. If estimates of performance based on the source flux are desired, then
+the appropriate fluxx=... command must have been issued as well.
 
-Two procedures must be available: calonfp and calofffp, which are used
-by fivpt to turn the noise diode on and off respectively. The recommended
-form for these procedures is:
+Two procedures must be available: calonfp and calofffp, which are used by
+fivpt to turn the noise diode on and off respectively. The recommended form for
+these procedures is:
 
-CALONFP:     CALON
-             !+1S 
+calonfp:     calon
+             !+1s 
 
-CALOFFFP:    CALOFF
-             !+1S 
+calofffp:    caloff
+             !+1s 
 
 calon and caloff are local procedures that do whatever is necessary to turn
 the noise source on and off.

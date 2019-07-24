@@ -60,6 +60,7 @@ C
       character*34 pathname
 C               - file names
       character*74 lnam1,lnam2,ibc,ibc2
+      character*80 ibcd
       integer trimlen, fnblnk
       character*40 cmessage
       logical kerr
@@ -120,7 +121,7 @@ C     DL - list procedures in active procedure file.
         ix=1
         call f_rewind(idcb3,ierr)
         if (ierr.ne.0) goto 990
-        ibc = ' '
+        ibcd = ' '
         len = 0
         do while (len.ge.0)
           call f_readstring(idcb3,ierr,ibc2,len)
@@ -129,21 +130,21 @@ C     DL - list procedures in active procedure file.
 C     Check for DEFINE.
           if (ibc2(1:6).eq.'define') then
 C     Move name to print buffer.
-            ibc(ix:ix+11) = ibc2(9:20)
+            ibcd(ix:ix+11) = ibc2(9:20)
             ix=ix+13
-            if(ix.lt.66) go to 120
+            if(ix.lt.79) go to 120
 C         Print buffer and reset pointer.
-            nch = trimlen(ibc)
-            if (nch.gt.0) write(luo,2101) ibc(:nch)
+            nch = trimlen(ibcd)
+            if (nch.gt.0) write(luo,2101) ibcd(:nch)
 2101                      format(1x,a)
-            ibc = ' '
+            ibcd = ' '
             ix=1
           end if
 120     end do
 C       Write last line.
 130     if(ix.gt.1) then
-          nch = trimlen(ibc)
-          if (nch.gt.0) write(luo,2102) ibc(:nch)
+          nch = trimlen(ibcd)
+          if (nch.gt.0) write(luo,2102) ibcd(:nch)
 2102                    format(1x,a)
         end if
         go to 900

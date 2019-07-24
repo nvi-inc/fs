@@ -1,35 +1,37 @@
 help or ? - display on-line help information
-Syntax:      help=command
-             ?=command
+Syntax:         help=command
+                ?=command
 
-Response:    displays information on the screen
+Response:       displays information on the screen
 
 
 Settable Parameters:
 command      The name of any SNAP command.
 
 Comments:
-This command displays available information on the specified SNAP
-command. Either the word help or the question mark may be used. Typing
-help or ? alone gives a directory of available help information.
+This command displays available information on the specified SNAP command. Either
+the word help or the question mark may be used. Typing help or ? alone gives
+a directory of available help information.
 
-This Field System command works the same as the UNIX system man
-command which uses the UNIX more command. The help information is
-displayed one screen at a time. If the information is longer than about 20
-lines, you see --More-- at the bottom of the screen. To continue listing,
-press the space bar. To exit from the command, type the letter q (not echoed
-on the screen).
+This Field System command works the same as the UNIX system man command which
+uses the UNIX more command. The help information is displayed one screen at a
+time. If the information is longer than about 20 lines, you see --More-- at the
+bottom of the screen. To continue listing, press the space bar. To exit from the
+command, type the letter q (not echoed on the screen).
 
-When you see --No more-- at the bottom of the screen, you have reached
-the end of the help information. If you press the space bar one more time the
-window will be closed. While the text is displayed in the window you can
-use the scroll bar to move around within the text.
+When you see --No more-- at the bottom of the screen, you have reached the end
+of the help information. If you press the space bar one more time the window will
+be closed. While the text is displayed in the window you can use the scroll bar
+to move around within the text.
 
-The help information is displayed in a temporary window that is opened in
-the center of the screen. When you type q, or if you press the space bar
-when --No more-- is displayed, the window will be closed.
+The help information is displayed in a temporary window that is opened in the
+center of the screen. When you type q, or if you press the space bar when --No
+more-- is displayed, the window will be closed.
 
 The help information is kept in files in the directory /usr2/fs/help, one file
-per command. The content of the files is the ASCII version of the pages in
-this manual.
+per command. The content of the files is the ASCII version of the pages in this
+manual. Station-dependent help files are found in /usr2/st/help.
 
+If no help is available for a command, a message to that effect will be displayed
+in the log output window. You will also receive the mssage if you request help
+for a command that is not defined for your equipment.

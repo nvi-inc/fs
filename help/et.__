@@ -1,16 +1,16 @@
 et - end recording on tape drive
-Syntax:      et
+Syntax:         et
 
-Response:    et/acknowledgement
+Response:       et/acknowledgement
 
 
 Parameters: none
 
 Comments:
-Tape motion is stopped when this command is issued. For Mark III, the record
-bit is disabled. For Mark IV, the enabled heads are not changed. For VLBA,
-no change is made in the track group enables. Reproduce mode is not changed;
-the low tape sensor is not changed. 
+Tape motion is stopped when this command is issued. For Mark III, the record bit
+is disabled. For Mark IV, the enabled heads are not changed. For VLBA, no change
+is made in the track group enables. Reproduce mode is not changed; the low tape
+sensor is not changed. 
 
 For Mark IV, see the st command for how to set up bypass mode.
 

@@ -1,7 +1,7 @@
 wakeup - ring bells to alert operator
-Syntax:      wakeup
+Syntax:         wakeup
 
-Response:    none
+Response:       none
 
 
 Settable Parameters: none

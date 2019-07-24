@@ -1,8 +1,0 @@
-sh /usr2/fs/backup/backupc
-sh /usr2/fs/backup/backupf
-sh /usr2/fs/backup/backupi
-sh /usr2/fs/backup/backupm
-sh /usr2/fs/backup/backupo
-sh /usr2/fs/backup/backupp
-sh /usr2/fs/backup/backups
-ls /tmp/*.Z | cpio -ovcB > /dev/rdsk/f1q18dt

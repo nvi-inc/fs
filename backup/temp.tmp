@@ -1,5 +1,0 @@
-#  FS/ST DEFAULT FILES
-find /usr2/fs/st/ -print > /tmp/fs/fsd
-cat /tmp/fs/fsd | cpio -ovcB > /tmp/fs/fsd.cpio
-rm /tmp/fs/fsd
-/usr/bin/X11/compress /tmp/fs/fsd.cpio

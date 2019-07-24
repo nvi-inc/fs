@@ -175,10 +175,6 @@ C       endif
         else if (itask.ge.11.and.itask.le.14) then
           call flux(ip,itask)
         endif
-      else if (isub.eq.20) then
-        if (itask.eq.1) then
-          call ucmo(ip)
-        endif
       else if (isub.eq.21) then
         if (itask.eq.1) then
           call pass(ip)

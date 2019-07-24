@@ -1,9 +1,0 @@
-cd /usr2
-find ./st -name '*.f' -print > FSS
-find ./st -name '*.c' -print >> FSS
-find ./st -name '*.i' -print >> FSS
-find ./st -name '*.h' -print >> FSS
-find ./st -name 'makefile*' -print >> FSS
-cat FSS | cpio -ovcB > /tmp/fss.cpio
-rm FSS
-compress /tmp/fss.cpio

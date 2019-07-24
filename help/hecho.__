@@ -1,16 +1,16 @@
 hecho - head control communications echo
-Syntax:      hecho=on/off
+Syntax:         hecho=on/off
 
-Response:    hecho/on/off
+Response:       hecho/on/off
 
 
 Settable parameters:
-on/off         ON to turn echo on, OFF to turn echo off.
+on/off          ON to turn echo on, OFF to turn echo off.
 
 Monitor-only parameters: none
 
 Comments: 
-This command prints debug information for commands that use the head
-positioner (peak and 
+This command prints debug information for commands that use the head positioner
+(peak and 
 locate).
 

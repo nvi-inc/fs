@@ -5,6 +5,7 @@ C           and sends this to DDOUT for starting a new log.
 C
       include '../include/fscom.i'
       include '../include/dpi.i'
+      include 'bosscm.i'
 C
 C  INPUT:
 C

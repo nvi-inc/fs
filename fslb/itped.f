@@ -96,7 +96,9 @@ C
 202   continue
 C     IF (IWHAT.NE.-2) GOTO 203 
       if (ic1-1+3.gt.ic2) return
-      itped = ichmv(ias,ic1,ldir,index*3+1,3) 
+      if(index.eq.1.or.index.eq.0) then
+        itped = ichmv(ias,ic1,ldir,index*3+1,3) 
+      endif
       return
 C 
 C  Code -3, LOCAL/REMOTE. 

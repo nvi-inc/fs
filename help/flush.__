@@ -1,14 +1,14 @@
 flush - flush operator command stream
-Syntax:      flush
+Syntax:         flush
 
-Response:    none
+Response:       none
 
 
 Parameters: none
 
 Comments: 
-This command re-initializes the operator procedure stack, unblocks the
-operator command stream, and terminates execution of the current procedure
-in the operator stream. There is no effect on the schedule command stream.
-This is an immediate execution operator command.
+This command re-initializes the operator procedure stack, unblocks the operator
+command stream, and terminates execution of the current procedure in the operator
+stream. There is no effect on the schedule command stream. This is an immediate
+execution operator command.
 

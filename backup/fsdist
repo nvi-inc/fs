@@ -1,47 +1,25 @@
-mkdir /tmp/fs
-cd /tmp/fs
-#  ALL THE C SOURCE CODE FILES
-find /usr2/fs/ -name '*.c' -print > /tmp/fs/fsc
-cat /tmp/fs/fsc | cpio -ovcB > /tmp/fs/fsc.cpio
-rm /tmp/fs/fsc
-/usr/bin/X11/compress /tmp/fs/fsc.cpio
-#  FS/ST DEFAULT FILES
-find /usr2/fs/st/ -print > /tmp/fs/fsd
-cat /tmp/fs/fsd | cpio -ovcB > /tmp/fs/fsd.cpio
-rm /tmp/fs/fsd
-/usr/bin/X11/compress /tmp/fs/fsd.cpio
-#  ALL THE FORTRAN SOURCE CODE FILES
-find /usr2/fs/ -name '*.f' -print > /tmp/fs/fsf
-cat /tmp/fs/fsf | cpio -ovcB > /tmp/fs/fsf.cpio
-rm /tmp/fs/fsf
-/usr/bin/X11/compress /tmp/fs/fsf.cpio
-#  MAKEFILES, INCLUDE FILES, AND HEADER FILES
-find /usr2/fs/ -name 'makefile*' -print > /tmp/fs/fsi
-find /usr2/fs/ -name '*.i' -print >> /tmp/fs/fsi
-find /usr2/fs/ -name '*.h' -print >> /tmp/fs/fsi
-cat /tmp/fs/fsi | cpio -ovcB > /tmp/fs/fsi.cpio
-rm /tmp/fs/fsi
-/usr/bin/X11/compress /tmp/fs/fsi.cpio
-#  HELP FILES AND MISC. FILES
-find /usr2/fs/help/ -print > /tmp/fs/fsm
-find /usr2/fs/misc/ -print >> /tmp/fs/fsm
-find /usr2/fs/backup/ -print >> /tmp/fs/fsm
-ls /usr2/fs/timeset/libcposix.a >> /tmp/fs/fsm
-ls /usr2/fs/boss/helpsh >> /tmp/fs/fsm
-ls /usr2/fs/setb/setb >> /tmp/fs/fsm
-cat /tmp/fs/fsm | cpio -ovcB > /tmp/fs/fsm.cpio
-rm /tmp/fs/fsm
-/usr/bin/X11/compress /tmp/fs/fsm.cpio
-#  OPER FILES
-find /usr2/fs/oper/ -print > /tmp/fs/fso
-cat /tmp/fs/fso | cpio -ovcB > /tmp/fs/fso.cpio
-rm /tmp/fs/fso
-/usr/bin/X11/compress /tmp/fs/fso.cpio
-#  FS CONTROL FILES
-find /usr2/fs/control/ -print > /tmp/fs/fsp
-cat /tmp/fs/fsp | cpio -ovcB > /tmp/fs/fsp.cpio
-rm /tmp/fs/fsp
-/usr/bin/X11/compress /tmp/fs/fsp.cpio
-#  FIELD SYSTEM INSTALLATION SCRIPT
-cp /usr2/fs/backup/fsinstall /tmp/fs/fsinstall
-ls /tmp/fs/* | cpio -ovcB > /dev/rdsk/f1q18dt
+# make distribution floppy for version 8.2, execute by root
+#
+echo "Removing old /tmp/fsdist directory"
+rm -rf /tmp/fsdist
+mkdir /tmp/fsdist
+#
+echo "Making file list"
+cd /usr2
+find fs  -type d -print > /tmp/fsdist/FSS
+find fs \! -name '*.o' \! -name '*.a' \! -perm -1 -print >> /tmp/fsdist/FSS
+find fs/st.default -perm -1 ! -type d -print >> /tmp/fsdist/FSS
+#
+echo "Making cpio archive"
+ulimit 409600
+cat /tmp/fsdist/FSS | cpio -oc >/tmp/fsdist/fs.cpio
+#
+echo "Compressing archive"
+/usr/bin/X11/compress /tmp/fsdist/fs.cpio
+#
+echo "Copying installation scripts"
+cd /usr2/fs/backup
+find *.82 -print |cpio -pmdu /tmp/fsdist
+#
+echo "Removing file list"
+rm -rf /tmp/fsdist/FSS

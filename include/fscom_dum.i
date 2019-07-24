@@ -22,7 +22,7 @@ c
      . ionsor, ipashd(2), ispeed, iremtp, ienatp,
      . idirtp, imodfm, iratfm, inp1if, inp2if, ndevlog, iaxis(2),
      . rack, drive, imaxtpsd, ichvlba(18), iskdtpsd, itpthick,
-     . vform_rate, vgroup(4), capstan, stchk(4)
+     . vform_rate, vgroup(4), capstan, stchk(4), sterp
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3), lgen(2),
@@ -54,7 +54,7 @@ c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 
      . lfreqv, idevant, idevgpib, idevlog, idevmcb, hwid, 
-     . modelti_fs, stcnm
+     . modelti_fs, stcnm, sterp
 
 
       CHARACTER*8 LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP

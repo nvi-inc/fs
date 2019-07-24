@@ -82,8 +82,8 @@ int iyear;
 	standend();
   } else mvaddstr(ROW1,COL1+40,"    "); 
 
-  move(ROW1,COL1+56);
-  preflt(outf,shm_addr->tempwx,-4,1);
+  move(ROW1,COL1+55);
+  preflt(outf,shm_addr->tempwx,-5,1);
   printw("%s",outfloat);
   move(ROW1,COL1+62);
   standout();

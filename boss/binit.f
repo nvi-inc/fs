@@ -11,6 +11,7 @@ C    LAR  880105  Change LNAMES to contain names instead of hash codes
 C    gag  920713  changed hex index from 1 to 3 to 1 to 7
 C
       include '../include/fscom.i'
+      include 'bosscm.i'
 C
       integer*4 ip(5)                   !  rmpar values from boss
       integer idcbsk(1)                 !  dcss for schedule
@@ -19,6 +20,7 @@ C
       integer ibuf(50)                  !  input buffer containing command
       integer itime(9)                  !  time array returned from spars
       integer lseg(2)                   !  segment name (obsolete)
+      integer it(5)
       integer ieqhex(7)
       data ieqhex /z'01',z'02',z'03',z'04',z'05',z'06',z'07'/
 C
@@ -196,6 +198,7 @@ C     1.18 Start first log file
 C
       call char2hol('station ',illog,1,8)
       call fs_set_llog(illog)
+      call fc_rte_time(it,iyear)
       call newlg(ibuf,2h::)
     
       call put_buf(iclopr,29H"Boss Initialization Complete, -29,0,0)

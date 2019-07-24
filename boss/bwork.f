@@ -18,6 +18,7 @@ C                logit4 call for the TI, time list, command print out.
 C     920922 gag Consolidated quikr routines back into one program.
 C
       include '../include/fscom.i'
+      include 'bosscm.i'
 C
       dimension ip(5)          !  array for rmpar parameters
       dimension lnames(12,1)

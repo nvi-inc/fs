@@ -1,0 +1,41 @@
+#!/bin/sh
+# This scripts deletes the old versions of files updated by stupdate, root only
+#
+echo "******************************************************************"
+echo "*  This script will delete old files and directories left from   *"
+echo "*  stupdate script.                                              *"
+echo "******************************************************************"
+echo "\nCAUTION: This script will delete the following directories and
+echo "their contents:"
+echo "                /usr2/oper.old"
+echo "                /usr2/prog.old"
+echo "                /usr2/dos.old"
+echo "and the following files:"
+echo "                /etc/rc2.d/x.SzzSTALLOC"
+echo "\nDo you wish to continue with the deleting? (y=yes, n=no) : \c" 
+badans=true
+while [ "$badans" = "true" ]
+do
+  read ans
+  case "$ans" in
+    y|yes) echo "\nO.K. Continuing with delete ... "
+           badans=false
+           ;;
+    n|no)  echo "\nO.K. Exiting."
+           exit
+           ;;
+    *)     echo "\nPlease answer with y=yes or n=no : \c"
+  esac
+done
+#
+echo "Removing old directories"
+cd /usr2
+rm -rf oper.old
+rm -rf prog.old
+rm -rf dos.old
+#
+echo "Removing old files"
+cd /etc/rc2.d
+rm -f x.SzzSTALLOC
+#
+echo "Done."
