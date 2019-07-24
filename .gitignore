@@ -58,3 +58,4 @@ vex/y.tab.h
 
 *.old
 *.new
+*.test
