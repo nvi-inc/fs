@@ -17,7 +17,8 @@ struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
 long ip[5];                           /* ipc parameters */
 {
-      int ilast, ierr, ind, ichold, i, count;
+      int ilast, ierr, ind, i, count, ichold;
+      int kenable, klowtape, kmove, kload;
       char *ptr;
       struct req_rec request;       /* mcbcn request record */
       struct req_buf buffer;        /* mcbcn request buffer */
@@ -34,7 +35,11 @@ long ip[5];                           /* ipc parameters */
       void skd_run(), skd_par();      /* program scheduling utilities */
       void venable81mc();
 
-      ichold= -99;                    /* check vlaue holder */
+      ichold = -99;
+      kenable = FALSE;
+      kmove = FALSE;
+      kload = FALSE;
+      klowtape = FALSE;
 
       ini_req(&buffer);
 
@@ -92,6 +97,7 @@ long ip[5];                           /* ipc parameters */
 
             request.addr=0xb3; /* load tape into vacuum */
             request.data=0x01; add_req(&buffer,&request);
+            kload=TRUE;
             goto parse;
 
          } else if(0==strcmp(command->argv[0],"unload")) {
@@ -119,7 +125,11 @@ long ip[5];                           /* ipc parameters */
             request.data=0x01; add_req(&buffer,&request);
             shm_addr->idirtp=-1;
             shm_addr->lowtp=1;
-            goto mcbcn;
+
+            kenable = TRUE;
+            kmove = TRUE;
+            klowtape = TRUE;
+            goto parse;
 
          } else if(0==strcmp(command->argv[0],"bot")) {
            verr=0;
@@ -162,6 +172,8 @@ long ip[5];                           /* ipc parameters */
             request.addr=0xb1; request.data=0x00; 
             shm_addr->idirtp=-1;
             add_req(&buffer,&request);
+            kenable = TRUE;
+            kmove = TRUE;
             goto parse;
 
          } else if(0==strcmp(command->argv[0],"eot")) {
@@ -205,6 +217,8 @@ long ip[5];                           /* ipc parameters */
             request.addr=0xb1; request.data=0x01; 
             shm_addr->idirtp=-1;
             add_req(&buffer,&request);
+            kenable = TRUE;
+            kmove = TRUE;
             goto parse;
 
          } else if(0==strcmp(command->argv[0],"release")) {
@@ -222,10 +236,9 @@ long ip[5];                           /* ipc parameters */
             goto mcbcn;
 
          } else { 
-             end_req(ip,&buffer);
-             ierr = rec_dec(command->argv[0],ip);
+             ierr = rec_dec(command->argv[0],&buffer,ip);
+             kmove = TRUE;
              if (ierr!=0) goto error;
-             goto display;
          }
 
 parse:
@@ -234,14 +247,29 @@ parse:
 
       ichold=shm_addr->check.rec;
       shm_addr->check.rec=0;
-      
+
 mcbcn:
       end_req(ip,&buffer);
       skd_run("mcbcn",'w',ip);
       skd_par(ip);
 
-      if (ichold != -99) shm_addr->check.rec=ichold;
-      if (ichold >= 0) shm_addr->check.rec=ichold % 1000 + 1;
+      if (ichold != -99) {
+         shm_addr->check.rec=ichold;
+         if (kmove) {
+            shm_addr->check.vkmove = FALSE;
+            rte_rawt(&shm_addr->check.rc_mv_tm);
+         }
+         if (kenable)
+            shm_addr->check.vkenable = FALSE;
+         if (klowtape)
+            shm_addr->check.vklowtape = FALSE;
+         if (kload){
+            shm_addr->check.vkmove = TRUE;
+            rte_rawt(&shm_addr->check.rc_mv_tm);
+         }
+      }
+      if (ichold >= 0)
+         shm_addr->check.rec=ichold % 1000 + 1;
 
 display:
       if(ip[2]<0) return;

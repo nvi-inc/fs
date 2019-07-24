@@ -141,7 +141,7 @@ C
         horaz(i) = -1.0
         horel(i) = -1.0
       enddo
-      fsver = 8.17
+      fsver = 8.18
 C                   Initialize the time-like variables
 C                   Initialize previous segment name for LINKP
       do i=1,15
@@ -178,6 +178,14 @@ C                   Initialize previous segment name for LINKP
       kcheck = .false.
       khalt = .false.
       call fs_set_khalt(khalt)
+      ichvkrepro=.false.
+      call fs_set_ichvkrepro(ichvkrepro)
+      ichvkenable=.false.
+      call fs_set_ichvkenable(ichvkenable)
+      ichvkmove=.false.
+      call fs_set_ichvkmove(ichvkmove)
+      ichvklowtape=.false.
+      call fs_set_ichvklowtape(ichvklowtape)
       imonds = -1
       ichper = 0
       tperer = 0.5

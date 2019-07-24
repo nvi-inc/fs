@@ -6,6 +6,8 @@
 #include <time.h>        /* time function definition header file */
 #include <sys/types.h>   /* data type definition header file */
 
+#include "fmset.h"
+
 extern unsigned char inbuf[512];      /* class i-o buffer */
 extern unsigned char outbuf[512];     /* class i-o buffer */
 extern char setcmd[];
@@ -80,7 +82,9 @@ ip[1] = outclass; /* class number */
 ip[2] = 1;        /* only one buf */
 ip[3] = 0;
 ip[4] = 0;
+nsem_take("fsctl",0);
 skd_run("mcbcn",'w',ip);
+nsem_put("fsctl");
 
 /* get reply from mcbcn */
 ip[0] = ip[1] = ip[2] = ip[3] = ip[4] = 0;
@@ -89,17 +93,11 @@ inclass = ip[0];
 if( ip[1] != 1 )
 	{
 	endwin();
-	printf("No reply from formatter - error %d\n", ip[2] );
-	cls_clr(outclass);
-	cls_clr(inclass);
-	exit(0);
-	}
-if( ip[2] != 0 )
-	{
-	endwin();
 	printf("Error %d from formatter\n",ip[2]);
+        logita(NULL,ip[2],ip+3,ip+4);
 	cls_clr(outclass);
 	cls_clr(inclass);
+        rte_sleep( SLEEP_TIME);
 	exit(0);
 	}
 msgflg = save = 0;
@@ -108,8 +106,10 @@ if ( (nbytes = cls_rcv(inclass, inbuf, 512,
 	{
 	endwin();
 	printf("Wrong len msg - %d bytes received\n" ,nbytes);
+        logita(NULL,-4,"fv","  ");
 	cls_clr(outclass);
 	cls_clr(inclass);
+        rte_sleep( SLEEP_TIME);
 	exit(0);
 	}
 
@@ -118,8 +118,10 @@ if( inbuf[0] | inbuf[1] | inbuf[2] | inbuf[3] ) /* check completion code */
 	endwin();
 	printf("Bad completion code from formatter %d %d %d %d\n",
                inbuf[0],inbuf[1],inbuf[2],inbuf[3]);
+        logita(NULL,-5,"fv","  ");
 	cls_clr(outclass);
 	cls_clr(inclass);
+        rte_sleep( SLEEP_TIME);
 	exit(0);
 	}
 

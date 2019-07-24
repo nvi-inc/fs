@@ -92,7 +92,7 @@ C
 C  2.2  Voltage
 C
       ich=icm+1
-      write(6,9100) indx
+c     write(6,9100) indx
 9100  format(10x,"the indx is ",i6,/)
       call gtprm(ibuf,ich,nchar,2,parm,ierr)
       if(cjchar(parm,1).eq.',') then

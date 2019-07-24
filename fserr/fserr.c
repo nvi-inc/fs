@@ -63,15 +63,23 @@ main(){
 /* initializing the array with the error information using subroutine */
 /* listinit.                                                          */
 
-  if ((dcbfs=fopen(CTLST, "r"))==NULL) goto Suspend;
-  listinit(dcbfs,list);
-  fclose(dcbfs);
+  if ((dcbfs=fopen(CTLST, "r"))==NULL) {
+    fprintf(stderr,"fserr: error opening %s\n",CTLST);
+    perror("fserr");
+  } else {
+    listinit(dcbfs,list);
+    fclose(dcbfs);
+  }
 
 /* Read in the error messages from FS control file, fserr */
 
-  if ((dcbfs=fopen(CTLFS, "r"))==NULL) goto Suspend;
-  listinit(dcbfs,list);
-  fclose(dcbfs);
+  if ((dcbfs=fopen(CTLFS, "r"))==NULL) {
+    fprintf(stderr,"fserr: error opening %s\n",CTLFS);
+    perror("fserr");
+  } else {
+    listinit(dcbfs,list);
+    fclose(dcbfs);
+  }
 
   skd_wait("fserr", ip, 0);
   if(ip[0]==-1) exit(-1);
@@ -97,8 +105,9 @@ Repeat:
     for(i=0;i<79;++i)
       inbuf[i]=inbuf[i+1];
 
-  for(i=0;i<80;++i)        /* use upper case for search */
+  for(i=0;i<80;++i) {      /* use upper case for search */
       inbuf[i]=toupper(inbuf[i]);
+  }
 
   i = sscanf(inbuf,"%2s %d",entry.buf,&entry.off);
 

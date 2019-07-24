@@ -4,7 +4,8 @@
       integer*4 ip(5)
       integer ih,im,is,ics
 c
-      integer centisec,it(6)
+      integer it(6)
+      integer*4 centisec
 c
       call fc_rte_time(it,it(6))
       centisec=ics-it(1)

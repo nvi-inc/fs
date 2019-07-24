@@ -6,7 +6,7 @@ C  LOCAL VARIABLES
 
       integer*4 secs_fm,secs_bef,secs_aft,diff_bef,diff_aft
       integer*4 centisec(2)
-      integer it(6)
+      integer it(6),rn_take
       integer ip(5)
 C     TIMTOL - tolerance on comparison between formatter and HP 
       integer*4 timtol,diff_both
@@ -21,7 +21,9 @@ C
       nerr = 0
 c
 50    continue
+      iold=rn_take('fsctl',0)
       call fc_get_vtime(centisec,it,ip)
+      call rn_put('fsctl')
       if (ip(3).lt.0) then
          nerr=nerr+1
          if(nerr.le.3) goto 50

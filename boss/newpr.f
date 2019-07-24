@@ -51,6 +51,8 @@ C     IREC,IOFF - position information for current procedure
       dimension itime(6),lprocn(6)
       character*80 ibc
       integer*2 ib(40)
+      integer*4 logsecs,seconds,prsecs
+      integer itpr(6)
       equivalence (ib,ibc)
 C
 C
@@ -84,16 +86,29 @@ C     the time the log file was started, then we are finished here.
 C     Otherwise, drop through to the logging of this procedure.
 C
 300   continue
-      if (ias2b(ib,23,2).gt.itmlog(6)-1900) goto 600
-      if (ias2b(ib,23,2).lt.itmlog(6)-1900) goto 400
-C                   First check the year
-      if (ias2b(ib,25,3).gt.itmlog(5)) goto 600
-      if (ias2b(ib,25,3).lt.itmlog(5)) goto 400
-C                   Then check the day number
-      timlog = itmlog(4)*3600.0+itmlog(3)*60.0+itmlog(2)
-      timprc = ias2b(ib,28,2)*3600.0+ias2b(ib,30,2)*60.0+
-     .         ias2b(ib,32,2)
-      if (timprc.gt.timlog) goto 600
+      call fc_rte_time(itime,itime(6))
+      call fc_rte2secs(itime,seconds)
+      call fc_rte2secs(itmlog,logsecs)
+      itpr(6)=ias2b(ib,23,2)+1900
+      itpr(5)=ias2b(ib,25,3)
+      itpr(4)=ias2b(ib,28,2)
+      itpr(3)=ias2b(ib,30,2)
+      itpr(2)=ias2b(ib,32,2)
+      itpr(1)=0
+      call fc_rte2secs(itpr,prsecs)
+c
+c just in case the field system time was reset so that it is earlier
+c the previous, check and band-aid around the problem This should only
+c occur when the field system first starts and the computer time
+c is fast
+c 
+      if(seconds.lt.logsecs) then
+        logsecs=seconds
+        do i=1,6
+           itmlog(i)=itime(i)
+        enddo
+      endif
+      if (prsecs.gt.logsecs) goto 600
 C                   Finally check the time of day, if the dates are equal
 C
 C

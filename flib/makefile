@@ -7,7 +7,7 @@ get_buf.o put_buf.o read_fscom.o read_init.o put_bufc.o\
 read_quikr.o run_prog.o setup_fscom.o wait_prog.o write_fscom.o\
 write_init.o write_quikr.o clrcl.o wait_relt.o\
 wait_abst.o susp.o rmpar.o rn_take.o rn_put.o rn_test.o kbreak.o\
-send_break.o clear_prog.o
+send_break.o clear_prog.o wait_abstd.o
 #
 #CFLAGS = -g
 #FFLAGS = -g

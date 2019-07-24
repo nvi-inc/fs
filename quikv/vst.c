@@ -74,12 +74,12 @@ parse:
         /* vacuum not ready (-1) or other error (-2) */
         ierr = verr;
         goto error;
-      }
-      else if (lerr!=0) { 
+      } else if (lerr!=0) { 
         /* error trying to read recorder */
         ierr = lerr;
         goto error;
       }
+
       ini_req(&buffer);
 
 /* all parameters parsed okay, update common */
@@ -104,7 +104,6 @@ parse:
       venable81mc(&request.data,&lcv);
       request.addr=0x81;
       add_req(&buffer,&request);
-/*      memcpy(&shm_addr->venable,&lcv,sizeof(lcv)); */
 
       request.addr=0xb1;
       vstb1mc(&request.data,&lcl); add_req(&buffer,&request);
@@ -115,8 +114,13 @@ mcbcn:
       skd_run("mcbcn",'w',ip);
       skd_par(ip);
 
-      if (ichold != -99) shm_addr->check.rec=ichold;
-      if (ichold >= 0) shm_addr->check.rec=ichold % 1000 + 1;
+      if (ichold != -99) {
+         shm_addr->check.rec=ichold;
+         shm_addr->check.vkmove = TRUE;
+         rte_rawt(&shm_addr->check.rc_mv_tm);
+      }
+      if (ichold >= 0)
+         shm_addr->check.rec=ichold % 1000 + 1;
 
       if(ip[2]<0) return;
       vst_dis(command,ip);

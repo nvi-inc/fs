@@ -76,6 +76,11 @@ main()
          exit( -1);
     }
 
+    if ( 1 == nsem_take("fsctl",1)) {
+       fprintf( stderr,"fsctl semaphore failed\n");
+         exit( -1);
+    }
+
     key=CLS_KEY;
     cls_ini( key);
 

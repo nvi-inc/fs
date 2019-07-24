@@ -29,6 +29,11 @@ C                   Command names list, and procedure lists
       equivalence (ibc,ibuf)
       dimension itime(9)         !  time array returned from spars
       dimension it(6)          !  time from system 
+      integer itn(6),itw(6)
+c
+      integer it1(6),it2(6),secs1,secs2,diff
+c
+      integer*4 secsnow,secswait,delta
       dimension iotref(3),istref(3)
 C                         Ref times for operator and schedule streams
       character*20 cnamef,tmpstr   !  file name, general use
@@ -50,7 +55,7 @@ C     NCPARM - # chars in procedure parameter string
       character*12 ibc1,ibc2
       dimension ireg(2)
       integer get_buf, fmpposition, ichcm_ch, rn_take
-      logical rn_test,kxdisp,kxlog
+      logical rn_test,kxdisp,kxlog,kput
       equivalence (ireg(1),reg)
       integer jchar, itype
       character cjchar,chsor,char2
@@ -173,6 +178,7 @@ C                     procs for the same reason
         if (indts.ne.0) goto 220
 C                     Jump back into the command loop if there's
 C                     something to do.  Not very elegant!
+        id = mod(itime(1),1024)
         ih = mod(itime(2)/60,24)
         im = mod(itime(2),60)
         is = itime(3)/100
@@ -182,7 +188,30 @@ C                     something to do.  Not very elegant!
         inext(3) = is
         call fs_set_inext(inext)
         call char2hol('bo',ip,1,2)
-        call wait_abst('boss ',ip,ih,im,is,ims)
+C
+C  figure out when to wake up
+C
+        call fc_rte_time(itn,itn(6))
+        itw(1)=ims
+        itw(2)=is
+        itw(3)=im
+        itw(4)=ih
+        itw(5)=id
+        itw(6)=itn(6)
+        call fc_rte2secs(itn,secsnow)
+        call fc_rte2secs(itw,secswait)
+        delta=(secswait-secsnow)*100+itw(1)-itn(1)
+        if(delta.gt.5*60*100) delta=5*60*100
+        kput=delta.gt.200
+        if(kput) then
+           call rn_put('fsctl')
+           delta=delta-200
+        endif
+        if(delta.gt.1) call wait_relt('boss ',ip,1,delta)
+        if(kput) then
+          if(kput) iold=rn_take('fsctl',0)
+        endif
+c       call wait_abstd('boss ',ip,id,ih,im,is,ims)
 C                   Self-suspend, saving our suspension point
 C********************************************************************
 C***************THIS IS THE WAKE-UP POINT****************************
@@ -606,7 +635,9 @@ C
         if (nch.eq.0) goto 600
         nch = ichmv(ibuf,1,ibuf,nch+1,nchar-nch)
         nch = ichmv(ibuf,nch,0,1,1)-1
+        call rn_put('fsctl')
         nch= fc_system(ibuf)
+        iold=rn_take('fsctl',0)
 cxx        nchar = -messs(ibuf,nch)
 c       if (nchar.gt.0) call logit4(ibuf,nchar,2H/ ,lprocn)
 C

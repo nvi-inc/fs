@@ -302,3 +302,68 @@
 930603 WEH flt0.f         add 2xAZ sin and cos to el offset
            flt.c          add 2xAZ sin and cos to el offset
            vhdcal.snp     fixed tape=load to rec=load
+
+930615 WEH fserr.c        don't fail if sterr.ctl isn't there
+           logita.c       created
+           head.ctl       made vlba rec parameter names agree with manual
+                          put in reasonable default for vlba rec parms
+           fserr.ctl      add error messages for fmset.
+           fmset.h        created
+           asktime.c      clear prompts when done
+                          improved user interaction
+           fmset.c        add field system time
+           getfmtime.c    add field system time
+           get4time.c     add field system time
+           getvtime.c     add field system time
+           setvtime.c     add error logging and sleep 
+           set4time.c     add error logging and sleep 
+           get4time.c     add error logging and sleep 
+           getvtime.c     add error logging and sleep 
+           point.prc      delete stow procedure 
+           vpoint.prc     delete stow procedure 
+
+930616 WEH chekr.f        remove junk associated with "fast checking"
+           mk3rack.f      remove junk associated with "fast checking"
+           mk3drive.f     remove junk associated with "fast checking"
+           vlbarack.f     remove junk associated with "fast checking"
+           vlbadrive.f    remove junk associated with "fast checking"
+           vlbarack.f     fixed to not report erronous errors
+           vlbadrive.f    fixed to not report erronous errors
+           params.h       create chekr realtime priority
+           params.i       create chekr realtime priority
+           chekr.f        assign realtime priority
+
+930617 WEH tape_util.c    increase feet to [6] so we won't overwrite
+           rec_brk.c      increase feet to [6] so we won't overwrite
+
+930618 WEH bwork.f        add "fsctl" semaphore locking
+           mk3rack.f      add "fsctl" semaphore locking
+           mk3drive.f     add "fsctl" semaphore locking
+           hdchk.f        add "fsctl" semaphore locking
+           rxchk.f        add "fsctl" semaphore locking
+           i3chk.f        add "fsctl" semaphore locking
+           timechk.f      add "fsctl" semaphore locking
+           bbchk.c        add "fsctl" semaphore locking
+           vformchk.c     add "fsctl" semaphore locking
+           distchk.c      add "fsctl" semaphore locking
+           recchk.c       add "fsctl" semaphore locking
+           setcl.f        add "fsctl" semaphore locking
+           get4time.c     add "fsctl" semaphore locking
+           set4time.c     add "fsctl" semaphore locking
+           getvtime.c     add "fsctl" semaphore locking
+           setvtime.c     add "fsctl" semaphore locking
+           params.h       add CL_PRIOR real-time priority
+           params.i       add CL_PRIOR real-time priority
+           setcl.f        use CL_PRIOR real-time priority
+           fmset.f        use CL_PRIOR real-time priority
+           mcbcn.c        use FS_PRIOR real-time priority
+           ibcon.f        use FS_PRIOR real-time priority
+           boss.f         use FS_PRIOR real-time priority
+           quikv.c        use FS_PRIOR real-time priority
+
+930619 WEH onoff.f        don't wait to return to source if we never arrived
+           fivpt.f        don't wait to return to source if we never arrived
+           fed.f          remove some extra blanks lines printed to terminal
+           ftn_edit.f     don't complain if sh has > 0 exit code ?
+
+930621 WEH vform_util.c   set phase-cal rotator correctly for 2 & 8 MHz

@@ -67,7 +67,7 @@ float rate;
                 lcl->a.bbc>0 ? 'u' : (lcl->a.bbc<0 ? 'l' : 'x' ) );
         break;
       case 2:
-        sprintf(output,"%d",lcl->a.track);
+        sprintf(output,"%2.2d",lcl->a.track);
         break;
       case 3:
         flt2str(output,(lcl->a.parity*8e6)/(dur*rate),7,0);
@@ -77,10 +77,10 @@ float rate;
         output[strlen(output)-1]='\0';
         break;
       case 5:
-        flt2str(output,lcl->a.amp,5,1);
+        flt2str(output,lcl->a.amp,-4,1);
         break;
       case 6:
-        flt2str(output,lcl->a.phase*180.0/M_PI,6,0);
+        flt2str(output,lcl->a.phase*180.0/M_PI,-6,0);
         output[strlen(output)-1]='\0';
         break;
       case 7:
@@ -89,7 +89,7 @@ float rate;
                 lcl->b.bbc>0 ? 'u' : (lcl->b.bbc<0 ? 'l' : 'x' ) );
         break;
       case 8:
-        sprintf(output,"%d",lcl->b.track);
+        sprintf(output,"%2.2d",lcl->b.track);
         break;
       case 9:
         flt2str(output,(lcl->b.parity*8e6)/(dur*rate),7,0);
@@ -99,10 +99,10 @@ float rate;
         output[strlen(output)-1]='\0';
         break;
       case 11:
-        flt2str(output,lcl->b.amp,5,1);
+        flt2str(output,lcl->b.amp,-4,1);
         break;
       case 12:
-        flt2str(output,lcl->b.phase*180.0/M_PI,6,0);
+        flt2str(output,lcl->b.phase*180.0/M_PI,-6,0);
         output[strlen(output)-1]='\0';
         break;
       default:

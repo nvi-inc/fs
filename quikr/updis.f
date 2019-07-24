@@ -53,7 +53,10 @@ C
 C     2.  Get common variables for display
 C 
 200   ierr = 0
-      do 310 i = 1,4
+      call fs_get_rack(rack)
+      iend=3
+      if(VLBA.eq.iand(rack,VLBA)) iend=4
+      do 310 i = 1,iend
         call fs_get_frequp(flo,i-1)
         nch = nch+ir2as(flo,ibuf2,nch,8,3)
         nch = mcoma(ibuf2,nch)

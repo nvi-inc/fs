@@ -32,7 +32,6 @@ C
       integer answer, nchar, trimlen
       character*79 outbuf
       integer fmpread, ilen
-      character*100 cbuf
       character*64 pathname
       character*79 logfc
       integer*2 logf(40)
@@ -100,8 +99,7 @@ C
         goto 200
       end if
 C
-      ilen = fmpread(idcb,ierr,cbuf,iblen*2)
-      call char2hol(cbuf,ibuf,1,100)
+      ilen = fmpread(idcb,ierr,ibuf,iblen*2)
       ilen = iflch(ibuf,iblen*2)
 C
       if (ierr.lt.0) then

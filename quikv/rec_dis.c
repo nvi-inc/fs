@@ -21,6 +21,7 @@ long ip[5];
       struct res_rec response;
       void get_res(); void opn_res();
       char output[MAX_OUT];
+      char feet[6];
 
       kcom = *command->argv[0] =='?' && command->argv[1] == NULL;
 
@@ -43,6 +44,10 @@ long ip[5];
         get_res(&response, &buffer);  /* 30 */
         sprintf(output+strlen(output),"%u",response.data);
         strcat(output,",");
+
+        feet[0]='\0';
+        int2str(feet,response.data,-5,1); 
+        memcpy(shm_addr->LFEET_FS,feet,5);
 
         get_res(&response, &buffer);  /* 31 */
         totlen = response.data;

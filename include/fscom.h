@@ -32,7 +32,7 @@ typedef struct fscom {
 	char LSTP[8];
 	char LSKD[8];
         char LEXPER[8];
-        int LFEET_FS[3];
+        char LFEET_FS[5];
         int lgen[2];
         int IREMTP;
         int ICHK[21];
@@ -84,11 +84,15 @@ typedef struct fscom {
 
         struct {
            int bbc[ MAX_BBC];
+           long bbc_time[ MAX_BBC];
            int dist[ MAX_DIST];
            int vform;
            int rec;
-           int vrepro;
-           int venable;
+           int vkrepro;
+           int vkenable;
+           int vkmove;
+           long rc_mv_tm;
+           int vklowtape;
         } check;
         char stcnm[4][2];
         int  stchk[4];

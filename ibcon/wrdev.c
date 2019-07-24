@@ -5,6 +5,7 @@
  */
 #include <memory.h>
 #include "ugpib.h"
+extern int boardid_ext;
 
 void wrdev_(devid,buffer,buflen,error)
 
@@ -15,9 +16,23 @@ int *buflen;  /* length of the message in buffer, characters */
 int *error;
 
 {
+  int val, len;
   *error = 0;
 
-  ibwrt(*devid,buffer,*buflen);
+  val = (XEOS <<8) + 0x0A;
+  ibeos(*devid,val);
+  memcpy(buffer+*buflen,"\r\n",2);
+  len=*buflen+2;
+/*
+  { int i;
+    printf("\n wrdev:");
+    for (i=0;i<len;i++)
+       printf("%2x ",buffer[i]);
+    printf("\n");
+  }
+*/
+  ibwrt(*devid,buffer,len);
+
 
 /*printf("\n ibsta = %.4xh iberr = %d ibcnt %d\n\n", ibsta,iberr,ibcnt);
 */

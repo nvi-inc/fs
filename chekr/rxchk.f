@@ -16,6 +16,7 @@ C
 C  LOCAL VARIABLES: 
       integer get_buf
       integer inerr(3)
+      integer rn_take
 C 
       dimension ip(5)             ! - for RMPAR
       integer*2 ibuf1(40),ibuf2(5),ibuf3(5)
@@ -43,7 +44,9 @@ C
       ibuf1(1)=-1
       call put_buf(iclass,ibuf1,-4,2Hfs,0)
 C
+      ierr=rn_take('fsctl',0)
       call run_matcn(iclass,4)
+      call rn_put('fsctl')
       call rmpar(ip)
       iclass = ip(1)
       ierr = ip(3)
@@ -84,7 +87,9 @@ C
       call rx2ma(ibuf1(3),lswcal,0,idchrx,ibxhrx,ifamrx,iadcrx)
       iclass=0
       call put_buf(iclass,ibuf1,-12,2Hfs,0)
+      ierr=rn_take('fsctl',0)
       call run_matcn(iclass,1)
+      call rn_put('fsctl')
       call rmpar(ip)
       iclass=ip(1)
       call clrcl(iclass)

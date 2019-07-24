@@ -35,6 +35,7 @@ C
       character*10 set
       character*1  cjchar
       logical rn_test
+      integer idum,fc_rte_prior,rn_take
 C
 C  ROUTINES CALLED:
 C
@@ -93,6 +94,7 @@ c
 911     format(' fs not running ')
         goto 999
       endif
+      idum=fc_rte_prior(CL_PRIOR)
       call rmpar(ip)
       nerr = 0
       call fs_get_rack(rack)
@@ -101,7 +103,9 @@ c
       iclasm = 0
       nrec = 0
       if (VLBA.eq.iand(rack,VLBA)) then
+        idum=rn_take('fsctl',0)
         call fc_get_vtime(centisec,it,ip)
+        call rn_put('fsctl')
         if(ip(3).lt.0) then
            call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
            nerr=nerr+1
@@ -130,7 +134,9 @@ C             two return buffers with imode = -53
         call put_buf(iclasm,ibuf,-4,2Hfs,0)
       endif
 C
+      idum=rn_take('fsctl',0)
       call run_matcn(iclasm,nrec)
+      call rn_put('fsctl')
       call rmpar(ip)
       iclass = ip(1)
       ncrec = ip(2)
@@ -248,9 +254,7 @@ c
       call fc_rte_fixt(secs_fs,centifs)
       if (abs(secs_fs-secs_fm).gt.86400*14) then
          call logit7(idum,idum,idum,-1,-4,2hsc,0)
-         nerr = nerr+1
-        if (nerr.gt.2) goto 998
-        goto 50
+        goto 999
       endif
       diff=(secs_fm-secs_fs)*100+it(1)-centifs
 c

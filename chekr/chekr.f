@@ -38,11 +38,10 @@ C      - the buffers from MATCN
 C      - MODule NAmes, 2-char codes
 C      - Number of BUFfers for each module
 C      - Integer CODES for MATCN for each buffer
-      dimension icherr(169),ichecks(21), icheckvs(18)
+      dimension icherr(169),ichecks(21)
 C      - Arrays for recording identified error conditions
       integer*2 lwho       ! - mnemonic for CHEKR
-      integer fc_dad_pid, kpapa
-      logical kerr_rep,kall
+      integer fc_dad_pid, kpapa, fc_rte_prior
 C
 C  INITIALIZED:
 C
@@ -51,7 +50,6 @@ C
      /             2Hvb,2Hvc,2Hvd,2Hve,2Hvf,2Hif,2Hfm,2Htp/
       data nverr,niferr,nfmerr,ntperr /9,8,11,15/
       data ichecks/21*0/
-      data icheckvs/18*0/
       data icherr/169*0/
 C
 C   LAST MODIFIED    LAR  880301      USE HEAD PASS NUMBERS FROM /FSCOM/
@@ -68,7 +66,9 @@ C  First get our input parameters.
 C
       call setup_fscom
       call read_fscom
-      call rmpar(ip)
+c
+      iold=fc_rte_prior(CH_PRIOR)
+c
       call fs_get_drive(drive)
       call fs_get_rack(rack)
 C
@@ -79,34 +79,29 @@ C  tie up the communications.  If there is an error in MATCN
 C  log it, and go on to the next module.
 C
 200   continue
-      kall = .true.
 C
 C Get and store reference day number for comparing with formatter
 C
       call fc_rte_time(itbuf1,idum)
       idaref = itbuf1(5)
 C
-      kerr_rep = .false.
       if ((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
-        call mk3rack(lmodna,lwho,icherr,ichecks,nverr,niferr,nfmerr,
-     .             kall)
-        kerr_rep = .true.
+        call mk3rack(lmodna,lwho,icherr,ichecks,nverr,niferr,nfmerr)
       else if (VLBA.eq.iand(rack,VLBA))  then
-        call vlbarack(icheckvs,lwho,kall)
+        call vlbarack(lwho)
       endif
       if ((MK3.eq.iand(drive,MK3)).or.(MK4.eq.iand(drive,MK4))) then
         call mk3drive(lwho,lmodna,nverr,niferr,nfmerr,ntperr,icherr,
-     .                ichecks,kall)
-        kerr_rep = .true.
+     .                ichecks)
       else if (VLBA.eq.iand(drive,VLBA)) then
-        call vlbadrive(icheckvs,lwho,kall)
+        call vlbadrive(lwho)
       endif
 C
 C  This is the error-reporting section.  The array ICHERR is
 C  examined to determine which error messages, if any, should
 C  be logged and displayed.
 C
-      if (kerr_rep) then
+      if(VLBA.ne.iand(drive,VLBA).or.VLBA.ne.iand(rack,VLBA)) then
         call err_rep(lmodna,lwho,icherr,ichecks,nverr,niferr,nfmerr,
      .               ntperr)
       endif
@@ -114,7 +109,6 @@ C
 C  Now we're going to check out the receiver.
 C
 800    continue
-       if (.not.kall) goto 1000
        call fs_get_icheck(icheck(19),19)
        if(icheck(19).le.0.or.ichecks(19).ne.icheck(19)) goto 900
        call rxchk(ichecks,lwho)
@@ -136,14 +130,6 @@ C
 C 10. Once we are finished, take a breather for 20 seconds.
 C
 1000  continue
-      do i=1,21
-        call fs_get_icheck(icheck(i),i)
-        ichecks(i)=icheck(i)
-      enddo
-      do i=1,18
-        call fs_get_ichvlba(ichvlba(i),i)
-        icheckvs(i)=ichvlba(i)
-      enddo
       call fs_get_stcnm(stcnm(1,1),1)
       if(ichcm_ch(stcnm(1,1),1,'  ').ne.0) then
          ip(1)=0
@@ -154,24 +140,17 @@ C
          endif
          call run_prog('cheks','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
       endif
+      do i=1,21
+        call fs_get_icheck(icheck(i),i)
+        ichecks(i)=icheck(i)
+      enddo
       call wait_relt('chekr',ip,2,iagain)
-      kall=.true.
-C     icount=icount+1
-C     kall=.false.
-C     if (icount.eq.10) then ! do the whole thing every 10th time
-C       icount=0
-C       kall=.true.
-C     endif
       call read_quikr
       kpapa=fc_dad_pid().ne.0
       if (kpapa) then
         do i=1,21
           call fs_get_icheck(icheck(i),i)
           ichecks(i)=icheck(i)
-        enddo
-        do i=1,18
-          call fs_get_ichvlba(ichvlba(i),i)
-          icheckvs(i)=ichvlba(i)
         enddo
       endif
       goto 200

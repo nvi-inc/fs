@@ -18,9 +18,11 @@ C      - true for alarm ON, i.e. NAK response from MAT
       dimension poffx(2),pnow(2)
       real*4 scale,volt           ! - for Head Position Read-out
       integer inerr
+      integer rn_take
 C
 C  INITIALIZED:
 C
+      ierr=rn_take('fsctl',0)
       call lvdonn('lock',ip)
       if (ip(3).ne.0) then
         call logit7(0,0,0,0,ip(3),lwho,2Hhd)
@@ -61,6 +63,7 @@ C  Turn off LVDT Oscillator
 C
 1091  continue
       call lvdofn('unlock',ip)
+      call rn_put('fsctl')
       if (ip(3).lt.0) then
         call logit7(0,0,0,0,ip(3),lwho,2Hhd)
       endif

@@ -2,9 +2,6 @@ define  acquire       00000000000x
 sy=aquir /usr2/control/ctlpo.ctl &
 log=point
 enddef
-define  stow          00000000000x
-source=stow,000000,000000,0000
-enddef
 define  kill          00000000000x
 sy=brk aquir
 sy=brk fivpt
@@ -17,7 +14,7 @@ fivept
 enddef
 define  prep          00000000000x
 wx
-radecoff=0s,0d
+xyoff=0d,0d
 !+2s
 track
 sy=run aquir &
@@ -51,11 +48,12 @@ ifdcd=0,0,*,*
 postp
 enddef
 define  postp         00000000000x
-sy=run aquir
+bbcagc
+sy=run aquir &
 enddef
 define  termp         00000000000x
-nooff
-sy=go,onoff
+bbcagc
+sy=run aquir &
 enddef
 define  initp         00000000000
 setup
@@ -65,7 +63,7 @@ beama=
 beamb=
 beamc=
 bbcman
-fivept=hadc,-2,9,.4,1,ia
+fivept=xyns,-2,9,.4,1,ia
 onoff=2,4,ia,ib,60,3
 check=
 sy=run aquir &

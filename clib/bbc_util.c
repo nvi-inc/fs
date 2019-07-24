@@ -79,7 +79,7 @@ char *ptr;
         }
         freq = freq+ifreq;
         if (strcmp(ptr,"*")!=0)
-          if ((freq < 50000) || (freq > 99999))
+          if ((freq < 45000) || (freq > 105000))
             ierr = -200;
           else
             lcl->freq = freq2bbc(freq);
@@ -189,7 +189,7 @@ struct bbc_cmd *lcl;
       case 8:
         ind=*count-7;
 /*        ulga = bblvdB(lcl->gain.value[ind]); */
-        sprintf(output,"%.2f",bblvdB(lcl->gain.value[ind]));
+        sprintf(output,"%6.2f",bblvdB(lcl->gain.value[ind]));
         break;
       default:
        *count=-1;
@@ -216,7 +216,7 @@ struct bbc_mon *lcl;
       case 2:
       case 3:
         ind=*count-2;
-        sprintf(output,"%u",0xFFFF & lcl->pwr[ind]);
+        sprintf(output,"%5u",0xFFFF & lcl->pwr[ind]);
         break;
       case 4:
         sprintf(output,"%d",0xFFF & lcl->serno);

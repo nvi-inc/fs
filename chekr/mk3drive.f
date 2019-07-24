@@ -1,5 +1,5 @@
       subroutine mk3drive(lwho,lmodna,nverr,niferr,nfmerr,ntperr,
-     .                    icherr,ichecks,kall)
+     .                    icherr,ichecks)
 C
       include '../include/fscom.i'
 C
@@ -8,17 +8,16 @@ C
       integer*2 lmodna(1), lwho
       integer nverr,niferr,nfmerr,ntperr,icherr(1)
       integer ichecks(1)
-      logical kall !true to check all every 20 sec
 C
 C LOCAL VARIABLES
 C
       dimension ip(5)             ! - for RMPAR
       integer*2 ibuf1(40)
       integer icodes(4), maxerr
+      integer rn_take
       data  icodes /-1,-2,-3,-4/
       data  maxerr /15/
 
-      if (.not.kall) return
       call fs_get_drive(drive)
       call fs_get_icheck(icheck(18),18)
       if(icheck(18).le.0.or.ichecks(18).ne.icheck(18)) goto 699
@@ -40,7 +39,9 @@ C
         ibuf1(3) = o'47'   ! an apostrophe '
         call put_buf(iclass,ibuf1,-5,2Hfs,0)
 C Finally, get alarm status
+        ierr=rn_take('fsctl',0)
         call run_matcn(iclass,5)
+        call rn_put('fsctl')
 C Send our requests to MATCN for the data
         call rmpar(ip)
         iclass = ip(1)

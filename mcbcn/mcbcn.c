@@ -66,6 +66,7 @@ void skd_wait();
 long times();
 int putout();    /* fill and dispatch output buffer */
 void wait_mcb(); /* wait a fraction of a second */
+int rte_prior();
 
 /* global variables */
 static struct MCBAD
@@ -107,6 +108,7 @@ main()
     /* loop forever for message received */
 
     setup_ids();    /* attach to the shared memory */
+    rte_prior(FS_PRIOR);
     initialized = FALSE;
     while (TRUE)
     {

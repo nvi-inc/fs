@@ -14,7 +14,8 @@ c
       integer*4 iclbox, iclopr, spanti_fs, epochti_fs, offsetti_fs,
      . secsoffti_fs
 
-      logical khalt, kecho, kenastk(2), klvdt_fs
+      logical khalt, kecho, kenastk(2), klvdt_fs,
+     . ichvkmove, ichvkenable, ichvklowtape, ichvkrepro
 
       INTEGER ICAPTP, ICHECK(21), ILOKVC(15), 
      . IRDYTP, IRENVC, ITRAKA, ITRAKB, TPIVC(15), ibmat, ibmcb,
@@ -36,9 +37,13 @@ c
      . lolim1, lolim2, uplim1, uplim2,
      . HORAZ, HOREL, motorv, inscint, inscsl, outscint,
      . outscsl, wrvolt, rateti_fs,
+c
      . iclbox, iclopr, spanti_fs, epochti_fs, offsetti_fs,
      . secsoffti_fs,
+c
      . khalt, kecho, kenastk, klvdt_fs,
+     . ichvkmove, ichvkenable, ichvklowtape, ichvkrepro,
+c
      . ICAPTP, ICHECK, ILOKVC, IRDYTP, 
      . IRENVC, ITRAKA, ITRAKB, TPIVC, ibmat, ibmcb,
      . ionsor, ipashd, ispeed, iremtp, ienatp,

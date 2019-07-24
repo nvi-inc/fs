@@ -63,8 +63,8 @@ C       WHICH DEVICE?
 C 
       call fs_get_rack(rack) 
       if(VLBA.eq.iand(rack,VLBA)) then
-        call fc_mcbcn_d2(ldv1nf,ldv2nf,ierr)
-        if(ierr.ne.0) goto 80000
+        id1=-1
+        id2=-1
         goto 13
       endif
       do 8 i=1,ndev 

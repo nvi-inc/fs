@@ -7,7 +7,7 @@ C
 C 
       double precision avg1,avg2,sig1,sig2,dtemp1,dtemp2,dri,dim1 
       double precision drdrm1,tsyav1,tsyav2,tsysi1,tsysi2 
-      logical rn_test,kbreak
+      logical rn_test,kbreak,kon
       integer rn_take
       integer*4 ip(5)
       integer*2 lbuf(40)
@@ -43,13 +43,14 @@ C
 1     continue
       call wait_prog('onoff',ip)
       ierr=0
+      kon=.false.
       if(0.ne.rn_take('onoff',1)) then
         call logit7(idum,idum,idum,-2,ierr,lwho,2Her)
         goto 1
       endif
       call read_quikr
-      if(kbreak('onoff')) goto 2
 2     continue
+      if(kbreak('onoff')) goto 2
 C
 C   0. Set-up and do preliminary work
 C
@@ -90,6 +91,23 @@ C
       if(rn_test('aquir')) nwt=300
       call onsor(nwt,ierr)
       if(ierr.ne.0) goto 80010 
+      kon=.true.
+c
+c lock the bbcs we are using to MAN gain mode
+c
+      call fs_get_rack(rack)
+      if(VLBA.eq.iand(rack,VLBA)) then
+        call fc_mcbcn_d2(ldv1nf,ldv2nf,ierr,ip)
+        if(ierr.ne.0) then
+          ierr=-81
+          goto 80010
+        endif
+        if(ip(3).lt.0) then
+          call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+          ierr=-111
+          goto 80010
+        endif
+      endif
 C 
 C MAKE SURE THE CAL IS OFF
 C 
@@ -285,6 +303,7 @@ C
 C
 80011 continue
       jerr=0
+      if(kon) goto 89990
       call gooff(azosav,elosav,4Hazel,nwait,jerr) 
       itry=itry-1 
       if(jerr.gt.0.and.itry.gt.0) goto 80011 
@@ -305,6 +324,13 @@ C
 C CLEAN UP AND EXIT 
 C 
 90000 continue
+      if(VLBA.eq.iand(rack,VLBA)) then
+        call fc_mcbcn_r2(ip)
+        if(ip(3).lt.0) then
+          call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+          call logit7(idum,idum,idum,-1,-112,lwho,2Her)
+        endif
+      endif
       call rn_put('onoff')
       goto 1
       end 

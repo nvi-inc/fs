@@ -1,5 +1,5 @@
       subroutine upset(ip)
-C  upconverter setup 
+C
 C  This is a copy of LO and LODIS
 C 
 C     UPSET sets up the common array FREQUP 
@@ -68,7 +68,7 @@ C
 C 
 C     2. Step through buffer getting each parameter and decoding it.
 C     Command from user has these parameters: 
-C     Mark III:   UPCONV=<up1nor>,<up2nor>,<up3>,<up1alt>,<up2alt> 
+C     Mark III:   UPCONV=<up1>,<up2>,<up3>
 C     VLBA:       UPCONV=<upA>,<upB>,<upC>,<upD>
 C     Upconverter freq in MHz, no default
 C                          same for all parameters
@@ -85,6 +85,9 @@ C
         if (cjchar(parm,1).ne.',') then
           if (ierr.ne.0) then
             ierr = -200-i 
+            goto 990
+          else if(i.eq.4.and.VLBA.ne.iand(rack,VLBA)) then
+            ierr = -304
             goto 990
           endif
           frhld(i) = parm 

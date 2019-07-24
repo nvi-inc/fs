@@ -223,8 +223,8 @@ lo=8080.00,2020.00,8080.0
 upconv=479.9,479.9,0
 enddef
 define  initi        000000000000
-"welcome to field system version 8.0 and the new pc field system
-form=addr
+"welcome to the pc field system
+vlbainit
 sy=setcl
 enddef
 define  midob        000000000000
@@ -254,13 +254,13 @@ ifdab=0,0,*,*
 ifdcd=0,0,*,*
 rxmon
 enddef
-define  min15
+define  min15         00000000000x
 rxall
 wx
 cable
 sxcts
 enddef
-define  overnite
+define  overnite      00000000000x
 log=overnite
 setup
 check=*,-rc
@@ -270,12 +270,12 @@ repro=byp,5,11
 dqa=1
 dqa@!,1m
 enddef
-define  postob
+define  postob        00000000000x
 enddef
-define  precond
+define  precond       00000000000x
 schedule=prepass,#1
 enddef
-define  preob
+define  preob         00000000000x
 onsource
 bbcman
 calon
@@ -284,7 +284,7 @@ tpical=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tpical=9u,10u,11u,12u,13u,14u,ifb
 caloff
 enddef
-define  prepass
+define  prepass       00000000000x
 wakeup
 xdisp=on
 " mount the next tape without cleaning the tape drive.
@@ -312,7 +312,7 @@ srw
 et
 !+9s
 enddef
-define  ready
+define  ready         00000000000x
 sxcts
 rxmon
 newtape
@@ -325,7 +325,7 @@ et
 label
 check=*,rc
 enddef
-define  rxall
+define  rxall         00000000000x
 rx=front,*,*,*,*,*,*
 rx
 rx=rear,*,*,*,*,*,*
@@ -389,7 +389,7 @@ rx
 rx=70k,*,*,*,*,*,*
 rx
 enddef
-define  rxmon
+define  rxmon         00000000000x
 rxx=lo
 rx
 rxx=dcal
@@ -403,25 +403,25 @@ rx
 rxx=70k
 rx
 enddef
-define  rxx
+define  rxx           00000000000x
 rx=$,*,*,*,*,*,*
 enddef
-define  setup
+define  setup         00000000000x
 dat
 enable=
 repro=byp,1,3
 enddef
-define  sfastf
+define  sfastf        00000000000x
 sff
 !+$
 et
 enddef
-define  sfastr
+define  sfastr        00000000000x
 srw
 !+$
 et
 enddef
-define  sx2a1
+define  sx2a1         00000000000x
 form=a,4.000
 !*
 tapeforma
@@ -457,7 +457,7 @@ tape=low
 repro=byp,6,18
 !*+7s
 enddef
-define  sx4a1
+define  sx4a1         00000000000x
 form=a,8.000
 !*
 tapeforma
@@ -469,7 +469,7 @@ tape=low
 repro=byp,5,17
 !*+7s
 enddef
-define  sx4c1
+define  sx4c1         00000000000x
 form=c,8.000
 !*
 tapeformc
@@ -481,7 +481,7 @@ tape=low
 repro=byp,5,17
 !*+7s
 enddef
-define  sx4c2
+define  sx4c2         00000000000x
 form=c,8.000
 !*
 tapeformc
@@ -493,7 +493,7 @@ tape=low
 repro=byp,6,18
 !*+7s
 enddef
-define  sxcts
+define  sxcts         00000000000x
 bbcman
 tpi=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tpi=9u,10u,11u,12u,13u,14u,ifb
@@ -514,17 +514,17 @@ caltemps
 tsys1=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tsys2=9u,10u,11u,12u,13u,14u,ifb
 enddef
-define  tapeforma
+define  tapeforma     00000000000x
 tapeform=1,-350,2,  0,3,-295, 4, 55, 5, -240, 6,110
 tapeform=7,-185,8,165,9,-130,10,220,11,  -75,12,275
 enddef
-define  tapeformc
+define  tapeformc     00000000000x
 tapeform=1,-330,2,-330,3,-275,4,-275,5,-220,6,-220
 tapeform=7,-165,8,-165,9,-110,10,-110,11,-55,12,-55
 tapeform=13,0,14,0,15,55,16,55,17,110,18,110
 tapeform=19,165,20,165,21,220,22,220,23,275,24,275
 enddef
-define  ucall
+define  ucall         00000000000x
 uc=front,*,*,*,*,*,*
 uc
 uc=rear,*,*,*,*,*,*
@@ -590,7 +590,7 @@ uc
 uc=secs2b,*,*,*,*,*,*
 uc
 enddef
-define  ucmon
+define  ucmon         00000000000x
 ucx=front
 uc
 ucx=rear
@@ -604,10 +604,10 @@ uc
 ucx=sense+
 uc
 enddef
-define  ucx
+define  ucx           00000000000x
 uc=$,*,*,*,*,*,*
 enddef
-define  unlod
+define  unlod         00000000000x
 enable=,
 check=*,-rc
 tape=off
@@ -617,7 +617,7 @@ xdisp=on
 wakeup
 xdisp=off
 enddef
-define  wb2c1
+define  wb2c1         00000000000x
 form=c,4.000
 !*
 tapeformc
@@ -629,7 +629,7 @@ tape=low
 repro=byp,5,17
 !*+7s
 enddef
-define  wb2c2
+define  wb2c2         00000000000x
 form=c,4.000
 !*
 tapeformc
@@ -641,7 +641,7 @@ tape=low
 repro=byp,6,18
 !*+7s
 enddef
-define  wb4c1
+define  wb4c1         00000000000x
 form=c,8.000
 !*
 tapeformc
@@ -653,7 +653,7 @@ tape=low
 repro=byp,5,17
 !*+7s
 enddef
-define  wb4c2
+define  wb4c2         00000000000x
 form=c,8.000
 !*
 tapeformc

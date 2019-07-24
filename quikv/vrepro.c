@@ -75,8 +75,8 @@ parse:
 
 /* all parameters parsed okay, update common */
 
-      ichold=shm_addr->check.vrepro;
-      shm_addr->check.vrepro=0;
+      ichold=shm_addr->check.rec;
+      shm_addr->check.rec=0;
       memcpy(&shm_addr->vrepro,&lcl,sizeof(lcl));
       
 /* format buffers for mcbcn */
@@ -108,8 +108,12 @@ mcbcn:
       skd_run("mcbcn",'w',ip);
       skd_par(ip);
 
-      if (ichold != -99) shm_addr->check.vrepro=ichold;
-      if (ichold >= 0) shm_addr->check.vrepro=ichold % 1000 + 1;
+      if (ichold != -99) {
+        shm_addr->check.rec=ichold;
+        shm_addr->check.vkrepro = TRUE;
+      }
+      if (ichold >= 0)
+        shm_addr->check.rec=ichold % 1000 + 1;
 
       if(ip[2]<0) return;
       vrepro_dis(command,itask,ip);

@@ -332,59 +332,62 @@ CH -209
 CH -210
 ?W LSB gain value does not check with requested value
 ""
-CH -211
-?W averaging period does not check with requested setting
-""
-CH -212
-?W attenuator for IF channel A does not check with requested setting
-""
-CH -213
-?W attenuator for IF channel B does not check with requested setting 
-""
-CH -214
-?W input source for IF channel A does not check with requested setting
-""
-CH -215
-?W input source for IF channel B does not check with requested setting 
-""
-CH -216
-?W averaging period does not check with requested setting
-""
-CH -217
-?W mode does not check with requested setting
-""
-CH -218
-?W sample rate does not check with requested setting
-""
-CH -219
-?W format does not check with requested setting
-""
-CH -220
-?W enable tracks do not check with requested setting
-""
 CH -221
-?W DQA channels do not check with requested setting
+?W averaging period does not check with requested setting
 ""
 CH -222
-?W group enables do not match commanded enable
+?W attenuator for IF channel A does not check with requested setting
 ""
 CH -223
-?W tape drive is not moving and it should be
+?W attenuator for IF channel B does not check with requested setting 
 ""
 CH -224
-?W commanded speed and actual speed differ
+?W input source for IF channel A does not check with requested setting
 ""
 CH -225
-?W direction of tape travel is different than commanded
+?W input source for IF channel B does not check with requested setting 
 ""
 CH -226
-?W tape drive is moving and it shouldn't be
+?W averaging period does not check with requested setting
 ""
 CH -227
-?W tape drive speed is different than the commanded speed of 0
+?W mode does not check with requested setting
 ""
 CH -228
+?W sample rate does not check with requested setting
+""
+CH -229
+?W format does not check with requested setting
+""
+CH -230
+?W enable tracks do not check with requested setting
+""
+CH -231
+?W DQA channels do not check with requested setting
+""
+CH -232
+?W group enables do not match commanded enable
+""
+CH -233
+?W tape drive should be moving and it isn't
+""
+CH -234
+?W commanded speed and actual speed differ
+""
+CH -235
+?W direction of tape travel is different than commanded
+""
+CH -236
+?W tape drive shouldn't be moving and it is
+""
+CH -237
+?W tape drive is not ready and a schedule is active and not halted.
+""
+CH -238
 ?W low tape sensor doesn't match commanded
+""
+CH -239
+?W tape drive should be recording but no groups are enabled.
 ""
 CH -301
 ?W module is not in remote
@@ -695,11 +698,41 @@ program error: incorrect response count from vset_zero.
 FP  -93
 program error: incorrect response count from vrst_att.
 ""
+FP  -94
+program error: incorrect response count from mcbcn_d #1
+""
+FP  -95
+program error: incorrect response count from mcbcn_d #2
+""
+FP  -96
+program error: incorrect response count from mcbcn_r
+""
 FP -100
 Couldn't get back to source after an error
 ""
 FP -110
 Couldn't reset attenuators after an error
+""
+FP -111
+Couldn't set manual gain control
+""
+FP -112
+Couldn't reset gain to original value
+""
+FV   -1
+fmset: Error receiving message from matcn
+""
+FV   -2
+fmset: Error receiving time from matcn
+""
+FV   -3
+fmset: Year less than 1900 for 5 tries, giving up
+""
+FV   -4
+fmset: Error receiving message from mcbcn
+""
+FV   -5
+fmset: Bad completion code from mcbcn
 ""
 IB   -1
 Trouble with class buffer
@@ -854,11 +887,26 @@ program error: incorrect response count from vset_zero.
 NF  -93
 program error: incorrect response count from vrst_att.
 ""
+NF  -94
+program error: incorrect response count from mcbcn_d2, #1.
+""
+NF  -95
+program error: incorrect response count from mcbcn_d2, #2.
+""
+NF  -96
+program error: incorrect response count from mcbcn_r2, #2.
+""
 NF -100
 Couldn't get back to source after an error
 ""
 NF -110
 Couldn't reset attenuators after an error
+""
+NF -111
+Couldn't set manual gain control
+""
+NF -112
+Couldn't reset gain to original value
 ""
 PC   -1
 program error: portopen8: devdb incorrect size.
@@ -1193,6 +1241,9 @@ First flux value must be a number.
 QO -412
 Second flux value must be a number.
 ""
+QO -502
+IF3 must be set-up first.
+""
 QP -201
 Number of cycles must be greater than or equal to 0.
 ""
@@ -1519,6 +1570,9 @@ LO frequency 3 must be a positive real number
 ""
 Q* -204
 LO frequency 4 must be a positive real number
+""
+Q* -304
+No fourth frequency for Mark III & Mark IV   
 ""
 Q# -201
 An invalid number was specified for an LU

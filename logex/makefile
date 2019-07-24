@@ -3,8 +3,7 @@ lxcmd.o lxcom.o lxcrt.o lxget.o lxhlp.o\
 lxhms.o lxist.o lxmcm.o lxopn.o lxout.o lxplt.o\
 lxprc.o lxprm.o lxscl.o lxscm.o lxskd.o\
 lxsum.o lxsze.o lxtim.o lxtyp.o lxwrt.o readl.o\
-readt.o redsk.o unpsk.o fmpwriteyy.o fmpreadyy.o\
-writestr.o
+readt.o redsk.o unpsk.o writestr.o
 #
 F77 = gf77
 #

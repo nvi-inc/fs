@@ -22,12 +22,12 @@ C  WHO  WHEN    WHAT
 C  NRV  920226  Get LO freq. from shm
 C  gag  920713  Added a check for Mark IV along with checking Mark III
 C
-
       indtmp=nsub
 C
       iclcm = ip(1)
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum)
       nchar = ireg(2)
+      call fs_get_rack(rack)
       ieq = iscn_ch(ibuf,1,nchar,'=')
       if (ieq.eq.0) goto 500
 C
@@ -44,13 +44,10 @@ C
 C                   Pick up the size from common
       goto 300
 211   continue
-      call fs_get_rack(rack)
       indf=indtmp 
       call fs_get_freqlo(flo,indf-1)
       fup=0
-      if(VLBA.eq.iand(rack,VLBA)) then
-        call fs_get_frequp(fup,indf-1)
-      endif
+      call fs_get_frequp(fup,indf-1)
 c     write(6,101) flo,fup,indf
 101   format(/' flo,fup,indf=',2f10.3,i5/)
       f=flo-fup
@@ -61,8 +58,15 @@ C
         f=f+750.
       else
         f=f+350.
-        if(indf.eq.3.and.imixif3_fs.eq.1) then
-           f=f+freqif3*0.001
+        if(indf.eq.3) then
+          call fs_get_icheck(icheck(21),21)
+          if(icheck(21).eq.0) then
+             ierr=-502
+             goto 990
+          else if(imixif3_fs.eq.1) then
+             f=f+freqif3_fs*0.01
+c            write(6,*) freqif3_fs
+          endif
         endif
       endif
       call fs_get_diaman(diaman)
