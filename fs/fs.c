@@ -28,7 +28,6 @@
 
 long cls_alc();
 void shm_att(),sem_att(),cls_ini(),brk_ini();
-long rte_secs();
 int parse();
 char *fgets();
 FILE *fopen();
@@ -54,9 +53,6 @@ main()
     ipids=-1;
 
     setup_ids();
-
-    if(shm_addr->time.secs_off == 0)
-      shm_addr->time.secs_off = rte_secs();
 
              /* ignore signals that might accidently abort */
              /* note this behaviour trickles down by default to all children */
