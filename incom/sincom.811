@@ -13,11 +13,10 @@ C
 C  Local variables used in the 600 section.
       integer tierr,pierr
       logical kasct,kascp,kdesp,kdest
-      double precision das2b
 C  Functions
       integer ichcm_ch
 C  End 600 variables
-      character*80 ibc, model
+      character*80 ibc
       equivalence (ibc,ibuf)
       data lnamef,lnamer/2h(e,2hxp,2her,2h(r,2hxd,2hef/
       data lnamet/2h(t,2hed,2hef/
@@ -34,7 +33,6 @@ C               pi parameters declared there.
 C  nrv  921020  Reading rxdef: check hex address before storing into
 C               common arrays. Use hex address in vfac array, not n.
 C               Add reading an offset value following the scale factor.
-C  weh 930430   removed kpass4, itapof4, koff4, etc.
 C
       ierrx = 0
       inext(1)=0
@@ -53,15 +51,11 @@ C
       lnewsk = ' '
       call char2hol(lnewsk,ilnewsk,1,8)
       call fs_set_lnewsk(ilnewsk)
-      do i=1,31
+      i1 = tpzero(1)
+      i2 = idwvr
+      do i=1,i2-i1+1
         tpzero(i)=0
-        tpsor(i)=0
-        tpspc(i)=0
       enddo
-      do i=1,32
-        systmp(i)= 0.0
-      enddo
-      call fs_set_systmp(systmp)
       ipcflg=0
       itrkpa(1)=0
       itrkpa(2)=0
@@ -80,11 +74,9 @@ C
       call fs_set_raoff(raoff)
       decoff=0.0
       call fs_set_decoff(decoff)
-      do i=1,21
+      do i=1,20
         icheck(i)=0
         call fs_set_icheck(icheck(i),i)
-      enddo
-      do i=1,18
         ichvlba(i)=0
         call fs_set_ichvlba(ichvlba(i),i)
       enddo
@@ -114,29 +106,6 @@ C
       end do
       tierr = 0
       pierr = 0
-c
-c station check arrays
-c
-      call char2hol(' ',stcnm(1,1),1,2)
-      call fs_set_stcnm(stcnm(1,1),1)
-      call char2hol(' ',stcnm(1,2),1,2)
-      call fs_set_stcnm(stcnm(1,2),2)
-      call char2hol(' ',stcnm(1,3),1,2)
-      call fs_set_stcnm(stcnm(1,3),3)
-      call char2hol(' ',stcnm(1,4),1,2)
-      call fs_set_stcnm(stcnm(1,4),4)
-c
-      stchk(1)=0
-      call fs_set_stchk(stchk(1),1)
-      stchk(2)=0
-      call fs_set_stchk(stchk(2),1)
-      stchk(3)=0
-      call fs_set_stchk(stchk(3),1)
-      stchk(4)=0
-      call fs_set_stchk(stchk(4),1)
-c
-      sterp=0
-      call fs_set_sterp(sterp)
 C
 C     2. Now initialize everything which is non-zero.
 C
@@ -144,7 +113,7 @@ C
         horaz(i) = -1.0
         horel(i) = -1.0
       enddo
-      fsver = 8.27
+      fsver = 8.11
 C                   Initialize the time-like variables
 C                   Initialize previous segment name for LINKP
       do i=1,15
@@ -176,21 +145,12 @@ C                   Initialize previous segment name for LINKP
       ilents = 10
       call char2hol('alarm',lalrm,1,6)
       ilenal = 5
+      kpass4 = .false.
       kecho = .false.
       call fs_set_kecho(kecho)
       kcheck = .false.
       khalt = .false.
       call fs_set_khalt(khalt)
-      ichvkrepro=.false.
-      call fs_set_ichvkrepro(ichvkrepro)
-      ichvkenable=.false.
-      call fs_set_ichvkenable(ichvkenable)
-      ichvkmove=.false.
-      call fs_set_ichvkmove(ichvkmove)
-      ichvklowtape=.false.
-      call fs_set_ichvklowtape(ichvklowtape)
-      ichvkload=.false.
-      call fs_set_ichvkload(ichvkload)
       imonds = -1
       ichper = 0
       tperer = 0.5
@@ -245,6 +205,11 @@ C     Finally, mode D
       ifamrx(3) = 1
       do i=1,100
         itapof(i)= -13000
+      enddo
+      do j=1,3
+        do i=1,12
+          itapof4(i,j)= -13000
+        enddo
       enddo
 C
       lauxfm(1)=0
@@ -315,6 +280,7 @@ C
       kenastk(2)=.false.
       call fs_set_kena(kenastk)
       kiwslw_fs=.false.
+      koff4=.true.
       lvbosc_fs=5.0
       ilvtl_fs=0
       vminpk_fs=.2
@@ -329,7 +295,6 @@ C
       kwrwo_fs=.false.
       kposhd_fs(1)=.false.
       kposhd_fs(2)=.false.
-      koffhd_fs=.true.
       idecpa_fs=0
       kdoaux_fs=.true.
       ierrdc_fs=1
@@ -345,14 +310,16 @@ C
       ifamst(2) = 1
       ifamst(3) = 1
 C
-      call fs_set_freqlo(0.0,0)
       call fs_set_freqlo(0.0,1)
       call fs_set_freqlo(0.0,2)
       call fs_set_freqlo(0.0,3)
-      call fs_set_frequp(0.0,0)
+      call fs_set_freqlo(0.0,4)
+      call fs_set_freqlo(0.0,5)
       call fs_set_frequp(0.0,1)
       call fs_set_frequp(0.0,2)
       call fs_set_frequp(0.0,3)
+      call fs_set_frequp(0.0,4)
+      call fs_set_frequp(0.0,5)
 C
       llog='station '
       call char2hol(llog,illog,1,8)
@@ -360,10 +327,6 @@ C
   
       call char2hol('      ',lfeet_fs(1),1,6)
       call fs_set_lfeet_fs(lfeet_fs)
-c
-      do i=1,4
-        iswif3_fs(i)=1
-      enddo
 C
 C  3. Open the file which contains the station-dependent
 C     information: LOCATION.CTL
@@ -470,13 +433,12 @@ C LINE #8  HORIZON MASK
       do i=1,MAX_HOR
         call gtfld(ibuf,ich,ilen,ic1,ic2)
         if (ic1.eq.0) goto 315
-        iaz = ias2b(ibuf,ic1,ic2-ic1+1)
-        horaz(i) = iaz
+        horaz(i) = ias2b(ibuf,ic1,ic2-ic1+1)
         call gtfld(ibuf,ich,ilen,ic1,ic2)
         if (ic1.eq.0) goto 315
         horel(i) = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       enddo
-315   if (iaz.lt.360) goto 900
+315   if (horaz(i).ne.360.0) goto 900
       call fs_set_horaz(horaz)
       call fs_set_horel(horel)
 C
@@ -745,41 +707,6 @@ C LINE #17  CAPSTAN SIZE - capstan
         ierrx = ierr
       endif
       call fs_set_capstan(capstan)
-C LINE #18  if3 lo freq.
-      call readg(idcb,ierr,ibuf,ilen)
-      if (ierr.lt.0) goto 900
-      ich = 1
-      call gtfld(ibuf,ich,ilen,ic1,ic2)
-      if (ic1.eq.0) goto 320
-      idec=iscn_ch(ibuf,ic1,ic2-ic1+1,'.')
-      ifrqu=-1
-      ifrqd=-1
-      if(idec.gt.ic1) then
-        ifrqu=ias2b(ibuf,ic1,idec-ic1)
-        if(ic2-idec.eq.0) then
-          ifrqd=0
-        else if(ic2-idec.lt.3) then
-          ifrqd=ias2b(ibuf,idec+1,ic2-idec)
-        endif
-      endif
-      freqif3_fs=ifrqu
-      freqif3_fs=100*freqif3_fs+ifrqd
-      if (ifrqu.lt.0.or.ifrqd.lt.0.or.
-     &    freqif3_fs.lt.50000.or.freqif3_fs.gt.100000) then
-        call logit7(0,0,0,1,-140,2hbo,18)
-        ierrx = ierr
-      endif
-C LINE #19  if3 switches
-      call readg(idcb,ierr,ibuf,ilen)
-      if (ierr.lt.0) goto 900
-      ich = 1
-      call gtfld(ibuf,ich,ilen,ic1,ic2)
-      if (ic1.eq.0) goto 320
-      iswavif3_fs=ia2hx(ibuf,ic1)
-      if (ic2-ic1.ne.0.or.iswavif3_fs.lt.0) then
-        call logit7(0,0,0,1,-140,2hbo,19)
-        ierrx = ierr
-      endif
 C
 320   continue
       call fmpclose(idcb,ierr)
@@ -1188,12 +1115,25 @@ C
           if (iad.le.MAX_RXCODES) then
             call gtfld(ibuf,ifc,ilen,ic1,ic2)
             idummy = ichmv(rxlcode(1,iad),1,ibuf,ic1,6)
+C            call fs_set_rxlcode(rxlcode(1,iad),iad)
             call gtfld(ibuf,ifc,ilen,ic1,ic2)
             call gtprm(ibuf,ic1,ic2,2,rxvfac(iad),ierr)
             if (ierr.lt.0) then
               call logit7(0,0,0,1,-145,2hbo,n)
               goto 990
             endif
+            call fs_set_rxvfac(rxvfac(iad),iad)
+            call gtfld(ibuf,ifc,ilen,ic1,ic2)
+            if (ic1.gt.0) then
+              call gtprm(ibuf,ic1,ic2,2,rxvoff(iad),ierr)
+              if (ierr.lt.0) then
+                call logit7(0,0,0,1,-145,2hbo,n)
+                goto 990
+              endif
+            else
+              rxvoff(iad)=0.0
+            endif
+            call fs_set_rxvoff(rxvoff(iad),iad)
           else
             call logit7(0,0,0,1,-145,2hbo,n)
             goto 990
@@ -1201,6 +1141,8 @@ C
           rxncodes=rxncodes+1
         endif
       enddo
+      call fs_set_rxlcode(rxlcode)
+      call fs_set_rxncodes(rxncodes)
       call fmpclose(idcb,ierr)
 C
 C  5. Read file of parameters for spectrum analyzer test procedures: TEDEF.CTL
@@ -1347,56 +1289,8 @@ C  each array.
       if (tierr.ne.0) call logit7(0,0,0,0,tierr,2hbo,0)
       if (pierr.ne.0) call logit7(0,0,0,0,pierr,2hbo,0)
       call fmpclose(idcb,ierr)
-C
-700   continue
-      call fmpopen
-     &   (idcb,FS_ROOT//'/control/time.ctl',ierr,'r',idum)
-      if (ierr.lt.0) then
-        call logit7(0,0,0,1,-180,2hbo,ierr)
-        goto 990
-      endif
-C
-C  7.1 Read and decode each line.
-C
-      ilen=0
-      call readg(idcb,ierr,ibuf,ilen)
-      if (ierr.lt.0.or.ilen.le.0) then
-        call logit7(0,0,0,1,-189,2hbo,ierr)
-        goto 990
-      endif
-      ifc=1
-      call gtfld(ibuf,ifc,ilen,ic1,ic2)
-      call gtprm(ibuf,ic1,ic2,2,rate,ierr)
-      if (ierr.lt.0) then
-        call logit7(0,0,0,1,-181,2hbo,0)
-        goto 990
-      endif
-      rate0ti_fs=rate/86400.
-      call gtfld(ibuf,ifc,ilen,ic1,ic2)
-      call gtprm(ibuf,ic1,ic2,2,span,ierr)
-      if (ierr.lt.0) then
-        call logit7(0,0,0,1,-182,2hbo,0)
-        goto 990
-      endif
-      span0ti_fs=span*3600d2
-      call gtfld(ibuf,ifc,ilen,ic1,ic2)
-      call hol2char(ibuf,ic1,ic2,model)
-      if(model.ne.'none'.and.model.ne.'offset'.and.model.ne.'rate')
-     &  then
-        call logit7(0,0,0,1,-183,2hbo,0)
-        goto 990
-      endif
-      call char2hol(model(1:1),model0ti_fs,1,2)
-      call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
-     &   rateti_fs,spanti_fs, modelti_fs)
-      rateti_fs=rate0ti_fs
-      spanti_fs=span0ti_fs
-      modelti_fs=model0ti_fs
-      call fs_set_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
-     &   rateti_fs,spanti_fs, modelti_fs)
-      call fmpclose(idcb,ierr)
       goto 990
-C
+  
 C  This is the error return section
 C
 900   call logit7(0,0,0,1,-118,2hbo,ierr)

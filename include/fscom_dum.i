@@ -27,7 +27,7 @@ c
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3), lgen(2),
      . lnaant(4), lsorna(5), lfreqv(3,15), idevant(32), idevgpib(32),
-     . idevlog(32,5), idevmcb(32), hwid, modelti_fs, stcnm(1,4)
+     . idevlog(5,32), idevmcb(32), hwid, modelti_fs, stcnm(1,4)
 
       common/fscom_dum/
      . ra50, dec50, radat, decdat, alat, wlong,
