@@ -417,3 +417,6 @@
            mout2.c        fix temp < -9.9
            help/*         updated
            st.d*/proc/*   updated
+
+930827 WEH if3.f          fix '*' switch parameter bug
+                          protect against out of range switch '*' params

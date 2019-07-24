@@ -121,7 +121,8 @@ C
         if(ierr.eq.2) then
           isw(i)=1
         else if (ierr.eq.1) then
-          isw(i) = iswif3_fs(1)
+          isw(i) = iswif3_fs(i)
+          if(isw(i).gt.2.or.isw(i).lt.1) isw(i)=1
         else
           if(iparm(1).lt.1.or.iparm(1).gt.2) then
             ierr = -202 - i
