@@ -77,7 +77,7 @@ C                   Don't bother with comments (") or wait commands (!)
         call char2hol(';;',lsor,1,2)
 C                    Immediate-execute functions and time-scheduled
 C                                      functions have priority.
-        if (ichcm_ch(itype,1,F).eq.0 .and. ierr.eq.0 .and.
+        if (ichcm_ch(itype,2,'F').eq.0 .and. ierr.eq.0 .and.
      &    (cjchar(lnames(7,index),1).eq.'*' .or.
      &    iscn_ch(ibuf,1,nchar,'@').ne.0)) return
       endif

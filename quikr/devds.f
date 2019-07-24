@@ -23,7 +23,7 @@ C
 C  LOCAL VARIABLES
 C     NSUB - subroutine number in segment 
 C            8 = ANTENNA
-      integer*2 ibuf(40),ibuf2(70)
+      integer*2 ibuf(40),ibuf2(70),icr,ilf
 C               - input class buffer, output display buffer 
 C        ILEN   - length of buffers, chars
 C        NCH    - character counter 
@@ -55,14 +55,23 @@ C
       nch = ichmv(ibuf2,nch,2h/ ,1,1) 
 C                   Put / to indicate a response
 C 
+      call pchar(icr,1,13)
+      call pchar(ilf,1,10)
       do i=1,ncrec
         if (i.ne.1) nch=ichmv(ibuf2,nch,2h, ,1,1) 
 C                   If not first parm, put comma before 
         ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
         nchar = ireg(2) 
-        if (ichcm(ibuf,nchar-1,o'5015',1,2).eq.0.or.
-     .      ichcm(ibuf,nchar-1,o'6412',1,2).eq.0) nchar=nchar-2 
-C                   Leave out the crlf or lfcr
+        if(nchar.gt.0) then
+C                   Delete CR and LF from the ends
+          do while(ichcm(ibuf,nchar,icr,1,1).eq.0.or.
+     &             ichcm(ibuf,nchar,ilf,1,1).eq.0.or.
+     &             ichcm(ibuf,nchar,  0,1,1).eq.0)
+             nchar=nchar-1
+             if(nchar.lt.1) goto 200
+          enddo
+        endif
+200     continue
         if (nsub.ne.8) nch = ichmv(ibuf2,nch,ibuf(2),1,nchar-2) 
 C                   For MA and IB responses, skip word 1
         if (nsub.eq.8) nch = ichmv(ibuf2,nch,ibuf,1,nchar)

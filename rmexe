@@ -1,0 +1,2 @@
+#remove executable files
+rm -f bin/*

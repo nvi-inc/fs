@@ -84,9 +84,7 @@ c
         idum = ichmv(ibuf,5,4H/TIM,1,4,4)
 C                   Place MAT address and command for the formatter 
 C                   into buffer
-        call ichmv(ibuf,9,o'006412',1,2,2)
-C                   Place a cr-lf at the end of the transmission buffer.
-        nch = 12
+        nch = 8
         nrec = nrec + 1
         call put_buf(iclasm,ibuf,-nch,2hfs,0)
 C             two return buffers with imode = -54
@@ -161,11 +159,11 @@ C                   Minutes
         ihs = ias2b(ibuf,9,2)
       else   ! MK4
 C  Expect the return buffer from the Mark IV formatter to look like
-C   1992 198 16:17:34:777
+C   1992 198 16:17:34.777
         ireg(2) = get_buf(iclass,ibuf4,-ilen,idum,idum)
         ireg(2) = get_buf(iclass,itm,-52,idum,idum)
         nchar=min0(ireg(2),ilen)
-        ich=1
+        ich=3
         call gtfld(ibuf4,ich,nchar,ic1,ic2)
         nch = ic2-ic1+1
         iyr = ias2b(ibuf4,ic1,nch)
@@ -194,7 +192,7 @@ C              The Minutes
 C            The Seconds
         ic1=ic3+1
         nch = ic2-ic1+1
-        ihs = ias2b(ibuf4,ic1,nch)
+        ihs = ias2b(ibuf4,ic1,nch)/10
 C             The mille seconds
       endif
 C

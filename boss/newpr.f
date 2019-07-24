@@ -74,7 +74,7 @@ C
       if (index.gt.0) ilen = fmpreadstr(idcbp1,ierr,ibc)
       if (index.lt.0) ilen = fmpreadstr(idcbp2,ierr,ibc)
       call char2low(ibc)
-      if (ierr.lt.0.or.ilen.le.0) goto 800
+      if (ierr.lt.0.or.ilen.lt.0) goto 800
       if (ibc(1:6).ne.'define') goto 800
 C
 C     3. Get the time field from the first line and check it against
@@ -104,9 +104,9 @@ C
 410   if (index.gt.0) ilen = fmpreadstr(idcbp1,ierr,ibc)
       if (index.lt.0) ilen = fmpreadstr(idcbp2,ierr,ibc)
       call char2low(ibc)
-      if (ilen.eq.0.or.ibc(1:6).eq.'define'.or.ibc(1:6).eq.'enddef')
+      if (ilen.lt.0.or.ibc(1:6).eq.'define'.or.ibc(1:6).eq.'enddef')
      .   goto 500
-      if (ierr.lt.0.or.ilen.le.0) goto 800
+      if (ierr.lt.0.or.ilen.lt.0) goto 800
       ilen = iflch(ib,80)
       call logit4(ib,ilen,2h&&,lprocn)
       goto 410

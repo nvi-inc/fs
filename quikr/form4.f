@@ -62,17 +62,14 @@ C                   If no parameters, get mad!
 C                   Scan for a tab character
       if (nenq.ne.0) idumm1 = ichmv(ibuf,nenq,o'5',2,1)
 C                   If we found one, substitute the enq character
-      ibuf2(1) = 8
-C                   Set up for MAT mode 5
+      ibuf2(1) = 9
+C                   Set up for MAT mode 9
       idumm1 = ichmv(ibuf2(2),1,2hfm,1,2,2)
 C                   Place fm mnemonics in buffer.
       idumm1 = ichmv(ibuf2(3),1,ibuf,ifc,nchar,nch)
 C                   Move characters to output buffer starting at first
 C                   character of this message.
-      nch = nch + 5
-      call ichmv(ibuf2,nch,o'006412',1,2)
-C                   Place a cr-lf at the end of the transmission buffer.
-      nch = nch + 1
+      nch = nch + 4
       call put_buf(iclass,ibuf2,-nch,2hfs,0)
       nrec = nrec + 1
 C
@@ -83,6 +80,7 @@ C
 980   call run_matcn(iclass,nrec)
       call rmpar(ip)
       call devds(ip,iclcm,1)
+      return
 C
 990   ip(1) = 0
       ip(2) = 0

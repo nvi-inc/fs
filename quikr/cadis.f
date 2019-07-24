@@ -70,15 +70,17 @@ C
       nchar=nchar-1  ! remove always present lf
       if(jchar(ibuf,nchar).eq.13) nchar=nchar-1 !remove CR if present
       call gtfld(ibuf(2),ich,nchar-2,ic1,ic2) 
-      if(ic1.ge.0.and.ic2-ic1+1.ge.1) then
+      if(ic1.gt.0.and.ic2-ic1+1.ge.1) then
         nch = ichmv(ibuf2,nch,ibuf(2),ic1,ic2-ic1+1)
-      endif
 C                   Skip the " S " before the number
 C                   Move buffer contents into output list 
       cablev = das2b(ibuf(2),ic1,ic2-ic1+1,ierr)
+C                   Don't check error return
+      else
+        cablev = 0.0
+      endif
       call fs_set_cablev(cablev)
 C                   Store current cable value in COMMON 
-C                   Don't check error return
 C 
 C 
 C     5. Now send to buffer back to BOSS

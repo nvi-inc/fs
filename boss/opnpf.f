@@ -56,7 +56,7 @@ C
       nproc = 0
 210   ilen = fmpreadstr(idcb,ierr,ibc)
       call char2low(ibc)
-      if (ilen.le.0) goto 900
+      if (ilen.lt.0) goto 900
       if (ierr.lt.0) goto 990
       if (ibc(1:6).eq.'define') then
 C

@@ -1,6 +1,3 @@
-/* 920618  gag  The numbers for the arithmetic in this subroutine
-   need to be unsigned so as not to get an overflow in the integer
-   time. */
 #include <rtx.h>
 #include <signal.h>
 
@@ -11,7 +8,6 @@ unsigned centisec;
 {
     int time, gran;
 
-/* fetch granularity in micro-seconds */
     if(centisec==0) {
       if(-1==rtalarm(RT_ALARM_CANCEL,time,SIGALRM)) {
         perror("rte_alarm, canceling");
@@ -19,14 +15,22 @@ unsigned centisec;
       }
       return( 0);
     }
+
+/* fetch granularity in micro-seconds */
+
     if(-1==(gran=rtalarm(RT_ALARM_GETGRAN,time,SIGALRM))) {
       perror("rte_alarm, getting granularity");
       exit(-1);
    }
+   if(gran != 10000) {
+      perror("rte_alarm, granularity != 10000");
+      exit(-1);
+   }
 
-   time=((unsigned)((10000*(long)centisec)+gran-1)/gran);
-/*   time=((10000*(long)centisec)+gran-1)/gran; */
-/* time to wait in clock tics */
+     time=centisec;
+     if(0>(int)centisec) /* correct for unsigned overflows so we at least
+                           won't abend */
+        time=((unsigned) ~0)>>1;
 
     if(-1==rtalarm(RT_ALARM_ONCE,time,SIGALRM)) {
       perror("rte_alarm, setting alarm");
