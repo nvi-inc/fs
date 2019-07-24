@@ -13,6 +13,7 @@ main()
     int size, nsems, shm_id, sem_id, cls_id, skd_id, brk_id;
     key_t key;
     void nsem_ini(),shm_att();
+    long rte_secs();
 
     key = SHM_KEY;
     size = SHM_SIZE;
@@ -25,6 +26,7 @@ main()
     shm_addr->time.index = 0;
     shm_addr->time.offset[0] = 0;
     shm_addr->time.offset[1] = 0;
+    shm_addr->time.secs_off = rte_secs();
 
     key = SEM_KEY;
     nsems = SEM_NUM;
