@@ -1,4 +1,4 @@
-      subroutine newlg(ibuf,lsor)
+      subroutine newlg(ibuf,lsorin)
 C
 C     NEWLG fills in the buffer with the first line of the log file
 C           and sends this to DDOUT for starting a new log.
@@ -12,7 +12,7 @@ C
 C      - buffer to use, assumed to be at least 50 characters long
       integer*2 ib(60)
       integer*2 lprocdumm(6)
-      character*1 model
+      character*1 model,cjchar
 C     LSOR - source of this message
 C
 C  OUTPUT: NONE
@@ -43,6 +43,10 @@ C
       nch = ichmv(ibuf,nch+1,loccup,1,8)-3
       call char2hol('nl',nl,1,2)
       call ifill_ch(lprocdumm,1,12,' ')
+      idum=ichmv(lsor,1,lsorin,1,2)
+      if(index('$&',cjchar(lsor,1)).ne.0) then
+          idum=ichmv(lsor,1,lsorin,2,1)
+      endif
       call logit5(ibuf(2),nch,lsor,lprocdumm,nl)
 C
 C     Second line contains minor version #; not read by correlator

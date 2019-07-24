@@ -200,8 +200,13 @@ C
         itw(6)=itn(6)
         call fc_rte2secs(itn,secsnow)
         call fc_rte2secs(itw,secswait)
+c
+c  assume that if the next time is more than 10 minutes in the
+c  it is actually for tomorrow
+c
+        if(secsnow.lt.secswait-60000) secswait=secswait+86400
         delta=(secswait-secsnow)*100+itw(1)-itn(1)
-        if(delta.gt.5*60*100) delta=5*60*100
+        if(delta.gt.5*60*100.or.delta.lt.0) delta=5*60*100
         kput=delta.gt.200
         if(kput) then
            call rn_put('fsctl')
@@ -209,7 +214,7 @@ C
         endif
         if(delta.gt.1) call wait_relt('boss ',ip,1,delta)
         if(kput) then
-          if(kput) iold=rn_take('fsctl',0)
+           iold=rn_take('fsctl',0)
         endif
 c       call wait_abstd('boss ',ip,id,ih,im,is,ims)
 C                   Self-suspend, saving our suspension point
