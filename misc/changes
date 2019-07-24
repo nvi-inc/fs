@@ -428,4 +428,4 @@
            fsexedist      updated
            fsinstall.exe  created
 
-940320 WEH cnvrt.c        fix case 10 HA sign error
+940321 WEH cnvrt.c        fix ha output sign per J. Quick

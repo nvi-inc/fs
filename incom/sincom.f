@@ -144,7 +144,7 @@ C
         horaz(i) = -1.0
         horel(i) = -1.0
       enddo
-      fsver = 8.27
+      fsver = 8.28
 C                   Initialize the time-like variables
 C                   Initialize previous segment name for LINKP
       do i=1,15
