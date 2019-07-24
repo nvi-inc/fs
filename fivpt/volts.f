@@ -61,8 +61,6 @@ C
       call fs_get_rack(rack)
       if(VLBA.eq.iand(rack,VLBA)) then
         id=-1
-        call fc_mcbcn_d(ldevfp,ierr)
-        if(ierr.ne.0) goto 80000
         goto 11
       endif
 c

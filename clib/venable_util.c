@@ -36,7 +36,10 @@ char *ptr;
     };
     if(ptr != NULL) {
         ierr=arg_key(ptr,key_group,NKEY_GROUP,&ivalue,0,FALSE); /* g1-4 */
-        if( ierr==-200) {
+        if( ierr==-100) {
+           ierr=0;
+           goto End;
+        } else if( ierr==-200) {
            ierr=arg_key(ptr,key_d    ,NKEY_D    ,&ivalue,0,FALSE); /* mode d */
            if(ierr==0) ivalue=(ivalue/14)*2+(ivalue%2);   /* group index */
         }
@@ -47,6 +50,7 @@ char *ptr;
     } else
        *count=-1;
 
+End:
    if(*count>0) (*count)++;
    return ierr;
 }

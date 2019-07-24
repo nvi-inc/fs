@@ -85,7 +85,7 @@ struct tape_mon *lcl;
     int ind;
     int itemp;
     double outvac;
-    char feet[5];
+    char feet[6];
     void int2str(); 
     void flt2str();
 
@@ -94,6 +94,7 @@ struct tape_mon *lcl;
     switch (*count) {
       case 1:
         int2str(output,lcl->foot,-5,1); 
+        feet[0]='\0';
         int2str(feet,lcl->foot,-5,1); 
         memcpy(shm_addr->LFEET_FS,feet,5);
         break;

@@ -10,7 +10,7 @@ C
       real latpos,lonpos,ltrchi,lnrchi,lonofs,latofs
       real ltpar,lnpar,ltliof,lnliof
       external fgaus
-      logical kbreak
+      logical kbreak,kon
 C
       dimension tim(31), temp(31), off(31), tmplin(4), timlin(4)
       dimension ltpar(5), eltpar(5), lnpar(5), elnpar(5),it(6)
@@ -39,6 +39,7 @@ C
 1     continue
       call wait_prog('fivpt',ip)
       ierr=0
+      kon=.false.
       if(0.ne.rn_take('fivpt',1)) then
         call logit7(idum,idum,idum,-1,-2,lwho,2Her)
         goto 1
@@ -89,6 +90,23 @@ C
 cxx      if (ipgst(6Haquir ).le.0) nwt=300  
       call onsor(nwt,ierr)
       if (ierr.ne.0) goto 80010 
+      kon=.true.
+C
+C lock gain if a bbc
+C
+      call fs_get_rack(rack)
+      if(VLBA.eq.iand(rack,VLBA)) then
+        call fc_mcbcn_d(ldevfp,ierr,ip)
+        if(ierr.ne.0) then
+          ierr=-81
+          goto 80010
+        endif
+        if(ip(3).lt.0) then
+          call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+          ierr=-111
+          goto 80010
+        endif
+      endif
 C 
 C   1. Get System Temperature OFF source
 C 
@@ -401,6 +419,7 @@ C
 C
 80011 continue
       jerr=0
+      if(.NOT.kon) goto 89990
       call gooff(lonosv,latosv,laxfp,nwait,jerr)
       itry=itry-1
       if (jerr.gt.o.and.itry.gt.0) goto 80011
@@ -421,6 +440,13 @@ C
 C CLEAN UP AND EXIT
 C
 90000 continue
+      if(VLBA.eq.iand(rack,VLBA)) then
+        call fc_mcbcn_r(ip)
+        if(ip(3).lt.0) then
+          call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+          call logit7(idum,idum,idum,-1,-112,lwho,2Her)
+        endif
+      endif
       call rn_put('fivpt')
       goto 1
       end

@@ -7,7 +7,7 @@
 
 #define INEXT_N 3
 #define KENASTK_N 2
-#define LFEET_N 6
+#define LFEET_N 5
 #define LGEN_N 4
 #define LNEWPR_N 8
 #define LNEWSK_N 8
@@ -769,6 +769,66 @@ void fs_get_khalt_(KHALT)
 	int *KHALT;
 	{
 	  *KHALT = shm_addr->KHALT;
+	}
+
+void fs_set_ichvkenable_(ichvkenable)
+	int *ichvkenable;
+	{
+	  shm_addr->check.vkenable = *ichvkenable;
+	}
+
+void fs_get_ichvkenable_(ichvkenable)
+	int *ichvkenable;
+	{
+	  *ichvkenable = shm_addr->check.vkenable;
+	}
+
+void fs_set_ichvkrepro_(ichvkrepro)
+	int *ichvkrepro;
+	{
+	  shm_addr->check.vkrepro = *ichvkrepro;
+	}
+
+void fs_get_ichvkrepro_(ichvkrepro)
+	int *ichvkrepro;
+	{
+	  *ichvkrepro = shm_addr->check.vkrepro;
+	}
+
+void fs_set_ichvkmove_(ichvkmove)
+	int *ichvkmove;
+	{
+	  shm_addr->check.vkmove = *ichvkmove;
+	}
+
+void fs_get_ichvkmove_(ichvkmove)
+	int *ichvkmove;
+	{
+	  *ichvkmove = shm_addr->check.vkmove;
+	}
+
+void fs_set_ichvklowtape_(ichvklowtape)
+	int *ichvklowtape;
+	{
+	  shm_addr->check.vklowtape = *ichvklowtape;
+	}
+
+void fs_get_ichvklowtape_(ichvklowtape)
+	int *ichvklowtape;
+	{
+	  *ichvklowtape = shm_addr->check.vklowtape;
+	}
+
+void fs_set_ichrc_mv_tm_(ichrc_mv_tm)
+	int *ichrc_mv_tm;
+	{
+	  shm_addr->check.rc_mv_tm = *ichrc_mv_tm;
+	}
+
+void fs_get_ichrc_mv_tm_(ichrc_mv_tm)
+	int *ichrc_mv_tm;
+	{
+	  *ichrc_mv_tm = shm_addr->check.rc_mv_tm;
 	}
 
 void fs_set_raoff_(RAOFF)

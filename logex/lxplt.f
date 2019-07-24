@@ -47,7 +47,7 @@ C
 C        - Buffer for plot.
 C
       integer fmpreadstr, fmpsetpos, fmppurge
-      integer fmpwritexx, fmpreadxx, fmpappend, fmpwriteyy, fmpreadyy
+      integer fmpwritexx, fmpreadxx, fmpappend
       integer fmpsetline, writestr, iflch
       integer irec
       character*64 FILENAME1, FILENAME2
@@ -199,7 +199,6 @@ C
 C Write scratch record.
 C
         id = fmpwritexx(idcb1, ierr, xx)
-        id = fmpwriteyy(idcb1, ierr, yy)
         if (ierr.lt.0) goto 1100
         call lxget
       enddo  !!!READ LOG ENTRIES
@@ -250,7 +249,7 @@ C
         call fmprewind(idcb1,ierr)
         if (ierr.lt.0) goto 1100
         do i=1,nplot
-          id = fmpread(idcb1,ierr,xx,26)
+          id = fmpreadxx(idcb1,ierr,xx)
           do n=1,nump
             if(sdelta(n).lt.0..and.yy(n).lt.y2max(n)+sdelta(n)) then
               yy(n)=y2max(n)
@@ -326,7 +325,7 @@ C
         call ifill_ch(imax,1,11,' ')
         call jr2as(smax(i),imax,1,11,iprec)
         call ichmv(ltitle(2),77,iplch(i),1,1)
-        nchar = iflch(ltitle,80)
+        nchar = iflch(ltitle(2),78)
         call lxwrt(ltitle(2),nchar)
         if(icode.eq.-1) goto 1200
       enddo
@@ -397,7 +396,6 @@ C
 1000  call ifill_ch(line,1,130,' ')
       do 1070 i=1,nplot
        id = fmpreadxx(idcb1,ierr,xx)
-       id = fmpreadyy(idcb1,ierr,yy)
 cxx        if(ifbrk(idum).lt.0) icode=-1
         if(icode.eq.-1) goto 1200
         if (ierr.lt.0) goto 1100

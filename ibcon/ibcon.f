@@ -73,6 +73,7 @@ C        maximum number of devices on IEEE board
       integer iscn_ch, ichmv, icomma, iend, iflch
       integer idlen
       integer rddev
+      integer idum,fc_rte_prior
       integer*2 moddev(imaxdev,idevln)
 C               - module device name
       integer idevid(imaxdev)   
@@ -104,6 +105,7 @@ C     1. First get parameters and initialize if necessary.
 C
       call setup_fscom
       call read_fscom
+      idum=fc_rte_prior(FS_PRIOR)
 1     call wait_prog('ibcon',ip)
       iclass = ip(1)
       nclrec = ip(2)

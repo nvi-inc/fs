@@ -1,6 +1,3 @@
-define  stow          00000000000x
-source=stow,000000,000000,0000
-enddef
 define  kill          00000000000x
 sy=brk aquir
 sy=brk fivpt
@@ -12,8 +9,8 @@ device=i2
 fivept
 enddef
 define  prep          00000000000x
-"wx
-radecoff=0s,0d
+wx
+xyoff=0d,0d
 !+2s
 track
 sy=run aquir &
@@ -43,11 +40,10 @@ ifd=-7,-7
 postp
 enddef
 define  postp         00000000000x
-sy=run aquir
+sy=run aquir &
 enddef
 define  termp         00000000000x
-nooff
-sy=go,onoff
+sy=run aquir &
 enddef
 define  initp         00000000000
 setup
@@ -56,8 +52,8 @@ caltemps
 beam1=
 beam2=
 beam3=
-fivept=hadc,-2,9,.4,1,ia
-onoff=2,4,ia,b11u,60,3
+fivept=xyns,-2,9,.4,1,i1
+onoff=2,4,i1,v9,60,3
 check=
 sy=run aquir &
 enddef

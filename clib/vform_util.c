@@ -270,7 +270,10 @@ void vform9Dmc(data, lcl)
 unsigned *data;
 struct vform_cmd *lcl;
 {
-    *data=0x8032;
+    if(lcl->rate >=3)   /* rates below 2 MHz we can't handle */
+      *data=0x8000+ (0x19 << (lcl->rate-3));
+    else
+      *data=0x8032;
 }
 
 void vformA6mc(data, hwid) 

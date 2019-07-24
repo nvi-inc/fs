@@ -62,6 +62,7 @@ void putpname();
 void skd_run(), cls_clr();
 int nsem_test();
 void logit();
+int rte_prior();
 
 /* antcn main program starts here */
 main()
@@ -78,6 +79,10 @@ main()
 */
   setup_ids();
   fs = shm_addr;
+
+/* set real-time priority */
+
+  rte_prior(FS_PRIOR);
 
 /* Put our program name where logit can find it. */
 

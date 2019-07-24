@@ -196,11 +196,11 @@ c     call ftn_runprog('vi ' // ls1,ierr)
 cxx      call ftn_editor(ls1,ierr,ichange)
       ierr = 0
       call ftn_edit(ls1,ierr,ichange)
-      if (ierr.ne.0) write(6,*) 'error editing procedure'
+      if (ierr.ne.0) write(6,*) 'error editing procedure',ierr
 C
       if (ichange.eq.0) then
         write(6,9000) lnam1
-9000    format(1x,"NO changes were made to the procedure: ",a)
+9000    format(" NO changes were made to the procedure: ",a)
       else if (ichange.eq.1) then
         call fopen(idcb1,ls1,ierr)
         if (ierr.lt.0) then
@@ -232,6 +232,9 @@ C
         call char2low(ibc)
         if(kerr(ierr,me,'reading',' ',0,0)) continue
         do while(ierr.ge.0.and.len.ge.0)
+          if(ibc(1:8).eq.'define  '.and.ibc(21:34).eq.' ') then
+             ibc(21:)='  00000000000x'
+          endif
           if(ibc(1:6).eq.'define'.and.ibc(9:20).eq.lnam1) goto 160
           nch = trimlen(ibc)
           if (nch.gt.0) call f_writestring(idcb2,ierr,ibc(:nch),lenw)
@@ -286,6 +289,9 @@ C
           call char2low(ibc)
           if(kerr(ierr,me,'reading',' ',0,0)) continue
           do while(ierr.ge.0.and.len.ge.0)
+            if(ibc(1:8).eq.'define  '.and.ibc(21:34).eq.' ') then
+               ibc(21:)='  00000000000x'
+            endif
             nch = trimlen(ibc)
             if (nch.gt.0) call f_writestring(idcb2,ierr,ibc(:nch),lenw)
             if(kerr(ierr,me,'writing',' ',0,0)) continue

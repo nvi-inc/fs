@@ -27,6 +27,7 @@ C
       iclcm = ip(1)
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum)
       nchar = ireg(2)
+      call fs_get_rack(rack)
       ieq = iscn_ch(ibuf,1,nchar,'=')
       if (ieq.eq.0) goto 500
 C

@@ -24,25 +24,31 @@ int *ierr;                             /* error return, -1 if no such device */
 
     if(0==strncmp(device,"ia",2)) {    /* check for each possible if detector */
       memcpy(request->device,"ia",2);
-      request->addr=0x06; found=TRUE;
+      request->addr=0x06;
+      found=TRUE;
     } else if(0==strncmp(device,"ib",2)) {
       memcpy(request->device,"ia",2);
-      request->addr=0x07; found=TRUE;
+      request->addr=0x07;
+      found=TRUE;
     } else if(0==strncmp(device,"ic",2)) {
       memcpy(request->device,"ic",2);
-      request->addr=0x06; found=TRUE;
+      request->addr=0x06;
+      found=TRUE;
     } else if(0==strncmp(device,"id",2)) {
       memcpy(request->device,"id",2);
-      request->addr=0x07; found=TRUE;
+      request->addr=0x07;
+      found=TRUE;
     } else {                             /* maybe it's a bbc */
       ptr=strchr(nums,device[0]);
       if(ptr!=NULL && *ptr != '\0') {
         request->device[0]='b';
         request->device[1]=device[0];
         if(device[1] == 'u') {          /* (u)pper and (l)ower SB detectors */
-           request->addr=0x06; found=TRUE;
+           request->addr=0x06;
+           found=TRUE;
         } else if(device[1] == 'l') {
-           request->addr=0x07; found=TRUE;
+           request->addr=0x07;
+           found=TRUE;
         }
       }
     }

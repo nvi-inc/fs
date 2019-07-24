@@ -1,7 +1,7 @@
-/* logit
+/* logita
 
-   logit formats message and errors for logging and sends the
-   buffer to ddout.
+   logitw formats message and errors for logging and sends the
+   buffer to ddout. It is just like logit.c, but it handles ascii what
 */
 
 #include <string.h>
@@ -15,10 +15,11 @@ void cls_snd();
 void pname();
 void rte_time();
 
-logit(msg,ierr,who)
+logita(msg,ierr,who, what)
 char *msg;           /* a message to be logged, NULL if none */
 int ierr;            /* error number, 0 if no error          */
 char *who;           /* 2-char string identifying the error  */
+char *what;          /* 2-char string with more info         */
 
 {
   char buf[100];    /* Holds the complete log entry */
@@ -34,12 +35,15 @@ char *who;           /* 2-char string identifying the error  */
   int2str(buf,it[2],-2,1);
   int2str(buf,it[1],-2,1);
 
-/* For error messages, put ?ERROR xx nnnn into the log entry.
+/* For error messages, put ?ERROR xx (nn) into the log entry.
 */
   if (ierr != 0) {
     strcat(buf,"?ERROR ");
     strcat(buf,who);
     int2str(buf,ierr,-5,0);
+    strcat(buf,"(");
+    strncat(buf,what,2);
+    strcat(buf,")");
   }
 /* Get the name of our main program and append #pname# to the
    log entry. Then append the message.

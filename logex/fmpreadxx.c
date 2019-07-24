@@ -1,6 +1,5 @@
 #include <stdio.h>
-#include <string.h>
-#define MAX_LINE 256
+#include <sys/types.h>
 
 int fmpreadxx_(dcb,error,xx)
 
@@ -9,6 +8,6 @@ int fmpreadxx_(dcb,error,xx)
   int *error;
 {
 
-  *error = fscanf(*dcb,"%lf",xx);
+  *error = fread((char *) xx,sizeof(short),14,*dcb);
   return(*error);
 }

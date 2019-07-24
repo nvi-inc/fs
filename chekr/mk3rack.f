@@ -1,12 +1,11 @@
       subroutine mk3rack(lmodna,lwho,icherr,ichecks,nverr,niferr,
-     .                   nfmerr,kall)
+     .                   nfmerr)
 C
       include '../include/fscom.i'
 C 
 C  INPUT: 
       integer*2 lmodna(1), lwho
       integer icherr(1), ichecks(1), nverr, niferr, nfmerr
-      logical kall !true to check everything, every 20 sec
 C 
 C  SUBROUTINES CALLED:
 C 
@@ -18,6 +17,7 @@ C
       dimension ip(5)             ! - for RMPAR
       integer*2 ibuf1(40)
       dimension nbufs(17), icodes(4,17)
+      integer rn_take
 C      - MODule NAmes, 2-char codes
 C      - Number of BUFfers for each module
 C      - Integer CODES for MATCN for each buffer
@@ -34,7 +34,6 @@ C
       data nmod/17/
       data maxerr /15/
 C
-      if (.not.kall) return
       do iloop=1,nmod
         call fs_get_icheck(icheck(iloop),iloop)
         if(icheck(iloop).le.0.or.ichecks(iloop).ne.icheck(iloop))
@@ -51,7 +50,9 @@ C
           ibuf1(3) = o'47'   ! an apostrophe '
           call put_buf(iclass,ibuf1,-5,2Hfs,0)
 C Finally, get alarm status
+         ierr=rn_take('fsctl',0)
           call run_matcn(iclass,nbufs(iloop)+1)
+          call rn_put('fsctl')
 C Send our requests to MATCN for the data
           call rmpar(ip)
           iclass = ip(1)

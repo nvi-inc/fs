@@ -25,7 +25,8 @@ int *ierr,*ichange,len;
 
      if (len > MAX_STRING) {
         *ierr=-2;
-        printf("String length is longer than the allowable string length\n");
+        fprintf(stderr,
+                "String length is longer than the allowable string length\n");
         return;
      }
 
@@ -40,17 +41,20 @@ int *ierr,*ichange,len;
      if(s2 != NULL) *s2='\0';
 
      if(stat(path, &sb)==-1) {
-        perror("");
+        fprintf(stderr,"Error on %s, '",path);
+        perror("on first stat");
         *ierr=-1;
         return;
      }
      tmone=(long) sb.st_mtime;
 
      *ierr=system(string);
-     if (ierr<0) perror("fork or exec fail");
+     if (*ierr<0) perror("fork or exec fail");
+     *ierr=0;
 
      if(stat(path, &sb)==-1) {
-        perror("");
+        fprintf(stderr,"Error on %s, '",path);
+        perror("on second stat");
         *ierr=-1;
         return;
      }

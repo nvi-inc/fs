@@ -29,6 +29,7 @@ int *error;
   int i;
   int iret;
   unsigned char locbuf[BSIZE];
+  int val, icopy;
 
   *error = 0;
 
@@ -48,7 +49,10 @@ int *error;
   ibcmd(boardid_ext,"_?",1);  /* Send UNT UNL */
 /*printf("\n ibsta = %.4xh iberr = %d ibcnt %d\n", ibsta,iberr,ibcnt);*/
 
+  val = (REOS << 8) +0x0a;
+  ibeos(*devid,val);
   ibrd(*devid,locbuf,BSIZE);
+
 /*  printf("\n ibsta = %.4xh iberr = %d ibcnt %d\n", ibsta,iberr,ibcnt); */
 
   if ( (ibsta & 0x4000) != 0) {
@@ -59,23 +63,21 @@ int *error;
     *error = -8; 
     return(iberr);
   }
-  iret = ibcnt;
 
-  i=0;
-  while(i<ibcnt && i < *buflen) {
-    buffer[i] = locbuf[i];
-    i++;
-  }
-/* { int i; for (i=0;i<ibcnt;i++) printf("%2x ",buffer[i]); } */
-/* { int i,j; 
-  char *hexid;
-  hexid = (char*)buffer;
-  for (i=0;i<ibcnt;i++) {
-    printf("%x ",*hexid);
-    hexid++;
-  }
+  iret = ibcnt;
+  while(iret > 0 &&
+     (locbuf[iret-1] == 0 || locbuf[iret-1] == '\r' || locbuf[iret-1]== '\n'))
+        iret--;
+
+  icopy=iret;
+  if(iret > *buflen)
+     icopy=*buflen;
+  memcpy(buffer,locbuf,icopy);
+
+/*
+ { int i; for (i=0;i<iret;i++) printf("%2x ",buffer[i]); } 
   printf("\n");
-} */
+*/
 
   return(iret);
 }

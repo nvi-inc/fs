@@ -15,7 +15,7 @@ fc_head_vmov.o fc_mcbcn_v.o fc_vset_zero.o fc_mcbcn_v2.o\
 fc_tpi_vlba.o fc_et_v.o fc_rwff_v.o fc_get_vaux.o fc_set_vaux.o\
 fc_chmod.o fc_rte_lock.o fc_rte_prior.o fc_putln.o fc_get_vtime.o\
 fc_mvdis_v.o fc_bbc2freq.o fc_rte_sett.o fc_rte2secs.o fc_rte_rawt.o\
-fc_rte_fixt.o fc_cls_sndc.o
+fc_rte_fixt.o fc_cls_sndc.o fc_secs2rte.o
 #
 #CFLAGS = -g
 #FFLAGS = -g

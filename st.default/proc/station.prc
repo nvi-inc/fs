@@ -88,7 +88,7 @@ patch=lo2,9l,10l,11l,12h,13h,14h
 patch=lo3,5h,6h,7h,8h
 enddef
 define  initi         92128154932x
-"Welcome to Field System version 8.0 and the new PC Field System
+"Welcome to the PC Field System
 sy=setcl
 enddef
 define  midob         00000000000x

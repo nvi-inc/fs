@@ -43,7 +43,9 @@ int *ierr;
 */
 
   end_req(ip,&buffer);
+  nsem_take("fsctl",0);
   skd_run("mcbcn",'w',ip);
+  nsem_put("fsctl");
   skd_par(ip);
 
   if (ip[2]<0) {  

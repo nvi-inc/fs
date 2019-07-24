@@ -1,11 +1,9 @@
-      subroutine vlbarack(ichecks,lwho,kall)
+      subroutine vlbarack(lwho)
 C
       include '../include/fscom.i'
 C 
 C  INPUT: 
-      integer ichecks(1)
       integer*2 lwho
-      logical kall !true to check everyting every 20 sec
 C 
 C 
 C  SUBROUTINES CALLED:
@@ -15,13 +13,13 @@ C  LOCAL VARIABLES:
       integer nbbc,ndist
       integer*2 lmodna(16)
       integer*2 ldistna(2)
-      integer icherr(10)
+      integer icherr(20)
       integer nbbcerr, niferr
 C
 C
 C  INITIALIZED:
       data nbbc/14/,ndist/2/
-      data nbbcerr/10/  !! number of possible bbc errors 
+      data nbbcerr/20/  !! number of possible bbc errors 
       data niferr/5/    !! number of possible if errors 
       data lmodna /2Hb1,2Hb2,2Hb3,2Hb4,2Hb5,2Hb6,2Hb7,2Hb8,2Hb9,2Hba,
      /             2Hbb,2Hbc,2Hbd,2Hbe,2Hbf,2Hbg/
@@ -29,20 +27,22 @@ C  INITIALIZED:
 C
 C  First loop through the array checking the BaseBand Converters (BBC)
 C
-      if (.not.kall) return
       do ibbc=1,nbbc
         do j=1,nbbcerr
           icherr(j)=0
         enddo
         call fs_get_ichvlba(ichvlba(ibbc),ibbc)
-        if(ichvlba(ibbc).le.0.or.ichecks(ibbc).ne.ichvlba(ibbc))
-     .     goto 199
+        ichecks=ichvlba(ibbc)
+        if(ichvlba(ibbc).le.0)  goto 199
         ierr=0
         call bbchk(ibbc,icherr,ierr)
         if (ierr.ne.0) then
           call logit7(0,0,0,0,ierr,lwho,lmodna(ibbc))
           goto 199
         endif
+        call fs_get_ichvlba(ichvlba(ibbc),ibbc)
+        if(ichvlba(ibbc).le.0.or.ichecks.ne.ichvlba(ibbc))
+     .     goto 199
         do j=1,nbbcerr
           if (icherr(j).ne.0) then
             call logit7(0,0,0,0,-201-j,lwho,lmodna(ibbc))
@@ -58,15 +58,17 @@ C
           icherr(j)=0
         enddo
         call fs_get_ichvlba(ichvlba(nbbc+idist),nbbc+idist)
-        if(ichvlba(idist+nbbc).le.0.or.ichecks(idist+nbbc).ne.
-     .             ichvlba(idist+nbbc))
-     .     goto 299
+        ichecks=ichvlba(idist+nbbc)
+        if(ichvlba(idist+nbbc).le.0) goto 299
         ierr=0
         call distchk(idist,icherr,ierr)
         if (ierr.ne.0) then
           call logit7(0,0,0,0,ierr,lwho,ldistna(idist))
           return
         endif
+        call fs_get_ichvlba(ichvlba(nbbc+idist),nbbc+idist)
+        if(ichvlba(idist+nbbc).le.0.or.ichecks.ne.ichvlba(idist+nbbc))
+     &     goto 299
         do j=1,niferr
           if (icherr(j).ne.0) then
             call logit7(0,0,0,0,-201-j-nbbcerr,lwho,ldistna(idist))
@@ -82,15 +84,18 @@ C
       enddo
       in=1+nbbc+ndist
       call fs_get_ichvlba(ichvlba(in),in)
-      if(ichvlba(in).le.0.or.ichecks(in).ne.ichvlba(in)) goto 399
+      ichecks=ichvlba(in)
+      if(ichvlba(in).le.0) goto 399
       ierr=0
       call vformchk(icherr,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,0,ierr,lwho,2Hvf)
+        call logit7(0,0,0,0,ierr,lwho,2Hfm)
       endif
+      call fs_get_ichvlba(ichvlba(in),in)
+      if(ichvlba(in).le.0.or.ichecks.ne.ichvlba(in)) goto 399
       do j=1,5
         if (icherr(j).ne.0) then
-          call logit7(0,0,0,0,-201-j-nbbcerr-niferr,lwho,2Hvf)
+          call logit7(0,0,0,0,-201-j-nbbcerr-niferr,lwho,2Hfm)
         endif
       enddo
 C check the formatter time with the computer time
@@ -98,10 +103,10 @@ C check the formatter time with the computer time
       ierror=0
       call timechk(ierror,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,0,ierr,lwho,2Hvf)
+        call logit7(0,0,0,0,ierr,lwho,2Hfm)
       endif
       if (ierror.ne.0) then
-        call logit7(0,0,0,0,-329,lwho,2Hvf)
+        call logit7(0,0,0,0,ierror,lwho,2Hfm)
       endif
 399   continue
 C

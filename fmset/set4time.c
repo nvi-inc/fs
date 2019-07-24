@@ -6,6 +6,8 @@
 #include <time.h>        /* time function definition header file */
 #include <sys/types.h>   /* data type definition header file */
 
+#include "fmset.h"
+
 void skd_run();
 void skd_par();
 void cls_snd();
@@ -51,7 +53,9 @@ ip[1] = 1;        /* only one buf */
 ip[2] = 0;
 ip[3] = 0;
 ip[4] = 0;
+nsem_take("fsctl",0);
 skd_run("matcn",'w',ip);
+nsem_put("fsctl");
 
 /* get reply from matcn */
 skd_par(ip);
@@ -60,8 +64,10 @@ if( ip[2] < 0 )
 	{
 	endwin();
 	printf("Error %d from formatter\n",ip[2]);
+        logita(NULL,ip[2],ip+3,ip+4);
 	cls_clr(outclass);
 	cls_clr(inclass);
+        rte_sleep(SLEEP_TIME);
 	exit(0);
 	}
 

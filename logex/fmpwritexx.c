@@ -1,6 +1,5 @@
 #include <stdio.h>
-#include <string.h>
-#define MAX_LINE 256
+#include <sys/types.h>
 
 int fmpwritexx_(dcb,error,xx)
 
@@ -12,7 +11,7 @@ int fmpwritexx_(dcb,error,xx)
 
   *error = 0;
 
-  *error = fprintf(*dcb,"%lf\n",*xx);
+  *error = fwrite((char *)xx,sizeof(short),14,*dcb);
 
   return(*error);
 }

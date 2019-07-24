@@ -467,8 +467,8 @@ int iyear;
     }
   } else {                            /* VLBA */
     for (i=0; i<17; i++) {
-      if (shm_addr->check.bbc[i]<=0) {
-        if (i<=13) {
+      if (i<=13) {
+        if (shm_addr->check.bbc[i]<=0) {
           strcat(checkln," b");
           if (((i+1)/10) == 0) {
             dig[0]=((i+1)%10) + '0';
@@ -479,21 +479,21 @@ int iyear;
             dig[2]= '\0';
           }
           strcat(checkln,dig);
-        } else {
-          switch (i) {
-            case 14:
-              if (shm_addr->check.dist[0]<=0)
-                strcat(checkln," ia");
-              break;
-            case 15:
-              if (shm_addr->check.dist[1]<=0)
-                strcat(checkln," ic");
-              break;
-            case 16:
-              if (shm_addr->check.vform<=0)
-                strcat(checkln," fm");
-              break;
-          }
+        }
+      } else {
+        switch (i) {
+          case 14:
+            if (shm_addr->check.dist[0]<=0)
+              strcat(checkln," ia");
+            break;
+          case 15:
+            if (shm_addr->check.dist[1]<=0)
+              strcat(checkln," ic");
+            break;
+          case 16:
+            if (shm_addr->check.vform<=0)
+              strcat(checkln," fm");
+            break;
         }
       }
     }

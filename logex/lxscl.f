@@ -42,28 +42,37 @@ C
 C
 C Retrieve the SMIN value
 C
-      call gtprm(ibuf,ich,nchar,2,parm,id)
-      s1 = parm
+      call gtprm2(ibuf,ich,nchar,2,parm,id)
+      if(id.eq.0) then
+        s1 = parm
+      else
+        s1=0.0
+      endif
 C
 C Retrieve the SMAX value
 C
-      call gtprm(ibuf,ich,nchar,2,parm,id)
-      s2 = parm
+      call gtprm2(ibuf,ich,nchar,2,parm,id)
+      if(id.eq.0) then
+        s2 = parm
+      else
+        s2=0.0
+      endif
 C
 C Retrieve the N value
 C
-      call gtprm(ibuf,ich,nchar,1,parm,id)
+      call gtprm2(ibuf,ich,nchar,1,parm,id)
       n=iparm(1)
-      if (cjchar(parm,1).eq.','.and.nump.gt.0) n=nscale(1)
+      if (id.eq.2.and.nump.gt.0) n=nscale(1)
 C
 C Retrieve the dB scale
 C
-      call gtprm(ibuf,ich,nchar,0,parm,id)
+      call gtprm2(ibuf,ich,nchar,0,parm,id)
+      iparm1=iparm(1)
 C
 C Retrieve the DELTA value
 C
-      call gtprm(ibuf,ich,nchar,2,parm,id)
-      if (cjchar(iparm,1).eq.',') then
+      call gtprm2(ibuf,ich,nchar,2,parm,id)
+      if (id.ne.0) then
         de=0.0
       else
         de = parm
@@ -86,9 +95,10 @@ C
       call po_put_c(outbuf)
       icode=-1
       goto 1700
-850   smin(i) = s1
+850   continue 
+      smin(i) = s1
       smax(i) = s2
-      llogx(i) = iparm(1)
+      llogx(i) = iparm1
       sdelta(i)=de
 C
 C Check for a dB scale

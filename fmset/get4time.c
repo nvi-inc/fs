@@ -1,6 +1,9 @@
 /* get4time.c - get mk4 formatter time */
 
+#include <stdio.h>
 #include <sys/types.h>   /* data type definition header file */
+
+#include "fmset.h"
 
 extern long ip[5];
 extern char inbuf[512];
@@ -16,15 +19,16 @@ void skd_par();
 void rte2secs();
 static short tmget[]= {0,'fm','/t','im'};
 
-void get4time(unixtime,unixhs,formtime,formhs)
-time_t *unixtime; /* system time */
+void get4time(unixtime,unixhs,fstime,fshs,formtime,formhs)
+time_t *unixtime; /* computer time */
 int *unixhs;
+time_t *fstime; /* fs time */
+int *fshs;
 time_t *formtime; /* formatter time */
 int *formhs;
 {
-	int itm[13],it[6],ms,nbytes,nrecs,ierr;
-	long timea, timeb;
-	double timeavg;
+	int it[6],ms,nbytes,nrecs,ierr;
+        long centisec[2], centiavg, centidiff;
 	int cnt=0;
 	
 	if (tmget[0] == 0) {
@@ -41,7 +45,9 @@ tryagain:
 	ip[2] = 0;
 	ip[3] = 0;
 	ip[4] = 0;
+        nsem_take("fsctl",0);
 	skd_run("matcn",'w',ip);
+        nsem_put("fsctl");
 
 /* get reply from matcn */
 	skd_par(ip);
@@ -52,8 +58,10 @@ tryagain:
 		{
 		endwin();
 		printf("Error reply from matcn - error %d\n", ierr );
+                logita(NULL,ip[2],ip+3,ip+4);
 		cls_clr(outclass);
 		cls_clr(inclass);
+                rte_sleep(SLEEP_TIME);
 		exit(0);
 		}
 	msgflg = save = 0;
@@ -62,19 +70,23 @@ tryagain:
 		{
 		endwin();
 		printf("Error rec. msg - %d bytes received\n" ,nbytes);
+                logita(NULL,-1,"fv"," ");
 		cls_clr(outclass);
 		cls_clr(inclass);
+                rte_sleep(SLEEP_TIME);
 		exit(0);
 		}
 	inbuf[nbytes]='\0';
 
-	if ( (nbytes = cls_rcv(inclass, itm, 52, 
+	if ( (nbytes = cls_rcv(inclass, centisec, 8, 
                                &rtn1, &rtn2, msgflg, save)) <0)
 		{
 		endwin();
 		printf("Error rec. time - %d bytes received\n" ,nbytes);
+                logita(NULL,-2,"fv"," ");
 		cls_clr(outclass);
 		cls_clr(inclass);
+                rte_sleep(SLEEP_TIME);
 		exit(0);
 		}
 
@@ -90,22 +102,22 @@ tryagain:
 		if(cnt++>5) {
 		endwin();
 		printf("Error year less than 1900 for 5 tries\n");
+                logita(NULL,-3,"fv"," ");
 		cls_clr(outclass);
 		cls_clr(inclass);
+                rte_sleep(SLEEP_TIME);
 		exit(0);
 		} else
 			goto tryagain;
 
-        rte2secs(itm,&timeb);
-        rte2secs(itm+6,&timea);
-        timeavg=(((double) timea)+((double) timeb)+0.01*(itm[0]+itm[6]))/2.0;
-        *unixtime=timeavg;
-        *unixhs=(timeavg-*unixtime)*100.0;
-        if(*unixhs<0)
-		*unixhs = 0;
-	else if(*unixhs>99) {
-		*unixtime = *unixhs/100;
-		*unixhs = *unixhs % 100;
-	}
+        centidiff =centisec[1]-centisec[0];
+        centiavg= centisec[0]+centidiff/2;
+
+        rte_cmpt(unixtime,&centiavg);
+        *unixhs=centiavg;
+
+        centiavg= centisec[0]+centidiff/2;
+        rte_fixt(fstime,&centiavg);
+        *fshs=centiavg;
         
 }

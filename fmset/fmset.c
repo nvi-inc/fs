@@ -8,10 +8,7 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-#define DISP_BORDER	1
-#define DISP_TEXT	2
-#define	DISP_FIELDS	3
-#define	DISP_ERROR	4
+#include "fmset.h"
 
 #define ESC_KEY		0x1b
 #define INC_KEY		'+'
@@ -41,7 +38,9 @@ main()
 WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
 time_t unixtime; /* local computer system time */
 int    unixhs;
-time_t formtime; /* vlba formatter time */
+time_t fstime; /* field systm time */
+int    fshs;
+time_t formtime; /* formatter time */
 int    formhs;
 char	buffer[128];
 int	running=TRUE;
@@ -50,8 +49,10 @@ int    disphs;
 char   inc;
 int    flag;
 
-/* connect to shared memory segment */
-setup_ids();
+
+setup_ids();         /* connect to shared memory segment */
+
+rte_prior(CL_PRIOR); /* set our priority */
 
 rack=shm_addr->equip.rack;
 
@@ -60,44 +61,27 @@ if(rack & VLBA)
 
 /* initialize terminal settings and curses.h data structures and variables */
 initscr ();
-if ( start_color () == ERR ) {
-  init_pair ( DISP_BORDER, COLOR_WHITE, COLOR_BLACK );
-  init_pair ( DISP_TEXT,   COLOR_WHITE, COLOR_BLACK );
-  init_pair ( DISP_FIELDS, COLOR_WHITE, COLOR_BLACK );
-  init_pair ( DISP_ERROR,  COLOR_BLACK, COLOR_WHITE );
-} else {
-  init_pair ( DISP_BORDER, COLOR_CYAN,   COLOR_BLUE );
-  init_pair ( DISP_TEXT,   COLOR_WHITE,  COLOR_BLUE );
-  init_pair ( DISP_FIELDS, COLOR_YELLOW, COLOR_BLUE );
-  init_pair ( DISP_ERROR,  COLOR_RED,    COLOR_BLUE );
-}
-maindisp = newwin ( 23, 80, 0, 0 );
-wattron ( maindisp, COLOR_PAIR ( DISP_BORDER ) );
-clear_scrn ( maindisp, 23 );
+maindisp = newwin ( 24, 80, 0, 0 );
+clear_scrn ( maindisp, 24 );
 box ( maindisp, 0, 0 );  /* use default vertical/horizontal lines */
 
 /* build display screen */
-wattroff ( maindisp, COLOR_PAIR ( DISP_BORDER ) );
-wattron ( maindisp, COLOR_PAIR ( DISP_TEXT ) );
-wattron ( maindisp, A_BOLD );
-mvwaddstr( maindisp, 4, 10, "Formatter Clock" );
-mvwaddstr( maindisp, 5, 10, "Computer Clock" );
-mvwaddstr( maindisp, 2, 30, "Current Time" );
+mvwaddstr( maindisp, 4, 10, "Formatter" );
+mvwaddstr( maindisp, 5, 10, "Field System" );
+mvwaddstr( maindisp, 6, 10, "Computer" );
 mvwaddstr( maindisp, 2, 23, "fmset - formatter time set" );
-mvwaddstr( maindisp, 7, 2,
+mvwaddstr( maindisp, ROW, 10,
  "Use '+'   to increment formatter time by one second." );
-mvwaddstr( maindisp, 8, 2,
+mvwaddstr( maindisp, ROW+1, 10,
  "    '-'   to decrement by one second.");
-mvwaddstr( maindisp,  9, 2, 
+mvwaddstr( maindisp,  ROW+2, 10, 
  "    '='   to be prompted for a new formatter time." );
-mvwaddstr( maindisp, 10, 2, 
- "    '.'   to set formatter time to computer time.");
-mvwaddstr( maindisp, 11, 2,
+mvwaddstr( maindisp, ROW+3, 10, 
+ "    '.'   to set formatter time to Field System time.");
+mvwaddstr( maindisp, ROW+4, 10,
  "    <esc> to quit.");
-wattroff ( maindisp, COLOR_PAIR ( DISP_TEXT ) );
 nodelay ( maindisp, TRUE );
 noecho ();
-wattron ( maindisp, COLOR_PAIR ( DISP_FIELDS ) );
 leaveok ( maindisp, TRUE); /* leave cursor in place */
 wrefresh ( maindisp );
 
@@ -106,7 +90,8 @@ do 	{
 
 	char fmt[40];
 
-	getfmtime(&unixtime,&unixhs,&formtime,&formhs); /* get times */
+	getfmtime(&unixtime,&unixhs,&fstime, &fshs,
+                  &formtime,&formhs); /* get times */
 
         disptime=formtime;
         disphs=formhs+5;
@@ -119,6 +104,17 @@ do 	{
 	cftime ( buffer, fmt, &disptime );
 	mvwaddstr( maindisp, 4, 30, buffer );
 
+        disptime=fstime;
+        disphs=fshs+5;
+        if (disphs > 99) {
+           disphs-=100;
+           disptime++;
+        }
+          
+        sprintf( fmt, "%%T.%01d %%Z %%d %%b (Day %%j) %%Y",disphs/10);
+	cftime ( buffer, fmt, &disptime );
+	mvwaddstr( maindisp, 5, 30, buffer );
+
         disptime=unixtime;
         disphs=unixhs+5;
         if (disphs > 99) {
@@ -128,7 +124,7 @@ do 	{
           
         sprintf( fmt, "%%T.%01d %%Z %%d %%b (Day %%j) %%Y",disphs/10);
 	cftime ( buffer, fmt, &disptime );
-	mvwaddstr( maindisp, 5, 30, buffer );
+	mvwaddstr( maindisp, 6, 30, buffer );
 
 	wrefresh ( maindisp );
 
@@ -141,12 +137,12 @@ do 	{
 			setfmtime(formtime--,-1);
 			break;
 		case SET_KEY :  /* Get time from user */
-			formtime = asktime( maindisp,&flag);
+			formtime = asktime( maindisp,&flag, formtime);
                         if(flag)
                           setfmtime(formtime,0);
 			break;
 		case EQ_KEY :  /* set form time from comp time */
-			setfmtime(formtime=unixtime+(unixhs+50)/100,0);
+			setfmtime(formtime=fstime+(fshs+50)/100,0);
 			break;
 		case ESC_KEY :  /* ESC character */
 			running = FALSE;

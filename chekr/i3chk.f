@@ -26,6 +26,7 @@ C      - Arrays for recording identified error conditions
       integer ireg(2),isw(4)
       integer*4 freq
       logical kalarm
+      integer rn_take
 C
 C  INITIALIZED:
 C
@@ -43,7 +44,9 @@ c
       call char2hol(''' ',ibuf1(3),1,1)
       call put_buf(iclass,ibuf1,-5,2Hfs,0)
 C
+      ierr=rn_take('fsctl',0)
       call run_matcn(iclass,3)
+      call rn_put('fsctl')
       call rmpar(ip)
       iclass = ip(1)
       ierr = ip(3)

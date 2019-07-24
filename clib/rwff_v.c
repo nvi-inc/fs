@@ -137,8 +137,13 @@ int *ierr;
       skd_run("mcbcn",'w',ip);
       skd_par(ip);
 
-      if (ichold != -99) shm_addr->check.rec=ichold;
-      if (ichold >= 0) shm_addr->check.rec=ichold % 1000 + 1;
+      if (ichold != -99) {
+         shm_addr->check.rec=ichold;
+         shm_addr->check.vkmove = TRUE;
+         rte_rawt(&shm_addr->check.rc_mv_tm);
+      }
+      if (ichold >= 0)
+         shm_addr->check.rec=ichold % 1000 + 1;
 
       return;
 }

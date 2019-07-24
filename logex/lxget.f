@@ -57,7 +57,6 @@ C  *****************************************************************
 C
 C
       integer fmpread, ichmv
-      character*100 cbuf
       character*79 outbuf
       integer answer, trimlen
       integer*2 ibuf2(50)
@@ -97,10 +96,9 @@ C
 200   continue
       call ifill_ch(ibuf,1,iblen*2,' ')
       call ifill_ch(ibuf2,1,iblen*2,' ')
-      ilen = fmpread(idcb,ierr,cbuf,iblen*2)
+      ilen = fmpread(idcb,ierr,ibuf,iblen*2)
 C
       if (ilen.ge.0) then
-        call char2hol(cbuf,ibuf,1,ilen)
         idum = ichmv(ibuf2,1,ibuf,1,ilen)
         ilen = iflch(ibuf,iblen*2)
         nchar = 10 + iflch(ibuf(6),ilen-10)

@@ -62,5 +62,7 @@
 
 #define FS_ROOT     "/usr2"
 
+#define CH_PRIOR    90
+#define CL_PRIOR    30
 #define FS_PRIOR    20
 #define AN_PRIOR    10

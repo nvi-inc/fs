@@ -67,7 +67,7 @@ C
       ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
       nchar = ireg(2) 
       ich = 4 
-      nchar=nchar-1  ! remove always present lf
+      if(jchar(ibuf,nchar).eq.10) nchar=nchar-1 !remove LF if present
       if(jchar(ibuf,nchar).eq.13) nchar=nchar-1 !remove CR if present
       call gtfld(ibuf(2),ich,nchar-2,ic1,ic2) 
       if(ic1.gt.0.and.ic2-ic1+1.ge.1) then

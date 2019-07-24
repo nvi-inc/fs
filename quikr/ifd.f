@@ -89,9 +89,9 @@ C
         else
           ich=ist
           call gtprm(ibuf,ich,nchar,1,parm,ierr)
-          if (cjchar(parm,1).eq.',') then
+          if (ichcm_ch(iparm,1,', ').eq.0) then
             iat(i) = 0                          ! default
-          else if (cjchar(parm,1).eq.'*') then
+          else if (ichcm_ch(iparm,1,'* ').eq.0) then
             if (i.eq.1) iat(i) = iat1if
             if (i.eq.2) iat(i) = iat2if
         else if (iparm(1).lt.0.or.iscn_ch(ibuf,ist,ich-1,'+').ne.0) then

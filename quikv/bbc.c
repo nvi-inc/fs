@@ -109,8 +109,13 @@ mcbcn:
       skd_run("mcbcn",'w',ip);
       skd_par(ip);
 
-      if (ichold != -99) shm_addr->check.bbc[ind]=ichold;
-      if (ichold >= 0) shm_addr->check.bbc[ind]=ichold % 1000 + 1;
+      if (ichold != -99) {
+         shm_addr->check.bbc[ind]=ichold;
+         rte_rawt(shm_addr->check.bbc_time+ind);
+      }
+         
+      if (ichold >= 0)
+         shm_addr->check.bbc[ind]=ichold % 1000 + 1;
 
       if(ip[2]<0) return;
       bbc_dis(command,itask,ip);

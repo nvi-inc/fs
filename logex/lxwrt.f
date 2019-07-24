@@ -56,6 +56,7 @@ C
       nwx=ncharx
       if (MOD(nwx,2).eq.1) then
         nwx=nwx+1
+        idum=ichmv(ibufx,nwx,2h  ,1,1)
       endif
       if (iterm.ne.1) goto 100
         call po_put_i(ibufx,nwx)

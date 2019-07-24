@@ -214,6 +214,9 @@ C     Copy scratch file minus purged procedure.
 11065       format(1x,"error reading procedure file")
             go to 389
           end if
+          if(ibc(1:8).eq.'define  '.and.ibc(21:34).eq.' ') then
+             ibc(21:)='  00000000000x'
+          endif
           if ((ibc(1:6).eq.'define').and.
      .        (ibc(9:20).eq.lnam1(1:12))) then
             kpu = -1
@@ -427,6 +430,9 @@ C     Copy active file.
         do while(len.ge.0)
           call f_readstring(idcb3,ierr,ibc,len)
           call char2low(ibc)
+          if(ibc(1:8).eq.'define  '.and.ibc(21:34).eq.' ') then
+             ibc(21:)='  00000000000x'
+          endif
           if(ierr.eq.-12.or.len.lt.0) go to 635
           if(ierr.lt.0) go to 685
 C     Check for duplicate procedure.

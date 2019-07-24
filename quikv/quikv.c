@@ -1,6 +1,7 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include "../include/params.h"
 #include "../include/cmd_ds.h"
 
 #define MAX_BUF   257
@@ -17,8 +18,10 @@ main()
     int cls_rcv(), cmd_parse();
     void setup_ids(),skd_wait();
     void dist();
+    int iold,rte_prior();
 
     setup_ids();
+    iold=rte_prior(FS_PRIOR);
 
 loop:
       skd_wait("quikv",ip,(unsigned) 0);
