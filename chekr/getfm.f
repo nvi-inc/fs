@@ -63,15 +63,15 @@ C
       itfm(1)=ias2b(ibuf2,9,2)
       call fc_rte_fixt(secs_before,centisec(1))
       call fc_rte2secs(itfm,secs_fm)
-      call fc_rte2secs(secs_after,centisec(2))
+      call fc_rte_fixt(secs_after,centisec(2))
 c
       diff_before=(secs_fm-secs_before)*100+itfm(1)-centisec(1)
       diff_after=(secs_after-secs_fm)*100+centisec(2)-itfm(1)
-      diff_both=diff_after-diff_before
-
+      diff_both=diff_after+diff_before
+c
       if(diff_both.gt.2*timtol) then
         inerr(9)=inerr(9)+icherr(15*nverr+niferr+9)+1
-      else if(diff_before.lt.-timtol.or.diff_after.gt.timtol) then
+      else if(diff_before.lt.-timtol.or.diff_after.lt.-timtol) then
         inerr(10)=inerr(10)+1
       endif
 
