@@ -19,7 +19,7 @@ MK3     type of recorder (MK3, VLBA, or MK4)
 0       vacuum sensor offset  (in)
 0       vacuum sensor scale   (in/count)
 268     tape thickness (kA)
-14.0    head write voltage (mV)
+14.0    head write voltage (V)
 54625   capstan size constant
 *
  500.10 IF3 LO Frequency

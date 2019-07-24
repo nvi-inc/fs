@@ -53,7 +53,5 @@ c         call xx(ip,itask)        replace with station dependent call
 c         call xx(ip,isub,itask)   replace with station dependent call
       endif
 c
-      call write_quikr
-c
       goto 1
       end

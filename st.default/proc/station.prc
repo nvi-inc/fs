@@ -70,7 +70,7 @@ if3=alarm
 lo=8080.00,2020.00,8080.0
 upconv=0,0,0
 patch=lo1,1l,2l,3l,4h
-patch=lo2,9l,10l,11l,12h,13h,14h
+patch=lo2,9l,10l,11h,12h,13h,14h
 patch=lo3,5h,6h,7h,8h
 enddef
 define  vcas4         00000000000
@@ -235,8 +235,8 @@ ifd=33,30,nor,nor
 if3=20,in,2
 lo=8080.00,2020.00,8080.0
 upconv=0,0,0
-patch=lo1,1l,2l,3l,4h
-patch=lo2,9l,10l,11l,12h,13h,14h
+patch=lo1,1l,2l,3h,4h
+patch=lo2,9l,10l,11h,12h,13h,14h
 patch=lo3,5h,6h,7h,8h
 enddef
 define  initi         00000000000x
