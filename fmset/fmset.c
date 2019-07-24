@@ -52,9 +52,21 @@ int    flag;
 
 setup_ids();         /* connect to shared memory segment */
 
+if (nsem_test(NSEM_NAME) != 1) {
+  printf("Field System not running - fmset aborting\n");
+  rte_sleep(SLEEP_TIME);
+  exit(0);
+}
+
 rte_prior(CL_PRIOR); /* set our priority */
 
 rack=shm_addr->equip.rack;
+
+if (rack & MK3) {
+  printf("fmset does not support Mark 3 racks - fmset aborting\n");
+  rte_sleep(SLEEP_TIME);
+  exit(0);
+}
 
 if(rack & VLBA)
 	initvstr();

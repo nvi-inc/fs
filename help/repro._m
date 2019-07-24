@@ -1,17 +1,15 @@
-repro - reproduce tracks (Mark III drive)
-Syntax:      repro=bypass,trackA,trackB,bandwidth,
-             equalizer 
+repro - set up reproduce tracks (Mark III drive)
+Syntax:         repro=bypass,trackA,trackB,bandwidth,equalizer 
 
-Response:    repro/bypass,trackA,trackB,bandwidth,
-             equalizer
+Response:       repro/bypass,trackA,trackB,bandwidth,equalizer
 
 
 Settable parameters:
-bypass         byp (default) for bypass, raw for read-after-write.
-trackA         track for decoder channel A, default 1, 0-28 allowed.
-trackB         track for decoder channel B, default 1, 0-28 allowed.
-bandwidth      bandwidth for decoding (MHz), default 2.
-equalizer      equalizer for reproduce, default same as bandwidth.
+bypass          byp (default) for bypass, raw for read-after-write.
+trackA          track for decoder channel A, default 1, 0-28 allowed.
+trackB          track for decoder channel B, default 1, 0-28 allowed.
+bandwidth       bandwidth for decoding (MHz), default 2.
+equalizer       equalizer for reproduce, default same as bandwidth.
 
 Monitor-only parameters: none
 

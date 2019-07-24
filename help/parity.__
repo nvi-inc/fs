@@ -1,70 +1,63 @@
 parity - measure and check parity errors
-Syntax:      parity=pemax,syncmax,channel,aux,tracks
-             parity
+Syntax:         parity=pemax,syncmax,channel,aux,tracks
+                parity
 
-Response:    parity/parity-errors
-             parity/sync-errors
+Response:       parity/parity-errors
+                parity/sync-errors
 
 
 Settable Parameters:
-pemax             maximum allowable parity errors per channel per
-                  megabyte of data. Default is 600. If errors exceed
-                  threshold, an error message is issued.
-syncmax           default is 12. Otherwise handled the same as parity error
-                  threshold.
-channel           decoder channel. Can be a, b, or ab (default).
-aux               aux data check, on (default) or off. Not supported for
-                  VLBA.
-tracks            list of recorder tracks on which to measure errors.
-                  Default is the currently enabled tracks. For Mark III and
-                  VLBA, values are Mark III tracks and must be between
-                  1 and 28, and/or may be specified by groups (g1, g2,
-                  g3, g4) as in the enable command. For Mark IV,
-                  values are Mark IV/VLBA tracks and must be between 0
-                  and 35, and/or may be specified by all which means
-                  tracks 2 through 33.
+pemax              maximum allowable parity errors per channel per megabyte of
+                   data. Default is 600. If errors exceed threshold, an error
+                   message is issued.
+syncmax            default is 12. Otherwise handled the same as parity error
+                   threshold.
+channel            decoder channel. Can be a, b, or ab (default).
+aux                aux data check, on (default) or off. Not supported for VLBA.
+tracks             list of recorder tracks on which to measure errors. Default is
+                   the currently enabled tracks. For Mark III and VLBA, values are
+                   Mark III tracks and must be between 1 and 28, and/or may be
+                   specified by groups (g1, g2, g3, g4) as in the enable
+                   command. For Mark IV, values are Mark IV/VLBA tracks and must
+                   be between 0 and 35, and/or may be specified by all which
+                   means tracks 2 through 33.
 
 Monitor-only parameters:
-parity-errors     for each track in the list, the corresponding parity errors
-                  (smallest of 4 samples).
-sync-errors       for each track in the list, the corresponding sync errors
-                  (smallest observed value over the same 4 sample intervals
-                  as the parity error check).
+parity-errors      for each track in the list, the corresponding parity errors
+                   (smallest of 4 samples).
+sync-errors        for each track in the list, the corresponding sync errors
+                   (smallest observed value over the same 4 sample intervals as
+                   the parity error check).
 
 Comments:
-Issuing this command with a list of parameters sets up the command. Issuing
-the command with no parameters then measures errors.
+Issuing this command with a list of parameters sets up the command. Issuing the
+command with no parameters then measures errors.
 
 This command assumes the read head stack is positioned appropriately for the
 tracks that will be read. The heads that are used to reproduce data are
 automatically mapped depending on the reproduce electronics specified in the
 head.ctl control file.
 
-If the auxiliary data field was set using the form or head positioning
-commands, then it is checked for accuracy, unless the aux parameter is off.
-An error message is issued if the auxiliary data on the tape does not agree with
-the value last sent to the formatter.
+If the auxiliary data field was set using the form or head positioning commands,
+then it is checked for accuracy, unless the aux parameter is off. An error
+message is issued if the auxiliary data on the tape does not agree with the value
+last sent to the formatter.
 
 If so many tracks are decoded that the response extends beyond about 100
 characters, then another response line is generated.
 
 The decoder channels used to read the data can be specified, either a, b, or
 both a and b reproduce channels can be used. If pcalr is running, it should be
-suspended before starting this command so that there's no competition for the
-b channel.
+suspended before starting this command so that there's no competition for the b
+channel.
 
-For Mark III/IV, 5 error readings are made from the decoder, spaced 0.25
-seconds apart. Actual parity errors are the difference between successive
-readings. The minimum of the 4 parity error values is reported in the
-response. (The previous Mark III command used a time difference of 0.34
-seconds.) Each round trip communication with the decoder takes approximately
-0.12 sec, plus the 0.25 seconds wait time yields 48 seconds to check 28 tracks,
-24 seconds to check 14 tracks.
-
-For VLBA, the time period of 0.34 seconds is sent to the DQA, and parity
-error values are reported back by the module. The algorithm used by the DQA
-is specified in NRAO documentation.
+Five error readings are made from the decoder or DQA, spaced 0.25 seconds apart.
+Actual parity errors are the difference between successive readings. The minimum
+of the 4 parity error values is reported in the response. (The previous Mark III
+command used a time difference of 0.34 seconds.) Each round trip communication
+with the decoder takes approximately 0.12 sec, plus the 0.25 seconds wait time
+yields 48 seconds to check 28 tracks, 24 seconds to check 14 tracks.
 
 Parity errors are reported as the number of errors per 1 million bits of data.
-The actual number of parity errors is scaled to account for the tape speed
-during playback.
+The actual number of parity errors is scaled to account for the tape speed during
+playback.

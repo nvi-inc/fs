@@ -1,0 +1,16 @@
+# Make archive of executables for distribution, for root only
+#
+echo "Stripping executables"
+cd /usr2/fs/bin
+strip * 
+#
+echo "Clearing /tmp/fsdist"
+rm -rf /tmp/fsdist
+mkdir /tmp/fsdis
+#
+echo "Making cpio archive"
+ulimit 409600
+find /usr2/fs/bin |cpio -oc >/tmp/fsdist/fsexe.cpi
+#
+echo "Compressing archive"
+/usr/bin/X11/compress /tmp/fsdist/fsexe.cpio

@@ -1,7 +1,7 @@
 cable - get the cable cal reading
-Syntax:      cable=message
+Syntax:         cable=message
 
-Response:    cable/value
+Response:       cable/value
 
 
 Settable parameters:
@@ -11,9 +11,8 @@ Monitor-only parameters:
 value           cable cal reading
 
 Comments: 
-When issued with no parameters this command sends a request for a
-reading to the HPIB counter which is connected to the phase cal cable
-measurement system.
+When issued with no parameters this command sends a request for a reading to the
+HPIB counter which is connected to the phase cal cable measurement system.
 
-The ibad.ctl control file must contain an entry with mnemonic CA and the
-device name.
+The ibad.ctl control file must contain an entry with mnemonic CA and the device
+name.

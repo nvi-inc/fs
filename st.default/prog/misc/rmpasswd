@@ -1,0 +1,10 @@
+cd /etc
+mv shadow shadow.raw
+sed -e "/^root/!s/^\([^:]*:\)[^:]*/\1*/" shadow.raw >shadow
+rm -f shadow.raw
+chmod 400 shadow
+passwd
+passwd powerdown
+passwd oper
+passwd dos
+passwd prog

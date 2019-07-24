@@ -1,41 +1,39 @@
 check - modules to be checked by chekr
-Syntax:      check=list
+Syntax:         check=list
 
-Response:    check/list
+Response:       check/list
 
 
 Settable parameters:
-list    The list of mnemonics for modules to be checked. Only
-        mnemonics for the equipment identified in the equip.ctl control
-        file are valid in this command. Standard module mnemonics are
-        allowed. If the list of modules to be checked is empty, then chekr
-        will not check any modules.
+list    The list of mnemonics for modules to be checked. Only mnemonics for the
+        equipment identified in the equip.ctl control file are valid in this
+        command. Standard module mnemonics are allowed. If the list of modules
+        to be checked is empty, then chekr will not check any modules.
 
 Monitor-only parameters: none
 
 Comments: 
-As modules are set up by SNAP commands, they are automatically added
-to the list of modules being checked by chekr. This command can be used
-to remove and reinstate modules on the list.
+As modules are set up by SNAP commands, they are automatically added to the list
+of modules being checked by chekr. This command can be used to remove and
+reinstate modules on the list.
 
-The entire list of modules to be checked may always be specified by
-listing the appropriate modules. However, the list of modules already
-being checked may also be modified by entering * as the first parameter,
-followed by the list of modules to be added or deleted from the existing
-list. Deletion is indicated by a leading minus sign. For example,
+The entire list of modules to be checked may always be specified by listing the
+appropriate modules. However, the list of modules already being checked may also
+be modified by entering * as the first parameter, followed by the list of
+modules to be added or deleted from the existing list. Deletion is indicated by
+a leading minus sign. For example,
 
-                          check=*,ifd,-tp
+                                    check=*,ifd,-tp
 
-will cause the IF distributor to be added to the list of modules being
-checked and the tape transport to be removed from the list, while the
-check status of all other modules remain unchanged.
+will cause the IF distributor to be added to the list of modules being checked
+and the tape transport to be removed from the list, while the check status of all
+other modules remain unchanged.
 
-If no modules are currently being checked then the word disabled is
-displayed.
+If no modules are currently being checked then the word disabled is displayed.
 
 The displayed list of modules always consists of the standard 2-character
-mnemonic, i.e. the ones listed on the reference page at the front of this
-manual.
+mnemonic, i.e. the ones listed on the reference page at the front of this manual.
+Station-specific mnemonics may be used for station-specific modules.
 
-Note: for VLBA systems, only the head positioner is checked in the
-current version.
+Note: In the current Field System version, for VLBA systems, the head position
+is checked but only some of the DAR module and REC functions are checked.

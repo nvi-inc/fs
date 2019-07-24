@@ -1,9 +1,0 @@
-cd /usr2/fs
-find ./help -name '*' -print > FSM
-find ./misc -name '*' -print >> FSM
-ls timeset/libcposix.a >> FSM
-ls boss/helpsh >> FSM
-ls setb/setb >> FSM
-cat FSM | cpio -ovcB > /tmp/fsm.cpio
-rm FSM
-compress /tmp/fsm.cpio

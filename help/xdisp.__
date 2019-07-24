@@ -1,15 +1,15 @@
 xdisp - extended display
-Syntax:      xdisp=on/off
+Syntax:         xdisp=on/off
 
-Response:    none
+Response:       none
 
 
 Settable parameters:
-on/off            on to turn on extended display, off (default) to turn off.
-                  When off, commands issued from within procedures are
-                  not displayed and ack responses from modules are not
-                  displayed. All responses are always displayed. When on,
-                  all commands and responses are displayed.
+on/off             on to turn on extended display, off (default) to turn off.
+                   When off, commands issued from within procedures are not
+                   displayed and ack responses from modules are not displayed.
+                   All responses are always displayed. When on, all commands and
+                   responses are displayed.
 
 Monitor-only parameters: none
 

@@ -69,12 +69,18 @@ C
 C  2.1 Get first requested head position index.
 C
       ich = ieq+1
+      ichs = ich
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(parm,1).eq.',') then
         kpas(1)=.false.
       else if(cjchar(parm,1).eq.'*') then
         call fs_get_ipashd(ipashd)
         ipas(1)=ipashd(1)
+        kpas(1)=.true.
+      else if(ichcm_ch(ibuf,ichs,'stack2').eq.0.and.
+     .        (MK4.eq.iand(drive,MK4))) then
+        call fs_get_ipashd(ipashd)
+        ipas(1)=ipashd(2)
         kpas(1)=.true.
       else
         nc = iflch(parm,4)

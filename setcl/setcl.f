@@ -201,8 +201,8 @@ C  Expect the return buffer from the Mark IV formatter to look like
 C   1992 198 16:17:34.777
         call ifill_ch(ibuf4,1,ilen,' ')
         ireg(2) = get_buf(iclass,ibuf4,-ilen,idum,idum)
-        ireg(2) = get_buf(iclass,centisec,-8,idum,idum)
         nchar=min0(ireg(2),ilen)
+        ireg(2) = get_buf(iclass,centisec,-8,idum,idum)
         ich=3
         call gtfld(ibuf4,ich,nchar,ic1,ic2)
         nch = ic2-ic1+1

@@ -1,0 +1,106 @@
+#!/bin/sh
+# This is the station files update script for FS version 8.2, for root only
+#
+echo "******************************************************************"
+echo "*  This is the UPDATE script for station files for Field System  *"
+echo "*  version 8.2 Refer to the instructions in the update notice.   *"
+echo "******************************************************************"
+echo "\nCAUTION: This script will rename the following directories:"
+echo "                 old name        new name "
+echo "                /usr2/oper       /usr2/oper.old"
+echo "                /usr2/prog       /usr2/prog.old"
+echo "                /usr2/dos        /usr2/dos.old"
+echo "and then install fresh copies. "
+echo "\nThe /etc/rc2.d/SzzSTALLOC file will be renamed to"
+echo "     /etc/rc2.d/x.SzzSTALLOC file wnd fresh copy will be installed."
+echo "\nDo you wish to continue with the UPDATE? (y=yes, n=no) : \c" 
+badans=true
+while [ "$badans" = "true" ]
+do
+  read ans
+  case "$ans" in
+    y|yes) echo "\nO.K. Continuing with install ... "
+           badans=false
+           ;;
+    n|no)  echo "\nO.K. Exiting."
+           exit
+           ;;
+    *)     echo "\nPlease answer with y=yes or n=no : \c"
+  esac
+done
+#
+echo "Renaming old directories"
+cd /usr2
+mv oper oper.old
+mv prog prog.old
+mv dos  dos.old
+#
+echo "Renaming old files"
+cd /etc/rc2.d
+mv SzzSTALLOC x.SzzSTALLOC
+#
+echo "Creating directories and copying default files"
+cd /usr2/fs/st.default
+find oper prog dos -print | cpio -pmdu /usr2
+#
+echo "Copying old vpix sub-directory to /usr2/dos"
+cd /usr2/dos.old
+find vpix -print |cpio -pmud /usr2/dos
+#
+echo "Copying old drudg sub-directory to /usr2/dos"
+cd /usr2/dos.old
+find drudg -print |cpio -pmud /usr2/dos
+#
+echo "Setting permissions on station directories and files"
+cd /usr2
+find oper -print |xargs chown oper
+find oper -print |xargs chgrp other
+find oper -print |xargs chmod a+r,u+w,go-w 
+find dos  -print |xargs chown dos
+find dos  -print |xargs chgrp other
+find dos  -print |xargs chmod a+r,u+w,go-w 
+find prog -print |xargs chown prog
+find prog -print |xargs chgrp code
+find prog -print |xargs chmod a+r,u+w,go-w 
+#
+echo "Installing updated Field System boot rc2 script"
+cd /usr2/fs/misc
+ls SzzSTALLOC |cpio -pmud /etc/rc2.d
+cd /etc/rc2.d
+chown root     SzzSTALLOC
+chgrp root     SzzSTALLOC
+chmod a+r,u+w,go-w SzzSTALLOC
+echo "******************************************************************"
+echo "\nYou can now optionally have your control files updated. You should"
+echo "do this only if you are upgrading from version 8.12 or less. This step"
+echo "will copy the the default time.ctl to your /usr2/control directory"
+echo "and add the default version of the new IF3 information equip.ctl."
+echo "\nDo you wish to continue with the UPDATE? (y=yes, n=no) : \c" 
+badans=true
+while [ "$badans" = "true" ]
+do
+  read ans
+  case "$ans" in
+    y|yes) echo "\nO.K. Continuing with update ... "
+           badans=false
+           ;;
+    n|no)  echo "\nO.K. Exiting."
+           exit
+           ;;
+    *)     echo "\nPlease answer with y=yes or n=no : \c"
+  esac
+done
+#
+echo "Copying default time.ctl file"
+cd /usr2/fs/st.default/control
+ls time.ctl | cpio -pmdu /usr2/control
+cd /usr2/control
+chown oper     time.ctl
+chgrp other    time.ctl
+chmod a+rw     time.ctl
+#
+echo "Appending default version of new IF3 lines to equip.ctl"
+cd /usr2/fs/st.default/control
+tail -3 equip.ctl >>/usr2/control/equip.ctl
+#
+echo "Done."

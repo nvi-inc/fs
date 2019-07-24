@@ -21,3 +21,6 @@ MK3     type of recorder (MK3, VLBA, or MK4)
 268     tape thickness (kA)
 14.0    head write voltage (mV)
 54625   capstan size constant
+*
+ 500.10 IF3 LO Frequency
+   3    hex mask indicating which IF3 switches are installed, sw N ~ 2^(N-1)

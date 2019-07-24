@@ -1,9 +1,9 @@
-/* antcn
-
-  This is the stub version of antcn (ANTenna CoNtrol program).
-  This version sends a log message whenever it is called.
-  NRV 920408
-*/
+/* antcn.c
+ *
+ * This is the stub version of antcn (ANTenna CoNtrol program).
+ * This version sends a log message whenever it is called.
+ *
+ */
 
 /* Input */
 /* IP(1) = mode

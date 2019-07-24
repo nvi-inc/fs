@@ -1,17 +1,17 @@
 reset - reset the MAT bus
-Syntax:      reset=baud
+Syntax:         reset=baud
 
-Response:    reset/baud
+Response:       reset/baud
 
 
 Settable parameters:
-baud           baud rate. MATs support 110, 300, 600, 1200,
-               2400, 4800, and 9600 baud.
+baud            baud rate. MATs support 110, 300, 600, 1200, 2400, 4800,
+                and 9600 baud.
 
 Monitor-only parameters: none
 
 Comments: 
-The old MATs (NRAO only) support 2400 baud only. Recommended rate is
-9600. A system reset is sent (break character), then the baud rate is changed,
-then some U's to synch up the MATs.
+The old MATs (NRAO only) support 2400 baud only. Recommended rate is 9600. A
+system reset is sent (break character), then the baud rate is changed, then some
+U's to synch up the MATs.
 

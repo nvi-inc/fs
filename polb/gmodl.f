@@ -47,7 +47,7 @@ C
       ifc=1
       ifield=0
       iferr=0
-      goto (100,200,300,300,300,400),  irec
+      goto (100,200,300,300,300,300),  irec
 C
 C  MODEL # AND DATE
 C
@@ -78,7 +78,7 @@ C
         pcof(i) = gtdbl(jbuf,ifc,ilc,ifield,iferr)*deg2rad
         if (iferr.ne.0) goto 8020
       enddo
-      if (iline.eq.3) goto 9000
+      if (iline.eq.4) goto 9000
       goto 50
 C
 400   continue

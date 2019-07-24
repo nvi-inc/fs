@@ -1,8 +1,0 @@
-cd /usr2
-find ./fs/control -print > FSP
-find ./control -print >> FSP
-find ./proc -print >> FSP
-find ./sched -print >> FSP
-cat FSP | cpio -ovcB > /tmp/fsp.cpio
-rm FSP
-compress /tmp/fsp.cpio

@@ -8,8 +8,8 @@
 * Write Heads  Read Heads  Reproduce: Electronics  Detector
       ALL        ODD                      ODD        ODD
 *
-*  Positioning  Slow  Osc (MHz)  A/D Tol. (bits)
-     ADAPTIVE  NO      5.0000       0
+*  Positioning  Slow  Osc (MHz)  A/D Tol. (counts)
+     ADAPTIVE  NO      5.0000       1
 *
 * Write    Read
   200.0   200.0   Fast Out Inchworm Speed (microns/sec)

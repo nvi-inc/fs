@@ -10,4 +10,3 @@ mv x.S85sndcp S85sndcp
 mv x.S86wintcp S86wintcp
 mv x.S87slip S87slip
 mv x.S87winnfs S87winnfs
-cd

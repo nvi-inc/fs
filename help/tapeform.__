@@ -1,26 +1,25 @@
 tapeform - specify tape format
-Syntax:      tapeform=pass,offset,pass,offset, ...
+Syntax:         tapeform=pass,offset,pass,offset, ...
 
-Response:    tapeform/pass,offset,pass,offset, ...
+Response:       tapeform/pass,offset,pass,offset, ...
 
 
 Settable parameters:
-pass           the pass number whose offset follows, must be between 1
-               and 100 for Mark III and VLBA, between 1 and 112 for
-               Mark IV. 
-offset         the a priori offset, in microns, for the preceding pass, must
-               be between 1 and ñ4000.
+pass            the pass number whose offset follows, must be between 1 and 100
+                for Mark III and VLBA, between 1 and 112 for Mark IV. 
+offset          the a priori offset, in microns, for the preceding pass, must be
+                between 1 and ñ4000.
 
 Comments: 
 The passes and offsets must appear in pairs. Multiple commands are allowed
 because all of the pairs will not fit on a single line. The offsets are are used
 by the pass command to position the head stack(s) by pass number.
 
-These commands appear in standard procedures named tapeforma,
-tapeformb, tapeformc, tapeformd, one for each recording mode.
-The appropriate procedure is invoked in the setup procedure. For example,
-sx2c1 and sx2c2 invoke tapeformc.
+These commands appear in standard procedures named tapeforma, tapeformb,
+tapeformc, tapeformd, one for each recording mode. The appropriate procedure
+is invoked in the setup procedure. For example, sx2c1 and sx2c2 invoke
+tapeformc.
 
-For Mark IV modes, passes for stack 1 should be between 1 and 12. For
-stack 2 passes, add 100 to the pass number for stack 1.
+For Mark IV modes, passes for stack 1 should be between 1 and 12. For stack 2
+passes, add 100 to the pass number for stack 1.
 

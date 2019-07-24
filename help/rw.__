@@ -1,7 +1,7 @@
 rw - rewind tape
-Syntax:      rw
+Syntax:         rw
 
-Response:    rw/acknowledgement
+Response:       rw/acknowledgement
 
 
 Settable Parameters: none

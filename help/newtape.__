@@ -1,11 +1,11 @@
-newtape - halt schedule for new tape
-Syntax:      newtape
+newtape - halt schedule until new tape is mounted
+Syntax:         newtape
 
-Response:    newtape/"To continue, use LABEL command"
+Response:       newtape/"To continue, use LABEL command"
 
 
 Comments: 
-This command in effect is the same as the halt command. Execution will
-continue after the label command has been successfully completed. The
-cont command will also work.
+This command in effect is the same as the halt command. Execution will continue
+after the label command has been successfully completed. The cont command will
+also work.
 

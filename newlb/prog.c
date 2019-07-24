@@ -947,6 +947,12 @@ int *ichk,*n;
       *ichk=shm_addr->stchk[*n-1];
 }
 
+void fs_set_sterp_(sterp)
+int *sterp;
+{
+      shm_addr->sterp=*sterp;
+}
+
 void fs_set_stcnm_(lhol,n)
 char lhol[2];
 int *n;

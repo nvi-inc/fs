@@ -147,7 +147,7 @@ C
 9030  format(
      & "* write heads  read heads  reproduce: electronics  detector")
 9040  format(5x,a4,8x,a4,20x,a4,8x,a4)
-9044  format("*  positioning  slow  osc (mhz)  a/d tol. (bits)")
+9044  format("*  positioning  slow  osc (mhz)  a/d tol. (counts)")
 9045  format(5x,a8,4x,a3,1x,f8.4,2x,i6)
 9050  format("* write    read")
 9060  format(2(f7.1,1x),"  fast out inchworm speed (microns/sec)")

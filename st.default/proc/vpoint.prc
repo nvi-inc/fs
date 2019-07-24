@@ -126,11 +126,11 @@ fluxc=twopoints,190,1m55s
 enddef
 define  casa          00000000000
 source=cas-a,232109.,583230,1950.
-"flux 1992.0 from dbs table a1.1
+"flux 1994.0 from dbs table a1.1
 "size from        dbs appendix 2
-fluxa=disk,500,4m
-fluxb=disk,1304,4m
-fluxc=disk,500,4m
+fluxa=disk,494,4m
+fluxb=disk,1385,4m
+fluxc=disk,494,4m
 enddef
 define  3c84          00000000000x
 source=3c84,031629.54,411951.7,1950.0
