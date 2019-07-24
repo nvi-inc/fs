@@ -1,0 +1,52 @@
+FTN77,I,Y
+$CDS ON
+        SUBROUTINE IADT(IT,IDT,IRES),C#870407:13:00    HP ADD TIME#
+        DIMENSION IT(1),ITM(5)
+        DATA ITM/100,60,60,24,365/
+C
+C               GET INITIAL INCREMENT
+C
+        IIX=IDT
+C
+C               INITIALIZE ILP
+C
+C               GET # DAYS/YEAR
+C
+        ITM(5)=365
+        IF(MOD(IT(6),4) .EQ .0)ITM(5)=366
+C
+C               SET UP LOOP
+C
+        DO 20000 I=IRES,5
+C
+C               INCREMENT THIS VALUE
+C 
+        IT(I)=IT(I)+IIX 
+C 
+C               HAS THIS UNIT OVERFLOWED
+C 
+        IF(IT(I) .LT. ITM(I))GO TO 60000
+C 
+C               GET REMAINDER FOR THIS UNIT 
+C 
+        ITX=MOD(IT(I),ITM(I)) 
+C 
+C               GET THE CARRY TO HIGHER UNIT
+C 
+        IIX=IT(I)/ITM(I)
+C 
+C               SET CURRENT UNITS TO REMAINDER
+C 
+        IT(I)=ITX 
+C 
+20000   CONTINUE
+C 
+C               INCREMENT YEAR (ASSUME NO BIGGER CHANGE)
+C 
+        IT(6)=IT(6)+1 
+C 
+60000   CONTINUE
+C 
+        RETURN
+        END 
+        END$

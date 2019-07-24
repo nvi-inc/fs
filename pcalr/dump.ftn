@@ -1,0 +1,35 @@
+FTN77,I,Y
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      subroutine dump(ltype,resp)           !  LAR last edited <890626.2346>
+c
+c  Request, read, and convert numeric values from the spectrum analyzer.
+c
+      dimension resp(1)                     !  list of numeric responses
+      integer ltype                         !  2nd and 3rd letters of command
+      include /fs/include/fscom.ftni
+c
+      parameter (lenbuf=2560)
+      dimension lcmd(2)                     !  complete command buffer
+      dimension lresp(lenbuf/2)             !  ASCII response buffer
+c
+      if (ltype.eq.2hDS) then
+        nvals = 256                         !  number of parameters expected
+        length = lenbuf                     !  # of characters in response
+      else if (ltype.eq.2hMK) then
+        nvals = 2
+        length = 20
+      else
+        nvals = 1
+      endif
+      lcmd(1) = 2hL-
+      lcmd(2) = 2h-
+      call ichmv(lcmd,2,ltype,1,2)
+      call exec(2,lusa,lcmd,-3)
+      call exec(1,lusa,lresp,-length)
+      iplace = 1                            !  placeholder in lresp
+      do i=1,nvals
+        call gtprm(lresp,iplace,length,2,resp(i),ierr)
+      enddo
+      return
+      end

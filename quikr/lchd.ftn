@@ -1,0 +1,80 @@
+FTN77,I,Y  
+$CDS ON
+      SUBROUTINE LCHD(HD,STEP,NSAMP,RNG,ODEV,VLTPOS,PEAKV,MPER,IP,ECHO,
+     &                LU)
+      IMPLICIT NONE
+      INTEGER*2 HD,ODEV,IP(5),LU,NSAMP
+      REAL*4 VLTPOS,PEAKV,MPER,STEP,PMAX,VMAX,RNG
+      LOGICAL*2 ECHO
+C
+C  PKHD: Peak High Density Head
+C
+C  INPUT:
+C     HD: Head to move for peaking, 1 or 2
+C     ICOUNT: NUMBER OF TIMES TO PEAK
+C     NSAMP: Samples to make for each power measurement, positive
+C     ODEV: Channel to monitor power of, odd or even
+C
+C  OUTPUT:
+C     VLTPOS: Voltage of peak response poistion
+C     PEAKV: Peak power voltage
+C     MPER: lowest sample at peak as a percentage of peak
+C     IP: Field System return parameters
+C
+C  The model of power response is two lines with slopes of the
+C  same absolute value, but oppisite sign.  The peak response is at
+C  the intersection of the two lines.
+C
+      INTEGER*2 IPASS(2)
+      REAL*4 MICNOW(2),MICOLD,VOLTS,MINPER,PNOW,RU,RL,RMPER
+      DATA IPASS/2*0/
+C
+C  get power and current location
+C
+      CALL MIC_READ(HD,IPASS,MICNOW,IP)
+      IF(IP(3).NE.0) RETURN
+C
+      RL=MICNOW(HD)-RNG
+      RU=MICNOW(HD)+RNG
+C
+91    FORMAT(3f10.3)
+C
+C  now GO IN STEPS UNTIL WE STOP ADVANCING
+C
+      VMAX=-20.0
+      PMAX=MICNOW(HD)
+      RMPER=0.0
+C
+      DO PNOW=RL,RU,STEP
+        MICNOW(HD)=PNOW
+C
+        CALL SET_MIC(HD,IPASS,MICNOW,IP,5.0)
+        IF(IP(3).NE.0) RETURN
+C
+        CALL MIC_READ(HD,IPASS,MICNOW,IP)
+        IF(IP(3).NE.0) RETURN
+C
+        CALL GET_POWER(ODEV,NSAMP,VOLTS,MINPER,IP)
+        IF(IP(3).NE.0) RETURN
+C
+        IF(VOLTS.GT.VMAX) THEN
+          PMAX=MICNOW(HD)
+          VMAX=VOLTS
+          RMPER=MINPER
+        ENDIF
+        IF(ECHO) THEN
+          WRITE(LU,91) MICNOW(HD),VOLTS,MINPER
+        ENDIF
+      ENDDO
+C
+      MICNOW(HD)=PMAX
+      CALL SET_MIC(HD,IPASS,MICNOW,IP,0.40)
+      IF(IP(3).NE.0) RETURN
+C
+      CALL GET_ATOD(HD,VLTPOS,IP)
+      IF(IP(3).NE.0) RETURN
+C
+      PEAKV=VMAX
+      MPER=RMPER
+C
+      END

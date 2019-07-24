@@ -1,0 +1,474 @@
+      subroutine SetTrap(SyRv)                           ,<871015.1451> 
+     >Set Fortran Trapping
+      implicit none 
+  
+!     KASUBS contains routines which are specific to RTE-A.  This 
+!     revision operates with KERMIT revision 1.99a or later.
+  
+!     This routine is actually system-independent.  It is included in the 
+!     system-dependent outines only because it contains conditionally-
+!     compiled code.  If the user MUST use this KERMIT on a C.83 system,
+!     having this routine here will reduce the installation time greatly. 
+!     BE SURE TO RE-INDEX the appropriate library file! 
+  
+      include kercom.ftni,NOLIST          !Defines "SysRev" 
+      integer*2 SyRv
+  
+      external FtnTrap
+  
+      if (SysRev .ge. 2440) then      !Fortran trapping desired?
+          if (SyRv .ge. 2440) then    !Yes - is it available? 
+              call Ftrap(FtnTrap)     !Yes - use it 
+          else
+              call tpFm('You must set "SysRev" (in KERCOM) <_')
+              call tpFm(' 2440, then recompile/relink KxSubs!')
+              call quit 
+          endif 
+      endif 
+      return
+  
+      end 
+  
+      subroutine restore(lu)                             ,<871015.1451> 
+     >A/Restore LU's
+      implicit none 
+  
+      include kercom.ftni,NOLIST
+      include kercnf.ftni,NOLIST
+      integer*2 lu,cnf(CnfSiz)
+      logical*2 fMux
+      integer*2 timv,ctrg,c17s,c30c,c30s,c33c,c33s,c34c,c34s
+      equivalence (fMux,Cnf(fMx)), (timv,Cnf(tim)), (ctrg,Cnf(trg)) 
+      equivalence (c17s,Cnf(v17)) 
+      equivalence (c30c,Cnf(c30)), (c33c,Cnf(c33)), (c34c,Cnf(c34)) 
+      equivalence (c30s,Cnf(s30)), (c33s,Cnf(s33)), (c34s,Cnf(s34)) 
+  
+!     This routine differs from it's RTE-6 counterpart in that IDM00
+!     has a CN45 request to kill the DC1 trigger character, which would 
+!     need to be restored.  The DVM00 trigger handling is part of the 
+!     DDV05 device-driver, which is restored (if needed) when we do the 
+!     CN33 to restore the driver-responses configuration. 
+  
+      if (lu .eq. L) then                 !Use which configuration array? 
+          call MoveWords(LocCnf,cnf,CnfSiz) 
+      else
+          call MoveWords(RemCnf,cnf,CnfSiz) 
+      endif 
+  
+      call Set_timeout(lu,timv,fMux)      !Restore original timeout 
+  
+      if (.not. fMux) return              !Not mux?  Nothing left to do 
+  
+c     At this point, we will restore ONLY those parameters we have altered
+c     as a result of KERMIT's normal operations.
+  
+      if (c30c .ne. c30s) then            !If we changed port configuration 
+          call control(lu,3000b,c30s)     !...put it back 
+      endif 
+      if (c33c .ne. c33s) then            !If we changed type-ahead 
+          call control(lu,3300b,c33s)     !...restore that too
+      endif 
+      if (c34c .ne. c34s) then            !If we changed handshake
+          call control(lu,3400b,c34s)     !...fix it up 
+      endif 
+  
+      if (.not. btest(Cnf,0) ) then       !D-mux or B-/C-mux? 
+          call control(lu,4500b,10400b)   !Restore DC1 trigger-char 
+          call control(lu,3700b,173400b)  !allow echo/edit; end on CR 
+      else                ! --> Need not yet established! 
+          call control(lu,1700b,c17s)     !Restore terminator 
+      endif 
+  
+      return
+      end 
+  
+      subroutine enable(lu,imux)                         ,<871015.1451> 
+     >A/Enable int-scheduling 
+      implicit none 
+  
+      include kercom.ftni,NOLIST          !Defines L
+      include kercnf.ftni,NOLIST          !Defines non-mux "trigger"
+  
+      integer*2 lu,iMux,dv6,if6,dp(12),p1(4),p2(4),xl(2),cw,p1s,p2s 
+      integer*2 p1a,p1b,p1c,p1d,p2a,p2b,p2c,p2d 
+      equivalence (dp(5),p1),(dp(9),p2),(xl(2),cw)
+      equivalence (p1(1),p1a),(p1(2),p1b),(p1(3),p1c),(p1(4),p1d) 
+      equivalence (p2(1),p2a),(p2(2),p2b),(p2(3),p2c),(p2(4),p2d) 
+  
+!     This routine differs from it's RTE-6 counterpart in that IDM00
+!     muxt keep up with the names of the interrupt-scheduled programs 
+!     and DVM00 doesn't.
+  
+      if ( btest(iMux,0) ) then           !D-mux? 
+          call control(lu,2000b)          !Yes - just re-enable 
+      else
+          if (lu .eq. L) then 
+              p1s = Ltrg
+              p2s = L17v
+          else
+              p1s = Rtrg
+              p2s = R17v
+          endif 
+          xl = lu                         !Prepare for XLUEX
+          call control(lu,3700b,173400b)  !cn37: set read type
+          cw = 10000b                     !Set the "Z-bit"
+          call xluex(13,xl,dv6,if6,dp,12) !Get pri/sec program names
+          call control(lu,102300b,0)      !cn23: set scheduling flag
+          if (imux .ge. 0) p1a = p1s      !Restore P1a if not on mux
+          cw = 2000b                      !cn20: enable primary scheduling
+          call xluex(3,xl,p1a,p1b,p1c,p1d)
+          if (imux .ge. 0) p2a = p2s      !Restore P2a if not on mux
+          cw = 4000b                      !cn40: enable secondary sched 
+          call xluex(3,xl,p2a,p2b,p2c,p2d)
+      endif 
+  
+      return
+      end 
+  
+      subroutine disable(lu,iMux)                        ,<871015.1451> 
+     >A/Disable int-scheduling
+      implicit none 
+  
+      integer*2 lu,iMux 
+  
+!     This routine differs from it's RTE-6 counterpart in that IDM00
+!     uses CN23 to disable interrupts, whereas DVM00 should agree with
+!     the RTE-6 "D" mux driver in using a CN21 to do the same job.
+  
+      if ( btest(iMux,0) ) then           !D-mux? 
+          call control(lu,2100b,1)        !cn21: disable scheduling 
+      else
+          call control(lu,102300b,1)      !cn23: clr sched flg (to intfc) 
+      endif 
+  
+      return
+      end 
+  
+      subroutine set_timeout(lu,val,iMux)                ,<871015.1451> 
+     >A/Set LU timeout value
+      implicit none 
+  
+      integer*2 lu,val,iMux 
+  
+!     This routine differs from it's RTE-6 counterpart in that IDM00
+!     has two flavors of timeout ("user" and "system") where DVM00 has
+!     only one. 
+  
+      if (val .lt. 0) return              !Don't set negative time-outs 
+  
+      if ( btest(iMux,0) ) then           !D-mux or B-/C-mux? 
+          call control(lu,2200b,val)      !D: only one flavor of timeout
+      else
+          call control(lu,2700b,val)      !B/C: set "user" time-out 
+      endif 
+  
+      return
+      end 
+  
+      subroutine KillEnqAck                              ,<871015.1451> 
+     >A/Disable remote ENQ/ACK
+      implicit none 
+  
+      include kercom.ftni,NOLIST
+      include kercnf.ftni,NOLIST
+  
+!     This routine differs from it's RTE-6 counterpart in that IDM00
+!     has a CN45 request to clear the trigger-character, whereas DVM00
+!     uses DDV05 to perform triggering, and we bypass that anyway.
+  
+      if ( btest(iRmx,0) ) then           !D-mux? 
+          if ( btest(r34c,0) ) then       !XON/XOFF enabled?
+              r34c = 5                    !Yes - add CPU<-->CPU protocol
+          else
+              r34c = 4                    !else change to CPU<-->CPU proto
+          endif 
+          call control(R,3400b,r34c)
+          r33c = 100000b                  !Turn on FIFO mode
+      else
+          call control(R,4500b,0)         !cn45: set trigger-char (to none) 
+          if ( btest(r30c,7) ) then       !is Enq/Ack on now? 
+              r30c = r30c .xor. 200b      !Yes - turn it off
+              call control(R,3000b,r30c)  !...and send it to the port 
+          endif 
+          r33c = 22500b                   !Set for type-ahead 
+      endif 
+      call control(R,3300b,r33c)
+  
+!     If we are really modifying the local configuration, we must track 
+!     the changes to the local array, or RESTORE won't work correctly!
+  
+      if (R .eq. L) call MoveWords(RemCnf,LocCnf,CnfSiz)
+  
+      return
+  
+      end 
+  
+      Subroutine cPrep                                   ,<871015.1451> 
+     >A/Prepare for Connect 
+      implicit none 
+  
+      include kercom.ftni,NOLIST          !Defines L and R
+      include kercnf.ftni,NOLIST
+      include kconcw.ftni,NOLIST
+  
+!     This routine differs from it's RTE-6 counterpart in the function- 
+!     codes it sets for IDM00 (12040B/C) vs. DVM00 (12792B/C), and for
+!     ID*00 (12005) vs. DVA05 (12966).
+  
+      call disable(L)                     !Kill local interrupt scheduling
+      Ltx=L $ Lrx=L $ Rtx=R $ Rrx=R       !Prepare XLUEX hi control words 
+      term = 5200b                        !(B/C mux terminate rcv buffer) 
+      dstat = 100600b                     !Dynamic status bypasses dev-dvr
+  
+!     Prepare the local LU for connect - allows for ASIC and 2 Mux types
+  
+      if ( fLmx ) then                    !Local on a mux?
+          if ( fLcm ) then                !Yes - if B or C mux... 
+              Lrc = 3100b                 !...use trans/save t-a data 
+              L33c = 22600b               !Turn on local FIFO 
+              call control(L,3300b,L33c)
+              call control(L,3600b,1)     !Set read length
+              call control(L,3700b,4000b) !terminate on count only
+              call control(L,term,0)      !terminate all buffers
+              call control(L,term,0)      !terminate all buffers again
+              call control(L,term,0)      !terminate all buffers once more
+          else
+              Lrc = 100b                  !D mux uses only binary 
+              L33c = 100000b              !Turn on local FIFO mode
+              call control(L,3300b,l33c)
+          endif 
+          call control(L,2600b,1)         !Flush card 
+      else
+          Lrc = 100100b                   !Skip device-driver + binary
+      endif 
+      Ltc = 2000b                         !transparent
+  
+!     Prepare the remote LU for connect - allows for 2 mux types only 
+  
+      if ( fRcm ) then                    !Prepping a B/C mux port? 
+          Rrc = 3100b                     !transparent + save t-a data
+          Rtc = 3700b                     !transparent + no handshake 
+          R33c = 22600b                   !cn33: read reconfig off
+          call control(R,3300b,R33c)      !cn33: read reconfig off
+          call control(R,3600b,254)       !cn36: set read len (254 bytes) 
+          call control(R,3700b,4000b)     !cn37: terminate on count only
+          call control(R,term,0)          !terminate all buffers
+          call control(R,term,0)          !terminate all buffers again
+          call control(R,term,0)          !terminate all buffers once more
+          call sleep(10)                  !allow .1 sec settling time 
+      else
+          Rrc = 100b                      !D-mux is simple: just binary 
+          Rtc = 2000b                     !...still simple: transparent 
+      endif 
+  
+      if ( fLmx ) call control(L,2600b,1) !Flush local if on a mux
+      call control(R,2600b,1)             !Flush remote 
+      return
+  
+      end 
+  
+      integer*2 function GetPak()                        ,<871015.1451> 
+     >A/Read a packet 
+      implicit none 
+  
+      include kercom.ftni,NOLIST
+      include kercnf.ftni,NOLIST          !To define fRmx 
+      integer*2 buf(128),xr(2),cw 
+      equivalence (buf,RecPkt),(xr(2),cw) 
+  
+!     This routine differs from it's RTE-6 equivalent in that we must 
+!     bypass DD*00 and suppress a trigger in the read call under RTE-A. 
+  
+      if ( btest(iRmx,0) ) then           !D-mux? 
+          cw = 0                          !Yes - set for normal ASCII 
+      else
+          cw = 103000b                    !B/C: no ddvr, trans, keep t-a
+      endif 
+      xr = R                              !Set remote lu into control word
+      call xluex(1,xr,buf,-254,40000b)    !Get the info 
+      call abreg(GetPak,rlen)             !Get the received length
+      return
+  
+      end 
+  
+      subroutine PutPak(len)                             ,<871015.1451> 
+     >A/Send a packet 
+      implicit none 
+  
+      include kercom.ftni,NOLIST          !Defines
+      include kercnf.ftni,NOLIST          !Defines fRmx 
+      integer*2 len,xl(2),cw,PakBuf 
+      equivalence (xl(2),cw),(Packet,PakBuf)
+  
+!     This routine differs from it's RTE-6 counterpart in that we must
+!     bypass DD*00 and suppress handshake under RTE-A.
+  
+      if ( btest(iRmx,0) ) then           !D-mux
+          cw = 2000b                      !Yes - do transparent write 
+      else
+          cw = 102700b                    !Else bypass, trans, no handshake 
+      endif 
+      xl = R                              !Get the remote LU
+      call control(R,2600b,1)             !Flush the card before sending
+      call xluex(2,xl,PakBuf,-len)
+      return
+  
+      end 
+      subroutine GetMux(LU,CnfArr)                       ,<871015.1451> 
+     >A/Get MUX info
+      implicit none 
+  
+!     This routine fills the Loc or Rem CNF array for the given LU. 
+!     If it uses the new serial drivers, we can ask the driver what kind of 
+!     card the LU is connected to; if it doesn't, we will look in the DVP 
+!     of the LU to see what we can learn. 
+! 
+!     The value placed in fLmx or fRmx tells KERMIT what kind of LU it is:
+!         Bit 15: set if LU supports KERMIT protocol as follows 
+!                  RTE-A: 12040 mux only
+!                  RTE-6: 12792 mux (or 12966 using DVW00 - see note below) 
+!         Bit 0:  set if LU is on a D MUX (RTE-A only at this time) 
+!         Bit 1:  set if LU is on the A400 OBIO 
+! 
+!     NOTE: This version of KERMIT doesn't actually support the 12966/DVW00 
+!           combination.  It is supported by KERMIT-CX as part of CONNECT,
+!           which is a terminal-emulation program by ICT.  If KERMIT-RTE
+!           does things which you would like to see in KERMIT-CX, ask Don 
+!           Wright (at ICT) to add the appropriate code.
+  
+$alias /lut/ = '$LUTA', NoAllocate
+$alias opsy  = '.OPSY', direct
+$alias xluex, NoAbort 
+  
+      include kercnf.ftni,NOLIST
+      include kercom.ftni,NOLIST
+      integer*2 LU,CnfArr(CnfSiz) 
+      integer*2 xl(2),cw,j,a,b,lut,dvta,dvxa
+      integer*2 LuTru,AddressOf,IxGet,opsy
+      integer*2 naRd,naCn 
+      parameter (naRd = 100001b)
+      parameter (naCn = 100003b)
+      logical*2 xftty 
+      common /lut/ lut
+      equivalence (xl(2),cw)
+  
+      integer*2 Cnf(CnfSiz) 
+      logical*2 fmxc
+      integer*2 imxc,syuc,timc,trgc,v17c
+      integer*2 c30c,c33c,c34c,s30c,s33c,s34c 
+      equivalence (fmxc,imxc,Cnf(fmx)),(syuc,Cnf(syu))
+      equivalence (timc,Cnf(tim)),(trgc,Cnf(trg)),(v17c,Cnf(v17)) 
+      equivalence (c30c,Cnf(c30)),(c33c,Cnf(c33)),(c34c,Cnf(c34)) 
+      equivalence (s30c,Cnf(s30)),(s33c,Cnf(s33)),(s34c,Cnf(s34)) 
+  
+!     The following are equivalences to cfg (in kercnf.ftni)
+      character*6 pnam,snam 
+      character*4 dnam,inam 
+      integer*2   drev,dvt6,dvad,irev,frev
+      integer*2   cn17,cn22,cn30,cn31,cn33,cn34,dv20
+      equivalence (dnam, cfg(1)),(drev, cfg(4)),(dvt6, cfg(5))
+      equivalence (dvad, cfg(6)),(inam, cfg(7)),(irev,cfg(10))
+      equivalence (frev,cfg(11)),(pnam,cfg(12)),(snam,cfg(15))
+      equivalence (cn17,cfg(18)),(cn22,cfg(19)),(cn30,cfg(20))
+      equivalence (cn31,cfg(21)),(cn33,cfg(22)),(cn34,cfg(23))
+      !           cfg words 24-31 are currently (rev 4.1) spares
+      equivalence (dv20,cfg(32))
+  
+!     This routine differs from it's RTE-6 counterpart in that
+!         1) D mux is not supported under RTE-6 yet 
+!         2) Determination of the interface type is different.
+  
+      j = opsy()                          !Get the operating-system type
+      if (j.ne.-53 .and. j.ne.-37 .and. j.ne.-61) then
+          call tpFm('Aborting - not set up for this system!')
+          call exec(6)
+      endif 
+  
+      Cnf = 0 
+      Call MoveWords(Cnf,Cnf(2),CnfSiz-1) !Clear the configuration array
+      syuc = LuTru(LU)                    !Get system LU
+      xl = syuc .or. 100000b              !Set session override for XLUEX 
+      imxc = 0                            !Preset to 'not a mux'
+  
+      rtobit = 1                          !Set the time-out bit for RTE-A 
+      if ( xftty(xl) ) then               !If interactive...
+          cw = 60600b                     !see if we can do SSR 
+          call xluex(naCn,xl,-2,*10)      !No-abort special dynamic status
+          call abreg(a,b)                 !Get the return flag
+          if (b .ne. 123456b) goto 10     !Not SSR compatible 
+          cw = 3700b                      !Prepare for the SSR
+          call xluex(naRd,xl,cfg,32,*30)  !Do the SSR 
+          if (inam .eq. 'ID80') then      !We have a "D" mux! 
+              imxc = 100001b
+          endif 
+          if (inam .eq. 'ID40') then      !See if maybe it's A400 OBIO
+              imxc = 100003b
+          endif 
+          if (imxc .eq. 0) goto 20        !Not a mux? Just return to caller 
+          v17c = cn17                     !Get current terminator 
+          timc = cn22                     !Current time-out value 
+          c30c = cn30                     !Current CN30 value 
+          c33c = cn33                     !Current CN33 value 
+          c34c = cn34                     !Current CN34 value 
+      endif 
+      goto 20 
+  
+!     We come here if the LU is interactive but the driver won't do SSR.
+!     We decide it is a MUX LU if:
+!         It has 12 driver parameters (eliminates IO-mapped LUs)
+!         It has 57 DVT-extension words (eliminates ASIC LUs) 
+!         DVP1 has bit 2 set (further eliminates ASIC LUs)
+  
+10    dvta = AddressOf(lut)               !Get address of $LUTA 
+      dvta = IxGet(dvta)                  !Get the address of the LUT 
+      dvta = IxGet(dvta + syuc - 1)       !Get LU's DVT address 
+!1.99a     dvta = IxGet(dvta)                  !Get the DVT address 
+      a = IxGet(dvta + 20)                !Get DVP/DVX size word
+      b = a .and. 777b                    !Isolate the DVX size 
+      a = ibits(a,9,7)                    !...and the DVP size
+      if (a .ne. 12) goto 20              !Terminals have 12 DVP words
+      timc = abs(IxGet(dvta+28))          !Get the current timeout value
+      if (b .ne. 57) then                 !MUX (IDM00) has 57 DVX words 
+          trgc = IxGet(dvta + 29)         !Capture 1st word of pri prog name
+          v17c = IxGet(dvta + 33)         !...and 1st word of sec prog name 
+          goto 20 
+      endif 
+      a = IxGet(dvta + 25)                !Get Driver Parameter #1
+      if (.not. btest(a,2)) goto 20       !DVP1 bit 2 must be set 
+      imxc = 100000b                      !Flag as KERMIT-useable 
+      trgc = IxGet(dvta + 27)             !Get the current trigger-character
+      dvxa = IxGet(dvta + 21)             !Get DVT-extension address
+      c30c = IxGet(dvxa + 40)             !Get the current CN30 value 
+      c33c = IxGet(dvxa + 39)             !Get the current cn33 value 
+      if (iand(c33c,177760b) .eq. 0) then !any configuration setup? 
+          c33c = 52500b                   !No - set power-on defaults 
+      endif 
+      !Note: the cn34 parameter isn't needed with 12040B/C muxes
+  
+ 20   call MoveWords(c30c,s30c,3)         !Copy current values to saves 
+      call MoveWords(cnf,CnfArr,CnfSiz)   !Copy config back to caller 
+      return
+  
+ 30   call tpFm('Aborting: SSR-compatible driver rejected the SSR') 
+      call quit 
+  
+      end 
+  
+      subroutine LogOff                                  ,<871015.1451> 
+     >A/Log the server off
+      implicit none 
+  
+      integer*2 sess,err,usnum
+  
+!     This routine differs from it's RTE-6 counterpart in that the jobs 
+!     performed by the log-off program are completely different under 
+!     RTE-A and under RTE-6.  Further, CLGOF doesn't exist for RTE-6! 
+  
+      sess = usnum()                      !Get the session number 
+      call Clgof(sess,2,err)              !Go to background (suppress msgs) 
+      sess = usnum()                      !My session# has changed
+      call Clgof(sess,1,err)              !Now kill everything off. 
+  
+      call exec(6)                        !(...and die, just in case) 
+  
+      end 

@@ -1,0 +1,89 @@
+FTN77,I,Y
+$CDS ON
+        SUBROUTINE PRSLN(IBUFF,LEN,NOUT)
+C 
+C 1.  NAME PROGRAM SPECIFICATION
+C 
+C 1.1.   PRSLN
+C               THIS ROUTINE PARSES AN INPUT STREAM OF THE FORM 
+C 
+C                       NAME,O1,O2,P1,P2,P3,P4,P5 
+C 
+C       AND RETURNS THE CONVERTED VALUES IN NOUT IN THE FORM
+C       FOR THE FOLLOWING CASES:
+C 
+C       O1 - NUMERIC
+C               NOUT(1-3)       - NAME
+C               NOUT(4-5)       - O1,O2 
+C               NOUT(6-10)      - P1 - P5 WHERE NUMBERS (DECIMAL
+C                                 AND OCTAL) HAVE BEEN CONVERTED
+C                                 AND THE FIRST 2 ASCII CHARACTERS
+C                                 HAVE BEEN RETURNED. 
+C 
+C 2.  NAME INTERFACE
+C 
+C 2.1.   CALLING SEQUENCE: CALL PRSLN(IBUFF,LEN,NOUT) 
+C 
+C     INPUT VARIABLES:
+        DIMENSION IBUFF(60),NOUT(10)
+C       IBUFF   - INPUT BUFFER FOR PARSING
+C       LEN     - LENGTH OF INPUT BUFFER TO USE 
+C       NOUT    - OUTPUT ARRAY OF FOLLOWING FORM
+C               NOUT(1-3)       - ASCII NAME PRECEEDING FIRST COMMA 
+C               IF O1 IS NUMERIC THEN 
+C               NOUT(4 -,- 10)  - CONVERTED INPUT OR FIRST 2 ASCII
+C                                 CHARACTERS (O1,O2,P1,,P5 IN ORDER)
+C               NOUT(11)        - NUMBER OF PARAMETERS PRESENT
+C               IF O1 =3HOFF THEN 
+C               NOUT(4) =400B - OFF INDICATOR 
+C               NOUT(5) =O2 IF PRESENT
+C               NOUT(6-10)      0 
+C               NOUT(11)        NUMBER OF PARAMETERS PRESENT(3,4) 
+C                                -1 IMPLIES NO NAME FOUND 
+C 
+C 3.  LOCAL VARIABLES 
+        DIMENSION IRBUF(4,9)
+C       IRBUF   - PARSE OUTPUT BUFFER FOR EXTRACTING INFORMATION
+C
+C 6.  PROGRAMMER: LEE N. FOSTER 
+C     LAST MODIFIED:
+C 
+C     PROGRAM STRUCTURE 
+C 
+C               PARSE THE INPUT USING SYSTEM FUNCTION 
+        CALL PARSE(IBUFF,IABS(LEN),IRBUF) 
+C               CHECK FOR NAME FOUND
+        NOUT(11) = 0
+        IF (IRBUF.NE.2) RETURN
+C               MOVE IN NAME FIELD
+        CALL ICHMV(NOUT,1,IRBUF,3,6)
+C               SAVE # OF PARAMETERS FOUND
+        NOUT(11) = IRBUF(1,9) 
+C               NOTE PARAMETER PRESENT IF ASKED TO
+        IF (LEN.LT.0) NOUT(11)=IOR(NOUT(11),100000B)
+C               CHECK FOR O1 NUMERIC
+      IF (IRBUF(1,2).LE.1) THEN
+C               MOVE VALID PARAMETERS TO OUTPUT OR ZERO PARM
+        DO I=2,8
+C               FIRST RESET OUTPUT
+          IF (LEN.GT.0) NOUT(I+2)=0
+C               REPLACE WITH VALID INPUT IF PRESENT 
+          IF (IRBUF(1,I).NE.0) THEN
+C               DO THE REPLACE AT THIS POINT
+            NOUT(I+2) = IRBUF(2,I)
+C               RECORD PARAMETER PRESENT IF ASKED TO
+            IF (LEN.LT.0) CALL SBIT(NOUT(11),17-I,1)
+          ENDIF
+        ENDDO
+        RETURN
+      ENDIF
+C               CHECK FOR OFF 
+      IF (ICHCM(IRBUF(2,2),1,3HOFF,1,3).NE.0) RETURN
+C               NOTE OFF FOUND
+      NOUT(4) = 400B
+C               CLEAR THE REST OF THE PARAMETERS
+      CALL IFILL(NOUT(5),1,12,0)
+C               SAVE O2 IF PRESENT
+      IF (IRBUF(1,3).NE.0 .AND. NOUT(11).GE.3) NOUT(5)=IRBUF(2,3)
+      RETURN
+      END

@@ -1,0 +1,189 @@
+FTN77,I,Y  
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE UCDMO(IP,ICLCM)             ! UC DISPLAY <910212.1738>
+C
+C     UCDMO gets data from the receiver and displays it
+C
+C     INPUT VARIABLES:
+C
+      DIMENSION IP(1)
+C        IP(1)  - class number of buffer from MATCN
+C        IP(2)  - # records in class
+C        IP(3)  - error return from MATCN
+C        IP(4)  - who, or 77B (?)
+C        IP(5)  - class with command
+C
+C     OUTPUT VARIABLES:
+C
+C        IP(1) - error
+C        IP(2) - class
+C        IP(3) - number of records
+C        IP(4) - who we are
+C
+C 2.2.   COMMON BLOCKS USED
+C
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+C 2.5   CALLED SUBROUTINES: character utilities
+C
+C 3.  LOCAL VARIABLES
+C
+C     IAD - A/D channel
+C     IDCAL - delay cal heater
+C     ICAL - cal status
+      DIMENSION LC(3)
+C     IBOX - box heater
+C     ILO - LO status
+C     NCH    - character counter
+C
+      DIMENSION LUNLK(8)
+      LOGICAL KCOM,KDATA
+      DIMENSION IREG(2)          ! registers from EXEC
+      EQUIVALENCE (REG,IREG(1)) 
+      DIMENSION IBUF1(20),IBUF2(30) 
+C               - input class buffers, output display buffer
+C 
+C 4.  CONSTANTS USED
+      parameter (ilen=40, ilen2=60)     !  buffer lengths, characters
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA LUNLK /015446B,2HdB,2HUN,2HLO,2HCK,2HED,015446B,2Hd@/  
+C 
+C 6.  PROGRAMMER: NRV  CREATED 830610 AT MOJAVE 
+C 
+C     WHO  WHEN    WHAT 
+C     WEH  830617  ADDED LOOKUP TABLE FOR 20K NOISE DIODE 
+C                  FIXED TO DISPLAY EXACTLY 4 SIGNIFICANT DIGITS
+C     NRV  840509  MADE CHANGES FOR NEW VERSION 
+C                  USE SAME TABLE FOR 70K AS FOR 20K
+C                  PRESSURE FORMULA FROM BEC
+C     MWH  850121  PUT 'UNLOCKED' MESSAGE IN INVERSE VIDEO
+C     LAR  880227  MOVE VOLTAGE-TO-WEATHER CONVERSION TO RXVTOT
+C 
+C 
+C     1. Determine whether parameters from COMMON wanted and skip to
+C     response section. 
+C     Get RMPAR parameters and check for errors from our I/O request. 
+C 
+      KCOM = IP(4).EQ.77B 
+D     WRITE(LU,9801) (IP(I),I=1,5),ICLCM,KCOM
+D9801 FORMAT("ENTERING UCDMO WITH IP,ICLCM,KCOM="6I5,1X,L1) 
+C 
+      ICLASS = IP(1)
+      NCREC = IP(2) 
+      IERR = IP(3)
+C 
+      IF (.NOT.KCOM.AND.(IERR.LT.0.OR.ICLASS.EQ.0.OR.ICLCM.EQ.0)) RETURN
+C 
+C     2. Get class buffer with command in it.  Set up first part
+C     of output buffer.  Get buffer from MATCN. 
+C 
+      REG = EXEC(21,ICLCM,IBUF2,-ILEN2)
+C 
+      NCHAR = IREG(2) 
+D     WRITE(LU,9802) NCHAR,(IBUF2(I),I=1,10)
+D9802 FORMAT("NCHAR,IBUF2="I5,1X,10A2)
+      NCH = ISCNC(IBUF2,1,NCHAR,75B)        !  Scan for "="
+      KDATA = NCH.EQ.0
+C                   If our command was only "device" we are waiting for 
+C                   data and know what to expect. 
+      IF (NCH.EQ.0) NCH = NCHAR+1 
+C                   If no "=" found, position after last character
+      NCH = ICHMV(IBUF2,NCH,2H/ ,1,1)    ! Put "/" to indicate a response
+C 
+      IF (.NOT.KCOM) THEN
+        IF (.NOT.KDATA) THEN
+          DO I=1,NCREC
+            IF (I.NE.1) NCH=MCOMA(IBUF2,NCH)
+C                   If not first parm, put comma before
+            REG = EXEC(21,ICLASS,IBUF1,-ILEN)
+            NCHAR = IREG(2)
+            NCH = ICHMV(IBUF2,NCH,IBUF1(2),1,NCHAR-2)
+C                   Move buffer contents into output list
+          ENDDO
+          GOTO 500
+        ENDIF
+C
+        REG = EXEC(21,ICLASS,IBUF1,-ILEN)
+        CALL MA2UC(IBUF1(2),LOSTST,ICAL,IDCAL,ILOH,IBOX,IADC,VADC)
+      ELSE
+        IADC = IADCST                ! READ VALUES FROM FIELD SYSTEM COMMON
+        ICAL = LSWCAL
+        IDCAL = IDCHST
+        ILOH = ILOHST
+        IBOX = IBXHST
+      ENDIF
+      IERR = 0
+      IA = 1 + IA22H(IADC)
+C
+C     3. Now the buffer contains: UC/, and we want to add the data. 
+C 
+      IAD = 2H-1
+      IDUMM1 = ICHMV(LC,1,5HUNDEF,1,5)
+      NL = 5
+      IF (IA.NE.0) THEN
+        NL = IFLCH(LCODE(1,IA),6)
+        IAD = IADC
+        IDUMM1 = ICHMV(LC,1,LCODE(1,IA),1,NL)
+      ENDIF
+      NCH = ICHMV(IBUF2,NCH,IAD,1,2)
+      NCH = ICHMV(IBUF2,NCH,2H( ,1,1)
+      NCH = ICHMV(IBUF2,NCH,LC,1,NL)
+      NCH = ICHMV(IBUF2,NCH,2H) ,1,1)
+      NCH = MCOMA(IBUF2,NCH)
+      IF (IDCAL.EQ.0) NCH = ICHMV(IBUF2,NCH,3HOFF,1,3)
+      IF (IDCAL.EQ.1) NCH = ICHMV(IBUF2,NCH,2HON,1,2)
+      NCH = MCOMA(IBUF2,NCH)
+      IF (ILOH.EQ. 0) NCH = ICHMV(IBUF2,NCH,3HOFF,1,3)
+      IF (ILOH.EQ. 1) NCH = ICHMV(IBUF2,NCH,2HON,1,2)
+      NCH = MCOMA(IBUF2,NCH)
+      IF (IBOX.EQ. 0) NCH = ICHMV(IBUF2,NCH,3HOFF,1,3)
+      IF (IBOX.EQ. 1) NCH = ICHMV(IBUF2,NCH,2HON,1,2)
+      NCH = MCOMA(IBUF2,NCH)
+      DO I=1,3
+        IF (IFAMST(I).EQ.0) NCH=ICHMV(IBUF2,NCH,3HOFF,1,3)
+        IF (IFAMST(I).EQ.1) NCH=ICHMV(IBUF2,NCH,2HON,1,2)
+        NCH=MCOMA(IBUF2,NCH)
+      ENDDO
+      IF (ICAL.EQ. 0) NCH = ICHMV(IBUF2,NCH,3HOFF,1,3)
+      IF (ICAL.EQ. 1) NCH = ICHMV(IBUF2,NCH,2HON,1,2)
+      IF (ICAL.EQ. 2) NCH = ICHMV(IBUF2,NCH,3HEXT,1,3)
+      IF (ICAL.EQ.-1) NCH = ICHMV(IBUF2,NCH,3HOON,1,3)
+      IF (ICAL.EQ.-2) NCH = ICHMV(IBUF2,NCH,4HOOFF,1,4)
+      IF (KCOM) GOTO 500
+      NCH = MCOMA(IBUF2,NCH)
+      IF (LOSTST.EQ.1) NCH=ICHMV(IBUF2,NCH,6HLOCKED,1,6)
+      IF (LOSTST.EQ.0) NCH=ICHMV(IBUF2,NCH,LUNLK,1,16)
+      NCH = MCOMA(IBUF2,NCH)
+C
+C   CONVERT TO ASCII, PUT THE NUMBER OF CHARACTERS INTO A DUMMY VARIABLE
+C
+      VADCST=VADC*VFAC(IA)
+C
+      NCHB= NCH + IR2AS(VADCST,IBUF2,NCH,10,3)
+C
+C   PUT ONLY 4 SIGNIFICANT DIGITS + A DECIMAL POINT (+ A MINUS
+C                                   SIGN IF NEGATIVE)
+C   THIS IS MADE SIMPLE BY THE FACTS THAT IR2AS LEFT JUSTIFIES
+C   AND THAT ALL THE NUMBERS WE WORK HAVE THE LEAST SIGNIFICANT
+C   DIGIT TO THE LEFT OF THE .0001 DECIMAL PLACE
+C   OTHERWISE WE WOULD NEED LOGS OR SOMETHING
+C
+      NCH = NCH + 5
+      IF (VADCST.LT.0) NCH=NCH+1
+C 
+C     5. Now send the buffer to BOSS for logging. 
+C 
+500   ICLASS = 0
+      NCH = NCH - 1 
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)
+C 
+      IP(1) = ICLASS 
+      IP(2) = 1 
+      IP(3) = IERR
+      IP(4) = 2HQB
+      IP(5) = 0 
+      RETURN
+      END 

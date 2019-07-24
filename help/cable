@@ -1,0 +1,14 @@
+CABLE - Get the cable cal reading
+
+Syntax:   CABLE=<message>
+Response: CABLE/<value>
+
+Settable parameters: none
+<message>: ASCII character to be sent to counter.
+
+Monitor-only parameters:
+<value>: cable cal reading
+
+     Comments: When issued with no parameters this command sends
+a request for a reading to the HPIB counter which is connected to
+the phase cal cable measurement system.

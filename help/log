@@ -1,0 +1,19 @@
+LOG - Start a new log file
+
+Syntax:   LOG=<name>
+Response: LOG/<name>
+
+Settable parameters:
+<name>: name of log file to be opened. If no directory path is
+        specified, /LOG is assumed. If no extension is specified,
+        .LOG is assumed.
+
+Monitor-only parameters: none
+
+      Comments: When the Field System is initialized, log file
+STATION.LOG was opened or created in directory /LOG. If the log
+file requested by this command cannot be opened or created, the
+Field System returns to using the log file previously in use. If
+no log file can be successfully opened, execution of the schedule
+continues, but an error message is displayed on the screen every
+time an attempt is made to write into the log.

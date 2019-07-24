@@ -1,0 +1,252 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE VC(IP,IVCN)  !   VIDEO CONVERTER CONTROL <910324.0011>
+C 
+C   VC controls the video converters
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer
+C        IP(2-5)- not used
+C        IVCN   - video converter index number, which one.
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - CLASS
+C        IP(2) - # RECS 
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES:
+C 
+C     CALLED SUBROUTINES: GTPRM,JCHAR 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C        FREQ   - frequency specified, must be < 500MHz 
+C        IBW    - bandwidth code
+C        ITP    - TP code 
+C        IATN   - attenuator code 
+C        NCHAR  - number of characters in uffer 
+C        ICH    - character counter 
+      DIMENSION IBUF(20)
+C               - class buffer
+      DIMENSION LFR(3)
+C               - frequency holder
+C        ILEN   - length of IBUF, chars 
+      DIMENSION IPARM(2)
+C               - parameters returned from GTPRM
+      DIMENSION IA(2) 
+C               - attenuator settings 
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+      DIMENSION LHEX(15)
+C               - hex characters corresponding to 1 - 14. 
+C 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 4.  CONSTANTS USED
+C 
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA ILEN/40/ 
+      DATA LHEX   /2HV1,2HV2,2HV3,2HV4,2HV5,2HV6,2HV7,2HV8,2HV9,2HVA, 
+     /             2HVB,2HVC,2HVD,2HVE,2HVF/
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED:  800213
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. If class buffer contains command name with "=" then we have
+C     parameters to set the VC.  If only the command name is present, 
+C     then read the VC. 
+D     WRITE(LU,9701) IVCN 
+D9701 FORMAT("IVCN="I5) 
+      NREC = 0
+C 
+      ICLCM = IP(1) 
+      IERR = 0
+      ICHOLD = -99
+      IF (ICLCM.EQ.0) THEN
+        IERR = -1
+        GOTO 990
+      ENDIF
+C     REG = EXEC(21,40000b+ICLCM,IBUF,-ILEN)
+      REG = EXEC(21,ICLCM,IBUF,-ILEN)
+      NCHAR = MIN0(IREG(2),ILEN)
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.EQ.0) GOTO 500
+C                   If no parameters, go read VC
+      IF (JCHAR(IBUF,IEQ+1).EQ.77B) THEN
+        IP(4) = 77B
+C       IP(5) = ICLCM
+        CALL VCDIS(IP,IVCN,ICLCM)
+        RETURN
+      ENDIF
+C 
+      IF (ICHCM(IBUF,IEQ+1,LTSRS,1,ILENTS).EQ.0) GOTO 600 
+      IF (ICHCM(IBUF,IEQ+1,LALRM,1,ILENAL).EQ.0) GOTO 700 
+C 
+C 
+C     2. Step through buffer getting each parameter and decoding it.
+C     Command from user has these parameters: 
+C                   VCnn=<freq>,<bw>,<TPI>,<atnU>,<atnL>,<MATmode>
+C     The frequency has no default.  Bandwidth defaults to 2 MHz. 
+C     TPI defaults to U, and attenuators to 10 db.
+C 
+      ICH = 1+IEQ 
+      CALL GTPRM(IBUF,ICH,NCHAR,2,FREQ) 
+C                   Pick up frequency, real number
+      IF (JCHAR(FREQ,1).EQ.52B) THEN
+        IDUMM1 = ICHMV(LFR,1,LFREQV(1,IVCN),1,6)
+      ELSE IF (JCHAR(FREQ,1).EQ.54B) THEN     !   Error if default specified
+        IERR = -101
+        GOTO 990
+      ELSE IF (FREQ.GT.500.0.OR.FREQ.LE.0.0) THEN
+        IERR = -201
+        GOTO 990
+      ELSE
+        IFR = IFIX(FREQ)
+        IDUMM1 = IB2AS(IFR,LFR,1,41400B+3)
+        IDUMM1 = ICHMV(LFR,4,2H. ,1,1)
+        IDUMM1 = IB2AS(IFIX((FREQ-IFR+.001)*100.0),LFR,5,41000B+2)
+      ENDIF
+C 
+      IC1=ICH
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+C                   Get the bandwidth as characters 
+      IF (JCHAR(PARM,1).EQ.52B) THEN
+        IBW = IBWVC(IVCN)
+      ELSE IF (JCHAR(PARM,1).EQ.54B) THEN
+        IBW = 5       !  Default is 2 MHz
+      ELSE
+        CALL IVCED(1,IBW,IBUF,IC1,ICH-2)
+        IF (IBW.LT.0) THEN
+          IERR = -202
+          GOTO 990
+        ENDIF
+      ENDIF
+C 
+      IC1 = ICH
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+C                   Get the TPI code, ASCII 
+      IF (JCHAR(PARM,1).EQ.52B) THEN
+        ITP = ITPIVC(IVCN)
+      ELSE IF (JCHAR(PARM,1).EQ.54B) THEN
+        ITP = 2           !  The default is USB
+      ELSE
+        CALL IVCED(2,ITP,PARM,1,2)
+        IF (ITP.LT.0) THEN
+          IERR = -203
+          GOTO 990
+        ENDIF
+      ENDIF
+C 
+      DO I=1,2
+        CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+C                   Get the attenuator setting
+        IA(I) = IPARM(1)
+        IF (JCHAR(PARM,1).EQ.52B.AND.I.EQ.1) IA(I)=IATUVC(IVCN) 
+        IF (JCHAR(PARM,1).EQ.52B.AND.I.EQ.2) IA(I)=IATLVC(IVCN) 
+        IF (JCHAR(PARM,1).EQ.54B) IA(I)=10
+        IF (IA(I).NE.0.AND.IA(I).NE.10) THEN
+          IERR = -203-I
+          GOTO 990
+        ENDIF
+      ENDDO
+C 
+C 
+C     3. Finally, format the buffer for the controller. 
+C     The buffer is set up as follows:
+C                   mmVndddddddd
+C     where 
+C                   mm = MAT mode, binary integer 
+C                   Vn = which VC, n=1 to E (hex 14)
+C                   dddddddd = data for VC
+C 
+      IBUF(1) = 0
+      IBUF(2) = LHEX(IVCN)
+      CALL VC2MA(IBUF(3),LFR,IBW,ITP,IA(1),IA(2)) 
+C                   Format the data part of the buffer
+C 
+C 
+C     4. Now plant these values into COMMON.
+C     Next send the buffer to SAM.
+C     Finally schedule BOSS to request that MATCON gets the data. 
+C 
+      ICHOLD = ICHECK(IVCN) 
+      ICHECK(IVCN) = 0
+      IDUMM1 = ICHMV(LFREQV(1,IVCN),1,LFR,1,6)
+C     FREQVC(IVCN) = DAS2B(LFREQV(1,IVCN),1,6,IERR) 
+      FREQVC(IVCN) = FREQ - AMOD(FREQ+.001,.01) 
+      IBWVC(IVCN) = IBW 
+      ITPIVC(IVCN) = ITP
+      IATUVC(IVCN) = IA(1)
+      IATLVC(IVCN) = IA(2)
+C 
+      ICLASS=0
+      CALL EXEC(20,0,IBUF,-12,2HFS,0,ICLASS)
+      NREC = 1
+      GOTO 800
+C 
+C 
+C     5.  This is the read device section.
+C     Fill up two class buffers, one requesting ! data (mode -1), 
+C     the other % (mode -2).
+C 
+500   IBUF(2) = LHEX(IVCN)
+      ICLASS = 0
+      DO I=1,2
+        IBUF(1) = -I
+        CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      ENDDO
+      NREC = 2
+      GOTO 800
+C 
+C 
+C     6. This is the test/reset device section. 
+C 
+600   IBUF(1) = 6 
+      IBUF(2) = LHEX(IVCN)
+      ICLASS=0
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      NREC = 1
+      GOTO 800
+C
+C
+C     7. This is the alarm query and reset request.
+C
+700   IBUF(1) = 7
+      IBUF(2) = LHEX(IVCN)
+      ICLASS=0
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS)
+      NREC = 1
+      GOTO 800
+C
+C
+C     8. All MATCN requests are scheduled here, and then VCDIS called.
+C
+800   CALL EXEC(23,6HMATCN ,ICLASS,NREC)
+      CALL RMPAR(IP)
+      IF (ICHOLD.NE.-99) ICHECK(IVCN) = ICHOLD
+      IF (ICHOLD.GE.0) ICHECK(IVCN) = MOD(ICHOLD,1000)+1
+      CALL VCDIS(IP,IVCN,ICLCM)
+      RETURN
+C
+990   IP(1) = 0
+      IP(2) = 0
+      IP(3) = IERR
+      IP(4) = 2HQV
+      RETURN
+      END

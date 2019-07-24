@@ -1,0 +1,28 @@
+FTN77,I,Y  
+$CDS ON
+      LOGICAL FUNCTION KFILD(LUT,IFERR,IFIELD,IREC,IPBUF)
+      LOGICAL KFMP
+      character*(*) IPBUF
+C
+      INTEGER   LFEL  ( 11 )
+      INTEGER   LREC  (  9 )
+      INTEGER   LIN   (  3 )
+C
+      DATA LFEL   /  20,2HEr,2Hro,2Hr ,2Hin,2H F,2Hie,2Hld,2H x,2Hxx,
+     /             2Hx_/
+      DATA LREC   /  16,2H i,2Hn ,2Hre,2Hco,2Hrd,2H x,2Hxx,2Hx_/
+      DATA LIN    /   4,2H i,2Hn_/
+      KFILD=.FALSE.
+      IF(IFERR.GE.0) RETURN
+C
+      IFC=16
+      IFC=IFC+IB2AS(IFIELD,LFEL(2),IFC,100000B+4)
+      IFC=ICHMV(LFEL(2),IFC,2H_  ,1,1)
+      CALL EXEC(2,LUT,LFEL(2),1-IFC)
+C
+      IFC=12
+      IFC=IFC+IB2AS(IREC,LREC(2),IFC,100000B+4)
+      IFC=ICHMV(LREC(2),IFC,2H_  ,1,1)
+      CALL EXEC(2,LUT,LREC(2),1-IFC)
+      KFILD=KFMP(LUT,0,LIN(2),LIN(1),IPBUF,0,1)
+      END

@@ -1,0 +1,87 @@
+FTN77,I,Y  
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C@READT
+C
+      SUBROUTINE READT(IBUFSK,ISKBW,LSTID,LSN,IYR,IDAYR,IHR,MIN,ISC,IDUR
+     .,NSTN),GET NEXT OBS. FROM SCHEDULE C#870115:05:35#
+C
+C READT - Get the next observation that the station participates in the
+C         schedule.
+C
+C MODIFICATIONS:
+C
+C    DATE     WHO  DESCRIPTION
+C    820513   KNM  SUBROUTINE CREATED
+C
+C INPUT VARIABLES:
+C
+      DIMENSION IBUFSK(80)
+C        - Buffer for schedule file
+C
+C     ISKBW - Number of words in IBUFSK.
+C
+C     LSTN - The station id.
+C
+C OUTPUT VARIABLES:
+C
+      DIMENSION LSN(4)
+C        - Contains the schedule entry source name.
+C
+C     ICODE - Error flag.
+C
+C COMMON BLOCKS USED:
+C
+      INCLUDE LXCOM.FTNI
+C
+C SUBROUTINE INTERFACES:
+C
+C    CALLING SUBROUTINES:
+C
+C      LXSUM - SUMMARY command.
+C
+C    CALLED SUBROUTINES:
+C
+C      UNPSK - Unpacks the record found in IBUFSK and puts the data
+C              into the output variables.
+C      File manager package routines.
+C
+C LOCAL VARIABLES:
+C
+      DIMENSION LST(10)
+C        - Station ids
+C
+C
+C ******************************************************************
+C
+C 1. The $SKED file entry. Then call UNPSK to put the data into out-
+C    put variables.  Check to see if the station was scheduled for
+C    an observation.
+C
+C ******************************************************************
+C
+C
+      CALL IFILL(LSN,1,8,40B)
+100   IF(IFBRK(IDUM).LT.0) GOTO 275
+      CALL IFILL(IBUFSK,1,160,40B)
+      ID = FmpRead(IDCBSK,IERR,IBUFSK,ISKBW*2)
+      ILENSK = IFLCH(IBUFSK,ISKBW*2)
+      IF(IERR.GE.0) GOTO 150
+      WRITE(LUUSR,9000) IERR
+9000  FORMAT("READT10 - Error FMGR"I3" reading schedule file")
+      GOTO 275
+150   IF(ISCNC(IBUFSK,1,1,44B).NE.0) GOTO 275
+      IF(ILENSK.LT.0) GOTO 275
+      CALL UNPSK(IBUFSK,ISKBW,LSN,LST,IYR,IDAYR,IHR,MIN,ISC,IDUR,NSTN)
+      ITSC2=IHR*60+MIN
+      IF(IDAYR.LT.ITSK1.OR.(IDAYR.EQ.ITSK1.AND.ITSC2.LT.ITSK2)) GOTO 100
+      DO 200 I=1,NSTN
+        IF(LSTID.EQ.LST(I)) GOTO 250
+200   CONTINUE
+      GOTO 100
+250   IF(IDAYR.LT.ITSKE1.OR.(IDAYR.EQ.ITSKE1.AND.ITSC2.LE.ITSKE2))
+     .GOTO 300
+      ID = FmpRewind(IDCBSK,IERR)
+275   ICODE=-1
+300   RETURN
+      END

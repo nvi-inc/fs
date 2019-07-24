@@ -1,0 +1,44 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C@ONSOR
+C
+      SUBROUTINE TRACK(IP),DISPLAY TRACKING STATUS
+C
+C     Display on-source information
+C
+C   MODIFIED 850204 TO HANDLE ERROR RETURN FROM ANTCN
+C
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+      DIMENSION IP(1)
+      DIMENSION IREG(2),IPARM(2)
+      DIMENSION IBUF(20)
+C
+      EQUIVALENCE (IREG(1),REG),(IPARM(1),PARM)
+C
+      DATA ILEN/40/
+C
+      ICLCM = IP(1)
+      REG = EXEC(21,ICLCM,IBUF,-ILEN)
+      NCHAR = IREG(2)
+      IEQ = ISCNC(IBUF,1,NCHAR,75B)
+      IF (IEQ.EQ.0) GOTO 200
+      IERR = -1
+      GOTO 990
+C
+C
+C     2. The command is: ONSOURCE
+C     The response may be either TRACKING or SLEWING,
+C     depending on the variable IONSOR=1 or 0.
+C     Schedule ANTCN to get the az,el errors and set IONSOR.
+C
+200   CALL EXEC(23,6HANTCN ,7)
+      CALL RMPAR(IP)
+      IERR = IP(3)
+      RETURN
+990   IP(1) = 0
+      IP(2) = 0
+      IP(3) = IERR
+      IP(4) = 2HQO
+      END 

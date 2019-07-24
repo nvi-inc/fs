@@ -1,0 +1,44 @@
+FTN77,I,Y
+$CDS ON
+C@FSHELP
+C
+      SUBROUTINE FSHELP(IBUF,ISTART,NCHAR,LU)  ! Field System Help Facility
+C
+C  INPUT VARIABLES:
+      DIMENSION IBUF(1)    ! command buffer
+C     ISTART: INDEX OF START OF NAME OF COMMAND FOR WHICH HELP IS DESIRED
+C     NCHAR:  END OF COMMAND STRING
+C     LU:     LOGICAL UNIT FOR MONIT OUTPUT
+C  OUTPUT VARIABLES: none
+C  LOCAL VARIABLES:
+C     KNOLI :  .TRUE. if LI has not been RP'ed into memory
+C     KMONIT:  .TRUE. if MONIT is in memory
+C     RUNSTR (equivalenced to IDUM):  runstring for calling programs
+C  PROGRAMMER:  Lloyd Rawley     early February 1988
+C
+      CHARACTER*27 RUNSTR,LDUM
+      DIMENSION LI(3),IDUM(5)
+      EQUIVALENCE(RUNSTR,IDUM)
+      LOGICAL KNOLI, KMONIT
+      SAVE KNOLI
+      DATA KNOLI/.TRUE./
+      IF (KNOLI) THEN
+        IER = 0
+        CALL FmpRpProgram('/PROGRAMS/LI.RUN','LI','P',IER)
+        KNOLI = .FALSE.
+      ENDIF
+      IDUM(1) = 2HMO
+      IDUM(2) = 2HNI
+      IDUM(3) = 2HT
+      KMONIT = (LU.EQ.1.AND.IDGET(IDUM).NE.0)
+      IF (KMONIT) CALL EXEC(23,6HMONIT ,1,10,0)  ! Turn off MONIT
+      IF (ISTART.NE.0) THEN
+        LENGTH = NCHAR+1-ISTART
+        RUNSTR='RU,LI,/FS/HELP/'
+        CALL ICHMV(IDUM,16,IBUF,ISTART,LENGTH)
+      ELSE
+        RUNSTR='RU,LI,/FS/HELP/HELP'
+      ENDIF
+      CALL FmpRunProgram(RUNSTR,IDUM,LDUM,.TRUE.)
+      RETURN
+      END

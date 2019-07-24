@@ -1,0 +1,8 @@
+OP - Operator identification
+
+Syntax:   OP=<name>
+Response: none
+
+Settable parameters:
+<name>: Operator name or initials, maximum of 12 characters.
+        Embedded blanks are allowed.

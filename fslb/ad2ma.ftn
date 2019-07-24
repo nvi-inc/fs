@@ -1,0 +1,35 @@
+FTN77,Y,I  
+$CDS ON
+      SUBROUTINE AD2MA(IBUF,IOSC,IGAIN,ICHAN)
+      IMPLICIT NONE
+      INTEGER*2 IOSC,IGAIN,ICHAN,IBUF(1)
+C
+C  ad2ma: encode MAT buffer for A/D control
+C
+C  INPUT:
+C     IOSC: oscillator control, 0 = on, 1 = off
+C     IGAIN: gain control, 0 = high, 1 = low
+C     ICHAN: channel select:
+C            1 - head 0 position
+C            2 - head 1 position
+C            3 - head 0 temperature
+C            4 - head 1 temperature
+C            5 - vacuum sensor
+C            6 -  odd reproduce power
+C            7 - even reproduce power
+C            8 - reference voltage (5.46 Volts)
+C
+C OUTPUT:
+C    IBUF:  8 characters holding MAT buffer
+  
+      INTEGER*2 INEXT,ICHMV,IHX2A
+C
+      INEXT=1
+      INEXT=ICHMV(IBUF,INEXT,4H0000,1,3)
+      INEXT=ICHMV(IBUF,INEXT,IHX2A(IOSC),2,1)
+      INEXT=ICHMV(IBUF,INEXT,IHX2A(IGAIN),2,1)
+      INEXT=ICHMV(IBUF,INEXT,2H00,1,2)
+      INEXT=ICHMV(IBUF,INEXT,IHX2A(ICHAN-1),2,1)
+C
+      RETURN
+      END

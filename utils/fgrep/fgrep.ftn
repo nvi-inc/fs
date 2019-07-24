@@ -1,0 +1,533 @@
+ftn7x,l,c
+      program fgrep
+c
+c FGREP is a string search utility modeled after the similarly named program
+c that exists under UNIX (r)
+c
+c written by:  dan felman
+c              hp/rockville
+c created on:  1/17/86
+c last update: <910220.1345>
+c
+c  1/20/86 added full file masking of search files created "fgrep::help" file
+c  1/24/86 modified to use RCPAR on run-time parameters, and added output
+c          redirection via the '>' character
+c  1/27/86 fixed problem w/0-length record reads and with redirection
+c  1/30/86 fixed to ignore FmpOpen's -230 error, when opening a directory file
+c  1/31/86 moved -C option resolution to SEARCH and fixed so that blank lines
+c          are not printed if -c is set.
+c          Also, replaced function EXPAND for WildCardMask
+c  4/9/86  fixed column one (added a blank) if redirecting to a device
+c  4/24/86 Added a total count of matches if filemasking and more than 1 file
+c          is searched (and there are matches)
+c  5/14/86 Added an error msg in case no file is found matching the mask
+c  5/30/86 Added right anchor character {$} in search pattern, and fixed
+c          the matching of null lines using: `^` (see ?fgrep for info)
+c  6/17/86 Now using FmpSetIoOptions to set CC on redirection to LP instead
+c          of adding a blank to the output line. Saves time.
+c  6/23/86 Added new option -d (debug mode) to display all files searched
+c          Made some general changes to optimize code and reduce its size.
+c  6/24/86 Added new option -a (ascii only) to search only type 3 or 4 files
+c  8/26/86 Moved option checks to main, so it is not done on every file search
+c          This should speed up processing somewhat.
+c  12/2/86 Added -y as synonim for -i (Bell vs Berkeley)
+c          Added 'illegal option' message on bad [-option]
+c          Changed 'usage: ...' to display all available options
+c
+c usage: fgrep [-acdilnvx] pattern fileMask [> file/lu]
+c
+c '?help' contains information on usage of this program
+c use ` instead of " to surround the search-string when blanks are in the
+c pattern. (CI's way of doing things)
+c
+      implicit none
+c
+      character fName*63,                        ! file name to search
+     +          dirPath*63,                      ! path directory part
+     +          pattern*63,                      ! pattern to search for
+     +          options*12,                      ! grep "-xy" type options
+     +          message*30,                      ! next parameter in input
+     +          next*63,                         ! next parameter in input
+     +          outFile*63                       ! output device/filename
+c
+      integer*2 TrimLen,                         ! {sys} character function
+     +          RCPAR,                           ! {sys} get run string parms
+     +          optLen,                          ! run options string length
+     +          patternLen,                      ! search pattern string len
+     +          fNameLen,                        ! filename string length
+     +          nextLen,                         ! length of "next" parm
+     +          outLen,                          ! length of outFile name
+     +          outType,                         ! type of output file
+     +          INDEX,                           ! {sys} ret pos of substring
+     +          search,                          ! {funct} ret # of matches
+     +          count,                           ! match count ret by search
+     +          total,                           ! total match count
+     +          parm                             ! parameter number
+c
+      integer*2 fType,                           ! file-type in fmpOpen
+     +          entry(32),                       ! used in "FmpNextMask"
+     +          fmpOpen,                         ! {sys} file open function
+     +          fmpInitMask,                     ! {sys} mask init function
+     +          dcb(6160),                       ! 1-track sized file dcb
+     +          outdcb(528),                     ! dcb for output file
+     +          dirdcb(400),                     ! dcb for mask routines
+     +          fErr,                            ! error return w/fmp calls
+     +          fError                           ! error return w/fmp calls
+c
+      logical   fmpNextMask,                     ! {sys} checks for next file
+     +          fmpDevice,                       ! {sys} is dcb a device ?
+     +          wildCardMask,                    ! {sys} ret .true. if wildc
+     +          expand                           ! {func} .true. if wildcards
+  
+      logical   masking,                         ! we are masking
+     +          allButMatch,                     ! -v option
+     +          matchExact,                      ! -x option
+     +          countOnly,                       ! -c option
+     +          ignoreCase,                      ! -i option (or -y)
+     +          numToo,                          ! -n option
+     +          blockToo,                        ! -b option
+     +          listFname,                       ! -l option
+     +          debug,                           ! -d option  (non-Unix)
+     +          asciiOnly                        ! -a option  (non-Unix)
+  
+      common masking, allButMatch, matchExact, countOnly, ignoreCase,
+     +       numToo, blockToo, listFname, debug, asciiOnly
+c
+      call charfill (options,' ')  $  optLen = 0  $  outFile = '1'
+c
+c initialize and retrieve run time parameters
+c
+c          with options       without options
+c         -----------------  ------------------
+c parm 1  = options            search pattern
+c parm 2  = search pattern       file-mask
+c parm 3  = file-mask         ['>' redirection]
+c parm 4  = ['>' redirection]
+c
+      parm = 1
+      patternLen = RCPAR ( parm, pattern )
+c
+      parm = 2
+      if ( pattern(1:1) .eq. '-' ) then
+          options = pattern(2:12)
+          optLen = TrimLen ( options )
+          patternLen = RCPAR ( parm, pattern )
+          parm = 3                               ! setup for file name
+      endif
+c
+      fNameLen = RCPAR ( parm, fName )
+c
+c we must have a search pattern AND a file to search in
+c
+      if ( (patternLen .eq. 0) .or. (fNameLen .eq. 0) ) then
+          stop 'usage: fgrep [-cilnvxad] pattern fileMask [> file/lu]'
+      endif
+c
+c check for output redirection (eg. '>')
+c
+      parm = parm+1                              ! setup for next file name
+      nextLen  = RCPAR ( parm, next )
+      if ( next(1:1) .eq. '>' ) then
+          if ( nextLen .eq. 1 ) then
+              parm = parm+1
+              outLen = RCPAR ( parm, outFile )
+          else
+              outFile = next(2:nextLen)
+          endif
+      endif
+c
+c open output file/device (redirected or not)
+c
+      outType = fmpOpen ( outdcb, fError, outFile, 'wc', 4 )
+      if ( fError .lt. 0 ) then
+          call fmpError ( fError, message )
+          stop 'fgrep: FmpOpen ' // message
+      endif
+      if ( FmpDevice( outdcb ) ) then            ! set the CC bit in ctwd
+          call FmpSetIoOptions ( outdcb, fError, 200b )
+      endif
+c
+      masking = wildCardMask ( fName )
+c
+c initialize FMP's masking subsystem
+c
+      if ( fmpInitMask (dirdcb,                  ! file masking dcb
+     +                  fError,                  ! returned by fmp
+     +                  fName,                   ! mask passed by user
+     +                  dirPath,                 ! created by fmp
+     +                  400) .lt. 0 ) then       ! size of "dirdcb"
+          call fmpError ( fError, message )
+          stop 'fgrep: FmpInitMask ' // message
+      endif
+c
+c default all the run-time options
+c
+      allButMatch = .false.                      ! -v option
+      matchExact = .false.                       ! -x option
+      countOnly = .false.                        ! -c option
+      ignoreCase = .false.                       ! -i option (or -y)
+      numToo = .false.                           ! -n option
+      blockToo = .false.                         ! -b option  {not yet}
+      listFname = .false.                        ! -l option
+      debug = .false.                            ! -d option  {non-Unix}
+      asciiOnly = .false.                        ! -a option  {non-Unix}
+c
+c resolve runtime options
+c
+      parm = index(options,'V')
+      if ( parm .gt. 0 ) then
+          allButMatch = .true.    $    options(parm:parm) = ' '
+      endif
+      parm = index(options,'X')
+      if ( parm .gt. 0 ) then
+          matchExact = .true.     $    options(parm:parm) = ' '
+      endif
+      parm = index(options,'C')
+      if ( parm .gt. 0 ) then
+          countOnly = .true.      $    options(parm:parm) = ' '
+      endif
+      parm = index(options,'I')
+      if ( parm .gt. 0 ) then
+          ignoreCase = .true.     $    options(parm:parm) = ' '
+      endif
+      parm = index(options,'Y')
+      if ( parm .gt. 0 ) then
+          ignoreCase = .true.     $    options(parm:parm) = ' '
+      endif
+      parm = index(options,'N')
+      if ( parm .gt. 0 ) then
+          numToo = .true.         $    options(parm:parm) = ' '
+      endif
+      parm = index(options,'B')             ! {not yet implemented}
+      if ( parm .gt. 0 ) then
+          blockToo = .true.       $    options(parm:parm) = ' '
+      endif
+      parm = index(options,'L')
+      if ( parm .gt. 0 ) then
+          listFname = .true.      $    options(parm:parm) = ' '
+      endif
+      parm = index(options,'D')
+      if ( parm .gt. 0 ) then
+          debug = .true.          $    options(parm:parm) = ' '
+      endif
+      parm = index(options,'A')             ! {not yet implemented}
+      if ( parm .gt. 0 ) then
+          asciiOnly = .true.      $    options(parm:parm) = ' '
+      endif
+c
+      if (options .ne. ' ') stop 'fgrep: illegal option ' // options
+c
+      total = 0                             ! total number of matches
+c
+c fmpNextMask returns .TRUE. if it can find a new file matching the mask
+c
+      do while ( fmpNextMask (dirdcb,fError,dirPath,entry) )
+c
+          if ( fError .lt. 0 ) then
+              call fmpError ( fError, message )
+              stop 'fgrep: FmpNextMask ' // message
+          else                                   ! get the file-name
+              call fmpMaskName ( dirdcb, fName, entry, dirPath )
+          endif
+c
+c OPEN the currently masked file
+c
+          fType = fmpOpen ( dcb,                 ! 6144 + 16 words
+     +                      fError,              ! returned by fmp
+     +                      fName,               ! passed by user
+     +                      'ro',                ! open for reading/existing
+     +                      48 )                 ! 1 track {48 blocks} dcb
+c
+c ignore fError = -230 {try to open directory file}
+c
+          if ( fError .lt. 0 ) then
+              if ( fError .ne. -230 ) then
+                  call fmpError ( fError, message )
+                  call fmpWriteString
+     +                 ( outdcb, fErr, 'FmpOpen: _' // message )
+              endif
+          else
+c
+c now, let's do the actual string search work
+c
+              count = search (dcb,outdcb,pattern,patternLen,fType)
+              total = total + count
+c
+          endif
+c
+c and close the file
+c
+          call fmpClose ( dcb, fError )
+          if ( fError .lt. 0 ) then
+              call fmpError ( fError, message )
+              call fmpWriteString
+     +             ( outdcb, fErr, 'FmpClose: _' // message )
+          endif
+c
+      enddo ! do while ( nextFileMask ...
+c
+c close fmp's and output file's dcb
+c
+      call fmpEndMask ( dirdcb )
+      call fmpClose ( outdcb, fError )
+c
+      if ( total .gt. count )
+     +    write (1,'("total: ",i4.1)') total
+c
+      end
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+      integer*2 function search                  ! returns count of matches
+     +                  (dcb,                    != current file's dcb
+     +                   odcb,                   != output file's dcb
+     +                   pattern,                != pattern to search for
+     +                   pLen,                   != length of pattern string
+     +                   type)                   != file type
+c
+c this routine does the actual search/compare work by reading through
+c a file and searching for "pattern"
+c
+      implicit none
+c
+      integer*2 EOF
+      parameter (EOF=-1)
+c
+      character line*1024,
+     +          oline*1024,
+     +          tline*1024,                      ! temp line
+     +          lineTemp*1024,
+     +          pattern*(*),                     ! pattern to search for
+     +          temp*63,                         ! temp holder pf "pattern"
+     +          IntToDecimal*6,                  ! {sys} returns ASCII
+     +          rec*6,                           ! used with "IntToDecimal"
+     +          countStr*64,                     ! used to print -C option
+     +          fileName*63,                     ! file name [path opt]
+     +          getName*21                       ! {func} gets full name
+c
+      integer*2 type,                            ! file type
+     +          dcb(*),                          ! 1-track sized file dcb
+     +          odcb(*),                         ! output file dcb
+     +          intLine(512),                    ! input line = "line"
+     +          oLen,                            ! output line length
+     +          lineLen,                         ! current length of record
+     +          fmpRead,                         ! {sys} read integer() rec
+     +          fErr,                            ! error return w/fmp calls
+     +          recCount,                        ! current record number
+     +          matchCount,                      ! number of matches in file
+     +          irec,
+     +          strPos,                          ! position of substring
+     +          index,                           ! {sys} finds substring
+     +          pLen,                            ! length of search pattern
+     +          fLen,
+     +          TrimLen                          ! {sys} return str w/o < >
+  
+      logical masking,                           ! true if we are file-masking
+     +        allButMatch,                       ! -v option
+     +        matchExact,                        ! -x option
+     +        countOnly,                         ! -c option
+     +        ignoreCase,                        ! -i option  (or -y)
+     +        numToo,                            ! -n option
+     +        blockToo,                          ! -b option
+     +        listFname,                         ! -l option
+     +        debug,                             ! -d option  (RTE-only)
+     +        asciiOnly,                         ! -a option  (RTE-only)
+     +        anchorLeft,                        ! ^ in search pattern
+     +        anchorRight,                       ! $ at end of pattern
+     +        ifbrk,                             ! {sys} .true. if 'br,fgrep'
+     +        FmpDevice                          ! {sys} .true. if device
+  
+      common masking, allButMatch, matchExact, countOnly, ignoreCase,
+     +       numToo, blockToo, listFname, debug, asciiOnly
+c
+      equivalence ( line, intLine )              ! for "FmpRead"
+c
+      anchorLeft = .false.                       ! ^ not in pattern
+      anchorRight = .false.                      ! $ not in pattern
+c
+c get the current file name we are suppose to work on, and its char length.
+c
+      if ( listFname ) then
+          call FmpFileName ( dcb, fErr, fileName ) ! get full path name
+      else
+          fileName = getName ( dcb )               ! get just file name
+      endif
+      fLen = TrimLen ( fileName )
+c
+c -d option
+c
+      if ( debug ) then
+          call fmpWriteString (odcb, fErr, 'mask: '//fileName(1:fLen))
+      endif
+c
+c -a option
+c
+      if ( asciiOnly .and. type .ne. 3 .and. type .ne. 4 ) then
+          lineLen = EOF
+      else
+c
+c handle the anchor characters {^ $} special options ala GREP
+c
+          if ( pattern(1:1) .eq. '^' ) then
+              anchorLeft = .true.
+              temp = pattern
+              if ( pLen .gt. 1 ) pattern = temp(2:pLen) // ' '
+              pLen = pLen - 1
+          endif
+          if ( pLen .gt. 0 ) then   ! in case {^} was the only character
+              if ( pattern(pLen:pLen) .eq. '$' ) then
+                  anchorRight = .true.
+                  pattern(pLen:pLen) = ' '
+                  pLen = pLen - 1
+              endif
+          endif
+c
+c read the first record of the file
+c
+          lineLen = fmpRead ( dcb, fErr, intLine, 1024 )
+c
+c -i or -y option
+c
+          if ( ignoreCase .and. pLen .gt. 0 ) call caseFold ( pattern )
+      endif
+c
+      recCount = 0
+      matchCount = 0
+c
+      do while ( lineLen .ge. 0 )
+c
+          recCount = recCount + 1                ! keep track of rec numbers
+          lineTemp = line                        ! save "line" temporarily
+          strPos = 0                             ! default 'not matched'
+c
+          if ( lineLen .gt. 0 ) then             ! in case of blank lines
+              if ( ignoreCase ) call caseFold ( line(1:lineLen) )
+              if ( pLen .gt. 0 ) then
+                  strPos = index(line(1:lineLen),pattern(1:pLen))
+              endif
+              if (( anchorRight .and. strPos .ne. (lineLen-pLen+1)) .or.
+     +            ( anchorLeft .and. strPos .ne. 1 ) .or.
+     +            ( matchExact .and. lineLen .ne. pLen )) strPos = 0
+          elseif ( pLen .eq. 0 ) then
+              lineLen = 1
+              strPos = 1
+          endif
+c
+c the next if-stmt resolve run-string options for matching output.
+c if -l : only print file name if a match is found ( only once )
+c if -c : just print a count of matches in the file
+c if -n : precede matched line with its record number
+c if file-Masking, precede records with their file name
+c
+          oLen = 1                               ! 1st char in output line
+c
+c ** lines that do NOT match  {-v}
+c
+          if (( strPos.eq.0 .and. allButMatch ) .or.
+c
+c ** lines that DO match
+c
+     +        ( strPos.gt.0 .and. (.not. allButMatch) )) then
+  
+              matchCount = matchCount + 1
+c
+c  ** if all we need is a count or file name, don't keep on searching
+c
+              if ( .not. countOnly .and. (.not. listFname) ) then
+                  if ( masking ) then            ! add file name to output
+                      oLine = fileName(1:fLen) // ':'
+                      oLen = oLen + fLen + 1
+                  endif
+                  if ( numToo ) then             ! add rec number to output
+                      rec = IntToDecimal ( recCount )
+                      irec = TrimLen(rec)
+                      oLine(olen:olen+irec) = rec(1:irec) // ':'
+                      oLen = oLen + irec + 1
+                  endif
+                  if ( lineLen .gt. 0 ) then     ! avoid a runtime 601 error
+                      oLine(oLen:oLen+lineLen+1) = lineTemp(1:lineLen)
+                      oLen = oLen + lineLen
+                  endif
+              elseif ( listFname ) then          ! print once and out
+                  oLine(oLen:oLen+fLen) = fileName(1:fLen)
+                  oLen = oLen + fLen
+                  lineLen = EOF                  ! end search now
+              endif
+c
+              if ( .not. countOnly )
+     +             call fmpWriteString ( odcb, fErr, oLine(1:oLen))
+          endif
+c
+c acknowledge the 'brake-bit' set.
+c
+          if ( ifbrk() ) then
+              call fmpClose ( dcb, fErr )
+              call fmpClose ( odcb, fErr )
+              stop 'fgrep: break acknowledged'
+          endif
+c
+c let's try the next record, if need be
+c
+          if ( lineLen .ge. 0 ) then
+              lineLen = fmpRead ( dcb, fErr, intLine, 1024 )
+              if ( fErr .lt. EOF ) then
+                  write (1,'("FmpRead: _")')
+                  call fmpReportError ( fErr, fileName )
+                  lineLen = EOF
+              endif
+          endif
+c
+      enddo
+c
+c -c option
+c
+      if ( countOnly .and. matchCount.gt.0 ) then
+          rec = IntToDecimal ( matchCount )
+          irec = TrimLen( rec )
+          if ( masking ) then
+              countStr = 'matches: ' // rec(1:irec) // '   ' //
+     +                      fileName(1:fLen)
+          else
+              countStr = 'matches: ' // rec(1:irec)
+          endif
+          call fmpWriteString ( odcb, fErr, countStr )
+      endif
+c
+c return number of matches
+c
+      search = matchCount
+c
+      end
+c
+c ****************************************************************
+c
+      character*21 function getName ( dcb )
+c
+      implicit none
+c
+      integer*2 dcb(*)
+  
+      character fileDescr*63,                    ! file descriptor for DCB
+     +          dirPath*63,                      ! path for the file
+     +          Name*16,                         ! file name
+     +          typex*4,                         ! file type extension
+     +          qual*40,                         ! mask qualifier
+     +          ds*63                            ! DS node path
+c
+      integer*2 sc, type, size, rl, fErr,
+     +          nameLen,                         ! char length of 'Name'
+     +          TrimLen                          ! {sys} ret stripped string
+c
+c get the current file name we are suppose to work on
+c
+      call FmpFileName ( dcb, fErr, fileDescr )
+      call FmpParsePath ( fileDescr, dirPath, Name, typex, qual,
+     +                    sc, type, size, rl, ds )
+c
+      if ( typex(1:1) .eq. ' ' ) then
+          getName = Name(1:TrimLen(Name))
+      else
+          getName = Name(1:TrimLen(Name)) // '.' // typex
+      endif
+c
+      end

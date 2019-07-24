@@ -1,6 +1,0 @@
-EC
-SZ,32 
-IF 6 EB 
-LI,$LIBHS::80 
-RE,%COMPC::80 
-EN

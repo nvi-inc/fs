@@ -1,0 +1,28 @@
+FTN77,Y,I  
+$CDS ON
+      SUBROUTINE VLT_READ(IHEAD,VOLT,IP)
+      IMPLICIT NONE
+      INTEGER*2 IHEAD,IP(5)
+      REAL*4 VOLT(2)
+C
+C  VLT_READ: read head vaoltage(s)
+C
+C  INPUT:
+C     IHEAD: Head to read voltage of: 1, 2, or 3 (both)
+C
+C  OUTPUT:
+C     VOLT(2): voltage or voltages (1), (2), or both
+C     IP - Field System return parameters
+C     IP(3) = 0, if no error
+C
+      INTEGER*2 I
+C
+      DO I=1,2
+        IF(I.EQ.IHEAD.OR.IHEAD.EQ.3) THEN
+          CALL VLT_HEAD(I,VOLT(I),IP)
+          IF(IP(3).NE.0) RETURN
+        ENDIF
+      ENDDO
+C
+      RETURN
+      END

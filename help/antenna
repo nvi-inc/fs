@@ -1,0 +1,15 @@
+ANTENNA - Direct line to the antenna
+
+Syntax:   ANTENNA=<message>,<message>, ...
+Response: ANTENNA/<response>,<response>, ... 
+
+Settable parameters:
+<message>: message to be sent to the antenna in the exact form
+           required by the pointing software. Each message between
+           commas will be sent separately. The special character
+           <enq> will be substituted for any <tab> character typed.
+
+Monitor-only parameters:
+<response>: response of the antenna to the message. This response
+            is either "ACK" or an error message sent by the
+            antenna.

@@ -1,0 +1,182 @@
+FTN77,I,Y
+$CDS ON
+C@IGEQT   .******* RETURNS LU,EQT WORDS,ADDRESSES,NUMBERS ************. 
+C 
+      FUNCTION IGEQT(LU,N,IALU,IAEQT),EQT WORD FETCH. LNF <880608.1441> 
+C 
+C 1.  IGEQT PROGRAM SPECIFICATION 
+C 
+C FUNCT. IGEQT returns the contents of equipment table word N 
+C              for N=1 up(no limit - over 15 from extent) for 
+C              the logical unit LU. Optionally, 
+C              the address of the first word of the LU table and
+C              equipment table are returned as arguments. 
+C              If N.LE.0, the contents of first word of the 
+C              device reference table,the subchannel number,
+C              and the EQT number are returned. 
+C 
+C 1.2.   RESTRICTIONS - May not work on other operating systems 
+C                       than RTE-IV.
+C                     - High-order bits in LU are ignored.
+C 
+C 1.3.   REFERENCES - HP Real Time Executive Operating System 
+C                     Driver Writing Manual (2RTE.340.92200-
+C                     93005) page 2-5.
+C                   - Real-Time Executive Batch/Spool Monitor 
+C                     and Operating System Pocket Guide 
+C                     (9600 Series) pages 64,65.
+C 
+C 2.  IGEQT INTERFACE 
+C 
+C 2.1.   CALLING SEQUENCE: IWD = IGEQT(N,LU,IALU,IAEQT) 
+C                    OR  IDRTW = IGEQT(0,LU,IEQTN,ISUBCH) 
+C     NOTE THAT ONLY THE FIRST 2 ARGUMENTS MUST BE SUPPLIED,
+C     OTHERWISE THE ARGUMENT LIST MAY BE TRUCATED FROM THE RIGHT. 
+C 
+C     INPUT VARIABLES:
+CI
+C     N = number of the word desired from the Equipment Table.
+C         Note that EQT words are numbered 1-...
+C     N = 0 causes the significance of the function value 
+C         and the return arguments to be changed. See OUTPUT variables. 
+CI
+C     LU = Logical unit number of device of interest. 
+C          Note that high-order bits are ignored. (See local variable ILU). 
+CIEND 
+C 
+C     OUTPUT VARIABLES: 
+CO
+C     IGEQT = function value = contents of Equipment Table word N 
+C             If N=0, contents of Device Reference Table Word 1.
+CO
+C     IEQTN = Equipment table number of device associated with
+C             logical unit number LU
+C           - Returned only if N=0 and third argument supplied. 
+CO
+C     ISUBCH = Subchannel of device associated with LU
+C            - Returned only if N=0 and four arguments supplied.
+CO
+C     IALU = address of first word of Device Reference Table
+C            associated with LU.
+C            Note: system function IGET properly handles alternate
+C            address space. 
+C          - returned only if N>0 and at least 3 arguments supplied.
+CO
+C     IAEQT = address of first word of Equipment Table entry associated 
+C             with this device. 
+C             Note: system function IGET properly handles alternate 
+C             address space.
+C           - Returned only if N>0 and at least 4 arguments supplied. 
+COEND 
+C 
+C 2.2.   COMMON BLOCKS USED 
+CCBEND
+C 
+C 2.3.   DATA BASE ACCESSES 
+C 2.4.   EXTERNAL INPUT/OUTPUT
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES: This is a SOLVE-2 utility program. 
+C 
+C     CALLED SUBROUTINES: listed by category: 
+CSUBR   UTILITY SUBROUTINES IN SYSTEM: IGET(FUNCTION),IAND(FUNCTION)
+CSUBR   SOLVE-2 UTILITIES (%%S2US): IGNPS(LEE FOSTER FUNCTION), 
+C          JCHAR(LEE FOSTER FUNCTION) 
+CSUBR   OTHER SOLVE-2 SUBROUTINES:
+CSUBR   SEGMENTS SCHEDULED: 
+C 
+C 3.  LOCAL VARIABLES 
+CL
+C     ILU = LOGICAL UNIT NUMBER WITH HIGH-ORDER BITS MASKED OUT.
+CL
+C     NP = NUMBER OF PARAMETERS IN CALLING SEQUENCE IN ROUTINE
+C          WHICH CALLED THIS ROUTINE
+CL
+C     IFROM = RETURN ADDRESS OF THIS ROUTINE
+CL
+C     IDRTA = DEVICE REFERENCE TABLE ADDRESS (WORD 1 FOR THIS LU) 
+CL
+C     IDRTW = DEVICE REFERENCE TABLE WORD 1 CONTENTS (FOR THIS LU)
+CL
+C     IEQTN = EQUIPMENT TABLE DEVICE NUMBER 
+CL
+C     ISUBCH = DEVICE SUBCHANNEL NUMBER 
+CL
+C     IEQTA = EQUIPMENT TABLE ADDRESS FOR WORD 1 FOR THIS DEVICE
+CL
+C     IGEQT = CONTENTS OF N-TH WORD OF EQUIPMENT TABLE FOR THIS DEVICE
+CLEND 
+C 
+C END EQUIVALENCE 
+C 
+C 4.  CONSTANTS USED
+CK
+C     NUMBER OF WORDS IN EACH ENTRY IN DEVICE REFERENCE TABLE = 2 
+C     HOWEVER, THE FIRST WORDS ARE IN 64 CONTIGUOUS LOCATIONS. THEREFORE, 
+C     THE EXISTENCE OF ANOTHER WORD CAN BE IGNORED. 
+CK
+C     NUMBER OF WORDS IN EACH ENTRY IN EQUIPMENT TABLE = 15 
+CK
+C     BITS 0-5 OF DRT = EQUIPMENT NUMBER, BITS 11-15 = SUBCHANNEL 
+CK
+C     1650B = LOCATION AT WHICH ADDRESS OF WORD 1 OF EQUIPMENT TABLE IS FOUND.
+C             (FOR EQT = 1) 
+CK
+C     1652B = LOCATION AT WHICH ADDRESS OF WORD 1 OF DEVICE REFERENCE TABLE 
+C             IS FOUND. (FOR LU = 1)
+CKEND 
+C 
+C 5.  INITIALIZED VARIABLES 
+C0END 
+C 
+C 6.  PROGRAMMER: J.C.PIGG
+C                 LEE N. FOSTER 
+C     LAST MODIFIED:
+CMOD: JCP 79 Jan 23:  CREATED 
+C# LAST COMPC'ED  870115:05:47e # 
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. GET NUMBER OF PARAMETERS IN CALLING SEQUENCE, AND
+C        MASK OUT HIGH-ORDER BITS OF LU:
+C 
+      NP = PCOUNT()
+      ILU = IAND(LU,77B)
+C 
+C     2. GET ADDRESS AND CONTENTS OF DATA REFERENCE TABLE.
+C        UNPACK CONTENTS. 
+C 
+      IDRTA = IGET(1652B) + (LU-1)
+      IDRTW = IGET(IDRTA) 
+C 
+      IEQTN = IAND(IDRTW,77B) 
+      ISUBCH = JCHAR(IDRTW,1) / 4 
+C     JCHAR RETURNS N-TH BYTE AS LOW-ORDER BYTE OF FUNCTION VALUE 
+C 
+C     3. GET ADDRESS OF EQUIPMENT TABLE WORD 1, AND CONTENTS OF WORD N. 
+C 
+      IEQTA = IGET(1650B) + (IEQTN-1)*15
+      IEQTX = IAND( IGET(IEQTA + 12),77777B)
+      IF(N .LE. 15)IGEQT = IGET(IEQTA + N-1)
+      IF(N .GT. 15)IGEQT = IGET(IEQTX + N-16) 
+C 
+C     4. SET UP ALTERNATE SIGNIFICANCE IF N=0 
+C 
+      IF (N.LE.0) THEN
+        IGEQT = IDRTW
+        IDRTA = IEQTN
+        IEQTA = ISUBCH
+      ENDIF
+C 
+C     5. RETURN OPTIONAL PARAMETERS 
+C 
+      IF (NP.GE.3) THEN
+        IALU = IDRTA
+        IF(NP.GE.4) IAEQT=IEQTA
+      ENDIF
+C 
+C     6. RETURN TO CALLING PROGRAM
+C 
+      RETURN
+      END 

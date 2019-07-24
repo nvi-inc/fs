@@ -1,0 +1,115 @@
+FTN77,I,Y  
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE HDCALC(IP)
+C
+C  Calculate the calibration parameters
+C
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+      INTEGER*2 IP(5),IBUF(50),IREG(2),IPARM(2)
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1))
+      DATA ILEN/100/
+C
+C  1.  Get the command
+C
+      ICLASS=0
+      NREC=0
+      ICLCM=IP(1)
+      IF(ICLCM.EQ.0) THEN
+        IP(3)=-1
+        GOTO 990
+      ENDIF
+      REG=EXEC(21,ICLCM,IBUF,-ILEN)
+      NCHAR=MIN0(ILEN,IREG(2))
+      IEQ=ISCNC(IBUF,1,NCHAR,75B)
+      IF(IEQ.EQ.0) THEN
+        GOTO 300
+      ELSE IF(ICHCM(IBUF,IEQ+1,6HCLEAR ,1,5).EQ.0) THEN
+        KSread_FS=.FALSE.
+        KSwrite_FS=.FALSE.
+        Ksdread_FS=.FALSE.
+        Ksdwrite_FS=.FALSE.
+        KBDwrite_FS=.FALSE.
+        KBDread_FS=.FALSE.
+        GOTO 990
+      ELSE IF(JCHAR(IBUF,IEQ+1).EQ.77B) THEN
+        IP(4)=77B
+        GOTO 500
+      ENDIF
+      ICH=IEQ+1
+C
+C  no parameters
+C
+      IP(3) = -261
+      GOTO 990
+C
+C  Calculate calibration parameters
+C
+300   CONTINUE
+C
+      KSread_FS=KV13_FS.and.KV15for_FS
+      IF(KSREAD_FS) RSread_FS=1397./(RV13_FS-RV15for_FS)
+C
+      KSwrite_FS=KSread_FS.and.KV15scale_FS.and.KV15for_FS
+     &           .AND.KVw0_FS.AND.KVw8_FS
+      IF(KSwrite_FS) RSwrite_FS=
+     &   RSread_FS*(RV15scale_FS-RV15for_FS)/(RVw8_FS-RVw0_FS)
+C
+      Ksdread_FS=KV15rev_FS.and.KV15for_FS.and.KSread_FS
+      IF(Ksdread_FS) Rsdread_FS=(RV15rev_FS-RV15for_FS)*RSread_FS
+C
+      Ksdwrite_FS=KV15for_FS.and.KVrevW_FS.and.KSread_FS
+      IF(Ksdwrite_FS) Rsdwrite_FS=(RV15for_FS-RVrevW_FS)*RSread_FS
+C
+      KBDwrite_FS=KV15flip_FS.and.KV15for_FS.and.KSread_FS
+     &            .and.KVw0_FS.and.KSwrite_FS
+      IF(KBDwrite_FS) THEN
+        RBDwrite_FS=
+     &  (RV15flip_FS-RV15for_FS)*RSread_FS/2.+RVw0_FS*RSwrite_FS+350.
+        IF(WRHD_FS.EQ.2) RBDWRITE_FS=RBDWRITE_FS+698.5
+      ENDIF
+C
+      KBDread_FS=KV15flip_FS.and.KV15for_FS.and.KSread_FS
+      IF(KBDread_FS) THEN
+        RBDread_FS=
+     &  (RV15flip_FS+RV15for_FS)*RSread_FS/2.+350.
+        IF(RDHD_FS.EQ.2) RBDREAD_FS=RBDREAD_FS+698.5
+      ENDIF
+C
+C  5.  Prepare output
+C
+500   CONTINUE
+      NCH=IEQ
+      IF(NCH.EQ.0) NCH=NCHAR+1
+      NCH=ICHMV(IBUF,NCH,2H/ ,1,1)
+C
+      IF(KBDwrite_FS) NCH=NCH+IR2AS(RBDwrite_FS,IBUF,NCH,8,1)
+      NCH=MCOMA(IBUF,NCH)
+C
+      IF(KBDread_FS) NCH=NCH+IR2AS(RBDread_FS,IBUF,NCH,8,1)
+      NCH=MCOMA(IBUF,NCH)
+C
+      IF(Ksdwrite_FS) NCH=NCH+IR2AS(Rsdwrite_FS,IBUF,NCH,8,1)
+      NCH=MCOMA(IBUF,NCH)
+C
+      IF(Ksdread_FS) NCH=NCH+IR2AS(Rsdread_FS,IBUF,NCH,8,1)
+      NCH=MCOMA(IBUF,NCH)
+C
+      IF(KSwrite_FS) NCH=NCH+IR2AS(RSwrite_FS,IBUF,NCH,8,2)
+      NCH=MCOMA(IBUF,NCH)
+C
+      IF(KSread_FS) NCH=NCH+IR2AS(RSread_FS,IBUF,NCH,8,2)
+C
+      NCH=NCH-1
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS)
+      NREC=1
+C
+C  That's all
+C
+990   CONTINUE
+      IP(4)=2HQ@
+      IP(1)=ICLASS
+      IP(2)=NREC
+      RETURN
+      END

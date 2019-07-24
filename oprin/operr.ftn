@@ -1,0 +1,18 @@
+FTN77,I,Y
+$CDS ON
+      SUBROUTINE OPERR(LU,IBUFF,ITYP,IERR,NAMEC)
+C 
+C               BUILD ERROR MESSAGE 
+C 
+      DIMENSION IBUFF(60)                   !  buffer for messages
+C 
+      NCH=ICHMV(IBUFF,1,9H!! ERROR ,1,9)
+      NCH=NCH+IB2AS(IERR,IBUFF,NCH,43005B)+1
+      IF (ITYP.EQ.1) NCH=ICHMV(IBUFF,NCH,8HIN OPRIN,1,8)
+      IF (ITYP.EQ.2) THEN
+        NCH=ICHMV(IBUFF,NCH,24HIN OPRIN, TRYING TO RUN ,1,24) 
+        NCH=ICHMV(IBUFF,NCH,NAMEC,1,6)      !  move in program name
+      ENDIF
+      NCH=ICHMV(IBUFF,NCH,1H,1,1)-1         !  move in bell ding
+      CALL EXEC(2,LU,IBUFF,-NCH)            !  send out error message
+      END

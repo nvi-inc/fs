@@ -1,8 +1,0 @@
-FTN4
-        FUNCTION IVOFF(IARY,LARY) 
-        DIMENSION IVVOF(2)
-        DATA IVVOF/015446B,062100B/ 
-        IVOFF=ICHMV(IARY,LARY,IVVOF,1,4)
-        RETURN
-        END 
-        END$

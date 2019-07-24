@@ -1,0 +1,42 @@
+FTN77,I,Y  
+$CDS ON
+      LOGICAL FUNCTION KGLIN(LU,IDCB,IERR,JBUF,IL,LEN,IIBUF)
+      DIMENSION JBUF(1)
+      CHARACTER*(*) IIBUF
+C
+      LOGICAL KREAD
+      INTEGER*2 FmpRead
+C
+      LOGICAL KGOT
+      COMMON/GOT/KGOT,LENG,IERRG,JBUFG(100)
+C
+      KGLIN=.FALSE.
+      IF(.NOT.KGOT) GO TO 10
+      KGOT=.FALSE.
+      LEN=LENG
+      IERR=IERRG
+      DO 5 I=1,MIN0(IL,LENG)
+         JBUF(I)=JBUFG(I)
+5     CONTINUE
+      RETURN
+C
+10    CONTINUE
+      LEN = FmpRead(IDCB,IERR,JBUF,IL*2)
+      if(len.gt.0) then
+        if(mod(len,2).eq.1) then
+          len=len+1
+          idum=ichmv(jbuf,1,len,2h  ,1,1)
+        endif
+        len=len/2
+      endif
+      IF(LEN.LT.0) RETURN
+      KGLIN=KREAD(LU,IERR,IIBUF)
+      IF(KGLIN) RETURN
+      ILC=LEN*2
+      IFC=1
+      CALL GTFLD(JBUF,IFC,ILC,IC1,IC2)
+      IF(IC1.LE.0) GO TO 10
+      IF(ICHCM(JBUF,1,2H**,1,1).EQ.0) GO TO 10
+C
+      RETURN
+      END

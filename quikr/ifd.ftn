@@ -1,0 +1,204 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE IFD(IP)       ! IF DISTRIBUTOR CONTROL    <910324.0011>
+C 
+      DIMENSION IP(1) 
+C     INPUT VARIABLES:
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C        IP(1) - CLASS
+C        IP(2) - # REC
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C   COMMON BLOCKS USED
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+C     CALLED SUBROUTINES: GTPRM,JCHAR
+C
+C   LOCAL VARIABLES
+C        NCHAR  - number of characters in buffer
+C        ICH    - character counter
+      DIMENSION IBUF(20)                      ! Class buffer
+      DIMENSION INP(2)                        ! Input indices for IF1 & IF2
+      DIMENSION IAT(2)                        ! IF attenuator settings
+      DIMENSION IOLD(2)
+      DIMENSION IPARM(2)                      ! Parameters from GTPRM
+      DIMENSION IREG(2)                       ! Registers from EXEC calls
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1))
+C
+C  LOCAL CONSTANT
+      PARAMETER (ILEN=40)
+C
+C  PROGRAMMER: NRV
+C     LAST MODIFIED: 810207
+C
+C 
+C     1. If we have a class buffer, then we are to set the IFD. 
+C     If no class buffer, we have been requested to read the IFD. 
+C 
+      ICHOLD = -99
+      ICLCM = IP(1) 
+      IF (ICLCM.EQ.0) THEN
+        IERR = -1
+        GOTO 990
+      ENDIF
+      REG = EXEC(21,ICLCM,IBUF,-ILEN)
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B)           ! Scan for "="
+      IF (IEQ.EQ.0) GOTO 500                  ! If no parameters, read device
+      IF (JCHAR(IBUF,IEQ+1).EQ.77B) THEN
+        IP(1) = 0
+        IP(4) = 77B
+        CALL IFDIS(IP,ICLCM)
+        RETURN
+      ENDIF
+C 
+      IF (ICHCM(IBUF,IEQ+1,LTSRS,1,ILENTS).EQ.0) GOTO 600
+      IF (ICHCM(IBUF,IEQ+1,LALRM,1,ILENAL).EQ.0) GOTO 700 
+C 
+C 
+C     2. Step through buffer getting each parameter and decoding it.
+C     Command from user has these parameters: 
+C                   IFD=<atten1>,<atten2>,<input1>,<input2> 
+C     Choices are <input>: NOR, ALT.  Default NOR.
+C                 <atten>: attenuator setting, 0 to 63db. Default 0.
+C                          If number is signed, interpret as a change to
+C                          the present attenuator setting.
+C                          IF atten is MAX, go to 63 and remember old value.
+C                          IF atten is OLD, return to old value.
+C
+C     2.1 ATTEN1 AND ATTEN2, PARAMETERS 1 AND 2
+C
+      ICH = 1+IEQ
+      DO I=1,2
+        IST = ICH
+        CALL GTPRM(IBUF,ICH,NCHAR,0,PARM)
+        IF(ICHCM(IPARM,1,4HMAX ,1,3).EQ.0) THEN
+          IF(I.EQ.1) IOLD(1)=IAT1IF
+          IF(I.EQ.2) IOLD(2)=IAT2IF
+          IAT(I)=63
+        ELSE IF(ICHCM(IPARM,1,4HOLD ,1,3).EQ.0) THEN
+          IF(I.EQ.1) IAT(1)=IOL1IF_FS
+          IF(I.EQ.2) IAT(2)=IOL2IF_FS
+        ELSE
+          ICH=IST
+          CALL GTPRM(IBUF,ICH,NCHAR,1,PARM)
+          IF (JCHAR(PARM,1).EQ.54B) THEN
+            IAT(I) = 0                          ! Default
+          ELSE IF (JCHAR(PARM,1).EQ.52B) THEN
+            IF (I.EQ.1) IAT(I) = IAT1IF
+            IF (I.EQ.2) IAT(I) = IAT2IF
+          ELSE IF (IPARM.LT.0 .OR. ISCNC(IBUF,IST,ICH-1,53B).NE.0) THEN
+            IF (I.EQ.1) IAT(I) = IAT1IF + IPARM
+            IF (I.EQ.2) IAT(I) = IAT2IF + IPARM
+          ELSE
+            IAT(I) = IPARM
+          ENDIF
+          IF (IAT(I).LT.0.OR.IAT(I).GT.63) THEN
+            IERR = -200-I
+            GOTO 990
+          ENDIF
+        ENDIF
+      ENDDO
+C
+C     2.2 INPUT1 AND INPUT2 - PARAMETERS 3 AND 4
+C 
+      DO I=1,2
+        IC1 = ICH 
+        CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+        IF (JCHAR(PARM,1).EQ.54B) THEN
+          INP(I) = 0
+        ELSE IF (JCHAR(PARM,1).EQ.52B) THEN
+          IF (I.EQ.1) INP(I) = INP1IF
+          IF (I.EQ.2) INP(I) = INP2IF
+        ELSE
+          CALL IIFED(1,INP(I),IBUF,IC1,ICH-2)
+          IF (INP(I).LT.0) THEN
+            IERR = -202-I
+            GOTO 990
+          ENDIF
+        ENDIF
+      ENDDO
+C
+C     3. Finally, format the buffer for the controller.
+C     We have a valid IAT(1),IAT(2),INP(1),INP(2).
+C
+      IBUF(1) = 0
+      IBUF(2) = 2HIF
+      CALL IF2MA(IBUF(3),IAT(1),IAT(2),INP(1),INP(2))
+C
+C     4. Now plant these values into COMMON.
+C     Next send the buffer to SAM.
+C     Finally schedule BOSS to request that MATCN gets the data.
+C
+      ICHOLD = ICHECK(16)
+      ICHECK(16)=0
+      IAT1IF = IAT(1)
+      IAT2IF = IAT(2)
+      INP1IF = INP(1)
+      INP2IF = INP(2)
+      IOL1IF_FS = IOLD(1)
+      IOL2IF_FS = IOLD(2)
+C
+      ICLASS=0
+      NCH = 12
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS)
+C
+      NREC = 1
+      GOTO 800
+C 
+C 
+C     5.  This is the read device section.
+C     Fill up two class buffers, one requesting % data (mode -2), 
+C     the other ! (mode -1).
+C 
+500   IBUF(2) = 2HIF
+      ICLASS = 0
+      DO I=1,2
+        IBUF(1) = -I
+        CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      ENDDO
+C 
+      NREC = 2
+      GOTO 800
+C 
+C 
+C 
+C     6. This is the test/reset device section. 
+C 
+600   IBUF(1) = 6 
+      IBUF(2) = 2HIF
+      ICLASS=0
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      NREC = 1
+      GOTO 800
+C 
+C 
+C     7. This is the alarm query and reset request. 
+C 
+700   IBUF(1) = 7 
+      IBUF(2) = 2HIF
+      ICLASS=0
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS)
+      NREC = 1
+      GOTO 800
+C
+C
+C     8. All MATCN requests are scheduled here, and then IFDIS called.
+C
+800   CALL EXEC(23,6HMATCN ,ICLASS,NREC)
+      CALL RMPAR(IP)
+      IF (ICHOLD.NE.-99) ICHECK(16) = ICHOLD
+      IF (ICHOLD.GE.0) ICHECK(16)=MOD(ICHOLD,1000)+1
+      CALL IFDIS(IP,ICLCM)
+      RETURN
+C
+990   IP(1) = 0
+      IP(2) = 0
+      IP(3) = IERR
+      IP(4) = 2HQI
+      RETURN
+      END

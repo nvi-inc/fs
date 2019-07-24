@@ -1,0 +1,36 @@
+FTN77,I,Y
+$CDS ON
+C@VC2MA 
+      SUBROUTINE VC2MA(IBUF,LFREQ,IBW,ITP,IATU, 
+     .           IATL),CONVERT VC DATA TO MAT BUFFER C#870407:12:38#
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF(1) 
+C      - buffer to be formatted 
+      DIMENSION LFREQ(1)
+C      - frequency, ASCII characters in form fff.ff (MHz) 
+C     IBW - bandwidth code
+C     ITP - total power integrator
+C     IATU, IATL - upper, lower attenuator settings 
+C 
+C 
+C     Format the buffer for the controller. 
+C     The buffer is set up as follows:
+C                   tabfffff
+C     where each letter represents a character (half word). 
+C                   t  = TPI code number
+C                   a  = attenuator settings code number
+C                   b  = bandwidth code 
+C                   fffff = frequency, in 10s of kHz, i.e.
+C                           an implied decimal point between the
+C                           third and fourth characters for MHz.
+C 
+      IATN = 2*IATU/10 + IATL/10
+      CALL IB2AS(ITP*100+IATN*10+IBW,IBUF,1,41400B+3) 
+C                   Set the pre-fill bit and fill leading zeros 
+      CALL ICHMV(IBUF,4,LFREQ,1,3)
+      CALL ICHMV(IBUF,7,LFREQ,5,2)
+C 
+      RETURN
+      END 

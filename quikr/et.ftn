@@ -1,0 +1,88 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE ET(IP),STOP TAPE C#870115:04:42#
+C
+C     This routine sends out the appropriate commands
+C     to stop the tape.
+C
+C  WHO  WHEN    DESCRIPTION
+C  WEH  850512  CHECK RMPAR AFTER CHECKING FOR VACUUM
+C  GAG  910111  Changed LFEET to LFEET_FS in call to MA2TP.
+C
+      DIMENSION IP(1)
+      DIMENSION IREG(2)
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+      DIMENSION IBUF(10)
+      EQUIVALENCE (IREG(1),REG)
+      DATA ILEN/20/
+C
+      ICHOLD = -99
+      ICLCM = IP(1)
+      IF (ICLCM.NE.0) GOTO 110
+100   IERR = -1
+      GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.NE.0) GOTO 100
+C                   If parameters, error
+C 
+C     1. Set up buffer for ending tape, i.e. send zero speed: 
+C                   mmTP)=07200000
+C     Then turn off enable bit: 
+C                   mmTP%=0xxxxxxx
+C     and set up bypass mode. 
+C 
+      ICHOLD = ICHECK(18) 
+      ICHECK(18) = 0
+      ISPEED = 0
+C                   Put stopped indicator in common
+      IBUF(1) = -3
+      IBUF(2) = 2HTP
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS)
+      CALL EXEC(23,6HMATCN ,ICLASS,1)
+      CALL RMPAR(IP)
+      IF(IP(3).LT.0) GO TO 155
+      CALL EXEC(21,IP(1),IBUF,-ILEN)
+      CALL MA2TP(IBUF,ILOW,LFEET_FS,IFASTP,ICAPTP,ISTPTP,ITACTP,IRDYTP)
+C
+      IBUF(1) = 0
+      IBUF(2) = 2HTP
+      ICLASS = 0
+C
+      IENATP = 0
+C                   Indicate disabled in common
+      CALL EN2MA(IBUF(3),IENATP,-1,LTRKEN)
+      CALL EXEC(20,0,IBUF,-13,2HFS,0,ICLASS)
+      NREC = 1
+C
+C  VACUUM MUST BE UP
+C
+      IF(IRDYTP.NE.0) GO TO 150
+      CALL MV2MA(IBUF(3),IDIRTP,ISPEED,3H720)
+C                     Send the stop message
+C
+      CALL EXEC(20,0,IBUF,-13,2HFS,0,ICLASS)
+      NREC = 2
+C
+150   CALL EXEC(23,6HMATCN ,ICLASS,NREC)
+      CALL RMPAR(IP)
+      CALL MVDIS(IP,ICLCM)
+C
+155   CONTINUE
+      IF (ICHOLD.NE.-99) ICHECK(18) = ICHOLD
+      IF (ICHOLD.GE.0) THEN
+        ICHECK(18) = MOD(ICHOLD,1000)+1
+        KMVTP_FS=.TRUE.
+      ENDIF
+      RETURN
+C
+990   IP(1) = 0
+      IP(2) = 0
+      IP(3) = IERR
+      IP(4) = 2HQ<
+      RETURN
+      END

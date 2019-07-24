@@ -1,0 +1,28 @@
+LVDT - Narrow track head positioning by LVDT voltage
+
+Syntax:   LVDT=<cmdVw>,<cmdVr>
+          LVDT
+Response: LVDT/<cmdVw>,<cmdVr>,<actVw>,<actVr>,
+          <deltaVw>,<deltaVr>
+
+Settable parameters:
+<cmdVw>: command position voltage for write head, default is don't move
+<cmdVr>: command position voltage for read head, default is don't move
+
+Monitor-only parameters:
+<actVw>: actual position voltage for write head
+<actVr>: actual position voltage for read head
+<deltaVw>: voltage difference between actual and commanded write head position
+<deltaVr>: voltage difference between actual and commanded read head position
+
+Comments: This command is used to position the narrow track head stacks
+in voltage units. An individual head may be moved by not specifying a
+command voltage for the other head.
+
+The <delta> parameters are reported with the sign of actual minus commanded.
+
+The command positions reported by the LVDT, PASS, and STACK commands are
+consistent. See the description of the PASS command for more information.
+
+If the write head position is commanded, the auxiliary data field is set
+to reflect the commanded position, see the PASS command for more information.

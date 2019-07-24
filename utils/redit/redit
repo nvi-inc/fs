@@ -1,0 +1,19 @@
+ 
+REDIT
+ 
+Usage: REDIT {mask} {command string or command file (+f:)}
+  
+REDIT allows a user to edit a group of files specifying a mask
+and a command string or command file.
+  
+examples:
+  
+redit @.ftn
+  
+redit @.pas
+  
+redit @.mac `f/cds on/|k|er`
+  
+redit @.ftn +f:file.cmd
+  
+  

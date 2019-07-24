@@ -1,0 +1,530 @@
+FTN77,I,Y  
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C@LXPLT
+C
+c
+      SUBROUTINE LXPLT
+c     LOGEX PLOTTING ROUTINE !<870115:05:35>
+C
+C LXPLT - LOGEX plotting routine
+C
+C MODIFICATIONS:
+C
+C    DATE     WHO  DESCRIPTION
+C    820525   CAK  SUBROUTINE CREATED
+C    820526   CAK  SCRATCH FILE FOR PLOT ADDED
+C    820607   CAK  LXPLT HAS BEEN CHANGED FROM A SUBROUTINE TO A SEGMENT
+C                  PROGRAM OF LOGEX.
+C    820923   KNM  THE STRIP-CHART PLOT AND THE SINGLE SCREEN PLOT ARE
+C                  HANDLED IN THIS PROGRAM SEGMENT. LXTPL IS NOW
+C                  OBSOLETE.
+c    871130   LEF  Changed back to subroutine and added CDS.
+C
+C RESTRICTIONS:
+C
+C INPUT VARIABLES:
+C
+C OUTPUT VARIABLES:
+C
+C COMMON BLOCKS USED:
+C
+      INCLUDE LXCOM.FTNI
+C
+C SUBROUTINE INTERFACES:
+C
+C    CALLING SUBROUTINES:
+C
+C     LNFCH Utilities
+C
+C LOCAL VARIABLES:
+C
+      DIMENSION SCALE(5)
+C        - Scale values for each parameter
+C
+      DIMENSION IPLCH(5)
+C        - Plotting character of each parameter.
+C
+      LOGICAL*2 KPASS2
+C        - A SECOND PASS IS NEEDED TO HANDLE DELTAS
+C
+      DIMENSION Y2MIN(5),Y2MAX(5)
+C        - TEMPORARY ARRAYS TO SUPPORT A SECOND PASS
+C
+      DIMENSION IREG(2),IPARM(2),IVAL(2)
+C        - registers for reading  parameters from GTPRM
+C        - REG, PARM - two word variables equiv
+C
+      DIMENSION LINE(65)
+C        - Buffer for plot.
+C
+      INTEGER*4 IREC
+      CHARACTER*4 IHC
+      DIMENSION IHAS(2)
+      EQUIVALENCE (IHC,IHAS)
+      CHARACTER*11 CMAX,CMIN
+      DIMENSION IMIN(5),IMAX(5)
+C        - Contains the min,max scale values in double precision.
+C          This is done because there are no routines to convert
+C          double precision to ASCII.
+C
+      EQUIVALENCE(LTITLE(24),IMIN(1)),(LTITLE(30),IMAX(1))
+      EQUIVALENCE (CMAX,IMAX),(CMIN,IMIN)
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)),(VALUE,IVAL(1))
+C
+      DIMENSION YMIN(5),YMAX(5),IY(5)
+C        - Y-Axis minimum, maximum, plotting locations for the data
+C          points.
+C
+      DIMENSION IDCB1(656),IREC1(14),YY(5)
+      SAVE IDCB1
+C        - DCB for the first scratch file. Buffer for scratch file.
+C          Parm value to plot.
+C
+      DIMENSION IDCB2(656),ISIZ2(2)
+      SAVE IDCB2
+C        - DCB for second scratch file. File size.
+C
+      DIMENSION LTITLE(40)
+      EQUIVALENCE (XX,IREC1( 1)),(YY(1),IREC1(5))
+      DOUBLE PRECISION XX,XMIN,XMAX,XA,XB
+C        - Log time in terms of days (& fractions of days).
+C          X-Axis minimum, maximum. Log day. Log minutes.
+C
+C
+C
+      DATA LTITLE/78,'      ,               [            ( )] Sc (',
+     .'           ,            ),  Ch < >'/
+C
+C INITIALIZED VARIABLES:
+C
+      DATA IPLCH/2H1 ,2H2 ,2H3 ,2H4 ,2H5 /
+C       - Plot characters
+C
+      DATA SCALE/1.149253,4*0.0/
+C
+C
+C **************************************************************
+C
+C 1. Create and open scratch files.
+C
+C **************************************************************
+C
+C
+      NC = IB2AS(IHGT,IHAS,1,100004B)
+      ID = FmpOpen(IDCB1,IERR,'#LOGE1::LOG:3:25:128','rwc',5)
+      IF (IERR.LT.0.AND.IERR.NE.-2) GO TO 1100
+      ID = FmpOpen (IDCB1,IERR,'#LOGE1::LOG','rwo',5)
+      IF (IERR.LT.0) GO TO 1100
+      ID = FmpOpen(IDCB2,IERR,'#LOGE2::LOG:2:' // IHC(1:NC) // ':65',
+     .   'rwc',5)
+      IF (IERR.LT.0.AND.IERR.NE.-2) GO TO 1100
+      ID = FmpOpen (IDCB2,IERR,'#LOGE2::LOG','rwo',5)
+      IF (IERR.LT.0) GO TO 1100
+C
+C
+C **************************************************************
+C
+C 2. Make sure a PARM and a COMMAND command has been specified.
+C    If that's ok, initialize variables & arrays.
+C
+C **************************************************************
+C
+C
+      IF(NCMD.EQ.0.OR.NUMP.EQ.0) GOTO 1200
+      IMAGW=(IWIDTH+1)/2
+      NPLOT=0
+      NLOUT=0
+      IOUT=0
+      CALL IFILL(LINE,1,130,40B)
+      XMIN=1.D20
+      XMAX=-1.D20
+      DO 200 I=1,NUMP
+        YMIN(I)=1.D20
+        YMAX(I)=-1.D20
+200   CONTINUE
+C
+C
+C **************************************************************
+C
+C 3. Call LXGET to read log entries.
+C
+C **************************************************************
+C
+C
+300   XX=0.D0
+      CALL LXGET
+C
+C If EOF, go check for a sufficient number of points to plot.
+C
+      IF(LSTEND.EQ.-1.OR.ILEN.LT.0) GOTO 600
+C
+C If a break was hit, go purge scratch files & return.
+C
+      IF(ICODE.EQ.-1) GOTO 1200
+C
+C Count the number of entries & lines outputted.
+C
+C
+      NPLOT=NPLOT+1
+      NLOUT=NLOUT+1
+C
+C Pick up the decoded time from common and check XX for min & max
+C time scale.
+C
+      XA=ITL1
+      XB=ITL2
+      XC=IT3
+      XX=XA+XB/1440.D0+XC/86400.D0
+      IF(XX.LT.XMIN) XMIN=XX
+      IF(XX.GT.XMAX) XMAX=XX
+C
+C
+C **************************************************************
+C
+C 4. Get specified parm store the value
+C
+C **************************************************************
+C
+C
+      DO 440 N= 1,NUMP
+C
+C  Skip over the time field plus the number of characters in NCOMND
+C  to begin the first character of the PARM at ICH.
+C
+         ICH = 11+NCOMND(1)
+C
+         IF(NPARM(N).EQ.1) GOTO 410
+C
+C  If more than one PARM is specified, the following DO loop will
+C  move ICH to the first character of that particular PARM.
+C
+         DO 400 I=1,NPARM(N)-1
+           ICH = 1 + ISCNC(IBUF,ICH,NCHAR,54B)
+400      CONTINUE
+410      CALL GTPRM(IBUF,ICH,NCHAR,2,PARM,IERR)
+         IF(IERR.EQ.0) GOTO 420
+         GOTO 440
+420      VALUE = PARM
+C
+C  Determine if the logarithm scale is to be used
+C
+         IF (LLOGX(N).NE.2HDB) GOTO 430
+         IF (VALUE.LE.0) VALUE=1.0
+         VALUE=10.0*ALOGT(VALUE)
+C
+430   CONTINUE
+C
+C Store the value for later plotting & check Y scale min & max.
+C
+      YY(N)=VALUE
+      IF(YY(N).LT.YMIN(N)) YMIN(N)=YY(N)
+      IF(YY(N).GT.YMAX(N)) YMAX(N)=YY(N)
+440   CONTINUE
+C
+C
+C ************************************************************
+C
+C 5. Write scratch record & return for another set of values.
+C
+C ************************************************************
+C
+C
+      ID = FmpWrite(IDCB1,IERR,XX,26)
+      IF (IERR.LT.0) GO TO 1100
+      GO TO 300
+C
+C
+C ************************************************************
+C
+C 6. Check for a sufficient number of points to plot.
+C
+C ************************************************************
+C
+C
+600   CONTINUE
+      ID = FmpRewind(IDCB1,IERR)
+      IF (NPLOT.GT.1) GO TO 700
+      WRITE (LUDSP,9100)
+9100  FORMAT(" No plot points - plot deleted.")
+      GO TO 1200
+C
+C
+C **************************************************************
+C
+C 7. Check for auto-scaling
+C
+C **************************************************************
+C
+C
+700   CONTINUE
+      XA=ITS1
+      XB=ITS2
+      IF(ITS1.NE.0) XMIN=XA+XB/1440.D0
+      XA=ITE1
+      XB=ITE2
+      IF(ITE1.NE.9999.AND.ITE1.NE.0) XMAX=XA+XB/1440.D0
+      KPASS2=.FALSE.
+      DO I=1,NUMP
+        KPASS2=KPASS2.OR.SDELTA(I).NE.0.0
+      ENDDO
+      IF(KPASS2) THEN
+        DO I=1,NUMP
+          Y2MIN(I)=YMIN(I)
+          Y2MAX(I)=YMAX(I)
+          YMIN(I)=1E20
+          YMAX(I)=-1E20
+        ENDDO
+        ID = FmpRewind(IDCB1,IERR)
+        DO I=1,NPLOT
+          ID = FmpRead(IDCB1,IERR,XX,26)
+          DO N=1,NUMP
+            IF(SDELTA(N).LT.0..AND.YY(N).LT.Y2MAX(N)+SDELTA(N)) THEN
+              YY(N)=Y2MAX(N)
+            ELSE IF(SDELTA(N).GT.0..AND.YY(N).GT.Y2MIN(N)+SDELTA(N))THEN
+              YY(N)=Y2MIN(N)
+            ENDIF
+            IF(YY(N).LT.YMIN(N)) YMIN(N)=YY(N)
+            IF(YY(N).GT.YMAX(N)) YMAX(N)=YY(N)
+          ENDDO
+        ENDDO
+        ID = FmpRewind(IDCB1,IERR)
+      ENDIF
+      DO 710 I=1,NUMP
+      IF(SMAX(I).NE.SMIN(I)) GOTO 710
+      SMAX(I)=YMAX(I)
+      SMIN(I)=YMIN(I)
+710   CONTINUE
+      IF(IKEY.EQ.6) SIZE=IWIDTH-11
+      IF(IKEY.EQ.13) SIZE=IHGT-1
+      SCALEX=(XMAX-XMIN)/FLOAT(IWIDTH-1)
+      DO 720 I=1,NUMP
+        SCALE(I)=(SMAX(I)-SMIN(I))/SIZE
+720   CONTINUE
+C
+C
+C
+C **************************************************************
+C
+C 8. Write out COMMAND and PARM specifications as a PLOT header
+C
+C **************************************************************
+C
+C
+C Write up to 5 plot titles giving Y-information.
+C Write one line giving X-information.
+C
+      DO 800 I=1,NUMP
+        CALL ICHMV(LTITLE(2),1,LOGNA,1,6)
+        CALL ICHMV(LTITLE(2),8,LSTATN,1,8)
+        CALL ICHMV(LTITLE(2),24,LCOMND,1,12)
+        ID = IB2AS(NPARM(I),LTITLE(2),37,1)
+      RLG10=0.0
+      IF(SMIN(I).NE.0.0) RLG10=LOG10(ABS(SMIN(I)))
+      IF(RLG10.GE.0.0) THEN
+        ILG10=RLG10+1
+        IPREC=MAX(6-ILG10,0)
+      ELSE
+        ILG10=RLG10-1
+        IM=9
+        IF(SMIN(I).LT.0) IM=8
+        IPREC=MIN(5-ILG10,IM)
+      ENDIF
+      CALL IFILL(IMIN,1,11,2H  )
+      CALL JR2AS(SMIN(I),IMIN,1,11,IPREC)
+C
+      RLG10=0.0
+      IF(SMAX(I).NE.0.0) RLG10=LOG10(ABS(SMAX(I)))
+      IF(RLG10.GE.0.0) THEN
+        ILG10=RLG10+1
+        IPREC=MAX(6-ILG10,0)
+      ELSE
+        ILG10=RLG10-1
+        IM=9
+        IF(SMIN(I).LT.0) IM=8
+        IPREC=MIN(5-ILG10,IM)
+      ENDIF
+      CALL IFILL(IMAX,1,11,2H  )
+      CALL JR2AS(SMAX(I),IMAX,1,11,IPREC)
+C
+        CALL ICHMV(LTITLE(2),77,IPLCH(I),1,1)
+        CALL LXWRT(LTITLE(2),LTITLE(1))
+        IF(ICODE.EQ.-1) GOTO 1200
+800   CONTINUE
+      L6=1H
+      IF(IKEY.EQ.13) GOTO 900
+C
+C Write a blank line, then a line of dashes for the strip-chart.
+C
+      CALL LXWRT(LINE,IWIDTH)
+      CALL IFILL(LINE,12,IWIDTH-12,2H--)
+      CALL LXWRT(LINE,IWIDTH)
+      GOTO 1000
+C
+C
+C **************************************************************
+C
+C 9. Reformat X-limits to DDD-HHMM.  Make the plot borders.
+C
+C **************************************************************
+C
+C
+900   CALL IFILL(LINE,1,130,40B)
+      NCH=1
+      CALL LXHMS(XMIN,LINE,NCH)
+      NCH=IWIDTH-7
+      CALL LXHMS(XMAX,LINE,NCH)
+      CALL LXWRT(LINE,NCH)
+      IF(ICODE.EQ.-1) GOTO 1200
+C
+C Clear page image
+C Write <|> and <-> on plot borders
+C
+      CALL IFILL(LINE,1,IMAGW*2,40B)
+      LINE(1)=2H|
+      LINE(IMAGW)=2H |
+      DO 910 I=2,IHGT-1
+      IREC = I
+      ID = FmpSetPosition(IDCB2,IERR,IREC,-IREC)
+      ID = FmpWrite(IDCB2,IERR,LINE,IMAGW*2)
+      IF (IERR.LT.0) GO TO 1100
+910   CONTINUE
+      CALL IFILL(LINE,1,IMAGW*2,2H--)
+      IREC = 1
+      ID = FmpSetPosition(IDCB2,IERR,IREC,-IREC)
+      ID = FmpWrite(IDCB2,IERR,LINE,IMAGW*2)
+      IF (IERR.LT.0) GO TO 1100
+      IREC = IHGT
+      ID = FmpSetPosition(IDCB2,IERR,IREC,-IREC)
+      ID = FmpWrite(IDCB2,IERR,LINE,IMAGW*2)
+      IF (IERR.LT.0) GO TO 1100
+C
+C
+C **************************************************************
+C
+C 10. Plot the points for the plot depending on the type
+C     specified.
+C
+C **************************************************************
+C
+C
+1000  CALL IFILL(LINE,1,130,40B)
+      DO 1070 I=1,NPLOT
+        ID = FmpRead(IDCB1,IERR,XX,26)
+        IF(IFBRK(IDUM).LT.0) ICODE=-1
+        IF(ICODE.EQ.-1) GOTO 1200
+        IF (IERR.LT.0) GO TO 1100
+C
+C Determine the X-position for the single screen plot
+C
+        IX=(XX-XMIN)/SCALEX+1.
+        IF (IX.LT.1) IX=1
+        IF (IX.GT.IWIDTH) IX=IWIDTH
+C
+C Determine the Y-positions for both plots.
+C
+        DO 1010 J=1,NUMP
+          IY(J)=(YY(J)-SMIN(J))/SCALE(J)+1.
+1010    CONTINUE
+C
+C Make and write the strip chart plot.
+C
+        IF(IKEY.NE.6) GOTO 1030
+        NCH=1
+        CALL LXHMS(XX,LINE,NCH)
+        CALL ICHMV(LINE,11,2H| ,1,1)
+        CALL IFILL(LINE,12,IWIDTH-12,40B)
+        CALL ICHMV(LINE,IWIDTH,2H| ,1,1)
+        DO 1020 K=1,NUMP
+          IF(IY(K).LT.1) IY(K)=1
+          IF(IY(K).GT.IWIDTH) IY(K)=SIZE
+          IQC=JCHAR(LINE,IY(K)+11)
+          IF(IQC.NE.40B.AND.IQC.NE.174B) GOTO 1015
+          CALL ICHMV(LINE,IY(K)+11,IPLCH(K),1,1)
+          GOTO 1020
+1015      CALL ICHMV(LINE,IY(K)+11,2H= ,1,1)
+1020    CONTINUE
+        CALL LXWRT(LINE,IWIDTH)
+        IF(ICODE.EQ.-1) GOTO 1200
+        GOTO 1070
+C
+C The points for the single screen plot are written to the second
+C scratch file here.
+C
+1030    DO 1060 N=1,NUMP
+          IF(IY(N).LT.1) IY(N)=1
+          IF(IY(N).GT.IHGT) IY(N)=IHGT
+          IREC = IHGT + 1 - IY(N)
+          ID = FmpSetPosition(IDCB2,IERR,IREC,-IREC)
+          ID = FmpRead(IDCB2,IERR,LINE,IMAGW*2)
+          IF(IERR.LT.0) GOTO 1100
+          IQC=JCHAR(LINE(1),IX)
+          IF(IQC.NE.40B.AND.IQC.NE.174B.AND.IQC.NE.55B) GOTO 1040
+          CALL ICHMV(LINE(1),IX,IPLCH(N),1,1)
+          GOTO 1050
+1040      CALL ICHMV(LINE(1),IX,2H= ,1,1)
+1050      CONTINUE
+          IREC = IHGT+1-IY(N)
+          ID = FmpSetPosition(IDCB2,IERR,IREC,-IREC)
+          ID = FmpWrite(IDCB2,IERR,LINE,IMAGW*2)
+          IF(IERR.LT.0) GOTO 1100
+1060    CONTINUE
+1070  CONTINUE
+C
+      IF(IKEY.EQ.13) GOTO 1080
+      CALL IFILL(LINE,1,130,40B)
+      CALL IFILL(LINE,12,IWIDTH-12,2H--)
+      CALL LXWRT(LINE,IWIDTH)
+      GOTO 1200
+C
+C The Single-Screen plot scratch file is written out here
+C
+1080  DO 1090 I=1,IHGT
+        IREC = I
+        ID = FmpSetPosition(IDCB2,IERR,IREC,-IREC)
+        ID = FmpRead(IDCB2,IERR,LINE,IMAGW*2)
+        LEN = IFLCH(LINE,IMAGW*2)
+        IF(IFBRK(IDUM).LT.0) ICODE=-1
+        IF(ICODE.EQ.-1) GOTO 1200
+        IF (IERR.LT.0) GO TO 1100
+        CALL LXWRT(LINE,LEN)
+        IF(ICODE.EQ.-1) GOTO 1200
+1090  CONTINUE
+      GOTO 1200
+C
+C
+C
+C **************************************************************
+C
+C 11. Errors encountered while using the scratch files are
+C     written here.
+C
+C **************************************************************
+C
+C
+1100  CONTINUE
+      WRITE (LUDSP,9300) IERR
+9300  FORMAT(" Error ",I3," in scratch file - Plot deleted.")
+C
+C
+C **************************************************************
+C
+C 12. Purge the scratch files.
+C
+C **************************************************************
+C
+C
+1200  CONTINUE
+      CALL FmpClose(IDCB1,IERR)
+      IERR = FmpPurge('/LOG/#LOGE1')
+      CALL FmpClose(IDCB2,IERR)
+      IERR = FmpPurge('/LOG/#LOGE2')
+      ILXGET=0
+      IF(NUMP.EQ.0) WRITE(LUUSR,9400)
+9400  FORMAT(" PARM Command must be issued in order to plot")
+      IF(NCMD.EQ.0) WRITE(LUUSR,9500)
+9500  FORMAT(" One COMMAND Command must be issued in order to plot")
+      IF(NCMD.EQ.0.OR.NUMP.EQ.0) ICODE=-1
+      RETURN
+C     GO TO IRTN4
+      END

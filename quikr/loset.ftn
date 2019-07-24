@@ -1,0 +1,115 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C@LOSET 
+C 
+      SUBROUTINE LOSET(IP),LO SETUP C#870115:04:52# 
+C 
+C     LOSET sets up the common array FREQLO 
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - CLASS
+C        IP(2) - # REC
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C   COMMON BLOCKS USED
+C 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 
+C     CALLED SUBROUTINES: GTPRM,JCHAR 
+C 
+C   LOCAL VARIABLES 
+C 
+C        NCHAR  - number of characters in buffer
+C        ICH    - character counter 
+      DIMENSION LOHLD(4)
+C               - temporary holder for decoded LO frequencies 
+C        INUM   - number of LO freqs input
+      DIMENSION IBUF(20)
+C               - class buffer
+C        ILEN   - length of IBUF, chars 
+      DIMENSION IPARM(2)
+C               - parameters returned from GTPRM
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+C 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 
+C  INITIALIZED VARIABLES
+C 
+      DATA ILEN/40/ 
+C 
+C  PROGRAMMER: NRV & MAH
+C     CREATED: 820310 
+C 
+C 
+C     1. If we have a class buffer, then we are to set the
+C     variables in common for PCALR to use. 
+C 
+      ICHOLD = -99
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+      IERR = -1 
+      GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.EQ.0) GOTO 120
+      IF (IEQ.EQ.NCHAR) GOTO 500
+C                   If no parameters, this is an error. 
+      IF (JCHAR(IBUF,IEQ+1).NE.77B) GOTO 210
+      IP(1) = 0 
+      IP(4) = 77B 
+120   CALL LODIS(IP,ICLCM)
+      RETURN
+C 
+C 
+C 
+C     2. Step through buffer getting each parameter and decoding it.
+C     Command from user has these parameters: 
+C        LO=<LO1nor>,<LO2nor>,<LO1alt>,<LO2alt> 
+C     Choices are <LO1nor>: LO freq in MHz, no default
+C                          same for all parameters
+C 
+C     2.1  ALL PARMS DECODED IN LOOP
+C 
+210   CONTINUE
+      ICH = IEQ+1 
+      INUM = 0
+      DO 220 I = 1,4
+          LOHLD(I) = 0
+          CALL GTPRM(IBUF,ICH,NCHAR,2,PARM,IERR)
+          IF (JCHAR(PARM,1).EQ.54B) GOTO 220
+          IF (PARM.GT.0.0.AND.IERR.EQ.0) GOTO 230 
+          IERR = -201 
+          GOTO 990
+230       LOHLD(I) = PARM 
+          INUM = INUM+1 
+220       CONTINUE
+      IF (INUM.EQ.0) GOTO 500 
+C             error if no input after "=" 
+C 
+C     Set up the common array now 
+C 
+400   FREQLO(1,1) = LOHLD(1)
+      FREQLO(2,1) = LOHLD(2)
+      FREQLO(1,2) = LOHLD(3)
+      FREQLO(2,2) = LOHLD(4)
+      GOTO 990
+500   CONTINUE
+      IERR = -101 
+990   IP(1) = 0 
+      IP(2) = 0 
+      IP(3) = IERR
+      IP(4) = 2HQ*
+      RETURN
+      END 

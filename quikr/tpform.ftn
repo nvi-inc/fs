@@ -1,0 +1,121 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE TPFORM(IP),SPECIFY TAPE FORMAT C#870115:04:35#
+C 
+C   TPFORM reads the a priori head offsets for each tape pass number
+C 
+C     INPUT VARIABLES:
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C        IP(1) - class (called ICLASS internally)
+C        IP(2) - # rec
+C        IP(3) - error
+C        IP(4) - who we are 
+C 
+C   LOCAL CONSTANTS
+      PARAMETER (MAXPASS = 100)              ! Maximum head pass number
+      PARAMETER (MAXOFF = 4000)              ! Maximum head offset
+      PARAMETER (MINOFF = -4000)             ! Minimum head offset
+      PARAMETER (ILEN = 80)                  ! Size of local class buffer
+C
+C   COMMON BLOCKS USED
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C       contains array ITAPOF
+C
+C     CALLED SUBROUTINES: GTPRM,ISCNC
+C
+C   LOCAL VARIABLES
+C        NCHAR  - number of characters in buffer
+C        ICH    - character counter
+      DIMENSION IBUF(40)            !  class buffer
+      LOGICAL PASSNO
+C               - keeps track of whether parameter is a pass # or head offset
+      DIMENSION IPARM(2)      !  parameters returned from GTPRM
+      DIMENSION IREG(2)             !  registers from EXEC calls
+      DIMENSION IPASS(20),IOFFSET(20)
+C               - paired pass numbers and head offsets
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 
+C  PROGRAMMER: LAR     LAST MODIFIED: <910329.1842>
+C 
+C     1. Set output parameters (except error flag) and read from input
+C     class into local buffer IBUF.
+C 
+      ICLCM = IP(1) 
+      ICLASS = 0
+      IP(1)=ICLASS
+      IP(2)=0
+      IP(4)=2HQ^
+      IF (ICLCM.EQ.0) THEN
+        IP(3) = -1
+        RETURN
+      ENDIF
+      REG = EXEC(21,ICLCM,IBUF,-ILEN)
+      NCHAR = IREG(2) 
+C           Scan for "="; its absence indicates a request to see
+C             the contents of the ITAPOF array.
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+      IF (IEQ.EQ.0) THEN
+        NCHAR = 1
+        NREC = 0
+        do i=1,maxpass
+          if (ITAPOF(I).GE.MINOFF .AND. ITAPOF(I).LE.MAXOFF) then
+            NCHAR = ICHMV(IBUF,NCHAR,2H  ,1,2)
+            NCHAR = NCHAR + IB2AS(I,IBUF,NCHAR,100003B)
+            NCHAR = ICHMV(IBUF,NCHAR,2H->,1,2)
+            NCHAR = NCHAR + IB2AS(ITAPOF(I),IBUF,NCHAR,100005B)
+            IF (NCHAR.GT.58) THEN
+              CALL EXEC(20,0,IBUF,1-NCHAR,2HFS,0,ICLASS)
+              NCHAR = 1
+              NREC = NREC + 1
+            ENDIF
+          endif
+        enddo
+        IF (NCHAR.GT.1) THEN
+          CALL EXEC(20,0,IBUF,1-NCHAR,2HFS,0,ICLASS)
+          NREC = NREC + 1
+        ENDIF
+        IP(1)=ICLASS
+        IP(2)=NREC
+        IP(3)=0
+        RETURN
+      ENDIF
+C 
+C     2. Step through buffer getting each parameter and decoding it.
+C     Command from user has these parameters: 
+C           TAPEFORM=<pass>,<offset>,<pass>,<offset>, ...
+C 
+      ICH = 1+IEQ
+      DO N=1,40
+        M=(N+1)/2
+        PASSNO = (M+M.NE.N)
+        CALL GTPRM(IBUF,ICH,NCHAR,1,PARM,IERR)
+        IF (IPARM(1).LE.MINOFF .OR. IPARM(1).GT.MAXOFF .OR.  (PASSNO
+     ^     .AND. (IPARM(1).GT.MAXPASS .OR. IPARM(1).LE.0) ) ) THEN
+          IP(3) = -201
+          RETURN
+        ENDIF
+        IF (PASSNO) THEN
+          IPASS(M)=IPARM(1)
+        ELSE
+          IOFFSET(M)=IPARM(1)
+        ENDIF
+        IF (ICH.GT.NCHAR) THEN             ! Last parameter
+          IF (PASSNO) THEN                     ! Abnormal end; error
+            IP(3) = -3
+          ELSE                                 ! Normal end of list
+            DO I=1,M
+              ITAPOF(IPASS(I)) = IOFFSET(I)
+            ENDDO
+            IP(3) = 0
+          ENDIF
+          RETURN
+        ENDIF
+      ENDDO               
+      IP(3) = -42          ! Get here only if line is unusually long
+      RETURN
+      END 

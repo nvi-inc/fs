@@ -1,0 +1,21 @@
+FTN77,I,Y  
+$CDS ON
+      SUBROUTINE PSETR(IBUF,ROTATI) 
+      DIMENSION IBUF(1),ROTATI(2,2) 
+C 
+C  SET virtual window rotation matrix 
+C 
+      COMMON/PPLOT/ICHARS,IWIDX,IWIDY,
+     +             IXMIN,IXMAX,IYMIN,IYMAX, 
+     +             XMIN,XMAX,YMIN,YMAX, 
+     +             ROTAT(2,2) 
+C 
+C     WRITE(1,9956) ROTATI                                               DEBUG
+C9956  FORMAT(" PSETR: ROTATI ",4F10.3)                                  DEBUG
+C 
+      ROTAT(1,1)=ROTATI(1,1)
+      ROTAT(2,1)=ROTATI(2,1)
+      ROTAT(1,2)=ROTATI(1,2)
+      ROTAT(2,2)=ROTATI(2,2)
+      RETURN
+      END 

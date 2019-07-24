@@ -1,0 +1,14 @@
+FTN77,I,Y  
+$CDS ON
+      SUBROUTINE PPPNT(IBUF,IX,IY,IC) 
+      DIMENSION IBUF(1) 
+C 
+C  Put POiNT on plotter coordinates 
+C 
+C      WRITE(1,9956) IX,IY,IC                                            DEBUG
+C9956  FORMAT(" PPPNT: IX,IY,IC ",3I7)                                   DEBUG
+C 
+      CALL PP2CH(IX,IY,IXY) 
+      IDUM=ICHMV(IBUF,IXY,IC,2,1) 
+      RETURN
+      END 

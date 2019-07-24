@@ -1,0 +1,16 @@
+PROC - Open new schedule procedure library
+
+Syntax:   PROC=<name>
+Response: PROC/<name>
+
+Settable parameters:
+<name>: name of procedure file to open. If no directory path is
+        specified, /PROC is assumed. If no extension is specified,
+        .PRC is assumed. This procedure library is opened as the
+        schedule library, and all procedure names are read.
+
+Monitor-only parameters: none
+
+      Comments: When a new procedure library is opened, any
+time-scheduled procedures from the previous procedure library are
+cancelled. See section 8.0 of the SNAP Language manual for detail.

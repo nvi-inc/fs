@@ -1,0 +1,111 @@
+FTN77,I,Y
+$CDS ON
+        FUNCTION LPROP(NAME,LU,I)                 !   <910329.2123>
+C 
+C 1.  NAME PROGRAM SPECIFICATION
+C 
+C 1.1.   LPROP
+C               LOAD PARAMETERIZE, RUN AND IF NOT THE MONITOR OFF THE 
+C       REQUESTED PROGRAM FOR THE CALLER
+C 
+C 2.1.   CALLING SEQUENCE: CALL LPROP(NAME,IP,LU,I) 
+        DIMENSION NAME(32)
+C 
+C 3.  LOCAL VARIABLES 
+C 
+        DIMENSION IP(5),IRUNN(7),IPx(5)
+        DIMENSION IBUF2(36)
+C       IRUNN   - RUNNING MESSAGE TEXT
+C       IRGA    - CONTENTS OF A REG WHERE REG WAS RETURNED FROM FUNCTION
+C                 CALL TO A ROUTINE
+C       IRGB    - CONTENTS OF B-REG WHERE REG WAS RETURNED FROM FUNCTION
+C                 CALL TO A ROUTINE
+        DIMENSION IREG(2)
+C       IREG    - DUMMY REGISTER RETREIVAL AID
+        EQUIVALENCE (REG,IREG(1),IRGA),(IREG(2),IRGB)
+        EQUIVALENCE (IP(2),IP2),(IP(3),IP3),(IP(4),IP4),(IP(5),IP5)
+        character*5 pgmchs,dirnm*6,pgmfd*63,blank*1,popt*1,slash*1
+        character*20 bl2
+        integer*2 irun(40),trimlen
+        character*80 runstring
+        character*5 string
+        equivalence (irun(1),runstring)
+C
+C 5.  INITIALIZED VARIABLES
+C
+        DATA IRUNN/2HRU,2HNN,2HIN,2HG:,2H  ,2H  ,2H  /
+        data dirnm/'/fsexe'/, blank/' '/, popt/' '/, slash/'/'/
+C       IRUNN   - TEXT FOR "RUNNING: "MESSAGE HEADER
+C
+C 6.  PROGRAMMER: LEE N. FOSTER
+C
+C     PROGRAM STRUCTURE
+C
+C               6.1  INITIALIZE VARIABLES
+      IERR=0
+      ILID=IDGET(NAME)              !  Check for presence of ID segment
+C
+C               LOAD PROGRAM INTO REGION IF NEEDED
+C
+      IF (ILID.EQ.0) THEN
+        call intoch(name,5,pgmchs,ierr)
+        pgmfd = dirnm // slash // pgmchs
+        bl2 = PGMCHS
+        call FmpRpProgram(pgmfd,bl2,popt,ierr)
+        IF (IERR.EQ.-6) THEN
+          PGMFD= '/STEXE/'//PGMCHS
+          BL2  = PGMCHS
+          IERR = 0
+          CALL FMPRPPROGRAM(PGMFD,BL2,POPT,IERR)
+          if(ierr.eq.-6) then
+             pgmfd='/programs/'//pgmchs
+             bl2=pgmchs
+             ierr=0
+            call fmprpprogram(pgmfd,bl2,popt,ierr)
+          endif
+        ENDIF
+      ENDIF
+C
+C               IF AN ERROR SKIP OUT THROUGH ERROR EXIT
+C
+      IF (IERR.LT.0 .OR. IERR.EQ.14) THEN
+        LPROP = IERR
+        RETURN
+      ENDIF
+C
+C               IF PRESENT TELL RUNNING
+C
+      IF (ILID.NE.0) THEN
+        IDUM=ICHMV(IRUNN,10,NAME,1,5)
+        CALL EXEC(2,LU,IRUNN,-14)
+      ENDIF
+C
+      CALL IFILL(IP,1,10,0)               !  Clear parameters
+      CALL IGPRM(IP,NAME(6),NAME(11),LU)  !  Create parameters for this run
+C
+C               NOW RUN IT WITH THESE PARAMETERS
+C
+      RUNSTRING='RU,'
+      CALL HOL2CHAR(NAME,1,6,RUNSTRING(4:9))
+      INEXT=TRIMLEN(RUNSTRING)+1
+      DO II=1,5
+        RUNSTRING(INEXT:INEXT)=','
+        INEXT=INEXT+1
+        IF(IP(II).NE.0) CALL IntString(IP(II),RUNSTRING(INEXT:INEXT+6))
+        INEXT=TRIMLEN(RUNSTRING)+1
+      ENDDO
+      CALL EXEC(3,2000B+LU,2HPR,2HOM,2HT )
+      CALL EXEC(23,NAME,IP(1),IP2,IP3,IP4,IP5)
+c     CALL EXEC(23,NAME,IP(1),IP2,IP3,IP4,IP5,IRUN,INEXT/2)
+      CALL EXEC(3,2000B+LU,2HOP,2HRI,2HN )
+C
+C               GET PROGRAM STATUS
+C
+      ISTAT=IPGST(NAME)
+      IERR = MIN(IERR,0)
+C
+C               SET ERROR RETURN AND EXIT NOW
+C
+      LPROP=IERR
+      RETURN
+      END

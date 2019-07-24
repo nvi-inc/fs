@@ -1,0 +1,23 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE WAKOP(IP),WAKE UP OPERATOR C#870115:04:37# 
+      DIMENSION IP(1) 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+      DIMENSION LMSG(30)
+      DATA LMSG/15446B,2HdC,10*2H  ,2HWA,2HKE,2H U,2HP ,2H!!,2H!!,
+     .          10*2H  ,15446B,2Hd@/
+      DATA NMSG/60/ 
+      CALL BELL(LU,1) 
+      CALL BELL(LU,0) 
+      CALL BELL(LU,1) 
+      CALL BELL(LU,0) 
+      ICLASS = 0
+      CALL EXEC(20,0,LMSG,-NMSG,2HFS,0,ICLASS)
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = 0 
+      IP(4) = 2HQO
+      IP(5) = 0 
+      RETURN
+      END 

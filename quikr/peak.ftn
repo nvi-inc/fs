@@ -1,0 +1,191 @@
+FTN77,I,Y  
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE PEAK(IP)
+C
+C  Peak up on tape drive read resposne
+C
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+      INTEGER*2 IP(5),IBUF(50),IREG(2),IPARM(2)
+      REAL*4 MPER
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1))
+      DATA ILEN/100/
+C
+      ICHOLD=-99
+      ICLASS=0
+      NREC=0
+C
+C  1.  Get the command
+C
+      ICLCM=IP(1)
+      IF(ICLCM.EQ.0) THEN
+        IP(3)=-1
+        GOTO 990
+      ENDIF
+      REG=EXEC(21,ICLCM,IBUF,-ILEN)
+      NCHAR=MIN0(ILEN,IREG(2))
+      IEQ=ISCNC(IBUF,1,NCHAR,75B)
+      IF(IEQ.EQ.0) THEN
+        GOTO 500
+      ELSE IF(JCHAR(IBUF,IEQ+1).EQ.77B) THEN
+        IP(4)=77B
+        GOTO 600
+      ENDIF
+      ICH=IEQ+1
+C
+C  2. Get parameters.
+C
+C   Number of samples
+C
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM,IERR)
+      IF(JCHAR(PARM,1).EQ.54B) THEN
+        NSAMP=3
+      ELSE IF(JCHAR(PARM,1).EQ.52B) THEN
+        NSAMP=NSAMPPK_FS
+      ELSE IF(IERR.EQ.0) THEN
+        NSAMP=IPARM
+      ELSE
+        IP(3)=-241
+        GOTO 990
+      ENDIF
+C
+C   Number of iterations
+C
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM,IERR)
+      IF(JCHAR(PARM,1).EQ.54B) THEN
+        ITER=1
+      ELSE IF(JCHAR(PARM,1).EQ.52B) THEN
+        ITER=ITERPK_FS
+      ELSE IF(IERR.EQ.0) THEN
+        ITER=IPARM
+      ELSE
+        IP(3)=-242
+        GOTO 990
+      ENDIF
+C
+C   Head to move
+C
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM)
+      IF(ICHCM(PARM,1,2HR ,1,1).EQ.0) THEN
+        IHD = 2
+      ELSE IF(ICHCM(PARM,1,2HW ,1,1).EQ.0) THEN
+        IHD = 1
+      ELSE IF(JCHAR(PARM,1).EQ.52B) THEN
+        IHD=IHDPK_FS
+      ELSE IF (JCHAR(PARM,1).EQ.54B) THEN
+        IHD = 2
+      ELSE
+        IP(3) = -243
+        GOTO 990
+      ENDIF
+C
+C   Minimum peak voltage
+C
+      CALL GTPRM(IBUF,ICH,NCHAR,2,PARM,IERR)
+      IF(JCHAR(PARM,1).EQ.54B) THEN
+        VMIN=.2
+      ELSE IF(JCHAR(PARM,1).EQ.52B) THEN
+        VMIN=VMINPK_FS
+      ELSE IF(IERR.EQ.0) THEN
+        VMIN=PARM
+      ELSE
+        IP(3)=-244
+        GOTO 990
+      ENDIF
+C
+C  3. Plant values in COMMON
+C
+300   CONTINUE
+      IHDPK_FS=IHD
+      ITERPK_FS=ITER
+      NSAMPPK_FS=NSAMP
+      VMINPK_FS=VMIN
+      GOTO 990
+C
+C  5.  Find peak
+C
+500   CONTINUE
+      KPEAKV_FS=.FALSE.
+      IF(ISPEED.EQ.0) THEN ! tape must be moving
+        IP(3)=-341
+        GOTO 990
+      ELSE IF(IDIRTP.NE.1..AND.IENATP.NE.0) THEN ! not rec in rev
+        IP(3)= -342
+        GOTO 990
+      ELSE IF(IHDPK_FS.EQ.0) THEN ! command must be set-up
+        IP(3)=-343
+        GOTO 990
+      ENDIF
+C
+      ICHOLD=ICHK20
+      ICHK20 = 0
+C
+      CALL LVDONN('LOCK',IP)
+      IF(IP(3).NE.0) GOTO 800
+C
+      CALL PKHD(IHDPK_FS,ITERPK_FS,NSAMPPK_FS,RPDT_FS,VLTPK_FS,PEAKV,
+     &          MPER,IP,KHECHO_FS,LU,KPEAKV_FS,VMINPK_FS)
+      IF(IP(3).NE.0) GOTO 800
+C
+      CALL LVDOFN('UNLOCK',IP)
+      IF(IP(3).NE.0) GOTO 800
+C
+C  6.  Set up response
+C
+600   CONTINUE
+      NCH=IEQ
+      IF(IEQ.EQ.0) NCH=NCHAR+1
+      NCH=ICHMV(IBUF,NCH,2H/ ,1,1)
+C
+      NCH=NCH+IB2AS(NSAMPPK_FS,IBUF,NCH,100003B)
+      NCH=MCOMA(IBUF,NCH)
+C
+      NCH=NCH+IB2AS(ITERPK_FS,IBUF,NCH,100003B)
+      NCH=MCOMA(IBUF,NCH)
+C
+      IF(IHDPK_FS.EQ.1) THEN
+        NCH=ICHMV(IBUF,NCH,6HWRITE ,1,5)
+      ELSE IF(IHDPK_FS.EQ.2) THEN
+        NCH=ICHMV(IBUF,NCH,4HREAD  ,1,4)
+      ENDIF
+      NCH=MCOMA(IBUF,NCH)
+C
+      IF(IEQ.EQ.0) NCH=NCH+IR2AS(VMINPK_FS,IBUF,NCH,8,3)
+      NCH=MCOMA(IBUF,NCH)
+C
+      IF(IEQ.EQ.0) NCH=NCH+IR2AS(PEAKV,IBUF,NCH,8,3)
+      NCH=MCOMA(IBUF,NCH)
+C
+      IF(IEQ.EQ.0) NCH=NCH+IR2AS(MPER,IBUF,NCH,8,1)
+      NCH=MCOMA(IBUF,NCH)
+C
+      IF(KPEAKV_FS) THEN
+        NCH=ICHMV(IBUF,NCH,2HT ,1,1)
+      ELSE
+        NCH=ICHMV(IBUF,NCH,2HF ,1,1)
+      ENDIF
+      NCH=MCOMA(IBUF,NCH)
+C
+      NCH=NCH+IR2AS(VLTPK_FS,IBUF,NCH,8,3)
+C
+      NCH=NCH-1
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS)
+      NREC=1
+      GOTO 990
+C
+800   CONTINUE
+      IF(IP(2).NE.0) CALL CLRCL(IP(1))
+      IP(2)=0
+      CALL LOGIT(0,0,0,0,IP(3),IP(4),IP(5))
+      CALL LVDOFN('UNLOCK',IP)
+C
+C  That's all
+C
+990   CONTINUE
+      IP(4)=2HQ@
+      IP(1)=ICLASS
+      IP(2)=NREC
+      IF(ICHOLD.NE.-99) ICHK20=ICHOLD
+      RETURN
+      END

@@ -1,0 +1,128 @@
+FTN77,I,Y
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      program rwand            !  Dump out the bar code reader (aka TimeWand)
+c        Programmed by Lloyd Rawley, March 1988.   Last update <890623.2034>
+c
+c   Subroutines called:  logit, cksum, bsort, character routines
+      logical cksum
+c
+      PARAMETER (lenbuf=3306)      !  Maximum length of wand buffer
+      PARAMETER (messmax=63)       !  Maximum message length for LOGIT
+      PARAMETER (idevto=5, margin=10)        !  units of centiseconds
+c
+c  Common block FSCOM contains LUs for bar code reader and screen output.
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+c  
+      INTEGER bufr(lenbuf), mess(32), id(8), labort(7)  !  Character buffers
+      DIMENSION istart(64), length(64)       !  Word delimiters within BUFR
+      DIMENSION it0(5),it1(5)
+      DATA id/2hNA,2hSA,2h/M,2hK ,2h3/,2hTA,2hPE,2h/ /
+      DATA labort/2hRW,2hAN,2hD ,2hga,2hve, 2h u,2hp./
+c
+      nport = MUXWND
+      ibufln = lenbuf*2
+      call exec(2,LU,41HInsert wand in recharger and push button.,-41)
+c
+c   Set up port for 8 data bits, 2 stop bits, no parity, 1200 baud, etc.
+c    There are no special characters in the input stream to signify the end
+c    of transmission, so we simply read whatever is in the input buffer
+c    when the device times out.  (If data were read character by character,
+c    some characters would be lost due to the lack of protocol.)
+c
+      CALL EXEC(3,3000B+LUwand,2070B+nport)
+      CALL EXEC(3,2100B+LUwand)              !  Disable as a terminal
+      CALL EXEC(3,2600B+LUwand)              !  Flush input buffers
+      CALL EXEC(3,3400B+LUwand,1000B)        !  Return data on time out
+      call exec(3,3300B+LUwand,100000B)      !  Enable FIFO buffering
+c
+c  Set the device time out very short, and read the wand repeatedly in order
+c   to discover the length of the data stream.  Then, set time out for just
+c   long enough to read in the whole stream.
+c
+      CALL EXEC(3,2200B+LUwand,idevto)
+      ntries = 0
+      nchar = 0
+      do while (nchar.eq.0)
+        if (ntries.eq.300) then                 !  Give up after 15 seconds
+          call logit(0,0,0,0,-1,2hRW)
+          call logit(labort,14)
+          stop
+        endif
+        call reio(1,64+LUwand,bufr,-ibufln)
+        call abreg(idontcare,nchar)
+        ntries = ntries+1
+      enddo
+      call exec(11,it0)                         !  Get time of message start
+      do while (nchar.ne.0)
+        call reio(1,64+LUwand,bufr,-ibufln)
+        call abreg(idontcare,nchar)
+      enddo
+      call exec(11,it1)                         !  Get time of message stop
+      newto = 100*(it1(2)-it0(2)) + it1(1)-it1(0) + margin
+      if (newto.lt.0) newto = newto + 6000
+      CALL EXEC(3,2200B+LUwand,newto)
+c
+c  Read the wand several times until two consecutive reads have the same
+c   number of characters and pass the checksum test.
+c
+      nchar = 0
+      ntries = 0
+      do while (nchar.le.0 .or. nchar.ne.lastn)
+        if (ntries.eq.5) then
+          call logit(labort,14)
+          stop
+        endif
+        lastn = nchar
+        call reio(2,64+LUwand,6400B,-1)        !  request dump of TimeWand
+        call reio(1,64+LUwand,bufr,-ibufln)    !  Binary read from TimeWand
+        call abreg(idontcare,nchar)
+        if (.not.cksum(bufr,nchar)) nchar = -nchar
+        if (nchar.eq.0) call logit(0,0,0,0,-2,2hRW)
+        ntries = ntries+1
+      enddo
+      call reio(2,64+LUwand,41415B,-2)       !  Clear TimeWand memory
+c
+c  Now break up the buffer into individual bar codes.
+c
+      ich = 1
+      nchar = nchar-4              !  Because final characters are checksum
+      ncode = 0
+      do while (ich.lt.nchar)
+c       Ignore the special character (ASCII 1) which begins keypad reads.
+        if (ichcm(bufr,ich,1,2,1).eq.0) ich=ich+1
+        nch = iscnc(bufr,ich,nchar,13)             !  Find carriage return
+        ncode = ncode+1  
+        istart(ncode) = ich
+        length(ncode) = nch-ich
+        ich = nch+1
+      enddo
+c
+c  Sort the bar codes by length and ASCII sequence, removing any readings
+c   of tape labels other than the last label in the chronological list.
+c
+      call bsort(istart,length,ncode,bufr)
+c
+c  Send lists of bar codes to LOGIT, ignoring duplicates.
+c
+      nchar = 0
+      do i=1,ncode
+        if (length(i).ne.nchar) then
+          if (nchar.ne.0) call logit(mess,ncmess-1)   ! Log previous message
+          nchar = length(i)
+          nstart = 5*(nchar/2)-14          ! 6-> 1, 8-> 6, 10-> 11
+          ncmess = ichmv(mess,1,id,nstart,5)         !  Start new message
+          ncmess = ichmv(mess,6,bufr,istart(i),nchar)
+        else if (ichcm(bufr,istart(i),bufr,istart(i-1),nchar).ne.0) then
+          if (ncmess+nchar.le.messmax) then
+c              Add bar code (preceded by a comma) to the message string
+            ncmess = ichmv(mess,ncmess,54B,2,1)
+            ncmess = ichmv(mess,ncmess,bufr,istart(i),nchar)
+          else
+            call logit(mess,ncmess-1)        !  Log previous message
+            ncmess = ichmv(mess,6,bufr,istart(i),nchar)  !  Start new line
+          endif
+        endif
+      enddo
+      if (nchar.ne.0) call logit(mess,ncmess-1)   ! Log last line of message
+      end

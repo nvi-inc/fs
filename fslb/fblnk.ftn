@@ -1,0 +1,37 @@
+FTN77,I,Y
+$CDS ON
+      integer*2 function FBLNK(IBUF,IFC,ILC)
+c
+      IMPLICIT NONE
+      INTEGER*2 IBUF(1),IFC,ILC
+      INTEGER*2 I,inext,iLEN,ichmv,ichcm
+      logical*2 KFIRST
+c
+      fblnk=0
+      ilen = ILC-IFC+1
+      if (ilen.LE.0) then
+        return
+      endif
+c
+c delete leading blanks
+c
+      INEXT=IFC
+      KFIRST=.FALSE.
+      DO i = IFC,ilc
+        if(ichcm(ibuf,i,2h  ,1,1).ne.0.OR.kfirst) then
+          KFIRST=.TRUE.
+          inext=ichmv(ibuf,inext,ibuf,i,1)
+        endif
+      END DO
+c
+C   return the length of array minus what was taken off.
+c
+      fblnk = INEXT-IFC
+C
+C  BLANK PAD TO THE END
+c
+      do while(inext.le.ilc)
+        inext=ichmv(ibuf,inext,2h  ,1,1)
+      enddo
+      return
+      end

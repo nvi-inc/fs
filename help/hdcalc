@@ -1,0 +1,24 @@
+HDCALC - Narrow Track Head Calibration Calculation
+
+Syntax:   HDCALC
+          HDCALC=CLEAR
+Response: HDCALC/<writeF>,<readF>,<writeR>,<readR>,<writeS>,<readS>
+
+Settable parameters:
+none, however HDCALC=CLEAR will delete previously calculated values
+
+Monitor-only parameters:
+<writeF>: Forward absolute offset for the write head
+<readF>: Forward absolute offset for the read head
+<writeR>: Reverse relative offset for the write head
+<readR>: Reverse relative offset for the read head
+<writeS>: Write head scale
+<readS>: Read head scale
+
+Comments: This command will calculate new calibration parameters based
+on the voltages saved with the SAVEV command. See the Narrow-Track
+Calibration Guide for a description of the calculations. Only one
+scale factor is calculated for each head.
+
+Any parameters which cannot be calculated because SAVEV has not saved
+a complete set of voltages will be reported as NULL, i.e. empty.

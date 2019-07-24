@@ -1,0 +1,123 @@
+FTN77,I,Y  
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE WOHD(HD,FO,SO,FI,SI,IP,ECHO,LUD,ICL)
+      INTEGER*2 HD,IP(5),LUD,ICL
+      REAL*4 FO(2),SO(2),FI(2),SI(2)
+      LOGICAL*2 ECHO
+C
+C  WOHD: Find Inchworm Speed
+C
+C  INPUT:
+C     HD: Head to find speed of, 1 or 2
+C     ICL: use old (=1) or new (=2) scale values
+C     ECHO: debug echo control
+C     LU: echo output lu
+C
+C  OUTPUT:
+C     FO: fast out speed
+C     SO: slow out speed
+C     FI: fast in  speed
+C     SI: slow in  speed
+C     IP: Field System return parameters
+C
+      include /fs/include/fscom.ftni
+C
+      INTEGER*2 IPASS(2),ISPDHD,IDIR
+      REAL*4 TMOVE
+      REAL*4 MICNOW(2),MICOLD,VOLT(2)
+      DATA IPASS/2*0/
+C
+C  get current location
+C
+      IF(ICL.EQ.1) THEN
+        CALL MIC_READ(HD,IPASS,MICNOW,IP)
+      ELSE
+        CALL VLT_READ(HD,VOLT,IP)
+        IF(HD.EQ.1) SCALE=RSWRITE_FS
+        IF(HD.EQ.2) SCALE=RSREAD_FS
+        MICNOW(HD)=VOLT(HD)*SCALE
+      ENDIF
+      IF(IP(3).NE.0) RETURN
+C
+C FAST OUT CAL
+C
+      MICOLD=MICNOW(HD)
+      IDIR=1 !OUT
+      ISPDHD=1 !FAST
+      TMOVE=0.1 ! 0.1 SECOND
+      CALL HEAD_MOVE(HD,IDIR,ISPDHD,TMOVE,IP)
+      IF(IP(3).NE.0) RETURN
+C
+      IF(ICL.EQ.1) THEN
+        CALL MIC_READ(HD,IPASS,MICNOW,IP)
+      ELSE
+        CALL VLT_READ(HD,VOLT,IP)
+        MICNOW(HD)=VOLT(HD)*SCALE
+      ENDIF
+      IF(IP(3).NE.0) RETURN
+C
+      FO(HD)=(1.0/TMOVE)*ABS(MICNOW(HD)-MICOLD)
+      IF(ECHO) WRITE(LUD,'(I3,3F8.1)') HD,FO(HD),MICNOW(HD),MICOLD
+C
+C FAST IN
+C
+      MICOLD=MICNOW(HD)
+      IDIR=0 !IN
+      ISPDHD=1 !FAST
+      TMOVE=0.1  ! 0.1 SECOND
+      CALL HEAD_MOVE(HD,IDIR,ISPDHD,TMOVE,IP)
+      IF(IP(3).NE.0) RETURN
+C
+      IF(ICL.EQ.1) THEN
+        CALL MIC_READ(HD,IPASS,MICNOW,IP)
+      ELSE
+        CALL VLT_READ(HD,VOLT,IP)
+        MICNOW(HD)=VOLT(HD)*SCALE
+      ENDIF
+      IF(IP(3).NE.0) RETURN
+C
+      FI(HD)=(1.0/TMOVE)*ABS(MICNOW(HD)-MICOLD)
+      IF(ECHO) WRITE(LUD,'(I3,3F8.1)') HD,FI(HD),MICNOW(HD),MICOLD
+C
+C SLOW OUT
+C
+      MICOLD=MICNOW(HD)
+      IDIR=1 !OUT
+      ISPDHD=0 !SLOW
+      TMOVE=1.0 ! 1 SECOND
+      CALL HEAD_MOVE(HD,IDIR,ISPDHD,TMOVE,IP)
+      IF(IP(3).NE.0) RETURN
+C
+      IF(ICL.EQ.1) THEN
+        CALL MIC_READ(HD,IPASS,MICNOW,IP)
+      ELSE
+        CALL VLT_READ(HD,VOLT,IP)
+        MICNOW(HD)=VOLT(HD)*SCALE
+      ENDIF
+      IF(IP(3).NE.0) RETURN
+C
+      SO(HD)=(1.0/TMOVE)*ABS(MICNOW(HD)-MICOLD)
+      IF(ECHO) WRITE(LUD,'(I3,3F8.1)') HD,SO(HD),MICNOW(HD),MICOLD
+C
+C SLOW IN
+C
+      MICOLD=MICNOW(HD)
+      IDIR=0 !IN
+      ISPDHD=0 !SLOW
+      TMOVE=1.0 ! 1 SECOND
+      CALL HEAD_MOVE(HD,IDIR,ISPDHD,TMOVE,IP)
+      IF(IP(3).NE.0) RETURN
+C
+      IF(ICL.EQ.1) THEN
+        CALL MIC_READ(HD,IPASS,MICNOW,IP)
+      ELSE
+        CALL VLT_READ(HD,VOLT,IP)
+        MICNOW(HD)=VOLT(HD)*SCALE
+      ENDIF
+      IF(IP(3).NE.0) RETURN
+C
+      SI(HD)=(1.0/TMOVE)*ABS(MICNOW(HD)-MICOLD)
+      IF(ECHO) WRITE(LUD,'(I3,3F8.1)') HD,SI(HD),MICNOW(HD),MICOLD
+C
+      END

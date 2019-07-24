@@ -1,0 +1,49 @@
+FTN77,I,Y
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      INTEGER FUNCTION DIREC(IOPT,B,IERR,TDCB)       !  <901204.1830>
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+      INTEGER FIND
+      INTEGER IOPT
+      INTEGER B(6)
+      INTEGER IERR
+      INTEGER TDCB(1)
+      INTEGER*4 IREC
+C  IOPT is either:
+C     9999 - close index file.
+C        1 - set to record one and read first record.
+C        2 - set to record one, write, and post.
+C        3 - call FIND for hash for making index file.
+C        4 - call FIND for hash for extracting from index file.
+      IF (IOPT.EQ.9999) THEN
+        CALL FmpClose(TDCB,IERR)
+        GOTO 9000
+      ENDIF
+      IF (IOPT.EQ.1) THEN
+        IREC = 1
+        CALL FmpSetPosition(TDCB,IERR,IREC,-IREC)
+        IF (FmpRead(TDCB,IERR,B,12).LT.0) GOTO 9000
+      ELSE IF (IOPT.EQ.2) THEN
+        IREC = 1
+        CALL FmpSetPosition(TDCB,IERR,IREC,-IREC)
+        IF (FmpWrite(TDCB,IERR,B,12).LT.0) GOTO 9000
+        IF (FmpPost(TDCB,IERR).LT.0) GOTO 9000
+      ELSE IF (IOPT.EQ.3) THEN
+        IF (FIND(TDCB,B,LOC,IERR).LT.0) GOTO 9000
+        IF (LOC.GE.0) GOTO 9000
+        IREC = -LOC
+        CALL FmpSetPosition(TDCB,IERR,IREC,-IREC)
+        IF (FmpWrite(TDCB,IERR,B,12).LT.0) GOTO 9000
+      ELSE IF (IOPT.EQ.4) THEN
+        IF (FIND(TDCB,B,LOC,IERR).LT.0) GOTO 9000
+        IF (LOC.LT.0) THEN
+          B =0
+        ELSE
+          IREC = LOC
+          CALL FmpSetPosition(TDCB,IERR,IREC,-IREC)
+          IF (FmpRead(TDCB,IERR,B,12).LT.0) GOTO 9000
+        ENDIF
+      ENDIF
+9000  DIREC = IERR
+      RETURN
+      END

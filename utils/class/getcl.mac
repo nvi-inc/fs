@@ -1,0 +1,30 @@
+ASMB,R,L
+      NAM GETCL,7     SUBROUTINE TO GET CLASS TABLE ADDRESS AND 
+      ENT GETCL       NUMBER OF CLASS NUMBERS 
+      EXT $CLTA,.ENTR 
+* 
+A     EQU 0 
+* 
+* 
+ADRS  BSS 1 
+NMBR  BSS 1 
+GETCL NOP 
+      JSB .ENTR 
+      DEF ADRS
+* 
+      LDA DCLAS     GET CLASS TABLE ADDRESS 
+      SSA,RSS 
+      JMP *+4 
+      ELA,CLE,ERA 
+      LDA A,I 
+      JMP *-4 
+* 
+      STA ADRS,I
+      LDA A,I 
+      STA NMBR,I
+* 
+      JMP GETCL,I 
+* 
+DCLAS DEF $CLTA 
+* 
+      END 

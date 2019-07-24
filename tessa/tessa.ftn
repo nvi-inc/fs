@@ -1,0 +1,85 @@
+FTN77,I,Y
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      program tessa                         !  Last modified:  <890625.0016>
+c
+c  Between-experiment TESt procedures with the Spectrum Analyzer (HP 3582A)
+c    or Signal Averager (HP 35660A).
+c    Must be run from the Field System, as it uses parameters from /FSCOM/.
+c
+c  Programmer:  Lloyd Rawley, June 1988
+      include /fs/include/fscom.ftni
+      dimension amp(4),phase(4)
+      dimension ip(5)
+      equivalence (ip(1),ntest)
+c
+c  1. Read command line parameter NTEST; if none, prompt for one.
+c
+      n = 0
+100   call rmpar(ip)
+      if (ip(1).eq.0) then
+        write (lu,900)
+        read (lu,*) ntest
+      endif
+900   FORMAT(/' Select a test from the following list:'//
+     ,' 1   Phase cal amplitudes and spurious signals'/
+     ,' 2   Connection to converters and single-band delays'/
+     ,' 3   Cable measurement'/
+     ,' 7   All of the above'/
+     ,' 8   Stability measurement'/
+     ,' 9   Final stability measurement of a series'/
+     ,' 10   Exit  (do not perform a test)')
+      if (ntest.eq.10) stop
+      if (ntest.eq.7) then
+        nstart = 1
+        nfin = 6
+      else
+        nstart = ntest
+        nfin = ntest
+      endif
+      if (modsa.eq.3566) then               !  Set up 35660A
+        call exec(2,lusa,15hFREQ:CENT 10kHz,-15)
+        call exec(2,lusa,16hAVER:COUNT 99999,-16)
+        call exec(2,lusa,18hAVER:DISP:RATE 100,-18)
+        call exec(2,lusa,23hAVER:DISP:RATE:STATE ON,-23)
+        call exec(2,lusa,14hCONF:TYPE NETW,-14)
+      else if (modsa.ne.3582) then          !  Unknown instrument type
+        call logit(0,0,0,0,-3,2hTE,modsa)
+        stop
+      endif
+      if (n.gt.0 .and. ntest.lt.8) then
+        call exec(2,lu,38hConnect SA's B input to decoder output,-38)
+        call confg(2h!!)
+      endif
+c
+c  2. Branch to the appropriate test (or multiple tests for option 7).
+c
+      call exec(3,2200B+LU,18000)             !  set time out to 3 min
+      do ntest=nstart,nfin
+        if (ntest.eq.1) then
+          call tpcal
+        else if (ntest.eq.2) then
+          call tconn
+        else if (ntest.eq.3) then
+          call tcabl
+        else if (ntest.eq.4) then
+        else if (ntest.eq.5) then
+        else if (ntest.eq.6) then
+        else if (ntest.eq.8 .or. ntest.eq.9) then
+          call stabl(ntest,n)
+        else
+          write (lu,*) 'Illegal option for TESSA'
+        endif
+      enddo
+      write (lu,*) 'Returning to OPRIN'
+      call exec(3,2200B+lu,6000)
+c
+c  3. Save resources for next call if in the middle of a stability test. 
+c
+      if (n.eq.0 .neqv. ntest.lt.8) 
+     :  call exec(2,lu,36hReminder - change SA's B input back?,-36)
+      if (n.ne.0) then
+        call exec(6,0,1)
+        goto 100
+      endif
+      end

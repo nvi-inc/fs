@@ -1,0 +1,42 @@
+FTN77,I,Y  
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      SUBROUTINE PHCAL(PCAL,ITRK,IVC),CALCULATES PHASE CAL FREQ C#870115:05:14# 
+C 
+C     This routine determines the phase cal freq in a video converter 
+C     given the track number. 
+C 
+C     MAH 19820222
+C 
+C     INPUT:
+C         ITRK - track number 
+C 
+C     OUTPUT: 
+C         IVC - video converter number for ITRK 
+      DOUBLE PRECISION PCAL,SUM,FLO,FVC 
+C         PCAL - phase cal freq in IVC
+C 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 
+      LSB = 0 
+      IVC = ITR2VC(ITRK,IMODFM+1) 
+      IF (IVC.LT.0) LSB = 1 
+      IVC = IABS(IVC) 
+      I1DEX = IABS(IFP2VC(IVC)) 
+      IF (I1DEX.EQ.1) I2DEX = INP1IF+1
+      IF (I1DEX.EQ.2) I2DEX = INP2IF+1
+      FLO = FREQLO(I1DEX,I2DEX) 
+      FVC = FREQVC(IVC)+5.D-3 
+D     WRITE(6,9900) FVC 
+D9900 FORMAT("FVC="D20.12)
+      FVC = FVC*100.D0
+      FVC = (DDINT(FVC))/100.D0 
+      SUM = FLO+FVC 
+D     WRITE(6,999) FLO,FVC,SUM,FREQVC(IVC)
+D999  FORMAT("FLO,FVC,SUM,FRQVC="3D20.12,F20.12)
+      IF (LSB.EQ.0) PCAL = DDINT(SUM+1.D0)-SUM
+      IF (LSB.EQ.1) PCAL = DMOD(SUM,1.D0) 
+      PCAL = PCAL*1.D6
+D     WRITE(6,99) PCAL
+D99   FORMAT("PCAL="E20.12) 
+      END 

@@ -1,0 +1,45 @@
+FTN77,Y,I  
+$CDS ON
+      SUBROUTINE SET_PASS(IHEAD,IPASS,MICPAS,IP,TOL)
+      IMPLICIT NONE
+      INTEGER*2 IHEAD,IPASS(2),IP(5)
+      REAL*4 MICPAS(2),TOL
+C
+C POS_HEAD: position heads, by pass or micron
+C
+C  This routine will position the heads by pass number or uncorrected
+C  micron position and/or return the current head position.
+C
+C INPUT ARGUMENTS:
+C
+C  IHEAD  Head to position 1=write, 2=read, 3=both.
+C  IPASS  The pass numbers each head is to positioned to. If zero, then
+C         position by uncorrected microns according to MICPAS, is desired.
+C  MICPAS The uncorrected micron positions to place the heads at if
+C         IPASS is zero.
+C
+C OUTPUT ARGUMENTS:
+C
+C  MICPAS The micron position that the pass numbers in IPASS correspond
+C         to if IPASS was nonzero.
+C  IP     Field System error return array.
+C
+C HISTORY:
+C
+C  WHO WHEN   WHAT
+C  --- ------ ----
+C  WEH 880928 CREATED
+C
+      INTEGER*2 I
+C
+      DO I=1,2
+        IF((IHEAD.EQ.I.OR.IHEAD.EQ.3).AND.IPASS(I).GT.0) THEN
+          CALL PAS2MIC(I,IPASS(I),MICPAS(I),IP)
+          IF(IP(3).NE.0) RETURN
+        ENDIF
+      ENDDO
+C
+      CALL SET_MIC(IHEAD,IPASS,MICPAS,IP,TOL)
+C
+      RETURN
+      END

@@ -1,0 +1,225 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C@STAT
+C
+      SUBROUTINE STAT(IBUF,LU,KHALT,KOPBLK,KSKBLK,ICURLN,IDCBSK,
+     .ITSCB,NTSCB,LSKD),Display schedule status C#870115:04:20#
+C
+C     STAT displays current status information concerning the currently
+C     running schedule on the operator's terminal
+C
+C  INPUT:
+C
+C     LU - LU for display output (operator's terminal)
+      LOGICAL KOPBLK,KSKBLK,KHALT
+C         - time-blocked status of operator stream
+C         - time-blocked status of schedule stream
+C         - HALT status of current schedule
+C     ICURLN - line # of current line of schedule
+      CHARACTER*12 LSKD
+C          - 2-character name of current schedule
+      DIMENSION IDCBSK(1),ITSCB(13,1)
+C         - DCB of current schedule file
+C         - time-schedule list
+C     NTSCB - maximum # of items on time list
+C
+C  CALLING SUBROUTINES: BWORK
+C
+C  LOCAL VARIABLES:
+C
+      INTEGER*4 IREC,IOFF,IR2,IO2,ICURLN
+      INTEGER*2 FmpReadString
+      DIMENSION IBUF(1),IB(50),IT(5)
+      CHARACTER*100 IBC
+      EQUIVALENCE (IB,IBC)
+C         - buffer to hold a line of schedule
+C         - buffer for display output
+C         - time array
+C
+      LOGICAL KENDO,KENDTP,KSTO,KSTTP
+C         - flags, true if end of obs, end of tape, start of obs, start
+C           of tape already identified
+C
+C  CONSTANTS:
+      DIMENSION LM1(20)
+      CHARACTER*32 LM2
+C
+      DATA IBLEN /50/
+      DATA LM1/2H  ,2H -,2H  ,2H: ,2H :,15*2H  /
+      DATA LM2 /'Active schedule is:             '/
+C          - messages for display on terminal
+C
+C   DATE   WHO  CHANGES
+C  840321  MWH  Created
+C
+C
+C  1.  Initialization.
+C
+      KENDO = .FALSE.
+      KENDTP = .FALSE.
+      KSTO = .FALSE.
+      KSTTP = .FALSE.
+      CALL SUSP(2,2)
+C
+C    Print display heading.
+      LM2(21:32) = LSKD(1:12)
+      WRITE(LU,'(A32)') LM2
+      CALL IFILL(IBUF,1,100,40B)
+      IDUMMY = ICHMV(IBUF,5,4HTIME,1,4)
+      IDUMMY = ICHMV(IBUF,16,5HEVENT,1,5)
+      CALL EXEC(2,LU,IBUF,-20)
+      CALL IFILL(IBUF,5,4,55B)
+      CALL IFILL(IBUF,16,5,55B)
+      CALL EXEC(2,LU,IBUF,-20)
+C
+C    Get and display current time.
+      CALL EXEC(11,IT)
+      IDUMMY = IB2AS(IT(5),LM1,1,41403B)
+      IDUMMY = IB2AS(IT(4),LM1,5,41002B)
+      IDUMMY = IB2AS(IT(3),LM1,8,41002B)
+      IDUMMY = IB2AS(IT(2),LM1,11,41002B)
+      IDUMMY = ICHMV(LM1,15,3HNow,1,3)
+      CALL EXEC(2,LU,LM1,-17)
+C
+C   Save current schedule position.
+      CALL FmpPosition(IDCBSK,IERR,IREC,IOFF)
+C
+C  2.  Main search loop.
+C
+      IR2 = IREC-1
+      IF(ICURLN.GE.1)CALL FmpSetPosition(IDCBSK,IERR,IR2,-IR2)
+200   IF(KENDO.AND.KENDTP.AND.KSTO.AND.KSTTP)GOTO 300
+      ILEN = FmpReadString(IDCBSK,IERR,IBC)
+      IF (IERR.LT.0) GOTO 500
+      IF(ILEN.GE.0)GOTO 210
+        WRITE(LU,'(13X,''End of schedule'')')
+        GO TO 300
+210   IF(JCHAR(IB,1).NE.41B)GOTO 220
+      IF(JCHAR(IB,2).LT.60B.OR.JCHAR(IB,2).GT.63B)GOTO 200
+      NC = IFLCH(IB,ILEN)
+      CALL GTTIM(IB,2,NC,0,IT1,IT2,IT3,IERR)
+      IDUMMY = IB2AS(MOD(IT1,1024),LM1,1,40000B+1400B+3)
+      IDUMMY = IB2AS(IT2/60,LM1,5,40000B+1000B+2)
+      IDUMMY = IB2AS(MOD(IT2,60),LM1,8,40000B+1000B+2)
+      IDUMMY = IB2AS(IT3/100,LM1,11,40000B+1000B+2)
+220   IF(ICHCM(IB,1,2HET,1,2).NE.0.OR.KENDO)GOTO 230
+C  End of observation
+      IF(KSTO)IDUMMY = ICHMV(LM1,15,26HEnd of next observation   ,1,26)
+      IF(.NOT.KSTO)
+     1   IDUMMY = ICHMV(LM1,15,26HEnd of current observation,1,26)
+      CALL EXEC(2,LU,LM1,-40)
+      KENDO = .TRUE.
+      GO TO 200
+C
+230   IF(ICHCM(IB,1,5HUNLOD,1,5).NE.0.OR.KENDTP)GOTO 240
+C  End of tape
+      IF(KSTTP)IDUMMY = ICHMV(LM1,15,19HEnd of next tape   ,1,19)
+      IF(.NOT.KSTTP)IDUMMY = ICHMV(LM1,15,19HEnd of current tape,1,19)
+      CALL EXEC(2,LU,LM1,-33)
+      KENDTP = .TRUE.
+      GO TO 200
+C
+240   IF(ICHCM(IB,1,3HST=,1,3).NE.0)GOTO 200
+      IF(KSTO) GOTO 250
+C  Start of observation
+      IDUMMY = ICHMV(LM1,15,25HStart of next observation,1,25)
+      CALL EXEC(2,LU,LM1,-39)
+      KSTO = .TRUE.
+C
+250   IF(.NOT.KENDTP.OR.KSTTP)GOTO 200
+C  Start of tape
+      IDUMMY = ICHMV(LM1,15,18HStart of next tape,1,18)
+      CALL EXEC(2,LU,LM1,-32)
+      KSTTP = .TRUE.
+      GO TO 200
+C
+C  3.  Display HALT status.
+C
+300   ICH = ICHMV(IBUF,1,12HSchedule is ,1,12)
+      IF(.NOT.KHALT)ICH = ICHMV(IBUF,ICH,4Hnot ,1,4)
+      ICH = ICHMV(IBUF,ICH,6HHALTed,1,6)-1
+      CALL EXEC(2,LU,IBUF,-ICH)
+C
+C  4.  Display time-blocked status.
+C
+      ICH = ICHMV(IBUF,1,19HSchedule stream is ,1,19)
+      IF(KSKBLK)GOTO 310
+        ICH = ICHMV(IBUF,ICH,16Hnot time-blocked,1,16)-1
+        GO TO 340
+310   CONTINUE
+      ICH = ICHMV(IBUF,ICH,20Htime-blocked until  ,1,20)
+      IND = 0
+      DO 320 I=1,NTSCB
+        IF(ITSCB(1,I).EQ.-1)GOTO 320
+        IF(JCHAR(ITSCB(10,I),1).NE.41B)GOTO 320
+        IF(JCHAR(ITSCB(13,I),2).NE.72B)GOTO 320
+        IND = I
+320   CONTINUE
+      IF(IND.GT.0) GOTO 330
+        CALL IFILL(IBUF,40,9,77B)
+        ICH=48
+        GO TO 340
+330   IT(5) = MOD(ITSCB(1,IND),1024)
+      IT(4) = ITSCB(2,IND)/60
+      IT(3) = MOD(ITSCB(2,IND),60)
+      IT(2) = ITSCB(3,IND)/100
+      IDUMMY = IB2AS(IT(5),IBUF,40,41403B)
+      IDUMMY = ICHMV(IBUF,43,2H- ,1,1)
+      IDUMMY = IB2AS(IT(4),IBUF,44,41002B)
+      IDUMMY = ICHMV(IBUF,46,2H: ,1,1)
+      IDUMMY = IB2AS(IT(3),IBUF,47,41002B)
+      IDUMMY = ICHMV(IBUF,49,2H: ,1,1)
+      IDUMMY = IB2AS(IT(2),IBUF,50,41002B)
+      ICH=51
+340   CALL EXEC(2,LU,IBUF,-ICH)
+      ICH = ICHMV(IB,1,19HOperator stream is ,1,19)
+      IF(KOPBLK) GOTO 350
+        ICH = ICHMV(IB,ICH,16Hnot time-blocked,1,16)-1
+        GO TO 370
+350   ICH = ICHMV(IB,ICH,20Htime-blocked until  ,1,20)
+      IND = 0
+      DO 360 I=1,NTSCB
+        IF(ITSCB(1,I).EQ.-1) GOTO 360
+        IF(JCHAR(ITSCB(10,I),1).NE.41B) GOTO 360
+        IF(JCHAR(ITSCB(13,I),2).NE.73B) GOTO 360
+        IND = I
+360   CONTINUE
+      IF(IND.GT.0) GOTO 365
+        CALL IFILL(IB,40,9,77B)
+        ICH = 48
+        GO TO 370
+365   IT(5) = MOD(ITSCB(1,IND),1024)
+      IT(4) = ITSCB(2,IND)/60
+      IT(3) = MOD(ITSCB(2,IND),60)
+      IT(2) = ITSCB(3,IND)/100
+      IDUMMY = IB2AS(IT(5),IBUF,40,41403B)
+      IDUMMY = ICHMV(IB,43,2H- ,1,1)
+      IDUMMY = IB2AS(IT(4),IBUF,44,41002B)
+      IDUMMY = ICHMV(IB,46,2H: ,1,1)
+      IDUMMY = IB2AS(IT(3),IBUF,47,41002B)
+      IDUMMY = ICHMV(IB,49,2H: ,1,1)
+      IDUMMY = IB2AS(IT(2),IBUF,50,41002B)
+      ICH = 51
+370   CALL EXEC(2,LU,IB,-ICH)
+C
+C  5.  Restore schedule to original position.
+C
+500   CALL FmpSetPosition(IDCBSK,IERR,IREC,IOFF)
+      IR2 = IREC-1
+      IF(ICURLN.GE.1) CALL FmpSetPosition(IDCBSK,IERR,IR2,-IR2)
+      ILEN=FmpReadString(IDCBSK,IERR,IBC)
+      CALL FmpSetPosition(IDCBSK,IERR,IREC,IOFF)
+C
+C  6.  Display current line of schedule.
+C
+      IDUMMY = ICHMV(IBUF,1,28HCurrent line of schedule is:,1,28)
+      CALL EXEC(2,LU,IBUF,-28)
+      ICH=ICHMV(IBUF,1,2H #,1,2)
+      ICUR = ICURLN
+      NC = IB2AS(ICUR,IBUF,ICH,100006B)
+      ICH = ICHMV(IBUF,9,IB,1,ILEN)-1
+      CALL EXEC(2,LU,IBUF,-ICH)
+C
+      RETURN
+      END

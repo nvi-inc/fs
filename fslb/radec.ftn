@@ -1,0 +1,55 @@
+FTN77,I,Y
+$CDS ON
+      SUBROUTINE RADEC(RA,DEC,HA,IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS, 
+     .LHSIGN,IHAH,IHAM,HAS),CONVERT RADIANS TO RADIX 60 C#870407:12:42# 
+C 
+C     RADEC returns the hms, dms, hms for ra, dec, and ha.
+C 
+      DOUBLE PRECISION RA,DEC                     !  LAR  <910607.0551>
+C 
+C  INPUT: 
+C 
+C     RA, DEC, HA - in radians
+C 
+C 
+C  OUTPUT:
+C 
+C     IRAH,IRAM,RAS - hms for ra
+C     LDSIGN,IDECD,IDECM,DECS - sign, dms for dec 
+C     LHSIGN,IHAH,IHAM,HAS - sign, hms for hour angle
+C
+      DOUBLE PRECISION H,PI
+C
+C  CONSTANTS:
+C
+      DATA PI/3.14159265358979323846d0/
+C
+C
+C     1. First convert the RA.
+C
+      H = RA*12.0/PI
+      IRAH = H
+      IRAM = (H-IRAH)*60.0
+      RAS = (H-IRAH-IRAM/60.0)*3600.0
+C
+C
+C     2. Next the declination.
+C
+      D = ABS(DEC)*180.0/PI
+      IDECD = D
+      IDECM = (D - IDECD)*60.0
+      DECS = (D-IDECD-IDECM/60.0)*3600.0
+      LDSIGN = 2H 
+      IF (DEC.LT.0) LDSIGN=2H-
+C 
+C 
+C     3. Finally the hour angle.
+C 
+      H = ABS(HA)*12.0/PI 
+      IHAH = H
+      IHAM = (H - IHAH)*60.0
+      HAS = (H - IHAH - IHAM/60.0)*3600.0 
+      LHSIGN=2H 
+      IF (HA.LT.0) LHSIGN=2H- 
+      RETURN
+      END 

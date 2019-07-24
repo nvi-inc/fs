@@ -1,6 +1,0 @@
-:OF,LOADF 
-:RU,LOADR,^LOADF::UT
-:PU,LOADF::2    
-:SP,LOADF::2    
-:OF,LOADF 
-:TR 

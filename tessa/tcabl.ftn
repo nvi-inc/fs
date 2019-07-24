@@ -1,0 +1,200 @@
+FTN77,Y,I
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      subroutine tcabl                      !  last update LAR <830401.1244>
+c
+c  Measure the length of a cable in three different ways.
+c
+c  Called subroutines:  copin,logit,susp,exec(2),dump,confg,LFNCH routines
+c
+      include /fs/include/fscom.ftni
+c  Common contents used:
+c       lusa       logical unit for spectrum analyzer or signal averager
+c       modsa      model number of device on LU # lusa
+c       lu         logical unit for operator's console
+c       cablev     result of most recent measurement with CABLE command
+c       nprset     number of measurements to make in each of four sets
+c       intpha     integration time per measurement, in seconds
+c       diftol     tolerance for difference between measurement methods
+c
+      parameter (nprmax=5)                    !  maximum value for nsets
+c
+      dimension lmess(20),delay(3,nprmax*4),lident(3,3),lrpt(24)
+      dimension resp(2),ibuf(9),turn(2)
+      data lmess/2hOp,2her,2hat,2hor,2h -,2h P,2hle,2has,2he ,2hch,
+     &           2han,2hge,2h t,2hhe,2h c,2hab,2hle,2h b,2hac,2hk./
+      data lident/2hX-,2hba,2hnd,2hS-,2hba,2hnd,2hCa,2hbl,2he /
+c        lmess     message which tells operator to change cable
+c        lrpt      message for log file
+c        lident    name of measuring device
+c        resp      buffer from confg, if spectrum analyzer is used
+c        ibuf      buffer from signal averager
+c        delay     normalized measurements of cable length
+c
+c        ntot      total number of measurements (4*nprset)
+c        twon      nprset*2., used in statistical calculations
+c        sumin     sum of length measurements with extra cable length in
+c        sumout    sum of length measurements with extra cable length out
+c        sumsq     sum of squares for both cases (in and out) together
+c        avgdif    average difference between in and out measurements
+c        stdev     standard error of estimate of avgdif
+c        lastx     highest-numbered channel patched to X-band LO
+c        freqx0,freqx1    frequencies of lowest and highest X-band VCs
+c        turn      inverse frequencies, in nanoseconds, at X- and S-bands
+c        dfreqx    difference between freqx0 and freqx1, in degrees/nanosec
+c        freqs0,freqs1,dfreqs    same as above but at S-band
+c        varthr    error threshold for variance of measurements
+c
+c
+c  1. Set up SA to measure relative phase of two channels.
+c
+      if (modsa.eq.3582) then
+        call exec(2,lusa,36hPRS,AA0,IM2,AV2,SH1,NU3,PX1,MN1,MP50,-36)
+      else
+        call exec(2,lusa,13hTRAC1:RES COH,-13)
+        call exec(2,lusa,14hFREQ:SPAN 1kHz,-14)
+        call exec(2,lusa,11hMARK1 10kHz,-11)
+        call exec(2,lusa,14hAVER:TYPE VECT,-14)
+        call exec(2,lusa,16hDISP1:AXIS PHASE,-16)
+        call exec(2,lusa,21hDISP1:SCAL:UNIT "DEG",-21)
+      endif
+c
+c  2. Find the break point between S and X band video converters.
+c
+      lastx = 0
+      do ivc=2,12
+        if (iabs(ifp2vc(ivc)).ne.iabs(ifp2vc(ivc+1))) lastx=ivc
+      enddo
+      if (lastx.eq.0) then
+        call logit(0,0,0,0,-31,2hTE)
+        return
+      endif
+c
+c  3. Get the extrema of frequencies for VC LOs in each band.
+c
+      freqx0 = das2b(lfreqv(1,1),1,6,ierr)
+      freqx1 = das2b(lfreqv(1,lastx),1,6,ierr)
+      freqs0 = das2b(lfreqv(1,lastx+1),1,6,ierr)
+      freqs1 = das2b(lfreqv(1,14),1,6,ierr)
+      if (freqx0*freqx1.eq.0. .or. freqs0*freqs1.eq.0.) then
+        call logit(0,0,0,0,-9,2hTE)
+        return
+      endif
+      dfreqx = (freqx1-freqx0)*.360
+      dfreqs = (freqs1-freqs0)*.360
+      if (dfreqx.eq.0. .or. dfreqs.eq.0.) then
+        call logit(0,0,0,0,-32,2hTE)
+        return
+      endif
+c
+c  4. Main loop.  Measure the cable length via X-band phase difference.
+c
+      if (nprset.gt.nprmax) nprset=nprmax
+      if (nprset.le.0) nprset=1
+      ntot = 4*nprset
+      do i=1,ntot
+        call copin(5hCABLE,-5)
+        call confg(2hRE,1,lastx)
+        if (modsa.eq.3582) then
+          call exec(2,lusa,2hRE,-2)
+          call susp(2,intpha)
+          call dump(2hMK,resp)
+          if (resp(1).lt.0.) resp(1)=resp(1)+360.
+          delay(1,i) = resp(1)/dfreqx
+        else
+          call exec(2,lusa,14hINIT:STAT STAR,-14)
+          call susp(2,intpha)
+          call exec(2,lusa,14hINIT:STAT PAUS,-14)
+          call exec(2,lusa,11hMARK1:AMPL?,-11)
+          call exec(1,lusa,ibuf,-18)
+          delay(1,i) = das2b(ibuf,1,iscnc(ibuf,1,18,10)-1,ierr)/dfreqx
+        endif
+c
+c  6. Measure cable length via S-band phase difference.
+c
+        call confg(2hRE,lastx+1,14)
+        if (modsa.eq.3582) then
+          call exec(2,lusa,2hRE,-2)
+          call susp(2,intpha)
+          call dump(2hMK,resp)
+          if (resp(1).lt.0.) resp(1)=resp(1)+360.
+          delay(2,i) = resp(1)/dfreqs
+        else
+          call exec(2,lusa,14hINIT:STAT STAR,-14)
+          call susp(2,intpha)
+          call exec(2,lusa,14hINIT:STAT PAUS,-14)
+          call exec(2,lusa,11hMARK1:AMPL?,-11)
+          call exec(1,lusa,ibuf,-18)
+          delay(2,i) = das2b(ibuf,1,iscnc(ibuf,1,18,10)-1,ierr)/dfreqs
+        endif
+c
+c  7. Change cable after nprset measurements; change it back after 2nprset
+c     more measurements; then do another nprset measurements.
+c
+        if (i.eq.nprset .or. i.eq.ntot-nprset) then
+          call exec(2,lu,lmess,-34-5*(i/(nprset+nprset)))
+          call confg(2h!!)
+        endif
+        delay(3,i) = cablev*2.5e+3
+      enddo
+c
+c  8. Do statistics on each of the three groups of measurements.
+c
+      call ichmv(lrpt,1,38hMeasured cable delay differences (ns) ,1,38)
+      nch = ib2as(nprset+nprset,lrpt,39,100002B)
+      call ichmv(lrpt,39+nch,6h times,1,6)
+      call logit(lrpt,44+nch)
+      twon = nprset+nprset
+      turn(1) = 360./dfreqx
+      turn(2) = 360./dfreqs
+c     write (1,998) turn
+c98   format (' One turn is',f8.3,' ns at X-band,',f8.3,' ns at S-band')
+      varthr = .16*diftol*diftol
+      do j=3,1,-1
+c       if (j.eq.1) write (1,*) 'Raw data:',(dfreqx*delay(j,i),i=1,4)
+c       if (j.eq.2) write (1,*) 'Raw data:',(dfreqs*delay(j,i),i=1,4)
+        sumin = 0.
+        sumout = 0.
+        sumsq = 0.
+        do i=1,nprset
+          sumout = sumout + delay(j,i) + delay(j,i+3*nprset)
+          sumin = sumin + delay(j,i+nprset) + delay(j,i+nprset+nprset)
+        enddo
+        do i=1,ntot
+          sumsq = sumsq + delay(j,i)*delay(j,i)
+        enddo
+        avgdif = (sumin-sumout)/twon
+        var = (sumsq-(sumin*sumin+sumout*sumout)/twon)/(twon-1.)
+        if (j.eq.3) then
+          cabavd = avgdif
+          cabvar = var
+          if (cabvar.ge.varthr) call logit(0,0,0,0,-39,2hTE)
+        else
+c
+c  9. Report results.
+c
+          dif = avgdif-cabavd
+          diftur = dif/turn(j)
+          dif = dif-anint(diftur)*turn(j)
+          if ((var+cabvar).ge.0) then
+             stdev = sqrt(var+cabvar)
+          else
+             stdev = -1.0
+          endif
+          call ichmv(lrpt,1,19hDifference between ,1,19)
+          call ichmv(lrpt,20,lident(1,j),1,6)
+          call ichmv(lrpt,26,12h and cable: ,1,12)
+          call ir2as(dif,lrpt,38,-6,3)
+          call ichmv(lrpt,44,2h (,1,2)
+          call ir2as(stdev,lrpt,46,-6,3)
+          call ichmv(lrpt,52,2h) ,1,1)
+          call logit(lrpt,52)
+          if (var.gt.varthr) then
+            call logit(0,0,0,0,-38,2hTE,lident(1,j))
+          else if (cabvar.lt.varthr .and. abs(dif).gt.diftol) then
+            call logit(0,0,0,0,-37,2hTE,lident(1,j))
+          endif
+        endif
+      enddo
+      return
+      end

@@ -1,8 +1,0 @@
-EC
-LL,$MATCN::7G 
-LI,%%FSLB::7G 
-LI,$LIBHS::7G 
-SC
-RE,%MATCN::5G 
-RE,%IAT::5G 
-RE,%DATAT::5G 

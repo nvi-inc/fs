@@ -1,0 +1,75 @@
+FTN77,I,Y
+$CDS ON
+C@IIFED 
+      FUNCTION IIFED(IWHAT,INDEX,IAS,IC1, 
+     .         IC2),IF INDEX ENCODE/DECODE C#870407:12:29#
+C 
+C     This routine encodes or decodes information relating
+C     to MAT communications for the IF distributor
+C 
+C  INPUT: 
+C 
+C     IWHAT - code for type of conversion, <0 encode, >0 decode 
+      DIMENSION IAS(1)
+C      - string with ASCII characters 
+C 
+C 
+C  If encode
+C 
+C     INDEX - input index of quantity 
+C     IAS - string to hold ASCII characters 
+C     IC1 - first char available in IAS 
+C     IC2 - last char available in IAS
+C     IIFED - next available char in IAS after encoding 
+C 
+C  If decode: 
+C 
+C     INDEX - returned index of quantity, error if zero 
+C     IAS - string containing ASCII characters to be decoded
+C     IC1 - first char to use in IAS
+C     IC2 - last char to use in IAS 
+C 
+C 
+C  SUBROUTINES called: character manipulation 
+C 
+C 
+C  LOCAL: 
+C 
+      DIMENSION LREM(8),LINPS(3),NREM(2)
+      DATA LREM/015446B,2HdB,2HLC,046033B,2H&d,2H@ ,
+     .          2HRE,2HM /
+      DATA NREM/11,3/ 
+      DATA LINPS/2HNO,2HRA,2HLT/
+C 
+C 
+C     1. Initialize returned parameter in case we have to quit early. 
+C 
+      IIFED = IC1 
+      IF (IWHAT.GT.0) INDEX = -1
+C 
+      GOTO (202,201,990,301) IWHAT+3
+C 
+C     2.01 Code -1, INPUT ALT/NOR 
+C 
+201   IF (IC1+2.GT.IC2) RETURN
+      IIFED = ICHMV(IAS,IC1,LINPS,1+3*INDEX,3)
+      RETURN
+C 
+C     2.02 Code -2, LOCAL/REMOTE. 
+C 
+202   CONTINUE
+      IF (IC1-1+NREM(INDEX+1).GT.IC2) RETURN
+      IIFED = ICHMV(IAS,IC1,LREM,INDEX*12+1,NREM(INDEX+1))
+      RETURN
+C 
+C     3. Initialize for the DECODE case.
+C 
+C     3.01 INPUT NOR/ALT
+C 
+301   CONTINUE
+      DO 3010 I=1,2 
+        IF (ICHCM(IAS,IC1,LINPS,(I-1)*3+1,3).EQ.0) INDEX = I-1
+3010    CONTINUE
+      RETURN
+990   RETURN
+      END 

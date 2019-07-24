@@ -1,0 +1,23 @@
+FTN77,I,Y
+$CDS ON
+C@IA22H 
+C 
+      FUNCTION IA22H(IWORD) 
+C 
+C    IA22H converts a 2-character ASCII word into a decimal number
+C          between 0 and 255
+C 
+      DIMENSION IVAL(23)
+C               - lookup table of hex values
+      DATA IVAL/0,1,2,3,4,5,6,7,8,9,7*0,10,11,12,13,14,15/
+C 
+C     1. Get the index into lookup table by subtracting 57B from
+C       each character.  If index is not within range set to 0. 
+C 
+      IND1 = JCHAR(IWORD,1) - 57B 
+      IND2 = JCHAR(IWORD,2) - 57B 
+      IA22H = -1
+      IF (IND1.LT.1.OR.IND1.GT.23.OR.IND2.LT.1.OR.IND2.GT.23) RETURN
+      IA22H = IVAL(IND1)*16 + IVAL(IND2)
+      RETURN
+      END 

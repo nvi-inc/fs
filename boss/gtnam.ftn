@@ -1,0 +1,95 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C@GTNAM 
+C 
+      SUBROUTINE GTNAM(IAS,IFC,IEC,LNAMES,NNAMES,LPROC1,NPROC1, 
+     .LPROC2,NPROC2,IERR,ITYPE, 
+     .           INDEX),CHECK FOR LEGAL NAME C#870115:04:20#
+C 
+C     GTNAM returns the index of the given word in one of 3 
+C              lists, and which list. 
+C 
+C     LAST MODIFIED BY LLOYD RAWLEY, 5 JANUARY 1988:
+C       CHECK NAME AGAINST ACTUAL PROCEDURE NAMES INSTEAD OF HASH CODES
+C
+C     INPUT VARIABLES:
+C 
+      DIMENSION IAS(1)
+C               - input character string
+C        IFC,IEC- first, end characters in input string IAS 
+C                 Word to be checked lies here. 
+      DIMENSION LNAMES(10,1),LPROC1(10,1),LPROC2(10,1) 
+C               - 3 lists to be checked for the word
+C               - word to be checked is word (1,I) in each array
+C        NNAMES - number of entries in LNAMES 
+C        NPROC1,2 - number of entries in LPROC1,2 (may be zero) 
+C 
+C     OUTPUT VARIABLES: 
+C
+C        IERR   - error return.  0=all ok
+C        ITYPE  - which list word was found in, F (names) or
+C                 P (procedure list1) or Q (procedure list 2)
+C        INDEX  - index of word in above list
+C
+C     CALLING SUBROUTINES: SPARS, GETCM
+C     CALLED SUBROUTINES: none
+C
+C   LOCAL VARIABLES
+C
+C        NCHAR  - number of characters in word
+C        LMATCH - copy of input character string
+      DIMENSION LMATCH(6)
+C
+C
+C     1. Write blank-filled left-justified word into LMATCH.
+C
+      NCHAR = IEC-IFC+1
+      IF (NCHAR.GT.12) THEN
+        IERR = -3
+        RETURN
+      ENDIF
+      DO I=1,6
+        LMATCH(I)=20040B
+      ENDDO
+      IDUMB=ICHMV(LMATCH,1,IAS,IFC,NCHAR)
+C
+C     2. Now search the first list.
+C
+      DO 290 I=1,NNAMES
+        DO J=1,6
+          IF (LNAMES(J,I).NE.LMATCH(J)) GOTO 290
+        ENDDO
+        ITYPE = 106B
+        INDEX = I
+        RETURN
+290   CONTINUE
+C
+C     3.  No match found in first list.
+C         Search the first procedure list.
+C
+      DO 390 I=1,NPROC1
+        DO J=1,6
+          IF (LPROC1(J,I).NE.LMATCH(J)) GOTO 390
+        ENDDO
+        ITYPE = 120B
+        INDEX = I
+        RETURN
+390   CONTINUE
+C 
+C     4. No match on the second list.  Try for the third. 
+C 
+      DO 490 I=1,NPROC2 
+        DO J=1,6
+          IF (LPROC2(J,I).NE.LMATCH(J)) GOTO 490
+        ENDDO
+        ITYPE = 121B
+        INDEX = I 
+        RETURN
+490   CONTINUE
+C 
+C     9. No match was found in any of the lists.
+C 
+      IERR = -4
+      RETURN
+      END 

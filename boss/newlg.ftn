@@ -1,0 +1,186 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE NEWLG(IBUF,LSOR)
+C
+C     NEWLG fills in the buffer with the first line of the log file
+C           and sends this to DDOUT for starting a new log.
+C
+C  MODIFICATIONS:
+C
+C  830914 NRV Added occupation serial # as second buffer
+C  880205 LAR Added FSUPDATE call.
+C  880331 LAR Added 2nd line with minor version #
+C  880708 WEH REMOVE FSUPDATE CALL
+C
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+C  INPUT:
+C
+      DIMENSION IBUF(1)
+C      - buffer to use, assumed to be at least 50 characters long
+      DIMENSION IB(60)
+C     LSOR - source of this message
+C
+C  OUTPUT: NONE
+C
+C     The new-log information line:
+C   MARK III FIELD SYSTEM VERSION <version> <station> <year> <occup#>
+C     Send this with option "NL" to LOGIT, i.e. start new log file.
+C
+      CALL IFILL(IBUF,3,60,40B)
+      NCH = ICHMV(IBUF,1,32H" MARK III FIELD SYSTEM VERSION ,1,32)
+      NCH = NCH + IR2AS(INT(FSVER*10.+.001)/10.,IBUF,NCH,3,1)
+      NCH = ICHMV(IBUF,NCH+1,LNAANT,1,8)
+      NCH = NCH+1
+      NCH = NCH+ IB2AS(IYEAR,IBUF,NCH,4)
+      NCH = ICHMV(IBUF,NCH+1,LOCCUP,1,8)-3
+      CALL LOGIT(IBUF(2),NCH,LSOR,0,2HNL)
+C
+C     Second line contains minor version #; not read by correlator
+C     Send this as a normal message (i.e. NOT a new log)
+C
+      NCH = 32 + IR2AS(FSVER,IBUF,33,4,2)
+      CALL LOGIT(IBUF,NCH,LSOR)
+C
+C     Send configuration info from control files to log
+C
+      CALL IFILL(IB,1,120,40B)
+      NCH = 1
+      NCH=ICHMV(IB,NCH,8HLOCATION,1,8)
+      NCH=MCOMA(IB,NCH)
+      NCH=ICHMV(IB,NCH,LNAANT,1,8)
+      NCH=MCOMA(IB,NCH)
+      NCH=ICHMV(IB,NCH,LIDSTN,1,1)
+      NCH=MCOMA(IB,NCH)
+      WL = WLONG * 180./PI
+      AL = ALAT * 180./PI
+      NCH = NCH + IR2AS(WL,IB,NCH,7,2)
+      NCH=MCOMA(IB,NCH)
+      NCH = NCH + IR2AS(AL,IB,NCH,6,2)
+      NCH=MCOMA(IB,NCH)
+      NCH = NCH + IR2AS(HEIGHT,IB,NCH,6,1)
+      NCH=MCOMA(IB,NCH)
+      NCH = ICHMV(IB,NCH,LOCCUP,1,8)
+      NCH=MCOMA(IB,NCH)
+      NCH = NCH + IB2AS(IACTTP,IB,NCH,100000B+6)
+      NCH=MCOMA(IB,NCH)
+      NCH = NCH + IB2AS(I20KCH,IB,NCH,100000B+6)
+      NCH=MCOMA(IB,NCH)
+      NCH = NCH + IB2AS(I70KCH,IB,NCH,100000B+6)
+      NCH=MCOMA(IB,NCH)
+      NCH = NCH + IB2AS(IYRCTL_FS,IB,NCH,100000B+6)
+      NCH=NCH-1
+      CALL LOGIT(IB,NCH,LSOR)
+      CALL IFILL(IB,1,120,40B)
+      NCH = 1
+      NCH = ICHMV(IB,NCH,8HHORIZON1,1,8)
+      NCH = MCOMA(IB,NCH)
+      DO I=1,8
+        IF(HORAZ(I).LT.0) GOTO 400
+        NCH = NCH + IR2AS(HORAZ(I),IB,NCH,4,0)
+        NCH=MCOMA(IB,NCH)
+        IF(HOREL(I).LT.0) GOTO 400
+        NCH = NCH + IR2AS(HOREL(I),IB,NCH,4,0)
+        NCH=MCOMA(IB,NCH)
+      ENDDO
+400   NCH = NCH-2
+      CALL LOGIT(IB,NCH,LSOR)
+      CALL IFILL(IB,1,120,40B)
+      NCH = 1
+      NCH = ICHMV(IB,NCH,8HHORIZON2,1,8)
+      NCH = MCOMA(IB,NCH)
+      DO I=9,15
+        IF(HORAZ(I).LT.0) GOTO 500
+        NCH = NCH + IR2AS(HORAZ(I),IB,NCH,4,0)
+        NCH=MCOMA(IB,NCH)
+        IF(HOREL(I).LT.0) GOTO 500
+        NCH = NCH + IR2AS(HOREL(I),IB,NCH,4,0)
+        NCH=MCOMA(IB,NCH)
+      ENDDO
+500   NCH = NCH-2
+      IF(nch.GT.8) CALL LOGIT(IB,NCH,LSOR)
+C
+      NCH = 1
+      NCH = ICHMV(IB,NCH,6HHEAD0,,1,6)
+      DO I=1,4
+        IF (I.EQ.1) THEN
+          IDUM=WRHD_FS
+        ELSE IF(I.EQ.2) THEN
+          IDUM=RDHD_FS
+        ELSE if(I.EQ.3) THEN
+          IDUM=RPRO_FS
+        ELSE
+          IDUM=RPDT_FS
+        ENDIF
+        IF(IDUM.EQ.0) THEN
+          NCH=ICHMV(IB,NCH,4HALL ,1,3)
+        ELSE IF(IDUM.EQ.1) THEN
+          NCH=ICHMV(IB,NCH,4HODD ,1,3)
+        ELSE IF(IDUM.EQ.2) THEN ! NO ELSE SO ILLEGAL VALUE IS BLANK
+          NCH=ICHMV(IB,NCH,4HEVEN,1,4)
+        ENDIF
+        NCH=MCOMA(IB,NCH)
+      ENDDO
+      IF(KADAPT_FS) THEN
+        NCH=ICHMV(IB,NCH,8HADAPTIVE,1,8)
+      ELSE
+        NCH=ICHMV(IB,NCH,6HFIXED ,1,5)
+      ENDIF
+      NCH=MCOMA(IB,NCH)
+      IF(KIWSLW_FS) THEN
+        NCH=ICHMV(IB,NCH,4HYES ,1,3)
+      ELSE
+        NCH=ICHMV(IB,NCH,2HNO  ,1,2)
+      ENDIF
+      NCH=MCOMA(IB,NCH)
+      NCH=NCH+IR2AS(LVBOSC_FS,IB,NCH,6,4)
+      NCH=MCOMA(IB,NCH)
+      NCH=NCH+IB2AS(ILVTL_FS,IB,NCH,100000B+5)
+      NCH=NCH-1
+      CALL LOGIT(IB,NCH,LSOR)
+C
+      DO I=1,2
+        CALL IFILL(IB,1,120,40B)
+        NCH = 1
+        NCH = ICHMV(IB,NCH,4HHEAD,1,4)
+        NCH = NCH + IB2AS(I,IB,NCH,1)
+        NCH=MCOMA(IB,NCH)
+        NCH = NCH + IR2AS(FASTFW(I),IB,NCH,7,1)
+        NCH=MCOMA(IB,NCH)
+        NCH = NCH + IR2AS(SLOWFW(I),IB,NCH,5,1)
+        NCH=MCOMA(IB,NCH)
+        NCH = NCH + IR2AS(FOROFF(I),IB,NCH,6,1)
+        NCH=MCOMA(IB,NCH)
+        NCH = NCH + IR2AS(FASTRV(I),IB,NCH,7,1)
+        NCH=MCOMA(IB,NCH)
+        NCH = NCH + IR2AS(SLOWRV(I),IB,NCH,5,1)
+        NCH=MCOMA(IB,NCH)
+        NCH = NCH + IR2AS(REVOFF(I),IB,NCH,6,1)
+        NCH=MCOMA(IB,NCH)
+        NCH = NCH + IR2AS(PSLOPE(I),IB,NCH,8,2)
+        NCH=MCOMA(IB,NCH)
+        NCH = NCH + IR2AS(RSLOPE(I),IB,NCH,8,2)
+        CALL LOGIT(IB,NCH,LSOR)
+      ENDDO
+      CALL IFILL(IB,1,120,40B)
+      NCH = 1
+      NCH = ICHMV(IB,NCH,8HANTENNA,,1,8)
+      NCH = NCH + IR2AS(DIAMAN,IB,NCH,5,1)
+      NCH=MCOMA(IB,NCH)
+      NCH = NCH + IR2AS(SLEW1,IB,NCH,5,1)
+      NCH=MCOMA(IB,NCH)
+      NCH = NCH + IR2AS(SLEW2,IB,NCH,5,1)
+      NCH=MCOMA(IB,NCH)
+      NCH = NCH + IR2AS(LOLIM1,IB,NCH,6,1)
+      NCH=MCOMA(IB,NCH)
+      NCH = NCH + IR2AS(UPLIM1,IB,NCH,6,1)
+      NCH=MCOMA(IB,NCH)
+      NCH = NCH + IR2AS(LOLIM2,IB,NCH,6,1)
+      NCH=MCOMA(IB,NCH)
+      NCH = NCH + IR2AS(UPLIM2,IB,NCH,6,1)
+      NCH=MCOMA(IB,NCH)
+      NCH = ICHMV(IB,NCH,IAXIS,1,4) - 1
+      CALL LOGIT(IB,NCH,LSOR)
+      RETURN
+      END

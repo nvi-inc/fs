@@ -1,0 +1,32 @@
+FTN77,Y,I  
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      SUBROUTINE PAS2MIC(IHEAD,IPASS,MICRON,IP)
+      INTEGER*2 IHEAD,IPASS,IP(5)
+      REAL*4 MICRON
+C
+C  PAS2MIC: convert pass number to micron position
+C
+C  INPUT:
+C     IHEAD: head to convert pass to microns: 1 or 2
+C     IPASS: pass to look up position of: positive integer less than
+C            or equal to maximum defined pass number
+C
+C  OUTPUT:
+C     MICRON: determined position
+C     IP: Field System return parameters
+C     IP(3) = 0 if no error
+C           = -403 if pass number is undefined
+C
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+      IF(ITAPOF(IPASS).GT.-13000) THEN
+        MICRON=ITAPOF(IPASS)
+      ELSE
+        IP(3)=-403
+        IP(4)=2HQ@
+        RETURN
+      ENDIF
+C
+      RETURN
+      END

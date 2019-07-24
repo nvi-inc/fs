@@ -1,0 +1,44 @@
+FTN77,I,Y  
+$CDS ON
+      SUBROUTINE GNEXT(LUT,IDCB,IERR,JBUF,IL,LEN,IFC,ILC) 
+      DIMENSION IDCB(1),JBUF(IL)
+      INTEGER*2 FmpRead
+C 
+10    CONTINUE
+      LEN=FmpRead(IDCB,IERR,JBUF,IL*2)
+      if(len.gt.0) then
+        if(mod(len,2).eq.1) then
+          len=len+1
+          idum=ichmv(jbuf,len,2h  ,1,1)
+        endif
+        len=len/2
+      endif
+      IF(IERR.NE.0.OR.LEN.LT.0) RETURN
+C
+      ILC=LEN*2
+      IFC=1
+      CALL GTFLD(JBUF,IFC,ILC,IC1,IC2)
+      IF(IC1.LE.0) GO TO 10
+      IF(ICHCM(JBUF,1,2H**,1,1).EQ.0) GO TO 10
+      IF(ICHCM(JBUF,11,6HFIVPT#,1,6).EQ.0) GO TO 100
+C     IF(ICHCM(JBUF,11,6HANTCN#,1,6).EQ.0) GO TO 100
+C
+C  MAKE SURE THIS IS IN LOG ENTRY FORMAT
+C
+C    IF NOT, JUST RETURN IT
+C 
+      IF(IAS2B(JBUF,1,4).NE.-32768.AND.IAS2B(JBUF,5,4).NE.-32768
+     +   .AND.IAS2B(JBUF,9,2).NE.-32768) GO TO 10 
+      IFC=1 
+      GO TO 1000
+C 
+100   CONTINUE
+      IFC=17
+      GO TO 1000
+C 
+1000  CONTINUE
+      ILC=2*LEN 
+C     CALL EXEC(2,LUT,JBUF,LEN)                                          DEBUG
+      RETURN
+C 
+      END 

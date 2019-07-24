@@ -1,0 +1,84 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE LODIS(IP,ICLCM),LO-FREQS DISPLAY C#870115:04:52# 
+C 
+C 1.1.   LODIS gets data from common variables and displays them
+C 
+C 2.  LODIS INTERFACE 
+C 
+C     INPUT VARIABLES:
+      DIMENSION IP(1) 
+C        IP(1)  - class number of buffer from MATCN 
+C        IP(2)  - number of records in class
+C        IP(3)  - error return from MATCN 
+C 
+C     OUTPUT VARIABLES: 
+C        IP(1) - CLASS
+C        IP(2) - # RECS 
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 2.5.   SUBROUTINE INTERFACE:
+C     CALLING SUBROUTINES: LOSET
+C     CALLED SUBROUTINES: character utilities 
+C 
+C 3.  LOCAL VARIABLES 
+      DIMENSION IBUF(30),IBUF2(30)
+C               - input class buffer, output display buffer 
+C        ILEN   - length of buffers, chars
+C        NCH    - character counter 
+      LOGICAL KCOM,KDATA
+      DIMENSION IREG(2) 
+C               - registers from EXEC 
+      EQUIVALENCE (REG,IREG(1)) 
+C 
+C 5.  INITIALIZED VARIABLES 
+      DATA ILEN/60/ 
+C 
+C 6.  PROGRAMMER: NRV & MAH 
+C     CREATED: 19820318 
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. First check error return from MATCN.  If not 0, get out
+C     immediately.
+C 
+C 
+      IF (ICLCM.EQ.0) GOTO 990
+      REG = EXEC(21,ICLCM,IBUF2,-ILEN)
+C 
+      NCHAR = IREG(2) 
+      NCH = ISCNC(IBUF2,1,NCHAR,75B)
+C                  Scan for "=" 
+      IF (NCH.EQ.0) NCH = NCHAR+1 
+C                  If no "=" found position after last character
+      NCH = ICHMV(IBUF2,NCH,2H/ ,1,1) 
+C                  Put / to indicate a response 
+C 
+C     2.  Get common variables for display
+C 
+200   IERR = 0
+      DO 310 I = 1,2
+          DO 300 J = 1,2
+              IF (FREQLO(J,I).GT.0) NCH = NCH+IR2AS(FREQLO(J,I),IBUF2,
+     .          NCH,6,0)
+              NCH = MCOMA(IBUF2,NCH)
+300           CONTINUE
+310       CONTINUE
+C 
+C     5. Now send the buffer to SAM and schedule PPT. 
+C 
+500   ICLASS = 0
+      NCH = NCH - 2 
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)
+C                   Send buffer starting with IFD to display, ignoring
+      IF (.NOT.KCHECK) IERR = 0 
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = IERR
+      IP(4) = 2HQ*
+990   RETURN
+      END 

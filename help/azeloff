@@ -1,0 +1,16 @@
+AZELOFF - Az-el source position offset
+
+Syntax:   AZELOFF=<az>,<el>
+Response: AZELOFF/<az>,<el>
+
+Settable parameters:
+<az>: Offset in azimuth, in numeric angle/degrees format. Response
+      is in degrees.
+<el>: Offset in elevation, in numeric angle/degrees format.
+      Response is in degrees.
+
+Monitor-only parameters: none
+
+     Comments: The antenna will move to the offset position when
+this command is issued. To return to the on-source position, issue
+this command with zero offsets.

@@ -1,0 +1,141 @@
+FTN77,Y,I  
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      SUBROUTINE HEAD_VLT(IHEAD,VOLT,IP,MICTOLIN)
+      INTEGER*2 IHEAD,IP(5)
+      REAL*4 VOLT,MICTOLIN
+C
+C  HEAD_VLT: position a head by voltage, try at most 50 times
+C
+C  INPUT:
+C     IHEAD - head to move, 1 or 2
+C     VOLT  - target position in voltage
+C     MICTOLIN - tolerance for positioning in microns @ NOMINAL 150uM/V
+C
+C  OUTPUT:
+C     IP - Field System retrun parameters
+C     IP(3) - error return, 0 if no error
+C
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+      INTEGER*2 I,ISPDHD
+      REAL*4 TMOVE
+      REAL*4 MICDST,MICNOW,MICOFF,VLTNOW,MICLST,VLTLST,VLTOTH
+      REAL*4 SPDNEW,SPDRAW,SPDOLD,VLTLIM,SCALE,MICTOL
+C
+      IF(VOLT.LT.-0.010) THEN
+       SCALE=RSLOPE(IHEAD)
+      ELSE IF(VOLT.GT.0.010) THEN
+       SCALE=PSLOPE(IHEAD)
+      ELSE
+       SCALE=MAX(RSLOPE(IHEAD),PSLOPE(IHEAD))
+      ENDIF
+      MICTOL=(MICTOLIN/150.)*SCALE
+      MICTOL=MAX(MICTOL,(ILVTL_FS*0.0049+0.0026)*SCALE)
+C
+      CALL VLT2MIC(IHEAD,0,VOLT,MICDST,IP)
+      IF(IP(3).NE.0) RETURN
+C
+      CALL VLT_HEAD(IHEAD,VLTNOW,IP)
+      IF(IP(3).NE.0) RETURN
+C
+      CALL VLT2MIC(IHEAD,0,VLTNOW,MICNOW,IP)
+      IF(IP(3).NE.0) RETURN
+C
+      VLTLST=VLTNOW
+      MICLST=MICNOW
+      MICOFF=MICDST-MICNOW
+      I=0
+      ILIMIT=0
+      VLTLIM=0.0
+C
+      DO WHILE (ABS(MICOFF).GT.MICTOL.AND.I.LT.50)
+        CALL HEAD_D_MIC(IHEAD,MICOFF,TMOVE,ISPDHD,IP)
+        IF(IP(3).NE.0) RETURN
+C
+        CALL VLT_HEAD(IHEAD,VLTNOW,IP)
+        IF(IP(3).NE.0) RETURN
+C
+        CALL VLT2MIC(IHEAD,0,VLTNOW,MICNOW,IP)
+        IF(IP(3).NE.0) RETURN
+C
+        IF(KHECHO_FS) THEN
+          WRITE(LU,91) IHEAD,MICLST,MICOFF,MICNOW-MICLST
+        ENDIF
+91      FORMAT(I4,3F8.1)
+C
+        IF(KADAPT_FS.AND.ABS(MICDST-MICNOW).GT.MICTOL.AND.ISPDHD.EQ.1)
+     &    THEN
+          CALL VLT_HEAD(3-IHEAD,VLTOTH,IP)
+          IF(IP(3).NE.0) RETURN
+          IF(ABS(VLTOTH).GE.9.989) GO TO 20
+          IF(VLTLST.GT.LMTN_FS(IHEAD).AND.VLTLST.LT.LMTP_FS(IHEAD).AND.
+     &       VLTNOW.GT.LMTN_FS(IHEAD).AND.VLTNOW.LT.LMTP_FS(IHEAD)) THEN
+             IF(ABS(MICNOW-MICLST).GT.20.) THEN
+               IF(MICOFF.GT.0.0) THEN
+                 SPDOLD=FASTRV(IHEAD)
+               ELSE
+                 SPDOLD=FASTFW(IHEAD)
+               ENDIF
+               SPDRAW=ABS(MICNOW-MICLST)/TMOVE
+               IF(ABS(SPDRAW-SPDOLD).LT.0.05*SPDOLD)THEN
+                 SPDNEW=SPDRAW
+               ELSE IF(SPDRAW.GT.SPDOLD) THEN
+                 SPDNEW=SPDOLD*1.05
+               ELSE
+                 SPDNEW=SPDOLD*0.95
+               ENDIF
+               SPDNEW=MIN(MAX(5.,SPDNEW),5000.)
+               IF(MICOFF.GT.0.0) THEN
+                 FASTRV(IHEAD)=SPDNEW
+               ELSE
+                 FASTFW(IHEAD)=SPDNEW
+               ENDIF
+             ENDIF
+             ILIMIT=0
+             VLTLIM=0.0
+           ELSE IF(MICOFF.GT.0.0.AND.VLTNOW.GT.LMTP_FS(IHEAD)) THEN
+             IF(ILIMIT.LE.0.OR.ABS(VLTLIM-LMTP_FS(IHEAD)).GT.0.003) THEN
+               VLTLIM=LMTP_FS(IHEAD)
+               ILIMIT=1
+             ELSE
+               ILIMIT=ILIMIT+1
+             ENDIF
+           ELSE IF(MICOFF.LT.0.0.AND.VLTNOW.LT.LMTN_FS(IHEAD)) THEN
+             IF(ILIMIT.GE.0.OR.ABS(VLTLIM-LMTN_FS(IHEAD)).GT.0.003) THEN
+               VLTLIM=LMTN_FS(IHEAD)
+               ILIMIT=-1
+             ELSE
+               ILIMIT=ILIMIT-1
+             ENDIF
+           ELSE
+             ILIMIT=0
+             VLTLIM=0.0
+           ENDIF
+           IF(ABS(ILIMIT).GE.5) THEN
+             IP(3)=-407
+             IP(4)=2HQ@
+             RETURN
+           ENDIF
+           LMTP_FS(IHEAD)=MAX(LMTP_FS(IHEAD),VLTNOW-0.010)
+           LMTN_FS(IHEAD)=MIN(LMTN_FS(IHEAD),VLTNOW+0.010)
+20         CONTINUE
+        ENDIF
+C
+        VLTLST=VLTNOW
+        MICLST=MICNOW
+        MICOFF=MICDST-MICNOW
+C
+        I=I+1
+        IF(IFBRK().LT.0) THEN
+          IP(3)=-405
+          IP(4)=2HQ@
+          RETURN
+        ENDIF
+      ENDDO
+C
+      IF(ABS(MICOFF).LT.MICTOL) RETURN
+      IP(3)=-404
+      IP(4)=2HQ@
+      RETURN
+      END

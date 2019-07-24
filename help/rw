@@ -1,0 +1,9 @@
+RW - Rewind tape
+
+Syntax:   RW
+Response: RW/<acknowledgement>
+
+Parameters: none
+
+      Comments: The tape is started moving in reverse at high speed
+(270 ips). Record is disabled and the low tape sensor is turned on.

@@ -1,0 +1,22 @@
+FTN77,I,Y  
+$CDS ON
+      SUBROUTINE PO2PL(IOX,IOY,IX,IY) 
+C 
+C  convert Object 2 PLotter 
+C 
+      COMMON/PPLOT/ICHARS,IWIDX,IWIDY,
+     +             IXMIN,IXMAX,IYMIN,IYMAX, 
+     +             XMIN,XMAX,YMIN,YMAX, 
+     +             ROTAT(2,2) 
+C 
+C      WRITE(1,9956) IOX,IOY                                             DEBUG
+C9956  FORMAT(" PO2PL: IOX,IOY ",2I7)                                    DEBUG
+C 
+      IOXL=MAX0(1,MIN0(IOX,IXMAX-IXMIN+1))
+      IOYL=MAX0(1,MIN0(IOY,IYMAX-IYMIN+1))
+C 
+      IX=IOXL-1+IXMIN 
+      IY=IOYL-1+IYMIN 
+C 
+      RETURN
+      END 

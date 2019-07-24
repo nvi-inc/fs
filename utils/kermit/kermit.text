@@ -1,0 +1,473 @@
+""
+HELP
+  
+This info goes with KERMIT version 1.99 or later, as of April 24, 1987. 
+  
+KERMIT is a file-transfer protocol for use over an asynchronous serial
+telecommunications lines.  Files are broken up into "packets", adding 
+checksums and other control information to ensure, with high likelihood,
+error-free and complete transmission. 
+  
+KERMIT-RTE is implemented for HP-1000 systems running RTE-6/VM or RTE-A.
+The following commands may be entered in upper- or lower-case:
+  Bye      Connect  Exit     Finish   Get      Help     Quit     REceive
+  RUn      SET      SENd     SERver   SHow     STatus   Transfer
+Note: the minimum allowable abbreviation is shown in UPPER-CASE.
+  
+Info about a given command's parameters, if any, is available via a "?" --
+"SET ?" gives you a list of settable parameters.  Info about the commands 
+themselves is available via "HELP <command>" where you replace "<command>"
+with one of the commands shown above.  If you need even more help, consult
+the KERMIT user's manual. 
+""
+CONNECT 
+  
+CONNECT [<lu#>] 
+  
+The CONNECT command puts KERMIT into a terminal-emulator state, connecting
+your terminal to either the <lu#> in this command, if given, or to the LU#
+given in a previous SET LINE command.  Anything you type will be sent to
+the other "remote" computer; anything it sends back will be displayed on
+your terminal.  WARNING: If you are NOT connected via a "D" mux (currently
+only under RTE-A), TYPE SLOWLY! You may otherwise lose keystrokes.
+  
+When you are typing to KERMIT-RTE, it will prompt you with "KERMIT-RTE>"
+unless you have changed the prompt (see SET PROMPT for info).  When you 
+CONNECT to another machine, you will see information about how to ESCAPE
+back to KERMIT-RTE, and then you will be typing as if you were on a terminal
+directly connected to the other machine.  When you need to return to KERMIT-
+RTE (to give it a command or to exit), you will need to type the ESCAPE info
+as shown in the message you got when you did the CONNECT (see SET ESCAPE for
+more info).  You will then get a message about having returned to the local 
+machine and KERMIT-RTE. 
+""
+EXIT
+""
+QUIT
+  
+EXIT or QUIT causes this KERMIT to shut itself down in an orderly way (as 
+opposed to crashing!), closing debugging files if opened, and restoring 
+various things to their original state before KERMIT was run. 
+  
+If you are running KERMIT-RTE as a server, you must use the FINISH, BYE, or 
+LOGOFF commands from your local machine rather than QUIT or EXIT. 
+""
+GET 
+""
+RECEIVE 
+  
+GET <file-descriptor> [<file-mask>] 
+RECEIVE [<file-mask>] 
+  
+GET and RECEIVE tell this KERMIT to receive one or more files from the
+KERMIT running on the other computer, be it a PC or another mainframe.
+  
+If the other KERMIT is a SERVER, you MUST use GET instead of RECEIVE; GET 
+requires a file-descriptor which must be legal for the remote system, and 
+may contain wild-cards if the remote KERMIT will accept them. 
+  
+The optional <file-mask> parameter allows you to rename the first received
+file to that mask, and remaining files using all but the file-name part of
+the mask.  If the received files are put in FMGR space, their names will be 
+subject to (possibly severe) editing, since FMGR allows only 6 characters.
+FILE-WARNING NOTE: If a received file's name conflicts with an existing file, 
+the RECEIVE or GET will be aborted with a message unless file-warnings are
+off.  If file-warnings are off, new files will overlay the first existing 
+one with the same name.  Do "HELP SET WARNING" if you need more information 
+on this.
+""
+SEND
+  
+SEND <file-descriptor> [<first file-name>]
+  
+"SEND <file-descriptor>" causes KERMIT-RTE to send the file(s) matching the 
+file-descriptor to the other KERMIT whether or not it is a SERVER.
+  
+"SEND <file-descriptor> <first file-name>" works as above starting with the 
+given file-name (wild-cards are NOT allowed here!); this is used primarily
+to resume sending a set of files after some kind of interruption. 
+  
+Files' names are sent to the "other" KERMIT in a "packet" so that they will 
+know what to receive.  If the SEND command is issued to the remote KERMIT 
+(you are CONNECTed) then you must escape back to the local KERMIT to give a 
+RECEIVE command within 15 seconds or this packet may be lost.  If this is 
+not an appropriate delay, you may alter it using the SET DELAY command. 
+""
+RUN 
+  
+"[RUN] <program-name> [<run-string parameters>]" causes KERMIT to schedule
+the named program with wait, passing any run-string parameters as supplied. 
+If the program so scheduled returns a non-zero first parameter or a string, 
+they will be displayed at your terminal.
+""
+SERVER
+  
+This command causes KERMIT-RTE to act as a server, getting all further
+commands from another KERMIT in "packets".  This command may only be used 
+if this KERMIT-RTE is the "remote" KERMIT and the "local" KERMIT knows how
+to talk to a server (not all of them do!).   Once this KERMIT becomes a 
+server, you will be told to ESCAPE back to the local KERMIT.
+  
+Once acting as a server, KERMIT-RTE may only be shut down by a local KERMIT 
+command such as FINISH, BYE, or LOGOUT, as appropriate.  FINISH will shut 
+down KERMIT-RTE but not log-off the session.  If you need to rename received
+files or direct them to a particular directory during a server receive, you 
+may SET RMASK to accomplish this before starting the server -- see SET RMASK
+for further information.
+  
+KERMIT-RTE is set up so that if the default communication parameters are
+already compatible with your PC, you can "[ru] kermit SERver".
+""
+STATUS
+  
+STATUS causes KERMIT-RTE to display retry- and overall packet-counts and
+timing information about the most recent file transfer, and retry- and
+overall packet-counts of all file transfers done during the current 
+KERMIT-RTE session. 
+""
+TRANSFER
+  
+Transfer <file-name> [NOecho] 
+  
+This causes all further commands to be obtained from the file-name given. 
+If 'NO' or blanks appear after the file-name, commands obtained from the
+file will not be echoed at the console; anything else will cause those
+commands to be shown at your terminal as they are processed.
+  
+Transfer-files may contain any legal command except the transfer command
+itself.  If the transfer-file contains a blank line, control will return
+to your terminal for one command, and then return to the transfer-file. 
+If you should inadvertently put a blank line in the transfer-file, you
+will have to enter SOMETHING at the KERMIT-RTE prompt; entering one or
+more commas will return you to the transfer-file.  At the end of the file 
+control automatically return to your terminal.  NOTE: all commands which
+appear in a transfer-file after a SERVER command will not be processed! 
+""
+FINISH
+""
+BYE 
+  
+BYE or FINISH 
+  
+FINISH causes the remote KERMIT to terminate but not log-off from the remote
+system when the remote KERMIT is acting as a server.  It does not cause the 
+local KERMIT to terminate.
+  
+BYE causes the remote KERMIT to terminate AND log-off from the remote system
+when the remote KERMIT is acting as a server.  It DOES cause KERMIT-RTE to
+terminate as if an EXIT or QUIT command was given.
+  
+WARNING: You should NOT use the BYE command under any KERMIT if there is a
+permanent connection between the systems, and if some kind of "log-on" is 
+usually performed on BOTH systems.  If you do use the BYE command in such 
+a situation, one system's log-off messages could act like a log-on attempt
+to the other system, and since that is bound to fail, the resulting message 
+will be like a log-on attempt to the first system, resulting in a chain-
+reaction which has been known to seriously degrade system performance.
+""
+SHOW
+""
+< 
+  
+SHOW
+SET <param> <value> 
+  
+SET and SHOW allow you to set or see system-dependent characteristics.
+  
+SHOW causes KERMIT-RTE to display the values of the SET parameters, and 
+various other information.
+  
+SET commands require one of the following <parameter-names>:
+  BInary   BQuote   Check    DEBug    DELay    Escape   Ibm      Line 
+  PACket   PARity   PRompt   Quote    REPeat   RETry    RMask    Sync 
+  Warning 
+NOTE: The minimum allowable abbreviation is shown in UPPER-CASE.
+  
+SET commands also require a value which is dependent on which parameters
+is being set.  If a parameter requires a numeric value, you may enter it
+in decimal, octal (post-fixed with a 'B'), hexadecimal (post-fixed with 
+an 'H'), or as a single literal character (post-fixed with a '"').
+  
+For more information on the settable parameters and the type of allowable 
+values they require, do "help set <parameter-name>" from the above list;
+to get help on set debug, for example, you would type "help set debug". 
+""
+BINARY
+  
+SET BINARY ON or OFF
+  
+As of version 1.97, KERMIT-RTE can transfer non-ASCII files to compatible 
+KERMITs if you SET BINARY ON. 
+  
+"Normal" (non-binary) transfers convert the logical END-OF-RECORD in a file 
+to a <CR> <LF> sequence which all KERMITs know how to use.  If this sequence
+appears as part of the normal data in a file, the destination KERMIT will 
+start a new record at that point and drop both characters.  Once you have 
+SET BINARY ON, KERMIT-RTE will transfer all data as it appears in the file
+and ignore the "special" significance of CR/LF within the file.  Further, 
+the file's record-structure is ignored; the file operates as if it's records
+are all 256 bytes long.  For this reason you should GET or RECEIVE (or SET
+RMASK) using a FULL FILE DESCRIPTION, including the type, size, and record- 
+length.  Otherwise the file will default to type-4, 24 blocks, record-length
+of 0. 
+  
+NOTE: if the communications line requires parity other than NONE, and if you
+have disabled binary-quoting (see SET BQUOTE), transfers of binary files
+will not be allowed.
+""
+BQUOTE
+  
+SET BQUOTE <value>
+  
+If you need to send non-text data to another KERMIT using a communications
+line with parity other than NONE, KERMIT-RTE can do "8th-bit prefixing" if
+the other KERMIT agrees to do it also.  What this means is that if KERMIT is
+about to send a character which has it's 8th bit set, KERMIT will send a
+special character (the "BQUOTE") before it (which tells the other KERMIT to 
+set the 8th bit on the next character it receives).  The setting of the 8th 
+bit would otherwise be lost due to the parity setting.
+  
+With this command you may set the BQUOTE to something other than the usual
+"&" (46 octal).  The value you enter is the character-code of the character 
+you would like to use (which must match what the other KERMIT expects); it
+must be in the range of 33-62 or 96-126 (all numbers decimal) and it must be
+different than the QUOTE (for control codes) and the REPEAT (use for repeat-
+count processing).  You may enter this number in decimal, octal (nnnB), 
+hexadecimal (nnH), or as the literal character followed by a quote ("). 
+  
+You should not have to change this for most KERMITs.  Setting the BQUOTE to 
+32 decimal (ASCII blank) turns 8th-bit prefixing off; this interacts with 
+the communications-line parity and may prevent binary-file transfers. 
+""
+CHECK 
+  
+SET CHECK <checksum type> 
+  
+This command allows you to request alternate checksum bytes within packets: 
+      "SET CHECK 1" builds 1-byte (arithmetic) checksums <default>
+      "SET CHECK 2" builds 2-byte (arithmetic) checksums
+      "SET CHECK 3" builds 3-byte (CCITT-CRC) checksums 
+  
+By setting CHECK to 2 or 3, KERMIT's error-detecting capability increases,
+but only if the other KERMIT can also do it!  If it can't do 2- or 3-byte 
+checksums, don't worry, because all KERMITs already know to do the 1-byte 
+checksum. 
+""
+DEBUG 
+  
+SET DEBUG <keyword> 
+  
+In the event that you experience some problem with KERMIT-RTE's operations, 
+you may arrange for KERMIT-RTE to perform some self-diagnosis.  Before you
+can debug any of KERMIT-RTE's operations, you must first setup it's debug 
+logging file via "SET DEBUG FILE <file-name>", which will create the given
+file if it doesn't already exist.  NOTE - if the debug logging file already 
+exists, it will be overlaid!  You may then "SET DEBUG <type>" as shown in 
+the following to obtain:
+   STATES - shows packet numbers/types and internal state as
+            A Abort transmission  B Break transmission  C Transfer complete 
+            D Data                E Error               F File header 
+            R Receive initiate    S Send initiate       T Timeout 
+            Z End of file 
+   PACKETS - shows the actual data in incoming and outgoing KERMIT packets. 
+             You will need to consult the KERMIT protocol manual in order 
+             to get a description of these
+   ALL     - a combination of STATES and PACKETS
+   OFF     - turns off debugging
+""
+DELAY 
+  
+SET DELAY <value> 
+  
+This sets the time in seconds which the KERMIT-RTE will delay before it 
+sends the first packet of a file.  It starts out at 15 seconds and you may
+change to anything from 1 to 30 seconds, to give yourself time to escape
+back to the local KERMIT to give a RECEIVE command.  This command will not
+be allowed if this KERMIT is the local one. 
+  
+      SET DELAY 25   sets the send-delay to 25 seconds. 
+""
+PROMPT
+  
+SET PROMPT [<up to 20 non-blank characters>]
+  
+When you are trying to work with a copy of KERMIT-RTE at both ends of a link, 
+you may have some difficulty in determining whether a command-line prompt is
+for the "local" KERMIT or for a "remote" KERMIT.  To resolve this problem,
+you may change the command-line prompt that KERMIT-RTE uses to any sequence 
+of up to 20 non-blank characters (a blank terminates the prompt-string);
+KERMIT-RTE will shift the string to all upper-case.  If no prompt-string is 
+given, the original command-prompt will be restored.
+""
+IBM 
+  
+SET IBM ON or OFF 
+  
+You may "SET IBM ON" or "SET IBM OFF" only if the local KERMIT is talking 
+to a remote KERMIT requiring IBM mode (half-duplex).  If IBM mode is ON,
+KERMIT will wait until it has received a DC1 (XON, or ^Q) character before
+it transmits anything.  Further, IBM ON causes KERMIT-RTE to locally echo 
+keystrokes during CONNECT mode. 
+""
+LINE
+  
+SET LINE <lu> 
+  
+This tells KERMIT-RTE which logical unit number (<lu>) is to be used for
+communications to a remote computer.  The LU# must be legal for your session, 
+and should be a 12792B/C or 12040B/C/D multiplexer port hooked to the desired 
+remote computer or modem. 
+  
+KERMIT-RTE starts up in "remote-host" mode, which means it expects that 
+you are running from a PC and will transfer files on "LU 1".  By setting
+the line to some other LU, you are putting KERMIT-RTE into "local-host" 
+mode.  Some commands work in one mode and not the other, or they operate
+differently depending on the KERMIT's mode.  You can switch from local- 
+host mode back to remote-host mode by SETting LINE to your terminal LU. 
+""
+PACKET
+  
+SET PACKET <size> 
+  
+This is used to change the packet size from it's default 94 bytes to any
+size from 31 to 94 bytes.  If the connection is very good, you may get
+slightly better thruput with a packet size of 94 bytes.  For noisy lines, 
+you may be able to avoid (costly) retries by reducing the packet size 
+""
+PARITY
+  
+SET PARITY NONE/ODD/EVEN/MARK/SPACE 
+  
+As of version 1.97, you may set the parity of KERMIT's remote line.  When 
+the system boots up, a port's parity is set by the system manager to suit 
+the needs of most users.  If you need to communicate with a remote system 
+which uses some other parity, you may change it (before you CONNECT) to be
+compatible with the other system.  KERMIT will restore the original parity
+when you SET LINE to some other LU or exit out of KERMIT. 
+  
+WARNING -- use this command with extreme caution!  If the parity you set is 
+different from what the other system actually does use, you may still be
+able to talk through CONNECT, but file-transfers will be impossible, and it 
+will be difficult to determine why! 
+  
+NOTE -- KERMIT-RTE supports "binary quoting" for the transfer of some non-
+printable data over lines where parity is not NONE (do H BQuote for info).
+""
+WARNING 
+  
+SET WARNING OFF or ON 
+  
+You may "SET WARNING OFF" to allow received file(s) to overlay existing 
+file(s) with the same name. 
+  
+You may "SET WARNING ON" to restore KERMIT-RTE's starting condition, in 
+which a file-reception which would overlay an existing file will be aborted 
+and you will get an error message telling you about it. 
+""
+RETRY 
+  
+SET RETRY <number of retries/packet> [Initial]
+  
+If KERMIT encounters an error in receiving or sending a packet to the other 
+computer, it will retry sending that packet.  It will keep on retrying the
+packet transfer operation until the retry-limit is reached.  The retry- 
+counter is reset each time a packet is successfully transferred so that an
+intermittently noisy line can be tolerated. 
+  
+KERMIT-RTE starts with a retry-limit of 5; with this command you may change 
+it to any value from 5 to 30.  If you can't transfer a packet trying 30 
+times, you probably never will. 
+  
+If you include the (I)nitial qualifier (only the first character is used),
+you will adjust the retry-limit used on initiation of a connection.  The
+default setting for the initial retry-limit is 15; you may increase it to 
+30, as above. 
+""
+RMASK 
+  
+SET RMASK <file-mask> 
+  
+Since server-receives won't allow you to specify any receive-mask info, 
+this command, given before the server command, will do it for you.  The 
+file mask may specifications for directory, subdirectory, type-extension, 
+file-type, file-size, security-code, record-length, and so on, but wild-
+card characters may not be used.  NO CHECKING IS PERFORMED as to the
+validity of the file-mask when it is entered, only when it is used.  If the 
+file-mask parameter is not given, a previously-defined file-mask (if any) 
+will be cleared; otherwise, any subsequent server-receives will function
+exactly like a RECEIVE command with the same file-mask.  Do "HELP RECEIVE"
+for more information. 
+""
+QUOTE 
+  
+SET QUOTE <value> 
+  
+The quote character is the character that the local KERMIT sends to prefix
+control-characters which may occur in the files to be transferred.  The 
+normal quote character is "#" (43 octal), and there should be no reason to
+change this.  If the remote KERMIT requires some other quote character, 
+enter it's NUMERIC VALUE (character-code) as "SET QUOTE <value>", entering
+the value in decimal, octal (nnnB), hexadecimal (nnH), or as a literal
+character followed by a quote character (").  The character-code for this 
+alternate quote character must be in the range of 33 to 126 (decimal), and
+it must not conflict with the BQUOTE character (for 8th-bit flagging) or the
+REPEAT character (for repeat-count processing). 
+""
+REPEAT
+  
+SET REPEAT <value>
+  
+The repeat character is the character that the local KERMIT sends to prefix 
+a repeat-count character.  If both KERMITs agree to do it (with the same
+character), data can be compressed if 4 or more identical characters need 
+to be sent consecutively. 
+  
+This command allows you to set KERMIT-RTE's repeat character to match the 
+one that the other KERMIT is using.  The usual repeat-character is a "~"
+(tilde, decimal 126, or octal 176), and most KERMITs which know how to do 
+this will use it.  If the KERMIT you want to talk with uses some other
+character to prefix repeat-counts, you may enter it's character code here 
+in decimal, octal (nnnB), hexadecimal (nnH), or as a literal character if 
+entered followed by a quote character (").  It must not be the same as
+either the QUOTE character (for control-codes) or the BQUOTE character (for 
+8th-bit processing).  The value you enter must be in the range of 33-62 or
+96-126. 
+""
+SYNC
+  
+SET SYNC <value>
+  
+The sync character is the character the local KERMIT expects to receive as
+the first character of any from the other KERMIT.  Control-A is the default 
+sync for most KERMITs and there should be no reason to change it.  If the 
+other KERMIT uses some other SOH, you must "SET SOH <value>", where <value> 
+is the character-code (a number) of the SOH character to be used; it must be
+from 1 to 31 and must not conflict with the EOL or IBM-prompt characters. 
+  
+The character-code may be entered in decimal, octal (nnnB), hexadecimal (nnH),
+or as a literal followed by a quote character (").
+""
+ESCAPE
+  
+SET ESCAPE <value>
+  
+The escape character is the character that you enter to "escape" back to the
+local KERMIT after CONNECTing to another machine.  The normal escape for
+KERMIT-RTE is control-] (35 octal) and probably doesn't need to be changed. 
+If this character is commonly used by the other machine for some reason, you
+may change by "SET ESCAPE <value>", where <value> is the character-code (a
+number) of the escape character to be used, which must range from 1 to 31 
+(decimal).  The actual value may be entered in decimal, octal (nnnB), hexa- 
+decimal (nnH), or as a literal followed by a quote character ("). 
+  
+The escape character is always a control-code of some kind.  It tells the 
+KERMIT terminal emulator to look for the next character as a KERMIT command 
+(rather than sending it to the remote computer).  If the default escape 
+character (control-], abbreviated as ^]) is in effect, then 
+  
+    ^]^] will actually send one ^] to the remote computer 
+    ^]C  will "Close" the CONNECTion (return to local)
+    ^]Q  will Quit debug logging, if active 
+    ^]R  will Resume debug logging, if previously active
+  
+Note that there are no spaces between the escape and the command character. 

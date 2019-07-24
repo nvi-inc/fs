@@ -1,0 +1,437 @@
+FTN77,I,Y  
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      SUBROUTINE FFMP(LUI,LUO,IB,ICHI,LPROC,LDEF)
+C
+C 1.  FFMP PROGRAM SPECIFICATION
+C
+C 1.1.   FFMP is a simplified FMGR for use with the Mark III field system.
+C        There are two sets of commands available.  Commands without the
+C        PF prefix (DL, LI, PU, RN, ST) apply to individual procedures
+C        within a procedure file.  The command LL is also handled here.
+C        The default prodedure file is the one currently used by BOSS.
+C
+C 1.2.   RESTRICTIONS - Only procedure files are accessible.  These have
+C        the prefix "[PRC" which is transparent to the user.  Procedures are
+C        available only on disc ICRPRC.
+C
+C 1.3.   REFERENCES - Field system manual
+C
+C 2.  FFMP INTERFACE
+C
+C 2.1.   CALLING SEQUENCE: CALL FFMP(LUI,LUO,IB,ICHI,LPROC,LDEF)
+C
+C     INPUT VARIABLES:
+C
+C        LUI,LUO - input, output LU's
+      DIMENSION IB(51)
+C               - line and record buffer
+C        ICHI   - number of characters from keyboard
+      CHARACTER*12 LPROC
+C               - procedure file currently active in PFMED
+      CHARACTER*34 LDEF
+C               - DEFINE line at top of each procedure
+C
+C 2.2.   COMMON BLOCKS USED:
+C
+      INCLUDE PFMED.FTNI
+C
+C 2.3.   DATA BASE ACCESSES: none
+C
+C 2.4.   EXTERNAL INPUT/OUTPUT
+C
+C     INPUT VARIABLES: none
+C
+C     OUTPUT VARIABLES:
+C
+C     TERMINAL   - error message
+C
+C 2.5.   SUBROUTINE INTERFACE:
+C
+C     CALLING SUBROUTINES: PFMED
+C
+C     CALLED SUBROUTINES: FMP routines, ICHMV, IB2AS, IAS2B, ISCNC, JCHAR,
+C                         ICHCM, IFILL, MIN0, PFBLK, PFCOP
+  
+C 3.  LOCAL VARIABLES
+C
+      CHARACTER*12 LFR,LPF
+      CHARACTER LRN
+      LOGICAL*2 LGE,LLE,ldupl
+      CHARACTER*28 PATHNAME
+C               - file names
+      CHARACTER*74 LNAM1,LNAM2,IBC,IBC2
+      INTEGER*2 TRIMLEN,FMPREADSTRING
+      CHARACTER*40 CMESSAGE
+      LOGICAL KERR
+C
+C 4.  CONSTANTS USED
+C
+C 5.  INITIALIZED VARIABLES: none
+C
+C 6.  PROGRAMMER: C. Ma
+C     LAST MODIFIED: <910710.1928>
+C# LAST COMPC'ED  870115:05:41 #
+C
+C     PROGRAM STRUCTURE
+C
+C     Exit if no procedure file active.
+  
+      IF(LPROC.EQ.' ') THEN
+        WRITE(LUI,'("NO PROCEDURE FILE ACTIVE")')
+        RETURN
+      END IF
+  
+C     Initialize and parse names.
+      LNAM1= ' '
+      LNAM2= ' '
+C     Search for commas.
+      IC1=ISCNC(IB,1,ICHI,54B)
+C     No commas means no names.
+      IF(IC1.GT.0) THEN
+        IC2=ISCNC(IB,IC1+1,ICHI,54B)
+        IF(IC2.EQ.0) IC2=ICHI+1
+C     Move first name to buffer.
+        NCH1 = IC2-IC1-1
+        CALL HOL2CHAR(IB,IC1+1,IC2-1,LNAM1)
+C     Move second name if present.
+        IF(ICHI.GT.IC2) THEN
+          NCH2 = ICHI-IC2
+          if ((nch2.le.0).or.(nch2.gt.12)) then
+            write(lui,'("Error, procedure names must be less than 12"
+     .                   " characters")')
+            return
+          end if
+          CALL HOL2CHAR(IB,IC2+1,ICHI,LNAM2)
+        END IF
+      END IF
+  
+C     DL - list procedures in active procedure file.
+  
+      IF(IB.EQ.2HDL) THEN
+        IX=1
+        ID = FmpRewind(IDCB3,IERR)
+        IF (IERR.NE.0) GOTO 990
+        IBC = ' '
+        len = 0
+        DO while (len.ge.0)
+          LEN = FmpReadString(IDCB3,IERR,IBC2)
+          IF(IERR.LT.0.OR.LEN.LT.0) GO TO 130
+C     Check for DEFINE.
+          IF (IBC2(1:6).NE.'DEFINE') GOTO 120
+C     Move name to print buffer.
+          IBC(IX:IX+11) = IBC2(9:20)
+          IX=IX+13
+          IF(IX.LT.66) GO TO 120
+C         Print buffer and reset pointer.
+          NCH = TRIMLEN(IBC)
+          IF (NCH.GT.0) WRITE(LUO,'(A)')IBC(:NCH)
+          IBC = ' '
+          IX=1
+120     end do
+C       Write last line.
+130     IF(IX.GT.1) THEN
+          NCH = TRIMLEN(IBC)
+          IF (NCH.GT.0) WRITE(LUO,'(A)') IBC(:NCH)
+        END IF
+        GO TO 900
+      END IF
+ 
+C     LI - list procedure.
+  
+      IF(IB.EQ.2HLI) THEN
+C     Check for name.
+        IF(LNAM1.EQ.' ') THEN
+          WRITE(LUI,'("No filename given")')
+          GOTO 900
+        END IF
+C     Search file for DEFINE  procedurenam.
+        ID = FmpRewind(IDCB3,IERR)
+        IF (IERR.NE.0) GOTO 990
+        len = 0
+        DO while (len.ge.0)
+          LEN= FmpReadString(IDCB3,IERR,IBC)
+          IF(IERR.LT.0.OR.LEN.LT.0) GO TO 226
+          IF(IBC(1:6).EQ.'DEFINE'.AND.IBC(9:20).EQ.LNAM1(1:12)) GOTO 221
+        end do
+C     Output body of procedure.
+221     len = 0
+        DO while(len.ge.0)
+          LEN= FmpReadString(IDCB3,IERR,IBC)
+          IF(IERR.LT.0.OR.LEN.LT.0) GOTO 230
+          IF(IBC(1:6).EQ.'ENDDEF') GOTO 230
+          NCH = TRIMLEN(IBC)
+          IF (NCH.GT.0) WRITE(LUO,'(A)') IBC(:NCH)
+        end do
+        GOTO 230
+226     WRITE(LUI,'("Procedure cannot be found")')
+C     Rewind scratch file.
+230     ID = FmpRewind(IDCB3,IERR)
+        IF (IERR.NE.0) GOTO 990
+        GO TO 900
+      END IF
+  
+C     PU - purge procedure from active procedure file.
+  
+      IF (IB.EQ.2HPU) THEN
+        IF (LNAM1.EQ.' ') THEN
+          WRITE(LUI,'("No filename given")')
+          GOTO 900
+        END IF
+C     Create scratch file 2.
+        ID = FmpOpen(IDCB2,IERR,LSF2,'rwc',IDCBX/128)
+        IF(IERR.LT.0) ID = FmpOpen(IDCB2,IERR,LSF2,'rwo',IDCBX/128)
+        IF(IERR.LT.0) GOTO 381
+        ID = FmpRewind(IDCB3,IERR)
+        IF(KERR(IERR,'FFMP','Rewinding',' ',0,0)) RETURN
+C     Copy scratch file minus purged procedure.
+        KPU=0
+        ierr = 0
+        len = 0
+        LEN = FmpReadString(IDCB3,IERR,IBC)
+        DO while (LEN.GE.0)
+          IF (IERR.LT.0) then
+            write(lui,'("Error reading procedure file")')
+            GO TO 389
+          end if
+          IF ((IBC(1:6).eq.'DEFINE').and.
+     .        (IBC(9:20).eq.LNAM1(1:12))) then
+            kpu = -1
+          else if (kpu.ne.-1) then
+            NCH = TRIMLEN(IBC)
+            IF (NCH.GT.0) ID = FmpWriteString(IDCB2,IERR,IBC(:NCH))
+            IF(IERR.LT.0) GOTO 389
+          end if
+          IF ((IBC(1:6).eq.'ENDDEF').and.(kpu.eq.-1)) then
+            kpu = 1
+          end if
+          LEN = FmpReadString(IDCB3,IERR,IBC)
+        end do
+C     Check if procedure found.
+        IF(KPU.NE.1) then
+          write(lui,'("Procedure ",a," not found")') lnam1(:NCH1)
+          GOTO 389
+        end if
+C     Close old scratch copy.
+        ID = FmpClose(IDCB3,IERR)
+        IF(KERR(IERR,'FFMP','Closing',' ',0,0)) RETURN
+C     Replace procedure file.
+        CALL PFBLK(3,LPROC,LFR)
+C     Copy new version.
+        CALL PFCOP(LPROC,LUI,ID)
+        GO TO 900
+      END IF
+  
+C     LL - change list device.
+  
+      IF(IB.EQ.2HLL) THEN
+        CALL IFILL(IB,1,3,2H  )
+        LUO=IAS2B(IB,4,ICHI-3)
+        IF (LUO.LT.1.OR.LUO.GT.63) THEN
+          WRITE(LUI,'("LL MUST BE BETWEEN 1 AND 63")')
+          LUO=LUI
+        END IF
+        GOTO 900
+      END IF
+  
+C     RN - rename procedure.
+  
+      IF(IB.EQ.2HRN) THEN
+        IF (LNAM1.EQ.' ') THEN
+          WRITE(LUI,'("No filename given")')
+          GOTO 900
+        END IF
+        IF (LNAM2.EQ.' ') THEN
+          WRITE(LUI,'("No destination filename given")')
+          GOTO 900
+        END IF
+C     Check for illegal name.
+        LRN=LNAM2(1:1)
+        IF ((LGE(LRN,'0')).AND.(LLE(LRN,'9'))) THEN
+          WRITE(LUI,'(A,"ILLEGAL PROCEDURE NAME")') LNAM2(:NCH2)
+          GO TO 900
+        END IF
+C     Create scratch file 2.
+        ID = FmpOpen(IDCB2,IERR,LSF2,'rwc',IDCBX/128)
+        IF(IERR.LT.0) ID = FmpOpen(IDCB2,IERR,LSF2,'rwo',IDCBX/128)
+        IF(IERR.LT.0) GO TO 381
+        ID = FmpRewind(IDCB3,IERR)
+        IF(KERR(IERR,'FFMP','Rewinding',' ',0,0)) RETURN
+C     Copy to scratch file.
+        KRN=0
+        ldupl = .false.
+        len = 0
+        LEN = FmpReadString(IDCB3,IERR,IBC)
+        DO while (len.ge.0)
+          IF(IERR.LT.0) then
+            write(lui,'("Error reading procedure file")')
+            GOTO 389
+          end if
+C     Check for DEFINE.
+          IF(IBC(1:6).EQ.'DEFINE') THEN
+C     Check for possible duplicate DEFINE.
+            IF(IBC(9:20).EQ.LNAM2(1:12)) THEN
+              WRITE(LUI,'("ERROR - DUPLICATE NAME")')
+              ldupl = .true.
+C              GO TO 389
+C     Rewrite name if target.
+            ELSE IF(IBC(9:20).EQ.LNAM1(1:12)) THEN
+              if (.not.ldupl) then
+                IBC(9:20) = LNAM2(1:12)
+                IBC(23:34) = '000000000000'
+              end if
+              KRN=1
+            END IF
+          END IF
+          NCH = TRIMLEN(IBC)
+          IF (NCH.GT.0) ID = FmpWriteString(IDCB2,IERR,IBC(:NCH))
+          IF(IERR.LT.0) then
+            write(lui,'("Error writing to scratch file")')
+            GO TO 389
+          end if
+          LEN = FmpReadString(IDCB3,IERR,IBC)
+        end do
+C     Check if procedure found.
+        IF(KRN.EQ.0) THEN
+          WRITE(LUI,'("PROCEDURE ",A," NOT FOUND")') LNAM1(:NCH1)
+          GOTO 389
+        END IF
+C     Close old scratch copy.
+        if (.not.ldupl) then
+          ID = FmpClose(IDCB3,IERR)
+          IF(KERR(IERR,'FFMP','Closing',' ',0,0)) RETURN
+C     Replace procedure file.
+          CALL PFBLK(3,LPROC,LFR)
+C     Copy new version.
+          CALL PFCOP(LPROC,LUI,ID)
+          GO TO 900
+        else
+          goto 389
+        end if
+      END IF
+  
+C     ST - copy procedure to active procedure file.
+  
+      IF(IB.EQ.2HST) THEN
+        IF (LNAM1.EQ.' ') THEN
+          WRITE(LUI,'("SYNTAX ERROR")')
+          RETURN
+        END IF
+C     Parse first name for procedure file.
+        IX = 1
+        DO WHILE ((LNAM1(IX:IX+1).NE.'::').AND.(IX.LE.NCH1))
+          IX = IX + 1
+        END DO
+        IF (IX.LT.NCH1) THEN
+          LPF= ' '
+          LPF = LNAM1(IX+2:NCH1)
+        ELSE
+          LPF = LPROC
+        END IF
+C     Blank ::FF.
+        LNAM1(IX:74) = ' '
+C     Copy procedure name if output name blank.
+        IF(LNAM2.EQ.' ') LNAM2(1:12) = LNAM1(1:12)
+C     Get full name for reading.
+        CALL PFBLK(1,LPF,LFR)
+C     Read until procedure found.
+        NCH = TRIMLEN(LPF)
+        IF (NCH.GT.0) PATHNAME = '/PROC/' // LPF(1:NCH) // LFR(1:4)
+        ID = FmpOpen(IDCB1,IERR,PATHNAME,'rwos',IDCBX/128)
+        IF(IERR.LT.0) THEN
+          WRITE(LUI,'("FILE ",A," NOT FOUND")') lpf(:nch)
+          GO TO 900
+        END IF
+        len = 0
+        DO while(len.ge.0)
+          LEN= FmpReadString(IDCB1,IERR,IBC)
+          IF(IERR.LT.0.OR.LEN.LT.0) THEN
+            WRITE(LUI,'("PROCEDURE ",A," NOT FOUND")') lnam1(:nch1)
+            GO TO 690
+          END IF
+C     Check for DEFINE of procedure.
+          IF(IBC(1:6).EQ.'DEFINE'.AND.IBC(9:20).EQ.LNAM1(1:12)) GOTO 615
+        end do
+C     Create scratch file 2.
+615     ID = FmpOpen(IDCB2,IERR,LSF2,'rwc',IDCBX/128)
+        IF(IERR.LT.0) ID = FmpOpen(IDCB2,IERR,LSF2,'rwo',IDCBX/128)
+        IF(IERR.LT.0) THEN
+          WRITE(LUI,'("Error creating scratch file")')
+          GO TO 690
+        END IF
+C     Change procedure name.
+        IBC(9:20) = LNAM2(1:12)
+        IBC(23:34) = '000000000000'
+C     Copy procedure to scratch.
+        len = 0
+        DO while(len.ge.0)
+          NCH = TRIMLEN(IBC)
+          IF (NCH.GT.0) ID = FmpWriteString(IDCB2,IERR,IBC(:NCH))
+          IF(IERR.LT.0) GO TO 687
+          LEN= FmpReadString(IDCB1,IERR,IBC)
+          IF(IERR.LT.0.OR.LEN.LT.0) GO TO 685
+C     Check for ENDDEF.
+          IF(IBC(1:6).EQ.'ENDDEF') GO TO 625
+        end do
+C     Write ENDDEF.
+625     NCH = TRIMLEN(IBC)
+        IF (NCH.GT.0) ID = FmpWriteString(IDCB2,IERR,IBC(:NCH))
+        IF(IERR.LT.0) GO TO 687
+        ID = FmpClose(IDCB1,IERR)
+        IF(KERR(IERR,'FFMP','Closing',' ',0,0)) RETURN
+C     Release lock.
+        CALL PFBLK(2,LPF,LFR)
+C     Copy active file.
+        ID = FmpRewind(IDCB3,IERR)
+        IF(KERR(IERR,'FFMP','Rewinding',' ',0,0)) RETURN
+        len = 0
+        DO while(len.ge.0)
+          LEN= FmpReadString(IDCB3,IERR,IBC)
+          IF(IERR.EQ.-12.OR.LEN.LT.0) GO TO 635
+          IF(IERR.LT.0) GO TO 685
+C     Check for duplicate procedure.
+          IF(IBC(1:6).EQ.'DEFINE'.AND.IBC(9:20).EQ.LNAM2(1:12)) THEN
+            WRITE(LUI,'("DUPLICATE PROCEDURE")')
+            GO TO 690
+          END IF
+          NCH = TRIMLEN(IBC)
+          IF (NCH.GT.0) ID = FmpWriteString(IDCB2,IERR,IBC(:NCH))
+          IF(IERR.LT.0) GO TO 687
+        end do
+635     ID = FmpClose(IDCB3,IERR)
+        IF(KERR(IERR,'FFMP','Closing',' ',0,0)) RETURN
+C     Replace file.
+        CALL PFBLK(3,LPROC,LFR)
+C     Copy new version.
+        CALL PFCOP(LPROC,LUI,ID)
+        GO TO 900
+C     Various errors and messages.
+685     WRITE(LUI,'("Error reading procedure file")')
+        GO TO 690
+687     WRITE(LUI,'("Error writing to scratch file")')
+690     ID = FmpClose(IDCB1,IERR)
+        IF(KERR(IERR,'FFMP','Closing',' ',0,0)) RETURN
+        goto 389
+      END IF
+  
+C     Bad command
+  
+      WRITE(LUI,'("Error, bad command")')
+      GO TO 900
+  
+C     FMP error condition.
+  
+381   WRITE(LUI,'("ERROR OPENING SCRATCH FILE")')
+389   ID = FmpClose(IDCB2,IERR1)
+      IF(KERR(IERR,'FFMP','Closing',' ',0,0)) RETURN
+      IERR1 = FmpPurge(LSF2)
+      IF(KERR(IERR,'FFMP','Purging',' ',0,0)) RETURN
+      ID = FmpRewind(IDCB3,IERR1)
+      IF(KERR(IERR,'FFMP','Rewinding',' ',0,0)) RETURN
+      GOTO 900
+  
+990   CALL FmpError(IERR,CMESSAGE)
+      WRITE(LUI,'(A)') CMESSAGE
+  
+900   RETURN
+      END

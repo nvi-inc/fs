@@ -1,0 +1,20 @@
+FTN77,I,Y  
+$CDS ON
+      SUBROUTINE PSCAL(X,NPTS,XMIN,XMAX)
+      DIMENSION X(NPTS) 
+C 
+      XMIN=0.0
+      XMAX=0.0
+C 
+      IF(NPTS.LE.0) RETURN
+C 
+      XMIN=X(1) 
+      XMAX=X(1) 
+C 
+      DO 10 I=1,NPTS
+        IF(X(I).LT.XMIN) XMIN=X(I)
+        IF(X(I).GT.XMAX) XMAX=X(I)
+10    CONTINUE
+C
+      RETURN
+      END

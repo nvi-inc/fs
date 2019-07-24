@@ -1,0 +1,705 @@
+FTN77,I,Y  
+$ALIAS /FSCOM/ , NOALLOCATE
+$ALIAS RNRQ,noabort
+$CDS ON
+      SUBROUTINE BWORK(IP,LNAMES,NNAMES,LPROC1,MAXPR1,LPROC2,MAXPR2,
+     .ITSCB,NTSCB,IDCBSK)      !  BOSS WORKING ROUTINE     <910606.1455>
+C
+C     This is the working subroutine of the Field System BOSS program.
+C
+C     DATE   WHO CHANGES
+C     810906 NRV Added procedure lists, 12-char proc names.
+C     840217 MWH Modified procedure stack structure.
+C     840320 MWH Added LIST and STATUS SNAP commands.
+C     880427 LAR "PROC=" changes schedule, not station, procedure library
+C     880428 LAR Allow for STQKR calls in QUIKR processing section
+C     910104 GAG Added RNRQ call before changing procedure file with
+C                PROC= command.
+C     910205 GAG Removed calls to QUIK1 and QUIK2 and added call to
+C                QUIKR.
+C
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+      DIMENSION IP(5)          !  Array for RMPAR parameters
+      DIMENSION LNAMES(10,1),LPROC1(10,1),LPROC2(10,1)
+C                   Command names list, and procedure lists
+      DIMENSION ITSCB(13,1)          !  Time Scheduling Control Block
+      DIMENSION IBUF(50)         !  Input buffer containing command
+      character*100 ibc
+      equivalence (ibc,ibuf)
+      DIMENSION ITIME(9)         !  Time array returned from SPARS
+      DIMENSION IT(6)          !  Time from system EXEC(11) call
+      DIMENSION IOTREF(3),ISTREF(3)
+C                         Ref times for operator and schedule streams
+      character*20 CNAMEF,TMPSTR   !  File name, general use
+      dimension lnamef(10),TMPCHR(10) !  File name, general use
+      equivalence (lnamef,cnamef),(TMPCHR,TMPSTR)
+      CHARACTER*28 PATHNAME
+      DIMENSION IDCBP1(656),IDCBP2(656)
+      SAVE IDCBP1,IDCBP2
+C                         DCB's for procedures from lists 1 and 2
+      DIMENSION ISTKSK(42),ISTKOP(42)        !  Stacks for nested procedures
+      DIMENSION LPROCN(6)          !  Name of currently-executing procedure
+      DIMENSION LPROCS(6),LPROCO(6)
+C                   Names of schedule, operator top-of-stack procedures
+      DIMENSION LSTKSK(26),LSTKOP(26),LPPARM(6)
+C                   Stacks for procedure parameters, parameter string
+C     NCPARM - # chars in procedure parameter string
+      DIMENSION LEND(8),LDONE(8),LM1(14)         !  Messages
+      DIMENSION ITMLOG(6)          !  Time log file was opened, from EXEC(11)
+      INTEGER*4 IRECL,ICURLN,ILSTLN
+      CHARACTER*12 IBC1,IBC2
+      DIMENSION IREG(2)
+      EQUIVALENCE (IREG(1),REG)
+      LOGICAL KRCUR,KPAST,KLAST,KTS,KSKBLK,KOPBLK,KBREAK,KSTAK,KON
+C                   KRCUR returns true if a procedure calls itself
+C                   KPAST returns true if a given time is earlier than now
+C                   KLAST true if this is last time scheduling of command
+C                   KTS true if command was time-scheduled
+C                   KSKBLK true if schedule is blocked waiting for time
+C                   KOPBLK true if operator is blocked waiting for time
+C                   KBREAK is true if operator wants to break a proc
+C                   KSTAK returns true if the stacks contain procs from
+C                          one of the libraries
+C                   KON is a temporary logical variable
+C     ICLASS - general variable for class with command/response
+C     ICLOP2 - secondary operator class after immediate commands
+C             have been stripped
+C     MAXPR1,2 - Maximum number of procs allowed in each lists
+      DATA IBLEN/50/
+      DATA LEND   /2H*B,2HOS,2HS ,2HTE,2HRM,2HIN,2HAT,2HED/
+      DATA LDONE  /2H*E,2HND,2H O,2HF ,2HSC,2HHE,2HDU,2HLE/
+      DATA LM1 /2HNO,2H S,2HCH,2HED,2HUL,2HE ,2HCU,2HRR,2HEN,2HTL,
+     .   2HY ,2HAC,2HTI,2HVE/
+      DATA KSKBLK/.TRUE./, KOPBLK/.FALSE./
+      DATA ISTKSK/40,2,40*0/, ISTKOP/40,2,40*0/
+      DATA LSTKSK/24,2,24*0/, LSTKOP/24,2,24*0/
+C     DATA IOTREF/3*0/, ISTREF/3*0/
+      DATA NPROC1/0/, NPROC2/0/
+C
+C**********************************************************************
+C
+C     1. Initialize.
+C
+      ICLASS = 0
+      ICLOP2 = 0
+      CALL EXEC(11,IT,IT(6))
+      IOTREF(1) = (IT(6)-1970)*1024 + IT(5)
+      IOTREF(2) = IT(4)*60 + IT(3)
+      IOTREF(3) = IT(2)*100
+      ISTREF(1) = IOTREF(1)
+      ISTREF(2) = IOTREF(2)
+      JQUIT = 0
+      LSTP = 'STATION'
+      CALL OPNPF(LSTP,IDCBP2,IBUF,IBLEN,LPROC2,MAXPR2,NPROC2,IERR,'N')
+      IF (IERR.LT.0) CALL LOGIT(0,0,0,1,-132,2HBO,IERR)
+      CALL EXEC(11,ITMLOG,ITMLOG(6))
+C
+C     2. First and always, check the time list for something to do.
+C     This is the highest priority.  Get next job, or next time to awaken.
+C     Check for any newly edited proc files sent by PFMED.
+C
+200   CONTINUE
+      CALL NEWPF(IDCBP1,IDCBP2,LPROC1,MAXPR1,NPROC1,LPROC2,MAXPR2,
+     .NPROC2,IBUF,IBLEN,ISTKOP,ISTKSK)
+      CALL GETTS(ITSCB,NTSCB,ITIME,ITYPE,INDEX,ICLASS,LSOR,INDTS,KLAST,
+     .ISTKSK,ISTKOP)
+      ICHSOR = JCHAR(LSOR,2)
+C
+C     2.1 If there's nothing to do (INDTS empty) go try
+C     getting a command from one of the main streams.
+C
+220   CONTINUE
+      IF (INDTS.NE.0) THEN
+C
+C     2.2 If the time of a ! command has arrived, unblock
+C     the appropriate command stream.
+C
+        IF (JCHAR(ITYPE,1).EQ.41B) THEN
+          IF (ICHSOR.EQ.73B) KOPBLK = .FALSE.
+          IF (ICHSOR.EQ.72B) KSKBLK = .FALSE.
+          GOTO 200
+        ENDIF
+C
+C     2.3 We do have a time-scheduled function to execute (INDEX non-zero).
+C     First, log the command and then go to process.
+C
+        REG = EXEC(21,ICLASS,IBUF,-IBLEN*2)
+        NCHAR = MIN0(IREG(2),IBLEN*2)
+        CALL LOGIT(IBUF,NCHAR,LSOR,LPROCN)
+        KTS = .TRUE.
+        GOTO 500
+      ENDIF
+C
+C     3. Get a command from the schedule file or from a procedure file.
+C     Check it out, log it, parse it, time-list if necessary, and
+C     block command streams if appropriate.  Finally process.
+C
+      CALL GETCM(ISTKSK,ISTKOP,LSTKSK,LSTKOP,IDCBP1,IDCBP2,IDCBSK,
+     .    KSKBLK,KOPBLK,KHALT,KBREAK,ICLOPR,ICLOP2,IBLEN,IBUF,
+     .    NCHAR,LSOR,LPROCS,LPROCO,LPPARM,NCPARM,
+     .    LNAMES,NNAMES,LPROC1,NPROC1,LPROC2,NPROC2,ITMLOG,
+     .    MAXPR1,MAXPR2,IERR,ICURLN,ILSTLN)
+      IF (IERR.EQ.-1) IERR=0
+      ICHSOR = JCHAR(LSOR,2)
+      IF (ICHSOR.EQ.73B) IDUMMY = ICHMV(LPROCN,1,LPROCO,1,12)
+      IF (ICHSOR.EQ.72B) IDUMMY = ICHMV(LPROCN,1,LPROCS,1,12)
+C                   Establish the current procedure name
+      IF (IERR.LT.0) THEN
+        CALL LOGIT(0,0,0,1,-101,2HBO,IERR)
+        GOTO 200
+      ENDIF
+C
+C     3.1 If there is no work to do (NCHAR is zero), suspend.  The time to
+C     awaken was decided by GETTS already when it passed on to this section.
+C
+      IF (NCHAR.LE.0) THEN
+        IF (LSOR.EQ.2H::) THEN
+          CALL LOGIT(LDONE,16,LSOR,LPROCN)
+          LSKD = 'NONE'
+          CALL FmpClose(IDCBSK,IERR)
+        ENDIF
+        CALL NEWPF(IDCBP1,IDCBP2,LPROC1,MAXPR1,NPROC1,LPROC2,MAXPR2,
+     &             NPROC2,IBUF,IBLEN,ISTKOP,ISTKSK)
+C                     Check one last time to see if perchance the stacks
+C                     were flushed with the last call to GETCM
+        CALL GETTS(ITSCB,NTSCB,ITIME,ITYPE,INDEX,ICLASS,LSOR,INDTS,
+     &             KLAST,ISTKSK,ISTKOP)
+        ICHSOR = JCHAR(LSOR,2)
+C                     Also, check one last time for time-scheduled
+C                     procs for the same reason
+        IF (INDTS.NE.0) GOTO 220
+C                     Jump back into the command loop if there's
+C                     something to do.  Not very elegant!
+        IH = MOD(ITIME(2)/60,24)
+        IM = MOD(ITIME(2),60)
+        IS = ITIME(3)/100
+        IMS = MOD(ITIME(3),100)
+        INEXT(1) = IH
+        INEXT(2) = IM
+        INEXT(3) = IS
+        CALL EXEC(12,6HBOSS  ,1,0,IH,IM,IS,IMS)
+C                   Put ourselves on the time list repeatedly, in case
+C                   IH:IM:IS is, by now, due to our dallying, in the past.
+C                   We will be woken up sometime in the near future.
+        IT(5) = 0
+        IF (KPAST(ITIME(1),ITIME(2),ITIME(3),IT)) GOTO 200
+C                   But, just to be sure, check that the IH,IM,IS
+C                   is not in the past right now.
+        REG = 0.0
+        IP(1) = 2HBO
+        CALL PRTN(IP)
+        REG = EXEC(6,0,1)
+C                   Self-suspend, saving our suspension point
+C********************************************************************
+C***************THIS IS THE WAKE-UP POINT****************************
+C********************************************************************
+C
+        CALL RMPAR(IP)
+        GOTO 200
+      ENDIF
+C
+C     3.2 Log the command.  Parse it.
+C
+      JIND = 1
+      CALL SPARS(IBUF,JIND,NCHAR,LNAMES,NNAMES,LPROC1,NPROC1,LPROC2,
+     .NPROC2,LPPARM,NCPARM,ITYPE,IERR,ITIME,INDEX,ICLASS)
+C*****NOTE***** IBUF IS EXPANDED IF THE PROCEDURE HAS ANY
+C               PARAMETERS.  MAX 100 CHARS.  JIND AND NCHAR ARE MODIFIED.
+C
+      IF (ICLASS.NE.0) THEN
+        ICLASS = ICLASS+60000B
+      ENDIF
+      CALL LOGIT(IBUF,NCHAR,LSOR,LPROCN)
+      IF (IERR.NE.0) THEN
+        CALL LOGIT(0,0,0,0,IERR,2HSP,0)
+        CALL CLRCL(ICLASS)
+        GOTO 200
+      ENDIF
+C
+C     3.3 Check out the command.
+C     If the command was a comment, we're done now.
+C
+      KTS = .FALSE.
+      IF (ITYPE.EQ.2H C) GOTO 200
+C
+C     3.4 Handle the time parameters.
+C     If ! command has something after the !, adjust time
+C     parameters wrt reference time.  Do nothing further if the command
+C     was simply !*, otherwise block appropriate command stream.
+C     If no time was specified, go to process.
+C     If a time was specified, put command into time list.
+C
+      ICHAR2 = JCHAR(ITYPE,2)
+      IF (JCHAR(ITYPE,1).EQ.41B) THEN
+        IF (ICHAR2.NE.40B) THEN
+          IF (ICHSOR.EQ.72B) CALL REFTM(ISTREF,ITIME,ICHAR2)
+          IF (ICHSOR.EQ.73B) CALL REFTM(IOTREF,ITIME,ICHAR2)
+          IF (ITIME.EQ.-1) GOTO 200
+        ENDIF
+        IF (ICHSOR.EQ.72B) KSKBLK = .TRUE.
+        IF (ICHSOR.EQ.73B) KOPBLK = .TRUE.
+      ENDIF
+C
+      IF ((ITIME.EQ.0.OR.ITIME.EQ.-1).AND.
+     .     ITIME(4).EQ.0.AND.ITIME(7).EQ.0) GOTO 500
+      CALL PUTTS(ITSCB,NTSCB,ITIME,ITYPE,INDEX,ICLASS,LSOR,IERR)
+      IF (IERR.LT.0) CALL LOGIT(0,0,0,1,-102,2HBO,ITIME(1))
+      IF (IERR.LT.0) CALL CLRCL(ICLASS)
+      GOTO 200
+C
+C     5. This is the processing section.
+C     Sub-sections process the following:
+C                   5.0 Procedure set-up
+C                   5.1 Functions - QUIKR segments
+C                   5.2 CONT command to undo HALT
+C                   5.3 HALT command to stop schedule stream
+C                   5.4 LOG command
+C                   5.5 SCHEDULE command
+C                   5.6 XLOG,XDISP,ECHO,CHECK commands
+C                   5.10 TERMINATE command
+C                   5.11 FLUSH command
+C                   5.14 BREAK command
+C                   5.15 PROC command
+C
+C
+500   MBRANCH = LNAMES(10,INDEX)
+C
+C     5.0 This is the procedure section.
+C
+      IF (JCHAR(ITYPE,2).NE.106B) THEN             !  106B = capital F
+        INDEXP = INDEX
+        IF (JCHAR(ITYPE,2).EQ.121B) INDEXP = -INDEXP
+C                   Indicate the second list by <0
+        IF ( (ICHSOR.NE.73B .OR. KRCUR(ISTKOP,INDEXP)) .AND.
+     &       (ICHSOR.NE.72B .OR. KRCUR(ISTKSK,INDEXP)) ) THEN
+C                   Recursion is not allowed
+          CALL LOGIT(0,0,0,0,-103,2HBO)
+          GOTO 600
+        ENDIF
+        REG = EXEC(21,ICLASS,IBUF,-IBLEN*2)
+        NCHAR = MIN0(IREG(2),IBLEN*2)
+C                   Get the command <name>=<parm>
+        ICH = ISCNC(IBUF,1,NCHAR,75B)              ! Look for = sign
+        IF (ICH.GT.0) THEN
+          NCPARM = NCHAR - ICH
+          IF (NCPARM.LE.0 .OR. NCPARM.GT.12) THEN
+            CALL LOGIT(0,0,0,1,-135,2HBO,12)
+            GOTO 600
+          ENDIF
+          IDUMMY = ICHMV(LPPARM,1,IBUF,ICH+1,NCPARM)
+        ELSE
+          NCPARM = 0
+          ICH = NCHAR+1
+        ENDIF
+        IF (ICHSOR.EQ.73B) THEN         !  Get the operator stream procedure
+          CALL IFILL(LPROCO,1,12,40B)
+          IDUMMY = ICHMV(LPROCO,1,IBUF,1,ICH-1)
+          CALL NEWPR(IDCBP1,IDCBP2,ISTKOP,INDEXP,
+     .     LPPARM,NCPARM,LSTKOP,LPROC1,LPROC2,ITMLOG,IBUF,IBLEN,IERR)
+        ELSE                            !  Get the schedule stream procedure
+          CALL IFILL(LPROCS,1,12,40B)
+          IDUMMY = ICHMV(LPROCS,1,IBUF,1,ICH-1)
+          CALL NEWPR(IDCBP1,IDCBP2,ISTKSK,INDEXP,
+     .     LPPARM,NCPARM,LSTKSK,LPROC1,LPROC2,ITMLOG,IBUF,IBLEN,IERR)
+        ENDIF
+        IF (IERR.LT.0) THEN
+          IF (KTS) ICLASS = 0
+          CALL CLRCL(ICLASS)
+          IF (KTS) CALL CANTS(ITSCB,NTSCB,5,INDEX,INDTS)
+          GOTO 200
+        ENDIF
+        IF(KTS) ICLASS = 0
+        CALL CLRCL(ICLASS)
+C
+C     5.1 This is the QUIKR/STQKR processing section.
+C
+      ELSE IF (MBRANCH.EQ.1) THEN
+        IF (LNAMES(7,INDEX).EQ.2HST) THEN
+          CALL EXEC(9,6HSTQKR ,ICLASS,LNAMES(9,INDEX))
+        ELSE IF (LNAMES(7,INDEX).EQ.2HQK) THEN
+          CALL EXEC(9,6HQUIKR ,ICLASS,LNAMES(9,INDEX))
+        END IF
+        CALL RMPAR(IP)
+        IF (IP(3).LT.0) THEN
+          IF (KTS) ICLASS=0
+C                   If we got ICLASS from time-scheduling, don't kill
+C                   it here, wait until CANTS
+          CALL LOGIT(0,0,0,0,IP(3),IP(4),IP(5))
+          CALL CLRCL(ICLASS)
+          IF(KTS) CALL CANTS(ITSCB,NTSCB,5,INDEX,INDTS)
+          IF (IP(1).EQ.0) GOTO 200
+        ENDIF
+C                   Don't leave just yet!  See if there is any
+C                   message in spite of our error.
+        IF (IP(1).NE.0) THEN
+          DO I=1,IP(2)
+            REG = EXEC(21,IP(1),IBUF,-IBLEN*2)
+            NCHAR = MIN0(IREG(2),IBLEN*2)
+            CALL LOGIT(IBUF,NCHAR,2H/ ,LPROCN)
+          ENDDO
+        ENDIF
+          IF (KTS) ICLASS = 0
+          CALL CLRCL(ICLASS)
+C
+C     5.2 Handle CONT command.  Set KHALT to false now.
+C
+      ELSE IF (MBRANCH.EQ.2) THEN
+        KHALT = .FALSE.
+C
+C     5.3 This is the HALT command.
+C
+      ELSE IF (MBRANCH.EQ.3) THEN
+        KHALT = .TRUE.
+C
+C     5.4 This section processes the LOG=xx command.  Similar
+C     to initialization code in BINIT for log files.
+C
+      ELSE IF (MBRANCH.EQ.4) THEN
+        REG = EXEC(21,ICLASS,IBUF,-IBLEN*2)
+        NCHAR = MIN0(IREG(2),IBLEN*2)
+        ICH = 1+ISCNC(IBUF,1,NCHAR,75B)
+        if (ich.eq.(nchar+1)) then
+          ich=1
+          nchar=nchar-1
+        endif
+        IF (ICH.EQ.1) THEN
+          NCH = ICHMV(IBUF,NCHAR+1,2H/ ,1,1)
+          IBC(NCH:NCH+6) = LLOG(1:7)
+          NCH = NCH + 7
+          CALL LOGIT(IBUF,NCH-1,LSOR,LPROCN)
+        ELSE
+C                   User requested log name, format response and log it.
+          IC2 = ISCNC(IBUF,ICH,NCHAR,54B)
+          IF (IC2.EQ.0) IC2 = NCHAR+1
+          LLOG = ' '
+          LLOG(1:IC2-ICH) = IBC(ICH:IC2-1)
+          CALL NEWLG(IBUF,LSOR)
+C                   Start the new log file
+          CALL EXEC(11,ITMLOG,ITMLOG(6))
+C                   Record the time the new log was started
+        ENDIF
+C
+C     5.5 SCHEDULE command section.
+C
+      ELSE IF (MBRANCH.EQ.5) THEN
+        CALL RNRQ(100001B,IRNPRC,ISTAT,*551)
+551     CONTINUE
+        IF (ISTAT.EQ.2) THEN
+          REG = EXEC(21,ICLASS,IBUF,-IBLEN*2)
+          NCHAR = MIN0(IREG(2),IBLEN*2)
+          ICH = 1+ISCNC(IBUF,1,NCHAR,75B)
+          IF (ICH.EQ.(NCHAR+1)) THEN
+            ICH = 1
+            NCHAR = NCHAR-1
+          ENDIF
+          IF (ICH.EQ.1) THEN
+            NCH = ICHMV(IBUF,NCHAR+1,2H/ ,1,1)
+            ibc(nch:nch+6) = lskd(1:7)
+            nch=nch+7
+            NCH = MCOMA(IBUF,NCH)
+            CALL FmpPosition(IDCBSK,IERR,IRECL,ID)
+            IF (IERR.LT.0) IREC=0
+            IREC = IRECL
+            NCH = NCH+IB2AS(IREC,IBUF,NCH,100000B+5)
+            CALL LOGIT(IBUF,NCH-1,LSOR,LPROCN)
+            GOTO 600
+          ENDIF
+C                 User requested schedule name, format response and log it.
+          IC4 = ISCNC(IBUF,ICH,NCHAR,54B)
+C           If a comma but no schedule name.
+          IF (IC4.EQ.ICH) THEN
+            CALL LOGIT(0,0,0,0,-168,2HBO,0)
+            GOTO 600
+          ENDIF
+          IF (IC4.EQ.0) IC4 = NCHAR + 1
+          CNAMEF=' '
+          CNAMEF = IBC(ICH:IC4-1)
+          IF (CNAMEF.EQ.' ') THEN
+            CALL LOGIT(0,0,0,0,-168,2HBO,0)
+            GOTO 600
+          ENDIF
+          NPROC1 = 0
+          ISTKSK(2) = 2
+          LSTKSK(2) = 2
+          CALL CANTS(ITSCB,NTSCB,4,0,0)
+          CALL CANTS(ITSCB,NTSCB,2,0,0)
+C                 Initialize, if we've got this far we must be
+C                 a valid schedule or all is set to zero.
+          IL = IFLCH(LNAMEF,20)
+          IC1=ISCNC(LNAMEF,1,20,57B)
+          IC2=ISCNC(LNAMEF,IC1+1,20,57B)
+          IC3=ISCNC(LNAMEF,1,20,56B)
+          IF(IC3.GT.0) THEN
+            IBC2=CNAMEF(IC3:IL)
+            IL2=IL-IC3+1
+          ELSE
+            IBC2='.SNP'
+            IC3=IL+1
+            IL2=4
+          ENDIF
+          IF(IC2.GT.0) THEN
+            IBC1=CNAMEF(IC1:IC2)
+            IL1=IC2-IC1+1
+          ELSE
+            IBC1='/SCHED/'
+            IL1=7
+          ENDIF
+          lskd = cnamef(IC2+1:IC3-1)
+          PATHNAME = IBC1(1:IL1) // LSKD(1:IC3-IC2-1) // IBC2(1:IL2)
+          CALL FmpOpen(IDCBSK,IERR,PATHNAME,'ros',5)
+          IF (IERR.LT.0) THEN
+            CALL LOGIT(0,0,0,1,-105,2HBO,IERR)
+            LSKD = 'NONE'
+            GOTO 600
+          ENDIF
+          ICH = IC4+1
+          CALL NEWSK(IBUF,ICH,NCHAR,IDCBSK,IBLEN,IERR,ICURLN,ILSTLN)
+          IF (IERR.NE.0) GOTO 600
+          KSKBLK = .FALSE.
+          KHALT = .FALSE.
+          IF (LSKD.EQ.'STATION') THEN
+            IF ((LPRC.NE.'NONE').OR.(LPRC.NE.' ')) THEN
+              CALL FmpClose(IDCBP1,IERR)
+              LPRC='NONE'
+              CALL LOGIT(0,0,0,1,-158,2HBO,IERR)
+              GOTO 600
+            END IF
+          END IF
+          CALL OPNPF(LSKD,IDCBP1,IBUF,IBLEN,LPROC1,MAXPR1,NPROC1,IERR,
+     &               'N')
+          IF (IERR.LT.0) THEN
+            IF(IERR.NE.-6) THEN
+              CALL LOGIT(0,0,0,1,-133,2HBO,IERR)
+            ELSE
+              CALL LOGIT(0,0,0,1,-139,2HBO,IERR)
+            ENDIF
+            LPRC='NONE'
+            NPROC1 = 0
+          ELSE
+            LPRC(1:12) = LSKD(1:12)
+          ENDIF
+          IF (LLOG.NE.LSKD) THEN
+            LLOG(1:12) = LSKD(1:12)
+            CALL NEWLG(IBUF,LSOR)
+            CALL EXEC(11,ITMLOG,ITMLOG(6))
+          ENDIF
+          CALL RNRQ(40004B,IRNPRC,ISTAT,*552)
+552       CONTINUE
+        ELSE
+          CALL LOGIT(0,0,0,0,-159,2HBO,0)
+        END IF
+C
+C     5.6 Commands which set switches (XLOG,ECHO,XDISP)
+C
+      ELSE IF (MBRANCH.GE.6 .AND. MBRANCH.LE.9) THEN
+        REG = EXEC(21,ICLASS,IBUF,-IBLEN*2)
+        NCHAR = MIN0(IREG(2),IBLEN*2)
+        ICH = 1+ISCNC(IBUF,1,NCHAR,75B)
+        IF (ICH.EQ.1) THEN
+          CALL LOGIT(0,0,0,0,-107,2HBO,0)
+        ELSE
+          KON = (ICHCM(IBUF,ICH,2HON,1,2).EQ.0)
+          IF (.NOT.KON .AND. ICHCM(IBUF,ICH,3HOFF,1,3).NE.0) THEN
+            CALL LOGIT(0,0,0,0,-108,2HBO,0)
+          ELSE
+            IF (MBRANCH.EQ.6) THEN
+              KXLOG = KON
+              IF (KON) CALL EXEC(20,0,IBUF,-1,2HFS,2HLN,ICLBOX)
+              IF (.NOT.KON) CALL EXEC(20,0,IBUF,-1,2HFS,2HLF,ICLBOX)
+            ENDIF
+            IF (MBRANCH.EQ.7) THEN
+              KXDISP = KON
+              IF (KON) CALL EXEC(20,0,IBUF,-1,2HFS,2HDN,ICLBOX)
+              IF (.NOT.KON) CALL EXEC(20,0,IBUF,-1,2HFS,2HDF,ICLBOX)
+            ENDIF
+            IF (MBRANCH.EQ.8) KECHO=KON
+            IF (MBRANCH.EQ.9) KCHECK=KON
+          ENDIF
+        ENDIF
+C
+C     5.10 TERMINATE command--the only way to leave this program
+C
+      ELSE IF (MBRANCH.EQ.10) THEN
+        CALL RNRQ(140001B,IRNPRC,ISTAT,*777)  !  LOCK IRNPRC
+777     CONTINUE
+        IF (ISTAT.EQ.6) THEN
+          CALL LOGIT(0,0,0,0,-171,2HBO,0)
+          GOTO 600
+        ENDIF
+        DO I=1,18
+          ICHECK(I)=0
+        ENDDO
+        ICHK19=0
+        ICHK20=0
+        CALL FmpClose(IDCBSK,IERR)
+        CALL FmpClose(IDCBP1,IERR)
+        CALL FmpClose(IDCBP2,IERR)
+        CALL CLRCL(ICLASS)
+        CALL CLRCL(ICLOPR)
+        CALL CLRCL(ICLOP2)
+        CALL LOGIT(LEND,16,2H::,LPROCN)
+        JQUIT = 2HQU
+        CALL EXEC(24,6HOPRIN ,LU,LU)       ! Terminate OPRIN
+        RETURN
+C
+C     5.11 FLUSH command to clear out the operator stream completely.
+C     Reinitialize everything.
+C
+      ELSE IF (MBRANCH.EQ.11) THEN
+        REG = EXEC(21,ICLOP2+120000B,IBUF,-IBLEN*2)
+        DO WHILE (IREG.GE.0)
+          NCHAR = IFLCH(IBUF,MIN0(IREG(2),IBLEN*2))
+          CALL EXEC(2,LU,IBUF,-NCHAR)
+          REG = EXEC(21,ICLOP2+120000B,IBUF,-IBLEN*2)
+        ENDDO
+        ISTKOP(2) = 2
+        LSTKOP(2) = 2
+        KOPBLK = .FALSE.
+        CALL CANTS(ITSCB,NTSCB,3,0,0)
+C
+C     5.12 Section handling SY messages
+C
+      ELSE IF (MBRANCH.EQ.12) THEN
+        NCH = ISCNC(IBUF,1,NCHAR,75B)            !  75B is "="
+        IF (NCH.EQ.0) GOTO 600
+        NCH = ICHMV(IBUF,1,IBUF,NCH+1,NCHAR-NCH)-1
+        NCHAR = -MESSS(IBUF,NCH)
+        IF (NCHAR.GT.0) CALL LOGIT(IBUF,NCHAR,2H/ ,LPROCN)
+C
+C     5.13 Section to handle TS command to list time list
+C
+      ELSE IF (MBRANCH.EQ.13) THEN
+        CALL IFILL(IBUF,1,IBLEN*2,40B)
+        DO I=1,NTSCB
+          IF (ITSCB(1,I).NE.-1) THEN
+            IDUMMY = ICHMV(IBUF,1,ITSCB(10,I),1,2)
+C                     First the type
+            IF (JCHAR(IBUF,1).EQ.0) IDUMMY = ICHMV(IBUF,1,2H  ,1,1)
+            IF (JCHAR(IBUF,2).EQ.0) IDUMMY = ICHMV(IBUF,2,2H  ,1,1)
+            IDUMMY = ICHMV(IBUF,3,ITSCB(13,I),2,1)
+C                     Next the source of the command
+            IDUMMY = IB2AS(ITSCB(11,I),IBUF,4,2)
+C                     The index in the function or proc lists
+            IDUMMY = ICHMV(IBUF,6,2H@ ,1,1)
+            IDUMMY = IB2AS(MOD(ITSCB(1,I),1024),IBUF,7,40000B+400B*3+3)
+            IDUMMY = IB2AS(ITSCB(2,I)/60,IBUF,10,40000B+400B*2+2)
+            IDUMMY = IB2AS(MOD(ITSCB(2,I),60),IBUF,12,40000B+400B*2+2)
+            IDUMMY = IB2AS(ITSCB(3,I)/100,IBUF,14,40000B+400B*2+2)
+C                     The time next scheduled
+            ICL = ITSCB(12,I)
+            NCH = 0
+            IF (ICL.NE.0) THEN
+              REG = EXEC(21,ICL,IBUF(9),IBLEN-9)
+              NCH = IREG(2)
+C                     Get the buffer in the class
+            ENDIF
+            CALL LOGIT(IBUF,MIN0(16+NCH,IBLEN*2),LSOR,LPROCN)
+          ENDIF
+        ENDDO
+C
+C     5.14 BREAK command sets the variable KBREAK to true.
+C     This is passed to GETCM, thence to READP, and the
+C     "end of a procedure" condition is forced.
+C     Set this flag only if there's a procedure to be broken.
+C     Otherwise, no effect.
+C
+      ELSE IF (MBRANCH.EQ.14) THEN
+        IF (ISTKOP(2).GT.2 .OR. ISTKSK(2).GT.2) KBREAK = .TRUE.
+C
+C     5.15 PROC command: new schedule procedure library
+C
+      ELSE IF (MBRANCH.EQ.15) THEN
+        REG = EXEC(21,ICLASS,IBUF,-IBLEN*2)
+        NCHAR = MIN0(IREG(2),IBLEN*2)
+        ICH = 1+ISCNC(IBUF,1,NCHAR,75B)
+        if (ich.eq.(nchar+1)) then
+          CALL RNRQ(100001B,IRNPRC,ISTAT,*5149)
+5149      CONTINUE
+          IF (ISTAT.EQ.2) THEN
+            CALL FmpClose(IDCBP1,IERR)
+            LPRC='NONE'
+            CALL RNRQ(40004B,IRNPRC,ISTAT,*5150)
+5150        CONTINUE
+          ELSE
+            CALL LOGIT(0,0,0,0,-157,2HBO,0)
+          END IF
+          GOTO 600
+        endif
+        IF (ICH.EQ.1) THEN         !  Request for procedure file name
+          NCH = ICHMV(IBUF,NCHAR+1,2H/ ,1,1)
+          IBC(NCH:NCH+7) = LPRC(1:8)
+          NCH = NCH+8
+          CALL LOGIT(IBUF,NCH-1,LSOR,LPROCN)
+        ELSE
+          IC2 = ISCNC(IBUF,ICH,NCHAR,54B)
+          IF (IC2.EQ.0) IC2 = NCHAR+1
+          IF (KSTAK(ISTKOP,ISTKSK,1)) THEN
+            CALL LOGIT(0,0,0,0,-133,2HBO,0)
+          ELSE IF (IBC(ICH:IC2-1).EQ.LSTP) THEN
+            CALL LOGIT(0,0,0,0,-136,2HBO,0)
+          ELSE
+            CALL RNRQ(100001B,IRNPRC,ISTAT,*5151)
+5151        CONTINUE
+            IF (ISTAT.EQ.2) THEN
+              IF (LPRC.NE.IBC(ICH:IC2-1)) CALL CANTS(ITSCB,NTSCB,2,0,0)
+C                   Cancel procs from the old library
+              LPRC = IBC(ICH:IC2-1)
+              CALL OPNPF(LPRC,IDCBP1,IBUF,IBLEN,LPROC1,MAXPR1,NPROC1,
+     &                   IERR,'N')
+              IF (IERR.NE.0) THEN
+                CALL LOGIT(0,0,0,1,-133,2HBO,IERR)
+                LPRC = 'NONE'
+                NPROC1 = 0
+              ENDIF
+            ELSE
+              CALL LOGIT(0,0,0,0,-157,2HBO,0)
+              GOTO 5152
+            ENDIF
+            CALL RNRQ(40004B,IRNPRC,ISTAT,*5152)
+5152        CONTINUE
+          ENDIF
+        ENDIF
+C
+C     5.16  LIST Command.
+C
+      ELSE IF (MBRANCH.EQ.16) THEN
+        REG=EXEC(21,ICLASS,IBUF,-IBLEN*2)
+        NCHAR=MIN0(IREG(2),IBLEN*2)
+        IF (LSKD(1:4).EQ.'NONE') THEN
+          CALL EXEC(2,LU,LM1,-28)
+        ELSE
+          CALL LISTS(LU,IDCBSK,IBUF,NCHAR,ICURLN)
+        ENDIF
+C
+C     5.17  STATUS Command.
+C
+      ELSE IF (MBRANCH.EQ.17) THEN
+        IF (LSKD(1:4).EQ.'NONE') THEN
+          CALL EXEC(2,LU,LM1,-28)
+        ELSE
+          CALL STAT(IBUF,LU,KHALT,KOPBLK,KSKBLK,ICURLN,IDCBSK,
+     .         ITSCB,NTSCB,LSKD)
+        ENDIF
+C
+C     5.18  HELP command
+C
+      ELSE IF (MBRANCH.EQ.18) THEN
+        ISTART = ISCNC(IBUF,1,NCHAR,75B)
+        IF (ISTART.NE.0) ISTART=ISTART+1
+        CALL FSHELP(IBUF,ISTART,NCHAR,LU)
+      ENDIF
+      MBRANCH = 0
+C
+C     6. All working sections end up here.  Clear out class buffer (if any)
+C     now, unless this is a time-scheduled command (KTS TRUE).
+C     Cancel this time-scheduled command if it is the last time for it
+C     (KTS TRUE and KLAST TRUE).
+C     Return to time-scheduling check before suspending.
+C
+600   continue
+      IF (.NOT.KTS) CALL CLRCL(ICLASS)
+      IF (KTS.AND.KLAST) CALL CANTS(ITSCB,NTSCB,5,INDEX,INDTS)
+      IERR = 0
+      GOTO 200        !  Program can only be exited via TERMINATE command.
+      END

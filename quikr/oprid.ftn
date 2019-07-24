@@ -1,0 +1,90 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE OPRID(IP),OPERATOR ID C#870115:04:53#
+C 
+C     OPRID gets/displays the operator's name 
+C 
+C     INPUT VARIABLES:
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C        IP(1) - CLASS #
+C        IP(2) - # RECORDS IN CLASS 
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 
+C     CALLED SUBROUTINES: CHARACTER ROUTINES
+C 
+C   LOCAL VARIABLES 
+C        NCHAR  - number of characters in buffer
+C        NCH    - character counter 
+      DIMENSION IBUF(20)                    !  class buffer
+      DIMENSION IREG(2)                     !  registers from EXEC calls
+      DIMENSION IPARM(2)                    !  parameters from GTPARM
+      EQUIVALENCE (REG,IREG(1)) 
+      EQUIVALENCE (PARM,IPARM(1)) 
+C 
+C 5.  INITIALIZED VARIABLES 
+      DATA ILEN/40/                         !  length of IBUF, chars
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED: CREATED  820323
+C 
+C 
+C     1. Get the class buffer.  Messages for the OPRID consist of 
+C     a series of LUs, separated by commas. 
+C 
+      ICLCM = IP(1) 
+      IF (ICLCM.EQ.0) THEN
+        IERR = -1
+        GOTO 990
+      ENDIF
+      REG = EXEC(21,ICLCM,IBUF,-ILEN)
+      NCHAR = MIN0(IREG(2),ILEN)
+      IEQ = ISCNC(IBUF,1,NCHAR,75B)                 !  Scan for "="
+      IF (IEQ.EQ.0.OR.JCHAR(IBUF,IEQ+1).EQ.77B) GOTO 500
+C 
+C     2. Get the parameters from the command. 
+C 
+      ICH = IEQ+1 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM,IERR)
+C                   Scan for characters in operator's name
+      IF (JCHAR(PARM,1).EQ.54B) THEN
+        IERR = -101
+        GOTO 990
+      ENDIF
+      NCH = ICH-IEQ-2
+      IF (NCH.GT.12) THEN
+        IERR = -201
+        GOTO 990
+      ENDIF
+      CALL IFILL(LOPRID,1,12,0)                  !  Fill name with nulls
+      IDUMM1 = ICHMV(LOPRID,1,IBUF,IEQ+1,NCH) 
+      IERR = 0
+      GOTO 990
+C 
+C     5. Display current ID.
+C 
+500   IF (IEQ.EQ.0) IEQ = NCHAR+1 
+      NCH = ICHMV(IBUF,IEQ,2H/ ,1,1)
+C                   Put / to indicate a response
+      NCH = ICHMV(IBUF,NCH,LOPRID,1,12)-1 
+C 
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS)
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = 0 
+      IP(4) = 2HQ&
+      RETURN
+C 
+990   IP(1) = 0 
+      IP(2) = 0 
+      IP(3) = IERR
+      IP(4) = 2HQ&
+      RETURN
+      END 

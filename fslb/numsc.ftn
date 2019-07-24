@@ -1,0 +1,70 @@
+FTN77,I,Y
+$CDS ON
+C@NUMSC 
+C 
+      FUNCTION NUMSC(IAS,IFC,IEC,FRAC)
+C 
+C     NUMSC 
+C 
+C 1.  NUMSC PROGRAM SPECIFICATION 
+C 
+C 1.1.   NUMSC scans an ASCII string and returns integer and fraction 
+C 
+C 1.2.   RESTRICTIONS - limits on use of routine
+C 
+C 1.3.   REFERENCES - document cited
+C 
+C 2.  NUMSC INTERFACE 
+C 
+C 2.1.   CALLING SEQUENCE: CALL NUMSC(III,III,...,OOO,OOO,...)
+C 
+C     INPUT VARIABLES:
+C 
+C        IFC    - first character in string to be scanned 
+C        IEC    - last character in string to be scanned
+      DIMENSION IAS(1)
+C               - ASCII string to be scanned
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        FRAC   - fractional part, if any, found in string
+C        NUMSC  - integer part of number
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+C 2.3.   DATA BASE ACCESSES 
+C 2.4.   EXTERNAL INPUT/OUTPUT
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES:
+C 
+C     CALLED SUBROUTINES: IAS2B,ISCNC 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C        IDC    - character index of decimal point
+C 
+C 4.  CONSTANTS USED
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+C 6.  PROGRAMMER: nrv 
+C     LAST MODIFIED:   781206 
+C# LAST COMPC'ED  870407:12:43 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. First find the decimal point, if any.
+C     Then decode the integer part of the number. 
+C     Finally decode the fraction, if any.
+C 
+      IDC = ISCNC(IAS,IFC,IEC,56B)
+      IF (IDC.EQ.0) IDC = IEC + 1 
+      NUMSC = IAS2B(IAS,IFC,IDC-IFC)
+      FRAC = 0.0
+      IF (IDC.EQ.IEC+1) GOTO 99 
+      FRAC = IAS2B(IAS,IDC+1,IEC-IDC) 
+      FRAC = FRAC/(10.0**(IEC-IDC)) 
+99    RETURN
+      END 

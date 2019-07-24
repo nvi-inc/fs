@@ -1,0 +1,41 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      LOGICAL FUNCTION KRCUR(ISTACK,INDEX), 
+     .CHECK FOR RECURSION C#870115:04:21# 
+C 
+C     KRCUR checks a stack for the presence of INDEX
+C     It returns TRUE if INDEX is already in the stack. 
+C 
+C  INPUT: 
+C 
+C     ISTACK - stack to be checked
+C     INDEX - the index to check for
+      DIMENSION ISTACK(1) 
+C 
+C  OUTPUT:
+C 
+C     KRCUR - TRUE if INDEX is found in ISTACK
+C 
+C  LOCAL: 
+C 
+D     DATA LU/16/ 
+C 
+C     1. Initialize the return to TRUE.  If we find INDEX in
+C     the stacks, then return immediately.
+C     Stacks have pointers in words 6,10,etc. 
+C 
+      KRCUR = .TRUE.
+      IF (ISTACK(2).EQ.2) GOTO 400
+C                     If stack is empty, we're done 
+      DO 210 I=6,ISTACK(2),4
+        IF (INDEX.EQ.ISTACK(I)) GOTO 900
+210     CONTINUE
+C 
+C     4. If we got here, then nothing was found in the stacks.
+C 
+400   KRCUR = .FALSE. 
+C 
+900   CONTINUE
+      RETURN
+      END 

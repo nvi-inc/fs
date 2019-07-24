@@ -1,0 +1,45 @@
+HELP or ? - Display on-line help information
+
+Syntax:     HELP=<command>
+            or ?=<command>
+
+Response:   <displays information on the screen>
+
+      Comments: This command displays available information on the
+specified SNAP command. Either the word HELP or the question mark
+may be used. Typing HELP or ? alone gives a directory of available
+help information.
+
+This Field System command works the same as the HP system help
+command. The help information is kept in files in the separate
+directory /FS/HELP, one file per command.
+
+The help information is displayed one screen at a time. If the file
+is longer than about 20 lines, you are prompted at the bottom of
+the screen to continue listing by hitting any key or to return to
+the Field System by typing "A" to abort.
+
+The <command> may be chosen from the following list:
+
+ANTENNA         AZELOFF         BEAM            BREAK
+CABLE           CAL             CALTEMP         CHECK
+CONT            DECODE          ECHO            ENABLE
+ET              FEET            FF              FIVEPT
+FLUSH           FLUX            FORM            FSVERSIO
+HALT            HDATA           HDCALC          HECHO
+HELP            HPIB            IFD             LABEL
+LIST            LO              LOCATE          LOG
+LOGOUT          LVDT            MAT             MATLOAD
+NEWTAPE         ONOFF           ONSOURCE        OP
+PARITY          PASS            PATCH           PC
+PCAL            PCALS           PEAK            PERR
+PROC            RADECOFF        REPRO           RESET
+RW              RX              SAVEV           SCHEDULE
+SFF             SOURCE          SRW             ST
+STACK           STATUS          SY              TAPE
+TAPEFORM        TAPEPOS         TERMINATE       TI
+TPI             TPICAL          TPZERO          TRACK
+TSYS            UC              VCNN            WAKEUP
+WORM            WX              XDISP           XLOG
+XYOFF
+ 

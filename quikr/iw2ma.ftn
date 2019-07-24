@@ -1,0 +1,33 @@
+FTN77,Y,I  
+$CDS ON
+      SUBROUTINE IW2MA(IBUF,ISPEED,IDIR,IHEAD,JDUR)
+      IMPLICIT NONE
+      INTEGER*2 ISPEED,IDIR,IHEAD,IBUF(1)
+      INTEGER*4 JDUR
+C
+C  IW2MA: build inchworm buffer for MAT
+C
+C  INPUT:
+C     ISPEED: speed, 0=slow or 1=fast
+C     IDIR: direction, 0=in or 1=out
+C     IHEAD: head, 1 or 2
+C     JDUR: move duration, 0 to 65535 (units 40 usecs)
+C
+C  OUTPUT:
+C     IBUF: hollerith buffer holding eight characters for MAT
+C
+      INTEGER*2 INEXT,ICHMV,IHX2A,IH22A,IDUM,IBYTE
+C
+      INEXT=1
+      INEXT=ICHMV(IBUF,INEXT,2H00,1,1)
+      INEXT=ICHMV(IBUF,INEXT,IHX2A(ISPEED),2,1)
+      INEXT=ICHMV(IBUF,INEXT,IHX2A(IDIR),2,1)
+      INEXT=ICHMV(IBUF,INEXT,IHX2A(IHEAD-1),2,1)
+C
+      IDUM=ICHMV(IBYTE,2,JDUR,3,1)
+      INEXT=ICHMV(IBUF,INEXT,IH22A(IBYTE),1,2)
+      IDUM=ICHMV(IBYTE,2,JDUR,4,1)
+      INEXT=ICHMV(IBUF,INEXT,IH22A(IBYTE),1,2)
+C
+      RETURN
+      END

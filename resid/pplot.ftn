@@ -1,0 +1,8 @@
+FTN77,I,Y  
+$CDS ON
+      BLOCK DATA PPLOT
+      COMMON/PPLOT/ICHARS,IWIDX,IWIDY,
+     +             IXMIN,IXMAX,IYMIN,IYMAX,
+     +             XMIN,XMAX,YMIN,YMAX,
+     +             ROTAT(2,2)
+      END
