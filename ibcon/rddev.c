@@ -1,26 +1,38 @@
 /*
  * The device drivers have already been opened.
- * Note the buffer size BSIZE for the reading command. This
- * must be a large number to force usage of DMA otherwise, if
- * a timeout situation occurs, the computer system will lockup
- * until the timeout happens.
- NRV 921124 Added external board ID reference (got in opbrd) and
+ * NRV 921124 Added external board ID reference (got in opbrd) and
             call to ibcmd to do an "untalk" to the board before reading.
  */
 #include <memory.h>
+#include <string.h>
 #include <stdio.h>
-#include "ugpib.h"
-#define  BSIZE 256   /* this size for DMA */
-extern int boardid_ext;
+#include "sys/ugpib.h"
 
-int rddev_(devid,buffer,buflen,error)
+#define	LF		0x0A
+#define TIMEOUT		-4
+#define BUS_ERROR	-8
+#define HPIBERR		-20
+#define BSIZE 		256   /* this size for DMA */
+#define IBCODE		300
+#define ASCII		  0
+#define BINARY		  1
+
+extern int ID_hpib;
+
+/*-------------------------------------------------------------------------*/
+
+int rddev_(mode,devid,buffer,buflen,error, ipcode)
 
 /* rddev returns the count of the number of bytes read, if there are
-   no errors. 
+   no errors.
+
+   The mode flag indicates ASCII (0) or BINARY (1) data reads.
+ 
    If an error occurs, *error is set to -4 for a timeout, -8 for a bus
    error. If a bus error occurs, rddev returns the system error variable.
 */
-int *devid;
+int *mode,*devid;
+long *ipcode;
 unsigned char *buffer;
 int *buflen;  /* buffer length in characters */
 int *error;
@@ -28,16 +40,14 @@ int *error;
 {
   int i;
   int iret;
-  unsigned char locbuf[BSIZE];
+  unsigned char lret,locbuf[BSIZE];
   int val, icopy;
 
   *error = 0;
-
-  for (i=0; i<BSIZE; i++)
-    locbuf[i] = 0;
+  *ipcode = 0;
 
 /* 
- * The termination character (line feed, hex a) is set in the
+ * The termination character (line feed, 0x0A) is set in the
  * configuration file for the device located in /dev directory.
  * The read command is set to terminate on the EOS value. This is set
  * in the configuration file along with the device flag REOS. 
@@ -46,38 +56,79 @@ int *error;
  * of characters to be read with the ibrd command must also be set high, 
  * 256 in this case works.
  */
-  ibcmd(boardid_ext,"_?",1);  /* Send UNT UNL */
-/*printf("\n ibsta = %.4xh iberr = %d ibcnt %d\n", ibsta,iberr,ibcnt);*/
 
-  val = (REOS << 8) +0x0a;
-  ibeos(*devid,val);
-  ibrd(*devid,locbuf,BSIZE);
+  ibcmd(ID_hpib,"_?",1);  	/* unaddress all listeners and talkers */
+  if ((ibsta & (ERR|TIMO)) != 0)
+  {
+    *error = -(IBCODE + iberr); 
+    memcpy((char *)ipcode,"RC",2);
+    return(-1);
+  } 
 
-/*  printf("\n ibsta = %.4xh iberr = %d ibcnt %d\n", ibsta,iberr,ibcnt); */
+  if ((*mode == 1) || (*mode == 2))
+  {
+    val = (REOS << 8) + LF;
+    ibeos(*devid,val);		/* set to read until REOS+EOS is detected */
 
-  if ( (ibsta & 0x4000) != 0) {
-    *error = -4;
-    return;
+    if ((ibsta & (ERR|TIMO)) != 0)
+    {
+      *error = -(IBCODE + iberr); 
+      memcpy((char*)ipcode,"RS",2);
+      return(-1);
+    }
   }
-  else if ((ibsta & 0x8000) != 0) {
-    *error = -8; 
-    return(iberr);
+  else
+  {
+    ibeos(*devid,0);		/* turn off all EOS detection */
+    if ((ibsta & (ERR|TIMO)) != 0)
+    {
+      *error = -(IBCODE + iberr); 
+      memcpy((char*)ipcode,"RT",2);
+      return(-1);
+    }
+  }
+
+  ibrd(*devid,locbuf,BSIZE);	/* addr device to TALK, board to LISTEN */
+
+  if ((ibsta & TIMO) != 0)	/* has the device timed out? */ 
+  {
+    *error = TIMEOUT;
+    memcpy((char *)ipcode,"RE",2);
+    return(-1);
+  } 
+  else if ((ibsta & ERR) != 0) 	/* if not, some other type of error */
+  {
+    *error = -(IBCODE + iberr);
+    memcpy((char *)ipcode,"RB",2);
+    return(-1);
   }
 
   iret = ibcnt;
-  while(iret > 0 &&
-     (locbuf[iret-1] == 0 || locbuf[iret-1] == '\r' || locbuf[iret-1]== '\n'))
-        iret--;
+
+  ibcmd(ID_hpib,"_?",1);  	/* unaddress all listeners and talkers */
+  if ((ibsta & (ERR|TIMO)) != 0)
+  {
+    *error = -(IBCODE + iberr); 
+    memcpy((char *)ipcode,"RD",2);
+    return(-1);
+  }
+
+  if ((*mode == 1) || (*mode == 2))
+  {  
+    if (iret <= 0)
+      return (0);
+    else
+      lret = locbuf[iret-1];
+
+    while ((iret > 0) && (strchr("\r\n\0",lret) != 0))
+      lret = locbuf[--iret-1];
+  }
 
   icopy=iret;
   if(iret > *buflen)
-     icopy=*buflen;
-  memcpy(buffer,locbuf,icopy);
+    icopy=*buflen;
 
-/*
- { int i; for (i=0;i<iret;i++) printf("%2x ",buffer[i]); } 
-  printf("\n");
-*/
+  memcpy(buffer,locbuf,icopy);
 
   return(iret);
 }
