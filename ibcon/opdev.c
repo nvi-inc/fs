@@ -6,30 +6,20 @@
  * configuration files for the devices are located in /dev directory.
  * It assumes you will use the configuration file 'ibboard' for the 
  * board. 
- *
- * The following configuration files use the default settings and have
- * the additional settings as described:
- *
- *  ib2: This file is used for the cable counter:
- *       PAD: 2        !! address 2 on the device
- *       EOS: a        !! hex for line feed, end character of output
- *       REOS          !! device flag turned on for reading EOS
- *
- *  ib11: This file is used for the spectrum analyzer:
- *       PAD: 11       !! address 11 on the device
- *       EOS: d        !! hex for carriage return, end character of output
- *       XEOS          !! device flag turned on for writing EOS
  */
+
 #include <memory.h>
-#include "ugpib.h"
+#include <string.h>
+#include "sys/ugpib.h"
 #define NULLPTR (char *) 0
 
-void opdev_(dev,devlen,devid,error)
+void opdev_(dev,devlen,devid,error,ipcode)
 
 int *dev;
 int *devlen;
 int *devid;
 int *error;
+long *ipcode;
 
 {
   int deviceid;
@@ -37,25 +27,25 @@ int *error;
   char *nameend;
 
   *error = 0;
-  if ((*devlen < 0) || (*devlen > 64)){
+  *ipcode = 0;
+
+  if ((*devlen < 0) || (*devlen > 64))
+  {
     *error = -3;
-    return;
+    memcpy((char *)ipcode,"DL",2);
   }
-  nameend = memccpy(device, dev, ' ', *devlen);
-  if (nameend != NULLPTR)
-    *(nameend-1) = '\0';
-  else *(device + *devlen) = '\0';
+  else
+  {
+    nameend = memccpy(device, dev, ' ', *devlen);
+    if (nameend != NULLPTR)
+      *(nameend-1) = '\0';
+    else 
+      *(device + *devlen) = '\0';
 
-  if ( (*devid = ibfind(device)) < 0) { 
-    erroroutd("couldn't 'ibfind()' %s\n",dev);
-    *error=-8;
-    return;
+    if ( (*devid = ibfind(device)) < 0) 
+    { 
+      *error = -320;
+      memcpy((char*)ipcode,"DF",2);
+    }
   }
-}
-
-erroroutd(msg)
-char *msg;
-{
-  printf("\n opdev error detected while %s",msg);
-  printf("\n ibsta = %.4xh iberr = %d ibcnt %d\n", ibsta,iberr,ibcnt);
 }

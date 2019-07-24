@@ -6,54 +6,68 @@
    NRV 921124 Added external boardid for rddev to use.
  */
 #include <memory.h>
-#include "ugpib.h"
-#define NULLPTR (char *) 0
-int boardid_ext;
+#include "sys/ugpib.h"
 
-void opbrd_(dev,devlen,error)
+#define NULLPTR (char *) 0
+#define	IBCODE	300
+
+int ID_hpib;
+
+void opbrd_(dev,devlen,error,ipcode)
 
 int *dev;
 int *devlen;
 int *error;
+long *ipcode;
 
 {
   char device[65];
   char *nameend;
-  int boardid;
+  int hpib;
 
   *error=0;
+  *ipcode = 0;
 
-  if ((*devlen < 0) || (*devlen > 64)){
+  if ((*devlen < 0) || (*devlen > 64))
+  {
     *error = -3;
+    memcpy((char *)ipcode,"BL",2);
     return;
   }
+
   nameend = memccpy(device, dev, ' ', *devlen);
   if (nameend != NULLPTR)
     *(nameend-1) = '\0';
-  else *(device + *devlen) = '\0';
+  else 
+    *(device + *devlen) = '\0';
 
-  if ( (boardid = ibfind(device)) < 0) { 
-    errorop("couldn't 'ibfind()' %s\n",dev);
-    *error=-8;
+/* find the device and assign a file descriptor, returns <0 on error */
+
+  if ( (hpib = ibfind(device)) < 0)
+  {  
+    *error = -(IBCODE + iberr);
+    memcpy((char *)ipcode,"BF",2);
     return;
   }
 
-  if (ibonl(boardid,1)&(ERR|TIMO)) {
-    errorop("couldn't initialize board\n");
-    *error=-8;
+/* put the hpib board 'on-line' and return ibsta as status */
+
+  if (ibonl(hpib,1)&ERR) 
+  {
+    *error = -(IBCODE + iberr);
+    memcpy((char *)ipcode,"BO",2);
+    return;
   }
 
-  if (ibsic(boardid,1)&(ERR|TIMO)) {
-    errorop("couldn't execute interface clear\n");
-    *error=-8;
+/* send an interface clear, making the hpib controller-in-chage */
+  
+  if (ibsic(hpib,1)&ERR) 
+  {
+    *error = -(IBCODE + iberr);
+    memcpy((char *)ipcode,"BS",2);
+    return;
   }
-  boardid_ext = boardid;
+/* used as ID for board in other hpib functions */
 
-}
-
-errorop(msg)
-char *msg;
-{
-  printf("\n opbrd error detected while %s",msg);
-  printf("\n ibsta = %.4xh iberr = %d ibcnt %d\n", ibsta,iberr,ibcnt);
+  ID_hpib = hpib;
 }

@@ -1,6 +1,7 @@
 * /usr2/control/dev.ctl
 ********** Field System LU control file
-/dev/ibboard  GPIB configuration file
+/dev/gpib0    NI-488 configuration file
+*/dev/ibboard  MetaSphere configuration file
 /dev/cui1a    Mark III MAT device name
 9600          Mark III MAT baud rate
 /dev/cui1c    Mark III Data Buffer device name

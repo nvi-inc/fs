@@ -1,4 +1,4 @@
-""
+b""
 AN   -1
 Illegal mode
 ""
@@ -735,34 +735,88 @@ FV   -5
 fmset: Bad completion code from mcbcn
 ""
 IB   -1
-Trouble with class buffer
+Trouble with GPIB class buffer
 ""
 IB   -2
-Illegal mode
+Illegal GPIB mode
 ""
 IB   -3
-Unrecognized device
+Unrecognized GPIB device
 ""
 IB   -4
-Device time-out on response
+GPIB Device time-out on response ?W
 ""
 IB   -5
-Improper response (wrong number of chars)
+Improper GPIB response (wrong number of chars)
 ""
 IB   -6
-Attempt to read from a listen-only device
+Attempt to read from a listen-only GPIB device
 ""
 IB   -7
-Attempt to write to a talk-only device
+Attempt to write to a talk-only GPIB device
 ""
 IB   -8
 GPIB error condition, check driver manual UGPIB section for explanation
+""
+IB   -9
+GPIB UNIX error code ?WWW
 ""
 IB -101
 Number of entries from IBAD control file exceed table limit of ?WWW
 ""
 IB -201
 GPIB error condition ?WWW
+""
+IB -300
+GPIB(edvr) unix error, see above message, ?W
+""
+IB -301
+GPIB(ecic) function requires GPIB board to be CIC, ?W
+""
+IB -302
+GPIB(enol) write handshake error, CHECK instrument and cable, ?W
+""
+IB -303
+GPIB(eadr) GPIB board not addressed correctly, ?W
+""
+IB -304
+GPIB(earg) invalid argument to function call, ?W
+""
+IB -305
+GPIB(esac) GPIB board not system controller as required, ?W
+""
+IB -306
+GPIB(eabo) I/O operation aborted, ?W
+""
+IB -307
+GPIB(eneb) not-existent GPIB board, ?W
+""
+IB -308 
+GPIB(edma) DMA hardware error, ?W
+""
+IB -309
+GPIB(ebto) DMA hardware bus timeout, ?W
+""
+IB -311
+GPIB(ecap) no capability for type of operation, ?W
+""
+IB -312
+GPIB(efso) file system error, ?W
+""
+IB -314
+GPIB(ebus) GPIB bus error, ?W
+""
+IB -315
+GPIB(estb) serial poll queue overflow, ?W
+""
+IB -316
+GPIB(esrq) SRQ line asserted by unknown device, ?W
+""
+IB -320
+GPIB(ibfind) failed to open GPIB special file, no file descriptor returned, ?W
+""
+IB -321
+GPIB(ibufln) the returned data string is longer then expected.
 ""
 MA   -1
 Trouble with class buffer

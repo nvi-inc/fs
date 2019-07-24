@@ -429,3 +429,20 @@
            fsinstall.exe  created
 
 940321 WEH cnvrt.c        fix ha output sign per J. Quick
+
+940618 WEH stdis.f        fix "it" array type
+
+940621 WEH fln.c          add safety "break"
+
+950120 DMV ibcon/         updated for new driver, binary, better errors,
+                          longer buffers
+
+950120 DMV fserr.ctl      error codes updated
+
+950120 WEH cover          logex control file added to st.default/oper
+
+950120 WEH cexper         logex control file added to st.default/oper
+
+950127 WEH dev.ctl        new NI driver configuration file
+
+950127 WEH ibad.ctl       new NI driver devices
