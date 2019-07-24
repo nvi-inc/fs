@@ -1,0 +1,62 @@
+form - formatter setup (VLBA rack)
+Syntax:      form=mode,rate,aux,chan
+
+Response:    form/mode,rate,aux,chan,rev,genstat
+             ,mcbstat,
+             hdwstat,sfwstat,intstat
+
+Settable Parameters:
+mode            The Mark III mode to be recorded, or reboot
+                (see below) to reboot the CPU. Choices for the
+                mode are A, B, C, Dn. Default B. For mode
+                D, n is the pass number, n=1 to 28. The cross-
+                point switch is set up for the specified mode and,
+                for mode D, for the specified track. Only Mark
+                III modes are allowable now; in the future
+                VLBA modes may be settable.
+rate            Sample rate in Mbits/sec. Choices are 0.25,
+                0.5, 1, 2, 4, 8. Default 4. This selection
+                must be consistent with the bandwidth set up
+                with the bbc commands and the tape speed used
+                in the st command. The tape clock rate is set to
+                be 9/8 of the sample rate for Mark III modes.
+aux             Auxiliary data to be written on the tape. Default
+                is to not specify this field and have it be
+                automatically set up as shown below. This
+                command sets up the same auxiliary data field
+                for each track (not yet implemented).
+chan            DQA channel to use. Choices are at1, at2,
+                at3, aaux, bt1, bt2, bt3. Default
+                aaux.
+
+Monitor-only Parameters:
+rev             Formatter firmware revision number, displayed
+                as rev#xx.xx.
+genstat         General status, ok or the hex value of hex
+                address 20.
+mcbstat         Communications status, ok or the hex value of
+                hex address 21.
+hdwstat         Hardware status, ok or the hex value of hex
+                address 22.
+sfwstat         Software status, ok or the hex value of hex
+                address 23.
+intstat         Internal status, ok or the hex value of hex
+                address 24.
+
+Comments:
+This command syntax applies to VLBA formatters only.  The
+many possible error conditions for the formatter are monitored and
+reported by chekv (not yet implemented).
+
+MCB functions are available. The formatter CPU can be reset
+manually. After manual reset you must issue the command
+form=addr to re-initialize the module.
+
+CAUTION: Issuing this command with an = causes a formatter
+reconfiguration which will put the formatter into a busy state for
+up to 7 seconds.
+
+The formatter clock is set with the timeset program.
+
+The auxiliary data field is set automatically to include pass number
+and the current commanded head position (not yet implemented).

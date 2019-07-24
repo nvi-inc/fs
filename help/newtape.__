@@ -1,0 +1,12 @@
+newtape - halt until new tape 
+Syntax:      newtape
+
+Response:    newtape/"To continue, use LABEL
+             command"
+
+
+Comments: 
+This command in effect is the same as the halt command.
+Execution will continue after the label command has been
+successfully completed. The cont command will also work.
+

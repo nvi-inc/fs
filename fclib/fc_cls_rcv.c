@@ -1,0 +1,9 @@
+int fc_cls_rcv_( iclass, buffer, nchars, rtn1, rtn2)
+long *iclass;
+char *buffer;
+int *nchars, *rtn1, *rtn2;
+{
+   int cls_rcv();
+
+   return(cls_rcv( *iclass, buffer, *nchars, rtn1, rtn2, 0, 0));
+}

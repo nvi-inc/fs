@@ -1,0 +1,42 @@
+tsys - system temps
+Syntax:      tsys1=list
+             tsys2=list
+             tsysa=list
+             tsysb=list
+
+Response:    tsys1/systemps
+             tsys2/systemps
+             tsysa/systemps
+             tsysb/systemps
+
+
+Settable parameters:
+list            list of modules for which Tsys will be computed.
+                Standard mnemonics allowed.
+
+Monitor-only parameters:
+systemps        list of system temperatures, computed from
+                values retrieved by the tpi, tpical, and
+                tpzero commands. -1.0 means no current
+                measurements available.
+
+Comments: 
+This command calculates and displays system temperatures for
+channels 1 and 2 (Mark III) or channels A and B (VLBA).  The
+command pairs, tsys1/tsysa and tsys2/tsysb, are
+synonymous. The calculations for the tsys1/2 and tsysa/b
+commands use the noise calibration values specified in the
+caltemp1/2 and caltempa/b commands, respectively. 
+Either USB or LSB system temperature is computed and displayed,
+depending on the last-measured values for the total power. The
+formula is:
+
+       tsys = (tpi - tpzero) * (caltemp/(tpical-tpi))
+
+tsys            system temperature, as reported in tsys
+command
+tpi             cal-off reading, from tpi command
+tpzero          zero-level reading, from tpzero command
+tpical          cal-on reading, from tpical command
+caltemp         noise calibration source temperature, from
+                caltemp command.

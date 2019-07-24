@@ -1,0 +1,14 @@
+# Set aliases
+alias a alias
+a una unalias
+a cd 'cd \!*;set prompt="`hostname`:`pwd`/:> "'
+a cls 'clear'
+a h history
+a lower 'tr "[A-Z]" "[a-z]"'
+a lsf 'ls -CF'
+a ll 'ls -l'
+a pu pushd
+a po popd
+a d dirs
+a rm 'rm -i'
+a psall 'ps -ef | egrep -v "(^  daemon|^    root|^      lp)"'

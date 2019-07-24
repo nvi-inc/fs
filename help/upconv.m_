@@ -1,0 +1,33 @@
+upconv - upconv. freq. (Mark III rack)
+Syntax:      upconv=chan1nor,chan2nor,chan3nor,c
+             han1alt,chan2alt
+
+Response:    upconv/chan1nor,chan2nor,chan3nor,c
+             han1alt,chan2alt
+
+
+Settable parameters:
+chan1nor        Upconverter frequency for IF channel 1, normal
+                input, MHz. Default 0.
+chan2nor        Upconverter frequency for IF channel 2, normal
+                input, MHz. Default 0.
+chan3nor        Upconverter frequency for IF channel 3, normal
+                input, MHz. Default 0.
+chan1alt        Upconverter frequency for IF channel 1,
+                alternate input, MHz. Default 0.
+chan2alt        Upconverter frequency for IF channel 2,
+                alternate input, MHz. Default 0.
+
+Monitor-only Parameters: none
+
+Comments: 
+This command specifies the frequency of the upconverter for each
+Mark III channel. Use the lo command to specify the local
+oscillator frequencies.
+
+The LO and upconverter frequencies are used by program pcalr
+and by the antenna calibration programs. These values along with
+the video converter frequencies are used to calculate the phase
+calibrator tone frequencies. For Mark III systems, the patch
+command should also be used to specify which converters are on
+each LO.

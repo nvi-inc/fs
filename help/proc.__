@@ -1,0 +1,21 @@
+proc - new schedule procedure library
+Syntax:      proc=name
+
+Response:    proc/name
+
+
+Settable parameters:
+name            name of procedure file to open. If no directory
+                path is specified, /usr2/proc is assumed. If no
+                extension is specified, .prc is assumed. This
+                procedure library is opened as the schedule
+                library, and all procedure names are read.
+
+Monitor-only parameters: none
+
+Comments: 
+When a new procedure library is opened, any time-scheduled
+procedures from the previous procedure library are cancelled. See
+section 8.0 of the SNAP Language manual for details. Refer to
+the PFMED manual for information on editing procedure libraries.
+

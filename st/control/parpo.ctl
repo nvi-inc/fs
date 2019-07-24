@@ -5,7 +5,7 @@
 *     1. TELESCOPE NAME (8 CHARACTERS MAX)
 *     2. TELESCOPE AXIS TYPE (4 CHARACTERS MAX)
 *
-     NASAGSFC XYNS
+     MV-3 azel
 *
 *  2ND LINE Parameters:
 *

@@ -1,9 +1,0 @@
-NEWTAPE - Halt schedule until new tape is mounted
-
-Syntax:   NEWTAPE
-Response: NEWTAPE/"To continue, use LABEL command"
-
-      Comments: This command in effect is the same as the HALT
-command. Execution will continue after the LABEL command has been
-successfully completed. The CONT command will also work.
-

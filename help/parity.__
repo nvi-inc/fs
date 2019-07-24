@@ -1,0 +1,51 @@
+parity - measure parity errors
+Syntax:      parity=pemax,syncmax,channel,
+             aux,tracks
+
+Response:    parity/parity-errors
+             parity/sync-errors
+
+
+Settable Parameters:
+pemax              maximum allowable parity errors per channel
+                   per megabyte of data. Default is 600. If
+                   errors exceed threshold, an error message is
+                   issued.
+syncmax            default is 12. Otherwise handled the same as
+                   parity error threshold.
+channel            decoder channel. Can be a, b, or ab
+                   (default).
+aux                aux data check, on (default) or off. Not
+                   supported for VLBA.
+tracks             list of recorder tracks on which to measure
+                   errors. Default is the currently enabled tracks.
+                   Values must be between 1 and 28, and/or
+                   may be specified by groups (g1,g2,g3,g4)
+                   as in the enable command.
+
+Monitor-only parameters:
+parity-errors      for each track in the list, the corresponding
+                   parity errors (smallest of 4 samples).
+sync-errors        for each track in the list, the corresponding
+                   sync errors (smallest observed value over the
+                   same 4 sample intervals as the parity error
+                   check).
+
+Comments: 
+Issuing this command with a list of tracks (or parity= for
+currently enabled tracks) sets up the command. Issuing the
+command with no parameters then measures errors. 
+
+If the auxiliary data field was set using the form or head
+positioning commands, then it is checked for accuracy, unless the
+aux parameter is off. An error message is issued if the auxiliary
+data on the tape does not agree with the value last sent to the
+formatter.
+
+If so many tracks are decoded that the response extends beyond
+about 100 characters, then another response line is generated.
+
+The decoder channels used to read the data can be specified, either
+a, b, or both a and b reproduce channels can be used. If pcalr is
+running, it should be suspended before starting this command so
+that there's no competition for the b channel.

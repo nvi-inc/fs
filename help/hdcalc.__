@@ -1,0 +1,36 @@
+hdcalc - head calibration calculation
+Syntax:      hdcalc
+             hdcalc=clear
+
+Response:    hdcalc/writeF,readF,writeR,readR,wr
+             iteS,readS
+
+
+Settable parameters:
+none, however hdcalc=clear will delete previously calculated
+values
+
+Monitor-only parameters:
+writeF             Forward absolute offset for the write head
+readF              Forward absolute offset for the read head,
+                   null for VLBA
+writeR             Reverse relative offset for the write head
+readR              Reverse relative offset for the read head, null
+                   for VLBA
+writeS             Write head scale
+readS              Read head scale, null for VLBA
+
+Comments: 
+This command will calculate new calibration parameters based on
+the voltages saved with the savev command. See the Narrow
+Track Calibration manual for a description of the calculations.
+Only one scale factor is calculated for each head.
+
+Any parameters which cannot be calculated because savev has
+not saved a complete set of voltages will be reported as null, i.e.
+empty.
+
+The VLBA recorder has only one head. Its parameters are reported
+as the write head parameters and the read head parameters are
+null.
+

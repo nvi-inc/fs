@@ -1,0 +1,7 @@
+cd /usr2/fs
+find . -depth -name '?akefile*' -print > FSI
+find . -depth -name '*.i' -print >> FSI
+find . -depth -name '*.h' -print >> FSI
+cat FSI | cpio -ovcB > /tmp/fsi.cpio
+rm FSI
+compress /tmp/fsi.cpio

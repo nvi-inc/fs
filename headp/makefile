@@ -1,0 +1,18 @@
+OBJECTS = headp.o
+#
+F77= gf77
+#FFLAGS = -c -g -i2
+FFLAGS = -c -g
+LIBES = ../fslb/fslb.a\
+../lnfch/lnfch.a\
+../newlb/newlb.a\
+../flib/flib.a\
+../fclib/fclib.a\
+../clib/clib.a\
+../fmpsee/fmpsee.a\
+../rtelb/rtelb.a -lrtx
+
+#
+../bin/headp: $(OBJECTS)
+	gf77 -g -o ../bin/headp $(OBJECTS) $(LIBES)
+	../setb/setb ../bin/headp

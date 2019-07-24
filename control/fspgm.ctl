@@ -1,17 +1,21 @@
-CLOUT,LA,8,,,0
-EPSON,,8,,,8
-DDOUT,L,8,,10,0
-FSERR,LA,8,,,0
-CHEKR,C,8,,23,8
-IBCON,,8,,,8
-MATCN,,8,,,8
-AQUIR,,8,,,8
-FIVPT,,8,,,8
-ONOFF,,8,,,8
-PCCOM,,8,,,8
-MOON,,8,,,8
-PRLAB,,8,,,8
-QUIKR,,8,,,8
-PCALR,,8,,,8
-BOSS,M,8,20,10,8,OP
-INCOM,,8,,,8
+incom n  incom
+ddout l  xterm -name ddout -e ddout &
+fserr la fserr &
+boss  n  boss &
+matcn n  matcn &
+mcbcn n  mcbcn &
+chekr n  chekr &
+antcn n  antcn > test.out 2>&1 &
+trakp n  trakp > test.out 2>&1 & 
+ibcon n  ibcon > testx.out 2>&1 &
+fivpt n  fivpt &
+onoff n  onoff &
+quika n  quika &
+quikb n  quikb &
+quikc n  quikc &
+quikd n  quikd &
+quikv n  quikv &
+*stqkr n stqkr &
+moon  n  moon  &
+pcalr n  pcalr &
+oprin n  xterm -name oprin -e oprin &

@@ -1,0 +1,5 @@
+cd /usr2/fs
+find . -depth -name '*.f' -print > FSF
+cat FSF | cpio -ovcB > /tmp/fsf.cpio
+rm FSF
+compress /tmp/fsf.cpio

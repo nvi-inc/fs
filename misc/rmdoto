@@ -1,0 +1,4 @@
+for dir in *
+do
+  rm $dir/*.o
+done

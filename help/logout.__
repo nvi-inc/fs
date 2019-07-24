@@ -1,0 +1,25 @@
+logout - set log output unit(s)
+Syntax:      logout=dev,dev,...
+
+Response:    none
+
+
+Settable parameters:
+dev             Device name for display of log entries. Up to 5
+                devices may be specified. Default device is the
+                log/display window.
+
+Comments: 
+Log entries are always written into the log file, this command is
+only for display during operations. All log entry display may be
+suppressed by issuing the command logout=/dev/null.
+
+An example of the use of this command is to specify a file name
+as the device in order to record a portion of the log file into a
+separate file. Another example would be to have the log display
+appear on a different terminal from the console screen.
+
+You must have permission to write to any device or file that you
+specify. If you specify a device which you do not have permission
+to write to, an error will be generated when the Field System
+attempts to open that device.

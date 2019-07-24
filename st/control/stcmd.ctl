@@ -1,2 +1,3 @@
-*********FIELD SYSTEM COMMANDS**************
+
+*********STATION SPECIFIC COMMANDS**************
 *COMMAND     SEG SBPA BO

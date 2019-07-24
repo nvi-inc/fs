@@ -1,0 +1,5 @@
+cd /usr2/fs
+find . -depth -name '*.c' -print > FSC
+cat FSC | cpio -ovcB > /tmp/fsc.cpio
+rm FSC
+compress /tmp/fsc.cpio
