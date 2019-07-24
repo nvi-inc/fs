@@ -1,0 +1,149 @@
+FTN4,X
+C@WX
+C 
+      SUBROUTINE WX(IP),WEATHER MODULE C#870115:04:36#
+C 
+C 1.1.   WX controls the weather module 
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - error
+C        IP(2) - class
+C        IP(3) - number of records
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES:
+C 
+C     CALLED SUBROUTINES: GTPRM,ICHAR 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C        NCHAR  - number of characters in buffer
+C        IMMODE - mode for MAT
+C        ICH    - character counter 
+      DIMENSION IBUF2(40),IBUF(20)
+C               - class buffer
+      DIMENSION LCHAR(4)
+C        ILEN   - length of IBUF, chars 
+      DIMENSION IPARM(2)
+C               - parameters returned from GTPRM
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 4.  CONSTANTS USED
+C 
+C 5. INITIALIZED VARIABLES
+C 
+      DATA ILEN/40/,ILEN2/80/ 
+      DATA IL/10/,LCHAR/2H+ ,2H% ,2H! ,2H? /
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED:  800315
+C# LAST COMPC'ED  870115:04:36 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     We have been requested to read the WX module. 
+C 
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+100   IERR = -1 
+      ICLASS = 0
+      NREC = 0
+      GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF2,-ILEN2) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF2,1,NCHAR,75B)
+C                   Scan for "="
+      IF (IEQ.NE.0) GOTO 100
+C                   If user specified parameters, this is error 
+C                   If not, OK
+C 
+C 
+C     2. Fill up a request for the three numbers: + (temp), % (humidity), 
+C     and ! (pressure). 
+C 
+      IBUF(2) = 2HWX
+      NCH = 5 
+      NREC = 1
+      IBUF(1) = 8 
+      DO 120 I=1,3
+        ICLASS = 0
+        IBUF(3) = LCHAR(I)
+        CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS) 
+        CALL EXEC(23,6HMATCN ,ICLASS,NREC)
+        CALL RMPAR(IP)
+        IF(IP(3).LT.0) GOTO 999 
+        ICLASS = 0
+        CALL SUSP(2,1)
+        IBUF(3) = LCHAR(4)
+        CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS) 
+        CALL EXEC(23,6HMATCN ,ICLASS,NREC)
+        CALL RMPAR(IP)
+        ICLASS = IP(1)
+        IF(IP(3).LT.0) GOTO 999 
+115     REG = EXEC(21,ICLASS,IBUF(I*5+1),-IL) 
+120   CONTINUE
+C 
+C 
+C     4. Now decode the message to get temp, humid, pres. 
+C     The temperature buffer: 
+C                   WX000atttt   (in degrees C*10)
+C     where a=B for t>0, a=C for t<0. 
+C     The humidity buffer:
+C                   WX00000hhh   (in percent*10)
+C     The pressure buffer:
+C                   WX000Ppppp   (in mbars*10)
+C     If the response is FFFFF, the instrument is down. 
+C     After conversion, store parameters in common. 
+C 
+      TEMPWX = DAS2B(IBUF,17,4,IERR)/10.0 
+      IF (ICHAR(IBUF,16).EQ.103B) TEMPWX = -TEMPWX  
+      IF (IERR.EQ.0) GOTO 410 
+      IERR = -301 
+      TEMPWX = 1.0E20 
+410   HUMIWX = DAS2B(IBUF,27,4,IERR)/10.0 
+      IF (IERR.EQ.0) GOTO 420 
+      IERR = -302 
+      HUMIWX = 1.0E20 
+C     The additional .001 is to fix the problem of 1000.0 
+C     which IR2AS doesn't handle properly.
+420   PRESWX = DAS2B(IBUF,36,5,IERR)/10.0  + .001 
+      IF (IERR.EQ.0) GOTO 500 
+      IERR = -303 
+      PRESWX = 1.0E20 
+C 
+C 
+C     5. Finally, code up the message for BOSS and the display and log. 
+C 
+500   NCH = ICHMV(IBUF2,NCHAR+1,2H/ ,1,1) 
+      NCH = NCH + IR2AS(TEMPWX,IBUF2,NCH,5,1) 
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = NCH + IR2AS(PRESWX,IBUF2,NCH,7,1) 
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = NCH + IR2AS(HUMIWX,IBUF2,NCH,5,1) 
+C 
+      ICLASS = 0
+      NCH = NCH - 1 
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)  
+      NREC = 1
+C 
+C 
+990   IP(1) = ICLASS
+      IP(2) = NREC
+      IP(3) = IERR
+      IP(4) = 2HQX
+999   RETURN
+      END 

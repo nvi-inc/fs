@@ -1,0 +1,33 @@
+FTN4,X
+C@QRVCX 
+C 
+      PROGRAM QRVCX,5 
+C 
+C     QRVCX 
+C 
+C 1.1.   QRVCX is the segment of QUIKR dealing with the VIDEO CONVERTERS
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C     CALLED SUBROUTINES: VC, VCDIS 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C        IVCN   - "subroutine number" sent via LINQ package 
+C                 Used in this segment to indicate VC number
+C 
+C 6.  PROGRAMMER: nrv 
+C     LAST MODIFIED:  800213
+C# LAST COMPC'ED  870115:04:30 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C 
+      CALL LINQB(IVCN)
+C                   We use this number to tell us which VC command
+      CALL LINQC
+      CALL VC(IP,IVCN)
+      CALL LINQD
+      END 

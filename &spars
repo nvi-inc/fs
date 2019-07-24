@@ -1,0 +1,256 @@
+FTN4,X
+C@SPARS 
+C 
+      SUBROUTINE SPARS(IAS,IFC,IEC,LNAMES,NNAMES,LPROC1,NPROC1, 
+     .       LPROC2,NPROC2,LPARM,NPARM, 
+     .       ITYPE,IERR,ITLIS,INDEX,ICLASS),SNAP PARSER C#870115:04:18 #
+C 
+C   SPARS parses a SNAP command 
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IAS(1)
+C               - array holding command 
+C***NOTE*** IAS IS MODIFIED BY EXPANDING PARAMETERS 
+C        IFC    - first character of command in IAS 
+C        IEC    - last character of command in IAS
+C****NOTE**** IEC IS MODIFIED IF IAS IS EXPANDED
+      DIMENSION LNAMES(5,1),LPROC1(5,1),LPROC2(5,1) 
+C               - lists of recognized functions and procedures
+C        NNAMES - number of entries in LNAMES array 
+C        NPROC1 - number of entries in LPROC1 array 
+C        NPROC2 - number of entries in LPROC2 array 
+      DIMENSION LPARM(1)
+C     - parameter to be inserted into command 
+C     NPARM - number of chars in LPPARM 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C     ITYPE - type of command returned from SPARS 
+C                   !_ (wait for time)
+C                   !R (wait for time and establish it as reference time) 
+C                   !* (wait for time + reference time) 
+C                   !! (wait for time + now)
+C                   _F (function) 
+C                   _P (procedure from list 1)
+C                   _Q (procedure from list 2)
+C                   !F (wait for function)
+C                   !P (wait for procedure) 
+C                   !Q (wait for procedure) 
+C                   _C (comment)
+C        IERR   - error code, 0=all OK, > 0 soft error, < 0 hard error
+C             0 - OK
+C            -1 - error in characters following a ! 
+C            -2 - more than 40 characters in parameter list 
+C            -3 - more than 12 characters in function or procedure name 
+C            -4 - unrecognized name (not a function or procedure) 
+C            -5 - standard format time field error
+C            -6 - <not used>
+C            -7 - date or time out or range 
+C            -8 - alternate format time field error 
+C            -9 - no date allowed in time field 
+C           -10 - attempt to schedule over New Year's eve - you should
+C                 be at a party instead!!!
+C           -11 - stop time occurs before start time
+C           -12 - no class number available (from EXEC 20)
+C           -13 - no SAM available (from EXEC 20) 
+C           -14 - more than 100 chars in expanded command 
+C        INDEX  - index into LNAMES, LPROC1, or LPROC2 which
+C                 corresponds to ITYPE
+C        ICLASS - class # for buffer which holds entire command 
+      DIMENSION ITLIS(3,3)
+C      ITIME - time list parameters 
+C              3 words each: start, period, stop. 
+C                   ITIME(1,1) - start (IYR-1970)*1024 + IDAY 
+C                   ITIME(2,1) - start HR*60+MIN
+C                   ITIME(3,1) - start SEC*100 + MSEC/10
+C                   ITIME(1,2) - period resolution code 
+C                              1=msec/100    2=sec   3=min
+C                   ITIME(2,2) - period multiplier (value)
+C                   ITIME(3,2) - 0
+C                   ITIME(1,3) - stop (IYR-1970)*1024 + IDAY
+C                   ITIME(2,3) - stop HR*60 + MIN 
+C                   ITIME(3,3) - stop SEC*100 + MSEC/10 
+C 
+C   COMMON BLOCKS USED:  none 
+C 
+C     CALLING SUBROUTINES: BWORK
+C 
+C     CALLED SUBROUTINES: GTNAM (hashes, checks out names)
+C                         GTTIM (parses time fields)
+C                         TMLIS (parses time lists) 
+C 
+C   LOCAL VARIABLES 
+C 
+C        ICHAR1,2 
+C               - character counters
+C        ICHARA,B,C 
+C               - character counters
+      DIMENSION IREG(2) 
+C        REG
+C               - registers from EXEC 18 (CLASS I/O)
+      DIMENSION LBUF(50)
+C               - buffer sent to CLASS I/O
+C        NCHAR  - number of characters in LBUF
+C        ICHAR2 - second character in command 
+C 
+      EQUIVALENCE (IREG(1),REG) 
+C 
+C 
+C     1. First initialize all returned parameters.
+C 
+      ITYPE = 2H
+      DO 100 I=1,9
+        ITLIS(I) = 0
+100     CONTINUE
+      ICLASS = 0
+      INDEX = 0 
+      IERR = 0
+C 
+      NCHAR = IEC-IFC+1 
+      IF (NPARM.EQ.0) GOTO 200
+      IDOL = ISCNC(IAS,IFC,IEC,44B) 
+C                   Scan for a $
+      IF (IDOL.EQ.0) GOTO 200 
+      IF (NCHAR+NPARM-1.LE.100) GOTO 110
+      IERR = -14
+      GOTO 999
+110   NCH = 1 
+      IF (IDOL.EQ.IFC) GOTO 111 
+      NCH = ICHMV(LBUF,NCH,IAS,IFC,IDOL-IFC)
+C                   Move the characters up to the $ into output 
+111   NCH = ICHMV(LBUF,NCH,LPARM,1,NPARM) 
+C                   Move the parameters into place
+      IF (IDOL.EQ.IEC) GOTO 120 
+      NCH = ICHMV(LBUF,NCH,IAS,IDOL+1,NCHAR-IDOL) 
+C                   Move the remaining characters 
+C*****NOTE***** HERE WE ARE MODIFYING OUR INPUT PARAMETERS!!
+120   IEC = NCH - IFC 
+      CALL ICHMV(IAS,IFC,LBUF,1,NCH-1)
+C 
+C 
+C     2. Get first character in command.  If it is ", handle comment. 
+C     If it is !, handle control command.  If neither, next section.
+C 
+200   ICHAR1 = ICHAR(IAS,IFC) 
+C 
+      IF (ICHAR1.NE.42B) GOTO 210 
+C 
+C     2.1 We have a ", i.e. comment.
+      ITYPE = 2H C
+      GOTO 999
+C 
+210   IF (ICHAR1.NE.41B) GOTO 300 
+C 
+C     2.2 We have a !, i.e. control command.
+C 
+      ICHAR2 = ICHAR(IAS,IFC+1) 
+      IF (ICHAR2.LT.101B.OR.ICHAR2.GT.132B) GOTO 220
+C 
+C     2.21 We have a letter, i.e. procedure or function name
+C 
+      CALL GTNAM(IAS,IFC+1,IEC,LNAMES,NNAMES,LPROC1,NPROC1, 
+     .LPROC2,NPROC2,IERR,ITYPE,INDEX) 
+      ITYPE = ITYPE + 20400B
+C                   On return from GTNAM, ITYPE has P or F.  We add a ! 
+C                   as the first character, indicating a wait.
+      GOTO 999
+C 
+220   IF (ICHAR2.LT.60B.OR.ICHAR2.GT.71B) GOTO 230
+C 
+C     2.22 We have a number, i.e. a time. 
+C 
+      IREF = ISCNC(IAS,IFC,IEC,52B) 
+C                   Find a * if any 
+      IF (IREF.EQ.0) IREF = IEC+1 
+      CALL GTTIM(IAS,IFC+1,IREF-1,0,ITLIS(1,1),ITLIS(2,1),
+     .           ITLIS(3,1),IERR) 
+      ITYPE = 2H! 
+      IF (IREF.EQ.IEC) ITYPE = 2H!R 
+      GOTO 999
+C 
+C     2.23 We have neither number nor letter, could be * or +.
+C 
+230   IF (ICHAR2.NE.52B) GOTO 250 
+C 
+C     2.24 We have !*.....
+C 
+      IF (IEC.GT.IFC+1) GOTO 240
+C 
+C     2.25 We have only !*, i.e. establish now as a ref time. 
+C 
+      ITYPE = 2H!R
+      ITLIS(1,1)=-1 
+      GOTO 999
+C 
+240   IF (ICHAR(IAS,IFC+2).NE.53B) GOTO 290 
+C 
+C     2.25 We have !*+<time>
+C 
+      ITYPE = 2H!*
+      CALL GTTIM(IAS,IFC+3,IEC,0,ITLIS(1,1),ITLIS(2,1),ITLIS(3,1),IERR) 
+      GOTO 999
+C 
+250   IF (ICHAR2.NE.53B) GOTO 290 
+C 
+C     2.26 We have !+<time> 
+C 
+      ITYPE = 2H!!
+      CALL GTTIM(IAS,IFC+2,IEC,0,ITLIS(1,1),ITLIS(2,1),ITLIS(3,1),IERR) 
+      GOTO 999
+C 
+290   IERR = -1 
+      GOTO 999
+C 
+C 
+C     3. This is the section which deals with functional, procedural, 
+C     commands.  Also reserved words and conditionals.
+C     Functional and procedural commands have the format: 
+C                   fpfp=p1,p2,p2@t1,t2,t3
+C     where fp is the function or procedure name, tested with GTNAM 
+C           pn are the parameters, collectively the parameter list
+C           tn is the timelist field
+C 
+C     3.1 First find locations of = and @ signs.  Check first word. 
+C 
+300   ICHARA = ISCNC(IAS,IFC,IEC,75B) 
+C                   Scan for = sign 
+      IF (ICHARA.EQ.0) ICHARA=IEC+1 
+      ICHARB = ISCNC(IAS,IFC,IEC,100B)
+C                   Scan for @ sign 
+      IF (ICHARB.EQ.0) ICHARB=IEC+1 
+      ICHAR1 = MIN0(ICHARA,ICHARB,IEC+1)
+C                   Use first special character position
+C 
+      CALL GTNAM(IAS,IFC,ICHAR1-1,LNAMES,NNAMES,LPROC1,NPROC1,
+     .LPROC2,NPROC2,IERR,ITYPE,INDEX) 
+      IF (IERR.NE.0) GOTO 999 
+C 
+C     3.2 Second section handles parameter list, which follows =. 
+C     All characters from start to @ are sent to class buffer,
+C     including parameters. 
+C 
+      NCHAR = ICHARB - IFC
+      CALL ICHMV(LBUF,1,IAS,IFC,ICHARB-1) 
+      IF (NCHAR.LE.80) GOTO 340 
+      IERR = -2 
+      GOTO 999
+C 
+340   REG = EXEC(20,0,LBUF,-NCHAR,2HFS,0,ICLASS)
+      IF (IREG.EQ.0) GOTO 350 
+      IF (IREG.EQ.-1) IERR=-12
+      IF (IREG.EQ.-2) IERR=-13
+      GOTO 999
+C 
+C 
+C 
+C     3.3  Time list section, characters following the @. 
+C 
+350   IF (ICHARB.EQ.IEC+1) GOTO 999 
+C 
+      CALL TMLIS(IAS,ICHARB+1,IEC,ITLIS,IERR) 
+      GOTO 999
+C 
+C 
+999   RETURN
+      END 

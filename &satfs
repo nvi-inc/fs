@@ -1,0 +1,150 @@
+FTN4X 
+      SUBROUTINE SATFS(ICRPRC,ALAT,WLONG,RAUT0,DECUT0,
+     .RADOT,DECDOT,RADDOT,DECDDT) 
+     .,SATELLITE EPHEMERIS C#831007:01:10#
+C 
+C     SATEP reads satellite orbital elements and produces 
+C           positions and derivatives for Haystack pointing.
+C           Calculations are done using the XAT subroutine
+C           of C. Knight, which is a translation of a 
+C           T. Clark program. 
+C 
+C     MODIFICATIONS:
+C     date   who  what
+C     831006 NRV Original incarnation 
+C     831012 BGL Output parameters must be single precision 
+C                Part of the code used DECDDT and part used DCDDOT for
+C                      the same quantity.  Replaced all DCDDOT with DECDDT. 
+C                BESLIE should be spelled BEASLEY 
+C 
+C 
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z) 
+C 
+C     INPUT:
+C 
+      REAL*4 ALAT,WLONG 
+      REAL*4 RAUT0,DECUT0,RADOT,DECDOT,RADDOT,DECDDT
+C 
+C 
+C     OUTPUT: 
+C 
+C     RAUT0,DECUT0 - ra,dec at UT=0 today 
+C     RADOT,DECDOT - first time-derivative of ra,dec
+C     RADDOT,DECDDT - second derivative 
+C 
+C     LOCAL:
+C 
+      DIMENSION LIAU(4),LCOM(4),LRA(8),LDC(7) 
+      DIMENSION IBUF(80),IBUF2(80)
+C         - buffers for input, output 
+      DIMENSION NNAME(3)
+C         - file name 
+C     IBLEN - length of IBUF, in words
+      DIMENSION IDCB(144) 
+C         - DCB for file accesses 
+      DIMENSION IT(5) 
+C         - for EXEC(11) call 
+C 
+C     INITIALIZED:
+C 
+      DATA IBLEN/80/
+      DATA PI/3.1415926D0/
+      DATA NNAME/2H(O,2HRB,2HIT/
+C 
+C 
+C 
+C 
+C 
+C     1.  Get orbital elements from file (ORBIT.
+C     Open the file with orbital elements.
+C     If we have problems with the file or with the 
+C     elements, then do error return. 
+C 
+      CALL OPEN(IDCB,IERR,NNAME,0,0,ICRPRC) 
+      IF (IERR.LT.0) GOTO 990 
+      CALL READF(IDCB,IERR,IBUF,IBLEN,IL) 
+      IF (IERR.LT.0) GOTO 990 
+      IF (IL.GT.0) GOTO 110 
+      IERR = -99
+      GOTO 990
+110   CALL CLOSE(IDCB)
+      CALL UNPVS(IBUF,IBLEN,IERR,LIAU,LCOM,LRA,IRAH,
+     .            IRAM,RA,RARAD,LDS,LDC,IDECD,IDECM,DEC,DECRAD, 
+     .            EPOCH,VELOC,OINC,OECC,OPER,ONOD,OANM,OAXS,
+     .            OMOT,IOEY,OEDY) 
+      IERR=0
+      IF (IERR.NE.0) GOTO 990 
+C 
+C 
+C     2. Now find out what time it is.
+C     Calculate current satellite position. 
+C 
+200   CALL EXEC(11,IT,IY) 
+      UTNOW = IT(4)*3600.D0 + IT(3)*60.D0 + IT(2) 
+      CALL YMDAY(IY,IT(5),IMON,IDAY)
+      MJDNOW = JULDA(IMON,IDAY,IY-1900) 
+      CALL SIDTM(MJDNOW,ST0,FRAC) 
+C     (There may be a problem with only single-precision
+C     latitude and longitude, but the Field System has them 
+C     only this way.) 
+      DLAT = ALAT 
+      DLON = WLONG
+      CALL XAT(OINC,OECC,OPER,ONOD,OANM,OAXS,OMOT,IOEY,OEDY,
+     .MJDNOW,UTNOW,DLAT,DLON,HA,DEC,RANGE)
+      RA  = ST0+UT*FRAC-DLON-HA 
+      RA = RA*180.D0/PI 
+      DEC = DEC*180.D0/PI 
+C 
+C 
+C     3. Now, calculate positions +/- 1 HOUR
+C                                 P/M 
+C 
+      UTM   = UTNOW-3600.D0 
+      IF (UTM.GT.0.D0) GOTO 310 
+        UTM = UTM + 86400.D0
+        MJDM = MJDM-1 
+310   CALL XAT(OINC,OECC,OPER,ONOD,OANM,OAXS,OMOT,IOEY,OEDY,
+     .MJDM,UTM,DLAT,DLON,HAM,DECM,RANGE)
+      RAM = ST0+UTM*FRAC-DLON-HAM 
+      RAM = RAM*180.D0/PI 
+      DECM = DECM*180.D0/PI 
+      UTP = UTNOW+3600.D0 
+      IF (UTP.LT.86400.D0) GOTO 320 
+        UTP = UTP - 86400.D0
+        MJDP = MJDP+1 
+320   CALL XAT(OINC,OECC,OPER,ONOD,OANM,OAXS,OMOT,IOEY,OEDY,
+     .MJDP,UTP,DLAT,DLON,HAP,DECP,RANGE)
+      RAP = ST0+UTP*FRAC-DLON-HAP 
+      RAP = RAP*180.D0/PI 
+      DECP = DECP*180.D0/PI 
+C 
+C 
+C     4. Calculate derivatives, in degrees per day. 
+C 
+C     UT time now, in days.]
+      UTDAY = UTNOW/86400.D0
+C     First time deriv. in degrees per day, at NOW time.
+      DDCNOW =  (DECP-DECM)*12.D0 
+      DRANOW =  (RAP-RAM)*12.D0 
+C 
+C     Second time deriv. in degrees per day**2
+C     NOTE: This is really the second derivative multiplied by 1/2
+C     BEASLEY expects this quantity rather than the true second derivative. 
+      RADDOT = ((RAP+RAM)/2.D0 - RA)*576.D0 
+      DECDDT = ((DECP+DECM)/2.D0 - DEC)*576.D0
+C 
+C     Evaluate derivative at UT=0 
+      RADOT = (DRANOW - 2.D0*RADDOT*UTDAY)
+      DECDOT = (DDCNOW - 2.D0*DECDDT*UTDAY) 
+C 
+C     Finally, position at UT=0 
+      RAUT0 = RA - (RADOT+RADDOT*UTDAY)*UTDAY 
+      DECUT0 = DEC - (DECDOT+DECDDT*UTDAY)*UTDAY
+C 
+C990  RAUT0=2.5 
+C     DECUT0=3.5
+C     RADOT=4.5 
+C     DECDOT=5.5
+C     RADDOT=6.5
+C     DECDDT=7.5
+990   END 

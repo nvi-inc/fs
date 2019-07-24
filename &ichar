@@ -1,0 +1,72 @@
+ASMB,R,B,L
+        HED     CHARACTER FETCHER 
+* 
+*@ICHAR 
+* 
+*       INTEGER FUNCTION ICHAR(IAR,I) 
+* 
+*     ICHAR 
+* 
+* 1.  NAME PROGRAM SPECIFICATION
+* 
+* 1.1.  ICHAR 
+*               THIS ROUTINE RETURNS THE BYTE VALUE FOUND 
+*       IN THE I-TH BYTE(8 BITS/2 BYTES PER WORD) 
+* 
+* 1.2.   RESTRICTIONS - limits on use of routine
+* 
+* 1.3.   REFERENCES - document cited
+* 
+* 2.  NAME INTERFACE
+* 
+* 2.1.   CALLING SEQUENCE: ICHAR(IAR,I) 
+* 
+*     INPUT VARIABLES:
+* 
+*       I       - THE NUMBER OF THE CHARACTER IN THE STRING IAR 
+* 
+*     DIMENSION IAR(2)
+* 
+*       IAR     - THE NAME OF THE CHARACTER STRING IN WHICH THE CHARACTER 
+*                 SHOULD BE FOUND 
+*       ICHAR   - THE CHARACTER FOUND (RIGHT JUSTIFIED) 
+* 
+* 2.5.   SUBROUTINE INTERFACE:
+* 
+*       THIS A UTILITY FUNCTION CALLE IN MANNY PLACES
+* 
+*     CALLED SUBROUTINES: IAND
+* 
+* 3.  LOCAL VARIABLES 
+* 
+*       NONE
+* 
+* 4.  CONSTANTS USED
+* 
+*       DMONE=-1        FOR DECREMENTING REGISTERS
+* 
+* 5.  INITIALIZED VARIABLES 
+* 
+*       NONE
+* 
+* 6.  PROGRAMMER: LEE N. FOSTER 
+*     LAST MODIFIED:
+*# (Filled by COMPC with the current date) #
+* 
+        NAM     ICHAR,7 C#890516:19:13  CHARACTER FETCH V=1.0  #
+        ENT     ICHAR 
+        EXT     .ENTR 
+* 
+IAR     BSS     1               CHARACTER STRING ADDRESS
+I       BSS     1               INDEX INTO STRING TO BE RETREIVED 
+ICHAR   NOP                     MAIN ENTRY
+        JSB     .ENTR 
+        DEF     IAR 
+        LDB     IAR             GET STRIN ADDRESS 
+        RBL                     MAKE INTO BYTE ADDRESS
+        ADB     DMONE           CORRECT FOR FIRST BYTE BEING 1
+        ADB     I,I             FIND ADDRESS OF BYTE SOUGHT 
+        LBT                     GET THE SOUGHT INTO A REG 
+        JMP     ICHAR,I         RETURN BYTE TO USER 
+DMONE   DEC     -1              FIRST BYTE IS ONE CORRECTION
+        END 

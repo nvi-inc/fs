@@ -1,0 +1,29 @@
+FTN4,X
+C@TWRAP 
+C 
+      SUBROUTINE TWRAP(ITIME) 
+C 
+C     FIX UP TIMES WHICH MAY HAVE OVERFLOWED (WRAPPED AROUND) 
+C 
+C  INPUT: 
+C 
+      DIMENSION ITIME(3)
+C     - time array
+C     ITIME(1) - (year-1970)*1024 + days
+C     ITIME(2) - hours*60 + min 
+C     ITIME(3) - seconds*100 + msec/10
+C 
+C 
+C  PROGRAMMER: NRV
+C  LAST MODIFIED:  CREATED 791010 
+C# LAST COMPC'ED  870115:04:23    # 
+C 
+C 
+      IF (ITIME(3).LT.6000) GOTO 1
+      ITIME(3) = ITIME(3) - 6000
+      ITIME(2) = ITIME(2) + 1 
+1     IF (ITIME(2).LT.1440) GOTO 2
+      ITIME(2) = ITIME(2) - 1440
+      ITIME(1) = ITIME(1) + 1 
+2     RETURN
+      END 

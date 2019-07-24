@@ -1,0 +1,124 @@
+FTN4,X
+C@WVTMP 
+C 
+      SUBROUTINE WVTMP(IP),WVR TEMP/TIP DATA C#870115:04:45#
+C 
+C     WVTMP gets temperature data from the JPL radiometer and 
+C           tip curve data from the Onsala radiometer.
+C           The structure is identical to that of WVRAW 
+C 
+C   INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C             -Parameters from QUIKR
+C      IP(1)  -Class number of input buffer 
+C      IP(2-5)-Not used 
+C 
+C   OUTPUT VARIABLES: 
+C 
+C      IP(1) - Class number 
+C      IP(2) - Number of records
+C      IP(3) - Error number 
+C      IP(4) - Who we are 
+C 
+C   COMMON BLOCKS USED
+C 
+      INCLUDE #FSCOM::FS
+C 
+C   SUBROUTINE INTERFACE
+C 
+C   CALLING SUBROUTINE: QUIKR 
+C   CALLED SUBROUTINES: CHARACTER STRING UTILITIES
+C                       WVTAK - decode mode parameter 
+C                       WVTDS - display temp/tip data 
+C                       TP2WV - format data request 
+C                       WVGTM - get WVR data
+C                       WV2TM - decode temps/tip from response
+C 
+C   LOCAL VARIABLES 
+C 
+C     ICLCM - class number having the command in it 
+C     NCHAR - number of characters in buffer
+      DIMENSION IBUF(40)
+C               - Input buffer holding command
+      DIMENSION IREG(2) 
+C               - Registers from EXEX calls 
+      DIMENSION IPARM(2)
+C               - Parameters from GTPRM calls 
+      EQUIVALENCE (REG,IREG(1)) 
+      EQUIVALENCE (PARM,IPARM(1)) 
+C     MDE - mode, used locally
+C 
+C   INITIALIZED VARIABLES 
+C 
+      DATA ILEN/80/ 
+C 
+C   PROGRAMMER VANDENBERG 
+C 
+C 
+C     1. If class buffer contains command with "=", then process
+C     the commanded mode. If only command name is present, then read
+C     the current WVR mode and data from the radiometer.
+C 
+      ICLCM=IP(1) 
+      IF(ICLCM.NE.0)GO TO 110 
+      IERR=-1 
+      GO TO 990 
+  110 REG=EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = MIN0(IREG(2),ILEN)
+      IEQ=ISCNC(IBUF,1,NCHAR,75B) 
+C                  Scan for "=" 
+      IF(IEQ.EQ.0)GO TO 500 
+C                   If no parameters present, go read WVR mode and data 
+      IF(ICHAR(IBUF,IEQ+1).NE.77B)GO TO 200 
+      IP(4)=77B 
+      CALL WVTDS(IP,ICLCM)
+C                   If parameter is "?", get mode from common and display 
+      RETURN
+C 
+C 
+C     2. Step through the buffer getting each parameter and decoding it.
+C     Command from the user has these parameters: 
+C      JPL:       NO PARAMETERS ALLOWED 
+C      Onsala:    WVTIP=<mode>    where <mode>=TAKE or nothing
+C 
+  200 ICH=IEQ+1 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+C                   Get first parameter, mode name
+      CALL WVTAK(PARM,MDE)
+      IF (MDE.NE.-1) GOTO 300 
+      IERR = -103 
+      GO TO 990 
+C 
+C 
+C     3. Format the buffer for the request to start data taking.
+C     Note: we should get here only for the Onsala radiometers. 
+C     Request is: 
+C              mmWV00000003   then >  then /
+C 
+300   CALL TP2WV(IBUF,ICLASS,NREC,IERR) 
+      IF (IERR.NE.0) GOTO 990 
+      GOTO 800
+C 
+C 
+C     5. This is the place where we format the buffer for the 
+C     command which gets data from the WVR. 
+C 
+500   CALL WVGTM(IBUF,ICLASS,NREC)
+C 
+C 
+C     8. Schedule MATCN to do the communications. 
+C 
+800   CALL EXEC(23,6HMATCN ,ICLASS,NREC)
+      CALL RMPAR(IP)
+      CALL WVTDS(IP,ICLCM)
+      RETURN
+C 
+C     9. Error exit 
+C 
+  990 IP(1)=0 
+      IP(2)=0 
+      IP(3)=IERR
+      IP(4)=2HQW
+      RETURN
+      END 

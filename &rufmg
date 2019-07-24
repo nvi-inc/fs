@@ -1,0 +1,52 @@
+FTN4
+      SUBROUTINE RUFMG(LNAMET,IPR,LUUSR,IBUF) 
+     .,SCHEDULE FMGR C#870115:05:29#
+C 
+C     RUFMG schedules FMGR with wait, passing it a string.
+C 
+C  INPUT: 
+C 
+C     LNAMET - name of transfer file
+C     IPR - cartridge with file 
+C     LUUSR - user's terminal 
+C     IBUF - buffer to use
+      DIMENSION LNAMET(1),IBUF(1) 
+C 
+C  LOCAL: 
+C 
+C     LFMGR - name of program FMGR
+C     LFMP99 - name of multi-copier FMGP99
+      DIMENSION LFMGR(3),LFMP99(3)
+C 
+C  INITIALIZED: 
+C 
+      DATA LFMGR  /2HFM,2HGR,2H  /
+      DATA LFMP99 /2HFM,2HP9,2H9 /
+C 
+C     If FMP99 exists, then we are in a multi-copy environment and
+C     need to run FMP99. If it does not exist, then run FMGR. 
+C     The string passed is: 
+C             TMKIII::ipr,luusr,luusr,8 
+C 
+      NCH = ICHMV(IBUF,1,3HRU,,1,3) 
+      IF (IPGST(LFMP99).NE.-1) NCH = ICHMV(IBUF,NCH,LFMP99,1,5) 
+      IF (IPGST(LFMP99).EQ.-1) NCH = ICHMV(IBUF,NCH,LFMGR,1,5)
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = ICHMV(IBUF,NCH,LNAMET,1,6)
+      NCH = ICHMV(IBUF,NCH,2H::,1,2)
+      NCH = NCH + IB2AS(IPR,IBUF,NCH,100000B+6) 
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IB2AS(LUUSR,IBUF,NCH,100000B+4) 
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IB2AS(LUUSR,IBUF,NCH,100000B+4) 
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IB2AS(8,IBUF,NCH,1)-1 
+D     WRITE(LUUSR,9901) NCH,(IBUF(I),I=1,NCH/2) 
+D9901 FORMAT("NCH,STRING="I5,1X,20A2) 
+      IF (IPGST(LFMP99).NE.-1) CALL EXEC(23,LFMP99,LNAMET(1), 
+     .LUUSR,8,LUUSR,0,IBUF,-NCH)
+      IF (IPGST(LFMP99).EQ.-1) CALL EXEC(23,LFMGR,LNAMET(1),
+     .LUUSR,8,LUUSR,0,IBUF,-NCH)
+C                     Send the request to the system. 
+      RETURN
+      END 

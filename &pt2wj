@@ -1,0 +1,115 @@
+FTN4,X
+C@PT2WV 
+      SUBROUTINE PT2WV(IBUF,ILEN,AZ,EL,ICLASS,
+     .NREC),POINTING REQUEST FOR WVR (JPL) C#870115:04:48#
+C 
+C     PT2WV formats the pointing command for the JPL WVR controller 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF(1) 
+C      - a buffer to use
+C     ILEN - length of IBUF in characters 
+C     AZ,EL - azimuth, elevation to be commanded, true coordinates
+C 
+C  OUTPUT:
+C 
+C     ICLASS,NREC - class, # records for MATCN request
+C 
+C  LOCAL: 
+C 
+C     B - conversion constant 
+C     IWAZ, IWEL - az,el converter to internal counts units 
+C     AZRX, ELRX - radiometer coordinates 
+C 
+C  MODIFICATIONS: 
+C 
+C  830908 NRV If in dead zone, send over-the-top in elev. 
+C 
+C 
+C 
+C     1. First convert from true to radiometer coordinates. 
+C 
+      AZRX = AZ-AZOFWV
+      ELRX = EL-ELOFWV
+C 
+C 
+C     2. Now correct for dead zone, i.e. the range of 
+C     azimuths to which the radiometer cannot point at all. 
+C     First find out if the az is in this range.
+C     If it is, then adjust the az to be 180 degrees opposite 
+C     and the el to be plunged. 
+C 
+      D1 = DEADWV(1)
+      D2 = DEADWV(2)
+C                   Store the dead zone limits into temp variables
+      AZT = AZRX
+C                   Store the az into a test variable 
+      IF (D1.LE.D2) GOTO 210
+      D2 = D2 + 360.0 
+C                   Handle the case where the dead zone surrounds 0 az
+      IF (AZRX.LT.180.0) AZT=AZRX+360.0 
+C                   Adjust the test az too
+210   IF (AZT.LE.D1.OR.AZT.GE.D2) GOTO 290
+C                   If the az is not in the range, then we're done
+C     ********THE FOLLOWING LINES REMOVED************** 
+C     AZMID = D1 + (D2-D1)/2.0
+C                   Compute the midpoint of the range 
+C     IF (AZT.LT.AZMID) AZRX = D1 
+C     IF (AZT.GE.AZMID) AZRX = D2 
+C                   Adjust the az to one end or the other 
+C     **************************************************
+C     ***********THE FOLLOWING DOES THE PLUNGE**********
+      AZRX = AZRX + 180.0 
+      ELRX = 180.0 - ELRX 
+C 
+290   IF (AZRX.GE.360.0) AZRX=AZRX-360.0
+C     ************IS THIS NEXT LINE STILL NECESSARY???*********** 
+      IF (AZRX.LT.D1.AND.AZRX.LT.DEADWV(2)) AZRX=AZRX+360.0 
+C                   The az must be continuous up to the dead zone 
+C 
+C 
+C     3. Check out the horizon now.  Adjust elevation upward
+C        if needed to avoid a mountain. 
+C 
+      CALL WVHOR(AZ,EL) 
+C 
+C 
+C     4. Now convert the az,el to integer counts. 
+C     At this point we also do the conversion from "true" az,el to
+C     "internal" az,el by applying the offsets in each coordinate.
+C 
+300   B=1.1*(1.*WVMX13-.091*WVMX10) 
+      IWAZ=IFIX((AZRX-AZC2WV)*(1.*WVMX10-B)/AZC1WV +B)
+      IWEL=IFIX((ELRX-ELC2WV)*(1.*WVMX10-B)/ELC1WV +B)
+C 
+D     WRITE(LU,9901) WVMX10,WVMX13,B,AZC1WV,AZC2WV, 
+D    .ELC1WV,ELC2WV,AZOFWV,ELOFWV,IWAZ,IWEL 
+D9901 FORMAT("MX10,13,B,AZC,ELC,AZO,ELO,IAZ,IEL="9F10.3,2I5)
+C 
+C     5. Format the buffer for the controller.
+C     The buffer is set up as follows:
+C             mmWVbPbaaaabeeee
+C     where 
+C             mm = MAT mode, binary integer 8 
+C             WV = WVR mnemonic 
+C             P  = indicates pointing 
+C             aaaa = azimuth in counts, 0-4095
+C             eeee = elevation in counts, 0-4095
+C             b = required blanks 
+C 
+      IBUF(1)=0 
+      IBUF(2)=2HWV
+      CALL IFILL(IBUF,5,12,40B) 
+      CALL ICHMV(IBUF,5,3H P ,1,3)
+      CALL IB2AS(IWAZ,IBUF,8,40000B+400B*4+4) 
+      CALL IB2AS(IWEL,IBUF,13,40000B+400B*4+4)
+C 
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-16,2HFS,0,ICLASS)
+      NREC = 1
+C 
+      RETURN
+      END 

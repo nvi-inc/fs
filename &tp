@@ -1,0 +1,187 @@
+FTN4,X
+C@TP
+C 
+      SUBROUTINE TP(IP),PARSE TAPE COMMAND C#870115:04:33#
+C 
+C  TP controls the tape controller
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - CLASS
+C        IP(2) - # REC
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C   COMMON BLOCKS USED
+C 
+      INCLUDE #FSCOM::FS
+C 
+C 
+C     CALLING SUBROUTINES:
+C 
+C     CALLED SUBROUTINES: GTPRM,ICHAR 
+C 
+C   LOCAL VARIABLES 
+C 
+C        NCHAR  - number of characters in buffer
+C        ICH    - character counter 
+      DIMENSION IBUF(20)
+C               - class buffer
+C        ILEN   - length of IBUF, chars 
+      DIMENSION IPARM(2)
+C               - parameters returned from GTPRM
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+C        ISP,IDIR,ILOW
+C               - indices for speed, direction, lowtape 
+C 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C   INITIALIZED VARIABLES 
+C 
+      DATA ILEN/40/ 
+C 
+C  PROGRAMMER: NRV
+C     LAST MODIFIED:  810207
+C 
+C 
+C     1. If we have a class buffer, then we are to set the TP.
+C     If no class buffer, we have been requested to read the TP.
+C 
+      ICHOLD = -99
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+      IERR = -1 
+      GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.EQ.0) GOTO 500
+C                   If no parameters, go read device
+      IF (ICHAR(IBUF,IEQ+1).NE.77B) GOTO 140
+      IP(1) = 0 
+      IP(4) = 77B 
+      CALL TPDIS(IP,ICLCM)
+      RETURN
+C 
+140   IF (ICHCM(IBUF,IEQ+1,LTSRS,1,ILENTS).EQ.0) GOTO 600 
+      IF (ICHCM(IBUF,IEQ+1,LALRM,1,ILENAL).EQ.0) GOTO 700 
+C 
+C 
+C     2. Step through buffer getting each parameter and decoding it.
+C     Command from user has these parameters: 
+C                   TAPE=<lowtape>,<reset>
+C                 <lowtape>: ON or OFF.  Default ON.
+C                 <footage>: RESET or <blank>.  Default <blank>.
+C 
+C     2.1 LOW TAPE, PARAMETER 1 
+C 
+210   ICH = 1 + IEQ 
+      IC1 = ICH 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (ICHAR(IPARM,1).NE.54B.AND.ICHAR(IPARM,1).NE.52B) GOTO 211 
+      IF (ICHAR(IPARM,1).EQ.52B) ILOW = ILOWTP
+      IF (ICHAR(IPARM,1).EQ.54B) ILOW = 1 
+C                   Default value is "ON" 
+      GOTO 220
+211   CALL ITPED(3,ILOW,IBUF,IC1,ICH-2) 
+      IF (ILOW.GE.0) GOTO 220 
+      IERR = -201 
+      GOTO 990
+C 
+C 
+C     2.2 FOOTAGE COUNTER RESET, PARAMETER 2
+C 
+220   IC1 = ICH 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (ICHAR(IPARM,1).NE.54B.AND.ICHAR(IPARM,1).NE.52B) GOTO 221 
+      IF (ICHAR(IPARM,1).EQ.52B) IRST = IRSTTP
+      IF (ICHAR(IPARM,1).EQ.54B) IRST = 0 
+C                   Default value is leave alone
+      GOTO 300
+221   CALL ITPED(4,IRST,IBUF,IC1,ICH-2) 
+      IF (IRST.GE.0) GOTO 300 
+      IERR = -202 
+      GOTO 990
+C 
+C 
+C     3. Now plant these values into COMMON.
+C 
+300   ICHOLD = ICHECK(18) 
+      ICHECK(18) = 0
+      ILOWTP = ILOW 
+      IRSTTP = IRST 
+C 
+C 
+C     4. Set up buffer for tape drive.  Send to MATCN.
+C     First message sets up low tape sensor and footage counter:
+C                   TP(l0f00000 
+C 
+      IBUF(1) = 0 
+      IBUF(2) = 2HTP
+      CALL TP2MA(IBUF(3),ILOW,IRST) 
+C 
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-13,2HFS,0,ICLASS)
+C 
+      NREC = 1
+      GOTO 800
+C 
+C 
+C     5.  This is the read device section.
+C     Fill up two class buffers,
+C     one  requesting ( (mode -3), one ! (mode -1). 
+C 
+500   IBUF(2) = 2HTP
+      ICLASS = 0
+      IBUF(1) = -3
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      IBUF(1) = -1
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+C 
+      NREC = 2
+      GOTO 800
+C 
+C 
+C     6. This is the test/reset device section. 
+C 
+600   IBUF(1) = 6 
+      IBUF(2) = 2HTP
+      ICLASS=0
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      NREC = 1
+      GOTO 800
+C 
+C 
+C     7. This is the alarm query and reset request. 
+C 
+700   IBUF(1) = 7 
+      IBUF(2) = 2HTP
+      ICLASS=0
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      NREC = 1
+      GOTO 800
+C 
+C 
+C     8. All MATCN requests are scheduled here, and then TPDIS called.
+C 
+800   CALL EXEC(23,6HMATCN ,ICLASS,NREC)
+      CALL RMPAR(IP)
+      IF (ICHOLD.NE.-99) ICHECK(18) = ICHOLD  
+      IF (ICHOLD.GE.0) ICHECK(18) = 1 
+      CALL TPDIS(IP,ICLCM)
+      RETURN
+C 
+C 
+990   IP(1) = 0 
+      IP(2) = 0 
+      IP(3) = IERR
+      IP(4) = 2HQT
+      RETURN
+      END 

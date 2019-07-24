@@ -1,0 +1,101 @@
+FTN4,X
+C@TSYS
+C 
+      SUBROUTINE TSYS(IP,NSUB),CALC SYSTEM TEMPS C#870115:04:45#
+C 
+C     TSYS calculates the system temps and displays them
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C               - parameters from SLOWP 
+C        IP(1)  - class number of input command buffer
+C        IP(2-5)- not used
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - class for response 
+C        IP(2) - number of records in class 
+C        IP(3) - IERR 
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C     CALLED SUBROUTINES: GTPRM,ICHAR 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+      DIMENSION ITPIS(16) 
+C      - which TPIs to read back, filled in by TPLIS
+C        ICH    - character counter 
+C     NCHAR  - character count
+      DIMENSION IBUF(60)
+C               - class buffer, holding command 
+C        ILEN   - length of IBUF, chars 
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+C 
+      EQUIVALENCE (REG,IREG(1)) 
+C 
+C 4.  CONSTANTS USED
+C 
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA ILEN/120/
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED:  810423
+C 
+C 
+C 
+C     1. Call TPLIS to parse the command for us.  Check for errors. 
+C     If none, we have the requested TPI readings in ITPIS. 
+C     Then start fixing up the output buffer for the response.
+C 
+      INDTMP = NSUB-4 
+C                   Pick up the Tsys1 or 2 index
+      CALL TPLIS(IP,ITPIS)
+      IF (IP(3).NE.0) RETURN
+C 
+      REG = EXEC(21,IP(1),IBUF,-ILEN) 
+      NCHAR = MIN0(IREG(2),ILEN)
+      NCH = ISCNC(IBUF,1,NCHAR,75B) 
+C                               = 
+      IF (NCH.EQ.0) NCH=NCHAR+1 
+      NCH = ICHMV(IBUF,NCH,2H/ ,1,1)
+C 
+C 
+C     3. Loop over the TPIs, calculate Tsys, and add it to the
+C     message for response. 
+C 
+      DO 290 I=1,16 
+        IF (ITPIS(I).EQ.0) GOTO 290 
+        II=I+14 
+        IF (I.LE.14) II=I+(ITPIVC(I)-1)*14
+D     WRITE(LU,9901) I,II,ITPIVC(I) 
+D9901 FORMAT("I,II,ITPI="3I5) 
+        IF (II.GE.1.AND.II.LE.30) GOTO 210
+        T = -1.0
+        GOTO 220
+210     T = (TPSOR(II)-TPZERO(II))*CALTMP(INDTMP)/(TPSPC(II)-TPSOR(II)) 
+        SYSTMP(II) = T
+D     WRITE(LU,9902) TPZERO(II),TPSOR(II),TPSPC(II),CALTMP(INDTMP),T
+D9902 FORMAT("TPZERO,SOR,S+CAL,CAL,TSYS="4F10.3)
+220     IF (NCH+5.GT.ILEN) GOTO 290 
+C                   Make sure we don't overstep our buffer
+        NCH = NCH+IR2AS(T,IBUF,NCH,6,1) 
+        NCH = MCOMA(IBUF,NCH) 
+290     CONTINUE
+C 
+      NCH = NCH - 2 
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS) 
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = 0 
+      IP(4) = 2HQR
+      RETURN
+      END 

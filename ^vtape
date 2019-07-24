@@ -1,0 +1,7 @@
+EC
+OP,LB 
+LI,$LIBHS 
+LI,%%FSLB::FS 
+RE,%VTAPE::FS 
+SE,%HLPEM::FS 
+EN

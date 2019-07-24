@@ -1,0 +1,46 @@
+FTN4,X
+C@WV2PT 
+      SUBROUTINE WV2PT(IBUF1, 
+     .NCHAR),DECODE POINTING INFO (JPL) C#870115:04:47# 
+C 
+C     WV2PT decodes the az and el from the response containing
+C     the pointing info -- JPL radiometers. 
+C 
+C  COMMON 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF1(1)
+C      - buffer holding the response. 
+C     NCHAR - length of response in IBUF1 
+C 
+C  OUTPUT:
+C 
+C  LOCAL: 
+C 
+C     IWAZ,IWEL - az,el integer counts
+C 
+C  INITIALIZED: 
+C 
+C 
+C 
+C     1. Decode the az,el from the appropriate place in the buffer. 
+C     Convert from internal units to true coordinates.
+C 
+       WAZ=IAS2B(IBUF1(24),1,4) 
+       WEL=IAS2B(IBUF1(22),1,4) 
+C                   WVR coordinates now in counts 
+      WVMX10=IAS2B(IBUF1(20),1,4) 
+      WVMX13=IAS2B(IBUF1(26),1,4) 
+C                   Stash latest values of conversion constants 
+      B=1.1*(WVMX13-.091*WVMX10)
+      AZIMWV = AZOFWV + AZC1WV*(WAZ-B)/(WVMX10-B) + AZC2WV  
+      IF (AZIMWV.GT.360.0) AZIMWV = AZIMWV-360.0
+      ELEVWV = ELOFWV + ELC1WV*(WEL-B)/(WVMX10-B) + ELC2WV  
+C                   Coordinates now in TRUE degrees 
+C 
+      RETURN
+      END 

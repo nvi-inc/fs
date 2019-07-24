@@ -1,0 +1,70 @@
+FTN4,X
+C@REDSK 
+C 
+      SUBROUTINE REDSK(IBUFSK,ISKBW),READ FOR $SKED SECTION 
+     .C#870115:05:35# 
+C 
+C  REDSK - This routine reads the schedule file until the $SKED section 
+C          is encountered.
+C 
+C  MODIFICATIONS: 
+C 
+C     DATE     WHO  DESCRIPTION 
+C     820513   KNM  SUBROUTINE CREATED
+C 
+C  INPUT VARIABLES: 
+C 
+      DIMENSION IBUFSK(80)
+C        - Buffer for schedule file.
+C 
+C     ISKBW - Number of words in IBUFSK 
+C 
+C  OUTPUT VARIABLES:
+C 
+C     ICODE - Error flag. 
+C 
+C  COMMON BLOCKS USED:
+C 
+      INCLUDE #LXCOM::56  
+C 
+C  SUBROUTINE INTERFACES: 
+C 
+C     CALLED SUBROUTINES: 
+C 
+C       LXSUM - SUMMARY command.
+C 
+C     CALLING SUBROUTINES:
+C 
+C       LNFCH Utilities 
+C       File manager package routines 
+C 
+C  LOCAL VARIABLES: 
+C 
+C 
+C  INITIALIZED VARIABLES: 
+C 
+C 
+C 
+C  ********************************************************** 
+C 
+C  Read the schedule file until the $SKED section is reached. 
+C  If the $SKED section is not found before the end of file,  
+C  write a message. 
+C 
+C  ********************************************************** 
+C 
+C 
+100   CALL IFILL(IBUFSK,1,160,40B)
+      CALL READF(IDCBSK,IERR,IBUFSK,ISKBW,ILENSK) 
+      IF(IERR.GE.0) GOTO 200
+      WRITE(LUUSR,9000) IERR,LSKNA,ISCR 
+9000  FORMAT("REDSK10 - FMGR Error "I3" reading SKED file "3A2"::"I3) 
+      ICODE=-1
+      GOTO 300
+200   IF(ICHCM(IBUFSK,1,5H$SKED,1,5).EQ.0) GOTO 300 
+      IF(ILENSK.GE.0) GOTO 100
+      WRITE(LUUSR,9100) 
+9100  FORMAT("EOF was encountered before $SKED section")
+      ICODE=-1
+300   RETURN
+      END 

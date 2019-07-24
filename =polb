@@ -1,0 +1,1141 @@
+FTN4,L,X
+      LOGICAL FUNCTION KPANT(LUT,IDCB,LANT,LAXIS,IBUF,IL,LST,IOBUF) 
+      DIMENSION IDCB(1),LANT(4),LAXIS(2),IBUF(IL),IOBUF(10) 
+      LOGICAL KPOUT 
+C 
+      INEXT=1 
+      INEXT=ICHMV(IBUF,INEXT,2H  ,1,2)
+      INEXT=ICHMV(IBUF,INEXT,LANT,1,8)
+      INEXT=ICHMV(IBUF,INEXT,2H  ,1,2)
+C 
+      INEXT=ICHMV(IBUF,INEXT,LAXIS,1,4) 
+      INEXT=ICHMV(IBUF,INEXT,2H  ,1,2)
+C 
+      IF(0.EQ.MOD(INEXT,2)) INEXT=ICHMV(IBUF,INEXT,2H  ,1,1)
+      NWDS=INEXT/2
+      KPANT=KPOUT(LUT,IDCB,IBUF,NWDS,IOBUF,LST) 
+C 
+      RETURN
+      END 
+      LOGICAL FUNCTION KGANT(LU,IDCB,LANT,LAXIS,IIBUF,JBUF,IL)
+      DIMENSION IDCB(1),JBUF(IL),IIBUF(10),LAXIS(2),LANT(5) 
+C 
+      LOGICAL KFMP,KDUM,KGLIN 
+C 
+      INTEGER   LMERR ( 14 )
+      INTEGER   LPEOF ( 18 )
+      INTEGER   LEERR ( 21 )
+      INTEGER   LFERR ( 24 )
+      INTEGER   LDERR ( 33 )
+C 
+      DATA LMERR  /  25,2H$A,2HNT,2HEN,2HNA,2H s,2Hec,2Hti,2Hon,2H m,   
+     /             2His,2Hsi,2Hng,2H_ /                                 
+      DATA LPEOF  /  34,2HPr,2Hem,2Hat,2Hur,2He ,2HEn,2Hd ,2Hof,2H $,   
+     /             2HAN,2HTE,2HNN,2HA ,2Hse,2Hct,2Hio,2Hn_/             
+      DATA LEERR  /  39,2HEx,2Htr,2Ha ,2Hre,2Hco,2Hrd,2H f,2Hou,2Hnd,   
+     /             2H i,2Hn ,2H$A,2HNT,2HEN,2HNA,2H s,2Hec,2Hti,2Hon,   
+     /             2H_ /                                                
+      DATA LFERR  /  46,2HEx,2Htr,2Ha ,2Hfi,2Hel,2Hd ,2Hin,2H r,2Hec,   
+     /             2Hor,2Hd ,2H  ,2H  ,2Hin,2H $,2HAN,2HTE,2HNN,2HA ,   
+     /             2Hse,2Hct,2Hio,2Hn_/                                 
+      DATA LDERR  /  64,2HFi,2Hel,2Hd ,2H  ,2H i,2Hn ,2Hre,2Hco,2Hrd,   
+     /             2H  ,2H  ,2H i,2Hn ,2H$A,2HNT,2HEN,2HNA,2H s,2Hec,   
+     /             2Hti,2Hon,2H c,2Hou,2Hld,2H n,2Hot,2H b,2He ,2Hde,   
+     /             2Hco,2Hde,2Hd_/                                      
+50    CONTINUE
+      KGANT=KGLIN(LU,IDCB,IERR,JBUF,IL,LEN,IIBUF) 
+      IF(KGANT) RETURN
+      IF(LEN.LT.0) GO TO  8015
+      IF(ICHCM(JBUF,1,8H$ANTENNA ,1,8).NE.0) GO TO 50 
+C 
+      IREC=0
+90    CONTINUE
+      KGANT=KGLIN(LU,IDCB,IERR,JBUF,IL,LEN,IIBUF) 
+      IF(KGANT) RETURN
+      IF(LEN.LT.0) GO TO 8010 
+C     CALL EXEC(2,LU,JBUF,LEN)                                           DEBUG
+      IF(ICHCM(JBUF,1,2H$$,1,1).NE.0) GO TO 95
+      CALL UNGET(JBUF,IERR,LEN) 
+      GO TO 8010
+C 
+95    CONTINUE
+C 
+      IREC=IREC+1 
+      IFERR=0 
+      IFC=1 
+      ILC=LEN*2 
+C     CALL EXEC(2,LU,JBUF,LEN)                                           DEBUG
+      GO TO (100,200),  IREC
+C 
+100   CONTINUE
+      CALL GTCHR(LANT,1,8,JBUF,IFC,ILC,IFIELD,IFERR)
+      CALL GTCHR(LAXIS,1,4,JBUF,IFC,ILC,IFIELD,IFERR) 
+      IF(IFERR.NE.0) GO TO 8020 
+      CALL GTFLD(JBUF,IFC,ILC,IC1,IC2)
+      IF(IC1.GT.0) GO TO 8005 
+      GO TO 90
+C 
+200   CONTINUE
+      KGANT=KFMP(LU,0,LEERR(2),LEERR(1),IIBUF,0,1)
+      GO TO 9000
+C 
+C EXTRA FIELD ERROR 
+C 
+8005  CONTINUE
+      INC=IB2AS(IREC,LFERR(2),23,3) 
+      KGANT=KFMP(LU,0,LFERR(2),LFERR(1),IIBUF,0,1)
+      GO TO 9000
+C 
+C CHECK FOR PREMATURE END OF SECTION
+C 
+8010  CONTINUE
+      IF(IREC.EQ.1) RETURN
+      INC=IB2AS(IREC+1,LPEOF(2),45,2) 
+      KGANT=KFMP(LU,0,LPEOF(2),LPEOF(1),IIBUF,0,1)
+      GO TO 9000
+C 
+C section missing 
+C 
+8015  CONTINUE
+      KGANT=KFMP(LU,0,LMERR(2),LMERR(1),IIBUF,0,1)
+      GO TO 9000
+C 
+C DECODE ERROR
+C 
+8020  CONTINUE
+      INC=IB2AS(-IFERR,LDERR(2),7,2)
+      INC=IB2AS(IREC,LDERR(2),20,3) 
+      KGANT=KFMP(LU,0,LDERR(2),LDERR(1),IIBUF,0,1)
+      GO TO 9000
+C 
+9000  CONTINUE
+      RETURN
+      END 
+      INTEGER FUNCTION IPTRA(RAIN,LBUF,ICNEXT)
+C 
+      DATA PI/3.1415926/
+C 
+C RA
+C 
+      RA=RAIN*432000.0/PI 
+      IH=INT(RA/36000.0)  
+      RA1=RA-36000.0*FLOAT(IH)  
+      IM=INT(RA1/600.0) 
+      RA2=RA1-600.0*FLOAT(IM) 
+      IS=INT(RA2/10.) 
+      RA3=RA2-10.0*FLOAT(IS)
+      ITS=INT(RA3+0.5)
+      IF(ITS.LT.0) ITS=0
+      IF(ITS.GT.9) ITS=9
+C 
+      IPTRA=ICNEXT+IB2AS(IH,LBUF,ICNEXT,40000B+400B*2+2)  
+      IPTRA=IPTRA+IB2AS(IM,LBUF,IPTRA,40000B+400B*2+2)  
+      IPTRA=IPTRA+IB2AS(IS,LBUF,IPTRA,40000B+400B*2+2)  
+      IPTRA=ICHMV(LBUF,IPTRA,2H..,1,1)
+      IPTRA=IPTRA+IB2AS(ITS,LBUF,IPTRA,40000B+400B*1+1)   
+      RETURN
+      END 
+      INTEGER FUNCTION IPTDC(DECIN,LBUF,ICNEXT) 
+C 
+      DATA PI/3.1415926/
+C 
+C DECLINATION 
+C 
+      DEC=ABS(DECIN)*648000.0/PI  
+      IH=INT(DEC/3600.0)  
+      DEC1=DEC-3600.0*FLOAT(IH) 
+      IM=INT(DEC1/60.0) 
+      DEC2=DEC1-60.0*FLOAT(IM)  
+      IS=INT(DEC2+0.5)
+      IF(IS.LT.0) IS=0
+      IF(IS.GT.59) IS=59
+C 
+      IPTDC=ICHMV(LBUF,ICNEXT,2H++,1,1) 
+      IF(DECIN.LT.0.0) IPTDC=ICHMV(LBUF,ICNEXT,2H--,1,1)
+      IPTDC=IPTDC+IB2AS(IH,LBUF,IPTDC,40000B+400B*2+2)
+      IPTDC=IPTDC+IB2AS(IM,LBUF,IPTDC,40000B+400B*2+2)  
+      IPTDC=IPTDC+IB2AS(IS,LBUF,IPTDC,40000B+400B*2+2)  
+      RETURN
+      END 
+      REAL FUNCTION GTRA(JBUF,IFC,ILC,IFIELD,IFERR) 
+C 
+      DOUBLE PRECISION DAS2B
+C 
+      DATA PI/3.1415926/
+C 
+      IFIELD=IFIELD+1 
+      CALL GTFLD(JBUF,IFC,ILC,IC1,IC2)
+      IRH=IAS2B(JBUF,IC1,2) 
+      IRM=IAS2B(JBUF,IC1+2,2) 
+      RAS=DAS2B(JBUF,IC1+4,IC2-(IC1+4)+1,JERR)  
+      IF((IC1.LE.0 .OR. 
+     +   IRH .EQ. -32768 .OR. 
+     +   IRM .EQ. -32768 .OR. 
+     +   IRS .EQ. -32768 .OR. 
+     +   JERR.NE.      0 .OR. 
+     +   (IC2 .NE. IC1+5  .AND. ICHCM(JBUF,IC1+6,2H..,1,1).NE.0)
+     +   ) .AND.IFERR.GE.0) IFERR=-IFIELD 
+      RA=FLOAT(IRH)*15.0+FLOAT(IRM)*.25+
+     +   RAS*.25/60.
+      GTRA=RA*PI/180.0
+      RETURN
+      END 
+      REAL FUNCTION GTDC(JBUF,IFC,ILC,IFIELD,IFERR) 
+C 
+      DOUBLE PRECISION DAS2B
+C 
+      DATA PI/3.1415926/
+C 
+      IFIELD=IFIELD+1 
+      CALL GTFLD(JBUF,IFC,ILC,IC1,IC2)
+      IF(ICHCM(JBUF,IC1,2H++,1,1).NE.0 .AND.
+     +   ICHCM(JBUF,IC1,2H--,1,1).NE.0) IC1=IC1-1 
+      IDD=IAS2B(JBUF,IC1+1,2) 
+      IDM=IAS2B(JBUF,IC1+3,2) 
+      DCS=DAS2B(JBUF,IC1+5,IC2-(IC1+5)+1,JERR)
+      IDS=IAS2B(JBUF,IC1+5,2) 
+      IF((IC1.LE.0 .OR. 
+     +   IDD .EQ. -32768 .OR. 
+     +   IDM .EQ. -32768 .OR. 
+     +   JERR.NE.      0 .OR. 
+     +   (IC2.NE.IC1+6.AND.ICHCM(JBUF,IC1+7,2H..,1,1).NE.0) 
+     +   ) .AND.IFERR.GE.0) IFERR=-IFIELD 
+      DEC=FLOAT(IDD)+FLOAT(IDM)/60.0+ 
+     +   DCS/3600.0 
+      IF(ICHCM(JBUF,IC1,2H--,1,1).EQ.0) DEC=-DEC
+      GTDC=DEC*PI/180.0 
+      RETURN
+      END 
+       SUBROUTINE IDNAM(IBUF,IDBUF) 
+      DIMENSION IBUF(10),IDBUF(10)
+C 
+      IB4=IBUF(4) 
+      IF(IAND(IB4,    3B).EQ.0) CALL ICHMV(IBUF,1,IDBUF,1,6)
+      IF(IAND(IB4,   14B).EQ.0) IBUF( 5)=IDBUF( 5)
+      IF(IAND(IB4,   60B).EQ.0) IBUF( 6)=IDBUF( 6)
+      IF(IAND(IB4,  300B).EQ.0) IBUF( 7)=IDBUF( 7)
+      IF(IAND(IB4, 1400B).EQ.0) IBUF( 8)=IDBUF( 8)
+      IF(IAND(IB4, 6000B).EQ.0) IBUF( 9)=IDBUF( 9)
+      IF(IAND(IB4,30000B).EQ.0) IBUF(10)=IDBUF(10)
+C 
+      RETURN
+      END 
+      SUBROUTINE IGETA(IB,IFC,ILC,IC1,IC2,KERR) 
+      LOGICAL KERR
+C 
+      KERR=.TRUE. 
+      IC2=0 
+      IC1=0 
+      IF(IFC.GT.ILC) RETURN 
+      IC2=ISCNC(IB,IFC,ILC,2H ,)
+      IF(IC2.LE.0) GO TO 20 
+      IF(IC2.GT.IFC) GO TO 10 
+C 
+      IFC=IFC+1 
+      IC2=0 
+      RETURN
+C 
+10    CONTINUE
+      IC1=IFC 
+      IFC=IC2+1 
+      IC2=IC2-1 
+      KERR=.FALSE.
+      RETURN
+C 
+20    CONTINUE
+      IL=IFLCH(IB,ILC)
+      IF(IL.LT.IFC) RETURN
+      IC2=IL
+      IC1=IFC 
+      IFC=ILC+1 
+      KERR=.FALSE.
+      RETURN
+      END 
+      LOGICAL FUNCTION KIF(IMESS,LEN,IB,IC1,IC2,KERR,LU)
+      LOGICAL KERR
+      DIMENSION IB(1) 
+C 
+      KIF=KERR
+      IF(.NOT. KERR) RETURN 
+      IF(LEN.LE.0) GO TO 1
+      CALL EXEC(2,LU,IMESS,-LEN)
+C 
+1     CONTINUE
+      IF(IC1.LE.0.OR.IC2.LT.IC1) RETURN 
+      IST=IC1 
+      ILEN=IC2-IC1+1
+      IF(MOD(IC1,2).EQ.1) GO TO 10
+      CALL ICHMV(ID,1,IB,IC1,1) 
+      CALL ICHMV(ID,2,2H_ ,1,1) 
+      CALL EXEC(2,LU,ID,-MIN0(ILEN,2))
+      IST=IST+1 
+      ILEN=ILEN-1 
+      IF(ILEN.LE.0) RETURN
+C 
+10    CONTINUE
+      CALL EXEC(2,LU,IB((IST+1)/2),-ILEN) 
+      RETURN
+      END 
+      SUBROUTINE INAMR(IBUF,IB,IC1,IC2,KERR)
+      LOGICAL KERR
+      DIMENSION IBUF(10)
+C 
+      IFC=IC1 
+      ILC=IC2 
+      IT=NAMR(IBUF,IB,ILC,IFC)
+      KERR=IAND(IBUF(4),3).NE.3 
+      RETURN
+      END 
+      LOGICAL FUNCTION KFILD(LUT,IFERR,IFIELD,IREC,IPBUF) 
+      LOGICAL KFMP
+C 
+      INTEGER   LFEL  ( 11 )
+      INTEGER   LREC  (  9 )
+      INTEGER   LIN   (  3 )
+C 
+      DATA LFEL   /  20,2HEr,2Hro,2Hr ,2Hin,2H F,2Hie,2Hld,2H x,2Hxx,   
+     /             2Hx_/                                                
+      DATA LREC   /  16,2H i,2Hn ,2Hre,2Hco,2Hrd,2H x,2Hxx,2Hx_/        
+      DATA LIN    /   4,2H i,2Hn_/                                      
+      KFILD=.FALSE. 
+      IF(IFERR.GE.0) RETURN 
+C 
+      IFC=16
+      IFC=IFC+IB2AS(IFIELD,LFEL(2),IFC,100000B+4) 
+      IFC=ICHMV(LFEL(2),IFC,2H_  ,1,1)
+      CALL EXEC(2,LUT,LFEL(2),1-IFC)
+C 
+      IFC=12
+      IFC=IFC+IB2AS(IREC,LREC(2),IFC,100000B+4) 
+      IFC=ICHMV(LREC(2),IFC,2H_  ,1,1)
+      CALL EXEC(2,LUT,LREC(2),1-IFC)
+      KFILD=KFMP(LUT,0,LIN(2),LIN(1),IPBUF,0,1) 
+      END 
+      LOGICAL FUNCTION KOPN(LUT,IERR,IPBUF,JERR)
+      LOGICAL KFMP
+      DIMENSION IPBUF(10) 
+C 
+      INTEGER   LOPEN (  5 )
+C 
+      DATA LOPEN  /   8,2Hop,2Hen,2Hin,2Hg_/                            
+      KOPN=.FALSE.
+      IF(JERR.EQ.IERR) RETURN 
+      KOPN=KFMP(LUT,IERR,LOPEN(2),LOPEN(1),IPBUF,1,0) 
+      RETURN
+      END 
+      LOGICAL FUNCTION KREOF(LUT,IERR,LEN,IREC,IPBUF) 
+      LOGICAL KFMP
+      DIMENSION IPBUF(10) 
+C 
+      INTEGER   LPEOF ( 23 )
+      INTEGER   LRED  ( 16 )
+C 
+      DATA LPEOF  /  44,2HPr,2Hem,2Hat,2Hur,2He ,2HEO,2HF ,2Hbe,2Hfo,   
+     /             2Hre,2H r,2Hea,2Hdi,2Hng,2H r,2Hec,2Hor,2Hd ,2Hxx,   
+     /             2Hxx,2H i,2Hn_/                                      
+      DATA LRED   /  30,2Hbe,2Hfo,2Hre,2H r,2Hea,2Hdi,2Hng,2H r,2Hec,   
+     /             2Hor,2Hd ,2Hxx,2Hxx,2H i,2Hn_/                       
+      KREOF=.FALSE. 
+      IF(LEN.GE.0) GO TO 10 
+      IFC=37
+      IFC=IFC+IB2AS(IREC,LPEOF(2),IFC,100000B+4)
+      IFC=ICHMV(LPEOF(2),IFC,4H in_ ,1,4) 
+      KREOF=KFMP(LUT,IERR,LPEOF(2),IFC-1,IPBUF,0,1)   
+      RETURN
+C 
+10    CONTINUE
+      IF(IERR.EQ.0) RETURN
+      IFC=23
+      IFC=IB2AS(IREC,LRED(2),IFC,100000B+4) 
+      IFC=ICHMV(LRED(2),IFC,4H in_ ,1,4)
+      KREOF=KFMP(LUT,IERR,LRED(2),IFC-1,IPBUF,0,1)
+C 
+      RETURN
+      END 
+      LOGICAL FUNCTION KOUTP(LU,IDCB,IDCBS,IAPP,IPBUF)
+      DIMENSION IPBUF(10),IDCB(IDCBS) 
+      LOGICAL KFMP,KIF,KREAD,KOPN,KCRT
+C 
+      INTEGER   LEXST ( 16 )
+      INTEGER   LOA   ( 20 )
+C 
+      DATA LEXST  /  29,2HOu,2Htp,2Hut,2H f,2Hil,2He ,2Hal,2Hre,2Had,   
+     /             2Hy ,2Hex,2His,2Hts,2H, ,2H_ /                       
+      DATA LOA    /  37,2HOv,2Her,2Hwr,2Hit,2He ,2Hor,2H A,2Hpp,2Hen,   
+     /             2Hd ,2Hmu,2Hst,2H b,2He ,2Hsp,2Hec,2Hif,2Hie,2Hd /   
+      CALL CREAT(IDCB,IERR,IPBUF,IPBUF(8),IPBUF(7),IPBUF(5),IPBUF(6), 
+     +           IDCBS-16)
+      IF(KCRT(LU,IERR,IPBUF,-2)) GO TO 1010 
+      IF(IERR.GT.0) GO TO 2000
+C 
+      IF(KIF(LEXST(2),LEXST(1),LOA(2),1,LOA(1),IAPP.LT.0,LU)) 
+     +   GO TO 1010 
+C 
+      CALL OPEN(IDCB,IERR,IPBUF,0,IPBUF(5),IPBUF(6),IDCBS-16) 
+      IF(KOPN(LU,IERR,IPBUF,0)) GO TO 1010
+C 
+      IF(IAPP.EQ.0) GO TO 2000
+      CALL FEOF(IDCB,IERR,LEN)
+      IF(KREAD(LU,IERR,IPBUF)) GO TO 1000 
+      GO TO 2000
+C 
+1000  CONTINUE
+      CALL CLOSE(IDCB)
+C 
+1010  CONTINUE
+      KOUTP=.TRUE.
+      RETURN
+C 
+2000  CONTINUE
+      KOUTP=.FALSE. 
+      RETURN
+      END 
+      LOGICAL FUNCTION KCRT(LUT,IERR,IPBUF,JERR)
+      LOGICAL KFMP
+      DIMENSION IPBUF(10) 
+C 
+      INTEGER   LCRET (  6 )
+C 
+      DATA LCRET  /   9,2Hcr,2Hea,2Hti,2Hng,2H_ /                       
+      KCRT=.FALSE.
+      IF(JERR.EQ.IERR) RETURN 
+      KCRT=KFMP(LUT,IERR,LCRET(2),LCRET(1),IPBUF,1,0) 
+      RETURN
+      END 
+      SUBROUTINE FEOF(IDCB,IERR,LEN)
+C 
+10    CONTINUE
+      CALL READF(IDCB,IERR,IB,1,LEN)
+      IF(IERR.NE.0.OR.LEN.LT.0) RETURN
+      GO TO 10
+      END 
+      LOGICAL FUNCTION KREAD(LU,IERR,IPBUF) 
+      LOGICAL KFMP
+      DIMENSION IPBUF(10) 
+C 
+      INTEGER   LREAD (  5 )
+C 
+      DATA LREAD  /   8,2Hre,2Had,2Hin,2Hg_/                            
+      KREAD=KFMP(LU,IERR,LREAD(2),LREAD(1),IPBUF,0,0) 
+      RETURN
+      END 
+      LOGICAL FUNCTION KWRIT(LU,IERR,IPBUF) 
+      LOGICAL KFMP
+      DIMENSION IPBUF(10) 
+C 
+      INTEGER   LWRIT (  5 )
+C 
+      DATA LWRIT  /   8,2Hwr,2Hit,2Hin,2Hg_/                            
+      KWRIT=KFMP(LU,IERR,LWRIT(2),LWRIT(1),IPBUF,0,0) 
+      RETURN
+      END 
+      LOGICAL FUNCTION KEOF(LU,LEN,IPBUF) 
+      LOGICAL KFMP
+      DIMENSION IPBUF(10) 
+C 
+      INTEGER   LEOF  (  5 )
+C 
+      DATA LEOF   /   7,2HEO,2HF ,2Hon,2H_ /                            
+      KEOF=.FALSE.
+      IF(LEN.GE.0) RETURN 
+C 
+      KEOF=KFMP(LU,0,LEOF(2),LEOF(1),IPBUF,0,1) 
+      RETURN
+      END 
+      LOGICAL FUNCTION KFMP(LU,IERR,IMESS,LEN,IPBUF,JERR1,JERR2)
+      DIMENSION IPBUF(10),IMESS(1),LFILE(25)
+  
+      INTEGER   LERR  (  8 )
+C 
+      DATA LERR   /  14,2HEr,2Hro,2Hr ,2H  ,2H  ,2H  ,2H  /             
+      KFMP=.FALSE.
+      IF(JERR2.GT.0.AND.IERR.EQ.0) GO TO 1
+      IF(IERR.EQ.0) RETURN
+      IF(JERR1.GT.0.AND.IERR.GT.0) RETURN 
+      IF(JERR1.EQ.IERR) RETURN
+C 
+      KFMP=.TRUE. 
+      IFC=7 
+      IFC=IFC+IB2AS(IERR,LERR(2),IFC,100000B+6) 
+      IFC=ICHMV(LERR(2),IFC,2H _,1,2) 
+      CALL EXEC(2,LU,LERR(2),1-IFC) 
+C 
+1     CONTINUE
+      KFMP=.TRUE. 
+      IF(LEN.LE.0) GO TO 2
+      CALL EXEC(2,LU,IMESS,-LEN)
+C 
+2     CONTINUE
+      IFC=1 
+      IFC=ICHMV(LFILE,IFC,2H  ,1,1) 
+      IFC=ICHMV(LFILE,IFC,IPBUF,1,6)
+      IFC=1+IFLCH(LFILE,IFC-1)
+      IFC=ICHMV(LFILE,IFC,2H::,1,1) 
+C 
+      IF(IPBUF(5).NE.0) IFC=IFC+IB2AS(IPBUF(5),LFILE,IFC,100000B+6) 
+      IFC=ICHMV(LFILE,IFC,2H::,1,1) 
+C 
+      IF(IPBUF(6).NE.0) IFC=IFC+IB2AS(IPBUF(6),LFILE,IFC,100000B+6) 
+      IF(IPBUF(7).EQ.0.AND.IPBUF(8).EQ.0.AND.IPBUF(9).EQ.0.AND. 
+     +   IPBUF(10).EQ.0) GO TO 100
+      IFC=ICHMV(LFILE,IFC,2H::,1,1) 
+C 
+      IF(IPBUF(7).NE.0) IFC=IFC+IB2AS(IPBUF(7),LFILE,IFC,100000B+6) 
+      IF(IPBUF(8).EQ.0.AND.IPBUF(9).EQ.0.AND.IPBUF(10).EQ.0) GO TO 100
+      IFC=ICHMV(LFILE,IFC,2H::,1,1) 
+C 
+      IF(IPBUF(8).NE.0) IFC=IFC+IB2AS(IPBUF(8),LFILE,IFC,100000B+6) 
+      IF(IPBUF(9).EQ.0.AND.IPBUF(10).EQ.0) GO TO 100
+      IFC=ICHMV(LFILE,IFC,2H::,1,1) 
+C 
+      IF(IPBUF(9).NE.0) IFC=IFC+IB2AS(IPBUF(9),LFILE,IFC,100000B+6) 
+      IF(IPBUF(10).EQ.0) GO TO 100
+      IFC=ICHMV(LFILE,IFC,2H::,1,1) 
+C 
+      IFC=IFC+IB2AS(IPBUF(10),LFILE,IFC,100000B+6)  
+C 
+100   CONTINUE
+      CALL EXEC(2,LU,LFILE,1-IFC) 
+      RETURN
+      END 
+      REAL FUNCTION GTREL(JBUF,IFC,ILC,IFIELD,IFERR)
+      DOUBLE PRECISION DAS2B
+      IFIELD=IFIELD+1 
+      CALL GTFLD(JBUF,IFC,ILC,IC1,IC2)
+      GTREL=SNGL(DAS2B(JBUF,IC1,IC2-IC1+1,JERR))
+      IF((IC1.LE.0.OR.JERR.NE.0).AND.IFERR.GE.0) IFERR=-IFIELD
+      RETURN
+      END 
+      INTEGER FUNCTION IGTBN(JBUF,IFC,ILC,IFIELD,IFERR) 
+      IFIELD=IFIELD+1 
+      CALL GTFLD(JBUF,IFC,ILC,IC1,IC2)
+      IGTBN=IAS2B(JBUF,IC1,IC2-IC1+1) 
+      IF((IC1.LE.0.OR.IGTBN.EQ.-32768).AND.IFERR.GE.0) IFERR=-IFIELD
+      RETURN
+      END 
+      SUBROUTINE GTCHR(LOUT,NF,NC,JBUF,IFC,ILC,IFIELD,IFERR)  
+      IFIELD=IFIELD+1 
+      CALL GTFLD(JBUF,IFC,ILC,IC1,IC2)  
+      IF(IC1.LE.0.AND.IFERR.GE.0) IFERR=-IFIELD 
+      CALL IFILL(LOUT,NF,NC,2H  ) 
+      CALL ICHMV(LOUT,NF,JBUF,IC1,MIN0(NC,IC2-IC1+1)) 
+      RETURN
+      END 
+      SUBROUTINE CNVRT(IMODE,AIN1,AIN2,OUT1,OUT2, 
+     + IYR, IDOY, IHR, IMN, ISC,IHSC,ALAT,WLONG), CONVERT COORDINATES 
+     +C#870915:10:50# 
+C 
+C  INPUT: 
+C 
+C     IMODE - specifies input and output coordinate systems 
+C              IMODE     Input      Output
+C              -----     -----      ------
+C                1       RA/DEC      AZ/EL
+C                2       AZ/EL       RA/DEC 
+C                3       RA/DEC      X/Y NS 
+C                4       X/Y NS      AZ/EL
+C                5       AZ/EL       X/Y NS 
+C                6       X/Y NS      HA/DEC 
+C                7       X/Y NS      RA/DEC 
+C                8       HA/DEC      X/Y NS 
+C                9       HA/DEC      AZ/EL
+C               10       AZ/EL       HA/DEC 
+C 
+C     AIN1 - first input coordinate 
+C     AIN2 - second input coordinate
+C 
+C  OUTPUT:
+C 
+C     OUT1 - first output coordinate
+C     OUT2 - second output coordinate 
+C 
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z) 
+      DOUBLE PRECISION SIDT,SIDER,HAD,TLST
+      DIMENSION IT(7) 
+C 
+      DATA PI/3.141592653589D0/ 
+C     DATA LU/15/                                                        DEBUG
+C 
+      DASIN(X) = DATN2(X,DSQRT(DABS(1.-X*X))) 
+      DACOS(X)=DATN2(DSQRT(DABS(1.-X*X)),X) 
+C 
+      SLAT = DSIN(ALAT) 
+      CLAT = DCOS(ALAT) 
+      SIN1 = DSIN(AIN1) 
+      SIN2 = DSIN(AIN2) 
+      CIN1 = DCOS(AIN1) 
+      CIN2 = DCOS(AIN2) 
+      SIDT=SIDER(IYR,IDOY,IHR,IMN,ISC,IHSC) 
+      TLST=SIDT-WLONG 
+C     WRITE(LU,1) TLST,SIDT,WLON                                         DEBUG
+C1    FORMAT("TLST,SIDT,WLON = "2(F10.6", "),F10.6)                      DEBUG
+      HAD = TLST-AIN1 
+      IF(HAD.GT.0.D0) HAD=DMOD(HAD,2.D0*PI) 
+      IF(HAD.LT.0.D0) HAD=DMOD(HAD,-2.D0*PI)
+      IF(HAD.LT.-PI) HAD=HAD+2.*PI
+      IF(HAD.GT.PI) HAD=HAD-2.*PI 
+      HA=HAD
+C     WRITE(LU,3) HA                                                     DEBUG
+C3    FORMAT("HA= "F10.6)                                                DEBUG
+      SHA=DSIN(HA)  
+      CHA=DCOS(HA)  
+C 
+      GO TO (110,130,150,170,190,210,230,250,270,290) IMODE 
+C 
+C  1. RA/DEC --> AZ/EL
+C 
+110   OUT2=DASIN(SLAT*SIN2+CLAT*CIN2*CHA) 
+      OUT1=DATN2(-CIN2*SHA,CLAT*SIN2-SLAT*CIN2*CHA) 
+      IF(OUT1.LT.0.) OUT1=OUT1+2.*PI
+      GO TO 900 
+C 
+C  2. AZ/EL --> RA/DEC
+C 
+130   HA=-DATN2(CIN2*SIN1,SIN2*CLAT-CIN2*CIN1*SLAT) 
+C     WRITE(LU,2)HA                                                      DEBUG
+C2    FORMAT("HA = "F10.6)                                               DEBUG
+      OUT1=TLST-HA
+      IF(OUT1.LT.0.) OUT1=OUT1+2.*PI
+      IF(OUT1.GT.2.*PI) OUT1=OUT1-2.*PI 
+      OUT2=DASIN(CIN2*CIN1*CLAT+SIN2*SLAT)  
+      GO TO 900 
+C 
+C  3. RA/DEC --> X/Y NS 
+C 
+150   OUT1=DATN2(-CIN2*SHA,SLAT*SIN2+CLAT*CIN2*CHA) 
+      OUT2=DASIN(CLAT*SIN2-SLAT*CIN2*CHA) 
+      GO TO 900 
+C 
+C  4. X/Y NS --> AZ/EL
+C 
+170   OUT1=DATN2(SIN1*CIN2,SIN2)
+      IF(OUT1.LT.0) OUT1=OUT1+2.*PI 
+      OUT2=DASIN(CIN2*CIN1) 
+      GO TO 900 
+C 
+C  5. AZ/EL  --> XY NS
+C 
+190   CONTINUE
+      OUT1=DATN2(CIN2*SIN1,SIN2)
+      OUT2=DASIN(CIN2*CIN1) 
+      GO TO 900 
+C 
+C  6. X/Y  NS --> HA/DEC
+C 
+210   CONTINUE
+      OUT1=-DATN2(CIN2*SIN1,CIN2*CIN1*CLAT-SIN2*SLAT) 
+      OUT2=DASIN(SIN2*CLAT+CIN2*CIN1*SLAT)  
+      GO TO 900 
+C 
+C   7. X/Y NS --> RA/DEC  
+C 
+230   CONTINUE
+      HA=-DATN2(CIN2*SIN1,CIN2*CIN1*CLAT-SIN2*SLAT) 
+      OUT1=TLST-HA  
+      IF(OUT1.LT.0.0) OUT1=OUT1+2.0*PI
+      IF(OUT1.GT.2.0*PI) OUT1=OUT1-2.0*PI 
+      OUT2=DASIN(SIN2*CLAT+CIN2*CIN1*SLAT)  
+      GO TO 900 
+C 
+C  8. HA/DEC --> X/Y NS 
+C 
+250   OUT1=DATN2(-CIN2*SIN1,SLAT*SIN2+CLAT*CIN2*CIN1) 
+      OUT2=DASIN(CLAT*SIN2-SLAT*CIN2*CIN1)  
+      GO TO 900 
+C 
+C  9. HA/DEC --> AZ/EL
+C 
+270   OUT2=DASIN(SLAT*SIN2+CLAT*CIN2*CIN1)  
+      OUT1=DATN2(-CIN2*SIN1,CLAT*SIN2-SLAT*CIN2*CIN1) 
+      IF(OUT1.LT.0.) OUT1=OUT1+2.*PI
+      GO TO 900 
+C 
+C 10. AZ/EL --> HA/DEC
+C 
+290   OUT1=-DATN2(CIN2*SIN1,SIN2*CLAT-CIN2*CIN1*SLAT) 
+C     WRITE(LU,2)HA                                                      DEBUG
+      IF(OUT1.LT.-PI) OUT1=OUT1+2.*PI 
+      IF(OUT1.GT.PI) OUT1=OUT1-2.*PI
+      OUT2=DASIN(CIN2*CIN1*CLAT+SIN2*SLAT)  
+      GO TO 900 
+C 
+900   CONTINUE
+      RETURN
+      END 
+      FUNCTION JR2AS(RE,LBUF,ICN,IT,ID,ISBUF) 
+      DIMENSION LBUF(1) 
+C 
+      JR2AS=IR2AS(RE,LBUF,ICN,IT,ID)  
+      IF(.NOT. JCHAR(LBUF,ICN).EQ.36) RETURN  
+      ITA=MIN0(IABS(IT)+IABS(ID)+1,ISBUF*2-ICN+1) 
+      JR2AS=IR2AS(RE,LBUF,ICN,ITA,ID) 
+      JR2AS=IABS(IT)
+      RETURN
+      END 
+      FUNCTION IR2AS(VALUE,IAS,IFC,NCHTOT,
+     .     NCFRAC),CONVERT REAL BINARY TO ASCII C#870915:10:50# 
+C 
+C     This function converts a real number to ASCII format
+C 
+C 
+C  INPUT: 
+C 
+C     VALUE - real value to be converted
+      DIMENSION IAS(1)
+C      - string array for ASCII value 
+C     IFC - first character to use in IAS 
+C     NCHTOT - maximum number of characters in field
+C              >0 for left-justify, <0 for right-justify
+C     NCFRAC - number of characters in fraction, i.e. following 
+C              decimal point.  >0 for leading spaces, <0 leading zeros
+C     **NOTE: NCHTOT and NCFRAC are similar in function to the two
+C     digits n and m used in the FORTRAN format Fn.m, respectively. 
+C 
+C  OUTPUT:
+C 
+C     IR2AS - number of characters used in formatting value 
+C 
+C 
+C  SUBROUTINES: 
+C 
+C     Character manipulation ICHMV, IB2AS 
+C 
+C 
+C  LOCAL: 
+C 
+      DOUBLE PRECISION VAL
+C     VAL - absolute value of VALUE 
+      DOUBLE PRECISION VALINT 
+C     VALINT - integer part, as number is being built up
+C     IDIGIT - current digit being added to number
+C     NDIG - set to 1 once leading zeros are passed over
+C     IC - current character in output string 
+C     IDEC - number of characters following decimal point 
+C     NCI - number of characters requested for integer part 
+C     IX - number of spaces pre-empted by "-" or "."
+C 
+C 
+C     1. First initialize the counters and indices. 
+C 
+      NCH = IABS(NCHTOT)
+C                   The total number of characters we can use 
+      NCFR = IABS(NCFRAC) 
+C                   The number of characters in the fractional part 
+      LLEAD = 2H
+      IF (NCFRAC.LT.0) LLEAD = 2H00 
+C                   Establish the character for leading blanks or zeros 
+      VAL = ABS(VALUE)+0.5*0.1**NCFR
+C                   The value to be converted 
+      VALINT = 0.0D0
+C                   The integer part of the number so far 
+      IX = 1
+C                   We expect to exclude one space for a decimal point
+      IF (VALUE.LT.0.0) IX = 2
+C                   We might have a sign to include,
+C                   so need to pre-empt another space 
+C     IF (NCFR.EQ.0) IX=IX-1
+C                   Maybe no decimal point is wanted at all 
+C     We can't handle the no-decimal point case easily, so skip it
+      NCI = NCH-NCFR-IX 
+C                   So, the number of characters in the INTEGER 
+C                   part of the number is the total less the number 
+C                   in the fraction and the number for . and/or - 
+      IF (NCI.EQ.0) GOTO 300
+C                   If we won't have any room for the integer 
+C                   part of the number, go fill with $$ 
+      IC = IFC
+C                   Start character counter where requested 
+      IF (VALUE.LT.0.0.AND.NCFRAC.LT.0) 
+     +  IC = ICHMV(IAS,IC,2H- ,1,1) 
+C                   Put in minus sign first if necessary
+      NDIG = 0
+C                   We have no digits processed yet 
+      IDEC = 0
+C                   There are no characters after the . yet 
+C 
+C 
+C     2. Main loop over max number of characters desired. 
+C     Do not fill in leading zeros. 
+C 
+      I=1 
+C                   The digit counter for exponentiation
+200   IDIGIT = VAL/10.0D0**(NCI-I) - VALINT   
+C200   IDIGIT = VAL*10.0**(I-NCI) - VALINT  
+      IF(IDIGIT.LT.0) IDIGIT=VAL/10.0D0**(NCI-1)-VALINT+.5
+C     IF(IDIGIT.LT.0.OR.IDIGIT.GT.9) IDIGIT=VAL*10.**(I-NCI)-VALINT 
+      IF (IDIGIT.LT.0.OR.IDIGIT.GT.9) GOTO 300
+C                   Get the Ith digit in the number 
+      IF (IDIGIT.NE.0.OR.NDIG.GT.0.OR.NCI.EQ.I) GOTO 202
+C                   Go to put in this digit if
+C                   1) the digit is non-zero
+C                   2) this is an embedded zero 
+C                   3) this is the zero before the decimal point
+      IF (NCHTOT.LT.0) IC = ICHMV(IAS,IC,LLEAD,1,1) 
+C                   Move in leading spaces or zeros for RIGHT-justify 
+      GOTO 210
+202   CONTINUE
+      IF(NDIG.EQ.0.AND.VALUE.LT.0.0.AND.NCFRAC.GE.0)
+     +  IC =  ICHMV(IAS,IC,2H- ,1,1)  
+      IC = IC + IB2AS(IDIGIT,IAS,IC,1)
+C                   Convert this digit.  We should get back a $ if
+C                   the digit is too large. 
+      NDIG = 1
+C                   Set the flag, we've started adding digits 
+      IF (IDEC.GT.0) IDEC=IDEC+1
+C                   Increment count of digits past decimal point
+      IF (NCI.NE.I) GOTO 201
+      IC = ICHMV(IAS,IC,2H. ,1,1) 
+      IDEC = 1
+C                   If we're at the 10**0 point, add "."
+201   VALINT = (VALINT+IDIGIT)*10.0D0 
+210   I = I + 1 
+      IF (IC.LT.IFC+NCH.AND.IDEC-1.LT.NCFR) GOTO 200
+C 
+      IR2AS = IC-IFC
+      RETURN
+C 
+C 
+C     3. Clearly, the number will not fit into the field we 
+C     were given.  Fill it up with $$$$$ and finish.
+C 
+300   CALL IFILL(IAS,IFC,NCH,2H$$)
+      IR2AS = NCH 
+      RETURN
+C 
+      END 
+      DOUBLE PRECISION FUNCTION REFR(DEL) 
+      DOUBLE PRECISION DEL  
+C 
+      DIMENSION P(5)
+C 
+      DATA A/40./,B/2.7/,C/4./,D/42.5/,E/0.4/,F/2.64/,G/.57295787E-4/ 
+      DATA P/.458675E1,.322009E0,.103452E-1,.274777E-3,.157115E-5/
+      DATA TEMPC/15./,HUMI/50./,PRES/1000./,CVT/1.33289/
+C 
+      EL=AMAX1(1.0,SNGL(DEL)) 
+C 
+C  Compute SN (surface refractivity)
+C 
+      RHUMI = (100.-HUMI)*.9
+      DEWPT = TEMPC-RHUMI*(.136667+RHUMI*1.33333E-3+TEMPC*1.5E-3) 
+      X = DEWPT 
+      PP = P(1) 
+      DO 20 I=2,5 
+        PP=PP+X*P(I)
+        X=X*DEWPT 
+20    CONTINUE
+      TEMPK=TEMPC+273.
+      SN=77.6*(PRES+(4810.*CVT*PP)/TEMPK)/TEMPK 
+C 
+      APHI = A/(EL+B)**C
+      ANG = .0174532905*(90.-EL)
+      DELE = -D/(EL+E)**F 
+      BPHI = G*(SIN(ANG)/COS(ANG)+DELE) 
+      IF(EL.EQ.0) BPHI = G*(1.+DELE)
+      REFR = BPHI*SN-APHI 
+C 
+      RETURN
+      END 
+      DOUBLE PRECISION FUNCTION TDPS(IYR,INDOY,IHR,IMN,ISC,IHSC)
+C 
+C CALCULATE GREENWICH SIDERAL TIME AS TSRT IN THE TDPS DOES 
+C 
+C SEEE WEH II OR TOM HORNBY DBA SYSTEMS 
+C 
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z) 
+      REAL WLON 
+      DATA PI/3.141592653589793D0/
+C 
+      A1=100.4989167D0
+      A2=36000.7695D0 
+      A3=38708.0D-8 
+      A4=.2506844773D0
+C 
+      TIM=DBLE(FLOAT(IHSC))*.01D0 + DBLE(FLOAT(ISC))
+     +   +DBLE(FLOAT(IMN))*60.D0 + DBLE(FLOAT(IHR))*3600.D0 
+     +   +DBLE(FLOAT(INDOY-1))*86400.0D0
+C 
+      IDOY=IDINT(TIM/86400.0D0) 
+      VM=DMOD(TIM,86400.0D0)
+      VMIN=VM/60.0D0
+      IX=IYR-73 
+      X=(IX*365+(IX/4)+IDOY)/36525.0D0
+      TDPS=A3*X*X+A2*X+A1+VMIN*A4 
+      TDPS=TDPS*PI/180.0D0
+      TDPS=DMOD(TDPS,2.0D0*PI)
+      IF(TDPS.LT.0) TDPS=TDPS+2.0D0*PI
+      RETURN
+      END 
+      DOUBLE PRECISION FUNCTION SIDER(IYR,IDOY,IHR,IMN,ISC,IHSC)
+C 
+C CALCULATE APPARENT GREENWICH SIDERAL TIME 
+C 
+C ACCURATE TO APPROXIMATELY .5 SECONDS OF TIME  
+C 
+C WEH 
+C 
+      DOUBLE PRECISION EQOFEQ,SIDTI,FRACT,UT,PI 
+      DATA PI/3.141592653589793D0/
+C 
+      UT =DBLE(FLOAT(IHSC))*.01D0 + DBLE(FLOAT(ISC))
+     +   +DBLE(FLOAT(IMN))*60.D0 + DBLE(FLOAT(IHR))*3600.D0 
+      MJD=JULDA(1,IDOY,IYR) 
+      CALL SIDTM(MJD,SIDER,FRACT) 
+      CALL EQUN(IYR,IDOY,EQOFEQ)
+      SIDER=SIDER+FRACT*UT+EQOFEQ 
+      SIDER=DMOD(SIDER,2.0D0*PI)
+      IF(SIDER.LT.0.0D0) SIDER=SIDER+2.0D0*PI 
+      END 
+      SUBROUTINE EQUN(NYRF,NDAY,EQOFEQ) 
+C 
+C   EQUATION OF EQUINOXES TO 10% FROM 
+C     J.BALL'S MOVE 
+C 
+C     NYRF = YEAR SINCE 1900
+C     NDAY = DAY OF YEAR
+C     EQOFEQ IS RETURNED EQUATION OF EQUINOXES
+C 
+      DOUBLE PRECISION T,AL,A,T2,T3,
+     .AOMEGA,ARG,DLONG,DOBLQ,EQOFEQ 
+C 
+      AL=NDAY 
+      A=NYRF
+      T=(A+AL/365.2421988D0)/100.D0 
+C 
+C     NUTATION
+C 
+      AOMEGA=259.183275D0-1934.142D0*T
+      ARG=AOMEGA*0.0174532925D0 
+      DLONG=-8.3597D-5*DSIN(ARG)
+      DOBLQ=4.4678D-5*DCOS(ARG) 
+C     EQOFEQ=DLONG*DCOS(DOBLQ)
+      EQOFEQ=DLONG*0.917450512D0
+      RETURN
+      END 
+      DOUBLE PRECISION FUNCTION FLT(IWHICH,X,Y,P,IPAR,PHI)  
+C 
+C     COMPUTES THE FUNCTION AND DERIVATIVES FOR Y COORDINATE. 
+C     4 PARAMETER MODLT FOR IWHICH = 0
+C     DERIVATIVE WITH RESPECT TO THE (IWHICH)th PARAMETER OTHERWISE 
+C               WEH 830501
+C 
+      DIMENSION P(15),IPAR(15)
+      DOUBLE PRECISION F,C,COSX,COSY,COSL,SINX,SINY,SINL
+      DATA C/0.01745329251994330D0/ 
+C 
+      COSX=DCOS(X*C)
+      COSY=DCOS(Y*C)
+      SINX=DSIN(X*C)
+      SINY=DSIN(Y*C)
+      SINL=DSIN(PHI*C)
+      COSL=DCOS(PHI*C)
+      F=0.0D0 
+C 
+      GO TO (1,200,200,200,200, 50, 
+     +          60, 70, 80, 90,100, 
+     +         110,200,200,200,200) IWHICH+1
+C 
+1     CONTINUE
+      IF(IPAR( 5).NE.0) F=F+P(5)*COSX 
+      IF(IPAR( 6).NE.0) F=F+P(6)*SINX 
+      IF(IPAR( 7).NE.0) F=F+P(7)
+      IF(IPAR( 8).NE.0) F=F-P(8)*(COSL*SINY*COSX-SINL*COSY) 
+      IF(IPAR( 9).NE.0) F=F-P(9)*(COSL*COSY*COSX-SINL*SINY) 
+      IF(IPAR(10).NE.0) F=F+P(10)*COSY
+      IF(IPAR(11).NE.0) F=F+P(11)*SINY
+      GO TO 200 
+C 
+50    CONTINUE
+      IF(IPAR( 5).NE.0) F=COSX
+      GO TO 200 
+C 
+60    CONTINUE
+      IF(IPAR( 6).NE.0) F=SINX
+      GO TO 200 
+C 
+70    CONTINUE
+      IF(IPAR( 7).NE.0) F=1.0D0 
+      GO TO 200 
+C 
+80    CONTINUE
+      IF(IPAR( 8).NE.0) F=-(COSL*SINY*COSX-SINL*COSY) 
+      GO TO 200 
+C 
+90    CONTINUE
+      IF(IPAR( 9).NE.0) F=-(COSL*COSY*COSX-SINL*SINY) 
+      GO TO 200 
+C 
+100   CONTINUE
+      IF(IPAR(10).NE.0) F=COSY
+      GO TO 200 
+C 
+110   CONTINUE
+      IF(IPAR(11).NE.0) F=SINY
+      GO TO 200 
+C 
+200   CONTINUE
+      FLT=F 
+      END 
+      DOUBLE PRECISION FUNCTION FLN(IWHICH,X,Y,P,IPAR,PHI)
+C 
+C     FITTING FUNCTION FOR X COORDINATE INCLUDING DERIVATIVES 
+C     6-PARAMETER FUCNTION FOR IWHICH = 0 
+C     DERIVATIVE WITH RESPECT TO THE (IWHICH)th PARAMETER OTHERWISE 
+C     COULD HANDLE UP TO 15 PARAMETERS
+C                  WEH 830501 
+C 
+      DIMENSION P(15),IPAR(15)
+      DOUBLE PRECISION F,C,COSX,COSY,COSL,SINX,SINY,SINL
+      DATA C/0.01745329251994330D0/ 
+C 
+      COSX=DCOS(X*C)
+      COSY=DCOS(Y*C)
+      COSL=DCOS(PHI*C)  
+      SINX=DSIN(X*C)
+      SINY=DSIN(Y*C)
+      SINL=DSIN(PHI*C)  
+      F=0.0D0 
+C 
+      GO TO (1, 10, 20, 30, 40, 50, 
+     +          60,200,200,200,200, 
+     +         200,200,200,200,200) IWHICH+1
+C 
+1     CONTINUE
+      IF(IPAR( 1).NE.0) F=F+P(1)
+      IF(IPAR( 2).NE.0) F=F-P(2)*COSL*SINX/COSY 
+      IF(IPAR( 3).NE.0) F=F+P(3)*SINY/COSY
+      IF(IPAR( 4).NE.0) F=F-P(4)/COSY 
+      IF(IPAR( 5).NE.0) F=F+P(5)*SINX*SINY/COSY 
+      IF(IPAR( 6).NE.0) F=F-P(6)*SINY*COSX/COSY 
+      GO TO 200 
+C 
+10    CONTINUE
+      IF(IPAR(1).NE.0) F=1.0D0
+      GO TO 200 
+20    CONTINUE
+      IF(IPAR(2).NE.0) F=-COSL*SINX/COSY
+      GO TO 200 
+30    CONTINUE
+      IF(IPAR(3).NE.0) F= SINY/COSY 
+      GO TO 200 
+40    CONTINUE
+      IF(IPAR(4).NE.0) F=-1.0D0/COSY
+      GO TO 200 
+50    CONTINUE
+      IF(IPAR(5).NE.0) F= (SINX*SINY)/COSY
+      GO TO 200 
+60    CONTINUE
+      IF(IPAR(6).NE.0) F=-(COSX*SINY)/COSY
+      GO TO 200 
+C 
+200   CONTINUE
+      FLN=F 
+      END 
+      SUBROUTINE GMODL(LUT,IDCB,IMBUF,PCOF,MPAR,IPAR,PHI, 
+     +                 IMDL,IT,JBUF,IL,IERR,IDCBS)
+      DOUBLE PRECISION DAS2B
+      DIMENSION IDCB(IDCBS),PCOF(MPAR),JBUF(IL),IPAR(MPAR),IT(6)
+      DIMENSION IMBUF(10) 
+C 
+      LOGICAL KOPN,KFMP,KDUM
+C 
+      INTEGER   LRERR ( 10 )
+      INTEGER   LPEOF ( 25 )
+      INTEGER   LEERR ( 11 )
+      INTEGER   LDERR ( 23 )
+C 
+C   OPEN THE DATA FILE
+C 
+      DATA LRERR  /  18,2HRe,2Had,2Hin,2Hg ,2Hre,2Hco,2Hrd,2H  ,2H _/   
+      DATA LPEOF  /  47,2HPr,2Hem,2Hat,2Hur,2He ,2HEn,2Hd-,2HOf,2H-F,   
+     /             2Hil,2He ,2Hbe,2Hfo,2Hre,2H r,2Hea,2Hdi,2Hng,2H r,   
+     /             2Hec,2Hor,2Hd ,2H  ,2H_ /                            
+      DATA LEERR  /  19,2HEx,2Htr,2Ha ,2Hre,2Hco,2Hrd,2H f,2Hou,2Hnd,   
+     /             2H_ /                                                
+      DATA LDERR  /  44,2HFi,2Hel,2Hd ,2H  ,2H i,2Hn ,2Hre,2Hco,2Hrd,   
+     /             2H  ,2H  ,2H c,2Hou,2Hld,2H n,2Hot,2H b,2He ,2Hde,   
+     /             2Hco,2Hde,2Hd_/                                      
+      CALL OPEN(IDCB,IERR,IMBUF,0,IMBUF(5),IMBUF(6),IDCBS)
+      IF(KOPN(LUT,IERR,IMBUF,4)) GO TO 9000 
+C 
+      IREC=0
+      ILINE=0 
+50    CONTINUE
+      CALL READF(IDCB,IERR,JBUF,IL,LEN) 
+      IF(IERR.NE.0) GO TO 8005
+      IF(LEN.EQ.-1) GO TO 8010
+C 
+      IF(ICHCM(JBUF,1,2H**,1,1).EQ.0) GO TO 50
+      IREC=IREC+1 
+      ILC=LEN*2 
+      IFC=1 
+      IFIELD=0
+      IFERR=0 
+C     CALL EXEC(2,LUT,JBUF,LEN)                                          DEBUG
+      GO TO (100,200,300,300,300,400),  IREC
+C 
+C  MODEL # AND DATE 
+C 
+100   CONTINUE
+      IMDL=IGTBN(JBUF,IFC,ILC,IFIELD,IFERR) 
+      IT(6)=IGTBN(JBUF,IFC,ILC,IFIELD,IFERR)
+      IT(5)=IGTBN(JBUF,IFC,ILC,IFIELD,IFERR)
+      IT(4)=IGTBN(JBUF,IFC,ILC,IFIELD,IFERR)
+      IT(3)=IGTBN(JBUF,IFC,ILC,IFIELD,IFERR)
+      IT(2)=IGTBN(JBUF,IFC,ILC,IFIELD,IFERR)
+      IT(1)=0 
+      IF(IFERR.NE.0) GO TO 8020 
+      GO TO 50
+C 
+C  Parameter Control Record 
+C 
+200   CONTINUE
+      PHI=GTREL(JBUF,IFC,ILC,IFIELD,IFERR)
+      DO 250 I=1,MPAR 
+        IPAR(I)=IGTBN(JBUF,IFC,ILC,IFIELD,IFERR)
+250   CONTINUE
+      IF(IFERR.NE.0) GO TO 8020 
+      GO TO 50
+C 
+300   CONTINUE
+      ILINE=ILINE+1 
+      DO 150 I=(ILINE-1)*5+1,ILINE*5
+        PCOF(I) = GTREL(JBUF,IFC,ILC,IFIELD,IFERR)
+        IF(IFERR.NE.0) GO TO 8020 
+150   CONTINUE
+      IF(ILINE.EQ.3) GO TO 9000 
+      GO TO 50
+C 
+400   CONTINUE
+      KDUM=KFMP(LUT,0,LEERR(2),LEERR(1),IMBUF,0,1)
+      IERR=-12
+      GO TO 9000
+C 
+C  READ ERROR 
+C 
+8005  CONTINUE
+      INC=IB2AS(IREC+1,LRERR(2),16,2) 
+      KDUM=KFMP(LUT,IERR,LRERR(2),LRERR(1),IMBUF,0,0) 
+      GO TO 9000
+C 
+C PREMATURE END OF FILE 
+C 
+8010  CONTINUE
+      INC=IB2AS(IREC+1,LPEOF(2),45,2) 
+      KDUM=KFMP(LUT,0,LPEOF(2),LPEOF(1),IMBUF,0,1)
+      IERR=-12
+      GO TO 9000
+C 
+C DECODE ERROR
+C 
+8020  CONTINUE
+      INC=IB2AS(-IFERR,LDERR(2),7,2)
+      INC=IB2AS(IREC,LDERR(2),20,3) 
+      KDUM=KFMP(LUT,0,LDERR(2),LDERR(1),IMBUF,0,1)
+      IERR=IFERR
+      GO TO 9000
+C 
+9000  CONTINUE
+      CALL CLOSE(IDCB)
+      RETURN
+      END 

@@ -1,0 +1,56 @@
+FTN4,X
+C@LABCK 
+      PROGRAM LABCK(99),GENERATE CHECK-LABEL C#870115:06:01#
+C 
+C 
+      DIMENSION IP(5),LABT(4),LCHK(2),LABTA(4),LABTB(4) 
+C 
+C 
+      CALL RMPAR(IP)
+      LU = IP(1)
+C 
+200   WRITE(LU,9901)
+9901  FORMAT("Enter tape number (:: to quit) _")
+      READ(LU,9902) LABT
+9902  FORMAT(4A2) 
+      IF (LABT(1).EQ.2H::) GOTO 999 
+      WRITE(LU,9905)
+9905  FORMAT("Enter tape number again to double check (:: to quit) _")
+      READ(LU,9902) LABTA 
+      IF(LABTA(1).EQ.2H::) GOTO 999 
+      WRITE(LU,9906)
+9906  FORMAT("Enter tape number once more, just to be sure ", 
+     .   " (:: to quit) _") 
+      READ(LU,9902)LABTB
+      IF(LABTB(1).EQ.2H::) GOTO 999 
+C 
+C     Generate check label.  Change any "O" to "0" in tape number first.
+C     Check for exactly 8 characters in tape number.
+C 
+      DO 322 I=1,8
+        IC = ICHAR(LABT,I)
+        IF (IC.NE.40B) GOTO 321 
+C                            no blanks allowed
+        WRITE(LU,9904)
+9904    FORMAT("Tape label must be exactly 8 characters, no blanks allow
+     .ed.  Try again.") 
+        GOTO 200
+321     IF (IC.EQ.117B) CALL ICHMV(LABT,I,60B,2,1)
+C                            "O"                     "0"
+        IF(ICHAR(LABTA,I).EQ.IC.AND.ICHAR(LABTB,I).EQ.IC) GOTO 322
+          WRITE(LU,9907)
+9907      FORMAT("Tape numbers disagree. Try again.") 
+          GOTO 200
+322     CONTINUE
+C 
+      ICODE = IHASH(LABT,1,8) 
+      LCHK(1) = IH22A(ICHAR(ICODE,1)) 
+      LCHK(2) = IH22A(ICODE)
+C 
+C     Now LCHK contains the four hex characters in the correct
+C     check label.
+C 
+      WRITE(LU,9903) LCHK 
+9903  FORMAT("Check label is "2A2)  
+999   CONTINUE    
+      END 

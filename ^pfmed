@@ -1,0 +1,13 @@
+LL,$PFMED::7G   
+LI,%%FSLB::7G 
+LI,$LIBHS::7G 
+SC
+RE,%PFMED::5G 
+RE,%PFCOP::5G 
+RE,%PFBLK::5G 
+RE,%DCBS ::5G 
+RE,%FFM  ::5G 
+RE,%FFMP ::5G 
+RE,%FED  ::5G 
+RE,%FEDCM::5G 
+RE,%KPRC ::5G 

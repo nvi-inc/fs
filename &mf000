@@ -1,0 +1,279 @@
+FTN4
+        SUBROUTINE MF000(LUDSP,ITYPE,NLINES,KLIN) 
+     .,C#870115:05:43    MONITOR VLBI V=1.2#
+C 
+C               THIS ROUTINE DISPLAYS THE STATUS OF THE VLBI SYSTEM WITH
+C       THE FORMAT THAT FOLLOWS LOCK ON THE TOP OF THE SCREEN UNDER THE 
+C       PROGRAM MONIT:
+C 
+C  &dBVLBI MARK III&d@ 1980-059 17:49:47 UT           TEMP   0.0C  &dB 
+C  &dBMODE&d@ &dBRATE&d@  &dBSPEED&d@ &dBDIR&d@ &dBENABLED&d@                 HUMID  0.0%  RA  00h00m 
+C   A   4.000  0    FOR                         PRES    0.0  DEC 00d00m 
+C  &dBVACUUM&d@   &dBTAPE&d@    &dBFEET&d@  &dBIF1&d@ &dBIF2&d@                            HA -00h25m21.2s
+C  READY    STOPPED       NOR NOR                            AZ 170d EL 47d 
+C  ---------------------------------------------------------------------------
+C 
+        LOGICAL KLIN4,KLIN,KHALTO,ITLN,ILLN,LLENT 
+C 
+C 
+      INCLUDE #FSCOM::1296
+C 
+        DIMENSION IDSC(2,5) 
+C 
+C       IDSC    - DISPLAY INFORMATION 
+C 
+C 
+        LOGICAL KCHECK
+C 
+        EXTERNAL IFMED,ITPED,IIFED,ISOED,ISH4X
+C 
+      DATA IDSC   /2H I,2HF ,2H F,2HM ,2H T,2HP ,2H R,2HX ,2H H,2HD / 
+      DATA ILLN/.FALSE./  
+C 
+C               INITIALIZE THE INPUTS 
+C 
+        NLINES=0
+C 
+C 
+C               CHECK ITYPE FOR ONE HANDLED BY THIS ROUTINE 
+C 
+        IF(             ITYPE .LT. 0
+     C          .OR.    2 .LT. ITYPE    )GO TO 99999
+C 
+C               GET THE ANGLES
+C 
+        CALL RADEC(RA50,DEC50,HA,IRAH,IRAM,RAS,LDSIGN,IDECD 
+     C  ,IDECM,DECS,LHSIGN,IHAH,IHAM,HAS) 
+C 
+C 
+C               FIRST LINE OF DISPLAY 
+C 
+        CALL ISH4X(0,LUDSP,.TRUE.)
+        CALL ISTND(ITODAY,IUT1,IUT2,ISH4X)
+C 
+C               IF ITYPE IS 0 OR 1 TIME TO QUIT 
+C 
+        IF(ITYPE .EQ. 2)GO TO 5000
+C 
+C               DISPLAY EVERYTHING UP TO HERE AND EXIT
+C 
+        CALL ISH4X(63,LUDSP,0,KLIN) 
+        NLINES=NLINES+1 
+C 
+        GO TO 99999 
+C 
+5000    CONTINUE
+C 
+        IF(KHALT)CALL ISH4X(2,38,12H&dAHALT&d@,12)
+        CALL ISH4X(2,45,4HTEMP,4) 
+        CALL ISH4X(4,54,TEMPWX,-5,1)
+        CALL ISH4X(2,59,2HC ,1) 
+        CALL ISH4X(66,62,LSORNA,8)
+        CALL ISH4X(20,71,ISOED,-1,IONSOR) 
+        CALL ISH4X(63,LUDSP,0,KLIN) 
+        NLINES=NLINES+1 
+C 
+C               SECOND LINE OF DISPLAY
+C 
+        CALL ISH4X(0,LUDSP) 
+        CALL ISH4X(66,1,4HMODE,4) 
+        CALL ISH4X(66,6,4HRATE,4) 
+        CALL ISH4X(66,12,5HSPEED,5) 
+        CALL ISH4X(66,18,3HDIR,3) 
+        CALL ISH4X(3,24,INEXT(1),41002B)
+        CALL ISH4X(2,26,2H::,1) 
+        CALL ISH4X(3,27,INEXT(2),41002B)
+        CALL ISH4X(2,29,2H::,1) 
+        CALL ISH4X(3,30,INEXT(3),41002B)
+        CALL ISH4X(2,32,5H NEXT,5)
+        CALL ISH4X(2,45,5HHUMID,5)
+        CALL ISH4X(4,54,HUMIWX,-5,1)
+        CALL ISH4X(2,59,6H%  RA ,6) 
+        CALL ISH4X(5,65,2H  ,IRAH,IRAM,RAS,3Hhms) 
+        CALL ISH4X(63,LUDSP,0,KLIN) 
+        NLINES=NLINES+1 
+C 
+C               LINE THREE STARTS HERE
+C 
+        CALL ISH4X(0,LUDSP) 
+        CALL ISH4X(20,2,IFMED,-1,IMODFM)
+        CALL ISH4X(20,6,IFMED,-2,IRATFM)
+        CALL ISH4X(20,13,ITPED,-1,ISPEED) 
+        CALL ISH4X(20,18,ITPED,-2,IDIRTP) 
+        IF(LSKD .EQ. 0)GO TO 5333 
+        CALL ISH4X(2,24,6HSCHED=,6) 
+        CALL ISH4X(2,30,LSKD,2) 
+5333    CONTINUE
+        IF(LLOG .EQ. 0)GO TO 5339 
+        CALL ISH4X(2,33,4HLOG=,4) 
+        CALL ISH4X(2,37,LLOG,2) 
+5339    CONTINUE
+        CALL ISH4X(2,45,4HPRES,4) 
+        CALL ISH4X(4,52,PRESWX,-6,1)
+        CALL ISH4X(2,58,2Hmb,2) 
+        CALL ISH4X(2,62,3HDEC,3)
+        CALL ISH4X(5,65,LDSIGN,IDECD,IDECM,0,3Hdms) 
+        CALL ISH4X(2,72,2H (,2) 
+        CALL ISH4X(4,74,EP1950,-5,0)
+        CALL ISH4X(2,-1,1H),1)
+        CALL ISH4X(63,LUDSP,0,KLIN) 
+        NLINES=NLINES+1 
+C 
+C               LINE FOUR STARTS HERE 
+C 
+C 
+        CALL ISH4X(0,LUDSP) 
+        CALL ISH4X(66,1,6HVACUUM,6) 
+        CALL ISH4X(66,10,4HTAPE,4)
+        CALL ISH4X(66,18,4HFEET,4)
+        CALL ISH4X(66,24,3HIF1,3) 
+        CALL ISH4X(66,29,4HTSYS,4)
+        CALL ISH4X(66,34,3HIF2,3) 
+        CALL ISH4X(66,39,4HTSYS,4)
+        CALL ISH4X(2,45,5HCABLE,5)
+        CALL ISH4X(4,51,CABLEV,8,6) 
+        CALL ISH4X(2,59,1Hs,1)
+        CALL ISH4X(2,62,2HAZ,2) 
+        CALL ISH4X(4,65,AZIM*180.0/PI,-5,1) 
+C       CALL ISH4X(2,-1,4Hd EL,4) 
+        CALL ISH4X(2,0,4H EL ,4)  
+        CALL ISH4X(4,0,ELEV*180.0/PI,-5,1)  
+C       CALL ISH4X(2,-1,2Hd ,1) 
+        CALL ISH4X(63,LUDSP,0,KLIN) 
+        NLINES=NLINES+1 
+C 
+C               LINE FIVE STARTS HERE 
+C 
+        CALL ISH4X(0,LUDSP) 
+        CALL ISH4X(20,1,ITPED,-8,IRDYTP)
+        CALL ISH4X(20,10,ITPED,-9,ICAPTP) 
+        CALL ISH4X(2,18,LFEET,4)
+        CALL ISH4X(20,24,IIFED,-1,INP1IF) 
+        CALL ISH4X(4,28,SYSTMP(29),-5,1)
+        CALL ISH4X(20,34,IIFED,-1,INP2IF) 
+        CALL ISH4X(4,38,SYSTMP(30),-5,1)
+        CALL ISH4X(2,62,12HHEAD PASS # ,12) 
+        CALL ISH4X(3,0,IPASHD(1),2) 
+        CALL ISH4X(2,0,2H  ,1)
+        CALL ISH4X(3,0,IPASHD(2),2) 
+        CALL ISH4X(63,LUDSP,0,KLIN) 
+        NLINES=NLINES+1 
+C 
+C               LINE 6 IF NEEDED STARTS HERE
+C 
+C 
+C 
+C               INITIALIZE FOR THIS LINE
+C 
+        IRT=1 
+C 
+        ITLN=.FALSE.
+C 
+C               SET UP LOOP 
+C 
+        DO 6800 I=1,20
+C 
+C               SEE IF CHECKING IS OK 
+C 
+        IF(I.EQ.19.AND.ICHK19.GT.0) GO TO 6800
+        IF(I.EQ.20.AND.ICHK20.GT.0) GO TO 6800
+        IF(I.GT.18) GO TO 6099
+        IF(ICHECK(I) .GT. 0)GO TO 6800
+C 
+C               SELECT ROUTE
+C 
+6099    CONTINUE
+        GO TO (6100,6200),IRT 
+C 
+6100    CONTINUE
+C 
+C               NOTE AN ENTRY IS MADE AND INITIALIZE
+C 
+        IRT=2 
+C 
+        ITLN=.TRUE. 
+C 
+        CALL ISH4X(0,LUDSP) 
+C 
+C               WRITE INITIAL MESSAGE AND LEAVE IN VID ON 
+C 
+        CALL ISH4X(202B,1,10HNO CHECK: , 9) 
+C 
+6200    CONTINUE
+C 
+C               GET THE MAPPED PARM 
+C 
+        ICR=MAX0(I-15,0)
+C 
+C               CHOOSE ROUTE AGAIN
+C 
+        IF(ICR .NE. 0)GO TO 6500
+C 
+C               PUT IN SPACE V
+C 
+        CALL ISH4X(2,0,2H V,2)
+C 
+C               PUT IN INDEX ON VC
+C 
+        ISHLN=ISH4X(3,0,I,100002B)
+C 
+C               EXIT THIS LOOP
+C 
+        GO TO 6799
+C 
+6500    CONTINUE
+C 
+C               MOVE IN THE FIELD 
+C 
+        ISHLN=ISH4X(2,0,IDSC(1,ICR),3)
+C 
+6799    CONTINUE
+C 
+6800    CONTINUE
+C 
+C               RESET LENGTH TEST 
+C 
+        LLENT=.FALSE. 
+C 
+C               CLEAR IF A CHANGE 
+C 
+        IF(ISHLN .NE. IOSHLN)LLENT=.TRUE. 
+C 
+C               SAVE OLD LENGTH 
+        IOSHLN=ISHLN
+C 
+C               DISPLAY LINE IF ANY 
+C 
+        IF(ITLN)CALL ISH4X(63,LUDSP,0,LLENT)
+C 
+C               NOTE LINE WRITTEN IF SO 
+C 
+        IF(ITLN)NLINES=NLINES+1 
+C 
+C               CLEAR LINE IF CHANGE
+C 
+C ****  IF(.NOT. ITLN .AND. ILLN)CALL CLLIN(LUDSP,0)
+C 
+C               SAVE ITLN 
+C 
+        ILLN=ITLN 
+C 
+6999    CONTINUE
+C 
+C               ENTER A LINE OF DASHES FOR 264X AS LINE 6/7 
+C 
+C               PUT IN A LINE OF DASHES TO SEPARATE FROM SCROLLABLE AREA
+C 
+        CALL ISH4X(0,LUDSP) 
+        CALL ISH4X(1,1,79,2H--) 
+        CALL ISH4X(63,LUDSP,0,KLIN) 
+C 
+C               NOTE LINE ADDED 
+C 
+        NLINES=NLINES+1 
+C 
+99999   CONTINUE
+C 
+        RETURN
+        END 
+        END$

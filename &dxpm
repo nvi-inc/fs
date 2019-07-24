@@ -1,0 +1,69 @@
+FTN4,X
+        REAL FUNCTION DXPM(IB,IBL,IPT,IL) 
+     .,C#870115:04:27    EXTENDED PATTERN MTCH V=1.0# 
+C 
+C                This routine detemines the location and length of an 
+C        extended pattern in the input string IB which has length IBL.
+C        Tha pattern is in IPT and has length IL.  The A register will
+C        give the starting location of the pattern in IB if it is present 
+C        and the B register will give the length of the pattern in the
+C        extended sense.  The pattern is extended by repeating the last 
+C        character. 
+C 
+C 
+        DIMENSION IB(1),IPT(1),IREG(2)
+        EQUIVALENCE (REG,IST,IREG(1)),(IREG(2),IXL) 
+C 
+C                SET NO FIND INTIAL CONDITIONS
+C 
+        IST=0 
+        IXL=0 
+C 
+C                SEARCH FOR THE PATTERN PRESENT 
+C 
+        ILOC=ISCNS(IB,1,IBL,IPT,1,IL) 
+C 
+C                IF NO FIND EXIT NOW
+C 
+        IF(ILOC .EQ. 0)GO TO 90000
+C 
+C                SET INITIAL RETURN FOR ONLY THE PATTERN
+C 
+        IST=ILOC
+        IXL=IL
+C 
+C               FIND THE END OF THE MATCHED FIELD 
+C 
+        ILOC1=ILOC+IL-1 
+C 
+C               FIND THE NEXT CHARACTER IN THE BUFFER 
+C 
+        ILOC2=ILOC1+1 
+C 
+C               TEST FOR THE END OF THE BUFFER WITH THIS CONDITION
+C 
+        IF(IBL .EQ. ILOC2)GO TO 90000 
+C 
+C               SEARCH FOR THE EXTENDED FIELD AND COMPUTE IT
+C 
+        IXL=IABS(ICHCM(IB,ILOC1,IB,ILOC2,IBL-ILOC1))
+C 
+C               IF ZERO USE REST OF FIELD INCLUDING MATCHING CHARACTER
+C 
+        IF(IXL .EQ. 0)IXL=IBL-ILOC1+1 
+C 
+C               NOW ADD IN PATTERN LENGTH 
+C 
+        IXL=IXL+IL-1
+C 
+90000        CONTINUE 
+C 
+C                RETURN INFORMATION TO USER 
+C 
+        DXPM=REG
+C 
+99999   CONTINUE
+C 
+        RETURN
+        END 
+        END$

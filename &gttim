@@ -1,0 +1,262 @@
+FTN4,X
+C@GTTIM 
+C 
+      SUBROUTINE GTTIM(IAS,IFC,IEC,IMODE,IT1,IT2,IT3,IERR)
+C 
+C     GTTIM 
+C 
+C 1.  GTTIM PROGRAM SPECIFICATION 
+C 
+C 1.1.   GTTIM decodes the SNAP time formats
+C 
+C 1.2.   RESTRICTIONS - limits on use of routine
+C 
+C 1.3.   REFERENCES - document cited
+C 
+C 2.  GTTIM INTERFACE 
+C 
+C 2.1.   CALLING SEQUENCE: CALL GTTIM(   see above        ...)
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IAS(1)
+C               - string array
+C        IFC,IEC- first, last characters of time format in IAS
+C        IMODE  - 0 - both date and time wanted 
+C                 1 - only time allowed 
+C                 2 - only date allowed (not implemented) 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IT1    - first word of time, (YR-1970)*1024+DAY
+C        IT2    - second word of time, HR*60+MIN
+C        IT3    - third word, SEC*100+MSEC/10 
+C        IERR   - error return, 0=all OK
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+C 2.3.   DATA BASE ACCESSES 
+C 2.4.   EXTERNAL INPUT/OUTPUT
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES: SPARS, TMLIS 
+C 
+C     CALLED SUBROUTINES: ICHMV,IAS2B,ISCNC 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C        LEC    - last character of IAS 
+C        ILEN   - length of time field, IEC-IFC+1 
+C        ICD    - character position of decimal point 
+C        NFPC   - number of characters beyond decimal point 
+C        NDATC  - number of characters in date part of time field 
+C        ICH    - scan character
+C        ICHX   - place-keeping scan character
+C        NSCAN  - number of char scanned so far 
+C        ICHM   - month scan character
+C        ICHD   - day scan character
+C        IHR    - hours 
+C        IMIN   - minutes 
+C        ISEC   - seconds 
+C        IFSEC  - fractional seconds
+C        IHSEC  - hundredths of seconds 
+C        IYR    - year
+C        IMON   - month 
+C        IDAY   - day 
+      DIMENSION NDAYS(12) 
+C               - number of days in year at beginning of each month 
+      DIMENSION ISUF(6) 
+C               - suffixes to be scanned for
+      DIMENSION IFLD(3) 
+C               - H,M,S fields
+      DIMENSION FRAC(3) 
+C               - possible fractional part of H,M,S 
+      DIMENSION ICT(6)
+C                   -CURRENT TIME (FROM EXEC(11)) 
+C 
+      EQUIVALENCE (ICT(5),IDACUR),(ICT(6),IYRCUR) 
+C 
+C 4.  CONSTANTS USED
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA NDAYS/0,31,59,90,120,151,181,212,243,273,304,334/
+      DATA ISUF/2H Y,2H M,2H D,2H H,2H M,2H S/
+C---------------------- TEMPORARY FIX---------------------
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED: CREATED 781204 
+C# LAST COMPC'ED  870115:04:21 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. Initialize.  Check last character: if numeric, we have 
+C     the fully numeric format, otherwise suffixes. 
+C 
+      CALL EXEC(11,ICT(1),ICT(6)) 
+      IT1 = 0 
+      IT2 = 0 
+      IT3 = 0 
+      IYR = 0 
+      IMON = 0
+      IDAY = 0
+      DO 100 I=1,3
+        IFLD(I) = 0 
+        FRAC(I) = 0.0 
+100     CONTINUE
+      IERR = 0
+      LEC = ICHAR(IAS,IEC)
+      ILEN = IEC-IFC+1
+      IF (ICHAR(IAS,IFC).NE.41B) GOTO 190 
+      IT1 = -1
+C                   We have a ! so indicate NOW 
+      GOTO 999
+C 
+190   IF (LEC.LT.60B.OR.LEC.GT.71B) GOTO 500
+C 
+C     2. Fully numeric format.  Locate the
+C     decimal point, if any, and pull off seconds, minutes, then
+C     hours from the right. 
+C     General format is:
+C                   yymmddhhmmss.sss
+C                   \----/\----/\--/
+C                    date  time  fraction 
+C # chars each:      NDATC   6   NFPC 
+C 
+C 
+      ICD = ISCNC(IAS,IFC,IEC,56B)
+C                    Scan for decimal point 
+      IF (ICD.EQ.0) ICD = IEC + 1 
+      NFPC = IEC - ICD + 1
+C                   Number of digits past decimal point, INCL . 
+      NDATC = ILEN - (6+NFPC) 
+C                   Number of digits in date field
+      IF (NDATC.GE.0.AND.IMODE.EQ.0) GOTO 300 
+      IF (NDATC.EQ.0.AND.IMODE.EQ.1) GOTO 300 
+C                   If we want both date and time (IMODE=0) go on.
+      IF (NDATC.LT.0               ) IERR=-5
+      IF (NDATC.GT.0.AND.IMODE.EQ.1) IERR=-9
+      GOTO 999
+C 
+C 
+C     3.  Decode H, M, S now.  Start from decimal point and 
+C     proceed to the left.
+C 
+300   IFSEC = 0 
+      IF (NFPC.GT.0) IFSEC = IAS2B(IAS,ICD+1,NFPC-1)
+      IHSEC = IFSEC*10**(3-NFPC)
+C                   Hundredths of sec = (fraction/10^nfp-1)*10^2
+      ISEC = IAS2B(IAS,ICD-2,2) 
+      IMIN = IAS2B(IAS,ICD-4,2) 
+      IHR  = IAS2B(IAS,ICD-6,2) 
+      GOTO 400
+C 
+C 
+C     4. Date field section.  Handle according to:
+C     NDATC = 6 implies we have    yymmdd 
+C             5                    yyddd
+C             4                    mmdd (assume current year) 
+C           <=3                    ddd, dd or d (day number, assume 
+C                                               current year) 
+C 
+400   IF (NDATC.EQ.0) GOTO 600
+C 
+410   IF (NDATC.LT.5) GOTO 420
+C 
+C     4.1 Here we have the year specified.
+C 
+      IYR = IAS2B(IAS,IFC,2)
+      IF (NDATC.EQ.6) IMON = IAS2B(IAS,IFC+2,2) 
+      IF (NDATC.EQ.6) IDAY = IAS2B(IAS,IFC+4,2) 
+      IF (NDATC.EQ.5) IDAY = IAS2B(IAS,IFC+2,3) 
+      GOTO 600
+C 
+C     4.2 Here we have no year. 
+C 
+420   IF (NDATC.EQ.4) IMON = IAS2B(IAS,IFC,2) 
+      IF (NDATC.EQ.4) IDAY = IAS2B(IAS,IFC+2,2) 
+      IF (NDATC.LE.3) IDAY = IAS2B(IAS,IFC,NDATC) 
+      GOTO 600
+C 
+C 
+C     5. Alternate format time, with suffixes.
+C 
+500   NSCAN = 0 
+      ICHX = IFC-1
+      ICH = ISCNC(IAS,IFC,IEC,ISUF(1))
+      IF (ICH.EQ.0) GOTO 510
+      IF (ICH.NE.IFC+2) GOTO 590
+C                   The "Y" must be the third character (first field) 
+      IYR = IAS2B(IAS,IFC,2)
+      NSCAN = NSCAN + ICH - ICHX
+      ICHX = ICH
+510   ICHD = ISCNC(IAS,ICHX+1,IEC,ISUF(3))
+      IF (ICHD.EQ.0) GOTO 520 
+      ICHM = ISCNC(IAS,ICHX+1,IEC,ISUF(2))
+      IF (ICHM.GT.ICHD.OR.ICHM.EQ.0) GOTO 515 
+      IMON = IAS2B(IAS,ICHX+1,ICHM-ICHX-1)
+      NSCAN = NSCAN + ICHM - ICHX 
+      IDAY = IAS2B(IAS,ICHM+1,ICHD-ICHM-1)
+      NSCAN = NSCAN + ICHD - ICHM 
+      GOTO 519
+515   IDAY = IAS2B(IAS,ICHX+1,ICHD-ICHX-1)
+      NSCAN = NSCAN + ICHD - ICHX 
+519   ICHX = ICHD 
+520   DO 530 I=1,3
+        ICH = ISCNC(IAS,ICHX+1,IEC,ISUF(I+3)) 
+        IF (ICH.EQ.0) GOTO 530
+        IFLD(I) = NUMSC(IAS,ICHX+1,ICH-1,FRAC(I)) 
+        NSCAN = NSCAN + ICH - ICHX
+        ICHX = ICH
+        IF (FRAC(I).NE.0.OR.ICHX.EQ.IEC) GOTO 540 
+530     CONTINUE
+540   IF (NSCAN.NE.IEC-IFC+1) GOTO 590
+550   IHR = IFLD(1) 
+      IFRAC = INT(FRAC(1)*60.0) 
+C                   Minutes in the fractional part of hour
+      IMIN = IFLD(2) + IFRAC
+      FRAC(2) = FRAC(2) + (FRAC(1)*60.0 - IFRAC)
+      IFRAC = INT(FRAC(2)*60.0) 
+C                   Seconds in the fractional part of minutes 
+      ISEC = IFLD(3) + IFRAC
+      FRAC(3) = FRAC(3) + (FRAC(2)*60.0 - IFRAC)
+      IHSEC = FRAC(3)*100.0 
+C 
+      GOTO 600
+C 
+590   IERR = -8 
+      GOTO 999
+C 
+C 
+C     6. Check range for H,M,S.  Set up current values for year and 
+C     month if not specified.  Check range for Y,M,D. 
+C     If all is OK, set up IT fields. 
+C 
+600   IF (IYR.EQ.0) IYR = IYRCUR
+      IF (IYR.LT.IYRCUR) GOTO 650 
+      IF (IDAY.EQ.0) IDAY = IDACUR
+      IF (IMON.LT.0.OR.IMON.GT.12) GOTO 650 
+      IF (IDAY.LT.0.OR.IDAY.GT.366) GOTO 650
+C 
+      IF (IHR.LT.0.OR.IHR.GT.23) GOTO 650 
+      IF (IMIN.LT.0.OR.IMIN.GT.59) GOTO 650 
+      IF (ISEC.LT.0.OR.ISEC.GT.59) GOTO 650 
+C 
+      IF (IMON.EQ.0) GOTO 610 
+      IDAY = IDAY + NDAYS(IMON) 
+C                   If month was specified, change to day of year 
+      IF (MOD(IYR,4).EQ.0.AND.IDAY.GT.59) IDAY = IDAY+1 
+C                   Leap year 
+C 
+610   IT1 = (IYR-1970)*1024 + IDAY
+      IT2 = IHR*60 + IMIN 
+      IT3 = ISEC*100 + IHSEC
+C 
+      GOTO 999
+C 
+650   IERR = -7 
+      GOTO 999
+C 
+999   RETURN
+      END 

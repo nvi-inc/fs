@@ -1,0 +1,35 @@
+FTN4
+C@QRPCL 
+C 
+      PROGRAM QRPCL,5 
+C 
+C     QRPCL 
+C 
+C 1.1.   QRPCL is the segment of QUIKR dealing with the PHASE CAL SYSTEM
+C 
+C 
+C     CALLED SUBROUTINES: PCALC     
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C        ISUB   - "subroutine number" sent via LINQ package 
+C 
+C 6.  PROGRAMMER: nrv 
+C     CREATED: 19820309         
+C# LAST COMPC'ED  870115:04:32 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C 
+      CALL LINQB(ISUB)
+      GOTO (100,200,300) ISUB 
+100   CALL LINQC
+      CALL PCALC(IP)
+      CALL LINQD
+200   CALL LINQC
+      CALL LOSET(IP)
+      CALL LINQD
+300   CALL LINQC
+      CALL PATCH(IP)
+      CALL LINQD
+      END 

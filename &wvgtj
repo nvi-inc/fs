@@ -1,0 +1,32 @@
+FTN4,X
+C@WVGTM 
+      SUBROUTINE WVGTM(IBUF,ICLASS, 
+     .NREC),GET WVR TEMPS (JPL) C#870115:04:49# 
+C 
+C     WVGTM formats the command to get sub-mux temps from the JPL radiometers.
+C 
+C  COMMON:
+      INCLUDE #FSCOM::FS
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF(1) 
+C      - buffer to put the command in.
+C 
+C  OUTPUT:
+C 
+C     ICLASS,NREC - class, #records for MATCN 
+C 
+C 
+C     1. The command to get the sub-mux data for the JPL radiometers is:
+C              D 3
+C 
+      IBUF(1) = 0 
+      IBUF(2) = 2HWV
+      CALL ICHMV(IBUF,5,4H D 3,1,4) 
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-8,2HFS,0,ICLASS) 
+      NREC = 1
+C 
+      RETURN
+      END 

@@ -1,0 +1,39 @@
+ASMB,L
+      HED <BIT SHIFTER  ARW 771229> RENAME TO ISHFT BRS 810616
+      NAM ISHFT,7 Left/right bit shifter (old ISHFT) ARW 771229 
+      ENT ISHFT 
+      EXT .ENTR 
+* 
+* FUNCTION TO SHIFT BITS WITHIN A 16-BIT WORD 
+* 
+* K=ISHFT(M,N) WILL SHIFT THE CONTENTS OF M BY N BITS (-LEFT,+RIGHT)
+*              AND SET THE RESULT INTO K  (-16<=N<=16). 
+*              BITS SHIFTED OFF EITHER END OF M ARE LOST. 
+* 
+M     BSS 1 
+N     BSS 1 
+ISHFT  NOP
+      JSB .ENTR 
+      DEF M 
+      LDA M,I 
+      LDB N,I 
+      SZB,RSS       N=0?
+      JMP ISHFT,I     YES. RETURN 
+      LDA RRL       SET (A)="RRL 16"
+      SSB,RSS       N<0?
+      IOR =B1000     NO. CONSTRUCT "RRR 16" INSTRUCTION.
+      STA R1         YES. 
+      LDA N,I 
+      SSA           N<0?
+      CMA,INA        YES. CHANGE SIGN.
+      AND =B17
+      IOR R1
+      STA R1
+      LDA M,I 
+      CLB 
+R1    NOP 
+      JMP ISHFT,I 
+RRL   RRL 16
+A     EQU 0 
+B     EQU 1 
+      END 

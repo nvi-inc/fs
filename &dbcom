@@ -1,0 +1,139 @@
+FTN4,X
+C@DBCOM 
+      SUBROUTINE DBCOM(LUOP,LUDB,IBUGPC,IBUF,NCHAR,IDATA,ILOG,IERR, 
+     .IBLK,ISTAT,ID,KDBTST,IDCB)
+     .,DATA BUFFER COMMUNICATIONS C#881130:20:44# 
+C 
+C     This routine handles the communications with the
+C     Mark III data buffer or the terminal or data file 
+C     as appropriate.  If there is an error in communications 
+C     with the data buffer (either wrong length record or incorrect 
+C     checksum) a total of NLOOPT attempts at comms are made
+C     before giving up. 
+C 
+C  INPUT: 
+C 
+C     LUOP - LU for debug output
+C     LUDB - LU of data buffer
+      DIMENSION IBUF(1) 
+C      - buffer holding command to be sent to data buffer 
+C     NCHAR - number of characters in the command in IBUF 
+      DIMENSION IDATA(1)
+C      - data returned from data buffer 
+      DIMENSION IDCB(1) 
+C      - DCB for data file
+      LOGICAL KDBTST
+C     KDBTST - true if we have a real data buffer 
+C 
+C 
+C  OUTPUT:
+C 
+C     IERR - error return, 0=OK 
+C     IBLK - block number pointer 
+C     ISTAT - data buffer status
+C     ID - data buffer ID word
+C 
+C 
+C     LOCAL:
+C 
+C     ILENB - expected length of response from data buffer
+C     NCH - character counter 
+      DIMENSION IREG(2) 
+C     ILOG - actual length of response from data buffer 
+C     ICHEK, JCHEK - checksum characters
+      EQUIVALENCE (IREG(1),REG) 
+      DATA NLOOPT/5/
+C     NLOOPT - max number of times to try and get correct response
+C              from data buffer.
+C 
+C  INITIALIZED: 
+C 
+C 
+C 
+C     1. Figure out how many characters we expect to get back.
+C     Then write the command to the data buffer.
+C     Read back its response. 
+C 
+C CHANGE PRIORITY TO PREVENT COMMUNICATION PROBLEMS 
+C 
+      IPR=IPRTY(900)  
+C 
+      NLOOP = 0 
+      IL = 260
+      ILENB = 5 
+      IF (ICHAR(IBUF,1).EQ.77B) ILENB = 517 
+C 
+      NCH = ICHMV(IBUF,NCHAR+1,2H_ ,1,1)-1
+C                   Suppress CRLF on transmission 
+99    IF (KDBTST) CALL EXEC(2,LUDB,IBUF,-NCH) 
+      IERR = 0
+      CALL IFILL(IDATA,1,520,40B) 
+      NLOOP = NLOOP+1 
+C                   Send the command to data buffer or terminal 
+C 
+C*************FOR THE REAL DATA BUFFER USE 3100B+LU****************** 
+C*************FOR TERMINAL TESTING     USE  400B+LU****************** 
+      IF (KDBTST) REG = EXEC(1,3100B+LUDB,IDATA,-ILENB) 
+C 
+C     IF (KTERM) REG = EXEC(1, 400B+LUDB,IDATA,-ILENB)
+C                   Issue binary read, buffer mode
+      IF (KDBTST) GOTO 100
+      CALL READF(IDCB,IERR,IDATA,IL,IR) 
+      ILOG = 0
+      IF (IR.EQ.-1) ILOG = -1 
+      IREG(2) = IFLCH(IDATA,520)
+      L = IH22A(ICHAR(IDATA,516)) 
+9500  FORMAT(" L,IREG(2),IR = "A2","I4","I4)
+      IF (IBUGPC.GT.2) WRITE(LUOP,9509) (IDATA(248+K),K=1,10) 
+9509  FORMAT("LAST 10 WORDS IDATA = "10(O7,2X)) 
+      IF (IREG(2).EQ.515.AND.L.EQ.2H20) IREG(2)=516 
+      IF (IERR.EQ.0.AND.ILOG.NE.-1) GOTO 100
+      IF (IERR.NE.0) WRITE(LUOP,9120) IERR
+      IF (ILOG.EQ.-1) WRITE(LUOP,9220)
+9220  FORMAT(" EOF in data file, quitting") 
+9120  FORMAT(" ERROR "I5" READING FROM DATA FILE")
+      GOTO 990
+C 
+100   ILOG = IREG(2)
+C 
+      IF (IBUGPC.LT.2) GOTO 300 
+      WRITE(LUOP,9110)
+9110  FORMAT("RAW RECEIVED DATA"/)
+      DO 200 I=1,ILOG 
+      L = ICHAR(IDATA,I)
+C***FOR DATA BUFFER, CONVERT FROM HEX BITS TO ASCII FOR PRINTING
+C     LA = IHX2A(L) 
+      L = IH22A(L)
+      WRITE(LUOP,9100) L
+ 9100 FORMAT(A2" _")
+C***FOR TERMINAL TESTS, CONVERT ASCII CHARACTERS TO HEX BITS NOW
+C     IF (KTERM) CALL ICHMV(IDATA,I,IA2HX(L,2),2,1) 
+200   CONTINUE
+C 
+C 
+C     2. Check all possible errors. 
+C 
+300   IERR = 0
+      IF (ILOG.NE.ILENB-1) IERR=-1
+      ICHEK = ICHAR(IDATA,ILOG) 
+      JCHEK = 0 
+      DO 301 I=1,ILOG-1 
+        JCHEK = IAND(JCHEK+ICHAR(IDATA,I),377B) 
+301     CONTINUE
+      IF (ICHEK.NE.JCHEK) IERR=-2 
+C 
+      IF (IERR.NE.0.AND.NLOOP.LT.NLOOPT) GOTO 99
+      IF (IERR.NE.0) GO TO 990
+C 
+      ISTAT = ICHAR(IDATA,1)
+      IBLK = ICHAR(IDATA,2) 
+      ID = ICHAR(IDATA,ILOG-1)
+C 
+990   CONTINUE
+C 
+C RETURN TO OLD PRIORITY
+C 
+      JPR=IPRTY(IPR)
+C 
+      RETURN
+      END 

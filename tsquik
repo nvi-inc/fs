@@ -1,0 +1,5 @@
+:RU,EDIT,TQUIKX::2G,SERE|1$g/QR.../QR###//|1$g:###:1G:/|er
+:RU,EDIT,TQUIKX::2G,SERE|1$g:{QR...}\:\:@:&1\:\:4G:/|er 
+:RU,EDIT,TQUIKX::2G,SERE|1$g:{UIKX}\:\:[^,]*:&1\:\:2G:/|er
+:RU,EDIT,^QUIKR::2G,K|$| QR|b/QR/|-1| |d:1G:q/|f/QR/|.$k/|er^QUIKX::2G
+:RU,EDIT,^QUIKX::2G,1$g:\5\G:2G:/|1$G:\7\G:3G:/|er

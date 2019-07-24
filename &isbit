@@ -1,0 +1,32 @@
+ASMB
+        HED     SET SPECIFIED BIT IN SPECIFIED WORD 
+        NAM     ISBIT,6 C#870227:18:36    SET BIT ON V=1.0# 
+        ENT     ISBIT 
+        EXT     .ENTR 
+IWRD    NOP                     WORD TO BE MANIPULATED/TESTED 
+IBIT    NOP                     PTR TO BIT TO BE ACCESSED 
+ISBIT   NOP                     ENTRY TO LOGICAL TEST OF BIT
+        JSB     .ENTR           GET PARM LIST AND RETURN SETUP
+        DEF     IWRD            TELL WHERE TOP OF PARM LIST IS
+        LDB     IBIT,I          GET BIT ADDRESS (IWORD*16+IBIT) 
+        CLA                     ZERO A REG FOR BIT SHUFFLING
+        RRR     4               MOVE LOWER 4 BITS TO B REG LEAVE UPPER 12 
+*                               IN A REG FOR NOW
+        ADB     IWRD            GET ADDRESS OF WORD BE REFERENCED 
+        STB     IADDR           SAVE ADDRESS TO ACCESS
+        SZA,RSS                 NO SHIFTING IF BIT ZERO WANTED
+        JMP     NSHFT           SKIP ON IF NO SHIFTING
+        ALF                     MOVE COUNT TO LOW BITS IN A REG 
+        ADA     MLSL            ADD IN LSR MASK 
+        STA     ILSL            PUT INTO INSTRUCTION STREAM 
+        CLA,INA                 SET BIT 0 ON FOR SKIFT
+ILSL    NOP                     THIS WILL BECOME AN LSR INSTRUCTION 
+        JMP     BITON           GO TO TURN ON BIT 
+NSHFT   CLA,INA                 SET BIT 0 ON
+BITON   IOR     IADDR,I         TURN BIT ON IN SOUGHT WORD
+        STA     IADDR,I         RESTORE WORD NOW RESET
+        JMP     ISBIT,I         RETURN TO USER
+MLSL    OCT     100040          DUMMY LSR MASK FOR MODIFYING CODE 
+IADDR   DEF     0               ADDRESS OF WORD TO BE ACTED ON
+        END 
+        END$

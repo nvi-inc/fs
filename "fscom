@@ -1,0 +1,193 @@
+C     FIELD SYSTEM BG COMMON CONTENTS 
+C     LAST UPDATED 830810 FOR VERSION 4.3 
+C 
+C 
+C     Common contains the requested settings for settable parameters
+C     and other useful information. 
+C     Monitor-only parameters are also retained in common 
+C     for the benefit of the monitor program. 
+C     Whenever the monitor values are read from the device they 
+C     are stored in common. 
+C     The monitor-only quantities are marked with a  *  in the comments.
+C     Settable parameters are indicated with a  +  below. 
+C     Unmarked variables are not accessible directly via SNAP commands. 
+C     Program TYCOM can be used to display the entire common block. 
+C 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C 
+C Function      Variable  Word  Units  Description
+C name          name      type
+C ------------  --------  ----  -----  -----------------------------------
+C 
+C   ---         NAMQR     8*INT   -    Current entry for QR segment 
+C   ---         LUMAT     INT     -    LU for MATs
+C   ---         LUIB      INT     -    LU for HPIB
+C   ---         LU        INT     -    LU of operator terminal
+C   ---         ICLBOX    INT     -    class I/O box for LOGIT/DDOUT
+C   ---         LUDB      INT     -    LU of data buffer
+C RESET         IBMAT     INT    bps    MAT baud rate 
+C               IBDB      INT    bps    data buffer baud rate 
+C   ---         FSVER     REAL    -    Field System software version
+C   ---         ICRLOG    INT     -    cartridge for log files
+C   ---         LLOG      INT     -    log file name, last two characters 
+C   ---         LTSRS    5*INT    -    "TEST/RESET" 
+C   ---         ILENTS    INT     -    # chars in LTSRS 
+C   ---         LALRM    3*INT    -    "ALARM " 
+C   ---         ILENAL    INT     -    # chars in LALRM 
+C   ---         PI        REAL    -    PI 
+C   ---         IYEAR     INT   years  current year, e.g. 1980
+C TODAY         ITODAY    INT   days   today's UT date, day of year 
+C UT and NOW    IUT1      INT   min    current UT time, minutes part
+C               IUT2      INT   hsec   current UT time, seconds*100 
+C LST           TLST      REAL  rad    current local sidereal time
+C HA            HA        REAL  rad    local hour angle of current source 
+C SOURCE        LSORNA    5*INT  -     current source name
+C RADEC         RADAT     REAL  rad    precessed RA of current source 
+C               DECDAT    REAL   rad    precessed DEC of current source 
+C               EPOCH     REAL   years  epoch of above position 
+C AZEL          AZIM      REAL   rad    azimuth calculated from RA,DEC
+C               ELEV      REAL   rad    elevation calculated from RA,DEC
+C RADEC50       RA50      REAL   rad    input right ascension 
+C               DEC50     REAL   rad    input declination 
+C               EP1950    REAL   year   epoch of input position 
+C ONSOURCE      IONSOR    INT     -     on-source indicator 
+C RADECOFF      RAOFF     REAL   rad    offset from RADAT 
+C               DECOFF    REAL   rad    offset from DECDAT
+C AZELOFF       AZOFF     REAL   rad    offset from AZIM
+C               ELOFF     REAL   rad    offset from ELEV
+C XYOFF         XOFF      REAL   rad    offset from X coordinate
+C               YOFF      REAL   rad    offset from Y coordinate
+C VCn           LFREQV  15*3*INT char   video converter frequency, decimal
+C                                       point implied between words 2 and 3 
+C               IBWVC   15*INT    -     video converter bandwidth code
+C               ITPIVC  15*INT    -     TPI selection code
+C               IATUVC  15*INT   db     first attenuator
+C               IATLVC  15*INT   db     second attenuator 
+C*              IREMVC  15*INT    -     remote code 
+C*              ILOKVC  15*INT    -     LO locked code
+C*              TPIVC   14*REAL   -     TPI reading, decimal
+C IFDIST        IAT1IF    INT    db     first attenuator
+C               IAT2IF    INT    db     second attenuator 
+C               INP1IF    INT     -     first input code
+C               INP2IF    INT     -     second input code 
+C*              IREMIF    INT     -     remote code 
+C*              TP1IFD    REAL    -     TP1 reading, decimal
+C*              TP2IFD    REAL    -     TP2 reading, decimal
+C FORM          INPFM     INT     -     input code
+C               IMODFM    INT     -     mode code 
+C               IRATFM    INT     -     sample rate code
+C               ISYNFM    INT     -     synch test selection code 
+C               LAUXFM   6*INT   -     auxill data, ASCII chars 
+C*              ITSTFM   INT     -     synch test pass/fail code
+C*              ISGNFM   INT     -     synch edge sign code 
+C*              IREMFM   INT     -     remote code
+C*              IPWRFM   INT     -     power OK/fail
+C*              IRUNFM   INT     -     run/set code 
+C DECODER       ICHAND   INT     -     channel number code
+C               IMODDC   INT     -     data request mode
+C*              LDATDC   6*INT  char   data returned
+C TAPE          ISPEED   INT     -     speed code 
+C               IDIRTP   INT     -     direction code 
+C               ILOWTP   INT     -     low tape sensor
+C               IRSTTP   INT     -     feet for resetting footage counter 
+C               ITRKEN  28*INT  trk    enabled tracks (1 ena, 0 dis)
+C               IENATP   INT     -     general enable/disable 
+C               ITRAKA   INT    trk    first reproduce track
+C               ITRAKB   INT    trk    second reproduce track 
+C               IBWTAP   INT     -     bandwidth code for reproduce 
+C               IEQTAP   INT     -     equalizer code for reproduce 
+C               IBYPAS   INT     -     bypass mode code 
+C*              LFEET   2*INT    -     footage counter, ASCII characters
+C*              IFASTP   INT     -     fast speed code
+C*              ICAPTP   INT     -     capstan stopped/moving 
+C*              ISTPTP   INT     -     stop command issued
+C*              ITACTP   INT     -     tach locked/unlocked 
+C*              IRDYTP   INT     -     vacuum ready/not ready 
+C*              IREMTP   INT     -     remote/local 
+C CAL           LSWCAL   INT     -     cal on/off 
+C CALTEMP       CALXXX   REAL    K     OBSOLETE 
+C               CALTMP  2*REAL   K     cal signal temperature 
+C BEAMSW        LSWBM    INT     -     beam switch on/off 
+C POL           LSWPOL   INT     -     feed polarization switch 
+C ANTENNA       LNAANT   4*INT   -     antenna name, ASCII
+C               ALAT     REAL   rad    antenna latitude 
+C               WLONG    REAL   rad    antenna longitude (west) 
+C               DIAMAN   REAL    m     antenna diameter 
+C*CABLE         CABLEV   REAL   nsec   cable cal value
+C*WX            TEMPWX   REAL    C     measured surface temp
+C*              HUMIWX   REAL    %     humidity 
+C*              PRESWX   REAL   mbar   surface pressure 
+C XLOG          KXLOG   LOGICAL   -    extended logging of commands 
+C XDISP         KXDISP  LOGICAL   -    extended display of commands 
+C ECHO          KECHO   LOGICAL   -    echo communications on terminal
+C               TPSOR  30*REAL   -     total power, on source 
+C TSYS          SYSTMP 30*REAL   K     system temperatures
+C               TPSPC  30*REAL   -     total power, source + cal
+C               TPOFF    REAL    K     total power, off source
+C               TPZERO 30*REAL   -     total power integrator zeros 
+C               TPOPC    REAL    K     total power, off + cal 
+C             **NOTE** All of the total power and system temperature
+C             arrays contain LSB, USB, IF1 and IF2 values in the
+C             following order:
+C                locations 1-14:  LSB for VCs 1-14
+C                locations 14-28: USB for VCs 1-14
+C                locations 29,30: IF1, IF2
+C               IMONDS    INT    -     which display MONIT is using 
+C  ---          KCHECK  LOGICAL  -     OBSOLETE 
+C  ---          ICLOPR    INT    -     class number input to BOSS from operator 
+C  ---          INEXT    3*INT  h,m,s  next time BOSS will awaken 
+C HALT/CONT     KHALT   LOGICAL  -     state of schedule BOSS is using
+C LABEL         LTPNUM   4*INT  char   tape number, 8 characters
+C               LTPCHK   2*INT  char   tape check label, 4 characters 
+C  ---          LTRKEN   4*INT   -     enabled tracks ready for MATs
+C  ---          LUANT     INT    -     LU of the antenna interface
+C NOCHECK       ICHECK  18*INT   -     status of modules for CHEKR program
+C  ---          ICRPRC    INT    -     cartridge for schedules&procedures 
+C PERR          INSPER    INT    -     # samples for parity errors
+C               TPERER   REAL   sec    time between samples 
+C               ICHPER    INT    -     channel for decoder
+C               ITRPER    INT  track   which track to decode
+C               IMODPE    INT    -     playback or record mode
+C SCHEDULE      LSKD      INT  char    schedule file name, last 2 char
+C               LUWVR     INT    -     LU for water vapor radiometer
+C               AZIMWV   REAL   deg    commanded az for WVR 
+C               ELEVWV   REAL   deg    commanded el for WVR 
+C               WVMX10   REAL    -     pointing constant read from MUX(10)
+C               WVMX13   REAL    -     pointing constant read from MUX(13)
+C               AZCMWV   REAL   deg    commanded azimuth
+C               ELCMWV   REAL   deg    commanded elevation
+C               AZC1WV   REAL    -     az pointing constant 
+C               AZC2WV   REAL    -     az pointing constant 
+C               ELC1WV   REAL    -     el pointing constant 
+C               ELC2WV   REAL    -     el pointing constant 
+C               AZOFWV   REAL   deg    az offset
+C               ELOFWV   REAL   deg    el offset
+C               DEADWV  2*REAL  deg    lower,upper ends of dead zone
+C               VHOTWV  2*REAL   -     hot load, arbitrary units
+C               VBASWV  2*REAL   -     base load, arbitrary units 
+C               VANTWV  2*REAL   -     antenna, arbitrary units 
+C               THOTWV  2*REAL   K     hot load temperature 
+C               TBASWV  2*REAL   K     base load temperature
+C               TANTWV  2*REAL   K     antenna temperature
+C               PATHWV   REAL   cm     wet path delay 
+C               AZHMWV  10*REAL deg    az for horizon mask
+C               ELHMWV  10*REAL deg    el for horizon mask
+C               NHORWV   REAL    -     number of entries in horizon mask
+C               IDWVR    INT     -     radiometer serial number (1-9) 
+C               RFFREQ   REAL   MHz    approx. freq. of experiment
+C               LUFLOP   INT     -     LU for floppy drive
+C               IRNPRC   INT     -     Resource number for BOSS/PFMED 
+C               LPRC     INT    char   Station proc library name
+C               LNEWPR   INT    char   Pending station library edited in PFMED
+C               LNEWSK   INT    char   Pending schedule library edited in PFMED 
+C TAPEPOS       IFTGO    INT    feet   Last commanded tape position 
+C               IACFTP   INT    feet   Feet used to accel. to speed 
+C               IACTTP   REAL   sec    Time used to accel. to speed 
+C               ICALRX   INT     -     cal control (0=nor,1=override) 
+C HEAT          IDCHRX   INT     -     Delay cal heater (0=off,1=on)
+C               IBXHRX   INT     -     Box heater (0=off,1=Aon,-1=Bon)
+C IFAMP         IFAMRX  3*INT    -     IF amps on(1)/off(0) for S,X,K 
+C RX            IADCRX   INT    hex    A/D channel address
+C*              VADCRX   REAL   var.   A/D reading (volts, temp, amps)

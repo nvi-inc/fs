@@ -1,0 +1,590 @@
+FTN4
+      PROGRAM TEST
+C 
+C     THIS FILE CONTAINS A TEST PROGRAM AND SOURCE FILES FOR 10 ROUTINES: 
+C 
+C     WEATH--GET VALUE OF TEMP, PRES, DEWPT, AND SKY CONDITIONS 
+C     AEERR--GET VALUE OF AZIMUTH AND ELEVATION POINTING ERRORS 
+C     CALON--TURN ON CAL TUBE 
+C     CALOF--TURN OFF CAL TUBE
+C     BSON--TURN ON BEAM SWITCH 
+C     BSOFF--TURN OFF BEAM SWITCH 
+C     SORCE--(ENTRY IN MASTR) CHANGE SOURCE ID AND COORDINATES
+C     OFSET--(ENTRY IN MASTR) ENTER OFFSET IN AZ, EL, RA, AND/OR DEC
+C     WAKUP--ALERT OPERATOR WITH VIDEO DISPLAY AND SONALERT ALARMS
+C     SLEEP--RESTORE VIDEO DISPLAY TO NORMAL STATUS 
+C     WHERE--RETURNS AZIMUTH AND ELEVATION COMMAND FOR HAYSTACK 
+C 
+C     WRITTEN AT HAYSTACK DURING THE SEIGE OF THE AMERICAN EMBASSY IN 
+C     IRAN, 1979.               BGL 
+C     ADDITION OF AEERR ROUTINE, 25 FEB 1979.  THE HOSTAGES ARE STILL 
+C     BEING HELD, BUT THE USA JUST WON THE OLYMPIC GOLD MEDAL IN HOCKEY.
+C       ADDITION OF "SLEEP" ROUTINE, 25 JULY 1980.  THEY RELEASED ONE OF
+C     THE HOSTAGES, WHO HAD MULTIPLE SCLEROSIS.  THE USA DIDN'T GO TO 
+C     THE SUMMER OLYMPICS IN MOSCOW BECAUSE THE RUSSIANS INVADED
+C     AFGHANASTAN, BUT GYMNAST NADIA COMINICH FELL ON HER NICELY CONTOURED
+C     ROMANIAN POSTERIOR AND MISSED THE GOLD MEDAL. 
+C 
+C     ADDITION OF OVERLAP ENABLE COMMANDS TO THE "SORCE" ROUTINE, 8 OCT 1980. 
+C     BELEIVE IT OR NOT, THE HOSTAGES ARE STILL THERE, AND IRAN IS AT 
+C     WAR WITH IRAQ.
+C 
+C     29 JANUARY 1980 -- CHANGE THE "CALON" AND "CALOF" ROUTINES TO 
+C     INTERACT THROUGH THE "MASTR/SLAVE" ROUTINES SO THAT THE CORRECT 
+C     CAL TUBE CAN BE UTILIZED. 
+C          THE HOSTAGES WERE FINALLY RELEASED ON JANUARY 20, 1981, AFTER
+C     444 DAYS OF CAPTIVITY.  THIS WAS INAUGURATION DAY FOR RONNY REAGAN, 
+C     WHOSE VICTORY IN PART WAS ATTRIBUTED TO JIMMY CARTER'S INEPT HANDLING 
+C     OF THE ENTIRE SITUATION.
+C 
+C     11 FEBRUARY 1981 -- CHANGED THE "AEERR" ROUTINES TO INTERACT
+C     THROUGH THE "SLAVE" PROGRAM.  THIS ALLOWS EITHER THE HAYSTACK OR
+C     MILLSTONE 150 FT. ERRORS TO BE RETURNED.
+C          AN AMERICAN JOURNALIST ALSO HELD IN IRAN AS A "SPY" WAS RELEASED 
+C     YESTERDAY AFTER 9 MONTHS.  IN HER FIRST PHONE CALL, SHE ASKED HER 
+C     HUSBAND IF HE'D GOTTEN THE DISHWASHER FIXED YET.
+C          HE HADN'T. 
+C 
+C     9 JUNE 1981 -- ADDED SUBROUTINE "WHERE" TO RETURN AZ AND EL FOR 
+C     HAYSTACK.  AS WRITTEN, THIS ONLY WORKS FOR HAYSTACK, NOT THE
+C     MILLSTONE 150 FT. 
+C          LAST NIGHT ISRAEL BOMBED AN ALMOST-COMPLETED NUCLEAR POWER 
+C     PLANT IN IRAQ, SPEAKING ARABIC SO THE SAUDIS WOULD THINK THAT IT
+C     WAS JORDANIANS FLYING OVER.  IRAQ, BY THE WAY, IS STILL OFFICIALLY
+C     AT WAR WITH IRAN. 
+C 
+C     26 APRIL 1982 -- MODIFIED THE ROUTINES THAT CALL THE "SLAVE"
+C     PROGRAM TO ALERT THE OPERATOR IN CASE THERE IS NO I.D. SEGMENT FOR
+C     "SLAVE" INSTEAD OF CRASHING THE PROGRAM.
+C     LET'S SEE.  ISRAEL GAVE THE SINAI BACK TO EGYPT.  IRAQ IS STILL 
+C     OFFICIALLY AT WAR WITH IRAN.  BEST OF ALL, MAGGIE THATCHER'S FLYING 
+C     CIRCUS IS ABOUT TO GO TO WAR WITH ARGENTINA TO RESTORE THE
+C     BRITISH FLAG TO THE FALKLAND ISLANDS.  THE FALKLANDS ARE A DESOLATE 
+C     BUNCH OF SUB-ANTARCTIC ROCKS WITH LOUSY WEATHER SUITABLE ONLY 
+C     FOR RAISING SHEEP.  THE SCOTSMEN WHO LIVE THERE THINK IT'S JUST 
+C     LIKE HOME.
+C 
+C     6 APRIL 1983 -- CHANGED THE FIELD SYSTEM OFFSET FOR HAYSTACK
+C     FROM 600 TO 750 WORDS TO REFLECT THE LARGER SIZE OF COMMON BEING
+C     USED BY THE POINTING SYSTEM.
+C         THE BRITISH WON THEIR WAR, LARGELY (ACCORDING TO A U.S. NAVY
+C     POST-MORTEM) BECAUSE THE WW-II SURPLUS BOMBS THE U.S. GAVE
+C     ARGENTINA FAILED TO EXPLODE.  ONE OF THESE DEADWEIGHTS FELL ALL THE 
+C     WAY THROUGH DECKS AND HULL OF A BRITISH SHIP, CAUSING CONSIDERABLE
+C     DAMAGE FROM ITS MOMENTUM ALONE.  ISRAEL IS NOW OCCUPYING LEBANON
+C     TO KEEP OUT THE PALESTINIANS, IRAN AND IRAQ ARE STILL AT WAR, AND 
+C     THE BOSTON BRUINS FINISHED THE REGULAR SEASON WITH THE BEST OVERALL 
+C     RECORD. 
+C 
+C     12 OCTOBER 1983 -- ADDED THE "SATEL" ENTRY FOR SATELLITES TO
+C     THE "MASTR" SUBROUTINE.  IRAQ IS STILL OFFICIALLY AT WAR WITH 
+C     IRAN.  BRITAIN BEAT ARGENTINA.  AUSTRALIA BEAT THE U.S. IN THE
+C     AMERICA'S CUP YACHT RACE.  THE ISLANDERS BEAT THE BRUINS.  MENACHEM 
+C     BEGIN AND JAMES WATT, TWO OF MY PERSONAL FAVORITE SHARK BAITS, BOTH 
+C     RESIGNED. 
+C 
+      DIMENSION IPAR(5) 
+C 
+      CALL RMPAR(IPAR)
+      LUT=IPAR(1) 
+C 
+      WRITE(LUT,1000) 
+1000  FORMAT(/,"TESTING WEATHER ROUTINE") 
+      CALL WEATH(TEMP,PRES,DEWPT,ICOND) 
+      WRITE(LUT,1001) TEMP,PRES,DEWPT,ICOND 
+1001  FORMAT("TEMP,PRES,DEWPT,ICOND:",3F7.1,I3) 
+      CALL SUSP(2,2)
+      WRITE(LUT,1007) 
+1007  FORMAT(/,"TESTING AZ/EL ERROR ROUTINE") 
+      CALL AEERR(AZERR,ELERR) 
+      WRITE(LUT,1008) AZERR,ELERR 
+1008  FORMAT("AZERR,ELERR:",2F9.3)
+      CALL SUSP(2,2)
+      WRITE(LUT,1002) 
+1002  FORMAT("CAL TUBE ON......_")
+      CALL CALON
+      CALL SUSP(2,5)
+      WRITE(LUT,1003) 
+1003  FORMAT("CAL TUBE OFF")
+      CALL CALOF
+      CALL SUSP(2,2)
+      WRITE(LUT,1004) 
+1004  FORMAT("BEAM SWITCH ON......_") 
+      CALL BSON 
+      CALL SUSP(2,5)
+      WRITE(LUT,1005) 
+1005  FORMAT("BEAM SWITCH OFF") 
+      CALL BSOFF
+      CALL SUSP(2,2)
+      WRITE(LUT,1009) 
+1009  FORMAT(/,"TESTING OPERATOR ALERT ROUTINE")
+      CALL WAKUP
+      CALL SUSP(2,5)
+      WRITE(LUT,1010) 
+1010  FORMAT(/,"TESTING VIDEO RESTORE ROUTINE") 
+      CALL SLEEP
+      CALL SUSP(2,2)
+      WRITE(LUT,1011) 
+1011  FORMAT(/,"TESTING AZ-EL RETURN ROUTINE")
+      CALL WHERE(AZ,EL) 
+      WRITE(LUT,1012) AZ,EL 
+1012  FORMAT("  AZIMUTH = ",F9.3,"      ELEVATION = ",F9.3) 
+      CALL SUSP(2,2)
+      WRITE(LUT,1006) 
+1006  FORMAT(//,"TEST COMPLETED",//)
+      END 
+C     SUBROUTINE CALON
+C 
+C     THIS ROUTINE TURNS ON THE CAL TUBE WITH A MOMENTARY (100 MS)
+C     CONTACT ON RELAY 0
+C 
+C     CALL RELAY(IRELAY,0,1)
+C     CALL SUSP(1,10) 
+C     CALL RELAY(IRELAY,0,-1) 
+C     END 
+C     SUBROUTINE CALOF
+C 
+C     THIS ROUTINE TURNS OFF THE CAL TUBE WITH A MOMENTARY (100MS)
+C     CONTACT ON RELAY 1
+C 
+C     CALL RELAY(IRELAY,1,1)
+C     CALL SUSP(1,10) 
+C     CALL RELAY(IRELAY,1,-1) 
+C     END 
+      SUBROUTINE BSON 
+C 
+C     THIS ROUTINE TURNS ON THE BEAM SWITCH WITH A MOMENTARY (100 MS) 
+C     CONTACT ON RELAY 14 
+C 
+      CALL RELAY(IRELAY,14,1) 
+      CALL SUSP(1,10) 
+      CALL RELAY(IRELAY,14,-1)
+      END 
+      SUBROUTINE BSOFF
+C 
+C     THIS ROUTINE TURNS OFF THE BEAM SWITCH WITH A MOMENTARY (100 MS)
+C     CONTACT ON RELAY 13 
+C 
+      CALL RELAY(IRELAY,13,1) 
+      CALL SUSP(1,10) 
+      CALL RELAY(IRELAY,13,-1)
+      END 
+      SUBROUTINE WAKUP
+C 
+C     THIS ROUTINE SCHEDULES PROGRAM BUTTN WITH PARAMETER -11, WHICH
+C     IN TURN RESTORES THE ID SEGMENT AND SCHEDULES TST9V WITH
+C     PARAMETER -8, CAUSING BOTH AUDIBLE AND VISIBLE ALARMS 
+C 
+      DIMENSION NAMB(3) 
+      DATA NAMB/2HBU,2HTT,2HN / 
+C 
+      CALL EXEC(24,NAMB,-11)
+      END 
+      SUBROUTINE SLEEP
+C 
+C     THIS ROUTINE RESTORES THE NORMAL VIDEO DISPLAY BY SCHEDULING
+C     "VIDEO" WITH PARAMETER STRING: RU,VIDEO,,5,0
+C 
+      DIMENSION NAMV(3) 
+      DATA NAMV/2HVI,2HDE,2HO / 
+C 
+      CALL EXEC(24,NAMV,7,5,0)
+      END 
+      SUBROUTINE WHERE(AZ,EL) 
+C 
+C     THIS ROUTINE PULLS THE AZIMUTH AND ELEVATION FOR HAYSTACK OUT 
+C     OF SYSTEM COMMON.  TO USE THE 150 FT. INSTEAD OF THE 120 FT.
+C     CHANGE THE VALUE 1746B TO 1752B WHICH WILL PICK UP BACKGROUND 
+C     COMMON INSTEAD. 
+C 
+      DIMENSION SAZEL(6),ISAZEL(12) 
+      EQUIVALENCE (SAZEL,ISAZEL)
+      IADR=IGETS(1746B)+307 
+      DO 10 I=1,12
+10    ISAZEL(I)=IGETS(IADR+I) 
+      AZ=SAZEL(3) 
+      EL=SAZEL(6) 
+      END 
+      END$
+ASMB
+      NAM           WEATH 
+* 
+*     THIS ROUTINE EXTRACTS WEATHER INFORMATION FROM SYSTEM COMMON
+*     REGARDLESS OF THE WAY THE CALLING PROGRAM IS LOADED.
+* 
+*     FORTRAN:  CALL WEATH(TEMP,PRES,DEWPT,ICOND) 
+* 
+      EXT           .ENTP,$LIBR,$LIBX 
+      ENT           WEATH 
+ADCOM OCT           1746             ADDRESS OF FIRST WORD OF SYS. COM. 
+ADR1  BSS           1                SCRATCH ADDRESS
+ADR2  BSS           1                ADDRESS OF "TEMP"
+ADR3  BSS           1                ADDRESS OF "PRES"
+ADR4  BSS           1                ADDRESS OF "DEWPT" 
+ADR5  BSS           1                ADDRESS OF "ICOND" 
+OFS1  DEC           294              OFFSET OF VALUE OF ICOND 
+OFS2  DEC           191              OFFSET OF VALUE OF TEMP
+WEATH  NOP
+      JSB           $LIBR            GO PRIVILEDGED 
+      NOP 
+      JSB           .ENTP            GET PARAMETER ADDRESSES
+      DEF           ADR2
+      LDA           ADCOM,I          GET ADDRESS OF SYSTEM COMMON 
+      ADA           OFS1             OFFSET 
+      STA           ADR1             STORE IN SCRATCH 
+      LDA           ADR1,I           VALUE OF ICOND TO A
+      STA           ADR5,I           STORE AT PARAMETER ADDRESS 
+      LDA           ADCOM,I          GET ADDRESS OF SYSTEM COMMON 
+      ADA           OFS2             OFFSET 
+      STA           ADR1             STORE IN SCRATCH 
+      DLD           ADR1,I           LOAD VALUE OF TEMP 
+      DST           ADR2,I           STORE AT PARAMETER ADDRESS 
+      LDA           ADR1             *****************************
+      INA                            PRESSURE AND DEWPT FOLLOW IN 
+      INA                                 SEQUENTIAL REAL LOCATIONS 
+      STA           ADR1
+      DLD           ADR1,I
+      DST           ADR3,I
+      LDA           ADR1
+      INA 
+      INA 
+      STA           ADR1
+      DLD           ADR1,I
+      DST           ADR4,I                *************************** 
+      JSB           $LIBX                 RETURN FROM PRIVILEDGED AND EXIT
+      DEF           WEATH 
+      END 
+      NAM           AEERR  ROUTINE TO RETURN TRACKING ERRORS
+* 
+*     THIS ROUTINE CALLS THE "SLAVE" PROGRAM WITH PARAMETER 4.
+*     "SLAVE" IN TURN TRANSMITS A BUFFER WITH AZ AND EL ERRORS. 
+*     THIS ROUTINE REPLACES THE OLDER VERSION WHICH ONLY WORKED 
+*     FOR THE HAYSTACK SYSTEM.
+*                               BGL 2/81
+* 
+      ENT           AEERR 
+      EXT           EXEC,.ENTR,RMPAR,IPST 
+* 
+ICODE DEC           9           EXEC CALL "IMMEDIATE SCHEDULE W/ WAIT 
+INAME ASC           3,SLAVE     NAME OF SLAVE PROGRAM 
+IPRM1 DEC           4           "4" FOR AEERR ROUTINE IN SLAVE
+IPRM2 BSS           1           DUMMY PARAMETER ADDRESSES 
+IPRM3 BSS           1           DUMMY PARAMETER ADDRESSES 
+IPRM4 BSS           1           DUMMY PARAMETER ADDRESSES 
+IPRM5 BSS           1           DUMMY PARAMETER ADDRESSES 
+IBUFR BSS           1           BUFFER
+IBUF2 BSS           1 
+IBUF3 BSS           1 
+IBUF4 BSS           13
+IBUFL DEC           16          LENGTH OF BUFFER
+ADDR  DEF           IBUFR        ADDRESS OF BUFFER
+LCODE DEC           14          RECOVER BUFFER EXEC CALL PARAMETER
+KCODE DEC           1           RECOVER BUFFER "READ" PARAMETER 
+JBUFL DEC           4           LENGTH OF RECOVERED BUFFER
+IADRA BSS           1           ADDRESS OF "AZERR"
+IADRE BSS           1           ADDRESS OF "ELERR"
+EMESS OCT           015446         ERROR MESSAGE START  ESC & 
+      OCT           062102             dB  -  4-CHAR INVERSE VIDEO SEQ
+      OCT           003407             CNTL G  -  BELL CODE 
+      ASC           5, There is 
+      ASC           5,no SLAVE! 
+ELONG DEC           13             LENGTH OF ERROR MESSAGE
+JCODE DEC           2              EXEC CODE FOR OUTPUT 
+LUFS  DEC           30             FIELD SYSTEM LU
+* 
+AEERR NOP                       ENTRY POINT 
+      JSB           .ENTR            GET PARAMETER ADDRESSES
+      DEF           IADRA 
+      JSB           IPST           CHECK TO SEE IF PROGRAM "SLAVE" EXISTS 
+      DEF           BACK2          RETURN POINT 
+      DEF           INAME          ASCII NAME OF PROGRAM
+BACK2 SZA                          ZERO IS CORRECT STATUS 
+      JMP           ERROR          JUMP TO ERROR SECTION
+      JSB           EXEC           CALL EXEC(9,NAME,IPRM1,0,0,0,0,IBUFR,16) 
+      DEF           BACK5          RETURN POINT 
+      DEF           ICODE 
+      DEF           INAME 
+      DEF           IPRM1 
+      DEF           IPRM2 
+      DEF           IPRM3 
+      DEF           IPRM4 
+      DEF           IPRM5 
+      DEF           IBUFR 
+      DEF           IBUFL 
+BACK5 JMP           BACK
+ERROR LDB           1752B          LOAD B WITH FWA OF BG SYS COM
+      ADB           =D10          OFFSET BY 10 WORDS
+      LDA           1,I            LOAD A WITH CONTENTS OF RESULTING ADDRESS
+      STA           LUFS           STORE IN LOCATION FOR TERMINAL LU
+      JSB           EXEC           WRITE ERROR MESSAGE TO THE TERMINAL
+      DEF           BACK           RETURN POINT 
+      DEF           JCODE          =2, FOR OUTPUT 
+      DEF           LUFS           FIELD SYSTEM TERMINAL LU 
+      DEF           EMESS          ERROR MESSAGE
+      DEF           ELONG          LENGTH OF ERROR MESSAGE, WORDS 
+BACK  JSB           RMPAR        CALL RMPAR(IPRM1)
+      DEF           BACK4 
+      DEF           IPRM1 
+BACK4 JSB           EXEC        CALL EXEC(14,1,IBUFR,4) 
+      DEF           BACK3 
+      DEF           LCODE 
+      DEF           KCODE 
+      DEF           IBUFR 
+      DEF           JBUFL 
+BACK3 DLD           IBUFR       "AZERR" TO A-B
+      DST           IADRA,I     STORE THROUGH ADDRESS LOCATION
+      DLD           IBUF3       "ELERR" TO A-B
+      DST           IADRE,I     STORE THROUGH ADDRESS LOCATION
+      JMP           AEERR,I     TERMINATE PROGRAM 
+      END 
+      NAM           MASTR  MASTER TELESCOPE CONTROL SUBROUTINES 
+* 
+*     THESE TWO ENTRY POINTS CONTROL POINTING OF A TELESCOPE IN THE 
+*     HAYSTACK POINTING SYSTEM ENVIRONMENT.  THEY WILL BOTH SCHEDULE
+*     PROGRAM "SLAVE" TO DO THE ACTUAL POINTING, PASSING PARAMETERS TO
+*     THE SLAVE PROGRAM.
+*                                    BGL 12/79
+* 
+      ENT           SORCE,OFSET,SATEL 
+      EXT           EXEC,.ENTR,IPST 
+* 
+ICODE DEC           9              EXEC CALL "IMMEDIATE SCHED W WAIT" 
+INAME ASC           3,SLAVE        NAME OF PROGRAM
+IPRM1 BSS           1              PARAMETER ADDRESSES
+IPRM2 BSS           1                       " 
+IPRM3 BSS           1                       " 
+IPRM4 BSS           1                       " 
+IPRM5 DEC           0                       " 
+IPRM6 DEC           0                       " 
+IPRM7 DEC           0                       " 
+IBUFR BSS           20             BUFFER TO BE PASSED
+IBUFL DEC           20             LENGTH OF BUFFER 
+ADDR  DEF           IBUFR          ADDRESS OF BUFFER
+EMESS OCT           015446         ERROR MESSAGE START  ESC & 
+      OCT           062102             dB  -  4-CHAR INVERSE VIDEO SEQ
+      OCT           003407             CNTL G  -  BELL CODE 
+      ASC           5, There is 
+      ASC           5,no SLAVE! 
+ELONG DEC           13             LENGTH OF ERROR MESSAGE
+JCODE DEC           2              EXEC CODE FOR OUTPUT 
+LUFS  DEC           30             FIELD SYSTEM LU
+SCX   EQU           1B
+* 
+SORCE NOP                          ENTRY FOR "SOURCE" SECTION 
+      JSB           .ENTR          GET PARAMETER ADDRESSES
+      DEF           IPRM1 
+      LDA           IPRM1          LOAD PARAMETER ADDRESS TO A-REGISTER 
+      LDB           ADDR           LOAD BUFFER ADDRESS TO B-REGISTER
+      MVW           =B5            MOVE WORDS 
+      LDA           IPRM2          -----------------------------------
+      MVW           =B3                   REPEAT FOR OTHER PARAMETERS.
+      LDA           IPRM3                 NOTE THAT THE MVW INSTRUCTION 
+      MVW           =B3                   AUTOMATICALLY INCREMENTS THE
+      LDA           IPRM4                 B-REGISTER.  IF NO 5TH
+      MVW           =B2                   PARAMETER, STORE ZERO.
+      CLA 
+      STA           1,I 
+      LDA           IPRM5 
+      SZA 
+      MVW           =B1            -----------------------------------
+      CLA                          CLEAR THE A-REGISTER 
+      STA           IPRM1          STORE IN FIRST PARAMETER TO PASS 
+      JMP           CEXEC          JUMP TO "CALL EXEC..." SECTION 
+OFSET NOP                          ENTRY FOR "OFFSET" SECTION 
+      JSB           .ENTR          GET PARAMETERS 
+      DEF           IPRM1 
+      LDA           IPRM1          -----------------------------------
+      LDB           ADDR                  SAME MVW SETUP AS ABOVE 
+      MVW           =B2 
+      LDA           IPRM2 
+      MVW           =B2 
+      LDA           IPRM3 
+      MVW           =B2 
+      LDA           IPRM4 
+      MVW           =B2            -----------------------------------
+      LDA           =B1            PUT A ONE IN THE A-REGISTER
+      STA           IPRM1          STORE IN FIRST PARAMETER TO PASS 
+      JMP           CEXEC          JUMP TO "CALL EXEC..." SECTION 
+* 
+*                                  SATELLITE SECTION
+* 
+SATEL NOP                         SATELLITE ENTRY POINT 
+      JSB           .ENTR          GET PARAMETERS 
+      DEF           IPRM1 
+      LDA           IPRM1          ---------------------------------- 
+      LDB           ADDR               SAME MVW SETUP -- 7 PARAMETERS 
+      MVW           =B5 
+      LDA           IPRM2 
+      MVW           =B2 
+      LDA           IPRM3 
+      MVW           =B2 
+      LDA           IPRM4 
+      MVW           =B2 
+      LDA           IPRM5 
+      MVW           =B2 
+      LDA           IPRM6 
+      MVW           =B2 
+      LDA           IPRM7 
+      MVW           =B2            ------------------------------------ 
+      LDA           =B5            PUT A FIVE IN THE A-REGISTER 
+      STA           IPRM1          STORE IN FIRST PARAMETER TO PASS 
+* 
+CEXEC JSB           IPST           CHECK TO SEE IF PROGRAM "SLAVE" EXISTS 
+      DEF           BACK2          RETURN POINT 
+      DEF           INAME          ASCII NAME OF PROGRAM
+BACK2 SZA                          ZERO IS CORRECT STATUS 
+      JMP           ERROR          JUMP TO ERROR SECTION
+      JSB           EXEC           CALL EXEC(9,NAME,IPRM1,0,0,0,0,IBUFR,16) 
+      DEF           BACK5          RETURN POINT 
+      DEF           ICODE 
+      DEF           INAME 
+      DEF           IPRM1 
+      DEF           IPRM2 
+      DEF           IPRM3 
+      DEF           IPRM4 
+      DEF           IPRM5 
+      DEF           IBUFR 
+      DEF           IBUFL 
+BACK5 JMP           BACK
+ERROR LDB           1752B          LOAD B WITH FWA OF BG SYS COM
+      ADB           =D10          OFFSET BY 10 WORDS
+      LDA           1,I            LOAD A WITH CONTENTS OF RESULTING ADDRESS
+      STA           LUFS           STORE IN LOCATION FOR TERMINAL LU
+      JSB           EXEC           WRITE ERROR MESSAGE TO THE TERMINAL
+      DEF           BACK           RETURN POINT 
+      DEF           JCODE          =2, FOR OUTPUT 
+      DEF           LUFS           FIELD SYSTEM TERMINAL LU 
+      DEF           EMESS          ERROR MESSAGE
+      DEF           ELONG          LENGTH OF ERROR MESSAGE, WORDS 
+BACK  LDA           IPRM1          COMPUTE RETURN POINT 
+      SZA,RSS 
+      JMP           SORCE,I        END SORCE
+      CPA           =B1 
+      JMP           OFSET,I        END OFSET
+      JMP           SATEL,I        END SATELLITE
+      END 
+      NAM           CAL     CALIBRATION CONTROL ROUTINES
+* 
+*     THESE TWO ENTRIES TURN ON AND OFF THE CAL SOURCE, INTERACTING 
+*     WITH THE "SLAVE" PROGRAM TO DECIDE WHICH CONTROL SYSTEM TO USE
+*     DEPENDING ON WHICH BOX IS UP, ETC.
+*                                         BGL 1/81
+* 
+      ENT           CALON,CALOF 
+      EXT           EXEC,.ENTR,IPST 
+* 
+ICODE DEC           9              EXEC CALL "IMMEDIATE SCHED W WAIT" 
+INAME ASC           3,SLAVE        NAME OF PROGRAM
+IPRM1 BSS           1              PARAMETER ADDRESSES
+IPRM2 BSS           1                       " 
+IPRM3 BSS           1                       " 
+IPRM4 BSS           1                       " 
+IPRM5 DEC           0                       " 
+IBUFR BSS           16             BUFFER TO BE PASSED
+IBUFL DEC           16             LENGTH OF BUFFER 
+ADDR  DEF           IBUFR          ADDRESS OF BUFFER
+EMESS OCT           015446         ERROR MESSAGE START  ESC & 
+      OCT           062102             dB  -  4-CHAR INVERSE VIDEO SEQ
+      OCT           003407             CNTL G  -  BELL CODE 
+      ASC           5, There is 
+      ASC           5,no SLAVE! 
+ELONG DEC           13             LENGTH OF ERROR MESSAGE
+JCODE DEC           2              EXEC CODE FOR OUTPUT 
+LUFS  DEC           30             FIELD SYSTEM LU
+CALON NOP                          ENTRY FOR "CAL ON" SECTION 
+      JSB           .ENTR 
+      DEF           IPRM1 
+      LDA           =B2            PUT A "2" IN A-REGISTER
+      STA           IPRM1          STORE AS FIRST PARAMETER 
+      CLA                          ZERO A-REGISTER
+      STA           IPRM2          SAVE AS SECOND PARAMETER 
+      JMP           CEXEC          JUMP TO "CALL EXEC(...)" SECTION 
+CALOF NOP                          ENTRY FOR "CAL OFF" SECTION
+      JSB           .ENTR 
+      DEF           IPRM1 
+      LDA           =B3 
+      STA           IPRM1 
+      LDA           =B1 
+      STA           IPRM2 
+CEXEC JSB           IPST           CHECK TO SEE IF PROGRAM "SLAVE" EXISTS 
+      DEF           BACK2          RETURN POINT 
+      DEF           INAME          ASCII NAME OF PROGRAM
+BACK2 SZA                          ZERO IS CORRECT STATUS 
+      JMP           ERROR          JUMP TO ERROR SECTION
+      JSB           EXEC           CALL EXEC(9,NAME,IPRM1,0,0,0,0,IBUFR,16) 
+      DEF           BACK5          RETURN POINT 
+      DEF           ICODE 
+      DEF           INAME 
+      DEF           IPRM1 
+      DEF           IPRM2 
+      DEF           IPRM3 
+      DEF           IPRM4 
+      DEF           IPRM5 
+      DEF           IBUFR 
+      DEF           IBUFL 
+BACK5 JMP           BACK
+ERROR LDB           1752B          LOAD B WITH FWA OF BG SYS COM
+      ADB           =D10          OFFSET BY 10 WORDS
+      LDA           1,I            LOAD A WITH CONTENTS OF RESULTING ADDRESS
+      STA           LUFS           STORE IN LOCATION FOR TERMINAL LU
+      JSB           EXEC           WRITE ERROR MESSAGE TO THE TERMINAL
+      DEF           BACK           RETURN POINT 
+      DEF           JCODE          =2, FOR OUTPUT 
+      DEF           LUFS           FIELD SYSTEM TERMINAL LU 
+      DEF           EMESS          ERROR MESSAGE
+      DEF           ELONG          LENGTH OF ERROR MESSAGE, WORDS 
+BACK  LDA           IPRM2          COMPUTE RETURN POINT 
+      SZA 
+      JMP           CALOF,I 
+      JMP           CALON,I 
+      END 
+      NAM           RELAY  SETUP AND OUTPUT TO RELAY DRIVER CARD
+* 
+*     THIS ROUTINE SETS UP THE RELAY CARD OUTPUT WORD AND OUTPUTS 
+*     THE WORD TO I/O CARD IN THE EQT LOCATION SPECIFIED BY SC. 
+*                   BGL   3-28-79 
+*     FORTRAN CALL RELAY(IRELAY,IBIT,MODE)
+*     IRELAY=CURRENT RELAY STATUS WORD
+*     IBIT=WHICH RELAY (0-15) TO SET OR CLEAR 
+*     MODE>=0, SET RELAY      MODE<0, CLEAR RELAY 
+* 
+*     EXT           .ENTR 
+      EXT           .ENTP,$LIBR,$LIBX 
+      ENT           RELAY             ENTRY POINT 
+RLY   BSS           1                 ADDRESS OF RELAY STATUS 
+BIT   BSS           1                 ADDRESS OF BIT TO SET/CLEAR 
+MODE  BSS           1                 ADDRESS OF SET/CLEAR MODE 
+SC    EQU           36B               SELECT CODE OF DEVICE 
+RELAY NOP 
+      JSB           $LIBR             GO PRIVILEDGED FOR I/O
+      NOP 
+      JSB           .ENTP             GET PARAMETER ADDRESSES 
+*     JSB           .ENTR 
+      DEF           RLY 
+      CLF           SC                CLEAR FLAG
+      LIA           SC                LOAD CURRENT STATUS 
+      STA           RLY,I             STORE IN RELAY STATUS LOCATION
+      LDA           =B1               1 TO A-REGISTER 
+      LDX           BIT,I             BIT (=SHIFT COUNT) TO X 
+      ADX           =B1               ADD 1 TO X
+ENUF  DSX                             ENOUGH SHIFTS?
+      JMP           SHIFT             NO, SHIFT AGAIN 
+      JMP           COMP              YES, GO CHECK SET/CLEAR MODE
+SHIFT RAL                             ROTATE A LEFT 
+      JMP           ENUF              CHECK AGAIN 
+COMP  LDB           MODE,I            MODE WORD TO B-REGISTER 
+      SSB,RSS                         IS MODE POSITIVE? 
+      JMP           ON                YES.  TURN RELAY ON.
+OFF   CMA                             NO.  COMPLEMENT A 
+      AND           RLY,I             LOGICAL AND A WITH RELAY STATUS 
+      JMP           STORE             JUMP TO STORE 
+ON    IOR           RLY,I             INC. OR A WITH RELAY STATUS 
+STORE CLF           SC                CLEAR FLAG
+      OTA           SC                OUTPUT A TO DEVICE
+      LIA           SC                READBACK
+      STA           RLY,I             STORE READ BACK STATUS
+      JSB           $LIBX             TERMINATE PRIV. 
+      DEF           RELAY 
+*     JMP           RELAY,I 
+      END 
+      END$

@@ -1,0 +1,213 @@
+FTN4
+      PROGRAM RP(3,30)
+C 
+C     Program to essentially do an :RP,NAME,,NUNAME 
+C     Will restore Type 6 from any FMP cartridge, not limited to lu2/3. 
+C     The normal usage of RP is through the subroutine IRP (see file &IRP), 
+C     although RP may be scheduled as stand-alone.
+C     Will work under any revision of RTE-IVA or RTE-IVB. 
+C 
+C     To run as stand-alone:
+C        RU,RP,NAMR,NUNAME
+C          where NAMR = NAME OF TYPE 6 FILE TO BE RESTORED
+C                       (may be on any arbitrary cartridge, not limited 
+C                        to lu2/3)
+C                NUNAME = PROG NAME TO BE INSTALLED IN ID SEGMENT, IF 
+C                         DIFFERENT FROM NAMR 
+C 
+C     Error on return to father program may be recovered by RMPAR.
+C     ERROR=0 for successful completion, standard FMGR error codes
+C     otherwise.
+C     Under RTE-IVB, error message is written to user terminal. 
+C     Otherwise, error message is written to system console unless "RP" is  
+C     scheduled with an "EXEC" call with IPRM5<0  (see subr "IRP"). 
+C 
+C     NOTE: If the cartref is not specified in NAMR, cartridges are searched
+C           in the order specified in array ICRX. 
+C 
+C     NOTE: IF USE OF SUBR "IRP" IS ANTICIPATED, IT IS SUGGESTED THAT 
+C           PGRM "RP" BE INSTALLED AS A PERMANENT PROGRAM.
+C 
+C     ARW 5/11/77 
+C 
+C     MODIFICATION RECORD:
+C     WHEN   WHO  WHAT
+C     770920 ARW  CHECK FOR EXISTING ID SEG BEFORE ATTEMTPING FILE OPEN.
+C     780319 ARW  IF CART# NOT SPECIFIED, SEARCH ONLY LU2 AND LU3.
+C                 IN CASE OF CALL BY SUBROUTINE IOF, ALLOW ERROR MESSAGE
+C                 ON ANY SPECIFIED LU.
+C     780516 ARW  FIX MINOR BUG 
+C     790604 ARW  FIX SO WORKS PROPERLY IF CARTLU<>CARTLABEL
+C     801117 ARW  SEND MESSAGE TO OPERATOR CONSOLE IF RTE-IVB 
+C     810301 ARW  Modify to allow RP from any cartref (not limited to lu2/3)
+C                 under any revision of RTE-IVA or RTE-IVB. 
+C     821031 BRS  Fix the 14 error return that always occurred when the 
+C                 item being RP'd was not on lu2/3.  This always occurred 
+C                 whether the RP was successful or not. 
+C 
+      DIMENSION IDCB(1296),IBUF(20),NAME(10),NUNAME(10),NAM(3),ICRR(3), 
+     .          NUNAM(3),JERR(5),IREG(2),MESS(5),ICRX(11),ISTAT(256)
+      EQUIVALENCE (NAME,NAM),(NUNAME,NUNAM),(IERR,JERR),(REG,IREG)
+      INTEGER OPEN
+      DATA IDCBS/1280/
+C     Array ICRX specifies cartrefs to be searched (in order) in case cartref 
+C     if not specified to RP.  NCRX is the number of entries in the list. 
+      DATA NCRX/0/,ICRX/2,3,21,54,55,56,57,58,59,60,61/ 
+C 
+      CALL RMPAR(MESS)
+      LUMESS=MESS(5)
+      IF (LUMESS .EQ. 0) LUMESS=1 
+      IF (LUMESS .LT. 0) LUMESS=0 
+C     IF MESS(1)=0, RP HAS BEEN SCHEDULED FROM SUBROUTINE IRP.
+C     IF RP HAS NOT BEEN SCHEDULED FROM IRP, AND MESS(5)=0, AND RTE-IVB,
+C     CHANGE MESSAGE LU TO INITIATING LU. 
+      IF (MESS .NE. 0 .AND. MESS(5) .LE. 0 .AND. IOPSY(IDUM) .EQ. 8)
+     .                                                LUMESS=LUOPR(IDUM)
+C 
+      CALL GETST(IBUF,-40,ILOG) 
+      ISCR=1
+      IERR=-15
+      IF (NAMR(NAME,IBUF,ILOG,ISCR) .LT. 0 .OR. 
+     .    IAND(NAME(4),3) .NE. 3) GO TO 145 
+      ISC=NAME(5) 
+      ICR=NAME(6) 
+      IF (MESS .EQ. 0) ICR=MESS(4)
+      IF (NAMR(NUNAME,IBUF,ILOG,ISCR) .LT. 0 .OR. NUNAME .EQ. 0)
+     .                                                    GO TO 90
+C     CHECK FOR LEGAL NAME
+      IERR=-15
+      IF (IAND(NUNAME(4),3) .NE. 3) 145,110 
+90    DO 100 I=1,3
+100   NUNAME(I)=NAME(I) 
+C     CHECK IF ID SEGMENT FOR NUNAME ALREADY EXISTS 
+110   IERR=23 
+      IF (IDSGA(NUNAME) .NE. 0) GO TO 145 
+C     Read current cartridge list 
+      CALL FSTAT(ISTAT,256,0,1) 
+C     If ICR=0, search cartridges in order of ICRX array. 
+      JCR=ICR 
+      IF (ICR.NE.0) GO TO 120 
+      JCR=0 
+      IF (NCRX .LE. 0) GO TO 120
+      DO 115 I=1,NCRX 
+      JCR=ICRX(I) 
+C     Check that specified cartridge is in cartridge list 
+      DO 113 J=1,256,4
+      IF (ISTAT(J) .EQ. 0-JCR .OR. ISTAT(J+2) .EQ. JCR) GO TO 114 
+113   CONTINUE
+C     Cartridge not found.  Ignore. 
+      GO TO 115 
+114   IF (OPEN(IDCB,IERR,NAME,5,ISC,JCR,IDCBS) .GE. 0) GO TO 140
+115   CONTINUE
+      IERR=-6 
+      GO TO 125 
+120   IF (OPEN(IDCB,IERR,NAME,5,ISC,JCR,IDCBS) .GE. 0) GO TO 140  
+125   ICRR=ICR
+      ICRR(2)=2H  
+      ICRR(3)=2H  
+      DO 126 I=1,2
+      IC=IGETC(ICR,I) 
+      IF (IC .LT. 40B .OR. IC .GT. 137B) CALL CNUMD(ICR,ICRR) 
+126   CONTINUE
+      IF (LUMESS .GT. 0) WRITE(LUMESS,130) IERR,NAM,ICRR
+130   FORMAT(" RP:OPEN ERR",I4,3X,3A2,"::",3A2) 
+      GO TO 200 
+C 
+140   LUCR=IAND(IDCB,77B) 
+      IF (LUCR .EQ. 2 .OR. LUCR .EQ. 3) GO TO 142 
+C     Copy file to system scratch area
+      CALL COPY6(IDCB,IERR,JLU,ISTRK,NTRKS) 
+      IF (IERR .LT. 0) GO TO 145
+C     Do the 'RP' 
+142   IF (IDRPL(IDCB,IERR,NUNAME) .NE. 0) GO TO 145 
+      IF (LUCR .EQ. 2 .OR. LUCR .EQ. 3) GO TO 200 
+      IDCB(10)=0
+C     Transfer ownership of system tracks back to the system. 
+      ITATAD=IGETS(1656B) 
+      IDAD=IDGET(NUNAME)
+      IERR=14 
+      IF (IDAD .EQ. 0) GO TO 145
+      DO 144 I=1,NTRKS
+144   CALL PUTS(ITATAD+(JLU-2)*IGETS(1756B)+ISTRK+I-1,100000B)
+C     Set ID segment word 14 bit 5 to indicate RP from non-lu2/3
+      CALL PUTS(IDAD+14,IOR(IGETS(IDAD+14),40B))
+C     If long ID segment, also set word 21 bit 6 since, for some reason the 
+C     the system software (RTE-IVB Rev 2026 at least)  clear word 14 bit 5
+C     when the program is run, and we lose our flag as a result.
+      IF (IAND(IGETS(IDAD+14),20B) .EQ. 0)
+     .          CALL PUTS(IDAD+21,IOR(IGETS(IDAD+21),100B)) 
+      IERR = 0
+      GO TO 200 
+C 
+C     Error return
+145   IF (LUMESS .GT. 0) WRITE(LUMESS,150) IERR,NUNAM 
+150   FORMAT(" RP:FMGR ERR",I4,3X,3A2)
+C 
+C     Close file and return 
+200   CALL CLOSE(IDCB)
+      CALL PRTN(JERR) 
+      CALL EXEC(6)
+      END 
+      SUBROUTINE COPY6(IDCB,IERR,JLU,ISTRK,NTRKS) 
+C 
+C     Routine to copy from Type 6 file on non-system cartridge into 
+C     system scratch area and return a DCB 'open' to this copy. 
+C 
+C     On entry: 
+C        IDCB,   DCB open to file to be copied
+C 
+C     On return:
+C        IERR,   0 - successful copy
+C               <0 - unsuccessfuly copy, FMP error returned 
+C        JLU,    lu of copy (will be 2 or 3)
+C        ISTRK,  starting track of copy 
+C        NTRKS,  #tracks occupied by copy 
+C 
+C     ARW 810301
+C 
+      INTEGER IDCB(1),ISAVE(16) 
+C 
+C     Determine how much of the file we need to copy to system tracks.
+C     (For some reason, some Type 6 files are slightly longer than they need be.
+C     This is OK, except when it comes time to 'RP,,prog', where the # of tracks
+C     to be released is calculated from low/hi main and base page addresses.
+C     If the entire Type 6 file is copied, and fewer tracks are released in 
+C     the subsequent 'RP,,prog', a track(s) will be irretrieveably lost to
+C     SYSTEM.)
+      ILU=IAND(IDCB,77B)
+      ITRK=IDCB(4)
+      ISEC=IDCB(5)
+      CALL EXEC(1,ILU,IDCB(17),128,ITRK,ISEC) 
+      LOMAIN=IDCB(39) 
+      MAINHI=IDCB(40) 
+      LOWBP=IDCB(41)
+      IHIBP=IDCB(42)
+      NSEC=(MAINHI-LOMAIN+64)/64+(IHIBP-LOWBP+64)/64+2
+      NBLKS=(NSEC+1)/2
+C     Get tracks from system
+      CALL EXEK4(4,NBLKS,ISTRK,JLU,JNSECT)  
+      IERR=-33
+      IF (ISTRK .LT. 0) RETURN
+      IERR=0
+C 
+C     Copy Type 6 file to scratch area
+      JTRK=ISTRK
+      JSEC=0
+      CALL DCOPY(ILU,ITRK,ISEC,IDCB(9),JLU,JTRK,JSEC, 
+     .           JNSECT,IDCB(6),IDCB(17),IAND(IDCB(8),77600B)/200B*128) 
+C 
+C     Save DCB, close file, then restore DCB and doctor it to point to  
+C     lu, track, sector of copy 
+      CALL WMOVE(IDCB,ISAVE,16) 
+      CALL CLOSE(IDCB)
+      CALL WMOVE(ISAVE,IDCB,16) 
+      IDCB=JLU
+      IDCB(2)=0 
+      IDCB(4)=ISTRK 
+      IDCB(5)=0 
+      IDCB(9)=JNSECT
+      IDCB(11)=ISTRK
+      IDCB(12)=0
+      NTRKS=(IDCB(6)-1)/JNSECT+1
+      RETURN
+      END 

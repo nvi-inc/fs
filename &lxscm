@@ -1,0 +1,66 @@
+FTN4,X
+C@LXSCM 
+C 
+      SUBROUTINE LXSCM(LSN,IDAYR,IHR,MIN,ISC,IDUR,KMATCH,KHUH),COMPARES 
+     .LOG AND SCHEDULE C#870115:05:36#
+C 
+C LXSCM - Compares the LOG RUN-ID with the SCHEDULE RUN-ID for a match. 
+C 
+C MODIFICATIONS:
+C 
+C    DATE     WHO  DESCRIPTION
+C    820513   KNM  SUBROUTINE CREATED 
+C 
+C INPUT VARIABLES:
+C 
+      DIMENSION LSN(4)
+C        - Contains the schedule source name
+C 
+C     IDAYR - Schedule start day. 
+C     IHR - Schedule hour.
+C     MIN - Schedule minutes. 
+C     ISC - Schedule start seconds. 
+C     IDUR- Schedule duration time. 
+C 
+C OUTPUT VARIABLES: 
+C 
+      LOGICAL KMATCH
+C       - A flag that indicates whether we have a matching schedule & 
+C         log observation.
+C 
+      LOGICAL KHUH
+C      - true if the log entry is screwy
+C 
+C COMMON BLOCKS USED: 
+C 
+      INCLUDE #LXCOM::56
+C 
+C SUBROUTINE INTERFACES:
+C 
+C     CALLING SUBROUTINES:
+C 
+C       LXSUM - SUMMARY command.
+C 
+C     CALLED SUBROUTINES: 
+C 
+C LOCAL VARIABLES:
+C 
+C 
+C ************************************************************* 
+C 
+C 1. Compare the Log RUN-ID with the Schedule RUN-ID. 
+C 
+C ************************************************************* 
+C 
+C 
+      KMATCH = .FALSE.
+      KHUH = .FALSE.
+      IF(ITL1.LT.ITSK1.OR.(ITL1.EQ.ITSK1.AND.ITL2.LT.ITSK2)) KHUH=.TRUE.
+      IF(KHUH) GOTO 10
+      IF(ILRDAY.EQ.IDAYR.AND.ILRHRS.EQ.IHR.AND.ILRMIN.EQ.MIN) 
+     .KMATCH = .TRUE. 
+      IF (ILRDAY.LT.IDAYR.OR.(IDAYR.EQ.ILRDAY.AND.ILRHRS.LT.IHR).OR.
+     .    (ILRDAY.EQ.IDAYR.AND.ILRHRS.EQ.IHR.AND.ILRMIN.LT.MIN) 
+     . ) KHUH  =.TRUE.  
+10    RETURN
+      END 

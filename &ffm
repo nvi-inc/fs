@@ -1,0 +1,180 @@
+FTN4,X
+C@FFM 
+C 
+      SUBROUTINE FFM(LUI,LUO,ICRPRC,IB,ICHI,LPROC,LNEWSK, 
+     .LNEWPR),FIELD SYSTEM FMGR C#870115:05:41
+C 
+C     FFM 
+C 
+C 1.  FFM PROGRAM SPECIFICATION 
+C 
+C 1.1.   FFM is a simplified FMGR for use with the Mark III field system. 
+C        There are two sets of commands available.  Commands with the 
+C        prefix PF (PF, PFCR, PFDL, PFPU, PFRN, PFST) apply to procedure
+C        files as disk file units.
+C 
+C 1.2.   RESTRICTIONS - Only procedure files are accessible.  These have
+C        the prefix "[PRC" which is transparent to the user.  Procedures are
+C        available only on disc ICRPRC. 
+C 
+C 1.3.   REFERENCES - Field system manual 
+C 
+C 2.  FFM INTERFACE 
+C 
+C 2.1.   CALLING SEQUENCE: CALL FFM(LUI,LUO,ICRPRC,IB,ICHI,LPROC,LNEWSK,LNEWPR) 
+C 
+C     INPUT VARIABLES:
+C 
+C        LUI,LUO - input, output LU's 
+C        ICRPRC  - procedure file cartridge 
+      DIMENSION IB(51)
+C               - line and record buffer
+C        ICHI   - number of characters from keyboard
+C        LPROC  - procedure file currently active in PFMED
+C        LNEWSK - 2nd copy of schedule procedure file 
+C        LNEWPR - 2nd copy of station procedure file
+C 
+C 2.2.   COMMON BLOCKS USED:
+C 
+      INCLUDE #PFMED::FS  
+C 
+C 2.3.   DATA BASE ACCESSES: none 
+C 
+C 2.4.   EXTERNAL INPUT/OUTPUT
+C 
+C     INPUT VARIABLES: none 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C     TERMINAL   - error message
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES: PFMED
+C 
+C     CALLED SUBROUTINES: FMP routines, ICHMV, IB2AS, ISCNC, ICHAR, 
+C                         IDTKX, KPRC, IDTYP, IFILL, MIN0,
+C                         PFBLK, PFCOP
+C 
+C 3.  LOCAL VARIABLES 
+C 
+      DIMENSION LNAM1(3),LNAM2(3) 
+C               - file names
+      DIMENSION LFR(3)
+C               - corrected procedure file name for reading 
+C        IR     - record count
+C        IERR   - error flag
+C        LEN    - record length 
+C        IDTK   - starting directory track of procedure LU
+C        JT, JS, JO - track, sector, offset of procedure file entry 
+C        JX     - extent of procedure file
+C 
+C 4.  CONSTANTS USED
+C 
+      DIMENSION LM1(5),LNAMX(3) 
+C 
+      DATA LM1    /2HER,2HRO,2HR ,2H  ,2H  /
+C               - error message - ERRORbbbb 
+      DATA LNAMX  /2H[P,2HRC,2H  /
+C               - initialization for procedure file names - "[PRC"
+C 
+C 5.  INITIALIZED VARIABLES: none 
+C 
+C 6.  PROGRAMMER: C. Ma 
+C     LAST MODIFIED: <810825.2338>
+C# LAST COMPC'ED  870115:05:41 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     Initialize and parse names. 
+      CALL ICHMV(LNAM1,1,LNAMX,1,6) 
+      CALL ICHMV(LNAM2,1,LNAMX,1,6) 
+C     Search for commas.
+      IC1=ISCNC(IB,1,ICHI,54B)
+C     No commas means no names. 
+      IF(IC1.EQ.0) GO TO 29 
+      IC2=ISCNC(IB,IC1+1,ICHI,54B)
+      IF(IC2.EQ.0) IC2=ICHI+1 
+C     Move first name to buffer with initialized prefix.
+      CALL ICHMV(LNAM1,5,IB,IC1+1,MIN0(IC2-IC1-1,2))
+C     Move second name if present.
+      IF(ICHI.LE.IC2) GO TO 29
+      CALL ICHMV(LNAM2,5,IB,IC2+1,MIN0(ICHI-IC2,2)) 
+29    CONTINUE
+C     PFCR - create new procedure file. 
+      IF(IB(2).EQ.2HCR) 100,199 
+100   CALL CREAT(IDCB1,IERR,LNAM1,ISIZE,3,0,ICRPRC,IDCBX) 
+      IF(IERR.LT.0) 800,910 
+199   CONTINUE
+C     PFDL - list directory of procedure files
+      IF(IB(2).EQ.2HDL) 200,299 
+C     Get first directory track.
+200   CALL IDTKX(IDCB1,ICRPRC,IDTK,LUCR,IDUM,NSECT) 
+      IF(IDTYP(ICRPRC).EQ.33B) NSECT=60 
+      IX=2
+      CALL IFILL(IB,1,100,2H  ) 
+      DO 210 I=1,32767
+C     Search for procedure files. 
+      IF(KPRC(LUCR,NSECT,IDTK,IDCB1,I-1,JT,JS,JO,LNAM2,JX).EQ.0)
+     .  GO TO 220 
+C     Add to list if extent 0.
+      IF(JX.NE.0) GO TO 210 
+      IB(IX)=LNAM2
+C     Add "a" for active, "s" for schedule 2nd copy, "x" for station 2nd copy.
+      IF(LNAM2.EQ.LPROC) CALL ICHMV(IB,2*IX-2,1Ha,1,1)
+      IF(LNAM2.EQ.LNEWSK) CALL ICHMV(IB,2*IX+1,1Hs,1,1) 
+      IF(LNAM2.EQ.LNEWPR) CALL ICHMV(IB,2*IX+1,1Hx,1,1) 
+      IX=IX+2 
+210   CONTINUE
+220   CALL EXEC(2,LUO,IB,IX)
+      GO TO 920 
+299   CONTINUE
+C     PF - change procedure file active in PFMED. 
+      IF(ICHAR(IB,3).EQ.54B) 300,399
+300   CALL ICHMV(LPROC,1,IB,4,2)
+      CALL PFCOP(LPROC,ICRPRC,LUI,IB) 
+      GO TO 920 
+399   CONTINUE
+C     PFPU - purge procedure file.
+      IF(IB(2).EQ.2HPU) 500,599 
+500   CALL PURGE(IDCB1,IERR,LNAM1,0,ICRPRC) 
+      IF(IERR.LT.0) 800,920 
+599   CONTINUE
+C     PFRN - rename procedure file. 
+      IF(IB(2).EQ.2HRN) 600,699 
+600   CALL NAMF(IDCB1,IERR,LNAM1,LNAM2,0,ICRPRC)
+      IF(IERR.LT.0) 800,610 
+610   IF(LNAM1(3).EQ.LPROC) LPROC=LNAM2(3)
+      GO TO 910 
+699   CONTINUE
+C     PFST - transfer from existing file to file created by this command. 
+      IF(IB(2).EQ.2HST) 700,799 
+C     Open file.
+700   CALL PFBLK(1,LNAM1(3),LFR)
+      CALL OPEN(IDCB1,IERR,LFR,1,0,ICRPRC,IDCBX)
+      IF(IERR.LT.0) GO TO 800 
+C     Create new file.
+      CALL CREAT(IDCB2,IERR,LNAM2,ISIZE,3,0,ICRPRC,IDCBX) 
+      IF(IERR.LT.0) GO TO 800 
+      DO 710 IR=1,32767 
+      CALL READF(IDCB1,IERR,IB,50,LEN)
+      IF(IERR.LT.0) GO TO 800 
+      IF(LEN.EQ.-1) GO TO 720 
+      CALL WRITF(IDCB2,IERR,IB,LEN) 
+      IF(IERR.LT.0) GO TO 800 
+710   CONTINUE
+720   CALL PFBLK(2,LNAM1(3),LFR)
+      GO TO 900 
+799   CONTINUE
+C     Bad command 
+      CALL EXEC(2,LUI,LM1,-5) 
+      GO TO 920 
+C     FMP error condition.
+800   CALL IB2AS(IERR,LM1,7,3)
+      CALL EXEC(2,LUI,LM1,-9) 
+      CALL PFBLK(4) 
+      GO TO 900 
+900   CALL CLOSE(IDCB2) 
+910   CALL CLOSE(IDCB1) 
+920   RETURN
+      END 

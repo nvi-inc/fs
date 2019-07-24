@@ -1,0 +1,27 @@
+:SV,2,,IN 
+:LL,0G
+:CA,7,1G
+:CA,8,2G
+:IF,-36P,NE,3,1 
+:IF,-32P,NE,0,1 
+:PA,0G,Enter ':,<transfer file name>,<cart> 
+:CA,7,1G
+:CA,8,2G
+:CA,1,0G
+:CA,2,0 
+:CA,3,0 
+:CA,4,8 
+:CA,5,8 
+:CA,6,8 
+:AN,__1G__<LISTlu> - lu for COMPC and LOADER listings 
+:AN,__2G__<cflg1>  - 1/0 for compile/nocompile routines with COMMON 
+:AN,__3G__<cflg2>  - 1/0 for compile/nocompile routines w/o COMMON
+:AN,__4G__<CODEcr> - cart for source and INCLUDE files
+:AN,__5G__<RELOcr> - cart for reloc., LCF, library files  
+:AN,__6G__<SPcr>   - cart for SP, 0 for temp load 
+:AN,__7G__<LIcr>   - cart for library files 
+:PA,0G,Enter ':,<LISTlu>,<cflg1>,<cflg2>,<CODEcr>,<RELOcr>,<SPcr>,<LIcr>' 
+:SV,0,,IH 
+:TR,8G::9G,1G,2G,3G,4G,5G,6G,7G 
+:SE 
+:TR 

@@ -1,0 +1,238 @@
+FTN4,X
+C@FVPNT 
+C 
+      SUBROUTINE FVPNT(IP),FIVE POINT SCAN SETUP CONTROL C#870115:04:56#
+C 
+C     FVPNT sets up the common variables necessary for
+C      the proper execution of program FIVPT
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - CLASS
+C        IP(2) - # REC
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C   COMMON BLOCKS USED
+C 
+      INCLUDE #FSCOM::FS
+C 
+C     CALLED SUBROUTINES: FVDIS, utilities
+C 
+C   LOCAL VARIABLES 
+C 
+C        NCHAR  - number of characters in buffer
+C        ICH    - character counter 
+      DIMENSION IBUF(40)
+C               - class buffer
+C        ILEN   - length of IBUF, chars 
+      DIMENSION IPARM(2)
+C               - parameters returned from GTPRM
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+      DIMENSION LEGAX(8)
+C 
+      DIMENSION VCBW(6) 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 
+C  INITIALIZED VARIABLES
+C 
+      DATA ILEN/80/ 
+      DATA LEGAX/2HHA,2HDC,2HAZ,2HEL,2HXY,2HEW,2HXY,2HNS/ 
+      DATA VCBW/.125,.25,.5,1.0,2.0,4.0/
+C 
+C  PROGRAMMER: MWH
+C     CREATED: 840510 
+C     LAST MODIFIED:
+C 
+C 
+C     1. If we have a class buffer, then we are to set the
+C     variables in common for FIVPT to use. 
+C 
+D     WRITE(LU,9002)
+D9002 FORMAT("ENTERING FVPNT")
+      CALL IFILL(IBUF,1,ILEN,40B) 
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+      IERR = -1 
+      GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = MIN0(ILEN,IREG(2))
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.EQ.0) GOTO 500
+C                   If no parameters, schedule FIVPT
+      IF(NCHAR.EQ.IEQ) GOTO 210 
+D     WRITE(LU,9001)(IBUF(I),I=1,10)
+D9001 FORMAT("IBUF IN FVPNT = "10A2)
+      IF (ICHAR(IBUF,IEQ+1).NE.77B) GOTO 210
+      IP(1) = 0 
+      IP(4) = 77B 
+      CALL FPDIS(IP,IBUF,ILEN,NCHAR)
+      RETURN
+C 
+C 
+C 
+C     2. Step through buffer getting each parameter and decoding it.
+C     2.1 First parm, axis type 
+C 
+210   CONTINUE
+      ICH = 1+IEQ 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (ICHAR(PARM,1).EQ.54B) CALL ICHMV(LAX,1,4HHADC,1,4)
+C                 The default is HADC 
+      IF (ICHAR(PARM,1).EQ.52B) CALL ICHMV(LAX,1,LAXFP,1,4) 
+      IF (ICHAR(PARM,1).NE.52B.AND.ICHAR(PARM,1).NE.54B)
+     .  CALL ICHMV(LAX,1,PARM,1,4)
+C 
+      DO 215 I=1,13,4 
+        IF(ICHCM(LAX,1,LEGAX,I,4).EQ.0) GOTO 220
+215   CONTINUE
+      IERR = -201 
+      GOTO 990
+C 
+C     2.2 Second parm, number of repetitions
+C 
+220   CONTINUE
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF (ICHAR(PARM,1).EQ.54B) NREP = 1
+C                 Default is 1 repetition 
+      IF (ICHAR(PARM,1).EQ.52B) NREP = NREPFP 
+      IF (ICHAR(PARM,1).NE.52B.AND.ICHAR(PARM,1).NE.54B) NREP = IPARM 
+      IF (NREP.GE.1.AND.NREP.LE.10) GOTO 230
+        IERR = -204 
+        GOTO 990
+C 
+C     2.3 Third parm, number of points
+C 
+230   CONTINUE
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF (ICHAR(PARM,1).EQ.54B) NPTS = 3
+C                 Default is 3 points 
+      IF (ICHAR(PARM,1).EQ.52B) NPTS = NPTSFP 
+      IF (ICHAR(PARM,1).NE.52B.AND.ICHAR(PARM,1).NE.54B) NPTS = IPARM 
+      NPTS = 2*(NPTS/2)+1 
+      IF (NPTS.GE.3.AND.NPTS.LE.31) GOTO 240
+        IERR = -205 
+        GOTO 990
+C 
+C  2.4  Fourth parm, step size
+C 
+240   CONTINUE
+      CALL GTPRM(IBUF,ICH,NCHAR,2,PARM,IERR)
+      IF(ICHAR(PARM,1).NE.54B) GOTO 242 
+        STEP = 0.5
+        GOTO 250
+242   IF(ICHAR(PARM,1).NE.52B) GOTO 245 
+        STEP = STEPFP 
+        GOTO 250
+245   IF(IERR.EQ.0) GOTO 247
+        IERR = -208 
+        GOTO 990
+247   STEP = PARM 
+      IERR = 0
+C 
+C  2.5  Fifth parm, integration period
+C 
+250   CONTINUE
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF(ICHAR(PARM,1).EQ.54B) INTP = 1 
+      IF(ICHAR(PARM,1).EQ.52B) INTP = INTPFP
+      IF(ICHAR(PARM,1).NE.54B.AND.ICHAR(PARM,1).NE.52B) INTP = IPARM
+      IF(INTP.GE.1.AND.INTP.LE.10) GOTO 260 
+        IERR = -207 
+        GOTO 990
+C 
+C     2.6 Sixth parm, detector device.  
+C 
+260   CONTINUE
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (ICHAR(PARM,1).NE.52B.AND.ICHAR(PARM,1).NE.54B)
+     .  LDEV=MDNAM(IPARM) 
+      IF (ICHAR(PARM,1).EQ.54B) CALL ICHMV(LDEV,1,2HI1,1,2) 
+C                      Default is IF1 
+      IF (ICHAR(PARM,1).EQ.52B) CALL ICHMV(LDEV,1,LDEVFP,1,2) 
+      IF(ICHAR(LDEV,1).EQ.111B.OR.ICHAR(LDEV,1).EQ.126B) GOTO 280 
+        IERR = -202 
+        GOTO 990
+C           Illegal value entered 
+C  2.8 Determine cal temp and frequency.
+C 
+C 
+280   CONTINUE
+      IF(ICHAR(LDEV,1).NE.111B) GOTO 285
+      IF(LDEV.NE.2HI1) GOTO 282 
+        CAL = CALTMP(1) 
+        FREQ = (FREQLO(1,1)+300.)/1000. 
+        GOTO 290
+282   CONTINUE
+      CAL = CALTMP(2) 
+      FREQ = (FREQLO(2,1)+300.)/1000. 
+      GOTO 290
+285   CONTINUE
+      INDVC = IA2HX(LDEV,2) 
+      IBW = IBWVC(INDVC)
+      BW = VCBW(IBW)
+      IF(IABS(IFP2VC(INDVC)).NE.1) GOTO 287 
+        CAL = CALTMP(1) 
+        FREQ = (FREQLO(1,1)+FREQVC(INDVC)+BW/2.)/1000.
+        GOTO 290
+287   CONTINUE
+      CAL = CALTMP(2) 
+      FREQ = (FREQLO(2,1)+FREQVC(INDVC)+BW/2.)/1000.
+C 
+C  Now check the cal and freq values. 
+290   CONTINUE
+      IF(CAL.NE.0) GOTO 295 
+        IERR = -203 
+        GOTO 990
+295   IF(FREQ.NE.0) GOTO 300
+        IERR = -206 
+        GOTO 990
+C 
+C  3.0  Set common variables to their new values
+C 
+300   CONTINUE
+      CALL ICHMV(LAXFP,1,LAX,1,4) 
+      CALL ICHMV(LDEVFP,1,LDEV,1,4) 
+      CALFP = CAL 
+      NREPFP = NREP 
+      NPTSFP = NPTS 
+      FREQFP = FREQ 
+      INTPFP = INTP 
+      STEPFP = STEP 
+      ANGLFP = ANGL 
+      GOTO 990
+C 
+C  5.0  Schedule FIVPT to start working 
+C 
+500   CONTINUE
+      IF(ICHAR(LDEVFP,1).EQ.111B) GOTO 504
+      INDVC = IA2HX(LDEVFP,2) 
+      IF(ITPIVC(INDVC).EQ.2) GOTO 504 
+C           - TPI selection for VC must be U
+        IERR = -304 
+        GOTO 990
+C          If it's not dormant, then error. 
+C 
+504   IF (IPGST(6HFIVPT ).EQ.0) GOTO 510
+      IF (IPGST(6HFIVPT ).EQ.-1) GOTO 505 
+      IERR = -301 
+      GOTO 990
+505   IERR = -302 
+      GOTO 990
+510   CONTINUE
+      CALL EXEC(10,6HFIVPT )
+C      Schedule FIVPT 
+990   IP(1) = 0 
+      IP(2) = 0 
+      IP(3) = IERR
+      IP(4) = 2HQZ
+      RETURN
+      END 

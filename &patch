@@ -1,0 +1,140 @@
+FTN4,X
+C@PATCH 
+C 
+      SUBROUTINE PATCH(IP),PATCH SETUP C#870115:04:52#
+C 
+C     PATCH sets up the common array IFP2VC 
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - CLASS
+C        IP(2) - # REC
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C   COMMON BLOCKS USED
+C 
+      INCLUDE #FSCOM::FS
+C 
+C     CALLED SUBROUTINES: GTPRM,ICHAR 
+C 
+C   LOCAL VARIABLES 
+C 
+C        NCHAR  - number of characters in buffer
+C        ICH    - character counter 
+      DIMENSION IFP(14) 
+C               - temporary holder for decoded Patching.
+C        ICHNL  - channel number
+C        IVC    - VC number 
+C        IVL    - -1 for Lo, +1 for High
+      DIMENSION IBUF(40)
+C               - class buffer
+C        ILEN   - length of IBUF, chars 
+      DIMENSION IPARM(2)
+C               - parameters returned from GTPRM
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+C 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 
+C  INITIALIZED VARIABLES
+C 
+      DATA ILEN/80/ 
+C 
+C  PROGRAMMER: NRV & MAH
+C     CREATED: 820310 
+C 
+C 
+C     1. If we have a class buffer, then we are to set the
+C     variables in common for PCALR to use. 
+C 
+      ICHOLD = -99
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+      IERR = -1 
+      GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.EQ.0) GOTO 120
+      IF (IEQ.EQ.NCHAR) GOTO 500
+C                   If no parameters, this is an error. 
+      IF (ICHAR(IBUF,IEQ+1).NE.77B) GOTO 210
+      IP(1) = 0 
+      IP(4) = 77B 
+120   CALL PADIS(IP,ICLCM)
+      RETURN
+C 
+C 
+C 
+C     2. Step through buffer getting each parameter and decoding it.
+C     Command from user has these parameters: 
+C        PATCH=<LO#>,<VC#H(or L)>,<VC#H(or L)>,.........
+C     Choices are <LO#>: LO1 or LO2, no default 
+C                 <VC#H(or L)>  : no default, must be at least one
+C 
+C     2.1 FIRST PARM, LO NUMBER 
+C 
+210   CONTINUE
+      ICH = 1+IEQ 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (ICHAR(PARM,1).NE.54B) GOTO 250
+      IERR = -201 
+      GOTO 990
+250   IF (ICHCM(PARM,1,2HLO,1,2).EQ.0) GOTO 255 
+      IERR = -201 
+      GOTO 990
+255   ICHNL = IAS2B(PARM,3,1) 
+      IF (ICHNL.EQ.1.OR.ICHNL.EQ.2) GOTO 260
+      IERR = -201 
+      GOTO 990
+C 
+C     2.2  2nd and subsequent parms, VC#, H or L. 
+C 
+260   IFC = 0 
+      DO 262 I = 1,14 
+          IFP(I) = IFP2VC(I)
+262       CONTINUE
+300   CALL GTPRM(IBUF,ICH,NCHAR,O,PARM) 
+      IF (ICHAR(PARM,1).EQ.54B) GOTO 390
+      NCH = 2 
+      IF (ICHAR(PARM,3).EQ.40B) NCH = 1 
+      IVC = IAS2B(PARM,1,NCH) 
+      IF (IVC.GE.1.AND.IVC.LE.14) GOTO 310
+      IERR = -202 
+      GOTO 990
+310   IF (ICHAR(PARM,NCH+1).EQ.110B.OR.ICHAR(PARM,NCH+1).EQ.114B) 
+     . GOTO 320 
+      IERR = -203 
+      GOTO 990
+320   IVL = 1 
+      IF (ICHAR(PARM,NCH+1).EQ.114B) IVL = -1 
+      IFP(IVC) = IVL*ICHNL
+      IFC = IFC+1 
+      GOTO 300
+390   IF (IFC.GT.0) GOTO 400
+      IERR = -102 
+      GOTO 990
+C 
+C     Set up the common array now 
+C 
+400   CONTINUE
+      DO 410 I = 1,14 
+          IFP2VC(I) = IFP(I)
+410       CONTINUE
+      GOTO 990
+500   CONTINUE
+      IERR = -101 
+990   IP(1) = 0 
+      IP(2) = 0 
+      IP(3) = IERR
+      IP(4) = 2HQQ
+      RETURN
+      END 

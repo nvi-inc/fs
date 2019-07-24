@@ -1,0 +1,48 @@
+FTN4,L
+        SUBROUTINE IVOUT(ILU,IBUF,IBFL,LINE,ICOL,IMODE),
+     C C#870115:05:48 IVOUT 4 TV V=1# 
+C 
+C         This routine does the output to the HP-TV card assumed
+C     to be on ILU.  The column and row position for this   
+C     information are computed assuming a 6 x 11 character size.
+C     The screen is clear upon the first entry and the LU is saved
+C     from that entry.  
+C 
+        DATA IILU/0/
+C 
+C               CHECK FOR FIRST ENTRY INTO THIS ROUTINE 
+C 
+        IF(IILU .NE. 0 .AND. IILU .EQ. ILU)GO TO 1000 
+C 
+C               SAVE LU 
+C 
+        IILU=ILU
+C 
+C               SET UP ADDRESSING FOR OUTPUT TO CARD
+C 
+        CALL VIDLU(ILU) 
+C 
+C               CLEAR THE CARD BEFORE WRITING ANYTHING
+C 
+        CALL ERASE
+1000    CONTINUE
+C 
+C               GET THE COLUMN POSITION 
+C 
+        IX=(ICOL-1)*6+2 
+C 
+C               CALCULATE LINE POSITION FROM TOP OF SCREEN
+C 
+        IY=240-11*LINE
+C 
+C               SET WRITE AREA AS PER MODE SPECIFIED
+C 
+        CALL VAREA(IX-1,IY-2,IBFL*6,10,0,IMODE+1) 
+C 
+C               WRITE INFORMATION INTO PREPARED AREA
+C 
+        CALL CHAR(IX,IY,IBUF,1,0,IBFL,IMODE)
+C 
+        RETURN
+        END 
+        END$

@@ -1,0 +1,34 @@
+FTN4,X
+C@CANTS 
+      SUBROUTINE CANTS(ITSCB,NTSCB,IFLAG,INDEX,INDTS) 
+     .,CANCEL ONE OR MORE TIME LIST ENTRIES C#870115:04:19# 
+C 
+C  CANTS cancels entries depending on IFLAG 
+C      1=cancel all procs from the station library
+C      2=cancel all procs from the schedule library 
+C      3=cancel everything initiated by the operator
+C      4=cancel everything initiated by the schedule
+C      5=cancel particular command as specified in INDEX,INDTS
+C 
+      DIMENSION ITSCB(13,1) 
+C 
+      DO 100 I=1,NTSCB
+        IF (ITSCB(1,I).EQ.-1) GOTO 100
+        ILIB = ICHAR(ITSCB(10,I),2) 
+        ISOR = ICHAR(ITSCB(13,I),2) 
+        GO TO (10,20,30,40,50) IFLAG
+10      IF(ILIB.EQ.121B) GOTO 90
+          GO TO 100 
+20      IF(ILIB.EQ.120B) GOTO 90
+          GO TO 100 
+30      IF(ISOR.EQ.73B) GOTO 90 
+          GO TO 100 
+40      IF(ISOR.EQ.72B) GOTO 90 
+          GO TO 100 
+50      IF(ITSCB(11,I).NE.INDEX) GOTO 100 
+        IF(INDTS.NE.-1.AND.I.NE.INDTS) GOTO 100 
+90      ITSCB(1,I) = -1 
+        CALL CLRCL(ITSCB(12,I)) 
+100   CONTINUE
+      RETURN
+      END 

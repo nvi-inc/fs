@@ -1,0 +1,112 @@
+FTN4,X
+      SUBROUTINE GETTS(ITSCB,NTSCB,IT,ITYPE,INDEX,ICLASS,LSOR,INDTS,
+     .KLAST,ISTKSK,ISTKOP),GET FROM TIME LIST C#870115:04:19# 
+C     GET NEXT TIME-SCHEDULED JOB FOR BOSS
+D     INCLUDE #FSCOM::FS
+      DIMENSION ITSCB(13,1),IT(9),ISTKOP(1),ISTKSK(1) 
+      DOUBLE PRECISION T1,TNOW,T2,TMIN
+      LOGICAL KLAST,KSTAK 
+C                   TRUE IF THIS IS LAST TIME TO BE EXECUTED
+C 
+C     INITIALIZE
+      ITYPE = 0 
+      INDEX = 0 
+      ICLASS = 0
+      ITMIN = 0 
+C                   INDEX OF EARLIEST TIME
+      INDTS = 0 
+      TMIN = 1.0D9
+C                   EARLIEST TIME FAR IN FUTURE FOR TESTING 
+      CALL EXEC(11,IT)
+      TNOW = 86400.D0*IT(5)+IT(4)*3600.D0+IT(3)*60.D0+IT(2)+IT(1)/100.D0
+C 
+      DO 100 I=1,NTSCB
+D     WRITE(LU,9801) I,(ITSCB(II,I),II=1,13)
+D9801 FORMAT("ITSCB"I2":"13O7)
+        IF (ITSCB(1,I).EQ.-1) GOTO 100
+C                   SKIP THE EMPTY ENTRIES
+        T1 = 86400.D0*MOD(ITSCB(1,I),1024)
+     .       +ITSCB(2,I)*60.D0 + ITSCB(3,I)/100.D0
+        IF (T1.GE.TMIN) GOTO 100
+        ITT = ICHAR(ITSCB(10,I),2)
+        IF (ITT.NE.120B.AND.ITT.NE.121B) GOTO 90
+C                     If this isn't a time-scheduled proc,
+C                     don't worry about checking stacks 
+        ICT = ICHAR(ITSCB(13,I),2)
+C                     This is the command stream, schedule or operator
+        IF(ICT.EQ.73B.AND.ISTKOP(2).NE.2)GOTO 100 
+        IF(ICT.EQ.72B.AND.ISTKSK(2).NE.2)GOTO 100 
+C                     If this is a time-scheduled procedure and the 
+C                     stream/stack onto which it wants to be
+C                     pushed has something in it, then ignore 
+C                     for now.
+90      ITMIN = I 
+        TMIN = T1 
+100     CONTINUE
+C 
+      IF (ITMIN.NE.0) GOTO 200
+C     NOTHING IS ON TIME LIST -- TELL BOSS TO SUSPEND FOR 5 MIN 
+      IT(1) = IT(5) 
+      IS = IT(2)
+      IT(2) = IT(4)*60 + IT(3) + 5
+      IT(3) = IS * 100
+      RETURN
+C 
+C     WE HAVE FOUND SOMETHING TO DO!
+200   DO 210 I=1,9
+        IT(I) = ITSCB(I,ITMIN)
+210     CONTINUE
+D     WRITE(LU,9902) TMIN,TNOW
+D9902 FORMAT("TMIN,TNOW: "2D20.10)
+      IF (TMIN.GT.TNOW+1.D0) RETURN 
+C                   IF EARLIEST JOB IS IN FUTURE, HAVE BOSS SUSPEND TILL THEN 
+C 
+      ITYPE = ITSCB(10,ITMIN) 
+      INDEX = ITSCB(11,ITMIN) 
+      ICLASS = ITSCB(12,ITMIN)
+      LSOR = ITSCB(13,ITMIN)
+      INDTS = ITMIN 
+      IT2 = ITSCB(2,ITMIN)
+      IT1 = ITSCB(1,ITMIN)
+      IT3 = ITSCB(3,ITMIN)
+      IT4 = ITSCB(4,ITMIN)
+      IT5 = ITSCB(5,ITMIN)
+      IT7 = ITSCB(7,ITMIN)
+      IT8 = ITSCB(8,ITMIN)
+      IT9 = ITSCB(9,ITMIN)
+      IF (IT4.EQ.0) GOTO 410
+C                   If once-only, mark as "last time" 
+C     INCREMENT TO NEXT EXECUTION TIME
+300   IF (IT4.NE.3) GOTO 310
+      IT2 = IT2 + IT5 
+      GOTO 320
+310   IF (IT4.EQ.2) IT3 = IT3 + IT5*100 
+      IF (IT4.EQ.1) IT3 = IT3 + IT5 
+      IF (IT3.LT.6000) GOTO 400 
+      IT3 = IT3 - 6000
+      IT2 = IT2 + 1 
+320   IF (IT2.LT.1440) GOTO 400 
+      IT2 = IT2 - 1440
+      IT1 = IT1 + 1 
+C 
+400   T1 = 86400.D0*MOD(IT1,1024) +IT2*60.D0 + IT3/100.D0 
+D     WRITE(LU,9901) ITMIN,IT1,IT2,IT3,IT4,IT5,IT6,IT7,IT8,IT9
+D9901 FORMAT("ITSCB ENTRY WITH INCREMENTED START TIME: "I5/9I5) 
+      IF (T1.LT.TNOW) GOTO 300
+      T2 = 86400.D0*MOD(IT7,1024) +IT8*60.D0 + IT9/100.D0 
+      IF (IT7.EQ.0) T2 = 1.0D9
+      ITSCB(2,ITMIN) = IT2
+      ITSCB(1,ITMIN) = IT1
+      ITSCB(3,ITMIN) = IT3
+      ITSCB(4,ITMIN) = IT4
+      ITSCB(5,ITMIN) = IT5
+      ITSCB(7,ITMIN) = IT7
+      ITSCB(8,ITMIN) = IT8
+      ITSCB(9,ITMIN) = IT9
+      KLAST = .FALSE. 
+      IF (T1.LE.T2) GOTO 990
+410   KLAST = .TRUE.
+      IF (ICHAR(ITYPE,1).EQ.41B) ITSCB(1,ITMIN) = -1
+C                   Cancel now if this is a wait-for command
+990   RETURN
+      END 

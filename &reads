@@ -1,0 +1,47 @@
+FTN4,X
+C@READS 
+C 
+      SUBROUTINE READS(IDCB,IBUF,IBLEN,NCHAR, 
+     .IERR),READ SCHEDULE ENTRY C#870115:04:22# 
+C 
+C     READS - reads the next line from the schedule file
+C 
+C 
+C  INPUT VARIABLES: 
+C 
+      DIMENSION IDCB(1) 
+C       DCB for schedule file 
+C     IBLEN - length of IBUF in words 
+C 
+C 
+C  OUTPUT VARIABLES:
+C 
+      DIMENSION IBUF(1) 
+C       buffer with next schedule line
+C     NCHAR - number of characters in IBUF
+C     IERR  - error return, FMP codes 
+C 
+C 
+C  LOCAL VARIABLES: 
+C 
+C     IL  - length of buffer read 
+C 
+C 
+C  INITIALIZED VARIABLES: 
+C 
+C 
+C  PROGRAMMER: NRV
+C  LAST MODIFIED:  CREATED 790912 
+C 
+C 
+C     1. Simple read from schedule file, and get number of characters.
+C 
+      NCHAR = 0 
+100   CALL READF(IDCB,IERR,IBUF,IBLEN,IL) 
+      IF (IERR.LT.0.OR.IL.LT.0) GOTO 900
+      NCHAR = IFLCH(IBUF,IL*2)
+      IF (NCHAR.EQ.0) GOTO 100
+      RETURN
+900   CALL CLOSE(IDCB)
+      RETURN
+      END 

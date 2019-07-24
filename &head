@@ -1,0 +1,229 @@
+FTN4,X
+      SUBROUTINE HEAD(IP),TAPE HEAD CONTROL C#880616:18:14# 
+C 
+C  HEAD controls the position of the tape recorder head blocks
+C 
+C  INPUT VARIABLES: 
+C 
+      DIMENSION IP(1),PNOW(2),POFF(2) 
+C        IP(1) - class # of input parameter buffer
+C 
+C  OUTPUT VARIABLES:
+C 
+C        IP(1) - class #
+C        IP(2) - # of records 
+C        IP(3) - error return 
+C        IP(4) - who we are 
+C 
+C  COMMON BLOCKS USED:
+      INCLUDE #FSCOM::FS
+C 
+C  CALLED SUBROUTINES: POSIT,HMOVE
+C 
+C  LOCAL VARIABLES: 
+C 
+      DIMENSION IPARM(2),IREG(2),IBUF(40),IBUF2(40) 
+      LOGICAL KREAD 
+C 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C  INITIALIZED VARIABLES: 
+C 
+      DATA ILEN /40/,IPITCH/55/,ICNTR/385/
+C 
+C  HISTORY: 
+C 
+C  DATE  WHO  WHAT
+C 841226 MWH  CREATED 
+C 850714 WEH  MOVE CAL TO ANOTHER COMMAND, OTHER MINOR THINGS 
+C 880615 NRV  MODIFIED PER LAR'S CHANGES FOR NEW TAPE FORMAT
+C 
+C  1. Get class buffer and decide whether we have to move the heads,
+C      or just monitor their position.
+C 
+      PITCH=IPITCH
+      CNTR=ICNTR
+      IPASS=0 
+      ICHOLD = -99
+      NREC = 0
+      ICLASS = 0
+      ICHOLD = -99
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+        IERR = -1 
+        GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = MIN0(IREG(2),ILEN)
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+      KREAD=.FALSE. 
+      IF (IEQ.EQ.0) GOTO 500
+      IF (ICHAR(IBUF,IEQ+1).EQ.77B) GOTO 600
+C 
+C  2. Step through buffer, getting each parameter and decoding it.
+C 
+200   ICH = IEQ+1 
+      IHD=0 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF(ICHCM(PARM,1,2HB ,1,1).NE.0) GO TO 201 
+         IHD=3
+         GO TO 220
+C 
+201   CONTINUE
+      IF(ICHCM(PARM,1,2HR ,1,1).NE.0) GO TO 202 
+         IHD=2
+         GO TO 220
+202   CONTINUE
+      IF(ICHCM(PARM,1,2HW ,1,1).NE.0) GO TO 203 
+         IHD=1
+         GO TO 220
+C 
+203   CONTINUE
+      IF (ICHAR(PARM,1).EQ.54B) IHD = 3 
+C 
+220   CONTINUE
+      IF (IHD.GE.1.AND.IHD.LE.3) GOTO 221 
+        IERR = -201 
+        GOTO 990
+C 
+C  2.2 Get requested head position index. 
+C 
+221   CONTINUE
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (ICHAR(PARM,1).NE.54B) GOTO 222
+        IPASS = 1 
+        GOTO 300
+C 
+222   CONTINUE
+      NC = IFLCH(PARM,4)
+      IPASS = IAS2B(PARM,1,NC)
+C     IF (IMODFM.EQ.0) INDX = (IPASS+1)/2+6*MOD(IPASS+1,2)
+C     IF (IMODFM.EQ.1.OR.IMODFM.EQ.2) INDX = (IPASS+1)/2
+C     IF (IMODFM.EQ.3) INDX = (IPASS-1/28)+1  
+C     WRITE(LU,9100) IPASS,IMODFM,INDX,IHD,LUMAT,LUIB,LU
+C9100 FORMAT(" IPASS,IMODFM,INDX,IHD,LUMAT,LUIB,LU "/ 
+C    +       7I7) 
+C250  IF (INDX.GE.1.AND.INDX.LE.12) GOTO 300
+C       IERR = -202 
+      IF (IPASS.GT.0.AND.IPASS.LE.100) GOTO 250 
+      IERR = -202 
+      GOTO 990
+250   IF (ITAPOF(IPASS).GT.-4000) GOTO 300
+      IERR = -204 
+      GOTO 990
+C 
+C  3. Now handle head positioning, one head at a time.
+C 
+300   CONTINUE
+      ICHOLD = ICHK20 
+      ICHK20 = 0
+302   IHEAD = IHD 
+      IHDNDX = INDX 
+D     WRITE(LU,9001) IHEAD,IHDNDX 
+D9001 FORMAT("IHEAD,IHDNDX IN HEAD = "2I5)
+      DO 390 J=1,2
+      DO 390 I=1,2
+        IF (IHEAD.NE.3.AND.IHEAD.NE.I) GOTO 390 
+C       POSX = IHDNDX*IPITCH-ICNTR
+C       POSX = POSX+FOROFF(I) 
+C       IF (MOD(IPASS,2).EQ.0) POSX = POSX+REVOFF(I)  
+        CALL HDPOS(I,IPASS,IP)  
+        IF(IP(3).LT.0) GO TO 999
+        POSNHD(I)=ITAPOF(IPASS) 
+        IPASHD(I)=IPASS 
+390   CONTINUE
+C 
+C  4. Put Pass Number into AUX data Field, IF WE SET UP THE WRITE HEAD
+C     LAR added a priori tape head offset 880228
+C 
+400   CONTINUE
+      IF(IHEAD.EQ.2) GO TO 500
+C     CALL IB2AS(IPASS,LAUXFM,9,40000B+1400B+4) 
+      CALL IB2AS(IABS(ITAPOF(IPASS)),LAUXFM,9,40000B+400B*4+4)
+      CALL IB2AS(IPASS,LAUXFM,5,40000B+400B*3+3)
+      CALL ICHMV(LAUXFM,8,2HDD,1,1) 
+      IF (ITAPOF(IPASS).LT.0) GOTO 410
+      CALL ICHMV(LAUXFM,8,2HFF,1,1) 
+C 
+410   ICLASS=0
+      IBUF2(1) = 0  
+      IBUF2(2) = 2HFM 
+      CALL ICHMV(IBUF2,5,LAUXFM,1,8)  
+      NCH = 12
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)  
+C                   Send out the first 8 chars ...
+      IBUF2(1) = 5  
+      IBUF2(2) = 2H!  
+      NCH = 3 
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)  
+C                   ... as ! type data
+      IBUF2(1) = 0  
+      IBUF2(2) = 2HFM 
+      CALL ICHMV(IBUF2,5,LAUXFM,9,4)  
+      CALL ICHMV(IBUF2,9,4H0000,1,4)  
+      NCH = 12
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)  
+C                   Send out the last 4 chars and zeros ... 
+      IBUF2(1) = 5  
+      IBUF2(2) = 2H%  
+      NCH = 3 
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)  
+C 
+      CALL EXEC(23,6HMATCN ,ICLASS,4) 
+      CALL RMPAR(IP)
+      CALL CLRCL(IP(1)) 
+      IF(IP(3).LT.0) GO TO 999
+C 
+C  5. Here we read the device to get current head positions.
+C 
+500   CONTINUE
+      DO 550 I=1,2
+        CALL POSIT(I,IPASHD(I),PNOW(I),IP)
+        IF (IP(3).LT.0) GOTO 999
+        POFF(I) = PNOW(I) - POSNHD(I) 
+D       WRITE(LU,9967) I,POFF(I),PNOW(I),POSNHD(I)
+D9967   FORMAT(" HEAD:I,POFF(I),PNOW(I),POSNHD(I) "/
+D    +         I7,3F10.2) 
+550   CONTINUE
+C 
+C  Turn off LVDT Osillator
+C 
+      CALL LVDOF(IP)  
+      IF(IP(3).LT.0) GO TO 999
+      KREAD=.TRUE.
+C 
+C  6. Now we must prepare a response. 
+C 
+600   IF (ICHOLD.NE.-99) ICHK20 = ICHOLD
+      IF (ICHOLD.GE.0) ICHK20 = 1 
+      NCH = IEQ 
+      IF (NCH.EQ.0) NCH = NCHAR+1 
+      NCH = ICHMV(IBUF,NCH,2H/ ,1,1)
+      DO 610 I=1,2
+        NCH = NCH+IB2AS(IPASHD(I),IBUF,NCH,100000B+2) 
+        NCH = MCOMA(IBUF,NCH) 
+610   CONTINUE
+      IF(.NOT.KREAD) GO TO 641
+      DO 630 I=1,2
+        NCH = NCH+IR2AS(POSNHD(I),IBUF,NCH,8,1) 
+        NCH = MCOMA(IBUF,NCH) 
+630   CONTINUE
+      DO 640 I=1,2
+        NCH = NCH+IR2AS(POFF(I),IBUF,NCH,8,1) 
+        NCH = MCOMA(IBUF,NCH) 
+640   CONTINUE
+C 
+641   CONTINUE
+      NCH = NCH-2 
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS) 
+      IERR = 0
+C 
+C  9. That's all for now. 
+C 
+990   IP(1) = ICLASS
+      IP(2) = NREC
+      IP(3) = IERR
+      IP(4) = 2HQ>
+999   CONTINUE
+      RETURN
+      END 

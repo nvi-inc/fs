@@ -1,0 +1,120 @@
+FTN4,X
+C@PEDIS 
+C 
+      SUBROUTINE PEDIS(IP,ICLCM,
+     .           PERR,ISYNER),PARITY ERROR DISPLAY C#870115:04:38#
+C 
+C   PEDIS displays parity errors
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C      - RMPAR parameters from PERR 
+      DIMENSION PERR(1) 
+C      - actual counts from decoder 
+C     ISYNER - number of synch errors 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - error
+C        IP(2) - class
+C        IP(3) - number of records
+C        IP(4) - who we are 
+C 
+C COMMON BLOCKS USED
+C 
+      INCLUDE #FSCOM::FS
+C 
+C SUBROUTINE INTERFACE: 
+C 
+C  LOCAL VARIABLES
+C 
+      LOGICAL KCOM
+      DIMENSION IBUF2(30) 
+C               - output display buffer 
+C        ILEN   - length of buffers, chars
+C        NCH    - character counter 
+C        I      - bit, converted to 0 or 1
+C        IA     - hex char from MAT 
+      DIMENSION IREG(2) 
+      DIMENSION LMODE(4),NMODE(2) 
+      EQUIVALENCE (REG,IREG(1)) 
+C 
+C INITIALIZED VARIABLES 
+C 
+      DATA ILEN/60/ 
+      DATA LCHAN/2HAB/
+      DATA LMODE/2HRE,2HC ,2HPL,2HAY/ 
+      DATA NMODE/3,4/ 
+C 
+C PROGRAMMER: NRV 
+C     LAST MODIFIED: CREATED 800901 
+C 
+C 
+C     1. Get class buffer with command in it.  Set up first part
+C     of output buffer. 
+C 
+      KCOM = IP(4).EQ.77B 
+C 
+      IF (ICLCM.EQ.0) GOTO 990
+      REG = EXEC(21,ICLCM,IBUF2,-ILEN)
+      NCHAR = MIN0(IREG(2),ILEN)
+      IEQ = ISCNC(IBUF2,1,NCHAR,75B)
+      NCH = NCHAR+1 
+      IF (KCOM) NCH = IEQ 
+      NCH = ICHMV(IBUF2,NCH,2H/ ,1,1) 
+C                   Put / to indicate a response
+C 
+C 
+C     2. Now the buffer contains: PERR/ and we want to add
+C     the data. 
+C 
+D     INX=INSPER+1
+D     WRITE(LU,9902) (PERR(I),I=1,INX)
+D9902 FORMAT("PERR="11D10.4)
+      NCH = NCH + IB2AS(ITRPER,IBUF2,NCH,100000B+2) 
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = ICHMV(IBUF2,NCH,LCHAN,ICHPER+1,1) 
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = NCH + IB2AS(INSPER,IBUF2,NCH,100000B+3) 
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = NCH + IR2AS(TPERER,IBUF2,NCH,5,1) 
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = ICHMV(IBUF2,NCH,LMODE,IMODPE*4+1,NMODE(IMODPE+1)) 
+      IF (KCOM) GOTO 500
+      NCH = MCOMA(IBUF2,NCH)
+C 
+C     2.1 Average the parity error counts and add 
+C     to output buffer. 
+C 
+      SUM = 0.0 
+      DO 350 I=1,INSPER 
+        PERR(I) = PERR(I+1)-PERR(I) 
+C                   The number of parity errors is the difference 
+C                   between successive readings 
+        SUM = SUM + PERR(I) 
+D     WRITE(LU,9901) I,PERR(I)
+D9901 FORMAT("I,PERR="I5,D10.5) 
+350     CONTINUE
+      SUM = SUM/(INSPER)
+D     WRITE(LU,9903) SUM
+D9903 FORMAT("AVG="D20.10)
+C 
+      NCH = NCH + IR2AS(SUM,IBUF2,NCH,6,1)
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = NCH + IB2AS(ISYNER,IBUF2,NCH,100000B+5) 
+C 
+C 
+C     5. Now send the buffer to SAM.
+C 
+500   ICLASS = 0
+      NCH = NCH - 1 
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)
+C                   Send buffer to display
+C 
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = 0 
+      IP(4) = 2HQJ
+990   RETURN
+      END 

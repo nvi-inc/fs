@@ -1,0 +1,85 @@
+ASMB,R,B,L,X,T
+        HED     INPUT PARAMETER COUNTER 
+* 
+*       IGNPS 
+*               THIS ROUTINE IF CALLED AS THE FIRST EXECUTABLE STATEMENT
+*       IN A SUBROUTINE WILL RETURN THE NUMBER OF PARAMETERS USED IN THE
+*       CALL TO THIS SUBROUTINE  IF THERE IS A SECOND PARAMETER IN THE
+*       CALL IT RETURNS THE ADDRESS OF THE CALLER OF THE ROUTINE IT IS
+*       CALLED FROM 
+* 
+*               IF CALLED AS OTHER THAN THE FIRST EXECUTABLE SATEMENT THE 
+*       RETURN VALUE IS UNPREDICTABLE 
+* 
+* 
+*       NOTE ** 
+*               THIS ROUTINE SHOULD BE CALLED WITH A DUMMY ARGUMENT TO
+*       INSURE THAT THE PROPER CALLING SEQUENCE RESULTS
+* 
+*       NOTE ** 
+*               THIS ROUTINE ASSUMES THE FOLLOWING ENTRY STRUCTURE IN THE 
+*       CALLING PROGRAM 
+* 
+*               SUB...  NOP 
+*                       JSB     .ENTR 
+*                       DEF     ARG1
+*                       ---     --- 
+*                       FORTRAN ROUITINES WITH VARIABLE DIMENSIONS
+*                       WILL HAVE SOME CODE INSERTED HERE 
+*               (THE CALL TO THIS ROUTINE SHOULD BE THE FIRST 
+*               EXECUTEABLE STATEMENT IN THE PROGRAM IN ALL CASES)
+*                       ---     --- 
+*                       JSB     IGNPS 
+*                       DEF     *+1+N 
+*                       DEF     ARG1
+*                       ...     ... 
+*                       DEF     ARGN
+*               *+1*N   XXX             NEXT EXECUTABLE INSTRUCTION 
+* 
+*               THIS IS THE STANDARD SEQUENCE IN RTE-M FORTRAN IV AND 
+*               RTE II/III FORTRAN IV 
+* 
+* 
+        NAM     IGNPS,7 PRM CNT RETRVR C#890516:19:14    #
+        ENT     IGNPS 
+        EXT     .ENTR 
+* 
+* 
+IGNPS   NOP 
+        LDA     ARSAV 
+        STA     RSAVD           SAVE FOR TEST 
+        LDA     IGNPS           GET ADDRESS OF RETURN POINT DEF *+1+N 
+*                               IN ABOVE ILLUSTRATION 
+        LDB     0,I             B=*+1*N IN ABOVE
+        ADA     =D2             CHECK FOR MORE THAN ONE PARAMETER 
+        CPA     1               IF EQUAL ONLY ONE PARAMETER 
+        JMP     NORAD           NO RETURN ADDRESS TO BE RETURNED
+        LDB     0,I             GET ADDRESS AT WHICH SAVE SHOULD OCCUR
+        STB     RSAVD           SAVE POINTER TO RETURN ADDRESS LOC
+NORAD   LDA     IGNPS           RESTORE B REG 
+        LDB     0,I             B=*+1+N IN ABOVE ILLUSTRATION 
+        STB     IGNPS           CORRECT RETURN ADDRESS FROM ROUTINE 
+        ADA     =D-3            A SHOULD NOW POINT AT THE JSB .ENTR INSTR 
+SENTR   LDB     0,I             CHECK FOR JSB .ENTR 
+        CPB     JENTR 
+        JMP     FENTR           SKIP ON IF A MATCH
+        ADA     =D-1            BACK UP TO .ENTR
+        JMP     SENTR 
+*                               POINT 
+FENTR   ADA     =D-1            RESTORE B REG 
+        LDA     0,I             GET THE RETURN ADDRESS OF CALLING SUB IN A
+        LDB     0               SAVE THE ADDRESS IN REG B FOR ADDRESSING
+TBACK   ADB     =D-1            BACK REG B UP ONE LOCATION
+        CPA     1,I             DOES B POINT AT POINTER TO SAME PLACE AS A
+        JMP     FOUND           IF EQUAL WE CAN GET THE ANSWER NOW
+        JMP     TBACK           IF NOT EQUAL BACK B UP SOME MORE
+FOUND   CMB                     GET 2'S COMPLIMENT OF *+1 IN B REG
+*                               B=* PRIOR TO ABOVE INSTRUCTION
+        ADA     1               A REG=*+1+N-(*+1)=N WHICH IS END
+        CMB,INB                 B=*-1 IN ABOVE HENCE ADDRESS OF JSB 
+        STB     RSAVD,I         SAVE IN USER ARE OR RSAVD 
+        JMP     IGNPS,I         RETURN TO CALLER
+JENTR   JSB     .ENTR           MAKE JSB INSTRUCTION FOR MATCH IN CALLER
+ARSAV   DEF     RSAVD 
+RSAVD   DEF     0 
+        END 

@@ -1,0 +1,118 @@
+FTN4,X
+C@TPPUT 
+C 
+      SUBROUTINE TPPUT(IP,ITPIS,ISUB,IBUFR,NCH,ILENR) 
+     .,PUT TPS INTO COMMON C#870115:04:44#
+C 
+C     TPPUT gets data from the TPIs and puts it into COMMON 
+C     Also, formats response with these values. 
+C 
+C     DATE   WHO CHANGES
+C     810913 NRV ADDED FORMATTING OF RESPONSE VALUES
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of buffer from MATCN 
+C        IP(2)  - # records in class
+C        IP(3)  - error return from MATCN 
+      DIMENSION ITPIS(1)
+C      - TPI selection
+C     ISUB - which sub-function, 3=TPI, 4=TPICAL, 7=TPZERO
+C     IBUFR - buffer with first part of response in it
+C     NCH - next available character in IBUFR 
+C     ILENR - length of IBUFR 
+      DIMENSION IBUFR(1)
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) -
+C        IP(2) -
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C 3.  LOCAL VARIABLES 
+C 
+      DIMENSION LD(3) 
+C      - dummy for VC conversion
+      DIMENSION T(2)
+C      - temporary TP variables 
+      DIMENSION IBUF(5),IBUFD(5)
+C               - input class buffers with MATCN responses
+C        ILEN   - length of buffers, chars
+C               - registers from EXEC 
+      DIMENSION IREG(2) 
+      EQUIVALENCE (REG,IREG(1)) 
+C 
+C 4.  CONSTANTS USED
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA ILEN/10/ 
+      DATA IBUFD/5*2H00/
+C 
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. Step through the TPIs requested which we assume correspnd
+C     to the responses from MATCN.  Put the TPs into COMMON.
+C 
+      NCREC = IP(2) 
+      ICLASS = IP(1)
+      NR = 0
+      IT = 0
+      IERR = 0
+      DO 190 I=1,16 
+        IF (ITPIS(I).EQ.0) GOTO 190 
+        IF (NR.GT.NCREC) GOTO 190 
+        IF (NR.EQ.NCREC) GOTO 120 
+C                     This is the case when both IFs were asked for 
+        NR = NR + 1 
+        REG = EXEC(21,ICLASS,IBUF,-10)
+        IF (I.GT.14) GOTO 120 
+        CALL MA2VC(IBUF,IBUF,LD,ID,ITP,ID,ID,ID,ID,T) 
+        IF (ITP.NE.1.AND.ITP.NE.2) T=-1.0 
+C                     If not a valid TPI, set reading to -1 
+        IF (T.EQ.65535.) T=1.D9 
+C                     If overflow, indicate by $$$$ 
+        NCH = NCH + IR2AS(T,IBUFR,NCH,6,0)
+        NCH = MCOMA(IBUFR,NCH)
+C                     Put the value into the response 
+        II = I+(ITP-1)*14 
+D     WRITE(LU,9901) ITP,T(1),II
+D9901 FORMAT("ITP,T,II="I3,F10.1,I5)
+        IF (II.LE.0.OR.II.GT.28) GOTO 190 
+        IF (ISUB.EQ.3) TPSOR(II) = T
+        IF (ISUB.EQ.4) TPSPC(II) = T
+        IF (ISUB.EQ.7) TPZERO(II) = T 
+        IT = 1
+        GOTO 190
+120     CALL MA2IF(IBUFD,IBUF,ID,ID,ID,ID,T(1),T(2))
+        IF (I.EQ.16) T(1) = T(2)
+C                     For IF2, pick up second value 
+        IF (ISUB.EQ.3) TPSOR(I+14)=T
+        IF (ISUB.EQ.4) TPSPC(I+14)=T
+        IF (ISUB.EQ.7) TPZERO(I+14)=T 
+        IT = 1
+D     WRITE(LU,9902) T(1),T(2)
+D9902 FORMAT("IFD T="2F10.1)
+        NCH = NCH + IR2AS(T,IBUFR,NCH,6,0)
+        NCH = MCOMA(IBUFR,NCH)
+190     CONTINUE
+C 
+      IF (IT.EQ.0) IERR = -1
+C 
+      NCH = NCH-2 
+980   IP(1) = 0 
+      IP(2) = 0 
+      IP(3) = IERR
+      IP(4) = 2HQK
+      IP(5) = 0 
+990   RETURN
+      END 

@@ -1,0 +1,7 @@
+VCSX  
+FORM=C,4,,,1111 
+TAPEFORMC 
+IFDSX     
+ENABLE=G1,G3    
+HEAD=B,$  
+TAPE=OFF  

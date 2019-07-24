@@ -1,0 +1,51 @@
+FTN4
+C@QRHED 
+C 
+      PROGRAM QRHED,5 
+C 
+C     QRHED 
+C 
+C 1.1.   QRHED is the segment of QUIKR dealing with the tape head blocks
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C 
+C     CALLED SUBROUTINES: HEAD
+C 
+C  LOCAL: 
+C 
+C        NSUB   - "subroutine number" sent via LINQ package 
+C 
+C 6.  PROGRAMMER: MWH 
+C     LAST MODIFIED:  841226
+C# LAST COMPC'ED  870115:04:32 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+      CALL LINQB(NSUB)
+      GO TO (1,2,3,4),NSUB
+1     CONTINUE
+      CALL LINQC
+      CALL HEAD(IP) 
+      GO TO 990 
+C 
+2     CONTINUE
+      CALL LINQC
+      CALL HDCAL(IP)
+      GO TO 990 
+C 
+3     CONTINUE
+      CALL LINQC
+      CALL LOWHI(IP)
+      GO TO 990 
+C 
+4     CONTINUE
+      CALL LINQC
+      CALL TFORM(IP)
+      GOTO 990
+C 
+990   CONTINUE
+      CALL LINQD
+      END 

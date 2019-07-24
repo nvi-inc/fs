@@ -1,0 +1,52 @@
+FTN4,X
+      SUBROUTINE RXV2T(IA,VADC,UADC)
+C 
+C    CONVERT MAT VOLTAGE READINGS TO TEMPERATURES AND PRESSURES 
+C 
+C   INPUT PARAMETERS: 
+C       IA      TYPE OF READING (31,32=TEMPERATURE;  24=PRESSURE) 
+C       VADC    VOLTAGE 
+C 
+C   OUTPUT PARAMETERS:
+C       UADC     CONVERTED TEMPERATURE (K) OR PRESSURE (mB) 
+C 
+C  INCLUDE FILES: 
+      INCLUDE #FSCOM::FS
+C       CONTAINS VFAC :  VOLTAGE DIVIDE RATIOS
+C 
+C   CONVERSION FACTORS  (FROM BRIAN COREY AT HAYSTACK): 
+      DIMENSION TMPK(40)                                  
+      DIMENSION PVOLT(40)                                 
+C 
+      DATA TMPK/  4.,  5.,  7.,  9., 14., 
+     A           18., 22., 23., 24., 25., 
+     B           26., 27., 28., 29., 30., 
+     C           32., 34., 36., 38., 60., 
+     D           75., 95.,130.,170.,215., 
+     E          235.,265.,285.,305.,330./ 
+      DATA PVOLT/2.46386,2.37578,2.23248,2.12245,1.91202, 
+     A           1.66870,1.34993,1.28434,1.23212,1.18995, 
+     B           1.16027,1.14015,1.12689,1.11741,1.11007, 
+     C           1.09942,1.09178,1.08559,1.07992,1.02744, 
+     D           0.98892,0.93535,0.83936,0.72739,0.59901, 
+     E           0.54327,0.46292,0.40797,0.35078,0.27665/ 
+C 
+      UADC = VADC  * VFAC(IA) 
+C 
+C   LOOKUP AND INTERPOLATE
+C 
+      IF (IA.LT.31 .OR. IA.GT.32) GOTO 200      
+        DO 100 IL=2,30
+          IF (UADC.LT.PVOLT(IL) .AND. IL.NE.30) GOTO 100        
+            TDIF = TMPK(IL)-TMPK(IL-1)
+            VDIF = PVOLT(IL)-PVOLT(IL-1)
+            VMID = UADC-PVOLT(IL-1) 
+            UADC = TMPK(IL-1)+VMID*TDIF/VDIF
+            RETURN
+100     CONTINUE
+200   IF (IA.NE.24) RETURN                
+        PRES = 62.*(5.0/UADC - 1.0)                                       
+C       IF (PRES.LT.0.0) PRES = 0.0 
+        UADC = PRES 
+      RETURN
+      END 

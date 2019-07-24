@@ -1,0 +1,19 @@
+FTN4
+      BLOCK DATA DCBS,PFMED DCB BUFFERS C#870115:05:41
+      INCLUDE #PFMED::FS  
+      DATA IDCBX /144/, ISIZE /50/
+      DATA LSF1 /2H[_,2HPR,2HC1/
+      DATA LSF2 /2H[_,2HPR,2HC2/
+      DATA LSF3 /2H[_,2HPR,2HC3/
+      END 
+      BLOCK DATA FEDCM,PFMED EDITOR BUFFERS C#870115:05:41
+      COMMON /FEDCM/ LBL,LINB(51),NIN,NOUT,KLIN,KEOF,ICH
+C        LBL    - leading blanks for output 
+C        LINB   - line buffer 
+C        NIN    - input file line count 
+C        NOUT   - output file line count
+C        KLIN   - current line flag (1 - line full, 2 - line empty) 
+C        KEOF   - EOF flag (0 - not at EOF, 1 - at EOF) 
+C        ICH    - line character count
+      DATA LBL /2H  /, LINB /51*2H  / 
+      END 

@@ -1,0 +1,28 @@
+FTN4,X
+C@MV2MA 
+      SUBROUTINE MV2MA(IBUF,IDIR,ISP, 
+     .           LGEN),CONVERT MV DATA TO MAT BUFFER C#890516:19:01#
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF(1) 
+C      - buffer to be formatted 
+      DIMENSION LGEN(1) 
+C      - rate generator, ASCII 720 or 960 
+C     IDIR - direction
+C     ISP - speed 
+C 
+C     Format the buffer for the controller. 
+C     The buffer is set up as follows:
+C                   )srrr0000 
+C     where each letter represents a character (half word). 
+C                   s  = speed (lower 3 bits) and direction (top bit) 
+C                 rrr  = rate generator frequency 
+C 
+      CALL ICHMV(IBUF,1,2H) ,1,1) 
+      CALL ICHMV(IBUF,2,IHX2A(IDIR*10B+ISP),2,1)
+      CALL ICHMV(IBUF,3,LGEN,1,3) 
+      CALL IFILL(IBUF,6,4,2H00) 
+C 
+      RETURN
+      END 

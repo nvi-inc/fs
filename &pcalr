@@ -1,0 +1,365 @@
+FTN4,X
+C@PCALR 
+      PROGRAM PCALR(3,900),PHASE CAL REAL TIME MONITOR C#870115:05:13#
+C 
+C     This program uses the data buffer to get Mark III 
+C     data and then extracts the phase cal information. 
+C 
+C     MODIFICATIONS:
+C     current programmer - Molly Hardman
+C       DATE   WHO   DESCRIPTION
+C      820222  MAH   Adding subroutines 
+C 
+C 
+C 
+C  CALLING PARAMETERS:
+C     INPUT:
+C 
+C     From FS common or prompts to the user 
+C 
+C     OUTPUT: 
+C 
+C     Phase cal amplitude and phase typed out on terminal 
+C     by track number.
+C 
+C 
+C  SUBROUTINES CALLED:
+C 
+C     MODET - determine in what mode PCALR should be run
+C     TPSET - sets up tracks on tape recorder 
+C     DBCOM - handles communications with data buffer 
+C     DPROX - processes data buffer data
+C     PCALX - extracts phase cal
+C     PHCAL - determines phase cal freq by track
+C     BPSET - sets tracks and IBYPPC as requested 
+C 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C  LOCAL VARIABLES: 
+C 
+C     ITRK - current track being processed
+C     IC - loop counter over PCALR
+C     ITKA - holds value of ITRAKA for later checking 
+C     ITKB - holds value of ITRAKB for later checking 
+C     IBYPCH - holds value of IBYPPC for later checking 
+C     IHOLD - value of ICHECK(18) 
+C     INIT - flag set to 1 except for very 1st time thru' PCALR 
+C     IVC - video converter corresponding to ITRAKB 
+C     IVC2 - video converter corresponding to ITRAKA
+C     IBLOKN - block # sent from data buffer
+C     LWHO - code for error messages
+      DIMENSION IDATA(260)
+C      - the data 
+      DIMENSION IBAUD(5)
+C      - the allowed baud rates, for DVB00
+      DIMENSION IBINX(5)
+C      - the baud rate index, for DVB00 
+C     ILOG - # characters in raw IDATA
+      DIMENSION IBUF(625) 
+C      - buffer for MAT and DB commands, and working buffer too 
+C      - Contains flag information for PCAL 
+      DIMENSION LTIME(8)
+C      - time characters from data buffer, if any occurred
+      DIMENSION BWDI(8) 
+C      - the possible sample rates
+      DIMENSION IDCB(144) 
+C      - DCB for the test data file.
+      DOUBLE PRECISION PCAL,PCALA 
+      DOUBLE PRECISION RSINA,RSINB,RCOSA,RCOSB,RNBITA,RNBITB
+      LOGICAL KFIELD,KDBUFF,KSPLIT,KCOUNT,KCOREL
+C      - KFIELD, true if FS is running
+C      - KDBUFF, true if we have a real data buffer 
+C      - KSPLIT, true if we are to run in split mode
+C      - KCOUNT, loop counter over PCALR
+C      - KCOREL, true if data was correlated
+C 
+C  INITIALIZED: 
+C 
+      DATA IBAUD/300,1200,2400,4800,9600/ 
+      DATA IBINX/6,9,11,13,15/
+      DATA BWDI/8.0,0.0,0.125,0.25,0.5,1.0,2.0,4.0/ 
+      DATA LWHO/2HPC/ 
+C 
+C 
+C   1. First get PCALR mode by calling MODET.  If the FS
+C     is not running, MODET prompts for needed input parameters.
+C     Set up the data buffer interface if this is the 
+C     first pass thru' PCALR (i.e. INIT=0). 
+C 
+      INIT = 0
+      KFIELD = .TRUE. 
+100   KDBUFF = .TRUE. 
+      KCOUNT = .TRUE. 
+      KSPLIT = .FALSE.
+      KCOREL = .FALSE.
+C     - initialize logical variables
+      IF (INIT.EQ.0) CALL MODET(KFIELD,KDBUFF,KSPLIT,LUOP,PCAL,PCALA, 
+     .      IDCB,IQUIT,IERR)
+      IF (IERR.EQ.-1) GOTO 990
+      IF (.NOT.KDBUFF.OR.INIT.EQ.1) GOTO 105
+C 
+C           Skip this if we don't have a real data buffer 
+C             or if it has been done before 
+C 
+      DO 101 I=1,5
+        IF (IBDB.EQ.IBAUD(I)) GOTO 102
+101     CONTINUE
+      I = 5 
+102   IB = IBINX(I) 
+C 
+      CALL EXEC(3,3000B+LUDB) 
+C                   Reset the interface line
+      CALL EXEC(3,2100B+LUDB) 
+C                   Disable this LU as a terminal 
+      CALL EXEC(3,3300B+LUDB,100B+IB) 
+C                   Set up selected baud rate 
+      CALL ITO(LUDB,900/(IBDB/100)+10)
+C                   Set time-out depending on baud rate 
+C 
+      IF (IBUGPC.GT.1) WRITE(LUOP,9110) ITRACK,LBLK,NBLKPC,IBYPPC,
+     .   IBWVC(1),IBDB
+9110  FORMAT("PARAMETERS FOR PHASE CAL EXTRACTION USING DATA BUFFER"/ 
+     ."TRACK# "I5" BLOCK# "A2" #BLKS "I3" BYPASS MODE "I2" BANDWIDTH "
+     .I2," BAUD RATE "I5) 
+105   CONTINUE
+      INIT = 1
+C 
+C   2. Start of loop over PCALR, NCYCPC times if NCYCPC > 0 
+C     If NCYCPC = 0, KCOUNT is always true and the loop 
+C     is executed continuously until you "break" PCALR. 
+C     This loop encloses the loop over all tracks and an
+C     inner loop over NBLKPC blocks 
+C 
+      IC = 1
+110   IF (NCYCPC.GT.0.AND.IC.GT.NCYCPC) KCOUNT = .FALSE.
+      IF (.NOT.KCOUNT) GOTO 990 
+      IF (IBUGPC.GT.1) WRITE(LUOP,9510) LU,LUOP,LUMAT,LUDB,IBDB 
+9510  FORMAT("LU,LUOP,LUMAT,LUDB,IBDB"/5I5) 
+C 
+C 
+C 
+C     3. Now set up the loop over all tracks. 
+C     Code up the buffer for the tape drive and send it off.
+C 
+      DO 900 ITRK = 1,28
+        IF (IFBRK(IDUM).LT.0) GOTO 999
+        IF (ITRKPC(ITRK).LE.0) GOTO 900 
+C                   Skip this track if it's not requested or setup
+C     PHCAL calculates the phase cal freq in the VC corresponding 
+C     to ITRK.  Data from this track is not processed if PCAL>50kHz 
+C 
+      IF (KFIELD) CALL PHCAL(PCAL,ITRK,IVC) 
+      IF (IBUGPC.GT.0) WRITE(LUOP,9205) PCAL,ITRK,IVC,FREQVC(IVC) 
+9205  FORMAT("PCAL (Hz)="D9.2" TRACK="I2" VC#="I2" VCFRQ="F7.2) 
+      IF (PCAL.GT.50000.) GOTO 900
+C 
+      IF (IBUGPC.GT.0) WRITE(LUOP,9210) ITRK
+9210  FORMAT(" TRACK # "I3) 
+      IF (.NOT.KFIELD) GOTO 300 
+C           Skip MATCN call if the Field System is not running
+112   CALL BPSET(IHOLD,IBYPCH,ITRK,KSPLIT,ITKA,ITKB,ISKIP)
+      IF (ISKIP.EQ.-1) GOTO 890 
+C 
+C      - Check phase cal in partner track if in split mode
+C 
+      IF (KSPLIT) CALL PHCAL(PCALA,ITRKPC(ITRK),IVC2) 
+      IF (IBUGPC.GT.0.AND.KSPLIT) WRITE(LUOP,9205) PCALA,ITRKPC(ITRK),
+     . IVC2,FREQVC(IVC2)
+      IF (PCALA.GT.50000.) KSPLIT = .FALSE. 
+C 
+      CALL TPSET(IHOLD,IBUF,IERR,KSPLIT)
+      IF (IERR.EQ.-1) GOTO 990
+C      - check the tape recorder again
+C 
+C 
+C     4. Reset the data buffer and arm it.  Suspend ourselves for 
+C     2 seconds, wake up, check data buffer status.  If 
+C     data is holding, set up block desired and get the data. 
+C     If still armed, suspend again.
+C 
+C     4.1  Send <esc> to say hello to the data buffer and then quit 
+C          if you only asked to check communications. 
+C 
+300   CONTINUE
+      CALL ICHMV(IBUF,1,15400B,1,1) 
+      IF (IBUGPC.GT.1) WRITE(LUOP,9310) IBUF(1) 
+9310  FORMAT("SENDING COMMAND TO DATA BUFFER: "5A2) 
+      CALL DBCOM(LUOP,LUDB,IBUGPC,IBUF,1,IDATA,ILOG,IERR,IBLK,ISTAT,ID, 
+     . KDBUFF,IDCB) 
+      IF (IBUGPC.NE.0) WRITE(LUOP,9311) ILOG,IBLK,ISTAT,ID,IERR 
+9311  FORMAT(/"ILOG="I5" IBLK="I3" ISTAT="I10" ID="I10" IERR="I5) 
+      IF (ILOG.EQ.-1) GOTO 990
+      IF (IQUIT.LT.0) GOTO 990
+      IF (ILOG.NE.0) GOTO 303 
+      IERR = -103 
+      IF (KFIELD) CALL LOGIT(IDUM,IDUM,IDUM,1,IERR,LWHO,ITRK) 
+      IF (.NOT.KFIELD) WRITE(LUOP,9312) ITRK
+9312  FORMAT("Zero length record returned on track #"I2)
+      GOTO 900
+C 
+C     4.2  Send ":" to reset the data buffer
+C 
+303   CALL ICHMV(IBUF,1,2H: ,1,1) 
+      IF (IBUGPC.GT.1) WRITE(LUOP,9310) IBUF(1) 
+      CALL DBCOM(LUOP,LUDB,IBUGPC,IBUF,1,IDATA,ILOG,IERR,IBLK,ISTAT,ID, 
+     . KDBUFF,IDCB) 
+      IF (IBUGPC.NE.0) WRITE(LUOP,9311) ILOG,IBLK,ISTAT,ID,IERR 
+      IF (ILOG.EQ.-1) GOTO 990
+      IF (ILOG.NE.0) GOTO 305 
+      IERR = -103 
+      IF (KFIELD) CALL LOGIT(IDUM,IDUM,IDUM,1,IERR,LWHO,ITRK) 
+      IF (.NOT.KFIELD) WRITE(LUOP,9312) ITRK
+      GOTO 900
+C 
+C     4.3  Send IMODE and "&" to set the data buffer mode 
+C 
+305   IMODE = 2 
+      IF (KSPLIT) IMODE = 3 
+      IBUF(1) = IH22A(IMODE)
+      CALL ICHMV(IBUF,3,2H& ,1,1) 
+      IF (IBUGPC.GT.1) WRITE(LUOP,9310) IBUF(1),IBUF(2) 
+      CALL DBCOM(LUOP,LUDB,IBUGPC,IBUF,3,IDATA,ILOG,IERR,IBLK,ISTAT,ID, 
+     . KDBUFF,IDCB) 
+      IF (IBUGPC.NE.0) WRITE(LUOP,9311) ILOG,IBLK,ISTAT,ID,IERR 
+      IF (ILOG.EQ.-1) GOTO 990
+      IF (ILOG.NE.0) GOTO 307 
+      IERR = -103 
+      IF (KFIELD) CALL LOGIT(IDUM,IDUM,IDUM,1,IERR,LWHO,ITRK) 
+      IF (.NOT.KFIELD) WRITE(LUOP,9312) ITRK
+      GOTO 900
+C 
+C     4.4  Send "!" to arm the data buffer
+C 
+307   CALL ICHMV(IBUF,1,2H! ,1,1) 
+      IF (IBUGPC.GT.1) WRITE(LUOP,9310) IBUF(1) 
+      CALL DBCOM(LUOP,LUDB,IBUGPC,IBUF,1,IDATA,ILOG,IERR,IBLK,ISTAT,ID, 
+     . KDBUFF,IDCB) 
+      IF (IBUGPC.NE.0) WRITE(LUOP,9311) ILOG,IBLK,ISTAT,ID,IERR 
+      IF (ILOG.EQ.-1) GOTO 990
+      IF (ILOG.NE.0) GOTO 310 
+      IERR = -103 
+      IF (KFIELD) CALL LOGIT(IDUM,IDUM,IDUM,1,IERR,LWHO,ITRK) 
+      IF (.NOT.KFIELD) WRITE(LUOP,9312) ITRK
+      GOTO 900
+C 
+C     4.5  Get status every 2 seconds and check that bypass mode and
+C          channel A and B tracks have not changed. 
+C          Go on when ISTAT is correctly set, i.e. the data buffer
+C          is holding data.  (ISTAT=17 for channel B,ISTAT=25 in split mode.) 
+C 
+310   CONTINUE
+      IF (IBUGPC.NE.0) WRITE(LUOP,9300) 
+9300  FORMAT("SUSPENDING FOR 2 SECONDS")
+      CALL SUSP(2,2)
+      IF (IBUGPC.GT.1) WRITE(LUOP,9310) IBUF(1) 
+      CALL DBCOM(LUOP,LUDB,IBUGPC,IBUF,1,IDATA,ILOG,IERR,IBLK,ISTAT,ID, 
+     . KDBUFF,IDCB) 
+      IF (IBUGPC.NE.0) WRITE(LUOP,9311) ILOG,IBLK,ISTAT,ID,IERR 
+      IF (KFIELD.AND.(IBYPCH.NE.IBYPAS.OR.ITKB.NE.ITRAKB.OR.( 
+     . ITKA.NE.ITRAKA.AND.KSPLIT))) GOTO 112
+      IF (ILOG.EQ.-1) GOTO 990
+      IF (IFBRK(IDUM).LT.0) GOTO 999
+      IF ((.NOT.KSPLIT.AND.ISTAT.EQ.17).OR.(KSPLIT.AND.ISTAT.EQ.25))
+     . GOTO 315 
+      IF (ILOG.NE.0.AND.IERR.EQ.0) GOTO 310 
+      IF (ILOG.NE.0) GOTO 313 
+      IERR = -103 
+      IF (KFIELD) CALL LOGIT(IDUM,IDUM,IDUM,1,IERR,LWHO,ITRK) 
+      IF (.NOT.KFIELD) WRITE(LUOP,9312) ITRK
+      GOTO 900
+313   IERR = -100+IERR
+      IF (KFIELD) CALL LOGIT(IDUM,IDUM,IDUM,1,IERR,LWHO,ITRK) 
+      IF (.NOT.KFIELD) WRITE(LUOP,9313) IERR,ITRK 
+9313  FORMAT("Error "I3" from track "I2", next track")
+      GOTO 900
+C 
+C     5.0  Initialize counters and do loop over blocks
+C 
+315   RSINA = 0.D0
+      RSINB = 0.D0
+      RCOSA = 0.D0
+      RCOSB = 0.D0
+      RNBITA = 0.D0 
+      RNBITB = 0.D0 
+      ISPLIT = 2
+      IF (KSPLIT) ISPLIT = 1
+      NLOOP = 2*NBLKPC-1
+C 
+      DO 899 I = 0,NLOOP,ISPLIT 
+          IBLOKN = I/ISPLIT 
+D         IBLOKN = I/ISPLIT+ 50 
+          IBUF(1) = IH22A(IBLOKN) 
+          CALL ICHMV(IBUF,3,2H+ ,1,1) 
+          IF (IBUGPC.GT.1) WRITE(LUOP,9310) IBUF(1),IBUF(2) 
+          CALL DBCOM(LUOP,LUDB,IBUGPC,IBUF,3,IDATA,ILOG,IERR,IBLK,ISTAT,
+     .    ID,KDBUFF,IDCB) 
+C                   Send "nn+" to set up block nn 
+          IF (IBUGPC.NE.0) WRITE(LUOP,9311) ILOG,IBLK,ISTAT,ID,IERR 
+          IF (ILOG.EQ.-1) GOTO 990
+          CALL ICHMV(IBUF,1,2H? ,1,1) 
+          IF (IBUGPC.GT.1) WRITE(LUOP,9310) IBUF(1) 
+          CALL DBCOM(LUOP,LUDB,IBUGPC,IBUF,1,IDATA,ILOG,IERR,IBLK,ISTAT,
+     .     ID,KDBUFF,IDCB)
+C                   Send "?" to get the data
+C 
+          IF (IBUGPC.NE.0) WRITE(LUOP,9311) ILOG,IBLK,ISTAT,ID,IERR 
+          IF (ILOG.EQ.-1) GOTO 990
+          IF (IERR.EQ.0) GOTO 400 
+          IF (.NOT.KFIELD) WRITE(LUOP,9319) IERR
+9319      FORMAT(" Error"I3" getting data, skipping this track")
+          IERR = IERR-100 
+          IF (KFIELD) CALL LOGIT(IDUM,IDUM,IDUM,1,IERR,LWHO,ITRK) 
+          GOTO 900
+C 
+C 
+C         6. Process the data.  Get the phase cal from it.
+C         Write out the amp and phase.
+C 
+400       CALL DPROX(LUOP,IBUGPC,IDATA(2),ILOG-4,IBLK,IBUF,NBYTES,IPAR, 
+     .           ICRCC,LTIME,ISCHAR,KSPLIT) 
+C         Get sampÿÿ rate from code in FSCOM
+          SMPLRT = BWDI(IRATFM+1) 
+          SMPLRT = SMPLRT*1.E6
+          IF (IBUGPC.NE.0.AND.ICRCC.NE.0.AND..NOT.KSPLIT) 
+     .         WRITE(LUOP,9320) LTIME 
+9320      FORMAT("LTIME FROM DPROC="8A2)
+C         - accumulate RSIN,RCOS,RNBIT
+          CALL PCALX(SMPLRT,IBLOKN,RSINB,RCOSB,RNBITB,RSINA,RCOSA,
+     .      RNBITA,IDATA(2),ILOG-4,PCAL,PCALA,KSPLIT) 
+          IF (IBUGPC.GT.1) WRITE(LUOP,9530) IBLOKN,RSINB,RCOSB,RNBITB 
+9530      FORMAT(/" BLOCK# "I3"; RSIN,RCOS,RNBIT = "3F8.0)
+          IF (KSPLIT) CALL PCCOR(IVC,IVC2,ITRK,KCOREL,IDATA,ILOG, 
+     .        R1BIT,NZERO)
+          IF (IFBRK(IDUM).LT.0) GOTO 999
+899       CONTINUE
+C 
+C 
+      CALL NRMLZ(KFIELD,KSPLIT,RSINB,RCOSB,RNBITB,RSINA,RCOSA,
+     . RNBITA,IVC,IVC2,ITRK,KCOREL,NZERO,R1BIT) 
+C 
+C 
+C     7. End of the loop over tracks.  Get next track from the
+C     enabled list and go on. 
+C 
+890     ICHECK(18) = IHOLD
+900     CONTINUE
+C 
+C     8.  Suspend here then return to the beginning.  If at 
+C     the end of # of cycles requested, go dormant saving resources.
+C 
+      IC = IC+1 
+C      - Suspend here for IPAUPC seconds
+      CALL SUSP(2,IPAUPC) 
+      GOTO 110
+990   CONTINUE
+      IF (.NOT.KDBUFF) CALL CLOSE(IDCB,IERR)
+      IF (.NOT.KFIELD) GOTO 999 
+      CALL EXEC(6,0,1)
+      CALL RMPAR(IBUF)
+      IF (IBUF(1).EQ.-1) GOTO 999 
+      GOTO 100
+999   CONTINUE
+      WRITE(LU,9999)
+9999  FORMAT("PCALR ENDED") 
+      END 

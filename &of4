@@ -1,0 +1,209 @@
+FTN4
+      PROGRAM OF(3,30)
+C 
+C     Program to do an :RP,,NAME to delete an ID segment that 
+C     has been previously restored by program RP or by the FMGR 'RP' command. 
+C     Program 'OF' is normally called by the subroutine 'IOF' to
+C     programmatically delete an RP'ed ID segment, but may also be run
+C     stand-alone.  Works under ANY revision of RTE-IVA or RTE-IVB. 
+C 
+C     To run stand-alone: 
+C        RU,OF,NAME 
+C          where NAME = NAME OF PROG TO BE DELETED
+C 
+C     Error on return to father program may be recovered by RMPAR.
+C     ERROR=0 for successful completion, standard FMGR error codes
+C     otherwise.
+C     Under RTE-IVB, error message is written to user terminal. 
+C     Otherwise, error message is written to system console unless "OF" is  
+C     scheduled with an "EXEC" call with IPRM5<0  (see subr "IOF"). 
+C 
+C     NOTE: If use of subr "IOF" is anticipated, it is suggested
+C           that prgm "OF" be installed as a permanent program. 
+C 
+C     NOTE TO USER'S OF RTE-IVB REV 2026: 
+C           Because of a bug in the RTE-IVB Rev 2026 system, OF has been
+C           modified so that it will not delete ID segments that have 
+C           been RP'ed from non-lu2/3 using the FMGR 'RP' command.
+C           This is to prevent temporarily-loaded programs from being 
+C           inadvertantly being blown away (the FMGR command RP,,prog 
+C           WILL blow away temporarily-loaded programs under Rev 2026!).
+C           However, programs that have been restored from non-lu2/3 by 
+C           program RP (or subroutine IRP -- see file "LIBHS) will be deleted.  
+C 
+C     ANOTHER NOTE TO USER'S OF RTE-IVB REV 2026: 
+C           Due to an apparent oversight at HP, the system entry point $DATC, 
+C           which is supposed to contain the date code (i.e. revision level)
+C           of the current system, was not updated from 2013 to 2026. 
+C           Program OF looks at $DATC to determine certain actions that it
+C           must take.  Although program OF will work perfectly well if you 
+C           leave the value of $DATC at 2013, things will be aesthetically  
+C           cleaner if you modify $DATC to be 2026.  This can be done with
+C           program CMM4 (see HST Save #3) using the DM command to modify 
+C           the system disc.  If you feel uncertain about doing this, then
+C           just leave well enough alone -- program OF will still work. 
+C           Alternatively, modify the source code of the replacement routine
+C           $DATC included in this file to indicate Rev 2026, and then
+C           modify the LOADR command file ^OF to force this $DATC to be 
+C           picked up ($DATC is compiled to a file called %OF2 -- see file *OF).
+C 
+C     ARW 5/12/77 
+C 
+C     MODIFICATION RECORD:
+C     WHEN   WHO  WHAT
+C     780319 ARW  TIGHTER NAME CHECKING AND ALLOW ERROR MESSAGES
+C                 TO GO TO ANY LU.
+C     801107 BRS  CHANGED SO THAT IT WILL NOT OFF ID SEGMENTS CREATED BY
+C                 THE LOADER.  THIS RESTORES RP TO OPERATING LIKE IT DID
+C                 BEFORE RTE-IVB ARRIVED. 
+C     801114 ARW  MODIFY SO WILL WORK WITH BOTH RTE-IVA AND RTE-IVB.
+C     801117 ARW  SEND MESSAGE TO OPERATOR CONSOLE IF RTE-IVB 
+C     800301 ARW  Modify method of distinguishing between RP'ed and 
+C                 temporarily-loaded programs 
+C 
+      DIMENSION IBUF(128),NAME(10),NAM(3),JERR(5),IREG(2),MESS(5) 
+      LOGICAL LU2OR3,PATCH
+      EQUIVALENCE (NAME,NAM),(IERR,JERR),(REG,IREG) 
+C 
+      CALL RMPAR(MESS)
+      LUMESS=MESS(5)
+      IF (LUMESS .EQ. 0) LUMESS=1 
+      IF (LUMESS .LT. 0) LUMESS=0 
+C     IF MESS(1)=0, 'OF' HAS BEEN SCHEDULED FROM SUBROUTINE IOF.
+C     IF 'OF' HAS NOT BEEN SCHEDULED FROM IOF, AND MESS(5)<=0, AND RTE-IVB, 
+C     CHANGE MESSAGE LU TO INITIATING LU. 
+      IF (MESS .NE. 0 .AND. MESS(5) .LE. 0 .AND. IOPSY(IDUM) .EQ. 8)
+     .                                                LUMESS=LUOPR(IDUM)
+C 
+80    CALL GETST(IBUF,-40,ILOG) 
+      ISCR=1
+      IERR=-15
+      IF (NAMR(NAME,IBUF,ILOG,ISCR) .LT. 0 .OR. 
+     .    IAND(NAME(4),3) .NE. 3) GO TO 145 
+C 
+C     FIND THE ID SEGMENT OF THE PROGRAM TO BE OFFED
+      IERR=9
+      IDAD = IDGET(NAM) 
+      IF(IDAD .EQ. 0) GO TO 145 
+C 
+C     WHAT KIND OF ID SEGMENT IS IT - SHORT OR LONG?
+      IDTYPE = IAND(20B,IGETS(IDAD+14)) 
+C 
+C     Get lu, track, and #sec/tk of program tracks
+      IF(IDTYPE .NE. 0) IWHERE=IGETS(IDAD+19) 
+      IF(IDTYPE .EQ. 0) IWHERE=IGETS(IDAD+26) 
+      ILU=2 
+      IF(IAND(100000B,IWHERE) .EQ. 100000B) ILU=3 
+      ITRACK=IAND(77600B,IWHERE)/200B 
+      ISEC=IAND(IWHERE,177B)
+      NSECT=IGETS(1755B+ILU)
+C 
+C     If system owns track, allow deletion only if ID segment word 14 bit 5 
+C     is set (indicating program RP restored the program from other than lu2/3) 
+C     or word 21 bit 6 is set in long ID segment. 
+      IERR=17 
+      LU2OR3=.TRUE. 
+      PATCH=.FALSE. 
+      ITATAD=IGETS(1656B) 
+      IF (IGETS(ITATAD+(ILU-2)*IGETS(1756B)+ITRACK).NE.100000B)GO TO 140
+      IF (IDTYPE.EQ.0 .AND. IAND(IGETS(IDAD+21),100B).NE.0) GO TO 120 
+      IF (IAND(IGETS(IDAD+14),40B) .EQ. 0) GO TO 145  
+120   LU2OR3=.FALSE.
+C 
+C     If RTE-IVA, or RTE-IVB pre-2026, must fool the system to persuade IDRPD 
+C     to gracefully delete the specified ID segment.
+C     If temporary load bit is set, status=0, point-of-suspension=0, and
+C     not in the time list, point the ID track and sector word to an FMP
+C     track so that IDRPD will be happy.
+      IF (IOPSY(IDUM) .EQ. 8 .AND. ISREV(IDUM) .GE. 2026) GO TO 140 
+C     Find first FMP track in TAT (starting from end and working backwards) 
+      LTAT=-IGETS(1755B)
+      DO 130 LTK=LTAT-1,0,-1
+      IF (IGETS(ITATAD+LTK) .EQ. 77776B) GO TO 132  
+130   CONTINUE
+      GO TO 145 
+132   LLU=IOR(100000B,(LTK-IGETS(1756B))*200B)
+      IF (LTK .LT. IGETS(1756B)) LLU=LTK*200B 
+      IERR=17 
+      IF (IAND(IGETS(IDAD+14),200B) .EQ. 0) GO TO 145 
+C     If short ID segment no need to check further. 
+      IOFST=19
+      IF (IDTYPE .NE. 0) GO TO 135
+      IOFST=26
+      IERR=18 
+      IF (IGETS(IDAD+8) .NE. 0 .OR. IAND(IGETS(IDAD+15),17B) .NE. 0 
+     .    .OR. IGETS(IDAD+16) .NE. 0) GO TO 145 
+C     Patch the lu,track,sector to point to FMP track 
+135   CALL PUTS(IDAD+IOFST,LLU) 
+      PATCH=.TRUE.
+C 
+C     Attempt to delete it
+140   IF (IDRPD(NAME,IERR) .NE. 0) GO TO 144
+C 
+C     If program was RP'ed from cartref other than lu2 or lu3, must release 
+C     the system tracks occupied by the RP'ed copy. 
+C     Do this by buying those tracks, which will then be released with this 
+C     program terminates. 
+      IF (LU2OR3) GO TO 200 
+      IF (IDTYPE .NE. 0) GO TO 141
+C     Long ID segment 
+      LOMAIN=IGETS(IDAD+22) 
+      MAINHI=IGETS(IDAD+23) 
+      LOWBP =IGETS(IDAD+24) 
+      IHIBP =IGETS(IDAD+25) 
+      GO TO 142 
+C     Short ID segment
+141   LOMAIN=IGETS(IDAD+15) 
+      MAINHI=IGETS(IDAD+16) 
+      LOWBP =IGETS(IDAD+17) 
+      IHIBP =IGETS(IDAD+18) 
+C     Compute #sectors occupied by the program
+142   NSEC=(MAINHI-LOMAIN+64)/64+(IHIBP-LOWBP+64)/64+ISEC 
+      NTRKS=(NSEC-1)/NSECT+1
+C     Buy the tracks
+      IDADOF=IGETS(1717B) 
+      DO 143 I=1,NTRKS
+143   CALL PUTS(ITATAD+(ILU-2)*IGETS(1756B)+ITRACK+I-1,IDADOF)
+      GO TO 200 
+C 
+C     IDRPD failed for some reason. 
+C     Patch ID segment back to original state, if necessary.
+144   IF (PATCH) CALL PUTS(IDAD+IOFST,IWHERE) 
+C 
+C     End and return errors 
+145   IF (LUMESS .GT. 0) WRITE(LUMESS,150) IERR,NAM 
+150   FORMAT(" OF:FMGR ERR",I3,3X,3A2)
+200   IF (IERR .EQ. 0) CALL EXEC(5,-1)
+      CALL PRTN(JERR) 
+      CALL EXEC(6)
+      END 
+ASMB
+      NAM ISREV,7 Get system revision level  ARW 810112 
+      ENT ISREV 
+      EXT $DATC 
+* 
+*FUNCTION ISREV(IDUM) 
+* 
+*     Function to return revision level of host operating system, if available. 
+*     This information is available only in systems which have the system entry 
+*     point $DATC available.  If $DATC is not already in your system, the 
+*     dummy routine $DATC should be used to satisfy the external reference. 
+* 
+ISREV NOP 
+      DLD ISREV,I 
+      STA ISREV     Set return point
+      LDA $DATC 
+      STA B,I 
+      JMP ISREV,I 
+* 
+A     EQU 0 
+B     EQU 1 
+      END 
+ASMB
+      NAM $DATC,7 Dummy for $DATC entry point  ARW 810112 
+*Needed only for older systems that do not already have $DATC as a
+*memory-resident system entry point.
+      ENT $DATC 
+* 
+$DATC DEC 2301      Replace with actual current rev code of your system 
+      END 

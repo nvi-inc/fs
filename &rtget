@@ -1,0 +1,990 @@
+FTN66 
+      PROGRAM RTGET 
+C 
+C     PROGRAM TO RETRIEVE DATA FROM MK III DATA BUFFER AND STORE IT TO DISC 
+C 
+C     ARW 790724, MOD ARW 800708
+C 
+      INTEGER XQ(40),YQ(6),IBUF(625),IDCB(912),IPBUF(10),ITIME(8),
+     .        JPAR(5),IDATQ(260),ZQ(3)
+      QDATA ICMD1 "/ % : ! # $ ?" 
+      QDATA ICMD2 "?? #^ $^ ?^ ::"
+C 
+      CALL RMPAR(JPAR)
+      LUOP=JPAR 
+      LULIST=LUOP 
+      IF (JPAR(2) .GT. 0) LULIST=JPAR(2)
+C 
+C     GET SETUP AND INITIALIZATION DATA 
+      CALL RTSET(LUOP,IBUF,LUDB,IPBUF,IDCB,ISCHED)
+      WRITE(LUOP,80)
+80    FORMAT("Type ?? for command summary") 
+      GO TO 110 
+C 
+90    WRITE(LUOP,100) 
+100   FORMAT(" SAY WHAT?")
+110   CALL READQ(LUOP,XQ,80,IERR) 
+      ISTRC=1 
+C 
+C     PARSE THE STRING
+120   IF (ISTRC .GT. XQ) GO TO 110
+      CALL IPRSQ(XQ,YQ,10,ISTRC,0)
+      IREPET=0
+      IDISP=0 
+      IRETRY=0
+      GO TO (90,130,140,160,90) YQ+1
+C 
+C     ONE-CHARACTER COMMANDS
+C                /   %   :   !   &   $   ?
+130   GO TO (90,132,200,200,200,133,134,200) (IPOSQ(ICMD1,YQ,1)+3)/2
+132   CALL PUTQ(YQ,1,33B) 
+      GO TO 200 
+133   IRETRY=1
+      KBLK=IBLK 
+134   IREPET=1
+      CALL PUTQ(YQ,1,2H ?)
+      GO TO 200 
+C     DISPLAY LAST DATA BLOCK RECEIVED
+136   CALL HEX(IDATQ,IBUF,256)
+      WRITE(LUOP,138) (IBUF(I),I=1,IDATQ) 
+138   FORMAT((16(1X,2A2)))
+      GO TO 120 
+C 
+C     TWO-CHARACTER COMMANDS
+140   ICH2=JASCQ(YQ,2)
+C                    -                   &
+      IF (ICH2 .NE. 55B .AND. ICH2 .NE. 46B) GO TO 150
+C     TEST MODE OR DATA COLLECTION MODE 
+      IY=JASCQ(YQ,1)
+      IF (IY .LT. 60B .OR. IY .GT. 103B) GO TO 90 
+      IF (IY .GT. 71B .AND. IY .LT. 101B) GO TO 90
+      GO TO 200 
+C                ??  #^  $^  ?^  :: 
+150   GO TO (90,152,153,155,156,158) (IPOSQ(ICMD2,YQ,1)+5)/3
+C     LIST COMMANDS 
+152   WRITE(LUOP,154) 
+154   FORMAT("        /     Hello and give current status",/, 
+     .    "        %     Goodbye and go inactive",/,
+     .    "        :     Reset buffer",/, 
+     .    "        nn+   Set block# pointer to nn (hex)",/, 
+     .    "        !     Arm buffer",/, 
+     .    "        ?     Send data block and store to disc",/,
+     .    "        ?^    Same as '?' but display data block as well",/, 
+     .    "        $     Send data blocks continuously and store",/,
+     .    "        $^    Same as '$' but display data blocks as well",/,
+     .    "        #     Same as '$' but auto-retry as necessary",/,
+     .    "        #^    Same as '&' but display data as it arrives",/, 
+     .    "        n-    Load buffer with test pattern n",/,
+     .    "        n&    Select data buffer mode n",/,
+     .    "              (0-A, 1-Ext, 2-B, 3-Split)",/, 
+     .    "        ::    Terminate program")
+      GO TO 120 
+153   IRETRY=1
+      KBLK=IBLK 
+155   IREPET=1
+      CALL PUTQ(YQ,1,2H ?)
+156   IDISP=3 
+      YQ=1
+      GO TO 200 
+C     TERMINATE 
+158   CALL CLOSE(IDCB,IERR) 
+      CALL IFERR(LUOP,IERR,IPBUF,6HCLOSE )
+      IF (ISCHED .EQ. 1) CALL EXEC(24,6HRTCOR ,0,0,0,999,997) 
+      CALL EXEC(6)
+C 
+C     3-CHARACTER COMMANDS
+160   IY=JASCQ(YQ,3)
+C     CHECK FOR "+" (ONLY ALLOWED 3-CHAR COMMAND) 
+      IF (IY .NE. 53B) GO TO 90 
+      DO 170 I=1,2
+      IY=JASCQ(YQ,1)
+      IF (IY .LT. 60B .OR. IY .GT. 106B) GO TO 90 
+      IF (IY .GT. 71B .AND. IY .LT. 101B) GO TO 90
+170   CONTINUE
+C 
+C     SEND COMMAND TO DATA BUFFER 
+200   CALL DBCOM(LUDB,LUOP,YQ,IDATQ,ISTAT,IBLK,ID,ILOG,JLOG,ICHEK,
+     .           JCHEK,IERR,IDISP,LULIST) 
+C 
+C     IF IRETRY=1, CHECK FOR BAD DATA 
+      IBAD=0
+      IF (IRETRY .EQ. 0) GO TO 208
+      IF (IBLK .NE. KBLK .OR. IERR .NE. 0) IBAD=1 
+C 
+C     IF DATA BLOCK HAS BEEN RECEIVED, PROCESS IT.
+208   CALL DPROC(LUOP,IDATQ(2),ILOG-4,IBLK,IDCB,IPBUF,IBUF,NBYTES,
+     .        IPAR,ICRCC,ITIME,ISCHAR,IDISP,IBAD,LSTREC,LULIST,ISTAT) 
+C 
+C     IF ISCHED=1 AND RTCOR DORMANT, SCHEDULE RTCOR TO DO CORRELATIONS. 
+C     PASS RTCOR THE LAST COMPLETE RECORD# WRITTEN TO DATA FILE.
+      IF (ISCHED .EQ. 1 .AND. IPST(6HRTCOR ) .EQ. 0)
+     .                   CALL EXEC(24,6HRTCOR ,0,0,0,LSTREC,997)
+C 
+C     DISPLAY BUFFER STATUS 
+      CALL DBST(LUOP,LULIST,ISTAT,IBLK,ID,ILOG,JLOG,ICHEK,JCHEK)
+      IF (IERR .EQ. 0) NBLKS=IAND(ID,17B)*64
+C 
+      IF (IBAD .NE. 0) WRITE(LUOP,209)
+209   FORMAT(" DATA NOT STORED TO DISC")
+C 
+      IF (NBYTES .LE. 0) GO TO 240
+      IF (ICRCC .NE. 0) GO TO 220 
+      WRITE(LUOP,210) IPAR
+210   FORMAT(" DATA BLOCK-- PARERRS=",I3,/) 
+      GO TO 240 
+220   WRITE(LUOP,230) IPAR,ICRCC,ITIME
+230   FORMAT(" DATA BLOCK-- PARERRS=",I3,"  CRCC=",I2,
+     .       "  TIME=",2A2,":",A2,":",A2,":",A2,".",3A2,/)
+C 
+240   IF (IFBRK(IDUM) .EQ. -1) GO TO 120
+C 
+      IF (IBAD .NE. 0) GO TO 250
+      IF (IRETRY .NE. 0) KBLK=KBLK+1
+      IF (IREPET .EQ. 1 .AND. IBLK .LT. NBLKS-1) GO TO 200
+      GO TO 120 
+C 
+C     RETRY ATTEMPT TO BE MADE. 
+C     ATTEMPT TO RESET BLOCK# BACK TO KBLK. 
+250   IF (KBLK .GE. 0 .AND. KBLK .LE. 255) GO TO 255
+      WRITE(LUOP,252) KBLK
+252   FORMAT("BLOCK # OUT OF RANGE (",I4," DECIMAL)") 
+      GO TO 120 
+255   WRITE(LUOP,260) 
+260   FORMAT(" ATTEMPT TO RESET BLOCK#")
+      CALL HEX(KBLK,ZQ,1) 
+      ZQ(3)=2H+ 
+      ZQ=3
+      CALL DBCOM(LUDB,LUOP,ZQ,IDATQ,ISTAT,IBLK,ID,ILOG,JLOG,
+     .           ICHEK,JCKEK,IERR,IDISP,LULIST) 
+      CALL DBST(LUOP,LULIST,ISTAT,IBLK,ID,ILOG,JLOG,ICHEK,JCHEK)
+      WRITE(LUOP,270) 
+270   FORMAT(" ") 
+      IF (IFBRK(IDUM) .EQ. -1) GO TO 120
+      IF (IBLK .EQ. KBLK .AND. IERR .EQ. 0) 200,250 
+C 
+      END 
+      SUBROUTINE RTSET(LUOP,IBUF,LUDB,IPBUF,IDCB,ISCHED)
+C 
+C     ROUTINE TO PERFORM UTILITY SETUP OPERATIONS 
+C 
+C     ON ENTRY--
+C       LUOP,   OPERATOR CONSOLE LU 
+C       IBUF,   SCRATCH BUFFER OF MINIMUM LENGTH 625 WORDS
+C     ON RETURN-- 
+C       LUDB,   DATA BUFFER LU
+C       IPBUF,  PARSED RAW-DATA FILE NAMR 
+C       IDCB,   DCB FOR IPBUF 
+C       SRATE,  SAMPLE RATE OF DATA IN DATA BUFFER (BITS/SEC) 
+C       IPCPER, # BITS IN QUARTER PERIOD OF PHASE-CAL 
+C 
+      INTEGER IDCB(1),IPAR(5),IBAUD(15),IPBUF(10),ISIZE(2),IBUF(625)
+      DATA IBAUD/50,75,110,134,150,300,600,900,1200,1800,2400,
+     .           3600,4800,7200,9600/ 
+C 
+      WRITE(LUOP,100) 
+100   FORMAT("DATA BUFFER LU? _") 
+      READ(LUOP,*) LUDB 
+110   WRITE(LUOP,120) 
+120   FORMAT("DATA BUFFER BAUD RATE (BITS/SEC)? _") 
+      READ(LUOP,*) JBAUD
+      DO 130 IB=1,15
+      IF (JBAUD .EQ. IBAUD(IB)) GO TO 140 
+130   CONTINUE
+      GO TO 110 
+C 
+C     SET UP INTERFACE
+140   CALL CN21(LUDB) 
+C     SET BAUD RATE 
+      CALL EXEC(3,3300B+LUDB,100B+IB) 
+C     SET TIME-OUT
+      CALL ITO(LUDB,900/(JBAUD/100)+10) 
+C-----CALL ITO(LUDB,900/(JBAUD/100)+110)   !For Kwajelein 
+C 
+150   WRITE(LUOP,160) 
+160   FORMAT("FILE NAMR FOR DATA STORAGE? _") 
+      IF (IFNAM(LUOP,IPBUF)) 150,170,180
+170   STOP
+C     IF FILE DOES NOT ALREADY EXIST, CREATE IT.
+180   CALL OPEN(IDCB,IERR,IPBUF,3,IPBUF(5),IPBUF(6),896)
+190   IF (IFERR(LUOP,IERR,IPBUF,6HOPEN  ,-8,-6) .LT. 0) GO TO 150 
+      IF (IERR .NE. -8) GO TO 200 
+      CALL IUNLK(IPBUF,IPBUF(6),JERR,LUOP)
+      GO TO 180 
+200   IF (IERR .EQ. -6) GO TO 225 
+C     CHECK RECORD LENGTH 
+      IF (IDCB(7) .EQ. 625) GO TO 205 
+      IERR=-5 
+      GO TO 190 
+C     CHECK FILE SIZE 
+205   IF (IDCB(6) .EQ. 1876) GO TO 210
+      IERR=-16
+      GO TO 190 
+210   WRITE(LUOP,220) 
+220   FORMAT("INITIALIZE FILE? (Y/N) _")
+      CALL EXEC(1,400B+LUOP,IBUF,-2)
+      IF (IBUF .EQ. 2HY ) GO TO 230 
+      IF (IBUF .EQ. 2HN ) GO TO 260 
+      GO TO 210 
+C     CREATE NEW FILE 
+C     938 BLOCKS BIG ENOUGH TO HOLD DATA FROM FULL 1-MEGABIT BUFFER 
+225   ISIZE=938 
+      ISIZE(2)=625
+      CALL CREAT(IDCB,IERR,IPBUF,ISIZE,2,IPBUF(5),IPBUF(6),896) 
+      IF (IFERR(LUOP,IERR,IPBUF,6HCREAT ) .LT. 0) GO TO 150 
+      WRITE(LUOP,227) (IPBUF(I),I=1,3),IPBUF(6) 
+227   FORMAT("File ",3A2,"::",I2," created")
+C     INITIALIZE DATA FILE BY CLEARING ALL FLAG RECORDS 
+230   DO 240 I=1,625
+240   IBUF(I)=0 
+      DO 250 I=1,32767
+      CALL WRITF(IDCB,IERR,IBUF,0,I)
+      IF (IERR .LT. 0) GO TO 260
+250   CONTINUE
+C     REOPEN FILE IN UPDATE MODE, NON-EXCLUSIVE 
+      CALL OPEN(IDCB,IERR,IPBUF,3,IPBUF(5),IPBUF(6),896)
+260   WRITE(LUOP,270) 
+270   FORMAT("CROSS-CORRELATION PROCESSING IN REAL-TIME? (Y/N) _")
+      CALL EXEC(1,400B+LUOP,IBUF,-2)
+      ISCHED=0
+      IF (IBUF .EQ. 2HN ) RETURN
+      IF (IBUF .NE. 2HY ) GO TO 260 
+      ISCHED=1
+      IF (IRP(6HRTCOR ,0,IERR,1) .LT. 0) GO TO 260
+C     SCHEDULE RTCOR WITH WAIT FOR SETUP
+      CALL EXEC(23,6HRTCOR ,LUOP,0,0,0,999,IPBUF,10)
+C     AFTER SETUP, RTCOR WILL GO DORMANT SAVING RESOURCES.
+C     SCHEDULE IT AGAIN WITHOUT WAIT. 
+      CALL EXEC(24,6HRTCOR ,16,0,0,0,998) 
+      RETURN
+      END 
+      SUBROUTINE DBCOM(LUDB,LUOP,XQ,IDATQ,ISTAT,IBLK,ID,ILOG,JLOG,
+     .                 ICHEK,JCHEK,IERR,IDISP,LULIST) 
+C 
+C     ROUTINE TO HANDLE COMMUNICATIONS WITH MKIII DATA BUFFER 
+C 
+C     ON ENTRY--
+C       LUDB,   LU OF DATA BUFFER 
+C       XQ,     STRING-FORMAT COMMAND BUFFER TO BE TRANSMITTED TO DATA BUFFER 
+C       LULIST, LIST LU 
+C     ON RETURN-- 
+C       IDATQ,  512 BYTE DATA BLOCK (STARTING AT IDATQ(2))
+C       ISTAT,  STATUS CHARACTER INDICATING DATA BUFFER STATUS
+C       IBLK,   BLOCK # JUST RECEIVED OR CURRENTLY READY FOR TRANSMISSION 
+C       ID,     DEFINES UNIT AND ITS MEMORY CAPACITY
+C       ILOG,   #CHARS RECEIVED 
+C       JLOG,   #CHARS EXPECTED 
+C       ICHEK,  RECEIVED CHECKSUM CHAR
+C       JCHEK,  COMPUTED CHECKSUM CHAR
+C       IERR,   COMMUNICATIONS STATUS 
+C                BIT 0 - IMPROPER # CHARS RECEIVED
+C                    1 - CHECKSUM ERROR 
+C 
+      INTEGER XQ(1),XQQ(4),IREG(2),IDATQ(1),IHEX(516) 
+      EQUIVALENCE (REG,IREG)
+C 
+      IERR=0
+      CALL EQUAT(XQQ,XQ)
+      LB=5
+      IF (XQ .EQ. 1 .AND. JASCQ(XQ,1) .EQ. 77B) LB=517
+      JLOG=LB-1 
+      CALL PUTQ(XQQ,XQQ+1,2H _) 
+      XQQ=XQQ+1 
+      CALL WRITQ(LUDB,XQQ)
+C     ISSUE BINARY READ REQUEST, BUFFER MODE
+      REG=EXEC(1,3100B+LUDB,IDATQ,-LB)
+      ILOG=IREG(2)
+      IF (IAND(IDISP,1) .EQ. 0) GO TO 145 
+      CALL HEX(IDATQ,IHEX,MIN0(ILOG/2,258)) 
+      WRITE(LULIST,140) (IHEX(I),I=3,ILOG-1)
+140   FORMAT(" DATA WITH PARITY--",/,(1X,15(1X,2A2))) 
+145   IF (ILOG .NE. LB-1) IERR=IOR(IERR,1)
+C     COMPUTE CHECKSUM
+      ICHEK=IGETC(IDATQ,ILOG) 
+      JCHEK=0 
+      DO 150 I=1,ILOG-1 
+150   JCHEK=IAND(JCHEK+IGETC(IDATQ,I),377B) 
+      IF (ICHEK .NE. JCHEK) IERR=IOR(IERR,2)
+      ISTAT=IGETC(IDATQ,1)
+      IBLK=IGETC(IDATQ,2) 
+      ID=IGETC(IDATQ,ILOG-1)
+C     IF "SPLIT" MODE AND PROPER DATA LENGTH, REORGANIZE DATA SO ALL A, 
+C     FOLLOWED BY ALL B.
+      IF (IAND(ISTAT,30B) .NE. 30B .OR. ILOG .NE. 516) GO TO 170
+C     MOVE 'B' BYTES TO TEMP BUFFER AND SQUEEZE HOLES OUT OF 'A'
+      DO 160 I=4,ILOG-2,2 
+      IC=(I-2)/2
+      CALL PUTC(IHEX,IC,IGETC(IDATQ,I)) 
+160   CALL PUTC(IDATQ,IC+3,IGETC(IDATQ,I+1))
+C     MOVE 'B' DATA BACK AGAIN
+      NC=(ILOG-4)/2 
+      CALL CMOVE(IHEX,1,IDATQ,3+NC,NC)
+170   RETURN
+      END 
+      SUBROUTINE DBST(LU,LULIST,ISTAT,IBLK,ID,ILOG,JLOG,ICHEK,JCHEK)
+C 
+C     ROUTINE TO DISPLAY DATA BUFFER STATUS ON LU 
+C 
+C     ARW 790722
+C 
+      INTEGER IBUF(40),IHEX(2)
+      QDATA IST1Q / IDLE      HOLDING   ARMED     TAKING    / 
+      QDATA IST2Q /A      EXT    B      SPLIT  /
+      QDATA IST3Q /STAT=XX  / 
+      QDATA IBLKQ /BLK=XX  /
+      QDATA IDQ /ID=X  /
+      QDATA MEMQ /MEM=X  /
+      QDATA ICHKQ /CKSUM=XX,XX  / 
+      QDATA LOGQ /LOG=XXX,XXX/
+      DATA IBUF/40*2H  /
+C 
+      IST1=IAND(ISTAT,3)
+      CALL MOVQQ(IST1Q,IST1*10+1,IBUF,1,10) 
+      IST2=IAND(ISTAT,30B)/10B
+      CALL MOVQQ(IST2Q,IST2*7+1,IBUF,11,7)
+      IBUF=17 
+      CALL HEX(ISTAT,IHEX,1)
+      CALL MOVQQ(IHEX,1,IST3Q,6,2)
+      CALL HEX(IBLK,IHEX,1) 
+      CALL MOVQQ(IHEX,1,IBLKQ,5,2)
+      CALL HEX(ID/20B,IHEX,1) 
+      CALL PUTQ(IDQ,4,JASCQ(IHEX,2))
+      CALL HEX(IAND(ID,17B),IHEX,1) 
+      CALL PUTQ(MEMQ,5,JASCQ(IHEX,2)) 
+      CALL HEX(ICHEK,IHEX,1)
+      CALL MOVQQ(IHEX,1,ICHKQ,7,2)
+      CALL HEX(JCHEK,IHEX,1)
+      CALL MOVQQ(IHEX,1,ICHKQ,10,2) 
+      ISTRC=5 
+      CALL KSTRQ(ILOG,LOGQ,0,ISTRC) 
+      CALL PUTQ(LOGQ,ISTRC,2H ,)
+      ISTRC=ISTRC+1 
+      CALL KSTRQ(JLOG,LOGQ,0,ISTRC) 
+      LOGQ=ISTRC-1
+      CALL ANDQ(IBUF,IST3Q,IBUF)
+      CALL ANDQ(IBUF,IBLKQ,IBUF)
+      CALL ANDQ(IBUF,IDQ  ,IBUF)
+      CALL ANDQ(IBUF,MEMQ ,IBUF)
+      CALL ANDQ(IBUF,ICHKQ,IBUF)
+      CALL ANDQ(IBUF,LOGQ ,IBUF)
+      CALL WRITQ(LU,IBUF) 
+C-----IF (LU .NE. LULIST) CALL WRITQ(LULIST,IBUF) 
+      RETURN
+      END 
+      SUBROUTINE DPROC(LUOP,IDATQ,ILOG,IBLK,IDCB,IPBUF,IBUF,NBYTES, 
+     .                 IPAR,ICRCC,ITIME,ISCHAR,IDISP,IBAD,LSTREC, 
+     .                 LULIST,ISTAT)
+C 
+C     ROUTINE TO PROCESS RAW DATA BLOCK BY SQUEEZING OUT PARITY BITS, 
+C     DECODING TIME/AUX DATA (IF APPROPRIATE), AND WRITING DATA TO DISC 
+C     IN A MORE CIVILIZED FORMAT (NAMELY, 2 RECORDS/FRAME)
+C 
+C     ON ENTRY--
+C       LUOP,    OPERATOR LU
+C       IDATQ,   BUFFER OF DATA TO BE PROCESSED 
+C       ILOG,    #CHARS IN IDATQ
+C       IBLK,    BLOCK# ASSOCIATED WITH IDATQ 
+C       IDCB,    DCB FOR DATA FILE
+C       IPBUF,   PARSED NAMR OF DATA FILE 
+C       IBUF,    SCRATCH BUFFER OF MINIMUM LENGTH 625 WORDS 
+C       IDISP,   IF IDISP<>0, DISPLAY RECEIVED DATA ON LUOP 
+C       IBAD,    IF IBAD<>0, DO NOT STORE DATA TO DISC
+C       LULIST,  LOGICAL LIST UNIT
+C       ISTAT,   DATA BUFFER STATUS CHARACTER 
+C 
+C     ON RETURN-- 
+C       IDATQ,   STRING BUFFER OF PROCESSED DATA STARTING AT FIRST FULL 
+C                BYTE IN THE INPUT DATA 
+C       NBYTES,  #BYTES RETURNED IN IDATQ 
+C       IPAR,    #PARITY ERROR DETECTED IN IDATQ
+C       ICRCC,   SYNC-BLOCK CRCC ERROR FLAG 
+C                 1 - SYNC BLOCK PRESENT WITH NO CRCC ERROR 
+C                 0 - NO SYNC BLOCK IN DATA 
+C                -1 - CRCC ERROR IN SYNC BLOCK
+C       ITIME    8-WORD ASCII ARRAY CONTAINING DECODED PRINTABLE TIME,
+C                IF AVAILABLE.
+C       ISCHAR,  CHARACTER # WITHIN IDATQ AT WHICH SYNC BLOCK BEGINS, 
+C                IF SYNC BLOCK FULLY CONTAINED WITHIN IDATQ (I.E. ICRCC<>0) 
+C       LSTREC,  LAST RECORD# WRITTEN TO DISC 
+C 
+C     ARW 790724
+C 
+      INTEGER IDATQ(1),IPBUF(1),ITIME(1),ITABL(256),ISYNC(10),IDCB(1),
+     .        IHEX(456),IBUF(1) 
+      DATA INIT/0/
+C 
+C     GENERATE TABLE FOR SUBROUTINE SQUISH
+      IF (INIT .NE. 999) CALL TABGN(ITABL)
+      INIT=999
+      NBYTES=0
+      IF (ILOG .LE. 0) RETURN 
+      LRECL=625 
+C 
+      NX=1
+      XBITS=4096. 
+      IXLOG=ILOG
+      IF (IAND(ISTAT,30B) .NE. 30B) GO TO 90
+C     'SPLIT' MODE
+      NX=2
+      XBITS=2048. 
+      IXLOG=ILOG/2
+C 
+90    DO 200 IX=1,NX
+      IPAR=0
+      ABIT=IBLK*XBITS 
+C     COMPUTE BIT# (IN IDATQ) OF FIRST FULL BYTE IN IDATQ (STARTING AT BIT#0) 
+      IBIT=9.-AMOD(ABIT,9.) 
+      IF (IBIT .EQ. 9) IBIT=0 
+C     COMPUTE FRAME# (WITHIN DATA BUFFER) IN WHICH THIS BIT OCCURS
+      IFRAME=(ABIT+IBIT)/22500. 
+C     COMPUTE BYTE# WITHIN FRAME
+      IBYTE=AMOD((ABIT+IBIT)/9.,2500.)
+      NBYTES=(IXLOG*8-IBIT)/9 
+C-----WRITE(17,100) ABIT,IBLK,IBIT,IFRAME,IBYTE,NBYTES
+C100--FORMAT("ABIT,IBLK,IBIT,IFRAME,IBYTE,NBYTES=",/,F12.1,5I6) 
+C 
+C     SQUEEZE OUT PARITY BITS AND COUNT PARITY ERRORS 
+      IWBIT=IBIT+1
+      JWBYT=1 
+      ID1=(IX-1)*IXLOG/2+1
+      CALL SQISH(IDATQ(ID1),IWBIT,IBUF,JWBYT,NBYTES,IPAR,ITABL) 
+      CALL CMOVE(IBUF,1,IDATQ,1,NBYTES) 
+      IF (IAND(IDISP,2) .EQ. 0) GO TO 120 
+      CALL HEX(IDATQ,IHEX,228)
+      WRITE(LULIST,110) (IHEX(I),I=1,NBYTES)
+110   FORMAT( " DATA WITH PARITY BITS STRIPPED--",/,(1X,15(1X,2A2)))
+C 
+C     CHECK IF COMPLETE SYNC BLOCK IS PRESENT WITHIN IDATQ
+120   ICRCC=0 
+      IF ((IBYTE.EQ.0 .OR. IBYTE+NBYTES.GE.2520) .AND. NBYTES.GE.20)
+     .                                                         150,180
+C     MOVE SYNC BLOCK TO SEPARATE BUFFER
+150   JBYT=MOD(2500-IBYTE,2500) 
+      ISCHAR=JBYT+1 
+      CALL CMOVE(IDATQ,ISCHAR,ISYNC,1,20) 
+C     DECODE TIME 
+      CALL HEX(ISYNC(7),ITIME,4)
+      ITIME(7)=IAND(ITIME(7),177400B) 
+      ITIME(8)=0
+      N=12
+      MASK=7003B
+      ISTATE=0
+      IDBIT=1 
+      NBITS=148 
+      CALL CRCC(N,MASK,ISTATE,ISYNC,IDBIT,NBITS,IDUM,0) 
+C     REVERSE ORDER OF BITS IN ISTATE TO GET CRC CHARACTER
+      DO 160 I=5,16 
+160   CALL PUTB(JSTATE,I,IGETB(ISTATE,21-I))
+C     COMPARE WITH CRC CHARACTER IN ISYNC 
+      ICRCC=1 
+      IF (IAND(ISYNC(10),7777B) .NE. IAND(JSTATE,7777B)) ICRCC=-1 
+C-----WRITE(17,170) ISCHAR,ICRCC
+C170--FORMAT("ISCHAR,ICRCC=",2I6) 
+C 
+C     IF IBAD<>0, DO NOT STORE DATA TO DISC 
+180   IF (IBAD .NE. 0) RETURN 
+C 
+C     WRITE DATA TO DISC. 
+C     ODD NUMBERED RECORDS ARE DATA.
+C     EVEN NUMBERED RECORDS ARE FLAGS.
+C     EACH RECORD CONTAINS 1/2 FRAME (10000 BITS).
+C     FILE IS WRITTEN SO THAT RECORDS 1-4 CORRESPOND TO THE ON-THE-MINUTE 
+C     FRAME, WHICH IS ACTUALLY NON-EXISTENT.  THIS WILL SIMPLIFY BOOKKEEPING
+C     LATER ON. 
+      IREC=(IFRAME*2+IBYTE/1250)*2+5
+      CALL READF(IDCB,IERR,IBUF,LRECL,LEN,IREC) 
+      CALL IFERR(LUOP,IERR,IPBUF,6HREADF )
+C     MOVE DATA INTO IBUF AND REWRITE IBUF
+      JB=MOD(IBYTE,1250)
+      NB=NBYTES 
+      IF (JB+NBYTES .GE. 1250) NB=1250-JB 
+      NID=0 
+C-----WRITE(17,190) IREC,NID,JB,NB
+C190--FORMAT("IREC,NID,JB,NB=",4I6) 
+      CALL CMOVE(IDATQ,NID+1,IBUF,JB+1,NB)
+      CALL WRITF(IDCB,IERR,IBUF,0,IREC) 
+      CALL IFERR(LUOP,IERR,IPBUF,6HWRITF )
+C     NOW WRITE THE FLAG RECORD IN THE SAME WAY 
+      IREC=IREC+1 
+      CALL READF(IDCB,IERR,IBUF,LRECL,LEN,IREC) 
+      CALL IFERR(LUOP,IERR,IPBUF,6HREADF )
+      CALL CFILL(IBUF,JB+1,JB+NB,377B)
+C     FLAG OUT FIRST 20 BYTES IF IREC=2,6,10,...
+      IF (MOD(IREC-2,4) .EQ. 0) CALL CFILL(IBUF,1,20,0) 
+      CALL WRITF(IDCB,IERR,IBUF,0,IREC) 
+      CALL IFERR(LUOP,IERR,IPBUF,6HWRITF )
+      LSTREC=IREC-3 
+200   CONTINUE
+      IF (NB .EQ. NBYTES) RETURN
+C     WRITE REMAINDER OF IDATQ TO NEXT DISC RECORD
+      IREC=IREC+1 
+      CALL READF(IDCB,IERR,IBUF,LRECL,LEN,IREC) 
+      CALL IFERR(LUOP,IERR,IPBUF,6HREADF )
+      NID=NID+NB
+      JB=JB+NB-1250 
+      NB=NBYTES-NB
+C-----WRITE(17,190) IREC,NID,JB,NB
+      CALL CMOVE(IDATQ,NID+1,IBUF,JB+1,NB)
+      CALL WRITF(IDCB,IERR,IBUF,0,IREC) 
+      CALL IFERR(LUOP,IERR,IPBUF,6HWRITF )
+      IREC=IREC+1 
+      CALL READF(IDCB,IERR,IBUF,LRECL,LEN,IREC) 
+      CALL CFILL(IBUF,JB+1,JB+NB,377B)
+C     FLAG OUT FIRST 20 BYTES IF IREC=2,6,10,...
+      IF (MOD(IREC-2,4) .EQ. 0) CALL CFILL(IBUF,1,20,0) 
+      CALL WRITF(IDCB,IERR,IBUF,0,IREC) 
+      CALL IFERR(LUOP,IERR,IPBUF,6HWRITF )
+C     COMPUTE LAST COMPLETE DATA RECORD 
+      LSTREC=IREC-3 
+      RETURN
+      END 
+      SUBROUTINE PUTB(IBUF,N,I) 
+C 
+C     ROUTINE TO SET/CLEAR BIT N IN ARRAY IBUF. 
+C     LSB OF I SETS/CLEARS SPECIFIED BIT. HIGHER ORDER BITS IN I ARE IGNORED. 
+C     FIRST BIT IN IBUF IS BIT #1.
+C 
+      INTEGER IBUF(1) 
+C 
+      NW=(N+15)/16
+      IBIT=MOD(N-1,16)
+      J=IBUF(NW)
+      IF (IAND(I,1) .EQ. 0) GO TO 100 
+C     SET BIT 
+      IBUF(NW)=IOR(J,IROT(100000B,IBIT))
+      GO TO 110 
+C     CLEAR BIT 
+100   IBUF(NW)=IAND(J,IROT(077777B,IBIT)) 
+C110--WRITE(16,105) N,I,NW,IBIT,IBUF(NW)
+C105--FORMAT("N,I,NW,IBIT,IBUF(NW)=",4I6,O8)
+110   RETURN
+      END 
+      FUNCTION IGETB(IBUF,N)
+C 
+C     ROUTINE TO RETURN VALUE OF Nth BIT IN ARRAY IBUF. 
+C     FIRST BIT IS BIT #1.
+C 
+      INTEGER MASK(16),IBUF(1)
+      DATA MASK/100000B,40000B,20000B,10000B,4000B,2000B,1000B, 
+     .          400B,200B,100B,40B,20B,10B,4B,2B,1B/
+C 
+      NN=N-1
+      IW=NN/16+1
+      IGETB=0 
+      IF (IAND(IBUF(IW),MASK(MOD(NN,16)+1)) .NE. 0) IGETB=1 
+      RETURN
+      END 
+      SUBROUTINE CFILL(IBUF,I,J,ICHAR),  CHARACTER FILL   ARW 790725
+C 
+C     ROUTINE TO FILL CHARACTER IBUF CHARACTER POSITIONS I THRU J,
+C     INCLUSIVE, WITH THE ASCII CHARACTER IN THE LOWER 8 BITS OF ICHAR. 
+C     FIRST CHARACTER OF BUFFER IS CHARACTER #1.
+C 
+      IF (I .GT. J) RETURN
+      DO 100 K=I,J
+      CALL PUTC(IBUF,K,ICHAR) 
+100   CONTINUE
+      RETURN
+      END 
+MACRO 
+      NAM SQISH,8  SQUEEZE OUT PARITY BITS  ARW 781004
+      ENT SQISH 
+      EXT .ENTR,.GOTO 
+* 
+*     CALL SUBROUTINE SQISH(IW,IWBIT,JW,JWBYT,NBYTES,IPERR,TABLE) 
+* 
+*STARTING WITH BIT IWBIT OF WORD IW, SQUEEZES OUT PARITY BITS FROM
+*NBYTES 9-BIT CHARS AND PLACES THE RESULTS (NBYTES 8-BIT CHARS) INTO
+*JW STARTING AT BYTE JWBYT. MAX VALUE OF NBYTES IS 3640-IWBIT/9.
+*INCREMENTS IPERR FOR EVERY EVEN PARITY BYTE FOUND. 
+*ON RETURN, IWBIT=IWBIT+9*NBYTES AND JWBYT=JWBYT+NBYTES.
+*FIRST BIT IN IW IS BIT #1. 
+*FIRST BYTE IN JW IS BYTE #1. 
+* 
+*NOTE!!!--IWBIT,JWBYT,IPERR MAY BE MODIFIED ON RETURN!!!! 
+* 
+A     EQU 0 
+B     EQU 1 
+* 
+IW    NOP 
+IWBIT NOP 
+JW    NOP 
+JWBYT NOP 
+NBYTE NOP 
+PERRS NOP 
+TABLE NOP 
+SQISH NOP 
+      JSB .ENTR 
+      DEF IW
+      LDB JW        SET UP CHARACTER ADDRESS
+      RBL 
+      ADB JWBYT,I 
+      ADB =B-1
+      STB JW
+      LDA NBYTE,I   SET UP BYTE COUNTER 
+      CMA,INA 
+      SSA,RSS       NBYTE<=0? 
+      JMP SQISH,I    YES. RETURN
+      STA COUNT 
+      CLA 
+      LDB IWBIT,I 
+      ADB =B-1
+      LSR 4         DIVIDE BY 16 TO GET STARTING WORD IN IW 
+      ADB IW
+      STB IW
+      ALF           GET REMAINDER--START BIT IN IW (0-15) 
+      SZA,RSS 
+      JMP S0        START ON WORD BOUNDARY
+      STA TEMP
+      IOR LSL       CREATE LSL INSTRUCTION
+      STA LSLX
+      LDA IW,I      INITIALIZE A-REG
+LSLX  LSL 16
+      JSB .GOTO 
+      DEF S0
+      DEF TEMP
+      DEF S1
+      DEF S2
+      DEF S3
+      DEF S4
+      DEF S5
+      DEF S6
+      DEF S7
+      DEF S8
+      DEF S9
+      DEF S10 
+      DEF S11 
+      DEF S12 
+      DEF S13 
+      DEF S14 
+      DEF S15 
+* 
+S0    LDA IW,I
+      LSL 8 
+      ELA 
+      JSB PARTY 
+S9    LSL 7 
+      ISZ IW
+      LDA IW,I
+      LSL 1 
+      ELA 
+      JSB PARTY 
+S2    LSL 8 
+      ELA 
+      JSB PARTY 
+S11   LSL 5 
+      ISZ IW
+      LDA IW,I
+      LSL 3 
+      ELA 
+      JSB PARTY 
+S4    LSL 8 
+      ELA 
+      JSB PARTY 
+S13   LSL 3 
+      ISZ IW
+      LDA IW,I
+      LSL 5 
+      ELA 
+      JSB PARTY 
+S6    LSL 8 
+      ELA 
+      JSB PARTY 
+S15   LSL 1 
+      ISZ IW
+      LDA IW,I
+      LSL 7 
+      ELA 
+      JSB PARTY 
+S8    LSL 8 
+      ISZ IW
+      LDA IW,I
+      ELA 
+      JSB PARTY 
+S1    LSL 8 
+      ELA 
+      JSB PARTY 
+S10   LSL 6 
+      ISZ IW
+      LDA IW,I
+      LSL 2 
+      ELA 
+      JSB PARTY 
+S3    LSL 8 
+      ELA 
+      JSB PARTY 
+S12   LSL 4 
+      ISZ IW
+      LDA IW,I
+      LSL 4 
+      ELA 
+      JSB PARTY 
+S5    LSL 8 
+      ELA 
+      JSB PARTY 
+S14   LSL 2 
+      ISZ IW
+      LDA IW,I
+      LSL 6 
+      ELA 
+      JSB PARTY 
+S7    LSL 8 
+      ELA 
+      JSB PARTY 
+      ISZ IW
+      JMP S0
+* 
+*PARITY CHECK AND BYTE STORE
+PARTY NOP 
+      CAX 
+      LDA B 
+      LDB JW
+      SBT           STORE BYTE
+      STB JW        STORE INCREMENTED ADDRESS 
+      AND =B377 
+      ADA TABLE 
+      LDA A,I       GET # OF 1's IN 8-BIT CHAR
+      SEZ           PARITY BIT=1? 
+      INA            YES. SO INCREMENT A-REG. 
+      SLA,RSS       TOTAL # OF 1's EVEN?
+      ISZ PERRS,I    YES. SO INCREMENT PARITY ERROR COUNT.
+      CXA 
+      ISZ COUNT     INCREMENT BYTE COUNTER
+      JMP PARTY,I 
+      LDA JWBYT,I   UPDATE JWBYT
+      ADA NBYTE,I 
+      STA JWBYT,I 
+      LDA NBYTE,I   UPDATE IWBIT
+      MPY =D9 
+      ADA IWBIT,I 
+      STA IWBIT,I 
+      JMP SQISH,I   RETURN
+* 
+COUNT BSS 1 
+TEMP  BSS 1 
+LSL   LSL 16
+* 
+      END 
+      NAM TABGN,8  TABLE GENERATOR FOR SOFTWARE CORRELATOR  ARW 780916
+      ENT TABGN 
+      EXT .ENTR 
+* 
+*COMPUTE TABLE OF # OF 1's IN EACH OF OCTAL NUMBERS 0-255 AND MAKE TABLE
+* 
+ITAB  NOP 
+TABGN NOP 
+      JSB .ENTR 
+      DEF ITAB
+      CLA 
+LOOP1 CAX 
+      LDB =D-8
+      STB COUNT 
+      CLB 
+LOOP2 SLA 
+      INB 
+      RAR 
+      ISZ COUNT 
+      JMP LOOP2 
+      STB ITAB,I
+      ISZ ITAB
+      CXA 
+      INA 
+      CPA =B400 
+      JMP TABGN,I 
+      JMP LOOP1 
+COUNT BSS 1 
+      END 
+
+-----------------------------------------------------------------------------
+
+$PARM \!IBSTAT!\IBIP( 1)\ - Baseline control and status word
+C                             Bit 0 - on-line. Set by CDVR when modules in
+C                                     baseline are brought on-line and enabled. 
+C                             Bit 1 - tapes started and into data.
+C                                     (simultaneously-valid X/Y tape time)
+C                                     Set by VJOKY. 
+C                             Bit 2 - tapes sync'ed.
+C                                     Set by VJOKY to start correlation data
+C                                     moving to disc. 
+C                             Bit 3 - external shutdown request 
+C                             Bit 4 - baseline shutdown.
+C                                     Set by CDVR when baseline is shutdown.
+C                             Bit 5 - data transfer request queued. 
+C                                     Set by VOUTQ when request for data
+C                                     transfer from temporary disc is 
+C                                     queued after baseline shutdown. 
+C                             Bit 6 - data transfer complete
+C                                     Set by VOUT2 when data transfer to
+C                                     permanent disc is complete (set only
+C                                     if 'wait' option is chosen) 
+C                             Bit 7 - baseline processing terminated. 
+C                                     May be set by either VSYNC, 
+C                                     VOUTQ (if 'no-wait' option active), or
+C                                     VOUT2 (if 'wait' option active) 
+C                             Bit 8 - unused
+C                             Bit 9 - unused
+C                         Bits 10-14 are status information only
+C                             Bit 10- Processing of baseline was terminated 
+C                                     by a 'RU,VSTOP' 
+C                             Bit 11- 0-indicates bits 12,13,14,15 apply to 
+C                                       'reference' station tape
+C                                     1-indicates bits 12,13,14,15 apply to 
+C                                       'remote' station tape 
+C                             Bit 12- baseline processing terminated due to 
+C                                     tape ID code conflict 
+C                             Bit 13- baseline processing terminated due to 
+C                                     'tape time beyond end-of-run' 
+C                             Bit 14- baseline processing terminated due to 
+C                                     'tape stopped'
+C                             Bit 15- baseline processing was terminated due
+C                                     to a 'CT' (cancel tape) command at
+C                                     tape mount time.
+$PARM \!IFRAME!\IBIP( 2)\ - #qrtrmsec/frame (at record time)  
+$PARM \!KMODE! \IBIP( 3)\ - Correlation mode
+C                         Bit 0   
+C                               0-bit shift/phase shift not to be used  
+C                               1-bit shift/phase shift to be used  
+C                         Bit 1  Use 3-level phase-cal extractor. 
+C                         Bit 2  unused 
+C                         Bit 3  Spectral line mode.
+C                         Bit 4  Pulsar mode
+C                         Bit 5  unused 
+C                         Bit 6  Global debug output to correlator data file
+C                         Bit 7  Pre-compute a prioris to disc
+C                                (This bit set only if co-computation 
+C                                directed by setting KMODE bit in $SCHED
+C                                section of correlator control file)
+C                         Bit 8  'Ad hoc' correction mode active on at
+C                                    least one station in baseline
+C                         Bit 9   Enable resync error discard.  
+C                         Bit 10  Enable nosync error discard.  
+C                         Bit 11  Enable last block parity error trap.  
+C                         Bits 15-12  Last block's parity 
+C                                     error threshold for discarding data.
+$PARM \!EQT11! \IBIP( 4)\ - Startup parameter: initial PPW pointer value to 
+C                           to used by CDVR on correlator startup [initially
+C                           computed by VIPPW, updated by VJOKY when rough  
+C                           tape sync acheived, and then is potentially 
+C                           further updated by CDVR on first service after
+C                           rough tape sync (IBSTAT bit set)] 
+$PARM \!NFP!   \IBIP( 5)\ - #frames/PP
+$PARM \!JFRAME!\IBIP( 6)\ - Startup parameter: #frames past minute mark 
+C                           corresponding to pointer !EQT11!
+C                           (unsigned 16-bit; max value 48000 @ 16 Mbits) 
+$PARM \!ISTN!  \IBIP( 7)\ - Addresses into TAT. 
+C                           Corresponds to station order in #SKxxx file.
+C                           Used as index into TAT. 
+C                             Bits 15-8 - Ref station#
+C                             Bits  7-0 - Rem station#
+$PARM \!IBASC! \IBIP( 8)\ - 2-char ASCII baseline code
+C                             Bits 15-8 - Ref station code
+C                             Bits  7-0 - Rem station code
+$PARM \!IDST!  \IBIP( 9)\ - Acquisition system hardware ID codes
+C                             Bits 15-8 Ref station 
+C                             Bits  7-0 Rem station 
+$PARM \!ITPASS!\IBIP(10)\ - Tape pass #'s (1-char ASCII for each station) 
+C                             Bits 15-8 Ref station 
+C                             Bits  7-0 Rem station 
+$PARM \!MODE!  \IBIP(11)\ - Correlator mode 
+$PARM \!KSEL!  \IBIP(12)\ - Rotator update rate selector
+$PARM \!LEQT!  \IBIP(13)\ - EQT length (words)
+$PARM \!NFREQ! \IBIP(14)\ - #freq in RFQ (Radio Frequency table)
+$PARM \!NPCFRQ!\IBIP(15)\ - #freq in PFQ (Phase-cal Freq table) 
+$PARM \!RMODE! \IBIP(16)\ - 2-char ASCII record mode (i.e. '2B' is 2MHz,mode B) 
+$PARM \!NBEQT! \IBIP(17)\ - #EQT's configured into this baseline
+$PARM \!XTNT#! \IBIP(18)\ - Extent# to be created for correlation data
+C                           (copied to OCB at VRUN time)
+$PARM \!NPP!   \IBIP(19)\ - #PP/AP
+$PARM \!PTIME1!\IBIP(20)\ - UT processing time YYDDD-70000
+$PARM \!PTIME2!\IBIP(21)\ - UT processing time HHMM 
+$PARM \!STARTS!\IBIP(22)\ - #seconds past scheduled start time that 
+C                           correlation started 
+$PARM \!STOPS! \IBIP(23)\ - #seconds past scheduled start time that 
+C                           correlation stopped 
+$PARM \!TCODE! \IBIP(24)\ - ASCII termination code (1-char, left-justified).
+C                           'Self-termination' codes: 
+C                              Z -  No data correlated  
+C                              0 -  0-10% of schedule data processed
+C                              1 - 10-20% of schedule data processed
+C                              2 - 20-30% of schedule data processed
+C                              3 - 30-40% of schedule data processed
+C                              4 - 40-50% of schedule data processed
+C                              5 - 50-60% of schedule data processed
+C                              6 - 60-70% of schedule data processed
+C                              7 - 70-80% of schedule data processed
+C                              8 - 80-90% of schedule data processed
+C                              9 - 90-100% of schedule data processed 
+C                           'Operator-terminated' codes:
+C                              A - Missing tape 
+C                              B - No data on tape (missed run) 
+C                              C - Unreadable tape
+C                              D - Wrong data on tape (time beyond end-of-run)"/
+C                              E - Physical tape damage 
+C                              F - Tape drive problems  
+C                              G - LT file error (abort due to) 
+C                              H - Wrong tape mounted 
+C                              J - I goofed!  
+C                              K - Tape cancelled (by 'CT' command) 
+C                              T - Test correlation 
+C      The 'goodness' of termination codes is assigned the following order: 
+C                Low quality   ZOTSRKJHGFDCBA0E123456789  High quality
+$PARM \!KTPASS!\IBIP(25)\ - 'Equivalent' pass#'s (1-char ASCII for each station)  
+C                             Bits 15-8 Ref station 
+C                             Bits  7-0 Rem station 
+$PARM \!MODTYP!\IBIP(26)\ - Correlator module type (1-old, 2-new) 
+$PARM \!LPPW!  \IBIP(27)\ - Length of PPW subarray (words)
+$PARM \!LPASS! \IBIP(28)\ - Length of IPASS subarray (words)
+$PARM \!LAPR!  \IBIP(29)\ - Length of APR subarray (words)
+$PARM \!NLAGS! \IBIP(30)\ - #lags to be correlated
+$PARM \!ATYPE! \IBIP(31)\ - 'ad hoc' correction type
+C                              Bits 15-8 ref station
+C                                    7-0 rem station
+$PARM \!LENR8! \IBIP(32)\ - 'ad hoc' R*8 table length 
+C                              Bits 15-8 ref station
+C                                    7-0 rem station
+$PARM \!LENI2! \IBIP(33)\ - 'ad hoc' I*2 table length 
+C                              Bits 15-8 ref station
+C                                    7-0 rem station
+$PARM \!NFC!   \IBIP(34)\ - #frames/control period
+$PARM \!LSECB! \IBIP(35)\ - scan length (sec) for this baseline 
+$PARM \!IBASE! \IBIP(36)\ - baseline# (for access to AST) 
+
+-----------------------------------------------------------------------------
+
+$PARM /!SRATE! / BFP( 1)/ - Sample rate (bits/sec)
+$PARM /!DAP!   / BFP( 2)/ - AP length (msec)
+$PARM /!DPP!   / BFP( 3)/ - PP length (msec)
+$PARM /!TIME0! / BFP( 4)/ - UT time for which root a prioris are calculated (msec from BOY) 
+$PARM /!UTOST1!/ BFP( 5)/ - Sidereal rate (rad/UT msec) 
+$PARM /!BQA!   / BFP( 6)/ - Invariant source/baseline parameter (usec)
+$PARM /!BQB!   / BFP( 7)/ - Invariant source/baseline parameter (usec)
+$PARM /!BQC!   / BFP( 8)/ - Invariant source/baseline parameter (usec)
+$PARM /!DHADT! / BFP( 9)/ - Hour angle rate (rad/sec) 
+$PARM /!BTR0!  / BFP(10)/ - Ref station a priori clock rate error (sec/sec) 
+$PARM /!EPOCH0!/ BFP(11)/ - Ref station a priori clock error at TIME0 (msec)
+$PARM /!BTE0!  / BFP(12)/ - A priori clock sync error difference at TIME0 (usec)
+$PARM /!BTR!   / BFP(13)/ - A Priori clock rate error difference (usec/sec) 
+$PARM /!BTI!   / BFP(14)/ - Instrumental delay (usec) 
+$PARM /!TWOPI! / BFP(15)/ - 4.*ATAN(1.) 
+$PARM /!TSTART!/ BFP(16)/ - Nominal UT start time (msec from BOY) 
+$PARM /!TIMEND!/ BFP(17)/ - Nominal UT stop time for observation (msec from BOY)  
+$PARM /!ELQA1! / BFP(18)/ - SIN(LAT)*SIN(DEC) for reference station 
+$PARM /!ELQA2! / BFP(19)/ - SIN(LAT)*SIN(DEC) for remote station
+$PARM /!ELQB1! / BFP(20)/ - COS(LAT)*COS(DEC) for reference station 
+$PARM /!ELQB2! / BFP(21)/ - COS(LAT)*COS(DEC) for remote station
+$PARM /!ZENAT1!/ BFP(22)/ - Zenith atmospheric thickness at reference station (usec)
+$PARM /!ZENAT2!/ BFP(23)/ - Zenith atmospheric thickness at remote station (usec) 
+$PARM /!TMER1! / BFP(24)/ - UT time of meridian passage at reference station (msec since midnight)  
+$PARM /!TMER2! / BFP(25)/ - UT time of meridian passage at remote station (msec since midnight) 
+$PARM /!TIME!  / BFP(26)/ - UT time (msec from BOY) of last PPW update  
+$PARM /!BQADOT!/ BFP(27)/ - Invariant source/baseline parameter (usec/sec)
+$PARM /!BQBDOT!/ BFP(28)/ - Invariant source/baseline parameter  (usec/sec) 
+$PARM /!BQCDOT!/ BFP(29)/ - Invariant source/baseline parameter  (usec/sec) 
+$PARM /!BQD!   / BFP(30)/ - Invariant source/baseline parameter  (dimensionless)
+$PARM /!BQE!   / BFP(31)/ - Invariant source/baseline parameter  (dimensionless)
+$PARM /!PHSITE!/ BFP(32)/ - Pulsar phase at reference site (rotations)
+$PARM /!PHSDOT!/ BFP(33)/ - Time derivative of !PHSITE!    (rot / sec)
+$PARM /!TIME1! / BFP(34)/ - Base time (msec from BOY) for PPW updates --
+C                           set by VIPPW to first good time time on tapes;
+C                           modified by VREAD if co-computation used  
+$PARM /!PHSDD! / BFP(35)/ - Time derivative of !PHSDOT!    (rot / sec**2) 
+

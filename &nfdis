@@ -1,0 +1,97 @@
+FTN4,X
+C@NFDIS 
+C 
+      SUBROUTINE NFDIS(IP,IBUF,ILEN,NCHAR)
+     .,ONOFF PARMS DISPLAY C#870115:04:56#
+C 
+C 1.1.   ONOFF gets data from common variables and displays them
+C 
+C 2.  NFDIS INTERFACE 
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1),IBUF(1) 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - CLASS
+C        IP(2) - # RECS 
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES: ONOFC
+C 
+C     CALLED SUBROUTINES: character utilities 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C        NCH    - character counter 
+C 
+C 4.  CONSTANTS USED
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+C 
+C 6.  PROGRAMMER: MWH 
+C     CREATED: 840510 
+C# LAST COMPC'ED  870115:04:56 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. First set up output buffer for response. 
+C 
+C 
+D     WRITE(LU,9002)
+D9002 FORMAT("ENTERING NFDIS")
+      NCH = ISCNC(IBUF,1,NCHAR,75B) 
+C                  Scan for "=" 
+      IF (NCH.EQ.0) NCH = NCHAR+1 
+C                  If no "=" found position after last character
+      NCH = ICHMV(IBUF,NCH,2H/ ,1,1)  
+C              Put / to indicate a response 
+C 
+C 
+C     2.  Fill the buffer with the required common variables
+C 
+200   IERR = 0
+D     WRITE(LU,9001)NREPNF,INTPNF,LDV1NF,LDV2NF,CAL1NF,CAL2NF,FRQ1NF, 
+D    .FRQ2NF,CTOFNF 
+D9001 FORMAT("REP,INT,DV1,DV2,CAL1,CAL2,FRQ1,FRQ2,CUTOFF = "/ 
+D    .I3,1X,I3,A2,1X,A2,1X,5(F5.1,1X))
+      NCH = NCH + IB2AS(NREPNF,IBUF,NCH,100002B)
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IB2AS(INTPNF,IBUF,NCH,100002B)
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = ICHMV(IBUF,NCH,LDV1NF,1,2)
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = ICHMV(IBUF,NCH,LDV2NF,1,2)
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IR2AS(CTOFNF*180./PI,IBUF,NCH,6,1)
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IR2AS(STEPNF,IBUF,NCH,4,1)
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IR2AS(CAL1NF,IBUF,NCH,6,1)  
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IR2AS(CAL2NF,IBUF,NCH,6,1)  
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IR2AS(FRQ1NF,IBUF,NCH,6,2)
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IR2AS(FRQ2NF,IBUF,NCH,6,2)
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IR2AS(DIAMAN,IBUF,NCH,6,1)
+C 
+C     5. Now send the buffer to SAM and schedule PPT. 
+C 
+500   ICLASS = 0
+      NCH = NCH - 1 
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS) 
+C                   Send buffer starting with info to display 
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(4) = 2HQZ
+990   RETURN
+      END 

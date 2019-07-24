@@ -1,0 +1,90 @@
+FTN4,X
+C@NEWTP 
+      SUBROUTINE NEWTP(IP),NEW TAPE COMMAND C#870115:04:41# 
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - error
+C        IP(2) - class
+C        IP(3) - number of records
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES:
+C 
+C     CALLED SUBROUTINES: GTPRM,ICHAR 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+      DIMENSION IREG(2) 
+C        NCHAR  - number of characters in buffer
+C     ILEN - length of buffer IBUF
+C        ICH    - character counter 
+      DIMENSION IBUF(40)
+C               - class buffer
+      DIMENSION LMSG(25)
+C               - message response
+      EQUIVALENCE (IREG(1),REG) 
+      DATA LMSG   /2H"T,2Ho ,2Hco,2Hnt,2Hin,2Hue,2H, ,2Hus,2He ,2HLA, 
+     /             2HBE,2HL ,2Hco,2Hmm,2Han,2Hd"/ 
+      DATA NMSG/32/ 
+      DATA ILEN/80/ 
+C 
+C     1. First check out the input variables.  Then get the command 
+C     into a buffer and fint the "=". 
+C 
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+      IERR = -1 
+      GOTO 900
+C 
+110   REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = MIN0(IREG(2),ILEN)
+C 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                              "="
+      IF (IEQ.EQ.0) GOTO 120
+      IERR = -200 
+      GOTO 900
+C                   There can be no parameters for this command 
+C 
+C 
+C     2. Now form the response message buffer.
+C     ***NOTE WE ARE SETTING BOSS'S HALT VARIABLE OURSELVES!!***
+C 
+120   NCH = ICHMV(IBUF,NCHAR+1,2H/ ,1,1)
+      NCH = ICHMV(IBUF,NCH,LMSG,1,NMSG) - 1 
+C 
+      KHALT = .TRUE.
+      CALL IFILL(LTPNUM,1,8,2H00) 
+      CALL IFILL(LTPCHK,1,4,2H00) 
+C                   Zero out the tape number and check label
+C 
+C 
+C     3. Now send the message back to BOSS. 
+C 
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS) 
+C 
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IERR = 0
+      GOTO 990
+C 
+C 
+900   IP(1) = 0 
+      IP(2) = 0 
+990   IP(3) = IERR
+      IP(4) = 2HQN
+      RETURN
+      END 

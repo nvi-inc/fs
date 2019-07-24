@@ -1,0 +1,35 @@
+FTN4,X
+C@MA2MV 
+      SUBROUTINE MA2MV(IBUF,IDIR,ISP, 
+     .           LGEN),CONVERT MAT BUFFER TO MV DATA C#890516:19:04#
+C 
+C     This routine converts the buffers returned from the MAT 
+C     into the tape motion information. 
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF(1) 
+C      - buffers of length 5 words, as returned from MATCN
+C 
+C  OUTPUT:
+C 
+C     IDIR - direction
+C     ISP - speed 
+      DIMENSION LGEN(1) 
+C       - rate generator frequency
+C 
+C 
+C     The format of the buffer from MATCN is: 
+C        TPsrrr0000 
+C     where each letter is a character with the following bits
+C                  s = direction (top bit) and speed (3 bits) 
+C            rrr = 3 digit rate, ASCII value 720 or 960 
+C     Note we are only concerned with the last 8 characters 
+C 
+      IA = IA2HX(IBUF,3)
+      ISP = IAND(IA,7)
+      IDIR = IAND(IA,8)/8 
+      CALL ICHMV(LGEN,1,IBUF,4,3) 
+C 
+      RETURN
+      END 

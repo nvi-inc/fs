@@ -1,0 +1,113 @@
+FTN4,X
+C@PCDIS 
+C 
+      SUBROUTINE PCDIS(IP,ICLCM),PCALR PARMS DISPLAY C#870115:04:52#
+C 
+C 1.1.   PCDIS gets data from common variables and displays them
+C 
+C 2.  PCDIS INTERFACE 
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of buffer from MATCN 
+C        IP(2)  - number of records in class
+C        IP(3)  - error return from MATCN 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - CLASS
+C        IP(2) - # RECS 
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES: PCALC
+C 
+C     CALLED SUBROUTINES: character utilities 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+      DIMENSION IBUF(60),IBUF2(60)
+C               - input class buffer, output display buffer 
+C        ILEN   - length of buffers, chars
+C        NCH    - character counter 
+C 
+      LOGICAL KCOM,KDATA
+      DIMENSION IREG(2) 
+C               - registers from EXEC 
+      EQUIVALENCE (REG,IREG(1)) 
+C 
+C 4.  CONSTANTS USED
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA ILEN/120/
+C 
+C 6.  PROGRAMMER: NRV & MAH 
+C     CREATED: 19820318 
+C# LAST COMPC'ED  870115:04:52 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. First check error return from MATCN.  If not 0, get out
+C     immediately.
+C 
+C 
+      IF (ICLCM.EQ.0) GOTO 990
+      REG = EXEC(21,ICLCM,IBUF2,-ILEN)
+C 
+      NCHAR = IREG(2) 
+      NCH = ISCNC(IBUF2,1,NCHAR,75B)
+C                  Scan for "=" 
+      IF (NCH.EQ.0) NCH = NCHAR+1 
+C                  If no "=" found position after last character
+      NCH = ICHMV(IBUF2,NCH,2H/ ,1,1) 
+C              Put / to indicate a response 
+C 
+C 
+C     2.  Fill the buffer with the required common variables
+C 
+200   IERR = 0
+C 
+      NCH = NCH+IB2AS(NCYCPC,IBUF2,NCH,100000B+8) 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = NCH+IB2AS(IPAUPC,IBUF2,NCH,100000B+8) 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      LREP = 2HFS 
+      IF (IREPPC.EQ.1) LREP=2HBY
+      IF (IREPPC.EQ.2) LREP=2HRW
+      IF (IREPPC.EQ.3) LREP=2HAB
+      NCH = ICHMV(IBUF2,NCH,LREP,1,2) 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = NCH+IB2AS(NBLKPC,IBUF2,NCH,100000B+8) 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = NCH+IB2AS(IBUGPC,IBUF2,NCH,100000B+8) 
+C 
+      DO 300 I = 1,28 
+          IF (ITRKPC(I).LE.0) GOTO 300
+          NCH = MCOMA(IBUF2,NCH)
+          NCH = NCH+IB2AS(I,IBUF2,NCH,100000B+8)
+300       CONTINUE
+C 
+C     5. Now send the buffer to SAM and schedule PPT. 
+C 
+500   ICLASS = 0
+      NCH = NCH - 1 
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)
+C                   Send buffer starting with info to display 
+      IF (.NOT.KCHECK) IERR = 0 
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = IERR
+      IP(4) = 2HQP
+990   RETURN
+      END 

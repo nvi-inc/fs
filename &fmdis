@@ -1,0 +1,206 @@
+FTN4,X
+C@FMDIS 
+C 
+      SUBROUTINE FMDIS(IP,ICLCM),FORMATTER DISPLAY C#870115:04:35#
+C 
+C 1.1.   FMDIS gets data from the formatter and displays it 
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of buffer from MATCN 
+C        IP(2)  - number of records in class
+C        IP(3)  - error return from MATCN 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - CLASS
+C        IP(2) - # REC
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES: SLOWP
+C 
+C     CALLED SUBROUTINES: character utilities 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+      DIMENSION IBUF(30),IBUF2(30)
+C               - input class buffer, output display buffer 
+C        ILEN   - length of buffers, chars
+C        NCH    - character counter 
+C        ISYN   - synch test bits 
+C        I      - bit, converted to 0 or 1
+C        INP    - input index 
+C        IOUT   - output index
+C        IRATE  - rate index
+      DIMENSION ITIM(10)
+C               - buffer for ( data with time 
+      LOGICAL KCOM,KDATA
+C              - true if COMMON variables wanted
+C 
+      DIMENSION IREG(2) 
+C               - registers from EXEC 
+      EQUIVALENCE (REG,IREG(1)) 
+C 
+C 4.  CONSTANTS USED
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA ILEN/60/ 
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED:   800215 
+C# LAST COMPC'ED  870115:04:35 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. First check error return from MATCN.  If not 0, get out
+C     immediately.
+C 
+C 
+      KCOM = IP(4).EQ.77B 
+C 
+      ICLASS = IP(1)
+      NCREC = IP(2) 
+      IERR = IP(3)
+      NREC = 0
+C 
+      IF (KCOM) GOTO 200
+      IF (IERR.LT.0) GOTO 990 
+      IF (ICLASS.EQ.0.OR.ICLCM.EQ.0) GOTO 990 
+C 
+C 
+C     2. Get class buffer with command in it.  Set up first part
+C     of output buffer.  Get first buffer from MATCN. 
+C 
+200   REG = EXEC(21,ICLCM,IBUF2,-ILEN)
+C 
+      NCHAR = IREG(2) 
+      NCH = ISCNC(IBUF2,1,NCHAR,75B)
+C                   Scan for "="
+      KDATA = NCH.EQ.0
+C                   If our command was only "device" we are waiting for 
+C                   data and know what to expect. 
+      IF (NCH.EQ.0) NCH = NCHAR+1 
+C                   If no "=" found, position after last character
+      NCH = ICHMV(IBUF2,NCH,2H/ ,1,1) 
+C                   Put / to indicate a response
+C 
+      IF (KCOM) GOTO 310
+      IF (KDATA) GOTO 230 
+C 
+      DO 220 I=1,NCREC
+        IF (I.NE.1) NCH=MCOMA(IBUF2,NCH)
+C                   If not first parm, put comma before 
+        REG = EXEC(21,ICLASS,IBUF,-ILEN)
+        NCHAR = IREG(2) 
+        NCH = ICHMV(IBUF2,NCH,IBUF(2),1,NCHAR-2)
+C                   Move buffer contents into output list 
+220     CONTINUE
+      GOTO 500
+C 
+230   REG = EXEC(21,ICLASS,ITIM,-ILEN)
+C                   Read first response into time buffer
+      REG = EXEC(21,ICLASS,IBUF,-ILEN)
+C                   Read second response into general buffer
+C 
+C 
+C     3. Now the buffer contains: FM=, and we want to add the data. 
+C     Format of data received from Formatter: 
+C      ( data:      hhmmssss
+C     where each letter represents a character: 
+C                   hh = hours
+C                   mm = minutes
+C                   ss = seconds
+C                   ss = fractional seconds 
+C 
+C      ) data:      bydddpsr
+C     where 
+C                   b = bits denoting rem/lcl, alarm, power status
+C                   y = years 
+C                   ddd = days
+C                   p = run/set, +/- edge, synch test bits
+C                   s = input, output selection 
+C                   r = rate setting
+C 
+300   CALL MA2FM(IBUF,INP,IMOD,IRATE,ISYN,
+     .           ITSTFM,ISGNFM,IRUNFM,IREMFM,IPWRFM,IAL)
+      GOTO 320
+310   INP = INPFM 
+      IMOD = IMODFM 
+      IRATE = IRATFM
+      ISYN = ISYNFM 
+C 
+320   IERR = 0
+      NCH = IFMED(-1,IMOD,IBUF2,NCH,ILEN) 
+C                   Output matrix selection 
+      IF (IMOD.NE.IMODFM) IERR = -301 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = IFMED(-2,IRATE,IBUF2,NCH,ILEN)
+C                   Sample rate 
+      IF (IRATE.NE.IRATFM) IERR = -302
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = IFMED(-8,INP,IBUF2,NCH,ILEN)
+C                   Input selection 
+      IF (INP.NE.INPFM) IERR = -303 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = IFMED(-4,ISYN,IBUF2,NCH,ILEN) 
+C                   Synch test on or off
+      IF (ISYN.NE.ISYNFM) IERR = -304 
+C 
+      IF (KCOM) GOTO 500
+C 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = IFMED(-5,ITSTFM,IBUF2,NCH,ILEN) 
+C                   Put in OK or FAIL 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = IFMED(-6,ISGNFM,IBUF2,NCH,ILEN) 
+C                   Synch edge sign 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = IFMED(-7,IRUNFM,IBUF2,NCH,ILEN) 
+C                   "RUN" or "SET" on front panel 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = IFMED(-3,IREMFM,IBUF2,NCH,ILEN) 
+C                   Remote/local
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = IFMED(-9,IPWRFM,IBUF2,NCH,ILEN) 
+C                   Power interrupt 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = ICHMV(IBUF2,NCH,IBUF,4,4) 
+C                   Pick up yddd
+      NCH = ICHMV(IBUF2,NCH,ITIM,3,6) 
+C                   This is hhmmss
+      NCH = ICHMV(IBUF2,NCH,2H. ,1,1) 
+      NCH = ICHMV(IBUF2,NCH,ITIM,9,2) 
+C                   Fractional seconds
+C 
+C 
+C     5. Now send the buffer to SAM and schedule PPT. 
+C 
+500   ICLASS = 0
+      NCH = NCH - 1 
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)  
+C                   Send buffer starting with FM to display 
+      IF (.NOT.KCHECK) IERR = 0 
+C 
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = IERR
+      IP(4) = 2HQF
+990   RETURN
+      END 

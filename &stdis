@@ -1,0 +1,74 @@
+FTN4,X
+C@STDIS 
+      SUBROUTINE STDIS(IP,ICLCM),START TAPE DISPLAY C#870115:04:42# 
+C 
+      INCLUDE #FSCOM::FS
+      DIMENSION IP(1) 
+      DIMENSION IREG(2) 
+      DIMENSION IBUF(20),IBUF2(50),IT(28) 
+      LOGICAL KDATA,KCOM
+      EQUIVALENCE (IREG(1),REG) 
+      DATA ILEN/40/,ILEN2/100/
+C 
+C 
+C     1. This is the display section for the ST command.
+C     Get class buffer with command in it.  Set up first part 
+C     of output buffer.  Get first buffer from MATCN. 
+C 
+      ICLASS = IP(1)
+      NCREC = IP(2) 
+      IERR = IP(3)
+      KCOM = IP(4).EQ.77B 
+      IF (IERR.LT.0) GOTO 990 
+      IF (ICLASS.EQ.0) GOTO 990 
+C 
+      REG = EXEC(21,ICLCM,IBUF2,-ILEN2) 
+C                   Get command buffer
+      NCHAR = IREG(2) 
+      NCH = ISCNC(IBUF2,1,NCHAR,75B)
+C                                =
+      KDATA = NCH.EQ.0
+      IF (NCH.EQ.0) NCH=NCHAR+1 
+      NCH = ICHMV(IBUF2,NCH,2H/ ,1,1) 
+C                   Put / to indicate a response
+      IF (KDATA) GOTO 230 
+      IF (KCOM) GOTO 320
+C 
+      DO 220 I=1,NCREC
+        REG = EXEC(21,ICLASS,IBUF,-ILEN)
+        IF (NCH+IREG(2)-2.GT.ILEN2) GOTO 220
+        IF (I.NE.1) NCH=MCOMA(IBUF2,NCH)
+        NCH = ICHMV(IBUF2,NCH,IBUF(2),1,IREG(2)-2)
+220     CONTINUE
+      GOTO 500
+C 
+230   REG = EXEC(21,ICLASS,IBUF,-ILEN)
+C                   Get response to query of ST 
+      CALL MA2MV(IBUF,IDIR,ISP,LGEN)
+      REG = EXEC(21,ICLASS,IBUF,-ILEN)
+      CALL MA2EN(IBUF,IENA,IT,NT) 
+D     WRITE(LU,9002) IENA 
+D9002 FORMAT("IENA FROM MAT = "I3)
+      GOTO 350
+320   ISP = ISPEED
+      IDIR = IDIRTP 
+      IENA = IENATP 
+C                   Get speed and direction and record status from common 
+C 
+350   NCH = ITPED(-2,IDIR,IBUF2,NCH,ILEN2)  
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = ITPED(-1,ISP,IBUF2,NCH,ILEN2) 
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = ITPED(-10,IENA,IBUF2,NCH,ILEN2) 
+C                   Encode speed and direction into response
+C 
+500   ICLASS = 0
+      NCH = NCH - 1 
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)
+C 
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = IERR
+      IP(4) = 2HQS
+990   RETURN
+      END 
