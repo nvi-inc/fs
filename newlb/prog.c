@@ -819,16 +819,28 @@ void fs_get_ichvklowtape_(ichvklowtape)
 	  *ichvklowtape = shm_addr->check.vklowtape;
 	}
 
-void fs_set_ichrc_mv_tm_(ichrc_mv_tm)
-	int *ichrc_mv_tm;
+void fs_set_ichvkload_(ichvkload)
+	int *ichvkload;
 	{
-	  shm_addr->check.rc_mv_tm = *ichrc_mv_tm;
+	  shm_addr->check.vkload = *ichvkload;
 	}
 
-void fs_get_ichrc_mv_tm_(ichrc_mv_tm)
-	int *ichrc_mv_tm;
+void fs_get_ichvkload_(ichvkload)
+	int *ichvkload;
 	{
-	  *ichrc_mv_tm = shm_addr->check.rc_mv_tm;
+	  *ichvkload = shm_addr->check.vkload;
+	}
+
+void fs_set_ichfm_cn_tm_(ichfm_cn_tm)
+	int *ichfm_cn_tm;
+	{
+	  shm_addr->check.fm_cn_tm = *ichfm_cn_tm;
+	}
+
+void fs_get_ichfm_cn_tm_(ichfm_cn_tm)
+	int *ichfm_cn_tm;
+	{
+	  *ichfm_cn_tm = shm_addr->check.fm_cn_tm;
 	}
 
 void fs_set_raoff_(RAOFF)

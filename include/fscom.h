@@ -87,12 +87,15 @@ typedef struct fscom {
            long bbc_time[ MAX_BBC];
            int dist[ MAX_DIST];
            int vform;
+           long fm_cn_tm;
            int rec;
            int vkrepro;
            int vkenable;
            int vkmove;
            long rc_mv_tm;
            int vklowtape;
+           int vkload;
+           long rc_ld_tm;
         } check;
         char stcnm[4][2];
         int  stchk[4];

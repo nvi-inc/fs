@@ -36,7 +36,7 @@ C     IBOX - box heater
 C     ILO - LO status 
 C     NCH    - character counter
 C
-      integer*2 lunlk(8)
+      integer*2 lunlk(4)
       logical kcom,kdata
       dimension ireg(2)          ! registers from exec
       integer get_buf
@@ -49,7 +49,7 @@ C 4.  CONSTANTS USED
 C 
 C 5.  INITIALIZED VARIABLES 
 C 
-      data lunlk /o'015446',2hdb,2hun,2hlo,2hck,2hed,o'015446',2hd@/  
+      data lunlk /2hun,2hlo,2hck,2hed/  
 cxx lunlk=unlocked
 C 
 C 6.  PROGRAMMER: NRV  CREATED 830610 AT MOJAVE 
@@ -150,7 +150,7 @@ C
       if (kcom) goto 500
       nch = mcoma(ibuf2,nch)
       if (lostrx.eq.1) nch=ichmv(ibuf2,nch,6Hlocked,1,6)
-      if (lostrx.eq.0) nch=ichmv(ibuf2,nch,lunlk,1,16)
+      if (lostrx.eq.0) nch=ichmv(ibuf2,nch,lunlk,1,8)
       nch = mcoma(ibuf2,nch)
 C
 C   CONVERT VOLTAGE TO TEMPERATURE OR BAROMETRIC PRESSURE

@@ -27,6 +27,10 @@ int *ierr;
   void ini_req(), add_req(), end_req(); /*mcbcn request utilities */
   void skd_run(), skd_par();      /* program scheduling utilities */
 
+
+/* tape ready does not seem to be reliable in RECON 4 */
+
+  return 0;
   ini_req(&buffer);
 
   memcpy(request.device,device,2);    /* device mnemonic */

@@ -85,11 +85,10 @@ mcbcn:
       skd_par(ip);
 
       if (ichold != -99) {
-         shm_addr->check.rec=ichold;
          shm_addr->check.vkenable = TRUE;
-      }
-      if (ichold >= 0) {
-         shm_addr->check.rec=ichold % 1000 + 1;
+         if (ichold >= 0)
+            ichold=ichold % 1000 + 1;
+         shm_addr->check.rec=ichold;
       }
 
       if(ip[2]<0) return;

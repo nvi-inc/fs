@@ -14,7 +14,7 @@ C
 C   COMMON BLOCKS USED
       include '../include/fscom.i'
 C
-C     CALLED SUBROUTINES: GTPRM
+C     CALLED SUBROUTINES: GTPRM2
 C
 C   LOCAL VARIABLES
 C        NCHAR  - number of characters in buffer
@@ -74,7 +74,7 @@ C     2.1 ATTEN PARAMETER 1
 C
       ich = 1+ieq
       ist = ich
-      call gtprm(ibuf,ich,nchar,0,parm,ierr)
+      call gtprm2(ibuf,ich,nchar,0,parm,ierr)
       if(ichcm_ch(iparm,1,'max').eq.0) then
         iold=iatif3_fs
         iat=63
@@ -82,10 +82,10 @@ C
         iat=iolif3_fs
       else
         ich=ist
-        call gtprm(ibuf,ich,nchar,1,parm,ierr)
-        if (cjchar(parm,1).eq.',') then
+        call gtprm2(ibuf,ich,nchar,1,parm,ierr)
+        if (ierr.eq.2) then
           iat = 0                          ! default
-        else if (cjchar(parm,1).eq.'*') then
+        else if (ierr.eq.1) then
           iat = iatif3_fs
         else if (iparm(1).lt.0.or.iscn_ch(ibuf,ist,ich-1,'+').ne.0) then
           iat = iatif3_fs + iparm(1)
@@ -101,10 +101,10 @@ C
 C     2.2 mixer - PARAMETERS 2
 C 
       ic1 = ich 
-      call gtprm(ibuf,ich,nchar,0,parm,ierr) 
-      if (cjchar(parm,1).eq.',') then
+      call gtprm2(ibuf,ich,nchar,0,parm,ierr) 
+      if (ierr.eq.2) then
         imix = 2             !default out
-      else if (cjchar(parm,1).eq.'*') then
+      else if (ierr.eq.1) then
         imix = imixif3_fs
       else
         call iif3ed(1,imix,ibuf,ic1,ich-2)
@@ -117,10 +117,10 @@ C
 C     2.3 sw1-sw4, parameters 3-6
 C
       do i=1,4
-        call gtprm(ibuf,ich,nchar,1,parm,ierr)
-        if(cjchar(parm,1).eq.',') then
+        call gtprm2(ibuf,ich,nchar,1,parm,ierr)
+        if(ierr.eq.2) then
           isw(i)=1
-        else if (cjchar(parm,1).eq.'*') then
+        else if (ierr.eq.1) then
           isw(i) = iswif3_fs(1)
         else
           if(iparm(1).lt.1.or.iparm(1).gt.2) then

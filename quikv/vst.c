@@ -115,12 +115,12 @@ mcbcn:
       skd_par(ip);
 
       if (ichold != -99) {
-         shm_addr->check.rec=ichold;
          shm_addr->check.vkmove = TRUE;
          rte_rawt(&shm_addr->check.rc_mv_tm);
+         if (ichold >= 0)
+            ichold=ichold % 1000 + 1;
+         shm_addr->check.rec=ichold;
       }
-      if (ichold >= 0)
-         shm_addr->check.rec=ichold % 1000 + 1;
 
       if(ip[2]<0) return;
       vst_dis(command,ip);

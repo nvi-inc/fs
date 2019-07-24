@@ -9,10 +9,10 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-void rec_brk(icherr,ierr,ip)
+void rec_brk(icherr,ierr,ip,ip2)
 int icherr[];
 int *ierr;
-long ip[5];
+long ip[5],ip2[5];
 {
   int i;
   void int2str(); 
@@ -20,20 +20,31 @@ long ip[5];
   struct venable_cmd lcle;
   struct vst_cmd lcls;
   struct tape_cmd lclt;
-  struct tape_mon lcltm;
+  struct tape_mon lcltm,lcltm2;
   struct res_buf buffer;
   struct res_rec response;
   void get_res();
   long time;
-  int kmove_time;
+  int kmove_time, kload_time;
 
   opn_res(&buffer,ip);
-  get_res(&response, &buffer); mc81venable(&lcle, response.data);
   get_res(&response, &buffer); mc73tape(&lcltm, response.data);
+  get_res(&response, &buffer); mc81venable(&lcle, response.data);
   get_res(&response, &buffer); mcb1vst(&lcls, response.data);
   get_res(&response, &buffer); mcb5vst(&lcls, response.data);
   get_res(&response, &buffer); mcb6tape(&lclt, response.data);
   get_res(&response, &buffer); mc30tape(&lcltm, response.data);
+
+  if(response.state == -1) {
+     clr_res(&buffer);
+     *ierr=-201;
+     return;
+  }
+
+  clr_res(&buffer);
+
+  opn_res(&buffer,ip2);
+  get_res(&response, &buffer); mc73tape(&lcltm2, response.data);
   if(response.state == -1) {
      clr_res(&buffer);
      *ierr=-201;
@@ -46,13 +57,15 @@ long ip[5];
   int2str(feet,lcltm.foot,-5,1); 
   memcpy(shm_addr->LFEET_FS,feet,5);
 
-  if ((lcltm.stat & 0x02)!=0)
+  if ((lcltm.stat & 0x02)!=0 && (lcltm2.stat & 0x02)!=0)
      shm_addr->ICAPTP = 1; /* drive is moving */
-  else
+  else if ((lcltm.stat & 0x02)==0 && (lcltm2.stat & 0x02)==0)
      shm_addr->ICAPTP = 0;
+  else
+     shm_addr->ICAPTP = -1;
 
-  if ((lcltm.stat & 0x40) == 0)
-     shm_addr->IRDYTP = 1;  /* tape is ready */
+  if ((lcltm.stat & 0x40) == 0 && (lcltm.stat & 0x40) ==0)
+     shm_addr->IRDYTP = 1;  /* tape is not ready */
   else
      shm_addr->IRDYTP = 0;
 
@@ -84,10 +97,19 @@ long ip[5];
         if (shm_addr->ICAPTP == 1)
            icherr[4]=1;
       }
+  }
+
+/* tape ready does not seem to be reliable for RECON 4
+
+  kload_time = shm_addr->check.rc_ld_tm+1000 < time;
+  if ((shm_addr->check.vkmove && kmove_time) ||
+      (shm_addr->check.vkload && kload_time) ) {
       if(shm_addr->IRDYTP == 1 && shm_addr->KHALT==0 &&
           memcmp(shm_addr->LSKD,"none    ",8)!=0)
            icherr[5]=1;
   }
+
+*/
 
   if (shm_addr->check.vkenable && shm_addr->check.vkmove) {
       if (shm_addr->venable.general==1 && shm_addr->ispeed != 0) {

@@ -195,8 +195,12 @@ mcbcn:
       skd_run("mcbcn",'w',ip);
       skd_par(ip);
 
-      if (ichold != -99) shm_addr->check.vform=ichold;
-      if (ichold >= 0) shm_addr->check.vform=ichold % 1000 + 1;
+      if (ichold != -99) {
+         rte_rawt(&shm_addr->check.fm_cn_tm);
+         if (ichold >= 0)
+            ichold=ichold % 1000 + 1;
+         shm_addr->check.vform=ichold;
+      }
 
       if(ip[2]<0) return;
       vform_dis(command,itask,ip);
