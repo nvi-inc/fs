@@ -1,0 +1,18 @@
+TPZERO - Measure zero levels
+
+Syntax:   TPZERO=<list>
+Response: TPZERO/<zero levels>
+
+Settable parameters: 
+<list>: list of modules for which zero levels are to be measured.
+        Refer to the description of <list> under the TPI command.
+
+Monitor-only parameters:
+<zero levels>: list of zero levels, counts. These values are stored
+               for use by the TSYS1 and TSYS2 commands.
+
+      Comments: These zero levels are subtracted from all readings
+taken on the same module before system temperatures are computed.
+Only USB or LSB readings are accepted; if another input is set, the
+reading is returned as -1. It is assumed that the IFD is set for
+maximum attenuation.

@@ -1,0 +1,268 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE PE(IP),TAPE ERROR RATES C#870115:04:38#
+C 
+C    PE computes tape parity error rates
+C 
+C     INPUT VARIABLES:
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C        IP(1) - CLASS
+C        IP(2) - # REC
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C     COMMON BLOCKS USED
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 
+C     CALLED SUBROUTINES: GTPRM,JCHAR 
+C 
+C    LOCAL VARIABLES
+C        NCHAR  - number of characters in buffer
+C        ICH    - character counter 
+      DIMENSION IBUF(20)
+      DIMENSION IBUF2(10) 
+C               - class buffer
+C        ILEN    - length of IBUF in chars
+      DIMENSION IPARM(2)
+C               - parameters returned from GTPRM
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+      DIMENSION PERR(11)
+C      - parity error counts
+C     ISYNER - count of synch errors
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 
+C    INITIALIZED VARIABLES
+      DATA ILEN/40/ 
+C 
+C    PROGRAMMER: NRV
+C     LAST MODIFIED:  810207
+C 
+C 
+C     1. Get the command. 
+C 
+      ICLASS = 0
+      NREC = 0
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+      IERR = -1 
+      GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.EQ.0) GOTO 500
+C                   If no parameters, go read decoder 
+      IF (JCHAR(IBUF,IEQ+1).NE.77B) GOTO 200
+      IP(4) = 77B 
+      CALL PEDIS(IP,ICLCM,PERR,ISYNER)
+      RETURN
+C 
+C 
+C     2. Step through buffer getting each parameter and decoding it.
+C     Command from user has these parameters: 
+C           PERR=<track>,<chan>,<#samples>,<period>,<mode>
+C           <track>=track number to decode
+C           <chan>=channel A or B 
+C           <#samples>=number of samples
+C           <period>=time between samples 
+C           <mode>=RECord or PLAYback 
+C 
+C     2.0 TRACK, PARAMETER 1
+C 
+200   ICH = 1+IEQ 
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      ITRK = -1 
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) GOTO 201 
+      IF (JCHAR(PARM,1).EQ.52B) ITRK = ITRPER 
+      IF (JCHAR(PARM,1).EQ.54B) ITRK = ITRAKA 
+C                   Default to channel A track already set up 
+      GOTO 220
+201   IF (IPARM.GE.1.AND.IPARM.LE.28) GOTO 202
+      IERR = -201 
+      GOTO 990
+202   ITRK = IPARM
+C 
+C     2.2 CHANNEL, PARAMETER 2
+C 
+220   ICHAN = -1
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (JCHAR(PARM,1).EQ.52B) ICHAN = ICHAND
+      IF (JCHAR(PARM,1).EQ.54B) ICHAN = 0 
+C                   Default is channel A
+      IF (JCHAR(PARM,1).EQ.101B) ICHAN = 0
+C                   Channel A 
+      IF (JCHAR(PARM,1).EQ.102B) ICHAN = 1
+C                   Channel B 
+      IF (ICHAN.NE.-1) GOTO 230 
+      IERR = -202 
+      GOTO 990
+C 
+C     2.3 # SAMPLES, PARAMETERS 3 
+C 
+230   CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) GOTO 231 
+      IF (JCHAR(PARM,1).EQ.52B) INS = INSPER
+      IF (JCHAR(PARM,1).EQ.54B) INS = 2 
+C                   Default number of samples is 1 (no averaging) 
+      GOTO 240
+231   INS = IPARM 
+      IF (INS.GE.1.AND.INS.LE.10) GOTO 240
+      IERR = -203 
+      GOTO 990
+C 
+C     2.4 TIME BETWEEN SAMPLES, PARAMETER 4 
+C 
+240   CALL GTPRM(IBUF,ICH,NCHAR,2,PARM) 
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) GOTO 241 
+      IF (JCHAR(PARM,1).EQ.52B) TPER = TPERER 
+      IF (JCHAR(PARM,1).EQ.54B) TPER = 0.5
+C                   Default time between samples is 0.5 sec 
+      GOTO 250
+241   TPER = PARM 
+      IF (TPER.GT.0.0.AND.TPER.LE.2.0) GOTO 250 
+      IERR = -204 
+      GOTO 990
+C 
+C     2.5 MODE, PARAMETER 5 
+C 
+250   CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) GOTO 251 
+      IF (JCHAR(PARM,1).EQ.52B) LM = IMODPE 
+      IF (JCHAR(PARM,1).EQ.54B) LM = 0
+C                   Default mode is REC 
+      GOTO 300
+251   LM = -1 
+      IF (ICHCM(PARM,1,4HPLAY,1,4).EQ.0) LM = 1 
+      IF (ICHCM(PARM,1,4HREC ,1,4).EQ.0) LM = 0 
+      IF (LM.NE.-1) GOTO 300
+      IERR = -205 
+      GOTO 990
+C 
+C 
+C     3. Now plant these values into COMMON.
+C 
+300   INSPER = INS
+      TPERER = TPER 
+      ICHPER = ICHAN
+      ITRPER = ITRK 
+      IMODPE = LM 
+      IERR = 0
+      GOTO 990
+C 
+C 
+C     5.  Now we read the device. 
+C                   mmDE000000dd
+C     where the first "d" has one bit telling the channel,
+C     and the second "d" has an "8" for error rates.
+C     Then send ">" to transfer control and load the data, then 
+C      "/" to read back the data. 
+C     First check for the following conditions to insure a valid
+C     measure of parity errors: 
+C     1) read-after-write mode
+C     2) record enabled 
+C     3) tape moving, in forward direction
+C     4) requested channel is attached to an enabled track
+C 
+500   CONTINUE
+      IF (IMODPE.EQ.0.AND.IBYPAS.EQ.0.AND.IENATP.EQ.1.AND.ISPEED.NE.0.
+     . .AND.IDIRTP.EQ.1.AND.ITRKEN(ITRPER).EQ.1) GOTO 501 
+      IF (IMODPE.EQ.1.AND.IBYPAS.EQ.0.AND.ISPEED.NE.0) GOTO 501 
+      IERR =   00 
+      GOTO 990
+C                     Skip out with no error if we can't measure PEs
+C 
+501   CONTINUE
+      ICHOLD = ICHECK(18) 
+      ICHECK(18) = 0
+      IBUF2(1) = 0
+      IBUF2(2) = 2HTP 
+      IF (ICHPER.EQ.0) ITRAKA = ITRPER  
+      IF (ICHPER.EQ.1) ITRAKB = ITRPER  
+      CALL RP2MA(IBUF2(3),IBYPAS,IEQTAP,IBWTAP,ITRAKA,ITRAKB) 
+      ICLASS=0
+      CALL EXEC(20,0,IBUF2,-13,2HFS,0,ICLASS) 
+      CALL EXEC(23,6HMATCN ,ICLASS,1) 
+      CALL RMPAR(IP)
+      IF (IP(3).LT.0) RETURN
+      CALL CLRCL(IP(1)) 
+      ICHECK(18) = ICHOLD 
+C                   First set up the repro track which was requested. 
+C 
+      IDUMM1 = ICHMV(IBUF2,5,8H00000008,1,8)
+      IDUMM1 = ICHMV(IBUF2,11,IHX2A(ICHPER),2,1)
+C                   Move in the channel bit 
+      PERR(1) = 0.0 
+      DO 580 ISAMP=1,INSPER+1 
+        CALL SUSP(1,IFIX(TPERER*100.0)) 
+C                   Suspend between samples and before the first
+C                   sample to let the decoding settle down
+        IBUF2(1) = 0
+        IBUF2(2) = 2HDE 
+        ICLASS = 0
+        CALL EXEC(20,0,IBUF2,-12,2HFS,0,ICLASS) 
+        IBUF2(1) = 5
+        IBUF2(2) = 2H>
+        CALL EXEC(20,0,IBUF2,-3,2HFS,0,ICLASS)
+        IBUF2(2) = 2H/
+        CALL EXEC(20,0,IBUF2,-3,2HFS,0,ICLASS)
+C 
+        CALL EXEC(23,6HMATCN ,ICLASS,3) 
+        CALL RMPAR(IP)
+        IF (IP(3).LT.0) RETURN
+C 
+        ICLASS = IP(1)
+        NREC = IP(2)
+        CALL EXEC(21,ICLASS,IBUF,-ILEN) 
+        CALL EXEC(21,ICLASS,IBUF,-ILEN) 
+C                   Ignore the first two ACKs 
+        CALL EXEC(21,ICLASS,IBUF,-ILEN) 
+C                   This is the data
+        COUNT = 0.0 
+        DO I=1,6
+          IA = IA2HX(IBUF,I+4)
+          COUNT = COUNT + IA*16.0**(6-I)
+        ENDDO
+D     WRITE(LU,9901) COUNT
+D9901 FORMAT("COUNT="D10.4) 
+        PERR(ISAMP) = COUNT 
+        IF (ISAMP.EQ.1) ISYN1=IA2HX(IBUF,3)*16 + IA2HX(IBUF,4)
+C                   If this is the first sample, get the number 
+C                   of synch errors 
+580     CONTINUE
+      ISYNER = IA2HX(IBUF,3)*16+IA2HX(IBUF,4)-ISYN1 
+C                   Total number of synch errors is difference between
+C                   last and first readings.
+C 
+C     Now set the repro tracks back to what they were.
+C     Turn on checking for the tape drive again.
+C 
+C     IBUF2(1) = 0
+C     IBUF2(2) = 2HTP 
+C     CALL RP2MA(IBUF2(3),IBYPAS,IEQTAP,IBWTAP,ITRAKA,ITRAKB) 
+C     ICLASS=0
+C     CALL EXEC(20,0,IBUF2,-13,2HFS,0,ICLASS) 
+C     CALL EXEC(23,6HMATCN ,ICLASS,1) 
+C     CALL RMPAR(IP)
+C     IF (IP(3).LT.0) RETURN
+C     CALL CLRCL(IP(1)) 
+C     ICHECK(18) = ICHOLD 
+C 
+C     Now we can display the results, finally.
+C 
+      CALL PEDIS(IP,ICLCM,PERR,ISYNER)
+      RETURN
+C 
+C 
+C 
+990   IP(1) = 0
+      IP(2) = 0
+      IP(3) = IERR
+      IP(4) = 2HQJ
+      RETURN
+      END 

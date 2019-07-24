@@ -1,0 +1,92 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE CADIS(IP,ICLCM),DISPLAY CABLE CAL C#870115:04:36#
+C 
+C 1.  CADIS PROGRAM SPECIFICATION 
+C 
+C 1.1.   CADIS displays data from the cable cal 
+C 
+C     INPUT VARIABLES:
+      DIMENSION IP(1) 
+C        IP(1)  - class number of buffer from IBCON 
+C        IP(2)  - number of records in class
+C        IP(3)  - error return from IBCON 
+C 
+C     OUTPUT VARIABLES: 
+C        IP(1) - error
+C        IP(2) - class
+C        IP(3) - number of records
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 
+C     CALLED SUBROUTINES: character utilities 
+C 
+C 3.  LOCAL VARIABLES 
+      DIMENSION IBUF(30),IBUF2(30)
+C               - input class buffer, output display buffer 
+C        ILEN   - length of buffers, chars
+C        NCH    - character counter 
+C 
+      DIMENSION IREG(2) 
+C               - registers from EXEC 
+      EQUIVALENCE (REG,IREG(1)) 
+C 
+C 5.  INITIALIZED VARIABLES 
+      DATA ILEN/60/ 
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED:   800220 
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. First check error return from IBCON.  If not 0, get out
+C     immediately.
+C 
+C 
+      ICLASS = IP(1)
+      IERR = IP(3)
+      NREC = 0
+C 
+      IF (IERR.LT.0) GOTO 990 
+      IF (ICLASS.EQ.0.OR.ICLCM.EQ.0) GOTO 990 
+C 
+C 
+C     2. Get class buffer with command in it.  Set up first part
+C     of output buffer.  Get first buffer from IBCON. 
+C 
+      REG = EXEC(21,ICLCM,IBUF2,-ILEN)
+      NCHAR = IREG(2) 
+      NCH = ISCNC(IBUF2,1,NCHAR,75B)
+C                   Scan for "="
+      IF (NCH.EQ.0) NCH = NCHAR+1 
+C                   If no "=" found, position after last character
+      NCH = ICHMV(IBUF2,NCH,2H/ ,1,1) 
+C                   Put / to indicate a response
+C 
+      REG = EXEC(21,ICLASS,IBUF,-ILEN)
+      NCHAR = IREG(2) 
+      ICH = 4 
+      CALL GTFLD(IBUF(2),ICH,NCHAR-2,IC1,IC2) 
+      NCH = ICHMV(IBUF2,NCH,IBUF(2),IC1,IC2-IC1+1)
+C                   Skip the " S " before the number
+C                   Move buffer contents into output list 
+      CABLEV = DAS2B(IBUF(2),IC1,IC2-IC1+1,IERR)
+C                   Store current cable value in COMMON 
+C                   Don't check error return
+C 
+C 
+C     5. Now send to buffer back to BOSS
+C 
+      ICLASS = 0
+      IF (IERR.LT.0) GOTO 900 
+      NCH = NCH - 1 
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)
+900   IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = IERR
+      IP(4) = 2HQY
+990   RETURN
+      END 

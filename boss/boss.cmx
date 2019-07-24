@@ -1,0 +1,47 @@
+if is $1 = c
+  then
+  ftn7x BOSS.FTN,,-
+  ftn7x BINIT.FTN,,-
+  ftn7x INCOM.FTN,,-
+  ftn7x BWORK.FTN,,-
+  ftn7x NEWPF.FTN,,-
+  ftn7x NEWLG.FTN,,-
+  ftn7x FSHELP.FTN,,-
+  ftn7x RDTMA.FTN,,-
+  ftn7x RDTIB.FTN,,-
+  ftn7x SPARS.FTN,,-
+  ftn7x GETTS.FTN,,-
+  ftn7x PUTTS.FTN,,-
+  ftn7x CANTS.FTN,,-
+  ftn7x GETCM.FTN,,-
+  ftn7x NEWPR.FTN,,-
+  ftn7x OPNPF.FTN,,-
+  ftn7x NEWSK.FTN,,-
+  ftn7x LISTS.FTN,,-
+  ftn7x STAT.FTN,,-
+  ftn7x GTNAM.FTN,,-
+  ftn7x KPAST.FTN,,-
+  ftn7x KRCUR.FTN,,-
+  ftn7x READG.FTN,,-
+  ftn7x TMLIS.FTN,,-
+  ftn7x GTTIM.FTN,,-
+  ftn7x KSTAK.FTN,,-
+  ftn7x READS.FTN,,-
+  ftn7x READP.FTN,,-
+  ftn7x PRPUT.FTN,,-
+  ftn7x PRGET.FTN,,-
+  ftn7x PRPOP.FTN,,-
+  ftn7x REFTM.FTN,,-
+  ftn7x TWRAP.FTN,,-
+  merge bosslb.mrg bosslb.rel
+  if lindx bosslb.rel bosslb.lib
+    then pu bosslb.rel
+  fi
+fi
+if is $1 = m
+  then merge bosslb.mrg bosslb.rel
+  if lindx bosslb.rel bosslb.lib
+    then pu bosslb.rel
+  fi
+fi
+link BOSS.LOD /FSEXE/BOSS.RUN

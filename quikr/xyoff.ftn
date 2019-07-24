@@ -1,0 +1,99 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE XYOFF(IP)
+C 
+C     Set and display  X/Y  offsets 
+C 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 
+      DIMENSION IP(1) 
+      DIMENSION IREG(2),IPARM(2)
+      DIMENSION IBUF(20)
+C 
+      EQUIVALENCE (IREG(1),REG),(IPARM(1),PARM) 
+C 
+      DATA ILEN/40/ 
+C 
+      ICLCM = IP(1) 
+      DO I=1,3
+        IP(I)=0
+      ENDDO
+      IP(4) = 2HQO
+      IF (ICLCM.EQ.0) THEN
+        IP(3)=-1
+        RETURN
+      ENDIF
+      REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+      IF (IEQ.EQ.0) GOTO 500
+C 
+C     2. Parse the command:   XYOFF=< xoffset>,< yoffset> 
+C 
+C     2.1 First get the X offset and convert to radians 
+C 
+      ICH = IEQ+1
+      IC1 = ICH 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (JCHAR(PARM,1).EQ.52B) THEN
+        X = XOFF                  !  Pick up the X offset from common
+      ELSE IF (JCHAR(PARM,1).EQ.54B) THEN
+        IP(3) = -101              !  there is no default for the X offset
+        RETURN
+      ELSE
+        CALL GTRAD(IBUF,IC1,ICH-2,2,X,IERR)
+        IF (IERR.LT.0) THEN
+          IP(3) = -201
+          RETURN
+        ENDIF
+      ENDIF
+C 
+C     2.2 Next the Y offset.  
+C 
+      IC1 = ICH
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (JCHAR(PARM,1).EQ.52B) THEN
+        Y = YOFF                 !  Pick up the Y offset from common
+      ELSE IF (JCHAR(PARM,1).EQ.54B) THEN
+        IP(3) = -102             !  there is no default for the Y offset
+        RETURN
+      ELSE
+        CALL GTRAD(IBUF,IC1,ICH-2,2,Y,IERR)
+        IF (IERR.LT.0) THEN
+          IP(3) = -202
+          RETURN
+        ENDIF
+      ENDIF
+C 
+C     3. Plant the variables in COMMON. 
+C     ***NOTE*** WE LEAVE AZ EL AND RA DEC OFFSETS AS THEY ARE
+C 
+      XOFF = X
+      YOFF = Y
+      IERR = 0
+C 
+C     4. Now schedule ANTCN.  Tell it to do source offsets.
+C 
+      CALL EXEC(23,6HANTCN ,2)
+      CALL RMPAR(IP)
+      RETURN
+C 
+C     5. Return the offsets for display 
+C 
+500   NCH = ICHMV(IBUF,NCHAR+1,2H/ ,1,1)
+      XO=XOFF*180./PI 
+      YO=YOFF*180./PI 
+      NCH = NCH + IR2AS(XO,IBUF,NCH,10,5)  
+      NCH = ICHMV(IBUF,NCH,2H, ,1,1)
+      NCH = NCH + IR2AS(YO,IBUF,NCH,10,5)  
+C 
+      ICLASS = 0
+      NCH = NCH - 1 
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS)
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = 0 
+      IP(4) = 2HQO
+      RETURN
+      END 

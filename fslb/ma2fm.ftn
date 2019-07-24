@@ -1,0 +1,62 @@
+FTN77,I,Y
+$CDS ON
+C@MA2FM 
+      SUBROUTINE MA2FM(IBUF,INP,IMOD,IRATE,ISYN,ITST,ISGN,IRUN, 
+     .IREM,IPWR,IALR),CONVERT MAT BUFFER TO FM DATA C#870407:12:41# 
+C 
+C     This routine converts the buffers returned from the MAT 
+C     into the formatter information. 
+C     **NOTE** Only the buffer with the date and miscellaneous
+C     information is decoded. 
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF(1) 
+C      - buffers of length 5 words, as returned from MATCN
+C 
+C  OUTPUT:
+C 
+C     INP - input source
+C     IMOD - mode 
+C     IRATE - sample rate index 
+C     ISYN - synch test setting 
+C     ITST - synch test result
+C     ISGN - sign of something
+C     IRUN - status of run/set switch 
+C     IREM - remote/local 
+C     IPWR - power fail indicator 
+C     IALR - alarm on/off 
+C 
+C 
+C     Buffers from MATCN look like: 
+C     for ( data:   FMhhmmssss (time word)
+C     where each letter represents a character: 
+C                   hh = hours
+C                   mm = minutes
+C                   ss = seconds
+C                   ss = fractional seconds 
+C 
+C      ) data:      FMbydddpsr
+C     where 
+C                   b = bits denoting rem/lcl, alarm, power status
+C                   y = years 
+C                   ddd = days
+C                   p = run/set, +/- edge, synch test bits
+C                   s = input, output selection 
+C                   r = rate setting
+C     Note we are only concerned with the last 8 characters 
+C 
+C 
+      INP = IAND(IA2HX(IBUF,9),12)/4
+      IMOD = IAND(IA2HX(IBUF,9),3)
+      IRATE = IAND(IA2HX(IBUF,10),7)
+      ISYN = IAND(IA2HX(IBUF,8),1)
+      ITST = IAND(IA2HX(IBUF,8),2)/2
+      ISGN = IAND(IA2HX(IBUF,8),4)/4
+      IRUN = IAND(IA2HX(IBUF,8),8)/8
+      IREM = IAND(IA2HX(IBUF,3),4)/4
+      IPWR = IAND(IA2HX(IBUF,3),1)
+      IALR = IAND(IA2HX(IBUF,3),2)
+C 
+      RETURN
+      END 

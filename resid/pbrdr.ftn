@@ -1,0 +1,27 @@
+FTN77,I,Y  
+$CDS ON
+      SUBROUTINE PBRDR(IBUF)
+      DIMENSION IBUF(1) 
+C 
+C  draw BoRDeR
+C 
+      COMMON/PPLOT/ICHARS,IWIDX,IWIDY,
+     +             IXMIN,IXMAX,IYMIN,IYMAX, 
+     +             XMIN,XMAX,YMIN,YMAX, 
+     +             ROTAT(2,2) 
+C 
+C      WRITE(1,9956)                                                     DEBUG
+C9956  FORMAT(" ENTER PBRDR")                                            DEBUG
+C 
+      DO 10 I=IYMIN,IYMAX 
+        CALL PPPNT(IBUF,IXMIN,I,2H||) 
+        CALL PPPNT(IBUF,IXMAX,I,2H||) 
+10    CONTINUE
+C 
+      DO 20 I=IXMIN,IXMAX 
+        CALL PPPNT(IBUF,I,IYMIN,2H--) 
+        CALL PPPNT(IBUF,I,IYMAX,2H--) 
+20    CONTINUE
+C 
+      RETURN
+      END 

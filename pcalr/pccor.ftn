@@ -1,0 +1,43 @@
+FTN77,I,Y  
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      SUBROUTINE PCCOR(IVC,IVC2,ITRK,KCOREL,IDATA,ILOG,R1BIT, 
+     . NZERO),CORRELATES DATA C#870115:05:15# 
+C 
+C     This routine first checks to see that the split mode data 
+C     comes from VC's on the same frequency and side band, and
+C     then checks to see if the data streams are the same.
+C 
+C  INPUT: 
+C     IVC - first VC
+C     IVC2 - second VC
+C     ITRK - track on first VC
+      LOGICAL KCOREL
+C      - true if data was correlated
+      DIMENSION IDATA(1)
+C      - holds the data 
+C     ILOG - length of IDATA in chars 
+C 
+C  OUTPUT:
+C     R1BIT - number of bits counted
+C     NZERO - number of non-matching bits 
+C 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 
+      KCOREL = .FALSE.
+      IF (FREQVC(IVC).NE.FREQVC(IVC2)) GOTO 990 
+      LSB1 = ITR2VC(ITRK,IMODFM+1)
+      LSB2 = ITR2VC(ITRKPC(ITRK),IMODFM+1)
+      IF ((LSB1.GT.0.AND.LSB2.LT.0).OR.(LSB1.LT.0.AND.LSB2.GT.0)) 
+     . GOTO 990 
+C 
+      DO 150 I = 1,ILOG/4 
+          R1BIT = R1BIT+16
+          IF (IDATA(I).EQ.IDATA(I+128)) GOTO 150
+          IBIT = IAND(IDATA(I),IDATA(I+128))
+          NZERO = NZERO+(16-I1BIT(IBIT))
+150       CONTINUE
+      KCOREL = .TRUE. 
+C 
+990   CONTINUE
+      END 

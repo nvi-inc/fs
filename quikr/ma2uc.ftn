@@ -1,0 +1,67 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C@MA2UC
+      SUBROUTINE MA2UC(IBUF,ILO,ICAL,IDCAL,ILOH,IBOX,IADC,
+     .VAL),CONVERT MAT BUFFER TO UC DATA C#870115:04:03#
+C
+C     This routine converts the buffers returned from the MAT
+C     into the receiver status and A/D readings.
+C
+C  INPUT:
+C
+      DIMENSION IBUF(1)
+C      - buffer as returned from MATCN
+C
+C  OUTPUT:
+C
+C     Buffers from MATCN look like:
+C                     lnnnvvvv
+C     where each character means
+C                   l    - LO status in lower bit
+C                   nnn  - messy noise, heaters, A/D address
+C                   vvvv - A/D value
+C 
+      LOGICAL KBIT
+C 
+C     LO status 
+      IA = IA2HX(IBUF,1)    
+      ILO = 0 
+      IF (KBIT(IA,1)) ILO=1 
+D     WRITE(1,90) IA,ILO
+D90   FORMAT("IA,LOSTAT="O7,I5) 
+C     Cal on/off
+      IA = IA2HX(IBUF,2)    
+      ICAL = 1
+      IF (KBIT(IA,4)) ICAL = 0
+D     WRITE(1,91) IA,ICAL 
+D91   FORMAT("IA,ICAL="O7,I5) 
+C     Heaters
+      IDCAL = 1
+      IF (KBIT(IA,3)) IDCAL = 0
+      ILOH = 1
+      IF (KBIT(IA,1)) ILOH =  0
+      IA = IA2HX(IBUF,3)
+      IBOX=1
+      IF (KBIT(IA,3)) IBOX=0
+D     WRITE(1,92) IA,IDCAL,IBOX
+D92   FORMAT("IA,IDC,IBX="O7,2I5)
+C     A/D channel address
+      CALL ICHMV(IADC,2,IBUF,4,1)
+C                            Pick up second char of address
+      CALL SBIT(IA,2,0)
+      CALL SBIT(IA,3,0)
+      CALL SBIT(IA,4,0)
+      CALL ICHMV(IADC,1,IHX2A(IA),2,1)
+D     WRITE(1,93) IADC
+D93   FORMAT("IADC="A2)
+C     A/D value in volts
+C     IA = ISHFT(IA22H(IBUF(3)),-8)  + IA22H(IBUF(4))
+      IA = IA2HX(IBUF,7) + IA2HX(IBUF,6)*16+ IA2HX(IBUF,5)*256
+C     VAL = 2.5 - FLOAT(ISHFT(IA,4))*(5.0/4095.0) 
+      VAL = 2.5 - FLOAT(IA)*(5.0/4095.0)  
+D     WRITE(1,94) IA,VAL
+D94   FORMAT("IA,VAL="I10,F20.5)
+C 
+      RETURN
+      END 

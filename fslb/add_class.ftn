@@ -1,0 +1,22 @@
+FTN77,Y,I  
+$CDS ON
+      SUBROUTINE ADD_CLASS(IBUF,NCH,ICLASS,NREC)
+      IMPLICIT NONE
+      INTEGER*2 IBUF(1),NCH,ICLASS,NREC
+C
+C  ADD_CLASS: Increment Class # Buffers
+C
+C  INPUT:
+C     IBUF: buffer to add to class number
+C     NCH: number of characters in IBUF
+C     ICLASS: class # to add buffer, 0 to allocate new class #
+C     NREC: number of records in class so far
+C
+C  OUTPUT:
+C     ICLASS: new class # if 0 on entry
+C     NREC: input NREC incremented by 1, new number of class records
+C
+      CALL EXEC(20,0,IBUF,NCH,2HFS,0,ICLASS)
+      NREC = NREC+1
+      RETURN
+      END

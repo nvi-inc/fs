@@ -1,0 +1,102 @@
+  
+      These instructions will assist you in the installation of KERMIT-RTE
+      revision 1.99c on any RTE-6 or RTE-A system of revision C.83 onward.
+  
+      1)  If your system is at revision C.83, you must edit KERCOM.IFTN.
+          On line 12, change the value of the SysRev parameter to any 
+          value less than 2440.  Then re-compile and re-index (lindx!)
+          only KASUBS and K6SUBS.  It is NOT necessary to re-compile the
+          main KERMIT program!  If your system is at revision A.85 (2440) 
+          or later, you may skip this step. 
+  
+      2)  Link KERMIT using the supplied KERMIT.LOD command-file.  The
+          choice of KASUBS or K6SUBS will be made by Link as it reads 
+          KERMIT.LOD.  If your Linker doesn't support the "if" command, 
+          use one of the following link run-strings:
+              Link kermit.rel $k6subs              <RTE-6>   -OR- 
+              Link kermit.rel $kAsubs              <RTE-A>
+  
+      3)  Put put KERMIT's help file where KERMIT can find it:
+            /SYSTEM  is where KERMIT looks first, and 
+            /KERMIT  is where KERMIT looks next.  If not found, 
+            <wd>     (your working directory) is where KERMIT looks next, 
+                     and if not found there, KERMIT will look for a file
+            "KERMI   in FMGR-space. 
+          If for some reason, the supplied KERMIT.HLP is corrupted, or if 
+          you need to change it, you will need to generate a new KERMIT.HLP 
+          by running the RTE-6 utility GENIX against the editable help file 
+          KERMIT.TEXT.
+  
+      In case of trouble: 
+          I have had a few reports of Link errors ("Illegal relocatable 
+      records") which seem to be caused by one of two conditions found so 
+      far:
+          1)  Errors in reading the tape -- especially in KERMIT.REL from 
+              the 2730 CSL. 
+          2)  Features in 5.0 or 4.1 software which are not backward- 
+              compatible to earlier systems in the relocatable files. 
+      The solution is the same in both cases: re-compile KERMIT.FTN and 
+      KxSUBS.FTN as needed.  If this doesn't solve the problem, call me!
+  
+      Compatibility issues: 
+          KERMIT should be runnable on any RTE-A or RTE-6 system from 
+      revision "C.83" (the first introduction of CI) thru revision "4.1"
+      if the correct SysRev parameter is set. 
+          KERMIT-RTE revision 1.99c fixes all bugs which I have had the 
+      time to fully research: 
+          a)  Under RTE-A, a B- or C-mux will be properly identified
+              without memory-protecting 
+          b)  The "wizard" commands (leftovers from some research I was 
+              doing for the RTE-6 version) have been removed
+          c)  An error crept into the subroutine ReportFileError which
+              was due to the resegmenting of KERMIT; this is fixed
+          d)  This revision >>will<< run under RTE-A revision 5.0 [we 
+              got a beta version] but is not extensively tested, and you
+              will get a message to that effect when you run it.
+          e)  ID800, ID801, ID400, and ID401 will be properly identified
+              and allowed as ("D") mux drivers under RTE-A.  I can't wait 
+              for their RTE-6 equivalents, although I am not holding my 
+              breath! 
+      KERMIT-RTE revisions 1.99 thru 1.99c do suffer from some problems 
+      which I have not yet had the time to research and solve:
+              If KERMIT-RTE is operating as a server under RTE-6, on
+              some occasions when a logoff-type command is used from
+              the local host, KERMIT-RTE will fail to terminate itself
+              (although it does a nice job of cleaning up its session!) 
+              It may take the services of the new Debug/1000 before I 
+              can solve this one. 
+  
+      While KERMIT is now transportable, there are some good reasons why
+      it may not transport once in a while: 
+          1)  Different systems: Don't expect a KERMIT linked under an
+              RTE-A to run on an RTE-6 system.  In addition to software 
+              differences arranged at link time, the layout of type-6 
+              files is different between RTE-A, RTE-6, and the older
+              RTE types.
+          2)  Different system revision: Don't expect a KERMIT linked 
+              under a C.83 system revision to run on a 4.1 system!  The 
+              list of transportable entry-points (in VCTR) may not be 
+              the same. 
+          3)  Different firmware: A KERMIT version linked on an A-600 
+              will probably run OK on an A-900, but it is possible that 
+              the reverse is not true.  Similar implications exist for
+              RTE-6 systems, where one machine may have Fast Fortran
+              and another may not.  "RPL CHANGE" warnings should not be 
+              taken lightly!
+          4)  You have force-loaded KERMIT because there were some un-
+              defined references.  This practice is strongly discouraged
+              anyway, because there is very little code that KERMIT uses
+              which it can do without.
+  
+      For those of you with "D" firmware on their multiplexers, enjoy!!!
+      While revision 1.99 does not take any particular advantage of the 
+      special features this card provides, it performs one of the better
+      terminal-emulation jobs I have seen and can transfer packets well.
+      I strongly recommend that XON/XOFF protocol be enabled where the
+      connected devices will support it.  NOTE: "D" mux support is not
+      exhaustively tested yet, but please DO report problems you find!
+          --  WARNING -- WARNING -- WARNING -- WARNING -- WARNING --
+      In order to use this KERMIT revision with the D mux, you MUST be
+      using least revision 4.10 of the drivers, and revision 4.10 of the
+      firmware!  BETA soft/firmware WILL NOT WORK! [KERMIT will seem to 
+      work fine for a while, then the mux card(s) involved will CRASH!] 

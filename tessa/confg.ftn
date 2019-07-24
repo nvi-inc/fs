@@ -1,0 +1,53 @@
+FTN77,I,Y
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      subroutine confg(lfcode,ip1,ip2)
+c
+c  Call OPRIN in order to set up for the Field System pre-tests.
+c
+      include /fs/include/fscom.ftni
+      parameter (iblen=80)
+      dimension ip(5),ibuf(iblen/2),ireg(2),itime(5)
+      equivalence (reg,ireg(1))
+      integer vc2trk          !  Convert video converter # to track #
+      vc2trk(ivc) = ivc + 15*(ivc-2*(ivc/2))         !  Mode C
+c
+c  Section for processing the VC command.
+c
+      if (lfcode.eq.2hVC) then
+        ibuf(1) = 2hVC
+        nch = ib2as(ip1,ibuf,3,41002B)
+        ibuf(3) = 2h=
+        nch = ichmv(ibuf,6,ip2,1,6)
+        nch = ichmv(ibuf,nch,6h,2.000,1,6) - 1
+c
+c  Section for processing the REPRO command.
+c
+      else if (lfcode.eq.2hRE) then
+        itrk1 = vc2trk(ip1) - 1
+        itrk2 = vc2trk(ip2)
+        nch = ichmv(ibuf,1,10hREPRO=BYP,,1,10)
+        nch = 11 + ib2as(itrk1,ibuf,11,100002B)
+        nch = ichmv(ibuf,nch,2h, ,1,1)
+        nch = nch + ib2as(itrk2,ibuf,nch,100002B)
+        nch = ichmv(ibuf,nch,4h,2,2,1,4) - 1
+c
+c  Section for procesing the WAKEUP command.
+c
+      else if (lfcode.eq.2h!!) then
+        ibuf(1) = 2hWA
+        ibuf(2) = 2hKE
+        ibuf(3) = 2hUP
+        nch = 6
+        call exec(2,lu,40hReply to OPRIN prompt with T when ready.,-40)
+      endif
+c
+c  Call COPIN in order to schedule BOSS to schedule QUIKR
+c
+      call copin(ibuf,-nch)
+c
+c  For the WAKEUP command, suspend until operator is ready.
+c
+      if (lfcode.eq.2h!!) call exec(6,0,1)
+      return
+      end

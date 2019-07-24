@@ -1,0 +1,394 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C 
+      SUBROUTINE PCALS(IP),PHASE CAL SETUP CONTROL C#870115:04:50#
+C 
+C     PCALC sets up the common variables necessary for
+C      the proper execution of program PCALR
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - CLASS
+C        IP(2) - # REC
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C   COMMON BLOCKS USED
+C 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 
+C     CALLED SUBROUTINES: GTPRM,JCHAR 
+C         IVC2T - gets track with phase cal given VC# 
+C         IPHCK - check for phase cal in given track
+C 
+C   LOCAL VARIABLES 
+C 
+C        NCHAR  - number of characters in buffer
+C        ICH    - character counter 
+C        ITN    - number of tracks typed in 
+      DIMENSION ITRK(28)
+C               - temporary holder for track codes
+      DIMENSION IT(28)
+C               - holder for tracks individually typed in 
+      DIMENSION ICN1(4),ICN2(4) 
+C               - hold first and second indices for each LO 
+C        ILO    - number of LO's
+      DIMENSION I1DEX(14),I2DEX(14) 
+C               - LO indices for all 14 VC's
+      DIMENSION IMIN(4),IMAX(4) 
+C               - VC's having min & max values for each LO
+      DIMENSION IBUF(40)
+C               - class buffer
+C        ILEN   - length of IBUF, chars 
+      DIMENSION IPARM(2)
+C               - parameters returned from GTPRM
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+C 
+      DOUBLE PRECISION PCAL 
+C               - phase cal frequency 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 
+C  INITIALIZED VARIABLES
+C 
+      DATA ILEN/80/ 
+C 
+C  PROGRAMMER: NRV & MAH
+C     LAST MODIFIED: 820305 
+C 
+C 
+C     1. If we have a class buffer, then we are to set the
+C     variables in common for PCALR to use. 
+C 
+      ICHOLD = -99
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+      IERR = -1 
+      GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.EQ.0) GOTO 500
+C                   If no parameters, schedule PCALR
+      IF (JCHAR(IBUF,IEQ+1).NE.77B) GOTO 210
+      IP(1) = 0 
+      IP(4) = 77B 
+      CALL PCDIS(IP,ICLCM)
+      RETURN
+C 
+C     2. Step through buffer getting each parameter and decoding it.
+C     Command from user has these parameters: 
+C        PCAL=<#cycles>,<pause>,<repro>,<#blocks>,<debug>,<track>,<track>,... 
+C     Choices are <#cycles>: >=0, default 0 (runs continuosly), NCYCPC
+C                 <pause>  : >=0, default 60 seconds, IPAUPC
+C                 <repro>  : FS,BY,RW,AB, default FS, IREPPC
+C                 <#blocks>: >=1, default 25, NBLKPC
+C                 <debug>  : -2 to +2, default 0, IBUGPC
+C                 <track>  : can be tracks or VC#s, VC's preceeded with 
+C                            V, can also be ALL,EVEN,ODD,VEVEN,VODD,VALL
+C                            sets array ITRKPC. 
+C 
+C     2.1 FIRST PARM, # OF CYCLES 
+C 
+210   CONTINUE
+      ICH = 1+IEQ 
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF (JCHAR(PARM,1).EQ.54B) ICYC = 0
+C                 The default is 0
+      IF (JCHAR(PARM,1).EQ.52B) ICYC = NCYCPC 
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) ICYC=IPARM 
+      IF (ICYC.GE.0) GOTO 220 
+      IERR = -200-1 
+C                 Number of cycles thru' PCALR must be GE.0 
+      GOTO 990
+C 
+C     2.2 PARM #2, PAUSE BETWEEN CYCLES THRU' PCALR 
+C 
+220   CONTINUE
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) IPAU = IPARM 
+      IF (JCHAR(PARM,1).EQ.54B) IPAU = 60 
+C                      Default is 60 seconds
+      IF (JCHAR(PARM,1).EQ.52B) IPAU = IPAUPC 
+      IF (IPAU.GE.0.AND.IPAU.LE.1800) GOTO 230
+      IERR = -200-2 
+      GOTO 990
+C 
+C     2.3 THIRD PARM, REPRODUCE MODE
+C 
+230   CONTINUE
+      IREP = -1 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (ICHCM(PARM,1,2HFS,1,2).EQ.0) IREP = 0 
+      IF (ICHCM(PARM,1,2HBY,1,2).EQ.0) IREP = 1 
+      IF (ICHCM(PARM,1,2HRW,1,2).EQ.0) IREP = 2 
+      IF (ICHCM(PARM,1,2HAB,1,2).EQ.0) IREP = 3 
+      IF (JCHAR(PARM,1).EQ.54B) IREP = 0
+C                 Default is FS mode
+      IF (JCHAR(PARM,1).EQ.52B) IREP = IREPPC 
+      IBY = 1 
+      IF (IREP.EQ.2) IBY = 0
+      IF (IREP.EQ.0) IBY = IBYPPC 
+      IF (IREP.NE.-1) GOTO 240
+      IERR = -200-3 
+      GOTO 990
+C 
+C     2.4 4TH PARM, NUMBER OF BLOCKS TO PROCESS 
+C 
+240   CONTINUE
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF (JCHAR(PARM,1).EQ.54B) NBLK = 3
+C                 Default is 3 SECONDS INTEGRATION TIME
+      IF (JCHAR(PARM,1).EQ.52B) NBLK = NBLKPC 
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) NBLK = IPARM 
+      IF (NBLK.GT.0.AND.NBLK.LE.256) GOTO 250 
+      IERR = -200-4 
+      GOTO 990
+C 
+C     2.5 5TH PARM, DEBUG CONTROL 
+C 
+250   CONTINUE
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF (JCHAR(PARM,1).EQ.54B) IBUG = 0
+C                 Default is 0 debug
+      IF (JCHAR(PARM,1).EQ.52B) IBUG = IBUGPC 
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) IBUG = IPARM 
+      IF (IBUG.GT.-3.AND.IBUG.LE.2) GOTO 260
+      IERR = -200-5 
+      GOTO 990
+C 
+C     2.6 6TH AND FURTHER PARMS, TRACKS AND VC#'S 
+C     First check for ALL, EVEN, ODD
+C     and then check for VALL, VEVEN, VODD. 
+C 
+260   CONTINUE
+      DO 261 I = 1,28 
+        ITRK(I) = -1
+261     CONTINUE
+      IC1 = ICH 
+C 
+C         set ITRK for default and ALL
+C 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (JCHAR(PARM,1).NE.54B) GOTO 263
+C                    - first do default 
+      GOTO 264
+263   IF (ICHCM(PARM,1,4HALL ,1,3).NE.0) GOTO 267 
+264   IF (IREP.NE.3) GOTO 265 
+C                   error if split mode (AB)
+      IERR = -206 
+      GOTO 990
+265   DO 266 I = 1,28 
+          IF (IPHCK(I).NE.0) ITRK(I) = 100
+266       CONTINUE
+          GOTO 304
+C 
+C         set ITRK for EVEN tracks
+C 
+267   IF (ICHCM(PARM,1,4HEVEN,1,4).NE.0) GOTO 270 
+      IF (IREP.NE.3) GOTO 268 
+C                   error if split mode (AB)
+      IERR = -206 
+      GOTO 990
+268   DO 269 I = 2,28,2 
+          IF (IPHCK(I).NE.0) ITRK(I) = 100
+269       CONTINUE
+          GOTO 304
+C 
+C         set ITRK for ODD tracks 
+C 
+270   IF (ICHCM(PARM,1,4HODD ,1,3).NE.0) GOTO 273 
+      IF (IREP.NE.3) GOTO 271 
+C                   error if split mode (AB)
+      IERR = -206 
+      GOTO 990
+271   DO 272 I = 1,28,2 
+          IF (IPHCK(I).NE.0) ITRK(I) = 100
+272       CONTINUE
+          GOTO 304
+C 
+C         set ITRK for ALL video converters 
+C 
+273   IF (ICHCM(PARM,1,4HVALL,1,4).NE.0) GOTO 276 
+      IF (IREP.NE.3) GOTO 274 
+C                   error if split mode (AB)
+      IERR = -206 
+      GOTO 990
+274   DO 275 I = 1,14 
+          IDUMM1 = IVCAT(I,ITRK,1,-1) 
+275       CONTINUE
+          GOTO 304
+C 
+C         set ITRK for EVEN video converters
+C 
+276   IF (ICHCM(IBUF,IC1,5HVEVEN,1,5).NE.0) GOTO 279
+      IF (IREP.NE.3) GOTO 277 
+C                   error if split mode (AB)
+      IERR = -206 
+      GOTO 990
+277   DO 278 I = 2,14,2 
+          IDUMM1 = IVCAT(I,ITRK,1,-1) 
+278       CONTINUE
+          GOTO 304
+C 
+C         set ITRK for ODD video converters 
+C 
+279   IF (ICHCM(PARM,1,4HVODD,1,4).NE.0) GOTO 290 
+      IF (IREP.NE.3) GOTO 280 
+C                   error if split mode (AB)
+      IERR = -206 
+      GOTO 990
+280   DO 281 I = 1,14,2 
+          IDUMM1 = IVCAT(I,ITRK,1,-1) 
+281       CONTINUE
+          GOTO 304
+C 
+C     If not default or ALL etc., decode each subsequent
+C     entry as either Vnn or nn.
+C 
+290   CONTINUE
+      ITN = 1 
+291   IF (JCHAR(PARM,1).NE.126B) GOTO 295 
+C                            V
+      NCH = 2 
+      IF (JCHAR(PARM,3).EQ.40B) NCH = 1 
+      IIV = IAS2B(PARM,2,NCH) 
+      IF (IIV.GE.1.AND.IIV.LE.14) GOTO 292
+      IERR = -200-7 
+      GOTO 990
+292   IF (IVCAT(IIV,IT,ITN,IREP).EQ.1) GOTO 297 
+      IERR = -200-8 
+      GOTO 990
+295   CONTINUE
+      NCH = 2 
+      IF (JCHAR(PARM,2).EQ.40B) NCH = 1 
+      IT(ITN) = IAS2B(PARM,1,NCH) 
+      IF (IPHCK(IT(ITN)).NE.0) GOTO 296 
+      ITN = ITN-1 
+      GOTO 297
+296   IF (IT(ITN).GT.0.AND.IT(ITN).LE.28) GOTO 297
+      IERR = -200-7 
+      GOTO 990
+297   CONTINUE
+      ITN = ITN+1 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (JCHAR(PARM,1).NE.54B) GOTO 291
+      IF (ITN.GT.1) GOTO 300
+      IERR = -200-9 
+      GOTO 990
+C 
+300   IF (IREP.EQ.3) GOTO 301 
+      IF (IREP.EQ.0) GOTO 312 
+      DO 302 I = 1,ITN-1
+302       ITRK(IT(I)) = 100 
+      GOTO 400
+301   IF (ITN.EQ.3) GOTO 303
+      IERR = -200-6 
+      GOTO 990
+303   ITRK(IT(1)) = IT(2) 
+      GOTO 400
+C 
+C     Set up LO indices for each VC 
+C 
+304   CONTINUE
+      IF (IREP.NE.0) GOTO 400 
+      ITN = 1 
+      DO 308 I = 1,28 
+          IF (ITRK(I).LE.0) GOTO 308
+          IT(ITN) = I 
+          ITN = ITN+1 
+308       CONTINUE
+312   DO 305 I = 1,14 
+          I1DEX(I) = IABS(IFP2VC(I))
+          IF (I1DEX(I).EQ.1) I2DEX(I) = INP1IF+1
+          IF (I1DEX(I).EQ.2) I2DEX(I) = INP2IF+1
+305       CONTINUE
+C 
+C     Now find the outer and inner tracks for split mode
+C 
+      ICN1(1) = I1DEX(1)
+      ICN2(1) = I2DEX(1)
+      ILO = 1 
+C 
+      DO 310 I = 1,14 
+          IF (I.EQ.1) GOTO 306
+C                Check if we have already done this LO
+          DO 309 IX = 1,ILO-1 
+              IF(I1DEX(I).EQ.ICN1(IX).AND.I2DEX(I).EQ.ICN2(IX)) GOTO 310
+309           CONTINUE
+          ICN1(ILO) = I1DEX(I)
+          ICN2(ILO) = I2DEX(I)
+C                 Remember this LO if it is new 
+306       IVCMIN = I
+          IVCMAX = I
+          DO 307 IJ = I+1,14
+              IF (I1DEX(I).NE.I1DEX(IJ).OR.I2DEX(I).NE.I2DEX(IJ)) 
+     .              GOTO 307
+              IF (FREQVC(IJ).LT.FREQVC(I)) IVCMIN = IJ
+              IF (FREQVC(IJ).GT.FREQVC(I)) IVCMAX = IJ
+307           CONTINUE
+          IMIN(ILO) = IVCMIN
+          IMAX(ILO) = IVCMAX
+          ILO = ILO+1 
+310       CONTINUE
+C 
+C     Now set up the selected split mode tracks 
+C 
+      DO 322 I = 1,ILO-1
+          ITMIN = IVC2T(IMIN(I),0)
+          ITMAX = IVC2T(IMAX(I),0)
+          DO 315 IJ = 1,ITN-1 
+C             IF(ITRK(IT(IJ)).LE.0) ITRK(IT(IJ)) = 100
+              IF (IT(IJ).EQ.ITMIN) GOTO 313 
+              GOTO 315
+313           DO 316 IK = 1,ITN-1 
+                  IF (IT(IK).EQ.ITMAX) GOTO 317 
+                  GOTO 316
+317               ITRK(ITMIN) = ITMAX 
+                  ITRK(ITMAX) = ITMIN 
+316               CONTINUE
+315           CONTINUE
+322       CONTINUE
+C 
+C     Finally set the common variables to their new values
+C 
+400   CONTINUE
+D     WRITE(LU,9001) ILO,(ITRK(I),I=1,28) 
+D9001 FORMAT("#LO'S,ITRK = "15I5/14I5)
+      NCYCPC = ICYC 
+      IPAUPC = IPAU 
+      IREPPC = IREP 
+      IBYPPC = IBY
+      NBLKPC = NBLK 
+      IBUGPC = IBUG 
+      DO 410 I = 1,28 
+          ITRKPC(I) = ITRK(I) 
+410       CONTINUE
+      GOTO 990
+C 
+C      5.  Schedule Pcalr to start working. 
+C          If it's not dormant, then error. 
+C 
+500   IF (IPGST(6HPCALR ).EQ.0) GOTO 510
+      IF (IPGST(6HPCALR ).EQ.-1) GOTO 505 
+      IERR = -301 
+      GOTO 990
+505   IERR = -302 
+      GOTO 990
+510   CONTINUE
+      CALL EXEC(10,6HPCALR ,2HSA)
+C      Schedule PCALR 
+990   IP(1) = 0 
+      IP(2) = 0 
+      IP(3) = IERR
+      IP(4) = 2HQP
+      RETURN
+      END 

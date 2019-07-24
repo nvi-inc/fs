@@ -1,0 +1,137 @@
+FTN77,I,Y
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      PROGRAM ANTCN(3)
+C
+C     This program rings some bells and writes a message on
+C     the terminal whenever it is called.
+C
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+C  INPUT:
+C
+      DIMENSION IP(5)
+C        IP(1) = mode
+C                0 = initialize LU
+C                1 = pointing (from SOURCE command)
+C                2 = offset (from RADECOFF, AZELOFF, or XYOFF commands)
+C                3 = on/off source status (from ONSOURCE command)
+C                4 = direct communications (from ANTENNA command)
+C                5 = on/off source status for pointing progras
+C                6 = reserved for future focus control
+C                7 = log tracking data
+C           8 - 99 = reserved for future use
+C      100 - 32767 = for site specific use
+C
+C        IP(2) = class number (mode 4 only)
+C        IP(3) = number of records in class (mode 4 only)
+C        IP(4) - not used
+C        IP(5) - not used
+C
+C  OUTPUT:
+C
+C        IP(1) = class with returned message
+C          (2) = number of records in class
+C          (3) = error number
+C                0 - ok
+C               -1 - illegal mode
+C               -2 - timeout
+C               -3 - wrong number of characters in response
+C               -4 - interface not set to remote
+C               -5 - error return from antenna
+C               -6 - ERROR IN POINTING MODEL INITIALIZATION
+C                others as defined local
+C          (4) = 2HAN for above errors
+C              = 2HST for site defined errors
+C          (5) = not used
+C
+C     1. This is the simplest of all antenna interfaces.
+C     (BECAUSE IT DOESN'T DO ANYTHING!)
+C     Just write a message.
+C
+      integer*2 ib(40),iblen,imode,iclass,nrec,iclasr,nrecr,ierr
+      integer*2 nch,ireg(2),ncr
+      equivalence (ireg,reg)
+      data iblen/80/
+C
+      CALL RMPAR(IP)
+C
+      imode=ip(1)
+      iclass=ip(2)
+      nrec=ip(3)
+c
+      iclasr=0
+      nrecr=0
+      ierr=0
+c
+      if(imode.lt.0.or.imode.gt.7) then
+        ierr=-1
+        go to 99999
+      endif
+      GOTO (1,100,200,300,400,500,600,700) IP(1)+1
+C
+1     continue
+      write(1,*) 'Initializing Antenna Interface'
+      IONSOR = 0
+      GOTO 90000
+C
+100   CONTINUE
+      WRITE(1,*) 'Commanding to a new source'
+      IONSOR = 0
+      GOTO 90000
+C
+200   CONTINUE
+      WRITE(1,*) 'Commanding new offsets'
+      IONSOR = 0
+      goto 90000
+C
+300   CONTINUE
+      write(1,*) 'Checking onsource status, extended error logging'
+      IONSOR=1
+      goto 90000
+C
+400   CONTINUE
+      IF(ICLASS.EQ.0) GOTO 99999
+      write(1,*) 'Direct Antenna Communication'
+410   continue
+      if(nrec.le.0) go to 90000
+        nrec=nrec-1
+        REG=EXEC(21,ICLASS,IB  ,-IBLEN)
+        NCH=MIN0(IREG(2),IBLEN)
+        call exec(2,1,ib,-nch)
+        write(1,*) 'Enter response:_'
+        reg= exec(1,400b+1,ib,-iblen)
+        ncr=min0(ireg(2),iblen)
+        IF(ICLASR.EQ.0) CALL CLRQ(1,ICLASR,0)
+        CALL EXEC(20,0,ib,-ncr,2HFS,0,iclasr)
+        nrecr=nrecr+1
+      goto 410
+c
+500   continue
+      write(1,*) 'Checking onsource status, no extended error logging'
+      IONSOR=1
+      goto 90000
+c
+600   continue
+      ierr=-1
+      goto 99999
+c
+700   continue
+      write(1,*) 'Checking onsource status, log tracking data'
+      IONSOR=1
+      goto 90000
+C
+90000 CONTINUE
+      CALL BELL(LU,0)
+C
+99999 CONTINUE
+      IF(NREC.ne.0.and.iclass.ne.0) CALL CLRCL(ICLASS)
+      IP(1) = iclasr
+      IP(2) = nrecr
+      IP(3) = ierr
+      IP(4) = 2HAN
+      IP(5) = 0
+      CALL PRTN(IP)
+      CALL EXEC(6,0,-1)
+C
+      END

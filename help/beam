@@ -1,0 +1,28 @@
+BEAM1, BEAM2, - Set beamsize for FLUXn command.
+
+Syntax:   BEAM1=<angle>
+          BEAM2=<angle>
+Response: BEAM1/<angle>
+          BEAM2/<angle>
+
+Settable parameters:
+<angle>: full-width half maximum beam size, displayed in degrees
+         of arc.
+
+Monitor-only parameters: none
+
+     Comments: Two beam sizes may be specified with these two
+commands. Normally this would be used for IF1 and IF2. The commands
+FLUX1 and FLUX2 use the sizes specified as BEAM1 and BEAM2
+respectively.
+
+There is no default for the beam size unless the IFD and LO
+commands have been issued, in which case the beam size is
+calculated from the appropriate LO frequency and the antenna
+diameter from the ANTENNA.CTL file by the formula:
+
+         beam size (radians) = 1.05*c/(FREQ*DIAMAN)
+
+The BEAMn=... command will change the calculated values of the
+FLUXn command to invalid quantities, until a corrrect FLUXn=...
+command is issued.

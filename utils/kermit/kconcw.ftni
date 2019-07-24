@@ -1,0 +1,12 @@
+!     Goes with rev 1.99b or later; edited  2:48 PM  THU., 15  OCT., 1987 
+  
+!     This common provides storage for the control-words used by Connect
+!     and its assistants. 
+  
+      integer*2 Ltx(2),Lrx(2),Rtx(2),Rrx(2) 
+      integer*2 Ltc,Lrc,Rrc,Rtc,term,dstat
+      logical*2 fASI,fRcm,fLcm
+      common /kconcw/ Ltx,Lrx,Rtx,Rrx,term,dstat,fASI,fRcm,fLcm 
+      equivalence (Ltx(2),Ltc),(Lrx(2),Lrc) 
+      equivalence (Rtx(2),Rtc),(Rrx(2),Rrc) 
+  

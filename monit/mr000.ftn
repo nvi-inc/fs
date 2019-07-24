@@ -1,0 +1,268 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+        SUBROUTINE MR000(LUDSP,ITYPE,NLINES,KLIN)
+     .,C#870115:05:46    MONITOR VLBI V=1.2#
+C
+C               THIS ROUTINE DISPLAYS THE STATUS OF THE VLBI SYSTEM WITH
+C       THE FORMAT THAT FOLLOWS LOCK ON THE TOP OF THE SCREEN UNDER THE
+C       PROGRAM MONIT:
+C
+C  &dBVLBI MARK III&d@ 1980-059 17:49:47 UT           TEMP   0.0C  &dB
+C  &dBMODE&d@ &dBRATE&d@  &dBSPEED&d@ &dBDIR&d@ &dBENABLED&d@                 HUMID  0.0%  RA  00h00m
+C   A   4.000  0    FOR                         PRES    0.0  DEC 00d00m
+C  &dBVACUUM&d@   &dBTAPE&d@     &dBFEET&d@ &dBIF1&d@ &dBIF2&d@                            HA -00h25m21.2s
+C  READY    STOPPED       NOR NOR                            AZ 170d EL 47d
+C  ---------------------------------------------------------------------------
+C
+C  WHO  WHEN    DESCRIPTION
+C  GAG  910111  Changed ISHRC call for LFEET from a length of 4 to 5
+C  GAG  910114  Added one space for FEET in the display.
+C
+        LOGICAL KLIN4,KLIN,KHALTO,ITLN,ILLN,LLENT
+C
+C
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+        DIMENSION IDSC(2,3)
+C
+C       IDSC    - DISPLAY INFORMATION
+C
+      CHARACTER*8 IBC
+      DIMENSION IB(4)
+      EQUIVALENCE (IB,IBC)
+C
+C
+        EXTERNAL IFMED,ITPED,IIFED,ISOED,ISHRC
+C
+      DATA IDSC   /2H I,2HF ,2H F,2HM ,2H T,2HP /,ILLN/.FALSE./
+C
+C               INITALIZE THE INPUTS
+C
+        NLINES=0
+C
+C
+C               CHECK ITYPE FOR ONE HANDLED BY THIS ROUTINE
+C
+        IF(             ITYPE .LT. 0
+     C          .OR.    2 .LT. ITYPE    )GO TO 99999
+C
+C               GET THE ANGLES
+C
+        CALL RADEC(RA50,DEC50,HA,IRAH,IRAM,RAS,LDSIGN,IDECD
+     C  ,IDECM,DECS,LHSIGN,IHAH,IHAM,HAS)
+C
+C
+C               FIRST LINE OF DISPLAY
+C
+        IDUMMY = ISHRC(0,LUDSP,.TRUE.,KLIN)
+        CALL ISTND(LNAANT,ITODAY,IUT1,IUT2,ISHRC)
+C
+C               IF ITYPE IS 0 OR 1 TIME TO QUIT
+C
+        IF(ITYPE .EQ. 2)GO TO 5000
+C
+C               DISPLAY EVERYTHING UP TO HERE AND EXIT
+C
+        IDUMMY = ISHRC(63,LUDSP,0,KLIN)
+        NLINES=NLINES+1
+C
+        GO TO 99999
+C
+5000    CONTINUE
+C
+        IF(KHALT)IDUMMY = ISHRC(2,36,9HS2$HALT,9)
+        IDUMMY = ISHRC(2,47,4HTEMP,4)
+        IDUMMY = ISHRC(4,54,TEMPWX,-5,1)
+        IDUMMY = ISHRC(2,59,2HC ,1)
+        IDUMMY = ISHRC(66,62,LSORNA,8)
+        IDUMMY = ISHRC(20,71,ISOED,-1,IONSOR)
+        IDUMMY = ISHRC(63,LUDSP,0,KLIN)
+        NLINES=NLINES+1
+C
+C               SECOND LINE OF DISPLAY
+C
+        IDUMMY = ISHRC(0,LUDSP)
+        IDUMMY = ISHRC(66,1,4HMODE,4)
+        IDUMMY = ISHRC(66,6,4HRATE,4)
+        IDUMMY = ISHRC(66,11,5HSPEED,5)
+        IDUMMY = ISHRC(66,17,3HDIR,3)
+        IDUMMY = ISHRC(3,24,INEXT(1),41002B)
+        IDUMMY = ISHRC(2,26,2H::,1)
+        IDUMMY = ISHRC(3,27,INEXT(2),41002B)
+        IDUMMY = ISHRC(2,29,2H::,1)
+        IDUMMY = ISHRC(3,30,INEXT(3),41002B)
+        IDUMMY = ISHRC(2,32,5H NEXT,5)
+        IDUMMY = ISHRC(2,47,5HHUMID,5)
+        IDUMMY = ISHRC(4,54,HUMIWX,-5,1)
+        IDUMMY = ISHRC(2,59,6H%  RA ,6)
+        IDUMMY = ISHRC(5,65,2H  ,IRAH,IRAM,RAS,3Hhms)
+        IDUMMY = ISHRC(63,LUDSP,0,KLIN)
+        NLINES=NLINES+1
+C
+C               LINE THREE STARTS HERE
+C
+        IDUMMY = ISHRC(0,LUDSP)
+        IDUMMY = ISHRC(20,2,IFMED,-1,IMODFM)
+        IDUMMY = ISHRC(20,6,IFMED,-2,IRATFM)
+        IDUMMY = ISHRC(20,12,ITPED,-1,ISPEED)
+        IDUMMY = ISHRC(20,17,ITPED,-2,IDIRTP)
+        IF(LSKD .EQ.'NONE')GO TO 5333
+        IBC = LSKD
+        IDUMMY = ISHRC(2,21,6HSCHED=,6)
+        IDUMMY = ISHRC(2,27,IB,7)
+5333    CONTINUE
+        IF(LLOG .EQ.' ')GO TO 5339
+        IBC = LLOG
+        IDUMMY = ISHRC(2,35,4HLOG=,4)
+        IDUMMY = ISHRC(2,39,IB,7)
+5339    CONTINUE
+        IDUMMY = ISHRC(2,47,4HPRES,4)
+        IDUMMY = ISHRC(4,52,PRESWX,-6,1)
+        IDUMMY = ISHRC(2,58,2Hmb,2)
+        IDUMMY = ISHRC(2,62,3HDEC,3)
+        IDUMMY = ISHRC(5,65,LDSIGN,IDECD,IDECM,0,3Hdms)
+        IDUMMY = ISHRC(2,72,2H (,2) 
+        IDUMMY = ISHRC(4,74,EP1950,-5,0)
+        IDUMMY = ISHRC(2,-1,1H),1)
+        IDUMMY = ISHRC(63,LUDSP,0,KLIN)
+        NLINES=NLINES+1
+C
+C               LINE FOUR STARTS HERE
+C
+C
+        IDUMMY = ISHRC(0,LUDSP)
+        IDUMMY = ISHRC(66,1,6HVACUUM,6)
+        IDUMMY = ISHRC(66,10,4HTAPE,4)
+        IDUMMY = ISHRC(66,19,4HFEET,4)
+        IDUMMY = ISHRC(66,24,3HIF1,3)
+        IDUMMY = ISHRC(66,29,4HTSYS,4)
+        IDUMMY = ISHRC(66,34,3HIF2,3)
+        IDUMMY = ISHRC(66,39,4HTSYS,4)
+        IDUMMY = ISHRC(2,45,5HCABLE,5)
+        IDUMMY = ISHRC(4,51,CABLEV,8,6)
+        IDUMMY = ISHRC(2,59,1Hs,1)
+        IDUMMY = ISHRC(2,62,3HHA ,3)
+        IDUMMY = ISHRC(5,65,LHSIGN,IHAH,IHAM,HAS,3Hhms)
+        IDUMMY = ISHRC(63,LUDSP,0,KLIN)
+        NLINES=NLINES+1
+C
+C               LINE FIVE STARTS HERE
+C
+        IDUMMY = ISHRC(0,LUDSP)
+        IDUMMY = ISHRC(20,1,ITPED,-8,IRDYTP)
+        IDUMMY = ISHRC(20,10,ITPED,-9,ICAPTP)
+        IDUMMY = ISHRC(2,18,LFEET_FS,5)
+        IDUMMY = ISHRC(20,24,IIFED,-1,INP1IF)
+        IDUMMY = ISHRC(4,28,SYSTMP(29),-5,1)
+        IDUMMY = ISHRC(20,34,IIFED,-1,INP2IF)
+        IDUMMY = ISHRC(4,38,SYSTMP(30),-5,1)
+        IDUMMY = ISHRC(2,62,3HAZ ,3)
+        IDUMMY = ISHRC(4,65,AZIM*180.0/PI,-4,0)
+        IDUMMY = ISHRC(2,-1,4Hd EL,4)
+        IDUMMY = ISHRC(4,75,ELEV*180.0/PI,-3,0)
+        IDUMMY = ISHRC(2,-1,2Hd ,1)
+        IDUMMY = ISHRC(63,LUDSP,0,KLIN)
+        NLINES=NLINES+1 
+C 
+C               LINE 6 IF NEEDED STARTS HERE
+C 
+C 
+C 
+C               INITIALIZE FOR THIS LINE
+C 
+        IRT=1 
+C 
+        ITLN=.FALSE.
+C 
+C               SET UP ISHRC IF DISPLAYED LAST TIME THROUGH 
+C 
+        IF(ILLN)IDUMMY = ISHRC(0,LUDSP) 
+C 
+C               SET UP LOOP 
+C 
+        DO 6800 I=1,18
+C 
+C               SEE IF CHECKING IS OK 
+C 
+        IF(ICHECK(I) .GT. 0)GO TO 6800
+C 
+C               SELECT ROUTE
+C 
+        GO TO (6100,6200),IRT 
+C 
+6100    CONTINUE
+C 
+C               NOTE AN ENTRY IS MADE AND INITIALIZE
+C 
+        IRT=2 
+C 
+        ITLN=.TRUE. 
+C 
+        IF(.NOT. ILLN)IDUMMY = ISHRC(0,LUDSP) 
+C 
+C               WRITE INITIAL MESSAGE AND LEAVE IN VID ON 
+C 
+        IDUMMY = ISHRC(202B,1,15HCHEKR IGNORING:,15)
+C 
+6200    CONTINUE
+C 
+C               GET THE MAPPED PARM 
+C 
+        ICR=MAX0(I-15,0)
+C 
+C               CHOOSE ROUTE AGAIN
+C 
+        IF(ICR .NE. 0)GO TO 6500
+C 
+C               PUT IN SPACE V
+C 
+        IDUMMY = ISHRC(2,0,2H V,2)
+C 
+C               PUT IN INDEX ON VC
+C 
+        ISHLN=ISHRC(3,0,I,100002B)
+C 
+C               EXIT THIS LOOP
+C 
+        GO TO 6799
+C 
+6500    CONTINUE
+C 
+C               MOVE IN THE FIELD 
+C 
+        ISHLN=ISHRC(2,0,IDSC(1,ICR),3)
+C 
+6799    CONTINUE
+C 
+6800    CONTINUE
+C 
+C               RESET LENGTH TEST 
+C 
+        LLENT=.FALSE. 
+C 
+C               CLEAR IF A CHANGE 
+C 
+        IF(ISHLN .NE. IOSHLN)LLENT=.TRUE. 
+C 
+C               SAVE OLD LENGTH 
+        IOSHLN=ISHLN
+C 
+C               DISPLAY LINE IF ANY 
+C 
+        IF(ITLN .OR. ILLN)IDUMMY = ISHRC(63,LUDSP,0,LLENT)
+C 
+C               NOTE LINE WRITTEN IF SO 
+C 
+        IF(ITLN .OR. ILLN)NLINES=NLINES+1 
+C 
+C               SAVE ITLN 
+C 
+        ILLN=ITLN 
+C 
+6999    CONTINUE
+99999   CONTINUE
+C 
+        RETURN
+        END 
+        END$

@@ -1,0 +1,151 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C
+      SUBROUTINE READP(IDCBP1,IDCBP2,ISTACK,LSTACK,LPROC1,LPROC2,KBREAK,
+     .IBUF,IBLEN,NCHAR,LPROCN,LPARM,NPARM,IERR)
+     .,READ FROM PROCEDURE C#870115:04:22#
+C
+C     READP - reads the next line from a procedure
+C     The stack is popped as necessary.
+C
+C     DATE   WHO CHANGES
+C     810907 NRV Modified for procedure files
+C     840217 MWH Modified stack structure
+C
+D     INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C     INPUT VARIABLES:
+C
+C     IDCBP1,2 - DCBs for the two proc files
+C     ISTACK - Stack for popping next procedure
+C     LSTACK - Stack for popping next parameters
+C     LPROC1,2 - procedure directories
+C     KBREAK - true if we are to end the current procedure now
+C               We set this to false after doing our thing.
+C     IBUF - buffer for reading the command
+C     IBLEN  - length of IBUF in words
+      DIMENSION IDCBP1(1),IDCBP2(1)
+      DIMENSION ISTACK(1),LSTACK(1)
+      DIMENSION LPROC1(10,1),LPROC2(10,1)
+      DIMENSION IBUF(1)
+      LOGICAL KBREAK
+C
+C     OUTPUT VARIABLES:
+C
+C     NCHAR - Number of characters in the command in IBUF
+C     LPROCN - the full procedure name - this is unchanged if
+C              no new procedure is popped
+C     LPARM - parameter string for this procedure
+C     NPARM - number of characters in LPARM
+C     IERR  - error return, FMP error from READF
+      DIMENSION LPARM(1),LPROCN(1)
+C
+C
+C  LOCAL VARIABLES:
+C
+C     INDEXP - index of the procedure
+C     IREC - location informtion for current line of procedure
+C     IL - length of record read from file
+      INTEGER*4 IRECL,ID
+      INTEGER*2 FmpReadString,fblnk
+      DIMENSION IREC(4)
+      character*80 ibc
+      dimension ib(40)
+      equivalence (ib,ibc)
+C
+C  INITIALIZED VARIABLES:
+C
+C
+C
+C     1. First try simply reading the next line from the DCB.
+C     If that works, then we are done.
+C
+100   nchar = 0
+      CALL PRGET(ISTACK,IREC,2,IERR)
+      IF (IERR.LT.0) GOTO 800
+      INDEXP = IREC(2)
+      IRECL = IREC(1)
+      IF(INDEXP.GT.0)id = FmpSetPosition(IDCBP1,IERR,IRECL,-IRECL)
+      IF(INDEXP.LT.0)id = FmpSetPosition(IDCBP2,IERR,IRECL,-IRECL)
+      IF(IERR.LT.0)GOTO 800
+      IF (INDEXP.GT.0) len = FmpReadString(IDCBP1,IERR,IBC)
+      IF (INDEXP.LT.0) len = FmpReadString(IDCBP2,IERR,IBC)
+      IF (IERR.LT.0.OR.LEN.LT.0) GOTO 800
+      IF (len.eq.0.OR.ibc(1:6).eq.'ENDDEF'.or.ibc(1:6).eq.'DEFINE')
+     .   goto 200
+C                     These are the conditions for end-of-procedure
+C
+C     Get location of next record of the procedure and put into stack
+C
+      IF(INDEXP.GT.0)id = FmpPosition(IDCBP1,IERR,IRECL,ID)
+      IF(INDEXP.LT.0)id = FmpPosition(IDCBP2,IERR,IRECL,ID)
+      IREC(1) = IRECL
+      IF(IERR.LT.0)GOTO 800
+      INDX = ISTACK(2) - 2
+      istack(indx+1) = irec(1)
+      nchar = iflch(ib,80)
+      if (ibc.eq.' ') goto 100
+      NCHAR=FBLNK(IB,1,NCHAR)
+      CALL UPPER(IB,1,NCHAR)
+      id = ichmv(ibuf,1,ib,1,nchar)
+      CALL PRPOP(LSTACK,NPARM,1,IERR)
+C                     Pop up the # parm ...
+      IF (NPARM.NE.0) CALL PRGET(LSTACK,LPARM,(NPARM+1)/2,IERR)
+C                     Get the parameters for this procedure
+      CALL PRPUT(LSTACK,NPARM,1,IERR)
+C                     Re-place on stack
+      GOTO 900
+C
+C
+C     2. This procedure is used up.
+C     Pop the index of the current proc to get rid of it.
+C     Pop the last line of the previous procedure.
+C     Also pop up the old parameters, if any.
+C
+200   CONTINUE
+      KBREAK = .FALSE.
+      CALL PRPOP(ISTACK,INDEXP,1,IERR)
+C                     This is the index of the just-completed procedure
+      CALL PRPOP(ISTACK,IREC,1,IERR)
+C                     This is the location info for the previous procedure
+      CALL PRPOP(LSTACK,NPARM,1,IERR)
+      IF (NPARM.NE.0) CALL PRPOP(LSTACK,LPARM,(NPARM+1)/2,IERR)
+      IF (ISTACK(2).EQ.2) GOTO 900
+C                     This is the end of the stack
+C
+C
+C     3. Re-position to the new procedure, then go back and try reading again.
+C     If the next procedure is used up too, continue to pop up
+C     the stacked names until we find one with more records.
+C
+      CALL PRGET(ISTACK,INDEXP,1,IERR)
+      IRECL = LPROC1(8,INDEXP)
+      IF (INDEXP.LT.0) GOTO 320
+      id = FmpSetPosition(IDCBP1,IERR,IRECL,-IRECL)
+      IF (IERR.LT.0) GOTO 800
+      len = FmpReadString(IDCBP1,IERR,IBC)
+      IF (IERR.LT.0.OR.LEN.LT.0) GOTO 800
+      IDUMMY = ICHMV(LPROCN,1,IB,9,12)
+      GOTO 100
+C
+320   INDEXQ = IABS(INDEXP)
+      IRECL = LPROC2(8,INDEXQ)
+      id = FmpSetPosition(IDCBP2,IERR,IRECL,-IRECL)
+      IF (IERR.LT.0) GOTO 800
+      len = FmpReadString(IDCBP2,IERR,IBC)
+      IF (IERR.LT.0.OR.LEN.LT.0) GOTO 800
+      IDUMMY = ICHMV(LPROCN,1,IB,9,12)
+      GOTO 100
+C
+C
+C     8. Abnormal error section.  There should be no errors, so
+C     this is serious.
+C
+800   IF (IERR.EQ.-1) CALL LOGIT(0,0,0,0,-128,2HBO)
+      IF (IERR.LT.-1) CALL LOGIT(0,0,0,1,-129,2HBO,IERR)
+      IF (IERR.EQ. 0) CALL LOGIT(0,0,0,1,-130,2HBO,IERR)
+      ISTACK(2) = 2
+      LSTACK(2) = 2
+C
+900   RETURN
+      END

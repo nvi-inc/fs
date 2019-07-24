@@ -1,0 +1,74 @@
+FTN77,I,Y  
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C 
+      SUBROUTINE LXHMS(XX,LINE,NCH),CONVERT LOG TIME FROM DOUBLE PRECISI
+     .ON TO ASCII C#870115:05:35# 
+C 
+C LXHMS - Convert log time from double precision to ASCII.
+C 
+C MODIFICATIONS:
+C 
+C    DATE     WHO  DESCRIPTION
+C    820917   KNM  SUBROUTINE CREATED 
+C 
+C INPUT VARIABLES:
+C 
+      DOUBLE PRECISION XX 
+C        - Contains the log time
+C 
+C OUTPUT VARIABLES: 
+C 
+      DIMENSION LINE(1) 
+C        - Plotting output array
+C     NCH - Character count 
+C 
+C COMMON BLOCKS USED: 
+C 
+      INCLUDE LXCOM.FTNI
+C 
+C SUBROUTINE INTERFACES:
+C 
+C     CALLING SUBROUTINES:
+C 
+C     LXPLT - Plotting routine
+C 
+C LOCAL VARIABLES:
+C 
+C     LXDAY,LXHR,LXMIN,LXSEC - Day, Hours, Minutes, & Seconds 
+C     TIME - Contains log time
+C 
+C INITIALIZED VARIABLES:
+C 
+C 
+C ******************************************************************* 
+C 
+C Convert the double precision variable TIME ( which is the log day & 
+C fraction of a day to log day, hours, minutes, & seconds.
+C 
+C ******************************************************************* 
+C 
+C 
+      TIME = XX 
+      LXDAY = TIME
+      TIME = TIME - LXDAY 
+      TIME = TIME * 24.D0 
+      LXHR = TIME 
+      TIME = TIME - LXHR
+      TIME = TIME * 60.D0 
+      LXMIN = TIME
+      TIME = TIME - LXMIN 
+      TIME = TIME * 60.D0 
+      LXSEC = TIME
+      CALL IB2AS(LXDAY,LINE,NCH,3)
+      NCH=NCH+3 
+      CALL IFILL(LINE,NCH,1,55B)
+      NCH=NCH+1 
+      CALL IB2AS(LXHR,LINE,NCH,40000B+400B+2) 
+      NCH=NCH+2 
+      CALL IB2AS(LXMIN,LINE,NCH,40000B+400B+2)
+      IF(IKEY.EQ.13) GOTO 10
+      NCH=NCH+2 
+      CALL IB2AS(LXSEC,LINE,NCH,40000B+400B+2)
+10    RETURN
+      END 

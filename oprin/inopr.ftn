@@ -1,0 +1,420 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$ALIAS RNRQ,NOABORT
+$CDS ON
+        SUBROUTINE INOPR(NAMEI,NAMEC,IP,NAMUS,MCNTL,NCNTL,IERR,IBUF)
+C
+C 2.  NAME INTERFACE
+C
+C 2.1.   CALLING SEQUENCE: CALL INOPR(NAMEI,NAMEC,IP,NAMUS,MCNTL,NCNTL)
+C
+C     INPUT VARIABLES:
+        DIMENSION NAMEI(14,25),NAMEC(32,20),IP(11),NCNTL(9),IBUF(60)
+C       NAMEI   - INITALIZATION LIST FOR OPRIN (FOR DETAILS SEE OPRIN)
+C       NAMEC   - CONTROL LIST FOR OPRIN RESPONSE TO CNTL-CHARACTER
+C                 (SEE OPRIN FOR DETAILS)
+C       IP      - INPUT PARAMETERS TO OPRIN
+C
+C     OUTPUT VARIABLES:
+        DIMENSION NAMUS(3)
+C       NAMUS  - THE NAME OF THIS PROGRAM FOR NON SUSPENDING TIME SCHEDULING
+        DIMENSION MCNTL(13)
+C       MCNTL  - THE CNTL BRANCH ARRAY FOR QUICK AND EFFICIENT ROUTING
+C       NCNTL   - NUMBER OF ENTRIES IN BRANCH ARRAY THAT HAVE BEEN USED
+C       IBUF    - INTERNAL BUFFER FOR INPUT INFORMATION
+C
+C 2.2.   COMMON BLOCKS USED
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+C 2.5.   SUBROUTINE INTERFACE:
+C     CALLING SUBROUTINES: OPRIN
+C     CALLED SUBROUTINES: IGET, RMPAR, OPEN, ICHMV,
+C                         PRSLN, CLOSE, EXEC[3,23,2]
+C
+C 3.  LOCAL VARIABLES
+        DIMENSION IDCB(144),ILIST(3)
+        DIMENSION IBUF2(36)
+        CHARACTER*80 IBC
+         DIMENSION IB(40)
+        EQUIVALENCE (IB,IBC)
+C       IBUF   - INTERNAL BUFFER FOR INPUT INFORMATION
+C       IDCB    - INTERNAL DCB
+C       ILIST   - LIST FOR PARSING NAMEI INPUT LIST
+C       IRGA    - CONTENTS OF A REG WHERE REG WAS RETURNED FROM FUNCTION
+C                 CALL TO A ROUTINE
+C       IRGB    - CONTENTS OF B-REG WHERE REG WAS RETURNED FROM FUNCTION
+C                 CALL TO A ROUTINE
+        DIMENSION IREG(2)
+C       IREG    - DUMMY REGISTER RETREIVAL AID
+        EQUIVALENCE (REG,IREG(1),IRGA),(IREG(2),IRGB)
+        character*5 pgmchs,dirnm*6,pgmfd*12,blank*1,popt*1,slash*1
+        character*20 bl2
+C
+C 4.  CONSTANTS USED
+        DATA ILIST/2HSM,2HCL,2HA /
+        data dirnm/'/fsexe'/, blank/' '/, popt/'P'/, slash/'/'/
+C       ILIST   - PARSING LIST FOR NAMEI INPUT
+C               THE SEQUENCE IN THIS LIST STANDS AS FOLLOWS 
+C               S       - SEGMENT 
+C               M       - FIELD SYSTEM MANAGER
+C               C       - CHECKING SYSTEM MANAGER
+C               L       - LOGGING SYSTEM MANAGER
+C               LA      - ASSISTANT LOGGING SYSTEM MANAGER
+        DATA NMCMX/20/
+C       NMCMX   - MAXIMUM NUMBER OF NAME ENTRIES IN NAMEC
+        DATA NPGMS/10/
+C
+C 6.  PROGRAMMER: LEE N. FOSTER
+C     LAST MODIFIED:
+C  MWH  870921  Adapted for use on A600/A400
+C  LAR  880604  Write error message if too many programs in (FSPGM
+C  GAG  901221  Changed parameter in logit call for OPPGM control file.
+C  GAG  910109  Added RNRQ logic for coordinating resources with PFMED.
+C  GAG  910124  Added resource allocation for IRNLVDT_FS for WEH's
+C               head calibration routines.
+C
+C     PROGRAM STRUCTURE
+C     1.  INITIALIZE VARIABLES
+C
+      IERR = 0
+      IFRR = 0
+      CALL PNAME(NAMUS)                 !  GET OUR NAME
+      CALL EXEC(3,2200B+LU,6000)        !  SET TERMINAL TIME-OUT TO 60 SEC
+      CALL IFILL(NCNTL(5),1,10,0)
+      NCNTL(1) = NCNTL(3)
+      NCNTL(2) = NCNTL(3)
+C               GET PROGRAM LIST
+C               SET I FOR READING NAMEI
+      I = 1
+      NDONE = 0
+      CALL FmpOpen(IDCB,IFRR,'/FS/CONTROL/FSPGM.CTL','ro',1)
+      IF (IFRR.LT.0) THEN
+        IERR = -3
+        CALL SDOUT(LU,-3,NAMUS,IFRR,23H FMP error on FSPGM.CTL,23)
+        GOTO 99999
+      ENDIF
+C
+C        2. Read each record from FSPGM.CTL and parse it.
+C
+      LEN = FmpReadString(IDCB,IFRR,IBC)
+      call casefold(ibc)
+100   DO WHILE (LEN.GT.0)
+        IF (IFRR.LT.0) THEN                          !  READ ERROR
+          IERR = -4
+         CALL SDOUT(LU,-4,NAMUS,IFRR,28H FMP error reading FSPGM.CTL,28)
+          GO TO 99999
+        ENDIF
+C               PROCESS ALL EXCEPT COMMENT RECORDS
+        IF (JCHAR(IB,1).NE.52B) THEN
+C                WRITE ERROR MESSAGE IF TOO MANY ENTRIES
+          IF (I.GT.NCNTL(4)) THEN
+            CALL EXEC(2,LU,30HTOO MANY PROGRAMS IN FSPGM.CTL,-30)
+            STOP
+          ENDIF
+C               INITIALIZE FOR RECORD PARSING
+          CALL IFILL(NAMEI(1,I),1,6,2H  )
+          CALL IFILL(NAMEI(1,I),7,22,0)
+          ISP = 0
+          IO1 = 0
+          IPRTY = 0
+          ISOP = 0
+          IOOP = 20B
+          ICF = 1
+          ICN = 0
+          INP = 0
+          IIST = 0
+          IEND = IFLCH(IB,80)
+          IGO = 1
+          DO WHILE (ICF.LE.IEND .AND. IGO.LE.11 .AND. ICN.NE.-1)
+C               FIND THE NEXT COMMA
+            ICN = ISCNC(IB,ICF,IEND,54B)-1
+C               IF NO MORE COMMA TRY NEXT BLANK
+            IF (ICN.EQ.-1) ICN = ISCNC(IB,ICF,IEND,40B)-1
+C               IF NEITHER BLANK NOR COMMA LEFT USE REST OF INPUT
+            IF (ICF.LE.IEND .AND. ICN.EQ.-1) ICN=IEND
+            IF (IGO.EQ.1) THEN
+C               MOVE NAME IN
+              IDUM = ICHMV(NAMEI(1,I),1,IB,ICF,ICN-ICF+1)
+C               GET IDSEG ADDRESS FOR LATER USES
+              IDAD = IDGET(NAMEI(1,I))
+C               CONTINUE SEARCH
+            ELSE IF (IGO.EQ.2 .AND. ICN.GE.ICF) THEN
+C               GET THE CHARACTER
+              ICH = JCHAR(IB,ICF)
+C               MAP TO LIST
+              ISP = ISCNC(ILIST,1,5,ICH)
+C               CHECK FOR LA CASE
+              IF(ISP.EQ.4 .AND. (ICN .EQ. ICF+1) .AND.
+     C         ICHCM(IB,ICF,ILIST,4,2).EQ.0) ISP=5
+C               NOTE PROGRAM TYPE FOUND
+              IF (ISP.GT.1) NCNTL(4+ISP) = I
+            ELSE IF (IGO.GT.2 .AND. IGO.LT.7 .AND. ICN.GE.ICF) THEN
+C               GET THE NUMERIC VALUE OF THE FIELD
+              REG = GBFAS(IB,ICF,ICN)
+C               CHECK FOR NUMBER FOUND
+              IF (JCHAR(IRGB,1).NE.0) THEN
+                CALL LOGIT(0,0,0,1,2,NAMUS,(I*100+IGO))
+              ELSE IF (IGO.EQ.3) THEN
+                IO1 = IAND(IRGA,17B)
+              ELSE IF (IGO.EQ.4) THEN
+                IPRTY = IRGA
+              ELSE IF (IGO.EQ.5) THEN
+                ISOP = IAND(IRGA,37B)
+              ELSE
+                IOOP = IAND(IRGA,17B)
+              ENDIF
+            ELSE IF (IGO.EQ.7 .AND. ICN.GE.ICF) THEN
+C               NOTE AN INPUT PARM FOUND
+              INP = INP+1
+              REG = GBFAS(IB,ICN,ICN)
+              IF (JCHAR(IB,ICF).EQ.76B .AND. ICN.EQ.ICF+1 .AND.
+     &            JCHAR(IRGB,1).EQ.0 .AND. IRGA.LE.5) THEN
+                NAMEI(IGO+2,I) = IP(IRGA)
+              ELSE
+C                          TRY FULL CONVERSION
+                REG = GBFAS(IB,ICF,ICN)
+C                       IF NOT A NUMBER GO MOVE IN CHARACTERS
+                IF (JCHAR(IRGB,1).EQ.0) THEN
+                  NAMEI(IGO+2,I) = IRGA
+                ELSE
+                  IMV = MIN0(2,ICN-ICF+1)
+                  IDUM = ICHMV(NAMEI(IGO+2,I),1,IB,ICF,IMV)
+                ENDIF
+              ENDIF
+            ENDIF
+            ICF = ICN+2               !  STEP OVER LAST COMMA FOR LOOP BACK
+            IGO = IGO+1
+          ENDDO
+C               NOTE IF PRESENT NOW
+          IF (IDAD.NE.0) IIST = 40B
+C               FINISH PARM CONSTRUCTION
+          NAMEI(7,I) = IO1*400B+IIST+ISOP
+          NAMEI(8,I) = ISP*400B+IOOP
+          NAMEI(14,I) = INP
+C               HAVE PROGRAM SET UP PROPERLY
+          IDAD = IDGET(NAMEI(1,I))
+          IF (IDAD.NE.0) CALL IDOFF(NAMEI(1,I),8)
+          NCH  = ICHMV(IBUF2,1,8HGETTING ,1,8)
+          NCH = ICHMV(IBUF2,NCH,NAMEI(1,I),1,6)
+          NCH=NCH-1
+          CALL EXEC(2,LU,IBUF2,-NCH)
+          call intoch(namei(1,i),5,pgmchs,ifrr)
+          pgmfd = dirnm // slash // pgmchs
+          bl2 = PGMCHS
+          call FmpRpProgram(pgmfd,bl2,popt,ifrr)
+          IF (IFRR.EQ.-6) THEN
+            PGMFD = '/STEXE/'//PGMCHS
+            BL2 = PGMCHS
+            CALL FMPRPPROGRAM(PGMFD,BL2,POPT,IFRR)
+          ENDIF
+C               CHECK FOR ERROR LOADING NEEDED PROGRAM
+          IF (IFRR.LT.0 .OR. IFRR.EQ.14) THEN
+            IERR = -5
+          CALL SDOUT(LU,-5,NAMUS,IFRR,27H program fetch in FSPGM.CTL,27)
+            GOTO 99999
+          ENDIF
+C               SAVE CURRENT ENTRIES UP TO NOW
+          NCNTL(5) = I
+C               STEP TO NEXT VALUE
+          I = I+1
+        ENDIF                          !  (IF not a comment)
+        LEN = FmpReadString(IDCB,IFRR,IBC)            !  Read next li
+        call casefold(ibc)
+      ENDDO
+      CALL FmpClose(IDCB,IERR)
+      IF (NDONE.GT.0) GOTO 200
+      NDONE = 1
+      CALL FmpOpen(IDCB,IFRR,'/CONTROL/STPGM.CTL','ro',1)
+      IF(IFRR.EQ.-6) GOTO 200
+      IF (IFRR.LT.0) THEN
+        IERR = -3
+        CALL SDOUT(LU,-3,NAMUS,IFRR,23H FMP error on STPGM.CTL,23)
+        GOTO 99999
+      ENDIF
+C
+C           Read each record from STPGM.CTL and parse it.
+C
+      LEN = FmpReadString(IDCB,IFRR,IBC)
+      call casefold(ibc)
+C               SAVE NUMBER OF ENTRIES FOUND
+      GOTO 100
+C
+200   NCNTL(5) = I-1
+C               GET CONTROL PARAMETERS FOR REST
+      CALL SUSP(2,1)
+      NB = NCNTL(6)
+      NC = NCNTL(7)
+      NL = NCNTL(8)
+      NLA = NCNTL(9)
+C               SET OPERATOR CLASS FOR NEW ASSIGNMENT
+      ICLOPR = 0
+C               IF NO BOSS SKIP
+      IF (NB.NE.0) THEN
+        IRNLVDT_FS=0
+        CALL RNRQ(100010B,IRNLVDT_FS,ISTAT)          !  GET IRNLVDT_FS
+C               CHECK IRNLVDT_FS ALLOCATED
+        IF (ISTAT.NE.1) THEN
+          IERR = -16
+          CALL SDOUT(LU,IERR,NAMUS,0,36H Resource # IRNLVDT_FS not alloc
+     .ated,36)
+          GO TO 99999
+        END IF
+        IRNMATC_FS=0
+        CALL RNRQ(100010B,IRNMATC_FS,ISTAT)          !  GET IRNMATC_FS
+C               CHECK IRNMATC_FS ALLOCATED
+        IF (ISTAT.NE.1) THEN
+          IERR = -16
+          CALL SDOUT(LU,IERR,NAMUS,0,36H Resource # IRNMATC_FS not alloc
+     .ated,36)
+          GO TO 99999
+        END IF
+C               SEND COMING UP MESSAGE
+        CALL EXEC(20,0,30H"BOSS INITIALIZATION COMPLETE",-30,
+     #   2HFS,0,ICLOPR)
+        REG = 0                               !  RESET A AND B REGISTERS
+C               ACTIVATE BOSS WITH INPUT PARAMETERS
+        idum = ichmv(namei(1,nb),1,6hBOSS  ,1,6)
+        REG = EXEC(23,NAMEI(1,NB),IP(1),IP(2),IP(3),IP(4),IP(5))
+        CALL RMPAR(IP)
+        IF (IRGA.NE.0) THEN             !  ERROR IN RETURNED INFO
+          IERR = -7
+          CALL SDOUT(LU,IERR,NAMUS,0,39H Error starting BOSS, OPRIN term
+     .inating,39)
+          GOTO 99999
+        ENDIF
+C               START DDOUT NOW
+        IF (NL.NE.0) THEN
+          CALL CLRQ(1,ICLBOX,NAMEI(1,NL))
+          CALL EXEC(IAND(NAMEI(7,NL),37B),NAMEI(1,NL),ICLBOX)
+        ENDIF
+      ENDIF
+C               CHECK BOSS IS ALIVE AND WELL
+      IDBOS = IDGET(NAMEI(1,NB))
+C               IF NOT PRESENT EXIT NOW
+      IERR = -9
+      IF (IDBOS.EQ.0) GO TO 90000
+C               IF NOT WELL EXIT NOW
+      IERR = -10
+      IF(IXGET(IDBOS+8) .EQ. 0)GO TO 90000
+C               IF NO CHECKER IGNORE NEXT
+C               START CHEKR NOW
+      IF (NC.NE.0) CALL EXEC(IAND(NAMEI(7,NC),37B),NAMEI(1,NC),
+     .  NAMEI(9,NC),NAMEI(10,NC),NAMEI(11,NC),NAMEI(12,NC),NAMEI(13,NC))
+C               6.2     READ IN CONTROL PROGRAM LIST
+      CALL FmpOpen(IDCB,IFRR,'/CONTROL/OPPGM.CTL','rwo',1)
+C               CHECK FILE OPENED O. K.
+      IF (IFRR.LT.0) THEN
+        IERR = -11
+        GO TO 90000
+      ENDIF
+C               READ IN THE LIST
+      ILOC = 1
+22000    CONTINUE
+        ILEN = FmpReadString(IDCB,IFRR,IBC)
+       IF (IFRR.LT.0) THEN
+         IERR = -12
+         GO TO 90000
+       ENDIF
+C               CHECK FOR COMMENT AND IGNORE IF IT IS
+        IF(JCHAR(IB,1) .EQ. 52B)GO TO 22000
+C               INITIALIZE NAMEC(12,ILOC)
+        NAMEC(12,ILOC) = 0
+        ISZ = IFLCH(IB,80)
+C               TEST FOR COMMENT INPUT IN THIS RECORD
+C               IF EOF SKIP OUT
+        IF(ILEN .LE. 0)GO TO 25000
+C               CONVERT AND SAVE FIRST CHARACTER
+        NCNTL = ICHMV(MCNTL,NCNTL,IB,1,1)
+C               GET CHARACTER SIZE OF RECORD
+        ICM = ISCNC(IB,3,ISZ,42B)
+C               IF COMMA ONLY USE FIRST PART FOR PARSING
+        IF (ICM.GT.0) ISZ = ICM-1
+C               NOW PARSE REST OF INPUT STREAM
+        CALL PRSLN(IB(2),ISZ-2,NAMEC(1,ILOC))
+C               SAVE THE NUMBER OF PARAMETERS PRESENT
+        NAMEC(11,ILOC) = MAX0(NAMEC(11,ILOC)-1,0)
+C               NOTE CURRENT STATUS OF PROGRAM
+        IF(IDGET(NAMEC(1,ILOC)) .NE. 0)
+     C          NAMEC(4,ILOC) = IOR(NAMEC(4,ILOC),100000B)
+C               TEST FOR COMMENT
+        IF (ICM.NE.0) THEN
+C               GET MAX COMMENT SIZE
+C         ICC = MIN0(ISZ+ISZ-ICM,40)
+          ICC = MIN0(IFLCH(IB,80)-ICM,40)
+C               SAVE SIZE FOR DISPLAY
+          NAMEC(12,ILOC) = ICC
+C               MOVE COMMENT INTO SAVE AREA
+          IDUM = ICHMV(NAMEC(13,ILOC),1,IB,ICM+1,ICC)
+        ENDIF
+C               STEP TO NEXT ENTRY AND READ ANOTHER RECORD
+        ILOC = ILOC+1
+C               CHECK LIMIT NOT EXCEEDED
+        IF(ILOC .LE. NMCMX)GO TO 22000
+C               TELL LIMIT REACHED - TELL LIMIT
+        CALL LOGIT(0,0,0,1,-1,NAMUS,NMCMX)
+25000    CONTINUE
+C               RESET NCNTL TO ONLY NUMBER IN USE
+        NCNTL = NCNTL-1
+        ILOC = ILOC-1
+C               NOW CLOSE DCB
+        CALL FmpClose(IDCB,IFRR)
+C               SET UP FOR SETTM LOOP
+        ITRY = 0
+27000   CONTINUE
+C               LOOK FOR S IN THE LIST implies SETTM
+        ISIS = ISCNC(MCNTL,1,NCNTL,123B)-NCNTL(2)+1
+C               NOT FOUND IF NEGATIVE
+        IF(ISIS .LE. 0)GO TO 30000
+C               GET THE COMPUTER CLOCK TIME
+        CALL EXEC(11,IP,IP(6))
+C               CHECK FOR VALID TIME (HOPEFULLY !!!!)
+        IF(             IP(6) .GE. 1988 ) GOTO 30000
+C               COMPUTER SAYS IT IS BEFORE THIS WAS WRITTEN
+        IFRR = LPROP(NAMEC(1,ISIS),LU,1)
+C               IF RUNNING FAILED NOTE AND SKIP RETRY
+        IF (IFRR.NE.0) THEN
+          CALL LOGIT(0,0,0,1,-15,NAMUS,IFRR)
+        ELSE
+C               NOTE TRY
+          ITRY = ITRY+1
+C               GO FOR TWO TRIES
+          IF (ITRY.LT.2) GO TO 27000
+        ENDIF
+C               TELL OF TROUBLE (with wrong date and time !%$#&)
+        CALL LOGIT(0,0,0,1,-14,NAMUS,IP(6))
+30000   CONTINUE
+C               SET UP FOR WAKEUP ON KEYSTRIKE
+        CALL EXEC(3,2000B+LU,2HOP,2HRI,2HN )
+C               TELL INITIALIZATION ERROR FREE
+        IERR = 0
+C               IF NO BOSS SKIP TO EXIT
+        IF(NB .EQ. 0)GO TO 99999
+C               START BOSS ON THE INITIALIZATION PROCEDURE
+        CALL EXEC(20,0,5HINITI,-5,2HFS,0,ICLOPR)
+C               START BOSS WITH NEW PROCEDURE
+        CALL EXEC(IAND(NAMEI(7,NB),37B),NAMEI(1,NB),NAMEI(9,NB)
+     .,NAMEI(10,NB),NAMEI(11,NB),NAMEI(12,NB),NAMEI(13,NB))
+        GO TO 99999
+90000   CONTINUE
+C               WRITE OUT ERROR MESSAGE
+        IF (IFRR.LT.0) CALL LOGIT(0,0,0,1,IERR,NAMUS,IFRR)
+        IF (IFRR.GE.0) CALL LOGIT(0,0,0,0,IERR,NAMUS)
+C
+99999   CONTINUE
+C      SUSPEND THE COMMAND INTERPRETER AND REPORT TO OPERATOR
+      IBUF2(1) = 2HSS
+      IBUF2(2) = 2H,C
+      IBUF2(3) = 2HI
+      IC = MESSS(IBUF2,5)
+      IF (IC.EQ.0) THEN
+        IBUF2(1) = 2HCI
+        IBUF2(2) = 2H S
+        IBUF2(3) = 2HUS
+        IBUF2(4) = 2HPE
+        IBUF2(5) = 2HND
+        IBUF2(6) = 2HED
+        IC = -12
+      ENDIF
+      CALL EXEC(2,LU,IBUF2,IC)
+      RETURN
+      END

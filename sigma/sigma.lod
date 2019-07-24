@@ -1,0 +1,15 @@
+EC
+LI,/FS/POLB/POLB.LIB
+LI,/FS/FSLB/FSLBCDS.LIB
+LI,$LIBHS.LIB
+RE,SIGMA.REL
+re,GOT.rel
+re,KGDAT.rel
+re,KGLIN.rel
+re,KGPNT.rel
+re,KGSTA.rel
+re,KINIT.rel
+re,KPDAT.rel
+re,KPOUT.rel
+re,UNGET.rel
+EN

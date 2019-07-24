@@ -1,0 +1,62 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      LOGICAL FUNCTION KSTAK(ISTKOP,ISTKSK,NLIST) 
+     .,CHECK STACKS FOR PROCS C#870115:04:21# 
+C 
+C     KSTAK checks the two stacks for procedures which are from 
+C     the requested list. 
+C     It returns TRUE if there are any of these procs present.
+C 
+C  INPUT: 
+C 
+C     ISTKOP,ISTKSK - stacks to be checked
+C     NLIST - 1=check for list 1, 2=check for list 2
+      DIMENSION ISTKSK(1),ISTKOP(1) 
+C 
+C  OUTPUT:
+C 
+C     KSTAK - TRUE if any procs from NLIST are found in either stack
+C 
+C  LOCAL: 
+C 
+D     DATA LU/16/ 
+C 
+C     1. Initialize the return to TRUE.  If we find anything in 
+C     the stacks which is in the list, then return immediately. 
+C 
+      KSTAK = .TRUE.
+C 
+D     WRITE(LU,9901)(ISTKOP(I),I=1,10),(ISTKSK(I),I=1,10) 
+D9901 FORMAT("IN KSTAK: STACKS="10I5/17X,10I5)
+C 
+C     2. First check the operator stack.
+C     Stacks have pointers in words 6,10,etc. 
+C 
+      IF (ISTKOP(2).EQ.2) GOTO 300
+C                     If stack is empty, try the next one 
+      DO 210 I=6,ISTKOP(2),4
+        IF (NLIST.EQ.1.AND.ISTKOP(I).GT.0) GOTO 900 
+        IF (NLIST.EQ.2.AND.ISTKOP(I).LT.0) GOTO 900 
+210     CONTINUE
+C 
+C 
+C     3. Now check the schedule stack.
+C 
+300   IF (ISTKSK(2).EQ.2) GOTO 400
+      DO 310 I=6,ISTKSK(2),4
+        IF (NLIST.EQ.1.AND.ISTKSK(I).GT.0) GOTO 900 
+        IF (NLIST.EQ.2.AND.ISTKSK(I).LT.0) GOTO 900 
+310     CONTINUE
+C 
+C 
+C     4. If we got here, then nothing was found in the stacks.
+C 
+400   KSTAK = .FALSE. 
+C 
+D9902 FORMAT("KSTAK RETURNING "L1" FOR LIST "I3)
+C 
+900   CONTINUE
+D     WRITE(LU,9902) KSTAK,NLIST
+      RETURN
+      END 

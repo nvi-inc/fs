@@ -1,0 +1,11 @@
+SFF - Super fast-forward
+
+Syntax:     SFF
+Response:   SFF/<acknowledgement>
+
+Parameters: none
+
+      Comments: The tape is moved forward at super high speed (330
+ips). Record is disabled and the low tape sensor is turned on. The 
+high speed is achieved by setting the rate generator frequency at 
+880 (normal default is 720).

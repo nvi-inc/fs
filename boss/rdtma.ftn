@@ -1,0 +1,77 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C@RDTMA
+C
+      SUBROUTINE RDTMA(IDCB,IERR),READ TABLE FOR MAT C#870115:04:18#
+C
+C 1.1.   RDTMA reads a table of names and addresses of ASCII transceivers
+C
+C     INPUT VARIABLES:
+C
+      DIMENSION IDCB(1)
+C                   DCB for reading file
+C
+C     OUTPUT VARIABLES:
+C
+C     IERR - error return, 0 OK, <0 trouble
+C
+C     CALLED SUBROUTINES: FMP PACKAGE, MATCN
+C
+C 3.  LOCAL VARIABLES
+C
+      DIMENSION IP(5)
+C                   for RMPAR
+      DIMENSION IBUF(6)
+C                   buffer to hold input records
+      INTEGER*2 FmpRead
+C     ICLASS - class to send to MATCN
+C     NREC   - number of records in class
+C
+C 4.  CONSTANTS USED
+C
+C 5.  INITIALIZED VARIABLES
+C
+C
+C 6.  PROGRAMMER: NRV
+C     LAST MODIFIED:800224
+C  WHO  WHEN    DESCRIPTION
+C  GAG  901220  Restructured while loop and added logit call.
+C
+C# LAST COMPC'ED  870115:04:18 #
+C
+C     PROGRAM STRUCTURE
+C
+C     1. Open up the file with the name/address correspondences.
+C
+      CALL FmpOpen(IDCB,IERR,'/CONTROL/MATAD.CTL','ros',1)
+      IF (IERR.LT.0) RETURN
+      CALL IFILL(IBUF,1,12,40B)
+      ILEN = FmpRead(IDCB,IERR,IBUF,12)
+      call upper(ibuf,1,ilen)
+      ICLASS = 0
+      NREC = 0
+      DO WHILE (ILEN.GE.0)
+        IF (IBUF.EQ.2H  ) GOTO 110
+        IF ((NREC+1).EQ.256) THEN
+C no more than 256 entries permitted from control file.
+          CALL LOGIT(0,0,0,1,-169,2HBO,256)
+          GOTO 110
+        END IF
+        NREC = NREC + 1
+        CALL EXEC(20,0,IBUF,-IFLCH(IBUF,12),0,0,ICLASS)
+C                   Put record into class record
+        CALL IFILL(IBUF,1,12,40B)
+        ILEN = FmpRead(IDCB,IERR,IBUF,12)
+        call upper(ibuf,1,ilen)
+      END DO
+110   CALL FmpClose(IDCB,IERR)
+C
+C     2. Now schedule MATCN and wait until it's done.
+C
+200   CONTINUE
+      CALL EXEC(9,6HMATCN ,ICLASS,NREC)
+      CALL RMPAR(IP)
+      IERR = IP(3)
+      RETURN
+      END

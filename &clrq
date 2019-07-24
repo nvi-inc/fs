@@ -1,7 +1,0 @@
-FTN4,X
-C 
-      SUBROUTINE CLRQ(XQ,I,J) 
-      DIMENSION XQ(1) 
-C 
-      CALL IFILL(XQ(2),I,J-I+1,40B) 
-      END 

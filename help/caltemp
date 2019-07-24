@@ -1,0 +1,16 @@
+CALTEMP1, CALTEMP2, - Set noise cal temperatures
+
+Syntax:   CALTEMP1=<temp>
+          CALTEMP2=<temp>
+Response: CALTEMP1/<temp>
+          CALTEMP2/<temp>
+
+Settable parameters:
+<temp>: temperature of cal signal, in degrees K.
+
+Monitor-only parameters: none
+
+     Comments: Two calibration temperatures may be specified with
+these two commands. Normally this would be used for IF1 and IF2.
+The commands TSYS1 and TSYS2 use the temperatures specified as
+CALTEMP1 and CALTEMP2 respectively.

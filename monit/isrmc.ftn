@@ -1,0 +1,59 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+        FUNCTION ISRMC(IB1,IBS1,IBL1,IB2,IBS2,IBL2) 
+     .,C#870115:05:49  SCAN FOR MATCH RESUMPTION V=1.0# 
+C 
+C       This function returns the first location in IB1 at which
+C       a match between the strings resumes.  The characters are
+C       scanned a character at a time in parallel until the match 
+C       is found.  A value of zero is returned if no match occurs 
+C       at all.  There is no shifting of one pattern relative to
+C       another in this routine.
+C 
+        DIMENSION IB1(1),IB2(1) 
+C 
+        ISRMC=0 
+C 
+C               FIND DIFFERENCE OFSET BETWEEN BUFFERS 
+C 
+        IB12=IBS2-IBS1
+C 
+C               FIND THE MINIMUM OF LENGTHS TO SCAN 
+C 
+        ISCNM=MIN0(IBL1-IBS1,IBL2-IBS2) 
+C 
+C               FIND END FOR SCANNING IN IB1
+C 
+        IBE1=IBS1+ISCNM 
+C 
+C               LOOP OVER ALL THE CHARACTERS FOR A MATCH
+C 
+        DO 50000 I=IBS1,IBE1
+C 
+C               CHECK FOR MATCH 
+C 
+        IF(JCHAR(IB1,I) .NE. JCHAR(IB2,IB12+I))GO TO 50000
+C 
+C               SAVE MATCH LOCATION IN IB1
+C 
+        ISRMC=I 
+C 
+C               NOW EXIT MATCH HAS BEEN FOUND 
+C 
+        GO TO 90000 
+C 
+50000   CONTINUE
+C 
+C               FOR FALL THROUGH ISRMC WILL BE ZERO AS IT SHOULD BE 
+C 
+90000   CONTINUE
+C 
+C               NOW EXIT
+D       WRITE(1,9001)ISRMC
+D9001   FORMAT("ISRMC: ISRMC= ",I3) 
+C 
+        RETURN
+C 
+        END 
+        END$

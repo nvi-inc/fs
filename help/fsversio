@@ -1,0 +1,10 @@
+FSVERSION - Get field system version
+
+Syntax:   FSVERSION
+Response: FSVERSION/<version>
+
+Monitor-only parameters:
+<version>: field system version number.
+
+      Comments: Used to display and log version number of the
+currently running field system.

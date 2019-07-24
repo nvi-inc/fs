@@ -1,0 +1,193 @@
+FTN77,I,Y  
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C@LXGET
+C
+      SUBROUTINE LXGET,GET NEXT SELECTED ENTRY C#870115:05:34#
+C
+C LXGET - Gets the next selected entry based on start & stop times,
+C         number of lines specified, COMMAND command, STRING, & TYPE
+C         commands.
+C
+C MODIFICATIONS:
+C
+C    DATE     WHO  DESCRIPTION
+C    820325   KNM  SUBROUTINE CREATED
+C
+C    820519   KNM  GETTING THE SELECTED ENTRY BASED ON THE FIRST
+C                  COMMAND SPECIFIED IN THE COMMAND COMMAND WAS
+C                  ADDED FOR THE PLOT COMMAND. THE OLD PLOT COMMAND
+C                  IS NOW CALLED TPLOT AND THE NEW COMMAND IS CALLED
+C                  PLOT.
+C
+C RESTRICTIONS:
+C
+C INPUT VARIABLES:
+C
+C OUTPUT VARIABLES:
+C
+C     ICODE - Error flag
+C
+C COMMON BLOCKS USED:
+C
+      INCLUDE LXCOM.FTNI
+C
+C
+C SUBROUTINE INTERFACES:
+C
+C     CALLED ROUTINES:
+C
+C     LXSUM - SUMMARY command.
+C     LXPLT - PLOT command.
+C     LXIST - LIST command.
+C
+C     CALLING SUBROUTINES:
+C
+C     File manager package routines
+C     LNFCH Utilities
+C
+C LOCAL VARIABLES:
+C
+C     NCHBUF - Number of characters in IBUF past time field.
+C     NREC - number of records in IBUF.
+C
+C INITIALIZED VARIABLES:
+C
+C
+C  *****************************************************************
+C
+C  1. Check to determine whether the log day is before the specified
+C     start day. If the log and start day are the same, check to see
+C     if the log minutes are less than the starting minutes. If the
+C     log minutes are greater than the starting minutes, then rewind
+C     the log file.
+C
+C  *****************************************************************
+C
+C
+      IF(ILXGET.NE.0) GOTO 200
+      IF (ITL1.LT.ITS1.OR.(ITL1.EQ.ITS1.AND.ITL2.LT.ITS2)) GOTO 100
+C
+C  Call rewind to begin at the first log entry.
+C
+      ID = FmpRewind(IDCB,IERR)
+      NREC = 0
+100   NLOUT = 0
+      ILXGET=1
+C
+C
+C  *************************************************************
+C
+C  2. Each return to call READF will read the next log entry
+C
+C  *************************************************************
+C
+C
+200   CALL IFILL(IBUF,1,IBLEN*2,40B)
+      ID = FmpRead(IDCB,IERR,IBUF,IBLEN*2)
+      ILEN = IFLCH(IBUF,IBLEN*2)
+      NCHAR = 10 + IFLCH(IBUF(6),ILEN-10)
+      IF (IERR.LT.0) WRITE(LUUSR,9000) IERR
+9000  FORMAT("LXGET10 - Error FMGR "I3" reading log file.")
+      IF (ILEN.GT.0) GOTO 300
+      ILEN=-1
+      ILXGET=0
+      GOTO 1200
+300   NREC = NREC + 1
+C
+C  To stop the listing, hit the break key.
+C
+      IF (IFBRK(IDUM).LT.0) GOTO 250
+      IF(ILEN.GE.0) GOTO 400
+      GOTO 255
+250   ICODE=-1
+255   IF(ICODE.EQ.-1.OR.ILEN.LT.0) ILXGET=0
+      GOTO 1200
+C
+C
+C  ************************************************************
+C
+C  3. Get day and time from log file and compare to start time.
+C     If a command was specified, check for its name.
+C
+C  ************************************************************
+C
+C
+C  Convert ASCII string to Binary integer to obtain day for ITL1
+C  and minutes for ITL2
+C
+400   ITL1 = IAS2B(IBUF,1,3)
+      ITL2 = IAS2B(IBUF,4,2)*60 + IAS2B(IBUF,6,2)
+      IT3  = IAS2B(IBUF,8,2)
+      IF (ITL1.LT.ITS1.OR.(ITL1.EQ.ITS1.AND.ITL2.LT.ITS2)) GOTO 200
+      IF(IKEY.EQ.9.OR.IKEY.EQ.12) GOTO 1000
+C
+C  Find the number of characters in IBUF and store into NCHBUF
+C
+      NCHBUF = IFLCH(IBUF(6),ILEN-10)
+C
+C
+C  ************************************************************
+C
+C  4. Determine selected entry for listing by checking for a
+C     COMMAND command, STRING, and TYPE command.
+C
+C  ************************************************************
+C
+C
+      IF (NCMD.EQ.0) GOTO 600
+C
+C  If a COMMAND command was specified, check to see if a PLOT command
+C  was issued. If a PLOT command was specified, the first command in
+C  the COMMAND command is only used.
+C
+      DO 500 I=1,NCMD
+        IF(I.GT.1.AND.(IKEY.EQ.6.OR.IKEY.EQ.13)) GOTO 500
+        IF(NCHBUF.LT.NCOMND(I)) GOTO 500
+        IF(ICHCM(IBUF,11,LCOMND(1,I),1,NCOMND(I)).EQ.0) GOTO 600
+500   CONTINUE
+      GOTO 200
+C
+C  Determine whether a STRING Command was specified.  Then check for a
+C  PLOT Command.  If a PLOT Command was issued, we skip the following
+C  lines of code and continue with the LISTING code.
+C
+600   IF(NSTR.EQ.0) GOTO 800
+      DO 700 I=1,NSTR
+        IF(NCHBUF.LT.NSTRNG(I)) GOTO 700
+        IF(ISCNS(IBUF,11,NCHAR,LSTRNG(1,I),1,NSTRNG(I)).NE.0) GOTO 800
+700   CONTINUE
+      GOTO 200
+C
+C  Determine whether a TYPE command was specified.
+C
+800   IF(NTYPE.EQ.0.OR.NTYPE.EQ.40B) GOTO 1000
+C
+C  JCHAR returns LCH as zero/character. To left justify multiply
+C  400B (256 decimal) and add a blank (40B).
+C
+      LCH = JCHAR(IBUF,10)*400B+40B
+      DO 900 I=1,NTYPE
+        IF(LCH.EQ.LTYPE(I)) GOTO 1000
+900   CONTINUE
+      GOTO 200
+C
+C
+C  ************************************************************
+C
+C  5. Determine whether the number of lines outputted exceeds
+C     the number of lines specified. Then proceed to make sure
+C     that the log day and minutes do not exceed the stop day
+C     and minutes. If the stop time or # lines specified passes
+C     these conditions, write out IBUF.
+C
+C  ************************************************************
+C
+C
+1000  CONTINUE
+      IF ((NLINES.GT.0.AND.NLOUT.LT.NLINES).OR.(NLINES.EQ.0.AND.
+     .(ITL1.LT.ITE1.OR.(ITL1.EQ.ITE1.AND.(ITL2.LE.ITE2))))) GOTO 1200
+      LSTEND=-1
+      ILXGET=0
+1200  RETURN
+      END

@@ -1,0 +1,26 @@
+ 
+QXREF                                        Rev.2434
+
+To run QXREF:
+ 
+    :QXREF,<namr1>,<namr2>,...,<last namr>
+ 
+where each namr is an output file name, a relocatable file
+name, or a command file name.  Only one output file allowed.
+The files are distinguished as follows:
+ 
+    Output file:  LU or first char is ' or "
+    Relocatable:  type 5 file
+    Command file: all others
+ 
+Command files have a list of file names, as for MERGE.
+ 
+Example:
+ 
+    :qxref,$mlib1,"map::xx,%myfil,=comnd::50
+ 
+CI> edit
+EDIT : Use ? for help
+FI,<file name> specifies file to edit.
+EOF
+/sc

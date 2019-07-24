@@ -1,0 +1,24 @@
+IFD - IF Distributor control and monitor
+
+Syntax:   IFD=<atten1>,<atten2>,<input1>,<input2>
+Response: IFD/<atten1>,<atten2>,<input1>,<input2>,<rem/lcl>,
+            <TP1>,<TP2>
+
+Settable parameters:
+<atten1>: IF1 attenuator setting in db, +/- relative change,
+            MAX, or OLD, default 0.
+<atten2>: IF2 attenuator setting in db, +/- relative change,
+            MAX, or OLD, default 0.
+<input1>: IF1 input, NORmal or ALTernate. Default NOR.
+<input2>: IF2 input, NORmal or ALTernate. Default NOR.
+
+Monitor-only parameters:
+<rem/lcl>: switch setting, REMote or LoCaL
+<TP1>: IF1 total power reading
+<TP2>: IF2 total power reading
+
+      Comments: MAT module functions available.
+
+The MAX and OLD values for the attenuator parameters allow the
+attenuators to set to the maximum value, 63, and then returned to
+their previous values.

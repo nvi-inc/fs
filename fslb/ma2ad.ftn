@@ -1,0 +1,33 @@
+FTN77,Y,I  
+$CDS ON
+      SUBROUTINE MA2AD(IBUF,IMOVE,ITEST,ICOUNT)
+      IMPLICIT NONE
+      INTEGER*2 IBUF(1),IMOVE,ITEST,ICOUNT
+C
+C  MA2AD: decode head MAT buffer for AD information
+C
+C  INPUT:
+C     IBUF: hollerith buffer contain MAT response
+C
+C  OUTPUT:
+C     IMOVE: 0 = idle, 1 = moving
+C     ITEST: auto test results, 0000 no error
+C                               1xxx unassigned
+C                               x1xx converter data not available
+C                               xx1x converter busy
+C                               xxx1 illegal channel number
+C     ICOUNT: A/D data in binary counts: 2047 =  +9.9951 volts
+C                                        0000 =  +0.0000 volts
+C                                       -2048 = -10.0000 volts
+C                                    1 count is  +0.0049 volts
+C
+C
+      INTEGER*2 IA2HX,IA22H,ICHMV,INEXT
+C
+      IMOVE=IA2HX(IBUF,3)/8
+      ITEST=IA2HX(IBUF,4)
+      INEXT=ICHMV(ICOUNT,1,IA22H(IBUF(4)),2,1)
+      INEXT=ICHMV(ICOUNT,2,IA22H(IBUF(5)),2,1)
+C
+      RETURN
+      END

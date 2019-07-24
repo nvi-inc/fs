@@ -1,0 +1,40 @@
+FTN77,I,Y  
+$CDS ON
+      SUBROUTINE PPLPT(IBUF,X,Y)
+      DIMENSION IBUF(1) 
+C 
+C  PLot PoinT 
+C 
+C      WRITE(1,9956) X,Y                                                 DEBUG
+C9956  FORMAT(" PPLPT: X,Y ",2F10.3)                                     DEBUG
+C 
+      CALL PV2OB(X,Y,IOX,IOY) 
+      CALL PO2PL(IOX,IOY,IX,IY) 
+      CALL PP2CH(IX,IY,IXY) 
+C 
+      IOLD=JCHAR(IBUF,IXY)
+      IDIFF=0 
+C      WRITE(1,9957) IXY,IOLD,IDIFF                                      DEBUG
+C9957  FORMAT(" PPLPT: IXY,IOLD,IDIFF ",3I7)                             DEBUG
+C 
+      IF(IOLD.EQ.JCHAR(2H  ,1)) GO TO 50
+      IF(IOLD.EQ.JCHAR(2H--,1)) GO TO 50
+      IF(IOLD.EQ.JCHAR(2H||,1)) GO TO 50
+C 
+      IDIFF=IOLD-48 
+      IF(IOLD.GE.49.AND.IOLD.LE.57) GO TO 50
+      IDIFF=IOLD-64+9 
+      IF(IOLD.GE.65.AND.IOLD.LE.90) GO TO 50
+      STOP 2
+C 
+50    CONTINUE
+C      WRITE(1,9957) IXY,IOLD,IDIFF                                      DEBUG
+      IDIFF=MIN0(IDIFF+1,35)
+      INEW=IDIFF+48
+      IF(INEW.GT.57) INEW=IDIFF-9+64
+C      WRITE(1,9958) IXY,INEW,IDIFF                                      DEBUG
+C9958  FORMAT(" PPLPT: IXY,INEW,IDIFF ",3I7)                             DEBUG
+C
+      IDUM=ICHMV(IBUF,IXY,INEW,2,1)
+      RETURN
+      END

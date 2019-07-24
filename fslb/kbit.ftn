@@ -1,0 +1,58 @@
+FTN77,I,Y
+$CDS ON
+C@KBIT
+C 
+      LOGICAL FUNCTION KBIT(IARRAY,IBIT),C#870115:06:04# SOLV2 UTIL 
+C 
+C        KBIT is true if the IBIT-th bit in IARRAY is set (1),
+C        false if it is not (0).
+C        KBIT is designed to complement SBIT which sets or resets 
+C        bits identified in the same way. 
+C        Bits are numbered starting with 1 as the lowest-order bit
+C        in the first word of IARRAY, 16 is the sign bit in the first 
+C        word of IARRAY, 17 is the low-order bit in the second word 
+C        of IARRAY, etc.
+C 
+C     INPUT VARIABLES:
+CI
+      DIMENSION IARRAY(1) 
+C     - may or may not be an array in calling program.
+C     - Variable in which the flag bits are located.
+CI
+C     IBIT = index of bit to test. Bits are numbered starting with
+C            1 as the lowest order bit in IARRAY(1), 16 is the sign 
+C            bit in IARRAY(1), 17 is the lowest order bit in IARRAY(2), 
+C            etc. 
+C 
+C     OUTPUT VARIABLES: 
+CO
+C     KBIT = FUNCTION VALUE = TRUE if the indicated bit is 1
+C                           = FALSE if the indicated bit is 0 
+C 
+C  LOCAL
+C 
+      DIMENSION MASK(16)
+C 
+C  INITIALIZED
+C 
+      DATA MASK /1,2,4,10B,20B,40B,100B,200B,400B,1000B,2000B,4000B,
+     M 10000B,20000B,40000B,100000B/
+C      - words which contain 1 bit set. Note remarks above about SOLVE
+C        numbering bits 1-16 instead of 0-15 to facilitate use of an
+C        array index. 
+C 
+C   PROGRAMMER: J.C.PIGG
+C     LAST MODIFIED:   NRV 810706 
+C 
+C     1. Decompose IBIT into an array index IA and a bit index IB.
+C 
+      IA = (IBIT+15)/16 
+      IB = IBIT - (IA-1)*16 
+C 
+C 
+C     2. Test the appropriate bit 
+C 
+      KBIT = IAND(IARRAY(IA),MASK(IB)) .NE. 0 
+C 
+C 
+      END 

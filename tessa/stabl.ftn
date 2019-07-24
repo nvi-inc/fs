@@ -1,0 +1,133 @@
+FTN77,Y,I
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      subroutine stabl(ntest,n)              !  LAR last edited <881213.1808>
+c 
+c  Check stability of phase cal signal through the receiver.
+c
+c  Input/output parameters:
+c       ntest       Test code number; 9 indicates end of sequence
+c       n           Number of previous measurements in this sequence
+c
+      include /fs/include/fscom.ftni
+c  Common contents used:
+c       lusa        Logical unit number for spectrum analyzer
+c       lu          Logical unit for operator's console
+c       lvsens      Sensitivity level for spectrum analyzer
+c       intamp      Integration time for spectrum analyzer measurements
+c       amptol      Amplitude variation tolerance, in decibels
+c       gdytol      Tolerance for variation in group delay, nanoseconds
+c       phatol      Single-channel phase variation tolerance, nanoseconds
+c       diftol      Tolerance for difference between variation in
+c                     cable length and variation in group delay, ns
+c       modsa       Model number of HP analyzer (3582 or 35660)
+c       lfreqv      Video converter frequencies, in ASCII  (MHz)
+c       cablev      Last measurement of cable length
+c
+c  Local variables:
+      dimension amp(3),phase(3),amplas(3),phalas(3),ivc(3),freq(3)
+      dimension resp(2)
+c       amp,phase       Amplitudes and phases in three channels
+c       amplas,phalas   Previous values of amp and phase
+c       ivc             Video converter numbers of the three channels used
+c       resp            Response from dump (only resp(1) is used)
+c       freq            Frequencies of the three video converters, in MHz
+c       dfreqx          Difference of freq(1) and freq(2), odd units
+c       gdlay           Group delay computed from frequencies and phases
+c       gdylas,cablas   Previous measurements of gdlay and cablev
+c
+      save amplas,cablas,gdylas,phalas
+c
+c   Initialized variables:
+      dimension lrpt(18),lopmes(22),levset(2)
+c       levset      Message which sets spectrum analyzer's sensitivity
+c       lopmes      Message to operator to change cable
+c       lrpt        Messages for logit
+      data levset,ivc/2hAS,2h--,1,8,12/
+      data lopmes/2hCo,2hnn,2hec,2ht ,2h10,2h k,2hHz,2h r,2hef,2her,
+     &  2hen,2hce,2h t,2ho ,2hB ,2hin,2hpu,2ht ,2hof,2h 3,2h58,2h2A/
+c
+c
+c  1. If this is the first measurement, set up the spectrum analyzer and
+c     have operator connect its B input to the 10 kHz reference source.
+c
+      if (n.eq.0) then
+        call exec(2,lu,lopmes,-44)
+        call confg(2h!!)
+        call exec(2,lusa,24hPRS,IM2,PX1,MN1,MP50,AV2,-24)
+        call ib2as(lvsens,levset,3,100002B)
+        call exec(2,lusa,levset,-3-(lvsens/10))
+        do i=1,3
+          freq(i) = das2b(lfreqv(1,ivc(i)),1,6,ierr)
+        enddo
+        dfreqx = (freqx1-freqx0)*.360
+      endif
+c
+c  2. Measure cable length with the counter.
+c
+      call copin(5hCABLE,-5)
+c
+c  3. Measure phase and amplitude at 10 kHz in the two extreme X-band
+c     channels and one channel at S-band.
+c
+      n = n+1
+      call ichmv(lrpt,1,18hAmplitudes (dBV): ,1,18)
+      do i=1,3
+        call confg(2hRE,ivc(i),8)
+        call exec(2,lusa,6hAA1,RE,-6)
+        call susp(2,intamp)
+        call dump(2hMK,resp)
+        amp(i) = resp(1)
+        lrpt(9+3*i) = 2h  
+        call ir2as(amp(i),lrpt,13+6*i,6,1)
+        call exec(2,lusa,3hAA0,-3)
+        call dump(2hMK,resp)
+        phase(i) = resp(1)
+      enddo
+      call logit(lrpt,36)
+      call ichmv(lrpt,1,18hPhases (degrees): ,1,18)
+      do i=1,3
+        call ib2as(int(phase(i)),lrpt,13+6*i,6)
+      enddo
+      call logit(lrpt,36)
+c
+c  4. Compute group delay at X-band; save it with cable measurement.
+c
+      gdlay = (phase(2)-phase(1))/dfreqx
+      call ichmv(lrpt,1,18hGroup delay (ns): ,1,18)
+      call ir2as(gdlay,lrpt,19,7,3)
+      call logit(lrpt,25)
+c
+c  5. Compare these results to those of the previous stability measurement.
+c
+      if (n.ne.1) then
+        cabdif = 2.5e+3*(cablev-cablas)
+        do i=2,3
+          if (abs(amp(i)-amplas(i)).gt.amptol)
+     #      call logit(0,0,0,1,-34,2hTE,ivc(i))
+          if (abs(phase(i)-phalas(i)).gt.phatol*freq(i)*.360)
+     #      call logit(0,0,0,1,-35,2hTE,ivc(i))
+        enddo
+        gdydif = gdlay-gdylas
+        if (abs(gdydif).gt.gdtol) call logit(0,0,0,0,-36,2hTE)
+        if (abs(gdydif-cabdif).gt.diftol)
+     :             call logit(0,0,0,0,-37,2hTE,2hX-)
+        WRITE (1,1001) gdlay,gdlas,gdtol,cabdif,diftol
+1001    format (' gdlay',f7.3,' gdlas',f7.3,' gdtol',f7.3,
+     &          ' cabdif',f7.3,' diftol',f6.3)
+      endif
+c
+c  6. Save these measurements unless it's the last time through.
+c
+      if (ntest.eq.9) then
+        n = 0
+      else
+        cablas = cablev
+        gdylas = gdlay
+        do i=1,3
+          amplas(i) = amp(i)
+          phalas(i) = phase(i)
+        enddo
+      endif
+      return
+      end

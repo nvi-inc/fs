@@ -1,0 +1,38 @@
+SCHEDULE - Start a new schedule file
+
+Syntax:   SCHEDULE=<name>,<start>,<#lines>
+Response: SCHEDULE/<name>,<line>
+
+Settable parameters:
+<name>: name of schedule file to be started. If no directory path
+        is specified, /SCHED is assumed. If no extension is
+        specified, .SNP is assumed. Any currently-executing
+        schedule file is closed, and the new schedule file is
+        opened. If the new file cannot be opened, there will be no
+        schedule active. When a valid schedule is started, a CONT
+        command may be necessary.
+<start>: place in the schedule to begin executing. May be one of
+         the following:
+        <null> to start with the observation beginning no earlier
+          than 5 minutes from now.
+        #<line> for a line number in the file, should be a SOURCE
+          command.
+        <time> to start with the observation beginning no earlier
+           than this time. <time> is in standard SNAP format.
+<#lines>: number of lines to execute before automatically halting.
+          Default is the remainder of the schedule.
+
+Monitor-only parameters:
+<line>: the line number to be executed next.
+
+      Comments: If the schedule is started successfully, a log file
+having the same name as the schedule is automatically started, and
+the procedure file having the same name as the schedule is
+automatically established as the schedule procedure library. Any
+previously time-scheduled procedures from this library are
+cancelled. If a # of lines is specified, an automatic HALT will be
+issued after execution of these lines. The schedule may then be
+continued using the CONT command.
+
+Note: If the schedule file is larger than 100,000 lines, execution
+will HALT after 100,000 lines.

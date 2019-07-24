@@ -1,0 +1,18 @@
+FTN77,I,Y  
+$CDS ON
+      SUBROUTINE PWIPE(IBUF)
+      DIMENSION IBUF(1) 
+C 
+C  WIPE plotter clean 
+C 
+      COMMON/PPLOT/ICHARS,IWIDX,IWIDY,
+     +             IXMIN,IXMAX,IYMIN,IYMAX, 
+     +             XMIN,XMAX,YMIN,YMAX, 
+     +             ROTAT(2,2) 
+C 
+C      WRITE(1,9956)                                                     DEBUG
+C9956  FORMAT(" ENTER PWIPE")                                            DEBUG
+C 
+      CALL IFILL(IBUF,1,ICHARS,2H  )
+      RETURN
+      END 

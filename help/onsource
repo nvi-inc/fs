@@ -1,0 +1,10 @@
+ONSOURCE - Get antenna pointing status
+
+Syntax:   ONSOURCE
+Response: ONSOURCE/<status>
+
+Settable parameters: none
+
+Monitor-only parameters:
+<status>: TRACKING or SLEWING, depending on the errors in pointing.
+

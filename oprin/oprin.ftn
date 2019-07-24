@@ -1,0 +1,163 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$ALIAS RNRQ,noabort
+$CDS ON
+        PROGRAM OPRIN(3,99)                       !  <910324.0230>
+C
+C 1.  NAME PROGRAM SPECIFICATION
+C
+C 1.1.   OPRIN
+C               THE OPERATOR INPUT CONTROL PROGRAM FOR THE MANAGING OF
+C       THE FIELD SYSTEM SOFTWARE.  THIS ROUTINE ALSO RESPONDS TO
+C       CONTROL SEQUENCES INPUT BY THE OPERATOR WHERE SUPPORTED BY THE
+C       DRIVER.
+C
+C 2.  NAME INTERFACE
+C
+C 2.1.   CALLING SEQUENCE: RU,OPRIN,LU,P2,P3,P4,P5
+C
+C     INPUT VARIABLES:
+C       LU      - THE LOGICAL UNIT TO INITIALIZE OPRIN FOR /
+C                 THE CONTROL INFORMATION FROM THE DRIVER FOR A CNTRL
+C                 FUNCTION
+C       P2 - P5 - INPUT CONTROL PARAMETERS FOR BOSS / ADDITIONAL CNTRL
+C                 FUNTION INPUT(SEE RELAVANT DRIVER FOR DETAILS)
+C
+C 2.2.   COMMON BLOCKS USED
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+C 2.5.   SUBROUTINE INTERFACE:
+C     CALLED SUBROUTINES: INOPR, RUOPR
+C
+C 3.  LOCAL VARIABLES
+      DIMENSION NAMEC(32,20),NAMEI(14,25),NAMUS(3),MCNTL(13),NCNTL(9)
+        DIMENSION IBUF(60)
+C       NAMEC   - PROGRAMS ACTIVATED BY CNTRL-CHARACTER BY OPERATOR
+C                 THE FOLLOWING INFORMATION IS IN THIS LIST;
+C               NAMEC(1-3,IX)   - ASCII NAME OF PROGRAM TO BE ACTIVATED
+C               NAMEC(4,IX)     - PARTITION TO RUN PROGRAM IN
+C               NAMEC(5,IX)     - PARTITION SIZE FOR RUNNING PROGRAM
+C               NAMEC(6-10,IX)  - DEFAULT PARAMETERS P1-P5 FOR PROGRAM
+C               NAMEC(11,IX)    - NUMBER OF DEFAULT PARAMETERS DEFINED
+C               NAMEC(12,IX)    - NUMBER OF COMMENT CHARARACTERS PRESENT
+C               NAMEC(13-32,IX) - COMMENT FOR USER 40 CHARACTERS MAX 
+C 
+C       NAMEI   - INITIALIZATION LIST FOR OPRIN OF PROGRAMS IT MUST 
+C                 GET A FRESH COPY OF FOR THIS RUNNING OF THE FIELD SYSTEM. 
+C                 THE INFORMATION IN THIS LIST IS AS FOLLOWS: 
+C 
+C               NAMEI(1-3,IX)   - ASCII NAME OF PROGRAM TO BE INITIALIZED 
+C               NAMEI(4,IX)     - SIZE OF PARTITION TO USE (RTE-M)
+C               NAMEI(5,IX)     - PARTITION TO USE FOR RUNNING THIS PROGRAM 
+C                                 (RTE-M). 0 IMPLIES LOAD INTO SYSTEM.
+C               NAMEI(6,IX)     - PRIORITY TO BE SET TO IF NOT=0
+C               NAMEI(7,IX)     - =IO1*400B+ISOP
+C                       IO1     - THE OFFING OPTION PRIOR TO START UP 
+C                                 THIS SHOULD BE 0,1,2,8.  SEE HP SYSTEM
+C                       ISOP    - THE OPRIN INTERFACE EXEC OPTION 
+C                                 THIS SHOULD BE 9,10,23, OR 24.
+C                                 SEE HP EXEC CALLS OF THESE NUMBERS
+C               NAMEI(8,IX)     - =ISP*400+IIST+IOOP
+C                       ISP     - SPECIAL PROGRAM DESIGNATION WILL
+C                                 MAKE CROSS REFERENCE IN NCNTL WHEN
+C                                 NOT EQUAL TO 0. 
+C                                       0 - NO SPECIAL FUNCTION 
+C                                       1 - SEGMENT 
+C                                       2 - FS MANAGER
+C                                       3 - CHECKING MANAGER
+C                                       4 - LOG SYSTEM MANAGER
+C                                       5 - ASSIST LOG SYSTEM MANAGER 
+C                                       10-15 - USER OPTIONS
+C                       IIST    - INITIAL STATUS OF PROGRAM AFTER INITIAL 
+C                                 OFF IF REQUESTED.
+C                                 0 - NOT PRESENT ORIGINALLY
+C                                 1 - PRESENT INITIALLY(LEAVE UNLESS OFF
+C                                 REQUESTED AT TERMINATION) 
+C                       IOOP    - OFFING OPTION AT COMPLETION 
+C                                 VALUES SHOULD BE 0,1,2,8
+C                                 NOTE 0 IMPLIES NO ACTION 
+C               NAMEI(9-13,IX)  - INPUT PARAMETERS TO CALLING PROGRAM 
+C                                 IF OPRIN INPUT REQUESTED IT WILL HAVE 
+C                                 BEEN SUBSTITUTED HERE FROM IP.
+C               NAMEI(14,IX)    - THE NUMBER OF PARAMETERS TO BE PASSED 
+C                                 TO THE CALLED PROGRAM, FROM (FSPGM LIST.
+C
+C       MCNTL   - BRANCH CONTROL ARRAY
+C       IBUF   - BUFFER FOR GENERAL USE 
+        DIMENSION IP(11)
+C       IP      - INPUT PARAMETERS OBTAINED THROUGH RMPAR
+C       NAMUS   - OUR NAME FROM IDSEG
+C
+C 4.  CONSTANTS USED
+        DATA MCNTL/2H^O,2HQC,11*0/
+C
+C       MCNTL   - SET FOR MONITOR ON AND OFF
+C
+        DATA NCNTL/0,0,5,25,0,0,0,0,0/
+C
+C       NCNTL(1)        - NUMBER OF ENTRIES USED IN MCNTL
+C       NCNTL(2)        - NUMBER OF CHARCTERS SET UP HERE
+C       NCNTL(3)        - FIRST USER ENTRY IN MCNTL
+C       NCNTL(4)        - MAXIMUM NUMBER OF NAMEI ENTRIES ALLOWED
+C       NCNTL(5)        - NUMBER OF NAMEI'S READ IN
+C       NCNTL(6)        - LAST FIELD SYSTEM MANAGER FOUND (nominally BOSS)
+C       NCNTL(7)        - LAST CHECKING SYSTEM MANAGER FOUND (CHEKR)
+C       NCNTL(8)        - LAST OUTPUT MANAGER FOUND (NOMINALLY DDOUT)
+C       NCNTL(9)        - LAST ASSIST OUTPUT MANAGER FOUND( 'CLOUT')
+C
+C 6.  PROGRAMMER: LEE N. FOSTER
+C     LAST MODIFIED:  LAR  880604   Increased max # of NAMEI's allowed.
+C
+        CALL RMPAR(IP)
+        LU=1
+        IF (IP(1).NE.0) LU=IP(1)
+  
+C  ALLOCATE BOSS'S RESOURCE NUMBER
+  
+        call rnrq(140002B,irnboss_fs,istat,*887)
+        if (istat.eq.7) goto 888
+        GOTO 889
+887     if (istat.eq.6.or.istat.eq.-1) then
+          call rnrq(140012B,irnboss_fs,istat,*888)
+          goto 889
+        endif
+888     CALL SDOUT(LU,-1,2HOP,0,26H OPRIN IS ALREADY RUNNING ,26)
+        STOP
+889     CONTINUE
+  
+        CALL RNRQ(140002B,IRNPRC,ISTAT,*777)
+777     CONTINUE
+C  This call has 100000=NO WAIT,2=LOCK GLOBALLY
+        IF (ISTAT.EQ.6) THEN
+          IERR = -8
+          CALL SDOUT(LU,IERR,2HOP,0,26H PFMED has resource locked,26)
+          STOP
+        ELSE IF(ISTAT.EQ.-1) THEN
+          CALL RNRQ(140020B,IRNPRC,ISTAT,*778)
+778       CONTINUE
+C  This call has 100000=NO WAIT,20=ALLOCATE GLOBALLY
+          IF(ISTAT.EQ.-1) THEN
+            IERR = -8
+            CALL SDOUT(LU,IERR,2HOP,0,26H Error allocating resource,26)
+            STOP
+          ELSE IF(ISTAT.NE.1) THEN
+            IERR = -8
+            CALL SDOUT(LU,IERR,2HOP,0,20H Error allocating RN,20)
+            STOP
+          ENDIF
+        ELSE
+          CALL RNRQ(140004B,IRNPRC,ISTAT,*779)
+779       CONTINUE
+        ENDIF
+  
+  
+        NOFST=4            !  SET OFFING FOR SELF TERMINATION
+        IERR=0
+        ICLBOX=0
+        CALL INOPR (NAMEI,NAMEC,IP,NAMUS,mcntl,ncntl,ierr,ibuf)
+        IF (IERR.GE.0 .AND. IERR.NE.14)
+     :      CALL RUOPR (NAMEC,IP,NAMUS,MCNTL,ncntl,ibuf,namei)
+        CALL TEOPR (NAMEC,IP,NAMUS,MCNTL,NCNTL,IBUF,NAMEI)
+        CALL EXEC(6,0,2)
+        stop
+        END

@@ -1,0 +1,26 @@
+HDATA - Head positioner A/D data readout
+
+Syntax:   HDATA
+Response: HDATA/<hd0p>,<hd1p>,<hd0t>,<hd1t>,<vac>,<oddpwr>,<evpwr>,<ref>
+
+Settable parameters:  none
+
+Monitor-only parameters:
+<hd0p>: Head 0 position
+<hd1p>: Head 1 position
+<hd0t>: Head 0 temperature
+<hd1t>: Head 1 temperature
+<vac>: vacuum sensor
+<oddpwr>: odd reproduce power
+<evpwr>: even reproduce power
+<ref>: reference voltage
+
+Comments: MAT module functions available.
+
+This command reads the Head Positioner A/D channels, all values are reported
+in units of volts.  Data from all channels are reported regardless of whether
+anything is hooked up to them or not. In particular, most stations do not
+use the temperature channels, the vacuum sensor, and one of the reproduce
+power channels.
+
+The position voltages (and all others) are reported with the LVDT off.

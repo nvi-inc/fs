@@ -1,0 +1,10 @@
+TERMINATE - End Field System operation
+
+Syntax:   TERMINATE
+Response: none
+
+Parameters: none
+
+      Comments: This is the graceful way to end operation of the
+Field System. Schedule execution is ended, log and schedule files
+are closed, all programs are removed from the system by OPRIN.

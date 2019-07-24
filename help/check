@@ -1,0 +1,42 @@
+CHECK - Modules to be checked by CHEKR
+
+Syntax:   CHECK=<list>
+Response: CHECK/<list>
+
+Settable parameters:
+<list>: list of modules to be checked. The list may include:
+        Vn or VCn - individual video converter, n = 1,2,...,15 or
+         1,2,...,F
+        IF or IFD - IF distributor
+        FM or FORM - formatter
+        TP or TAPE - tape transport
+        RX - receiver
+        HD - high density tape heads
+Other words recognized are:
+        ALL - all modules
+        ODD - odd video converters 1,3,5,7,9,11,13
+        EVEN - even video converters 2,4,6,8,10,12,14
+        <NULL> - do not check anything
+
+Monitor-only parameters: none
+
+     Comments: As modules are set up by SNAP commands, they are
+automatically added to the list of modules being checked by CHEKR.
+This command can be used to remove and reinstate modules on the
+list.
+
+The entire list of modules to be checked may always be specified
+by listing the appropriate modules. However, the list of modules
+already being checked may also be modified by entering * as the
+first parameter, followed by the list of modules to be added or
+deleted from the existing list. Deletion is indicated by a leading
+(-) sign. For example,
+
+                      CHECK = *,IFD,-TP
+
+will cause the IF distributor to be added to the list of modules
+being checked and the tape transport to be removed from the list,
+while the CHECK status of all other modules remain unchanged.
+
+If no modules are currently being checked then the list will be
+displayed as: DISABLED.

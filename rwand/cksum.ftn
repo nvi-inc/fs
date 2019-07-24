@@ -1,0 +1,45 @@
+FTN77,I,Y
+$CDS ON
+      logical function cksum(bufr,nchar)                    !  <880316.1627>
+c  Check the sum of characters received from the TimeWand. 
+c                                                   Lloyd Rawley   March 1988
+c  Input parameters:
+      integer bufr(1)           !  Buffer recieved from the wand
+      integer nchar             !  Number of characters in buffer
+c
+c  Output value:  TRUE if check works, FALSE if it fails
+c
+c  Method:  The last five bytes of the buffer sent by the wand contain three
+c           carriage returns and a two-digit hexadecimal value which should
+c           be the sum of the binary values of the characters sent before
+c           (other than carriage returns).
+c
+c  Subroutines called:  Lee Fowler's character routines,
+c                       HP bit manipulation routines
+c
+c   1.  Check that last five bytes are in the form expected.
+c
+      lcrcr = 6415B     !  (Two carriage returns.)
+      icompare = ichcm(lcrcr,1,bufr,nchar-4,2)
+      i16 = ia2hx(bufr,nchar-2)             !  Convert ASCII hex to binary;
+      i1  = ia2hx(bufr,nchar-1)             !  -1 returned if out of range. 
+      if (i16.eq.-1 .or. i1.eq.-1 .or. icompare.ne.0) then
+        cksum = .false.
+        return                              !  String was probably truncated.
+      endif
+      icheck = 16*i16 + i1
+c
+c   2.  Add up all previous bytes and compare to value obtained above.
+c
+      isum = 0
+      nwords = (nchar-4)/2
+      do i=1,nwords
+        lbyte = iand(bufr(i),377B)
+        if (lbyte.eq.15B) lbyte=0           !  Carriage returns don't count. 
+        mbyte = ishft(bufr(i),-8)
+        if (mbyte.eq.15B) mbyte=0
+        isum = iand(isum+lbyte+mbyte,377B)
+      enddo
+      cksum = (isum.eq.icheck)
+      return
+      end

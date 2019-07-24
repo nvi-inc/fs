@@ -1,0 +1,86 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE BEAM(IP,NSUB)
+C
+C     Set and display RF beamwidth, FWHM
+C
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+      DIMENSION IP(1)
+      DIMENSION IREG(2),IPARM(2)
+      DIMENSION IBUF(20)
+C
+      EQUIVALENCE (IREG(1),REG),(IPARM(1),PARM)
+C
+      DATA ILEN/40/
+C
+      INDTMP=NSUB
+C
+      ICLCM = IP(1)
+      REG = EXEC(21,ICLCM,IBUF,-ILEN)
+      NCHAR = IREG(2)
+      IEQ = ISCNC(IBUF,1,NCHAR,75B)
+      IF (IEQ.EQ.0) GOTO 500
+C
+C     2. Parse the command:   BEAM=< SIZE>
+C
+C     2.1 First get the size and convert to radians
+C
+210   ICH = IEQ+1
+      IC1 = ICH
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM)
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) GOTO 215
+      IF (JCHAR(PARM,1).NE.52B) GOTO 211
+      B = BEAMSZ_FS(INDTMP)
+C                   Pick up the size from common
+      GOTO 300
+211   CONTINUE
+      IF(INDTMP.EQ.1) THEN
+        F=FREQLO(INDTMP,INP1IF+1)
+      ELSE
+        F=FREQLO(INDTMP,INP2IF+1)
+      ENDIF
+      B=1.05*299792458D0/(F*1D6*DIAMAN)
+      IF(B.GT.4.8D-8)  GOTO 300
+      IERR=-401
+  
+C                   there is no default if IFD and LO haven't been set
+      GOTO 990
+215   CALL GTRAD(IBUF,IC1,ICH-2,2,B,IERR)
+      IF (IERR.GE.0.AND.B.GT.0.0) GOTO 300
+      IERR = -402
+      GOTO 990
+C
+C     3. Plant the variables in COMMON.
+C
+300   CONTINUE
+      BEAMSZ_FS(INDTMP)=B
+      IF(INDTMP.EQ.1) THEN
+        FLX1FX_FS=-1.0
+      ELSE
+        FLX2FX_FS=-1.0
+      ENDIF
+      IERR = 0
+C
+990   IP(1) = 0
+      IP(2) = 0
+      IP(3) = IERR
+      IP(4) = 2HQO
+      RETURN
+C
+C     5. Return the beamsize for display
+C
+500   NCH = ICHMV(IBUF,NCHAR+1,2H/ ,1,1)
+      BO=BEAMSZ_FS(INDTMP)*180./PI
+      NCH = NCH + IR2AS(BO,IBUF,NCH,10,4)
+C
+      ICLASS = 0
+      NCH = NCH - 1
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS)
+      IP(1) = ICLASS
+      IP(2) = 1
+      IP(3) = 0 
+      IP(4) = 2HQO
+      RETURN
+      END 

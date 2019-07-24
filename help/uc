@@ -1,0 +1,68 @@
+UC - Uncooled receiver monitor and control
+  
+Syntax:   UC=<channel>,<dcal>,<loh>,<box>,<S>,<X>,<k>,<cal>
+Response: UC/<channel>,<dcal>,<loh>,<box>,<S>,<X>,<K>,<cal>,
+            <lostat>,<value>
+  
+Settable parameters:
+<channel>: hex value or code word (next page). No default.
+<dcal>: delay cal heater, ON or OFF. Default is ON.
+<loh>: LO box heater, ON or OFF.  Default is ON.
+<box>: box heaters. Turn on with A or B (for controller), or OFF.
+       Default is A.
+<S>,<X>,<K>: IF amplifier controls, ON or OFF. Default ON.
+<cal>: noise cal control. May be ON, OFF, OON (Override ON), OOF
+       (Override OFf), or EXTernal modulation. Default OFF.
+  
+Monitor-only parameters:
+<lostat>: status of LO, LOCKED or UNLOCKED.
+<value>: reading in A/D channel shown in first parameter. Units are
+         appropriate for channel in use.
+  
+      Comments: MAT module functions are available (i.e. ALARM and
+TEST/RESET). Channel assignments for the "standard" receiver are
+on the next page. Your station's channel assignments are in the
+RXDEF.CTL control file. Details of the MAT protocol are in the MAT
+Communications manual.
+  
+     UC must be specified in MATAD.CTL control file.
+  
+  
+              Receiver A/D converter channels
+  
+ 
+ channel   code      Voltage      Description
+ # (hex)   name      Div. Ratio
+  
+ 00        FRONT     100.         Temperature probe: box front
+ 01        REAR      100.         Temperature probe: box rear
+ 02        LO        100.         Temperature probe: LO
+ 03        DCAL      100.         Temperature probe: Delay cal
+ 04        +12V      101.         +12 volt monitor Delay cal
+ 05        SENSE+     11.         Peltier driver current sense
+ 06        LOLOCK     11.         LO lock monitor
+ 07        -2.73V      2.         -2.73 volt control monitor reference
+ 08        PRISIF      1.         Power level S-band IF primary
+ 09        XIF         1.         Power level X-band IF
+ 0A        SECSIF      1.         Power level S-band IF secondary
+ 0B        PRISLO      1.         Power level primary S-band LO
+ 0C        XLO         1.         X-band LO power level
+ 0D        SECSLO      1.         Power level secondary S-band LO
+ 0E        LO5MHZ      1.         5 MHz power level to LO
+ 0F        +15PS2     11.         +15 volt monitor for Power Supply 2
+ 10        28V       101.         +28 volt monitor
+ 11        -15PS1     11.         -15 volt monitor for Power Supply 1
+ 12        20V        11.         monitor LO 20 volt
+ 13        +15PS1     11.         +15 volt monitor for Power Supply 1
+ 14        +5PS1      11.         +5 volt monitor for Power Supply 1
+ 15        -15PS2     11.         -15 volt monitor for Power Supply 2
+ 16        +5PS2      11.         +5 volt monitor for Power Supply 2
+ 17        SECS3B      4.9        3rd stage S-band FET secondary
+ 18        X1BIAS      4.9        1st stage X-band FET bias current
+ 19        X2BIAS      4.9        2nd stage X-band FET bias current
+ 1A        X3BIAS      4.9        3rd stage X-band FET bias current
+ 1B        PRIS1B      4.9        1st stage S-band FET primary
+ 1C        PRIS2B      4.9        2nd stage S-band FET primary
+ 1D        PRIS3B      4.9        3rd stage S-band FET primary
+ 1E        SECS1B      4.9        1st stage S-band FET secondary
+ 1F        SECS2B      4.9        2nd stage S-band FET secondary

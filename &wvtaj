@@ -1,9 +1,0 @@
-FTN4,X
-C@WVTAK 
-      SUBROUTINE WVTAK(PARM,MDE),TEMP PARM JPL C#870115:04:49#
-C 
-C     WVTAK checks the parameter for the TEMP command 
-C 
-      MDE = -1
-      RETURN
-      END 

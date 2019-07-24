@@ -1,0 +1,111 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C@PADIS 
+C 
+      SUBROUTINE PADIS(IP,ICLCM),PATCHING DISPLAY C#870115:04:52# 
+C 
+C 1.1.   PADIS gets data from common variables and displays them
+C 
+C 2.  PADIS INTERFACE 
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of buffer from MATCN 
+C        IP(2)  - number of records in class
+C        IP(3)  - error return from MATCN 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - CLASS
+C        IP(2) - # RECS 
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES: PATCH
+C 
+C     CALLED SUBROUTINES: character utilities 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+      DIMENSION IBUF(30),IBUF2(30)
+C               - input class buffer, output display buffer 
+C        ILEN   - length of buffers, chars
+C        NCH    - character counter 
+C 
+      LOGICAL KCOM,KDATA
+      DIMENSION IREG(2) 
+C               - registers from EXEC 
+      EQUIVALENCE (REG,IREG(1)) 
+C 
+C 4.  CONSTANTS USED
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA ILEN/60/ 
+C 
+C 6.  PROGRAMMER: NRV & MAH 
+C     CREATED: 19820318 
+C# LAST COMPC'ED  870115:04:52 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. First check error return from MATCN.  If not 0, get out
+C     immediately.
+C 
+C 
+      IF (ICLCM.EQ.0) RETURN
+      REG = EXEC(21,ICLCM,IBUF2,-ILEN)
+C 
+      NCHAR = IREG(2) 
+      NCH = ISCNC(IBUF2,1,NCHAR,75B)
+C                  Scan for "=" 
+      IF (NCH.EQ.0) NCH = NCHAR+1 
+C                  If no "=" found position after last character
+      NCH = ICHMV(IBUF2,NCH,2H/ ,1,1) 
+C                  Put / to indicate a response 
+C 
+C     2.  Now get common variables and decode for display 
+C 
+      IERR = 0
+      ICLASS = 0
+C 
+      NCH = ICHMV(IBUF2,NCH,2HLO,1,2) 
+      DO  J = 1,2
+          NCH = NCH+IB2AS(J,IBUF2,NCH,100000B+1)
+          IC1 = NCH 
+          JC = 0
+C 
+          DO  I = 1,14 
+            IF (IABS(IFP2VC(I)).EQ.J) THEN
+              NCH = MCOMA(IBUF2,NCH)
+              NCH = NCH+IB2AS(I,IBUF2,NCH,100000B+2)
+              L = 2HH 
+              IF (IFP2VC(I).LT.0) L = 2HL 
+              NCH = ICHMV(IBUF2,NCH,L,1,1)
+              JC = JC+1 
+            ENDIF
+          ENDDO
+C 
+          IF (JC.EQ.0) NCH = IC1
+C 
+C     5. Now send the buffer to SAM and schedule PPT. 
+C 
+          NCH = NCH - 1 
+          CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)
+          NCH = IC1-1 
+      ENDDO
+C                   Send buffer starting with IFD to display, ignoring
+      IF (.NOT.KCHECK) IERR = 0 
+      IP(1) = ICLASS
+      IP(2) = 2 
+      IP(3) = IERR
+      IP(4) = 2HQQ
+      RETURN
+      END 

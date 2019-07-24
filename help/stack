@@ -1,0 +1,39 @@
+STACK - Narrow track head positioning by microns
+
+Syntax:   STACK=<cmdMw>,<cmdMr>,<calW>,<calR>
+          STACK
+Response: STACK/<cmdMw>,<cmdMr>,<calW>,<calR>,<actMw>,
+          <actMr>,<deltaMw>,<deltaMr>
+
+Settable parameters:
+<cmdMw>: Write command position in microns. Default is not to move.
+<cmdMr>: Read command position in microns. Default is not to move.
+<calW>: Write head calibration to use: Forward, Reverse, or Uncalibrated.
+        Only the first letter is checked. Default is Uncalibrated.
+<calR>: Write head calibration to use: Forward, Reverse, or Uncalibrated.
+        Only the first letter is checked. Default is Uncalibrated.
+
+Monitor-only parameters:
+<actMw>: Actual write head position, microns.
+<actMr>: Actual read head position, microns.
+<deltaMw>: Difference of actual and commanded position for write 
+     head, microns.
+<deltaMr>: Difference of actual and commanded position for read 
+     head, microns.
+
+Comments: This command is used to position the narrow track head stacks
+in micron units. An individual head may be moved by not specifying the
+command position and calibration to use for the other head.
+
+The <delta> parameters are reported with the sign of actual minus commanded.
+
+The command positions reported by the LVDT, PASS, and STACK commands are
+consistent. See the description of the PASS command for more information.
+
+If the heads were last positioned with the PASS or LVDT commands, the response
+<calW> and <calR> will correctly identify the calibration used. Odd pass
+numbers will be reported as `forward' calibrations, even passes as `reverse'
+calibrations. Positions commanded with the LVDT command are `uncalibrated.'
+
+If the write head position is commanded, the auxiliary data field is set
+to reflect the commanded position, see the PASS command for more information.

@@ -1,0 +1,71 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE CTEMP(IP,NSUB),SET CAL TEMP C#870115:04:44#
+C 
+C     Set and display the cal temperature 
+C 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 
+      DIMENSION IP(1) 
+      DIMENSION IREG(2),IPARM(2)
+      DIMENSION IBUF(20)
+C 
+      EQUIVALENCE (IREG(1),REG),(IPARM(1),PARM) 
+      DATA ILEN/40/ 
+C 
+      INDTMP = NSUB 
+C                   Pick up the proper index for the temp 
+      ICLCM = IP(1) 
+      REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+      IF (IEQ.EQ.0) GOTO 500
+C 
+C 
+C     2. Parse the command: CALTEMP=<value> 
+C 
+      ICH = IEQ+1 
+      IC1 = ICH 
+      CALL GTPRM(IBUF,ICH,NCHAR,2,PARM,IERR)  
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) GOTO 215 
+      IF (JCHAR(PARM,1).NE.52B) GOTO 211
+      T = CALTMP(INDTMP)
+C                   Pick up the temp from COMMON
+      GOTO 300
+211   IERR = -101 
+C                   There is no default for the temperature 
+      GOTO 990
+C 
+215   T = PARM
+      IF (IERR.EQ.0) GOTO 300 
+      IERR = -201 
+      GOTO 990
+C 
+C 
+C     3. Put the value into common. 
+C 
+300   CALTMP(INDTMP) = T
+C 
+      IERR = 0
+C 
+990   IP(1) = 0 
+      IP(2) = 0 
+      IP(3) = IERR
+      IP(4) = 2HQC
+      RETURN
+C 
+C     5. Return the cal temp for display
+C 
+500   NCH = ICHMV(IBUF,NCHAR+1,2H/ ,1,1)
+      NCH = NCH + IR2AS(CALTMP(INDTMP),IBUF,NCH,5,1)
+C 
+      ICLASS = 0
+      NCH = NCH - 1 
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS)
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = 0 
+      IP(4) = 2HQC
+      RETURN
+      END 

@@ -1,0 +1,85 @@
+FTN77,I,Y  
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C
+C@LXWRT
+C
+      SUBROUTINE LXWRT(IBUFX,NCHARX),WRITE LOGEX DATA C#870115:05:34#
+C
+C LXWRT - Writes LOGEX output to the terminal or output file.
+C
+C MODIFICATIONS:
+C
+C    DATE     WHO  DESCRIPTION
+C    820819   KNM  SUBROUTINE CREATED
+C
+C RESTRICTIONS:
+C
+C INPUT VARIABLES:
+C
+      DIMENSION IBUFX(1)
+C        - Output buffer to write out
+C
+C     NCHARX - Number of characters in the output buffer.
+C
+C OUTPUT VARIABLES:
+C
+C COMMON BLOCKS USED:
+C
+      INCLUDE LXCOM.FTNI
+C
+C DATA BASE ACCESSES:
+C
+C EXTERNAL INPUT/OUTPUT:
+C
+C SUBROUTINE INTERFACES:
+C
+C    CALLING SUBROUTINES:
+C
+C      LOGEX - Main program
+C      LXSUM - Summary command
+C      READL - Get next observation from the log for the Summary
+C      LXTPL - Strip-chart plotting routine
+C      LXOPN - Opens log file
+C      LXIST - List log file
+C
+C    CALLED SUBROUTINES:
+C
+C      LNFCH Utilities
+C
+C LOCAL VARIABLES:
+C
+C     NW - Number of words to write from the output buffer.
+C
+C INITIALIZED VARIABLES:
+C
+C
+C *********************************************************
+C
+C 1. Put a blank after the last character in the output
+C    buffer in case we have an odd number of characters
+C    to write out. Then test for whether the output is
+C    to be written to the terminal or the output file.
+C
+C **********************************************************
+C
+C
+      NW=(NCHARX+1)/2
+      IF(ITERM.NE.1) GOTO 100
+      WRITE(LUDSP,9000) L6,(IBUFX(I),I=1,NW)
+9000  FORMAT(A1,65A2)
+      GOTO 200
+C
+C Buffer is written to the output file here.
+C
+100   IF(IOUT.EQ.1) GOTO 150
+      WRITE(LUDSP,9100)
+9100  FORMAT(/"***OUTPUT FILE IS BEING PROCESSED***"/)
+      IOUT=1
+150   ID = FmpWrite(JDCB,IERR,IBUFX,NCHARX)
+      IF(IERR.GE.0) GOTO 200
+      WRITE(LUUSR,9200) IERR
+9200  FORMAT("LXWRT - Error FMGR"I3" writing to output file")
+      ICODE=-1
+200   RETURN
+      END

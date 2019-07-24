@@ -1,0 +1,7 @@
+EC
+li /fs/fslb/fslbcds.lib
+lc
+re rwand.rel
+re bsort.rel
+re cksum.rel
+en

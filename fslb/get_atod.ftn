@@ -1,0 +1,55 @@
+FTN77,Y,I  
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      SUBROUTINE GET_ATOD(ICHAN,VOLT,IP)
+      INTEGER*2 ICHAN,IP(5)
+      REAL*4 VOLT
+C
+C  GET_ATOD: get A/D sample
+C
+C     INPUT:
+C       ICHAN: channel to sample (1-8, see AD2MA for details)
+C
+C     OUTPUT:
+C       VOLT: sampled voltage
+C       IP: field system parameter array
+C
+      INCLUDE /fs/include/fscom.ftni
+C
+      INTEGER*2 IBUF(6),ICOUNT,ITEST,IMOVE,ILVDT,NCHAR,ICLASS,NREC
+      INTEGER*2 ILEN
+      DATA ILEN/12/
+C
+      NREC=0
+      ICLASS=0
+C
+      IBUF(1)=0
+      IBUF(2)=2HHD
+      ILVDT=1
+      IF(KLVDT_FS) ILVDT=0
+      CALL AD2MA(IBUF(3),ILVDT,0,ICHAN)
+      CALL ADD_CLASS(IBUF,-12,ICLASS,NREC)
+C
+      IBUF(1) = -2
+      CALL ADD_CLASS(IBUF,-12,ICLASS,NREC)
+C
+C   Now schedule MATCN
+C
+      CALL RUN_MATCN(ICLASS,NREC,IP)
+      IF(IP(3).NE.0) RETURN
+C
+C  Get and decode voltage response from MATCN
+C
+      CALL GET_CLASS(IBUF,-ILEN,IP,NCHAR)
+      CALL GET_CLASS(IBUF,-ILEN,IP,NCHAR)
+      CALL CLRCL(IP(1))
+      IP(2)=0
+      CALL MA2AD(IBUF,IMOVE,ITEST,ICOUNT)
+      IF(IMOVE.NE.0) THEN
+        IP(3)=-401
+        IP(4)=2HQ@
+      ENDIF
+      VOLT=ICOUNT*4.8828125E-3
+C
+      RETURN
+      END

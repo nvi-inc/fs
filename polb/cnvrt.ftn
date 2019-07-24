@@ -1,0 +1,140 @@
+FTN77,I,Y  
+$CDS ON
+      SUBROUTINE CNVRT(IMODE,AIN1,AIN2,OUT1,OUT2,IT,ALAT,WLONG)
+C
+C  INPUT:
+C
+C     IMODE - specifies input and output coordinate systems
+C              IMODE     Input      Output
+C              -----     -----      ------
+C                1       RA/DEC      AZ/EL
+C                2       AZ/EL       RA/DEC
+C                3       RA/DEC      X/Y NS
+C                4       X/Y NS      AZ/EL
+C                5       AZ/EL       X/Y NS
+C                6       X/Y NS      HA/DEC
+C                7       X/Y NS      RA/DEC
+C                8       HA/DEC      X/Y NS
+C                9       HA/DEC      AZ/EL
+C               10       AZ/EL       HA/DEC
+C
+C     AIN1 - first input coordinate
+C     AIN2 - second input coordinate
+C
+C  OUTPUT:
+C
+C     OUT1 - first output coordinate
+C     OUT2 - second output coordinate
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DOUBLE PRECISION SIDT,SIDER,HAD,TLST
+      DIMENSION IT(6)
+C
+      INCLUDE /FS/INCLUDE/DPI.FTNI
+C
+      DASIN(X) = DATAN2Z(X,DSQRT(DABS(1.-X*X)))
+      DACOS(X)=DATAN2Z(DSQRT(DABS(1.-X*X)),X)
+C
+      SLAT = DSIN(ALAT)
+      CLAT = DCOS(ALAT)
+      SIN1 = DSIN(AIN1)
+      SIN2 = DSIN(AIN2)
+      CIN1 = DCOS(AIN1)
+      CIN2 = DCOS(AIN2)
+      SIDT=SIDER(IT)
+      TLST=SIDT-WLONG
+C     WRITE(LU,1) TLST,SIDT,WLON                                         DEBUG
+C1    FORMAT("TLST,SIDT,WLON = "2(F10.6", "),F10.6)                      DEBUG
+      HAD = TLST-AIN1
+      IF(HAD.GT.0.D0) HAD=DMOD(HAD,DTWOPI)
+      IF(HAD.LT.0.D0) HAD=DMOD(HAD,-DTWOPI)
+      IF(HAD.LT.-DPI) HAD=HAD+DTWOPI
+      IF(HAD.GT.DPI) HAD=HAD-DTWOPI
+      HA=HAD
+C     WRITE(LU,3) HA                                                     DEBUG
+C3    FORMAT("HA= "F10.6)                                                DEBUG
+      SHA=DSIN(HA)
+      CHA=DCOS(HA)
+C
+      GO TO (110,130,150,170,190,210,230,250,270,290) IMODE
+C
+C  1. RA/DEC --> AZ/EL
+C
+110   OUT2=DASIN(SLAT*SIN2+CLAT*CIN2*CHA)
+      OUT1=DATAN2Z(-CIN2*SHA,CLAT*SIN2-SLAT*CIN2*CHA)
+      IF(OUT1.LT.0.) OUT1=OUT1+DTWOPI
+      GO TO 900
+C
+C  2. AZ/EL --> RA/DEC
+C
+130   HA=-DATAN2Z(CIN2*SIN1,SIN2*CLAT-CIN2*CIN1*SLAT)
+C     WRITE(LU,2)HA                                                      DEBUG
+C2    FORMAT("HA = "F10.6)                                               DEBUG
+      OUT1=TLST-HA
+      IF(OUT1.LT.0.) OUT1=OUT1+DTWOPI
+      IF(OUT1.GT.DTWOPI) OUT1=OUT1-DTWOPI
+      OUT2=DASIN(CIN2*CIN1*CLAT+SIN2*SLAT)
+      GO TO 900
+C
+C  3. RA/DEC --> X/Y NS
+C
+150   OUT1=DATAN2Z(-CIN2*SHA,SLAT*SIN2+CLAT*CIN2*CHA)
+      OUT2=DASIN(CLAT*SIN2-SLAT*CIN2*CHA)
+      GO TO 900
+C
+C  4. X/Y NS --> AZ/EL
+C
+170   OUT1=DATAN2Z(SIN1*CIN2,SIN2)
+      IF(OUT1.LT.0) OUT1=OUT1+DTWOPI
+      OUT2=DASIN(CIN2*CIN1)
+      GO TO 900
+C
+C  5. AZ/EL  --> XY NS
+C
+190   CONTINUE
+      OUT1=DATAN2Z(CIN2*SIN1,SIN2)
+      OUT2=DASIN(CIN2*CIN1)
+      GO TO 900
+C
+C  6. X/Y  NS --> HA/DEC
+C
+210   CONTINUE
+      OUT1=-DATAN2Z(CIN2*SIN1,CIN2*CIN1*CLAT-SIN2*SLAT)
+      OUT2=DASIN(SIN2*CLAT+CIN2*CIN1*SLAT)
+      GO TO 900
+C 
+C   7. X/Y NS --> RA/DEC  
+C
+230   CONTINUE
+      HA=-DATAN2Z(CIN2*SIN1,CIN2*CIN1*CLAT-SIN2*SLAT)
+      OUT1=TLST-HA
+      IF(OUT1.LT.0.0) OUT1=OUT1+DTWOPI
+      IF(OUT1.GT.DTWOPI) OUT1=OUT1-DTWOPI
+      OUT2=DASIN(SIN2*CLAT+CIN2*CIN1*SLAT)
+      GO TO 900
+C
+C  8. HA/DEC --> X/Y NS
+C
+250   OUT1=DATAN2Z(-CIN2*SIN1,SLAT*SIN2+CLAT*CIN2*CIN1)
+      OUT2=DASIN(CLAT*SIN2-SLAT*CIN2*CIN1)
+      GO TO 900
+C
+C  9. HA/DEC --> AZ/EL
+C
+270   OUT2=DASIN(SLAT*SIN2+CLAT*CIN2*CIN1)
+      OUT1=DATAN2Z(-CIN2*SIN1,CLAT*SIN2-SLAT*CIN2*CIN1)
+      IF(OUT1.LT.0.) OUT1=OUT1+DTWOPI
+      GO TO 900
+C
+C 10. AZ/EL --> HA/DEC
+C
+290   OUT1=-DATAN2Z(CIN2*SIN1,SIN2*CLAT-CIN2*CIN1*SLAT)
+C     WRITE(LU,2)HA                                                      DEBUG
+      IF(OUT1.LT.-DPI) OUT1=OUT1+DTWOPI
+      IF(OUT1.GT.DPI) OUT1=OUT1-DTWOPI
+      OUT2=DASIN(CIN2*CIN1*CLAT+SIN2*SLAT)
+      GO TO 900
+C
+900   CONTINUE
+      RETURN
+      END

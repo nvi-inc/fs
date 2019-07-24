@@ -1,0 +1,13 @@
+HPIB - General HP Interface Bus communications
+
+Syntax:   HPIB=<LU>,<data>
+Response: HPIB/<data>
+
+Settable parameters:
+<LU>:   LU of module to be addressed
+<data>: complete message to be sent to module, if any. Talk-only
+        modules do not accept data.
+
+Monitor-only parameters:
+<data>: response of module, if any. Listen-only modules do not
+        generate any response.

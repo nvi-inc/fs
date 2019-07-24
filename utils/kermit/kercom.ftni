@@ -1,0 +1,40 @@
+!     Goes with rev 1.99 or later; edited  9:35 AM  Sun., 12  APR., 1987
+  
+!     This is KERMIT's main control storage; see the main program for info
+  
+!     Notice: If you encounter an undefined external reference to FTRAP 
+!             as you link KERMIT, you should set the value of the SysRev
+!             (below) to any value less than 2440, then re-compile.  This 
+!             parameter is only used in the KermInit subroutine.  Any other 
+!             undefined externals mean a real problem - call me!
+  
+      integer*2 SysRev
+      parameter (SysRev = 2540)           !The current latest system revision 
+  
+      !Warning: Do Not allocate any storage between PakSiz and sSync! 
+  
+      integer*2    Delay,EsChar,L,ImxTry,MaxTry,R,p,rlen,seq,class, 
+     >             slen,trCb(144),fePath,sPcnt,parity,seg,pvalu(10),
+     >             NewChk,rtoBit, 
+     >             PakSiz,Timeout,nPad,Padch,EOLch,Quote,   ! My params 
+     >              Bit8,ChkTyp, Repc,capas(2),  Sync,      ! My params 
+     >             sPkSiz,sTime,sPad,sPadch,sEOL,sQuote,    ! other's parms 
+     >             sBit8,sCheck,sRepc,sCapas(2),sSync       ! other's parms 
+      logical*2    fWarn,fIBM,fServ,fTrans,fBit8,fRepc,fpkio,fEcho, 
+     >             fSend,f8OK 
+      character    HlpNam*64,Packet*100,RecPkt*256,pdata*96,state*1 
+      character*1  P1cket(100),R1cPkt(256),p1ata(96)
+      equivalence  (Packet,P1cket),(RecPkt,R1cPkt),(pdata,p1ata)
+      character    ErrMsg*72,Prompt*20
+  
+      common /ker/ Delay,EsChar,L,ImxTry,MaxTry,R,p,rlen,seq,class, 
+     >             slen,trCb     ,fePAth,sPcnt,parity,seg,pvalu    ,
+     >             NewChk,rtoBit, 
+     >             PakSiz,Timeout,nPad,Padch,EOLch,Quote,   ! My params 
+     >              Bit8,ChkTyp, Repc,capas   ,  Sync,      ! My params 
+     >             sPkSiz,sTime,sPad,sPadch,sEOL,sQuote,    ! other's parms 
+     >             sBit8,sCheck,sRepc,sCapas   ,sSync,      ! other's parms 
+     >             fWarn,fIBM,fServ,fTrans,fBit8,fRepc,fpkio,fEcho, 
+     >             fSend,f8OK,
+     >             HlpNam   ,Packet    ,RecPkt    ,pdata   ,state  ,
+     >             ErrMsg   ,Prompt 

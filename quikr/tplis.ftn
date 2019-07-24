@@ -1,0 +1,147 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE TPLIS(IP,ITPIS),PARSE TPI LIST C#870115:04:30# 
+C 
+C 1.1.   TPLIS parses the list of possible TPI modules
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C               - parameters from SLOWP 
+C        IP(1)  - class number of input parameter buffer
+C        IP(2-5)- not used
+C 
+C     OUTPUT VARIABLES: 
+C 
+      DIMENSION ITPIS(1)
+C      - TPIs requested, 0=not wanted, 1=get it 
+C        IP(3) - ERROR RETURN 
+C        IP(4) - who we are 
+C 
+C     CALLED SUBROUTINES: GTPRM,JCHAR,MDNAM 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C        ICH    - character counter 
+C     NCHAR  - character count
+C     LPRM   - 2-character mnemonic for module name 
+      DIMENSION IBUF(40)
+C               - class buffer, holding command 
+C        ILEN   - length of IBUF, chars 
+      DIMENSION IPARM(2)
+C               - parameters returned from GTPRM
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+C 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 4.  CONSTANTS USED
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA ILEN/80/ 
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED:  840308  MWH  added call to MDNAM for module mnemonic
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. If class buffer contains command name with "=" then we have
+C     parameters to get the TPIs.  If only the command name is present, 
+C     then use the default. 
+C 
+      IERR = 0
+      ICLCM = IP(1) 
+      IF (ICLCM.EQ.0) THEN
+        IERR = -1
+        GOTO 990
+      ENDIF
+      REG = EXEC(21,ICLCM,IBUF,-ILEN)
+      NCHAR = MIN0(IREG(2),ILEN)
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.EQ.0) IEQ = NCHAR + 1 
+C                   Set counter to end of command for default 
+C 
+C 
+C     2. Step through buffer getting each parameter and decoding it.
+C     Command from user looks like: 
+C                   TPI=<list>
+C     where <list> may contain the following key words: 
+C                   <null> - the default gets VC plus IF1 and IF2 
+C                   ALL - same as default 
+C                   VC - gets V1 to 14
+C                   EVEN - even-numbered VCs
+C                   ODD - odd-numbered VCs
+C                   Vn - VC number n
+C                   IFn - IF 1 or 2 
+C 
+      DO I=1,16 
+        ITPIS(I) = 0
+      ENDDO
+C                   Turn off all of the TPIs to start 
+      ICH = 1+IEQ 
+      DO 290 I=1,20 
+        CALL GTPRM(IBUF,ICH,NCHAR,0,PARM)
+C                   Pick up each parameter as characters
+        IF (JCHAR(PARM,1).EQ.54B) THEN        ! comma; no more parameters
+          IF (I.EQ.1) THEN        !  if no parameters, set all indicators ON
+            DO II=1,16
+              ITPIS(II) = 1
+            ENDDO
+          ENDIF
+          GOTO 990
+        ENDIF
+        IF (JCHAR(PARM,1).EQ.52B) GOTO 280
+C                           * 
+C                   We haven't any stored values to pick up here
+C 
+        LPRM=MDNAM(IPARM)
+        IF(LPRM.EQ.0)GOTO 285
+        IF (LPRM.NE.2HAL) GOTO 220
+        DO II=1,16
+          ITPIS(II) = 1
+        ENDDO
+        GOTO 290
+C 
+220     IF (LPRM.NE.2HEV) GOTO 230
+        DO II=2,14,2
+          ITPIS(II) = 1
+        ENDDO
+        GOTO 290
+C 
+230     IF (LPRM.NE.2HOD) GOTO 240
+        DO II=1,13,2
+          ITPIS(II) = 1
+        ENDDO
+        GOTO 290
+C 
+240     IF (JCHAR(PARM,1).NE.126B) GOTO 250
+C                              V
+        II=JCHAR(LPRM,2)-60B
+        IF (II.GT.9) II=II-7
+        IF (II.LT.1 .OR. II.GT.14) GOTO 285
+        ITPIS(II) = 1
+        GOTO 290
+C 
+250     IF (JCHAR(LPRM,1).NE.111B)GOTO 285
+        II = IAS2B(LPRM,2,1)
+        IF (II.NE.1.AND.II.NE.2) GOTO 285
+        ITPIS(II+14) = 1
+        GOTO 290
+C 
+280     IERR = -100-I
+        GOTO 990
+285     IERR = -200-I
+        GOTO 990
+C 
+290     CONTINUE
+C 
+C 
+C     3. We are finished with our job.
+C 
+990   IP(3) = IERR
+      IP(4) = 2HQK
+      RETURN
+      END 

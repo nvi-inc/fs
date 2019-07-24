@@ -1,0 +1,31 @@
+FTN77,I,Y  
+$CDS ON
+      SUBROUTINE PV2OB(X,Y,IOX,IOY) 
+C 
+C  convert Virtual 2 OBject 
+C 
+      COMMON/PPLOT/ICHARS,IWIDX,IWIDY,
+     +             IXMIN,IXMAX,IYMIN,IYMAX, 
+     +             XMIN,XMAX,YMIN,YMAX, 
+     +             ROTAT(2,2) 
+C 
+C      WRITE(1,9956) X,Y                                                 DEBUG
+C9956  FORMAT(" PV2OB: X,Y ",2F10.3)                                     DEBUG
+C 
+      XL=AMAX1(XMIN,AMIN1(X,XMAX))
+      YL=AMAX1(YMIN,AMIN1(Y,YMAX))
+C 
+      XRATIO=(XL-XMIN)/(XMAX-XMIN)-0.5
+      YRATIO=(YL-YMIN)/(YMAX-YMIN)-0.5
+C 
+      XROT=ROTAT(1,1)*XRATIO+ROTAT(1,2)*YRATIO+0.5
+      YROT=ROTAT(2,1)*XRATIO+ROTAT(2,2)*YRATIO+0.5
+C 
+      IOX=XROT*FLOAT(IXMAX-IXMIN)+1.5 
+      IOY=YROT*FLOAT(IYMAX-IYMIN)+1.5 
+C      WRITE(1,9957) XL,YL,XRATIO,YRATIO,XROT,YROT,IOX,IOY               DEBUG
+C9957  FORMAT(" PV2OB: XL,YL,XRATIO,YRATIO,XROT,YROT,IOX,IOY "           DEBUG
+C    +          6F10.5,2I7)                                              DEBUG
+C 
+      RETURN
+      END 

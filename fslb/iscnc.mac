@@ -1,0 +1,79 @@
+ASMB,R,B,L
+        HED     CHARACTER STRING COMPARER 
+* 
+*       CALLING SEQUENCE: 
+* 
+*               IAT=ISCNC(IAR,IS,IL,IC) 
+* 
+*               THIS ROUTINE SEARCHES THE STRING IN ARRAY IAR 
+*       FOR THE FIRST OCCURENCE OF THE CHARACTER IN THE LOW ORDER BYTE
+*       OF VARIABLE IC.  THE SCAN IS BEGUN AT CHARACTER IS IN THE ARRAY 
+*       AND CONTINUES THROUGH CHARACTER IL IN THE ARRAY.  IF NOTHING IS 
+*       MATCHING IS FOUND A ZERO IS RETURNED ELSE THE LOCATION OF THE 
+*       CHARACTER IN THE ARRAY IS RETURNED
+* 
+*       IAR     - STRING OF CHARACTERS TO BE SCANNED
+* 
+*       IS      - LOCATION IN IAR AT WHICH SCAN WILL BEGIN
+* 
+*       IL      - THE LENGTH OF THE STRING TO BE SCANNED
+* 
+*       IC      - LOW ORDER BYTE CONTAINS THE CHARACTER SCANNED FOR 
+* 
+* 
+        NAM     ISCNC,7 CHAR SCANNER C#870407:12:49    #
+* 
+*# LAST COMPC'ED  870407:12:49                          # 
+* 
+        ENT     ISCNC           SCAN FOR NULL CHARACTER 
+        EXT     .ENTR 
+* 
+* 
+IAR     BSS     1               ADDRESS OF ARRAY TO BE SCANNED
+IS      BSS     1               CHARACTER TO START SCAN AT
+IL      BSS     1               CHARACTER END SCAN AT IF NOT FOUND
+IC      BSS     1               POINTS TO CHARACTER TO BE SCANNED FOR 
+*                               IN BYTES
+ISCNC   NOP                     MAIN ENTRY POINT
+        JSB     .ENTR 
+        DEF     IAR 
+        LDA     IS,I            GET START ADDRESS 
+        CMA,INA                 MAKE IT NEGATIVE
+        ADA     IL,I            ADD END ADDRESS 
+        SSA                     IF POSITIVE BEGINNING PRECEEDS END
+        JMP     NMTCH           NEG - INVALID CALL NEVER FIND 
+        LDA     IC,I            GET THE SOUGHT CHARACTER
+        CBS     DHBTS 0         CLEAR THE HIGH BITS 
+        STA     SCHAR           SAVE SEARCH CHARACTER 
+        LDB     IAR             GET FIRST WORD OF ARRAY ADDRESS 
+        RBL                     MAKE INTO A BYTE ADDRESS
+        ADB     DMONE           BACK UP 1 FOR FIRST BYTE =1 
+        STB     AIBYT           SAVE INITIAL BYTE ADDRESS 
+        ADB     IL,I            GET FIRST BYTE ADDRESS
+        STB     AREND           SAVE END ADDRESS
+        LBT                     GET LAST BYTE IN ARRAY TO INSURE STOPPING 
+        LDB     AIBYT           GET START ADDRESS OF ARRAY
+        ADB     IS,I            POINT AT CHARACTER TO START SCAN AT 
+        ALF,ALF                 MOVE LAST BYTE TO HIGH OR STOP BYTE POSITION
+        ADA     SCHAR           ADD IN SRCH CHARACTER FOR SCANNING
+SRCH    SFB                   FIND THE FIRST CHARACTER SOUGHT IF PRESENT
+        JMP     MATCH           SKIP IF A MATCH 
+        ADB     DMONE           DECREMENT TO LAST BYTE FOR BLANK TEST 
+        CPB     AREND           TEST FOR EARLY END FIND 
+        JMP     NMTCH           IF AT END RETURN NO FIND
+        INB                     MOVE TO NEXT BYTE AND CONTINUE SEARCH 
+        JMP     SRCH
+MATCH   CMB                     MAKE BYTE ADDRESS NEGATIVE(1'COMP)
+        ADB     AIBYT           FIND OFFSET 
+        CMB                     GET RELATIVE ADDRESS FOR INITIAL =1 
+        LDA     1               MOVE ANSWER INTO A REGISTER 
+END     JMP     ISCNC,I 
+NMTCH   CLA                     GIVE ZERO FOR NO MATCH
+        JMP     END             EXIT FOR NO FIND
+DMONE   DEC     -1
+DHBTS   OCT     177400          HIGH ORDER BITS CLEAR MASK
+SCHAR   DEC     0               SEARCH CHARACTER HIGH BITS FORCED TO ZERO 
+AREND   DEC     0               ARRAY END ADDRESS 
+AIBYT   DEC     0               ARRAY START BYTE ADDRESS
+ABLNK   OCT     40              INTERNAL BLANK REPRESENTATION 
+        END 

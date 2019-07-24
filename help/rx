@@ -1,0 +1,79 @@
+RX - Receiver monitor and control
+
+Syntax:   RX=<channel>,<dcal>,<box>,<S>,<X>,<k>,<cal>
+Response: RX/<channel>,<dcal>,<box>,<S>,<X>,<K>,<cal>,
+            <lostat>,<value>
+
+Settable parameters:
+<channel>: hex value or code word (next page). No default.
+<dcal>: delay cal heaterr, ON or OFF. Default is ON.
+<box>: box heaters. Turn on with A or B (for controller), or OFF.
+       Default is A.
+<S>,<X>,<K>: IF amplifier controls, ON or OFF. Default ON.
+<cal>: noise cal control. May be ON, OFF, OON (Override ON), OOF
+       (Override OFf), or EXTernal modulation. Default OFF.
+
+Monitor-only parameters:
+<lostat>: status of LO, LOCKED or UNLOCKED.
+<value>: reading in A/D channel shown in first parameter. Units are
+         appropriate for channel in use.
+
+      Comments: MAT module functions are available (i.e. ALARM and
+TEST/RESET). Channel assignments for the "standard" receiver are
+on the next page. Your station's channel assignments are in the
+RXDEF.CTL file. Details of the MAT protocol are in the MAT
+Communications manual.
+
+      RX must be specified in MATAD.CTL control file.
+
+              Receiver A/D converter channels
+
+
+ channel   code      Voltage      Description
+ # (hex)   name      Div. Ratio
+
+ 00        FRONT     1            Temperature probe: box front
+ 01        REAR      1            Temperature probe: box rear
+ 02        LO        1            Temperature probe: LO
+ 03        DCAL      1            Temperature probe: delay cal
+ 04        INLET     1            Temperature probe: inlet air
+                                    (after heat)
+ 05        RET       1            Temperature probe: return air
+ 06        SUP       1            Temperature probe: supply air
+                                    (cold)
+ 07        2.73V     2            -2.73 volt reference for
+                                    temperature probes
+ 08        SIF       1            S-band IF power level
+ 09        XIF       1            X-band IF power level
+ 0A        KIF       1            K-band IF power level
+ 0B        SLO       1            S-band LO power level (not
+                                     enabled)
+ 0C        XLO       1            X-band LO power level (not
+                                     enabled)
+ 0D        KLO       1            K-band 2020 MHz LO power level 
+                                     (not enabled)
+ 0E        LO5MHZ    1            5 MHz power level to LO
+ OF                  1            spare
+ 10        28V       101          +28 volt power supply voltage
+ 11        24V       101          +24 volt power supply voltage
+ 12        20V       11           +20 volt power supply voltage
+ 13        15V       11           +15 volt power supply voltage
+ 14        5V        11           + 5 volt power supply voltage
+ 15        -15V      11           -15 volt power supply voltage
+ 16        GROUND    1            ground reference (not at Mojave)
+ 17        PRES      4.9          dewar pressure (not at Mojave)
+ 18        X1BIAS    4.9          1st stage X-band FET bias current
+ 19        X2BIAS    4.9          2nd stage X-band FET bias current
+ 1A        X3BIAS    4.9          3rd stage X-band FET bias current
+ 1B        S1BIAS    4.9          1st stage S-band FET bias current
+ 1C        S2BIAS    4.9          2nd stage S-band FET bias current
+ 1D        S3BIAS    4.9          3rd stage S-band FET bias current
+ 1E        20K       1            temperature diode on 20K station
+                                    in dewar
+ 1F        70K       1            temperature diode on 70K station
+                                    in dewar
+
+
+Note: This table applies only to standard S/X receivers. Channel
+assignments for your station's receiver may be found in control
+file RXDEF.CTL.

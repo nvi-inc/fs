@@ -1,0 +1,34 @@
+FTN77,I,Y
+$CDS ON
+      INTEGER FUNCTION FIND(TDCB,B,LOC,IERR)          !  <901204.1839>
+      INTEGER TDCB(1),B(6),IERR
+      INTEGER C(6)
+      INTEGER*4 IREC,IOFF,IR
+      PARAMETER (LOCLIM=1229)
+C  Hash code.
+      LOC = MOD(IAND(2*(B(1)+B(2)+B(3)+B(4)),77777B),LOCLIM)+2
+      LOCOLD = LOC
+      IREC = LOC
+C
+      CALL FmpSetPosition(TDCB,IERR,IREC,-IREC)
+      DO WHILE (FmpRead(TDCB,IERR,C,12).GE.0)
+        IF (C(1).EQ.0) THEN
+          LOC = -LOC
+          GOTO 9000
+        ENDIF
+C  If found.
+        IF (B(1).EQ.C(1) .AND. B(2).EQ.C(2) .AND. B(3).EQ.C(3) .AND.
+     &      B(4).EQ.C(4)) GOTO 9000
+        LOC = LOC+1
+        IF (LOC.GT.LOCLIM) LOC = 2
+        IF (LOC.EQ.LOCOLD) THEN
+          CALL REIO(2,1,24HIndex table overflow!!!!,-24)
+          CALL EXEC(6)
+        ENDIF
+        IREC = LOC
+        CALL FmpSetPosition(TDCB,IERR,IREC,-IREC)
+      ENDDO
+C
+9000  FIND = IERR
+      RETURN
+      END

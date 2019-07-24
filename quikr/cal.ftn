@@ -1,0 +1,103 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C@CAL 
+      SUBROUTINE CAL(IP),CAL SIGNAL COMMAND C#870115:04:37# 
+C 
+C     This routine handles the CAL command
+C 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 
+C  INPUT: 
+C 
+      DIMENSION IP(5) 
+C     IP(1) - class with command
+C 
+C  OUTPUT:
+C 
+C     IP(1) - class with response 
+C     IP(2) - number of records 
+C     IP(3) - error 
+C     IP(4) - who we are
+C 
+C  LOCAL: 
+C 
+      DIMENSION IBUF(10)
+      DIMENSION IREG(2) 
+      DIMENSION IPARM(2)
+      EQUIVALENCE (IREG(1),REG), (IPARM(1),PARM)
+C 
+C  INITIALIZED: 
+C 
+      DATA ILEN/20/ 
+C      - length of IBUF 
+C 
+C  PROGRAMMER: NRV
+C  LAST MODIFIED: CREATED 800831
+C 
+C 
+C     1. First get the command and see whether we are to
+C     set or report the cal status. 
+C 
+      ICLCM = IP(1) 
+      REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = MIN0(IREG(2),ILEN)
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                               = 
+      IF (IEQ.EQ.0) GOTO 500
+C 
+      IERR = 0
+      ICLASS = 0
+      NREC = 0
+      NCH = IEQ+1 
+      CALL GTPRM(IBUF,NCH,NCHAR,0,PARM) 
+      IF (JCHAR(PARM,1).NE.54B) GOTO 211
+      IERR = -101 
+      GOTO 990
+211   IF (JCHAR(PARM,1).NE.52B) GOTO 212
+      ICAL = LSWCAL 
+      GOTO 300
+212   ICAL = -1 
+      IF (ICHCM(PARM,1,4HON  ,1,4).EQ.0) ICAL = 1 
+      IF (ICHCM(PARM,1,4HOFF ,1,4).EQ.0) ICAL = 0 
+      IF (ICAL.NE.-1) GOTO 300
+      IERR = -201 
+      GOTO 990
+C 
+C 
+C     3. Parameters are OK.  Put into COMMON and set the switch.
+C     We are using the VHF switch protocol, and assuming that 
+C     the "cal on" signal is in position A1 while 
+C     the "cal off" is in position A2.
+C 
+300   LSWCAL = ICAL 
+C 
+      IBUF(1) = 2 
+      IBUF(2) = 2HCL
+      IF (LSWCAL.EQ.0) IBUF(3) = 2HA1 
+      IF (LSWCAL.EQ.1) IBUF(3) = 2HA2 
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-6,2HFS,0,ICLASS) 
+      CALL EXEC(23,6HIBCON ,ICLASS,1) 
+      CALL RMPAR(IP)
+      RETURN
+C 
+C 
+C     5. Here report the cal switch status. 
+C
+500   NCH = ICHMV(IBUF,NCHAR+1,2H/ ,1,1)
+      IF (LSWCAL.EQ.0) NCH=ICHMV(IBUF,NCH,3HOFF,1,3)
+      IF (LSWCAL.EQ.1) NCH=ICHMV(IBUF,NCH,2HON,1,2)
+      NCH = NCH-1
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS)
+      nrec = 1
+C
+C
+990   IP(1) = ICLASS
+      IP(2) = NREC
+      IP(3) = IERR
+      IP(4) = 2HQC
+      IP(5) = 0
+C
+      END

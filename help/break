@@ -1,0 +1,8 @@
+BREAK - Stop the current procedure
+
+Syntax:   BREAK
+Response: none
+
+     Comments: The currently-executing procedure is stopped after
+the current command is finished. The procedure stack is popped to
+the next higher level. This is an immediate execution command.

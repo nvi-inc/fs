@@ -1,0 +1,317 @@
+FTN77,Y,I  
+$CDS ON
+      SUBROUTINE DPPCO(A,N,RCOND,Z,INFO)
+      IMPLICIT NONE
+      INTEGER*2 N,INFO
+      REAL*4 RCOND
+      REAL*8 A(1),Z(1)
+C
+C  LINPACK ROUTINE TO FACTOR AND FIND CONDITON OF MATRIX A
+C  CALLS DPPFA TO GET FACTOR, BLAS CALLS CONVERTED TO HP VIS CALLS
+C
+      INTEGER*2 J,I,K
+      INTEGER*2 J1,IJ,KJ,KK
+      REAL*8 ANORM,LOCAL,EK,WK,WKM,S,SM,T,YNORM
+C
+      J1=1
+      DO J=1,N
+        CALL DVNRM(LOCAL,A,1,J)
+        Z(J)=LOCAL
+        IJ=J1
+        J1=J1+J
+        DO I=1,J-1
+          Z(I)=Z(I)+DABS(A(IJ))
+          IJ=IJ+1
+        ENDDO
+      ENDDO
+      ANORM=0.0D0
+      DO J=1,N
+        ANORM=MAX(ANORM,Z(J))
+      ENDDO
+C
+      CALL DPPFA(A,N,INFO)
+      IF(INFO.NE.0) RETURN
+C
+      EK=1.0D0
+      DO J=1,N
+        Z(J)=0.0D0
+      ENDDO
+      KK=0
+      DO K=1,N
+        KK=KK+K
+        IF(Z(K).NE.0.0D0) EK=DSIGN(EK,-Z(K))
+        IF(DABS(EK-Z(K)).GT.A(KK)) THEN
+          S=A(KK)/DABS(EK-Z(K))
+          CALL DVSMY(S,Z,1,Z,1,N)
+          EK=S*EK
+        ENDIF
+        WK=EK-Z(K)
+        WKM=-EK-Z(K)
+        S=DABS(WK)
+        SM=DABS(WKM)
+        WK=WK/A(KK)
+        WKM=WKM/A(KK)
+        KJ=KK+K
+        IF(K+1.LE.N) THEN
+          DO J=K+1,N
+            SM=SM+DABS(Z(J)+WKM*A(KJ))
+            Z(J)=Z(J)+WK*A(KJ)
+            S=S+DABS(Z(J))
+            KJ=KJ+J
+          ENDDO
+          IF(S.LT.SM) THEN
+            T=WKM-WK
+            WK=WKM
+            KJ=KK+K
+            DO J=K+1,N
+              Z(J)=Z(J)+T*A(KJ)
+              KJ=KJ+J
+            ENDDO
+          ENDIF
+        ENDIF
+        Z(K)=WK
+      ENDDO
+      CALL DVNRM(LOCAL,Z,1,N)
+      S=1.0D0/LOCAL
+      CALL DVSMY(S,Z,1,Z,1,N)
+C
+      DO K=N,1,-1
+        IF(DABS(Z(K)).GT.A(KK)) THEN
+          S=A(KK)/DABS(Z(K))
+          CALL DVSMY(S,Z,1,Z,1,N)
+        ENDIF
+        Z(K)=Z(K)/A(KK)
+        KK=KK-K
+        T=-Z(K)
+        CALL DVPIV(T,A(KK+1),1,Z,1,Z,1,K-1)
+      ENDDO
+      CALL DVNRM(LOCAL,Z,1,N)
+      S=1.0D0/LOCAL
+      CALL DVSMY(S,Z,1,Z,1,N)
+C
+      YNORM=1.0D0
+C
+      DO K=1,N
+        LOCAL=0.0D0
+        CALL DVDOT(LOCAL,A(KK+1),1,Z,1,K-1)
+        Z(K)=Z(K)-LOCAL
+        KK=KK+K
+        IF(DABS(Z(K)).GT.A(KK)) THEN
+          S=A(KK)/DABS(Z(K))
+          CALL DVSMY(S,Z,1,Z,1,N)
+          YNORM=S*YNORM
+        ENDIF
+        Z(K)=Z(K)/A(KK)
+      ENDDO
+      CALL DVNRM(LOCAL,Z,1,N)
+      S=1.0D0/LOCAL
+      CALL DVSMY(S,Z,1,Z,1,N)
+      YNORM=S*YNORM
+C
+      DO K=N,1,-1
+        IF(DABS(Z(K)).GT.A(KK)) THEN
+          S=A(KK)/DABS(Z(K))
+          CALL DVSMY(S,Z,1,Z,1,N)
+          YNORM=S*YNORM
+        ENDIF
+        Z(K)=Z(K)/A(KK)
+        KK=KK-K
+        T=-Z(K)
+        CALL DVPIV(T,A(KK+1),1,Z,1,Z,1,K-1)
+      ENDDO
+      CALL DVNRM(LOCAL,Z,1,N)
+      S=1.0D0/LOCAL
+      CALL DVSMY(S,Z,1,Z,1,N)
+      YNORM=S*YNORM
+C
+      IF(ANORM.NE.0.0D0) THEN
+        RCOND=YNORM/ANORM
+      ELSE
+        RCOND=0.0D0
+      ENDIF
+C
+      RETURN
+      END
+      SUBROUTINE SCALER(MATRIX, VECTOR, SCALE, DIM)
+      IMPLICIT NONE
+      REAL*8 MATRIX(1), VECTOR(DIM), SCALE(DIM)
+      INTEGER*2 DIM
+C
+C  SCALE SOLVE FORMAT MATRIX AND B VECTOR
+C
+      INTEGER*2 I
+      INTEGER*2 II,IJ
+      REAL*8 LOCAL,DIV
+C
+C   scaling
+C
+      II=0
+      DO I = 1 , DIM
+         II = II+I
+         If (MATRIX(II) .lt. 0.D0) then
+             Write (1,'("SCALER STOP ",I5)') I
+             Pause
+         End if
+         DIV=DSQRT(MATRIX(II))
+         IF(DIV.LT.1D-14) THEN
+            SCALE(I)=0.0D0
+         ELSE
+            SCALE(I)=1.0D0/DIV
+         ENDIF
+         MATRIX(II) = 1.0D0
+         LOCAL=SCALE(I)
+         IJ=1+II-I
+         CALL DVSMY(LOCAL,MATRIX(IJ),1,MATRIX(IJ),1,I-1)
+         CALL DVMPY(MATRIX(IJ),1,SCALE,1,MATRIX(IJ),1,I-1)
+      ENDDO
+      CALL DVMPY(VECTOR,1,SCALE,1,VECTOR,1,DIM)
+C
+      RETURN
+      END
+      SUBROUTINE UNSCALER(MATRIX, VECTOR, SCALE, DIM)
+      IMPLICIT NONE
+      REAL*8 MATRIX(1), VECTOR(DIM), SCALE(DIM)
+      INTEGER*2 DIM
+C
+C  UNSCALE SOLVE FORMAT MATRIX AND B VECTOR
+C
+      INTEGER*2 I
+      INTEGER*2 IJ
+      REAL*8 LOCAL
+C
+C   unscaling
+C
+      IJ=1
+      DO I = 1 , DIM
+         LOCAL=SCALE(I)
+         CALL DVSMY(LOCAL,MATRIX(IJ),1,MATRIX(IJ),1,I)
+         CALL DVMPY(MATRIX(IJ),1,SCALE,1,MATRIX(IJ),1,I)
+         IJ = IJ + I
+      ENDDO
+      CALL DVMPY(VECTOR,1,SCALE,1,VECTOR,1,DIM)
+C
+      RETURN
+      END
+      SUBROUTINE DPPFA(A,N,INFO)
+      IMPLICIT NONE
+      INTEGER*2 N,INFO
+      REAL*8 A(1)
+C
+C CHOLESKY FACTORIZATION OF A SOLVE FORMAT MATRIX
+C
+C DOUBLE PRECESION VERSION OF LINPACK SPPFA ROUTINE WITH
+C DIRECT CALLS TO THE HP VECTOR INSTRUCTION SET AND
+C
+      INTEGER*2 J,K
+      INTEGER*2 JJ,KJ,KK
+      REAL*8 S,T
+C
+      JJ=0
+      DO J=1,N
+        S=0.0D0
+        KJ=JJ
+        KK=0
+        DO K=1,J-1
+          KJ=KJ+1
+          T=0.0D0
+          CALL DVDOT(T,A(KK+1),1,A(JJ+1),1,K-1)
+          T=A(KJ)-T
+          KK=KK+K
+          T=T/A(KK)
+          A(KJ)=T
+          S=S+T*T
+        ENDDO
+        JJ=JJ+J
+        S=A(JJ)-S
+        IF(S.LE.0.0) THEN
+          INFO=J
+          RETURN
+        ENDIF
+        A(JJ)=DSQRT(S)
+      ENDDO
+      INFO=0
+C
+      RETURN
+      END
+      SUBROUTINE DPPSL(A,B,N)
+      IMPLICIT NONE
+      INTEGER*2 N
+      REAL*8 A(1),B(1)
+C
+C SOLVE FROM A CHOLESKY FACTORIZATION OF A SOLVE FORMAT MATRIX
+C
+C DOUBLE PRECESION VERSION OF LINPACK SPPSL ROUTINE WITH
+C DIRECT CALLS TO THE HP VECTOR INSTRUCTION SET
+C
+      INTEGER*2 K,KB
+      INTEGER*2 KK
+      REAL*8 T
+C
+      KK=0
+      DO K=1,N
+        T=0.0D0
+        CALL DVDOT(T,A(KK+1),1,B,1,K-1)
+        KK=KK+K
+        B(K)=(B(K)-T)/A(KK)
+      ENDDO
+C
+      DO K=N,1,-1
+        B(K)=B(K)/A(KK)
+        KK=KK-K
+        T=-B(K)
+        CALL DVPIV(T,A(KK+1),1,B,1,B,1,K-1)
+      ENDDO
+C
+      RETURN
+      END
+      SUBROUTINE DPPIN(A,N)
+      IMPLICIT NONE
+      REAL*8 A(1)
+      INTEGER*2 N
+C
+C CALCULATE INVERSE FROM A CHOLESKY FACTORIZATION OF A SOLVE FORMAT MATRIX
+C
+C DOUBLE PRECISION VERSION OF LINPACK SPPDI ROUTINE WITH
+C DIRECT CALLS TO THE HP VECTOR INSTRUCTION SET AND
+C ONLY THE INVERSION PART OF THE ORIGINAL LINPACK IS HERE
+C
+      INTEGER*2 J,K
+      INTEGER*2 K1,KK,J1,KJ,JJ
+      REAL*8 T
+C
+      KK=0
+      DO K=1,N
+        K1=KK+1
+        KK=KK+K
+        A(KK)=1.0D0/A(KK)
+        T=-A(KK)
+        CALL DVSMY(T,A(K1),1,A(K1),1,K-1)
+        J1=KK+1
+        KJ=KK+K
+        DO J=K+1,N
+          T=A(KJ)
+          A(KJ)=0.0D0
+          CALL DVPIV(T,A(K1),1,A(J1),1,A(J1),1,K)
+          J1=J1+J
+          KJ=KJ+J
+        ENDDO
+      ENDDO
+C
+      JJ=0
+      DO J=1,N
+        J1=JJ+1
+        JJ=JJ+J
+        K1=1
+        KJ=J1
+        DO K=1,J-1
+          T=A(KJ)
+          CALL DVPIV(T,A(J1),1,A(K1),1,A(K1),1,K)
+          K1=K1+K
+          KJ=KJ+1
+        ENDDO
+        T=A(JJ)
+        CALL DVSMY(T,A(J1),1,A(J1),1,J) 
+      ENDDO 
+C 
+      RETURN
+      END 

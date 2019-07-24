@@ -1,0 +1,46 @@
+FTN77,I,Y
+$CDS ON
+      SUBROUTINE FRMAUX(IBUF,IPOSN,IPAS)
+      IMPLICIT NONE
+      INTEGER*2 IBUF(1),IPOSN,IPAS
+C
+C FRMAUX: FORMAT AUX DATA INTO BUFFER
+C
+C INPUT:
+C   IPOSN: position of write head in microns
+C   IPAS: pass number of write head
+C         odd, implies forward pass (-1 is odd)
+C         even, implies reverse pass (-2 is even)
+C         0, implies no calibration
+C
+C OUTPUT:
+C   IBUF: output hollerith aux data field, 12 characters
+C         <XXwxwxyzyzFF>
+C         where XX is hex FF for forward calibration
+C                         FE for reverse calibration
+C                         FD for no      calibration
+C         wxyz encodes the micron position
+C           0000-3999 are positive positions
+C           4000-7999 are negative positions as 4000+abs(position)
+C         FF is hex FF
+C
+      INTEGER*2 IOF,IDUMM1,IB2AS,ICHMV,IXX
+C
+      IOF=MIN(ABS(IPOSN),3999)    !limit offset to 3999
+      IF(IPOSN.LT.0) IOF=IOF+4000
+      IDUMM1 = IB2AS(IOF,IBUF,5,40000B+400B*4+4)
+      IF(IPAS.EQ.0) THEN
+        IXX=2HFD
+      ELSE IF(MOD(IPAS,2).EQ.0) THEN
+        IXX=2HFE
+      ELSE
+        IXX=2HFF
+      ENDIF
+C
+      IDUMM1 = ICHMV(IBUF, 1,IXX ,1,2)
+      IDUMM1 = ICHMV(IBUF, 3,IBUF,5,2)
+      IDUMM1 = ICHMV(IBUF, 9,IBUF,7,2)
+      IDUMM1 = ICHMV(IBUF,11,2HFF,1,2)
+C
+      RETURN
+      END

@@ -1,0 +1,32 @@
+WX - Get current weather parameters
+
+Syntax:   WX
+Response: WX/<temp>,<press>,<humid>
+
+Settable parameters: none
+
+Monitor-only parameters:
+<temp>: current temperature, degrees C.
+<press>: current barometric pressure, mbars.
+<humid>: current humidity, %.
+
+     Comments: In the standard version of this command, used when
+the standard met sensor package is available, temperature,
+barometric pressure and relative humidity are automatically read
+from the met sensor, displayed at the operator's terminal and
+written to the Field System log. If a nonstandard met package is
+used, the command works the same way, but special station-specific
+software is required to implement the command. If no electronic met
+sensor is available, there is a manual version of the command which
+prompts for the required information as follows:
+
+     Enter current outdoor temperature (C):
+     Enter current barometric pressure (mbar):
+     Enter current humidity (%):
+
+     When the manual version of the command is used, the value for
+pressure is checked to make sure it's greater than zero, and
+humidity is checked to make sure it is between 0 and 100. A WAKEUP
+command should be issued before manual WX when included in a
+procedure in order to gain the operator's attention.
+

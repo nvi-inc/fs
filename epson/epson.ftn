@@ -1,0 +1,1512 @@
+FTN77,I,Y
+$CDS ON
+      PROGRAM EPSON(3,99) 
+     .,Dump to Epson printer    ARW 830919
+C 
+C     Program to read and dump an ASCII file to an EPSON MX-80 printer. 
+C     Special escape sequences are intercepted and processed to print 
+C     block-character text and bar codes.  The total height of the page 
+C     (i.e. total paper excursion) may be optionally specified. 
+C 
+C     Interactive run sequence: 
+C       :RU,EPSON,<filenamr>,<lu>,[<height>],[<lfeed>]
+C          where
+C             <filenamr>, file which contains text to be printed
+C             <lu>,       lu of Epson printer 
+C             <height>,   (optional) total page height in units of 1/72". 
+C                         Paper will be moved by exactly this value.
+C             <lfeed>,    (optional) linefeed spacing to which printer
+C                         is to be returned on termination (units of 1/72").
+C                         Default is 12 (i.e. 1/6").
+C     Non-interactive run sequence: 
+C         CALL EXEC(23,6HEPSON ,0,<lu>,[<height>],[<lfeed>],0,IBUF,LBUF)
+C            where IBUF contains ASCII <filenamr> of file to be dumped. 
+C      or 
+C         CALL EXEC(23,6HEPSON ,1,<lu>,[<height>],[<lfeed>],0,IBUF,LBUF)
+C            where IBUF contains an ASCII line to be dumped.
+C 
+C     Three special escape sequences are trapped for special processing:
+C       1. '<ESC>*q' prefix causes the escape sequence to be processed
+C                    to print block-character text as explained in
+C                    the notes in subroutine ETEXT. 
+C       2. '<ESC>*z' prefix causes the escape sequence to be processed
+C                    to print bar code as explained in the notes in 
+C                    subroutine BCODE.
+C       3. '<ESC>*h<height> is a special escape sequence to control paper 
+C                    movement within the dump.  The parameter <height> is 
+C                    specified in units of 1/72".  This sequence may be 
+C                    placed at the beginning of a section to specify the
+C                    height of the section.  The section is terminated by 
+C                    another '<ESC>*h<height>' sequence, which specifies
+C                    the height of the next section, etc.  A value of 
+C                    <height>=0 terminates the current section and removes
+C                    any section height specification.  This escape sequence
+C                    must stand alone on a line and needs no terminator 
+C                    character.   If section height is greater than <height>, 
+C                    the section height specification is ignored. 
+C 
+C     Notes:
+C       1. '~' may be substituted for <ESC> in the source file in order to
+C          lessen the difficulty of managing the source file with EDIT. 
+C       2. Lines in the source file terminating in an '^' (up-arrow)
+C          are assumed to be continued at column 1 of the next line.
+C       3. The character "\" may be used to force the 
+C          following character to itself (i.e. "\~"="~", "\|"="|",
+C          "\\"="\") in a manner similar to EDIT. 
+C       4. The three special escape sequences (prefixes <ESC>*q,<ESC>*z,
+C          <ESC>*h) must stand on lines separate from lines to be directly
+C          dumped to the Epson.  Continuation lines within these special
+C          escape sequences are allowed.
+C       5. A <CR>,<LF> is normally issued at the end of a text line.
+C          The linefeed (but not carriage return) may be suppressed by
+C          by terminating the line with "\" or "_".  No linefeed is normally
+C          issued following bar-code or block character printing. 
+C       6. On entry, EPSON sets line spacing to 1/6" so that EPSON
+C          can keep track of paper usage.  Note that EPSON has no way 
+C          of determining the current setting of form length so that
+C          form feeds will likely screw up EPSON's paper-use bookkeeping. 
+C          It is permissible to use form feeds so long as they follow 
+C          a form length setting command (must be specified in inches,
+C          not in number of lines).  On termination, linefeed spacing is set
+C          to (optionally) specified value. 
+C       7. If the total page height specified is less than the height of
+C          the printed text, the height specification is ignored. 
+C       8. When scheduling EPSON non-interactively, the calling program may 
+C          have <lu> locked.  EPSON will write through the lock.
+C       9. On return from non-interactive scheduling, CALL RMPAR(IPAR) may be 
+C          used. IPAR(2) indicates total paper excursion in units of 1/216".
+C 
+C     ARW 830915
+C 
+      INTEGER JBUF(201),IPBUF(10),IBUF(483),IDCB(144),
+     .        IQ(3,11),BTEXTQ(3),BCODEQ(3),IFL(3),LFA(2), 
+     .        ICQ(2),ECODEQ(3),IPAR(5),IREG(2),ICRLFQ(3), 
+     .        UPAROW,BSLASH,ESCAPE,ICRQ(2)
+      EQUIVALENCE (REG,IREG)
+      LOGICAL KEY,LINE
+      DIMENSION ITQ(2)
+      DIMENSION IEQ(17)
+      DATA IEQ/32,'#-01234589<=>@ACDEFGHJKLNOQSTUW*'/
+      DATA ITQ/1,'~'/
+      DATA ICQ/1,0/ 
+      DATA IQ/1,005000B,0,                    !<LF> 
+     .        1,005400B,0,                    !<VT> 
+     .        1,006000B,0,                    !<FF> 
+     .        2,015460B,0,                    !<ESC>0  ~0 
+     .        2,015461B,0,                    !<ESC>1  ~1 
+     .        2,015462B,0,                    !<ESC>2  ~2 
+     .        2,015463B,0,                    !<ESC>3  ~3 
+     .        2,015500B,0,                    !<ESC>@  ~@ 
+     .        2,015501B,0,                    !<ESC>A  ~A 
+     .        3,015503B,0,                    !<ESC>C  ~C 
+     .        2,015512B,0/                    !<ESC>J  ~J 
+      DATA BTEXTQ/3,015452B,070400B/          !<ESC>*q - block char text
+      DATA BCODEQ/3,015452B,075000B/          !<ESC>*z - bar code 
+      DATA ECODEQ/3,015452B,064000B/          !<ESC>*h - section height 
+      DATA LFA   /015501B,000137B/            !<ESC>A  - set line spacing 
+      DATA IFL   /015503B,000000B,006137B/    !<ESC>C0 - set form length
+      DATA ICRLFQ/3,006412B,057400B/          !<CR><LF><_>
+      DATA ICRQ  /2,006537B/                  !<CR><_>
+      DATA UPAROW/136B/                       !"^"
+      DATA BSLASH/134B/                       !"\"
+      DATA ESCAPE/33B/                        !<ESC>
+      DATA ITHITE/0/,ISHITE/0/,KWTL/0/,KFEED/0/ 
+      DATA KEY/.FALSE./,LINE/.FALSE./ 
+C 
+      CALL RMPAR(IPAR)
+      LUOP=LOGLU(IDUM)
+      IF (IPAR(1) .EQ. 0) THEN  !Non-interactive, file namr specified
+          LU=IPAR(2)
+          ITHITE=IPAR(3)*3
+          KFEED=IPAR(4)
+          KEY=.TRUE.
+          REG=EXEC(14,1,JBUF,-400)
+          LOG=IREG(2)
+          ISTRC=1
+          IDUM=NAMR(IPBUF,JBUF,LOG,ISTRC)
+          CALL FmpOpen(IDCB,IERR,IPBUF,'rwo',1)
+          IF (IFERR(LUOP,IERR,IPBUF,6HOPEN  ) .LT. 0) GO TO 200
+      ELSE IF (IPAR(1) .EQ. 1) THEN  !Non-interactive, line specified
+          LU=IPAR(2)
+          ITHITE=IPAR(3)*3
+          KFEED=IPAR(4)
+          KEY=.TRUE.
+          REG=EXEC(14,1,JBUF(2),-400)
+          JBUF=IREG(2)
+          LINE=.TRUE.
+      ELSE                           !Interactive
+          CALL GETST(IBUF,-150,LOG)
+          IF (LOG .NE. 0) GOTO 101
+100           WRITE(LUOP,110)
+110           FORMAT(" Proper run sequence is:",/,
+     .               "   :RU,EPSON,<filenamr>,<lu>,[<height>]",/,
+     .               "       where <height> is in units of 1/4 inch")
+              STOP
+101       CONTINUE
+          ISTRC=1
+          IF (NAMR(IPBUF,IBUF,LOG,ISTRC) .LT. 0 .OR.
+     .        IAND(IPBUF(4),3) .NE. 3) GO TO 100
+          IF (NAMR(JBUF,IBUF,LOG,ISTRC) .LT. 0 .OR.
+     .        IAND(JBUF(4),3) .NE. 1) GO TO 100
+          LU=JBUF(1)
+          IF (NAMR(JBUF,IBUF,LOG,ISTRC) .EQ. 0 .AND.
+     .        IAND(JBUF(4),3) .EQ. 1) ITHITE=JBUF(1)*3  !Units of 1/216"
+          IF (NAMR(JBUF,IBUF,LOG,ISTRC) .EQ. 0 .AND.
+     .        IAND(JBUF(4),3) .EQ. 1) KFEED=JBUF(1)     !Units of 1/72"
+          CALL FmpOpen(IDCB,IERR,IPBUF,'rwo',1)
+          IF (IFERR(LUOP,IERR,IPBUF,6HOPEN  ) .LT. 0) GO TO 200
+      ENDIF
+C
+C     Initialize the Epson
+      IF (KEY) THEN
+C         KWTL=IWTL(LU)                    !Key to write through lu lock
+      ELSE
+C         CALL LURQ(1,LU,1)                !Lock lu
+      ENDIF
+      CALL PUTC(LFA,3,12)
+      CALL EXEC(2,LU,LFA,-4,0,0,0,0,KWTL)  !Set line spacing to 1/6"
+      LFEED=36                             !1/6" line feed
+      IFLEN=11*216                         !Assume 11" form length
+      JHITE=0                              !Running total height counter 1/2
+      JHITE1=0                             !Running total height counter 2/2
+      JSHITE=0                             !Running section height counter
+C 
+C     Read the file 
+      DO 150 K=1,32767
+      IF (.NOT.LINE) THEN 
+          JBUF=0
+120       CALL READF(IDCB,IERR,IBUF(2),100,LEN) 
+          IF (IFERR(LUOP,IERR,IPBUF,6HREADF ) .LT. 0) GO TO 200 
+          IF (LEN .LT. 0) GO TO 155                   !EOF
+          IBUF=LEN*2
+          CALL TRIMQ(IBUF)                            !Trim trailing spaces 
+          CALL MERGQ(JBUF,JBUF,IBUF)                  !Merge into JBUF
+          IF (IGETQ(JBUF,JBUF) .EQ. UPAROW .AND. JBUF .GT. 1 .AND.
+     .        IGETQ(JBUF,JBUF-1) .NE. BSLASH) THEN      
+              JBUF=JBUF-1 
+              GO TO 120                               !Go get continuation line 
+          ENDIF 
+      ENDIF 
+C     Check for '~' that should be changed to <ESC>.  
+      DO 122 I=1,JBUF 
+      IP=IXQ(JBUF,ITQ(1),ITQ(1),1)   !Find position of first occurrence of '~'
+      IF (IP .EQ. 0) THEN 
+          GO TO 124 
+      ELSE
+          IF (IP .LT. JBUF) THEN
+              CALL PUTQ(ICQ,1,IGETQ(JBUF,IP+1)) 
+              IF (IPOSQ(IEQ,ICQ,1) .GT. 0 .AND. 
+     .           (IP .EQ. 1 .OR. IGETQ(JBUF,IP-1) .NE. BSLASH)) 
+     .                                       CALL PUTQ(JBUF,IP,ESCAPE)
+          ENDIF 
+      ENDIF 
+122   CONTINUE
+C     Find all characters prefaced by "\" and revert them to themselves.
+124   J=0 
+      JBUFN=JBUF     !Value of JBUF may change during following DO LOOP 
+      DO 125 I=1,JBUFN
+      J=J+1 
+      IF (J .EQ. JBUF) THEN 
+          IF (IGETQ(JBUF,J) .EQ. BSLASH) CALL PUTQ(JBUF,J,137B) !Trailing "\" to "_"
+          GO TO 126 
+      ELSE IF (IGETQ(JBUF,J) .EQ. BSLASH) THEN
+          CALL DLETQ(JBUF,J,1)           !Delete the leading "\"
+      ENDIF 
+125   CONTINUE
+126   IF (IPOSQ(JBUF,BTEXTQ,1) .GT. 0) THEN 
+          CALL ETEXT(JBUF(2),-JBUF,IBUF,483,LU,KEY,LFEED,KHITE,IERR,127)  
+127       IF (IFERR(LUOP,IERR,IPBUF,6HETEXT ) .LT. 0) GO TO 200 
+          JHITE=JHITE+KHITE 
+          JSHITE=JSHITE+KHITE 
+      ELSE IF (IPOSQ(JBUF,BCODEQ,1) .GT. 0) THEN  
+          CALL BCODE(JBUF(2),-JBUF,IBUF,483,LU,KEY,LFEED,KHITE,IERR,128)  
+128       IF (IFERR(LUOP,IERR,IPBUF,6HBCODE ) .LT. 0) GO TO 200 
+          JHITE=JHITE+KHITE 
+          JSHITE=JSHITE+KHITE 
+      ELSE IF (IPOSQ(JBUF,ECODEQ,1) .GT. 0) THEN
+          IP=IPOSQ(JBUF,ECODEQ,1) 
+          IF (ISHITE .GT. 0) THEN 
+C             Move paper to acheive specified section height
+              KMOVE=ISHITE-JSHITE 
+              IF (KMOVE .GT. 0) THEN
+                  CALL PMOVE(LU,KMOVE,KWTL) 
+                  JHITE=JHITE+KMOVE 
+              ENDIF 
+          ENDIF 
+          JSHITE=0
+          NC=JBUF-IP-2
+          CALL CMOVE(JBUF(2),IP+3,IBUF,1,NC)
+          DECODE(NC,*,IBUF,IOSTAT=IERR,ERR=129) ISHITE  !New section height 
+129       IF (IFERR(LUOP,IERR,IPBUF,6HDECODE) .NE. 0) GO TO 200 
+          ISHITE=ISHITE*3 
+      ELSE
+C         Check for control chars and escape sequences that may have
+C         influence on paper movement.
+          IC=1
+130       IP=32767
+          DO 140 I=1,11 
+          JP=IPOSQ(JBUF,IQ(1,I),IC)   
+          IF (JP .GT. 0 .AND. JP .LT. IP) THEN
+              IP=JP 
+              IX=I
+          ENDIF 
+140       CONTINUE
+          IF (IP .LT. 32767) THEN 
+              IF (IX .EQ. 1) THEN               !Line feed
+                  JHITE=JHITE+LFEED 
+                  JSHITE=JSHITE+LFEED 
+                  IC=IP+1 
+              ELSE IF (IX .EQ. 2) THEN          !Vertical tab 
+                  JHITE=JHITE+LFEED 
+                  JSHITE=JSHITE+LFEED 
+                  IC=IP+1 
+              ELSE IF (IX .EQ. 3) THEN          !Form feed
+                  KMOVE=IFLEN-MOD(JHITE,IFLEN)
+                  JHITE=JHITE+KMOVE 
+                  JHITE=JHITE1+JHITE
+                  JHITE=0                       !Reset TOF
+                  JSHITE=JSHITE+KMOVE 
+                  IC=IP+1 
+              ELSE IF (IX .EQ. 4) THEN          !Line spacing to 1/8" 
+                  LFEED=27
+                  IC=IP+2 
+              ELSE IF (IX .EQ. 5) THEN          !Line spacing to 7/72"
+                  LFEED=21
+                  IC=IP+2 
+              ELSE IF (IX .EQ. 6) THEN          !Line spacing to 1/6" 
+                  LFEED=36
+                  IC=IP+2 
+              ELSE IF (IX .EQ. 7) THEN          !Line spacing to N/216" 
+                  LFEED=IGETQ(JBUF,IP+2)  
+                  IC=IP+3 
+              ELSE IF (IX .EQ. 8) THEN          !Power-up reset 
+                  LFEED=36
+                  IFLEN=11*216
+                  IC=IP+2 
+              ELSE IF (IX .EQ. 9) THEN          !Line spacing to N/72"
+                  LFEED=IGETQ(JBUF,IP+2)*3  
+                  IC=IP+3 
+              ELSE IF (IX .EQ. 10) THEN         !Form length to N"
+                  IFLEN=IGETQ(JBUF,IP+3)*216  
+                  JHITE1=JHITE1+JHITE 
+                  JHITE=0                       !Resets TOF 
+                  IC=IP+4 
+              ELSE IF (IX .EQ. 11) THEN         !Line spacing to N/216" for 1 line
+                  JHITE=JHITE-LFEED+IGETQ(JBUF,IP+2)  
+                  JSHITE=JSHITE-LFEED+IGETQ(JBUF,IP+2)  
+                  IC=IP+3 
+              ENDIF 
+              GO TO 130                         !Go continue search 
+          ENDIF 
+C 
+C         Send this line
+          ICL=IGETQ(JBUF,JBUF)
+          IF (ICL .NE. 137B) THEN 
+C             Append <CR><LF><_> and print
+              CALL MERGQ(JBUF,JBUF,ICRLFQ)
+              CALL EXEC(2,LU,JBUF(2),-JBUF,0,0,0,0,KWTL)
+              JHITE=JHITE+LFEED 
+              JSHITE=JSHITE+LFEED 
+          ELSE
+C             <LF> suppressed. Delete trailing <_>. Append <CR><_> and print. 
+              JBUF=JBUF-1 
+              CALL MERGQ(JBUF,JBUF,ICRQ)
+              CALL EXEC(2,LU,JBUF(2),-JBUF,0,0,0,0,KWTL)
+          ENDIF 
+      ENDIF 
+      IF (LINE) GO TO 155 
+150   CONTINUE
+C 
+C     Adjust section height, if necessary 
+155   IF (ISHITE .GT. 0) THEN 
+C         Move papar to achieve specified section height. 
+          KMOVE=ISHITE-JSHITE 
+          IF (KMOVE .GT. 0) THEN
+              CALL PMOVE(LU,KMOVE,KWTL) 
+              JHITE=JHITE+KMOVE 
+          ENDIF 
+      ENDIF 
+      JSHITE=0
+C 
+C     Compute total height used and adjust as necessary 
+      JHITE=JHITE+JHITE1            !Total height actually used 
+      IF (ITHITE .GT. 0) THEN 
+          IF (JHITE .GT. ITHITE) THEN 
+              WRITE(LUOP,160) JHITE 
+160           FORMAT("/EPSON:Specified height exceeded. ",
+     .               "Actual height is",I6," (units of 1/216 inch)")
+          ELSE
+              KMOVE=ITHITE-JHITE     !Amount paper must be moved  
+              IF (KMOVE .GT. 0) THEN
+                  CALL PMOVE(LU,KMOVE,KWTL)!Move paper KMOVE/216 inches
+                  JHITE=JHITE+KMOVE
+              ENDIF
+          ENDIF
+      ENDIF
+      IF (KFEED .GT. 0) THEN                  !Set linefeed spacing
+          CALL PUTC(LFA,3,KFEED)
+          CALL EXEC(2,LU,LFA,-4,0,0,0,0,KWTL)
+      ENDIF
+C     IF (.NOT.KEY) CALL LURQ(0,LU,1) !Unlock the printer lu
+200   CALL FmpClose(IDCB)
+      IPAR(1)=0
+      IPAR(2)=JHITE        !Total paper excursion in units of 1/216"
+      CALL PRTN(IPAR)
+      END
+      SUBROUTINE PMOVE(LU,KMOVE,KWTL)
+     .,Move paper               ARW 830919
+C
+C     Move paper by KMOVE units of 1/216".
+C     KWTL is key to write through lock, if desired; otherwise set KWTL=0.
+C
+      INTEGER LFA(3),LF3(3) 
+      DATA LFA/015501B,000015B,005137B/ 
+      DATA LF3/015463B,000015B,005137B/ 
+C 
+      IF (KMOVE .LE. 0) RETURN
+      KM=MOD(KMOVE,216) 
+      IF (KM .NE. 0) THEN 
+          CALL PUTC(LF3,3,KM) 
+          CALL EXEC(2,LU,LF3,-6,0,0,0,0,KWTL) 
+      ENDIF 
+C     Remaining move must be integral inches
+      INCHES=(KMOVE-KM)/216 
+      IF (INCHES .GT. 0) THEN 
+          CALL PUTC(LFA,3,72) 
+          DO 100 I=1,INCHES 
+          CALL EXEC(2,LU,LFA,-6,0,0,0,0,KWTL) 
+100       CONTINUE
+      ENDIF 
+      RETURN
+      END 
+      SUBROUTINE ETEXT(JBUF,LJBUF,IBUF,LBUF,LU,KEY,LFEED,IHITE,IERR,*)
+     .,Block-letter text on Epson MX-80/100/HP82905B   ARW 830913   
+C 
+C     Print block characters on Epson MX-80 or MX-100 printer.
+C 
+C     Instructions to subroutine ETEXT are in the form of an ASCII  
+C     escape sequence in much the same way that HP uses to control many 
+C     of the features of its equipment. 
+C 
+C     Each character is formed by a 12x12 matrix of "cells".
+C     The horizontal and vertical size of the cells is under software 
+C     control so that characters may be made as large or small as desired.
+C     Minimum cell size is 1/72" vertical by 1/120" horizontal so that the  
+C     minimum character size is 12/72" high by 12/120" wide (1/6" by 1/10").
+C 
+C     The escape sequence prefix is always '<ESC>*q'. 
+C 
+C     The following parameters are under control of the user: 
+C       Code    Default   Unit          Parameter 
+C        u         2      1/120"      Horizontal cell size
+C        v         2      1/72"       Vertical cell size
+C        s        14    horiz cells   Horizontal character spacing  
+C        t         0     vert cells   Vertical character spacing
+C        x         0      1/120"      X-position of upper-left of first char
+C                                     (x=0 is at left margin; MX-80 is 480
+C                                      units wide; MX-100 is 816 units wide)
+C        y         0      1/72"       Y-position of upper-left of first char
+C                                     (y=0 is current position and increases
+C                                      downward on the paper) 
+C        r         0       -          Character rotation
+C                                        0 - normal 
+C                                        1 - rotated 90 deg CCW (read up) 
+C                                        2 - rotated 180 deg
+C                                        3 - rotated 270 deg CCW (read down)
+C        m         0       -          Mirror
+C                                        0 - normal character presentation
+C                                        1 - mirrored 
+C        p         0       -          Print density 
+C                                        0 - normal print density 
+C                                        1-  high print density (half as fast)
+C        g         0      1/72"       Total paper height to be used.
+C                                     If formatted text does not exceed this
+C                                     value, paper will be moved on termination 
+C                                     so that total paper excursion is exactly
+C                                     the specified value.
+C        a         0      1/120"      X-position of upper-left of outline/filled-area 
+C        b         0      1/72"       Y-position of upper-left of outline/filled-area 
+C        c         0      1/120"      Width of outline/filled-area
+C        d         0      1/72"       Height of outline/filled-area.  Also
+C                                     serves as terminator character for
+C                                     outline/filled-area specification 
+C                                     (see Notes below).
+C        f         0       -          Outline/area-fill control 
+C                                        0 - outline
+C                                        1 - filled area
+C 
+C  Notes: 
+C     1. The character strings to be printed are enclosed within '<' and '>'
+C        characters (i.e. <this is a string>).  All lower-case characters 
+C        in a string are converted to upper-case. 
+C     2. Multiple strings may be specified within the same escape 
+C        sequence.  Only those parameters which are explicitly changed
+C        from one string to the next will be changed. 
+C     3. The escape sequence will terminate on the occurrence of a capital
+C        letter which is not within a string. 'Z' is often convenient for 
+C        this purpose.
+C     4. An outline/filled-area is processed upon the occurrence of a 'd' 
+C        parameter.  The values of parameters a,b,c,f,h in effect at that 
+C        time will be used.  An unlimited number of outline/filled-areas
+C        may be processed.
+C     5. The escape sequence is processed strictly in order.  Each successive 
+C        outline/filled-area or character string COMPLEMENTS existing points. 
+C        This allows, for example, the creation of windows within filled-areas. 
+C     6. Only one total height parameter (g) may be specified.
+C     7. The entire escape sequence may be executed at only one print 
+C        density, which must be specified preceding the first string and
+C        outline/filled-area. 
+C     8. The lowest row of dots of the lowest character will always be
+C        printed with the lowest (graphics) pin in the printhead. 
+C        This means that, if there is no trailing vertical space, 
+C        the lower edge of a normal print line printed
+C        immediately following return from ETEXT will line up with the
+C        lower edge of the lower-most block character or outline/filled-area. 
+C     9. Any illegal text characters will be printed as '?'.
+C    10. Any strings violating the left or right margins will be truncated. 
+C    11. Any lower-case characters within strings will be interpreted 
+C        as upper-case. 
+C    12. Negative character spacings are allowed so long as margins are 
+C        not violated.
+C    13. There is no limit to the length of the escape sequence.
+C    14. Errors will be returned on the following conditions: 
+C            - negative horizontal or vertical cell size
+C            - negative starting coordinates for any string or outline/filled-area
+C            - negative width or height specified for outline/filled-area 
+C        Other illegal parameters will simply cause the default to be used. 
+C        Unrecognized control codes are ignored.
+C 
+C  Example: 
+C       <ESC>*q2r1f10a20b100c50d15x25y<ABC>1u1v<EFG>Z 
+C   specifies-- 
+C    <ESC>*q -  escape sequence prefix
+C       2r   -  print with rotation parameter 2 (upside down) 
+C       1f   -  filled area 
+C      10a   -  left edge of outline/filled-area to be at x=10
+C      20b   -  top edge of outline/filled-area to be at y=10 
+C     100c   -  outline/filled-area to be 100 units wide
+C      50d   -  outline/filled-area to be 50 units high 
+C               (terminates outline/filled area specification)
+C      15x   -  left edge of first character to be at x=15
+C      25y   -  upper edge of first character to be at y=25 
+C     <ABC>  -  print string 'ABC' (upside down). Cell sizes will be default. 
+C       1u   -  change horizontal cell size to 1 unit 
+C       1v   -  change vertical cell size to 1 unit 
+C     <DEF>  -  print string 'DEF'.  Will be printed immediately following
+C               'ABC' with default character spacing. Printing will still 
+C               be upside down because rotation has not been modified.
+C        Z   -  capital letter to terminate sequence. 
+C 
+C     Note that very complicated block character patterns can very easily 
+C     be created.  There is no limit to the length of the escape sequence.
+C 
+C     On entry: 
+C         JBUF,   escape sequence for block character printing. 
+C                 Terminated by upper-case character in standard way. 
+C         LJBUF,  length of JBUF (+words/-chars)
+C         IBUF,   scratch buffer for block character generation 
+C         LBUF,   length of IBUF (words).  Should be 483 for MX-80, 
+C                 819 for MX-100; shorter buffer may truncate printing. 
+C         LU,     lu of printer 
+C         KEY,    if .TRUE., allows writing through LU lock 
+C         LFEED,  linefeed spacing to which printer is to be returned 
+C                 after printing barcode (in units of 1/216") 
+C 
+C     On return:
+C         IHITE,  total vertical paper excursion (units of 1/216")  
+C         IERR,   0 - OK
+C                -1 - Illegal parameter  (see Notes)
+C                All non-zero error codes return through RETURN 1.
+C 
+C     ARW 830913
+C 
+      IMPLICIT INTEGER (A-Z)
+      INTEGER JBUF(1),IBUF(1),ICQ(2),KBUF(10),LF3(2)
+      REAL VAL
+      LOGICAL END,OPEN,LCASE,UCASX,LHSPAC,LXPOS,LYPOS,MIRROR,HIRES, 
+     .        FILL,KEY
+      DIMENSION NUMQ(7)
+      INTEGER SELECT(10)
+      DATA NUMQ/12,'0123456789+-'/
+      DATA SELECT/17,'RSTUVGXYMABCDFP<>'/
+      DATA ICQ  /1,0/ 
+C 
+C              <ESC>3 
+      DATA LF3/015463B,000137B/            !Hi-resolution line feed control 
+C 
+C     Local function
+      LCASE(I)=I .GE. 141B .AND. I .LE. 172B    !Lower case 
+      UCASX(I)=I .GE. 101B .AND. I .LE. 132B    !Upper case 
+C 
+C     Parse run string and set up graphics buffer for every 8-pin 
+C     raster across page. 
+      IF (KEY) THEN 
+C         KWTL=IWTL(LU)          !Get key to write through lu lock
+      ELSE
+          KWTL=0
+      ENDIF 
+      NCBUF=2*LJBUF 
+      IF (LJBUF .LT. 0) NCBUF=-LJBUF
+      LLBUF=2*LBUF-6
+      IHITE=0 
+      JHITE=0 
+      DO 280 IRAST=1,32767
+      IY=(IRAST-1)*8         !y-position of current raster
+      OPEN=.FALSE.
+      KC=0
+      NB=0
+      IYMAX=6 
+      END=.FALSE. 
+      CALL AFILL(KBUF,1,2H  ,0,10)
+      CALL AFILL(IBUF,1,0,0,LBUF) 
+C 
+C     Set back to default parameters
+      IROT=0
+      IHSPAC=14 
+      IVSPAC=0
+      IHCELL=2
+      IVCELL=2
+      ITHITE=0
+      IXPOS=0 
+      IYPOS=0 
+      JXPOS=0 
+      MIRROR=.FALSE.
+      LHSPAC=.FALSE.
+      LXPOS=.FALSE. 
+      LYPOS=.FALSE. 
+      HIRES=.FALSE. 
+      FILL=.FALSE.
+      IXFILL=0
+      IYFILL=0
+      IHFILL=0
+      IVFILL=0
+C 
+C     Parse the input string
+      DO 250 L=1,NCBUF
+      IC=IGETC(JBUF,L)
+      IF (.NOT.OPEN .AND. UCASX(IC)) END=.TRUE. !Upper case terminates    
+      IF (LCASE(IC)) IC=IAND(IC,137B) !To upper case
+      CALL PUTQ(ICQ,1,IC) 
+      IP=IPOSQ(SELECT,ICQ,1)
+      IF (.NOT.OPEN) THEN 
+          IF (IP .EQ. 0 .OR. IP .EQ. SELECT) THEN   
+C             If numeric or +/-, add to KBUF. If non-numeric, flush KBUF. 
+              IF (IPOSQ(NUMQ,ICQ,1) .GT. 0) THEN
+                  KC=KC+1 
+                  CALL PUTC(KBUF,KC,IC) 
+              ELSE
+                  CALL AFILL(KBUF,1,2H  ,0,10)
+                  KC=0
+              ENDIF 
+          ELSE
+              DECODE(20,*,KBUF,ERR=300) VAL   
+              CALL AFILL(KBUF,1,2H  ,0,10)
+              KC=0
+C                     R   S   T   U   V   G   X   Y   M   A   B   C 
+              GO TO (110,120,130,140,150,160,170,180,190,200,210,220, 
+C                     D   F   P   < 
+     .               230,231,232,235) IP
+C             Rotation
+110           IROT=VAL
+              GO TO 240 
+C             Horizontal character spacing
+120           IHSPAC=VAL
+              LHSPAC=.TRUE. 
+              GO TO 240 
+C             Vertical character spacing
+130           IVSPAC=VAL
+              GO TO 240 
+C             Horizontal cell size
+140           IHCELL=VAL
+              IF (IHCELL .LT. 0) GO TO 300
+              GO TO 240 
+C             Vertical cell size
+150           IVCELL=VAL
+              IF (IVCELL .LT. 0) GO TO 300
+              GO TO 240 
+C             Total page height 
+160           ITHITE=3*VAL
+              GO TO 240 
+C             X-position
+170           IXPOS=VAL 
+              IF (IXPOS .LT. 0) GO TO 300 
+              LXPOS=.TRUE.
+              GO TO 240 
+C             Y-position
+180           IYPOS=VAL 
+              IF (IYPOS .LT. 0) GO TO 300 
+              LYPOS=.TRUE.
+              GO TO 240 
+C             Mirror
+190           MIRROR=VAL .NE. 0 
+              GO TO 240 
+C             Outline/area-fill x-position
+200           IXFILL=VAL
+              IF (IXFILL .LT. 0) GO TO 300
+              GO TO 240 
+C             Outline/area-fill y-position
+210           IYFILL=VAL
+              IF (IYFILL .LT. 0) GO TO 300
+              GO TO 240 
+C             Outline/area-fill horizontal extent (units of 1/120") 
+220           IHFILL=VAL
+              IF (IHFILL .LT. 0) GO TO 300
+              GO TO 240 
+C             Outline/area-fill vertical extent (units of 1/72")
+230           IVFILL=VAL
+              IF (IVFILL .LT. 0) GO TO 300
+C             Process outline/area-fill; preset specified part of IBUF. 
+              JYFILL=IYFILL+IVFILL-1
+              IF (IHFILL .GT. 0 .AND. IY+7 .GE. IYFILL .AND.
+     .            IY .LE. JYFILL) THEN  
+                  IF (IY+7-IYFILL .LE. 7) THEN
+                      MASKA=ISHFT(377B,IY-IYFILL)     !Area-fill mask 
+                      MASKB=ISHFT(200B,IY-IYFILL)     !Outline mask 
+                      IF (JYFILL-IY .LE. 7) THEN
+C                         Top and bottom of area are within this raster 
+                          MASKA=IAND(MASKA,ISHFT(377B,(IY+7)-JYFILL)) 
+                          MASKB=IOR(MASKB,ISHFT(1,(IY+7)-JYFILL)) 
+                      ENDIF 
+                  ELSE IF (JYFILL-IY .LE. 7) THEN 
+                      MASKA=IAND(ISHFT(377B,(IY+7)-JYFILL),377B)  
+                      MASKB=ISHFT(1,(IY+7)-JYFILL)
+                  ELSE
+                      MASKA=377B  
+                      MASKB=0 
+                  ENDIF 
+                  L1=MAX0(IXFILL+1,1) 
+                  L2=MIN0(IXFILL+IHFILL,LLBUF)
+                  IF (L1 .LE. L2) THEN
+                      DO 245 I=L1,L2
+                      IF (FILL) THEN
+                          IQ=IXOR(IGETC(IBUF(3),I),MASKA) 
+                          CALL PUTC(IBUF(3),I,IQ) 
+                      ELSE
+                          IF (I .EQ. L1 .OR. I .EQ. L2) THEN
+                              IQ=IXOR(IGETC(IBUF(3),I),MASKA) 
+                              CALL PUTC(IBUF(3),I,IQ) 
+                          ELSE
+                              IF (MASKB .NE. 0) THEN
+                                  IQ=IXOR(IGETC(IBUF(3),I),MASKB) 
+                                  CALL PUTC(IBUF(3),I,IQ) 
+                              ENDIF 
+                          ENDIF 
+                      ENDIF 
+245                   CONTINUE
+                      NB=MAX0(NB,L2)
+                  ENDIF 
+              ENDIF 
+              IYMAX=MAX0(IYMAX,JYFILL)
+              GO TO 240 
+C             Outline/area-fill control 
+231           FILL=VAL .NE. 0 
+              GO TO 240 
+C             Hi-resolution 
+232           HIRES=VAL .NE. 0
+              GO TO 240 
+C             Open character string 
+235           LC1=L+1 
+              OPEN=.TRUE.                     !Beginning of text string 
+240           CONTINUE
+          ENDIF 
+      ELSE
+          IF (IP .EQ. SELECT) THEN  
+C             Close character string
+              LC2=L-1 
+              OPEN=.FALSE.                    !End of text
+C             If neither x or y position has been specified and a string has
+C             already been processed in this raster, choose IXPOS to be 
+C             adjacent to previous string.
+              IF (.NOT.LXPOS .AND. .NOT.LYPOS .AND. JXPOS .GT. 0) 
+     .            IXPOS=JXPOS+2*IHCELL
+C             Add data to graphics buffer for this text string
+              CALL ERAST(JBUF,LC1,LC2,IY,IBUF(3),LLBUF,IROT,IHSPAC, 
+     .                   IVSPAC,IHCELL,IVCELL,IXPOS,IYPOS,MIRROR, 
+     .                   HIRES,NB,IYMAX)
+              JXPOS=IXPOS+(MAX0(LC2-LC1,0)*IHSPAC+12)*IHCELL
+              LHSPAC=.FALSE.
+              LXPOS=.FALSE. 
+              LYPOS=.FALSE. 
+              IHFILL=0
+              KC=0
+          ENDIF 
+      ENDIF 
+      IF (END) GO TO 260
+250   CONTINUE
+260   IF (IY+7 .GT. IYMAX) THEN 
+C         Last raster.
+C         Shift all data so that it is justified to the lowest pin. 
+          NPINS=IYMAX-IY+1         !#pins used in printhead 
+          DO 270 I=3,LBUF 
+          IBUF(I)=ISHFT(IBUF(I),NPINS-8)
+270       CONTINUE
+      ELSE
+          NPINS=8 
+      ENDIF 
+      IF (IRAST .GT. 1) THEN
+C         Do a line feed of (NPINS-1)/216"
+          KMOVE=(NPINS-1)*3 
+          CALL PMOVE(LU,KMOVE,KWTL) 
+          JHITE=JHITE+KMOVE 
+      ENDIF 
+      IF (NB .GT. 0) THEN 
+C         Write the graphics data 
+          IBUF(1)=015514B                        !<ESC>K
+          CALL PUTC(IBUF,3,MOD(NB,256))          !N1 for Epson
+          CALL PUTC(IBUF,4,NB/256)               !N2 for Epson
+          CALL PUTC(IBUF,NB+5,15B)               !Carriage return 
+          CALL PUTC(IBUF,NB+6,137B)              !Underscore
+          CALL EXEC(2,LU,IBUF,-(NB+6),0,0,0,0,KWTL) 
+          IF (HIRES) THEN 
+C             Print again spaced down 1/216"
+              CALL PMOVE(LU,1,KWTL) 
+              JHITE=JHITE+1 
+              CALL EXEC(2,LU,IBUF,-(NB+6),0,0,0,0,KWTL) 
+C             Space down 2/216" 
+              CALL PMOVE(LU,2,KWTL) 
+              JHITE=JHITE+2 
+          ELSE
+C             Space down 1/72" (3/216") 
+              CALL PMOVE(LU,3,KWTL) 
+              JHITE=JHITE+3 
+          ENDIF 
+      ELSE
+C         Space down 1/72" (3/216") 
+          CALL PMOVE(LU,3,KWTL) 
+          JHITE=JHITE+3 
+      ENDIF 
+      IF (IY+7 .GE. IYMAX) THEN 
+          IHITE=(IYMAX-6)*3       !Total vertical paper excursion to present
+          IF (ITHITE .GT. 0) THEN 
+              KMOVE=ITHITE-IHITE
+              IF (KMOVE .GT. 0) THEN  
+                  CALL PMOVE(LU,KMOVE,KWTL) 
+                  IHITE=IHITE+KMOVE 
+                  JHITE=JHITE+KMOVE 
+              ENDIF 
+          ENDIF 
+C         Reset LF to specified value 
+          CALL PUTC(LF3,3,LFEED)  
+          CALL EXEC(2,LU,LF3,-4,0,0,0,0,KWTL) 
+          IF (IHITE .NE. JHITE) STOP 123 !Bookkeeping/programming error 
+          RETURN                             !Done
+      ENDIF 
+280   CONTINUE
+      RETURN
+C 
+C     Error return
+300   IERR=-1 
+      RETURN 1
+      END 
+      SUBROUTINE ERAST(JBUF,LC1,LC2,IY,IBUF,LLBUF,IROT,IHSPAC,IVSPAC, 
+     .                 IHCELL,IVCELL,IXPOS,IYPOS,MIRROR,HIRES,NB,IYMAX) 
+     .,Block-letter text on Epson MX-80/100/HP82905B   ARW 830913   
+C 
+C     Assemble graphics buffer for one string for one 8-pin high raster 
+C     at position IY. 
+C 
+C     On entry: 
+C         JBUF,   buffer containing string to be printed. 
+C         LC1,LC2 first and last character #'s within JBUF of string
+C                 to be printed 
+C         IY,     current raster position 
+C         IBUF,   scratch buffer for graphics data
+C         LLBUF,  length of IBUF in bytes 
+C         IROT,   charater rotation 
+C                   0 - normal
+C                   1 - rotate CCW 90 deg (read up) 
+C                   2 - rotate 180 deg (upside down)  
+C                   3 - rotate CCW 270 deg (read down)
+C         IHSPAC, horizontal character spacing in units of IHCELL 
+C         IVSPAC, vertical character spacing in units of IVCELL 
+C         IHCELL, horizontal cell size in units of 1/120" 
+C         IVCELL, vertical cell size in units of 1/72"
+C         IXPOS,  x-position of upper left corner of first char in string 
+C                 to be printed 
+C         IYPOS,  y-position of upper left corner of first char in string 
+C                 to be printed 
+C         MIRROR, .TRUE. if characters are to be mirrored 
+C         HIRES,  .TRUE. if hi-resolution printing to be done 
+C         NB,     current highest byte used in IBUF 
+C         IYMAX,  current maximum y-extent of text
+C 
+C     On return:
+C         IBUF,   graphics data added for specified string and raster 
+C         NB,     #bytes used in IBUF 
+C         IYMAX,  current maximum y-extent of text
+C 
+      INTEGER JBUF(1),IBUF(1),ICQ(2)
+      LOGICAL MIRROR,HIRES
+      INTEGER CHQ(29)
+      DATA CHQ/55,'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%()#:"',
+     1    '!,*?^[]'/
+      DATA ICQ/1,0/ 
+C 
+      IF (LC1 .GT. LC2) RETURN
+      DO 110 IC=LC1,LC2 
+      CALL PUTQ(ICQ,1,IGETC(JBUF,IC)) 
+      CALL UCQ(ICQ) 
+      JCHAR=IPOSQ(CHQ,ICQ,1)
+      IF (JCHAR .EQ. 0) JCHAR=52     !Set unrecognized char to '?'
+      IPOSX=IXPOS+(IC-LC1)*IHSPAC*IHCELL
+      IPOSY=IYPOS+(IC-LC1)*IVSPAC*IVCELL
+      IYMAX=MAX0(IYMAX,IPOSY+12*IVCELL-1) 
+      CALL ECHAR(JCHAR,IBUF,LLBUF,IY,IROT,IHCELL,IVCELL,IPOSX,IPOSY,
+     .           MIRROR,HIRES,NB) 
+110   CONTINUE
+      RETURN
+      END 
+      SUBROUTINE ECHAR(JCHAR,IBUF,LLBUF,IY,IROT,IHCELL,IVCELL,IPOSX,
+     .                 IPOSY,MIRROR,HIRES,NB) 
+     .,Block-letter text on Epson MX-80/100/HP82905B   ARW 830913   
+C 
+C     Given that the upper pin of the current 8-pin high raster is at 
+C     vertical position IY, and the upper left corner of the character
+C     matrix is at position IPOSX,IPOSY, fill IBUF with appropriate 
+C     graphics data for the current 8-pin high raster.
+C 
+C     On entry: 
+C         JCHAR,  code of character to be assembled (1-56)
+C         IBUF,   buffer in which graphics data is to be assembled
+C         LLBUF,  length of IBUF in words.  Should correspond to #points
+C                 across page (480 for MX-80, 816 for MX-100).  Shorter 
+C                 buffer will may truncate characters before right margin.
+C         IY,     vertical position of upper pin of current 8-pin high
+C                 raster
+C         IROT,   character rotation
+C         IHCELL, horizontal cell size
+C         IVCELL, vertical cell size
+C         IPOSX,  position of left edge of character matrix 
+C         IPOSY,  position of top edge of character matrix
+C         MIRROR, .TRUE. if characters are to be mirrored 
+C         HIRES,  .TRUE. if hi-resolution printing to be done 
+C         NB,     current highest byte used in IBUF 
+C 
+C     On return:
+C         IBUF,   has graphics data added for current raster of JCHAR 
+C         NB,     highest byte used in IBUF 
+C 
+C     ARW 830913
+C 
+      INTEGER IDATA(12,56),IBUF(1),JDATA(12)
+      LOGICAL MIRROR,HIRES
+      DATA IDATA/ 
+     .           001774B,003776B,006017B,006033B,006063B,006143B, !Zero 
+     .           006303B,006603B,007403B,007003B,003776B,001774B, !Zero 
+     1           000140B,000340B,000740B,000140B,000140B,000140B, 
+     1           000140B,000140B,000140B,000140B,003776B,003776B, 
+     2           003776B,007777B,006003B,000003B,000003B,000006B, 
+     2           000030B,000140B,000600B,003000B,007777B,007777B, 
+     3           003776B,007777B,006003B,000003B,000003B,000036B, 
+     3           000036B,000003B,000003B,006003B,007777B,003776B, 
+     4           000070B,000170B,000330B,000630B,001430B,003777B, 
+     4           007777B,000030B,000030B,000030B,000030B,000030B, 
+     5           007777B,007777B,006000B,006000B,006000B,007770B, 
+     5           007774B,000006B,000003B,000003B,007777B,007776B, 
+     6           003776B,007777B,006003B,006000B,006000B,007776B, 
+     6           007777B,006003B,006003B,006003B,007777B,003776B, 
+     7           007777B,007776B,006014B,000030B,000060B,000140B, 
+     7           000140B,000140B,000140B,000140B,000140B,000140B, 
+     8           003776B,007777B,006003B,006003B,003006B,001774B, 
+     8           001774B,003006B,006003B,006003B,007777B,003776B, 
+     9           003776B,007777B,006003B,006003B,006003B,007777B, 
+     9           007777B,000003B,000003B,006003B,007777B,003776B, 
+     A           000140B,000360B,000630B,001414B,003006B,006003B, 
+     A           007777B,007777B,006003B,006003B,006003B,006003B, 
+     B           007774B,007776B,006007B,006003B,006006B,007774B, 
+     B           007774B,006006B,006003B,006007B,007776B,007774B, 
+     C           003776B,007777B,006003B,006000B,006000B,006000B, 
+     C           006000B,006000B,006000B,006003B,007777B,003776B, 
+     D           007770B,007774B,006006B,006003B,006003B,006003B, 
+     D           006003B,006003B,006003B,006006B,007774B,007770B, 
+     E           007777B,007777B,006000B,006000B,006000B,007760B, 
+     E           007760B,006000B,006000B,006000B,007777B,007777B, 
+     F           007777B,007777B,006000B,006000B,006000B,007760B, 
+     F           007760B,006000B,006000B,006000B,006000B,006000B, 
+     G           003776B,007777B,006003B,006000B,006000B,006000B, 
+     G           006037B,006037B,006003B,006003B,007777B,003776B, 
+     H           006003B,006003B,006003B,006003B,006003B,007777B, 
+     H           007777B,006003B,006003B,006003B,006003B,006003B, 
+     I           003776B,003776B,000140B,000140B,000140B,000140B, 
+     I           000140B,000140B,000140B,000140B,003776B,003776B, 
+     J           000003B,000003B,000003B,000003B,000003B,000003B, 
+     J           000003B,000003B,000003B,006003B,007777B,003776B, 
+     K           006003B,006006B,006014B,006030B,006060B,007740B, 
+     K           007740B,006060B,006030B,006014B,006006B,006003B, 
+     L           006000B,006000B,006000B,006000B,006000B,006000B, 
+     L           006000B,006000B,006000B,006000B,007777B,007777B, 
+     M           006003B,007007B,007417B,006633B,006363B,006143B, 
+     M           006003B,006003B,006003B,006003B,006003B,006003B, 
+     N           006003B,006003B,007003B,007403B,006603B,006303B, 
+     N           006143B,006063B,006033B,006017B,006007B,006003B, 
+     O           001774B,003776B,006003B,006003B,006003B,006003B, 
+     O           006003B,006003B,006003B,006003B,003776B,001774B, 
+     P           007776B,007777B,006003B,006003B,006003B,007777B, 
+     P           007776B,006000B,006000B,006000B,006000B,006000B, 
+     Q           003776B,007777B,006003B,006003B,006003B,006003B, 
+     Q           006003B,006063B,006033B,006017B,007776B,003777B, 
+     R           007776B,007777B,006003B,006003B,006003B,007777B, 
+     R           007776B,006060B,006030B,006014B,006006B,006003B, 
+     S           001774B,003776B,006003B,006000B,006000B,003774B, 
+     S           001776B,000003B,000003B,006003B,003776B,001774B, 
+     T           007777B,007777B,000140B,000140B,000140B,000140B, 
+     T           000140B,000140B,000140B,000140B,000140B,000140B, 
+     U           006003B,006003B,006003B,006003B,006003B,006003B, 
+     U           006003B,006003B,006003B,006003B,007777B,003776B, 
+     V           006003B,006003B,006003B,006003B,006003B,006003B, 
+     V           003006B,003006B,000630B,000630B,000140B,000140B, 
+     W           006003B,006003B,006003B,006003B,006003B,006003B, 
+     W           006143B,006363B,006633B,007417B,007007B,006003B, 
+     X           006003B,006003B,003006B,001414B,000630B,000360B, 
+     X           000360B,000630B,001414B,003006B,006003B,006003B, 
+     Y           006003B,006003B,003006B,001414B,000630B,000360B, 
+     Y           000140B,000140B,000140B,000140B,000140B,000140B, 
+     Z           007777B,007777B,000006B,000014B,000030B,000060B, 
+     Z           000140B,000300B,000600B,001400B,003777B,007777B, 
+     -           000000B,000000B,000000B,000000B,000000B,003776B, 
+     -           003776B,000000B,000000B,000000B,000000B,000000B, 
+     .           000000B,000000B,000000B,000000B,000000B,000000B, 
+     .           000000B,000000B,000000B,000000B,000340B,000340B, 
+     .           000000B,000000B,000000B,000000B,000000B,000000B, !Space  
+     .           000000B,000000B,000000B,000000B,000000B,000000B, !Space  
+     $           000140B,001774B,003776B,006143B,006140B,003774B, 
+     $           001777B,000143B,006143B,003776B,001774B,000140B, 
+     /           000000B,000003B,000006B,000014B,000030B,000060B, 
+     /           000140B,000300B,000600B,001400B,003000B,006000B, 
+     +           000000B,000000B,000140B,000140B,000140B,003776B, 
+     +           003776B,000140B,000140B,000140B,000000B,000000B, 
+     %           007703B,004106B,004114B,007730B,000060B,000140B, 
+     %           000300B,000677B,001441B,003041B,006077B,000000B, 
+     (           000600B,000600B,001400B,003000B,006000B,006000B, 
+     (           006000B,006000B,003000B,001400B,000600B,000600B, 
+     )           000030B,000030B,000014B,000006B,000003B,000003B, 
+     )           000003B,000003B,000006B,000014B,000030B,000030B, 
+     #           001414B,001414B,001414B,007777B,007777B,001414B, 
+     #           001414B,007777B,007777B,001414B,001414B,001414B, 
+     :           000000B,000000B,000340B,000340B,000000B,000000B, 
+     :           000000B,000000B,000340B,000340B,000000B,000000B, 
+     "           001414B,001414B,001414B,001414B,000000B,000000B, 
+     "           000000B,000000B,000000B,000000B,000000B,000000B, 
+     !           000140B,000140B,000140B,000140B,000140B,000140B, 
+     !           000140B,000140B,000000B,000000B,000140B,000140B, 
+     '           000140B,000140B,000140B,000140B,000000B,000000B, 
+     '           000000B,000000B,000000B,000000B,000000B,000000B, 
+     *           000000B,006143B,003146B,001554B,000770B,007777B, 
+     *           007777B,000770B,001554B,003146B,006143B,000000B, 
+     ?           001774B,003777B,006003B,000003B,000006B,000014B, 
+     ?           000030B,000060B,000140B,000000B,000140B,000140B, 
+     \           000000B,006000B,003000B,001400B,000600B,000300B, 
+     \           000140B,000060B,000030B,000014B,000006B,000003B, 
+     ^           000000B,000140B,000360B,000770B,001554B,003146B, 
+     ^           006143B,000140B,000140B,000140B,000140B,000140B, 
+     [           007700B,007700B,006000B,006000B,006000B,006000B, 
+     [           006000B,006000B,006000B,006000B,007700B,007700B, 
+     ]           000077B,000077B,000003B,000003B,000003B,000003B, 
+     ]           000003B,000003B,000003B,000003B,000077B,000077B/ 
+C 
+C     Return if no overlap of character with this raster. 
+      IF (IY+7 .LT. IPOSY .OR. IPOSY+12*IVCELL-1 .LT. IY) RETURN
+C 
+C     Save character data to scratch array
+      CALL WMOVE(IDATA(1,JCHAR),JDATA,12) 
+C 
+C     Determine first and last vertical cell #'s that have points in this 
+C     raster.  Top cell is #0.
+      ICELL1=MAX0((IY-IPOSY)/IVCELL,0)
+      ICELL2=MIN0((IY+7-IPOSY)/IVCELL,11) 
+      DO 130 IC=ICELL1,ICELL2 
+      JYCEL1=IPOSY+IC*IVCELL                 !Top of cell 
+      JYCEL2=JYCEL1+IVCELL-1                     !Bottom of cell
+C         Determine mask for pins involved in this cell (top pin is #0) 
+          MASK=0
+          DO 100 IPIN=0,7 
+          JYPIN=IY+IPIN                          !y-position of pin 
+          IF (JYPIN .GE. JYCEL1 .AND. JYPIN .LE. JYCEL2)
+     .                                  MASK=IOR(MASK,ISHFT(200B,-IPIN))
+100       CONTINUE
+C         Fill in data in IBUF
+          DO 120 IH=0,11                         !Cells from left to right
+          IF (.NOT.MIRROR) THEN 
+              IF (IROT .EQ. 1) THEN                         !90 degrees CCW 
+                  IBIT=IAND(JDATA(IH+1),ISHFT(1,IC))
+              ELSE IF (IROT .EQ. 2) THEN                    !180 degrees
+                  IBIT=IAND(JDATA(12-IC),ISHFT(1,IH)) 
+              ELSE IF (IROT .EQ. 3) THEN                    !270 degrees CCW
+                  IBIT=IAND(JDATA(12-IH),ISHFT(4000B,-IC))  
+              ELSE                                          !No rotation
+                  IBIT=IAND(JDATA(IC+1),ISHFT(4000B,-IH)) 
+              ENDIF 
+          ELSE                          !Mirrored characters
+              IF (IROT .EQ. 1) THEN 
+                  IBIT=IAND(JDATA(12-IH),ISHFT(1,IC)) 
+              ELSE IF (IROT .EQ. 2) THEN
+                  IBIT=IAND(JDATA(12-IC),ISHFT(4000B,-IH))
+              ELSE IF (IROT .EQ. 3) THEN
+                  IBIT=IAND(JDATA(IH+1),ISHFT(4000B,-IC)) 
+              ELSE
+                  IBIT=IAND(JDATA(IC+1),ISHFT(1,IH))
+              ENDIF 
+          ENDIF 
+          IF (IBIT .NE. 0) THEN 
+              JPOSX1=MAX0(IPOSX+IH*IHCELL+1,1)
+              JPOSX2=MIN0(JPOSX1+IHCELL-1,LLBUF)
+              IF (JPOSX1 .LE. JPOSX2) THEN
+                  DO 110 JX=JPOSX1,JPOSX2 
+                  IQ=IXOR(IGETC(IBUF,JX),MASK)
+                  CALL PUTC(IBUF,JX,IQ) 
+110               CONTINUE
+                  NB=MAX0(NB,JPOSX2)
+              ENDIF 
+          ENDIF 
+120       CONTINUE
+130   CONTINUE
+      RETURN
+      END 
+      SUBROUTINE BCODE(JBUF,LJBUF,IBUF,LBUF,LU,KEY,LFEED,IHITE,IERR,*)
+     .,Bar code on Epson MX-80/MX-100/HP82905B   ARW 830812 
+C 
+C     Emulation of HP2631G bar code printing on Epson MX-80/100,HP82905B. 
+C 
+C     Instructions to subroutine BCODE are in the form of an ASCII  
+C     escape sequence in an almost identical manner to the HP2631G. 
+C 
+C     The escape sequence prefix is always '<ESC>*z'. 
+C 
+C     The following parameters are under control of the user: 
+C       Code    Default   Unit          Parameter 
+C        r       1.5      1/60"       Wide bar width (number of dots) 
+C        s       0.5      1/60"       Narrow bar width (number of dots) 
+C        t       3.0      1/60"       Wide space width (number of dots) 
+C        u       1.5      1/60"       Narrow space width (number of dots) 
+C                                     Note: Minimum increment of r,s,t,u is 0.5 
+C        q        1        -          Header print mode 
+C                                        0 - do not print header
+C                                        1 - print header above bar-code
+C                                        2 - suppress last character of 
+C                                            header (see Notes) 
+C        h        5      ~1/10"       Label height
+C        x        0       1/60"       X-offset of bar-code label (see Notes)
+C        y        0       1/72"       Leading vertical space before printing
+C                                     header and/or bar-code. 
+C        n        -        -          Tab (see Notes) 
+C        v        0        -          Code select 
+C                                        0 - Code 39
+C                                        3 - Code 39 with automatic modulo 43 
+C                                            check character generation 
+C        g        0       1/72"       Total paper height to be used 
+C                                     (see Notes) 
+C 
+C     On entry: 
+C         JBUF,   escape sequence for bar code printing 
+C                 (identical to HP2631G escape sequence except for
+C                 restrictions indicated in Notes)  
+C                 See 'Bar Code and Mark Sense Printing Guide', 
+C                 HP part# 02631-90194 for details. 
+C         LJBUF,  length of JBUF (+words/-chars)
+C         IBUF,   scratch buffer for bar code generation
+C         LBUF,   length of IBUF (words)
+C         LU,     lu of printer 
+C         KEY,    if .TRUE., allows writing through LU lock 
+C         LFEED,  linefeed spacing to which printer is to be returned 
+C                 after printing barcode (in units of 1/216") 
+C 
+C     On return:
+C         IHITE,  total vertical paper excursion (units of 1/216")
+C         IERR,   0 - OK
+C                -1 - Illegal parameter or syntax error 
+C                -2 - Illegal bar code type selected (i.e. not 3-of-9)
+C                -3 - Illegal text character
+C                -4 - IBUF overflow 
+C                All non-zero error codes return through RETURN 1.
+C 
+C     Notes:
+C       1. Only code 3-of-9 is supported. Default density is 4.3 char/inch. 
+C       2. Bar and space widths are specified in units of 1/60" with
+C          increments of 1/120", as opposed to 1/72" and 1/144",
+C          respectively, for the HP2631G. 
+C       3. If labels are printed with headers or if there are 
+C          multiple labels on a single line, label placement should 
+C          be done using tabs, not X-offset.  If X-offset is used,
+C          label and header placement may not be correct. X-offset may
+C          be used for placement of a single label without header.
+C          Setting of tabs is the user responsibility.
+C       4. Headers will be printed in default type font and pitch.  
+C       5. Multiple labels on the same line must all have the same height.
+C          Multiple labels on the same line must all have the same
+C          header enable/disable specification. 
+C       6. The last character of the header (e.g. externally-generated check
+C          character) may be suppressed with a '2q' specification in the
+C          escape sequence. This is outside of the HP2631G specification. 
+C       7. A code 3-of-9 with modulo-43 check character may be automatically  
+C          generated with a '3v' specification in the escape sequence.
+C          The check character will not be printed in the header and a '2q' 
+C          specification (see Note 7) should not be used. 
+C          This is outside of the HP2631G specification.
+C       8. The total paper height to be used may be specified as
+C          <height>g in the escape sequence where <height> is in units
+C          of 1/72".  If barcode label generation does not exceed this
+C          height, paper will be moved on termination so that total paper 
+C          excursion is exactly the specified value.
+C       9. A leading vertical space may be specified as <space>y in the 
+C          escape sequence where <space> is in units of 1/72".  The paper 
+C          will be advanced by this amount before printing begins.
+C          Only one 'y' parameter may be specified in the escape sequence.
+C          This is outside the HP2631G specification. 
+C      10. Carriage must be at left margin on entry to BCODE. 
+C 
+C     ARW 830812
+C 
+      IMPLICIT INTEGER (A-Z)
+      INTEGER JBUF(1),IBUF(1),PARMS(8),ICQ(2),KBUF(30),LF(2,2),LC(3,10),
+     .        LFA(2),LF3(2) 
+      REAL VAL
+      LOGICAL END,TEXT,OPEN,LCASE,UCASX,KEY 
+      DIMENSION NUMQ(7)
+      INTEGER SELECT(8)
+      DATA NUMQ/11,'0123456789.'/
+      DATA SELECT/13,'RSTUQHXVGYN<>'/
+C                R S T U Q H X V
+      DATA PARMS/3,1,6,3,1,5,0,0/            !Bar code parameters 
+      DATA ICQ  /1,0/ 
+C             <ESC>3  <1>     <ESC>3  <20>
+      DATA LF/015463B,000400B,015463B,012000B/   !Line feed control   
+      DATA LFA/015501B,00137B/                   !<ESC>A
+      DATA LF3/015463B,00137B/                   !<ESC>3
+C 
+C     Local function
+      LCASE(I)=I .GE. 141B .AND. I .LE. 172B    !Lower case 
+      UCASX(I)=I .GE. 101B .AND. I .LE. 132B    !Upper case 
+C 
+      NCBUF=2*LJBUF 
+      IF (LJBUF .LT. 0) NCBUF=-LJBUF
+      LLBUF=2*LBUF
+      TEXT=.FALSE.
+      OPEN=.FALSE.
+      IBYTE=1 
+      N=0                             !Label count
+      END=.FALSE. 
+      PARMS(7)=0                      !Reset X-offset 
+      NTABS=0                         !Reset tab count
+      IHITE=0 
+      LSPACE=0
+      KC=0
+      CALL AFILL(KBUF,1,2H  ,0,10)
+C 
+C     Parse the input string
+      DO 250 L=1,NCBUF
+      IC=IGETC(JBUF,L)
+      IF (.NOT. OPEN .AND. UCASX(IC)) END=.TRUE. !Upper case terminates   
+      IF (LCASE(IC)) IC=IAND(IC,137B) !To upper case
+      CALL PUTQ(ICQ,1,IC) 
+      IP=IPOSQ(SELECT,ICQ,1)
+      IF (.NOT.OPEN) THEN 
+          IF (IP .EQ. 0 .OR. IP .EQ. SELECT) THEN   
+C             If numeric or decimal point, add to KBUF. If non-numeric, flush KBUF. 
+              IF (IPOSQ(NUMQ,ICQ,1) .GT. 0) THEN
+                  KC=KC+1 
+                  CALL PUTQ(KBUF,KC,IC) 
+              ELSE
+                  CALL AFILL(KBUF,1,2H  ,0,10)
+                  KC=0
+              ENDIF 
+          ELSE
+              IF (IP .LE. 10) DECODE(20,*,KBUF,ERR=290) VAL 
+              CALL AFILL(KBUF,1,2H  ,0,10)
+              KC=0
+C                     R   S   T   U   Q   H   X   V   G   Y   N   < 
+              GO TO (110,120,130,140,150,160,170,180,185,187,190,200) IP
+C             'Wide bar' width
+110           PARMS(1)=2.*VAL 
+              GO TO 240 
+C             'Narrow bar' width
+120           PARMS(2)=2.*VAL 
+              GO TO 240 
+C             'Wide space' width
+130           PARMS(3)=2.*VAL 
+              GO TO 240 
+C             'Narrow space' width
+140           PARMS(4)=2.*VAL 
+              GO TO 240 
+C             Enable/disable header 
+150           PARMS(5)=VAL  
+              GO TO 240 
+C             Height
+160           PARMS(6)=VAL  
+              GO TO 240 
+C             'X-offset'
+170           PARMS(7)=PARMS(7)+2.*VAL  
+              GO TO 240 
+C             Code select (only 3 or 9 supported) 
+180           IF (VAL .NE. 0. .AND. VAL .NE. 3.) THEN 
+                  IERR=-2 
+                  RETURN 1
+              ENDIF 
+              PARMS(8)=VAL
+              GO TO 240 
+C             Total vertical paper excursion
+185           ITHITE=3*VAL
+              GO TO 240 
+C             Leading vertical space
+187           LSPACE=3*VAL                        !Units of 1/216"
+              GO TO 240 
+C             Tab 
+190           NTABS=NTABS+1 
+              GO TO 240 
+C             Open character string 
+200           N=N+1                       !Increment label count
+              LC(1,N)=L 
+              TEXT=.TRUE. 
+              OPEN=.TRUE.                     !Beginning of text string 
+              GO TO 240 
+240           CONTINUE
+          ENDIF 
+      ELSE
+          IF (IP .EQ. SELECT) THEN
+C             Close character string
+              LC(2,N)=L 
+              LC(3,N)=NTABS 
+              OPEN=.FALSE.                    !End of text
+C             Construct graphics buffer 
+              NT=0
+              DO 245 I=1,N
+245           NT=NT+LC(3,I)      !Accumulated tabs from left margin 
+              CALL BAR1(JBUF,LC(1,N),LC(2,N),IBUF,LLBUF,IBYTE,PARMS,
+     .                  NT,*300,*400) 
+              NTABS=0                 !Reset tab count
+              PARMS(7)=0              !Reset X-offset 
+          ENDIF 
+      ENDIF 
+      IF (END) GO TO 260
+250   CONTINUE
+C 
+C     If text has been parsed, print the header/bar-codes as necessary
+260   IF (TEXT) THEN
+          IF (KEY) THEN 
+C             KWTL=IWTL(LU)        !Get key to write through lu lock
+          ELSE
+              KWTL=0
+          ENDIF 
+          IF (LSPACE .GT. 0) THEN 
+              CALL PMOVE(LU,LSPACE,KWTL) !Leading vert space
+              IHITE=IHITE+LSPACE
+          ENDIF 
+          IF (PARMS(5) .NE. 0) THEN 
+C             Print header
+              KBYTE=1 
+              KBUF(1)=015462B             !<ESC>2 - line spacing to 1/6"
+              KBYTE=KBYTE+2 
+              DO 264 I=1,N
+              IF (LC(3,I) .GT. 0) THEN
+                  DO 262 J=1,LC(3,I)
+                  CALL PUTC(KBUF,KBYTE,11B)     !Horiz tab
+                  KBYTE=KBYTE+1 
+262               CONTINUE
+              ENDIF 
+              NL=LC(2,I)-LC(1,I)-1
+              IF (PARMS(5) .EQ. 2) NL=NL-1   !Suppress last character 
+              CALL CMOVE(JBUF,LC(1,I)+1,KBUF,KBYTE,NL)
+              KBYTE=KBYTE+NL
+264           CONTINUE
+              KB=KBYTE-1
+              CALL UCASE(KBUF,-KB)
+              CALL EXEC(2,LU,KBUF,-KB,0,0,0,0,KWTL) 
+              IHITE=IHITE+36
+          ENDIF 
+          DO 280 I=1,PARMS(6) 
+              DO 270 J=1,2
+              IF (I .NE. PARMS(6) .OR. J .NE. 2) THEN 
+                  CALL CMOVE(LF(1,J),1,IBUF,IBYTE,3)  !Set line feed spacing
+                  IHITE=IHITE+IGETC(LF(1,J),3)
+                  LB=IBYTE+2
+              ELSE
+                  CALL PUTC(IBUF,IBYTE,15B)     !Carriage return
+                  CALL PUTC(IBUF,IBYTE+1,137B)  !Underscore 
+                  LB=IBYTE+1
+              ENDIF 
+              CALL EXEC(2,LU,IBUF,-LB,0,0,0,0,KWTL) 
+270           CONTINUE
+280       CONTINUE
+      ENDIF 
+      IF (ITHITE .GT. 0) THEN 
+          KMOVE=ITHITE-IHITE
+          IF (KMOVE .GT. 0) THEN  
+              CALL PMOVE(LU,KMOVE,KWTL) 
+              IHITE=IHITE+KMOVE 
+          ENDIF 
+      ENDIF 
+C     Reset LF to specified value 
+      CALL PUTC(LF3,3,LFEED)  
+      CALL EXEC(2,LU,LF3,-4,0,0,0,0,KWTL) 
+      RETURN
+C 
+C     Illegal parameter/syntax error
+290   IERR=-1 
+      RETURN 1
+C 
+C     IBUF overflow 
+300   IERR=-4 
+      RETURN 1
+C 
+C     Illegal text character
+400   IERR=-3 
+      RETURN 1
+      END 
+      SUBROUTINE BAR1(JBUF,IC1,IC2,IBUF,LLBUF,IBYTE,PARMS,NTABS,*,*)
+     .,Bar code on Epson MX-80/MX-100/HP82905B   ARW 830812 
+C 
+C     Generate graphics buffer for text string between characters 
+C     IC1 and IC2 in JBUF.
+C 
+C     On entry: 
+C         JBUF,   input buffer
+C         IC1,    start of text in JBUF (char# of '<')
+C         IC2,    end of text in JBUF (char# of '>')
+C         IBUF,   buffer for barcode graphics data
+C         LLBUF,  length of IBUF (bytes)
+C         IBYTE,  current byte count in IBUF
+C         PARMS,  bar code parameters 
+C         NTABS,  total #tabs from left margin to this label
+C                 (this is required due to an apparent bug in Epson/HP
+C                  firmware that does not always tab properly after a 
+C                  graphics sequence) 
+C 
+C     On return:
+C         IBUF,   graphics output buffer
+C         IBYTE,  current byte count (points to next byte in IBUF)
+C         RETURN 1, IBUF overflow 
+C         RETURN 2, Illegal character in text 
+C 
+      IMPLICIT INTEGER (A-Z)
+      INTEGER ICQ(2),PARMS(1) 
+      LOGICAL LSPACE
+      INTEGER CHARQ(24)
+      DATA CHARQ/45,'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%<>'/
+      DATA ICQ/1,0/ 
+C 
+C     Set up the preliminaries
+      IF (NTABS .GT. 0) THEN  
+          CALL PUTC(IBUF,IBYTE,15B)       !Carriage return
+          IBYTE=IBYTE+1 
+          DO 100 I=1,NTABS  
+          CALL PUTC(IBUF,IBYTE,11B)   !Horizontal tab 
+          IBYTE=IBYTE+1 
+          IF (IBYTE .GT. LLBUF) RETURN 1
+100       CONTINUE
+      ENDIF 
+      IF (IBYTE+4 .GT. LLBUF) RETURN 1
+      CALL PUTC(IBUF,IBYTE,33B)       !Escape 
+      IBYTE=IBYTE+1 
+      CALL PUTC(IBUF,IBYTE,2H L)
+      IBYTE=IBYTE+3   !Leave space for N1,N2
+      IBYTE1=IBYTE
+C 
+C     Insert 'x' space
+      IF (PARMS(7) .GT. 0) THEN 
+          DO 110 I=1,PARMS(7) 
+          CALL PUTC(IBUF,IBYTE,0) 
+          IBYTE=IBYTE+1 
+          IF (IBYTE .GT. LLBUF) RETURN 1
+110       CONTINUE
+      ENDIF 
+C 
+C     Create bar code for text
+      LSPACE=.FALSE.
+      ICHEK=0 
+      DO 120 I=IC1,IC2
+      IC=IGETC(JBUF,I)
+      IF (IC .GE. 141B .AND. IC .LE. 172B) IC=IAND(IC,137B) !Convert to UC
+      CALL PUTQ(ICQ,1,IC) 
+      IP=IPOSQ(CHARQ,ICQ,1) 
+      IF (IP .EQ. 0) RETURN 2 
+      IF (PARMS(8) .EQ. 3) THEN        !Generate 3-of-9 check character 
+          IF (I .GT. IC1 .AND. I .LT. IC2) THEN 
+              ICHEK=ICHEK+(IP-1)
+          ELSE IF (I .EQ. IC2) THEN    !Insert check character
+              ICHEK=MOD(ICHEK,43)+1 
+              CALL B3OF9(ICHEK,IBUF,LLBUF,IBYTE,PARMS,LSPACE,*200)
+          ENDIF 
+      ENDIF 
+      CALL B3OF9(IP,IBUF,LLBUF,IBYTE,PARMS,LSPACE,*200)   
+      LSPACE=.TRUE. 
+120   CONTINUE
+      NB=IBYTE-IBYTE1             !#graphics bytes
+      CALL PUTC(IBUF,IBYTE-NB-2,MOD(NB,256))    !N1 for Epson/HP
+      CALL PUTC(IBUF,IBYTE-NB-1,NB/256)         !N2 for Epson/HP
+      N1=MOD(NB,256)
+      N2=NB/256 
+C 
+      RETURN
+C 
+C     IBUF overflow 
+200   RETURN 1
+      END 
+      SUBROUTINE B3OF9(JCHAR,IBUF,LLBUF,IBYTE,PARMS,LSPACE,*) 
+     .,Bar code on Epson MX-80/MX-100/HP82905B   ARW 830812 
+C 
+C     Assemble the graphics data to print JCHAR in 3-of-9 barcode,
+C     starting at character IBYTE in IBUF and using the parameters
+C     in  PARMS.
+C 
+C     On entry: 
+C         JCHAR,  code of character to be assembled (1-45). 
+C                 Assumed to be valid.
+C         IBUF,   buffer in which code is to be assembled.
+C         LLBUF,  length if IBUF (bytes)
+C         IBYTE,  first byte of IBUF to be used 
+C         PARMS,  bar/space width parameters
+C         LSPACE, if .TRUE., leading narrow space is inserted before
+C                 character 
+C 
+C     On return:
+C         IBUF,   has specified character added as graphics data
+C         IBYTE,  updated to point one byte beyond last byte used 
+C         RETURN 1, IBUF overflow 
+C 
+      IMPLICIT INTEGER (A-Z)
+      INTEGER CODE(2,45),PARMS(1),IBUF(1) 
+      LOGICAL LSPACE
+      DATA CODE/06B,04B,21B,04B,11B,04B,30B,04B,05B,04B,   !01234 
+     .          24B,04B,14B,04B,03B,04B,22B,04B,12B,04B,   !56789 
+     .          21B,02B,11B,02B,30B,02B,05B,02B,24B,02B,   !ABCDE 
+     .          14B,02B,03B,02B,22B,02B,12B,02B,06B,02B,   !FGHIJ 
+     .          21B,01B,11B,01B,30B,01B,05B,01B,24B,01B,   !KLMNO 
+     .          14B,01B,03B,01B,22B,01B,12B,01B,06B,01B,   !PQRST 
+     .          21B,10B,11B,10B,30B,10B,05B,10B,24B,10B,   !UVWXY 
+     .          14B,10B,03B,10B,22B,10B,12B,10B,           !Z-.<space>
+     .          00B,16B,00B,15B,00B,13B,00B,07B,           !$/+%
+     .          06B,10B,06B,10B/                           !<> (start/stop) 
+C 
+      BAR=CODE(1,JCHAR) 
+      SPACE=CODE(2,JCHAR) 
+      DO 120 I=1,5
+C     Space 
+      IF (I .EQ. 1) THEN
+C         Intercharacter leading space
+          IF (LSPACE) THEN
+              NS=PARMS(4)*3/2 
+              DO 80 J=1,NS
+              CALL PUTC(IBUF,IBYTE,0) 
+              IBYTE=IBYTE+1 
+              IF (IBYTE .GT. LLBUF) RETURN 1
+80            CONTINUE
+          ENDIF 
+      ELSE
+          IP=4-IAND(ISHFT(SPACE,I-5),1)    !3-wide space, 4-narrow space
+          DO 100 J=1,PARMS(IP)  
+          CALL PUTC(IBUF,IBYTE,0) 
+          IBYTE=IBYTE+1 
+          IF (IBYTE .GT. LLBUF) RETURN 1
+100       CONTINUE
+      ENDIF 
+C 
+C     Bar 
+      IP=2-IAND(ISHFT(BAR,I-5),1)     !1-Wide bar, 2-Narrow bar 
+      DO 110 J=1,PARMS(IP)  
+      CALL PUTC(IBUF,IBYTE,377B)
+      IBYTE=IBYTE+1 
+      IF (IBYTE .GT. LLBUF) RETURN 1
+110   CONTINUE
+120   CONTINUE
+C 
+      RETURN
+      END 

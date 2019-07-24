@@ -1,0 +1,14 @@
+!     Goes with rev 1.99 or later; edited  1:00 PM  Thu., 12  Jun., 1986
+  
+!     This common provides storage for KERMIT's command-parsing routines
+  
+      integer*2 cmP1                      ! parsing pointer #1
+      integer*2 cmP2                      ! parsing pointer #2
+      integer*2 cmLn                      ! current length of command 
+      integer*2 cmIn(40)                  ! the command-line array
+      character cmCh*80                   ! same as cmIn
+      character cmTk*80                   ! A command-line token
+      character cmRu*80                   ! A run-command save
+      common /kercmd/ cmP1,cmP2,cmLn,cmIn,cmTk,cmRu 
+      equivalence (cmCh,cmIn) 
+  

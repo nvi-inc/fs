@@ -1,0 +1,203 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE RUOPR(NAMEC,IP,NAMUS,MCNTL,NCNTL,IBUFF,NAMEI)
+C 
+C               THIS ROUTINE PROVIDES THE MAIN INTERFACE TO THE 
+C               FIELD SYSTEM FOR THE USER AT THE TERMINAL.
+C 
+C 2.1.   CALLING SEQUENCE: CALL RUOPR(NAMEC,IP,NAMUS,MCNTL,NCNTL,IBUFF) 
+C 
+C     INPUT VARIABLES:
+        DIMENSION NAMEC(32,20),IP(11),NAMUS(3),NCNTL(9),NAMEI(14,15) 
+C       NAMEC   - THE LIST OF CONTROLLED PROGRAMS READ IN BY INOPR
+C                 SEE OPRIN FOR DETAILS OF ARRAY INFORMATION AND USE.
+C       IP      - OPERATOR INPUT PARAMETERS ON INITIALIZATION AND 
+C                 FROM RESTARTS OF OPRIN WHILE IN THIS MODULE 
+C       NAMUS   - OUR NAME FROM IDSEG FOR TIME SCHEDULING WITHOUT SUSPENDING
+C       MCNTL   - CONTROL ACTIVATION BRANCH ARRAY 
+C       NCNTL(1)        - NUMBER OF ENTRIES IN MCNTL THAT HAVE BEEN USED
+C       NCNTL(2)        - NUMBER OF INTERNAL ENTRIES USED 
+C       NAMEI   - INPUT LIST OF FIELD SYSTEM PROGRAMS FOR OPERATIONS
+        DIMENSION IBUFF(60)           !  Buffer for internal use
+C 
+C     OUTPUT VARIABLES:  NONE
+C 
+C 2.2.   COMMON BLOCKS USED 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C      Contains JQUIT flag, LU
+C 
+C 3.  LOCAL VARIABLES 
+        LOGICAL LMON,LSUSP,NOMATCH
+        DIMENSION INAML(11)                   !  Work area for parsing
+        INTEGER*2 FBLNK
+        DIMENSION IREG(2)
+        DIMENSION IPRMT(2)
+        CHARACTER INCHR,CICLONE*5
+        EQUIVALENCE (REG,IREG(1),IRGA),(IREG(2),IRGB)
+C       REG     - DUMMY REAL VARIABLE FOR DOUBLE INTEGER RETURN FROM REAL
+C                 FUNCTIONS
+C       IREG    - INTERMEDIARY USED TO SORT DOUBLE INTEGERS INTO SEPARATE
+C                 VARIABLES FOR USE IN PROGRAM
+C       IRGA    - FIRST INTEGER EXTRACTED FROM REG RETURNED BY REAL FUNCTION
+C       IRGB    - SECOND INTEGER EXTRACTED FROM REG ...
+C
+C 4.  CONSTANTS USED
+        DATA IPRMT/6412B,2H> /                !  User prompt
+        DATA LPRMT/-3/                        !  Length of IPRMT
+C
+C 5.  INITIALIZED VARIABLES
+        DATA LSUSP/.TRUE./        !  Set to give first suspending message
+C
+C 6.  PROGRAMMER: LEE N. FOSTER               LAST MODIFIED  <910325.1646>
+C  MWH  870921  Modified for use on A600/A400
+C  LAR  880406  Wake up ready for procedure scheduling
+C 
+C   1. Initialize and begin a loop which lasts until quitting time.
+C 
+      ILOC = NCNTL-(NCNTL(2)-1)
+      NB = NCNTL(6)
+      DO WHILE (JQUIT.NE.2HQU)
+C
+C   2. Suspend (unless Q option is in effect) until operator hits a key.
+C
+        IF (LSUSP) THEN
+          CALL EXEC(2,LU,
+     &    44HOPRIN suspending: strike any key to activate,-44)
+          REG = 0.
+          REG = EXEC(6,0,1)                   ! Suspend until woken up
+          IF (JQUIT.EQ.2HQU) RETURN
+          CALL EXEC(2,2000B+LU,
+     &    45HSelect OPRIN option ('^' for list) or command,-45)
+        ENDIF
+C
+C   3. Get the input command string.
+C
+        CALL EXEC(2,2000B+LU,IPRMT,LPRMT)         ! Prompt for user
+        REG = REIO(1,400B+LU,IBUFF,-120,3000)     ! Read response
+        LENIN = MIN0(120,IRGB)                ! Save length of input
+        CALL UCASE(IBUFF,-LENIN)              ! Change to upper case
+        LENIN=FBLNK(IBUFF,1,LENIN)
+C
+C   4. Certain input strings of less than three characters need special
+C      handling.  Check for these cases and set flags accordingly.  These
+C      flags determine which (if any) of the mutually exclusive branches
+C      5 through 8 will be executed, and whether to skip step 2 next time.
+C
+        IF (IMCTL.EQ.3) LSUSP = .TRUE.
+        IF (LENIN.EQ.0 .OR.  ( LENIN.EQ.2 .AND.
+     &      (IBUFF(1).EQ.2H:: .OR. IBUFF(1).EQ.2HEX)))  THEN
+          LSUSP = .TRUE.
+          IMCTL = 1
+        ELSE IF ( (LENIN.EQ.1 .AND. JCHAR(IBUFF,1).NE.77B) .OR.
+     &            (LENIN.EQ.2 .AND. JCHAR(IBUFF,1).EQ.33B) )    THEN
+          ICNTL = JCHAR(IBUFF,LENIN)
+          IMCTL = ISCNC(MCNTL,1,NCNTL,ICNTL) + 1
+          IF (IMCTL.EQ.3 .OR. IMCTL.EQ.4) LSUSP = .FALSE.
+        ELSE
+          IMCTL = 0                ! Normal command; will be sent to BOSS.
+        ENDIF
+C
+C   5. Run a program from the (OPPGM list.
+C
+        IF (IMCTL.GE.6) THEN
+          I = IMCTL-NCNTL(2)
+          ITYPE = IAND(JCHAR(NAMEC(4,I),1),17B)+1
+          IF (ITYPE.EQ.2) THEN
+            INAD = IDGET(NAMEC(1,I))            ! Check for program present
+            NOFF = NAMEC(5,I)                   ! Get offing option
+            IF (NAMEC(11,I).LT.2) NOFF=8
+            IF (INAD.NE.0) CALL IDOFF(NAMEC(1,I),NOFF)
+          ELSE
+            IERR = LPROP(NAMEC(1,I),LU,1)         !  Load and run program
+            IF (IERR.LT.0) CALL OPERR(LU,IBUFF,2,IERR,NAMEC(1,I))
+          ENDIF
+C
+C   6. Run the command interpreter (CI).
+C
+        ELSE IF (IMCTL.EQ.5) THEN
+          CALL EXEC(3,2000B+LU,2HPR,2HOM,2HT )
+          IERR = FmpRunProgram('CI',IP,CICLONE)
+          CALL EXEC(3,2000B+LU,2HOP,2HRI,2HN )
+C
+C   7. Show a menu of 1-character options.
+C
+        ELSE IF (IMCTL.EQ.2) THEN
+          IDT = NCNTL(2)-1
+          CALL EXEC(2,LU,
+     .62H  C   CI                              Command Interpreter (CI),
+     .-62)
+          DO I=1,ILOC
+            CALL IFILL(IBUFF,1,120,2H  )          ! Clear buffer
+C               FIRST PUT IN THE CHARACTER FOR ACTIVATION
+            NCH = ICHMV(IBUFF,3,JCHAR(MCNTL,I+IDT),2,1)
+            ITYPE = IAND(JCHAR(NAMEC(4,I),1),17B)+1          ! Get entry type
+            IF (ITYPE.EQ.2) THEN
+              IRGA = ICHMV(IBUFF,NCH+3,NAMEC(1,I),1,6)       ! Move name in
+              IRGA = ICHMV(IBUFF,IRGA,5H,OFF,,1,5)-2         ! Move OFF in
+              IF (NAMEC(5,I).NE.0)                ! Display O2 if present
+     :        IRGA = IB2AS(NAMEC(5,I),IBUFF,IRGA+2,1)+IRGA+1
+            ELSE                ! Display program name and current parameters
+              REG = DSPLN(IBUFF,NCH+3,NAMEC(1,I),1,2H3A)
+              REG = DSPLN(IBUFF,IRGA+2,IAND(NAMEC(4,I),77777B),1,2H1I)
+              REG = DSPLN(IBUFF,IRGA+2,NAMEC(5,I),NAMEC(11,I)-1,2H6U)
+              IRGA = ICHMV(IBUFF,IRGA+1,2H  ,1,1)-2      ! Remove last comma
+            ENDIF
+            IF (NAMEC(12,I).NE.0)             ! Add comment (if any) to line
+     :      IRGA = ICHMV(IBUFF,39,NAMEC(13,I),1,NAMEC(12,I))-1
+            CALL EXEC(2,LU,IBUFF,-IRGA)           ! Display the line
+          ENDDO
+C
+C   8. Handle multi-character commands by any of three different methods.
+C 
+        ELSE IF (IMCTL.EQ.0) THEN
+          ISC = 1
+          DO WHILE (ISC.NE.0)                   !  Remove ESC characters
+            ISC = ISCNC(IBUFF,1,LENIN,33B)
+            IF (ISC.NE.0) LENIN=ICHMV(IBUFF,ISC,IBUFF,ISC+1,LENIN-ISC)-1
+          ENDDO
+C
+C      8.1  "RU," at the beginning of the string means run a program.
+C
+          IF (ICHCM(IBUFF,1,3HRU,,1,3).EQ.0) THEN
+            LENIN = ICHMV(IBUFF,1,IBUFF,4,LENIN-3)-1      ! Remove "RU,"
+            CALL PRSLN(IBUFF,-LENIN,IP)
+            I = 0
+            NOMATCH = .TRUE.
+            DO WHILE (NOMATCH)     ! Look for matching name in program list.
+              I = I+1
+              IF (ICHCM(IP,1,NAMEC(1,I),1,5).EQ.0) THEN
+                NOMATCH = .FALSE.
+                IF (LENIN.GT.5)              ! Replace any parameters in list
+     :          CALL IGPRM (NAMEC(6,I),IP(4),IAND(IP(11),77777B)-1,0)
+                IERR = LPROP(NAMEC(1,I),LU,1)     ! Run the program
+                IF (IERR.LT.0) CALL OPERR(LU,IBUFF,2,IERR,NAMEC(1,I))
+              ELSE IF (I.EQ.ILOC) THEN          !  Program name not in list
+                CALL EXEC(2,LU,34H!! OPRIN: INVALID PROGRAM REQUEST,17)
+                NOMATCH = .FALSE.
+              ENDIF
+            ENDDO
+C
+C      8.2  A string starting with " is a comment; log it.
+C
+          ELSE IF (JCHAR(IBUFF,1).EQ.42B) THEN
+            IF (LENIN.GT.110) LENIN=110
+            CALL LOGIT(IBUFF,LENIN,2H;;,NAMUS)
+C
+C      8.3  Other strings are sent as commands to BOSS.
+C
+          ELSE
+            LBOSID = IDGET(NAMEI(1,NB))
+            IF (LBOSID.EQ.0 .OR. IXGET(LBOSID+8).EQ.0) RETURN
+            CALL EXEC(20,0,IBUFF,-LENIN,2HFS,0,ICLOPR)
+            REG = 0
+            REG = EXEC(IAND(NAMEI(7,NB),37B),NAMEI(1,NB),NAMEI(9,NB),
+     +            NAMEI(10,NB),NAMEI(11,NB),NAMEI(12,NB),NAMEI(13,NB))
+          ENDIF
+        ENDIF
+C
+C   9. Go back to the top and start again.
+C
+      ENDDO
+      RETURN
+      END

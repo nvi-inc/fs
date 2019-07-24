@@ -1,0 +1,148 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE LABEL(IP)    !  CHECK-LABEL COMMAND   <910323.0100>
+C
+C     Calling parameters:
+      DIMENSION IP(1)
+C        On input:   IP(1) = class # of input parameter buffer
+C        On output:  IP(1) = class # of output parameter buffer (if any)
+C                    IP(2) = # of records in class IP(1)
+C                    IP(3) = error #
+C                    IP(4) = subroutine identifier
+C
+C        COMMON BLOCKS USED
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI        !  Contains LTPNUM and LTPCHK
+C
+C        SUBROUTINE INTERFACE:     Called by QUIKR
+C            Calls LNF's character routines and system utilities only.
+C
+C     PROGRAMMER:  ANONYMOUS, MISTS OF ANTIQUITY, STYLE OF LEE FOSTER
+C                             ^^^^^^^^^^^^^^^^^^
+C                             FOGGY REMNANTS OF THE PAST
+C     MODIFIED BY:  LAR, March 1988, for labels read by bar code reader
+C  WHO  WHEN    DESCRIPTION
+C  GAG  910102  Broke compound IF statement concerning PRLAB scheduling
+C               into parts.
+C
+      DIMENSION IPARM(2)
+      DIMENSION IREG(2)
+C        NCHAR  - number of characters in buffer
+C        ICH    - character counter
+      DIMENSION IBUF(40)           !  Class buffer
+      DIMENSION LNUM(4),LCHK(2)
+C                   - holders for tape number, check label
+C                   - program to be RPed, buffer for status request
+      DIMENSION LBARCO(22)                !  Ordered list of legal bar codes
+      EQUIVALENCE (IREG(1),REG), (IPARM(1),PARM)
+      DATA ILEN/80/               !  Length of IBUF in characters
+      DATA LBARCO/'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+% '/
+C 
+C     1. First check out the input class number.  Then get the command 
+C     into a buffer and find the "=" to determine whether to check or 
+C     report the tape info. 
+C 
+      ICLCM = IP(1) 
+      DO I=1,3         !  Set up default output parameters.
+        IP(I)=0
+      ENDDO
+      IP(4) = 2HQA
+      IF (ICLCM.EQ.0) THEN
+        IP(3) = -1
+        RETURN                              !  Zero class number
+      ENDIF
+      REG = EXEC(21,ICLCM,IBUF,-ILEN)
+      NCHAR = MIN0(IREG(2),ILEN)
+      IEQ = ISCNC(IBUF,1,NCHAR,75B)         !  Scan for = sign (ASCII 75B)
+C
+C     2. If there are no parameters (no =), fill a character buffer with the
+C     current tape # and check label, write the buffer to a class, and return
+C     the class number to the calling program.
+C
+      IF (IEQ.EQ.0) THEN
+        NCH = ICHMV(IBUF,NCHAR+1,2H/ ,1,1)
+        NCH = ICHMV(IBUF,NCH,LTPNUM,1,8)
+        NCH = MCOMA(IBUF,NCH)
+        NCH = ICHMV(IBUF,NCH,LTPCHK,1,4) - 1
+        ICLASS = 0
+        CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS)
+        IP(1) = ICLASS
+        IP(2) = 1
+        RETURN
+      ENDIF
+C
+C     3. Read the first parameter, the tape number (not necessarily numeric).
+C
+      ICH = 1+IEQ
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM)
+      IF (JCHAR(PARM,1).EQ.52B.OR.JCHAR(PARM,1).EQ.54B) THEN
+        IP(3) = -101
+        RETURN                              !  Missing or blank tape number
+      ENDIF
+      LENGTH = ICH-IEQ-2
+      IF (LENGTH.NE.8 .AND. LENGTH.NE.10) THEN
+        IP(3) = -201
+        RETURN                              !  Wrong length
+      ENDIF
+      IDUMM1 = ICHMV(LNUM,1,IBUF,1+IEQ,8)            !  Put tape # in LNUM
+C
+C     4. The bar code reading program, RWAND, sends a ten-character tape #
+C     whose last byte is a checksum.  Operators enter eight-character tape
+C     numbers followed by four-character hash codes called check labels.
+C
+      IF (LENGTH.EQ.10) THEN                !  Label from bar code reader
+        ISUM = 30
+        DO I=1,8
+          ISUM = ISUM + ISCNS(LBARCO,1,43,LNUM,I,1)
+        ENDDO
+c       WRITE (1,*) MOD(ISUM,43)
+        IF (MOD(ISUM,43).NE.ISCNS(LBARCO,1,43,IBUF,10+IEQ,1)-1) THEN
+          IP(3) = -202
+          RETURN
+        ENDIF
+      ELSE                                  !  Operator typed in tape #.
+        CALL GTPRM(IBUF,ICH,NCHAR,0,PARM)
+        IF (JCHAR(PARM,1).EQ.52B.OR.JCHAR(PARM,1).EQ.54B) THEN
+          IP(3) = -102
+          RETURN                      !  Missing or blank check label
+        ENDIF
+C       Change any O's in the check label to 0's
+        DO I=1,4
+          IF (JCHAR(PARM,I).EQ.117B) IDUMM1 = ICHMV(PARM,I,60B,2,1)
+        ENDDO
+      ENDIF
+C
+C     5. Generate check label.  If the operator typed the parameters,
+C     compare this check label against the one the operator typed.  Change
+C     O's to zeroes in the tape number whether label was typed or scanned.
+C
+      DO I=1,8
+        IF (JCHAR(LNUM,I).EQ.117B) IDUMM1 = ICHMV(LNUM,I,60B,2,1)
+      ENDDO
+      ICODE = IHASH(LNUM,1,8)
+      LCHK(1) = IH22A(JCHAR(ICODE,1))
+      LCHK(2) = IH22A(ICODE)
+      IF (LENGTH.EQ.8 .AND. ICHCM(LCHK,1,PARM,1,4).NE.0) THEN
+        IP(3) = -202
+        RETURN                              !  Label check failed.
+      ENDIF
+C
+C     6. Now plant the new tape number and check label in COMMON.
+C
+      IDUMM1 = ICHMV(LTPNUM,1,LNUM,1,8)
+      IDUMM1 = ICHMV(LTPCHK,1,LCHK,1,4)
+C
+C     7. Schedule PRLAB to print tape label if next parameter is P.
+C        Queue schedule, no wait.
+C
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM)
+      IF (IPARM.EQ.2HP ) THEN
+C       Find out whether PRLAB is RPed already; if not, RP it
+        IF (IPGST(6HPRLAB ).EQ.-1) THEN
+          IF (IRP(6HPRLAB ,0,IERR,0).LT.0) IP(3)=-301
+        ENDIF
+        IF (IP(3).NE.-301) CALL EXEC(24,6HPRLAB ,LU,2)
+      ENDIF
+      KHALT=.FALSE.       !  Undo BOSS's HALT so the schedule can proceed.
+      RETURN
+      END

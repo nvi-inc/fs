@@ -1,3 +1,0 @@
-:IF,2G,EQ,0,1 
-:RU,COMPC,1G,2G,&PSUBS::4G,N,%PSUBS::5G,0::4G,X 
-:TR 

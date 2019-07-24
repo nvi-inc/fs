@@ -1,0 +1,15 @@
+FTN77,I,Y  
+$CDS ON
+      LOGICAL FUNCTION KEOF(LU,LEN,IPBUF)
+      LOGICAL KFMP
+      CHARACTER*(*) IPBUF
+C
+      INTEGER   LEOF  (  5 )
+C
+      DATA LEOF   /   7,2HEO,2HF ,2Hon,2H_ /
+      KEOF=.FALSE.
+      IF(LEN.GE.0) RETURN
+C
+      KEOF=KFMP(LU,0,LEOF(2),LEOF(1),IPBUF,0,1)
+      RETURN
+      END

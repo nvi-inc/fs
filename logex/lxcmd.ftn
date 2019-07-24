@@ -1,0 +1,61 @@
+FTN77,I,Y  
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C
+C@LXCMD
+C
+      SUBROUTINE LXCMD,READ COMMAND FILE C#870115:05:34#
+C
+C LXCMD - Reads one command entry at a time.
+C
+C MODIFICATIONS:
+C
+C    DATE     WHO  DESCRIPTION
+C    820909   KNM  SUBROUTINE CREATED
+C
+C INPUT VARIABLES:
+C
+C OUTPUT VARIABLES:
+C
+C COMMON BLOCKS USED:
+C
+      INCLUDE LXCOM.FTNI
+C
+C SUBROUTINE INTERFACES:
+C
+C    CALLED SUBROUTINES:
+C
+C    LOGEX - Main program
+C
+C    CALLING SUBROUTINES
+C
+C    File manager package routines
+C
+C LOCAL VARIABLES:
+      INTEGER*2 FBLNK
+C
+C
+C  ****************************************************************
+C
+C  1. Read the Command file and check for a break.
+C
+C  ****************************************************************
+C
+C
+      CALL IFILL(IBUF,1,IBLEN*2,40B)
+      ID = FmpRead(IDCBCM,IERR,IBUF,IBLEN*2)
+      NCHAR=IFLCH(IBUF,IBLEN*2)
+      CALL UPPER(IBUF,1,NCHAR)
+      NCHAR = FBLNK(IBUF,1,NCHAR)
+      ICMWD=(NCHAR+1)/2
+      IF (NCHAR.EQ.0) IL = -1
+      IF(IERR.GE.0) GOTO 100
+      WRITE(LUUSR,9000) IERR,(NAMCM(I),I=1,10)
+9000  FORMAT("LXCMD10 - Error"I3" reading command file "10A2)
+      ICODE=-1
+      GOTO 200
+100   IF(IFBRK(IDUM).LT.0) ICODE=-1
+      IF(ICMD.EQ.1) WRITE(LUUSR,9100) (IBUF(I),I=1,ICMWD)
+9100  FORMAT(1X,36A2)
+200   RETURN
+      END

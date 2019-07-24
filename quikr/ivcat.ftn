@@ -1,0 +1,40 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+C 
+C@IVCAT 
+      FUNCTION IVCAT(IVC,IT,ITN,IREP) 
+C 
+C  INPUT: 
+C     IVC - VC #
+C     ITN - track counter (not used if IREP=-1) 
+C 
+C  OUTPUT:
+C     IT - array with tracks
+C     ITN - updated for next track
+C 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 
+      DIMENSION IT(1),INUM(5) 
+      DATA INUM/1,2,2,28,4/ 
+C 
+      IVCAT = 1 
+      NMOD = INUM(IMODFM+1) 
+      IF (IREP.EQ.3) NMOD = 1 
+      IS = 0
+      ITREM = ITN 
+      DO 110 I = 1,NMOD 
+          ICHK = IVC2T(IVC,IS)
+          IF (ICHK.EQ.0) GOTO 120 
+          IF (IREP.EQ.-1) 101,102 
+101       IT(ICHK) = 100
+          GOTO 103
+102       IT (ITN) = ICHK 
+          IF (I.NE.NMOD) ITN = ITN+1
+103       IS = ICHK+1 
+110       CONTINUE
+      RETURN
+120   IF (IS.EQ.0) IVCAT = 0
+      IF (IS.NE.0.AND.IREP.NE.-1) ITN = ITN-1 
+      RETURN
+      END 

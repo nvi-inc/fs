@@ -1,0 +1,36 @@
+PC - Send a message to the PC
+
+Syntax:   PC=<resp mode>,<trans mode>,<message>
+Response: <response>
+
+Settable parameters:
+<resp mode>: INIT = set up PC LU, set PC clock
+             NRES = ignore response from PC
+             RESP = read and display response from PC
+<trans mode>: DIR = send message directly, as is (default)
+             FRM = format MET, POINT or LOS command before sending
+             Note: only "FRM" is checked for, any other characters
+             are assumed to mean direct mode.
+<message>: character string to be sent to PC
+
+Monitor-only parameters:
+<response>: response from PC if resp mode is RESP
+
+      Comments: This command allows a message to be sent to a
+personal computer connected to the HP1000 via a 12966A card. It
+also allows responses to be received from the PC. Its purpose is
+to allow the WVR TASK software, running on the PC, to be controlled
+by the Field System. That is, TASK commands can be issued by the
+Field System operator or by Field System procedures. Before
+commands can be sent, program PCCOM must first be run with the
+string RU,PCCOM,<LU>, where <LU> is the LU of the PC. This sets up
+the LU and, if TASK is running in the PC, the PC clock is set to
+the time on the HP clock. Issuing the command in the INITI
+procedure will repeat this set up procedure.
+
+In trans mode DIR, <message> is sent unchanged to the PC. In trans
+mode FRM, which may only be used with the MET, POINT or LOS
+commands of TASK, parameters are retrieved from Field System
+Common, loaded into the message buffer in the proper format, and
+sent to the PC. In this case, <message> should consist of only the
+command name, e.g. PC=NRES,FRM,LOS.

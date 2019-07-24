@@ -1,0 +1,24 @@
+ASMB,L,T,C
+        HED     GET SYSTEM TYPE INDICATOR 
+        NAM     NOPSY,7 C#870407:12:00    GET SYSTEM TYPE V=1#
+        EXT     $OPSY 
+        ENT     NOPSY 
+* 
+*               RETURN THE SYSTEM INDICATOR PARAMETER TO THE USER 
+*       THE VALUES RETURNED ARE AS FOLLOWS: 
+* 
+*       A=      -7      RTE-MI
+*               -15     RTE-MII 
+*               -5      RTE-MIII
+*               -3      RTE-II
+*               -1      RTE-III 
+*               -9      RTE-IV
+*               1       DOS 
+* 
+NOPSY   NOP                     ENTRY POINT OF ROUTINE
+        LDA     NOPSY,I         GET RETRUN POINT
+        STA     NOPSY           CORRECT RETURN POINT
+        LDA     AOPSY,I         GET THE VALUE OF SYSTEM TYPE
+        JMP     NOPSY,I         RETURN TO CALLER
+AOPSY   DEF     $OPSY           ADDRESS OF SYSTEM VALUE 
+        END 

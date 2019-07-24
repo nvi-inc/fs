@@ -1,0 +1,135 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE RESET(IP)         !   MAT RESET        <900517.1618>
+C 
+C 1.1.   RESET resets the MAT interface 
+C 
+C     INPUT VARIABLES:
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C        IP(1) - CLASS
+C        IP(2) - # RECORDS
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C 
+C     CALLED SUBROUTINES: GTPRM,IFILL 
+C 
+C 3.  LOCAL VARIABLES 
+C        NCHAR  - number of characters in buffer
+C        ICH    - character counter 
+      DIMENSION IBUF(20)
+C               - class buffer
+C        ILEN   - length of IBUF, chars 
+      DIMENSION IPARM(2)
+C               - parameters returned from GTPRM
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+      DIMENSION IRATE(6),IRIND(6) 
+C               - baud rate selections, and DVB00 indices corresponding 
+C     IB - selected baud rate, in bits
+C     IBIND - selected baud rate, DVB00 index 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 5.  INITIALIZED VARIABLES 
+      DATA ILEN/40/ 
+      DATA NRATES/7/
+      DATA IRATE/110,300,1200,2400,4800,9600/ 
+      DATA IRIND/3,6,7,9,10,11/
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED:  800316
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. If we have a class buffer, then we are to set the baud rate. 
+C     If no class buffer, this is an error. 
+C 
+      ICLCM = IP(1) 
+      IF (ICLCM.EQ.0) THEN
+        IERR = -1
+        GOTO 990
+      ENDIF
+      REG = EXEC(21,ICLCM,IBUF,-ILEN)
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.EQ.0) THEN
+        IERR = -1
+        GOTO 990
+      ENDIF
+C                   If no parameters, ERROR 
+      IF (IEQ.NE.NCHAR.AND.JCHAR(IBUF,IEQ+1).EQ.77B) GOTO 500 
+C 
+C     2. Step through buffer getting each parameter and decoding it.
+C     Command from user has the form:   RESET=<baud>
+C 
+      ICH = 1+IEQ
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF (JCHAR(PARM,1).EQ.52B) THEN
+        IB = IBMAT
+      ELSE IF (JCHAR(PARM,1).EQ.54B) THEN
+        IB = 2400       ! Default is 2400 baud
+      ELSE
+        DO I=1,NRATES         ! Check for legal speed request
+          IF (IPARM(1).EQ.IRATE(I)) THEN
+            IBMAT = IRATE(I)
+            IBIND = IRIND(I)
+            GOTO 300
+          ENDIF
+        ENDDO
+        IERR = -201
+        GOTO 990
+      ENDIF
+C 
+C     3. These values have been planted in COMMON.  Reset MAT interface.
+C 
+300   CONTINUE
+C                   Reset the interface line
+      IPORT = LUMAT - 10*(LUMAT/10)
+      CALL EXEC(3,3000B+LUMAT,41410B+IPORT)       !  Even parity, 50 baud
+      IBUF(1) = 5         !  Mode 5:  direct message to the MATs
+      IBUF(2) = 0         !  Null, which comes through as BREAK
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-3,2HFS,0,ICLASS) 
+      CALL EXEC(23,6HMATCN ,ICLASS,1) 
+      CALL RMPAR(IP)
+C 
+      IPRAM1 = 41400B+8*IBIND+IPORT
+      IF(IBMAT.EQ.110.OR.IBMAT.EQ.9600) IPRAM1=43400B+8*IBIND+IPORT
+      CALL EXEC(3,3000B+LUMAT,IPRAM1)
+C                   Change baud rate to our requested value 
+C                   For 110 and 9600 use two stop bits 
+      ICLASS = 0
+      IBUF(1) = 5 
+      CALL IFILL(IBUF(2),1,38,2HUU) 
+C                   Fill up the buffer with UUUUUUUUUUU's 
+C                   Send string of U's to synch up
+      CALL EXEC(20,0,IBUF,-40,2HFS,0,ICLASS)  
+      CALL EXEC(23,6HMATCN ,ICLASS,1) 
+      CALL RMPAR(IP)
+      RETURN
+C 
+C     5. Return current baud rate setting.
+C 
+500   NCH = ICHMV(IBUF,IEQ,2H/ ,1,1)
+      NCH = NCH + IB2AS(IBMAT,IBUF,NCH,100000B+4) -1
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS)
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = 0 
+      IP(4) = 2HQM
+      RETURN
+C 
+990   IP(1) = 0 
+      IP(2) = 0 
+      IP(3) = IERR
+      IP(4) = 2HQM
+      RETURN
+      END 

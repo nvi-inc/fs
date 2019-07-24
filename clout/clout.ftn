@@ -1,0 +1,18 @@
+FTN77,I,Y
+$CDS ON
+        PROGRAM CLOUT(3,3)                    !  Clear class output buffer.
+        DIMENSION IREG(2),IP(5) 
+        EQUIVALENCE (REG,IREG(1),IRGA),(IREG(2),IRGB)
+C
+        CALL RMPAR(IP)               !  Class # to work on is IP(1)
+        ICLOUT=IOR(IP(1),20000B)       !  Set do-no-deallocate bit.
+1000    CONTINUE
+        REG=EXEC(21,ICLOUT,IBUFF,-2,IR1,IR2,IR3)   !  Get buffer to free SAM
+        IF (IR2.NE.-1) GO TO 1000        !  Check for end of class indicator
+        ICLOUT=IOR(IAND(ICLOUT,117777B),100000B)  !  Deallocate OK; no wait
+        CALL EXEC(21,ICLOUT,IBUFF,-2,IR1,IR2,IR3)      !  Deallocate class #
+C       IDAD=IDGET(6HCLOUT )                  !  Get our ID address
+C       CALL IDOFF(IDGET(6HCLOUT ))           !  Vanish if not in system
+        CALL IDOFF(6HCLOUT ,8)          !  Vanish if not in system
+C       CALL EXEC(6,0,3)
+        END

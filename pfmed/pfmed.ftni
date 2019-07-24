@@ -1,0 +1,8 @@
+C COMMON FOR PFMED     LAST MODIFIED BY GAG  910321
+      LOGICAL KNEWPF,KBOSS_PF
+      CHARACTER*28 LSF1,LSF2,LSF3
+      COMMON /DCBS/ IDCB1(656),IDCB2(656),IDCB3(656),IDCBX,ISIZE,
+     .              LSF1,LSF2,LSF3,KNEWPF,KBOSS_PF
+C               - DCB buffers, DCB size
+C               - scratch file names [[PRC1, [[PRC2, [[PRC3
+C               - flag which tells BOSS there's a new active procedure file

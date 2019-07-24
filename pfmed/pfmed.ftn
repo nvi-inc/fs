@@ -1,0 +1,223 @@
+FTN77,I,Y  
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+$ALIAS RNRQ,NOABORT
+$FILES 1,1
+C
+      PROGRAM PFMED (3,99)
+C
+C 1.  PFMED PROGRAM SPECIFICATION
+C
+C 1.1.   PFMED is a simplified FMGR and EDITR for use in the Mark III field
+C        system.  FMGR features are described in FFM and FFMP,
+C        EDITR features in FED.
+C
+C 1.2.   RESTRICTIONS - Only SNAP procedures may be accessed.
+C
+C 1.3.   REFERENCES - Field system manual
+C
+C 2.  PFMED INTERFACE
+C
+C 2.1.   CALLING SEQUENCE: none
+C
+C 2.2.   COMMON BLOCKS USED:
+C
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+C        LPRC   - current schedule procedure library
+C        LNEWSK - next version of procedure file
+C        LNEWPR - next version of station procedure file
+C
+      INCLUDE PFMED.FTNI
+C
+C 2.3.   DATA BASE ACCESSES: none
+C
+C 2.4.   EXTERNAL INPUT/OUTPUT
+C
+C     INPUT VARIABLES:
+C
+C     RMPAR      - (1) INPUT LU - DEFAULT = 1
+C                  (2) OUTPUT LU - DEFAULT = INPUT
+C
+C     TERMINAL   - IB
+C
+C     OUTPUT VARIABLES: ending message
+C
+C 2.5.   SUBROUTINE INTERFACE:
+C
+C     CALLING SUBROUTINES: none
+C
+C     CALLED SUBROUTINES: RMPAR, EXEC, FED, FFM, FFMP, PFCOP
+C
+C 3.  LOCAL VARIABLES
+C
+C        ICHI   - number of characters from keyboard
+C        LPROC  - active procedure file for PFMED
+      DIMENSION IB(51)
+C               - line and record buffer
+      DIMENSION IMPAR(5)
+C               - RMPAR parameters from RU or EXEC schedule
+      CHARACTER*12 LPROC,L1
+      INTEGER*2 FNBLNK,IPOS
+      INTEGER*2 TRIMLEN
+      LOGICAL KERR,KEX,KBOSS
+C
+C 4.  CONSTANTS USED
+C
+      DIMENSION LCOL(5)
+      CHARACTER*34 LDEF
+      CHARACTER*54 LMDISP
+      CHARACTER*102 CIB,CIB1
+  
+C
+      DATA LCOL   /2H&,2HdB,2H:,2H&d,2H@_/
+C               - FMGR-like prompt with reverse video
+C               - ending message - PFMED ENDED
+      DATA LDEF   /'DEFINE  NNNNNNNNNNNN  00000000000 '/
+C               - DEFINE record - 12 char name begins col. 9,
+C                 time field YYDDDHHMMSS begins col. 23
+C
+C 5.  INITIALIZED VARIABLES
+C
+      DATA IB /51*0/, LPROC /' '/
+C
+C 6.  PROGRAMMER: C. Ma
+C     LAST MODIFIED: <910521.2126>
+C     MODIFIED 840307 BY MWH To add opening messages about procedure files
+C     MODIFIED 890505 BY MWH To support CI rather than FMGR files
+C  WHO  WHEN    DESCRIPTION
+C  GAG  901031  Restructured loop locking files for duration.
+C  GAG  901228  Changed IDGET calls to KBOSS calls to see if BOSS is running.
+C  GAG  910104  Changed KBOSS call back to IPGST call before scheduling
+C               BOSS
+C
+C     PROGRAM STRUCTURE
+C
+C     Set input and output LU's.
+      CALL RMPAR(IMPAR)
+      LUI=IMPAR(1)
+      IF (LUI.EQ.0) LUI=1
+      LUO=IMPAR(2)
+      IF(LUO.EQ.0) LUO=LUI
+      KBOSS_PF=KBOSS()
+C
+C     If the Field System is not running, check to see if BOSS is
+C     present.
+C
+      LSTP = 'STATION'
+      IF (.NOT.KBOSS_PF) THEN
+        CALL RNRQ(140001B,IRNPRC,ISTAT,*1)
+C  THIS RNRQ CALL HAS 100000=NO WAIT,40000=NO ABORT,1=LOCK LOCALLY
+1       CONTINUE
+        IF (ISTAT.EQ.6) THEN
+          WRITE(LUI,'("Another copy of PFMED is already running")')
+          GOTO 990
+        ELSE IF(ISTAT.EQ.-1) THEN
+          CALL RNRQ(140021B,IRNPRC,ISTAT,*2)
+C  THIS RNRQ CALL HAS 100000=NO WAIT,40000=NO ABORT,20=ALLOCATE GLOBALLY
+C   AND 1=LOCK LOCALLY
+2         continue
+          IF(ISTAT.EQ.-1) THEN
+            WRITE(LUI,'("Error allocating resorce")')
+            GOTO 990
+          ELSE IF(ISTAT.NE.2) THEN
+            write(lui,'("Unexpected error allocating RN ",I7)') ISTAT
+            go to 990
+          ENDIF
+        ELSE IF(ISTAT.NE.2) THEN
+          write(lui,'("Unexpected error locking RN ",I7)') ISTAT
+          GOTO 990
+        ENDIF
+        LPRC='NONE'
+C        LSTP='NONE'
+      ELSE
+        CALL RNRQ(140001B,IRNPRC,ISTAT,*3)
+3       CONTINUE
+        IF (ISTAT.EQ.6) THEN
+          WRITE(LUI,9100)
+9100      FORMAT("BOSS OR PFMED HAS THE RN LOCKED. TRY AGAIN LATER.")
+          GOTO 990
+        ELSE IF(ISTAT.EQ.-1) THEN
+          WRITE(LUI,'("Error locking rescource number")')
+          GOTO 990
+        END IF
+      ENDIF
+C
+C     Set active procedure file for PFMED to schedule procedure file or
+C     station procedure file.
+C
+      LPROC = LPRC
+      IF(LPROC.EQ.'NONE') LPROC=LSTP
+C
+C  Print messages about current procedure files
+C
+      LMDISP = 'Current active schedule procedure file: ' // LPRC(1:12)
+      WRITE(LUI,'(A54)')LMDISP
+      if (kboss_pf) then
+        LMDISP = 'Current active station procedure file:  '// LSTP(1:12)
+        WRITE(LUI,'(A54)')LMDISP
+      else
+        LMDISP = 'Current active station procedure file:  NONE'
+        WRITE(LUI,'(A54)')LMDISP
+      endif
+      LMDISP = 'Procedure file currently open in PFMED: '//
+     .    LPROC(1:12)
+      WRITE(LUI,'(A54)')LMDISP
+C     Copy current procedure file to scratch file 3.
+      KNEWPF = .FALSE.
+      CALL PFCOP(LPROC,LUI,ID)
+C     Prompt and read input line with echo.
+100   WRITE(LUI,'(10A)') LCOL
+      CALL IFILL(IB,1,40,40B)
+      CIB1 = ' '
+      CIB = ' '
+      READ(LUI,'(A)') CIB1
+      ICHI = 0
+      IPOS = 1
+      IPOS = FNBLNK(CIB1,IPOS)
+      NCH = TRIMLEN(CIB1)
+      IF (NCH.GT.0) THEN
+        CIB = CIB1(IPOS:NCH)
+      END IF
+      ICHI = TRIMLEN(CIB)
+C     If nothing entered, re-prompt.
+      IF (ICHI.GT.0) THEN
+        CALL CASEFOLD(CIB)
+        CALL CHAR2HOL(CIB,IB,1,ICHI)
+C     If EX or ::, exit.
+        IF (IB.EQ.2HEX .OR. IB.EQ.2H::) GO TO 900
+C     Check mode.
+        IF (IB.EQ.2HED) THEN
+          IERR = 0
+          CALL FED(LUI,LUO,IB,ICHI,LPROC,LDEF)
+        ELSE IF (IB.EQ.2HPF) THEN
+          CALL FFM(LUI,LUO,IB,ICHI,LPROC,LPRC,LSTP,LNEWSK,LNEWPR)
+        ELSE
+          CALL FFMP(LUI,LUO,IB,ICHI,LPROC,LDEF)
+        ENDIF
+      END IF
+      GOTO 100
+C     Exit.
+900   CONTINUE
+      CALL FmpClose(IDCB3,IERR)
+      IF(KERR(IERR,'PFMED','Closing',' ',0,0)) CONTINUE
+      IF (((KBOSS_PF).AND.(.NOT.KBOSS())).AND.(KNEWPF)) THEN !BOSS was 'offed'
+        IF (LNEWSK.NE.' ') CALL REPRC(LNEWSK)
+        IF (LNEWPR.NE.' ') CALL REPRC(LNEWPR)
+      ENDIF
+      CALL RNRQ(140004B,IRNPRC,ISTAT,*980)  !Unlock only
+980   CONTINUE
+      IF(ISTAT.NE.1) THEN
+         WRITE(LUI,'("Unexpected error unlocking RN ",I7)') ISTAT
+         goto 990
+      ENDIF
+990   INQUIRE(FILE=LSF2,EXIST=KEX)
+      IF (KEX) THEN
+        IERR = FmpPurge(LSF2)
+        IF(KERR(IERR,'PFMED','Purging',' ',0,0)) CONTINUE
+      END IF
+      WRITE(LUI,9300)
+9300  FORMAT('PFMED ENDED')
+      IF (KNEWPF.and.(IPGST(6HBOSS  ).NE.-1))
+     .    CALL EXEC(10,6HBOSS  ,2HPF)
+      END

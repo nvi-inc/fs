@@ -1,0 +1,32 @@
+FTN77,I,Y
+$CDS ON
+        INTEGER FUNCTION IPGST(NAME),C#870407:12:16    GET PGM STATUS#
+C
+        DIMENSION NAME(3)
+C
+C       This routine returns the status of program NAME where the
+C       value will be the contents of the status field in the IDSEG
+C       if it is present else -1 will be returned.
+C
+        IPGST=-1
+C
+C               GET IDSEG ADDRESS
+C
+        IDAD=IDGET(NAME)
+C
+C               CHECK PROGRAM IS PRESENT
+C
+        IF(IDAD .EQ. 0)GO TO 99999
+C
+C               GET PROGRAM STATUS
+C
+        ISTAT = 0
+        IERR = IDINFO(IDAD,NAME,ISTAT,1,1)
+        IF (IERR.LT.0) GOTO 99999
+C
+        IPGST = ISTAT
+C
+99999   CONTINUE
+C
+        RETURN
+        END

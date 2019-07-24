@@ -1,0 +1,21 @@
+FTN77,I,Y  
+$CDS ON
+      SUBROUTINE PSETO(IBUF,IXMINI,IXMAXI,IYMINI,IYMAXI)
+      DIMENSION IBUF(1) 
+C 
+C  SET Object window limits (plotter units window limits) 
+C 
+      COMMON/PPLOT/ICHARS,IWIDX,IWIDY,
+     +             IXMIN,IXMAX,IYMIN,IYMAX, 
+     +             XMIN,XMAX,YMIN,YMAX, 
+     +             ROTAT(2,2) 
+C 
+C     WRITE(1,9956) IXMINI,IXMAXI,IYMINI,IYMAXI                          DEBUG
+C9956  FORMAT(" PSETO: IXMINI,IXMAXI,IYMINI,IYMAXI ",4I7)                DEBUG
+C 
+      IXMIN=IXMINI
+      IYMIN=IYMINI
+      IXMAX=IXMAXI
+      IYMAX=IYMAXI
+      RETURN
+      END 

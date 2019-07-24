@@ -1,0 +1,316 @@
+FTN77,I,Y
+$ALIAS /FSCOM/ , NOALLOCATE
+$CDS ON
+      SUBROUTINE FLUX(IP,NSUB)
+C
+C     Set and display FLUX values
+C
+      INCLUDE /FS/INCLUDE/FSCOM.FTNI
+C
+      DIMENSION IP(1)
+      DIMENSION IREG(2),IPARM(2)
+      DIMENSION IBUF(40)
+      INTEGER*2 IMDL
+      REAL*4 ARR(6)
+C
+      EQUIVALENCE (IREG(1),REG),(IPARM(1),PARM)
+C
+      DATA ILEN/80/
+C
+      IMDL=0
+      DO I=1,6
+        ARR(I)=0.0
+      ENDDO
+C
+      INDTMP=NSUB-2
+C
+      ICLCM = IP(1)
+      REG = EXEC(21,ICLCM,IBUF,-ILEN)
+      NCHAR = IREG(2)
+      IEQ = ISCNC(IBUF,1,NCHAR,75B)
+      IF (IEQ.EQ.0) GOTO 500
+C
+C     2. Parse the command:
+C
+C  FLUX=GAUSSIAN,<flux1>,<major1>,<minor1>,<flux2>,<major2>,<minor2>
+C  FLUX=DISK,<flux>,<diameter>
+C  FLUX=TWOPOINTS,<flux1>,<seperation>,<flux2>
+C
+C     2.1 First get the model name
+C
+C
+220   CONTINUE
+      ICH=IEQ+1
+      IC2=ICH
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM)
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) GOTO 225
+      IF (JCHAR(PARM,1).NE.52B) GOTO 221
+      IF(INDTMP.EQ.1) THEN
+        IMDL=IMDL1FX_FS
+      ELSE
+        IMDL=IMDL2FX_FS
+      ENDIF
+C                   Pick up the model from common
+      GOTO 229
+221   CONTINUE
+      CORR=1.0
+      FLX=-3.0
+C  there is no default for the model, so assume the user doesn't want one
+      GOTO 301
+225   CONTINUE
+      IMDL=-1
+      IF(ICHCM(IBUF,IC2,10HGAUSSIAN  ,1,MIN(10,ICH-IC2-1)).EQ.0) IMDL=1
+      IF(ICHCM(IBUF,IC2,10HDISK      ,1,MIN(10,ICH-IC2-1)).EQ.0) IMDL=2
+      IF(ICHCM(IBUF,IC2,10HTWOPOINTS ,1,MIN(10,ICH-IC2-1)).EQ.0) IMDL=3
+C
+229   CONTINUE
+      IF(IMDL.GE.0.AND.IMDL.LE.3) GO TO 230
+      IERR=-403
+      GOTO 990
+C
+C  2.3 second parameter value, a flux
+C
+230   CONTINUE
+      CALL GTPRM(IBUF,ICH,NCHAR,2,PARM,IERR)
+      IF(IERR.NE.0) THEN
+        IERR=-411
+        GOTO 990
+      ENDIF
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) GOTO 235
+      IF (JCHAR(PARM,1).NE.52B) GOTO 231
+      IF(INDTMP.EQ.1) THEN
+        ARR(1)=ARR1FX_FS(1)
+      ELSE
+        ARR(1)=ARR2FX_FS(1)
+      ENDIF
+C                   Pick up the flux from common
+      GOTO 240
+231   CONTINUE
+      IERR=-404
+C                   there is no default for the flux
+      GOTO 990
+235   CONTINUE
+      ARR(1)=PARM
+      GO TO 240
+C
+C 2.4 third parameter, an angle
+C
+240   CONTINUE
+      IC1=ICH
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM)
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) GOTO 245
+      IF (JCHAR(PARM,1).NE.52B) GOTO 241
+      IF(INDTMP.EQ.1) THEN
+        ARR(2)=ARR1FX_FS(2)
+      ELSE
+        ARR(2)=ARR2FX_FS(2)
+      ENDIF
+C                   Pick up the angle from common
+      GOTO 250
+241   CONTINUE
+      IERR=-405
+C                   there is no default for the angle
+      GOTO 990
+245   CONTINUE
+      CALL GTRAD(IBUF,IC1,ICH-2,4,ARR(2),IERR)
+      IF (IERR.GE.0.AND.ARR(2).GT.0.0) GOTO 250
+      IERR = -406
+      GOTO 990
+C
+C  2.5 third parameter, angle for model 1 and 4
+C
+250   CONTINUE
+      IC1=ICH
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM)
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) GOTO 255
+      IF (JCHAR(PARM,1).NE.52B) GOTO 251
+      IF(INDTMP.EQ.1) THEN
+        ARR(3)=ARR1FX_FS(3)
+      ELSE
+        ARR(3)=ARR2FX_FS(3)
+      ENDIF
+C                   Pick up the value from common
+      GOTO 260
+251   CONTINUE
+      IF(IMDL.EQ.1) THEN
+        ARR(3)=ARR(2)
+      ELSE
+        ARR(3)=0.0
+      ENDIF
+C                   pick correct default
+      GOTO 260
+255   CONTINUE
+      CALL GTRAD(IBUF,IC1,ICH-2,4,ARR(3),IERR)
+      IF (IERR.GE.0.AND.ARR(3).GT.0.0) GOTO 260
+      IERR = -407
+      GOTO 990
+C
+C 2.6 fifth parameter: flux for model 4
+C
+260   CONTINUE
+      CALL GTPRM(IBUF,ICH,NCHAR,2,PARM,IERR)
+      IF(IERR.NE.0) THEN
+        IERR=-412
+        GOTO 990
+      ENDIF
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) GOTO 265
+      IF (JCHAR(PARM,1).NE.52B) GOTO 261
+      IF(INDTMP.EQ.1) THEN
+        ARR(4)=ARR1FX_FS(4)
+      ELSE
+        ARR(4)=ARR2FX_FS(4)
+      ENDIF
+C                   Pick up the value from common
+      GOTO 270
+261   CONTINUE
+      ARR(4)=0.0
+C                default is zero
+      GOTO 270
+265   CONTINUE
+      ARR(4)=PARM
+      GO TO 270
+C
+C 2.7 sixth parameter: angle for model 1
+C
+270   CONTINUE
+      IC1=ICH
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM)
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) GOTO 275
+      IF (JCHAR(PARM,1).NE.52B) GOTO 271
+      IF(INDTMP.EQ.1) THEN
+        ARR(5)=ARR1FX_FS(5)
+      ELSE
+        ARR(5)=ARR2FX_FS(5)
+      ENDIF
+C                   Pick up the angle from common
+      GOTO 280
+271   CONTINUE
+      ARR(5)=0.0
+C                   default is zero
+      GOTO 280
+275   CONTINUE
+      CALL GTRAD(IBUF,IC1,ICH-2,4,ARR(5),IERR)
+      IF (IERR.GE.0.AND.ARR(5).GT.0.0) GOTO 280
+      IERR = -408
+      GOTO 990
+C
+C 2.8 7th parameter: angle for model 1
+C
+280   CONTINUE
+      IC1=ICH
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM)
+      IF (JCHAR(PARM,1).NE.52B.AND.JCHAR(PARM,1).NE.54B) GOTO 285
+      IF (JCHAR(PARM,1).NE.52B) GOTO 281
+      IF(INDTMP.EQ.1) THEN
+        ARR(6)=ARR1FX_FS(6)
+      ELSE
+        ARR(6)=ARR2FX_FS(6)
+      ENDIF
+C                   Pick up the angle from common
+      GOTO 300
+281   CONTINUE
+      ARR(6)=ARR(5)
+C                   default is previous parameter
+      GOTO 300
+285   CONTINUE
+      CALL GTRAD(IBUF,IC1,ICH-2,4,ARR(6),IERR)
+      IF (IERR.GE.0.AND.ARR(6).GT.0.0) GOTO 300
+      IERR = -409
+      GOTO 990
+C
+C     3. Plant the variables in COMMON.
+C
+300   CONTINUE
+C
+C     3.1 first calculate effective flux
+C
+      BM=BEAMSZ_FS(INDTMP)
+      IF(BM.LT.4.8E-8) THEN
+        IERR=-410
+        GOTO 990
+      ENDIF
+      FX=FLXVL(IMDL,ARR,BM,CORR)
+301   CONTINUE
+      IF(INDTMP.EQ.1) THEN
+        IMDL1FX_FS=IMDL
+        DO I=1,6
+          ARR1FX_FS(I)=ARR(I)
+        ENDDO
+        COR1FX_FS=CORR
+        FLX1FX_FS=FX
+      ELSE
+        IMDL2FX_FS=IMDL
+        DO I=1,6
+          ARR2FX_FS(I)=ARR(I)
+        ENDDO
+        COR2FX_FS=CORR
+        FLX2FX_FS=FX
+      ENDIF
+      IERR = 0
+C
+990   IP(1) = 0
+      IP(2) = 0
+      IP(3) = IERR
+      IP(4) = 2HQO
+      RETURN
+C
+C     5. Return the values for display
+C
+500   NCH = ICHMV(IBUF,NCHAR+1,2H/ ,1,1)
+      IF(INDTMP.EQ.1) THEN
+        IMDL=IMDL1FX_FS
+        DO I=1,6
+          ARR(I)=ARR1FX_FS(I)
+        ENDDO
+        CORR=COR1FX_FS
+        FX=FLX1FX_FS
+      ELSE
+        IMDL=IMDL2FX_FS
+        DO I=1,6
+          ARR(I)=ARR2FX_FS(I)
+        ENDDO
+        CORR=COR2FX_FS
+        FX=FLX2FX_FS
+      ENDIF
+C
+      IF(IMDL.EQ.1) THEN
+        NCH=ICHMV(IBUF,NCH,10HGAUSSIAN  ,1,8)
+      ELSE IF(IMDL.EQ.2) THEN
+        NCH=ICHMV(IBUF,NCH,10HDISK      ,1,4)
+      ELSE IF(IMDL.EQ.3) THEN
+        NCH=ICHMV(IBUF,NCH,10HTWOPOINTS ,1,9)
+      ENDIF
+      NCH=MCOMA(IBUF,NCH)
+C
+      NCH=NCH+IR2AS(ARR(1),IBUF,NCH,10,1)
+      NCH=MCOMA(IBUF,NCH)
+C
+      NCH=NCH+IR2AS(ARR(2)*180./PI,IBUF,NCH,10,4)
+      NCH=MCOMA(IBUF,NCH)
+C
+      NCH=NCH+IR2AS(ARR(3)*180./PI,IBUF,NCH,10,4)
+      NCH=MCOMA(IBUF,NCH)
+C
+      NCH=NCH+IR2AS(ARR(4),IBUF,NCH,10,1)
+      NCH=MCOMA(IBUF,NCH)
+C
+      NCH=NCH+IR2AS(ARR(5)*180./PI,IBUF,NCH,10,4)
+      NCH=MCOMA(IBUF,NCH)
+C
+      NCH=NCH+IR2AS(ARR(6)*180./PI,IBUF,NCH,10,4)
+      NCH=MCOMA(IBUF,NCH)
+C
+      NCH = NCH + IR2AS(CORR,IBUF,NCH,10,3)
+      NCH=MCOMA(IBUF,NCH)
+C
+      NCH = NCH + IR2AS(FX,IBUF,NCH,10,1)
+C
+      ICLASS = 0
+      NCH = NCH - 1
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS)
+      IP(1) = ICLASS
+      IP(2) = 1
+      IP(3) = 0
+      IP(4) = 2HQO
+      RETURN
+      END

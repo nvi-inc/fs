@@ -1,0 +1,186 @@
+FTN77,I,Y
+$CDS ON
+      SUBROUTINE PKHD(HD,ICOUNT,NSAMP,ODEV,VLTPOS,PEAKV,MPER,IP,ECHO,LU,
+     &                KPEAK,PMIN)
+      INTEGER*2 HD,ICOUNT,NSAMP,ODEV,IP(5),LU
+      REAL*4 VLTPOS,PEAKV,MPER,PMIN
+      LOGICAL*2 ECHO,KPEAK
+C
+C  PKHD: Peak High Density Head
+C
+C  INPUT:
+C     HD: Head to move for peaking, 1 or 2
+C     ICOUNT: NUMBER OF TIMES TO PEAK
+C     NSAMP: Samples to make for each power measurement, positive
+C     ODEV: Channel to monitor power of, odd or even
+C     PMIN: minimum power to accepted as a good peak
+C
+C  OUTPUT:
+C     VLTPOS: Voltage of peak response poistion
+C     PEAKV: Peak power voltage
+C     MPER: lowest sample at peak as a percentage of peak
+C     IP: Field System return parameters
+C
+C  The model of power response is two lines with slopes of the
+C  same absolute value, but oppisite sign.  The peak response is at
+C  the intersection of the two lines.
+C
+      INTEGER*2 IPASS(2),IOFF(2),I,IMAX,IMIN,J,STEP
+      REAL*4 MICNOW(2),MICOLD,VOLTS,MINPER,POS(3),PWR(3),M1,M2,B1,B2
+      REAL*4 MICPK,TEMP,LVSIG,LVAVG,LVSUM,LVSUM2,WIDE,PWRPK
+      LOGICAL*2 KWIDE
+      DATA IPASS/2*0/,IOFF/8,-8/
+C
+      DO J=1,ICOUNT
+C
+C  get power and current location
+C
+      CALL MIC_READ(HD,IPASS,MICNOW,IP)
+      IF(IP(3).NE.0) RETURN
+C
+      CALL GET_POWER(ODEV,NSAMP,VOLTS,MINPER,IP)
+      IF(IP(3).NE.0) RETURN
+C
+      POS(2)=0.0
+      MICOLD=MICNOW(HD)
+      PWR(2)=VOLTS
+      IF(ECHO) THEN
+        WRITE(LU,91) MICNOW(HD),VOLTS,MINPER
+91      FORMAT(3f10.3)
+      ENDIF
+C
+C  now try to bracket peak, take two more samples
+C  go off IOFF(1), if power is lower there,
+C                     then next point is in the oppisite direction
+C                  if power is higher there,
+C                     then next point is in the same direction
+C                     and rearrange the values in memory
+C
+      DO I=1,2
+        STEP=IOFF(I)
+        MICNOW(HD)=MICOLD+STEP
+        IF(I.EQ.2.AND.PWR(1).GT.PWR(2)) THEN
+          STEP=IOFF(1)
+          MICNOW(HD)=MICOLD+2*STEP
+          TEMP=PWR(1)
+          PWR(1)=PWR(2)
+          PWR(2)=TEMP
+          TEMP=POS(1)
+          POS(1)=POS(2)
+          POS(2)=TEMP
+        ENDIF
+C
+        CALL SET_MIC(HD,IPASS,MICNOW,IP,2.7)
+        IF(IP(3).NE.0) RETURN
+C
+        CALL MIC_READ(HD,IPASS,MICNOW,IP)
+        IF(IP(3).NE.0) RETURN
+C
+        CALL GET_POWER(ODEV,NSAMP,VOLTS,MINPER,IP)
+        IF(IP(3).NE.0) RETURN
+C
+        POS(2*(I-1)+1)=MICNOW(HD)-MICOLD
+        PWR(2*(I-1)+1)=VOLTS
+        IF(ECHO) THEN
+          WRITE(LU,91) MICNOW(HD),VOLTS,MINPER
+        ENDIF
+      ENDDO
+C
+C HAVE WE should have braketted the peak, but if not search on:
+C
+      I=0
+      DO WHILE(PWR(3).GT.PWR(2).AND.I.LE.ABS(40/STEP))
+        I=I+1
+        PWR(1)=PWR(2)
+        POS(1)=POS(2)
+        PWR(2)=PWR(3)
+        POS(2)=POS(3)
+        MICNOW(HD)=MICOLD+(2+I)*STEP
+C
+        CALL SET_MIC(HD,IPASS,MICNOW,IP,2.7)
+        IF(IP(3).NE.0) RETURN
+C
+        CALL MIC_READ(HD,IPASS,MICNOW,IP)
+        IF(IP(3).NE.0) RETURN
+C
+        CALL GET_POWER(ODEV,NSAMP,VOLTS,MINPER,IP)
+        IF(IP(3).NE.0) RETURN
+C
+        POS(3)=MICNOW(HD)-MICOLD
+        PWR(3)=VOLTS
+        IF(ECHO) THEN
+          WRITE(LU,91) MICNOW(HD),VOLTS,MINPER
+        ENDIF
+      ENDDO
+C
+C Now we estimate the peak location, assuming noiseless (ha, ha) data.
+C Using the response model mentioned above, the lower of the two
+C outside points and the center point should be on the same line.
+C We get that line's slope and intercept. Then assume the other outside
+C point is on the other line (it might not be, but we'll worry about it
+C latter) and gets its slope, negative of the first by assumption, and
+C intercept. Then find the peak posiiton as the intersection of the two
+C lines.
+C
+      M1=(PWR(1)-PWR(2))/(POS(1)-POS(2))
+      M2=(PWR(3)-PWR(2))/(POS(3)-POS(2))
+      IMAX=3
+      IF(abs(M2).gt.abs(M1)) IMAX=1
+      IMIN=4-IMAX
+      M1=(PWR(IMIN)-PWR(2))/(POS(IMIN)-POS(2))
+      B1=PWR(IMIN)-M1*POS(IMIN)
+      M2=-M1
+      B2=PWR(IMAX)-M2*POS(IMAX)
+      MICPK=(B1-B2)/(M2-M1)
+      PWRPK=(M2*B1-M1*B2)/(M2-M1)
+C
+C Now, what can go wrong: (I) The power (measured) at point 1 is garunteed
+C to have less power than point (2). Suppose point (1) and point (2)
+C actually should be reversed, this would imply that the two points
+C are actually at about the same response on opposite sides of the peak .
+C (at least to the level of measurement noise). Then the third point
+C will be down a long way, assuming the step size times the response
+C slope is large compared to the noise. Which will give a reasonable
+C estimate of the slope and the larger outside point WILL lie on the second
+C line.
+C (II) Suppose the larger outside point is not on the second line, actually
+C all three points are on the same line. The intersection will occur at the
+C third point. Suppose the third point lies above or below the first
+C line, i.e. the lines should be collinear, but the third point is
+C noisy, then this algorithm would treat it as two distinct lines.
+C If the larger outside point is below the line, the algorihtm
+C will estimate a peak near the larger outside points, but interior
+C to the endpoints. If it's above the line the intersction will lie
+C somewhere outside the intersection, in fact maybe a long way, so we
+C will simple require that the "peak" must be on the interval defined by
+C the endpoints.  This at least puts us closer to the peak than we were
+C before.
+C (III) Suppose the response curve is flat in this area. Then there is
+C no information to look for a peak with.  Since we can't predict a prior
+C what a responable slope should be, limiting the peak position to within
+C the endpoints saves us from shooting off aimlessly.
+C
+      MICPK=MAX(MICPK,MIN(POS(1),POS(2),POS(3)))
+      MICPK=MIN(MICPK,MAX(POS(1),POS(2),POS(3)))
+      MICPK=MICPK+MICOLD
+C
+      MICNOW(HD)=MICPK
+C
+C Get the voltage position and power at the estimated peak slope
+C
+      CALL SET_MIC(HD,IPASS,MICNOW,IP,0.40)
+      IF(IP(3).NE.0) RETURN
+      IF(ECHO.OR.J.EQ.ICOUNT) THEN
+        CALL GET_ATOD(HD,VLTPOS,IP)
+        IF(IP(3).NE.0) RETURN
+C
+        CALL GET_POWER(ODEV,NSAMP,PEAKV,MPER,IP)
+        IF(IP(3).NE.0) RETURN
+C
+        KPEAK=ABS(MICPK-(POS(2)+MICOLD)).LT.5.4.AND.PEAKV.GE.PMIN
+        IF(ECHO) WRITE(LU,99) MICNOW(HD),VLTPOS,PEAKV,MPER,KPEAK,PWRPK
+99      FORMAT(" ",4F10.3,L7,F10.3)
+      ENDIF
+      ENDDO
+C
+      END

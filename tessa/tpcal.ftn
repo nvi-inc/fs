@@ -1,0 +1,144 @@
+FTN77,I,Y
+$CDS ON
+$ALIAS /FSCOM/ , NOALLOCATE
+      subroutine tpcal                      !  last update LAR <890625.0017>
+c
+c  Test phase-cal amplitudes and spurious signals
+c
+c  Called subroutines:  copin,logit,exec(2),susp,confg,dump,LFNCH routines
+c
+      include /fs/include/fscom.ftni
+c  Common contents used:
+c       lusa       logical unit for spectrum analyzer or signal averager
+c       modsa      model number of above
+c       lu         logical unit for operator's console
+c       lvsens     sensitivity level of spectrum analyzer display
+c       intamp     integration time, in seconds
+c       son2lo,son2hi    limits of acceptable phase cal SNRs
+c       sof2hi     maximum acceptable leakage with phase cal off
+c
+      parameter (nvc = 14, lenmsg = 20, oflw = 1.e+10)
+c       nvc        number of video converters
+c       lenmsg     length of message to operator, in words
+c       oflw       threshold for overflow (or underflow) from 3582A
+c
+      dimension resp(2),lonoff(0:1),levset(2),lopmsg(lenmsg),lmess(19)
+      dimension ibuf(10)              !  buffer for signal averager response
+c       resp       response from dump (only resp(1) is used)
+c       lopmsg     message telling operator to flip phase cal switch
+c       lonoff     last two characters of lopmsg (FF or N ;to follow O)
+c       levset     message setting spectrum analyzer's sensitivity
+c       lmess      message for logit
+c
+      data lopmsg/2hOp,2her,2hat,2hor,2h -,2h P,2hle,2has,2he ,2htu,
+     &            2hrn,2h t,2hhe,2h p,2hha,2hse,2h c,2hal,2h O,2h--/
+      data lmess/2hVC,2h--,2h p,2hha,2hse,2h c,2hal,2h-t,2ho-,2hno,
+     &           2his,2he ,2hra,2hti,2ho:,2h--,2h-.,2h--,2h-%/
+      data lonoff,levset/2hN ,2hFF,2hAS,2h--/
+c
+c       ivc       index of video converter under examination
+c       ionoff    0 when phase cal should be off, 1 when it should be on
+c       signal    dB reading at phase cal frequency (10 kHz)
+c       synch     dB reading at a multiple of 200 Hz near but not at 10 kHz
+c       dbvhz     dB reading at an undistinguished frequency over root BW
+c       corfac    fraction of signal at 10 kHz not found 200 Hz away
+c       snr       voltage ratio of phase cal to system noise (expressed as %)
+c
+c
+c  1. Set video converters to their usual frequencies.
+c
+      call copin(5hSETUP,-5)
+c
+c  2. Set the SA to look at a 500 Hz range around 10 kHz.
+c
+      if (modsa.eq.3582) then
+        call exec(2,lusa,35hPRS,MN1,SP9,MD3,AD10000,SH1,NU3,AV2,-35)
+        call ib2as(lvsens,levset,3,100002B)
+        call exec(2,lusa,levset,-3-(lvsens/10))
+      else
+        call exec(2,lusa,15hFREQ:SPAN 400Hz,-15)
+        call exec(2,lusa,15hTRAC1:RES SPEC1,-15)
+        call exec(2,lusa,15hDISP1:AXIS LOGM,-15)
+        call exec(2,lusa,13hAVER:TYPE RMS,-13)
+      endif
+c
+c  3. Select each video converter in turn.
+c
+      do ionoff=1,0,-1
+        do ivc=1,nvc
+          call confg(2hRE,ivc,ivc)
+c
+c  4. Read amplitude (in dbV) at the phase cal tone of 10 kHz.
+c
+          if (modsa.eq.3582) then
+            call exec(2,lusa,12hMP125,MB0,RE,-12)
+            call susp(2,intamp)
+            call dump(2hMK,resp)
+            signal = resp(1)
+          else
+            call exec(2,lusa,14hINIT:STAT STAR,-14)
+            call susp(2,intamp)
+            call exec(2,lusa,14hINIT:STAT PAUS,-14)
+            call exec(2,lusa,24hDISP1:SCAL:UNIT "DBVRMS",-24)
+            call exec(2,lusa,11hMARK1 10kHz,-11)
+            call exec(2,lusa,11hMARK1:AMPL?,-11)
+            signal = das2b(ibuf,1,iscnc(ibuf,1,20,10)-1,ierr)
+          endif
+c
+c  5. Read amplitude 200 Hz away so as to subtract synch pulse amplitude.
+c
+          if (modsa.eq.3582) then
+            call exec(2,lusa,5hMP25,,-5)
+            call dump(2hMK,resp)
+            synch = resp(1)
+          else
+            call exec(2,lusa,12hMARK1 9800Hz,-12)
+            call exec(2,lusa,11hMARK1:AMPL?,-11)
+            synch = das2b(ibuf,1,iscnc(ibuf,1,20,10)-1,ierr)
+          endif
+c
+c  6. Read noise amplitude in dbV per root Hz at a nearby frequency.
+c
+          if (modsa.eq.3582) then
+            call exec(2,lusa,9hMP171,MB1,-9)
+            call dump(2hMK,resp)
+            dbvhz = resp(1)
+          else
+            call exec(2,lusa,13hMARK1 10090Hz,-13)
+            call exec(2,lusa,11hMARK1:AMPL?,-11)
+            dbvhz = das2b(ibuf,1,iscnc(ibuf,1,20,10)-1,ierr)
+          endif
+          if (signal.ge.oflw .or. synch.ge.oflw .or. dbvhz.ge.oflw) then
+            call logit(0,0,0,1,-24,2hTE,ivc)
+          else
+            if (signal.le.synch) then
+              snr = 0.
+            else
+              corfac = 1.-10**(.05*(synch-signal))
+              snr = 10**((signal-dbvhz)*.05)*corfac/14.14     !  2 MHz BW
+            endif
+c
+c  7. Log SNR and check that value is within tolerance limits.
+c
+            call ib2as(ivc,lmess,3,40402B)
+            call ir2as(snr,lmess,31,-7,3)
+            call logit(lmess,38)
+            if (ionoff.eq.1) then
+              if (snr.lt.son2lo) call logit(0,0,0,1,-22,2hTE,ivc)
+              if (snr.gt.son2hi) call logit(0,0,0,1,-21,2hTE,ivc)
+            else
+              if (snr.gt.sof2hi) call logit(0,0,0,1,-23,2hTE,ivc)
+            endif
+          endif
+        enddo
+c
+c  8. Ask operator to turn phase cal OFF.  Repeat measurements, then ask
+c     operator to return the phase cal to its normal ON state.
+c
+        lopmsg(lenmsg) = lonoff(ionoff)
+        call exec(2,lu,lopmsg,-lenmsg*2)
+        call confg(2h!!)                    !  WAKEUP command
+      enddo
+c
+      return
+      end

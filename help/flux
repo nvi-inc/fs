@@ -1,0 +1,69 @@
+FLUX1, FLUX2, - Set flux parameters for a source.
+
+Syntax:   FLUX1=<model>,<flux1>,<angle1>,<angle2>,
+            <flux2>,<angle3>,<angle4>
+          FLUX2=<model>,<flux1>,<angle1>,<angle2>,
+            <flux2>,<angle3>,<angle4>
+RESPONSE: FLUX1=<model>,<flux1>,<angle1>,<angle2>,
+            <flux2>,<angle3>,<angle4>,<corr>,<aflux>
+          FLUX2=<model>,<flux1>,<angle1>,<angle2>,
+            <flux2>,<angle3>,<angle4>,<aflux>
+
+Settable parameters:
+<model>:  source model, one of GAUSSIAN, DISK, or TWOPOINTS
+<flux1>:  flux density of the first source component, Janskys
+<angle1>: first angular dimension of the first component
+<angel2>: second angular dimension of the first component
+<flux2>:  flux density of the second source component, Janskys
+<angle3>: first angular dimension of the second component
+<angle4>: second angular dimension of the second component
+
+Monitor-only parameters:
+<corr>:   correction divisor
+<aflux>:  apparent flux density 
+
+      Comments: Two source models may be specified with these two
+commands. Normally this would be used for IF1 and IF2. The commands
+FLUX1 and FLUX2 use the source model and the beam size specified
+by BEAM1 or BEAM2 respectively to calculate the apparent flux
+density . The parameter <model> determines which model is used and
+which parameters have meaning. Parameters which have no meaning for
+given model will not be displayed before the <corr> parameter.
+
+If <model> is GAUSSIAN, then the source is assumed to consist of
+up to two, possibly elliptical, Gaussian brightness distributions.
+<flux1> gives the flux density value for the first component.
+<angle1> and <angle2> specify the diameters along the two principal
+axes. <angle2> defaults to <angel1>. <flux2> gives the flux density
+value for a second concentric optional Gaussian distribution,
+default value 0. <angle3> and <angle4> give the principal axes of
+the second component. <angle4> defaults to <angle3>.
+
+If <model> is TWOPOINTS, then the source is assumed to consist of
+two equally bright points. <flux1> is the total flux density of
+the two points. <angle1> is their angular separation.
+
+If <model> is DISK, then the source is assumed to consist of a
+uniform circular disk brightness distribution. <flux1> is the total
+flux density. <angle1> is the diameter of the disk.
+
+Once the model is specified, the FLUXn command will use the
+appropriate beam size to calculate the apparent flux density of the
+source when the beam is centered on the brightness distribution.
+The approximations given in Dave Shaffer's antenna check-out memo
+are used to compensate for the finite size of the sources relative
+to the beam. Note that these are only approximations and become
+very poor as the correction divisor approaches a value of two.
+Further note that very few sources are correctly represented by one
+of these three models. This command gives a crude approximation to
+the true apparent flux density.
+
+Issuing a SOURCE=... or a BEAMn=... command will automatically
+change the value of the <aflux> parameters to be a negative,
+invalid, number until a correct FLUXn=... command is issued again.
+It is recommended that procedures that include the SOURCE=...
+command and the appropriate FLUXn=... commands be used to command
+sources when doing flux density measurements.
+
+See the description of the FIVEPT and ONOFF commands for more
+details on the use of the apparent flux density values.
