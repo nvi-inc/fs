@@ -63,6 +63,7 @@ struct pmdl *pmodel;
       break;
     case 13:
       if (pmodel->ipar[13] != 0) f=sinx;
+      break;
  } 
     return f;
 }

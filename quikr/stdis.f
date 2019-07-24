@@ -5,7 +5,8 @@ C
       dimension ip(1) 
       dimension ireg(2) 
       integer get_buf
-      integer*2 ibuf(20),ibuf2(50),it(28) 
+      integer*2 ibuf(20),ibuf2(50)
+      integer it(28)
       logical kdata,kcom
       equivalence (ireg(1),reg) 
       data ilen/40/,ilen2/100/
