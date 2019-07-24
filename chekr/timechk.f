@@ -13,7 +13,7 @@ C     TIMTOL - tolerance on comparison between formatter and HP
 C
 C  INITIALIZED:
 C
-      data timtol/200/
+      data timtol/100/
 C                   time tolerance in centi-seconds
 C
 C
@@ -46,13 +46,13 @@ C
 C*****************THE REAL THING*******************
 C
       diff_bef=(secs_fm-secs_bef)*100+it(1)-centisec(1)
-      diff_aft=(secs_aft-secs_fm)*100+centisec(2)-it(7)
+      diff_aft=(secs_aft-secs_fm)*100+centisec(2)-it(1)
 C
-      diff_both=diff_aft-diff_bef
+      diff_both=diff_aft+diff_bef
 
       if(diff_both.gt.2*timtol) then
         ierror = -328
-      else if(diff_bef.gt.timtol.or.diff_aft.gt.timtol) then
+      else if(diff_bef.lt.-timtol.or.diff_aft.lt.-timtol) then
         ierror = -329
       endif
 C
