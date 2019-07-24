@@ -88,6 +88,7 @@ long ip[5];
   for (i=0;i<4;i++)
      add_req(&buffer, &request);
 
+  request.type=0;
   request.data=0;                                   /* set array index */
   request.addr=0xC8; add_req(&buffer,&request);
   request.data=12;                                   /* set array index */

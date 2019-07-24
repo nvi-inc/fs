@@ -30,11 +30,11 @@ long ip[5];
       } else if (kcom){
          lclc.dir = shm_addr->idirtp;
          lclc.speed = shm_addr->ispeed;
-         lclc.rec = shm_addr->ienatp;
+         lclc.rec = shm_addr->venable.general;
       } else {
          opn_res(&buffer,ip);
          get_res(&response, &buffer); mcb5vst(&lclc, response.data);
-         lclc.rec = shm_addr->ienatp;
+         lclc.rec = shm_addr->venable.general;
          get_res(&response, &buffer); mcb1vst(&lclc, response.data);
          if(response.state == -1) {
             clr_res(&buffer);

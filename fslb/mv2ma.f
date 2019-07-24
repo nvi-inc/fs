@@ -1,12 +1,12 @@
       subroutine mv2ma(ibuf,idir,isp,lgen)
 
-C  convert mv data to mat buffer c#870407:12:39#
+C  convert mv data to mat buffer
 C 
 C  INPUT: 
 C 
       integer*2 ibuf(1) 
 C      - buffer to be formatted 
-      dimension lgen(1) 
+      integer*2 lgen(1) 
 C      - rate generator, ASCII 720 or 880 
 C     IDIR - direction
 C     ISP - speed 

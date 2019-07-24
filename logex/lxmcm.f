@@ -86,7 +86,7 @@ C
       if (nstx.eq.0) goto 50
       write(luusr,9100) (lc(k,inxkey),k=1,4),((lscx(j,i),j=1,6),i=1,nstx
      .)
-9100  format(4a2,"="4(6a2,","),6a2)
+9100  format(1x,4a2,"="4(6a2,","),6a2)
       goto 500
 50    call po_put_c(' none specified')
       goto 500

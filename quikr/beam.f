@@ -3,6 +3,7 @@ C
 C     Set and display RF beamwidth, FWHM
 C
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C
       dimension ip(1)
       dimension ireg(2),iparm(2)
@@ -16,7 +17,11 @@ C
 C
       data ilen/40/
 C
-C  NRV 920226 Get LO freq. from shm
+C  HISTORY:
+C  WHO  WHEN    WHAT
+C  NRV  920226  Get LO freq. from shm
+C  gag  920713  Added a check for Mark IV along with checking Mark III
+C
 
       indtmp=nsub
 C
@@ -42,7 +47,7 @@ C                   Pick up the size from common
       call fs_get_rack(rack)
       indf=indtmp 
       if(indtmp.eq.1) then
-        if (MK3.eq.iand(MK3,rack)) then
+        if((MK3.eq.iand(MK3,rack)).or.(MK4.eq.iand(MK4,rack))) then
           call fs_get_inp1if(inp1if)
           indf=indtmp+inp1if*3
         endif
@@ -51,7 +56,7 @@ C                   Pick up the size from common
 c     write(6,101) flo,fup,indf
 101   format(/' flo,fup,indf=',2f10.3,i5/)
       else
-        if (MK3.eq.iand(MK3,rack)) then
+        if((MK3.eq.iand(MK3,rack)).or.(MK4.eq.iand(MK4,rack))) then
           call fs_get_inp2if(inp2if)
           indf=indtmp+inp2if*3
         endif
@@ -96,7 +101,7 @@ C
 C     5. Return the beamsize for display
 C
 500   nch = ichmv(ibuf,nchar+1,2h/ ,1,1)
-      bo=beamsz_fs(indtmp)*180./pi
+      bo=beamsz_fs(indtmp)*180./RPI
       nch = nch + ir2as(bo,ibuf,nch,10,4)
 C
       iclass = 0

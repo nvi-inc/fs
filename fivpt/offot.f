@@ -4,20 +4,21 @@
       integer*2 lbuf(1)
 C
        include '../include/fscom.i'
+       include '../include/dpi.i'
 C
       icnext=1
       icnext=ichmv(lbuf,1,8Hoffset  ,1,7)
 C
-      icnext=icnext+jr2as(lonpos*180.0/pi,lbuf,icnext,-9,4,isbuf)
+      icnext=icnext+jr2as(lonpos*180.0/RPI,lbuf,icnext,-9,4,isbuf)
       icnext=ichmv(lbuf,icnext,2H  ,1,1)  
 C 
-      icnext=icnext+jr2as(latpos*180.0/pi,lbuf,icnext,-9,4,isbuf)     
+      icnext=icnext+jr2as(latpos*180.0/RPI,lbuf,icnext,-9,4,isbuf)     
       icnext=ichmv(lbuf,icnext,2H  ,1,1)  
 C 
-      icnext=icnext+jr2as(lonoff*180.0/pi,lbuf,icnext,-9,5,isbuf)     
+      icnext=icnext+jr2as(lonoff*180.0/RPI,lbuf,icnext,-9,5,isbuf)     
       icnext=ichmv(lbuf,icnext,2H  ,1,1)  
 C
-      icnext=icnext+jr2as(latoff*180.0/pi,lbuf,icnext,-9,5,isbuf)
+      icnext=icnext+jr2as(latoff*180.0/RPI,lbuf,icnext,-9,5,isbuf)
       icnext=ichmv(lbuf,icnext,2H  ,1,1)
 C
       icnext=icnext+ib2as(ilon,lbuf,icnext,2)

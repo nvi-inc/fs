@@ -1,20 +1,19 @@
-tpi - total power integrators, cal off
+tpi - read back total power integrators, caloff
+
 Syntax:      tpi=list
 
 Response:    tpi/readings
 
 
 Settable parameters:
-list            list of total power integrators to read back.
-                Standard detector mnemonics allowed.
+list           list of total power integrators to read back. Standard detector
+               mnemonics allowed.
 
 Monitor-only parameters:
-readings              List of readings, counts. These values are
-                      stored for use by the tsys1 and tsys2
-                      commands.
+readings            List of readings, counts. These values are stored for
+                    use by the tsys1 and tsys2 commands.
 
 Comments: 
-Only USB or LSB total power readings are accepted; if another
-total power selection has been set up with the vc command, the
-reading is returned as -1. It is assumed the noise calibration signal
-is off.
+Only USB or LSB total power readings are accepted; if another total power
+selection has been set up with the vc command, the reading is returned as -1.
+It is assumed the noise calibration signal is off.

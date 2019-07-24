@@ -1,11 +1,14 @@
 #include <string.h>
+#include <stdio.h>
 #include <sys/types.h>
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
 #define INEXT_N 3
+#define KENASTK_N 2
 #define LFEET_N 6
+#define LGEN_N 4
 #define LNEWPR_N 8
 #define LNEWSK_N 8
 #define LPRC_N 8
@@ -20,9 +23,10 @@
 #define IDEVANT_N 64
 #define IDEVGPIB_N 64
 #define IDEVLOG_N 320
+#define RXLCODE_N 240    /* total characters, 6 chars*40 entries */
 #define IDEVMCB_N 64
-#define HORAZ_N  60
-#define HOREL_N  60
+#define HORAZ_N  4*MAX_HOR
+#define HOREL_N  4*MAX_HOR
 
 extern struct fscom *shm_addr;
 
@@ -607,6 +611,23 @@ void fs_get_inext_(INEXT)
 	    *(INEXT++)=shm_addr->INEXT[i];
 	}
 
+void fs_set_kena_(KENASTK)
+	int *KENASTK;
+        
+	{
+          int i;
+          for(i=0;i<KENASTK_N;i++)
+	    shm_addr->KENASTK[i]=*(KENASTK++);
+	}
+
+void fs_get_kena_(KENASTK)
+	int *KENASTK;
+	{
+          int i;
+	  for(i=0;i<KENASTK_N;i++)
+	    *(KENASTK++)=shm_addr->KENASTK[i];
+	}
+
 void fs_set_irdytp_(IRDYTP)
 	int *IRDYTP;
 	{
@@ -809,7 +830,7 @@ void fs_set_ichvlba_(ichvlba,N)
 	   shm_addr->check.bbc[*N-1] = *ichvlba;
            break;
          case 17 : case 18 :
-	   shm_addr->check.dist[*N-1] = *ichvlba;
+	   shm_addr->check.dist[*N-17] = *ichvlba;
            break;
          case 19 :
 	   shm_addr->check.vform = *ichvlba;
@@ -830,7 +851,7 @@ void fs_get_ichvlba_(ichvlba,N)
            *ichvlba = shm_addr->check.bbc[*N-1];
            break;
          case 17 : case 18 :
-	   *ichvlba = shm_addr->check.dist[*N-1];
+	   *ichvlba = shm_addr->check.dist[*N-17];
            break;
          case 19 :
 	   *ichvlba = shm_addr->check.vform;
@@ -907,6 +928,22 @@ void fs_get_lfeet_fs_(LFEET_FS)
           size_t N;
 	  N = LFEET_N;
 	  memcpy(LFEET_FS,shm_addr->LFEET_FS,N);
+	}
+
+void fs_set_lgen_(lgen)
+	int *lgen;
+	{
+          size_t N;
+	  N = LGEN_N;
+	  memcpy(shm_addr->lgen,lgen,N);
+	}
+
+void fs_get_lgen_(lgen)
+	int *lgen;
+	{
+          size_t N;
+	  N = LGEN_N;
+	  memcpy(lgen,shm_addr->lgen,N);
 	}
 
 void fs_set_lnewpr_(LNEWPR)
@@ -1288,3 +1325,71 @@ void fs_get_bbc_source_(source,n)
 	{
           *source=shm_addr->bbc[*n].source;
 	}
+
+void fs_set_rxvfac_(vfac,N)
+	float *vfac;
+	int *N;
+	{
+	  shm_addr->rxvfac[*N-1] = *vfac;
+	}
+
+void fs_get_rxvfac_(vfac,N)
+	float *vfac;
+	int *N;
+	{
+	  *vfac = shm_addr->rxvfac[*N-1];
+	}
+
+void fs_set_rxvoff_(voff,N)
+	float *voff;
+	int *N;
+	{
+	  shm_addr->rxvoff[*N-1] = *voff;
+	}
+
+void fs_set_rxlcode_(rxlcode)
+	char *rxlcode;
+	{
+          size_t N;
+	  N = RXLCODE_N;
+	  memcpy(shm_addr->rxlcode,rxlcode,N);
+/*{ int i;
+fprintf(stdout,"prog set: N=%d shm->rxlcode[0-6],[7-13]=",N);
+for (i=0;i<6;i++) fprintf(stdout,"%c",shm_addr->rxlcode[0][i]);
+for (i=0;i<6;i++) fprintf(stdout,"%c",shm_addr->rxlcode[1][i]);
+fprintf(stdout,"\n");
+}*/
+	}
+
+void fs_get_rxlcode_(rxlcode)
+	char *rxlcode;
+	{
+          size_t N;
+	  N = RXLCODE_N;
+	  memcpy(rxlcode,shm_addr->rxlcode,N);
+/*{ int i;
+fprintf(stdout,"prog get: rxlcode[0-6],[7-13]=");
+for (i=0;i<6;i++) fprintf(stdout,"%c",rxlcode[i]);
+for (i=7;i<13;i++) fprintf(stdout,"%c",rxlcode[i]);
+fprintf(stdout,"\n");
+}*/
+	}
+/*
+void fs_set_rxlcode_(rxlcode,N)
+	char *rxlcode[6];
+	int *N;
+	{
+	  memcpy(shm_addr->rxlcode[*N-1][0],*rxlcode,6);
+	}
+*/
+void fs_set_rxncodes_(rxncodes)
+	int *rxncodes;
+	{
+	  shm_addr->rxncodes = *rxncodes;
+	}
+void fs_get_rxncodes_(rxncodes)
+	int *rxncodes;
+	{
+	  *rxncodes = shm_addr->rxncodes;
+	}
+

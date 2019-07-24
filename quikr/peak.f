@@ -12,6 +12,12 @@ C
       character cjchar
       data ilen/100/
 C
+C HISTORY:
+C  WHO  WHEN    WHAT
+C  gag  920714  made read head selection for the head parameter valid
+C               for a Mark IV drive along with a Mark III drive.
+C  nrv  921027  Change from stack 0/1 to 1/2 for Mark IV
+C
       ichold=-99
       iclass=0
       nrec=0
@@ -68,12 +74,16 @@ C   Head to move
 C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       call fs_get_drive(drive)
-      if(ichcm_ch(parm,1,'r').eq.0.and.MK3.eq.iand(drive,MK3)) then
+      if (((ichcm_ch(parm,1,'r').eq.0).or.
+     .     (ichcm_ch(parm,1,'2').eq.0)).and.
+     .  ((MK3.eq.iand(drive,MK3)).or.(MK4.eq.iand(drive,MK4)))) then
         ihd = 2
-      else if(ichcm_ch(parm,1,'r').eq.0) then
+      else if((ichcm_ch(parm,1,'r').eq.0).or.
+     .        (ichcm_ch(parm,1,'2').eq.0)) then
         ip(3)=-501
         goto 990
-      else if(ichcm_ch(parm,1,'w').eq.0) then
+      else if((ichcm_ch(parm,1,'w').eq.0).or.
+     .        (ichcm_ch(parm,1,'1').eq.0)) then
         ihd = 1
       else if(cjchar(parm,1).eq.'*') then
         ihd=ihdpk_fs

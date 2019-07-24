@@ -13,6 +13,7 @@ C         IP(4) - who we are
 C 
 C  COMMON BLOCKS USED:
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C 
 C  LOCAL VARIABLES: 
 C 
@@ -106,8 +107,8 @@ C  Handle LOS here
       call fs_get_alat(alat)
       call fs_get_wlong(wlong)
       call cnvrt(1,radat,decdat,daz,del,it,alat,wlong)
-      az = daz*180./pi 
-      el = del*180./pi 
+      az = daz*180./RPI 
+      el = del*180./RPI 
       if(iscn_ch(ibuf,icom,nchar,'=').ne.0) el = 90.0
       if (az.ge.0..and.az.le.360.) goto 275 
         ierr = -7 

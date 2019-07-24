@@ -4,9 +4,6 @@ C
 C     GTNAM returns the index of the given word in one of 3 
 C              lists, and which list. 
 C 
-C     LAST MODIFIED BY LLOYD RAWLEY, 5 JANUARY 1988:
-C       CHECK NAME AGAINST ACTUAL PROCEDURE NAMES INSTEAD OF HASH CODES
-C
 C     INPUT VARIABLES:
 C 
       integer*2 ias(1)
@@ -36,6 +33,11 @@ C        NCHAR  - number of characters in word
 C        LMATCH - copy of input character string
       integer ichcm, ichmv, rack, drive
       integer*2 lmatch(6)
+C
+C  HISTORY:
+C  WHO  WHEN    WHAT
+C  LAR  880105  CHECK NAME AGAINST ACTUAL PROCEDURE NAMES INSTEAD OF 
+C               HASH CODES
 C
 C
 C     1. Write blank-filled left-justified word into LMATCH.

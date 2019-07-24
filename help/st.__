@@ -5,26 +5,54 @@ Response:    st/direction,speed,record
 
 
 Settable parameters:
-direction          for to move tape forward, rev to move in
-                   reverse. No default. When the tape is
-                   stopped, this parameter is displayed in the
-                   response as rev for Mark III, 0 for VLBA.
-speed              Tape speed in inches per second, either
-                   nominal or actual. Choices are: 
-                   Nominal: 3 7 15 30 60 120 240
-                   Actual: 3.375 7.875 16.875 33.75
-                           67.5 135 270
-                   No default. When the tape is stopped, this
-                   parameter is reported as 0.
-record             on to record; off to disable recording.
-                   Default is on.
+direction         for to move tape forward, rev to move in reverse. No
+                  default. When the tape is stopped, this parameter is
+                  displayed in the response as rev for Mark III and IV.
+speed             Tape speed in inches per second, either nominal or actual.
+                  Choices for Mark III and VLBA are:
+                  Nominal:  3    7 15   30   60   120  240
+                  Actual:   3.375  7.875   16.875    33.75  
+                            67.5   135     270
+                  For Mark IV recording, additional choices are: 0, 5,
+                  10, 20, 40, 80, 160, 320. No default. When the
+                  tape is stopped, this parameter is reported as 0. For Mark
+                  IV recorders, a requested tape speed of 0 and record on
+                  will enable the write heads but will not move the tape.
+record            on to record; off to disable recording. Default is on.
 
 Monitor-only parameters: none
 
 Comments: 
-The tape is started moving. For Mark III, the record bit is enabled
-if record is on. For VLBA, the track groups are enabled if
-record is on; they are disabled if record is off. For both
-systems, reproduce mode is not changed and the state of the low
-tape sensor is not changed.
+The tape is started moving. For Mark III, the record bit is enabled if record
+is on. For Mark IV, the general record bit is enabled and the record bit for
+each enabled stack is enabled if record is on. For VLBA, the track groups
+are enabled if record is on; they are disabled if record is off. For all
+systems, reproduce mode is not changed and the state of the low tape sensor
+is not changed. For Mark III speeds, the rate generator is set to 720, for Mark
+IV speeds it is set to 853.
 
+For all recorders, the vacuum is checked before the command is issued to the
+recorder. If the vacuum state is not ready, no further commands are sent.
+Vacuum is not checked if speed is 0.
+
+A given tape speed of 0 does not move tape but does enable write heads, thus
+making bypass mode useful. To see the time displayed on the decoder front
+panel while the tape is stopped, set up the desired reproduce tracks with the
+repro command and then issue the command st=for,0,on.
+
+Examples:
+st=for,320                    #94(>
+                              #94=%80000001$
+                              #94=)F8530000$
+st=for,135                    #94(>
+                              #94=%80000000$
+                              #94=)E7200000$
+st=rev,160                    #94(>
+                              #94=%80000001$
+                              #94=)68530000$
+st=rev,80,off                 #94(>
+                              #94=%00000001$
+                              #94=)58530000$
+
+
+ 

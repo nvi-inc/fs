@@ -16,11 +16,10 @@ temp            temperature of cal signal, in degrees K.
 Monitor-only parameters: none
 
 Comments: 
-Two calibration temperatures, for either Mark III or VLBA
-systems, may be specified with the caltemp1/2 and
-caltempa/b commands, respectively. Normally this would be
-used for the two IF distributor channels. The commands tsys1/2
-and tsysa/b use the temperatures specified as caltemp1/2 and
-caltempa/b respectively. The two command pairs,
-caltemp1/caltempa and caltemp2/caltempb are
+Two calibration temperatures, for either Mark III or VLBA systems, may
+be specified with the caltemp1/2 and caltempa/b commands,
+respectively. Normally this would be used for the two IF distributor
+channels. The commands tsys1/2 and tsysa/b use the temperatures
+specified as caltemp1/2 and caltempa/b respectively. The two
+command pairs, caltemp1/caltempa and caltemp2/caltempb are
 synonomous.

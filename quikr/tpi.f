@@ -4,8 +4,10 @@ C
 C   TPI gets the total power integrator readings and stores 
 C     them in common. 
 C 
-C     DATE   WHO CHANGES
-C     810909 NRV Added VC zero capability 
+C  HISTORY:
+C  WHO  WHEN    WHAT 
+C  NRV  810909  Added VC zero capability 
+C  gag  920714  Added Mark IV as a valid rack along with Mark III.
 C 
 C     INPUT VARIABLES:
       dimension ip(1) 
@@ -59,7 +61,7 @@ C
 C                     Retain class for later response
       call fs_get_rack(rack)
 
-      if (MK3 .eq. iand(rack,MK3)) then
+      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
         call tplis(ip,itpis)
       else if (VLBA .eq. iand(rack,VLBA)) then
         call tplisv(ip,itpis_vlba)
@@ -76,8 +78,7 @@ C
       nrec = 0
       iclass = 0
 
-      if (MK3 .eq. iand(rack,MK3)) then
-
+      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
         do i=1,16
          if(itpis(i).ne.0.and.(i.le.15.or.(i.eq.16.and.itpis(15).eq.0)))
      &      then
@@ -113,7 +114,7 @@ C
       if (ieq.eq.0) ieq=nchar+1
       nch = ichmv(ibuf,ieq,2h/ ,1,1)
 C                     Get the command part of the response set up
-      if(MK3.eq.iand(rack,MK3)) then
+      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
         call tpput(ip,itpis,isub,ibuf,nch,ilen)
       else
         call fc_tpput_vlba(ip,itpis_vlba,isub,ibuf,nch,ilen)

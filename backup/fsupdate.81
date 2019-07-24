@@ -1,0 +1,89 @@
+# This is the update script for Field System version 8.1
+# Created by G. Gregorich 921106
+# Modified by N. Vandenberg 921124
+#
+# !! IMPORTANT !! You must create the user "dos" before running this script
+#
+echo "******************************************************************"
+echo "*  This is the UPDATE script for Field System version 8.1        *"
+echo "*  Refer to instructions in the Update Notice for version 8.1.   *"
+echo "*  You must already have created the user 'dos'.                 *"
+echo "******************************************************************"
+echo "\nNOTE: This script will OVERWRITE files in the /usr2/fs "
+echo "      directory while restoring the standard distributed "
+echo "      files from the floppy."
+echo "\nIf you want to do a fresh, complete installation of the Field System"
+echo "which first removes all old files, use the fsinstall.81 script instead."
+echo "\nDo you wish to continue with the UPDATE? (y=yes, n=no) : \c" 
+badans=true
+while [ "$badans" = "true" ]
+do
+  read ans
+  case "$ans" in
+    y|yes) echo "\nO.K. Continuing with install ... "
+           badans=false
+           ;;
+    n|no)  echo "\nO.K. Exiting."
+           exit
+           ;;
+    *)     echo "\nPlease answer with y=yes or n=no : \c"
+  esac
+done
+
+# UNCOMPRESS THE CPIO FILES FROM THE DISTRIBUTION DISKETTE
+/usr/bin/X11/uncompress fsc.cpio.Z
+/usr/bin/X11/uncompress fsd.cpio.Z
+/usr/bin/X11/uncompress fsf.cpio.Z
+/usr/bin/X11/uncompress fsi.cpio.Z
+/usr/bin/X11/uncompress fsm.cpio.Z
+/usr/bin/X11/uncompress fso.cpio.Z
+/usr/bin/X11/uncompress fsp.cpio.Z
+# WRITE ALL THE FILES USING CPIO
+cpio -Bicmuvd < fsc.cpio
+cpio -Bicmuvd < fsd.cpio
+cpio -Bicmuvd < fsf.cpio
+cpio -Bicmuvd < fsi.cpio
+cpio -Bicmuvd < fsm.cpio
+cpio -Bicmuvd < fso.cpio
+cpio -Bicmuvd < fsp.cpio
+# COPY DEFAULT STPGM.CTL CONTROL FILE (new control file)
+cd /usr2/fs/st/control
+cp stpgm.ctl /usr2/control/.
+# COPY THE SYSTEM MISCELLANEOUS FILES TO THEIR RESPECTIVE DIRECTORIES
+# A NEW REMAKE FILE
+cd /usr2/fs/misc
+cp remake /usr2/fs/.
+cp rmdoto /usr2/fs/.
+# COPY THE DEFAULT ACCOUNT FILES TO THE HOME DIRECTORIES OF OPER, PROG, 
+# AND DOS USERS
+# For 8.1 update, copy only .exrc and .cshrc, others remain unchanged.
+#   OPER
+cd /usr2/fs/oper
+cp exrc /usr2/oper/.exrc
+cp cshrc /usr2/oper/.cshrc
+cd /usr2/oper
+chown oper .exrc
+chown oper .cshrc
+#   PROG
+cd /usr2/fs/oper
+cp exrc /usr2/prog/.exrc
+cp cshrc /usr2/prog/.cshrc
+cd /usr2/prog
+chown prog .exrc
+chown prog .cshrc
+#   DOS
+cd /usr2/fs/oper
+cp cshrc /usr2/dos/.cshrc
+cp exrc /usr2/dos/.exrc
+cp login /usr2/dos/.login
+cd /usr2/dos
+chown dos .*
+# CHANGE THE OWNERSHIP OF ALL SOURCE CODE AND RELATED FILES TO PROG
+cd /usr2/fs
+find . -print | xargs chown prog
+cd /usr2/st
+find . -print | xargs chown prog
+# CHANGE TO OWNERSHIP OF THESE FILES TO ROOT  !!! VERY IMPORTANT !!!
+cd /usr2/fs/setb
+chown root *
+cd /tmp/fs

@@ -18,7 +18,7 @@ C
 C  LOCAL VARIABLES:
 C
       real*4 volts(8)
-      dimension iparm(2),ireg(2),ipas(2)
+      dimension iparm(2),ireg(2)
       integer*2 ibuf(40),ibuf2(40)
       integer get_buf
       equivalence (reg,ireg(1)),(parm,iparm(1))

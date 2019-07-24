@@ -361,7 +361,7 @@ C
         if (fxfp_fs.gt.0.0) then
           sefd=temps*(fxfp_fs/lnpar(1))
           call fs_get_diaman(diaman)
-          ae=lnpar(1)*2.0*1.380662e0/(fxfp_fs*1e-3*dpi*(diaman/2.0)**2)
+          ae=lnpar(1)*2.0*1.380662e0/(fxfp_fs*1e-3*DPI*(diaman/2.0)**2)
           aedts=1000.*ae/temps
         endif
       endif

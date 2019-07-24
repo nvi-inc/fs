@@ -13,6 +13,9 @@ C     910104 GAG Added RNRQ call before changing procedure file with
 C                PROC= command.
 C     910205 GAG Removed calls to QUIK1 and QUIK2 and added call to
 C                QUIKR.
+C     920910 gag Increased the constant in the min0 call parameter of
+C                logit4 call for the TI, time list, command print out.
+C     920922 gag Consolidated quikr routines back into one program.
 C
       include '../include/fscom.i'
 C
@@ -249,7 +252,7 @@ C                   5.6 XLOG,XDISP,ECHO,CHECK commands
 C                   5.10 TERMINATE command
 C                   5.11 FLUSH command
 C                   5.12 SY command
-C                   5.13 TS command
+C                   5.13 TI command
 C                   5.14 BREAK command
 C                   5.15 PROC command
 C                   5.16 LIST command
@@ -314,28 +317,13 @@ C
      .                   ip(4),ip(5))
         else if (ichcm_ch(lnames(7,index),1,'qk').eq.0) then
           isub = lnames(9,index)/100
-          if (isub.ge.1.and.isub.le.6) then
-            call run_prog('quika','wait',iclass,lnames(9,index),ip(3),
-     .                   ip(4),ip(5))
-            call read_quikr
-          else if (isub.ge.7.and.isub.le.12) then
-            call run_prog('quikb','wait',iclass,lnames(9,index),ip(3),
-     .                   ip(4),ip(5))
-            call read_quikr
-          else if (isub.ge.13.and.isub.le.16) then
-            call run_prog('quikc','wait',iclass,lnames(9,index),ip(3),
-     .                   ip(4),ip(5))
-            call read_quikr
-          else if (isub.ge.18.and.isub.le.21) then
-            call run_prog('quikd','wait',iclass,lnames(9,index),ip(3),
+          if (isub.ge.1.and.isub.le.21) then
+            call run_prog('quikr','wait',iclass,lnames(9,index),ip(3),
      .                   ip(4),ip(5))
             call read_quikr
           else if (isub.ge.22) then
             call run_prog('quikv','wait',iclass,lnames(9,index),ip(3),
      .                   ip(4),ip(5))
-cxx          else
-cxx            call run_prog('quikr','wait',iclass,lnames(9,index),ip(3),
-cxx     .                   ip(4),ip(5))
           end if
         end if
         call rmpar(ip)
@@ -622,7 +610,7 @@ C
 cxx        nchar = -messs(ibuf,nch)
 c       if (nchar.gt.0) call logit4(ibuf,nchar,2H/ ,lprocn)
 C
-C     5.13 Section to handle TS command to list time list
+C     5.13 Section to handle TI command to list time list
 C
       else if (mbranch.eq.13) then
         call ifill_ch(ibuf,1,iblen*2,' ')
@@ -645,7 +633,7 @@ C                     The time next scheduled
             icl = itscb(12,i)
             nch = 0
             if (icl.ne.0) then
-              ireg(2) = get_buf(icl,ibuf(9),iblen-9,idum,idum)
+              ireg(2) = get_buf(icl,ibuf(9),-(iblen-9),idum,idum)
               nch = ireg(2)
 C                     Get the buffer in the class
             endif

@@ -1,5 +1,5 @@
       subroutine et(ip)
-C  stop tape c#870115:04:42#
+C  stop tape
 
       include '../include/fscom.i'
 C
@@ -9,6 +9,8 @@ C
 C  WHO  WHEN    DESCRIPTION
 C  WEH  850512  CHECK RMPAR AFTER CHECKING FOR VACUUM
 C  GAG  910111  Changed LFEET to LFEET_FS in call to MA2TP.
+C  gag  920714  Added MK4 control code and use of the tape rate generator
+C               common variable lgen.
 C
       dimension ip(1)
       dimension ireg(2)
@@ -61,24 +63,35 @@ C
       ibuf(1) = 0
       call char2hol('tp',ibuf(2),1,2)
       iclass = 0
+      nrec = 0
+C
+C  DISABLE RECORD ENABLE ON MARK III DRIVE
 C
       ienatp = 0
       call fs_set_ienatp(ienatp)
+      call fs_get_kena(kenastk)
 C                   Indicate disabled in common
-      call en2ma(ibuf(3),ienatp,-1,ltrken)
+      if (MK3.eq.iand(drive,MK3)) then
+        call en2ma(ibuf(3),ienatp,-1,ltrken)
+      else if (MK4.eq.iand(drive,MK4)) then
+        call en2ma4(ibuf(3),ienatp,kenastk)
+      endif
       call put_buf(iclass,ibuf,-13,2hfs,0)
-      nrec = 1
+      nrec = nrec + 1
 C
 C  VACUUM MUST BE UP
 C
       call fs_get_irdytp(irdytp)
-      if(irdytp.ne.0) go to 150
+      if (irdytp.ne.0) then
+        goto 150
+      endif
       call fs_get_idirtp(idirtp)
-      call mv2ma(ibuf(3),idirtp,ispeed,3h720)
+      call fs_get_lgen(lgen) ! get the rate generator
+      call mv2ma(ibuf(3),idirtp,ispeed,lgen)
 C                     Send the stop message
 C
       call put_buf(iclass,ibuf,-13,2hfs,0)
-      nrec = 2
+      nrec = nrec + 1
 C
 150   call run_matcn(iclass,nrec)
       call rmpar(ip)
@@ -105,6 +118,15 @@ C             if VLBA recorder, then this section
 c
       call fc_et_v(ip)
       call mvdis(ip,iclcm)
+      if (ichold.ne.-99) then
+        ichvlba(20) = ichold
+        call fs_set_ichvlba(ichvlba(20),20)
+      endif
+      if (ichold.ge.0) then
+        ichvlba(20) = mod(ichold,1000)+1
+        call fs_set_ichvlba(ichvlba(20),20)
+        kmvtp_fs=.true.
+      endif
       return
 
 990   ip(1) = 0

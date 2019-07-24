@@ -1,5 +1,5 @@
       subroutine tp(ip)
-C  parse tape command c#870115:04:33#
+C  parse tape command
 C 
 C  TP controls the tape controller
 C 
@@ -147,12 +147,17 @@ C     one  requesting ( (mode -3), one ! (mode -1).
 C 
 500   call char2hol('tp',ibuf(2),1,2)
       iclass = 0
+      nrec = 0
       ibuf(1) = -3
       call put_buf(iclass,ibuf,-4,2hfs,0)
-      ibuf(1) = -1
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      nrec = nrec + 1
+      call fs_get_drive(drive)
+      if (MK3.eq.iand(MK3,drive)) then
+        ibuf(1) = -1
+        call put_buf(iclass,ibuf,-4,2hfs,0)
+        nrec = nrec + 1
+      endif
 C 
-      nrec = 2
       goto 800
 C 
 C 

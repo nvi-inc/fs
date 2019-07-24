@@ -52,6 +52,7 @@ C               - line and record buffer
       dimension impar(5)
 C               - RMPAR parameters from RU or EXEC schedule
       character*12 lproc,l1
+      character cret
       integer fnblnk,ipos
       integer trimlen, rn_take
       logical kerr,kex,kboss
@@ -84,6 +85,8 @@ C  GAG  901031  Restructured loop locking files for duration.
 C  GAG  901228  Changed IDGET calls to KBOSS calls to see if BOSS is running.
 C  GAG  910104  Changed KBOSS call back to IPGST call before scheduling
 C               BOSS
+C  gag  920910  Added error check after the second rn_take call if BOSS is 
+C               running.
 C
 C     PROGRAM STRUCTURE
 C
@@ -115,13 +118,24 @@ C
         if (irnprc.eq.1) then
           write(lui,1101) 
 1101      format(" pfmed is already locked")
+          write(lui,1102) 
+1102      format(" hit return to continue",$)
+          read(5,1103) cret
+1103      format(a)
           goto 990
         end if
         lprc='none'
         call char2hol(lprc,ilprc,1,8)
         call fs_set_lprc(ilprc)
       else
-        irnprc = rn_take('pfmed',0)
+cxx        irnprc = rn_take('pfmed',0)
+        irnprc = rn_take('pfmed',1)
+        if (irnprc.eq.1) then
+          write(lui,1101) 
+          write(lui,1102) 
+          read(5,1103) cret
+          goto 990
+        end if
       endif
 C
 C     Set active procedure file for PFMED to schedule procedure file or
@@ -216,11 +230,12 @@ C      ABOUT TO UNLOCK: RESETTING VARS
       call char2hol(lnewpr,ilnewpr,1,8)
       call fs_set_lnewpr(ilnewpr)
       call rn_put('pfmed')
-990   inquire(file=lsf2,exist=kex)
+      inquire(file=lsf2,exist=kex)
       if (kex) then
         call ftn_purge(lsf2,ierr)
         if(kerr(ierr,'pfmed','purging',' ',0,0)) continue
       end if
+990   continue
       write(lui,9300)
 9300  format(' pfmed ended')
 cxx      if (knewpf.and.(ipgst(6hboss  ).ne.-1))

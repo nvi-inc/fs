@@ -36,6 +36,9 @@ C 5.  INITIALIZED VARIABLES
 C 
 C 6.  PROGRAMMER: NRV 
 C     LAST MODIFIED:  810423
+C  HISTORY:
+C  WHO  WHEN    WHAT
+C  gag  920714  Made Mark IV a valid rack along with Mark III.
 C 
 C 
 C     1. Call TPLIS to parse the command for us.  Check for errors. 
@@ -47,7 +50,7 @@ C
 C                   Pick up the Tsys1 or 2 index
       call fs_get_rack(rack)
 
-      if (MK3 .eq. iand(rack,MK3)) then
+      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
         call tplis(ip,itpis)
       else if (VLBA .eq. iand(rack,VLBA)) then
         call tplisv(ip,itpis_vlba)
@@ -67,7 +70,7 @@ C
 C     3. Loop over the TPIs, calculate Tsys, and add it to the
 C     message for response. 
 C 
-      if (MK3 .eq. iand(rack,MK3)) then
+      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
         do i=1,16 
           if (itpis(i).ne.0) then
             j = i+14

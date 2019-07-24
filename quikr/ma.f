@@ -1,5 +1,5 @@
       subroutine ma(ip,nsub)
-C  mat and antenna command c#870115:04:35#
+C  mat and antenna command 
 C 
 C    MA transmits a buffer to MATCN or to ANTCN (OVRO ONLY) 
 C 

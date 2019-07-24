@@ -5,23 +5,20 @@ Response:    lo/chanA,chanB,chanC,chanD
 
 
 Settable parameters:
-chanA           LO frequency for IF channel A, MHz. Default
-                0. Normally this is the X-band channel.
-chanB           LO frequency for IF channel B, MHz. Default 0.
-                Normally this is the S-band channel.
-chanC           LO frequency for IF channel C, MHz. Default
-                0. Normally this is the high end of the X-band
-                channel.
-chanD           LO frequency for IF channel D, MHz. Default
-                0.
+chanA          LO frequency for IF channel A, MHz. Default 0. Normally
+               this is the X-band channel.
+chanB          LO frequency for IF channel B, MHz. Default 0. Normally
+               this is the S-band channel.
+chanC          LO frequency for IF channel C, MHz. Default 0. Normally
+               this is the high end of the X-band channel.
+chanD          LO frequency for IF channel D, MHz. Default 0.
 
 Monitor-only Parameters: none
 
 Comments: 
-This command specifies the total LO for each VLBA channel. If
-your station has an upconverter, use the upconv command to
-specify the frequency.
+This command specifies the total LO for each VLBA channel. If your station
+has an upconverter, use the upconv command to specify the frequency.
 
-The LO and upconverter frequencies are used by the antenna
-calibration programs.
+The LO and upconverter frequencies are used by the antenna calibration
+programs.
 

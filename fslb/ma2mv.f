@@ -1,6 +1,6 @@
       subroutine ma2mv(ibuf,idir,isp,lgen)
 
-C  convert mat buffer to mv data c#870407:12:42#
+C  convert mat buffer to mv data
 C 
 C     This routine converts the buffers returned from the MAT 
 C     into the tape motion information. 
@@ -14,7 +14,7 @@ C  OUTPUT:
 C 
 C     IDIR - direction
 C     ISP - speed 
-      dimension lgen(1) 
+      integer*2 lgen(1) 
 C       - rate generator frequency
 C 
 C 

@@ -132,6 +132,17 @@ struct vrepro_cmd *lcl;
      return;
 }
 
+void vreproa8mc(data,lcl)
+unsigned *data;
+struct vrepro_cmd *lcl;
+{
+     *data= 0x24;  /* double speed */
+     if (lcl->equalizer[ 0] == 1) 
+          *data= 0x34;   /* normal speed */
+
+     return;
+}
+
 void vrepro95mc(data,lcl)
 unsigned *data;
 struct vrepro_cmd *lcl;

@@ -1,47 +1,41 @@
-ifdcd - IFD chan. C & D (VLBA rack)
-Syntax:      ifdcd=attenC,attenD,inputC,inputD,a
-             vper
+ifdcd - IF Distributor, C & D (VLBA rack)
+Syntax:      ifdcd=attenC,attenD,inputC,inputD,avper
 
-Response:    ifdcd/attenC,attenD,inputC,inputD,a
-             vper,TPC,     TPD,serno,err
+Response:    ifdcd/attenC,attenD,inputC,inputD,
+             avper,TPC,TPD,serno,err
 
 
 Settable Parameters:
-attenC          Attenuator setting for IF channel C. 0 (default)
-                or 20 db. Normally this attenuator should be set
-                to 0 so that the 20 db can be used for
-                radiometry.
-attenD          Attenuator setting for IF channel A. 0 (default)
-                or 20 db. Normally this attenuator should be set
-                to 0 so that the 20 db can be used for
-                radiometry.
-inputC          Input source for IF channel C. nor (default) for
-                normal input, ext for front panel IF input.
-inputD          Input source for IF channel D. nor (default) for
-                normal input, ext for front panel IF input.
-avper           Averaging period in seconds for the total power
-                integrator. May be 0, 1, 2, 4, 10, 20,
-                40, or 60 seconds. A value of 0 results in 1/80
-                sec averaging time. Default 1. The averaging
-                period is synchronous with 1 pps.
+attenC         Attenuator setting for IF channel C. 0 (default) or 20 db.
+               Normally this attenuator should be set to 0 so that the
+               20 db can be used for radiometry.
+attenD         Attenuator setting for IF channel A. 0 (default) or 20 db.
+               Normally this attenuator should be set to 0 so that the
+               20 db can be used for radiometry.
+inputC         Input source for IF channel C. nor (default) for normal
+               input, ext for front panel IF input.
+inputD         Input source for IF channel D. nor (default) for normal
+               input, ext for front panel IF input.
+avper          Averaging period in seconds for the total power integrator.
+               May be 0, 1, 2, 4, 10, 20, 40, or 60 seconds.
+               A value of 0 results in 1/80 sec averaging time. Default 1.
+               The averaging period is synchronous with 1 pps.
 
 Monitor-only Parameters:
-TPA             Total power in IF channel A in counts. Range 0
-                to 66535, nominal operating level = 16000.
-TPB             Total power in IF channel B in counts. Range 0
-                to 65535, nominal operating level = 16000.
-serno           Module serial number.
-err             Module timing error indication, 1pps or
-                no_1pps.
+TPA            Total power in IF channel A in counts. Range 0 to 66535,
+               nominal operating level = 16000.
+TPB            Total power in IF channel B in counts. Range 0 to 65535,
+               nominal operating level = 16000.
+serno          Module serial number.
+err            Module timing error indication, 1pps or no_1pps.
 
 Comments:
-This command sets up the IF distributor module that is connected
-to channels A and B. Use the ifdab command to set up channels
-A and B. This command is analagous to the Mark III ifd
-command.
+This command sets up the IF distributor module that is connected to channels
+A and B. Use the ifdab command to set up channels A and B. This
+command is analagous to the Mark III ifd command.
 
 MCB module functions are available.
 
-The nominal input level to the rack is -20 dbm. If this level is
-present then the total power will be at the nominal value and no
-extra attenuation will be needed.
+The nominal input level to the rack is -20 dbm. If this level is present then
+the total power will be at the nominal value and no extra attenuation will be
+needed.

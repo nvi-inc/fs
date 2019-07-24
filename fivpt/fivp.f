@@ -4,6 +4,7 @@ C
 C WRITE FIVEPT LOG ENTRY
 C 
        include '../include/fscom.i'
+       include '../include/dpi.i'
 C 
 C WE READ THE FOLLOWING FROM FSCOM: 
 C 
@@ -52,7 +53,7 @@ C
 C
 C BEAMWIDTH
 C
-      icnext=icnext+jr2as(bmfp_fs*180./pi,lbuf,icnext,-7,4,isbuf)
+      icnext=icnext+jr2as(bmfp_fs*180./RPI,lbuf,icnext,-7,4,isbuf)
       icnext=ichmv(lbuf,icnext,2H  ,1,1)
 C
 C FLUX

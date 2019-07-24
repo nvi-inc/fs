@@ -3,6 +3,7 @@ C
 C     Set and display  X/Y  offsets 
 C 
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C 
       dimension ip(1) 
       dimension ireg(2),iparm(2)
@@ -86,9 +87,9 @@ C     5. Return the offsets for display
 C 
 500   nch = ichmv(ibuf,nchar+1,2h/ ,1,1)
       call fs_get_xoff(xoff)
-      xo=xoff*180./pi 
+      xo=xoff*180./RPI 
       call fs_get_yoff(yoff)
-      yo=yoff*180./pi 
+      yo=yoff*180./RPI 
       nch = nch + ir2as(xo,ibuf,nch,10,5)  
       nch = ichmv(ibuf,nch,2h, ,1,1)
       nch = nch + ir2as(yo,ibuf,nch,10,5)  

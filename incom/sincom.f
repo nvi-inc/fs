@@ -1,9 +1,11 @@
       subroutine sincom
 C
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C
 C     INITIALIZE FIELD SYSTEM COMMON
 C
+      integer itsp(8)
       integer idcb(2)
       integer*4 ip(5)
       integer*2 lnamef(3),lnamer(3),lnamet(3),ibuf(50)
@@ -20,7 +22,17 @@ C  End 600 variables
       data lnamet/2h(t,2hed,2hef/
       data ibaud/110,300,600,1200,2400,4800,9600/
       data kasct,kascp,kdesp,kdest/4*.false./
+      data itsp/0,3,7,15,30,60,120,240/
 C
+C  HISTORY:
+C  WHO  WHEN    WHAT
+C  gag  920720  Added kpass4 and itapof4 initialization for Mark IV
+C               tape passes
+C  gag  920902  Changed code to use the include file dpi.i to access the
+C               pi parameters declared there.
+C  nrv  921020  Reading rxdef: check hex address before storing into
+C               common arrays. Use hex address in vfac array, not n.
+C               Add reading an offset value following the scale factor.
 C
       ierrx = 0
       inext(1)=0
@@ -65,6 +77,8 @@ C
       do i=1,20
         icheck(i)=0
         call fs_set_icheck(icheck(i),i)
+        ichvlba(i)=0
+        call fs_set_ichvlba(ichvlba(i),i)
       enddo
       iadcrx =  0
       lswcal = 0
@@ -95,12 +109,11 @@ C
 C
 C     2. Now initialize everything which is non-zero.
 C
-      do i=1,15
+      do i=1,MAX_HOR
         horaz(i) = -1.0
         horel(i) = -1.0
       enddo
-      fsver = 8.00
-      pi = 3.141592
+      fsver = 8.10
 C                   Initialize the time-like variables
 C                   Initialize previous segment name for LINKP
       do i=1,15
@@ -112,8 +125,12 @@ C                   Initialize previous segment name for LINKP
       imodfm = 1
       call fs_set_imodfm(imodfm)
       imoddc = 4
-      idirtp = 1
+      ispeed = 0
+      call fs_set_ispeed(ispeed)
+      idirtp = -1
       call fs_set_idirtp(idirtp)
+      idummy = ichmv(lgen,1,3H000,1,3)
+      call fs_set_lgen(lgen)
       ilowtp = 1
       ibyp=1
       lexper = ' '
@@ -128,6 +145,7 @@ C                   Initialize previous segment name for LINKP
       ilents = 10
       call char2hol('alarm',lalrm,1,6)
       ilenal = 5
+      kpass4 = .false.
       kecho = .false.
       call fs_set_kecho(kecho)
       kcheck = .false.
@@ -143,7 +161,6 @@ C                   Initialize previous segment name for LINKP
       nhorwv = 1
       iacftp = 80
       iacttp = 10
-      ncodes = 32
 C     First mode A
       do i=1,14
         itr2vc(i,1) = i
@@ -189,6 +206,11 @@ C     Finally, mode D
       do i=1,100
         itapof(i)= -13000
       enddo
+      do j=1,3
+        do i=1,12
+          itapof4(i,j)= -13000
+        enddo
+      enddo
 C
       lauxfm(1)=0
       lauxfm(2)=0
@@ -196,6 +218,10 @@ C
       lauxfm(4)=0
       lauxfm(5)=0
       lauxfm(6)=0
+      lauxfm4(1)=0
+      lauxfm4(2)=0
+      lauxfm4(3)=0
+      lauxfm4(4)=0
 C
       klvdt_fs=.false.
       ihdpk_fs=0
@@ -250,7 +276,11 @@ C
       rpro_fs=-1
       rpdt_fs=-1
       kadapt_fs=.false.
+      kenastk(1)=.false.
+      kenastk(2)=.false.
+      call fs_set_kena(kenastk)
       kiwslw_fs=.false.
+      koff4=.true.
       lvbosc_fs=5.0
       ilvtl_fs=0
       vminpk_fs=.2
@@ -328,7 +358,7 @@ C LINE #2  WEST LONGITUDE
       if (ierr.lt.0) goto 900
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
-      wlong = das2b(ibuf,ic1,ic2-ic1+1,ierr)*pi/180.0
+      wlong = das2b(ibuf,ic1,ic2-ic1+1,ierr)*DPI/180.0D0
       call fs_set_wlong(wlong)
       if (ierr.ne.0) then
         call logit7(0,0,0,1,-119,2hbo,2)
@@ -339,7 +369,7 @@ C LINE #3  LATITUDE
       if (ierr.lt.0) goto 900
       ich = 1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
-      alat = das2b(ibuf,ic1,ic2-ic1+1,ierr)*pi/180.0
+      alat = das2b(ibuf,ic1,ic2-ic1+1,ierr)*DPI/180.0D0
       call fs_set_alat(alat)
       if (ierr.ne.0) then
         call logit7(0,0,0,1,-119,2hbo,3)
@@ -400,7 +430,7 @@ C LINE #8  HORIZON MASK
       if (ierr.lt.0) goto 900
       if (ilen.lt.0) goto 312
       ich = 1
-      do i=1,15
+      do i=1,MAX_HOR
         call gtfld(ibuf,ich,ilen,ic1,ic2)
         if (ic1.eq.0) goto 315
         horaz(i) = ias2b(ibuf,ic1,ic2-ic1+1)
@@ -442,11 +472,29 @@ C LINE #2 MAX TAPE SPEED - imaxtpsd
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       if (ic1.eq.0) goto 320
       imaxtpsd = ias2b(ibuf,ic1,ic2-ic1+1)
-      call fs_set_imaxtpsd(imaxtpsd)
-      if (imaxtpsd.lt.0) then
-        call logit7(0,0,0,1,-140,2hbo,2)
-        ierrx = -1
+      if (imaxtpsd.eq.360) then
+        index = -2
+        goto 3002
       endif
+      if (imaxtpsd.eq.330) then
+        index = -1
+        goto 3002
+      endif
+      if (imaxtpsd.eq.270) then
+        index = 7
+        goto 3002
+      endif
+      do i=1,8
+        if (imaxtpsd.eq.itsp(i)) then
+          index=i-1
+          goto 3002
+        endif
+      enddo
+        call logit7(0,0,0,1,-140,2hbo,2) ! invalid speed given
+        ierrx = -1
+3002  continue
+      imaxtpsd = index ! invalid speed given
+      call fs_set_imaxtpsd(imaxtpsd)
 C LINE #3 SCHEDULE TAPE SPEED - iskdtpsd
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) goto 900
@@ -454,11 +502,29 @@ C LINE #3 SCHEDULE TAPE SPEED - iskdtpsd
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       if (ic1.eq.0) goto 320
       iskdtpsd = ias2b(ibuf,ic1,ic2-ic1+1)
-      call fs_set_iskdtpsd(iskdtpsd)
-      if (iskdtpsd.lt.0) then
-        call logit7(0,0,0,1,-140,2hbo,3)
-        ierrx = -1
+      if (iskdtpsd.eq.360) then
+        index = -2
+        goto 3003
       endif
+      if (iskdtpsd.eq.330) then
+        index = -1
+        goto 3003
+      endif
+      if (iskdtpsd.eq.270) then
+        index = 7
+        goto 3003
+      endif
+      do i=1,8
+        if (iskdtpsd.eq.itsp(i)) then
+          index=i-1
+          goto 3003
+        endif
+      enddo
+        call logit7(0,0,0,1,-140,2hbo,3) ! invalid speed given
+        ierrx = -1
+3003  continue
+      iskdtpsd = index 
+      call fs_set_iskdtpsd(iskdtpsd)
 C LINE #4 RF FREQUENCY - refreq
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) goto 900
@@ -1034,7 +1100,8 @@ C
 C
 C     4.1 Read and decode each line.
 C
-      do n=1,ncodes
+      rxncodes=0
+      do n=1,MAX_RXCODES
         call readg(idcb,ierr,ibuf,ilen)
         if (ierr.lt.0) then
           call logit7(0,0,0,1,-144,2hbo,n)
@@ -1045,18 +1112,37 @@ C
           call gtfld(ibuf,ifc,ilen,ic1,ic2)
           iad = ia2hx(ibuf,ic1)
           iad = iad*16 + ia2hx(ibuf,ic1+1)+1
-          call gtfld(ibuf,ifc,ilen,ic1,ic2)
-          idummy = ichmv(lcode(1,iad),1,ibuf,ic1,6)
-          call gtfld(ibuf,ifc,ilen,ic1,ic2)
-          call gtprm(ibuf,ic1,ic2,2,vfac(n),ierr)
-          if (ierr.lt.0) then
+          if (iad.le.MAX_RXCODES) then
+            call gtfld(ibuf,ifc,ilen,ic1,ic2)
+            idummy = ichmv(rxlcode(1,iad),1,ibuf,ic1,6)
+C            call fs_set_rxlcode(rxlcode(1,iad),iad)
+            call gtfld(ibuf,ifc,ilen,ic1,ic2)
+            call gtprm(ibuf,ic1,ic2,2,rxvfac(iad),ierr)
+            if (ierr.lt.0) then
+              call logit7(0,0,0,1,-145,2hbo,n)
+              goto 990
+            endif
+            call fs_set_rxvfac(rxvfac(iad),iad)
+            call gtfld(ibuf,ifc,ilen,ic1,ic2)
+            if (ic1.gt.0) then
+              call gtprm(ibuf,ic1,ic2,2,rxvoff(iad),ierr)
+              if (ierr.lt.0) then
+                call logit7(0,0,0,1,-145,2hbo,n)
+                goto 990
+              endif
+            else
+              rxvoff(iad)=0.0
+            endif
+            call fs_set_rxvoff(rxvoff(iad),iad)
+          else
             call logit7(0,0,0,1,-145,2hbo,n)
             goto 990
           endif
-        else
-          ncodes = n-1
+          rxncodes=rxncodes+1
         endif
       enddo
+      call fs_set_rxlcode(rxlcode)
+      call fs_set_rxncodes(rxncodes)
       call fmpclose(idcb,ierr)
 C
 C  5. Read file of parameters for spectrum analyzer test procedures: TEDEF.CTL

@@ -146,7 +146,6 @@ C
       call fs_get_idevgpib(idevgpib)
       ingpib = iflch(idevgpib,idevln)
       call opbrd(idevgpib,ingpib,ierr)   !! OPEN BOARD
-      kini=.true.  !! DEBUG ****************
       if (ierr.ne.0) goto 1090     !! GPIB ERROR CONDITION
       do i=1,ndev   !! OPEN DEVICES
         idlen = iflch(moddev(1,i),idevln)

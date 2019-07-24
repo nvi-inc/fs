@@ -1,6 +1,6 @@
       subroutine gtprm(ibuf,ifc,iec,itype,parm,ierr)
 
-C     get next parameter c#870407:12:26#
+C     get next parameter
 C 
 C        GTPRM parses the input buffer and returns the next parameter 
 C 

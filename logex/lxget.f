@@ -61,6 +61,7 @@ C
       character*79 outbuf
       integer answer, trimlen
       integer*2 ibuf2(50)
+      integer*2 lch
 
       if (ilxget.ne.0) goto 200
       if (itl1.lt.its1.or.(itl1.eq.its1.and.itl2.lt.its2)) goto 100
@@ -81,7 +82,8 @@ C
         goto 1200
       endif
       nrec = 0
-100   nlout = 0
+100   continue
+      nlout = 0
       ilxget=1
 C
 C
@@ -92,7 +94,8 @@ C
 C  *************************************************************
 C
 C
-200   call ifill_ch(ibuf,1,iblen*2,' ')
+200   continue
+      call ifill_ch(ibuf,1,iblen*2,' ')
       call ifill_ch(ibuf2,1,iblen*2,' ')
       ilen = fmpread(idcb,ierr,cbuf,iblen*2)
 C
@@ -112,6 +115,7 @@ C
         call po_put_c(outbuf)
       end if
       if (ilen.gt.0) goto 300
+      if (ilen.eq.0) goto 200   ! empty record
         ilen=-1
         ilxget=0
         goto 1200
@@ -158,6 +162,8 @@ C
 C  ************************************************************
 C
 C
+cxx      write(6,9000) ncmd, ntype, nstr
+9000  format(1x,"LXGET: ncmd=",i6," ntype=",i6," nstr=",i6)
       if (ncmd.eq.0) goto 600
 C
 C  If a COMMAND command was specified, check to see if a PLOT command
@@ -191,7 +197,8 @@ C
 C  JCHAR returns LCH as zero/character. To left justify multiply
 C  o'400' (256 decimal) and add a blank (o'40').
 C
-      lch = jchar(ibuf,10)*o'400'+' '
+cxx      lch = jchar(ibuf,10)*o'400'+' '
+      lch = jchar(ibuf,10)
       do i=1,ntype
         if (lch.eq.ltype(i)) goto 1000
       end do

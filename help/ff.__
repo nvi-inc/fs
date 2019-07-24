@@ -7,14 +7,13 @@ Response:    ff/acknowledgement
 Parameters: none
 
 Comments:
-The tape is moved forward at high speed. For Mark III, the record
-bit is disabled and the low tape sensor is turned on. For VLBA, all
-track groups are disabled and the low tape sensor is turned on.
+The tape is moved forward at high speed. For Mark III, the record bit is
+disabled and the low tape sensor is turned on. For VLBA, all track groups are
+disabled and the low tape sensor is turned on.
 
-The tape is moved at the "schedule" speed value as specified in the
-equip.ctl control file. This is the speed assumed in the SNAP
-schedule file for positioning the tape with the fastf procedure.
+The tape is moved at the "schedule" speed value as specified in the equip.ctl
+control file. This is the speed assumed in the SNAP schedule file for
+positioning the tape with the fastf procedure.
 
-Use the sff command and sfastf procedure for possibly faster
-tape motion.
+Use the sff command and sfastf procedure for possibly faster tape motion.
 

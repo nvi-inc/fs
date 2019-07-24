@@ -1,5 +1,5 @@
       subroutine repro(ip)
-C  set up reproduce tracks c#870115:04:40#
+C  set up reproduce tracks
 C
 C   REPRO controls the reproduce tracks in the tape controller
 C

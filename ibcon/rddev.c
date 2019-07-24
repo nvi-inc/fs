@@ -4,29 +4,36 @@
  * must be a large number to force usage of DMA otherwise, if
  * a timeout situation occurs, the computer system will lockup
  * until the timeout happens.
+ NRV 921124 Added external board ID reference (got in opbrd) and
+            call to ibcmd to do an "untalk" to the board before reading.
  */
 #include <memory.h>
+#include <stdio.h>
 #include "ugpib.h"
 #define  BSIZE 256   /* this size for DMA */
-extern int boardid;
+extern int boardid_ext;
 
 int rddev_(devid,buffer,buflen,error)
 
+/* rddev returns the count of the number of bytes read, if there are
+   no errors. 
+   If an error occurs, *error is set to -4 for a timeout, -8 for a bus
+   error. If a bus error occurs, rddev returns the system error variable.
+*/
 int *devid;
-int *buffer;
-int *buflen;
+unsigned char *buffer;
+int *buflen;  /* buffer length in characters */
 int *error;
 
 {
   int i;
   int iret;
-  int locbuf[BSIZE];
+  unsigned char locbuf[BSIZE];
 
   *error = 0;
 
   for (i=0; i<BSIZE; i++)
     locbuf[i] = 0;
-  ibcmd(boardid,"_?",2);      /* send UNL, UNT first */
 
 /* 
  * The termination character (line feed, hex a) is set in the
@@ -38,15 +45,18 @@ int *error;
  * of characters to be read with the ibrd command must also be set high, 
  * 256 in this case works.
  */
-  ibrd(*devid,locbuf,BSIZE);
+  ibcmd(boardid_ext,"_?",1);  /* Send UNT UNL */
 /*printf("\n ibsta = %.4xh iberr = %d ibcnt %d\n", ibsta,iberr,ibcnt);*/
+
+  ibrd(*devid,locbuf,BSIZE);
+/*  printf("\n ibsta = %.4xh iberr = %d ibcnt %d\n", ibsta,iberr,ibcnt); */
 
   if ( (ibsta & 0x4000) != 0) {
     *error = -4;
     return;
   }
   else if ((ibsta & 0x8000) != 0) {
-    *error = -8;
+    *error = -8; 
     return(iberr);
   }
   iret = ibcnt;
@@ -56,7 +66,7 @@ int *error;
     buffer[i] = locbuf[i];
     i++;
   }
-
+/* { int i; for (i=0;i<ibcnt;i++) printf("%2x ",buffer[i]); } */
 /* { int i,j; 
   char *hexid;
   hexid = (char*)buffer;
@@ -65,10 +75,7 @@ int *error;
     hexid++;
   }
   printf("\n");
-}
-*/
-
-  ibcmd(boardid,"_?",2);      /* send UNL, UNT at end */
+} */
 
   return(iret);
 }

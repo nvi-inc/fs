@@ -4,6 +4,7 @@ C
 C WRITE ORIGIN LOG ENTRY
 C 
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C 
 C INPUT:
 C 
@@ -21,32 +22,32 @@ C
 C 
 C HAOFFSET
 C 
-      icnext=icnext+jr2as(hao*180.0/pi,lbuf,icnext,-8,4,isbuf)
+      icnext=icnext+jr2as(hao*180.0/RPI,lbuf,icnext,-8,4,isbuf)
       icnext=ichmv(lbuf,icnext,2H  ,1,1)
 C 
 C DECLINATION OFFSET
 C 
-      icnext=icnext+jr2as(dco*180.0/pi,lbuf,icnext,-8,4,isbuf)
+      icnext=icnext+jr2as(dco*180.0/RPI,lbuf,icnext,-8,4,isbuf)
       icnext=ichmv(lbuf,icnext,2H  ,1,1)
 C 
 C AZIMUTH OFFSET
 C 
-      icnext=icnext+jr2as(azo*180.0/pi,lbuf,icnext,-8,4,isbuf)
+      icnext=icnext+jr2as(azo*180.0/RPI,lbuf,icnext,-8,4,isbuf)
       icnext=ichmv(lbuf,icnext,2H  ,1,1)
 C 
 C ELEVATION OFFSET
 C 
-      icnext=icnext+jr2as(elo*180.0/pi,lbuf,icnext,-8,4,isbuf)
+      icnext=icnext+jr2as(elo*180.0/RPI,lbuf,icnext,-8,4,isbuf)
       icnext=ichmv(lbuf,icnext,2H  ,1,1)
 C 
 C X OFFSET
 C 
-      icnext=icnext+jr2as(xo*180.0/pi,lbuf,icnext,-8,4,isbuf) 
+      icnext=icnext+jr2as(xo*180.0/RPI,lbuf,icnext,-8,4,isbuf) 
       icnext=ichmv(lbuf,icnext,2H  ,1,1)
 C 
 C Y OFFSET
 C 
-      icnext=icnext+jr2as(yo*180.0/pi,lbuf,icnext,-8,4,isbuf) 
+      icnext=icnext+jr2as(yo*180.0/RPI,lbuf,icnext,-8,4,isbuf) 
       icnext=ichmv(lbuf,icnext,2H  ,1,1)
 C 
 C CLEAN UP AND SEND IT

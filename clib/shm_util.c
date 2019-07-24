@@ -108,7 +108,8 @@ int *b_1,*e_1,*b_2,*e_2;
    start[0]=(char *) shm_addr;
    total=0;
 
-   for (i=1; i<MAX_PTS;i++)  {
+/*   for (i=1; i<MAX_PTS;i++)  { */
+   for (i=1; i<=MAX_PTS;i++)  {
        start[i]=start[i-1]+chars[i-1];
        total+=chars[i-1];
    }

@@ -12,6 +12,8 @@ c
       integer MAX_BBC
       integer FS_PRIOR      ! Field System realtime priority
       integer AN_PRIOR      ! Antenna      realtime priority
+      integer MAX_RXCODES   ! Max number of entries in rxdef.ctl
+      integer MAX_HOR      ! Max number of horizon mask entries
 c
       parameter ( INT_BITS = 32 )
       parameter ( INT_CHARS=  4 )
@@ -24,3 +26,5 @@ c
       parameter ( MAX_BBC = 15 )
       parameter ( FS_PRIOR= 20)
       parameter ( AN_PRIOR= 10)
+      parameter ( MAX_RXCODES = 40)
+      parameter ( MAX_HOR = 30)

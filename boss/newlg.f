@@ -3,14 +3,8 @@ C
 C     NEWLG fills in the buffer with the first line of the log file
 C           and sends this to DDOUT for starting a new log.
 C
-C  MODIFICATIONS:
-C
-C  830914 NRV Added occupation serial # as second buffer
-C  880205 LAR Added FSUPDATE call.
-C  880331 LAR Added 2nd line with minor version #
-C  880708 WEH REMOVE FSUPDATE CALL
-C
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C
 C  INPUT:
 C
@@ -21,6 +15,18 @@ C      - buffer to use, assumed to be at least 50 characters long
 C     LSOR - source of this message
 C
 C  OUTPUT: NONE
+C
+C  HISTORY:
+C  WHO  WHEN    WHAT
+C  NRV  830914  Added occupation serial # as second buffer
+C  LAR  880205  Added FSUPDATE call.
+C  LAR  880331  Added 2nd line with minor version #
+C  WEH  880708  REMOVE FSUPDATE CALL
+C  gag  920902  Changed code to use pi from the include file dpi.i
+C
+C  LOCAL
+      integer itsp(8)
+      data itsp/0,3,7,15,30,60,120,240/
 C
 C     The new-log information line:
 C   MARK IV FIELD SYSTEM VERSION <version> <station> <year> <occup#>
@@ -56,8 +62,8 @@ C
       nch=mcoma(ib,nch)
       call fs_get_wlong(wlong)
       call fs_get_alat(alat)
-      wl = wlong * 180./pi
-      al = alat * 180./pi
+      wl = wlong * 180.0D0/dpi
+      al = alat * 180.0D0/dpi
       nch = nch + ir2as(wl,ib,nch,7,2)
       nch=mcoma(ib,nch)
       nch = nch + ir2as(al,ib,nch,6,2)
@@ -203,10 +209,22 @@ C
       nch = nch + ib2as(iacttp,ib,nch,3)
       nch=mcoma(ib,nch)
       call fs_get_imaxtpsd(imaxtpsd)
-      nch = nch + ib2as(imaxtpsd,ib,nch,3)
+      if (imaxtpsd.eq.-2) then
+        nch = nch + ib2as(360,ib,nch,3)
+      else if (imaxtpsd.eq.-1) then
+        nch = nch + ib2as(330,ib,nch,3)
+      else
+        nch = nch + ib2as(itsp(imaxtpsd+1),ib,nch,3)
+      endif
       nch=mcoma(ib,nch)
       call fs_get_iskdtpsd(iskdtpsd)
-      nch = nch + ib2as(iskdtpsd,ib,nch,3)
+      if (iskdtpsd.eq.-2) then
+        nch = nch + ib2as(360,ib,nch,3)
+      else if (iskdtpsd.eq.-1) then
+        nch = nch + ib2as(330,ib,nch,3)
+      else
+        nch = nch + ib2as(itsp(iskdtpsd+1),ib,nch,3)
+      endif
       nch=mcoma(ib,nch)
       call fs_get_i70kch(i70kch)
       nch = nch + ib2as(i70kch,ib,nch,2)

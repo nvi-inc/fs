@@ -1,5 +1,5 @@
       subroutine repds(ip,iclcm)
-C  reproduce display c#870115:04:40#
+C  reproduce display
 C 
 C    REPDS gets data about the reproduce tracks and displays it 
 C 

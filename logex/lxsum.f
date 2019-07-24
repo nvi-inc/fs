@@ -160,14 +160,16 @@ C
 C *********************************************************************
 C
 C
-200   call ichmv(lsum(2),13,logna,1,16)
+200   continue 
+      call ichmv(lsum(2),13,logna,1,16)
       call ichmv(lsum(2),34,lstatn,1,8)
       call lxwrt(lsum(2),lsum(1))
       call lxwrt(star(2),star(1))
       call lxwrt(lrun(2),lrun(1))
       call lxwrt(star(2),star(1))
       call char2hol(' ',l6,1,1)
-300   if (ikey.eq.9) goto 400
+300   continue 
+      if (ikey.eq.9) goto 400
 C
 C     Get next schedule entry
 C
@@ -183,15 +185,18 @@ C ****************************************************************
 C
 C
       if (ilen.eq.-1) goto 420
-400   if (kmatch) then
+400   continue
+      if (kmatch) then
         goto 410
       else
         goto 420
       end if
-410   call readl(lnewso,lnewsn,lstid)
+410   continue
+      call readl(lnewso,lnewsn,lstid)
       if (icode.eq.-1.or.lstend.eq.-1) goto 600
       if (ikey.eq.9) goto 430
-420   call lxscm(lsn,idayr,ihr,min,isc,idur,kmatch,khuh)
+420   continue 
+      call lxscm(lsn,idayr,ihr,min,isc,idur,kmatch,khuh)
       if (khuh.and.ilen.ne.-1) goto 410
 C
 C
@@ -205,7 +210,8 @@ C
 C ***************************************************************
 C
 C
-430   call ifill_ch(jbuf,1,100,' ')
+430   continue 
+      call ifill_ch(jbuf,1,100,' ')
       if (ikey.eq.12) then
         call ib2as(idayr,jbuf,1,o'40000'+o'400'*2+3)
         call ifill_ch(jbuf,4,1,'-')

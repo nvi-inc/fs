@@ -1,30 +1,25 @@
-repro - reproduce (Mark III drive)
-Syntax:      repro=bypass,trackA,trackB,bandwidt
-             h,equalizer 
+repro - reproduce tracks (Mark III drive)
+Syntax:      repro=bypass,trackA,trackB,bandwidth,
+             equalizer 
 
-Response:    repro/bypass,trackA,trackB,bandwidt
-             h,equalizer
+Response:    repro/bypass,trackA,trackB,bandwidth,
+             equalizer
 
 
 Settable parameters:
-bypass          byp (default) for bypass, raw for
-                read-after-write.
-trackA          track for decoder channel A, default 1, 0-28
-                allowed.
-trackB          track for decoder channel B, default 1, 0-28
-                allowed.
-bandwidth       bandwidth for decoding (MHz), default 2.
-equalizer       equalizer for reproduce, default same as
-                bandwidth.
+bypass         byp (default) for bypass, raw for read-after-write.
+trackA         track for decoder channel A, default 1, 0-28 allowed.
+trackB         track for decoder channel B, default 1, 0-28 allowed.
+bandwidth      bandwidth for decoding (MHz), default 2.
+equalizer      equalizer for reproduce, default same as bandwidth.
 
 Monitor-only parameters: none
 
 Comments: 
-MAT module functions available for Mark III. For VLBA, the
-bandwidth and equalizer are not separately commandable.
+MAT module functions available for Mark III. For VLBA, the bandwidth and
+equalizer are not separately commandable.
 
-The raw mode normally is used only when checking parity errors
-on the tape.
+The raw mode normally is used only when checking parity errors on the tape.
 
-Selection of track 0 for a decoder channel will disable that channel
-until another track is selected.
+Selection of track 0 for a decoder channel will disable that channel until
+another track is selected.

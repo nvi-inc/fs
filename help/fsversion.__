@@ -3,8 +3,7 @@ Syntax:      fsversion
 
 fsversion/version
 Monitor-only parameters:
-version               field system version number.
+version              field system version number.
 
 Comments: 
-Used to display and log version number of the currently running
-field system.
+Used to display and log version number of the currently running field system.

@@ -1,6 +1,8 @@
       subroutine gtrad(ias,ic1,ic2,imode,rad,ierr)
 C  get ra,dec formats c#870115:04:30# 
 C 
+      include '../include/dpi.i'
+C
 C 1.1.   GTRAD decodes the SNAP ra, dec formats 
 C 
 C     INPUT VARIABLES:
@@ -47,7 +49,6 @@ C 4.  CONSTANTS USED
 C
 C 5.  INITIALIZED VARIABLES
 C
-      data pi/3.141592/
 C
 C 6.  PROGRAMMER: NRV
 C     LAST MODIFIED: CREATED 800216
@@ -154,7 +155,7 @@ C
       fac = 1.0 
       if (imode.eq.2.or.imode.eq.4) fac = 15.0
       rad = isign*(fld(1)*3600.0+fld(2)*60.0+fld(3))* 
-     .      pi/(3600.0*12.0*fac)
+     .      RPI/(3600.0*12.0*fac)
 C 
       goto 999
 C 

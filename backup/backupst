@@ -4,6 +4,10 @@ find ./st -name '*.c' -print >> FSS
 find ./st -name '*.i' -print >> FSS
 find ./st -name '*.h' -print >> FSS
 find ./st -name '?akefile*' -print >> FSS
+find ./control -print >> FSS
+find ./proc -print >> FSS
+ls ./sched/prepass.snp >> FSS
+ls ./sched/hdcal.snp >> FSS
 cat FSS | cpio -ovcB > /tmp/fss.cpio
 rm FSS
 compress /tmp/fss.cpio

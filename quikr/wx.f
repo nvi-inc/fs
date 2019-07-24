@@ -1,5 +1,6 @@
       subroutine wx(ip)
-C  weather module c#870115:04:36#
+C
+C  weather module
 C 
 C 1.1.   WX controls the weather module 
 C 
@@ -102,11 +103,13 @@ C
         ierr = -301
         tempwx = 1.0E10
       endif
+      call fs_set_tempwx(tempwx)
       humiwx = das2b(ibuf,27,4,ierr)/10.0
       if (ierr.ne.0) then
         ierr = -302
         humiwx = 1.0E10
       endif
+      call fs_set_humiwx(humiwx)
 C     The additional .001 is to fix the problem of 1000.0 
 C     which IR2AS doesn't handle properly.
       preswx = das2b(ibuf,36,5,ierr)/10.0  + .001
@@ -114,6 +117,7 @@ C     which IR2AS doesn't handle properly.
         ierr = -303
         preswx = 1.0E10
       endif
+      call fs_set_preswx(preswx)
 C 
 C     5. Finally, code up the message for BOSS and the display and log. 
 C 

@@ -3,6 +3,8 @@
 C  This routine encodes or decodes information relating
 C  to MAT communications for video converters
 C 
+      include '../include/fscom.i'
+C
 C  INPUT: 
 C 
 C     IWHAT - code for type of conversion, <0 encode, >0 decode 
@@ -25,6 +27,8 @@ C     IAS - string containing ASCII characters to be decoded
 C     IC1 - first char to use in IAS
 C     IC2 - last char to use in IAS 
 C 
+C  CALLED BY:  quikr/vc  quikr/vcdis
+C
 C 
 C  SUBROUTINES called: character manipulation 
 C 
@@ -33,9 +37,11 @@ C  LOCAL:
 C 
       double precision das2b
       dimension bw(7),nchtp(8),nrem(2),nlok(2) 
+      dimension bw4(7)
       integer*2 ltp(8)
       integer*2 lrem(4),llok(4)
       data bw/0.0,0.125,0.250,0.50,1.0,2.0,4.0/ 
+      data bw4/0.0,0.125,16.0,0.50,8.0,2.0,4.0/ 
       data ltp/2Hul,2Hl ,2Hu ,2Hif,2Hlo,2Hgr,2Hgr,2Hgr/ 
       data nchtp/2,1,1,2,2,2,2,2/ 
       data lrem/2Hre,2Hm ,2Hlo,2Hc /
@@ -44,6 +50,10 @@ C
       data nlok/4,4/ 
       data nbw/7/, ntp/8/ 
 C 
+C  HISTORY:
+C    WHO  WHEN    WHAT
+C    gag  920713  Added bw4 array and check for MK4.
+C    gag  920727  Changed 0.25 to 16 in bandwidth array.
 C 
 C  Initialize returned parameter in case we have to quit early. 
 C 
@@ -56,7 +66,12 @@ C  Code -1, VC bandwidth.
 C 
 201   continue
       if (ic1+5.gt.ic2) return
-      ivced = ic1 + ir2as(bw(index+1),ias,ic1,5,3)
+      call fs_get_rack(rack)
+      if (rack.eq.iand(MK4,rack)) then
+        ivced = ic1 + ir2as(bw4(index+1),ias,ic1,5,3)
+      else
+        ivced = ic1 + ir2as(bw(index+1),ias,ic1,5,3)
+      endif
       return
 C 
 C  Code -2, VC TPI selection
@@ -88,9 +103,16 @@ C
 301   continue
       val = das2b(ias,ic1,ic2-ic1+1,ierr) 
       if (ierr.ne.0) return 
-      do 3010 i=1,nbw 
-        if (val.eq.bw(i)) index = i-1 
-3010    continue
+      call fs_get_rack(rack)
+      if (rack.eq.iand(MK4,rack)) then
+        do 3010 i=1,nbw 
+          if (val.eq.bw4(i)) index = i-1 
+3010      continue
+      else
+        do 3011 i=1,nbw 
+          if (val.eq.bw(i)) index = i-1 
+3011      continue
+      endif
       return
 C 
 C 

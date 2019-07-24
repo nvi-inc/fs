@@ -3,11 +3,12 @@
  * It uses the configuration file defined in the dev.ctl file for the 
  * board located in /dev directory. This configuration file uses all
  * the default settings except for the DMA which should be 1 for on. 
+   NRV 921124 Added external boardid for rddev to use.
  */
 #include <memory.h>
 #include "ugpib.h"
 #define NULLPTR (char *) 0
-int boardid;
+int boardid_ext;
 
 void opbrd_(dev,devlen,error)
 
@@ -18,6 +19,7 @@ int *error;
 {
   char device[65];
   char *nameend;
+  int boardid;
 
   *error=0;
 
@@ -45,6 +47,7 @@ int *error;
     errorop("couldn't execute interface clear\n");
     *error=-8;
   }
+  boardid_ext = boardid;
 
 }
 

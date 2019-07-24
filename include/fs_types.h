@@ -12,3 +12,4 @@
 #include "res_ds.h"
 #include "vst_ds.h"
 #include "mcb_ds.h"
+#include "tape_ds.h"

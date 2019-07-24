@@ -10,6 +10,10 @@ C
       equivalence (ireg(1),reg) 
       data ilen/40/,ilen2/100/
 C 
+C  HISTORY:
+C  WHO  WHEN    WHAT
+C  gag  920715  Added new common variable lgen for rate generator.
+C  gag  920727  Added code for Mark IV enable.
 C 
 C     1. This is the display section for the ST command.
 C     Get class buffer with command in it.  Set up first part 
@@ -44,8 +48,15 @@ C
 230   ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
 C                   Get response to query of ST 
       call ma2mv(ibuf,idir,isp,lgen)
+      call fs_set_lgen(lgen)
       ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
-      call ma2en(ibuf,iena,it,nt) 
+      call fs_get_drive(drive)
+      if (MK4.eq.iand(MK4,drive)) then
+        ia = ia2hx(ibuf,3)
+        iena = iand(ia,8)/8
+      else
+        call ma2en(ibuf,iena,it,nt) 
+      endif
       goto 350
 320   isp = ispeed
       idir = idirtp 

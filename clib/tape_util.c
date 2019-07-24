@@ -6,7 +6,6 @@
 #include <sys/types.h>
 #include "../include/params.h"
 #include "../include/fs_types.h"
-#include "../include/tape_ds.h"
 #include "../include/macro.h"
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"

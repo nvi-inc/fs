@@ -18,7 +18,6 @@ int itask;                            /* sub-task, ifd number +1  */
 long ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, ind, ichold, count;
-      int gag;
       char *ptr;
       struct req_rec request;      /* mcbcn request record */
       struct req_buf buffer;       /* mcbcn request buffer */
@@ -111,7 +110,7 @@ mcbcn:
       skd_par(ip);
 
       if (ichold != -99) shm_addr->check.bbc[ind]=ichold;
-      else if (ichold >= 0) shm_addr->check.bbc[ind]=ichold % 1000 + 1;
+      if (ichold >= 0) shm_addr->check.bbc[ind]=ichold % 1000 + 1;
 
       if(ip[2]<0) return;
       bbc_dis(command,itask,ip);

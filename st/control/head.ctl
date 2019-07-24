@@ -20,7 +20,7 @@
   200.0   200.0   Fast In  Inchworm Speed (microns/sec)
    20.0    20.0   Slow In  Inchworm Speed (microns/sec)
 *
-    0.0     0.0   Forward-Reverse Relative Offset (microns)
+    0.0     0.0   Reverse minus Forward Relative Offset (microns)
 *
   150.00  150.00  Positive Voltage Scale (microns/volt)
   150.00  150.00  Negative Voltage Scale (microns/volt)

@@ -1,36 +1,31 @@
 lo - LO frequencies (Mark III rack)
-Syntax:      lo=chan1nor,chan2nor,chan3nor,chan1
-             alt,chan2alt
+Syntax:      lo=chan1nor,chan2nor,chan3nor,chan1alt,
+             chan2alt
 
-Response:    lo/chan1nor,chan2nor,chan3nor,chan1
-             alt,chan2alt
+Response:    lo/chan1nor,chan2nor,chan3nor,chan1alt,
+             chan2alt
 
 
 Settable parameters:
-chan1nor        LO frequency for IF channel 1, normal input,
-                MHz. Default 0. Normally this is the X-band
-                channel.
-chan2nor        LO frequency for IF channel 2, normal input,
-                MHz. Default 0. Normally this is the S-band
-                channel.
-chan3nor        LO frequency for IF channel 3, normal input,
-                MHz. Default 0. Normally this is the high end
-                of the X-band channel.
-chan1alt        LO frequency for IF channel 1, alternate input,
-                MHz. Default 0.
-chan2alt        LO frequency for IF channel 2, alternate input,
-                MHz. Default 0.
+chan1nor       LO frequency for IF channel 1, normal input, MHz. Default
+               0. Normally this is the X-band channel.
+chan2nor       LO frequency for IF channel 2, normal input, MHz. Default
+               0. Normally this is the S-band channel.
+chan3nor       LO frequency for IF channel 3, normal input, MHz. Default
+               0. Normally this is the high end of the X-band channel.
+chan1alt       LO frequency for IF channel 1, alternate input, MHz.
+               Default 0.
+chan2alt       LO frequency for IF channel 2, alternate input, MHz.
+               Default 0.
 
 Monitor-only Parameters: none
 
 Comments: 
-This command specifies the total LO for each Mark III channel.
-If your station has an upconverter, use the upconv command to
-specify the frequency.
+This command specifies the total LO for each Mark III channel. If your station
+has an upconverter, use the upconv command to specify the frequency.
 
-The LO and upconverter frequencies are used by program pcalr
-and by the antenna calibration programs. These values along with
-the video converter frequencies are used to calculate the phase
-calibrator tone frequencies. For Mark III systems, the patch
-command should also be used to specify which converters are on
-each LO.
+The LO and upconverter frequencies are used by program pcalr and by the
+antenna calibration programs. These values along with the video converter
+frequencies are used to calculate the phase calibrator tone frequencies. For
+Mark III systems, the patch command should also be used to specify which
+converters are on each LO.

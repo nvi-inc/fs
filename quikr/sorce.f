@@ -251,9 +251,9 @@ C                   Adjust next char to be first blank in source name.
       call fs_get_decdat(decdat)
       call fs_get_epoch(epoch)
       if (kd) then
-        nch = nch + ir2as(ra50*180.0/pi,ibuf,nch,7,2)
+        nch = nch + ir2as(ra50*180.0/RPI,ibuf,nch,7,2)
         nch = mcoma(ibuf,nch)
-        nch = nch + ir2as(dec50*180.0/pi,ibuf,nch,7,2)
+        nch = nch + ir2as(dec50*180.0/RPI,ibuf,nch,7,2)
       else
         call radec(ra50,dec50,0.0,irah,iram,ras,
      .     lds,idcd,idcm,dcs,lhs,i,i,d) 

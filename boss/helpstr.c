@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #define MK3  0x01
+#define MK4  0x04
 #define VLBA 0x02
 #define MAX_STRING  256
 
@@ -69,10 +70,16 @@ int rlen;
       for (i=0;i<inum;i++) {
         *ierr=fscanf(idum,"%s",outbuf);
         decloc = strchr(outbuf,'.');
-        if (((*(decloc+1)=='m') && (MK3==*rack))  ||
+        if (((*(decloc+1)=='4') && (MK4==*rack))  ||
+           ((*(decloc+2)=='4') && (MK4==*drive))) {
+          strcpy(runstr,string);
+          strcat(runstr,decloc);
+          break;
+        }
+        else if (((*(decloc+1)=='m') && (MK3==*rack))  ||
            ((*(decloc+1)=='v') && (VLBA==*rack))  ||
            ((*(decloc+2)=='m') && (MK3==*drive))  ||
-           ((*(decloc+2)=='v') && (VLBA==*drive))) {
+           ((*(decloc+2)=='v') && (VLBA==*drive))) { 
           strcpy(runstr,string);
           strcat(runstr,decloc);
           break;

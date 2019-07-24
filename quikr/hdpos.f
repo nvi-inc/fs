@@ -31,13 +31,22 @@ C
       logical new
 C
 C  LAST MODIFIED:  LAR GETS POSITION REQUESTS FROM COMMON  <880826.2357>
+C HISTORY:
+C  WHO  WHEN    WHAT
+C  gag  920721  Added condition on ipass gt 100 for Mark IV.
 C
 C
       new=.true.
       do ntries=0,maxtry
         call posit(i,ipass,pnowx,ip,new)
         if (ip(3).lt.0) return         ! error in posit
-        poffx = pnowx - itapof(ipass)
+        if (ipass.gt.100) then
+          itens = MOD(ipass,100)
+          ihunds = ipass/100
+          poffx = pnowx - itapof4(itens,ihunds)
+        else
+          poffx = pnowx - itapof(ipass)
+        endif
         if (abs(poffx).le.ptoler) return         ! successful termination
 C
         if (poffx.le.0.) then

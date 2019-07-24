@@ -69,7 +69,7 @@ monit2.input:		false
 monit2*border:		PaleGreen3
 !Mwm*monit2*clientDecoration: title border
 ! monit3 (Tsys display, 7 lines)
-monit3*geometry:	32x16-0+120
+monit3*geometry:	80x7-0+120
 monit3*background:	linen
 monit3*border:		PaleGreen3
 monit3.title:		System Temperatures

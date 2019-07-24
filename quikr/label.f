@@ -112,7 +112,6 @@ C
         endif
 C       Change any O's in the check label to 0's
         do i=1,4
-        write(6,'('' index(parm '',i7)') index('Oo',cjchar(parm,i))
           if (index('Oo',cjchar(parm,i)).ne.0)
      &         call char2hol('0',parm,i,i)
         enddo
@@ -123,7 +122,6 @@ C     compare this check label against the one the operator typed.  Change
 C     O's to zeroes in the tape number whether label was typed or scanned.
 C
       do i=1,8
-        write(6,'('' index(lnum '',i7)') index('Oo',cjchar(lnum,i))
         if (index('Oo',cjchar(lnum,i)).ne.0) call char2hol('0',lnum,i,i)
       enddo
       call upper(lnum,1,8)

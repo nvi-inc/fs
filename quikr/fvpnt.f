@@ -44,9 +44,10 @@ C
       data ilen/80/
       data legax/2hha,2hdc,2haz,2hel,2hxy,2hew,2hxy,2hns/
 C
-C  PROGRAMMER: MWH
-C     CREATED: 840510
-C     LAST MODIFIED:
+C  PROGRAMMER: MWH  CREATED: 840510
+C  HISTORY:
+C  WHO  WHEN    WHAT 
+C  gag  920714  Added Mark IV rack to be valid along with Mark III.
 C
 C     1. If we have a class buffer, then we are to set the
 C     variables in common for FIVPT to use.
@@ -161,9 +162,9 @@ C
       endif
 
       call fs_get_rack(rack)
-      if (MK3 .eq. iand(rack,MK3)) then
+      if ((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv(ldev,1,2Hi1,1,2)
-C                      Default for MK3 is IF1
+C                      Default for MK3 and MK4 is IF1
         if(cjchar(ldev,1).eq.'i'.or.cjchar(ldev,1).eq.'v') goto 300
 
       else if (VLBA .eq. iand(rack,VLBA)) then
@@ -200,7 +201,7 @@ C
       goto 990
 C
 400   continue
-      if(rack.and.iand(rack,MK3)) then
+      if((rack.and.iand(rack,MK3)).or.(rack.and.iand(rack,MK4))) then
         if(cjchar(ldevfp,1).ne.'i') goto 405
         if(ichcm_ch(ldevfp,1,'i1').ne.0) goto 402
           ichain=1
@@ -262,7 +263,7 @@ C  Now check the cal and freq values.
       calfp = cal
       bmfp_fs= bm
       fxfp_fs = fx
-      if(rack.eq.iand(rack,MK3)) then
+      if((rack.eq.iand(rack,MK3)).or.(rack.eq.iand(rack,MK4))) then
         if(cjchar(ldevfp,1).eq.'i') goto 504
         indvc = ia2hx(ldevfp,2)
         if(freqvc(indvc).gt.96.0.and.freqvc(indvc).lt.504.00) goto 504
