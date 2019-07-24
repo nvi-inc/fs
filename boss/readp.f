@@ -65,8 +65,8 @@ C
       if (indexp.gt.0) ilen = fmpreadstr(idcbp1,ierr,ibc)
       if (indexp.lt.0) ilen = fmpreadstr(idcbp2,ierr,ibc)
       call char2low(ibc)
-      if (ierr.lt.0.or.ilen.lt.0) goto 800
-      if (ilen.eq.0.or.ibc(1:6).eq.'enddef'.or.ibc(1:6).eq.'define')
+      if (ierr.lt.0) goto 800
+      if (ilen.lt.0.or.ibc(1:6).eq.'enddef'.or.ibc(1:6).eq.'define')
      .   goto 200
 C                     These are the conditions for end-of-procedure
 C

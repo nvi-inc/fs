@@ -19,6 +19,7 @@ C
       integer*2 ibuf2(10),ibuf(20),laux(12)
       integer*4 ip(5),jperr(2),jsync(2)
       integer itrk(2),isyna(5),isynb(5),ireg(2),itrk2(2),iaux(2)
+      integer equalizer
 C
       data itper/25/,nav/4/,ilen/40/
 C             - time 10s of milliseconds
@@ -187,13 +188,19 @@ C
           isysmb=min(isysmb,isynb(i))
         endif
       enddo
-      if (MK3.eq.iand(rack,MK3)) then
+      if (MK3.eq.iand(drive,MK3)) then
         secs=2**(7-ibwtap)      ! seconds for a full megabyte
-      else if (MK4.eq.iand(rack,MK4)) then
+      else if (MK4.eq.iand(drive,MK4)) then
         secs=1     !!! MAKE ONE UNTIL MORE KNOWLEDGE OF MK4 !!! 
       else
-        call fs_get_vform_rate(vform_rate)
-        secs=0.25*(2**(7-vform_rate))
+        call fs_get_vrepro_equalizer(equalizer,1)
+        if(equalizer.eq.1) then
+          secs=2.0
+        else if(equalizer.eq.2) then
+          secs=1.0
+        else 
+          secs=1.0
+        endif
       endif
       tper=(itper*0.01)-0.005 ! average sample period 
       if(itrk(1).ne.0) then

@@ -55,3 +55,7 @@
 
 #define MAX_HOR   30
 #define MAX_RXCODES   40
+
+#define MK3	0x01
+#define VLBA	0x02
+#define MK4	0x04

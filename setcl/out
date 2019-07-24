@@ -1,0 +1,18 @@
+87c87,89
+<         nch = 8
+---
+>         call ichmv(ibuf,9,o'006412',1,2,2)
+> C                   Place a cr-lf at the end of the transmission buffer.
+>         nch = 12
+162c164
+< C   1992 198 16:17:34.777
+---
+> C   1992 198 16:17:34:777
+166c168
+<         ich=3
+---
+>         ich=1
+195c197
+<         ihs = ias2b(ibuf4,ic1,nch)/10
+---
+>         ihs = ias2b(ibuf4,ic1,nch)

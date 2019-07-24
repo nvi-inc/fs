@@ -1281,10 +1281,10 @@ void fs_get_vgroup_(vgroup)
 	  vgroup[3] = shm_addr->venable.group[3];
 	}
 
-void fs_get_vform_rate_(vform_rate)
-        int *vform_rate;
+void fs_get_vrepro_equalizer_(equalizer,n)
+        int *equalizer,*n;
 	{
-	  *vform_rate = shm_addr->vform.rate;
+	  *equalizer = shm_addr->vrepro.equalizer[*n-1];
 	}
 
 void fs_set_horaz_(HORAZ)

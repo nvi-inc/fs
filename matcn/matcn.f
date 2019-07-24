@@ -119,7 +119,7 @@ C
 C   INITIALIZED VARIABLES
 C
       data kini/.false./
-      data minmod/-8/, maxmod/8/,  maxdev/25/, nalarm/18/
+      data minmod/-8/, maxmod/9/,  maxdev/25/, nalarm/18/
       data ilen/360/,ilen2/160/
       data lstrob/2h!>,2h%>,2h(>,2h)>,2h+>,2h->,2h.>,2h;>/
       data ibaud/110,300,600,1200,2400,4800,9600/
@@ -234,6 +234,7 @@ C
         if (imode.eq.6) goto 600
         if (imode.eq.7) goto 700
         if (imode.eq.8) goto 800
+        if (imode.eq.9) goto 800
 C
 C
 C     3. Here we are sending data to the MAT.
@@ -353,6 +354,10 @@ C     8. Send buffer directly.  Address has already been substituted
 C     into first three characters.  Fill in fourth with a blank.
 C 
 800     idum=ichmv(ibuf,4,2h  ,1,1) 
+        if(imode.eq.9.or.imode.eq.-54) then
+          nchar=nchar+1
+          call pchar(ibuf,nchar,10)
+        endif
         call fs_get_kecho(kecho)
         call iat(ibuf,nchar,lumat,kecho,lu,ibuf2(2),nch2,ierr,itn) 
         goto 899

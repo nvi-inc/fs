@@ -1,0 +1,31 @@
+# This is the update script for Field System version 8.12
+#
+echo "******************************************************************"
+echo "*  This is the UPDATE script for Field System version 8.12       *"
+echo "*  Refer to instructions in the Update Notice for version 8.12.   *"
+echo "******************************************************************"
+echo "\nNOTE: This script will OVERWRITE the updated files in the /usr2/fs "
+echo "      directory. This is NOT a complete distribution. FS 8.10 must"
+echo "      already be installed."
+echo "\nDo you wish to continue with the UPDATE? (y=yes, n=no) : \c" 
+badans=true
+while [ "$badans" = "true" ]
+do
+  read ans
+  case "$ans" in
+    y|yes) echo "\nO.K. Continuing with install ... "
+           badans=false
+           ;;
+    n|no)  echo "\nO.K. Exiting."
+           exit
+           ;;
+    *)     echo "\nPlease answer with y=yes or n=no : \c"
+  esac
+done
+
+# UNCOMPRESS THE CPIO FILES FROM THE DISTRIBUTION DISKETTE
+/usr/bin/X11/uncompress fs.cpio.Z
+# WRITE ALL THE FILES USING CPIO
+cpio -Bicmuvd < fs.cpio
+#
+rm -f /usr2/fs/timeset/*.a

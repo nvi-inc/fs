@@ -45,7 +45,7 @@ C  NRSPN  - number of responses possible
       integer nchrc(8)   ! number of characters received in responses
       integer*2 irspn(4) ! terminal characters which generate a response
       integer wrdech,maxech
-      parameter (wrdech=40,maxech=wrdech*2)
+      parameter (wrdech=320,maxech=wrdech*2)
       integer iebuf(wrdech),iebuf2(wrdech),itn
       integer*2 irecx(10)
 C
@@ -79,6 +79,8 @@ C
         ifrecv = 1
       else if (imode.eq.-54) then
         ifrecv = 1
+      else if (imode.eq.9) then
+        ifrecv = 1
       else
 C  A colon in the message means a response to the download 
         do ir=1,nrspn
@@ -102,13 +104,16 @@ C
 C  Write message on the screen if echo is on
       ilen=nchrc(ir)
       ierr=portflush(lumat)
-      if(imode.eq.-53 .or. imode.eq.-54) then
+      if(imode.eq.-53) then
         ierr=portwrite(lumat,itran,nctran-1)
         idum=ichmv(irecx,1,itran,nctran,1)
         call fc_rte_time(it1,it1(6))
         ierr=portwrite(lumat,irecx,1)
+      else if(imode.eq.-54) then
+        call fc_rte_time(it1,it1(6))
+        ierr=portwrite(lumat,itran,nctran)
       else
-       ierr=portwrite(lumat,itran,nctran)
+        ierr=portwrite(lumat,itran,nctran)
       endif
 C                   Write the buffer to the MAT bus
       if (ifrecv.eq.0) then
@@ -129,15 +134,25 @@ C            !       ! transmit special characters
 C            ! buffered mode
 C
       maxc=ilen
-      if (imode.eq.-54) maxc=40
 C  at this time, don't know how many characters are expected 7/16/92
-      if(imode.eq.-53 .or. imode.eq.-54) then
+      if(imode.eq.-53) then
         ireg(1)=portread(lumat,irecx,ilen,1,-1,itimeout)
         call fc_rte_time(it1(7),it1(12))
         ireg(1)=portread(lumat,irecx(2),ilen,maxc-1,-1,itimeout)
         idum=ichmv(irecv,1,irecx,1,1)
         idum=ichmv(irecv,2,irecx(2),1,maxc-1)
         ilen=ilen+1
+      else if(imode.eq.-54) then
+        maxc=40
+        ireg(1)=portread(lumat,irecx,ilen,1,-1,itimeout)
+        call fc_rte_time(it1(7),it1(12))
+        ireg(1)=portread(lumat,irecx(2),ilen,maxc-1,10,itimeout)
+        idum=ichmv(irecv,1,irecx,1,1)
+        idum=ichmv(irecv,2,irecx(2),1,maxc-1)
+        ilen=ilen+1
+      else if (imode.eq.9) then
+        maxc=78
+        ireg(1)=portread(lumat,irecv,ilen,maxc,10,itimeout)
       else
         ireg(1)=portread(lumat,irecv,ilen,maxc,-1,itimeout)
       endif
@@ -164,7 +179,8 @@ C
       if (ireg(1).eq.-2) then          ! timeout
         if (itry.lt.maxtry) goto 200
         ierr = -4
-      else if (nrc.ne.nchrc(ir)) then    ! wrong # of characters in response
+      else if (nrc.ne.nchrc(ir).and.imode.ne.9.and.imode.ne.-54) then
+c                                ! wrong # of characters in response
         if (itry.lt.maxtry) goto 200
         call ifill_ch(irecv,1,80,' ')
         nrc=0
