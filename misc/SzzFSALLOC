@@ -1,0 +1,3 @@
+FS_ROOT=/usr2
+export FS_ROOT
+/usr2/fs/bin/fsalloc

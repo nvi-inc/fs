@@ -1,223 +1,226 @@
-DEFINE  KILL          91084174911
-SY=BR,AQUIR
-SY=BR,FIVPT
-SY=BR,ONOFF
-LOG=STATION
-ENDDEF
-DEFINE  SBAND         00000000000
-DEVICE=I2
-FIVEPT
-ENDDEF
-DEFINE  PREP          91084174227X
-WX
-XYOFF=0D,0D
-!+2S
-TRACK
-SY=GO,AQUIR
-ENDDEF
-DEFINE  PRESUN        89075001240X
-IFD=+18,+23
-STEP=6
-ONOFF=2,4,I1,I2,60,18
-PREP
-ENDDEF
-DEFINE  POSTSUN       89074224501X
-ONOFF=2,4,I1,I2,60,3
-STEP=.5
-IFD=-18,-23
-POSTP
-ENDDEF
-DEFINE  PREMOON       89074224638X
-IFD=+7,+7
-STEP=6
-ONOFF=2,4,I1,I2,60,18
-PREP
-ENDDEF
-DEFINE  POSTMOON      88237015859X
-ONOFF=2,4,I1,I2,60,3
-STEP=.5
-IFD=-7,-7
-POSTP
-ENDDEF
-DEFINE  POSTP         89074224501X
-SY=GO,AQUIR
-ENDDEF
-DEFINE  TERMP         84245002506X
-NOOFF
-SY=GO,ONOFF
-ENDDEF
-DEFINE  INITP         91084173931X
-SETUP
-CALOFF
-CALTEMPS
-BEAM1=
-BEAM2=
-FIVEPT=XYNS,-2,9,.4,1,I1
-ONOFF=2,4,I1,VC11,60,3
-CHECK=
-SY=GO,AQUIR
-ENDDEF
-DEFINE  ACQUIRE       91084173929X
-SY=RU,AQUIR,CTLPO.CTL
-LOG=POINT
-ENDDEF
-DEFINE  XBAND         88244180236X
-DEVICE=I1
-FIVEPT
-ENDDEF
-DEFINE  CALONFP       91084175118X
-CALON
-SY=GO,FIVPT
-ENDDEF
-DEFINE  CALOFFFP      91084175114X
-CALOFF
-SY=GO,FIVPT
-ENDDEF
-DEFINE  CALOFFNF      91084175402X
-CALOFF
-SY=GO,ONOFF
-ENDDEF
-DEFINE  CALONNF       91084175420X
-CALON
-SY=GO,ONOFF
-ENDDEF
-DEFINE  AXIS          85138021704X
-FIVEPT=$,*,*,*,*,*
-ENDDEF
-DEFINE  REPS          87302214715X
-FIVEPT=*,$,*,*,*,*
-ENDDEF
-DEFINE  POINTS        88246001007X
-FIVEPT=*,*,$,*,*,*
-ENDDEF
-DEFINE  STEP          89075001240X
-FIVEPT=*,*,*,$,*,*
-ENDDEF
-DEFINE  INTP          88245052320X
-FIVEPT=*,*,*,*,$,*
-ENDDEF
-DEFINE  DEVICE        88244180236X
-FIVEPT=*,*,*,*,*,$
-ENDDEF
-DEFINE  SUN           00000000000
-SOURCE=SUN
-FLUX1=DISK,2500000,0.52D
-FLUX2=DISK,0400000,0.52D
-ENDDEF
-DEFINE  MOON          91037003547X
-SOURCE=MOON
-FLUX1=DISK,31000,0.52D
-FLUX2=DISK,02250,0.52D
-ENDDEF
-DEFINE  CYGNUSA       91084174947X
-SOURCE=CYGNUS-A,195744.4,403546,1950.
-FLUX1=TWOPOINTS,190,1M55S
-FLUX2=TWOPOINTS,966,1M55S
-ENDDEF
-DEFINE  CASA          91084175539X
-SOURCE=CAS-A,232109.,583230,1950.
-"FLUX 1992.0 FROM DBS TABLE A1.1
-"SIZE FROM        DBS APPENDIX 2
-FLUX1=DISK,500,4M
-FLUX2=DISK,1304,4M
-ENDDEF
-DEFINE  3C84          91077162108X
-SOURCE=3C84,031629.54,411951.7,1950.0
-ENDDEF
-DEFINE  3C454D3       91022025534X
-SOURCE=3C454.3,225129.53,+155254.2,1950.0
-ENDDEF
-DEFINE  TAURUSA       91083092917X
-SOURCE=TAURUS-A,053131,215900,1950.0
-"SIZE FROM DBS APPENDIX 2
-FLUX1=GAUSSIAN,552,4.2M,2.6M
-FLUX2=GAUSSIAN,815,4.2M,2.6M
-ENDDEF
-DEFINE  ORIONA        91070044833X
-SOURCE=ORION-A,053249.,-052515,1950.0
-FLUX1=GAUSSIAN,340,4M
-FLUX2=GAUSSIAN,440,4M
-ENDDEF
-DEFINE  VIRGOA        91081075140X
-SOURCE=VIRGO-A,122817.57,124002.0,1950.
-"TOTAL FLUX FROM DBS MEMO APPENDIX 1
-"SIZE OF CORE AND HALO AND SPLIT OF FLUX FROM DBS 880901
-FLUX1=GAUSSIAN,044.75,40S,20S,01.25,10M,10M
-FLUX2=GAUSSIAN,114,40S,20S,27,10M,10M
-ENDDEF
-DEFINE  3C273B        91081074738X
-SOURCE=3C273B,122633.25,021943.5,1950.
-ENDDEF
-DEFINE  1921M293      88246012748X
-SOURCE=1921-293,192142.18,-292024.9,1950.0
-ENDDEF
-DEFINE  3C345         91081080423X
-SOURCE=3C345,164117.64,395411.0,1950.0
-ENDDEF
-DEFINE  3C353         91081110821X
-SOURCE=3C353,171753.3,-005550.,1950.0
-FLUX1=GAUSSIAN,13.6,2M30S
-FLUX2=GAUSSIAN,39.9,2M30S
-ENDDEF
-DEFINE  2134P004      91022025210X
-SOURCE=2134+004,213405.23,002825.0,1950.
-ENDDEF
-DEFINE  3C279         91081085320X
-SOURCE=3C279,125335.83,-053107.9,1950.
-ENDDEF
-DEFINE  3C123         91084173949X
-SOURCE=3C123,043355.2,293414.,1950.
-FLUX1=GAUSSIAN,10.1,20S
-FLUX2=GAUSSIAN,32.9,20S
-ENDDEF
-DEFINE  3C147         91084174823X
-SOURCE=3C147,053843.52,+494942.2,1950.
-FLUX1=GAUSSIAN,04.9,1S
-FLUX2=GAUSSIAN,15.6,1S
-ENDDEF
-DEFINE  3C161         91081073927X
-SOURCE=3C161,062443.2,-055112.,1950.
-FLUX1=GAUSSIAN,04.0,3S
-FLUX2=GAUSSIAN,13.1,3S
-ENDDEF
-DEFINE  3C218         91081084039X
-SOURCE=3C218,091541.2,-115305.,1950.
-FLUX1=GAUSSIAN,08.4,3M20S
-FLUX2=GAUSSIAN,27.7,3M20S
-ENDDEF
-DEFINE  3C286         91081075546X
-SOURCE=3C286,132849.66,+304558.7,1950.
-FLUX1=GAUSSIAN,05.2,1S
-FLUX2=GAUSSIAN,11.6,1S
-ENDDEF
-DEFINE  3C295         91081080004X
-SOURCE=3C295,140933.5,+522613.,1950.
-FLUX1=GAUSSIAN,03.4,4S
-FLUX2=GAUSSIAN,14.4,4S
-ENDDEF
-DEFINE  3C348         91081100401X
-SOURCE=3C348,164840.0,+050435.,1950.
-FLUX1=GAUSSIAN,06.8,1M55S
-FLUX2=GAUSSIAN,27.0,1M55S
-ENDDEF
-DEFINE  3C380         91081080725X
-SOURCE=3C380,182813.47,+484241.0,1950.
-FLUX1=GAUSSIAN,05.2,1S
-FLUX2=GAUSSIAN,11.0,1S
-ENDDEF
-DEFINE  3C391         91081122551X
-SOURCE=3C391,184648.5,-005858.,1950.
-FLUX1=GAUSSIAN,07.5,4.5M
-FLUX2=GAUSSIAN,16.0,4.5M
-ENDDEF
-DEFINE  0521M365      00000000000
-SOURCE=0521M365,052113.2,-363019.,1950.
-FLUX1=GAUSSIAN,05.5,15S
-FLUX2=GAUSSIAN,13.5,15S
-ENDDEF
-DEFINE  0552P398      91081073633X
-SOURCE=0552+398,055201.4,394822,1950.0
-ENDDEF
-DEFINE  OJ287         91081074400X
-SOURCE=OJ287,085157.2,201759,1950.0
-ENDDEF
+define  acquire       00000000000x
+sy=aquir /usr2/control/ctlpo.ctl &
+log=point
+enddef
+define  stow          00000000000x
+source=stow,000000,000000,0000
+enddef
+define  kill          00000000000x
+sy=brk aquir
+sy=brk fivpt
+sy=brk onoff
+log=station
+enddef
+define  sband         00000000000
+device=i2
+fivept
+enddef
+define  prep          00000000000x
+wx
+radecoff=0s,0d
+!+2s
+track
+sy=run aquir &
+enddef
+define  presun        00000000000
+ifd=+18,+23
+step=1
+onoff=2,4,i1,i2,60,6
+prep
+enddef
+define  postsun       00000000000
+onoff=2,4,i1,i2,60,3
+step=.4
+ifd=-18,-23
+postp
+enddef
+define  premoon       00000000000
+ifd=+7,+7
+step=1
+onoff=2,4,i1,i2,60,10
+prep
+enddef
+define  postmoon      00000000000x
+onoff=2,4,i1,i2,60,3
+step=.4
+ifd=-7,-7
+postp
+enddef
+define  postp         00000000000x
+sy=run aquir
+enddef
+define  termp         00000000000x
+nooff
+sy=go,onoff
+enddef
+define  initp         00000000000
+setup
+caloff
+caltemps
+beam1=
+beam2=
+fivept=hadc,-2,9,.4,1,i1
+onoff=2,4,i1,i2,60,3
+check=
+sy=run aquir &
+enddef
+define  xband         00000000000x
+device=i1
+fivept
+enddef
+define  calonfp       00000000000
+calon
+sy=run fivpt &
+enddef
+define  calofffp      00000000000x
+caloff
+sy=run fivpt &
+enddef
+define  caloffnf      00000000000
+caloff
+sy=run onoff &
+enddef
+define  calonnf       00000000000x
+calon
+sy=run onoff &
+enddef
+define  axis          00000000000x
+fivept=$,*,*,*,*,*
+enddef
+define  reps          00000000000x
+fivept=*,$,*,*,*,*
+enddef
+define  points        00000000000x
+fivept=*,*,$,*,*,*
+enddef
+define  step          00000000000x
+fivept=*,*,*,$,*,*
+enddef
+define  intp          00000000000x
+fivept=*,*,*,*,$,*
+enddef
+define  device        00000000000x
+fivept=*,*,*,*,*,$
+enddef
+define  sun           00000000000
+source=sun
+flux1=disk,2500000,0.52d
+flux2=disk,0400000,0.52d
+enddef
+define  moon          00000000000x
+source=moon
+flux1=disk,31000,0.52d
+flux2=disk,02250,0.52d
+enddef
+define  cygnusa       00000000000x
+source=cygnus-a,195744.4,403546,1950.
+flux1=twopoints,190,1m55s
+flux2=twopoints,966,1m55s
+enddef
+define  casa          00000000000
+source=cas-a,232109.,583230,1950.
+"flux 1992.0 from dbs table a1.1
+"size from        dbs appendix 2
+flux1=disk,500,4m
+flux2=disk,1304,4m
+enddef
+define  3c84          00000000000x
+source=3c84,031629.54,411951.7,1950.0
+enddef
+define  3c454d3       00000000000x
+source=3c454.3,225129.53,+155254.2,1950.0
+enddef
+define  taurusa       00000000000x
+source=taurus-a,053131,215900,1950.0
+"size from dbs appendix 2
+flux1=gaussian,552,4.2m,2.6m
+flux2=gaussian,815,4.2m,2.6m
+enddef
+define  oriona        92128144624x
+source=orion-a,053249.,-052515,1950.0
+flux1=gaussian,340,4m
+flux2=gaussian,440,4m
+enddef
+define  virgoa        00000000000x
+source=virgo-a,122817.57,124002.0,1950.
+"total flux from dbs memo appendix 1
+"size of core and halo and split of flux from dbs 880901
+flux1=gaussian,044.75,40s,20s,01.25,10m,10m
+flux2=gaussian,114,40s,20s,27,10m,10m
+enddef
+define  3c273b        00000000000x
+source=3c273b,122633.25,021943.5,1950.
+enddef
+define  1921m293      00000000000x
+source=1921-293,192142.18,-292024.9,1950.0
+enddef
+define  3c345         00000000000x
+source=3c345,164117.64,395411.0,1950.0
+enddef
+define  3c353         00000000000x
+source=3c353,171753.3,-005550.,1950.0
+flux1=gaussian,13.6,2m30s
+flux2=gaussian,39.9,2m30s
+enddef
+define  2134p004      00000000000x
+source=2134+004,213405.23,002825.0,1950.
+enddef
+define  3c279         00000000000x
+source=3c279,125335.83,-053107.9,1950.
+enddef
+define  3c123         00000000000x
+source=3c123,043355.2,293414.,1950.
+flux1=gaussian,10.1,20s
+flux2=gaussian,32.9,20s
+enddef
+define  3c147         00000000000x
+source=3c147,053843.52,+494942.2,1950.
+flux1=gaussian,04.9,1s
+flux2=gaussian,15.6,1s
+enddef
+define  3c161         00000000000x
+source=3c161,062443.2,-055112.,1950.
+flux1=gaussian,04.0,3s
+flux2=gaussian,13.1,3s
+enddef
+define  3c218         00000000000x
+source=3c218,091541.2,-115305.,1950.
+flux1=gaussian,08.4,3m20s
+flux2=gaussian,27.7,3m20s
+enddef
+define  3c286         00000000000x
+source=3c286,132849.66,+304558.7,1950.
+flux1=gaussian,05.2,1s
+flux2=gaussian,11.6,1s
+enddef
+define  3c295         00000000000x
+source=3c295,140933.5,+522613.,1950.
+flux1=gaussian,03.4,4s
+flux2=gaussian,14.4,4s
+enddef
+define  3c348         00000000000x
+source=3c348,164840.0,+050435.,1950.
+flux1=gaussian,06.8,1m55s
+flux2=gaussian,27.0,1m55s
+enddef
+define  3c380         00000000000x
+source=3c380,182813.47,+484241.0,1950.
+flux1=gaussian,05.2,1s
+flux2=gaussian,11.0,1s
+enddef
+define  3c391         00000000000x
+source=3c391,184648.5,-005858.,1950.
+flux1=gaussian,07.5,4.5m
+flux2=gaussian,16.0,4.5m
+enddef
+define  0521m365      00000000000
+source=0521m365,052113.2,-363019.,1950.
+flux1=gaussian,05.5,15s
+flux2=gaussian,13.5,15s
+enddef
+define  0552p398      00000000000x
+source=0552+398,055201.4,394822,1950.0
+enddef
+define  oj287         00000000000x
+source=oj287,085157.2,201759,1950.0
+enddef

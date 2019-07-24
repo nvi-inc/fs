@@ -1,0 +1,20 @@
+for dir in clib flib fclib fmpsee fslb lnfch newlb polb port rtelb vis
+do
+cd $dir
+make
+cd ..
+done
+
+cd boss
+make boss.a
+cd ..
+
+for dir in rwand chekr fserr ddout fs fsalloc ibcon incom matcn oprin pcalr onoff fivpt pfmed error resid sigma xtrac boss quikr antcn monit run labck setcl aquir quikv mcbcn brk moon logex headp timeset
+do
+   if( test -f "$dir"/makefile)
+           then
+               cd $dir
+               make
+               cd ..
+   fi
+done

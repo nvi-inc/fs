@@ -1,0 +1,31 @@
+repro - reproduce tracks (VLBA drive)
+Syntax:      repro=modeA,trackA,trackB,modeB,
+             equA,equB
+
+Response:    repro/modeA,trackA,trackB,modeB,
+             equA,equB
+
+
+Settable parameters:
+modeA           reproduce mode for channel A. byp (default) for
+                bypass, raw or read for read (playback).
+trackA          track for decoder channel A, default 1, 1-28
+                allowed.
+trackB          track for decoder channel B, default 1, 1-28
+                allowed.
+modeB           reproduce mode for channel B. byp for bypass,
+                raw or read for read (playback). Default is
+                modeA.
+equA            equalizer to use for decoding channel A. alt1
+                (default) for normal speed (135 ips), alt2 for
+                double speed (270 ips), std unspecified.
+equB            equalizer to use for decoding channel B. alt1
+                for normal speed (135 ips), alt2 for double
+                speed (270 ips), std unspecified. Default is
+                equA.
+
+Monitor-only parameters: none
+
+Comments: 
+The raw or read mode normally is used only when checking
+parity errors on the tape. This is also known as "playback" mode.

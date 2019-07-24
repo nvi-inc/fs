@@ -1,8 +1,0 @@
-CONT - Continue schedule execution after a HALT
-
-Syntax:   CONT
-Response: none
-
-     Comments: This command must be issued after a HALT to get the
-schedule going again. It has no effect if no HALT was actually
-issued. This is an immediate execution operator command.

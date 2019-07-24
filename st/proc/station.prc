@@ -1,471 +1,628 @@
-DEFINE  SX4A1         00000000000
-VCSX
-FORM=C,8.000
-FORM=RESET
-IFDSX
-TAPEFORMA
-PASS=$,SAME
-ENABLE=G1,G2,G3,G4
-TAPE=LOW
-REPRO=BYP,6,18,4
-DECODE=A,CRC
-DECODE
-ENDDEF
-DEFINE  SX2A1         00000000000
-VCSX
-FORM=A,4.000
-FORM=RESET
-IFDSX
-TAPEFORMA
-PASS=$,SAME
-ENABLE=G1,G2,G3,G4
-TAPE=LOW
-REPRO=BYP,5,17
-DECODE=A,CRC
-DECODE
-ENDDEF
-DEFINE  SXCTS         00000000000X
-TPI=V1,V2,V3,V4,V5,V6,V7,V8,IF1
-TPI=V9,V10,V11,V12,V13,V14,IF2
-IFD=MAX,MAX,*,*
-!+2S
-TPZERO=V1,V2,V3,V4,V5,V6,V7,V8,IF1
-TPZERO=V9,V10,V11,V12,V13,V14,IF2
-IFD=OLD,OLD,*,*
-CALON
-!+2S
-TPICAL=V1,V2,V3,V4,V5,V6,V7,V8,IF1
-TPICAL=V9,V10,V11,V12,V13,V14,IF2
-CALOFF
-CALTEMPS
-TSYS1=V1,V2,V3,V4,V5,V6,V7,V8,IF1
-TSYS2=V9,V10,V11,V12,V13,V14,IF2
-ENDDEF
-DEFINE  CHECK2A1      00000000000X
-CHECK2C1
-ENDDEF
-DEFINE  CHECK2A2      00000000000X
-CHECK2C2
-ENDDEF
-DEFINE  SX4C2         00000000000
-VCSX
-FORM=C,8.000
-FORM=RESET
-IFDSX
-TAPEFORMC
-PASS=$,SAME
-ENABLE=G2,G4
-TAPE=LOW
-REPRO=BYP,18,6,4
-DECODE=A,CRC
-DECODE
-ENDDEF
-DEFINE  SX4C1         00000000000
-VCSX
-FORM=C,8.000
-FORM=RESET
-IFDSX
-TAPEFORMC
-PASS=$,SAME
-ENABLE=G1,G3
-TAPE=LOW
-REPRO=BYP,5,17,4
-DECODE=A,CRC
-DECODE
-ENDDEF
-DEFINE  TAPEFORMA     00000000000
-TAPEFORM=1,-350,2,  0,3,-295, 4, 55, 5,-240, 6,110
-TAPEFORM=7,-185,8,165,9,-130,10,220,11, -75,12,275
-"PASSES 51-62 ARE FOR READING, NOT WRITING,
-"EVEN TRACKS IN FORWARD AND ODD TRACKS IN REVERSE
-TAPEFORM=51,349,52,-698,53,404,54,-643,55,459,56,-588
-TAPEFORM=57,514,58,-533,59,569,60,-478,61,624,62,-423
-ENDDEF
-DEFINE  VALARM        00000000000X
-VC01=ALARM
-VC02=ALARM
-VC03=ALARM
-VC04=ALARM
-VC05=ALARM
-VC06=ALARM
-VC07=ALARM
-VC08=ALARM
-VC09=ALARM
-VC10=ALARM
-VC11=ALARM
-VC12=ALARM
-VC13=ALARM
-VC14=ALARM
-ENDDEF
-DEFINE  MIDOB         00000000000X
-WX
-TPI=V1,V2,V3,V4,V5,V6,V7,V8,IF1
-TPI=V9,V10,V11,V12,V13,V14,IF2
-CALTEMPS
-TSYS1=V1,V2,V3,V4,V5,V6,V7,V8,IF1
-TSYS2=V9,V10,V11,V12,V13,V14,IF2
-CABLE
-IFD
-VC06
-VC11
-ONSOURCE
-TRACK
-ENDDEF
-DEFINE  READY         00000000000X
-SXCTS
-RXMON
-NEWTAPE
-ST=FOR,240,OFF
-!+6S
-ET
-!+6S
-LABEL
-CHECK=*,TP
-ENDDEF
-DEFINE  UNLOD         00000000000X
-ENABLE=,
-CHECK=*,-TP
-TAPE=OFF
-ST=REV,120,OFF
-XDISP=ON
-"**************DISMOUNT THIS TAPE NOW************"
-WAKEUP
-XDISP=OFF
-ENDDEF
-DEFINE  PHASECAL      00000000000X
-REPRO=BYP,1,1
-PCAL=,,BYP
-PCAL
-ENDDEF
-DEFINE  FASTF         00000000000X
-FF
+define  caloff        00000000000x
+rx=*,*,*,*,*,*,off
+enddef
+define  calon         00000000000x
+rx=*,*,*,*,*,*,on
+enddef
+define  caltemps      00000000000
+caltemp1=20.8
+caltemp2=21.4
+enddef
+define  check2a1      00000000000x
+check2c1
+enddef
+define  check2a2      00000000000x
+check2c2
+enddef
+define  check2c1      00000000000
+check=*,-tp,-hd
+enable=
+decode=a,crc,byte
+parity=,,ab,on,g1,g3
+fastr=15s
+!+6s
+!*
+st=for,120,off
+!+4s
+repro=raw,1,3
+parity
+repro=byp,0,0
+!*+29.20s
+et
+!+3s
+check=*,tp,hd
+enddef
+define  check2c2      00000000000x
+check=*,-tp,-hd
+enable=
+decode=a,crc,byte
+parity=,,ab,on,g1,g3
+fastf=15s
+!+6s
+!*
+st=rev,120,off
+!+4s
+repro=raw,2,4
+parity
+repro=byp,0,0
+!*+29.20s
+et
+!+3s
+check=*,tp,hd
+enddef
+define  dat           00000000000x
+form=reset
+vc15=200
+vcsx2
+vc15=alarm
+ifdsx
+form=c,4
+form=alarm
+enddef
+define  fastf         00000000000x
+ff
 !+$
-ET
-ENDDEF
-DEFINE  FASTR         00000000000X
-RW
+et
+enddef
+define  fastr         00000000000x
+rw
 !+$
-ET
-ENDDEF
-DEFINE  VREAD         00000000000X
-VC01
-VC02
-VC03
-VC04
-VC05
-VC06
-VC07
-VC08
-VC09
-VC10
-VC11
-VC12
-VC13
-VC14
-ENDDEF
-DEFINE  SX2C1         00000000000
-VCSX
-FORM=C,4.000
-FORM=RESET
-IFDSX
-TAPEFORMC
-PASS=$,SAME
-ENABLE=G1,G3
-TAPE=LOW
-REPRO=BYP,5,17
-DECODE=A,CRC
-DECODE
-ENDDEF
-DEFINE  SX2C2         00000000000
-VCSX
-FORM=C,4.000
-FORM=RESET
-IFDSX
-TAPEFORMC
-PASS=$,SAME
-ENABLE=G2,G4
-TAPE=LOW
-REPRO=BYP,18,6
-DECODE=A,CRC
-DECODE
-ENDDEF
-DEFINE  CHECK2C1      00000000000X
-CHECK=*,-TP,-HD
-ENABLE=
-DECODE=A,CRC,BYTE
-PARITY=,,AB,ON,G1,G3
-FASTR=15S
-!+6S
-!*
-ST=FOR,120,OFF
-!+4S
-REPRO=RAW,1,3
-PARITY
-REPRO=BYP,0,0
-!*+29.20S
-ET
-!+3S
-CHECK=*,TP,HD
-ENDDEF
-DEFINE  CHECK2C2      00000000000
-CHECK=*,-TP,-HD
-ENABLE=
-DECODE=A,CRC,BYTE
-PARITY=,,AB,ON,G2,G4
-FASTF=15S
-!+6S
-!*
-ST=REV,120,OFF
-!+4S
-REPRO=RAW,2,4
-PARITY
-REPRO=BYP,0,0
-!*+29.20S
-ET
-!+3S
-CHECK=*,TP,HD
-ENDDEF
-DEFINE  RXMON         00000000000X
-RX=FRONT,*,*,*,*,*,*
-RX
-RX=REAR,*,*,*,*,*,*
-RX
-RX=LO,*,*,*,*,*,*
-RX
-RX=DCAL,*,*,*,*,*,*
-RX
-RX=SUP,*,*,*,*,*,*
-RX
-RX=LO5MHZ,*,*,*,*,*,*
-RX
-RX=PRES,*,*,*,*,*,*
-RX
-RX=20K,*,*,*,*,*,*
-RX
-RX=70K,*,*,*,*,*,*
-RX
-ENDDEF
-DEFINE  MIN15         00000000000
-RXALL
-WX
-SY=OF,PCALR
-!+15S
-CABLE
-SXCTS
-PCAL
-ENDDEF
-DEFINE  INITI         00000000000 
-"WELCOME TO THE FIELD SYSTEM
-!*
-ENDDEF
-DEFINE  OVERNITE      00000000000
-LOG=OVERNITE
-SETUP
-CHECK=*,-TP
-MIN15@!,15M
-RXMON@!+2M30S,5M
-PCAL=0,60,BY,25,0,5,11
-PCAL
-ENDDEF
-DEFINE  RXALL         00000000000X
-RX=FRONT,*,*,*,*,*,*
-RX
-RX=REAR,*,*,*,*,*,*
-RX
-RX=LO,*,*,*,*,*,*
-RX
-RX=DCAL,*,*,*,*,*,*
-RX
-RX=INLET,*,*,*,*,*,*
-RX
-RX=SUP,*,*,*,*,*,*
-RX
-RX=RET,*,*,*,*,*,*
-RX
-RX=-2.73V,*,*,*,*,*,*
-RX
-RX=SIF,*,*,*,*,*,*
-RX
-RX=XIF,*,*,*,*,*,*
-RX
-RX=KIF,*,*,*,*,*,*
-RX
-RX=SLO,*,*,*,*,*,*
-RX
-RX=XLO,*,*,*,*,*,*
-RX
-RX=KLO,*,*,*,*,*,*
-RX
-RX=LO5MHZ,*,*,*,*,*,*
-RX
-RX=SPARE,*,*,*,*,*,*
-RX
-RX=28V,*,*,*,*,*,*
-RX
-RX=24V,*,*,*,*,*,*
-RX
-RX=20V,*,*,*,*,*,*
-RX
-RX=15V,*,*,*,*,*,*
-RX
-RX=5V,*,*,*,*,*,*
-RX
-RX=-15V,*,*,*,*,*,*
-RX
-RX=GROUND,*,*,*,*,*,*
-RX
-RX=PRES,*,*,*,*,*,*
-RX
-RX=X1BIAS,*,*,*,*,*,*
-RX
-RX=X2BIAS,*,*,*,*,*,*
-RX
-RX=X3BIAS,*,*,*,*,*,*
-RX
-RX=S1BIAS,*,*,*,*,*,*
-RX
-RX=S2BIAS,*,*,*,*,*,*
-RX
-RX=S3BIAS,*,*,*,*,*,*
-RX
-RX=20K,*,*,*,*,*,*
-RX
-RX=70K,*,*,*,*,*,*
-RX
-ENDDEF
-DEFINE  SETUP         00000000000
-DAT
-TAPE=ALARM
-HDATA=ALARM
-ET
-ENABLE=
-REPRO=BYP,1,3
-TAPEFORMC
-PASS=1,1
-ENDDEF
-DEFINE  POSTOB        00000000000X
-ENDDEF
-DEFINE  MIDTP         00000000000
-IFD=MAX,MAX,*,*
-!+2S
-TPZERO=V1,V2,V3,V4,V5,V6,V7,V8,IF1
-TPZERO=V9,V10,V11,V12,V13,V14,IF2
-IFD=OLD,OLD,*,*
-RXMON
-ENDDEF
-DEFINE  PREOB         00000000000
-CALON
-!+2S
-TPICAL=V1,V2,V3,V4,V5,V6,V7,V8,IF1
-TPICAL=V9,V10,V11,V12,V13,V14,IF2
-CALOFF
-ONSOURCE
-ENDDEF
-DEFINE  DAT           00000000000
-VCSX
-FORM=C,4
-FORM=RESET
-FORM=ALARM
-IFDSX
-DECODE=A,CRC
-ENDDEF
-DEFINE  MIDTPR        00000000000
-MIDTP
-ENDDEF
-DEFINE  TAPEFORMC     00000000000X
-TAPEFORM=1,-330,2,-330,3,-275,4,-275,5,-220,6,-220
-TAPEFORM=7,-165,8,-165,9,-110,10,-110,11,-55,12,-55
-TAPEFORM=13,  0,14,  0,15, 55,16, 55,17,110,18,110
-TAPEFORM=19,165,20,165,21,220,22,220,23,275,24,275
-ENDDEF
-DEFINE  RXX           00000000000X
-RX=$,*,*,*,*,*,*
-ENDDEF
-DEFINE  CALON         00000000000X
-RX=*,*,*,*,*,*,ON
-ENDDEF
-DEFINE  CALOFF        00000000000X
-RX=*,*,*,*,*,*,OFF
-ENDDEF
-DEFINE  IFDSX         00000000000X
-IFD=27,40,NOR,NOR
-LO=8080.00,2020.00
-PATCH=LO1,1L,2L,3L,4L,5H,6H,7H,8H
-PATCH=LO2,9L,10L,11L,12H,13H,14H
-ENDDEF
-DEFINE  CALTEMPS      00000000000
-CALTEMP1=20.8
-CALTEMP2=14.8
-ENDDEF
-DEFINE  VCSX          00000000000
-VC01=130.99,2.000
-VC02=140.99,2.000
-VC03=170.99,2.000
-VC04=230.99,2.000
-VC05=340.99,2.000
-VC06=420.99,2.000
-VC07=470.99,2.000
-VC08=490.99,2.000
-VC09=197.99,2.000
-VC10=202.99,2.000
-VC11=217.99,2.000
-VC12=247.99,2.000
-VC13=272.99,2.000
-VC14=282.99,2.000
-VALARM
-ENDDEF
-DEFINE  PREPASS       00000000000X
-WAKEUP
-XDISP=ON
+et
+enddef
+define  ifdsx         00000000000
+ifd=33,30,nor,nor
+lo=8080.00,2020.00
+patch=lo1,1l,2l,3l,4h,5h,6h,7h,8h
+patch=lo2,9l,10l,11l,12h,13h,14h
+enddef
+define  ifdwb
+ifd=33,30,nor,nor
+lo=8080.00,2020.00,8580.1
+upconv=0,0,0
+patch=lo1,1l,2l,3l,4h,5h,6h,7h,8h
+patch=lo2,9l,10l,11l,12h,13h,14h
+enddef
+define  initi         92128154932x
+"Welcome to Field System version 8.0 and the new PC Field System
+sy=setcl
+enddef
+define  midob         00000000000x
+onsource
+wx
+cable
+ifd
+vc06
+vc11
+tpi=v1,v2,v3,v4,v5,v6,v7,v8,if1
+tpi=v9,v10,v11,v12,v13,v14,if2
+caltemps
+tsys1=v1,v2,v3,v4,v5,v6,v7,v8,if1
+tsys2=v9,v10,v11,v12,v13,v14,if2
+enddef
+define  midtp         00000000000
+ifd=max,max,*,*
+!+2s
+tpzero=v1,v2,v3,v4,v5,v6,v7,v8,if1
+tpzero=v9,v10,v11,v12,v13,v14,if2
+ifd=old,old,*,*
+rxmon
+enddef
+define  min15         00000000000
+rxall
+wx
+sy=of,pcalr
+!+15s
+cable
+sxcts
+pcal
+enddef
+define  overnite      00000000000
+log=overnite
+setup
+check=*,-tp
+min15@!,15m
+rxmon@!+2m30s,5m
+pcal=0,60,by,25,0,5,11
+pcal
+enddef
+define  postob        00000000000x
+enddef
+define  precond
+schedule=prepass,#1
+enddef
+define  preob         00000000000
+onsource
+calon
+!+2s
+tpical=v1,v2,v3,v4,v5,v6,v7,v8,if1
+tpical=v9,v10,v11,v12,v13,v14,if2
+caloff
+enddef
+define  prepass       00000000000x
+wakeup
+xdisp=on
 " Mount the next tape without cleaning the tape drive.
-" Type CONT when finished.
-HALT
-XDISP=OFF
-CHECK=*,-TP,-HD
-TAPE=LOW
-SFF
-!+5M22S
-ET
-!+9S
-WAKEUP
-XDISP=ON
-"  Drop the vacuum loop and clean the tape drive thoroughly.
-"  Re-thread the tape and establish vacuum.
-"  Type CONT when finished.
-HALT
-XDISP=OFF
-SRW
-!+5M24S
-ET
-!+9S
-CHECK=*,TP,HD
-ENDDEF
-DEFINE  WVR           00000000000
-PC=INIT
-WVTIP@!+5S,30M
-WVLOS@!+15S,3M
-WVZEN@!+1M15,3M
-ENDDEF
-DEFINE  WVTIP         00000000000
-PC=NRES,FRM,MET
-!+5S
-PC=NRES,DIR,TIP=7,20,160
-ENDDEF
-DEFINE  WVLOS         00000000000
-PC=INIT
-!+3S
-PC=NRES,FRM,LOS
-ENDDEF
-DEFINE  WVZEN         00000000000
-PC=NRES,FRM,LOS=,90
-ENDDEF
-DEFINE  SFASTR        00000000000
-SRW
+" Use the cont command when finished.
+halt
+xdisp=off
+check=*,-tp,-hd
+tape=low
+sff
+!+5m27s
+et
+!+9s
+wakeup
+xdisp=on
+"Drop vacuum loop, clean the tape drive thoroughly.
+"Re-thread the tape, establish vacuum.
+"Type cont when finished.
+halt
+xdisp=off
+srw
+!+5m28s
+et
+!+9s
+enddef
+define  ready         00000000000x
+sxcts
+rxmon
+newtape
+st=for,120,off
+!+11s
+et
+!+3s
+label
+check=*,tp
+enddef
+define  rxall
+rx=front,*,*,*,*,*,*
+rx
+rx=rear,*,*,*,*,*,*
+rx
+rx=lo,*,*,*,*,*,*
+rx
+rx=dcal,*,*,*,*,*,*
+rx
+rx=inlet,*,*,*,*,*,*
+rx
+rx=ret,*,*,*,*,*,*
+rx
+rx=sup,*,*,*,*,*,*
+rx
+rx=2.73v,*,*,*,*,*,*
+rx
+rx=sif,*,*,*,*,*,*
+rx
+rx=xif,*,*,*,*,*,*
+rx
+rx=kif,*,*,*,*,*,*
+rx
+rx=slo,*,*,*,*,*,*
+rx
+rx=xlo,*,*,*,*,*,*
+rx
+rx=klo,*,*,*,*,*,*
+rx
+rx=lo5mhz,*,*,*,*,*,*
+rx
+rx=28v,*,*,*,*,*,*
+rx
+rx=24v,*,*,*,*,*,*
+rx
+rx=20v,*,*,*,*,*,*
+rx
+rx=15v,*,*,*,*,*,*
+rx
+rx=5v,*,*,*,*,*,*
+rx
+rx=-15v,*,*,*,*,*,*
+rx
+rx=ground,*,*,*,*,*,*
+rx
+rx=pres,*,*,*,*,*,*
+rx
+rx=x1bias,*,*,*,*,*,*
+rx
+rx=x2bias,*,*,*,*,*,*
+rx
+rx=x3bias,*,*,*,*,*,*
+rx
+rx=s1bias,*,*,*,*,*,*
+rx
+rx=s2bias,*,*,*,*,*,*
+rx
+rx=s3bias,*,*,*,*,*,*
+rx
+rx=20k,*,*,*,*,*,*
+rx
+rx=70k,*,*,*,*,*,*
+rx
+enddef
+define  rxmon         00000000000x
+rxx=lo
+rx
+rxx=dcal
+rx
+rxx=lo5mhz
+rx
+rxx=pres
+rx
+rxx=20k
+rx
+rxx=70k
+rx
+enddef
+define  rxx           00000000000x
+rx=$,*,*,*,*,*,*
+enddef
+define  setup         00000000000
+dat
+et
+enable=
+tape=alarm
+repro=byp,1,3
+enddef
+define  sfastf        00000000000
+sff
 !+$
-ET
-ENDDEF
-DEFINE  SFASTF        00000000000
-SFF
+et
+enddef
+define  sfastr        00000000000
+srw
 !+$
-ET
-ENDDEF
+et
+enddef
+define  sx2a1         00000000000
+vcsx2
+form=a,4.000
+form=reset
+ifdsx
+tapeforma
+pass=$,same
+enable=g1,g2,g3,g4
+tape=low
+repro=byp,5,17
+decode=a,crc
+decode
+enddef
+define  sx2c1         00000000000
+vcsx2
+form=c,4.000
+form=reset
+ifdsx
+tapeformc
+pass=$,same
+enable=g1,g3
+tape=low
+repro=byp,5,17,2
+decode=a,crc
+decode
+enddef
+define  sx2c2         00000000000
+vcsx2
+form=c,4.000
+form=reset
+ifdsx
+tapeformc
+pass=$,same
+enable=g2,g4
+tape=low
+repro=byp,6,18,2
+decode=a,crc
+decode
+enddef
+define  sx4a1         00000000000
+vcsx4
+form=a,8.000
+form=reset
+ifdsx
+tapeforma
+pass=$,same
+enable=g1,g2,g3,g4
+tape=low
+repro=byp,5,17,4
+decode=a,crc
+decode
+enddef
+define  sx4c1         00000000000
+vcsx4
+form=c,8.000
+form=reset
+ifdsx
+tapeformc
+pass=$,same
+enable=g1,g3
+tape=low
+repro=byp,5,17,4
+decode=a,crc
+decode
+enddef
+define  sx4c2         00000000000
+vcsx4
+form=c,8.000
+form=reset
+ifdsx
+tapeformc
+pass=$,same
+enable=g2,g4
+tape=low
+repro=byp,6,18,4
+decode=a,crc
+decode
+enddef
+define  sxcts         00000000000x
+tpi=v1,v2,v3,v4,v5,v6,v7,v8,if1
+tpi=v9,v10,v11,v12,v13,v14,if2
+ifd=max,max,*,*
+!+2s
+tpzero=v1,v2,v3,v4,v5,v6,v7,v8,if1
+tpzero=v9,v10,v11,v12,v13,v14,if2
+ifd=old,old,*,*
+calon
+!+2s
+tpical=v1,v2,v3,v4,v5,v6,v7,v8,if1
+tpical=v9,v10,v11,v12,v13,v14,if2
+caloff
+caltemps
+tsys1=v1,v2,v3,v4,v5,v6,v7,v8,if1
+tsys2=v9,v10,v11,v12,v13,v14,if2
+enddef
+define  tapeforma     00000000000
+tapeform=1,-350,2,  0,3,-295, 4, 55, 5,-240, 6,110
+tapeform=7,-185,8,165,9,-130,10,220,11, -75,12,275
+enddef
+define  tapeformc     00000000000x
+tapeform=1,-330,2,-330,3,-275,4,-275,5,-220,6,-220
+tapeform=7,-165,8,-165,9,-110,10,-110,11,-55,12,-55
+tapeform=13,  0,14,  0,15, 55,16, 55,17,110,18,110
+tapeform=19,165,20,165,21,220,22,220,23,275,24,275
+enddef
+define  ucall
+uc=front,*,*,*,*,*,*
+uc
+uc=rear,*,*,*,*,*,*
+uc
+uc=lo,*,*,*,*,*,*
+uc
+uc=dcal,*,*,*,*,*,*
+uc
+uc=+12v,*,*,*,*,*,*
+uc
+uc=sense+,*,*,*,*,*,*
+uc
+uc=lolock,*,*,*,*,*,*
+uc
+uc=-2.73v,*,*,*,*,*,*
+uc
+uc=prisif,*,*,*,*,*,*
+uc
+uc=xif,*,*,*,*,*,*
+uc
+uc=secsif,*,*,*,*,*,*
+uc
+uc=prislo,*,*,*,*,*,*
+uc
+uc=xlo,*,*,*,*,*,*
+uc
+uc=secslo,*,*,*,*,*,*
+uc
+uc=lo5mhz,*,*,*,*,*,*
+uc
+uc=+15ps2,*,*,*,*,*,*
+uc
+uc=28v,*,*,*,*,*,*
+uc
+uc=-15ps1,*,*,*,*,*,*
+uc
+uc=20v,*,*,*,*,*,*
+uc
+uc=+15ps1,*,*,*,*,*,*
+uc
+uc=+5ps1,*,*,*,*,*,*
+uc
+uc=-15ps2,*,*,*,*,*,*
+uc
+uc=+5ps2,*,*,*,*,*,*
+uc
+uc=secs3b,*,*,*,*,*,*
+uc
+uc=x1bias,*,*,*,*,*,*
+uc
+uc=x2bias,*,*,*,*,*,*
+uc
+uc=x3bias,*,*,*,*,*,*
+uc
+uc=pris1b,*,*,*,*,*,*
+uc
+uc=pris2b,*,*,*,*,*,*
+uc
+uc=pris3b,*,*,*,*,*,*
+uc
+uc=secs1b,*,*,*,*,*,*
+uc
+uc=secs2b,*,*,*,*,*,*
+uc
+enddef
+define  ucmon
+ucx=front
+uc
+ucx=rear
+uc
+ucx=lo
+uc
+ucx=dcal
+uc
+ucx=lo5mhz
+uc
+ucx=sense+
+uc
+enddef
+define  ucx
+uc=$,*,*,*,*,*,*
+enddef
+define  unlod         00000000000x
+enable=,
+check=*,-tp
+tape=off
+st=rev,120,off
+xdisp=on
+"**************Dismount this tape now************"
+wakeup
+xdisp=off
+enddef
+define  valarm        00000000000x
+vc01=alarm
+vc02=alarm
+vc03=alarm
+vc04=alarm
+vc05=alarm
+vc06=alarm
+vc07=alarm
+vc08=alarm
+vc09=alarm
+vc10=alarm
+vc11=alarm
+vc12=alarm
+vc13=alarm
+vc14=alarm
+enddef
+define  vcsx2         00000000000x
+vc01=130.99,2.000
+vc02=140.99,2.000
+vc03=170.99,2.000
+vc04=230.99,2.000
+vc05=340.99,2.000
+vc06=420.99,2.000
+vc07=470.99,2.000
+vc08=490.99,2.000
+vc09=197.99,2.000
+vc10=202.99,2.000
+vc11=217.99,2.000
+vc12=247.99,2.000
+vc13=272.99,2.000
+vc14=282.99,2.000
+!+1s
+valarm
+enddef
+define  vcsx4         00000000000x
+vc01=130.99,4.000
+vc02=140.99,4.000
+vc03=170.99,4.000
+vc04=230.99,4.000
+vc05=340.99,4.000
+vc06=420.99,4.000
+vc07=470.99,4.000
+vc08=490.99,4.000
+vc09=197.99,4.000
+vc10=202.99,4.000
+vc11=217.99,4.000
+vc12=247.99,4.000
+vc13=272.99,4.000
+vc14=282.99,4.000
+!+1s
+valarm
+enddef
+define  vcwb2         00000000000x
+vc01=132.99,2.000
+vc02=172.99,2.000
+vc03=272.99,2.000
+vc04=432.99,2.000
+vc05=152.89,2.000
+vc06=272.89,2.000
+vc07=332.89,2.000
+vc08=352.89,2.000
+vc09=200.99,2.000
+vc10=210.99,2.000
+vc11=230.99,2.000
+vc12=285.99,2.000
+vc13=320.99,2.000
+vc14=325.99,2.000
+!+1s
+valarm
+enddef
+define  vcwb4         00000000000x
+vc01=132.99,4.000
+vc02=172.99,4.000
+vc03=272.99,4.000
+vc04=432.99,4.000
+vc05=152.89,4.000
+vc06=272.89,4.000
+vc07=332.89,4.000
+vc08=352.89,4.000
+vc09=200.99,4.000
+vc10=210.99,4.000
+vc11=230.99,4.000
+vc12=285.99,4.000
+vc13=320.99,4.000
+vc14=325.99,4.000
+!+1s
+valarm
+enddef
+define  vread         00000000000x
+vc01
+vc02
+vc03
+vc04
+vc05
+vc06
+vc07
+vc08
+vc09
+vc10
+vc11
+vc12
+vc13
+vc14
+enddef
+define  wb2c1
+vcwb2
+form=c,4.000
+form=reset
+ifdwb
+tapeformc
+pass=$,same
+enable=g1,g3
+tape=low
+repro=byp,5,17,2
+decode=a,crc
+decode
+enddef
+define  wb2c2
+vcwb2
+form=c,4.000
+form=reset
+ifdwb
+tapeformc
+pass=$,same
+enable=g2,g4
+tape=low
+repro=byp,6,18,2
+decode=a,crc
+decode
+enddef
+define  wb4c1
+vcwb4
+form=c,8.000
+form=reset
+ifdwb
+tapeformc
+pass=$,same
+enable=g1,g3
+tape=low
+repro=byp,5,17,4
+decode=a,crc
+decode
+enddef
+define  wb4c2
+vcwb4
+form=c,8.000
+form=reset
+ifdwb
+tapeformc
+pass=$,same
+enable=g2,g4
+tape=low
+repro=byp,6,18,4
+decode=a,crc
+decode
+enddef

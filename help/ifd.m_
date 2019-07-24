@@ -1,0 +1,32 @@
+ifd - IF distributor (Mark III rack)
+Syntax:      ifd=atten1,atten2,input1,input2
+
+Response:    ifd/atten1,atten2,input1,input2,rem
+             /lcl,TP1,TP2
+
+
+Settable parameters:
+atten1          IF1 attenuator setting in db, range 0 (default) to
+                63 db. Enter a numerical value preceeded by +
+                or - to indicate relative change. Other options
+                are max, or old to restore the previous value
+                after a max.
+atten2          IF2 attenuator setting in db, range 0 (default) to
+                63 db. Enter a numerical value preceeded by +
+                or - to indicate relative change. Other options
+                are max, or old to restore the previous value
+                after a max.
+input1          IF1 input, nor (default) or alt. 
+input2          IF2 input, nor (default) or alt.  
+
+Monitor-only parameters:
+rem/lcl         switch setting, remote or local
+TP1             IF1 total power reading
+TP2             IF2 total power reading
+
+Comments: 
+MAT module functions available.
+
+The max and old values for the attenuator parameters allow the
+attenuators to set to the maximum value of 63, and then returned
+to their previous values.

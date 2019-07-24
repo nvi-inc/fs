@@ -1,0 +1,30 @@
+st - start tape recording
+Syntax:      st=direction,speed,record
+
+Response:    st/direction,speed,record
+
+
+Settable parameters:
+direction          for to move tape forward, rev to move in
+                   reverse. No default. When the tape is
+                   stopped, this parameter is displayed in the
+                   response as rev for Mark III, 0 for VLBA.
+speed              Tape speed in inches per second, either
+                   nominal or actual. Choices are: 
+                   Nominal: 3 7 15 30 60 120 240
+                   Actual: 3.375 7.875 16.875 33.75
+                           67.5 135 270
+                   No default. When the tape is stopped, this
+                   parameter is reported as 0.
+record             on to record; off to disable recording.
+                   Default is on.
+
+Monitor-only parameters: none
+
+Comments: 
+The tape is started moving. For Mark III, the record bit is enabled
+if record is on. For VLBA, the track groups are enabled if
+record is on; they are disabled if record is off. For both
+systems, reproduce mode is not changed and the state of the low
+tape sensor is not changed.
+

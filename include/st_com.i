@@ -1,0 +1,22 @@
+C
+      DOUBLE PRECISION A1DAT_NEW, A2DAT_NEW, AZOFF_NEW, DCOFF_NEW,
+     .  ELOFF_NEW, RAOFF_NEW 
+
+      REAL BARMB_NEW, RHUM_NEW, TDEGC_NEW
+
+      CHARACTER*12 OLDLOG
+
+      INTEGER IMODE, ITYPE_NEW,
+     . b_stcom(INT_ALIGN),e_stcom
+
+      LOGICAL KPOINT_NEW
+
+
+      COMMON/stcom/b_stcom,
+     .  A1DAT_NEW, A2DAT_NEW, AZOFF_NEW, DCOFF_NEW,
+     .  ELOFF_NEW, RAOFF_NEW, 
+     .  BARMB_NEW, RHUM_NEW, TDEGC_NEW,
+     .  OLDLOG,
+     .  IMODE, ITYPE_NEW,
+     .  KPOINT_NEW,
+     .  e_stcom

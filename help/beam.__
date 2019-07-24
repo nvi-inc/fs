@@ -1,0 +1,43 @@
+beam - beamsize for flux command
+Syntax:      beam1=angle
+             beam2=angle
+             beama=angle
+             beamb=angle
+
+Response:    beam1/angle
+             beam2/angle
+             beama/angle
+             beamb/angle
+
+
+Settable parameters:
+angle           full-width half maximum beam size, displayed in
+                decimal degrees of arc.
+
+Monitor-only parameters: none
+
+Comments:
+The beam1/beam2 and beama/beamb commands are applicable
+for Mark III and VLBA systems, respectively. The two command
+pairs, beam1/beama and beam2/beamb are synonomous.
+
+Two beam sizes may be specified with these two commands.
+Normally IF channels 1 and 2 (Mark III) and IF channels A and
+B (VLBA) correspond to the two beam sizes. The commands
+flux1/flux2 and fluxa/fluxb use the sizes specified as
+beam1/beam2 and beama/beamb respectively.
+
+There is no default for the beam size unless the appropriate IF
+distributor command (ifd for Mark III systems, ifab or ifcd
+for VLBA systems) and the lo and upconv commands have been
+issued. If these commands have been issued, then the beam size
+will default to the beam size calculated from the appropriate LO
+and upconverter frequencies and the antenna diameter found in the
+antenna.ctl control file. The formula is:
+
+         beam size (radians) = 1.05*c/(freq*diaman)
+
+Issuing a beamx=... command will change the calculated values
+of the fluxx command to invalid quantities. Reissue a corrrect
+fluxx=... command to recalculate fluxes.
+

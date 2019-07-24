@@ -1,0 +1,5 @@
+cd /usr2/fs
+find ./oper -print > FSO
+cat FSO | cpio -ovcB > /tmp/fso.cpio
+rm FSO
+compress /tmp/fso.cpio

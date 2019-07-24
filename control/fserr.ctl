@@ -3,13 +3,13 @@ AN   -1
 Illegal mode
 ""
 AN   -2
-Antenna LU timed-out while waiting for a response
+Time-out while waiting for a response
 ""
 AN   -3
 Antenna response garbled.
 ""
 AN   -4
-Antenna interface not set to remote.
+Interface not set to remote.
 ""
 AN   -5
 Error return from antenna.
@@ -114,13 +114,13 @@ BO -119
 Error decoding LOCATION.CTL line ?WWW
 ""
 BO -120
-Error opening LU.CTL FMP ?WWW
+Error opening MUX.CTL FMP ?WWW
 ""
 BO -121
-Error reading LU.CTL FMP ?WWW
+Error reading DEV.CTL FMP ?WWW
 ""
 BO -122
-Error decoding LU.CTL line ?WWW
+Error decoding DEV.CTL line ?WWW
 ""
 BO -123
 Error positioning in schedule.  FMP ?FFF
@@ -147,13 +147,13 @@ BO -130
 Reading edited proc file. FMP ?FFF
 ""
 BO -131
-Reading new procedure library FMP ?FFF
+Reading new procedure library FMP ?FFF
 ""
 BO -132
 No SOURCE command found in schedule.
 ""
 BO -133
-Error opening procedure library FMP ?FFF
+Error opening procedure library
 ""
 BO -134
 Positioning in schedule file error FMP ?FFFF
@@ -171,7 +171,10 @@ BO -138
 Number of lines must be a positive integer.
 ""
 BO -139
-WARNING: No schedule procedure library for this schedule
+Error opening EQUIP.CTL ?FFF
+""
+BO -140
+Error decoding EQUIP.CTL line ?WWW
 ""
 BO -143
 Error opening RXDEF.CTL FMP ?FFF
@@ -369,7 +372,7 @@ CH -328
 System too busy to compare Formatter/computer clock
 ""
 CH -329
-Formatter clock does not agree with computer clock
+Formatter time does not agree with Field System time.
 ""
 CH -330
 Formatter alarm is on
@@ -435,10 +438,10 @@ CH -350
 The Receiver 20K stage is hotter than?WWWK.
 ""
 CH -351
-Write tape head is not in requested position.
+Tape head 1 is not in requested position.
 ""
 CH -352
-Read tape head is not in requested position.
+Tape head 2 is not in requested position.
 ""
 CH -401
 Head is still moving.
@@ -509,6 +512,9 @@ Not enough room on disc cartridge
 FP   -1
 Break Detected in FIVPT
 ""
+FP   -2
+FIVPT RN already locked
+""
 FP  -10
 Diagnostic: Unknown axis system found in REOFF
 ""
@@ -524,6 +530,15 @@ Diagnostic: Unknown axis system found in LOCAL
 FP  -60
 Diagnostic: Unknown axis system found in GOOFF
 ""
+FP  -70
+Device Timed Out
+""
+FP  -71
+Device returned wrong number of characters
+""
+FP  -72
+Device communication failed too many times
+""
 FP  -80
 TPI Overflowed
 ""
@@ -533,14 +548,17 @@ Diagnostic: Unknown device
 FP  -82
 TPI overflowed too many times
 ""
-FP  -70
-Device Timed Out
+FP  -90
+program error: incorrect response count from mcbcn_v.
 ""
-FP  -71
-Device returned wrong number of characters
+FP  -91
+program error: incorrect response count from vget_att.
 ""
-FP  -72
-Device communication failed too many times
+FP  -92
+program error: incorrect response count from vset_zero.
+""
+FP  -93
+program error: incorrect response count from vrst_att.
 ""
 FP -100
 Couldn't get back to source after an error
@@ -570,10 +588,13 @@ IB   -7
 Attempt to write to a talk-only device
 ""
 IB   -8
-Device is down, UP it first.
+GPIB error condition, check driver manual UGPIB section for explanation
 ""
 IB -101
 Number of entries from IBAD control file exceed table limit of ?WWW
+""
+IB -201
+GPIB error condition ?WWW
 ""
 MA   -1
 Trouble with class buffer
@@ -593,8 +614,65 @@ Improper response (wrong number of chars)
 MA   -6
 Verify error
 ""
+MA -100
+Unable to open MAT device.
+""
 MA -101
 Number of entries from MATAD control file exceed table limit of ?WWW
+""
+MC   -1
+Interface ?W timed-out.
+""
+MC   -2
+Interface ?W responded, but did not ACKnowledge.
+""
+MC   -3
+Interface ?W detected parity error.
+""
+MC   -4
+Interface ?W failed to handshake on command.
+""
+MC   -5
+Interface ?W failed to handshake on monitor.
+""
+MC   -6
+Interface ?W timed-out on last monitor byte.
+""
+MC  -18
+Interface ?W has the wrong address.
+""
+MC  -19
+Interface ?W has the wrong block length.
+""
+MC  -20
+Formatter MM:SS stuck.
+""
+MC -101
+Unable to open mcbcn.ctl file.
+""
+MC -102
+Too many devices in mcbcn.ctl file.
+""
+MC -103
+Class buffer problems in mcbcn.
+""
+MC -104
+MCBCN not initiliazed.
+""
+MC -105
+Unknown interface mnemonic ?W.
+""
+MC -106
+Illegal mode.
+""
+MC -107
+Unable to open mcb device.
+""
+MC -108
+Error in request buffer format.
+""
+MC -121
+Write request to mcb device failed.
 ""
 NF   -1
 Break Detected in ONOFF
@@ -629,62 +707,41 @@ Diagnostic: Unknown device
 NF  -82
 TPI overflowed too many times
 ""
+NF  -90
+program error: incorrect response count from mcbcn_v2.
+""
+NF  -91
+program error: incorrect response count from vget_att.
+""
+NF  -92
+program error: incorrect response count from vset_zero.
+""
+NF  -93
+program error: incorrect response count from vrst_att.
+""
 NF -100
 Couldn't get back to source after an error
 ""
 NF -110
 Couldn't reset attenuators after an error
 ""
-OP    2
-Invalid field in FSPGM file ?WWW = (line #)*100 + (parm #) -
-OPRIN Continuing
+PC   -1
+program error: portopen8: devdb incorrect size.
 ""
-OP   -1
-File OPPGM.CTL has more than ?WWW entries - OPRIN Continuing
+PC   -2
+PCALR could not open data buffer.
 ""
-OP   -2
-Not enough contiguous SAM or not enought SAM (SYSTEM AVAILABLE
-MEMORY)
+PC   -3
+PCALR could not get data buffer device set-up.
 ""
-OP   -3
-File FSPGM or STPGM open error FMP ?FFF
+PC   -4
+Data buffer BAUD rate not supported.
 ""
-OP   -4
-File FSPGM or STPGM read error FMP ?FFF
+PC   -5
+PCALR could not change data buffer device set-up.
 ""
-OP   -5
-Program referenced on line ?WWW in FSPGM.CTL
-""
-OP   -6
-FSPGM.CTL program on RP FMP ?FFF
-""
-OP   -7
-Error starting BOSS, OPRIN terminating
-""
-OP   -8
-Resource # IRNPRC not allocated ISTAT = ?WWW
-""
-OP   -9
-BOSS not present now after normal start
-""
-OP  -10
-BOSS not dormant now - OPRIN terminating
-""
-OP  -11
-File OPPGM.CTL open error FMP ?FFF
-""
-OP  -12
-File OPPGM.CTL read error FMP ?FFF
-""
-OP  -14
-!!! &dETIME IS OFF - OPRIN COULD NOT SET - SET TIME&d@ !!!
-""
-OP  -15
-Initialization call to set time [S entry in OPPGM] failed with
-FMP ?FFF
-""
-OP  -16
-Resource # IRNLVDT_FS not allocated ISTAT = ?WWW
+PC   -6
+PCALR RN already locked.
 ""
 PC -101
 Skipping track ?WWW, incorrect record length from data buffer.
@@ -928,6 +985,9 @@ Baud rate must be one of 9600,4800,2400,1200,600,300,110
 ""
 QN -201
 Error in request.  Must be ALL,EVEN,ODD,IF,FM,TP,V1...V15,HD,RX.
+""
+QN -301
+Error in request.  Must be ALL,EVEN,ODD,IF,FM,TP,B1...B16,RC.
 ""
 QO -101
 No default for first offset.
@@ -1194,6 +1254,12 @@ Step size must be a real number.
 QZ -209
 PATCH has not setup the specified VC for FIVPT.
 ""
+QZ -210
+bbc not set-up for ifa or ifb.
+""
+QZ -211
+Detector device not one of ia, ib, or bbc1 ... bbc14.
+""
 QZ -301
 FIVPT is not dormant.
 ""
@@ -1241,6 +1307,18 @@ VC for device 1 was not setup with PATCH.
 ""
 QZ -412
 VC for device 2 was not setup with PATCH.
+""
+QZ -413
+bbc for device 1 not set-up for ifa or ifb.
+""
+QZ -414
+Detector device 1 not one of ia, ib, or bbc1 ... bbc14.
+""
+QZ -415
+bbc for device 2 not set-up for ifa or ifb.
+""
+QZ -416
+Detector device 2 not one of ia, ib, or bbc1 ... bbc14.
 ""
 QZ -501
 ONOFF is not dormant.
@@ -1387,7 +1465,7 @@ Q@ -214
 Read head calibration parameter must start with F,R, or U.
 ""
 Q@ -221
-Error decoding write head position parameter.
+Error decoding write head position pamameter.
 ""
 Q@ -222
 Error decoding read head position parameter.
@@ -1429,7 +1507,28 @@ Q@ -272
 Scale calibration must be O(ld) or N(ew).
 ""
 Q@ -281
-No parameters allowed.
+No parameters allowed except MAT functions.
+""
+Q@ -282
+No parameters allowed for VLBA rec.
+""
+Q@ -283
+program error: in get_vatod.
+""
+Q@ -284
+program error: incorrect response count in get_vatod.
+""
+Q@ -285
+program error: incorrect response count in lvdonn_v.
+""
+Q@ -286
+program error: incorrect response count in lvdofn_v.
+""
+Q@ -287
+program error: incorrect response count in head_vmov.
+""
+Q@ -288
+VLBA recorder head stack still moving.
 ""
 Q@ -291
 Echo control must be ON or OFF.
@@ -1512,11 +1611,35 @@ Error unlocking LVDT Resource Number.
 Q@ -410
 Commanded position out of range
 ""
+RC -201
+Parameter must be reboot,load,unload,bot,eot,release,<feet>,feet,or zero.
+""
+RC -401
+program error: incorrect number of responses in rec.
+""
 RW   -1
 No signal from bar code reader.
 ""
 RW   -2
 Successive readings from bar code reader differ.
+""
+SC   -1
+setcl: incorrect number of class buffers.
+""
+SC   -2
+setcl: fomatter time out-of-range
+""
+SC   -3
+setcl: cpu time sampled before formatter out-of-range.
+""
+SC   -4
+setcl: cpu time sampled after formatter out-of-range.
+""
+SC   -5
+setcl: reseting system clock failed.
+""
+SC  -10
+setcl: failed too many times, time information not updated.
 ""
 SP   -1
 Error in characters following a !
@@ -1552,13 +1675,10 @@ SP  -11
 Stop time occurs before start time.
 ""
 SP  -12
-No class number available (from EXEC 20).
+More than 100 characters in expanded command.
 ""
 SP  -13
-No SAM available (from EXEC 20).
-""
-SP  -14
-More than 100 characters in expanded command.
+This command not supported for your equipment, check equip.ctl.
 ""
 TE   -9
 Video converter frequency has not been set
@@ -1571,9 +1691,6 @@ Phase cal amplitude too low in VC?WWW
 ""
 TE  -23
 Phase cal insufficently suppressed when off in VC?WWW
-""
-TE  -24
-VC?WWW's signal is out of spectrum analyzer's range
 ""
 TE  -24
 Spectrum analyzer input from VC?WWW is out of range
@@ -1590,3 +1707,149 @@ Can't separate S and X band; patching probably wrong
 TE  -32
 Extreme channels in band have the same frequency
 ""
+VB -101
+No default for L.O. frequency.
+""
+VB -102
+No default for IF source.
+""
+VB -103
+No default for USB bandwidth.
+""
+VB -104
+No default for LSB bandwidth.
+""
+VB -201
+L.O. frequency must be between 500.00 MHz and 999.99 MHz.
+""
+VB -202
+I.F. input should be one of: a, b, c, or d.
+""
+VB -203
+USB bandwidth should be one of: 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16.
+""
+VB -204
+LSB bandwidth should be one of: 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16.
+""
+VB -205
+TPI averaging period must be one of: 0, 1, 2, 4, 10, 20, 40, or 60.
+""
+VB -206
+Gain mode must be agc or man.
+""
+VB -207
+USB gain value must be between -18.0 and 12.0.
+""
+VB -208
+LSB gain value must be between -18.0 and 12.0.
+""
+VB -401
+program error: incorrect number of responses in bbc.
+""
+VE -200
+List elements must be one of: g1, g2, g3, g4, d1, ..., d28.
+""
+VE -300
+Redundant list entries.
+""
+VE -301
+mcb functions addr and test not supported for this command.
+""
+VR -401
+program error: incorrect number of responses in venable_dec.
+""
+VF -201
+Mode must be one of: prn, a, b, c, d1, ..., d28.
+""
+VF -202
+Rate must be one of: 0.25, 0.5, 1, 2, 4, 8, 16, 32.
+""
+VF -204
+Channel must be one of: at1, at2, at3, aaux, bt1, bt2, bt3, baux.
+""
+VF -401
+program error: incorrect number of responses in vform_dis.
+""
+VF -402
+program error: incorrect number of responses in need_config.
+""
+VF -403
+program error: incorrect number of responses in aux_active.
+""
+VI -201
+IF attenuator setting must be 0 or 20.
+""
+VI -202
+IF attenuator setting must be 0 or 20.
+""
+VI -203
+IF input selection must be nor or ext.
+""
+VI -204
+IF input selection must be nor or ext.
+""
+VI -205
+IF averaging period must be one of: 0, 1, 2, 4, 10, 20, 40, or 60.
+""
+VI -401
+program error: incorrect number of responses in dist_dec.
+""
+V@   -1
+program error: missing class number in quikv.
+""
+V@   -2
+Command too long for quikv to handle.
+""
+V@   -3
+Too many parameters in command for quikv to parse.
+""
+V@   -4
+program error: unknown command in quikv.
+""
+VR -201
+modeA must be read (raw), or byp.
+""
+VR -202
+trackA must 1-28.
+""
+VR -203
+trackB must 1-28.
+""
+VR -204
+modeB must be read (raw), or byp.
+""
+VR -205
+equA must be std, alt1, or alt2.
+""
+VR -206
+equB must be std, alt1, or alt2.
+""
+VR -301
+mcb functions addr and test not supported for this command.
+""
+VR -401
+program error: incorrect number of responses in vrepro_dec.
+""
+VS -101
+No default for tape direction.
+""
+VS -102
+No default for tape speed.
+""
+VS -201
+Tape direction must be for or rev.
+""
+VS -202
+Tape speed must be one of: 3, 7, 15, 30, 60, 120, or 240.
+""
+VS -203
+Record parameter must be on or off.
+""
+VS -401
+program error: incorrect number of responses in vst.
+""
+VT -201
+Tape parameter must be low, or off.
+""
+VT -401
+program error: incorrect number of responses in tape.

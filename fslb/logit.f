@@ -1,0 +1,92 @@
+      subroutine logit(lmessg,nchar,lsor,lprocn,ierr,lwho,lwhat,nargs)
+
+C  LOGIT formats a buffer for the log file and puts it into a
+C  mailbox for DDOUT.
+C  Character messages are displayed as is, errors are formatted
+C  in a standard format. 
+C  For normal messages, only 4 parameters need be input. 
+C  For the command which terminates Field System operation,
+C  the error parameter (5) is used as a cue to CLOUT to clear the class
+C  after the message is processed. 
+C  The error parameter (5) is also used by DDOUT as a signal 
+C  to start a new log file.
+C  If only 2 parameters are input, the calling program's name
+C  prefaces the message. 
+C  For error messages, all 6 (7 if LWHAT is present) parameters are
+C  required although the message and procedure name are ignored. 
+C 
+      include '../include/fscom.i'
+C 
+C  INPUT: 
+C 
+      dimension lmessg(1) 
+C      - the buffer holding the message 
+C     NCHAR - length of the message, in characters
+C     LSOR - source of the message, 1 character (determined by BOSS)
+      dimension lprocn(1) 
+C      - the procedure file from whence this message came, 12 chars 
+C     IERR - error number, if this is an error. 
+C            -999 indicates termination for CLOUT and DDOUT.
+C     LWHO - source of the error, 2 chars, e.g. Qx for QUIKR or BO for BOSS.
+C     LWHAT - what caused the error (usually a device name), 2 chars. 
+C             If LWHAT is binary, it is converted to a 4-char ASCII number. 
+C             Indicate that LWHAT is binary by setting LPROCN>0.
+C             This parameter should be 0 or not present if not relevant.
+C 
+C  OUTPUT:  none
+C 
+C  LOCAL: 
+C 
+C     NCH - character counter in IBUF 
+      integer*2 ibuf(60)
+C      - buffer in which log entry is formatted 
+C     NARGS - number of arguments passed to us
+C     IOPT2 - sent as optional parameter 2 on the class I/O.
+C             "B1" appends a bell to the terminal display,
+C                  normally used for error messages.
+C 
+C  INITIALIZED: 
+C 
+C 
+C 
+C     1. Get the number of parameters we were sent. 
+C     Set up the class I/O option.
+C 
+      iopt2 = 0 
+      if (nargs.gt.5) then
+        if (ierr.lt.0) call char2hol('b1',iopt2,1,2)
+      endif
+      if (nargs.eq.5) then
+        iopt2 = ierr
+        ierr = 0
+      end if
+C                   If there are exactly 5 arguments, then
+C                   transfer the IERR parameter directly. 
+C 
+C 
+C     2. Call LOGEN to format the message.  Call it with the appropriate
+C     number of parameters, depending on NARGS. 
+C 
+      if (nargs.eq.2) call logen4(ibuf,nch,lmessg,nchar) 
+      if (nargs.eq.3) call logen5(ibuf,nch,lmessg,nchar,lsor)
+      if (nargs.eq.4) call logen6(ibuf,nch,lmessg,nchar,lsor,lprocn) 
+      if (nargs.eq.5) call logen7(ibuf,nch,lmessg,nchar,lsor,lprocn, 
+     .                ierr) 
+      if (nargs.eq.6) call logen8(ibuf,nch,lmessg,nchar,lsor,lprocn, 
+     .                ierr,lwho)
+      if (nargs.eq.7) call logen9(ibuf,nch,lmessg,nchar,lsor,lprocn, 
+     .                ierr,lwho,lwhat)
+C 
+C 
+C     4. The buffer is formatted.  Pad with a blank for disk writing
+C     purposes and put it into the mailbox.  That's all we do.
+C 
+      nch = ichmv(ibuf,nch,2H  ,1,1)-2
+C                   Pad with a blank
+      call ifill_ch(ibuf,nch+1,120-nch,' ')
+c
+      call fs_get_iclbox(iclbox)
+      call put_buf(iclbox,ibuf,-nch,2hfs,iopt2) 
+C 
+      return
+      end 

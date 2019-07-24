@@ -1,6 +1,0 @@
-ec
-if 6 eb
-if a pc,31,0
-li $libhs.lib
-re clock.rel
-en

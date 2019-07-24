@@ -1,0 +1,88 @@
+pass - head position by pass number
+Syntax:      pass=cmdPw,cmdPr
+             pass
+
+Response:    pass/cmdPw,cmdPr,cmdMw,cmdMr,actMw,
+             actMr,deltaMw,deltaMr
+
+
+Settable parameters:
+cmdPw           command pass number for write head, range
+                1-100. Default is to not move the write head.
+cmdPr           command pass number for read head, range
+                1-100. If the parameter is same, the read pass
+                will be same as the write pass. Default is to not
+                move the read head. This parameter may not be
+                specified for VLBA recorders.
+
+Monitor-only parameters:
+cmdMw           microns corresponding to command write head
+                pass number
+cmdMr           microns corresponding to command read head
+                pass number, null for VLBA
+actMw           microns corresponding to actual write head pass
+                number 
+actMr           microns corresponging to actual read head pass
+                number, null for VLBA
+deltaMw         micron error between actual and commanded
+                write head position
+deltaMr         micron error between actual and commanded
+                read head position, null for VLBA
+
+Comments: 
+This command moves the read and/or write heads to the position
+for the commanded passes. The correspondence of pass numbers
+to micron positions is established by the tapeform command.
+The requested pass must have been set-up by the tapeform
+command to be used. Odd pass numbers are used for forward
+pass, even for reverse.
+
+Only the write head parameters are used for VLBA recorders. The
+read head parameters are reported as nulls.
+
+An individual head can be moved by not specifying a command
+pass number for the other head. The read command pass can be
+same, which causes it to be the same as the write head pass
+number. This feature is useful for setting both heads to the same
+pass number in set-up procedures.
+
+The deltaM parameters are reported with the sign of actual minus
+commanded.
+
+The commanded positions of the lvdt, pass, and stack
+commands are reported consistently. For example, if you
+command the head positions with the stack or pass command,
+you can determine the corresponding command voltage with
+lvdt. And vice-versa, the micron position corresponding to a
+voltage position commanded with lvdt can be determined with
+stack or pass.
+
+The commanded pass numbers reported by pass are given special
+values if either lvdt or stack last commanded the positions. If
+lvdt or stack is used with uncalibrated positions, the
+commanded pass number will be reported as 0. If the stack
+command with forward calibrated positions was used, -1 will be
+reported for the pass number, for reverse calibrations -2 will be
+reported.
+
+When the write head is moved by either pass, stack, or lvdt,
+the auxiliary data field used by the formatter is set to reflect the
+commanded position. The twelve characters of the auxiliary data
+field are set as:
+
+                        xxwxwxyzyzff
+
+xx           ff for forward calibration (odd passes)
+             fe for reverse calibration (even passes)
+             fd for uncalibrated positions.
+wxyz         0000-3999 for positive micron positions
+             4000-7999 for negative micron positions
+ff           hex characters ff
+
+The positions occupied by wxyz are the four digits of the
+commanded micron write head position. In the auxiliary data field
+the digits are repeated two at a time.  The negative positions are
+represented as the 4000+ absolute value of the position.  The xx
+field is used to identify which type of calibration was used to set
+the position. The last two digits of the auxiliary data are fixed with
+the value ff. Auxiliary data field not supported for VLBA.

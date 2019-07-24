@@ -1,4 +1,3 @@
-CA=23,0 
-SW=22,0 
-C2=21,0 
-SA=24,0 
+CA=/dev/ib3,0 
+AN=/dev/ib4,0 
+ST=/dev/ib5,0

@@ -1,0 +1,19 @@
+radecoff - ra/dec position offsets
+Syntax:      radecoff=ra,dec
+
+Response:    radecoff/ra,dec
+
+
+Settable parameters:
+ra           right ascension offset, in numeric angle/hours
+             format. The response is in numeric angle/hours
+             format.
+dec          declination offset, in numeric angle/degrees format.
+             The response is in numeric angle/degrees format.
+
+Monitor-only parameters: none
+
+Comments: 
+The antenna will move to the offset position when this command
+is issued. To return to the on-source position, issue this command
+with zero for the offset.

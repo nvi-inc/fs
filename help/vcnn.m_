@@ -1,0 +1,27 @@
+vcnn - video converter (Mark III rack)
+Syntax:      vcnn=freq,bandwidth,TPIsel,attenU,a
+             ttenl
+
+Response:    vcnn/freq,bandwidth,TPIsel,attenU,a
+             ttenl,
+             rem/lcl,LOlock,TP
+
+
+Settable parameters:
+freq            synthesizer frequency in MHz, value must be
+                less than 500.00 MHz. No default.
+bandwidth       final filter bandwidth in MHz. Choices are
+                0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 0
+                (external filter). Value may be integer for
+                bandwidths of 1, 2 (default), or 4 MHz.
+TPIsel          total power integrator selection. Choices are ul,
+                l, u, if, lo, gr (ground). Default u.
+attenU          USB attenuator, 0 (default) or 10 db only. 
+attenL          LSB attenuator, 0 (default) or 10 db only.
+
+Monitor-only parameters:
+rem/lcl         switch setting, rem or lcl.
+LOlock          LO lock/unlock staus, lock or unlock.
+TP              total power reading, decimal.
+
+Comments: MAT module functions available.

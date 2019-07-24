@@ -1,0 +1,36 @@
+uc - uncooled receiver control
+Syntax:      uc=channel,dcal,loh,box,S,X,K,cal
+
+Response:    uc/channel,dcal,loh,box,S,X,K,cal,l
+             ostat,value
+
+
+Settable parameters:
+channel         hex value or code word (next page). No default.
+dcal            delay cal heater, on (default) or off.
+loh             LO box heater, on (default) or off.
+box             box heaters. Turn on with a (default) or b (for
+                controller), or off.
+S,X,K           IF amplifier controls, on (default) or off.
+cal             noise cal control. May be on, off (default),
+                oon (override on), oof (override off), or ext
+                modulation.
+
+Monitor-only parameters:
+lostat          status of LO, locked or unlocked.
+value           reading in A/D channel shown in first parameter.
+                Units are appropriate for channel in use.
+
+Comments: 
+MAT module functions are available.
+
+Channel assignments for the "standard" receiver are on the next
+page. Your station's channel assignments are in the rxdef.ctl
+control file. Details of the MAT protocol are in the MAT
+Communications manual.
+
+UC must be specified in the matad.ctl control file.
+
+This command is identical to the rx command except uc is for
+uncooled receivers.
+
