@@ -1,26 +1,60 @@
-logout - set log output unit(s)
-Syntax:         logout=dev,dev,...
+logout - set log output file(s)
 
-Response:       none
+Syntax:         logout=file,mode,bits,parity,stop
+                logout=*,file,mode,bits,parity,stop
+
+Response:       logout/file,file,...
 
 
 Settable parameters:
-dev             Device name for display of log entries. Up to 5 devices may be
-                specified. Default device is the log/display window.
+dev             File name for display output. This may either be a normal file,
+                e.g., /tmp/logout, a pseudo-terminal device file that is in use
+                as an xterm, e.g., /dev/pts011, or a serial port device file,
+                e.g., /dev/cui1h. No default.
+mode            Open mode for file, one of append, write, or a valid BAUD rate:
+                50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400,
+                4800, 9600, 19200, or 38400.  The default is write. If a BAUD
+                rate is specified it implies that the file being opened is serial
+                device. The remaining parameters may be used to define the line
+                protocol.
+bits            The number of bits per character transmitted, one of 5, 6, 7, or
+                8. The default is 8.
+parity          How parity generation is handled: none, odd, or even. The default
+                is none.
+stop            The number of stop bits, one of 1 or 2. The default is 1.
 
 Comments: 
-Log entries are always written into the log file, this command is only for
-display during operations. All log entry display may be suppressed by issuing the
-command logout=/dev/null.
+Log entries are always written into the log file and sent to the display device
+for the ddout program. This command can be used to send the displayed output of
+the ddout program, both log entries and information messages (including bus
+communications echoing) to other terminals, devices, and files. This command is
+useful for recording the displayed output in a file for later examination or to
+direct the output to an auxiliary display.
 
-An example of the use of this command is to specify a file name as the device in
-order to record a portion of the log file into a separate file. Another example
-would be to have the log display appear on a different terminal from the console
-screen.
+Up to five different output files (or devices) can be in use at any time.
+However, only one new device can be specified per logout=þ command. If the
+logout=*,þ form is used, the specified file receives the display output in
+addition to those already doing so. If the form without the asterisk þ*þ as the
+first parameter is used, any files currently in use will be closed and the
+specified file will be opened. The command logout= with no parameters will
+close any files current receiving output.
 
-You must have permission to write to any device or file that you specify. If you
-specify a device which you do not have permission to write to, an error will be
-generated when the Field System attempts to open that device.
+The line protocol parameters bits, parity, and stop are useful only if the
+mode was specified as a valid BAUD rate. The default mode, write, will cause
+the specified file to be overwritten if it already exists.
 
+If a file is not specified as an absolute pathname, i.e., without a leading slash
+þ/þ, the file will be opened in the current directory that the Field System was
+started from, usually /usr2/oper.
 
-                        NOTE:  This command is not implemented.
+Because of the mapping of all command input to lower case, it is not possible to
+open a file that contains any upper case letters. This files can still be opened
+if they are linked to a another file name that does not contain upper case
+letters. For example, the file /dev/ttyF01 could be linked to /dev/ttyf01 using
+the UNIX command: ln /dev/ttyF01 /dev/ttyf01. Then /dev/ttyf01 can be used
+as the file name. Also because of the special meaning of asterisk þ*þ as the
+first parameter it is not possible to open a file with a name of asterisk unless
+the logout=*,þ command form is used.
+
+Files are opened with the permissions of the user that started the Field System,
+usually oper.
