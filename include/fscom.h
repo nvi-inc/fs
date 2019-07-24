@@ -56,7 +56,7 @@ typedef struct fscom {
 	char lsorna[10];
         char idevant[64];
         char idevgpib[64];
-        char idevlog[5][64];
+        char idevlog[64][5];
         long ndevlog;
 	int imodfm;
         int ipashd[2];

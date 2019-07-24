@@ -120,7 +120,7 @@ double alat,wlong;      /* lat,lon of station */
       break;
 
     case 10:              /* az/el --> ha/dec  */
-      *out1 = ATAN2Z(cin2*sin1,sin2*clat-cin2*cin1*slat);
+      *out1 = -ATAN2Z(cin2*sin1,sin2*clat-cin2*cin1*slat);
       if (*out1 < -DPI) *out1 += DTWOPI;
       if (*out1 >  DPI) *out1 -= DTWOPI;
       *out2 = asin(cin2*cin1*clat+sin2*slat);

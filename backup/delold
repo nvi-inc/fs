@@ -5,7 +5,7 @@ echo "******************************************************************"
 echo "*  This script will delete old files and directories left from   *"
 echo "*  stupdate script.                                              *"
 echo "******************************************************************"
-echo "\nCAUTION: This script will delete the following directories and
+echo "\nCAUTION: This script will delete the following directories and"
 echo "their contents:"
 echo "                /usr2/oper.old"
 echo "                /usr2/prog.old"

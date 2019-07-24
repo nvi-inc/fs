@@ -420,14 +420,12 @@
 
 930827 WEH if3.f          fix '*' switch parameter bug
                           protect against out of range switch '*' params
-930923 WEH lgout.f        modified for new logout command
-           ddout.c        modified for new logout command
-           lineset.c      created  for new logout command
-           fserr.ctl      modified for new logout command
-           fscmd.ctl      modified for new logout command
-           sincom.f       modified for new logout command & 8.24
 
-931027 WEH getfm.f        fix rte_fixt and limits of check
+940214 WEH fs.c           remove boot time calculation
+           fsalloc.c      install boot time detection
+           getfm.f        fix rte_fixt and limits of check
            timechk.f      fix limits of check, make tolerance 1 second
            fsexedist      updated
            fsinstall.exe  created
+
+940320 WEH cnvrt.c        fix case 10 HA sign error
