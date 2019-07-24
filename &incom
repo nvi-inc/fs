@@ -1,0 +1,674 @@
+FTN4,X
+      SUBROUTINE INCOM(IDCB,IERR),INITIALIZE COMMON C#881012:16:17# 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C     INITIALIZE FIELD SYSTEM COMMON
+C 
+C HISTORY 
+C 
+C 880615 NRV MODIFIED PER LAR'S CHANGES TO READ (RXDEF FILE 
+C 
+      DIMENSION LNAMEF(3),LNAMER(3) 
+      DIMENSION IBUF(40),IBUF2(15)
+      DIMENSION IBAUD(7)
+      DATA LNAMEF/2H(E,2HXP,2HER/ 
+      DATA LNAMER/2H(R,2HXD,2HEF/ 
+      DATA IBAUD/110,300,600,1200,2400,4800,9600/ 
+C 
+C 
+C     1. First zero out all values beyond ones already set
+C     via RMPAR parameters. 
+C***NOTE***THIS MEANS YOU CAN'T JUST REARRANGE COMMON 
+C          WHENEVER YOU FEEL LIKE IT UNLESS YOU CHECK 
+C          HERE TOO.
+C          THERE ARE SOME VARIABLES WHICH CANNOT BE 
+C          INITIALIZED HERE BECAUSE THEY ALREADY HAVE VALUES. 
+C          SO FAR THEY ARE: ICLOPR, IRNPRC
+C*** OPRIN SHOULD REALLY DO THIS JOB
+C 
+      I1 = LOC(LTSRS) 
+      I2 = LOC(KCHECK)
+      IERR = I2-I1+1
+C                   Get total length of common block
+C     IF (IERR.LT.0.OR.IERR.GT.2048) RETURN 
+C                   Quit if length is negative or too large 
+      DO 1 I=1,IERR 
+        LTSRS(I)=0
+1       CONTINUE
+      I1 = LOC(INEXT) 
+      I2 = LOC(LUFLOP)
+      IERR = I2-I1+1
+C     IF (IERR.LT.0.OR.IERR.GT.2048) RETURN 
+      DO 2 I=1,IERR 
+        INEXT(I)=0
+2       CONTINUE
+      LPRC = 0
+      LNEWPR = 0
+      LNEWSK = 0
+      I1 = TPZERO(1)
+      I2 = IDWVR
+      DO 3 I=1,I2-I1+1
+        TPZERO(I)=0 
+3       CONTINUE
+      IPCFLG=0
+      ITRKPA(1)=0 
+      ITRKPA(2)=0 
+      IERR = 0
+      PETHR =100.0
+      ISETHR = 3
+      XOFF=0.0
+      YOFF=0.0
+      ICHK19 = 0
+      IADCRX = 0
+      LSWCAL = 0
+      LDV1NF = 0
+      LDEVFP=0
+      DO 4 I=1,2
+      FASTFW(I)=0.
+      SLOWFW(I)=0.
+      FASTRV(I)=0.
+      SLOWRV(I)=0.
+      FOROFF(I)=0.
+      REVOFF(I)=0.
+      PSLOPE(I)=0.
+      RSLOPE(I)=0.
+      POSNHD(I)=0.
+      IPASHD(I)=0 
+4     CONTINUE
+      ICHK20=0
+      OPOSLH(1)=0.0 
+      OPOSLH(2)=0.0 
+      OPOSLH(3)=0.0 
+      OPOSLH(4)=0.0 
+C 
+C 
+C     2. Now initialize everything which is non-zero. 
+C 
+      FSVER = 5.8 
+      PI = 3.141592 
+      CALL UPDAT
+C                   Initialize the time-like variables
+      NAMQR(6) = 2HXX 
+      NAMQR(7) = 2HXX 
+      NAMQR(8) = 2HXX 
+C                   Initialize previous segment name for LINKP
+      DO 101 I=1,15 
+        CALL ICHMV(LFREQV(1,I),1,6H000.00,1,6)
+101     CONTINUE
+      IRATFM = 0
+      IMODDC = 4
+      IDIRTP = 1
+      ILOWTP = 1
+      IBYP=1
+      LFEET(1) = 2H 
+      LFEET(2) = 2H 
+      LTRKEN(1) = 2H00
+      LTRKEN(2) = 2H00
+      LTRKEN(3) = 2H00
+      LTRKEN(4) = 2H00
+      LTPNUM(1) = 2H00
+      LTPNUM(2) = 2H00
+      LTPNUM(3) = 2H00
+      LTPNUM(4) = 2H00
+      LTPCHK(1) = 2H00
+      LTPCHK(2) = 2H00
+      LTSRS(1) = 2HTE 
+      LTSRS(2) = 2HST 
+      LTSRS(3) = 2H/R 
+      LTSRS(4) = 2HES 
+      LTSRS(5) = 2HET 
+      ILENTS = 10 
+      LALRM(1) = 2HAL 
+      LALRM(2) = 2HAR 
+      LALRM(3) = 2HM
+      ILENAL = 5
+      LSORNA(1) = 2H
+      LSORNA(2) = 2H
+      LSORNA(3) = 2H  
+      LSORNA(4) = 2H
+      LSORNA(5) = 2H
+      LEXPER(1) = 2H  
+      LEXPER(2) = 2H  
+      LEXPER(3) = 2H  
+      LEXPER(4) = 2H  
+      KXLOG = .FALSE. 
+      KXDISP = .FALSE.
+      KECHO = .FALSE. 
+      KCHECK = .FALSE.
+      KHALT = .FALSE. 
+      IMONDS = -1 
+      ICHPER = 0
+      TPERER = 0.5
+      INSPER = 2
+      AZHMWV(1) = 0.0 
+      AZHMWV(2) = 360.0 
+      ELHMWV(1) = 15.0
+      NHORWV = 1
+      IACFTP = 80 
+      IACTTP = 10 
+C     First mode A
+      DO 102 I=1,14 
+        ITR2VC(I,1) = I 
+        ITR2VC(I+14,1) = -I 
+102     CONTINUE
+C     Mode B
+      DO 103 I=1,14,2 
+        ITR2VC(I,2) = I 
+        ITR2VC(I+14,2) = -I 
+        ITR2VC(I+1,2) = I 
+        ITR2VC(I+15,2) = -I 
+103     CONTINUE
+C     Mode C
+      DO 104 I=1,14,2 
+        ITR2VC(I+1,3) = I+1 
+        ITR2VC(I+15,3) = I
+        ITR2VC(I,3) = I+1 
+        ITR2VC(I+14,3) = I
+104     CONTINUE
+C     Finally, mode D 
+      DO 105 I=1,28 
+        ITR2VC(I,4) = 1 
+105     CONTINUE
+      NCYCPC = 0
+      IPAUPC = 60 
+      IREPPC = 0
+      IBYPPC = 1
+      NBLKPC = 25 
+      IBUGPC = 0
+      DO 106 I = 1,28 
+        ITRKPC(I) = 101 
+106     CONTINUE
+      DO 1061 I=1,100 
+        ITAPOF(I)=-13000
+1061    CONTINUE
+      LAUXFM(3)=2HFF
+      LAUXFM(4)=2HFF
+      LAUXFM(5)=2HFF
+      LAUXFM(6)=2HFF
+      NCODES = 32 
+      NLULOG = 1
+      LULOG(1) = LU 
+      CALL ICHMV(LOCCUP,1,8HOCCUP##!,1,8) 
+      IDCHRX = 1
+      IBXHRX = 1
+      IFAMRX(1) = 1 
+      IFAMRX(2) = 1 
+      IFAMRX(3) = 1 
+C 
+C 
+C     3. Open the file which contains the station-dependent 
+C     information: (EXPER.
+C 
+      CALL OPEN(IDCB,IERR,LNAMEF,0,0,ICRLOG)
+      IF (IERR.GE.0) GOTO 310 
+      CALL LOGIT(0,0,0,1,-117,2HBO,IERR)
+      GOTO 990
+C 
+C     3.1 Read and decode the first line.  Station information. 
+C 
+310   CALL READG(IDCB,IERR,IBUF,40,ILEN)
+      IF (IERR.GE.0) GOTO 3101
+      CALL LOGIT(0,0,0,1,-118,2HBO,IERR)
+      GOTO 990
+3101  ICH = 1 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      N = IC2-IC1+1 
+      IF (N.LE.8) GOTO 31011
+      CALL LOGIT(0,0,0,1,-119,2HBO,1) 
+      IERRX = -1
+31011 CALL IFILL(LNAANT,1,8,40B)
+      CALL ICHMV(LNAANT,1,IBUF,IC1,MIN0(8,N)) 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      WLONG = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)*PI/180.0 
+      IF (IERR.EQ.0) GOTO 3102
+      CALL LOGIT(0,0,0,1,-119,2HBO,2) 
+      IERRX = IERR
+3102  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      ALAT = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)*PI/180.0
+      IF (IERR.EQ.0) GOTO 3103
+      CALL LOGIT(0,0,0,1,-119,2HBO,3) 
+      IERRX = IERR
+3103  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 320
+      DIAMAN = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+      IF (IERR.EQ.0) GOTO 3104
+      CALL LOGIT(0,0,0,1,-119,2HBO,4) 
+      IERRX = IERR
+3104  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 320
+      RFFREQ = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+      IF (IERR.EQ.0) GOTO 3105
+      CALL LOGIT(0,0,0,1,-119,2HBO,5) 
+      IERRX = IERR
+3105  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 320
+      IACTTP = IAS2B(IBUF,IC1,IC2-IC1+1)
+      IF (IACTTP.GT.0) GOTO 3106
+      CALL LOGIT(0,0,0,1,-119,2HBO,6) 
+      IERRX = -1    
+3106  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 320
+      IACFTP = IAS2B(IBUF,IC1,IC2-IC1+1)
+      IF (IACFTP.GT.0) GOTO 3107
+      CALL LOGIT(0,0,0,1,-119,2HBO,7) 
+      IERRX = -1
+3107  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 320  
+      LIDSTN = 2H 
+      CALL ICHMV(LIDSTN,1,IBUF,IC1,1) 
+3108  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 320  
+      HEIGHT = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+      IF (IERR.EQ.0) GOTO 3109
+      CALL LOGIT(0,0,0,1,-119,2HBO,9) 
+      IERRX = -1
+3109  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 320  
+      N = IC2-IC1+1 
+      CALL ICHMV(LOCCUP,1,IBUF,IC1,MIN0(8,N)) 
+      IF (N.LE.8) GOTO 3110   
+      CALL LOGIT(0,0,0,1,-119,2HBO,10)
+      IERRX = -1
+3110  CONTINUE
+C 
+C     3.2 Second line: the LUs and baud rates.
+C 
+320   CALL READG(IDCB,IERR,IBUF,40,ILEN)
+      IF (IERR.GE.0) GOTO 3201
+      CALL LOGIT(0,0,0,1,-118,2HBO,IERR)
+      GOTO 990
+3201  ICH = 1 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      LUMAT = IAS2B(IBUF,IC1,IC2-IC1+1) 
+      IF (LUMAT.NE.-32768) GOTO 3202
+      CALL LOGIT(0,0,0,1,-120,2HBO,1) 
+      IERRX = -1    
+3202  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IBMAT = IAS2B(IBUF,IC1,IC2-IC1+1) 
+      IF (IBMAT.NE.-32768) GOTO 3203
+      CALL LOGIT(0,0,0,1,-120,2HBO,2) 
+      IERRX = -1  
+3203  IBX = -1
+      DO 302 I=1,7
+        IF (IBMAT.EQ.IBAUD(I)) IBX = I
+302     CONTINUE
+C                   Check that a legal value was specified
+      IF (IBX.GT.0) GOTO 3204 
+      CALL LOGIT(0,0,0,1,-120,2HBO,2) 
+      IERRX = -1  
+3204  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      LUIB = IAS2B(IBUF,IC1,IC2-IC1+1)
+      IF (LUIB.NE.-32768) GOTO 3205 
+      CALL LOGIT(0,0,0,1,-120,2HBO,3) 
+      IERRX = -1  
+C                   This is the HPIB control LU, i.e. subchannel 0
+3205  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      LUDB = IAS2B(IBUF,IC1,IC2-IC1+1)
+      IF (LUDB.NE.-32768) GOTO 3206 
+      CALL LOGIT(0,0,0,1,-120,2HBO,4) 
+      IERRX = -1  
+C                   This is the data buffer LU
+3206  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IBDB = IAS2B(IBUF,IC1,IC2-IC1+1)
+      IF (IBDB.NE.-32768) GOTO 3207 
+      CALL LOGIT(0,0,0,1,-120,2HBO,5) 
+      IERRX = -1
+C                   The baud rate for the data buffer 
+3207  IBX = -1
+      DO 303 I=1,7
+        IF (IBDB .EQ.IBAUD(I)) IBX = I
+303     CONTINUE
+C                   Check that a legal value was specified
+      IF (IBX.GT.0) GOTO 3208 
+      CALL LOGIT(0,0,0,1,-120,2HBO,5) 
+      IERRX = -1
+3208  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      ICRLOG = IAS2B(IBUF,IC1,IC2-IC1+1)
+      IF (ICRLOG.NE.-32768) GOTO 3209 
+      CALL LOGIT(0,0,0,1,-120,2HBO,6) 
+      IERRX = -1
+C                   The cartridge for logs
+3209  LLOG = 2HXX 
+      ICRPRC = ICRLOG 
+C                   Set the default 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 330
+      ICRPRC = IAS2B(IBUF,IC1,IC2-IC1+1)
+      IF (ICRPRC.NE.-32768) GOTO 3210 
+      CALL LOGIT(0,0,0,1,-120,2HBO,7) 
+      IERRX = -1
+C                   The cartridge for procedures
+3210  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 330
+      LUANT = IAS2B(IBUF,IC1,IC2-IC1+1) 
+      IF (LUANT.NE.-32768) GOTO 3211
+      CALL LOGIT(0,0,0,1,-120,2HBO,8) 
+      IERRX = -1
+C                   The LU for the antenna
+3211  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 330
+      LUFLOP = IAS2B(IBUF,IC1,IC2-IC1+1)
+      IF (LUFLOP.NE.-32768) GOTO 3212 
+      CALL LOGIT(0,0,0,1,-120,2HBO,9) 
+      IERRX = IERR
+C                   The LU for the floppy drive 
+3212  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF(IC1.EQ.0) GOTO 330 
+      LURPP = IAS2B(IBUF,IC1,IC2-IC1+1) 
+      IF(LURPP.NE.-32768) GOTO 3213 
+      CALL LOGIT(0,0,0,1,-120,2HBO,10)
+      IERRX = IERR
+C                   LU for programs 
+3213  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF(IC1.EQ.0) GOTO 330 
+      LUPRT = IAS2B(IBUF,IC1,IC2-IC1+1) 
+      IF(LUPRT.NE.-32768) GOTO 3214 
+      CALL LOGIT(0,0,0,1,-120,2HB0,11)
+      IERRX = IERR
+C                   LU for printer
+3214  CONTINUE
+C 
+C     3.3 Third line: WVR LU and pointing information.
+C 
+330   CALL READG(IDCB,IERR,IBUF,40,ILEN)
+      IF (IERR.GE.0) GOTO 3301
+      CALL LOGIT(0,0,0,1,-118,2HBO,IERR)
+      GOTO 990
+3301  IF (ILEN.LT.0) GOTO 990 
+      ICH = 1 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 340
+      LUWVR = IAS2B(IBUF,IC1,IC2-IC1+1) 
+      IF (LUWVR.NE.-32768) GOTO 3302
+      CALL LOGIT(0,0,0,1,-121,2HBO,1) 
+      IERRX = -1
+C                   The LU for the WVR (temporary: until it goes on MATs) 
+3302  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 340
+      AZOFWV = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+      IF (IERR.EQ.0) GOTO 3303
+      CALL LOGIT(0,0,0,1,-121,2HBO,2) 
+      IERRX = IERR
+3303  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 340
+      ELOFWV = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+      IF (IERR.EQ.0) GOTO 3304
+      CALL LOGIT(0,0,0,1,-121,2HBO,3) 
+      IERRX = IERR
+3304  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 340
+      AZC1WV = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+      IF (IERR.EQ.0) GOTO 3305
+      CALL LOGIT(0,0,0,1,-121,2HBO,4) 
+      IERRX = IERR
+3305  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 340
+      AZC2WV = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+      IF (IERR.EQ.0) GOTO 3306
+      CALL LOGIT(0,0,0,1,-121,2HBO,5) 
+      IERRX = IERR
+3306  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 340
+      ELC1WV = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+      IF (IERR.EQ.0) GOTO 3308
+      CALL LOGIT(0,0,0,1,-121,2HBO,6) 
+      IERRX = IERR
+3308  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 340
+      ELC2WV = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+      IF (IERR.EQ.0) GOTO 3309
+      CALL LOGIT(0,0,0,1,-121,2HBO,7) 
+      IERRX = IERR
+3309  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 340
+      DEADWV(1) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3310
+      CALL LOGIT(0,0,0,1,-121,2HBO,9) 
+      IERRX = IERR
+3310  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 340
+      DEADWV(2) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3311
+      CALL LOGIT(0,0,0,1,-121,2HBO,9) 
+      IERRX = IERR
+3311  CONTINUE
+C3311 CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+C     IF (IC1.EQ.0) GOTO 3312 
+C     DEADW3 = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+C     IF (IERR.EQ.0) GOTO 3312
+C     CALL LOGIT(0,0,0,1,-121,2HBO,10)
+C     IERRX = IERR
+3312  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 3313 
+      TCORWV(1) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3313
+      CALL LOGIT(0,0,0,1,-121,2HBO,11)
+      IERRX = IERR
+3313  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 3314 
+      TCORWV(2) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3314
+      CALL LOGIT(0,0,0,1,-121,2HBO,12)
+      IERRX = IERR
+3314  CONTINUE
+C 
+C     3.4 Fourth line: WVR horizon mask.
+C 
+340   CALL READG(IDCB,IERR,IBUF,40,ILEN)
+      IF (IERR.GE.0) GOTO 3401
+      CALL LOGIT(0,0,0,1,-118,2HBO,IERR)
+      GOTO 990
+3401  IF (ILEN.LT.0) GOTO 990 
+      NHORWV=0
+      ICH = 1 
+341   CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 350
+C                   If there is no az to match the previous el, then
+C                   the last el is ignored. 
+      NHORWV=NHORWV+1 
+C                   Increment the count of az,el pairs
+      AZHMWV(NHORWV) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+C                   Decode and store the az limit 
+      IF (IERR.EQ.0) GOTO 3402
+      CALL LOGIT(0,0,0,1,-122,2HBO,NHORWV)
+      IERRX = IERR
+3402  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 350
+C                   If there is no matching el, then we're done 
+      ELHMWV(NHORWV) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+      IF (IERR.EQ.0) GOTO 3403
+      CALL LOGIT(0,0,0,1,-122,2HBO,NHORWV)
+      IERRX = IERR
+3403  GOTO 341
+C 
+C     3.5 Fifth line: Tape Head Controller 1
+C 
+350   CALL READG(IDCB,IERR,IBUF,40,ILEN)
+      IF (IERR.GE.0) GOTO 3501
+      CALL LOGIT(0,0,0,1,-117,2HBO,IERR)
+      GOTO 990
+3501  IF (ILEN.LT.0) GOTO 990 
+      ICH = 1 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 360
+      FASTFW(1) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3502
+      CALL LOGIT(0,0,0,1,-139,2HBO,1) 
+      IERRX = -1
+C 
+3502  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 360
+      SLOWFW(1) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3503
+      CALL LOGIT(0,0,0,1,-139,2HBO,2) 
+      IERRX = IERR
+3503  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 360
+      FOROFF(1) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3504
+      CALL LOGIT(0,0,0,1,-139,2HBO,3) 
+      IERRX = IERR
+3504  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 360
+      FASTRV(1) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3505
+      CALL LOGIT(0,0,0,1,-139,2HBO,4) 
+      IERRX = IERR
+3505  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 360
+      SLOWRV(1) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3506
+      CALL LOGIT(0,0,0,1,-139,2HBO,5) 
+      IERRX = IERR
+3506  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 360
+      REVOFF(1) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3507
+      CALL LOGIT(0,0,0,1,-139,2HBO,6) 
+      IERRX = IERR
+3507  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 360
+      PSLOPE(1) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3508
+      CALL LOGIT(0,0,0,1,-139,2HBO,7) 
+      IERRX = IERR
+3508  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 360
+      RSLOPE(1) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3509
+      CALL LOGIT(0,0,0,1,-139,2HBO,8) 
+      IERRX = IERR
+3509  CONTINUE
+C 
+C     3.6 Sixth line: Tape Head Controller 2
+C 
+360   CALL READG(IDCB,IERR,IBUF,40,ILEN)
+      IF (IERR.GE.0) GOTO 3601
+      CALL LOGIT(0,0,0,1,-117,2HBO,IERR)
+      GOTO 990
+3601  IF (ILEN.LT.0) GOTO 990 
+      ICH = 1 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 370
+      FASTFW(2) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3602
+      CALL LOGIT(0,0,0,1,-140,2HBO,1) 
+      IERRX = -1
+C 
+3602  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 370
+      SLOWFW(2) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3603
+      CALL LOGIT(0,0,0,1,-140,2HBO,2) 
+      IERRX = IERR
+3603  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 370
+      FOROFF(2) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3604
+      CALL LOGIT(0,0,0,1,-140,2HBO,3) 
+      IERRX = IERR
+3604  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 370
+      FASTRV(2) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3605
+      CALL LOGIT(0,0,0,1,-140,2HBO,4) 
+      IERRX = IERR
+3605  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 370
+      SLOWRV(2) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3606
+      CALL LOGIT(0,0,0,1,-140,2HBO,5) 
+      IERRX = IERR
+3606  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 370
+      REVOFF(2) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3607
+      CALL LOGIT(0,0,0,1,-140,2HBO,6) 
+      IERRX = IERR
+3607  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 370
+      PSLOPE(2) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3608
+      CALL LOGIT(0,0,0,1,-140,2HBO,7) 
+      IERRX = IERR
+3608  CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF (IC1.EQ.0) GOTO 370
+      RSLOPE(2) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF (IERR.EQ.0) GOTO 3609
+      CALL LOGIT(0,0,0,1,-140,2HBO,8) 
+      IERRX = IERR
+3609  CONTINUE
+C 
+C   3.7 Seventh Line: NARROW TRACK HEAD POSITIONS TO REPRODUCE WIDE TRACK 
+C 
+370   CONTINUE
+      CALL READG(IDCB,IERR,IBUF,40,ILEN)
+      IF (IERR.GE.0) GOTO 3701
+      CALL LOGIT(0,0,0,1,-117,2HBO,IERR)
+      GOTO 990
+3701  IF (ILEN.LT.0) GOTO 990 
+      ICH = 1 
+      DO 3705 I=1,4 
+        CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+        IF (IC1.NE.0) OPOSLH(I) = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+        IF (IERR.EQ.0.AND.IC1.NE.0) GOTO 3705 
+        CALL LOGIT(0,0,0,1,-141,2HBO,I) 
+        IERRX = -1
+        GO TO 990 
+3705    CONTINUE
+C 
+C  LINE 8: Warning limits for 70K and 20K receiver stages.
+C 
+380   CONTINUE
+      CALL READG(IDCB,IERR,IBUF,40,ILEN)
+      IF (IERR.GE.0) GOTO 381 
+        CALL LOGIT(0,0,0,1,-117,2HBO,IERR)
+        GOTO 990
+381   IF (ILEN.LT.0) GOTO 400 
+      ICH = 1 
+      DO 389 I=1,2
+        CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+        IF (IC1.EQ.0) GOTO 386
+        IF (I.EQ.1) I70KCH = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+        IF (I.EQ.2) I20KCH = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+        IF (IERR.EQ.0) GOTO 389 
+386       CALL LOGIT(0,0,0,1,-142,2HBO,I) 
+          IERRX = -1
+          GOTO 990
+389   CONTINUE
+C 
+C     4. Read file of RX monitor points and scale factors: (RXDEF 
+C 
+400   CALL CLOSE(IDCB)
+      CALL OPEN(IDCB,IERR,LNAMER,0,0,ICRLOG)
+      IF (IERR.GE.0) GOTO 410 
+      CALL LOGIT(0,0,0,1,-143,2HBO,IERR)
+      GOTO 990
+C 
+C 4.1 Read and decode each line.
+C 
+410   CONTINUE
+      DO 490 N=1,NCODES 
+        CALL READG(IDCB,IERR,IBUF,20,ILEN)
+        IF (IERR.GE.0) GOTO 420 
+        CALL LOGIT(0,0,0,1,-144,2HBO,N) 
+        GOTO 990
+420     CONTINUE
+        IF (ILEN.LE.0) GOTO 480 
+        DO 430 I=1,3
+          LCODE(I,N)=IBUF(I)
+430     CONTINUE
+        IFC=7 
+        CALL GTFLD(IBUF,IFC,ILEN*2,IC1,IC2) 
+        CALL GTPRM(IBUF,IC1,IC2,2,VFAC(N),IERR) 
+        IF (IERR.GE.0) GOTO 490 
+        CALL LOGIT(0,0,0,1,-145,2HBO,N) 
+        GOTO 990
+480     NCODES=N-1
+490     CONTINUE
+C 
+990   CALL CLOSE(IDCB)
+      IERR = IERRX
+      RETURN
+      END 

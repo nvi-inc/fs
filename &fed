@@ -1,0 +1,307 @@
+FTN4,X
+C@FED 
+C 
+      SUBROUTINE FED(LUI,LUO,ICRPRC,IB,ICHX,LPROC,
+     .LDEF),FIELD SYSTEM EDITR C#870115:05:41 
+C 
+C     FED 
+C 
+C 1.  FED PROGRAM SPECIFICATION 
+C 
+C 1.1.   FED is a simplified editor for use with the Mark III field system. 
+C        The following commands are available: P, O, L, >, /, -, ^, R,  , E, A. 
+C        The syntax and usage are similar to the corresponding EDITR commands.
+C        P and O allow only character for character replacement or a single 
+C        use of controlS, controlC, or controlT.
+C 
+C        Procedure files lacking DEFINE as the first record are amended.
+C 
+C 1.2.   RESTRICTIONS - Only procedure files are accessible.  These have
+C        the prefix "[PRC" which is transparent to the user.  Procedures are
+C        available only on disc ICRPRC.  Two scratch files [____1 and [____2
+C        must exist on ICRPRC before editing can take place.  They are created
+C        if needed. 
+C 
+C 1.3.   REFERENCES - Field system manual 
+C 
+C 2.  FED INTERFACE 
+C 
+C 2.1.   CALLING SEQUENCE: CALL FED(LUI,LUO,ICRPRC,IB,ICHX,LPROC,LDEF)
+C 
+C     INPUT VARIABLES:
+C 
+C        LUI, LUO  - input, output LU's 
+C        ICRPRC    - procedure cartridge
+      DIMENSION IB(51)
+C               - line and record buffer
+C        ICHX   - number of characters from terminal
+C        LPROC  - active procedure file 
+      DIMENSION LDEF(17)
+C               - DEFINE line (name begins in col. 9) 
+C 
+C     OUTPUT VARIABLES: none
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #PFMED::FS
+      COMMON /FEDCM/ LBL,LINB(51),NIN,NOUT,KLIN,KEOF,ICH
+C        LBL    - leading blanks for output 
+C        LINB   - line buffer 
+C        NIN    - input file line count 
+C        NOUT   - output file line count
+C        KLIN   - current line flag (1 - line full, 2 - line empty) 
+C        KEOF   - EOF flag (0 - not at EOF, 1 - at EOF) 
+C        ICH    - line character count
+C 
+C 2.3.   DATA BASE ACCESSES: none 
+C 
+C 2.4.   EXTERNAL INPUT/OUTPUT
+C 
+C     INPUT VARIABLES:
+C 
+C     TERMINAL   - IB 
+C     FILES      - IB, LINB 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C     TERMINAL   - various messages 
+C     FILE name  - LINB 
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES: PFMED  
+C 
+C     CALLED SUBROUTINES: EXEC, FMP routines, IB2AS, ICHAR, ICHMV, IAS2B, 
+C                         IFTL, LTOF, IFTOF, PLIN, ETO, ICHCM,
+C                         IFILL, ISCNC, GTFLD, PFBLK, PFCOP 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+      LOGICAL KNEW
+C               - flag for newly created procedure
+      DIMENSION LNAM1(6)
+C               - procedure name
+      DIMENSION JDCB(16)
+C               - buffer to save IDCB2
+C        NN     - line number or count from command 
+C        ICHI   - character count of typed line 
+C        LCOM   - single character edit command 
+C        IERR   - FMP error flag
+C        NPASS  - number of lines to pass over in positioning 
+C        REG    - A and B registers as real 
+      DIMENSION IAB(2)
+C               - A and B registers as integer array
+      DIMENSION IB2(25) 
+C 
+      EQUIVALENCE (REG,IAB),(ICHI,IAB(2)) 
+C 
+C 4.  CONSTANTS USED
+C 
+      DIMENSION LSLA(5) 
+      DIMENSION LS1(3),LS2(3) 
+      DIMENSION LM1(13),LM2(5),LM3(13),LM4(19),LM5(7),LM7(9)  
+      DIMENSION LM1A(10),LM2A(9),LM3A(9),LM4A(11),LM5A(15),LM6A(16) 
+      DIMENSION LM7A(12),LM8(20)
+C 
+      QDATA QM9 $ERROR bbbb OPENING [____1::bbbbbb$   
+      DATA LSLA   /2H&,2HdB,2H/,2H&d,2H@_/
+C               - EDITR-like prompt with reverse video
+C 
+      DATA LS1    /2H[_,2H__,2H_1/
+      DATA LS2    /2H[_,2H__,2H_2/
+C               - scratch file names - [____1, [____2 
+      DATA LM1    /2HER,2HRO,2HR ,2HCR,2HEA,2HTI,2HNG,2H [,2H__,2H__, 
+     /             2H1 ,2H  ,2H  /
+C               - ERROR CREATING [____1bbbb 
+      DATA LM2    /2HER,2HRO,2HR ,2H  ,2H  /
+C               - ERRORbbbb 
+      DATA LM3    /2HER,2HRO,2HR ,2HCR,2HEA,2HTI,2HNG,2H [,2H__,2H__, 
+     /             2H2 ,2H  ,2H  /
+C               - ERROR CREATING [____2bbbb 
+      DATA LM4    /2HEN,2HTE,2HR ,2HPR,2HOC,2HED,2HUR,2HE ,2HNA,2HME, 
+     .   2H(:,2H: ,2HTO,2H C,2HAN,2HCE,2HL),2H: ,2H_ /
+C               - ENTER PROCEDURE NAME
+      DATA LM5    /2HNE,2HW ,2HPR,2HOC,2HED,2HUR,2HE /
+C               - NEW PROCEDURE 
+      DATA LM7    /2HSC,2HRA,2HTC,2HH ,2HER,2HRO,2HR ,2H  ,2H  /
+C               - SCRATCH ERRORbbbb 
+      DATA LM8    /2HPR,2HOC,2HED,2HUR,2HE ,10*2H  ,2H I,2HN ,2H[P, 
+     .2HRC,2H  /
+      DATA LM1A   /2HDU,2HPL,2HIC,2HAT,2HE ,2HPR,2HOC,2HED,2HUR,2HE / 
+C               - DUPLICATE PROCEDURE 
+      DATA LM2A   /2HER,2HRO,2HR ,2H  ,2H  ,2HRE,2HAD,2HIN,2HG /
+C               - ERROR bbb READING 
+      DATA LM3A   /2HER,2HRO,2HR ,2H  ,2H  ,2HWR,2HIT,2HIN,2HG /
+C               - ERROR bbb WRITING 
+      DATA LM4A   /2HNO,2HNE,2HXI,2HST,2HEN,2HT ,2HPR,2HOC,2HED,2HUR, 
+     /             2HE /
+C               - NONEXISTENT PROCEDURE 
+      DATA LM5A   /2HER,2HRO,2HR ,2H  ,2H  ,2HCR,2HEA,2HTI,2HNG,2H O, 
+     /             2HUT,2HPU,2HT ,2HFI,2HLE/
+C               - ERROR bbb CREATING OUTPUT FILE
+      DATA LM6A   /2HDU,2HPL,2HIC,2HAT,2HE ,2HHA,2HSH,2H C,2HOD,2HE / 
+      DATA LM7A   /2HNO,2H P,2HRO,2HCE,2HDU,2HRE,2H F,2HIL,2HE ,2HAC, 
+     /             2HTI,2HVE/ 
+C 
+C 5.  INITIALIZED VARIABLES: none 
+C 
+C 6.  PROGRAMMER: C. Ma 
+C     LAST MODIFIED: <870406.1737>
+C     MODIFIED 840307 BY MWH To schedule EDIT/1000
+C# LAST COMPC'ED  870115:05:41 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     Exit if no preocedure file active.
+      IF(LPROC.EQ.0) GO TO 899
+C     Initialize and parse names. 
+      CALL IFILL(LNAM1,1,12,2H  ) 
+C     Search for commas.
+      IC1=ISCNC(IB,1,ICHX,54B)
+C     No commas means no names. 
+      IF(IC1.EQ.0) GO TO 29 
+C     Move name to buffer.
+      CALL ICHMV(LNAM1,1,IB,IC1+1,ICHX-IC1) 
+29    CONTINUE
+C     Initialize flags and counters.
+      KNEW = .FALSE.
+      KLIN=2
+      KEOF=0
+      NIN=1 
+      NOUT=1
+C     Open first scratch file.
+      CALL OPEN(IDCB1,IERR,LS1,0,0,ICRPRC,IDCBX)
+      IF(IERR.GT.0) GO TO 110 
+C     Create scratch file if nonexistent. 
+      IF(IERR.NE.-6) 102,104
+102   CALL IB2AS(IERR,LM7,15,3) 
+      CALL EXEC(2,LUI,LM7,-17)
+      GO TO 390 
+104   CALL CREAT(IDCB1,IERR,LS1,ISIZE,3,0,ICRPRC,IDCBX) 
+      IF(IERR.GT.0) GO TO 110 
+      CALL IB2AS(IERR,LM1,23,3) 
+      CALL EXEC(2,LUI,LM1,-25)
+      GO TO 390 
+C     Write EOF to initialize.
+110   CALL WRITF(IDCB1,IERR,IB,-1)
+      CALL RWNDF(IDCB1) 
+C     Search for procedure name given.  
+112   IF(LNAM1.NE.2H  )GOTO 115 
+        CALL EXEC(2,LUI,LM4,-37)
+        REG=EXEC(1,LUI+400B,LNAM1,-12)
+        GO TO 112 
+115   IF(LNAM1.EQ.2H::)GOTO 390 
+      DO 120 I=1,32767
+        CALL READF(IDCB3,IERR,IB,50,LEN)
+        IF(LEN.EQ.-1)GOTO 125 
+        IF(ICHCM(IB,1,LDEF,1,6).EQ.0.AND.ICHCM(IB,9,LNAM1,1,12) 
+     .   .EQ.0)GOTO 130 
+120   CONTINUE
+125   CALL EXEC(2,LUI,LM5,-13)
+      KNEW = .TRUE. 
+      GO TO 150 
+130   DO 135 I=1,32767
+        IB=2H   
+        CALL READF(IDCB3,IERR,IB,50,LEN)
+        IF(ICHCM(IB,1,6HENDDEF,1,6).EQ.0)GOTO 150 
+        IF(LEN.EQ.0)LEN=1 
+        CALL WRITF(IDCB1,IERR,IB,LEN) 
+135   CONTINUE
+150   CALL RWNDF(IDCB3) 
+      CALL CLOSE(IDCB1) 
+C  Edit procedure 
+      IF(IPGST(6HEDIT  ).NE.-1) GOTO 137
+        IF(IRP(6HEDIT  ,0,IERR,0).GE.0) GOTO 137
+          CALL EXEC(2,LUI,21HEDIT/1000 not present,-21) 
+          GOTO 390
+137   CALL EXEC(2,LUI,42HScheduling EDIT/1000 - ALWAYS exit with ER,
+     .   -42) 
+      NCH=ICHMV(IB,1,16HRU,EDIT,[____1::,1,16)
+      NCH=NCH+IB2AS(ICRPRC,IB,NCH,6+100000B)
+      CALL IFILL(IB,NCH,72-NCH+1,40B) 
+      NCH=NCH-1 
+C 
+C  SCHEDULE EDIT
+C 
+      CALL EXEC(23,6HEDIT  ,0,0,0,0,0,IB,NCH) 
+      CALL OPEN(IDCB1,IERR,LS1,0,0,ICRPRC,IDCBX)
+      IF(IERR.GT.0)GOTO 140 
+         CALL IB2AS(IERR,QM9(2),7,4)
+         ICH=QM9(1)-6+ IB2AS(ICRPRC,QM9(2),28,6+100000B)  
+         CALL EXEC(2,LUI,QM9(2),-ICH) 
+         GO TO 390
+C 
+C  Open/Create scratch file 2 
+C 
+140   CONTINUE
+      CALL OPEN(IDCB2,IERR,LSF2,0,0,ICRPRC,IDCBX) 
+      IF(IERR.GT.0)GOTO 153 
+      IF(IERR.EQ.-6)GOTO 152
+        CALL IB2AS(IERR,LM7,15,3) 
+        CALL EXEC(2,LUI,LM7,-17)
+        GO TO 390 
+152   CALL CREAT(IDCB2,IERR,LSF2,ISIZE,3,0,ICRPRC,IDCBX)
+      IF(IERR.LT.0)GOTO 550 
+C  Replace/insert edited procedure
+153   DO 155 I=1,32767
+        IB=2H   
+        CALL READF(IDCB3,IERR,IB,50,LEN)
+        IF(LEN.EQ.-1)GOTO 160 
+        IF(ICHCM(IB,1,LDEF,1,6).EQ.0.AND.ICHCM(IB,9,LNAM1,1,12) 
+     .    .EQ.0)GOTO 160
+        IF(LEN.EQ.0)LEN=1 
+        CALL WRITF(IDCB2,IERR,IB,LEN) 
+155   CONTINUE
+160   CALL ICHMV(LDEF,9,LNAM1,1,12) 
+      CALL WRITF(IDCB2,IERR,LDEF,17)
+      DO 165 I=1,32767
+        IB=2H   
+        CALL READF(IDCB1,IERR,IB,50,LEN)
+        IF(LEN.EQ.-1)GOTO 170 
+        IF(LEN.EQ.0)LEN=1 
+        CALL WRITF(IDCB2,IERR,IB,LEN) 
+165   CONTINUE
+C  Write ENDDEF 
+170   CALL WRITF(IDCB2,IERR,6HENDDEF,3) 
+      DO 172 I=1,32767
+        CALL READF(IDCB3,IERR,IB,50,LEN)
+        IF(LEN.EQ.-1.OR.IERR.EQ.-12)GOTO 180
+        IF(ICHCM(IB,1,6HENDDEF,1,6).EQ.0)GOTO 173 
+172   CONTINUE
+173   DO 175 I=1,32767
+        IB=2H   
+        CALL READF(IDCB3,IERR,IB,50,LEN)
+        IF(LEN.EQ.-1.OR.IERR.EQ.-12)GOTO 180  
+        IF(LEN.EQ.0)LEN=1 
+        CALL WRITF(IDCB2,IERR,IB,LEN) 
+175   CONTINUE
+180   CALL CLOSE(IDCB3) 
+      CALL CLOSE(IDCB1) 
+      CALL ICHMV(LM8,11,LNAM1,1,12) 
+      CALL ICHMV(LM8,23,8Hreplaced,1,8) 
+      IF(KNEW) CALL ICHMV(LM8,23,8Hinserted,1,8)
+      CALL ICHMV(LM8,39,LPROC,1,2)
+      CALL EXEC(2,LUI,LM8,-40)
+C  Replace procedure file 
+      CALL PFBLK(3,LPROC,LNAM1) 
+C  Copy to scratch 3
+      CALL PFCOP(LPROC,ICRPRC,LUI,IB) 
+390   CALL CLOSE(IDCB1) 
+      CALL CLOSE(IDCB2) 
+      CALL RWNDF(IDCB3) 
+      GO TO 900 
+520   CALL IB2AS(IERR,LM2A,7,3) 
+      CALL EXEC(2,LUI,LM2A,-17) 
+      GO TO 390 
+530   CALL IB2AS(IERR,LM3A,7,3) 
+      CALL EXEC(2,LUI,LM3A,-17) 
+      GO TO 390 
+550   CALL IB2AS(IERR,LM5A,7,3) 
+      CALL EXEC(2,LUI,LM5A,-30) 
+      GO TO 390 
+560   CALL EXEC(2,LUI,LM4A,-21) 
+      GO TO 390 
+899   CALL EXEC(2,LUI,LM7A,-24) 
+C     Return. 
+900   RETURN
+      END 

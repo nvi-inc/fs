@@ -1,0 +1,83 @@
+FTN4,X
+C@DATAT 
+C 
+      SUBROUTINE DATAT(IMODE,ITRAN,NTR,LUMAT,KECHO,LU,KWVR, 
+     .                 IRECV,NRC,IERR),C#890502:19:18#
+C 
+C 1.1.   DATAT sends a data stream to the AT
+C 
+C     INPUT VARIABLES:
+C 
+C        IMODE  - mode of transmission, > 0 
+C        NTR    - number of characters in transmission buffer 
+      DIMENSION ITRAN(1)
+C               - transmission buffer, all ready execpt for last char 
+C        LUMAT  - LU of MAT daisy chain 
+      LOGICAL KECHO 
+C               - true if terminal echo of communications is wanted 
+C        LU     - unit for operator's terminal
+      LOGICAL KWVR
+C                - true if this is WVR communications 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IERR   - error return
+      DIMENSION IRECV(10) 
+C               - buffer for response, if any 
+C        NRC    - number of characters in response
+C 
+C     CALLING SUBROUTINES: MATCN
+C 
+C     CALLED SUBROUTINES: character utilities, IAT
+C 
+C 3.  LOCAL VARIABLES 
+C 
+      DIMENSION LASTCH(4) 
+C               - terminal characters, depending on mode
+C        IVERIF - transmitted to AT for verification response 
+C        IUPDAT - transmitted to AT for updating pending data 
+C 
+C 4.  CONSTANTS USED
+C 
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA LASTCH/2H$/,2H**,2H& / 
+      DATA IVERIF/2H/ / 
+      DATA IUPDAT/2H$ / 
+C 
+C 6.  PROGRAMMER: NRV (FROM ARW)
+C     LAST MODIFIED:  800229
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. Put the appropriate last character into the buffer.
+C     Send buffer to AT via function IAT call.
+C     If verification requested, get response and compare.
+C     If update required, update and quit.
+C 
+      CALL ICHMV(ITRAN,NTR+1,LASTCH(IMODE+1),1,1) 
+C 
+      IF(IAT(ITRAN,NTR+1,LUMAT,KECHO,LU,KWVR,IRECV,NRC,IERR).LT.0)  
+     .GOTO 990
+D     I = IAT(ITRAN,NTR+1,LUMAT,KECHO,LU,KWVR,IRECV,NRC,IERR) 
+D     WRITE(LU,9901) I,NRC,IRECV
+D9901 FORMAT("IN DATAT: I,NRC,IREC="2I4,20A2) 
+      IF (IMODE.EQ.0.OR.IMODE.EQ.2.OR.IMODE.EQ.4) GOTO 990
+C 
+      IF (IMODE.EQ.1) GOTO 200
+C 
+      IF (IAT(IVERIF,1,LUMAT,KECHO,LU,KWVR,IRECV,NRC,IERR).LT.0)
+     .GOTO 990
+C 
+200   DO 210 I=1,NTR-2
+        IF (IRECV(I).EQ.ITRAN(I+2)) GOTO 210
+        IERR = -6 
+        GOTO 990
+210     CONTINUE
+C 
+      IF (IMODE.EQ.1) CALL IAT(IUPDAT,1,LUMAT,KECHO,LU,KWVR,
+     .IRECV,NRC,IERR) 
+C 
+990   RETURN
+      END 

@@ -1,0 +1,125 @@
+FTN4
+C@LGOUT 
+      SUBROUTINE LGOUT(IP),OUTPUT LOG LUS C#870115:04:53# 
+C 
+C     LGOUT specifies output LUs for log entries
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - CLASS #
+C        IP(2) - # RECORDS IN CLASS 
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+      INCLUDE #FSCOM::56
+C 
+C     CALLED SUBROUTINES: CHARACTER ROUTINES
+C 
+C   LOCAL VARIABLES 
+C 
+      DIMENSION ILU(5)
+C     - temp holder for specified LUs 
+C     NLU - temp holder for # of LUs
+C        NCHAR  - number of characters in buffer
+C        NCH    - character counter 
+      DIMENSION IBUF(20),IBUF2(20)
+C               - class buffer
+C        ILEN   - length of IBUF, chars 
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+      DIMENSION IPARM(2)
+C              - parameters from GTPARM 
+C 
+      EQUIVALENCE (REG,IREG(1)) 
+      EQUIVALENCE (PARM,IPARM(1)) 
+C 
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA ILEN/40/ 
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED: CREATED  820323
+C 
+C 
+C     1. Get the class buffer.  Messages for the LGOUT consist of 
+C     a series of LUs, separated by commas. 
+C 
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+100   IERR = -1 
+      GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = MIN0(IREG(2),ILEN)
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.EQ.0.OR.ICHAR(IBUF,IEQ+1).EQ.77B) GOTO 500  
+C 
+C 
+C     2. Scan input command for specified LUs.
+C 
+      ICH = IEQ+1 
+      NLU = 0 
+201   CALL GTPRM(IBUF,ICH,NCHAR,1,PARM,IERR)
+C                   Scan for a number, the LU 
+      IF (IERR.EQ.0) GOTO 210 
+      IERR = -201 
+      GOTO 990
+210   IF (ICHAR(PARM,1).NE.54B) GOTO 220
+      IF (NLU.GT.0) GOTO 300
+      ILU(1) = LU 
+      NLU = 1 
+      GOTO 201
+220   IF (IPARM.GE.0) GOTO 230
+      IERR = -202 
+      GOTO 990
+230   IF (NLU+1.LE.5) GOTO 240
+      IERR = -203 
+      GOTO 990
+240   NLU = NLU+1 
+      ILU(NLU) = IPARM
+      GOTO 201
+C 
+C 
+C     3. Stash LUs into common for DDOUT. 
+C 
+300   DO 310 I=1,NLU
+        LULOG(I) = ILU(I) 
+310     CONTINUE
+      NLULOG = NLU
+      IERR = 0
+      GOTO 990
+C 
+C 
+C     5. Display current list of LUs. 
+C 
+500   IF (IEQ.EQ.0) IEQ=NCHAR+1 
+      NCH = ICHMV(IBUF,IEQ,2H/ ,1,1)
+C                   Put / to indicate a response
+      IF (NLULOG.LE.0) GOTO 520 
+      DO 510 I=1,NLULOG 
+        IF (I.NE.1) NCH = MCOMA(IBUF,NCH) 
+        NCH = NCH+IB2AS(LULOG(I),IBUF,NCH,100000B+5)  
+510     CONTINUE
+520   NCH = NCH-1 
+C 
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS) 
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = 0 
+      IP(4) = 2HQ#
+      GOTO 999
+C 
+C 
+990   IP(1) = 0 
+      IP(2) = 0 
+      IP(3) = IERR
+      IP(4) = 2HQ#
+999   RETURN
+      END 

@@ -1,0 +1,157 @@
+FTN4,X
+C@TPPOS 
+C 
+      SUBROUTINE TPPOS(IP),TAPE POSITION CONTROL C#870115:04:34#
+C 
+C     TAPPOS sends commands to BOSS that control the position of the tape 
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - CLASS
+C        IP(2) - # REC
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES:
+C 
+C     CALLED SUBROUTINES: GTPRM,ICHAR 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C        NCHAR  - number of characters in buffer
+C        ICH    - character counter 
+      DIMENSION IBUF(20)
+C               - class buffer
+      DIMENSION IT(6) 
+C         - holds current time from system
+C        ILEN   - length of IBUF, chars 
+      DIMENSION IPARM(2)
+C               - parameters returned from GTPRM
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 4.  CONSTANTS USED
+C 
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA ILEN/40/ 
+C 
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. If there was "=" in the buffer, then we have parameters. 
+C     If none, then error.  If parameter is "?" then give last command. 
+C 
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+      IERR = -1 
+      GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.NE.0) GOTO 120
+      IERR = -101 
+      GOTO 990
+120   IF (ICHAR(IBUF,IEQ+1).NE.77B) GOTO 210
+      NCH = ICHMV(IBUF,IEQ,2H/ ,1,1)
+      NCH = NCH + IB2AS(IFTGO,IBUF,NCH,40000B+400B*4+4) 
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS) 
+      NREC = 1
+      GOTO 990
+C 
+C 
+C     2. Get the parameter (foot count) and decode it.
+C               TAPEPOS=<position>
+C 
+210   ICH = 1+IEQ 
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+C                   Get the position in feet
+      IF (ICHAR(PARM,1).NE.52B.AND.ICHAR(PARM,1).NE.54B) GOTO 211 
+      IERR = -101 
+      GOTO 990
+211   IFT = IPARM 
+      IF (IFT.GE.0.AND.IFT.LE.9600) GOTO 300
+      IERR = -201 
+      GOTO 990
+C 
+C 
+C     3. Get the tape motion and foot count status. 
+C     Then, make sure that the tape is stopped!  If not, we can't move it.
+C     Check if the amount to move is within 200 feet.  If so, don't bother. 
+C 
+300   IBUF(1) = -3
+      IBUF(2) = 2HTP
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      CALL EXEC(23,6HMATCN ,ICLASS,1) 
+      CALL RMPAR(IP)
+      IF (IP(3).LT.0) GOTO 999  
+      CALL EXEC(21,IP(1),IBUF,-ILEN)  
+      CALL MA2TP(IBUF,ILOW,LFEET,IFASTP,ICAPTP,ISTPTP,ITACTP,IRDYTP)
+C 
+D     WRITE(LU,9901) ICAPTP,IFT,LFEET 
+D9901 FORMAT("ICAPTP,IFT,LFEET="2I5,1X,2A2) 
+      ICLASS = 0
+      NREC = 0
+      IF (ICAPTP.EQ.0) GOTO 310 
+      IERR = -301 
+      GOTO 990
+310   IFTNOW = IAS2B(LFEET,1,4) 
+      IF (IFTNOW.GT.9600.OR.IFTNOW.LT.0) IFTNOW=0 
+C                   Consider out-of-range as 0
+      IFTDIF = IABS(IFTNOW-IFT) 
+D     WRITE(LU,9902) IFTNOW,IFTDIF
+D9902 FORMAT("IFTNOW,IFTDIF="2I5) 
+      IF (IFTDIF.GT.200) GOTO 400 
+      IERR = -302 
+      GOTO 990
+C 
+C 
+C     4. Send the commands to BOSS.  Commands are:
+C              RW@! or FF@! 
+C          and ET@<now+feet/31fps>
+C     Also, set commanded feet into common. 
+C 
+400   IFTGO = IFT 
+      CALL EXEC(11,IT,IT(6))
+D     WRITE(LU,9903) IT 
+D9903 FORMAT("IT NOW="6I5)
+      IDT = IACTTP + (IFTDIF-IACFTP*2)/22.5 
+      CALL IADT(IT,IDT,2) 
+D     WRITE(LU,9904) IT,IDT 
+D9904 FORMAT("IT INC="6I5", IDT="I5)
+C                     Add on the time difference to the present 
+      IBUF(1) = 2HFF
+      IF (IFTNOW.GT.IFTGO) IBUF(1) = 2HRW 
+      IBUF(2) = 2H@!
+      IBUF(3) = 2HET
+      IBUF(4) = 2H@ 
+      CALL IB2AS(IT(5),IBUF, 8,40000B+400B*3+3) 
+      CALL IB2AS(IT(4),IBUF,11,40000B+400B*2+2) 
+      CALL IB2AS(IT(3),IBUF,13,40000B+400B*2+2) 
+      CALL IB2AS(IT(2),IBUF,15,40000B+400B*2+2) 
+      CALL COPIN(IBUF,4)
+      CALL COPIN(IBUF(3),12)
+C                     Send the commands to BOSS 
+C 
+990   IP(1) = ICLASS
+      IP(2) = NREC
+      IP(3) = IERR
+      IP(4) = 2HQU
+999   RETURN
+      END 

@@ -1,0 +1,314 @@
+FTN4,A
+C@ISHTV 
+C 
+        FUNCTION ISHTV(ITYPE,IXCOL,I1,I2,I3,I4,I5)
+     .,C#870115:05:47    FORM SCREEN LINE V=1.1#
+C 
+C     ISHTV 
+C 
+C 1.  NAME PROGRAM SPECIFICATION
+C 
+C 1.1.   ISHTV
+C 
+C               This routine displays information of a TV via the HP-TV 
+C       interface card.  This routine supports all the standard ISHOW 
+C       option of moving in characters, inserting integer, converting 
+C       floating point number, displaying astronomical angles and 
+C       calling special used supplied functions for other variables.
+C       This routine supports the rapid updating of the screen in that
+C       only changes from the last write are actually written to the
+C       device. 
+C 
+C 1.2.   RESTRICTIONS - limits on use of routine
+C 
+C 1.3.   REFERENCES - document cited
+C 
+C 2.  NAME INTERFACE
+C 
+C 2.1.   CALLING SEQUENCE: NLEFT=ISHTV(ITYPE,IXCOL,I1,I2,I3,I4,I5)
+C 
+C     INPUT VARIABLES:
+C 
+C       GLOBAL DEFS REFERENCED: "name'(local name if different)' ...
+C 
+      INCLUDE #SHOW::FS 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C       GLOBAL DEFS REFERENCED: "name'(local name if different)' ...
+C 
+C       ISHTV   - THE NUMBER OF CHARACTER AVAILABLE FOR USE IN THE
+C                 BUFFER IN CONSTRUCTING THE CURRENT DISPLAY LINE 
+C                 (NOTE 0 MEANS INTERNAL BUFFER IS FULL AND NEW 
+C                 REQUESTS OTHER THAN WRITTING THE BUFFER OR RESETING 
+C                 WILL BE IGNORED)
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+C 2.3.   DATA BASE ACCESSES 
+C 
+C 2.4.   EXTERNAL INPUT/OUTPUT
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES: SUB1, SUB2, ... (not required for utilities) 
+C 
+C     CALLED SUBROUTINES: SUB1, SUB2, ... (includes segments scheduled) 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C       GLOBAL DEFS REFERENCED: "name'(local name if different)' ...
+C 
+C 
+        DIMENSION LINE(85),IMTCH(23,22) 
+C 
+C       LINE    - INTERNAL BUFFER FOR SCREEN DISPLAY
+C       IRGA    - CONTENTS OF A REG WHERE REG WAS RETURNED FROM FUNCTION
+C                 CALL TO A ROUTINE 
+C 
+C       IRGB    - CONTENTS OF B-REG WHERE REG WAS RETURNED FROM FUNCTION
+C                 CALL TO A ROUTINE 
+C 
+        DIMENSION IREG(2) 
+C 
+C       IREG    - DUMMY REGISTER RETREIVAL AID
+C 
+        EQUIVALENCE (REG,IREG(1),IRGA),(IREG(2),IRGB) 
+C 
+C 4.  CONSTANTS USED
+C 
+        DATA IBLIM/160/,IFRM0/0/,IMTCH/504*0/ 
+C 
+C       IBLIM   - THE MAXIMUM NUMBER OF CHARACTERS THAT MAY BE WRITTEN INTO 
+C                 BUFFER LINE AT ONE TIME 
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+C 6.  PROGRAMMER: LEE N. FOSTER 
+C     LAST MODIFIED:
+C       LASTED EDITED ON <820506.2011>
+C# LAST COMPC'ED  870115:05:47urrent date) #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C               6.1  INITIALIZE VARIABLES 
+C 
+        INP=IGNPS(IND,IFRM) 
+D       WRITE(1,1001)IFRM 
+D1001   FORMAT(" ISHTV: IFRM = ",O7)
+C 
+C               CHECK FOR IGO = 0 RESET ENTRY 
+D 
+        IF(INP .LT. 2 .OR. IGO .NE. 0)GO TO 20
+C 
+C               IF RESET SOUGHT DO IT NOW 
+C 
+        IF(I1 .EQ. 100000B)NLN=0
+20      CONTINUE
+C 
+C               SEPARATE IGO AND IVID 
+C 
+        IGO=IAND(ITYPE,77B) 
+        IVID=IAND(ITYPE/100B,77B) 
+C 
+C               GET ABSOLUTE COLUMN POSITION
+C 
+        ICOL=IABS(IXCOL)
+C 
+C               PICK ROUTE THROUGH THE JUNGLE 
+C 
+        IF(IGO .EQ. 63)GO TO 63000
+        IF(IGO .NE. 0)GO TO 100 
+C 
+C               SET UP INITIAL VALUES FOR THIS LINE 
+C 
+        IF(INP .LT. 2)GO TO 99990 
+        CALL IFILL(LINE,1,160,2H  ) 
+        NCHAR=1 
+        NCHO=1
+        IOCOL=1 
+        IICOL=1 
+        IMODE=0 
+C 
+C               STEP TO NEXT LINE 
+C 
+        NLN=NLN+1 
+        LLN=NLN 
+C 
+C               SAVE OUTPUT LU FOR INDIVIUAL WRITES 
+C 
+        ILU=IXCOL 
+        ISHTV=IBLIM 
+        GO TO 99999 
+100    CONTINUE 
+C 
+C               CHECK FOR OFF SCREEN OR BUFFER FILLED 
+C 
+        IF(             ICOL .LE. 80
+     C          .AND.   NCHAR .LT. IBLIM)GO TO 110
+C 
+        ISHTV=MAX0(IBLIM-NCHAR+1,0) 
+C 
+        GO TO 99999 
+C 
+110     CONTINUE
+C 
+C               FIND COLUMN TO BE DISPLAYED 
+C 
+        IF(IXCOL .GT. 0)IICOL=IXCOL 
+        IF(IXCOL .LE. 0)IICOL=IICOL+NCHAR-1+IABS(IXCOL) 
+        IDCOL=IICOL 
+C 
+C               START EACH WRITE IN START OF BUFFER 
+C 
+        NCHAR=1 
+C 
+C               PICK A ROUTE THROUGH THE JUNGLE 
+C 
+        IG1=IGO-18
+        GO TO (999,19999),IG1 
+999   CONTINUE
+C 
+C               FOR LOWER 19 ITYPES TURN INVERSE VIDEO ON IF ASKED TO 
+C 
+        IF(IAND(IVID+1,2) .NE. 0)IMODE=1
+C 
+C               PICK PARTICULAR ROUTE FOR REQUESTED ACTION
+C 
+        GO TO (99999,2000,3000,4000,5000),IGO 
+2000   CONTINUE 
+        IIS=1 
+        ICNT=I2 
+        IF(ICNT .LT. 9)GO TO 2020 
+        IF(ICHCM(I1,1,3H&d ,1,3) .NE. 0)GO TO 2010 
+        IIS=5 
+        ICNT=ICNT-4 
+2010    CONTINUE
+        IF(ICHCM(I1,I2-3,3H&d ,1,3) .NE. 0)GO TO 2020
+        ICNT=ICNT-4 
+2020    CONTINUE
+        NCHAR=ICHMV(LINE,NCHAR,I1,IIS,ICNT) 
+        GO TO 19000 
+3000   CONTINUE 
+        NCHAR=IB2AS(I1,LINE,NCHAR,I2)+NCHAR 
+        GO TO 19000 
+4000   CONTINUE 
+        NCHAR=IR2AS(I1,LINE,NCHAR,I2,I3)+NCHAR
+        GO TO 19000 
+5000   CONTINUE 
+        NCHAR=IFAMS(LINE,NCHAR,I1,I2,I3,I4,I5)
+        GO TO 19000 
+19000   CONTINUE
+        GO TO 64000 
+19999   CONTINUE
+        IF(IGO .NE. 20)GO TO 99990
+        NCHAR=I1(I2,I3,LINE,NCHAR,IBLIM)
+        GO TO 64000 
+63000   CONTINUE
+C 
+C               This is the clean up the line entry. The information
+C       was written to the device as constructed.  Now the lines must 
+C       be cleaned up if the lines were shortened or inverse video was
+C       changed in any way. 
+C 
+C               LOOP OVER BOTH LINES FOR THIS ENTRY 
+C 
+        DO 63800 I=LLN,14,7 
+C 
+C               GET LENGTH DIFFERENCE FROM LAST DISPLAY COMPLETION
+C 
+        ND=IMTCH(2,I)-IMTCH(1,I)
+C 
+C               DECIDE IF SHORTER, SAME OR LONGER THAN BEFORE 
+C 
+        IF(ND)63300,63700,63500 
+63300   CONTINUE
+C 
+C               SHORTER THAN BEFORE FILL RESAT USED WITH BLANKS 
+C 
+        CALL IFILL(LINE,1,-ND,2H  ) 
+C 
+C               RESET DISPLAY RECORD TO FORCE BLANKS OUT
+C 
+        CALL IFILL(IMTCH(3,I),IMTCH(2,I)+1,-ND,0) 
+C 
+C               OUTPUT THE BLANKS 
+C 
+        CALL IDLTV(LINE,-ND,IMTCH(3,I),42,IMTCH(2,I)+1,ILU,I,0) 
+C 
+C               CLEAR UNUSED DISPLAY RECORD IN CASE OF EXTENTION
+C 
+        CALL IFILL(IMTCH(3,I),IMTCH(2,I)+1,-ND,0) 
+63500   CONTINUE
+C 
+C               SAVE NEW LINE LENGTH
+C 
+        IMTCH(1,I)=IMTCH(2,I) 
+63700   CONTINUE
+C 
+C               RESET OLD LINE LENGTH 
+C 
+        IMTCH(2,I)=0
+63800   CONTINUE
+        GO TO 99990 
+64000   CONTINUE
+C 
+C               FIND ENDING COLUMN POSITION 
+C 
+        INCOL=IDCOL+NCHAR-1 
+C 
+C               IF STARTING POSITION OFF SCREEN PUT ON OTHER LINE 
+C 
+        IF(IDCOL .GT. 42)GO TO 64300
+C 
+C               GET CHARACTER COUNT FOR THIS LINE 
+C 
+        IOUT=MIN0(INCOL,43)-IDCOL 
+C 
+C               HAVE INFORMATION DISPLAYED AND SAVE LENGTH OF THIS LINE 
+C 
+        IMTCH(2,LLN)=IDLTV(LINE,IOUT,IMTCH(3,LLN),42,IDCOL, 
+     C  ILU,LLN,IMODE)
+C 
+C               IF ENDING COLUMN IS ON THIS LINE QUIT NOW 
+C 
+        IF(INCOL .LE. 43)GO TO 64999
+C 
+C              SQUEEZE OUT DISPLAYED INFORMATION AND GET REMAINING COUNT
+C 
+        NCHAR=ICHMV(LINE,1,LINE,IOUT+1,INCOL-43)
+C 
+C               SET COLUMN POSITION TO FIRST IN ALTERNATE LINE
+C 
+        IDCOL=43
+64300   CONTINUE
+C 
+C               IF END NOT IN ALTERNATE LINE QUIT NOW 
+C 
+        IF(INCOL .LE. 43)GO TO 64999
+C 
+C               GET START & END IN THIS LINE
+C 
+        IDCOL=IDCOL-42
+        INCOL=INCOL-42
+C 
+C               CALCULATE ALTERNATE LINE LOCATION 
+C 
+        N7=LLN+7
+C 
+C               DISPLAY INFORMATION ON THIS LINE SAVE LENGTH USED 
+C 
+        IMTCH(2,N7)=IDLTV(LINE,NCHAR-1,IMTCH(3,N7),42,IDCOL,
+     C  ILU,N7,IMODE) 
+64999   CONTINUE
+C 
+C               SET MODE ACCORDING TO INSTRUCTIONS FOR END OF DISPLAY 
+C 
+        IF(IAND(IVID,1) .EQ. 1)IMODE=0
+99990   CONTINUE
+        ISHTV=IBLIM-NCHAR+1 
+99999   CONTINUE
+C 
+        RETURN
+        END 
+        END$

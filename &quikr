@@ -1,0 +1,47 @@
+FTN4,X
+C@QUIKR 
+C 
+      PROGRAM QUIKR(3),QUICK RESPONSE COMMANDS C#870115:04:32#
+C 
+C QUIKR is the root for all quick-response applications 
+C              functions in the Field System
+C 
+C     INPUT VARIABLES:
+C 
+C               - RMPAR parameters, contents variable depending 
+C                 on caller 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C               - RMPAR parameters sent to BOSS:
+C         IP(1) - IERR error code return
+C         IP(2) - class number, if any
+C         IP(3) - number of records in class
+C         IP(4) - who caused the error
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C 3.  LOCAL VARIABLES 
+C 
+      DIMENSION IP(5) 
+C               - RMPAR variables 
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED:  800316
+C# LAST COMPC'ED  870115:04:32 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. Get RMPAR parameters.
+C     Call LINKP to set up appropriate segment call.
+C     Finally return to BOSS with error code. 
+C 
+      CALL RMPAR(IP)
+      CALL LIBER(LU)
+      CALL LINKP(NAMQR,IP)
+C                   GET SEGMENT INTO CORE, SCHEDULE IT, SEND IT 
+C                   IP PARAMETERS 
+      CALL PRTN(IP) 
+      END 

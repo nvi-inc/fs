@@ -1,0 +1,162 @@
+FTN4,X
+C@TPDIS 
+C 
+      SUBROUTINE TPDIS(IP,ICLCM),DISPLAY TAPE PARAMETERS C#870115:04:33#
+C 
+C 1.1.   TPDIS gets data from the TAPE and displays it
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of buffer from MATCN 
+C        IP(2)  - number of records in class
+C        IP(3)  - error return from MATCN 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - CLASS
+C        IP(2) - # REC
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES: SLOWP
+C 
+C     CALLED SUBROUTINES: character utilities 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+      DIMENSION IBUFS(20),IBUFD(20),IBUF2(40) 
+C               - input class buffers, output display buffer
+C        ILEN   - length of output buffer, chars
+C        ILENM   - length of input buffers, chars 
+C        NCH    - character counter 
+C        I      - bit, converted to 0 or 1
+C        IA     - hex char from MAT 
+      LOGICAL KCOM,KDATA
+C              - true if COMMON variables wanted
+      DIMENSION IREG(2) 
+C               - registers from EXEC 
+      EQUIVALENCE (REG,IREG(1)) 
+C 
+C 4.  CONSTANTS USED
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA ILEN/80/,ILENM/40/ 
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED: 800229 
+C# LAST COMPC'ED  870115:04:33 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. First check error return from MATCN.  If not 0, get out
+C     immediately.  If setup data wanted ( ? ), skip class read.
+C 
+      KCOM = IP(4).EQ.77B 
+C 
+      ICLASS = IP(1)
+      NCREC = IP(2) 
+      IERR = IP(3)
+      NREC = 0
+C 
+      IF (KCOM) GOTO 200
+      IF (IERR.LT.0) GOTO 990 
+      IF (ICLASS.EQ.0.OR.ICLCM.EQ.0) GOTO 990 
+C 
+C 
+C     2. Get class buffer with command in it.  Set up first part
+C     of output buffer.  Get first buffer from MATCN. 
+C 
+200   REG = EXEC(21,ICLCM,IBUF2,-ILEN)
+C 
+      NCHAR = IREG(2) 
+      NCH = ISCNC(IBUF2,1,NCHAR,75B)
+C                   Scan for "="
+      KDATA = NCH.EQ.0
+C                   If our command was only "device" we are waiting for 
+C                   data and know what to expect. 
+      IF (NCH.EQ.0) NCH = NCHAR+1 
+C                   If no "=" found, position after last character
+      NCH = ICHMV(IBUF2,NCH,2H/ ,1,1) 
+C                   Put / to indicate a response
+C 
+      IF (KCOM) GOTO 310
+      IF (KDATA) GOTO 230 
+C 
+      DO 220 I=1,NCREC
+        IF (I.NE.1) NCH=MCOMA(IBUF2,NCH)
+C                   If not first parm, put comma before 
+        REG = EXEC(21,ICLASS,IBUFD,-ILENM)
+        NCHAR = IREG(2) 
+        NCH = ICHMV(IBUF2,NCH,IBUFD(2),1,NCHAR-2) 
+C                   Move buffer contents into output list 
+220     CONTINUE
+      GOTO 500
+C 
+230   REG = EXEC(21,ICLASS,IBUFD,-ILENM)
+C                   Read first record into display buffer 
+      REG = EXEC(21,ICLASS,IBUFS,-ILENM)
+C                   Read next record into  settings buffer
+C 
+C 
+C     3. Now the buffer contains: TAPE=, and we want to add the data. 
+C 
+      CALL MA2TP(IBUFD,ILOW,LFEET,IFASTP,ICAPTP,ISTPTP,ITACTP,IRDYTP) 
+      CALL MA2RP(IBUFS,IREMTP,IBY,IEQ,IBW,ITA,ITB)
+      GOTO 320
+310   ILOW = ILOWTP 
+C 
+320   NCH = ITPED(-5,ILOW,IBUF2,NCH,ILEN) 
+C                   Low tape setting
+C 
+      IF (KCOM) GOTO 500
+C 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = ICHMV(IBUF2,NCH,LFEET,1,4)
+C                   Move footage count into output
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = ITPED(-6,IFASTP,IBUF2,NCH,ILEN) 
+C                   Fast speed button 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = ITPED(-9,ICAPTP,IBUF2,NCH,ILEN) 
+C                   Capstan status
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = ITPED(-7,ISTPTP,IBUF2,NCH,ILEN) 
+C                   Stop command status 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = ITPED(-4,ITACTP,IBUF2,NCH,ILEN) 
+C                   Tach lock status
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      NCH = ITPED(-8,IRDYTP,IBUF2,NCH,ILEN) 
+C                   Ready status
+      NCH = MCOMA(IBUF2,NCH)
+C 
+C                   Top bit is rem/lcl
+      NCH = ITPED(-3,IREMTP,IBUF2,NCH,ILEN) 
+C 
+C 
+C     4. Now send the buffer to SAM.
+C 
+500   ICLASS = 0
+      NCH = NCH - 1 
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)  
+C                   Send buffer starting with TP to display 
+C 
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = 0 
+      IP(4) = 2HQT
+990   RETURN
+      END 

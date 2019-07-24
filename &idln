@@ -1,0 +1,147 @@
+FTN4,A
+        FUNCTION IDLN(LINA,KAS,KAL,LINB,KBS,KBL)
+     .,C#870115:05:48 DISPLAY MIN UP DATE V=1.00# 
+C 
+C 
+C           This routine compares the information in LINA and LINB    
+C     and builds a display line for 264x using cursor positioning.
+C     The length of the information to be written is IDLN at com- 
+C     pletion of this routine.  A value of zero says there is no
+C     change and nothing need be written.  Changed information is 
+C     is replaced in LINB as it is found. 
+C 
+        DIMENSION LINA(1),LINB(1) 
+C 
+C               INITIALIZE INTERNAL VARIABLES 
+C 
+        LAS=KAS 
+        LAL=KAL 
+        LBS=KBS 
+        LBL=KBL 
+C 
+C               SET DEFAULT RETURN VALUE
+C 
+        IDLN=0
+C 
+30000   CONTINUE
+C 
+C               COMPUTE MAX COMPARE LENGTH
+C 
+        ICMP=MIN0(LAL-LAS,LBL-LBS)+1
+C 
+C               COMPARE STRINGS 
+C 
+        IMC=IABS(ICHCM(LINA,LAS,LINB,LBS,ICMP)) 
+C 
+D       WRITE(1,3001)LAS,LAL,LBS,LBL,ICMP,IMC 
+D3001   FORMAT("IDLN: LAS= ",I3," LAL= ",I3," LBS= ",I3," LBL= ",I3,
+D    . " ICMP= ",I3," IMC= ",I3)
+C 
+C               FOR  NO CHANGE EXIT NOW 
+C 
+        IF(IMC .EQ. 0)GO TO 90000 
+C 
+C               CALCULATE MAXIMUM COLUMN SHIFT TO CHANGE
+C 
+        IDCOL=IMC-LAS 
+C 
+C               CALCULATE NEW LBS 
+C 
+        LBS=LBS+IDCOL 
+C 
+C               THE NEXT CHECK IS A DOUBLE CHECK
+C                       1. THE MINUMUM NUMBER OF CHARACTERS TO REPLACE
+C                       2. THE MINUMUM NUMBER THAT CAN CONTAIN TWO ENHANCEMENTS 
+C 
+        IF(IDCOL .GE. 8)GO TO 39000 
+C 
+C               GET NEW START FOR SHORT MATCH 
+C 
+        LAS=IMC 
+C 
+C               GO CHHECK FOR CHANGE END
+C 
+        GO TO 60000 
+C 
+39000   CONTINUE
+C 
+C               BUILD ESC SCAN CONTROL PARMS
+C 
+        IESCL=IMC-1 
+        IESTR=LAS 
+C 
+40000   CONTINUE
+C 
+C               ANY ESC SEQUENCES IN DATA 
+C 
+        IESC=ISCNC(LINA,IESTR,IESCL,33B)
+C 
+C               WHHEN ALL ESC SEQUENCES REMOVED EXIT SCANNING 
+C 
+        IF(IESC .EQ. 0)GO TO 50000
+C 
+C               REDUCE COLUMN MOVEMENT BY 4 
+C 
+        IDCOL=IDCOL-4 
+C 
+C               SKIP OVER ESC & d ? (PRESUMED)
+C 
+        IESTR=IESC+4
+C 
+C               IF ENOUGH CHARACTERS LEFT SCAN SOME MORE
+C 
+        IF(IESCL-IESTR .GT. 4)GO TO 40000 
+C 
+50000   CONTINUE
+C 
+C               MOVE IN CURSOR POSITIONING START
+C 
+        LAS=ICHMV(LINA,LAS,4H&a ,1,3)
+C 
+C               INSERT MOVE COUNT 
+C 
+        LAS=IB2AS(IDCOL,LINA,IOR(100000B,LAS),100003B)+LAS
+C 
+C               INSERT TRAILING "C" FOR CURSOR POSITIONING
+C 
+        LAS=ICHMV(LINA,LAS,2HC ,1,1)
+C 
+C               NOW SHORTEN STRING WITH LEFT SHIFT
+C 
+        LAL=ICHMV(LINA,LAS,LINA,IMC,LAL-IMC+1)-1
+C 
+60000   CONTINUE
+C 
+C               SCAN FOR RESUMPTION OF MATCH IN STRINGS 
+C 
+        LRMC=ISRMC(LINA,LAS,LAL,LINB,LBS,LBL) 
+C 
+C               FOR NO NEW MATCH USE REST OF STRING 
+C 
+        IF(LRMC .EQ. 0)LRMC=LAL+1 
+C 
+C               MOVE UNMATCHED INFO INTO LINB NOW 
+C 
+        LBS=ICHMV(LINB,LBS,LINA,LAS,LRMC-LAS) 
+C 
+C               GET NEW LOC IN LINA FOR MORE LOOPING
+C 
+        LAS=LRMC
+C 
+C               SAVE USEABLE LINA FOR RETURN
+C 
+        IDLN=LAS-1
+C 
+C               FOR MORE INFO LOOP BACK AND SCAN SOME MORE
+C 
+        IF(LAS .LT. LAL)GO TO 30000 
+C 
+90000   CONTINUE
+C 
+C               RETURN TO CALLER
+D       WRITE(1,9001)IDLN 
+D9001   FORMAT("IDLN: IDLN= ",I3) 
+C 
+        RETURN
+        END 
+        END$

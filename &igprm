@@ -1,0 +1,15 @@
+FTN4,X
+        SUBROUTINE IGPRM(IP,IIP,IIPN,LU)
+     .,C#870328:18:46    MERGE PARMS V=2.1# 
+        LOGICAL LTBIT 
+        DIMENSION IP(1),IIP(1)
+        IPRES=ICHAR(IIPN,1) 
+        IF(IPRES .EQ. 0)IPRES=174B
+        IEND=MIN0(5,ICHAR(IIPN,2))
+        DO 1000 I=1,IEND
+        IF(LTBIT(IPRES,7-I))IP(I)=IIP(I)
+        IF(LU .NE. 0 .AND. IP(I) .EQ. 2Hlu)IP(I)=LU 
+1000    CONTINUE
+        RETURN
+        END 
+        END$

@@ -1,0 +1,631 @@
+FTN4,X
+C@LXPRC 
+C 
+      PROGRAM LXPRC(5),STATIC COMMANDS C#821004:12:09#
+C 
+C  LXPRC
+C 
+C  LXPRC program specification
+C 
+C  LXPRC handles all of the static commands for LOGEX.
+C 
+C  MODIFICATIONS: 
+C 
+C     DATE     WHO  DESCRIPTION 
+C     810204   KNM  SUBROUTINE WRITTEN
+C 
+C     810803   KNM  TYPE COMMAND WAS ADDED. 
+C 
+C     810810   KNM  THE <COMMAND>=? WAS CHANGED TO <COMMAND>
+C 
+C     820329   KNM  SUBROUTINE ARGUMENTS WERE CHANGED & LXCOM WAS 
+C                   INCLUDED. THE CALL TO LXOPN WAS ADDED TO THE LOG
+C                   COMMAND.
+C 
+C     820416   KNM  THE OUTPUT COMMAND REPLACED THE LU COMMAND.  THE
+C                   USER MAY SPECIFY ANY LOGICAL UNIT OR AN OUTPUT
+C                   FILE IN THE FORM <NAME>:<SECU.CODE>:<CARTRIDGE> 
+C 
+C     820525   CAK  FIXED UP TO ALLOW SCALE VALUES TO BE EQUAL
+C                   (CAUSES PLOT TO SELF-SCALE). BUG IN FORMAT
+C                   9520 REMOVED TO ELIMINATE FMT ERR 3 
+C 
+C     820607   CAK  LXPRC HAS BEEN CHANGED FROM A SUBROUTINE TO A 
+C                   SEGMENT PROGRAM OF LOGEX. CALLING ARGUMENTS WERE
+C                   PLACED INTO COMMON. 
+C 
+C     820625   KNM  THE WIDTH AND HEIGHT PARAMETERS WERE ADDED TO THE 
+C                   OUTPUT COMMAND. THE WIDTH OF THE OUTPUT IS IN UNITS 
+C                   OF CHARACTERS. THE HEIGHT PARAMETER IS THE LENGTH 
+C                   OF THE OUTPUT DISPLAY IN TERMS OF NUMBER OF LINES.
+C 
+C     820816   KNM  EIGHT IF STATEMENTS TESTING THE VALUE OF IKEY WERE
+C                   ELIMINATED & REPLACED WITH A COMPUTED GO TO STATE-
+C                   MENT AT THE BEGINNING OF THIS ROUTINE. CALCULATING
+C                   THE SCALE VALUE IN THE SCALE COMMAND WAS DELETED
+C                   AND PLACED IN LXTPL.
+C 
+C     820825   KNM  SUBROUTINE LXLSN NOW HANDLES LOG & SKED COMMANDS
+C                   WHICH SPECIFY A 2-CHAR NAME OR A FULL NAMR. 
+C 
+C     820909   KNM  CFILE COMMAND WAS ADDED.
+C 
+C     820922   KNM  WIDTH & HEIGHT PARAMETERS WERE TAKEN OUT OF THE 
+C                   OUTPUT COMMAND. THE SIZE COMMAND PERFORMS THIS
+C                   FUNCTION NOW. 
+C 
+C  RESTRICTIONS: limits on the use of the segment.
+C 
+C  REFERENCES: LOGEX: Examining the logs/Mark III Field System
+C                     Documentation.
+C 
+C  INPUT VARIABLES: 
+C 
+C  OUTPUT VARIABLES:
+C 
+C 
+C  COMMON BLOCKS USED:
+C 
+      INCLUDE #FSCOM::56
+C 
+      INCLUDE #LXCOM::56
+C 
+C  DATA BASE ACCESSES 
+C 
+C  EXTERNAL INPUT/OUTPUT
+C 
+C  SUBROUTINE INTERFACE:
+C 
+C      CALLING SUBROUTINES: 
+C 
+C      File manager package routines
+C      Character manipulation routines
+C      GTPRM - parses the input buffer and returns the next parameter.
+C      LXOPN - Open log file
+C 
+C  LOCAL VARIABLES: 
+C 
+      DIMENSION IREG(2),IPARM(2),IVAL(2)
+C        - Registers for reading; parameters from GTPRM 
+C        - REG, PARM - two word variables equiv 
+C 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)),(VALUE,IVAL(1)) 
+C 
+C     ICH - character counter 
+C     IPRM - The special character is stored in IPRM upon its return
+C            from GTPRM.
+C     ITLU - Variable that determines whether the output LU is a non- 
+C            disc devices such as a line printer or terminal. 
+C     JPARM - total number of parameters possible 
+C 
+      DIMENSION LOGNR(2)
+C        - Contains the characters [LOG 
+C 
+      DIMENSION LSPECR(4) 
+C        - Array of valid special characters
+C 
+C     N - the variable that indicates the parameters the min & max
+C         SCALE values apply to.
+C 
+C  INITIALIZED VARIABLES: 
+C 
+      DATA JPARM/5/ 
+      DATA JTYPE/5/ 
+      DATA LOGNR/2H[L,2HOG/ 
+      DATA LSPECR/2H:;,2H$@,2H?&,2H/#/
+      DATA N/1/ 
+C 
+C 
+      GO TO (100,200,300,1700,500,1700,700,800,1700,1000,1100,1700,1700,
+     .1400,1500,1600),IKEY
+C 
+C 
+C     ******************* 
+C     1. OUTPUT commmand. 
+C     ******************* 
+C 
+C 
+C 
+C  Check for a specified OUTPUT LU. If no OUTPUT LU was specified, then 
+C  write out the OUTPUT file name.
+C 
+100   IF(ISCNC(IBUF,1,NCHAR,75B).NE.0) GOTO 105 
+      IF(ITERM.NE.1) GOTO 102 
+      WRITE(LUUSR,9100) LUDSP 
+9100  FORMAT("OUTPUT="I4) 
+      GOTO 1700 
+102   WRITE(LUUSR,9105) (NAMF(K),K=1,3),NAMF(6) 
+9105  FORMAT("OUTPUT="3A2,"::"I3) 
+      GOTO 1700 
+C 
+C  Determine whether the OUTPUT command is an LU or an output file
+C  by calling GTPRM with the IERR parameter.
+C 
+105   ICH= IEQ+1
+      ICH1=ICH
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM,IERR)
+      IF(IERR.EQ.-1) GOTO 150 
+      IF(ICHAR(IPARM,1).NE.54B) GOTO 110
+      LUDSP=LUUSR 
+      GOTO 120
+110   ITLU=IDTYP(IPARM(1))    
+      IF(ITLU.EQ.0B.OR.ITLU.EQ.5B.OR.ITLU.EQ.12B) GOTO 115
+      WRITE(LUUSR,9115) IPARM(1)
+9115  FORMAT("LXPRC10 - "I4," is an invalid LU")
+      ICODE=-1
+      GOTO 1700 
+115   LUDSP=IPARM(1)
+120   ITERM=1 
+      CALL CLOSE(JDCB)
+C 
+C Store one blank in L6 for single spacing. 
+C 
+      L6= 1H
+C 
+C If LUDSP is a printer, a one is stored in L6 which will start the 
+C printer on a new page.
+C 
+      IF (LUDSP.EQ.6) L6=1H1
+      GOTO 1700 
+C 
+C Let's get the output file name.  If the NAMR is valid, call LXCRT to
+C create it.
+C 
+150   ISTRC=ICH1
+      IF(NAMR(NAMF,IBUF,ICH-2,ISTRC).GE.0.OR.NAMF(1).NE.0) GOTO 155 
+      WRITE(LUUSR,9120) 
+9120  FORMAT("Invalid output file namr, please re-enter") 
+      ICODE=-1
+      GOTO 1700 
+155   CALL LXCRT
+      IF(ICODE.NE.-1) GOTO 160
+      LUDSP=LUUSR 
+      GOTO 1700 
+160   ITERM=0 
+      GOTO 1700 
+C 
+C 
+C     ******************
+C     2. COMMAND command
+C     ******************
+C 
+C 
+200   CALL LXMCM(LCOMND,NCOMND,NCMD)
+      GOTO 1700 
+C 
+C 
+C     **************
+C     3. LOG command
+C     **************
+C 
+C 
+300   IF(ISCNC(IBUF,1,NCHAR,75B).NE.0) GOTO 340 
+      GO TO (310,320,330),IFTYPE  
+310   WRITE(LUUSR,9300) LOGNA(3),ICR  
+9300  FORMAT("LOG="A2,","I4)  
+      GOTO 1700 
+320   WRITE(LUUSR,9310) (LOGNA(J),J=1,3),ICR  
+9310  FORMAT("LOG="3A2,"::"I4)
+      GOTO 1700 
+330   WRITE(LUUSR,9710) 
+      GOTO 1700 
+C 
+C Check for a two character name. 
+C 
+340   CALL IFILL(LOGNA,1,6,40B) 
+      ICH=IEQ+1 
+      IC1=ICH 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF((ICH-1)-IC1.GT.2) GOTO 350 
+      CALL ICHMV(LOGNA,1,LOGNR,1,4)   
+      CALL ICHMV(LOGNA(3),1,IBUF,IEQ+1,MIN0(NCHAR-IEQ,2)) 
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF(ICHAR(PARM,1).EQ.54B) ICR=ICRLOG 
+      ICR=IPARM 
+      IFTYPE=1
+      GOTO 370  
+C 
+C Check for a full Namr 
+C 
+350   ISTRC=IC1 
+      IF(NAMR(NAMF,IBUF,NCHAR,ISTRC).GE.0.OR.NAMF(1).NE.0) GOTO 360 
+      WRITE(LUUSR,9320) 
+9320  FORMAT("Invalid LOG namr, please re-enter") 
+      ICODE=-1
+      GOTO 1700 
+360   LOGNA(1)=NAMF(1)  
+      LOGNA(2)=NAMF(2)  
+      LOGNA(3)=NAMF(3)  
+      ILSEC=NAMF(5) 
+      ICR=NAMF(6) 
+      IFTYPE=2
+370   CALL LXOPN
+      GOTO 1700 
+C 
+C 
+C     ******************
+C     4. Help command ??
+C     ******************
+C 
+C 
+500   WRITE(LUUSR,9500) 
+9500  FORMAT( 
+     .28X,"GENERAL COMMANDS"/ 
+     ."<command>",32X,"Displays current values"/
+     ."CFILE=<NAMR>"29X,"File that contains LOGEX commands"/
+     ."LIST=<start>,<stop> or #<lines>"10X,"Lists selected entries on LU
+     ."/
+     ."LOG=<xx>,<cart> or <NAMR>"16X,"Opens log file [LOGxx::cart or <NA
+     .MR>"/ 
+     ."OUTPUT=<LU> or <NAMR>"20X,"OUTPUT for LU or output file"/
+     ."SKED=<NAMR>,<start>,<stop>",15X,"Opens schedule file <NAMR>"/
+     ."SUMMARY=<start>,<stop> or #<lines>"7X,"Summary of observations"/ 
+     ."SKSUMMARY",32X,"Compares SUMMARY with schedule file"/
+     ."EX or ::",33X,"Ends a LOGEX session"// 
+     .28X,"PLOTTING COMMANDS"/
+     ."PARM=<n1>,...<n5>",24X,"Specifies parms for plotting."/
+     ."SCALE=<min>,<max>,<n>,<db>",15X,"Sets scale for plots."/ 
+     ."SIZE=<width>,<height>",20X,"Plot width in chars, height in lines.
+     ."/  
+     ."TPLOT=<start>,<stop> or #<lines>"9X,"Plots in a strip chart forma
+     .t"/ 
+     ."PLOT=<start>,<stop> or #<lines>",10X,"Single-screen plot."// 
+     .28X,"SELECTION COMMANDS"/ 
+     ."COMMAND=<name 1>,...<name 5>",13X,"Search for up to five command 
+     .names"/ 
+     ."STRING=<name1>,...<name5>",16X,"Scans for up to five strings"/ 
+     ."TYPE=<char1>,...<char5>"18X,"Scans for up to five types of entrie
+     .s.")  
+      GOTO 1700 
+C 
+C 
+C     ********************
+C     5. The PARM command.
+C     ********************
+C 
+C 
+700   IF(ISCNC(IBUF,1,NCHAR,75B).NE.0) GOTO 710 
+C 
+C  WRITE OUT TOTAL NUMBER OF PARMS SPECIFIED
+C 
+      IF(NUMP.EQ.0) GOTO 705
+      WRITE(LUUSR,9700) (NPARM(I),I=1,NUMP) 
+9700  FORMAT("PARM = "4(I2,","),I2) 
+      GOTO 1700 
+705   WRITE(LUUSR,9710) 
+9710  FORMAT(" None specified") 
+      GOTO 1700 
+C 
+710   ICH = IEQ+1 
+C 
+C  Determine the PARMS and the number of PARMS specified
+C 
+      NUMP=0
+      CALL IFILL(NPARM,1,10,40B)
+      DO 730 N= 1,JPARM 
+         CALL GTPRM(IBUF,ICH,NCHAR,1,PARM,IERR) 
+C 
+C  Check to see if any more PARMs have been specified and see if they 
+C  are valid. 
+C 
+         IF(ICHAR(PARM,1).EQ.54B) GOTO 1700 
+         IF(IERR.EQ.0.AND.IPARM.GT.0) GOTO 720
+         WRITE(LUUSR,9720)
+9720     FORMAT("LXPRC20 - Invalid Parameter number") 
+         ICODE=-1 
+         GOTO 1700
+C 
+C  Store the specified PARM into NPARM. NUMP stores the quantity
+C  of PARMS specified within the 430 loop. Store the <n> values 
+C  that indicate the parameter number for the corresponding SCALE 
+C  command. 
+C 
+720      NPARM(N) = IPARM 
+         NSCALE(N) = NPARM(N) 
+         NUMP = NUMP+1
+730   CONTINUE
+      DO 740 I=1,JPARM
+      SMIN(I) = 0.D0
+      SMAX(I) = 0.D0
+740   CONTINUE
+      GOTO 1700 
+C 
+C 
+C     ********************* 
+C     6. The SCALE command. 
+C     ********************* 
+C 
+C 
+C Scan for an equals sign.  If no equals sign, write out SCALE values.
+C 
+800   IF(ISCNC(IBUF,1,NCHAR,75B).NE.0) GOTO 810 
+C 
+C  Write out total number of min, max, n, llogx values specified
+C 
+      WRITE(LUUSR,9800) (SMIN(N),SMAX(N),NSCALE(N),LLOGX(N),N= 1,NUMP)
+9800  FORMAT("SCALE="D11.8","D11.8","I1","A2) 
+      GOTO 1700 
+C 
+810   ICH = IEQ+1 
+C 
+C Retrieve the SMIN value 
+C 
+      CALL GTPRM(IBUF,ICH,NCHAR,2,PARM) 
+      S1 = PARM 
+C 
+C Retrieve the SMAX value 
+C 
+      CALL GTPRM(IBUF,ICH,NCHAR,2,PARM) 
+      S2 = PARM 
+C 
+C Retrieve the N value
+C 
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      N=IPARM 
+      IF(ICHAR(PARM,1).EQ.54B.AND.NUMP.GT.0) N=NSCALE(1)
+C 
+C Retrieve the dB scale 
+C 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+C 
+C  Determine whether the min is less than the max 
+C 
+      IF(S1.LE.S2) GOTO 830 
+C 
+      WRITE(LUUSR,9820) 
+9820  FORMAT("LXPRC40 - Min greater than max.") 
+      ICODE=-1
+      GOTO 1700 
+C 
+830   DO 840 I=1,NUMP 
+       IF(NSCALE(I).EQ.N) GOTO 850
+840   CONTINUE
+      WRITE(LUUSR,9810) N 
+9810  FORMAT("LXPRC30 - Invalid parameter number: "I3)
+      ICODE=-1
+      GOTO 1700 
+850   SMIN(I) = S1
+      SMAX(I) = S2
+      LLOGX(I) = IPARM
+C 
+C Check for a dB scale
+C 
+      IF (LLOGX(I).NE.2HDB) LLOGX(I)=2H 
+C 
+      GO TO 1700
+C 
+C  *****************
+C  7. STRING command
+C  *****************
+C 
+C 
+1000  CALL LXMCM(LSTRNG,NSTRNG,NSTR)
+      GOTO 1700 
+C 
+C 
+C  ******************** 
+C  8. The TYPE command. 
+C  ******************** 
+C 
+C 
+C 
+C  Determine whether any types were specified by search for any equals
+C  sign.  If there was no equals sign, write out the previous specified 
+C  types. 
+C 
+1100  IF(ISCNC(IBUF,1,NCHAR,75B).NE.0) GOTO 1110
+C 
+C  If no types are specified, a message is written out. If any types
+C  were specified, they are written out.  If all types were requested, a
+C  message is written out.
+C 
+      IF(NTYPE.EQ.0) GOTO 1105
+      IF(NTYPE.EQ.40B) GOTO 1106
+      WRITE(LUUSR,10000) (LTYPE(I),I=1,NTYPE) 
+10000 FORMAT("TYPE="4(A1,",")A1)
+      GOTO 1700 
+1105  WRITE(LUUSR,9710) 
+      GOTO 1700 
+1106  WRITE(LUUSR,10020)
+10020 FORMAT("TYPE= <All Types are being listed>")
+      GOTO 1700 
+C 
+C  Let's get the special characters that are specified.  Fill the LTYPE 
+C  array in case a previous TYPE command was issued.
+C 
+1110  ICH=IEQ+1 
+      NTYPE=0 
+      CALL IFILL(LTYPE,1,10,40B)
+      DO 1120 I=1,JTYPE 
+        CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+C 
+C  Store the special character in IPRM. 
+C 
+        IPRM=ICHAR(IPARM,1) 
+C 
+C  If the first parm is a blank, then all types are to be listed. Set 
+C  NTYPE to a blank and return to LOGEX.
+C 
+        IF(IPRM.EQ.40B) GOTO 1130 
+C 
+        IF(IPRM.EQ.54B) GOTO 1700 
+        NCH=ISCNC(LSPECR,1,8,IPRM)
+C 
+C  Left justify the character by multiplying by 400B (256 decimal) and
+C  adding a blank (40B).  Store it into LTYPE.
+C 
+        LTYPE(I)=IPRM*400B+40B
+C 
+C  Check to see if the character is valid.
+C 
+        IF(NCH.EQ.0) WRITE(LUUSR,10030) LTYPE(I)
+10030   FORMAT("LXPRC50 - Invalid Special Character: "A1) 
+        ICODE=-1
+        NTYPE=NTYPE+1 
+1120  CONTINUE
+1130  IF(IPRM.EQ.40B) NTYPE=40B 
+      GOTO 1700 
+C 
+C 
+C ********************
+C 
+C 9. The SKED command.
+C 
+C ********************
+C 
+C 
+1400  IF(ISCNC(IBUF,1,NCHAR,75B).NE.0) GOTO 1410
+      IF(ISKED.EQ.0) WRITE(LUUSR,9710)
+      IF(ISKED.EQ.1) WRITE(LUUSR,10040) (LSKNA(I),I=1,3),ISCR 
+10040 FORMAT("SKED="3A2,"::"I4) 
+      GOTO 1700 
+C 
+C Get SKED namr 
+C 
+1410  ICH=IEQ+1 
+      IC1=ICH 
+      ISKED=0 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      ISTRC=ICH-2 
+      IF(NAMR(NAMF,IBUF,ISTRC,IC1).GE.0.OR.NAMF(1).NE.0) GOTO 1420
+      WRITE(LUUSR,10050)  
+10050 FORMAT("Invalid SKED namr, please re-enter")
+      ICODE=-1
+      GOTO 1700 
+1420  LSKNA(1)=NAMF(1)
+      LSKNA(2)=NAMF(2)
+      LSKNA(3)=NAMF(3)
+      ISKSEC=NAMF(5)
+      ISCR=NAMF(6)
+      CALL OPEN(IDCBSK,IERR,LSKNA,1,ISKSEC,ISCR)  
+      IF(IERR.GE.0) GOTO 1430 
+      WRITE(LUUSR,10060) IERR,LSKNA 
+10060 FORMAT("LXPRC60 - Error FMGR"I3" opening schedule file "3A2)
+      ICODE=-1
+      GOTO 1700 
+C 
+C Get schedule start time 
+C 
+1430  IC2=ICH 
+      ISKED=1 
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF(ICHAR(PARM,1).NE.54B) GOTO 1440
+      ITSK1=0 
+      ITSK2=0 
+D     WRITE(LUUSR,54) ITSK1,ITSK2 
+D54   FORMAT("ITSK1="I3,1X,"ITSK2="I3)
+      GOTO 1460 
+C 
+C Call GTTIM to decode snap time format 
+C 
+1440  CALL GTTIM(IBUF,IC2,ICH-2,0,ITSK1,ITSK2,IT3,IERR) 
+      IF(IERR.GE.0) GOTO 1450 
+      WRITE(LUUSR,10070) IERR 
+10070 FORMAT("LXPRC70 - Error SP"I3" schedule start time")
+      ICODE=-1
+      GOTO 1700 
+C 
+C Store calculated start schedule day in ITSK1
+C 
+1450  ITSK1=MOD(ITSK1,1024) 
+C 
+C Get the schedule stop time
+C 
+1460  IC3=ICH 
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF(ICHAR(PARM,1).NE.54B) GOTO 1470
+      ITSKE1=9999 
+      ITSKE2=0
+D     WRITE(LUUSR,55) ITSKE1,ITSKE2 
+D55   FORMAT("ITSKE1="I6,1X,"ITSKE2="I3)
+      GOTO 1700 
+1470  CALL GTTIM(IBUF,IC3,ICH-2,0,ITSKE1,ITSKE2,IT3,IERR) 
+      IF(IERR.GE.0) GOTO 1480 
+      WRITE(LUUSR,10080) IERR 
+10080 FORMAT("LXPRC80 - Error SP"I3" schedule stop time") 
+      ICODE=-1
+      GOTO 1700 
+1480  ITSKE1=MOD(ITSKE1,1024) 
+      GOTO 1700 
+C 
+C 
+C ******************
+C 
+C 10. CFILE command.
+C 
+C ******************
+C 
+C 
+C Scan for an equals sign.
+C 
+1500  IF(ISCNC(IBUF,1,NCHAR,75B).NE.0) GOTO 1510
+      IF(ICMD.EQ.0) WRITE(LUUSR,9710) 
+      IF(ICMD.EQ.1) WRITE(LUUSR,11100) (NAMCM(I),I=1,3),NAMCM(6)
+11100 FORMAT("CFILE="3A2"::"I3) 
+      GOTO 1700 
+C 
+C Close command file if we are requesting a new file to be opened.
+C Then obtain the command file name and open it.
+C 
+1510  CALL CLOSE(IDCBCM)
+      ISTRC=IEQ+1 
+      IF(NAMR(NAMCM,IBUF,NCHAR,ISTRC).GE.0.OR.NAMCM(1).NE.0) GOTO 1520
+      WRITE(LUUSR,11200)
+11200 FORMAT("Invalid command file name, please re-enter")
+      ICODE=-1
+      GOTO 1700 
+1520  CALL OPEN(IDCBCM,IERR,NAMCM,0,NAMCM(5),NAMCM(6))
+      IF(IERR.GE.0) GOTO 1530 
+      WRITE(LUUSR,11300) IERR,(NAMCM(I),I=1,3),NAMCM(6) 
+11300 FORMAT("LXPRC90 - Error"I3" opening command file "3A2"::"I3)
+      ICODE=-1
+      GOTO 1700 
+1530  ICMD=1
+      GOTO 1700 
+C 
+C 
+C ********************
+C 
+C 11. The SIZE Command
+C 
+C ********************
+C 
+C 
+1600  IF(ISCNC(IBUF,1,NCHAR,75B).NE.0) GOTO 1610
+      WRITE(LUUSR,12000) IWIDTH,IHGT
+12000 FORMAT("SIZE="I3","I3)
+      GOTO 1700 
+C 
+C Get the width parameter 
+C 
+1610  ICH=IEQ+1 
+      CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF(ICHAR(IPARM,1).NE.54B) GOTO 1620 
+      IWIDTH=78 
+      GOTO 1640 
+C 
+C Check for a valid width and if it is ok, store it.
+C 
+1620  IF(IPARM.LT.78.OR.IPARM.GT.130) GOTO 1630 
+      IWIDTH=IPARM
+      GOTO 1640 
+1630  WRITE(LUUSR,12100) IPARM(1) 
+12100 FORMAT("LXPRC100 - "I4" is an invalid width parameter") 
+      GOTO 1700 
+C 
+C Get the height parameter
+C 
+1640  CALL GTPRM(IBUF,ICH,NCHAR,1,PARM) 
+      IF(ICHAR(IPARM,1).NE.54B) GOTO 1650 
+      IHGT=18 
+      GOTO 1700 
+C 
+C Check for a valid height, if ok, store it.
+C 
+1650  IF(IPARM.LT.10.OR.IPARM.GT.100) GOTO 1660 
+      IHGT=IPARM
+      GOTO 1700 
+1660  WRITE(LUUSR,12200) IPARM(1) 
+12200 FORMAT("LXPRC110 - "I4" is an invalid height parameter")  
+1700  GO TO IRTN6 
+      END 

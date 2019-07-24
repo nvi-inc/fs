@@ -1,0 +1,41 @@
+FTN4,X
+C 
+C@BSPLT 
+C 
+      SUBROUTINE BSPLT(IDATA,ILOG),REFORMATS SPLITMODE BUFFER C#870115:05:15# 
+C 
+C     BSPLT separates the data from the A and B channels, 
+C     which is necessary to process split mode data.
+C 
+C  INPUT: 
+      DIMENSION IDATA(1)
+C      - IDATA holds the data in the form 1 byte A, 1 byte B etc. 
+C     ILOG - # of characters in IDATA 
+C 
+C  OUTPUT:
+C     IDATA - reformatted to hold all channel B bytes and then
+C     all channel A bytes.
+C 
+C  LOCAL: 
+      DIMENSION ITEMP(260)
+C      - buffer to save IDATA whilst reformatting 
+C 
+C     MAH - 19820217
+C 
+      DO 100 I = 1,ILOG/2 
+100     ITEMP(I) = IDATA(I) 
+C 
+      DO 200 I = 1,ILOG/2 
+200     CALL ICHMV(IDATA,I,ITEMP,2*I,1) 
+C 
+      DO 300 I = 1,ILOG/2 
+300     CALL ICHMV(IDATA,ILOG/2+I,ITEMP,2*I-1,1)
+C 
+D     DO 400 I = 1,ILOG 
+D         LH = IH22A(ICHAR(IDATA,I))
+D         WRITE(6,99) LH
+D99       FORMAT(A2" _")
+D         LI = IH22A(ICHAR(ITEMP,I))
+D         WRITE(1,99) LI
+D400      CONTINUE
+      END 

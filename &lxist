@@ -1,0 +1,57 @@
+FTN4,X
+C@LXIST 
+C 
+      SUBROUTINE LXIST,LIST LOG FILE C#870115:05:36#
+C 
+C LXIST - Writes the Log Output to a LU or Output file. 
+C 
+C MODIFICATIONS:
+C 
+C    DATE     WHO  DESCRIPTION
+C    820326   KNM  SUBROUTINE CREATED 
+C 
+C    820416   KNM  THE LISTING OF A LOG CAN BE WRITTEN INTO AN OUTPUT 
+C                  FILE IF THE OUTPUT COMMAND SPECIFIED A FILE NAME.
+C 
+C    820816   KNM  THE LOG IS NO LONGER WRITTEN OUT BY THIS ROUTINE.  
+C                  LXIST CALLS LXWRT WHICH WRITES OUT THE LOG.
+C 
+C RESTRICTIONS: 
+C 
+C INPUT VARIABLES:
+C 
+C OUTPUT VARIABLES: 
+C 
+C COMMON BLOCKS USED: 
+C 
+      INCLUDE #LXCOM::56
+C 
+C SUBROUTINE INTERFACES:
+C 
+C    CALLING SUBROUTINES: 
+C 
+C      LOGEX - Main program 
+C 
+C    CALLED SUBROUTINES:
+C 
+C      LNFCH Utilities
+C      LXWRT - Writes out LOGEX data
+C 
+C 
+C  ************************************************************** 
+C 
+C  Call LXGET to read a log entry. If there is no error or end of 
+C  listing write out IBUF.
+C 
+C  ************************************************************** 
+C 
+C 
+      IOUT=0
+      ILEN=0
+100   CALL LXGET
+      IF(ICODE.EQ.-1.OR.LSTEND.EQ.-1.OR.ILEN.LT.0) GOTO 200   
+      CALL LXWRT(IBUF,ILEN*2) 
+      NLOUT=NLOUT+1 
+      GOTO 100
+200   RETURN
+      END 

@@ -1,0 +1,952 @@
+FTN66 
+$INCLUDE =BCB::M3 
+$INCLUDE =BIP::M3 
+$INCLUDE =BFP::M3 
+      PROGRAM RTCOR(3,100)
+C 
+C     Program to do software cross-correlation and phase-cal processing 
+C     of data-buffer data and create an output compatible with FRNGE. 
+C     RTCOR is normally scheduled by program VRUN.
+C 
+C     ARW 790728
+C     ARW 830415 Updated for use with new with new correlator software
+C 
+      COMMON IBG(1) 
+C 
+      INTEGER IDCB1(144),IDCB2(144),IPBUF1(10),IPBUF2(10),IPAR(5),
+     .        IASC(5),IBCD(3),IDCB(144),JFNAM(11) 
+      REAL*8 DI2DF,SRATE,TSTART 
+C 
+      CALL RMPAR(IPAR)
+      LUOP=IPAR 
+      LULOG=LUOP
+C 
+C     Compute addresses 
+      IFWA=LOC(IBG) 
+      IRCBAD=IPAR(2)
+      IBCBAD=IBG(IRCBAD+1)-IFWA+1 
+      IBIPAD=IBG(IBCBAD+5)-IFWA+1 
+      IBFPAD=IBG(IBCBAD+11)-IFWA+1
+C 
+C     Get station codes 
+      IAREF=IBG(IBIPAD+7) 
+      IAREM=ISHFT(IBG(IBIPAD+7),8)
+C 
+100   WRITE(LUOP,110) IAREF 
+110   FORMAT(/,"File namr of station ",A1," data? _") 
+      IF (IFNAM(LUOP,IPBUF1)) 100,120,130 
+120   STOP
+130   CALL OPEN(IDCB1,IERR,IPBUF1,3,IPBUF1(5),IPBUF1(6))
+140   IF (IFERR(LUOP,IERR,IPBUF1,6HOPEN  ,-8) .LT. 0) GO TO 100 
+      IF (IERR .NE. -8) GO TO 150 
+      CALL IUNLK(IPBUF1,IPBUF1(6),JERR,LUOP)
+      GO TO 130 
+C     Check record length 
+150   IF (IDCB1(7) .EQ. 625) GO TO 155
+      IERR=-5 
+      GO TO 140 
+C     Check file size 
+155   IF (IDCB1(6) .EQ. 1876) GO TO 160 
+      IERR=-16
+      GO TO 140 
+C 
+160   WRITE(LUOP,170) IAREM 
+170   FORMAT(/,"File namr of station ",A1," data? _") 
+      IF (IFNAM(LUOP,IPBUF2)) 160,180,190 
+180   STOP
+190   CALL OPEN(IDCB2,IERR,IPBUF2,3,IPBUF2(5),IPBUF2(6))
+200   IF (IFERR(LUOP,IERR,IPBUF2,6HOPEN  ,-8) .LT. 0) GO TO 160 
+      IF (IERR .NE. -8) GO TO 210 
+      CALL IUNLK(IPBUF2,IPBUF2(6),JERR,LUOP)
+      GO TO 190 
+210   IF (IERR .EQ. -6) GO TO 160 
+C     Check record length 
+      IF (IDCB2(7) .EQ. 625) GO TO 220
+      IERR=-5 
+      GO TO 200 
+C     Check file size 
+220   IF (IDCB2(6) .EQ. 1876) GO TO 225 
+      IERR=-16
+      GO TO 200 
+C 
+C     Create the correlator data extent 
+225   CALL WMOVE(IBG(IRCBAD+36),JFNAM,10) 
+      JFNAM(11)=IBG(IBIPAD+17)
+      NEQT=IBG(IBIPAD+16) 
+      CALL XTNT(IDCB,JFNAM,NEQT,NFP,LUOP) 
+C 
+C     Call DBCOR to do the actual processing
+      CALL DBCOR(IDCB1,IPBUF1,IDCB2,IPBUF2,IDCB,JFNAM,IBG(IBCBAD),
+     .           IBG(IBIPAD),IBG(IBFPAD),LUOP)
+C 
+300   CALL CLOSE(IDCB1,IERR)
+      CALL CLOSE(IDCB2,IERR)
+      STOP
+      END 
+      SUBROUTINE DBCOR(IDCB1,IPBUF1,IDCB2,IPBUF2,IDCB,JFNAM,
+     .                 IBCB,IBIP,BFP,LUOP)
+C 
+C     Routine to do actual cross-correlation and phase-cal processing 
+C     for data-buffer data. 
+C 
+C     On entry--
+C       IDCB1,  DCB for ref-station data file 
+C       IPBUF1, parsed namr corresponding to IDCB1
+C       IDCB2,  DCB for raw remote station data file
+C       IPBUF2, parsed namr corresponding to IDCB2
+C       IDCB,   DCB for correlator data extent
+C       JFNAM,  parse namr corresponding to IDCB
+C       IBCB,   Baseline Control Block
+C       IBIP,   Baseline Integer Parameter block
+C       BFP,    Baseline Floating (R*8) Parameter block 
+C       LUOP,   operator console lu 
+C 
+C     ARW 790729
+C 
+      COMMON IBG(1) 
+C 
+      COMMON/RTBUF/IBUF(1024),IBUF1(1046) 
+C 
+      INTEGER IBCB(1),IBIP(1),IREG(2),IPPW(15),IPASS(29)
+      REAL*4 ACOR(2,256),ANCOR(2),APCAL1(3),APCAL2(3) 
+      REAL*8 BFP(1) 
+      EQUIVALENCE (REG,IREG),(IPPW(1),IPASS(15))
+C 
+C     Restore program RTDSP if necessary
+                                                 $
+-----------------------------------------------------------------------------
+
+C                 IBCB( 1)    BCB link word 
+$PARM \!FWAPRCB! \IBCB( 2)\ - FWA PPR CCB 
+$PARM \!FWAOCB!  \IBCB( 3)\ - FWA Output Control Block (OCB)  
+$PARM \!FWAWCB!  \IBCB( 4)\ - FWA PPW CCB 
+$PARM \!FWAPCB!  \IBCB( 5)\ - FWA PASS CCB  
+$PARM \!FWABIP!  \IBCB( 6)\ - FWA Baseline Integer Parameter (BIP) array  
+$PARM \!FWASCB!  \IBCB( 7)\ - FWA Synchronization Control Block (SCB) 
+$PARM \!FWARCB!  \IBCB( 8)\ - FWA Run Control Block (RCB) 
+$PARM \!EQTHD!   \IBCB( 9)\ - EQT link head 
+$PARM \!FWAAMT!  \IBCB(10)\ - FWA Active Module Table (AMT) 
+$PARM \!FWALOF!  \IBCB(11)\ - FWA LO offset Table (LOF) 
+$PARM \!FWABFP!  \IBCB(12)\ - FWA Baseline Floating Parameters (BFP)  
+$PARM \!FWARFQ!  \IBCB(13)\ - FWA RF Frequency Table (RFQ)  
+$PARM \!FWAPFQ!  \IBCB(14)\ - FWA Phase-cal Frequency Table (PFQ) 
+$PARM \!TATAD1!  \IBCB(15)\ - Address of TAT entry for reference station  
+$PARM \!TATAD2!  \IBCB(16)\ - Address of TAT entry for remote station 
+$PARM \!FWAFST!  \IBCB(17)\ - FWA Frequency Subgroup Table  
+$PARM \!FWACORA1!\IBCB(18)\ - FWA R*8 'ad hoc' correction table for ref stat
+$PARM \!FWACORI1!\IBCB(19)\ - FWA I*2 'ad hoc' correction table for ref stat
+$PARM \!FWACORA2!\IBCB(20)\ - FWA R*8 'ad hoc' correction table for rem stat
+$PARM \!FWACORI2!\IBCB(21)\ - FWA I*2 'ad hoc' correction table for rem stat
+      IF (IDGET(6HRTDSP ) .EQ. 0) THEN
+          IF (IRP(6HRTDSP ,0,IERR,LUOP) .LT. 0) STOP
+      ENDIF 
+      CALL EXEC(24,6HRTDSP ,0)       !Initialize display
+C 
+C     Initialize dynamic disc scratch area
+      CALL STOPN(625) 
+C 
+C     Determine range of delay offsets
+      CALL LGET(LG1,1,IERR,!EQTHD!,1,6) 
+      CALL LGET(LG2,1,IERR,!EQTHD!,!NBEQT!,6) 
+      NDLY=IABS(LG1-LG2)+8
+      IF (NDLY .GT. 256) NDLY=256 
+      IF (LG1 .LE. LG2) LAG1=LG1-3
+      IF (LG1 .GT. LG2) LAG1=LG2-3
+      !TIME!=!TSTART! 
+C     WRITE(16,100) !NBEQT!,NDLY,!NFP!,LG1,LG2,LAG1 
+C100  FORMAT("NBEQT,NDLY,NFP,LG1,LG2,LAG1=",6I6)  
+C 
+      NAP=0 
+C 
+      DO 400 IAP=1,32767
+C 
+C     Schedule VIPPW to compute a prioris 
+      REG=EXEC(23,6HVIPPW ,0,0,!EQTHD!,0,40B) 
+      REG=EXEC(14,1,IPASS,29) 
+      IF (IREG(2) .NE. 29) STOP 10
+C     CALL WRPPW(LOC(IPPW),IAP,16)
+C     CALL WRPAS(LOC(IPASS),IAP,16) 
+      !TIME!=!TIME!+!DAP!          !Increment the time
+C 
+C     Compute start frame# (within data buffer) for this AP 
+      IFRAME=(IAP-1)*!NFP!+1
+C 
+C     Call APCOR to do correlation for this AP
+      CALL APCOR(IDCB1,IPBUF1,IDCB2,IPBUF2,IBCB,IBIP,BFP,IFRAME,
+     .           LAG1,NDLY,IPPW,IPASS,ACOR,ANCOR,APCAL1,APCAL2,FBIT,
+     .           APTIM,IEOF,LUOP)   
+      IF (IEOF .EQ. 1) GO TO 410
+C     Ignore if less than half the bits in AP have been correlated
+      IF (ANCOR(1) .LT. !NFP!*10000. .AND.
+     .     ANCOR(2) .LT. !NFP!*10000.)      GO TO 390 
+C 
+C     Call APWRT to write the processed data to correlator data extent
+      CALL APWRT(IDCB,JFNAM,IBCB,!NBEQT!,LAG1,IPPW,IPASS,ACOR,ANCOR,  
+     .           APCAL1,APCAL2,APTIM,LUOP)
+C 
+C     Call RTDSP to compute cumulative delay function 
+      NAP=NAP+1 
+      FRSIGN=1.0
+      IF (IAND(IPPW(9),200B) .NE. 0) FRSIGN=-1.0
+C 
+C     Prepare buffer and send it to RTDSP 
+      IBUF1=NDLY
+      IBUF1(2)=NAP
+      CALL WMOVE(ANCOR,IBUF1(3),4)
+      CALL WMOVE(FBIT ,IBUF1(7),2)
+      CALL WMOVE(FRSIGN,IBUF1(9),2) 
+      CALL WMOVE(APCAL1,IBUF1(11),6)
+      CALL WMOVE(APCAL2,IBUF1(17),6)
+      CALL WMOVE(ACOR  ,IBUF1(23),NDLY*4+22)
+C     WRITE(16,295) NDLY,FBIT,FRSIGN,NAP,ANCOR, 
+C    .              ((ACOR(I,J),I=1,2),J=1,NDLY)
+C295  FORMAT("1NDLY,FBIT,FRSIGN,NAP=",I5,F9.5,F4.0,I5,/,
+C    .       "ANCOR,ACOR=",2F10.0,/,(8F10.0)) 
+      CALL EXEC(24,6HRTDSP ,1,!IBASC!,0,0,0,IBUF1,NDLY*4+22)
+C 
+390   IF (IFBRK(IDUM) .LT. 0) GO TO 410 
+C 
+400   CONTINUE
+C 
+C     Release the scratch disc area 
+410   CALL STOPN(0) 
+      CALL EXEC(24,6HRTDSP ,3)       !Terminate display program 
+      CALL IOF(6HRTDSP ,IERR,LUOP)
+C 
+      RETURN
+      END 
+      SUBROUTINE APCOR(IDCB1,IPBUF1,IDCB2,IPBUF2,IBCB,IBIP,BFP, 
+     .                 IFRAME,LAG1,NDLY,IPPW,IPASS,ACOR,ANCOR,APCAL1, 
+     .                 APCAL2,FBIT,APTIM,IEOF,LUOP) 
+C 
+C     Routine to do cross-correlation and phase-cal processing for
+C     one accumulation period (AP). 
+C 
+C     On entry--
+C       IDCB1,  DCB for rotated ref-station data file 
+C       IPBUF1, parsed namr corresponding to IDCB1
+C       IDCB2,  DCB for raw remote-station data file
+C       IPBUF2, parsed namr corresponding to IDCB2
+C       IBCB,   Baseline Control Block
+C       IBIP,   Baseline Integer Parameter block
+C       BFP,    Baseline Floating (R*8) Parameter block 
+C       IFRAME, frame# within data buffer of first frame of this AP 
+C               (frame on minute mark is frame #1)
+C       LAG1,   First lag to be processed 
+C       NDLY,   # of delays to process
+C       IPPW,   PPW subarray for this AP
+C       IPASS,  IPASS subarray for this AP
+C       LUOP,   operator console lu 
+C 
+C     On return-- 
+C       ACOR,   single-precision complex array of raw cross-correlations
+C       ANCOR,  array of # bits processed in cosine and sine cross-correlation
+C               channel, respectively 
+C       APCAL1, phase-cal results for reference station, containing cosine, 
+C               sine and #bits respectively 
+C       APCAL2, same as APCAL1, except for remote station 
+C       FBIT,   single-precision fractional bit error (bits)
+C       APTIM,  start time of this AP in double-integer msec
+C       IEOF,   end-of-file flag (1=end-of-file encountered)
+C 
+C     ARW 790729
+C 
+      COMMON/RTBUF/IBUF1(625),IFLG1(625),IBUF2(645),IFLG2(645)
+C 
+      REAL*4 ACOR(2,256),ANCOR(2),APCAL1(3),APCAL2(3) 
+      INTEGER ITIME(8),IBCD(3),IASC(5),IACCEL(2),IPPW(1),IPASS(1),
+     .        IBCB(1),IBIP(1) 
+      INTEGER*4 ZDELAY
+      REAL*8 TIME,DI2DF,BTDLY,BDLY,DELAY,BFP(1) 
+C 
+      IEOF=0
+      LRECL=625 
+C 
+C     Get pre-computed parameters for this AP from IPPW subarray
+      CALL WMOVE(IPASS(5),DELAY,4)  
+      IPCPER=IAND(NOT(IPPW(8)),7777B)+1 
+      KSEL=JSHFT(IPPW(10),13) 
+      CALL WMOVE(IPPW(3),PHASI,2) 
+      CALL WMOVE(IPPW(5),DPHASI,2)
+      CALL WMOVE(IPPW(13),IACCEL,2) 
+      IACCEL=IAND(IACCEL,17B) 
+      ACCEL=DI2SF(IACCEL)+1 
+      IF (IAND(IPPW(13),100000B) .NE. 0) ACCEL=-ACCEL 
+      ABYTE=0.
+C 
+C     Compute a priori delay to nearest bit. Compute fractional bit error.
+      BDLY=!SRATE!/1000000.D0*DELAY 
+      BTDLY=DDINT(BDLY+DSIGN(0.5D0,DELAY))
+      ZDELAY=BTDLY
+      FBIT=BDLY-BTDLY 
+C     Move ZDELAY and FBIT into IPASS subarray
+      CALL WMOVE(ZDELAY,IPASS(10),2)
+      CALL WMOVE(IPASS(12),FBITX,2) 
+      CALL WMOVE(FBIT,IPASS(12),2)  
+C     WRITE(16,150) IAP,IFRAME,NDLY,IOFST,IPCPER, 
+C    .              !SRATE!,DELAY,BDLY,BTDLY,FBIT,FBITX 
+C150  FORMAT("IAP,IFRAME,NDLY,IOFST,IPCPER=",5I5,/, 
+C    .       "SRATE,DELAY,BDLY,BTDLY,FBIT,FBITX=",/,4F12.3,2F10.4)
+C 
+C     Decode and display AP start time. 
+C     Start time for AP is one PP earlier than time given in IPASS subarray.
+      TIME=DI2DF(TDCOD(IPASS))-!DAP!
+      IF (TIME .LE. 0.D0) TIME=0.D0 
+      APTIM=TOBCD(DF2DI(TIME),IBCD,IDUM,IDUM,IASC)
+      WRITE(LUOP,180) IASC
+C     WRITE(  16,180) IASC
+180   FORMAT("Correlating AP starting at ",5A2) 
+C 
+C     Initialize parameters 
+      ICPHS1=0
+      ICPHS2=0
+      DO 182 I=1,NDLY 
+      ACOR(1,I)=0.
+182   ACOR(2,I)=0.
+      ANCOR(1)=0. 
+      ANCOR(2)=0. 
+      DO 184 I=1,3
+      APCAL1(I)=0.
+184   APCAL2(I)=0.
+      IW=11 
+      NW=615
+C 
+      DO 350 IHF=1,2*!NFP!
+C     Compute frame# and record# for ref station data 
+      JHF=MOD(IHF-1,2)+1
+      JFRAME=IFRAME+(IHF-1)/2 
+      IREC1=4*(JFRAME-1)+2*(JHF-1)+1
+C     No valid data for frame 1 
+      IF (JFRAME .EQ. 1) GO TO 330
+C 
+C     Compute first and last bit# of remote station data stream that
+C     will be needed to do the cross-correlation. 
+C     Compute so that delay corresponding to LAG1 will be in ACOR(1,1)
+      ABIT1=(2*(IFRAME-1)+(IHF-1))*10000.+BTDLY+LAG1
+      ABIT2=ABIT1+10000.+NDLY 
+      IHF2A=ABIT1/10000.
+      IWD2A=(ABIT1-IHF2A*10000.)/16.
+      IBIT2A=ABIT1-(IHF2A*10000.+IWD2A*16)
+      IHF2B=ABIT2/10000.
+      IWD2B=(ABIT2-IHF2B*10000.)/16.
+      IBIT2B=ABIT2-(IHF2B*10000.+IWD2B*16.) 
+C     WRITE(16,186) IHF,IREC1,ABIT1,ABIT2,IHF2A,IWD2A,IBIT2A, 
+C    .              IHF2B,IWD2B,IBIT2B
+C186  FORMAT("IHF,IREC1,ABIT1,ABIT2=",2I6,2F12.3,/, 
+C    .       "IHF2A,IWD2A,IBIT2A=",3I6,/, 
+C    .       "IHF2B,IWD2B,IBIT2B=",3I6) 
+      IF (IHF2A .LT. 0) GO TO 330 
+C 
+C     Read ref-station data and flag
+      CALL READF(IDCB1,IERR,IBUF1,LRECL,LEN,IREC1)
+      CALL IFERR(LUOP,IERR,IPBUF1,6HREADF ,-12) 
+      CALL READF(IDCB1,IERR,IFLG1,LRECL,LEN,IREC1+1)
+      CALL IFERR(LUOP,IERR,IPBUF1,6HREADF ,-12) 
+      IF (IERR .EQ. -12) GO TO 360
+C 
+C     Do ref-station phase-cal processing 
+      CALL PCAL(IBUF1,IFLG1,LRECL,IPCPER,ICPHS1,APCAL1,APCAL1(2), 
+     .          APCAL1(3))
+C 
+C     Rotate the ref-station data 
+      CALL WMOVE(IBUF1,IBUF2,10)
+      CALL WMOVE(IFLG1,IFLG2,10)
+      CALL ROTAT(IBUF1(IW),IFLG1(IW),NW,KSEL,PHASI,DPHASI,ACCEL,
+     .           ABYTE,IBUF1(IW),IFLG1(IW),IBUF2(IW),IFLG2(IW)) 
+C     Write sine data and flag buffers to temp disc storage 
+      CALL STWRT(IERR,IBUF2,1)
+      CALL IFERR(LUOP,IERR,8HSCRTCH  ,6HSTWRT ) 
+      CALL STWRT(IERR,IFLG2,2)
+      CALL IFERR(LUOP,IERR,8HSCRTCH  ,6HSTWRT ) 
+      IW=1
+      NW=625
+C 
+C     Do the correlations 
+C     Do cosine component first, then sine component
+      DO 220 ISC=1,2
+C 
+      IF (ISC .EQ. 1) GO TO 187 
+C     Read back sine data and flag
+      CALL STRED(IERR,IBUF1,1)
+      CALL IFERR(LUOP,IERR,8HSCRTCH  ,6HSTRED ) 
+      CALL STRED(IERR,IFLG1,2)
+      CALL IFERR(LUOP,IERR,8HSCRTCH  ,6HSTRED ) 
+C 
+C     Read remote station data
+187   IREC2=2*IHF2A+1 
+      LBUF2=625+(NDLY/16+1) 
+      IW2=IWD2A+1 
+      CALL READF(IDCB2,IERR,IBUF2,LRECL,LEN,IREC2)
+      CALL IFERR(LUOP,IERR,IPBUF2,6HREADF ,-12) 
+      CALL READF(IDCB2,IERR,IFLG2,LRECL,LEN,IREC2+1)
+      CALL IFERR(LUOP,IERR,IPBUF2,6HREADF ,-12) 
+      JRECL1=626-IW2
+      IF (IW2 .GT. 1) CALL WMOVE(IBUF2(IW2),IBUF2,JRECL1) 
+      IF (IW2 .GT. 1) CALL WMOVE(IFLG2(IW2),IFLG2,JRECL1) 
+      JW2=JRECL1+1
+      JRECL2=MIN0(625,645-JRECL1) 
+      CALL READF(IDCB2,IERR,IBUF2(JW2),JRECL2,LEN,IREC2+2)
+      CALL IFERR(LUOP,IERR,IPBUF2,6HREADF ,-12) 
+      CALL READF(IDCB2,IERR,IFLG2(JW2),JRECL2,LEN,IREC2+3)
+      CALL IFERR(LUOP,IERR,IPBUF2,6HREADF ,-12) 
+C     WRITE(16,1888) IREC2,IW2,LBUF2
+C1888 FORMAT("IREC2,IW2,LBUF2=",3I6)
+C     Read partial next record only if needed 
+      IF (IHF2B-IHF2A .LE. 1) GO TO 190 
+      JW3=JRECL1+JRECL2+1 
+      JRECL3=645-JRECL1-JRECL2
+      CALL READF(IDCB2,IERR,IBUF2(JW3),JRECL3,LEN,IREC2+4)
+      CALL IFERR(LUOP,IERR,IPBUF2,6HREADF ,-12) 
+      CALL READF(IDCB2,IERR,IFLG2(JW3),JRECL3,LEN,IREC2+5)
+      CALL IFERR(LUOP,IERR,IPBUF2,6HREADF ,-12) 
+      IF (IERR .EQ. -12) GO TO 360
+C 
+C     Shift remote data stream so first bit to be correlated is on word 
+C     boundary, then do phase-cal processing on remote data.
+190   CALL SHFTB(IBUF2,LBUF2,-IBIT2A) 
+      CALL SHFTB(IFLG2,LBUF2,-IBIT2A) 
+      IF (ISC .EQ. 1) CALL PCAL(IBUF2,IFLG2,LRECL,IPCPER, 
+     .                          ICPHS2,APCAL2,APCAL2(2),APCAL2(3))
+C 
+C     Do the cross-correlation
+      CALL CORR(IBUF1,IFLG1,IBUF2,IFLG2,LBUF2,1,NDLY,LRECL, 
+     .           ACOR(ISC,1),ANCOR(ISC),2)
+C     WRITE(16,202) ANCOR,((ACOR(I,J),I=1,2),J=1,NDLY+1)
+C202  FORMAT("ANCOR,ACOR=",2F12.0,/,(8F10.0)) 
+220   CONTINUE
+C 
+      IF (JHF .NE. 1) GO TO 350 
+C     Decode time from data-buffer data 
+      CALL HEX(IBUF1(7),ITIME,4)
+      ITIME(7)=IAND(ITIME(7),177400B) 
+      ITIME(8)=0
+C 
+      WRITE(LUOP,230) JFRAME,ITIME
+C     WRITE(  16,230) JFRAME,ITIME
+230   FORMAT("Data correlated for frame",I4,"   Time= ",2A2,":",A2, 
+     .       ":",A2,":",A2,".",3A2) 
+      GO TO 350 
+C 
+330   IF (JHF .EQ. 1) WRITE(LUOP,340) JFRAME
+C     IF (JHF .EQ. 1) WRITE(  16,340) JFRAME
+340   FORMAT("No correlatable data for frame",I4) 
+C 
+350   CONTINUE
+C 
+      DO 355 I=1,3
+      APCAL1(I)=DI2SF(APCAL1(I))
+355   APCAL2(I)=DI2SF(APCAL2(I))
+C-----WRITE(16,356) APCAL1,APCAL2 
+C356--FORMAT("APCAL1=",3F12.1,/,"APCAL2=",3F12.1) 
+      RETURN
+C 
+C     EOF encountered 
+ 360  IEOF=1
+      RETURN
+      END 
+      SUBROUTINE XTNT(IDCB,JFNAM,NEQT,NFP,LUOP)   
+C 
+C     Routine to create and clear correlator data extent. 
+C     permanent data file extent. 
+C 
+C     On entry--
+C       IDCB,   DCB buffer for correlator extent
+C       JFNAM,  Parsed namr of output file plus extent# in JFNAM(11)
+C       NEQT,   #EQT's in baseline
+C       NFP,    #frames/PP
+C       LUOP,   operator lu 
+C 
+C     ARW 790729
+C 
+      COMMON/RTBUF/IBUF(1024) 
+      INTEGER JFNAM(1),IDCB(1),JBUF(10),RMAN
+C 
+      ISC=JFNAM(5)
+      JCR=JFNAM(6)
+      IXTNT=JFNAM(11) 
+C 
+C     Create Type 51 extent to specified file.
+C     Choose size sufficient to hold data from all 47 frames in data buffer 
+80    NBLKS=(47/NFP+1)*((NEQT+1)/2*2)/2 
+      CALL CRETX(IDCB,JERR,JFNAM,IXTNT,NBLKS,51,JCR,ISC)
+      IF (IFERR(LUOP,JERR,JFNAM,6HCRETX ) .LT. 0) STOP  
+      ISTRC=1 
+      IDUM=RMAN(JFNAM,IBUF,50,ISTRC)  
+      ENCODE(20,85,JBUF) JFNAM(11)
+85    FORMAT(" Extent",I4," created ")
+      CALL CMOVE(JBUF,1,IBUF,ISTRC,20)
+      WRITE(LUOP,88)
+88    FORMAT(" ") 
+      CALL EXEC(2,LUOP,IBUF,-(ISTRC+19))
+C 
+      LUCR=IAND(IDCB(1),77B)
+      ITRK=IDCB(4)
+      ISEC=IDCB(5)
+      NSEC=IDCB(9)
+      LBUF=1024 
+      JTRK=IDCB(4)
+      JSEC=IDCB(5)
+C     Clear the extent
+      CALL AFILL(IBUF,1,0,0,1024) 
+      CALL AFILL(IBUF,64,100000B,0,16)
+      IF (NBLKS/8 .EQ. 0) GO TO 100 
+      DO 90 I=1,NBLKS/8 
+      CALL BKWRT(IBUF,LBUF,LUCR,JTRK,JSEC,NSEC) 
+90    CONTINUE
+100   NLEFT=NBLKS-NBLKS/8*8 
+      IF (NLEFT .GT. 0) CALL BKWRT(IBUF,NLEFT*128,LUCR,JTRK,JSEC,NSEC)
+      RETURN
+      END 
+      SUBROUTINE APWRT(IDCB,JFNAM,IBCB,NEQT,LAG1,IPPW,IPASS,ACOR, 
+     .                 ANCOR,APCAL1,APCAL2,APTIM,LUOP)
+C 
+C     Routine to write AP data to correlator data extent. 
+C 
+C     ARW 790729
+C 
+C     On entry--
+C       IDCB,   DCB for correlator data extent
+C       JFNAM,  parsed namr corresponding to IDCB 
+C       IBCB,   Baseline Control Block
+C       NEQT,   #EQT's in this baseline 
+C       LAG1,   first lag to be processed 
+C       IPPW,   PPW subarray for this AP
+C       IPASS,  IPASS subarray for this AP
+C       ACOR,   correlation output array from APCOR (single-precision)
+C       ANCOR,  #bits correlated from APCOR  (single-precision) 
+C       APCAL1, ref-station phase-cal array from APCOR (single-precision) 
+C       APCAL2, remote-station phase-cal array from APCOR 
+C       APTIM,  start time of this AP in double-integer msec
+C       LUOP,   operator lu 
+C 
+      COMMON/RTBUF/IBUF(64,32),IHEX(16),CAMAC(26) 
+      REAL ABUF(32,32)
+      EQUIVALENCE (IBUF,ABUF) 
+C 
+      REAL ACOR(2,1),ANCOR(1),APCAL1(1),APCAL2(1) 
+      INTEGER IPPW(1),IPASS(1),IBCD(3),IASC(5),IDCB(1),JFNAM(1),IBCB(1) 
+C 
+C     ACOR is in order of increasing delay, which is opposite to order
+C     we want to write to disc. 
+C 
+      DO 180 IOUT=1,NEQT
+      CALL LGET(IEQT5,1,IERR,!EQTHD!,IOUT,4)
+      CALL LGET(IOFST,1,IERR,!EQTHD!,IOUT,6)
+      IBUF(1,IOUT)=IOR(100000B,IEQT5) 
+      IBUF(2,IOUT)=IOR(JSHFT(IAND(IPPW(9),300B),-8),IAND(IPPW(7),37B))
+C     Indicate software fractional bit correction in use. 
+      IBUF(3,IOUT)=401B 
+      IBUF(4,IOUT)=IPASS(14)
+      CALL TOBCD(APTIM,IBCD,IDUM,IDUM,IASC) 
+      IBCD(2)=IOR(JSHFT(IBCD(1),-8),IBCD(2))
+      CALL WMOVE(IBCD(2),IBUF(5,IOUT),2)
+      IBUF(7,IOUT)=0
+      IBUF(8,IOUT)=0
+      CALL WMOVE(IPASS(10),IBUF(9,IOUT),4)  
+      IOFST1=LAG1+3                  !Most negative delay ofset 
+      K=IOFST-IOFST1
+      DO 150 I=0,7
+      ABUF(7+I*2,IOUT)=SF2DI(ACOR(1,8+K-I)) 
+150   ABUF(8+I*2,IOUT)=SF2DI(ACOR(2,8+K-I)) 
+      ABUF(23,IOUT)=SF2DI(ANCOR(1)) 
+      ABUF(24,IOUT)=SF2DI(ANCOR(2)) 
+      DO 160 I=1,3
+      ABUF(24+I,IOUT)=SF2DI(APCAL1(I))
+160   ABUF(28+I,IOUT)=SF2DI(APCAL2(I))
+      ABUF(28,IOUT)=0.
+      ABUF(32,IOUT)=0.
+D     DO 261 I=1,26 
+D     J=I+6 
+D261  CAMAC(I)=DI2SF(ABUF(J,IOUT))
+D     CALL HEX(IBUF(1,IOUT),IHEX,8) 
+D     IHEX(13)=2H 
+D     DELAYZ=DI2SF(ABUF(5,IOUT))
+D     WRITE(16,266) (IHEX(K),K=1,16),DELAYZ,ABUF(6,IOUT)
+D266  FORMAT(" ID = ",4(2A2,2X),2A2,".",2A2,/,
+D    .       " Phase,Delayz,Fbit = ",4A2,2E15.7)
+D     WRITE(16,264) CAMAC 
+D264  FORMAT(" 8*(coscor,sincor)= ",4("(",F10.0,",",F10.0")"),/,
+D    .       "                    ",4("(",F10.0,",",F10.0")"),/,
+D    .       " Costot,Sintot =    ",2F10.0,/, 
+D    .       " Xcalcos,Xcalsin=   ",2F10.0,/, 
+D    .       " Xcaltot,Xerrtot=   ",2F10.0,/, 
+D    .       " Zcalcos,Zcalsin=   ",2F10.0,/, 
+D    .       " Zcaltot,Zerrtot=   ",2F10.0) 
+180   CONTINUE
+C 
+C     If NEQT is an odd# construct a dummy AP subarray so that number 
+C     of AP subarrays written to disc is even#. 
+      NOUT=NEQT 
+      IF (MOD(NOUT,2) .EQ. 0) GO TO 200 
+      NOUT=NOUT+1 
+      DO 190 I=1,64 
+190   IBUF(I,NOUT)=0
+      IBUF(1,NOUT)=100000B
+C 
+C     Write data to correlator extent 
+200   DO 210 I=1,NOUT/2 
+      CALL WRITF(IDCB,IERR,IBUF(1,I*2-1),128) 
+      IF (IFERR(LUOP,IERR,JFNAM,6HWRITF ) .LT. 0) STOP
+210   CONTINUE
+      RETURN
+      END 
+      SUBROUTINE ROTAT(INBUF,INFLG,NWORDS,KSEL,PHASI,DPHASI,ACCEL,ABYTE,
+     .                 ICBUF,ICFLG,ISBUF,ISFLG) 
+C 
+C     ROUTINE TO ROTATE DATA IN SAME WAY AS MK III CORRELATOR ROTATOR 
+C 
+C     ON ENTRY: 
+C       INBUF,   BUFFER OF UNROTATED DATA 
+C       INFLG,   FLAG BUFFER FOR INBUF.  SHOULD BE PRESENT WITH 1's IN
+C                ALL VALID-DATA BIT POSITIONS.
+C       NWORDS,  # 16-BIT WORDS IN INBUF  (MAX 32676) 
+C       KSEL,    ROTATOR UPDATE RATE SELECTION
+C       PHASI,   24-BIT INITIAL ROTATOR PHASE 
+C                I.E. PHASE TO BE APPLIED TO FIRST BIT OF INBUF 
+C                1048576 (2**20) CORRESPONDS TO ZERO PHASE. 
+C       DPHASI,  24-BIT INITIAL ROTATOR PHASE INCREMENT (DOUBLE-INTEGER FORMAT) 
+C       ACCEL,   # BYTES OVER WHICH PHASE INCREMENT IS TO BE HELD CONSTANT. 
+C                (+ IF POSITIVE ROTATOR ACCELERATION, - IF NEGATIVE 
+C                 ROTATOR ACCELERATION) 
+C                 SET =0. IF NO ACCELERATION IS TO BE USED. 
+C                 ACCEL IS SINGLE-PRECISION FLOATING POINT. 
+C       ABYTE,   BYTE OFFSET WITH WHICH TO START COUNTING BYTES FOR DELTA 
+C                INCREMENT (NORMALLY 0 AT START OF PARAMETER PERIOD). 
+C                ABYTE IS SINGLE-PRECISION FLOATING-POINT.
+C 
+C     ON RETURN:
+C       PHASI,   24-BIT FINAL ROTATOR PHASE (DOUBLE-INTEGER FORMAT) 
+C                (I.E. ONE PHASE INCREMENT BEYOND PHASE APPLIED TO LAST BIT 
+C                      IN INBUF)
+C       DPHASI,  FINAL PHASE INCREMENT
+C                (I.E. PHASE INCREMENT THAT WOULD BE USED ON RETURNED PHASI)
+C       ABYTE,   FINAL BYTE OFFSET AT END OF NWORDS 
+C       ICBUF,   BUFFER OF COSINE ROTATED DATA
+C       ICFLG,   FLAG BUFFER FOR ICBUF (0-DO NOT CORRELATE CORRESPONDING BIT
+C                IN ICBUF; 1-CORRELATE CORRESPONDING BIT IN ICBUF)
+C       ISBUF,   BUFFER OF SINE ROTATED DATA
+C       ISFLG,   FLAG BUFFER FOR ISBUF
+C 
+C     ARW 790721
+C 
+      INTEGER INBUF(1),ICBUF(1),ICFLG(1),ISBUF(1),ISFLG(1),ISTAB(16), 
+     .        ICTAB(16),INFLG(1)
+      DOUBLE PRECISION DI2DF,DDPHAS 
+      EQUIVALENCE (PHASIX,IPHAS)
+      DATA ISTAB/ 0, 0, 1, 1, 1, 1, 1, 1, 0, 0,-1,-1,-1,-1,-1,-1/ 
+      DATA ICTAB/ 1, 1, 1, 1, 0, 0,-1,-1,-1,-1,-1,-1, 0, 0, 1, 1/ 
+C 
+      ACCELX=ABS(ACCEL) 
+      IF (ACCELX .EQ. 0.D0) ACCELX=10.*NWORDS 
+      DDPHAS=1.D0 
+      IF (ACCEL .LT. 0.) DDPHAS=-1.D0 
+      KSELX=2**KSEL 
+      KBIT=0
+      PHASIX=PHASI
+C 
+      DO 280 IW=1,NWORDS
+      JBIT=100000B
+      JCFLG=INFLG(IW) 
+      JSFLG=INFLG(IW) 
+      JNBUF=INBUF(IW) 
+      JCBUF=JNBUF 
+      JSBUF=JNBUF 
+      DO 270 IBYT=1,2 
+      DO 260 IBIT=1,8 
+      JPH=IAND(IPHAS,360B)/20B+1
+C     WRITE(16,199) JBIT,JPH,ICTAB(JPH),ISTAB(JPH)
+C199  FORMAT("JBIT,JPH,ICTAB,ISTAB=",O7,3I5)
+C     GET COSINE VALUE
+      IF (ICTAB(JPH)) 200,210,220 
+200   JCBUF=IXOR(JCBUF,JBIT)
+      GO TO 220 
+210   JCFLG=IAND(JCFLG,NOT(JBIT)) 
+C     GET SINE VALUE
+220   IF (ISTAB(JPH)) 230,240,250 
+230   JSBUF=IXOR(JSBUF,JBIT)
+      GO TO 250 
+240   JSFLG=IAND(JSFLG,NOT(JBIT)) 
+250   JBIT=JSHFT(JBIT,1)
+C     UPDATE ROTATOR
+      KBIT=MOD(KBIT+1,KSELX)
+      IF (KBIT .EQ. 0) PHASIX=DF2DI(DI2DF(PHASIX)+DI2DF(DPHASI))
+      IPHAS=IAND(IPHAS,377B)
+260   CONTINUE
+      ABYTE=AMOD(ABYTE+1.,ACCELX) 
+      IF (ABYTE .EQ. 0) DPHASI=DF2DI(DI2DF(DPHASI)+DDPHAS)
+270   CONTINUE
+      ICFLG(IW)=JCFLG 
+      ISFLG(IW)=JSFLG 
+      ICBUF(IW)=JCBUF 
+      ISBUF(IW)=JSBUF 
+280   CONTINUE
+      PHASI=PHASIX
+      RETURN
+      END 
+      SUBROUTINE CORR(IBUF1,IFLG1,IBUF2,IFLG2,LBUF2,IBIT, 
+     .                 NDLY,NWORDS,ACOR,ANCOR,NDIM) 
+C 
+C     CROSS-CORRELATE TWO BIT STREAMS WITH SEVERAL ADJACENT LAGS. 
+C 
+C     ON ENTRY--
+C       IBUF1,   DATA STREAM #1 
+C       IFLG1,   FLAG BUFFER CORRESPONDING TO IBUF1 
+C       IBUF2,   DATA STREAM #2 
+C       IFLG2,   FLAG BUFFER CORRESPODNING TO IBUF2 
+C       LBUF2,   LENGTH OF IBUF2,IFLG2 (WORDS). 
+C                LBUF2 SHOULD BE >NWORDS+(IBIT+NDLY)/16 TO AVOID
+C                    TRUNCATION EFFECTS.
+C       IBIT,    BIT# OF IBUF2(1) WHICH IS TO BE CORRELATED WITH FIRST
+C                BIT OF IBUF2(1) FOR FIRST LAG IN ACOR ARRAY. 
+C                FIRST BIT OF WORD IS BIT #1. 
+C                1<=IBIT<=16
+C       NDLY,    # OF LAGS TO BE PROCESSED
+C       NWORDS,  # 16-BIT WORDS TO BE CORRELATED
+C       NDIM,    SPACING BETWEEN ENTRIES IN ACOR ARRAY (NORMALLY 2) 
+C     ON RETURN-- 
+C       ACOR,    SINGLE-PRECISION ARRAY OF CUMULATIVE # OF MATCHING BITS
+C                FOR EACH LAG, IN ORDER OF INCREASING DELAY.
+C                EACH ADDITION TO ACOR IS NORMALIZED ACCORDING TO THE # OF
+C                BITS PROCESSED IN THE FIRST LAG. 
+C                NOTE: ACOR IS CUMULATIVE (I.E. NOT CLEARED ON ENTRY) 
+C       ANCOR,   SINGLE-PRECISION CUMULATIVE # OF BITS PROCESSED IN FIRST LAG.
+C                NOTE: ANCOR IS CUMULATIVE (I.E. NOT CLEARED ON ENTRY)
+C 
+C     NOTE: IBUF2 AND IFLG2 BUFFERS WILL GENERALLY BE RETURNED CORRUPTED FROM 
+C           THEIR ENTRY CONDITION.
+C 
+C     ARW 790728
+C 
+      INTEGER IBUF1(1),IFLG1(1),IBUF2(1),IFLG2(1) 
+      REAL ACOR(NDIM,1) 
+C 
+      CALL SHFTB(IBUF2,LBUF2,-(IBIT-1)) 
+      CALL SHFTB(IFLG2,LBUF2,-(IBIT-1)) 
+      DO 100 IDLY=1,NDLY
+      ACORX=0.
+      ANCRX=0.
+      CALL XCOR(IBUF1,IFLG1,IBUF2,IFLG2,NWORDS,ACORX,ANCRX) 
+      BCOR=DI2SF(ACORX) 
+      BNCOR=DI2SF(ANCRX)
+      IF (IDLY .EQ. 1) ANCR1=DI2SF(ANCRX) 
+      ACOR(1,IDLY)=ACOR(1,IDLY)+DI2SF(ACORX)*(ANCR1/DI2SF(ANCRX)) 
+      IF (IDLY .EQ. NDLY) GO TO 110 
+      CALL SHFTB(IBUF2,LBUF2,-1)
+      CALL SHFTB(IFLG2,LBUF2,-1)
+100   CONTINUE
+110   ANCOR=ANCOR+ANCR1 
+      RETURN
+      END 
+      SUBROUTINE PCAL(INBUF,INFLG,NWORDS,IPCPER,IPHAS,PCOS,PSIN,PNBITS) 
+C 
+C     ROUTINE TO EXTRACT PHASE-CAL FROM DATA STREAM IN SAME WAY AS THE
+C     MK III CORRELATOR MODULE
+C 
+C     ON ENTRY--
+C       INBUF,  BUFFER OF DATA
+C       INFLG,  FLAG BUFFER FOR INBUF (PROCESS ON THOSE BITS IN INBUF 
+C               FOR WHICH THE CORRESPONDING BITS IN INFLG ARE SET)
+C       NWORDS, #16-BIT WORDS TO BE PROCESSED 
+C       IPCPER, #BITS IN QUARTER PERIOD OF PHASE-CAL CYCLE
+C       IPHAS,  14-BIT INITIAL ROTATOR PHASE. 
+C               IPHAS=0 CORRESPONDS TO ZERO PHASE.
+C     ON RETURN-- 
+C       IPHAS,  14-BIT ROTATOR PHASE AT END OF NWORDS OF ROTATION.
+C               USEFUL FOR RE-ENTERING PCAL WITH CONTINUED DATA.
+C       PCOS,   DOUBLE-INTEGER COSINE COMPONENT OF CORRELATION
+C               (# OF MATCHING BITS)
+C               NOTE: PCOS IS NOT CLEARED ON ENTRY. 
+C       PSIN,   DOUBLE-INTEGER SINE COMPONENT OF CORRELATION
+C               (# OF MATCHING BITS)
+C               NOTE: PSIN IS NOT CLEARED ON ENTRY. 
+C       PNBITS, DOUBLE-INTEGER #BITS CORRELATED.
+C               NOTE: PNBITS IS NOT CLEARED ON ENTRY. 
+C 
+C     TIMING ON 2117F: APPROX 4 SECS/FRAME (1 FRAME=20000 BITS) 
+C 
+C     ARW 790722
+C 
+      INTEGER IONES(50),ICBUF(50),ISBUF(50),ICTAB(4),ISTAB(4),
+     .        INBUF(1),INFLG(1) 
+      DATA IONES/50*177777B/
+      DATA ISTAB/ 1, 1,-1,-1/ 
+      DATA ICTAB/ 1,-1,-1, 1/ 
+C 
+C     CREATE COSINE AND SINE BUFFERS IN 50 WORD HUNKS AND SEND TO 
+C     CORRELATOR ROUTINE. 
+C 
+      IWORDS=0
+      JPH=IAND(IPHAS,30000B)/10000B+1 
+      MBIT=IAND(IPHAS,7777B)
+      IN=1
+190   DO 220 IW=1,50
+      JBIT=077777B
+      JCBUF=177777B 
+      JSBUF=177777B 
+      DO 200 IBIT=1,16
+C     GET COSINE VALUE
+      IF (ICTAB(JPH) .LT. 0) JCBUF=IAND(JCBUF,JBIT) 
+      IF (ISTAB(JPH) .LT. 0) JSBUF=IAND(JSBUF,JBIT) 
+      JBIT=IROT(JBIT,1) 
+C     UPDATE ROTATOR
+      MBIT=MOD(MBIT+1,IPCPER) 
+      IF (MBIT .EQ. 0) JPH=MOD(JPH,4)+1 
+200   CONTINUE
+      ICBUF(IW)=JCBUF 
+      ISBUF(IW)=JSBUF 
+      IWORDS=IWORDS+1 
+      IF (IWORDS .LT. NWORDS) GO TO 220 
+      NW=IW 
+      GO TO 230 
+220   CONTINUE
+      NW=50 
+230   CALL XCOR(INBUF(IN),INFLG(IN),ICBUF,IONES,NW,PCOS,DUMMY)
+      CALL XCOR(INBUF(IN),INFLG(IN),ISBUF,IONES,NW,PSIN,PNBITS) 
+C-----APCOS=DI2SF(PCOS) 
+C-----APSIN=DI2SF(PSIN) 
+C-----ANBITS=DI2SF(PNBITS)
+C-----WRITE(16,240) NW,APCOS,APSIN,ANBITS 
+C240--FORMAT("NW,APCOS,APSIN,ANBITS=",I4,3F12.1)
+      IN=IN+50
+      IF (IWORDS .LT. NWORDS) GO TO 190 
+      IPHAS=(JPH-1)*10000B+MBIT 
+      RETURN
+      END 
+      SUBROUTINE SHFTB(IBUF,N,KSFHT)
+C 
+C     ROUTINE TO BIT-SHIFT AN ENTIRE BUFFER OF N WORDS BY KSFHT BITS. 
+C     KSFHT<0 SHIFTS BITS TO LEFT 
+C     KSFHT>0 SHIFTS BITS TO RIGHT
+C     -16<=KSFHT<=16
+C     ZEROES FILL VACATED BITS. 
+C 
+      INTEGER IBUF(1) 
+C 
+      IF (KSFHT .EQ. 0) RETURN
+      IF (KSFHT .LT. 0) GO TO 105 
+C 
+C     SHIFT TO RIGHT
+      DO 100 I=N,1,-1 
+      K1=JSHFT(IBUF(I),KSFHT) 
+      K2=0
+      IF (I .GT. 1) K2=JSHFT(IBUF(I-1),KSFHT-16)
+100   IBUF(I)=IOR(K1,K2)
+      RETURN
+C 
+C     SHIFT TO LEFT 
+105   DO 110 I=1,N
+      K1=JSHFT(IBUF(I),KSFHT) 
+      K2=0
+      IF (I .LT. N) K2=JSHFT(IBUF(I+1),16+KSFHT)
+110   IBUF(I)=IOR(K1,K2)
+      RETURN
+      END 
+MACRO 
+      NAM XCOR  CROSS-CORRELATE TWO BIT STREAMS   ARW 790722
+      ENT XCOR
+      EXT .ENTR 
+* 
+*     SUBROUTINE XCOR(IBUF1,IFLG1,IBUF2,IFLG2,NWORDS,ACOR,ANCOR)
+* 
+*     ON ENTRY--
+*       IBUF1,  DATA STREAM #1
+*       IFLG1,  FLAG BUFFER CORRESPONDING TO IBUF1
+*       IBUF2,  DATA STREAM #2
+*       IFLG2,  FLAG BUFFER CORRESPONDING TO IBUF2
+*       NWORDS, #16-BIT WORDS TO BE CORRELATED
+* 
+*     ON RETURN-- 
+*       ACOR,   # OF MATCHING BITS BETWEEN IBUF1 AND IBUF2 (DOUBLE-INTEGER) 
+*               NOTE: ACOR IS NOT CLEARED ON ENTRY
+*       ANCOR,  # BITS CORRELATED                          (DOUBLE-INTEGER) 
+*               NOTE: ANCOR IS NOT CLEARED ON ENTRY 
+* 
+IBUF1 BSS 1 
+IFLG1 BSS 1 
+IBUF2 BSS 1 
+IFLG2 BSS 1 
+NWDS  BSS 1 
+ACOR  BSS 1 
+ANCOR BSS 1 
+XCOR  NOP 
+      JSB .ENTR 
+      DEF IBUF1 
+* 
+      LDA INIT
+      CPA =D999     LOOKUP TABLE GENERATED YET? 
+      JMP START      YES. 
+      CLA            NO. GENERATE IT. 
+TLOP1 CAX 
+      LDB =D-8
+      STB COUNT 
+      CLB 
+TLOP2 SLA 
+      INB 
+      RAR 
+      ISZ COUNT 
+      JMP TLOP2 
+      STB DTAB,I
+      ISZ DTAB
+      CXA 
+      INA 
+      CPA =B400     TABLE FINISHED? 
+      JMP *+2        YES. 
+      JMP TLOP1      NO.
+      LDA =D999 
+      STA INIT
+* 
+START CLA 
+      CAX 
+      LDA NWDS,I
+      CMA,INA 
+      STA NW
+LOOP  LAX IFLG1,I 
+      LBX IFLG2,I 
+      AND B         GET MASK OF BITS TO BE CORRELATED 
+      STA IFLG
+      JSB NBITS     GET # BITS IN IFLG
+      DLD ANCOR,I   ADD TO ANCOR
+      CLE 
+      ADB NB
+      SEZ 
+      INA 
+      DST ANCOR,I 
+LP1   LAX IBUF1,I 
+      LBX IBUF2,I 
+      XOR B 
+      CMA 
+      AND IFLG
+      JSB NBITS     GET # OF MATCHING BITS
+      DLD ACOR,I    ADD TO ACOR 
+      CLE 
+      ADB NB
+      SEZ 
+      INA 
+      DST ACOR,I
+      ISX 
+      ISZ NW
+      JMP LOOP
+      JMP XCOR,I
+* 
+NBITS NOP           COMPUTE # BITS SET IN A-REG AND RETURN ANSWER IN NB 
+      CLB 
+      RRR 8 
+      CAY 
+      LAY ITAB
+      BLF,BLF 
+      CBY 
+      LBY ITAB
+      ADA B 
+      STA NB
+      JMP NBITS,I 
+* 
+A     EQU 0 
+B     EQU 1 
+INIT  NOP 
+COUNT BSS 1 
+DTAB  DEF ITAB
+ITAB  BSS 256       LOOKUP TABLE FOR CORRELATION
+NW    BSS 1 
+IFLG  BSS 1 
+NB    BSS 1 
+      END 

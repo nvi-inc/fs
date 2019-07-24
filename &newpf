@@ -1,0 +1,107 @@
+FTN4,X
+      SUBROUTINE NEWPF(IDCBP1,IDCBP2,LPROC1,MAXPR1,NPROC1,LPROC2, 
+     .MAXPR2,NPROC2,IBUF,IBLEN,ISTKOP,ISTKSK) 
+     .,NEW PROC FILE FROM PFMED C#870115:04:18# 
+C 
+C     NEWPF checks for a newly-edited procedure file from PFMED 
+C     and acts accordingly. 
+C 
+C     DATE   WHO CHANGES
+C     810906 NRV CREATED
+C 
+C  COMMON BLOCKS: 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C  INPUT/OUTPUT:
+C 
+C     IDCBP1,IDCBP2 - DCBs for the two procedure files
+C     LPROC1,LPROC2 - directory arrays for the two files
+C     MAXPR1,MAXPR2 - maximum number of entries in each file
+C     NPROC1,NPROC2 - actual number of entries
+C     IBUF - buffer to pass to OPNPF for use
+C     IBLEN - length of IBUF in words 
+C     ISTKOP,ISTKSK - operator and schedule procedure stacks
+      DIMENSION IDCBP1(1),IDCBP2(1),LPROC1(5,1),LPROC2(5,1),IBUF(1) 
+      DIMENSION ISTKOP(1),ISTKSK(1) 
+C 
+C 
+C  CALLING ROUTINES: BOSS 
+C  SUBROUTINES CALLED:  OPNPF, KSTAK, FMP 
+C 
+C  LOCAL: 
+C 
+C     KSTAK - function which is TRUE if there's some procedure in the stacks
+C     LNAMEF - name of the procedure file 
+C     LNAMEX - temp name given to edited version by PFMED 
+      DIMENSION LNAMEF(3),LNAMEX(3) 
+      LOGICAL KSTAK 
+C 
+C  INITIALIZED: 
+C 
+      DATA LNAMEF/2H[P,2HRC,2H--/ 
+      DATA LNAMEX/2H]P,2HRC,2H--/ 
+C 
+C 
+C 
+D     WRITE(LU,9901) LNEWSK,LNEWPR,LSKD,LPRC
+D9901 FORMAT("IN NEWPF: LNEWSK,LNEWPR,LSKD,LPRC="4("."A2".")) 
+C     1. Lock the resource number no matter what. 
+C 
+      CALL RNRQ(1,IRNPRC,ISTAT) 
+D     WRITE(LU,9903) IRNPRC,ISTAT 
+D9903 FORMAT("BOSS LOCKED RN "2O7)
+C 
+C 
+C     2. Get a new version of the schedule proc file. 
+C     First check that there are not any procedures from the schedule 
+C     library on the active stack list. 
+C     If not, then close the file, purge it, and rename the pending 
+C     edited file to the proper name.  Then call OPNPF to get the 
+C     directory.
+C 
+200   IF (LNEWSK.EQ.0) GOTO 300 
+      IF (KSTAK(ISTKOP,ISTKSK,1)) GOTO 300
+      CALL CLOSE(IDCBP1)
+      LNAMEF(3) = LSKD
+D9902 FORMAT("NEW SCHEDULE LIBRARY")
+D     WRITE(LU,9902)
+      CALL PURGE(IDCBP1,IERR,LNAMEF,0,ICRPRC) 
+C                     Purge the old version of the file 
+      LNAMEX(3) = LSKD
+      CALL NAMF(IDCBP1,IERR,LNAMEX,LNAMEF,0,ICRPRC) 
+C                     Rename the edited version to the proper name
+      IF (IERR.GE.0) GOTO 220 
+      CALL LOGIT(0,0,0,1,-127,2HBO,IERR)
+      IERR = 0
+      GOTO 990
+220   CALL OPNPF(LSKD,IDCBP1,IBUF,IBLEN,ICRPRC,LPROC1,MAXPR1,NPROC1,
+     .IERR) 
+      LNEWSK = 0
+C 
+C 
+C     3. Get a new version of the station proc file.
+C 
+300   IF (LNEWPR.EQ.0) GOTO 990 
+      IF (KSTAK(ISTKOP,ISTKSK,2)) GOTO 990
+D9904 FORMAT("NEW STATION LIBRARY") 
+D     WRITE(LU,9904)
+      CALL CLOSE(IDCBP2)
+      LNAMEF(3) = LPRC
+      CALL PURGE(IDCBP2,IERR,LNAMEF,0,ICRPRC) 
+      LNAMEX(3) = LPRC
+      CALL NAMF(IDCBP2,IERR,LNAMEX,LNAMEF,0,ICRPRC) 
+      IF (IERR.GE.0) GOTO 320 
+      CALL LOGIT(0,0,0,1,-127,2HBO,IERR)
+      IERR = 0
+      GOTO 990
+320   CALL OPNPF(LPRC,IDCBP2,IBUF,IBLEN,ICRPRC,LPROC2,MAXPR2,NPROC2,
+     .IERR) 
+      LNEWPR = 0
+C 
+990   CALL RNRQ(4,IRNPRC,ISTAT) 
+D     WRITE(LU,9905) IRNPRC,ISTAT 
+D9905 FORMAT("BOSS UNLOCKING RN "2O7) 
+      IF (IERR.LT.0) CALL LOGIT(0,0,0,1,-131,2HBO,IERR) 
+      RETURN
+      END 

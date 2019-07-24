@@ -1,0 +1,47 @@
+FTN4,X
+C@MD2WV 
+      SUBROUTINE MD2WV(IBUF,MODE,NSAMP,ICLASS,NREC, 
+     .IERR),FORMAT MODE & NSAMP COMMAND (JPL) C#870115:04:48# 
+C 
+C     MD2WV formats the command to set the mode -- JPL radiometers. 
+C     MD2WV also sets the number of samples.
+C 
+C  COMMON: NONE 
+C 
+C  INPUT; 
+C 
+      DIMENSION IBUF(1) 
+C      - buffer to put the command in.
+C     MODE - the mode to be sent
+C 
+C  OUTPUT:
+C 
+C     ICLASS,NREC - class, #records for MATCN 
+C     IERR - error return, 0=oK 
+C 
+C  LAST MODIFIED BY NRV 830908 - Send N command too.
+C 
+C 
+C     1. The command to set the mode for the JPL radiometers is:
+C              M n     where n=1,2,3,4
+C 
+      IBUF(1) = 0 
+      IBUF(2) = 2HWV
+      CALL ICHMV(IBUF,5,3H M ,1,3)
+      CALL IB2AS(MODE,IBUF,8,1) 
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-8,2HFS,0,ICLASS) 
+C 
+C 
+C     2. The command to set the number of samples is: 
+C              N n     where n=# of samples 
+C 
+      CALL ICHMV(IBUF,5,3H N ,1,3)
+      NCH = 7+IB2AS(NSAMP,IBUF,8,100000B+3) 
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS) 
+C 
+      NREC = 2
+      IERR = 0
+C 
+      RETURN
+      END 

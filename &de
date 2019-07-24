@@ -1,0 +1,201 @@
+FTN4,X
+C@DE
+C 
+      SUBROUTINE DE(IP),DECODER CONTROLLER C#870115:04:37#
+C 
+C 1.1.   DE controls the DECODER
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUDECUT VARIABLES:
+C 
+C        IP(1) - CLASS
+C        IP(2) - # REC
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES:
+C 
+C     CALLED SUBROUTINES: GTPRM,ICHAR 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C        NCHAR  - number of characters in buffer
+C        IMMODE - mode for MAT
+C        ICH    - character counter 
+      DIMENSION IBUF(20)
+C               - class buffer
+      DIMENSION LMODE(10) 
+C               - modes for type of data from decoder 
+C        ILEN    - length of IBUF in chars
+      DIMENSION NR(5),N1(5) 
+C                - number of requests, first code number, for 
+C                  each of the types of data
+      DIMENSION IPARM(2)
+C               - parameters returned from GDECRM 
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+C 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 4.  CONSTANTS USED
+C 
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA ILEN/40/ 
+      DATA LMODE  /2HAU,2HX ,2HSY,2HN ,2HTI,2HME,2HDA,2HTA,2HER,2HR / 
+      DATA NR/2,1,2,3,1/
+      DATA N1/0,2,3,5,8/
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED:  790320
+C# LAST COMPC'ED  870115:04:37 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. If we have a class buffer, then we are to set up the data type.
+C     If no class buffer, we have been requested to read the data.
+C 
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+      IERR = -1 
+      GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.EQ.0) GOTO 500
+C                   If no parameters, go read device
+      IF (ICHAR(IBUF,IEQ+1).NE.77B) GOTO 140
+      IP(1) = 0 
+      IP(4) = 77B 
+      CALL DEDIS(IP,ICLCM)
+      RETURN
+C 
+140   IF (ICHCM(IBUF,IEQ+1,LTSRS,1,ILENTS).EQ.0) GOTO 600 
+      IF (ICHCM(IBUF,IEQ+1,LALRM,1,ILENAL).EQ.0) GOTO 700 
+C 
+C 
+C     2. Step through buffer getting each parameter and decoding it.
+C     Command from user has these parameters: 
+C                   DECODE=<chan>,<datatype>
+C     where <chan>=A or B, default A. 
+C                   <datatype>=AUX,SYN,TIME,DATA, or ERR.  Default ERR. 
+C 
+C 
+C     2.1 CHAN, PARAMETER 1 
+C 
+210   ICH = 1+IEQ 
+      ICHAN = -1
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (ICHAR(PARM,1).EQ.52B) ICHAN = ICHAND
+      IF (ICHAR(PARM,1).EQ.54B) ICHAN = 0 
+C                   Default is channel A
+      IF (ICHAR(PARM,1).EQ.101B) ICHAN = 0
+C                   Channel A 
+      IF (ICHAR(PARM,1).EQ.102B) ICHAN = 1
+C                   Channel B 
+      IF (ICHAN.NE.-1) GOTO 220 
+      IERR = -201 
+      GOTO 990
+C 
+C     2.2 DATA MODE, PARAMETERS 2 
+C 
+220   CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (ICHAR(PARM,1).NE.52B.AND.ICHAR(PARM,1).NE.54B) GOTO 221 
+      IF (ICHAR(PARM,1).EQ.52B) IM = IMODDC 
+      IF (ICHAR(PARM,1).EQ.54B) IM = 5
+C                   Default mode is 5, ERROR
+      GOTO 300
+221   DO 222 I=1,5
+        IF (IPARM(1).EQ.LMODE(I*2-1).AND.IPARM(2).EQ.LMODE(I*2))
+     .        GOTO 223
+222     CONTINUE
+      IERR = -202 
+      GOTO 990
+223   IM =I 
+C 
+C 
+C     3. Now plant these values into COMMON.
+C 
+300   IMODDC = IM 
+      ICHAND = ICHAN
+      IERR = 0
+      GOTO 990
+C 
+C 
+C     5.  This is the read device section.
+C     Fill up NR*3 buffers, using data modes starting with N1.
+C     Format the buffer for the controller as follows.
+C                   mmDE000000dd
+C     where the first "d" has one bit telling the channel,
+C     and the second "d" has the 4 bits for data type.
+C     Then send ">" to transfer control and load the data, then 
+C      "/" to read back the data. 
+C 
+500   IBUF(1) = 0 
+      IBUF(2) = 2HDE
+      CALL ICHMV(IBUF,5,6H000000,1,6) 
+      CALL ICHMV(IBUF,11,IHX2A(ICHAND),2,1) 
+C                   Move in the channel bit 
+      ICLASS = 0
+      DO 510 I=1,NR(IMODDC) 
+        CALL ICHMV(IBUF,12,IHX2A(N1(IMODDC)+I-1),2,1) 
+C                   Put the proper mode number into buffer
+        IBUF(1) = 0 
+        IBUF(2) = 2HDE
+        CALL EXEC(20,0,IBUF,-12,2HFS,0,ICLASS)  
+        IBUF(1) = 5 
+        IBUF(2) = 2H> 
+        CALL EXEC(20,0,IBUF,-3,2HFS,0,ICLASS) 
+        IBUF(2) = 2H/ 
+        CALL EXEC(20,0,IBUF,-3,2HFS,0,ICLASS) 
+510     CONTINUE
+C 
+      NREC = 3*NR(IMODDC) 
+      GOTO 800
+C 
+C 
+C     6. This is the test/reset device section. 
+C 
+600   IBUF(1) = 6 
+      IBUF(2) = 2HDE
+      ICLASS=0
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      NREC = 1
+      GOTO 800
+C 
+C 
+C     7. This is the alarm query and reset request. 
+C 
+700   IBUF(1) = 7 
+      IBUF(2) = 2HDE
+      ICLASS=0
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      NREC = 1
+      GOTO 800
+C 
+C 
+C     8. All MATCN requests are scheduled here, and then DEDIS called.
+C 
+800   CALL EXEC(23,6HMATCN ,ICLASS,NREC)
+      CALL RMPAR(IP)
+      CALL DEDIS(IP,ICLCM)
+      RETURN
+C 
+990   IP(1) = 0 
+      IP(2) = 0 
+      IP(3) = IERR
+      IP(4) = 2HQD
+      RETURN
+      END 

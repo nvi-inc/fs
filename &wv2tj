@@ -1,0 +1,121 @@
+FTN4,X
+C@WV2TM 
+      SUBROUTINE WV2TM(ICLASS,NCREC,IBUF,ILEN,IBUF2,NC1,
+     .ILEN2),WVR RESPONSE TO TEMPS (JPL) C#870115:04:48#
+C 
+C     WV2TM converts the WVR response from counts to temperature units. 
+C     (JPL radiometer)
+C 
+      INCLUDE #FSCOM::FS
+C 
+C  INPUT: 
+C 
+C     ICLASS,NCREC - class, # records from MATCN with response
+      DIMENSION IBUF(1) 
+C      - a buffer to use for getting the class
+C     ILEN - length of IBUF in characters 
+      DIMENSION IBUF2(1)
+C      - the output buffer, partially filled
+C     NC1 - the first character to use in IBUF2 
+C     ILEN2 - total length of IBUF2, characters 
+C 
+C  OUTPUT:
+C 
+C     IBUF2 - the output buffer ready for display 
+C     NC1 - the number of characters in IBUF2 
+C 
+C  LOCAL: 
+C 
+      DIMENSION INPUT(16) 
+C      - integers decoded directly from WVR response
+      DIMENSION OUTPUT(16)
+C      - INPUT converted to physical temperatures 
+      DIMENSION G(3),GH(3)
+C      - sensor coefficients
+C     R15,R16 - calibration resistor values 
+C     NCHAR - number of characters in response
+      DIMENSION IREG(2) 
+C      - returned from EXEC calls 
+      EQUIVALENCE (IREG(2),REG) 
+C 
+C  INITIALIZED: 
+C 
+      DATA R15/1000.0/, R16/9500.0/ 
+C                - Resistor values
+      DATA G/1.40423E-3,2.37077E-4,1.0062E-7/ 
+C                - For loads other than hot 
+      DATA GH/9.4096E-4,2.20236E-4,1.3175E-7/ 
+C                - For hot loads
+C 
+C 
+C 
+C     1. Define functions to compute temperatures 
+C 
+      VOLTS(IN,A,B)=ALOG(IN*A +B) 
+      TEMP(G1,G2,G3,V)=1./(G1 +G2*V +G3*V**3) 
+C 
+C 
+C     2. Get the buffer from the class. Test for an error.
+C     Calculate conversions and then convert to degrees.
+C 
+200   REG = EXEC(21,ICLASS,IBUF,-ILEN)
+      NCHAR = MIN0(IREG(2),ILEN)
+      IF(ICHAR(IBUF,3).NE.77B) GOTO 205 
+C                   Test for "?" indicating WVR error response
+      NC1=ICHMV(IBUF2,NC1,IBUF,3,NCHAR-2)-1 
+      GOTO 900
+C 
+205   DO 206 I=1,16 
+        INPUT(I)=IAS2B(IBUF,4*(I-1)+3,4)
+C                    Convert the 16 four-digit numbers into binary
+206     CONTINUE
+C 
+      DELTA=FLOAT(INPUT(15)-INPUT(16))
+      C2=(INPUT(15)*R16-INPUT(16)*R15)/DELTA
+      C1=(R15-R16)/DELTA
+C                         Compute the two constants C1 and C2.
+      DO 290 I=1,14 
+        GOTO (210,220,220,210,220,220,220,260,220,220,260,260,220,260),I
+  210   OUTPUT(I)=TEMP(GH(1),GH(2),GH(3),VOLTS(INPUT(I),C1,C2)) 
+C                                 Hot loads 
+        GO TO 290 
+  220   OUTPUT(I)=TEMP(G(1),G(2),G(3),VOLTS(INPUT(I),C1,C2))
+C                                 Loads other than hot
+        GO TO 290 
+  260   OUTPUT(I)=0.
+C                                 Spares
+  290 CONTINUE
+      OUTPUT(15)=INPUT(15)*1. 
+      OUTPUT(16)=INPUT(16)*1. 
+C                                     Resistance calibrators
+C 
+D     WRITE(LU,9901) INPUT,C2,C1,OUTPUT 
+D9901 FORMAT("INPUT="16I5/"C2,C1="2F10.4/"OUTPUT="16F6.1) 
+C 
+C     3. Convert the real numbers to ASCII and place in output buffer.
+C     NOTE: We won't send out all of the numbers from the WVR.
+C     Only channels 1,2,3,4,5,6,7,9,10,13.
+C 
+      NCH = NC1 
+      DO 310 I=1,7
+        NCH=NCH+IR2AS(OUTPUT(I),IBUF2,NCH,5,1)
+        NCH=MCOMA(IBUF2,NCH)
+310     CONTINUE
+      NCH=NCH+IR2AS(OUTPUT(9),IBUF2,NCH,5,1)
+      NCH=MCOMA(IBUF2,NCH)
+      NCH=NCH+IR2AS(OUTPUT(10),IBUF2,NCH,5,1) 
+      NCH=MCOMA(IBUF2,NCH)
+      NCH=NCH+IR2AS(OUTPUT(13),IBUF2,NCH,5,1) 
+      NC1=NCH-1 
+C 
+C 
+C     4. Stash the temperatures we may need later into common.
+C 
+      THOTWV(1) = OUTPUT(1) 
+      TBASWV(1) = OUTPUT(2) 
+      THOTWV(2) = OUTPUT(4) 
+      TBASWV(2) = OUTPUT(5) 
+C 
+C 
+900   RETURN
+      END 

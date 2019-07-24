@@ -1,0 +1,39 @@
+FTN4,X
+C@RP2MA 
+      SUBROUTINE RP2MA(IBUF,IBY,IEQ,IBW,ITA,
+     .ITB),CONVERT REPRO DATA TO MAT BUFFER C#890516:19:00# 
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF(1) 
+C      - buffer for the formatted message for MATCN.
+C        There are 9 characters returned
+C     IBY - bypass code 
+C     IEQ - equalizer selection 
+C     IBW - bandwidth selection code
+C     ITA - track A to be reproduced
+C     ITB - track B to be rrproduced
+C 
+C 
+C     1. The format of the tape drive control word which sets 
+C     up the tracks to be reproduced is:
+C 
+C                   !rdebtbta 
+C     where r = reset bit (??)
+C           d = bypass bit and disable tracks 
+C           e = equalizer choice
+C           b = bandwidth choice AND EQ=BW bit
+C          tb = track B 
+C          ta = track A 
+C 
+      NCH = ICHMV(IBUF,1,2H! ,1,1)
+C                   The strobe character
+      NCH = ICHMV(IBUF,NCH,2H00,1,1)
+      NCH = NCH + IB2AS(IBY*2,IBUF,NCH,1) 
+      NCH = NCH + IB2AS(IEQ,IBUF,NCH,1) 
+      NCH = NCH + IB2AS(IBW,IBUF,NCH,1) 
+      NCH = NCH + IB2AS(ITB,IBUF,NCH,2+40000B+400B*2) 
+      NCH = NCH + IB2AS(ITA,IBUF,NCH,2+40000B+400B*2) 
+C 
+      RETURN
+      END 

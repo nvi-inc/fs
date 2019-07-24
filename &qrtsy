@@ -1,0 +1,16 @@
+FTN4,X
+C@QRTSY 
+      PROGRAM QRTSY,5 
+C     This segment of QUIKR deals with system temperature measurements. 
+      CALL LINQB(NSUB)
+      GOTO (1,1,2,2,3,3,2) NSUB 
+1     CALL LINQC
+      CALL CTEMP(IP,NSUB) 
+      GOTO 900
+2     CALL LINQC
+      CALL TPI(IP,NSUB) 
+      GOTO 900
+3     CALL LINQC
+      CALL TSYS(IP,NSUB)  
+900   CALL LINQD
+      END 

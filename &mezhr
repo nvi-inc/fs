@@ -1,0 +1,174 @@
+FTN4,X
+      SUBROUTINE MEZHR(AVPEA,AVPEB,ISERRA,ISERRB
+     .,IP,IAUXA,IAUXB),MEASURE PARITY & SYNC ERRORS C#870115:04:39# 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C MEZHR measures parity and sync errors for two tracks sent as arguments
+C 
+C LAST MODIFIED: 04-24-86 W.E. Himwich
+C                made form of AUX parameter agree with parity 
+C                and synch, i.e. one variable for A and one for B 
+C                instead of array 
+C                12-10-85 J.C. Webber 
+C                Changed to 5 instead of 4 readings, spaced at 0.33 sec 
+C                instead of 0.50 sec.  Changed criterion from average 
+C                of best two to best value of all readings.  Output 
+C                remains in original format (subroutine argument).
+C 
+      DIMENSION PERRA(5),PERRB(5),ISYNA(5),ISYNB(5) 
+      DIMENSION IBUF2(10),IBUF(20),IP(1),LAUX(12) 
+C 
+      DATA TPER/0.33/,NAV/4/,ILEN/40/ 
+C             - time between samples and # of samples to average
+C 
+C 
+      AVPEA=-1. 
+      AVPEB=-1. 
+      ISERRA=-1 
+      ISERRB=-1 
+100   IBUF2(1)=0
+      IBUF2(2)=2HTP 
+      IF(IBWTAP.EQ.0) IBWTAP=6
+      IF(IEQTAP.EQ.0) IEQTAP=IBWTAP-1 
+      IBYPAS = 0
+D     WRITE(LU,9001)IEQTAP,IBWTAP,ITRAKA,ITRAKB 
+D9001 FORMAT("IEQTAP,IBWTAP,ITRAKA,ITRAKB = "4I5) 
+      CALL RP2MA(IBUF2(3),IBYPAS,IEQTAP,IBWTAP,ITRAKA,ITRAKB) 
+      ICLASS=0
+D     WRITE(LU,9002) IBUF2
+D9002 FORMAT("IBUF2 TO MATCN = " 7A2) 
+      CALL EXEC(20,0,IBUF2,-13,2HFS,0,ICLASS) 
+      CALL EXEC(23,6HMATCN ,ICLASS,1) 
+      CALL RMPAR(IP)
+      IF(IP(3).LT.0) RETURN 
+110   CALL CLRCL(IP(1)) 
+      PERRA(1)=0. 
+      PERRB(1)=0. 
+      ISYNA(1)=0  
+      ISYNB(1)=0  
+      ISERRA=0  
+      ISERRB=0  
+C  Initialize error counters first
+      IBUF2(1)=0
+      IBUF2(2)=2HDE 
+      CALL ICHMV(IBUF2,5,2H% ,1,1)
+      ICLASS=0
+      CALL EXEC(20,0,IBUF2,-5,2HFS,0,ICLASS)
+      CALL EXEC(23,6HMATCN ,ICLASS,1) 
+      CALL RMPAR(IP)
+      IF(IP(3).LT.0) RETURN 
+      CALL CLRCL(IP(1)) 
+      CALL ICHMV(IBUF2,5,8H00000008,1,8)
+      CALL SUSP(1,1)
+      DO 180 I=1,NAV+1
+C 
+C    Now read the errors for tracks A & B 
+      DO 170 II=1,2 
+        IF(II.EQ.1) CALL ICHMV(IBUF2,11,2H0 ,1,1) 
+        IF(II.EQ.2) CALL ICHMV(IBUF2,11,2H1 ,1,1) 
+        IBUF2(1)=0
+        IBUF2(2)=2HDE 
+        ICLASS=0
+        CALL EXEC(20,0,IBUF2,-12,2HFS,0,ICLASS) 
+        IBUF2(1)=5
+        IBUF2(2)=2H>  
+        CALL EXEC(20,0,IBUF2,-3,2HFS,0,ICLASS)
+        IBUF2(2)=2H/  
+        CALL EXEC(20,0,IBUF2,-3,2HFS,0,ICLASS)
+        CALL EXEC(23,6HMATCN ,ICLASS,3) 
+        CALL RMPAR(IP)
+        IF(IP(3).LT.0) RETURN 
+        ICLASS=IP(1)
+        CALL EXEC(21,ICLASS,IBUF,-ILEN) 
+        CALL EXEC(21,ICLASS,IBUF,-ILEN) 
+        CALL EXEC(21,ICLASS,IBUF,-ILEN) 
+        COUNT=0.
+        DO 120 J=1,6
+          IA=IA2HX(IBUF,J+4)
+          COUNT=COUNT+IA*16.**(6-J) 
+120     CONTINUE
+        ISYNC=IA2HX(IBUF,3)*16+IA2HX(IBUF,4)
+        IF(II.NE.1) GOTO 130
+          PERRA(I)=COUNT
+          ISYNA(I)=ISYNC
+          GOTO 170
+130     PERRB(I)=COUNT
+        ISYNB(I)=ISYNC
+170   CONTINUE
+      CALL SUSP(1,IFIX(TPER*100.))
+180   CONTINUE
+C 
+C  2.  Find average error rates for tracks A and B
+C 
+C  Get #'s of parity errors (difference between successive readings)
+C 
+      DO 220 I=1,NAV
+        PERRA(I)=PERRA(I+1)-PERRA(I)
+        PERRB(I)=PERRB(I+1)-PERRB(I)
+        ISYNA(I)=ISYNA(I+1)-ISYNA(I)
+        ISYNB(I)=ISYNB(I+1)-ISYNB(I)
+220   CONTINUE
+C 
+C  Sum each error type and identify largest value for each
+C 
+C --JCW-- 
+C 
+C Use the smallest value of parity error found
+C 
+      SUMA=100000.
+      SUMB=100000.
+      ISYSMA=100
+      ISYSMB=100
+      DO 230 I=1,NAV
+        IF(PERRA(I).LT.SUMA) SUMA=PERRA(I)
+        IF(PERRB(I).LT.SUMB) SUMB=PERRB(I)
+        IF(ISYNA(I).LT.ISYSMA) ISYSMA=ISYNA(I)
+        IF(ISYNB(I).LT.ISYSMB) ISYSMB=ISYNB(I)
+230   CONTINUE
+      AVPEA=SUMA
+      AVPEB=SUMB
+      ISERRA=ISYSMA 
+      ISERRB=ISYSMB 
+C 
+C  4.  Check AUX data.
+C 
+C  Check COMMON for AUX data
+      DO 400 I=1,6
+        IF(LAUXFM(I).NE.0) GOTO 401 
+400   CONTINUE
+      GOTO 990
+401   NCH=1 
+      CALL ICHMV(IBUF2,5,8H00000000,1,8)
+      DO 450 II=1,2 
+        IF(II.EQ.1) IAUXA=0 
+        IF(II.EQ.2) IAUXB=0 
+        DO 420 I=1,2
+          IF(II.EQ.2) CALL ICHMV(IBUF2,11,2H1 ,1,1) 
+          IF(I.EQ.1) CALL ICHMV(IBUF2,12,2H0 ,1,1)
+          IF(I.EQ.2) CALL ICHMV(IBUF2,12,2H1 ,1,1)
+          IBUF2(1)=0
+          IBUF2(2)=2HDE 
+          ICLASS=0
+          CALL EXEC(20,0,IBUF2,-12,2HFS,0,ICLASS) 
+          IBUF2(1)=5
+          IBUF2(2)=2H>
+          CALL EXEC(20,0,IBUF2,-3,2HFS,0,ICLASS)
+          IBUF2(2)=2H/
+          CALL EXEC(20,0,IBUF2,-3,2HFS,0,ICLASS)
+          CALL EXEC(23,6HMATCN ,ICLASS,3) 
+          CALL RMPAR(IP)
+          ICLASS=IP(1)
+          IF(IP(3).LT.0) RETURN 
+405       DO 410 J=1,3
+            CALL EXEC(21,ICLASS,IBUF,-ILEN) 
+410       CONTINUE
+          NCH=ICHMV(LAUX,NCH,IBUF,3,4)
+          IF(I.EQ.1) NCH=ICHMV(LAUX,NCH,IBUF,7,4) 
+420     CONTINUE
+        IF(ICHCM(LAUX,12*(II-1)+1,LAUXFM,1,12).EQ.0) GOTO 450 
+        IF(II.EQ.1) IAUXA = 1 
+        IF(II.EQ.2) IAUXB = 1 
+450   CONTINUE
+990   RETURN
+      END 

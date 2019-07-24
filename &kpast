@@ -1,0 +1,21 @@
+FTN4,X
+      LOGICAL FUNCTION KPAST(IT1,IT2,IT3,IT), 
+     .COMPARE TIMES C#870115:04:20# 
+C 
+C     KPAST determines if the time IT1,IT2,IT3 (FS format)
+C           is in the past compared to IT (HP format).
+C     If IT(1)=0 then it is assumed IT should be the current time.
+C 
+      DIMENSION IT(1) 
+      DOUBLE PRECISION TNOW,T1
+C 
+      IF (IT(5).EQ.0) CALL EXEC(11,IT)
+C         Get the current time
+      TNOW = 86400.D0*IT(5)+IT(4)*3600.D0+IT(3)*60.D0 
+     .       +IT(2) + IT(1)/100.D0
+      T1 = 86400.D0*MOD(IT1,1024) + IT2*60.D0 + IT3/100.D0
+C 
+      KPAST = T1 .LT. TNOW
+C 
+      RETURN
+      END 

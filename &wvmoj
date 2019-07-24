@@ -1,0 +1,27 @@
+FTN4,X
+C@WVMOD 
+C 
+      SUBROUTINE WVMOD(PARM,MDE),WVR MODES (JPL) C#870115:04:49#
+C 
+C   WVMOD checks out the allowed raw data modes (JPL radiometers) 
+C 
+C   INPUT VARIABLES:
+C 
+C     PARM - the 4-character parameter
+C 
+C  OUTPUT:
+C 
+C     MDE - code for the mode 
+C           1=HOT, 2=BASE, 3=ANT, 4=ALL 
+C          -1=error 
+C 
+C LAST MODIFIED 830908 BY NRV - Allow new mode ALL
+C 
+C 
+      MDE = -1
+      IF(ICHCM(PARM,1,4HALL ,1,4).EQ.0)MDE=4
+      IF(ICHCM(PARM,1,4HANT ,1,4).EQ.0)MDE=3
+      IF(ICHCM(PARM,1,4HBASE,1,4).EQ.0)MDE=2
+      IF(ICHCM(PARM,1,4HHOT ,1,4).EQ.0)MDE=1
+      RETURN
+      END 

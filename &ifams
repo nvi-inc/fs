@@ -1,0 +1,72 @@
+FTN4,X
+        FUNCTION IFAMS(IOUT,ISTRT,LSGN,IH,IM,SEC,IFORM) 
+     C  ,C#890516:19:07    FORMAT ANG,MIN,SEC#
+C 
+C               THIS FUNCTION FORMAT ANGLES(EITHER DEGREES OR HOURS)
+C       MINUTES AND SECONDS INTO AN ASCII FORMAT OF THE FOLLOWING FORM
+C 
+C               shhammbss.sc
+C 
+C       WHERE THE CHARACTERS HAVE THE FOLLOWING MEANING AND AFFECT
+C 
+C       s       - If not a zero(=0) this will be inserted into stream else
+C                 field will begin later
+C 
+C       hh      - ASCII conversion of IH unless all the following conditions
+C                 are meet: 
+C 
+C                       1.  s was not inserted
+C                       2.  IH =0 
+C 
+C       a       - first field designator character in string IFORM
+C 
+C       mm      - ASCII conversion of IM the following combination of 
+C                 conditions have been meet:
+C 
+C                       1.  IM = 0 and no previous characters have been 
+C                           generated in this call
+C 
+C               or      2.  the second and third forms character are both 
+C                           identically equal to zero 
+C 
+C       b       - the second character in the string IFORM
+C 
+C       ss.s    - the FORTRAN equivalent conversion of SEC via and F4.1 
+C                 format unless the character c is = 0 or SEC =0
+C 
+C       c       - the third character in IFORM
+C 
+C 
+C               THE FOLLOWING OUTPUTS ARE POSSIBLE
+C 
+C                       (NULL) IF (LSGN=0&IH=0&IM=0&ICHAR(IFORM,3)=0) 
+C       hha             IF(LSGN=0&ICHCM(IFORM,1,0,1,2)=0) 
+C       hhammb          IF(LSGN=0&ICHAR(IFORM,3)=0) 
+C       hhammbss.sc     IF(LSGN=0)
+C       shha            IF(ICHCM(IFORM,2,0,1,2)=0)
+C       shhammb         IF(ICHAR(IFORM,3)=0orISEC=0)
+C       shhammbss.sc
+C       mmb             IF(LSGN=0&IH=0&ICHAR(IFORM,3)=0)
+C       mmbss.sc        IF(LSGN=0&IH=0) 
+C       ss.sc           IF(LSGN=0&IH=0&IM=0)
+C 
+        DIMENSION IOUT(1) 
+        IFAMS=ISTRT 
+        IF(ICHAR(LSGN,1) .NE. 0)IFAMS=ICHMV(IOUT,IFAMS,LSGN,1,1)
+        IF(IH .EQ. 0 .AND. IFAMS .EQ. ISTRT)GO TO 1000
+        IFAMS=IB2AS(IH,IOUT,IFAMS,41002B)+IFAMS 
+        IFAMS=ICHMV(IOUT,IFAMS,IFORM,1,1) 
+1000    CONTINUE
+        IF((IM .EQ. 0 .AND. IFAMS .EQ. ISTRT )
+     .                 .OR. ICHCM(IFORM,2,0,1,2) .EQ. 0)
+     .           GO TO 2000 
+        IFAMS=IB2AS(IM,IOUT,IFAMS,41002B)+IFAMS 
+        IFAMS=ICHMV(IOUT,IFAMS,IFORM,2,1) 
+2000    CONTINUE
+        IF(ICHAR(IFORM,3) .EQ. 0 .OR. SEC .EQ. 0.)GO TO 3000
+        IFAMS=IR2AS(SEC,IOUT,IFAMS,4,1)+IFAMS 
+        IFAMS=ICHMV(IOUT,IFAMS,IFORM,3,1) 
+3000    CONTINUE
+        RETURN
+        END 
+        END$

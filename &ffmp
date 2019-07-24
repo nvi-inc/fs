@@ -1,0 +1,367 @@
+FTN4,X
+C@FFMP
+C 
+      SUBROUTINE FFMP(LUI,LUO,ICRPRC,IB,ICHI,LPROC, 
+     .LDEF),FIELD SYSTEM FMGR C#870115:05:41
+C 
+C     FFMP
+C 
+C 1.  FFMP PROGRAM SPECIFICATION
+C 
+C 1.1.   FFMP is a simplified FMGR for use with the Mark III field system.
+C        There are two sets of commands available.  Commands without the
+C        PF prefix (DL, LI, PU, RN, ST) apply to individual procedures
+C        within a procedure file.  The command LL is also handled here. 
+C        The default prodedure file is the one currently used by BOSS.
+C 
+C 1.2.   RESTRICTIONS - Only procedure files are accessible.  These have
+C        the prefix "[PRC" which is transparent to the user.  Procedures are
+C        available only on disc ICRPRC. 
+C 
+C 1.3.   REFERENCES - Field system manual 
+C 
+C 2.  FFMP INTERFACE
+C 
+C 2.1.   CALLING SEQUENCE: CALL FFMP(LUI,LUO,ICRPRC,IB,ICHI,LPROC,LDEF) 
+C 
+C     INPUT VARIABLES:
+C 
+C        LUI,LUO - input, output LU's 
+C        ICRPRC  - procedure file cartridge 
+      DIMENSION IB(51)
+C               - line and record buffer
+C        ICHI   - number of characters from keyboard
+C        LPROC  - procedure file currently active in PFMED
+      DIMENSION LDEF(17)
+C               - DEFINE line at top of each procedure
+C 
+C 2.2.   COMMON BLOCKS USED:
+C 
+      INCLUDE #PFMED::56
+C 
+C 2.3.   DATA BASE ACCESSES: none 
+C 
+C 2.4.   EXTERNAL INPUT/OUTPUT
+C 
+C     INPUT VARIABLES: none 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C     TERMINAL   - error message
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES: PFMED
+C 
+C     CALLED SUBROUTINES: FMP routines, ICHMV, IB2AS, IAS2B, ISCNC, ICHAR,
+C                         ICHCM, IFILL, MIN0, PFBLK, PFCOP
+C 
+C 3.  LOCAL VARIABLES 
+C 
+      DIMENSION LNAM1(20),LNAM2(10) 
+C               - file names
+      DIMENSION LFR(3)
+C               - file name for reading 
+C       LPF     - file suffix for ST
+C 
+C 4.  CONSTANTS USED
+C 
+      DIMENSION LM0(5),LM1(16),LM2(9),LM3(9),LM4(12)
+C 
+      DATA LM0    /2HER,2HRO,2HR ,2H  ,2H  /
+C               - error message - ERRORbbbb 
+      DATA LM1    /2HER,2HRO,2HR ,2H  ,2H  ,2HCR,2HEA,2HTI,2HNG,2H S, 
+     /             2HCR,2HAT,2HCH,2H F,2HIL,2HE / 
+C               - ERROR bbb CREATING SCRATCH FILE 
+      DATA LM2    /2HER,2HRO,2HR ,2H  ,2H  ,2HRE,2HAD,2HIN,2HG /
+C               - ERROR bbb READING 
+      DATA LM3    /2HER,2HRO,2HR ,2H  ,2H  ,2HWR,2HIT,2HIN,2HG /
+C               - ERROR bbb WRITING 
+      DATA LM4    /2HNO,2H P,2HRO,2HCE,2HDU,2HRE,2H F,2HIL,2HE ,2HAC, 
+     /             2HTI,2HVE/ 
+C               - NO PROCEDURE FILE ACTIVE
+C 
+C 5.  INITIALIZED VARIABLES: none 
+C 
+C 6.  PROGRAMMER: C. Ma 
+C     LAST MODIFIED: <840515.0002>
+C# LAST COMPC'ED  870115:05:41 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     Exit if no procedure file active. 
+      IF(LPROC.EQ.0) GO TO 899
+C     Initialize and parse names. 
+      CALL IFILL(LNAM1,1,40,2H  ) 
+      CALL IFILL(LNAM2,1,20,2H  ) 
+C     Search for commas.
+      IC1=ISCNC(IB,1,ICHI,54B)
+C     No commas means no names. 
+      IF(IC1.EQ.0) GO TO 29 
+      IC2=ISCNC(IB,IC1+1,ICHI,54B)
+      IF(IC2.EQ.0) IC2=ICHI+1 
+C     Move first name to buffer.
+      CALL ICHMV(LNAM1,1,IB,IC1+1,IC2-IC1-1)
+C     Move second name if present.
+      IF(ICHI.LE.IC2) GO TO 29
+      CALL ICHMV(LNAM2,1,IB,IC2+1,ICHI-IC2) 
+29    CONTINUE
+C     DL - list procedures in active procedure file.
+      IF(IB.EQ.2HDL) 100,199
+100   IX=1
+      CALL IFILL(IB,1,80,2H  )
+      DO 120 I=1,32767
+      CALL READF(IDCB3,IERR,LNAM1,20,LEN) 
+      IF(LEN.EQ.-1.OR.IERR.EQ.-12.OR.IERR.EQ.-11) GO TO 130 
+C     Check for DEFINE. 
+      IF(ICHCM(LNAM1,1,LDEF,1,6).NE.0) GO TO 120
+C     Move name to print buffer.
+      CALL ICHMV(IB,IX,LNAM1,9,12)
+      IX=IX+13
+      IF(IX.LT.66) GO TO 120
+C     Print buffer and reset pointer. 
+      CALL EXEC(2,LUO,IB,-77) 
+      CALL IFILL(IB,1,80,2H  )
+      IX=1
+120   CONTINUE
+C     Write last line.
+130   IF(IX.GT.1) CALL EXEC(2,LUO,IB,-IX) 
+C     Rewind scratch copy.
+      CALL RWNDF(IDCB3) 
+      GO TO 900 
+199   CONTINUE
+C     LI - list procedure.
+      IF(IB.EQ.2HLI) 200,299
+C     Check for name. 
+200   IF(LNAM1.EQ.2H  ) GO TO 900 
+C     Search file for DEFINE  procedurenam. 
+      DO 220 I=1,32767
+      CALL READF(IDCB3,IERR,IB,50,LEN)
+      IF(LEN.EQ.-1) GO TO 226 
+      IF(ICHCM(IB,1,LDEF,1,6).EQ.0.AND.ICHCM(IB,9,LNAM1,1,12).EQ.0) 
+     .  GO TO 221 
+220   CONTINUE
+C     Output body of procedure. 
+221   DO 225 I=1,32767
+      CALL READF(IDCB3,IERR,IB,50,LEN)
+      IF(ICHCM(IB,1,6HENDDEF,1,6).EQ.0) GO TO 230 
+      CALL EXEC(2,LUO,IB,LEN) 
+225   CONTINUE
+      GOTO 230
+226   LM0(4) = 2H-6 
+      CALL EXEC(2,LUI,LM0,4)
+C     Rewind scratch file.
+230   CALL RWNDF(IDCB3) 
+      GO TO 900 
+299   CONTINUE
+C     PU - purge procedure from active procedure file.
+      IF(IB.EQ.2HPU) 300,399
+C     Create scratch file 2.
+300   CALL CREAT(IDCB2,IERR,LSF2,ISIZE,3,0,ICRPRC,IDCBX)
+      IF(IERR.LT.0) GO TO 381 
+C     Copy scratch file minus purged procedure. 
+      KPU=0 
+      DO 320 I=1,32767
+      CALL READF(IDCB3,IERR,IB,50,LEN)
+      IF(LEN.EQ.-1) GO TO 330 
+      IF(IERR.LT.0) GO TO 382 
+      IF(KPU.EQ.-1) GO TO 315 
+      IF(KPU.EQ.0) GO TO 310
+C     Check if at end of purged procedure.
+      IF(ICHCM(IB,1,6HENDDEF,1,6).NE.0) GO TO 320 
+C     Found ENDDEF - reset flag to allow writing. 
+      KPU=-1
+      GO TO 320 
+C     Check for DEFINE of purged procedure. 
+310   IF(ICHCM(IB,1,LDEF,1,6).NE.0.OR.ICHCM(IB,9,LNAM1,1,12).NE.0)
+     . GO TO 315
+C     Found DEFINE - set flag to skip writing.
+      KPU=1 
+      GO TO 320 
+315   CALL WRITF(IDCB2,IERR,IB,LEN) 
+      IF(IERR.LT.0) GO TO 383 
+320   CONTINUE
+C     Check if procedure found. 
+330   IF(KPU.NE.-1) GO TO 384 
+C     Close old scratch copy. 
+      CALL CLOSE(IDCB3) 
+C     Replace procedure file. 
+      CALL PFBLK(3,LPROC,LFR) 
+C     Copy new version. 
+      CALL PFCOP(LPROC,ICRPRC,LUI,IB) 
+      GO TO 900 
+381   CALL IB2AS(IERR,LM1,7,3)
+      CALL EXEC(2,LUI,LM1,-31)
+      GO TO 389 
+382   CALL IB2AS(IERR,LM2,7,3)
+      CALL EXEC(2,LUI,LM2,-17)
+      GO TO 389 
+383   CALL IB2AS(IERR,LM3,7,3)
+      CALL EXEC(2,LUI,LM3,-17)
+      GO TO 389 
+384   LM0(4)=2H-6 
+      CALL EXEC(2,LUI,LM0,4)
+389   CALL PURGE(IDCB2,IERR,LSF2,0,ICRPRC)
+      CALL RWNDF(IDCB3) 
+      GO TO 900 
+399   CONTINUE
+C     LL - change list device.
+      IF(IB.EQ.2HLL) 400,499
+400   CALL IFILL(IB,1,3,2H  ) 
+      LUO=IAS2B(IB,4,ICHI-3)
+      IF(LUO.LT.1.OR.LUO.GT.63) LUO=LUI 
+      GO TO 900 
+499   CONTINUE
+C     RN - rename procedure.
+      IF(IB.EQ.2HRN) 500,599
+C     Check for illegal name. 
+500   KRN=ICHAR(LNAM2,1)
+      IF(KRN.GE.60B.AND.KRN.LE.71B) GO TO 587 
+C     Create scratch file 2.
+      CALL CREAT(IDCB2,IERR,LSF2,ISIZE,3,0,ICRPRC,IDCBX)
+      IF(IERR.LT.0) GO TO 381 
+C     Copy scratch file.
+      KRN=0 
+      DO 520 I=1,32767
+      CALL READF(IDCB3,IERR,IB,50,LEN)
+      IF(LEN.EQ.-1) GO TO 530 
+      IF(IERR.LT.0) GO TO 382 
+C     Check for DEFINE. 
+      IF(ICHCM(IB,1,LDEF,1,6).NE.0) GO TO 515 
+C     Check for possible duplicate DEFINE.
+      IF(ICHCM(IB,9,LNAM2,1,12).EQ.0) GO TO 584 
+C     Rewrite name if target. 
+      IF(ICHCM(IB,9,LNAM1,1,12).NE.0) GO TO 515 
+      CALL ICHMV(IB,9,LNAM2,1,12) 
+      CALL IFILL(IB,23,12,2H 0) 
+      KRN=1 
+515   CALL WRITF(IDCB2,IERR,IB,LEN) 
+      IF(IERR.LT.0) GO TO 383 
+520   CONTINUE
+C     Check if procedure found. 
+530   IF(KRN.EQ.0) GO TO 585
+C     Close old scratch copy. 
+      CALL CLOSE(IDCB3) 
+C     Replace procedure file. 
+      CALL PFBLK(3,LPROC,LFR) 
+C     Copy new version. 
+      CALL PFCOP(LPROC,ICRPRC,LUI,IB) 
+      GO TO 900 
+584   LM0(4)=2H-2 
+      CALL EXEC(2,LUI,LM0,4)
+      GO TO 586 
+585   LM0(4)=2H-6 
+      CALL EXEC(2,LUI,LM0,4)
+586   CALL PURGE(IDCB2,IERR,LSF2,0,ICRPRC)
+      CALL RWNDF(IDCB3) 
+      GO TO 900 
+587   CALL ICHMV(LM0,7,4H-15 ,1,3)
+      CALL EXEC(2,LUI,LM0,-9) 
+      GO TO 900 
+599   CONTINUE
+C     ST - copy procedure to active procedure file. 
+      IF(IB.EQ.2HST) 600,699
+C     Check for illegal output name.
+600   NCH=ICHAR(LNAM2,1)
+      IF(NCH.GE.60B.AND.NCH.LE.71B) GO TO 692 
+C     Parse first name for procedure file.
+      NCH=ISCNC(LNAM1,1,16,2H :)
+      NCH=ISCNC(LNAM1,NCH+1,16,2H :)
+      IF(NCH.EQ.0) GO TO 681
+C     Get procedure file suffix.
+      CALL ICHMV(LPF,1,LNAM1,NCH+1,2) 
+      IF(LPF.EQ.LPROC) GO TO 682
+C     Blank ::FF. 
+      CALL IFILL(LNAM1,NCH-1,4,2H  )
+C     Copy procedure name if output name blank. 
+      IF(LNAM2.EQ.2H  ) CALL ICHMV(LNAM2,1,LNAM1,1,12)
+C     Get full name for reading.
+      CALL PFBLK(1,LPF,LFR) 
+C     Read until procedure found. 
+      CALL OPEN(IDCB1,IERR,LFR,0,0,ICRPRC,IDCBX)
+      IF(IERR.LT.0) GO TO 683 
+      DO 610 I=1,32767
+      CALL READF(IDCB1,IERR,IB,50,LEN)
+      IF(LEN.EQ.-1) GO TO 684 
+      IF(IERR.LT.0) GO TO 685 
+C     Check for DEFINE of procedure.
+      IF(ICHCM(IB,1,LDEF,1,6).EQ.0.AND.ICHCM(IB,9,LNAM1,1,12).EQ.0) 
+     .  GO TO 615 
+610   CONTINUE
+C     Create scratch file 2.
+615   CALL CREAT(IDCB2,IERR,LSF2,ISIZE,3,0,ICRPRC,IDCBX)
+      IF(IERR.LT.0) GO TO 686 
+C     Change procedure name.
+      CALL ICHMV(IB,9,LNAM2,1,12) 
+      CALL IFILL(IB,23,12,2H 0) 
+C     Copy procedure to scratch.
+      DO 620 I=1,32767
+      CALL WRITF(IDCB2,IERR,IB,LEN) 
+      IF(IERR.LT.0) GO TO 687 
+      CALL READF(IDCB1,IERR,IB,50,LEN)
+      IF(IERR.LT.0) GO TO 685 
+C     Check for ENDDEF. 
+      IF(ICHCM(IB,1,6HENDDEF,1,6).EQ.0) GO TO 625 
+620   CONTINUE
+C     Write ENDDEF. 
+625   CALL WRITF(IDCB2,IERR,IB,LEN) 
+      IF(IERR.LT.0) GO TO 687 
+      CALL CLOSE(IDCB1) 
+C     Release lock. 
+      CALL PFBLK(2,LPF,LFR) 
+C     Copy active file. 
+      DO 630 I=1,32767
+      CALL READF(IDCB3,IERR,IB,50,LEN)
+      IF(LEN.EQ.-1) GO TO 635 
+      IF(IERR.LT.0) GO TO 685 
+C     Check for duplicate procedure.
+      IF(ICHCM(IB,1,LDEF,1,6).EQ.0.AND.ICHCM(IB,9,LNAM2,1,12).EQ.0) 
+     .  GO TO 688 
+      CALL WRITF(IDCB2,IERR,IB,LEN) 
+      IF(IERR.LT.0) GO TO 687 
+630   CONTINUE
+635   CALL CLOSE(IDCB3) 
+C     Replace file. 
+      CALL PFBLK(3,LPROC,LFR) 
+C     Copy new version. 
+      CALL PFCOP(LPROC,ICRPRC,LUI,IB) 
+      GO TO 900 
+C     Various errors and messages.
+681   CALL EXEC(2,LUI,12HNO FILE NAME,-12)
+      GO TO 900 
+682   CALL EXEC(2,LUI,11HACTIVE FILE,-11) 
+      GO TO 900 
+683   CALL EXEC(2,LUI,14HFILE NOT FOUND,-14)
+      GO TO 691 
+684   CALL EXEC(2,LUI,19HPROCEDURE NOT FOUND,-19) 
+      GO TO 690 
+685   CALL IB2AS(IERR,LM2,7,3)
+      CALL EXEC(2,LUI,LM2,-17)
+      GO TO 690 
+686   CALL IB2AS(IERR,LM1,7,3)
+      CALL EXEC(2,LUI,LM1,-31)
+      GO TO 690 
+687   CALL IB2AS(IERR,LM3,7,3)
+      CALL EXEC(2,LUI,LM2,-17)
+      GO TO 690 
+688   CALL EXEC(2,LUI,19HDUPLICATE PROCEDURE,-19) 
+      GO TO 690 
+690   CALL CLOSE(IDCB1) 
+      CALL PURGE(IDCB2,IERR,LSF2,0,ICRPRC)
+      CALL RWNDF(IDCB3) 
+691   CALL PFBLK(4) 
+      GO TO 900 
+692   CALL ICHMV(LM0,7,4H-15 ,1,3)
+      CALL EXEC(2,LUI,LM0,-9) 
+      GO TO 900 
+699   CONTINUE
+C     Bad command 
+      CALL EXEC(2,LUI,LM0,-5) 
+      GO TO 900 
+C     FMP error condition.
+800   CALL IB2AS(IERR,LM0,7,3)
+      CALL EXEC(2,LUI,LM0,-9) 
+      GO TO 900 
+899   CALL EXEC(2,LUI,LM4,-24)
+900   RETURN
+      END 

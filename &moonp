@@ -1,0 +1,507 @@
+FTN4,X
+C@MOONP 
+      SUBROUTINE MOONP(FJD,C1,C2,C3)  
+C 
+C     THIS SUBROUTINE COMPUTES THE COORDINATES OF THE MOON FROM 
+C     TRIGONOMETRIC SERIES TO AN ACCURACY OF ABOUT 1 ARCMINUTE. 
+C 
+C     FJD = JULIAN DATE OF INTEREST (IN)
+C     C1,C2,C3 = COORDINATE VALUES RETURNED (OUT) 
+C          C1=RIGHT ASCENSION (HOURS AND DECIMAL) 
+C          C2=DECLINATION (DEGREES AND DECIMAL) 
+C          C3=GEOCENTRIC DISTANCE (EARTH RADII) 
+C 
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z) 
+      REAL A,B,C,D,E,F,G,H,I,J
+      DATA RPS/0.48481368110954D-5/ 
+D     DATA LU/1/
+C 
+      DASIN(X) = DATN2(X,DSQRT(DABS(1D0-X*X)))
+C 
+      CALL PAPVL(FJD,CT,ELM,EMM,EOM,ALM,DS,ELS,EMS,ELVEN) 
+D     WRITE(LU,9006) EMM,ALM,DS,EOM,ELS,EMS,ELVEN 
+D9006 FORMAT("PARMS FROM PAPVL = "7D8.4)
+      A=EMM 
+      B=ALM 
+      C=DS
+      D=EOM 
+      E=ELS 
+      F=EMS 
+      G=ELVEN 
+D     WRITE(LU,9005) A,B,C,D,E,F,G
+D9005 FORMAT("A - G IN MOONP = "7F8.4)
+      CFAC=60.40974D0 
+      XADD1=ELM 
+      XADD2=ELM 
+      Z=CT
+   20 V           =0.D0 
+     &+3.95580E-01*       SIN(          +B          +D
+     &                                                      ) 
+     &+8.20000E-02*       SIN(          +B
+     &                                                      ) 
+     &+3.25700E-02*       SIN(     A    -B          -D
+     &                                                      ) 
+     &+1.09200E-02*       SIN(     A    +B          +D
+     &                                                      ) 
+     &+6.66000E-03*       SIN(     A    -B
+     &                                                      ) 
+     &-6.44000E-03*       SIN(     A    +B -2.*C    +D
+     &                                                      ) 
+     &-3.31000E-03*       SIN(          +B -2.*C    +D
+     &                                                      ) 
+     &-3.04000E-03*       SIN(          +B -2.*C
+     &                                                      ) 
+      V           =V
+     &-2.40000E-03*       SIN(     A    -B -2.*C    -D
+     &                                                      ) 
+     &+2.26000E-03*       SIN(     A    +B
+     &                                                      ) 
+     &-1.08000E-03*       SIN(     A    +B -2.*C
+     &                                                      ) 
+     &-7.90000E-04*       SIN(          +B          -D
+     &                                                      ) 
+     &+7.80000E-04*       SIN(          +B +2.*C    +D
+     &                                                      ) 
+     &+6.60000E-04*       SIN(          +B          +D
+     &                            -F                        ) 
+     &-6.20000E-04*       SIN(          +B          +D
+     &                            +F                        ) 
+     &-5.00000E-04*       SIN(     A    -B -2.*C
+     &                                                      ) 
+     &+4.50000E-04*       SIN( +2.*A    +B          +D
+     &                                                      ) 
+      V           =V
+     &-3.10000E-04*       SIN( +2.*A    +B -2.*C    +D
+     &                                                      ) 
+     &-2.70000E-04*       SIN(     A    +B -2.*C    +D
+     &                            +F                        ) 
+     &-2.40000E-04*       SIN(          +B -2.*C    +D
+     &                            +F                        ) 
+     &-2.10000E-04*Z     *SIN(          +B          +D
+     &                                                      ) 
+     &+1.80000E-04*       SIN(          +B    -C    +D
+     &                                                      ) 
+     &+1.60000E-04*       SIN(          +B +2.*C
+     &                                                      ) 
+     &+1.60000E-04*       SIN(     A    -B          -D
+     &                            -F                        ) 
+     &-1.60000E-04*       SIN( +2.*A    -B          -D
+     &                                                      ) 
+     &-1.50000E-04*       SIN(          +B -2.*C
+     &                            +F                        ) 
+      V           =V
+     &-1.20000E-04*       SIN(     A    -B -2.*C    -D
+     &                            +F                        ) 
+     &-1.10000E-04*       SIN(     A    -B          -D
+     &                            +F                        ) 
+     &+9.00000E-05*       SIN(     A    +B          +D
+     &                            -F                        ) 
+     &+9.00000E-05*       SIN( +2.*A    +B
+     &                                                      ) 
+     &+8.00000E-05*       SIN( +2.*A    -B
+     &                                                      ) 
+     &+8.00000E-05*       SIN(     A    +B +2.*C    +D
+     &                                                      ) 
+     &-8.00000E-05*       SIN(       +3.*B -2.*C    +D
+     &                                                      ) 
+     &+7.00000E-05*       SIN(     A    -B +2.*C
+     &                                                      ) 
+     &-7.00000E-05*       SIN( +2.*A    -B -2.*C    -D
+     &                                                      ) 
+      V           =V
+     &-7.00000E-05*       SIN(     A    +B          +D
+     &                            +F                        ) 
+     &-6.00000E-05*       SIN(          +B    +C    +D
+     &                                                      ) 
+     &+6.00000E-05*       SIN(          +B -2.*C
+     &                            -F                        ) 
+     &+6.00000E-05*       SIN(     A    -B          +D
+     &                                                      ) 
+     &+6.00000E-05*       SIN(          +B +2.*C    +D
+     &                            -F                        ) 
+     &-5.00000E-05*       SIN(     A    +B -2.*C
+     &                            +F                        ) 
+     &-4.00000E-05*       SIN( +2.*A    +B -2.*C
+     &                                                      ) 
+     &+4.00000E-05*       SIN(     A -3.*B          -D
+     &                                                      ) 
+     &+4.00000E-05*       SIN(     A    -B
+     &                            -F                        ) 
+      V           =V
+     &-3.00000E-05*       SIN(     A    -B
+     &                            +F                        ) 
+     &+3.00000E-05*       SIN(          +B    -C
+     &                                                      ) 
+     &+3.00000E-05*       SIN(          +B -2.*C    +D
+     &                            -F                        ) 
+     &-3.00000E-05*       SIN(          +B -2.*C    -D
+     &                                                      ) 
+     &+3.00000E-05*       SIN(     A    +B -2.*C    +D
+     &                            -F                        ) 
+     &+3.00000E-05*       SIN(          +B
+     &                            -F                        ) 
+     &-3.00000E-05*       SIN(          +B    -C    +D
+     &                            -F                        ) 
+     &-2.00000E-05*       SIN(     A    -B -2.*C
+     &                            +F                        ) 
+     &-2.00000E-05*       SIN(          +B
+     &                            +F                        ) 
+      V           =V
+     &+2.00000E-05*       SIN(     A    +B    -C    +D
+     &                                                      ) 
+     &-2.00000E-05*       SIN(     A    +B          -D
+     &                                                      ) 
+     &+2.00000E-05*       SIN( +3.*A    +B          +D
+     &                                                      ) 
+     &-2.00000E-05*       SIN( +2.*A    -B -4.*C    -D
+     &                                                      ) 
+     &+2.00000E-05*       SIN(     A    -B -2.*C    -D
+     &                            -F                        ) 
+     &-2.00000E-05*Z     *SIN(     A    -B          -D
+     &                                                      ) 
+     &-2.00000E-05*       SIN(     A    -B -4.*C    -D
+     &                                                      ) 
+     &-2.00000E-05*       SIN(     A    +B -4.*C
+     &                                                      ) 
+     &-2.00000E-05*       SIN( +2.*A    -B -2.*C
+     &                                                      ) 
+      V           =V
+     &+2.00000E-05*       SIN(     A    +B +2.*C
+     &                                                      ) 
+     &+2.00000E-05*       SIN(     A    +B
+     &                            -F                        ) 
+      U           =0.D0 
+     &+1.00000E 00*       COS(0.
+     &                                                      ) 
+     &-1.08280E-01*       COS(     A
+     &                                                      ) 
+     &-1.88000E-02*       COS(     A       -2.*C
+     &                                                      ) 
+     &-1.47900E-02*       COS(             +2.*C
+     &                                                      ) 
+     &+1.81000E-03*       COS( +2.*A       -2.*C
+     &                                                      ) 
+     &-1.47000E-03*       COS( +2.*A
+     &                                                      ) 
+     &-1.05000E-03*       COS(             +2.*C
+     &                            -F                        ) 
+     &-7.50000E-04*       COS(     A       -2.*C
+     &                            +F                        ) 
+      U           =U
+     &-6.70000E-04*       COS(     A
+     &                            -F                        ) 
+     &+5.70000E-04*       COS(                +C
+     &                                                      ) 
+     &+5.50000E-04*       COS(     A
+     &                            +F                        ) 
+     &-4.60000E-04*       COS(     A       +2.*C
+     &                                                      ) 
+     &+4.10000E-04*       COS(     A -2.*B
+     &                                                      ) 
+     &+2.40000E-04*       COS(
+     &                            +F                        ) 
+     &+1.70000E-04*       COS(             +2.*C
+     &                            +F                        ) 
+     &+1.30000E-04*       COS(     A       -2.*C
+     &                            -F                        ) 
+     &-1.00000E-04*       COS(     A       -4.*C
+     &                                                      ) 
+      U           =U
+     &-9.00000E-05*       COS(                +C
+     &                            +F                        ) 
+     &+7.00000E-05*       COS( +2.*A       -2.*C
+     &                            +F                        ) 
+     &+6.00000E-05*       COS( +3.*A       -2.*C
+     &                                                      ) 
+     &+6.00000E-05*       COS(       +2.*B -2.*C
+     &                                                      ) 
+     &-5.00000E-05*       COS(             +2.*C
+     &                         -2.*F                        ) 
+     &-5.00000E-05*       COS( +2.*A       -4.*C
+     &                                                      ) 
+     &+5.00000E-05*       COS(     A +2.*B -2.*C
+     &                                                      ) 
+     &-5.00000E-05*       COS(     A          -C
+     &                                                      ) 
+     &-4.00000E-05*       COS(     A       +2.*C
+     &                            -F                        ) 
+      U           =U
+     &-4.00000E-05*       COS( +3.*A
+     &                                                      ) 
+     &-3.00000E-05*       COS(     A       -4.*C
+     &                            +F                        ) 
+     &-3.00000E-05*       COS( +2.*A -2.*B
+     &                                                      ) 
+     &-3.00000E-05*       COS(       +2.*B
+     &                                                      ) 
+      W           =0.D0 
+     &+1.04780E-01*       SIN(     A
+     &                                                      ) 
+     &-4.10500E-02*       SIN(       +2.*B       +2.*D
+     &                                                      ) 
+     &-2.13000E-02*       SIN(     A       -2.*C
+     &                                                      ) 
+     &-1.77900E-02*       SIN(       +2.*B          +D
+     &                                                      ) 
+     &+1.77400E-02*       SIN(                      +D
+     &                                                      ) 
+     &+9.87000E-03*       SIN(             +2.*C
+     &                                                      ) 
+     &-3.38000E-03*       SIN(     A -2.*B       -2.*D
+     &                                                      ) 
+     &-3.09000E-03*       SIN(
+     &                            +F                        ) 
+      W           =W
+     &-1.90000E-03*       SIN(       +2.*B
+     &                                                      ) 
+     &-1.44000E-03*       SIN(     A                +D
+     &                                                      ) 
+     &-1.44000E-03*       SIN(     A -2.*B          -D
+     &                                                      ) 
+     &-1.13000E-03*       SIN(     A +2.*B       +2.*D
+     &                                                      ) 
+     &-9.40000E-04*       SIN(     A       -2.*C
+     &                            +F                        ) 
+     &-9.20000E-04*       SIN( +2.*A       -2.*C
+     &                                                      ) 
+     &+7.10000E-04*       SIN(             +2.*C
+     &                            -F                        ) 
+     &+7.00000E-04*       SIN( +2.*A
+     &                                                      ) 
+     &+6.70000E-04*       SIN(     A +2.*B -2.*C +2.*D
+     &                                                      ) 
+      W           =W
+     &+6.60000E-04*       SIN(       +2.*B -2.*C    +D
+     &                                                      ) 
+     &-6.60000E-04*       SIN(             +2.*C    +D
+     &                                                      ) 
+     &+6.10000E-04*       SIN(     A
+     &                            -F                        ) 
+     &-5.80000E-04*       SIN(                +C
+     &                                                      ) 
+     &-4.90000E-04*       SIN(     A +2.*B          +D
+     &                                                      ) 
+     &-4.90000E-04*       SIN(     A                -D
+     &                                                      ) 
+     &-4.20000E-04*       SIN(     A
+     &                            +F                        ) 
+     &+3.40000E-04*       SIN(       +2.*B -2.*C +2.*D
+     &                                                      ) 
+     &-2.60000E-04*       SIN(       +2.*B -2.*C
+     &                                                      ) 
+      W           =W
+     &+2.50000E-04*       SIN(     A -2.*B -2.*C -2.*D
+     &                                                      ) 
+     &+2.40000E-04*       SIN(     A -2.*B
+     &                                                      ) 
+     &+2.30000E-04*       SIN(     A +2.*B -2.*C    +D
+     &                                                      ) 
+     &+2.30000E-04*       SIN(     A       -2.*C    -D
+     &                                                      ) 
+     &+1.90000E-04*       SIN(     A       +2.*C
+     &                                                      ) 
+     &+1.20000E-04*       SIN(     A       -2.*C
+     &                            -F                        ) 
+     &+1.10000E-04*       SIN(     A       -2.*C    +D
+     &                                                      ) 
+     &+1.10000E-04*       SIN(     A -2.*B -2.*C    -D
+     &                                                      ) 
+     &-1.00000E-04*       SIN(             +2.*C
+     &                            +F                        ) 
+      W           =W
+     &+9.00000E-05*       SIN(     A          -C
+     &                                                      ) 
+     &+8.00000E-05*       SIN(                +C
+     &                            +F                        ) 
+     &-8.00000E-05*       SIN(       +2.*B +2.*C +2.*D
+     &                                                      ) 
+     &-8.00000E-05*       SIN(                   +2.*D
+     &                                                      ) 
+     &-7.00000E-05*       SIN(       +2.*B       +2.*D
+     &                            -F                        ) 
+     &+6.00000E-05*       SIN(       +2.*B       +2.*D
+     &                            +F                        ) 
+     &-5.00000E-05*       SIN(     A +2.*B
+     &                                                      ) 
+     &+5.00000E-05*       SIN( +3.*A
+     &                                                      ) 
+     &-5.00000E-05*       SIN(     A                  +16.*E
+     &                              -18.*G                  ) 
+      W           =W
+     &-5.00000E-05*       SIN( +2.*A +2.*B       +2.*D
+     &                                                      ) 
+     &+4.00000E-05*Z     *SIN(       +2.*B       +2.*D
+     &                                                      ) 
+     &+4.00000E-05*       COS(     A                  +16.*E
+     &                              -18.*G                  ) 
+     &-4.00000E-05*       SIN(     A -2.*B +2.*C
+     &                                                      ) 
+     &-4.00000E-05*       SIN(     A       -4.*C
+     &                                                      ) 
+     &-4.00000E-05*       SIN( +3.*A       -2.*C
+     &                                                      ) 
+     &-4.00000E-05*       SIN(       +2.*B +2.*C    +D
+     &                                                      ) 
+     &-4.00000E-05*       SIN(             +2.*C    -D
+     &                                                      ) 
+     &-3.00000E-05*       SIN(
+     &                         +2.*F                        ) 
+      W           =W
+     &-3.00000E-05*       SIN(     A       -2.*C
+     &                         +2.*F                        ) 
+     &+3.00000E-05*       SIN(       +2.*B -2.*C    +D
+     &                            +F                        ) 
+     &-3.00000E-05*       SIN(             +2.*C    +D
+     &                            -F                        ) 
+     &+3.00000E-05*       SIN( +2.*A +2.*B -2.*C +2.*D
+     &                                                      ) 
+     &+3.00000E-05*       SIN(             +2.*C
+     &                         -2.*F                        ) 
+     &-3.00000E-05*       SIN( +2.*A       -2.*C
+     &                            +F                        ) 
+     &+3.00000E-05*       SIN(     A +2.*B -2.*C +2.*D
+     &                            +F                        ) 
+     &-3.00000E-05*       SIN( +2.*A       -4.*C
+     &                                                      ) 
+     &+2.00000E-05*       SIN(       +2.*B -2.*C +2.*D
+     &                            +F                        ) 
+      W           =W
+     &-2.00000E-05*       SIN( +2.*A +2.*B          +D
+     &                                                      ) 
+     &-2.00000E-05*       SIN( +2.*A                -D
+     &                                                      ) 
+     &+2.00000E-05*Z     *COS(     A                  +16.*E
+     &                              -18.*G                  ) 
+     &+2.00000E-05*       SIN(             +4.*C
+     &                                                      ) 
+     &-2.00000E-05*       SIN(       +2.*B    -C +2.*D
+     &                                                      ) 
+     &-2.00000E-05*       SIN(     A +2.*B -2.*C
+     &                                                      ) 
+     &-2.00000E-05*       SIN( +2.*A                +D
+     &                                                      ) 
+     &-2.00000E-05*       SIN( +2.*A -2.*B          -D
+     &                                                      ) 
+     &+2.00000E-05*       SIN(     A       +2.*C
+     &                            -F                        ) 
+      W           =W
+     &+2.00000E-05*       SIN( +2.*A
+     &                            -F                        ) 
+     &-2.00000E-05*       SIN(     A       -4.*C
+     &                            +F                        ) 
+     &+2.00000E-05*Z     *SIN(     A                  +16.*E
+     &                              -18.*G                  ) 
+     &-2.00000E-05*       SIN(     A -2.*B       -2.*D
+     &                            -F                        ) 
+     &+2.00000E-05*       SIN( +2.*A -2.*B       -2.*D
+     &                                                      ) 
+     &-2.00000E-05*       SIN(     A       +2.*C    +D
+     &                                                      ) 
+     &-2.00000E-05*       SIN(     A -2.*B +2.*C    -D
+     &                                                      ) 
+      DIST=DSQRT(U) 
+      DELTA=DIST*CFAC 
+      RA=((DASIN(W/DSQRT(U-V**2))+XADD1)/RPS)/3600.D0 
+      IF(RA .LT. 0.D0)RA=RA+360.D0
+      RA=RA/15.D0 
+      DEC=(DASIN(V/DIST)/RPS)/3600.D0 
+D     WRITE(LU,9001) RA,DEC,DELTA 
+D9001 FORMAT("RA,DEC,RANGE IN MOONP = "3D10.4)
+      C1=RA 
+      C2=DEC
+      C3=DELTA
+      RETURN
+      END 
+C 
+C@PAPVL 
+C 
+      SUBROUTINE PAPVL (DATE,CT,ELM,EMM,EOM,ALM,DS,ELS,EMS,ELVEN) 
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z) 
+      DIMENSION A(33) 
+      DATA RPS/0.48481368110954D-5/,PIE/3.141592653589793D0/
+      DATA Y,D1,D2/36525.D0,3600.D0,60.D0/
+D     DATA LU/1/
+C     COMPUTES ARGUMENTS FOR A GIVEN JULIAN DATE
+C     T= JULIAN DAYS FROM JAN 1.5,2000
+      T=DATE-2451545.D0 
+C     CT=JULIAN CENTURIES FROM 1900.D0
+      CT=(DATE-2415020.D0)/36525.D0 
+      TPI=2.D0*PIE
+D     WRITE(LU,9001) T,CT 
+D9001 FORMAT("T,CT IN PAPVL = "2D10.4)
+C 
+C     A(I) ARE IN UNITS OF REVOLUTIONS
+      A( 1)= +0.606434D0 +0.03660110129D0*T 
+      A( 2)= +0.374897D0 +0.03629164709D0*T 
+      A( 5)= +0.347343D0 -0.00014709391D0*T 
+      A( 3)= +0.259091D0 +0.03674819520D0*T 
+      A( 4)= +0.827362D0 +0.03386319198D0*T 
+      A( 7)= +0.779072D0 +0.00273790931D0*T 
+      A( 8)= +0.993126D0 +0.00273777850D0*T 
+      A( 9)= +0.700695D0 +0.01136771400D0*T 
+      A(10)= +0.485541D0 +0.01136759566D0*T 
+      A(11)= +0.566441D0 +0.01136762384D0*T 
+      A(12)= +0.505498D0 +0.00445046867D0*T 
+      A(13)= +0.140023D0 +0.00445036173D0*T 
+      A(14)= +0.292498D0 +0.00445040017D0*T 
+      A(15)= +0.987353D0 +0.00145575328D0*T 
+      A(16)= +0.053856D0 +0.00145561327D0*T 
+      A(17)= +0.849694D0 +0.00145569465D0*T 
+      A(18)= +0.089608D0 +0.00023080893D0*T 
+      A(19)= +0.056531D0 +0.00023080893D0*T 
+      A(20)= +0.814794D0 +0.00023080893D0*T 
+      A(21)= +0.133295D0 +0.00009294371D0*T 
+      A(22)= +0.882987D0 +0.00009294371D0*T 
+      A(23)= +0.821218D0 +0.00009294371D0*T 
+      A(24)= +0.870169D0 +0.00003269438D0*T 
+      A(25)= +0.400589D0 +0.00003269438D0*T 
+      A(26)= +0.664614D0 +0.00003265562D0*T 
+      A(27)= +0.846912D0 +0.00001672092D0*T 
+      A(28)= +0.725368D0 +0.00001672092D0*T 
+      A(29)= +0.480856D0 +0.00001663715D0*T 
+      A(31)= +0.663854D0 +0.00001115482D0*T 
+      A(32)= +0.041020D0 +0.00001104864D0*T 
+      A(33)= +0.357355D0 +0.00001104864D0*T 
+      A(6)=0.D0 
+      A(30)=0.D0
+C 
+C     CONVERT A(I) INTO UNITS OF RADIANS
+      DO 10 I=1,33
+      A(I)=A(I)*TPI 
+   10 CONTINUE
+C     CONVERT ANGLES SO THAT THEY ARE LESS THAN OR EQUAL TO 2.D0*PIE
+      ELM=DMOD(A(1),TPI)
+      EMM=DMOD(A(2),TPI)
+      ALM=DMOD(A(3),TPI)
+       DS=DMOD(A(4),TPI)
+      EOM=DMOD(A(5),TPI)
+      ELS=DMOD(A(7),TPI)
+      EMS=DMOD(A(8),TPI)
+      ELMER=DMOD(A( 9),TPI) 
+      EMMER=DMOD(A(10),TPI) 
+      ALMER=DMOD(A(11),TPI) 
+      ELVEN=DMOD(A(12),TPI) 
+      EMVEN=DMOD(A(13),TPI) 
+      ALVEN=DMOD(A(14),TPI) 
+      ELMAR=DMOD(A(15),TPI) 
+      EMMAR=DMOD(A(16),TPI) 
+      ALMAR=DMOD(A(17),TPI) 
+      ELJUP=DMOD(A(18),TPI) 
+      EMJUP=DMOD(A(19),TPI) 
+      ALJUP=DMOD(A(20),TPI) 
+      ELSAT=DMOD(A(21),TPI) 
+      EMSAT=DMOD(A(22),TPI) 
+      ALSAT=DMOD(A(23),TPI) 
+      ELURA=DMOD(A(24),TPI) 
+      EMURA=DMOD(A(25),TPI) 
+      ALURA=DMOD(A(26),TPI) 
+      ELNEP=DMOD(A(27),TPI) 
+      EMNEP=DMOD(A(28),TPI) 
+      ALNEP=DMOD(A(29),TPI) 
+      ELPLU=DMOD(A(31),TPI) 
+      EMPLU=DMOD(A(32),TPI) 
+      ALPLU=DMOD(A(33),TPI) 
+D     WRITE(LU,9002) EMM,ALM,DS,EOM,ELS,EMS,ELVEN 
+D9002 FORMAT("PARMS IN PAPVL = "7D8.4)
+      RETURN
+      END 

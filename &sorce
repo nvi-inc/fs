@@ -1,0 +1,283 @@
+FTN4,X
+C@SORCE 
+C 
+      SUBROUTINE SORCE(IP)
+C 
+C     Set and display the source name 
+C 
+      INCLUDE #FSCOM::FS
+C 
+      DIMENSION IP(1),IT(6) 
+      DIMENSION IREG(2),IPARM(2)
+      DIMENSION IBUF(40),IBUFI(24),IBUFO(12)  
+      DIMENSION LS(5) 
+      DOUBLE PRECISION DAS2B
+      DOUBLE PRECISION RAD,DECD,ALATI,ELONG,GHEIG 
+C      - double precision versions of ra and dec for MOVE 
+      DOUBLE PRECISION DRA,DDEC,DC
+C      - returned by MOVE: changes in ra and dec to be added
+C        to the old values
+      LOGICAL KD,KPREC,KSUN,KMOON 
+C      - true if we have azel or xy degrees specified 
+C      - true if we precess these coordinates 
+C      - true if Sun
+C      - true if Moon 
+C 
+      EQUIVALENCE (IREG(1),REG),(IPARM(1),PARM) 
+C 
+C  TO MOON BUFFER 24 WORDS
+C 
+      EQUIVALENCE (IBUFI(1),ALATI), 
+     +            (IBUFI(7),ELONG), 
+     +            (IBUFI(13),GHEIG),
+     +            (IBUFI(19),IT)
+C 
+C  FROM MOON BUFFER 9 WORDS 
+C 
+      EQUIVALENCE (IBUFO(1),RAD), 
+     +            (IBUFO(7),DECD) 
+C 
+      DATA ILEN/80/ 
+      DATA ELLIM/0.17453/ 
+C        - set elevation limit at 10 degrees for SUN and MOON 
+C 
+      ICLCM = IP(1) 
+      REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+      IF (IEQ.EQ.0) GOTO 500
+C 
+C 
+C     2. Parse the command: SOURCE=<name>,<ra>,<dec>,<epoch>
+C 
+C     2.1 First get the source name 
+C 
+      ICH = IEQ+1 
+      IC1 = ICH 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (ICHAR(PARM,1).NE.52B.AND.ICHAR(PARM,1).NE.54B) GOTO 215 
+      IF (ICHAR(PARM,1).NE.52B) GOTO 211
+      CALL ICHMV(LS,1,LSORNA,1,10)
+C                   Pick up the name from COMMON
+      GOTO 219
+211   IERR = -101 
+C                   There is no default for the source name 
+      GOTO 990
+215   CALL ICHMV(LS,1,10H          ,1,10) 
+      CALL ICHMV(LS,1,IBUF,IC1,MIN0(10,ICH-IC1-1))
+C                   First clear the temporary name buffer then move 
+C                   in the name from the command
+219   IAZ=ICHCM(LS,1,10HAZEL      ,1,10)
+      IXY=ICHCM(LS,1,10HXY        ,1,10)
+      KD = IAZ.EQ.0.OR.IXY.EQ.0 
+      KSUN=ICHCM(LS,1,10HSUN       ,1,10).EQ.0
+      KMOON=ICHCM(LS,1,10HMOON      ,1,10).EQ.0 
+      IF (KSUN) GOTO 320
+      IF (KMOON) GOTO 340 
+C 
+C     2.2 Next get the RA and convert to radians
+C 
+      IC1 = ICH 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (ICHAR(PARM,1).NE.52B.AND.ICHAR(PARM,1).NE.54B) GOTO 225 
+      IF (ICHAR(PARM,1).NE.52B) GOTO 221
+      RA = RA50 
+C                   Pick up the RA from common
+      GOTO 230
+221   IERR = -102 
+C                   there is no default for the RA
+      GOTO 990
+225   IF (.NOT.KD) CALL GTRAD(IBUF,IC1,ICH-2,1,RA,IERR) 
+C                      First convert assuming we have RA
+      IF (KD) CALL GTRAD(IBUF,IC1,ICH-2,4,RA,IERR)
+C                      If we've got AZEL or XY, convert degrees 
+      IF (IERR.GE.0) GOTO 230 
+      IERR = -202 
+      GOTO 990
+C 
+C     2.3 Next the DEC. 
+C 
+230   IC1 = ICH 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (ICHAR(PARM,1).NE.52B.AND.ICHAR(PARM,1).NE.54B) GOTO 235 
+      IF (ICHAR(PARM,1).NE.52B) GOTO 231
+      DEC = DEC50 
+C                   Pick up the DEC from common 
+      GOTO 240
+231   IERR = -103 
+C                   there is no default for the DEC 
+      GOTO 990
+235   IF (.NOT.KD) CALL GTRAD(IBUF,IC1,ICH-2,2,DEC,IERR)  
+      IF (KD) CALL GTRAD(IBUF,IC1,ICH-2,4,DEC,IERR) 
+      IF (IERR.GE.0) GOTO 240 
+      IERR = -203 
+      GOTO 990
+C 
+C     2.4 Finally the epoch.
+C 
+240   IC1 = ICH 
+      CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+      IF (ICHAR(PARM,1).NE.52B.AND.ICHAR(PARM,1).NE.54B) GOTO 245 
+      IF (ICHAR(PARM,1).EQ.52B) EP = EP1950 
+      IF (ICHAR(PARM,1).EQ.54B) EP = 1950.0 
+C                   The default is 1950 for positions 
+      GOTO 300
+245   EP = DAS2B(IBUF,IC1,ICH-IC1-1,IERR) 
+      IF (IERR.EQ.0) GOTO 300 
+      IERR = -204 
+      GOTO 990
+C 
+C     3. Precess the positions to today's date from the epoch 
+C     given as input.  Store the variables away in COMMON.
+C 
+300   CALL ICHMV(LSORNA,1,LS,1,10)
+C                   Make sure the proper dates are in common
+      RAD = RA
+      DECD = DEC
+C                   Stuff into double precision variables 
+      DRA=0 
+      DDEC=0
+C                   Pick out today's day-of-year for precession 
+      CALL EXEC(11,IT,IT(6))
+      KPREC=.NOT. (KD.OR.KSUN.OR.KMOON) 
+      IF(KPREC) CALL MOVE(IFIX(EP),IT(6),1,IT(5),RAD,DECD,DRA,DDEC,DC)
+C 
+      RA50 = RA 
+      DEC50 = DEC 
+      EP1950 = EP 
+      RADAT = RA + DRA
+      DECDAT = DEC + DDEC 
+      IDINYR=365
+      IF(MOD(IT(6),400).EQ.0 .OR. 
+     +   (MOD(IT(6),4).EQ.0.AND.MOD(IT(6),100).NE.0)) IDINYR=366
+      EPOCH = IT(6) + IT(5)/FLOAT(IDINYR) 
+      IF(KSUN.OR.KMOON) EP1950=EPOCH
+      CALL UPDAT
+C                   Call again to fix up az and el
+      IERR = 0
+      GOTO 400
+C 
+C  Handle SUN position here.
+C 
+320   CONTINUE
+      CALL GTFLD(IBUF,ICH,NCHAR,IC1,IC2)
+      IF(IC1.EQ.0) GO TO 321
+         IERR=-303
+         GO TO 990
+C 
+321   CONTINUE
+      CALL EXEC(11,IT,IT(6))
+      CALL SUN(RAD,DECD,IT) 
+      RA=RAD
+      DEC=DECD
+C     CALL RD2AE(RA,DEC,AZS,ELS,IT,-WLONG,ALAT) 
+C     IF (ELS.GT.ELLIM) GOTO 390
+C       IERR=-301 
+C       GOTO 990
+D     WRITE(LU,9910) RA,DEC 
+D9910 FORMAT("RA,DEC = "2E10.4) 
+      GO TO 300 
+C 
+C  Handle MOON position here. 
+C 
+340   CONTINUE
+      CALL GTFLD(IBUF,ICH,NCHAR,IC1,IC2)
+      IF(IC1.EQ.0) GO TO 341
+         IERR=-304
+         GO TO 990
+C 
+341   CONTINUE
+      CALL IRP(6HMOON  ,0,IERR,-1)
+      IF (IERR.EQ.0.OR.IERR.EQ.23) GOTO 350 
+        IERR = -305 
+        GOTO 990
+350   CONTINUE
+      ALATI=ALAT
+      ELONG=-WLONG
+      GHEIG=HEIGHT
+      CALL EXEC(11,IT,IT(6))
+      CALL EXEC(23,6HMOON  ,0,0,0,0,0,IBUFI,24) 
+      CALL EXEC(14,1,IBUFO,12)
+      RA=RAD
+      DEC=DECD
+C     CALL RD2AE(RA,DEC,AZS,ELS,IT,-WLONG,ALAT) 
+D     WRITE(LU,9911) RA,DEC 
+D9911 FORMAT("RA,DEC = "2E10.4) 
+C360   IF (ELS.GT.ELLIM) GOTO 390 
+C        IERR = -302
+C        GOTO 990 
+C 
+390   CONTINUE
+      GO TO 300 
+C 
+C     4. Now schedule ANTCN.  Tell it to do source pointing.
+C 
+400   CONTINUE
+      CALL EXEC(23,6HANTCN ,1)
+      CALL RMPAR(IP)
+C 
+C       MOJAVE PATCH SO IF C3P0 BOMBS, THE ONSOURCE STAT WILL 
+C       CHANGED TO SLEWING AND THE NEXT 'ONSOURCE' FROM PREOB 
+C       WILL ALERT THE OPERATOR  -  840322  RWMc
+C       (IN GENERAL ASSUME ONSOURCE STATUS SLEWING UNTIL WE 
+C        KNOW OTHERWISE FOR SURE - WEH 850523)
+C 
+      IONSOR=0
+C 
+      RETURN
+C 
+990   IP(1) = 0 
+      IP(2) = 0 
+      IP(3) = IERR
+      IP(4) = 2HQS
+      CALL IOF(6HMOON  ,IERR,-1)
+      RETURN
+C 
+C 
+C     5. Return the source name for display 
+C 
+500   NCH = ICHMV(IBUF,NCHAR+1,2H/ ,1,1)
+      IF (ICHCM(LSORNA,1,10H          ,1,10).EQ.0) GOTO 530 
+      NCH = ICHMV(IBUF,NCH,LSORNA,1,10) 
+      IAZ=ICHCM(LSORNA,1,10HAZEL      ,1,10)
+      IXY=ICHCM(LSORNA,1,10HXY        ,1,10)
+      KD = IAZ.EQ.0.OR.IXY.EQ.0 
+      N = ISCNC(IBUF,1,NCH-1,40B) 
+      IF (N.NE.0) NCH=N 
+C                   Adjust next char to be first blank in source name.
+      NCH = MCOMA(IBUF,NCH) 
+      IF (KD) GOTO 510
+      CALL RADEC(RA50,DEC50,0.0,IRAH,IRAM,RAS,
+     .     LDS,IDCD,IDCM,DCS,L,I,I,D) 
+      NCH = NCH + IR2AS(IRAH*10000.0+IRAM*100.0+RAS,IBUF,NCH,9,1) 
+      NCH = MCOMA(IBUF,NCH) 
+      IF (LDS.EQ.2H- ) NCH = ICHMV(IBUF,NCH,LDS,1,1)
+      NCH = NCH + IR2AS(IDCD*10000.0+IDCM*100.0+DCS,IBUF,NCH,7,0) 
+      GOTO 520
+510   NCH = NCH + IR2AS(RA50*180.0/PI,IBUF,NCH,7,2) 
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IR2AS(DEC50*180.0/PI,IBUF,NCH,7,2)
+      GOTO 530
+520   NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IR2AS(EP1950,IBUF,NCH,6,1)
+      NCH = MCOMA(IBUF,NCH) 
+      CALL RADEC(RADAT,DECDAT,0.0,IRAH,IRAM,RAS,
+     .     LDS,IDCD,IDCM,DCS,L,I,I,D) 
+      NCH = NCH + IR2AS(IRAH*10000.0+IRAM*100.0+RAS,IBUF,NCH,8,1) 
+      NCH = MCOMA(IBUF,NCH) 
+      IF (LDS.EQ.2H- ) NCH = ICHMV(IBUF,NCH,LDS,1,1)
+      NCH = NCH + IR2AS(IDCD*10000.0+IDCM*100.0+DCS,IBUF,NCH,7,0) 
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IR2AS(EPOCH,IBUF,NCH,6,1) 
+C 
+530   ICLASS = 0
+D     WRITE(LU,9001) NCH,(IBUF(I),I=1,10) 
+D9001 FORMAT("NCH,IBUF IN SORCE = "I5,1X,10A2)
+      NCH = NCH - 1 
+      CALL EXEC(20,0,IBUF,-NCH,2HFS,0,ICLASS) 
+      IP(1) = ICLASS
+      IP(2) = 1 
+      IP(3) = 0 
+      IP(4) = 2HQS
+      RETURN
+      END 

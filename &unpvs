@@ -1,0 +1,682 @@
+FTN4,X
+$STRUC
+      SUBROUTINE UNPVS(IBUF,ILEN,IERR,
+     .LNAME1,LNAME2,LRAHMS,IRAH,IRAM,RAS,RARAD, 
+     .LDSIGN,LDCDMS,IDECD,IDECM,DECS,DECRAD,
+     .EPOCH,VELOC,
+     .            OINC,OECC,OPER,ONOD,
+     .OANM,OAXS,OMOT,IEPY,OEDY, 
+     .            PARALX,PMRA,PMDEC,
+     .NCOM,IVER,IDATE,LCOMP,
+     .LPROT),UNPACK SOURCE VERSION RECORD C#780803:08:04# 
+C 
+C     UNPVS unpacks the record holding information on a source entry version. 
+C           This routine may be called only the first 30 parameters 
+C           if information related to the catalog only is not wanted. 
+C           27 parameters will work for no parrallax and proper motion. 
+C 
+C  HISTORY: 
+C 
+C      WHO   WHEN    WHAT 
+C 
+C      NRV   ??????  CREATED
+C      WEH   830519  SATELLITES ADDED 
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF(1) 
+C           - buffer having the record
+C     ILEN - length of the record in IBUF, in words 
+C 
+C  OUTPUT:
+C 
+C     IERR - error, 0=OK, -100-n=error reading nth field in the record
+      DIMENSION LNAME1(4), LNAME2(4)
+C           - IAU and common names
+C 
+C   Celestial Source Info:
+C 
+      DIMENSION LRAHMS(8) 
+C          - right ascension, in form hhmmss.ssssssss 
+C     IRAH,IRAM - right ascension hours&minutes, in binary
+      DOUBLE PRECISION RAS
+C           - seconds field of right ascension
+      DOUBLE PRECISION RARAD
+C           - right ascension, in radians 
+C     LDSIGN - sign of the declination, + or -
+      DIMENSION LDCDMS(7) 
+C           - declination, in form ddmmss.sssssss 
+C     IDECD,IDECM - declination degrees&minutes, in binary
+      DOUBLE PRECISION DECS 
+C           - declination seconds field 
+      DOUBLE PRECISION DECRAD 
+C           - declination, in radians 
+C     EPOCH - epoch of RA and DEC 
+C     VELOC - velocity, for spectral line sources 
+C 
+C   Satellite orbit info: 
+C 
+      DOUBLE PRECISION OINC 
+C           - orbit inclination 
+      DOUBLE PRECISION OECC 
+C           - orbit eccentricity
+      DOUBLE PRECISION OPER 
+C           - orbit arguement of the perigee
+      DOUBLE PRECISION ONOD 
+C           - orbit right ascending node
+      DOUBLE PRECISION OANM 
+C           - orbit anomaly 
+      DOUBLE PRECISION OAXS 
+C           - orbit semi-major axis 
+      DOUBLE PRECISION OMOT 
+C           - orbit motion
+C     IEPY - orbit epoch year 
+      DOUBLE PRECISION OEDY 
+C           - orbit epoch day 
+C 
+C   More celestial source info: 
+C 
+C     PARALX - parallax 
+C     PMRA, PMDEC - proper motion in ra and dec 
+C 
+C   Catalog info: 
+C 
+C     NCOM - number of comments 
+C     IVER - version number of this information 
+      DIMENSION IDATE(4)
+C          - date/time this version was entered 
+C     LCOMP - computer ID where this version was entered
+C     LPROT - Y for protected, N for OK to edit and delete
+C 
+C  SUBROUTINES CALLED: LNFCH UTILITIES
+C                      NARG - to get # arguments in call
+C                      UNPWC - to get celestial specific info 
+C                      UNPWO - to get satellite orbit specific info 
+C 
+C  LOCAL: 
+C 
+      DOUBLE PRECISION DAS2B
+      DIMENSION LORBIT(4) 
+C 
+C  INITIALIZED: 
+C 
+      DATA LORBIT/2HOR,2HBI,2HT ,2H  /
+D     DATA LUUSR/16/
+C 
+C 
+C     0. First, find out how many parameters we were called with. 
+C 
+      NARGS = NARG(IDUM)
+      PIPOO=3.1415926535D0
+C 
+C      NO ERRORS YET SET CODE TO ZERO 
+C 
+      IERR = 0
+C 
+C 
+C     1. Start decoding this record with the first character. 
+C 
+      ICH = 1 
+C 
+C 
+C     IAU-name, 8 characters. 
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      NCH = IC2-IC1+1 
+      IF$ (NCH.GT.8)
+        THEN BEGIN "too long" 
+          IERR = -101 
+          DONE
+          ENDT "too long" 
+      CALL IFILL(LNAME1,1,8,40B)
+      CALL ICHMV(LNAME1,1,IBUF,IC1,NCH) 
+C 
+C 
+C     Common-name, 8 characters.
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      NCH = IC2-IC1+1 
+      IF$ (NCH.GT.8)
+        THEN BEGIN "too many" 
+          IERR = -102 
+          DONE
+          ENDT "too many" 
+      CALL IFILL(LNAME2,1,8,40B)
+      CALL ICHMV(LNAME2,1,IBUF,IC1,NCH) 
+C 
+C 
+C   Test for Satellite as opposed to celestial source and call
+C        the appropriate decoding routine.
+C 
+      JERR=0
+      IF$ (ICHCM(LNAME1,1,LORBIT,1,8).NE.0) 
+        THEN BEGIN "celestial"
+          CALL UNPWC(IBUF,ILEN,JERR,LRAHMS,IRAH,IRAM,RAS,RARAD, 
+     .               LDSIGN,LDCDMS,IDECD,IDECM,DECS,DECRAD, 
+     .               EPOCH,VELOC,NARGS,APARA,APMRA,APMDEC,ICH)  
+D     WRITE(LUUSR,9901) JERR
+D9901 FORMAT("RETURN FROM UNPWC, JERR= ",I6)
+          IF$ (JERR.NE.0) 
+            THEN BEGIN "error celestial"
+              IERR=JERR 
+              DONE
+              ENDT "error celestial"
+            ELSE BEGIN "good celestial" 
+              IF$ (NARGS.GT.27) 
+                THEN BEGIN "more celestial" 
+                  PARALX=APARA
+                  PMRA=APMRA
+                  PMDEC=APMDEC
+                  ENDT "more celestial" 
+              ENDE "good celestial" 
+          ENDT "celestial"
+        ELSE BEGIN "orbit"
+          CALL UNPWO(IBUF,ILEN,JERR,OINC,OECC,OPER,ONOD,
+     .               OANM,OAXS,OMOT,IEPY,OEDY,ICH)
+D     WRITE(LUUSR,9904) JERR
+D9904 FORMAT("RETURN FROM UNPWO, JERR =",I6)
+          IF$ (JERR.NE.0) 
+            THEN BEGIN "error orbit"
+              IERR=JERR 
+              DONE
+              ENDT "error orbit"
+          ENDE "orbit"
+C 
+C     Quit now if we were called with only 30 arguments.
+C 
+      IF$ (NARGS.LE.30) 
+        THEN DONE 
+C 
+C 
+      JERR=0
+      CALL UNPCA(IBUF,ICH,ILEN,JERR,NCOM,IVER,IDATE,LCOMP,LPROT)
+D     WRITE(LUUSR,9906) JERR
+D9906 FORMAT("RETURN FORM UNPCA, JERR =, ",I6)
+      IERR=JERR 
+C 
+C       CORRECT FOR DIFFERANT NUMBER OF SATELLITE AND CELESTIAL 
+C       SOURCE FIELDS, IF AND ONLY IF THERE IS ERROR
+C 
+      IF$ (JERR.NE.0 .AND. ICHCM(LNAME1,1,LORBIT,1,8).EQ.0) 
+          THEN IERR=JERR+2
+C 
+C 
+      END 
+C@UNPWC 
+      SUBROUTINE UNPWC(IBUF,ILEN,IERR,
+     .LRAHMS,IRAH,IRAM,RAS,RARAD, 
+     .LDSIGN,LDCDMS,IDECD,IDECM,DECS,DECRAD,
+     .EPOCH,VELOC,
+     .            NARGS,
+     .            PARALX,PMRA,PMDEC,
+     .ICH),UNPACK CELESTIAL RECORD INFO C#780803:08:04# 
+C 
+C     UNPWC unpacks celestial source information from source entry record.
+C           This routine is intended to be a utility for UNPVS. 
+C 
+C  HISTORY: 
+C 
+C    WHO  WHEN    WHAT
+C 
+C    NRV  ??????  CREATED 
+C    WEH  830519  EXTRACTED FROM UNPVS AND MADE INTO A SUBROUTINE 
+C 
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF(1) 
+C           - buffer having the record
+C     ILEN - length of the record in IBUF, in words 
+C     NARGS - number in arguements in the original call to UNPVS
+C             that resulted in this invokation of UNPWC 
+C     ICH   - characters processed so far in IBUF 
+C 
+C  OUTPUT:
+C 
+C     IERR - error, 0=OK, -100-n=error reading nth field in the record
+C 
+C   Celestial Source Info:
+C 
+      DIMENSION LRAHMS(8) 
+C          - right ascension, in form hhmmss.ssssssss 
+C     IRAH,IRAM - right ascension hours&minutes, in binary
+      DOUBLE PRECISION RAS
+C           - seconds field of right ascension
+      DOUBLE PRECISION RARAD
+C           - right ascension, in radians 
+C     LDSIGN - sign of the declination, + or -
+      DIMENSION LDCDMS(7) 
+C           - declination, in form ddmmss.sssssss 
+C     IDECD,IDECM - declination degrees&minutes, in binary
+      DOUBLE PRECISION DECS 
+C           - declination seconds field 
+      DOUBLE PRECISION DECRAD 
+C           - declination, in radians 
+C     EPOCH - epoch of RA and DEC 
+C     VELOC - velocity, for spectral line sources 
+C     PARALX - parallax 
+C     PMRA, PMDEC - proper motion in ra and dec 
+C 
+C  SUBROUTINES CALLED: LNFCH UTILITIES
+C 
+C  LOCAL: 
+C 
+      DOUBLE PRECISION DAS2B
+C 
+C  INITIALIZED: 
+C 
+D     DATA LUUSR/16/
+C 
+C 
+C 
+C     Right ascension.
+C 
+      PIPOO=3.1415926535D0
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IRAH = IAS2B(IBUF,IC1,IC2-IC1+1)
+      IF$ (IRAH.LT.0.OR.IRAH.GT.24) 
+        THEN BEGIN
+          IERR = -103 
+          DONE
+          ENDT
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IRAM = IAS2B(IBUF,IC1,IC2-IC1+1)
+      IF$ (IRAM.LT.0.OR.IRAM.GT.60) 
+        THEN BEGIN
+          IERR = -104 
+          DONE
+          ENDT
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      RAS = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF$ (IERR.LT.0.OR.RAS.GT.60.0)
+        THEN BEGIN
+          IERR = -105 
+          DONE
+          ENDT
+C 
+      RARAD = (IRAH*3600.D0+IRAM*60.D0+RAS)*PIPOO/43200.D0  
+C                   Compute RA in radians 
+D     WRITE(16,9901) IRAH,IRAM,RAS,PIPOO,RARAD  
+D9901 FORMAT("H,M,S,PI,RAD="2I3,3D20.6) 
+      CALL IFILL(LRAHMS,1,16,40B) 
+C                   First clear out the ASCII returned RA 
+      CALL IB2AS(IRAH,LRAHMS,1,40000B+400B*2+2) 
+C                   Put back the RA, leading zeros attached 
+      CALL IB2AS(IRAM,LRAHMS,3,40000B+400B*2+2) 
+C                   The minutes, with leading zeros 
+      CALL IB2AS(IDINT(RAS),LRAHMS,5,40000B+400B*2+2) 
+C                   The integral part of seconds, with leading zeros
+      ID = ISCNC(IBUF,IC1,IC2,56B)
+C                   Find the decimal point in the seconds, if any 
+      IF (ID.GT.0) CALL ICHMV(LRAHMS,7,IBUF,ID,MIN0(IC2-ID+1,8))
+C                   Finally move in the decimal point and fractional seconds
+C 
+C 
+C     Declination.
+C 
+      ISIGN = +1
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF$ (ICHAR(IBUF,IC1).EQ.55B)
+        THEN BEGIN "- sign" 
+          IC1 = IC1 + 1 
+          ISIGN = -1
+          ENDT "- sign" 
+      IDECD = IAS2B(IBUF,IC1,IC2-IC1+1) 
+      IF$ (IDECD.LT.0.OR.IDECD.GT.90) 
+        THEN BEGIN
+          IERR = -106 
+          DONE
+          ENDT
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF$ (ICHAR(IBUF,IC1).EQ.55B)
+        THEN BEGIN "- sign" 
+          IC1 = IC1 + 1 
+          ISIGN = -1
+          ENDT "- sign" 
+      IDECM = IAS2B(IBUF,IC1,IC2-IC1+1) 
+      IF$ (IDECM.LT.0.OR.IDECM.GT.60) 
+        THEN BEGIN
+          IERR = -107 
+          DONE
+          ENDT
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IF$ (ICHAR(IBUF,IC1).EQ.55B)
+        THEN BEGIN "- sign" 
+          IC1 = IC1 + 1 
+          ISIGN = -1
+          ENDT "- sign" 
+      DECS = DAS2B(IBUF,IC1,IC2-IC1+1,IERR) 
+      IF$ (IERR.LT.0.OR.DECS.GT.60.0D0) 
+        THEN BEGIN
+          IERR = -108 
+          DONE
+          ENDT
+C 
+      DECRAD = (IDECD*3600.D0+IDECM*60.D0+DECS)*PIPOO/648000.D0 
+C                   Compute declination in radians
+      CALL IFILL(LDCDMS,1,14,40B) 
+C                   First clear out the ASCII returned DC 
+      CALL IB2AS(IDECD,LDCDMS,1,40000B+400B*2+2)
+C                   Put back the degrees, leading zeros attached
+      CALL IB2AS(IDECM,LDCDMS,3,40000B+400B*2+2)
+C                   The minutes, with leading zeros 
+      CALL IB2AS(IDINT(DECS),LDCDMS,5,40000B+400B*2+2)
+C                   The integral part of seconds, with leading zeros
+      ID = ISCNC(IBUF,IC1,IC2,56B)
+C                   Find the decimal point in the seconds, if any 
+      IF (ID.GT.0) CALL ICHMV(LDCDMS,7,IBUF,ID,MIN0(IC2-ID+1,7))
+C                   Finally move in the decimal point and fractional seconds
+      LDSIGN = 2H+
+      IF$ (ISIGN.EQ.-1) 
+        THEN BEGIN
+          DECRAD = -DECRAD
+          LDSIGN = 2H-
+          ENDT
+C 
+C 
+C     The epoch of position.
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      R = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF$ (IERR.LT.0.OR.R.LT.1800.0.OR.R.GT.2500.0) 
+        THEN BEGIN
+          IERR = -109 
+          DONE
+          ENDT
+      EPOCH = R 
+C 
+C 
+C     Velocity. 
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      R = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF$ (IERR.LT.0.OR.R.LT.0.0) 
+        THEN BEGIN
+          IERR = -110 
+          DONE
+          ENDT
+      VELOC = R 
+C 
+C 
+      IF$ (NARGS.LE.27) 
+        THEN DONE 
+C 
+C 
+C     Parallax. 
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      R = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF$ (IERR.LT.0.OR.R.LT.0.0) 
+        THEN BEGIN
+          IERR = -111 
+          DONE
+          ENDT
+      PARALX = R
+C 
+C 
+C     Proper motion, in ra and dec. 
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      R = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF$ (IERR.LT.0.OR.R.LT.0.0) 
+        THEN BEGIN
+          IERR = -112 
+          DONE
+          ENDT
+      PMRA = R
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      R = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)
+      IF$ (IERR.LT.0.OR.R.LT.0.0) 
+        THEN BEGIN
+          IERR = -113 
+          DONE
+          ENDT
+      PMDEC = R 
+C 
+C      Di-da-da-di-da-da-di that's all folks! 
+C 
+      END 
+C@UNPWO 
+      SUBROUTINE UNPWO(IBUF,ILEN,IERR,
+     .            OINC,OECC,OPER,ONOD,
+     .OANM,OAXS,OMOT,IEPY,OEDY, 
+     .ICH),UNPACK SATELLITE RECORD INFO C#780803:08:04# 
+C 
+C     UNPWO unpacks the satellite specific information in a source record.
+C           This routine is intended to be a utility to UNPVS.
+C 
+C  HISTORY: 
+C 
+C     WHO  WHEN    WHAT 
+C 
+C     WEH  820519  CREATED
+C 
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF(1) 
+C           - buffer having the record
+C     ILEN - length of the record in IBUF, in words 
+C     ICH  - the number of characters in IBUF that were processed by
+C            UNPVS
+C 
+C  OUTPUT:
+C 
+C     IERR - error, 0=OK, -100-n=error reading nth field in the record
+C 
+C   Satellite orbit info: 
+C 
+      DOUBLE PRECISION OINC 
+C           - orbit inclination 
+      DOUBLE PRECISION OECC 
+C           - orbit eccentricity
+      DOUBLE PRECISION OPER 
+C           - orbit arguement of the perigee
+      DOUBLE PRECISION ONOD 
+C           - orbit right ascending node
+      DOUBLE PRECISION OANM 
+C           - orbit anomaly 
+      DOUBLE PRECISION OAXS 
+C           - orbit semi-major axis 
+      DOUBLE PRECISION OMOT 
+C           - orbit motion
+C     IEPY - orbit epoch year 
+      DOUBLE PRECISION OEDY 
+C           - orbit epoch day 
+C 
+C  SUBROUTINES CALLED: LNFCH UTILITIES
+C 
+C  LOCAL: 
+C 
+      DOUBLE PRECISION DAS2B
+C 
+C  INITIALIZED: 
+C 
+D     DATA LUUSR/16/
+C 
+C   Orbit Inclination.
+C 
+      PIPOO=3.1415926535D0
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      OINC =DAS2B(IBUF,IC1,IC2-IC1+1) 
+      IF$ (OINC  .LT.-360.0 .OR.  OINC  .GT.360.0D0)
+        THEN BEGIN
+          IERR=-103 
+          DONE
+          ENDT
+C 
+C       Orbit eccentricity. 
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      OECC =DAS2B(IBUF,IC1,IC2-IC1+1) 
+      IF$ (OECC  .LT. 0.0D0 .OR.  OECC  .GT. 1.0D0  ) 
+        THEN BEGIN
+          IERR=-104 
+          DONE
+          ENDT
+C 
+C       Orbit arguement of perigee. 
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      OPER=DAS2B(IBUF,IC1,IC2-IC1+1)
+      IF$ (OPER .LT.-360.D0 .OR.  OPER .GT.360.0D0) 
+        THEN BEGIN
+          IERR=-105 
+          DONE
+          ENDT
+C 
+C       Orbit right ascending node. 
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      ONOD=DAS2B(IBUF,IC1,IC2-IC1+1)
+      IF$ (ONOD .LT.-360.D0 .OR.  ONOD .GT.360.0D0) 
+        THEN BEGIN
+          IERR=-106 
+          DONE
+          ENDT
+C 
+C       Orbit anomaly.
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      OANM=DAS2B(IBUF,IC1,IC2-IC1+1)
+      IF$ (OANM .LT.-360.D0.OR.  OANM .GT.360.D0 )
+        THEN BEGIN
+          IERR=-107 
+          DONE
+          ENDT
+C 
+C       Orbit semi-major axis.
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      OAXS=DAS2B(IBUF,IC1,IC2-IC1+1)
+      IF$ (OAXS .LT.0.0D0 ) 
+        THEN BEGIN
+          IERR=-108 
+          DONE
+          ENDT
+C 
+C       Orbit motion. 
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      OMOT=DAS2B(IBUF,IC1,IC2-IC1+1)
+      IF$ (OMOT .LT. 0.0D0 )
+        THEN BEGIN
+          IERR=-109 
+          DONE
+          ENDT
+C 
+C      Orbit epoch year.  If this program is still being used in
+C       in the year 2000, make someone think about the accuracy of
+C       the time calculations (sideral, modified Julian day, etc.). 
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IEPY =IAS2B(IBUF,IC1,IC2-IC1+1) 
+      IF$ (IEPY  .LT. 1959 .OR.  IEPY  .GT.1999 ) 
+        THEN BEGIN
+          IERR=-110 
+          DONE
+          ENDT
+C 
+C       Orbit epoch day.
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      OEDY=DAS2B(IBUF,IC1,IC2-IC1+1)
+      IF$ (OEDY .LT.0.0D0  .OR.  OEDY .GT.366.0D0)
+        THEN BEGIN
+          IERR=-111 
+          DONE
+          ENDT
+C 
+C        Done.
+C 
+      RETURN
+      END 
+C@UNPCA 
+      SUBROUTINE UNPCA(IBUF,ICH1,ILEN,IERR,NCOM,IVER,IDATE,LCOMP, 
+     .LPROT),UNPACK CATALOG INFO C#780803:08:04#
+C 
+C     UNPCA unpacks catalog-specific information
+C     The number of comments. 
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF(1) 
+C           - buffer having the record
+C     ILEN - length of the record in IBUF, in words 
+C     ICH1 - first character to use in IBUF 
+C 
+C  OUTPUT:
+C 
+C     IERR - error, 0=OK, -100-n=error reading nth field in the record
+C     NCOM - number of comments 
+C     IVER - version number of this information 
+      DIMENSION IDATE(4)
+C          - date/time this version was entered 
+C     LCOMP - computer ID where this version was entered
+C     LPROT - Y for protected, N for OK to edit and delete
+C 
+C 
+      ICH = ICH1
+C 
+C     The number of comments. 
+C 
+      PIPOO=3.1415926535D0
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      N = IAS2B(IBUF,IC1,IC2-IC1+1) 
+      IF$ (N.LT.0)
+        THEN BEGIN
+          IERR = -114 
+          DONE
+          ENDT
+      NCOM = N
+C 
+C 
+C     Next, version number. 
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      N = IAS2B(IBUF,IC1,IC2-IC1+1) 
+      IF$ (N.LT.0)
+        THEN BEGIN
+          IERR = -115 
+          DONE
+          ENDT
+      IVER = N
+C 
+C 
+C     The date field, format yydddhhmm. 
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      IDATE(1) = IAS2B(IBUF,IC1,2)
+      IDATE(2) = IAS2B(IBUF,IC1+2,3)
+      IDATE(3) = IAS2B(IBUF,IC1+5,2)
+      IDATE(4) = IAS2B(IBUF,IC1+7,2)
+      IF$ (IDATE(1).LT.0.OR.IDATE(2).LT.0.OR.IDATE(3).LT.0.OR.
+     .    IDATE(4).LT.0)
+        THEN BEGIN
+          IERR = -116 
+          DONE
+          ENDT
+C 
+C 
+C     Computer ID, 1 character. 
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      CALL ICHMV(LCOMP,1,IBUF,IC1,1)
+      IF$ (IC2-IC1+1.NE.1)
+        THEN BEGIN
+          IERR = -117 
+          DONE
+          ENDT
+C 
+C 
+C     Protection field, Y or N. 
+C 
+      CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) 
+      LPROT = 2H
+      CALL ICHMV(LPROT,1,IBUF,IC1,1)
+      IF$ (IC2-IC1+1.NE.1)
+        THEN BEGIN
+          IERR = -118 
+          DONE
+          ENDT
+      END 

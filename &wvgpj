@@ -1,0 +1,34 @@
+FTN4,X
+C@WVGPT 
+      SUBROUTINE WVGPT(IBUF,ILEN,ICLASS,  
+     .NREC),GET WVR POINTING STATUS (JPL) C#870115:04:49# 
+C 
+C     WVGPT formats the command to get pointing info from the JPL radiometers.
+C 
+C  COMMON:
+      INCLUDE #FSCOM::FS
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF(1) 
+C      - buffer to put the command in.
+C 
+C  OUTPUT:
+C 
+C     ICLASS,NREC - class, #records for MATCN 
+C 
+C 
+C     1. The command to get the pointing info for the JPL radiometers is: 
+C              P
+C 
+      IBUF(1) = 0 
+      IBUF(2) = 2HWV
+      CALL ICHMV(IBUF,5,4H D 2,1,4) 
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-8,2HFS,0,ICLASS) 
+      NREC = 1
+C 
+C     ITOWVR = ITO(LUWVR,5000)
+C                   Set time-out to 5 sec 
+      RETURN
+      END 

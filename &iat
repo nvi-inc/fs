@@ -1,0 +1,173 @@
+FTN4,X
+C@IAT 
+C 
+      FUNCTION IAT(ITRAN,NTR,LUMAT,KECHO,LU,KWVR,IRECV,NRC, 
+     .             IERR),MAT COMMUNICATIONS C#831014:18:27# 
+C 
+C   IAT handles communications with the MAT 
+C 
+C  WHO DATE    CHANGE 
+C  NRV 810624 MODIFY FOR DVF00 TRIGGER CHAR IMMEDIATE TURNAROUND
+C  NRV 811012 REMOVE SOME WVR-SPECIFIC CODE (AFTER RBM) 
+C 
+C     INPUT VARIABLES:
+C 
+C        NTR    - number of characters in ITRAN 
+      DIMENSION ITRAN(1)
+C               - buffer to be transmitted
+C        LUMAT  - LU of MAT daisy chain 
+      LOGICAL KECHO 
+C              - true if MAT communications echo desired
+      LOGICAL KWVR
+C              - true if this is a WVR communication
+C        LU     - LU for operator's terminal
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        NRC    - number of characters in received buffer 
+      DIMENSION IRECV(1)
+C               - buffer received from AT 
+C        IERR   - error code
+C 
+C     CALLING SUBROUTINES: MATCN,DATAT
+C 
+C     CALLED SUBROUTINES: character utilities, REIO(1and 2)s
+C 
+C LOCAL VARIABLES 
+C 
+C        ILEN   - max length available in ITRAN buffer, characters. 
+C                ***NOTE*** THIS MUST CORRESPOND TO THE LENGTH
+C                           OF IBUF2 IN MATCN, LESS 1 WORD. 
+C        IFRECV - 1 if we expect response, 0 if none expected 
+C        IR     - which terminal character in IRSPN we find 
+C     MAXTRY - maximum number of times we will try to communicate 
+C     ITRY - count of attempts
+      DIMENSION IREG(2) 
+C               - registers from REIO 
+C     LTRIG - termination character for trigger 
+C     NCTRAN - number of char to be transmitted 
+      DIMENSION NCHRC(8)
+C               - number of characters received in responses
+      DIMENSION IRSPN(4)
+C               - terminal characters which generate a response 
+C        NRSPN  - number of responses possible
+      EQUIVALENCE (IREG(1),REG) 
+C 
+C   INITIALIZED VARIABLES 
+C 
+      DATA NCHRC/3,3,10,10,3,3,16,3/
+      DATA IRSPN/2H$*,2H?/,2H>',002472B/
+C                   Last word is <enq>: 
+      DATA ILEN/158/
+      DATA NRSPN/8/ 
+      DATA MAXTRY/2/
+C 
+C 
+C     1. Set up the buffer to be sent to the MAT. 
+C     First initialize some things. 
+C 
+      CALL LURQ(010001B,LUMAT,1)
+      IERR = 0
+      ITRY = 0
+      IFRECV = 0
+      NRC = 0 
+      NCTRAN = NTR
+C 
+C     1.1 Find the last character in the buffer to determine the
+C     type of response. 
+C 
+      IF (KWVR) IFRECV = 1
+C                   There is always a response to the WVR 
+      IF (ISCNC(ITRAN,1,NTR,72B).EQ.0) GOTO 90
+      IR = 8
+      GOTO 110
+C                   A colon in the message means a response to the download 
+90    DO 100 IR=1,NRSPN 
+        IF (ICHAR(ITRAN,NTR).EQ.ICHAR(IRSPN,IR)) GOTO 110 
+100     CONTINUE
+C                     Check each type of terminal character 
+      GOTO 120
+110   IFRECV = 1
+C                     IR holds the index for the type of response 
+C 
+C     1.2 Set up the trigger character and put a "_" into the 
+C     buffer to inhibit a CRLF from the driver. 
+C 
+120   LTRIG = 0 
+      IF (IFRECV.EQ.0) GOTO 125 
+      CALL ICHMV(LTRIG,2,ITRAN,NCTRAN,1)
+C                   Move the last char into a separate variable, lower byte 
+      NCTRAN = NCTRAN-1 
+C                   Don't count the last char any more
+125   NCTRAN = ICHMV(ITRAN,NCTRAN+1,2H_ ,1,1)-1 
+C                     The "_" will keep the CRLF off the end of the message 
+      IF (NCTRAN.EQ.1) NCTRAN=ICHMV(ITRAN,1,2H _,1,2)-1 
+C 
+C 
+C     2. Write the buffer to the MAT, and read response if expected.
+C     Set the time-out on the MAT depending on the response.
+C 
+C     ******** COMMENT THESE LINES FOR TERMINAL TESTING!!  ******** 
+      CALL ITO(LUMAT,100) 
+      IF (KWVR.OR.IR.EQ.7) CALL ITO(LUMAT,500)
+C                     Longer time-outs for WVR and for CRC response 
+C     ********                                            ********
+200   IF (KECHO) CALL REIO(2,LU,ITRAN,-(NCTRAN-1))
+      IF (KECHO.AND.IFRECV.NE.0) CALL REIO(2,LU,LTRIG,-2) 
+C                   Write message on the screen if echo is on 
+      REG = REIO(2,LUMAT,ITRAN,-NCTRAN) 
+C                   Write the buffer to the MAT bus 
+      IF (IFRECV.EQ.0) GOTO 900 
+C                   We're done now if there is to be no response
+C 
+C     For actual communications, use 3200B in the read request. 
+C       3200B = 0 1 1 0 1 0 
+C                 | | | | | ASCII read
+C                 | | | | no master reset on initialization 
+C                 | | | no echo 
+C                 | | transmit spec. char. (LF, CR) 
+C                 | buffer mode 
+C***NOTE THIS SHOULD BE  400B+LUMAT FOR TERMINAL TESTS******
+C***NOTE THIS SHOULD BE 3200B+LUMAT FOR THE REAL THING******
+      CALL EXEC(3,1200B+LUMAT,020000B+LTRIG)
+C                   Set up the trigger character
+      REG = REIO(1,3200B+LUMAT,IRECV,-ILEN) 
+C     REG = REIO(1, 400B+LUMAT,IRECV,-ILEN) 
+C                     Read from the MAT bus 
+      NRC = MIN0(ILEN,IREG(2))
+      IF (KECHO) CALL REIO(2,LU,IRECV,-NRC) 
+C                   If echo requested, write response on screen 
+      ITRY = ITRY + 1 
+C 
+C 
+C     8. Now check for errors.  If time-out or wrong number of characters,
+C     try communications all over again.
+C     If we got a 6B (ack) or 25B (nak) substitute readable ACK or NAK. 
+C 
+800   IF (IAND(IREG,10B).EQ.0) GOTO 810 
+C     TIMEOUT 
+      IF (ITRY.LT.MAXTRY) GOTO 200
+      IERR = -4 
+      GOTO 900
+810   IF (NRC.EQ.NCHRC(IR).OR.KWVR) GOTO 820
+C     WRONG NUMBER OF CHARACTERS IN RESPONSE
+      IF (ITRY.LT.MAXTRY) GOTO 200
+      IERR = -5 
+      GOTO 900
+820   IF ((.NOT.KWVR.AND.ICHAR(IRECV,1).NE.6B).OR.
+     .     (KWVR.AND.NRC.NE.2)) GOTO 830
+C     ACK RESPONSE
+      IERR = +1 
+      NRC = ICHMV(IRECV,1,3HACK,1,3) - 1
+      GOTO 900
+830   IF (KWVR.OR.ICHAR(IRECV,1).NE.25B) GOTO 840 
+C     NAK RESPONSE
+      IF (IR.EQ.5.AND.ITRY.LT.MAXTRY) GOTO 200
+      IERR = +2 
+      NRC = ICHMV(IRECV,1,3HNAK,1,3) - 1
+      GOTO 900
+840   IERR = 0
+900   IAT = IERR
+      CALL LURQ(110000B,LUMAT,1)
+      RETURN
+      END 

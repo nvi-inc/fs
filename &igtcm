@@ -1,0 +1,133 @@
+FTN4,X
+C@IGTCM 
+      FUNCTION IGTCM(IFC,IEC),GET COMMAND FOR LOGEX C#870115:05:33# 
+C 
+C IGTCM - Returns Command number after checking name in IBUF
+C 
+C MODIFICATIONS:  
+C 
+C     DATE     WHO  DESCRIPTION 
+C 
+C     820416   KNM  THE OUTPUT COMMAND REPLACED THE LU COMMAND. THE 
+C                   USER MAY NOW SPECIFY AN OUTPUT FILE OR ANY LOGICAL
+C                   UNIT FOR LOGEX OUTPUT.
+C 
+C     820421   KNM  THE SKSUMMARY WAS ADDED.
+C 
+C     820519   KNM  THE OLD PLOT COMMAND WAS CHANGED TO TPLOT 
+C                   (STILL IKEY=6) AND THE NEW PLOT COMMAND (PLOT)
+C                   WAS ADDED (IKEY=13).
+C 
+C     820825   KNM  SKED COMMAND WAS ADDED AS A VALID COMMAND 
+C 
+C     820909   KNM  CFILE COMMAND WAS ADDED AS A VALID COMMAND
+C 
+C     820922   KNM  IGTCM WAS REWRITTEN TO TEST FOR AMBIGUOUS 
+C                   COMMANDS INPUT FROM THE USER FOR MINIMUM
+C                   MATCHING. 
+C 
+C  INPUT VARIABLES: 
+C 
+C     IFC - first char to use in IBUF 
+C     IEC - last char to use in IBUF
+C 
+C 
+C  OUTPUT VARIABLES:
+C 
+C     IGTCM - command number, as found in LKEYNM
+C 
+C  LOCAL VARIABLES: 
+C 
+      DIMENSION LKEYNM(48)
+C     - key words which are recognized
+C 
+C     ICOMN - Contains the command number count 
+C     IFCMD - Flag which indicates whether first match has  
+C             been encountered. 
+C     IKEYWD - Number of words in LKEYNM.  This Constant must 
+C              be increased if any new commands are added.
+C 
+C  COMMON BLOCKS USED:
+C 
+      INCLUDE #LXCOM::56
+C 
+C 
+C  INITIALIZED VARIABLES: 
+C 
+C  ******IMPORTANT!!!****** 
+C 
+C  One blank must always precede the beginning of a command word, even
+C  the first command in LKEYNM!!
+C 
+      DATA LKEYNM /2H O,2HUT,2HPU,2HT ,2HCO,2HMM,2HAN,2HD ,2HLO,2HG , 
+     /             2HLI,2HST,2H ?,2H? ,2HTP,2HLO,2HT ,2HPA,2HRM,2H S, 
+     .             2HCA,2HLE,2H S,2HUM,2HMA,2HRY,2H S,2HTR,2HIN,2HG , 
+     .             2HTY,2HPE,2H S,2HKS,2HUM,2HMA,2HRY,2H P,2HLO,2HT ,   
+     .             2HSK,2HED,2H C,2HFI,2HLE,2H S,2HIZ,2HE / 
+C 
+      DATA IKEYWD/48/ 
+C 
+C 
+C ************************************************************
+C 
+C 1. Scan for a comparision of strings in LKEYNM and in IBUF. 
+C 
+C ************************************************************
+C 
+C 
+      IC1 = 1 
+      IFCMD=0 
+      NCH = IEC-IFC+1 
+100   ICH = ISCNS(LKEYNM,IC1,IKEYWD*2,IBUF,IFC,NCH) 
+      IF(ICH.GT.0) GOTO 200 
+      IF(IFCMD.EQ.1) GOTO 300 
+      ICOMN=0   
+      GOTO 400
+C 
+C 
+C ************************************************************
+C 
+C 2. Some match was found. Check to see if it starts at the 
+C    beginning of a word in LKEYNM. 
+C 
+C **********************************************************
+C 
+C 
+200   IF(ICHAR(LKEYNM,ICH-1).EQ.40B) GOTO 210   
+      IC1=ICH+1 
+      GOTO 100
+210   ICH1=ICH
+      IC1=ICH+1 
+      IFCMD=IFCMD+1 
+      IF(IFCMD.GT.1) ICOMN=-1 
+      IF(IFCMD.LE.1) GOTO 100 
+      GOTO 400
+C 
+C 
+C ************************************************************
+C 
+C 3. Count the number of blanks to determine the Command #
+C 
+C ************************************************************
+C 
+C 
+300   IC2=1 
+      ICOMN=0 
+310   IC3=ISCNC(LKEYNM,IC2,IKEYWD*2,40B)
+      IF(IC3.EQ.0) GOTO 400 
+      ICOMN=ICOMN+1 
+      IF(IC3+1.EQ.ICH1) GOTO 400  
+      IC2=IC3+1 
+      GOTO 310
+C 
+C 
+C ************************************************************
+C 
+C 4. Store the command number and return. 
+C 
+C ************************************************************
+C 
+C 
+400   IGTCM = ICOMN 
+      RETURN
+      END 

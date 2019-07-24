@@ -1,0 +1,210 @@
+FTN4,X
+C@ENA 
+C 
+      SUBROUTINE ENA(IP),TRACK ENABLE CONTROL C#870115:04:39# 
+C 
+C 1.1.   ENA controls the track enable function 
+C 
+C     INPUT VARIABLES 
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUENAUT VARIABLES:
+C 
+C        IP(1) - CLASS RETURNED 
+C        IP(2) - # RECORDS
+C        IP(3) - ERROR
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C     CALLED SUBROUTINES: GTPRM,ICHAR 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C        NCHAR  - number of characters in buffer
+C        IMMODE - mode for MAT
+C        ICH    - character counter 
+      DIMENSION IBUF(50)
+C               - class buffer
+      DIMENSION IG1(4)
+C               - first track in group
+C        ILEN   - length of IBUF, chars 
+      DIMENSION IPARM(2)
+C               - parameters returned from GENARM 
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+      DIMENSION ITRK(28)
+C               - one word per track
+C 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 4.  CONSTANTS USED
+C 
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA ILEN/100/
+      DATA IG1/0,1,14,15/ 
+C 
+C 6.  PROGRAMMER: NRV 
+C     LAST MODIFIED:  790320
+C# LAST COMPC'ED  870115:04:39 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     1. If we have a class buffer, then we are to enable tracks. 
+C     If no class buffer, we have been requested to read the enabled tracks.
+C 
+      ICHOLD = -99
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+      IERR = -1 
+      GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF,-ILEN) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF,1,NCHAR,75B) 
+C                   Scan for "="
+      IF (IEQ.EQ.0) GOTO 500
+C                   If no parameters, go read device
+      IF (ICHAR(IBUF,IEQ+1).NE.77B) GOTO 140
+      IP(1) = 0 
+      IP(4) = 77B 
+      CALL ENDIS(IP,ICLCM)
+      RETURN
+C 
+140   IF (ICHCM(IBUF,IEQ+1,LTSRS,1,ILENTS).EQ.0) GOTO 600 
+      IF (ICHCM(IBUF,IEQ+1,LALRM,1,ILENAL).EQ.0) GOTO 700 
+C 
+C 
+C     2. Step through buffer getting each parameter and decoding it.
+C     Command from user has these parameters: 
+C                   ENABLE=<track1,...trackn> 
+C     where 
+C           <track1...> = list of tracks, or G<n> where <n> is group number 
+C 
+C 
+210   ICH = IEQ+1 
+C 
+C     2.2 TRACKS, PARAMETERS 2
+C 
+220   DO 221 I=1,28 
+        ITRK(I) = 0 
+221     CONTINUE
+C                   Disable all tracks to start 
+C                   Leave general enable as is
+      NTRK=0
+      DO 225 I=1,28 
+        CALL GTPRM(IBUF,ICH,NCHAR,0,PARM) 
+        IF (ICHAR(PARM,1).EQ.52B) GOTO 226
+        IF (ICHAR(PARM,1).EQ.54B) GOTO 300
+C                   We are done when there are no more
+        IF (ICHAR(IPARM,1).GE.60B.AND.ICHAR(IPARM,1).LE.71B) GOTO 224 
+C                   If parameter is a number, skip to that section
+        IF (ICHAR(IPARM,1).NE.107B) GOTO 227
+C                   If not a "G", illegal 
+        IG = IAS2B(IPARM,2,1) 
+        IF (IG.LT.1.OR.IG.GT.4) GOTO 227
+        DO 223 J=1,14,2 
+          ITRK(J+IG1(IG)) = 1 
+          NTRK=NTRK+1 
+223       CONTINUE
+        GOTO 225
+224     NC = 1
+        IF (ICHAR(IPARM,2).NE.40B) NC = 2 
+C                   Number of characters to decode from ASCII to binary 
+        IT = IAS2B(IPARM,1,NC)
+        IF (IT.LE.0.OR.IT.GT.28) GOTO 227 
+C                   Check for in range
+        ITRK(IT) = 1
+        NTRK=NTRK+1 
+225     CONTINUE
+      GOTO 300
+226   IERR = -102 
+      GOTO 990
+227   IERR = -201-I 
+      GOTO 990
+C 
+C 
+C     3. Format the buffer for the controller.
+C                  mmTP%tttttttt
+C     where each "t" has 3 or 4 bits set by enabled tracks. 
+C 
+300   IBUF(1) = 0 
+C*************WE ARE NOT TURNING ON THE GENERAL ENABLE BIT WITH THIS COMMAND
+C*************ONLY THE REQUESTED TRACKS ARE SET UP. 
+C     IF (NTRK.GT.0) IENA = 1 
+      IBUF(2) = 2HTP
+C 
+      CALL EN2MA(IBUF(3),IENATP,ITRK,LDUMMY)  
+C 
+C 
+C     4. Now plant these values into COMMON.  Send to MATCN.
+C 
+400   ICHOLD = ICHECK(18) 
+      ICHECK(18)=0
+C                   Turn off checking while we set up the module
+      DO 410 I=1,28 
+        ITRKEN(I) = ITRK(I) 
+C       CALL SBIT(ITRKEN,I,ITRK(I)) 
+410     CONTINUE
+      CALL ICHMV(LTRKEN,1,IBUF,6,8) 
+      IA = IAND(IA2HX(LTRKEN,1),7)
+      CALL ICHMV(LTRKEN,1,IHX2A(IA),2,1)
+C 
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-13,2HFS,0,ICLASS)
+      NREC = 1
+      GOTO 800
+C 
+C 
+C     5.  This is the read device section.
+C     Fill up one class buffers, requesting % data (mode -2). 
+C 
+500   IBUF(2) = 2HTP
+      ICLASS = 0
+      IBUF(1) = -2
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      NREC = 1
+      GOTO 800
+C 
+C 
+C 
+C     6. This is the test/reset device section. 
+C 
+600   IBUF(1) = 6 
+      IBUF(2) = 2HTP
+      ICLASS=0
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      NREC = 1
+      GOTO 800
+C 
+C 
+C     7. This is the alarm query and reset request. 
+C 
+700   IBUF(1) = 7 
+      IBUF(2) = 2HTP
+      ICLASS=0
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      NREC = 1
+      GOTO 800
+C 
+C 
+C     8. All MATCN requests are scheduled here, and then ENDIS called.
+C 
+800   CALL EXEC(23,6HMATCN ,ICLASS,NREC)
+      CALL RMPAR(IP)
+      IF(ICHOLD.NE.-99) ICHECK(18) = ICHOLD 
+      IF (ICHOLD.GE.0) ICHECK(18)=1 
+      CALL ENDIS(IP,ICLCM)
+      RETURN
+C 
+990   IP(1) = 0 
+      IP(2) = 0 
+      IP(3) = IERR
+      IP(4) = 2HQE
+      RETURN
+      END 

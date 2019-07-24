@@ -1,0 +1,91 @@
+FTN4,X
+C@REFTM 
+C 
+      SUBROUTINE REFTM(ITREF,ITIME, 
+     .           ICHAR),HANDLE REFERENCE TIMES C#870115:04:23 # 
+C 
+C     MANIPULATES REFERENCE TIME AND TIME OFFSETS 
+C 
+C  INPUT: 
+C 
+D     INCLUDE #FSCOM::FS
+      DIMENSION ITREF(3)
+C     - current reference time
+      DIMENSION ITIME(3)
+C     - time array from parsing routine 
+C     ICHAR  - control character
+C            - R (122B) set ITREF to ITIME
+C            - * (52B) add ITIME to ITREF and replace in ITIME
+C            - ! (41B) add ITIME to current time and replace ITIME
+C 
+C  OUTPUT:
+C 
+C     New values of ITREF and ITIME depending on ICHAR
+C 
+C  LOCAL: 
+C 
+      DIMENSION INOW(6) 
+C     - holds current time
+  
+C     IT1,IT2,IT3 - current time in SNAP units
+C 
+C  SUBROUTINES CALLED:
+C 
+C     TWRAP - unwraps ITIME if any part overflows 
+C     EXEC(11) - to get current time
+C 
+C  INITIALIZED: 
+C 
+C 
+C  PROGRAMMER: NRV
+C  LAST MODIFIED:  CREATED 791010 
+C# LAST COMPC'ED  870115:04:23   #
+C 
+C 
+C     1. First get the current time in case we need it later. 
+C 
+      CALL EXEC(11,INOW,INOW(6))
+      IT1 = (INOW(6)-1970)*1024 + INOW(5) 
+      IT2 = INOW(4)*60 + INOW(3)
+      IT3 = INOW(2)*100 
+D     WRITE(LU,9901) ITREF,ITIME
+C 
+C 
+C     2. First for ICHAR=R, establish ITIME as the new ITREF. 
+C 
+      IF (ICHAR.NE.122B) GOTO 300 
+      IF (ITIME.NE.-1) GOTO 210 
+      ITREF(1) = IT1
+      ITREF(2) = IT2
+      ITREF(3) = IT3
+      GOTO 990
+210   ITREF(1) = ITIME(1) 
+      ITREF(2) = ITIME(2) 
+      ITREF(3) = ITIME(3) 
+      GOTO 990
+C 
+C 
+C     3. For ICHAR=*, replace ITIME with ITIME+ITREF. 
+C 
+300   IF (ICHAR.NE.52B) GOTO 400
+      ITIME(1) = ITREF(1) 
+      ITIME(2) = ITIME(2) + ITREF(2)
+      ITIME(3) = ITIME(3) + ITREF(3)
+      CALL TWRAP(ITIME) 
+      GOTO 990
+C 
+C 
+C     4. Finally, for ICHAR=!, replace ITIME with ITIME+current time. 
+C 
+400   ITIME(1) = IT1
+      ITIME(2) = ITIME(2) + IT2 
+      ITIME(3) = ITIME(3) + IT3 
+      CALL TWRAP(ITIME) 
+      GOTO 990
+C 
+C 
+990   CONTINUE
+D     WRITE(LU,9901) ITREF,ITIME
+D9901 FORMAT("ITREF,ITIME="6I10)
+      RETURN
+      END 

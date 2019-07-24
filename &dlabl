@@ -1,0 +1,106 @@
+FTN4X 
+      SUBROUTINE DLABL(LU,NOUT,LEXPER,LSTNNA,LSTCOD,IYR,ID1,IH1,IM1,
+     .                 ID2,IH2,IM2,NOB,LUOP)
+     .,Print barcode Mark III field labels  ARW 830920
+C 
+C     Print barcode field labels for Mark III tapes on Epson printer. 
+C 
+C     On entry: 
+C         LU,     Epson printer lu
+C         NOUT,   #labels across page (5 max) 
+C         LEXPER, 8-character experiment name (4A2) 
+C         LSTNNA, 8-character station name (4A2)
+C         LSTCOD, 1-character station code (A1) 
+C         IYR,    year of observation (i.e. 83 or 1983) 
+C         ID1,IH1,IM1,  day,hour,minute tape start times
+C         ID2,IH2,IM2,  day,hour,minute tape stop times 
+C         NOB, number of observations on this tape
+C         LUOP,   operator lu 
+C 
+C     Labels are assumed to be on 1.5" vertical spacing.
+C     On entry, label is assumed to be positioned to top-of-label 
+C     with horizontal page positioning such that printer column 1 
+C     is at left edge of first label. 
+C 
+C     ARW 830818
+C     NRV 840321 ADDED NUMBER OF OBSERVATIONS TO LABEL
+C 
+      IMPLICIT INTEGER(A-Z) 
+      INTEGER LEXPER(4),LSTNNA(4),ID1(1),IH1(1),IM1(1),ID2(1),IH2(1), 
+     .        IM2(1),TABS(4),LABEL(6),ICQ(2),JBUF(49),MODE(2) 
+      QDATA CHARQ\0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%\
+C 
+C                 <ESC>@  <CR>
+      DATA MODE  /015500B,006400B/         !Power-up reset,<CR> 
+C 
+C                 <ESC>D
+      DATA TABS  /015504B,3*0/             !Set tabs
+C 
+C                 <ESC>*
+      DATA JBUF  /015452B,6Hz05y2q, 
+     .            2H0x,2Hn<,5*0,2H >,2Hzz,
+     .            2H0x,2Hn<,5*0,2H >,2Hzz,
+     .            2H0x,2Hn<,5*0,2H >,2Hzz,
+     .            2H0x,2Hn<,5*0,2H >,2Hzz,
+     .            2H0x,2Hn<,5*0,2H >,2Hzz/
+C 
+      DATA TAB   /004400B/
+      DATA ICQ   /1,0/
+      DATA WIDTH /41/    !Horizontal label spacing in units of 0.1" 
+      DATA TAB1  /5/     !Tab column for first label
+C 
+C     Set up tabs 
+      CALL AFILL(TABS(2),1,0,0,3) 
+      DO 100 I=1,NOUT 
+      CALL PUTC(TABS,I+2,TAB1+(I-1)*WIDTH)
+100   CONTINUE
+      CALL LURQ(1,LU,1)                      !Lock lu 
+C 
+C     Write the normal ASCII information
+      WRITE(LU,110) MODE,TABS 
+110   FORMAT(A2,A1,4A2) 
+      JYR=MOD(IYR,100)
+      WRITE(LU,130) (TAB,LSTNNA,JYR,ID1(I),IH1(I),IM1(I),I=1,NOUT)
+130   FORMAT(5(A1,4A2,5X,"Start ",I2.2,"/",I3.3,"-",I2.2,I2.2)) 
+      WRITE(LU,140) (TAB,LEXPER,JYR,ID2(I),IH2(I),IM2(I),I=1,NOUT)
+140   FORMAT(5(A1,4A2,5X,"End   ",I2.2,"/",I3.3,"-",I2.2,I2.2)) 
+C     WRITE(LU,145) TAB,NOB 
+C145  FORMAT(A1,13X,"Obs   ",I2)
+C 
+C     Create and print bar code labels
+      DO 200 I=1,NOUT 
+      ENCODE(10,160,LABEL) LSTCOD,ID1(I),IH1(I),IM1(I)
+160   FORMAT(A1,I3.3,"-",2I2.2,1X)
+C     Compute modulo-43 check character 
+      ICHEK=0 
+      DO 170 J=1,10 
+      CALL CMOVE(LABEL,J,ICQ,3,1) 
+      IP=IPOSQ(CHARQ,ICQ,1) 
+      IF (IP .EQ. 0) THEN     !Replace any illegal character with <space> 
+          CALL PUTC(LABEL,J,40B)
+          IP=39 
+      ENDIF 
+      ICHEK=ICHEK+(IP-1)
+170   CONTINUE
+      ICHEK=MOD(ICHEK,43) 
+      JCHAR=IGETQ(CHARQ,ICHEK+1)
+      CALL PUTC(LABEL,11,JCHAR) 
+      CALL CMOVE(LABEL,1,JBUF,13+(I-1)*18,11) 
+      IF ( I .LT. NOUT) THEN
+          CALL PUTC(JBUF,25+(I-1)*18,2H z)
+      ELSE
+          NC=25+(I-1)*18
+          CALL PUTC(JBUF,NC,2H Z)        !Terminator  
+      ENDIF 
+200   CONTINUE
+C 
+C     Schedule program EPSON to print barcode.  
+      IF (IDGET(6HEPSON ) .EQ. 0) THEN
+          IF (IRP(6HEPSON ,0,IERR,LUOP) .LT. 0) STOP
+      ENDIF 
+      CALL EXEC(23,6HEPSON ,1,LU,72,12,0,JBUF,-NC)  
+      CALL LURQ(0,LU,1)          !UNLOCK LU 
+C 
+      RETURN
+300   STOP 300
+      END 

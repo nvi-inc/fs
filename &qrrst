@@ -1,0 +1,39 @@
+FTN4,X
+C@QRRST 
+C 
+      PROGRAM QRRST,5 
+C 
+C   QRRST is the segment of QUIKR dealing which resets the MAT  
+C        Also handles tape label commands.
+C        Also does the MAT download command.
+C 
+C  MODIFICATIONS: 
+C 
+C  DATE   WHO CHANGE
+C  811012 NRV ADDED MATLOAD COMMAND 
+C 
+C     CALLED SUBROUTINES: LINQ package
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C        NSUB   - "subroutine number" sent via LINQ package 
+C 
+C 
+C     PROGRAM STRUCTURE 
+C 
+      CALL LINQB(NSUB)
+      GOTO (100,200,300,400) NSUB 
+100   CALL LINQC
+      CALL RESET(IP)
+      GOTO 900
+200   CALL LINQC
+      CALL NEWTP(IP)
+      GOTO 900
+300   CALL LINQC
+      CALL LABEL(IP)
+      GOTO 900
+400   CALL LINQC
+      CALL MATLD(IP)
+      GOTO 900
+900   CALL LINQD
+      END 

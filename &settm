@@ -1,0 +1,127 @@
+FTN4,X
+      PROGRAM SETTM(3,99),SET CLOCK FROM FORMATTER C#870115:05:27#
+C 
+C     This program reads the formatter to get the 
+C     correct time and then sets the computer clock.
+C 
+C************************************************************ 
+C 
+C     **NOTE** THE MARK III FIELD SYSTEM MUST BE UP 
+C              AND RUNNING TO USE THIS PROGRAM. 
+C 
+C     CAUTION: THIS PROGRAM SHOULD BE RUN *ONLY* DURING 
+C     REALLY QUIESCENT PERIODS OF SYSTEM OPERATION. 
+C     MAKE SURE THAT NO PROGRAMS ON THE TIME LIST 
+C     WILL HAVE THEIR EXECUTION TIMES FOREVER IN THE
+C     PAST WHEN THE TIME IS UPDATED.
+C     IF THIS DOES HAPPEN, THE SYSTEM COMMAND TO
+C     RESTART THE PROGRAM IS:  *ON,<program name>,NOW 
+C 
+C************************************************************ 
+C 
+C  INPUT: 
+C 
+      DIMENSION IP(5) 
+C      - IP(1) = lu for error messages
+C 
+C  LOCAL: 
+C 
+      DIMENSION IBUF(10)
+C      - buffer from MATCN
+      DIMENSION IBUF2(10) 
+C      - output buffer for MESSS
+C 
+C 
+C 
+C  ROUTINES CALLED: 
+C 
+C     MATCN - to get the formatter time 
+C     MESSS - to set the computer clock 
+C 
+C 
+C     1. Get the operator's LU. 
+C     Set up the two buffers for MATCN and schedule it. 
+C 
+      CALL RMPAR(IP)
+      LUOP = IP(1)
+      NERR = 0
+50    DO 100 J=1,2
+      IBUF(1) = -4
+      IBUF(2) = 2HFM
+      ICLASS = 0
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      IBUF(1) = -3
+      CALL EXEC(20,0,IBUF,-4,2HFS,0,ICLASS) 
+      CALL EXEC(23,6HMATCN ,ICLASS,2) 
+C 
+      CALL RMPAR(IP)
+      ICLASS = IP(1)
+      NCREC = IP(2) 
+      IERR = IP(3)
+      IF (IERR.GE.0) GOTO 110 
+      IF(NERR.LT.2) GOTO 110
+      WRITE(LUOP,9101) IERR 
+9101  FORMAT("ERROR MA "I4) 
+      GOTO 190
+C 
+110   IF (ICLASS.NE.0.AND.NCREC.EQ.2) GOTO 198
+      IF(NERR.LE.2) GOTO 190
+      WRITE(LUOP,9201)
+9201  FORMAT("ERROR -1")
+C 
+190   IF (ICLASS.EQ.0.OR.NCREC.EQ.0) GOTO 150 
+      DO 195 I=1,NCREC
+        CALL EXEC(21,ICLASS,IBUF,-1)
+195     CONTINUE
+      GOTO 150
+198   IF(J.EQ.2) GOTO 100 
+        DO 199 II=1,NCREC 
+          CALL EXEC(21,ICLASS,IBUF,-1)
+199     CONTINUE
+100   CONTINUE
+      GOTO 200
+150   NERR = NERR+1 
+      IF(NERR.LE.2) GOTO 50 
+        GOTO 990
+C 
+C 
+C     2. Get back the first buffer from MATCN, with the yddd. 
+C     Fill in the year and date in the output buffer. 
+C     Get back the second buffer and fill in the hms. 
+C     The message we are formatting for the system is:
+CCC       TM,198y,ddd,hh,mm,ss
+C         TM,199y,ddd,hh,mm,ss
+C  Modified 1990 January 15 by JAB according to email instructions from 
+C  Ed Himwich.  
+C 
+200   CALL EXEC(21,ICLASS,IBUF,-20) 
+CCC   NCH = ICHMV(IBUF2,1,6HTM,198,1,6) 
+      NCH = ICHMV(IBUF2,1,6HTM,199,1,6) 
+      NCH = ICHMV(IBUF2,NCH,IBUF,4,1) 
+C                   The last digit of the year
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = ICHMV(IBUF2,NCH,IBUF,5,3) 
+C                   The day of the year 
+      NCH = MCOMA(IBUF2,NCH)
+      CALL EXEC(21,ICLASS,IBUF,-20) 
+      NCH = ICHMV(IBUF2,NCH,IBUF,3,2) 
+C                   The hours 
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = ICHMV(IBUF2,NCH,IBUF,5,2) 
+C                   Minutes 
+      NCH = MCOMA(IBUF2,NCH)
+      IS = IAS2B(IBUF,7,2) + 1
+C                   We add 1 to the integer seconds so as to
+C                   always round up to the next second. 
+      NCH = NCH + IB2AS(IS,IBUF2,NCH,100000B+2) - 1 
+C*****************THE REAL THING******************* 
+      CALL MESSS(IBUF2,NCH) 
+C                   Finally send this message to the computer 
+      CALL EXEC(2,LUOP,IBUF2,-NCH)
+C                   ...and type it on the terminal too
+C 
+      NCH = ICHMV(IBUF2,1,12HON,CHEKR,NOW,1,12)-1 
+      CALL MESSS(IBUF2,NCH) 
+C                   Re-start CHEKR because it was time-scheduled
+990   CONTINUE
+      END 

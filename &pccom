@@ -1,0 +1,164 @@
+FTN4,X
+C@PCCOM 
+C 
+      PROGRAM PCCOM(3,99),Talk with the IBM PC C#870115:05:18#
+C 
+C  INPUT VARIABLES 
+C 
+      DIMENSION IP(5) 
+C       IP(1) - LU of operator's terminal 
+C       IP(2) - LU of the IBM PC
+C       IP(3) - Mode: 1= don't echo response; 2= echo response
+C       IP(4) - Class number for input buffer 
+C       IP(5) - KECHO 
+      LOGICAL KECHO 
+C 
+C  LOCAL VARIABLES: 
+C 
+      DIMENSION IBUF(42),IREG(2),IT(7)
+      LOGICAL KSET
+C 
+      EQUIVALENCE (REG,IREG(1)) 
+C 
+C  INITIALIZED VARIABLES: 
+C 
+      DATA ILEN /84/    
+      DATA KSET /.FALSE./ 
+      DATA ITOD /500/ 
+C 
+C  HISTORY: 
+C 
+C  DATE  WHO  WHAT
+C 841130 MWH  CREATED 
+C 
+C  1.  Get input parameters and class buffer
+C 
+100   ICLAS = 0 
+      JREADS = 0
+      CALL RMPAR(IP)
+      LU = IP(1)
+      IF (.NOT.KSET) LUPC = IP(2) 
+      IMODE = IP(3) 
+      ICLASS = IP(4)
+      IF (IMODE.EQ.0) GOTO 200
+      IF (KSET) GOTO 105
+        WRITE(LU,9003)
+9003    FORMAT("PC LU must be set up with RU,PCCOM,,<PC LU>") 
+        GOTO 990
+105   KECHO = .FALSE. 
+      IF (IP(5).EQ.1) KECHO = .TRUE.
+      IF (ICLASS.NE.0) GOTO 110 
+        WRITE(LU,9001)
+9001    FORMAT("PCCOM01 - trouble with class buffer") 
+        GOTO 990
+110   CALL IFILL(IBUF,1,ILEN,40B)   
+      REG = EXEC(21,ICLASS,IBUF,-ILEN)
+      NCHAR = IREG(2) 
+      GOTO 300  
+C 
+C  2.  Set up the PC LU 
+C 
+200   CONTINUE
+D     WRITE(LU,9008)
+D9008 FORMAT("CHECK POINT") 
+      CALL EXEC(3,3000B+LUPC) 
+C         - hard reset
+      CALL CN21(LUPC) 
+C         - disable as terminal 
+      CALL EXEC(3,3300B+LUPC,15)  
+C         - set baud rate to 9600 
+      CALL EXEC(3,3200B+LUPC,56B) 
+C         - 7 BITS EVEN PARITY NO ECHO 2 STOP 
+      CALL ITO(LUPC,ITOD)     
+C         - set timeout to 3 seconds  
+D     WRITE(LU,9008)
+      KSET = .TRUE. 
+C 
+      IMODE = 1 
+      CALL IDATE(IT)
+      NCH = ICHMV(IBUF,1,5HTIME=,1,5) 
+      NCH = NCH + IB2AS(IT(1)+1900,IBUF,NCH,100000B+4)
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IB2AS(IT(2),IBUF,NCH,100000B+2) 
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IB2AS(IT(3),IBUF,NCH,100000B+2) 
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IB2AS(IT(4),IBUF,NCH,100000B+2) 
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IB2AS(IT(5),IBUF,NCH,100000B+2) 
+      NCH = MCOMA(IBUF,NCH) 
+      NCH = NCH + IB2AS(IT(6),IBUF,NCH,100000B+2) 
+      NCHAR = NCH - 1 
+C  3.  Send message to the PC 
+C 
+300   CONTINUE
+      IF (ICHCM(IBUF,1,4HTASK,1,4).EQ.0.AND.IMODE.EQ.2) 
+     . ITMOUT = ITO(LUPC,3000)
+      ICNWD = 200B +LUPC
+D     WRITE(LU,9902) (IBUF(I),I=1,20) 
+D9902 FORMAT("IBUF TO PC = "20A2) 
+      IF (KECHO) CALL EXEC(2,LU,IBUF,-NCHAR)
+      IF (MOD(NCHAR,2).EQ.0) GOTO 310 
+        CALL PUTC(IBUF,NCHAR+1,0) 
+310   CALL  EXEC(2,LUPC,IBUF,-NCHAR)
+      CALL EXEC(3,1200B+LUPC,020000B+40B) 
+      IF (IMODE.EQ.1) GOTO 990
+C          - that's it if we don't want the response
+C 
+C  4.  Read response, if any, and display it
+C 
+      CALL EXEC(17,ICNWD,IBUF,-ILEN,IDUM,IDUM,ICLAS)
+D     WRITE(LU,9909)
+D9909 FORMAT("ONE CLASS READ DONE") 
+      JREADS = JREADS + 1 
+      ICLAS = IOR(20000B,ICLAS) 
+C         -save the class number
+      CALL EXEC(17,ICNWD,IBUF,-ILEN,IDUM,IDUM,ICLAS)
+D     WRITE(LU,9909)
+      JREADS = JREADS + 1 
+      CALL EXEC(17,ICNWD,IBUF,-ILEN,IDUM,IDUM,ICLAS)
+D     WRITE(LU,9909)
+      JREADS = JREADS + 1 
+D     WRITE(LU,9904)
+D9904 FORMAT("Getting ready to read from PC") 
+C 
+400   CONTINUE
+      CALL EXEC(17,ICNWD,IBUF,-ILEN,IDUM,IDUM,ICLAS)
+      REG = EXEC(21,ICLAS,IBUF,-ILEN) 
+      NCHAR = IREG(2) 
+      NC = MAX0(NCHAR,2)
+D     WRITE(LU,9905) IREG(1),IREG(2),(IBUF(I),I=1,(NC+1)/2) 
+D9905 FORMAT("REGS,IBUF FROM PC = "2(O8,1X),80A2) 
+D     WRITE(LU,9906) IBUF(1)
+D9906 FORMAT("IBUF(1),OCTAL = "O8)
+      IF (IBUF(1).EQ.2H$ ) GOTO 900 
+C         - skip out on TASK prompt ($) 
+      IF (IAND(IREG,10B).EQ.0) GOTO 420 
+        WRITE(LU,9002)
+ 9002    FORMAT("PCCOM02 - Device timed out") 
+        GOTO 900
+420   CONTINUE
+D     CALL EXEC(2,LU,IBUF,-NCHAR) 
+      CALL LOGIT(IBUF,NCHAR)
+C         - display response on operator's terminal 
+      IF (ITMOUT.EQ.ITOD) ITMOUT = ITO(LUPC,ITOD) 
+      GOTO 400
+C 
+C  9.  This is the end
+C 
+900   CONTINUE
+      ISAVE = ITO(LUPC,1) 
+      DO 910 I=1,JREADS 
+        IF (I.EQ.JREADS) ICLAS = IAND(157777B,ICLAS)
+        CALL EXEC(21,ICLAS,IBUF,-ILEN)
+910   CONTINUE
+      IDUM = ITO(LUPC,ISAVE)
+990   CONTINUE
+C  That's it for now; suspend saving resources
+      CALL EXEC(6,0,1)
+C 
+C*************************************************************
+C** This is the wake-up point; simply go back to the beginning
+C*************************************************************
+      GOTO 100
+      END 

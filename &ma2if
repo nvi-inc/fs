@@ -1,0 +1,57 @@
+FTN4,X
+C@MA2IF 
+      SUBROUTINE MA2IF(IBUF1,IBUF2,IAT1,IAT2,INP1,INP2,TP1,TP2, 
+     .     IREM),CONVERT MAT BUFFER TO IF DATA C#890516:19:02#
+C 
+C     This routine converts the buffers returned from the MAT 
+C     into the IF distributor attenuators, inputs, and total power. 
+C 
+C  INPUT: 
+C 
+      DIMENSION IBUF1(1),IBUF2(1) 
+C      - buffers of length 5 words, as returned from MATCN
+C      - buffer 1 contains the settings 
+C      - buffer 2 contains the total powers 
+C 
+C  OUTPUT:
+C 
+C     IAT1 - attenuator setting, IF1
+C     IAT2 - attenuator setting, IF2
+C     INP1 - input selection, IF1 
+C     INP2 - input selection, IF2 
+C     TP1 - total power reading, IF1, binary
+C     TP2 - total power reading, IF2, binary
+C     IREM - remote/local setting 
+C 
+C 
+C     Buffers from MATCN look like: 
+C      ! data:      IFttttpppp
+C     where each character has 4 bits of the total power value: 
+C                   tttt - IF2 total power
+C                   pppp - IF1 total power
+C      % data:      IFr0ija2a1
+C     where 
+C                   r = one bit denoting rem/lcl
+C                   0 = a fixed zero
+C                   i = IF2 input, 0=NOR, 8=ALT 
+C                   j = IF1 input, 0=NOR, 8=ALT 
+C                   a1= atten. 1 (2 bits first char., other 4 in second)
+C                   a2= atten. 2 (2 bits first char., other 4 in second)
+C 
+C 
+      IAT1 = 16*IAND(IA2HX(IBUF1,9),3) + IA2HX(IBUF1,10)
+C                   Atten: upper 2 bits from char 9, lower 4 from char 10 
+      IAT2 = 16*IAND(IA2HX(IBUF1,7),3) + IA2HX(IBUF1,8) 
+      INP1 = IA2HX(IBUF1,6)/8 
+      INP2 = IA2HX(IBUF1,5)/8 
+      IREM = IA2HX(IBUF1,3)/8 
+C 
+      TP1 = 10000B*IA2HX(IBUF2,7) + 400B*IA2HX(IBUF2,8) 
+     .     + 20B*IA2HX(IBUF2,9) + IA2HX(IBUF2,10) 
+C                   Pick up four bits from each character for TP
+      TP2 = 10000B*IA2HX(IBUF2,3) + 400B*IA2HX(IBUF2,4) 
+     .     + 20B*IA2HX(IBUF2,5) + IA2HX(IBUF2,6)
+C                   Pick up four bits from each character for TP
+C 
+      RETURN
+      END 

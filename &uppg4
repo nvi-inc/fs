@@ -1,0 +1,167 @@
+FTN4,X
+C@UPPGX 
+C 
+        INTEGER FUNCTION UPPGX(NAME,IPRT,ISIZE,IDUM)
+     .,C#870115:04:06   ACTIV PGM RTE-4 V=1 # 
+C 
+C     UPPGX 
+C 
+C 1.  NAME PROGRAM SPECIFICATION
+C 
+C 1.1.   UPPGX
+C               THIS PROGRAM INITIALIZES A MEMBER OF THE FIELDS SYSTEM
+C       FOR AN RTE-IV SYSTEM AND PREPARES THE PROGRAM FOR RUNNING.
+C       IF THE PROGRAM IS PRESENT IT IS OF,name,8.  IT IS THEN RPED 
+C       USING IRP.
+C 
+C 
+C 1.2.   RESTRICTIONS - limits on use of routine
+C 
+C 1.3.   REFERENCES - document cited
+C 
+C 2.  NAME INTERFACE
+C 
+C 2.1.   CALLING SEQUENCE: CALL UPPGX(NAME) 
+C 
+C     INPUT VARIABLES:
+C 
+C       GLOBAL DEFS REFERENCED: "name'(local name if different)' ...
+C 
+        DIMENSION NAME(3) 
+C 
+C       NAME    - NAME OF PROGRAM TO BE ACTIVATED 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C       GLOBAL DEFS REFERENCED: "name'(local name if different)' ...
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C 2.3.   DATA BASE ACCESSES 
+C 
+C 2.4.   EXTERNAL INPUT/OUTPUT
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES: SUB1, SUB2, ... (not required for utilities) 
+C 
+C     CALLED SUBROUTINES: SUB1, SUB2, ... (includes segments scheduled) 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C       GLOBAL DEFS REFERENCED: "name'(local name if different)' ...
+C 
+        DIMENSION IMESS(5),IGTIT(7),IRUNN(7)
+C 
+C       IMESS   - MESSAGE AREA FOR OFFING PROGRAMS UPON REQUEST 
+C 
+C       IGTIT   - MESSAGE OF WHO TO BE BROUGHT IN NEXT
+C 
+C       IRUNN   - MESSAGE OF WHO IS ABOUT TO BE RUN NEXT
+C 
+C 4.  CONSTANTS USED
+C 
+C 5.  INITIALIZED VARIABLES 
+C 
+      DATA IGTIT  /2HGE,2HTT,2HIN,2HG:,2H  /
+C 
+C       IGTIT   - MESSAGE TEXT "GETTING: "
+C 
+        DATA IRUNN  /2HRU,2HNN,2HIN,2HG:,2H  /
+C 
+C       IRUNN   - MESSAGE TEXT "RUNNING:" 
+C 
+C 6.  PROGRAMMER: LEE N. FOSTER 
+C     LAST MODIFIED:
+C# LAST COMPC'ED  870115:04:06urrent date) #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C               6.1  INITIALIZE VARIABLES 
+C 
+C               GET THE NUMBER OF PARAMETERS PRESENT
+C 
+        NPS=IGNPS(NPS)
+C 
+        UPPGX=0 
+C 
+        IERR=0
+C 
+C               GET CURRENT STATUS OF PROGRAM 
+C 
+        IDSEG=IGID(NAME)
+C 
+C               CHECK FOR NOT PRESENT 
+C 
+        IF(IDSEG .EQ. 0) GO TO 8000 
+C 
+C               IF INITIALIZATION AND PGM PRESENT TELL RUNNING
+C 
+        IF(NPS .EQ. 4)GO TO 98000 
+C 
+C               PROGRAM IS PRESENT NOW OF,1 THEN EXIT 
+C 
+        IMESL=ICHMV(IMESS,1,3HOF,,1,3)
+C 
+C               NOW PROGRAM NAME
+C 
+        IMESL=ICHMV(IMESS,IMESL,NAME,1,5) 
+C 
+C               NOW ,1
+C 
+        IMESL=ICHMV(IMESS,IMESL,2H,1,1,2) 
+C 
+C               NOW SEND TO SYSTEM
+C 
+        I=-MESSS(IMESS,IMESL-1) 
+C 
+C               HAVE PROGRAM OFFED
+C 
+C ***   CALL IOF(NAME,IERR,LU)
+C 
+C               PASS ERROR TO USER
+C 
+        UPPGX=IERR
+C 
+C               NOW TELL BEING RUN
+C 
+        GO TO 98000 
+C 
+8000    CONTINUE
+C 
+C               TELL WHO IS COMING - MOVE IN NAME 
+C 
+        CALL ICHMV(IGTIT,10,NAME,1,5) 
+C 
+C               SEND MESSAGE TO USER
+C 
+        CALL EXEC(2,LU,IGTIT,-14) 
+C 
+C               PROGRAM NOT PRESENT, MUST BE RP'ED
+C 
+        CALL IRP(NAME(1),0,IERR,-1) 
+C 
+C               NOW MUST EXIT 
+C 
+        GO TO 99999 
+C 
+98000   CONTINUE
+C 
+C               BUILD RUNNING MESSAGE 
+C 
+        CALL ICHMV(IRUNN,10,NAME,1,5) 
+C 
+C               SEND MESSAGE TO USER
+C 
+        CALL EXEC(2,LU,IRUNN,-14) 
+C 
+99999   CONTINUE
+C 
+        UPPGX=IERR
+C 
+C 
+        RETURN
+        END 
+        END$

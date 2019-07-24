@@ -1,0 +1,156 @@
+FTN4,X
+      SUBROUTINE BINIT(IP,LNAMES,NNAMES,ITSCB,NTSCB,
+     .           IDCBSK,IERR),INITIALIZE BOSS C#780803:09:01# 
+C 
+C     This is the initialization part of the BOSS program.
+C     NRV modified 801201 
+C     810730 NRV Add error calls to LOGIT in new format 
+C     850121 MWH Call RMPAR on return from ANTCN
+C     850501 WEH Print a message if we didn't initialize ANCTN
+C 
+      INCLUDE #FSCOM::FS
+C 
+      DIMENSION IP(1) 
+C                   Boss's RMPAR input we are to process
+      DIMENSION IDCBSK(1) 
+C                   DCBs for schedule,
+      DIMENSION LNAMES(5,1) 
+C                   Names list
+      DIMENSION ITSCB(13,1) 
+C                   Time-scheduling control block 
+      DIMENSION IBUF(50)
+C                   Input buffer containing command 
+      DIMENSION ITIME(9)
+C                   Time array returned from SPARS
+      DIMENSION LNAMEF(3) 
+C                   File name 
+      DIMENSION LSEG(2) 
+C                   Segment name from command list file 
+      DIMENSION IREG(2),ISIZE(2)
+      DIMENSION LMES1(10),LMES2(10),LMES3(10),LMES2A(10), 
+     .          LMES5(10),LMES4(10),LMES6(19),LMES7(10) 
+      EQUIVALENCE (IREG(1),REG) 
+      DATA ISIZE/50,0/
+      DATA IBLEN/50/
+      DATA LMES1  /2HCO,2HMM,2HAN,2HD ,2HLI,2HST,2H I,2HNI,2HT ,2H  / 
+      DATA LMES2  /2HMA,2HTC,2HN ,2HIN,2HIT,2HIA,2HLI,2HZE,2HD ,2H  / 
+      DATA LMES2A /2HIB,2HCO,2HN ,2HIN,2HIT,2HIA,2HLI,2HZE,2HD ,2H  / 
+      DATA LMES4  /2HAN,2HTE,2HNN,2HA ,2HIN,2HIT,2HIA,2HLI,2HZE,2HD / 
+      DATA LMES5  /2HST,2HAT,2HIO,2HN ,2HCO,2HNF,2HIG,2H I,2HNI,2HT / 
+      DATA LMES7  /2HRE,2HCE,2HIV,2HER,2H C,2HON,2HFI,2HG ,2HIN,2HIT/ 
+      DATA LMES6  /015446B,2HdB,2H!!,2H A,2HNT,2HEN,2HNA,2H N,2HOT, 
+     +             2H I,2HNI,2HTI,2HAL,2HIZ,2HED,32,2H!!,015446B,2Hd@/
+C 
+C 
+C     1. First initialize values from RMPAR parameters. 
+C     IP(1) = LU for terminal input and messages
+C     IP(2) = LU for logs and procedures (optional) 
+C 
+      LU = IP(1)
+      IF (LU.EQ.0) LU = 1 
+      ICRLOG = IP(2)
+C 
+      CALL EXEC(11,ITIME) 
+      ITODAY = ITIME(5) 
+C 
+C     INITIALIZE COMMON 
+C 
+      CALL INCOM(IDCBSK,IERR) 
+      IF (IERR.NE.0) GOTO 990 
+C 
+      DO 103 I=1,NTSCB
+        ITSCB(1,I) = -1 
+103     CONTINUE
+C 
+      CALL EXEC(2,LU,LMES5,-20) 
+      CALL EXEC(2,LU,LMES7,-20) 
+C 
+C 
+C     1.1 READ IN ALLOWED COMMAND NAMES 
+C 
+      LNAMEF(1) = 2H(C
+      LNAMEF(2) = 2HMD
+      LNAMEF(3) = 2HLS
+      CALL OPEN(IDCBSK,IERR,LNAMEF,0,0,ICRPRC)
+      IF (IERR.GE.0) GOTO 901 
+      CALL LOGIT(0,0,0,1,-110,2HBO,IERR)
+      GOTO 990
+901   IERR = 0
+      INAME = 0 
+90    CALL READG(IDCBSK,IERR,IBUF,12,ILEN)
+      IF (IERR.GE.0) GOTO 92
+      CALL LOGIT(0,0,0,1,-111,2HBO,IERR)
+      GOTO 990
+92    IF (ILEN.LT.0) GOTO 111 
+      INAME = INAME + 1 
+      IF (INAME.LE.NNAMES) GOTO 91
+      CALL LOGIT(0,0,0,1,-112,2HBO,NNAMES)
+      GOTO 990
+91    ICH = ISCNC(IBUF,1,12,40B)
+      IF (ICH.EQ.0) ICH=13
+      ICODE = IHASH(IBUF,1,ICH-1) 
+      IF (INAME.EQ.1) GOTO 102
+      DO 101 II=1,INAME-1 
+        IF (ICODE.NE.LNAMES(1,II)) GOTO 101 
+        CALL LOGIT(0,0,0,1,-113,2HBO,INAME*100+II)
+        GOTO 990
+101     CONTINUE
+102   CALL ICHMV(LSEG,1,IBUF,14,4)
+      ISS = IAS2B(IBUF,18,4)
+      ITY = IAS2B(IBUF,23,2)
+      LNAMES(1,INAME) = ICODE 
+      LNAMES(2,INAME) = LSEG(1) 
+      LNAMES(3,INAME) = LSEG(2) 
+      LNAMES(4,INAME) = ISS 
+      LNAMES(5,INAME) = ITY 
+      GOTO 90 
+111   CALL CLOSE(IDCBSK)
+      NNAMES = INAME
+      CALL EXEC(2,LU,LMES1,-20) 
+C 
+C 
+C     1.15 Initialize MATCN's names and addresses.
+C 
+      CALL RDTMA(IDCBSK,ICRPRC,IERR)
+      IF (IERR.EQ.0) GOTO 115 
+      CALL LOGIT(0,0,0,1,-114,2HBO,IERR)
+      GOTO 990
+115   CALL EXEC(2,LU,LMES2,-20) 
+C 
+C 
+C     1.16 Initialize tables in IBCON 
+C 
+      CALL RDTIB(IDCBSK,ICRPRC,IERR)
+      IF (IERR.EQ.0) GOTO 116 
+      CALL LOGIT(0,0,0,1,-115,2HBO,IERR)
+      GOTO 990
+116   CALL EXEC(2,LU,LMES2A,-20)
+C 
+C     1.17 Initialize the antenna interface, if any.
+C 
+      IF (LUANT.EQ.0) LUANT = LU
+      IERR = 0
+      IF (LUANT.EQ.LU) GOTO 118 
+C                   For testing with LUANT=LU, don't issue CNs
+       CALL EXEC(9,6HANTCN ,0)
+      CALL RMPAR(IP)
+      IERR = IP(3)
+      IF (IERR.EQ.0) GOTO 117 
+      CALL LOGIT(0,0,0,1,-116,2HBO,IERR)
+      GOTO 990
+117   CALL EXEC(2,LU,LMES4,-20) 
+      GO TO 120 
+C 
+118   CONTINUE
+      CALL EXEC(2,LU,LMES6,-38) 
+      CALL BELL(LU,0) 
+      GO TO 120 
+C 
+C     1.18 Start first log file 
+C 
+120   LLOG = 2HXX 
+      CALL NEWLG(IBUF,2H::) 
+C                   Tell DDOUT to start a new log file
+C 
+990   RETURN
+      END 

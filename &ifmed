@@ -1,0 +1,164 @@
+FTN4,X
+C@IFMED 
+      FUNCTION IFMED(IWHAT,INDEX,IAS,IC1, 
+     .         IC2),FM INDEX ENCODE/DECODE C#890516:18:58#
+C 
+C     This routine encodes or decodes information relating
+C     to MAT communications for the formatter 
+C 
+C  INPUT: 
+C 
+C     IWHAT - code for type of conversion, <0 encode, >0 decode 
+      DIMENSION IAS(1)
+C      - string with ASCII characters 
+C 
+C 
+C  If encode
+C 
+C     INDEX - input index of quantity 
+C     IAS - string to hold ASCII characters 
+C     IC1 - first char available in IAS 
+C     IC2 - last char available in IAS
+C     IFMED - next available char in IAS after encoding 
+C 
+C  If decode: 
+C 
+C     INDEX - returned index of quantity, error if zero 
+C     IAS - string containing ASCII characters to be decoded
+C     IC1 - first char to use in IAS
+C     IC2 - last char to use in IAS 
+C 
+C 
+C  SUBROUTINES called: character manipulation 
+C 
+C 
+C  LOCAL: 
+C 
+      DOUBLE PRECISION DAS2B
+      DIMENSION LINPS(5),LMODES(4),RATES(8) 
+      DIMENSION LREM(8),LPWR(7),LTEST(7),LSET(3)
+      DIMENSION LSYN(2) 
+      DIMENSION NTEST(2),NPWR(2),NREM(2)
+      DATA RATES/8.0,0.0,0.125,0.25,0.5,1.0,2.0,4.0/
+      DATA LREM/2HRE,2HM ,015446B,2HdB,2HLC,046033B,2H&d,2H@ /
+      DATA NREM/3,11/ 
+      DATA LPWR/2HOK,015446B,2HdB,2HPW,051033B,2H&d,2H@ / 
+      DATA NPWR/2,11/ 
+      DATA LSIGN/2H-+/
+      DATA LSET/2HRU,2HNS,2HET/ 
+      DATA LTEST/2HOK,015446B,2HdB,2HFA,2HIL,015446B,2Hd@/
+      DATA NTEST/2,12/
+      DATA LSYN/2HOF,2HON/
+      DATA LINPS/2HNO,2HRE,2HXT,2HCR,2HC /
+      DATA LMODES/2HAB,2HCD/
+      DATA NRATES/8/
+C 
+C 
+C     1. Initialize returned parameter in case we have to quit early. 
+C 
+      IFMED = IC1 
+      IF (IWHAT.GT.0) INDEX = -1
+C 
+      GOTO (209,208,207,206,205,204,203,202,201,990,
+     .301,302,303,304) IWHAT+10 
+C 
+C     2.01 Code -1, MODE
+C 
+201   IF (IC1+1.GT.IC2) RETURN
+      IFMED = ICHMV(IAS,IC1,LMODES,1+INDEX,1) 
+      RETURN
+C 
+C     2.02 Code -2, SAMPLE RATE 
+C 
+202   CONTINUE
+      IF (IC1-1+5.GT.IC2) RETURN
+      IFMED = IC1 + IR2AS(RATES(INDEX+1),IAS,IC1,5,3) 
+      RETURN
+C 
+C     2.03 Code -3, General LOCAL/REMOTE. 
+C 
+203   CONTINUE
+      IF (IC1-1+NREM(INDEX+1).GT.IC2) RETURN
+      IFMED = ICHMV(IAS,IC1,LREM,INDEX*4+1,NREM(INDEX+1)) 
+      RETURN
+C 
+C     2.04 Code -4, SYNCH TEST ON/OFF 
+C 
+204   CONTINUE
+      IF (IC1-1+2.GT.IC2) RETURN
+      IFMED = ICHMV(IAS,IC1,LSYN,INDEX*2+1,2) 
+      RETURN
+C 
+C     2.05 Code -5, SYNCH TEST PASS/FAIL
+C 
+205   CONTINUE
+      IF (IC1-1+NTEST(INDEX+1).GT.IC2) RETURN 
+      IFMED = ICHMV(IAS,IC1,LTEST,INDEX*2+1,NTEST(INDEX+1)) 
+      RETURN
+C 
+C     2.06 Code -6, SIGN OF SYNCH TEST
+C 
+206   CONTINUE
+      IF (IC1.GT.IC2) RETURN
+      IFMED = ICHMV(IAS,IC1,LSIGN,INDEX+1,1)
+      RETURN
+C 
+C     2.07 Code -7, RUN/SET 
+C 
+207   CONTINUE
+      IF (IC1+2.GT.IC2) RETURN
+      IFMED = ICHMV(IAS,IC1,LSET,INDEX*3+1,3) 
+      RETURN
+C 
+C     2.08 Code -8, INPUT SELECTION 
+C 
+208   CONTINUE
+      IF (IC1+2.GT.IC2) RETURN
+      IFMED = ICHMV(IAS,IC1,LINPS,INDEX*3+1,3)
+      RETURN
+C 
+C     2.09 Code -9, POWER INTERRUPT 
+C 
+209   CONTINUE
+      IF (IC1-1+NPWR(INDEX+1).GT.IC2) RETURN
+      IFMED = ICHMV(IAS,IC1,LPWR,INDEX*2+1,NPWR(INDEX+1)) 
+      RETURN
+C 
+C     3. Initialize for the DECODE case.
+C 
+C     3.01 FORMATTER MODES
+C 
+301   CONTINUE
+      DO 3010 I=1,4 
+        IF (ICHAR(IAS,IC1).EQ.ICHAR(LMODES,I)) INDEX=I-1
+3010    CONTINUE
+      RETURN
+C 
+C     3.02 SAMPLE RATES 
+C 
+302   CONTINUE
+      VAL = DAS2B(IAS,IC1,IC2-IC1+1,IERR) 
+      IF (IERR.NE.0) RETURN 
+      DO 3020 I=1,NRATES
+        IF (VAL.EQ.RATES(I)) INDEX = I-1
+3020    CONTINUE
+      RETURN
+C 
+C     3.03 INPUT SELECTION
+C 
+303   CONTINUE
+      DO 3030 I=1,3 
+        IF (ICHCM(IAS,IC1,LINPS,(I-1)*3+1,3).EQ.0) INDEX = I-1
+3030    CONTINUE
+      RETURN
+C 
+C     3.04 SYNCH TEST ON/OFF
+C 
+304   CONTINUE
+      DO 3040 I=1,2 
+        IF (ICHCM(IAS,IC1,LSYN(I),1,2).EQ.0) INDEX=I-1
+3040    CONTINUE
+      RETURN
+C 
+990   RETURN
+      END 

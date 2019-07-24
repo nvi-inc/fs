@@ -1,0 +1,141 @@
+FTN4,X
+C@WX
+C 
+      SUBROUTINE WX(IP),ALTERNATE WEATHER MODULE C#840611:12:00#
+C 
+C 1.1.   WX obtains weather information 
+C********************************************************************** 
+C This is an alternate WX routine for use when electronic MET sensors * 
+C  are not available for use.                                         * 
+C********************************************************************** 
+C 
+C     INPUT VARIABLES:
+C 
+      DIMENSION IP(1) 
+C        IP(1)  - class number of input parameter buffer. 
+C 
+C     OUTPUT VARIABLES: 
+C 
+C        IP(1) - error
+C        IP(2) - class
+C        IP(3) - number of records
+C        IP(4) - who we are 
+C 
+C 2.2.   COMMON BLOCKS USED 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C 2.5.   SUBROUTINE INTERFACE:
+C 
+C     CALLING SUBROUTINES:
+C 
+C     CALLED SUBROUTINES: GTPRM,ICHAR 
+C 
+C 3.  LOCAL VARIABLES 
+C 
+C        NCHAR  - number of characters in buffer
+      DIMENSION IBUF2(40),IBUF(20)
+C               - class buffer
+C        ILEN   - length of IBUF, chars 
+      DIMENSION LMES1(14) 
+C               - message buffer
+      DIMENSION IPARM(2)
+C               - parameters returned from GTPRM
+      DIMENSION IREG(2) 
+C               - registers from EXEC calls 
+      EQUIVALENCE (REG,IREG(1)),(PARM,IPARM(1)) 
+C 
+C 4.  CONSTANTS USED
+C 
+      DATA LMES1/2HIn,2Hva,2Hli,2Hd ,2Hre,2Hsp,2Hon,2Hse,2H; ,
+     .2HTr,2Hy ,2Hag,2Hai,2Hn / 
+C 5. INITIALIZED VARIABLES
+C 
+      DATA ILEN/40/,ILEN2/80/ 
+C 
+C 6.  PROGRAMMER: MWH 
+C     LAST MODIFIED:  840607
+C# LAST COMPC'ED  840611:12:00 #
+C 
+C     PROGRAM STRUCTURE 
+C 
+C     We have been requested to obtain weather information. 
+C 
+      ICLCM = IP(1) 
+      IF (ICLCM.NE.0) GOTO 110
+100   IERR = -1 
+      ICLASS = 0
+      NREC = 0
+      GOTO 990
+110   REG = EXEC(21,ICLCM,IBUF2,-ILEN2) 
+      NCHAR = IREG(2) 
+      IEQ = ISCNC(IBUF2,1,NCHAR,75B)
+C                   Scan for "="
+      IF (IEQ.NE.0) GOTO 100
+C                   If user specified parameters, this is error 
+C                   If not, OK
+C 
+C     2.  Get weather data from operator. 
+C 
+C     2.1  First request and read the temperature.
+C 
+      CALL EXEC(2,LU,29HEnter :: to cancel WX command,-29)
+200   CALL EXEC(2,LU,40HEnter current outdoor temperature (C): _,-40) 
+      CALL GTRSP(IBUF,ILEN/2,LU,NCH)
+      IF(IBUF.EQ.2H::) GOTO 990 
+      TEMP = DAS2B(IBUF,1,NCH,IERR) 
+      IF(IERR.EQ.0) GOTO 220
+        CALL EXEC(2,LU,LMES1,-27) 
+        GOTO 200
+C 
+C     2.2  Now get the barometric pressure. 
+C 
+220   CONTINUE
+      CALL EXEC(2,LU,44HEnter current barometric pressure (mbars): _, 
+     .-44)
+      CALL GTRSP(IBUF,ILEN/2,LU,NCH)
+      IF(IBUF.EQ.2H::) GOTO 990 
+      PRES = DAS2B(IBUF,1,NCH,IERR) 
+      IF(IERR.EQ.0.AND.PRES.GE.0.) GOTO 230 
+        CALL EXEC(2,LU,LMES1,-27) 
+        GOTO 220
+C 
+C     2.3  Finally get the humidity.
+C 
+230   CONTINUE
+      CALL EXEC(2,LU,29HEnter current humidity (%): _,-29)
+      CALL GTRSP(IBUF,ILEN/2,LU,NCH)
+      IF(IBUF.EQ.2H::) GOTO 990 
+      HUMI = DAS2B(IBUF,1,NCH,IERR) 
+      IF(IERR.EQ.0.AND.HUMI.GE.0.0.AND.HUMI.LE.100.) GOTO 300 
+        CALL EXEC(2,LU,LMES1,-27) 
+        GOTO 230
+C 
+C     3.  Now plant the new values in COMMON. 
+C 
+300   CONTINUE
+      TEMPWX = TEMP 
+      PRESWX = PRES 
+      HUMIWX = HUMI 
+C 
+C     5. Finally, code up the message for BOSS and the display and log. 
+C 
+500   NCH = ICHMV(IBUF2,NCHAR+1,2H/ ,1,1) 
+      NCH = NCH + IR2AS(TEMPWX,IBUF2,NCH,5,1) 
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = NCH + IR2AS(PRESWX,IBUF2,NCH,7,1) 
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = NCH + IR2AS(HUMIWX,IBUF2,NCH,5,1) 
+C 
+      ICLASS = 0
+      NCH = NCH - 1 
+      CALL EXEC(20,0,IBUF2,-NCH,2HFS,0,ICLASS)  
+      NREC = 1
+C 
+C 
+990   IP(1) = ICLASS
+      IP(2) = NREC
+      IP(3) = IERR
+      IP(4) = 2HQX
+999   RETURN
+      END 

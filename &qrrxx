@@ -1,0 +1,23 @@
+FTN4
+C@QRRXX 
+C 
+      PROGRAM QRRXX(5,99),RECEIVER COMMANDS C#870115:04:32# 
+C 
+C   QRRXX is the segment of QUIKR dealing with  
+C         the receiver commands.  
+C 
+C        ISUB   - "subroutine number" sent via LINQ package 
+C 
+C  PROGRAMMER: nrv  
+C     CREATED: 830610           
+C 
+C 
+      CALL LINQB(ISUB)
+      GOTO (100    ) ISUB 
+100   CALL LINQC
+      CALL RXMO (IP)
+      CALL LINQD
+C00   CALL LINQC
+C     CALL OPRID(IP)
+C     CALL LINQD
+      END 

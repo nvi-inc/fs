@@ -1,0 +1,133 @@
+FTN4,X
+C@WV2DT 
+      SUBROUTINE WV2DT(KCOM,ICLASS,NREC,IBUF1,ILEN,IBUF2,NC1, 
+     .ILEN2,IERR),DECODE/FORMAT RAW DATA (JPL) C#870115:04:47#
+C 
+C     WV2DT decodes and formats the response containing 
+C           the raw data -- JPL radiometers.
+C 
+C  COMMON 
+C 
+      INCLUDE #FSCOM::FS
+C 
+C  INPUT: 
+C 
+      LOGICAL KCOM
+C      - true if we're to get the mode from common only 
+C     ICLASS - class returned from MATCN
+C     NREC - number of records in ICLASS
+      DIMENSION IBUF1(1)
+C      - buffer to put the data in. 
+C     ILEN - length of IBUF1
+      DIMENSION IBUF2(1)
+C      - buffer to put the response in. 
+C     NC1 - first character to use in IBUF2 
+C     ILEN2 - total number of characters available in IBUF2 
+C 
+C  OUTPUT:
+C 
+C     IBUF2 - the formatted response
+C     NC1 - the number of characters in the response
+C 
+C  LOCAL: 
+C 
+C     IMODE - mode reported by the radiometer 
+      DIMENSION LMODE(10) 
+C      - ASCII names for the modes
+      DIMENSION NCMODE(5) 
+C      - number of characters in each mode name 
+C     V1 - temp holder for binary value.
+C     NS - number of samples averaged 
+      DIMENSION IREG(2) 
+C      - returns from EXEC calls
+      EQUIVALENCE (IREG(1),REG) 
+C 
+C  INITIALIZED: 
+C 
+      DATA LMODE/2HHO,2HT ,2HBA,2HSE,2HAN,2HT ,2HAL,2HL ,2HHU,2HH?/ 
+      DATA NCMODE/3,4,3,3,4/
+C 
+C 
+C  LAST MODIFIED:  830908 BY NRV - decode response to "Q" command 
+C 
+C 
+C     0. First determine if we're only to access common.
+C 
+      IF (.NOT.KCOM) GOTO 100 
+      IMODE = MODEWV
+      NSAMP = NRAWWV
+      GOTO 120
+C 
+C 
+C     1. Get the status response, decode the mode and put it  
+C     into the buffer.   Then decode the number of samples. 
+C 
+100   REG = EXEC(21,ICLASS,IBUF1,-ILEN) 
+      NCHAR = MIN0(IREG(2),ILEN)
+      IF (ICHAR(IBUF1,3).NE.77B) GOTO 110 
+      NC1 = ICHMV(IBUF2,NC1,IBUF1,3,NCHAR-2)-1
+C                     This was an error response
+      GOTO 990
+C 
+110   CALL WV2ST(IBUF1(2),IERR,IERR2,ISTPNT,ISTDAT,IID,ISMUX, 
+     .           NSAMP,IMODE) 
+C                     Decode the satus line 
+      IF (ISTDAT.EQ.0) GOTO 120 
+C                      Check that data taking terminated normally 
+      IERR = -302 
+      REG = EXEC(21,ICLASS,IBUF1,-ILEN) 
+C                               Clear out the second buffer 
+      GOTO 990
+C 
+120   IF (IMODE.LE.0.OR.IMODE.GT.4) IMODE=5 
+      NCH = ICHMV(IBUF2,NC1,LMODE,1+(IMODE-1)*4,NCMODE(IMODE))
+      NCH = MCOMA(IBUF2,NCH)
+      NCH = NCH + IB2AS(NSAMP,IBUF2,NCH,100000B+3)  
+      IF (.NOT.KCOM) GOTO 200 
+      NC1 = NCH - 1 
+      GOTO 990
+C 
+C 
+C     2. Get the second buffer with the data.  Decode the values. 
+C     Depending on the mode, store the values into the appropriate
+C     place in common.
+C 
+200   REG = EXEC(21,ICLASS,IBUF1,-ILEN) 
+      NCHAR = MIN0(IREG(2),ILEN)
+C                     First read in the data line 
+      IF (ICHAR(IBUF1,3).NE.77B) GOTO 210 
+      NC1 = ICHMV(IBUF2,NCH,IBUF1,3,NCHAR-2)-1
+      GOTO 990
+C 
+210   IC1 = 3 
+C                     Start after the "WV" identified in word 1 
+      NCH = MCOMA(IBUF2,NCH)
+C 
+      DO 220 IM=1,3 
+        IF (IMODE.NE.4.AND.IM.NE.IMODE) GOTO 220
+C                     Only process for our mode, unless it's ALL
+        DO 215 IC=1,2 
+          CALL GTFLD(IBUF1,IC1,NCHAR,IFC,IEC) 
+C                     This is the averaged data value 
+          V1 = DAS2B(IBUF1,IFC,IEC-IFC+1,IERX)
+          IF (IERX.LT.0) IERR=-303
+          NCH = ICHMV(IBUF2,NCH,IBUF1,IFC,IEC-IFC+1)
+          NCH = MCOMA(IBUF2,NCH)
+          CALL GTFLD(IBUF1,IC1,NCHAR,IFC,IEC) 
+C                      This is the stardard deviation 
+          NCH = ICHMV(IBUF2,NCH,IBUF1,IFC,IEC-IFC+1)
+          NCH = MCOMA(IBUF2,NCH)
+          IF (IM.NE.1) GOTO 211 
+          VHOTWV(IC) = V1 
+211       IF (IM.NE.2) GOTO 212 
+          VBASWV(IC) = V1 
+212       IF (IM.NE.3) GOTO 215 
+          VANTWV(IC) = V1 
+215       CONTINUE
+        IF (V1.GT.4090..OR.V1.LT.0010.) IERR = -301 
+220     CONTINUE
+C 
+C 
+      NC1 = NCH-2 
+990   RETURN
+      END 

@@ -1,0 +1,33 @@
+ASMB
+        HED     LOGICAL BIT TESTER
+        NAM     LTBIT,6 C#870227:18:36    LOGICAL BIT TEST V=1.0# 
+        ENT     LTBIT 
+        EXT     .ENTR 
+IWRD    NOP                     WORD TO BE MANIPULATED/TESTED 
+IBIT    NOP                     PTR TO BIT TO BE ACCESSED 
+LTBIT   NOP                     ENTRY TO LOGICAL TEST OF BIT
+        JSB     .ENTR           GET PARM LIST AND RETURN SETUP
+        DEF     IWRD            TELL WHERE TOP OF PARM LIST IS
+        LDA     IBIT,I          GET BIT ADDRESS (IWORD*16+IBIT) 
+        CLB                     ZERO B REG FOR BIT SHUFFLING
+        RRR     4               MOVE LOWER 4 BITS TO B REG LEAVE UPPER 12 
+*                               IN A REG FOR NOW
+        ADA     IWRD            GET ADDRESS OF WORD BE REFERENCED 
+        LDA     0,I             GET THE WORD BEING ACCESSES 
+        SZB,RSS                 NO SHIFTING IF BIT ZERO WANTED
+        JMP     NSHFT           SKIP ON IF NO SHIFTING
+        BLF                     MOVE COUNT TO LOW BITS IB B REG 
+        ADB     MLSR            ADD IN LSR MASK 
+        STB     ILSL            PUT INTO INSTRUCTION STREAM 
+ILSL    NOP                     THIS WILL BECOME AN LSR INSTRUCTION 
+NSHFT   SLA                     SKIP IF 0 BIT OF A REG IS A 0 
+        JMP     DTRUE           IF NOT ZERO RETURN TRUE 
+RFLSE   LDA     IFLSE           RETURN FALSE FOR THESES CASES 
+        JMP     LTBIT,I         RETURN TO USER
+DTRUE   LDA     ITRUE           GET TRUE FOR RETURN 
+        JMP     LTBIT,I         RETURN ALL IS DONE
+IFLSE   DEF     0               FTN4 DEF OF FALSE (HP)
+ITRUE   OCT     100000          FTN4 DEF OF TRUE  (HP)
+MLSR    OCT     101040          DUMMY LSR MASK FOR MODIFYING CODE 
+        END 
+        END$

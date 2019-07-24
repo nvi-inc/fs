@@ -1,0 +1,430 @@
+FTN4X   
+      PROGRAM TRAKQ(3,80), AUTOMATIC POSITION FINDER          
+C# LAST COMPC'ED  870309:14:44                                # 
+C                                         <870309.1443> 
+C 
+C 
+      DIMENSION ITIME(5),NAME(3),IDOUT(528),LUS(5),TOFF(5), 
+     + IBUF(65),IREG(2),ODDPOW(5),EVNPOW(5),YINT(5),PSLOP(5), 
+     + WHERE(5),TPOS(200),DOFF(5) 
+$INCLUDE #HPOS::-37 
+$INCLUDE #FSCOM::FS 
+      EQUIVALENCE (REG,IREG)
+      DATA NAME/2H  ,2H  ,2H  / 
+      DATA TOFF/-15.,-5.0,5.0,15.,0.0/
+      DATA VTOL/0.010/,IHEAD/0/ 
+      DATA LU6/6/ 
+      DATA IX10/10/,IY190/190/,IY160/160/,IY130/130/,IY30/30/,
+     + IY80/80/ 
+      DATA NORET/2H _/
+      DATA ICOLON/2H::/ 
+C 
+      CALL RMPAR(LUS) 
+      LUI=LUS(1)
+      LUM3=4
+      IF(LUS(2).NE.0) LUM3=LUS(2) 
+      LUT=LUOPR(IDUM) 
+      WRITE(LUT,1000) 
+1000  FORMAT(" Track position finder:  TRAKQ ") 
+      WRITE(LUT,1062) 
+1062  FORMAT(" Head 1 or 2 ? _")
+      READ(LUT,*) IHEAD 
+      SCALEF=1.000
+      IF(IHEAD.EQ.2) SCALEF=1.042*1.0061
+      IHEAD=IHEAD-1 
+      WRITE(LUT,1061) 
+1061  FORMAT("Enter forward and reverse offsets: _")
+      READ(LUT,*) FOROFF,REVOFF 
+      WRITE(LUT,1063) 
+1063  FORMAT("Enter odd & even power offsets: _") 
+      READ(LUT,*) ODDBAS,EVNBAS 
+      IF(LUI.EQ.0) LUI=4  
+      VTOL=.010 
+      IDEBUG=0
+      SLOPE1=82.36*SCALEF   
+      SLOPE1=SLOPE1*1.030 
+      QUAD1=0.
+      SLOPE2=82.19*SCALEF   
+      SLOPE2=SLOPE2*1.019 
+      QUAD2=0.
+      TCOEFL=0. 
+      TCOREF=20.
+      PTOL=SLOPE1*VTOL
+      WRITE(LUT,1040) PTOL
+1040  FORMAT(" The position tolerance will be ",F5.1," um.")
+      NCHOUT=36 
+      CALL FMOT(LUT,LUI,IHEAD)
+C     FASTFW=-1761. 
+C     SLOWFW=-9.6 
+C     FASTRV=1848.
+C     SLOWRV=11.2 
+C     FASTFW=-1800. 
+C     SLOWFW=-4.8 
+C     FASTRV=1900.
+C     SLOWRV=6.0
+C Set position to XINDEX=11.
+      CALL HGO(LUT,LUI,IHEAD,11.,0.,PERROR) 
+235   WRITE(LUT,1035) 
+1035  FORMAT("To activate TRAKQ: GO,TRAKQ,INDEX,OFFSET", 
+     + ",NTIMES") 
+      DO 236 I=1,5
+236   IBUF(I)=2H  
+C Wait for keyboard.
+      CALL EXEC(7)
+C XINDEX is specified by >GO,TRAKQ,INDEX,OFFSET,NTIMES
+C        where INDEX= Pass #
+C        OFFSET= Offset from that in um 
+C        NTIMES= # of times to repeat 
+      CALL GETST(IBUF,-20,IREG(2))
+      CALL CODE 
+      READ(IBUF,*) XINDEX,HOFF,NTIMES 
+      ODDSUM=0. 
+      EVNSUM=0. 
+      AVESUM=0. 
+      IF(XINDEX.EQ.9999.) GO TO 500 
+      NDEX=XINDEX 
+      XINDEX=(NDEX+1)/2 
+250   DO 600 NT=1,NTIMES
+      DO 400 IFND=1,4 
+      TRYOFF=HOFF+TOFF(IFND)
+      CALL HGO(LUT,LUI,IHEAD,XINDEX,TRYOFF,PERROR)
+      IF(IFBRK(IDUM).LT.0) GO TO 500
+C Read odd and even power levels
+      DOFF(IFND)=TOFF(IFND)+PERROR      
+255   CALL HATOD(LUT,LUI,5,ISTAT,ODDPOW(IFND))
+      ODDPOW(IFND)=ODDPOW(IFND)-ODDBAS
+      IF(ODDPOW(IFND).LT.0.) GO TO 255
+C 
+C COMMENTED OUT FOR SPEED 
+C 
+C     CALL HATOD(LUT,LUI,6,ISTAT,POWEVN)
+C     POWEVN=POWODD 
+      EVNPOW(IFND)=ODDPOW(IFND) 
+260   NDEX=XINDEX 
+      WRITE(LUT,1037) ODDPOW(IFND)
+ 1037 FORMAT(F5.2,"_")
+400   CONTINUE
+      ODDRAW=ODDPOW(1)
+      IRAW=1
+      DO 280 I=2,4
+      IF(ODDPOW(I).LT.ODDRAW) GO TO 280 
+      ODDRAW=ODDPOW(I)
+      IRAW=I
+280   CONTINUE
+      IF(IRAW.EQ.2.OR.IRAW.EQ.3) GO TO 282
+      ODDPOW(5)=ODDRAW
+      ODDPK=TOFF(IRAW)
+      GO TO 283 
+C 
+C CHECK FOR THE WRONG SLOPE 
+C 
+282   IF(ODDPOW(2).LT.ODDPOW(1).OR.ODDPOW(3).LT.ODDPOW(4)) GO TO 600
+C 
+C  TRY THE LONG-LINE APPROACH AGAIN 
+C 
+      SLOPX1=(ODDPOW(2)-ODDPOW(1))/(TOFF(2)-TOFF(1))
+      SLOPX2=(ODDPOW(3)-ODDPOW(4))/(TOFF(4)-TOFF(3))
+      SLOPX=0.5*(SLOPX1+SLOPX2) 
+      XINT1=0.5*(TOFF(1)+TOFF(2)-(ODDPOW(1)+ODDPOW(2))/SLOPX) 
+      XINT2=0.5*(TOFF(4)+TOFF(3)+(ODDPOW(4)+ODDPOW(3))/SLOPX) 
+      ODDPK=0.5*(XINT1+XINT2) 
+      IF(ODDPK.GT.100..OR.ODDPK.LT.-100.) ODDPK=0.
+      ODDPOW(5)=SLOPX*(ODDPK-XINT1) 
+283   ODDPK=ODDPK+HOFF
+      EVNPK=ODDPK 
+      PEAK=0.5*(ODDPK+EVNPK)
+      IF(NT.EQ.1) GO TO 284 
+      ODDSUM=ODDSUM+ODDPK 
+      EVNSUM=EVNSUM+EVNPK 
+      AVESUM=AVESUM+PEAK
+284   WRITE(LUT,1038) ODDPK 
+1038  FORMAT("  Track position= ",F5.1," um") 
+      ODDSUM=0. 
+      ODDQ=ABS(ODDPK-HOFF)
+      EVNQ=ABS(EVNPK-HOFF)
+      HNEW=ODDPK
+      IF(EVNQ.LT.ODDQ) HNEW=EVNPK 
+C     CALL HGO(LUT,LUI,IHEAD,XINDEX,PEAK,PERROR)
+      HOFF=HNEW   
+      TPOS(NT)=HOFF 
+600   CONTINUE
+      ODDSUM=ODDSUM/(NTIMES-1)
+      EVNSUM=EVNSUM/(NTIMES-1)
+      AVESUM=AVESUM/(NTIMES-1)
+      POSN=0. 
+      DO 605 I=2,NTIMES 
+605   POSN=POSN+(AVESUM-TPOS(I))**2 
+      POSN=SQRT(POSN/(NTIMES-2))
+      CALL HGO(LUT,LUI,IHEAD,XINDEX,AVESUM,PERROR)
+      ODDSUM=0. 
+      DO 610 I=1,4
+      CALL SUSP(1,50) 
+      CALL HATOD(LUT,LUI,5,ISTAT,ODDPOW(I)) 
+610   ODDSUM=ODDSUM+0.25*ODDPOW(I)
+      EVNSUM=0. 
+C 
+C TO OFFSET FROM THE CENTRAL POSITION, CHANGE THIS 0. TO THE OFFSET 
+C 
+      AVESUM=AVESUM+0.  
+      CALL HGO(LUT,LUI,IHEAD,XINDEX,AVESUM,PERROR)
+      DO 620 I=1,4
+      CALL SUSP(1,50) 
+      CALL HATOD(LUT,LUI,5,ISTAT,EVNPOW(I)) 
+620   EVNSUM=EVNSUM+0.25*EVNPOW(I)
+      CALL CODE 
+      WRITE(IBUF,1776) ODDSUM,EVNSUM
+1776  FORMAT("POWER=",2F8.3)  
+      CALL LOGIT(IBUF,22) 
+      CALL CODE 
+      WRITE(IBUF,1777) AVESUM,POSN
+1777  FORMAT("POSITION, RMS=",F6.1," ,",F6.2) 
+      CALL LOGIT(IBUF,38) 
+      GO TO 235 
+C Break in program. 
+500   CALL CLOSE(IDCB)
+C     WRITE(LUT,2010) 
+C2010 FORMAT(/"Break in TRAKQ. Enter 0 to end or 1 to continue. _")   
+C     READ(LUT,*) IBRK
+C     IF(IBRK.EQ.1) GO TO 235 
+      GO TO 235 
+      END 
+      SUBROUTINE HMOVE(LUT,LUI,IHEAD,ISPEDE,IDIRCT,IDURA,MODE)
+      DIMENSION IOUT(9),IABRT(8),JDURA(3),IASC(2) 
+$INCLUDE #HPOS::-37 
+$INCLUDE #FSCOM::FS 
+      DATA IOUT/16,2H#A,2H7 ,2H=0,2H00,2H00,2H00,2H0$,2H(_/ 
+      DATA IABRT/2H#A,2H7 ,2H=0,2H00,2H00,2H0$,2H!_,2H  / 
+      DATA IASC/2,2H01/ 
+      DATA JDURA/4,2H00,2H00/ 
+      IF(MODE.EQ.1) GO TO 10
+C MODE.NE.1 means abort motion & reset controls 
+      WRITE(LUI,1000) IABRT 
+1000  FORMAT(8A2) 
+      IF(IDEBUG.GT.1) WRITE(LUT,1010) IABRT 
+1010  FORMAT("HMOVE/ abort output = ",7A2,A1) 
+      RETURN
+C This is a motion control command
+10    CALL HEX(IDURA,JDURA(2),1)
+      CALL MOVQQ(JDURA,1,IOUT,10,4) 
+      CALL MOVQQ(IASC,ISPEDE+1,IOUT,7,1)
+      CALL MOVQQ(IASC,IDIRCT+1,IOUT,8,1)
+C This is a temporary patch for single-channel Inchworm controllers 
+C     IHEADQ=0  
+      IHEADQ=IHEAD+1
+C 
+      CALL MOVQQ(IASC,IHEADQ,IOUT,9,1)      
+      WRITE(LUI,1000) (IOUT(I),I=2,9) 
+      IF(IDEBUG.GT.0) WRITE(LUT,1020) (IOUT(I),I=2,9) 
+1020  FORMAT("HMOVE/ output = ",7A2,A1) 
+      END 
+FTN4X   
+      SUBROUTINE HATOD(LUT,LUI,ICHAN,ISTAT,DATA)
+      DIMENSION IOUT(9),IRPORT(3),IN(5),IASC(2),ITEMP(2),IOFFOS(8)
+      DIMENSION ICONV(3)
+$INCLUDE #HPOS::-37 
+$INCLUDE #FSCOM::FS 
+      EQUIVALENCE (IN(2),IN2),(ITEMP(2),ITEMP2),(IOUT(9),IREAD),
+     + (IOUT(2),IOUT2)
+      DATA IASC/2,2H01/ 
+      DATA IRPORT/2H#A,2H7=,2H?_/ 
+      DATA IOUT/16,2H#A,2H7 ,2H=0,2H00,2H00,2H00,2H0$,2H__/ 
+      DATA ICONV/2H%_,2H7=,2H% /
+      DATA IOFFOS/2H#A,2H7 ,2H=0,2H00,2H10,2H00,2H0$,2H__/
+      DATA ITEMP/2,2H00/
+      DATA ITURN/020077B/ 
+      IF(ICHAN.LT.8.AND.ICHAN.GT.-1) GO TO 10 
+C Illegal channel means just report status
+      CALL LURQ(10001B,LUI,1) 
+      IF(IDEBUG.GT.1) WRITE(LUT,1020) IRPORT
+1020  FORMAT("HATOD/ output = ",7A2,A1) 
+      WRITE(LUI,1000) IRPORT
+1000  FORMAT(8A2) 
+      READ(LUI,1000) (IN(I),I=2,5)
+      CALL LURQ(110000B,LUI,1)
+      IF(IDEBUG.GT.1) WRITE(LUT,1030) (IN(I),I=2,5) 
+1030  FORMAT("HATOD/ reply = ",4A2) 
+      ISTAT=0 
+      IF(IAND(IN2,177400B).EQ.1H8) ISTAT=1
+      RETURN
+C Request for data
+10    CALL CODE 
+      WRITE(ITEMP2,1010) ICHAN
+1010  FORMAT(I2)
+      CALL MOVQQ(ITEMP,2,IOUT,13,1) 
+      CALL LURQ(10001B,LUI,1) 
+      IF(IDEBUG.EQ.0) GO TO 20
+      WRITE(LUT,1020) (IOUT(I),I=2,9) 
+      WRITE(LUT,1020) IRPORT
+C20   WRITE(LUI,1000) (IOUT(I),I=2,9) 
+20    CALL EXEC(2,LUI,IOUT2,-15)
+      CALL SUSP(1,5)  
+      CALL EXEC(2,LUI,ICONV,1)  
+      CALL SUSP(1,5)  
+C     WRITE(LUI,1000) (IOUT(I),I=2,9) 
+C     CALL EXEC(2,LUI,IREAD,1)
+C     CALL EXEC(2,LUI,IRPORT,-5)
+      CALL EXEC(3,1200B+LUI,ITURN)
+      REG=REIO(1,3200B+LUI,IN2,4) 
+C     Turn off LVDT oscillator
+      CALL EXEC(2,LUI,IOFFOS,-15) 
+      CALL SUSP(1,5)  
+      CALL LURQ(110000B,LUI,1)
+      CALL HEXI(IN(4),IDATA,4,IERR) 
+      DATA=IDATA*0.004882804
+      IF(IDEBUG.GT.1) WRITE(LUT,1040) (IN(I),I=2,5),DATA
+1040  FORMAT("HATOD/ reply = ",4A2," DATA=",F10.3)
+      END 
+      SUBROUTINE FMOT(LUT,LUI,IHEAD)
+$INCLUDE #HPOS::-37 
+$INCLUDE #FSCOM::FS 
+C Finds inchworm speeds in fast and slow modes
+C for motion in each direction
+C First, set close to 0 assuming default values for inchworm speed. 
+      FASTFW=-1900. 
+      SLOWFW=-8.5 
+      FASTRV=2206.
+      SLOWRV=9.5  
+      CALL HGO(LUT,LUI,IHEAD,11.,0.)
+C Read voltage, go forward fast 0.1 second, read again  
+      CALL POSIT(LUT,LUI,IHEAD,POS1)
+      IF(IDEBUG.GT.0) WRITE(LUT,1000) POS1
+1000  FORMAT("FMOT/ POSITION=",F10.1) 
+      CALL HMOVE(LUT,LUI,IHEAD,1,1, 2500,1) 
+      CALL SUSP(1,20) 
+      CALL POSIT(LUT,LUI,IHEAD,POS2)
+      IF(IDEBUG.GT.0) WRITE(LUT,1000) POS2
+      FASTFW=10.*(POS2 -POS1) 
+      IF(FASTFW.EQ.0.) FASTFW=-1925.
+C Same thing for slow speed, but 10 seconds of motion 
+      DO 15 I=1,10
+      CALL HMOVE(LUT,LUI,IHEAD,0,1,25000,1) 
+      CALL SUSP(2,1)
+15    CALL SUSP(1,5)
+      CALL POSIT(LUT,LUI,IHEAD,POS3)
+      SLOWFW=(POS3-POS2)/10.
+      IF(SLOWFW.EQ.0.) SLOWFW=-4.2
+      IF(IDEBUG.EQ.0) GO TO 20
+      WRITE(LUT,1000) POS3
+20    WRITE(LUT,1010) FASTFW,SLOWFW 
+1010  FORMAT("FMOT/ Forward speeds in um/sec = ",2F12.4)
+C Now do the same thing for reverse motion
+      CALL HMOVE(LUT,LUI,IHEAD,1,0, 2500,1) 
+      CALL SUSP(1,20) 
+      CALL POSIT(LUT,LUI,IHEAD,POS4)
+      FASTRV=10.*(POS4-POS3)  
+      IF(FASTRV.EQ.0.) FASTRV=2200. 
+      IF(IDEBUG.GT.0) WRITE(LUT,1000) POS4
+      DO 25 I=1,10
+      CALL HMOVE(LUT,LUI,IHEAD,0,0,25000,1) 
+      CALL SUSP(2,1)
+25    CALL SUSP(1,5)
+      CALL POSIT(LUT,LUI,IHEAD,POS5)
+      SLOWRV=(POS5-POS4)/10.
+      IF(SLOWRV.EQ.0.) SLOWRV=5.6 
+      IF(IDEBUG.EQ.0) GO TO 30
+      WRITE(LUT,1000) POS5
+30    WRITE(LUT,1020) FASTRV,SLOWRV 
+1020  FORMAT("FMOT/ Reverse speeds in um/sec = ",2F12.4)
+      END 
+      SUBROUTINE POSIT(LUT,LUI,IHEAD,POS) 
+$INCLUDE #HPOS::-37 
+$INCLUDE #FSCOM::FS 
+C Returns head position from LVDT in um.
+      CALL HATOD(LUT,LUI,IHEAD,I,V1)
+      VHEAD=V1
+      CALL HATOD(LUT,LUI,3,I,T1)
+      TLVDT=T1*10.
+      SLOPE=SLOPE1
+      QUAD=QUAD1/SLOPE1 
+      IF(V1.LT.0.) SLOPE=SLOPE2 
+      IF(V1.LT.0.) QUAD=QUAD2/SLOPE2
+      POS=SLOPE*V1*(1.+QUAD*V1)*(1.+TCOEFL*(TLVDT-TCOREF))
+      IF(IDEBUG.LT.2) RETURN
+      WRITE(LUT,1000) V1,TLVDT,LVDT,POS 
+1000  FORMAT("POSIT/ LVDT voltage, temperature, position= ",F10.3,
+     + 2F6.1,F8.1)  
+      END 
+      SUBROUTINE HGO(LUT,LUI,IHEAD,XINDEX,HOFF,POFF)
+C Sets head to XINDEX, with tolerance PTOL
+$INCLUDE #HPOS::-37 
+$INCLUDE #FSCOM::FS 
+      DIMENSION PSET(13)  
+      DATA PSET/-60.,0.,60.,120.,180.,240.,300.,360.,420.,480.,540.,  
+     + 600.,660./ 
+      NTRIES=-1 
+C Convert from index # to position in um
+      OFFSET=-330.0 
+      INDEX=XINDEX+1. 
+      POSN=PSET(INDEX)+OFFSET+HOFF  
+      IF(POSN.GT.0.) GO TO 60 
+      POSN=POSN+FOROFF
+      GO TO 10
+60    POSN=POSN+REVOFF
+C Get current position and compare to desired position
+10    CALL POSIT(LUT,LUI,IHEAD,PNOW)
+      POFF=PNOW-POSN
+C If we are very close, average 4 readings
+C This has been omitted 
+C     IF(ABS(POFF).GT.5.*PTOL) GO TO 12 
+C     PSUM=PNOW 
+C     DO 11 I=1,3 
+C     CALL POSIT(LUT,LUI,IHEAD,PNOW)
+C11   PSUM=PSUM+PNOW
+C     PNOW=PSUM/4.
+C Set forward or reverse speeds according to sign of error
+12    FASTSP=FASTFW 
+      SLOWSP=SLOWFW 
+      IF(POFF.GT.0.) GO TO 15 
+      FASTSP=FASTRV 
+      SLOWSP=SLOWRV 
+15    IF(IDEBUG.GT.0) WRITE(LUT,1005) POSN,PNOW,POFF
+1005  FORMAT("HGO/ desired, current, error= ",3F10.1) 
+      NTRIES=NTRIES+1 
+      IF(ABS(POFF).LE.PTOL) RETURN
+      IF(NTRIES.LT.20) GO TO 20 
+C Can't position within tolerance in 20 tries.  Give up and return. 
+      WRITE(LUT,1000) POSN,PNOW,POFF,PTOL 
+1000  FORMAT("Unable to position to ",F7.1," --achieved position= ",
+     + F7.1/" for error= ",F4.1," which is > tolerance of ",F4.1) 
+      RETURN
+C Try to achieve position.  Assume slow speed first.
+20    ISPEDE=0
+      TMOVE=ABS(POFF/SLOWSP)
+      IF(IDEBUG.GT.0) WRITE(LUT,1010) TMOVE 
+1010  FORMAT("HGO/ time at slow speed = ",F10.3)
+      IF(TMOVE.LT.1.0) GO TO 30 
+      ISPEDE=1
+      TMOVE=ABS(POFF /FASTSP )
+      IF(IDEBUG.GT.0) WRITE(LUT,1020) TMOVE 
+1020  FORMAT("HGO/ time at fast speed = ",F10.3)
+C Need time in 40 usec increments.
+30    TMOVE=TMOVE*25000.
+      IF(IDEBUG.GT.0) WRITE(LUT,1030) TMOVE 
+1030  FORMAT("HGO/ need ",F12.0," 40-usec increments")
+      IDIRCT=0
+      IF(POFF.GT.0.) IDIRCT=1 
+C Count down 1-second moves 
+40    IF(TMOVE.LT.24000.) GO TO 50
+      IF(IDEBUG.GT.0) WRITE(LUT,1040) 
+1040  FORMAT("HGO/ moving for 1 second")
+      CALL HMOVE(LUT,LUI,IHEAD,ISPEDE,IDIRCT,24000,1) 
+C     CALL SUSP(2,1)
+      CALL SUSP(1,5)
+      NTRIES=NTRIES-1 
+      GO TO 10
+C This is the trim move for moves > 1 second duration 
+50    IDURA=TMOVE 
+      TMOV1=TMOVE/25000.
+      IF(IDEBUG.GT.0) WRITE(LUT,1050) TMOV1 
+1050  FORMAT("HGO/ trim move for ",F8.3," seconds") 
+      CALL HMOVE(LUT,LUI,IHEAD,ISPEDE,IDIRCT,IDURA,1) 
+      IWAIT=TMOVE/250.
+      IWAIT=IWAIT+5 
+      CALL SUSP(1,IWAIT)
+C Go see where we are and re-cycle if necesary
+      GO TO 10
+      END 
+      BLOCK DATA NULL 
+$INCLUDE #HPOS::-37 
+$INCLUDE #FSCOM::FS 
+      END 

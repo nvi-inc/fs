@@ -1,0 +1,7 @@
+C COMMON FOR PFMED
+C 
+      COMMON /DCBS/ IDCB1(144),IDCB2(144),IDCB3(144),IDCBX,ISIZE, 
+     .              LSF1(3),LSF2(3),LSF3(3) 
+C               - DCB buffers, DCB size 
+C               - scratch file names [[PRC1, [[PRC2, [[PRC3 
+C 
