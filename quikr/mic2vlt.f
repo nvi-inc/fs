@@ -1,6 +1,7 @@
-      subroutine mic2vlt(ihead,ipass,micron,volt,ip)
+      subroutine mic2vlt(ihead,ipass,micron,volt,ip,koffset)
       integer ihead,ip(5),ipass
       real*4 micron,volt
+      logical koffset
 C
 C  MIC2VLT: convert calibrated micron position to voltage
 C
@@ -8,16 +9,21 @@ C  INPUT:
 C    IHEAD: head to convert for, 1 or 2
 C    IPASS: pass number to convert, 0 = uncalibrated
 C           if odd use forward calibration, even use reverse
+C    KOFFSET  True if offset of heads are to be applied.
 C
 C  OUTPUT:
 C    VOLT: conrresponding voltage position
 C    IP: Field System return parameters, not currently modified
 C
+C  HISTORY:
+C  WHO  WHEN    WHAT
+C  gag  920721  Added logical koffset.
+C
       real*4 mic
       include '../include/fscom.i'
 C
       mic=micron
-      if(ipass.ne.0) then
+      if ((ipass.ne.0).and.(koffset)) then
         mic=mic+foroff(ihead)
         if(mod(ipass,2).eq.0) mic=mic+revoff(ihead)
         ipitch=wrhd_fs

@@ -13,6 +13,7 @@ C        IP(4) - who we are
 C 
 C 2.2.   COMMON BLOCKS USED 
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C 
 C     CALLING SUBROUTINES: FVPNT
 C     CALLED SUBROUTINES: character utilities 
@@ -50,7 +51,7 @@ C
       nch = mcoma(ibuf,nch) 
       nch = nch + ir2as(calfp,ibuf,nch,6,1) 
       nch = mcoma(ibuf,nch) 
-      nch = nch + ir2as(bmfp_fs*180./pi,ibuf,nch,6,2)
+      nch = nch + ir2as(bmfp_fs*180./RPI,ibuf,nch,6,2)
       nch = mcoma(ibuf,nch) 
       nch = nch + ir2as(fxfp_fs,ibuf,nch,6,2)
 C 

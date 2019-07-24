@@ -6,6 +6,7 @@ C
 C WRITE XXXERR LOG ENTRY
 C 
        include '../include/fscom.i'
+       include '../include/dpi.i'
 C 
 C INPUT:
 C 
@@ -21,12 +22,12 @@ C
 C 
 C SIGMA OFFSET
 C 
-      icnext=icnext+jr2as(eltpar(2)*180.0/pi,lbuf,icnext,-9,5,isbuf)   
+      icnext=icnext+jr2as(eltpar(2)*180.0/RPI,lbuf,icnext,-9,5,isbuf)   
       icnext=ichmv(lbuf,icnext,2H  ,1,1) 
 C 
 C SIGMA HALF-WIDTH
 C 
-      icnext=icnext+jr2as(eltpar(3)*180.0/pi,lbuf,icnext,-7,4,isbuf) 
+      icnext=icnext+jr2as(eltpar(3)*180.0/RPI,lbuf,icnext,-7,4,isbuf) 
       icnext=ichmv(lbuf,icnext,2H  ,1,1) 
 C 
 C TEMPERATURE PEAK SIGMA

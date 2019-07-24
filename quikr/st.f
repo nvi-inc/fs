@@ -16,6 +16,8 @@ C
 C
 C  WHO  WHEN    DESCRIPTION
 C  GAG  910111  Changed LFEET to LFEET_FS in call to MA2TP.
+C  gag  920715  Added code to handle Mark IV tape drive, including
+C               new common variable lgen for rate generator.
 C
 C     1. First pick up the class buffer with the command in it.
 C     Find out whether this is a monitor or setting command by
@@ -117,6 +119,8 @@ C                   mmTP%=8xxxxxxx
 C     where xx... is currently enabled tracks 
 C     and set up RAW or BYP depending on direction.
 C
+      if (ispeed.eq.0) goto 410
+C  Skip checking the drive if tape speed is 0.
       ibuf(1) = -3
       call char2hol('tp',ibuf(2),1,2)
       iclass = 0
@@ -137,11 +141,18 @@ C          if vacuum not ready, forget it
         goto 990
 410   ibuf(1) = 0
       call char2hol('tp',ibuf(2),1,2)
-      call en2ma(ibuf(3),ienatp,-1,ltrken)
+      call fs_get_drive(drive)
+      if (MK3.eq.iand(drive,MK3)) then
+        call en2ma(ibuf(3),ienatp,-1,ltrken)
+      else if (MK4.eq.iand(drive,MK4)) then
+        call fs_get_kena(kenastk)
+        call en2ma4(ibuf(3),ienatp,kenastk)
+      endif
       iclass = 0
       call put_buf(iclass,ibuf,-13,2hfs,0)
 C
-      call mv2ma(ibuf(3),idirtp,ispeed,3h720)
+      call fs_get_lgen(lgen)
+      call mv2ma(ibuf(3),idirtp,ispeed,lgen)
       call put_buf(iclass,ibuf,-13,2hfs,0)
 C
       call run_matcn(iclass,2)
@@ -161,6 +172,7 @@ C
 C
 C     5.  This is the read device section.
 C     Fill up a class buffer, requesting ) data (mode -4).
+C                                        % data (mode -2)
 C
 500   call char2hol('tp',ibuf(2),1,2)
       iclass = 0

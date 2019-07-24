@@ -1,12 +1,28 @@
       subroutine bell(lui,ieb)  
       implicit none
-      integer i,it,lui,ieb
+      integer i,itime,lui,ieb,itest,isec,itest2
+      integer it(6), itone
+      data itone/2h /
 
-      do 100 i=1,10 
-        call put_cons_raw(2H ,1)
-        if (ieb.eq.0) it=25-2*i 
-        if (ieb.ne.0) it=5+2*i
-        call susp(1,it) 
+C  HISTORY:
+C  WHO  WHEN    WHAT
+C  gag  920904  Added print and commented out put_cons_raw.
+C  CAK is credited with this discovery.
+C
+C  Using put_cons_raw to output the bell, the susp call would
+C  suspend the process before the bell was actually rung. What
+C  ended up happening was all the bell ringing was stuck in a buffer
+C  until all of the suspends were finished suspending. What you would
+C  get was a delay and a one second spurt of dings. Using the print
+C  statement works.  gag
+C
+      do 100 i=1,10
+cxx        call put_cons_raw(2H ,1)
+      print 9100
+9100  format('+','',$)
+        if (ieb.eq.0) itime=25-2*i 
+        if (ieb.ne.0) itime=5+2*i
+        call susp(1,itime) 
 100   continue
 
       return

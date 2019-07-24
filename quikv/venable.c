@@ -85,7 +85,7 @@ mcbcn:
       skd_par(ip);
 
       if (ichold != -99) shm_addr->check.venable=ichold;
-      else if (ichold >= 0) shm_addr->check.venable=ichold % 1000 + 1;
+      if (ichold >= 0) shm_addr->check.venable=ichold % 1000 + 1;
 
       if(ip[2]<0) return;
       venable_dis(command,itask,ip);

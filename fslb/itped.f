@@ -3,6 +3,9 @@
 C  This routine encodes or decodes information relating
 C  to MAT communications for the tape drive
 C 
+C  INCLUDE FILES:
+      include '../include/fscom.i'
+C
 C  INPUT: 
 C 
 C     IWHAT - code for type of conversion, <0 encode, >0 decode 
@@ -31,15 +34,19 @@ C
 C 
 C  LOCAL: 
 C 
+      double precision das2b, tsp3(8), val
       integer*2 lfast(4),lcaps(7),lstop(5),ltach(6)
       integer*2 ldir(3),llow(3),lreset(5),lrec(3)
-      integer itsp(8)
+      integer itsp(8), itsp4(8)
+      
       dimension nready(2),ncaps(2),nstop(2),nrem(2),nrec(2) 
       integer*2 lrem(4), lready(7)
 C 
 C  INITIALIZED: 
 C 
       data itsp/0,3,7,15,30,60,120,240/ 
+      data tsp3/0.0,3.375,7.875,16.875,33.75,67.5,135.0,270.0/
+      data itsp4/0,5,10,20,40,80,160,320/ 
       data nsp/8/ 
       data lrem   /2Hre,2Hm ,2Hlo,2Hc /
       data nrem/3,3/ 
@@ -57,6 +64,11 @@ C
       data nstop/6,4/ 
       data nrec /3,2/ 
 C 
+C  HISTORY:
+C  WHO  WHEN    WHAT
+C  gag  920715  added new variable array to hold tape speeds for Mark IV
+C               drive and added conditions to check speeds. Also added
+C               calls to set and get the tape drive rate generator.
 C 
 C  Initialize returned parameter in case we have to quit early. 
 C 
@@ -71,7 +83,12 @@ C
 201   continue
 C     IF (IWHAT.NE.-1) GOTO 202 
       if (ic1-1+3.gt.ic2) return
-      itped = ic1 + ib2as(itsp(index+1),ias,ic1,o'100000'+3)
+      call fs_get_lgen(lgen)
+      if (ichcm_ch(lgen,1,'853').eq.0) then
+        itped = ic1 + ib2as(itsp4(index+1),ias,ic1,o'100000'+3)
+      else
+        itped = ic1 + ib2as(itsp(index+1),ias,ic1,o'100000'+3)
+      endif
       return
 C 
 C  Code -2, tape direction. 
@@ -151,18 +168,43 @@ C
 C     INDEX = -1
 C 
 C 
-C  TAPE SPEEDS
+C  Code 1, TAPE SPEEDS
 C 
 301   continue
+      call ichmv(lgen,1,3H720,1,3)
       ii = ias2b(ias,ic1,ic2-ic1+1) 
-      if (ii.eq.-32768) return
-      do 3010 i=1,nsp 
+      if (ii.eq.-32768) goto 3011
+      do i=1,nsp 
         if (ii.eq.itsp(i)) index = i-1
-3010    continue
+      enddo
+      if (index.eq.-1) then
+        call fs_get_drive(drive)
+        if (MK4.eq.iand(drive,MK4)) then
+          do i=1,nsp 
+            if (ii.eq.itsp4(i)) index = i-1
+          enddo
+        endif
+        if (index.ne.-1) then  ! set rate generator
+          call ichmv(lgen,1,3H853,1,3)
+        endif
+      endif
+
+      call fs_set_lgen(lgen)
+
+3011  continue
+      if (index.eq.-1) then
+        ierr=0
+        val = das2b(ias,ic1,ic2-ic1+1,ierr) 
+        if (ierr.ne.0) return 
+        do i=1,nsp 
+          if (val.eq.tsp3(i)) index = i-1
+        enddo
+      endif
+
       return
 C 
 C 
-C  TAPE DIRECTIN
+C  TAPE DIRECTION
 C 
 302   continue
 C     IF (IWHAT.NE.+2) GOTO 303 

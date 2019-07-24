@@ -11,18 +11,17 @@ C         LATPOS = CALCULATED LATITUDE-LIKE COORDINATE
 C 
 C         IERR = 0 IF NO ERROR OCCURRED 
 C 
-       double precision dlat,dlon,ra,dec,az,el,x,y,dha,dpi,refr 
+       double precision dlat,dlon,ra,dec,az,el,x,y,dha,refr 
        dimension it(6)
 C 
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C 
       integer ichcm_ch
 C
 C  THE FOLLOWING VARIABLES ARE READ FROM FSCOM: 
 C 
 C        XOFF, YOFF, AZOFF, ELOFF, RAOFF, DECOFF, LAXNF, RADAT, DECDAT
-C 
-      data dpi/3.141592653589d0/
 C 
 C  CALCULATE THE POSITION IN THE LOCAL X/Y NS SYSTEM
 C 
@@ -37,7 +36,7 @@ C
       ra=radat
       dec=decdat
       call cnvrt(1,ra,dec,az,el,it,dlat,dlon)
-      el=el+(dpi/180.0d0)*refr(el*(180.0d0/dpi))
+      el=el+(DPI/180.0d0)*refr(el*(180.0d0/DPI))
       call cnvrt(5,az,el,x,y,it,dlat,dlon)
 C
 C  NOW CONVERT BACK TO WHAT WE WERE ASKED FOR

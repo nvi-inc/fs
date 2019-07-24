@@ -93,6 +93,10 @@ C 5.  INITIALIZED VARIABLES: none
 C
 C 6.  PROGRAMMER: C. Ma
 C     MODIFIED 840307 BY MWH To schedule EDIT/1000
+C 
+C HISTORY:
+C WHO  WHEN    WHAT
+C gag  920901  Added calls to char2low after a few readstring calls.
 C
 C     PROGRAM STRUCTURE
 C
@@ -136,12 +140,12 @@ C     Initialize flags and counters.
         if (ierr.lt.0) then
           write(lui,9100) ierr
 9100      format(' error creating tmppf1 ',i4)
-          go to 390
+          goto 390
         endif
       else if (ierr.lt.0) then
         write(lui,9200) ierr
 9200    format(' scratch error ',i4)
-        go to 390
+        goto 390
       endif
 C     Write EOF to initialize.
       call f_rewind(idcb3,ierr)
@@ -159,7 +163,7 @@ C     Search for procedure name given.
       write(lui,1105)
 1105  format(" new procedure")
       knew = .true.
-      go to 150
+      goto 150
 c
 130   continue
       call f_readstring(idcb3,ierr,ibc,len)
@@ -190,120 +194,126 @@ C     having ported the field system, the editor now used will be
 C     'vi' since EDIT 1000 is no longer available
 c     call ftn_runprog('vi ' // ls1,ierr)
 cxx      call ftn_editor(ls1,ierr,ichange)
+      ierr = 0
       call ftn_edit(ls1,ierr,ichange)
       if (ierr.ne.0) write(6,*) 'error editing procedure'
 C
-
-c      call rmpar(ip)
-c     ip(1) = 0
-c     if (ip(1).eq.0) then
-      if (ichange.eq.1) then
-      call fopen(idcb1,ls1,ierr)
-      if (ierr.lt.0) then
-        write(lui,9090) ierr
-9090    format(' error ',i4,' opening tmppf1')
-        go to 390
-      endif
+      if (ichange.eq.0) then
+        write(6,9000) lnam1
+9000    format(1x,"NO changes were made to the procedure: ",a)
+      else if (ichange.eq.1) then
+        call fopen(idcb1,ls1,ierr)
+        if (ierr.lt.0) then
+          write(lui,9090) ierr
+9090      format(' error ',i4,' opening tmppf1')
+          goto 390
+        endif
 C
 C  Open/Create scratch file 2
 C
-      call fopen(idcb2,lsf2,ierr)
-      if (ierr.eq.-6) then
         call fopen(idcb2,lsf2,ierr)
-        if (ierr.lt.0) then
-          write(lui,9500) ierr
-9500      format(' error ',i4,' creating output file')
-          go to 390
+        if (ierr.eq.-6) then
+          call fopen(idcb2,lsf2,ierr)
+          if (ierr.lt.0) then
+            write(lui,9500) ierr
+9500        format(' error ',i4,' creating output file')
+            goto 390
+          endif
+        else if (ierr.lt.0) then
+          write(lui,9200) ierr
+          goto 390
         endif
-      else if (ierr.lt.0) then
-        write(lui,9200) ierr
-        go to 390
-      endif
       
 C  Replace/insert edited procedure
 C
 C   copy down to the old procedure if it existed, to the end otherwise
 C
-      call f_readstring(idcb3,ierr,ibc,len)
-      call char2low(ibc)
-      if(kerr(ierr,me,'reading',' ',0,0)) continue
-      do while(ierr.ge.0.and.len.ge.0)
-        if(ibc(1:6).eq.'define'.and.ibc(9:20).eq.lnam1) goto 160
-        nch = trimlen(ibc)
-        if (nch.gt.0) call f_writestring(idcb2,ierr,ibc(:nch),lenw)
-        if(kerr(ierr,me,'writing',' ',0,0)) continue
         call f_readstring(idcb3,ierr,ibc,len)
         call char2low(ibc)
         if(kerr(ierr,me,'reading',' ',0,0)) continue
-      enddo
-160   continue
+        do while(ierr.ge.0.and.len.ge.0)
+          if(ibc(1:6).eq.'define'.and.ibc(9:20).eq.lnam1) goto 160
+          nch = trimlen(ibc)
+          if (nch.gt.0) call f_writestring(idcb2,ierr,ibc(:nch),lenw)
+          if(kerr(ierr,me,'writing',' ',0,0)) continue
+          call f_readstring(idcb3,ierr,ibc,len)
+          call char2low(ibc)
+          if(kerr(ierr,me,'reading',' ',0,0)) continue
+        enddo
+160     continue
 C
 C   write the new DEFINE line
 C
-      ldef(9:20) = lnam1(1:12)
-      call f_writestring(idcb2,ierr,ldef(:34),lenw)
-      if(kerr(ierr,me,'writing',' ',0,0)) continue
+        ldef(9:20) = lnam1(1:12)
+        call f_writestring(idcb2,ierr,ldef(:34),lenw)
+        if(kerr(ierr,me,'writing',' ',0,0)) continue
 C
 C  copy the new procedure in
 C
-      call f_readstring(idcb1,ierr,ibc,len)
-      if(kerr(ierr,me,'reading',' ',0,0)) continue
-      do while(ierr.ge.0.and.len.ge.0)
-        nch = trimlen(ibc)
-        if (nch.gt.0) call f_writestring(idcb2,ierr,ibc(:nch),lenw)
-        if(kerr(ierr,me,'writing',' ',0,0)) continue
         call f_readstring(idcb1,ierr,ibc,len)
-        if(kerr(ierr,me,'reading',' ',0,0)) continue
-      enddo
-C
-C  Write the ENDDEF line
-C
-      call f_writestring(idcb2,ierr,'enddef',lenw)
-      if(kerr(ierr,me,'writing',' ',0,0)) continue
-C
-C  copy through the old routine if it existed, otherwise we are at EOF
-C
-      if (.not.knew) then
-        call f_readstring(idcb3,ierr,ibc,len)
         call char2low(ibc)
-        if(kerr(ierr,me,'reading',' ',0,0)) continue
-        do while(ibc(1:6).ne.'enddef')
-          if(ierr.lt.0.or.len.le.0) go to 180
-          call f_readstring(idcb3,ierr,ibc,len)
-          if(kerr(ierr,me,'reading',' ',0,0)) continue
-        enddo
-C
-C  okay, now copy the remaining procedures
-C
-        call f_readstring(idcb3,ierr,ibc,len)
         if(kerr(ierr,me,'reading',' ',0,0)) continue
         do while(ierr.ge.0.and.len.ge.0)
           nch = trimlen(ibc)
           if (nch.gt.0) call f_writestring(idcb2,ierr,ibc(:nch),lenw)
           if(kerr(ierr,me,'writing',' ',0,0)) continue
-          call f_readstring(idcb3,ierr,ibc,len)
+          call f_readstring(idcb1,ierr,ibc,len)
+          call char2low(ibc)
           if(kerr(ierr,me,'reading',' ',0,0)) continue
         enddo
-      end if
 C
-180   continue
-      call fclose(idcb3,ierr)
-      if(kerr(ierr,me,'closing',' ',0,0)) return
-      call fclose(idcb1,ierr)
-      if(kerr(ierr,me,'closing',' ',0,0)) return
-      if (knew) then
-        lm8(1:8) = 'inserted'
-      else
-        lm8(1:8) = 'replaced'
-      end if
-      nch = trimlen(lnam1)
-      if (nch.gt.0) write(lui,9800) lnam1(1:nch),lm8,lproc(1:12)
-9800  format(' procedure ',a,' ',a8,' in ',a)
+C  Write the ENDDEF line
+C
+        call f_writestring(idcb2,ierr,'enddef',lenw)
+        if(kerr(ierr,me,'writing',' ',0,0)) continue
+C
+C  copy through the old routine if it existed, otherwise we are at EOF
+C
+        if (.not.knew) then
+          call f_readstring(idcb3,ierr,ibc,len)
+          call char2low(ibc)
+          if(kerr(ierr,me,'reading',' ',0,0)) continue
+          do while(ibc(1:6).ne.'enddef')
+            if(ierr.lt.0.or.len.le.0) goto 180
+            call f_readstring(idcb3,ierr,ibc,len)
+            call char2low(ibc)
+            if(kerr(ierr,me,'reading',' ',0,0)) continue
+          enddo
+C
+C  okay, now copy the remaining procedures
+C
+          call f_readstring(idcb3,ierr,ibc,len)
+          call char2low(ibc)
+          if(kerr(ierr,me,'reading',' ',0,0)) continue
+          do while(ierr.ge.0.and.len.ge.0)
+            nch = trimlen(ibc)
+            if (nch.gt.0) call f_writestring(idcb2,ierr,ibc(:nch),lenw)
+            if(kerr(ierr,me,'writing',' ',0,0)) continue
+            call f_readstring(idcb3,ierr,ibc,len)
+            call char2low(ibc)
+            if(kerr(ierr,me,'reading',' ',0,0)) continue
+          enddo
+        end if
+C
+180     continue
+        call fclose(idcb3,ierr)
+        if(kerr(ierr,me,'closing',' ',0,0)) return
+        call fclose(idcb1,ierr)
+        if(kerr(ierr,me,'closing',' ',0,0)) return
+        if (knew) then
+          lm8(1:8) = 'inserted'
+        else
+          lm8(1:8) = 'replaced'
+        end if
+        nch = trimlen(lnam1)
+        if (nch.gt.0) write(lui,9800) lnam1(1:nch),lm8,lproc(1:12)
+9800    format(' procedure ',a,' ',a8,' in ',a)
 C  Replace procedure file
-      call pfblk(3,lproc,cid)
+        call pfblk(3,lproc,cid)
 C  Copy to scratch 3
-      call pfcop(lproc,lui,id)
+        call pfcop(lproc,lui,id)
       endif
+C
 390   call fclose(idcb1,ierr)
       if(kerr(ierr,me,'closing',' ',0,0)) return
       call ftn_purge(ls1,ierr)    !idcb1

@@ -1,11 +1,14 @@
       subroutine binit(ip,lnames,nnames,itscb,ntscb,idcbsk,ierr)
 C                INITIALIZE BOSS          <910322.1647>
 C
-C     NRV modified 801201
-C     810730 NRV Add error calls to LOGIT in new format
-C     850121 MWH Call RMPAR on return from ANTCN
-C     850501 WEH Print a message if we didn't initialize ANCTN
-C     880105 LAR Change LNAMES to contain names instead of hash codes
+C  HISTORY:
+C    WHO  WHEN    WHAT
+C    NRV  801201  modified
+C    NRV  810730  Add error calls to LOGIT in new format
+C    MWH  850121  Call RMPAR on return from ANTCN
+C    WEH  850501  Print a message if we didn't initialize ANCTN
+C    LAR  880105  Change LNAMES to contain names instead of hash codes
+C    gag  920713  changed hex index from 1 to 3 to 1 to 7
 C
       include '../include/fscom.i'
 C
@@ -16,8 +19,8 @@ C
       integer ibuf(50)                  !  input buffer containing command
       integer itime(9)                  !  time array returned from spars
       integer lseg(2)                   !  segment name (obsolete)
-      integer ieqhex(3)
-      data ieqhex /z'01',z'02',z'03'/
+      integer ieqhex(7)
+      data ieqhex /z'01',z'02',z'03',z'04',z'05',z'06',z'07'/
 C
 C
 C     1. First initialize values from RMPAR parameters.
@@ -72,12 +75,12 @@ C
           lnames(8,iname) = lseg(2)
           lnames(9,iname) = iss
           lnames(10,iname) = ity
-          if ((ieq1.ge.1) .and. (ieq1.le.3)) then
+          if ((ieq1.ge.1) .and. (ieq1.le.7)) then
             lnames(11,iname) = ieqhex(ieq1)
           else
             lnames(11,iname) = 0
           endif
-          if ((ieq2.ge.1) .and. (ieq2.le.3)) then
+          if ((ieq2.ge.1) .and. (ieq2.le.7)) then
             lnames(12,iname) = ieqhex(ieq2)
           else
             lnames(12,iname) = 0
@@ -115,12 +118,12 @@ C
           lnames(8,iname) = lseg(2)
           lnames(9,iname) = iss
           lnames(10,iname) = ity
-          if ((ieq1.ge.1) .and. (ieq1.le.3)) then
+          if ((ieq1.ge.1) .and. (ieq1.le.7)) then
             lnames(11,iname) = ieqhex(ieq1)
           else
             lnames(11,iname) = 0
           endif
-          if ((ieq2.ge.1) .and. (ieq2.le.3)) then
+          if ((ieq2.ge.1) .and. (ieq2.le.7)) then
             lnames(12,iname) = ieqhex(ieq2)
           else
             lnames(12,iname) = 0

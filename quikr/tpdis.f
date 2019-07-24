@@ -93,9 +93,13 @@ C                   Move buffer contents into output list
 220     continue
       goto 500
 C 
-230   ireg(2) = get_buf(iclass,ibufd,-ilenm,idum,idum)
+230   continue
+      ireg(2) = get_buf(iclass,ibufd,-ilenm,idum,idum)
 C                   Read first record into display buffer 
-      ireg(2) = get_buf(iclass,ibufs,-ilenm,idum,idum)
+      call fs_get_drive(drive)
+      if (MK3.eq.iand(MK3,drive)) then
+        ireg(2) = get_buf(iclass,ibufs,-ilenm,idum,idum)
+      endif
 C                   Read next record into  settings buffer
 C 
 C 
@@ -107,8 +111,10 @@ C
       call fs_set_irdytp(irdytp)
       call fs_set_itactp(itactp)
       call fs_set_lfeet_fs(lfeet_fs)
-      call ma2rp(ibufs,iremtp,iby,ieq,ibw,ita,itb)
-      call fs_set_iremtp(iremtp)
+      if (MK3.eq.iand(MK3,drive)) then
+        call ma2rp(ibufs,iremtp,iby,ieq,ibw,ita,itb,ial)
+        call fs_set_iremtp(iremtp)
+      endif
       goto 320
 310   ilow = ilowtp
       call fs_get_iremtp(iremtp)

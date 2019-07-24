@@ -12,6 +12,13 @@ C
       equivalence (reg,ireg(1)),(parm,iparm(1))
       data ilen/100/
 C
+C  HISTORY:
+C  WHO  WHEN    WHAT
+C  gag  920714  Made Mark IV drive valid for specifing read head as
+C               the head parameter.
+C  gag  920727  Added 0 or 1 for write or read head, respectively.
+C  nrv  921027  Change 0 or 1 to 1 or 2
+C
       ichold=-99
       iclass=0
       nrec=0
@@ -83,12 +90,16 @@ C  which head
 C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       call fs_get_drive(drive)
-      if(ichcm_ch(parm,1,'r').eq.0.and.MK3.eq.iand(drive,MK3)) then
+      if (((ichcm_ch(parm,1,'r').eq.0).or.
+     .     (ichcm_ch(parm,1,'2').eq.0)).and.
+     .    ((MK3.eq.iand(drive,MK3)).or.(MK4.eq.iand(drive,MK4)))) then
         ihd = 2
-      else if(ichcm_ch(parm,1,'r').eq.0) then
+      else if((ichcm_ch(parm,1,'r').eq.0).or.
+     .        (ichcm_ch(parm,1,'2').eq.0)) then
         ip(3)=-501
         goto 990
-      else if(ichcm_ch(parm,1,'w').eq.0) then
+      else if ((ichcm_ch(parm,1,'w').eq.0).or.
+     .         (ichcm_ch(parm,1,'1').eq.0)) then
         ihd = 1
       else if(cjchar(parm,1).eq.'*') then
         ihd=ihdlc_fs

@@ -1,6 +1,6 @@
       subroutine ma2rp(ibuf,irem,iby,ieq,ibw,ita,itb,ial)
 
-C  convert mat buffer to rp data c#870407:12:41#
+C  convert mat buffer to rp data
 C 
 C     This routine converts the buffers returned from the MAT 
 C     into the reproduce tracks information.

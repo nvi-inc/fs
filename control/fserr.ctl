@@ -287,6 +287,90 @@ Improper response (wrong number of chars) from MATCN
 CH   -6
 Verify error from MATCN
 ""
+CH -201
+?W communication trouble
+""
+CH -202
+?W frequency does not check with requested value
+""
+CH -203
+?W if input source does not check with requested setting
+""
+CH -204
+?W USB bandwidth does not check with requested value
+""
+CH -205
+?W LSB bandwidth does not check with requested value
+""
+CH -206
+?W USB bandwidth compensation does not check with requested value
+""
+CH -207
+?W LSB bandwidth compensation does not check with requested value
+""
+CH -208
+?W gain mode does not check with requested setting
+""
+CH -209
+?W USB gain value does not check with requested value
+""
+CH -210
+?W LSB gain value does not check with requested value
+""
+CH -211
+?W averaging period does not check with requested setting
+""
+CH -212
+?W attenuator for IF channel A does not check with requested setting
+""
+CH -213
+?W attenuator for IF channel B does not check with requested setting 
+""
+CH -214
+?W input source for IF channel A does not check with requested setting
+""
+CH -215
+?W input source for IF channel B does not check with requested setting 
+""
+CH -216
+?W averaging period does not check with requested setting
+""
+CH -217
+?W mode does not check with requested setting
+""
+CH -218
+?W sample rate does not check with requested setting
+""
+CH -219
+?W format does not check with requested setting
+""
+CH -220
+?W enable tracks do not check with requested setting
+""
+CH -221
+?W DQA channels do not check with requested setting
+""
+CH -222
+?W group enables do not match commanded enable
+""
+CH -223
+?W tape drive is not moving and it should be
+""
+CH -224
+?W commanded speed and actual speed differ
+""
+CH -225
+?W direction of tape travel is different than commanded
+""
+CH -226
+?W tape drive is moving and it shouldn't be
+""
+CH -227
+?W tape drive speed is different than the commanded speed of 0
+""
+CH -228
+?W low tape sensor doesn't match commanded
+""
 CH -301
 ?W module is not in remote
 ""
@@ -767,6 +851,12 @@ Check label doesn't match.  Check it and try again.
 QA -301
 Error RP'ing program PRLAB
 ""
+QB -1
+Must have parameters, see help file
+""
+QB -2
+No default for mnemonic
+""
 QB -101
 No default for the A/D channel.
 ""
@@ -808,6 +898,9 @@ Synch block CRC checksum test FAILED.
 ""
 QE -102
 Asterisk (*) notation not supported by ENABLE command.
+""
+QE -103
+Not a valid enable command for Mark IV.
 ""
 QE -201
 Error in 1st track specified.  Must be G1,G2,G3,G4,1,...28.
@@ -865,6 +958,9 @@ Number with G for track assignment must be between 1 and 4.
 ""
 QG -207
 Track must be between 1 and 28.
+""
+QG -208
+Track assignment must be between 0 and 35 and/or ALL.
 ""
 QG -302
 No class number available.
@@ -1044,8 +1140,7 @@ QP -201
 Number of cycles must be greater than or equal to 0.
 ""
 QP -202
-Pause between cycles must be between 0 and 1800 seconds
-inclusive.
+Pause between cycles must be between 0 and 1800 seconds inclusive.
 ""
 QP -203
 Reproduce mode must be one of FS, BY, RW or AB.
@@ -1089,14 +1184,17 @@ VC number must be from 1 to 14
 QQ -203
 Patching must be L(ow) or H(igh)
 ""
+QR -1
+No class number available.
+""
 QR -201
-Only BYP (BYPass) or RAW (Read After Write) permitted.
+Only BYP (BYPass) or RAW/READ (Read After Write) permitted.
 ""
 QR -202
-Track for decoder channel A must be 0 to 28.
+Track for decoder channel A must be 0 to 28, or 0 to 35 for Mark IV.
 ""
 QR -203
-Track for decoder channel B must be 0 to 28.
+Track for decoder channel B must be 0 to 28, or 0 to 35 for Mark IV.
 ""
 QR -204
 Bandwidth must be 4, 2, 0.5, 0.25, 0.125.
@@ -1109,6 +1207,15 @@ Tracks can't be even and odd when electronics is even or odd.
 ""
 QR -207
 Reproduce electronics variable incorrectly set.
+""
+QR -208
+Track must be from stack 0 if read mode.
+""
+QR -209
+Equalizer must be 0, 1, 2, 3 (DIS) or 80, 135, 160, 270.
+""
+QR -210
+Bitrate must be 16, 8, 4, or 2.
 ""
 QR -301
 Bypass in disagreement with common.
@@ -1124,6 +1231,9 @@ Bandwidth for reproduce in disagreement with common.
 ""
 QR -305
 Equalizer in disagreement with common.
+""
+QR -306
+Bitrate in disagreement with common.
 ""
 QS -101
 No default for source name.
@@ -1183,7 +1293,7 @@ QV -201
 Video converter frequency must be between 100 and 500 MHz.
 ""
 QV -202
-Video converter bandwidth must be 4, 2, 0.5, 0.25, 0.125.
+Video converter bandwidth must be 4, 2, 1 (8 for MK4), 0.5, 0.25, 0.125.
 ""
 QV -203
 TPI must be U, L, UL, IF, LO, or GR.
@@ -1419,6 +1529,12 @@ Record enable must be ON or OFF.
 Q< -301
 Vacuum is not ready.
 ""
+Q< -302
+Tape drive has an error condition, not ready.
+""
+Q< -303
+program error: incorrect number of responses from recorder.
+""
 Q?   -2
 Tape position must be greater than or equal to 0
 ""
@@ -1447,10 +1563,13 @@ Q@   -1
 Class error.
 ""
 Q@ -201
-Write head pass number must be 1 to 100 inclusive.
+Write head pass number out of range.
 ""
 Q@ -202
-Read head pass number must be 1 to 100 inclusive.
+Read head pass number out of range.
+""
+Q@ -203
+Offset parameter must be auto or none.
 ""
 Q@ -211
 Error decoding write stack position parameter.
@@ -1611,8 +1730,26 @@ Error unlocking LVDT Resource Number.
 Q@ -410
 Commanded position out of range
 ""
+Q@ -501
+No default for VLBA
+""
+Q@ -502
+No second head for VLBA
+""
+Q@ -506
+No second head for VLBA so calibration not valid. 
+""
+RC -1
+Tape drive has no vacuum.
+"
+RC -2
+Tape drive has an error condition, not ready.
+"
 RC -201
 Parameter must be reboot,load,unload,bot,eot,release,<feet>,feet,or zero.
+""
+RC -202
+No vacuum on recorder or problem reading recorder.
 ""
 RC -401
 program error: incorrect number of responses in rec.
@@ -1746,6 +1883,9 @@ LSB gain value must be between -18.0 and 12.0.
 VB -401
 program error: incorrect number of responses in bbc.
 ""
+VE - 100
+No default for the tracks/groups to be enabled.
+""
 VE -200
 List elements must be one of: g1, g2, g3, g4, d1, ..., d28.
 ""
@@ -1829,6 +1969,12 @@ mcb functions addr and test not supported for this command.
 ""
 VR -401
 program error: incorrect number of responses in vrepro_dec.
+""
+VS -1
+Tape drive has no vacuum.
+""
+VS -2
+Tape drive has an error condition, not ready.
 ""
 VS -101
 No default for tape direction.

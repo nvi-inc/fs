@@ -3,6 +3,7 @@ C
 C     Set and display FLUX values
 C
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C
       dimension ip(1)
       dimension ireg(2),iparm(2)
@@ -284,19 +285,19 @@ C
       nch=nch+ir2as(arr(1),ibuf,nch,10,1)
       nch=mcoma(ibuf,nch)
 C
-      nch=nch+ir2as(arr(2)*180./pi,ibuf,nch,10,4)
+      nch=nch+ir2as(arr(2)*180./RPI,ibuf,nch,10,4)
       nch=mcoma(ibuf,nch)
 C
-      nch=nch+ir2as(arr(3)*180./pi,ibuf,nch,10,4)
+      nch=nch+ir2as(arr(3)*180./RPI,ibuf,nch,10,4)
       nch=mcoma(ibuf,nch)
 C
       nch=nch+ir2as(arr(4),ibuf,nch,10,1)
       nch=mcoma(ibuf,nch)
 C
-      nch=nch+ir2as(arr(5)*180./pi,ibuf,nch,10,4)
+      nch=nch+ir2as(arr(5)*180./RPI,ibuf,nch,10,4)
       nch=mcoma(ibuf,nch)
 C
-      nch=nch+ir2as(arr(6)*180./pi,ibuf,nch,10,4)
+      nch=nch+ir2as(arr(6)*180./RPI,ibuf,nch,10,4)
       nch=mcoma(ibuf,nch)
 C
       nch = nch + ir2as(corr,ibuf,nch,10,3)

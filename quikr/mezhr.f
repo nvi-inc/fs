@@ -20,7 +20,7 @@ C
       integer*4 ip(5),jperr(2),jsync(2)
       integer itrk(2),isyna(5),isynb(5),ireg(2),itrk2(2),iaux(2)
 C
-      data itper/34/,nav/4/,ilen/40/
+      data itper/25/,nav/4/,ilen/40/
 C             - time 10s of milliseconds
 c               between samples and # of samples to average
 c
@@ -34,7 +34,10 @@ c
 c
 c set reproduce tracks
 c
-      if(MK3.eq.iand(drive,MK3)) THEN
+      call fs_get_rack(rack)
+      call fs_get_drive(drive)
+      if ((MK3.eq.iand(drive,MK3)).or.(MK4.eq.iand(drive,MK4))) THEN
+        nrec=0
         ibuf2(1)=0
         call char2hol('tp',ibuf2(2),1,2)
         call fs_get_itraka(itraka)
@@ -43,10 +46,18 @@ c
         if(itrk(2).ne.0) itrakb=itrk(2)
         call fs_set_itraka(itraka)
         call fs_set_itrakb(itrakb)
-        call rp2ma(ibuf2(3),ibypas,ieqtap,ibwtap,itraka,itrakb)
         iclass=0
+        if (MK3.eq.iand(MK3,drive)) then
+          call rp2ma(ibuf2(3),ibypas,ieqtap,ibwtap,itraka,itrakb)
+        else if (MK4.eq.iand(MK4,drive)) then
+          call rp2ma4(ibuf2(3),ibypas,ieq4tap,itraka,itrakb)
+          call put_buf(iclass,ibuf2,-13,2hfs,0)
+          nrec = nrec+1
+          call rpbr2ma4(ibuf2(3),ibr4tap)  !! bitrate has a different strobe
+        endif
         call put_buf(iclass,ibuf2,-13,2hfs,0)
-        call run_matcn(iclass,1)
+        nrec = nrec+1
+        call run_matcn(iclass,nrec)
         call rmpar(ip)
       else !VLBA
         call fc_set_vrptrk(itrk, ip)
@@ -65,7 +76,7 @@ c
 c
 c  initialize decoder error counters
 c
-      if(MK3.eq.iand(rack,MK3)) then
+      if ((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
         ibuf2(1)=0
         call char2hol('de%',ibuf2(2),1,3)
         iclass=0
@@ -176,8 +187,10 @@ C
           isysmb=min(isysmb,isynb(i))
         endif
       enddo
-      if(MK3.eq.iand(rack,MK3)) then
+      if (MK3.eq.iand(rack,MK3)) then
         secs=2**(7-ibwtap)      ! seconds for a full megabyte
+      else if (MK4.eq.iand(rack,MK4)) then
+        secs=1     !!! MAKE ONE UNTIL MORE KNOWLEDGE OF MK4 !!! 
       else
         call fs_get_vform_rate(vform_rate)
         secs=0.25*(2**(7-vform_rate))
@@ -194,15 +207,21 @@ C
 C
 C  4.  Check AUX data.
 C
-      if(.not.kdoaux_fs) goto 990
-      if(MK3.eq.iand(rack,MK3)) then
+      if (.not.kdoaux_fs) goto 990
+      if ((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
 c
 c  Check COMMON for AUX data
 c
-        do i=1,6
-          if(lauxfm(i).ne.0) goto 401
-        enddo
-        goto 990     !no aux to check
+        if (MK3.eq.iand(rack,MK3)) then
+          do i=1,6
+            if(lauxfm(i).ne.0) goto 401
+          enddo
+          goto 990     !no aux to check
+        else if (MK4.eq.iand(rack,MK4)) then
+          do i=1,4
+            if(lauxfm4(i).ne.0) goto 401
+          enddo
+        endif
 c
 401     continue
         do ii=1,2
@@ -233,12 +252,20 @@ c
               if(i.eq.1) nch=ichmv(laux,nch,ibuf,7,4)
             enddo
             call lower(laux(6*(ii-1)+1),12)
-            if(ichcm(laux,12*(ii-1)+1,lauxfm,1,12).ne.0) then
-              if(ii.eq.1) iauxa = 1
-              if(ii.eq.2) iauxb = 1
+            if (MK3.eq.iand(MK3,rack)) then
+              if(ichcm(laux,12*(ii-1)+1,lauxfm,1,12).ne.0) then
+                if(ii.eq.1) iauxa = 1
+                if(ii.eq.2) iauxb = 1
+              endif
+            else if (MK4.eq.iand(MK4,rack)) then
+              if(ichcm(laux,12*(ii-1)+1,lauxfm4,1,12).ne.0) then
+                if(ii.eq.1) iauxa = 1
+                if(ii.eq.2) iauxb = 1
+              endif
             endif
           endif
         enddo
+
       else !vlba RACK
         call fc_get_vaux(iaux,itrk,ip) !check our aux data
         if(ip(3).lt.0) return
@@ -253,17 +280,27 @@ c
           endif
         enddo
         if(itrk(1).ne.0.and.itrk(2).ne.0) then !swap a & b tracks
-          if(MK3.eq.iand(drive,MK3)) THEN !mk3 drive (&VLBA rack), not likely
+C !mk3 or mk4 drive (&VLBA rack), not likely
+          if((MK3.eq.iand(drive,MK3)).or.(MK4.eq.iand(drive,MK4))) THEN
+            nrec=0
             ibuf2(1)=0
             call char2hol('tp',ibuf2(2),1,2)
             itraka=itrk(2)
             itrakb=itrk(1)
             call fs_set_itraka(itraka)
             call fs_set_itrakb(itrakb)
-            call rp2ma(ibuf2(3),ibypas,ieqtap,ibwtap,itraka,itrakb)
             iclass=0
+            if (MK3.eq.iand(drive,MK3)) then
+              call rp2ma(ibuf2(3),ibypas,ieqtap,ibwtap,itraka,itrakb)
+            else if (MK4.eq.iand(drive,MK4)) then
+              call rp2ma4(ibuf2(3),ibypas,ieq4tap,itraka,itrakb)
+              call put_buf(iclass,ibuf2,-13,2hfs,0)
+              nrec = nrec+1
+              call rpbr2ma4(ibuf2(3),ibr4tap)  !! bitrate has a different strobe
+            endif
             call put_buf(iclass,ibuf2,-13,2hfs,0)
-            call run_matcn(iclass,1)
+            nrec=nrec+1
+            call run_matcn(iclass,nrec)
             call rmpar(ip)
           else !VLBA drive
             itrk2(1)=itrk(2)

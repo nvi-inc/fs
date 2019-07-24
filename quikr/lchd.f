@@ -5,7 +5,7 @@
       real*4 vltpos,peakv,mper,step,pmax,vmax,rng
       logical echo
 C
-C  PKHD: Peak High Density Head
+C  LCHD: Peak High Density Head
 C
 C  INPUT:
 C     HD: Head to move for peaking, 1 or 2
@@ -25,11 +25,19 @@ C  the intersection of the two lines.
 C
       integer ipass(2),ichcm_ch
       real*4 micnow(2),micold,volts,minper,pnow,ru,rl,rmper
+      logical koffset
       data ipass/2*0/
+      data koffset/.false./
+C
+C  HISTORY:
+C  WHO  WHEN    WHAT
+C  gag  920721  Added logical koffset for the call to set_mic. This is
+C               to not use the head offsets. They wouldn't be used anyways
+C               because ipass is set to 0.
 C
 C  get power and current location
 C
-      call mic_read(hd,ipass,micnow,ip)
+      call mic_read(hd,ipass,micnow,ip,koffset)
       if(ip(3).ne.0) return
 C
       rl=micnow(hd)-rng
@@ -48,11 +56,11 @@ C
 c
 c set the position, if we get stuck go to the highest peak
 c
-        call set_mic(hd,ipass,micnow,ip,5.0)
+        call set_mic(hd,ipass,micnow,ip,5.0,koffset)
         if(ip(3).eq.-407.and.ichcm_ch(ip(4),1,'q@').eq.0) goto 100
         if(ip(3).ne.0) return
 C
-        call mic_read(hd,ipass,micnow,ip)
+        call mic_read(hd,ipass,micnow,ip,koffset)
         if(ip(3).ne.0) return
 C
         call get_power(odev,nsamp,volts,minper,ip)
@@ -71,7 +79,7 @@ C
 100   continue
       ip(3)=0
       micnow(hd)=pmax
-      call set_mic(hd,ipass,micnow,ip,0.40)
+      call set_mic(hd,ipass,micnow,ip,0.40,koffset)
       if(ip(3).ne.0) return
 C
       call get_atod(hd,vltpos,ip)

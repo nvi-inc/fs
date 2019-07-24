@@ -7,14 +7,13 @@ Response:    sff/acknowledgement
 Parameters: none
 
 Comments:
-The tape is started moving forward at super high speed. For Mark
-III, the record bit is disabled and the low tape sensor is turned on.
-For VLBA, all track groups are disabled and the low tape sensor
-is turned on.
+The tape is started moving forward at super high speed. For Mark III, the
+record bit is disabled and the low tape sensor is turned on. For VLBA, all
+track groups are disabled and the low tape sensor is turned on.
 
-The tape is moved at the "super" speed value as specified in the
-equip.ctl control file. This is the fastest speed that your tape drive
-can manage, normally 330 ips.
+The tape is moved at the "super" speed value as specified in the equip.ctl
+control file. This is the fastest speed that your tape drive can manage,
+normally 330 ips.
 
-Use the ff command and fastf procedure for positioning the
-tape during a schedule.
+Use the ff command and fastf procedure for positioning the tape during a
+schedule.

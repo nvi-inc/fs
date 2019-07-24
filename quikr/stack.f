@@ -38,6 +38,8 @@ C  HISTORY:
 C
 C  DATE  WHO  WHAT
 C 900222 weh  created by cloning from new PASS command
+C 920721 gag  Added Mark IV code, including new parameter offset.
+C 920722 gag  Added call to frmaux4 if Mark IV formatter.
 C
 C  1. Get class buffer and decide whether we have to move the heads,
 C      or just monitor their position.
@@ -73,11 +75,13 @@ C
       ich = ieq+1
       ics=ich
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if (cjchar(parm,1).eq.','.and.MK3.eq.iand(drive,MK3)) then
-        kmic(1)=.false.
-      else if (cjchar(parm,1).eq.',') then
+      if ((cjchar(parm,1).eq.',').and.(VLBA.eq.iand(drive,VLBA))) then
         ip(3)=-501
         goto 990
+      endif
+      if (cjchar(parm,1).eq.','.and.(MK3.eq.iand(drive,MK3).or.
+     .     (MK4.eq.iand(drive,MK4)))) then
+        kmic(1)=.false.
       else if(cjchar(parm,1).eq.'*') then
         microns(1)=posnhd(1)
         kmic(1)=.true.
@@ -162,6 +166,21 @@ C
         goto 990
       endif
 C
+C  Get the offset parameter
+C
+      ichs=ich
+      call gtprm(ibuf,ich,nchar,0,parm,ierr)
+      if (cjchar(parm,1).eq.',') then
+        koff4 = .true.
+      else if (ichcm_ch(ibuf,ichs,'none').eq.0) then
+        koff4 = .false.
+      else if (ichcm_ch(ibuf,ichs,'auto').eq.0) then
+        koff4 = .true.
+      else 
+        ip(3)=-203
+        goto 990
+      endif
+C
 C  3. Now handle head positioning
 C
       call fs_get_icheck(icheck(20),20)
@@ -184,17 +203,17 @@ C
       enddo
       call fs_set_ipashd(ipashd)
 C
-      call set_mic(ihd,ipas ,microns,ip,0.40)
+      call set_mic(ihd,ipas ,microns,ip,0.40,koff4)
       if(ip(3).ne.0) go to 800
 C
 C  4. Put micron pos. into AUX data Field, IF WE SET UP THE WRITE HEAD
 C
       if(ihd.eq.2) go to 500
-      call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
+      nrec=0
+      iclass=0
       call fs_get_rack(rack)
       if(MK3.eq.iand(rack,MK3)) THEN
-        nrec=0
-        iclass=0
+        call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
 C
         ibuf2(1) = 0
         call char2hol('fm',ibuf2(2),1,2)
@@ -221,7 +240,17 @@ C                   Send out the last 4 chars and zeros ...
 C
         call run_matcn(iclass,nrec)
         call rmpar(ip)
-      else !vlba
+      else if(MK4.eq.iand(rack,MK4)) THEN
+        call frmaux4(lauxfm4,posnhd,ipashd,koff4)
+        ibuf2(1) = 8
+        call char2hol('fm /AUX ',ibuf2(2),1,8)
+        idumm1 = ichmv(ibuf2,11,lauxfm4,1,8)
+        nch=18
+        call put_buf(iclass,ibuf2,-nch,2Hfs,0)
+        nrec=1
+        call run_matcn(iclass,nrec)
+        call rmpar(ip)
+      else if(VLBA.eq.iand(rack,VLBA)) THEN
         call fc_set_vaux(lauxfm,ip)
       endif
       call clrcl(ip(1))
@@ -244,7 +273,7 @@ C
       call fs_get_ipashd(ipashd)
       ihd=3
       if(VLBA.eq.iand(drive,VLBA)) ihd=1
-      call mic_read(ihd,ipashd,pnow,ip)
+      call mic_read(ihd,ipashd,pnow,ip,koff4)
       if(ip(3).ne.0) goto 800
 C
 C find the deltas
@@ -288,6 +317,14 @@ C
           nch = mcoma(ibuf,nch)
         endif
       enddo
+C
+      if (koff4) then
+        call char2hol('auto',ibuf,nch,nch+3)
+      else
+        call char2hol('none',ibuf,nch,nch+3)
+      endif
+      nch = nch + 4
+      nch = mcoma(ibuf,nch)
 C
       do i=1,2
         if(i.eq.1.or.VLBA.ne.iand(drive,VLBA)) then

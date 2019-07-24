@@ -62,6 +62,7 @@ C                  USE SAME TABLE FOR 70K AS FOR 20K
 C                  PRESSURE FORMULA FROM BEC
 C     MWH  850121  PUT 'UNLOCKED' MESSAGE IN INVERSE VIDEO
 C     LAR  880227  MOVE VOLTAGE-TO-WEATHER CONVERSION TO RXVTOT
+C     NRV  921020  Add fs_get calls
 C 
 C 
 C     1. Determine whether parameters from COMMON wanted and skip to
@@ -120,9 +121,10 @@ C
       idumm1 = ichmv(lc,1,5Hundef,1,5)
       nl = 5
       if (ia.ne.0) then
-        nl = iflch(lcode(1,ia),6)
+        call fs_get_rxlcode(rxlcode)
+        nl = iflch(rxlcode(1,ia),6)
         idum=ichmv(iad,1,iadc,1,2)
-        idumm1 = ichmv(lc,1,lcode(1,ia),1,nl) 
+        idumm1 = ichmv(lc,1,rxlcode(1,ia),1,nl) 
       endif
       nch = ichmv(ibuf2,nch,iad,1,2)
       nch = ichmv(ibuf2,nch,2h( ,1,1) 

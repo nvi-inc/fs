@@ -20,6 +20,14 @@ C
       real*4 tmove
       real*4 micdst,micnow,micoff,vltnow,miclst,vltlst,vltoth
       real*4 spdnew,spdraw,spdold,vltlim,scale,mictol
+      logical koffset
+      data koffset/.false./
+C
+C HISTORY:
+C  WHO  WHEN    WHAT
+C  gag  920721  Added koffset to send to vlt2mic. It is false because
+C               do not need to add offset. Won't be done anyways because
+C               ipass parameter is 0.
 C
       if(volt.lt.-0.010) then
        scale=rslope(ihead)
@@ -31,13 +39,13 @@ C
       mictol=(mictolin/150.)*scale
       mictol=max(mictol,(ilvtl_fs*0.0049+0.0026)*scale)
 C
-      call vlt2mic(ihead,0,volt,micdst,ip)
+      call vlt2mic(ihead,0,volt,micdst,ip,koffset)
       if(ip(3).ne.0) return
 C
       call vlt_head(ihead,vltnow,ip)
       if(ip(3).ne.0) return
 C
-      call vlt2mic(ihead,0,vltnow,micnow,ip)
+      call vlt2mic(ihead,0,vltnow,micnow,ip,koffset)
       if(ip(3).ne.0) return
 C
       vltlst=vltnow
@@ -54,7 +62,7 @@ C
         call vlt_head(ihead,vltnow,ip)
         if(ip(3).ne.0) return
 C
-        call vlt2mic(ihead,0,vltnow,micnow,ip)
+        call vlt2mic(ihead,0,vltnow,micnow,ip,koffset)
         if(ip(3).ne.0) return
 C
         if(khecho_fs) then

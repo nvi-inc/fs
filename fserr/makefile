@@ -1,9 +1,8 @@
-OBJECTS = fserr.o direc.o find.o uptime.o
+OBJECTS = fserr.o listinit.o hashcode.o
 #
 #FFLAGS = -c -g -i2
 FFLAGS = -c
-LIBES = ../fslb/fslb.a ../lnfch/lnfch.a ../clib/clib.a ../rtelb/rtelb.a\
--lrtx
+LIBES = ../clib/clib.a ../rtelb/rtelb.a -lrtx
 #
 ../bin/fserr: $(OBJECTS)
 	cc -o ../bin/fserr $(OBJECTS) $(LIBES)

@@ -57,7 +57,7 @@ C
       ifc = 1+ieq 
       call gtprm(ibuf,ifc,nchar,0,parm,ierr)  ! scan for mnemonic
       if (cjchar(parm,1).eq.',') then
-        ip(3) = -101                          ! no default for mnemonic
+        ip(3) = -2                          ! no default for mnemonic
         return
       endif
       ibuf2(2) = iparm(1)                 !put mnemonic in 2nd word for ibcon
@@ -67,13 +67,14 @@ C
       else
         ibuf2(1) = 2                         ! write to device
         nch = nchar - ifc + 1
+        call upper(ibuf,ifc,nchar)           ! force upper case
         idumm1 = ichmv(ibuf2,5,ibuf,ifc,nch)
         nch = nch + 4
       endif
       iclass = 0
       call put_buf(iclass,ibuf2,-nch,2hfs,0)
-      if (iclass.eq.0) then 
-        ip(3) = -1
+      if (iclass.eq.0) then
+        ip(3)=-1
         return
       endif
       call run_prog('ibcon','wait',iclass,1,idum,idum,idum)

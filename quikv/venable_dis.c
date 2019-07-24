@@ -30,9 +30,10 @@ long ip[5];
       if ((!kcom) && command->equal == '=') {
          logmsg(output,command,ip);
          return;
-      } else if(kcom)
+      } else if(kcom) {
          memcpy(&lclc,&shm_addr->venable,sizeof(lclc));
-      else {
+         lclc.general=1;
+       } else {
          opn_res(&buffer,ip);
          get_res(&response, &buffer); mc80venable(&lclc, response.data);
          get_res(&response, &buffer); mc81venable(&lclc, response.data);

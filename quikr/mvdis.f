@@ -24,7 +24,7 @@ C                   Get command buffer
       nch = ichmv(ibuf2,ireg(2)+1,2h/ ,1,1) 
 C                   Put / to indicate a response
 C 
-      if(drive.eq.iand(drive,MK3)) then
+      if ((drive.eq.iand(drive,MK3)).or.(MK4.eq.iand(drive,MK4))) then
         do i=1,ncrec
           ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
           if (nch+ireg(2)-2.le.ilen2) then

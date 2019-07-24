@@ -5,9 +5,8 @@ Response:    none
 
 
 Settable parameters:
-set             on to turn echo on, off to turn off (default).
-                Any external communications are echoed on the
-                operator's terminal.
+set             on to turn echo on, off to turn off (default). Any external
+                communications are echoed on the operator's terminal.
 
 Monitor-only parameters: none
 
@@ -15,21 +14,19 @@ Comments:
 Immediate execution operator command for MAT and/or MCB
 communications and at some stations antenna control also.
 
-The display format for MCB communications when echo=on has
-been issued is as follows. Each byte of the communication is
-displayed as
+The display format for MCB communications when echo=on has been issued
+is as follows. Each byte of the communication is displayed as
 
-     bytes sent to the MCB            [nxx]
-     bytes received from the MCB      <nxx>
+     bytes sent to the MCB           [nxx]
+     bytes received from the MCB     <nxx>
 
-where n is normally a blank. n is + when data is being written to
-the module. The address or data is xx, represented as two hex
-characters. Control function bytes are displayed with special 3-
-letter mnemonics:
+where n is normally a blank. n is + when data is being written to the module.
+The address or data is xx, represented as two hex characters. Control function
+bytes are displayed with special 3-letter mnemonics:
 
-        [SYN]      hex 16     synchronization byte
-        <ACK>      hex 06     acknowledge
-        <NAK>      hex 15     not acknowledge
-        <DC1>      hex 11     data control 1
-        <DC2>      hex 12     data control 2
+        [SYN]      hex 16    synchronization byte
+        <ACK>      hex 06    acknowledge
+        <NAK>      hex 15    not acknowledge
+        <DC1>      hex 11    data control 1
+        <DC2>      hex 12    data control 2
 

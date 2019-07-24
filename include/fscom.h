@@ -20,6 +20,7 @@ typedef struct fscom {
 	float ITACTP;
 	int KHALT;
 	int KECHO;
+        int KENASTK[2];
 	int INEXT[3];
 	float RAOFF;
 	float XOFF;
@@ -32,6 +33,7 @@ typedef struct fscom {
 	char LSKD[8];
         char LEXPER[8];
         int LFEET_FS[3];
+        int lgen[2];
         int IREMTP;
         int ICHK[20];
 	float tempwx;
@@ -81,7 +83,7 @@ typedef struct fscom {
         } sem;
 
         struct {
-           int bbc[ MAX_BBC];
+           int bbc[ MAX_BBC+1];
            int dist[ MAX_DIST];
            int vform;
            int rec;
@@ -126,10 +128,15 @@ typedef struct fscom {
           long offset[2];
         } time;
         int class_count;
-        float horaz[15];
-        float horel[15];
+        float horaz[MAX_HOR];
+        float horel[MAX_HOR];
         char mcb_dev[64];
         unsigned char hwid;
         int iw_motion;
         int lowtp;
+        char rxlcode[MAX_RXCODES][6];
+        float rxvfac[MAX_RXCODES];
+        float rxvoff[MAX_RXCODES];
+        int rxncodes;
+        int form_version;
 } Fscom;

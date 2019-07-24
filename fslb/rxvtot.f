@@ -19,8 +19,10 @@ C  respectively.  These arrays are declared in the FSCOM.FTNI common
 C  file.  The variable NRX_FS, also declared in common, holds the number
 C  of values read from the control file.
 C   - GAG 901206
+C  921020 NRV Add fs_get to get voltage factors
 C
-      uadc = vadc  * vfac(ia)
+      call fs_get_rxvfac(rxvfac(ia),ia)
+      uadc = vadc  * rxvfac(ia)
 C
 C   LOOKUP AND INTERPOLATE
 C
@@ -35,7 +37,8 @@ C
           endif
         enddo
       else if (ia.eq.24) then               !  calculate pressure
-        pres = 62.*(5.0/uadc - 1.0)      ! ***check this equation!*** !
+        pres = 62.*(5.0/uadc - 1.0)
+cxx       pres = 10.*(1.0/uadc - 1.0  !*** MV-3 ***!
 C       IF (PRES.LT.0.0) PRES = 0.0
         uadc = pres
       endif

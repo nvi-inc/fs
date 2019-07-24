@@ -39,7 +39,8 @@ C
       nchar = 0
 100   len = fmpreadstr(idcb,ierr,ibc)
       call char2low(ibc)
-      if (ierr.lt.0.or.len.le.0) goto 900
+      if (ierr.lt.0.or.len.lt.0) goto 900
+      if (len.eq.0) goto 100
       nchar = iflch(ib,80)
       if (nchar.eq.0) goto 100
       id = ichmv(ibuf,1,ib,1,nchar)

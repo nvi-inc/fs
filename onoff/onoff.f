@@ -183,8 +183,8 @@ C
 C
       call local(az2,el2,4Hazel,ierr)
       if(ierr.ne.0) goto 80010
-      if(az2.gt.pi*1.5.and.az .lt.pi*.5) az2=az2-2.*pi
-      if(az .gt.pi*1.5.and.az2.lt.pi*.5) az =az -2.*pi
+      if(az2.gt.RPI*1.5.and.az .lt.RPI*.5) az2=az2-2.*RPI
+      if(az .gt.RPI*1.5.and.az2.lt.RPI*.5) az =az -2.*RPI
       az=(az+az2)*.5
       el=(el+el2)*.5
 C
@@ -247,12 +247,12 @@ C
       ae2s=0.0d0
       call fs_get_diaman(diaman)
       if(fx1.gt.1e-6.and.avg1.gt.1e-6) then
-        ae1 =avg1*2.0*1.380662e0/(fx1*1e-3*dpi*(diaman/2.0)**2)
-        ae1s=sig1*2.0*1.380662e0/(fx1*1e-3*dpi*(diaman/2.0)**2)
+        ae1 =avg1*2.0*1.380662e0/(fx1*1e-3*DPI*(diaman/2.0)**2)
+        ae1s=sig1*2.0*1.380662e0/(fx1*1e-3*DPI*(diaman/2.0)**2)
       endif
       if(fx2.gt.1e-6.and.avg2.gt.1e-6) then
-        ae2 =avg2*2.0*1.380662e0/(fx2*1e-3*dpi*(diaman/2.0)**2)
-        ae2s=sig2*2.0*1.380662e0/(fx2*1e-3*dpi*(diaman/2.0)**2)
+        ae2 =avg2*2.0*1.380662e0/(fx2*1e-3*DPI*(diaman/2.0)**2)
+        ae2s=sig2*2.0*1.380662e0/(fx2*1e-3*DPI*(diaman/2.0)**2)
       endif
       if(fx1nf_fs.gt.0.or.fx2nf_fs.gt.0) then
         call reslt(8heta     ,7,lsorna,10,az,el,ae1,ae2,ae1s,

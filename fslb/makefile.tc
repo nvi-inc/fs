@@ -1,0 +1,10 @@
+OBJECTS = testc.o
+#
+F77= gf77
+FFLAGS = -c -g
+LIBES = ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a\
+../flib/flib.a ../fclib/fclib.a\
+../clib/clib.a ../fmpsee/fmpsee.a ../rtelb/rtelb.a -lrtx
+#
+testc: $(OBJECTS)
+	cc -g -o testc $(OBJECTS) $(LIBES)

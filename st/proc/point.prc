@@ -1,7 +1,3 @@
-define  acquire       00000000000x
-sy=aquir /usr2/control/ctlpo.ctl &
-log=point
-enddef
 define  stow          00000000000x
 source=stow,000000,000000,0000
 enddef
@@ -16,7 +12,7 @@ device=i2
 fivept
 enddef
 define  prep          00000000000x
-wx
+"wx
 radecoff=0s,0d
 !+2s
 track
@@ -59,10 +55,15 @@ caloff
 caltemps
 beam1=
 beam2=
-fivept=hadc,-2,9,.4,1,i1
-onoff=2,4,i1,i2,60,3
+bbcman
+fivept=hadc,-2,9,.4,1,ia
+onoff=2,4,ia,b11u,60,3
 check=
 sy=run aquir &
+enddef
+define  acquire       00000000000x
+sy=aquir /usr2/control/ctlpo.ctl &
+log=point
 enddef
 define  xband         00000000000x
 device=i1
@@ -121,8 +122,8 @@ define  casa          00000000000
 source=cas-a,232109.,583230,1950.
 "flux 1992.0 from dbs table a1.1
 "size from        dbs appendix 2
-flux1=disk,500,4m
-flux2=disk,1304,4m
+fluxa=disk,500,4m
+fluxb=disk,1304,4m
 enddef
 define  3c84          00000000000x
 source=3c84,031629.54,411951.7,1950.0
@@ -170,8 +171,8 @@ source=3c279,125335.83,-053107.9,1950.
 enddef
 define  3c123         00000000000x
 source=3c123,043355.2,293414.,1950.
-flux1=gaussian,10.1,20s
-flux2=gaussian,32.9,20s
+fluxa=gaussian,10.1,20s
+fluxb=gaussian,32.9,20s
 enddef
 define  3c147         00000000000x
 source=3c147,053843.52,+494942.2,1950.

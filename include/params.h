@@ -6,8 +6,8 @@
 #endif
 
 #define SHM_KEY     1
-#define SHM_SIZE    8192
-#define C_RES       4096
+#define SHM_SIZE    10240
+#define C_RES       5120
 
 #define CLS_KEY     1
 #define CLS_SIZE    20480
@@ -36,6 +36,7 @@
 #define BAD_ADDR    (char *)(-1)
 
 #define FSPGM_CTL "/usr2/fs/control/fspgm.ctl"
+#define STPGM_CTL "/usr2/control/stpgm.ctl"
 
 #define ADDR      "addr"              
 #define TEST      "test"
@@ -51,3 +52,6 @@
 #define DEV_VFM     "fm"
 #define DEV_VIA     "ia"
 #define DEV_VIC     "ic"
+
+#define MAX_HOR   30
+#define MAX_RXCODES   40

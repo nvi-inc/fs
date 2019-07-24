@@ -1,25 +1,22 @@
 form - formatter (Mark III rack)
 Syntax:      form=mode,rate,input,aux,synch
 
-Response:    form/mode,rate,input,synch,test,sign,run/set,rem/l
-             cl,
+Response:    form/mode,rate,input,synch,test,sign,run/set,rem/lcl,
              pwr,daytime
 
 
+
 Settable parameters:
-mode            Matrix output mode to tape. Choices are A, B,
-                C, D. Default B.
-rate            Sample rate in Mbits/sec. Choices are 0.125,
-                0.25, 0.5, 1.0, 2.0, 4.0, 8.0.
-                Default 4.0.
-input           Source of data. Choices are nor (default), ext,
-                crc. 
-aux             Auxiliary data, up to 12 hex characters. Default
-                is no change. If more than 12 characters are
-                given, only the first 12 are used. If aux has been
-                specified either now or implicitly by a pass,
-                lvdt, or stack command, then the parity
-                command will check its validity.
+mode            Matrix output mode to tape. Choices are A, B, C, D.
+                Default B.
+rate            Sample rate in Mbits/sec. Choices are 0.125, 0.25,
+                0.5, 1.0, 2.0, 4.0, 8.0. Default 4.0.
+input           Source of data. Choices are nor (default), ext, crc. 
+aux             Auxiliary data, up to 12 hex characters. Default is no
+                change. If more than 12 characters are given, only the first
+                12 are used. If aux has been specified either now or
+                implicitly by a pass, lvdt, or stack command, then the
+                parity command will check its validity.
 synch           Synch test on (default) or off.
 
 Monitor-only parameters:
@@ -34,14 +31,12 @@ Comments:
 
 MAT module functions available.
 
-It may take the formatter up to 4 seconds to re-synch itself if a
-change is made to a low sample rate. During this time the
-read-back may not be accurate. This module must be reset
-manually using the front panel pushbutton in order to clear error
-conditions; then turn off alarm remotely. The eight LEDS on the
-rear panel of the formatter give some error conditions which are
-not available remotely.
+It may take the formatter up to 4 seconds to re-synch itself if a change is made
+to a low sample rate. During this time the read-back may not be accurate. This
+module must be reset manually using the front panel pushbutton in order to
+clear error conditions; then turn off alarm remotely. The eight LEDS on the
+rear panel of the formatter give some error conditions which are not available
+remotely.
 
-The auxiliary data field for the formatter is automatically filled
-with the tape head offset by the pass, lvdt, and stack
-commands. 
+The auxiliary data field for the formatter is automatically filled with the tape
+head offset by the pass, lvdt, and stack commands. 

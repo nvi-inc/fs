@@ -1,0 +1,78 @@
+/usr/bin/X11/uncompress fsc.cpio.Z
+/usr/bin/X11/uncompress fsd.cpio.Z
+/usr/bin/X11/uncompress fsf.cpio.Z
+/usr/bin/X11/uncompress fsi.cpio.Z
+/usr/bin/X11/uncompress fsm.cpio.Z
+/usr/bin/X11/uncompress fso.cpio.Z
+/usr/bin/X11/uncompress fsp.cpio.Z
+/usr/bin/X11/uncompress fss.cpio.Z
+cpio -Bicmuvd < fsc.cpio
+cpio -Bicmuvd < fsd.cpio
+cpio -Bicmuvd < fsf.cpio
+cpio -Bicmuvd < fsi.cpio
+cpio -Bicmuvd < fsm.cpio
+cpio -Bicmuvd < fso.cpio
+cpio -Bicmuvd < fsp.cpio
+cpio -Bicmuvd < fss.cpio
+cd /usr2
+mkdir control
+chmod +w control
+cd /usr2/fs/st/control
+cp * /usr2/control/.
+cd /usr2
+mkdir log
+chmod +w log
+mkdir proc
+chmod +w proc
+cd /usr2/fs/st/proc
+cp * /usr2/proc/.
+cd /usr2
+mkdir sched
+chmod +w sched
+cd /usr2/fs/st/sched
+cp * /usr2/sched/.
+cd /usr2
+chmod +w st
+cd /usr2/fs/st/antcn
+cp * /usr2/st/antcn/.
+cd /usr2/fs/st/stlib
+cp * /usr2/st/stlib/.
+cd /usr2/fs/st/stalloc
+cp * /usr2/st/stalloc/.
+cd /usr2/fs/st/stqkr
+cp * /usr2/st/stqkr/.
+cd /usr2/fs/st/include
+cp * /usr2/st/include/.
+cd /usr2/fs
+mkdir bin
+chmod +w bin
+cd /usr2/fs/misc
+cp S* /etc/rc2.d/.
+mv /usr/lib/X11/xdm/Xresources /usr/lib/X11/xdm/Xresources.org
+cp Xresources /usr/lib/X11/xdm/.
+cp remake /usr2/fs/.
+cd /usr2/fs/oper
+cp Xresources /usr2/oper/.Xresources
+cp login /usr2/oper/.login
+cp cshrc /usr2/oper/.cshrc
+cp mwmrc /usr2/oper/.mwmrc
+cp xsession /usr2/oper/.xsession
+cp fitter /usr2/oper/fitter
+cp update /usr2/oper/update
+cd /usr2/oper
+chown oper .*
+cd /usr2/fs/oper
+cp Xresources /usr2/prog/.Xresources
+cp login /usr2/prog/.login
+cp cshrc /usr2/prog/.cshrc
+cp mwmrc /usr2/prog/.mwmrc
+cp xsession /usr2/prog/.xsession
+cd /usr2/prog
+chown prog .*
+cd /usr2/fs
+find . -print | xargs chown prog
+cd /usr2/st
+find . -print | xargs chown prog
+cd /usr2/fs/setb
+chown root setb
+cd /tmp/fs

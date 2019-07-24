@@ -1,4 +1,4 @@
-define  bbcagc
+define  bbcagc        000000000000
 bbc01=*,*,*,*,*,agc
 bbc02=*,*,*,*,*,agc
 bbc03=*,*,*,*,*,agc
@@ -14,7 +14,7 @@ bbc12=*,*,*,*,*,agc
 bbc13=*,*,*,*,*,agc
 bbc14=*,*,*,*,*,agc
 enddef
-define  bbcman
+define  bbcman        000000000000
 bbc01=*,*,*,*,*,man
 bbc02=*,*,*,*,*,man
 bbc03=*,*,*,*,*,man
@@ -30,7 +30,7 @@ bbc12=*,*,*,*,*,man
 bbc13=*,*,*,*,*,man
 bbc14=*,*,*,*,*,man
 enddef
-define  bread
+define  bread        000000000000
 bbc01
 bbc02
 bbc03
@@ -46,7 +46,7 @@ bbc12
 bbc13
 bbc14
 enddef
-define  bbcsx2
+define  bbcsx2        000000000000
 bbc01=610.89,a,2.0,2.0
 bbc02=620.89,a,2.0,2.0
 bbc03=650.89,a,2.0,2.0
@@ -62,7 +62,7 @@ bbc12=727.89,b,2.0,2.0
 bbc13=752.89,b,2.0,2.0
 bbc14=762.89,b,2.0,2.0
 enddef
-define  bbcsx4
+define  bbcsx4        000000000000
 bbc01=610.89,a,4.0,4.0
 bbc02=620.89,a,4.0,4.0
 bbc03=650.89,a,4.0,4.0
@@ -78,7 +78,7 @@ bbc12=727.89,b,4.0,4.0
 bbc13=752.89,b,4.0,4.0
 bbc14=762.89,b,4.0,4.0
 enddef
-define  bbcwb2
+define  bbcwb2        000000000000
 bbc01=612.89,a,2.0,2.0
 bbc02=652.89,a,2.0,2.0
 bbc03=752.89,a,2.0,2.0
@@ -94,7 +94,7 @@ bbc12=765.89,b,2.0,2.0
 bbc13=800.89,b,2.0,2.0
 bbc14=805.89,b,2.0,2.0
 enddef
-define  bbcwb4
+define  bbcwb4        000000000000
 bbc01=612.89,a,4.0,4.0
 bbc02=652.89,a,4.0,4.0
 bbc03=752.89,a,4.0,4.0
@@ -110,23 +110,23 @@ bbc12=765.89,b,4.0,4.0
 bbc13=800.89,b,4.0,4.0
 bbc14=805.89,b,4.0,4.0
 enddef
-define  caloff
+define  caloff        000000000000
 rx=*,*,*,*,*,*,off
 enddef
-define  calon
+define  calon        000000000000
 rx=*,*,*,*,*,*,on
 enddef
-define  caltemps
+define  caltemps        000000000000
 caltempa=20.8
 caltempb=21.4
 enddef
-define  check2a1
+define  check2a1        000000000000
 check2c1
 enddef
-define  check2a2
+define  check2a2        000000000000
 check2c2
 enddef
-define  check2c1
+define  check2c1        000000000000
 check=*,-rc
 enable=
 parity=,,ab,off,g1,g3
@@ -143,7 +143,7 @@ et
 !+3s
 check=*,rc
 enddef
-define  check2c2
+define  check2c2        000000000000
 check=*,-rc
 enable=
 parity=,,ab,off,g2,g4
@@ -167,7 +167,7 @@ bbc15=alarm
 ifdsx
 form=c,4
 enddef
-define  dqaeven
+define  dqaeven        000000000000
 dqa=1
 repro=byp,2,4
 dqa
@@ -183,7 +183,7 @@ repro=byp,22,24
 dqa
 repro=byp,26,28
 enddef
-define  dqaodd
+define  dqaodd        000000000000
 dqa=1
 repro=byp,1,3
 dqa
@@ -199,34 +199,34 @@ repro=byp,21,23
 dqa
 repro=byp,25,27
 enddef
-define  fastf
+define  fastf        000000000000
 ff
 !+$
 et
 enddef
-define  fastr
+define  fastr        000000000000
 rw
 !+$
 et
 enddef
-define  ifdsx
+define  ifdsx        000000000000
 ifdab=0,0,nor,nor
 ifdcd=0,0,nor,nor
 lo=8080.00,2020.00
 upconv=479.9,479.9
 enddef
-define  ifdwb
+define  ifdwb        000000000000
 ifdab=0,0,nor,nor
 ifdcd=0,0,nor,nor
 lo=8080.00,2020.00,8080.0
 upconv=479.9,479.9,0
 enddef
-define  initi
-"Welcome to Field System version 8.0 and the new PC Field System
+define  initi        000000000000
+"welcome to field system version 8.0 and the new pc field system
 form=addr
 sy=setcl
 enddef
-define  midob
+define  midob        000000000000
 tpi=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tpi=9u,10u,11u,12u,13u,14u,ifb
 bbcagc
@@ -241,7 +241,7 @@ ifdcd
 bbc06
 bbc11
 enddef
-define  midtp
+define  midtp        000000000000
 bbcman
 ifdab=max,max,*,*
 ifdcd=max,max,*,*
@@ -286,8 +286,8 @@ enddef
 define  prepass
 wakeup
 xdisp=on
-" Mount the next tape without cleaning the tape drive.
-" Use the cont command when finished.
+" mount the next tape without cleaning the tape drive.
+" use the cont command when finished.
 halt
 xdisp=off
 check=*,-rc
@@ -301,8 +301,8 @@ et
 wakeup
 rec=release
 xdisp=on
-"Drop vacuum loop, clean the tape drive thoroughly.
-"Re-thread the tape. type cont when finished.
+"drop vacuum loop, clean the tape drive thoroughly.
+"re-thread the tape. type cont when finished.
 halt
 xdisp=off
 rec=load
@@ -498,13 +498,13 @@ tpi=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tpi=9u,10u,11u,12u,13u,14u,ifb
 ifdab=20,20,*,*
 ifdcd=20,20,*,*
-!+2S
+!+2s
 tpzero=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tpzero=9u,10u,11u,12u,13u,14u,ifb
 ifdab=0,0,*,*
 ifdcd=0,0,*,*
 calon
-!+2S
+!+2s
 tpical=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
 tpical=9u,10u,11u,12u,13u,14u,ifb
 caloff
@@ -611,7 +611,7 @@ check=*,-rc
 tape=off
 rec=unload
 xdisp=on
-"**Dismount this tape now**"
+"**dismount this tape now**"
 wakeup
 xdisp=off
 enddef
@@ -662,4 +662,24 @@ enable=g2,g4
 tape=low
 repro=byp,6,18
 !*+7s
+enddef
+define  vlbainit      00000000000 
+bbc01=addr
+bbc02=addr
+bbc03=addr
+bbc04=addr
+bbc05=addr
+bbc06=addr
+bbc07=addr
+bbc08=addr
+bbc09=addr
+bbc10=addr
+bbc11=addr
+bbc12=addr
+bbc13=addr
+bbc14=addr
+form=addr
+rec=addr
+ifdab=addr
+ifdcd=addr
 enddef

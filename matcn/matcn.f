@@ -8,11 +8,13 @@ C   MATCN controls the I/O to the Microprocessor ASCII Transceiver
 C 
 C  MODIFICATIONS: 
 C
-C  DATE   WHO CHANGES
-C  811012 NRV REMOVED SOME WVR-SPECIFIC CODE, ALL REFERENCES TO LUWVR
-C  870911 MWH MODIFIED FOR USE WITH A400 8-CHANNEL MUX
-C  901220 GAG Added call to logit when initializing MODTBL table upon error
-C             condition.
+C  WHO  WHEN    WHAT
+C  NRV  811012  REMOVED SOME WVR-SPECIFIC CODE, ALL REFERENCES TO LUWVR
+C  MWH  870911  MODIFIED FOR USE WITH A400 8-CHANNEL MUX
+C  GAG  901220  Added call to logit when initializing MODTBL table upon
+C               error condition.
+C  gag  920716  Added mode -54 for Mark IV formatter time info for setcl.
+C  
 C
 C     INPUT VARIABLES: (RMPAR)
 C
@@ -21,6 +23,7 @@ C        IP2    - number of records in class
 C
 C     Buffer from class I/O contains following:
 C     IBUF(1) = mode, must be between MINMOD and MAXMOD
+C                  -54 - get MK4 fm data and cpu time
 C                  -53 - get ( strobe data and cpu time
 C                   -8 - get ; strobe data
 C                   -7 - get . strobe data
@@ -100,6 +103,7 @@ C               - TRUE once we have initialized
 C        NDEV   - # devices in module table
       dimension modtbl(3,25)
 C               - module table, word 1 = mnemonic, word 2 = hex address
+C               - word 3 = time out
       integer*2 lalarm(20)
 C               - alarm message **NOTE** this should remain at a
 C                 max of 20 characters for longest message from MATCN 
@@ -201,6 +205,7 @@ C
         imode = ibuf(1)
         if(imode.eq.-53.or.imode.eq.55) goto 220
         if (imode.ge.minmod.and.imode.le.maxmod) goto 220
+        if(imode.eq.-54) goto 220
         ierr = -2
         goto 900
 C
@@ -224,6 +229,7 @@ C                   The input buffer now has: #xx <data>
         ibuf2(1) = modtbl(1,idev)
 C                   The output buffer now has module mnemonic
 C
+        if (imode.eq.-54) goto 800
         if (imode.lt.0) goto 400
         if (imode.eq.6) goto 600
         if (imode.eq.7) goto 700
@@ -362,7 +368,7 @@ C                   the actual response - it might be intereseting.
         call put_buf(iclasr,ibuf2,-nch2-2,2hfs,0)
         nclrer = nclrer + 1 
 C                   Put response into class 
-        if(imode.eq.-53) then
+        if(imode.eq.-53 .or. imode.eq.-54) then
           it1(13)=itn
           call put_buf(iclasr,it1,-52,2hfs,0)
           nclrer=nclrer +1

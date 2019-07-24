@@ -7,6 +7,7 @@ C     UPDAT reschedules itself for the number of seconds in the
 C           future in its first parameter, the default being 1 sec. 
 C 
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C 
 C     CALLED SUBROUTINES: JULDA, SIDTM
 C 
@@ -56,12 +57,12 @@ C
       call sidtm(mjd,st0,f) 
       gst = st0 + f*(iut1*60.0+iut2/100.0)
       tlst = gst - wlong
-      if (tlst.ge.2.0*pi) tlst = tlst - 2.0*pi
-      if (tlst.le.0     ) tlst = tlst + 2.0*pi
+      if (tlst.ge.DTWOPI) tlst = tlst - DTWOPI
+      if (tlst.le.0     ) tlst = tlst + DTWOPI
 C 
       ha = tlst - radat 
-      if (ha.gt. pi) ha = ha - 2.0*pi 
-      if (ha.lt.-pi) ha = ha + 2.0*pi 
+      if (ha.gt. DPI) ha = ha - DTWOPI 
+      if (ha.lt.-DPI) ha = ha + DTWOPI 
       call fs_set_ha(ha)
 C 
       cdec = cos(decdat)
@@ -69,7 +70,7 @@ C
       clat = cos(alat)
       slat = sin(alat)
       arg = cdec*clat*cos(ha) + sdec*slat 
-      elev = pi/2.0 - acos(arg) 
+      elev = DPI/2.0 - acos(arg) 
       arg = (-slat/(clat*cos(elev)))*(sin(elev)-sdec/slat)
 C 
 C***HANDLE ROUNDING PROBLEM HERE (MWH - 840806) 
@@ -78,7 +79,7 @@ C***HANDLE ROUNDING PROBLEM HERE (MWH - 840806)
 C** 
       azim = acos(arg)
       sazim = -cdec*sin(ha)/cos(elev) 
-      if (sazim.lt.0) azim = 2.0*pi - azim
+      if (sazim.lt.0) azim = DTWOPI - azim
 C 
       return
       end 

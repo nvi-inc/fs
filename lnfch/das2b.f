@@ -1,5 +1,5 @@
       double precision function das2b(ias,ic1,nch,ierr)
-C     ascii to double precision binary c#87
+C     ascii to double precision binary
 C 
 C     THIS FUNCTION CONVERTS AN ASCII STRING TO DOUBLE PRECISION
 C 

@@ -1,18 +1,29 @@
 /* end tape movement for vlba recorder */
 
-#include "../include/req_ds.h"
-#include "../include/res_ds.h"
+#include <stdio.h> 
+#include <string.h> 
+#include <sys/types.h>
+
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"         /* shared memory definition */
+#include "../include/shm_addr.h"      /* shared memory pointer */
 
 void et_v(ip)
 long ip[5];
 {
       struct req_buf buffer;
       struct req_rec request;
+      struct vst_cmd lcl;
 
       ini_req(&buffer);                      /* format the buffer */
       memcpy(request.device,"rc",2);
       request.type=0;
       request.addr=0xb0; request.data=0x01  ; add_req(&buffer,&request);
+      lcl.speed=0;
+      request.addr=0xb5; 
+      vstb5mc(&request.data,&lcl); add_req(&buffer,&request);
+      shm_addr->ispeed=0;
 
       end_req(ip,&buffer);                /* send buffer and schedule */
       skd_run("mcbcn",'w',ip);

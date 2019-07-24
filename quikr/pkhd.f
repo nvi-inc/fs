@@ -27,13 +27,21 @@ C
       real*4 micnow(2),micold,volts,minper,pos(3),pwr(3),m1,m2,b1,b2
       real*4 micpk,temp,lvsig,lvavg,lvsum,lvsum2,wide,pwrpk
       logical kwide
+      logical koffset
       data ipass/2*0/,ioff/8,-8/
+      data koffset/.false./
+C
+C  HISTORY:
+C  WHO  WHEN    WHAT
+C  gag  920721  Added logical koffset for the call to set_mic. This is
+C               to not use the head offsets. They wouldn't be used anyways
+C               because ipass is set to 0.
 C
       do j=1,icount
 C
 C  get power and current location
 C
-      call mic_read(hd,ipass,micnow,ip)
+      call mic_read(hd,ipass,micnow,ip,koffset)
       if(ip(3).ne.0) return
 C
       call get_power(odev,nsamp,volts,minper,ip)
@@ -68,10 +76,10 @@ C
           pos(2)=temp
         endif
 C
-        call set_mic(hd,ipass,micnow,ip,2.7)
+        call set_mic(hd,ipass,micnow,ip,2.7,koffset)
         if(ip(3).ne.0) return
 C
-        call mic_read(hd,ipass,micnow,ip)
+        call mic_read(hd,ipass,micnow,ip,koffset)
         if(ip(3).ne.0) return
 C
         call get_power(odev,nsamp,volts,minper,ip)
@@ -95,10 +103,10 @@ C
         pos(2)=pos(3)
         micnow(hd)=micold+(2+i)*step
 C
-        call set_mic(hd,ipass,micnow,ip,2.7)
+        call set_mic(hd,ipass,micnow,ip,2.7,koffset)
         if(ip(3).ne.0) return
 C
-        call mic_read(hd,ipass,micnow,ip)
+        call mic_read(hd,ipass,micnow,ip,koffset)
         if(ip(3).ne.0) return
 C
         call get_power(odev,nsamp,volts,minper,ip)

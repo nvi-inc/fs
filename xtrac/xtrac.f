@@ -1,5 +1,7 @@
       program xtrac
 C 
+      include '../include/dpi.i'
+C
       integer getdp,ipt 
       integer*2 laxis(2),lant(4),lsaxis(2),lsorna(5) 
       integer idcb(2), idcbo(2)
@@ -36,7 +38,7 @@ C
       real lnsoff,lnswid,lnspk,lnsbas,lnsslp,lnrchi 
       real loncor,latcor,lonoff,latoff
 C
-      double precision dpi,lonsum,latsum,lonrms,latrms,dirms
+      double precision lonsum,latsum,lonrms,latrms,dirms
       real slnavg,sltavg,slnrms,sltrms,sdirms
 C
       character*64 iibuf,iobuf,ipbuf
@@ -60,9 +62,8 @@ C          break detected
 C          terminating:         input points         good points
       data ndlin/31/,ndlat/31/,ndlon/31/,il/50/,nrec/12/,idcbz/1552/
 C 
-      data dpi/3.141592653589d0/,idcbos/144/,aofer/.0001/ 
+      data idcbos/144/,aofer/.0001/ 
 C
-      pi=dpi
       if (kinit(lu,iibuf,iobuf,iapp,ipbuf,lst)) goto 10020
 C
       if (kgetp(lu,idcb,idcbz,ipbuf,jbuf,il,iedit,widmin,widmax,pkrlim,
@@ -129,7 +130,7 @@ C
 C
 145   continue
       igp=igp+1 
-      coslt=cos(latcor*pi/180.) 
+      coslt=cos(latcor*RPI/180.) 
       distr=sqrt(lonoff*lonoff*coslt*coslt+latoff*latoff) 
       call incsm(lonsum,lonrms,lonoff,latsum,latrms,latoff,dirms, 
      +           distr,igp,lu)

@@ -2,10 +2,11 @@
 C 
 C   IAT handles communications with the MAT 
 C 
-C  WHO DATE    CHANGE 
-C  NRV 810624 MODIFY FOR DVF00 TRIGGER CHAR IMMEDIATE TURNAROUND
-C  NRV 811012 REMOVE SOME WVR-SPECIFIC CODE (AFTER RBM) 
-C  MWH 870911 Modify for use with A400 8-channel MUX
+C  WHO  WHEN    WHAT
+C  NRV  810624  MODIFY FOR DVF00 TRIGGER CHAR IMMEDIATE TURNAROUND
+C  NRV  811012  REMOVE SOME WVR-SPECIFIC CODE (AFTER RBM) 
+C  MWH  870911  Modify for use with A400 8-channel MUX
+C  gag  920716  Added mode -54.
 C
       include 'matcm.i'
 C 
@@ -76,6 +77,8 @@ C
       if (iscn_ch(itran,1,ntr,':').ne.0) then
         ir = 8
         ifrecv = 1
+      else if (imode.eq.-54) then
+        ifrecv = 1
       else
 C  A colon in the message means a response to the download 
         do ir=1,nrspn
@@ -99,7 +102,7 @@ C
 C  Write message on the screen if echo is on
       ilen=nchrc(ir)
       ierr=portflush(lumat)
-      if(imode.eq.-53) then
+      if(imode.eq.-53 .or. imode.eq.-54) then
         ierr=portwrite(lumat,itran,nctran-1)
         idum=ichmv(irecx,1,itran,nctran,1)
         call fc_rte_time(it1,it1(6))
@@ -126,7 +129,9 @@ C            !       ! transmit special characters
 C            ! buffered mode
 C
       maxc=ilen
-      if(imode.eq.-53) then
+      if (imode.eq.-54) maxc=40
+C  at this time, don't know how many characters are expected 7/16/92
+      if(imode.eq.-53 .or. imode.eq.-54) then
         ireg(1)=portread(lumat,irecx,ilen,1,-1,itimeout)
         call fc_rte_time(it1(7),it1(12))
         ireg(1)=portread(lumat,irecx(2),ilen,maxc-1,-1,itimeout)

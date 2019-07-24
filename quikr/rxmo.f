@@ -54,6 +54,8 @@ C 6.  PROGRAMMER: NRV
 C     LAST MODIFIED:  CREATED 830610 AT MOJAVE
 C          NRV 840509 MADE CHANGES FOR NEW VERSION
 C          LAR 880426  REMOVED CODE NAMES TO (RXDEF
+C     NRV 921020 Added fs_get calls
+
 C 
 C     1. If class buffer contains command name with "=" then we have
 C     parameters to set the RX.  If only the command name is present, 
@@ -110,9 +112,15 @@ C     First check for an address
       if (ia22h(la).ne.-1) goto 220 
 C         This is a valid hex address 
 C     Now check for a code word 
-212   do 213 ic=1,ncodes  
-        if (ichcm(ibuf,ic1,lcode(1,ic),1,nch).eq.0 
-     .  .and. iflch(lcode(1,ic),6).eq.nch) goto 214
+212   call fs_get_rxncodes(rxncodes)
+      call fs_get_rxlcode(rxlcode)
+C      write(6,101) rxncodes
+C101   format("rxmo: rxncodes=",i5/)
+C      write(6,102) (rxlcode(i,1),i=1,3),(rxlcode(j,2),j=1,3)
+C102   format("rxmo: rxlcode(n,1&2)=",3a2,2x,3a2/)
+      do 213 ic=1,rxncodes  
+        if (ichcm(ibuf,ic1,rxlcode(1,ic),1,nch).eq.0 
+     .  .and. iflch(rxlcode(1,ic),6).eq.nch) goto 214
 213     continue
       ierr = -201 
 C             No match found for code word

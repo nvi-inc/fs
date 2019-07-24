@@ -4,6 +4,7 @@ C
 C WRITE ONOFF  LOG ENTRY
 C 
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C 
 C WE READ THE FOLLOWING FROM FSCOM: 
 C 
@@ -37,7 +38,7 @@ C
 C
 C CUTOFF ELEVATION
 C
-      icnext=icnext+jr2as(ctofnf*180./pi,lbuf,icnext,-2,0,isbuf)
+      icnext=icnext+jr2as(ctofnf*180./RPI,lbuf,icnext,-2,0,isbuf)
       icnext=ichmv(lbuf,icnext,2H  ,1,1)
 C
 C STEP SIZE
@@ -57,12 +58,12 @@ C
 C
 C FREQUENCY 1
 C
-      icnext=icnext+jr2as(bm1nf_fs*180./pi,lbuf,icnext,-4,2,isbuf)
+      icnext=icnext+jr2as(bm1nf_fs*180./RPI,lbuf,icnext,-4,2,isbuf)
       icnext=ichmv(lbuf,icnext,2H  ,1,1)
 C
 C FREQUENCY 2
 C
-      icnext=icnext+jr2as(bm2nf_fs*180./pi,lbuf,icnext,-4,2,isbuf)
+      icnext=icnext+jr2as(bm2nf_fs*180./RPI,lbuf,icnext,-4,2,isbuf)
       icnext=ichmv(lbuf,icnext,2H  ,1,1)
 C
 C DIAMETER OF DISH

@@ -100,13 +100,16 @@ parse:
       request.addr=0x99;
       vrepro99mc(&request.data,&lcl); add_req(&buffer,&request);
 
+      request.addr=0xa8;
+      vreproa8mc(&request.data,&lcl); add_req(&buffer,&request);
+
 mcbcn:
       end_req(ip,&buffer);
       skd_run("mcbcn",'w',ip);
       skd_par(ip);
 
       if (ichold != -99) shm_addr->check.vrepro=ichold;
-      else if (ichold >= 0) shm_addr->check.vrepro=ichold % 1000 + 1;
+      if (ichold >= 0) shm_addr->check.vrepro=ichold % 1000 + 1;
 
       if(ip[2]<0) return;
       vrepro_dis(command,itask,ip);

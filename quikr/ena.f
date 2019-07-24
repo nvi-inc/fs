@@ -38,6 +38,7 @@ C               - one word per track
       equivalence (reg,ireg(1)),(parm,iparm(1))
 C
       logical keven,kodd
+      logical kena(2)
 C
 C 5.  INITIALIZED VARIABLES
       data ilen/100/
@@ -48,6 +49,8 @@ C     LAST MODIFIED:  790320
 C  WHO  WHEN    DESCRIPTION
 C  GAG  910128  Added Write Electronics logic to change tracks according
 C               to the variable WRHD_FS.
+C  gag  920724  Added MK4 code.
+C  nrv  921027  Changed stack0/1 to stack1/2
 C
 C     PROGRAM STRUCTURE
 C
@@ -85,6 +88,49 @@ C           <track1...> = list of tracks, or G<n> where <n> is group number
 C
 C
       ich = ieq+1
+C
+C  The enable command for the Mark IV formatter only sets
+C  a common logical variable to indicate which head stacks
+C  are enabled. The options for the command are: stack1 and/or stack2
+C  or null.
+C
+      call fs_get_drive(drive)
+      if (MK4.eq.iand(MK4,drive)) then
+        kena(1)=.false.
+        kena(2)=.false.
+        if (ich.lt.nchar) then
+          call fdfld(ibuf,ich,nchar,ic1,ic2)
+          if (ic1.gt.0) then
+            if (ichcm_ch(ibuf,ic1,'stack2').eq.0) then
+              kena(2)= .true.
+            else if (ichcm_ch(ibuf,ic1,'stack1').eq.0) then
+              kena(1)= .true.
+            else if (ichcm_ch(ibuf,ic1,'null').eq.0) then
+              kena(1)= .false.
+              kena(2)= .false.
+            else
+              ierr= -103
+              goto 990
+            endif
+          endif
+          call fdfld(ibuf,ich,nchar,ic1,ic2)
+          if (ic1.gt.0) then
+            if (ichcm_ch(ibuf,ic1,'stack2').eq.0) then
+              kena(2)= .true.
+            else if (ichcm_ch(ibuf,ic1,'stack1').eq.0) then
+              kena(1)= .true.
+            else
+              ierr= -103
+              goto 990
+            endif
+          endif
+        endif
+        kenastk(1)=kena(1)
+        kenastk(2)=kena(2)
+        call fs_set_kena(kenastk)
+        ierr = 0
+        goto 990
+      endif
 C
 C  2.1 TRACKS, PARAMETERS 2
 C
@@ -137,7 +183,8 @@ C     3. Format the buffer for the controller.
 C                  mmTP%tttttttt
 C     where each "t" has 3 or 4 bits set by enabled tracks.
 C
-300   ibuf(1) = 0
+300   continue
+      ibuf(1) = 0
 C*************WE ARE NOT TURNING ON THE GENERAL ENABLE BIT WITH THIS COMMAND
 C*************ONLY THE REQUESTED TRACKS ARE SET UP.
 C     IF (NTRK.GT.0) IENA = 1
@@ -206,7 +253,8 @@ C
 C     5.  This is the read device section.
 C     Fill up one class buffers, requesting % data (mode -2).
 C 
-500   call char2hol('tp',ibuf(2),1,2)
+500   continue 
+      call char2hol('tp',ibuf(2),1,2)
       iclass = 0
       ibuf(1) = -2
       call put_buf(iclass,ibuf,-4,2hfs,0) 
@@ -217,7 +265,8 @@ C
 C 
 C     6. This is the test/reset device section. 
 C 
-600   ibuf(1) = 6 
+600   continue 
+      ibuf(1) = 6 
       call char2hol('tp',ibuf(2),1,2)
       iclass=0
       call put_buf(iclass,ibuf,-4,2hfs,0) 
@@ -227,7 +276,8 @@ C
 C
 C     7. This is the alarm query and reset request.
 C
-700   ibuf(1) = 7
+700   continue
+      ibuf(1) = 7
       call char2hol('tp',ibuf(2),1,2)
       iclass=0
       call put_buf(iclass,ibuf,-4,2hfs,0)
@@ -237,7 +287,8 @@ C
 C
 C     8. All MATCN requests are scheduled here, and then ENDIS called.
 C
-800   call run_matcn(iclass,nrec)
+800   continue
+      call run_matcn(iclass,nrec)
       call rmpar(ip)
       if(ichold.ne.-99) then
         icheck(18) = ichold
@@ -251,7 +302,8 @@ C
       call endis(ip,iclcm)
       return
 C
-990   ip(1) = 0
+990   continue 
+      ip(1) = 0
       ip(2) = 0
       ip(3) = ierr
       call char2hol('qe',ip(4),1,2)

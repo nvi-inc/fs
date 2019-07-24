@@ -6,17 +6,16 @@ Response:    tpzero/zero levels
 
 
 Settable parameters: 
-list            list of modules for which zero levels are to be
-                measured. Standard detector mnemonics allowed.
+list           list of modules for which zero levels are to be measured.
+               Standard detector mnemonics allowed.
 
 Monitor-only parameters:
-zero levels             list of zero levels, counts. These values
-                        are stored for use by the tsys1 and
-                        tsys2 commands.
+zero levels            list of zero levels, counts. These values are stored
+                       for use by the tsys1 and tsys2 commands.
 
 Comments: 
-These zero levels are subtracted from all readings taken on the
-same module before system temperatures are computed. Only USB
-or LSB readings are accepted; if another total power selection has
-been set up with the vc command, the reading is returned as-1. It
-is assumed that the IF distributor is set for maximum attenuation.
+These zero levels are subtracted from all readings taken on the same module
+before system temperatures are computed. Only USB or LSB readings are
+accepted; if another total power selection has been set up with the vc
+command, the reading is returned as-1. It is assumed that the IF distributor is
+set for maximum attenuation.

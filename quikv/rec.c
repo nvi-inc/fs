@@ -11,8 +11,7 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char device[]={"rc"};           /* device menemonics */
-
+static float spd[ ]={0,3.375,7.875,16.875,33.75,67.5,135.,270.};
 void rec(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
@@ -26,8 +25,10 @@ long ip[5];                           /* ipc parameters */
 
       int rec_dec();                 /* parsing utilities */
       char *arg_next();
-      float vacuum;
+      float fvacuum;
 
+      int verr, lerr, vacuum();
+      
       void rec_dis();
       void ini_req(), add_req(), end_req(); /*mcbcn request utilities */
       void skd_run(), skd_par();      /* program scheduling utilities */
@@ -39,7 +40,7 @@ long ip[5];                           /* ipc parameters */
 
       ind=itask-1;                    /* index for this module */
 
-      memcpy(request.device,device,2);    /* device mnemonic */
+      memcpy(request.device,DEV_VRC,2);    /* device mnemonic */
 
       if (command->equal != '=') {            /* read module */
         request.type=1;
@@ -78,10 +79,10 @@ long ip[5];                           /* ipc parameters */
             request.data= bits16on(16) & shm_addr->itpthick;
             add_req(&buffer,&request);
 
-            vacuum= 0.0;
+            fvacuum= 0.0;
             request.addr=0xd0;                 /* vacuum motor voltage (mV) */
-            vacuum = (shm_addr->motorv * shm_addr->inscsl) + shm_addr->inscint;
-            request.data = bits16on(14) & (int)(vacuum);
+            fvacuum=(shm_addr->motorv * shm_addr->inscsl) + shm_addr->inscint;
+            request.data = bits16on(14) & (int)(fvacuum);
             add_req(&buffer,&request);
 
             request.addr=0xd3;                 /* head write voltage */
@@ -91,25 +92,66 @@ long ip[5];                           /* ipc parameters */
 
             request.addr=0xb3; /* load tape into vacuum */
             request.data=0x01; add_req(&buffer,&request);
-            goto mcbcn;
+            goto parse;
 
          } else if(0==strcmp(command->argv[0],"unload")) {
+           verr=0;
+           lerr=0;
+           verr = vacuum(&lerr);
+           if (verr<0) {
+             /* vacuum not ready or other error */
+             ierr = verr;
+             goto error;
+           } 
+           else if (lerr!=0) { 
+             /* error with trying to read recorder */
+             ierr = lerr;
+             goto error;
+           } 
             request.type=0;
+            memcpy(&lcl,&shm_addr->venable,sizeof(lcl));
+            lcl.general=0;                  /* turn off record */
+            shm_addr->venable.general=0;
+            venable81mc(&request.data,&lcl);
+            request.addr=0x81; add_req(&buffer,&request);
+
             request.addr=0xb4;
             request.data=0x01; add_req(&buffer,&request);
+            shm_addr->idirtp=-1;
+            shm_addr->lowtp=1;
             goto mcbcn;
 
          } else if(0==strcmp(command->argv[0],"bot")) {
+           verr=0;
+           lerr=0;
+           verr = vacuum(&lerr);
+           if (verr<0) {
+             /* vacuum not ready or other error */
+             ierr = verr;
+             goto error;
+           } 
+           else if (lerr!=0) { 
+             /* error with trying to read recorder */
+             ierr = lerr;
+             goto error;
+           } 
             request.type=0;
             memcpy(&lcl,&shm_addr->venable,sizeof(lcl));
             lcl.general=0;                  /* turn off record */
+            shm_addr->venable.general=0;
             venable81mc(&request.data,&lcl);
             request.addr=0x81;
             add_req(&buffer,&request);
 
-            memcpy(&shm_addr->venable,&lcl,sizeof(lcl));
             request.addr=0xb5;           /* schedule tape speed */
-            request.data= bits16on(16) & (shm_addr->iskdtpsd*100); 
+            if (shm_addr->iskdtpsd == -2) {
+              request.data=bits16on(16) & (int)(360*100.0);
+            } else if (shm_addr->iskdtpsd == -1) {
+              request.data=bits16on(16) & (int)(330*100.0);
+            } else {
+              request.data=bits16on(16) & (int)(spd[shm_addr->iskdtpsd]*100.0);
+            }
+            shm_addr->ispeed=shm_addr->iskdtpsd;
             add_req(&buffer,&request);
 
             request.addr=0xb6;           /* set low tape sensor */
@@ -117,22 +159,42 @@ long ip[5];                           /* ipc parameters */
             request.data= bits16on(1) & 1; 
             add_req(&buffer,&request);
 
-            request.addr=0xb1;
-            request.data=0x00; 
+            request.addr=0xb1; request.data=0x00; 
+            shm_addr->idirtp=-1;
             add_req(&buffer,&request);
-            goto mcbcn;
+            goto parse;
 
          } else if(0==strcmp(command->argv[0],"eot")) {
+           verr=0;
+           lerr=0;
+           verr = vacuum(&lerr);
+           if (verr<0) {
+             /* vacuum not ready or other error */
+             ierr = verr;
+             goto error;
+           } 
+           else if (lerr!=0) { 
+             /* error with trying to read recorder */
+             ierr = lerr;
+             goto error;
+           } 
             request.type=0;
             memcpy(&lcl,&shm_addr->venable,sizeof(lcl));
             lcl.general=0;                  /* turn off record */
+            shm_addr->venable.general=0;
             venable81mc(&request.data,&lcl);
             request.addr=0x81;
             add_req(&buffer,&request);
 
-            memcpy(&shm_addr->venable,&lcl,sizeof(lcl));
             request.addr=0xb5;           /* schedule tape speed */
-            request.data= bits16on(16) & (shm_addr->iskdtpsd*100); 
+            if (shm_addr->iskdtpsd == -2) {
+              request.data=bits16on(16) & (int)(360*100.0);
+            } else if (shm_addr->iskdtpsd == -1) {
+              request.data=bits16on(16) & (int)(330*100.0);
+            } else {
+              request.data=bits16on(16) & (int)(spd[shm_addr->iskdtpsd]*100.0);
+            }
+            shm_addr->ispeed=shm_addr->iskdtpsd;
             add_req(&buffer,&request);
 
             request.addr=0xb6;           /* set low tape sensor */
@@ -140,10 +202,10 @@ long ip[5];                           /* ipc parameters */
             shm_addr->lowtp=1;
             add_req(&buffer,&request);
 
-            request.addr=0xb1;
-            request.data=0x01; 
+            request.addr=0xb1; request.data=0x01; 
+            shm_addr->idirtp=-1;
             add_req(&buffer,&request);
-            goto mcbcn;
+            goto parse;
 
          } else if(0==strcmp(command->argv[0],"release")) {
             request.type=0;
@@ -160,12 +222,10 @@ long ip[5];                           /* ipc parameters */
             goto mcbcn;
 
          } else { 
-             ierr = rec_dec(command->argv[0],&request,&buffer,ip);
-             if (ierr!=0) 
-               goto error;
-             request.type=0;
-             add_req(&buffer,&request);
-             goto mcbcn;
+             end_req(ip,&buffer);
+             ierr = rec_dec(command->argv[0],ip);
+             if (ierr!=0) goto error;
+             goto parse;
          }
 
 parse:
@@ -181,7 +241,7 @@ mcbcn:
       skd_par(ip);
 
       if (ichold != -99) shm_addr->check.rec=ichold;
-      else if (ichold >= 0) shm_addr->check.rec=ichold % 1000 + 1;
+      if (ichold >= 0) shm_addr->check.rec=ichold % 1000 + 1;
 
       if(ip[2]<0) return;
       rec_dis(command,ip);

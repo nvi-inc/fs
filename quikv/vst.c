@@ -17,12 +17,14 @@ int itask;
 long ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, ichold, i, count;
+      int verr;
       char *ptr;
       struct req_rec request;       /* mcbcn request record */
       struct req_buf buffer;        /* mcbcn request buffer */
       struct vst_cmd lcl;
       struct venable_cmd lcv;        /* general recording structure */
 
+      int vacuum(), lerr;
       int vst_dec();                 /* parsing utilities */
       char *arg_next();
 
@@ -62,6 +64,24 @@ parse:
         if(ierr !=0 ) goto error;
       }
 
+/*  check for vacuum */
+
+      end_req(ip,&buffer); 
+      verr=0;
+      lerr=0;
+      verr = vacuum(&lerr);
+      if (verr<0) {
+        /* vacuum not ready (-1) or other error (-2) */
+        ierr = verr;
+        goto error;
+      }
+      else if (lerr!=0) { 
+        /* error trying to read recorder */
+        ierr = lerr;
+        goto error;
+      }
+      ini_req(&buffer);
+
 /* all parameters parsed okay, update common */
 
       ichold=shm_addr->check.rec;
@@ -75,15 +95,16 @@ parse:
       shm_addr->ispeed=lcl.speed;
 
       memcpy(&lcv,&shm_addr->venable,sizeof(lcv));
-      lcv.general=lcl.rec;                  /* turn off record */
+      lcv.general=lcl.rec;                  /* turn record off or on */
+      shm_addr->venable.general=lcv.general;
       venable80mc(&request.data,&lcv);
       request.addr=0x80;
       add_req(&buffer,&request);
+
       venable81mc(&request.data,&lcv);
       request.addr=0x81;
       add_req(&buffer,&request);
-      memcpy(&shm_addr->venable,&lcv,sizeof(lcv));
-      shm_addr->ienatp=lcv.general;
+/*      memcpy(&shm_addr->venable,&lcv,sizeof(lcv)); */
 
       request.addr=0xb1;
       vstb1mc(&request.data,&lcl); add_req(&buffer,&request);
@@ -95,7 +116,7 @@ mcbcn:
       skd_par(ip);
 
       if (ichold != -99) shm_addr->check.rec=ichold;
-      else if (ichold >= 0) shm_addr->check.rec=ichold % 1000 + 1;
+      if (ichold >= 0) shm_addr->check.rec=ichold % 1000 + 1;
 
       if(ip[2]<0) return;
       vst_dis(command,ip);

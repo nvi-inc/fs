@@ -120,7 +120,8 @@ C
 C  *********************************************************
 C
 C
-300   if (ichcm_ch(ibuf,11,'SOURCE=').ne.0) goto 350
+300   continue
+      if (ichcm_ch(ibuf,11,'source=').ne.0) goto 350
       ich = 18
       call gtprm(ibuf,ich,nchar,0,parm,id)
 C
@@ -148,7 +149,7 @@ C
 C  ************************************************************
 C
 C
-400   if (ichcm_ch(ibuf,11,'ST=').ne.0) goto 500
+400   if (ichcm_ch(ibuf,11,'st=').ne.0) goto 500
       isld=ias2b(ibuf,1,3)
       islhr=ias2b(ibuf,4,2)
       islmin=ias2b(ibuf,6,2)
@@ -164,8 +165,8 @@ C
 C  ************************************************************
 C
 C
-500   if (ichcm_ch(ibuf,11,'ONSOURCE/').ne.0) goto 600
-      if (ichcm_ch(ibuf,20,'TRACKING').ne.0) goto 510
+500   if (ichcm_ch(ibuf,11,'onsource/').ne.0) goto 600
+      if (ichcm_ch(ibuf,20,'tracking').ne.0) goto 510
       call ichmv(lstat,1,2HO ,1,1)
       goto 100
 510   if (islew.eq.1.or.iet.eq.1) goto 100
@@ -181,7 +182,7 @@ C
 C  *************************************************************
 C
 C
-600   if (ichcm_ch(ibuf,11,'ERROR CH').ne.0) goto 700
+600   if (ichcm_ch(ibuf,11,'error ch').ne.0) goto 700
       if (ichk.eq.1) goto 100
       call ichmv(lstat,2,2HE ,1,1)
       ichk=1
@@ -195,7 +196,7 @@ C
 C  ************************************************************
 C
 C
-700   if (ichcm_ch(ibuf,11,'ET').ne.0) goto 800
+700   if (ichcm_ch(ibuf,11,'et').ne.0) goto 800
       ield=ias2b(ibuf,1,3)
       ielhr=ias2b(ibuf,4,2)
       ielmin=ias2b(ibuf,6,2)
@@ -210,7 +211,7 @@ C
 C  ************************************************************
 C
 C
-800   if (ichcm_ch(ibuf,11,'LABEL=').ne.0) goto 900
+800   if (ichcm_ch(ibuf,11,'label=').ne.0) goto 900
       call ichmv(ltapen,1,ibuf,17,8)
       call ichmv(ltapn,1,ltapen,1,8)
       goto 100
@@ -224,7 +225,7 @@ C
 C  ************************************************************
 C
 C
-900   if (ichcm_ch(ibuf,11,'UNLOD').ne.0) goto 1000
+900   if (ichcm_ch(ibuf,11,'unlod').ne.0) goto 1000
       call ichmv(ltapn,1,ltapen,1,8)
       call ifill(ltapen,1,8,2H  )
       call ifill_ch(ltapen,3,1,'-')
@@ -238,7 +239,7 @@ C
 C  ************************************************************
 C
 C
-1000  if (ichcm_ch(ibuf,11,'TAPE/').ne.0) goto 1100
+1000  if (ichcm_ch(ibuf,11,'tape/').ne.0) goto 1100
       nch=1
       call gtprm(ibuf,nch,nchar,0,parm,ierr)
       call gtprm(ibuf,nch,nchar,1,parm,ierr)

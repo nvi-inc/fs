@@ -1,0 +1,4 @@
+# Generate a distribution disk for Field System version 8.1
+# Assume the correct files are already on /tmp/fs 
+cd /tmp/fs
+ls /tmp/fs/* | cpio -ovcB > /dev/rdsk/f0q18dt

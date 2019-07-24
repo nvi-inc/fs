@@ -91,23 +91,19 @@ C
       call tp2ma(ibuf(3),ilowtp,0)
       call put_buf(iclass,ibuf,-13,2hfs,0)
 C
-C     IBYPAS = 1
-C     CALL RP2MA(IBUF(3),IBYPAS,IEQTAP,IBWTAP,ITRAKA,ITRAKB)
-C
+      call ichmv(lgen,1,3H720,1,3)
       if(isub.lt.5) then
-        call mv2ma(ibuf(3),idirtp,ispeed,3h720)
+        call mv2ma(ibuf(3),idirtp,ispeed,lgen)
       else
         call fs_get_imaxtpsd(imaxtpsd)
-        if (imaxtpsd.eq.330) then
-          call mv2ma(ibuf(3),idirtp,ispeed,3h880)
-        else if (imaxtpsd.eq.270) then
-          call mv2ma(ibuf(3),idirtp,ispeed,3h720)
-        else if (imaxtpsd.eq.135) then
-          call mv2ma(ibuf(3),idirtp,ispeed,3h720)
+        if (imaxtpsd.eq.-1) then
+          call ichmv(lgen,1,3H880,1,3)
+          call mv2ma(ibuf(3),idirtp,ispeed,lgen)
         else
-          call mv2ma(ibuf(3),idirtp,ispeed,3h720)
+          call mv2ma(ibuf(3),idirtp,imaxtpsd,lgen)
         endif
       endif
+      call fs_set_lgen(lgen)
       call put_buf(iclass,ibuf,-13,2hfs,0)
 C
       call run_matcn(iclass,3)
@@ -125,7 +121,9 @@ C
       return
 C        vlba recorder movement commands
 500   continue
-      call fc_rwff_v(ip,isub)
+      ierr = 0
+      call fc_rwff_v(ip,isub,ierr)
+      if (ierr.ne.0) goto 990
       call mvdis(ip,iclcm)
       return
 C

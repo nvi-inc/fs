@@ -57,9 +57,15 @@ C
           call pe(ip)
         else if (itask.eq.3) then
           call party(ip)
+        else if (itask.eq.4) then
+          call party4(ip)
         endif
       else if (isub.eq.10) then
-        call repro(ip)
+        if (itask.eq.1) then
+          call repro(ip)
+        else if (itask.eq.2) then
+          call repro4(ip)
+        endif
       else if (isub.eq.11) then
         if (itask.eq.1) then
           call sorce(ip)

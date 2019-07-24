@@ -12,6 +12,20 @@
 #define MAX_LINE    82
 #define MAX_PROG_ARGS    4
 
+/*                                                                  */
+/*   FS acts like a UNIX shell, initializing and starting the       */
+/*   required Field System programs. FS activates the programs      */
+/*   listed in the files fspgm.ctl and stpgm.ctl. Each line in      */
+/*   these control files is a system command to start a program.    */
+/*                                                                  */
+
+/*                                                                  */
+/* HISTORY:                                                         */
+/* WHO  WHEN    WHAT                                                */
+/* weh  92????  Created                                             */
+/* gag  920922  Added code for stpgm.ctl, station control file.     */
+/*                                                                  */
+
 long cls_alc();
 void shm_att(),sem_att(),cls_ini(),brk_ini();
 int parse();
@@ -37,8 +51,6 @@ main()
     okay = FALSE;
     npids=0;
     ipids=-1;
-    lesm=-1;
-    lesam=-1;
 
     setup_ids();
 
@@ -81,59 +93,95 @@ main()
 /*  fprintf( stderr," iclopr %d iclbox %d\n",shm_addr->iclopr,
     shm_addr->iclbox);
 */
+    argv[0]="sh";
+    argv[1]="-c";
+    argv[2]=line2;
+    argv[3]=NULL;
+    lesm=-1;
+    lesam=-1;
+    s1=strcpy( line2, "exec ");
     if((fp = fopen( FSPGM_CTL, "r")) == NULL) {
        fprintf( stderr, " can't open %s\n", FSPGM_CTL);
         exit( -1);
-     }
+    }
   
-     argv[0]="sh";
-     argv[1]="-c";
-     argv[2]=line2;
-     argv[3]=NULL;
-     s1=strcpy( line2, "exec ");
-     while( NULL != fgets( line, MAX_LINE, fp) ) {
-       if (line[0] != '*') {
-         if( (s1= strrchr( line, '\n')) != NULL) 
-            *s1='\0';
-         if(0 != parse(&line2[5],MAX_LINE,line, &ampr,&les,&name)) goto cleanup;
-         if (!ampr) {
-            fprintf( stderr,"running %5.5s\n",name);
-            if( (err=start_prog(argv,'n')) < 0) {
-              fprintf( stderr," error return %d\n", err);
-              goto cleanup;
-            }
-         } else {
-           if( ++ipids >= MAX_PIDS) {
-              fprintf( stderr,"too many programs, max is %d\n",MAX_PIDS);
-              goto cleanup;
-           }
-           fprintf( stderr,"getting %s\n",name);
-           pids[ ipids]=start_prog(argv,'w');
-           if( pids[ ipids] <= 0) {
-             fprintf( stderr," error starting process\n");
+    while( NULL != fgets( line, MAX_LINE, fp) ) {
+      if (line[0] != '*') {
+        if( (s1= strrchr( line, '\n')) != NULL) 
+           *s1='\0';
+        if(0 != parse(&line2[5],MAX_LINE,line, &ampr,&les,&name)) goto cleanup;
+        if (!ampr) {
+           fprintf( stderr,"running %5.5s\n",name);
+           if( (err=start_prog(argv,'n')) < 0) {
+             fprintf( stderr," error return %d\n", err);
              goto cleanup;
            }
-           s1=strncpy( p_names[ ipids], name, 6);
-           if (les >0) {
-              if (lesm < 0) lesm=ipids;
-              else {
-                lesm2=ipids;
-                fprintf( stderr," more than one LES Manager\n");
-               /* goto cleanup;*/
-              }
-           }
+        } else {
+          if( ++ipids >= MAX_PIDS) {
+             fprintf( stderr,"too many programs, max is %d\n",MAX_PIDS);
+             goto cleanup;
+          }
+          fprintf( stderr,"getting %s\n",name);
+          pids[ ipids]=start_prog(argv,'w');
+          if( pids[ ipids] <= 0) {
+            fprintf( stderr," error starting process\n");
+            goto cleanup;
+          }
+          s1=strncpy( p_names[ ipids], name, 6);
+          if (les >0) {
+            if (lesm < 0) lesm=ipids;
+             else {
+               lesm2=ipids;
+               fprintf( stderr," more than one LES Manager\n");
+              /* goto cleanup;*/
+             }
+          }
 
-           if (les <0) {
-              if (lesam < 0) lesam=ipids;
-              else {
-                fprintf( stderr," more than on LES Assistant Manager\n");
-                goto cleanup;
-              }
-           }
-           npids++;
-         }
-       }
-     }
+          if (les <0) {
+             if (lesam < 0) lesam=ipids;
+             else {
+               fprintf( stderr," more than on LES Assistant Manager\n");
+               goto cleanup;
+             }
+          }
+          npids++;
+        }
+      }
+    }
+
+    s1=strcpy( line2, "exec ");
+    if((fp = fopen( STPGM_CTL, "r")) == NULL) {
+       fprintf( stderr, " can't open %s\n", STPGM_CTL);
+    }
+    else {
+      while( NULL != fgets( line, MAX_LINE, fp) ) {
+        if (line[0] != '*') {
+          if( (s1= strrchr( line, '\n')) != NULL) 
+             *s1='\0';
+          if(0!= parse(&line2[5],MAX_LINE,line, &ampr,&les,&name)) goto cleanup;
+          if (!ampr) {
+             fprintf( stderr,"running %5.5s\n",name);
+             if( (err=start_prog(argv,'n')) < 0) {
+               fprintf( stderr," error return %d\n", err);
+               goto cleanup;
+             }
+          } else {
+            if( ++ipids >= MAX_PIDS) {
+               fprintf( stderr,"too many programs, max is %d\n",MAX_PIDS);
+               goto cleanup;
+            }
+            fprintf( stderr,"getting %s\n",name);
+            pids[ ipids]=start_prog(argv,'w');
+            if( pids[ ipids] <= 0) {
+              fprintf( stderr," error starting process\n");
+              goto cleanup;
+            }
+            s1=strncpy( p_names[ ipids], name, 6);
+            npids++;
+          }
+        }
+      }
+    }
      okay=TRUE;
      skd_run("boss ",'n',ip);
      goto waitfor;
@@ -186,8 +234,7 @@ waitfor:
          else
             klesam=TRUE;
        }
-       while((wpid=wait(&status)) == -1)
-           ;
+       while((wpid=wait(&status)) == -1);
        for (i=0;i<=ipids;i++) {
           if(wpid==pids[i]) {
             pids[i]=0;
@@ -196,7 +243,7 @@ waitfor:
             else
               fprintf(stderr,"%s killed\n",p_names[i]);
             break;
-          }
+         }
        }
        npids--;
        if(okay) goto cleanup;

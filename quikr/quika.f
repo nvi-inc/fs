@@ -26,6 +26,7 @@ C  WHO  WHEN    DESCRIPTION
 C  GAG  910116  Added calls to WEH's new tape head calibration routines.
 C  GAG  910124  Removed callS to LOWHI and PARTN.
 C  GAG  910205  Rejoined QUIK1 and QUIK2 into this one file.
+C  gag  920715  Removed feet command and inserted form4 command.
 C
 C     PROGRAM STRUCTURE :
 C  Get RMPAR parameters, then call the subroutine whose number is in IP(2).
@@ -39,7 +40,11 @@ C
       isub = ip(2)/100
       itask = ip(2) - 100*isub
       if (isub.eq.1) then
-        call fm(ip)
+        if (itask.eq.1) then
+          call fm(ip)
+        else if (itask.eq.2) then
+          call form4(ip)
+        endif
       else if (isub.eq.2) then
         call vc(ip,itask)
       else if (isub.eq.3) then
@@ -65,8 +70,6 @@ C
           call tp(ip)
         else if (itask.eq.2) then
           call tppos(ip)
-        else if (itask.eq.3) then
-          call feet(ip)
         endif
       else if (isub.eq.6) then
         if (itask.eq.1) then

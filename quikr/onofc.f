@@ -1,5 +1,6 @@
       subroutine onofc(ip)
-C  onoff setup control c#870115:04:56#
+C
+C  onoff setup control
 C 
 C     ONOFC sets up the common variables necessary for
 C      the proper execution of program ONOFF
@@ -19,6 +20,7 @@ C
 C   COMMON BLOCKS USED
 C 
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C 
 C     CALLED SUBROUTINES: NFDIS, utilities
 C 
@@ -37,7 +39,6 @@ C               - parameter returned from FDFLD
       dimension ireg(2) 
       integer get_buf
 C               - registers from EXEC calls 
-      dimension vcbw(6) 
       integer source
       logical rn_test
       character cjchar
@@ -47,11 +48,11 @@ C
 C  INITIALIZED VARIABLES
 C 
       data ilen/80/ 
-      data vcbw/.125,.25,.5,1.0,2.0,4.0/
 C 
-C  PROGRAMMER: MWH
-C     CREATED: 840510 
-C     LAST MODIFIED:
+C  PROGRAMMER: MWH  CREATED: 840510 
+C  HISTORY:
+C  WHO  WHEN    WHAT
+C  gag  920714  Made Mark IV a valid rack to go along with Mark III
 C 
 C 
 C     1. If we have a class buffer, then we are to set the
@@ -122,7 +123,7 @@ C
 
       call fs_get_rack(rack)
 
-      if (MK3 .eq. iand(rack,MK3)) then
+      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv(ldv1,1,2Hi1,1,2)
 C                      Default is IF1
         if(cjchar(ldv1,1).eq.'i'.or.cjchar(ldv1,1).eq.'v') goto 360
@@ -161,7 +162,7 @@ C
 
       call fs_get_rack(rack)
 
-      if (MK3 .eq. iand(rack,MK3)) then
+      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
         if (cjchar(iprm,1).eq.',') idumm1 = ichmv(ldv2,1,2Hi2,1,2)
 C                      Default is IF2
         if(cjchar(ldv2,1).eq.'i'.or.cjchar(ldv2,1).eq.'v') goto 400
@@ -182,11 +183,11 @@ C  2.7  Fifth parm, cut off elevation
 C
 400   continue
       call gtprm(ibuf,ich,nchar,2,parm,ierr)
-      if(cjchar(parm,1).eq.',') ctof= 60.*pi/180.
+      if(cjchar(parm,1).eq.',') ctof= 60.*RPI/180.
       if(cjchar(parm,1).eq.'*') ctof = ctofnf
       if(cjchar(parm,1).ne.','.and.cjchar(parm,1).ne.'*')
-     +           ctof = parm*pi/180.
-      if(ctof.ge.0.and.ctof.le.90.1*pi/180.) goto 450
+     +           ctof = parm*RPI/180.
+      if(ctof.ge.0.and.ctof.le.90.1*RPI/180.) goto 450
         ierr = -409
         goto 990
 C 
@@ -218,7 +219,7 @@ C
 C  Determine cal temp and frequency for device 1.
 C
 490   continue
-      if(rack.and.iand(MK3,rack)) then
+      if((rack.and.iand(MK3,rack)).or.(rack.and.iand(MK4,rack))) then
         if(cjchar(ldv1nf,1).eq.'i'.or.cjchar(ldv1nf,1).eq.'v') 
      .    goto 500
           ierr = -503
@@ -298,7 +299,7 @@ C
 C   Determine cal temp and frequency for device 2.
 C
 520   continue
-      if(rack.eq.iand(MK3,rack)) then
+      if((rack.eq.iand(MK3,rack)).or.(rack.eq.iand(MK4,rack))) then
         if(cjchar(ldv2nf,1).ne.'i') goto 525
         if(ichcm_ch(ldv2nf,1,'i1').ne.0) goto 522
           cal2 = caltmp(1)
@@ -376,7 +377,7 @@ C
       bm2nf_fs=bm2
       fx1nf_fs=fx1
       fx2nf_fs=fx2
-      if(rack.eq.iand(MK3,rack)) then
+      if((rack.eq.iand(MK3,rack)).or.(rack.eq.iand(MK4,rack))) then
         if(cjchar(ldv1nf,1).eq.'i') goto 602
         indvc = ia2hx(ldv1nf,2)
         if(freqvc(indvc).gt.96.0.and.freqvc(indvc).lt.504.00) goto 602

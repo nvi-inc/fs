@@ -6,7 +6,7 @@ C ACCURATE TO APPROXIMATELY .1 SECONDS OF TIME
 C
 C WEH
 C
-      double precision eqofeq,sidti,fract,ut,pi
+      double precision eqofeq,sidti,fract,ut
       integer it(6)
       include '../include/dpi.i'
 C
@@ -17,8 +17,8 @@ C
       call sidtm(mjd,sider,fract)
       call equn(iy,it(5),eqofeq)
       sider=sider+fract*ut+eqofeq
-      sider=dmod(sider,dtwopi)
-      if (sider.lt.0.0d0) sider=sider+dtwopi
+      sider=dmod(sider,DTWOPI)
+      if (sider.lt.0.0d0) sider=sider+DTWOPI
 
       return
       end

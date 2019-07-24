@@ -3,6 +3,7 @@ C
 C     Set and display AZ/EL offsets 
 C 
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C 
       dimension ip(1) 
       dimension ireg(2),iparm(2)
@@ -87,8 +88,8 @@ C
 500   continue
       call fs_get_azoff(azoff)
       call fs_get_eloff(eloff)
-      az=azoff*180./pi
-      el=eloff*180./pi
+      az=azoff*180./RPI
+      el=eloff*180./RPI
       nch = ichmv(ibuf,nchar+1,2H/ ,1,1)
       nch = nch + ir2as(az,ibuf,nch,10,5)
       nch = ichmv(ibuf,nch,2H, ,1,1)

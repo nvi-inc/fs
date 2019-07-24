@@ -90,14 +90,28 @@ C
       call fs_get_raoff(raoff)
       call radec(dble(raoff),dble(decoff),0.0,irah,iram,ras,
      .     lds,idcd,idcm,dcs,lhs,i,i,d)
-      is=ras*1000
-      ras=is/1000.
-      nch = nch + ir2as(irah*10000.0+iram*100.0+ras,ibuf,nch,10,3)
+C     is=ras*1000
+C     ras=is/1000.
+C     nch = nch + ir2as(irah*10000.0+iram*100.0+ras,ibuf,nch,10,3)
+      nch = nch + ib2as(irah,ibuf,nch,o'40000'+o'400'*2+2)
+      nch = nch + ib2as(iram,ibuf,nch,o'40000'+o'400'*2+2)
+C     iras = ifix(ras)
+C     nch = nch + ib2as(iras,ibuf,nch,o'40000'+o'400'*2+2)
+C     ras = ras-iras
+      if (ras.lt.10.0) nch=ichmv(ibuf,nch,2h00,1,1)
+      nch = nch + ir2as(ras,ibuf,nch,4,1)
       nch = ichmv(ibuf,nch,2h, ,1,1)
       if(ichcm_ch(lds,1,'-').eq.0) nch = ichmv(ibuf,nch,lds,1,1)
-      is=dcs*100
-      dcs=is/100.
-      nch = nch + ir2as(idcd*10000.0+idcm*100.0+dcs,ibuf,nch,9,2)
+C     is=dcs*100
+C     dcs=is/100.
+C     nch = nch + ir2as(idcd*10000.0+idcm*100.0+dcs,ibuf,nch,9,2)
+      nch = nch + ib2as(idcd,ibuf,nch,o'40000'+o'400'*2+2)
+      nch = nch + ib2as(idcm,ibuf,nch,o'40000'+o'400'*2+2)
+C     idcs = ifix(dcs)
+C     nch = nch + ib2as(idcs,ibuf,nch,o'40000'+o'400'*2+2)
+C     dcs = dcs-idcs
+      if (dcs.lt.10.0) nch=ichmv(ibuf,nch,2h00,1,1)
+      nch = nch + ir2as(dcs,ibuf,nch,4,1)
 C
       iclass = 0
       nch = nch - 1

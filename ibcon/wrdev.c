@@ -1,23 +1,20 @@
-/*
- * It assumes you will use the configuration 'ibboard' for the 
- * board. 
+/* wrdev - write to IEEE device
+   It assumes you will use the configuration 'ibboard' for the 
+   board. 
+   NRV 921202 Changed buffer to char
  */
 #include <memory.h>
 #include "ugpib.h"
-extern int boardid;
 
 void wrdev_(devid,buffer,buflen,error)
 
 int *devid;
 /*int *buffer; */
-char *buffer;
-int *buflen; 
+unsigned char *buffer;
+int *buflen;  /* length of the message in buffer, characters */
 int *error;
 
 {
-
-  ibcmd(boardid,"?_",2);      /* send UNT, UNL first */
-
   *error = 0;
 
   ibwrt(*devid,buffer,*buflen);
@@ -36,5 +33,4 @@ int *error;
 
   if (iberr != 0) *error=-10;
 
-  ibcmd(boardid,"?_",2);      /* send UNT, UNL at end */
 }

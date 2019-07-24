@@ -33,7 +33,7 @@ C  Set flag for PCALR to stop
       if(MK3.eq.iand(drive,MK3)) then
         call fs_get_icheck(icheck(18),18)
         ichold=icheck(18)
-      else
+      else !!! VLBA
         call fs_get_ichvlba(ichvlba(20),20)
         ichold=ichvlba(20)
       endif
@@ -193,7 +193,7 @@ C
       if(MK3.eq.iand(drive,MK3)) then
         icheck(18) = 0
         call fs_set_icheck(icheck(18),18)
-      else
+      else !!! VLBA
         ichvlba(20)=0
         call fs_set_ichvlba(ichvlba(20),20)
       endif
@@ -342,7 +342,7 @@ C
           else if (rpro_fs.eq.1.and.ibypas.eq.0) then    !odd
             if (mod(iv,2).eq.0) iv = iv - 1
           end if
-          if(ive.le.ilast) then            !report only as far as we got
+          if(iv.le.ilast) then            !report only as far as we got
             if (iserr(iv).gt.isethr) then
               nc=ib2as(i,lwhat,1,2)        !report requested, not actual track
               call logit7(0,0,0,0,-304,2hqg,lwhat)
@@ -405,8 +405,9 @@ C
 C
 C  That's all
 C
-990   call char2hol('qg',ip(4),1,2)
-999   ip(1)=iclass
+990   continue
+      call char2hol('qg',ip(4),1,2)
+      ip(1)=iclass
       ip(2)=nrec
       ip(3)=ierr
       ip(5)=0
@@ -414,9 +415,10 @@ C
       if(MK3.eq.iand(drive,MK3)) then
         icheck(18)=ichold
         call fs_set_icheck(icheck(18),18)
-      else
+      else  !!! VLBA
         ichvlba(20)=ichold
         call fs_set_ichvlba(ichvlba(20),20)
       endif
+C
       return
       end

@@ -11,7 +11,8 @@ OBJECTS1 = monit1.o die.o
 	cc -o ../bin/monit1 $(OBJECTS1) $(LIBES)
 	../setb/setb ../bin/monit1
 #
-OBJECTS2 = monit2.o die.o azel.o sider.o pre_str.o cnvrt.o
+OBJECTS2 = monit2.o die.o azel.o sider.o pre_str.o cnvrt.o m2init.o\
+mout2.o
 #
 ../bin/monit2: $(OBJECTS2)
 	cc -o ../bin/monit2 $(OBJECTS2) $(LIBES)

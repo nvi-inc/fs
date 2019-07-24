@@ -2,6 +2,7 @@
       integer*2 lmess(2),lbuf(1)
 C 
        include '../include/fscom.i'
+       include '../include/dpi.i'
 C 
       icnext=1
       icnext=ichmv(lbuf,icnext,lmess,1,mchars)
@@ -13,7 +14,7 @@ C
       icnext=icnext+jr2as(tim,lbuf,icnext,-7,0,isbuf) 
       icnext=ichmv(lbuf,icnext,2H  ,1,1)  
 C 
-      icnext=icnext+jr2as(off*180./pi,lbuf,icnext,-8,4,isbuf)   
+      icnext=icnext+jr2as(off*180./RPI,lbuf,icnext,-8,4,isbuf)   
       icnext=ichmv(lbuf,icnext,2H  ,1,1)
 C 
       icnext=icnext+jr2as(temp,lbuf,icnext,-8,3,isbuf)  

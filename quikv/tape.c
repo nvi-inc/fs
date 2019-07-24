@@ -7,7 +7,6 @@
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"         /* shared memory definition */
-#include "../include/tape_ds.h"
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
 static char device[]={"rc"};           /* device menemonics */
@@ -93,7 +92,7 @@ mcbcn:
       skd_par(ip);
 
       if (ichold != -99) shm_addr->check.rec=ichold;
-      else if (ichold >= 0) shm_addr->check.rec=ichold % 1000 + 1;
+      if (ichold >= 0) shm_addr->check.rec=ichold % 1000 + 1;
 
       if(ip[2]<0) return;
       tape_dis(command,itask,ip);

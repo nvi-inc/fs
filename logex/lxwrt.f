@@ -12,7 +12,8 @@ C
 C INPUT VARIABLES:
 C
       integer*2 ibufx(1)
-      integer ncharx
+      integer*2 ncharx
+      integer nwx
 C
 C     NCHARX - Number of characters in the output buffer.
 C
@@ -52,9 +53,12 @@ C
 C **********************************************************
 C
 C
-      nw=(ncharx+1)/2
+      nwx=ncharx
+      if (MOD(nwx,2).eq.1) then
+        nwx=nwx+1
+      endif
       if (iterm.ne.1) goto 100
-        call po_put_i(ibufx,ncharx)
+        call po_put_i(ibufx,nwx)
       goto 900
 C
 C Buffer is written to the output file here.
@@ -62,7 +66,8 @@ C
 100   if(iout.eq.1) goto 150
         call po_put_c('***output file is being processed***')
         iout=1
-150   id = fmpwrite2(jdcb,ierr,ibufx,ncharx)
+150   continue 
+      id = fmpwrite2(jdcb,ierr,ibufx,nwx)
       if (ierr.lt.0) then
         outbuf='LXWRT - error '
         call ib2as(ierr,answer,1,4)

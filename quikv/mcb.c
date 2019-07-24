@@ -14,7 +14,7 @@ struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
 long ip[5];                           /* ipc parameters */
 {
-      int ilast, ierr, ind, ichold, i, count;
+      int ilast, ierr, ind, i, count;
       char *ptr;
       struct req_rec request;          /* mcbcn request record */
       struct req_buf buffer;           /* mcbcn request buffer */

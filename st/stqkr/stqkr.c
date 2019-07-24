@@ -1,17 +1,16 @@
 /* stqkr - C version of station command controller
    NRV 920527  Stub version
 */
-
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
+
 #include "../include/stparams.h"
 #include "../include/stcom.h"
-#include "../include/stm_addr.h"     /* shared memory pointer */
-#include "../../fs/include/fs_types.h"
-#include "../../fs/include/shm_addr.h"      /* shared memory pointer */
 #include "../../fs/include/params.h"
+#include "../../fs/include/fs_types.h"
 #include "../../fs/include/fscom.h"
+#include "../../fs/include/shm_addr.h"      /* shared memory pointer */
 
 struct stcom *st;
 struct fscom *fs;
@@ -34,7 +33,6 @@ main()
   setup_ids();
   fs = shm_addr;
   setup_st();
-  st = stm_addr;
 
 loop:
       skd_wait("stqkr",ip,(unsigned) 0);

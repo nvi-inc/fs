@@ -52,7 +52,11 @@ char *ptr;
           lcl->enable.high  =0xFFFF;
           lcl->enable.system=0x000F;
         } else {
-          lcl->format=0x7000;
+/* hex version prior to 2.90 */
+          if (shm_addr->form_version < 656) 
+            lcl->format=0x7000; 
+          else
+            lcl->format=0x0002;
           lcl->enable.low   =0x7FFE;     /* enable M3 tracks only */
           lcl->enable.high  =0x7FFE;
           lcl->enable.system=0x0000;
@@ -102,18 +106,22 @@ int *count;
 struct vform_cmd *lcl;
 {
     int ind, ivalue, iokay, i, j;
+    unsigned int iversion;
 
     output=output+strlen(output);
 
     switch (*count) {
       case 1:
         ivalue=lcl->mode;
+/* formatter versions prior to version 2.90  in hex */
+        if (shm_addr->form_version < 656) iversion = 0x7000;
+        else iversion = 0x0002;
         if(ivalue<=0 && lcl->format == 0x0003 &&
               lcl->enable.low    == 0xFFFF &&
               lcl->enable.high   == 0xFFFF &&
               lcl->enable.system == 0x000F)
           strcpy(output,key_mode[0]);
-        else if (ivalue  > 0 && lcl->format == 0x7000 &&
+        else if (ivalue  > 0 && lcl->format == iversion &&
               lcl->enable.low    == 0x7FFE &&
               lcl->enable.high   == 0x7FFE &&
               lcl->enable.system == 0x0000 )
@@ -234,7 +242,7 @@ void vform90mc(data, lcl)
 unsigned *data;
 struct vform_cmd *lcl;
 {
-    *data=0x8000 | (bits16on(15) & lcl->format);
+    *data=0x8000 | (bits16on(15) & lcl->format); 
 }
 
 void vform91mc(data, lcl) 
@@ -263,6 +271,13 @@ unsigned *data;
 struct vform_cmd *lcl;
 {
     *data=0x8032;
+}
+
+void vformA6mc(data, hwid) 
+unsigned *data;
+unsigned char hwid;
+{
+    *data=0x000 | hwid;
 }
 
 void vformADmc(data, lcl) 
@@ -415,6 +430,14 @@ unsigned data;
 {
       lclc->rate=bits16on(3) & data;
       if((data & 0x8000)==0) lclc->rate=-1;
+}
+
+void mcA6vform(hwid,data)
+unsigned data;
+unsigned char *hwid;
+{
+      *hwid=data;
+      return;
 }
 
 void mcADvform(lclc,data)

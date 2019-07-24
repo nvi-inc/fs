@@ -80,7 +80,7 @@ C
         ierr=-1
         goto 900
 C
-C 1. Determine the type of parameter which was input with the comand.
+C 1. Determine the type of parameter which was input with the command.
 C    null = start with SOURCE before now+5min.
 C    time = start with SOURCE before time.
 C    #nnn = start with line nnn in file.
@@ -136,7 +136,6 @@ C
       if (ilen.le.0) then
         ierr = -1
         call logit6(0,0,0,0,-124,2hbo)
-        call fmpclose(idcbsk,ierr)
         goto 900
       endif
       if (ichcm_ch(ib,1,'source=').eq.0) then
@@ -174,7 +173,7 @@ C
       if(nlines.gt.0) ilstln = iline+nlines-1
 
 C ** CLOSE DCB IF AN ERROR OCCURRED -- NRV 840709
-900   if (ierr.lt.0) call fmpclose(idcbsk,ierr)
+900   if (ierr.lt.0) call fmpclose(idcbsk,inerr)
 
       return
       end

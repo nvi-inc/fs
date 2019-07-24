@@ -15,7 +15,7 @@ int itask;                            /* sub-task, ifd number +1  */
 long ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, ichold, i, count;
-      int  aux_track, j;
+      int  aux_track, j, version;
       unsigned long iptr;
       unsigned itracks[32];
       char *ptr;
@@ -26,12 +26,16 @@ long ip[5];                           /* ipc parameters */
       int vform_dec();                 /* parsing utilities */
       char *arg_next();
 
-      void vform_dis();
+      void vform_dis(), vform_ver();
       void ini_req(), add_req(), end_req(); /*mcbcn request utilities */
       void skd_run(), skd_par();      /* program scheduling utilities */
 
       ichold= -99;                    /* check vlaue holder */
 
+      ierr=0;
+      vform_ver(&version,ierr,ip);
+      shm_addr->form_version = version;
+   
       ini_req(&buffer);
 
       memcpy(request.device,DEV_VFM,2);    /* device mnemonic */
@@ -151,6 +155,9 @@ parse:
       request.addr=0x9D;
       vform9Dmc(&request.data, &lcl); add_req(&buffer,&request); 
 
+      request.addr=0xA6; /* send rack ID */
+      vformA6mc(&request.data, shm_addr->hwid); add_req(&buffer,&request); 
+
       request.addr=0xAD;
       vformADmc(&request.data, &lcl); add_req(&buffer,&request); 
 
@@ -186,7 +193,7 @@ mcbcn:
       skd_par(ip);
 
       if (ichold != -99) shm_addr->check.vform=ichold;
-      else if (ichold >= 0) shm_addr->check.vform=ichold % 1000 + 1;
+      if (ichold >= 0) shm_addr->check.vform=ichold % 1000 + 1;
 
       if(ip[2]<0) return;
       vform_dis(command,itask,ip);
