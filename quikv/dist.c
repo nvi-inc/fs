@@ -93,8 +93,11 @@ mcbcn:
       skd_run("mcbcn",'w',ip);
       skd_par(ip);
 
-      if (ichold != -99) shm_addr->check.dist[ind]=ichold;
-      if (ichold >= 0) shm_addr->check.dist[ind]=ichold % 1000 + 1;
+      if (ichold != -99) {
+         if (ichold >= 0)
+            ichold=ichold % 1000 + 1;
+         shm_addr->check.dist[ind]=ichold;
+      }
 
       if(ip[2]<0) return;
       dist_dis(command,itask,ip);

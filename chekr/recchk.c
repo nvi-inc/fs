@@ -13,7 +13,7 @@ void recchk_(icherr,ierr)
 int icherr[];
 int *ierr;
 {
-  long ip[5];                           /* ipc parameters */
+  long ip[5],ip2[5];            /* ipc parameters */
   struct req_rec request;       /* mcbcn request record */
   struct req_buf buffer;        /* mcbcn request buffer */
   struct vst_cmd lcl;
@@ -30,8 +30,8 @@ int *ierr;
   memcpy(request.device,DEV_VRC,2);    /* device mnemonic */
 
   request.type=1;
-  request.addr=0x81; add_req(&buffer,&request);
   request.addr=0x73; add_req(&buffer,&request);
+  request.addr=0x81; add_req(&buffer,&request);
   request.addr=0xb1; add_req(&buffer,&request);
   request.addr=0xb5; add_req(&buffer,&request);
   request.addr=0xb6; add_req(&buffer,&request);
@@ -46,11 +46,35 @@ int *ierr;
   skd_par(ip);
 
   if (ip[2]<0) {
+    cls_clr(ip[0]);
+    *ierr=-201;
+    return;
+  }
+  rte_sleep(100); /* wait to resample 0x73 in case we have RECON 4 */
+
+  ini_req(&buffer);
+
+  memcpy(request.device,DEV_VRC,2);    /* device mnemonic */
+
+  request.type=1;
+  request.addr=0x73; add_req(&buffer,&request);
+
+  end_req(ip2,&buffer);
+  nsem_take("fsctl",0);
+
+  skd_run("mcbcn",'w',ip2);
+
+  nsem_put("fsctl");
+  skd_par(ip2);
+
+  if (ip2[2]<0) {
+    cls_clr(ip[0]);
+    cls_clr(ip2[0]);
     *ierr=-201;
     return;
   }
 
-  rec_brk(icherr,ierr,ip);
+  rec_brk(icherr,ierr,ip,ip2);
 
   return;
 

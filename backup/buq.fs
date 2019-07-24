@@ -5,5 +5,5 @@ rm /tmp/FSS
 rm /tmp/fs.cpio
 find fs \! -name '*.o' \! -name '*.a' \! -perm -1 -print > /tmp/FSS
 find fs  -type d -print >> /tmp/FSS
-cat /tmp/FSS | cpio -ocvB > /tmp/fs.cpio
+cat /tmp/FSS | cpio -ocB > /tmp/fs.cpio
 /usr/bin/X11/compress /tmp/fs.cpio

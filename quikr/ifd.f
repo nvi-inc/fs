@@ -14,7 +14,7 @@ C
 C   COMMON BLOCKS USED
       include '../include/fscom.i'
 C
-C     CALLED SUBROUTINES: GTPRM
+C     CALLED SUBROUTINES: GTPRM2
 C
 C   LOCAL VARIABLES
 C        NCHAR  - number of characters in buffer
@@ -78,7 +78,7 @@ C
       ich = 1+ieq
       do i=1,2
         ist = ich
-        call gtprm(ibuf,ich,nchar,0,parm,ierr)
+        call gtprm2(ibuf,ich,nchar,0,parm,ierr)
         if(ichcm_ch(iparm,1,'max').eq.0) then
           if(i.eq.1) iold(1)=iat1if
           if(i.eq.2) iold(2)=iat2if
@@ -88,10 +88,10 @@ C
           if(i.eq.2) iat(2)=iol2if_fs
         else
           ich=ist
-          call gtprm(ibuf,ich,nchar,1,parm,ierr)
-          if (ichcm_ch(iparm,1,', ').eq.0) then
+          call gtprm2(ibuf,ich,nchar,1,parm,ierr)
+          if (ierr.eq.2) then
             iat(i) = 0                          ! default
-          else if (ichcm_ch(iparm,1,'* ').eq.0) then
+          else if (ierr.eq.1) then
             if (i.eq.1) iat(i) = iat1if
             if (i.eq.2) iat(i) = iat2if
         else if (iparm(1).lt.0.or.iscn_ch(ibuf,ist,ich-1,'+').ne.0) then
@@ -111,10 +111,10 @@ C     2.2 INPUT1 AND INPUT2 - PARAMETERS 3 AND 4
 C 
       do i=1,2
         ic1 = ich 
-        call gtprm(ibuf,ich,nchar,0,parm,ierr) 
-        if (cjchar(parm,1).eq.',') then
+        call gtprm2(ibuf,ich,nchar,0,parm,ierr) 
+        if (ierr.eq.2) then
           inp(i) = 0
-        else if (cjchar(parm,1).eq.'*') then
+        else if (ierr.eq.1) then
           if (i.eq.1) inp(i) = inp1if
           if (i.eq.2) inp(i) = inp2if
         else

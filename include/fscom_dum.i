@@ -12,10 +12,10 @@ c
      . outscint, outscsl, wrvolt, rateti_fs
 
       integer*4 iclbox, iclopr, spanti_fs, epochti_fs, offsetti_fs,
-     . secsoffti_fs
+     . secsoffti_fs,ichfm_cn_tm
 
       logical khalt, kecho, kenastk(2), klvdt_fs,
-     . ichvkmove, ichvkenable, ichvklowtape, ichvkrepro
+     . ichvkmove, ichvkenable, ichvklowtape, ichvkrepro, ichvkload
 
       INTEGER ICAPTP, ICHECK(21), ILOKVC(15), 
      . IRDYTP, IRENVC, ITRAKA, ITRAKB, TPIVC(15), ibmat, ibmcb,
@@ -39,7 +39,7 @@ c
      . outscsl, wrvolt, rateti_fs,
 c
      . iclbox, iclopr, spanti_fs, epochti_fs, offsetti_fs,
-     . secsoffti_fs,
+     . secsoffti_fs,ichfm_cn_tm,
 c
      . khalt, kecho, kenastk, klvdt_fs,
      . ichvkmove, ichvkenable, ichvklowtape, ichvkrepro,

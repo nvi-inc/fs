@@ -12,5 +12,5 @@ find prog -print >> /tmp/FSS
 find dos  -print >> /tmp/FSS
 ls sched/*hdcal.snp >> /tmp/FSS
 ls sched/prepass.snp >> /tmp/FSS
-cat /tmp/FSS | cpio -ovcB > /tmp/st.cpio
+cat /tmp/FSS | cpio -ocB > /tmp/st.cpio
 /usr/bin/X11/compress /tmp/st.cpio

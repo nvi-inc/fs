@@ -14,7 +14,7 @@ C  LOCAL VARIABLES:
 C
 C
 C  INITIALIZED:
-      do j=1,7
+      do j=1,8
         icherr(j)=0
       enddo
       call fs_get_ichvlba(ichvlba(18),18)

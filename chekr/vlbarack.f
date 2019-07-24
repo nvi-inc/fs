@@ -86,6 +86,13 @@ C
       call fs_get_ichvlba(ichvlba(in),in)
       ichecks=ichvlba(in)
       if(ichvlba(in).le.0) goto 399
+C
+C it must have been at least 10 seconds since the last formatter configure
+c
+      call fs_get_ichfm_cn_tm(ichfm_cn_tm)
+      call fc_rte_rawt(time)
+      if(ichfm_cn_tm+1000.gt.time) goto 399
+C
       ierr=0
       call vformchk(icherr,ierr)
       if (ierr.ne.0) then
