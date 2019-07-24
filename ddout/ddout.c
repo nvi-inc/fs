@@ -12,7 +12,7 @@
 
 #define NULLPTR (char *) 0
 #define PERMISSIONS 0666
-#define ULIMIT 4096L
+#define ULIMIT 40960L
 #define MAX_BUF 120
 
 extern struct fscom *shm_addr;
