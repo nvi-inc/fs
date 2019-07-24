@@ -29,16 +29,29 @@ C        NCH    - character counter
       character cjchar
       equivalence (reg,ireg(1)) 
       equivalence (parm,iparm(1)) 
+C
+C decalration for class buffer
+C
+      integer iadd,bits,stop,parity
+      integer*2 idev(33),iwora
+      integer*4 iclass,baud
+      common/lgoutcm/iclass,baud,iadd,bits,stop,parity,idev,iwora
+C
+C valid baud rates table
+C
+      integer MAX_RATES
+      parameter (MAX_RATES=15)
+      integer*4 rates(MAX_RATES)
+      data rates/50,75,110,134,150,200,300,600,1200,1800,2400,4800,
+     &           9600,19200,38400/
 C 
 C 5.  INITIALIZED VARIABLES 
       data ilen/40/                           !  length of ibuf, chars
 C 
-C 6.  PROGRAMMER: NRV 
-C     LAST MODIFIED: CREATED  820323
+C 6.  LAST MODIFIED: CREATED  820323
 C 
 C 
-C     1. Get the class buffer.  Messages for the LGOUT consist of 
-C     a series of LUs, separated by commas. 
+C     1. Get the class buffer. 
 C 
       iclcm = ip(1) 
       if (iclcm.eq.0) then
@@ -50,30 +63,35 @@ C
       ieq = iscn_ch(ibuf,1,nchar,'=')
       if (ieq.eq.0.or.cjchar(ibuf,ieq+1).eq.'?') goto 500  
 C 
-C     2. Scan input command for specified LUs.
+C     2. Scan input command
 C 
       ich = ieq+1 
-      nlu = 0 
-201   continue
+      iadd=0
+      baud=0
+      iwora=0
       ich1=ich
-      call gtprm(ibuf,ich,nchar,1,parm,ierr)
-C                   Scan for a number, the LU 
-      if (ierr.ne.0) then
-        ierr = -201
+      call gtprm2(ibuf,ich,nchar,0,parm,ierr)
+C                   Scan for a "*", which tells us to add new output
+      if (ierr.lt.0) then
+        ierr = -301
         goto 990
+      else if (ierr.eq.1) then !*
+        call fs_get_ndevlog(ndevlog)
+        if (ndevlog.ge.5) then
+          ierr = -302
+          goto 990
+        endif
+        iadd=1
+        ich1=ich
       endif
-      if (cjchar(parm,1).eq.',') then
-        if (nlu.gt.0) goto 300
-        call char2hol('/dev/tty',idevlog(1,1),1,64)
-        nlu = 1
-      else if (iparm(1).lt.0) then
-        ierr = -202
-        goto 990
-      else if (nlu.ge.5) then
-        ierr = -203
-        goto 990
+c
+c  get device name
+c
+      ich=ich1
+      call gtprm2(ibuf,ich,nchar,0,parm,ierr)
+      if(ierr.eq.2) then
+         call pchar(idev,1,0)
       else
-        nlu = nlu+1
         icm = iscn_ch(ibuf,ich1,nchar,',')
         if(icm.eq.0) then
           icm=nchar
@@ -81,17 +99,96 @@ C                   Scan for a number, the LU
           icm=icm-1
         endif
         n=min(64,icm-ich1+1)
-        idum=ichmv(idevlog(1,nlu),1,ibuf,ic1,n)
-        call char2hol(' ',idevlog(1,nlu),n+1,64)
+        idum=ichmv(idev,1,ibuf,ich1,n)
+        call pchar(idev,idum,0)
       endif
-      goto 201
+c
+c  is there more information?
+c
+      ich1=ich
+      call gtprm2(ibuf,ich,nchar,0,parm,ierr)
+      if(ierr.eq.2.or.ichcm_ch(parm,1,'w ').eq.0) then
+         call char2hol('w'//char(0),iwora,1,2)
+         goto 300
+      else if(ichcm_ch(parm,1,'a ').eq.0) then
+         call char2hol('a'//char(0),iwora,1,2)
+         goto 300
+      else
+        call gtprm2(ibuf,ich1,nchar,1,parm,ierr)
+        if(ierr.eq.0) Then
+          do i=1,MAX_RATES
+            if(iparm(1).eq.rates(i)) then
+              goto 205
+            endif
+          enddo
+        endif
+        ierr=-202
+        goto 990
+      endif
+205   continue
+      baud=iparm(1)
+c
+c  okay we have a line protocal, get the remaining info
+C
+C  bits
+c
+      call gtprm2(ibuf,ich1,nchar,1,parm,ierr)
+      bits=0
+      if(ierr.eq.2) then
+        bits=8
+      else if(ierr.eq.0) then
+        bits=iparm(1)
+      endif
+      if(ierr.lt.0.or.bits.lt.5.or.bits.gt.8) then
+        ierr=-203
+        goto 990
+      endif
+c
+c  parity
+c
+      call gtprm2(ibuf,ich1,nchar,0,parm,ierr)
+      parity=-1
+      if(ierr.eq.2) then
+        parity=0
+      else if(ierr.eq.0) then
+        if(ichcm_ch(parm,1,'e').eq.0) then
+          parity=2
+        else if(ichcm_ch(parm,1,'o').eq.0) then
+          parity=1
+        else if(ichcm_ch(parm,1,'n').eq.0) then
+          parity=0
+        endif
+      endif
+      if(ierr.lt.0.or.parity.gt.2.or.parity.lt.0) then
+        ierr=-204
+        goto 990
+      endif
+C
+C stop bits
+c
+      call gtprm2(ibuf,ich1,nchar,1,parm,ierr)
+      stop=-1
+      if(ierr.eq.2) then
+        stop=1
+      else if(ierr.eq.0) then
+        stop=iparm(1)
+      endif
+      if(ierr.lt.0.or.stop.lt.1.or.stop.gt.2) then
+        ierr=-205
+        goto 990
+      endif
 C 
-C     3. Stash LUs into common for DDOUT. 
+C     3. Send logging request to DDOUT. 
 C 
 300   continue
-      call fs_set_idevlog(idevlog)
-      call fs_set_ndevlog(ndevlog)
+      call fc_cls_alc(iclass)
+      call fs_get_iclbox(iclbox)
+      call put_buf(iclbox,iclass,-92,2Hfs,2Hlo)
+      idum = get_buf(iclass,ip,-20,idum,idum)
       ierr = 0
+      if(ip(3).ne.0) then
+        ierr=-400-ip(3)
+      endif
       goto 990
 C 
 C     5. Display current list of LUs. 

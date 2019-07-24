@@ -144,7 +144,7 @@ C
         horaz(i) = -1.0
         horel(i) = -1.0
       enddo
-      fsver = 8.23
+      fsver = 8.24
 C                   Initialize the time-like variables
 C                   Initialize previous segment name for LINKP
       do i=1,15
@@ -233,10 +233,8 @@ C     Finally, mode D
       do i=1,28
         itrkpc(i) = 101 
       enddo
-      ndevlog = 1
+      ndevlog = 0
       call fs_set_ndevlog(ndevlog)
-      call char2hol('/dev/tty',idevlog(1,1),1,64)
-      call fs_set_idevlog(idevlog)
       idummy = ichmv(loccup,1,8hoccup##!,1,8)
       idchrx = 1
       ibxhrx = 1

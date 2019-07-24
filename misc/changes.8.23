@@ -1,0 +1,422 @@
+930205 WEH loset.f        removed alternate inputs for Mark III
+           lodis.f        removed alternate output for Mark III
+                          made the number of output parameters rack dependent
+           fscom.h        reduced lofreq to 4 elements
+           beam.f         remove upconverter and alternate input use
+
+930212 WEH quikr.f        support 7 flavors of beam and flux
+           fscmd.ctl      support 7 flavors of beam and flux
+           flux.f         support 7 flavors of flux
+           fscom_quik.i   support 7 flavors of flux and beam
+           sorce.f        support 7 flavors of flux and beam
+
+930217 WEH fscmd.ctl      make upconv VLBA rack only
+                          support 4 CALTEMPS
+                          fix flux/beam/caltemps, so that a-d goes with vlba
+                              and 1-3 goes with MK3 rack
+           loset.f        correct logic in parameter error detection
+           fserr.ctl      add errors for parameters 3&4 of LO=
+                          add error for fourth LO parameter for MK3
+           fscom_quik.i   icnrease CALTMP array for four channels
+           ctemp.f        support 7 flavors of caltemps
+           quikr.f        add support for additionl ctemps
+                          fix flux call if tests
+           fscom_dum.i    increase systmp to 32 elements
+           fscom.i        increase systmp to 32 elements
+           params.h       change MAX_BBC to 14
+                          change MAX_DET to 32
+
+930218 WEH tpi_vlba.c     modified to use MAX_BBC correctly
+                          remove tsys array
+           tpi.f          modifed for if3 and remove BBC15 ref.
+           tpput.f        modifed for if3
+           tplis.f        modifed for if3
+           tplisv.f       removed reference to BBC15
+           tsys.f         modified for i3 and remove BBC15 ref.
+           prog.c         chnaged systmp ref. to 32 elements
+           mout2.c        remove use of tsys array
+           fscom.h        removce tsys array
+           fscmd.ctl      7 flavors of TSYS and restrict to approproate equip.
+           opnpf.f        fix bug that drops procedures after null line
+
+930219 WEH newpf.f        more null line fixes
+           readp.f        more null line fixes
+           tplisv.f       corrected error in handling individual lsb channels
+
+930221 WEH mdnam.f        add i3 as a module name, remove i1 & i2 as modules
+           chk.f          support i3 module
+           prog.c         make get_ichvlba return 0 for module 21
+
+930222 WEH fscom_dum.i    increase check arrray sizes to 21
+           mout2.c        add i3
+           fvpnt.f        add i3, ic, id, and as detectors and distributors.
+                          save the chain number in fscom_quik
+           onofc.f        add i3, ic, id, and as detectors and distributors.
+                          save the chain numbers in fscom_quik
+           volts.f        add i3 as a device
+           vlts2.f        add i3 as a device
+                          correct failure to detect dev 1 overflow
+           station.prc    add caltemp3, remove upconv=
+           vstation.prc   add caltempc
+           point.prc      add beam3= and flux3'es
+           vpoint.prc     add beamc= and fluxc'es
+
+930223 WEH if3.f          created
+           if3dis.f       created
+           quikr.f        add call to if3
+           fscom_quik.i   add if3 variables
+           fscmd.ctl      add if3 command
+           iif3ed.f       created
+
+930224 WEH i32ma.f        created
+           ma2i3.f        created
+           fc_bbc2freq.c  created
+           sincom.f       added missing das2b declaration
+                          add reading IF3 lofreq and switches from equip.ctl
+           mezhr.f        correct secs/megabyte calcuation to key on drive
+           rte_alarm.c    fix int overflow problem, now good until 248 days
+
+930225 WEH getcm.f        fixed 'F' missing quotes and index #, fixes flush
+           fscom.h        frequp 4 elements only
+                          change freqif3_fs to long
+           upset.f        frequp 4 elements only
+           updis.f        frequp 4 elements only
+           sincom.f       frequp 4 elements only
+           sincom.f       freqlo 4 elements only
+           sincom.f       change freqif3_fs to long
+           if3dis.f       change freq to long
+           ma2i3.f        change freq to long
+930228 WEH chekr.f        add i3chk
+           i3chk.f        created
+           fserr.ctl      add i3 chekr errors
+           tsys.f         add i3 att. control to fivpt
+                          max att. only for if chains in use
+           tzer.f         add i3 att. control to onoff
+                          max att. only for if chains in use
+           vset_zero.c    max att. only for if chains in use
+           fc_vset_zero.c max att. only for if chains in use
+           zero_vatt.f    max att. only for if chains in use
+           sincom.f       zero 21 check array elements
+
+930301 WEH fscom_quik.i   delete unused freqlo variable
+           phcal.f        fixed to use correct freqlo array
+                          add if3 mixer state to calculation
+
+930302 WEH devds.f        trim CR, LF, and NULLs from end of string
+
+930309 WEH dtnam.f        add if3
+           fserr.ctl      correct TPI error messages for if3
+                          correct PATCH error messages for LO3
+           patch.f        support lo3
+           padis.f        support lo3
+           tpput.f        add if3 conversion
+           params.h       make shared memory size even number of pages
+           fscom_quik.i   increase tpspc, tpsor,tpzero arrays to 31 elements
+
+930310 WEH fserr.ctl      fix fivpt and onoff error messages to include if3
+           if3.f          pre-fill class buffer to prevent inadvertant matches
+           ifd.f          pre-fill class buffer to prevent inadvertant matches
+           vc.f           pre-fill class buffer to prevent inadvertant matches
+           if3.f          allow missing to be commanded for unifomrity's sake
+           station.prc    update for if3
+           point.prc      remove erroneous bbcmax reference
+
+930316 WEH repro.f        pre-fill class buffer to prevent inadvertant matches
+           ucmo.f         pre-fill class buffer to prevent inadvertant matches
+           tp.f           pre-fill class buffer to prevent inadvertant matches
+           stack.f        pre-fill class buffer to prevent inadvertant matches
+           rxmo.f         pre-fill class buffer to prevent inadvertant matches
+           repro4.f       pre-fill class buffer to prevent inadvertant matches
+           pass.f         pre-fill class buffer to prevent inadvertant matches
+           lvdt.f         pre-fill class buffer to prevent inadvertant matches
+           head.f         pre-fill class buffer to prevent inadvertant matches
+           hdata.f        pre-fill class buffer to prevent inadvertant matches
+           fm.f           pre-fill class buffer to prevent inadvertant matches
+           de.f           pre-fill class buffer to prevent inadvertant matches
+
+930318 WEH setcl.f        moved offset adjustment into rte_sett.c
+           fc_rte_sett.c  created
+           rte_sett.c     created
+           fc_stime.c     deleted
+           fc_rte2secs.c  created
+           rte2secs.c     made normal 'c' routine
+           rte_time.c     updated to use rte_uadt.c
+           rte_uadt.c     collect UNIX time "adjust" into a function
+           fscom.h        add new time structure elements for rate info
+           fserr.c        fix abend for upper case
+           find.c         old fserr routine, deleted
+           direc.c        old fserr routine, deleted
+           uptime.c       old fserr routine, deleted
+           vstation.prc   add missing bbcagc to sxcts
+
+930329 WEH form4.f        changed to mode 9
+           matcn.f        support mode 9 and -54
+           iat.f          support mode 9 and -54
+           setcl.f        support Mark IV formatter
+           params.h       add defines for MK3, MK4, and VLBA
+           timeset.c      re-written to support MK4
+           asktime.c      re-written to support MK4
+           clear_srcn.c   re-written to support MK4
+           getfmtime.c    re-written to support MK4
+           setfmtime.c    re-written to support MK4
+           get4time.c     re-written to support MK4
+           getvtime.c     re-written to support MK4
+           set4time.c     re-written to support MK4
+           setvtime.c     re-written to support MK4
+           initvstr.c     re-written to support MK4
+
+930413 WEH setcl.f        new time method
+           matcn.f        new time method
+           iat.f          new time method
+           prog.c         new time method
+           fscom.h        new time method
+           rte_time.c     new time method
+           rte_rawt.c     new time method, created
+           rte_fixt.c     new time method, created
+           rte_secs.c     new time method, created
+           rte_sett.c     new time method, created
+           fc_rte_rawt.c  new time method, created
+           fc_rte_sett.c  new time method, created
+           fs.c           new time method
+           getvtime.c     new time method
+           get_vtime.c    new time method
+           initvstr.c     new time method
+
+930414 WEH fscmd.ctl      make decode available to mark4
+
+930415 WEH sincom.f       read time.ctl file
+           newlg.f        log time.ctl data
+           fscom_init.i   add time variables
+           fscom_dum.i    add time variables
+           prog.c         update set/get time coeff
+	   main/          deleted
+
+930420 WEH ddout.c        increase maximum file size to 20 megabytes
+           ddout.c        add error message if file is too large
+           setcl.f        open time.nwe with fopen to set permissions
+
+930426 WEH chk.f          remove extra comma for vlba recorder
+
+930428 WEH helpstr.c      simplify file selection
+                          add st/help support
+                          send ls errors to /dev/null not login shell
+                          put temp file in /tmp
+           params.h       add FS_ROOT parameter
+           fshelp.c       print console error message if no help
+           help/*         rename unique files that had m or v in
+                          extentions to "__"
+           putcon_ch.f    fix to use put_bufc, fixes arg type error
+           put_bufc.f     created
+           fc_cls_sndc.c  created
+           ./oper/login   remove vpix references
+           ./oper         moved to ./st/oper
+           ./st/oper/exrc remove autowrite and showmatch, add nowrapscan
+           ./st/prog      created
+           ./st/prog/login unique version created
+           ./st/dos       created
+           ./st/dos/login unique version created
+
+930430 WEH pass.f         remove mark4 variables and re-implement "auto"
+           stack.f        remove mark4 variables and re-implement "auto"
+           lvdt.f         remove mark4 variables and re-implement "auto"
+           set_pass.f     remove mark4 variables and re-implement "auto"
+           set_mic.f      remove mark4 variables and re-implement "auto"
+           pas2vlt.f      remove mark4 variables and re-implement "auto"
+           mic2vlt.f      remove mark4 variables and re-implement "auto"
+           vlt2mic.f      remove mark4 variables and re-implement "auto"
+           mic_read.f     remove mark4 variables and re-implement "auto"
+           head_vlt.f     remove mark4 variables and re-implement "auto"
+           locate.f       remove mark4 variables and re-implement "auto"
+           lchd.f         remove mark4 variables and re-implement "auto"
+           peak.f         remove mark4 variables and re-implement "auto"
+           pkhd.f         remove mark4 variables and re-implement "auto"
+           worm.f         remove mark4 variables and re-implement "auto"
+           wohd.f         remove mark4 variables and re-implement "auto"
+           sincom.f       remove mark4 variables and re-implement "auto"
+           fscom_init.i   remove mark4 variables and re-implement "auto"
+           fscom_quik.i   remove mark4 variables and re-implement "auto"
+           tpform.f       remove mark4 variables and re-implement "auto"
+           head.f         deleted
+           chk.f          delete 2 extra bbcs
+           fscom.h        delete 1 extra bbc
+           prog.c         delete 2 extra bbcs
+           mout2.c        delete 2 extra bbcs
+           fscom_dum.i    delete 2 extra bbcs & one space holder
+           chekr.f        deleted extra bbcs
+           vlbarack.f     deleted extra bbcs
+           vlbadrive.f    deleted extra bbcs
+           party.f        deleted extra bbcs
+           et.f           deleted extra bbcs
+
+930509 WEH sorce.f        added special names hold & disable            
+                          made hold, disable, stow, service, not accept angles
+           mout2.f        made consistent with sorce.f
+           statusprt.c    created
+           fs.c           use statusprt to report abnormal terminations
+           boss.f         changed exit code to 0
+
+930521 WEH m2init.c       moved UT and NEXT over
+           mout2.c        moved HALT and makde blink
+           sorce.f        don't run antcn if device is /dev/null
+           rdoff.f        don't run antcn if device is /dev/null
+           aeoff.f        don't run antcn if device is /dev/null
+           xyoff.f        don't run antcn if device is /dev/null
+           onsor.f        don't run antcn if device is /dev/null
+           track.f        don't run antcn if device is /dev/null
+           ma.f           don't run antcn if device is /dev/null
+           fserr.ctl      add messages for antenna device is /dev/null
+
+930527 WEH timechk.f      fixed incorrect call to get_vtime
+           fscmd.ctl      made fluxX, beamX, caltempX, tsysX equip indepedent
+           prog.c         corrected get_bbc_source to get correct element
+           onofc.f        set ierr=0 if we scheduled program
+           fvpnt.f        set ierr=0 if we scheduled program
+           fpdis.f        increased width of flux output
+           tpi_vlba.c     give overflow output if tpi, tpc max'd or tpz got 0
+           tsys.f         give overflow output if tpi, tpc max'd or tpz got 0
+           tplisv.f       changed bbc detector order to agree with mk3
+           tpi_vlba.f     changed bbc detector order to agree with mk3
+           monit3.c       add if3 and if4(d), change labels depending on equip
+           .Xresources    expand monit3 window
+           sincom.f       zero systmp values at start-up
+                          remove do loop zero an unknown amount of memory
+
+930528 WEH rec.c          reversed order of comamnds for release option
+                          fixed extraneous rec/ output for =feet and =nnnn
+                          (what a mess, this needs to be completely reworked)
+           echoe.c        added to poclb
+           params.h       added FS_PRIOR and AN_PRIOR to match params.i
+
+930531 WEH vform.c        retrieve version only for set-up command
+           vform_ver.c    simplified calling sequence
+           vform_dis.c    save version on module query
+           gmodl.c        convert phi to radians
+
+930601 WEH bbc_util.c     fixed USB/LSB gain monitor order
+
+930602 WEH fmset.c        renamed from timeset.c
+                          improved user interaction
+           asktime.c      improved user interaction
+          
+
+930603 WEH flt0.f         add 2xAZ sin and cos to el offset
+           flt.c          add 2xAZ sin and cos to el offset
+           vhdcal.snp     fixed tape=load to rec=load
+
+930615 WEH fserr.c        don't fail if sterr.ctl isn't there
+           logita.c       created
+           head.ctl       made vlba rec parameter names agree with manual
+                          put in reasonable default for vlba rec parms
+           fserr.ctl      add error messages for fmset.
+           fmset.h        created
+           asktime.c      clear prompts when done
+                          improved user interaction
+           fmset.c        add field system time
+           getfmtime.c    add field system time
+           get4time.c     add field system time
+           getvtime.c     add field system time
+           setvtime.c     add error logging and sleep 
+           set4time.c     add error logging and sleep 
+           get4time.c     add error logging and sleep 
+           getvtime.c     add error logging and sleep 
+           point.prc      delete stow procedure 
+           vpoint.prc     delete stow procedure 
+
+930616 WEH chekr.f        remove junk associated with "fast checking"
+           mk3rack.f      remove junk associated with "fast checking"
+           mk3drive.f     remove junk associated with "fast checking"
+           vlbarack.f     remove junk associated with "fast checking"
+           vlbadrive.f    remove junk associated with "fast checking"
+           vlbarack.f     fixed to not report erronous errors
+           vlbadrive.f    fixed to not report erronous errors
+           params.h       create chekr realtime priority
+           params.i       create chekr realtime priority
+           chekr.f        assign realtime priority
+
+930617 WEH tape_util.c    increase feet to [6] so we won't overwrite
+           rec_brk.c      increase feet to [6] so we won't overwrite
+
+930618 WEH bwork.f        add "fsctl" semaphore locking
+           mk3rack.f      add "fsctl" semaphore locking
+           mk3drive.f     add "fsctl" semaphore locking
+           hdchk.f        add "fsctl" semaphore locking
+           rxchk.f        add "fsctl" semaphore locking
+           i3chk.f        add "fsctl" semaphore locking
+           timechk.f      add "fsctl" semaphore locking
+           bbchk.c        add "fsctl" semaphore locking
+           vformchk.c     add "fsctl" semaphore locking
+           distchk.c      add "fsctl" semaphore locking
+           recchk.c       add "fsctl" semaphore locking
+           setcl.f        add "fsctl" semaphore locking
+           get4time.c     add "fsctl" semaphore locking
+           set4time.c     add "fsctl" semaphore locking
+           getvtime.c     add "fsctl" semaphore locking
+           setvtime.c     add "fsctl" semaphore locking
+           params.h       add CL_PRIOR real-time priority
+           params.i       add CL_PRIOR real-time priority
+           setcl.f        use CL_PRIOR real-time priority
+           fmset.f        use CL_PRIOR real-time priority
+           mcbcn.c        use FS_PRIOR real-time priority
+           ibcon.f        use FS_PRIOR real-time priority
+           boss.f         use FS_PRIOR real-time priority
+           quikv.c        use FS_PRIOR real-time priority
+
+930619 WEH onoff.f        don't wait to return to source if we never arrived
+           fivpt.f        don't wait to return to source if we never arrived
+           fed.f          remove some extra blanks lines printed to terminal
+           ftn_edit.f     don't complain if sh has > 0 exit code ?
+
+930621 WEH vform_util.c   set phase-cal rotator correctly for 2 & 8 MHz
+
+930624 WEH gtrpm2.f       created to fix special case ambiguity
+           ifd.f          changed to use gtprm2.f
+           if3.f          changed to use gtprm2.f
+
+930702 WEH iadt.f         fix end of day wrap around bug
+           iadt.c         fix end of day wrap around bug
+
+930709 WEH bwork.f        assume any command more than 10 minutes old is
+                          actually for tomorrow
+
+930712 WEH fscom_dum.i    add sterp
+           fscom.h        add sterp
+           prog.c         add fs_set_sterp
+           incom.f        initialize sterp
+           ddout.c        sterp implemented
+           sterp/         created in st.default/st
+
+930719 WEH fscom_quik.i   remove UC command variables
+           quikr.f        remove UC command
+           ucmo.f         deleted
+           ucdmo.f        deleted
+           uc2ma.f        deleted
+           ma2uc.f        deleted
+           uc.__          deleted help file
+
+930805 WEH setcl.f        fix Mark IV buffer length
+           get4time.c     fix Mark IV buffer length
+
+930809 WEH Xresources     used fixed font for OppgmMenu ONLY
+           fmset.c        detect if fs is not running
+           getfmtime.c    detect if fs has terminated
+           setfmtime.c    detect if fs has terminated
+           fmset.h        add fs semaphore name
+
+930810 WEH matcn.f        fix ktp logical variable
+
+930813 WEH bosscm.i       created to hold iyear
+           boss.f         added bosscm.i
+           newsk.f        added bosscm.i
+           newlg.f        added bosscm.i
+           binit.f        added bosscm.i
+                          initialize iyear
+
+930817 WEH helpstr.c      handle mk4 equip properly
+
+930819 WEH ffmp.f         make pfmed dl display six wide
+           mout2.c        fix temp < -9.9
+           help/*         updated
+           st.d*/proc/*   updated
+
+930827 WEH if3.f          fix '*' switch parameter bug
+                          protect against out of range switch '*' params

@@ -1574,14 +1574,41 @@ LO frequency 4 must be a positive real number
 Q* -304
 No fourth frequency for Mark III & Mark IV   
 ""
-Q# -201
-An invalid number was specified for an LU
-""
 Q# -202
-LU must not be negative.
+After the file name there must be "a", "w", or a valid BAUD rate.
 ""
 Q# -203
-Maximum of 5 LUs may be specified.
+The data bits must be one of 5, 6, 7, or 8.
+""
+Q# -204
+The parity must be one of even, none, or odd.
+""
+Q# -205
+The stop bits must be one of 1 or 2.
+""
+Q# -301
+First parameter must be * or a file name.
+""
+Q# -302
+There are already the maximum 5 log out files open.
+""
+Q# -401
+ddout already has too many files open (internal error).
+""
+Q# -402
+ddout encountered an error creating the file.
+""
+Q# -403
+ddout encountered an error setting the file permissions.
+""
+Q# -404
+ddout encountered an error opening the file.
+""
+Q# -405
+ddout encountered an error adjusting the line protocol.
+""
+Q# -406
+ddout encountered an error associating the file with a stream.
 ""
 Q& -101
 No default for operator ID.
