@@ -74,9 +74,9 @@ C                   VC - gets V1 to 14
 C                   EVEN - even-numbered VCs
 C                   ODD - odd-numbered VCs
 C                   Vn - VC number n
-C                   IFn - IF 1 or 2 
+C                   IFn - IF 1 or 2 or 3
 C 
-      do i=1,16 
+      do i=1,17
         itpis(i) = 0
       enddo
 C                   Turn off all of the TPIs to start 
@@ -85,7 +85,7 @@ C                   Turn off all of the TPIs to start
         call fdfld(ibuf,ich,nchar,ic1,ic2)
         if (ic1.eq.0) then
           if (i.eq.1) then        !  if no parameters, set all indicators on
-            do ii=1,16
+            do ii=1,17
               itpis(ii) = 1
             enddo
           endif
@@ -103,7 +103,7 @@ C                   We haven't any stored values to pick up here
 C 
         if (lprm.eq.0) goto 285
         if (ichcm_ch(lprm,1,'al').ne.0) goto 220
-        do ii=1,16
+        do ii=1,17
           itpis(ii) = 1
         enddo
         goto 290
@@ -130,7 +130,7 @@ C                              V
 C 
 250     if (cjchar(lprm,1).ne.'i')goto 285
         ii = ias2b(lprm,2,1)
-        if (ii.ne.1.and.ii.ne.2) goto 285
+        if (ii.lt.1.or.ii.gt.3) goto 285
         itpis(ii+14) = 1
         goto 290
 C 

@@ -54,11 +54,13 @@ int *ierr;
     lierr = -1;
     shm_addr->IRDYTP = 1;
   }
+#if 0
   else if ((lcl.stat & 0x01)==1) {
     /* error present */
     lierr = -2;
     shm_addr->IRDYTP = 1;
   }
+#endif
   else {                             /* vacuum is ready */
     lierr = 0;
     shm_addr->IRDYTP = 0;

@@ -67,7 +67,9 @@ C
       if (iclcm.ne.0) goto 110
       ierr = -1 
       goto 990
-110   ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum) 
+110   continue
+      call ifill_ch(ibuf,1,ilen,' ')
+      ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum) 
       nchar = min0(ireg(2),ilen)
       ieq = iscn_ch(ibuf,1,nchar,'=') 
       if (ieq.eq.0) goto 500
@@ -112,8 +114,7 @@ C     First check for an address
       if (ia22h(la).ne.-1) goto 220 
 C         This is a valid hex address 
 C     Now check for a code word 
-212   call fs_get_rxncodes(rxncodes)
-      call fs_get_rxlcode(rxlcode)
+212   continue
 C      write(6,101) rxncodes
 C101   format("rxmo: rxncodes=",i5/)
 C      write(6,102) (rxlcode(i,1),i=1,3),(rxlcode(j,2),j=1,3)

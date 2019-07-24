@@ -49,9 +49,9 @@ C
         if (mod(i,5).eq.0.and.i.ne.np) inext=ichmv(ibuf,inext,2H  ,1,1)
       enddo
 C
-      inext=ichmv(ibuf,inext,2H  ,1,1)
+      if (0.eq.mod(inext,2)) inext=ichmv(ibuf,inext,2H  ,1,1)
   
-      kplin=kpout(lut,idcb,ibuf,inext,iobuf,lst)
+      kplin=kpout(lut,idcb,ibuf,inext-1,iobuf,lst)
       if (kplin) return
 C
       kplin=kpout(lut,idcb,2H* ,2,iobuf,lst)
@@ -65,7 +65,7 @@ C
         enddo
 C
         if (0.eq.mod(inext,2)) inext=ichmv(ibuf,inext,2H  ,1,1)
-        kplin=kpout(lut,idcb,ibuf,inext,iobuf,lst)
+        kplin=kpout(lut,idcb,ibuf,inext-1,iobuf,lst)
         if (kplin) return
         if (nq.le.0) goto 25
 C
@@ -76,7 +76,7 @@ C
         enddo
 C
         if (0.eq.mod(inext,2)) inext=ichmv(ibuf,inext,2H  ,1,1)
-        kplin=kpout(lut,idcb,ibuf,inext,iobuf,lst)
+        kplin=kpout(lut,idcb,ibuf,inext-1,iobuf,lst)
         if (kplin) return
 C
 25      continue

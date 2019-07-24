@@ -27,32 +27,32 @@ C
         goto 1091
       endif
       call fs_get_ipashd(ipashd)
-      do iloop=1,2
-        if(kposhd_fs(iloop)) then
+      do ihd=1,2
+        if(kposhd_fs(ihd)) then
           inerr = 0
-          call vlt_head(iloop,volt,ip)
+          call vlt_head(ihd,volt,ip)
           if (ip(3).ne.0) then
             call logit7(0,0,0,0,ip(3),lwho,2Hhd)
             goto 1091
           endif
-          call vlt2mic(iloop,ipashd(iloop),volt,pnow(iloop),ip,koff4)
+          call vlt2mic(ihd,ipashd(ihd),kautohd_fs,volt,pnow(ihd),ip)
           if (ip(3).ne.0) then
             call logit7(0,0,0,0,ip(3),lwho,2Hhd)
             goto 1091
           endif
-          poffx(iloop) = pnow(iloop) - posnhd(iloop)
+          poffx(ihd) = pnow(ihd) - posnhd(ihd)
           if(volt.lt.-0.010) then
-            scale=rslope(iloop)
+            scale=rslope(ihd)
           else if(volt.gt.0.010)then
-            scale=pslope(iloop)
+            scale=pslope(ihd)
           else
-            scale=max(pslope(iloop),rslope(iloop))
+            scale=max(pslope(ihd),rslope(ihd))
           endif
-          if (abs(poffx(iloop)).gt.((ilvtl_fs+2)*0.0049+0.0026)*scale)
+          if (abs(poffx(ihd)).gt.((ilvtl_fs+2)*0.0049+0.0026)*scale)
      &        inerr = inerr+1
           call fs_get_icheck(icheck(20),20)
           if(icheck(20).gt.0.and.ichecks(20).eq.icheck(20)) then
-            if (inerr.ge.1) call logit7(0,0,0,0,-350-iloop,lwho,2Hhd)
+            if (inerr.ge.1) call logit7(0,0,0,0,-350-ihd,lwho,2Hhd)
           endif
         endif
       enddo

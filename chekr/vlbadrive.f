@@ -18,8 +18,8 @@ C  INITIALIZED:
       do j=1,7
         icherr(j)=0
       enddo
-      call fs_get_ichvlba(ichvlba(20),20)
-      if(ichvlba(20).le.0.or.ichecks(20).ne.ichvlba(20)) goto 199
+      call fs_get_ichvlba(ichvlba(18),18)
+      if(ichvlba(18).le.0.or.ichecks(18).ne.ichvlba(18)) goto 199
       ierr=0
       call recchk(icherr,ierr)
       if (ierr.ne.0) then

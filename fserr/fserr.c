@@ -42,7 +42,7 @@ main(){
   int sscanf();
   long class, ip[5];
   int rtn1, rtn2;
-  char inbuf[80];
+  char inbuf[81];
   int i;
   int len;
   int hash;
@@ -78,6 +78,7 @@ main(){
 
 /* call to retrieve parameter string */
   cls_rcv(ip[0], inbuf, 80, &rtn1, &rtn2, 0, 0);
+  inbuf[80]='\0';   /* make sure it is null terminated */
 
 /* main rept-until loop done once for each err reported */
 
@@ -87,13 +88,19 @@ Repeat:
     printf("number of entries = ");
     goto Suspend; 
   } 
-  while((inbuf[0]<'a')||(inbuf[0]>'z'))
+
+  while(inbuf[0]!= ' ')     /* find the first space to delimit error code */
     for(i=0;i<79;++i)
       inbuf[i]=inbuf[i+1];
-  for(i=0;i<80;++i)
+
+  if(inbuf[0]== ' ')       /* skip the space */
+    for(i=0;i<79;++i)
+      inbuf[i]=inbuf[i+1];
+
+  for(i=0;i<80;++i)        /* use upper case for search */
       inbuf[i]=toupper(inbuf[i]);
 
-  i = sscanf(inbuf,"%s %d",entry.buf,&entry.off);
+  i = sscanf(inbuf,"%2s %d",entry.buf,&entry.off);
 
   hashcode(&entry,&hash);
   hashcount=1;

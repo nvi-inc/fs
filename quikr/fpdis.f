@@ -53,7 +53,7 @@ C
       nch = mcoma(ibuf,nch) 
       nch = nch + ir2as(bmfp_fs*180./RPI,ibuf,nch,6,2)
       nch = mcoma(ibuf,nch) 
-      nch = nch + ir2as(fxfp_fs,ibuf,nch,6,2)
+      nch = nch + ir2as(fxfp_fs,ibuf,nch,7,2)
 C 
 C     5. Now send the buffer to SAM and schedule PPT. 
 C 

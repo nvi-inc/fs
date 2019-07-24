@@ -25,7 +25,7 @@ C
 C  LOCAL VARIABLES:
 C
       real*4 pnow(2),poff(2),microns(2)
-      logical kmic(2)
+      logical kmic(2), kauto
       dimension iparm(2),ireg(2),ipas(2)
       integer*2 ibuf(40),ibuf2(40)
       integer get_buf,ichcm_ch
@@ -38,8 +38,6 @@ C  HISTORY:
 C
 C  DATE  WHO  WHAT
 C 900222 weh  created by cloning from new PASS command
-C 920721 gag  Added Mark IV code, including new parameter offset.
-C 920722 gag  Added call to frmaux4 if Mark IV formatter.
 C
 C  1. Get class buffer and decide whether we have to move the heads,
 C      or just monitor their position.
@@ -55,6 +53,7 @@ C
         ip(3) = -1
         goto 990
       endif
+      call ifill_ch(ibuf,1,ilen,' ')
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum)
       nchar = min0(ireg(2),ilen)
       ieq = iscn_ch(ibuf,1,nchar,'=')
@@ -75,13 +74,11 @@ C
       ich = ieq+1
       ics=ich
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if ((cjchar(parm,1).eq.',').and.(VLBA.eq.iand(drive,VLBA))) then
+      if (cjchar(parm,1).eq.','.and.VLBA.ne.iand(drive,VLBA)) then
+        kmic(1)=.false.
+      else if (cjchar(parm,1).eq.',') then
         ip(3)=-501
         goto 990
-      endif
-      if (cjchar(parm,1).eq.','.and.(MK3.eq.iand(drive,MK3).or.
-     .     (MK4.eq.iand(drive,MK4)))) then
-        kmic(1)=.false.
       else if(cjchar(parm,1).eq.'*') then
         microns(1)=posnhd(1)
         kmic(1)=.true.
@@ -166,18 +163,20 @@ C
         goto 990
       endif
 C
-C  Get the offset parameter
+C  2.5  Get the offset parameter.
 C
       ichs=ich
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(parm,1).eq.',') then
-        koff4 = .true.
+        kauto=.true.
+      else if (cjchar(parm,1).eq.'*') then
+        kauto=kautohd_fs
       else if (ichcm_ch(ibuf,ichs,'none').eq.0) then
-        koff4 = .false.
+        kauto=.false.
       else if (ichcm_ch(ibuf,ichs,'auto').eq.0) then
-        koff4 = .true.
-      else 
-        ip(3)=-203
+        kauto=.true.
+      else
+        ip(3)=-205
         goto 990
       endif
 C
@@ -199,11 +198,12 @@ C
           posnhd(i)=microns(i)
           ipashd(i)=ipas(i)
           kposhd_fs(i)=.true.
+          if(i.eq.1) kautohd_fs=kauto
         endif
       enddo
       call fs_set_ipashd(ipashd)
 C
-      call set_mic(ihd,ipas ,microns,ip,0.40,koff4)
+      call set_mic(ihd,ipas ,kauto,microns,ip,0.40)
       if(ip(3).ne.0) go to 800
 C
 C  4. Put micron pos. into AUX data Field, IF WE SET UP THE WRITE HEAD
@@ -211,10 +211,10 @@ C
       if(ihd.eq.2) go to 500
       nrec=0
       iclass=0
+C
       call fs_get_rack(rack)
       if(MK3.eq.iand(rack,MK3)) THEN
         call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
-C
         ibuf2(1) = 0
         call char2hol('fm',ibuf2(2),1,2)
         idumm1 = ichmv(ibuf2,5,lauxfm,1,8)
@@ -241,7 +241,7 @@ C
         call run_matcn(iclass,nrec)
         call rmpar(ip)
       else if(MK4.eq.iand(rack,MK4)) THEN
-        call frmaux4(lauxfm4,posnhd,ipashd,koff4)
+        call frmaux4(lauxfm4,posnhd,ipashd,kautohd_fs)
         ibuf2(1) = 8
         call char2hol('fm /AUX ',ibuf2(2),1,8)
         idumm1 = ichmv(ibuf2,11,lauxfm4,1,8)
@@ -250,7 +250,8 @@ C
         nrec=1
         call run_matcn(iclass,nrec)
         call rmpar(ip)
-      else if(VLBA.eq.iand(rack,VLBA)) THEN
+      else !vlba
+        call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
         call fc_set_vaux(lauxfm,ip)
       endif
       call clrcl(ip(1))
@@ -273,7 +274,7 @@ C
       call fs_get_ipashd(ipashd)
       ihd=3
       if(VLBA.eq.iand(drive,VLBA)) ihd=1
-      call mic_read(ihd,ipashd,pnow,ip,koff4)
+      call mic_read(ihd,ipashd,kautohd_fs,pnow,ip)
       if(ip(3).ne.0) goto 800
 C
 C find the deltas
@@ -318,7 +319,7 @@ C
         endif
       enddo
 C
-      if (koff4) then
+      if (kautohd_fs) then
         call char2hol('auto',ibuf,nch,nch+3)
       else
         call char2hol('none',ibuf,nch,nch+3)

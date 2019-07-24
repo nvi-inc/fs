@@ -10,7 +10,7 @@ C
       integer get_buf,ichcm_ch
       integer*2 ibuf(40)
       integer imdl
-      real*4 arr(6),arr2fx_fs(6)
+      real*4 arr(6)
       character cjchar
 C
       equivalence (ireg(1),reg),(iparm(1),parm)
@@ -22,7 +22,7 @@ C
         arr(i)=0.0
       enddo
 C
-      indtmp=nsub-2
+      indtmp=nsub-10
 C
       iclcm = ip(1)
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum)
@@ -47,8 +47,12 @@ C
       if (cjchar(parm,1).ne.'*') goto 221
       if(indtmp.eq.1) then
         imdl=imdl1fx_fs
-      else
+      else if(indtmp.eq.2) then
         imdl=imdl2fx_fs
+      else if(indtmp.eq.3) then
+        imdl=imdl3fx_fs
+      else
+        imdl=imdl4fx_fs
       endif
 C                   Pick up the model from common
       goto 229
@@ -80,8 +84,12 @@ C
       if (cjchar(parm,1).ne.'*') goto 231
       if(indtmp.eq.1) then
         arr(1)=arr1fx_fs(1)
-      else
+      else if(indtmp.eq.2) then
         arr(1)=arr2fx_fs(1)
+      else if(indtmp.eq.3) then
+        arr(1)=arr3fx_fs(1)
+      else
+        arr(1)=arr4fx_fs(1)
       endif
 C                   Pick up the flux from common
       goto 240
@@ -102,8 +110,12 @@ C
       if (cjchar(parm,1).ne.'*') goto 241
       if(indtmp.eq.1) then
         arr(2)=arr1fx_fs(2)
-      else
+      else if(indtmp.eq.2) then
         arr(2)=arr2fx_fs(2)
+      else if(indtmp.eq.3) then
+        arr(2)=arr3fx_fs(2)
+      else
+        arr(2)=arr4fx_fs(2)
       endif
 C                   Pick up the angle from common
       goto 250
@@ -126,8 +138,12 @@ C
       if (cjchar(parm,1).ne.'*') goto 251
       if(indtmp.eq.1) then
         arr(3)=arr1fx_fs(3)
-      else
+      else if (indtmp.eq.2) then
         arr(3)=arr2fx_fs(3)
+      else if (indtmp.eq.3) then
+        arr(3)=arr3fx_fs(3)
+      else
+        arr(3)=arr4fx_fs(3)
       endif
 C                   Pick up the value from common
       goto 260
@@ -157,8 +173,12 @@ C
       if (cjchar(parm,1).ne.'*') goto 261
       if(indtmp.eq.1) then
         arr(4)=arr1fx_fs(4)
-      else
+      else if(indtmp.eq.2) then
         arr(4)=arr2fx_fs(4)
+      else if(indtmp.eq.3) then
+        arr(4)=arr3fx_fs(4)
+      else
+        arr(4)=arr4fx_fs(4)
       endif
 C                   Pick up the value from common
       goto 270
@@ -179,8 +199,12 @@ C
       if (cjchar(parm,1).ne.'*') goto 271
       if(indtmp.eq.1) then
         arr(5)=arr1fx_fs(5)
-      else
+      else if(indtmp.eq.2) then
         arr(5)=arr2fx_fs(5)
+      else if(indtmp.eq.3) then
+        arr(5)=arr3fx_fs(5)
+      else
+        arr(5)=arr4fx_fs(5)
       endif
 C                   Pick up the angle from common
       goto 280
@@ -203,8 +227,12 @@ C
       if (cjchar(parm,1).ne.'*') goto 281
       if(indtmp.eq.1) then
         arr(6)=arr1fx_fs(6)
-      else
+      else if(indtmp.eq.2) then
         arr(6)=arr2fx_fs(6)
+      else if(indtmp.eq.3) then
+        arr(6)=arr3fx_fs(6)
+      else
+        arr(6)=arr4fx_fs(6)
       endif
 C                   Pick up the angle from common
       goto 300
@@ -238,13 +266,27 @@ C
         enddo
         cor1fx_fs=corr
         flx1fx_fs=fx
-      else
+      else if(indtmp.eq.2) then
         imdl2fx_fs=imdl
         do i=1,6
           arr2fx_fs(i)=arr(i)
         enddo
         cor2fx_fs=corr
         flx2fx_fs=fx
+      else if(indtmp.eq.3) then
+        imdl3fx_fs=imdl
+        do i=1,6
+          arr3fx_fs(i)=arr(i)
+        enddo
+        cor3fx_fs=corr
+        flx3fx_fs=fx
+      else
+        imdl4fx_fs=imdl
+        do i=1,6
+          arr4fx_fs(i)=arr(i)
+        enddo
+        cor4fx_fs=corr
+        flx4fx_fs=fx
       endif
       ierr = 0
 C
@@ -264,13 +306,27 @@ C
         enddo
         corr=cor1fx_fs
         fx=flx1fx_fs
-      else
+      else if(indtmp.eq.2) then
         imdl=imdl2fx_fs
         do i=1,6
           arr(i)=arr2fx_fs(i)
         enddo
         corr=cor2fx_fs
         fx=flx2fx_fs
+      else if(indtmp.eq.3) then
+        imdl=imdl3fx_fs
+        do i=1,6
+          arr(i)=arr3fx_fs(i)
+        enddo
+        corr=cor3fx_fs
+        fx=flx3fx_fs
+      else
+        imdl=imdl4fx_fs
+        do i=1,6
+          arr(i)=arr4fx_fs(i)
+        enddo
+        corr=cor4fx_fs
+        fx=flx4fx_fs
       endif
 C
       if(imdl.eq.1) then

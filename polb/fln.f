@@ -9,9 +9,11 @@ C
       double precision f,cosx,cosy,cosl,sinx,siny,sinl,x,y,p(20),phi
 C
       cosx=dcos(x)
+      cos2x=dcos(2.d0*x)
       cosy=dcos(y)
       cosl=dcos(phi)
       sinx=dsin(x)
+      sin2x=dsin(2.d0*x)
       siny=dsin(y)
       sinl=dsin(phi)
       f=0.0d0
@@ -32,6 +34,8 @@ C
       if (ipar(12).ne.0) f=f+p(12)*x
       if (ipar(13).ne.0) f=f+p(13)*cosx
       if (ipar(14).ne.0) f=f+p(14)*sinx
+      if (ipar(15).ne.0) f=f+p(15)*sin2x*siny/cosy
+      if (ipar(16).ne.0) f=f-p(16)*siny*cos2x/cosy
       goto 1000
 C
 10    continue

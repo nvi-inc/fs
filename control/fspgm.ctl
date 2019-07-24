@@ -6,8 +6,6 @@ matcn n  matcn &
 mcbcn n  mcbcn &
 chekr n  chekr &
 ibcon n  ibcon &
-*antcn is in stpgm
-*antcn n  antcn &
 fivpt n  fivpt &
 onoff n  onoff &
 quikr n  quikr &
@@ -15,3 +13,4 @@ quikv n  quikv &
 moon  n  moon  &
 pcalr n  pcalr &
 oprin n  xterm -name oprin -e oprin &
+antcn n  antcn &

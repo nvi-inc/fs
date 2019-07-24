@@ -28,13 +28,13 @@ C
 C     CALLED SUBROUTINES: TPLIS,TPPUT,IF2MA
 C
 C 3.  LOCAL VARIABLES
-      integer itpis(16)
-      integer itpis_vlba(34)
+      integer itpis(17)
+      integer itpis_vlba(32)
 C      - which TPIs to read back
 C        ICH    - character counter
 C     NCHAR  - character count
-      parameter (ibufln=106)     ! worst case: TPZERO/34($$$$$,) + '\0'
-      integer*2 ibuf(ibufln)     !         106 =(  7  + 34*6 + 1)/2
+      parameter (ibufln=106)     ! worst case: TPZERO/32($$$$$,) + '\0'
+      integer*2 ibuf(ibufln)     !         100 =(  7  + 32*6 + 1)/2
 C               - class buffer, holding command
 C        ILEN   - length of IBUF, chars
       dimension ireg(2)
@@ -79,15 +79,18 @@ C
       iclass = 0
 
       if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
-        do i=1,16
-         if(itpis(i).ne.0.and.(i.le.15.or.(i.eq.16.and.itpis(15).eq.0)))
-     &      then
+        do i=1,17
+         if(itpis(i).ne.0.and.
+     &      (i.ne.16.or.(i.eq.16.and.itpis(15).eq.0)) ) then
             if (i.le.14) then
               ibuf(1) = -2
               ibuf(2) = lvcn(i)
-            else
+            else if (i.le.16) then
               ibuf(1) = -1
               call char2hol('if',ibuf(2),1,2)
+            else
+              ibuf(1) = -2
+              call char2hol('i3',ibuf(2),1,2)
             endif
             call put_buf(iclass,ibuf,-4,2hfs,0)
             nrec = nrec + 1

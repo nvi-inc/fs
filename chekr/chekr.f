@@ -38,21 +38,20 @@ C      - the buffers from MATCN
 C      - MODule NAmes, 2-char codes
 C      - Number of BUFfers for each module
 C      - Integer CODES for MATCN for each buffer
-      dimension icherr(169),ichecks(20), icheckvs(20)
+      dimension icherr(169),ichecks(21), icheckvs(18)
 C      - Arrays for recording identified error conditions
       integer*2 lwho       ! - mnemonic for CHEKR
-      integer fc_dad_pid
+      integer fc_dad_pid, kpapa
       logical kerr_rep,kall
 C
 C  INITIALIZED:
 C
-C                   Set time tolerance to 100 centi-seconds
       data lwho /2Hch/
       data lmodna /2Hv1,2Hv2,2Hv3,2Hv4,2Hv5,2Hv6,2Hv7,2Hv8,2Hv9,2Hva,
      /             2Hvb,2Hvc,2Hvd,2Hve,2Hvf,2Hif,2Hfm,2Htp/
       data nverr,niferr,nfmerr,ntperr /9,8,11,15/
-      data ichecks/20*0/
-      data icheckvs/20*0/
+      data ichecks/21*0/
+      data icheckvs/18*0/
       data icherr/169*0/
 C
 C   LAST MODIFIED    LAR  880301      USE HEAD PASS NUMBERS FROM /FSCOM/
@@ -113,34 +112,48 @@ C
       endif
 C
 C  Now we're going to check out the receiver.
-C********************************************************************
-C *** Receiver at station with hardware id 102 (==Kokee Park) 
-C    is not checked. Kokee's receiver has its own check program.
-C*********************************************************************
+C
 800    continue
        if (.not.kall) goto 1000
        call fs_get_icheck(icheck(19),19)
-       call fs_get_hwid(hwid)
-       if(icheck(19).le.0.or.ichecks(19).ne.icheck(19).or.
-     .  hwid.eq.102) goto 900
+       if(icheck(19).le.0.or.ichecks(19).ne.icheck(19)) goto 900
        call rxchk(ichecks,lwho)
 C
 C 9. Check tape head positioning.
 C
 900   continue
        call fs_get_icheck(icheck(20),20)
-       if (icheck(20).le.0.or.ichecks(20).ne.icheck(20)) goto 1000
+       if (icheck(20).le.0.or.ichecks(20).ne.icheck(20)) goto 910
        call hdchk(ichecks,lwho)
+C
+910    continue
+       if((MK3.eq.iand(MK3,rack)).or.(MK4.eq.iand(MK4,rack))) then
+         call fs_get_icheck(icheck(21),21)
+         if (icheck(21).le.0.or.ichecks(21).ne.icheck(21)) goto 1000
+         call i3chk(ichecks,lwho)
+       endif
 C
 C 10. Once we are finished, take a breather for 20 seconds.
 C
 1000  continue
-      do i=1,20
+      do i=1,21
         call fs_get_icheck(icheck(i),i)
         ichecks(i)=icheck(i)
+      enddo
+      do i=1,18
         call fs_get_ichvlba(ichvlba(i),i)
         icheckvs(i)=ichvlba(i)
       enddo
+      call fs_get_stcnm(stcnm(1,1),1)
+      if(ichcm_ch(stcnm(1,1),1,'  ').ne.0) then
+         ip(1)=0
+         if(kpapa) then
+           ip(2)=1
+         else
+           ip(2)=0
+         endif
+         call run_prog('cheks','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      endif
       call wait_relt('chekr',ip,2,iagain)
       kall=.true.
 C     icount=icount+1
@@ -150,10 +163,13 @@ C       icount=0
 C       kall=.true.
 C     endif
       call read_quikr
-      if (fc_dad_pid().ne.0) then
-        do i=1,20
+      kpapa=fc_dad_pid().ne.0
+      if (kpapa) then
+        do i=1,21
           call fs_get_icheck(icheck(i),i)
           ichecks(i)=icheck(i)
+        enddo
+        do i=1,18
           call fs_get_ichvlba(ichvlba(i),i)
           icheckvs(i)=ichvlba(i)
         enddo

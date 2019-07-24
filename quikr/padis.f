@@ -72,7 +72,7 @@ C
       iclass = 0
 C 
       nch = ichmv(ibuf2,nch,2hlo,1,2) 
-      do  j = 1,2
+      do  j = 1,3
           nch = nch+ib2as(j,ibuf2,nch,o'100000'+1)
           ic1 = nch 
           jc = 0
@@ -99,7 +99,7 @@ C
 C                   Send buffer starting with IFD to display, ignoring
       if (.not.kcheck) ierr = 0 
       ip(1) = iclass
-      ip(2) = 2 
+      ip(2) = 3 
       ip(3) = ierr
       call char2hol('qq',ip(4),1,2)
 

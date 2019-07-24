@@ -1,4 +1,4 @@
-OBJECTS = setcl.o fc_stime.o
+OBJECTS = setcl.o
 #
 F77= gf77
 FFLAGS = -c -g

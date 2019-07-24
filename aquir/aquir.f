@@ -71,7 +71,7 @@ C
 C
 10010 continue
       if(ierr.eq.-2) goto 11000     !fs is gone
-      if (ierr.gt.0) goto 10015
+      if (ierr.gt.-2) goto 10015
       call logit7(idum,idum,idum,-1,ierr,lwho,2Her)
       goto 11000
 C

@@ -13,10 +13,12 @@
 #include "../include/shm_addr.h"
 
 static struct dist_cmd lclsave[2];     /* saved if states */
+static int ia,ib,ic,id;                /* which if chains are in use */
 
-void vget_att(lwho,ip)
+void vget_att(lwho,ip,ichain1,ichain2)
 char lwho[2];
 long ip[5];
+int ichain1,ichain2;
 {
     struct req_buf buffer;
     struct req_rec request;
@@ -27,13 +29,22 @@ long ip[5];
 
     ini_req(&buffer);              /* initialize structure */
 
+    ia = ichain1 == 1 || ichain2 == 1;
+    ib = ichain1 == 2 || ichain2 == 2;
+    ic = ichain1 == 3 || ichain2 == 3;
+    id = ichain1 == 4 || ichain2 == 4;
+
     request.type=1;
     request.addr=0x01;
-    memcpy(request.device,"ia",2);
-    add_req(&buffer,&request);     
+    if (ia || ib) {
+      memcpy(request.device,"ia",2);
+      add_req(&buffer,&request);     
+    }
 
-    memcpy(request.device,"ic",2);
-    add_req(&buffer,&request);     
+    if (ic || id) {
+      memcpy(request.device,"ic",2);
+      add_req(&buffer,&request);     
+    }
 
     end_req(ip,&buffer);
     skd_run("mcbcn",'w',ip);
@@ -44,11 +55,15 @@ long ip[5];
     }
 
     opn_res(&buff_res,ip);
-    get_res(&response,&buff_res);
-    mc01dist(&lclsave[0],response.data);          /* save 'ia' set-up */
+    if (ia || ib) {
+      get_res(&response,&buff_res);
+      mc01dist(&lclsave[0],response.data);          /* save 'ia' set-up */
+    }
 
-    get_res(&response,&buff_res);
-    mc01dist(&lclsave[1],response.data);          /* save 'ic' set-up */
+    if (ic || id) {
+      get_res(&response,&buff_res);
+      mc01dist(&lclsave[1],response.data);          /* save 'ic' set-up */
+    }
 
     if(response.state == -1) {
       clr_res(&buff_res);
@@ -74,19 +89,27 @@ long ip[5];
     request.type=0;
     request.addr=0x01;
 
-    memcpy(request.device,"ia",2);             /* set 'ia' atten */
-    memcpy(&lcl,&lclsave[0],sizeof(lcl));
-    lcl.atten[ 0]=1;             
-    lcl.atten[ 1]=1;
-    dist01mc(&request.data,&lcl);
-    add_req(&buffer,&request);     
+    if (ia||ib) {
+      memcpy(request.device,"ia",2);             /* set 'ia' atten */
+      memcpy(&lcl,&lclsave[0],sizeof(lcl));
+      if(ia)
+        lcl.atten[ 0]=1;             
+      if(ib)
+        lcl.atten[ 1]=1;
+      dist01mc(&request.data,&lcl);
+      add_req(&buffer,&request);     
+    }
 
-    memcpy(request.device,"ic",2);             /* set 'ic' atten */
-    memcpy(&lcl,&lclsave[1],sizeof(lcl));
-    lcl.atten[ 0]=1;             
-    lcl.atten[ 1]=1;
-    dist01mc(&request.data,&lcl);
-    add_req(&buffer,&request);     
+    if (ic||id) {
+      memcpy(request.device,"ic",2);             /* set 'ic' atten */
+      memcpy(&lcl,&lclsave[1],sizeof(lcl));
+      if (ic) 
+        lcl.atten[ 0]=1;             
+      if (id) 
+        lcl.atten[ 1]=1;
+      dist01mc(&request.data,&lcl);
+      add_req(&buffer,&request);     
+    }
     
     end_req(ip,&buffer);
     skd_run("mcbcn",'w',ip);
@@ -97,8 +120,10 @@ long ip[5];
     }
 
     opn_res(&buff_res,ip);
-    get_res(&response,&buff_res);
-    get_res(&response,&buff_res);
+    if (ia||ib)
+      get_res(&response,&buff_res);
+    if (ic||id)
+      get_res(&response,&buff_res);
 
     if(response.state == -1) {
       clr_res(&buff_res);
@@ -123,15 +148,19 @@ long ip[5];
     request.type=0;
     request.addr=0x01;
 
-    memcpy(request.device,"ia",2);             /* set 'ia' atten */
-    memcpy(&lcl,&lclsave[0],sizeof(lcl));
-    dist01mc(&request.data,&lcl);
-    add_req(&buffer,&request);     
+    if(ia||ib) {
+      memcpy(request.device,"ia",2);             /* set 'ia' atten */
+      memcpy(&lcl,&lclsave[0],sizeof(lcl));
+      dist01mc(&request.data,&lcl);
+      add_req(&buffer,&request);     
+    }
 
-    memcpy(request.device,"ic",2);             /* set 'ic' atten */
-    memcpy(&lcl,&lclsave[1],sizeof(lcl));
-    dist01mc(&request.data,&lcl);
-    add_req(&buffer,&request);     
+    if(ic||id) {
+      memcpy(request.device,"ic",2);             /* set 'ic' atten */
+      memcpy(&lcl,&lclsave[1],sizeof(lcl));
+      dist01mc(&request.data,&lcl);
+      add_req(&buffer,&request);     
+    }
     
     end_req(ip,&buffer);
     skd_run("mcbcn",'w',ip);
@@ -142,8 +171,10 @@ long ip[5];
     }
 
     opn_res(&buff_res,ip);
-    get_res(&response,&buff_res);
-    get_res(&response,&buff_res);
+    if(ia||ib)
+      get_res(&response,&buff_res);
+    if(ic||id)
+      get_res(&response,&buff_res);
 
     if(response.state == -1) {
       clr_res(&buff_res);

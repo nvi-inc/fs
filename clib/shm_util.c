@@ -106,15 +106,13 @@ int *b_1,*e_1,*b_2,*e_2;
    chars[2]=(e_2-b_2+1)*sizeof(int);
 
    start[0]=(char *) shm_addr;
-   total=0;
+   total=chars[0];
 
-/*   for (i=1; i<MAX_PTS;i++)  { */
-   for (i=1; i<=MAX_PTS;i++)  {
+   for (i=1; i<MAX_PTS;i++)  {
        start[i]=start[i-1]+chars[i-1];
-       total+=chars[i-1];
+       total+=chars[i];
    }
 
-   total+=chars[MAX_PTS];
    if (total > SHM_SIZE) {
       printf("shm_map: fscom too large: %d bytes \n",total);
       exit(-1);

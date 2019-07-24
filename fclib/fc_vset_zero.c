@@ -1,10 +1,11 @@
-void fc_vget_att_(lwho,ip)
+void fc_vget_att_(lwho,ip,ichain1,ichain2)
 char lwho[2];
 long ip[5];
+int *ichain1,*ichain2;
 {
     void vget_att();
 
-    vget_att(lwho,ip);
+    vget_att(lwho,ip,*ichain1,*ichain2);
     return;
 }
 void fc_vset_zero_(lwho,ip)

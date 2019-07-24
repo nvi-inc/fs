@@ -22,7 +22,7 @@ C
 C   LOCAL VARIABLES 
 C        NCHAR  - number of characters in buffer
 C        ICH    - character counter 
-      real frhld(5)
+      real frhld(4)
 C               - temporary holder for decoded frequencies 
 C        INUM   - number of freqs input
       integer*2 ibuf(20)
@@ -79,12 +79,11 @@ C
       call fs_get_rack(rack)
       ich = ieq+1 
       inum = 0
-      do i = 1,5
+      do i = 1,4
         frhld(i) = 0
         call gtprm(ibuf,ich,nchar,2,parm,ierr)
         if (cjchar(parm,1).ne.',') then
-          if (ierr.ne.0.or.
-     .      (i.eq.5.and.VLBA.eq.iand(rack,VLBA))) then
+          if (ierr.ne.0) then
             ierr = -200-i 
             goto 990
           endif
@@ -101,7 +100,6 @@ C
       call fs_set_frequp(frhld(2),1)
       call fs_set_frequp(frhld(3),2)
       call fs_set_frequp(frhld(4),3)
-      call fs_set_frequp(frhld(5),4)
       goto 990
 500   continue
       ierr = -101 

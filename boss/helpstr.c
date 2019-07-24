@@ -9,9 +9,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#define MK3  0x01
-#define MK4  0x04
-#define VLBA 0x02
+#include "../include/params.h"
+
 #define MAX_STRING  256
 
 void helpstr_(cnam,clength,runstr,rack,drive,ierr,clen,rlen)
@@ -31,6 +30,7 @@ int rlen;
   int freq,system();
   int i;
   char outbuf[80];
+  char equip1, equip2, ch1, ch2;
 
   *ierr=0;
   if (*clength > MAX_STRING) {
@@ -42,53 +42,59 @@ int rlen;
   string[*clength]='\0';
 
   decloc = strchr(string,'.');
-  if (decloc != NULL) {    /* an extension accompanied the help <name> */
-    strcpy(runstr,string);
-    return;
-  }
-  else {               /* check for number of help files with same name */
-    strcpy(outbuf,"ls /usr2/fs/help/");
-    strcat(outbuf,string);
-    strcat(outbuf,".* | wc -l > LS.NUM");
-    freq = system(outbuf);
-    idum=fopen("LS.NUM","r");
-    *ierr=fscanf(idum,"%d",&inum);
-    fclose(idum);
-    unlink("LS.NUM");
-    if (inum==1) {                /* if only one, has '__' as extension */
-      strcpy(runstr,string);
-      strcat(runstr,".__");
-      return;
-    }
-    else if (inum > 1) {          /* if more than one, find appropriate */
-      strcpy(outbuf,"ls /usr2/fs/help/");
-      strcat(outbuf,string);
-      strcat(outbuf,".* > LS.NUM");
-      freq = system(outbuf);
+  if(decloc==NULL)
+    strcat(string,".*");
 
-      idum=fopen("LS.NUM","r");
-      for (i=0;i<inum;i++) {
-        *ierr=fscanf(idum,"%s",outbuf);
-        decloc = strchr(outbuf,'.');
-        if (((*(decloc+1)=='4') && (MK4==*rack))  ||
-           ((*(decloc+2)=='4') && (MK4==*drive))) {
-          strcpy(runstr,string);
-          strcat(runstr,decloc);
-          break;
-        }
-        else if (((*(decloc+1)=='m') && (MK3==*rack))  ||
-           ((*(decloc+1)=='v') && (VLBA==*rack))  ||
-           ((*(decloc+2)=='m') && (MK3==*drive))  ||
-           ((*(decloc+2)=='v') && (VLBA==*drive))) { 
-          strcpy(runstr,string);
-          strcat(runstr,decloc);
-          break;
-        }
+  strcpy(outbuf,"ls ");
+  strcat(outbuf,FS_ROOT);
+  strcat(outbuf,"/st/help/");
+  strcat(outbuf,string);
+
+  strcat(outbuf," > /tmp/LS.NUM 2> /dev/null");
+  freq = system(outbuf);
+
+  strcpy(outbuf,"ls ");
+  strcat(outbuf,FS_ROOT);
+  strcat(outbuf,"/fs/help/");
+  strcat(outbuf,string);
+
+  strcat(outbuf," >> /tmp/LS.NUM 2> /dev/null");
+  freq = system(outbuf);
+
+  idum=fopen("/tmp/LS.NUM","r");
+
+  if(decloc != NULL)
+    equip1=*(decloc+1);
+  else if(MK3==*rack)
+    equip1='m';
+  else if(MK4==*rack)
+    equip1='4';
+  else if(VLBA==*rack)
+    equip1='v';
+
+  if(decloc != NULL)
+    equip2=*(decloc+2);
+  else if(MK3==*drive)
+    equip2='m';
+  else if(MK4==*drive)
+    equip2='4';
+  else if(VLBA==*drive)
+    equip2='v';
+
+  *ierr = -3;
+  while(-1!=fscanf(idum,"%s",outbuf)){
+    decloc = strchr(outbuf,'.');
+    if(decloc != NULL) {
+      ch1=*(decloc+1);
+      ch2=*(decloc+2);
+ 
+      if ((ch1==equip1 || ch1=='_') && (ch2==equip2 || ch2=='_')) {
+        strcpy(runstr,outbuf);
+        *ierr = 0;
+        break;
       }
-      fclose(idum);
-      unlink("LS.NUM");
     }
-    else
-      strcpy(runstr,string);
   }
+  fclose(idum);
+  unlink("/tmp/LS.NUM");
 }

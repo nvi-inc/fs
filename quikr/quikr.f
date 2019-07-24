@@ -48,7 +48,11 @@ C
       else if (isub.eq.2) then
         call vc(ip,itask)
       else if (isub.eq.3) then
-        call ifd(ip)
+        if(itask.eq.1) then
+          call ifd(ip)
+        else if(itask.eq.2) then
+          call if3(ip)
+        endif
       else if (isub.eq.4) then
         if (itask.eq.1.or.itask.eq.8) then
           call ma(ip,itask)
@@ -122,9 +126,10 @@ C
           call track(ip)
         endif
       else if (isub.eq.12) then
-        if (itask.eq.1.or.itask.eq.2) then
+        if (itask.eq.1.or.itask.eq.2.or.itask.eq.13.or.itask.eq.14) then
           call ctemp(ip,itask)
-        else if (itask.eq.5.or.itask.eq.6) then
+        else if (itask.eq.5.or.itask.eq.6.or.itask.eq.17.or.itask.eq.18)
+     &       then
           call tsys(ip,itask)
         else
           call tpi(ip,itask)
@@ -165,9 +170,9 @@ C       endif
       else if (isub.eq.18) then
         call tpform(ip)
       else if (isub.eq.19) then
-        if (itask.eq.1.or.itask.eq.2) then
+        if (itask.ge.1.and.itask.le.4) then
           call beam(ip,itask)
-        else if (itask.eq.3.or.itask.eq.4) then
+        else if (itask.ge.11.and.itask.le.14) then
           call flux(ip,itask)
         endif
       else if (isub.eq.20) then

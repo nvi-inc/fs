@@ -8,7 +8,7 @@ C
       integer*4 ip(5)
       integer it(6),iparm(2),get_buf,ichcm_ch,itb(6)
       integer*2 ibuf(40),ibufi(18),ibufo( 8),ls(5),lds,lhs
-      double precision rad,decd,alati,elong,gheig
+      double precision rad,decd,alati,elong,gheig,ra,dec
 C      - double precision versions of ra and dec for MOVE
       double precision dra,ddec,dc
 C      - returned by MOVE: changes in ra and dec to be added
@@ -66,14 +66,29 @@ C                   First clear the temporary name buffer then move
 C                   in the name from the command
       iaz = ichcm_ch(ls,1,'azel      ')
       ixy = ichcm_ch(ls,1,'xy        ')
-      istow = ichcm_ch(ls,1,'stow      ')
-      iserv = ichcm_ch(ls,1,'service   ')
       iazunc = ichcm_ch(ls,1,'azeluncr  ')
-      kd = iaz*ixy*istow*iserv*iazunc.eq.0
+      kd = iaz*ixy*iazunc.eq.0
       ksun = ichcm_ch(ls,1,'sun       ').eq.0
       kmoon = ichcm_ch(ls,1,'moon      ').eq.0 
       if (ksun) goto 320
       if (kmoon) goto 340 
+      if(ichcm_ch(ls,1,'stow      ').eq.0 .or.
+     &   ichcm_ch(ls,1,'service   ').eq.0 .or.
+     &   ichcm_ch(ls,1,'disable   ').eq.0 .or.
+     &   ichcm_ch(ls,1,'idle      ').eq.0 .or.
+     &   ichcm_ch(ls,1,'hold      ').eq.0 ) then
+        ra = ra50
+        dec = dec50
+        ep = ep1950
+        kd = .true.
+        call gtfld(ibuf,ich,nchar,ic1,ic2)
+        if (ic1.ne.0) then
+          ierr = -305
+          go to 990
+        endif
+        goto 300
+      endif
+       
 C 
 C     2.2 Next get the RA and convert to radians
 C 
@@ -86,9 +101,9 @@ C
         ierr = -102                 !  there is no default for the ra
         goto 990
       else
-        if (.not.kd) call gtrad(ibuf,ic1,ich-2,1,ra,ierr)
+        if (.not.kd) call gtradd(ibuf,ic1,ich-2,1,ra,ierr)
 C                      First convert assuming we have RA
-        if (kd) call gtrad(ibuf,ic1,ich-2,4,ra,ierr)
+        if (kd) call gtradd(ibuf,ic1,ich-2,4,ra,ierr)
 C                      If we've got AZEL or XY, convert degrees 
         if (ierr.lt.0) then
           ierr = -202
@@ -107,8 +122,8 @@ C
         ierr = -103                 !  there is no default for the dec
         goto 990
       else
-        if (.not.kd) call gtrad(ibuf,ic1,ich-2,2,dec,ierr)
-        if (kd) call gtrad(ibuf,ic1,ich-2,4,dec,ierr)
+        if (.not.kd) call gtradd(ibuf,ic1,ich-2,2,dec,ierr)
+        if (kd) call gtradd(ibuf,ic1,ich-2,4,dec,ierr)
         if (ierr.lt.0) then
           ierr = -203
           goto 990
@@ -122,6 +137,8 @@ C
       if (cjchar(parm,1).eq.'*') then
         call fs_get_ep1950(ep1950)
         ep = ep1950
+      else if (cjchar(parm,1).eq.','.and.kd) then
+        ep = -1
       else if (cjchar(parm,1).eq.',') then
         ep = 1950.0              !  the default is 1950 for positions
       else
@@ -140,7 +157,7 @@ C
 C                   Make sure the proper dates are in common
       rad = ra
       decd = dec
-C                   Stuff into double precision variables 
+C                   Initialize apparent deltas
       dra = 0 
       ddec = 0
 C                   Pick out today's day-of-year for precession 
@@ -167,6 +184,8 @@ C
 c  
       flx1fx_fs = -2.0
       flx2fx_fs = -2.0
+      flx3fx_fs = -2.0
+      flx4fx_fs = -2.0
 C                   Call again to fix up az and el
       ierr = 0
       goto 400
@@ -218,13 +237,18 @@ C     4. Now schedule ANTCN.  Tell it to do source pointing.
 C 
 400   continue
       call write_quikr
-      call run_prog('antcn','wait',1,idum,idum,idum,idum)
-      call rmpar(ip)
+      call fs_get_idevant(idevant)
+      if (ichcm_ch(idevant,1,'/dev/null ').ne.0) then
+        call run_prog('antcn','wait',1,idum,idum,idum,idum)
+        call rmpar(ip)
+      else
+        ierr= -306
+      endif
 C 
       ionsor = 0
       call fs_set_ionsor(ionsor)
 C 
-      return
+      if(ierr.eq.0) return
 C 
 990   ip(1) = 0 
       ip(2) = 0 
@@ -239,10 +263,18 @@ C
       if (ichcm(lsorna,1,10h          ,1,10).eq.0) goto 530 
       nch = ichmv(ibuf,nch,lsorna,1,10) 
       iaz = ichcm_ch(lsorna,1,'azel      ')
+      iazun = ichcm_ch(lsorna,1,'azeluncr  ')
       ixy = ichcm_ch(lsorna,1,'xy        ')
-      kd = (iaz.eq.0 .or. ixy.eq.0)
+      kd = (iaz.eq.0 .or. ixy.eq.0 .or. iazun.eq.0)
       n = iscn_ch(ibuf,1,nch-1,' ') 
       if (n.ne.0) nch=n 
+      if(ichcm_ch(ls,1,'stow      ').eq.0 .or.
+     &   ichcm_ch(ls,1,'service   ').eq.0 .or.
+     &   ichcm_ch(ls,1,'disable   ').eq.0 .or.
+     &   ichcm_ch(ls,1,'idle      ').eq.0 .or.
+     &   ichcm_ch(ls,1,'hold      ').eq.0 ) then
+        goto 530
+      endif
 C                   Adjust next char to be first blank in source name.
       nch = mcoma(ibuf,nch) 
       call fs_get_ra50(ra50)
@@ -251,9 +283,9 @@ C                   Adjust next char to be first blank in source name.
       call fs_get_decdat(decdat)
       call fs_get_epoch(epoch)
       if (kd) then
-        nch = nch + ir2as(ra50*180.0/RPI,ibuf,nch,7,2)
+        nch = nch + ir2as(sngl(ra50*180.0/RPI),ibuf,nch,7,2)
         nch = mcoma(ibuf,nch)
-        nch = nch + ir2as(dec50*180.0/RPI,ibuf,nch,7,2)
+        nch = nch + ir2as(sngl(dec50*180.0/RPI),ibuf,nch,7,2)
       else
         call radec(ra50,dec50,0.0,irah,iram,ras,
      .     lds,idcd,idcm,dcs,lhs,i,i,d) 

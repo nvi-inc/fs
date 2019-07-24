@@ -12,6 +12,7 @@ C
 C      - buffer to use, assumed to be at least 50 characters long
       integer*2 ib(60)
       integer*2 lprocdumm(6)
+      character*1 model
 C     LSOR - source of this message
 C
 C  OUTPUT: NONE
@@ -234,6 +235,23 @@ C
       nch=mcoma(ib,nch)
       call fs_get_refreq(refreq)
       nch = nch + ir2as(refreq,ib,nch,6,1)
-      call logit3(ib,nch,lsor)
+      call logit3(ib,nch-1,lsor)
+c
+      call ifill_ch(ib,1,120,' ')
+      nch = 1
+      nch = ichmv(ib,nch,6Htime, ,1,5)
+      nch = nch + ir2as(rate0ti_fs*86400.,ib,nch,12,3)
+      nch=mcoma(ib,nch)
+      nch = nch + ir2as(span0ti_fs/3600.0e2,ib,nch,12,3)
+      nch=mcoma(ib,nch)
+      call hol2char(model0ti_fs,1,1,model)
+      if (model.eq.'n') then
+         nch=ichmv(ib,nch,4hnone,1,4)
+      else if (model.eq.'o') then
+         nch=ichmv(ib,nch,6hoffset,1,6)
+      else if (model.eq.'r') then
+         nch=ichmv(ib,nch,4hrate,1,4)
+      endif
+      call logit3(ib,nch-1,lsor)
       return
       end

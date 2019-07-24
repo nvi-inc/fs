@@ -1,12 +1,13 @@
 /* get time setting information from mcbcns */
 
+#include <memory.h>
+
 #include "../include/params.h"
 #include "../include/req_ds.h"
 #include "../include/res_ds.h"
 
-void get_vtime(cpu_bef,cpu_aft,fm_tim,ip)
-int cpu_bef[6];
-int cpu_aft[6];
+void get_vtime(centisec,fm_tim,ip)
+long centisec[2];
 int fm_tim[6];
 long ip[5];                          /* ipc array */
 {
@@ -17,7 +18,7 @@ long ip[5];                          /* ipc array */
 
       ini_req(&buffer);                      /* format the buffer */
       memcpy(request.device,DEV_VFM,2);
-      request.type=7; 
+      request.type=5; 
       request.addr=0x2B;
       add_req(&buffer,&request);
       
@@ -33,8 +34,7 @@ long ip[5];                          /* ipc array */
 
       opn_res(&buffer_out,ip);              /* decode response */
       get_res(&response, &buffer_out);
-      memcpy(cpu_bef,response.array,6*sizeof(cpu_bef));
-      memcpy(cpu_aft,response.array+24,6*sizeof(cpu_aft));
+      memcpy(centisec,response.array,8);
       fm_tim[0]=0;
       fm_tim[1]=    (0xF & response.data   ) +  10*(0xF &response.data>>4);
       fm_tim[2]=    (0xF & response.data>>8) +  10*(0xF &response.data>>12);

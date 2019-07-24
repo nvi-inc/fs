@@ -14,7 +14,7 @@ C
       equivalence (ireg(1),reg),(iparm(1),parm) 
       data ilen/40/ 
 C 
-      indtmp = nsub 
+      indtmp = mod(nsub,10)
 C                   Pick up the proper index for the temp 
       iclcm = ip(1) 
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum) 

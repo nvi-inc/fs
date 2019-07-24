@@ -25,7 +25,7 @@ C
       double precision tpia1,tpia2,sig1,sig2,timta,timt 
       double precision dri,dim1,didim1,dtpi1,dtpi2
       integer it(5),iti(5)
-      integer*2 icmnd(4,17),indata(10),indat2(10)
+      integer*2 icmnd(4,18),indata(10),indat2(10)
       integer*2 iques,lwho,lwhat
       character*1 cjchar
       logical kbreak
@@ -52,8 +52,9 @@ C
      +            2hve, 2h#0,2he%,2h__,
      +            2hvf, 2h#0,2hf%,2h__,
      +            2hi1, 2h#9,2h3!,2h__,
-     +            2hi2, 2h#9,2h3!,2h__/
-      data iques/2H??/,ndev/17/,lwho/2Hnf/,lwhat/2Hvo/,ntry/1/
+     +            2hi2, 2h#9,2h3!,2h__,
+     +            2hi3, 2h#9,2h5%,2h__/
+      data iques/2H??/,ndev/18/,lwho/2Hnf/,lwhat/2Hvo/,ntry/1/
       data nin/10/
 C
 C  0. INITIALIZE
@@ -130,8 +131,9 @@ C
           call mcbcn2(dtpi1,dtpi2,ierr)
         else
           call matcn(icmnd(2,id1),-5,iques,indata,nin, 9,ierr) 
-          if (.not. (id1.gt.15.and.id2.gt.15))
-     +    call matcn(icmnd(2,id2),-5,iques,indat2,nin, 9,ierr) 
+          if (.not.
+     +      (id1.gt.15.and.id2.gt.15.and.id1.lt.18.and.id2.lt.18)
+     +    ) call matcn(icmnd(2,id2),-5,iques,indat2,nin, 9,ierr) 
         endif
         call fc_rte_time(iti,idum)  
         if (ierr.ne.0) return 
@@ -139,21 +141,22 @@ C
 C      CONVERT TO COUNTS
 C 
         if(VLBA.ne.iand(rack,VLBA)) then
-          if (id1.eq.17) dtpi1=float(ia22h(indata(2)))*256.0+ 
+          if (id1.ge.17) dtpi1=float(ia22h(indata(2)))*256.0+ 
      +                      float(ia22h(indata(3)))
-          if (id1.ne.17) dtpi1=float(ia22h(indata(4)))*256.0+ 
+          if (id1.lt.17) dtpi1=float(ia22h(indata(4)))*256.0+ 
      +                      float(ia22h(indata(5)))
-          if (.not. (id1.gt.15.and.id2.gt.15))
-     +                      idum=ichmv(indata,1,indat2,1,10) 
-          if (id2.eq.17) dtpi2=float(ia22h(indata(2)))*256.0+ 
+          if (.not.
+     +      (id1.gt.15.and.id2.gt.15.and.id1.lt.18.and.id2.lt.18)
+     +                    ) idum=ichmv(indata,1,indat2,1,10) 
+          if (id2.ge.17) dtpi2=float(ia22h(indata(2)))*256.0+ 
      +                      float(ia22h(indata(3)))
-          if (id2.ne.17) dtpi2=float(ia22h(indata(4)))*256.0+ 
+          if (id2.lt.17) dtpi2=float(ia22h(indata(4)))*256.0+ 
      +                      float(ia22h(indata(5)))
          endif
 C 
 C       CHECK FOR TPI SATURATION
 C 
-        if (dtpi2.lt.65534.5d0.and.dtpi2.lt.65534.5d0) goto 16 
+        if (dtpi1.lt.65534.5d0.and.dtpi2.lt.65534.5d0) goto 16 
         call logit7(idum,idum,idum,-1,-80,lwho,lwhat) 
         itry=itry-1
         if (itry.le.0) goto 80010

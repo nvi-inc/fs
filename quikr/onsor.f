@@ -33,8 +33,14 @@ C     The response may be either TRACKING or SLEWING,
 C     depending on the variable IONSOR=1 or 0.
 C     Schedule ANTCN to get the az,el errors and set IONSOR.
 C 
-      call run_prog('antcn','wait',3,idum,idum,idum,idum)
-      call rmpar(ip)
+      call fs_get_idevant(idevant)
+      if (ichcm_ch(idevant,1,'/dev/null ').ne.0) then
+        call run_prog('antcn','wait',3,idum,idum,idum,idum)
+        call rmpar(ip)
+      else
+        ierr= -302
+        goto 990
+      endif
       ierr = ip(3)
       if (ierr.lt.0)  return
       call fs_get_ionsor(ionsor)

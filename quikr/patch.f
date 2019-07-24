@@ -79,7 +79,7 @@ C
 C     2. Step through buffer getting each parameter and decoding it.
 C     Command from user has these parameters:
 C        PATCH=<LO#>,<VC#H(or L)>,<VC#H(or L)>,.........
-C     Choices are <LO#>: LO1 or LO2, no default
+C     Choices are <LO#>: LO1, LO2, or LO3, no default
 C                 <VC#H(or L)>  : no default, must be at least one
 C
 C     2.1 FIRST PARM, LO NUMBER
@@ -90,7 +90,7 @@ C
         ip(3) = -201
       else
         ichnl = ias2b(parm,3,1)
-        if (ichnl.ne.1 .and. ichnl.ne.2) ip(3)= -201
+        if (ichnl.lt.1 .or. ichnl.gt.3) ip(3)= -201
       endif
       if (ip(3).eq.-201) return
 C 

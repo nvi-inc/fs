@@ -1,0 +1,43 @@
+pcals - pcalr (spectrum analy.) (Mark III rack)
+Syntax:      pcals=#cycles,pause,repro,integ.time,debug,
+             track, ...
+
+Response:    none/
+
+
+Settable parameters:
+#cycles        number of times to cycle through tracks. 0 = run
+               continuously (default).
+pause          time to pause between cycles, seconds. Default is 60
+               seconds.
+repro          type of reproduce mode:
+                  fs = use current mode set up by Field System
+                  by = use bypass mode
+                  rw = use read after write mode
+                  ab = use split mode (implies bypass mode too)
+               If an experiment is in progress (i.e. if a schedule file is
+               active) then fs is the recommended mode. Attempts to force
+               read-after-write or bypass may result in compromising
+               execution of the schedule.
+integ. time    integration time for the spectrum analyzer in seconds.
+               Default is value specified in tessa control file tedef.ctl.
+debug          not used with spectrum analyzer. Any value here will be
+               ignored.
+tracks         tape recorder track(s) to use. 0 = use all tracks for current
+               mode (default). A list of track numbers may be given. A list
+               of video converters may be specified by preceding each
+               number with v. The words all, even, odd referring to
+               tracks and vall, veven, vodd referring to VCs may be
+               used. Split mode will be set up for the outer channels in the
+               frequency sequence, if bypass mode is set up.
+
+Comments: 
+This command is identical to pcal except it sets up values for pcalr to use
+with the spectrum analyzer in place of the data buffer. Invoking this command
+with no parameters activates pcalr. To stop pcalr, issue the command sy=br
+pcals. Before starting pcalr, specify LO frequencies with the lo command
+and patching with patch command.
+
+Note: Use of this command is identical to the pcal command except that the
+fourth parameter specifies integration time for the spectrum analyzer rather
+than number of blocks of data to average from the data buffer.

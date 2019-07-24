@@ -1,0 +1,22 @@
+patch - specify IF patching (Mark III rack)
+Syntax:      patch=lon,vc#horl,...
+
+Response:    none
+
+
+Settable Parameters:
+lon            either lo1 or lo2. No default.
+vc#horl        video converter number with the character h or l appended,
+               e.g. 1h or 3l. h indicates the high band of the channel, and
+               l the low. No default.
+
+Comments: 
+This command stores the patching information for access by program pcalr
+and the antenna calibration programs. This command identifies which video
+converters are patched to channel 1, which to channel 2. This command is not
+needed for VLBA systems because the bbc command specifies the
+connections.
+
+The lo command should also be used to specify the LO frequencies, and the
+upconv command should be used if you have an upconverter.
+

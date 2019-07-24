@@ -38,6 +38,7 @@ main()
   signal(SIGINT, die);
   curs_set(0);
   clear();
+  curs_set(0);
   refresh();
 
 /*  Initialize the display window */
@@ -46,11 +47,12 @@ main()
 
   while(1) {
     rte_time(it,&iyear);
+    mout2(it,iyear);
     move(ROW1,COL1+16);
     printw("%d-%.3d %.2d:%.2d:%.2d",iyear,it[4],it[3],it[2],
             it[1]);
+    move(ROW1,COL1+33);
     refresh();
-    mout2(it,iyear);
     rte_time(it,&iyear);
     isleep=100-it[0];
     isleep=isleep>100?100:isleep;

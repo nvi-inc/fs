@@ -12,7 +12,7 @@ main()
 {
   int it[5];
   int iyear;
-
+  int isleep;
   int die();
   int m1init();
   int nsem_test();
@@ -43,7 +43,11 @@ main()
             it[1]);
     move(ROW1,COL1+36);
     refresh();
-    rte_sleep(100);
+    rte_time(it,&iyear);
+    isleep=100-it[0];
+    isleep=isleep>100?100:isleep;
+    isleep=isleep<1?100:isleep;
+    rte_sleep((unsigned) isleep);
     if (nsem_test(NSEMNAME) != 1) {
       printf("Field System terminated\n");
       die();

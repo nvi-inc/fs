@@ -8,6 +8,7 @@
 #include <curses.h>
 #include <signal.h>
 #include <math.h>
+#include <string.h>
 #include <sys/types.h>
 #include "mparm.h"
 #include "dpi.h"
@@ -46,13 +47,14 @@ int iyear;
   char dig[3];
   char outfloat[80];
   char *outf; 
-  char checkarr[81];
+  char checkarr[91];
   char *checkln; 
   char *ptfeet;
   int posdeg;
   double raxx,dcxx;
   void preflt();
   void preint();
+  int len;
 
   kMrack = 0;
   kMdrive = 0;
@@ -73,29 +75,43 @@ int iyear;
   standend();
 
   if (shm_addr->KHALT!=0) {            /* schedule halted */
-    idum=attron(A_BLINK);
-    mvaddstr(ROW1,COL1+37,"HALT"); 
-    idum=attroff(A_BLINK);
-  } else mvaddstr(ROW1,COL1+37,"    "); 
+    if(it[1]%2==0)
+	standout();
+    mvaddstr(ROW1,COL1+40,"HALT"); 
+    if(it[1]%2==0)
+	standend();
+  } else mvaddstr(ROW1,COL1+40,"    "); 
 
-  move(ROW1,COL1+54);
+  move(ROW1,COL1+56);
   preflt(outf,shm_addr->tempwx,-4,1);
   printw("%s",outfloat);
-  move(ROW1,COL1+61);
+  move(ROW1,COL1+62);
   standout();
-  printw("%.8s",shm_addr->lsorna);
+  printw("%.10s",shm_addr->lsorna);
   posdeg = 0;
-  if (memcmp(shm_addr->lsorna,"azel    ",8)==0 ||
-      memcmp(shm_addr->lsorna,"azeluncr",8)==0 ||
-      memcmp(shm_addr->lsorna,"stow    ",8)==0 ||
-      memcmp(shm_addr->lsorna,"service ",8)==0) {
+  if (memcmp(shm_addr->lsorna,"azel      ",10)==0 ||
+      memcmp(shm_addr->lsorna,"azeluncr  ",10)==0 ) {
     posdeg = 1; 
     /* Convert az/el in common to actual ra/dec */
     cnvrt(2,shm_addr->radat,shm_addr->decdat,&raxx,&dcxx,it,
         shm_addr->alat,shm_addr->wlong);
-    }
+   } else if (memcmp(shm_addr->lsorna,"stow      ",10)==0 ||
+              memcmp(shm_addr->lsorna,"service   ",10)==0 ||
+              memcmp(shm_addr->lsorna,"hold      ",10)==0 ||
+              memcmp(shm_addr->lsorna,"disable   ",10)==0 ||
+              memcmp(shm_addr->lsorna,"idle      ",10)==0 ||
+              memcmp(shm_addr->lsorna,"          ",10)==0)  {
+    posdeg = 1; 
+    raxx = 0.0;
+    dcxx = 0.0;
+   } else if (memcmp(shm_addr->lsorna,"xy        ",10)==0) {
+    posdeg = 1; 
+    /* Convert x/y in common to actual ra/dec */
+    cnvrt(7,shm_addr->radat,shm_addr->decdat,&raxx,&dcxx,it,
+        shm_addr->alat,shm_addr->wlong);
+   }
   standend();
-  move(ROW1,COL1+70);
+  move(ROW1,COL1+73);
   if (shm_addr->ionsor == 0)
     printw("SLEWING ");
   else if (shm_addr->ionsor == 1)
@@ -115,11 +131,11 @@ int iyear;
   preint(outf,shm_addr->INEXT[2],-2,1);
   printw("%s",outfloat);
 
-  move(ROW1+1,COL1+52);
+  move(ROW1+1,COL1+54);
   preflt(outf,shm_addr->humiwx,-6,2);
   printw("%s",outfloat);
 
-  move(ROW1+1,COL1+65);
+  move(ROW1+1,COL1+66);
   if (posdeg == 1) 
     htemp= raxx*12.0/M_PI;
   else
@@ -129,10 +145,10 @@ int iyear;
   ras=(htemp-irah-iram/60.0)*3600.0;
   preint(outf,irah,-2,1);
   printw("%s",outfloat);
-  move(ROW1+1,COL1+68);
+  move(ROW1+1,COL1+69);
   preint(outf,iram,-2,1);
   printw("%s",outfloat);
-  move(ROW1+1,COL1+71);
+  move(ROW1+1,COL1+72);
   preflt(outf,ras,-4,1);
   printw("%s",outfloat);
 
@@ -278,12 +294,12 @@ int iyear;
 
   move(ROW1+2,COL1+26);
   printw("%.8s",shm_addr->LSKD);
-  move(ROW1+2,COL1+38);
+  move(ROW1+2,COL1+39);
   printw("%.8s",shm_addr->LLOG);
-  move(ROW1+2,COL1+51);
+  move(ROW1+2,COL1+53);
   preflt(outf,shm_addr->preswx,-6,1);
   printw("%s",outfloat);
-  move(ROW1+2,COL1+64);
+  move(ROW1+2,COL1+65);
   if (posdeg == 1) {
     if (dcxx < 0)
       printw("-");
@@ -298,40 +314,53 @@ int iyear;
       printw(" ");
     dtemp=fabs(shm_addr->dec50)*180.0/M_PI; 
     }
-  move(ROW1+2,COL1+65);
+  move(ROW1+2,COL1+66);
   idecd=(int)(dtemp+.00001);
   preint(outf,idecd,-2,1);
   printw("%s",outfloat);
   idecm= (dtemp-idecd)*60.0;
-  move(ROW1+2,COL1+68);
+  move(ROW1+2,COL1+69);
   preint(outf,idecm,-2,1);
   printw("%s",outfloat);
-  move(ROW1+2,COL1+74);
-  preflt(outf,shm_addr->ep1950,-5,0);
-  outfloat[4]=NULL;
-  printw("%s",outfloat);
+  move(ROW1+2,COL1+76);
+  if(memcmp(shm_addr->lsorna,"          ",10)==0)  {
+    addstr("    ");
+  } else {
+    preflt(outf,shm_addr->ep1950,-5,0);
+    outfloat[4]=NULL;
+    printw("%s",outfloat);
+  }
 
 /* ROW 4 */
 
-  move(ROW1+3,COL1+50);
+  move(ROW1+3,COL1+52);
   preflt(outf,shm_addr->cablev,-8,6);
   printw("%s",outfloat);
 
-/*azel(it,shm_addr->alat,shm_addr->wlong,shm_addr->radat,
-       shm_addr->decdat,&azim,&elev);
-*/
-  if (posdeg==0)
+  if (posdeg==0) {
     cnvrt(1,shm_addr->radat,shm_addr->decdat,&azim,&elev,it,
         shm_addr->alat,shm_addr->wlong);
-  else {
-    azim = shm_addr->ra50;
-    elev = shm_addr->dec50;
+  } else if (memcmp(shm_addr->lsorna,"azel      ",10)==0 ||
+             memcmp(shm_addr->lsorna,"azeluncr  ",10)==0 ) {
+        azim = shm_addr->ra50;
+        elev = shm_addr->dec50;
+  } else if (memcmp(shm_addr->lsorna,"stow      ",10)==0 ||
+             memcmp(shm_addr->lsorna,"service   ",10)==0 ||
+             memcmp(shm_addr->lsorna,"hold      ",10)==0 ||
+             memcmp(shm_addr->lsorna,"disable   ",10)==0 ||
+             memcmp(shm_addr->lsorna,"idle      ",10)==0 ||
+             memcmp(shm_addr->lsorna,"          ",10)==0)  {
+        azim =0.0;
+        elev =0.0;
+  } else if (memcmp(shm_addr->lsorna,"xy        ",10)==0) {
+    cnvrt(4,shm_addr->radat,shm_addr->decdat,&azim,&elev,it,
+        shm_addr->alat,shm_addr->wlong);
   }
 
-  move(ROW1+3,COL1+64);
+  move(ROW1+3,COL1+66);
   preflt(outf,(float)azim*RAD2DEG,-5,1);
   printw("%s",outfloat);
-  move(ROW1+3,COL1+74);
+  move(ROW1+3,COL1+76);
   preflt(outf,(float)elev*RAD2DEG,-5,1);
   printw("%s",outfloat);
 
@@ -354,32 +383,23 @@ int iyear;
   move(ROW1+4,COL1+17);
   memcpy(ptfeet,shm_addr->LFEET_FS,6);
   printw("%.5s",ptfeet);
-  move(ROW1+4,COL1+23);
-  if (shm_addr->inp1if == 0)
-    printw("NOR");
-  else if (shm_addr->inp1if == 1)
-    printw("ALT");
-  else
-    printw("   ");
-  move(ROW1+4,COL1+27);
-  if (kMrack) 
-    preflt(outf,shm_addr->systmp[28],-5,1);
-  else
-    preflt(outf,shm_addr->tsys[30],-5,1);
+  move(ROW1+4,COL1+29);
+  preint(outf,(int)(shm_addr->systmp[28]+.5),-3,0);
   printw("%s",outfloat);
+
   move(ROW1+4,COL1+33);
-  if (shm_addr->inp2if == 0)
-    printw("NOR");
-  else if (shm_addr->inp2if == 1)
-    printw("ALT");
-  else
-    printw("   ");
-  move(ROW1+4,COL1+37);
-  if (kMrack)
-    preflt(outf,shm_addr->systmp[29],-5,1);
-  else
-    preflt(outf,shm_addr->tsys[31],-5,1);
+  preint(outf,(int)(shm_addr->systmp[29]+.5),-3,0);
   printw("%s",outfloat);
+
+  move(ROW1+4,COL1+37);
+  preint(outf,(int)(shm_addr->systmp[30]+.5),-3,0);
+  printw("%s",outfloat);
+
+  if(!kMrack) {
+    move(ROW1+4,COL1+41);
+    preint(outf,(int)(shm_addr->systmp[31]+.5),-3,0);
+    printw("%s",outfloat);
+  }
 
   it[5]=iyear;
 /*
@@ -407,11 +427,11 @@ int iyear;
   printw("%s",outfloat);
 */
 
-  move(ROW1+4,COL1+73);
-  preint(outf,shm_addr->ipashd[0],-2,1);
+  move(ROW1+4,COL1+74);
+  preint(outf,shm_addr->ipashd[0],-3,0);
   printw("%s",outfloat);
-  move(ROW1+4,COL1+77);
-  preint(outf,shm_addr->ipashd[1],-2,1);
+  move(ROW1+4,COL1+78);
+  preint(outf,shm_addr->ipashd[1],-3,0);
   printw("%s",outfloat);
 
 /* ROW 6 */
@@ -419,93 +439,104 @@ int iyear;
   *checkln=NULL;
   strcat(checkln,"NO CHECK:");
 
-  for(i=0;i<20;i++) {
-    if ((kMrack) && (i<17)) {   /* MK3 */
+  if (kMrack) {
+    for(i=0;i<17;i++) {
       if (shm_addr->ICHK[i]<=0) {
-        icr = i-14;
-        if (icr<=0) {
+        if (i<=14) {
           strcat(checkln," v");
           if (((i+1)/10) == 0) {
             dig[0]=((i+1)%10) + '0';
             dig[1]= '\0';
-          }
-          else {
+          } else {
             dig[0]=((i+1)/10) + '0';
             dig[1]=((i+1)%10) + '0';
             dig[2]= '\0';
           }
           strcat(checkln,dig);
-        }
-        else {
-          switch (icr) {
-          case 1:
-            strcat(checkln," if");
-            break;
-          case 2:
-            strcat(checkln," fm");
-            break;
-          }
-        }
-      }
-    }
-    if ((!kMrack) && (i<19)) {   /* VLBA */
-      icr = i-15;
-      if (icr<=0) {
-        if (icr<-1) {  /* skip bbc 15 & 16 */
-          if (shm_addr->check.bbc[i]<=0) {
-            strcat(checkln," b");
-            if (((i+1)/10) == 0) {
-              dig[0]=((i+1)%10) + '0';
-              dig[1]= '\0';
-            }
-            else {
-              dig[0]=((i+1)/10) + '0';
-              dig[1]=((i+1)%10) + '0';
-              dig[2]= '\0';
-            }
-            strcat(checkln,dig);
-          }
-        }
-      }
-      else {
-        switch (icr) {
-          case 1:   /* 16 */
-            if (shm_addr->check.dist[icr-1]<=0)
-              strcat(checkln," ia");
-            break;
-          case 2:   /* 17 */
-            if (shm_addr->check.dist[icr-1]<=0)
-              strcat(checkln," ic");
-            break;
-          case 3:   /* 18 */
-            if (shm_addr->check.vform<=0)
+        } else {
+          switch (i) {
+            case 15:
+              strcat(checkln," if");
+              break;
+            case 16:
               strcat(checkln," fm");
-            break;
+              break;
+          }
         }
       }
     }
-    if ((i==17) && (kMdrive)) {
-      if (shm_addr->ICHK[i]<=0) strcat(checkln," tp");
-    }
-    if (i==18) {
-      if (shm_addr->ICHK[i]<=0) strcat(checkln," rx");
-    }
-    if (i==19) {
-      if (shm_addr->ICHK[i]<=0) strcat(checkln," hd");
-      if (!kMdrive) {
-        if (shm_addr->check.rec<=0) strcat(checkln," rc");
+  } else {                            /* VLBA */
+    for (i=0; i<17; i++) {
+      if (shm_addr->check.bbc[i]<=0) {
+        if (i<=13) {
+          strcat(checkln," b");
+          if (((i+1)/10) == 0) {
+            dig[0]=((i+1)%10) + '0';
+            dig[1]= '\0';
+          } else {
+            dig[0]=((i+1)/10) + '0';
+            dig[1]=((i+1)%10) + '0';
+            dig[2]= '\0';
+          }
+          strcat(checkln,dig);
+        } else {
+          switch (i) {
+            case 14:
+              if (shm_addr->check.dist[0]<=0)
+                strcat(checkln," ia");
+              break;
+            case 15:
+              if (shm_addr->check.dist[1]<=0)
+                strcat(checkln," ic");
+              break;
+            case 16:
+              if (shm_addr->check.vform<=0)
+                strcat(checkln," fm");
+              break;
+          }
+        }
       }
     }
   }
 
-  move(ROW1+5,0);
-  printw("%80s"," ");
-  standout();
-  move(ROW1+5,0);
-  printw("%s",checkln);
-  standend();
-  move(ROW1+6,COL1+0);
+  if (kMdrive) {
+    if (shm_addr->ICHK[17]<=0) {
+      strcat(checkln," tp");
+    }
+  } else {
+    if (shm_addr->check.rec<=0)
+      strcat(checkln," rc");
+  }
 
-  refresh();
+  for (i=18; i<21; i++) {
+    if (shm_addr->ICHK[i]<=0) {
+      switch (i) {
+        case 18:
+          strcat(checkln," rx");
+          break;
+        case 19:
+          strcat(checkln," hd");
+          break;
+        case 20:
+          if(kMrack) strcat(checkln," i3");
+          break;
+      }
+    }
+  }
+  for (i=0;i<4;i++)
+      if(memcmp(shm_addr->stcnm[i],"  ",2)!=0 && shm_addr->stchk[i]<=0) {
+        len=strlen(checkln);
+        checkln[len  ]=' ';
+        checkln[len+1]=shm_addr->stcnm[i][0];
+        checkln[len+2]=shm_addr->stcnm[i][1];
+        checkln[len+3]='\0';
+      }
+  
+  move(ROW1+5,0);
+  printw("%90s"," ");
+  move(ROW1+5,0);
+  standout();
+  printw("%.90s",checkln);
+  standend();
 
 }  /* end mout2 */

@@ -71,24 +71,24 @@ C                   TPI=<list>
 C     where <list> may contain the following key words: 
 C                   <null> - the default gets BBC plus IFA IFB IFC IFD
 C                   ALL - same as default 
-C                   BBCU - gets B1 to 15 USB
-C                   BBCL - gets B1 to 15 LSB
+C                   BBCU - gets B1 to 14 USB
+C                   BBCL - gets B1 to 14 LSB
 C                   EVENU - even-numbered BBCs USB
 C                   EVENL - even-numbered BBCs LSB
 C                   ODDU - odd-numbered BBCs USB
 C                   ODDL - odd-numbered BBCs LSB
 C                   IFn - IF a, b, c, or d 
 C 
-      do i=1,34 
+      do i=1,32 
         itpis_vlba(i) = 0
       enddo
 C                   Turn off all of the TPIs to start 
       ich = 1+ieq 
-      do 290 i=1,34 
+      do 290 i=1,32 
         call fdfld(ibuf,ich,nchar,ic1,ic2)
         if (ic1.eq.0) then
           if (i.eq.1) then        !  if no parameters, set all indicators on
-            do ii=1,34
+            do ii=1,32
               itpis_vlba(ii) = 1
             enddo
           endif
@@ -106,44 +106,44 @@ C                   We haven't any stored values to pick up here
 C 
         if (lprm.eq.0) goto 285
         if (ichcm_ch(lprm,1,'al').ne.0) goto 220
-        do ii=1,34
+        do ii=1,32
           itpis_vlba(ii) = 1
         enddo
         goto 290
 C 
 220     if (ichcm_ch(lprm,1,'vu').ne.0) goto 225
-        do ii=3,27,4
+        do ii=16,28,2
           itpis_vlba(ii) = 1
         enddo
         goto 290
 C
 225     if (ichcm_ch(lprm,1,'vl').ne.0) goto 230
-        do ii=4,28,4
+        do ii=2,14,2
           itpis_vlba(ii) = 1
         enddo
         goto 290
 C 
 230     if (ichcm_ch(lprm,1,'ou').ne.0) goto 235
-        do ii=1,29,4
+        do ii=15,27,2
           itpis_vlba(ii) = 1
         enddo
         goto 290
 C
 235     if (ichcm_ch(lprm,1,'ol').ne.0) goto 240
-        do ii=2,30,4
+        do ii=1,13,2
           itpis_vlba(ii) = 1
         enddo
         goto 290
 C 
 240     continue 
         if (((cjchar(lprm,1).ge.'1').and.(cjchar(lprm,1).le.'9')).or.
-     .      ((cjchar(lprm,1).ge.'a').and.(cjchar(lprm,1).le.'f'))) then
+     .      ((cjchar(lprm,1).ge.'a').and.(cjchar(lprm,1).le.'e'))) then
           ii=jchar(lprm,1) - 48  !! turns hollerith into integer
-          if (ii.gt.9) ii=ii-39  !! if a thru f subtract to get correct
+          if (ii.gt.9) ii=ii-39  !! if a thru e subtract to get correct
 C                              !! integer
-          if (ii.lt.1 .or. ii.gt.15) goto 285
+          if (ii.lt.1 .or. ii.gt.14) goto 285
           if (cjchar(lprm,2).eq.'u') then
-            itpis_vlba(ii*2-1) = 1
+            itpis_vlba(14+ii) = 1
           else if (cjchar(lprm,2).eq.'l') then
             itpis_vlba(ii) = 1
           else
@@ -154,13 +154,13 @@ C                              !! integer
 C 
 250     if (ichcm_ch(lprm,1,'i').ne.0) goto 285
           if (ichcm_ch(lprm,2,'a').eq.0) then
-            itpis_vlba(31) = 1
+            itpis_vlba(29) = 1
           else if (ichcm_ch(lprm,2,'b').eq.0) then
-            itpis_vlba(32) = 1
+            itpis_vlba(30) = 1
           else if (ichcm_ch(lprm,2,'c').eq.0) then
-            itpis_vlba(33) = 1
+            itpis_vlba(31) = 1
           else if (ichcm_ch(lprm,2,'d').eq.0) then
-            itpis_vlba(34) = 1
+            itpis_vlba(32) = 1
           else
             goto 285
           endif

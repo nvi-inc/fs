@@ -46,25 +46,25 @@ C                   Pick up the size from common
 211   continue
       call fs_get_rack(rack)
       indf=indtmp 
-      if(indtmp.eq.1) then
-        if((MK3.eq.iand(MK3,rack)).or.(MK4.eq.iand(MK4,rack))) then
-          call fs_get_inp1if(inp1if)
-          indf=indtmp+inp1if*3
-        endif
-        call fs_get_freqlo(flo,indf-1)
+      call fs_get_freqlo(flo,indf-1)
+      fup=0
+      if(VLBA.eq.iand(rack,VLBA)) then
         call fs_get_frequp(fup,indf-1)
+      endif
 c     write(6,101) flo,fup,indf
 101   format(/' flo,fup,indf=',2f10.3,i5/)
+      f=flo-fup
+C
+C use the middle of the bandpass for the appropriate rack
+C
+      if(VLBA.eq.iand(rack,VLBA)) then
+        f=f+750.
       else
-        if((MK3.eq.iand(MK3,rack)).or.(MK4.eq.iand(MK4,rack))) then
-          call fs_get_inp2if(inp2if)
-          indf=indtmp+inp2if*3
+        f=f+350.
+        if(indf.eq.3.and.imixif3_fs.eq.1) then
+           f=f+freqif3*0.001
         endif
-        call fs_get_freqlo(flo,indf-1)
-        call fs_get_frequp(fup,indf-1)
-c     write(6,101) flo,fup,indf
       endif
-      f=flo
       call fs_get_diaman(diaman)
 100   format(/' f,diaman=',2f10.3/)
 c     write(6,100) f,diaman
@@ -87,8 +87,12 @@ C
       beamsz_fs(indtmp) = btmp
       if(indtmp.eq.1) then
         flx1fx_fs=-1.0
-      else
+      else if (indtmp.eq.2) then
         flx2fx_fs=-1.0
+      else if (indtmp.eq.3) then
+        flx3fx_fs=-1.0
+      else if (indtmp.eq.4) then
+        flx4fx_fs=-1.0
       endif
       ierr = 0
 C

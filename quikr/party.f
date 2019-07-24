@@ -34,8 +34,8 @@ C  Set flag for PCALR to stop
         call fs_get_icheck(icheck(18),18)
         ichold=icheck(18)
       else !!! VLBA
-        call fs_get_ichvlba(ichvlba(20),20)
-        ichold=ichvlba(20)
+        call fs_get_ichvlba(ichvlba(18),18)
+        ichold=ichvlba(18)
       endif
 C
 C  1.  Get the command
@@ -194,8 +194,8 @@ C
         icheck(18) = 0
         call fs_set_icheck(icheck(18),18)
       else !!! VLBA
-        ichvlba(20)=0
-        call fs_set_ichvlba(ichvlba(20),20)
+        ichvlba(18)=0
+        call fs_set_ichvlba(ichvlba(18),18)
       endif
       itrkpalo(1)=0
       itrkpalo(2)=0
@@ -416,8 +416,8 @@ C
         icheck(18)=ichold
         call fs_set_icheck(icheck(18),18)
       else  !!! VLBA
-        ichvlba(20)=ichold
-        call fs_set_ichvlba(ichvlba(20),20)
+        ichvlba(18)=ichold
+        call fs_set_ichvlba(ichvlba(18),18)
       endif
 C
       return

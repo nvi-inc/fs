@@ -1,8 +1,8 @@
-      subroutine set_pass(ihead,ipass,micpas,ip,tol,koffset)
+      subroutine set_pass(ihead,ipass,kauto,micpas,ip,tol)
       implicit none
       integer ihead,ipass(2),ip(5)
       real*4 micpas(2),tol
-      logical koffset
+      logical kauto
 C
 C POS_HEAD: position heads, by pass or micron
 C
@@ -14,9 +14,9 @@ C
 C  IHEAD  Head to position 1=write, 2=read, 3=both.
 C  IPASS  The pass numbers each head is to positioned to. If zero, then
 C         position by uncorrected microns according to MICPAS, is desired.
+C  KAUTO  true if the write head offset should be auto-adjusted
 C  MICPAS The uncorrected micron positions to place the heads at if
 C         IPASS is zero.
-C  KOFFSET  True if offset of heads are to be applied.
 C
 C OUTPUT ARGUMENTS:
 C
@@ -25,10 +25,10 @@ C         to if IPASS was nonzero.
 C  IP     Field System error return array.
 C
 C HISTORY:
-C  WHO  WHEN   WHAT
-C  --- ------  ----
-C  WEH  880928 CREATED
-C  gag  920721 Added logical koffset.
+C
+C  WHO WHEN   WHAT
+C  --- ------ ----
+C  WEH 880928 CREATED
 C
       integer i
 C
@@ -39,7 +39,7 @@ C
         endif
       enddo
 C
-      call set_mic(ihead,ipass,micpas,ip,tol,koffset)
+      call set_mic(ihead,ipass,kauto,micpas,ip,tol)
 C
       return
       end

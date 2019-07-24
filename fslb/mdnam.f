@@ -76,11 +76,10 @@ C  Handle IFD's
       nc=2
       if (cicr(nc:nc).ne.'f') goto 163
         nc=3
-      if (cicr(nc:nc).ne.'d') goto 165
+      if (cicr(nc:nc).ne.'d') goto 163
         nc=4
-163   if (cicr(nc:nc).eq.'1') call char2hol('i1',mdnam,1,2)
-      if (cicr(nc:nc).eq.'2') call char2hol('i2',mdnam,1,2)
-165   if (cicr(nc:nc).eq.' ') call char2hol('if',mdnam,1,2)
+163   if (cicr(nc:nc).eq.'3') call char2hol('i3',mdnam,1,2)
+      if (cicr(nc:nc).eq.' ') call char2hol('if',mdnam,1,2)
 
 C  look for VLBA mnemonics
 
