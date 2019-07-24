@@ -44,13 +44,13 @@ long ip[5];
              itracks[i]=response.data;
          }
          mcD2vform(&lclc,itracks);
-
          get_res(&response,&buff_out); mc20vform(&lclm,response.data);
          get_res(&response,&buff_out); mc21vform(&lclm,response.data);
          get_res(&response,&buff_out); mc22vform(&lclm,response.data);
          get_res(&response,&buff_out); mc23vform(&lclm,response.data);
          get_res(&response,&buff_out); mc24vform(&lclm,response.data);
          get_res(&response,&buff_out); mc60vform(&lclm,response.data);
+         shm_addr->form_version=lclm.version;
          get_res(&response,&buff_out); mc8Dvform(&lclc,response.data);
          get_res(&response,&buff_out); mc8Evform(&lclc,response.data);
          get_res(&response,&buff_out); mc8Fvform(&lclc,response.data);

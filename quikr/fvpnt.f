@@ -207,32 +207,36 @@ C
           ichain=1
           goto 410
 402     continue
-        ichain=2
-        goto 410
+        if(ichcm_ch(ldevfp,1,'i2').ne.0) goto 403
+          ichain=2
+          goto 410
+403     continue
+          ichain=3
+          goto 410
+c
+c  video channels
+c
 405     continue
         indvc = ia2hx(ldevfp,2)
-        if(iabs(ifp2vc(indvc)).eq.1.or.iabs(ifp2vc(indvc)).eq.2)goto 406
-        ierr=-209
-        goto 990
-406     continue
-        if(iabs(ifp2vc(indvc)).ne.1) goto 407
-          ichain=1
-          goto 410
-407     continue
-        ichain=2
+        ichain=iabs(ifp2vc(indvc))
+        if(ichain.lt.1.or.ichain.gt.3) then
+          ierr=-209
+          goto 990
+        endif
       else    !VLBA
         indbc=ia2hx(ldevfp,1)
         if(ichcm_ch(ldevfp,1,'ia').eq.0) then
           ichain=1
         else if(ichcm_ch(ldevfp,1,'ib').eq.0) then
           ichain=2
+        else if(ichcm_ch(ldevfp,1,'ic').eq.0) then
+          ichain=3
+        else if(ichcm_ch(ldevfp,1,'id').eq.0) then
+          ichain=4
         else if(indbc.ge.1.and.indbx.le.14) then
           call fs_get_bbc_source(source,indbc)
-          if(source.eq.0) then
-            ichain=1
-          else if(source.eq.1) then
-            ichain=2
-          else
+          ichain=source+1
+          if(ichain.lt.1.or.ichain.gt.4) then
             ierr=-210
             goto 990
           endif
@@ -248,10 +252,18 @@ C  Now check the cal and freq values.
         cal = caltmp(1)
         bm=beamsz_fs(1)
         fx=flx1fx_fs
-      else
+      else if(ichain.eq.2) then
         cal = caltmp(2)
         bm=beamsz_fs(2)
         fx=flx2fx_fs
+      else if(ichain.eq.3) then
+        cal = caltmp(3)
+        bm=beamsz_fs(3)
+        fx=flx3fx_fs
+      else if(ichain.eq.4) then
+        cal = caltmp(4)
+        bm=beamsz_fs(4)
+        fx=flx4fx_fs
       endif
       if(cal.ne.0) goto 415
         ierr = -203
@@ -263,6 +275,7 @@ C  Now check the cal and freq values.
       calfp = cal
       bmfp_fs= bm
       fxfp_fs = fx
+      ichfp_fs = ichain
       if((rack.eq.iand(rack,MK3)).or.(rack.eq.iand(rack,MK4))) then
         if(cjchar(ldevfp,1).eq.'i') goto 504
         indvc = ia2hx(ldevfp,2)
@@ -281,6 +294,7 @@ C
 510   continue
       call write_quikr
       call run_prog('fivpt','nowait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      ierr=0
 C      Schedule FIVPT
 990   ip(1) = 0
       ip(2) = 0

@@ -1,0 +1,2 @@
+rm -i unix.[1-9]*
+rm -ir /etc/conf/kconfig.d/unix.*

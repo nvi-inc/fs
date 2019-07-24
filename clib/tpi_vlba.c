@@ -17,7 +17,7 @@ static char ch[ ]={"123456789abcde"};
 void tpi_vlba(ip,itpis_vlba)                    /* sample tpi(s) */
 long ip[5];                                     /* ipc array */
 int itpis_vlba[MAX_DET]; /* detector selection array */
-                      /* in order: bbc1(U), bbc1(L), ..., bbc15(U), bbc15(L), */
+                      /* in order: bbc1(U), bbc1(L), ..., bbc14(U), bbc14(L), */
                       /*           ia, ib, ic, id; value: 0=don't use, 1=use */
 {
     struct req_buf buffer;
@@ -31,13 +31,20 @@ int itpis_vlba[MAX_DET]; /* detector selection array */
      if(1==itpis_vlba[i]) {
        if(i<(2*MAX_BBC)) {                   /* bbc(s): */
          request.device[0]='b';
-         request.device[1]=ch[i/2];                /* '1'-'e' */
+         request.device[1]=ch[i%MAX_BBC];                /* '1'-'e' */
        } else {                              /* ifd(s): */
          request.device[0]='i';
-         request.device[1]=ch[((i-30)/2)*2+9];   /* 'a' or 'c' */
+         request.device[1]=ch[((i-2*MAX_BBC)/2)*2+9];   /* 'a' or 'c' */
        }
+#if 0
        if(0==(i%2)) request.addr=0x06;        /* USB or ia or ic */
        else request.addr=0x07;                /* LSB or ib or id */
+#endif
+       if (i<MAX_BBC || (i>=2*MAX_BBC && 1==(i%2)))
+         request.addr=0x07;
+       else
+         request.addr=0x06;
+
        add_req(&buffer,&request);
      }
     }
@@ -115,11 +122,12 @@ float caltmp;
            tpi=shm_addr->tpi[ i];             /* various pieces */
            tpic=shm_addr->tpical[ i];
            tpiz=shm_addr->tpizero[ i];        /* avoid overflow | div-by-0 */
-           if(fabs((double)(tpic-tpi))<0.5)
-             shm_addr->tsys[ i]=1e9;
+           if(fabs((double)(tpic-tpi))<0.5 || tpic > 65534 || tpi > 65534
+              || tpiz < 1 )
+             shm_addr->systmp[ i]=1e9;
            else
-             shm_addr->tsys[ i]=(tpi-tpiz)*caltmp/(tpic-tpi);
-           flt2str(ibuf,shm_addr->tsys[ i],8,1);
+             shm_addr->systmp[ i]=(tpi-tpiz)*caltmp/(tpic-tpi);
+           flt2str(ibuf,shm_addr->systmp[ i],8,1);
            strcat(ibuf,",");
          }
        }

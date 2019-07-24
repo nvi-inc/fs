@@ -12,7 +12,7 @@
 #define HR_SECS		3600L
 #define MIN_SECS	60L
 
-void rte2secs_(it,seconds)
+void rte2secs(it,seconds)
 int it[6];
 long *seconds;
 {

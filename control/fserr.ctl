@@ -269,6 +269,21 @@ Incorrect amount of digits,?WWW, in year from LOCATION.CTL.  Should be 4.
 BO -173
 Year,?WWW, in LOCATION.CTL is wrong. Must end in a 0, i.e. 1990.
 ""
+BO -180
+Error opening TIME.CTL FMP ?FFF
+""
+BO -181
+Error decoding rate field in TIME.CTL
+""
+BO -182
+Error decoding span field in TIME.CTL
+""
+BO -183
+Error decoding model field in TIME.CTL
+""
+BO -189
+Error reading TIME.CTL FMP ?FFF
+""
 CH   -1
 Trouble with class buffer in CHEKR
 ""
@@ -526,6 +541,42 @@ Tape head 1 is not in requested position.
 ""
 CH -352
 Tape head 2 is not in requested position.
+""
+CH -360
+IF3 module shows the majority of possible error conditions
+""
+CH -361
+IF3 module is not in remote
+""
+CH -362
+IF3 attenuator does not check with requested value.
+""
+CH -363
+IF3 mixer state does not check with request.
+""
+CH -364
+IF3 switch 1 setting does not check with request.
+""
+CH -365
+IF3 switch 2 setting does not check with request.
+""
+CH -366
+IF3 switch 3 setting does not check with request.
+""
+CH -367
+IF3 switch 4 setting does not check with request.
+""
+CH -368
+IF3 frequency does not check with equip.ctl value.
+""
+CH -369
+IF3 lo is unlocked.
+""
+CH -370
+Total power integrator overflow on IF3
+""
+CH -371
+IF3 alarm is on
 ""
 CH -401
 Head is still moving.
@@ -881,6 +932,9 @@ K-band amplifier can be turned ON or OFF.
 QB -207
 Noise cal can be ON, OFF, EXT, OON, or OOFF.
 ""
+QB -301
+WARNING: ANTCN not being run, antenna device is /dev/null.
+""
 QC -101
 No default for CAL switch.
 ""
@@ -1029,34 +1083,34 @@ QK -101
 No default for the list of TPIs to be read.
 ""
 QK -201
-1st TPI requested must be ALL,EVEN,ODD,IF1,IF2,V1,...V14.
+1st TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -202
-2nd TPI requested must be ALL,EVEN,ODD,IF1,IF2,V1,...V14.
+2nd TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -203
-3rd TPI requested must be ALL,EVEN,ODD,IF1,IF2,V1,...V14.
+3rd TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -204
-4th TPI requested must be ALL,EVEN,ODD,IF1,IF2,V1,...V14.
+4th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -205
-5th TPI requested must be ALL,EVEN,ODD,IF1,IF2,V1,...V14.
+5th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -206
-6th TPI requested must be ALL,EVEN,ODD,IF1,IF2,V1,...V14.
+6th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -207
-7th TPI requested must be ALL,EVEN,ODD,IF1,IF2,V1,...V14.
+7th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -208
-8th TPI requested must be ALL,EVEN,ODD,IF1,IF2,V1,...V14.
+8th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -209
-9th TPI requested must be ALL,EVEN,ODD,IF1,IF2,V1,...V14.
+9th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QK -210
-10th TPI requested must be ALL,EVEN,ODD,IF1,IF2,V1,...V14.
+10th TPI requested must be ALL,EVEN,ODD,IF1,IF2,IF3,V1,...V14.
 ""
 QL -101
 No default for the MAT address.
@@ -1099,6 +1153,9 @@ Error specifying second offset.
 ""
 QO -301
 WARNING: ONSOURCE status is SLEWING!
+""
+QO -302
+WARNING: ANTCN not being run, antenna device is /dev/null.
 ""
 QO -401
 No default for BEAMx= until LO and IFD have been setup.
@@ -1176,7 +1233,7 @@ QQ -102
 No default for patching, you must give at least one
 ""
 QQ -201
-Parameter must be LO1 or LO2, no default
+Parameter must be LO1, LO2, or LO3, no default
 ""
 QQ -202
 VC number must be from 1 to 14
@@ -1266,7 +1323,10 @@ QS -304
 No parameters are allowed after MOON.
 ""
 QS -305
-Error RP'ing MOON program
+No parameters are allowed after: stow, idle, disable, or service.
+""
+QS -306
+WARNING: ANTCN not being run, antenna device is /dev/null.
 ""
 QT -201
 Lowtape sensor must be OFF or LOW.
@@ -1341,7 +1401,7 @@ QZ -201
 Axis must be HADC, AZEL, XYEW, or XYSN.
 ""
 QZ -202
-Detector device must be VC1, ..., VC14, IF1 or IF2.
+Detector device must be VC1, ..., VC14, IF1, IF2, IF3.
 ""
 QZ -203
 Cal noise source temp not retrievable from COMMON.
@@ -1389,7 +1449,7 @@ QZ -402
 Integration period must be between 1 and 10.
 ""
 QZ -403
-Detector device 1 must be VC1, ..., VC14, IF1 or IF2.
+Detector device 1 must be VC1, ..., VC14, IF1, IF2, or IF3.
 ""
 QZ -404
 Cal noise source temp for device 1 not retrievable from COMMON.
@@ -1398,7 +1458,7 @@ QZ -405
 Beam size for device 1 was not retrievable from COMMON.
 ""
 QZ -406
-Detector device 2 must be VC1, ..., VC14, IF1 or IF2.
+Detector device 2 must be VC1, ..., VC14, IF1, IF2 or IF3.
 ""
 QZ -407
 Cal noise source temp for device 2 not retrievable from COMMON.
@@ -1419,16 +1479,16 @@ QZ -412
 VC for device 2 was not setup with PATCH.
 ""
 QZ -413
-bbc for device 1 not set-up for ifa or ifb.
+bbc for device 1 not set-up for one of ifa ... ifd.
 ""
 QZ -414
-Detector device 1 not one of ia, ib, or bbc1 ... bbc14.
+Detector device 1 not one of ifa ... ifd or bbc1 ... bbc14.
 ""
 QZ -415
-bbc for device 2 not set-up for ifa or ifb.
+bbc for device 2 not set-up for one of ifa ... ifd.
 ""
 QZ -416
-Detector device 2 not one of ia, ib, or bbc1 ... bbc14.
+Detector device 2 not one of ifa ... ifd or bbc1 ... bbc14.
 ""
 QZ -501
 ONOFF is not dormant.
@@ -1449,7 +1509,16 @@ Q* -101
 You cannot default all the LO's
 ""
 Q* -201
-LO frequency must be a positive real number
+LO frequency 1 must be a positive real number
+""
+Q* -202
+LO frequency 2 must be a positive real number
+""
+Q* -203
+LO frequency 3 must be a positive real number
+""
+Q* -204
+LO frequency 4 must be a positive real number
 ""
 Q# -201
 An invalid number was specified for an LU
@@ -1739,6 +1808,36 @@ No second head for VLBA
 Q@ -506
 No second head for VLBA so calibration not valid. 
 ""
+Q+ -201
+if3 attenuation must be one of 0, ..., 63, max, or old.
+""
+Q+ -202
+if3 mixer state must be in or out.
+""
+Q+ -203
+if3 switch 1 state must be 1 or 2.
+""
+Q+ -204
+if3 switch 2 state must be 1 or 2.
+""
+Q+ -205
+if3 switch 3 state must be 1 or 2.
+""
+Q+ -206
+if3 switch 4 state must be 1 or 2.
+""
+Q+ -303
+if3 switch 1 not available, check equip.ctl.
+""
+Q+ -304
+if3 switch 2 not available, check equip.ctl.
+""
+Q+ -305
+if3 switch 3 not available, check equip.ctl.
+""
+Q+ -306
+if3 switch 4 not available, check equip.ctl.
+""
 RC -1
 Tape drive has no vacuum.
 "
@@ -1764,16 +1863,13 @@ SC   -1
 setcl: incorrect number of class buffers.
 ""
 SC   -2
-setcl: fomatter time out-of-range
+setcl: formatter time out-of-range
 ""
 SC   -3
-setcl: cpu time sampled before formatter out-of-range.
+setcl: reseting system clock failed.
 ""
 SC   -4
-setcl: cpu time sampled after formatter out-of-range.
-""
-SC   -5
-setcl: reseting system clock failed.
+setcl: formatter to cpu time difference greater than two weeks
 ""
 SC  -10
 setcl: failed too many times, time information not updated.

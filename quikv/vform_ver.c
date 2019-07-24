@@ -9,9 +9,8 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-void vform_ver(version,ierr,ip)
+void vform_ver(version,ip)
 int *version;
-int *ierr;
 long ip[5];
 {
   struct vform_mon lclm;
@@ -32,15 +31,16 @@ long ip[5];
   skd_run("mcbcn",'w',ip);
   skd_par(ip);
 
-  if(ip[2]<0) goto error;
+  if(ip[2]<0)
+    return;
 
   opn_res(&buff_out,ip);
   get_res(&response,&buff_out); mc60vform(&lclm,response.data);
 
   if(response.state == -1) {
      clr_res(&buff_out);
-     *ierr=-401;
-     goto error;
+     ip[2]=-401;
+     return;
   }
   clr_res(&buff_out);
 
@@ -48,7 +48,4 @@ long ip[5];
 
   return;
 
-error:
-      ip[2]=*ierr;
-      return;
 }

@@ -12,7 +12,7 @@ C  SUBROUTINES CALLED:
 C 
 C
 C  LOCAL VARIABLES: 
-      integer nbbc
+      integer nbbc,ndist
       integer*2 lmodna(16)
       integer*2 ldistna(2)
       integer icherr(10)
@@ -20,7 +20,7 @@ C  LOCAL VARIABLES:
 C
 C
 C  INITIALIZED:
-      data nbbc/16/
+      data nbbc/14/,ndist/2/
       data nbbcerr/10/  !! number of possible bbc errors 
       data niferr/5/    !! number of possible if errors 
       data lmodna /2Hb1,2Hb2,2Hb3,2Hb4,2Hb5,2Hb6,2Hb7,2Hb8,2Hb9,2Hba,
@@ -53,7 +53,7 @@ C
 C
 C Check the if distributors
 C
-      do idist=1,2
+      do idist=1,ndist
         do j=1,nbbcerr
           icherr(j)=0
         enddo
@@ -80,8 +80,9 @@ C
       do j=1,5
         icherr(j)=0
       enddo
-      call fs_get_ichvlba(ichvlba(19),19)
-      if(ichvlba(19).le.0.or.ichecks(19).ne.ichvlba(19)) goto 399
+      in=1+nbbc+ndist
+      call fs_get_ichvlba(ichvlba(in),in)
+      if(ichvlba(in).le.0.or.ichecks(in).ne.ichvlba(in)) goto 399
       ierr=0
       call vformchk(icherr,ierr)
       if (ierr.ne.0) then

@@ -4,13 +4,15 @@ cxx      implicit none
       parameter (ifsnum=256)
       integer*4 ip(5)
       dimension lnames(12,ifsnum)
-      integer*2 lproc1(10,80),lproc2(10,80)
+      integer MAX_PROC
+      PARAMETER (MAX_PROC=128)
+      integer*2 lproc1(10,MAX_PROC),lproc2(10,MAX_PROC)
       integer itscb(13,15)
       integer idcbsk(2)
       integer ntscb,maxpr1,maxpr2,nnames,ierr,idum,fc_rte_prior
       data ntscb/15/
 C                     Number of available entries in ITSCB
-      data maxpr1/80/, maxpr2/80/
+      data maxpr1/MAX_PROC/, maxpr2/MAX_PROC/
 C                     Number of entries in each proc list
       data nnames/ifsnum/
 C                     Maximum number of entries available in LNAMES
@@ -30,5 +32,5 @@ C
 
 C  HARI-KIRI
 
-      call fc_exit( -1)
+      call fc_exit( 0)
       end

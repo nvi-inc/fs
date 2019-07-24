@@ -35,6 +35,8 @@ C 2.5.   SUBROUTINE INTERFACE:
 C 
 C 3.  LOCAL VARIABLES 
 C 
+      integer*4 freq
+      integer*4 isw(4)
       dimension ld(3) 
 C      - dummy for VC conversion
       dimension tret(2)
@@ -66,7 +68,7 @@ C
       nr = 0
       it = 0
       ierr = 0
-      do 190 i=1,16
+      do 190 i=1,17
         if (itpis(i).eq.0) goto 190
         if (nr.gt.ncrec) goto 190
         if (nr.eq.ncrec) goto 120
@@ -91,10 +93,22 @@ C                     Put the value into the response
         it = 1
         goto 190
 120     continue
+        if (i.gt.16) goto 130
         call ma2if(ibufd,ibuf,id,id,id,id,tret(1),tret(2),id)
         if (i.eq.16) tret(1) = tret(2)
         if (tret(1).eq.65535.) tret(1)=1.d9
 C                     For IF2, pick up second value 
+        if (isub.eq.3) tpsor(i+14)=tret(1)
+        if (isub.eq.4) tpspc(i+14)=tret(1)
+        if (isub.eq.7) tpzero(i+14)=tret(1) 
+        it = 1
+        nch = nch + ir2as(tret,ibufr,nch,6,0)-1
+        nch = mcoma(ibufr,nch)
+        goto 190
+c
+130     continue
+        call ma2i3(ibufd,ibuf,iat,imix,isw(1),isw(2),isw(3),isw(4),
+     &                iswp,freq,irem,ilo,tret(1))
         if (isub.eq.3) tpsor(i+14)=tret(1)
         if (isub.eq.4) tpspc(i+14)=tret(1)
         if (isub.eq.7) tpzero(i+14)=tret(1) 

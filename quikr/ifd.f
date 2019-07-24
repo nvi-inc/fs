@@ -45,6 +45,7 @@ C
         ierr = -1
         goto 990
       endif
+      call ifill_ch(ibuf,1,ilen,' ')
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum)
       nchar = ireg(2) 
       ieq = iscn_ch(ibuf,1,nchar,'=')

@@ -111,20 +111,20 @@ C
 C
 C             if VLBA recorder, then this section
 200   continue
-      call fs_get_ichvlba(ichvlba(20),20)
-      ichold = ichvlba(20) 
-      ichvlba(20) = 0
-      call fs_set_ichvlba(ichvlba(20),20)
+      call fs_get_ichvlba(ichvlba(18),18)
+      ichold = ichvlba(18) 
+      ichvlba(18) = 0
+      call fs_set_ichvlba(ichvlba(18),18)
 c
       call fc_et_v(ip)
       call mvdis(ip,iclcm)
       if (ichold.ne.-99) then
-        ichvlba(20) = ichold
-        call fs_set_ichvlba(ichvlba(20),20)
+        ichvlba(18) = ichold
+        call fs_set_ichvlba(ichvlba(18),18)
       endif
       if (ichold.ge.0) then
-        ichvlba(20) = mod(ichold,1000)+1
-        call fs_set_ichvlba(ichvlba(20),20)
+        ichvlba(18) = mod(ichold,1000)+1
+        call fs_set_ichvlba(ichvlba(18),18)
         kmvtp_fs=.true.
       endif
       return

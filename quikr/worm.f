@@ -11,12 +11,6 @@ C
       equivalence (reg,ireg(1)),(parm,iparm(1))
       data ilen/100/
 C
-C HISTORY:
-C  WHO  WHEN    WHAT
-C  gag  920727  Added code for stack input (parameter 1) to be
-C               0 or 1 for write or read, respectively.
-C  nrv  921027  Change 0 or 1 to 1 or 2
-C
       ichold=-99
 C
 C  1.  Get the command
@@ -28,6 +22,7 @@ C
         ip(3)=-1
         goto 990
       endif
+      call ifill_ch(ibuf,1,ilen,' ')
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum)
       nchar=min0(ilen,ireg(2))
       ieq=iscn_ch(ibuf,1,nchar,'=')
@@ -45,16 +40,15 @@ C   Head to move
 C
       call fs_get_drive(drive)
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if (((ichcm_ch(parm,1,'r').eq.0).or.
-     .     (ichcm_ch(parm,1,'2').eq.0)).and.
-     .     (VLBA.ne.iand(drive,VLBA))) then
+      if((ichcm_ch(parm,1,'r').eq.0.or.ichcm_ch(parm,1,'2').eq.0)
+     &   .and.VLBA.ne.iand(drive,VLBA)) then
         ihd = 2
-      else if((ichcm_ch(parm,1,'r').eq.0).or.
-     .        (ichcm_ch(parm,1,'2').eq.0)) then
+      else if(ichcm_ch(parm,1,'r').eq.0 .or.
+     &        ichcm_ch(parm,1,'2').eq.0) then
         ip(3)=-501
         goto 990
-      else if((ichcm_ch(parm,1,'w').eq.0).or.
-     .        (ichcm_ch(parm,1,'1').eq.0)) then
+      else if(ichcm_ch(parm,1,'w').eq.0 .or.
+     &        ichcm_ch(parm,1,'1').eq.0) then
         ihd = 1
       else if (cjchar(parm,1).eq.','.and.VLBA.ne.iand(drive,VLBA)) then
         ihd = 2

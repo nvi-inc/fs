@@ -19,9 +19,10 @@ C     TIMTOL - tolerance on comparison between formatter and HP
       logical kalarm
 C      - true for alarm ON, i.e. NAK response from MAT
       integer*2 ibuf1(40),ibuf2(5)
-      integer it1(13),itfm(6)
+      integer itfm(6)
       integer*4 secs_before,secs_after,secs_fm
-      integer*4 timtol,diff_before,diff_after,diff_both,timchk
+      integer*4 timtol,diff_before,diff_after,diff_both
+      integer*4 centisec(2)
       parameter (ibuf1len=40)
       parameter (ibuf2len=5)
 C      - Arrays for recording identified error conditions
@@ -38,7 +39,7 @@ C
       enddo
       call ifill_ch(ibuf2,1,ibuf2len*2,' ')
       ireg(2) = get_buf(iclass,ibuf2,-10,idum,idum)
-      ireg(2) = get_buf(iclass,it1,-52,idum,idum)
+      ireg(2) = get_buf(iclass,centisec,-8,idum,idum)
       call ifill_ch(ibuf1,1,ibuf1len*2,' ')
       ireg(2) = get_buf(iclass,ibuf1,-10,idum,idum)
       call ma2fm(ibuf1,in,im,ir,isyn,itstfm,isgnfm,irunfm,
@@ -60,19 +61,17 @@ C
       itfm(3)=ias2b(ibuf2,5,2)
       itfm(2)=ias2b(ibuf2,7,2)
       itfm(1)=ias2b(ibuf2,9,2)
-      call rte2secs(it1,secs_before)
-      call rte2secs(itfm,secs_fm)
-      call rte2secs(it1(7),secs_after)
+      call fc_rte_fixt(secs_before,centisec(1))
+      call fc_rte2secs(itfm,secs_fm)
+      call fc_rte2secs(secs_after,centisec(2))
+c
+      diff_before=(secs_fm-secs_before)*100+itfm(1)-centisec(1)
+      diff_after=(secs_after-secs_fm)*100+centisec(2)-itfm(1)
+      diff_both=diff_after-diff_before
 
-      diff_before=abs((secs_fm-secs_before)*100+itfm(1)-it1(1))
-      diff_after=abs((secs_after-secs_fm)*100+it1(7)-itfm(1))
-      diff_both=abs(diff_after-diff_before)
-      timchk=timtol+it1(13)      !add in the time-out in use
-
-      if(diff_both.gt.2*timchk) then
+      if(diff_both.gt.2*timtol) then
         inerr(9)=inerr(9)+icherr(15*nverr+niferr+9)+1
-cxx      else if(diff_before.gt.timchk.or.diff_after.lt.-timchk) then
-      else if(diff_before.gt.timchk.or.diff_after.gt.timchk) then
+      else if(diff_before.lt.-timtol.or.diff_after.gt.timtol) then
         inerr(10)=inerr(10)+1
       endif
 

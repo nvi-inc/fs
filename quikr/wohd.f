@@ -23,19 +23,13 @@ C
       integer ipass(2),ispdhd,idir
       real*4 tmove
       real*4 micnow(2),micold,volt(2)
-      logical koffset
-      data ipass/2*0/
-      data koffset/.false./
-C
-C HISTORY:
-C  WHO  WHEN    WHAT
-C  gag  920721  Added koffset logical. This is false because the ipass
-C               being 0 will already not apply the offsets to the heads.
+      logical kauto
+      data ipass/2*0/,kauto/.true./
 C
 C  get current location
 C
       if(mod(icl,2).eq.1) then
-        call mic_read(hd,ipass,micnow,ip,koffset) !use existing calibration
+        call mic_read(hd,ipass,kauto,micnow,ip)   !use existing calibration
       else
         call vlt_read(hd,volt,ip)           ! raw measurements appropriate
         if(hd.eq.1) scale=rswrite_fs        ! for new
@@ -54,7 +48,7 @@ C
       if(ip(3).ne.0) return
 C
       if(mod(icl,2).eq.1) then
-        call mic_read(hd,ipass,micnow,ip,koffset)
+        call mic_read(hd,ipass,kauto,micnow,ip)
       else
         call vlt_read(hd,volt,ip)
         micnow(hd)=volt(hd)*scale
@@ -74,7 +68,7 @@ C
       if(ip(3).ne.0) return
 C
       if(mod(icl,2).eq.1) then
-        call mic_read(hd,ipass,micnow,ip,koffset)
+        call mic_read(hd,ipass,kauto,micnow,ip)
       else
         call vlt_read(hd,volt,ip)
         micnow(hd)=volt(hd)*scale
@@ -94,7 +88,7 @@ C
       if(ip(3).ne.0) return
 C
       if(mod(icl,2).eq.1) then
-        call mic_read(hd,ipass,micnow,ip,koffset)
+        call mic_read(hd,ipass,kauto,micnow,ip)
       else
         call vlt_read(hd,volt,ip)
         micnow(hd)=volt(hd)*scale
@@ -114,7 +108,7 @@ C
       if(ip(3).ne.0) return
 C
       if(mod(icl,2).eq.1) then
-        call mic_read(hd,ipass,micnow,ip,koffset)
+        call mic_read(hd,ipass,kauto,micnow,ip)
       else
         call vlt_read(hd,volt,ip)
         micnow(hd)=volt(hd)*scale

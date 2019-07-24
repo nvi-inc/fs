@@ -1,5 +1,4 @@
-/* MCBCN  MCB communication daemon CAK 16 Dec 91*/
-/* Copyright 1991, 1992 Interferometrics Inc. */
+/* mcbcn.c - mcb control program */
 
 /* include files */
 #include <stdio.h>
@@ -34,12 +33,10 @@
 #define CKUNB 1
 #define CHKA 4
 #define CHKAB 3
-#define TIME 5
-#define TIMEB 5
+#define TIMEW 5
+#define TIMEWB 5
 #define SRAW 6
 #define SRAWB 5
-#define TIMEW 7
-#define TIMEWB 5
 #define MON 0      /* mcb monitor request */
 #define CMD 1      /* mcb command request */
 #define BUFSIZE 512 /* size of the input and output buffers */
@@ -291,7 +288,6 @@ int doinit()
     cnt = 0;
 
 #ifdef DEBUG
-    printf ("MCBCN Copyright 1991, 1992 Interferometrics Inc.\n");
     printf ("MCBCN: initialization for the following devices\n");
     printf ("\nNM ID base  len  ");
     printf ("NM ID base  len  ");
@@ -330,8 +326,6 @@ int doproc(ip4)    /* process the input class buffers */
 long ip4;
 {
     time_t fmt1; /* formatter time first try */
-    time_t sys1; /* system time first try */
-    time_t sys2; /* system time second try */
     int cnt;     /* general purpose counter */
     int nmess;   /* number of messages processed */
     int rtn1;    /* argument for cls_rcv - unused */
@@ -349,7 +343,7 @@ long ip4;
     unsigned char outmess[100]; /* output message holder */
     int numbuf;       /* number of buffers */
     int iscmd;        /* is RAW request a command? */
-    int it1[5],it61,it2[5],it62; /* arguments of rte_time */
+    int centisec[2];             /* arguments of rte_rawt */
     unsigned short devdatap;      /* temporary for TIMEW command */
     int done;                    /* TIMEW has completed */
     struct tms tms_buff;
@@ -529,47 +523,6 @@ long ip4;
                     inptr += CHKAB;
                     break;
 
-                case TIME:   /* get formatter time */
-#ifdef DEBUG
-                    printf("TIME request received\n");
-#endif
-/* system time immediately before data request */
-                    sys1 = time(0);
-                    outmess[0] = 2;
-                    memcpy( outmess+1, (char*) &sys1, 4);
-                    if (!initialized) {
-#ifdef DEBUG
-                        printf("MCBCN (TIME): not initialized\n");
-#endif
-                        return(-104);
-                    }
-                    memcpy(ip4,inbuf+inptr+1,2);
-                    if (!getad(inbuf+inptr+1, &devid, &devad, &devlen)) {
-#ifdef DEBUG
-                        printf("MCBCN bad device mnemonic %c %c\n",
-                            inbuf[inptr+1],inbuf[inptr+2]);
-#endif
-                        return(-105);
-                    }
-                    devad += inbuf[inptr+4] + (inbuf[inptr+3]<<8);
-                    devdata = inbuf[inptr+6] + (inbuf[inptr+5]<<8);
-                    mcb_get (devad, &devdata, &result);
-                    outmess[5] = (devdata>>8) & 0xff;
-                    outmess[6] = devdata & 0xff;
-
-/* system time immediately after data request */
-                    sys2 = time(0);
-                    memcpy( outmess+7, (char*) &sys2, 4);
-                    if (result >= 0) {
-                        putout(outmess, 11);
-                        result = 2;
-                    } else {
-                        outmess[0] = result;
-                        putout(outmess,1);
-                    }
-                    inptr += TIMEB;
-                    break;
-
                 case SRAW:   /* send bytes to the MCB */
 #ifdef DEBUG
                     printf("SRAW request received\n");
@@ -613,30 +566,28 @@ long ip4;
                     devad += inbuf[inptr+4] + (inbuf[inptr+3]<<8);
                     devdata = inbuf[inptr+6] + (inbuf[inptr+5]<<8);
                     
+                    cnt=0;
                     end=times(&tms_buff)+110;  /* calculate ending time */
                     while(end>times(&tms_buff)) {
                         done = FALSE;
-			rte_time (it1,&it61);
+			rte_rawt (centisec);
                         mcb_get (devad, &devdata, &result);
-                        rte_time (it2,&it62);
+                        rte_rawt (centisec+1);
                         if(result < 0){
                             outmess[0]=result;
                             putout(outmess,1);
                             inptr += TIMEWB;
                             goto done_timew;
                         }
-                        if (cnt == 0) devdatap = devdata;
+                        if (cnt++ == 0) devdatap = devdata;
                         if (devdatap != devdata)
                             {
                             outmess[1] = (devdata>>8) & 0xff;
                             outmess[2] = devdata & 0xff;
-                            memcpy( outmess+ 3, (char*) it1, 24);
-                            memcpy( outmess+23, (char*) &it61, 4);
-                            memcpy( outmess+27, (char*) it2, 24);
-                            memcpy( outmess+47, (char*) &it62, 4);
+                            memcpy( outmess+ 3, (char*) centisec, 8);
                             if (result >= 0) 
                                 {
-                                putout(outmess, 51);
+                                putout(outmess, 11);
                                 result = 1;
                                 } 
                             else  

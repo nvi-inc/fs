@@ -209,10 +209,10 @@ long ip[5];                           /* ipc parameters */
 
          } else if(0==strcmp(command->argv[0],"release")) {
             request.type=0;
-            request.addr=0xba;
-            request.data=0x01; add_req(&buffer,&request);
             request.addr=0xd0;
             request.data=0x00; add_req(&buffer,&request);
+            request.addr=0xba;
+            request.data=0x01; add_req(&buffer,&request);
             goto mcbcn;
 
          } else if(0==strcmp(command->argv[0],"zero")) {
@@ -225,7 +225,7 @@ long ip[5];                           /* ipc parameters */
              end_req(ip,&buffer);
              ierr = rec_dec(command->argv[0],ip);
              if (ierr!=0) goto error;
-             goto parse;
+             goto display;
          }
 
 parse:
@@ -243,6 +243,7 @@ mcbcn:
       if (ichold != -99) shm_addr->check.rec=ichold;
       if (ichold >= 0) shm_addr->check.rec=ichold % 1000 + 1;
 
+display:
       if(ip[2]<0) return;
       rec_dis(command,ip);
       return;

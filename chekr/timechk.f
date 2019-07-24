@@ -5,10 +5,11 @@
 C  LOCAL VARIABLES
 
       integer*4 secs_fm,secs_bef,secs_aft,diff_bef,diff_aft
-      integer itm(13),it(6)
+      integer*4 centisec(2)
+      integer it(6)
       integer ip(5)
 C     TIMTOL - tolerance on comparison between formatter and HP 
-      integer*4 timtol,timchk,diff_both
+      integer*4 timtol,diff_both
 C
 C  INITIALIZED:
 C
@@ -20,7 +21,7 @@ C
       nerr = 0
 c
 50    continue
-      call fc_get_vtime(itm(1),itm(7),it,ip)
+      call fc_get_vtime(centisec,it,ip)
       if (ip(3).lt.0) then
          nerr=nerr+1
          if(nerr.le.3) goto 50
@@ -28,7 +29,7 @@ c
          return
       endif
 C
-      call rte2secs(it,secs_fm)
+      call fc_rte2secs(it,secs_fm)
       if(secs_fm.lt.0) then
         nerr=nerr+1
         if(nerr.gt.2) then
@@ -37,36 +38,19 @@ C
         endif
         goto 50
       endif
-      call rte2secs(itm,secs_bef)
-      if(secs_bef.lt.0) then
-        nerr=nerr+1
-        if(nerr.gt.2) then
-          ierr = -1
-          return
-        endif
-        goto 50
-      endif
-      call rte2secs(itm(7),secs_aft)
-      if(secs_aft.lt.0) then
-        nerr=nerr+1
-        if(nerr.gt.2) then
-          ierr = -1
-          return
-        endif
-        goto 50
-      endif
+      call fc_rte_fixt(secs_bef,centisec(1))
+      call fc_rte_fixt(secs_aft,centisec(2))
 C
 C*****************THE REAL THING*******************
 C
-C     diff_bef=abs((secs_fm-secs_bef)*100+it(1)-itm(1))
-      diff_aft=abs((secs_fm-secs_aft)*100+it(1)-itm(7))
+      diff_bef=(secs_fm-secs_bef)*100+it(1)-centisec(1)
+      diff_aft=(secs_aft-secs_fm)*100+centisec(2)-it(7)
 C
-      diff_both=abs(diff_aft-diff_bef)
-      timchk=timtol
+      diff_both=diff_aft-diff_bef
 
-      if(diff_both.gt.2*timchk) then
+      if(diff_both.gt.2*timtol) then
         ierror = -328
-      else if(diff_bef.gt.timchk.or.diff_aft.gt.timchk) then
+      else if(diff_bef.gt.timtol.or.diff_aft.gt.timtol) then
         ierror = -329
       endif
 C

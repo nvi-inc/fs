@@ -16,14 +16,13 @@
 #define LSKD_N 8
 #define LLOG_N 8
 #define LEXPER_N 8
-#define SYSTMP_N 30
+#define SYSTMP_N 32
 #define LFREQV_N 90
 #define LNAANT_N 8
 #define LSORNA_N 10
 #define IDEVANT_N 64
 #define IDEVGPIB_N 64
 #define IDEVLOG_N 320
-#define RXLCODE_N 240    /* total characters, 6 chars*40 entries */
 #define IDEVMCB_N 64
 #define HORAZ_N  4*MAX_HOR
 #define HOREL_N  4*MAX_HOR
@@ -826,16 +825,16 @@ void fs_set_ichvlba_(ichvlba,N)
          switch(*N) {
          case 1 : case 2 : case 3 : case 4 : case 5 : case 6 :
          case 7 : case 8 : case 9 : case 10 : case 11 : case 12 :
-         case 13 : case 14 : case 15 : case 16 :
+         case 13 : case 14 :
 	   shm_addr->check.bbc[*N-1] = *ichvlba;
            break;
-         case 17 : case 18 :
-	   shm_addr->check.dist[*N-17] = *ichvlba;
+         case 15 : case 16 :
+	   shm_addr->check.dist[*N-15] = *ichvlba;
            break;
-         case 19 :
+         case 17 :
 	   shm_addr->check.vform = *ichvlba;
            break;
-         case 20 :
+         case 18 :
 	   shm_addr->check.rec = *ichvlba;
            break;
          }
@@ -847,20 +846,48 @@ void fs_get_ichvlba_(ichvlba,N)
          switch(*N) {
          case 1 : case 2 : case 3 : case 4 : case 5 : case 6 :
          case 7 : case 8 : case 9 : case 10 : case 11 : case 12 :
-         case 13 : case 14 : case 15 : case 16 :
+         case 13 : case 14 :
            *ichvlba = shm_addr->check.bbc[*N-1];
            break;
-         case 17 : case 18 :
-	   *ichvlba = shm_addr->check.dist[*N-17];
+         case 15 : case 16 :
+	   *ichvlba = shm_addr->check.dist[*N-15];
            break;
-         case 19 :
+         case 17 :
 	   *ichvlba = shm_addr->check.vform;
            break;
-         case 20 :
+         case 18 :
 	   *ichvlba = shm_addr->check.rec;
            break;
+         default:
+           *ichvlba = 0;
          }
 	}
+
+void fs_set_stchk_(ichk,n)
+int *ichk,*n;
+{
+      shm_addr->stchk[*n-1]=*ichk;
+}
+
+void fs_get_stchk_(ichk,n)
+int *ichk,*n;
+{
+      *ichk=shm_addr->stchk[*n-1];
+}
+
+void fs_set_stcnm_(lhol,n)
+char lhol[2];
+int *n;
+{
+      memcpy(shm_addr->stcnm[*n-1],lhol,2);
+}
+
+void fs_get_stcnm_(lhol,n)
+char lhol[2];
+int *n;
+{
+      memcpy(lhol,shm_addr->stcnm[*n-1],2);
+}
 
 void fs_set_irenvc_(IRENVC)
 	int *IRENVC;
@@ -1246,30 +1273,37 @@ void fs_set_refreq_(refreq)
 	  shm_addr->refreq = *refreq;
 	}
 
-void fs_get_time_offset_(offset,n)
-        long *offset;
-        int *n;
+void fs_get_time_coeff_(secs_off,epoch,offset,rate,span,model)
+        long *secs_off,*epoch,*offset,*span;
+	float *rate;
+	char *model;
 	{
-	  *offset = shm_addr->time.offset[*n];
+		int index;
+
+		*secs_off = shm_addr->time.secs_off;
+		index = 01 & shm_addr->time.index;
+		*epoch = shm_addr->time.epoch[index];
+		*offset = shm_addr->time.offset[index];
+		*rate = shm_addr->time.rate[index];
+		*span = shm_addr->time.span[index];
+                *model = shm_addr->time.model;
 	}
 
-void fs_set_time_offset_(offset,n)
-        long *offset;
-        int *n;
+void fs_set_time_coeff_(secs_off,epoch,offset,rate,span,model)
+        long *secs_off,*epoch,*offset,*span;
+	float *rate;
+	char *model;
 	{
-	  shm_addr->time.offset[*n]=*offset;
-	}
+		int index;
 
-void fs_get_time_index_(time_index)
-        int *time_index;
-	{
-	  *time_index = shm_addr->time.index;
-	}
-
-void fs_set_time_index_(time_index)
-        int *time_index;
-	{
-	  shm_addr->time.index = *time_index;
+		shm_addr->time.secs_off = *secs_off;
+		index = 01 & ~shm_addr->time.index;
+		shm_addr->time.epoch[index] = *epoch;
+		shm_addr->time.offset[index] = *offset;
+		shm_addr->time.rate[index] = *rate;
+		shm_addr->time.span[index] = *span;
+                shm_addr->time.model = *model;
+		shm_addr->time.index = index;
 	}
 
 void fs_get_vgroup_(vgroup)
@@ -1323,73 +1357,5 @@ void fs_get_horel_(HOREL)
 void fs_get_bbc_source_(source,n)
 	int *source, *n;
 	{
-          *source=shm_addr->bbc[*n].source;
+          *source=shm_addr->bbc[*n-1].source;
 	}
-
-void fs_set_rxvfac_(vfac,N)
-	float *vfac;
-	int *N;
-	{
-	  shm_addr->rxvfac[*N-1] = *vfac;
-	}
-
-void fs_get_rxvfac_(vfac,N)
-	float *vfac;
-	int *N;
-	{
-	  *vfac = shm_addr->rxvfac[*N-1];
-	}
-
-void fs_set_rxvoff_(voff,N)
-	float *voff;
-	int *N;
-	{
-	  shm_addr->rxvoff[*N-1] = *voff;
-	}
-
-void fs_set_rxlcode_(rxlcode)
-	char *rxlcode;
-	{
-          size_t N;
-	  N = RXLCODE_N;
-	  memcpy(shm_addr->rxlcode,rxlcode,N);
-/*{ int i;
-fprintf(stdout,"prog set: N=%d shm->rxlcode[0-6],[7-13]=",N);
-for (i=0;i<6;i++) fprintf(stdout,"%c",shm_addr->rxlcode[0][i]);
-for (i=0;i<6;i++) fprintf(stdout,"%c",shm_addr->rxlcode[1][i]);
-fprintf(stdout,"\n");
-}*/
-	}
-
-void fs_get_rxlcode_(rxlcode)
-	char *rxlcode;
-	{
-          size_t N;
-	  N = RXLCODE_N;
-	  memcpy(rxlcode,shm_addr->rxlcode,N);
-/*{ int i;
-fprintf(stdout,"prog get: rxlcode[0-6],[7-13]=");
-for (i=0;i<6;i++) fprintf(stdout,"%c",rxlcode[i]);
-for (i=7;i<13;i++) fprintf(stdout,"%c",rxlcode[i]);
-fprintf(stdout,"\n");
-}*/
-	}
-/*
-void fs_set_rxlcode_(rxlcode,N)
-	char *rxlcode[6];
-	int *N;
-	{
-	  memcpy(shm_addr->rxlcode[*N-1][0],*rxlcode,6);
-	}
-*/
-void fs_set_rxncodes_(rxncodes)
-	int *rxncodes;
-	{
-	  shm_addr->rxncodes = *rxncodes;
-	}
-void fs_get_rxncodes_(rxncodes)
-	int *rxncodes;
-	{
-	  *rxncodes = shm_addr->rxncodes;
-	}
-

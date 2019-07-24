@@ -19,9 +19,7 @@ C  respectively.  These arrays are declared in the FSCOM.FTNI common
 C  file.  The variable NRX_FS, also declared in common, holds the number
 C  of values read from the control file.
 C   - GAG 901206
-C  921020 NRV Add fs_get to get voltage factors
 C
-      call fs_get_rxvfac(rxvfac(ia),ia)
       uadc = vadc  * rxvfac(ia)
 C
 C   LOOKUP AND INTERPOLATE

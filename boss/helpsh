@@ -1,1 +1,1 @@
-xterm -g 85x24+75+75 -sb -name help -e more -w $1 &
+xterm -g 85x24+75+75 -sb -title "fs help" -e more -w $1 &

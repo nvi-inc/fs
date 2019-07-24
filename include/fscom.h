@@ -35,7 +35,7 @@ typedef struct fscom {
         int LFEET_FS[3];
         int lgen[2];
         int IREMTP;
-        int ICHK[20];
+        int ICHK[21];
 	float tempwx;
 	float humiwx;
 	float preswx;
@@ -49,7 +49,7 @@ typedef struct fscom {
         double decdat;
         double alat;
         double wlong;
-	float systmp[30];
+	float systmp[32];
         int ldsign;
 	char lfreqv[90];
         char lnaant[8];
@@ -83,13 +83,15 @@ typedef struct fscom {
         } sem;
 
         struct {
-           int bbc[ MAX_BBC+1];
+           int bbc[ MAX_BBC];
            int dist[ MAX_DIST];
            int vform;
            int rec;
            int vrepro;
            int venable;
         } check;
+        char stcnm[4][2];
+        int  stchk[4];
 
         struct dist_cmd dist[ MAX_DIST];
 
@@ -98,7 +100,6 @@ typedef struct fscom {
         unsigned tpi[ MAX_DET];
         unsigned tpical[ MAX_DET];
         unsigned tpizero[ MAX_DET];
-        float tsys[ MAX_DET];
 
         struct {
            int rack;
@@ -110,8 +111,8 @@ typedef struct fscom {
         struct vform_cmd vform;
         struct venable_cmd venable;
         struct dqa_cmd dqa;
-        float freqlo[5];
-        float frequp[5];
+        float freqlo[4];
+        float frequp[4];
         float diaman;
         float slew1;
         float slew2;
@@ -124,8 +125,13 @@ typedef struct fscom {
         int i20kch;
         int iacttp;
         struct {
-          int index;
+          float rate[2];
           long offset[2];
+          long epoch[2];
+          long span[2];
+          long secs_off;
+          int index;
+          char model;
         } time;
         int class_count;
         float horaz[MAX_HOR];
@@ -134,9 +140,5 @@ typedef struct fscom {
         unsigned char hwid;
         int iw_motion;
         int lowtp;
-        char rxlcode[MAX_RXCODES][6];
-        float rxvfac[MAX_RXCODES];
-        float rxvoff[MAX_RXCODES];
-        int rxncodes;
         int form_version;
 } Fscom;

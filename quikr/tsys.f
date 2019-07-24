@@ -21,8 +21,8 @@ C
 C     CALLED SUBROUTINES: TPLIS
 C 
 C 3.  LOCAL VARIABLES 
-      dimension itpis(16) 
-      integer itpis_vlba(34) 
+      dimension itpis(17) 
+      integer itpis_vlba(32) 
 C      - which TPIs to read back, filled in by TPLIS
 C        ICH    - character counter 
 C     NCHAR  - character count
@@ -46,7 +46,7 @@ C     If none, we have the requested TPI readings in ITPIS.
 C     Then start fixing up the output buffer for the response.
 C 
       ierr = 0
-      indtmp = nsub-4 
+      indtmp = mod(nsub-4 ,10)
 C                   Pick up the Tsys1 or 2 index
       call fs_get_rack(rack)
 
@@ -71,13 +71,14 @@ C     3. Loop over the TPIs, calculate Tsys, and add it to the
 C     message for response. 
 C 
       if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
-        do i=1,16 
+        do i=1,17 
           if (itpis(i).ne.0) then
             j = i+14
             if (i.le.14) j=i+(itpivc(i)-1)*14
-            if (j.lt.1 .or. j.gt.30) then
+            if (j.lt.1 .or. j.gt.31) then
               t = -1.0
-            else if (abs(tpspc(j)-tpsor(j)).lt.0.5) then
+            else if (abs(tpspc(j)-tpsor(j)).lt.0.5 .or. tpzero(j).lt.0.5 
+     &        .or. tpspc(j).gt.65534.5.or.tpsor(j).gt.65534.5  ) then
               t= 1d9
               systmp(j) = t
             else

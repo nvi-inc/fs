@@ -6,8 +6,7 @@
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
-
-extern struct fscom *shm_addr;
+#include "../include/shm_addr.h"
 
 main()
 {
@@ -55,19 +54,26 @@ m3init()
   outpt = &outarr[0];
   standout();
   mvaddstr(ROW1,COL1,"Tsys");
-  mvaddstr(ROW1,COL1+13,"(IF1)");
-  mvaddstr(ROW1,COL1+26,"(IF2)");
-  standend();
+  if(shm_addr->equip.rack == VLBA) {
+    mvaddstr(ROW1,COL1+13,"(IFA)");
+    mvaddstr(ROW1,COL1+26,"(IFB)");
+    mvaddstr(ROW1+1,COL1+13,"(IFC)");
+    mvaddstr(ROW1+1,COL1+26,"(IFD)");
+    mvaddstr(ROW1+2,COL1,"BBC");
+  } else {
+    mvaddstr(ROW1,COL1+13,"(IF1)");
+    mvaddstr(ROW1,COL1+26,"(IF2)");
+    mvaddstr(ROW1+1,COL1+13,"(IF3)");
+    mvaddstr(ROW1+2,COL1+1,"VC");
+  }
 
-  standout();
-  mvaddstr(ROW1+1,COL1+1,"VC");
-  mvaddstr(ROW1+1,COL1+7,"Freq"); 
-  mvaddstr(ROW1+1,COL1+16,"Ts-U");
-  mvaddstr(ROW1+1,COL1+24,"Ts-L");
+  mvaddstr(ROW1+2,COL1+7,"Freq"); 
+  mvaddstr(ROW1+2,COL1+16,"Ts-U");
+  mvaddstr(ROW1+2,COL1+24,"Ts-L");
   standend();
 
   for(j=1;j<=14;j++) {
-    move(ROW1+1+j,COL1+1);
+    move(ROW1+2+j,COL1+1);
     preint(outpt,j,-2,1);
     printw("%s",outarr);
   }
@@ -86,22 +92,40 @@ mout3()
 
     outpt = &outarr[0];
     ptfreq= &freq[0];
+
     move(ROW1,COL1+7);
     preflt(outpt,shm_addr->systmp[28],-5,1);
     printw("%s",outarr);
+
     move(ROW1,COL1+20);
     preflt(outpt,shm_addr->systmp[29],-5,1);
     printw("%s",outarr);
 
+    move(ROW1+1,COL1+7);
+    preflt(outpt,shm_addr->systmp[30],-5,1);
+    printw("%s",outarr);
+
+    if(shm_addr->equip.rack == VLBA) {
+      move(ROW1+1,COL1+20);
+      preflt(outpt,shm_addr->systmp[31],-5,1);
+      printw("%s",outarr);
+    }
+
     for (i=1;i<=14;i++) {
-      move(ROW1+1+i,COL1+6);
-      k = (i-1)*6;
-      memcpy(ptfreq,shm_addr->lfreqv+k,6);
+      move(ROW1+2+i,COL1+6);
+      if(shm_addr->equip.rack == VLBA) {
+        long bbc2freq(),freq;
+        freq=bbc2freq(shm_addr->bbc[i-1].freq);
+        sprintf(ptfreq,"%-06.2f",(float)freq/100);
+      } else {
+        k = (i-1)*6;
+        memcpy(ptfreq,shm_addr->lfreqv+k,6);
+      }
       printw("%.6s",ptfreq);
-      move(ROW1+1+i,COL1+15);
+      move(ROW1+2+i,COL1+15);
       preflt(outpt,shm_addr->systmp[i+13],-6,1);
       printw("%s",outarr);
-      move(ROW1+1+i,COL1+23);
+      move(ROW1+2+i,COL1+23);
       preflt(outpt,shm_addr->systmp[i-1],-6,1);
       printw("%s",outarr);
     }

@@ -121,7 +121,6 @@ C
       idumm1 = ichmv(lc,1,5Hundef,1,5)
       nl = 5
       if (ia.ne.0) then
-        call fs_get_rxlcode(rxlcode)
         nl = iflch(rxlcode(1,ia),6)
         idum=ichmv(iad,1,iadc,1,2)
         idumm1 = ichmv(lc,1,rxlcode(1,ia),1,nl) 

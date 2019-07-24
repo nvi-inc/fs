@@ -31,10 +31,16 @@ C     depending on the variable IONSOR=1 or 0.
 C     Schedule ANTCN to get the az,el errors and set IONSOR.
 C
 200   continue
-      call run_prog('antcn','wait',7,idum,idum,idum,idum)
-      call rmpar(ip)
-      ierr = ip(3)
-      return
+      call fs_get_idevant(idevant)
+      if (ichcm_ch(idevant,1,'/dev/null ').ne.0) then
+        call run_prog('antcn','wait',7,idum,idum,idum,idum)
+        call rmpar(ip)
+        ierr = ip(3)
+        return
+      else
+        ierr = -302
+      endif
+
 990   ip(1) = 0
       ip(2) = 0
       ip(3) = ierr

@@ -23,7 +23,7 @@ c
       parameter ( VLBA = z'02'  )
       parameter ( MK4 = z'04'   )
       parameter ( FS_ROOT='/usr2')
-      parameter ( MAX_BBC = 15 )
+      parameter ( MAX_BBC = 14 )
       parameter ( FS_PRIOR= 20)
       parameter ( AN_PRIOR= 10)
       parameter ( MAX_RXCODES = 40)

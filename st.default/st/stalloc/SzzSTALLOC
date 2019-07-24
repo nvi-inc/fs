@@ -1,0 +1,5 @@
+file=/usr2/st/bin/stalloc
+if [ -f ${file} ]
+then
+	${file}
+fi

@@ -120,7 +120,6 @@ C
       idumm1 = ichmv(lc,1,5hundef,1,5)
       nl = 5
       if (ia.ne.0) then
-C       call fs_get_rxlcode(rxlcode(1,ia),ia)
         nl = iflch(rxlcode(1,ia),6)
         iad = iadc
         idumm1 = ichmv(lc,1,rxlcode(1,ia),1,nl)
@@ -157,7 +156,6 @@ C       call fs_get_rxlcode(rxlcode(1,ia),ia)
 C
 C   CONVERT TO ASCII, PUT THE NUMBER OF CHARACTERS INTO A DUMMY VARIABLE
 C
-C     call fs_get_rxvfac(rxvfac(ia),ia)
       vadcst=vadc*rxvfac(ia)
 C
       nchb= nch + ir2as(vadcst,ibuf2,nch,10,3)

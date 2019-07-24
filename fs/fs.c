@@ -28,6 +28,7 @@
 
 long cls_alc();
 void shm_att(),sem_att(),cls_ini(),brk_ini();
+long rte_secs();
 int parse();
 char *fgets();
 FILE *fopen();
@@ -53,6 +54,9 @@ main()
     ipids=-1;
 
     setup_ids();
+
+    if(shm_addr->time.secs_off == 0)
+      shm_addr->time.secs_off = rte_secs();
 
              /* ignore signals that might accidently abort */
              /* note this behaviour trickles down by default to all children */
@@ -238,7 +242,11 @@ waitfor:
        for (i=0;i<=ipids;i++) {
           if(wpid==pids[i]) {
             pids[i]=0;
-            if(okay ||i==lesm||i==lesam && !klesam)
+            if(okay) {
+              fprintf(stderr,"%s terminated",p_names[i]);
+              statusprt(status);
+              fprintf(stderr,"\n");
+            } else if(i==lesm||i==lesam && !klesam)
               fprintf(stderr,"%s terminated\n",p_names[i]);
             else
               fprintf(stderr,"%s killed\n",p_names[i]);
@@ -316,7 +324,9 @@ char **argv,w;
        for (i=0;i<=ipids;i++) {
           if(wpid==pids[i]) {
             pids[i]=0;
-            fprintf(stderr,"%5.5s terminated\n",p_names[i]);
+            fprintf(stderr,"%5.5s terminated",p_names[i]);
+            statusprt(status);
+            fprintf(stderr,"\n");
             return -4;
             break;
           }

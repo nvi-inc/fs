@@ -32,10 +32,6 @@ long ip[5];                           /* ipc parameters */
 
       ichold= -99;                    /* check vlaue holder */
 
-      ierr=0;
-      vform_ver(&version,ierr,ip);
-      shm_addr->form_version = version;
-   
       ini_req(&buffer);
 
       memcpy(request.device,DEV_VFM,2);    /* device mnemonic */
@@ -108,6 +104,13 @@ skip_aux:
 /* if we get this far it is a set-up command so parse it */
 
 parse:
+      ierr=0;
+      vform_ver(&version,ip);
+      if(ip[2]<0)
+        return;
+      else
+        shm_addr->form_version = version;
+   
       ilast=0;                                      /* last argv examined */
       memcpy(&lcl,&shm_addr->vform,sizeof(lcl));
 

@@ -101,7 +101,13 @@ C
       goto 990
 980   if (nsub.eq.1) call run_matcn(iclass,nrec)
       if (nsub.eq.8) then
-        call run_prog('antcn','wait',4,iclass,nrec,idum,idum)
+        call fs_get_idevant(idevant)
+        if (ichcm_ch(idevant,1,'/dev/null ').ne.0) then
+          call run_prog('antcn','wait',4,iclass,nrec,idum,idum)
+        else
+          ierr= -301
+          goto 990
+        endif
       endif
       call rmpar(ip)
       call devds(ip,iclcm,nsub)

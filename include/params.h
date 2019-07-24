@@ -6,8 +6,8 @@
 #endif
 
 #define SHM_KEY     1
-#define SHM_SIZE    10240
-#define C_RES       5120
+#define SHM_SIZE    12288       /* should be a multiple of 4096 */
+#define C_RES       6144        /* reserves bytes for Fscom     */
 
 #define CLS_KEY     1
 #define CLS_SIZE    20480
@@ -44,9 +44,9 @@
 #define BAD_VALUE "BAD_VALUE"
 
 #define MAX_VC     15
-#define MAX_BBC    15
+#define MAX_BBC    14
 #define MAX_DIST   2
-#define MAX_DET    34
+#define MAX_DET    32
 
 #define DEV_VRC     "rc"
 #define DEV_VFM     "fm"
@@ -56,6 +56,11 @@
 #define MAX_HOR   30
 #define MAX_RXCODES   40
 
-#define MK3	0x01
-#define VLBA	0x02
-#define MK4	0x04
+#define MK4         0x04
+#define VLBA        0x02
+#define MK3         0x01
+
+#define FS_ROOT     "/usr2"
+
+#define FS_PRIOR    20
+#define AN_PRIOR    10

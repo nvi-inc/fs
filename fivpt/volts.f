@@ -22,7 +22,7 @@ C
 C       IERR = 0 IF NO ERROR OCCURRED 
 C 
       double precision timt,dtpi,dri,tpita,sigt,timta,didim1
-      integer*2 icmnd(4,17),indata(10),iques,lwho,lwhat
+      integer*2 icmnd(4,18),indata(10),iques,lwho,lwhat
       integer it(5),iti(5)
       character*1 cjchar
       logical kbreak
@@ -49,8 +49,9 @@ C
      +            2hve, 2h#0,2he%,2h__,
      +            2hvf, 2h#0,2hf%,2h__,
      +            2hi1, 2h#9,2h3!,2h__,
-     +            2hi2, 2h#9,2h3!,2h__/
-      data iques/2H??/,ndev/17/,lwho/2Hfp/,lwhat/2Hvo/,ntry/1/
+     +            2hi2, 2h#9,2h3!,2h__,
+     +            2hi3, 2h#9,2h5%,2h__/
+      data iques/2H??/,ndev/18/,lwho/2Hfp/,lwhat/2Hvo/,ntry/1/
       data nin/10/
 C
 C  0. INITIALIZE
@@ -122,9 +123,9 @@ C
 C      CONVERT TO COUNTS
 C 
         if(VLBA.ne.iand(rack,VLBA)) then
-          if (id.eq.17) dtpi=float(ia22h(indata(2)))*256.0+ 
+          if (id.ge.17) dtpi=float(ia22h(indata(2)))*256.0+ 
      +                       float(ia22h(indata(3)))
-          if (id.ne.17) dtpi=float(ia22h(indata(4)))*256.0+ 
+          if (id.lt.17) dtpi=float(ia22h(indata(4)))*256.0+ 
      +                       float(ia22h(indata(5)))
 c         write(6,9953) dtpi,(cjchar(indata,i),i=1,12)
 9953      format(' dtpti ',f20.10,' indata ',12a1)

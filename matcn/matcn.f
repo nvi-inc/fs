@@ -130,6 +130,7 @@ C     1. First get parameters and initialize if necessary.
 C
       call char2hol('  *alarm*  (#  )'//char(7)//char(7),
      &             lalarm,1,18)
+      call putpname('matcn')
       call setup_fscom
       call read_fscom
 c     call fc_rte_lock(1)        ! lock into memory
@@ -374,8 +375,7 @@ C                   the actual response - it might be intereseting.
         nclrer = nclrer + 1 
 C                   Put response into class 
         if(imode.eq.-53 .or. imode.eq.-54) then
-          it1(13)=itn
-          call put_buf(iclasr,it1,-52,2hfs,0)
+          call put_buf(iclasr,centisec,-8,2hfs,0)
           nclrer=nclrer +1
         endif
         if (ierr.ne.+2) goto 900

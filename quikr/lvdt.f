@@ -25,19 +25,14 @@ C
       integer*2 ibuf(40),ibuf2(40)
       integer get_buf
       character cjchar
-      logical koffset
       equivalence (reg,ireg(1)),(parm,iparm(1))
 C
       data ilen /40/
-      data koffset/.true./
 C
 C  HISTORY:
 C
 C  DATE  WHO  WHAT
 C 900222 weh  created by cloning from new PASS command
-C 920721 gag  Added logical koffset for parameters on calls to
-C             vlt2mic and mic2vlt.
-C 920722 gag  Added call to frmaux4 if Mark IV formatter.
 C
 C  1. Get class buffer and decide whether we have to move the heads,
 C      or just monitor their position.
@@ -53,6 +48,7 @@ C
         ip(3) = -1
         goto 990
       endif
+      call ifill_ch(ibuf,1,ilen,' ')
       ireg(2) = get_buf(iclcm,ibuf,-ilen,idum,idum)
       nchar = min0(ireg(2),ilen)
       ieq = iscn_ch(ibuf,1,nchar,'=')
@@ -76,15 +72,15 @@ C
       ich = ieq+1
       ics=ich
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if ((cjchar(parm,1).eq.',').and.(VLBA.eq.iand(drive,VLBA))) then
-        ip(3)=-501
-        goto 990
-      endif
       if (cjchar(parm,1).eq.',') then
         kvolts(1)=.false.
+      else if(cjchar(parm,1).eq.','.and.
+     &        VLBA.eq.iand(drive,VLBA)) then
+        ip(3)=-501
+        goto 990
       else if(cjchar(parm,1).eq.'*') then
         call fs_get_ipashd(ipashd)
-        call mic2vlt(1,ipashd(1),posnhd(1),volts(1),ip,koffset)
+        call mic2vlt(1,ipashd(1),kautohd_fs,posnhd(1),volts(1),ip)
         if(ip(3).ne.0) goto 990
         kvolts(1)=.true.
       else
@@ -108,7 +104,7 @@ C
         goto 990
       else if(cjchar(parm,1).eq.'*') then
         call fs_get_ipashd(ipashd)
-        call mic2vlt(2,ipashd(2),posnhd(2),volts(2),ip,koffset)
+        call mic2vlt(2,ipashd(2),kautohd_fs,posnhd(2),volts(2),ip)
         if(ip(3).ne.0) goto 990
         kvolts(2)=.true.
       else
@@ -144,10 +140,11 @@ C
       call fs_get_ipashd(ipashd)
       do i=1,2
         if(kvolts(i)) then
-          call vlt2mic(i,0,volts(i),microns(i),ip,.false.)
+          call vlt2mic(i,0,.false.,volts(i),microns(i),ip)
           posnhd(i)=microns(i)
           ipashd(i)=0
           kposhd_fs(i)=.true.
+          if(i.eq.1) kautohd_fs=.false.
         endif
       enddo
       call fs_set_ipashd(ipashd)
@@ -160,10 +157,10 @@ C
       if(ihd.eq.2) go to 500
       nrec=0
       iclass=0
+C
       call fs_get_rack(rack)
       if(MK3.eq.iand(rack,MK3)) THEN
         call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
-C
         ibuf2(1) = 0
         call char2hol('fm',ibuf2(2),1,2)
         idumm1 = ichmv(ibuf2,5,lauxfm,1,8)
@@ -190,7 +187,7 @@ C
         call run_matcn(iclass,nrec)
         call rmpar(ip)
       else if(MK4.eq.iand(rack,MK4)) THEN
-        call frmaux4(lauxfm4,posnhd,ipashd,koffset)
+        call frmaux4(lauxfm4,posnhd,ipashd,kautohd_fs)
         ibuf2(1) = 8
         call char2hol('fm /AUX ',ibuf2(2),1,8)
         idumm1 = ichmv(ibuf2,11,lauxfm4,1,8)
@@ -199,7 +196,8 @@ C
         nrec=1
         call run_matcn(iclass,nrec)
         call rmpar(ip)
-      else if (VLBA.eq.iand(rack,VLBA)) then !vlba
+      else !vlba
+        call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
         call fc_set_vaux(lauxfm,ip)
       endif
       call clrcl(ip(1))
@@ -242,7 +240,7 @@ C
       call fs_get_ipashd(ipashd)
         do i=1,2
           if(i.eq.1.or.VLBA.ne.iand(drive,VLBA)) then
-            call mic2vlt(i,ipashd(i),posnhd(i),volt(i),ip,koffset)
+            call mic2vlt(i,ipashd(i),kautohd_fs,posnhd(i),volt(i),ip)
             nch = nch+ir2as(volt(i),ibuf,nch,8,3)
           endif
           nch = mcoma(ibuf,nch)

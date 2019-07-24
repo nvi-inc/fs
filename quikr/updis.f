@@ -53,9 +53,9 @@ C
 C     2.  Get common variables for display
 C 
 200   ierr = 0
-      do 310 i = 1,5
+      do 310 i = 1,4
         call fs_get_frequp(flo,i-1)
-        if (flo.gt.0.0) nch = nch+ir2as(flo,ibuf2,nch,8,3)
+        nch = nch+ir2as(flo,ibuf2,nch,8,3)
         nch = mcoma(ibuf2,nch)
 310   continue
 C 

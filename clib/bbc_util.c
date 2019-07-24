@@ -407,11 +407,11 @@ unsigned data;
 {
 
 /* gain control */
-/* USB gain bits 0-7 */
-/* LSB gain bits 8-15 */
+/* LSB gain bits 0-7 */
+/* USB gain bits 8-15 */
 
- lcl->gain.value[0] = (data >> 0) & bits16on(8);
- lcl->gain.value[1] = (data >> 8) & bits16on(8);
+ lcl->gain.value[0] = (data >> 8) & bits16on(8);
+ lcl->gain.value[1] = (data >> 0) & bits16on(8);
 
   return;
 

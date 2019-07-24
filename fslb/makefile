@@ -8,13 +8,14 @@ fblnk.o get_atod.o get_class.o iadt.o idoff.o if2ma.o ifmed.o\
 ihash.o iifed.o ipgst.o isoed.o itped.o ivced.o\
 julda.o kbit.o kboss.o logen.o logen4.o logen5.o\
 logen6.o logen7.o logen8.o logen9.o logit.o logit2.o logit3.o\
-logit4.o logit5.o logit6.o logit7.o lusim.o lvdof.o lvdofn.o\
+logit4.o logit5.o logit6.o logit7.o lusim.o lvdofn.o\
 lvdonn.o ma2ad.o ma2en.o ma2fm.o ma2if.o ma2mv.o ma2rp.o ma2rp4.o\
 ma2rpbr4.o ma2rx.o ma2tp.o ma2vc.o mdnam.o move.o mv2ma.o numsc.o\
-phcal.o poshd.o posit.o radec.o rp2ma.o rp2ma4.o rpbr2ma4.o rplnk.o\
+phcal.o radec.o rp2ma.o rp2ma4.o rpbr2ma4.o rplnk.o\
 run_matcn.o rx2ma.o rxvtot.o sbit.o sidtm.o tp2ma.o updat.o\
 upper.o vc2ma.o vlt2mic.o vlt_head.o\
-put_cons.o put_cons_raw.o putcon_ch.o sun.o zero_vatt.o
+put_cons.o put_cons_raw.o putcon_ch.o sun.o zero_vatt.o\
+i32ma.o ma2i3.o iif3ed.o
 #
 #CFLAGS = -g
 FFLAGS = -X426 -g

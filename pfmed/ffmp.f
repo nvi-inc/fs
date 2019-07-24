@@ -273,11 +273,11 @@ C     RN - rename procedure.
         end if
 C     Check for illegal name.
         lrn=lnam2(1:1)
-        if ((lge(lrn,'0')).and.(lle(lrn,'9'))) then
-          write(lui,1111) lnam2(:nch2)
-1111      format(1x,a,"illegal procedure name")
-          go to 900
-        end if
+c        if ((lge(lrn,'0')).and.(lle(lrn,'9'))) then
+c          write(lui,1111) lnam2(:nch2)
+c1111      format(1x,a,"illegal procedure name")
+c          go to 900
+c        end if
 C     Create scratch file 2.
         call fopen(idcb2,lsf2,ierr)
         if(ierr.lt.0) call fopen(idcb2,lsf2,ierr)

@@ -220,53 +220,40 @@ C  Determine cal temp and frequency for device 1.
 C
 490   continue
       if((rack.and.iand(MK3,rack)).or.(rack.and.iand(MK4,rack))) then
-        if(cjchar(ldv1nf,1).eq.'i'.or.cjchar(ldv1nf,1).eq.'v') 
-     .    goto 500
+        if(cjchar(ldv1nf,1).ne.'i'.and.cjchar(ldv1nf,1).ne.'v') then
           ierr = -503
           goto 990
+        endif
 C
-500     continue
-        if(cjchar(ldv1nf,1).ne.'i') goto 505
-        if(ichcm_ch(ldv1nf,1,'i1').ne.0) goto 502
-          cal1 = caltmp(1)
-          bm1=beamsz_fs(1)
-          fx1=flx1fx_fs
-          goto 510
-502     continue
-        cal1 = caltmp(2)
-        bm1=beamsz_fs(2)
-        fx1=flx2fx_fs
-        goto 510
-505     continue
-        indvc = ia2hx(ldv1nf,2)
-        if(iabs(ifp2vc(indvc)).ne.1) goto 507
-        cal1 = caltmp(1)
-        bm1=beamsz_fs(1)
-        fx1=flx1fx_fs
-        goto 510
-507     continue
-        if(iabs(ifp2vc(indvc)).ne.2) goto 508
-        cal1 = caltmp(2)
-        bm1=beamsz_fs(2)
-        fx1=flx2fx_fs
-        goto 510
-508     continue
-        ierr=-411
-        goto 990
-      else
+        if(ichcm_ch(ldv1nf,1,'i1').eq.0) then
+          ichain=1
+        else if(ichcm_ch(ldv1nf,1,'i2').eq.0) then
+          ichain=2
+        else if(ichcm_ch(ldv1nf,1,'i3').eq.0) then
+          ichain=3
+        else if(ichcm_ch(ldv1nf,1,'v').eq.0) then
+          indvc = ia2hx(ldv1nf,2)
+          ichain=iabs(ifp2vc(indvc))
+          if(ichain.lt.1.or.ichain.gt.3) then
+            ierr=-411
+            goto 990
+          endif
+        endif
+      else  !VLBA
         indbc=ia2hx(ldv1nf,1)
         if(ichcm_ch(ldv1nf,1,'ia').eq.0) then
           ichain=1
         else if(ichcm_ch(ldv1nf,1,'ib').eq.0) then
           ichain=2
+        else if(ichcm_ch(ldv1nf,1,'ic').eq.0) then
+          ichain=3
+        else if(ichcm_ch(ldv1nf,1,'id').eq.0) then
+          ichain=4
         else if(indbc.ge.1.and.indbx.le.14) then
           call fs_get_bbc_source(source,indbc)
-          write(6,'(/'' source indbc'',2i10/)') source,indbc
-          if(source.eq.0) then
-            ichain=1
-          else if(source.eq.1) then
-            ichain=2
-          else
+c         write(6,'(/'' source indbc'',2i10/)') source,indbc
+          ichain=source+1
+          if(ichain.lt.1.or.ichain.gt.4) then
             ierr=-413
             goto 990
           endif
@@ -275,100 +262,111 @@ C
           goto 990
         endif
       endif
-      write(6,'(/'' ichain '',i10/)') ichan 
+c     write(6,'(/'' ichain '',i10/)') ichan 
+C
+C  Now check the cal and freq values.
+C
+      ichain1 = ichain
       if(ichain.eq.1) then
         cal1 = caltmp(1)
         bm1=beamsz_fs(1)
         fx1=flx1fx_fs
-      else
+      else if(ichain.eq.2) then
         cal1 = caltmp(2)
         bm1=beamsz_fs(2)
         fx1=flx2fx_fs
+      else if(ichain.eq.3) then
+        cal1 = caltmp(3)
+        bm1=beamsz_fs(3)
+        fx1=flx3fx_fs
+      else if(ichain.eq.4) then
+        cal1 = caltmp(4)
+        bm1=beamsz_fs(4)
+        fx1=flx4fx_fs
       endif
-C
-C  Now check the cal and freq values.
-C
-510   continue
-      if(cal1.ne.0) goto 515
+      if(cal1.eq.0) then     
         ierr = -404
         goto 990
-515   if(bm1.gt.4.8e-8) goto 520
+      else if(bm1.le.4.8e-8) then
         ierr = -405
         goto 990
+      endif
 C
 C   Determine cal temp and frequency for device 2.
 C
 520   continue
-      if((rack.eq.iand(MK3,rack)).or.(rack.eq.iand(MK4,rack))) then
-        if(cjchar(ldv2nf,1).ne.'i') goto 525
-        if(ichcm_ch(ldv2nf,1,'i1').ne.0) goto 522
-          cal2 = caltmp(1)
-          bm2= beamsz_fs(1)
-          fx2=flx1fx_fs
-          goto 530
-522     continue
-        cal2 = caltmp(2)
-        bm2=beamsz_fs(2)
-        fx2=flx2fx_fs
-        goto 530
-525     continue
-        indvc = ia2hx(ldv2nf,2)
-        if(iabs(ifp2vc(indvc)).ne.1) goto 527
-          cal2 = caltmp(1)
-          bm2  = beamsz_fs(1)
-          fx2=flx1fx_fs
-          goto 530
-527     continue
-        if(iabs(ifp2vc(indvc)).ne.2) goto 528
-        cal2 = caltmp(2)
-        bm2  = beamsz_fs(2)
-        fx2=flx2fx_fs
-        goto 530
-528     continue
-        ierr=-412
-        goto 990
-      else
+      if((rack.and.iand(MK3,rack)).or.(rack.and.iand(MK4,rack))) then
+        if(cjchar(ldv2nf,1).ne.'i'.and.cjchar(ldv2nf,1).ne.'v') then
+          ierr = -503
+          goto 990
+        endif
+C
+        if(ichcm_ch(ldv2nf,1,'i1').eq.0) then
+          ichain=1
+        else if(ichcm_ch(ldv2nf,1,'i2').eq.0) then
+          ichain=2
+        else if(ichcm_ch(ldv2nf,1,'i3').eq.0) then
+          ichain=3
+        else if(ichcm_ch(ldv2nf,1,'v').eq.0) then
+          indvc = ia2hx(ldv2nf,2)
+          ichain=iabs(ifp2vc(indvc))
+          if(ichain.lt.1.or.ichain.gt.3) then
+            ierr=-412
+            goto 990
+          endif
+        endif
+      else  !VLBA
         indbc=ia2hx(ldv2nf,1)
         if(ichcm_ch(ldv2nf,1,'ia').eq.0) then
           ichain=1
         else if(ichcm_ch(ldv2nf,1,'ib').eq.0) then
           ichain=2
+        else if(ichcm_ch(ldv2nf,1,'ic').eq.0) then
+          ichain=3
+        else if(ichcm_ch(ldv2nf,1,'id').eq.0) then
+          ichain=4
         else if(indbc.ge.1.and.indbx.le.14) then
           call fs_get_bbc_source(source,indbc)
-          write(6,'(/'' source indbc'',2i10/)') source,indbc
-          if(source.eq.0) then
-            ichain=1
-          else if(source.eq.1) then
-            ichain=2
-          else
-            ierr=-413
+c         write(6,'(/'' source indbc'',2i10/)') source,indbc
+          ichain=source+1
+          if(ichain.lt.1.or.ichain.gt.4) then
+            ierr=-415
             goto 990
           endif
         else
-          ierr=-414
+          ierr=-416
           goto 990
         endif
       endif
-      write(6,'(/'' ichain '',i10/)') ichan 
+c     write(6,'(/'' ichain '',i10/)') ichan 
+C
+C  Now check the cal and freq values.
+C
+      ichain2 = ichain
       if(ichain.eq.1) then
         cal2 = caltmp(1)
         bm2=beamsz_fs(1)
         fx2=flx1fx_fs
-      else
+      else if(ichain.eq.2) then
         cal2 = caltmp(2)
         bm2=beamsz_fs(2)
         fx2=flx2fx_fs
+      else if(ichain.eq.3) then
+        cal2 = caltmp(3)
+        bm2=beamsz_fs(3)
+        fx2=flx3fx_fs
+      else if(ichain.eq.4) then
+        cal2 = caltmp(4)
+        bm2=beamsz_fs(4)
+        fx2=flx4fx_fs
       endif
-C
-C  Now check the cal and freq values.
-C
-530   continue
-      if(cal2.ne.0) goto 535
+      if(cal2.eq.0) then     
         ierr = -407
         goto 990
-535   if(bm2.gt.4.8e-8) goto 600
+      else if(bm2.le.4.8e-8) then
         ierr = -408
         goto 990
+      endif
 C
 600   continue
       cal1nf=cal1
@@ -377,6 +375,8 @@ C
       bm2nf_fs=bm2
       fx1nf_fs=fx1
       fx2nf_fs=fx2
+      ich1nf_fs=ichain1
+      ich2nf_fs=ichain2
       if((rack.eq.iand(MK3,rack)).or.(rack.eq.iand(MK4,rack))) then
         if(cjchar(ldv1nf,1).eq.'i') goto 602
         indvc = ia2hx(ldv1nf,2)
@@ -404,6 +404,7 @@ C
 610   continue
       call write_quikr
       call run_prog('onoff','nowait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      ierr=0
 C      Schedule ONOFF
 990   ip(1) = 0
       ip(2) = 0

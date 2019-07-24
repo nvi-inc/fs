@@ -1,0 +1,55 @@
+dqa - data quality analyzer (VLBA rack)
+Syntax:      dqa=duration
+
+Response:    dqa/duration,Asource,Atrack,Aparity,Ares
+             ync,Acalamp,
+             
+Acalphs,Bsource,Btrack,Bparity,Bresync,Bcalamp,Bca
+lphs
+
+
+Settable Parameters:
+duration        The duration of the analysis in seconds. Default 1 sec,
+                max 5 seconds. Set up the command with
+                dqa=duration. Subsequent commands dqa will make
+                a measurement. For each measurement, the DQA
+                module is started, allowed to run for duration and
+                then stopped. The accumulated counters are then read
+                out.
+
+Monitor-only Parameters:
+Asource         Source of the A channel signal, in the form bnns,
+                nn=baseband converter number, s=u or l.
+Atrack          Track with the A channel signal on it, as set up in the
+                repro command.
+Aparity         Measured parity error rate for A channel, per Mbyte.
+Aresync         Measured resync rate for A channel, per Mbyte.
+Acalamp         Measured phase calibrator amplitude for A channel, in
+                units of voltage percentage.
+Acalphs         Measured phase calibrator phase for A channel, degrees.
+Bsource         Source of the B channel signal, in the form bnns,
+                nn=baseband converter number, s=u or l.
+Btrack          Track with the B channel signal on it, as set up in the
+                repro command.
+Bparity         Measured parity error rate for B channel, per Mbyte.
+Bresync         Measured resync rate for B channel, per Mbyte.
+Bcalamp         Measured phase calibrator amplitude for B channel, in
+                units of voltage percentage.
+Bcalphs         Measured phase calibrator phase for B channel, degrees.
+
+Comments:
+The data quality analyzer (DQA) is a formatter sub-module. It extracts
+phase cal and measures parity errors and re-synch rates. It is comparable
+to the Mark III decode command plus the capabilities of program pcalr.
+Normally you would use the check2c1/2 procedures during Field
+System operations.
+
+Channels A and B are the recorded tracks as specified in the repro
+command. To measure parity errors, the tape should be moving (use the
+st command) with record disabled. The phase cal can be measured in
+bypass or reproduce mode. The group enables must be turned on with the
+enable command.
+
+The DQA is commanded to generate an internal sine wave at a rate
+consistent with the tape clock rate. The amplitude and phase of the phase
+cal signal are calculated from the sine and cosine counters

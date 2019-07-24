@@ -42,7 +42,6 @@ C
 C Finally, get alarm status
         call run_matcn(iclass,5)
 C Send our requests to MATCN for the data
-C Get computer time if we're checking the formatter
         call rmpar(ip)
         iclass = ip(1)
         nrec = ip(2)

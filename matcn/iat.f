@@ -48,6 +48,9 @@ C  NRSPN  - number of responses possible
       parameter (wrdech=320,maxech=wrdech*2)
       integer iebuf(wrdech),iebuf2(wrdech),itn
       integer*2 irecx(10)
+      character*80 cbuf
+      integer*2 ibufc(40)
+      integer*4 secs1,secs2
 C
       equivalence (ireg(1),reg)
 C
@@ -107,10 +110,10 @@ C  Write message on the screen if echo is on
       if(imode.eq.-53) then
         ierr=portwrite(lumat,itran,nctran-1)
         idum=ichmv(irecx,1,itran,nctran,1)
-        call fc_rte_time(it1,it1(6))
+        call fc_rte_rawt(centisec(1))
         ierr=portwrite(lumat,irecx,1)
       else if(imode.eq.-54) then
-        call fc_rte_time(it1,it1(6))
+        call fc_rte_rawt(centisec(1))
         ierr=portwrite(lumat,itran,nctran)
       else
         ierr=portwrite(lumat,itran,nctran)
@@ -137,7 +140,7 @@ C
 C  at this time, don't know how many characters are expected 7/16/92
       if(imode.eq.-53) then
         ireg(1)=portread(lumat,irecx,ilen,1,-1,itimeout)
-        call fc_rte_time(it1(7),it1(12))
+        call fc_rte_rawt(centisec(2))
         ireg(1)=portread(lumat,irecx(2),ilen,maxc-1,-1,itimeout)
         idum=ichmv(irecv,1,irecx,1,1)
         idum=ichmv(irecv,2,irecx(2),1,maxc-1)
@@ -145,7 +148,7 @@ C  at this time, don't know how many characters are expected 7/16/92
       else if(imode.eq.-54) then
         maxc=40
         ireg(1)=portread(lumat,irecx,ilen,1,-1,itimeout)
-        call fc_rte_time(it1(7),it1(12))
+        call fc_rte_rawt(centisec(2))
         ireg(1)=portread(lumat,irecx(2),ilen,maxc-1,10,itimeout)
         idum=ichmv(irecv,1,irecx,1,1)
         idum=ichmv(irecv,2,irecx(2),1,maxc-1)

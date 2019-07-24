@@ -1,10 +1,12 @@
 #
-LIBES =  ../clib/clib.a ../rtelb/rtelb.a -lrtx
+CFLAGS= -g
+LIBES = ../../fs/poclb/poclb.a ../../fs/clib/clib.a\
+../../fs/rtelb/rtelb.a -lrtx 
 #
-OBJECTS = antcn.o pname.o logit.o
+OBJECTS = antcn.o 
 #
 ../bin/antcn: $(OBJECTS)
-	cc -g -o ../bin/antcn $(OBJECTS) $(LIBES)
+	cc -g -o ../bin/antcn $(OBJECTS) $(LIBES) -lm
 	../../fs/setb/setb ../bin/antcn
 #
 antcn:

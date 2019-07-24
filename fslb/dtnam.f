@@ -90,6 +90,8 @@ C  Handle IFD's
      .  call char2hol('i1',dtnam,1,2)
       if ((cicr(nc:nc).eq.'2').and.(cicr(nc+1:nc+1).eq.' '))
      .  call char2hol('i2',dtnam,1,2)
+      if ((cicr(nc:nc).eq.'3').and.(cicr(nc+1:nc+1).eq.' '))
+     .  call char2hol('i3',dtnam,1,2)
       if ((cicr(nc:nc).eq.'a').and.(cicr(nc+1:nc+1).eq.' '))
      .  call char2hol('ia',dtnam,1,2)
       if ((cicr(nc:nc).eq.'b').and.(cicr(nc+1:nc+1).eq.' '))

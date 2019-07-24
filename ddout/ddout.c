@@ -12,10 +12,11 @@
 
 #define NULLPTR (char *) 0
 #define PERMISSIONS 0666
+#define ULIMIT 4096L
 #define MAX_BUF 120
 
 extern struct fscom *shm_addr;
-
+long ulimit();
 
 main()
 {
@@ -47,6 +48,8 @@ main()
     
     setup_ids();
     sig_ignore();
+    if(ULIMIT > ulimit(1,ULIMIT))
+	ulimit(2, ULIMIT); /* set maximum log size to 20 megabytes */
 
 /* SECTION 2 */
 
@@ -217,8 +220,14 @@ Append:
 
     if (kxl || (!kp && !kack)) {
       bull = strlen(bul);
-      write(fd, bul, bull);
-      write(fd, "\n", 1);
+      if(bull != write(fd, bul, bull)) {
+	printf("!! wrong length written, file probably too large\n");
+	goto Trouble;
+      }
+      if(1 != write(fd, "\n", 1)) {
+	printf("!! wrong length written, file probably too large\n");
+        goto Trouble;
+      }
     }
 
 /* SECTION 7 */
@@ -231,7 +240,7 @@ Post:
 /*  routine called if trouble occurs with log file */
 
 Trouble:
-    printf("!! help! ** error writing log file %.8s\n",sllog);
+    printf("\007!! help! ** error writing log file %.8s\n",sllog);
     if (rtn2 != -1) goto Messenger;
 
 /* SECTION 9 */

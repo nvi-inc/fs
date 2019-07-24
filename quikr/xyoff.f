@@ -79,8 +79,13 @@ C
 C 
 C     4. Now schedule ANTCN.  Tell it to do source offsets.
 C 
-      call run_prog('antcn','wait',2,idum,idum,idum,idum)
-      call rmpar(ip)
+      call fs_get_idevant(idevant)
+      if (ichcm_ch(idevant,1,'/dev/null ').ne.0) then
+        call run_prog('antcn','wait',2,idum,idum,idum,idum)
+        call rmpar(ip)
+      else
+        ip(3) = -302
+      endif
       return
 C 
 C     5. Return the offsets for display 

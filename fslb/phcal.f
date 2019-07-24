@@ -13,6 +13,7 @@ C
 C     OUTPUT: 
 C         IVC - video converter number for ITRK 
       double precision pcal,sum,flo,fvc 
+      real rflo
 C         PCAL - phase cal freq in IVC
 C 
       include '../include/fscom.i'
@@ -23,11 +24,9 @@ C
       if (ivc.lt.0) lsb = 1 
       ivc = iabs(ivc) 
       i1dex = iabs(ifp2vc(ivc)) 
-      call fs_get_inp1if(inp1if)
-      if (i1dex.eq.1) i2dex = inp1if+1
-      call fs_get_inp2if(inp2if)
-      if (i1dex.eq.2) i2dex = inp2if+1
-      flo = freqlo(i1dex,i2dex) 
+      call fs_get_freqlo(rflo,i1dex-1)
+      flo=rflo
+      if(i1dex.eq.3.and.imixif3_fs.eq.1) flo=flo+freqif3_fs*0.01d0
       fvc = freqvc(ivc)+5.d-3 
       fvc = fvc*100.d0
       fvc = (aint(fvc))/100.d0 
@@ -37,6 +36,6 @@ C
         pcal = dmod(sum,1.d0) 
       endif
       pcal = pcal*1.d6
-
+c
       return
       end 

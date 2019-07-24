@@ -1,7 +1,7 @@
-      subroutine get_vatt(name,lwho,ierr) 
+      subroutine get_vatt(name,lwho,ierr,ichain1,ichain2) 
       character*(*) name
       integer*2 lwho
-      integer ierr
+      integer ierr,ichain1,ichain2
 C 
 C  get vlba rack attenuator settings
 C 
@@ -23,7 +23,7 @@ C
       if (iter.lt.0) goto 80000
       if (kbreak(name)) goto 80010
 
-      call fc_vget_att(lwho,ip)
+      call fc_vget_att(lwho,ip,ichain1,ichain2)
 C
 C      CHECK FOR TIME OUT
 C

@@ -24,7 +24,6 @@ C      - Integer CODES for MATCN for each buffer
 C
 C  INITIALIZED:
 C
-C                   Set time tolerance to 100 centi-seconds
       data nbufs/15*2,2,2/
       data icodes/-1,-2,0,0,  -1,-2,0,0, -1,-2,0,0,
      .            -1,-2,0,0,  -1,-2,0,0, -1,-2,0,0,
@@ -54,7 +53,6 @@ C
 C Finally, get alarm status
           call run_matcn(iclass,nbufs(iloop)+1)
 C Send our requests to MATCN for the data
-C Get computer time if we're checking the formatter
           call rmpar(ip)
           iclass = ip(1)
           nrec = ip(2)

@@ -15,16 +15,22 @@ C
       if (istart.ne.0) then
         length = nchar+1-istart
         call hol2char(ibuf,istart,nchar,cstring)
-        call fs_get_drive(drive)
-        call fs_get_rack(rack)
-        ierr = 0
-        call helpstr(cstring,length,rstring,rack,drive,ierr)
-        runstr= 'helpsh '//FS_ROOT//'/fs/help/'//rstring
       else
-        runstr='helpsh '//FS_ROOT//'/fs/help/help.__'
+        cstring='help.__'
+        length=7
       endif
-      call ftn_runprog(runstr,idum)
-
+c
+      call fs_get_drive(drive)
+      call fs_get_rack(rack)
+      ierr = 0
+      call helpstr(cstring,length,rstring,rack,drive,ierr)
+      if(ierr.ne.-3) then
+        runstr= 'helpsh '//rstring
+        call ftn_runprog(runstr,idum)
+      else
+       call putcon_ch('No help for '//cstring(:length))
+      endif
+c
 9999  continue
       return
       end

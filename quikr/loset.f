@@ -25,7 +25,7 @@ C   LOCAL VARIABLES
 C 
 C        NCHAR  - number of characters in buffer
 C        ICH    - character counter 
-      real frhld(5)
+      real frhld(4)
 C               - temporary holder for decoded LO frequencies 
 C        INUM   - number of LO freqs input
       integer*2 ibuf(20)
@@ -74,9 +74,9 @@ C
 C 
 C     2. Step through buffer getting each parameter and decoding it.
 C     Command from user has these parameters: 
-C        Mark III:  LO=<LO1nor>,<LO2nor>,<LO3>,<LO1alt>,<LO2alt> 
+C        Mark III:  LO=<LO1nor>,<LO2nor>,<LO3>
 C        VLBA:      LO=<LOA>,<LOB>,<LOC>,<LOD>
-C                            (5th parameter not allowed for VLBA)
+C                            (4th parameter not allowed for M3)
 C     LO freq in MHz, no default
 C                          same for all parameters
 C 
@@ -86,12 +86,14 @@ C
       call fs_get_rack(rack)
       ich = ieq+1 
       inum = 0
-      do i = 1,5
+      do i = 1,4
         frhld(i) = 0
         call gtprm(ibuf,ich,nchar,2,parm,ierr)
         if (cjchar(parm,1).ne.',') then
-          if (parm.le.0.0.or.ierr.ne.0.or.
-     .      (i.eq.5.and.VLBA.eq.iand(rack,VLBA))) then
+          if (i.eq.4.and.VLBA.ne.iand(rack,VLBA)) then
+	     ierr = -304
+	     goto 990
+          else if (parm.le.0.0.or.ierr.ne.0) then
             ierr = -200-i 
             goto 990
           endif
@@ -108,7 +110,6 @@ C
       call fs_set_freqlo(frhld(2),1)
       call fs_set_freqlo(frhld(3),2)
       call fs_set_freqlo(frhld(4),3)
-      call fs_set_freqlo(frhld(5),4)
       goto 990
 500   continue
       ierr = -101 

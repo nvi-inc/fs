@@ -44,20 +44,39 @@ C  READ EXISTING IFD ATTENUATOR SETTINGS
 C
       call fs_get_rack(rack)
       if(VLBA.ne.iand(rack,VLBA)) then
-        call matcn(icmnd,-5,iques,indata,nin, 9,ierr)
-        if (ierr.ne.0) return
-c       write(6,9954) nin,(indata(iweh),iweh=1,6)
-9954    format(' nin',i10,' indata "',6a2,'"')
-        idum=ichmv(isav,5,indata,3,8)
+        if(ichfp_fs.ne.3) then
+          call matcn(icmnd,-5,iques,indata,nin, 9,ierr)
+          if (ierr.ne.0) return
+c         write(6,9954) nin,(indata(iweh),iweh=1,6)
+c9954      format(' nin',i10,' indata "',6a2,'"')
+          call char2hol('93',isav,2,3)
+          idum=ichmv(isav,5,indata,3,8)
+        else
+          call char2hol('95',isav,2,3)
+          call i32ma(isav(3),iatif3_fs,imixif3_fs,iswif3_fs(1),
+     &               iswif3_fs(2),iswif3_fs(3),iswif3_fs(4))
+        endif
       else
-        call get_vatt(name,lwho,ierr)
+        call get_vatt(name,lwho,ierr,ichfp_fs,0)
         if (ierr.ne.0) return
       endif
 C
 C  TURN ON ALL THE ATTENUATORS
 C
       if(VLBA.ne.iand(rack,VLBA)) then
-        idum=ichmv(izero,5,indata,3,4)
+        if(ichfp_fs.ne.3) then
+          idum=ichmv(izero,5,indata,3,10)
+          call char2hol('93',izero,2,3)
+          if(ichfp_fs.eq.1) then
+            call char2hol('3f',izero,11,12)
+          else
+            call char2hol('3f',izero,9,10)
+          endif
+        else
+          call char2hol('95',izero,2,3)
+          call i32ma(izero(3),63,imixif3_fs,iswif3_fs(1),
+     &               iswif3_fs(2),iswif3_fs(3),iswif3_fs(4))
+        endif
         call matcn(izero,-13,idolr,indata,nin,2,ierr)
       else
         call zero_vatt(name,lwho,ierr)
