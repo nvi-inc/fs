@@ -241,7 +241,7 @@ patch=lo3,5h,6h,7h,8h
 enddef
 define  initi         00000000000x
 "welcome to the pc field system
-sy=setcl
+sy=run setcl &
 enddef
 define  midob         00000000000x
 onsource
@@ -271,7 +271,7 @@ enddef
 define  min15         00000000000
 rxall
 wx
-sy=of,pcalr
+sy=brk pcalr &
 !+15s
 cable
 sxcts

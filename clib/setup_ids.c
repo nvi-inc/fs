@@ -23,7 +23,11 @@ void setup_ids()
 
     sem_att( SEM_KEY);
 
+    nsem_att( NSEM_KEY);
+
     brk_att( BRK_KEY);
+
+    go_att( GO_KEY);
 
                        /* ignore signals that might accidently abort */
     if (SIG_ERR==signal(SIGINT,SIG_IGN)) {

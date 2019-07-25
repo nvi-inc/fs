@@ -1,6 +1,4 @@
 #
-all: ../bin/boss ../bin/helpsh
-#
 LIBES = ../bosslb/bosslb.a ../lnfch/lnfch.a ../fslb/fslb.a ../newlb/newlb.a \
 ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../fmpsee/fmpsee.a\
 ../rtelb/rtelb.a

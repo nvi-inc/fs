@@ -1,11 +1,11 @@
 define  acquire       00000000000x
-sy=aquir /usr2/control/ctlpo.ctl &
+sy=run aquir /usr2/control/ctlpo.ctl &
 log=point
 enddef
 define  kill          00000000000x
-sy=brk aquir
-sy=brk fivpt
-sy=brk onoff
+sy=brk aquir &
+sy=brk fivpt &
+sy=brk onoff &
 log=station
 enddef
 define  sband         00000000000
@@ -17,7 +17,7 @@ wx
 xyoff=0d,0d
 !+2s
 track
-sy=run aquir &
+sy=go aquir &
 enddef
 define  presun        00000000000
 ifdab=20,20,*,*
@@ -49,11 +49,11 @@ postp
 enddef
 define  postp         00000000000x
 bbcagc
-sy=run aquir &
+sy=go aquir &
 enddef
 define  termp         00000000000x
 bbcagc
-sy=run aquir &
+sy=go aquir &
 enddef
 define  initp         00000000000
 setup
@@ -66,7 +66,7 @@ bbcman
 fivept=xyns,-2,9,.4,1,ia
 onoff=2,4,ia,ib,60,3
 check=
-sy=run aquir &
+sy=go aquir &
 enddef
 define  xband         00000000000x
 device=ia
@@ -74,19 +74,19 @@ fivept
 enddef
 define  calonfp       00000000000
 calon
-sy=run fivpt &
+sy=go fivpt &
 enddef
 define  calofffp      00000000000x
 caloff
-sy=run fivpt &
+sy=go fivpt &
 enddef
 define  caloffnf      00000000000
 caloff
-sy=run onoff &
+sy=go onoff &
 enddef
 define  calonnf       00000000000x
 calon
-sy=run onoff &
+sy=go onoff &
 enddef
 define  axis          00000000000x
 fivept=$,*,*,*,*,*

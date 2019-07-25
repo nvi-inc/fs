@@ -1,19 +1,19 @@
-define  kill          00000000000x
-sy=brk aquir
-sy=brk fivpt
-sy=brk onoff
+define  kill          95227142724x
+sy=brk aquir &
+sy=brk fivpt &
+sy=brk onoff &
 log=station
 enddef
 define  sband         00000000000
 device=i2
 fivept
 enddef
-define  prep          00000000000x
+define  prep          95227142750
 wx
 xyoff=0d,0d
 !+2s
 track
-sy=run aquir &
+sy=go aquir &
 enddef
 define  presun        00000000000
 ifd=+18,+23
@@ -39,13 +39,13 @@ step=.4
 ifd=-7,-7
 postp
 enddef
-define  postp         00000000000x
-sy=run aquir &
+define  postp         00000000000
+sy=go aquir &
 enddef
-define  termp         00000000000x
-sy=run aquir &
+define  termp         00000000000
+sy=go aquir &
 enddef
-define  initp         00000000000
+define  initp         95227142737
 setup
 caloff
 caltemps
@@ -55,31 +55,31 @@ beam3=
 fivept=xyns,-2,9,.4,1,i1
 onoff=2,4,i1,v9,60,3
 check=
-sy=run aquir &
+sy=go aquir &
 enddef
-define  acquire       00000000000x
-sy=aquir /usr2/control/ctlpo.ctl &
+define  acquire       95227142736x
+sy=run aquir /usr2/control/ctlpo.ctl &
 log=point
 enddef
 define  xband         00000000000x
 device=i1
 fivept
 enddef
-define  calonfp       00000000000
+define  calonfp       95227142804
 calon
-sy=run fivpt &
+sy=go fivpt &
 enddef
-define  calofffp      00000000000x
+define  calofffp      95227142759x
 caloff
-sy=run fivpt &
+sy=go fivpt &
 enddef
-define  caloffnf      00000000000
+define  caloffnf      95227142813
 caloff
-sy=run onoff &
+sy=go onoff &
 enddef
-define  calonnf       00000000000x
+define  calonnf       00000000000
 calon
-sy=run onoff &
+sy=go onoff &
 enddef
 define  axis          00000000000x
 fivept=$,*,*,*,*,*
@@ -131,14 +131,14 @@ enddef
 define  3c454d3       00000000000x
 source=3c454.3,225129.53,+155254.2,1950.0
 enddef
-define  taurusa       00000000000x
+define  taurusa       95227142748x
 source=taurus-a,053131,215900,1950.0
 "size from dbs appendix 2
 flux1=gaussian,552,4.2m,2.6m
 flux2=gaussian,815,4.2m,2.6m
 flux3=gaussian,552,4.2m,2.6m
 enddef
-define  oriona        92128144624x
+define  oriona        95227142831x
 source=orion-a,053249.,-052515,1950.0
 flux1=gaussian,340,4m
 flux2=gaussian,440,4m

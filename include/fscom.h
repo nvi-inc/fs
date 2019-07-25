@@ -77,11 +77,14 @@ typedef struct fscom {
         int itpthick;
         float wrvolt;
         int capstan;
+	struct {
+	    int allocated;
+	    char name[SEM_NUM][5];
+	  } go;
         struct {
             int allocated;
-            char name[MAX_SEM_LIST][5];
+            char name[SEM_NUM][5];
         } sem;
-
         struct {
            int bbc[ MAX_BBC];
            long bbc_time[ MAX_BBC];

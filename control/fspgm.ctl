@@ -12,5 +12,7 @@ quikr n  quikr &
 quikv n  quikv &
 moon  n  moon  &
 pcalr n  pcalr &
-oprin n xterm -name oprin -j -e oprin &
+setcl n  setcl &
+aquir n  aquir &
 antcn n  antcn &
+oprin n xterm -name oprin -j -e oprin &

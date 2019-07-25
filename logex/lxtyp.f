@@ -79,7 +79,8 @@ C
 C
         if (ichcm_ch(iprm,1,',').eq.0) goto 1700
         idumc=0
-        idum=ichmv(idumc,2,iprm,1,1)
+c        idum=ichmv(idumc,2,iprm,1,1)
+        idumc=jchar(iprm,1)
         nch=iscnc(lspecr,1,8,idumc)
         ltype(i)=iprm
 C

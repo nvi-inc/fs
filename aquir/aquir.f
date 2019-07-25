@@ -14,13 +14,16 @@ C
 C
       data il/120/,msorc/200/,mprc/6/,ierr/0/,mc/5/,lwho/2Haq/
       data imsmax/36/
+c
+      call setup_fscom
+ 1    continue
+      call wait_prog('aquir',ip)
+      call read_fscom
 C
 C  GET RID OF ANY BREAKS THAT WERE HANGING AROUND
 C
-      call setup_fscom
-      call read_fscom
-1     continue
-      if (kbreak('aquir')) goto 1
+2     continue
+      if (kbreak('aquir')) goto 2
 C
       if (kinit(icbuf)) goto 10020
 C
@@ -84,4 +87,5 @@ C
       goto 11000
 C
 11000 continue
+      goto 1
       end

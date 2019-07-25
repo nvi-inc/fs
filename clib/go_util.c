@@ -12,47 +12,48 @@ extern struct fscom *shm_addr;
 
 static int semid = 0;
 
-static int nsem_find();
+static int go_find();
 
-int nsem_get( key, nsems)
+int go_get( key, nsems)
 key_t   key;
 int     nsems;
 {
   void sem_take(),sem_put();
-  int iret,i;
+  int iret, i;
 
-  sem_take( SEM_SEM);
+  sem_take( SEM_GO);
 
   shm_addr->sem.allocated=0;
 
   iret=semid_get( key, nsems, &semid);
 
   if(iret != -1)
-    for(i=0;i<nsems;i++)
-      semid_set(i,1,semid);
+    for (i=0;i<nsems;i++)
+      semid_set( i, 0, semid);
 
-  sem_put( SEM_SEM);
+  sem_put( SEM_GO);
 
   return(iret);
 }
-void nsem_att( key)
+void go_att( key)
 key_t key;
 {
   semid_att(key,&semid);
 }
 
-int nsem_take(name, flags)
+int go_take(name, flags)
 char name[5];
 int flags;
 {
-    int nsem_find(), isem, semid_nb();
+    int isem, semid_nb();
     void semid_take();
 
-/*    printf("nsem_take enter, name %5.5s flags %d \n",name,flags); */
-    isem=nsem_find(name);
+/*    printf("go_take enter, name %5.5s flags %d \n",name,flags); */
+    isem=go_find(name);
 /*    printf("isem %d val %d\n",isem, semid_val(isem, semid));*/
 
 
+    if(semid_val( isem, semid) > 0) semid_set( isem, 0, semid);
     if( flags == 0) {
        semid_take(isem, semid);
        return( 0);
@@ -62,26 +63,25 @@ int flags;
        return iret;
      }
 }
-void nsem_put(name)
+void go_put(name)
 char name[5];
 {
-    int nsem_find(), semid_val(), isem;
+    int  isem;
     void semid_put();
 
-    isem=nsem_find(name);
+     isem=go_find(name);
 
-    if(semid_val( isem, semid) < 1) semid_put( isem, semid);
-
+    semid_put( isem, semid);
     return;
 }    
-int nsem_test(name)
+int go_test(name)
 char name[5];
 {
-    int nsem_find(), semid_val(), isem, iret;
+    int semid_val(), isem, iret;
 
 /*    printf(" name %5.5s\n",name);*/
 
-    isem=nsem_find(name);
+    isem=go_find(name);
 
 /*    printf(" isem %d\n",isem); */
 
@@ -89,13 +89,13 @@ char name[5];
 
     return (iret);
 }    
-static int nsem_find( name)
+static int go_find( name)
 char name[5];
 {
     void sem_take(), sem_put();
     int i, isem;
 
-    sem_take( SEM_SEM);
+    sem_take( SEM_GO);
 
 /*  printf(" name %5.5s allocated %d\n",name,shm_addr->sem.allocated);*/
     isem = -1;
@@ -119,12 +119,12 @@ char name[5];
 
 /*   printf(" ending isem %d allocated %d name %5.5s\n",
             isem,shm_addr->sem.allocated,shm_addr->sem.name[isem]);*/
-    sem_put( SEM_SEM);
+    sem_put( SEM_GO);
 
     return( isem);
 }
 
-int nsem_rel( key)
+int go_rel( key)
 key_t key;
 {
   return(semid_rel( key, &semid));

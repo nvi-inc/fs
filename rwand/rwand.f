@@ -156,7 +156,7 @@ C
 C Ignore the special character (ASCII 1) which begins keypad reads.
         if (ichcm(bufr,ich,1,2,1).eq.0) ich=ich+1
         call pchar(idum,2,13)
-        nch = iscnc(bufr,ich,nchar,idum)       ! find carriage return
+        nch = iscnc(bufr,ich,nchar,13)       ! find carriage return
         ncode = ncode+1  
         istart(ncode) = ich
         length(ncode) = nch-ich

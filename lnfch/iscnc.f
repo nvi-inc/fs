@@ -1,6 +1,7 @@
       INTEGER FUNCTION ISCNC (LINPUT,IFC,ILC,LCH)
       IMPLICIT NONE
-      INTEGER*2 LINPUT(1),IFC,ILC,LCH
+      INTEGER*2 LINPUT(1)
+      integer IFC,ILC,LCH
 C
 C ISCNC: scan for character 
 C
@@ -27,7 +28,7 @@ C
         STOP
       ENDIF
 C
-      clch = cjchar(lch,2)
+      clch = char(LCH)
       DO I=IFC,ILC
         cret = cjchar(linput,i)
         if ( clch .eq. cret) then

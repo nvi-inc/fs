@@ -11,14 +11,3 @@ then
 	${file}
 fi
 #
-file=/boot/gpib0.o
-if [ -f ${file} ]
-then
-	/sbin/insmod ${file}
-	/sbin/lsmod
-fi
-file=/usr/bin/X11/xdm
-if [ -f ${file} ]
-then
-	${file}
-fi
