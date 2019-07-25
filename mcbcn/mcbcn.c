@@ -100,6 +100,7 @@ static unsigned char secho[80];
 static int necho;
 static int iecho;
 static int digiboard;
+static int knull;
 
 /* external variables */
 extern struct fscom *shm_addr;    /* shared memory segment */
@@ -357,6 +358,9 @@ long *ip4;
 #endif
         inptr=0;
         while (inptr < nchars) {
+          if (knull) 
+            result = -122;
+          else
             switch (inbuf[inptr]) {
                 case SEND:   /* send data to an MCB address */
 #ifdef DEBUG
@@ -859,6 +863,10 @@ int open_mcb(devnm)    /* open mcb tty line CAK 16OCT91 */
 char *devnm;
 
 {
+    knull = strcmp(devnm,"/dev/null") == 0;
+    if (knull)
+       return TRUE;
+
     if ( (mcb_fildes = open(devnm, O_RDWR)) < 0 ) {
         return(FALSE);
     } else {

@@ -1,12 +1,12 @@
 #
 VERSION = 9
 SUBLEVEL = 0
-PATCHLEVEL = 4
+PATCHLEVEL = 5
 FS_VERSION = $(VERSION).$(SUBLEVEL).$(PATCHLEVEL)
 export VERSION SUBLEVEL PATCHLEVEL FS_VERSION
 #
 LIB_DIR = clib flib bosslb fclib fmpsee fslb lnfch newlb polb port rtelb vis \
-poclb drutil
+poclb drutils
 #
 EXEC_DIR = rwand chekr fserr ddout fs fsalloc incom matcn oprin pcalr onoff \
 fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \

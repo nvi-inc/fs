@@ -1,2 +1,8 @@
 usr2/prog
 usr2/oper
+usr2/control
+usr2/proc
+usr2/sched/hdcal.snp
+usr2/sched/vhdcal.snp
+usr2/sched/3vhdcal.snp
+usr2/sched/prepass.snp
