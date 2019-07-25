@@ -21,6 +21,6 @@ echo "Making tar.gz archive"
 tar -X /tmp/FSS -czf /tmp/fs.tar.gz fs
 #
 echo "Removing file list"
-#rm -rf /tmp/FSS
+rm -rf /tmp/FSS
 #
 echo "Done."

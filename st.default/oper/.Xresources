@@ -1,8 +1,10 @@
 ! .Xresources file
-!*background:		BlanchedAlmond
 *background:		linen
 *font:			10x20
-emacs*geometry:		80x26
+!emacs
+!emacs needs a font with a better boldface
+emacs.geometry:		80x26
+emacs*font:		-bitstream-terminal-medium-r-normal--*-*-*-*-*-*-iso8859-1
 !
 ! Utilities
 ! xclock
@@ -12,7 +14,6 @@ XClock*chime:		true
 XClock*update:		1
 XClock*borderWidth:	1
 XClock*title:		UT
-Mwm*XClock*clientDecoration: menu
 ! xcalc
 XCalc*geometry:		-0-0
 ! xload
@@ -22,7 +23,6 @@ XLoad*geometry:		-0-0
 ! fmset
 fmset*geometry:	80x24+75+75
 fmset*scrollBar:	false
-Mwm*fmset*clientDecoration: title border
 ! logex
 logex*geometry:		80x24+75+75
 logex*scrollBar:	true
@@ -34,26 +34,22 @@ oprin.title:		Operator Input
 oprin*geometry:		80x5+0-0
 oprin*scrollBar:	true
 oprin*saveLines:	100
-Mwm*oprin*clientDecoration: title border
 ! monit1 (single line, time)
 monit1*geometry:	40x1-0+0
 monit1.title:		Field System Time
 monit1*border:		PaleGreen3
-!Mwm*monit1*clientDecoration: title border
 ! monit2 (standard display, 6 lines)
 monit2*geometry:	81x6-0+0
 monit2.title:		System Status Monitor
 monit2.input:		false
-!Mwm*monit2*clientDecoration: title border
 ! monit3 (Tsys display, 17 lines)
 monit3*geometry:	32x17-0+120
 monit3.title:		System Temperatures
-!Mwm*monit3*clientDecoration: title border
 !login shell
 login_sh.title:		login shell
 login_sh*scrollBar:	true
 login_sh*saveLines:	500
-Mwm*login_sh*clientDecoration: title border
+login_sh*geometry:	99x24+0+0
 !xterm
 xterm.input:            false
 xterm*scrollBar:	true

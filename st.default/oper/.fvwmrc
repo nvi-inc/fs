@@ -40,12 +40,17 @@ MenuStippleColor        SlateGrey
 #Font			-adobe-helvetica-medium-r-*-*-14-*-*-*-*-*-*-*
 #Font			-*-times-medium-i-*-*-*-140-*-*-*-*-*-*
 Font			10x20
+#Font			9x15
+#Font			-bitstream-terminal-medium-r-normal--*-*-*-*-*-110-iso8859-1
 #WindowFont		-adobe-helvetica-bold-r-*-*-12-*-*-*-*-*-*-*
 WindowFont		10x20
+#WindowFont		9x15
+#WindowFont		-bitstream-terminal-medium-r-normal--*-*-*-*-*-110-iso8859-1
 #IconFont		-adobe-helvetica-medium-r-*-*-11-*-*-*-*-*-*-*
 #IconFont		fixed
 IconFont		10x20
-
+#IconFont		9x15
+#IconFont		-bitstream-terminal-medium-r-normal--*-*-*-*-*-110-iso8859-1
 ###########################################################################
 # Set up the major operating modes
 #
@@ -108,11 +113,11 @@ MWMDecorHints
 
 # These are affect minor aspects for the look-and-feel.
 # Sub-menus placement mwm-style?
-#MWMMenus
+MWMMenus
 # mwm-style border reliefs (less deep than default fvwm) ?
-# MWMBorders
+#MWMBorders
 # Maximize button does mwm-inversion thingy
-# MWMButtons
+MWMButtons
 ########################      MISCELLANEOUS STUFF     #######################
 # If you don't like the default 150 msec click delay for the complex functions
 # change this and uncomment it.
@@ -196,23 +201,22 @@ Style "FvwmBanner" StaysOnTop
 Style "GoodStuff"  NoTitle, NoHandles, Sticky, WindowListSkip,BorderWidth 0
 Style "*lock"      NoTitle, NoHandles, Sticky, WindowListSkip
 Style "xbiff"      NoTitle,            Sticky, WindowListSkip
-Style "Maker"      StartsOnDesk 1
-Style "matlab"     StartsOnDesk 3
-Style "signal"     StartsOnDesk 3 
 Style "rxvt"       Icon  term.xpm
-Style "xterm"      Icon xterm.xpm, Color black/grey
+Style "xterm"      Icon xterm.xpm
+#, Color black/grey
 Style "Appointment" Icon datebook.xpm
 Style "xcalc"      Icon xcalc.xpm
 Style "xbiff"      Icon mail1.xpm
 Style "xmh"        Icon mail1.xpm, StartsOnDesk 2
 Style "xman"	   Icon xman.xpm
 Style "xvgr"	   Icon graphs.xpm
-Style "matlab"	   Icon math4.xpm
 Style "xmag"	   Icon mag_glass.xpm
 Style "xgraph"	   Icon graphs.xpm
 Style "GoodStuff"  Icon toolbox.xpm
-Style "login_sh"   NoButton
-Style "*"		Color black/gray
+Style "login_sh"   NoButton 1, NoButton 2, NoButton 4, NoHandles
+Style "oprin"	   NoButton 1, NoButton 2, NoButton 4, NoHandles
+Style "fmset"      NoButton 1, NoButton 2, NoButton 4, NoHandles
+Style "*"          Color black/khaki
 
 #############################################################################
 
@@ -482,8 +486,8 @@ EndPopup
 Popup "Root Menu"
 	Title	"Root Menu"
 	Exec	"New Window"	exec xterm -ls -g 80x24+75+75 -rw &
-	CirculateUp	"Shuffle Up"
-	CirculateDown	"Shuffle Down"
+#	CirculateUp	"Shuffle Up"
+#	CirculateDown	"Shuffle Down"
 	Refresh		"Refresh"
 	Nop		""
 	Popup		"Utilities"	Utilities
@@ -512,16 +516,16 @@ EndPopup
 # Operator menu
 Popup "Operator Menu"
 	Title	"Operator Menu"
-	Exec	"Monit: time    C-A-1"	exec xterm -name monit1 -e monit1 &
-	Exec	"Monit: status  C-A-2"	exec xterm -name monit2 -e monit2 &
-	Exec	"Monit: Tsys    C-A-3"	exec xterm -name monit3 -e monit3 &
-	Exec	"Chekr          C-A-C"	exec run chekr w &
-	Exec	"Emacs          C-A-E"	exec emacs &
-	Exec	"Logex          C-A-L"	exec xterm -name logex -e logex &
-	Exec	"Pfmed          C-A-P"	exec xterm -name pfmed -e pfmed &
-	Exec	"Setcl          C-A-S"	exec setcl &
-	Exec	"Fmset          C-A-T"	exec xterm -name fmset -e fmset &
-	Exec	"New window     C-A-W"	exec xterm -ls -g 80x24+75+75 &
+	Exec	"Monit: time    C-S-1"	exec xterm -name monit1 -e monit1 &
+	Exec	"Monit: status  C-S-2"	exec xterm -name monit2 -e monit2 &
+	Exec	"Monit: Tsys    C-S-3"	exec xterm -name monit3 -e monit3 &
+	Exec	"Chekr          C-S-C"	exec run chekr w &
+	Exec	"Emacs          C-S-E"	exec emacs &
+	Exec	"Logex          C-S-L"	exec xterm -name logex -e logex &
+	Exec	"Pfmed          C-S-P"	exec xterm -name pfmed -e pfmed &
+	Exec	"Setcl          C-S-S"	exec setcl &
+	Exec	"Fmset          C-S-T"	exec xterm -name fmset -e fmset &
+	Exec	"New window     C-S-W"	exec xterm -ls -g 80x24+75+75 &
 	Nop	""
 	Popup	"Window Ops"	Window Ops
 EndPopup
@@ -613,16 +617,16 @@ Mouse 3         W       M       RaiseLower
 ############################################################################
 # Now some keyboard shortcuts.
 
-Key 1		A	CM	Exec "monit1" exec xterm -name monit1 -e monit1 &
-Key 2		A	CM	Exec "monit2" exec xterm -name monit2 -e monit2 &
-Key 3		A	CM	Exec "monit3" exec xterm -name monit3 -e monit3 &
-Key c		A	CM	Exec "chekr" exec run chekr w &
-Key e		A	CM	Exec "emacs" exec emacs &
-Key l		A	CM	Exec "logex" exec xterm -name logex -e logex &
-Key p		A	CM	Exec "pfmed" exec xterm -name pfmed -e pfmed &
-Key s		A	CM	Exec "setcl" exec setcl &
-Key t		A	CM	Exec "fmset" exec xterm -name fmset -e fmset &
-Key w		A	CM	Exec "new window" exec xterm -ls -g 80x24+75+75 -rw &
+Key 1		A	CS	Exec "monit1" exec xterm -name monit1 -e monit1 &
+Key 2		A	CS	Exec "monit2" exec xterm -name monit2 -e monit2 &
+Key 3		A	CS	Exec "monit3" exec xterm -name monit3 -e monit3 &
+Key c		A	CS	Exec "chekr" exec run chekr w &
+Key e		A	CS	Exec "emacs" exec emacs &
+Key l		A	CS	Exec "logex" exec xterm -name logex -e logex &
+Key p		A	CS	Exec "pfmed" exec xterm -name pfmed -e pfmed &
+Key s		A	CS	Exec "setcl" exec setcl &
+Key t		A	CS	Exec "fmset" exec xterm -name fmset -e fmset &
+Key w		A	CS	Exec "new window" exec xterm -ls -g 80x24+75+75 -rw &
 Key Escape	A	SC	CirculateDown
 Key Escape	A	C	CirculateUp
 # Arrow Keys

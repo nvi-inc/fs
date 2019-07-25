@@ -146,9 +146,9 @@ C
 C
 C FS version number
 C
-      sVerMajor_FS = 8
-      sVerMinor_FS = 9
-      sVerPatch_FS = 0
+      sVerMajor_FS = VERSION
+      sVerMinor_FS = SUBLEVEL
+      sVerPatch_FS = PATCHLEVEL
 C                   Initialize the time-like variables
 C                   Initialize previous segment name for LINKP
       do i=1,15
@@ -885,20 +885,10 @@ C  MCB BAUD RATE
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       ibmcb = ias2b(ibuf,ic1,ic2-ic1+1)      ! baud rate for MCB
       call fs_set_ibmcb(ibmcb)
-      if (ibmcb.eq.-32768) then
+      if (ibmcb.eq.-32768. or. ibmcb .ne.57600) then
         call logit7ci(0,0,0,1,-122,'bo',9)
         ierrx = -1
       endif
-      ibx = -1
-      do i=1,7
-        if (ibmcb.eq.ibaud(i)) ibx = i
-      enddo
-C                   Check that a legal value was specified
-      if (ibx.le.0) then
-        call logit7ci(0,0,0,1,-122,'bo',9)
-        ierrx = -1
-      endif
-
 C
       call fmpclose(idcb,ierr)
 C
