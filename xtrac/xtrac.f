@@ -43,12 +43,12 @@ C
 C
       character*64 iibuf,iobuf,ipbuf
 C
-      logical kinit,kgetp,kopn,koutp,kread,kwrit,kd,kpant,kobot
-      logical kpout
+      logical kinit,kgetp,kopn,koutp,kread,kpant,kobot
+      logical kpout_ch
 C
       integer*2 lingdp(23)
       integer*2 lbreak(8)
-      integer*2 ldone(27)
+c     integer*2 ldone(27)
 C
       data lingdp /  43,2her,2hro,2hr ,2h  ,2h  ,2h  ,2hin,2hte,2hrn,
      /             2hal,2h i,2hnc,2hon,2hsi,2hst,2hen,2hcy,2h i,2hn ,
@@ -56,9 +56,9 @@ C
 C          error       internal inconsistency in getdp
       data lbreak /  14,2hbr,2hea,2hk ,2hde,2hte,2hct,2hed/             
 C          break detected
-      data ldone  /  51,2hte,2hrm,2hin,2hat,2hin,2hg:,2h  ,2h  ,2h  ,   
-     /             2h  ,2hin,2hpu,2ht ,2hpo,2hin,2hts,2h  ,2h  ,2h  ,   
-     /             2h  ,2hgo,2hod,2h p,2hoi,2hnt,2hs /                  
+c     data ldone  /  51,2hte,2hrm,2hin,2hat,2hin,2hg:,2h  ,2h  ,2h  ,   
+c    /             2h  ,2hin,2hpu,2ht ,2hpo,2hin,2hts,2h  ,2h  ,2h  ,   
+c    /             2h  ,2hgo,2hod,2h p,2hoi,2hnt,2hs /                  
 C          terminating:         input points         good points
       data ndlin/31/,ndlat/31/,ndlon/31/,il/50/,nrec/12/,idcbz/1552/
 C 
@@ -74,11 +74,11 @@ C
 C
       if (koutp(lu,idcbo,idcbos,iapp,iobuf)) goto 10010
 C
-      if (kpout(lu,idcbo,8H$antenna,8,iobuf,lst)) goto 10000
+      if (kpout_ch(lu,idcbo,'$antenna',iobuf,lst)) goto 10000
 C
       if (kpant(lu,idcbo,lant,lpaxis,jbuf,il,lst,iobuf)) goto 10000
 C
-      if (kpout(lu,idcbo,6H$data   ,6,iobuf,lst)) goto 10000
+      if (kpout_ch(lu,idcbo,'$data ',iobuf,lst)) goto 10000
 C
       inp=0 
       igp=0 
@@ -164,7 +164,7 @@ C
       sltrms=latrms
       sdirms=dirms
 C
-      if (kpout(lu,idcbo,6H$stats  ,6,iobuf,lst)) goto 10000
+      if (kpout_ch(lu,idcbo,'$stats',iobuf,lst)) goto 10000
 C
       call tpstb(lu,idcbo,slnavg,sltavg,slnrms,sltrms,sdirms,inp,igp,
      +         iobuf,lst,jbuf,il) 

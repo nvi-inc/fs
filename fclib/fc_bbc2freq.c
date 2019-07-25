@@ -1,4 +1,4 @@
-long fc_bbc2freq_(bits)
+long fc_bbc2freq__(bits)
 long *bits;
 {
     long bbc2freq();

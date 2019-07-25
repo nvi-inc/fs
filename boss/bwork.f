@@ -32,7 +32,6 @@ C                   Command names list, and procedure lists
       dimension it(6)          !  time from system 
       integer itn(6),itw(6)
 c
-      integer it1(6),it2(6),secs1,secs2,diff
 c
       integer*4 secsnow,secswait,delta
       dimension iotref(3),istref(3)
@@ -52,15 +51,15 @@ C                   Names of schedule, operator top-of-stack procedures
 C                   Stacks for procedure parameters, parameter string
 C     NCPARM - # chars in procedure parameter string
       dimension itmlog(6)          !  time log file was opened
-      integer*4 irecl,icurln,ilstln
+      integer*4 icurln,ilstln
       character*12 ibc1,ibc2
       dimension ireg(2)
-      integer get_buf, fmpposition, ichcm_ch, rn_take
+      integer get_buf, ichcm_ch, rn_take
       logical rn_test,kxdisp,kxlog,kput
       equivalence (ireg(1),reg)
       integer jchar, itype
       character cjchar,chsor,char2
-      logical krcur,kpast,klast,kts,kskblk,kopblk,kbreak,kstak,kon
+      logical krcur,klast,kts,kskblk,kopblk,kbreak,kstak,kon
 C                   KRCUR returns true if a procedure calls itself
 C                   KPAST returns true if a given time is earlier than now
 C                   KLAST true if this is last time scheduling of command
@@ -97,7 +96,7 @@ C
       call char2hol(lstp,ilstp,1,8)
       call fs_set_lstp(ilstp)
       call opnpf(lstp,idcbp2,ibuf,iblen,lproc2,maxpr2,nproc2,ierr,'n')
-      if (ierr.lt.0) call logit7(0,0,0,1,-133,2hbo,ierr)
+      if (ierr.lt.0) call logit7ci(0,0,0,1,-133,'bo',ierr)
       call fc_rte_time(itmlog,itmlog(6))
 C
 C     2. First and always, check the time list for something to do.
@@ -152,7 +151,7 @@ C
       if (chsor.eq.':') idummy = ichmv(lprocn,1,lprocs,1,12)
 C                   Establish the current procedure name
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-101,2hbo,ierr)
+        call logit7ci(0,0,0,1,-101,'bo',ierr)
         goto 200
       endif
 C
@@ -161,7 +160,7 @@ C     awaken was decided by GETTS already when it passed on to this section.
 C
       if (nchar.le.0) then
         if (ichcm_ch(lsor,1,'::').eq.0) then
-          call logit4(16H*end of schedule,16,lsor,lprocn)
+          call logit4_ch('*end of schedule',lsor,lprocn)
           lskd = 'none'
           call char2hol(lskd,ilskd,1,8)
           call fs_set_lskd(ilskd)
@@ -239,7 +238,7 @@ C
       endif
       call logit4(ibuf,nchar,lsor,lprocn)
       if (ierr.ne.0) then
-        call logit7(0,0,0,0,ierr,2hsp,0)
+        call logit7ci(0,0,0,0,ierr,'sp',0)
         call clrcl(iclass)
         goto 200
       endif
@@ -271,7 +270,7 @@ C
       if ((itime(1).eq.0.or.itime(1).eq.-1).and.
      .     itime(4).eq.0.and.itime(7).eq.0) goto 500
       call putts(itscb,ntscb,itime,itype,index,iclass,lsor,ierr)
-      if (ierr.lt.0) call logit7(0,0,0,1,-102,2hbo,itime(1))
+      if (ierr.lt.0) call logit7ci(0,0,0,1,-102,'bo',itime(1))
       if (ierr.lt.0) call clrcl(iclass)
       goto 200
 C
@@ -306,7 +305,7 @@ C                   Indicate the second list by <0
         if ( (chsor.ne.';' .or. krcur(istkop,indexp)) .and.
      &       (chsor.ne.':' .or. krcur(istksk,indexp)) ) then
 C                   Recursion is not allowed
-          call logit6(0,0,0,0,-103,2hbo)
+          call logit6c(0,0,0,0,-103,'bo')
           goto 600
         endif
         ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
@@ -316,7 +315,7 @@ C                   Get the command <name>=<parm>
         if (ich.gt.0) then
           ncparm = nchar - ich
           if (ncparm.le.0 .or. ncparm.gt.12) then
-            call logit7(0,0,0,1,-135,2hbo,12)
+            call logit7ci(0,0,0,1,-135,'bo',12)
             goto 600
           endif
           idummy = ichmv(lpparm,1,ibuf,ich+1,ncparm)
@@ -377,7 +376,8 @@ C                   message in spite of our error.
           do i=1,ip(2)
             ireg(2) = get_buf(ip(1),ibuf,-iblen*2,idum,idum)
             nchar = min0(ireg(2),iblen*2)
-            call logit4(ibuf,nchar,2H/ ,lprocn)
+            call char2hol('/ ',ldum,1,2)
+            call logit4(ibuf,nchar,ldum,lprocn)
           enddo
         endif
         if (kts) iclass = 0
@@ -408,7 +408,7 @@ C
           nchar=nchar-1
         endif
         if (ich.eq.1) then
-          nch = ichmv(ibuf,nchar+1,2h/ ,1,1)
+          nch = ichmv_ch(ibuf,nchar+1,'/')
           call fs_get_llog(illog)
           nch = nch + ichmv(ibuf,nch,illog,1,8)
           call logit4(ibuf,nch-1,lsor,lprocn)
@@ -441,7 +441,7 @@ C
           endif
 C  User requested schedule name, format response and log it.
           if (ich.eq.1) then
-            nch = ichmv(ibuf,nchar+1,2h/ ,1,1)
+            nch = ichmv_ch(ibuf,nchar+1,'/')
             call fs_get_lskd(ilskd)
             call hol2char(ilskd,1,8,lskd)
             ibc(nch:nch+6) = lskd(1:7)
@@ -456,7 +456,7 @@ C  User requested schedule name, format response and log it.
           ic4 = iscn_ch(ibuf,ich,nchar,',')
 C  If a comma but no schedule name.
           if (ic4.eq.ich) then
-            call logit7(0,0,0,0,-168,2hbo,0)
+            call logit7ci(0,0,0,0,-168,'bo',0)
             call rn_put('pfmed')
             goto 600
           endif
@@ -464,7 +464,7 @@ C  If a comma but no schedule name.
           cnamef=' '
           cnamef = ibc(ich:ic4-1)
           if (cnamef.eq.' ') then
-            call logit7(0,0,0,0,-168,2hbo,0)
+            call logit7ci(0,0,0,0,-168,'bo',0)
             call rn_put('pfmed')
             goto 600
           endif
@@ -500,7 +500,7 @@ C  a valid schedule or all is set to zero.
           pathname = ibc1(1:il1) // lskd(1:ic3-ic2-1) // ibc2(1:il2)
           call fmpopen(idcbsk,pathname,ierr,'r',id)
           if (ierr.lt.0) then
-            call logit7(0,0,0,1,-105,2hbo,ierr)
+            call logit7ci(0,0,0,1,-105,'bo',ierr)
             lskd = 'none'
             call char2hol(lskd,ilskd,1,8)
             call fs_set_lskd(ilskd)
@@ -527,7 +527,7 @@ C  a valid schedule or all is set to zero.
               lprc='none'
               call char2hol(lprc,ilprc,1,8)
               call fs_set_lprc(ilprc)
-              call logit7(0,0,0,1,-158,2hbo,ierr)
+              call logit7ci(0,0,0,1,-158,'bo',ierr)
               call rn_put('pfmed')
               goto 600
             end if
@@ -538,9 +538,9 @@ C  a valid schedule or all is set to zero.
      &               'n')
           if (ierr.lt.0) then
             if(ierr.ne.-6) then
-              call logit7(0,0,0,1,-133,2hbo,ierr)
+              call logit7ci(0,0,0,1,-133,'bo',ierr)
             else
-              call logit7(0,0,0,1,-139,2hbo,ierr)
+              call logit7ci(0,0,0,1,-139,'bo',ierr)
             endif
             lprc='none'
             call char2hol(lprc,ilprc,1,8)
@@ -566,7 +566,7 @@ C  a valid schedule or all is set to zero.
           endif
           call rn_put('pfmed')
         else
-          call logit7(0,0,0,0,-159,2hbo,0)
+          call logit7ci(0,0,0,0,-159,'bo',0)
         end if
 C
 C     5.6 Commands which set switches (XLOG,ECHO,XDISP)
@@ -576,21 +576,21 @@ C
         nchar = min0(ireg(2),iblen*2)
         ich = 1+iscn_ch(ibuf,1,nchar,'=')
         if (ich.eq.1) then
-          call logit7(0,0,0,0,-107,2hbo,0)
+          call logit7ci(0,0,0,0,-107,'bo',0)
         else
           kon = (ichcm_ch(ibuf,ich,'on').eq.0)
           if (.not.kon .and. ichcm_ch(ibuf,ich,'off').ne.0) then
-            call logit7(0,0,0,0,-108,2hbo,0)
+            call logit7ci(0,0,0,0,-108,'bo',0)
           else
             if (mbranch.eq.6) then
               kxlog = kon
-              if (kon) call put_buf(iclbox,ibuf,-1,2hfs,2hln)
-              if (.not.kon) call put_buf(iclbox,ibuf,-1,2hfs,2hlf)
+              if (kon) call put_buf(iclbox,ibuf,-1,'fs','ln')
+              if (.not.kon) call put_buf(iclbox,ibuf,-1,'fs','lf')
             endif
             if (mbranch.eq.7) then
               kxdisp = kon
-              if (kon) call put_buf(iclbox,ibuf,-1,2hfs,2hdn)
-              if (.not.kon) call put_buf(iclbox,ibuf,-1,2hfs,2hdf)
+              if (kon) call put_buf(iclbox,ibuf,-1,'fs','dn')
+              if (.not.kon) call put_buf(iclbox,ibuf,-1,'fs','df')
             endif
             if (mbranch.eq.8) kecho=kon
             call fs_set_kecho(kecho)
@@ -603,7 +603,7 @@ C
       else if (mbranch.eq.10) then
          ierr=0
         if (rn_test('pfmed')) then
-          call logit7(0,0,0,0,-171,2hbo,0)
+          call logit7ci(0,0,0,0,-171,'bo',0)
           goto 600
         endif
         do i=1,20
@@ -616,7 +616,9 @@ C
         call clrcl(iclass)
         call clrcl(iclopr)
         call clrcl(iclop2)
-        call logit4(16H*boss terminated,16,2H::,lprocn)
+        call char2hol('::',ldum,1,2)
+        call logit4_ch('*boss terminated',ldum,lprocn)
+        call fc_rte_sleep( 10)
         return
 C
 C     5.11 FLUSH command to clear out the operator stream completely.
@@ -655,13 +657,13 @@ C
           if (itscb(1,i).ne.-1) then
             idummy = ichmv(ibuf,1,itscb(10,i),1,2)
 C                     First the type
-            if (jchar(ibuf,1).eq.0) idummy = ichmv(ibuf,1,2h  ,1,1)
-            if (jchar(ibuf,2).eq.0) idummy = ichmv(ibuf,2,2h  ,1,1)
+            if (jchar(ibuf,1).eq.0) idummy = ichmv_ch(ibuf,1,' ')
+            if (jchar(ibuf,2).eq.0) idummy = ichmv_ch(ibuf,2,' ')
             idummy = ichmv(ibuf,3,itscb(13,i),2,1)
 C                     Next the source of the command
             idummy = ib2as(itscb(11,i),ibuf,4,2)
 C                     The index in the function or proc lists
-            idummy = ichmv(ibuf,6,2h@ ,1,1)
+            idummy = ichmv_ch(ibuf,6,'@')
          idummy = ib2as(mod(itscb(1,i),1024),ibuf,7,o'40000'+o'400'*3+3)
          idummy = ib2as(itscb(2,i)/60,ibuf,10,o'40000'+o'400'*2+2)
          idummy = ib2as(mod(itscb(2,i),60),ibuf,12,o'40000'+o'400'*2+2)
@@ -702,12 +704,12 @@ C
             call fs_set_lprc(ilprc)
             call rn_put('pfmed')
           else
-            call logit7(0,0,0,0,-157,2hbo,0)
+            call logit7ci(0,0,0,0,-157,'bo',0)
           end if
           goto 600
         endif
         if (ich.eq.1) then         !  request for procedure file name
-          nch = ichmv(ibuf,nchar+1,2h/ ,1,1)
+          nch = ichmv_ch(ibuf,nchar+1,'/')
           call fs_get_lprc(ilprc)
           call hol2char(ilprc,1,8,lprc)
           ibc(nch:nch+7) = lprc(1:8)
@@ -719,11 +721,11 @@ C
           call fs_get_lstp(ilstp)
           call hol2char(ilstp,1,8,lstp)
           if (kstak(istkop,istksk,1)) then
-            call logit7(0,0,0,0,-133,2hbo,0)
+            call logit7ci(0,0,0,0,-133,'bo',0)
           else if (ibc(ich:ic2-1).eq.lstp) then
 C  the station procedure library is opened on startup and remains open
 C  therefore, station as a procedure command parameter is an error.
-            call logit7(0,0,0,0,-136,2hbo,0)
+            call logit7ci(0,0,0,0,-136,'bo',0)
           else
             irnprc = rn_take('pfmed',1)
             if (irnprc.eq.0) then
@@ -737,14 +739,14 @@ C                   Cancel procs from the old library
               call opnpf(lprc,idcbp1,ibuf,iblen,lproc1,maxpr1,nproc1,
      &                   ierr,'n')
               if (ierr.ne.0) then
-                call logit7(0,0,0,1,-133,2hbo,ierr)
+                call logit7ci(0,0,0,1,-133,'bo',ierr)
                 lprc = 'none'
                 call char2hol(lprc,ilprc,1,8)
                 call fs_set_lprc(ilprc)
                 nproc1 = 0
               endif
             else
-              call logit7(0,0,0,0,-157,2hbo,0)
+              call logit7ci(0,0,0,0,-157,'bo',0)
               goto 5152
             endif
             call rn_put('pfmed')

@@ -5,6 +5,8 @@
 #define FALSE       0
 #endif
 
+#define WORD_BIT    32
+
 #define SHM_KEY     1
 #define SHM_SIZE    12288       /* should be a multiple of 4096 */
 #define C_RES       6144        /* reserves bytes for Fscom     */
@@ -38,7 +40,7 @@
 #define FSPGM_CTL "/usr2/fs/control/fspgm.ctl"
 #define STPGM_CTL "/usr2/control/stpgm.ctl"
 
-#define ADDR      "addr"              
+#define ADDR_ST   "addr"              
 #define TEST      "test"
 #define REBOOT    "reboot"
 #define BAD_VALUE "BAD_VALUE"
@@ -62,7 +64,7 @@
 
 #define FS_ROOT     "/usr2"
 
-#define CH_PRIOR    90
-#define CL_PRIOR    30
-#define FS_PRIOR    20
-#define AN_PRIOR    10
+#define CH_PRIOR    -4
+#define CL_PRIOR    -8
+#define FS_PRIOR   -12
+#define AN_PRIOR   -16

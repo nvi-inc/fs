@@ -60,7 +60,7 @@ long ip[5];                           /* ipc parameters */
          if (*command->argv[0]=='?') {
             rec_dis(command,ip);
             return;
-         } else if(0==strcmp(command->argv[0],ADDR)) {
+         } else if(0==strcmp(command->argv[0],ADDR_ST)) {
             request.type=2; add_req(&buffer,&request);
             goto mcbcn;
 

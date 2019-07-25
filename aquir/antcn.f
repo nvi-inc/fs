@@ -11,7 +11,7 @@ C
 C       IERR = 0 IF NO ERROR OCCURRED
 C
       integer*4 ip(5)
-      logical kbreak,rn_test
+      logical kbreak
 C
       data ntry/2/,idum/0/
 C
@@ -21,7 +21,7 @@ C
       call run_prog('antcn','wait',ip1,0,0,0,0)
       call rmpar(ip)
       if (ip(3).ge.0) return 
-      call logit7(idum,idum,idum,-1,ip(3),ip(4),2Hfp)
+      call logit7ic(idum,idum,idum,-1,ip(3),ip(4),'fp')
       itry=itry-1 
       if (itry.gt.0) goto 15
       goto 80020 

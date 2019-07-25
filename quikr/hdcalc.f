@@ -78,7 +78,7 @@ C
       endif
 C
       call fs_get_drive(drive)
-      if(VLBA.eq.iand(drive,VLBA)) then
+      if(VLBA.eq.and(drive,VLBA)) then
         kswrite_fs=ksread_fs
         ksdwrite_fs=ksdread_fs
         kbdwrite_fs=kbdread_fs
@@ -95,7 +95,7 @@ C
 500   continue
       nch=ieq
       if(nch.eq.0) nch=nchar+1
-      nch=ichmv(ibuf,nch,2h/ ,1,1)
+      nch=ichmv_ch(ibuf,nch,'/')
 C
       if(kbdwrite_fs) nch=nch+ir2as(rbdwrite_fs,ibuf,nch,8,1)
       nch=mcoma(ibuf,nch)
@@ -115,7 +115,7 @@ C
       if(ksread_fs) nch=nch+ir2as(rsread_fs,ibuf,nch,8,2)
 C
       nch=nch-1
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       nrec=1
 C
 C  That's all

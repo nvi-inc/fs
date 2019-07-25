@@ -7,7 +7,7 @@ C
 C
       integer ftry,rn_take
       real latosv,lonosv,latps1,lonps1,latps2,lonps2,latoff,lonoff
-      real latpos,lonpos,ltrchi,lnrchi,lonofs,latofs
+      real latpos,lonpos,ltrchi,lnrchi
       real ltpar,lnpar,ltliof,lnliof
       external fgaus
       logical kbreak,kon
@@ -16,6 +16,7 @@ C
       dimension ltpar(5), eltpar(5), lnpar(5), elnpar(5),it(6)
       integer*2 lbuf(40)
       integer*4 ip(5)
+      character*4 caxfp
 C
       include '../include/fscom.i'
       include '../include/dpi.i'
@@ -41,7 +42,7 @@ C
       ierr=0
       kon=.false.
       if(0.ne.rn_take('fivpt',1)) then
-        call logit7(idum,idum,idum,-1,-2,lwho,2Her)
+        call logit7ic(idum,idum,idum,-1,-2,lwho,'er')
         goto 1
       endif
       call read_fscom
@@ -54,6 +55,7 @@ C
       bw = bmfp_fs
       nmb=intpfp
       ntsys=intpfp
+      call hol2char(laxfp,1,4,caxfp)
 C
 C        Write SOURCE, SITE, ORIGIN, and FIVEPT log entries
 C
@@ -95,7 +97,7 @@ C
 C lock gain if a bbc
 C
       call fs_get_rack(rack)
-      if(VLBA.eq.iand(rack,VLBA)) then
+      if(VLBA.eq.and(rack,VLBA)) then
         call fc_mcbcn_d(ldevfp,ierr,ip)
         if(ierr.ne.0) then
           ierr=-81
@@ -113,7 +115,7 @@ C
       call offco(5.0*bw,azof,elof,azt,elt,ierr) 
       if (ierr.ne.0) goto 80010 
 C
-      call gooff(azosav+azof,elosav+elof,4hazel,nwait*2,ierr)
+      call gooff(azosav+azof,elosav+elof,'azel',nwait*2,ierr)
       if (ierr.ne.0) goto 80010
 C
       call tsys(temps,sigts,tpia,tima,vbase,vslope,ntsys,rut,ierr)
@@ -121,7 +123,7 @@ C
 C
       call wtsys(temps,sigts,azt,elt,ntsys,lbuf,isbuf)
 C
-      call gooff(azosav,elosav,4hazel,-1,ierr)
+      call gooff(azosav,elosav,'azel',-1,ierr)
       if (ierr.ne.0) goto 80010
 C
 C    MAIN LOOP
@@ -134,7 +136,7 @@ C
 C
 C  REMEMBER WHERE WE ARE
 C 
-      call local(lonps1,latps1,laxfp,ierr)
+      call local(lonps1,latps1,caxfp,ierr)
       if (ierr.ne.0) goto 80010 
       coslat=cos(latps1)
 C 
@@ -150,7 +152,7 @@ C
 C  GET FIRST LINEARITY POINT
 C
       ltliof=float(3+(nptsfp/2))*bstep
-      call gooff(lonoff,latosv-ltliof,laxfp,nwait*2,ierr)
+      call gooff(lonoff,latosv-ltliof,caxfp,nwait*2,ierr)
       if (ierr.ne.0) goto 80010
 C
       call volts(tpia,sig,tima,nmb,rut,ierr)
@@ -160,7 +162,7 @@ C
       sig=sig*vslope
 C
       otoff=latosv-ltliof
-      call dpoin(4Hlin ,3,1,timlin(1),otoff,tmplin(1),sig,nmb,lbuf,
+      call dpoin('lin',1,timlin(1),otoff,tmplin(1),sig,nmb,lbuf,
      +          isbuf)
 90    continue
 C
@@ -169,9 +171,9 @@ C
       do i=1,nptsfp
         latoff=start+float(i-1)*bstep
         if (i.eq.1.and.nptsfp.gt.3) then
-          call gooff(lonoff,latoff,laxfp,nwait*2,ierr)
+          call gooff(lonoff,latoff,caxfp,nwait*2,ierr)
         else
-          call gooff(lonoff,latoff,laxfp,nwait,ierr)
+          call gooff(lonoff,latoff,caxfp,nwait,ierr)
         endif
         if (ierr.ne.0) goto 80010
         call volts(tpia,sig,tima,intpfp,rut,ierr)
@@ -181,14 +183,14 @@ C
         sig=sig*vslope
         off(i)=latoff
 C
-        call dpoin(4Hlat ,3,i,tim(i),off(i),temp(i),sig,intpfp,
+        call dpoin('lat',i,tim(i),off(i),temp(i),sig,intpfp,
      +             lbuf,isbuf)   
       enddo
 C 
 C   SECOND LINEARITY POINT
 C 
       if (nptsfp.ge.5) goto 140 
-      call gooff(lonoff,latosv+ltliof,laxfp,nwait,ierr) 
+      call gooff(lonoff,latosv+ltliof,caxfp,nwait,ierr) 
       if (ierr.ne.0) goto 80010 
       call volts(tpia,sig,tima,nmb,rut,ierr)    
       if (ierr.ne.0) goto 80010 
@@ -196,7 +198,7 @@ C
       timlin(2)=tima
       sig=sig*vslope
       otoff=latosv+ltliof 
-      call dpoin(4Hlin ,3,2,timlin(2),otoff,tmplin(2),vslope,nmb, 
+      call dpoin('lin',2,timlin(2),otoff,tmplin(2),vslope,nmb, 
      +           lbuf,isbuf)  
 C 
 C    REMOVE LINEAR DRIFT
@@ -238,8 +240,8 @@ C
       if (nptsfp.lt.5) ltpar(4)=const
       if (nptsfp.lt.5) ltpar(5)=slope
 C 
-      call fitot(6Hlatfit,6,ltpar,ierr,lbuf,isbuf)
-      call errot(6Hlaterr,6,eltpar,ltrchi,lbuf,isbuf) 
+      call fitot('latfit',ltpar,ierr,lbuf,isbuf)
+      call errot('laterr',eltpar,ltrchi,lbuf,isbuf) 
 C 
       if (ltpar(2).gt.off(1).and.ltpar(2).lt.off(nptsfp).and.    
      + ierr.gt.0 ) ilat=1   
@@ -260,7 +262,7 @@ C
 C   GET THIRD LINEARITY POINT 
 C 
       lnliof=float(3+(nptsfp/2))*bstep
-      call gooff(lonosv-lnliof,latoff,laxfp,nwait,ierr) 
+      call gooff(lonosv-lnliof,latoff,caxfp,nwait,ierr) 
       if (ierr.ne.0) goto 80010 
       call volts(tpia,sig,tima,nmb,rut,ierr)    
       if (ierr.ne.0) goto 80010 
@@ -268,7 +270,7 @@ C
       timlin(3)=tima
       sig=sig*vslope
       otoff=lonosv-lnliof 
-      call dpoin(4Hlin ,3,3,timlin(3),otoff,tmplin(3),sig,nmb,
+      call dpoin('lin',3,timlin(3),otoff,tmplin(3),sig,nmb,
      +          lbuf,isbuf) 
 190   continue
 C 
@@ -277,9 +279,9 @@ C
       do i=1,nptsfp 
         lonoff=start+float(i-1)*bstep
         if (i.eq.1.and.nptsfp.gt.3) then
-          call gooff(lonoff,latoff,laxfp,nwait*2,ierr) 
+          call gooff(lonoff,latoff,caxfp,nwait*2,ierr) 
         else
-          call gooff(lonoff,latoff,laxfp,nwait,ierr) 
+          call gooff(lonoff,latoff,caxfp,nwait,ierr) 
         endif
         if (ierr.ne.0) goto 80010
         call volts(tpia,sig,tima,intpfp,rut,ierr)  
@@ -289,7 +291,7 @@ C
         sig=sig*vslope 
         off(i)=lonoff
 C 
-        call dpoin(4Hlon ,3,i,tim(i),off(i),temp(i),sig,intpfp,
+        call dpoin('lon',i,tim(i),off(i),temp(i),sig,intpfp,
      +             lbuf,isbuf)   
       enddo
 C 
@@ -297,7 +299,7 @@ C
 C 
 C   FOURTH LINEARITY POINT
 C 
-      call gooff(lonosv+lnliof,latoff,laxfp,nwait,ierr) 
+      call gooff(lonosv+lnliof,latoff,caxfp,nwait,ierr) 
       if (ierr.ne.0) goto 80010 
       call volts(tpia,sig,tima,nmb,rut,ierr)    
       if (ierr.ne.0) goto 80010 
@@ -305,7 +307,7 @@ C
       timlin(4)=tima
       sig=sig*vslope
       otoff=lonosv+lnliof 
-      call dpoin(4Hlin ,3,4,timlin(4),otoff,tmplin(4),sig,nmb,
+      call dpoin('lin',4,timlin(4),otoff,tmplin(4),sig,nmb,
      +           lbuf,isbuf)  
 C 
 C    REMOVE LINEAR DRIFT
@@ -316,7 +318,7 @@ C
 C 
 C    GET ANOTHER LOCAL COORDINATE POSITON TO AVERAGE WITH THE FIRST 
 C 
-      call local(lonps2,latps2,laxfp,ierr)
+      call local(lonps2,latps2,caxfp,ierr)
       if (ierr.ne.0) goto 80010 
 C 
       lonpos=(lonps1+lonps2)*.5 
@@ -360,8 +362,8 @@ C
       lnpar(3)=lnpar(3)*coslat
       elnpar(3)=elnpar(3)*coslat
 C
-      call fitot(6Hlonfit,6,lnpar,ierr,lbuf,isbuf)
-      call errot(6Hlonerr,6,elnpar,lnrchi,lbuf,isbuf)
+      call fitot('lonfit',lnpar,ierr,lbuf,isbuf)
+      call errot('lonerr',elnpar,lnrchi,lbuf,isbuf)
 C
       if (lnpar(2).gt.off(1).and.lnpar(2).lt.off(nptsfp).and.
      + ierr.gt.0) ilon=1
@@ -395,9 +397,9 @@ C
       endif
       if (ilat.eq.1) savlt2=latosv
       if (ilon.eq.1) savln2=lonosv
-      call gooff(savln2,savlt2,laxfp,nwait*2,ierr)
+      call gooff(savln2,savlt2,caxfp,nwait*2,ierr)
       call offot(lonpos,latpos,lonosv,latosv,ilon,ilat,lbuf,isbuf)
-      if (ierr.ne.0) call logit7(idum,idum,idum,-1,ierr,lwho,2her)
+      if (ierr.ne.0) call logit7ic(idum,idum,idum,-1,ierr,lwho,'er')
       goto 90000
 C
 C   ERROR
@@ -419,32 +421,33 @@ C
 C
 80011 continue
       jerr=0
-      if(.NOT.kon) goto 89990
-      call gooff(lonosv,latosv,laxfp,nwait,jerr)
+      if(.NOT.kon) goto 80015
+      call gooff(lonosv,latosv,caxfp,nwait,jerr)
       itry=itry-1
       if (jerr.gt.o.and.itry.gt.0) goto 80011
 C
+80015 continue
       if (ierr.gt.0) goto 89990
-      call logit7(idum,idum,idum,-1,ierr,lwho,2Her)
-      if (jerr.ne.0) call logit7(idum,idum,idum,-1,-100,lwho,2Her)
+      call logit7ic(idum,idum,idum,-1,ierr,lwho,'er')
+      if (jerr.ne.0) call logit7ic(idum,idum,idum,-1,-100,lwho,'er')
       goto 90000
 C
 C BREAK DETECTED
 C
 89990 continue
       ierr=-1
-      call logit7(idum,idum,idum,-1,ierr,lwho,2Hbr)
-      if (jerr.ne.0) call logit7(idum,idum,idum,-1,-100,lwho,2Her)
+      call logit7ic(idum,idum,idum,-1,ierr,lwho,'br')
+      if (jerr.ne.0) call logit7ic(idum,idum,idum,-1,-100,lwho,'er')
       goto 90000
 C
 C CLEAN UP AND EXIT
 C
 90000 continue
-      if(VLBA.eq.iand(rack,VLBA)) then
+      if(VLBA.eq.and(rack,VLBA)) then
         call fc_mcbcn_r(ip)
         if(ip(3).lt.0) then
           call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
-          call logit7(idum,idum,idum,-1,-112,lwho,2Her)
+          call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
         endif
       endif
       call rn_put('fivpt')

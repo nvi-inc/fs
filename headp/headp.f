@@ -5,13 +5,11 @@ C  TO FILE /CONTROL/HEAD.NEW
 C
       character*3 slow
       character*4 type(0:2)
-      character*6 inttodecimal
       character*8 posit
       character*20 tbuff
       character*63 name
       logical kspd,kcal,kexist
       integer it(6),trimlen
-      integer*4 totalseconds,seconds
 C
       include '../include/fscom.i'
 C
@@ -25,14 +23,14 @@ c
       call rcpar(1,name)
 C
       kcal=kswrite_fs.and.kbdwrite_fs.and.ksdwrite_fs
-      if(VLBA.ne.iand(drive,VLBA)) then
+      if(VLBA.ne.and(drive,VLBA)) then
          kcal=kcal.and.ksread_fs.and.ksdread_fs.and.kbdread_fs
       endif
       if(.not.kcal) write(16,*)
      &  'head calibration has not been completed successfully.'
 C
       kspd=kwrwo_fs
-      if(VLBA.ne.iand(drive,VLBA)) then
+      if(VLBA.ne.and(drive,VLBA)) then
          kspd=kspd.and.krdwo_fs
        endif
       if(.not.kspd) write(16,*)
@@ -90,7 +88,7 @@ C
       write(16,9020)
 C
       write(16,9050)
-      if(VLBA.ne.iand(drive,VLBA)) then
+      if(VLBA.ne.and(drive,VLBA)) then
         write(16,9060) fowo_fs
         write(16,9070) sowo_fs
       else
@@ -99,14 +97,14 @@ C
       endif
 C
       write(16,9020)
-      if(VLBA.ne.iand(drive,VLBA)) then
+      if(VLBA.ne.and(drive,VLBA)) then
         write(16,9080) rbdwrite_fs,rbdread_fs
       else
         write(16,9080) rbdread_fs,0.0
       endif
 C
       write(16,9020)
-      if(VLBA.ne.iand(drive,VLBA)) then
+      if(VLBA.ne.and(drive,VLBA)) then
         write(16,9090) fiwo_fs
         write(16,9100) siwo_fs
       else
@@ -115,14 +113,14 @@ C
       endif
 C
       write(16,9020)
-      if(VLBA.ne.iand(drive,VLBA)) then
+      if(VLBA.ne.and(drive,VLBA)) then
         write(16,9110) rsdwrite_fs,rsdread_fs
       else
         write(16,9110) rsdread_fs,0.0
       endif
 C
       write(16,9020)
-      if(VLBA.ne.iand(drive,VLBA)) then
+      if(VLBA.ne.and(drive,VLBA)) then
         write(16,9120) rswrite_fs,rsread_fs
         write(16,9130) rswrite_fs,rsread_fs
       else

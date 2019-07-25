@@ -45,14 +45,14 @@ C
 C
 C  Atten: upper 2 bits from char 9, lower 4 from char 10
 C
-      iat = 16*iand(ia2hx(ibuf2,9),3) + ia2hx(ibuf2,10)
-      imix = iand(ia2hx(ibuf2,9),o'14')/4
+      iat = 16*and(ia2hx(ibuf2,9),3) + ia2hx(ibuf2,10)
+      imix = and(ia2hx(ibuf2,9),o'14')/4
       iswh = ia2hx(ibuf1,10)
-      is1  = 2-iand(iswh,1)
-      is2  = 2-(iand(iswh,2)/2)
-      is3  = 2-(iand(iswh,4)/4)
-      is4  = 2-(iand(iswh,8)/8)
-      iswp = 1-(iand(ia2hx(ibuf1,9),8)/8)
+      is1  = 2-and(iswh,1)
+      is2  = 2-(and(iswh,2)/2)
+      is3  = 2-(and(iswh,4)/4)
+      is4  = 2-(and(iswh,8)/8)
+      iswp = 1-(and(ia2hx(ibuf1,9),8)/8)
 c
 c lo freq
 c
@@ -60,8 +60,8 @@ c
      &     + o'400'*ia2hx(ibuf1,5)+o'20'*ia2hx(ibuf1,6)+ia2hx(ibuf1,7)
       freq=fc_bbc2freq(bits)
 c
-      irem = 1-iand(ia2hx(ibuf2,7),1)
-      lck = 1-(iand(ia2hx(ibuf2,7),8)/8)
+      irem = 1-and(ia2hx(ibuf2,7),1)
+      lck = 1-(and(ia2hx(ibuf2,7),8)/8)
 C
 C  Pick up four bits from each character for TP
       tpi = o'10000'*ia2hx(ibuf2,3) + o'400'*ia2hx(ibuf2,4)

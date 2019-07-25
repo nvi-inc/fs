@@ -63,8 +63,8 @@ C
       rad = 0.0
       ifc = ic1
       iec = ic2
-      idumm1 = ichmv(isuf,1,2Hh ,1,1)
-      if (imode.eq.2.or.imode.eq.4) idumm1 = ichmv(isuf,1,2Hd ,1,1)
+      idumm1 = ichmv_ch(isuf,1,'h')
+      if (imode.eq.2.or.imode.eq.4) idumm1 = ichmv_ch(isuf,1,'d')
 C                   If declination, change first suffix to "D"
       do 100 i=1,3
         fld(i) = 0.0

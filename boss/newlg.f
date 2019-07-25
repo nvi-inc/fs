@@ -35,8 +35,16 @@ C   MARK IV FIELD SYSTEM VERSION <version> <station> <year> <occup#>
 C     Send this with option "NL" to LOGIT, i.e. start new log file.
 C
       call ifill_ch(ibuf,3,60,' ')
-      nch = ichmv(ibuf,1,32H" MARK IV Field System Version   ,1,32)
-      nch = nch + ir2as(int(fsver*10.+.001)/10.,ibuf,nch,3,1)
+      nch = ichmv_ch(ibuf,1,'" Mark IV Field System Version ')
+      idum=sVerMajor_FS
+      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = ichmv_ch(ibuf,nch,'.')
+      idum=sVerMinor_FS
+      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = ichmv_ch(ibuf,nch,'.')
+      idum=sVerPatch_FS
+      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      iend=nch-1
       call fs_get_lnaant(lnaant)
       nch = ichmv(ibuf,nch+1,lnaant,1,8)
       nch = nch+1
@@ -53,14 +61,13 @@ C
 C     Second line contains minor version #; not read by correlator
 C     Send this as a normal message (i.e. NOT a new log)
 C
-      nch = 32 + ir2as(fsver,ibuf,33,4,2)
-      call logit3(ibuf,nch,lsor)
+      call logit3(ibuf,iend,lsor)
 C
 C     Send configuration info from control files to log
 C
       call ifill_ch(ib,1,120,' ')
       nch = 1
-      nch=ichmv(ib,nch,8Hlocation,1,8)
+      nch=ichmv_ch(ib,nch,'location')
       nch=mcoma(ib,nch)
       nch=ichmv(ib,nch,lnaant,1,8)
       nch=mcoma(ib,nch)
@@ -90,7 +97,7 @@ C
       call logit3(ib,nch,lsor)
       call ifill_ch(ib,1,120,' ')
       nch = 1
-      nch = ichmv(ib,nch,8Hhorizon1,1,8)
+      nch = ichmv_ch(ib,nch,'horizon1')
       nch = mcoma(ib,nch)
       call fs_get_horaz(horaz)
       call fs_get_horel(horel)
@@ -106,7 +113,7 @@ C
       call logit3(ib,nch,lsor)
       call ifill_ch(ib,1,120,' ')
       nch = 1
-      nch = ichmv(ib,nch,8Hhorizon2,1,8)
+      nch = ichmv_ch(ib,nch,'horizon2')
       nch = mcoma(ib,nch)
       do i=9,15
         if(horaz(i).lt.0) goto 500
@@ -120,7 +127,7 @@ C
       if(nch.gt.8) call logit3(ib,nch,lsor)
 C
       nch = 1
-      nch = ichmv(ib,nch,6Hhead0,,1,6)
+      nch = ichmv_ch(ib,nch,'head0,')
       do i=1,4
         if (i.eq.1) then
           idum=wrhd_fs
@@ -132,24 +139,24 @@ C
           idum=rpdt_fs
         endif
         if(idum.eq.0) then
-          nch=ichmv(ib,nch,4Hall ,1,3)
+          nch=ichmv_ch(ib,nch,'all')
         else if(idum.eq.1) then
-          nch=ichmv(ib,nch,4Hodd ,1,3)
+          nch=ichmv_ch(ib,nch,'odd')
         else if(idum.eq.2) then ! no else so illegal value is blank
-          nch=ichmv(ib,nch,4Heven,1,4)
+          nch=ichmv_ch(ib,nch,'even')
         endif
         nch=mcoma(ib,nch)
       enddo
       if(kadapt_fs) then
-        nch=ichmv(ib,nch,8Hadaptive,1,8)
+        nch=ichmv_ch(ib,nch,'adaptive')
       else
-        nch=ichmv(ib,nch,6Hfixed ,1,5)
+        nch=ichmv_ch(ib,nch,'fixed')
       endif
       nch=mcoma(ib,nch)
       if(kiwslw_fs) then
-        nch=ichmv(ib,nch,4Hyes ,1,3)
+        nch=ichmv_ch(ib,nch,'yes')
       else
-        nch=ichmv(ib,nch,2Hno  ,1,2)
+        nch=ichmv_ch(ib,nch,'no')
       endif
       nch=mcoma(ib,nch)
       nch=nch+ir2as(lvbosc_fs,ib,nch,6,4)
@@ -161,7 +168,7 @@ C
       do i=1,2
         call ifill_ch(ib,1,120,' ')
         nch = 1
-        nch = ichmv(ib,nch,4Hhead,1,4)
+        nch = ichmv_ch(ib,nch,'head')
         nch = nch + ib2as(i,ib,nch,1)
         nch=mcoma(ib,nch)
         nch = nch + ir2as(fastfw(i),ib,nch,7,1)
@@ -183,7 +190,7 @@ C
       enddo
       call ifill_ch(ib,1,120,' ')
       nch = 1
-      nch = ichmv(ib,nch,8Hantenna,,1,8)
+      nch = ichmv_ch(ib,nch,'antenna,')
       call fs_get_diaman(diaman)
       nch = nch + ir2as(diaman,ib,nch,5,1)
       nch=mcoma(ib,nch)
@@ -209,8 +216,7 @@ C
       call logit3(ib,nch,lsor)
 
       call ifill_ch(ib,1,120,' ')
-      nch = 1
-      nch = ichmv(ib,nch,6Hequip,,1,6)
+      nch = ichmv_ch(ib,1,'equip1,')
       call fs_get_iacttp(iacttp)
       nch = nch + ib2as(iacttp,ib,nch,3)
       nch=mcoma(ib,nch)
@@ -232,30 +238,94 @@ C
         nch = nch + ib2as(itsp(iskdtpsd+1),ib,nch,3)
       endif
       nch=mcoma(ib,nch)
-      call fs_get_i70kch(i70kch)
-      nch = nch + ib2as(i70kch,ib,nch,2)
-      nch=mcoma(ib,nch)
-      call fs_get_i20kch(i20kch)
-      nch = nch + ib2as(i20kch,ib,nch,2)
-      nch=mcoma(ib,nch)
       call fs_get_refreq(refreq)
       nch = nch + ir2as(refreq,ib,nch,6,1)
+      nch=mcoma(ib,nch)
+      call fs_get_i70kch(i70kch)
+      nch = nch + ib2as(i70kch,ib,nch,z'8005')
+      nch=mcoma(ib,nch)
+      call fs_get_i20kch(i20kch)
+      nch = nch + ib2as(i20kch,ib,nch,z'8005')
+c
+      nch=mcoma(ib,nch)
+      call fs_get_rack(rack)
+      if(rack.eq.MK3) then
+        nch=ichmv_ch(ib,nch,'mk3')
+      else if(rack.eq.VLBA) then
+        nch=ichmv_ch(ib,nch,'vlba')
+      else if(rack.eq.MK3) then
+        nch=ichmv_ch(ib,nch,'mk4')
+      endif
+c
+      nch=mcoma(ib,nch)
+      call fs_get_drive(drive)
+      if(drive.eq.MK3) then
+        nch=ichmv_ch(ib,nch,'mk3')
+      else if(drive.eq.VLBA) then
+        nch=ichmv_ch(ib,nch,'vlba')
+      else if(drive.eq.MK3) then
+        nch=ichmv_ch(ib,nch,'mk4')
+      endif
+c
+      nch=mcoma(ib,nch)
+      call fs_get_hwid(hwid)
+      nch=nch+ib2as(hwid,ib,nch,z'8005')
+c
+      call logit3(ib,nch-1,lsor)
+      nch = ichmv_ch(ib,1,'equip2,')
+c
+      call fs_get_motorv(motorv)
+      nch=nch+ir2as(motorv,ib,nch,12,3)
+c
+      nch=mcoma(ib,nch)
+      call fs_get_inscint(inscint)
+      nch=nch+ir2as(inscint,ib,nch,12,3)
+c
+      nch=mcoma(ib,nch)
+      call fs_get_inscsl(inscsl)
+      nch=nch+ir2as(inscsl,ib,nch,12,3)
+c
+      nch=mcoma(ib,nch)
+      call fs_get_outscint(outscint)
+      nch=nch+ir2as(outscint,ib,nch,12,3)
+c
+      nch=mcoma(ib,nch)
+      call fs_get_outscsl(outscsl)
+      nch=nch+ir2as(outscsl,ib,nch,12,3)
+c
+      nch=mcoma(ib,nch)
+      call fs_get_itpthick(itpthick)
+      nch=nch+ib2as(itpthick,ib,nch,z'8000'+10)
+c
+      nch=mcoma(ib,nch)
+      call fs_get_capstan(capstan)
+      nch=nch+ib2as(capstan,ib,nch,z'8000'+10)
+c
+      nch=mcoma(ib,nch)
+      nch=nch+ib2as(freqif3_fs/100,ib,nch,z'8000'+10)
+c
+      nch=mcoma(ib,nch)
+      nch=nch+ib2as(mod(freqif3_fs,100),ib,nch,z'C100'+2)
+c
+      nch=mcoma(ib,nch)
+      nch=ichmv(ib,nch,ihx2a(iswavif3_fs),2,1)
+c
       call logit3(ib,nch-1,lsor)
 c
       call ifill_ch(ib,1,120,' ')
       nch = 1
-      nch = ichmv(ib,nch,6Htime, ,1,5)
+      nch = ichmv_ch(ib,nch,'time,')
       nch = nch + ir2as(rate0ti_fs*86400.,ib,nch,12,3)
       nch=mcoma(ib,nch)
       nch = nch + ir2as(span0ti_fs/3600.0e2,ib,nch,12,3)
       nch=mcoma(ib,nch)
       call hol2char(model0ti_fs,1,1,model)
       if (model.eq.'n') then
-         nch=ichmv(ib,nch,4hnone,1,4)
+         nch=ichmv_ch(ib,nch,'none')
       else if (model.eq.'o') then
-         nch=ichmv(ib,nch,6hoffset,1,6)
+         nch=ichmv_ch(ib,nch,'offset')
       else if (model.eq.'r') then
-         nch=ichmv(ib,nch,4hrate,1,4)
+         nch=ichmv_ch(ib,nch,'rate')
       endif
       call logit3(ib,nch-1,lsor)
       return

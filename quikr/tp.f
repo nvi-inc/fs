@@ -136,7 +136,7 @@ C
       call tp2ma(ibuf(3),ilow,irst) 
 C 
       iclass = 0
-      call put_buf(iclass,ibuf,-13,2hfs,0)
+      call put_buf(iclass,ibuf,-13,'fs','  ')
 C 
       nrec = 1
       goto 800
@@ -150,12 +150,12 @@ C
       iclass = 0
       nrec = 0
       ibuf(1) = -3
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = nrec + 1
       call fs_get_drive(drive)
-      if (MK3.eq.iand(MK3,drive)) then
+      if (MK3.eq.and(MK3,drive)) then
         ibuf(1) = -1
-        call put_buf(iclass,ibuf,-4,2hfs,0)
+        call put_buf(iclass,ibuf,-4,'fs','  ')
         nrec = nrec + 1
       endif
 C 
@@ -167,7 +167,7 @@ C
 600   ibuf(1) = 6 
       call char2hol('tp',ibuf(2),1,2)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
       goto 800
 C 
@@ -177,7 +177,7 @@ C
 700   ibuf(1) = 7 
       call char2hol('tp',ibuf(2),1,2)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
       goto 800
 C 

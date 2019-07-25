@@ -20,6 +20,7 @@ C
       character*79 outbuf
       integer answer, trimlen, nchar
       character cchar
+      logical kfile
 C
 C  **************************************************************
 C

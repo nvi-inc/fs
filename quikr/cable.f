@@ -66,7 +66,7 @@ C                   Writing data, using mnemonic
       nc = min0(ilen2-4,nchar-ieq)
       if (nc.gt.0) nch = ichmv(ibuf2,5,ibuf,ieq+1,nc)-1 
       iclass=0
-      call put_buf(iclass,ibuf2,-nch,2Hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
       nrec = 1
       goto 800
 C 
@@ -76,7 +76,7 @@ C
 500   ibuf2(1) = 1
       call char2hol('ca',ibuf2(2),1,2)
       iclass = 0
-      call put_buf(iclass,ibuf2,-4,2Hfs,0)
+      call put_buf(iclass,ibuf2,-4,'fs','  ')
       nrec = 1
       goto 800
 C 

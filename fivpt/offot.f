@@ -7,28 +7,28 @@ C
        include '../include/dpi.i'
 C
       icnext=1
-      icnext=ichmv(lbuf,1,8Hoffset  ,1,7)
+      icnext=ichmv_ch(lbuf,1,'offset ')
 C
       icnext=icnext+jr2as(lonpos*180.0/RPI,lbuf,icnext,-9,4,isbuf)
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)  
+      icnext=ichmv_ch(lbuf,icnext,' ')  
 C 
       icnext=icnext+jr2as(latpos*180.0/RPI,lbuf,icnext,-9,4,isbuf)     
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)  
+      icnext=ichmv_ch(lbuf,icnext,' ')  
 C 
       icnext=icnext+jr2as(lonoff*180.0/RPI,lbuf,icnext,-9,5,isbuf)     
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)  
+      icnext=ichmv_ch(lbuf,icnext,' ')  
 C
       icnext=icnext+jr2as(latoff*180.0/RPI,lbuf,icnext,-9,5,isbuf)
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)
+      icnext=ichmv_ch(lbuf,icnext,' ')
 C
       icnext=icnext+ib2as(ilon,lbuf,icnext,2)
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)
+      icnext=ichmv_ch(lbuf,icnext,' ')
 C
       icnext=icnext+ib2as(ilat,lbuf,icnext,2)
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)
+      icnext=ichmv_ch(lbuf,icnext,' ')
 C
       nchars=icnext-1
-      if (1.ne.mod(icnext,2)) icnext=ichmv(lbuf,icnext,2H  ,1,1)
+      if (1.ne.mod(icnext,2)) icnext=ichmv_ch(lbuf,icnext,' ')
       call logit2(lbuf,nchars)
 
       return

@@ -1,4 +1,4 @@
-void fc_rte_lock_(ivalue)
+void fc_rte_lock__(ivalue)
 int *ivalue;
 {
      void rte_lock();

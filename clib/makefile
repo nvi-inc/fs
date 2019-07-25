@@ -12,8 +12,8 @@ vform_util.o venable_util.o dqa_util.o capture_util.o et_v.o rwff_v.o\
 vst_util.o get_vaux.o set_vaux.o cchmod.o sig_ignore.o get_vtime.o\
 mcb_util.o bblv2db.o motion_done.o itrk2bbc.o mvdis_v.o vacuum.o
 #
-CFLAGS = -g
-#FFLAGS = -g
+CFLAGS = 
+#FFLAGS = 
 F77 = gf77
 #
 #  The following line that has a ":" in it is a "dependency line".
@@ -26,4 +26,5 @@ F77 = gf77
 clib.a: $(OBJECTS)
 	touch clib.a
 	rm clib.a
-	ar qc clib.a $(OBJECTS)
+	ar -qc clib.a $(OBJECTS)
+	ar s clib.a

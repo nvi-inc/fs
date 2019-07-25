@@ -37,7 +37,7 @@ c set reproduce tracks
 c
       call fs_get_rack(rack)
       call fs_get_drive(drive)
-      if ((MK3.eq.iand(drive,MK3)).or.(MK4.eq.iand(drive,MK4))) THEN
+      if ((MK3.eq.and(drive,MK3)).or.(MK4.eq.and(drive,MK4))) THEN
         nrec=0
         ibuf2(1)=0
         call char2hol('tp',ibuf2(2),1,2)
@@ -48,15 +48,15 @@ c
         call fs_set_itraka(itraka)
         call fs_set_itrakb(itrakb)
         iclass=0
-        if (MK3.eq.iand(MK3,drive)) then
+        if (MK3.eq.and(MK3,drive)) then
           call rp2ma(ibuf2(3),ibypas,ieqtap,ibwtap,itraka,itrakb)
-        else if (MK4.eq.iand(MK4,drive)) then
+        else if (MK4.eq.and(MK4,drive)) then
           call rp2ma4(ibuf2(3),ibypas,ieq4tap,itraka,itrakb)
-          call put_buf(iclass,ibuf2,-13,2hfs,0)
+          call put_buf(iclass,ibuf2,-13,'fs','  ')
           nrec = nrec+1
           call rpbr2ma4(ibuf2(3),ibr4tap)  !! bitrate has a different strobe
         endif
-        call put_buf(iclass,ibuf2,-13,2hfs,0)
+        call put_buf(iclass,ibuf2,-13,'fs','  ')
         nrec = nrec+1
         call run_matcn(iclass,nrec)
         call rmpar(ip)
@@ -77,11 +77,11 @@ c
 c
 c  initialize decoder error counters
 c
-      if ((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
+      if ((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
         ibuf2(1)=0
         call char2hol('de%',ibuf2(2),1,3)
         iclass=0
-        call put_buf(iclass,ibuf2,-5,2hfs,0)
+        call put_buf(iclass,ibuf2,-5,'fs','  ')
         call run_matcn(iclass,1) 
         call rmpar(ip)
         if(ip(3).lt.0) return 
@@ -104,12 +104,12 @@ c
               ibuf2(1)=0
               call char2hol('de00',ibuf2(2),1,4)
               iclass=0
-              call put_buf(iclass,ibuf2,-12,2hfs,0) 
+              call put_buf(iclass,ibuf2,-12,'fs','  ') 
               ibuf2(1)=8
               call char2hol('de> ',ibuf2(2),1,4)
-              call put_buf(iclass,ibuf2,-5,2hfs,0)
+              call put_buf(iclass,ibuf2,-5,'fs','  ')
               call char2hol('/ ',ibuf2(3),1,2)
-              call put_buf(iclass,ibuf2,-5,2hfs,0)
+              call put_buf(iclass,ibuf2,-5,'fs','  ')
               call run_matcn(iclass,3) 
               call rmpar(ip)
               if(ip(3).lt.0) return 
@@ -188,9 +188,9 @@ C
           isysmb=min(isysmb,isynb(i))
         endif
       enddo
-      if (MK3.eq.iand(drive,MK3)) then
+      if (MK3.eq.and(drive,MK3)) then
         secs=2**(7-ibwtap)      ! seconds for a full megabyte
-      else if (MK4.eq.iand(drive,MK4)) then
+      else if (MK4.eq.and(drive,MK4)) then
         secs=1     !!! MAKE ONE UNTIL MORE KNOWLEDGE OF MK4 !!! 
       else
         call fs_get_vrepro_equalizer(equalizer,1)
@@ -215,16 +215,16 @@ C
 C  4.  Check AUX data.
 C
       if (.not.kdoaux_fs) goto 990
-      if ((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
+      if ((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
 c
 c  Check COMMON for AUX data
 c
-        if (MK3.eq.iand(rack,MK3)) then
+        if (MK3.eq.and(rack,MK3)) then
           do i=1,6
             if(lauxfm(i).ne.0) goto 401
           enddo
           goto 990     !no aux to check
-        else if (MK4.eq.iand(rack,MK4)) then
+        else if (MK4.eq.and(rack,MK4)) then
           do i=1,4
             if(lauxfm4(i).ne.0) goto 401
           enddo
@@ -235,19 +235,19 @@ c
           if(itrk(ii).ne.0)then
             nch=1+12*(ii-1)
             do i=1,2
-              idumm1 = ichmv(ibuf2,5,8h00000000,1,8)
-              if(ii.eq.2) idumm1 = ichmv(ibuf2,11,2h1 ,1,1)
-              if(i.eq.1) idumm1 = ichmv(ibuf2,12,2h0 ,1,1)
-              if(i.eq.2) idumm1 = ichmv(ibuf2,12,2h1 ,1,1)
+              idumm1 = ichmv_ch(ibuf2,5,'00000000')
+              if(ii.eq.2) idumm1 = ichmv_ch(ibuf2,11,'1')
+              if(i.eq.1) idumm1 = ichmv_ch(ibuf2,12,'0')
+              if(i.eq.2) idumm1 = ichmv_ch(ibuf2,12,'1')
               ibuf2(1)=0
               call char2hol('de',ibuf2(2),1,2)
               iclass=0
-              call put_buf(iclass,ibuf2,-12,2hfs,0)
+              call put_buf(iclass,ibuf2,-12,'fs','  ')
               ibuf2(1)=5
               call char2hol('> ',ibuf2(2),1,2)
-              call put_buf(iclass,ibuf2,-3,2hfs,0)
+              call put_buf(iclass,ibuf2,-3,'fs','  ')
               call char2hol('/ ',ibuf2(2),1,2)
-              call put_buf(iclass,ibuf2,-3,2hfs,0)
+              call put_buf(iclass,ibuf2,-3,'fs','  ')
               call run_matcn(iclass,3)
               call rmpar(ip)
               iclass=ip(1)
@@ -259,12 +259,12 @@ c
               if(i.eq.1) nch=ichmv(laux,nch,ibuf,7,4)
             enddo
             call lower(laux(6*(ii-1)+1),12)
-            if (MK3.eq.iand(MK3,rack)) then
+            if (MK3.eq.and(MK3,rack)) then
               if(ichcm(laux,12*(ii-1)+1,lauxfm,1,12).ne.0) then
                 if(ii.eq.1) iauxa = 1
                 if(ii.eq.2) iauxb = 1
               endif
-            else if (MK4.eq.iand(MK4,rack)) then
+            else if (MK4.eq.and(MK4,rack)) then
               if(ichcm(laux,12*(ii-1)+1,lauxfm4,1,12).ne.0) then
                 if(ii.eq.1) iauxa = 1
                 if(ii.eq.2) iauxb = 1
@@ -288,7 +288,7 @@ c
         enddo
         if(itrk(1).ne.0.and.itrk(2).ne.0) then !swap a & b tracks
 C !mk3 or mk4 drive (&VLBA rack), not likely
-          if((MK3.eq.iand(drive,MK3)).or.(MK4.eq.iand(drive,MK4))) THEN
+          if((MK3.eq.and(drive,MK3)).or.(MK4.eq.and(drive,MK4))) THEN
             nrec=0
             ibuf2(1)=0
             call char2hol('tp',ibuf2(2),1,2)
@@ -297,15 +297,15 @@ C !mk3 or mk4 drive (&VLBA rack), not likely
             call fs_set_itraka(itraka)
             call fs_set_itrakb(itrakb)
             iclass=0
-            if (MK3.eq.iand(drive,MK3)) then
+            if (MK3.eq.and(drive,MK3)) then
               call rp2ma(ibuf2(3),ibypas,ieqtap,ibwtap,itraka,itrakb)
-            else if (MK4.eq.iand(drive,MK4)) then
+            else if (MK4.eq.and(drive,MK4)) then
               call rp2ma4(ibuf2(3),ibypas,ieq4tap,itraka,itrakb)
-              call put_buf(iclass,ibuf2,-13,2hfs,0)
+              call put_buf(iclass,ibuf2,-13,'fs','  ')
               nrec = nrec+1
               call rpbr2ma4(ibuf2(3),ibr4tap)  !! bitrate has a different strobe
             endif
-            call put_buf(iclass,ibuf2,-13,2hfs,0)
+            call put_buf(iclass,ibuf2,-13,'fs','  ')
             nrec=nrec+1
             call run_matcn(iclass,nrec)
             call rmpar(ip)

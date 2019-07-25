@@ -52,10 +52,10 @@ C                - correct file name for reading
 C
 C 4.  CONSTANTS USED
 C
-      dimension lm6(12)
+c     dimension lm6(12)
 C
-      data lm6    /2hno,2h p,2hro,2hce,2hdu,2hre,2h f,2hil,2he ,2hac,
-     /             2hti,2hve/
+c     data lm6    /2hno,2h p,2hro,2hce,2hdu,2hre,2h f,2hil,2he ,2hac,
+c    /             2hti,2hve/
 C          - NO PROCEDURE FILE ACTIVE
 C
 C 5.  INITIALIZED VARIABLES: none

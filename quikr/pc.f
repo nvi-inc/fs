@@ -88,7 +88,7 @@ C  Handle MET or LOS commands
         ierr = -3
         goto 990
 C  Handle MET here
-260   nch = ichmv(ibuf,1,4hmet=,1,4)
+260   nch = ichmv_ch(ibuf,1,'met=')
       call fs_get_tempwx(tempwx)
       call fs_get_preswx(preswx)
       call fs_get_humiwx(humiwx)
@@ -116,19 +116,19 @@ C  Handle LOS here
 275   if (el.ge.0..and.el.le.180.) goto 280 
         ierr = -8 
         goto 990
-280   if(ityp.eq.1) nch = ichmv(ibuf,1,4hlos=,1,4)
-      if(ityp.eq.2) nch = ichmv(ibuf,1,6hpoint=,1,6)
+280   if(ityp.eq.1) nch = ichmv_ch(ibuf,1,'los=')
+      if(ityp.eq.2) nch = ichmv_ch(ibuf,1,'point=')
       nch = nch + ir2as(az,ibuf,nch,5,1)
       nch = mcoma(ibuf,nch) 
       nch = nch + ir2as(el,ibuf,nch,5,1)
-      if(ityp.eq.1) nch = ichmv(ibuf,nch,5h,,,,g,1,5)
-      if(ityp.eq.2) nch = ichmv(ibuf,nch,3h,,g,1,3)
+      if(ityp.eq.1) nch = ichmv_ch(ibuf,nch,',,,,g')
+      if(ityp.eq.2) nch = ichmv_ch(ibuf,nch,',,g')
       nchar = nch - 1 
 C 
 C  3.  RP and schedule PCCOM
 C 
 300   iclass = 0
-      if (imode.ne.0) call put_buf(iclass,ibuf,-nchar,2hfs,0) 
+      if (imode.ne.0) call put_buf(iclass,ibuf,-nchar,'fs','  ') 
 cxx      if (ipgst(6hpccom ).ne.-1) goto 320 
 cxx        if (irp(6hpccom ,0,ierr,0).ge.0) goto 320 
 cxx          ierr = -6 

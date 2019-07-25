@@ -34,7 +34,7 @@ C
       double precision das2b
       integer*2 lset(3),lsyn(2)
       integer*2 lrem(4), lpwr(2), ltest(3)
-      integer*2 linps(5),lmodes(4)
+      integer*2 linps(5),lmodes(4),lsign
       dimension rates(8) 
       dimension ntest(2),npwr(2),nrem(2)
       data rates/8.0,0.0,0.125,0.25,0.5,1.0,2.0,4.0/

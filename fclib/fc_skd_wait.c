@@ -1,4 +1,4 @@
-void fc_skd_wait_( name, ip, centisec, len)
+void fc_skd_wait__( name, ip, centisec, len)
 char name[5];
 long *ip;
 int *centisec, len;

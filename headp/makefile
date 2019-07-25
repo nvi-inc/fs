@@ -1,8 +1,7 @@
 OBJECTS = headp.o
 #
-F77= gf77
-#FFLAGS = -c -g -i2
-FFLAGS = -c -g
+#FFLAGS = -c  -i2
+FFLAGS = -c 
 LIBES = ../fslb/fslb.a\
 ../lnfch/lnfch.a\
 ../newlb/newlb.a\
@@ -10,9 +9,9 @@ LIBES = ../fslb/fslb.a\
 ../fclib/fclib.a\
 ../clib/clib.a\
 ../fmpsee/fmpsee.a\
-../rtelb/rtelb.a -lrtx
+../rtelb/rtelb.a
 
 #
 ../bin/headp: $(OBJECTS)
-	gf77 -g -o ../bin/headp $(OBJECTS) $(LIBES)
-	../setb/setb ../bin/headp
+	f77  -o ../bin/headp $(OBJECTS) $(LIBES)
+	strip ../bin/headp

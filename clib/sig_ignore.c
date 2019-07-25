@@ -5,12 +5,12 @@ void sig_ignore()
 {
 
                        /* ignore signals that might accidently abort */
-    if (-1==sigignore(SIGINT)) {
+    if (SIG_ERR==signal(SIGINT,SIG_IGN)) {
       perror("sig_ignore: ignoring SIGINT");
       exit(-1);
     }
 
-    if (-1==sigignore(SIGQUIT)) {
+    if (SIG_ERR==signal(SIGQUIT,SIG_IGN)) {
       perror("sig_ignore: ignoring SIGQUIT");
       exit(-1);
     }

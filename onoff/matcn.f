@@ -18,7 +18,7 @@ C        IERR = 0 IF NO ERROR
 C 
       include '../include/fscom.i'
 C 
-      character*1 cjchar
+c     character*1 cjchar
       integer*2 lwho,lwhat,ibuf(80),indata(1)
       integer nrecs,ichmv,get_buf
       integer*4 iclass,ip(5)
@@ -43,7 +43,7 @@ c
       inextc=1
       inextc=ichmv(ibuf(2),inextc,icmnd,1,-(nout+1))
       inextc=ichmv(ibuf(2),inextc,itrig,1,1)
-      call put_buf(iclass,ibuf,-(1+inextc),0,0)
+      call put_buf(iclass,ibuf,-(1+inextc),'  ','  ')
 c     write(6,9953) inextc-1,(cjchar(ibuf,2+i),i=1,inextc-1)
 9953  format(' inextc ',i10,' ibuf ',20a1)
       nrecs=nrecs+1

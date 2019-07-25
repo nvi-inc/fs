@@ -1,4 +1,4 @@
-void fc_putln_( string, len)
+void fc_putln__( string, len)
 char *string;
 int len;
 {

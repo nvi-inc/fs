@@ -1,4 +1,4 @@
-void fc_setup_ids_()
+void fc_setup_ids__()
 {
     void setup_ids();
 

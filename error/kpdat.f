@@ -10,20 +10,20 @@ C
       include '../include/dpi.i'
 C
       inext=1
-      if (.not.kuse) inext=ichmv(ibuf,inext,4H 0  ,1,4)
-      if (kuse) inext=ichmv(ibuf,inext,4h 1  ,1,4)
+      if (.not.kuse) inext=ichmv_ch(ibuf,inext,' 0  ')
+      if (kuse) inext=ichmv_ch(ibuf,inext,' 1  ')
       inext=inext+jr2as(sngl(ar1*rad2deg),ibuf,inext,-10,5,il)
-      inext=ichmv(ibuf,inext,2H  ,1,1)
+      inext=ichmv_ch(ibuf,inext,' ')
       inext=inext+jr2as(sngl(ar2*rad2deg),ibuf,inext,-10,5,il)
-      inext=ichmv(ibuf,inext,2H  ,1,1)
+      inext=ichmv_ch(ibuf,inext,' ')
       inext=inext+jr2as(sngl(ar3*rad2deg),ibuf,inext,-10,5,il)
-      inext=ichmv(ibuf,inext,2H  ,1,1)
+      inext=ichmv_ch(ibuf,inext,' ')
       inext=inext+jr2as(sngl(ar4*rad2deg),ibuf,inext,-10,5,il)
-      inext=ichmv(ibuf,inext,2H  ,1,1)
+      inext=ichmv_ch(ibuf,inext,' ')
       inext=inext+jr2as(sngl(ar5*rad2deg),ibuf,inext,-10,5,il)
-      inext=ichmv(ibuf,inext,2H  ,1,1)
+      inext=ichmv_ch(ibuf,inext,' ')
 C
-      if (0.eq.mod(inext,2)) inext=ichmv(ibuf,inext,2H  ,1,1)
+      if (0.eq.mod(inext,2)) inext=ichmv_ch(ibuf,inext,' ')
       kpdat=kpout(lut,idcb,ibuf,inext,iobuf,lst)
 C
       return

@@ -1,7 +1,6 @@
       logical function kgpnt(lu,idcb,kuse,lonr,latr,lnofr,ltofr,len,inp,
      + iibuf,jbuf,il,lstrng,ic)
 C
-      double precision das2b
       real lonr,lnofr,latr,ltofr
       character*(*) iibuf
       integer*2 idcb(1)

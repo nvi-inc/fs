@@ -28,6 +28,7 @@ C        LUI, LUO  - input, output LU's
       character*74 ibc
 C               - line and record buffer
 C        ICHX   - number of characters from terminal
+      character*103 editor
       character*12 lproc
 C               - active procedure file
       character*34 ldef
@@ -61,14 +62,12 @@ C                         IFILL, ISCN_CH, GTFLD, PFBLK, PFCOP
 C
 C 3.  LOCAL VARIABLES
 C
-      integer ichange,ierr,itime1,itime2
+      integer ichange,ierr
 c               - flag for editor
       logical knew
 C               - flag for newly created procedure
       character*12 lnam1,lnam2,cid
 C               - procedure name
-      dimension jdcb(16),ip(5)
-C               - buffer to save IDCB2
 C        NN     - line number or count from command
 C        ICHI   - character count of typed line
 C        LCOM   - single character edit command
@@ -77,7 +76,7 @@ C        NPASS  - number of lines to pass over in positioning
 C
 C 4.  CONSTANTS USED
 C
-      character*28 ls1,ls2
+      character*28 ls1
       character*8 lm8
       integer trimlen
       integer nch,fnblnk
@@ -86,7 +85,6 @@ C
       data me/'fed'/
 C
       data ls1    /'/usr2/proc/tmppf1'/
-      data ls2    /'/usr2/proc/tmppf2'/
 C               - scratch file names
 C
 C 5.  INITIALIZED VARIABLES: none
@@ -101,9 +99,10 @@ C
 C     PROGRAM STRUCTURE
 C
 C     Exit if no procedure file active.
+C
       if (lproc(1:1).eq.' ') then
         write(lui,1101)
-1101    format(" no procedure file active")
+1101    format("no procedure file active")
         goto 900
       endif
 C     Initialize and parse names.
@@ -116,17 +115,22 @@ C       Move name to buffer.
       if (ic1.ne.0) then
         nch = ichx - ic1
         lnam2 = ib(ic1+1:ichx)
+        editor=ib(1:ic1-1)
       else
+        editor=ib(1:ichx)
         write(lui,1102)
-1102    format(" enter procedure name(:: to cancel): ",$)
+1102    format("enter procedure name(:: to cancel): ",$)
 cxx        read(lui,'(a)') lnam2
         read(5,'(a)') lnam2
       end if
+      if(editor(1:2).eq.'ed') editor='edit'
+      ipos=trimlen(editor)+1
+      editor(ipos:ipos)=char(0)
       ipos = fnblnk(lnam2,1)
       nch = trimlen(lnam2)
       if (nch.le.0) then
         write(lui,1103)
-1103    format(" error entering procedure name")
+1103    format("error entering procedure name")
         return
       end if
       lnam1 = lnam2(ipos:nch)
@@ -161,7 +165,7 @@ C     Search for procedure name given.
         if(kerr(ierr,me,'reading',' ',0,0)) continue
       enddo
       write(lui,1105)
-1105  format(" new procedure")
+1105  format("new procedure")
       knew = .true.
       goto 150
 c
@@ -195,12 +199,12 @@ C     'vi' since EDIT 1000 is no longer available
 c     call ftn_runprog('vi ' // ls1,ierr)
 cxx      call ftn_editor(ls1,ierr,ichange)
       ierr = 0
-      call ftn_edit(ls1,ierr,ichange)
+      call ftn_edit(ls1,ierr,ichange,editor)
       if (ierr.ne.0) write(6,*) 'error editing procedure',ierr
 C
       if (ichange.eq.0) then
         write(6,9000) lnam1
-9000    format(" NO changes were made to the procedure: ",a)
+9000    format("NO changes were made to the procedure: ",a)
       else if (ichange.eq.1) then
         call fopen(idcb1,ls1,ierr)
         if (ierr.lt.0) then

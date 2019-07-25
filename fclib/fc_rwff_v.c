@@ -1,4 +1,4 @@
-void fc_rwff_v_(ip,isub,ierr)
+void fc_rwff_v__(ip,isub,ierr)
 long ip[5];
 int *isub;
 int *ierr;

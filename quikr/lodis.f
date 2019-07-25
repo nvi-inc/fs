@@ -52,7 +52,7 @@ C
       nch = iscn_ch(ibuf2,1,nchar,'=')
       if (nch.eq.0) nch = nchar+1 
 C                  If no "=" found position after last character
-      nch = ichmv(ibuf2,nch,2h/ ,1,1) 
+      nch = ichmv_ch(ibuf2,nch,'/') 
 C                  Put / to indicate a response 
 C 
 C     2.  Get common variables for display
@@ -60,7 +60,7 @@ C
 200   ierr = 0
       call fs_get_rack(rack)
       iend=3
-      if(VLBA.eq.iand(VLBA,rack)) iend=4
+      if(VLBA.eq.and(VLBA,rack)) iend=4
       do 310 i = 1,iend
         call fs_get_freqlo(flo,i-1)
         if (flo.gt.0.0) nch = nch+ir2as(flo,ibuf2,nch,8,3)
@@ -71,7 +71,7 @@ C     5. Now send the buffer to class.
 C 
       iclass = 0
       nch = nch - 2 
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
       ip(1) = iclass
       ip(2) = 1 
       ip(3) = ierr

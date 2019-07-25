@@ -1,4 +1,4 @@
-void fc_set_vaux_(lauxfm,ip)
+void fc_set_vaux__(lauxfm,ip)
 char lauxfm[12];
 long ip[5];
 {

@@ -15,10 +15,11 @@ C
 C  OUTPUT:
 C     IBUF: hollerith buffer holding eight characters for MAT
 C
-      integer inext,ichmv,ihx2a,ih22a,idum,ibyte
+      integer inext,ichmv,ihx2a,ih22a,ibyte,ichmv_ch
+c     integer idum
 C
       inext=1
-      inext=ichmv(ibuf,inext,2h00,1,1)
+      inext=ichmv_ch(ibuf,inext,'0')
       inext=ichmv(ibuf,inext,ihx2a(ispeed),2,1)
       inext=ichmv(ibuf,inext,ihx2a(idir),2,1)
       inext=ichmv(ibuf,inext,ihx2a(ihead-1),2,1)

@@ -2,6 +2,7 @@
      . rnbita,ivc,ivc2,itrk,kcorel,nzero,r1bit)
 C 
       include '../include/fscom.i'
+      include '../include/dpi.i'
 C 
       double precision rnbita,rnbitb,rsina,rcosa,rsinb,rcosb,fnbit
 C 
@@ -16,19 +17,19 @@ C
 110   fnbit = 0.5*rnbitb
       rsin = (rsinb-fnbit)/fnbit
       rcos = (rcosb-fnbit)/fnbit
-      brsin = sin(rsin*pi/2)
-      brcos = sin(rcos*pi/2)
+      brsin = sin(rsin*dpi/2)
+      brcos = sin(rcos*dpi/2)
       ampb = 100.*sqrt(brsin*brsin+brcos*brcos) 
-      phaseb = -atan2(rsin,rcos)*180./pi
+      phaseb = -atan2(rsin,rcos)*180./dpi
 C 
       if (.not.ksplit) goto 990 
       fnbit = 0.5*rnbita
       rsin = (rsina-fnbit)/fnbit
       rcos = (rcosa-fnbit)/fnbit
-      arsin = sin(rsin*pi/2)
-      arcos = sin(rcos*pi/2)
+      arsin = sin(rsin*dpi/2)
+      arcos = sin(rcos*dpi/2)
       ampa = 100.*sqrt(arsin*arsin+arcos*arcos) 
-      phasea = -atan2(rsin,rcos)*180./3.14159 
+      phasea = -atan2(rsin,rcos)*180./dpi
 C 
 C      - Calculate delay
 C 

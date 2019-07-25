@@ -75,7 +75,7 @@ C
       if (lswcal.eq.0) call char2hol('a1',ibuf(3),1,2)
       if (lswcal.eq.1) call char2hol('a2',ibuf(3),1,2)
       iclass = 0
-      call put_buf(iclass,ibuf,-6,2Hfs,0) 
+      call put_buf(iclass,ibuf,-6,'fs','  ') 
       call run_prog('ibcon','wait',iclass,1,idum,idum,idum) 
       call rmpar(ip)
       return
@@ -83,12 +83,12 @@ C
 C 
 C     5. Here report the cal switch status. 
 C
-500   nch = ichmv(ibuf,nchar+1,2h/ ,1,1)
-      if (lswcal.eq.0) nch=ichmv(ibuf,nch,3Hoff,1,3)
-      if (lswcal.eq.1) nch=ichmv(ibuf,nch,2Hon,1,2)
+500   nch = ichmv_ch(ibuf,nchar+1,'/')
+      if (lswcal.eq.0) nch=ichmv_ch(ibuf,nch,'off')
+      if (lswcal.eq.1) nch=ichmv_ch(ibuf,nch,'on')
       nch = nch-1
       iclass = 0
-      call put_buf(iclass,ibuf,-nch,2Hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       nrec = 1
 C
 C

@@ -38,13 +38,13 @@ C                   vvvv = four digits of value, hex.
 C     Note we are only concerned with the last 8 characters
 C
       ia = ia2hx(ibuf,3)
-      ilow = iand(ia,8)/8
-      ifas = iand(ia,4)/4
-      icap = iand(ia,2)/2
-      istp = iand(ia,1)
+      ilow = and(ia,8)/8
+      ifas = and(ia,4)/4
+      icap = and(ia,2)/2
+      istp = and(ia,1)
       call ichmv(lft,1,ibuf,6,5)
-      itac = iand(ia2hx(ibuf,4),4)/4
-      irdy = iand(ia2hx(ibuf,5),8)/8
+      itac = and(ia2hx(ibuf,4),4)/4
+      irdy = and(ia2hx(ibuf,5),8)/8
 C
       return
       end

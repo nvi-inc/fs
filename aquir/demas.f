@@ -37,5 +37,5 @@ C
       endif
       goto 1
 C
-      return
+c     return
       end

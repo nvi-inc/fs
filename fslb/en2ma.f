@@ -25,18 +25,18 @@ C     The buffer is set up as follows:
 C                   %xxxxxxxx 
 C     where each x represents a group of tracks.
 C 
-      call ichmv(ibuf,1,2H% ,1,1) 
+      call ichmv_ch(ibuf,1,'%') 
 C                   The strobe character for this control word
       if (itrk(1).eq.-1) goto 150
 C 
-      call ichmv(ibuf,2,8H00000000,1,8) 
+      call ichmv_ch(ibuf,2,'00000000') 
 C                   Fill buffer with zeros to start 
       do 100 i=1,28 
         if (itrk(i).ne.1) goto 100
         ia = ia2hx(ibuf,9-ibit(i)/4)
 C                   Pick out the proper character for this track
         ib = 2**(ibit(i)-(ibit(i)/4)*4) 
-        ia = ior(ia,ib) 
+        ia = or(ia,ib) 
         call ichmv(ibuf,9-ibit(i)/4,ihx2a(ia),2,1)
 C                   Put back into place 
 100     continue
@@ -44,7 +44,7 @@ C                   Put back into place
 C 
 150   call ichmv(ibuf,2,ltrk,1,8) 
 C 
-200   ia = ior(ia2hx(ibuf,2),iena*8)
+200   ia = or(ia2hx(ibuf,2),iena*8)
       call ichmv(ibuf,2,ihx2a(ia),2,1)
 C                   Add in top bit with general enable
 C 

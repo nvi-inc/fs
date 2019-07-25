@@ -33,7 +33,7 @@ C
       ilen=max0(listrh,listrv)
 C
       inext=1
-      inext=ichmv(istr,inext,6Hvert: ,1,6)
+      inext=ichmv_ch(istr,inext,'vert: ')
       inext=ichmv(istr,inext,istrv,1,listrv)
       ifl=ilen-listrv
       if (ifl.gt.0) then
@@ -41,14 +41,14 @@ C
         inext=inext+ifl
       endif
       inext=inext+ir2as(ymin,istr,inext,-10,5)
-      inext=ichmv(istr,inext,4H to ,1,4)
+      inext=ichmv_ch(istr,inext,' to ')
       inext=inext+ir2as(ymax,istr,inext,-10,5)
       ichi=min0(iwidx,max0(1,inext-1))
       ist=(iwidx-ichi)/2+1
       call ppstr(ibuf,ist,3,istr,ichi)
 C
       inext=1
-      inext=ichmv(istr,inext,6Hhorz: ,1,6)
+      inext=ichmv_ch(istr,inext,'horz: ')
       inext=ichmv(istr,inext,istrh,1,listrh)
       ifl=ilen-listrh
       if (ifl.gt.0) then
@@ -56,13 +56,14 @@ C
         inext=inext+ifl
       endif
       inext=inext+ir2as(xmin,istr,inext,-10,5)
-      inext=ichmv(istr,inext,4H to ,1,4)
+      inext=ichmv_ch(istr,inext,' to ')
       inext=inext+ir2as(xmax,istr,inext,-10,5)
       ichi=min0(iwidx,max0(1,inext-1))
       ist=(iwidx-ichi)/2+1
       call ppstr(ibuf,ist,2,istr,ichi)
 C
-      call pppnt(ibuf,1,iwidy,2H 1)
+      call char2hol(' 1',ichr,1,2)
+      call pppnt(ibuf,1,iwidy,ichr)
 100   continue
       call pfrme(ibuf,lut,idcb,iobuf,lst)
 C

@@ -6,7 +6,7 @@ C
       ic2=0
       ic1=0
       if (ifc.gt.ilc) return 
-      ic2=iscnc(ib,ifc,ilc,2h ,)
+      ic2=iscn_ch(ib,ifc,ilc,',')
       if (ic2.le.0) goto 20 
       if (ic2.gt.ifc) goto 10 
 C 

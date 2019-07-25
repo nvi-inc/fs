@@ -14,7 +14,7 @@ C       2 = B
 C
       include '../include/fscom.i'
 
-      logical kbit,keven,kodd,kready,kbreak,kdoaux
+      logical kbit,keven,kodd,kbreak,kdoaux
       integer*4 ip(1)
       integer*2 ibuf(50)
       real perr(28)
@@ -30,7 +30,7 @@ C  Set flag for PCALR to stop
       ipcflg=1
       call fs_get_rack(rack)
       call fs_get_drive(drive)
-      if(MK3.eq.iand(drive,MK3)) then
+      if(MK3.eq.and(drive,MK3)) then
         call fs_get_icheck(icheck(18),18)
         ichold=icheck(18)
       else !!! VLBA
@@ -128,7 +128,7 @@ C
       end do
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(parm,1).eq.',') then
-        if(MK3.eq.iand(drive,MK3)) then
+        if(MK3.eq.and(drive,MK3)) then
           do i=1,28
             itrk(i)=itrkenus_fs(i)
           end do
@@ -190,7 +190,7 @@ C
 C  5.  Measure errors
 C
 500   continue
-      if(MK3.eq.iand(drive,MK3)) then
+      if(MK3.eq.and(drive,MK3)) then
         icheck(18) = 0
         call fs_set_icheck(icheck(18),18)
       else !!! VLBA
@@ -296,7 +296,7 @@ C
       iclass=0
       nrec=0
       nch=nchar+1
-      nch=ichmv(ibuf,nch,2h/ ,1,1)
+      nch=ichmv_ch(ibuf,nch,'/')
       do i=1,28
         if (kbit(itrkpa,i)) then
           iv=i                   !again map to reproduce track
@@ -308,16 +308,16 @@ C
           if(iv.le.ilast) then        !only report as far as we got
             nc=ib2as(i,lwhat,1,2)     !report requested, not actual track
             if (perr(iv).gt.pethr) then
-              call logit7(0,0,0,0,-303,2hqg,lwhat)
+              call logit7ci(0,0,0,0,-303,'qg',lwhat)
             end if
             if (iaux(iv).ne.0) then
-              call logit7(0,0,0,0,-305,2hqg,lwhat)
+              call logit7ci(0,0,0,0,-305,'qg',lwhat)
             end if
             nch=nch+ir2as(perr(iv),ibuf,nch,5,0)
             nch=mcoma(ibuf,nch)
             if (nch.ge.95) then
               nch=nch-2
-              call put_buf(iclass,ibuf,-nch,2hfs,0)
+              call put_buf(iclass,ibuf,-nch,'fs','  ')
               nrec=nrec+1
               nch=nchar+2
             end if
@@ -327,13 +327,13 @@ C
 C
       if (nch.ne.1) then
         nch=nch-2
-        call put_buf(iclass,ibuf,-nch,2hfs,0)
+        call put_buf(iclass,ibuf,-nch,'fs','  ')
         nrec=nrec+1
       end if
 C
 C  Now sync errors
 C
-      nch=ichmv(ibuf,1,7hparity/,1,7)
+      nch=ichmv_ch(ibuf,1,'parity/')
       do i=1,28
         if (kbit(itrkpa,i)) then
           iv=i
@@ -345,13 +345,13 @@ C
           if(iv.le.ilast) then            !report only as far as we got
             if (iserr(iv).gt.isethr) then
               nc=ib2as(i,lwhat,1,2)        !report requested, not actual track
-              call logit7(0,0,0,0,-304,2hqg,lwhat)
+              call logit7ci(0,0,0,0,-304,'qg',lwhat)
             end if
             nch=nch+ib2as(iserr(iv),ibuf,nch,o'100003')
             nch=mcoma(ibuf,nch)
             if (nch.ge.95) then
               nch=nch-2
-              call put_buf(iclass,ibuf,-nch,2hfs,0)
+              call put_buf(iclass,ibuf,-nch,'fs','  ')
               nrec=nrec+1
               nch=nchar+2
             end if
@@ -361,7 +361,7 @@ C
   
       if (nch.ne.1) then
         nch=nch-2
-        call put_buf(iclass,ibuf,-nch,2hfs,0)
+        call put_buf(iclass,ibuf,-nch,'fs','  ')
         nrec=nrec+1
       end if
       goto 990
@@ -370,23 +370,23 @@ C  7.  Display settable parameters
 C
 700   iclass=0
       nch=nchar-1
-      nch=ichmv(ibuf,nch,2h/ ,1,1)
+      nch=ichmv_ch(ibuf,nch,'/')
       nch=nch+ib2as(int(pethr),ibuf,nch,o'100005')
       nch=mcoma(ibuf,nch)
       nch=nch+ib2as(isethr,ibuf,nch,o'100003')
       nch=mcoma(ibuf,nch)
       if (idecpa_fs.eq.0) then
-        nch= ichmv(ibuf,nch,2hab,1,2)
+        nch= ichmv_ch(ibuf,nch,'ab')
       else if (idecpa_fs.eq.1) then
-        nch= ichmv(ibuf,nch,2ha ,1,1)
+        nch= ichmv_ch(ibuf,nch,'a')
       else if (idecpa_fs.eq.2) then
-        nch= ichmv(ibuf,nch,2hb ,1,1)
+        nch= ichmv_ch(ibuf,nch,'b')
       end if
       nch=mcoma(ibuf,nch)
       if (kdoaux_fs) then
-        nch= ichmv(ibuf,nch,2hon,1,2)
+        nch= ichmv_ch(ibuf,nch,'on')
       else
-        nch= ichmv(ibuf,nch,3hoff,1,3)
+        nch= ichmv_ch(ibuf,nch,'off')
       endif
       nch=mcoma(ibuf,nch)
       ntrk=0
@@ -397,9 +397,9 @@ C
           ntrk=ntrk+1
         end if
       end do
-      if(ntrk.eq.0) nch=ichmv(ibuf,nch,5hnone ,1,5)
+      if(ntrk.eq.0) nch=ichmv_ch(ibuf,nch,'none ')
       nch=nch-2
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       nrec=1
 C
 C
@@ -412,7 +412,7 @@ C
       ip(3)=ierr
       ip(5)=0
 998   ipcflg=0
-      if(MK3.eq.iand(drive,MK3)) then
+      if(MK3.eq.and(drive,MK3)) then
         icheck(18)=ichold
         call fs_set_icheck(icheck(18),18)
       else  !!! VLBA

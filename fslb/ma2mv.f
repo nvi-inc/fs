@@ -26,8 +26,8 @@ C            rrr = 3 digit rate, ASCII value 720 or 960
 C     Note we are only concerned with the last 8 characters 
 C 
       ia = ia2hx(ibuf,3)
-      isp = iand(ia,7)
-      idir = iand(ia,8)/8 
+      isp = and(ia,7)
+      idir = and(ia,8)/8 
       call ichmv(lgen,1,ibuf,4,3) 
 C 
       return

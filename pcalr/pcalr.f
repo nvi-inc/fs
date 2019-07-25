@@ -52,6 +52,7 @@ C     ILOG - # characters in raw IDATA
       integer*2 idata(260)     ! the data 
       integer*4 ibaudl       ! long baud for portopen
       integer portopen
+      integer rn_take
       real resp(2)
       integer*2 levset(2)
       integer*2 ibuf(625)
@@ -77,7 +78,7 @@ C
       data bwdi/8.0,0.0,0.125,0.25,0.5,1.0,2.0,4.0/
       data lwho/2Hpc/
       data levset/2Has,2H--/
-      data oflw/1.e+10/
+c     data oflw/1.e+10/
 C
 C
 C   1. First get PCALR mode by calling MODET.  If the FS
@@ -92,7 +93,7 @@ C
 2     continue
       if(kbreak('pcalr')) goto 2
       if(0.ne.rn_take('pcalr',1)) then
-        call logit7(idum,idum,idum,-1,-8,2hpc,2Her)
+        call logit7cc(idum,idum,idum,-1,-8,'pc','er')
         goto 1
       endif
       call read_fscom
@@ -121,7 +122,7 @@ C
       if(ibdb.eq.110) istop=2
       ierr=portopen(ludb,idevdb,64,ibaudl,iparity,idbits,istop)
       if(ierr.ne.0) then
-        call logit7(idum,idum,idum,0,ierr,2hpc,0)
+        call logit7ci(idum,idum,idum,0,ierr,'pc',0)
         goto 999
       endif
       if (ibugpc.gt.1) write(luop,9110) itrack,lblk,nblkpc,ibyppc,
@@ -177,7 +178,7 @@ C
 C
       if(kbreak('pcalr')) goto 999
       call tpset(ihold,ibuf,ierr,ksplit,ksa)
-      if(ierr.ne.0) call logit7(idum,idum,idum,0,ierr,2hma,2htp)
+      if(ierr.ne.0) call logit7cc(idum,idum,idum,0,ierr,'ma','tp')
       if (ierr.ne.0) goto 990
 C
 C     4. Reset the data buffer and arm it.  Suspend ourselves for
@@ -209,7 +210,7 @@ C
 C
 C     4.2  Send ":" to reset the data buffer
 C
-303   call ichmv(ibuf,1,2h: ,1,1)
+303   call ichmv_ch(ibuf,1,':')
       if (ibugpc.gt.1) write(luop,9310) ibuf(1)
       if(kbreak('pcalr')) goto 999
       call dbcom(luop,ludb,ibugpc,ibuf,1,idata,ilog,ierr,iblk,istat,id,
@@ -227,7 +228,7 @@ C
 305   imode = 2
       if (ksplit) imode = 3
       ibuf(1) = ih22a(imode)
-      call ichmv(ibuf,3,2h& ,1,1)
+      call ichmv_ch(ibuf,3,'&')
       if (ibugpc.gt.1) write(luop,9310) ibuf(1),ibuf(2)
       if(kbreak('pcalr')) goto 999
       call dbcom(luop,ludb,ibugpc,ibuf,3,idata,ilog,ierr,iblk,istat,id,
@@ -242,7 +243,7 @@ C
 C
 C     4.4  Send "!" to arm the data buffer
 C
-307   call ichmv(ibuf,1,2h! ,1,1)
+307   call ichmv_ch(ibuf,1,'!')
       if (ibugpc.gt.1) write(luop,9310) ibuf(1)
       if(kbreak('pcalr')) goto 999
       call dbcom(luop,ludb,ibugpc,ibuf,1,idata,ilog,ierr,iblk,istat,id,
@@ -303,9 +304,9 @@ C
 C
       do 899 i = 0,nloop,isplit
           iblokn = i/isplit
-d         iblokn = i/isplit+ 50
+c         iblokn = i/isplit+ 50
           ibuf(1) = ih22a(iblokn)
-          call ichmv(ibuf,3,2h+ ,1,1)
+          call ichmv_ch(ibuf,3,'+')
           if (ibugpc.gt.1) write(luop,9310) ibuf(1),ibuf(2)
           if(kbreak('pcalr')) goto 999
           call dbcom(luop,ludb,ibugpc,ibuf,3,idata,ilog,ierr,iblk,istat,
@@ -313,7 +314,7 @@ d         iblokn = i/isplit+ 50
 C                   Send "nn+" to set up block nn
           if (ibugpc.ne.0) write(luop,9311) ilog,iblk,istat,id,ierr
           if (ilog.eq.-1) goto 990
-          call ichmv(ibuf,1,2h? ,1,1)
+          call ichmv_ch(ibuf,1,'?')
           if (ibugpc.gt.1) write(luop,9310) ibuf(1)
           if(kbreak('pcalr')) goto 999
           call dbcom(luop,ludb,ibugpc,ibuf,1,idata,ilog,ierr,iblk,istat,
@@ -367,10 +368,10 @@ cxx      call exec(2,lusa,levset,-3-(lvsens/10))
 C Measure phase cal amp and phase with spectrum analyzer
 cxx      call exec(2,lusa,6Haa1,re,-6)
       call susp(2,intamp)
-      call dump(2Hmk,resp)
+      call dump('mk',resp)
       ampb = resp(1)
 cxx      call exec(2,lusa,3Haa0,-3)
-      call dump(2Hmk,resp)
+      call dump('mk',resp)
       phaseb = resp(1)
       call messg(kfield,ksplit,ampa,phasea,ampb,phaseb,dlyab,itrk,
      .  ivc,ivc2,kcorel,correl)

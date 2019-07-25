@@ -4,7 +4,7 @@ c See fscom.i for information on the structure
 c
 
       REAL AMPTOL, AZHMWV(10), CPKMIN, 
-     . DIFTOL, ELHMWV(30), FOROFF(2), FSVER, GDYTOL,
+     . DIFTOL, ELHMWV(30), FOROFF(2), GDYTOL,
      . LVBOSC_FS, rxvfac(MAX_RXCODES), 
      . PHATOL, PHJMAX, PI, PSLOPE(2), PVOLT_FS(30), 
      . REVOFF(2), RSLOPE(2),
@@ -25,11 +25,13 @@ c
       integer*2 idevmat(32), idevdb(32), idevwand(32),
      . rxlcode(3,MAX_RXCODES),
      . lalrm(3), ltsrs(5), loccup(4), lidstn, model0ti_fs,
+     . sVerMajor_fs, sVerMinor_fs, sVerPatch_fs,
+     . iaxis(2),
      . e_fill_init
 
       common/fscom_init/b_init,
      . AMPTOL, AZHMWV, CPKMIN, DIFTOL, 
-     . ELHMWV, FOROFF, FSVER, GDYTOL,
+     . ELHMWV, FOROFF, GDYTOL,
      . LVBOSC_FS, rxvfac,
      . PHATOL, PHJMAX, PI, PSLOPE, PVOLT_FS,
      . REVOFF, RSLOPE,
@@ -46,5 +48,7 @@ c
      . idevmat, idevdb, idevwand,
      . rxlcode,
      . lalrm, ltsrs, loccup, lidstn, model0ti_fs,
-c    . e_fill_init,
+     . sVerMajor_fs, sVerMinor_fs, sVerPatch_fs,
+     . iaxis,
+     . e_fill_init,
      . e_init

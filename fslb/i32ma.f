@@ -25,11 +25,11 @@ C
 c
 C  Put upper two bits (of six) into char 7 plus mixer control
 c
-      call ichmv(ibuf,7,ihx2a((2-imix)*4+iand(iat,o'60')/o'20'),2,1)
+      call ichmv(ibuf,7,ihx2a((2-imix)*4+and(iat,o'60')/o'20'),2,1)
 c
 C  Put lower four bits into next character.
 c
-      call ichmv(ibuf,8,ihx2a(iand(iat,o'17')),2,1)
+      call ichmv(ibuf,8,ihx2a(and(iat,o'17')),2,1)
 C 
       return
       end 

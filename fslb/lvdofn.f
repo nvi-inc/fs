@@ -28,7 +28,7 @@ C
       endif
 C
       call fs_get_drive(drive)
-      if(VLBA.eq.iand(drive,VLBA)) then
+      if(VLBA.eq.and(drive,VLBA)) then
         call fc_lvdofn_v(ip)
       else 
         nrec=0

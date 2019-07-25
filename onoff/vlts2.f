@@ -27,7 +27,6 @@ C
       integer it(5),iti(5)
       integer*2 icmnd(4,18),indata(10),indat2(10)
       integer*2 iques,lwho,lwhat
-      character*1 cjchar
       logical kbreak
 C 
       include '../include/fscom.i'
@@ -62,7 +61,7 @@ C
 C       WHICH DEVICE? 
 C 
       call fs_get_rack(rack) 
-      if(VLBA.eq.iand(rack,VLBA)) then
+      if(VLBA.eq.and(rack,VLBA)) then
         id1=-1
         id2=-1
         goto 13
@@ -127,7 +126,7 @@ C      GET THE STUFF
 C 
         itry=ntry
 15      continue 
-        if(VLBA.eq.iand(rack,VLBA)) then
+        if(VLBA.eq.and(rack,VLBA)) then
           call mcbcn2(dtpi1,dtpi2,ierr)
         else
           call matcn(icmnd(2,id1),-5,iques,indata,nin, 9,ierr) 
@@ -140,7 +139,7 @@ C
 C 
 C      CONVERT TO COUNTS
 C 
-        if(VLBA.ne.iand(rack,VLBA)) then
+        if(VLBA.ne.and(rack,VLBA)) then
           if (id1.ge.17) dtpi1=float(ia22h(indata(2)))*256.0+ 
      +                      float(ia22h(indata(3)))
           if (id1.lt.17) dtpi1=float(ia22h(indata(4)))*256.0+ 

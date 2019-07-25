@@ -5,8 +5,8 @@
 OBJECTS=\
 dvdot.o dvmpy.o dvnrm.o dvpiv.o dvsmy.o
 #
-#CFLAGS = -g
-#FFLAGS = -g
+#CFLAGS = 
+#FFLAGS = 
 F77 = gf77
 #
 #  The following line that has a ":" in it is a "dependency line".
@@ -19,4 +19,5 @@ F77 = gf77
 vis.a: $(OBJECTS)
 	touch vis.a
 	rm vis.a
-	ar qc vis.a $(OBJECTS)
+	ar -qc vis.a $(OBJECTS)
+	ar s vis.a

@@ -22,7 +22,7 @@ C  CALLING SUBROUTINES: BWORK
 C
 C  LOCAL VARIABLES:
 C
-      integer*4 irec,ioff,ir2,io2,icurln
+      integer*4 irec,ioff,ir2,icurln
       integer fmpposition,fmpreadstr,fmpsetpos,fmpsetline
       integer ichcm_ch
       integer*2 ibuf(1),ib(50)
@@ -39,10 +39,9 @@ C         - flags, true if end of obs, end of tape, start of obs, start
 C           of tape already identified
 C
 C  CONSTANTS:
-      dimension lm1(20)
+      integer*2 lm1(40)
       character*32 lm2
 C
-      data iblen /50/
       data lm2 /' active schedule is:            '/
 C          - messages for display on terminal
 C
@@ -59,12 +58,12 @@ C
       call susp(2,2)
 C
 C    Print display heading.
-      call ifill_ch(lm1,1,80,' ')
       lm2(21:32) = lskd(1:12)
-      call put_cons(lm2,32)
+      call char2hol(lm2,lm1,1,32)
+      call put_cons(lm1,32)
       call ifill_ch(ibuf,1,100,' ')
-      idummy = ichmv(ibuf,5,4htime,1,4)
-      idummy = ichmv(ibuf,16,5hevent,1,5)
+      idummy = ichmv_ch(ibuf,5,'time')
+      idummy = ichmv_ch(ibuf,16,'event')
       call put_cons(ibuf,21)
       call ifill_ch(ibuf,5,4,'-')
       call ifill_ch(ibuf,16,5,'-')
@@ -72,12 +71,12 @@ C    Print display heading.
 C
 C    Get and display current time.
       call fc_rte_time(it,idum)
-      call char2hol('   -  :  :',lm1,1,10)
+      call char2hol('   -  :  :',lm1,1,80)
       idummy = ib2as(it(5),lm1,1,o'41403')
       idummy = ib2as(it(4),lm1,5,o'41002')
       idummy = ib2as(it(3),lm1,8,o'41002')
       idummy = ib2as(it(2),lm1,11,o'41002')
-      idummy = ichmv(lm1,15,3hnow,1,3)
+      idummy = ichmv_ch(lm1,15,'now')
       call put_cons(lm1,18)
 C
 C   Save current schedule position.
@@ -102,13 +101,13 @@ C
       idummy = ib2as(mod(it1,1024),lm1,1,o'40000'+o'1400'+3)
       idummy = ib2as(it2/60,lm1,5,o'40000'+o'1000'+2)
       idummy = ib2as(mod(it2,60),lm1,8,o'40000'+o'1000'+2)
-      idummy = ib2as(it3/100,lm1,11,o'40000'+o'0100'+2)
+      idummy = ib2as(it3/100,lm1,11,o'40000'+o'01000'+2)
 220   if (ichcm_ch(ib,1,'et').ne.0.or.kendo) goto 230
 C  End of observation
       if (ksto) then
-        idummy = ichmv(lm1,15,26hend of next observation   ,1,26)
+        idummy = ichmv_ch(lm1,15,'end of next observation   ')
       else
-        idummy = ichmv(lm1,15,26hend of current observation,1,26)
+        idummy = ichmv_ch(lm1,15,'end of current observation')
       end if
       call put_cons(lm1,41)
       kendo = .true.
@@ -117,9 +116,9 @@ C
 230   if (ichcm_ch(ib,1,'unlod').ne.0.or.kendtp) goto 240
 C  End of tape
       if (ksttp) then
-        idummy = ichmv(lm1,15,19hend of next tape   ,1,19)
+        idummy = ichmv_ch(lm1,15,'end of next tape   ')
       else
-        idummy = ichmv(lm1,15,19hend of current tape,1,19)
+        idummy = ichmv_ch(lm1,15,'end of current tape')
       end if
       call put_cons(lm1,33)
       kendtp = .true.
@@ -128,33 +127,33 @@ C
 240   if (ichcm_ch(ib,1,'st=').ne.0) goto 200
       if (ksto) goto 250
 C  Start of observation
-      idummy = ichmv(lm1,15,25hstart of next observation,1,25)
+      idummy = ichmv_ch(lm1,15,'start of next observation')
       call put_cons(lm1,40)
       ksto = .true.
 C
 250   if (.not.kendtp.or.ksttp) goto 200
 C  Start of tape
-      idummy = ichmv(lm1,15,18hstart of next tape,1,18)
+      idummy = ichmv_ch(lm1,15,'start of next tape')
       call put_cons(lm1,32)
       ksttp = .true.
       goto 200
 C
 C  3.  Display HALT status.
 C
-300   ich = ichmv(ibuf,1,12hschedule is ,1,12)
+300   ich = ichmv_ch(ibuf,1,'schedule is ')
       ich = 13
-      if(.not.khalt)ich = ichmv(ibuf,ich,4hnot ,1,4)
-      ich = ichmv(ibuf,ich,6hhalted,1,6)-1
+      if(.not.khalt)ich = ichmv_ch(ibuf,ich,'not ')
+      ich = ichmv_ch(ibuf,ich,'halted')-1
       call put_cons(ibuf,ich)
 C
 C  4.  Display time-blocked status.
 C
-      ich = ichmv(ibuf,1,19hschedule stream is ,1,19)
+      ich = ichmv_ch(ibuf,1,'schedule stream is ')
       if(kskblk) goto 310
-        ich = ichmv(ibuf,ich,16hnot time-blocked,1,16)-1
+        ich = ichmv_ch(ibuf,ich,'not time-blocked')-1
         goto 340
 310   continue
-      ich = ichmv(ibuf,ich,20htime-blocked until  ,1,20)
+      ich = ichmv_ch(ibuf,ich,'time-blocked until  ')
       ind = 0
       do 320 i=1,ntscb
         if(itscb(1,i).eq.-1) goto 320
@@ -171,19 +170,19 @@ C
       it(3) = mod(itscb(2,ind),60)
       it(2) = itscb(3,ind)/100
       idummy = ib2as(it(5),ibuf,40,o'41403')
-      idummy = ichmv(ibuf,43,2h- ,1,1)
+      idummy = ichmv_ch(ibuf,43,'-')
       idummy = ib2as(it(4),ibuf,44,o'41002')
-      idummy = ichmv(ibuf,46,2h: ,1,1)
+      idummy = ichmv_ch(ibuf,46,':')
       idummy = ib2as(it(3),ibuf,47,o'41002')
-      idummy = ichmv(ibuf,49,2h: ,1,1)
+      idummy = ichmv_ch(ibuf,49,':')
       idummy = ib2as(it(2),ibuf,50,o'41002')
       ich=51
 340   call put_cons(ibuf,ich)
-      ich = ichmv(ib,1,19hoperator stream is ,1,19)
+      ich = ichmv_ch(ib,1,'operator stream is ')
       if(kopblk) goto 350
-        ich = ichmv(ib,ich,16hnot time-blocked,1,16)-1
+        ich = ichmv_ch(ib,ich,'not time-blocked')-1
         goto 370
-350   ich = ichmv(ib,ich,20htime-blocked until  ,1,20)
+350   ich = ichmv_ch(ib,ich,'time-blocked until  ')
       ind = 0
       do 360 i=1,ntscb
         if(itscb(1,i).eq.-1) goto 360
@@ -200,11 +199,11 @@ C
       it(3) = mod(itscb(2,ind),60)
       it(2) = itscb(3,ind)/100
       idummy = ib2as(it(5),ibuf,40,o'41403')
-      idummy = ichmv(ib,43,2h- ,1,1)
+      idummy = ichmv_ch(ib,43,'-')
       idummy = ib2as(it(4),ibuf,44,o'41002')
-      idummy = ichmv(ib,46,2h: ,1,1)
+      idummy = ichmv_ch(ib,46,':')
       idummy = ib2as(it(3),ibuf,47,o'41002')
-      idummy = ichmv(ib,49,2h: ,1,1)
+      idummy = ichmv_ch(ib,49,':')
       idummy = ib2as(it(2),ibuf,50,o'41002')
       ich = 51
 370   call put_cons(ib,ich)
@@ -220,9 +219,9 @@ C
 C
 C  6.  Display current line of schedule.
 C
-      idummy = ichmv(ibuf,1,28hcurrent line of schedule is:,1,28)
+      idummy = ichmv_ch(ibuf,1,'current line of schedule is:')
       call put_cons(ibuf,28)
-      ich=ichmv(ibuf,1,2h #,1,2)
+      ich=ichmv_ch(ibuf,1,' #')
       icur = icurln
       nc = ib2as(icur,ibuf,ich,o'100006')
       ich = ichmv(ibuf,9,ib,1,ilen)-1

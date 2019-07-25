@@ -46,14 +46,14 @@ C
       call fs_get_ionsor(ionsor)
       if (ionsor.eq.0) ierr = -301
 C 
-      nch = ichmv(ibuf,nchar+1,2h/ ,1,1)
+      nch = ichmv_ch(ibuf,nchar+1,'/')
 C                   Move in the response indicator
       nch = isoed(-1,ionsor,ibuf,nch,ilen)
 C                   Encode the response word TRACKING or SLEWING
 C 
       iclass = 0
       nch = nch - 1 
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       ip(1) = iclass
       ip(2) = 1 
       ip(3) = ierr

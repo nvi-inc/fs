@@ -38,7 +38,7 @@ int rlen;
     return;
   }
 
-  s1=strcpy(string,cnam,*clength);
+  s1=strncpy(string,cnam,*clength);
   string[*clength]='\0';
 
   decloc = strchr(string,'.');

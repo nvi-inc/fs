@@ -61,9 +61,9 @@ C
 C                     Retain class for later response
       call fs_get_rack(rack)
 
-      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
+      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
         call tplis(ip,itpis)
-      else if (VLBA .eq. iand(rack,VLBA)) then
+      else if (VLBA .eq. and(rack,VLBA)) then
         call tplisv(ip,itpis_vlba)
       endif
 C
@@ -78,7 +78,7 @@ C
       nrec = 0
       iclass = 0
 
-      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
+      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
         do i=1,17
          if(itpis(i).ne.0.and.
      &      (i.ne.16.or.(i.eq.16.and.itpis(15).eq.0)) ) then
@@ -92,7 +92,7 @@ C
               ibuf(1) = -2
               call char2hol('i3',ibuf(2),1,2)
             endif
-            call put_buf(iclass,ibuf,-4,2hfs,0)
+            call put_buf(iclass,ibuf,-4,'fs','  ')
             nrec = nrec + 1
           endif
         enddo
@@ -101,7 +101,7 @@ C
         call rmpar(ip)
         if (ip(3).lt.0) return
 
-      else if (VLBA .eq. iand(rack,VLBA)) then
+      else if (VLBA .eq. and(rack,VLBA)) then
         call fc_tpi_vlba(ip,itpis_vlba)
         if(ip(3).lt.0) return
       endif
@@ -115,16 +115,16 @@ C
       nchar = min0(ireg(2),ilen)
       ieq = iscn_ch(ibuf,1,nchar,'=')
       if (ieq.eq.0) ieq=nchar+1
-      nch = ichmv(ibuf,ieq,2h/ ,1,1)
+      nch = ichmv_ch(ibuf,ieq,'/')
 C                     Get the command part of the response set up
-      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
+      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
         call tpput(ip,itpis,isub,ibuf,nch,ilen)
       else
         call fc_tpput_vlba(ip,itpis_vlba,isub,ibuf,nch,ilen)
         if(ip(3).lt.0) return
       endif
       iclass = 0
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       nrec = 1
 C
 990   ip(1) = iclass

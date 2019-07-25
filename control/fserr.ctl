@@ -1,4 +1,4 @@
-b""
+""
 AN   -1
 Illegal mode
 ""
@@ -283,6 +283,9 @@ Error decoding model field in TIME.CTL
 ""
 BO -189
 Error reading TIME.CTL FMP ?FFF
+""
+BO -190
+Error initilaizing mcbcn, internal error ?WWW
 ""
 CH   -1
 Trouble with class buffer in CHEKR
@@ -761,6 +764,15 @@ GPIB error condition, check driver manual UGPIB section for explanation
 IB   -9
 GPIB UNIX error code ?WWW
 ""
+IB  -10
+ibcon initialization failed, gpib devices inaccessible.
+""
+IB  -11
+gpib driver not installed, gpib devices inaccessible.
+""
+IB  -12
+gpib device /dev/null, gpib devices inaccessible.
+""
 IB -101
 Number of entries from IBAD control file exceed table limit of ?WWW
 ""
@@ -818,6 +830,9 @@ GPIB(ibfind) failed to open GPIB special file, no file descriptor returned, ?W
 IB -321
 GPIB(ibufln) the returned data string is longer then expected.
 ""
+IB -322
+GPIB driver not installed
+""
 MA   -1
 Trouble with class buffer
 ""
@@ -841,6 +856,9 @@ Unable to open MAT device.
 ""
 MA -101
 Number of entries from MATAD control file exceed table limit of ?WWW
+""
+MA -102
+Unsupported BAUD rate, use one of 110, 300, 600, 1200, 2400, 4800, or 9600.
 ""
 MC   -1
 Interface ?W timed-out.

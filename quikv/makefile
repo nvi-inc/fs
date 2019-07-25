@@ -1,6 +1,6 @@
 #
-CFLAGS= -g
-LIBES = ../clib/clib.a ../rtelb/rtelb.a -lrtx
+CFLAGS= 
+LIBES = ../clib/clib.a ../rtelb/rtelb.a
 #
 OBJECTS =\
 quikv.o dist.o dist_dis.o logmsg.o vrepro.o vrepro_dis.o vform.o vform_dis.o\
@@ -9,8 +9,8 @@ bbc_dis.o vst.o vst_dis.o rec.o rec_dec.o rec_dis.o tape.o tape_dis.o\
 mcb.o mcb_dis.o vform_ver.o
 #
 ../bin/quikv: $(OBJECTS)
-	cc -g -o ../bin/quikv $(OBJECTS) $(LIBES) -lm
-	../setb/setb ../bin/quikv
+	cc  -o ../bin/quikv $(OBJECTS) $(LIBES) -lm
+	strip ../bin/quikv
 #
 quikv:
 	rm -f ../bin/quikv

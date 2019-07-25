@@ -31,7 +31,7 @@ C
       if (ieq.ne.0) goto 100
 C                   If parameters, error
       call fs_get_drive(drive)
-      if (VLBA .eq. iand(drive,VLBA)) goto 500
+      if (VLBA .eq. and(drive,VLBA)) goto 500
 C
 C
 C     1. Set up buffer for rewinding or fast forwarding tape:
@@ -57,7 +57,7 @@ C
       ibuf(1) = -3
       call char2hol('tp',ibuf(2),1,2)
       iclass = 0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       call run_matcn(iclass,1)
       call rmpar(ip)
       if(ip(3).lt.0) go to 415
@@ -86,25 +86,25 @@ C
       call char2hol('tp',ibuf(2),1,2)
       call en2ma(ibuf(3),ienatp,-1,ltrken)
       iclass = 0
-      call put_buf(iclass,ibuf,-13,2hfs,0)
+      call put_buf(iclass,ibuf,-13,'fs','  ')
 C
       call tp2ma(ibuf(3),ilowtp,0)
-      call put_buf(iclass,ibuf,-13,2hfs,0)
+      call put_buf(iclass,ibuf,-13,'fs','  ')
 C
-      call ichmv(lgen,1,3H720,1,3)
+      call ichmv_ch(lgen,1,'720')
       if(isub.lt.5) then
         call mv2ma(ibuf(3),idirtp,ispeed,lgen)
       else
         call fs_get_imaxtpsd(imaxtpsd)
         if (imaxtpsd.eq.-1) then
-          call ichmv(lgen,1,3H880,1,3)
+          call ichmv_ch(lgen,1,'880')
           call mv2ma(ibuf(3),idirtp,ispeed,lgen)
         else
           call mv2ma(ibuf(3),idirtp,imaxtpsd,lgen)
         endif
       endif
       call fs_set_lgen(lgen)
-      call put_buf(iclass,ibuf,-13,2hfs,0)
+      call put_buf(iclass,ibuf,-13,'fs','  ')
 C
       call run_matcn(iclass,3)
       call rmpar(ip)

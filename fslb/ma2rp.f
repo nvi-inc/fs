@@ -36,11 +36,11 @@ C
 C 
       ita = ia2hx(ibuf,9)*10 + ia2hx(ibuf,10) 
       itb = ia2hx(ibuf,7)*10 + ia2hx(ibuf,8)
-      ibw = iand(ia2hx(ibuf,6),7) 
+      ibw = and(ia2hx(ibuf,6),7) 
       ieq = ia2hx(ibuf,5) 
-      iby = iand(ia2hx(ibuf,4),2)/2 
-      ial = iand(ia2hx(ibuf,3),4)/4 
-      irem = iand(ia2hx(ibuf,3),8)/8
+      iby = and(ia2hx(ibuf,4),2)/2 
+      ial = and(ia2hx(ibuf,3),4)/4 
+      irem = and(ia2hx(ibuf,3),8)/8
 C 
       return
       end 

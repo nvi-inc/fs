@@ -23,8 +23,8 @@ C
      &          len_wds=(len_chars+1)/2
      &          )
       integer*2 ibuf(len_wds),ibuf2(max_wds)
-      integer nrec,i,ncfsr,nch
-      integer ichmv,mcoma,imov,nchs,iscn_ch,iclass
+      integer nrec,ncfsr,nch
+      integer ichmv,mcoma,imov,nchs,iscn_ch,iclass,ichmv_ch
 C
       iclass=0
       nrec=0
@@ -34,7 +34,7 @@ C
         if(imov.le.0) imov=ich
         nch=1
         nch=ichmv(ibuf2,nch,ipre,1,min(imov,max_chars))
-        nch=ichmv(ibuf2,nch,2h//,1,1)
+        nch=ichmv_ch(ibuf2,nch,'/')
         nchs=nch
         do while(ip(2).gt.0)
           call get_class(ibuf,-len_chars,ip,ncfsr)

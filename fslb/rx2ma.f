@@ -28,11 +28,11 @@ C
       call ifill_ch(ibuf,1,8,'0')
 C                   Fill the whole thing with zeros first
 C     First, set up noise source
-      if (ical.eq.0) call ichmv(ibuf,8,2H02,2,1)
+      if (ical.eq.0) idum=ichmv_ch(ibuf,8,'2')
 C                                          OFF
-      if (ical.eq.2) call ichmv(ibuf,8,2H04,2,1)
+      if (ical.eq.2) idum=ichmv_ch(ibuf,8,'4')
 C                                          EXT
-      if (ical.eq.1) call ichmv(ibuf,8,2H01,2,1)
+      if (ical.eq.1) idum=ichmv_ch(ibuf,8,'1')
 C                                        ON
 C     Heater control
       ia = 0
@@ -43,14 +43,14 @@ C                                    OFF
       if (idcal.eq. 0) call sbit(ia,3,1)
 C                                    OFF
       if (iheat.eq.1) call sbit(ia,4,1)
-      call ichmv(ibuf,7,ihx2a(ia),2,1)
+      idum=ichmv(ibuf,7,ihx2a(ia),2,1)
 C                    Convert to ASCII and put in buffer
 C     IF amplifier switches
       ia = 0
       if (ifamp(1).eq.0) call sbit(ia,3,1)
       if (ifamp(2).eq.0) call sbit(ia,2,1)
       if (ifamp(3).eq.0) call sbit(ia,1,1)
-      call ichmv(ibuf,6,ihx2a(ia),2,1)
+      idum=ichmv(ibuf,6,ihx2a(ia),2,1)
 C     A/D address AND NOISE CONTROL OVERRIDE
       idum=ichmv(iado,1,iad,1,2)
       if(iad.eq.0) call char2hol('00',iado,1,2)

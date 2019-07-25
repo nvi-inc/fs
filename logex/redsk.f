@@ -50,7 +50,7 @@ C
         goto 300
       end if
 C
-      if (ichcm(ibufsk,1,5h$sked,1,5).eq.0) goto 300
+      if (ichcm_ch(ibufsk,1,'$sked').eq.0) goto 300
       if (ilensk.ge.0) goto 100
         call po_put_c('eof was encountered before $sked section')
         icode=-1

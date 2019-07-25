@@ -89,7 +89,7 @@ C                   If our command was only "device" we are waiting for
 C                   data and know what to expect. 
       if (nch.eq.0) nch = nchar+1 
 C                   If no "=" found, position after last character
-      nch = ichmv(ibuf2,nch,2h/ ,1,1)    ! put "/" to indicate a response
+      nch = ichmv_ch(ibuf2,nch,'/')    ! put "/" to indicate a response
 C 
       if (.not.kcom) then
         if (.not.kdata) then
@@ -118,7 +118,7 @@ C
 C     3. Now the buffer contains: RX/, and we want to add the data. 
 C 
       call char2hol('-1',iad,1,2)
-      idumm1 = ichmv(lc,1,5Hundef,1,5)
+      idumm1 = ichmv_ch(lc,1,'undef')
       nl = 5
       if (ia.ne.0) then
         nl = iflch(rxlcode(1,ia),6)
@@ -126,30 +126,30 @@ C
         idumm1 = ichmv(lc,1,rxlcode(1,ia),1,nl) 
       endif
       nch = ichmv(ibuf2,nch,iad,1,2)
-      nch = ichmv(ibuf2,nch,2h( ,1,1) 
+      nch = ichmv_ch(ibuf2,nch,'(') 
       nch = ichmv(ibuf2,nch,lc,1,nl)  
-      nch = ichmv(ibuf2,nch,2h) ,1,1) 
+      nch = ichmv_ch(ibuf2,nch,')') 
       nch = mcoma(ibuf2,nch)
-      if (idcal.eq.0) nch = ichmv(ibuf2,nch,3Hoff,1,3)
-      if (idcal.eq.1) nch = ichmv(ibuf2,nch,2Hon,1,2) 
+      if (idcal.eq.0) nch = ichmv_ch(ibuf2,nch,'off')
+      if (idcal.eq.1) nch = ichmv_ch(ibuf2,nch,'on') 
       nch = mcoma(ibuf2,nch)
-      if (ibox.eq. 0) nch = ichmv(ibuf2,nch,3Hoff,1,3)
-      if (ibox.eq. 1) nch = ichmv(ibuf2,nch,1Ha,1,1)    
-      if (ibox.eq.-1) nch = ichmv(ibuf2,nch,1Hb,1,1)    
+      if (ibox.eq. 0) nch = ichmv_ch(ibuf2,nch,'off')
+      if (ibox.eq. 1) nch = ichmv_ch(ibuf2,nch,'a')    
+      if (ibox.eq.-1) nch = ichmv_ch(ibuf2,nch,'b')    
       nch = mcoma(ibuf2,nch)
       do i=1,3
-        if (ifamrx(i).eq.0) nch=ichmv(ibuf2,nch,3Hoff,1,3)  
-        if (ifamrx(i).eq.1) nch=ichmv(ibuf2,nch,2Hon,1,2)   
+        if (ifamrx(i).eq.0) nch=ichmv_ch(ibuf2,nch,'off')  
+        if (ifamrx(i).eq.1) nch=ichmv_ch(ibuf2,nch,'on')   
         nch=mcoma(ibuf2,nch)
       enddo
-      if (ical.eq. 0) nch = ichmv(ibuf2,nch,3Hoff,1,3)
-      if (ical.eq. 1) nch = ichmv(ibuf2,nch,2Hon,1,2) 
-      if (ical.eq. 2) nch = ichmv(ibuf2,nch,3Hext,1,3)
-      if (ical.eq.-1) nch = ichmv(ibuf2,nch,3Hoon,1,3)
-      if (ical.eq.-2) nch = ichmv(ibuf2,nch,4Hooff,1,4) 
+      if (ical.eq. 0) nch = ichmv_ch(ibuf2,nch,'off')
+      if (ical.eq. 1) nch = ichmv_ch(ibuf2,nch,'on') 
+      if (ical.eq. 2) nch = ichmv_ch(ibuf2,nch,'ext')
+      if (ical.eq.-1) nch = ichmv_ch(ibuf2,nch,'oon')
+      if (ical.eq.-2) nch = ichmv_ch(ibuf2,nch,'ooff') 
       if (kcom) goto 500
       nch = mcoma(ibuf2,nch)
-      if (lostrx.eq.1) nch=ichmv(ibuf2,nch,6Hlocked,1,6)
+      if (lostrx.eq.1) nch=ichmv_ch(ibuf2,nch,'locked')
       if (lostrx.eq.0) nch=ichmv(ibuf2,nch,lunlk,1,8)
       nch = mcoma(ibuf2,nch)
 C
@@ -175,7 +175,7 @@ C     5. Now send the buffer to BOSS for logging.
 C 
 500   iclass = 0
       nch = nch - 1 
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
 C 
       ip(1) = iclass 
       ip(2) = 1 

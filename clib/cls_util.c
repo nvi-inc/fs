@@ -24,6 +24,9 @@ struct  cls_buf {
 
 static int msqid;
 
+static long cls_alc_s();
+static void cls_chk();
+
 int cls_get( key, size)
 key_t key;
 int size;
@@ -99,9 +102,9 @@ int     parm4;
 int	status, i;
 size_t  nchars;
 struct  cls_buf msg;
-long    msgtype, cls_alc();
+long    msgtype;
 char    *s1;
-void cls_chk(), sem_take(), sem_put();
+void sem_take(), sem_put();
 
   if(length > MAX_TEXT) {
     length=MAX_TEXT;
@@ -127,7 +130,7 @@ if ( status == -1 ) {
 
 long cls_alc()
 {
-long    cls_alc_s(),class;
+long    class;
 void    sem_take(), sem_put();
 
 sem_take( SEM_CLS);
@@ -167,7 +170,7 @@ char	*buffer;
 int     nchars, sb, sc, nw;
 struct  cls_buf msg;
 char *s1;
-void cls_chk(), sem_take(), sem_put();
+void sem_take(), sem_put();
 
    sb= 0040000 & class;
    sc= 0020000 & class;

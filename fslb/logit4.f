@@ -4,6 +4,7 @@
 
       dimension lmessg(1)
       dimension lprocn(1)
+      integer*2 lsor
       lwhat=0
       lwho=0
       ierr=0

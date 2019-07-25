@@ -1,6 +1,6 @@
 /* setvtime.c - set vlba formmatter time */
 
-#include <curses.h>      /* ETI curses standard I/O header file */
+#include <ncurses.h>      /* ETI curses standard I/O header file */
 #include <errno.h>       /* error code definition header file */
 #include <memory.h>      /* for memcpy */
 #include <time.h>        /* time function definition header file */

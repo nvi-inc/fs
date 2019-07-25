@@ -48,7 +48,7 @@ C 2.5.   SUBROUTINE INTERFACE:
 C
 C     CALLING SUBROUTINES: PFMED
 C
-C     CALLED SUBROUTINES: FMP routines, ICHMV, IB2AS, ISCN_CH, CJCHAR,
+C     CALLED SUBROUTINES: FMP routines, ICHMV, IB2AS, ISCN_CH,
 C                         IDTYP, IFILL, MIN0, PFBLK, PFCOP
 C
 C 3.  LOCAL VARIABLES
@@ -64,19 +64,17 @@ C        IDTK   - starting directory track of procedure LU
 C        JT, JS, JO - track, sector, offset of procedure file entry
 C        JX     - extent of procedure file
 C
-      character cjchar
       integer ierr
-      character*34 foostr
       character*29 dlstr
       character*12 dlfilenm
       character*74 ibc
       character*80 dirstr
       character*12 twochr
       character*28 pathname,pathname2
-      integer fmparm(5), fnblnk,trimlen
+      integer trimlen
       integer i2byte(6)
       integer iret
-      character*12 sl1,sl2,sl3,sl4
+      character*12 sl1,sl2,sl4
       character*40 cmessage
       logical kex,kest,kerr
       character*3 me
@@ -150,7 +148,6 @@ C     PFDL - list directory of procedure files
       if(ib(3:4).eq.'dl') then
 c  Have the OS issue directory command and send the results to file, FFMTMP
         call ftn_runprog('ls /usr2/proc > /usr2/proc/ffmtmp',ierr)
-        dfilenm = '/usr2/proc/ffmtmp'
         if(kerr(ierr,me,'running',' ',0,0)) return
         open(unit=77,file='/usr2/proc/ffmtmp',
      .  status='old',iostat=ierr)

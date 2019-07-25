@@ -1,4 +1,4 @@
-int fc_cls_rcv_( iclass, buffer, nchars, rtn1, rtn2)
+int fc_cls_rcv__( iclass, buffer, nchars, rtn1, rtn2)
 long *iclass;
 char *buffer;
 int *nchars, *rtn1, *rtn2;

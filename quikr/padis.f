@@ -63,7 +63,7 @@ C
       nch = iscn_ch(ibuf2,1,nchar,'=')
       if (nch.eq.0) nch = nchar+1 
 C                  If no "=" found position after last character
-      nch = ichmv(ibuf2,nch,2h/ ,1,1) 
+      nch = ichmv_ch(ibuf2,nch,'/') 
 C                  Put / to indicate a response 
 C 
 C     2.  Now get common variables and decode for display 
@@ -71,7 +71,7 @@ C
       ierr = 0
       iclass = 0
 C 
-      nch = ichmv(ibuf2,nch,2hlo,1,2) 
+      nch = ichmv_ch(ibuf2,nch,'lo') 
       do  j = 1,3
           nch = nch+ib2as(j,ibuf2,nch,o'100000'+1)
           ic1 = nch 
@@ -93,7 +93,7 @@ C
 C     5. Now send the buffer to SAM and schedule PPT. 
 C 
           nch = nch - 1 
-          call put_buf(iclass,ibuf2,-nch,2hfs,0)
+          call put_buf(iclass,ibuf2,-nch,'fs','  ')
           nch = ic1-1 
       enddo
 C                   Send buffer starting with IFD to display, ignoring

@@ -17,12 +17,12 @@ C           in_
 C
       ifc=16
       ifc=ifc+ib2as(ifield,lfel(2),ifc,o'100000'+4)
-      ifc=ichmv(lfel(2),ifc,2H_  ,1,1)
+      ifc=ichmv_ch(lfel(2),ifc,'_')
       call po_put_i(lfel(2),ifc)
 C
       ifc=12
       ifc=ifc+ib2as(irec,lrec(2),ifc,o'100000'+4)
-      ifc=ichmv(lrec(2),ifc,2H_  ,1,1)
+      ifc=ichmv_ch(lrec(2),ifc,'_')
       call po_put_i(lrec(2),ifc)
       kfild=kfmp(lut,0,lin(2),lin(1),ipbuf,0,1)
 

@@ -1,4 +1,4 @@
-void fc_nsem_put_( name, lenn)
+void fc_nsem_put__( name, lenn)
 char	name[5];	
 int     lenn;
 {

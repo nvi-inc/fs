@@ -49,7 +49,7 @@ C
       call fs_get_drive(drive)
       if (ieq.eq.0) then
         goto 500
-      else if (VLBA.eq.iand(drive,VLBA)) then
+      else if (VLBA.eq.and(drive,VLBA)) then
         ip(3)=-282
         goto 990
       else if (ichcm(ibuf,ieq+1,lalrm,1,ilenal).eq.0) then
@@ -78,7 +78,7 @@ C
 600   continue
       nch = ieq
       if (nch.eq.0) nch = nchar+1
-      nch = ichmv(ibuf,nch,2h/ ,1,1)
+      nch = ichmv_ch(ibuf,nch,'/')
 C
       do i=1,nchan
         nch = nch+ir2as(volts(i),ibuf,nch,8,3)

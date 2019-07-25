@@ -77,9 +77,9 @@ C
       kMdrive=.false.
       call fs_get_rack(rack)
       call fs_get_drive(drive)
-      if ((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4)))
+      if ((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4)))
      . kMrack = .true.
-      if ((MK3.eq.iand(drive,MK3)).or.(MK4.eq.iand(drive,MK4)))
+      if ((MK3.eq.and(drive,MK3)).or.(MK4.eq.and(drive,MK4)))
      . kMdrive = .true.
       if (ieq.eq.0) goto 500
 C                   If no parameters, go report current list
@@ -336,17 +336,17 @@ C  check kMdrive
 C  if true then list mk3 drive oriented mnemonics
 C  else if false then list vlba drive oriented mnemonics
 C
-      nch = ichmv(ibuf,nchar+1,2H/ ,1,1)
+      nch = ichmv_ch(ibuf,nchar+1,'/')
       if (kMrack) then    !! if MK3 rack
         do i=1,17
           call fs_get_icheck(icheck(i),i)
           if (icheck(i).ge.1) then
             if (i.le.15) then
-              nch = ichmv(ibuf,nch,2Hv ,1,1)
+              nch = ichmv_ch(ibuf,nch,'v')
               nch = nch + ib2as(i,ibuf,nch,o'100000'+2)
             else
-              if (i.eq.16) nch = ichmv(ibuf,nch,2Hif,1,2)
-              if (i.eq.17) nch = ichmv(ibuf,nch,2Hfm,1,2)
+              if (i.eq.16) nch = ichmv_ch(ibuf,nch,'if')
+              if (i.eq.17) nch = ichmv_ch(ibuf,nch,'fm')
             endif
             nch = mcoma(ibuf,nch)
           endif
@@ -356,12 +356,12 @@ C
           call fs_get_ichvlba(ichvlba(i),i)
           if (ichvlba(i).ge.1) then
             if (i.le.14) then
-              nch = ichmv(ibuf,nch,2Hb ,1,1)
+              nch = ichmv_ch(ibuf,nch,'b')
               nch = nch + ib2as(i,ibuf,nch,o'100000'+2)
             else
-              if (i.eq.15) nch = ichmv(ibuf,nch,2Hia,1,2)
-              if (i.eq.16) nch = ichmv(ibuf,nch,2Hic,1,2)
-              if (i.eq.17) nch = ichmv(ibuf,nch,2Hfm,1,2)
+              if (i.eq.15) nch = ichmv_ch(ibuf,nch,'ia')
+              if (i.eq.16) nch = ichmv_ch(ibuf,nch,'ic')
+              if (i.eq.17) nch = ichmv_ch(ibuf,nch,'fm')
             endif
             nch = mcoma(ibuf,nch)
           endif
@@ -371,29 +371,29 @@ C
       if (kMdrive) then   !! if MK3 drive
         call fs_get_icheck(icheck(18),18)
         if (icheck(18).ge.1) then
-          nch = ichmv(ibuf,nch,2Htp,1,2)
+          nch = ichmv_ch(ibuf,nch,'tp')
           nch = mcoma(ibuf,nch)
         endif
       else   !! if VLBA drive
         call fs_get_ichvlba(ichvlba(18),18)
         if (ichvlba(18).ge.1) then
-           nch = ichmv(ibuf,nch,2Hrc,1,2)
+           nch = ichmv_ch(ibuf,nch,'rc')
            nch = mcoma(ibuf,nch)
         endif
       endif
       call fs_get_icheck(icheck(19),19)
       if (icheck(19).ge.1) then
-        nch = ichmv(ibuf,nch,2Hrx,1,2)
+        nch = ichmv_ch(ibuf,nch,'rx')
         nch = mcoma(ibuf,nch)
       endif
       call fs_get_icheck(icheck(20),20)
       if (icheck(20).ge.1) then
-        nch = ichmv(ibuf,nch,2Hhd,1,2)
+        nch = ichmv_ch(ibuf,nch,'hd')
         nch = mcoma(ibuf,nch)
       endif
       if(kMrack.and.icheck(21).ge.1) then
         call fs_get_icheck(icheck(21),21)
-        nch = ichmv(ibuf,nch,2Hi3,1,2)
+        nch = ichmv_ch(ibuf,nch,'i3')
         nch = mcoma(ibuf,nch)
       endif
       do i=1,4
@@ -410,10 +410,10 @@ C
       nch=nch-1
       if (ichcm_ch(ibuf,nch,',').eq.0) nch=nch-1
       if (ichcm_ch(ibuf,nch,'/').eq.0)
-     +  nch=ichmv(ibuf,nch+1,8Hdisabled,1,8)-1
+     +  nch=ichmv_ch(ibuf,nch+1,'disabled')-1
 C 
       iclass = 0
-      call put_buf(iclass,ibuf,-nch,2Hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       ip(1) = iclass
       ip(2) = 1
 

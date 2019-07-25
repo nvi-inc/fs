@@ -6,7 +6,11 @@
 #include <memory.h>
 #include <string.h>
 #include <stdio.h>
-#include "sys/ugpib.h"
+
+#ifdef CONFIG_GPIB
+#include <ib.h>
+#include <ibP.h>
+#endif
 
 #define	LF		0x0A
 #define TIMEOUT		-4
@@ -57,6 +61,7 @@ int *error;
  * 256 in this case works.
  */
 
+#ifdef CONFIG_GPIB
   ibcmd(ID_hpib,"_?",1);  	/* unaddress all listeners and talkers */
   if ((ibsta & (ERR|TIMO)) != 0)
   {
@@ -131,4 +136,9 @@ int *error;
   memcpy(buffer,locbuf,icopy);
 
   return(iret);
+
+#else
+  *error = -(IBCODE + 22);
+  return -1;
+#endif
 }

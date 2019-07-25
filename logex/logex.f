@@ -249,7 +249,9 @@ C
 C
 C LOGEX is terminated if an EX or :: is typed
 C
-      if (ibuf(1).eq.2hEX.or.ibuf(1).eq.2h::) goto 500
+      if(ichcm_ch(ibuf,1,'EX').eq.0 .or.
+     &   ichcm_ch(ibuf,1,'ex').eq.0 .or.
+     &   ichcm_ch(ibuf,1,'::').eq.0) goto 500
 C
 C
 C  ****************************************************************

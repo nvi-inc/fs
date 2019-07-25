@@ -1,4 +1,4 @@
-int fc_nsem_test_( name, lenn)
+int fc_nsem_test__( name, lenn)
 char	name[5];	
 int     lenn;
 {

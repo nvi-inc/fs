@@ -95,7 +95,7 @@ C  are enabled. The options for the command are: stack1 and/or stack2
 C  or null.
 C
       call fs_get_drive(drive)
-      if (MK4.eq.iand(MK4,drive)) then
+      if (MK4.eq.and(MK4,drive)) then
         kena(1)=.false.
         kena(2)=.false.
         if (ich.lt.nchar) then
@@ -241,11 +241,11 @@ C
       call fs_get_ienatp(ienatp)
       call en2ma(ibuf(3),ienatp,itrken,ldummy)
       idumm1 = ichmv(ltrken,1,ibuf,6,8)
-      ia = iand(ia2hx(ltrken,1),7)
+      ia = and(ia2hx(ltrken,1),7)
       idumm1 = ichmv(ltrken,1,ihx2a(ia),2,1)
 C
       iclass = 0
-      call put_buf(iclass,ibuf,-13,2hfs,0)
+      call put_buf(iclass,ibuf,-13,'fs','  ')
       nrec = 1
       goto 800
 C
@@ -257,7 +257,7 @@ C
       call char2hol('tp',ibuf(2),1,2)
       iclass = 0
       ibuf(1) = -2
-      call put_buf(iclass,ibuf,-4,2hfs,0) 
+      call put_buf(iclass,ibuf,-4,'fs','  ') 
       nrec = 1
       goto 800
 C 
@@ -269,7 +269,7 @@ C
       ibuf(1) = 6 
       call char2hol('tp',ibuf(2),1,2)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0) 
+      call put_buf(iclass,ibuf,-4,'fs','  ') 
       nrec = 1
       goto 800
 C 
@@ -280,7 +280,7 @@ C
       ibuf(1) = 7
       call char2hol('tp',ibuf(2),1,2)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
       goto 800
 C

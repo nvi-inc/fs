@@ -44,7 +44,7 @@ long ip[5];                           /* ipc parameters */
          if (*command->argv[0]=='?') {
             venable_dis(command,itask,ip);
             return;
-         } else if(0==strcmp(command->argv[0],ADDR)) {
+         } else if(0==strcmp(command->argv[0],ADDR_ST)) {
             ierr=-301;
             goto error;
          } else if(0==strcmp(command->argv[0],TEST)) {

@@ -1,9 +1,9 @@
       program moon
 C
-      double precision conv5utc,utfrac,ra,dec,days,
-     .dasin,quad,x,dattim,range,gst,stm,frac,
+      double precision utfrac,ra,dec,
+     .dasin,x,dattim,range,gst,stm,frac,
      .rearth,xm,ym,zm,singst,cosgst,xme,yme,zme,xsm,ysm,zsm,
-     .rsm,diam,had,el,az,gdlat,gdlon,hite,xs,ys,zs,rate,gdhei
+     .rsm,diam,had,gdlat,gdlon,xs,ys,zs,rate,gdhei
 C
 C  INPUT VARIABLES
 C
@@ -98,7 +98,7 @@ C
       if (ra.lt.0d0) ra = ra + dtwopi
 C
       ip(1)=0
-      call put_buf(ip(1),ibufo,-16,0,0)
+      call put_buf(ip(1),ibufo,-16,'  ','  ')
       goto 1
 C
       end

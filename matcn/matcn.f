@@ -1,7 +1,7 @@
       program matcn
 c      implicit none
       integer*4 ip(5),iclass
-      integer rtn1,rtn2,i,get_buf,nwords
+      integer i,get_buf
 c
 C 
 C   MATCN controls the I/O to the Microprocessor ASCII Transceiver
@@ -113,17 +113,18 @@ C                 max of 20 characters for longest message from MATCN
 C               - true if this message is addressed to the TAPE drive
       equivalence (reg,ireg(1))
       parameter (nbaud=7)
-      dimension ibaud(nbaud),ibindx(nbaud)
+      dimension ibaud(nbaud),ibdrt(nbaud)
 C      - list of legal baud rates and corresponding indices
 C
 C   INITIALIZED VARIABLES
 C
       data kini/.false./
       data minmod/-8/, maxmod/9/,  maxdev/25/, nalarm/18/
-      data ilen/360/,ilen2/160/
+      data ilen/360/
       data lstrob/2h!>,2h%>,2h(>,2h)>,2h+>,2h->,2h.>,2h;>/
       data ibaud/110,300,600,1200,2400,4800,9600/
-      data ibindx/3,6,0,7,9,10,11/
+C effective read character rates from Blue Books
+      data ibdrt/10,29.8,57.4,110,203,341,500/
 C
 C
 C     1. First get parameters and initialize if necessary.
@@ -148,9 +149,14 @@ c     call fc_rte_lock(1)        ! lock into memory
 C
 100   if (kini) goto 200
       call fs_get_ibmat(ibmat)
+      ibx=0
       do i=1,nbaud
         if (ibmat.eq.ibaud(i)) ibx=i
       enddo
+      if(ibx.eq.0) then
+        ibx=1
+        call logit7ci(0,0,0,1,-102,'ma',ierr)
+      endif
       nchar=iflch(idevmat,64)
       istop=1
       if(ibmat.eq.110.or.ibmat.eq.9600) istop=2
@@ -158,7 +164,7 @@ C
       ibits=7
       ibmatl=ibmat
       ierr=portopen(lumat,idevmat,nchar,ibmatl,iparity,ibits,istop)
-      if (ierr.ne.0) call logit7(0,0,0,1,-100,2hma,ierr)
+      if (ierr.ne.0) call logit7ci(0,0,0,1,-100,'ma',ierr)
 C
       if (lumat.lt.0) goto 1090
 C
@@ -177,7 +183,7 @@ C
           modtbl(3,i)=ix
         endif
       enddo
-      if (nclrec.gt.maxdev) call logit7(0,0,0,1,-101,2hma,maxdev)
+      if (nclrec.gt.maxdev) call logit7ci(0,0,0,1,-101,'ma',maxdev)
 C
 190   ndev = min0(maxdev,nclrec)
 C
@@ -193,7 +199,7 @@ C
 200   continue
       call ifill_ch(ibuf,1,180,' ')
       do 900 iclrec = 1,nclrec
-        ireg(2) = get_buf(ior(o'020000',iclass),ibuf,-ilen,idum,idum)
+        ireg(2) = get_buf(or(o'020000',iclass),ibuf,-ilen,idum,idum)
 
         if (ierr.lt.0) goto 900
 C                   If we got an error earlier, skip to end of loop
@@ -221,10 +227,10 @@ C
 221     idev = i
         itimeout=modtbl(3,i)
         call fs_get_ibmat(ibmat)
-        itn=modtbl(3,i)+1.5*10.*1100./float(ibmat)+5.0001
+        itn=modtbl(3,i)+1.5*10.*100./float(ibdrt(ibx))+5.5
         ktp=ichcm_ch(modtbl(1,idev),1,'tp').eq.0
 C
-        idum=ichmv(ibuf,1,2h# ,1,1)
+        idum=ichmv_ch(ibuf,1,'#')
         idum=ichmv(ibuf,2,modtbl(2,idev),1,2)
 C                   The input buffer now has: #xx <data>
         ibuf2(1) = modtbl(1,idev)
@@ -241,7 +247,7 @@ C
 C     3. Here we are sending data to the MAT.
 C     Put an "=" sign before the data
 C
-        idum=ichmv(ibuf,4,2h= ,1,1)
+        idum=ichmv_ch(ibuf,4,'=')
         call fs_get_kecho(kecho)
         call datat(imode,ibuf,nchar,lumat,kecho,lu,
      .             ibuf2(2),nch2,ierr,itn)
@@ -269,7 +275,7 @@ C                   ready for the following data request.
 C                   For the tape drive, we send #nn? only 
 C                   For the other modules, we already have #nns> in the 
 C                   buffer and NCHAR is set at the > character
-        nchar = ichmv(ibuf,nchar,2h? ,1,1)-1
+        nchar = ichmv_ch(ibuf,nchar,'?')-1
 C                   Put the ? into the buffer, so that
 C                   for the tape drive, we have #nn?
 C                   and for the others, we have #nns?
@@ -284,19 +290,24 @@ C
 500     continue
         call fs_get_ibmat(ibmat)
         if(imode.eq.55) then
+          ibx=0
           do i=1,nbaud
             if (ibmat.eq.ibaud(i)) ibx=i
           enddo
+          if(ibx.eq.0) then
+             ibx=1
+             call logit7ci(0,0,0,1,-102,'ma',ierr)
+          endif
           ierr=portbaud(lumat,ibmat)
           if(ierr.ne.0) goto 899
-          itn=1.5*10.*1100./float(ibmat)+5.0001
+          itn=modtbl(3,i)+1.5*10.*100./float(ibdrt(ibx))+5.5
         else
-          nch=iscnc(ibuf(2),1,nchar-2,2h##)
+          nch=iscn_ch(ibuf(2),1,nchar-2,'#')
           if(nch.ne.0.and.nch.lt.nchar-3) then
             nch=nch+1
             do i=1,ndev
               if (ichcm(modtbl(2,i),1,ibuf(2),nch,2).eq.0) then
-                itn=modtbl(3,i)+1.5*10.*1100./float(ibmat)+5.0001
+                itn=modtbl(3,i)+1.5*10.*100./float(ibdrt(ibx))+5.5
                 goto 501
               endif
             enddo
@@ -318,10 +329,10 @@ C
         call iat(ibuf,nch,lumat,kecho,lu,ibuf2(2),nch2,ierr,itn)
 C                   Send <escape> to the device
         if (ierr.lt.0.or.nch2.eq.0) goto 601
-        call put_buf(iclasr,ibuf2,-nch2-2,2hfs,0)
+        call put_buf(iclasr,ibuf2,-nch2-2,'fs','  ')
         nclrer = nclrer + 1 
 601     continue
-        idum=ichmv(ibuf,1,5hUUUUU,1,5)
+        idum=ichmv_ch(ibuf,1,'UUUUU')
 C                   Send some UU's to synch up again
         nch = 5 
         call fs_get_kecho(kecho)
@@ -331,20 +342,20 @@ C
 C 
 C     7. Query and reset alarm.  Buffer contains address. 
 C 
-700     idum=ichmv(ibuf,4,2h' ,1,1) 
+700     idum=ichmv_ch(ibuf,4,'''') 
         nch = 4 
         call fs_get_kecho(kecho)
         call iat(ibuf,nch,lumat,kecho,lu,ibuf2(2),nch2,ierr,itn) 
 C                   Send ' to query alarm 
         if (ierr.lt.0.or.nch2.eq.0) goto 900
-        call put_buf(iclasr,ibuf2,-nch2-2,2hfs,0)
+        call put_buf(iclasr,ibuf2,-nch2-2,'fs','  ')
         nclrer = nclrer + 1 
-        idum=ichmv(ibuf,4,2h" ,1,1) 
+        idum=ichmv_ch(ibuf,4,'"') 
         nch = 4 
         call fs_get_kecho(kecho)
         call iat(ibuf,nch,lumat,kecho,lu,ibuf2(2),nch2,ierr,itn) 
 C                   Send " to reset alarm 
-        idum=ichmv(ibuf,4,2h' ,1,1) 
+        idum=ichmv_ch(ibuf,4,'''') 
         nch = 4 
         call fs_get_kecho(kecho)
         call iat(ibuf,nch,lumat,kecho,lu,ibuf2(2),nch2,ierr,itn) 
@@ -354,7 +365,7 @@ C
 C     8. Send buffer directly.  Address has already been substituted
 C     into first three characters.  Fill in fourth with a blank.
 C 
-800     idum=ichmv(ibuf,4,2h  ,1,1) 
+800     idum=ichmv_ch(ibuf,4,' ') 
         if(imode.eq.9.or.imode.eq.-54) then
           nchar=nchar+1
           call pchar(ibuf,nchar,10)
@@ -371,18 +382,18 @@ C                   If there was a real error, skip any responses
 C                   EXCEPTION: for wrong-length responses, report 
 C                   the actual response - it might be intereseting. 
 
-        call put_buf(iclasr,ibuf2,-nch2-2,2hfs,0)
+        call put_buf(iclasr,ibuf2,-nch2-2,'fs','  ')
         nclrer = nclrer + 1 
 C                   Put response into class 
         if(imode.eq.-53 .or. imode.eq.-54) then
-          call put_buf(iclasr,centisec,-8,2hfs,0)
+          call put_buf(iclasr,centisec,-8,'fs','  ')
           nclrer=nclrer +1
         endif
         if (ierr.ne.+2) goto 900
         idum=ichmv(lalarm, 1,modtbl(1,idev),1,2)
         idum=ichmv(lalarm,10,modtbl(1,idev),1,2)
         idum=ichmv(lalarm,14,modtbl(2,idev),1,2)
-        call put_buf(iclasr,lalarm,-nalarm,2hfs,0)
+        call put_buf(iclasr,lalarm,-nalarm,'fs','  ')
 C                   If alarm was on, send message 
         nclrer = nclrer + 1 
 C 

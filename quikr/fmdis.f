@@ -77,7 +77,7 @@ C                   If our command was only "device" we are waiting for
 C                   data and know what to expect. 
       if (nch.eq.0) nch = nchar+1 
 C                   If no "=" found, position after last character
-      nch = ichmv(ibuf2,nch,2h/ ,1,1) 
+      nch = ichmv_ch(ibuf2,nch,'/') 
 C                   Put / to indicate a response
 C 
       if (kcom) goto 310
@@ -173,7 +173,7 @@ C
 C                   Pick up yddd
       nch = ichmv(ibuf2,nch,itim,3,6) 
 C                   This is hhmmss
-      nch = ichmv(ibuf2,nch,2h. ,1,1) 
+      nch = ichmv_ch(ibuf2,nch,'.') 
       nch = ichmv(ibuf2,nch,itim,9,2) 
 C                   Fractional seconds
 C 
@@ -182,7 +182,7 @@ C     5. Now send the buffer to SAM and schedule PPT.
 C 
 500   iclass = 0
       nch = nch - 1 
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
 C                   Send buffer starting with FM to display 
       if (.not.kcheck) ierr = 0 
 C 

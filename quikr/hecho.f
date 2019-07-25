@@ -55,15 +55,15 @@ C
 600   continue
       nch=ieq
       if(ieq.eq.0) nch=nchar+1
-      nch=ichmv(ibuf,nch,2h/ ,1,1)
+      nch=ichmv_ch(ibuf,nch,'/')
       if(khecho_fs) then
-        nch=ichmv(ibuf,nch,2hon,1,2)
+        nch=ichmv_ch(ibuf,nch,'on')
       else
-        nch=ichmv(ibuf,nch,4hoff ,1,3)
+        nch=ichmv_ch(ibuf,nch,'off')
       endif
 C
       nch=nch-1
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       nrec=1
 C
 C  That's all

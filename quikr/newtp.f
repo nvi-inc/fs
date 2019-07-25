@@ -57,7 +57,7 @@ C
 C     2. Now form the response message buffer.
 C     ***NOTE WE ARE SETTING BOSS'S HALT VARIABLE OURSELVES!!***
 C 
-      nch = ichmv(ibuf,nchar+1,2h/ ,1,1)
+      nch = ichmv_ch(ibuf,nchar+1,'/')
       nch = ichmv(ibuf,nch,lmsg,1,nmsg) - 1 
 C 
       khalt = .true.
@@ -69,7 +69,7 @@ C
 C     3. Now send the message back to BOSS. 
 C 
       iclass = 0
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       ip(1) = iclass
       ip(2) = 1 
       return

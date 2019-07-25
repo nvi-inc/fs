@@ -90,18 +90,18 @@ C
 C 
 C     5. Return the offsets for display 
 C 
-500   nch = ichmv(ibuf,nchar+1,2h/ ,1,1)
+500   nch = ichmv_ch(ibuf,nchar+1,'/')
       call fs_get_xoff(xoff)
       xo=xoff*180./RPI 
       call fs_get_yoff(yoff)
       yo=yoff*180./RPI 
       nch = nch + ir2as(xo,ibuf,nch,10,5)  
-      nch = ichmv(ibuf,nch,2h, ,1,1)
+      nch = ichmv_ch(ibuf,nch,',')
       nch = nch + ir2as(yo,ibuf,nch,10,5)  
 C 
       iclass = 0
       nch = nch - 1 
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       ip(1) = iclass
       ip(2) = 1 
       ip(3) = 0 

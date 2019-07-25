@@ -59,7 +59,7 @@ C
         ierr = -101               !  there is no default for the source name
         goto 990
       else
-        idumm1 = ichmv(ls,1,10h          ,1,10)
+        idumm1 = ichmv_ch(ls,1,'          ')
         idumm1 = ichmv(ls,1,ibuf,ic1,min0(10,ich-ic1-1))
       endif
 C                   First clear the temporary name buffer then move 
@@ -223,10 +223,10 @@ C
         itb(i)=it(i)
       enddo
       ip(1)=0
-      call put_buf(ip,ibufi,-48,0,0)
+      call put_buf(ip,ibufi,-48,'  ','  ')
       call run_prog('moon ','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
       call rmpar(ip)
-      nwords=get_buf(ip(1),ibufo,-16,rtn1,rtn2)
+      nwords=get_buf(ip(1),ibufo,-16,irtn1,irtn2)
       ra = rad
       dec = decd
 C
@@ -258,9 +258,9 @@ C
 C 
 C     5. Return the source name for display 
 C 
-500   nch = ichmv(ibuf,nchar+1,2h/ ,1,1)
+500   nch = ichmv_ch(ibuf,nchar+1,'/')
       call fs_get_lsorna(lsorna)
-      if (ichcm(lsorna,1,10h          ,1,10).eq.0) goto 530 
+      if (ichcm_ch(lsorna,1,'          ').eq.0) goto 530 
       nch = ichmv(ibuf,nch,lsorna,1,10) 
       iaz = ichcm_ch(lsorna,1,'azel      ')
       iazun = ichcm_ch(lsorna,1,'azeluncr  ')
@@ -294,7 +294,7 @@ C                   Adjust next char to be first blank in source name.
         nch = nch + ir2as(irah*10000.0+iram*100.0+ras,ibuf,nch,8,1)
         nch = mcoma(ibuf,nch)
 C       if (ichcm_ch(lds,1,'-').eq.0) nch = ichmv(ibuf,nch,lds,1,1)
-        if (dec50.lt.0.0) nch=ichmv(ibuf,nch,2h- ,1,1)
+        if (dec50.lt.0.0) nch=ichmv_ch(ibuf,nch,'-')
         is=dcs
         dcs=is
         nch = nch + ir2as(idcd*10000.0+idcm*100.0+dcs,ibuf,nch,7,0)
@@ -309,7 +309,7 @@ C       if (ichcm_ch(lds,1,'-').eq.0) nch = ichmv(ibuf,nch,lds,1,1)
         nch = nch + ir2as(irah*10000.0+iram*100.0+ras,ibuf,nch,8,1)
         nch = mcoma(ibuf,nch)
 C       if (ichcm_ch(lds,1,'-').eq.0) nch = ichmv(ibuf,nch,lds,1,1)
-        if (decdat.lt.0.0) nch=ichmv(ibuf,nch,2h- ,1,1)
+        if (decdat.lt.0.0) nch=ichmv_ch(ibuf,nch,'-')
         is=dcs*10
         dcs=is/10.0
         nch = nch + ir2as(idcd*10000.0+idcm*100.0+dcs,ibuf,nch,7,0)
@@ -318,7 +318,7 @@ C       if (ichcm_ch(lds,1,'-').eq.0) nch = ichmv(ibuf,nch,lds,1,1)
       endif
 530   iclass = 0
       nch = nch - 1 
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       ip(1) = iclass
       ip(2) = 1 
       ip(3) = 0 

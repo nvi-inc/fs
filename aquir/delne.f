@@ -9,6 +9,7 @@ C
 C SOURCE NAME
 C
       call gtchr(lsorna,1,mc*2,jbuf,ifc,ilc,ifield,iferr)
+      call lower(lsorna,mc*2)
 C
 C  RA
 C

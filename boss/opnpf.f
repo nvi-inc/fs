@@ -63,7 +63,7 @@ C
 C     3. Fill up LPROC with the information on this file location.
 C
         if (nproc+1.gt.maxpr) then
-          call logit7(0,0,0,1,-126,2hbo,maxpr)
+          call logit7ci(0,0,0,1,-126,'bo',maxpr)
           goto 990
         endif
         nproc = nproc + 1

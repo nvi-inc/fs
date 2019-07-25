@@ -40,7 +40,7 @@ C
 C  READ EXISTING IFD ATTENUATOR SETTINGS
 C
       call fs_get_rack(rack)
-      if(VLBA.eq.iand(rack,VLBA)) then
+      if(VLBA.eq.and(rack,VLBA)) then
         call get_vatt(name,lwho,ierr,ich1nf_fs,ich2nf_fs)
         if(ierr.ne.0) return
       else
@@ -60,7 +60,7 @@ C
 C
 C  TURN ON ALL THE ATTENUATORS
 C
-      if(VLBA.eq.iand(rack,VLBA)) then
+      if(VLBA.eq.and(rack,VLBA)) then
         call zero_vatt(name,lwho,ierr)
       else
         if(kif1.or.kif2) then
@@ -85,7 +85,7 @@ C
 C
 C  RESET THE ATTENUATORS
 C
-      if(VLBA.eq.iand(rack,VLBA)) then
+      if(VLBA.eq.and(rack,VLBA)) then
         call rst_vatt(name,lwho,ierr)
       else
         if(kif1.or.kif2) then
@@ -106,7 +106,7 @@ C
 8001  continue
       jerr=0
       jerr3=0
-      if(VLBA.eq.iand(rack,VLBA)) then
+      if(VLBA.eq.and(rack,VLBA)) then
         call rst_vatt(name,lwho,jerr)
       else
         if(kif1.or.kif2) then
@@ -115,7 +115,7 @@ C
         if(kif3) call matcn(isav3,-13,idolr,indata,nin,2,jerr3)
       endif
       jtry=jtry-1
-      if(VLBA.ne.iand(rack,VLBA)) then   !don't retry device that was okay
+      if(VLBA.ne.and(rack,VLBA)) then   !don't retry device that was okay
         if((kif1.or.kif2).and.(jerr.eq.0)) then
           kif1=.false.
           kif2=.false.

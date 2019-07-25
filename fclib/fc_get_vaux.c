@@ -1,4 +1,4 @@
-void fc_set_vrptrk_(itrk, ip)
+void fc_set_vrptrk__(itrk, ip)
 int itrk[2];
 long ip[5];
 {
@@ -8,7 +8,7 @@ long ip[5];
 
   return;
 }
-void fc_get_verate_(jperr,jsync,itrk,itper,ip)
+void fc_get_verate__(jperr,jsync,itrk,itper,ip)
 long jperr[2];
 long jsync[2];
 int itrk[2];
@@ -21,7 +21,7 @@ long ip[5];
 
   return;
 }
-void fc_get_vaux_(iaux,itrk,ip)
+void fc_get_vaux__(iaux,itrk,ip)
 int iaux[2];
 int itrk[2];
 long ip[5];

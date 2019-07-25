@@ -15,10 +15,6 @@ C
       character*79 outbuf
       integer answer, nchar, trimlen, ichmv
 C 
-C  INITIALIZED VARIABLES:
-C
-      data n/1/ 
-C 
 C 
 C Scan for an equals sign.
 C

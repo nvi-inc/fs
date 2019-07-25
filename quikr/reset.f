@@ -98,18 +98,18 @@ C                   Change baud rate to our requested value
       call ifill_ch(ibuf(2),1,38,'U') 
 C                   Fill up the buffer with UUUUUUUUUUU's 
 C                   Send string of U's to synch up
-      call put_buf(iclass,ibuf,-40,2hfs,0)
+      call put_buf(iclass,ibuf,-40,'fs','  ')
       call run_matcn(iclass,1) 
       call rmpar(ip)
       return
 C 
 C     5. Return current baud rate setting.
 C 
-500   nch = ichmv(ibuf,ieq,2h/ ,1,1)
+500   nch = ichmv_ch(ibuf,ieq,'/')
       call fs_get_ibmat(ibmat)
       nch = nch + ib2as(ibmat,ibuf,nch,o'100000'+4) -1
       iclass = 0
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       ip(1) = iclass
       ip(2) = 1 
       ip(3) = 0 

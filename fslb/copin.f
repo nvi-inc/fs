@@ -42,7 +42,7 @@ C     3. The Field System is probably running.  Send the message into
 C     the OPRIN input class.
 C 
       call fs_get_iclopr(iclopr)
-      call put_buf(iclopr,lmessg,-iabs(nchar),2Hfs,0)
+      call put_buf(iclopr,lmessg,-iabs(nchar),'fs','  ')
 C 
 C     4. Finally, schedule BOSS with OPRIN's calling card.
 C 

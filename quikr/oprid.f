@@ -70,12 +70,12 @@ C
 C     5. Display current ID.
 C 
 500   if (ieq.eq.0) ieq = nchar+1 
-      nch = ichmv(ibuf,ieq,2h/ ,1,1)
+      nch = ichmv_ch(ibuf,ieq,'/')
 C                   Put / to indicate a response
       nch = ichmv(ibuf,nch,loprid,1,12)-1 
 C 
       iclass = 0
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       ip(1) = iclass
       ip(2) = 1 
       ip(3) = 0 

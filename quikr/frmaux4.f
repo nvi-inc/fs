@@ -29,14 +29,14 @@ C
       integer ibit0,ibit1,ibit2,ibit3,ibits
       integer index, iloop, ichmv, idum, ihx2a, iposn
 C
-      call ichmv(ibuf,1,8H00000000,1,8)
+      call ichmv_ch(ibuf,1,'00000000')
       do iloop = 1,2
         ibit0=z'00'
         ibit1=z'00'
         ibit2=z'00'
         ibit3=z'00'
         ibits=z'00'
-        iposn = JNINT(posn(iloop))
+        iposn = posn(iloop)+SIGN(0.5,posn(iloop))
         ipos1 = ABS(iposn)
         if (ipos1.ge.1000) then
           ibit0=z'01' 

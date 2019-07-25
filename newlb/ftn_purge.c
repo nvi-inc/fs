@@ -5,7 +5,7 @@
 
 #define MAX_NAME 64
 
-ftn_purge_(name,ierr,len)
+ftn_purge__(name,ierr,len)
 char *name;
 int *ierr,len;
 {
@@ -27,7 +27,7 @@ int *ierr,len;
    *ierr=unlink(iname);    /* do it */
    return;
 }
-ftn_rename_(old,erro,new,errn,leno,lenn)
+ftn_rename__(old,erro,new,errn,leno,lenn)
 char *old,*new;
 int *erro,*errn,leno,lenn;
 {
@@ -78,7 +78,7 @@ int *erro,*errn,leno,lenn;
 }
 #define MAX_STRING  256
 
-ftn_runprog_(in,ierr,len)
+ftn_runprog__(in,ierr,len)
 char *in;
 int *ierr,len;
 {
@@ -100,7 +100,7 @@ int *ierr,len;
 
 /* time should be delcared integer*4 in caller */
 
-ftn_upd_time_(path,time,ierr,len)
+ftn_upd_time__(path,time,ierr,len)
 char *path;
 int len,*ierr;
 long *time;

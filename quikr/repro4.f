@@ -238,10 +238,10 @@ C
       call rp2ma4(ibuf(3),iby,ieq,ita,itb)
 C
       iclass = 0
-      call put_buf(iclass,ibuf,-13,2hfs,0)
+      call put_buf(iclass,ibuf,-13,'fs','  ')
 C
       call rpbr2ma4(ibuf(3),ibr)
-      call put_buf(iclass,ibuf,-13,2hfs,0)
+      call put_buf(iclass,ibuf,-13,'fs','  ')
       nrec = 2
       goto 800
 C
@@ -253,9 +253,9 @@ C
 500   call char2hol('tp',ibuf(2),1,2)
       iclass = 0
       ibuf(1) = -5
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       ibuf(1) = -7
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
 C
       nrec = 2
       goto 800
@@ -266,7 +266,7 @@ C
 600   ibuf(1) = 6
       call char2hol('tp',ibuf(2),1,2)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
       goto 800
 C
@@ -276,7 +276,7 @@ C
 700   ibuf(1) = 7
       call char2hol('tp',ibuf(2),1,2)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
       goto 800
 C

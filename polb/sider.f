@@ -6,7 +6,7 @@ C ACCURATE TO APPROXIMATELY .1 SECONDS OF TIME
 C
 C WEH
 C
-      double precision eqofeq,sidti,fract,ut
+      double precision eqofeq,fract,ut
       integer it(6)
       include '../include/dpi.i'
 C

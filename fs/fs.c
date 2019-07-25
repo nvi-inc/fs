@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <termio.h>
 #include <sys/types.h>
+#include <sys/ipc.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
@@ -45,8 +46,10 @@ main()
     FILE *fp;
     char *s1, line[ MAX_LINE], line2[ 5+MAX_LINE];
     char *argv[ MAX_PROG_ARGS], *name;
+    short fs;
     key_t key;
 
+    strncpy((char *)&fs,"fs",2);
     klesam=FALSE;
     okay = FALSE;
     npids=0;
@@ -57,12 +60,12 @@ main()
              /* ignore signals that might accidently abort */
              /* note this behaviour trickles down by default to all children */
 
-    if (-1==sigignore(SIGINT)) {
+    if (SIG_ERR==signal(SIGINT,SIG_IGN)) {
       perror("fs: ignoring SIGINT");
       exit(-1);
     }
 
-    if (-1==sigignore(SIGQUIT)) {
+    if (SIG_ERR==signal(SIGQUIT,SIG_IGN)) {
       perror("fs: ignoring SIGQUIT");
       exit(-1);
     }
@@ -209,13 +212,13 @@ cleanup:
 
 /* send a message to LES manager to terminate */
        if(lesm >=0 && pids[lesm] != 0 )
-          cls_snd( &(shm_addr->iclbox), "", -1, 'fs', -1);
+          cls_snd( &(shm_addr->iclbox), "", -1, fs, -1);
 
-    if (SIG_ERR==sigset(SIGINT,SIG_DFL)) {
+    if (SIG_ERR==signal(SIGINT,SIG_DFL)) {
       perror("fs: restoring default action for SIGINT");
     }
 
-    if (SIG_ERR==sigset(SIGQUIT,SIG_DFL)) {
+    if (SIG_ERR==signal(SIGQUIT,SIG_DFL)) {
       perror("fs: restoring default action for SIGQUIT");
     }
 
@@ -316,7 +319,7 @@ char **argv,w;
         return -1;
       case 0:
         i=execvp(argv[0],argv);
-        fprintf(2,"exec failed on %s\n",argv[0]);
+        fprintf(stderr,"exec failed on %s\n",argv[0]);
         _exit(-2);
     }
     if (w != 'n') return chpid;

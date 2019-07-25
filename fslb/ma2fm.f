@@ -46,16 +46,16 @@ C                   r = rate setting
 C     Note we are only concerned with the last 8 characters 
 C 
 C 
-      inp = iand(ia2hx(ibuf,9),12)/4
-      imod = iand(ia2hx(ibuf,9),3)
-      irate = iand(ia2hx(ibuf,10),7)
-      isyn = iand(ia2hx(ibuf,8),1)
-      itst = iand(ia2hx(ibuf,8),2)/2
-      isgn = iand(ia2hx(ibuf,8),4)/4
-      irun = iand(ia2hx(ibuf,8),8)/8
-      irem = iand(ia2hx(ibuf,3),4)/4
-      ipwr = iand(ia2hx(ibuf,3),1)
-      ialr = iand(ia2hx(ibuf,3),2)
+      inp = and(ia2hx(ibuf,9),12)/4
+      imod = and(ia2hx(ibuf,9),3)
+      irate = and(ia2hx(ibuf,10),7)
+      isyn = and(ia2hx(ibuf,8),1)
+      itst = and(ia2hx(ibuf,8),2)/2
+      isgn = and(ia2hx(ibuf,8),4)/4
+      irun = and(ia2hx(ibuf,8),8)/8
+      irem = and(ia2hx(ibuf,3),4)/4
+      ipwr = and(ia2hx(ibuf,3),1)
+      ialr = and(ia2hx(ibuf,3),2)
 C 
       return
       end 

@@ -56,7 +56,8 @@ C 3.  LOCAL VARIABLES
 C
       character*12 lfr,lpf
       character lrn
-      logical lge,lle,ldupl
+      logical ldupl
+c     logical lge,lle
       character*34 pathname
 C               - file names
       character*74 lnam1,lnam2,ibc,ibc2

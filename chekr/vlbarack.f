@@ -96,13 +96,13 @@ C
       ierr=0
       call vformchk(icherr,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,0,ierr,lwho,2Hfm)
+        call logit7ic(0,0,0,0,ierr,lwho,'fm')
       endif
       call fs_get_ichvlba(ichvlba(in),in)
       if(ichvlba(in).le.0.or.ichecks.ne.ichvlba(in)) goto 399
       do j=1,5
         if (icherr(j).ne.0) then
-          call logit7(0,0,0,0,-201-j-nbbcerr-niferr,lwho,2Hfm)
+          call logit7ic(0,0,0,0,-201-j-nbbcerr-niferr,lwho,'fm')
         endif
       enddo
 C check the formatter time with the computer time
@@ -110,10 +110,10 @@ C check the formatter time with the computer time
       ierror=0
       call timechk(ierror,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,0,ierr,lwho,2Hfm)
+        call logit7ic(0,0,0,0,ierr,lwho,'fm')
       endif
       if (ierror.ne.0) then
-        call logit7(0,0,0,0,ierror,lwho,2Hfm)
+        call logit7ic(0,0,0,0,ierror,lwho,'fm')
       endif
 399   continue
 C

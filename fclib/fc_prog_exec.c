@@ -1,4 +1,4 @@
-void fc_prog_exec_( name, nlen)
+void fc_prog_exec__( name, nlen)
 char *name;
 int nlen;
 {

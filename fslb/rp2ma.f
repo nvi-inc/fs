@@ -25,9 +25,9 @@ C           b = bandwidth choice AND EQ=BW bit
 C          tb = track B 
 C          ta = track A 
 C 
-      nch = ichmv(ibuf,1,2H! ,1,1)
+      nch = ichmv_ch(ibuf,1,'!')
 C                   The strobe character
-      nch = ichmv(ibuf,nch,2H00,1,1)
+      nch = ichmv_ch(ibuf,nch,'0')
       nch = nch + ib2as(iby*2,ibuf,nch,1) 
       nch = nch + ib2as(ieq,ibuf,nch,1) 
       nch = nch + ib2as(ibw,ibuf,nch,1) 

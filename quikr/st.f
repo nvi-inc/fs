@@ -100,8 +100,9 @@ C
 C 
 C     3. Now plant these values into COMMON.
 C 
+300   continue
       call fs_get_icheck(icheck(18),18)
-300   ichold = icheck(18) 
+      ichold = icheck(18) 
       icheck(18) = 0
       call fs_set_icheck(icheck(18),18)
       ispeed = isp
@@ -124,7 +125,7 @@ C  Skip checking the drive if tape speed is 0.
       ibuf(1) = -3
       call char2hol('tp',ibuf(2),1,2)
       iclass = 0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       call run_matcn(iclass,1)
       call rmpar(ip)
       if(ip(3).lt.0) go to 415
@@ -142,18 +143,18 @@ C          if vacuum not ready, forget it
 410   ibuf(1) = 0
       call char2hol('tp',ibuf(2),1,2)
       call fs_get_drive(drive)
-      if (MK3.eq.iand(drive,MK3)) then
+      if (MK3.eq.and(drive,MK3)) then
         call en2ma(ibuf(3),ienatp,-1,ltrken)
-      else if (MK4.eq.iand(drive,MK4)) then
+      else if (MK4.eq.and(drive,MK4)) then
         call fs_get_kena(kenastk)
         call en2ma4(ibuf(3),ienatp,kenastk)
       endif
       iclass = 0
-      call put_buf(iclass,ibuf,-13,2hfs,0)
+      call put_buf(iclass,ibuf,-13,'fs','  ')
 C
       call fs_get_lgen(lgen)
       call mv2ma(ibuf(3),idirtp,ispeed,lgen)
-      call put_buf(iclass,ibuf,-13,2hfs,0)
+      call put_buf(iclass,ibuf,-13,'fs','  ')
 C
       call run_matcn(iclass,2)
       call rmpar(ip)
@@ -177,9 +178,9 @@ C
 500   call char2hol('tp',ibuf(2),1,2)
       iclass = 0
       ibuf(1) = -4
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       ibuf(1) = -2
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
 C 
       call run_matcn(iclass,2) 
       call rmpar(ip)

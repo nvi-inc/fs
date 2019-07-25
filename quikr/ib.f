@@ -72,7 +72,7 @@ C
         nch = nch + 4
       endif
       iclass = 0
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
       if (iclass.eq.0) then
         ip(3)=-1
         return

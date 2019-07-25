@@ -1,4 +1,4 @@
-void fc_lvdonn_v_(iflag,ip)
+void fc_lvdonn_v__(iflag,ip)
 int *iflag;
 long ip[5];
 {

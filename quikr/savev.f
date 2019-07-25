@@ -48,7 +48,7 @@ C   Voltage name to remember
 C
       call fs_get_drive(drive)
       ich=ieq+1
-      icm=iscnc(ibuf,ich,nchar,2H,,)
+      icm=iscn_ch(ibuf,ich,nchar,',')
       if(icm.eq.0) icm=nchar
       if(ichcm_ch(ibuf,ich,'vrevw').eq.0) then
         indx=vrevw
@@ -64,13 +64,13 @@ C
         indx=v15flip
       else if(ichcm_ch(ibuf,ich,'vw0').eq.0) then
         indx=vw0
-        if(VLBA.eq.iand(drive,VLBA)) then
+        if(VLBA.eq.and(drive,VLBA)) then
           ip(3)=-502
           goto 990
         endif
       else if(ichcm_ch(ibuf,ich,'vw8').eq.0) then
         indx=vw8
-        if(VLBA.eq.iand(drive,VLBA)) then
+        if(VLBA.eq.and(drive,VLBA)) then
           ip(3)=-502
           goto 990
         endif
@@ -160,7 +160,7 @@ C  5.  Prepare output
 C
 500   continue
       nch=nchar+1
-      nch=ichmv(ibuf,nch,2h/ ,1,1)
+      nch=ichmv_ch(ibuf,nch,'/')
 C
       if(kvrevw_fs)      nch=nch+ir2as(rvrevw_fs,ibuf,nch,8,3)
       nch=mcoma(ibuf,nch)
@@ -186,7 +186,7 @@ C
       if(kvw8_fs)        nch=nch+ir2as(rvw8_fs,ibuf,nch,8,3)
 C
       nch=nch-1
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       nrec=1
       goto 990
 C

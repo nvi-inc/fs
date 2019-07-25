@@ -11,14 +11,14 @@ C
 C     Format buffer for LOGIT, channel B
 C
       call ifill_ch(lmessg,1,60,' ')
-      icn = ichmv(lmessg,1,6Htone/ ,1,5)
-      icn = ichmv(lmessg,icn,2Hv ,1,1)
+      icn = ichmv_ch(lmessg,1,'tone/')
+      icn = ichmv_ch(lmessg,icn,'v')
 C     IF (.NOT.KFIELD) GOTO 100
       icn = icn+ib2as(ivc,lmessg,icn,o'100000'+2)
       icn = mcoma(lmessg,icn)
       icn = icn+ib2as(itrk,lmessg,icn,o'100000'+2)
       goto 110
-100   icn = ichmv(lmessg,icn,4H0,0 ,1,3)
+100   icn = ichmv_ch(lmessg,icn,'0,0')
 110   icn = mcoma(lmessg,icn)
       icn = icn+ir2as(ampb,lmessg,icn,6,1)
       icn = mcoma(lmessg,icn)
@@ -31,14 +31,14 @@ C     IF (.NOT.KFIELD) GOTO 100
 C 
       if (.not.ksplit) goto 950 
       call ifill_ch(lmessg,1,60,' ') 
-      icn = ichmv(lmessg,1,6Htone/ ,1,5)
-      icn = ichmv(lmessg,icn,2Hv ,1,1)
+      icn = ichmv_ch(lmessg,1,'tone/')
+      icn = ichmv_ch(lmessg,icn,'v')
       if (.not.kfield) goto 200 
       icn = icn+ib2as(ivc2,lmessg,icn,o'100000'+2)
       icn = mcoma(lmessg,icn) 
       icn = icn+ib2as(itrkpc(itrk),lmessg,icn,o'100000'+2)
       goto 210
-200   icn = ichmv(lmessg,icn,4H0,0 ,1,3)
+200   icn = ichmv_ch(lmessg,icn,'0,0')
 210   icn = mcoma(lmessg,icn) 
       icn = icn+ir2as(ampa,lmessg,icn,6,1)
       icn = mcoma(lmessg,icn) 
@@ -52,7 +52,7 @@ C     Format buffer for LOGIT, delay
 C 
       if (.not.kfield) goto 950 
       call ifill_ch(lmessg,1,60,' ') 
-      icn = ichmv(lmessg,1,6Hdelay/,1,6)
+      icn = ichmv_ch(lmessg,1,'delay/')
       icn = icn+ib2as(itrkpc(itrk),lmessg,icn,o'100000'+2)
       icn = mcoma(lmessg,icn) 
       icn = icn+ib2as(itrk,lmessg,icn,o'100000'+2)
@@ -64,11 +64,11 @@ C     Format buffer for LOGIT, correlation
 C 
 950   if (.not.kcorel) goto 990 
       call ifill_ch(lmessg,1,60,' ')
-      icn = ichmv(lmessg,1,7Hcorrel/,1,7) 
-      icn = ichmv(lmessg,icn,2Hv ,1,1)
+      icn = ichmv_ch(lmessg,1,'correl/') 
+      icn = ichmv_ch(lmessg,icn,'v')
       icn = icn+ib2as(ivc,lmessg,icn,o'100000'+2) 
       icn = mcoma(lmessg,icn) 
-      icn = ichmv(lmessg,icn,2Hv ,1,1)
+      icn = ichmv_ch(lmessg,icn,'v')
       icn = icn+ib2as(ivc2,lmessg,icn,o'100000'+2)
       icn = mcoma(lmessg,icn) 
       icn = icn+ir2as(correl,lmessg,icn,7,3)

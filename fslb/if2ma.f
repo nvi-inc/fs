@@ -25,12 +25,12 @@ C  Fill unused fields with zeros
       call ib2as(inp1*8,ibuf,4,1) 
 C  Put inputs into chars 3,4 
 C 
-      call ichmv(ibuf,7,ihx2a(iand(iat1,o'60')/16),2,1) 
+      call ichmv(ibuf,7,ihx2a(and(iat1,o'60')/16),2,1) 
 C  Put upper two bits (of six) into char 7 
-      call ichmv(ibuf,8,ihx2a(iand(iat1,o'17')),2,1)
+      call ichmv(ibuf,8,ihx2a(and(iat1,o'17')),2,1)
 C  Put lower four bits into next character.
-      call ichmv(ibuf,5,ihx2a(iand(iat2,o'60')/16),2,1) 
-      call ichmv(ibuf,6,ihx2a(iand(iat2,o'17')),2,1)
+      call ichmv(ibuf,5,ihx2a(and(iat2,o'60')/16),2,1) 
+      call ichmv(ibuf,6,ihx2a(and(iat2,o'17')),2,1)
 C  Do the same for channel 2 
 C 
       return

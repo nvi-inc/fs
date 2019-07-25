@@ -1,14 +1,13 @@
 OBJECTS = setcl.o
 #
-F77= gf77
-FFLAGS = -c -g
+FFLAGS = -c 
 LIBES = ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a\
 ../flib/flib.a ../fclib/fclib.a\
-../clib/clib.a ../fmpsee/fmpsee.a ../rtelb/rtelb.a -lrtx
+../clib/clib.a ../fmpsee/fmpsee.a ../rtelb/rtelb.a
 #
 ../bin/setcl: $(OBJECTS)
-	gf77 -g -o ../bin/setcl $(OBJECTS) $(LIBES)
-	../setb/setb ../bin/setcl
+	f77  -o ../bin/setcl $(OBJECTS) $(LIBES)
+	strip ../bin/setcl
 #
 setcl:
 	rm -f ../bin/setcl

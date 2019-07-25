@@ -5,8 +5,6 @@ C
       logical kgot
       common/got/leng,ierrg,jbufg,kgot
 C
-      logical kif,kerr
-C
       character*(*) iibuf,iobuf,imbuf
       character append
       character*2 luout

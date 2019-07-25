@@ -65,12 +65,12 @@ C     current tape # and check label, write the buffer to a class, and return
 C     the class number to the calling program.
 C
       if (ieq.eq.0) then
-        nch = ichmv(ibuf,nchar+1,2h/ ,1,1)
+        nch = ichmv_ch(ibuf,nchar+1,'/')
         nch = ichmv(ibuf,nch,ltpnum,1,8)
         nch = mcoma(ibuf,nch)
         nch = ichmv(ibuf,nch,ltpchk,1,4) - 1
         iclass = 0
-        call put_buf(iclass,ibuf,-nch,2hfs,0)
+        call put_buf(iclass,ibuf,-nch,'fs','  ')
         ip(1) = iclass
         ip(2) = 1
         return
@@ -146,8 +146,8 @@ C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (ichcm_ch(iparm,1,'p ').eq.0) then
 C       Find out whether PRLAB is RPed already; if not, RP it
-        if (ipgst(6hprlab ).eq.-1) then
-        endif
+c       if (ipgst(6hprlab ).eq.-1) then
+c       endif
         if (ip(3).ne.-301) 
      .     call run_prog('prlab','nowait',lu,2,idum,idum,idum)
       endif

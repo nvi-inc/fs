@@ -1,4 +1,4 @@
-int fc_rte_prior_(ivalue)
+int fc_rte_prior__(ivalue)
 int *ivalue;
 {
      int rte_prior();

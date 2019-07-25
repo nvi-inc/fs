@@ -6,7 +6,11 @@
    NRV 921124 Added external boardid for rddev to use.
  */
 #include <memory.h>
-#include "sys/ugpib.h"
+
+#ifdef CONFIG_GPIB
+#include <ib.h>
+#include <ibP.h>
+#endif
 
 #define NULLPTR (char *) 0
 #define	IBCODE	300
@@ -41,6 +45,7 @@ long *ipcode;
   else 
     *(device + *devlen) = '\0';
 
+#ifdef CONFIG_GPIB
 /* find the device and assign a file descriptor, returns <0 on error */
 
   if ( (hpib = ibfind(device)) < 0)
@@ -52,22 +57,37 @@ long *ipcode;
 
 /* put the hpib board 'on-line' and return ibsta as status */
 
+/*
   if (ibonl(hpib,1)&ERR) 
   {
     *error = -(IBCODE + iberr);
     memcpy((char *)ipcode,"BO",2);
     return;
   }
-
+*/
 /* send an interface clear, making the hpib controller-in-chage */
-  
-  if (ibsic(hpib,1)&ERR) 
+
+  if (ibsic(hpib)&ERR) 
   {
     *error = -(IBCODE + iberr);
     memcpy((char *)ipcode,"BS",2);
     return;
   }
+#else
+    *error = -(IBCODE + 22);
+    return;
+#endif
+
+
 /* used as ID for board in other hpib functions */
 
   ID_hpib = hpib;
 }
+
+
+
+
+
+
+
+

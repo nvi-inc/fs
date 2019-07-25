@@ -49,7 +49,7 @@ C               - parameters returned from GTPRM
       integer get_buf,ichcm_ch
 C               - registers from EXEC calls 
 C 
-      double precision pcal 
+c     double precision pcal 
 C               - phase cal frequency 
       character cjchar
       equivalence (reg,ireg(1)),(parm,iparm(1)) 
@@ -380,10 +380,10 @@ C
 500   goto 510
 cxx500   if (ipgst(6hpcalr ).eq.0) goto 510
 cxx      if (ipgst(6hpcalr ).eq.-1) goto 505 
-      ierr = -301 
-      goto 990
-505   ierr = -302 
-      goto 990
+cxx      ierr = -301 
+cxx      goto 990
+cxx505   ierr = -302 
+cxx      goto 990
 510   continue
 cxx      call exec(10,6hpcalr ,2hsa)
       call char2hol('sa',ip(1),1,2)

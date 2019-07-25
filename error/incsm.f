@@ -3,7 +3,7 @@
      +                 np,igp,feclon,feclat,coslt)
 C
       double precision lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms
-      double precision dim1,dri,ddisr,dwln,dwlt,wdisum,dwdi
+      double precision ddisr,dwln,dwlt,wdisum,dwdi
       double precision dlnof,dltof
       real lnofr,ltofr,distr,coslt
       logical kbit

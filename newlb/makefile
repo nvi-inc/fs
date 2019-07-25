@@ -5,10 +5,11 @@
 OBJECTS=\
 char2low.o fmpread.o f_readstring.o f_rewind.o f_writestrng.o\
 fclose.o fopen.o ftn_purge.o lower.o prog.o trimlen.o ymday.o\
-iday0.o rcpar.o pname.o crcc.o igetb.o putb.o
+iday0.o rcpar.o pname.o crcc.o igetb.o putb.o\
+bitest.o bjtest.o iibset.o jibset.o iibclr.o jibclr.o iishftc.o\
+jibits.o jmvbits.o iishft.o jishft.o
 #
-#CFLAGS = -g
-FFLAGS = -X426
+#CFLAGS = 
 F77 = gf77
 #
 #  The following line that has a ":" in it is a "dependency line".
@@ -21,4 +22,5 @@ F77 = gf77
 newlb.a: $(OBJECTS)
 	touch newlb.a
 	rm newlb.a
-	ar qc newlb.a $(OBJECTS)
+	ar -qc newlb.a $(OBJECTS)
+	ar s newlb.a

@@ -34,7 +34,8 @@ C        ICH    - character counter
       equivalence (reg,ireg(1)),(parm,iparm(1)) 
 C 
 C 5. INITIALIZED VARIABLES
-      data ilen/40/,ilen2/80/          !  lengths of class buffers
+c     data ilen/40/
+      data ilen2/80/          !  lengths of class buffers
       data il/10/,lchar/2h+ ,2h% ,2h! ,2h? /
 C 
 C 6.  PROGRAMMER: NRV 
@@ -71,14 +72,14 @@ C
       do i=1,3
         iclass = 0
         ibuf(3) = lchar(i)
-        call put_buf(iclass,ibuf,-nch,2hfs,0)
+        call put_buf(iclass,ibuf,-nch,'fs','  ')
         call run_matcn(iclass,nrec)
         call rmpar(ip)
         if(ip(3).lt.0) return 
         iclass = 0
         call susp(2,1)
         ibuf(3) = lchar(4)
-        call put_buf(iclass,ibuf,-nch,2hfs,0)
+        call put_buf(iclass,ibuf,-nch,'fs','  ')
         call run_matcn(iclass,nrec)
         call rmpar(ip)
         iclass = ip(1)
@@ -121,7 +122,7 @@ C     which IR2AS doesn't handle properly.
 C 
 C     5. Finally, code up the message for BOSS and the display and log. 
 C 
-      nch = ichmv(ibuf2,nchar+1,2h/ ,1,1)
+      nch = ichmv_ch(ibuf2,nchar+1,'/')
       nch = nch + ir2as(tempwx,ibuf2,nch,5,1) 
       nch = mcoma(ibuf2,nch)
       nch = nch + ir2as(preswx,ibuf2,nch,7,1) 
@@ -130,7 +131,7 @@ C
 C 
       nch = nch - 1 
       iclass = 0
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
 C 
       ip(1) = iclass
       ip(2) = 1

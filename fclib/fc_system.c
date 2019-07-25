@@ -1,4 +1,4 @@
-int fc_system_( string)
+int fc_system__( string)
 char *string;
 {
     int system();

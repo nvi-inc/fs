@@ -26,7 +26,7 @@ C                   Code up the buffer for MATCN.
 9100  format(/" ibyppc="i2" itraka="i3" itrakb="i3)
 C                   Get bandwidth from IRATFM in common
       iclass = 0
-      call put_buf(iclass,ibuf,-13,2hfs,0)
+      call put_buf(iclass,ibuf,-13,'fs','  ')
       call run_matcn(iclass,1)
       call rmpar(ibuf)
       if (ibuf(3).ge.0) goto 290

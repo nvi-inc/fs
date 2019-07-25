@@ -1,4 +1,4 @@
-void fc_shm_write_(b_1)
+void fc_shm_write__(b_1)
 int *b_1;
 {
      void shm_write();

@@ -17,7 +17,7 @@ C
       nn=n-1
       iw=nn/16+1
       igetb=0 
-      if (iand(ibuf(iw),mask(mod(nn,16)+1)).ne.0) igetb=1 
+      if (and(ibuf(iw),mask(mod(nn,16)+1)).ne.0) igetb=1 
 
       return
       end 

@@ -61,7 +61,7 @@ C
       ieq = iscn_ch(ibuf2,1,nchar,'=')
       nch = nchar+1 
       if (kcom) nch = ieq 
-      nch = ichmv(ibuf2,nch,2h/ ,1,1) 
+      nch = ichmv_ch(ibuf2,nch,'/') 
 C                   Put / to indicate a response
 C 
 C 
@@ -101,7 +101,7 @@ C     5. Now send the buffer to SAM.
 C 
 500   iclass = 0
       nch = nch - 1 
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
 C                   Send buffer to display
 C 
       ip(1) = iclass

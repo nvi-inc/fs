@@ -20,7 +20,7 @@ c
       INTEGER ICAPTP, ICHECK(21), ILOKVC(15), 
      . IRDYTP, IRENVC, ITRAKA, ITRAKB, TPIVC(15), ibmat, ibmcb,
      . ionsor, ipashd(2), ispeed, iremtp, ienatp,
-     . idirtp, imodfm, iratfm, inp1if, inp2if, ndevlog, iaxis(2),
+     . idirtp, imodfm, iratfm, inp1if, inp2if, ndevlog,
      . rack, drive, imaxtpsd, ichvlba(18), iskdtpsd, itpthick,
      . vform_rate, vgroup(4), capstan, stchk(4), sterp
 
@@ -42,12 +42,12 @@ c
      . secsoffti_fs,ichfm_cn_tm,
 c
      . khalt, kecho, kenastk, klvdt_fs,
-     . ichvkmove, ichvkenable, ichvklowtape, ichvkrepro,
+     . ichvkmove, ichvkenable, ichvklowtape, ichvkrepro, ichvkload,
 c
      . ICAPTP, ICHECK, ILOKVC, IRDYTP, 
      . IRENVC, ITRAKA, ITRAKB, TPIVC, ibmat, ibmcb,
      . ionsor, ipashd, ispeed, iremtp, ienatp,
-     . idirtp, imodfm, iratfm, inp1if, inp2if, ndevlog, iaxis,
+     . idirtp, imodfm, iratfm, inp1if, inp2if, ndevlog,
      . rack, drive, imaxtpsd, ichvlba, iskdtpsd,
      . itpthick, 
      . vform_rate, vgroup, capstan, stchk,

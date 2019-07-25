@@ -142,7 +142,7 @@ Continue:
       for (i=0; i<nrec; i++) {
         strcpy(buf2,"Received message for antenna: ");
         nchar = cls_rcv(class,buf,sizeof(buf),&r1,&r2,dum,dum);
-        buf[nchar] = NULL;  /* make into a string */
+        buf[nchar] = 0;  /* make into a string */
         strcat(buf2,buf);
         logit(buf2,0,NULL);
         strcpy(buf,"ACK");

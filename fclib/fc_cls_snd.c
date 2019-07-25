@@ -1,4 +1,4 @@
-void fc_cls_snd_( iclass, buffer, nchars, parm3, parm4)
+void fc_cls_snd__( iclass, buffer, nchars, parm3, parm4)
 long *iclass;
 char *buffer;
 int *nchars, *parm3, *parm4;

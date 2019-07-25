@@ -1,5 +1,8 @@
       program boss
 cxx      implicit none
+c
+      include '../include/fscom.i'
+c
       integer ifsnum
       parameter (ifsnum=256)
       integer*4 ip(5)
@@ -16,8 +19,6 @@ C                     Number of available entries in ITSCB
 C                     Number of entries in each proc list
       data nnames/ifsnum/
 C                     Maximum number of entries available in LNAMES
-C
-      include '../include/fscom.i'
 C
       call setup_fscom
       call read_fscom

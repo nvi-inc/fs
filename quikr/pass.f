@@ -78,7 +78,7 @@ C
         ipas(1)=ipashd(1)
         kpas(1)=.true.
       else if(ichcm_ch(ibuf,ichs,'stack2').eq.0.and.
-     .        (MK4.eq.iand(drive,MK4))) then
+     .        (MK4.eq.and(drive,MK4))) then
         call fs_get_ipashd(ipashd)
         ipas(1)=ipashd(2)
         kpas(1)=.true.
@@ -105,7 +105,7 @@ C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(parm,1).eq.',') then
         kpas(2)=.false.
-      else if(VLBA.eq.iand(drive,VLBA)) then
+      else if(VLBA.eq.and(drive,VLBA)) then
         ip(3)=-501
         goto 990
       else if(ichcm_ch(ibuf,ichs,'same').eq.0.and.kpas(1)) then
@@ -195,7 +195,7 @@ C
       iclass=0
 C
       call fs_get_rack(rack)
-      if(MK3.eq.iand(rack,MK3)) THEN
+      if(MK3.eq.and(rack,MK3)) THEN
         call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
         ibuf2(1) = 0
         call char2hol('fm',ibuf2(2),1,2)
@@ -211,7 +211,7 @@ C                   ... as ! type data
         ibuf2(1) = 0
         call char2hol('fm',ibuf2(2),1,2)
         idumm1 = ichmv(ibuf2,5,lauxfm,9,4)
-        idumm1 = ichmv(ibuf2,9,4H0000,1,4)
+        idumm1 = ichmv_ch(ibuf2,9,'0000')
         nch = 12
         call add_class(ibuf2,-nch,iclass,nrec)
 C                   Send out the last 4 chars and zeros ...
@@ -222,13 +222,13 @@ C                   Send out the last 4 chars and zeros ...
 C
         call run_matcn(iclass,nrec)
         call rmpar(ip)
-      else if(MK4.eq.iand(rack,MK4)) THEN
+      else if(MK4.eq.and(rack,MK4)) THEN
         call frmaux4(lauxfm4,posnhd,ipashd,kautohd_fs)
         ibuf2(1) = 8
         call char2hol('fm /AUX ',ibuf2(2),1,8)
         idumm1 = ichmv(ibuf2,11,lauxfm4,1,8)
         nch=18
-        call put_buf(iclass,ibuf2,-nch,2Hfs,0)
+        call put_buf(iclass,ibuf2,-nch,'fs','  ')
         nrec=1
         call run_matcn(iclass,nrec)
         call rmpar(ip)
@@ -255,7 +255,7 @@ C  read the postions
 C
       call fs_get_ipashd(ipashd)
       ihd=3
-      if(VLBA.eq.iand(drive,VLBA)) ihd=1
+      if(VLBA.eq.and(drive,VLBA)) ihd=1
       call mic_read(ihd,ipashd,kautohd_fs,pnow,ip)
       if(ip(3).ne.0) goto 800
 C
@@ -277,10 +277,10 @@ C
 600   continue
       nch = ieq
       if (nch.eq.0) nch = nchar+1
-      nch = ichmv(ibuf,nch,2h/ ,1,1)
+      nch = ichmv_ch(ibuf,nch,'/')
       call fs_get_ipashd(ipashd)
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.iand(drive,VLBA)) then
+        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
           nch = nch+ib2as(ipashd(i),ibuf,nch,o'100000'+3)
         endif
         nch = mcoma(ibuf,nch)
@@ -295,21 +295,21 @@ C
       nch = mcoma(ibuf,nch)
 C
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.iand(drive,VLBA)) then
+        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
           nch = nch+ir2as(posnhd(i),ibuf,nch,8,1)
         endif
         nch = mcoma(ibuf,nch)
       enddo
 C
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.iand(drive,VLBA)) then
+        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
           nch = nch+ir2as(pnow(i),ibuf,nch,8,1)
         endif
         nch = mcoma(ibuf,nch)
       enddo
 C
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.iand(drive,VLBA)) then
+        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
           nch = nch+ir2as(poff(i),ibuf,nch,8,1)
         endif
         nch = mcoma(ibuf,nch)

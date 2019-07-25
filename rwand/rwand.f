@@ -59,13 +59,13 @@ C
       ierr=portopen(luwand,idevwand,indev,ibaud,iparity,ibits,istop)
 C
       if (ierr.lt.0) then
-        call logit2(35HRWAND: cannot open port for reading,35)
+        call logit2_ch('RWAND: cannot open port for reading')
         goto 9999
       endif
 C
       ierr = portflush(luwand)
       if (ierr.ne.0) then
-        call logit2(26HRWAND: error flushing port,26)
+        call logit2_ch('RWAND: error flushing port')
         goto 9999
       endif
 C
@@ -82,12 +82,12 @@ C
       ierr = portread(luwand,buftmp,ibufln,1,iendc,itimeout)
 
       if (ierr.eq.-2) then
-        call logit2(23HRWAND: timeout occurred,23)
+        call logit2_ch('RWAND: timeout occurred')
         goto 9999
       endif
 
       if (ierr.ne.0) then
-        call logit2(29HRWAND: error reading TimeWand,29)
+        call logit2_ch('RWAND: error reading TimeWand')
         goto 9999
       endif
 C
@@ -95,7 +95,7 @@ C Check to see if first character read is a carraige return. If yes,
 C no information is in the timewand.
 C
       if (buftmp .eq. 13) then
-        call logit2(35HRWAND: no information from TimeWand,35)
+        call logit2_ch('RWAND: no information from TimeWand')
         goto 9999
       endif
 
@@ -110,7 +110,7 @@ C
       do while (idone.lt.2) 
         ierr = portread(luwand,buftmp,ibufln,1,iendc,itimeout)
         if (ierr.ne.0) then
-          call logit2(29HRWAND: error reading TimeWand,29)
+          call logit2_ch('RWAND: error reading TimeWand')
           goto 9999
         endif
         itotlen= itotlen+ibufln
@@ -126,7 +126,7 @@ C  Now read the checksum.
 C
       ierr = portread(luwand,buftmp,ibufln,1,iendc,itimeout)
       if (ierr.ne.0) then
-        call logit2(29HRWAND: error reading TimeWand,29)
+        call logit2_ch('RWAND: error reading TimeWand')
         goto 9999
       endif
       itotlen= itotlen+ibufln
@@ -134,7 +134,7 @@ C
       do while (buftmp.ne.13)
         ierr = portread(luwand,buftmp,ibufln,1,iendc,itimeout)
         if (ierr.ne.0) then
-          call logit2(29HRWAND: error reading TimeWand,29)
+          call logit2_ch('RWAND: error reading TimeWand')
           goto 9999
         endif
         itotlen= itotlen+ibufln
@@ -145,7 +145,7 @@ C
       itemp = ichmv(bufr,1,buf1,1,nchar)
 
       if (.not.cksum(bufr,nchar)) then
-        call logit2(22HRWAND: checksum failed,22)
+        call logit2_ch('RWAND: checksum failed')
         goto 9999
       endif
 

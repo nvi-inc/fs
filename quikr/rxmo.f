@@ -207,11 +207,11 @@ C
       call rx2ma(ibuf(3),ical,0,idcal,ibox,ifamp,la)
 C                   Format the data part of the buffer
       iclass = 0
-      call put_buf(iclass,ibuf,-12,2hfs,0)
+      call put_buf(iclass,ibuf,-12,'fs','  ')
       nrec = 1
       call rx2ma(ibuf(3),ical,1,idcal,ibox,ifamp,la)
 C                      Send second message to effect transition 
-      call put_buf(iclass,ibuf,-12,2hfs,0)
+      call put_buf(iclass,ibuf,-12,'fs','  ')
       nrec = 2
       goto 400
 C 
@@ -241,7 +241,7 @@ C
 500   ibuf(1) = -1
       call char2hol('rx',ibuf(2),1,2)
       iclass = 0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
       goto 800
 C 
@@ -251,7 +251,7 @@ C
 600   ibuf(1) = 6 
       call char2hol('rx',ibuf(2),1,2)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
       goto 800
 C 
@@ -261,7 +261,7 @@ C
 700   ibuf(1) = 7 
       call char2hol('rx',ibuf(2),1,2)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
       goto 800
 C

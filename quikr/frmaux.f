@@ -23,7 +23,7 @@ C           0000-3999 are positive positions
 C           4000-7999 are negative positions as 4000+abs(position)
 C         FF is hex FF
 C
-      integer iof,idumm1,ib2as,ichmv
+      integer iof,idumm1,ib2as,ichmv,ichmv_ch
       integer*2 ixx
 C
       iof=min(abs(iposn),3999)    !limit offset to 3999
@@ -40,7 +40,7 @@ C
       idumm1 = ichmv(ibuf, 1,ixx ,1,2)
       idumm1 = ichmv(ibuf, 3,ibuf,5,2)
       idumm1 = ichmv(ibuf, 9,ibuf,7,2)
-      idumm1 = ichmv(ibuf,11,2Hff,1,2)
+      idumm1 = ichmv_ch(ibuf,11,'ff')
 C
       return
       end

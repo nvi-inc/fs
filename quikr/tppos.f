@@ -61,11 +61,11 @@ C
         goto 990
       endif
       if (cjchar(ibuf,ieq+1).eq.'?') then
-        nch = ichmv(ibuf,ieq,2h/ ,1,1)
+        nch = ichmv_ch(ibuf,ieq,'/')
         nch = nch + ib2as(iftgo,ibuf,nch,o'40000'+o'400'*5+5)
         iclass = 0
         nch = nch - 1
-        call put_buf(iclass,ibuf,-nch,2hfs,0)
+        call put_buf(iclass,ibuf,-nch,'fs','  ')
         nrec = 1
         goto 990
       endif
@@ -93,7 +93,7 @@ C
       ibuf(1) = -3
       call char2hol('tp',ibuf(2),1,2)
       iclass = 0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       call run_matcn(iclass,1)
       call rmpar(ip)
       if (ip(3).lt.0) return
@@ -142,7 +142,7 @@ C                     Add on the time difference to the present
       idumm1 = ib2as(it(4),ibuf,11,o'40000'+o'400'*2+2) 
       idumm1 = ib2as(it(3),ibuf,13,o'40000'+o'400'*2+2) 
       idumm1 = ib2as(it(2),ibuf,15,o'40000'+o'400'*2+2) 
-      idumm1 = ichmv(ibuf,17,2h..,1,1)
+      idumm1 = ichmv_ch(ibuf,17,'.')
       idumm1 = ib2as(it(1),ibuf,18,o'40000'+o'400'*2+2)
       call copin(ibuf,4)
       call copin(ibuf(3),15)

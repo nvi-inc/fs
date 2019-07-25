@@ -1,4 +1,4 @@
-void fc_mcbcn_d_(device,ierr,ip)
+void fc_mcbcn_d__(device,ierr,ip)
 char device[2];
 int *ierr;
 long ip[5];
@@ -8,7 +8,7 @@ long ip[5];
     mcbcn_d(device,ierr,ip);
     return;
 }
-void fc_mcbcn_v_(dtpi,ip)
+void fc_mcbcn_v__(dtpi,ip)
 double *dtpi;
 long ip[5];
 {
@@ -17,7 +17,7 @@ long ip[5];
     mcbcn_v(dtpi,ip);
     return;
 }
-void fc_mcbcn_r_(ip)
+void fc_mcbcn_r__(ip)
 long ip[5];
 {
     void mcbcn_r();

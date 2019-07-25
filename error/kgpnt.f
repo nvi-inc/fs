@@ -3,7 +3,6 @@
 C
       include '../include/dpi.i'
 C
-      double precision das2b
       character*(*) iibuf
       logical kuse
       real lonr,lnofr,latr,ltofr

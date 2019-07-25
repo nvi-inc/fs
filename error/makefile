@@ -2,17 +2,16 @@
 OBJECTS = error.o dppco.o dppfa.o dppin.o dppsl.o fecon.o \
 fit2.o incne.o incsm.o inine.o inism.o kgetm.o kglin.o kgpnt.o \
 kinit.o kpcon.o kpdat.o kpfit.o kplin.o kpout.o kpst.o kptri.o \
-rstat.o scaler.o unget.o unscaler.o
+rstat.o scaler.o unget.o unscaler.o kpout_ch.o
 #
-F77= gf77
-FFLAGS = -c -g
+FFLAGS = -c 
 LIBES = ../port/port.a ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a \
 ../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a \
-../fmpsee/fmpsee.a ../vis/vis.a ../rtelb/rtelb.a -lrtx
+../fmpsee/fmpsee.a ../vis/vis.a ../rtelb/rtelb.a
 #
 ../bin/error: $(OBJECTS)
-	gf77 -g -o ../bin/error $(OBJECTS) $(LIBES)
-	../setb/setb ../bin/error
+	f77  -o ../bin/error $(OBJECTS) $(LIBES)
+	strip ../bin/error
 #
 error:
 	rm -f ../bin/error

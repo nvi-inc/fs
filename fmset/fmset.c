@@ -1,6 +1,6 @@
 /* fmset.c - set formatter time when there aren't any buttons */
 
-#include <curses.h>      /* ETI curses standard I/O header file */
+#include <ncurses.h>      /* ETI curses standard I/O header file */
 #include <time.h>        /* time function definition header file */
 #include <sys/types.h>   /* data type definition header file */
 #include "../include/params.h"  /* module mnemonics */
@@ -48,6 +48,7 @@ time_t disptime;
 int    disphs;
 char   inc;
 int    flag;
+struct tm *disptm;
 
 
 setup_ids();         /* connect to shared memory segment */
@@ -74,6 +75,9 @@ if(rack & VLBA)
 /* initialize terminal settings and curses.h data structures and variables */
 initscr ();
 maindisp = newwin ( 24, 80, 0, 0 );
+cbreak();
+nodelay ( maindisp, TRUE );
+noecho ();
 clear_scrn ( maindisp, 24 );
 box ( maindisp, 0, 0 );  /* use default vertical/horizontal lines */
 
@@ -92,9 +96,8 @@ mvwaddstr( maindisp, ROW+3, 10,
  "    '.'   to set formatter time to Field System time.");
 mvwaddstr( maindisp, ROW+4, 10,
  "    <esc> to quit.");
-nodelay ( maindisp, TRUE );
-noecho ();
-leaveok ( maindisp, TRUE); /* leave cursor in place */
+
+leaveok ( maindisp, FALSE); /* leave cursor in place */
 wrefresh ( maindisp );
 
 
@@ -112,8 +115,9 @@ do 	{
            disptime++;
         }
           
-        sprintf( fmt, "%%T.%01d %%Z %%d %%b (Day %%j) %%Y",disphs/10);
-	cftime ( buffer, fmt, &disptime );
+        sprintf( fmt, "%%H:%%M:%%S.%01d %%Z %%d %%b (Day %%j) %%Y",disphs/10);
+        disptm = gmtime(&disptime);
+	strftime ( buffer, sizeof(buffer), fmt, disptm );
 	mvwaddstr( maindisp, 4, 30, buffer );
 
         disptime=fstime;
@@ -123,8 +127,9 @@ do 	{
            disptime++;
         }
           
-        sprintf( fmt, "%%T.%01d %%Z %%d %%b (Day %%j) %%Y",disphs/10);
-	cftime ( buffer, fmt, &disptime );
+        sprintf( fmt, "%%H:%%M:%%S.%01d %%Z %%d %%b (Day %%j) %%Y",disphs/10);
+        disptm = gmtime(&disptime);
+	strftime ( buffer, sizeof(buffer), fmt, disptm );
 	mvwaddstr( maindisp, 5, 30, buffer );
 
         disptime=unixtime;
@@ -134,8 +139,9 @@ do 	{
            disptime++;
         }
           
-        sprintf( fmt, "%%T.%01d %%Z %%d %%b (Day %%j) %%Y",disphs/10);
-	cftime ( buffer, fmt, &disptime );
+        sprintf( fmt, "%%H:%%M:%%S.%01d %%Z %%d %%b (Day %%j) %%Y",disphs/10);
+        disptm = gmtime(&disptime);
+	strftime ( buffer, sizeof(buffer), fmt, disptm );
 	mvwaddstr( maindisp, 6, 30, buffer );
 
 	wrefresh ( maindisp );

@@ -120,7 +120,7 @@ C
         call gtfld(ibuf,ifc,ilen,ic1,ic2)
       end do
 C
-      call ichmv(lstatn,1,8H        ,1,8)
+      call ichmv_ch(lstatn,1,'        ')
 C
       if (ic1.ne.0) call ichmv(lstatn,1,ibuf,ic1,min0(8,ic2-ic1+1))
       ierr=0
@@ -141,10 +141,10 @@ C
       logfc='log file ' // pathname(:nchar) // ' for station '
       nchar = trimlen(logfc) + 2
       call hol2char(lstatn,1,8,logfc(nchar:))
-      logf(1) = trimlen(logfc)
-      call lxwrt(logf(2),logf(1))
+      idum = trimlen(logfc)
+      call lxwrt(logf(2),idum)
       if (nintv.eq.0.or.iterm.eq.1) goto 200
-        call lxwrt(star(2),star(1))
+        call lxwrt(star(2),1)
 C
 200   continue
       return

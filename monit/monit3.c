@@ -1,4 +1,4 @@
-#include <curses.h>
+#include <ncurses.h>
 #include <string.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -15,7 +15,7 @@ main()
 
   int m3init();
   int mout3();
-  int die();
+  void die();
   unsigned rte_sleep();
 
   setup_ids();
@@ -26,7 +26,9 @@ main()
   }
 
   initscr();
+/*
   signal(SIGINT, die);
+*/
   clear();
   refresh();
 

@@ -66,7 +66,7 @@ C if we aren't there yet, see if we can adapt the speed, FAST only
 c
         if(kadapt_fs.and.abs(micdst-micnow).gt.mictol.and.ispdhd.eq.1)
      &    then
-          if(VLBA.ne.iand(drive,VLBA)) then   !make sure other head is on scale
+          if(VLBA.ne.and(drive,VLBA)) then   !make sure other head is on scale
              call vlt_head(3-ihead,vltoth,ip)
              if(ip(3).ne.0) return
              if(abs(vltoth).ge.9.989) go to 20

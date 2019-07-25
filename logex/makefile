@@ -5,17 +5,15 @@ lxprc.o lxprm.o lxscl.o lxscm.o lxskd.o\
 lxsum.o lxsze.o lxtim.o lxtyp.o lxwrt.o readl.o\
 readt.o redsk.o unpsk.o writestr.o
 #
-F77 = gf77
+FFLAGS = -c 
 #
-FFLAGS = -c -g
-#
-LIBES = ../boss/boss.a ../fslb/fslb.a ../newlb/newlb.a ../polb/polb.a\
-../lnfch/lnfch.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a \
-../fmpsee/fmpsee.a ../vis/vis.a ../rtelb/rtelb.a -lrtx
+LIBES = ../bosslb/bosslb.a ../fslb/fslb.a ../polb/polb.a ../lnfch/lnfch.a\
+../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a \
+../fmpsee/fmpsee.a ../vis/vis.a ../rtelb/rtelb.a
 #
 ../bin/logex: logex.o $(OBJECTS)
-	gf77 -g -o ../bin/logex $(OBJECTS) $(LIBES)
-	../setb/setb ../bin/logex
+	f77  -o ../bin/logex $(OBJECTS) $(LIBES)
+	strip ../bin/logex
 logex:
 	rm -f ../bin/logex
 	make

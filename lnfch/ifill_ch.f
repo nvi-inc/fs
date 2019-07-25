@@ -20,7 +20,7 @@ C Warning:
 C         Negative and zero values of IC are not support
 C         NCHAR must be non-negative
 C
-      INTEGER I,IEND
+      INTEGER I
 C
       IF(IC.LE.0.OR.NC.LT.0) THEN
 	  WRITE(6,*) ' IFILL: Illegal arguments',IC,NC

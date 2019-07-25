@@ -24,7 +24,7 @@ C
       call rmpar(ip)
       if(ip(1).ne.0) call clrcl(ip(1))
       if (ip(3).ge.0) return 
-      call logit7(idum,idum,idum,-1,ip(3),ip(4),2Hfp)
+      call logit7ic(idum,idum,idum,-1,ip(3),ip(4),'fp')
       itry=itry-1 
       if (itry.gt.0) goto 15
       goto 80020 

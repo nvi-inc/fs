@@ -64,13 +64,13 @@ C                   Scan for a tab character
 C                   If we found one, substitute the enq character
       ibuf2(1) = 9
 C                   Set up for MAT mode 9
-      idumm1 = ichmv(ibuf2(2),1,2hfm,1,2,2)
+      idumm1 = ichmv_ch(ibuf2(2),1,'fm')
 C                   Place fm mnemonics in buffer.
-      idumm1 = ichmv(ibuf2(3),1,ibuf,ifc,nchar,nch)
+      idumm1 = ichmv(ibuf2(3),1,ibuf,ifc,nch)
 C                   Move characters to output buffer starting at first
 C                   character of this message.
       nch = nch + 4
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
       nrec = nrec + 1
 C
       ierr = 0

@@ -87,7 +87,6 @@ C
       real lattim(1),latpos(1),lattmp(1) 
       real lontim(1),lonpos(1),lontmp(1) 
 C
-      double precision das2b
       logical kret
       save ifc,ilc
 C
@@ -347,5 +346,5 @@ C
      +           ndlon) 
       goto 100 
 C 
-      return
+c     return
       end 

@@ -76,7 +76,7 @@ C
 210   continue
       ich = 1+ieq
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
-      if (cjchar(parm,1).eq.',') idumm1 = ichmv(lax,1,4Hhadc,1,4)
+      if (cjchar(parm,1).eq.',') idumm1 = ichmv_ch(lax,1,'hadc')
 C                 The default is HADC
       if (cjchar(parm,1).eq.'*') idumm1 = ichmv(lax,1,laxfp,1,4)
       if (cjchar(parm,1).ne.'*'.and.cjchar(parm,1).ne.',')
@@ -162,13 +162,13 @@ C
       endif
 
       call fs_get_rack(rack)
-      if ((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
-        if (cjchar(iprm,1).eq.',') idumm1 = ichmv(ldev,1,2Hi1,1,2)
+      if ((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
+        if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'i1')
 C                      Default for MK3 and MK4 is IF1
         if(cjchar(ldev,1).eq.'i'.or.cjchar(ldev,1).eq.'v') goto 300
 
-      else if (VLBA .eq. iand(rack,VLBA)) then
-        if (cjchar(iprm,1).eq.',') idumm1 = ichmv(ldev,1,2Hia,1,2)
+      else if (VLBA .eq. and(rack,VLBA)) then
+        if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldev,1,'ia')
 C                      Default for VLBA is IA
         if ((cjchar(ldev,1).eq.'i').or.
      .      ((cjchar(ldev,1).ge.'1').and.(cjchar(ldev,1).le.'9')).or.
@@ -201,7 +201,7 @@ C
       goto 990
 C
 400   continue
-      if((rack.and.iand(rack,MK3)).or.(rack.and.iand(rack,MK4))) then
+      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
         if(cjchar(ldevfp,1).ne.'i') goto 405
         if(ichcm_ch(ldevfp,1,'i1').ne.0) goto 402
           ichain=1
@@ -276,7 +276,7 @@ C  Now check the cal and freq values.
       bmfp_fs= bm
       fxfp_fs = fx
       ichfp_fs = ichain
-      if((rack.eq.iand(rack,MK3)).or.(rack.eq.iand(rack,MK4))) then
+      if((rack.eq.and(rack,MK3)).or.(rack.eq.and(rack,MK4))) then
         if(cjchar(ldevfp,1).eq.'i') goto 504
         indvc = ia2hx(ldevfp,2)
         if(freqvc(indvc).gt.96.0.and.freqvc(indvc).lt.504.00) goto 504

@@ -7,7 +7,7 @@ C
       character*63 icbuf
       integer iwpre(200),iwfiv(200),iwonof(200),iwpeak(200),iwpos(200)
       integer*2 lset(6),lter(6),lwho
-      logical kbreak,rn_test
+      logical kbreak
 C
       include '../include/fscom.i'
       include '../include/dpi.i'
@@ -48,13 +48,13 @@ C
       call scmd(lcpre(1,i),iwpre(i),mprc,ierr)
       if (ierr.ne.0) goto 10010
 C
-      call sctl(6Hfivept,6,6Hfivpt ,iwfiv(i),ierr)
+      call sctl('fivept','fivpt',iwfiv(i),ierr)
       if (ierr.ne.0) goto 10010
 C
-      call sctl(6Honoff ,5,6Honoff ,iwonof(i),ierr)
+      call sctl('onoff','onoff',iwonof(i),ierr)
       if (ierr.ne.0) goto 10010
 C
-      call sctl(6Hpeakf ,5,6Hpeakf ,iwpeak(i),ierr)
+      call sctl('peakf','peakf',iwpeak(i),ierr)
       if (ierr.ne.0) goto 10010
 C
       call scmd(lcpos(1,i),iwpos(i),mprc,ierr)
@@ -72,12 +72,12 @@ C
 10010 continue
       if(ierr.eq.-2) goto 11000     !fs is gone
       if (ierr.gt.-2) goto 10015
-      call logit7(idum,idum,idum,-1,ierr,lwho,2Her)
+      call logit7ic(idum,idum,idum,-1,ierr,lwho,'er')
       goto 11000
 C
 10015 continue
       call scmd(lter,iwter,mprc,jerr)
-      call logit7(idum,idum,idum,-1,ierr,lwho,2Hbr)
+      call logit7ic(idum,idum,idum,-1,ierr,lwho,'br')
       goto 11000
 C
 10020 continue

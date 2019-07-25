@@ -15,7 +15,6 @@ C  LOCAL VARIABLES:
 C 
 C     TIMTOL - tolerance on comparison between formatter and HP 
       integer inerr(11)
-      integer*4 offset, index
       logical kalarm
 C      - true for alarm ON, i.e. NAK response from MAT
       integer*2 ibuf1(40),ibuf2(5)

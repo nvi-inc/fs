@@ -7,7 +7,7 @@ C     outputting the appropriate 2-character mnemonic.
 C 
 C  INPUT: 
 C 
-      dimension lnam(1) 
+      integer*2 lnam(1) 
 C          - module name to be parsed 
       integer ifc,ilc
 C          - ifc  first character position
@@ -22,8 +22,6 @@ C
       character*80 cicr
       character    cic2
       integer*2  ic2
-      integer*2 icr(4)
-C          - array of individual characters in LNAM 
 C     NC - character position in LNAM 
 C     IC2 - 2nd character of mnemonic 
 C 
@@ -99,7 +97,7 @@ C  Handle VC's
 
       if (cicr(3:3).eq.' ') then
         if ((cicr(2:2).ge.'1'.and.cicr(2:2).le.'9').or.(cicr(2:2).ge.'a'
-     ..and.cicr(2:2).le.'f')) mdnam=lnam(1) 
+     ..and.cicr(2:2).le.'f')) call ichmv(mdnam,1,lnam(1),1,2)
         goto 900 
       endif
       nc=2

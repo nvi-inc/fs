@@ -8,7 +8,7 @@ C
 C DOUBLE PRECESION VERSION OF LINPACK SPPSL ROUTINE WITH
 C DIRECT CALLS TO THE HP VECTOR INSTRUCTION SET
 C
-      integer k,kb
+      integer k
       integer kk
       double precision t
 C

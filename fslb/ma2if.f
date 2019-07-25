@@ -38,9 +38,9 @@ C                   a1= atten. 1 (2 bits first char., other 4 in second)
 C                   a2= atten. 2 (2 bits first char., other 4 in second)
 C
 C
-      iat1 = 16*iand(ia2hx(ibuf1,9),3) + ia2hx(ibuf1,10)
+      iat1 = 16*and(ia2hx(ibuf1,9),3) + ia2hx(ibuf1,10)
 C  Atten: upper 2 bits from char 9, lower 4 from char 10
-      iat2 = 16*iand(ia2hx(ibuf1,7),3) + ia2hx(ibuf1,8)
+      iat2 = 16*and(ia2hx(ibuf1,7),3) + ia2hx(ibuf1,8)
       inp1 = ia2hx(ibuf1,6)/8
       inp2 = ia2hx(ibuf1,5)/8
       irem = ia2hx(ibuf1,3)/8

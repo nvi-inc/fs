@@ -118,7 +118,7 @@ C                   Pick up frequency, real number
       else
         ifr = ifix(freq)
         idumm1 = ib2as(ifr,lfr,1,o'41400'+3)
-        idumm1 = ichmv(lfr,4,2h. ,1,1)
+        idumm1 = ichmv_ch(lfr,4,'.')
         idumm1 = ib2as(ifix((freq-ifr+.001)*100.0),lfr,5,o'41000'+2)
       endif
 C 
@@ -198,7 +198,7 @@ C     FREQVC(IVCN) = DAS2B(LFREQV(1,IVCN),1,6,IERR)
       iatlvc(ivcn) = ia(2)
 C 
       iclass=0
-      call put_buf(iclass,ibuf,-12,2hfs,0)
+      call put_buf(iclass,ibuf,-12,'fs','  ')
       nrec = 1
       goto 800
 C 
@@ -211,7 +211,7 @@ C
       iclass = 0
       do i=1,2
         ibuf(1) = -i
-        call put_buf(iclass,ibuf,-4,2hfs,0)
+        call put_buf(iclass,ibuf,-4,'fs','  ')
       enddo
       nrec = 2
       goto 800
@@ -222,7 +222,7 @@ C
 600   ibuf(1) = 6 
       ibuf(2) = lhex(ivcn)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
       goto 800
 C
@@ -232,7 +232,7 @@ C
 700   ibuf(1) = 7
       ibuf(2) = lhex(ivcn)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
       goto 800
 C

@@ -41,7 +41,7 @@ C     NCH - character counter
 C     ILOG - actual length of response from data buffer
 C     ICHEK, JCHEK - checksum characters
       equivalence (ireg(1),reg)
-      data nloopt/5/
+c     data nloopt/5/
 C     NLOOPT - max number of times to try and get correct response
 C              from data buffer.
 C
@@ -82,7 +82,8 @@ C                   Issue binary read, buffer mode
       l = ih22a(jchar(idata,516))
       if (ibugpc.gt.2) write(luop,9509) (idata(248+k),k=1,10)
 9509  format(1x,"last 10 words idata = "10(o7,2x)) 
-      if (ireg(2).eq.515.and.l.eq.2h20) ireg(2)=516 
+c     if (ireg(2).eq.515.and.l.eq.2h20) ireg(2)=516 
+      if (ireg(2).eq.515.and.jchar(idata,516).eq.z'20') ireg(2)=516 
       if (ierr.eq.0.and.ilog.ne.-1) goto 100
       if (ierr.ne.0) write(luop,9120) ierr
       if (ilog.eq.-1) write(luop,9220)
@@ -111,7 +112,7 @@ C
       ichek = jchar(idata,ilog) 
       jchek = 0 
       do i=1,ilog-1 
-        jchek = iand(jchek+jchar(idata,i),o'377') 
+        jchek = and(jchek+jchar(idata,i),o'377') 
       enddo
       if (ichek.ne.jchek) ierr=-2 
 C 

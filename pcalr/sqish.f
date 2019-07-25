@@ -15,7 +15,7 @@ c*FIRST BYTE IN JW IS BYTE #1.
 c* 
 c*NOTE!!!--IWBIT,JWBYT,IPERR MAY BE MODIFIED ON RETURN!!!! 
 c
-      integer ibyte,ibit,icount,jbyte,jchar,out,byte
+      integer ibyte,ibit,icount,jchar,out,byte,jibits
 c
 c  our caller numbers bit 1 as most signifcant       
 c                     and byte 1 as first
@@ -38,7 +38,7 @@ c
 c store what we have so far
 c
 10    continue
-      call mvbits(byte,0,9-ibit,out,ibit-1)
+      call jmvbits(byte,0,9-ibit,out,ibit-1)
 c      
 c get next byte
 c
@@ -47,7 +47,7 @@ c
 c      
 c store what we need
 c
-      if(ibit.ne.1) call mvbits(byte,9-ibit,ibit-1,out,0)
+      if(ibit.ne.1) call jmvbits(byte,9-ibit,ibit-1,out,0)
 c      
 c put output byte in array
 c
@@ -56,7 +56,7 @@ c
 c
 c  check parity, if even, it's an error
 c
-      if(mod(table(1+out)+ibits(byte,8-ibit,1),2).eq.0) iperr=iperr+1
+      if(mod(table(1+out)+jibits(byte,8-ibit,1),2).eq.0) iperr=iperr+1
 c      
 c  check loop count
 c

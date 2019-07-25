@@ -6,7 +6,7 @@ C TO UNIX EQUIV. (UPPER/LOWER)
 
       implicit none
       integer*2 iar(1)
-      integer F2,i
+      integer F2,i,jishft
       data F2/Z'FF'/
 C
       jchar=iar((i+1)/2)
@@ -17,8 +17,8 @@ C      JCHAR=IAND(JCHAR,F2)
 c 900808 put char in DOS higher (RIGHT) bit - lower position
 C storage: odd position on right bit, even position on left bit
 
-      if(mod(i,2).eq.0) jchar=ishft(jchar,-8)
-      jchar=iand(jchar,F2)
+      if(mod(i,2).eq.0) jchar=jishft(jchar,-8)
+      jchar=and(jchar,F2)
 
       return
       end

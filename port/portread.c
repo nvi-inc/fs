@@ -1,4 +1,4 @@
-#include <termio.h>
+#include <termios.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/times.h>
@@ -20,9 +20,11 @@ unsigned char *buff;   /* hollerith */
   and portopen for details
 */
 {
+  unsigned long unsl;
   unsigned char inch;
   struct tms tms_buff;
   long end;
+  int iret;
 
   if( *maxc<=0)                /* no buffer extent */
     return -1;
@@ -31,30 +33,25 @@ unsigned char *buff;   /* hollerith */
   *count=-1;
   inch=-1;
 
+  portdelay(*port,0,(*to+9)/10);
+
 /* loop on count and terminating charcater */
 
-  while( ++*count <*maxc && (*termch<0 || *termch != inch) ) {
+  while( ++*count <*maxc && (*termch<0 || *termch != inch)) {
 
-/* check for time-outs */
-
-    if(end>0) {                                 
-      while( end-times(&tms_buff)>0 && ioctl(*port,FIORDCHK,NULL) == 0) 
-         rte_sleep( (unsigned) 1);
-
-/* if we timed-out, but there are still characters on the input queue */
-/* it might not be the device's fault it timed-out, we might have been */
-/* delayed by a busy system, so we won't give-up until the queue is empty */
-
-      if( end-times(&tms_buff)<=0  && ioctl(*port,FIORDCHK,NULL) == 0)
-         return -2;                 /* that's it: time-out */
+    iret=0;
+    while (iret == 0 ) {
+      iret=read(*port,&inch,1);
+      if (iret == 1)
+        break;
+      else if (end > 0 && end-times(&tms_buff) <= 0)
+        return -2;                    /* time-out */
+      else if(iret == -1)
+        return -3;                    /* read error */
     }
-    if(read(*port,&inch,1)!=1)
-      return -3;                    /* read error */
     *(buff)++=inch;
   }
-/*
-  *to=times(&tms_buff)-(end-*to-1);
-*/
+/*   printf(" to %d actual %d\n",*to,times(&tms_buff)-(end-*to-1));*/
   return 0;
 
 }

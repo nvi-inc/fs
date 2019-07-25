@@ -82,7 +82,7 @@ C
 C        - Contains the schedule source name.
 C
       integer*2 lsum(25), lrun(39), lnewsn
-      integer star(2)
+      integer*2 star(2)
       integer ilsft,ileft
 C
 C     data lsum/48,'*summary of                  for                '/
@@ -163,10 +163,14 @@ C
 200   continue 
       call ichmv(lsum(2),13,logna,1,16)
       call ichmv(lsum(2),34,lstatn,1,8)
-      call lxwrt(lsum(2),lsum(1))
-      call lxwrt(star(2),star(1))
-      call lxwrt(lrun(2),lrun(1))
-      call lxwrt(star(2),star(1))
+      idum=lsum(1)
+      call lxwrt(lsum(2),idum)
+      idum=star(1)
+      call lxwrt(star(2),idum)
+      idum=lrun(1)
+      call lxwrt(lrun(2),idum)
+      idum=star(1)
+      call lxwrt(star(2),idum)
       call char2hol(' ',l6,1,1)
 300   continue 
       if (ikey.eq.9) goto 400

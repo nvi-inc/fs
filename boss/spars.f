@@ -233,7 +233,7 @@ C
         goto 999
       endif
 C
-      call put_buf(iclass,lbuf,-nchar,2Hfs,0)
+      call put_buf(iclass,lbuf,-nchar,'fs','  ')
 C
 C  3.3 TIME LIST SECTION, CHARACTERS FOLLOWING THE @.
 C

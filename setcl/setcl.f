@@ -29,7 +29,6 @@ C
       integer it(6),get_buf, ireg(2), fc_rte_sett
       integer*4 centisec(2),centiavg,secs_fm,secs_fs,centifs
       integer*4 centidiff,diff
-      character*80 cbuf
       character*63 name
       character*6 model
       character*10 set
@@ -102,7 +101,7 @@ c
 50    continue
       iclasm = 0
       nrec = 0
-      if (VLBA.eq.iand(rack,VLBA)) then
+      if (VLBA.eq.and(rack,VLBA)) then
         idum=rn_take('fsctl',0)
         call fc_get_vtime(centisec,it,ip)
         call rn_put('fsctl')
@@ -113,25 +112,25 @@ c
            goto 998
         endif
         goto 200
-      else if (MK4.eq.iand(rack,MK4)) then
+      else if (MK4.eq.and(rack,MK4)) then
         ibuf(1) = -54
-        idum = ichmv(ibuf,3,2Hfm,1,2)
-        idum = ichmv(ibuf,5,4H/TIM,1,4)
+        idum = ichmv_ch(ibuf,3,'fm')
+        idum = ichmv_ch(ibuf,5,'/TIM')
 C                   Place MAT address and command for the formatter 
 C                   into buffer
         nch = 8
         nrec = nrec + 1
-        call put_buf(iclasm,ibuf,-nch,2hfs,0)
+        call put_buf(iclasm,ibuf,-nch,'fs','  ')
 C             two return buffers with imode = -54
       else    ! Mark III formatter
         ibuf(1) = -53
         call char2hol('fm',ibuf(2),1,2)
         nrec = nrec + 1
-        call put_buf(iclasm,ibuf,-4,2Hfs,0)  
+        call put_buf(iclasm,ibuf,-4,'fs','  ')  
 C             two return buffers with imode = -53
         ibuf(1) = -4
         nrec = nrec + 1
-        call put_buf(iclasm,ibuf,-4,2Hfs,0)
+        call put_buf(iclasm,ibuf,-4,'fs','  ')
       endif
 C
       idum=rn_take('fsctl',0)
@@ -146,7 +145,7 @@ C
       else if (iclass.ne.0.and.ncrec.eq.nrec+1) then
         goto 198
       else
-        call logit7(idum,idum,idum,-1,-1,2hsc,0)
+        call logit7ci(idum,idum,idum,-1,-1,'sc',0)
       endif
 C
       if (iclass.ne.0.and.ncrec.ne.0) then
@@ -167,14 +166,14 @@ C     The message we are formatting for the system is:
 C         TM,yyyy,ddd,hh,mm,ss
 C
 198   continue
-      if (MK3.eq.iand(rack,MK3)) then
+      if (MK3.eq.and(rack,MK3)) then
         call ifill_ch(ibuft,1,20,' ')
         call ifill_ch(ibuf ,1,20,' ')
         ireg(2) = get_buf(iclass,ibuft,-20,idum,idum)
         ireg(2) = get_buf(iclass,centisec,-8,idum,idum)
         ireg(2) = get_buf(iclass,ibuf,-20,idum,idum)
 c
-        nch = ichmv(ibuf2,1,3Htm,,1,3)
+        nch = ichmv_ch(ibuf2,1,'tm,')
         nch = nch+ib2as(iyrctl_fs/10,ibuf2,nch,3)
         nch = ichmv(ibuf2,nch,ibuf,4,1)
 C                   The last digit of the year
@@ -239,7 +238,7 @@ C
 200   continue
       call fc_rte2secs(it,secs_fm)
       if(secs_fm.lt.0.or.it(1).lt.0) then
-        call logit7(idum,idum,idum,-1,-2,2hsc,0)
+        call logit7ci(idum,idum,idum,-1,-2,'sc',0)
         nerr=nerr+1
         if(nerr.gt.2) goto 998
         goto 50
@@ -253,7 +252,7 @@ c
       centifs=centiavg
       call fc_rte_fixt(secs_fs,centifs)
       if (abs(secs_fs-secs_fm).gt.86400*14) then
-         call logit7(idum,idum,idum,-1,-4,2hsc,0)
+         call logit7ci(idum,idum,idum,-1,-4,'sc',0)
         goto 999
       endif
       diff=(secs_fm-secs_fs)*100+it(1)-centifs
@@ -261,7 +260,7 @@ c
       call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
      &                       rateti_fs,spanti_fs,modelti_fs)
 c
-      inxtc=ichmv(ibuf,1,6Htime/ ,1,5)
+      inxtc=ichmv_ch(ibuf,1,'time/')
       inxtc=inxtc+ib2as(centiavg,ibuf,inxtc,o'100000'+12)
       inxtc = mcoma(ibuf,inxtc)
       inxtc=inxtc+ib2as(centidiff,ibuf,inxtc,o'100000'+12)
@@ -275,7 +274,7 @@ c
       inxtc=inxtc+ib2as(it(3),ibuf,inxtc,o'40000'+o'400'*2+2)
       inxtc = mcoma(ibuf,inxtc)
       inxtc=inxtc+ib2as(it(2),ibuf,inxtc,o'40000'+o'400'*2+2)
-      inxtc=ichmv(ibuf,inxtc,2h..,1,1)
+      inxtc=ichmv_ch(ibuf,inxtc,'.')
       inxtc=inxtc+ib2as(it(1),ibuf,inxtc,o'40000'+o'400'*2+2)
       inxtc = mcoma(ibuf,inxtc)
       if (epochti_fs.eq.0.or.set.eq.'offset') then
@@ -295,7 +294,7 @@ c    &     (rateti_fs+(float(diff)/(centiavg-epochti_fs)))*86400.
       inxtc=inxtc+ib2as(diff,ibuf,inxtc,o'100000'+12)
       call logit2(ibuf,inxtc-1)
 c
-      inxtc=ichmv(ibuf,1,10Hmodel/old,,1,10)
+      inxtc=ichmv_ch(ibuf,1,'model/old,')
       inxtc=inxtc+ib2as(secsoffti_fs,ibuf,inxtc,o'100000'+12)
       inxtc = mcoma(ibuf,inxtc)
       inxtc=inxtc+ib2as(offsetti_fs,ibuf,inxtc,o'100000'+12)
@@ -307,18 +306,18 @@ c
       inxtc=inxtc+ir2as(spanti_fs/3600e2,ibuf,inxtc,8,3)
       inxtc = mcoma(ibuf,inxtc)
       if(cjchar(modelti_fs,1).eq.'r') then
-        inxtc = ichmv(ibuf,inxtc,4hrate,1,4)
+        inxtc = ichmv_ch(ibuf,inxtc,'rate')
       else if(cjchar(modelti_fs,1).eq.'o') then
-        inxtc = ichmv(ibuf,inxtc,6hoffset,1,6)
+        inxtc = ichmv_ch(ibuf,inxtc,'offset')
       else
-        inxtc = ichmv(ibuf,inxtc,4hnone,1,4)
+        inxtc = ichmv_ch(ibuf,inxtc,'none')
       endif
       call logit2(ibuf,inxtc-1)
 c
       if(set.eq.'cpu') then
         ierr=fc_rte_sett(secs_fm,it(1),centiavg,'cpu'//char(0))
         if (ierr.ne.0) then
-          call logit7(idum,idum,idum,-1,-3,2hsc,0)
+          call logit7ci(idum,idum,idum,-1,-3,'sc',0)
           nerr = nerr+1
           if (nerr.gt.2) goto 998
           goto 50
@@ -335,7 +334,7 @@ c
      &                   set(:max(trimlen(set),1))//char(0))
         call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
      &                       rateti_fs,spanti_fs,modelti_fs)
-        inxtc=ichmv(ibuf,1,10Hmodel/new,,1,10)
+        inxtc=ichmv_ch(ibuf,1,'model/new,')
         inxtc=inxtc+ib2as(secsoffti_fs,ibuf,inxtc,o'100000'+12)
         inxtc = mcoma(ibuf,inxtc)
         inxtc=inxtc+ib2as(offsetti_fs,ibuf,inxtc,o'100000'+12)
@@ -347,11 +346,11 @@ c
         inxtc=inxtc+ir2as(spanti_fs/3600e2,ibuf,inxtc,8,3)
         inxtc = mcoma(ibuf,inxtc)
         if(cjchar(modelti_fs,1).eq.'r') then
-          inxtc = ichmv(ibuf,inxtc,4hrate,1,4)
+          inxtc = ichmv_ch(ibuf,inxtc,'rate')
         else if(cjchar(modelti_fs,1).eq.'o') then
-          inxtc = ichmv(ibuf,inxtc,6hoffset,1,6)
+          inxtc = ichmv_ch(ibuf,inxtc,'offset')
         else
-          inxtc = ichmv(ibuf,inxtc,4hnone,1,4)
+          inxtc = ichmv_ch(ibuf,inxtc,'none')
         endif
         call logit2(ibuf,inxtc-1)
 c
@@ -359,6 +358,6 @@ c
       goto 999
 C
 998   continue
-      call logit7(idum,idum,idum,-1,-10,2hsc,0)
+      call logit7ci(idum,idum,idum,-1,-10,'sc',0)
 999   continue
       end

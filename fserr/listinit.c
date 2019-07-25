@@ -15,18 +15,15 @@
 /*  gag  920917  Created.                                          */
 /*                                                                 */
 
-void listinit(tdcb,list)
-
-int tdcb;
-
-struct errorlist{
+struct errorlst{
   char mnemonic[2];
   int ierr;
   char message[120];
 };
 
-struct errorlist list[MAXERRORS];
-
+void listinit(tdcb,list)
+FILE *tdcb;
+struct errorlst list[MAXERRORS];
 {
 
   int hashcount;
@@ -35,7 +32,6 @@ struct errorlist list[MAXERRORS];
   char dquote[2];
   int errnum;
   char buffer[MAXSTR];
-  int sscanf();
   int err;
 
   struct {

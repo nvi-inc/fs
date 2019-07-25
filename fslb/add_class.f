@@ -15,7 +15,7 @@ C  OUTPUT:
 C     ICLASS: new class # if 0 on entry
 C     NREC: input NREC incremented by 1, new number of class records
 C
-      call put_buf(iclass,ibuf,nch,2Hfs,0)
+      call put_buf(iclass,ibuf,nch,'fs','  ')
       nrec = nrec+1
       return
       end

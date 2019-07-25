@@ -6,10 +6,10 @@
 * xxx  910319 Created at GILCREEK
 *
 * Write Heads  Read Heads  Reproduce: Electronics  Detector
-      ALL        ODD                      ODD        ODD
+      all        odd                      odd        odd
 *
 *  Positioning  Slow  Osc (MHz)  A/D Tol. (counts)
-     ADAPTIVE  NO      5.0000       1
+     adaptive  no      5.0000       1
 *
 * Write    Read
   200.0   200.0   Fast Out Inchworm Speed (microns/sec)

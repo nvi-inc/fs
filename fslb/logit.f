@@ -41,7 +41,8 @@ C     NCH - character counter in IBUF
       integer*2 ibuf(60)
 C      - buffer in which log entry is formatted 
 C     NARGS - number of arguments passed to us
-C     IOPT2 - sent as optional parameter 2 on the class I/O.
+      character*2 copt2
+C     IOPT2/COPT2 - sent as optional parameter 2 on the class I/O.
 C             "B1" appends a bell to the terminal display,
 C                  normally used for error messages.
 C 
@@ -53,8 +54,9 @@ C     1. Get the number of parameters we were sent.
 C     Set up the class I/O option.
 C 
       iopt2 = 0 
+      copt2 =' '
       if (nargs.gt.5) then
-        if (ierr.lt.0) call char2hol('b1',iopt2,1,2)
+        if (ierr.lt.0) copt2='b1'
       endif
       if (nargs.eq.5) then
         iopt2 = ierr
@@ -81,12 +83,16 @@ C
 C     4. The buffer is formatted.  Pad with a blank for disk writing
 C     purposes and put it into the mailbox.  That's all we do.
 C 
-      nch = ichmv(ibuf,nch,2H  ,1,1)-2
+      nch = ichmv_ch(ibuf,nch,' ')-2
 C                   Pad with a blank
       call ifill_ch(ibuf,nch+1,120-nch,' ')
 c
       call fs_get_iclbox(iclbox)
-      call put_buf(iclbox,ibuf,-nch,2hfs,iopt2) 
+      if(nargs.eq.5) then
+        call put_bufi(iclbox,ibuf,-nch,'fs',iopt2) 
+      else
+        call put_buf(iclbox,ibuf,-nch,'fs',copt2) 
+      endif
 C 
       return
       end 

@@ -15,14 +15,14 @@
 /*  gag  920917  Created.                                          */
 /*                                                                 */
 
+struct entrystruc{
+  char buf[2];
+  int off;
+};
+
 void hashcode(entry, hash)
-
-  struct{
-    char buf[2];
-    int off;
-  } *entry;
-
-  long *hash;
+struct entrystruc *entry;
+long *hash;
 
 {
   int i;

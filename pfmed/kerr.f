@@ -12,7 +12,6 @@ C  INPUT VARIABLES
 C
 C  LOCAL VARIABLES
 C
-      integer trimlen
 C
       kerr=.false.
       if(ierr.eq.0) return

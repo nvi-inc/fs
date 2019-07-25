@@ -1,4 +1,4 @@
-void fc_chmod_(filename,permissions,ilen,error,flen)
+void fc_chmod__(filename,permissions,ilen,error,flen)
 char *filename;
 int *permissions;
 int *ilen;

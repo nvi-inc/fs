@@ -27,7 +27,7 @@ C
       if (len.gt.0) then
         if(mod(len,2).eq.1) then
           len=len+1
-          idum=ichmv(jbuf,len,2H  ,1,1)
+          idum=ichmv_ch(jbuf,len,' ')
         endif
       endif
       if (len.lt.0) return

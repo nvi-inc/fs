@@ -30,18 +30,18 @@ C
         return                              !  string was probably truncated.
       endif
 C
-      icheck = iand((16*i16)+i1,z'FF')
+      icheck = and((16*i16)+i1,z'FF')
 C
 C 2. Add up all previous bytes and compare to value obtained above.
 C
       isum = 0
       nwords = (nchar-4)/2
       do i=1,nwords
-        lbyte = iand(bufr(i),z'FF')
+        lbyte = and(bufr(i),z'FF')
         if (lbyte.eq.z'0D') lbyte=0
-        mbyte = ishft(bufr(i),-8)
+        mbyte = rshift(bufr(i),8)
         if (mbyte.eq.z'0D') mbyte=0
-        isum = iand(lbyte+mbyte+isum,z'FF')
+        isum = and(lbyte+mbyte+isum,z'FF')
       end do
 
       cksum = (isum.eq.icheck)

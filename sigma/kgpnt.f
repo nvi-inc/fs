@@ -1,7 +1,6 @@
       logical function kgpnt(lu,idcb,kuse,lonr,latr,lnofr,ltofr,len,inp,
      + iibuf,jbuf,il)
 C
-      double precision das2b
       real lonr,lnofr,latr,ltofr
       dimension idcb(1)
       integer*2 jbuf(1)

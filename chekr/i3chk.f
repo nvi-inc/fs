@@ -19,13 +19,13 @@ C  LOCAL VARIABLES:
       integer inerr(ni3err)
 C 
       integer*4 ip(5)             ! - for RMPAR
-      integer*2 ibuf1(40),ibuf2(5),ibuf3(5)
+      integer*2 ibuf1(40),ibuf2(5)
       parameter (ibuf1len=40)
       parameter (ibuf2len=5)
 C      - Arrays for recording identified error conditions
       integer ireg(2),isw(4)
       integer*4 freq
-      logical kalarm
+      logical kalarm,kbit
       integer rn_take
 C
 C  INITIALIZED:
@@ -37,12 +37,12 @@ c
       call char2hol('i3',ibuf1(2),1,2)
       iclass = 0
       ibuf1(1)=-1
-      call put_buf(iclass,ibuf1,-4,2Hfs,0)
+      call put_buf(iclass,ibuf1,-4,'fs','  ')
       ibuf1(1)=-2
-      call put_buf(iclass,ibuf1,-4,2Hfs,0)
+      call put_buf(iclass,ibuf1,-4,'fs','  ')
       ibuf1(1)=8
       call char2hol(''' ',ibuf1(3),1,1)
-      call put_buf(iclass,ibuf1,-5,2Hfs,0)
+      call put_buf(iclass,ibuf1,-5,'fs','  ')
 C
       ierr=rn_take('fsctl',0)
       call run_matcn(iclass,3)
@@ -53,7 +53,7 @@ C
 C
       if (ierr.lt.0) then
         call clrcl(iclass)
-        call logit7(0,0,0,0,ierr,lwho,2Hi3)
+        call logit7ic(0,0,0,0,ierr,lwho,'i3')
         goto 880
       endif
       ireg(2) = get_buf(iclass,ibuf1,-10,idum,idum)
@@ -86,7 +86,7 @@ C
       call fs_get_icheck(icheck(21),21)
       if(icheck(21).le.0.or.ichecks(21).ne.icheck(21)) goto 880
       if(inerr(1).ne.0) then
-        call logit7(0,0,0,0,-361,lwho,2hi3)
+        call logit7ic(0,0,0,0,-361,lwho,'i3')
         goto 880
       endif
       nerr=0
@@ -94,12 +94,12 @@ C
         if(inerr(j).gt.0) nerr=nerr+1
       enddo
       if(nerr.gt.(ni3err-4+iswc)/2) then
-        call logit7(0,0,0,0,-360,lwho,2hi3)
+        call logit7ic(0,0,0,0,-360,lwho,'i3')
         goto 880
       endif
       do j=2,ni3err
         if(inerr(j).gt.0)
-     .  call logit7(0,0,0,0,-360-j,lwho,2hi3)
+     .  call logit7ic(0,0,0,0,-360-j,lwho,'i3')
       enddo
 880   continue
 C

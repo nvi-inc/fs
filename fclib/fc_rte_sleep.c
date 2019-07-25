@@ -1,4 +1,4 @@
-int fc_rte_sleep_( centisec)
+int fc_rte_sleep__( centisec)
 int *centisec;
 {
     unsigned rte_sleep();

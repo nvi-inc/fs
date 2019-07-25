@@ -1,4 +1,4 @@
-void fc_skd_clr_( name, len)
+void fc_skd_clr__( name, len)
 char name[5];
 int len;
 {

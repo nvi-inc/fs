@@ -11,7 +11,7 @@ C
       integer rn_take
       integer*4 ip(5)
       integer*2 lbuf(40)
-      integer*2 lwho
+      integer*2 lwho,i10blnks
       dimension it(6)
 C 
       include '../include/fscom.i'
@@ -34,6 +34,7 @@ C
 C
 C  GET RID OF ANY BREAKS THAT WERE HANGING AROUND
 C
+      call char2hol(' ',i10blnks,1,10)
       call putpname('onoff')
       call setup_fscom
       call read_fscom
@@ -45,7 +46,7 @@ C
       ierr=0
       kon=.false.
       if(0.ne.rn_take('onoff',1)) then
-        call logit7(idum,idum,idum,-2,ierr,lwho,2Her)
+        call logit7ic(idum,idum,idum,-2,ierr,lwho,'er')
         goto 1
       endif
       call read_quikr
@@ -96,7 +97,7 @@ c
 c lock the bbcs we are using to MAN gain mode
 c
       call fs_get_rack(rack)
-      if(VLBA.eq.iand(rack,VLBA)) then
+      if(VLBA.eq.and(rack,VLBA)) then
         call fc_mcbcn_d2(ldv1nf,ldv2nf,ierr,ip)
         if(ierr.ne.0) then
           ierr=-81
@@ -111,11 +112,11 @@ c
 C 
 C MAKE SURE THE CAL IS OFF
 C 
-      call scmds(8Hcaloffnf,8)  
+      call scmds('caloffnf',1)  
 C 
 C  REMEMBER WHERE WE ARE
 C 
-      call local(az,el,4hazel,ierr) 
+      call local(az,el,'azel',ierr) 
       if(ierr.ne.0) goto 80010 
       cosel=cos(el) 
 C 
@@ -136,7 +137,7 @@ C   2.ON SOURCE POINT
 C 
       call vlts2(vons,sigons,tmons,intpnf,rut,ierr) 
       if(ierr.ne.0) goto 80010 
-      call dpnt2(4Hon  ,4,i,tmons,0.0,0.0,vons,sigons,intpnf,lbuf,isbuf)
+      call dpnt2('on  ',i,tmons,0.0,0.0,vons,sigons,intpnf,lbuf,isbuf)
 C 
       isgn=-isgn
       if(el.gt.ctofnf) goto 20 
@@ -149,26 +150,26 @@ C
       estep=isgn*bw*stepnf
 C 
 30    continue
-      call gooff(azosav+astep,elosav+estep,4Hazel,nwait,ierr) 
+      call gooff(azosav+astep,elosav+estep,'azel',nwait,ierr) 
       if(ierr.ne.0) goto 80010
 C
       call vlts2(vofs,sigofs,tmofs,intpnf,rut,ierr)
       if(ierr.ne.0) goto 80010
-      call dpnt2(4Hoff ,4,i,tmofs,astep,estep,vofs,sigofs,intpnf,lbuf,
+      call dpnt2('off ',i,tmofs,astep,estep,vofs,sigofs,intpnf,lbuf,
      +           isbuf)
 C
 C       TURN CAL ON
 C
-      call scmds(8Hcalonnf ,7)
+      call scmds('calonnf',1)
       call vlts2(vcal,sigcal,tmcal,intpnf,rut,ierr)
       if(ierr.ne.0) goto 80010
 C
-      call dpnt2(4Hcal ,4,i,tmcal,astep,estep,vcal,sigcal,intpnf,lbuf,
+      call dpnt2('cal ',i,tmcal,astep,estep,vcal,sigcal,intpnf,lbuf,
      +            isbuf)
 C
 C  TURN CAL OFF
 C
-      call scmds(8Hcaloffnf,8)
+      call scmds('caloffnf',1)
 C
       dtemp1=cal1nf*((vons(1)-vofs(1))/(vcal(1)-vofs(1)))
       dtemp2=cal2nf*((vons(2)-vofs(2))/(vcal(2)-vofs(2)))
@@ -182,7 +183,7 @@ C
       if(i.gt.1) goto 9
       call tzer(vzer,sigzer,tmzer,intpnf,rut,ierr)
       if(ierr.ne.0) goto 80010
-      call dpnt2(4Hzero,4,i,tmzer,astep,estep,vzer,sigzer,intpnf,
+      call dpnt2('zero',i,tmzer,astep,estep,vzer,sigzer,intpnf,
      +           lbuf,isbuf)
 C
 9     continue
@@ -192,14 +193,14 @@ C
       tsyav2 =(tsyav2*dim1+dtemp2)*dri
       tsysi1 =(tsysi1*dim1+dtemp1*dtemp1)*dri 
       tsysi2 =(tsysi2*dim1+dtemp2*dtemp2)*dri 
-      call gooff(azosav,elosav,4Hazel,nwait,ierr) 
+      call gooff(azosav,elosav,'azel',nwait,ierr) 
       if(ierr.ne.0) goto 80010 
 C 
 C    LOOP BACK FOR MORE REPITIONS 
 C
 10    continue
 C
-      call local(az2,el2,4Hazel,ierr)
+      call local(az2,el2,'azel',ierr)
       if(ierr.ne.0) goto 80010
       if(az2.gt.RPI*1.5.and.az .lt.RPI*.5) az2=az2-2.*RPI
       if(az .gt.RPI*1.5.and.az2.lt.RPI*.5) az =az -2.*RPI
@@ -225,21 +226,21 @@ C
       savg2=tsyav2
       ssig1=tsysi1
       ssig2=tsysi2
-      call reslt(8Htsys    ,7,10H          ,10,az,el,savg1,savg2,ssig1,
+      call reslt('tsys   ',i10blnks,10,az,el,savg1,savg2,ssig1,
      +           ssig2,nrepnf,lbuf,isbuf)
       savg1=avg1
       savg2=avg2
       ssig1=sig1
       ssig2=sig2
       call fs_get_lsorna(lsorna)
-      call reslt(8Hsignal  ,7,lsorna,10,az,el,savg1,savg2,ssig1,
+      call reslt('signal ',lsorna,10,az,el,savg1,savg2,ssig1,
      +           ssig2,nrepnf,lbuf,isbuf)
 C
       sdc1=avg1/cal1nf
       sdc1s=sig1/cal1nf
       sdc2=avg2/cal2nf
       sdc2s=sig2/cal2nf
-      call reslt(8Hsrc/cal ,7,lsorna,10,az,el,sdc1,sdc2,sdc1s,sdc2s,
+      call reslt('src/cal',lsorna,10,az,el,sdc1,sdc2,sdc1s,sdc2s,
      +           nrepnf,lbuf,isbuf)
       fx1=max(fx1nf_fs,0.0)
       fx2=max(fx2nf_fs,0.0)
@@ -256,7 +257,7 @@ C
         sefd2s=(fx2/avg2)*sqrt(tsysi2**2+(sig2*(tsyav2/avg2))**2)
       endif
       if(fx1nf_fs.gt.0.0.or.fx2nf_fs.gt.0.0) then
-        call reslt(8Hsefd    ,7,lsorna,10,az,el,sefd1,sefd2,sefd1s,
+        call reslt('sefd   ',lsorna,10,az,el,sefd1,sefd2,sefd1s,
      +             sefd2s,nrepnf,lbuf,isbuf)
       endif
       ae1=0.0d0
@@ -273,13 +274,13 @@ C
         ae2s=sig2*2.0*1.380662e0/(fx2*1e-3*DPI*(diaman/2.0)**2)
       endif
       if(fx1nf_fs.gt.0.or.fx2nf_fs.gt.0) then
-        call reslt(8heta     ,7,lsorna,10,az,el,ae1,ae2,ae1s,
+        call reslt('eta    ',lsorna,10,az,el,ae1,ae2,ae1s,
      +             ae2s,nrepnf,lbuf,isbuf)
         edts1=1000.*ae1/tsyav1
         edts1s=sqrt(ae1s**2+(tsysi1/tsyav1)**2)*1000./tsyav1
         edts2=1000.*ae2/tsyav2
         edts2s=sqrt(ae2s**2+(tsysi2/tsyav2)**2)*1000./tsyav2
-        call reslt(8h1k*e/ts ,7,lsorna,10,az,el,edts1,edts2,
+        call reslt('1k*e/ts',lsorna,10,az,el,edts1,edts2,
      +             edts1s,edts2s,nrepnf,lbuf,isbuf)
       endif
       goto 90000
@@ -304,31 +305,31 @@ C
 80011 continue
       jerr=0
       if(kon) goto 89990
-      call gooff(azosav,elosav,4Hazel,nwait,jerr) 
+      call gooff(azosav,elosav,'azel',nwait,jerr) 
       itry=itry-1 
       if(jerr.gt.0.and.itry.gt.0) goto 80011 
 C 
       if(ierr.gt.0) goto 89990 
-      call logit7(idum,idum,idum,-1,ierr,lwho,2Her)
-      if(jerr.ne.0) call logit7(idum,idum,idum,-1,-100,lwho,2Her)
+      call logit7ic(idum,idum,idum,-1,ierr,lwho,'er')
+      if(jerr.ne.0) call logit7ic(idum,idum,idum,-1,-100,lwho,'er')
       goto 90000 
 C 
 C BREAK DETECTED
 C 
 89990 continue
       ierr=-1 
-      call logit7(idum,idum,idum,-1,ierr,lwho,2Hbr)
-      if(jerr.ne.0) call logit7(idum,idum,idum,-1,-100,lwho,2Her)
+      call logit7ic(idum,idum,idum,-1,ierr,lwho,'br')
+      if(jerr.ne.0) call logit7ic(idum,idum,idum,-1,-100,lwho,'er')
       goto 90000 
 C 
 C CLEAN UP AND EXIT 
 C 
 90000 continue
-      if(VLBA.eq.iand(rack,VLBA)) then
+      if(VLBA.eq.and(rack,VLBA)) then
         call fc_mcbcn_r2(ip)
         if(ip(3).lt.0) then
           call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
-          call logit7(idum,idum,idum,-1,-112,lwho,2Her)
+          call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
         endif
       endif
       call rn_put('onoff')

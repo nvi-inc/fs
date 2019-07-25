@@ -2,7 +2,7 @@
 #include <sys/times.h>
 #include <time.h>
 
-int fc_rte_sett_( poFmClock, piFmHs, plCentiSec, pcMode, iLenMode)
+int fc_rte_sett__( poFmClock, piFmHs, plCentiSec, pcMode, iLenMode)
 time_t *poFmClock;
 int *piFmHs;
 long *plCentiSec;
