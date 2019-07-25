@@ -439,7 +439,7 @@ enddef
 define  initi        000000000000
 "welcome to the pc field system
 vlbainit
-sy=setcl
+sy=run setcl &
 enddef
 define  midob        000000000000
 tpi=1u,2u,3u,4u,5u,6u,7u,8u,ifa,ifc
@@ -456,7 +456,7 @@ ifdcd
 bbc02
 bbc06
 bbc11
-sy=setcl
+sy=run setcl &
 enddef
 define  midtp         00000000000
 bbcman

@@ -58,7 +58,7 @@ C                   If no parameters, get mad!
       call upper(ibuf,1,nchar)
       nch = nchar - ifc + 1
       call pchar(idum,2,9)
-      nenq = iscnc(ibuf,ifc,nchar,idum)
+      nenq = iscnc(ibuf,ifc,nchar,9)
 C                   Scan for a tab character
       if (nenq.ne.0) idumm1 = ichmv(ibuf,nenq,o'5',2,1)
 C                   If we found one, substitute the enq character

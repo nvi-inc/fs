@@ -2,13 +2,13 @@
 C
       integer it(5)
       integer*2 lcmd(1)
-      integer*4 ip(5)
+c      integer*4 ip(5)
       logical kbreak,rn_test
 C
       if (kbreak('aquir')) goto 200
       if (iwcmd.le.-2) goto 100
       nchars=iflch(lcmd,mcmd*2)
-      if(iwcmd.eq.-1) call clear_prog('aquir')
+c      if(iwcmd.eq.-1) call clear_prog('aquir')
       call copin(lcmd,nchars)
       if(iwcmd.eq.-1) goto 110
       call susp(2,2)
@@ -35,7 +35,8 @@ C
       return
 C
 110   continue
-      call wait_prog('aquir',ip)
+c      call wait_prog('aquir',ip)
+      call suspend('aquir')
       goto 100
 c
 200   continue
@@ -43,3 +44,5 @@ c
 C
       return
       end
+
+

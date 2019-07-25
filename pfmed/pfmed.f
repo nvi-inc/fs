@@ -110,9 +110,9 @@ C
         irnprc = rn_take('pfmed',1)
         if (irnprc.eq.1) then
           write(lui,1101) 
-1101      format(" pfmed is already locked")
+1101      format("pfmed is already locked")
           write(lui,1102) 
-1102      format(" hit return to continue",$)
+1102      format("hit return to continue",$)
           read(5,1103) cret
 1103      format(a)
           goto 990
@@ -121,7 +121,6 @@ C
         call char2hol(lprc,ilprc,1,8)
         call fs_set_lprc(ilprc)
       else
-cxx        irnprc = rn_take('pfmed',0)
         irnprc = rn_take('pfmed',1)
         if (irnprc.eq.1) then
           write(lui,1101) 

@@ -56,10 +56,13 @@ C
 C
       call putpname('setcl')
       call setup_fscom
+c
+ 1    continue
+      call wait_prog('setcl',ip)
       call read_fscom
 c
       set=' '
-      call rcpar(1,set)
+      call get_arg(1,set)
       if(set.eq.'save') then
         name=FS_ROOT//'/control/time.new'
         call fopen(9,name,ierr)
@@ -360,4 +363,5 @@ C
 998   continue
       call logit7ci(idum,idum,idum,-1,-10,'sc',0)
 999   continue
+      goto 1
       end

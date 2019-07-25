@@ -186,16 +186,16 @@ C     5. Alternate format time, with suffixes.
 C 
 500   nscan = 0 
       ichx = ifc-1
-      ich = iscnc(ias,ifc,iec,isuf(1))
+      ich = iscnc(ias,ifc,iec,jchar(isuf(1),2))
       if (ich.eq.0) goto 510
       if (ich.ne.ifc+2) goto 590
 C                   The "Y" must be the third character (first field) 
       iyr = ias2b(ias,ifc,2)
       nscan = nscan + ich - ichx
       ichx = ich
-510   ichd = iscnc(ias,ichx+1,iec,isuf(3))
+510   ichd = iscnc(ias,ichx+1,iec,jchar(isuf(3),2))
       if (ichd.eq.0) goto 520 
-      ichm = iscnc(ias,ichx+1,iec,isuf(2))
+      ichm = iscnc(ias,ichx+1,iec,jchar(isuf(2),2))
       if (ichm.gt.ichd.or.ichm.eq.0) goto 515 
       imon = ias2b(ias,ichx+1,ichm-ichx-1)
       nscan = nscan + ichm - ichx 
@@ -206,7 +206,7 @@ C                   The "Y" must be the third character (first field)
       nscan = nscan + ichd - ichx 
 519   ichx = ichd 
 520   do 530 i=1,3
-        ich = iscnc(ias,ichx+1,iec,isuf(i+3)) 
+        ich = iscnc(ias,ichx+1,iec,jchar(isuf(i+3),2)) 
         if (ich.eq.0) goto 530
         ifld(i) = numsc(ias,ichx+1,ich-1,frac(i)) 
         nscan = nscan + ich - ichx

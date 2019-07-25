@@ -60,7 +60,14 @@ C
       ireg(2) = get_buf(iclopr+o'120000',ibuf,-iblen*2,idum,idum)
       nchar = iflch(ibuf,min0(ireg(2),iblen*2))
       nchar = fblnk(ibuf,1,nchar)
-      call lower(ibuf,nchar)
+      do i=1,nchar
+         if(cjchar(ibuf,i).eq.'"') goto 201
+         if(cjchar(ibuf,i).ne.' ') then
+            call lower(ibuf,nchar)
+            goto 201
+         endif
+      enddo
+ 201  continue
       if (ireg(1).lt.0) nchar = 0
       if (nchar.eq.0) goto 300
 C                   When there's nothing there, that's the

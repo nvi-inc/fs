@@ -314,10 +314,9 @@ C
       if(jerr.ne.0) call logit7ic(idum,idum,idum,-1,-100,lwho,'er')
       goto 90000 
 C 
-C BREAK DETECTED
+c error detected
 C 
 89990 continue
-      ierr=-1 
       call logit7ic(idum,idum,idum,-1,ierr,lwho,'br')
       if(jerr.ne.0) call logit7ic(idum,idum,idum,-1,-100,lwho,'er')
       goto 90000 

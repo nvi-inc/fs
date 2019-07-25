@@ -21,12 +21,15 @@
 #define BRK_KEY     3
 #define BRK_SIZE    1024
 
-#define MAX_SEM_LIST 20
-#define SEM_SEM     MAX_SEM_LIST+0
-#define SEM_CLS     MAX_SEM_LIST+1
+#define SEM_GO       0
+#define SEM_SEM      1
+#define SEM_CLS      2
 
 #define SEM_KEY     1
-#define SEM_NUM     MAX_SEM_LIST+2
+#define NSEM_KEY    2
+#define GO_KEY      3
+
+#define SEM_NUM     32
 
 #define MAX_PTS     3
 
@@ -68,3 +71,5 @@
 #define CL_PRIOR    -8
 #define FS_PRIOR   -12
 #define AN_PRIOR   -16
+
+

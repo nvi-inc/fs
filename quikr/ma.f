@@ -73,7 +73,7 @@ C
       if (nch.le.0) goto 210
 C                   If there's nothing left, quit
       call pchar(idum,2,9)
-      nenq = iscnc(ibuf,ifc,icom-1,idum)
+      nenq = iscnc(ibuf,ifc,icom-1,9)
 C                   Scan for a tab character
       if (nenq.ne.0) idumm1 = ichmv(ibuf,nenq,o'5',2,1)
 C                   If we found one, substitute the enq character

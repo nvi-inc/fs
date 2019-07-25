@@ -204,7 +204,7 @@ C
       call fc_rte_time(it,iyear)
       call char2hol('::',ldum,1,2)
       call newlg(ibuf,ldum)
-    
+c    
       call put_buf_ch(iclopr,'"Boss Initialization Complete','  ','  ')
       call put_buf_ch(iclopr,'initi','  ','  ')
 C

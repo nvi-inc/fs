@@ -38,7 +38,7 @@ c
       luz=1
 C
       icbuf=' '
-      call rcpar(1,icbuf)
+      call get_arg(1,icbuf)
       if (icbuf.eq.' ') goto 8000
 C
 C CHECK FOR FIELD SYSTEM

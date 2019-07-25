@@ -9,13 +9,17 @@
 #include <memory.h>    /* shared memory IPC header file */
 #include <ctype.h>
 
+#define  MAX_BUF       256
+
 struct skd_buf {
 	long	mtype;
         struct {
-          long    ip[5];
-          long    rtype;
-          int     dad;
+	    long    ip[5];
+	    long    rtype;
+	    int     dad;
+	    char arg[MAX_BUF+1];
         } messg;
+
 } ;
 
 static int msqid;
@@ -23,6 +27,9 @@ static long rtype=0;
 static int dad=0;
 static char prog_name[5];
 static long save_ip[5];
+static char arg[MAX_BUF+1];
+static char *argv[(MAX_BUF+1)/2];
+static int  argc = -1;
 
 static long mtype();
 static void nullfcn();
@@ -86,11 +93,23 @@ key_t key;
         exit( -1);
     }
 }
+
 void skd_run( name, w, ip)
-char	name[5], w;	
+char    name[5], w;
+long    ip[5];
+{
+	    void skd_run_arg();
+	    char arg[]= "";
+	    
+	    skd_run_arg( name, w, ip, arg);
+}
+
+
+void skd_run_arg( name, w, ip, arg)
+char	name[5], w, *arg;	
 long	ip[5];
 {
-int	i;
+int	i, n;
 struct skd_buf sched;
 
 sched.mtype=mtype(name);
@@ -103,7 +122,13 @@ else          sched.messg.rtype=0;
 
 sched.messg.dad=getpid();
 
-if ( -1 == msgsnd( msqid, &sched, sizeof(sched.messg), 0 ) ) {
+n=strlen(arg)+1;
+n = n > MAX_BUF + 1 ? MAX_BUF + 1: n;
+strncpy(sched.messg.arg,arg,n);
+
+if ( -1 == msgsnd(msqid, &sched,
+		  sizeof(sched.messg)+strlen(sched.messg.arg)-(MAX_BUF+1),
+		  0 ) ) {
        fprintf( stderr,"skd_run: msqid %d,",msqid);
         perror(" sending schedule message");
         exit( -1);
@@ -129,6 +154,32 @@ for (i=0;i<5;i++)
     ip[i]=save_ip[i];
 
 }
+void skd_arg(n,buff,len)
+char *buff;
+int  n,len;
+{
+  char *ptr;
+  int n1;
+
+  if (argc < 0) {
+    argc = 0;
+    ptr = strtok(arg," ");
+    while ( NULL != (argv[argc++] = ptr) ) {
+      ptr = strtok(NULL," ");
+    }
+  }
+
+  if (n < argc && argv[n] != NULL) {
+    n1=strlen(argv[n])+1;
+    n1 = n1 > len? len: n1;
+    strncpy(buff,argv[n],n1);
+    if(n1==n && len > 0)
+      buff[n-1]='\0';
+  } else if (len > 0)
+    buff[0]='\0';
+
+}
+
 void skd_wait( name, ip, centisec)
 char    name[ 5];
 unsigned centisec;
@@ -183,8 +234,15 @@ for (i=0;i<5;i++)
     ip[i]=sched.messg.ip[i];
 
 rtype=sched.messg.rtype;
-if (getpid() == sched.messg.dad) dad=0;
-else dad=sched.messg.dad;
+
+if (getpid() == sched.messg.dad)
+  dad=0;
+else
+  dad=sched.messg.dad;
+
+strcpy(arg,sched.messg.arg);
+argc=-1;
+
 }
 
 void skd_clr( name)

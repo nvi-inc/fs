@@ -3,15 +3,16 @@
       integer ic
 c
       integer*2 imess(128)
-      integer*4 ip(5)
+c      integer*4 ip(5)
       integer ix
 C
-      call clear_prog('onoff')
+c      call clear_prog('onoff')
       if(len(cmess).gt.256) stop 999
       call char2hol(cmess,imess,1,len(cmess))
       ix=sign(len(cmess),-ic)
       call copin(imess,ix)
-      call wait_prog('onoff',ip)
+c      call wait_prog('onoff',ip)
+      call suspend('onoff')
 c
       return
       end
