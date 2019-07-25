@@ -22,13 +22,13 @@ C
 C OUTPUT:
 C    IBUF:  8 characters holding MAT buffer
   
-      integer inext,ichmv,ihx2a
+      integer inext,ichmv,ihx2a,ichmv_ch
 C
       inext=1
-      inext=ichmv(ibuf,inext,4H0000,1,3)
+      inext=ichmv_ch(ibuf,inext,'000')
       inext=ichmv(ibuf,inext,ihx2a(iosc),2,1)
       inext=ichmv(ibuf,inext,ihx2a(igain),2,1)
-      inext=ichmv(ibuf,inext,2H00,1,2)
+      inext=ichmv_ch(ibuf,inext,'00')
       inext=ichmv(ibuf,inext,ihx2a(ichan-1),2,1)
 C
       return

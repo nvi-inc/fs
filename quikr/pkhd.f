@@ -25,8 +25,8 @@ C  the intersection of the two lines.
 C
       integer ipass(2),ioff(2),i,imax,imin,j,step
       real*4 micnow(2),micold,volts,minper,pos(3),pwr(3),m1,m2,b1,b2
-      real*4 micpk,temp,lvsig,lvavg,lvsum,lvsum2,wide,pwrpk
-      logical kwide,kauto
+      real*4 micpk,temp,pwrpk
+      logical kauto
       data ipass/2*0/,ioff/8,-8/,kauto/.true./
 C
       do j=1,icount

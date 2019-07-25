@@ -9,8 +9,6 @@
 #include <memory.h>    /* shared memory IPC header file */
 #include <ctype.h>
 
-#define BADSIG ((void (*)())-1)
-
 struct skd_buf {
 	long	mtype;
         struct {
@@ -25,6 +23,9 @@ static long rtype=0;
 static int dad=0;
 static char prog_name[5];
 static long save_ip[5];
+
+static long mtype();
+static void nullfcn();
 
 int skd_get( key, size)
 key_t key;
@@ -91,7 +92,6 @@ long	ip[5];
 {
 int	i;
 struct skd_buf sched;
-long mtype();
 
 sched.mtype=mtype(name);
 
@@ -103,7 +103,7 @@ else          sched.messg.rtype=0;
 
 sched.messg.dad=getpid();
 
-if ( -1 == msgsnd( msqid, &sched, sizeof(sched.messg), NULL ) ) {
+if ( -1 == msgsnd( msqid, &sched, sizeof(sched.messg), 0 ) ) {
        fprintf( stderr,"skd_run: msqid %d,",msqid);
         perror(" sending schedule message");
         exit( -1);
@@ -111,7 +111,7 @@ if ( -1 == msgsnd( msqid, &sched, sizeof(sched.messg), NULL ) ) {
 
 if(w != 'w') return;
 
-if(-1== msgrcv( msqid, &sched, sizeof(sched.messg), sched.messg.rtype, NULL)){
+if(-1== msgrcv( msqid, &sched, sizeof(sched.messg), sched.messg.rtype, 0)){
         perror("skd_run: receiving return message");
         exit( -1);
 }
@@ -136,8 +136,7 @@ long	ip[5];
 {
 int	status,i;
 struct skd_buf	sched;
-long    mtype(), type;
-void nullfcn();
+long    type;
 char *s1;
 
 if( rtype != 0) {
@@ -145,7 +144,7 @@ if( rtype != 0) {
       sched.messg.ip[i]=ip[i];
   }
   sched.mtype=rtype;
-  if ( -1 == msgsnd( msqid, &sched, sizeof( sched.messg), NULL )) {
+  if ( -1 == msgsnd( msqid, &sched, sizeof( sched.messg), 0 )) {
         perror("skd_wait: sending termination message");
   	exit( -1);
   }
@@ -163,7 +162,7 @@ if(centisec !=0) {
 }
 
 waitr:
-status = msgrcv( msqid, &sched, sizeof( sched.messg), type, NULL );
+status = msgrcv( msqid, &sched, sizeof( sched.messg), type, 0);
 if (centisec !=0) {
    rte_alarm((unsigned) 0);
    if(signal(SIGALRM,SIG_DFL) == BADSIG){
@@ -193,7 +192,7 @@ char    name[ 5];
 {
 int	status;
 struct skd_buf	sched;
-long    mtype(), type;
+long    type;
 char *s1;
 
 type=mtype(name);
@@ -213,7 +212,7 @@ int skd_rel( )
 {
 int status;
 /* release specified shared memory segment */
-if(-1==msgctl( msqid, IPC_RMID, NULL )) {
+if(-1==msgctl( msqid, IPC_RMID, 0 )) {
    perror("skd_rel: releasing skd id");
    return( -1);
 }
@@ -227,7 +226,11 @@ char name[5];
     long val;
 
     val=0;
-    for (i=0;i<5;i++) if(name[i] != ' ') val+=(tolower(name[i])-'a')<<(5*i);
+    for (i=0;i<5;i++) {
+       if(name[i] != ' ' && name[i] != 0 ) {
+           val+=(tolower(name[i])-'a')<<(5*i);
+       }
+    }
     return(val);
 }
 static void nullfcn(sig)

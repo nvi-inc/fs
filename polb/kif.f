@@ -1,7 +1,7 @@
       logical function kif(imess,len,ib,ic1,ic2,kerr,lu)
 
       logical kerr
-      integer*2 ib(1),imess(1)
+      integer*2 ib(1),imess(1),id
 C
       kif=kerr
       if (.not.kerr) return
@@ -14,7 +14,7 @@ C
       ilen=ic2-ic1+1
       if(mod(ic1,2).eq.1) goto 10
       call ichmv(id,1,ib,ic1,1) 
-      call ichmv(id,2,2H_ ,1,1)
+      call ichmv_ch(id,2,'_')
       call po_put_i(id,min0(ilen,2))
       ist=ist+1
       ilen=ilen-1

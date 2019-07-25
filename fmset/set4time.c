@@ -1,6 +1,6 @@
 /* set4time.c - set mk4 formatter time */
 
-#include <curses.h>      /* ETI curses standard I/O header file */
+#include <ncurses.h>      /* ETI curses standard I/O header file */
 #include <memory.h>
 #include <string.h>
 #include <time.h>        /* time function definition header file */
@@ -33,7 +33,10 @@ int count;
 
 	if(delta == 0) {
 		unsigned char *cp;
-		(void) cftime(outbuf+2,"fm/tim %Y %j %H %M %S",&formtime);
+                struct tm *formtm;
+                formtm=gmtime(&formtime);
+		(void) strftime(outbuf+2,sizeof(outbuf)-2,
+                                "fm/tim %Y %j %H %M %S",formtm);
 		for (cp=outbuf+2;*cp!='\0';cp++)
 			if(*cp==' '&&*(cp+1)=='0')
 				*(cp+1)=' ';

@@ -40,7 +40,7 @@ C  MAXTRY - maximum number of times we will try to communicate
 C  ITRY - count of attempts
 C  NCTRAN - number of char to be transmitted
 C  NRSPN  - number of responses possible
-      integer ichmv, portflush, portwrite,portread
+      integer ichmv, portflush, portwrite,portread,portoutdrain
       dimension ireg(2)
       integer nchrc(8)   ! number of characters received in responses
       integer*2 irspn(4) ! terminal characters which generate a response
@@ -48,9 +48,6 @@ C  NRSPN  - number of responses possible
       parameter (wrdech=320,maxech=wrdech*2)
       integer iebuf(wrdech),iebuf2(wrdech),itn
       integer*2 irecx(10)
-      character*80 cbuf
-      integer*2 ibufc(40)
-      integer*4 secs1,secs2
 C
       equivalence (ireg(1),reg)
 C
@@ -127,6 +124,10 @@ C                   Write the buffer to the MAT bus
         endif
         return    !  we're done now if there is to be no response.
       endif
+c
+c wait for the output to drain
+c
+      ierr=portoutdrain(lumat)
 C
 C  For actual communications, use o'2000' in the read request.
 C  For terminal tests, use o'400' instead.
@@ -190,15 +191,20 @@ c                                ! wrong # of characters in response
         ierr = -5
       else if (jchar(irecv,1).eq.o'6') then        ! ack response
         ierr = +1
-        nrc = ichmv(irecv,1,3hack,1,3) - 1
+        nrc = ichmv_ch(irecv,1,'ack') - 1
       else if (jchar(irecv,1).eq.o'25') then     ! nak response
         if (ir.eq.5.and.itry.lt.maxtry) goto 200
         ierr = +2
-        nrc = ichmv(irecv,1,3hnak,1,3) - 1
+        nrc = ichmv_ch(irecv,1,'nak') - 1
       else
         ierr = 0
       endif
       iat = ierr
-
+c
       return
       end 
+
+
+
+
+

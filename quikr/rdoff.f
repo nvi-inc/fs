@@ -8,7 +8,7 @@ C
       dimension ireg(2),iparm(2)
       integer get_buf
       integer*2 ibuf(20),lds,lhs
-      integer*4 is
+c     integer*4 is
       character cjchar
 C 
       equivalence (ireg(1),reg),(iparm(1),parm) 
@@ -90,7 +90,7 @@ C
 C
 C     5. Return the offsets for display
 C
-500   nch = ichmv(ibuf,nchar+1,2h/ ,1,1)
+500   nch = ichmv_ch(ibuf,nchar+1,'/')
       call fs_get_decoff(decoff)
       call fs_get_raoff(raoff)
       call radec(dble(raoff),dble(decoff),0.0,irah,iram,ras,
@@ -103,9 +103,9 @@ C     nch = nch + ir2as(irah*10000.0+iram*100.0+ras,ibuf,nch,10,3)
 C     iras = ifix(ras)
 C     nch = nch + ib2as(iras,ibuf,nch,o'40000'+o'400'*2+2)
 C     ras = ras-iras
-      if (ras.lt.10.0) nch=ichmv(ibuf,nch,2h00,1,1)
+      if (ras.lt.10.0) nch=ichmv_ch(ibuf,nch,'0')
       nch = nch + ir2as(ras,ibuf,nch,4,1)
-      nch = ichmv(ibuf,nch,2h, ,1,1)
+      nch = ichmv_ch(ibuf,nch,',')
       if(ichcm_ch(lds,1,'-').eq.0) nch = ichmv(ibuf,nch,lds,1,1)
 C     is=dcs*100
 C     dcs=is/100.
@@ -115,12 +115,12 @@ C     nch = nch + ir2as(idcd*10000.0+idcm*100.0+dcs,ibuf,nch,9,2)
 C     idcs = ifix(dcs)
 C     nch = nch + ib2as(idcs,ibuf,nch,o'40000'+o'400'*2+2)
 C     dcs = dcs-idcs
-      if (dcs.lt.10.0) nch=ichmv(ibuf,nch,2h00,1,1)
+      if (dcs.lt.10.0) nch=ichmv_ch(ibuf,nch,'0')
       nch = nch + ir2as(dcs,ibuf,nch,4,1)
 C
       iclass = 0
       nch = nch - 1
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       ip(1) = iclass
       ip(2) = 1 
       ip(3) = 0 

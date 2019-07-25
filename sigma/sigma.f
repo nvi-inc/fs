@@ -3,7 +3,7 @@ C
       logical kinit,kgpnt,kopn,kif,koutp,kgsta,kuse
       logical kgdat,kpdat,kusen
 C
-      real lat,lon,latoff,lonoff
+      real latoff,lonoff
       real latr,lonr,ltofr,lnofr,lnofs,ltofs
 C
       integer idcbi(2)
@@ -20,7 +20,7 @@ C
       integer*2 qtmnin(12)
       integer*2 qtfwin(11)
       integer*2 qedit(23)
-      integer qnchar
+      integer qnchar,qnc
 C                  1234567890123456789012345678901
       data l2mny  /  43,2hto,2ho ,2hma,2hny,2h p,2hoi,2hnt,2hs ,2hin,
      /             2h e,2hrr,2hor,2h o,2hut,2hpu,2ht,,2h l,2him,2hit,
@@ -40,7 +40,7 @@ C          too few input points
      /             2Hs),2H a,2Hdd,2Hed/
       data qnchar /46/
 C          edit:     point(s) removed,     point(s) added
-      data il/50/,mpts/500/,iwds/3072/,idcbos/784/,is/40/,idcbis/784/
+      data il/50/,mpts/500/,idcbos/784/
       data ip/5*0/
 C
       ic=ib2as(mpts,ldum,1,o'100000'+6)
@@ -98,11 +98,13 @@ C
       goto 10000
 C
 9980  continue
-      call po_put_i(qtmnin(2),qtmnin(1))
+      qnc=qtmnin(1)
+      call po_put_i(qtmnin(2),qnc)
       goto 10000
 C
 9990  continue
-      call po_put_i(qtfwin(2),qtfwin(1))
+      qnc=qtfwin(1)
+      call po_put_i(qtfwin(2),qnc)
       goto 10000
 C
 10000 continue

@@ -1,6 +1,6 @@
 /* getvtime.c - get vlba formatter time */
 
-#include <curses.h>      /* ETI curses standard I/O header file */
+#include <ncurses.h>      /* ETI curses standard I/O header file */
 #include <memory.h>      /* for memcpy */
 #include <sys/types.h>   /* data type definition header file */
 

@@ -4,7 +4,7 @@ c
 cxx      integer ibuf(1)
       integer*2 ibuf(1)
       integer ifc,ilc
-      integer i,inext,ilen,ichmv,ichcm
+      integer i,inext,ilen,ichmv,ichcm_ch,ichmv_ch
       logical kfirst
 c
       fblnk=0
@@ -18,7 +18,7 @@ c
       inext=ifc
       kfirst=.false.
       do i = ifc,ilc
-        if(ichcm(ibuf,i,2H  ,1,1).ne.0.or.kfirst) then
+        if(ichcm_ch(ibuf,i,' ').ne.0.or.kfirst) then
           kfirst=.true.
           inext=ichmv(ibuf,inext,ibuf,i,1)
         endif
@@ -31,7 +31,7 @@ C
 C  BLANK PAD TO THE END
 c
       do while(inext.le.ilc)
-        inext=ichmv(ibuf,inext,2H  ,1,1)
+        inext=ichmv_ch(ibuf,inext,'  ')
       enddo
       return
       end

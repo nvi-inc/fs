@@ -13,10 +13,9 @@ C LOCAL VARIABLES
 C
       dimension ip(5)             ! - for RMPAR
       integer*2 ibuf1(40)
-      integer icodes(4), maxerr
+      integer icodes(4)
       integer rn_take
       data  icodes /-1,-2,-3,-4/
-      data  maxerr /15/
 
       call fs_get_drive(drive)
       call fs_get_icheck(icheck(18),18)
@@ -27,17 +26,17 @@ C
         do j=1,4
 C  For the Mark IV tape drive, do not want to send ! strobe, which
 C  is mode -1 to matcn. Replace with -5 which is the + strobe.
-          if ((MK4.eq.iand(MK4,drive)).and.(j.eq.1)) then
+          if ((MK4.eq.and(MK4,drive)).and.(j.eq.1)) then
             ibuf1(1) = -5
           else
             ibuf1(1) = icodes(j)
           endif
-          call put_buf(iclass,ibuf1,-4,2Hfs,0)
+          call put_buf(iclass,ibuf1,-4,'fs','  ')
         enddo
 C
         ibuf1(1) = 8
         ibuf1(3) = o'47'   ! an apostrophe '
-        call put_buf(iclass,ibuf1,-5,2Hfs,0)
+        call put_buf(iclass,ibuf1,-5,'fs','  ')
 C Finally, get alarm status
         ierr=rn_take('fsctl',0)
         call run_matcn(iclass,5)

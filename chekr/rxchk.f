@@ -33,16 +33,18 @@ C
       enddo
       ibuf1(1) = 0
       call char2hol('rx',ibuf1(2),1,2)
-      call rx2ma(ibuf1(3),lswcal,0,idchrx,ibxhrx,ifamrx,2H1e)
+      call char2hol('1e',ldum,1,2)
+      call rx2ma(ibuf1(3),lswcal,0,idchrx,ibxhrx,ifamrx,ldum)
       iclass = 0
-      call put_buf(iclass,ibuf1,-12,2Hfs,0)
+      call put_buf(iclass,ibuf1,-12,'fs','  ')
       ibuf1(1)=-1
-      call put_buf(iclass,ibuf1,-4,2Hfs,0)
+      call put_buf(iclass,ibuf1,-4,'fs','  ')
       ibuf1(1)=0
-      call rx2ma(ibuf1(3),lswcal,0,idchrx,ibxhrx,ifamrx,2H1f)
-      call put_buf(iclass,ibuf1,-12,2Hfs,0)
+      call char2hol('1f',ldum,1,2)
+      call rx2ma(ibuf1(3),lswcal,0,idchrx,ibxhrx,ifamrx,ldum)
+      call put_buf(iclass,ibuf1,-12,'fs','  ')
       ibuf1(1)=-1
-      call put_buf(iclass,ibuf1,-4,2Hfs,0)
+      call put_buf(iclass,ibuf1,-4,'fs','  ')
 C
       ierr=rn_take('fsctl',0)
       call run_matcn(iclass,4)
@@ -53,7 +55,7 @@ C
 C
       if (ierr.lt.0) then
         call clrcl(iclass)
-        call logit7(0,0,0,0,ierr,lwho,2Hrx)
+        call logit7ic(0,0,0,0,ierr,lwho,'rx')
         goto 880
       endif
       call ifill_ch(ibuf3,1,ibuf2len*2,' ')
@@ -86,7 +88,7 @@ C
       ibuf1(1)=0
       call rx2ma(ibuf1(3),lswcal,0,idchrx,ibxhrx,ifamrx,iadcrx)
       iclass=0
-      call put_buf(iclass,ibuf1,-12,2Hfs,0)
+      call put_buf(iclass,ibuf1,-12,'fs','  ')
       ierr=rn_take('fsctl',0)
       call run_matcn(iclass,1)
       call rn_put('fsctl')

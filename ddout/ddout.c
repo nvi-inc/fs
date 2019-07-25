@@ -22,7 +22,7 @@ main()
 {
     int i;
     int cls_rcv();
-    int kp=0, kack=0, kxd=FALSE, kxl=FALSE, fd;
+    int kp=0, kack=0, kxd=FALSE, kxl=FALSE, fd=-1;
     int iwl, iw1, iwm;
     char *llogndx;
     int irga;
@@ -48,6 +48,7 @@ main()
     
     setup_ids();
     sig_ignore();
+    lnamef[0]='\0';
     if(ULIMIT > ulimit(1,ULIMIT))
 	ulimit(2, ULIMIT); /* set maximum log size to 20 megabytes */
 
@@ -97,7 +98,7 @@ Messenger:
       if (*lnamef != '\0') 
         {
           err = close(fd);
-          if(err<0) perror();
+          if(err<0) perror("closing file");
         }
       strcpy(lnamef,"/usr2/log/");
       memcpy(sllog, shm_addr->LLOG, 8);
@@ -224,7 +225,7 @@ Append:           /* send message to station error program */
 /* SECTION 6 */
 /*  write information to the log file if conditions are met */
 
-    if (kxl || (!kp && !kack)) {
+    if (fd >= 0 && (kxl || (!kp && !kack))) {
       bull = strlen(bul);
       if(bull != write(fd, bul, bull)) {
 	printf("!! wrong length written, file probably too large\n");

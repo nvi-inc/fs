@@ -156,7 +156,7 @@ C
 C
       iclass=0
       nch = 12
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
 C
       nrec = 1
       goto 800
@@ -170,7 +170,7 @@ C
       iclass = 0
       do i=1,2
         ibuf(1) = -i
-        call put_buf(iclass,ibuf,-4,2hfs,0)
+        call put_buf(iclass,ibuf,-4,'fs','  ')
       enddo
 C 
       nrec = 2
@@ -183,7 +183,7 @@ C
 600   ibuf(1) = 6 
       call char2hol('i3',ibuf(2),1,2)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
       goto 800
 C 
@@ -193,7 +193,7 @@ C
 700   ibuf(1) = 7 
       call char2hol('i3',ibuf(2),1,2)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       nrec = 1
       goto 800
 C

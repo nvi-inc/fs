@@ -10,8 +10,8 @@ kfild.o kfmp.o kgant.o kidnam.o kif.o kopn.o\
 koutp.o kpant.o kread.o kreof.o kwrit.o refr.o\
 sider.o po_put_i.o po_put_c.o fmpwrite2.o
 #
-#CFLAGS = -g
-#FFLAGS = -g
+#CFLAGS = 
+#FFLAGS = 
 F77 = gf77
 #
 #  The following line that has a ":" in it is a "dependency line".
@@ -24,4 +24,5 @@ F77 = gf77
 polb.a: $(OBJECTS)
 	touch polb.a
 	rm polb.a
-	ar qc polb.a $(OBJECTS)
+	ar -qc polb.a $(OBJECTS)
+	ar s polb.a

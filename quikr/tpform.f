@@ -63,19 +63,19 @@ C             the contents of the ITAPOF array.
         nrec = 0
         do i=1,maxpass
           if (itapof(i).ge.minoff .and. itapof(i).le.maxoff) then
-            nchar = ichmv(ibuf,nchar,2h  ,1,2)
+            nchar = ichmv_ch(ibuf,nchar,'  ')
             nchar = nchar + ib2as(i,ibuf,nchar,o'100003')
-            nchar = ichmv(ibuf,nchar,2h->,1,2)
+            nchar = ichmv_ch(ibuf,nchar,'->')
             nchar = nchar + ib2as(itapof(i),ibuf,nchar,o'100005')
             if (nchar.gt.58) then
-              call put_buf(iclass,ibuf,1-nchar,2hfs,0)
+              call put_buf(iclass,ibuf,1-nchar,'fs','  ')
               nchar = 1
               nrec = nrec + 1
             endif
           endif
         enddo
         if (nchar.gt.1) then
-          call put_buf(iclass,ibuf,1-nchar,2hfs,0)
+          call put_buf(iclass,ibuf,1-nchar,'fs','  ')
           nrec = nrec + 1
         endif
         ip(1)=iclass

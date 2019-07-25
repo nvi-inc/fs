@@ -42,7 +42,7 @@ C
       ireg(2) = get_buf(iclass,ibuf3,-10,idum,idum)
       call ifill_ch(ibuf4,1,ibuf2len*2,' ')
       ireg(2) = get_buf(iclass,ibuf4,-10,idum,idum)
-      if (MK4.eq.iand(MK4,drive)) then
+      if (MK4.eq.and(MK4,drive)) then
         call ma2rp4(ibuf1,iby,ieq,ita,itb)
       else
         call ma2rp(ibuf1,iremtp,iby,ieq,ibw,ita,itb,ialarm)
@@ -59,7 +59,7 @@ C
       call ma2mv(ibuf4,idir,isp,lchgen)
       ierr = 0
       ntrks = 0
-      if (MK3.eq.iand(MK3,drive)) then
+      if (MK3.eq.and(MK3,drive)) then
         do k=1,28
           if (itc(k).eq.itrken(k)) then
             if (itc(k).eq.1) ntrks=ntrks+1
@@ -94,12 +94,12 @@ CXX  OF HARD CODING IT IN AS IN THE ABOVE STATEMENTS.
         if (ienatp.ne.iena) inerr(15)=inerr(15)+1
         if (ierr.ne.0) inerr(5)=inerr(5)+1
       endif
-      if ((kentp_fs.and.kmvtp_fs).and.(MK3.eq.iand(MK3,drive))) then
+      if ((kentp_fs.and.kmvtp_fs).and.(MK3.eq.and(MK3,drive))) then
         if (ispeed.ne.0.and.ienatp.ne.0.and.ntrks.eq.0)
      &      inerr(13)=inerr(13)+1
       endif
       if (krptp_fs) then
-        if (MK4.eq.iand(MK4,drive)) then
+        if (MK4.eq.and(MK4,drive)) then
           if (ieq.ne.ieq4tap) inerr(7)=inerr(7)+1
         else
           if (ibw.ne.ibwtap) inerr(6)=inerr(6)+1

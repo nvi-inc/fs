@@ -23,7 +23,7 @@ C
       call run_prog('antcn','wait',ip1,0,0,0,0)
       call rmpar(ip)
       if (ip(3).ge.0) return 
-      call logit7(idum,idum,idum,-1,ip(3),ip(4),2Hnf)
+      call logit7ic(idum,idum,idum,-1,ip(3),ip(4),'nf')
       itry=itry-1 
       if (itry.gt.0) goto 15
       goto 80020 

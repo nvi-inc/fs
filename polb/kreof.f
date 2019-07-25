@@ -17,7 +17,7 @@ C          before reading record xxxx in_
       if (len.ge.0) goto 10
       ifc=37
       ifc=ifc+ib2as(irec,lpeof(2),ifc,o'100000'+4)
-      ifc=ichmv(lpeof(2),ifc,4h in_ ,1,4)
+      ifc=ichmv_ch(lpeof(2),ifc,' in_')
       kreof=kfmp(lut,ierr,lpeof(2),ifc-1,ipbuf,0,1)
       return
 C
@@ -25,7 +25,7 @@ C
       if (ierr.eq.0) return
       ifc=23
       ifc=ib2as(irec,lred(2),ifc,o'100000'+4)
-      ifc=ichmv(lred(2),ifc,4h in_ ,1,4)
+      ifc=ichmv_ch(lred(2),ifc,' in_')
       kreof=kfmp(lut,ierr,lred(2),ifc-1,ipbuf,0,1)
 C
       return

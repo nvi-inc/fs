@@ -7,11 +7,10 @@ char2hol.o cjchar.o das2b.o fdfld.o gbfas.o gtfld.o gtprm.o\
 gtrsp.o hol2char.o ia22h.o ia2hx.o ias2b.o ib2as.o\
 ibin.o ichcm.o ichcm_ch.o ichmv.o ifams.o ifill.o ifill_ch.o iflch.o\
 ih22a.o ihx2a.o ir2as.o iscn_ch.o iscnc.o iscns.o\
-jchar.o mcoma.o pchar.o reio.o gtprm2.o
+jchar.o mcoma.o pchar.o reio.o gtprm2.o ichmv_ch.o
 #
-#CFLAGS = -g
-#FFLAGS = -g
-F77 = gf77
+#CFLAGS = 
+#FFLAGS = 
 #
 #  The following line that has a ":" in it is a "dependency line".
 #  What follows the dependency line are command lines.  The
@@ -23,4 +22,5 @@ F77 = gf77
 lnfch.a: $(OBJECTS)
 	touch lnfch.a
 	rm lnfch.a
-	ar qc lnfch.a $(OBJECTS)
+	ar -qc lnfch.a $(OBJECTS)
+	ar s lnfch.a

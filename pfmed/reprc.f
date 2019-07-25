@@ -5,7 +5,6 @@ C IN PARAMETERS
 C
 C LOCAL VARIABLES
       character*63 fname1,fname2
-      character*4 lfr
       integer trimlen,nch,ierr,ierr1,ierr2
       logical kerr
       character*5 me

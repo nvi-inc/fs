@@ -21,7 +21,7 @@ C        IP(2): number of class records remaining on return
 C
       integer get_buf,idum
       integer ireg(2)
-      real*4 reg,exec
+      real*4 reg
       equivalence (ireg(1),reg)
 C
       if(ip(2).le.0) then

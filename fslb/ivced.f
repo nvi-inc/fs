@@ -67,7 +67,7 @@ C
 201   continue
       if (ic1+5.gt.ic2) return
       call fs_get_rack(rack)
-      if (rack.eq.iand(MK4,rack)) then
+      if (rack.eq.and(MK4,rack)) then
         ivced = ic1 + ir2as(bw4(index+1),ias,ic1,5,3)
       else
         ivced = ic1 + ir2as(bw(index+1),ias,ic1,5,3)
@@ -104,7 +104,7 @@ C
       val = das2b(ias,ic1,ic2-ic1+1,ierr) 
       if (ierr.ne.0) return 
       call fs_get_rack(rack)
-      if (rack.eq.iand(MK4,rack)) then
+      if (rack.eq.and(MK4,rack)) then
         do 3010 i=1,nbw 
           if (val.eq.bw4(i)) index = i-1 
 3010      continue

@@ -23,7 +23,7 @@ C
 C 
 C  INITAILLY ASSUME THAT: 
 C 
-      call local(azpos,elpos,4Hazel,ierr) 
+      call local(azpos,elpos,'azel',ierr) 
       if (ierr.ne.0) return
       azof=off/cos(elpos) 
       elof=0.0

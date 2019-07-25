@@ -31,7 +31,7 @@ C
       do 150 i = 1,ilog/4 
           r1bit = r1bit+16
           if (idata(i).eq.idata(i+128)) goto 150
-          ibit = iand(idata(i),idata(i+128))
+          ibit = and(idata(i),idata(i+128))
           nzero = nzero+(16-i1bit(ibit))
 150       continue
       kcorel = .true. 

@@ -1,6 +1,5 @@
       program labck
 C 
-      dimension ip(5)
       integer*2 labt(4),lchk(2),labta(4),labtb(4) ,ihash,icode
 C 
       lu = 6
@@ -10,16 +9,16 @@ C
 9901  format(1x,"enter tape number (:: to quit) ")
       read(lui,9902) labt
 9902  format(4a2) 
-      if (labt(1).eq.2h::) goto 999 
+      if (ichcm_ch(labt,1,'::').eq.0) goto 999 
       write(lu,9905)
 9905  format(1x,"enter tape number again to double check (:: to quit) ")
       read(lui,9902) labta 
-      if(labta(1).eq.2h::) goto 999 
+      if (ichcm_ch(labta,1,'::').eq.0) goto 999 
       write(lu,9906)
 9906  format(1x,"enter tape number once more, just to be sure ", 
      .   " (:: to quit) ") 
       read(lui,9902)labtb
-      if(labtb(1).eq.2h::) goto 999 
+      if (ichcm_ch(labtb,1,'::').eq.0) goto 999 
 C 
 C     Generate check label.  Change any "O" to "0" in tape number first.
 C     Check for exactly 8 characters in tape number.

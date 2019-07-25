@@ -1,4 +1,4 @@
-void fc_lvdofn_v_(ip)
+void fc_lvdofn_v__(ip)
 long ip[5];
 {
    void lvdofn_v();

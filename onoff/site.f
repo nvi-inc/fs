@@ -7,55 +7,55 @@ C
 C  WRITE SITE RECORD TO LOG
 C
       icnext=1
-      icnext=ichmv(lbuf,1,6Hsite  ,1,5)
+      icnext=ichmv_ch(lbuf,1,'site ')
 C
 C  ANTENNA NAME
 C
       call fs_get_lnaant(lnaant)
       icnext=ichmv(lbuf,icnext,lnaant,1,8)
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)
+      icnext=ichmv_ch(lbuf,icnext,' ')
 C
 C  LONGITUDE
 C
       call fs_get_wlong(wlong)
       icnext=icnext+jr2as(sngl(wlong*rad2deg),lbuf,icnext,-8,4,isbuf)
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)
+      icnext=ichmv_ch(lbuf,icnext,' ')
 C
 C  LATITIUDE
 C
       call fs_get_alat(alat)
       icnext=icnext+jr2as(sngl(alat*rad2deg),lbuf,icnext,-8,4,isbuf)
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)
+      icnext=ichmv_ch(lbuf,icnext,' ')
 C
 C  DIAMETER
 C
       icnext=icnext+jr2as(diaman,lbuf,icnext,-6,2,isbuf)
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)
+      icnext=ichmv_ch(lbuf,icnext,' ')
 C 
 C  AXIS TYPE
 C 
-      icnext=ichmv(lbuf,icnext,4Hxxxx,1,4)
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)
+      icnext=ichmv_ch(lbuf,icnext,'xxxx')
+      icnext=ichmv_ch(lbuf,icnext,' ')
 C 
 C  POINTING MODEL NUMBER
 C 
       icnext=icnext+ib2as(0,lbuf,icnext,3)
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)
+      icnext=ichmv_ch(lbuf,icnext,' ')
 C 
 C  FIVPT VERSION NUMBER 
 C 
       icnext=icnext+jr2as(vfivpt,lbuf,icnext,-5,2,isbuf)
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)
+      icnext=ichmv_ch(lbuf,icnext,' ')
 C 
 C  FS VERSION 
 C 
       icnext=icnext+jr2as(fsver,lbuf,icnext,-5,2,isbuf) 
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)
+      icnext=ichmv_ch(lbuf,icnext,' ')
 C 
 C CLEAN UP AND SEND 
 C 
       nchars=icnext-1 
-      if (1.ne.mod(icnext,2)) icnext=ichmv(lbuf,icnext,2H  ,1,1) 
+      if (1.ne.mod(icnext,2)) icnext=ichmv_ch(lbuf,icnext,' ') 
       call logit2(lbuf,nchars) 
 C 
       return

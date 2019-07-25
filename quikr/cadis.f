@@ -61,7 +61,7 @@ C
       nch = iscn_ch(ibuf2,1,nchar,'=')
       if (nch.eq.0) nch = nchar+1 
 C                   If no "=" found, position after last character
-      nch = ichmv(ibuf2,nch,2H/ ,1,1) 
+      nch = ichmv_ch(ibuf2,nch,'/') 
 C                   Put / to indicate a response
 C 
       ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
@@ -88,7 +88,7 @@ C
       iclass = 0
       if (ierr.lt.0) goto 900 
       nch = nch - 1 
-      call put_buf(iclass,ibuf2,-nch,2Hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
 900   ip(1) = iclass
       ip(2) = 1 
       ip(3) = ierr

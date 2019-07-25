@@ -1,4 +1,4 @@
-void fc_loc_read_(b_1)
+void fc_loc_read__(b_1)
 int *b_1;
 {
      void loc_read();

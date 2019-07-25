@@ -3,7 +3,7 @@
 C     GET NEXT TIME-SCHEDULED JOB FOR BOSS
       dimension itscb(13,1),it(9),istkop(1),istksk(1)
       double precision t1,tnow,t2,tmin
-      logical klast,kstak
+      logical klast
 C                   TRUE IF THIS IS LAST TIME TO BE EXECUTED
       character cjchar
 C

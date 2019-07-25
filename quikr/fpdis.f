@@ -31,7 +31,7 @@ C
       nch = iscn_ch(ibuf,1,nchar,'=') 
       if (nch.eq.0) nch = nchar+1 
 C                  If no "=" found position after last character
-      nch = ichmv(ibuf,nch,2h/ ,1,1)  
+      nch = ichmv_ch(ibuf,nch,'/')  
 C              Put / to indicate a response 
 C 
 C     2.  Fill the buffer with the required common variables
@@ -59,7 +59,7 @@ C     5. Now send the buffer to SAM and schedule PPT.
 C 
 500   iclass = 0
       nch = nch - 1 
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
 C                   Send buffer starting with info to display 
       ip(1) = iclass
       ip(2) = 1 

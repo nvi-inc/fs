@@ -4,7 +4,7 @@
 /*  gag  920714  Added a check for Mark IV rack and drive to      */
 /*               to go along with Mark III rack and drive.        */
 /*                                                                */
-#include <curses.h>
+#include <ncurses.h>
 #include <signal.h>
 #include <math.h>
 #include <sys/types.h>
@@ -22,7 +22,7 @@ main()
 
   int m2init();
   int mout2();
-  int die();
+  void die();
   unsigned rte_sleep();
 
   setup_ids();

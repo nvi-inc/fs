@@ -1,6 +1,6 @@
       subroutine gmodl(lut,idcb,imbuf,pcof,mpar,ipar,phi,
      +                 imdl,it,jbuf,il,ierr,idcbs)
-      double precision das2b,gtdbl
+      double precision gtdbl
       dimension idcb(1),ipar(mpar),it(6)
       integer*2 jbuf(1)
       double precision pcof(mpar),phi

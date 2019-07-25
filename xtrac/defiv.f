@@ -1,7 +1,7 @@
       subroutine defiv(jbuf,ifc,ilc,laxis,nrep,npts,step,intp,ldev,cal, 
      +                 freq,iferr)
 C
-      integer*2 jbuf(1),laxis(1)
+      integer*2 jbuf(1),laxis(1),ldev
 C 
       iferr=1 
       ifield=0

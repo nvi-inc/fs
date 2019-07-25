@@ -28,7 +28,7 @@ C
       tmove=jm*(5.0/lvbosc_fs)*40e-6       !calculate actual time
 c
       call fs_get_drive(drive)
-      if(VLBA.eq.iand(drive,VLBA)) then
+      if(VLBA.eq.and(drive,VLBA)) then
          call fc_head_vmov(ihead,idir,ispdhd,jm,ip)
       else
 c

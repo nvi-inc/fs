@@ -25,17 +25,15 @@ void setup_ids()
 
     brk_att( BRK_KEY);
 
-    rte_fpmask();      /* disable fp exceptions for robustness */
-
                        /* ignore signals that might accidently abort */
-/*  if (-1==sigignore(SIGINT)) {
+    if (SIG_ERR==signal(SIGINT,SIG_IGN)) {
       perror("setup_ids: ignoring SIGINT");
       exit(-1);
     }
 
-    if (-1==sigignore(SIGQUIT)) {
+    if (SIG_ERR==signal(SIGQUIT,SIG_IGN)) {
       perror("setup_ids: ignoring SIGQUIT");
       exit(-1);
-    }*/
+    }
 
 }

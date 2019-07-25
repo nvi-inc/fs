@@ -10,7 +10,7 @@ C          C2=DECLINATION (DEGREES AND DECIMAL)
 C          C3=GEOCENTRIC DISTANCE (EARTH RADII)
 C
       implicit double precision (a-h,o-z)
-      real a,b,c,d,e,f,g,h,i,j
+      real a,b,c,d,e,f,g
 C
       data rps/0.48481368110954d-5/
 C

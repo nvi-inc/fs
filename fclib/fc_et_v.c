@@ -1,4 +1,4 @@
-void fc_et_v_(ip)
+void fc_et_v__(ip)
 long ip[5];
 {
    void et_v();

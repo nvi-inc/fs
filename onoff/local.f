@@ -1,5 +1,6 @@
-      subroutine local(lonpos,latpos,laxis,ierr)
+      subroutine local(lonpos,latpos,caxis,ierr)
       real lonpos,latpos
+      character*(*) caxis
 C 
 C  GET LOCAL ANTENNA COORDINATES
 C 
@@ -17,8 +18,6 @@ C
       include '../include/fscom.i'
       include '../include/dpi.i'
 C 
-      integer ichcm_ch
-C
 C  THE FOLLOWING VARIABLES ARE READ FROM FSCOM: 
 C 
 C        XOFF, YOFF, AZOFF, ELOFF, RAOFF, DECOFF, LAXNF, RADAT, DECDAT
@@ -43,7 +42,7 @@ C  NOW CONVERT BACK TO WHAT WE WERE ASKED FOR
 C
 C  HA/DEC, NOT RA/DEC
 C
-      if (ichcm_ch(laxis,1,'hadc').ne.0) goto 200
+      if (caxis.ne.'hadc') goto 200
       call cnvrt(6,x,y,dha,dec,it,dlat,dlon)
       lonpos=dha
       latpos=dec
@@ -52,7 +51,7 @@ C
 C  AZ/EL
 C
 200   continue
-      if (ichcm_ch(laxis,1,'azel').ne.0) goto 400
+      if (caxis.ne.'azel') goto 400
       call cnvrt(4,x,y,az,el,it,dlat,dlon)
       lonpos=az
       latpos=el
@@ -61,7 +60,7 @@ C
 C  X/Y NS
 C
 400   continue
-      if (ichcm_ch(laxis,1,'xyns').ne.0) goto 600
+      if (caxis.ne.'xyns') goto 600
       lonpos=x
       latpos=y
       return
@@ -69,7 +68,7 @@ C
 C  X/Y EW 
 C 
 600   continue
-C     if (ichcm_ch(laxis,1,'xyew').ne.0) goto 800
+C     if (caxis.ne.'xyew') goto 800
 C 
 C   WE DON'T SUPPORT THIS YET WEH 840728
 C 

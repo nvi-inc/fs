@@ -75,8 +75,10 @@ C
       integer*2 ibuf(ibufln),ibuf2(ibufln)
 C               - buffers for reading, writing
 C        ILEN   - length of above buffers 
-      logical kini
+      logical kini, kfirst, kgpib
 C               - TRUE once we have initialized 
+C               - TRUE on the first time through,
+C               - TRUE until I know the gpib driver isn't installed
 C        NDEV   - # devices in module table 
       parameter (idevln=32)
 C        length of device file names, up to 64 characters
@@ -100,7 +102,7 @@ C 4.  CONSTANTS USED
 C 
 C 5.  INITIALIZED VARIABLES 
 C 
-      data kini/.false./
+      data kini/.false./,kfirst/.true./,kgpib/.true./
       data minmod/0/, maxmod/4/
       data ilen/256/
 C
@@ -124,7 +126,9 @@ C                   Initialize return class and number of records
         ierr = -1 
         goto 1090 
       endif
-C 
+C
+      if (.not.kfirst) goto 200
+      kfirst=.false.
       if (kini) goto 200
 C 
 C     1.5  Read in device address table.
@@ -148,11 +152,15 @@ C !! IF THERE IS A COMMA, MOVE OPTION INTO VARIABLE
           idum = ichmv(moddev(1,i),1,ibuf,4,iend-4)
         endif
       enddo
-      if (nclrec.gt.imaxdev) call logit7(0,0,0,1,-101,2hib,imaxdev)
+      if (nclrec.gt.imaxdev) call logit7ci(0,0,0,1,-101,'ib',imaxdev)
 C
       ndev = min0(nclrec,imaxdev)
 C
       call fs_get_idevgpib(idevgpib)
+      if(ichcm_ch(idevgpib,1,'/dev/null ').eq.0) then
+         ierr = -12
+         goto 1090
+      endif
       ingpib = iflch(idevgpib,idevln)
       call opbrd(idevgpib,ingpib,ierr,ipcode)  	!! OPEN BOARD
       if (ierr.ne.0) goto 1090     		!! GPIB ERROR CONDITION
@@ -170,7 +178,20 @@ C     Read in the buffer, get the mode and module code.
 C     Search the module table for a match.
 C 
 C
-200   do 900 iclrec = 1,nclrec
+200   continue
+      if(ichcm_ch(idevgpib,1,'/dev/null ').eq.0) then
+         ierr = -12
+         goto 910
+      endif
+      if(.not.kini) then
+         if(.not.kgpib) then
+            ierr=-11
+         else
+            ierr=-10
+         endif
+         goto 910
+      endif
+      do 900 iclrec = 1,nclrec
         call ifill_ch(ibuf,1,ilen,' ')
         ireg = get_buf(iclass,ibuf,-ilen,idum,idum)
         nchar = ireg
@@ -214,7 +235,7 @@ C     IREG number of characters in the buffer
       nclrer = nclrer + 1
       idum = ichmv(ibuf2,3,ibuf,1,ireg)
       ibuf2(1) = nadev				!!MNEMONIC DEVICE NAME 
-      call put_buf(iclasr,ibuf2,-ireg-2,0,0)
+      call put_buf(iclasr,ibuf2,-ireg-2,'  ','  ')
       goto 900
 C
 C
@@ -275,16 +296,17 @@ C*************************** SUSPEND HERE **********************
 
       if (ierr .EQ. -4) then
 	call ifclr(ierr,ipcode) 
-	if (ierr .LT. 0) call logit7(0,0,0,1,ierr,2hib,ipcode)
+	if (ierr .LT. 0) call logit7ci(0,0,0,1,ierr,'ib',ipcode)
         if (ierr .EQ. -300) then
           call get_ibcnt(ibcnt)
-          call logit7(0,0,0,1,-9,2hib,ibcnt)
+          call logit7ci(0,0,0,1,-9,'ib',ibcnt)
         endif
       else if (ierr .EQ. -300) then
         call get_ibcnt(ibcnt)
-        call logit7(0,0,0,1,-9,2hib,ibcnt)
+        call logit7ci(0,0,0,1,-9,'ib',ibcnt)
       endif
-
+      if(ierr.eq.-322) kgpib=.false.
+c
       goto 1
       end
 

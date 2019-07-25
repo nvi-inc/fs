@@ -71,38 +71,38 @@ C
 C 
       inext=1 
       inext=ichmv(ilabel,inext,lant,1,8)
-      inexts=ichmv(ilabel,inext,2H  ,1,1) 
+      inexts=ichmv_ch(ilabel,inext,' ') 
       kazel=ichcm_ch(laxis,1,'azel').eq.0
       kxy=ichcm_ch(laxis,1,'xy').eq.0
       khadc=ichcm_ch(laxis,1,'hadc').eq.0
 C 
       if (.not.kazel) goto 55 
-      listr1=ichmv(istr1,1,8Hazimuth ,1,8)-1
-      listr2=ichmv(istr2,1,10Helevation ,1,10)-1
+      listr1=ichmv_ch(istr1,1,'azimuth ')-1
+      listr2=ichmv_ch(istr2,1,'elevation ')-1
       listr3=ichmv(istr3,1,istr1,1,listr1)
       listr4=ichmv(istr4,1,istr2,1,listr2)
-      listr3=ichmv(istr3,listr3,6Hoffset,1,6)-1 
-      listr4=ichmv(istr4,listr4,6Hoffset,1,6)-1 
+      listr3=ichmv_ch(istr3,listr3,'offset')-1 
+      listr4=ichmv_ch(istr4,listr4,'offset')-1 
       goto 95
 C 
 55    continue
       if (.not.kxy) goto 65 
-      listr1=ichmv(istr1,1,2Hx ,1,2)-1
-      listr2=ichmv(istr2,1,2Hy ,1,2)-1
+      listr1=ichmv_ch(istr1,1,'x ')-1
+      listr2=ichmv_ch(istr2,1,'y ')-1
       listr3=ichmv(istr3,1,istr1,1,listr1)
       listr4=ichmv(istr4,1,istr2,1,listr2)
-      listr3=ichmv(istr3,listr3,6Hoffset,1,6)-1 
-      listr4=ichmv(istr4,listr4,6Hoffset,1,6)-1 
+      listr3=ichmv_ch(istr3,listr3,'offset')-1 
+      listr4=ichmv_ch(istr4,listr4,'offset')-1 
       goto 95
 C 
 65    continue
       if (.not.khadc) goto 75 
-      listr1=ichmv(istr1,1,12Hhour angle  ,1,11)-1
-      listr2=ichmv(istr2,1,12Hdeclination ,1,12)-1
+      listr1=ichmv_ch(istr1,1,'hour angle ')-1
+      listr2=ichmv_ch(istr2,1,'declination ')-1
       listr3=ichmv(istr3,1,istr1,1,listr1)
       listr4=ichmv(istr4,1,istr2,1,listr2)
-      listr3=ichmv(istr3,listr3,6Hoffset,1,6)-1 
-      listr4=ichmv(istr4,listr4,6Hoffset,1,6)-1 
+      listr3=ichmv_ch(istr3,listr3,'offset')-1 
+      listr4=ichmv_ch(istr4,listr4,'offset')-1 
       goto 95
 C 
 75    continue
@@ -121,7 +121,7 @@ C
 100   continue
 C 
       inext=ichmv(ilabel,inexts,istr2,1,listr2) 
-      inext=ichmv(ilabel,inext,4H vs ,1,4)
+      inext=ichmv_ch(ilabel,inext,' vs ')
       inext=ichmv(ilabel,inext,istr1,1,listr1)
       call pquik(iwds,lon,lat,inp,iwidx,iwidy, 
      +           ixmin,ixmax,iymin,iymax, 
@@ -139,7 +139,7 @@ C
 200   continue
 C 
       inext=ichmv(ilabel,inexts,istr3,1,listr3) 
-      inext=ichmv(ilabel,inext,4H vs ,1,4)
+      inext=ichmv_ch(ilabel,inext,' vs ')
       inext=ichmv(ilabel,inext,istr1,1,listr1)
       call pquik(iwds,lon,lonoff,inp,iwidx,iwidy,
      +           ixmin,ixmax,iymin,iymax, 
@@ -157,7 +157,7 @@ C
 300   continue
 C 
       inext=ichmv(ilabel,inexts,istr4,1,listr4) 
-      inext=ichmv(ilabel,inext,4H vs ,1,4)
+      inext=ichmv_ch(ilabel,inext,' vs ')
       inext=ichmv(ilabel,inext,istr1,1,listr1)
       call pquik(iwds,lon,latoff,inp,iwidx,iwidy,
      +           ixmin,ixmax,iymin,iymax, 
@@ -175,7 +175,7 @@ C
 400   continue
 C 
       inext=ichmv(ilabel,inexts,istr3,1,listr3) 
-      inext=ichmv(ilabel,inext,4H vs ,1,4)
+      inext=ichmv_ch(ilabel,inext,' vs ')
       inext=ichmv(ilabel,inext,istr2,1,listr2)
       call pquik(iwds,lat,lonoff,inp,iwidx,iwidy,
      +           ixmin,ixmax,iymin,iymax, 
@@ -193,7 +193,7 @@ C
 500   continue
 C 
       inext=ichmv(ilabel,inexts,istr4,1,listr4) 
-      inext=ichmv(ilabel,inext,4H vs ,1,4)
+      inext=ichmv_ch(ilabel,inext,' vs ')
       inext=ichmv(ilabel,inext,istr2,1,listr2)
       call pquik(iwds,lat,latoff,inp,iwidx,iwidy,
      +           ixmin,ixmax,iymin,iymax,

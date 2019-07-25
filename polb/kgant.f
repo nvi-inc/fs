@@ -4,7 +4,7 @@
       integer*2 jbuf(1),laxis(2),lant(5)
       character*(*) iibuf
 C
-      logical kfmp,kdum,kglin
+      logical kfmp,kglin
 C
       integer*2 lmerr(14),lpeof(18),leerr(21),lferr(24),lderr(33)
       integer ichcm_ch

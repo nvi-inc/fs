@@ -1,4 +1,4 @@
-void fc_head_vmov_(ihead,idir,ispdhd,jm,ip)
+void fc_head_vmov__(ihead,idir,ispdhd,jm,ip)
 int *ihead;
 int *idir;
 int *ispdhd;

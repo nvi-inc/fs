@@ -1,4 +1,4 @@
-void fc_cls_clr_( iclass)
+void fc_cls_clr__( iclass)
 long *iclass;
 {
    int cls_clr(),idum;

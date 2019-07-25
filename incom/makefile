@@ -1,15 +1,14 @@
 OBJECTS = incom.o sincom.o
 #
-F77= gf77
-#FFLAGS = -c -g -i2
-FFLAGS = -c -g
-LIBES = ../boss/boss.a ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a\
+#FFLAGS = -c  -i2
+FFLAGS = -c 
+LIBES = ../bosslb/bosslb.a ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a\
 ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../fmpsee/fmpsee.a\
-../rtelb/rtelb.a -lrtx
+../rtelb/rtelb.a
 #
 ../bin/incom: $(OBJECTS)
-	gf77 -g -o ../bin/incom $(OBJECTS) $(LIBES)
-	../setb/setb ../bin/incom
+	f77  -o ../bin/incom $(OBJECTS) $(LIBES)
+	strip ../bin/incom
 incom:
 	rm -f ../bin/incom
 	make

@@ -1,12 +1,12 @@
 #
-CFLAGS= -g
-LIBES = ../clib/clib.a ../rtelb/rtelb.a -lrtx
+CFLAGS= 
+LIBES = ../clib/clib.a ../rtelb/rtelb.a
 #
 OBJECTS = mcbcn.o
 #
 ../bin/mcbcn: $(OBJECTS)
-	cc -g -o ../bin/mcbcn $(OBJECTS) $(LIBES)
-	../setb/setb ../bin/mcbcn
+	cc  -o ../bin/mcbcn $(OBJECTS) $(LIBES)
+	strip ../bin/mcbcn
 #
 mcbcn:
 	rm -f ../bin/mcbcn

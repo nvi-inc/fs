@@ -57,12 +57,12 @@ C
 C 
 C     5. Return the cal temp for display
 C 
-500   nch = ichmv(ibuf,nchar+1,2h/ ,1,1)
+500   nch = ichmv_ch(ibuf,nchar+1,'/')
       nch = nch + ir2as(caltmp(indtmp),ibuf,nch,5,1)
 C 
       iclass = 0
       nch = nch - 1 
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       ip(1) = iclass
       ip(2) = 1 
       ip(3) = 0 

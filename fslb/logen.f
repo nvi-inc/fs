@@ -11,7 +11,7 @@ C  required although the message and procedure name are ignored for now.
 C 
 C  INPUT: 
 C 
-      integer*2 lmessg(1) 
+      integer*2 lmessg(1)
 C      - the buffer holding the message 
 C     NCHAR - length of the message, in characters
 C     LSOR - source of the message, 1 character (determined by BOSS)
@@ -38,7 +38,7 @@ C
       dimension itime(5)
 C      - to retrieve system time
 C     NARGS - number of arguments passed to us
-      dimension lname(3)
+      integer*2 lname(3)
 C      - the calling program's name 
 C 
 C 
@@ -57,17 +57,17 @@ C
 C     IF (IERR.EQ.0.OR.NARGS.LT.8) GOTO 300 
       if(nargs.lt.8) go to 300
       if(ierr.eq.0) go to 300
-      nch = ichmv(ibuf,nch,7H?ERROR ,1,7) 
+      nch = ichmv_ch(ibuf,nch,'?ERROR ') 
       nch = ichmv(ibuf,nch,lwho,1,2)
-      nch = ichmv(ibuf,nch,2H  ,1,1)
+      nch = ichmv_ch(ibuf,nch,'  ')
       nch = nch + ib2as(ierr,ibuf,nch,4)
 C     IF (NARGS .LT. 9 .OR. LWHAT.EQ.0) GOTO 900
       if(nargs.lt.9) goto 900
       if(lwhat.eq.0) goto 900
-      nch = ichmv(ibuf,nch,2h( ,1,1)
+      nch = ichmv_ch(ibuf,nch,'(')
       if (lprocn(1).le.0) nch = ichmv(ibuf,nch,lwhat,1,2)
       if (lprocn(1).gt.0) nch = nch+ib2as(lwhat,ibuf,nch,4)
-      nch = ichmv(ibuf,nch,2H) ,1,1)
+      nch = ichmv_ch(ibuf,nch,')')
       goto 900
 C 
 C     3. This section is for Field System messages. 
@@ -85,7 +85,7 @@ C                   Find last non-blank character in proc name
       i = iflch(lprocn,12)
       nch = ichmv(ibuf,nch,lprocn,1,i)
 C                   Move proc name into output buffer 
-      nch = ichmv(ibuf,nch,2H/ ,1,1)
+      nch = ichmv_ch(ibuf,nch,'/')
 C                   Put a / after proc name 
 350   nch = ichmv(ibuf,nch,lmessg,1,nchar)
 C                   Finally move the log entry in 
@@ -101,13 +101,13 @@ C
 400   continue
       call pname(lname) 
 C                   Get our caller's name 
-      nch = ichmv(ibuf,nch,2H# ,1,1)
+      nch = ichmv_ch(ibuf,nch,'#')
 C                   Put the message type special character into the buffer
       i = iflch(lname,5)
 C                   Search the name for trailing blanks 
       nch = ichmv(ibuf,nch,lname,1,i) 
 C                   Move the program name into the bufer
-      nch = ichmv(ibuf,nch,2H# ,1,1)
+      nch = ichmv_ch(ibuf,nch,'#')
 C                   Put a # after the program name
       nch = ichmv(ibuf,nch,lmessg,1,nchar)
 C                   Finally, move in the message part itself

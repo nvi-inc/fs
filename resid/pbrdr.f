@@ -2,9 +2,6 @@
 C
       integer*2 ibuf(1) 
       integer*2 ipipe,idash
-
-      data ipipe/2H||/
-      data idash/2H--/
 C 
 C  draw BoRDeR
 C 
@@ -12,6 +9,9 @@ C
      +             ixmin,ixmax,iymin,iymax, 
      +             xmin,xmax,ymin,ymax, 
      +             rotat(2,2) 
+c
+      data ipipe/2H||/
+      data idash/2H--/
 C 
       do i=iymin,iymax 
         call pppnt(ibuf,ixmin,i,ipipe) 

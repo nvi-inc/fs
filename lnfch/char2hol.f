@@ -24,8 +24,9 @@ C
         CALL PCHAR(IARR,IFC+I-1,IWORD)
       ENDDO
       IF(IEND.LT.LN) THEN
+          IWORD=ichar(' ')
         DO I=IEND+1,LN
-          CALL PCHAR(IARR,IFC+I-1,2H  )
+          CALL PCHAR(IARR,IFC+I-1,IWORD)
         ENDDO
       ENDIF
 C

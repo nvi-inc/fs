@@ -74,14 +74,14 @@ C                   If our command was only "device" we are waiting for
 C                   data and know what to expect. 
       if (nch.eq.0) nch = nchar+1 
 C                   If no "=" found, position after last character
-      nch = ichmv(ibuf2,nch,2h/ ,1,1) 
+      nch = ichmv_ch(ibuf2,nch,'/') 
 C                   Put / to indicate a response
 C 
       if (kcom) goto 310
       if (kdata) goto 230 
 C 
       do 220 i=1,ncrec
-        if (i.ne.1) nch=ichmv(ibuf2,nch,2h, ,1,1) 
+        if (i.ne.1) nch=ichmv_ch(ibuf2,nch,',') 
 C                   If not first parm, put comma before 
         ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
         nchar = ireg(2) 
@@ -110,18 +110,18 @@ C               z will have   bit0 = 1 for stack2 enabled
 C                             remaining bits will be 0.
 C
       call fs_get_drive(drive)
-      if (MK4.eq.iand(MK4,drive)) then
+      if (MK4.eq.and(MK4,drive)) then
         ncx=nch
-        if (z1.eq.iand(ia2hx(ibuf,10),z1)) then
-          nch = ichmv(ibuf2,nch,6Hstack1,1,6)
+        if (z1.eq.and(ia2hx(ibuf,10),z1)) then
+          nch = ichmv_ch(ibuf2,nch,'stack1')
           nch = mcoma(ibuf2,nch)
         endif
-        if (z1.eq.iand(ia2hx(ibuf,8),z1)) then
-          nch = ichmv(ibuf2,nch,6Hstack2,1,6)
+        if (z1.eq.and(ia2hx(ibuf,8),z1)) then
+          nch = ichmv_ch(ibuf2,nch,'stack2')
           nch = mcoma(ibuf2,nch)
         endif
         if (nch.eq.ncx) then
-          nch = ichmv(ibuf2,nch,4Hnull,1,4)
+          nch = ichmv_ch(ibuf2,nch,'null')
           nch = mcoma(ibuf2,nch)
         endif
         nch=nch-1
@@ -133,18 +133,18 @@ C
 C
 310   continue
       call fs_get_drive(drive)
-      if (MK4.eq.iand(MK4,drive)) then
+      if (MK4.eq.and(MK4,drive)) then
         call fs_get_kena(kenastk)
         if (kenastk(1)) then
-          nch = ichmv(ibuf2,nch,6Hstack1,1,6)
+          nch = ichmv_ch(ibuf2,nch,'stack1')
           nch = mcoma(ibuf2,nch)
         endif
         if (kenastk(2)) then
-          nch = ichmv(ibuf2,nch,6Hstack2,1,6)
+          nch = ichmv_ch(ibuf2,nch,'stack2')
           nch = mcoma(ibuf2,nch)
         endif
         if ((.not.kenastk(1)).and.(.not.kenastk(2))) then
-          nch = ichmv(ibuf2,nch,4Hnull,1,4)
+          nch = ichmv_ch(ibuf2,nch,'null')
           nch = mcoma(ibuf2,nch)
         endif
         nch=nch-1
@@ -164,7 +164,7 @@ C
 400   continue
       ierr = 0
       if (ntrk.ne.0) goto 401
-      nch = ichmv(ibuf2,nch,8hdisabled,1,8)
+      nch = ichmv_ch(ibuf2,nch,'disabled')
       goto 500
 C
 401   continue
@@ -172,7 +172,7 @@ C
         if (itrk(i).ne.itrken(i).and..not.kcom) ierr = -300-i
         if (itrk(i).eq.0) goto 410
         ncx = ib2as(i,ibuf2,nch,o'100000'+2)
-        nch = ichmv(ibuf2,nch+ncx,2h, ,1,1)
+        nch = ichmv_ch(ibuf2,nch+ncx,',')
 410   continue
       nch = nch-1
 C
@@ -181,7 +181,7 @@ C     5. Now send the buffer to SAM.
 C
 500   iclass = 0
       nch = nch - 1
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
 C                   Send buffer starting with TP to display
 C
       if (.not.kcheck) ierr = 0 

@@ -14,9 +14,9 @@ C
       iold=jchar(ibuf,ixy)
       idiff=0 
 C 
-      if (iold.eq.jchar(2H  ,1)) goto 50
-      if (iold.eq.jchar(2H--,1)) goto 50
-      if (iold.eq.jchar(2H||,1)) goto 50
+      if (iold.eq.ichar(' ')) goto 50
+      if (iold.eq.ichar('-')) goto 50
+      if (iold.eq.ichar('|')) goto 50
 C 
       idiff=iold-48 
       if (iold.ge.49.and.iold.le.57) goto 50

@@ -4,15 +4,14 @@
      +         iwfiv,iwonof,iwpeak,lcpos,iwpos,
      +         nsorc,mc,msorc,mprc,isrcwt,isrcld)
 C
-      double precision das2b
       character*(*) icbuf
       integer*2 lset(mprc),lter(mprc),lname(mc,msorc),lcpre(mprc,msorc)
-      integer*2 lcpos(mprc,msorc),jbuf(1),idum(4)
+      integer*2 lcpos(mprc,msorc),jbuf(1),idum(4),ib
       real cra(msorc),cdec(msorc),cepoch(msorc),azar(1),elar(1)
       integer iwpre(msorc),iwfiv(msorc),iwonof(msorc),iwpeak(msorc)
       integer iwpos(msorc)
 C
-      logical kfmp,kfild,kreof,kopn,kread,kif
+      logical kfild,kreof,kopn,kread,kif
       integer idcb(1)
 C
       integer fmpread, ichcm_ch, trimlen

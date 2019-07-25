@@ -1,7 +1,7 @@
-CFLAGS = -g
-LIBS = ../clib/clib.a ../rtelb/rtelb.a -lrtx
+CFLAGS = 
+LIBS = ../clib/clib.a ../rtelb/rtelb.a
 OBJECTS = 
 
 ../bin/brk : brk.o $(OBJECTS)
 	cc -o ../bin/brk brk.o $(OBJECTS) $(LIBS)
-	../setb/setb ../bin/brk
+	strip ../bin/brk

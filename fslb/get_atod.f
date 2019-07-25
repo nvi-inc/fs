@@ -23,7 +23,7 @@ C
 C  check for and handle VLBA REC
 C
       call fs_get_drive(drive)
-      if(VLBA.eq.iand(drive,VLBA)) then
+      if(VLBA.eq.and(drive,VLBA)) then
         call fc_get_vatod(ichan,volt,ip)
         return
       endif

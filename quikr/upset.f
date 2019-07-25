@@ -86,7 +86,7 @@ C
           if (ierr.ne.0) then
             ierr = -200-i 
             goto 990
-          else if(i.eq.4.and.VLBA.ne.iand(rack,VLBA)) then
+          else if(i.eq.4.and.VLBA.ne.and(rack,VLBA)) then
             ierr = -304
             goto 990
           endif

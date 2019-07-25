@@ -7,6 +7,7 @@ C     ROUTINE TO GENERATE A CRCC CODE SEQUENCE
 C 
 C     ARW 780917
 C     WEH 911012 port to PC, use DOD MIL-STD-1753 bit intrinsics
+C     WEH 950330 port to linux f2c
 C 
 C     "N" IS THE # OF BITS IN THE CRCC GENERATOR. 
 C     "MASK" HAS "1"'s IN ALL POSITIONS WHERE AN XOR GATE FOLLOWS THE 
@@ -46,46 +47,47 @@ c  on little adend and big adend machines and also is different from
 c  DOD MIL-STD-1753 order
 c  
       integer igetb,i
-      integer*2 nmask,notmsk,ipat,jdata,k1,k2,jchar
+      integer*2 nmask,notmsk,ipat,jdata,k1,k2,iishftc,iishft
       integer*2 m1,m2,m32768
       data m1/o'177777'/,m2/o'177776'/,m32768/o'100000'/
 C
 C     CREATE MASK OF N ONES.
 50     continue
-      nmask=ishft(m1,n-16) 
-      istate=iand(istate,nmask) 
+      nmask=iishft(m1,n-16) 
+      istate=and(istate,nmask) 
 C     CREATE COMPLEMENT OF EXCLUSIVE-OR MASK
-      notmsk=ieor(nmask,mask) 
+      notmsk=xor(nmask,mask) 
       do 100 i=1,nbits
 C 
 C     DETERMINE FEEDBACK PATTERN
       ipat=0
-      if (iand(mask,1) .eq. 0) go to 70 
+      if (and(mask,1) .eq. 0) go to 70 
 C 
 C     LEAST SIG BIT OF MASK IS SET
       jdata=igetb(idata,idbit)
       idbit=idbit+1 
-      if (ieor(iand(istate,1),jdata) .eq. 1) ipat=nmask 
+      if (xor(and(istate,1),jdata) .eq. 1) ipat=nmask 
 C     MODIFY LAST BIT OF IPAT TO CORRESPOND TO JDATA
-      ipat=ior(iand(ipat,m2),jdata)
+      ipat=or(and(ipat,m2),jdata)
       go to 80
 C 
 C     LEAST SIG BIT OF MASK IS ZERO 
-70    if (iand(istate,1) .eq. 1) ipat=nmask 
+70    if (and(istate,1) .eq. 1) ipat=nmask 
 C 
 C     XOR THE APPROPRIATE BITS
 80    continue
-      k1=iand(ieor(istate,ipat),mask) 
+      k1=and(xor(istate,ipat),mask) 
 C     MASK BITS WHICH ARE DIRECTLY TRANSMITTED
-      k2=iand(istate,notmsk)
+      k2=and(istate,notmsk)
 C 
 C     CREATE NEW STATE OF GENERATOR BY "OR"ing K1 & K2 AND ROTATING 
 C     LOWER N BITS RIGHT 1 BIT. 
-      istate=ishftc(ior(k1,k2),15,16) !should be next line
-c     istate=ishftc(ior(k1,k2),-1,16) !doesn't work oasys fortran 1.8.5
-      if (iand(istate,m32768) .eq. 0) go to 90 
-      istate=iand(istate,nmask) 
-      istate=ior(istate,ishft(m32768,n-16))
+c     istate=ishftc2(or(k1,k2),15,16) !should be next line
+c     istate=ishftc2(or(k1,k2),-1,16) !doesn't work oasys fortran 1.8.5
+      istate=iishftc(or(k1,k2),-1,16)
+      if (and(istate,m32768) .eq. 0) go to 90 
+      istate=and(istate,nmask) 
+      istate=or(istate,iishft(m32768,n-16))
 90    if (isbit .eq. 0) go to 100 
       call putb(ibuf,isbit,istate)
       isbit=isbit+1 

@@ -7,8 +7,11 @@
 #include <sys/times.h>
 #include <time.h>
 #include <fcntl.h>
-#include <termio.h>
+#include <termios.h>
 #include <math.h>
+#include <errno.h>
+#include <linux/serial.h>
+#include "/usr/src/linux/drivers/char/digi.h"
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
@@ -40,12 +43,12 @@
 #define MON 0      /* mcb monitor request */
 #define CMD 1      /* mcb command request */
 #define BUFSIZE 512 /* size of the input and output buffers */
-#define TIME_OUT 20 /* time-out in centiseconds */
+#define TIME_OUT 3 /* time-out in centiseconds */
+#define MAX_DEV 25
 
 /* function prototypes */
 struct MCBAD *get_mcbad (); /* read the mcbad.ctl file */
 long fjuldat(); /* get Julian date - 0.5 */
-int isahexnum ();  /* check for valid hexadecimal number */
 int getad ();
 int doinit(); /* process rmpar case 0 */
 int doproc(); /* process rmpar case 1 */
@@ -67,6 +70,7 @@ long times();
 int putout();    /* fill and dispatch output buffer */
 void wait_mcb(); /* wait a fraction of a second */
 int rte_prior();
+void isdigiboard();
 
 /* global variables */
 static struct MCBAD
@@ -75,7 +79,8 @@ static struct MCBAD
     unsigned short id;   /* module id */
     unsigned short base; /* module base addr */
     unsigned short len;  /* module addr block len */
-} *dev[25];    /* pointers to MCB address blocks */
+} *dev[MAX_DEV+1];    /* pointers to MCB address blocks */
+
 
 static struct termio mcb;     /* mcb tty line attributes structure */
 static char mcbad_file[] = {
@@ -94,6 +99,7 @@ static int nbufout;     /* number of output buffers */
 static unsigned char secho[80];
 static int necho;
 static int iecho;
+static int digiboard;
 
 /* external variables */
 extern struct fscom *shm_addr;    /* shared memory segment */
@@ -219,24 +225,6 @@ FILE *fp; /* file pointer to mcb address block file */
 
 /* ********************************************************************* */
 
-int isahexnum(s) /* is the string s a hex number */
-char *s; /* string to check */
-
-{
-    int i;   /* general purpose counter */
-    int len;   /* length of string */
-
-    len = strlen(s);
-    for (i = 0; i < len; i++) {
-        if (  !(((*s >= 'a') && (*s <= 'f')) || ((*s >= 'A') && (*s <= 'F')) ||
-                ((*s >= '0') && (*s <= '9'))) ) return(FALSE);
-                s++;
-    }
-    return(TRUE);
-}
-
-/* ********************************************************************* */
-
 int getad (s, id, addr, len) /* get address from name */
 char *s;   /* first char of mnemonic */
 unsigned short *id;    /* module id code */
@@ -277,10 +265,10 @@ int doinit()
 
     cnt = 0;
 
-    while ( ((dev[cnt] = get_mcbad(fp)) != NULL) && (cnt++ < 25) ) ;
-
+    while ( ((dev[cnt] = get_mcbad(fp)) != NULL) && (cnt++ < MAX_DEV) )
+         ;
     fclose (fp);
-    if ( cnt >= 25 ) {
+    if ( cnt > MAX_DEV ) {
 #ifdef DEBUG
         printf("too many mcb devices\n");
 #endif
@@ -325,7 +313,7 @@ int doinit()
 /* ********************************************************************* */
 
 int doproc(ip4)    /* process the input class buffers */
-long ip4;
+long *ip4;
 {
     time_t fmt1; /* formatter time first try */
     int cnt;     /* general purpose counter */
@@ -355,7 +343,9 @@ long ip4;
     numbuf = ip[2];
 
     for(bufcnt = 0; bufcnt < numbuf; bufcnt++) {
-        if ( (nchars = cls_rcv(ip[1],inbuf,512,&rtn1,&rtn2,msgflg,save)) <= 0) {
+        if (
+           (nchars = cls_rcv(ip[1],inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0
+           ) {
 #ifdef DEBUG
             printf ("MCBCN failed to get a request buffer\n");
 #endif
@@ -639,33 +629,29 @@ int nch;  /* number of characters to read */
 
 {
     int cnt; /* character counter */
-    int ict;
     struct tms tms_buff;
     long end;
-
-
-/*
-    set_mcb (5);    
-*/
+    int iret;
+    unsigned char inch;
 
     cnt = 0;
 
     end=times(&tms_buff)+TIME_OUT;  /* calculate ending time */
 
-    while (cnt < nch) {
-        while( end-times(&tms_buff)>0 && ioctl(mcb_fildes,FIORDCHK,NULL) == 0) 
-            rte_sleep( (unsigned) 1);
-
-/* if we timed-out, but there are still characters on the input queue */
-/* it might not be the device's fault it timed-out, we might have been */
-/* delayed by a busy system, so we won't give-up until the queue is empty */
-
-        if( end-times(&tms_buff)<=0  && ioctl(mcb_fildes,FIORDCHK,NULL) == 0){
-           return (FALSE);
-        }
-        read(mcb_fildes,ch++,1);   
-        if(iecho) secho[necho++]=*(ch-1);
-        cnt++;
+    while (cnt <nch) {
+      iret=0;
+      while (iret == 0 ) {
+        iret=read(mcb_fildes,&inch,1);
+        if(iret==1)
+          break;
+        else if (end-times(&tms_buff) <= 0) {
+           return FALSE;                    /* time-out */
+        } else if(iret == -1)
+          return FALSE;                    /* read error */
+      }
+      *(ch++)=inch;
+       if(iecho) secho[necho++]=*(ch-1);
+       cnt++;
     }
 #ifdef DEBUG
     printf(" actual delay %d \n",times(&tms_buff)-(end-TIME_OUT));
@@ -681,9 +667,10 @@ int mode;            /* command or monitor */
 
 {
     unsigned char messo1[5];  /* output chars in the right order */
-    unsigned char messo2[10];  /* output chars with ESCP as necessary */
     int nch;                  /* number of char to send */
     int i;                    /* general purpose counter */
+    int iret;
+    unsigned long statusReg;
 
     /* prepare the buffer */
     messo1[0] = SYN;
@@ -694,25 +681,37 @@ int mode;            /* command or monitor */
 
     if (mode == CMD) messo1[1] |= 0x80;  /* write flag for commands */
 
-    /* add ESCP characters as necessary */
-    for (i = nch = 0; i < 5; i++,nch++)
-    {
-        messo2[nch] = messo1[i];
-        if (messo2[nch] == ESCP) {
-            messo2[++nch] = ESCP;
-        }
-        if ( (messo2[nch] == SYN) && (i != 0) ) {
-            messo2[nch] = ESCP;
-            messo2[++nch] = SYN;
-        }
-    }
+     set_mcb(2);
 
-    ioctl(mcb_fildes,TIOCFLUSH,NULL);
+     if(write(mcb_fildes,messo1,1) != 1) {
+        perror("write_mcb: SYN");
+        return(FALSE);
+     }
+
+     if(!digiboard) {
+       while((0==(iret=ioctl(mcb_fildes,TIOCSERGETLSR, &statusReg))) &&
+          ((statusReg & TIOCSER_TEMT) != TIOCSER_TEMT))
+             ;
+       if(iret != 0) {
+          perror("write_mcb:TEMT");
+          exit(-1);
+       }
+     } else{
+       if(-1==tcdrain(mcb_fildes)) {
+          perror("write_mcb:tcdrain");
+          exit(-1);
+       }
+     }
+
+     set_mcb(1);
 
         /* write the characters to the MCB */
-    if ( write(mcb_fildes,messo2,nch) != nch) {
+
+     if ( write(mcb_fildes,messo1+1,4) != 4) {
+        perror("write_mcb:write 4");
         return(FALSE);
     }  
+
 
 #ifdef DEBUG
     for(i = 0; i < nch; i++) {
@@ -725,38 +724,127 @@ int mode;            /* command or monitor */
         for(i=0;i<5;i++) 
             secho[necho++]=messo1[i];
 
+/*make sure output queue is empty before returning */
+    if(-1==tcdrain(mcb_fildes)) {
+      perror("write_mcb:tcdrain");
+      exit(-1);
+    }
+
     return(TRUE);
 }
 
 /* ********************************************************************* */
 
-void set_mcb(nread) /* set communication parameters */
-int nread;
+void set_mcb(parity) /* set communication parameters */
+int parity;
 
 {
-/* 9600 baud, 8 char, no parity, read enabled,   */
-/*       direct connection, disconnect on close. */
+    struct serial_struct allSerialSettings;
+    int oldBits;
 
-    mcb.c_cflag = B9600 | CS8 | CREAD | CLOCAL | HUPCL;
+/* 57600 baud, 8 char, no parity, read enabled,   */
+/*       direct connection, do not disconnect on close. */
 
-    mcb.c_lflag = 0;
+    mcb.c_cflag &= ~( HUPCL    |CRTSCTS| CSIZE| CBAUD|CSTOPB );
+
+    mcb.c_cflag |= ( CLOCAL |CREAD | CS8);
+
+/* 1==odd, 2 == even, 0(and all others)==none */
+
+    if(parity == 1)
+      mcb.c_cflag |= PARENB|PARODD;
+    else if(parity == 2) {
+      mcb.c_cflag |= PARENB;
+      mcb.c_cflag &= ~PARODD;
+     } else
+      mcb.c_cflag &= ~ PARENB;
+
+    if(digiboard)
+        mcb.c_cflag |= B50;
+    else
+      mcb.c_cflag |= B38400;
+
+    mcb.c_iflag &= ~( INPCK   |IGNPAR  |PARMRK  |ISTRIP  |BRKINT  |IGNCR   |ICRNL   |INLCR   
+                     |IXOFF   |IXON    |IMAXBEL |IUCLC   );
+    mcb.c_iflag |= ( IGNBRK |IXANY );
+
+    mcb.c_oflag &= ~( OPOST   |ONLCR  
+#ifdef OXTABS
+    |OXTABS  
+#else
+    |XTABS   
+#endif
+#ifdef ONOEOT
+    |ONOEOT  
+#endif
+    |OLCUC );
+
+    mcb.c_lflag &= ~( ICANON  |ECHO    |ISIG    |IEXTEN  |TOSTOP  |ECHOCTL 
+#ifdef XCASE
+    |XCASE   
+#endif
+  );
+
 
 /* char functions are INTR, QUIT, ERASE, KILL,    */
 /* EOF(min), EOL(time), (reserved), SWTCH.  min=min # char, time = timeout */
 /* value in 0.1 second units */
 
-    mcb.c_cc[0] = 0; /* INTR */
-    mcb.c_cc[1] = 0; /* QUIT */
-    mcb.c_cc[2] = 0; /* ERASE */
-    mcb.c_cc[3] = 0; /* KILL */
-    mcb.c_cc[4] = 1; /* min number of char necessary for completion */
-    mcb.c_cc[5] = 10;    /* timeout value in 0.1 sec units */
-    mcb.c_cc[7] = 0;     /* SWTCH */
+    mcb.c_cc[VMIN]   = 0; /* min number of char necessary for completion */
+    mcb.c_cc[VTIME]  = 1;    /* timeout value in 0.1 sec units */
 
-    ioctl (mcb_fildes,TCSETA,&mcb);  /* set terminal settings */
+    if(-1==ioctl (mcb_fildes,TCSETA,&mcb)){ /* set terminal settings */
+       perror("set_mcb:setting terminal");
+       exit(-1);
+    }
+
+    if(!digiboard) {
+      if(-1 == ioctl(mcb_fildes, TIOCGSERIAL, &allSerialSettings)) {
+        perror("set_mcb:getting serial");
+        exit(-1);
+      }
+
+      oldBits = allSerialSettings.flags & ASYNC_SPD_MASK;
+
+/* Zero the SPD bits first.  (== "normal" 38400 baud) */
+
+      allSerialSettings.flags &= ~ASYNC_SPD_MASK;
+
+/* 57600 baud. */
+
+      allSerialSettings.flags |= ASYNC_SPD_HI;
+
+      if ((allSerialSettings.flags & ASYNC_SPD_MASK) != oldBits)
+        if(-1 == ioctl(mcb_fildes, TIOCSSERIAL, &allSerialSettings)) {
+          perror("set_mcb:setting serial");
+          exit(-1);
+        }
+    }
 
 }
 
+/* ********************************************************************* */
+
+void isdigiboard()
+{
+    struct serial_struct allSerialSettings;
+    if(ioctl(mcb_fildes, TIOCGSERIAL, &allSerialSettings)==-1) {/*digi! */
+       digi_t di;
+       digiboard = TRUE;
+       if(-1==ioctl(mcb_fildes, DIGI_GETA, &di)) {
+         perror("isdigiboard:DIGI_GETA");
+         exit(-1);
+       }
+       di.digi_flags |= DIGI_FAST ;
+       if(-1==ioctl(mcb_fildes, DIGI_SETAW, &di)){
+         perror("isdigiboard:DIGI_SETA");
+         exit(-1);
+       }
+    } else
+      digiboard=FALSE;
+
+    return;
+}
 /* ********************************************************************* */
 
 void close_mcb()
@@ -771,11 +859,16 @@ int open_mcb(devnm)    /* open mcb tty line CAK 16OCT91 */
 char *devnm;
 
 {
-    if ( (mcb_fildes = open(devnm, O_NDELAY | O_RDWR)) < 0 ) {
+    if ( (mcb_fildes = open(devnm, O_RDWR)) < 0 ) {
         return(FALSE);
     } else {
-        ioctl (mcb_fildes,TCGETA,&mcb);   /* get terminal settings */
-            set_mcb (1);                      /* set baud, etc */
+        if(-1==ioctl (mcb_fildes,TCGETA,&mcb)){  /* get terminal settings */
+            perror("open_mcb:getting terminal settings");
+            exit(-1);
+        }
+        isdigiboard();
+        set_mcb (1);                      /* set baud, etc */
+
         return(TRUE);
     }
 }
@@ -791,8 +884,14 @@ int *result;         /* return code */
     unsigned char ch[3]; /* temporary storage */
     unsigned short dummy;
 
+    if(tcflush(mcb_fildes,TCIFLUSH)!=0) {
+       perror("mcb_get:flushing");
+       exit(-1);
+    }
+
     dummy = 0;
     *val = 0;
+
     if ( !write_mcb(addr,dummy,MON) ) { /* send monitor request */
 #ifdef DEBUG
         printf("write failed on MCB\n");
@@ -802,6 +901,7 @@ int *result;         /* return code */
     }
 
     ch[0] = ch[1] = ch[2] = 0;
+
     if ( !read_mcb(ch,2) ) { /* get reply */
 #ifdef DEBUG
         printf("timeout on MCB\n");
@@ -809,6 +909,7 @@ int *result;         /* return code */
         *result = -1;
         goto done;
     }
+
     if(!read_mcb(ch+2,1)){ /* short monitor reponse */
        if(ch[1]==NAK)
          *result = -5;    /* it was a NAK */
@@ -819,6 +920,7 @@ int *result;         /* return code */
 
     *val = (ch[1]<<8) + ch[2];
     *result = 1;
+
 done:
        send_echo();
        return;
@@ -834,6 +936,11 @@ int *result;         /* return code */
 {
     unsigned char ch[3]; /* temporary storage */
 
+    if(tcflush(mcb_fildes,TCIFLUSH)!=0){
+      perror("mcb_out:flushing");
+      exit(-1);
+    }
+
     if ( !write_mcb(addr,val,CMD) ) {
 #ifdef DEBUG
         printf("write failed on MCB\n");
@@ -841,6 +948,7 @@ int *result;         /* return code */
         *result = -121;
         goto done;
     }
+
     if (!read_mcb(ch,2)) {
 #ifdef DEBUG
         printf("timeout on MCB\n");

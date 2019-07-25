@@ -14,8 +14,8 @@ C
       if (is.lt.0) is=0
       if (is.gt.59) is=59
 C
-      iptdc=ichmv(lbuf,icnext,2h++,1,1)
-      if (decin.lt.0.0) iptdc=ichmv(lbuf,icnext,2h--,1,1)
+      iptdc=ichmv_ch(lbuf,icnext,'+')
+      if (decin.lt.0.0) iptdc=ichmv_ch(lbuf,icnext,'-')
       iptdc=iptdc+ib2as(ih,lbuf,iptdc,o'40000'+o'400'*2+2)
       iptdc=iptdc+ib2as(im,lbuf,iptdc,o'40000'+o'400'*2+2)
       iptdc=iptdc+ib2as(is,lbuf,iptdc,o'40000'+o'400'*2+2)

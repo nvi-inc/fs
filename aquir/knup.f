@@ -4,7 +4,7 @@ C
       double precision dra,ddec,daz,del,dlat,dlon
 C
       real azar(1),elar(1)
-      integer*2 lname(mc),ibuf(40),ibufi(18),ibufo(8)
+      integer*2 lname(mc),ibufi(18),ibufo(8)
       double precision alati,elong,gheig,delr,deld,dc
       integer get_buf,it(6),itb(6)
       integer*4 ip(5)
@@ -43,8 +43,8 @@ C
         itb(i)=it(i)
       enddo
       ip(1)=0
-      call put_buf(ip(1),ibufi,-48,0,0)
-      call run_prog('moon','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      call put_buf(ip(1),ibufi,-48,'  ','  ')
+      call run_prog('moon ','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
       call rmpar(ip)
       idum = get_buf(ip(1),ibufo,-16,idum,idum)
       goto 100

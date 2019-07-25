@@ -72,7 +72,7 @@ C                   If our command was only "device" we are waiting for
 C                   data and know what to expect. 
       if (nch.eq.0) nch = nchar+1 
 C                   If no "=" found, position after last character
-      nch = ichmv(ibuf2,nch,2h/ ,1,1)         ! put / to indicate a response
+      nch = ichmv_ch(ibuf2,nch,'/')         ! put / to indicate a response
 C 
       if (.not.kcom .and. .not.kdata) then
         do i=1,ncrec
@@ -117,7 +117,7 @@ c
 c
           inf=freq/100
           nch=nch+ib2as(inf,ibuf2,nch,z'8000'+4)
-          nch=ichmv(ibuf2,nch,2h. ,1,1)
+          nch=ichmv_ch(ibuf2,nch,'.')
           inf=freq-inf*100
           nch=nch+ib2as(inf,ibuf2,nch,z'8000'+2)
           nch = mcoma(ibuf2,nch)
@@ -134,7 +134,7 @@ C     5. Now send the buffer to SAM and schedule PPT.
 C 
       iclass = 0
       nch = nch - 1 
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
       if (.not.kcheck) ierr = 0 
       ip(1) = iclass
       ip(2) = 1 

@@ -5,8 +5,8 @@ C
 C
       include '../include/dpi.i'
 C
-      data rps/0.48481368110954d-5/
-      data y,d1,d2/36525.d0,3600.d0,60.d0/
+c     data rps/0.48481368110954d-5/
+c     data d1,d2/36525.d0,3600.d0,60.d0/
 C     COMPUTES ARGUMENTS FOR A GIVEN JULIAN DATE
 C     T= JULIAN DAYS FROM JAN 1.5,2000
       t=date-2451545.d0

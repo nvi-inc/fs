@@ -39,7 +39,6 @@ FILE *dcbfs;
 
 main(){
   int cls_rcv();
-  int sscanf();
   long class, ip[5];
   int rtn1, rtn2;
   char inbuf[81];
@@ -67,7 +66,7 @@ main(){
     fprintf(stderr,"fserr: error opening %s\n",CTLST);
     perror("fserr");
   } else {
-    listinit(dcbfs,list);
+    listinit(dcbfs,&list);
     fclose(dcbfs);
   }
 
@@ -77,7 +76,7 @@ main(){
     fprintf(stderr,"fserr: error opening %s\n",CTLFS);
     perror("fserr");
   } else {
-    listinit(dcbfs,list);
+    listinit(dcbfs,&list);
     fclose(dcbfs);
   }
 
@@ -91,7 +90,8 @@ main(){
 /* main rept-until loop done once for each err reported */
 
 Repeat: 
-  inbuf[48]='  ';
+  
+  inbuf[48]=' ';
   if(memcmp(inbuf, "##", 2)==0){ 
     printf("number of entries = ");
     goto Suspend; 

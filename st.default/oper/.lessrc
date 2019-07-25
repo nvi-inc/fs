@@ -1,0 +1,6 @@
+[B  	forw-line      
+[A  	back-line     
+[6~ 	forw-scroll
+[5~  	back-scroll 
+[1~  	goto-line
+[4~  	goto-end

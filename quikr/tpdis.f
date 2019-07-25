@@ -77,7 +77,7 @@ C                   If our command was only "device" we are waiting for
 C                   data and know what to expect. 
       if (nch.eq.0) nch = nchar+1 
 C                   If no "=" found, position after last character
-      nch = ichmv(ibuf2,nch,2h/ ,1,1) 
+      nch = ichmv_ch(ibuf2,nch,'/') 
 C                   Put / to indicate a response
 C 
       if (kcom) goto 310
@@ -97,7 +97,7 @@ C
       ireg(2) = get_buf(iclass,ibufd,-ilenm,idum,idum)
 C                   Read first record into display buffer 
       call fs_get_drive(drive)
-      if (MK3.eq.iand(MK3,drive)) then
+      if (MK3.eq.and(MK3,drive)) then
         ireg(2) = get_buf(iclass,ibufs,-ilenm,idum,idum)
       endif
 C                   Read next record into  settings buffer
@@ -111,7 +111,7 @@ C
       call fs_set_irdytp(irdytp)
       call fs_set_itactp(itactp)
       call fs_set_lfeet_fs(lfeet_fs)
-      if (MK3.eq.iand(MK3,drive)) then
+      if (MK3.eq.and(MK3,drive)) then
         call ma2rp(ibufs,iremtp,iby,ieq,ibw,ita,itb,ial)
         call fs_set_iremtp(iremtp)
       endif
@@ -168,7 +168,7 @@ C     4. Now send the buffer to SAM.
 C 
 500   iclass = 0
       nch = nch - 1 
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
 C                   Send buffer starting with TP to display 
 C 
       ip(1) = iclass

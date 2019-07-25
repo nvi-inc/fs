@@ -2,7 +2,7 @@
 C
       include '../include/dpi.i'
 C
-      logical kinit,kgpnt,kopn,koutp,kpst,kplin,kpdat,kpout,kpfit
+      logical kinit,kgpnt,kopn,koutp,kpst,kplin,kpdat,kpout_ch,kpfit
       logical kif,kgetm,kptri,kpant,kgant,kbit,kpcon,kfixed
 C
       double precision lonsum,lonrms,latsum,latrms,dirms
@@ -25,7 +25,7 @@ C
       dimension latres(600),lonres(600)
       dimension idcbo(2),it(6),ipar(20),ito(6),ispar(20)
       double precision pcof(20),pcofer(20),phi,spcof(20)
-      double precision a(210),b(20),aux(20),scale(20)
+      double precision a(210),b(20),aux(20),scale(20),ddum
 C
       equivalence (ireg,reg)
 C
@@ -90,10 +90,10 @@ C
       call fmpclose(idcbo,ierr)
       if (koutp(lu,idcbo,idcbos,iapp,iobuf)) goto 10000
 C
-      if (kpout(lu,idcbo, 8H$antenna  ,8,iobuf,lst)) goto 10000
+      if (kpout_ch(lu,idcbo,'$antenna',iobuf,lst)) goto 10000
       if (kpant(lu,idcbo,lant,laxis,jbuf,il,lst,iobuf)) goto 10000
 C
-      if (kpout(lu,idcbo,10H$observed ,10,iobuf,lst)) goto 10000
+      if (kpout_ch(lu,idcbo,'$observed ',iobuf,lst)) goto 10000
       call inism(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,
      &           wdisum,igp)
       do i=1,inp
@@ -107,7 +107,7 @@ C
      +           mc,iobuf,lst,jbuf,il)) goto 10000
       enddo
 C
-      if (kpout(lu,idcbo,16H$observed_stats ,16,iobuf,lst)) goto 10000
+      if (kpout_ch(lu,idcbo,'$observed_stats ',iobuf,lst)) goto 10000
 C
       call rstat(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,wdisum,
      &           igp,lu)
@@ -118,10 +118,10 @@ C
       call inism(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,
      &           wdisum,igp)
 C
-      if (kpout(lu,idcbo,10H$old_model ,10,iobuf,lst)) goto 10000
-      if (kplin(lu,idcbo,pcof,mpar,idum,0,imdl,ito,ipar,phi,iobuf,lst,
+      if (kpout_ch(lu,idcbo,'$old_model',iobuf,lst)) goto 10000
+      if (kplin(lu,idcbo,pcof,mpar,ddum,0,imdl,ito,ipar,phi,iobuf,lst,
      +    jbuf,il)) goto 10000
-      if (kpout(lu,idcbo,12H$uncorrected ,12,iobuf,lst)) goto 10000
+      if (kpout_ch(lu,idcbo,'$uncorrected',iobuf,lst)) goto 10000
 C
 C PARAMETER FLAGS:
 C
@@ -166,7 +166,7 @@ C
       call rstat(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,wdisum,
      &           igp,lu)
 C
-      if (kpout(lu,idcbo,18h$uncorrected_stats ,18,iobuf,lst))
+      if (kpout_ch(lu,idcbo,'$uncorrected_stats',iobuf,lst))
      +  goto 10000
 C
       if (kpst(lu,idcbo,lonsum,lonrms,latsum,latrms,dirms,igp,inp,
@@ -218,19 +218,19 @@ C
 C
       imdl=imdl+1
 C
-      if (kpout(lu,idcbo,10h$fit_data ,10,iobuf,lst)) goto 10000
+      if (kpout_ch(lu,idcbo,'$fit_data ',iobuf,lst)) goto 10000
 C
       if (kplin(lu,idcbo,pcof,mpar,pcofer,mpar,imdl,it,ipar,phi,
      + iobuf,lst,jbuf,il))  goto 10000
 C
-      if (kpout(lu,idcbo,10h$fit_stats,10,iobuf,lst)) goto 10000
+      if (kpout_ch(lu,idcbo,'$fit_stats',iobuf,lst)) goto 10000
       if (kpfit(lu,idcbo,ierr,rchi,rlnnr,rltnr,nfree,feclon,feclat,
      +         iftry,iobuf,lst,jbuf,il)) goto 10000
 C
       if (rcond.ne.0) then
         cond=1.0/rcond
       endif
-      if (kpout(lu,idcbo,12h$conditions ,12,iobuf,lst)) goto 10000
+      if (kpout_ch(lu,idcbo,'$conditions ',iobuf,lst)) goto 10000
       if (kpcon(lu,idcbo,cond,scale,npar,iobuf,lst,jbuf,il)) goto 10000
 C
 C     IF(KPOUT(LU,IDCBO,12H$COVARIANCE ,-12,IOBUF,LST)) GOTO 10000
@@ -252,13 +252,13 @@ C
         nxpnt=nxpnt+i
       enddo
   
-      if (kpout(lu,idcbo,12H$correlation,12,iobuf,lst)) goto 10000
+      if (kpout_ch(lu,idcbo,'$correlation',iobuf,lst)) goto 10000
       if (kptri(lu,idcbo,a,npar,iobuf,lst,jbuf,il)) goto 10000
 C
       call inism(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,
      &           wdisum,igp)
 C
-      if (kpout(lu,idcbo,10H$corrected ,10,iobuf,lst)) goto 10000
+      if (kpout_ch(lu,idcbo,'$corrected',iobuf,lst)) goto 10000
 C
       do i=1,inp
         coslt=cos(lat(i))
@@ -276,7 +276,7 @@ C
       call rstat(lonsum,lonrms,wlnsum,latsum,latrms,wltsum,dirms,wdisum,
      &           igp,lu)
 C
-      if (kpout(lu,idcbo,16h$corrected_stats ,16,iobuf,lst)) goto 10000
+      if (kpout_ch(lu,idcbo,'$corrected_stats',iobuf,lst)) goto 10000
 C
       if (kpst(lu,idcbo,lonsum,lonrms,latsum,latrms,dirms,igp,inp,
      +        iobuf,lst,jbuf,il)) goto 10000
@@ -290,8 +290,8 @@ C
         endif
       enddo
 C
-      if (kpout(lu,idcbo,10h$new_model ,10,iobuf,lst)) goto 10000
-      if (kplin(lu,idcbo,pcof,mpar,idum,0,imdl,it,ipar,phi,iobuf,lst,
+      if (kpout_ch(lu,idcbo,'$new_model',iobuf,lst)) goto 10000
+      if (kplin(lu,idcbo,pcof,mpar,ddum,0,imdl,it,ipar,phi,iobuf,lst,
      +    jbuf,il)) goto 10000
 C
 C

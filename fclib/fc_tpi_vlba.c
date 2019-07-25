@@ -1,4 +1,4 @@
-void fc_tpi_vlba_(ip,itpis_vlba)
+void fc_tpi_vlba__(ip,itpis_vlba)
 long ip[5];
 int itpis_vlba[34];
 {
@@ -9,7 +9,7 @@ int itpis_vlba[34];
     return;
 }
     
-void fc_tpput_vlba_(ip,itpis_vlba,isub,ibuf,nch,ilen)
+void fc_tpput_vlba__(ip,itpis_vlba,isub,ibuf,nch,ilen)
 long ip[5];
 int itpis_vlba[34];
 int *isub;
@@ -24,7 +24,7 @@ int *ilen;
     return;
 }
 
-void fc_tsys_vlba_(itpis_vlba,ibuf,nch,caltmp)
+void fc_tsys_vlba__(itpis_vlba,ibuf,nch,caltmp)
 int itpis_vlba[34];
 char *ibuf;
 int *nch;

@@ -5,7 +5,7 @@
 /*               to go along with Mark III rack and drive.        */
 /*  nrv  921027  Added check for special source names             */
 /*                                                                */
-#include <curses.h>
+#include <ncurses.h>
 #include <signal.h>
 #include <math.h>
 #include <string.h>
@@ -327,7 +327,7 @@ int iyear;
     addstr("    ");
   } else {
     preflt(outf,shm_addr->ep1950,-5,0);
-    outfloat[4]=NULL;
+    outfloat[4]=0;
     printw("%s",outfloat);
   }
 
@@ -436,7 +436,7 @@ int iyear;
 
 /* ROW 6 */
 
-  *checkln=NULL;
+  *checkln=0;
   strcat(checkln,"NO CHECK:");
 
   if (kMrack) {

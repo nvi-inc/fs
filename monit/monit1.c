@@ -1,5 +1,5 @@
 /*  Field System time */
-#include <curses.h>
+#include <ncurses.h>
 #include <signal.h>
 #include "mparm.h"
 #include <sys/types.h>
@@ -13,7 +13,7 @@ main()
   int it[5];
   int iyear;
   int isleep;
-  int die();
+  void die();
   int m1init();
   int nsem_test();
   int nsemret;

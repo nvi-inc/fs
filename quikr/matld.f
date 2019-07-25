@@ -163,7 +163,7 @@ C     8. Schedule MATCN and check for error return.
 C 
       iclass = 0
       nch = (nhxbyt+8)*2
-      call put_buf(iclass,ibuf,-nch,2hfs,0) 
+      call put_buf(iclass,ibuf,-nch,'fs','  ') 
       call run_matcn(iclass,1) 
       call rmpar(ip)
       return

@@ -1,8 +1,8 @@
-LIBES = ../clib/clib.a ../rtelb/rtelb.a -lrtx
+LIBES = ../clib/clib.a ../rtelb/rtelb.a
 #
 ../bin/ddout: ddout.o $(OBJECTS)
-	cc -g -o ../bin/ddout ddout.o $(OBJECTS) $(LIBES)
-	../setb/setb ../bin/ddout
+	cc  -o ../bin/ddout ddout.o $(OBJECTS) $(LIBES)
+	strip ../bin/ddout
 
 ddout:
 	rm -f ../bin/ddout

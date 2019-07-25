@@ -30,14 +30,14 @@ C
         if (i.eq.2) ic = 8
         do 110 j=i,16,14
           ia = ia2hx(ibuf,ic) 
-          itrk(j) = iand(ia,1)
-          itrk(j+2) = iand(ia,2)/2
-          itrk(j+4) = iand(ia,4)/4
-          itrk(j+6) = iand(ia,8)/8
+          itrk(j) = and(ia,1)
+          itrk(j+2) = and(ia,2)/2
+          itrk(j+4) = and(ia,4)/4
+          itrk(j+6) = and(ia,8)/8
           ia = ia2hx(ibuf,ic-1) 
-          itrk(j+8) = iand(ia,1)
-          itrk(j+10) = iand(ia,2)/2 
-          itrk(j+12) = iand(ia,4)/4 
+          itrk(j+8) = and(ia,1)
+          itrk(j+10) = and(ia,2)/2 
+          itrk(j+12) = and(ia,4)/4 
           ic = ic - 4 
 110       continue
 120     continue
@@ -47,7 +47,7 @@ C
         if (itrk(i).eq.1) ntrk = ntrk + 1 
 130     continue
 C 
-      iena = iand(ia,8)/8 
+      iena = and(ia,8)/8 
 C 
       return
       end 

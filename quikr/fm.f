@@ -80,7 +80,7 @@ C
         iclass = 0
         do i=3,4
           ibuf(1) = -i
-          call put_buf(iclass,ibuf,-4,2hfs,0)
+          call put_buf(iclass,ibuf,-4,'fs','  ')
         enddo
 C 
         nrec = 2
@@ -99,7 +99,7 @@ C
         ibuf(1) = 6
         call char2hol('fm',ibuf(2),1,2)
         iclass=0
-        call put_buf(iclass,ibuf,-4,2hfs,0)
+        call put_buf(iclass,ibuf,-4,'fs','  ')
         nrec = 1
 C
 C
@@ -111,7 +111,7 @@ C
         ibuf(1) = 8
         call char2hol('fm+ ',ibuf(2),1,4)
         iclass = 0
-        call put_buf(iclass,ibuf,-nch,2hfs,0)
+        call put_buf(iclass,ibuf,-nch,'fs','  ')
         kfmrst = .true.
         nrec = 1
 C
@@ -122,7 +122,7 @@ C
         ibuf(1) = 7
         call char2hol('fm',ibuf(2),1,2)
         iclass = 0
-        call put_buf(iclass,ibuf,-4,2hfs,0)
+        call put_buf(iclass,ibuf,-4,'fs','  ')
         nrec = 1
 C
       else          ! set formatter
@@ -274,12 +274,12 @@ C
 C 
         iclass=0
         nch = 12
-        call put_buf(iclass,ibuf,-nch,2hfs,0)
+        call put_buf(iclass,ibuf,-nch,'fs','  ')
 C 
         nch = 3
         ibuf(1) = 5
         call char2hol('; ',ibuf(2),1,2)
-        call put_buf(iclass,ibuf,-nch,2hfs,0)
+        call put_buf(iclass,ibuf,-nch,'fs','  ')
 C                   ***NOTE***SEND THE STROBE CHARACTER AS SEPARATE 
 C                   MESSAGE FOR JIM LEVINE'S FORMATTER
 C                   USE MODE 5 TO SIMPLY TRANSMIT THIS CHARACTER
@@ -292,24 +292,24 @@ C
           call char2hol('fm',ibuf(2),1,2)
           idumm1 = ichmv(ibuf,5,laux,1,8)
           nch = 12
-          call put_buf(iclass,ibuf,-nch,2hfs,0)
+          call put_buf(iclass,ibuf,-nch,'fs','  ')
 C                   Send out the first 8 chars ...
           ibuf(1) = 5
           call char2hol('! ',ibuf(2),1,2)
           nch = 3
-          call put_buf(iclass,ibuf,-nch,2hfs,0)
+          call put_buf(iclass,ibuf,-nch,'fs','  ')
 C                   ... as ! type data
           ibuf(1) = 0
           call char2hol('fm',ibuf(2),1,2)
           idumm1 = ichmv(ibuf,5,laux,9,4)
           call char2hol('00000',ibuf(9),1,4)
           nch = 12
-          call put_buf(iclass,ibuf,-nch,2hfs,0)
+          call put_buf(iclass,ibuf,-nch,'fs','  ')
 C                   Send out the last 4 chars and zeros ...
           ibuf(1) = 5
           call char2hol('% ',ibuf(2),1,2)
           nch = 3
-          call put_buf(iclass,ibuf,-nch,2hfs,0)
+          call put_buf(iclass,ibuf,-nch,'fs','  ')
 C                   ... as % type data
           nrec = 6
         endif

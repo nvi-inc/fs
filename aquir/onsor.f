@@ -34,7 +34,7 @@ C
 C  DIDN'T REACH ONSOURCE
 C
       ierr=-20
-      call logit7(idum,idum,idum,-1,ierr,2Haq,2Her)
+      call logit7cc(idum,idum,idum,-1,ierr,'aq','er')
 C
       return
       end

@@ -1,9 +1,9 @@
 #
 F77= gf77
-FFLAGS = -c -g
-LIBES = ../boss/boss.a ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a\
+FFLAGS = -c
+LIBES = ../bosslb/bosslb.a ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a\
 ../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a\
-../newlb/newlb.a ../fmpsee/fmpsee.a ../rtelb/rtelb.a -lrtx
+../newlb/newlb.a ../fmpsee/fmpsee.a ../rtelb/rtelb.a
 #
 OBJECTS = quikr.o aeoff.o beam.o cable.o cadis.o cal.o chk.o\
 class_frm.o ctemp.o de.o dedis.o devds.o ena.o endis.o\
@@ -25,8 +25,8 @@ updis.o upset.o vc.o vcdis.o vlt_read.o wakop.o wohd.o\
 worm.o wx.o xyoff.o gtradd.o
 #
 ../bin/quikr: $(OBJECTS)
-	gf77 -g -o ../bin/quikr $(OBJECTS) $(LIBES)
-	../setb/setb ../bin/quikr
+	f77 -o ../bin/quikr $(OBJECTS) $(LIBES)
+	strip ../bin/quikr
 #
 quikr:
 	rm -f ../bin/quikr

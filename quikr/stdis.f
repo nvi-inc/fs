@@ -33,7 +33,7 @@ C                   Get command buffer
       nch = iscn_ch(ibuf2,1,nchar,'=')
       kdata = nch.eq.0
       if (nch.eq.0) nch=nchar+1 
-      nch = ichmv(ibuf2,nch,2h/ ,1,1) 
+      nch = ichmv_ch(ibuf2,nch,'/') 
 C                   Put / to indicate a response
       if (kdata) goto 230 
       if (kcom) goto 320
@@ -52,9 +52,9 @@ C                   Get response to query of ST
       call fs_set_lgen(lgen)
       ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
       call fs_get_drive(drive)
-      if (MK4.eq.iand(MK4,drive)) then
+      if (MK4.eq.and(MK4,drive)) then
         ia = ia2hx(ibuf,3)
-        iena = iand(ia,8)/8
+        iena = and(ia,8)/8
       else
         call ma2en(ibuf,iena,it,nt) 
       endif
@@ -73,7 +73,7 @@ C                   Encode speed and direction into response
 C 
 500   iclass = 0
       nch = nch - 1 
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
 C 
       ip(1) = iclass
       ip(2) = 1 

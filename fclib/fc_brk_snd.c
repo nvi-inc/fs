@@ -1,4 +1,4 @@
-void fc_brk_snd_( prog, lenp)
+void fc_brk_snd__( prog, lenp)
 char *prog;
 int lenp;
 {

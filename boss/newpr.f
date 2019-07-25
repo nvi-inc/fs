@@ -123,7 +123,8 @@ C
      .   goto 500
       if (ierr.lt.0.or.ilen.lt.0) goto 800
       ilen = iflch(ib,80)
-      call logit4(ib,ilen,2h&&,lprocn)
+      call char2hol('&&',ldum,1,2)
+      call logit4(ib,ilen,ldum,lprocn)
       goto 410
 C
 C
@@ -175,8 +176,8 @@ C     8. This is the abnormal error section.  There should be no
 C     errors in this routine because all of the file has been checked
 C     before.  So this is serious.
 C
-800   if (ierr.eq.-1) call logit7(0,0,0,1,-128,2hbo,ierr)
-      if (ierr.ne.-1) call logit7(0,0,0,1,-129,2hbo,ierr)
+800   if (ierr.eq.-1) call logit7ci(0,0,0,1,-128,'bo',ierr)
+      if (ierr.ne.-1) call logit7ci(0,0,0,1,-129,'bo',ierr)
       istack(2) = 2
       lstack(2) = 2
 C

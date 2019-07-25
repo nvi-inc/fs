@@ -50,7 +50,7 @@ C
       iname = 0
       call fmpopen(idcbsk,FS_ROOT//'/control/stcmd.ctl',ierr,'r',id)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-110,2hbo,ierr)
+        call logit7ci(0,0,0,1,-110,'bo',ierr)
         return
       endif
       ierr = 0
@@ -58,13 +58,13 @@ C
       call readg(idcbsk,ierr,ibuf,ilen)
       do while (ilen.ne.-1)
         if (ierr.ne.0) then
-          call logit7(0,0,0,1,-111,2hbo,ierr)
+          call logit7ci(0,0,0,1,-111,'bo',ierr)
           return
         endif
         if (ilen.gt.0) then
           iname = iname + 1
           if (iname.gt.nnames) then
-            call logit7(0,0,0,1,-112,2hbo,nnames)
+            call logit7ci(0,0,0,1,-112,'bo',nnames)
             return
           endif
           idummy = ichmv(lseg,1,ibuf,14,4)
@@ -93,7 +93,7 @@ C
       call fmpclose(idcbsk,ierr)
       call fmpopen(idcbsk,FS_ROOT//'/fs/control/fscmd.ctl',ierr,'r',id)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-110,2hbo,ierr)
+        call logit7ci(0,0,0,1,-110,'bo',ierr)
         return
       endif
       ierr = 0
@@ -101,13 +101,13 @@ C
       call readg(idcbsk,ierr,ibuf,ilen)
       do while (ilen.ne.-1)
         if (ierr.ne.0) then
-          call logit7(0,0,0,1,-111,2hbo,ierr)
+          call logit7ci(0,0,0,1,-111,'bo',ierr)
           return
         endif
         if (ilen.gt.0) then
           iname = iname + 1
           if (iname.gt.nnames) then
-            call logit7(0,0,0,1,-112,2hbo,nnames)
+            call logit7ci(0,0,0,1,-112,'bo',nnames)
             return
           endif
           idummy = ichmv(lseg,1,ibuf,14,4)
@@ -115,7 +115,7 @@ C
           ity = ias2b(ibuf,23,2)
           ieq1 = ias2b(ibuf,26,1)
           ieq2 = ias2b(ibuf,27,1)
-          call ichmv(lnames(1,iname),1,ibuf,1,12)
+          idummy=ichmv(lnames(1,iname),1,ibuf,1,12)
           lnames(7,iname) = lseg(1)
           lnames(8,iname) = lseg(2)
           lnames(9,iname) = iss
@@ -142,9 +142,9 @@ C     1.15 Initialize MATCN's names and addresses.
 C
       call rdtma(idcbsk,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-114,2hbo,ierr)
-c       return
+        call logit7ci(0,0,0,1,-114,'bo',ierr)
         call fc_putln('matcn initialization failed')
+        return
       else
         call fc_putln('matcn initialized')
       endif
@@ -152,10 +152,11 @@ C
 C
 C     1.16 Initialize tables in IBCON
 C
-      call rdtib(idcbsk,ierr)
-      if (ierr.ne.0) then
-        call logit7(0,0,0,1,-115,2hbo,ierr)
-c       return
+      ierr=0
+      call rdtib(idcbsk,ip)
+      if (ip(3).ne.0) then
+        call logit7ci(0,0,0,1,ip(3),ip(4),ip(5))
+        call logit7ci(0,0,0,1,-115,'bo',ip(3))
         call fc_putln('ibcon initialization failed')
       else
         call fc_putln('ibcon initialized')
@@ -171,9 +172,9 @@ C                   For testing with LUANT=LU, don't issue CNs
         call rmpar(ip)
         ierr = ip(3)
         if (ierr.ne.0) then
-          call logit7(0,0,0,1,-116,2hbo,ierr)
-c         return
+          call logit7ci(0,0,0,1,-116,'bo',ierr)
           call fc_putln('antenna initialization failed')
+          return
         else
           call fc_putln('antenna initialized')
         endif
@@ -184,12 +185,14 @@ c
 c  initialize mcbcn
 c
       ip(1)=0
+      ip(3)=0
       call run_prog('mcbcn','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+      call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-117,2hbo,ierr)
-c       return
+        call logit7ci(0,0,0,1,-190,'bo',ierr)
         call fc_putln('mcbcn initialization failed')
+        return
       else
         call fc_putln('mcbcn initialized')
       endif
@@ -199,10 +202,11 @@ C
       call char2hol('station ',illog,1,8)
       call fs_set_llog(illog)
       call fc_rte_time(it,iyear)
-      call newlg(ibuf,2h::)
+      call char2hol('::',ldum,1,2)
+      call newlg(ibuf,ldum)
     
-      call put_buf(iclopr,29H"Boss Initialization Complete, -29,0,0)
-      call put_buf(iclopr,8Hiniti   , -5,0,0)
+      call put_buf_ch(iclopr,'"Boss Initialization Complete','  ','  ')
+      call put_buf_ch(iclopr,'initi','  ','  ')
 C
       return
       end

@@ -6,8 +6,8 @@ OBJECTS=\
 fmpappend.o fmpclose.o fmpopen.o fmpposition.o fmppost.o fmppurge.o\
 fmpreadstr.o fmprewind.o fmpsetline.o fmpsetpos.o fmpwritestr.o
 #
-#CFLAGS = -g
-#FFLAGS = -g
+#CFLAGS = 
+#FFLAGS = 
 F77 = gf77
 #
 #  The following line that has a ":" in it is a "dependency line".
@@ -20,4 +20,5 @@ F77 = gf77
 fmpsee.a: $(OBJECTS)
 	touch fmpsee.a
 	rm fmpsee.a
-	ar qc fmpsee.a $(OBJECTS)
+	ar -qc fmpsee.a $(OBJECTS)
+	ar s fmpsee.a

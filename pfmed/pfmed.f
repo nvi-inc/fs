@@ -49,9 +49,7 @@ C        ICHI   - number of characters from keyboard
 C        LPROC  - active procedure file for PFMED
       dimension ib(51)
 C               - line and record buffer
-      dimension impar(5)
-C               - RMPAR parameters from RU or EXEC schedule
-      character*12 lproc,l1
+      character*12 lproc
       character cret
       integer fnblnk,ipos
       integer trimlen, rn_take
@@ -91,10 +89,6 @@ C
 C     PROGRAM STRUCTURE
 C
 C     Set input and output LU's.
-cxx      call rmpar(impar)
-cxx      lui=impar(1)
-C     INITIALIZE FILE CONTROL BLOCK VALUES
-cxx      call fc_setup_ids
       call setup_fscom
       call read_fscom
       idcb3=23
@@ -102,7 +96,6 @@ cxx      call fc_setup_ids
       idcb1=21
       lui = 6
       if (lui.eq.0) lui=1
-c      luo=impar(2)
       luo=0
       if(luo.eq.0) luo=lui
       kboss_pf=kboss()
@@ -157,26 +150,26 @@ C  Print messages about current procedure files
 C
       lmdisp = 'current active schedule procedure file: ' // lprc(1:8)
       write(lui,2102) lmdisp
-2102  format(1x,a54)
+2102  format(a)
       if (kboss_pf) then
         lmdisp = 'current active station procedure file:  '// lstp(1:8)
         write(lui,2103) lmdisp
-2103    format(1x,a54)
+2103    format(a)
       else
         lmdisp = 'current active station procedure file:  none'
         write(lui,2104) lmdisp
-2104    format(1x,a54)
+2104    format(a)
       endif
       lmdisp = 'procedure file currently open in pfmed: '//
      .    lproc(1:8)
       write(lui,2105) lmdisp
-2105  format(1x,a54)
+2105  format(a)
 C     Copy current procedure file to scratch file 3.
       knewpf = .false.
       call pfcop(lproc,lui,id)
 C     Prompt and read input line with echo.
 100   write(lui,2106) ccol
-2106  format(1x,a,$)
+2106  format(a,$)
       call ifill_ch(ib,1,40,' ')
       cib1 = ' '
       cib = ' '
@@ -198,7 +191,8 @@ C       call char2low(cib)
 C     If EX or ::, exit.
         if (cib(1:2).eq.'ex'.or.cib(1:2).eq.'::') go to 900
 C     Check mode.
-        if (cib(1:2).eq.'ed') then
+        if (cib(1:2).eq.'ed'.or.cib(1:2).eq.'vi'.or.cib(1:5).eq.'emacs')
+     &    then
           ierr = 0
           call fed(lui,luo,cib,ichi,lproc,ldef)
         else if (cib(1:2).eq.'pf') then
@@ -237,8 +231,14 @@ C      ABOUT TO UNLOCK: RESETTING VARS
       end if
 990   continue
       write(lui,9300)
-9300  format(' pfmed ended')
+9300  format('pfmed ended')
 cxx      if (knewpf.and.(ipgst(6hboss  ).ne.-1))
 cxx    .    call exec(10,6hboss  ,2hpf)
 C
       end
+
+
+
+
+
+

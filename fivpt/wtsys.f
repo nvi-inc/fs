@@ -10,34 +10,34 @@ C
 C 
 C RECORD IDENTIFIER 
 C 
-      icnext=ichmv(lbuf,icnext,6Htsys  ,1,5)
+      icnext=ichmv_ch(lbuf,icnext,'tsys ')
 C 
 C AZIMUTH 
 C 
       icnext=icnext+jr2as(az*180.0/RPI,lbuf,icnext,-7,3,isbuf) 
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)  
+      icnext=ichmv_ch(lbuf,icnext,' ')  
 C 
 C  ELEVATION
 C 
       icnext=icnext+jr2as(el*180.0/RPI,lbuf,icnext,-7,3,isbuf) 
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)  
+      icnext=ichmv_ch(lbuf,icnext,' ')  
 C 
 C SYSTEM TEMPERATURE
 C 
       icnext=icnext+jr2as(temps,lbuf,icnext,-7,3,isbuf) 
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)  
+      icnext=ichmv_ch(lbuf,icnext,' ')  
 C 
 C SYSTEM TEMPERATURE SIGMA
 C 
       if (np.le.1) goto 100 
       icnext=icnext+jr2as(sigts,lbuf,icnext,-7,4,isbuf) 
-      icnext=ichmv(lbuf,icnext,2H  ,1,1)  
+      icnext=ichmv_ch(lbuf,icnext,' ')  
 C 
 C CLEAN AND SEND BUFFER 
 C 
 100   continue
       nchars=icnext-1 
-      if (1.ne.mod(icnext,2)) icnext=ichmv(lbuf,icnext,2h  ,1,1) 
+      if (1.ne.mod(icnext,2)) icnext=ichmv_ch(lbuf,icnext,' ') 
       call logit2(lbuf,nchars) 
 C 
       return

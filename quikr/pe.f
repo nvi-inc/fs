@@ -194,7 +194,7 @@ C
       call fs_get_itraka(itraka)
       call rp2ma(ibuf2(3),ibypas,ieqtap,ibwtap,itraka,itrakb) 
       iclass=0
-      call put_buf(iclass,ibuf2,-13,2hfs,0) 
+      call put_buf(iclass,ibuf2,-13,'fs','  ') 
       call run_matcn(iclass,1) 
       call rmpar(ip)
       if (ip(3).lt.0) return
@@ -203,7 +203,7 @@ C
       call fs_set_icheck(icheck(18),18)
 C                   First set up the repro track which was requested. 
 C 
-      idumm1 = ichmv(ibuf2,5,8h00000008,1,8)
+      idumm1 = ichmv_ch(ibuf2,5,'00000008')
       idumm1 = ichmv(ibuf2,11,ihx2a(ichper),2,1)
 C                   Move in the channel bit 
       perr(1) = 0.0 
@@ -214,12 +214,12 @@ C                   sample to let the decoding settle down
         ibuf2(1) = 0
         call char2hol('de',ibuf2(2),1,2)
         iclass = 0
-        call put_buf(iclass,ibuf2,-12,2hfs,0) 
+        call put_buf(iclass,ibuf2,-12,'fs','  ') 
         ibuf2(1) = 5
         call char2hol('> ',ibuf2(2),1,2)
-        call put_buf(iclass,ibuf2,-3,2hfs,0)
+        call put_buf(iclass,ibuf2,-3,'fs','  ')
         call char2hol('/ ',ibuf2(2),1,2)
-        call put_buf(iclass,ibuf2,-3,2hfs,0)
+        call put_buf(iclass,ibuf2,-3,'fs','  ')
 C 
         call run_matcn(iclass,3) 
         call rmpar(ip)

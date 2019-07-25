@@ -75,7 +75,7 @@ C
       if (cjchar(parm,1).eq.',') then
         kvolts(1)=.false.
       else if(cjchar(parm,1).eq.','.and.
-     &        VLBA.eq.iand(drive,VLBA)) then
+     &        VLBA.eq.and(drive,VLBA)) then
         ip(3)=-501
         goto 990
       else if(cjchar(parm,1).eq.'*') then
@@ -99,7 +99,7 @@ C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       if (cjchar(parm,1).eq.',') then
         kvolts(2)=.false.
-      else if(VLBA.eq.iand(drive,VLBA)) then
+      else if(VLBA.eq.and(drive,VLBA)) then
         ip(3)=-502
         goto 990
       else if(cjchar(parm,1).eq.'*') then
@@ -159,7 +159,7 @@ C
       iclass=0
 C
       call fs_get_rack(rack)
-      if(MK3.eq.iand(rack,MK3)) THEN
+      if(MK3.eq.and(rack,MK3)) THEN
         call frmaux(lauxfm,nint(posnhd(1)),ipashd(1))
         ibuf2(1) = 0
         call char2hol('fm',ibuf2(2),1,2)
@@ -175,7 +175,7 @@ C                     ... as ! type data
         ibuf2(1) = 0
         call char2hol('fm',ibuf2(2),1,2)
         idumm1 = ichmv(ibuf2,5,lauxfm,9,4)
-        idumm1 = ichmv(ibuf2,9,4h0000,1,4)
+        idumm1 = ichmv_ch(ibuf2,9,'0000')
         nch = 12
         call add_class(ibuf2,-nch,iclass,nrec)
 C                   Send out the last 4 chars and zeros ...
@@ -186,13 +186,13 @@ C                   Send out the last 4 chars and zeros ...
 C
         call run_matcn(iclass,nrec)
         call rmpar(ip)
-      else if(MK4.eq.iand(rack,MK4)) THEN
+      else if(MK4.eq.and(rack,MK4)) THEN
         call frmaux4(lauxfm4,posnhd,ipashd,kautohd_fs)
         ibuf2(1) = 8
         call char2hol('fm /AUX ',ibuf2(2),1,8)
         idumm1 = ichmv(ibuf2,11,lauxfm4,1,8)
         nch=18
-        call put_buf(iclass,ibuf2,-nch,2Hfs,0)
+        call put_buf(iclass,ibuf2,-nch,'fs','  ')
         nrec=1
         call run_matcn(iclass,nrec)
         call rmpar(ip)
@@ -220,7 +220,7 @@ C
 C  read the postions
 C
       ihd=3
-      if(VLBA.eq.iand(drive,VLBA)) ihd=1
+      if(VLBA.eq.and(drive,VLBA)) ihd=1
       call vlt_read(ihd,volts,ip)
       if(ip(3).ne.0) goto 800
 C
@@ -234,12 +234,12 @@ C
 600   continue
       nch = ieq
       if (nch.eq.0) nch = nchar+1
-      nch = ichmv(ibuf,nch,2h/ ,1,1)
+      nch = ichmv_ch(ibuf,nch,'/')
 C
       if(itask.eq.3) then
       call fs_get_ipashd(ipashd)
         do i=1,2
-          if(i.eq.1.or.VLBA.ne.iand(drive,VLBA)) then
+          if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
             call mic2vlt(i,ipashd(i),kautohd_fs,posnhd(i),volt(i),ip)
             nch = nch+ir2as(volt(i),ibuf,nch,8,3)
           endif
@@ -248,7 +248,7 @@ C
       endif
 C
       do i=1,2
-        if(i.eq.1.or.VLBA.ne.iand(drive,VLBA)) then
+        if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
           nch = nch+ir2as(volts(i),ibuf,nch,8,3)
         endif
         nch = mcoma(ibuf,nch)
@@ -256,7 +256,7 @@ C
 C
       if(itask.eq.3) then
         do i=1,2
-          if(i.eq.1.or.VLBA.ne.iand(drive,VLBA)) then
+          if(i.eq.1.or.VLBA.ne.and(drive,VLBA)) then
             nch = nch+ir2as(volts(i)-volt(i),ibuf,nch,8,3)
           endif
           nch = mcoma(ibuf,nch)

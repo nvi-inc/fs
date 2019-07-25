@@ -40,7 +40,7 @@ C
 C  2. Send the tape label (if any) to the QUIKR LABEL command via COPIN.
 C
       if (lasttap.ne.0) then
-        call ichmv(lmess,1,6Hlabel=,1,6)
+        call ichmv_ch(lmess,1,'label=')
         call ichmv(lmess,7,bufr,istart(lasttap),lentap)
         call mcoma(lmess,17)
         call copin(lmess,7+lentap)

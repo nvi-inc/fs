@@ -17,8 +17,8 @@ fc_chmod.o fc_rte_lock.o fc_rte_prior.o fc_putln.o fc_get_vtime.o\
 fc_mvdis_v.o fc_bbc2freq.o fc_rte_sett.o fc_rte2secs.o fc_rte_rawt.o\
 fc_rte_fixt.o fc_cls_sndc.o fc_secs2rte.o
 #
-#CFLAGS = -g
-#FFLAGS = -g
+#CFLAGS = 
+#FFLAGS = 
 F77 = gf77
 #
 #  The following line that has a ":" in it is a "dependency line".
@@ -31,4 +31,5 @@ F77 = gf77
 fclib.a: $(OBJECTS)
 	touch fclib.a
 	rm fclib.a
-	ar qc fclib.a $(OBJECTS)
+	ar -qc fclib.a $(OBJECTS)
+	ar s fclib.a

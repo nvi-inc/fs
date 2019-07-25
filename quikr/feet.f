@@ -59,7 +59,7 @@ C         First check whether tape is stopped and read footage
       ibuf(1) = -3
       call char2hol('tp',ibuf(2),1,2)
       iclass = 0
-      call put_buf(iclass,ibuf,-4,2hfs,0)
+      call put_buf(iclass,ibuf,-4,'fs','  ')
       call run_matcn(iclass,1)
       call rmpar(ip)
       iclass=ip(1)
@@ -87,15 +87,15 @@ C    Now disable general record, set low-tape sensor,put in BYPass mode
       ienatp=0
       call fs_set_ienatp(ienatp)
       call en2ma(ibuf(3),ienatp,itrken,ldummy)  
-      call put_buf(iclass,ibuf,-13,2hfs,0)
+      call put_buf(iclass,ibuf,-13,'fs','  ')
       ilowtp = 1
       call tp2ma(ibuf(3),ilowtp,0)
-      call put_buf(iclass,ibuf,-13,2hfs,0)
+      call put_buf(iclass,ibuf,-13,'fs','  ')
       ibypas = 1
       call fs_get_itraka(itraka)
       call fs_get_itrakb(itrakb)
       call rp2ma(ibuf(3),ibypas,ieqtap,ibwtap,itraka,itrakb)
-      call put_buf(iclass,ibuf,-13,2hfs,0)
+      call put_buf(iclass,ibuf,-13,'fs','  ')
       call run_matcn(iclass,3) 
       call rmpar(ip)
       if (ip(3).lt.0) goto 999
@@ -157,10 +157,10 @@ C     ID = IPRTY(JPR)
 C
 C  6.  Set up response.
 C
-600   nch = ichmv(ibuf,1,5hfeet/,1,5)
+600   nch = ichmv_ch(ibuf,1,'feet/')
       nch = nch + ib2as(icurft,ibuf,nch,o'100005')-1
       iclass = 0
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
 C
       ip(1) = iclass
       ip(2) = 1

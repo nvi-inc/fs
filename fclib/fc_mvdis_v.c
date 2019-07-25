@@ -1,4 +1,4 @@
-void fc_mvdis_v_(ip,ibuf,nch)
+void fc_mvdis_v__(ip,ibuf,nch)
 long ip[5];
 char *ibuf;
 int *nch;

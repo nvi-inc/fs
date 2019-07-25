@@ -90,7 +90,7 @@ C
         frhld(i) = 0
         call gtprm(ibuf,ich,nchar,2,parm,ierr)
         if (cjchar(parm,1).ne.',') then
-          if (i.eq.4.and.VLBA.ne.iand(rack,VLBA)) then
+          if (i.eq.4.and.VLBA.ne.and(rack,VLBA)) then
 	     ierr = -304
 	     goto 990
           else if (parm.le.0.0.or.ierr.ne.0) then

@@ -1,4 +1,4 @@
-void fc_incom_ini_( iclbox, iclopr)
+void fc_incom_ini__( iclbox, iclopr)
 long *iclbox, *iclopr;
 {
      void incom_ini();

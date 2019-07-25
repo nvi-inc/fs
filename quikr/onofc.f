@@ -123,12 +123,12 @@ C
 
       call fs_get_rack(rack)
 
-      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
-        if (cjchar(iprm,1).eq.',') idumm1 = ichmv(ldv1,1,2Hi1,1,2)
+      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
+        if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldv1,1,'i1')
 C                      Default is IF1
         if(cjchar(ldv1,1).eq.'i'.or.cjchar(ldv1,1).eq.'v') goto 360
-      else if (VLBA .eq. iand(rack,VLBA)) then
-        if (cjchar(iprm,1).eq.',') idumm1 = ichmv(ldv1,1,2Hia,1,2)
+      else if (VLBA .eq. and(rack,VLBA)) then
+        if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldv1,1,'ia')
 C                      Default is IA
         if ((cjchar(ldv1,1).eq.'i').or.
      .      ((cjchar(ldv1,1).ge.'1').and.(cjchar(ldv1,1).le.'9')).or.
@@ -162,12 +162,12 @@ C
 
       call fs_get_rack(rack)
 
-      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
-        if (cjchar(iprm,1).eq.',') idumm1 = ichmv(ldv2,1,2Hi2,1,2)
+      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
+        if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldv2,1,'i2')
 C                      Default is IF2
         if(cjchar(ldv2,1).eq.'i'.or.cjchar(ldv2,1).eq.'v') goto 400
-      else if (VLBA .eq. iand(rack,VLBA)) then
-        if (cjchar(iprm,1).eq.',') idumm1 = ichmv(ldv2,1,2Hib,1,2)
+      else if (VLBA .eq. and(rack,VLBA)) then
+        if (cjchar(iprm,1).eq.',') idumm1 = ichmv_ch(ldv2,1,'ib')
 C                      Default is IB
         if ((cjchar(ldv2,1).eq.'i').or.
      .      ((cjchar(ldv2,1).ge.'1').and.(cjchar(ldv2,1).le.'9')).or.
@@ -219,7 +219,7 @@ C
 C  Determine cal temp and frequency for device 1.
 C
 490   continue
-      if((rack.and.iand(MK3,rack)).or.(rack.and.iand(MK4,rack))) then
+      if((MK3.eq.and(MK3,rack)).or.(MK4.eq.and(MK4,rack))) then
         if(cjchar(ldv1nf,1).ne.'i'.and.cjchar(ldv1nf,1).ne.'v') then
           ierr = -503
           goto 990
@@ -295,7 +295,7 @@ C
 C   Determine cal temp and frequency for device 2.
 C
 520   continue
-      if((rack.and.iand(MK3,rack)).or.(rack.and.iand(MK4,rack))) then
+      if((MK3.eq.and(MK3,rack)).or.(MK4.eq.and(MK4,rack))) then
         if(cjchar(ldv2nf,1).ne.'i'.and.cjchar(ldv2nf,1).ne.'v') then
           ierr = -503
           goto 990
@@ -377,7 +377,7 @@ C
       fx2nf_fs=fx2
       ich1nf_fs=ichain1
       ich2nf_fs=ichain2
-      if((rack.eq.iand(MK3,rack)).or.(rack.eq.iand(MK4,rack))) then
+      if((rack.eq.and(MK3,rack)).or.(rack.eq.and(MK4,rack))) then
         if(cjchar(ldv1nf,1).eq.'i') goto 602
         indvc = ia2hx(ldv1nf,2)
         if(freqvc(indvc).gt.96.0.and.freqvc(indvc).lt.504.00) goto 602

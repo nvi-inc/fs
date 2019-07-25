@@ -1,17 +1,21 @@
-      subroutine sctl(ibuf,ic,iprog,iwait,ierr)
+      subroutine sctl(cbuf,prog,iwait,ierr)
 C
       integer it(5)
-      integer*2 ibufm(1), iprog(1), ibuf(1)
       logical kbreak,rn_test
-      character*5 prog
+      character*(*) prog
+      character*(*) cbuf
+      integer*2 ibuf(128)
 C
 C  SEND THE COMMAND IF THE PROGRAM ISN'T ACTIVE
 C
       if (iwait.le.0) return
-      call hol2char(iprog,1,ic,prog)
-      if(rn_test(prog)) goto 500
+      if(rn_test(prog(1:5))) goto 500
       if (ip.gt.0) goto 500
-      call scmd(ibuf,0,(ic+1)/2,ierr)
+      ic=(len(cbuf)+1)/2
+      ic=ic*2
+      if(ic.gt.256) stop 999
+      call char2hol(cbuf,ibuf,1,ic)
+      call scmd(ibuf,0,ic/2,ierr)
       if (ierr.ne.0) return
 C
 C  GIVE THE FIELD SYSTEM UPTO 1 MINUTE TO GET THE PROGRAM GOING
@@ -22,7 +26,7 @@ C
 5     continue
       if(kbreak('aquir')) goto 100
       call susp(2,2)
-      if(rn_test(prog)) goto 9
+      if(rn_test(prog(1:5))) goto 9
       call fc_rte_time(it,idum)
       tim2=float(it(4))*60.0+float(it(3))+float(it(2))/60.0
       if (tim2.lt.tim) tim2=tim2+1440.
@@ -38,7 +42,7 @@ C
 10    continue
       if(kbreak('aquir')) goto 100
       call susp(2,2)
-      if(.not.rn_test(prog)) goto 300
+      if(.not.rn_test(prog(1:5))) goto 300
       call fc_rte_time(it,idum)
       tim2=float(it(4))*60.0+float(it(3))+float(it(2))/60.0
       if (tim2.lt.tim) tim2=tim2+1440.
@@ -50,7 +54,7 @@ C
       return
 C
 200   continue
-      call send_break(prog)
+      call send_break(prog(1:5))
       ierr=-10
       return
 C

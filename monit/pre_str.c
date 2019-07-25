@@ -1,4 +1,4 @@
-#include <curses.h>
+#include <ncurses.h>
 #include <signal.h>
 #include <math.h>
 #include <sys/types.h>
@@ -16,7 +16,7 @@ int width,deci;
 {
   void flt2str();
 
-  outf[0]=NULL;
+  outf[0]=0;
   flt2str(outf,flnum,width,deci);
 
 }
@@ -30,7 +30,7 @@ int width,zorb;
 {
   void int2str();
 
-  *outi=NULL;
+  *outi=0;
   int2str(outi,inum,width,zorb);
 
 }

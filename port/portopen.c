@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <termio.h>
+#include <linux/serial.h>
 
 int portopen_(port, name, len, baud, parity, bits, stop)
 int *port;
@@ -45,8 +46,8 @@ int *stop;
 
   term.c_lflag &= ~(ICANON | ISIG | ECHO);
 
-  term.c_cc[VEOF] = 1;
-  term.c_cc[VEOL] = 1;
+  term.c_cc[VMIN] = 1;
+  term.c_cc[VTIME] = 1;
 
   switch (*stop) {
      case 1:
@@ -99,8 +100,13 @@ int *stop;
   term.c_cflag &= ~CBAUD;
   if( *baud==38400 )
     term.c_cflag |= B38400;
+  else if( *baud==57600)
+    term.c_cflag |= B38400;
+  else if( *baud==115200)
+    term.c_cflag |= B38400;
   else if (*baud > 32767)
     return -7;
+  else
   switch ((int)*baud){
     case 110:
       term.c_cflag |= B110;
@@ -140,6 +146,40 @@ int *stop;
   };
   if(ioctl (*port, TCSETA, &term)==-1)
     return -8;
+
+  /* We attempt to adjust 38400 baud into higher speeds. */
+  /* Linux can give 57600 or 115200 when std Unix 'termios' call */
+  /* requests for 38400. */
+  if (*baud > 19200)  /* why bother setting if it is less? */
+  {
+    struct serial_struct allSerialSettings;
+    int oldBits;
+
+    if(ioctl(*port, TIOCGSERIAL, &allSerialSettings)==-1) {
+        return -9;
+    }
+    oldBits = allSerialSettings.flags & ASYNC_SPD_MASK;
+
+    /* Zero the SPD bits first.  (== "normal" 38400 baud) */
+    allSerialSettings.flags &= ~ASYNC_SPD_MASK;
+
+    if (*baud > 86400) {
+      /* 115200 baud. */
+      allSerialSettings.flags |= ASYNC_SPD_VHI;
+    } else if (*baud > 48000) {
+      /* 57600 baud. */
+      allSerialSettings.flags |= ASYNC_SPD_HI;
+    } else {
+      /* Leave at genuine 38400 baud (or lower.) */
+    }
+
+    /* Change (all the) serial settings only if they really need changing. */
+    if ((allSerialSettings.flags & ASYNC_SPD_MASK) != oldBits) {
+      if(ioctl(*port, TIOCSSERIAL, &allSerialSettings) == -1) {
+        return -10;
+       }
+    }
+  }  /* if > 19200 baud */
 
   return 0;
 }

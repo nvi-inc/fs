@@ -95,14 +95,14 @@ C
       call fs_get_eloff(eloff)
       az=azoff*180./RPI
       el=eloff*180./RPI
-      nch = ichmv(ibuf,nchar+1,2H/ ,1,1)
+      nch = ichmv_ch(ibuf,nchar+1,'/')
       nch = nch + ir2as(az,ibuf,nch,10,5)
-      nch = ichmv(ibuf,nch,2H, ,1,1)
+      nch = ichmv_ch(ibuf,nch,',')
       nch = nch + ir2as(el,ibuf,nch,10,5)
 C 
       iclass = 0
       nch = nch - 1 
-      call put_buf(iclass,ibuf,-nch,2Hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       ip(1) = iclass
       ip(2) = 1 
       ip(3) = 0 

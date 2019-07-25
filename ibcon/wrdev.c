@@ -1,11 +1,15 @@
 /*
    It assumes you will use the configuration 'ibboard' for the 
    board. 
-   NRV 921202 Changed buffer to char
+
  */
 #include <memory.h>
 #include <string.h>
-#include "sys/ugpib.h"
+
+#ifdef CONFIG_GPIB
+#include <ib.h>
+#include <ibP.h>
+#endif
 
 #define LF		0x0A
 #define	TIMEOUT		-4
@@ -32,6 +36,8 @@ int *error;
 
   *error = 0;
   *ipcode = 0;
+
+#ifdef CONFIG_GPIB
 
   ibcmd(ID_hpib,"_?",1);  	/* unaddress all listeners and talkers */
   if ((ibsta & (ERR|TIMO)) != 0)
@@ -115,4 +121,8 @@ int *error;
     memcpy((char *)ipcode,"WD",2);
     return;
   } 
+#else
+    *error = -(IBCODE + 22); 
+    return;
+#endif
 }

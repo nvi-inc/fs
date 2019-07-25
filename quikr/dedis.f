@@ -94,7 +94,7 @@ C                   If our command was only "device" we are waiting for
 C                   data and know what to expect. 
       if (nch.eq.0) nch = nchar+1 
 C                   If no "=" found, position after last character
-      nch = ichmv(ibuf2,nch,2h/ ,1,1) 
+      nch = ichmv_ch(ibuf2,nch,'/') 
 C                   Put / to indicate a response
 C 
       if (kcom) goto 310
@@ -164,10 +164,10 @@ C
      .                )
         enddo
         if(kcrc) then
-          nch=ichmv(ibuf2,nch,4hpass,1,4)
+          nch=ichmv_ch(ibuf2,nch,'pass')
         else
-          nch=ichmv(ibuf2,nch,4hfail,1,4)
-            call logit7(0,0,0,0,-301,2hqd,0)
+          nch=ichmv_ch(ibuf2,nch,'fail')
+            call logit7ci(0,0,0,0,-301,'qd',0)
         endif
       endif
 C
@@ -175,7 +175,7 @@ C     5. Now send the buffer to SAM.
 C
 500   iclass = 0
       nch = nch - 1
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
 C                   Send buffer starting with TP to display
 C
       ip(1) = iclass

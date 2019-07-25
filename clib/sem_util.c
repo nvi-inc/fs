@@ -12,11 +12,13 @@
 
 static int semid = 0;
 
+/*
 union semun {
       int val;
       struct semid_ds *buf;
       ushort *array;
 };
+*/
 
 int sem_get( key, nsems)
 key_t   key;

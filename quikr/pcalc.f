@@ -50,7 +50,7 @@ C               - parameters returned from GTPRM
 C               - registers from EXEC calls 
       logical rn_test
 C 
-      double precision pcal 
+c     double precision pcal 
 C               - phase cal frequency 
       character cjchar
       equivalence (reg,ireg(1)),(parm,iparm(1)) 

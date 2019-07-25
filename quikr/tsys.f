@@ -50,9 +50,9 @@ C
 C                   Pick up the Tsys1 or 2 index
       call fs_get_rack(rack)
 
-      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
+      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
         call tplis(ip,itpis)
-      else if (VLBA .eq. iand(rack,VLBA)) then
+      else if (VLBA .eq. and(rack,VLBA)) then
         call tplisv(ip,itpis_vlba)
       endif
       
@@ -65,12 +65,12 @@ C
       nchar = min0(ireg(2),ilen)
       nch = iscn_ch(ibuf,1,nchar,'=')
       if (nch.eq.0) nch=nchar+1 
-      nch = ichmv(ibuf,nch,2h/ ,1,1)
+      nch = ichmv_ch(ibuf,nch,'/')
 C 
 C     3. Loop over the TPIs, calculate Tsys, and add it to the
 C     message for response. 
 C 
-      if((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
+      if((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
         do i=1,17 
           if (itpis(i).ne.0) then
             j = i+14
@@ -100,7 +100,7 @@ C
       endif
 C
       iclass = 0
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       nrec = 1
 990   ip(1) = iclass
       ip(2) = nrec

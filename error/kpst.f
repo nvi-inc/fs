@@ -14,22 +14,22 @@ C
       s6=d6*rad2deg
 C
       inext=1
-      inext=ichmv(ibuf,inext,4H    ,1,4)
+      inext=ichmv_ch(ibuf,inext,'    ')
       inext=inext+jr2as(s1,ibuf,inext,-10,5,il)
-      inext=ichmv(ibuf,inext,2H  ,1,1)
+      inext=ichmv_ch(ibuf,inext,' ')
       inext=inext+jr2as(s2,ibuf,inext,-10,5,il)
-      inext=ichmv(ibuf,inext,2H  ,1,1)
+      inext=ichmv_ch(ibuf,inext,' ')
       inext=inext+jr2as(s3,ibuf,inext,-10,5,il)
-      inext=ichmv(ibuf,inext,2H  ,1,1)
+      inext=ichmv_ch(ibuf,inext,' ')
       inext=inext+jr2as(s4,ibuf,inext,-10,5,il)
-      inext=ichmv(ibuf,inext,2H  ,1,1)
+      inext=ichmv_ch(ibuf,inext,' ')
       inext=inext+jr2as(s6,ibuf,inext,-10,5,il)
-      inext=ichmv(ibuf,inext,2H  ,1,2)
+      inext=ichmv_ch(ibuf,inext,'  ')
       inext=inext+ib2as(igp,ibuf,inext,5)
-      inext=ichmv(ibuf,inext,2H  ,1,2)
+      inext=ichmv_ch(ibuf,inext,'  ')
       inext=inext+ib2as(inp,ibuf,inext,5)
 C
-      if (0.eq.mod(inext,2)) inext=ichmv(ibuf,inext,2H  ,1,1)
+      if (0.eq.mod(inext,2)) inext=ichmv_ch(ibuf,inext,' ')
       kpst=kpout(lut,idcb,ibuf,inext,iobuf,lst)
 C
       return

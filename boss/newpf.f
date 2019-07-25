@@ -34,7 +34,7 @@ C  LOCAL:
 C
 C     KSTAK - function which is TRUE if there's some procedure in the stacks
       character*28 pathname,pathname2
-      logical kstak, rn_test, result
+      logical kstak
       integer trimlen, nch, rn_take
 C
 C  INITIALIZED:
@@ -74,10 +74,10 @@ C                     Purge the old version of the file
           call ftn_rename(pathname2,ierr1,pathname,ierr2)
 C                     Rename the edited version to the proper name
           if (ierr1.lt.0) then
-            call logit7(0,0,0,1,-127,2hbo,ierr1)
+            call logit7ci(0,0,0,1,-127,'bo',ierr1)
             ierr1 = 0
           else if (ierr2.lt.0) then
-            call logit7(0,0,0,1,-127,2hbo,ierr2)
+            call logit7ci(0,0,0,1,-127,'bo',ierr2)
             ierr2 = 0
           else
             call fs_get_lprc(ilprc)
@@ -111,10 +111,10 @@ C
           pathname2= FS_ROOT//'/proc/' // lstp(1:nch) // '.prx'
           call ftn_rename(pathname2,ierr1,pathname,ierr2)
           if (ierr1.lt.0) then
-            call logit7(0,0,0,1,-127,2hbo,ierr1)
+            call logit7ci(0,0,0,1,-127,'bo',ierr1)
             ierr1 = 0
           else if (ierr2.lt.0) then
-            call logit7(0,0,0,1,-127,2hbo,ierr2)
+            call logit7ci(0,0,0,1,-127,'bo',ierr2)
             ierr2 = 0
           else
             call fs_get_lstp(ilstp)
@@ -128,7 +128,7 @@ C
         endif
 C
         call rn_put('pfmed') 
-        if (ierr.lt.0) call logit7(0,0,0,1,-131,2hbo,ierr)
+        if (ierr.lt.0) call logit7ci(0,0,0,1,-131,'bo',ierr)
       endif
 C
       return

@@ -1,0 +1,8 @@
+if [ -r /boot/gpib0.o ]; then
+  echo "Loading the GPIB driver..."
+  /sbin/insmod -f /boot/gpib0.o
+fi
+if [ -r /etc/rc.d/rc.fs ]; then
+  echo "Establishing FS shared memory..."
+  sh /etc/rc.d/rc.fs
+fi

@@ -25,7 +25,7 @@ C     RXCHK - receiver check
 C     HDCHK - tape drive check
 C 
 C  LOCAL VARIABLES: 
-      integer get_buf,ichcm_ch
+      integer ichcm_ch
       parameter (iagain=20)      ! repeat period for chekr (seconds)
       parameter (ifastr=2 )      ! repeat period for tape footage
 C 
@@ -41,7 +41,8 @@ C      - Integer CODES for MATCN for each buffer
       dimension icherr(169),ichecks(21)
 C      - Arrays for recording identified error conditions
       integer*2 lwho       ! - mnemonic for CHEKR
-      integer fc_dad_pid, kpapa, fc_rte_prior
+      integer fc_dad_pid, fc_rte_prior
+      logical kpapa
 C
 C  INITIALIZED:
 C
@@ -51,6 +52,7 @@ C
       data nverr,niferr,nfmerr,ntperr /9,8,11,15/
       data ichecks/21*0/
       data icherr/169*0/
+      data kpapa/.false./
 C
 C   LAST MODIFIED    LAR  880301      USE HEAD PASS NUMBERS FROM /FSCOM/
 C  WHO  WHEN    DESCRIPTION
@@ -85,15 +87,15 @@ C
       call fc_rte_time(itbuf1,idum)
       idaref = itbuf1(5)
 C
-      if ((MK3.eq.iand(rack,MK3)).or.(MK4.eq.iand(rack,MK4))) then
+      if ((MK3.eq.and(rack,MK3)).or.(MK4.eq.and(rack,MK4))) then
         call mk3rack(lmodna,lwho,icherr,ichecks,nverr,niferr,nfmerr)
-      else if (VLBA.eq.iand(rack,VLBA))  then
+      else if (VLBA.eq.and(rack,VLBA))  then
         call vlbarack(lwho)
       endif
-      if ((MK3.eq.iand(drive,MK3)).or.(MK4.eq.iand(drive,MK4))) then
+      if ((MK3.eq.and(drive,MK3)).or.(MK4.eq.and(drive,MK4))) then
         call mk3drive(lwho,lmodna,nverr,niferr,nfmerr,ntperr,icherr,
      .                ichecks)
-      else if (VLBA.eq.iand(drive,VLBA)) then
+      else if (VLBA.eq.and(drive,VLBA)) then
         call vlbadrive(lwho)
       endif
 C
@@ -101,7 +103,7 @@ C  This is the error-reporting section.  The array ICHERR is
 C  examined to determine which error messages, if any, should
 C  be logged and displayed.
 C
-      if(VLBA.ne.iand(drive,VLBA).or.VLBA.ne.iand(rack,VLBA)) then
+      if(VLBA.ne.and(drive,VLBA).or.VLBA.ne.and(rack,VLBA)) then
         call err_rep(lmodna,lwho,icherr,ichecks,nverr,niferr,nfmerr,
      .               ntperr)
       endif
@@ -121,7 +123,7 @@ C
        call hdchk(ichecks,lwho)
 C
 910    continue
-       if((MK3.eq.iand(MK3,rack)).or.(MK4.eq.iand(MK4,rack))) then
+       if((MK3.eq.and(MK3,rack)).or.(MK4.eq.and(MK4,rack))) then
          call fs_get_icheck(icheck(21),21)
          if (icheck(21).le.0.or.ichecks(21).ne.icheck(21)) goto 1000
          call i3chk(ichecks,lwho)

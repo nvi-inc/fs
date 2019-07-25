@@ -18,7 +18,7 @@ C     where each letter represents a character (half word).
 C                   s  = speed (lower 3 bits) and direction (top bit) 
 C                 rrr  = rate generator frequency 
 C 
-      call ichmv(ibuf,1,2H) ,1,1) 
+      call ichmv_ch(ibuf,1,')') 
       call ichmv(ibuf,2,ihx2a(idir*o'10'+isp),2,1)
       call ichmv(ibuf,3,lgen,1,3) 
       call ifill_ch(ibuf,6,4,'0') 

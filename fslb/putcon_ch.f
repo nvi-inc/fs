@@ -9,7 +9,7 @@
       nchar = len(string)
 
       call fs_get_iclbox(iclbox)
-      call put_bufc(iclbox,string,-nchar,2Hfs,2Hto)
+      call put_buf_ch(iclbox,string,'fs','to')
 
       return
       end

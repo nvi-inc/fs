@@ -7,7 +7,7 @@ C     NYRF = YEAR SINCE 1900
 C     NDAY = DAY OF YEAR
 C     EQOFEQ IS RETURNED EQUATION OF EQUINOXES
 C
-      double precision t,al,a,t2,t3,aomega,arg,dlong,doblq,eqofeq
+      double precision t,al,a,aomega,arg,dlong,doblq,eqofeq
 C
       al=nday
       a=nyrf

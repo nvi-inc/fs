@@ -1,0 +1,26 @@
+#!/bin/bash
+# make distribution floppy for version 8.9
+#
+echo "Removing old /tmp/fs.tar.gz"
+rm -rf /tmp/fs.tar.gz
+#
+echo "Making anti-file list"
+cd /usr2
+rm -rf /tmp/FSS
+find fs -name '*.[oas]' -print >/tmp/FSS
+find fs/bin -perm -1 -type f -print >>/tmp/FSS
+if [ -e fs/oprin/readline-2.0 ]
+then
+	find fs/oprin/readline-2.0 -print >>/tmp/FSS
+fi
+find fs -name 'core' -print >>/tmp/FSS
+find fs -name '#*#' -print >>/tmp/FSS
+find fs -name '*~' -print >>/tmp/FSS
+#
+echo "Making tar.gz archive"
+tar -X /tmp/FSS -czf /tmp/fs.tar.gz fs
+#
+echo "Removing file list"
+#rm -rf /tmp/FSS
+#
+echo "Done."

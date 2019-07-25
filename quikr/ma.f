@@ -77,16 +77,16 @@ C                   If there's nothing left, quit
 C                   Scan for a tab character
       if (nenq.ne.0) idumm1 = ichmv(ibuf,nenq,o'5',2,1)
 C                   If we found one, substitute the enq character
-      idumm1 = ichmv(ibuf2(2),1,ibuf,ifc,icom-1,nch)
+      idumm1 = ichmv(ibuf2(2),1,ibuf,ifc,icom-1)
 C                   Move characters to output buffer starting at first
 C                   character of this message up to just before comma.
       if (nsub.eq.8) goto 205
       ibuf2(1) = 5
 C                   Set up for MAT mode 5
       nch = nch + 2
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
       goto 220
-205   call put_buf(iclass,ibuf2(2),-nch,2hfs,0)
+205   call put_buf(iclass,ibuf2(2),-nch,'fs','  ')
 C                   For ANTCN, don't send the mode
 220   nrec = nrec + 1
       ifc = icom + 1

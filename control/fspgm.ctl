@@ -1,5 +1,5 @@
 incom n  incom
-ddout l  xterm -name ddout -e ddout &
+ddout l  ddout &
 fserr la fserr &
 boss  n  boss &
 matcn n  matcn &
@@ -12,5 +12,5 @@ quikr n  quikr &
 quikv n  quikv &
 moon  n  moon  &
 pcalr n  pcalr &
-oprin n  xterm -name oprin -e oprin &
+oprin n xterm -name oprin -j -e oprin &
 antcn n  antcn &

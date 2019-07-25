@@ -3,10 +3,11 @@
 #  to indicate continuation.
 #
 OBJECTS=\
-portopen.o portread.o portwrite.o portbaud.o portflush.o
+portopen.o portread.o portwrite.o portbaud.o portflush.o portoutdrain.o\
+portdelay.o
 #
-#CFLAGS = -g
-#FFLAGS = -g
+#CFLAGS = 
+#FFLAGS = 
 F77 = gf77
 #
 #  The following line that has a ":" in it is a "dependency line".
@@ -19,4 +20,5 @@ F77 = gf77
 port.a: $(OBJECTS)
 	touch port.a
 	rm port.a
-	ar qc port.a $(OBJECTS)
+	ar -qc port.a $(OBJECTS)
+	ar s port.a

@@ -25,7 +25,6 @@ C        NCH    - character counter
       equivalence (parm,iparm(1))
 C
 C 5.  INITIALIZED VARIABLES
-      data ilen/40/                         !  length of ibuf, chars
 C
 C 6.  PROGRAMMER: MWH
 C     LAST MODIFIED: CREATED  890531
@@ -33,12 +32,12 @@ C
 C
 C     1. Display current FS version.
 C
-      nch = ichmv(ibuf,1,10hfsversion/,1,10)
+      nch = ichmv_ch(ibuf,1,'fsversion/')
 C                   Put / to indicate a response
       nch = nch + ir2as(fsver,ibuf,nch,4,2)-1
 C
       iclass = 0
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       ip(1) = iclass
       ip(2) = 1
       ip(3) = 0

@@ -103,7 +103,8 @@ C
 C
 C Check for a dB scale
 C
-      if (llogx(i).ne.2Hdb) call char2hol('  ',llogx(i),1,2)
+      if(ichcm_ch(llogx(i),1,'db').ne.0)
+     &  call char2hol('  ',llogx(i),1,2)
 C
 1700  continue
       return

@@ -10,7 +10,12 @@
 
 #include <memory.h>
 #include <string.h>
-#include "sys/ugpib.h"
+
+#ifdef CONFIG_GPIB
+#include <ib.h>
+#include <ibP.h>
+#endif
+
 #define NULLPTR (char *) 0
 
 void opdev_(dev,devlen,devid,error,ipcode)
@@ -33,19 +38,23 @@ long *ipcode;
   {
     *error = -3;
     memcpy((char *)ipcode,"DL",2);
+    return;
   }
-  else
-  {
-    nameend = memccpy(device, dev, ' ', *devlen);
-    if (nameend != NULLPTR)
-      *(nameend-1) = '\0';
-    else 
-      *(device + *devlen) = '\0';
+  
+  nameend = memccpy(device, dev, ' ', *devlen);
+  if (nameend != NULLPTR)
+    *(nameend-1) = '\0';
+  else 
+    *(device + *devlen) = '\0';
 
-    if ( (*devid = ibfind(device)) < 0) 
-    { 
-      *error = -320;
-      memcpy((char*)ipcode,"DF",2);
-    }
+#ifdef CONFIG_GPIB
+  if ( (*devid = ibfind(device)) < 0) 
+  { 
+   *error = -320;
+   memcpy((char*)ipcode,"DF",2);
   }
+#else
+   *error = -322;
+#endif
 }
+

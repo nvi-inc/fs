@@ -11,7 +11,7 @@ cd ..
 
 for dir in rwand chekr fserr ddout fs fsalloc ibcon incom matcn oprin pcalr onoff fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir quikv mcbcn brk moon logex headp fmset quikr
 do
-   if( test -f "$dir"/makefile)
+   if( test -f "$dir"/Makefile)
            then
                cd $dir
                make

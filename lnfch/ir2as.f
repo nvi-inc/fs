@@ -72,7 +72,8 @@ C  part of the number, go fill with $$
       ic = ifc
 C  Start character counter where requested 
       if (value.lt.0.0.and.ncfrac.lt.0) 
-     +  ic = ichmv(ias,ic,2H- ,1,1) 
+c    +  ic = ichmv(ias,ic,2H- ,1,1) 
+     +  ic = ichmv_ch(ias,ic,'-') 
 C  Put in minus sign first if necessary
       ndig = 0
 C  We have no digits processed yet 
@@ -101,7 +102,8 @@ C  Move in leading spaces or zeros for RIGHT-justify
       goto 210
 202   continue
       if(ndig.eq.0.and.value.lt.0.0.and.ncfrac.ge.0)
-     +  ic =  ichmv(ias,ic,2H- ,1,1)  
+c    +  ic =  ichmv(ias,ic,2H- ,1,1)  
+     +  ic =  ichmv_ch(ias,ic,'-')  
       ic = ic + ib2as(idigit,ias,ic,1)
 C  Convert this digit.  We should get back a $ if
 C  the digit is too large. 
@@ -110,7 +112,8 @@ C  Set the flag, we've started adding digits
       if (idec.gt.0) idec=idec+1
 C  Increment count of digits past decimal point
       if (nci.ne.i) goto 201
-      ic = ichmv(ias,ic,2H. ,1,1) 
+c     ic = ichmv(ias,ic,2H. ,1,1) 
+      ic = ichmv_ch(ias,ic,'.') 
       idec = 1
 C  If we're at the 10**0 point, add "."
 201   valint = (valint+idigit)*10.0d0 
@@ -124,7 +127,7 @@ C
 C     3. Clearly, the number will not fit into the field we 
 C     were given.  Fill it up with $$$$$ and finish.
 C 
-300   call ifill(ias,ifc,nch,2H$$)
+300   call ifill_ch(ias,ifc,nch,'$')
       ir2as = nch 
 C 
       return

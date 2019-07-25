@@ -70,7 +70,7 @@ C
       call gtprm(ibuf,ich,nchar,0,parm,ierr)
       call fs_get_drive(drive)
       if((ichcm_ch(parm,1,'r').eq.0..or.ichcm_ch(parm,1,'2').eq.0)
-     &   .and.VLBA.ne.iand(drive,VLBA)) then
+     &   .and.VLBA.ne.and(drive,VLBA)) then
         ihd = 2
       else if(ichcm_ch(parm,1,'r').eq.0.or.
      &        ichcm_ch(parm,1,'2').eq.0) then
@@ -81,7 +81,7 @@ C
         ihd = 1
       else if(cjchar(parm,1).eq.'*') then
         ihd=ihdpk_fs
-      else if (cjchar(parm,1).eq.','.and.VLBA.ne.iand(drive,VLBA)) then
+      else if (cjchar(parm,1).eq.','.and.VLBA.ne.and(drive,VLBA)) then
         ihd = 2
       else if (cjchar(parm,1).eq.',') then
         ihd = 1
@@ -151,7 +151,7 @@ C
 600   continue
       nch=ieq
       if(ieq.eq.0) nch=nchar+1
-      nch=ichmv(ibuf,nch,2h/ ,1,1)
+      nch=ichmv_ch(ibuf,nch,'/')
 C
       nch=nch+ib2as(nsamppk_fs,ibuf,nch,o'100003')
       nch=mcoma(ibuf,nch)
@@ -160,9 +160,9 @@ C
       nch=mcoma(ibuf,nch)
 C
       if(ihdpk_fs.eq.1) then
-        nch=ichmv(ibuf,nch,6hwrite ,1,5)
+        nch=ichmv_ch(ibuf,nch,'write')
       else if(ihdpk_fs.eq.2) then
-        nch=ichmv(ibuf,nch,4hread  ,1,4)
+        nch=ichmv_ch(ibuf,nch,'read')
       endif
       nch=mcoma(ibuf,nch)
 C
@@ -176,16 +176,16 @@ C
       nch=mcoma(ibuf,nch)
 C
       if(kpeakv_fs) then
-        nch=ichmv(ibuf,nch,2ht ,1,1)
+        nch=ichmv_ch(ibuf,nch,'t')
       else
-        nch=ichmv(ibuf,nch,2hf ,1,1)
+        nch=ichmv_ch(ibuf,nch,'f')
       endif
       nch=mcoma(ibuf,nch)
 C
       nch=nch+ir2as(vltpk_fs,ibuf,nch,8,3)
 C
       nch=nch-1
-      call put_buf(iclass,ibuf,-nch,2hfs,0)
+      call put_buf(iclass,ibuf,-nch,'fs','  ')
       nrec=1
       goto 990
 C

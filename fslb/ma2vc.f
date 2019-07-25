@@ -30,20 +30,20 @@ C     for % data:   Vn----pppp (total power word)
 C     Note we are only concerned with the last 8 characters 
 C 
       call ichmv(lfreq,1,ibuf1,6,3) 
-      call ichmv(lfreq,4,2H. ,1,1)
+      call ichmv_ch(lfreq,4,'.')
       call ichmv(lfreq,5,ibuf1,9,2) 
       ibw = ia2hx(ibuf1,5)
-      itp = iand(ia2hx(ibuf1,3),7)
+      itp = and(ia2hx(ibuf1,3),7)
       ia = ia2hx(ibuf1,4) 
-      iatu = 10*iand(ia,2)/2
-      iatl = 10*iand(ia,1)
-      irem = iand(ia2hx(ibuf1,3),8)/8 
-      ilok = iand(ia,8)/8 
+      iatu = 10*and(ia,2)/2
+      iatl = 10*and(ia,1)
+      irem = and(ia2hx(ibuf1,3),8)/8 
+      ilok = and(ia,8)/8 
       tpwr = 0.0
       do i=1,4
         tpwr = tpwr + ia2hx(ibuf2,6+i)*(16.0**(4-i))
       enddo
-      ial = iand(ia,4)/4
+      ial = and(ia,4)/4
 c
       return
       end 

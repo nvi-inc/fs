@@ -1,4 +1,4 @@
-#include <curses.h>
+#include <ncurses.h>
 #include <signal.h>
 #include <math.h>
 #include <sys/types.h>

@@ -8,7 +8,7 @@ C
       integer itsp(8)
       integer idcb(2)
       integer*4 ip(5)
-      integer*2 lnamef(3),lnamer(3),lnamet(3),ibuf(50)
+      integer*2 ibuf(50)
       integer ist(9),nchar(9),ibaud(7)
 C  Local variables used in the 600 section.
       integer tierr,pierr
@@ -19,8 +19,6 @@ C  Functions
 C  End 600 variables
       character*80 ibc, model
       equivalence (ibc,ibuf)
-      data lnamef,lnamer/2h(e,2hxp,2her,2h(r,2hxd,2hef/
-      data lnamet/2h(t,2hed,2hef/
       data ibaud/110,300,600,1200,2400,4800,9600/
       data kasct,kascp,kdesp,kdest/4*.false./
       data itsp/0,3,7,15,30,60,120,240/
@@ -92,6 +90,7 @@ C
       lswcal = 0
       ldv1nf = 0
       ldevfp = 0
+      call char2hol(' ',laxfp,1,4)
       do i=1,2
         fastfw(i)=0.
         slowfw(i)=0.
@@ -144,11 +143,16 @@ C
         horaz(i) = -1.0
         horel(i) = -1.0
       enddo
-      fsver = 8.29
+C
+C FS version number
+C
+      sVerMajor_FS = 8
+      sVerMinor_FS = 9
+      sVerPatch_FS = 0
 C                   Initialize the time-like variables
 C                   Initialize previous segment name for LINKP
       do i=1,15
-        idummy = ichmv(lfreqv(1,i),1,6h000.00,1,6)
+        idummy = ichmv_ch(lfreqv(1,i),1,'000.00')
       enddo
       call fs_set_lfreqv(lfreqv)
       iratfm = 0
@@ -160,7 +164,7 @@ C                   Initialize previous segment name for LINKP
       call fs_set_ispeed(ispeed)
       idirtp = -1
       call fs_set_idirtp(idirtp)
-      idummy = ichmv(lgen,1,3H000,1,3)
+      idummy = ichmv_ch(lgen,1,'000')
       call fs_set_lgen(lgen)
       ilowtp = 1
       ibyp=1
@@ -237,7 +241,7 @@ C     Finally, mode D
       call fs_set_ndevlog(ndevlog)
       call char2hol('/dev/tty',idevlog(1,1),1,64)
       call fs_set_idevlog(idevlog)
-      idummy = ichmv(loccup,1,8hoccup##!,1,8)
+      idummy = ichmv_ch(loccup,1,'occup##!')
       idchrx = 1
       ibxhrx = 1
       ifamrx(1) = 1
@@ -329,7 +333,6 @@ C
       kwrwo_fs=.false.
       kposhd_fs(1)=.false.
       kposhd_fs(2)=.false.
-      koffhd_fs=.true.
       idecpa_fs=0
       kdoaux_fs=.true.
       ierrdc_fs=1
@@ -371,7 +374,7 @@ C
       call fmpopen
      &  (idcb,FS_ROOT//'/control/location.ctl',ierr,'r',idum)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-117,2hbo,ierr)
+        call logit7ci(0,0,0,1,-117,'bo',ierr)
         goto 990
       endif
 C
@@ -384,7 +387,7 @@ C LINE #1  STATION NAME
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       n = ic2-ic1+1
       if (n.gt.8) then
-        call logit7(0,0,0,1,-119,2hbo,1)
+        call logit7ci(0,0,0,1,-119,'bo',1)
         ierrx = -1
       endif
       call ifill_ch(lnaant,1,8,' ')
@@ -398,7 +401,7 @@ C LINE #2  WEST LONGITUDE
       wlong = das2b(ibuf,ic1,ic2-ic1+1,ierr)*DPI/180.0D0
       call fs_set_wlong(wlong)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-119,2hbo,2)
+        call logit7ci(0,0,0,1,-119,'bo',2)
         ierrx = ierr
       endif
 C LINE #3  LATITUDE
@@ -409,7 +412,7 @@ C LINE #3  LATITUDE
       alat = das2b(ibuf,ic1,ic2-ic1+1,ierr)*DPI/180.0D0
       call fs_set_alat(alat)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-119,2hbo,3)
+        call logit7ci(0,0,0,1,-119,'bo',3)
         ierrx = ierr
       endif
 C LINE #4  STATION ELEVATION
@@ -421,7 +424,7 @@ C LINE #4  STATION ELEVATION
       height = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       call fs_set_height(height)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-119,2hbo,4)
+        call logit7ci(0,0,0,1,-119,'bo',4)
         ierrx = ierr
       endif
 C LINE #5  OCCUPATION CODE
@@ -433,7 +436,7 @@ C LINE #5  OCCUPATION CODE
       n = ic2-ic1+1
       idummy = ichmv(loccup,1,ibuf,ic1,min0(8,n))
       if (n.gt.8) then
-        call logit7(0,0,0,1,-119,2hbo,5)
+        call logit7ci(0,0,0,1,-119,'bo',5)
         ierrx = -1
       endif
 C LINE #6  STATION ID
@@ -452,13 +455,13 @@ C LINE #7  NEAREST PAST DECADE
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       nch = ic2-ic1+1
       if (nch.ne.4) then
-        call logit7(0,0,0,1,-172,2hbo,nch)
+        call logit7ci(0,0,0,1,-172,'bo',nch)
         ierrx = -1
         goto 990
       end if
       if (ic1.ne.0) iyrctl_fs = ias2b(ibuf,ic1,ic2-ic1+1)
       if (mod(iyrctl_fs,10).ne.0) then
-        call logit7(0,0,0,1,-173,2hbo,iyrctl_fs)
+        call logit7ci(0,0,0,1,-173,'bo',iyrctl_fs)
         ierrx = -1
         goto 990
       endif
@@ -488,7 +491,7 @@ C
       call fmpopen
      &  (idcb,FS_ROOT//'/control/equip.ctl',ierr,'r',idum)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-139,2hbo,ierr)
+        call logit7ci(0,0,0,1,-139,'bo',ierr)
         goto 990
       endif
 C LINE #1 TAPE STARTUP PARAMETER (TACC) - iacttp
@@ -499,7 +502,7 @@ C LINE #1 TAPE STARTUP PARAMETER (TACC) - iacttp
       if (ic1.eq.0) goto 320
       iacttp = ias2b(ibuf,ic1,ic2-ic1+1)
       if (iacttp.lt.0) then
-        call logit7(0,0,0,1,-140,2hbo,1)
+        call logit7ci(0,0,0,1,-140,'bo',1)
         ierrx = -1
       endif
       call fs_set_iacttp(iacttp)
@@ -528,7 +531,7 @@ C LINE #2 MAX TAPE SPEED - imaxtpsd
           goto 3002
         endif
       enddo
-        call logit7(0,0,0,1,-140,2hbo,2) ! invalid speed given
+        call logit7ci(0,0,0,1,-140,'bo',2) ! invalid speed given
         ierrx = -1
 3002  continue
       imaxtpsd = index ! invalid speed given
@@ -558,7 +561,7 @@ C LINE #3 SCHEDULE TAPE SPEED - iskdtpsd
           goto 3003
         endif
       enddo
-        call logit7(0,0,0,1,-140,2hbo,3) ! invalid speed given
+        call logit7ci(0,0,0,1,-140,'bo',3) ! invalid speed given
         ierrx = -1
 3003  continue
       iskdtpsd = index 
@@ -571,7 +574,7 @@ C LINE #4 RF FREQUENCY - refreq
       if (ic1.eq.0) goto 320
       refreq = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-140,2hbo,4)
+        call logit7ci(0,0,0,1,-140,'bo',4)
         ierrx = ierr
       endif
       call fs_set_refreq(refreq)
@@ -583,7 +586,7 @@ C LINE #5 RECEIVER 70K STAGE CHECK TEMPERATURE - i70kch
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       if (ic1.ne.0) i70kch = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0.or.ic1.eq.0) then
-        call logit7(0,0,0,1,-140,2hbo,5)
+        call logit7ci(0,0,0,1,-140,'bo',5)
         ierrx = -1
         go to 990
       endif
@@ -596,7 +599,7 @@ C LINE #6 RECEIVER 20K STAGE CHECK TEMPERATURE - i20kch
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       if (ic1.ne.0) i20kch = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0.or.ic1.eq.0) then
-        call logit7(0,0,0,1,-140,2hbo,6)
+        call logit7ci(0,0,0,1,-140,'bo',6)
         ierrx = -1
         go to 990
       endif
@@ -614,7 +617,7 @@ C LINE #7  TYPE OF RACK - rack
       else if (ichcm_ch(ibuf,ic1,'mk4').eq.0) then
         rack = MK4
       else
-        call logit7(0,0,0,1,-140,2Hbo,7)
+        call logit7ci(0,0,0,1,-140,'bo',7)
         ierrx = -1
         goto 990
       endif
@@ -632,7 +635,7 @@ C LINE #8  TYPE OF RECORDER - drive
       else if (ichcm_ch(ibuf,ic1,'mk4').eq.0) then
         drive = MK4
       else
-        call logit7(0,0,0,1,-140,2Hbo,8)
+        call logit7ci(0,0,0,1,-140,'bo',8)
         ierrx = -1
         goto 990
       endif
@@ -645,7 +648,7 @@ C LINE #9 HARDWARE ID - hwid
       if (ic1.eq.0) goto 320
       hwid = ias2b(ibuf,ic1,ic2-ic1+1)
       if (hwid.le.100 .or. hwid.ge.255) then
-        call logit7(0,0,0,1,-140,2hbo,9)
+        call logit7ci(0,0,0,1,-140,'bo',9)
         ierrx = -1
       endif
       call fs_set_hwid(hwid)
@@ -657,7 +660,7 @@ C LINE #10 VACUUM MOTOR VOLTAGE - motorv
       if (ic1.eq.0) goto 320
       motorv = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-140,2hbo,10)
+        call logit7ci(0,0,0,1,-140,'bo',10)
         ierrx = ierr
       endif
       call fs_set_motorv(motorv)
@@ -669,7 +672,7 @@ C LINE #11 VACUUM SCALE INTERCEPT - inscint
       if (ic1.eq.0) goto 320
       inscint = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-140,2hbo,11)
+        call logit7ci(0,0,0,1,-140,'bo',11)
         ierrx = ierr
       endif
       call fs_set_inscint(inscint)
@@ -681,7 +684,7 @@ C LINE #12 VACUUM SCALE SLOPE - inscsl
       if (ic1.eq.0) goto 320
       inscsl = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-140,2hbo,12)
+        call logit7ci(0,0,0,1,-140,'bo',12)
         ierrx = ierr
       endif
       call fs_set_inscsl(inscsl)
@@ -693,7 +696,7 @@ C LINE #13 VACUUM SCALE INTERCEPT - outscint
       if (ic1.eq.0) goto 320
       outscint = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-140,2hbo,13)
+        call logit7ci(0,0,0,1,-140,'bo',13)
         ierrx = ierr
       endif
       call fs_set_outscint(outscint)
@@ -705,7 +708,7 @@ C LINE #14 VACUUM SCALE SLOPE - outscsl
       if (ic1.eq.0) goto 320
       outscsl = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-140,2hbo,14)
+        call logit7ci(0,0,0,1,-140,'bo',14)
         ierrx = ierr
       endif
       call fs_set_outscsl(outscsl)
@@ -717,7 +720,7 @@ C LINE #15  TAPE THICKNESS - itpthick
       if (ic1.eq.0) goto 320
       itpthick = ias2b(ibuf,ic1,ic2-ic1+1)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-140,2hbo,15)
+        call logit7ci(0,0,0,1,-140,'bo',15)
         ierrx = ierr
       endif
       call fs_set_itpthick(itpthick)
@@ -729,7 +732,7 @@ C LINE #16 HEAD WRITE VOLTAGE - wrvolt
       if (ic1.eq.0) goto 320
       wrvolt = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-140,2hbo,16)
+        call logit7ci(0,0,0,1,-140,'bo',16)
         ierrx = ierr
       endif
       call fs_set_wrvolt(wrvolt)
@@ -741,7 +744,7 @@ C LINE #17  CAPSTAN SIZE - capstan
       if (ic1.eq.0) goto 320
       capstan = ias2b(ibuf,ic1,ic2-ic1+1)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-140,2hbo,17)
+        call logit7ci(0,0,0,1,-140,'bo',17)
         ierrx = ierr
       endif
       call fs_set_capstan(capstan)
@@ -766,7 +769,7 @@ C LINE #18  if3 lo freq.
       freqif3_fs=100*freqif3_fs+ifrqd
       if (ifrqu.lt.0.or.ifrqd.lt.0.or.
      &    freqif3_fs.lt.50000.or.freqif3_fs.gt.100000) then
-        call logit7(0,0,0,1,-140,2hbo,18)
+        call logit7ci(0,0,0,1,-140,'bo',18)
         ierrx = ierr
       endif
 C LINE #19  if3 switches
@@ -777,7 +780,7 @@ C LINE #19  if3 switches
       if (ic1.eq.0) goto 320
       iswavif3_fs=ia2hx(ibuf,ic1)
       if (ic2-ic1.ne.0.or.iswavif3_fs.lt.0) then
-        call logit7(0,0,0,1,-140,2hbo,19)
+        call logit7ci(0,0,0,1,-140,'bo',19)
         ierrx = ierr
       endif
 C
@@ -788,7 +791,7 @@ C 3.2 Open the file with device LU information.
 C
       call fmpopen(idcb,FS_ROOT//'/control/dev.ctl',ierr,'r',idum)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-120,2hbo,ierr)
+        call logit7ci(0,0,0,1,-120,'bo',ierr)
         goto 990
       endif
 C  GPIB CONFIGURATION FILE
@@ -814,7 +817,7 @@ C  MAT BAUD RATE
       ibmat = ias2b(ibuf,ic1,ic2-ic1+1)           ! baud rate for MAT
       call fs_set_ibmat(ibmat)
       if (ibmat.eq.-32768) then
-        call logit7(0,0,0,1,-122,2hbo,3)
+        call logit7ci(0,0,0,1,-122,'bo',3)
         ierrx = -1
       endif
       ibx = -1
@@ -823,7 +826,7 @@ C  MAT BAUD RATE
       enddo
 C                   Check that a legal value was specified
       if (ibx.le.0) then
-        call logit7(0,0,0,1,-122,2hbo,3)
+        call logit7ci(0,0,0,1,-122,'bo',3)
         ierrx = -1
       endif
 C  DATA BUFFER DEVICE NAME
@@ -840,7 +843,7 @@ C  DATA BUFFER BAUD RATE
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       ibdb = ias2b(ibuf,ic1,ic2-ic1+1)        ! data buffer baud rate
       if (ibdb.eq.-32768) then
-        call logit7(0,0,0,1,-122,2hbo,5)
+        call logit7ci(0,0,0,1,-122,'bo',5)
         ierrx = -1
       endif
       ibx = -1
@@ -849,7 +852,7 @@ C  DATA BUFFER BAUD RATE
       enddo
 C                   Check that a legal value was specified
       if (ibx.le.0) then
-        call logit7(0,0,0,1,-122,2hbo,7)
+        call logit7ci(0,0,0,1,-122,'bo',7)
         ierrx = -1
       endif
 C  ANTENNA DEVICE NAME
@@ -883,7 +886,7 @@ C  MCB BAUD RATE
       ibmcb = ias2b(ibuf,ic1,ic2-ic1+1)      ! baud rate for MCB
       call fs_set_ibmcb(ibmcb)
       if (ibmcb.eq.-32768) then
-        call logit7(0,0,0,1,-122,2hbo,9)
+        call logit7ci(0,0,0,1,-122,'bo',9)
         ierrx = -1
       endif
       ibx = -1
@@ -892,7 +895,7 @@ C  MCB BAUD RATE
       enddo
 C                   Check that a legal value was specified
       if (ibx.le.0) then
-        call logit7(0,0,0,1,-122,2hbo,9)
+        call logit7ci(0,0,0,1,-122,'bo',9)
         ierrx = -1
       endif
 
@@ -904,7 +907,7 @@ C
 330   continue
       call fmpopen(idcb,FS_ROOT//'/control/head.ctl',ierr,'r',idum)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-151,2hbo,ierr)
+        call logit7ci(0,0,0,1,-151,'bo',ierr)
         goto 990
       endif
       call readg(idcb,ierr,ibuf,ilen)
@@ -914,11 +917,11 @@ C
         call gtfld(ibuf,ich,ilen,ic1,ic2)
         if(ic1.eq.0) goto 340
         idum=-1
-        if(ichcm(ibuf,ic1,4hall   ,1,3).eq.0) idum=0
-        if(ichcm(ibuf,ic1,4hodd   ,1,3).eq.0) idum=1
-        if(ichcm(ibuf,ic1,6heven  ,1,4).eq.0) idum=2
+        if(ichcm_ch(ibuf,ic1,'all').eq.0) idum=0
+        if(ichcm_ch(ibuf,ic1,'odd').eq.0) idum=1
+        if(ichcm_ch(ibuf,ic1,'even').eq.0) idum=2
         if(idum.lt.0.or.(idum.eq.0.and.i.eq.4)) then
-          call logit7(0,0,0,1,-153,2hbo,1)
+          call logit7ci(0,0,0,1,-153,'bo',1)
           ierrx=-1
         endif
         if(i.eq.1) wrhd_fs=idum
@@ -934,22 +937,22 @@ C
       ich=1
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       if(ic1.eq.0) goto 340
-      if(ichcm(ibuf,ic1,8hadaptive,1,8).eq.0) then
+      if(ichcm_ch(ibuf,ic1,'adaptive').eq.0) then
         kadapt_fs=.true.
-      else if(ichcm(ibuf,ic1,6hfixed ,1,5).eq.0) then
+      else if(ichcm_ch(ibuf,ic1,'fixed').eq.0) then
         kadapt_fs=.false.
       else
-        call logit7(0,0,0,1,-153,2hbo,2)
+        call logit7ci(0,0,0,1,-153,'bo',2)
         ierrx=-1
       endif
       call gtfld(ibuf,ich,ilen,ic1,ic2)
       if(ic1.eq.0) goto 340
-      if(ichcm(ibuf,ic1,4hyes     ,1,3).eq.0) then
+      if(ichcm_ch(ibuf,ic1,'yes').eq.0) then
         kiwslw_fs=.true.
-      else if(ichcm(ibuf,ic1,2hno ,1,2).eq.0) then
+      else if(ichcm_ch(ibuf,ic1,'no').eq.0) then
         kiwslw_fs=.false.
       else
-        call logit7(0,0,0,1,-153,2hbo,2)
+        call logit7ci(0,0,0,1,-153,'bo',2)
         ierrx=-1
       endif
       call gtfld(ibuf,ich,ilen,ic1,ic2)
@@ -959,7 +962,7 @@ C
       if (ic1.eq.0) goto 340
       ilvtl_fs = ias2b(ibuf,ic1,ic2-ic1+1)
       if(ilvtl_fs.lt.0.or.ilvtl_fs.gt.4097) then
-        call logit7(0,0,0,1,-153,2hbo,2)
+        call logit7ci(0,0,0,1,-153,'bo',2)
         ierrx=-1
       endif
 C
@@ -971,7 +974,7 @@ C
         if (ic1.eq.0) goto 340
         fastfw(i) = das2b(ibuf,ic1,ic2-ic1+1,ierr)
         if (ierr.ne.0) then
-          call logit7(0,0,0,1,-153,2hbo,3)
+          call logit7ci(0,0,0,1,-153,'bo',3)
           ierrx = -1
         endif
       enddo
@@ -984,7 +987,7 @@ C
         if (ic1.eq.0) goto 340
         slowfw(i) = das2b(ibuf,ic1,ic2-ic1+1,ierr)
         if (ierr.ne.0) then
-          call logit7(0,0,0,1,-153,2hbo,4)
+          call logit7ci(0,0,0,1,-153,'bo',4)
           ierrx = ierr
         endif
       enddo
@@ -996,7 +999,7 @@ C
         if (ic1.eq.0) goto 340
         foroff(i) = das2b(ibuf,ic1,ic2-ic1+1,ierr)
         if (ierr.ne.0) then
-          call logit7(0,0,0,1,-153,2hbo,5)
+          call logit7ci(0,0,0,1,-153,'bo',5)
           ierrx = ierr
         endif
       enddo
@@ -1008,7 +1011,7 @@ C
         if (ic1.eq.0) goto 340
         fastrv(i) = das2b(ibuf,ic1,ic2-ic1+1,ierr)
         if (ierr.ne.0) then
-          call logit7(0,0,0,1,-153,2hbo,6)
+          call logit7ci(0,0,0,1,-153,'bo',6)
           ierrx = ierr
         endif
       enddo
@@ -1020,7 +1023,7 @@ C
         if (ic1.eq.0) goto 340
         slowrv(i) = das2b(ibuf,ic1,ic2-ic1+1,ierr)
         if (ierr.ne.0) then
-          call logit7(0,0,0,1,-153,2hbo,7)
+          call logit7ci(0,0,0,1,-153,'bo',7)
           ierrx = ierr
         endif
       enddo
@@ -1032,7 +1035,7 @@ C
         if (ic1.eq.0) goto 340
         revoff(i) = das2b(ibuf,ic1,ic2-ic1+1,ierr)
         if (ierr.ne.0) then
-          call logit7(0,0,0,1,-153,2hbo,8)
+          call logit7ci(0,0,0,1,-153,'bo',8)
           ierrx = ierr
         endif
       enddo
@@ -1044,7 +1047,7 @@ C
         if (ic1.eq.0) goto 340
         pslope(i) = das2b(ibuf,ic1,ic2-ic1+1,ierr)
         if (ierr.ne.0) then
-          call logit7(0,0,0,1,-153,2hbo,9)
+          call logit7ci(0,0,0,1,-153,'bo',9)
           ierrx = ierr
         endif
       enddo
@@ -1056,13 +1059,13 @@ C
         if (ic1.eq.0) goto 340
         rslope(i) = das2b(ibuf,ic1,ic2-ic1+1,ierr)
         if (ierr.ne.0) then
-          call logit7(0,0,0,1,-153,2hbo,9)
+          call logit7ci(0,0,0,1,-153,'bo',9)
           ierrx = ierr
         endif
       enddo
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-152,2hbo,ierr)
+        call logit7ci(0,0,0,1,-152,'bo',ierr)
         goto 990
       endif
 C
@@ -1074,7 +1077,7 @@ C  3.4 Open the file with antenna information
 C
       call fmpopen(idcb,FS_ROOT//'/control/antenna.ctl',ierr,'r',idum)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-154,2hbo,ierr)
+        call logit7ci(0,0,0,1,-154,'bo',ierr)
         goto 990
       endif
       call readg(idcb,ierr,ibuf,ilen)
@@ -1084,7 +1087,7 @@ C
       if (ic1.eq.0) goto 400
       diaman = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-156,2hbo,1)
+        call logit7ci(0,0,0,1,-156,'bo',1)
         ierrx = ierr
       endif
       call fs_set_diaman(diaman)
@@ -1095,7 +1098,7 @@ C
       if (ic1.eq.0) goto 400
       slew1 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-156,2hbo,2)
+        call logit7ci(0,0,0,1,-156,'bo',2)
         ierrx = ierr
       endif
       call fs_set_slew1(slew1)
@@ -1106,7 +1109,7 @@ C
       if (ic1.eq.0) goto 400
       slew2 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-156,2hbo,3)
+        call logit7ci(0,0,0,1,-156,'bo',3)
         ierrx = ierr
       endif
       call fs_set_slew2(slew2)
@@ -1117,7 +1120,7 @@ C
       if (ic1.eq.0) goto 400
       lolim1 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-156,2hbo,4)
+        call logit7ci(0,0,0,1,-156,'bo',4)
         ierrx = ierr
       endif
       call fs_set_lolim1(lolim1)
@@ -1128,7 +1131,7 @@ C
       if (ic1.eq.0) goto 400
       uplim1 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-156,2hbo,5)
+        call logit7ci(0,0,0,1,-156,'bo',5)
         ierrx = ierr
       endif
       call fs_set_uplim1(uplim1)
@@ -1139,7 +1142,7 @@ C
       if (ic1.eq.0) goto 400
       lolim2 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-156,2hbo,6)
+        call logit7ci(0,0,0,1,-156,'bo',6)
         ierrx = ierr
       endif
       call fs_set_lolim2(lolim2)
@@ -1150,7 +1153,7 @@ C
       if (ic1.eq.0) goto 400
       uplim2 = das2b(ibuf,ic1,ic2-ic1+1,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,1,-156,2hbo,7)
+        call logit7ci(0,0,0,1,-156,'bo',7)
         ierrx = ierr
       endif
       call fs_set_uplim2(uplim2)
@@ -1167,7 +1170,7 @@ C
 400   continue
       call fmpopen(idcb,FS_ROOT//'/control/rxdef.ctl',ierr,'r',idum)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-143,2hbo,ierr)
+        call logit7ci(0,0,0,1,-143,'bo',ierr)
         goto 990
       endif
 C
@@ -1177,7 +1180,7 @@ C
       do n=1,MAX_RXCODES
         call readg(idcb,ierr,ibuf,ilen)
         if (ierr.lt.0) then
-          call logit7(0,0,0,1,-144,2hbo,n)
+          call logit7ci(0,0,0,1,-144,'bo',n)
           goto 990
         endif
         if (ilen.gt.0) then
@@ -1191,11 +1194,11 @@ C
             call gtfld(ibuf,ifc,ilen,ic1,ic2)
             call gtprm(ibuf,ic1,ic2,2,rxvfac(iad),ierr)
             if (ierr.lt.0) then
-              call logit7(0,0,0,1,-145,2hbo,n)
+              call logit7ci(0,0,0,1,-145,'bo',n)
               goto 990
             endif
           else
-            call logit7(0,0,0,1,-145,2hbo,n)
+            call logit7ci(0,0,0,1,-145,'bo',n)
             goto 990
           endif
           rxncodes=rxncodes+1
@@ -1208,7 +1211,7 @@ C
 500   continue
       call fmpopen(idcb,FS_ROOT//'/control/tedef.ctl',ierr,'r',idum)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-146,2hbo,ierr)
+        call logit7ci(0,0,0,1,-146,'bo',ierr)
         goto 990
       endif
 C
@@ -1217,7 +1220,7 @@ C
       call readg(idcb,ierr,ibuf,ilen)
       ilen = iflch(ibuf,80)/2
       if (ierr.lt.0) then
-        call logit7(0,0,0,0,-147,2hbo,1)
+        call logit7ci(0,0,0,0,-147,'bo',1)
         goto 990
       endif
       ifc = 1
@@ -1225,13 +1228,13 @@ C
         call gtfld(ibuf,ifc,ilen*2,ist(i),ic2)
         nchar(i) = ic2 + 1 - ist(i)
         if (nchar(i).le.0 .or. ist(i).le.0) then
-          call logit7(0,0,0,0,-148,2hbo,1)
+          call logit7ci(0,0,0,0,-148,'bo',1)
           goto 990
         endif
       enddo
       modsa = ias2b(ibuf,ist(1),4)  ! read only 4 digits (or 35660 overflows)
       if (modsa.eq.-32767) then
-        call logit7(0,0,0,0,-149,2hbo,1)
+        call logit7ci(0,0,0,0,-149,'bo',1)
         goto 990
       endif
       amptol = das2b(ibuf,ist(2),nchar(2),ierr)
@@ -1242,7 +1245,7 @@ C
       ierrs = ierrs + ierr
       phatol = das2b(ibuf,ist(5),nchar(5),ierr)
       if (ierr.lt.0 .or. ierrs.lt.0) then
-        call logit7(0,0,0,0,-150,2hbo,1)
+        call logit7ci(0,0,0,0,-150,'bo',1)
         goto 990
       endif
 C
@@ -1251,7 +1254,7 @@ C
       call readg(idcb,ierr,ibuf,ilen)
       ilen = iflch(ibuf,80)/2
       if (ierr.lt.0) then
-        call logit7(0,0,0,0,-147,2hbo,2)
+        call logit7ci(0,0,0,0,-147,'bo',2)
         goto 990
       endif
       ifc = 1
@@ -1259,7 +1262,7 @@ C
         call gtfld(ibuf,ifc,ilen*2,ist(i),ic2)
         nchar(i) = ic2 + 1 - ist(i)
         if (nchar(i).le.0 .or. ist(i).le.0) then
-          call logit7(0,0,0,0,-148,2hbo,2)
+          call logit7ci(0,0,0,0,-148,'bo',2)
           goto 990
         endif
       enddo
@@ -1269,7 +1272,7 @@ C
       lvsens = ias2b(ibuf,ist(4),nchar(4))
       if (nprset.eq.-32768 .or. intpha.eq.-32768 .or.
      ^    intamp.eq.-32768 .or. lvsens.eq.-32768) then
-        call logit7(0,0,0,0,-149,2hbo,2)
+        call logit7ci(0,0,0,0,-149,'bo',2)
         goto 990
       endif
       son2hi = das2b(ibuf,ist(5),nchar(5),ierr)
@@ -1282,7 +1285,7 @@ C
       ierrs = ierrs + ierr
       phjmax = das2b(ibuf,ist(9),nchar(9),ierr)
       if (ierr.lt.0 .or. ierrs.lt.0) then
-        call logit7(0,0,0,0,-150,2hbo,2)
+        call logit7ci(0,0,0,0,-150,'bo',2)
         goto 990
       endif
 C
@@ -1290,7 +1293,7 @@ C
       call fmpopen
      &   (idcb,FS_ROOT//'/control/rxdiode.ctl',ierr,'r',idum)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-160,2hbo,ierr)
+        call logit7ci(0,0,0,1,-160,'bo',ierr)
         goto 990
       endif
 C
@@ -1300,12 +1303,12 @@ C
       do while(ilen.ge.0)
         call readg(idcb,ierr,ibuf,ilen)
         if (ierr.lt.0) then
-          call logit7(0,0,0,1,-161,2hbo,ierr)
+          call logit7ci(0,0,0,1,-161,'bo',ierr)
           goto 990
         endif
         if (ilen.gt.0) then
           if (nrx_fs.eq.maxnrx_fs) then
-            call logit7(0,0,0,1,-165,2hbo,maxnrx_fs)
+            call logit7ci(0,0,0,1,-165,'bo',maxnrx_fs)
             goto 990
           end if
           nrx_fs = nrx_fs + 1
@@ -1313,13 +1316,13 @@ C
           call gtfld(ibuf,ifc,ilen,ic1,ic2)
           call gtprm(ibuf,ic1,ic2,2,tmpk_fs(nrx_fs),ierr)
           if (ierr.lt.0) then
-            call logit7(0,0,0,1,-162,2hbo,nrx_fs)
+            call logit7ci(0,0,0,1,-162,'bo',nrx_fs)
             goto 990
           endif
           call gtfld(ibuf,ifc,ilen,ic1,ic2)
           call gtprm(ibuf,ic1,ic2,2,pvolt_fs(nrx_fs),ierr)
           if (ierr.lt.0) then
-            call logit7(0,0,0,1,-162,2hbo,nrx_fs)
+            call logit7ci(0,0,0,1,-162,'bo',nrx_fs)
             goto 990
           endif
 C  Check if the values are either ascending or descending order for
@@ -1342,17 +1345,17 @@ C  each array.
           endif !(nrx_fs>=2)
         endif  !(ilen>0)
       enddo  !(ilen>0)
-      if ((kasct).and.(kdest)) call logit7(0,0,0,0,-163,2hbo,0)
-      if ((kascp).and.(kdesp)) call logit7(0,0,0,0,-164,2hbo,0)
-      if (tierr.ne.0) call logit7(0,0,0,0,tierr,2hbo,0)
-      if (pierr.ne.0) call logit7(0,0,0,0,pierr,2hbo,0)
+      if ((kasct).and.(kdest)) call logit7ci(0,0,0,0,-163,'bo',0)
+      if ((kascp).and.(kdesp)) call logit7ci(0,0,0,0,-164,'bo',0)
+      if (tierr.ne.0) call logit7ci(0,0,0,0,tierr,'bo',0)
+      if (pierr.ne.0) call logit7ci(0,0,0,0,pierr,'bo',0)
       call fmpclose(idcb,ierr)
 C
 700   continue
       call fmpopen
      &   (idcb,FS_ROOT//'/control/time.ctl',ierr,'r',idum)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-180,2hbo,ierr)
+        call logit7ci(0,0,0,1,-180,'bo',ierr)
         goto 990
       endif
 C
@@ -1361,21 +1364,21 @@ C
       ilen=0
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
-        call logit7(0,0,0,1,-189,2hbo,ierr)
+        call logit7ci(0,0,0,1,-189,'bo',ierr)
         goto 990
       endif
       ifc=1
       call gtfld(ibuf,ifc,ilen,ic1,ic2)
       call gtprm(ibuf,ic1,ic2,2,rate,ierr)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-181,2hbo,0)
+        call logit7ci(0,0,0,1,-181,'bo',0)
         goto 990
       endif
       rate0ti_fs=rate/86400.
       call gtfld(ibuf,ifc,ilen,ic1,ic2)
       call gtprm(ibuf,ic1,ic2,2,span,ierr)
       if (ierr.lt.0) then
-        call logit7(0,0,0,1,-182,2hbo,0)
+        call logit7ci(0,0,0,1,-182,'bo',0)
         goto 990
       endif
       span0ti_fs=span*3600d2
@@ -1383,7 +1386,7 @@ C
       call hol2char(ibuf,ic1,ic2,model)
       if(model.ne.'none'.and.model.ne.'offset'.and.model.ne.'rate')
      &  then
-        call logit7(0,0,0,1,-183,2hbo,0)
+        call logit7ci(0,0,0,1,-183,'bo',0)
         goto 990
       endif
       call char2hol(model(1:1),model0ti_fs,1,2)
@@ -1399,13 +1402,13 @@ C
 C
 C  This is the error return section
 C
-900   call logit7(0,0,0,1,-118,2hbo,ierr)
+900   call logit7ci(0,0,0,1,-118,'bo',ierr)
       goto 990
-910   call logit7(0,0,0,1,-121,2hbo,ierr)
+910   call logit7ci(0,0,0,1,-121,'bo',ierr)
       goto 990
-920   call logit7(0,0,0,1,-152,2hbo,ierr)
+920   call logit7ci(0,0,0,1,-152,'bo',ierr)
       goto 990
-930   call logit7(0,0,0,1,-155,2hbo,ierr)
+930   call logit7ci(0,0,0,1,-155,'bo',ierr)
       goto 990
 C
 C

@@ -21,7 +21,6 @@ C
       data ncomnd/5*0/
       data ncmd/0/
       data nintv/0/
-      data nump/0/
       data lstrng/30*0/
       data nstrng/5*0/
       data nstr/0/

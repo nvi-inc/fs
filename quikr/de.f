@@ -152,7 +152,7 @@ C
       call char2hol('de',ibuf(2),1,2)
       idumm1 = ichmv(ibuf,5,iemc(ierrdc_fs),1,1)
       iclass=0
-      call put_buf(iclass,ibuf,-5,2hfs,0)
+      call put_buf(iclass,ibuf,-5,'fs','  ')
       nrec=1
       goto 800
 C
@@ -171,7 +171,7 @@ C
 C                   Move in the channel bit
       iclass = 0
       do 510 i=1,nr(imoddc)
-        idumm1 = ichmv(ibuf,5,6h000000,1,6)
+        idumm1 = ichmv_ch(ibuf,5,'000000')
         idumm1 = ichmv(ibuf,11,ihx2a(ichand),2,1)
         if(imoddc.eq.3) then
           idumm1 = ichmv(ibuf,12,ihx2a(n3(i)),2,1)
@@ -183,12 +183,12 @@ C                   Move in the channel bit
 C                   Put the proper mode number into buffer
         ibuf(1) = 0
         call char2hol('de',ibuf(2),1,2)
-        call put_buf(iclass,ibuf,-12,2hfs,0)
+        call put_buf(iclass,ibuf,-12,'fs','  ')
         ibuf(1) = 8
         call char2hol('de> ',ibuf(2),1,4)
-        call put_buf(iclass,ibuf,-5,2hfs,0)
+        call put_buf(iclass,ibuf,-5,'fs','  ')
         call char2hol('/ ',ibuf(3),1,2)
-        call put_buf(iclass,ibuf,-5,2hfs,0)
+        call put_buf(iclass,ibuf,-5,'fs','  ')
 510     continue
 C
       nrec = 3*nr(imoddc)
@@ -200,7 +200,7 @@ C
 600   ibuf(1) = 6 
       call char2hol('de',ibuf(2),1,2)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0) 
+      call put_buf(iclass,ibuf,-4,'fs','  ') 
       nrec = 1
       goto 800
 C 
@@ -210,7 +210,7 @@ C
 700   ibuf(1) = 7 
       call char2hol('de',ibuf(2),1,2)
       iclass=0
-      call put_buf(iclass,ibuf,-4,2hfs,0) 
+      call put_buf(iclass,ibuf,-4,'fs','  ') 
       nrec = 1
       goto 800
 C 

@@ -48,7 +48,7 @@ C
       itscb(10,ind) = itype 
       itscb(11,ind) = index 
       itscb(12,ind) = iclass
-      idummy = ichmv(lsor,1,2h@ ,1,1) 
+      idummy = ichmv_ch(lsor,1,'@') 
       itscb(13,ind) = lsor
 C
       return

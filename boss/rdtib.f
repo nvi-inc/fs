@@ -1,4 +1,6 @@
-      subroutine rdtib(idcb,ierr)
+      subroutine rdtib(idcb,ip)
+C
+      include '../include/params.i'
 C
 C 1.1.   RDTIB reads a table of names and addresses of HPIB devices
 C
@@ -17,12 +19,11 @@ C 3.  LOCAL VARIABLES
 C
       dimension ip(5)
 C                   for RMPAR
-      dimension ibuf(4)
+      integer*2 ibuf(40)
 C                   buffer to hold input records
       integer fmpread,ichcm_ch
-      integer ibadread
 C     ibadrd - max length of line in ibad.ctl to read
-      data ibadrd /15/
+      data ibadrd /80/
 C     ICLASS - class to send to IBCON
 C     NREC   - number of records in class
 C
@@ -35,8 +36,6 @@ C 6.  PROGRAMMER: NRV
 C     LAST MODIFIED: 800224
 C  WHO  WHEN    DESCRIPTION
 C  GAG  901220  Restructured loop and added call to logit.
-C
-      include '../include/params.i'
 c
 C# LAST COMPC'ED  870115:04:18 #
 C
@@ -46,7 +45,7 @@ C     1. Open up the file with the name/address correspondences.
 C
       call fmpopen(idcb,FS_ROOT//'/control/ibad.ctl',ierr,'r',id)
       if (ierr.lt.0) return
-      call ifill_ch(ibuf,1,8,' ')
+      call ifill_ch(ibuf,1,80,' ')
       ilen = fmpread(idcb,ierr,ibuf,ibadrd)
       call lower(ibuf,ilen)
       iclass = 0
@@ -54,13 +53,13 @@ C
       do while (ilen.ge.0)
         if (ichcm_ch(ibuf,1,'  ').eq.0) goto 110
         if ((nrec+1).eq.256) then
-          call logit7(0,0,0,1,-170,2hbo,256)
+          call logit7ci(0,0,0,1,-170,'bo',256)
           goto 110
         end  if
         nrec = nrec + 1
-        call put_buf(iclass,ibuf,-iflch(ibuf,ilen),0,0)
+        call put_buf(iclass,ibuf,-iflch(ibuf,ilen),'  ','  ')
 C                   Put record into class record
-        call ifill_ch(ibuf,1,8,' ')
+        call ifill_ch(ibuf,1,80,' ')
         ilen = fmpread(idcb,ierr,ibuf,ibadrd)
         call lower(ibuf,ilen)
       end do
@@ -69,8 +68,8 @@ C                   Put record into class record
 C
 C     2. Now schedule IBCON and wait until it's done.
 C
-200   call run_prog('ibcon','wait',iclass,nrec,ip(3),ip(4),ip(5))
+200   continue
+      call run_prog('ibcon','wait',iclass,nrec,ip(3),ip(4),ip(5))
       call rmpar(ip)
-      ierr = ip(3)
       return
       end

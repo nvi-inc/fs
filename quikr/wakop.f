@@ -14,7 +14,7 @@ C  wake up operator c#870115:04:37#
       call bell(lu,1) 
       call bell(lu,0) 
       iclass = 0
-      call put_buf(iclass,lmsg,-nmsg,2hfs,0)
+      call put_buf(iclass,lmsg,-nmsg,'fs','  ')
       ip(1) = iclass
       ip(2) = 1 
       ip(3) = 0 

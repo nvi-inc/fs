@@ -1,12 +1,11 @@
 OBJECTS = rwand.o bsort.o cksum.o wandwr.o
 #
-F77= gf77
-#FFLAGS = -c -g -i2
-FFLAGS = -c -g
-LIBES = ../fslb/fslb.a ../newlb/newlb.a ../lnfch/lnfch.a ../port/port.a\
+#FFLAGS = -c  -i2
+FFLAGS = -c 
+LIBES = ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a ../port/port.a\
 ../flib/flib.a ../fclib/fclib.a\
-../clib/clib.a ../fmpsee/fmpsee.a ../rtelb/rtelb.a -lrtx
+../clib/clib.a ../fmpsee/fmpsee.a ../rtelb/rtelb.a
 #
 ../bin/rwand: $(OBJECTS)
-	gf77 -g -o ../bin/rwand $(OBJECTS) $(LIBES)
-	../setb/setb ../bin/rwand
+	f77  -o ../bin/rwand $(OBJECTS) $(LIBES)
+	strip ../bin/rwand

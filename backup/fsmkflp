@@ -2,12 +2,12 @@
 #
 echo "Removing old archive"
 rm -rf /tmp/fs.cpio
-ulimit 409600
+#ulimit 409600
 #
 echo "Creating new archive"
 find /tmp/fsdist -print |cpio -oc >/tmp/fs.cpio
 #
-echo "Creating floppy"
-find /tmp/fsdist -print |cpio -ocB >/dev/rdsk/f0q18dt
+#echo "Creating floppy"
+#find /tmp/fsdist -print |cpio -ocB >/dev/rdsk/f0q18dt
 #
 echo "Done."

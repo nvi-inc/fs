@@ -17,7 +17,7 @@ cxx      call susp(1,50)
       ibuf(1) = -3
       call char2hol('tp',ibuf(2),1,2)
       iclass = 0
-      call put_buf(iclass,ibuf,-4,2hfs,0) 
+      call put_buf(iclass,ibuf,-4,'fs','  ') 
       call run_matcn(iclass,1) 
       call rmpar(ip)
       iclass = ip(1)

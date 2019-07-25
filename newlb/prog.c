@@ -29,397 +29,397 @@
 
 extern struct fscom *shm_addr;
 
-void fs_set_ibmat_(ibmat)
+void fs_set_ibmat__(ibmat)
 	int *ibmat;
 	{
 	  shm_addr->ibmat = *ibmat;
 	}
 
-void fs_get_ibmat_(ibmat)
+void fs_get_ibmat__(ibmat)
 	int *ibmat;
 	{
 	  *ibmat = shm_addr->ibmat;
 	}
 
-void fs_set_ibmcb_(ibmcb)
+void fs_set_ibmcb__(ibmcb)
 	int *ibmcb;
 	{
 	  shm_addr->ibmcb = *ibmcb;
 	}
 
-void fs_get_ibmcb_(ibmcb)
+void fs_get_ibmcb__(ibmcb)
 	int *ibmcb;
 	{
 	  *ibmcb = shm_addr->ibmcb;
 	}
 
-void fs_set_wrvolt_(wrvolt)
+void fs_set_wrvolt__(wrvolt)
 	float *wrvolt;
 	{
 	  shm_addr->wrvolt = *wrvolt;
 	}
 
-void fs_get_wrvolt_(wrvolt)
+void fs_get_wrvolt__(wrvolt)
 	float *wrvolt;
 	{
 	  *wrvolt = shm_addr->wrvolt;
 	}
 
-void fs_set_itpthick_(itpthick)
+void fs_set_itpthick__(itpthick)
 	int *itpthick;
 	{
 	  shm_addr->itpthick = *itpthick;
 	}
 
-void fs_get_itpthick_(itpthick)
+void fs_get_itpthick__(itpthick)
 	int *itpthick;
 	{
 	  *itpthick = shm_addr->itpthick;
 	}
 
-void fs_set_capstan_(capstan)
+void fs_set_capstan__(capstan)
 	int *capstan;
 	{
 	  shm_addr->capstan = *capstan;
 	}
 
-void fs_get_capstan_(capstan)
+void fs_get_capstan__(capstan)
 	int *capstan;
 	{
 	  *capstan = shm_addr->capstan;
 	}
 
-void fs_set_outscsl_(outscsl)
+void fs_set_outscsl__(outscsl)
 	float *outscsl;
 	{
 	  shm_addr->outscsl = *outscsl;
 	}
 
-void fs_get_outscsl_(outscsl)
+void fs_get_outscsl__(outscsl)
 	float *outscsl;
 	{
 	  *outscsl = shm_addr->outscsl;
 	}
 
-void fs_set_inscsl_(inscsl)
+void fs_set_inscsl__(inscsl)
 	float *inscsl;
 	{
 	  shm_addr->inscsl = *inscsl;
 	}
 
-void fs_get_inscsl_(inscsl)
+void fs_get_inscsl__(inscsl)
 	float *inscsl;
 	{
 	  *inscsl = shm_addr->inscsl;
 	}
 
-void fs_set_outscint_(outscint)
+void fs_set_outscint__(outscint)
 	float *outscint;
 	{
 	  shm_addr->outscint = *outscint;
 	}
 
-void fs_get_outscint_(outscint)
+void fs_get_outscint__(outscint)
 	float *outscint;
 	{
 	  *outscint = shm_addr->outscint;
 	}
 
-void fs_set_inscint_(inscint)
+void fs_set_inscint__(inscint)
 	float *inscint;
 	{
 	  shm_addr->inscint = *inscint;
 	}
 
-void fs_get_inscint_(inscint)
+void fs_get_inscint__(inscint)
 	float *inscint;
 	{
 	  *inscint = shm_addr->inscint;
 	}
 
-void fs_set_motorv_(motorv)
+void fs_set_motorv__(motorv)
 	float *motorv;
 	{
 	  shm_addr->motorv = *motorv;
 	}
 
-void fs_get_motorv_(motorv)
+void fs_get_motorv__(motorv)
 	float *motorv;
 	{
 	  *motorv = shm_addr->motorv;
 	}
 
-void fs_set_tempwx_(tempwx)
+void fs_set_tempwx__(tempwx)
 	float *tempwx;
 	{
 	  shm_addr->tempwx = *tempwx;
 	}
 
-void fs_get_tempwx_(tempwx)
+void fs_get_tempwx__(tempwx)
 	float *tempwx;
 	{
 	  *tempwx = shm_addr->tempwx;
 	}
 
-void fs_set_humiwx_(humiwx)
+void fs_set_humiwx__(humiwx)
 	float *humiwx;
 	{
 	  shm_addr->humiwx = *humiwx;
 	}
 
-void fs_get_humiwx_(humiwx)
+void fs_get_humiwx__(humiwx)
 	float *humiwx;
 	{
 	  *humiwx = shm_addr->humiwx;
 	}
 
-void fs_set_preswx_(preswx)
+void fs_set_preswx__(preswx)
 	float *preswx;
 	{
 	  shm_addr->preswx = *preswx;
 	}
 
-void fs_get_preswx_(preswx)
+void fs_get_preswx__(preswx)
 	float *preswx;
 	{
 	  *preswx = shm_addr->preswx;
 	}
 
-void fs_set_ep1950_(ep1950)
+void fs_set_ep1950__(ep1950)
 	float *ep1950;
 	{
 	  shm_addr->ep1950 = *ep1950;
 	}
 
-void fs_get_ep1950_(ep1950)
+void fs_get_ep1950__(ep1950)
 	float *ep1950;
 	{
 	  *ep1950 = shm_addr->ep1950;
 	}
 
-void fs_set_epoch_(epoch)
+void fs_set_epoch__(epoch)
 	float *epoch;
 	{
 	  shm_addr->epoch = *epoch;
 	}
 
-void fs_get_epoch_(epoch)
+void fs_get_epoch__(epoch)
 	float *epoch;
 	{
 	  *epoch = shm_addr->epoch;
 	}
 
-void fs_set_iclopr_(iclopr)
+void fs_set_iclopr__(iclopr)
 	long *iclopr;
 	{
 	  shm_addr->iclopr = *iclopr;
 	}
 
-void fs_get_iclopr_(iclopr)
+void fs_get_iclopr__(iclopr)
 	long *iclopr;
 	{
 	  *iclopr = shm_addr->iclopr;
 	}
 
-void fs_set_iclbox_(iclbox)
+void fs_set_iclbox__(iclbox)
 	long *iclbox;
 	{
 	  shm_addr->iclbox = *iclbox;
 	}
 
-void fs_get_iclbox_(iclbox)
+void fs_get_iclbox__(iclbox)
 	long *iclbox;
 	{
 	  *iclbox = shm_addr->iclbox;
 	}
 
-void fs_set_cablev_(cablev)
+void fs_set_cablev__(cablev)
 	float *cablev;
 	{
 	  shm_addr->cablev = *cablev;
 	}
 
-void fs_set_ra50_(ra50)
+void fs_set_ra50__(ra50)
 	double *ra50;
 	{
 	  shm_addr->ra50 = *ra50;
 	}
 
-void fs_get_ra50_(ra50)
+void fs_get_ra50__(ra50)
 	double *ra50;
 	{
 	  *ra50 = shm_addr->ra50;
 	}
 
-void fs_set_dec50_(dec50)
+void fs_set_dec50__(dec50)
 	double *dec50;
 	{
 	  shm_addr->dec50 = *dec50;
 	}
 
-void fs_get_dec50_(dec50)
+void fs_get_dec50__(dec50)
 	double  *dec50;
 	{
 	  *dec50 = shm_addr->dec50;
 	}
 
-void fs_set_radat_(radat)
+void fs_set_radat__(radat)
 	double *radat;
 	{
 	  shm_addr->radat = *radat;
 	}
 
-void fs_get_radat_(radat)
+void fs_get_radat__(radat)
 	double *radat;
 	{
 	  *radat = shm_addr->radat;
 	}
 
-void fs_set_decdat_(decdat)
+void fs_set_decdat__(decdat)
 	double *decdat;
 	{
 	  shm_addr->decdat = *decdat;
 	}
 
-void fs_get_decdat_(decdat)
+void fs_get_decdat__(decdat)
 	double  *decdat;
 	{
 	  *decdat = shm_addr->decdat;
 	}
 
-void fs_set_height_(height)
+void fs_set_height__(height)
 	float *height;
 	{
 	  shm_addr->height = *height;
 	}
 
-void fs_get_height_(height)
+void fs_get_height__(height)
 	float  *height;
 	{
 	  *height = shm_addr->height;
 	}
 
-void fs_set_alat_(alat)
+void fs_set_alat__(alat)
 	double *alat;
 	{
 	  shm_addr->alat = *alat;
 	}
 
-void fs_get_alat_(alat)
+void fs_get_alat__(alat)
 	double  *alat;
 	{
 	  *alat = shm_addr->alat;
 	}
 
-void fs_set_wlong_(wlong)
+void fs_set_wlong__(wlong)
 	double *wlong;
 	{
 	  shm_addr->wlong = *wlong;
 	}
 
-void fs_get_wlong_(wlong)
+void fs_get_wlong__(wlong)
 	double  *wlong;
 	{
 	  *wlong = shm_addr->wlong;
 	}
 
-void fs_set_imodfm_(imodfm)
+void fs_set_imodfm__(imodfm)
 	int *imodfm;
 	{
 	  shm_addr->imodfm = *imodfm;
 	}
 
-void fs_get_imodfm_(imodfm)
+void fs_get_imodfm__(imodfm)
 	int *imodfm;
 	{
 	  *imodfm = shm_addr->imodfm;
 	}
 
-void fs_set_iratfm_(iratfm)
+void fs_set_iratfm__(iratfm)
 	int *iratfm;
 	{
 	  shm_addr->iratfm = *iratfm;
 	}
 
-void fs_get_iratfm_(iratfm)
+void fs_get_iratfm__(iratfm)
 	int *iratfm;
 	{
 	  *iratfm = shm_addr->iratfm;
 	}
 
-void fs_set_ispeed_(ispeed)
+void fs_set_ispeed__(ispeed)
 	int *ispeed;
 	{
 	  shm_addr->ispeed = *ispeed;
 	}
 
-void fs_get_ispeed_(ispeed)
+void fs_get_ispeed__(ispeed)
 	int *ispeed;
 	{
 	  *ispeed = shm_addr->ispeed;
 	}
 
-void fs_set_ienatp_(ienatp)
+void fs_set_ienatp__(ienatp)
 	int *ienatp;
 	{
 	  shm_addr->ienatp = *ienatp;
 	}
 
-void fs_get_ienatp_(ienatp)
+void fs_get_ienatp__(ienatp)
 	int *ienatp;
 	{
 	  *ienatp = shm_addr->ienatp;
 	}
 
-void fs_set_idirtp_(idirtp)
+void fs_set_idirtp__(idirtp)
 	int *idirtp;
 	{
 	  shm_addr->idirtp = *idirtp;
 	}
 
-void fs_get_idirtp_(idirtp)
+void fs_get_idirtp__(idirtp)
 	int *idirtp;
 	{
 	  *idirtp = shm_addr->idirtp;
 	}
 
-void fs_set_inp1if_(inp1if)
+void fs_set_inp1if__(inp1if)
 	int *inp1if;
 	{
 	  shm_addr->inp1if = *inp1if;
 	}
 
-void fs_get_inp1if_(inp1if)
+void fs_get_inp1if__(inp1if)
 	int *inp1if;
 	{
 	  *inp1if = shm_addr->inp1if;
 	}
 
-void fs_set_inp2if_(inp2if)
+void fs_set_inp2if__(inp2if)
 	int *inp2if;
 	{
 	  shm_addr->inp2if = *inp2if;
 	}
 
-void fs_get_inp2if_(inp2if)
+void fs_get_inp2if__(inp2if)
 	int *inp2if;
 	{
 	  *inp2if = shm_addr->inp2if;
 	}
 
-void fs_set_ionsor_(ionsor)
+void fs_set_ionsor__(ionsor)
 	int *ionsor;
 	{
 	  shm_addr->ionsor = *ionsor;
 	}
 
-void fs_get_ionsor_(ionsor)
+void fs_get_ionsor__(ionsor)
 	int *ionsor;
 	{
 	  *ionsor = shm_addr->ionsor;
 	}
 
-void fs_set_systmp_(systmp)
+void fs_set_systmp__(systmp)
 	float *systmp;
 	{
           int i;
@@ -427,21 +427,21 @@ void fs_set_systmp_(systmp)
             shm_addr->systmp[i]=*(systmp++);
 	}
 
-void fs_set_ipashd_(ipashd)
+void fs_set_ipashd__(ipashd)
 	int ipashd[2];
 	{
           shm_addr->ipashd[0]=ipashd[0];
           shm_addr->ipashd[1]=ipashd[1];
 	}
 
-void fs_get_ipashd_(ipashd)
+void fs_get_ipashd__(ipashd)
 	int ipashd[2];
 	{
           ipashd[0]=shm_addr->ipashd[0];
           ipashd[1]=shm_addr->ipashd[1];
 	}
 
-void fs_set_lfreqv_(lfreqv)
+void fs_set_lfreqv__(lfreqv)
 	char *lfreqv;
 	{
           size_t N;
@@ -449,7 +449,7 @@ void fs_set_lfreqv_(lfreqv)
 	  memcpy(shm_addr->lfreqv,lfreqv,N);
 	}
 
-void fs_get_lfreqv_(lfreqv)
+void fs_get_lfreqv__(lfreqv)
 	char *lfreqv;
 	{
           size_t N;
@@ -457,7 +457,7 @@ void fs_get_lfreqv_(lfreqv)
 	  memcpy(lfreqv,shm_addr->lfreqv,N);
 	}
 
-void fs_set_lnaant_(lnaant)
+void fs_set_lnaant__(lnaant)
 	char *lnaant;
 	{
           size_t N;
@@ -465,7 +465,7 @@ void fs_set_lnaant_(lnaant)
 	  memcpy(shm_addr->lnaant,lnaant,N);
 	}
 
-void fs_get_lnaant_(lnaant)
+void fs_get_lnaant__(lnaant)
 	char *lnaant;
 	{
           size_t N;
@@ -473,7 +473,7 @@ void fs_get_lnaant_(lnaant)
 	  memcpy(lnaant,shm_addr->lnaant,N);
 	}
 
-void fs_set_idevgpib_(idevgpib)
+void fs_set_idevgpib__(idevgpib)
 	char *idevgpib;
 	{
           size_t N;
@@ -481,7 +481,7 @@ void fs_set_idevgpib_(idevgpib)
 	  memcpy(shm_addr->idevgpib,idevgpib,N);
 	}
 
-void fs_get_idevgpib_(idevgpib)
+void fs_get_idevgpib__(idevgpib)
 	char *idevgpib;
 	{
           size_t N;
@@ -489,7 +489,7 @@ void fs_get_idevgpib_(idevgpib)
 	  memcpy(idevgpib,shm_addr->idevgpib,N);
 	}
 
-void fs_set_idevant_(idevant)
+void fs_set_idevant__(idevant)
 	char *idevant;
 	{
           size_t N;
@@ -497,7 +497,7 @@ void fs_set_idevant_(idevant)
 	  memcpy(shm_addr->idevant,idevant,N);
 	}
 
-void fs_get_idevant_(idevant)
+void fs_get_idevant__(idevant)
 	char *idevant;
 	{
           size_t N;
@@ -505,7 +505,7 @@ void fs_get_idevant_(idevant)
 	  memcpy(idevant,shm_addr->idevant,N);
 	}
 
-void fs_set_idevlog_(idevlog)
+void fs_set_idevlog__(idevlog)
 	char *idevlog;
 	{
           size_t N;
@@ -513,7 +513,7 @@ void fs_set_idevlog_(idevlog)
 	  memcpy(shm_addr->idevlog,idevlog,N);
 	}
 
-void fs_get_idevlog_(idevlog)
+void fs_get_idevlog__(idevlog)
 	char *idevlog;
 	{
           size_t N;
@@ -521,7 +521,7 @@ void fs_get_idevlog_(idevlog)
 	  memcpy(idevlog,shm_addr->idevlog,N);
 	}
 
-void fs_set_idevmcb_(idevmcb)
+void fs_set_idevmcb__(idevmcb)
 	char *idevmcb;
 	{
           size_t N;
@@ -529,7 +529,7 @@ void fs_set_idevmcb_(idevmcb)
 	  memcpy(shm_addr->mcb_dev,idevmcb,N);
 	}
 
-void fs_get_idevmcb_(idevmcb)
+void fs_get_idevmcb__(idevmcb)
 	char *idevmcb;
 	{
           size_t N;
@@ -537,19 +537,19 @@ void fs_get_idevmcb_(idevmcb)
 	  memcpy(idevmcb,shm_addr->mcb_dev,N);
 	}
 
-void fs_set_ndevlog_(ndevlog)
+void fs_set_ndevlog__(ndevlog)
 	int *ndevlog;
 	{
 	  shm_addr->ndevlog = *ndevlog;
 	}
 
-void fs_get_ndevlog_(ndevlog)
+void fs_get_ndevlog__(ndevlog)
 	int *ndevlog;
 	{
 	  *ndevlog= shm_addr->ndevlog;
 	}
 
-void fs_set_lsorna_(lsorna)
+void fs_set_lsorna__(lsorna)
 	char *lsorna;
 	{
           size_t N;
@@ -557,7 +557,7 @@ void fs_set_lsorna_(lsorna)
 	  memcpy(shm_addr->lsorna,lsorna,N);
 	}
 
-void fs_get_lsorna_(lsorna)
+void fs_get_lsorna__(lsorna)
 	char *lsorna;
 	{
           size_t N;
@@ -565,19 +565,19 @@ void fs_get_lsorna_(lsorna)
 	  memcpy(lsorna,shm_addr->lsorna,N);
 	}
 
-void fs_set_azoff_(AZOFF)
+void fs_set_azoff__(AZOFF)
 	float *AZOFF;
 	{
 	  shm_addr->AZOFF = *AZOFF;
 	}
 
-void fs_get_azoff_(AZOFF)
+void fs_get_azoff__(AZOFF)
 	float *AZOFF;
 	{
 	  *AZOFF = shm_addr->AZOFF;
 	}
 
-void fs_set_lexper_(LEXPER)
+void fs_set_lexper__(LEXPER)
 	int *LEXPER;
 	{
           size_t N;
@@ -585,7 +585,7 @@ void fs_set_lexper_(LEXPER)
 	  memcpy(shm_addr->LEXPER,LEXPER,N);
 	}
 
-void fs_get_lexper_(LEXPER)
+void fs_get_lexper__(LEXPER)
 	int *LEXPER;
 	{
           size_t N;
@@ -593,7 +593,7 @@ void fs_get_lexper_(LEXPER)
 	  memcpy(LEXPER,shm_addr->LEXPER,N);
 	}
 
-void fs_set_inext_(INEXT)
+void fs_set_inext__(INEXT)
 	short *INEXT;
         
 	{
@@ -602,7 +602,7 @@ void fs_set_inext_(INEXT)
 	    shm_addr->INEXT[i]=*(INEXT++);
 	}
 
-void fs_get_inext_(INEXT)
+void fs_get_inext__(INEXT)
 	short *INEXT;
 	{
           int i;
@@ -610,7 +610,7 @@ void fs_get_inext_(INEXT)
 	    *(INEXT++)=shm_addr->INEXT[i];
 	}
 
-void fs_set_kena_(KENASTK)
+void fs_set_kena__(KENASTK)
 	int *KENASTK;
         
 	{
@@ -619,7 +619,7 @@ void fs_set_kena_(KENASTK)
 	    shm_addr->KENASTK[i]=*(KENASTK++);
 	}
 
-void fs_get_kena_(KENASTK)
+void fs_get_kena__(KENASTK)
 	int *KENASTK;
 	{
           int i;
@@ -627,271 +627,271 @@ void fs_get_kena_(KENASTK)
 	    *(KENASTK++)=shm_addr->KENASTK[i];
 	}
 
-void fs_set_irdytp_(IRDYTP)
+void fs_set_irdytp__(IRDYTP)
 	int *IRDYTP;
 	{
 	  shm_addr->IRDYTP = *IRDYTP;
 	}
 
-void fs_get_irdytp_(IRDYTP)
+void fs_get_irdytp__(IRDYTP)
 	int *IRDYTP;
 	{
 	  *IRDYTP = shm_addr->IRDYTP;
 	}
 
-void fs_set_itraka_(ITRAKA)
+void fs_set_itraka__(ITRAKA)
 	int *ITRAKA;
 	{
 	  shm_addr->ITRAKA = *ITRAKA;
 	}
 
-void fs_get_itraka_(ITRAKA)
+void fs_get_itraka__(ITRAKA)
 	int *ITRAKA;
 	{
 	  *ITRAKA = shm_addr->ITRAKA;
 	}
 
-void fs_set_itrakb_(ITRAKB)
+void fs_set_itrakb__(ITRAKB)
 	int *ITRAKB;
 	{
 	  shm_addr->ITRAKB = *ITRAKB;
 	}
 
-void fs_get_itrakb_(ITRAKB)
+void fs_get_itrakb__(ITRAKB)
 	int *ITRAKB;
 	{
 	  *ITRAKB = shm_addr->ITRAKB;
 	}
 
-void fs_set_decoff_(DECOFF)
+void fs_set_decoff__(DECOFF)
 	float *DECOFF;
 	{
 	  shm_addr->DECOFF = *DECOFF;
 	}
 
-void fs_get_decoff_(DECOFF)
+void fs_get_decoff__(DECOFF)
 	float *DECOFF;
 	{
 	  *DECOFF = shm_addr->DECOFF;
 	}
 
-void fs_set_eloff_(ELOFF)
+void fs_set_eloff__(ELOFF)
 	float *ELOFF;
 	{
 	  shm_addr->ELOFF = *ELOFF;
 	}
 
-void fs_get_eloff_(ELOFF)
+void fs_get_eloff__(ELOFF)
 	float *ELOFF;
 	{
 	  *ELOFF = shm_addr->ELOFF;
 	}
 
-void fs_set_icaptp_(ICAPTP)
+void fs_set_icaptp__(ICAPTP)
 	int *ICAPTP;
 	{
 	  shm_addr->ICAPTP = *ICAPTP;
 	}
 
-void fs_get_icaptp_(ICAPTP)
+void fs_get_icaptp__(ICAPTP)
 	int *ICAPTP;
 	{
           *ICAPTP = shm_addr->ICAPTP;
         }
 
-void fs_set_iremtp_(IREMTP)
+void fs_set_iremtp__(IREMTP)
 	int *IREMTP;
 	{
 	  shm_addr->IREMTP= *IREMTP;
 	}
 
-void fs_get_iremtp_(IREMTP)
+void fs_get_iremtp__(IREMTP)
 	int *IREMTP;
 	{
           *IREMTP = shm_addr->IREMTP; 
         }
 
-void fs_set_istptp_(ISTPTP)
+void fs_set_istptp__(ISTPTP)
 	int *ISTPTP;
 	{
 	  shm_addr->ISTPTP= *ISTPTP;
 	}
 
-void fs_get_istptp_(ISTPTP)
+void fs_get_istptp__(ISTPTP)
 	int *ISTPTP;
 	{
           *ISTPTP = shm_addr->ISTPTP; 
         }
 
-void fs_set_itactp_(ITACTP)
+void fs_set_itactp__(ITACTP)
 	int *ITACTP;
 	{
 	  shm_addr->ITACTP= *ITACTP;
 	}
 
-void fs_get_itactp_(ITACTP)
+void fs_get_itactp__(ITACTP)
 	int *ITACTP;
 	{
           *ITACTP = shm_addr->ITACTP; 
         }
 
-void fs_set_klvdt_fs_(KLVDT_FS)
+void fs_set_klvdt_fs__(KLVDT_FS)
 	int *KLVDT_FS;
 	{
 	  shm_addr->klvdt_fs = *KLVDT_FS;
 	}
 
-void fs_get_klvdt_fs_(KLVDT_FS)
+void fs_get_klvdt_fs__(KLVDT_FS)
 	int *KLVDT_FS;
 	{
 	  *KLVDT_FS = shm_addr->klvdt_fs;
 	}
 
-void fs_set_kecho_(KECHO)
+void fs_set_kecho__(KECHO)
 	int *KECHO;
 	{
 	  shm_addr->KECHO = *KECHO;
 	}
 
-void fs_get_kecho_(KECHO)
+void fs_get_kecho__(KECHO)
 	int *KECHO;
 	{
 	  *KECHO = shm_addr->KECHO;
 	}
 
-void fs_set_khalt_(KHALT)
+void fs_set_khalt__(KHALT)
 	int *KHALT;
 	{
 	  shm_addr->KHALT = *KHALT;
 	}
 
-void fs_get_khalt_(KHALT)
+void fs_get_khalt__(KHALT)
 	int *KHALT;
 	{
 	  *KHALT = shm_addr->KHALT;
 	}
 
-void fs_set_ichvkenable_(ichvkenable)
+void fs_set_ichvkenable__(ichvkenable)
 	int *ichvkenable;
 	{
 	  shm_addr->check.vkenable = *ichvkenable;
 	}
 
-void fs_get_ichvkenable_(ichvkenable)
+void fs_get_ichvkenable__(ichvkenable)
 	int *ichvkenable;
 	{
 	  *ichvkenable = shm_addr->check.vkenable;
 	}
 
-void fs_set_ichvkrepro_(ichvkrepro)
+void fs_set_ichvkrepro__(ichvkrepro)
 	int *ichvkrepro;
 	{
 	  shm_addr->check.vkrepro = *ichvkrepro;
 	}
 
-void fs_get_ichvkrepro_(ichvkrepro)
+void fs_get_ichvkrepro__(ichvkrepro)
 	int *ichvkrepro;
 	{
 	  *ichvkrepro = shm_addr->check.vkrepro;
 	}
 
-void fs_set_ichvkmove_(ichvkmove)
+void fs_set_ichvkmove__(ichvkmove)
 	int *ichvkmove;
 	{
 	  shm_addr->check.vkmove = *ichvkmove;
 	}
 
-void fs_get_ichvkmove_(ichvkmove)
+void fs_get_ichvkmove__(ichvkmove)
 	int *ichvkmove;
 	{
 	  *ichvkmove = shm_addr->check.vkmove;
 	}
 
-void fs_set_ichvklowtape_(ichvklowtape)
+void fs_set_ichvklowtape__(ichvklowtape)
 	int *ichvklowtape;
 	{
 	  shm_addr->check.vklowtape = *ichvklowtape;
 	}
 
-void fs_get_ichvklowtape_(ichvklowtape)
+void fs_get_ichvklowtape__(ichvklowtape)
 	int *ichvklowtape;
 	{
 	  *ichvklowtape = shm_addr->check.vklowtape;
 	}
 
-void fs_set_ichvkload_(ichvkload)
+void fs_set_ichvkload__(ichvkload)
 	int *ichvkload;
 	{
 	  shm_addr->check.vkload = *ichvkload;
 	}
 
-void fs_get_ichvkload_(ichvkload)
+void fs_get_ichvkload__(ichvkload)
 	int *ichvkload;
 	{
 	  *ichvkload = shm_addr->check.vkload;
 	}
 
-void fs_set_ichfm_cn_tm_(ichfm_cn_tm)
+void fs_set_ichfm_cn_tm__(ichfm_cn_tm)
 	int *ichfm_cn_tm;
 	{
 	  shm_addr->check.fm_cn_tm = *ichfm_cn_tm;
 	}
 
-void fs_get_ichfm_cn_tm_(ichfm_cn_tm)
+void fs_get_ichfm_cn_tm__(ichfm_cn_tm)
 	int *ichfm_cn_tm;
 	{
 	  *ichfm_cn_tm = shm_addr->check.fm_cn_tm;
 	}
 
-void fs_set_raoff_(RAOFF)
+void fs_set_raoff__(RAOFF)
 	float *RAOFF;
 	{
 	  shm_addr->RAOFF = *RAOFF;
 	}
 
-void fs_get_raoff_(RAOFF)
+void fs_get_raoff__(RAOFF)
 	float *RAOFF;
 	{
 	  *RAOFF = shm_addr->RAOFF;
 	}
 
-void fs_set_xoff_(XOFF)
+void fs_set_xoff__(XOFF)
 	float *XOFF;
 	{
 	  shm_addr->XOFF = *XOFF;
 	}
 
-void fs_get_xoff_(XOFF)
+void fs_get_xoff__(XOFF)
 	float *XOFF;
 	{
 	  *XOFF = shm_addr->XOFF;
 	}
 
-void fs_set_yoff_(YOFF)
+void fs_set_yoff__(YOFF)
 	float *YOFF;
 	{
 	  shm_addr->YOFF = *YOFF;
 	}
 
-void fs_get_yoff_(YOFF)
+void fs_get_yoff__(YOFF)
 	float *YOFF;
 	{
 	  *YOFF = shm_addr->YOFF;
 	}
 
-void fs_set_icheck_(icheck,N)
+void fs_set_icheck__(icheck,N)
 	int *icheck, *N;
 	{
 	  shm_addr->ICHK[*N-1] = *icheck;
 	}
 
-void fs_get_icheck_(icheck,N)
+void fs_get_icheck__(icheck,N)
 	int *icheck, *N;
 	{
 	  *icheck = shm_addr->ICHK[*N-1];
 	}
 
-void fs_set_ichvlba_(ichvlba,N)
+void fs_set_ichvlba__(ichvlba,N)
 	int *ichvlba, *N;
 	{
          switch(*N) {
@@ -912,7 +912,7 @@ void fs_set_ichvlba_(ichvlba,N)
          }
 	}
 
-void fs_get_ichvlba_(ichvlba,N)
+void fs_get_ichvlba__(ichvlba,N)
 	int *ichvlba, *N;
 	{
          switch(*N) {
@@ -935,75 +935,75 @@ void fs_get_ichvlba_(ichvlba,N)
          }
 	}
 
-void fs_set_stchk_(ichk,n)
+void fs_set_stchk__(ichk,n)
 int *ichk,*n;
 {
       shm_addr->stchk[*n-1]=*ichk;
 }
 
-void fs_get_stchk_(ichk,n)
+void fs_get_stchk__(ichk,n)
 int *ichk,*n;
 {
       *ichk=shm_addr->stchk[*n-1];
 }
 
-void fs_set_sterp_(sterp)
+void fs_set_sterp__(sterp)
 int *sterp;
 {
       shm_addr->sterp=*sterp;
 }
 
-void fs_set_stcnm_(lhol,n)
+void fs_set_stcnm__(lhol,n)
 char lhol[2];
 int *n;
 {
       memcpy(shm_addr->stcnm[*n-1],lhol,2);
 }
 
-void fs_get_stcnm_(lhol,n)
+void fs_get_stcnm__(lhol,n)
 char lhol[2];
 int *n;
 {
       memcpy(lhol,shm_addr->stcnm[*n-1],2);
 }
 
-void fs_set_irenvc_(IRENVC)
+void fs_set_irenvc__(IRENVC)
 	int *IRENVC;
 	{
 	  shm_addr->IRENVC = *IRENVC;
 	}
 
-void fs_get_irenvc_(IRENVC)
+void fs_get_irenvc__(IRENVC)
 	int *IRENVC;
 	{
 	  *IRENVC = shm_addr->IRENVC;
 	}
 
-void fs_set_ilokvc_(ILOKVC)
+void fs_set_ilokvc__(ILOKVC)
 	int *ILOKVC;
 	{
 	  shm_addr->ILOKVC = *ILOKVC;
 	}
 
-void fs_get_ilokvc_(ILOKVC)
+void fs_get_ilokvc__(ILOKVC)
 	int *ILOKVC;
 	{
 	  *ILOKVC = shm_addr->ILOKVC;
 	}
 
-void fs_set_tpivc_(TPIVC)
+void fs_set_tpivc__(TPIVC)
 	int *TPIVC;
 	{
 	  shm_addr->TPIVC = *TPIVC;
 	}
 
-void fs_get_tpivc_(TPIVC)
+void fs_get_tpivc__(TPIVC)
 	int *TPIVC;
 	{
 	  *TPIVC = shm_addr->TPIVC;
 	}
 
-void fs_set_llog_(LLOG)
+void fs_set_llog__(LLOG)
 	int *LLOG;
 	{
           size_t N;
@@ -1011,7 +1011,7 @@ void fs_set_llog_(LLOG)
 	  memcpy(shm_addr->LLOG,LLOG,N);
 	}
 
-void fs_get_llog_(LLOG)
+void fs_get_llog__(LLOG)
 	int *LLOG;
 	{
           size_t N;
@@ -1019,7 +1019,7 @@ void fs_get_llog_(LLOG)
 	  memcpy(LLOG,shm_addr->LLOG,N);
 	}
 
-void fs_set_lfeet_fs_(LFEET_FS)
+void fs_set_lfeet_fs__(LFEET_FS)
 	int *LFEET_FS;
 	{
           size_t N;
@@ -1027,7 +1027,7 @@ void fs_set_lfeet_fs_(LFEET_FS)
 	  memcpy(shm_addr->LFEET_FS,LFEET_FS,N);
 	}
 
-void fs_get_lfeet_fs_(LFEET_FS)
+void fs_get_lfeet_fs__(LFEET_FS)
 	int *LFEET_FS;
 	{
           size_t N;
@@ -1035,7 +1035,7 @@ void fs_get_lfeet_fs_(LFEET_FS)
 	  memcpy(LFEET_FS,shm_addr->LFEET_FS,N);
 	}
 
-void fs_set_lgen_(lgen)
+void fs_set_lgen__(lgen)
 	int *lgen;
 	{
           size_t N;
@@ -1043,7 +1043,7 @@ void fs_set_lgen_(lgen)
 	  memcpy(shm_addr->lgen,lgen,N);
 	}
 
-void fs_get_lgen_(lgen)
+void fs_get_lgen__(lgen)
 	int *lgen;
 	{
           size_t N;
@@ -1051,7 +1051,7 @@ void fs_get_lgen_(lgen)
 	  memcpy(lgen,shm_addr->lgen,N);
 	}
 
-void fs_set_lnewpr_(LNEWPR)
+void fs_set_lnewpr__(LNEWPR)
 	int *LNEWPR;
 	{
           size_t N;
@@ -1059,7 +1059,7 @@ void fs_set_lnewpr_(LNEWPR)
 	  memcpy(shm_addr->LNEWPR,LNEWPR,N);
 	}
 
-void fs_get_lnewpr_(LNEWPR)
+void fs_get_lnewpr__(LNEWPR)
 	int *LNEWPR;
 	{
           size_t N;
@@ -1067,7 +1067,7 @@ void fs_get_lnewpr_(LNEWPR)
 	  memcpy(LNEWPR,shm_addr->LNEWPR,N);
 	}
 
-void fs_set_lnewsk_(LNEWSK)
+void fs_set_lnewsk__(LNEWSK)
 	int *LNEWSK;
 	{
           size_t N;
@@ -1075,7 +1075,7 @@ void fs_set_lnewsk_(LNEWSK)
           memcpy(shm_addr->LNEWSK, LNEWSK, N);
 	}
 
-void fs_get_lnewsk_(LNEWSK)
+void fs_get_lnewsk__(LNEWSK)
 	int *LNEWSK;
 	{
           size_t N;
@@ -1083,7 +1083,7 @@ void fs_get_lnewsk_(LNEWSK)
 	  memcpy(LNEWSK,shm_addr->LNEWSK,N);
 	}
 
-void fs_set_lprc_(LPRC)
+void fs_set_lprc__(LPRC)
 	int *LPRC;
 	{
           size_t N;
@@ -1091,7 +1091,7 @@ void fs_set_lprc_(LPRC)
 	  memcpy(shm_addr->LPRC,LPRC,N);
 	}
 
-void fs_get_lprc_(LPRC)
+void fs_get_lprc__(LPRC)
 	int *LPRC;
 	{
           size_t N;
@@ -1099,7 +1099,7 @@ void fs_get_lprc_(LPRC)
 	  memcpy(LPRC,shm_addr->LPRC,N);
 	}
 
-void fs_set_lstp_(LSTP)
+void fs_set_lstp__(LSTP)
 	int *LSTP;
 	{
           size_t N;
@@ -1107,7 +1107,7 @@ void fs_set_lstp_(LSTP)
 	  memcpy(shm_addr->LSTP,LSTP,N);
 	}
 
-void fs_get_lstp_(LSTP)
+void fs_get_lstp__(LSTP)
 	int *LSTP;
 	{
           size_t N;
@@ -1115,19 +1115,19 @@ void fs_get_lstp_(LSTP)
 	  memcpy(LSTP,shm_addr->LSTP,N);
 	}
 
-void fs_set_hwid_(hwid)
+void fs_set_hwid__(hwid)
 	int *hwid;
 	{
           shm_addr->hwid = 0xff & *hwid;
         }
 
-void fs_get_hwid_(hwid)
+void fs_get_hwid__(hwid)
 	int *hwid;
 	{
           *hwid = shm_addr->hwid;
 	}
 
-void fs_set_lskd_(LSKD)
+void fs_set_lskd__(LSKD)
 	int *LSKD;
 	{
           size_t N;
@@ -1135,7 +1135,7 @@ void fs_set_lskd_(LSKD)
           memcpy(shm_addr->LSKD,LSKD,N);
         }
 
-void fs_get_lskd_(LSKD)
+void fs_get_lskd__(LSKD)
 	int *LSKD;
 	{
           size_t N;
@@ -1143,215 +1143,215 @@ void fs_get_lskd_(LSKD)
           memcpy(LSKD,shm_addr->LSKD,N);
 	}
 
-void fs_set_rack_(rack)
+void fs_set_rack__(rack)
 	int *rack;
 	{
 	  shm_addr->equip.rack = *rack;
 	}
 
-void fs_get_rack_(rack)
+void fs_get_rack__(rack)
 	int *rack;
 	{
 	  *rack = shm_addr->equip.rack;
 	}
 
-void fs_set_drive_(drive)
+void fs_set_drive__(drive)
 	int *drive;
 	{
 	  shm_addr->equip.drive = *drive;
 	}
 
-void fs_get_drive_(drive)
+void fs_get_drive__(drive)
 	int *drive;
 	{
 	  *drive = shm_addr->equip.drive;
 	}
 
-void fs_set_iskdtpsd_(iskdtpsd)
+void fs_set_iskdtpsd__(iskdtpsd)
 	int *iskdtpsd;
 	{
 	  shm_addr->iskdtpsd = *iskdtpsd;
 	}
 
-void fs_get_iskdtpsd_(iskdtpsd)
+void fs_get_iskdtpsd__(iskdtpsd)
 	int *iskdtpsd;
 	{
 	  *iskdtpsd = shm_addr->iskdtpsd;
 	}
 
-void fs_set_imaxtpsd_(imaxtpsd)
+void fs_set_imaxtpsd__(imaxtpsd)
 	int *imaxtpsd;
 	{
 	  shm_addr->imaxtpsd = *imaxtpsd;
 	}
 
-void fs_get_imaxtpsd_(imaxtpsd)
+void fs_get_imaxtpsd__(imaxtpsd)
 	int *imaxtpsd;
 	{
 	  *imaxtpsd = shm_addr->imaxtpsd;
 	}
 
-void fs_set_freqlo_(freqlo,N)
+void fs_set_freqlo__(freqlo,N)
 	int *N;
         float *freqlo;
 	{
 	  shm_addr->freqlo[*N] = *freqlo;
 	}
 
-void fs_get_freqlo_(freqlo,N)
+void fs_get_freqlo__(freqlo,N)
 	int *N;
 	float *freqlo;
 	{
 	  *freqlo = shm_addr->freqlo[*N];
 	}
 
-void fs_set_frequp_(frequp,N)
+void fs_set_frequp__(frequp,N)
 	int *N;
         float *frequp;
 	{
 	  shm_addr->frequp[*N] = *frequp;
 	}
 
-void fs_get_frequp_(frequp,N)
+void fs_get_frequp__(frequp,N)
 	int *N;
 	float *frequp;
 	{
 	  *frequp = shm_addr->frequp[*N];
 	}
 
-void fs_get_diaman_(diaman)
+void fs_get_diaman__(diaman)
 	float *diaman;
 	{
 	  *diaman = shm_addr->diaman;
 	}
 
-void fs_set_diaman_(diaman)
+void fs_set_diaman__(diaman)
         float *diaman;
 	{
 	  shm_addr->diaman = *diaman;
 	}
 
-void fs_get_slew1_(slew1)
+void fs_get_slew1__(slew1)
 	float *slew1;
 	{
 	  *slew1 = shm_addr->slew1;
 	}
 
-void fs_set_slew1_(slew1)
+void fs_set_slew1__(slew1)
         float *slew1;
 	{
 	  shm_addr->slew1 = *slew1;
 	}
 
-void fs_get_slew2_(slew2)
+void fs_get_slew2__(slew2)
 	float *slew2;
 	{
 	  *slew2 = shm_addr->slew2;
 	}
 
-void fs_set_slew2_(slew2)
+void fs_set_slew2__(slew2)
         float *slew2;
 	{
 	  shm_addr->slew2 = *slew2;
 	}
 
-void fs_get_uplim1_(uplim1)
+void fs_get_uplim1__(uplim1)
 	float *uplim1;
 	{
 	  *uplim1 = shm_addr->uplim1;
 	}
 
-void fs_set_uplim1_(uplim1)
+void fs_set_uplim1__(uplim1)
         float *uplim1;
 	{
 	  shm_addr->uplim1 = *uplim1;
 	}
 
-void fs_get_uplim2_(uplim2)
+void fs_get_uplim2__(uplim2)
 	float *uplim2;
 	{
 	  *uplim2 = shm_addr->uplim2;
 	}
 
-void fs_set_uplim2_(uplim2)
+void fs_set_uplim2__(uplim2)
         float *uplim2;
 	{
 	  shm_addr->uplim2 = *uplim2;
 	}
 
-void fs_get_lolim1_(lolim1)
+void fs_get_lolim1__(lolim1)
 	float *lolim1;
 	{
 	  *lolim1 = shm_addr->lolim1;
 	}
 
-void fs_set_lolim1_(lolim1)
+void fs_set_lolim1__(lolim1)
         float *lolim1;
 	{
 	  shm_addr->lolim1 = *lolim1;
 	}
 
-void fs_get_lolim2_(lolim2)
+void fs_get_lolim2__(lolim2)
 	float *lolim2;
 	{
 	  *lolim2 = shm_addr->lolim2;
 	}
 
-void fs_set_lolim2_(lolim2)
+void fs_set_lolim2__(lolim2)
         float *lolim2;
 	{
 	  shm_addr->lolim2 = *lolim2;
 	}
 
-void fs_get_iacttp_(iacttp)
+void fs_get_iacttp__(iacttp)
 	int *iacttp;
 	{
 	  *iacttp = shm_addr->iacttp;
 	}
 
-void fs_set_iacttp_(iacttp)
+void fs_set_iacttp__(iacttp)
         int *iacttp;
         {
           shm_addr->iacttp = *iacttp;
         }
 
-void fs_get_i70kch_(i70kch)
+void fs_get_i70kch__(i70kch)
         int *i70kch;
         {
           *i70kch = shm_addr->i70kch;
         }
 
-void fs_set_i70kch_(i70kch)
+void fs_set_i70kch__(i70kch)
         int *i70kch;
 	{
 	  shm_addr->i70kch = *i70kch;
 	}
 
-void fs_get_i20kch_(i20kch)
+void fs_get_i20kch__(i20kch)
         int *i20kch;
         {
           *i20kch = shm_addr->i20kch;
         }
 
-void fs_set_i20kch_(i20kch)
+void fs_set_i20kch__(i20kch)
         int *i20kch;
 	{
 	  shm_addr->i20kch = *i20kch;
 	}
 
-void fs_get_refreq_(refreq)
+void fs_get_refreq__(refreq)
         float *refreq;
         {
           *refreq = shm_addr->refreq;
         }
 
-void fs_set_refreq_(refreq)
+void fs_set_refreq__(refreq)
         float *refreq;
 	{
 	  shm_addr->refreq = *refreq;
 	}
 
-void fs_get_time_coeff_(secs_off,epoch,offset,rate,span,model)
+void fs_get_time_coeff__(secs_off,epoch,offset,rate,span,model)
         long *secs_off,*epoch,*offset,*span;
 	float *rate;
 	char *model;
@@ -1367,7 +1367,7 @@ void fs_get_time_coeff_(secs_off,epoch,offset,rate,span,model)
                 *model = shm_addr->time.model;
 	}
 
-void fs_set_time_coeff_(secs_off,epoch,offset,rate,span,model)
+void fs_set_time_coeff__(secs_off,epoch,offset,rate,span,model)
         long *secs_off,*epoch,*offset,*span;
 	float *rate;
 	char *model;
@@ -1384,7 +1384,7 @@ void fs_set_time_coeff_(secs_off,epoch,offset,rate,span,model)
 		shm_addr->time.index = index;
 	}
 
-void fs_get_vgroup_(vgroup)
+void fs_get_vgroup__(vgroup)
         int *vgroup;
 	{
 	  vgroup[0] = shm_addr->venable.group[0];
@@ -1393,13 +1393,13 @@ void fs_get_vgroup_(vgroup)
 	  vgroup[3] = shm_addr->venable.group[3];
 	}
 
-void fs_get_vrepro_equalizer_(equalizer,n)
+void fs_get_vrepro_equalizer__(equalizer,n)
         int *equalizer,*n;
 	{
 	  *equalizer = shm_addr->vrepro.equalizer[*n-1];
 	}
 
-void fs_set_horaz_(HORAZ)
+void fs_set_horaz__(HORAZ)
 	float *HORAZ;
 	{
           size_t N;
@@ -1407,7 +1407,7 @@ void fs_set_horaz_(HORAZ)
           memcpy(shm_addr->horaz,HORAZ,N);
         }
 
-void fs_get_horaz_(HORAZ)
+void fs_get_horaz__(HORAZ)
 	float *HORAZ;
 	{
           size_t N;
@@ -1416,7 +1416,7 @@ void fs_get_horaz_(HORAZ)
 	}
 
 
-void fs_set_horel_(HOREL)
+void fs_set_horel__(HOREL)
 	float *HOREL;
 	{
           size_t N;
@@ -1424,7 +1424,7 @@ void fs_set_horel_(HOREL)
           memcpy(shm_addr->horel,HOREL,N);
         }
 
-void fs_get_horel_(HOREL)
+void fs_get_horel__(HOREL)
 	float *HOREL;
 	{
           size_t N;
@@ -1432,7 +1432,7 @@ void fs_get_horel_(HOREL)
           memcpy(HOREL,shm_addr->horel,N);
 	}
 
-void fs_get_bbc_source_(source,n)
+void fs_get_bbc_source__(source,n)
 	int *source, *n;
 	{
           *source=shm_addr->bbc[*n-1].source;

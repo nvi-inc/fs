@@ -1,4 +1,4 @@
-int fc_brk_chk_(name,lenn)
+int fc_brk_chk__(name,lenn)
 char name[5];
 int lenn;
 {

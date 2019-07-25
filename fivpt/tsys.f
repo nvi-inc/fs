@@ -38,12 +38,12 @@ C
 C
 C MAKE SURE THE CAL IS OFF
 C
-      call scmds(8Hcalofffp,8)
+      call scmds('calofffp',1)
 C
 C  READ EXISTING IFD ATTENUATOR SETTINGS
 C
       call fs_get_rack(rack)
-      if(VLBA.ne.iand(rack,VLBA)) then
+      if(VLBA.ne.and(rack,VLBA)) then
         if(ichfp_fs.ne.3) then
           call matcn(icmnd,-5,iques,indata,nin, 9,ierr)
           if (ierr.ne.0) return
@@ -63,7 +63,7 @@ c9954      format(' nin',i10,' indata "',6a2,'"')
 C
 C  TURN ON ALL THE ATTENUATORS
 C
-      if(VLBA.ne.iand(rack,VLBA)) then
+      if(VLBA.ne.and(rack,VLBA)) then
         if(ichfp_fs.ne.3) then
           idum=ichmv(izero,5,indata,3,10)
           call char2hol('93',izero,2,3)
@@ -90,7 +90,7 @@ C
 C
 C  RESET THE ATTENUATORS
 C
-      if(VLBA.ne.iand(rack,VLBA)) then
+      if(VLBA.ne.and(rack,VLBA)) then
          call matcn(isav,-13,idolr,indata,nin,2,ierr)
       else
          call rst_vatt(name,lwho,ierr)
@@ -106,7 +106,7 @@ C  NOW DO TPICAL
 C
 C       TURN CAL ON
 C 
-      call scmds(8Hcalonfp ,7)  
+      call scmds('calonfp',1)
 C 
 C       GET DATA
 C 
@@ -115,7 +115,7 @@ C
 C 
 C       CAL OFF
 C
-      call scmds(8Hcalofffp,8)
+      call scmds('calofffp',1)
 C
 C  FINALLY, GET THE SYSTEM TEMPEARTURE AND VSLOPE
 C
@@ -131,14 +131,14 @@ C
 C
 8001  continue
       jerr=0
-      if(VLBA.ne.iand(rack,VLBA)) then
+      if(VLBA.ne.and(rack,VLBA)) then
          call matcn(isav,-13,idolr,indata,nin,2,jerr)
       else
          call rst_vatt(name,lwho,jerr)
       endif
       jtry=jtry-1
       if (jerr.gt.0.and.jtry.gt.0) goto 8001
-      if (jerr.ne.0) call logit7(idum,idum,idum,-1,-110,lwho,2Her)
+      if (jerr.ne.0) call logit7ic(idum,idum,idum,-1,-110,lwho,'er')
 
       return
       end 

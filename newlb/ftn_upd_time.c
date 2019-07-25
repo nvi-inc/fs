@@ -3,7 +3,7 @@
 
 /* time should be delcared integer*4 in caller */
 
-ftn_upd_time_(path,time,ierr,len)
+ftn_upd_time___(path,time,ierr,len)
 char *path;
 int len,*ierr;
 long *time;

@@ -1,24 +1,20 @@
-#include <rtx.h>
+#include <errno.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 int rte_prior(ivalue)
 int ivalue;
 {
-     int iret,level;
+     int iret;
 
-     iret=rtpriority(RT_PRI_GET,level);
-     if(iret==-1) {
-       perror("getting old priority");
-       exit(-1);
+     errno=0;
+     iret=getpriority(PRIO_PROCESS, 0);
+     if(errno != 0) {
+       perror("rte_prior: getting priority");
+       iret= 0;
      }
-     if(ivalue>-1 && ivalue <128)
-       level=ivalue;
-     else
-       level=RT_PRI_OFF;
-
-     if(rtpriority(RT_PRI_SET, level)==-1) {
-       perror("setting priority");
-       exit(-1);
-     }
-
+     if( -1 == setpriority(PRIO_PROCESS, 0, ivalue))
+       perror("rte_prior: setting priority");
+  
      return iret;
 }

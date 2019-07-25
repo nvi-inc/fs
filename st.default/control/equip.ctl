@@ -9,8 +9,8 @@
 60      Receiver 70K Stage Check Temperature
 20      Receiver 20K Stage Check Temperature
 *  VLBI equipment
-MK3     type of rack (MK3, VLBA, or MK4) 
-MK3     type of recorder (MK3, VLBA, or MK4)
+mk3     type of rack (MK3, VLBA, or MK4) 
+mk3     type of recorder (MK3, VLBA, or MK4)
 101     Hardware ID for VLBA rack (assigned by GSFC)
 *
 10.0    vacuum level (inches)

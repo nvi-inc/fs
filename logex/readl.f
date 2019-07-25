@@ -61,8 +61,8 @@ C
       call ifill_ch(left,1,6,' ')
       call ifill_ch(left,1,1,'-')
       call ifill_ch(lstat,1,6,' ')
-      call ichmv(lstat,1,2HO ,1,1)
-      call ichmv(lstat,2,2HE ,1,1)
+      call ichmv_ch(lstat,1,'O')
+      call ichmv_ch(lstat,2,'E')
       isld=0
       islhr=0
       islmin=0
@@ -79,7 +79,7 @@ C
       itcntl=-1
       islew=-1
       ichk=-1
-      if (lnewsn.ne.2h$$) call ichmv(lsourn,1,lnewso,1,8)
+      if (ichcm_ch(lnewsn,1,'$$').ne.0) call ichmv(lsourn,1,lnewso,1,8)
 C
 C  *************************************************************
 C
@@ -129,17 +129,17 @@ C  Make sure there are some characters in the source name
 C  before trying to move them.  Accept a maximum of 8
 C  characters.
 C
-      if (lnewsn.ne.2H$$) goto 310
+      if (ichcm_ch(lnewsn,1,'$$').ne.0) goto 310
       if (ich-19.le.0) goto 100
       call ichmv(lnewso,1,ibuf,18,min0(8,ich-19))
       call ichmv(lsourn,1,ibuf,18,min0(8,ich-19))
       call char2hol('  ',lnewsn,1,2)
       goto 100
-310   call ifill(lnewso,1,8,2H  )
+310   call ifill_ch(lnewso,1,8,' ')
       if (ich-19.gt.0) call ichmv(lnewso,1,ibuf,18,min0(8,ich-19))
       goto 1200
 C
-350   if (ichcm_ch(lsourn,1,8H        ,1,8).eq.0) goto 100
+350   if (ichcm_ch(lsourn,1,'        ').eq.0) goto 100
 C
 C
 C  ************************************************************
@@ -167,10 +167,10 @@ C
 C
 500   if (ichcm_ch(ibuf,11,'onsource/').ne.0) goto 600
       if (ichcm_ch(ibuf,20,'tracking').ne.0) goto 510
-      call ichmv(lstat,1,2HO ,1,1)
+      call ichmv_ch(lstat,1,'O')
       goto 100
 510   if (islew.eq.1.or.iet.eq.1) goto 100
-      call ichmv(lstat,1,2HO ,1,1)
+      call ichmv_ch(lstat,1,'O')
       islew=1
       goto 100
 C
@@ -184,7 +184,7 @@ C
 C
 600   if (ichcm_ch(ibuf,11,'error ch').ne.0) goto 700
       if (ichk.eq.1) goto 100
-      call ichmv(lstat,2,2HE ,1,1)
+      call ichmv_ch(lstat,2,'E')
       ichk=1
       goto 100
 C
@@ -227,7 +227,7 @@ C
 C
 900   if (ichcm_ch(ibuf,11,'unlod').ne.0) goto 1000
       call ichmv(ltapn,1,ltapen,1,8)
-      call ifill(ltapen,1,8,2H  )
+      call ifill_ch(ltapen,1,8,' ')
       call ifill_ch(ltapen,3,1,'-')
       goto 100
 C

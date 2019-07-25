@@ -23,7 +23,8 @@ long ip[5];
       char output[MAX_OUT];
       char feet[6];
 
-      kcom = *command->argv[0] =='?' && command->argv[1] == NULL;
+      kcom= command->argv[0] != NULL &&
+            *command->argv[0] == '?' && command->argv[1] == NULL;
 
       if ((!kcom) && (command->equal == '=')) {
          logmsg(output,command,ip);

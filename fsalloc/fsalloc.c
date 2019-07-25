@@ -2,6 +2,7 @@
 #include <string.h>
 #include <signal.h>
 #include <sys/types.h>
+#include <sys/ipc.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"

@@ -23,13 +23,13 @@ C  INITIALIZED:
       ierr=0
       call recchk(icherr,ierr)
       if (ierr.ne.0) then
-        call logit7(0,0,0,0,ierr,lwho,2Hrc)
+        call logit7ic(0,0,0,0,ierr,lwho,'rc')
       endif
       call fs_get_ichvlba(ichvlba(18),18)
       if(ichvlba(18).le.0.or.ichecks.ne.ichvlba(18)) goto 199
       do j=1,8
         if (icherr(j).ne.0) then
-          call logit7(0,0,0,0,-231-j,lwho,2Hrc)
+          call logit7ic(0,0,0,0,-231-j,lwho,'rc')
         endif
       enddo
 199   continue

@@ -1,4 +1,5 @@
-      subroutine gooff(lonoff,latoff,laxis,nwait,ierr)
+      subroutine gooff(lonoff,latoff,caxis,nwait,ierr)
+      character*(*) caxis
       real lonoff,latoff
 C 
 C  GO TO THE INDICATED OFFSET 
@@ -18,7 +19,6 @@ C
       include '../include/fscom.i'
 C 
 C  LOCAL:
-      integer ichcm_ch
 C
 C  THE FOLLOWING VARIABLES ARE READ FROM FSCOM: 
 C 
@@ -26,7 +26,7 @@ C        XOFF, YOFF, AZOFF, ELOFF, RAOFF, DECOFF,
 C 
 C  HA/DEC, NOT RA/DEC 
 C 
-      if (ichcm_ch(laxis,1,'hadc').ne.0) goto 200
+      if (caxis.ne.'hadc') goto 200
       raoff=-lonoff 
       call fs_set_raoff(raoff)
       decoff=latoff 
@@ -36,7 +36,7 @@ C
 C  AZ/EL
 C 
 200   continue
-      if (ichcm_ch(laxis,1,'azel').ne.0) goto 400
+      if (caxis.ne.'azel') goto 400
       azoff=lonoff
       call fs_set_azoff(azoff)
       eloff=latoff
@@ -46,7 +46,7 @@ C
 C  X/Y NS 
 C 
 400   continue
-      if (ichcm_ch(laxis,1,'xyns').ne.0) goto 600
+      if (caxis.ne.'xyns') goto 600
       xoff=lonoff 
       call fs_set_xoff(xoff)
       yoff=latoff 
@@ -56,7 +56,7 @@ C
 C  X/Y EW 
 C 
 600   continue
-      if (ichcm_ch(laxis,1,'xyew').ne.0) goto 80000
+      if (caxis.ne.'xyew') goto 80000
       xoff=lonoff 
       call fs_set_xoff(xoff)
       yoff=latoff 

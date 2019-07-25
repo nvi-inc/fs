@@ -28,28 +28,28 @@ C          8-13 = Channel B head select
 C          6-7  = Channel A stack select
 C          0-5  = Channel A head select
 C 
-      nch = ichmv(ibuf,1,2H+ ,1,1)
+      nch = ichmv_ch(ibuf,1,'+')
 C                   The strobe character
-      nch = ichmv(ibuf,nch,2H00,1,1)
+      nch = ichmv_ch(ibuf,nch,'0')
       nch = nch + ib2as(iby*2,ibuf,nch,1) 
       nch = nch + ib2as(ieq,ibuf,nch,1) 
-      nch = ichmv(ibuf,nch,2H00,1,1)
+      nch = ichmv_ch(ibuf,nch,'0')
 
       ibit1415=0 
-      if (itb.ge.100) ibit1415=ISHFT((itb/100),2)
+      if (itb.ge.100) ibit1415=JISHFT((itb/100),2)
       itens = MOD(itb,100)
       ibit1213 = itens/16 
-      call ichmv(ibuf,nch,ihx2a(IOR(ibit1415,ibit1213)),2,1)
+      call ichmv(ibuf,nch,ihx2a(or(ibit1415,ibit1213)),2,1)
       nch=nch+1
       ibit811 = itens - (ibit1213*16)
       call ichmv(ibuf,nch,ihx2a(ibit811),2,1)
       nch=nch+1
 
       ibit67=0 
-      if (ita.ge.100) ibit67=ISHFT((ita/100),2)
+      if (ita.ge.100) ibit67=JISHFT((ita/100),2)
       itens = MOD(ita,100)
       ibit45 = itens/16 
-      call ichmv(ibuf,nch,ihx2a(IOR(ibit67,ibit45)),2,1)
+      call ichmv(ibuf,nch,ihx2a(or(ibit67,ibit45)),2,1)
       nch=nch+1
       ibit03 = itens - (ibit45*16)
       call ichmv(ibuf,nch,ihx2a(ibit03),2,1)

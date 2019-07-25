@@ -1,4 +1,4 @@
-#include <curses.h>      /* ETI curses standard I/O header file */
+#include <ncurses.h>      /* ETI curses standard I/O header file */
 #include <sys/types.h>   /* data type definition header file */
 #include <time.h>
 

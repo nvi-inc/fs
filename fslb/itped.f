@@ -173,7 +173,7 @@ C
 C  Code 1, TAPE SPEEDS
 C 
 301   continue
-      call ichmv(lgen,1,3H720,1,3)
+      call ichmv_ch(lgen,1,'720')
       ii = ias2b(ias,ic1,ic2-ic1+1) 
       if (ii.eq.-32768) goto 3011
       do i=1,nsp 
@@ -181,13 +181,13 @@ C
       enddo
       if (index.eq.-1) then
         call fs_get_drive(drive)
-        if (MK4.eq.iand(drive,MK4)) then
+        if (MK4.eq.and(drive,MK4)) then
           do i=1,nsp 
             if (ii.eq.itsp4(i)) index = i-1
           enddo
         endif
         if (index.ne.-1) then  ! set rate generator
-          call ichmv(lgen,1,3H853,1,3)
+          call ichmv_ch(lgen,1,'853')
         endif
       endif
 

@@ -2,7 +2,7 @@
 #include <sys/times.h>
 #include <time.h>
 
-void fc_rte_fixt_(poClock,plCentiSec)
+void fc_rte_fixt__(poClock,plCentiSec)
 time_t *poClock;
 long *plCentiSec;
 {

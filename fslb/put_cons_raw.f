@@ -6,7 +6,7 @@
       integer nchar
 
       call fs_get_iclbox(iclbox)
-      call put_buf(iclbox,ibuf,-nchar,2Hfs,2Htr)
+      call put_buf(iclbox,ibuf,-nchar,'fs','tr')
 
       return
       end

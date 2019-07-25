@@ -62,7 +62,7 @@ C  Now get the year of the schedule
 C  Make sure schedule year is same as current year
       call fc_rte_time(it,iyr)
       if(iy.ne.iyr) then
-        call logit6(0,0,0,0,-137,2hbo)
+        call logit6c(0,0,0,0,-137,'bo')
         ierr = -1
         goto 900
       endif
@@ -77,7 +77,7 @@ C
       if(ic2.gt.nchar) goto 105
       nlines=ias2b(ibuf,ic2,nchar-ic2+1)
       if(nlines.ge.0) goto 105
-        call logit6(0,0,0,0,-138,2hbo)
+        call logit6c(0,0,0,0,-138,'bo')
         ierr=-1
         goto 900
 C
@@ -96,7 +96,7 @@ C                            #
       if (cjchar(ibuf,ic1).ne.'#') then
         call gttim(ibuf,ic1,ic2-2,0,it1,it2,it3,ierr)
         if (ierr.lt.0) then
-          call logit6(0,0,0,0,ierr,2hsp)
+          call logit6c(0,0,0,0,ierr,'sp')
           goto 900
         endif
         it(5) = mod(it1,1024)
@@ -112,7 +112,7 @@ C
       iline = ias2b(ibuf,ic1+1,ic2-ic1-2)
       ierr = 0
       if (iline.lt.0) then
-        call logit7(0,0,0,1,-106,2hbo,iline)
+        call logit7ci(0,0,0,1,-106,'bo',iline)
         ierr = -1
         goto 900
       endif
@@ -123,7 +123,7 @@ C
 cxx      idum = fmpsetpos(idcbsk,ierr,irec2,ioff)
 C                     Space down to the requested line
       if (ierr.ge.0) goto 800
-      call logit7(0,0,0,1,-134,2hbo,ierr)
+      call logit7ci(0,0,0,1,-134,'bo',ierr)
       goto 900
 C
 C
@@ -136,7 +136,7 @@ C
       call char2low(ibc)
       if (ilen.le.0) then
         ierr = -1
-        call logit6(0,0,0,0,-124,2hbo)
+        call logit6c(0,0,0,0,-124,'bo')
         goto 900
       endif
       if (ichcm_ch(ib,1,'source=').eq.0) then
@@ -156,7 +156,7 @@ C                          ! -- a wait-for command
       if (kpast(it1,it2,it3,it)) goto 200
 C                   If this time is in the past, go back and read some more
       if (irec.le.0) then
-        call logit6(0,0,0,0,-132,2hbo)
+        call logit6c(0,0,0,0,-132,'bo')
         ierr = -1
         goto 900
       endif

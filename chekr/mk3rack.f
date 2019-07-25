@@ -32,7 +32,6 @@ C
      .            -1,-2,0,0,  -1,-2,0,0, -1,-2,0,0,
      .            -1,-2,0,0, -53,-4,0,0/
       data nmod/17/
-      data maxerr /15/
 C
       do iloop=1,nmod
         call fs_get_icheck(icheck(iloop),iloop)
@@ -43,12 +42,12 @@ C
           iclass = 0
           do j=1,nbufs(iloop)
             ibuf1(1) = icodes(j,iloop)
-            call put_buf(iclass,ibuf1,-4,2Hfs,0)
+            call put_buf(iclass,ibuf1,-4,'fs','  ')
           enddo
 C
           ibuf1(1) = 8
           ibuf1(3) = o'47'   ! an apostrophe '
-          call put_buf(iclass,ibuf1,-5,2Hfs,0)
+          call put_buf(iclass,ibuf1,-5,'fs','  ')
 C Finally, get alarm status
          ierr=rn_take('fsctl',0)
           call run_matcn(iclass,nbufs(iloop)+1)
@@ -93,7 +92,7 @@ C
 C
 C This is the end of the checking loop over modules. 
 C 
-        call clrcl(iclass)
+c       call clrcl(iclass)
 699     continue
       enddo
 C

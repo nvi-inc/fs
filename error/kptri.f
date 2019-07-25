@@ -4,7 +4,7 @@ C
       character*(*) iobuf
       double precision a(1)
 C
-      logical kpout
+      logical kpout,kpout_ch
 C
       data nline/10/
 C
@@ -12,7 +12,7 @@ C
 C
       if (np.le.0) return
 C
-      kptri=kpout(lut,idcb,2H* ,2,iobuf,lst)
+      kptri=kpout_ch(lut,idcb,'* ',iobuf,lst)
       if (kptri) return
 C
       nxpnt=0
@@ -20,16 +20,16 @@ C
         do j=1,k,nline
           inext=1
           do i=j,min0(j+nline-1,k)
-            inext=ichmv(ibuf,inext,2h  ,1,1)
+            inext=ichmv_ch(ibuf,inext,' ')
             nxpnt=nxpnt+1
             inext=inext+jr2as(sngl(a(nxpnt)),ibuf,inext,-6,3,il)
           enddo
 C
-          if (0.eq.mod(inext,2)) inext=ichmv(ibuf,inext,2H  ,1,1)
+          if (0.eq.mod(inext,2)) inext=ichmv_ch(ibuf,inext,' ')
           kptri=kpout(lut,idcb,ibuf,inext,iobuf,lst)
           if (kptri) return
         enddo
-        kptri=kpout(lut,idcb,2H* ,2,iobuf,lst)
+        kptri=kpout_ch(lut,idcb,'* ',iobuf,lst)
         if (kptri) return
       enddo
 C

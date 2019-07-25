@@ -21,10 +21,10 @@ C
 C 
       ireg(2) = get_buf(iclcm,ibuf2,-ilen,idum,idum)
 C                   Get command buffer
-      nch = ichmv(ibuf2,ireg(2)+1,2h/ ,1,1) 
+      nch = ichmv_ch(ibuf2,ireg(2)+1,'/') 
 C                   Put / to indicate a response
 C 
-      if ((drive.eq.iand(drive,MK3)).or.(MK4.eq.iand(drive,MK4))) then
+      if ((drive.eq.and(drive,MK3)).or.(MK4.eq.and(drive,MK4))) then
         do i=1,ncrec
           ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
           if (nch+ireg(2)-2.le.ilen2) then
@@ -40,7 +40,7 @@ C                     Move buffer contents into output list
 C 
       iclass = 0
       nch = nch - 1 
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
 C 
       ip(1) = iclass
       ip(2) = 1 

@@ -417,9 +417,9 @@ C
         if(ikey.ne.6) goto 1030
         nch=1
         call lxhms(xx,line,nch)
-        call ichmv(line,11,2h| ,1,1)
+        call ichmv_ch(line,11,'|')
         call ifill_ch(line,12,iwidth-12,' ')
-        call ichmv(line,iwidth,2h| ,1,1)
+        call ichmv_ch(line,iwidth,'|')
 C
         do 1020 k=1,nump
           if(iy(k).lt.1) iy(k)=1
@@ -429,7 +429,7 @@ C
      .       (ichcm_ch(iqc,1,'|').ne.0)) goto 1015
           call ichmv(line,iy(k)+11,iplch(k),1,1)
           goto 1020
-1015      call ichmv(line,iy(k)+11,2h= ,1,1)
+1015      call ichmv_ch(line,iy(k)+11,'=')
 1020    continue
 C
         call lxwrt(line,iwidth)
@@ -453,7 +453,7 @@ C
      .       (ichcm_ch(iqc,1,'-').eq.0)) then
             call ichmv(line(1),ix,iplch(n),1,1)
           else
-            call ichmv(line(1),ix,2H= ,1,1)
+            call ichmv_ch(line(1),ix,'=')
           endif
           irec = ihgt+1-iy(n)
           id = fmpsetline(idcb2,ierr,irec-1)

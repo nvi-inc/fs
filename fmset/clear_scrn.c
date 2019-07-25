@@ -1,4 +1,4 @@
-#include <curses.h>      /* ETI curses standard I/O header file */
+#include <ncurses.h>      /* ETI curses standard I/O header file */
 
 clear_scrn ( maindisp, num_rows )
 

@@ -1,12 +1,11 @@
-CFLAGS = -g
+CFLAGS = 
 F77 = gf77
-LIBS = ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a\
--lrtx
+LIBS = ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a
 OBJECTS = statusprt.o
 
 ../bin/fs : fs.o $(OBJECTS)
 	cc -o ../bin/fs fs.o $(OBJECTS) $(LIBS)
-	../setb/setb ../bin/fs
+	strip ../bin/fs
 #
 fs:
 	rm -f ../bin/fs

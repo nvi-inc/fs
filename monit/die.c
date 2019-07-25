@@ -1,6 +1,7 @@
 #include <signal.h>
 
-die()
+void die(i)
+int i;
 {
   signal(SIGINT, SIG_IGN);
   mvcur(0,0, 1, 5);

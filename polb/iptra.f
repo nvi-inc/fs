@@ -19,7 +19,7 @@ C
       iptra=icnext+ib2as(ih,lbuf,icnext,o'40000'+o'400'*2+2)
       iptra=iptra+ib2as(im,lbuf,iptra,o'40000'+o'400'*2+2)
       iptra=iptra+ib2as(is,lbuf,iptra,o'40000'+o'400'*2+2)
-      iptra=ichmv(lbuf,iptra,2h..,1,1)
+      iptra=ichmv_ch(lbuf,iptra,'.')
       iptra=iptra+ib2as(its,lbuf,iptra,o'40000'+o'400'*1+1)
 
       return

@@ -4,8 +4,8 @@
 #
 OBJECTS=\
 ad2ma.o add_class.o bell.o chmov.o copin.o dtnam.o en2ma.o en2ma4.o\
-fblnk.o get_atod.o get_class.o iadt.o idoff.o if2ma.o ifmed.o\
-ihash.o iifed.o ipgst.o isoed.o itped.o ivced.o\
+fblnk.o get_atod.o get_class.o iadt.o if2ma.o ifmed.o\
+ihash.o iifed.o isoed.o itped.o ivced.o\
 julda.o kbit.o kboss.o logen.o logen4.o logen5.o\
 logen6.o logen7.o logen8.o logen9.o logit.o logit2.o logit3.o\
 logit4.o logit5.o logit6.o logit7.o lusim.o lvdofn.o\
@@ -15,11 +15,10 @@ phcal.o radec.o rp2ma.o rp2ma4.o rpbr2ma4.o rplnk.o\
 run_matcn.o rx2ma.o rxvtot.o sbit.o sidtm.o tp2ma.o updat.o\
 upper.o vc2ma.o vlt2mic.o vlt_head.o\
 put_cons.o put_cons_raw.o putcon_ch.o sun.o zero_vatt.o\
-i32ma.o ma2i3.o iif3ed.o
+i32ma.o ma2i3.o iif3ed.o logit2_ch.o logit4_ch.o logit6c.o logit7cc.o\
+logit7ci.o logit7ic.o
 #
-#CFLAGS = -g
-FFLAGS = -X426 -g
-F77 = gf77
+#CFLAGS = 
 #
 #  The following line that has a ":" in it is a "dependency line".
 #  What follows the dependency line are command lines.  The
@@ -31,4 +30,5 @@ F77 = gf77
 fslb.a: $(OBJECTS)
 	touch fslb.a
 	rm fslb.a
-	ar qc fslb.a $(OBJECTS)
+	ar -qc fslb.a $(OBJECTS)
+	ar s fslb.a

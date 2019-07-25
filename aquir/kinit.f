@@ -5,10 +5,10 @@ C  WHO  WHEN    DESCRIPTION
 C  GAG  901228  Changed IPGST call to KBOSS call to see if BOSS is running.
 C
 C
-      logical kif,kerr,kidnam,kboss
+      logical kif
 C
       character*(*) icbuf
-      character*63 icdbuf
+c     character*63 icdbuf
 C
       integer*2 lfs(16),lfs2(16),lfp(16),lnf(16)
       character*32 lfsc,lfs2c,lfpc,lnfc
@@ -20,7 +20,7 @@ C
       data lfpc   /  'fivpt must dormant              '/
       data lnfc   /  'onoff must dormant              '/
 c
-      data icdbuf/'/usr2/control/'/
+c     data icdbuf/'/usr2/control/'/
 C
       call char2hol(lfsc,lfs,1,32)
       lfs1=trimlen(lfsc)

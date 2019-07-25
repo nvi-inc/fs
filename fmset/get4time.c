@@ -17,7 +17,8 @@ void cls_snd();
 void skd_run();
 void skd_par();
 void rte2secs();
-static short tmget[]= {0,'fm','/t','im'};
+/*static short tmget[]= {0,'fm','/t','im'};*/
+static short tmget[4]= {0,0,0,0};
 
 void get4time(unixtime,unixhs,fstime,fshs,formtime,formhs)
 time_t *unixtime; /* computer time */

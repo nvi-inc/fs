@@ -8,10 +8,6 @@ C
 C      - buffer to be formatted 
 C     IBR - bitrate selection
 C 
-C  LOCAL: 
-C
-      integer*2 ia,ib,ic
-C 
       call ichmv(itemp,1,ibuf,9,1) 
       ibr = ia2hx(itemp,1)
 C

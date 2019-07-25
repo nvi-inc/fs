@@ -52,13 +52,13 @@ C
 C 
       nchar = min0(ireg(2),ilen2) 
       nch = iscn_ch(ibuf2,1,nchar,'=')
-      nch = ichmv(ibuf2,nch,2h/ ,1,1) 
+      nch = ichmv_ch(ibuf2,nch,'/') 
 C                   Put / to indicate a response
 C 
       call pchar(icr,1,13)
       call pchar(ilf,1,10)
       do i=1,ncrec
-        if (i.ne.1) nch=ichmv(ibuf2,nch,2h, ,1,1) 
+        if (i.ne.1) nch=ichmv_ch(ibuf2,nch,',') 
 C                   If not first parm, put comma before 
         ireg(2) = get_buf(iclass,ibuf,-ilen,idum,idum)
         nchar = ireg(2) 
@@ -81,7 +81,7 @@ C                   Move buffer contents into output list
 C 
       nch = nch - 1 
       iclass = 0
-      call put_buf(iclass,ibuf2,-nch,2hfs,0)
+      call put_buf(iclass,ibuf2,-nch,'fs','  ')
 C 
       ip(1) = iclass
       ip(2) = 1 
