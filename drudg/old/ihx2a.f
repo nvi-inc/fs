@@ -1,0 +1,18 @@
+C@IHX2A
+      integer*2 FUNCTION IHX2A(INUM)
+C
+C     CONVERT INUM TO A HEX CHARACTER, RETURNED IN LOWER BYTE
+C     LHEX changed to INT*2 by P. Ryan
+C
+      implicit none
+      INTEGER*2 LHEX(8),inum,jchar
+      CHARACTER*16 LHEX_CHR
+      EQUIVALENCE(LHEX,LHEX_CHR)
+      DATA LHEX_CHR /'0123456789ABCDEF'/
+
+      IHX2A = 0
+      IF (INUM.LT.0.OR.INUM.GT.15) RETURN
+      IHX2A = JCHAR(LHEX,INUM+1)
+      RETURN
+      END
+

@@ -101,7 +101,7 @@ C
       if (ilen.ge.0) then
         idum = ichmv(ibuf2,1,ibuf,1,ilen)
         ilen = iflch(ibuf,iblen*2)
-        nchar = 10 + iflch(ibuf(6),ilen-10)
+        nchar = 15 + iflch(ibuf(7),ilen-15)
       end if
 C
       if (ierr.lt.0) then
@@ -141,15 +141,15 @@ C
 C  Convert ASCII string to Binary integer to obtain day for ITL1
 C  and minutes for ITL2
 C
-400   itl1 = ias2b(ibuf,1,3)
-      itl2 = ias2b(ibuf,4,2)*60 + ias2b(ibuf,6,2)
-      it3  = ias2b(ibuf,8,2)
+400   itl1 = ias2b(ibuf,3,3)
+      itl2 = ias2b(ibuf,6,2)*60 + ias2b(ibuf,8,2)
+      it3  = ias2b(ibuf,10,2)
       if (itl1.lt.its1.or.(itl1.eq.its1.and.itl2.lt.its2)) goto 200
       if (ikey.eq.9.or.ikey.eq.12) goto 1000
 C
 C  Find the number of characters in IBUF and store into NCHBUF
 C
-      nchbuf = iflch(ibuf(6),ilen-10)
+      nchbuf = iflch(ibuf(7),ilen-14)
 C
 C
 C  ************************************************************
@@ -172,7 +172,7 @@ C
       do 500 i=1,ncmd
         if (i.gt.1.and.(ikey.eq.6.or.ikey.eq.13)) goto 500
         if (nchbuf.lt.ncomnd(i)) goto 500
-        if (ichcm(ibuf,11,lcomnd(1,i),1,ncomnd(i)).eq.0) goto 600
+        if (ichcm(ibuf,15,lcomnd(1,i),1,ncomnd(i)).eq.0) goto 600
 500   continue
       goto 200
 C
@@ -183,7 +183,7 @@ C
 600   if (nstr.eq.0) goto 800
       do i=1,nstr
         if (nchbuf.ge.nstrng(i))  then
-        if (iscns(ibuf,11,nchar,lstrng(1,i),1,nstrng(i)).ne.0) goto 800
+        if (iscns(ibuf,15,nchar,lstrng(1,i),1,nstrng(i)).ne.0) goto 800
         endif
       end do
       goto 200
@@ -196,7 +196,7 @@ C  JCHAR returns LCH as zero/character. To left justify multiply
 C  o'400' (256 decimal) and add a blank (o'40').
 C
 cxx      lch = jchar(ibuf,10)*o'400'+' '
-      lch = jchar(ibuf,10)
+      lch = jchar(ibuf,14)
       do i=1,ntype
         if (lch.eq.ltype(i)) goto 1000
       end do

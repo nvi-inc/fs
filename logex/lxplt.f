@@ -169,7 +169,7 @@ C
 C  Skip over the time field plus the number of characters in NCOMND
 C  to begin the first character of the PARM at ICH.
 C
-          ich = 11+ncomnd(1)
+          ich = 15+ncomnd(1)
           if (nparm(n).eq.1) goto 410
 C
 C  If more than one PARM is specified, the following DO loop will

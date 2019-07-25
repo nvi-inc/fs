@@ -1,0 +1,81 @@
+      SUBROUTINE PORT
+
+C   This routine will change the printer output destination and
+C   the printer type and the output width.
+
+C  COMMON BLOCKS:
+      INCLUDE 'skparm.ftni'
+      INCLUDE 'drcom.ftni'
+C
+C  History:
+C  901018 NRV Changed variable name, changed logic to leave port
+C             set if user types <return>.
+C  901205 NRV Moved width option in here from main program.
+C  910703 NRV New version for UX.  Change prompts and remove
+C             printer type prompt.
+C  930412 nrv implicit none
+C
+C  Local:
+	character*128 ctemp,ctemp2
+	integer*2 ltemp(10)
+      integer l,nch,ierr,idummy
+	integer trimlen,ichmv ! functions
+C
+
+C  1.0  Read the input from user and set output appropriatly.
+
+	l=trimlen(cprport)
+	write(luscn,9100) cprport(1:l)
+9100  format(' Printer output set to ',A,'.  Just enter ',
+     .       'return if you do not wish to change,'/' else type new ',
+     .       'file name or PRINT for printer  ? ',$)
+
+	call gtrsp(ibuf,25,luusr,nch)
+
+	if (nch.gt.0) then !got a response
+          call hol2char(ibuf,1,nch,cprport)
+          if (cprport.eq.'print') cprport='PRINT'
+        endif
+
+
+C  2.0  Now get printer type.
+
+C  This section deleted.
+
+
+C  3. Now get printer output width.
+
+	ierr=1
+	ctemp2 = 'LAND'
+	if (iwidth.eq.80) ctemp2='PORT'
+	l=trimlen(ctemp2)
+	do while (ierr.ne.0)
+	  write(luscn,9300) ctemp2(1:l)
+9300    format(' Output orientation set to ',a,'.  Just enter return ',
+     .  'if you do not wish to change,'/' else enter PORT '
+     .  ,'or LAND ? ',$)
+
+	  call gtrsp(ibuf,15,luusr,nch)
+
+	  if (nch.gt.0) then
+	    idummy = ichmv(ltemp,1,ibuf,1,nch)
+	    call hol2upper(ltemp,nch)
+	    call hol2char(ltemp,1,nch,ctemp)
+	    if (ctemp.eq.'LAND') then
+		iwidth = 137
+		ierr=0
+	    else if (ctemp.eq.'PORT') then
+		iwidth = 80
+		ierr=0
+	    else
+		write(luscn,9310)
+9310        format(' Invalid output orientation.  Only LAND or PORT'
+     .      ,' allowed.  Try again.')
+	    endif
+	  else
+	    ierr=0
+	  endif
+	enddo
+
+      RETURN
+      END

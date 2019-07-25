@@ -152,3 +152,4 @@ list         *xx 0000 16 77
 status       *xx 0000 17 77
 help         *xx 0000 18 77
 ?            *xx 0000 18 77
+date         *xx 0000 19 77

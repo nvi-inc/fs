@@ -1,5 +1,5 @@
       subroutine logen(ibuf,nch,lmessg,nchar,lsor,lprocn,ierr,lwho,
-     .                 lwhat,nargs)
+     .                 lwhat,nargsin)
 C 
 C  LOGEN formats a buffer for the log file.
 C  Character messages are displayed as is, errors are formatted
@@ -40,16 +40,22 @@ C      - to retrieve system time
 C     NARGS - number of arguments passed to us
       integer*2 lname(3)
 C      - the calling program's name 
+      integer iyear
 C 
 C 
 C     1. Get the number of parameters we were sent. 
 C     Get the current time and put into our output buffer.
 C 
-      call fc_rte_time(itime,idum) 
-      nch = 1 + ib2as(itime(5),ibuf,1,o'41000'+3) 
+      call fc_rte_time(itime,iyear) 
+c
+      nargs=abs(nargsin)
+c
+      nch = 1 + ib2as(mod(iyear,100),ibuf,1,o'41000'+2) 
+      nch = nch + ib2as(itime(5),ibuf,nch,o'41000'+3) 
       nch = nch + ib2as(itime(4),ibuf,nch,o'41000'+2) 
       nch = nch + ib2as(itime(3),ibuf,nch,o'41000'+2) 
       nch = nch + ib2as(itime(2),ibuf,nch,o'41000'+2) 
+      nch = nch + ib2as(itime(1),ibuf,nch,o'41000'+2) 
 C 
 C 
 C     2. If this is an error message, format it appropriately.
@@ -91,6 +97,11 @@ C                   Put a / after proc name
 C                   Finally move the log entry in 
 cxx      write(6,9200) (ibuf(i),i=1,15)
 cxx9200  format(1x,"LOGEN: ibuf=",15a2)
+      if(nargsin.eq.-6) then
+         nch=nch+ib2as(iyear,ibuf,nch,4)
+         nch=mcoma(ibuf,nch)
+         nch=nch+ib2as(itime(5),ibuf,nch,3)
+      endif
       goto 900
 C 
 C 

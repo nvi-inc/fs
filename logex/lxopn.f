@@ -100,7 +100,7 @@ C
       end if
 C
       ilen = fmpread(idcb,ierr,ibuf,iblen*2)
-      ilen = iflch(ibuf,iblen*2)
+      ilen = fmpread(idcb,ierr,ibuf,iblen*2)
 C
       if (ierr.lt.0) then
         outbuf='LXOPN - error '
@@ -114,15 +114,14 @@ C
         icode=-1
         goto 200
       end if
-      ifc=1
+      ifc=15
 C
-      do i=1,7
-        call gtfld(ibuf,ifc,ilen,ic1,ic2)
-      end do
+      ic1=iscn_ch(ibuf,ifc,ilen,',')+1
+      ic2=iscn_ch(ibuf,ic1,ilen,',')-1
 C
       call ichmv_ch(lstatn,1,'        ')
 C
-      if (ic1.ne.0) call ichmv(lstatn,1,ibuf,ic1,min0(8,ic2-ic1+1))
+      if (ic1.ne.1) call ichmv(lstatn,1,ibuf,ic1,min0(8,ic2-ic1+1))
       ierr=0
       call fmprewind(idcb,ierr)
       if (ierr.ne.0) then

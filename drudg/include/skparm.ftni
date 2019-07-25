@@ -1,0 +1,268 @@
+C********************************************************************
+C
+C     SKPARM.FTNI HOLDS PARAMETERS FOR THE SKED FAMILY OF PROGRAMS.
+C     Parameters which are used by SKED and/or DRUDG are
+C     collected here.
+C
+C  Last modified:  890623 by NRV to add windows parameters
+C 891113 NRV Add max base/flux parameter
+C 900125 NRV added max tape length parameter
+C 900206 NRV Modified to remove SOCAT, STCAT
+C 900302 gag removed catalogs, luscn and luusr
+C 911026 NRV Changed flux parameters
+C 911215 NRV Changed max_chart to 100 (per Heinz)
+C 920528 NRV Add MAX_SEFDPAR
+C 920702 NRV Changed MAX_HOR,COR to 30
+C 930204 NRV Merged sked parameters into this version
+C 930308 NRV Changed autosked max parameters to use previously
+C            defined parameters for source and station numbers
+C 930408 nrv Add oblank (single blank character)
+C            Add octal constants
+C 930506 nrv Changed max_stn to 14
+C 931015 nrv Add flcon1, flcon2 (removed from obsfl)
+C 931223 nrv Change to 4000 scans (for test schedules)
+C 940112 nrv Make the default be 100 celestial, 5 satellites
+C            Change to 2000 scans as default.
+C 940719 nrv Special version for 35 stations
+C 940805 nrv Back to normal values
+C            Add MAX_NRS parameter
+C 950622 nrv Change MAX_PASS to 28 for 4-pass mode C with VLBA
+C
+C********************************************************************
+C
+      implicit none
+C
+C     The maximum number of stations which can be selected for
+C     an experiment at one time.  Used in SKED and DRUDG.
+C
+      integer max_stn,max_baseline,max_hor,max_cor
+
+      PARAMETER (MAX_STN = 16)
+C     PARAMETER (MAX_STN = 35)
+C
+C     The maximum number of baselines.
+C
+      PARAMETER (MAX_BASELINE = (MAX_STN*(MAX_STN-1))/2)
+C
+C     The maximum number of az/el and coordinate pairs for horizon
+C     and coordinate masks. 18 is the maximum number allowed without
+C     increasing the buffer size.
+C
+      PARAMETER (MAX_HOR = 30)
+      PARAMETER (MAX_COR = 30)
+C
+C     The maximum number of sources, celetial AND satellite
+C     which can be selected for an experiment at one time. 
+C     This must be the largest parameter of the maximum 
+C     parameters used with the stations, frequencies and sources.
+C     Used in SKED and DRUDG.
+C *** NOTE: If this value is changed, then at least one of MAX_CEL
+C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
+C
+      integer max_sor,max_cel,max_sat,max_frq
+      PARAMETER (MAX_SOR = 105)
+C
+C     The maximum number of celestial (RA,DEC) sources which can
+C     be selected for an experiment at one time. Used in SKED,SOCAT,DRUDG.
+C *** NOTE: If this value is changed at least one of MAX_SOR
+C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
+C
+      PARAMETER (MAX_CEL = 100)
+C
+C     The maximum number of satellite (orbital element) sources which
+C     can be selected for an experiment at one time. Used in SKED
+C     and DRUDG.
+C *** NOTE: If this value is changed, then at least one of MAX_SOR
+C *** and MAX_CEL must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
+C
+      PARAMETER (MAX_SAT = 5)
+C
+C     The maximum number of frequency codes which can be selected
+C     for use in an experiment at one time.  Used in SKED and DRUDG.
+C
+      PARAMETER (MAX_FRQ = 2)
+C
+C     The maximum number of frequency bands within a schedule.
+C       **NOTE** This is restricted to be no more than 2!
+C       There are places in SKED that may appear to handle more
+C       than two bands, but this feature is really tailored to
+C       only S/X observations. ***
+C     Several frequency codes may be selected, as long as they
+C     are composed of a maximum of two bands, e.g. S and X.
+C
+      integer max_band,max_flux,max_vlba,max_sefdpar,max_nrs
+      PARAMETER (MAX_BAND = 2)
+C
+C     The maximum size of flux arrays. For source models, this number
+C     is the maximum number of model components times 6, because
+C     there are 6 parameters for a gaussian model. The value of 18 
+C     allows for 3 components, although no source models currently have
+C     more than 2 components. For baseline/flux profiles, this is the
+C     maximum number of entries in the profile. The value of 18 allows
+C     for 9 baselines and 8 fluxes, more than generous to describe a
+C     source.
+C
+      PARAMETER (MAX_FLUX = 18)
+C 
+C     Maximum number of VLBA entries. 
+
+      parameter (max_vlba = MAX_STN*MAX_FRQ)
+C
+C     Maximum number of rise/set times in arrays.
+
+      parameter (MAX_NRS = 4)
+C
+C     Maximum number of parameters for the calculation of
+C     elevation-dependent SEFDs.
+
+      parameter (MAX_SEFDPAR = 5)
+C
+C     Value for PI.
+C
+      real*8 PI,ROG,ROZ,SECRAD,OMEGA,EPS,ROS,C,TWOPI
+      PARAMETER (PI = 3.1415926535897932D0)
+      PARAMETER (TWOPI = 2.d0*PI)
+C
+C     EPSILON FOR 23 DEG AND 27 MIN IN RADIANS
+      PARAMETER (EPS=0.4092797096D0) 
+C
+C     Speed of light
+      PARAMETER (C=2.99792458D8)
+C
+C     Degrees per radian
+      PARAMETER (ROG=57.2957795131D0)
+C 
+C     Seconds of time per radian
+      PARAMETER (ROZ=13750.98708313D0)
+C
+C     Seconds of arc per radian
+      PARAMETER (ROS=206264.8062471D0)
+C
+C     Radians per second of arc
+      PARAMETER (SECRAD=4.8481368111D-6)
+C
+C     Radians per second of time
+      PARAMETER (OMEGA=7.272205217D-5)
+C
+      real*8 flcon1,flcon2
+C     Note: 0.6931471=alog(2)
+      PARAMETER (flcon1 = (pi*pi)/(4.0*0.6931471))
+      PARAMETER (flcon2 = pi/(3600.d0*180.d0*1.d3)) ! marcsec --> radians
+
+      integer max_par_esti,max_par_opti,max_dim_esti
+      integer max_sor_esti,max_chart
+
+C     Maximum number of parameters that can be estimated.
+      PARAMETER (MAX_PAR_ESTI=50)
+C     PARAMETER (MAX_PAR_ESTI=20)
+C
+C     Maximum number of parameters that can be optimized
+      PARAMETER (MAX_PAR_OPTI=30)
+C     PARAMETER (MAX_PAR_OPTI=10)
+C
+C     Maximum dimension for arrays holding coefficients etc.
+C     This parameter is = 269 for 100 sources, 8 stations
+C                         277 for 100 sources, 9 stations
+C                         285 for 100 sources, 10 stations
+
+      PARAMETER (MAX_DIM_ESTI=5+2*MAX_SOR+8*MAX_STN)
+C
+C     Maximum number of sources for which positions can be estimated
+      PARAMETER(MAX_SOR_ESTI=10) 
+C     PARAMETER(MAX_SOR_ESTI=1) 
+C
+C     Maximum number of subconfigurations that will be
+C     examined for possible scheduling. 
+
+      integer max_tape,max_pass
+      PARAMETER(MAX_CHART=100)
+C
+C     Default maximum tape length.  This value is usually
+C     specified for each station in the equipment catalog.
+C
+      PARAMETER (MAX_TAPE = 8820)
+C
+C     Default maximum number of passes.  This is usally
+C     specified for each station in the equipment catalog.
+C     Since most stations have high density heads, the
+C     default is set to 12 rather than 1.
+C
+      PARAMETER (MAX_PASS = 28)
+C
+      INTEGER  NULL
+      PARAMETER (NULL = 0)
+
+C     Definitions for octal constants.
+
+      integer OBLANK,ODOLLAR,OZERO,OCOMMA,OMINUS,OPLUS,
+     .          ODOT,OLPAREN,OUNDERSCORE,OSTAR,OSLASH,OAND,
+     .          ORPAREN
+      parameter (OBLANK = O'40', ODOLLAR = O'44',
+     .OZERO = O'60', OCOMMA = O'54', OMINUS = O'55',
+     .OPLUS = O'53', ODOT = O'56', OLPAREN = O'50',
+     .ORPAREN = O'51',OUNDERSCORE = O'137', OSTAR = O'52',
+     .OSLASH = O'57', OAND = O'46')
+      integer OCAPA,OCAPB,OCAPC,OCAPD,OCAPE,OCAPF,OCAPX,
+     .OCAPY,OCAPW,OSMALLE,OCAPL,OCAPT,OCAPN,ONINE,OCAPH,
+     .OCAPP,OONE,OCAPZ,OSMALLA,OSMALLZ
+      parameter (OCAPA = O'101', OCAPB = O'102',
+     .OCAPC = O'103', OCAPD = O'104', OCAPE = O'105',
+     .OCAPF = O'106', OCAPX = O'130', OCAPY = O'131',
+     .OCAPW = O'127', OCAPL = O'114', OCAPN = O'116',
+     .OSMALLE = O'145', OCAPT = O'124', ONINE = O'71',
+     .OCAPH = O'110', OCAPP = O'120', OCAPZ = O'132',
+     .OONE = O'61', OSMALLZ = O'172', OSMALLA = O'141')
+
+C     Unit 5 = standard input (keyboard)
+C     Unit 6 = standard output (screen)
+
+      INTEGER STDIN,STDOUT,STDERR
+      PARAMETER (STDIN = 5, STDOUT = 6, STDERR = 7)
+C
+C
+C     The lengths of the general purpose buffers IBUF and IBUFQ
+C     are determined by MAX_STN as follows:
+C     length of IBUF in chars must be >=60+MAX_STN*13
+C     IBUFQ is 1 word longer than IBUF
+C
+      integer ibuf_len,ibufq_len,max_obs,max_ent_sor,ibfcom_len
+      PARAMETER (IBUF_LEN = 499)
+      PARAMETER (IBUFQ_LEN = 500)
+C     PARAMETER (IBUF_LEN = 256)
+C     PARAMETER (IBUFQ_LEN = 257)
+C
+C     The maximum number of observations allowed in a schedule
+C
+      PARAMETER (MAX_OBS = 2000)
+C
+C     The maximum number of entries in the source
+C     catalog. CAUTION: YOU MUST ALSO CHANGE IBFCOM_LEN BELOW.
+C
+      PARAMETER (MAX_ENT_SOR = 1000)
+C
+C     The length of array IBFCOM = 4*MAX_ENT_SOR
+C
+      PARAMETER (IBFCOM_LEN = 4000)
+C
+C     The maximum number of entries in the station
+C     catalog. This must be no more than 108. This
+C     is because the station and frequency selection
+C     options only can display one page on the terminal.
+C     (Limit set by NROWS*NCOLS in SEST)
+C
+      integer max_ent_stn
+      PARAMETER (MAX_ENT_STN = 100)
+C
+C     The name of the control files. These files are
+C     read at run time. cctfil is the default control
+C     file that SKED reads each time it is run and should
+C     be in the users path. cownctl is a
+C     personal control file that should be in the 
+C     directory of the user when running SKED if it is
+C     to be used.
+C
+      character*128 cctfil,cownctl
+      parameter(cctfil = '/usr/local/bin/skedf.ctl')
+      parameter(cownctl = 'skedf.ctl')
+
+C
