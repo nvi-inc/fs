@@ -158,7 +158,7 @@ C
 C
       call fs_get_idevgpib(idevgpib)
       if(ichcm_ch(idevgpib,1,'/dev/null ').eq.0) then
-         ierr = -12
+         ierr = 0
          goto 1090
       endif
       ingpib = iflch(idevgpib,idevln)

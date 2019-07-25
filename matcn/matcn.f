@@ -98,7 +98,7 @@ C               - buffers for input, output
 C        ILEN,ILEN2   - length of above buffers
       integer*2 lstrob(8)
 C              - strobe characters for modes < 0, requesting data
-      logical kini
+      logical kini, knull
 C               - TRUE once we have initialized
 C        NDEV   - # devices in module table
       dimension modtbl(3,25)
@@ -163,8 +163,12 @@ C
       iparity=2
       ibits=7
       ibmatl=ibmat
-      ierr=portopen(lumat,idevmat,nchar,ibmatl,iparity,ibits,istop)
-      if (ierr.ne.0) call logit7ci(0,0,0,1,-100,'ma',ierr)
+      knull=ichcm_ch(idevmat,1,'/dev/null ').eq.0
+      lumat=0
+      if(.not.knull) then
+        ierr=portopen(lumat,idevmat,nchar,ibmatl,iparity,ibits,istop)
+        if (ierr.ne.0) call logit7ci(0,0,0,1,-100,'ma',ierr)
+      endif
 C
       if (lumat.lt.0) goto 1090
 C
@@ -197,6 +201,10 @@ C     Search the module table for a match.
 C     Set up the output buffer with the hex address.
 C
 200   continue
+      if(knull) then
+        ierr=-7
+        goto 1090
+      endif
       call ifill_ch(ibuf,1,180,' ')
       do 900 iclrec = 1,nclrec
         ireg(2) = get_buf(or(o'020000',iclass),ibuf,-ilen,idum,idum)

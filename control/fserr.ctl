@@ -771,7 +771,7 @@ IB  -11
 gpib driver not installed, gpib devices inaccessible.
 ""
 IB  -12
-gpib device /dev/null, gpib devices inaccessible.
+gpib device is /dev/null, gpib devices inaccessible.
 ""
 IB -101
 Number of entries from IBAD control file exceed table limit of ?WWW
@@ -851,6 +851,9 @@ Improper response (wrong number of chars)
 MA   -6
 Verify error
 ""
+MA   -7
+MAT device is /dev/null, MAT devices inaccessible.
+""
 MA -100
 Unable to open MAT device.
 ""
@@ -913,6 +916,9 @@ Error in request buffer format.
 ""
 MC -121
 Write request to mcb device failed.
+""
+MC -122
+MCB device is /dev/null, MCB devices inaccessible.
 ""
 NF   -1
 Break Detected in ONOFF
