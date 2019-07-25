@@ -1,7 +1,13 @@
+#
+ifndef VERSION
+VERSION = 0
+PATCHLEVEL = 0
+SUBLEVEL = 0
+endif
+#
 OBJECTS = incom.o sincom.o
 #
-#FFLAGS = -c  -i2
-FFLAGS = -c 
+FFLAGS = -cpp -DVERSION=$(VERSION) -DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL)
 LIBES = ../bosslb/bosslb.a ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a\
 ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../fmpsee/fmpsee.a\
 ../rtelb/rtelb.a
