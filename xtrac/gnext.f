@@ -21,6 +21,7 @@ C
       if (ic1.le.0) goto 10
       if (ichcm_ch(jbuf,1,'*').eq.0) goto 10
       if (ichcm_ch(jbuf,11,'fivpt#').eq.0) goto 100
+      if (ichcm_ch(jbuf,15,'fivpt#').eq.0) goto 200
 C
 C  MAKE SURE THIS IS IN LOG ENTRY FORMAT
 C
@@ -35,6 +36,10 @@ C
       ifc=17
       goto 1000
 C 
+ 200  continue
+      ifc=21
+      goto 1000
+c
 1000  continue
       ilc=len 
 C 

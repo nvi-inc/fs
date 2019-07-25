@@ -1,5 +1,5 @@
 echo "*******************************************************************"
-echo "*  This is the INSTALLATION script for Field System version 9.0.x *"
+echo "*  This is the INSTALLATION script for Field System version $FS_VERSION *"
 echo "*  This script must be excuted by root to work correctly.         *"
 echo "*  Refer to instructions in the Update Notice.                    *"
 echo "*******************************************************************"
@@ -12,14 +12,15 @@ echo "CAUTION: This script will automatically modify some of your directories."
 echo ""
 echo "On /usr2 each of the following directories will be created and filled"
 echo "with their default contents, unless they already exist: oper, prog,"
-echo "control, sched, proc, and log. If the /usr2/oper directory is created,"
+echo "control, sched, proc, log, and st. If the /usr2/oper directory is created,"
 echo "the /home/oper directory will be copied to /home/oper.FSCOPY (unless it"
 echo "exists already), and /home/oper will be made a link to /usr2/oper. A"
-echo "parallel operation will occur for /usr2/prog. Finally the link /usr2/fs"
-echo "will be deleted and made to point to this version of the Field System."
-echo "The permissions and ownership of the files are set."
+echo "parallel operation will occur for /usr2/prog. The link /usr2/fs" will
+echo "be deleted and made to point to this version of the Field System. A"
+echo "similar link structure will be used for /usr2/st. The permissions and"
+echo "ownerships of the files will be set (including for /etc/gpib.conf)."
 echo ""
-echo "This is fairly benign operation on most systems and always safe on a"
+echo "This is a fairly benign operation on most systems and always safe on a"
 echo "standard system. To get the default versions of any already existing"
 echo "directories, you will need to delete them before continuing with this"
 echo "script."
@@ -58,6 +59,19 @@ chown -R prog fs fs-$FS_VERSION
 chgrp -R rtx fs fs-$FS_VERSION
 chmod -R a+r,u+w,go-w fs fs-$FS_VERSION
 #
+if [ ! -e st-0.0.0 -a \( -L st -o ! -e st \) ]; then
+  echo "Creating /usr2/st default directory structure..."
+  mkdir /usr2/st-0.0.0
+  cd /usr2/fs/st.default/st-0.0.0
+  find Makefile misc help bin -print|cpio -pmdu /usr2/st-0.0.0
+  cd /usr2
+  rm -f st
+  ln -s st-0.0.0 st
+  chown -R prog st st-0.0.0
+  chgrp -R rtx  st st-0.0.0
+  chmod -R a+r,u+w,go-w st st-0.0.0
+fi
+#
 if [ ! -e /usr2/oper ]; then
    echo "Setting up /usr2/oper ..."
    if [ -e /home/oper.FSCOPY -o -L /home/oper.FSCOPY ]; then
@@ -66,7 +80,6 @@ if [ ! -e /usr2/oper ]; then
          exit
       fi
    fi
-   mkdir /usr2/oper
    cd /usr2/fs/st.default
    find oper -print|cpio -pmdu /usr2
    chown -R oper /usr2/oper
@@ -81,7 +94,6 @@ fi
 #
 if [ ! -e /usr2/prog ]; then
    echo "Setting up /usr2/prog ..."
-   mkdir /usr2/prog
    cd /usr2/fs/st.default
    find prog -print|cpio -pmdu /usr2
    chown -R prog /usr2/prog
@@ -95,8 +107,7 @@ if [ ! -e /usr2/prog ]; then
 fi
 #
 if [ ! -e /usr2/control ]; then
-   echo "Setting up /usr/control ..."
-   mkdir /usr2/control
+   echo "Setting up /usr2/control ..."
    cd /usr2/fs/st.default
    find control -print|cpio -pmdu /usr2
    chown -R oper /usr2/control
@@ -105,8 +116,7 @@ if [ ! -e /usr2/control ]; then
 fi
 #
 if [ ! -e /usr2/proc ]; then
-   echo "Setting up /usr/proc ..."
-   mkdir /usr2/proc
+   echo "Setting up /usr2/proc ..."
    cd /usr2/fs/st.default
    find proc -print|cpio -pmdu /usr2
    chown -R oper /usr2/proc
@@ -115,8 +125,7 @@ if [ ! -e /usr2/proc ]; then
 fi
 #
 if [ ! -e /usr2/sched ]; then
-   echo "Setting up /usr/sched ..."
-   mkdir /usr2/sched
+   echo "Setting up /usr2/sched ..."
    cd /usr2/fs/st.default
    find sched -print|cpio -pmdu /usr2
    chown -R oper /usr2/sched
@@ -125,11 +134,19 @@ if [ ! -e /usr2/sched ]; then
 fi
 #
 if [ ! -e /usr2/log ]; then
-   echo "Setting up /usr/log ..."
+   echo "Setting up /usr2/log ..."
    mkdir /usr2/log
    chown -R oper /usr2/log
    chgrp -R rtx  /usr2/log
    chmod -R a+rw /usr2/log
+fi
+#
+if [ -e /etc/gpib.conf ]; then
+   echo "Setting permissions for /etc/gpib.conf ..."
+   cd /etc
+   chown root         gpib.conf
+   chgrp rtx          gpib.conf
+   chmod a+r,ug+w,o-w gpib.conf
 fi
 #
 echo "Done."

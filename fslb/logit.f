@@ -72,6 +72,7 @@ C
       if (nargs.eq.2) call logen4(ibuf,nch,lmessg,nchar) 
       if (nargs.eq.3) call logen5(ibuf,nch,lmessg,nchar,lsor)
       if (nargs.eq.4) call logen6(ibuf,nch,lmessg,nchar,lsor,lprocn) 
+      if (nargs.eq.-4) call logen6d(ibuf,nch,lmessg,nchar,lsor,lprocn) 
       if (nargs.eq.5) call logen7(ibuf,nch,lmessg,nchar,lsor,lprocn, 
      .                ierr) 
       if (nargs.eq.6) call logen8(ibuf,nch,lmessg,nchar,lsor,lprocn, 

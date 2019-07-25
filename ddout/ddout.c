@@ -117,7 +117,7 @@ Messenger:
           if(ch != '\n') write(fd, "\n", 1);
         }
         if(strcmp(shm_addr->LLOG, llog0)!=0) memcpy(llog0, shm_addr->LLOG,8);
-        goto Post;  /* log exists, don't write first message */
+        goto Append;  /* always write first message */
       }
       while (fd < 0) {  /* if open failed, try creating the file */
         fd = creat(lnamef, PERMISSIONS);
@@ -165,7 +165,7 @@ Ack:    ich = strtok(NULL, ",");
 /* SECTION 5 */
 /*  error recognition and message expansion */
 
-    kp = (buf[9] == '$');
+    kp = (buf[13] == '$');
     if(kxd || (rtn2 == -1) || (!kp && !kack)){
       if (*cp2 != 'b') goto Append;
       iwhe = NULL;
@@ -219,7 +219,16 @@ Append:           /* send message to station error program */
         skd_run("sterp", 'n', ip); 
       }
       if (*cp2 == 'b') strcat(buf, "\007");
-      printf("%s\n", buf);
+      { char bufout[256];
+      strncpy(bufout+0,buf+5,2);
+      strncpy(bufout+2,":",1);
+      strncpy(bufout+3,buf+7,2);
+      strncpy(bufout+5,":",1);
+      strncpy(bufout+6,buf+9,2);
+      strncpy(bufout+8,".",1);
+      strcpy(bufout+9,buf+11);
+      printf("%s\n", bufout);
+      }
     }
 
 /* SECTION 6 */

@@ -11,7 +11,6 @@ set history = 50
 set savehist = 50
 umask 022
 set ignoreeof
-set noclobber
 setenv PAGER "less -i"
 setenv EDITOR vi
 #

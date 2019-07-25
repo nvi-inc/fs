@@ -1,0 +1,64 @@
+C     STATION INFORMATION COMMON BLOCK
+C 
+      real*8 stnxyz,baselen,axisof,
+     .       GLONG,PHI,HGT,R1,R2,BX,BY,BZ    
+      integer*2 lstnna,lstcod,lpocod,lposid,lantna,loccup,
+     .lhccod,lterna,lbsefd
+      integer nstatn,iaxis,maxpas,iterid,istcon,nhorz,
+     .ncord,maxtap,nsefdpar,nrecst
+      real stnpos,stnlim,stnrat,stnelv,azhorz,elhorz,co1mask,
+     .co2mask,sefdst,diaman,sefdpar,sefdstel
+      COMMON/STATN/NSTATN,
+     .       LSTNNA(4,MAX_STN),STNPOS(2,MAX_STN), 
+     .       STNLIM(2,2,MAX_STN),STNRAT(2,MAX_STN), 
+     .       IAXIS(MAX_STN),LSTCOD(MAX_STN),STNELV(MAX_STN),
+     .       MAXPAS(MAX_STN),ITERID(MAX_STN), 
+     .       ISTCON(2,MAX_STN),LPOCOD(MAX_STN),
+     .       NHORZ(MAX_STN),AZHORZ(MAX_HOR,MAX_STN),
+     .       ELHORZ(MAX_HOR,MAX_STN),
+     .       NCORD(MAX_STN),CO1MASK(MAX_COR,MAX_STN),
+     .       CO2MASK(MAX_COR,MAX_STN),
+     .       LPOSID(MAX_STN),SEFDST(MAX_BAND,MAX_STN),
+     .       stnxyz(3,max_stn),baselen(max_baseline),
+     .       lantna(4,max_stn),
+     .       axisof(max_stn),diaman(max_stn),loccup(4,max_stn),
+     .       lhccod(max_stn),maxtap(max_stn),lterna(4,max_stn),
+     .       lbsefd(max_band,max_stn),
+     .       GLONG(MAX_STN),PHI(MAX_STN),HGT(MAX_STN),
+     .       R1(MAX_STN),R2(MAX_STN),
+     .       BX(MAX_BASELINE),
+     .       BY(MAX_BASELINE),BZ(MAX_BASELINE),
+     .       sefdpar(max_sefdpar,max_band,max_stn),
+     .       nsefdpar(max_band,max_stn),sefdstel(max_band,max_stn),
+     .       nrecst(max_stn)
+C 
+C  NSTN   - number of stations
+C  LSTNNA - position names, up to 8 chars
+C  STNPOS - station longitude and latitude, geodetic, radians 
+C  STNLIM - limit stops: (1,1) lower limit, axis 1
+C           (degrees)    (2,1) upper limit, axis 1
+C                        (1,2) lower limit, axis 2
+C                        (2,2) upper limit, axis 2
+C  STNRAT - slew rates: (1) axis 1, (2) axis 2 (degrees per minute) 
+C  IAXIS  - axis type: 1=hadec, 2=xy, 3=azel
+C  LSTCOD - station codes, 2 characters 
+C  ITERID - terminal ID, integer
+C  STNELV - station elevation limit, assigned in SKED 
+C  ISTCON - slew overhead time, seconds
+C  NHORZ - number of az, el pairs in horizon mask
+C  AZHORZ, ELHORZ - as, el of horizon mask
+C  NCORD - number of pairs in coordinate mask
+C  CO1MASK, CO2MASK - mask for antenna coordinates
+C  LPOSID - position ID's
+C  SEFDST - System Equiv. Flux Densities by observing band.
+C  baselen - baseline lengths, meters
+C  stnxyz - station position x,y,z in meters
+C  lantna - antenna names
+C  axisof - axis offset
+C  diaman - antenna diameter
+C  loccup - occupation code
+C  lhccod - code for horizon/coordinate mask
+C  LPOCOD - position codes
+C  maxtap - maximum tape length for each station
+C  lterna - terminal name
+C  lbsefd - band names for sefds, storage until frequencies are known

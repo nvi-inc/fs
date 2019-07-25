@@ -35,7 +35,9 @@ C   MARK IV FIELD SYSTEM VERSION <version> <station> <year> <occup#>
 C     Send this with option "NL" to LOGIT, i.e. start new log file.
 C
       call ifill_ch(ibuf,3,60,' ')
-      nch = ichmv_ch(ibuf,1,'" Mark IV Field System Version ')
+      nch = ichmv_ch(ibuf,1,'Log Opened: ')
+      nch = ichmv_ch(ibuf,nch,'Mark IV Field System ')
+      nch = ichmv_ch(ibuf,nch,'Version ')
       idum=sVerMajor_FS
       nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
       nch = ichmv_ch(ibuf,nch,'.')
@@ -44,24 +46,14 @@ C
       nch = ichmv_ch(ibuf,nch,'.')
       idum=sVerPatch_FS
       nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
-      iend=nch-1
-      call fs_get_lnaant(lnaant)
-      nch = ichmv(ibuf,nch+1,lnaant,1,8)
-      nch = nch+1
-      nch = nch+ ib2as(iyear,ibuf,nch,4)
-      nch = ichmv(ibuf,nch+1,loccup,1,8)-3
+      nch = nch-1
       call char2hol('nl',nl,1,2)
       call ifill_ch(lprocdumm,1,12,' ')
       idum=ichmv(lsor,1,lsorin,1,2)
       if(index('$&',cjchar(lsor,1)).ne.0) then
           idum=ichmv(lsor,1,lsorin,2,1)
       endif
-      call logit5(ibuf(2),nch,lsor,lprocdumm,nl)
-C
-C     Second line contains minor version #; not read by correlator
-C     Send this as a normal message (i.e. NOT a new log)
-C
-      call logit3(ibuf,iend,lsor)
+      call logit5(ibuf(1),nch,lsor,lprocdumm,nl)
 C
 C     Send configuration info from control files to log
 C
@@ -69,6 +61,7 @@ C
       nch = 1
       nch=ichmv_ch(ib,nch,'location')
       nch=mcoma(ib,nch)
+      call fs_get_lnaant(lnaant)
       nch=ichmv(ib,nch,lnaant,1,8)
       nch=mcoma(ib,nch)
       nch=ichmv(ib,nch,lidstn,1,1)

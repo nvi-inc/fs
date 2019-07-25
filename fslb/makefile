@@ -16,7 +16,7 @@ run_matcn.o rx2ma.o rxvtot.o sbit.o sidtm.o tp2ma.o updat.o\
 upper.o vc2ma.o vlt2mic.o vlt_head.o\
 put_cons.o put_cons_raw.o putcon_ch.o sun.o zero_vatt.o\
 i32ma.o ma2i3.o iif3ed.o logit2_ch.o logit4_ch.o logit6c.o logit7cc.o\
-logit7ci.o logit7ic.o
+logit7ci.o logit7ic.o logit4d.o logen6d.o
 #
 #CFLAGS = 
 #

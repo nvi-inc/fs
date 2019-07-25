@@ -1,0 +1,86 @@
+C     FREQUENCY CODE INFORMATION COMMON BLOCK 
+C 
+C 891117 nrv Added dimension to change NFREQ from total number of frequencies
+C 910702 nrv changed VLBA-related arrays to correspond to PC version
+C 910709 NRV Changed FREQLO,LSGINP to allow 3 LO frequencies, removed PATCH
+C 910924 NRV Add WAVEI 
+C 930802 NRV Add ihdpos, ihddir to hold head position information
+C 940620 nrv Add trkn to hold number of tracks being recorded
+C 950303 nrv Add variables effreq, ffact for ionosphere S/X correction.
+C 950405 nrv Change index on head arrays for mode E (4*max_pass)
+C
+      logical kswitch,kvlba
+      real*4 synthf,synthv,vcband,freqrf,freqlo,wavei,bwrms,trkn
+      real*8 effreq,ffact
+      character*3 csetv
+      character*1 clast
+      integer ncodes,nfreq,npassf,nband,nvcs,invcx,nchanv,nsynv,ibbcv,
+     .ivcv,itras,isyn,nvset,ivix,ihdpos,ihddir
+      integer*2 lcode,lmode,lsubvc,ltraks,lsginp,lnafrq,
+     .lband,lsbv,lifchan
+      COMMON/FREQS/NCODES,
+     .       LCODE(MAX_FRQ),LMODE(MAX_FRQ),VCBAND(MAX_FRQ), 
+     .       NFREQ(2,MAX_FRQ),LSUBVC(14,MAX_FRQ), 
+     .       FREQRF(14,MAX_FRQ),LTRAKS(2,28,MAX_FRQ), 
+     .       FREQLO(3,MAX_STN,MAX_FRQ),LSGINP(3,MAX_FRQ), 
+     .       NPASSF(MAX_FRQ),LNAFRQ(4,MAX_FRQ), 
+     .       lband(max_band),nband,
+     .       nvcs(max_vlba),invcx(14,max_frq),
+     .       nchanv(max_vlba),nsynv,ibbcv(max_vlba,14),
+     .       ivcv(max_vlba,14),csetv(max_vlba,14),
+     .       lsbv(max_vlba,14),lifchan(max_vlba,14),
+     .       synthv(14),itras(2,28,14,max_vlba),
+     .       isyn(max_vlba,14),
+     .       kswitch(max_vlba),synthf(max_vlba,14),
+     .       kvlba,nvset,clast,ivix(max_frq,max_stn),
+     .       wavei(max_band,max_frq),bwrms(max_band,max_frq),
+     .       ihdpos(4*max_pass,max_stn,max_frq),
+     .       ihddir(4*max_pass,max_stn,max_frq),
+     .       trkn(2,max_stn,max_frq),
+     .       effreq(max_band,max_frq),ffact(max_frq)
+C 
+C     NCODES - number of codes filled in
+C     LCODE - the 2-character frequency codes 
+C     LMODE - the observing mode for each code
+C     VCBAND - final video bandwidth, MHz 
+C     NFREQ - number of frequencies in each subgroup in each code
+C     LSUBVC - sub-group code for each VC, in each code
+C     FREQRF - observing frequency for each VC, in each code
+C     LTRAKS - All tracks to be recorded, for each pass, in each code.
+C              Tracks are coded into the first 28 bits of the two words.
+C     FREQLO - LO 1 and 2 freq, MHz, by station, for each code
+C     LSGINP - sub-group code and input for LO 1 and 2, for each code 
+C              First char=sub-group code (same as in LSUBVC)
+C              Second char=N for normal, A for alternate
+C     NPASSF - number of tape passes with this code 
+C     LNAFRQ - 8-char name for this code
+C     lband  - all bands in all codes
+C     nband  - number of entries in lband
+C     nvcs   - number of VCs used in each code (normally 7 or 14)
+C     nchanv - number of VLBA channels
+C     nsynv  - number of synthesizer settings
+C     ibbcv  - BBC numbers
+C     ivcv   - VC numbers
+C     csetv  - switch set
+C     lsbv   - hollerith SB
+C     lifchan - hollerith IF channel
+C     synthv - real synthesizer values (Total Lo synthesizer value.)
+C     synthf - synthesizer values read from schedule file.
+C     itras  - track assignments(a,b,c,d)
+C          a = U/L simultaneously recorded 
+C          b = corresponding passes, forward/reverse (1-28, e.g.
+C              1 for mode A, 2 for B and C, 28 for D, 4 for E)
+C          c = channels (1 to 14)
+C          d = max_frq
+C     isyn   - number assigned to synthesizer frequency.
+C    max_vla = max_frq*max_stn    maximum number of L lines
+C    ivlname(4,max_vla)           variable for station names
+C    ivllo(4,max_vla)             LO_name variable
+C    ivlco(max_vla)               Code variable
+C    nllines                      number of L lines in vlba
+C    kswitch                      switched sequence
+C    squal1  - for switched vlba files bbsynth for qual 1
+C    squal2  - for switched vlba files bbsynth for qual 2
+C    kvlba   - true if a $VLBA section is in schedule file
+C    wavei   - constant to convert baseline length to wavelengths
+C    trkn    - number of tracks recorded per frequency, per station

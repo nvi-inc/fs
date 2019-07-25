@@ -1,15 +1,15 @@
       INTEGER FUNCTION iscn_ch(LINPUT,IFC,ILC,CCH)
       IMPLICIT NONE
       INTEGER LINPUT(1),IFC,ILC
-      CHARACTER CCH
+      CHARACTER*(*) CCH
 C
-C iscn_ch: scan for character 
+C iscn_ch: scan for character string
 C
 C Input:
 C       LINPUT: Hollerith array to scan in
 C       IFC:    character in LINPUT at which to start scan
 C       ILC:    character in LINPUT at which to stop scan
-C       CCH:    contains character to scan for
+C       CCH:    contains character string to scan for
 C
 C Output:
 C       iscn_ch: zero if CCH was not found in LINPUT
@@ -20,7 +20,7 @@ C
 C Warning:
 C       Negative and zero values of IFC or ICL are not supported
 C
-      INTEGER I
+      INTEGER I,j
       character ch
 C
       IF(ILC.LE.0.OR.IFC.LE.0) THEN
@@ -28,12 +28,17 @@ C
         STOP
       ENDIF
 C
-      DO I=IFC,ILC
+      DO I=IFC,ILC-len(cch)+1
         call hol2char(LINPUT,i,i,ch) 
-        IF(CCH.EQ.ch) THEN
-          iscn_ch=I
-          RETURN
+        IF(CCH(1:1).EQ.ch) THEN
+           do j=2,len(cch)
+              call hol2char(linput,i+j,i+j,ch)
+              if(cch(j:j).ne.ch) goto 100
+           enddo
+           iscn_ch=I
+           RETURN
         ENDIF
+ 100    continue
       ENDDO
 C
       iscn_ch=0

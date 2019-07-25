@@ -792,6 +792,9 @@ C
           istart=0
         endif
         call fshelp(ibuf,istart,nchar)
+      else if (mbranch.eq.19) then
+         nch = ichmv_ch(ibuf,nchar+1,'/')
+         call logit4d(ibuf,nch-1,lsor,lprocn)
       endif
       mbranch = 0
 C

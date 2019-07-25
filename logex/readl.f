@@ -102,7 +102,7 @@ C
 C  ************************************************************
 C
 C
-      if (cjchar(ibuf,11).ne.'"') goto 300
+      if (cjchar(ibuf,15).ne.'"') goto 300
       call ifill_ch(jbuf,1,100,' ')
       call ifill(jbuf,1,1,o'42')
       call ichmv(jbuf,2,lstid,1,1)
@@ -121,8 +121,8 @@ C  *********************************************************
 C
 C
 300   continue
-      if (ichcm_ch(ibuf,11,'source=').ne.0) goto 350
-      ich = 18
+      if (ichcm_ch(ibuf,15,'source=').ne.0) goto 350
+      ich = 22
       call gtprm(ibuf,ich,nchar,0,parm,id)
 C
 C  Make sure there are some characters in the source name
@@ -130,13 +130,13 @@ C  before trying to move them.  Accept a maximum of 8
 C  characters.
 C
       if (ichcm_ch(lnewsn,1,'$$').ne.0) goto 310
-      if (ich-19.le.0) goto 100
-      call ichmv(lnewso,1,ibuf,18,min0(8,ich-19))
-      call ichmv(lsourn,1,ibuf,18,min0(8,ich-19))
+      if (ich-23.le.0) goto 100
+      call ichmv(lnewso,1,ibuf,18,min0(8,ich-23))
+      call ichmv(lsourn,1,ibuf,18,min0(8,ich-23))
       call char2hol('  ',lnewsn,1,2)
       goto 100
 310   call ifill_ch(lnewso,1,8,' ')
-      if (ich-19.gt.0) call ichmv(lnewso,1,ibuf,18,min0(8,ich-19))
+      if (ich-23.gt.0) call ichmv(lnewso,1,ibuf,12,min0(8,ich-23))
       goto 1200
 C
 350   if (ichcm_ch(lsourn,1,'        ').eq.0) goto 100
@@ -149,11 +149,11 @@ C
 C  ************************************************************
 C
 C
-400   if (ichcm_ch(ibuf,11,'st=').ne.0) goto 500
-      isld=ias2b(ibuf,1,3)
-      islhr=ias2b(ibuf,4,2)
-      islmin=ias2b(ibuf,6,2)
-      islsec=ias2b(ibuf,8,2)
+400   if (ichcm_ch(ibuf,15,'st=').ne.0) goto 500
+      isld=ias2b(ibuf,3,3)
+      islhr=ias2b(ibuf,6,2)
+      islmin=ias2b(ibuf,8,2)
+      islsec=ias2b(ibuf,10,2)
       ist=1
       goto 100
 C
@@ -165,8 +165,8 @@ C
 C  ************************************************************
 C
 C
-500   if (ichcm_ch(ibuf,11,'onsource/').ne.0) goto 600
-      if (ichcm_ch(ibuf,20,'tracking').ne.0) goto 510
+500   if (ichcm_ch(ibuf,15,'onsource/').ne.0) goto 600
+      if (ichcm_ch(ibuf,24,'tracking').ne.0) goto 510
       call ichmv_ch(lstat,1,'O')
       goto 100
 510   if (islew.eq.1.or.iet.eq.1) goto 100
@@ -182,7 +182,7 @@ C
 C  *************************************************************
 C
 C
-600   if (ichcm_ch(ibuf,11,'error ch').ne.0) goto 700
+600   if (ichcm_ch(ibuf,15,'error ch').ne.0) goto 700
       if (ichk.eq.1) goto 100
       call ichmv_ch(lstat,2,'E')
       ichk=1
@@ -196,11 +196,11 @@ C
 C  ************************************************************
 C
 C
-700   if (ichcm_ch(ibuf,11,'et').ne.0) goto 800
-      ield=ias2b(ibuf,1,3)
-      ielhr=ias2b(ibuf,4,2)
-      ielmin=ias2b(ibuf,6,2)
-      ielsec=ias2b(ibuf,8,2)
+700   if (ichcm_ch(ibuf,15,'et').ne.0) goto 800
+      ield=ias2b(ibuf,3,3)
+      ielhr=ias2b(ibuf,6,2)
+      ielmin=ias2b(ibuf,8,2)
+      ielsec=ias2b(ibuf,10,2)
       iet=1
       goto 100
 C
@@ -211,8 +211,8 @@ C
 C  ************************************************************
 C
 C
-800   if (ichcm_ch(ibuf,11,'label=').ne.0) goto 900
-      call ichmv(ltapen,1,ibuf,17,8)
+800   if (ichcm_ch(ibuf,15,'label=').ne.0) goto 900
+      call ichmv(ltapen,1,ibuf,21,8)
       call ichmv(ltapn,1,ltapen,1,8)
       goto 100
 C
@@ -225,7 +225,7 @@ C
 C  ************************************************************
 C
 C
-900   if (ichcm_ch(ibuf,11,'unlod').ne.0) goto 1000
+900   if (ichcm_ch(ibuf,15,'unlod').ne.0) goto 1000
       call ichmv(ltapn,1,ltapen,1,8)
       call ifill_ch(ltapen,1,8,' ')
       call ifill_ch(ltapen,3,1,'-')
@@ -239,7 +239,7 @@ C
 C  ************************************************************
 C
 C
-1000  if (ichcm_ch(ibuf,11,'tape/').ne.0) goto 1100
+1000  if (ichcm_ch(ibuf,15,'tape/').ne.0) goto 1100
       nch=1
       call gtprm(ibuf,nch,nchar,0,parm,ierr)
       call gtprm(ibuf,nch,nchar,1,parm,ierr)
@@ -255,13 +255,13 @@ C
 C  ************************************************************
 C
 C
-1100  if (cjchar(ibuf,11).ne.'!') goto 100
+1100  if (cjchar(ibuf,15).ne.'!') goto 100
       if (ist.eq.1) goto 100
-      inum=ias2b(ibuf,12,3)
+      inum=ias2b(ibuf,16,3)
       if (inum.eq.-32768) goto 100
       ilrday=inum
-      ilrhrs=ias2b(ibuf,15,2)
-      ilrmin=ias2b(ibuf,17,2)
+      ilrhrs=ias2b(ibuf,19,2)
+      ilrmin=ias2b(ibuf,21,2)
       itcntl=1
       goto 100
 C

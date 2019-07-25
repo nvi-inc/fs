@@ -519,11 +519,11 @@ Popup "Operator Menu"
 	Exec	"Monit: time    C-S-1"	exec xterm -name monit1 -e monit1 &
 	Exec	"Monit: status  C-S-2"	exec xterm -name monit2 -e monit2 &
 	Exec	"Monit: Tsys    C-S-3"	exec xterm -name monit3 -e monit3 &
-	Exec	"Chekr          C-S-C"	exec run chekr w &
+	Exec	"Chekr          C-S-C"	exec run -w chekr &
 	Exec	"Emacs          C-S-E"	exec emacs &
 	Exec	"Logex          C-S-L"	exec xterm -name logex -e logex &
 	Exec	"Pfmed          C-S-P"	exec xterm -name pfmed -e pfmed &
-	Exec	"Setcl          C-S-S"	exec setcl &
+	Exec	"Setcl          C-S-S"	exec run -w setcl &
 	Exec	"Fmset          C-S-T"	exec xterm -name fmset -e fmset &
 	Exec	"New window     C-S-W"	exec xterm -ls -g 80x24+75+75 &
 	Nop	""
@@ -620,11 +620,11 @@ Mouse 3         W       M       RaiseLower
 Key 1		A	CS	Exec "monit1" exec xterm -name monit1 -e monit1 &
 Key 2		A	CS	Exec "monit2" exec xterm -name monit2 -e monit2 &
 Key 3		A	CS	Exec "monit3" exec xterm -name monit3 -e monit3 &
-Key c		A	CS	Exec "chekr" exec run chekr w &
+Key c		A	CS	Exec "chekr" exec run -w chekr &
 Key e		A	CS	Exec "emacs" exec emacs &
 Key l		A	CS	Exec "logex" exec xterm -name logex -e logex &
 Key p		A	CS	Exec "pfmed" exec xterm -name pfmed -e pfmed &
-Key s		A	CS	Exec "setcl" exec setcl &
+Key s		A	CS	Exec "setcl" exec run -w setcl &
 Key t		A	CS	Exec "fmset" exec xterm -name fmset -e fmset &
 Key w		A	CS	Exec "new window" exec xterm -ls -g 80x24+75+75 -rw &
 Key Escape	A	SC	CirculateDown

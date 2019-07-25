@@ -39,8 +39,7 @@ C
       isc = 0 
       goto 990
 101   continue
-      call pchar(idum,2,jchar(icomp,icomst))
-      isc = iscnc(input,ich,icen,idum) 
+      isc = iscnc(input,ich,icen,jchar(icomp,icomst)) 
 C 
 C  IF THIS CHARACTER NOT FOUND, RETURN ZERO FOR NO MATCH 
 C 

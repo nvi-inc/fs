@@ -54,7 +54,7 @@ char **argv;
 
     skd_run_arg(argv[first],wait,ipr,arg);
     if( wait == 'w') {
-      sprintf(mess,"%-5.5s finished",argv[1]);
+      sprintf(mess,"%-5.5s finished",argv[first]);
       memcpy(&ivalue,"to",2);
       cls_snd(&(shm_addr->iclbox),mess,14,0,ivalue);
     }
