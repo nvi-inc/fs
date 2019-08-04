@@ -1,18 +1,23 @@
 #
-VERSION = 9
-SUBLEVEL = 12
-PATCHLEVEL = 12
-FS_VERSION = $(VERSION).$(SUBLEVEL).$(PATCHLEVEL)
-export VERSION SUBLEVEL PATCHLEVEL FS_VERSION
-
-
-FS_DISPLAY_SERVER = yes
-#ifeq '$(strip $(shell /sbin/ldconfig -p | grep libnanomsg))' ''
-#$(info libnanomsg not found, building without display server/client support)
-#override FS_DISPLAY_SERVER = no
-#endif
-export FS_DISPLAY_SERVER
-
+pwd = $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
+FS_VERSION := $(shell echo $(pwd) | cut -d- -f2-)
+VERSION    := $(shell echo $(FS_VERSION) | cut -d. -f1 )
+SUBLEVEL   := $(shell echo $(FS_VERSION) | cut -d. -f2 )
+PATCHLEVEL := $(shell echo $(FS_VERSION) | cut -d. -f3 | cut -d- -f1)
+RELEASE    := $(shell echo $(FS_VERSION) | cut -d- -f2- -s)
+#
+ifeq ($(VERSION),)
+$(error no VERSION value)
+endif
+ifeq ($(SUBLEVEL),)
+$(error no SUBLEVEL value)
+endif
+ifeq ($(PATCHLEVEL),)
+$(error no PATCHLEVEL value)
+endif
+export VERSION SUBLEVEL PATCHLEVEL FS_VERSION RELEASE
+# print variable,  use 'make print-version' to print VERSION
+print-%  : ; @echo $* = $($*)
 #
 # If environment variable FS_SERIAL_CLOCAL is define with a non-empty value
 #  the port library and mcbcn program will be compiled with a O_NONBLOCK
@@ -21,7 +26,7 @@ export FS_DISPLAY_SERVER
 #  portopen(), including ibcon.
 #
 LIB_DIR = clib flib bosslb fclib fmpsee fslb lnfch newlb polb port rtelb vis \
-poclb skdrut vex rclco/rcl s2das
+poclb skdrut vex rclco/rcl s2das third_party
 #
 EXEC_DIR = rwand chekr fserr ddout fs fsalloc incom matcn oprin pcalr onoff \
 fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \
@@ -29,36 +34,42 @@ quikv mcbcn brk moon logex headp fmset ibcon quikr go drudg rclcn pdplt logpl \
 lognm pcald msg fsvue fs.prompt inject_snap erchk mk5cn tpicd flagr \
 gnfit gndat gnplt dscon systests autoftp monpcal logpl1 holog gnplt1 predict \
 dbbcn rdbcn rdtcn mk6cn popen udceth0 rack mcicn be_client s_client lgerr fesh\
-plog
-
-ifeq "$(FS_DISPLAY_SERVER)"  "yes"
-EXEC_DIR += spubsub
-endif
-
+plog spubsub fsserver
 #
+
+export LDFLAGS += -L$(shell pwd)/third_party/lib
+export CPPFLAGS += -I$(shell pwd)/third_party/include
+
 all:	libs execs
 #
 dist:
 	rm -rf /tmp/fs-$(FS_VERSION).tgz /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name 'core'     -print >  /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name '#*#'      -print >> /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name '*~'       -print >> /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name '.*~'      -print >> /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name '*.[oas]'  -print >> /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name '*.pyc'  -print >> /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION) -name 'y.tab.h'  -print >> /tmp/fsdist-exclude
-	cd /; find usr2/fs-$(FS_VERSION)/bin -mindepth 1 -name '*' -print >> /tmp/fsdist-exclude
-	echo usr2/fs-$(FS_VERSION)/oprin/readline-2.0            >> /tmp/fsdist-exclude
-	echo usr2/fs-$(FS_VERSION)/rclco/rcl/all                 >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name 'core' -type f -print >  /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name '#*#'          -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name '*~'           -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name '.*~'          -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name '*.[oas]'      -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name '*.pyc'        -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION) -name 'y.tab.h'      -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION)/bin -mindepth 1 \
+	                                            -name '*' -print >> /tmp/fsdist-exclude
+	cd /; find usr2/fs-$(FS_VERSION)/third_party/src/* \
+			! -iname '*.tar.gz' \
+			! -iname '*.make'                     -print >> /tmp/fsdist-exclude 
+	echo usr2/fs-$(FS_VERSION)/third_party/lib                   >> /tmp/fsdist-exclude
+	echo usr2/fs-$(FS_VERSION)/third_party/include               >> /tmp/fsdist-exclude
+	echo usr2/fs-$(FS_VERSION)/rclco/rcl/all                     >> /tmp/fsdist-exclude
 	cd /; tar -czf /tmp/fs-$(FS_VERSION).tgz -X /tmp/fsdist-exclude usr2/fs-$(FS_VERSION)
 	chmod a+rw /tmp/fs-$(FS_VERSION).tgz
 #
 clean:
-	rm -f `find . -name 'core' -print`
+	rm -f `find . -name 'core' -type f -print`
 	rm -f `find . -name '#*#' -print`
 	rm -f `find . -name '*~' -print`
 	rm -f `find . -name '.*~' -print`
 	rm -f `find . -name '*.pyc' -print`
+	rm -rf third_party/include third_party/lib third_party/bin
+	find third_party/src/* ! -iname '*.tar.gz' ! -iname '*.make' -delete
 #
 rmexe:
 	rm -fr bin/*
@@ -67,6 +78,8 @@ rmdoto:
 	rm -f `find . -name '*.[oas]' -print`
 	rm -rf oprin/readline-2.0
 	rm -f `find . -name '*.pyc' -print`
+	rm -rf third_party/include third_party/lib third_party/bin
+	find third_party/src/* ! -iname '*.tar.gz' ! -iname '*.make' -delete
 #
 libs:
 	for dir in $(LIB_DIR); do\

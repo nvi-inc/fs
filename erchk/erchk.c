@@ -1,9 +1,7 @@
 /* erchk.c
  *
  *       The error message to be processed is transmitted by ddout and
- *       retrieved with the get_err() call. In the pubsub architecture
- *       erchk uses ssub to subscribe to the log stream.
- *
+ *       retrieved with the get_err() call.
  *
  * VERY IMPORTANT:
  *
@@ -62,7 +60,7 @@ int read_ssub() {
 
   close(pipefd[READ_END]);
   dup2(pipefd[WRITE_END], STDOUT_FILENO);
-  execlp("ssub", "ssub", "-w", FS_DISPLAY_PUBADDR, FS_DISPLAY_REPADDR, NULL);
+  execlp("ssub", "ssub", "-w", FS_SERVER_URL_BASE "/windows/fs/pub", FS_SERVER_URL_BASE "/windows/fs/rep", NULL);
   perror("erchk: error starting ssub");
   exit(EXIT_FAILURE);
 
@@ -115,11 +113,10 @@ main()
   size_t n;
   char *buffer = NULL;
 
-#ifdef NO_SERVER
-  fd = read_skd();
-#else
-  fd = read_ssub();
-#endif
+  if(getenv("FS_DISPLAY_SERVER") != NULL)
+    fd = read_ssub();
+  else
+    fd = read_skd();
 
   FILE* pipe = fdopen(fd, "r");
 
@@ -129,9 +126,8 @@ main()
   irow=0;
   icol=0;
   while (getline(&buffer, &n, pipe) >= 0 &&  n > 0) { /* retrieve error from the pipe */
-    if (!strstr(buffer, "ERROR")) {
-      continue;
-    }
+    if (!strstr(buffer, "ERROR")) continue;
+
     if(strcmp(chk_message,buffer)) {
       strcpy(chk_message,buffer);
       if(strstr(buffer," bo ") ||

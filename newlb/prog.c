@@ -33,6 +33,7 @@
 #define CWRAP_N 8
 #define IDEVDS_N 64
 #define DBBC3_DDC_VS_N 16
+#define SVERRELEASE 32
 
 extern struct fscom *shm_addr;
 
@@ -2666,3 +2667,10 @@ void fs_get_dbbc3_cont_cal_mode__(dbbc3_cont_cal_mode)
 	  *dbbc3_cont_cal_mode=shm_addr->dbbc3_cont_cal.mode;
 	}
 
+void fs_get_sverrelease_fs__(sVerRelease_FS)
+	int *sVerRelease_FS;
+	{
+          size_t N;
+	  N = SVERRELEASE;
+	  memcpy(sVerRelease_FS,shm_addr->sVerRelease_FS,N);
+	}

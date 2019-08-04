@@ -58,3 +58,5 @@ cdp     cdp or met3 server port & host, use cdp if you don't have either
 * a clock rate value of "none" will suppress clock_set command in FMSET
 *                                            and mk5c_mode command
    nominal   one of: none, nominal, 2, 4, 8, 16, 32, 64
+* DBBC3 firmware version, bbcs/if, ifs
+  v223 16 8

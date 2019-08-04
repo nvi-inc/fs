@@ -1,3 +1,5 @@
+#
+CFLAGS += -DRELEASE=$(RELEASE)
 # set environment variable NO_FTOK_FS non-empty if ftok() is not available
 # if you use csh/tcsh add this to your .login file:
 #   setenv NO_FTOK_FS TRUE
@@ -45,7 +47,7 @@ dbbc_if_power.o dbbcgain_util.o mk6_disk_pos_util.o\
 mk6_scan_check_util.o get_RDBEtime.o rdbe_dot_util.o rdbcn_v.o\
 rdbe_atten_util.o fserr_cls.o rdbe_2_tsysx.o get_fila10gtime.o daymy.o\
 dbbc3_ifx_util.o dbbc3_bbcnn_util.o dbbc3n_v.o dbbc3_if_power.o tpi_dbbc3.o\
-dbbc3_cont_cal_util.o dbbc3_iftpx_util.o
+dbbc3_cont_cal_util.o dbbc3_iftpx_util.o helpstr.o
 # mk6_record_util.o 
 #
 #FFLAGS = 

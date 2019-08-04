@@ -13,6 +13,7 @@ C      - buffer to use, assumed to be at least 50 characters long
       integer*2 ib(128)
       integer*2 lprocdumm(6)
       character*1 model,cjchar
+      character*256 display_server_envar
 C     LSOR - source of this message
 C
 C  OUTPUT: NONE
@@ -53,6 +54,28 @@ C
       call fs_get_logchg(logchg)
       logchg=mod(logchg+1,2147483647)
       call fs_set_logchg(logchg)
+C
+C     Add release info to log
+C
+      nch = 1
+      nch=ichmv_ch(ibuf,nch,'release')
+      nch=mcoma(ibuf,nch)
+      idum=sVerMajor_FS
+      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = ichmv_ch(ibuf,nch,'.')
+      idum=sVerMinor_FS
+      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = ichmv_ch(ibuf,nch,'.')
+      idum=sVerPatch_FS
+      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      call fs_get_sVerrelease_fs(sVerRelease_FS)
+      idum=iflch(sVerRelease_FS,32)
+      if(idum.ne.0) then
+         nch = ichmv_ch(ibuf,nch,'-')
+         nch = ichmv(ibuf,nch,sVerRelease_FS,1,idum)
+      endif
+      nch = nch-1
+      call logit3(ibuf,nch,lsor)
 C
 C     Send configuration info from control files to log
 C
@@ -500,6 +523,15 @@ C
       endif
       call logit3(ib,nch-1,lsor)
 c
+      nch = 1
+      nch = ichmv_ch(ib,nch,'fsserver,')
+      call getenv('FS_DISPLAY_SERVER', display_server_envar)
+      if (display_server_envar == "") then
+          nch = ichmv_ch(ib,nch,'disabled')
+      else
+          nch = ichmv_ch(ib,nch,'enabled')
+      endif
+      call logit3(ib,nch-1,lsor)
       return
       end
 

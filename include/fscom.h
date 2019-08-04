@@ -426,4 +426,6 @@ typedef struct fscom {
 
   struct dbbc3_cont_cal_cmd dbbc3_cont_cal;
 
+  char sVerRelease_FS[33];
+
 } Fscom;

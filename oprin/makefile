@@ -14,7 +14,10 @@
 #CC = gcc
 #CC = gcc-2.95
 
+READLINE :=$(shell fgrep >/dev/null 2>&1 'rl_completion_append_character' /usr/include/readline/readline.h ; echo $$?)
+ifneq ($(READLINE),0)
 READLINE :=$(shell fgrep >/dev/null 2>&1 'rl_compentry_func_t' /usr/include/readline/readline.h ; echo $$?)
+endif
 
 # In all default compilation commands involving the C preprocessor,
 # use these preprocessor control flags (include dirs, defines).
@@ -22,7 +25,7 @@ ifneq ($(READLINE),0)
 CPPFLAGS = -Ireadline-2.0
 
 # Flags for default $(CC) compilations.
-CFLAGS = -Wall -pipe -O2 -fomit-frame-pointer -DREADLINE
+CFLAGS =  -Wall -pipe #-O2 -fomit-frame-pointer -DREADLINE
 # debugging CFLAGS =  -Wall -pipe -g
 endif
 
@@ -52,8 +55,7 @@ endif
 # cause relinking; if libraries are missing, this makefile cannot
 # create them on its own, it says "don't know how to make $(LIBS)".
 ../bin/oprin : $(OBJECTS) $(LIBS)
-	gcc -o ../bin/oprin $(OBJECTS) $(LIBS) $(TERMLIB)
-	strip ../bin/oprin
+	gcc -g -o ../bin/oprin $(OBJECTS) $(LIBS) $(TERMLIB)
 
 # Actually 'oprin.c' is not dependent on the lib archive file
 # but the include files in 'readline-2.0' directory, but still:

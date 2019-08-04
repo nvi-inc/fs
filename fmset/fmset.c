@@ -100,7 +100,6 @@ struct fila10g_cfg *fila10g_cfg=NULL;
 
  putpname("fmset");
 skd_set_return_name("fmset");
-skd_clr_ret();
 setup_ids();         /* connect to shared memory segment */
 
 if (nsem_test(NSEM_NAME) != 1) {
@@ -114,6 +113,13 @@ if ( 1 == nsem_take("fmset",1)) {
   rte_sleep(SLEEP_TIME);
   exit(0);
 }
+
+while (skd_clr_ret(ip)) // only one should be possible, but just  in case 
+    if(ip[1]!=0)
+     cls_clr(ip[0]);
+// note that the above will not clear a partially read set of clase buffers
+// it only handles if 'fmset' is aborted while a ...cn is running
+// so not bullet proof, but more robust
 
 rte_prior(CL_PRIOR); /* set our priority */
 

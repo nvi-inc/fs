@@ -11,6 +11,12 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
+void setupdirs(void) {
+    system("mkdir -p " FS_SERVER_SOCKET_PATH);
+    system("chgrp rtx " FS_SERVER_SOCKET_PATH);
+    system("chmod 770 " FS_SERVER_SOCKET_PATH);
+}
+
 main()
 {
     int size, nsems, shm_id, sem_id, cls_id, skd_id, brk_id;
@@ -85,6 +91,7 @@ main()
     }
     go_att(key);
 
+    setupdirs();
 
     exit( 0);
 
