@@ -181,20 +181,14 @@ c      write(6,*) 'icont',icont
       call fs_get_dbbc_cont_cal_mode(dbbc_cont_cal_mode)
       call fs_get_dbbc3_cont_cal_mode(dbbc3_cont_cal_mode)
       if(calfp.gt.0.0.and.
-<<<<<<< HEAD
      &     ((rack.ne.DBBC.and.rack.ne.RDBE.and.rack.ne.DBBC3).or.
-     &     (rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.0).or.
-     &     (rack.eq.DBBC3.and.dbbc3_cont_cal_mode.eq.0))) then
-c     &     (rack.eq.RDBE.and.dbbc_cont_cal_mode.eq.0))) then
-=======
-     &     (rack.ne.DBBC.or.
      &     (rack.eq.DBBC.and.rack_type.eq.DBBC_PFB).or.
      &     (rack.eq.DBBC.and.rack_type.eq.DBBC_PFB_FILA10G).or.
      &     (rack.eq.DBBC.and.
-     &     (rack_type.eq.DBBC_DDC.or.rack_type.eq.DBBC_DDC_FILA10G).and.
-     &     dbbc_cont_cal_mode.eq.0))) then
+     &      (rack_type.eq.DBBC_DDC.or.rack_type.eq.DBBC_DDC_FILA10G).and.dbbc_cont_cal_mode.eq.0).or.
+     &     (rack.eq.DBBC3.and.dbbc3_cont_cal_mode.eq.0)) 
+     & ) then
 
->>>>>>> master
 C
 C       TURN CAL ON
 C 
