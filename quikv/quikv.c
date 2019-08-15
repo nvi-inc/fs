@@ -284,9 +284,11 @@ loop:
 	  break;
 	case 20:
 	case 22:
+/* TODO Ed needs to look at this
 	case 23:
 	case 24:
 	case 25:
+    */
 	  dbbc(&command,itask,ip);
 	  break;
     case 21:
@@ -401,6 +403,8 @@ loop:
 	dbbcgain(&command,itask,ip);
 	break;
       case 97:
+/* TODO: Ed needs to look at this */
+/*
 	switch (itask) {
 	case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
 	  dbbc3_ifx(&command,itask,ip);
@@ -418,6 +422,7 @@ loop:
       case 98:
 	dbbc3_bbcnn(&command,itask,ip);
 	break;
+    */
       case 100:
 	mk6(&command,itask,ip);
 	break;
