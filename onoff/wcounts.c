@@ -68,19 +68,20 @@ void wcounts(label,azoff,eloff,onoff,accum, rack)
     memcpy(buff+strlen(buff),onoff->devices[i].lwhat,4);
     strcat(buff," ");
     if(onoff->intp==1) {
-      if(rack==RDBE)
+      if(rack==RDBE) {
 	dble2str(buff,       accum->avg[i],-9,0);
-      else if(dbbc2_pfb)
+      } else if(dbbc2_pfb) {
 	dble2str(buff,       accum->avg[i],-8,3);
-      else
+      } else {
 	flt2str(buff,(float) accum->avg[i],-7,0);
       buff[strlen(buff)-1]=0;
+      }
     } else {
-      if(rack==RDBE)
+      if(rack==RDBE) {
 	dble2str(buff,       accum->avg[i],-9,1);
 	strcat(buff," ");
 	dble2str(buff,       accum->sig[i],-9,1);
-      else if(dbbc2_pfb) {
+      } else if(dbbc2_pfb) {
 	dble2str(buff,       accum->avg[i],-9,4);
 	strcat(buff," ");
 	dble2str(buff,       accum->sig[i],-9,4);
