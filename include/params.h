@@ -8,7 +8,7 @@
 #define WORD_BIT    32
 #define PAGE_SIZE   4096
 
-#define C_RES       154*PAGE_SIZE /* reserves bytes for Fscom     */
+#define C_RES       167*PAGE_SIZE /* reserves bytes for Fscom     */
 /* for C_RES */
 /* take 'x' size from " setup_ids: Fscom C structure too large: x bytes */
 /* divide by PAGE_SIZE, round up to next integer */
