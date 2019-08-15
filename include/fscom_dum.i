@@ -39,7 +39,7 @@ c
      $ icomputer, satellite, dbbcddcv, dbbcpfbv, dbbc_cond_mods,
      $ dbbc_if_factors(MAX_DBBC_IF), dbbc_cont_cal_mode, m5b_crate,
      $ dbbcddcvc, dbbcddcsubv, dbbccontcalpol, dbbcpfbvc, dbbcpfbsubv,
-     $ dbbc_como_cores(4),dbbc_cores, ichdbbcfm, user_device_zero(6)
+     $ dbbc_como_cores(4),dbbc_cores, ichdbbcfm, user_device_zero(6),
      $  mk6_units(MAX_MK6), mk6_active(MAX_MK6),
      $  rdbe_units(MAX_RDBE), rdbe_active(MAX_RDBE),
      $  dbbc3_ddc_v, dbbc3_ddc_vc, dbbc3_ddc_bbcs_per_if, dbbc3_ddc_ifs,
