@@ -50,11 +50,7 @@ typedef struct fscom {
         double decdat;
         double alat;
         double wlong;
-<<<<<<< HEAD
-	float systmp[MAX_TSYS_DET];
-=======
 	float systmp[MAX_GLOBAL_DET];
->>>>>>> master
         int ldsign;
 	char lfreqv[90];
         char lnaant[8];
