@@ -359,6 +359,7 @@ c
                ierr=-218
                goto 990
             endif
+         endif
       else if(RDBE.eq.rack) then
          ichan=ias2b(ldevfp,1,2)
          irdbe=index("abcdefghihklm",cjchar(ldevfp,3))
