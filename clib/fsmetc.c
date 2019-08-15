@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <strings.h>
 #include <netdb.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -41,7 +42,7 @@
 int fsmetc_()
 {
   int sockfd, numbytes,cnt,i,k,j,flags;
-  char buf[MAXLEN];
+  char buf[MAXLEN],*ptr;
   int loopcnt, err;
   struct timeval to;
   fd_set ready;
@@ -189,15 +190,30 @@ int fsmetc_()
     goto closer;
   }
 
+  shm_addr->tempwx=-100;
+  shm_addr->preswx=-1;
+  shm_addr->humiwx=-1;
   shm_addr->speedwx=-1;
   shm_addr->directionwx=-1;
   buf[numbytes]='\0';
-  sscanf(buf,"%f,%f,%f,%f,%d",
-	 &shm_addr->tempwx,
-	 &shm_addr->preswx,
-	 &shm_addr->humiwx,
-	 &shm_addr->speedwx,
-	 &shm_addr->directionwx);
+  ptr=buf;
+  sscanf(ptr,"%f",&shm_addr->tempwx);
+  ptr=index(ptr,',');
+  if (ptr!=NULL & *++ptr!=0) {
+      sscanf(ptr,"%f",&shm_addr->preswx);
+      ptr=index(ptr,',');
+      if (ptr!=NULL & *++ptr!=0) {
+            sscanf(ptr,"%f",&shm_addr->humiwx);
+            ptr=index(ptr,',');
+            if (ptr!=NULL & *++ptr!=0) {
+                sscanf(ptr,"%f",&shm_addr->speedwx);
+                ptr=index(ptr,',');
+                if (ptr!=NULL & *++ptr!=0) {
+                   sscanf(ptr,"%d",&shm_addr->directionwx);
+                }
+            }
+      }
+   }
 
   errno_save = 0;
 

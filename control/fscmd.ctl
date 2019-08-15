@@ -310,6 +310,7 @@ tacd         qkr 07501 01 FFFFFFFFFFFF
 cablelong    qkr 07604 01 FFFFFFFFFFFF
 cablediff    qkr 07701 01 FFFFFFFFFFFF
 mk5          qkr 07800 01 FFFFFFFFFFFF
+jive5ab      qkr 07800 01 FFFFFFFFFFFF
 disk_record  qkr 07801 01 FFFFEFFFFFFF
 disk_pos     qkr 07802 01 FFFFEFFFFFFF
 disk_serial  qkr 07803 01 FFFFEFFFFFFF
@@ -328,6 +329,9 @@ mk5c_mode    qkr 07815 01 FFFFEFFFFFFF
 dbbc         qkr 07820 01 FFFFFFFFFFFF
 mk5_status   qkr 07821 01 FFFFFFFFFFFF
 fila10g      qkr 07822 01 FFFFFFFFFFFF
+fila10g_mode qkr 07823 01 FFFFFFFFFFFF
+dbbcrelink   qkr 07824 01 FFFFFFFFFFFF
+dbbcclose    qkr 07825 01 FFFFFFFFFFFF
 dbbc2        qkr 07823 01 FFFFFFFFFFFF
 fila10g2     qkr 07824 01 FFFFFFFFFFFF
 dbbc3        qkr 07825 01 FFFFFFFFFFFF
@@ -402,7 +406,13 @@ ifa          qkr 09501 01 0800FFFFFFFF
 ifb          qkr 09502 01 0800FFFFFFFF
 ifc          qkr 09503 01 0800FFFFFFFF
 ifd          qkr 09504 01 0800FFFFFFFF
-bbc_gain     qkr 09600 01 4800FFFFFFFF
+bbc_gain     qkr 09600 01 0800FFFFFFFF
+vsi1         qkr 09700 01 0800FFFFFFFF
+vsi2         qkr 09701 01 0800FFFFFFFF
+pfb1         qkr 09801 01 0800FFFFFFFF
+pfb2         qkr 09802 01 0800FFFFFFFF
+pfb3         qkr 09803 01 0800FFFFFFFF
+pfb4         qkr 09804 01 0800FFFFFFFF
 ifa          qkr 09701 01 4000FFFFFFFF
 ifb          qkr 09702 01 4000FFFFFFFF
 ifc          qkr 09703 01 4000FFFFFFFF

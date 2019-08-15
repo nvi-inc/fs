@@ -347,6 +347,9 @@ VSN does not contain + or - in first seven characters
 5B -401
 error retrieving class
 ""
+5B -402
+Use "bank_check" and "bank_status" for Mark 5A, 5B, and 5C recorders only.
+""
 5B -411
 error retrieving class, rtime/bank_set
 ""
@@ -429,10 +432,13 @@ program error: strdup() failed
 command does not accept parameters
 ""
 5D -301
-command does not accept parameters
+data_check command does not accept parameters
 ""
 5D -403
 error retrieving class for data_check response
+""
+5D -404
+Use "data_check" for Mark 5A, 5B, and 5C recorders only.
 ""
 5D -501
 error decoding data_check? mode parameter
@@ -587,6 +593,9 @@ Error retrieving class for response to commands.
 5F -401
 Error retrieving class for response to query.
 ""
+5F -402
+Use "disk2file" for Mark 5 and FlexBuff (including Mark 6) recorders only.
+""
 5F -501
 error decoding disk2file? status parameter
 ""
@@ -702,13 +711,19 @@ query response not found
 program error: strdup() failed
 ""
 5K -301
-command does not accept parameters
+scan_check command does not accept parameters
+""
+5K  302
+There have not been two scan_name=... commands since the schedule started, use scan_check=force to force check
 ""
 5K -401
 error retrieving class for scan_check response
 ""
+5K -402
+Use "scan_check" for Mark 5 and FlexBuff (including Mark 6) recorders only.
+""
 5K -501
-error decoding data_check? scan parameter
+error decoding scan_check? scan parameter
 ""
 5K -502
 error decoding scan_check? label parameter
@@ -732,7 +747,7 @@ error decoding scan_check? track rate parameter
 error decoding scan_check? missing parameter
 ""
 5K -513
-error decoding scan_check? date type parameter
+error decoding scan_check? data type parameter
 ""
 5K -514
 error decoding scan_check? data code parameter
@@ -748,6 +763,9 @@ SCAN_CHECK failed
 ""
 5K -602
 SCAN_CHECK missing bytes is not zero.
+""
+5K  602
+Warning: SCAN_CHECK missing bytes is not zero, but recorder is Mark 5C or FlexBuff.
 ""
 5K -901
 query response not received
@@ -769,6 +787,9 @@ command does not accept parameters
 ""
 5P -401
 error retrieving class
+""
+5P -402
+Use "disk_pos" for Mark 5A, 5B, and 5C recorders only.
 ""
 5P -501
 error decoding position? record position
@@ -845,32 +866,53 @@ program error: too many serial numbers
 5T -104
 No default sample rate if clock rate (from equip.ctl) is "none".
 ""
+5T -114
+No default sample rate for Ethernet recorders unless decimate was specified with mark5b.
+""
 5T -201
-source parameter must be 'ext', 'tvg', or 'ramp'.
+source parameter must be 'vdif' or 'mark5b' for Mark 5C/FlexBuff.
 ""
 5T -202
-mask parameter, must specify an int, usually as a hex value, e.g., 0xf
+mask parameter must specify a non-zero integer, maximum 64 bits, usually as a hex value, e.g., 0xf
 ""
 5T -203
-decimate parameter, must be one of 1, 2, 4, 8, or 16
+decimate parameter must be one of 1, 2, 4, 8, or 16
 ""
 5T -204
-Sample rate must be a number greater than 0.124
+Mark 5B recorder sample rate must be integer 2, 4, 8, 16, 32, or 64 (MHz).
 ""
 5T -205
 fpdp parameter, if specified, must be 1 or 2.
 ""
 5T -206
-okay parameter, must be 'disk_record_ok' or null.
+okay parameter must be 'disk_record_ok' or null.
+""
+5T -211
+Source parameter must be 'ext', 'tvg', or 'ramp' for Mark 5B.
+""
+5T -212
+Upper or lower 32 bits of mask must be zero for Mark 5B.
+""
+5T -213
+For Mark 5B recorder minimum implied sample rate is 2 MHz. Check Mark 5B clock rate in equip.ctl.
 ""
 5T -214
 Clock rate (from equip.ctl) divided by sample rate must be integer 1, 2, 4, 8, or 16 within 0.1 percent.
 ""
+5T -223
+Decimation not supported for VDIF.
+""
+5T -224
+For Ethernet recorders, total date rate must be an integer multiple of 1 Mbps.
+""
+5T -234
+Can't specify sample rate and decimate parameters simultaneously
+""
+5T -244
+Sample rate must be a positive integer Hz.
+""
 5T -301
 Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the sixth parameter.
-""
-5T -304
-Can't specify sample rate and decimate parameters simultaneously
 ""
 5T -400
 error retrieving acknowledgement of command
@@ -882,25 +924,43 @@ error retrieving class
 Use "mk5b_mode" for Mark 5B recorders only.
 ""
 5T -403
-Use "mk5c_mode" for Mark 5C recorders only.
+Use "mk5c_mode" for Mark 5C and Flexbuff recorders only.
 ""
 5T -501
-error decoding mode? source parameter
+error decoding mode? source/magic  parameter
 ""
 5T -502
-error decoding mode? mask parameter
+error decoding mode? mask or format parameter
 ""
 5T -503
-error decoding mode? decimate parameter
+error decoding mode? decimate or tracks parameter
 ""
 5T -504
-error decoding mode? fpdp parameter
+error decoding mode? fpdp or track bit rate parameter
+""
+5T -505
+error decoding mode? vdif frame size parameter
+""
+5T -512
+error decoding mode? format parameter
+""
+5T -513
+error decoding mode? tracks parameter
+""
+5T -514
+error decoding mode? track bit rate parameter
 ""
 5T -901
 query response not found
 ""
 5T -902
 program error: strdup() failed
+""
+10 -401
+error retrieving class for time query in get_fila10gtime
+""
+10 -402
+error decoding time in get_fila10gtime
 ""
 AN   -1
 Illegal mode
@@ -927,7 +987,7 @@ AN   -8
 Pointing system NOT present.
 ""
 AN   -9
-Antenna= command error, see above errors.
+antenna=... command error, see above errors.
 ""
 AN -101
 Pointing computer year, day, or time is incorrect.
@@ -972,7 +1032,7 @@ BD -401
 error retrieving class
 ""
 BO -101
-Error getting next command FMGR ?FFF
+Error getting next command, UNIX ?FFF
 ""
 BO -102
 Not enough room in time-scheduling block.  Max entries ?WWW
@@ -984,7 +1044,7 @@ BO -104
 Procedure stack is full (5 levels allowed)
 ""
 BO -105
-Error opening schedule file FMP ?FFF
+Error opening schedule file, UNIX ?FFF
 ""
 BO -106
 Error specifying line number ?WWW
@@ -999,10 +1059,10 @@ BO -109
 Common too big
 ""
 BO -110
-Error opening FSCMD.CTL or STCMD.CTL FMGR ?FFF
+Error opening FSCMD.CTL or STCMD.CTL, UNIX ?FFF
 ""
 BO -111
-Error reading FSCMD.CTL or STCMD.CTL FMGR ?FFF
+Error reading FSCMD.CTL or STCMD.CTL, UNIX ?FFF
 ""
 BO -112
 Too many commands in FSCMD.CTL and STCMD.CTL.  Max is ?WWW
@@ -1020,58 +1080,58 @@ BO -116
 Error initializing ANTCN ?WWW
 ""
 BO -117
-Error opening LOCATION.CTL FMP ?FFF
+Error opening LOCATION.CTL, UNIX ?FFF
 ""
 BO -118
-Error reading LOCATION.CTL FMP ?FFF
+Error reading LOCATION.CTL, UNIX ?FFF
 ""
 BO -119
 Error decoding LOCATION.CTL line ?WWW
 ""
 BO -120
-Error opening MUX.CTL FMP ?WWW
+Error opening MUX.CTL, UNIX ?WWW
 ""
 BO -121
-Error reading DEV.CTL FMP ?WWW
+Error reading DEV.CTL, UNIX ?WWW
 ""
 BO -122
 Error decoding DEV.CTL line ?WWW
 ""
 BO -123
-Error positioning in schedule.  FMP ?FFF
+Error positioning in schedule, UNIX ?FFF
 ""
 BO -124
 No (scan_name=...) observation starting at a future time found in schedule.
 ""
 BO -125
-Reading procedure file, error FMP ?FFF
+Reading procedure file, error, UNIX ?FFF
 ""
 BO -126
 Too many procedures.  Maximum is ?WWW
 ""
 BO -127
-Call to NAMF establishing new procedure library FMP ?FFF
+Call to NAMF establishing new procedure library, UNIX ?FFF
 ""
 BO -128
 Error in new proc routine, stack is flushed.
 ""
 BO -129
-Error in new proc routine, stack is flushed. FMP ?FFF
+Error in new proc routine, stack is flushed, UNIX ?FFF
 ""
 BO -130
-Reading edited proc file. FMP ?FFF
+Reading edited proc file, UNIX ?FFF
 ""
 BO -131
-Reading new procedure library FMP ?FFF
+Reading new procedure library, UNIX ?FFF
 ""
 BO -132
 No SOURCE command found in schedule.
 ""
 BO -133
-Error opening procedure library
+Error opening procedure library, UNIX ?FFF
 ""
 BO -134
-Positioning in schedule file error FMP ?FFFF
+Positioning in schedule file error, UNIX ?FFF
 ""
 BO -135
 Maximum number of characters in procedure parameter is ?WWW.
@@ -1092,13 +1152,13 @@ BO -140
 Error decoding EQUIP.CTL line ?WWW
 ""
 BO -141
-Illegal version string in DBBC DDC version in EQUIP.CTL line ?WWW
+Illegal version string in DBBC DDC or PFB version in EQUIP.CTL line ?WWW
 ""
 BO -142
 No 'nominal' rate for that DBBC version number, rate in EQUIP.CTL line ?WWW
 ""
 BO -143
-Error opening RXDEF.CTL FMP ?FFF
+Error opening RXDEF.CTL, UNIX ?FFF
 ""
 BO -144
 Error trying to read RXDEF.CTL line ?WWW
@@ -1107,7 +1167,7 @@ BO -145
 Non-numeric conversion factor in RXDEF.CTL line ?WWW
 ""
 BO -146
-Error opening TEDEF.CTL FMP ?FFF
+Error opening TEDEF.CTL, UNIX ?FFF
 ""
 BO -147
 Error trying to read first line of TEDEF.CTL
@@ -1122,19 +1182,19 @@ BO -150
 Illegal floating point number in first line of TEDEF.CTL
 ""
 BO -151
-Error opening HEAD.CTL, FMGR ?FFF
+Error opening HEAD.CTL, UNIX ?FFF
 ""
 BO -152
-Error reading HEAD.CTL, FMGR ?FFF
+Error reading HEAD.CTL, UNIX ?FFF
 ""
 BO -153
 Error decoding line # ?WWW in HEAD.CTL
 ""
 BO -154
-Error opening ANTENNA.CTL, FMGR ?FFF
+Error opening ANTENNA.CTL, UNIX ?FFF
 ""
 BO -155
-Error reading ANTENNA.CTL, FMGR ?FFF
+Error reading ANTENNA.CTL, UNIX ?FFF
 ""
 BO -156
 Error decoding line # ?WWW in ANTENNA.CTL
@@ -1149,7 +1209,7 @@ BO -159
 Can't change schedule library because resource is locked.
 ""
 BO -160
-Error opening RXDIODE.CTL FMP ?FFF
+Error opening RXDIODE.CTL, UNIX ?FFF
 ""
 BO -161
 Error trying to read RXDIODE.CTL line ?WWW
@@ -1188,7 +1248,7 @@ BO -173
 Don't terminate while recording, either use disk_record=off first or (dangerous) terminate=disk_record_ok.
 ""
 BO -180
-Error opening TIME.CTL FMP ?FFF
+Error opening TIME.CTL, UNIX ?FFF
 ""
 BO -181
 Error decoding rate field in TIME.CTL
@@ -1200,7 +1260,7 @@ BO -183
 Error decoding model field in TIME.CTL
 ""
 BO -189
-Error reading TIME.CTL FMP ?FFF
+Error reading TIME.CTL, UNIX ?FFF
 ""
 BO -190
 Error initiliazing mcbcn, internal error ?WWW
@@ -1236,7 +1296,7 @@ BO -202
 Error reading decoder field (line 2) in SW.CTL
 ""
 BO -209
-Error reading SW.CTL FMP ?FFF
+Error reading SW.CTL, UNIX ?FFF
 ""
 BO -210
 Procedure library is too big, trailing procedures ignored.
@@ -1379,11 +1439,20 @@ Error already "on", for TNX.
 BO -312
 Error already "off", for TNX.
 ""
+BO -313
+IF command must have an equals.
+""
+BO -314
+No default for IF command condition.
+""
+BO -315
+Unknown condition in IF command.
+""
 BO -400
-Error opening flagr.ctl FMP ?FFF
+Error opening flagr.ctl, UNIX ?FFF
 ""
 BO -401
-Error reading flagr.ctl FMP ?FFF
+Error reading flagr.ctl, UNIX ?FFF
 ""
 BO -402
 Error antenna check period in TIME.CTL
@@ -1398,7 +1467,7 @@ BO -405
 Error opening TACD.CTL ?FFF
 ""
 BO -406
-Error reading TACD.CTL FMP ?FFF
+Error reading TACD.CTL, UNIX ?FFF
 ""
 BO -407
 Error decoding TACD.CTL line ?WWW
@@ -1421,11 +1490,17 @@ Procedure library link was empty.
 BO -508
 Final procedure library link does contain '.prc'.
 ""
+BO -998
+ANTCN termination mode failed, see above error.
+""
 BO -999
 WARNING: Log file just opened is already larger than 10 MB.
 ""
 CD  -1
 Error from DBBCN in TPICD, see above for error.
+""
+CD  -2
+Error retrieving processing buffers from DBBCN in TPICD, see above for error.
 ""
 CH   -1
 Trouble with class buffer in CHEKR
@@ -1552,6 +1627,21 @@ CH -238
 ""
 CH -239
 ?W tape drive should be recording but no groups are enabled.
+""
+CH -240
+?W attenuator for IF channel C does not check with requested setting
+""
+CH -241
+?W attenuator for IF channel D does not check with requested setting 
+""
+CH -242
+?W input source for IF channel C does not check with requested setting
+""
+CH -243
+?W input source for IF channel D does not check with requested setting 
+""
+CH -244
+?W averaging period does not check with requested setting
 ""
 CH -288
 Head is moving.
@@ -1928,6 +2018,18 @@ Frequency Switching is not as expected.
 CH -805
 Frequency Switching sequence has been changed.
 ""
+CH -810
+Communication error for DBBC.
+""
+CH -811
+Error retrieving communication buffer for DBBC.
+""
+CH -812
+Incorrect response from DBBC.
+""
+CH -813
+DBBC firmware version/personality does not match equip.ctl, compare to dbbc=version.
+""
 DB   -1
 dbbc.: error opening dbb?W.ctl
 ""
@@ -2066,20 +2168,35 @@ Error decoding dbbcNN/ response, could be a DBBC version mis-match, see error DC
 DC -451
 Class buffer error from command response.
 ""
+DC -501
+Only DBBC DDC rack types supported in bbcNN commands.
+""
 DD -201
 Mode must be one of: off, on.
 ""
 DD -202
+Polarity control must one of: 0, 1, 2, or 3.
+""
+DD -212
+Continuous cal polarity control not supported for firmware versions < 105x_1.
+""
+DD -203
 Samples must be a positive integer.
 ""
 DD -401
 Class buffer error from monitor response.
+""
+DD -402 Place holder
+
 ""
 DD -403
 Error decoding cont_cal/ response, could be a DBBC version mis-match, see error DD -402 for text.
 ""
 DD -451
 Class buffer error from command response.
+""
+DD -501
+Only DBBC DDC rack types supported in cont_cal command.
 ""
 DE -201
 Mode must be one of: off, on.
@@ -2112,7 +2229,7 @@ DF -102
 No default for test parameter if mode=test.
 ""
 DF -201
-Mode must be one of: astro, geo, wastro, test, lba, astro2, or astro3.
+Mode must be one of (DDC): astro, geo, wastro, test, lba, astro2, astro3, geo2, (PFB): flex, full, full_auto, spol.
 ""
 DF -202
 Test must be one of:  0, 1, bin, tvg.
@@ -2126,11 +2243,20 @@ Mode astro3 cannot be used with non-lettered (NOT e/f) DDC versions.
 DF -231
 Lettered DDC versions (e/f) only support modes astro3 and test modes.
 ""
+DF -241
+Mode geo2 not supported before DBBC version 106.
+""
 DF -301
 astro2 mode not supppored for DBBC DDC version less than 104
 ""
+DF -302
+Above error probably caused by a DBBC version mismatch, check equip.ctl and a dbbc=version response.
+""
 DF -401
 Class buffer error from monitor response.
+""
+DF -402 Place Holder
+
 ""
 DF -403
 Error decoding dbbcform/ response, could be a DBBC version mis-match, see error DF -402 for text.
@@ -2161,6 +2287,18 @@ DBBC has unsupported date code for version 102, ddbc has: July 04 2012
 ""
 DF -460
 DBBC has unsupported date code for version 104, ddbc has: DDC,104,March 19 2013
+""
+DF -461
+DBBC version should be DDC, but is PFB; see next message for DBBC's version.
+""
+DF -462
+DBBC version should be PFB, but is DDC; see next message for DBBC's version.
+""
+DF -463
+Unknown rack type in logmsg_dbbc().
+""
+DF -501
+Only DDC and PFB types suppoterd in DBBC form command.
 ""
 DG -101
 No default for bbc, should be "all" or 1,2,...16.
@@ -2194,6 +2332,54 @@ Error decoding dbbcgain/ response, could be a DBBC version mis-match, see error 
 ""
 DG -451
 Class buffer error from command response.
+""
+DG -501
+Only DBBC DDC rack types supported in bbc_gain command.
+""
+DH -104
+No default sample rate if clock rate (from equip.ctl) is "none".
+""
+DH -201
+mask2 parameter, must specify an integer, usually as a hex value, e.g., 0xf
+""
+DH -202
+mask1 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
+""
+DH -203
+decimate parameter, must be 1-255
+""
+DH -204
+Sample rate must be a number greater than 0.124
+""
+DH -205
+okay parameter must be disk_record_ok or null
+""
+DH -211
+mask2 parameter cannot be non-zero unless FiLa10G input select in 'equip.ctl' is 'vsi1-2'.
+""
+DH -214
+Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255.
+""
+DH -301
+Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the fifth parameter.
+""
+DH -302
+mask2 cannot be used unless VSI1-2 input is selected in equip.ctl.
+""
+DH -304
+Can't specify sample rate and decimate parameters simultaneously
+""
+DH -400
+error retrieving acknowledgement of command
+""
+DH -401
+error retrieving class
+""
+DH -501
+error decoding vsi_bitmask response
+""
+DH -502
+error decoding vsi_samplerate response
 ""
 DI -101
 No default for IF input.
@@ -2234,6 +2420,23 @@ Error decoding dbbcifX/ response, could be a DBBC version mis-match, see error D
 DI -451
 Class buffer error from command response.
 ""
+DP -301
+No command form of pfbX command.
+""
+DP -302
+Error response from DBBC in pfbX command.
+""
+DP -401
+Class buffer error from monitor response.
+""
+DP -402 Place Holder
+
+""
+DP -403
+Error decoding power/ response, could be a DBBC version mis-match, see error DP -402 for text.
+""
+DP -501
+Only DBBC PFB rack types supported in pfbX commands.
 DJ -101
 No default for IF input.
 ""
@@ -2507,56 +2710,128 @@ FLAGR detected error in ANTCN, see above for error.
 FM  007
 Checksum error
 ""
-FM  010
-Error in input
+DV -201
+Error decoding channel number of parameter 1
 ""
-FM  012
-Duplicate disc label or lu
+DV -202
+Error decoding channel number of parameter 2
 ""
-FM  014
-Not enough ID segments
+DV -203
+Error decoding channel number of parameter 3
 ""
-FM  054
-Disk not mounted
+DV -204
+Error decoding channel number of parameter 4
 ""
-FM   -2
-Duplicate file name
+DV -205
+Error decoding channel number of parameter 5
 ""
-FM   -5
-Illegal record length in a file
+DV -206
+Error decoding channel number of parameter 6
 ""
-FM   -6
-File not found
+DV -207
+Error decoding channel number of parameter 7
 ""
-FM   -7
-File security code improperly specified
+DV -208
+Error decoding channel number of parameter 8
 ""
-FM   -8
-File open or locked
+DV -209
+Error decoding channel number of parameter 9
 ""
-FM  -11
-File is not open
+DV -210
+Error decoding channel number of parameter 10
 ""
-FM  -12
-End-of-file or start-of-file error
+DV -211
+Error decoding channel number of parameter 11
 ""
-FM  -13
-Disk is locked
+DV -212
+Error decoding channel number of parameter 12
 ""
-FM  -14
-No more room in disk directory
+DV -213
+Error decoding channel number of parameter 13
 ""
-FM  -15
-Illegal name for a file
+DV -214
+Error decoding channel number of parameter 14
 ""
-FM  -16
-Illegal type for a file
+DV -215
+Error decoding channel number of parameter 15
 ""
-FM  -32
-Cartridge not found (RTE-IVB)
+DV -216
+Error decoding channel number of parameter 16
 ""
-FM  -33
-Not enough room on disc cartridge
+DV -221
+No such channel for parameter 1
+""
+DV -222
+No such channel for parameter 2
+""
+DV -223
+No such channel for parameter 3
+""
+DV -224
+No such channel for parameter 4
+""
+DV -225
+No such channel for parameter 5
+""
+DV -226
+No such channel for parameter 6
+""
+DV -227
+No such channel for parameter 7
+""
+DV -228
+No such channel for parameter 8
+""
+DV -229
+No such channel for parameter 9
+""
+DV -230
+No such channel for parameter 10
+""
+DV -231
+No such channel for parameter 11
+""
+DV -232
+No such channel for parameter 12
+""
+DV -233
+No such channel for parameter 13
+""
+DV -234
+No such channel for parameter 14
+""
+DV -235
+No such channel for parameter 15
+""
+DV -236
+No such channel for parameter 16
+""
+DV -300
+Maximum 16 parameters for vsiX command.
+""
+DV -301
+No monitor form of vsiX command.
+""
+DV -302
+Error response from DBBC in vsiX command.
+""
+DV -451
+Class buffer error from command response.
+""
+DV -501
+Only DBBC PFB rack types supported in vsiX commands.
+""
+ER -902
+Unable to find ":" in S2 error decode response.
+""
+FL   -1
+Previous source in this schedule not reached before new source was commanded
+""
+FL   -2
+FLAGR detected error in ANTCN, see above for error.
+""
+FM   -1 FMPSEE Place Holder
+
 ""
 FP   -1
 Break Detected in FIVPT
@@ -2646,7 +2921,7 @@ FP -111
 Couldn't set manual gain control
 ""
 FP -112
-Couldn't reset gain to original value
+Couldn't restore automatic gain control (AGC)
 ""
 FP -401
 Class buffer error, from monitor response for DBBC IF gain control.
@@ -2662,6 +2937,9 @@ Error decoding BBCnn response for voltage from DBBC.
 ""
 FP -405
 Error decoding IFx response for voltage from DBBC.
+""
+FP -406
+Error decoding power=n response for voltage.
 ""
 FP -410
 Class buffer error, for monitor response from RBDE.
@@ -2695,6 +2973,9 @@ fmset: Error from DBBCN, please see messages above.
 ""
 FV  -10
 fmset: Error from MATCN, please see messages above.
+""
+FV  -11 FMSET place holder
+
 ""
 FV -401
 Program error: prematurely out of rclcn response_buffer for device ?W
@@ -3377,6 +3658,15 @@ Did not get Mark IV formatter prompt.
 MA   -9
 MAT not open.
 ""
+MA  -10
+MAT had bad buffer length for read (programming error).
+""
+MA  -11
+MAT read error from UNIX, see error message above.
+""
+MA  -12
+MAT error setting BAUD.
+""
 MA -100
 Unable to open MAT device, ?WWW
 ""
@@ -3677,8 +3967,14 @@ mk5cn: no data pre-draining input, but no EOF or error, connection closed
 M5 -114
 mk5cn: re-open after pre-drain error was okay, proceeding to transaction.
 ""
+M5 -898
+Mark 5B sync required, use FMSET 's'.
+""
 M5 -899
 unable to find or decode return code
+""
+M5 -900 place holder for Mark 5 error string
+
 ""
 M5 -901
 Mark5 return code 1: action initiated or enabled, but not completed
@@ -3876,7 +4172,13 @@ NF  -15
 MCBCN failed resetting IF attenuators
 ""
 NF  -16
-MCBCN failed getting TPI
+Device communication failed getting TPI
+""
+NF  -17
+Error retrieving reponses.
+""
+NF  -18
+Error decoding response.
 ""
 NF  -20
 Did not reach source in allotted time
@@ -4731,7 +5033,7 @@ QK -205
 TPIs are ALL,EVENU,ODDU,EVENL,ODDL,IFA-D,1u,1l,...16u,16l,FORMBBC,FORMIF.
 ""
 QK -206
-TPIs are ALL,EVENU,ODDU,EVENL,ODDL,IA-IH(IFA-IFH),1u,1l,...128u,128l,FORMBBC,FORMIF.
+TPIs are ALL, FORMBBC, FORMIF, IFX (IX), X01-Xnn, X=available CoMos A-D, nn=16*Cores available on CoMo X
 ""
 QK -207
 FORMBBC and FORMIF are not implemented for DBBC3.
@@ -4748,6 +5050,21 @@ Previous detectors not remembered between uses.
 QK -214
 No rack detectors must be one of u5 or u6
 ""
+QK -215
+Tsys value for device a?W overflowed or was less than zero.
+""
+QK -216
+Tsys value for device b?W overflowed or was less than zero.
+""
+QK -217
+Tsys value for device c?W overflowed or was less than zero.
+""
+QK -218
+Tsys value for device d?W overflowed or was less than zero.
+""
+QK -219
+Tsys value for device i?W overflowed or was less than zero.
+""
 QK -301
 VC detectors other than must be upper, lower, and dual not supported.
 ""
@@ -4763,8 +5080,17 @@ LBA filter mode not defined for detector device.
 QK -306
 IF source not defined for detector device.
 ""
+QK -307
+Filter not defined for detector device IF source.
+""
+QK -308
+Detector not found.
+""
+QK -309
+IF not defined for station device.
+""
 QK -401
-program error: incorrect number of responses in tpput_vlba.
+Error retrieving device response buffers.
 ""
 QK -402
 Error in DBBC communication in tpput_dbbc.
@@ -5063,7 +5389,7 @@ Total Power selection in disagreement with common.
 QV -304
 Attenuator upper in disagreement with common.
 ""
-QV - 305
+QV -305
 Attenuator lower in disagreement with common.
 ""
 QX -301
@@ -5219,6 +5545,9 @@ User Device polarization must be one of unknown, rcp, or lcp.
 Q- -205
 User Device center frequency must be a positive real number
 ""
+Q- -206
+User Device zero must be yes or no.
+""
 Q- -301
 Previous value not permitted for User Device channel.
 ""
@@ -5233,6 +5562,9 @@ Previous value not permitted for User Device polarization.
 ""
 Q- -305
 Previous value not permitted for User Device center frequency.
+""
+Q- -306
+Previous value not permitted for User Device zero
 ""
 Q# -201
 An invalid number was specified for an LU
@@ -6240,7 +6572,7 @@ SC  -10
 setcl: failed too many times, couldn't check formatter time
 ""
 SC  -11
-setcl: cannot set fs time without Mark 3/4/VLBA, S2, K4*/MK4 rack or S2, K4, M5B recorder
+setcl: cannot set fs time without Mk3/4 VLBA/4, S2, K4*/MK4, DBBC/FiLa10G rack or S2, K4, M5B recorder
 ""
 SC  -12
 setcl: FS to computer time difference 0.5 seconds or greater
@@ -6414,10 +6746,13 @@ TC -202
 Cycle period must be a non-negative integer.
 ""
 TC -301
-Continuous cal not enabled for DBBC.
+Continuous cal not enabled for DBBC DDC.
 ""
 TC -302
 TPICD not set-up: no detectors selected.
+""
+TC -303
+Continuous cal Tsys only available for DBBC DDC.
 ""
 TE   -9
 Video converter frequency has not been set

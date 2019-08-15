@@ -124,7 +124,10 @@ int itask;
 	   if(itask==5) {
 	     tpi=shm_addr->tpi[ i];             /* various pieces */
 	     tpic=shm_addr->tpical[ i];
-	     tpiz=shm_addr->tpizero[ i];
+	     if(shm_addr->user_device.zero[4+i])
+	       tpiz=shm_addr->tpizero[ i];
+	     else
+	       tpiz=0.0;
 	     tpid=shm_addr->tpidiff[ i];
 	     /* avoid overflow | div-by-0 */
 	     if(tpid<0.5 || tpid > 65534.5 || tpi > 65534.5 || tpi < 0.5)

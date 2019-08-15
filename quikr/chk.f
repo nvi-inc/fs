@@ -25,7 +25,7 @@ C   LOCAL VARIABLES
       logical kminus
 C               - true if parameter is preceded by a minus sign 
       logical kMrack, kMdrive1,kMdrive2,kS2drive,kVrack
-      logical kVdrive1,kVdrive2,kLrack
+      logical kVdrive1,kVdrive2,kLrack,kDBBC
 C               - true for MK3 rack and drive, respectively
 C               - if false, then VLBA rack or drive, respectively
       integer ick(23) 
@@ -81,6 +81,8 @@ C
       kMrack= MK3.eq.rack.or.MK4.eq.rack
       kVrack= VLBA.eq.rack.or.VLBA4.eq.rack
       kLrack= LBA.eq.rack.or.LBA4.eq.rack
+      kDBBC=DBBC.eq.rack
+c
       kMdrive1= MK3.eq.drive(1).or.MK4.eq.drive(1)
       kMdrive2= MK3.eq.drive(2).or.MK4.eq.drive(2)
       kVdrive1= VLBA.eq.drive(1).or.VLBA4.eq.drive(1)
@@ -110,6 +112,8 @@ C     LBA parameters:
 C                   P1 to P16 - IF processors
 C     S2 parameters:
 C                   TP or RC - tape recorder
+C     DBBC parameters:
+C                   FM - formatter
 C     Other modules:
 C                   RX - S/X receiver
 C                   ALL - all modules 
@@ -135,6 +139,8 @@ C Turn off all of the parameters to start
         icks(i) = 0
       enddo
 C
+      ickdbbcfm=0
+C
       ich = 1+ieq 
 C  Handle * if present
       if (cjchar(ibuf,ich).eq.'*') then
@@ -152,6 +158,10 @@ C  Handle * if present
         enddo
         call fs_get_ichs2(ichs2)
         if (ichs2.gt.0) icks2=1
+c
+        call fs_get_ichdbbcfm(ichdbbcfm)
+        if (ichdbbcfm.gt.0) ickdbbcfm=1
+c
         do i=1,4
           if(ichcm_ch(stcnm(1,i),1,'  ').ne.0) then
             call fs_get_stchk(stchk(i),i)
@@ -218,6 +228,8 @@ C
              enddo
              ick(22) = iset
              ick(20) = iset
+          else if(kDBBC) then
+             ickdbbcfm= iset
           else if(kLrack) then
              if (stchk(i).gt.0) icks(i)=1
              do i=1,2*ndas
@@ -342,6 +354,9 @@ C
 
         else if (ichcm_ch(lprm,1,'fm').eq.0.and.kVrack) then
           ickv(17) = iset
+
+        else if (ichcm_ch(lprm,1,'fm').eq.0.and.kDBBC) then
+          ickdbbcfm = iset
 C 
 C  2.10 Tape (MK3)
 C 
@@ -410,12 +425,21 @@ C             If the module was set up, don't check it now
 C             If the module was previously ignored, check it now
           call fs_set_ichlba(ichlba(i),i)
         enddo
+c
         call fs_get_ichs2(ichs2)
         if (icks2.eq.0.and.ichs2.gt.0) ichs2 = -1
 C     If the module was set up, don't check it now
         if (icks2.eq.1.and.ichs2.lt.0) ichs2 = +1
 C     If the module was previously ignored, check it now
         call fs_set_ichs2(ichs2)
+c
+        call fs_get_ichdbbcfm(ichdbbcfm)
+        if (ickdbbcfm.eq.0.and.ichdbbcfm.gt.0) ichdbbcfm = -1
+C     If the module was set up, don't check it now
+        if (ickdbbcfm.eq.1.and.ichdbbcfm.lt.0) ichdbbcfm = +1
+C     If the module was previously ignored, check it now
+        call fs_set_ichdbbcfm(ichdbbcfm)
+c
         do i=1,4
            if(ichcm_ch(stcnm(1,i),1,'  ').ne.0) then
               call fs_get_stchk(stchk(i),i)
@@ -476,6 +500,12 @@ C
             nch = mcoma(ibuf,nch)
           endif
         enddo
+      else if(kDBBC) then
+         call fs_get_ichdbbcfm(ichdbbcfm)
+         if (ichdbbcfm.ge.1) then
+            nch = ichmv_ch(ibuf,nch,'fm')
+            nch = mcoma(ibuf,nch)
+         endif
       endif
 C
       if (kMdrive1) then   !! if MK3 drive

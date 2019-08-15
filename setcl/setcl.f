@@ -224,7 +224,9 @@ c       write(6,*) 'm5clock ',m5clock
            goto 998
         endif
         goto 200
-      else if (MK4.eq.rack.or.VLBA4.eq.rack.or.rack.eq.K4MK4) then
+      else if ((MK4.eq.rack.and.MK4.eq.rack_type) .or.
+     &       (VLBA4.eq.rack.and.VLBA4.eq.rack_type) .or.
+     &       rack.eq.K4MK4) then
         ibuf(1) = -54
         idum = ichmv_ch(ibuf,3,'fm')
         idum = ichmv_ch(ibuf,5,'/TIM')
@@ -248,6 +250,22 @@ C             two return buffers with imode = -53
         call fc_rte_cmpt(unixsec(1),unixhs(1))
         call fc_get_k3time(centisec,it,ip)
         call fc_rte_cmpt(unixsec(2),unixhs(2))
+        call rn_put('fsctl')
+        centisec(2)=centisec(1)
+        unixsec(2)=unixsec(1)
+        unixhs(2)=unixhs(1)
+        if(ip(3).lt.0) then
+           call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+           nerr=nerr+1
+           if(nerr.le.3) goto 50
+           goto 998
+        endif
+        goto 200
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_DDC_FILA10G.eq.rack_type.or.
+     &       DBBC_PFB_FILA10G.eq.rack_type)) then
+        idum=rn_take('fsctl',0)
+        idum=fc_get_fila10gtime(centisec,it,ip,0)
         call rn_put('fsctl')
         centisec(2)=centisec(1)
         unixsec(2)=unixsec(1)
@@ -641,6 +659,8 @@ C
      &     (MK5B.eq.drive_type(1).or.MK5B_BS.eq.drive_type(1))) then
         if((MK4.eq.rack.and.MK45.eq.rack_type).or.
      &       (VLBA4.eq.rack.and.VLBA45.eq.rack_type).or.
+     &       (VLBA4.eq.rack.and.VLBA4C.eq.rack_type).or.
+     &       (VLBA4.eq.rack.and.VLBA4CDAS.eq.rack_type).or.
      &        DBBC.eq.rack) then
            if("vsi"//char(0).ne.m5pps(1:4)) then
               call logit7ci(idum,idum,idum,-1,-19,'sc',0)

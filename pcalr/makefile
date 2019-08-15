@@ -5,8 +5,8 @@ i1bit.o sqish.o tabgn.o
 #FFLAGS = -c  -i2
 FFLAGS = -c 
 LIBES =  ../lnfch/lnfch.a ../fslb/fslb.a ../newlb/newlb.a ../flib/flib.a\
-../fclib/fclib.a ../clib/clib.a ../port/port.a ../fmpsee/fmpsee.a\
-../rtelb/rtelb.a
+../fclib/fclib.a ../port/port.a ../fmpsee/fmpsee.a ../poclb/poclb.a \
+../clib/clib.a ../rtelb/rtelb.a
 #
 ../bin/pcalr: $(OBJECTS)
 	$(FC)  -o ../bin/pcalr $(OBJECTS) $(LIBES)

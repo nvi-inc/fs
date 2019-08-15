@@ -5,6 +5,9 @@ ask_fila10g_cfg.o getRDBEtime.o setRDBEtime.o
 #
 CFLAGS =  -I/usr/include/ncurses
 LIBES	= ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a
+ifdef FS_TINFO_LIB
+LIBES := $(LIBES) -ltinfo
+endif
 #
 ../bin/fmset: $(OBJECTS)
 	cc  -o ../bin/fmset $(OBJECTS) $(LIBES) -lm -lncurses

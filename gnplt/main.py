@@ -30,7 +30,8 @@ class Gui(Frame):
         """
         Frame.__init__(self, parent)
         self.master.title('Gain Plot 2')
-        fontb = tkFont.Font(font = ("Helvetica 8 bold"))
+	font_size = os.getenv('FS_GNPLT_FONTSIZE', '8')
+        fontb = tkFont.Font(font = ("Helvetica %s bold" % font_size))
         self.master.option_add("*Font", fontb)
         self.master.minsize(width = 300, height = 300)
         

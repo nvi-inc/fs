@@ -54,3 +54,48 @@ if called, "mk5_status" will clear the error queue.
 It is advised to run this command at regular intervals (typically during
 "checkmk5") in order to identify errors that may be occurring and in what
 scan they occurred.
+
+Hex Status word from jive5ab documentation 1.4, Dated 27 August 2015 (same as 
+Mark5A/DIMino):
+
+Bit 0  (0x0001) system `ready'
+Bit 1  (0x0002) error message(s) pending; (message may be appended); messages 
+                may be queued; error is NOT cleared by this command. See also
+                `error?' query
+Bit 2  (0x0004) not used
+Bit 3  (0x0008) one or more `delayed-completion' commands are pending. Also set
+                whenever any datatransfer activity, such as recording, playing,
+                or transfer to or from disk or net, is active or waiting.
+--------------------------------------------------------------------------------
+Bit 4  (0x0010) one or more `delayed-completion' queries are pending
+Bit 5  (0x0020) Disk-FIFO mode
+Bit 6 - (0x0040) record `on'
+Bit 7 - (0x0080) media full (recording halted)
+--------------------------------------------------------------------------------
+Bit 8 - (0x0100) readback `on'
+Bit 9 - (0x0200) end-of-scan or end-of-media (readback halted)
+Bit 10  (0x0400) recording can't keep up; some lost data
+Bit 11  (0x0800) not used
+--------------------------------------------------------------------------------
+Bit 12  (0x1000) disk2file active
+Bit 13  (0x2000) file2disk active
+Bit 14  (0x4000) disk2net active
+Bit 15  (0x8000) net2disk active or waiting
+--------------------------------------------------------------------------------
+Bit 16  (0x10000) in2net sending (on)
+Bit 17  (0x20000) net2out active or waiting
+Bit 18  (0x40000) DIM ready to record
+Bit 19  (0x80000) DOM ready to play
+--------------------------------------------------------------------------------
+Bits 20-27 are set properly even if a data transfer is in progress.
+Bit 20  (0x100000) Bank A selected
+Bit 21  (0x200000) Bank A ready
+Bit 22  (0x400000) Bank A media full or faulty (not writable)
+Bit 23  (0x800000) Bank A write protected
+--------------------------------------------------------------------------------
+Bits 20-27 are set properly even if a data transfer is in progress.
+Bit 24  (0x1000000) Bank B selected
+Bit 25  (0x2000000) Bank B ready
+Bit 26  (0x4000000) Bank B media full or faulty (not writable)
+Bit 27  (0x8000000) Bank B write protected
+

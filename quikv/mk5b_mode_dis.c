@@ -30,6 +30,7 @@ long ip[5];
       int kcom;
       int iclass, nrecs;
       struct mk5b_mode_cmd lclc;
+      struct mk5b_mode_mon lclm;
 
       kcom= command->argv[0] != NULL &&
             *command->argv[0] == '?' && command->argv[1] == NULL;
@@ -43,6 +44,7 @@ long ip[5];
 	return;
       } else if(kcom) {
          memcpy(&lclc,&shm_addr->mk5b_mode,sizeof(lclc));
+	 m5state_init(&lclm.tbitrate.state);
       } else {
 	iclass=ip[0];
 	nrecs=ip[1];
@@ -54,7 +56,7 @@ long ip[5];
 	    goto error2;
 	  }
 	  if(i==0)
-	    if(0!=m5_2_mk5b_mode(inbuf,&lclc,ip)) {
+	    if(0!=m5_2_mk5b_mode(inbuf,&lclc,&lclm,itask,ip)) {
 	      goto error;
 	    }
 	}
@@ -68,9 +70,18 @@ long ip[5];
       while( count>= 0) {
         if (count > 0) strcat(output,",");
         count++;
-        mk5b_mode_enc(output,&count,&lclc,itask);
+        mk5b_mode_enc(output,&count,&lclc,&lclm,itask);
       }
 
+      if(15 == itask && !kcom) {
+	count=0;
+	while( count>= 0) {
+	  if (count > 0) strcat(output,",");
+	  count++;
+	  mk5b_mode_mon(output,&count,&lclm);
+	}
+      }
+      
       if(strlen(output)>0) output[strlen(output)-1]='\0';
 
       for (i=0;i<5;i++) ip[i]=0;
@@ -87,5 +98,3 @@ error:
       cls_clr(iclass);
       return;
 }
-
-

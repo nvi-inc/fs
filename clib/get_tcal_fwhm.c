@@ -26,9 +26,13 @@ static char *lwhatm[ ]={
 "i1","i2","i3"};
 static char *lwhatl[ ]={
 "p1","p2","p3","p4","p5","p6","p7","p8","p9","pa","pb","pc","pd","pe","pf"};
+static char ch[ ]={"abcd"};
+static char *lwhati[ ]={
+  "ifa","ifb","ifc","ifd"};
 static char *lwhat3if[ ]={
   "ia","ib","ic","id","ie","if","ig","ih"};
 
+static int zone_table[] = {2, 1, 4,3}; /* DBBC filter Nyquist zones */
 static char lets[]="abcdefghijklm";
 
 void get_tcal_fwhm(device,tcal,fwhm,epoch,flux,corr,ssize,ierr)
@@ -46,6 +50,8 @@ int *ierr;
   float vcf,vcbw,dpfu,gain;
   char lsorna[10];
   int det;
+  int k, filter, zone;
+  char idevice[4];
 
   ifchain=0;
   *ierr=0;
@@ -53,7 +59,7 @@ int *ierr;
   if(strncmp(device,"u",1) == 0) {
     if(strncmp(device,"u5",2) == 0)
       ifchain=MAX_LO+5;
-    else
+    else if(strncmp(device,"u6",2) == 0)
       ifchain=MAX_LO+6;
 
     center=shm_addr->user_device.center[ifchain-(1+MAX_LO)];
@@ -67,7 +73,6 @@ int *ierr;
     default:
       *ierr=-302;
       goto error;
-      break;
     }
   } else if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4
 	    ||shm_addr->equip.rack==LBA4) {
@@ -268,7 +273,10 @@ int *ierr;
 	break;
       }
     }
-  } else if(shm_addr->equip.rack==DBBC) {
+  } else if(shm_addr->equip.rack==DBBC && 
+	    (shm_addr->equip.rack_type == DBBC_DDC ||
+	     shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
+	    ){
     for(i=0;i<sizeof(lwhat)/sizeof(char *);i++) {
       if(strncmp(device,lwhat[i],2)==0) {
 	if(i<2*MAX_DBBC_BBC) {
@@ -309,8 +317,8 @@ int *ierr;
 	  case 2:  lower=  10; upper= 512; break;
 	  case 3:  lower=1536; upper=2048; break;
 	  case 4:  lower=1024; upper=1536; break;
-	  case 5:  lower=   0; upper=1024; break;
-	  case 6:  lower=1200; upper=1800; break;
+	  case 5:  lower=1200; upper=1800; break;
+	  case 6:  lower=   0; upper=1024; break;
 	  default: *ierr=-307; goto error; break;
 	  }
 
@@ -330,6 +338,77 @@ int *ierr;
 	break;
       }
     }
+  } else if(shm_addr->equip.rack==DBBC && 
+	    (shm_addr->equip.rack_type == DBBC_PFB ||
+	     shm_addr->equip.rack_type == DBBC_PFB_FILA10G)  ){
+
+    for(i=0;i<shm_addr->dbbc_cond_mods;i++) {
+      for(j=0;j<shm_addr->dbbc_como_cores[i];j++) {
+	for(k=1;k<16;k++) {
+	  snprintf(idevice,4,"%c%02d",ch[i],k+j*16);
+	  if(strncmp(idevice,device,3)==0) {
+	    float freq;
+
+	    ifchain=i+1;
+	    freq=k*32; /* center */
+
+	    filter=shm_addr->dbbcifx[ifchain-1].filter;
+	    if(filter <1 || filter >4) {
+	      *ierr=-307;
+	      goto error;
+	    }
+	    zone=zone_table[filter-1];
+	    if(1==zone%2) /*odd zone */
+	      freq=(zone-1)*512+freq;
+	    else /* even */
+	      freq=zone*512-freq;
+
+	    switch(shm_addr->lo.sideband[ifchain-1]) {
+	    case 1:
+	      center=shm_addr->lo.lo[ifchain-1]+freq;
+	      break;
+	    case 2:
+	      center=shm_addr->lo.lo[ifchain-1]-freq;
+	      break;
+	    default:
+	      *ierr=-302;
+	      goto error;
+	      break;
+	    }
+	    goto end;
+	  }
+	}
+      }
+
+      if(strncmp(device,lwhati[i],3)==0) {
+	float upper, lower;
+	
+	ifchain=i+1;
+	switch(shm_addr->dbbcifx[ifchain-1].filter) {
+	case 1:  lower= 512; upper=1024; break;
+	case 2:  lower=  10; upper= 512; break;
+	case 3:  lower=1536; upper=2048; break;
+	case 4:  lower=1024; upper=1536; break;
+	case 5:  lower=1200; upper=1800; break;
+	case 6:  lower=   0; upper=1024; break;
+	default: *ierr=-307; goto error; break;
+	}
+	
+	switch (shm_addr->lo.sideband[ifchain-1]) {
+	case 1:
+	  center=shm_addr->lo.lo[ifchain-1]+(lower+upper)*0.5;
+	  break;
+	case 2:
+	  center=shm_addr->lo.lo[ifchain-1]-(lower+upper)*0.5;
+	  break;
+	default:
+	  *ierr=-302;
+	  goto error;
+	  break;
+	}
+	goto end;
+      }
+    }    
   } else if(shm_addr->equip.rack==RDBE) {
     int iscan, ifc, irdbe, ichan;
     char *prdbe, crdbe;
@@ -415,14 +494,15 @@ int *ierr;
       }
     }
   }
-// printf(" ifchain2 %d center %f\n",ifchain, center );
-  if(ifchain!=0) {
-    get_gain_par(ifchain,center,fwhm,&dpfu,NULL,tcal);
-  } else {
+
+  end:
+  if(ifchain==0) { /* not found */
+    *ierr=-308;
     *fwhm=-1.0;
     *tcal=-1.0;
+    goto error;
   }
-//  printf(" fwhm %f tcal %f\n",*fwhm*180./3.14159,*tcal);
+  get_gain_par(ifchain,center,fwhm,&dpfu,NULL,tcal);
 
   if(epoch <0.0)
     return;

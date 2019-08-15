@@ -29,7 +29,7 @@ long ip[5];                           /* ipc parameters */
 
       if (command->equal != '=') {           /* run pcald */
 	if(RDBE!=shm_addr->equip.rack) {
-	  for(i=0;i<MAX_TSYS_DET;i++)
+	  for(i=0;i<MAX_GLOBAL_DET;i++)
 	    if(0!=shm_addr->tpicd.itpis[i])
 	      goto Start;
 	  ierr=-302;
@@ -53,18 +53,37 @@ long ip[5];                           /* ipc parameters */
 	  ip[0]=ip[1]=ip[2]=0;
           return;
 	} else if(0==strcmp(command->argv[0],"tsys")){
-	  if(DBBC==shm_addr->equip.rack && 0==shm_addr->dbbc_cont_cal.mode||
-	     DBBC3==shm_addr->equip.rack && 0==shm_addr->dbbc3_cont_cal.mode) {
+	  if((DBBC==shm_addr->equip.rack && 0==shm_addr->dbbc_cont_cal.mode)||
+	     (DBBC3==shm_addr->equip.rack && 0==shm_addr->dbbc3_cont_cal.mode)) {
 	    ierr=-301;
 	    goto error;
 	  }
 	  if(RDBE!=shm_addr->equip.rack) {
-	    for(i=0;i<MAX_TSYS_DET;i++)
+	    for(i=0;i<MAX_GLOBAL_DET;i++)
 	      if(0!=shm_addr->tpicd.itpis[i])
 		goto Tsys;
 	    ierr=-302;
 	    goto error;
 	  }
+	  if(shm_addr->equip.rack==DBBC && 
+	     (shm_addr->equip.rack_type == DBBC_DDC ||
+	      shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
+	    if(0==shm_addr->dbbc_cont_cal.mode) {
+	      ierr=-301;
+	      goto error;
+	    }
+	  } else {
+	    ierr=-303;
+	    goto error;
+	  }
+
+	if(RDBE!=shm_addr->equip.rack) {
+	  for(i=0;i<MAX_GLOBAL_DET;i++)
+	    if(0!=shm_addr->tpicd.itpis[i])
+	      goto Tsys;
+	  ierr=-302;
+	  goto error;
+	}
 	Tsys:
 	  shm_addr->tpicd.tsys_request=1;
 	  skd_run("tpicd",'w',ip);

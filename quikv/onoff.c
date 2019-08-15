@@ -18,6 +18,7 @@ static float bw4[ ]={0.0,0.125,16.0,0.50,8.0,2.0,4.0};
 static float bw_vlba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0};
 static float bw_lba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0,64.0};
 static float bw_dbbc[ ]={1.0,2.0,4.0,8.0,16.0,32.0};
+static int zone_table[] = {2, 1, 4,3}; /* DBBC filter Nyquist zones */
 
 float flux_val();
 
@@ -117,6 +118,8 @@ long ip[5];                           /* ipc parameters */
 	  for (i=14;i<16;i++)
 	    if(lcl.itpis[i]!=0) {
 	      lcl.devices[i].ifchain=i-13;
+	      lcl.devices[i].lwhat[0]='i';
+	      lcl.devices[i].lwhat[1]=hex[i-13];
 	      switch (shm_addr->lo.sideband[lcl.devices[i].ifchain-1]) {
 	      case 1:
 		lcl.devices[i].center=
@@ -136,6 +139,8 @@ long ip[5];                           /* ipc parameters */
 	    if(lcl.itpis[i]!=0) {
 	      float upper;
 	      lcl.devices[i].ifchain=i-13;
+	      lcl.devices[i].lwhat[0]='i';
+	      lcl.devices[i].lwhat[1]=hex[i-13];
 	      if(shm_addr->imixif3==1)
 		upper=400.0;
 	      else
@@ -275,7 +280,9 @@ long ip[5];                           /* ipc parameters */
 	      }
 	    }
 	  }
-	} else if(shm_addr->equip.rack==DBBC) {
+	} else if(shm_addr->equip.rack==DBBC &&
+	    (shm_addr->equip.rack_type == DBBC_DDC ||
+	     shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
 	  for (i=0;i<MAX_DBBC_BBC*2;i++) {
 	    if(lcl.itpis[i]!=0) {
 	      lcl.devices[i].ifchain=shm_addr->dbbcnn[i%MAX_DBBC_BBC].source+1;
@@ -322,8 +329,8 @@ long ip[5];                           /* ipc parameters */
 	      case 2:  lower=  10; upper= 512; break;
 	      case 3:  lower=1536; upper=2048; break;
 	      case 4:  lower=1024; upper=1536; break;
-	      case 5:  lower=   0; upper=1024; break;
-	      case 6:  lower=1200; upper=1800; break;
+	      case 5:  lower=1200; upper=1800; break;
+	      case 6:  lower=   0; upper=1024; break;
 	      default: ierr=-308; goto error; break;
 	      }
 
@@ -334,6 +341,81 @@ long ip[5];                           /* ipc parameters */
 		break;
 	      case 2:
 		lcl.devices[i].center=shm_addr->lo.lo[lcl.devices[i].ifchain-1]-
+		  (lower+upper)*0.5;
+		break;
+	      default:
+		ierr=-302;
+		goto error;
+		break;
+	      }
+	    }
+	  }
+	} else if(shm_addr->equip.rack==DBBC &&
+	    (shm_addr->equip.rack_type == DBBC_PFB ||
+	     shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+	  int i,j,icore,k,ik,ifchain,filter,zone;
+	  icore=0;
+	  for(i=0;i<shm_addr->dbbc_cond_mods;i++) {
+	    ifchain=i+1;
+	    for(j=0;j<shm_addr->dbbc_como_cores[i];j++) {
+	      icore++;
+	      for(k=1;k<16;k++) {
+		ik=k+(icore-1)*16;
+		if(1==lcl.itpis[ik]) {
+		  lcl.devices[ik].ifchain=ifchain;
+		  float freq, center;
+
+		  freq=k*32; /* center */
+
+		  filter=shm_addr->dbbcifx[ifchain-1].filter;
+		  if(filter <1 || filter >4) {
+		    ierr=-309;
+		    goto error;
+		  }
+		  zone=zone_table[filter-1];
+		  if(1==zone%2) /*odd zone */
+		    freq=(zone-1)*512+freq;
+		  else /* even */
+		    freq=zone*512-freq;
+		  
+		  switch(shm_addr->lo.sideband[ifchain-1]) {
+		  case 1:
+		    lcl.devices[ik].center=shm_addr->lo.lo[ifchain-1]+freq;
+		    break;
+		  case 2:
+		    lcl.devices[ik].center=shm_addr->lo.lo[ifchain-1]-freq;
+		    break;
+		  default:
+		    ierr=-302;
+		    goto error;
+		    break;
+		  }
+		}
+	      }
+	    }
+
+	    ik=i+MAX_DBBC_PFB;
+	    if(lcl.itpis[ik]!=0) {
+	      float upper, lower, center;
+
+	      lcl.devices[ik].ifchain=ifchain;
+	      switch(shm_addr->dbbcifx[ifchain-1].filter) {
+	      case 1:  lower= 512; upper=1024; break;
+	      case 2:  lower=  10; upper= 512; break;
+	      case 3:  lower=1536; upper=2048; break;
+	      case 4:  lower=1024; upper=1536; break;
+	      case 5:  lower=1200; upper=1800; break;
+	      case 6:  lower=   0; upper=1024; break;
+	      default: ierr=-308; goto error; break;
+	      }
+	
+	      switch (shm_addr->lo.sideband[ifchain-1]) {
+	      case 1:
+		lcl.devices[ik].center=shm_addr->lo.lo[ifchain-1]+
+		  (lower+upper)*0.5;
+		break;
+	      case 2:
+		lcl.devices[ik].center=shm_addr->lo.lo[ifchain-1]-
 		  (lower+upper)*0.5;
 		break;
 	      default:
@@ -412,21 +494,24 @@ long ip[5];                           /* ipc parameters */
 	    }
 	  }
 	}
+
 	/* user devices */
-	for (i=MAX_DBBC3_DET;i<MAX_ONOFF_DET;i++)
+	for (i=MAX_GLOBAL_DET;i<MAX_ONOFF_DET;i++)
 	    if(lcl.itpis[i]!=0) {
-	      lcl.devices[i].ifchain=i-MAX_DBBC3_DET+1;
+	      lcl.devices[i].ifchain=i-MAX_GLOBAL_DET+1;
+	      lcl.devices[i].lwhat[0]='u';
+	      lcl.devices[i].lwhat[1]=hex[i-MAX_GLOBAL_DET+1];
 	      lcl.devices[i].center=
-		shm_addr->user_device.center[i-MAX_DBBC3_DET];
-	      switch(shm_addr->user_device.sideband[i-MAX_DBBC3_DET]) {
+		shm_addr->user_device.center[lcl.devices[i].ifchain-1];
+	      switch(shm_addr->user_device.sideband[lcl.devices[i].ifchain-1]) {
 	      case 1:
 		lcl.devices[i].center=
-		  shm_addr->user_device.lo[i-MAX_DBBC3_DET]
+		  shm_addr->user_device.lo[lcl.devices[i].ifchain-1]
 		  +lcl.devices[i].center;
 		break;
 	      case 2:
 		lcl.devices[i].center=
-		  shm_addr->user_device.lo[i-MAX_DBBC3_DET]
+		  shm_addr->user_device.lo[lcl.devices[i].ifchain-1]
 		  -lcl.devices[i].center;
 		break;
 	      default:

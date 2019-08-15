@@ -36,6 +36,8 @@ C 17Apr2003  JMG.  Added Mark5 option.
 ! 2008Oct20  JMG. Better error messages.
 ! 2012Sep13  JMG. Tempoary fix so that don't show Mark5C.  (Search for 2012Sep13)
 ! 2014Dec06  JMG. Now show Mark5C
+! 2015May08  JMG. Made Rack wider
+! 2016Jan05  JMG. Made it wider still
 
 C Input:
       character*(*) cr1
@@ -49,17 +51,18 @@ C LOCAL:
       integer max_equip_lines
       parameter (max_equip_lines=max(max_rack_type,max_rec_type))
       integer max_rack_local,max_rec_local,max_rec2_local
-      character*12 crack_slot,crec1_slot,crec2_slot
+      character*20 crack_slot
+      character*12  crec1_slot,crec2_slot
       character*4  cfirst_slot
 
-      character*1 cactive
+      character*1 cstar
       character*2 crec1
       character*1 lchar
 
 C 0. Determine current types.
 
         max_rack_local = max_rack_type
-
+   
 ! 2012Sep13 
 !      max_rec_local = max_rec_type-1
        max_rec_local = max_rec_type
@@ -83,11 +86,7 @@ C 0. Determine current types.
            ifirst_rec=1
         else
            ifirst_rec=2
-        endif
-        write(*,*) "RACK ",irack_in, irec1_in, irec2_in 
-        write(*,*) cstrack(istn), cstrec(istn,1), cstrec(istn,2)
-           
-        
+        endif           
 
 C 1. Batch input
 
@@ -121,56 +120,54 @@ C 1. Batch input
 C 2. Interactive input
 
       else ! interactive
- 1      WRITE(LUSCN,9019) cantna(ISTN),
-     >  cstrack(istn),cstrec(istn,1),cstrec(istn,2)
-
-9019    FORMAT(a8,' equipment: Rack=',a8,' Recorder1=',a8
-     >       ' Recorder2=',a8)
-
+      
+100     continue
+        WRITE(LUSCN,"(a8,' equipment: Rack=',a12,'   Recorder=',a8)")
+     &   cantna(ISTN),cstrack(istn),cstrec(istn,1)
+ 
         write(luscn,'(a)')
-     .       '| Select rack  | Select Rec 1 | Select Rec 2 | Start|'
+     &  '| Select rack          | Select Rec 1 | Select Rec 2 | Start|'
 ! We subtract 1 from max_equip_lines, max_rack_type and max_rec_type
 !  so we don't display the "unknown" option.
           do i=1,max_equip_lines-1 ! write each line
             if(i .le. max_rack_type-1) then
               if(irack_in .eq. i) then
-                cactive="*"
+                cstar="*"
               else
-                cactive=" "
+                cstar=" "
               endif
-              write(crack_slot,'(a1,i2,"=",a8)') cactive,i,crack_type(i)
+              write(crack_slot,'(a1,i2,"=",a16)')  cstar,i,crack_type(i)
             else
               crack_slot=" "
             endif
-! JMG 2012Sep13  Temporary fix!!!
-! Undid.  was max_rec_type-2
+
             if(i .le. max_rec_type-1) then
               if(irec1_in .eq. i) then
-                cactive="*"
+                cstar="*"
               else
-                cactive=" "
+                cstar=" "
               endif
-              write(crec1_slot,'(a1,i2,"=",a8)') cactive,i,crec_type(i)
+              write(crec1_slot,'(a1,i2,"=",a8)') cstar,i,crec_type(i)
             else
               crec1_slot=" "
             endif
             if(i .le. max_rec2_type) then
               if(irec2_in .eq. i) then
-                cactive="*"
+                cstar="*"
               else
-                cactive=" "
+                cstar=" "
               endif
-              write(crec2_slot,'(a1,i2,"=",a8)') cactive,i,crec_type(i)
+              write(crec2_slot,'(a1,i2,"=",a8)') cstar,i,crec_type(i)
             else
               crec2_slot=" "
             endif
             if(i .le. 2) then
               if(ifirst_rec .eq. i) then
-                 cactive="*"
+                 cstar="*"
               else
-                 cactive=" "
+                 cstar=" "
               endif
-              write(cfirst_slot,'(a,i2)') cactive,i
+              write(cfirst_slot,'(a,i2)') cstar,i
             else
               cfirst_slot=" "
             endif
@@ -197,7 +194,7 @@ C 2. Interactive input
         irack= ias2b(ibuf(1),ic1,ic2-ic1+1)
         IF (irack.LT.0.OR.(irack.GT.max_rack_local)) then
           write(luscn,9991) max_rack_local
-          GOTO 1
+          goto 100
         endif
         call gtfld(ibuf,ich,nch,ic1,ic2) ! rec1 field
         if (ic1.ne.0) then ! rec1 specified
@@ -205,7 +202,7 @@ C 2. Interactive input
 !2012Sep13
           IF (irec1.LT.0.OR.(irec1.GT.max_rec_local-1)) then
             write(luscn,9992) max_rec_local
-            GOTO 1
+            goto 100
           endif
           call gtfld(ibuf,ich,nch,ic1,ic2) ! rec2 field
           if (ic1.ne.0) then ! rec2 specified
@@ -213,7 +210,7 @@ C 2. Interactive input
             IF (irec2.LT.0.OR.(irec2.GT.max_rec_local).or.
      .        irec2.gt.max_rec2_local) then
               write(luscn,9993) max_rec2_local
-              GOTO 1
+              goto 100
             endif
             call gtfld(ibuf,ich,nch,ic1,ic2) ! starting rec field
             if (ic1.ne.0) then ! rec1 specified
@@ -222,7 +219,7 @@ C 2. Interactive input
               if (crec1 .ne. "0" .and. crec1 .ne. "1" .and.
      >            crec1 .ne. "2") then
                 write(luscn,9994)
-                GOTO 1
+                goto 100
               endif
             endif ! rec1 specified
           endif ! rec2 specified

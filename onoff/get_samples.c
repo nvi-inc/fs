@@ -26,14 +26,14 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
   }
 
   non_station=FALSE;
-  for(i=0;i<MAX_DBBC3_DET;i++)
+  for(i=0;i<MAX_GLOBAL_DET;i++)
     if(itpis[i]!=0) {
       non_station=TRUE;
       break;
     }
 
-  kst1=itpis[MAX_DBBC3_DET+4];
-  kst2=itpis[MAX_DBBC3_DET+5];
+  kst1=itpis[MAX_GLOBAL_DET+4];
+  kst2=itpis[MAX_GLOBAL_DET+5];
   station=kst1||kst2;
   
   if(non_station) {
@@ -79,7 +79,9 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
 	*ierr=-16;
 	return -1;
       }
-    } else if(shm_addr->equip.rack==DBBC) {
+    } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_DDC ||
+	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
       tpi_dbbc(ip,itpis);
       if(ip[2]<0) {
 	if(ip[1]!=0)
@@ -88,8 +90,10 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
 	*ierr=-16;
 	return -1;
       }
-    } else if(shm_addr->equip.rack==DBBC3) {
-      tpi_dbbc3(ip,itpis);
+    } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_PFB ||
+	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+      tpi_dbbc_pfb(ip,itpis);
       if(ip[2]<0) {
 	if(ip[1]!=0)
 	  cls_clr(ip[0]);
@@ -137,13 +141,24 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
 	if(itpis[j]!=0) {
 	  sample.avg[j]=tpi[j];
 	}
-    } else if(shm_addr->equip.rack==DBBC) {
+    } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_DDC ||
+	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
       if(tpget_dbbc(cont,ip,itpis,ierr,tpi,tpi2))
 	 return -1;
       for(j=0;j<MAX_DET;j++)
 	if(itpis[j]!=0) {
 	  sample.avg[j]=tpi[j];
 	  sample2.avg[j]=tpi2[j];
+	}
+    } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_PFB ||
+	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+      if(tpget_dbbc_pfb(ip,itpis,dtpi,ierr))
+	 return -1;
+      for(j=0;j<MAX_DBBC_PFB_DET;j++)
+	if(itpis[j]!=0) {
+	  sample.avg[j]=dtpi[j];
 	}
     } else if(shm_addr->equip.rack==RDBE) {
       if(tpget_rdbe(cont,ip,itpis,ierr,dtpi,dtpi2))
@@ -164,9 +179,9 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
     }
     if(station) {
       if(kst1)
-	sample.avg[MAX_DBBC3_DET+4]=shm_addr->user_dev1_value;
+	sample.avg[MAX_GLOBAL_DET+4]=shm_addr->user_dev1_value;
       if(kst2)
-	sample.avg[MAX_DBBC3_DET+5]=shm_addr->user_dev2_value;
+	sample.avg[MAX_GLOBAL_DET+5]=shm_addr->user_dev2_value;
     }
 
     sample.stm=stm-rut;

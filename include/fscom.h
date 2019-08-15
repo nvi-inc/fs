@@ -50,7 +50,11 @@ typedef struct fscom {
         double decdat;
         double alat;
         double wlong;
+<<<<<<< HEAD
 	float systmp[MAX_TSYS_DET];
+=======
+	float systmp[MAX_GLOBAL_DET];
+>>>>>>> master
         int ldsign;
 	char lfreqv[90];
         char lnaant[8];
@@ -107,6 +111,7 @@ typedef struct fscom {
 	  struct k4rec_check k4rec;
 	  int ifp[2*MAX_DAS];
 	  long ifp_time[2*MAX_DAS];
+	  int dbbc_form;
         } check;
         char stcnm[4][2];
         int  stchk[4];
@@ -115,9 +120,9 @@ typedef struct fscom {
 
         struct bbc_cmd bbc[ MAX_BBC];
 
-        long tpi[ MAX_TSYS_DET];
-        long tpical[ MAX_TSYS_DET];
-        long tpizero[ MAX_TSYS_DET];
+        long tpi[ MAX_GLOBAL_DET];
+        long tpical[ MAX_GLOBAL_DET];
+        long tpizero[ MAX_GLOBAL_DET];
 
         struct {
            int rack;
@@ -247,7 +252,7 @@ typedef struct fscom {
         int imk4fmv;
         struct tpicd_cmd tpicd;
         int ITPIVC[15];
-        long tpigain[ MAX_TSYS_DET];
+        long tpigain[ MAX_GLOBAL_DET];
         int iapdflg;
         int k4rec_mode_stat; /* should be moved after k4rec_mode next chance */
         struct onoff_cmd onoff;
@@ -256,9 +261,9 @@ typedef struct fscom {
   int ipcalif3;
   struct flux_ds flux[MAX_FLUX];
 
-  long tpidiff[ MAX_TSYS_DET];
-  long tpidiffgain[ MAX_TSYS_DET];
-  float caltemps[ MAX_TSYS_DET];
+  long tpidiff[ MAX_GLOBAL_DET];
+  long tpidiffgain[ MAX_GLOBAL_DET];
+  float caltemps[ MAX_GLOBAL_DET];
   struct calrx_cmd calrx;
 
        int ibds;
@@ -343,6 +348,22 @@ typedef struct fscom {
   char dbbcddcvl[1];
   char dbbcddcvs[16];
   int  dbbcddcvc;
+  int dbbcddcsubv;
+  int dbbccontcalpol;
+
+  struct fila10g_mode_cmd fila10g_mode;
+
+  char fila10gvsi_in[16];
+
+  char dbbcpfbvl[1];
+  char dbbcpfbvs[16];
+  int  dbbcpfbvc;
+  int  dbbcpfbsubv;
+
+  int dbbc_como_cores[4];
+  int dbbc_cores;
+
+  struct dbbc_vsix_cmd dbbc_vsix[2];
 
   int mk6_units[MAX_MK6];
   int mk6_active[MAX_MK6];

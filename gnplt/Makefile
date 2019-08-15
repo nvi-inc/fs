@@ -1,4 +1,4 @@
 #
-../bin/gnplt: main.py gnplt.py NumericTools.py PrintCanvas.py GndatReader.py GnPltError.py Coordinate.py AutoBreakMenu.py
+../bin/gnplt: gnplt.py
 	rm -f ../bin/gnplt
 	ln -s ../gnplt/gnplt.py ../bin/gnplt

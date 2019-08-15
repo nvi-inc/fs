@@ -6,7 +6,7 @@ OBJECTS=\
 portopen.o portread.o portwrite.o portbaud.o portflush.o portoutdrain.o\
 portdelay.o portclose.o
 #
-#CFLAGS =
+CFLAGS += -g
 #FFLAGS = 
 #
 ifeq (/usr/src/linux-1.2.12,\
@@ -16,6 +16,9 @@ endif
 ifeq (/usr/src/linux/include/digi.h,\
 $(wildcard /usr/src/linux/include/digi.h ))
 CFLAGS := $(CFLAGS) -DDIGI
+endif
+ifdef FS_SERIAL_CLOCAL
+CFLAGS := $(CFLAGS) -DFS_SERIAL_CLOCAL
 endif
 #
 #  The following line that has a ":" in it is a "dependency line".

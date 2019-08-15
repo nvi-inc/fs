@@ -50,12 +50,14 @@ C  LOCAL:
       integer iwhere
       character*1 ctype
 
+
 C      - these are used in unpacking station info
       INTEGER J,nr,maxt,npar(max_band)
       integer ib,ii,nco,nhz,i
       integer*2 lid,lidpos,lidhor
 
-      character*8 crack,crec1,crec2
+      character*20 crack
+      character*12 crec1,crec2
       character*4 cidt,cidhor,cidpos
       character*2 cid
       character*1 c1
@@ -133,9 +135,10 @@ C
 ! 2009Mar03  JMG. Fixed bug in OR statement with K5.
 ! 2013Mar22  JMG. Fix problem if first antenna limit is negative. (i.e., (-270,270) instead of (90, 630) 
 ! 2013Sep17  JMG. Fixed incorrect error message for latitude. Said "A line" but was "B line". 
-! 2014Mar31  JMG. Removed extraneous argument from unpvt.
-! 2014Apr09  JMG. Fixed bug introduced above where cstrec(i,1) was not getting set
-
+! 2015Jun30  JMG. Changed Rack, recorder length from 8-->12 chars.
+! 201Jul28   JMG. Changed rack length to 20 chars.  
+!                 Initialize cfirtrec(i)="1" even if have problems reading "T " line. 
+! 
       cbufin=" "
 ! AEM 20050314 init vars
       cs2sp = " "
@@ -216,9 +219,8 @@ C
            anlim2(1)=anlim2(1)+360
            anlim2(2)=anlim2(2)+360
         endif
-        endif                                     
-
-
+        endif 
+  
         cidpos=ltoken(14)
         if(NumToken .ge. 15) then
           cidt=ltoken(15)
@@ -356,14 +358,13 @@ C
 ! 101  MOJ-VLBA 1x56000  17640    X   750   S   800   X 1.0 0.954 0.0464 S 1.0 0.974 0.0263 VLBA VLBA
         cidt=ltoken(1)
         cname=ltoken(2)
-      
+
+        j=8
         CALL UNPVT(IBUFX(2),ILEN-1,IERR,cIDT,cNAME,ibitden,
-     >   nstack,maxt,nr,cs2sp,cb,sefd,par,npar,crack,crec1,crec2)      
-
-         
-
-        if(ierr .ne. 0) goto 910
-
+     >   nstack,maxt,nr,cs2sp,cb,sefd,j,par,npar,crack,crec1,crec2) 
+!
+! Try to get the station by looking at the terminal ID at station name. 
+!
         i=0
         if (cidt .ne. " " .and. cidt .ne. "--") then
           i=iwhere_in_string_list(cterid,nstatn,cidt)
@@ -375,6 +376,17 @@ C
           write(lu,'("STINP24 - Name or ID match not found: ",a)') cname
           goto 910
         END IF  !matching entry not found
+
+! Initialize to default values. Must do here before error exit. 
+        cfirstrec(i)="1 " 
+
+        cstrack(i)="UNKNOWN"
+        cstrec(i,1)="UNKNOWN"
+        cstrec(i,2)="NONE"
+        cs2speed(i)=" "
+! This ierr is from unpvt and indicates a problem in parsing the line.
+        if(ierr .ne. 0) goto 910   
+
 ! Assume the terminal id line is correct.
         if(cidt .ne. " " .and. cidt .ne. "--") then
           cterid(i)=cidt
@@ -382,24 +394,19 @@ C
 C  Got a match. Initialize names.
         cterna(i)=cname
 
-        cstrack(i)="unknown"
-        cstrec(i,1)="unknown"
-        cstrec(i,2)="none"
-        cs2speed(i)=" "
 
-      
 C  Store equipment names.
         if (crack .ne. " ") then
-          if(.not.kvalid_rack(crack)) crack='none'
+          if(.not.kvalid_rack(crack)) crack='UNKNOWN'
           cstrack(i)=crack
         endif       
         if (crec1 .ne. " ") then
-           if(.not.kvalid_rec(crec1)) crec1='none' 
-           cstrec(i,1)=crec1                
-        endif     
-  
+           if(.not.kvalid_rec(crec1)) crec1='UNKNOWN'  
+           cstrec(i,1)=crec1               
+        endif   
+            
 C       If second recorder is specified and the first recorder was S2
-C       then save the second recorder field as the S2 mode.
+C       then save the second recorder field as the S2 mode.  
         if (crec2 .eq. " ") then
          if(nr .eq. 2) nr=1
         else
@@ -409,20 +416,29 @@ C       then save the second recorder field as the S2 mode.
             if(.not.kvalid_rec(crec2)) crec2='none'           
             cstrec(i,2)=crec2
           endif
-        endif
-        cfirstrec(i)="1 "
+        endif     
 
+C    Now set the S2 and K4 switches depending on the recorder type.
         nrecst(i) = nr
-        isink_mbps(i)=0 
-      
-        if(cstrec(i,1) .eq. "Mark5A" .or.
-     >     cstrec(i,1) .eq. "Mark6" .or.          
-     >     cstrec(i,1) .eq.  "K5") then  
-      
+        if (cstrec(i,1)(1:2) .eq. "S2") then ! set S2 variables
+          cs2speed(i)=cs2sp
+          if(cs2sp.eq.   "LP") then
+            s2sp=SPEED_LP
+          else if(cs2sp .eq. "SLP") then
+            s2sp=SPEED_SLP
+          endif
+          nheadstack(i)=1
+          ibitden_save(i)=1
+          maxtap(i)=maxt*5.0*s2sp ! convert from minutes to feet
+        else if (cstrec(i,1)(1:2) .eq. "K4")  then ! set K4 variables
+          nheadstack(i)=1
+          maxtap(i) = maxt ! conversion??
+          ibitden_save(i)=1
+        else if(cstrec(i,1) .eq. "Mark5A" .or.         
+     >          cstrec(i,1) .eq.  "K5") then          
           maxtap(i)=10000         !set to 10 thousand feet.
           bitdens(i,1)=1.000d11   !very high means we don't need to worry about it. 
-          nheadstack(i)=nstack            
-      
+          nheadstack(i)=nstack 
         else ! set Mk34 variables
           maxtap(i) = maxt
           ibitden_save(i)=ibitden

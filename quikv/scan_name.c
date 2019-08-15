@@ -51,6 +51,8 @@ long ip[5];                           /* ipc parameters */
 	ierr=-201;
 	goto error;
       }
+      strncpy(shm_addr->scan_name.name_old,shm_addr->scan_name.name,
+	      sizeof(shm_addr->scan_name.name));
       strcpy(shm_addr->scan_name.name,command->argv[0]);
 
       /* set defaults for early exit for NULL on any remaining args */

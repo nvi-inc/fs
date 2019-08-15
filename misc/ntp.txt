@@ -1,0 +1,154 @@
+File: /usr2/fs/misc/ntp.txt                  Version: 0.4  Date: 180614
+
+			 NTP recommendations
+
+This document contains recommendations for set-up and use of NTP for
+robust FS operations.  If you have reliable NTP time available, this
+is appropriate, and recommended.  Please see section (2) for an
+appropriate NTP configuration for your FS computer.  Please note that
+section (7) is critical.
+
+Please also see '/usr2/fs/misc/fstime.txt' for more explanation about
+time in the FS.  That document is a little out of date because it was
+written at a time when the best model was 'rate'.  It still provides
+useful details and an explanation about time in the FS.  The use
+'rate' is still recommended for stations that do not have reliable NTP
+time available.  The current document ('ntp.txt'), provides all the
+information needed to set-up your system for NTP.
+
+
+1. Use the 'computer' model in 'time.ctl':
+
+* rate (secs/day)  span (hours)  model (none/offset/rate/computer)
+*                                      -use 'computer' if you have reliable
+*                                         NTP available; if not, use 'rate'
+*                                      -to be safe, reboot if changing the model
+    0.000          1.000         computer
+
+   If you use the 'computer' model, the FS time becomes the computer
+   time.
+
+
+2. In 'ntp.conf' (IPv4 assumed):
+
+   2a. Use a mix of local and remote servers, as many as you can, up
+       to 10.  These are preferably stratum 1 servers, but
+       _independent_ stratum 2s can be used to fill-in.  You should
+       try for as many stratum 1s as you can.  NTP strongly prefers to
+       have at least three servers and you should try to have at least
+       three local ones if you can in case of Internet outages.  You
+       can get by with less than three local servers.  Including
+       remote serves is strongly recommended.
+
+   2b. In the 'ntp.conf' file, only list servers by their IP
+       addresses.  This makes it more robust if there is a DNS outage.
+       You can include a comment line to help identify each server in
+       the file.
+
+   2c. Use 'iburst minpoll 4' for each stratum 1 (or 2) server to
+       speed-up initial sync. A report of an 'ntpd' bug:
+
+         https://blog.ntpsec.org/2017/09/19/jitter-bug-perfume.html
+
+       may help explain some of NTP's strange start-up behavior. One
+       thing that has been noticed is that it prefers local servers at
+       start-up, but will eventually sync to a better remote server.
+
+   2d. Use 'restrict' with 'notrap nomodify nopeer noquery' with
+       each server for security.
+
+       The overall result for a server is typically something like
+       this for each NTP server:
+
+#  node.domain
+server      192.5.41.209 iburst minpoll 4
+restrict    192.5.41.209 notrap nomodify nopeer noquery
+
+   2e. Use 'noselect' after 'iburst minpoll 4' for monitoring
+       (only) of local devices.
+
+   2f. Serve other devices on the local network, with something like:
+
+# serve this private subnet
+restrict 192.168.1.0 mask 255.255.255.0 nomodify notrap
+
+   2g. Block access from all other nodes (especially remote) with:
+
+restrict -4 default ignore
+restrict -6 default ignore
+
+3. Other devices at the station that support NTP
+
+   For other devices that use NTP, point them to the FS as the only
+   NTP server.  This will make sure that the other devices do not
+   somehow get on a different time than the FS. 
+
+   If you have a backup FS computer point the other devices to both FS
+   computers.  Use exactly the same NTP set-up on both FS computers.
+   This will make the station more robust if the operational computer
+   fails.  Be sure each FS computer is monitoring the other as
+   'noselect' (see 2e.). This will make it possible to monitor the
+   agreement between the two computers with 'ntpq -c pe'.  If the
+   other devices use only the FS computers as NTP servers and there is
+   no discrepancy between the FS computers, all the other local
+   devices should agree.
+
+   You can make a script similar to 'check_ntp' in (6a.) below to
+   monitor and log the time of other devices (and possibly a backup FS
+   computer).  You will probably want to filter the 'ntpq' output on
+   the nodes that you want displayed.
+
+
+4. Use 'sy=run setcl &' in 'midob' to monitor the difference between
+   the FS and the formatter.  This will make it possible to detect if
+   the formatter is different from the FS time including whether an
+   integer second jump occurs.
+
+
+5. 'ntpd' vs 'ntpdate'
+
+   In the old days, if the time from the hardware clock was very far
+   off, NTP would not adjust the time. 'ntpdate' was used to get close
+   first.  More recently the 'ntpd' daemon seems to handle this if
+   started with '-g' option.  That is probably the standard
+   configuration for most systems now, but it might be worth checking
+   if your system is set-up this way.  A big advantage of '-g' over
+   early versions of 'ntpdate' is that it will use the servers already
+   configured in 'ntp.conf'.  Some later versions of 'ntpdate' may
+   also do that.
+
+   You check the options that 'ntpd' was started with using the command:
+
+     ps aux | grep ntpd     
+
+
+6. 'check_ntp' SNAP procedure
+
+   6a. Have the 'check_ntp' procedure in the 'station' procedure
+       library:
+
+sy=popen 'uptime 2>&1' -n uptime &
+sy=popen 'ntpq -np 2>&1|grep -v "^[- x#]" 2>&1' -n ntpq &
+
+       'popen' is available in all FS versions starting with
+       9.11.9. See 'help=sy' for details on its use.
+
+   6b. Put a call to 'check_ntp' at the end of 'initi' for a visible
+       initial check at FS start up.
+
+   6c. Put a call to 'check_ntp' at the start of 'exper_initi' to
+       record the ntp state in the experiment log at the experiment
+       start (and restarts) for troubleshooting.
+
+
+7. Make sure NTP is synced before operations are started.
+
+   After a FS start, particularly after a computer boot, operations
+   should not start until the 'check_ntp' output shows a server with a
+   '*' in column one of the 'ntpq' output.  That is the server the
+   daemon is synced with.  The operator can run 'check_ntp' manually
+   as many times as necessary until the output of 'initi' shows a
+   sync.  It should sync quickly if 'ntp.conf' is configured as
+   described above.  Ideally the offsets, the next to last column of
+   the 'ntpq' output, should be a few milliseconds or less for several
+   servers, hopefully all.

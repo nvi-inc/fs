@@ -15,6 +15,7 @@ WIND=/dev/null
 PORT=50001
 REMOTE=local
 DEVICE=MET4
+FLAGS=0x0
 
 test -x $DAEMON || exit 0
 test -f $LFILE || exit 0
@@ -22,7 +23,7 @@ test -f $LFILE || exit 0
 case "$1" in
   start)
         echo -n "Starting $DESC: $NAME"
-        start-stop-daemon --start --quiet --exec $DAEMON $MET $WIND $PORT $REMOTE $DEVICE &
+        start-stop-daemon --start --quiet --exec $DAEMON $MET $WIND $PORT $REMOTE $DEVICE $FLAGS &
         echo "."
 	;;
   stop)

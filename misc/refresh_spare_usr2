@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 echo "*******************************************************************"
 echo "*  This is a script to refresh the contents of the spare computer *"
 echo "*    '/usr2' partition if you have both an Operational and Spare  *"

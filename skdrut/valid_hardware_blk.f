@@ -22,9 +22,13 @@
       crack_type(15)=    'LBA'
       crack_type(16)=    'Mark5'
       crack_type(17)=    'VLBA5'
-      crack_type(18)=    'DBBC'
-      crack_type(19)=    'BB'
-      crack_type(20)=    'unknown'
+      crack_type(18)=    'DBBC_DDC'                         
+      crack_type(19)=    'DBBC_DDC/Fila10g'
+      crack_type(20)=    'DBBC_PFB'                         
+      crack_type(21)=    'DBBC_PFB/Fila10g'
+      crack_type(22)=    'VLBAC'
+      crack_type(23)=    'CDAS'
+      crack_type(24)=    'unknown'
 
 ! Valid recorder types
       crec_type(1)=     'none'
@@ -42,7 +46,7 @@
       crec_type(13)=    'K5'
       crec_type(14)=    'Mark5B'
       crec_Type(15)=    'Mark5C'
-      crec_type(16)=    'Mark6'
+      crec_type(16)=    'FlexBuff'
       crec_type(17)=    'unknown'
 
 ! Make version of the above in capitalform.

@@ -171,6 +171,10 @@ c
         nch=ichmv_ch(ib,nch,'vlba4')
       else if(rack.eq.VLBA4.and.rack_type.eq.VLBA45) then
         nch=ichmv_ch(ib,nch,'vlba5')
+      else if(rack.eq.VLBA4.and.rack_type.eq.VLBA4C) then
+        nch=ichmv_ch(ib,nch,'vlbac')
+      else if(rack.eq.VLBA4.and.rack_type.eq.VLBA4CDAS) then
+        nch=ichmv_ch(ib,nch,'cdas')
       else if(rack.eq.K4.and.rack_type.eq.K41) then
         nch=ichmv_ch(ib,nch,'k41')
       else if(rack.eq.K4.and.rack_type.eq.K41U) then
@@ -215,12 +219,18 @@ c
         nch=ichmv_ch(ib,nch,'lba4')
       else if(rack.eq.S2) then
         nch=ichmv_ch(ib,nch,'s2')
-      else if(rack.eq.DBBC) then
-        nch=ichmv_ch(ib,nch,'dbbc')
-      else if(rack.eq.RDBE) then
-        nch=ichmv_ch(ib,nch,'rdbe')
+      else if(rack.eq.DBBC.and.rack_type.eq.DBBC_DDC) then
+        nch=ichmv_ch(ib,nch,'dbbc_ddc')
+      else if(rack.eq.DBBC.and.rack_type.eq.DBBC_DDC_FILA10G) then
+        nch=ichmv_ch(ib,nch,'dbbc_ddc/fila10g')
+      else if(rack.eq.DBBC.and.rack_type.eq.DBBC_PFB) then
+        nch=ichmv_ch(ib,nch,'dbbc_pfb')
+      else if(rack.eq.DBBC.and.rack_type.eq.DBBC_PFB_FILA10G) then
+        nch=ichmv_ch(ib,nch,'dbbc_pfb/fila10g')
       else if(rack.eq.DBBC3) then
         nch=ichmv_ch(ib,nch,'dbbc3')
+      else if(rack.eq.RDBE) then
+        nch=ichmv_ch(ib,nch,'rdbe')
       else if(rack.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
@@ -266,6 +276,8 @@ c
         nch=ichmv_ch(ib,nch,'mk5c')
       else if(drive(1).eq.MK5.and.drive_type(1).eq.MK5C_BS) then
         nch=ichmv_ch(ib,nch,'mk5c_bs')
+      else if(drive(1).eq.MK5.and.drive_type(1).eq.FLEXBUFF) then
+        nch=ichmv_ch(ib,nch,'flexbuff')
       else if(drive(1).eq.MK6.and.drive_type(1).eq.MK6) then
         nch=ichmv_ch(ib,nch,'mk6')
       else if(drive(1).eq.0) then
@@ -420,13 +432,19 @@ c
       nch=nch+dbbcddcvc
 c
       nch=mcoma(ib,nch)
-      call fs_get_dbbcpfbv(dbbcpfbv)
       nch=ichmv_ch(ib,nch,'v')
-      nch = nch + ib2as(dbbcpfbv,ib,nch,z'800F')
+      call fs_get_dbbcpfbvs(dbbcpfbvs)
+      call fs_get_dbbcpfbvc(dbbcpfbvc)
+      call char2hol(dbbcpfbvs,ib,nch,nch+dbbcpfbvc-1)
+      nch=nch+dbbcpfbvc
 c
-      nch=mcoma(ib,nch)
       call fs_get_dbbc_cond_mods(dbbc_cond_mods)
-      nch = nch + ib2as(dbbc_cond_mods,ib,nch,z'8002')
+      call fs_get_dbbc_como_cores(dbbc_como_cores)
+      call fs_get_dbbc_cores(dbbc_cores)
+      do i=1,dbbc_cond_mods
+         nch=mcoma(ib,nch)
+         nch = nch + ib2as(dbbc_como_cores(i),ib,nch,z'8002')
+      enddo
 
       call fs_get_dbbc_if_factors(dbbc_if_factors)
       do i=1,dbbc_cond_mods
@@ -439,6 +457,12 @@ c
       nch = nch + ib2as(m5b_crate,ib,nch,z'8002')
 c
       nch=mcoma(ib,nch)
+      call fs_get_fila10gvsi_in(fila10gvsi_in)
+      ilast=index(fila10gvsi_in,' ')
+      if(ilast.eq.0) ilast=len(fila10gvsi_in)
+      call char2hol(fila10gvsi_in,ib,nch,nch+ilast-1)
+      nch=nch+ilast
+c
       nch=ichmv_ch(ib,nch,'v')
       call fs_get_dbbc3_ddc_vs(dbbc3_ddc_vs)
       call fs_get_dbbc3_ddc_vc(dbbc3_ddc_vc)

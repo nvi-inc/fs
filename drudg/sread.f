@@ -75,6 +75,7 @@ C 021021 nrv Don't set default tape motion parameters for VEX files
 C            because they have already been read in.
 C
 ! 2006Jul24 JMGipson. Got rid of ilocf, reio. (Remnants of old operating system no longer used.)
+! 2018Jun17 JMGipson. Got rid of extra space in output after return from vread. 
 
       close(unit=LU_INFILE)
       open(unit=LU_INFILE,file=LSKDFI,status='old',iostat=IERR)
@@ -94,6 +95,7 @@ C
       kvlb = .false.
       khed = .false.
       call frinit(max_stn,max_frq)
+C
       read(lu_infile,'(a)') cfirstline
 C*********************************************************
 C vex file section
@@ -117,7 +119,7 @@ C       read stations, codes, sources
 9009      format(' from VREAD iret=',i5,' ierr=',i5)
         endif
 C       Write out experiment information now.
-        write(luscn,'(/"Experiment name: ",a)') cexper
+        write(luscn,'("Experiment name: ",a)') cexper
         i=trimlen(cexperdes)
         if (i.gt.0) write(luscn,'("Experiment description: ",a)') 
      .  cexperdes(1:i)
@@ -134,8 +136,9 @@ C*********************************************************
         kgeo=.true.
         rewind(lu_infile)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-           DO WHILE (ILEN.GT.0) !read schedule file
-         IF (IERR.NE.0)  THEN
+
+      DO WHILE (ILEN.GT.0) !read schedule file
+        IF (IERR.NE.0)  THEN
           WRITE(LUSCN,9210) IERR
 9210      FORMAT(' Error ',I5,' reading schedule file.')
           RETURN
@@ -178,7 +181,8 @@ C         Get the next line
 C
         ELSE IF(ctype .eq. "SO" .or. ctype .eq. "ST" .or.
      >          ctype .eq. "FR" .or. ctype .eq. "HD") then
-C      Get the first line of this section
+          write(*,*) cbuf(1:ilen)
+C         Get the first line of this section
           CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
           DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
             IF (IERR.LT.0)  THEN
@@ -307,9 +311,6 @@ C
       isortm = 5
       ihdtm = 6
       call drprrd(ivexnum)
-      if(.not.kvex) then
-        call read_broadband_section
-      endif 
       if (.not.kgeo) kpostpass=.true.
 C      if (.not.kgeo) kpostpass=.false.
 C

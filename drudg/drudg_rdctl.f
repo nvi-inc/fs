@@ -1,12 +1,22 @@
       SUBROUTINE drudg_rdctl(csked,csnap,cproc,cscratch,
-     >   dr_rack_type,crec_default,  kequip_over)
+     >   crack_type_def,crec_default,cfirstrec_def, kequip_over)
       
 C
 ! This routine will open the default control file for drudg. 
 ! Based on old routine rdctl that handlled both sked and drudg.
 ! This just handles handles drudg.
 
-C
+! 2015Jun05. JMGipson. Size of crack_type_def, crec_default set by calling program. Previously hardwired. 
+! 2015Jul06  JMGipson. Initialized "crack_type_def, crec_default to " ". 
+! 2015Jul17 JMG. Added cont_cal_polarity.
+! 2015Jul21 JMG. Made "ASK" valid option ofr cont_cal_polarity 
+! 2016Jul28 JMG. Now also set cfirstrec_def in 'equipment override'
+! 2016Sep08 JMG. New keyword 'vsi_align' 
+! 2018Jun17 JMG. Father's day. Make sure always a space " " between sections of snap file.
+!                Also fix reported error in label size.  Was reporting error when there was not one. 
+! 2018Sep25 JMG. skedf.ctl has different locations depending on wheater PC-FS computer or not. This is set in makefile. 
+
+
 C   parameter file
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/data_xfer.ftni'   !This includes info about data transfer
@@ -17,9 +27,8 @@ C   parameter file
 
 ! Passed
       character*128 csked,csnap,cproc,cscratch     !Various directories. 
-      character*8 dr_rack_type,crec_default(2)
-      logical kequip_over
-    
+      character*(*) crack_type_def,crec_default(2),cfirstrec_def
+      logical kequip_over    
           
 ! functions
       integer iwhere_in_string_list
@@ -44,7 +53,7 @@ C  LOCAL VARIABLES
       parameter(MaxToken=6)
       character*128 ltoken(MaxToken)
       equivalence (lkeyword,ltoken(1))
-      equivalence (lvalue,ltoken(2))
+      equivalence (lvalue,ltoken(2))    
 
       integer lu          !open lu
       integer ic,i,j,ilen,ierr
@@ -54,14 +63,48 @@ C  LOCAL VARIABLES
       logical kfound_global_file
       logical kfirst_skip    
 
+      character*4 lvalid_polarity(6)
+      character*6 lvalid_vsi_align(4)
+      integer ifs_PC
+      logical kexist
+
+
+      integer ifile_beg,ifile_end
       character*32 cskedf(3)   
       data cskedf/
-     > "/usr/local/bin/skedf.ctl",  "/usr2/control/skedf.ctl",
-     > "skedf.ctl"/ 
-
+     > "/usr/local/bin/skedf.ctl",  "skedf.ctl",
+     > "/usr2/control/skedf.ctl"/
+  
       data lvalid_dbbc_if_inputs/"1","2","3","4"/ 
+      data lvalid_polarity/"0","1","2","3","NONE","ASK"/     
+      data lvalid_vsi_align/"0","1","NONE","ASK"/     
 
-C  1. Open the default control file if it exists.   
+! this is set in makefile. if it is set to 1, then on FS_PC.
+
+      ifs_PC=FS_PC
+
+      if(ifs_PC .eq. 1) then
+        ifile_beg=3
+        ifile_end=3   
+        inquire(exist=kexist,file=cskedf(3))
+        if(.not.kexist) then
+          write(*,*) "Aborting because we did not find "//cskedf(3)
+          stop
+        endif                    
+      else
+        ifile_beg=1
+        ifile_end=2
+        inquire(exist=kexist,file=cskedf(1))
+        if(.not.kexist) then
+           inquire(exist=kexist,file=cskedf(2))
+           if(.not.kexist) then
+             writE(*,*) "Did not find primary file "//cskedf(1)
+             write(*,*) "or secondary file "//cskedf(2)
+             write(*,*) "aborting!"
+             stop
+           endif 
+        endif 
+      endif         
       
 ! Initialization
 ! Stuff for DBBC
@@ -71,13 +114,13 @@ C  1. Open the default control file if it exists.
       end do
       idbbc_bbc_target=-1   
 
-      contcal_prompt="off" 
+      cont_cal_prompt="off" 
+      cont_cal_polarity=" "    !default is none!
+      lvsi_align_prompt= " "   !default is none!
       ktarget_time=.false.
       klo_config=.false. 
       kignore_mark5b_bad_mask=.false.
-
-
-
+      
       kfound_global_file=.false. 
 ! Avery 5160. ht,wid,rows,cols,top,left
       rlabsize(1)=1.0
@@ -91,9 +134,9 @@ C  1. Open the default control file if it exists.
       ierr = 0
       lu = 11
       kequip_over=.false.         !initialize
-      dr_rack_type    = "UNKNOWN"
-      crec_default(1) = "UNKNOWN"
-      crec_default(2) = "NONE"
+      crack_type_def    = " "
+      crec_default(1) = " "
+      crec_default(2) = " "
    
 
       kautoftp0=.false.
@@ -106,29 +149,19 @@ C  2. Process the control file if it exists. Loop throug 3 times.
 !     The last time for the local file. 
 
       kfirst_skip=.true.
-      do j=1,3      
-         if(.not.kfirst_skip) write(*,*) " "   !close out 'skipping non-sked' line  
-         kfirst_skip=.true. 
-     
-! If already found the global file, don't need to check the alternative.
-        if(j .eq. 2 .and. kfound_global_file) goto 500    !quick exit. 
-! If we are the start of the third round and haven't found the global file, 
-! write a warning message but try to read the local file. 
-        if(j .eq. 3 .and. .not.kfound_global_file) then
-          write(luscn,
-     >'("WARNING! drudg_rdctl: Did not find global skedf.ctl file:",a)')
-     >       cskedf(1)(1:trimlen(cskedf(1)))
-         write(luscn,
-     > '("                or alternate global skedf.ctl file:",a)') 
-     >       cskedf(2)(1:trimlen(cskedf(2)))                 
-        end if
+      do j=ifile_beg, ifile_end   
+        if(.not.kfirst_skip) write(*,*) " "   !close out 'skipping non-sked' line  
+         kfirst_skip=.true.     
 
         itmplen = trimlen(cskedf(j))
         kexist = .false.
         inquire(file=cskedf(j),exist=kexist)      
         if(.not.kexist) goto 500                !quick exit. 
 
+ 
         open(lu,file=cskedf(j),iostat=ierr,status='old')
+
+
         if (ierr.ne.0) then
           write(luscn,9100) cskedf(j)(1:itmplen)
 9100      format("drudg_rdctl ERROR: Error opening control file ",A)
@@ -136,16 +169,10 @@ C  2. Process the control file if it exists. Loop throug 3 times.
           return
         end if
 
-       if(j .le. 2) then
-         write(luscn,'("drudg_rdctl: Reading system control file ",A)')
-     >       cskedf(j)(1:itmplen)
-             kfound_global_file=.true. 
-        else
-          write(luscn,'("drudg_rdctl: Reading local control file ",A)')
-     >       cskedf(j)(1:itmplen)
-        endif
-        write(*,'(a,$)') "   "
-   
+        write(luscn,'("drudg_rdctl: Reading system control file ",A)')
+     >       cskedf(j)(1:itmplen)   
+
+    
 ! File exists, and we have opened it.    
         call readline_skdrut(lu,cbuf,keof,ierr,1) !read first $           
         do while (.not.keof)
@@ -158,7 +185,7 @@ C  2. Process the control file if it exists. Loop throug 3 times.
             if(keof) goto 500
           end do     
 C  $SCHEDULES
-          write(*,'(a,$)') lsecname(1:trimlen(lsecname)+1) 
+          write(*,'(a," ",$)') lsecname(1:trimlen(lsecname)) 
           if (lsecname .eq.'$SCHEDULES') then                  
              if ((cbuf(1:1) .ne. '$').and..not.keof) then
                 read(cbuf,'(a)') csked
@@ -270,10 +297,10 @@ C  $PRINT
                     endif
                   endif
              else if (lkeyword .eq.'LABEL_SIZE') then
-C              label_size ht wid nrows ncols topoff leftoff
+C              label_size ht wid nrows ncols topoff leftoff              
                read(cbuf,*,err=92140) lkeyword,rlabsize
-               goto 9216
-92140          write(luscn,'(a)') "RDCTL12 ERROR: Label Size error"
+               goto 9216    !Skip emitting error message
+92140          write(luscn,'(a)') "RDCTL12 ERROR: Label Size error"               
              else
                  write(luscn,'(a)') "Error in $PRINT section"
                  write(luscn,'(a)') cbuf(1:trimlen(cbuf))
@@ -316,30 +343,36 @@ C  $MISC
                     write(*,*) "Should be: AUTOFTP [ON|OFF] <String>"
                 endif
               else if(lkeyword .eq. 'AUTOFTP_ABORT_TIME') then
-                 read(ltoken(2),*) iautoftp_abort_time                
+                 read(ltoken(2),*) iautoftp_abort_time  
+               
 
 C         EQUIPMENT
               else if (lkeyword  .eq.'EQUIPMENT') then          
-                dr_rack_type=lvalue(1:8)
+                crack_type_def=lvalue
                 crec_default(1)=ltoken(3)
                 if(NumToken .eq. 3) then
-                   crec_default(2)="NONE"
+                   crec_default(2)="NONE"                
                 else
                    crec_default(2)=ltoken(4)
                 endif 
+                if(NumToken .eq. 5) then
+                   cfirstrec_def=ltoken(5)
+                else
+                   cfirstrec_def="1 "
+                endif 
               
-                call capitalize(dr_rack_type)
+                call capitalize(crack_type_def)
                 call capitalize(crec_default(1))
                 call capitalize(crec_default(2))         
 ! Now check to see if valid types.
                 itemp=iwhere_in_string_list(crack_type_cap,
-     >                 max_rack_type, dr_rack_type)
+     >                 max_rack_type, crack_type_def)
                 if(itemp .eq. 0) then
                    write(*,*) "Error in line: "//cbuf(1:60) 
-                   write(*,*) "Invalid rack_type: ",dr_rack_type
+                   write(*,*) "Invalid rack_type: ",crack_type_def
                    write(*,*) "Please fix in control file!"                   
                 else
-                  dr_rack_type=crack_type(itemp)
+                  crack_type_def=crack_type(itemp)
                 endif
                 do i=1,2
                   ltoken(2)=crec_default(i)
@@ -382,13 +415,47 @@ C         TPICD
               elseif (lkeyword .eq. 'CONT_CAL') then
                 lprompt=lvalue(1:3)
                 call capitalize(lprompt)
-                if(lprompt .eq. "ON" .or. lprompt .eq. "OFF" .or. 
-     >             lprompt .eq. "ASK") then
-                   contcal_prompt=lprompt
+                cont_cal_prompt=" "
+                kcont_cal=.false.
+                if(lprompt .eq. "ON") then 
+                  kcont_cal=.true.
+                else if(lprompt .eq. "OFF") then
+                  continue 
+                else if(lprompt .eq. "ASK") then
+                  cont_cal_prompt="ASK"
                 else
                    write(luscn, *)
      >              "Error:  Valid CONT_CAL options are ON, OFF, ASK."
                  endif 
+              elseif (lkeyword .eq. 'CONT_CAL_POLARITY') then
+                call capitalize(lvalue)
+                itemp=iwhere_in_string_list(lvalid_polarity,6,lvalue)
+                if(itemp .eq. 0) then
+                  write(*,*) "drudg_rdctl: Invalid cont_cal_polarity: ",
+     >              lvalue
+                  write(*,*) "  valid options are: ", 
+     >              lvalid_polarity
+                   cont_cal_polarity="ASK"
+                else if(itemp .le. 4) then
+                    cont_cal_polarity=lvalue
+                else if(lvalue .eq. "NONE") then    !value set to "NONE"
+                    cont_cal_polarity=" "
+                else if(lvalue .eq. "ASK") then
+                    cont_cal_polarity="ASK"
+                endif 
+
+             elseif (lkeyword .eq. 'VSI_ALIGN') then
+                call capitalize(lvalue)
+                itemp=iwhere_in_string_list(lvalid_vsi_align,4,lvalue)
+                if(itemp .eq. 0) then
+                  write(*,*) "drudg_rdctl: Invalid vsi_align: ",
+     >              lvalue
+                  write(*,*) "  valid options are: ", 
+     >              lvalid_vsi_align
+                   lvalue="ASK"           !set to ask if not valid. 
+                endif
+                lvsi_align_prompt=lvalue                                    
+        
               elseif(lkeyword .eq. "DEFAULT_DBBC_IF_INPUTS") then
                 if(NumToken .gt. 5) then 
                    write(*,*) "drudg_rdctl: Too many tokens for "//      
@@ -506,7 +573,7 @@ C         TPICD
       lautoftp_string=lautoFTP_string0
 
       if(kequip_over) then
-        if(dr_rack_type .eq. 'UNKNOWN' .or.
+        if(crack_type_def .eq. 'UNKNOWN' .or.
      >      crec_default(1) .eq. 'UNKNOWN') then
          write(*,*)
      >    "If EQUIPMENT_OVERRIDE is on, must set rack and recoders!"
@@ -514,7 +581,7 @@ C         TPICD
          stop
        endif
       endif
-!      write(*,*) " " 
+      write(*,*) " " 
       RETURN
 
 ! Come here on error parsing line

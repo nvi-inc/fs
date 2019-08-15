@@ -1,5 +1,5 @@
       SUBROUTINE unpvt(IBUF_in,ILEN,IERR,cIDTER,cNATER,ibitden,
-     .nstack,mxtap,nrec,cs2sp,cb,sefd,par,npar,crack,creca,crecb)
+     .nstack,mxtap,nrec,cs2sp,cb,sefd,pcount,par,npar,crack,creca,crecb)
 C
 C     UNPVT unpacks a record containing Mark III terminal information.
 C
@@ -37,15 +37,17 @@ C            implement this until a FS upgrade can be done.
 C 011011 nrv If the second recorder field doesn't match a recorder type
 C            and the first recorder is S2, then the second field is mode.
 ! 2007Aug07  JMG. Converted all hollerith to ASCII
-! 2014Mar31  JMG. Removed pcount argument in call list that was never removed. 
-!                 Removed special handling of K4 AND S2 which is now obsolete.
-! 
+! 2015Jun30  JMG. Changed Rack, recorder length from 8-->12 chars.
+! 2016Jul28  JMG. Changed Rack length to 20 characters
+! 2016Nov21  JMG.  Map DBBC to DBBC_DDC on input
 C
 C  INPUT:
-      integer*2 IBUF_in(*)            !buffer containing the record
-      integer ilen                    !length of buffer in words (=1/2 length in chars)
-
-   
+      integer*2 IBUF_in(*)
+      integer ilen
+C           - buffer containing the record
+C     ILEN  - length of IBUF in words
+      integer pcount ! number of arguments, 5 for ID and name only
+C
 C  OUTPUT:
       integer mxtap,ierr,nrec
       character*4 cidter
@@ -59,7 +61,8 @@ C     mxtap - maximum tape length for this station
       character*2 cb(*) !bands
       real*4 sefd(*),par(max_sefdpar,*)
       integer npar(*)   ! sefds
-      character*8 crack,creca,crecb  !rack, recorder, names
+      character*20 crack
+      character*12 creca,crecb  !rack, recorder, names
       character*4 cs2sp
 C
 
@@ -119,9 +122,10 @@ C
       END IF  !
       cnater=cbuf(ic1:ic1+nch-1)
       ks2=cnater(1:2) .eq. "S2"
-!      kk4=cnater(1:2) .eq. "K4"
-   
-     
+      kk4=cnater(1:2) .eq. "K4"
+
+      if (pcount.le.5) return
+
 C  3. Number of headstacks at this station.
 C     Bit density capability at this station.
 C     Format:  <heads>x<bitden> where heads is required,
@@ -133,8 +137,33 @@ C  Mk3/4  T 102  KO-VLBA  1x56000  2x17640   X   900   S   750
 C  S2     T 102  KO-VLBA   SLP     2x360     X   900   S   750
 C  K4     T 102  KO-VLBA   1       2x240     X   900   S   750
 C                         *******  *****
-
-      if (ks2) then ! speed, nominal length of tape
+C K4 recorder parameters
+      if (kk4) then ! reserved, nominal length of tape
+C first field reserved
+        CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
+        if (ic1.eq.0) return
+        nch=ic2-ic1+1
+        i = IAS2B(IBUF,IC1,nch) ! reserved
+        if (i.lt.0) then
+          ierr=-104
+          return
+        endif
+C second field number of recorders and tape length
+        CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
+        nrec = 1
+        if (cbuf(ic1:ic1+1) .eq. "2x") then
+          nrec = 2
+          ic1 = ic1+2
+        endif
+          NCH = IC2-IC1+1
+          mxtap = IAS2B(IBUF,IC1,NCH)
+C       endif
+        IF  (mxtap.le.0.and.mxtap.ne.-1) THEN  !
+          IERR = -105
+          RETURN
+        END IF  
+C S2 recorder
+      else if (ks2) then ! speed, nominal length of tape
 C first field tape speed, either LP or SLP
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
         if (ic1.eq.0) return
@@ -287,19 +316,40 @@ C     GTFLD has already been done above if there were no SEFD parameters.
       if (npar(1).gt.0) CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
 C Rack field
       if (ic1.ne.0) then ! rack field
-        nch = min0(ic2-ic1+1,8)
-        crack=cbuf(ic1:ic1+nch-1)    
+        nch = min0(ic2-ic1+1,20)
+        crack=cbuf(ic1:ic1+nch-1)
+        call capitalize(crack)
+! Map DBBC rack to DBBC_DDC 
+        if(crack .eq. "DBBC") crack = "DBBC_DDC" 
+        if(crack .eq. "DBBC/FILA10G") crack ="DBBC_DDC/FILA10G"
+! 
+        iwhere=iwhere_in_string_list(crack_type_cap,max_rack_type,crack)
+        if(iwhere .eq. 0) then
+          crack="unknown"
+          ierr=-10-2*npar(1)
+          return
+        else
+          crack=crack_type(iwhere)
+        endif
           
         CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
 C Rec A field
         if (ic1.ne.0) then ! rec A field
-          nch = min0(ic2-ic1+1,8)
+          nch = min0(ic2-ic1+1,12)
           creca=cbuf(ic1:ic1+nch-1)
-          call capitalize(creca)      
+          call capitalize(creca)
+          iwhere=iwhere_in_string_list(crec_type_cap,max_rec_type,creca)
+          if(iwhere .eq. 0) then
+            ierr=-11-2*npar(1)
+            return
+          else
+            creca=crec_type(iwhere)
+          endif
           CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
+
 C Rec B field or S2 mode
           if (ic1.ne.0) then ! rec B or S2 mode field
-            nch = min0(ic2-ic1+1,8)
+            nch = min0(ic2-ic1+1,12)
             if(creca .eq. "S2") then
               continue
             else

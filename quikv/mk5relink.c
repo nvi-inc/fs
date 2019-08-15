@@ -1,4 +1,4 @@
-/* mk5relink SNAP command */
+/* mk5relink/dbbcrelink SNAP command */
 
 #include <stdio.h> 
 #include <string.h> 
@@ -34,11 +34,14 @@ mk5cn:
       ip[0]=2;
       ip[1]=0;
       ip[2]=0;
-      skd_run("mk5cn",'w',ip);
+      if(itask == 5)
+	skd_run("mk5cn",'w',ip);
+      else // (itask == 24)
+	skd_run("dbbcn",'w',ip);
       skd_par(ip);
 
-      /* allow schedule to continue if no error */
-      if(ip[2]==0)
+      /* for mark5: allow schedule to continue if no error */
+      if(itask == 5 && ip[2]==0)
 	shm_addr->KHALT=0;
 
       return;

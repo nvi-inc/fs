@@ -10,6 +10,7 @@ c
 
       ip(3)=0
       call setup_fscom
+      call fmperror_standalone_set(0)
       call sincom(ip)
       if(ip(3).ne.0) call fc_exit(-1)
       call write_fscom

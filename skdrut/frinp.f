@@ -23,7 +23,7 @@ C     IERR - error number
       integer igetstatnum
       integer ias2b,igtfr
 
-C
+
 C  LOCAL:
       integer ix,n
 
@@ -103,6 +103,8 @@ C 2003Jul25 JMG  ITRAS changed to function
 ! 2008Sep25 JMG. Modified so won;'t set bitdens if recorder is Mark5 or K5
 ! 2011Aug11  JMG. Reformatted some warning messages
 ! 2013Sep19  JMGipson made sample rate station dependent
+! 2015Jun05 JMG Modified to use new version of itras. 
+! 2016Dec05 JMG. Fixed bug in reading in samplate rate. Previously  applied the sample rate to "1,ns". Now to "1,nstatn" 
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -110,6 +112,8 @@ C
       iDoNotUse=ibuf(1)   !this bit of code makes lchar=first character in ibuf
 
       ilen2=ilen-1
+!      write(*,'("--->",10a2)') ibuf(2:11) 
+
       if(lchar .eq. "C") then
        CALL UNPCO(IBUF(2),ilen2,IERR,LC,LSG,F1,F2,Icx,LM,VB,itrk_map,
      >     cswit,ivc)
@@ -128,16 +132,16 @@ C
 
 ! Update the track mapping if neccessary.
       if(nstsav .eq. 0 .and. lchar .eq. "F") then
-        call init_itrk_map(itrk_map)
+        call new_track_map()                  !indicate that we are starting a new track map. 
       endif
 
       if(lchar .ne. "C" .and. nstsav .ne. 0) then
         do j=1,nstsav ! apply to each station on the preceding "F" line
           is=istsav(j)
-          call add_trk_map(is,ncodes,itrk_map)
+          call add_track_map(is,ncodes)       !Done with all of the tracks. Add the map. 
         end do
         nstsav=0
-        call init_itrk_map(itrk_map)
+        call new_track_map()
       endif
 
 C
@@ -359,7 +363,7 @@ C     4. This is the name type entry section.
 C        Index for icode has already been found above.
 C
       IF (lchar.eq. "F") THEN  !name entry
-C       Check the list of station names.
+C       Check the list of station names.  
         ibad=0
         if (ns.gt.0) then ! station names on "F" line
           do is=1,ns ! for each station name found on the line
@@ -374,7 +378,7 @@ C       Check the list of station names.
 C            idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
             endif
           enddo
-          nstsav=ns ! 
+          nstsav=ns !           
         else ! no stations listed, assume all
           nstsav=nstatn
           do i=1,nstatn
@@ -388,10 +392,10 @@ C           idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
 C
 C 5. This is the sample rate line.
 
-      if (lchar.eq. "R") then ! sample rate
-        do is=1,ns
+      if (lchar.eq. "R") then ! sample rate  
+        do is=1,nstatn 
           samprate(is,icode)=srate
-         end do 
+        end do 
       endif ! sample rate
 
 C 6. This section for the barrel roll line.

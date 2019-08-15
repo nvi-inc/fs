@@ -185,6 +185,8 @@ void cshm_init()
 
   shm_addr->check.systracks[0]=0;
   shm_addr->check.systracks[1]=0;
+  
+  shm_addr->check.dbbc_form=0;
 
   shm_addr->IRDYTP[0]=-1;
   shm_addr->IRDYTP[1]=-1;
@@ -195,6 +197,7 @@ void cshm_init()
   shm_addr->knewtape[0]=0;
   shm_addr->knewtape[1]=0;
 
+  shm_addr->scan_name.name_old[0]=0;
   shm_addr->scan_name.name[0]=0;
   shm_addr->scan_name.session[0]=0;
   shm_addr->scan_name.station[0]=0;
@@ -244,7 +247,7 @@ void cshm_init()
   shm_addr->tpicd.stop_request=1;
   shm_addr->tpicd.tsys_request=0;
   shm_addr->tpicd.cycle=0;
-  for(i=0;i<MAX_TSYS_DET;i++)
+  for(i=0;i<MAX_GLOBAL_DET;i++)
      shm_addr->tpicd.itpis[i]=0;
 
   for(i=0;i<MAX_ONOFF_DET;i++)
@@ -320,6 +323,7 @@ void cshm_init()
   for (i=0;i<MAX_USER_DEV;i++) {
     shm_addr->user_device.lo[i]=-1.0;
     shm_addr->user_device.sideband[i]=0;
+    shm_addr->user_device.zero[0]=1;
   }
 
   shm_addr->disk_record.record.record=-1;
@@ -378,6 +382,7 @@ void cshm_init()
   m5state_init(&shm_addr->mk5b_mode.source.state);
   m5state_init(&shm_addr->mk5b_mode.mask.state);
   m5state_init(&shm_addr->mk5b_mode.decimate.state);
+  m5state_init(&shm_addr->mk5b_mode.samplerate.state);
   m5state_init(&shm_addr->mk5b_mode.fpdp.state);
 
   shm_addr->holog.az=0.0;
@@ -417,10 +422,10 @@ void cshm_init()
     shm_addr->dbbcnn[i].avper=0;
   }
   for (i=0;i<MAX_DBBCIFX;i++) {
-    shm_addr->dbbcifx[i].input=1;
+    shm_addr->dbbcifx[i].input=-1;
     shm_addr->dbbcifx[i].att=-1;
-    shm_addr->dbbcifx[i].agc=1;
-    shm_addr->dbbcifx[i].filter=1;
+    shm_addr->dbbcifx[i].agc=-1;
+    shm_addr->dbbcifx[i].filter=-1;
     shm_addr->dbbcifx[i].target_null=1;
     shm_addr->dbbcifx[i].target=0;
   }
@@ -428,9 +433,19 @@ void cshm_init()
   shm_addr->dbbcform.test=-1;
 
   shm_addr->dbbc_cont_cal.mode=0;
+  shm_addr->dbbc_cont_cal.polarity=-1;
   shm_addr->dbbc_cont_cal.samples=10;
 
   shm_addr->m5b_crate=32;
+
+  m5state_init(&shm_addr->fila10g_mode.mask2.state);
+  m5state_init(&shm_addr->fila10g_mode.mask1.state);
+  m5state_init(&shm_addr->fila10g_mode.decimate.state);
+
+  for(i=0;i<16;i++) {
+    shm_addr->dbbc_vsix[0].core[i]=0;
+    shm_addr->dbbc_vsix[1].core[i]=0;
+  }
 
   for(i=0;i<MAX_MK6;i++) {
     shm_addr->mk6_units[i]=0;

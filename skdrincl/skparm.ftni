@@ -11,7 +11,11 @@ C           max_frq from 20 to 17
 C so that drudg will compile and load.
 C********************************************************************
 C
-C  Last modified:  890623 by NRV to add windows parameters
+! Now put in recent changes at the top.
+!
+! 2017Oct24 JMG MAX_SOR-->5000, MAX_CEL-->4990
+!
+C 890623 by NRV to add windows parameters
 C 891113 NRV Add max base/flux parameter
 C 900125 NRV added max tape length parameter
 C 900206 NRV Modified to remove SOCAT, STCAT
@@ -68,18 +72,18 @@ C 2004May14 JMGipson. Removed physical constants-->constants.ftni
 ! 2006Sep18 JMGipson. Changed max_obs to 10000
 ! 2007Feb09 JMGipson. Changed max_stn to 40, max_sor to 500, and max_obs to 20000
 ! 2007May26 JMGipson. Changed max_rec_type,max_rack_type for Mark5B hardware
-! 2008Apr11 JMGipson. Changed max_obs to 30000
-! 2014Aug20 JMGipson. Removed implicit none. Now must appear in each subroutine
+! 2016Jan19 JMGipson. Changed max_bbc to 32
 C
 C********************************************************************
-
+C
+      implicit none
 C
 C     The maximum number of stations which can be selected for
 C     an experiment at one time.  Used in SKED and DRUDG.
 C
       integer max_stn,max_baseline,max_hor,max_cor,max_headstack,
      .max_track,max_pass,max_ifd,max_bbc,max_index,max_chan,
-     .max_subpass,max_tone,max_roll_def
+     .max_subpass,max_tone,max_roll_def,max_change_list
 
       PARAMETER (MAX_STN = 40)
 C
@@ -103,7 +107,7 @@ C *** NOTE: If this value is changed, then at least one of MAX_CEL
 C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
 C
       integer max_sor,max_cel,max_sat,max_frq
-      PARAMETER (MAX_SOR = 1000)
+      PARAMETER (MAX_SOR = 5000)
 
 C     The maximum number of CHARACTERS in a source name. Should be
 C     an even integer. Maximum size now is 26, to be cmpatible with
@@ -117,7 +121,7 @@ C     be selected for an experiment at one time. Used in SKED,SOCAT,DRUDG.
 C *** NOTE: If this value is changed at least one of MAX_SOR
 C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
 C
-      PARAMETER (MAX_CEL = 990)
+      PARAMETER (MAX_CEL = 4990)
 C
 C     The maximum number of satellite (orbital element) sources which
 C     can be selected for an experiment at one time. Used in SKED
@@ -130,11 +134,11 @@ C
 C     The maximum number of frequency codes which can be selected
 C     for use in an experiment at one time.  Used in SKED and DRUDG.
 C
-      PARAMETER (MAX_FRQ = 50)
+      PARAMETER (MAX_FRQ = 40)
 
 !     Maximum number of tracks.  Mark4 goes from 2:33 usable tracks.
       integer max_trk
-      parameter (max_trk=128)
+      parameter (max_trk=33)
 
 C
 C     The maximum number of phase cal tones that can be detected
@@ -169,6 +173,8 @@ C     Maximum number of VLBA entries.
 
       parameter (max_vlba = MAX_STN*MAX_FRQ)
 C
+C     Maximum number of rise/set times in arrays.
+
 C     Maximum number of parameters for the calculation of
 C     elevation-dependent SEFDs.
 
@@ -206,7 +212,7 @@ C     Maximum number of IFs in a system.
 
 C     Maximum number of BBCs in a system.
 
-      parameter (max_bbc = 16)
+      parameter (max_bbc = 32)
 
 C     Maximum number of video channels.
 C     Formerly this was 16 because u/l are handled as sub-parts of
@@ -215,6 +221,11 @@ C     in VEX file, so this probably has to be 32 now.
 C
       PARAMETER (MAX_CHAN = 32)
 
+C     Maximum number of tapes for which tape change times will be
+C     displayed in the summary listing. This does not limit
+C     the number of tapes that can be scheduled.
+
+      PARAMETER (max_change_list = 10)
 
 C     Lengths for thick and thin tape.
 
@@ -312,6 +323,6 @@ C
 C
 C     The maximum number of scans allowed in a schedule
 C
-      PARAMETER (MAX_OBS = 30000)
+      PARAMETER (MAX_OBS = 20000)
 
 

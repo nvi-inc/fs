@@ -8,10 +8,8 @@
 Settable parameters:
          chan   loX, where X is one of:
                    1, 2, or 3 for Mark III/IV/5 and K-4,
-                   a, b, c, or d for VLBA/4/5
+                   a, b, c, or d for VLBA/4/5 and DBBC
                    1, 2, 3, or 4 for LBA/4,
-                   a, b, c, d, 2a, 2b, 2c, or 2d for DBBC
-                   a0, a1, b0, b1, c0, c1, d0, or d1 for RDBE
 	           1-4 for all others.
                 No default. No previous value available.
          freq   LO frequency for this channel, MHz. No default. No
@@ -42,14 +40,8 @@ IF3 mixer, if it is being used.
 
 The LO frequencies are used by the pcalr and pcald programs to
 calculate the frequencies of the phase calibrator tones. Pcalr has not
-been tested with spacings other than 1 MHz.
-
-The FIVEPT and ONOFF commands use the values to look-up the source
-flux, antenna gains and Tcal values for the the selected
-detectors. The CALTEMP command uses it to look up the Tcal values.
-
-For the DBBBC, the second four LOs (2a, 2b, 2c, 2d) are not used for
-anything but populating the internal LO array.
+been tested with spacings other than 1 MHz. The beamx commands use the
+LO frequencies to calculate default beamwidths.
 
 An lo= with no parameters clears all LO values.
 

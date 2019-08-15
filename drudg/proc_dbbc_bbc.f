@@ -3,7 +3,9 @@
   
 ! Note: Also calculate and store in common BBC freqs, lo freqs. 
 ! History
-!  2012Sep12  JMGipson. First version. Modeled proc_vracks_bbc.
+!  2012Sep12 JMGipson. First version. Modeled proc_vracks_bbc.
+!  2016Jan19 JMGipson. Modified for new DBBC versions. 
+!  2016Nov21 JMGipson. Don't check original rack type anymore. 
 !
 ! Write out VC commands.
       include 'hardware.ftni'
@@ -42,9 +44,11 @@
 
       write(cbbc,'("bbc",i2.2)') ib 
   
-      if(cstrack_orig(istn) .eq. "DBBC" .or. 
-     >   cstrack_orig(istn) .eq. "NONE") then
-         kdbbc=.true.
+! Commented out 2016Nov21 
+!      if(cstrack_orig(istn)(1:4) .eq. "DBBC" .or.  
+!     >   cstrack_orig(istn) .eq. "NONE") then
+       if(.true.) then
+         kdbbc=.true. 
 !        Check to see if the IF is valid. Should be of the form:
 !        A1,A2...A4,  B1,B2...B4, .... D1...D4 
         cif=cifinp(ic,istn,icode)  
@@ -113,10 +117,12 @@
   
 ! Make a string that looks like:
 ! bbc01=612.99,a,8.000
-      write(cbuf,'("bbc",i2.2,"=",f7.2,",",a1,",", f6.2)') 
+      if(cstrack_cap(istn)(1:8) .eq. "DBBC_DDC") then
+        write(cbuf,'("bbc",i2.2,"=",f7.2,",",a1,",", f6.2)') 
      >    ib,fvc(ib),cifinp(ic,istn,icode), vcband(ic,istn,icode)
-      call squeezeleft(cbuf,nch)
-      call lowercase_and_write(lu_outfile,cbuf)
+        call squeezeleft(cbuf,nch)
+        call lowercase_and_write(lu_outfile,cbuf)
+      endif
       return
       end 
 

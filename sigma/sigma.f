@@ -43,6 +43,8 @@ C          edit:     point(s) removed,     point(s) added
       data il/100/,mpts/500/,idcbos/784/
       data ip/5*0/
 C
+      call fmperror_standalone_set(1)
+C
       ic=ib2as(mpts,ldum,1,o'100000'+6)
 C
       if (kinit(lu,iibuf,iobuf,iapp,imbuf,lst)) goto 10010

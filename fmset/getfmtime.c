@@ -20,7 +20,7 @@ extern int s2type;
 extern char s2dev[2][3];
 
 void getfmtime(unixtime,unixhs,fstime,fshs,formtime,formhs,m5sync,sz_m5sync,
-	       m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock,vdif_epoch)
+	       m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock,vdif_epoch,ierr)
 time_t *unixtime; /* computer time */
 int    *unixhs;
 time_t *fstime; /* field system time */
@@ -36,9 +36,13 @@ int sz_m5freq;
 char *m5clock;
 int sz_m5clock;
 int *vdif_epoch;
+int *ierr;
 {
   static long phase =-1;
   long raw, sleep, rawch;
+  int it[6];
+
+  *ierr=0;
 
   if (nsem_test(NSEM_NAME) != 1) {
     endwin();
@@ -74,15 +78,14 @@ int *vdif_epoch;
       rte_sleep(sleep); 
     }
     get5btime(unixtime,unixhs,fstime,fshs,formtime,formhs,&rawch,m5sync,
-	      sz_m5sync,m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock);
+	      sz_m5sync,m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock,
+	      ierr);
     if(*formtime < 0) {
       phase = -2;
     } else if(*formhs > -1 && *formhs < 100) {
       phase=(100+*formhs-rawch%100)%100;
     }
-  } else if (source == DBBC 
-   /* && (rack_type == DBBC_DDC_FILA10G || rack_type == DBBC_PFB_FILA10G) */
-	     ) {
+  } else if (rack == DBBC && (rack_type == DBBC_DDC_FILA10G || rack_type == DBBC_PFB_FILA10G)) {
     getfila10gtime(unixtime,unixhs,fstime,fshs,formtime,formhs);
   }  else if (source == S2) {
     gets2time(s2dev[s2type],unixtime,unixhs,fstime,fshs,formtime,formhs);

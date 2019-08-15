@@ -31,24 +31,38 @@ C
       integer*2 icmnd(3),iques,idolr,indata(12),isav(10),izero(10)
       integer*2 lwho
       character*5 name
-      logical kst
+      logical kst, kzero
       data icmnd/ 2H#9,2H3%,2H__/,iques/2H??/,idolr/2H$$/
       data isav/2h#9,2H3=,0,0,0,0,2H__,0,0,0/
       data izero/2H#9,2H3=,2H00,2H00,2H3f,2H3f,2H__,0,0,0/
       data nin/-20/,lwho/2hfp/,name/'fivpt'/
 C
       kst=ichcm_ch(ldevfp,1,'u').eq.0
+      if(kst) then
+         call fs_get_user_device_zero(user_device_zero)
+         if(ichcm_ch(ldevfp,2,'5').eq.0) then
+            kzero=user_device_zero(5).ne.0
+         else if(ichcm_ch(ldevfp,2,'6').eq.0) then
+            kzero=user_device_zero(6).ne.0
+         else
+            kzero=.true.
+         endif
+      endif
 C
 C MAKE SURE THE CAL IS OFF
 C
       call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
       call fs_get_dbbc_cont_cal_mode(dbbc_cont_cal_mode)
       call fs_get_dbbc3_cont_cal_mode(dbbc3_cont_cal_mode)
       if(calfp.gt.0.0.and.
      &     ((rack.ne.DBBC.and.rack.ne.RDBE.and.rack.ne.DBBC3).or.
-     &     (rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.0).or.
+     &     (rack.eq.DBBC.and.rack_type.eq.DBBC_PFB).or.
+     &     (rack.eq.DBBC.and.rack_type.eq.DBBC_PFB_FILA10G).or.
+     &     (rack.eq.DBBC.and.
+     &        (rack_type.eq.DBBC_DDC.or.rack_type.eq.DBBC_DDC_FILA10G).and.
+     &        dbbc_cont_cal_mode.eq.0).or.
      &     (rack.eq.DBBC3.and.dbbc3_cont_cal_mode.eq.0))) then
-c     &     (rack.eq.RDBE.and.dbbc_cont_cal_mode.eq.0))) then
          call scmds('calofffp',1)
       endif
 C
@@ -85,7 +99,10 @@ C
 C  TURN ON ALL THE ATTENUATORS
 C
       if (kst) then
-         call scmds('sigofffp',1)
+         if(kzero) then
+            call susp(1,202)
+            call scmds('sigofffp',1)
+         endif
          ierr=0
       else if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
          if(ichfp_fs.ne.3) then
@@ -115,12 +132,18 @@ c       digital detector - assume tpzero=0
 C
 C  OKAY GET THE VOLTS
 C
-      if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack.or.
-     .   VLBA.eq.rack.or.VLBA4.eq.rack) then
+      if((MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack.or.
+     .   VLBA.eq.rack.or.VLBA4.eq.rack.or.(kst.and.kzero)) .and.
+     .   .not.(kst.and..not.kzero)) then
         call volts(0,vbase,sig,vdum,sigdum,tdum,intp,rut,ierr,icont)
       else if(LBA.eq.rack.or.rack.eq.DBBC.or.rack.eq.RDBE.or.
      &           DBBC3.eq.rack) then
 c       digital detector - assume tpzero=0
+	vbase=0.0
+	sig=0.0
+	tdum=0
+	ierr=0
+      else if(kst.and..not.kzero) then
 	vbase=0.0
 	sig=0.0
 	tdum=0
@@ -131,7 +154,9 @@ C
 C  RESET THE ATTENUATORS
 C
       if (kst) then
-         call scmds('sigonfp',1)
+         if(kzero) then
+            call scmds('sigonfp',1)
+         endif
          ierr=0
       else if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
          call matcn(isav,-13,idolr,indata,nin,2,ierr)
@@ -152,13 +177,24 @@ C  NOW DO TPICAL
 C
 c      write(6,*) 'icont',icont
       call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
       call fs_get_dbbc_cont_cal_mode(dbbc_cont_cal_mode)
       call fs_get_dbbc3_cont_cal_mode(dbbc3_cont_cal_mode)
       if(calfp.gt.0.0.and.
+<<<<<<< HEAD
      &     ((rack.ne.DBBC.and.rack.ne.RDBE.and.rack.ne.DBBC3).or.
      &     (rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.0).or.
      &     (rack.eq.DBBC3.and.dbbc3_cont_cal_mode.eq.0))) then
 c     &     (rack.eq.RDBE.and.dbbc_cont_cal_mode.eq.0))) then
+=======
+     &     (rack.ne.DBBC.or.
+     &     (rack.eq.DBBC.and.rack_type.eq.DBBC_PFB).or.
+     &     (rack.eq.DBBC.and.rack_type.eq.DBBC_PFB_FILA10G).or.
+     &     (rack.eq.DBBC.and.
+     &     (rack_type.eq.DBBC_DDC.or.rack_type.eq.DBBC_DDC_FILA10G).and.
+     &     dbbc_cont_cal_mode.eq.0))) then
+
+>>>>>>> master
 C
 C       TURN CAL ON
 C 
@@ -208,7 +244,9 @@ C
 8001  continue
       jerr=0
       if (kst) then
-         call scmds('sigonfp',1)
+         if(kzero) then
+            call scmds('sigonfp',1)
+         endif
          jerr=0
       else if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
          call matcn(isav,-13,idolr,indata,nin,2,jerr)

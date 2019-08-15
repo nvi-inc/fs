@@ -46,8 +46,10 @@ C 2003Jul11 JMG added itctim
 ! 2008Aug19 JMG. Added cbbcbuf which is equivalenced to ibbcbuf.
 ! 2013Sep19 JMG. Added klo_config, ktarget_time
 ! 2015Jan30 JMG. Added kignore_bad_mask 
-! 2015Mar20 JMG. Added imark6_off 
-! 2015Mar30 JMG. Got rid of iperm. 
+! 2015Jul17 JMG. Added  cont_calPolarity
+! 2016Sep08 JMG. Added lvsi_prompt
+! 2016Dec23 JMG. Added ical_time_staggered, kcont_cal
+! 2018Jul20 JMG. removed cversion and put in drver_com.ftni 
 c
       logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
      .          kprepass,kdr_type,kgeo,kpostpass
@@ -56,18 +58,21 @@ c
 
       logical klo_config, ktarget_time
       logical kignore_Mark5B_bad_mask 
+      logical kcont_cal
 
       common/drcom_logical/
      .       kvex,klab,KSPINT,KFLG(4),kbatch,kmissing,kparity,
      .       kdrg_infile,kprepass,kdr_type,kgeo,
      .       kpostpass,klabel_ps,ksked_proc,
-     >       klo_config,ktarget_time,kignore_Mark5b_bad_mask 
+     >       klo_config,ktarget_time,kignore_Mark5b_bad_mask,
+     >       kcont_cal 
 
       CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .  lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
-     .  cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,cversion
+     .  cprttyp,cprport,cprtlab,clabtyp,labname,ctextname
 
-      character*4 tpid_prompt, contcal_prompt
+      character*4 tpid_prompt, cont_cal_prompt,lvsi_align_prompt
+      character*4 cont_cal_Polarity
 
       character*2 cpaper_size
       character*2 coption
@@ -76,24 +81,26 @@ c
       integer*2 IBUF(ibuf_len)
       character*(2*ibuf_len) cbuf
       equivalence (cbuf,ibuf)
+    
 
       COMMON/DRCOM_CH/cbuf, LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .    lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .    cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,
-     >    cpaper_size,coption(3),ctextname,cversion,
-     >    tpid_prompt,contcal_prompt
+     >    cpaper_size,coption(3),ctextname,
+     >    tpid_prompt,cont_cal_prompt,cont_cal_polarity,
+     >    lvsi_align_prompt
 
 
       double precision RA50(max_cel),DEC50(max_cel)
       real rlabsize(6)
 c
-      integer iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
+     
       INTEGER ireccv,IRECSK,IRECST,IRECEL,isklen,luusr,
      .  lu_infile,istn,
      .  nlab,nllab,
      .  icrty6,
      .  itctim,ilabrow,ilabcol,inewpage,
-     .  nchanr,fileptr,itpid_period
+     .  nchanr,iperm,fileptr,itpid_period
 
       integer lu_outfile,luprt,luscn
 C
@@ -102,10 +109,11 @@ C
       equivalence (ibbcbuf,cbbcbuf)
       integer ibbclen(2,3)
       integer nbbcbuf(2)
-      integer imark6_off
+
+      integer ical_time_staggered           !override time for the calibration.
 
       COMMON/DRCOM_int/
-     .       iVerMajor_FS, iVerMinor_FS, iVerPatch_FS,
+  
      .       ISKLEN,LUUSR,
      .       LU_INFILE, LU_OUTFILE,LUPRT,
      >       ISTN,
@@ -115,8 +123,8 @@ C
      .       ICRTY6,
      .       ilabrow,ilabcol,inewpage,
      .       luscn,itpid_period,
-     .       nchanr,fileptr,
-     .       ibbcbuf,ibbclen,nbbcbuf,imark6_off 
+     .       nchanr,iperm,fileptr,
+     .       ibbcbuf,ibbclen,nbbcbuf,ical_time_staggered
 
       common/drcom_real/
      >       RA50,DEC50,rlabsize

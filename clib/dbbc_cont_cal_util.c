@@ -12,9 +12,9 @@ static char *mode_key[ ]={"off","on"};
 
 #define NMODE_KEY sizeof(mode_key)/sizeof( char *)
 
-int dbbc_cont_cal_dec(lcl,count,ptr)
+int dbbc_cont_cal_dec(lcl,count,ptr,polarity_control)
 struct dbbc_cont_cal_cmd *lcl;
-int *count;
+int *count, polarity_control;
 char *ptr;
 {
     int ierr, ind, arg_key();
@@ -29,6 +29,23 @@ char *ptr;
 	ierr=arg_key(ptr,mode_key,NMODE_KEY,&lcl->mode,0,TRUE);
         break;
       case 2:
+	if(polarity_control) {
+	  ierr=arg_int(ptr,&lcl->polarity,0,FALSE);
+	  if(ierr==-100)
+	    ierr=0;  /*old value is the default */
+	  else if(ierr==0 && (lcl->polarity < 0 ||lcl->polarity > 3))
+	    ierr=-200;
+	} else {
+	  ierr=arg_int(ptr,&lcl->polarity,0,FALSE);
+	  if(ierr!=-100)
+	    ierr=-210;
+	  else {
+	    ierr=0;
+	    lcl->polarity=-1;
+	  }
+	}
+	break;
+      case 3:
         ierr=arg_int(ptr,&lcl->samples,10,TRUE);
 	if(ierr == 0 && lcl->samples < 1)
 	  ierr=-200;
@@ -60,6 +77,10 @@ struct dbbc_cont_cal_cmd *lcl;
           strcpy(output,BAD_VALUE);
         break;
       case 2:
+	if(lcl->polarity>=0)
+	  sprintf(output,"%d",lcl->polarity);
+        break;
+      case 3:
 	sprintf(output,"%d",lcl->samples);
         break;
       default:
@@ -82,6 +103,9 @@ struct dbbc_cont_cal_cmd *lcl;
   if(lcl->mode >= 0 && lcl->mode < NMODE_KEY) 
     strcat(buff,mode_key[lcl->mode]);
 
+  if(lcl->polarity >= 0)
+    sprintf(buff+strlen(buff),",%d",lcl->polarity);
+
   return;
 }
 
@@ -98,6 +122,11 @@ char *buff;
 
   ptr=strtok(NULL,",");
   ierr=arg_key(ptr,mode_key,NMODE_KEY,&lclc->mode,-1,TRUE);
+  if(ierr!=0)
+    return -1;
+
+  ptr=strtok(NULL,",");
+  ierr=arg_int(ptr,&lclc->polarity,-1,TRUE);
   if(ierr!=0)
     return -1;
 

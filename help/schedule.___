@@ -1,6 +1,6 @@
                schedule - start a new schedule file
 
-            Syntax:     schedule=name,start,#lines
+            Syntax:     schedule=name,start,lines
 
             Response:   schedule/name,line
 
@@ -24,24 +24,32 @@ Settable parameters:
                     time  to start with the observation beginning no
                           earlier than this time. time is in standard SNAP
                           format.
-        #lines  Number of lines to execute before automatically
+        lines   Number of lines to execute before automatically
                 halting. Default is the remainder of the schedule.
 
 Monitor-only parameters:
         line    The line number to be executed next.
 
-Comments: 
-If the schedule is started successfully, a log file having the same
-name as the schedule is automatically started, and the procedure file
-having the same name as the schedule is automatically established as
-the schedule procedure library.  Any previously time-scheduled
-procedures from this library are cancelled. If a # of lines is
-specified, an automatic halt will be issued after execution of these
-lines. The schedule may then be continued using the cont command.
+Comments:
+You can specify a name of an actual schedule as "none".  However, this
+can be confusing and doing so may cause some aspects of the FS to
+misbehave since "none" is used internally to indicate there is no
+schedule.
 
-Line numbers for starting, or restarting, a schedule can found in
-the DRUDG option 5 listing.  Only line numbers where the schedule
-can be cleanly restarted at the start of a recording are shown.
+If the schedule is started successfully, a log file having the same
+name as the schedule is automatically opened (if not already open). It
+will be created if not already existing.  A procedure file having the
+same name as the schedule is automatically opened as the schedule
+procedure library.  Any previously time-scheduled procedures from the
+previous eexperiment libray (if any) are cancelled.
+
+If lines is specified, an automatic halt will be issued after
+execution of that many lines. The schedule may then be continued using
+the cont command.
+
+Line numbers for starting, or restarting, a schedule can found in the
+DRUDG option 5 listing.  Only line numbers where the schedule can be
+cleanly restarted at the start of a recording are shown.
 
 There is an interlock that causes a "schedule=..." command to be
 rejected if either PFMED is running or disk recording has been
@@ -84,10 +92,11 @@ the station library if no commands are needed.
 
 You can override this behavior for any particular experiment in
 several possible ways.  You can change the commands in the
-"exper_initi" procedure in anyway.  Specifically, you can remove the
-call to "sched_initi" in "exper_initi" or you can change the procedure
-to call something else.  Another option is to put an experiment
-specific "sched_initi" in the experiment's schedule procedure library.
+"exper_initi" procedure in the experiment procedure file in anyway.
+Specifically, you can remove the call to "sched_initi" or you can
+change the procedure to call something else.  Another option is to put
+an experiment specific "sched_initi" in the experiment's schedule
+procedure library.
 
 You could also remove "exper_initi" from the experiment's schedule
 library.  In that case, an "exper_initi" in the station procedure

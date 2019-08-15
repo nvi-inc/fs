@@ -43,6 +43,7 @@ long ip[5];
   int out_recs, out_class;
 
   *ierr=0;
+  savec.agc=0;
 
   if ((device[0]!='i' || NULL == strchr(ifds,device[1])) &&
        (NULL== strchr(bbcs,device[0]) ||

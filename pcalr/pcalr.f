@@ -87,6 +87,7 @@ C     Set up the data buffer interface if this is the
 C     first pass thru' PCALR (i.e. INIT=0).
 C
       call setup_fscom
+      call fmperror_standalone_set(1)
       call putpname('pcalr')
 1     continue
       call wait_prog('pcalr',ip)

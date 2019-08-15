@@ -19,7 +19,7 @@ void rte_time();
 logitf(msg)
 char *msg;           /* a message to be logged, NULL if none */
 {
-  char buf[513];    /* Holds the complete log entry */
+  char buf[1025];    /* Holds the complete log entry */
   char name[5];     /* The name of our main program */
   int it[6],ip1,ip2,l;
  
@@ -40,8 +40,16 @@ char *msg;           /* a message to be logged, NULL if none */
   int2str(buf,it[0],-2,1);
 
   strcat(buf,"/");
-  if(msg!=NULL)
-    strncat(buf,msg,sizeof(buf)-strlen(buf)-1);
+  if(msg!=NULL) {
+    int n;
+    int bufl=strlen(buf);
+    int msgl=strlen(msg);
+    n=sizeof(buf)-bufl-1;
+    if(msgl < n)
+      n=msgl;
+    memcpy(buf+bufl,msg,n);
+    buf[bufl+n]=0;
+  }
 
 /* Send the complete log entry to ddout via class.
 */

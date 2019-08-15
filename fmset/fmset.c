@@ -25,6 +25,7 @@
 #define TOGGLE_KEY      't'
 #define TOGGLE2_KEY     'u'
 #define SYNCH_KEY       's'
+#define SYNCH2_KEY      'S'
 
 /* externals */
 void initvstr();
@@ -94,13 +95,16 @@ char mk5b_clock_source[10] ="";
 char blank[ ] = {"                                                                              "};
 int drive, drive_type;
 struct fila10g_cfg *fila10g_cfg=NULL;
- int nRDBE;
- int clear_area=0;
- int vdif_epoch, vdif_should;
+int ierr;
+int nRDBE;
+int clear_area=0;
+int vdif_epoch, vdif_should;
+
 
  putpname("fmset");
 skd_set_return_name("fmset");
 setup_ids();         /* connect to shared memory segment */
+
 
 if (nsem_test(NSEM_NAME) != 1) {
   fprintf(stderr,"Field System not running - fmset aborting\n");
@@ -172,10 +176,7 @@ else if (drive==S2) {
     toggle=TRUE;
     other=rack;
   }
- } else if (rack==DBBC
-	    /* we don't have these rack types yet */
-	    /*&& (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)*/
-	    ) {
+ } else if (rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)) {
   char buff[80];
   strcpy(buff,FS_ROOT);
   strncat(buff,"/control/fila10g_cfg.ctl",sizeof(buff)-strlen(buff)-1);
@@ -200,7 +201,7 @@ else if (drive==S2) {
       toggle2=TRUE;
   }
 
- } else if ((rack & MK3 || rack==0||rack==LBA) ||
+ } else if ((rack & MK3 || rack==0||rack==LBA ||rack==DBBC) ||
 	    ((( rack == MK4 && rack_type != MK4) ||
 	      (rack == VLBA4 && rack_type != VLBA4)) &&
 	     ( drive = MK5 && drive_type != MK5B && drive_type != MK5B_BS))
@@ -265,9 +266,8 @@ mvwaddstr( maindisp, 2, 3, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B
    hint_row=12;
    form="Mark 5B";
   mvwaddstr( maindisp, 4, column, "Mark 5B     " );
- }  else if (source==DBBC 
-    /* we don't have these rack types yet */
-    /*&& (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)*/
+ }  else if (rack==DBBC 
+         && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)
 	     ) {
    if(0==iDBBC) {
      mvwaddstr( maindisp, 4, column, "FiLa10G     " );
@@ -313,9 +313,7 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  }
  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
-		     (source==DBBC
-     /* we don't have these rack types yet */
-     /*&& (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)*/
+		     (rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)
 		      ) || source==RDBE)) {
    sprintf(buffer, "    's'/'S' to SYNC %s (VERY rarely needed)",form);
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
@@ -393,6 +391,13 @@ do 	{
 	    vdif_should=(disptm->tm_year-100)%32;
 	    vdif_should=vdif_should*2+disptm->tm_mon/6;
 	  }
+	} else if (ierr==-898 &&   source==MK5) {
+                                          /* 123456789012345678901234567890123456789012345678901234 */
+	  wstandout(maindisp);
+	  mvwaddstr( maindisp, 4, column+15, "Mark 5B sync required, use 's'.");
+	  wstandend(maindisp);
+	  mvwaddstr( maindisp, 4, column+15+31, "                       ");
+ 
 	} else {                           /* 123456789012345678901234567890123456789012345678901234 */
 	  wstandout(maindisp);
 	  mvwaddstr( maindisp, 4, column+15, "Error from device, see log for details.");
@@ -468,15 +473,11 @@ do 	{
 	} else if(source==MK5) {
 	  char *pps_status,*freq_status,*source_status;
 	  if((rack == VLBA4 && rack_type == VLBA45) ||
-	    /* we don't have these rack types yet */
-	     /* (rack == VLBA4 && rack_type == VLBA4C ) || */
-	     /* (rack == VLBA4 && rack_type == VLBA4CDAS ) || */
+	     (rack == VLBA4 && rack_type == VLBA4C ) || 
+	     (rack == VLBA4 && rack_type == VLBA4CDAS ) || 
 	     (rack == MK4   && rack_type == MK45  ) || 
-	     (source==DBBC
-  /* we don't have these rack types yet */
-  /* && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)
-   */
-	      )) {
+	     (rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G))
+	     ) {
 	    if(strcmp(mk5b_1pps,"vsi")==0)
 	      pps_status="- okay                         ";
 	    else
@@ -650,10 +651,8 @@ do 	{
 	  for (i=hint_row;i<hint_row+irow;i++)
 	    mvwaddstr( maindisp, i, 1, blank);
 	  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
-			      (source==DBBC 
-   /* we don't have these rack types yet */
-   /*&& (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)*/
-			       ) || source == RDBE) &&
+			      (rack==DBBC && 
+			       (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)) || source == RDBE) &&
 	     asksure( maindisp,m5rec,1)) {
 	    synch=1;
 	    if(source == S2 && s2type == 1)
@@ -661,10 +660,8 @@ do 	{
 	    else
 	      changedfm=1;
 	  }
-	  if (synch && rack==DBBC
-	    /* we don't have these rack types yet */
-	      /* && (rack_type==DBBC_DDC_FILA10G ||
-		 rack_type==DBBC_PFB_FILA10G) */ &&
+	  if (synch && rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||
+			     rack_type==DBBC_PFB_FILA10G) &&
 	      NULL!=fila10g_cfg) {
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
@@ -694,7 +691,7 @@ endwin ();
 
      } else 
        skd_run_arg("setcl",' ',ipr,"setcl offset");
-   else if(source != DBBC)/* temporary since we don't have fila10g in setcl yet */
+   else
      if(formtime >0 )
        skd_run_arg("setcl",' ',ipr,"setcl");
  }

@@ -2,7 +2,7 @@
 
             Syntax:     tnx=code,number,off/on,#num
 
-            Response:   tnx/code,number,off/on,#num,string
+            Response:   tnx/code,number,off/on,#num,string,example
 
 
 Settable parameters:
@@ -17,13 +17,17 @@ Settable parameters:
                         otherwise default is null
 
 Monitor-only parameters:
-          string      the error message instance associated with #num
+          string      the error message instance associated with
+                      code,number and #num. This is null if the
+                      code,number is not defined in fserr.ctl,
+                      sterr.ctl, or the list of OS error messages.
+          example     example of message if not defined in fserr.ctl or
+                      sterr.ctl
 
-Comments: 
-
+Comments:
 This command is intended to provide a way to turn off display of
 specific error messages if the operator determines that nothing can be
-done to correct the problem. For example if one parameter of a
+done to correct the problem.  For example if one parameter of a
 module's set-up is being reported incorrectly by the hardware, but has
 been checked and is known to be correct, the operator can suppress
 that one error message rather than unchecking the entire module.  Even
@@ -37,23 +41,36 @@ The listing form of the command, i.e., just "tnx", displays errors
 that have been suppressed.  Each error is listed in a separate log
 entry.
 
-If the off/on parameter is 'on' display of the message is
-reenabled.
+If the off/on parameter is 'on' display of the message is reenabled.
 
 The #num is only needed if more than instance of an error with the
-specified code,number has ocurred. If there is more than one instance
+specified code,number has ocurred.  If there is more than one instance
 and #num is not specified, all instances that have occurred so far are
 displayed with their corresponding "num" values along with a
-suggestion to use the #num form. If #num is negative, it will match
-all instances of the code,number. In this case only, the FS will not
-complain if the display status of any of code,number errors are already
-in the requested state.
+suggestion to use the #num form.  If #num is negative, it will match
+all instances of the code,number that occurred so far.  In this case
+only, the FS will not complain if the display status of any of
+code,number errors are already in the requested state.
 
-This command must be used with great care. If misused it may
-turn off important error messages that the operator needs to
-know about. Consequently, its use is blocked if it is executed
-from a procedure, schedule, or time-list. This command must be
-entered interactively. The list of suppressed error messages
-is cleared every time the FS is started. Turning off an error
-message is not the same as correcting the underlying problem,
-which is the preferred method of dealing with a problem.
+If the displayed error string is null (empty) but when the error
+occurs a string is displayed that may because the programmer is
+supplying the string in a call to logite() along with the error
+code,number.  This may be because the string contents are variable.
+Note that in this case TNX will not distinguish between such variable
+strings.  It will suppress all errors with that error code,number.
+This is different from how it handles different error strings from
+fserr.ctl and sterr.ctl, all of which are individually suppressable,
+but have a more limited range of variation.  For the code,number with
+completely variable error strings, the TNX command prints an example
+string to help identify it.  This is most helpful if all the errors
+for this code,number are related, maybe only differing by a specific
+value in an otherwise fixed string.
+
+This command must be used with great care.  If misused it may turn off
+important error messages that the operator needs to know about.
+Consequently, its use is blocked if it is executed from a procedure,
+schedule, or time-list.  This command must be entered interactively.
+The list of suppressed error messages is cleared every time the FS is
+started.  Turning off an error message is not the same as correcting
+the underlying problem, which is the preferred method of dealing with
+a problem.

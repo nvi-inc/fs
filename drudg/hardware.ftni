@@ -40,12 +40,17 @@
       logical kk3fmk4rack
       logical k8bbc
       logical kdbbc_rack 
- 
+      logical kfila10g_rack    !this is another version of the DBBC rack 
+      logical kvlbac_rack      !chinese analog
+      logical kcdas_rack       !chinese digital rack    
+
       common /hardware/knorack,km3rack,km4rack,km5rack,kmracks
       common /hardware/kvrack,kv4rack,kv5rack,kvracks
       common /hardware/kk41rack,kk42rack,klrack
       common /hardware/km4fmk4rack,kk3fmk4rack,k8bbc
-      common /hardware/kdbbc_rack
+      common /hardware/kdbbc_rack,kfila10g_rack  
+      common /hardware/kvlbac_rack,kcdas_rack
+ 
 ! Mark4 formatter.
       logical kvform,km3form,km4form,km5form 
       common /hardware/kvform,km3form,km4form,km5form
@@ -65,11 +70,11 @@
       logical kk42rec(2)
       logical kk5rec(2)
       logical knorec(2)
-      logical km6rec(2)
+      logical kflexbuff 
 
       common /hardware/km3rec,km4rec,km5Arec,km5Brec,km5Crec,km5aPigWire
       common /hardware/km5prec,ks2rec,kvrec,kv4rec
-      common /hardware/kk41rec,kk42rec,kk5rec,km6rec,knorec
+      common /hardware/kk41rec,kk42rec,kk5rec,knorec,kflexbuff
 
       integer irec              !active recorder
       logical kuse(2)           !true if the recorder is in use.
@@ -82,14 +87,10 @@
       logical km5A                !config info
       logical km5B
       logical km5C 
-      logical km5disk
-      logical km6disk
-      logical kdisk 
       
-
+      logical km5disk
       logical knopass
-      common /hardware/ks2,kk4,kk5,km5A,km5B,km5C,km5p,km5disk,km6disk
-      common /hardware/kdisk, knopass
+      common /hardware/ks2,kk4,kk5,km5A,km5B,km5C,km5p,km5disk,knopass
 
       logical km5A_piggy,km5P_piggy
       logical kpiggy_km3mode         !piggy back on 2nd headstack

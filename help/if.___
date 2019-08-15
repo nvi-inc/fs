@@ -1,0 +1,115 @@
+		      if - conditional execution
+
+            Syntax:     if=condition,true-command,false-command
+
+            Response:   none
+
+
+Settable parameters:
+          condition     condition to test, see list in comments, case
+                        insensitive, leading and trailing spaces are
+                        trimmed, no default
+          true-command  SNAP command to execute if condition is true,
+                        leading spaces are trimmed, default is null
+          false-command SNAP command to execute if condition is false,
+                        leading spaces are trimmed, default is null
+
+Comments:
+This command provides conditional execution of SNAP commands based on
+whether a "condition" is true or false.  If the value of the
+"condition" is true, the "true-command" is executed; if false, the
+"false-command" is executed.  If the command that would be executed is
+null (empty), the "if" command is essentially a no-op.  Nesting of
+"if" commands is supported. 
+
+The available "condition"s and their values are given in the following
+table.
+
+condition        value
+---------        -----
+ true            always true
+ false           always false
+ ddc             true iff DDC personality is in use
+ pfb             true iff PFB personality is in use
+ cont_cal        true iff continuous cal is selected
+ core1           true iff any channels from core1 are selected for recording 
+ core2           true iff any channels from core2 are selected for recording 
+ core3           true iff any channels from core3 are selected for recording 
+ core4           true iff any channels from core1 are selected for recording
+ ifa             true iff any channels from ifa are selected for recording
+ ifb             true iff any channels from ifb are selected for recording
+ ifc             true iff any channels from ifc are selected for recording
+ ifd             true iff any channels from ifd are selected for recording
+ schedule:string true iff string matches the leading subsrting of the schedule,
+                   see below
+
+If the "schedule:string" condition, the string is compare to the
+leading characters of the current schedule name.  If and only if (iff)
+they match, the condition is true. For example:
+
+  if=schedule:r1,yes,no
+
+executes "yes" if the schedule name starts with "r1".  If ":" or
+":string" is omitted, the command is true iff any schedule is
+executing.  Trailing spaces in "string" are ignored unless they are
+followed by a colon (which is discarded).  If no schedule is executing
+(schedule=) all of the follow lines will all execute "no":
+
+  if=schedule,yes,no
+  if=schedule:none,no,yes
+  if=schedule=:none    :,no,yes
+
+Please note that if a schedule named "none" is executing
+(schedule=none), the above commands will also all execute "no".
+
+It is necessary to use backslash ("\") to "escape" any commas (",")
+and at-signs ("@") within the "true-command" and "false-command". For
+example to set the gain to AGC for IFA *if* IFA is in use without
+changing the value of other parameters, use:
+
+  if=ifa,ifa=*\,agc\,*\,*
+
+For nested "if" commands, multiple backslashes must be used to escape
+commas and at-signs.  The progression of the number of backslashes
+needed for each level of nesting (start with no nesting) is 1 (see
+example above), 3, 7, 15, 31, etc.  In other words, to escape an
+existing escape (of a single backslash) in an unnested "if" for use in
+a nest "if", add two more backslashes.  To escape an escape with three
+backslashes for another level of nesting add four more, and so on,
+doubling the number to add at each level of nesting. More than one
+level of nesting gets very complicted
+
+A method to construct a nested "if" is to start with the final command
+to be executed.  When you add an "if=..."  in front of it, add a back
+slash in front of each comma or at-sign.  If you add an "if=..." in
+front of that command, add two backslashes before any single
+backslashes and a single backslash before any unbackslashed commas or
+at-signs.  On the next iteration use the same rule, but add four
+backslashes before any triple backslashes.  Continue in this fashion
+for each level of "if", doubling the number of backslashes added
+before the previous level's greatest number of backslashes.
+
+Here is an example of using backslashes in nested "if"s.  The goal for
+this example is to contruct a command that will execute:
+
+ bbc_gain=all,agc
+
+only if the DBBC is "ddc" and the calibration mode is NOT continuous
+cal. The steps ares:
+
+1. Start with desired command:
+
+     bbc_gain=all,agc
+
+2, Add an "if" for "ddc", escaping the existing comma:
+
+     if=ddc,bbc_gain=all\,agc
+
+3. Add an enclosing "if" for NOT continuous cal.  This requires adding
+   a backslash before the previously unescaped comma and adding two
+   before the one previously escaped:
+
+     if=cont_cal,,if=ddc\,bbc_gain=all\\\,agc
+
+   The above is the resulting command. Please also note the empty
+   "true-command" for the outer "if".

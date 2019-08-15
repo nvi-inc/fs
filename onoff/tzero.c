@@ -23,20 +23,24 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
   struct req_rec request;
   struct res_buf buff_res;
   struct res_rec response;
-  int atten[4], kst1, kst2;
+  int atten[4], kst1, kst2, kst1z, kst2z;
   struct sample acdum;
 
   ifc[0]=ifc[1]=ifc[2]=ifc[3]=FALSE;
   ierr2=0;
 
-  kst1=onoff->itpis[MAX_DBBC3_DET+4];
-  kst2=onoff->itpis[MAX_DBBC3_DET+5];
+  kst1=onoff->itpis[MAX_GLOBAL_DET+4];
+  if(kst1)
+    kst1z=shm_addr->user_device.zero[4];
+  kst2=onoff->itpis[MAX_GLOBAL_DET+5];
+  if(kst2)
+    kst2z=shm_addr->user_device.zero[5];
 
-  for(i=0;i<MAX_DET;i++)  /* only for non-RDBE and non-DBBC3 */
+  for(i=0;i<MAX_GLOBAL_DET;i++)
     if(onoff->itpis[i]!=0)
       ifc[onoff->devices[i].ifchain-1]=TRUE;
 
-  if(kst1||kst2)
+  if((kst1 && kst1z)||(kst2 && kst2z))
     scmds("sigoffnf");
 
   if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||
@@ -91,12 +95,12 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
     if (ifc[0]||ifc[1]) {
       memcpy(request.device,"ia",2);             /* set 'ia' atten */
 
+      atten[0]=shm_addr->dist[0].atten[0];
       if(ifc[0]) {
-	atten[0]=shm_addr->dist[0].atten[0];
         shm_addr->dist[0].atten[ 0]=1;
       }
+      atten[1]=shm_addr->dist[0].atten[1];
       if(ifc[1]) {
-	atten[1]=shm_addr->dist[0].atten[1];
         shm_addr->dist[0].atten[ 1]=1;
       }
       dist01mc(&request.data,&shm_addr->dist[0]);
@@ -105,12 +109,12 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
     
     if (ifc[2]||ifc[3]) {
       memcpy(request.device,"ic",2);             /* set 'ic' atten */
+      atten[2]=shm_addr->dist[1].atten[0];
       if (ifc[2])  {
-	atten[2]=shm_addr->dist[1].atten[0];
         shm_addr->dist[1].atten[ 0]=1;
       }
+      atten[3]=shm_addr->dist[1].atten[1];
       if (ifc[3])  {
-	atten[3]=shm_addr->dist[1].atten[1];
         shm_addr->dist[1].atten[ 1]=1;
       }
       dist01mc(&request.data,&shm_addr->dist[1]);
@@ -144,13 +148,28 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
     /* digital detetector - assume tpzero=0 */
   }
 
-  if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4||
-     shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4||
-     onoff->itpis[MAX_DBBC3_DET+4]!=0||onoff->itpis[MAX_DBBC3_DET+5]!=0) {
+  if(shm_addr->equip.rack==MK3||
+     shm_addr->equip.rack==MK4||
+     shm_addr->equip.rack==LBA4||
+     shm_addr->equip.rack==VLBA||
+     shm_addr->equip.rack==VLBA4||
+     (kst1 && kst1z) || (kst2 && kst2z)) {
+    int itpis[MAX_ONOFF_DET]; /* if it is not a digital detector, sample zero */
 
-    get_samples(cont,ip,onoff->itpis,onoff->intp,rut,accum,&acdum,&ierr2);
+    for(i=0;i<MAX_ONOFF_DET;i++)
+      itpis[i]=onoff->itpis[i];
+    if(shm_addr->equip.rack!=MK3&&
+       shm_addr->equip.rack!=MK4&&
+       shm_addr->equip.rack!=LBA4&&
+       shm_addr->equip.rack!=VLBA&&
+       shm_addr->equip.rack!=VLBA4) /* doctor up a local copy */
+      for(i=0;i<MAX_GLOBAL_DET;i++)
+	itpis[i]=0;
 
-  } else if(shm_addr->equip.rack==LBA) {
+    get_samples(cont,ip,itpis,onoff->intp,rut,accum,&acdum,&ierr2);
+
+  }
+  if(shm_addr->equip.rack==LBA) {
 
     /* digital detetector - assume tpzero=0 */
     for (i=0; i<2*shm_addr->n_das; i++) 
@@ -160,8 +179,10 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
       }
     accum->count=1;
 
-  } else if(shm_addr->equip.rack==DBBC) {
-
+  } else if(shm_addr->equip.rack==DBBC &&
+	    (shm_addr->equip.rack_type == DBBC_DDC ||
+	     shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
+    
     /* digital detetector - assume tpzero=0 */
     for (i=0; i<MAX_DBBC_DET; i++) 
       if (onoff->itpis[i]) {
@@ -169,8 +190,19 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
         accum->sig[i]=0.0;
       }
     accum->count=1;
-  } else if(shm_addr->equip.rack==RDBE) {
+  } else if(shm_addr->equip.rack==DBBC &&
+	    (shm_addr->equip.rack_type == DBBC_PFB ||
+	     shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+    
+    /* digital detetector - assume tpzero=0 */
+    for (i=0; i<MAX_DBBC_PFB_DET; i++) 
+      if (onoff->itpis[i]) {
+        accum->avg[i]=0.0;
+        accum->sig[i]=0.0;
+      }
+    accum->count=1;
 
+  } else if(shm_addr->equip.rack==RDBE) {
     /* digital detetector - assume tpzero=0 */
     for (i=0; i<MAX_RDBE_DET; i++) 
       if (onoff->itpis[i]) {
@@ -187,11 +219,22 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
         accum->avg[i]=0.0;
         accum->sig[i]=0.0;
       }
+  }
+
+  if (kst1 && !kst1z) {
+    accum->avg[MAX_GLOBAL_DET+4] = 0.0;
+    accum->sig[MAX_GLOBAL_DET+4] = 0.0;
+    accum->count=1;
+    
+  }
+  if (kst2 && !kst2z) {
+    accum->avg[MAX_GLOBAL_DET+5] = 0.0;
+    accum->sig[MAX_GLOBAL_DET+5] = 0.0;
     accum->count=1;
   }
 
  restore:
-  if(kst1||kst2)
+  if((kst1 && kst1z)||(kst2 && kst2z))
     scmds("sigonnf");
 
   if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
@@ -304,7 +347,3 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
   *ierr=-6;
   return -1;
 }
-
-
-
-

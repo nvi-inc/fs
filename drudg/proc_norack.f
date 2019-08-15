@@ -5,54 +5,65 @@
       include '../skdrincl/statn.ftni'
       include 'drcom.ftni'
 
+! 2007Jul20. First version.
+! 2015Aug13  JMG. Output more info. Simplified code (don't use lnfch library.) 
+
 ! passed
       integer icode
 
 ! functions
-      integer ib2as     !lnfch
-      integer ir2as
-      integer ichmv_ch
+      integer itras 
 ! local
-      integer ichan
-      integer nch
+      integer ichan 
       integer ic
-      real fr,rfvc  !VC frequencies
-
-      integer igig
-      integer Z4000,Z100
+      character*1 lq
+   
       double precision DRF,DLO
+      integer isb
+      integer isb_out
+      integer ibit, isb
+      character*2 lsb(2)
+      integer ibit_out 
+      character*2 lvid_sb, lnet_sb 
 
-      data Z4000/Z'4000'/,Z100/Z'100'/
+      data lsb /"U","L"/
+   
+      lq='"'
 
-      write(lu_outfile,'(a)')'"channel  sky freq  lo freq  video'
-      DO ichan=1,nchan(istn,icode) !loop on channels
-        cbuf='"'
-        nch=6
+      write(lu_outfile,'(a)')
+     &  '"channel  sky       lo       video   sample '
+     &  //'video net  bits/'
+      write(lu_outfile,'(a)') 
+     &  '"         freq     freq      freq     rate  '
+     & //'  sb  sb  sample'
+   
+      do ichan=1,nchan(istn,icode) 
         ic=invcx(ichan,istn,icode) ! channel number
-        nch = nch + ib2as(ic,ibuf,nch,Z4000+2*Z100+2)
-        nch = nch + 3
-        fr = FREQRF(ic,istn,ICODE) ! sky freq
-        if (freqrf(ic,istn,icode).gt.100000.d0) then
-          igig=freqrf(ic,istn,icode)/100000.d0
-          nch=nch+ib2as(igig,ibuf,nch,1)
-          fr=freqrf(ic,istn,icode)-igig*100000.d0
-        endif
-        NCH = nch + IR2AS(fr,IBUF,nch,8,2)
-        nch = nch + 3
-        fr = abs(FREQLO(ic,istn,ICODE)) ! sky freq
-        if (abs(freqLO(ic,istn,icode)).gt.100000.d0) then
-          igig=abs(freqLO(ic,istn,icode))/100000.d0
-          nch=nch+ib2as(igig,ibuf,nch,1)
-          fr=abs(freqLO(ic,istn,icode))-igig*100000.d0
-        endif
-        NCH = nch + IR2AS(fr,IBUF,nch,8,2)
-        nch = nch + 3
-        DLO = freqlo(ic,istn,icode) ! lo freq
-        DRF = abs(FREQRF(ic,istn,ICODE)) ! sky freq
-        rFVC = abs(DRF-DLO)   ! BBCfreq = RFfreq - LOfreq
-        NCH = nch + IR2AS(rFVC,IBUF,nch,8,2)
-        if (DRF-DLO .lt. 0.d0) nch = ichmv_ch(ibuf,nch+1,"LSB")
-        call lowercase_and_write(lu_outfile,cbuf)
-      enddo ! loop on channels
 
+        drf=freqrf(ic,istn,icode)
+        dlo=freqlo(ic,istn,icode)
+
+        ibit_out=1 
+        lvid_sb=" "
+        lnet_sb=" "
+        do isb=1,2
+        do ibit=1,2    
+          if(itras(isb,ibit,1,ic,1,istn,icode) .ne. -99) then 
+            if(ibit .eq.  2) ibit_out=2
+            if(drf .gt. dlo) then
+              isb_out=isb
+            else
+              isb_out=3-isb
+            endif 
+            lvid_sb(isb:isb)=lsb(isb)
+            lnet_sb(isb:isb)=lsb(isb_out)
+          endif
+         end do
+         end do 
+           write(lu_outfile,
+     &  "(a,2x,i2.2,2x,  3(1x,f8.2), 1x,f7.2, 2x,2(2x,a2), 3x,i2)")
+     &     lq,ic,  drf,dlo, dabs(drf-dlo), samprate(istn,icode),
+     &     lvid_sb, lnet_sb, ibit_out 
+       end do 
+  
       end

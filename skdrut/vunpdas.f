@@ -32,6 +32,8 @@ C 000907 nrv Get second headstack statement. If there are two of
 C            them, set NSTACK=2.
 C 020110 nrv Check S2 tape speed, must be LP or SLP. Make upper case.
 ! 2006Nov16 JMG Fixed initialization of ltlc.
+! 2016Nov29 JMG. Mapps obsolete DBBC-->DBBC_DDC & DBBC/FILA10G ---> DBBC_DDC/FIL10G
+! 2016Nov29 JMG. Rack changed to character*20 from character*8 
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -49,7 +51,8 @@ C                    section had vex error, <0 is invalid value
       integer*2 lb(*)    ! bands
       real sefd(*),par(max_sefdpar,*)
       integer npar(*)    ! sefds
-      character*8 crec,crack ! recorder and rack types
+      character*8 crec   ! recorder
+      character*20 crack ! rack
       character*128 ctapemo ! tape motion type
       integer ite,itl,itg ! early, late, gap 
       character*4 cs2sp ! S2 tape speed
@@ -107,20 +110,25 @@ C
 
 C  2. The rack type
 C    
+ 
       ierr = 2
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('electronics_rack_type'//char(0)),
-     .ptr_ch('DAS'//char(0)),ivexnum)
+     .ptr_ch('DAS'//char(0)),ivexnum)  
       if (iret.eq.0) then
-        iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get rack name
+        iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get rack name  
         if (iret.ne.0) return
-        NCH = fvex_len(cout)
-        IF  (NCH.GT.8.or.NCH.le.0) THEN  !
+        NCH = fvex_len(cout) 
+        IF (NCH.GT.20.or.NCH.le.0) THEN  !
           write(lu,'("VUNPDAS02 - Rack type name too long: ",a)') 
      .    cout(1:nch)
           ierr=-2
         else
-          crack=cout(1:nch)       
+          crack=cout(1:nch)    
+          call capitalize(crack)
+! Map DBBC rack to DBBC_DDC 
+          if(crack .eq. "DBBC") crack = "DBBC_DDC" 
+          if(crack .eq. "DBBC/FILA10G") crack ="DBBC_DDC/FILA10G"   
         endif
       endif
     

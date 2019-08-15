@@ -46,8 +46,6 @@ C LOCAL:
       integer iyr,idayr,ihr,imin,isc,mjd,mon,ida,ical,icod
       integer mjdpre,ispre,iyr2,idayr2,ihr2,imin2,isc2
       integer*2 lfreq,lcbpre,lcbnew
-      character*2 cwrap_pre
-      character*2 cwrap_new
       double precision UT,GST,utpre ! previous value required for slewing
       integer nstnsk,istnsk,isor,nsat
       character*7 cwrap ! cable wrap string returned from CBINF 
@@ -129,7 +127,6 @@ C 991209 nrv Add ITUSE to iftold calculation.
 ! 2007   jmg Removed obsolete call to m3inf.  Not used.
 ! 2007Jul20 JMG.  Added character LD
 ! 2013Sep19  JMGipson made sample rate station dependent
-! 2014Apr23  JMG.  Changed lcbpre, lcbnow to cwrap_pre, cwrap_now. Updated call to slewo.f
 C
 C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
@@ -204,8 +201,7 @@ C
       MJDPRE = MJD
       UTPRE = UT
       ISPRE = ISOR
-     
-      cwrap_pre=" " 
+      CALL CHAR2HOL('  ',LCBPRE,1,2)
 C
       IC = TRIMLEN(LSKDFI)
       WRITE(LUSCN,100) cSTNNA(ISTN),LSKDFI(1:ic) ! new
@@ -451,13 +447,13 @@ C
      .             'SLEWING TIME.  INFORM THE SCHEDULER!'/)
                   NLINES = NLINES + 2
           endif
-          IF (KUP) THEN !source is up 
-            cwrap_new=ccable(istnsk)
+          IF (KUP) THEN !source is up
+            lcbnew=lcable(istnsk)
             CALL SLEWo(ISPRE,MJDPRE,UTPRE,ISOR,ISTN,
-     >            cwrap_pre,cwrap_new,TSLEW,0,dum)
+     .           LCBPRE,LCBNEW,TSLEW,0,dum)
             TSLEW = TSLEW/60.0
             MJDPRE = MJD
-            cwrap_pre=cwrap_new
+            LCBPRE = LCBNEW
             ISPRE = ISOR
             UTPRE = UT+IDUR(ISTNSK)
           ELSE !source not up

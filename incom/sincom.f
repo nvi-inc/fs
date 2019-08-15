@@ -55,7 +55,7 @@ C
         tpsor(i)=0
         tpspc(i)=0
       enddo
-      do i=1,32
+      do i=1,MAX_GLOBAL_DET
         systmp(i)= 0.0
       enddo
       call fs_set_systmp(systmp)

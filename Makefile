@@ -28,14 +28,13 @@ print-%  : ; @echo $* = $($*)
 LIB_DIR = clib flib bosslb fclib fmpsee fslb lnfch newlb polb port rtelb vis \
 poclb skdrut vex rclco/rcl s2das third_party
 #
-EXEC_DIR = rwand chekr fserr ddout fs fsalloc incom matcn oprin pcalr onoff \
-fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \
-quikv mcbcn brk moon logex headp fmset ibcon quikr go drudg rclcn pdplt logpl \
-lognm pcald msg fsvue fs.prompt inject_snap erchk mk5cn tpicd flagr \
-gnfit gndat gnplt dscon systests autoftp monpcal logpl1 holog gnplt1 predict \
-dbbcn rdbcn rdtcn mk6cn popen udceth0 rack mcicn be_client s_client lgerr fesh\
-plog spubsub fsserver
-#
+EXEC_DIR = antcn aquir autoftp be_client boss brk chekr dbbcn ddout drudg dscon \
+erchk error fesh fivpt flagr fmset fs fs.prompt fsalloc fserr fsserver \
+fsvue gndat gnfit gnplt gnplt1 go headp holog ibcon incom inject_snap \
+labck lgerr logex lognm logpl logpl1 matcn mcbcn mcicn mk5cn mk6cn monit \
+monpcal moon msg onoff oprin pcald pcalr pdplt pfmed plog popen predict \
+quikr quikv rack rclcn rdbcn rdtcn resid run rwand s_client setcl sigma \
+spubsub systests tpicd udceth0 xtrac
 
 export LDFLAGS += -L$(shell pwd)/third_party/lib
 export CPPFLAGS += -I$(shell pwd)/third_party/include

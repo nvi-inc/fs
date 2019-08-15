@@ -22,6 +22,7 @@ C 991122 nrv Change LMODE to allow 16 characters.
 ! 2006Nov09 JMG. Changed logical for checking valid bandwidths
 ! 2010.06.15 JMG. Better error message if bad track #. 
 ! 2010.10.11 JMG. Increased number of valid BWs
+! 2015Jun05  JMG Modified to use new version of itras.
 
 C  INPUT:
       integer*2 IBUF(*)
@@ -223,9 +224,8 @@ C                              (        Find the opening parenthesis
             if (ihead.le.max_headstack)  then
                ibit=(icnt-1)/2
                isb=icnt-2*ibit
-               ibit=ibit+1
-               itrk_map(ihead,itx)=itras_ind(isb,ibit,ichan,ipas)
-!               write(*,"(i3,' | ', 66i4)") ichan, itrk_map(1,1:33)
+               ibit=ibit+1  
+               call add_track(itx,isb,ibit,ihead,ichan,ipas)       
             endif
           endif
           ict=ict+ind

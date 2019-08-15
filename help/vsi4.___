@@ -55,3 +55,45 @@ MARK 4 SAMPLER TO VSI BIT STREAM MAPPING
    8LM    31     19                16LM                   31
 
 18-Dec-03                                 vsi4.txt   DAN SMYTHE
+
+VLBAC SAMPLER TO VSI BIT STREAM MAPPING
+
+ VLBAC    VSI                     VLBAC       VSI    
+ SAMPLER OUTPUT #1                SAMPLER  OUTPUT #1 
+ OUTPUT  VLBA GEODETIC            OUTPUT   GEODETIC  
+   1US     0      0                 9US        4     
+   1UM     1                        9UM              
+   2US     2      1                10US        5     
+   2UM     3                       10UM              
+   3US     4     16                11US       20     
+   3UM     5                       11UM              
+   4US     6     17                12US       12     
+   4UM     7                       12UM              
+   5US     8      8                13US       13     
+   5UM     9                       13UM              
+   6US    10      9                14US       28     
+   6UM    11                       14UM              
+   7US    12     24                15US              
+   7UM    13                       15UM              
+   8US    14     25                16US              
+   8UM    15                       16UM              
+   1LS    16      2                 9LS        6     
+   1LM    17                        9LM              
+   2LS    18      3                10LS        7     
+   2LM    19                       10LM              
+   3LS    20     18                11LS       22     
+   3LM    21                       11LM              
+   4LS    22     19                12LS       14     
+   4LM    23                       12LM              
+   5LS    24     10                13LS       15     
+   5LM    25                       13LM              
+   6LS    26     11                14LS              
+   6LM    27                       14LM       30     
+   7LS    28     26                15LS              
+   7LM    29                       15LM              
+   8LS    30     27                16LS              
+   8LM    31                       16LM              
+ OUTPUT  VLBA GEODETIC            OUTPUT   GEODETIC  
+ SAMPLER OUTPUT #1                SAMPLER  OUTPUT #1 
+ VLBAC    VSI                     VLBAC       VSI    
+

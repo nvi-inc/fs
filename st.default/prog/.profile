@@ -42,5 +42,6 @@ else
  FC=fort77
 fi
 export FC
-#FS_CHECK_NTP=
-#export FS_CHECK_NTP
+#export FS_CHECK_NTP=
+#export FS_SERIAL_CLOCAL=1
+#export FS_TINFO_LIB=1

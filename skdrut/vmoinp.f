@@ -42,6 +42,9 @@ C 021111 jfq Extend S2 mode to support LBA rack
 ! 2007Jul13  Fixed bug if nchdefs=0.  Was trying to check roll, but this wouldn't work
 ! 2010.06.15 Fixed bug if recorder was K5. Wasn't initializing tracks. 
 ! 2012Sep14  Fixed bug with not initializing bbc_present for VEX schedules
+! 2015Jun05  JMG Modified to use new version of itras. 
+! 2016Jan19 JMG. Changed dim of variables: max_track-->2*max_track since sign& magnitude can be on same track 
+! 2016Jan19 Also re-arranged definition of parameters to group like to together
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -59,29 +62,25 @@ C          frinit
 C          vunpfrq, vunpbbc,vunpif,vunpprc,vunptrk,vunphead,
 C          vunroll,ckroll
 ! function
-      integer iwhere_in_string_list
-      integer*4 itras_ind
+      integer iwhere_in_string_list   
+      integer ptr_ch,fvex_len,fget_mode_def
 C
-C  LOCAL:
-      integer*4 itrk_map(max_headstack,max_trk)  !Has map of track mappings.
-      integer*4 ind
-      logical kupdate
+C  LOCAL:  
+      logical kadd_track_map
 
       integer ix,ib,ic,i,ia,icode,istn
       integer il,im,in, iret,ierr1,iul,ism,ip,ipc,itone
-      integer ipct(max_chan,max_tone),ntones(max_chan)
-      integer ifanfac,itrk(max_track),ivc(max_bbc)
-      integer irtrk(18,max_roll_def)
       integer iinc,ireinit
-      double precision posh(max_index,max_headstack)
-      integer ih,ihdn(max_track),indexp(max_index),indexl(max_pass)
-      character*1 csubpassl(max_pass),csubpass(max_subpass)
-      character*3 cpassl(max_pass)
+      integer ifanfac
+
+
+      integer irtrk(18,max_roll_def)
+      integer ih 
+
       double precision bitden_das
       integer nsubpass,npcaldefs,nrdefs,nrsteps
       integer nchdefs,nbbcdefs,nifdefs,nfandefs,nhd,nhdpos,npl
-      character*2 csb(max_chan),csg(max_chan)
-      character*2 cin2(max_ifd),cs2(max_ifd),cp2(max_ifd)      !LO, sideband
+ 
       character*8 cpre
       character*16 cs2m
       character*16 cm
@@ -89,17 +88,42 @@ C  LOCAL:
 
       double precision bitden
       character*4 cmodu, croll ! ON or OFF
-      character*3 cs(max_chan)
-      character*6 cifdref(max_ifd),cfrbbref(max_chan),cbbcref(max_bbc)
-      character*6 cbbifdref(max_chan),cfrpcalref(max_chan)
-      character*6 cpcalref(max_chan)
-      character*6 cchanidref(max_chan),ctrchanref(max_track)
 
-      character*1 cp(max_track),csm(max_track)
-      double precision frf(max_chan),flo(max_chan),vbw(max_chan),srate
+! IF related parameters. 
+      character*6 cifdref(max_ifd)
+      character*2 cin2(max_ifd),cs2(max_ifd),cp2(max_ifd)      !LO, sideband
+
+! BBC parameters
+      character*6 cbbcref(max_bbc)
+!Things that depend on number of channels.
+
+      character*3 cs(max_chan)
+      character*6 cfrbbref(max_chan)
+
+      character*6 cbbifdref(max_chan)
+      character*6 cfrpcalref(max_chan)
+      character*6 cpcalref(max_chan)
+      character*6 cchanidref(max_chan)
+      character*2 csb(max_chan),csg(max_chan)
+      integer ipct(max_chan,max_tone),ntones(max_chan)
+
+      double precision frf(max_chan),flo(max_chan),vbw(max_chan)
       double precision fpcal(max_chan),fpcal_base(max_chan)
-      character*128 cout
-      integer ptr_ch,fvex_len,fget_mode_def
+
+! Things that depend on number of tracks. 
+      character*6 ctrchanref(2*max_track)
+      character*1 cp(2*max_track),csm(2*max_track)
+      integer ihdn(2*max_track)
+      integer itrk(2*max_track),ivc(2*max_bbc)
+
+!things that depend pass.
+      double precision posh(max_index,max_headstack)
+      integer indexp(max_index),indexl(max_pass)
+      character*1 csubpassl(max_pass),csubpass(max_subpass)
+      character*3 cpassl(max_pass)
+
+      double precision srate
+      character*128 cout  
      
       logical kDiskRec,km4rec,km3rec,kvrec,ks2rec
       logical kk4rec
@@ -110,13 +134,14 @@ C  LOCAL:
       logical kvunppcal_first    !first call to vunppcall
       character*1 lq 
 
+!*********************************************************************************************
+! Start of code
       lq="'"
       kvunppcal_first=.true. 
-
  
-C 1. First get all the mode def names. Station names have already
-C    been gotten and saved.
-C
+! 1. First get all the mode def names. 
+!    Station names have already been gotten and saved.
+!
       ncodes=0
       iret = fget_mode_def(ptr_ch(cout),len(cout),ivexnum) ! get first one
       do while (iret.eq.0.and.fvex_len(cout).gt.0)
@@ -156,8 +181,8 @@ C    Assign a code to the mode and the same to the name
         do istn=1,nstatn ! for one station at a time
 
 ! Initialize this array.
-          call init_itrk_map(itrk_map)
-          kupdate=.false.
+          call new_track_map()
+          kadd_track_map=.false.
 
           il=fvex_len(modedefnames(icode))
           im=fvex_len(stndefnames(istn))
@@ -201,12 +226,10 @@ C    Assign a code to the mode and the same to the name
      >       cstnna(istn), crecorder
             kdiskRec=.true.
  !           ks2rec  =.false. 
-          endif 
-        
+          endif       
    
 C         Initialize roll to blank
           cbarrel(istn,icode)=" "
-
          
 C         Get $FREQ statements. If there are no chan_defs for this
 C         station, then skip the other sections.
@@ -225,12 +248,12 @@ C         station, then skip the other sections.
 C         Get $PROCEDURES statements.
 C         (Get other procedure timing info later.)
           call vunpprc(modedefnames(icode),stndefnames(istn),
-     .    ivexnum,iret,ierr,lu,cpre)
+     &      ivexnum,iret,ierr,lu,cpre)
           if (ierr.ne.0) then
-            write(lu,'("VMOINP03 - Error getting $PROCEDURES",
-     .      " for mode ",a," station ",a/" iret=",i5," ierr=",i5)') 
-     .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
-     .      iret,ierr
+            write(lu,'("VMOINP03 - Error getting $PROCEDURES for mode ",
+     &      ,a," station ",a/" iret=",i5," ierr=",i5)') 
+     &      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
+     &      iret,ierr
             call errormsg(iret,ierr,'PROCEDURES',lu)
             ierr1=1
           endif
@@ -302,7 +325,7 @@ C         Get $HEAD_POS and $PASS_ORDER statements.
             call vunphp(modedefnames(icode),stndefnames(istn),ivexnum,
      .        iret,ierr,lu,
      .        indexp,posh,nhdpos,nhd,cpassl,indexl,csubpassl,npl)
-          endif
+          endif     
           if (ierr.ne.0) then 
             write(lu,'("VMOINP07 - Error getting $HEAD_POS and",
      .        "$PASS_ORDER information for mode",a, " station ",a,
@@ -363,7 +386,7 @@ C         else ! non-S2
 ! 2014Sep22 
 
 C         endif ! S2/not
-
+ 
 C    Save the chan_def info and its links.
           do i=1,nchdefs ! each chan_def line
             invcx(i,istn,icode)=i ! save channel index number 
@@ -376,10 +399,11 @@ C    Save the chan_def info and its links.
             cset(i,istn,icode) = cs(i) ! switching 
 C           BBC refs
             ib=iwhere_in_string_list(cbbcref,nbbcdefs,cfrbbref(i))
+
             if(ib .eq. 0) then
               write(lu,'("VMOINP09 - BBC link missing for channel ",i3,
-     .        " for mode ",a," station ",a)') i,
-     .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
+     &        " for mode ",a," station ",a)') i,
+     &        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
             else
               ibbcx(i,istn,icode) = ivc(ib) ! BBC number
             endif
@@ -387,8 +411,8 @@ C           BBC refs
            
             if (ic.eq.0) then
               write(lu,'("VMOINP10 - IFD link missing for channel ",i3,
-     .        " for mode ",a," station ",a)') i,
-     .        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
+     &        " for mode ",a," station ",a)') i,
+     &        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
             else
               cifinp(i,istn,icode) = cin2(ic) ! IF input channel          
               cosb(i,istn,icode)   = cs2(ic)  ! LO sideband
@@ -444,11 +468,9 @@ C           Track assignments
                        if (Frf(i).lt.Frf(ia)) iul=2 ! IFP LSB channel
                        if (Frf(i).gt.Frf(ia)) iul=1 ! IFP USB channel
                     endif
-                  endif
-  
-                 ind=itras_ind(iul,ism,i,ip)
-                 itrk_map(ihdn(ix),itrk(ix))=ind
-                 kupdate=.true.
+                  endif 
+                 call add_track(itrk(ix),iul,ism,ihdn(ix),i,ip)            
+                 kadd_track_map=.true.
                 endif
               endif ! matched link
             enddo ! check each fandef
@@ -519,7 +541,7 @@ C    Store head positions and subpases
               ix=iwhere_in_string_list(csubpass,nsubpass,csubpassl(ip))
               do ih=1,nhd ! store the head offsets
                 ihdpos(ih,ip,istn,icode)=posh(indexl(ip),ih)
-                ihddir(ih,ip,istn,icode)=ix
+                ihddir(ih,ip,istn,icode)=ix   
               enddo
             enddo  ! number of passes in list
           endif ! m3/4 or v rec
@@ -543,8 +565,8 @@ C       Store the procedure prefix by station and code.
            cpre="01_"
         endif ! missing
         cprefix(istn,icode)=cpre
-        if(kupdate) then
-           call add_trk_map(istn,icode,itrk_map)
+        if(kadd_track_map) then
+           call add_track_map(istn,icode)
         endif
         enddo ! for one station at a time
       enddo ! get all mode information

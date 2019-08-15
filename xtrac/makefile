@@ -6,8 +6,8 @@ rstat.o tpstb.o kpout_ch.o
 #
 FFLAGS = -c 
 LIBES = ../port/port.a ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a \
-../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a \
-../fmpsee/fmpsee.a ../vis/vis.a ../rtelb/rtelb.a
+../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../fmpsee/fmpsee.a \
+../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a
 #
 ../bin/xtrac: $(OBJECTS)
 	$(FC)  -o ../bin/xtrac $(OBJECTS) $(LIBES)

@@ -39,7 +39,7 @@ char *who;           /* 2-char string identifying the error  */
 char *type;          /* data type NULL = "fs", "nd" = no display */
 
 {
-  char buf[513];    /* Holds the complete log entry */
+  char buf[1025];    /* Holds the complete log entry */
   char name[5];     /* The name of our main program */
   int it[6],ip1,ip2,l;
  
@@ -79,8 +79,15 @@ char *type;          /* data type NULL = "fs", "nd" = no display */
       strcat(buf,"#");
     } else
       strcat(buf,"/");
-    if(msg!=NULL)
-      strncat(buf,msg,sizeof(buf)-strlen(buf)-1);
+    if(msg!=NULL) {
+      int n;
+      int bufl=strlen(buf);
+      int msgl=strlen(msg);
+      n=sizeof(buf)-bufl-1;
+      if(msgl < n)
+	n=msgl;
+      memcpy(buf+bufl,msg,n);
+      buf[bufl+n]=0;
     else
       strcat(buf,"empty message, program error");
   }

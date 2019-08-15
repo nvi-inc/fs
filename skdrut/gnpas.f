@@ -1,4 +1,4 @@
-      SUBROUTINE gnpas(luscn,ierr,iserr)
+       SUBROUTINE gnpas(luscn,ierr,iserr)
 C
 C     GNPAS derives the number of sub-passes in each frequency code
 C and checks for compatibility between track assignments and head
@@ -68,16 +68,18 @@ C     Use itras(u/l,s/m,head,max_subpass,max_chan,station,code)
 C     Use ihddir(head,max_pass,station,code)
 C
       ierr=0
-      IF (NCODES.LE.0) RETURN
-C
+      IF (NCODES.LE.0) RETURN     
+!      pause 
+C     
       DO  Ic=1,NCODES ! codes
         do is=1,nstatn
           if (nchan(is,ic).gt.0) then ! this station has this mode defined
+          npassf(is,ic)=0                 !initialize. May be set later. 
           if(cstrec(is,1)(1:2).eq."S2".or.
      >       cstrec(is,1)(1:2).eq."K4") then
             npassf(is,ic)=1
           else ! not S2 or K4
-            iserr(is)=0
+            iserr(is)=0          
             do ih=1,max_headstack ! for each headstack
               np(ih)=0
               DO  J=1,max_subpass ! count sub-passes
@@ -86,9 +88,12 @@ C
                 do k=1,nchan(is,ic) ! channels
                   do l=1,2 ! upper/lower
                     do m=1,2 ! sign/mag
+!                      write(*,'("gnpas:  ",8i4)') l,m,ih,k,j,is,ic
                       if (itras(l,m,ih,k,j,is,ic).ne.-99) then
                         it(ih)=it(ih)+1
                       endif
+!                    write(*,'("gnpas2: ",8i4)') l,m,ih,k,j,is,ic,ncodes
+      
                     enddo
                   END DO ! upper/lower
                 enddo ! channels
@@ -102,7 +107,8 @@ C
                 if (ihddir(ih,j,is,ic).gt.ipmax(ih)) 
      >              ipmax(ih)=ihddir(ih,j,is,ic)
               enddo ! check sub-passes             
-              if (ih.eq.1 .and. np(ih) .ge. 1) then ! set npassf and increment ntrakf             
+              if (ih.eq.1 .and. np(ih) .ge. 1) then ! set npassf and increment ntrakf   
+       
                 npassf(is,ic)=np(ih)             
                 ntrakf(is,ic)=ntrakf(is,ic)+itrk(np(ih),ih)
                 nhstack(is,ic) = 1
@@ -125,7 +131,7 @@ C
                   endif
                 endif ! one head/check second
               endif ! set/check
-            enddo ! for each headstack
+            enddo ! for each headstack 
             if(cstrec(is,1)(1:5) .eq. "Mark5" .or. 
      >         cstrec(is,1)(1:2) .eq. "K5") then
               npassf(is,ic)=1

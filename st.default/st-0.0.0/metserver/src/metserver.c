@@ -24,7 +24,7 @@
 
 /* STALE_AGE determines how old, in seconds, data must be
  * to be considered stale. Stale data results in an error. */
-#define STALE_AGE 300
+#define STALE_AGE 10
 
 #define BACKLOG 5       /* how many pending connections queue will hold */
 #define TRUE 1
@@ -44,7 +44,7 @@ struct met_data{
   pthread_mutex_t mutex; /* Mutex for locking the met data for reading/writing. */
 };
 
-int met_data_age(struct met_data *md) {
+time_t met_data_age(struct met_data *md) {
 	struct timespec now;
 	if (clock_gettime(CLOCK_MONOTONIC, &now) < 0) {
 		err_report("clock_gettime", 0, errno, 0);
@@ -54,11 +54,14 @@ int met_data_age(struct met_data *md) {
 }
 
 
+static const char empty_message[] = ",,,,,";
+
 /* Define  globally accessible variables. */
 static struct met_data metstr;
 static char temp_buf[2][METBUF]; /* Will contain met data string from function metget */
 static char port1[20];
 static char port2[20];
+static unsigned int flags;
 char metdevice[20];
 
 void *threadFunc(void *arg) {
@@ -72,7 +75,7 @@ void *threadFunc(void *arg) {
   int iping = 0;
 
   while(1) {
-    sprintf(temp_buf[iping], "%s", (char *)metget(port1, port2));
+    sprintf(temp_buf[iping], "%s", (char *)metget(port1, port2,flags));
     pthread_mutex_lock(&metstr.mutex); /* Lock the mutex, will cause main thread to block
 				          if trying to lock mutex protecting 'metstr.buf'. */
     metstr.buf = temp_buf[iping];
@@ -106,7 +109,6 @@ main(argc, argv)
   char buf[METBUF], send_buf[METBUF];
   fd_set ready;
   struct timeval to;
-  int   flags;
   int sockcnt;                   /* counter for testing connections */
   pid_t pid;
   unsigned int myport;
@@ -127,6 +129,7 @@ main(argc, argv)
      'remote'. */
   use_remote = 0;
   metdevice[0] = 0; 
+  flags = 0;
 
   if( argc <= 1) {
     err_report("metserver: ports NOT specifed, check INSTALL", NULL,0,0);
@@ -156,14 +159,27 @@ main(argc, argv)
     myport=atoi(argv[3]);
     if (strstr(argv[4], "remote") != NULL) use_remote = 1;
     strcpy(metdevice,argv[5]);   
+  } else if (argc == 7) {
+    strcpy(port1,argv[1]);
+    strcpy(port2,argv[2]);
+    myport=atoi(argv[3]);
+    if (strstr(argv[4], "remote") != NULL) use_remote = 1;
+    strcpy(metdevice,argv[5]);   
+    flags=strtol(argv[6],NULL,0);
   }
   if(myport <= 0) {
     err_report("metserver: socket invalid value, check INSTALL", NULL,0,0);
     exit(-1);  /* Will not be able to accept connections on negative ports */
   }
 
-  /* Set up the buffer for the structure.*/
-  metstr.buf = send_buf;
+
+  /* Set up the buffer for the structure. Other thread will write to temp_buf[0] first*/
+  strcpy(temp_buf[1], empty_message);
+  metstr.buf = temp_buf[1];
+  /* The the last updated time to now, so we don't error right at startup*/
+  if (clock_gettime(CLOCK_MONOTONIC, &metstr.last_updated) < 0) {
+    err_report("clock_gettime", 0, errno, 0);
+  }
 
   /* Initialize the mutex that will protect the met data. Create the thread that
      will read met data. */
@@ -270,9 +286,6 @@ main(argc, argv)
       continue;
     }
 
-    if (met_data_age(&metstr) > STALE_AGE) {
-      err_report("data stale", NULL, 0, 0);
-    }
 
     if(FD_ISSET(sockfd, &ready)) {
       new_fd = accept(sockfd,(struct sockaddr *)0,(int *)0);
@@ -281,7 +294,12 @@ main(argc, argv)
 	continue;
       }
       pthread_mutex_lock(&metstr.mutex);
-      memcpy(send_buf, metstr.buf, METBUF); /* Copy the values */
+      if (met_data_age(&metstr) > STALE_AGE) {
+        err_report("metserver: met data stale", NULL, 0, 0);
+        strcpy(send_buf, empty_message);
+      } else {
+        memcpy(send_buf, metstr.buf, METBUF); /* Copy the values */
+      }
       pthread_mutex_unlock(&metstr.mutex);
 
       len=strlen(send_buf);

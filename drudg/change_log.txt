@@ -1,40 +1,135 @@
 This file contains a summary of changes made and why.
-2015Jun14 init_hardware_common.f. Removed RDBE rack.  
-          ../skdrincl/valid_hardware.ftni   Added space for BB rack on Jun10.  Removed space for RDBE rack on Jun14. Net effect is a wash. 
-          ../valid_hardware_blk.f           Initialized BB rack. 
-2016Jun10 procs.f     Updated to use $PROCS section in sked file if rack type is "BB".
-2015Dec01 ../skdrut/read_nolf.f New routine that strips LF from the end of a line. Put in because sometimes the skd file
-                      is transferred via ftp with the wrong settings. 
-          proc_from_sked.f, read_broadband_section.f.  Modified to use read_nolf.f
-2015Nov05 snap.f  Fixed a couple of bugs with Broadband. Bug with writing out 'rtime'. Index should be istn, was istnsk. 
-                  Also setup name hardcoded to 'setupbb' if station has Mark6 disk. 
+2018Sep25 Makefile, drudg_rdctl.f: Location of skedf.ctl varies depending on whether computer is PC-FS or not. 
+2018Sep11
+   proc_disk_tracks.f: Comments modified based on email from WEH 2018Sep06. Also if fila10g, use 64 bit mask for Mark5C.  
+   proc_dbbc_pfb_tracks.f: Fixed an error in writing out a mask. 
+   proc_track_mask_lines.f: New routine.  writes out the mask lines for the proc_disk_tracks.f and proc_dbbc_pfb_tracks.f
+2018Sep05 
+   New routine: drudg_write_comment.f.  This outputs comment lines in files. 
+   proc_mk5_init1.f:  Got rid of extraneous '"'  (double quotes) at end of comment lines.           
+   proc_disk_tracks.f: Better debug info. Now if it doesn't find a valid mode, will write 
+   all the "CSB" info (Channel-Sideband-Bit) info that was in the sked file. 
+2018Sep04 
+   get_version.f Removed line that wrote debug info. This was printing spurious "32". 
+2018Aug18 
+   Added support for modes that vsi2
+   check_csb_list.f:    Increased mask from 32 bits to 64 bits
+   proc_disk_tracks.f:  Added wastro2 and geo2 modes which can use 64 tracks. Also output comments 
+   if DBBC_DDC or  DBBC_DDC/FILA10G saying how things should be setup for recorder. 
+2018Jul20 
+  New subroutine write_drudge_release_line for use by procintr.f and snapintf.f. Removed this functionality from both.
+  Put all version information in common file  drver_com.ftni. Added this include file to fdrudg.f.
+  Introduced  new char*32  string crel_FS which contains release info. 
+  Modified get_version to get crel_fs (which is specified at compile time).  
+  New function crelease.c gets RELEASE string at compile time. 
+  fdrudg.f and write_drudge_release_line.f will include crel_fs if it is non-blank.  
+  Makefile was modified to correctly get the RELEASE      
+2018Jun19 
+  proc_setup.f: Fixed bug in cont_cal. If Rack is DBBC_DDC and 'cont_cal off' emit cont_cal=off;
+2018Jun17 
+  sread.f: When reading in a VEX file printed an extra blank line when it was done reading in the schedule. 
+  his showed up as a blank line between "$SOURCES" and "Experiment name: ",
+  drudg_rdctl.f:  Removed erroneous report of error in label command.
+  Also made sure there were spaces between all sections when it was writing out progrees of reading skedf.ctl. 
+  fdrudg.f: Removed debugging statement that wrote out first recorder
+2018Jun05 vobinp.f: Modified so if a station in the scan is not in the station list, then program 
+          aborts with warning message.
+2018Jun05 ivgtst.f: Version in drudg had bug where if station were missing in station list, set the value 
+          to # of stations. This had been fixed in 2014 in sked, but not propagated here. Now it is.           
+2018May02 snap.f: Fine tuning staggered start. If the station offset for OUR station is zero, assume non-staggered.
+2018May02 snap.f: Take account of staggered start in calculating recording 
+2018Apr02 snap.f: Fixed staggered start. I hope. 
+2017Dec23 snap.f:  If staggered start (different stations start at different times) then change handling of 
+          calibrations.  A.) Uses nomimal data_valid_time to start recording data and do calibration. 
+          B.) ical_time later sets data valid flag.  
+          ical_time is either nominal cal_time (10 sec) or ical_time_staggered, or if cont_cal is on, then 1.
+2017Dec20 proc_dbbc_pfb_tracks.f, proc_disk_tracks.f.  Got rid of extra "," before mask in 'bit_streams=' command. 
+2017Dec20 proc_mk5_init2.f.  Changed 'bank_set?' to 'mk5=bank_set?'
+2017Oct24 proc_dbbc_pfb_tracks.f, proc_disk_tracks.f 
+          If 'bit_streams' then only care about mask. Everything else is null.
+20178ct24 proc_mk5_int2.f:  Added 'bank_set?'  after bank_check
+2017Oct24 MAX_SOR-->5000, MAX_CEL-->4990
+2017Oct24 vlbah.f  Fixed output bugs in writing vlba pointing file. 
+2017Oct24 wrsos.f  Fixed bug in vlba pointing file. if RA seconds is >59.65s, then used to write out as 60.0s. 
+!********************************
+2016Dec05 ../skdrut/frinp.f.  Was not correctly applying sample rate from "R" line to all stations 
+2016Dec05 ../skdrut/count_freq_tracks.f. Fixed bug in how it was setting the sample-rate if it was absent in the schedule. 
+2016Nov29 ../skdrut/kvalid_rack.f.  Fixed sleeping bug. In second check of valid rack type was using unitialized variable. Corrected and added 'implicit none'.
+2016Nov29 ../skdrut/kvalid_rec.f.  Added 'implicit none' for consistency with kvalid_rack.f 
+2016Nov29 ../skdrut/vstinp.f, vunpdas.f. Changed crack from character*8 to character*10 to handle longer rack names. 
+2016Nov29 ../skdrut/unpvt.f, skdrut/vunpdas.f  Map rack DBBC -->DBBC_DDC, DBBC/FILA10G-->DBBC_DDC/FILA10G upon input. Done for backwards compatibility. 
+2016Nov21 ../skdrut/stinp.f  Set default RACK, RECORDER types before checking for error condition. Previously if there was an error these would not be set.
+2016Nov21 proc_dbbc_bbc.f. Don't check what the ORIGINAL (in schedule) rack type was. Should not matter
+2016Sep11 proc_setup.f.  Made input for cont_cal, cont_cal_parity appear on same line as prompt.
+2016Sep11 proc_dbbc_pfb_tracks.f  Made input for proc_dbbc_pfb_tracks.f appear on same line as prompt.
+2016Sep11 proc_disk_tracks.  Doubled size of lsked_csb to 64. Was running out of space.
+2016Sep08 New keyword "vsi_align" in skedf.ctl. Following files changed: proc_dbbc_pfb_tracks.f, drudg_rdctl.f, drcom.ftni.
+2016Sep08  proc_mk5_init2.f:  Output 'jiveab' commands if >2GBS
+2016Sep06  proc_exper_initi.f:  Replace 'mk5=status?' with 'mk5_status'
+2016Aug23  ../skdrut/stinp.f. 2016Jul28 fix did not work. (index of cfirstrec(i) was unitialized). This fixes it.  
+2016Jul28
+1. drudg_rdctl.f  Added 'cfirstrec_def' to capture default recorder if 'equipment override' is on in skedf.ctl
+2. fdrudg.f       Use 'cfirstrec_def' if 'equipment override' is on in skedf.ctl.
+3. ../skdrut/stinp.f   Initialize cfirstrec="1 " even if you  have an error in reading in terminal line. Changed dimension of crack to char*20
+4. ../skdrut/unpvt.f   Changed dimension ofrack_type to char*20.
+
+2016Apr07.
+1. Fixed typographic bug in proc_disk_tracks with filag10 mode. 
+
+2016Jan19 Lots of changes having to do with supporting DBBC_PFB. Here is a quick summary.
+1. ../skdrincl/skparm.ftni: Max_bbc=16-->32
+2. proc_setup.f:  Different handling of DBBC_DDC and DBBC_PFB. Modifed to not emit BBC commands if DBBC_PFB. 
+3. proc_tracks.f: Call proc_dbbc_pfb_tracks instead of proc_disk_tracks for DBBC_PFB. 
+3. proc_dbbc_pfb_tracks.f: New routine to handle various track stuff for DBBC_PFB
+4. proc_ifd.f:  Fixed so that emit commands for all IFs. The issue is that DBBCs can re-use the same BBC number.
+5. proc_mracks_vc.f:  Changed initialization of some variables since max_bbc-->32.
+6. proc_vc_name.f.  Only write out command if cname_vc<> " ". (if DBBC_PFB/* then cname_vc=" ")
+7. ../skdrincl/statn.ftni, ../skdrincl/valid_hardware.ftni.  dimensions of cstrack and cstrack_cap increased to handle longer names.
+8. ../skdrincl/valid_hardware.ftni.  Increased number of valid racks. 
+9. ../skdrut/valid_hardware_blk.f.   DBBC-->DBBC_DDC, added DBBC_PFB, DBBC_PFB/fila10g
+10. ../skdrut/vmoinp.f, vunptrk.f  max_tracks-->2*max_tracks. This is because sign, magnitude can now be on same track (but drudg expects to be on different tracks.
+11. ../skdrut/indexx_int2.f.   New routine. Sort an integer*2 array.
+12. ../skdrut/indexx_string.f  New routine. Sort an array of strings. Used by proc_dbbc_pfb_tracks.f
+
+
+2015Aug31 fdrudg.f Previously quit if first character of filename was "q" or "Q".  
+2015Aug20 snap.f.  Allow disk2file for flexbuff.
+2015Aug13 proc_norack.f    Output more information about lo, sidebands, etc.  proc_exper_initi.f  Minor changes.  
+2015Jul29 proc_disk_tracks.f. Emit 'fila10g_mode' after "fila10g_mode=xxxx..."
+2015Jul20. proc_exper_initi.f  Added "jiveab=version?" in exper_initi for Mark5C. 
+2015Jul20. proc_setup.f    Don't output cont_cal_parity if turning cont_call off.
+2015Jul17. Added support for cont_cal_polarity for DBBC racks.  drudg_rdctl.f, drcom.ftni, proc_setuup.f 
+20145Jul06 proc_disk_tracks.f  Changed "geo_r" to "geo-r" and "geo_t" to "geo-t" for Chinese
+          drudg_rdctl.f.  Initialized "dr_rack_Type, crec_default to " ". 
+          fdrudg.f        If rack or recorder is "UNKNOWN" set to "none".  Onyly use equipment from skedf.ctl if explicitly called. 
+2015Jun30 unpvt.f, stinp.f    Had to increase space for rack, recorder since size went char*8-->char*12
+2015Jun19 proc_disk_tracks.f  Reorganized after adding CDAS and VLBAC rack types.  
+          Checking tracks in (proc_disk_tracks) moved to subroutine check_csb_list.f 
+          Modified init_hardware_commo to add CDAS and VLBAC types. 
+2015Jun05. Replace "squeezewrite" by "drudg_write" which  a.) Remove spaces; B.)Lower case; C.) write it out. Affected routines:
+   proc_disk_tracks.f, proc_patch.f snap.f,  snap_in2net_connect.f,  snap_pcalf.f,  snap_ready.f, snap.recp.f, snap_rollform.f,   
+   snap_setup.f, snap_systracks.f, snap_tpicd.f
+   drudg_rdctl.f:  Changed dimensions of variables that hold 'rack' and 'recorder' to char*12. (See 2015May19)
+   proc_exper_initi.f:  Added 'dbbc=version' and 'fila10g=version' if appropriate.     
+ 
+2015May29 proc_disk_tracks.f  Was using vdif for dbbc/fila10g and recorder Mark5B. Vdif is valid only for Mark6.
+                    
+2015May19 Added support for dbbc/fila10g rack and Mark6. Mostly minor changes. 
+          Also changed size or variables that hold 'rack' and 'recorder' type: char*8-->char*12 Routines affected:          
+  hardware.ftni 
+  init_hardware_common.f 
+  proc_disk_tracks.f 
+  proc_mk5_init2.f
+  proc_tracks.f
+  snap.f
+  snap_monitor.f
+ ../skdrut/valid_hardware_blk.f 
+ ../skdrincl/valid_hardware.ftni
+
 2015Apr04 snap.f  Removed special treatment if two consecutive scans involve the same source. 
 2015Mar31 snap.f  Fixed several problmems with phase-referencing. These occured in going from 9.11.4-->9.11.5 when the logic was simplified.
-2015Mar30 Many changes associated with Mark6  recording and some cleanup.
-../skdrincl/statn.ftni   Added variables bb_bw, idata_mbps, isink_mbps
-../skdrincl/valid_hardware.ftni      Added Mark6, RDBE 
-../skdrut/kvalid_rack.f  Fixed a bug. Used unitilized variable 'iwhere' instead of 'i'.
-../skdrut/kvalid_rec.f   Added implicit none 
-../skdrut/stinp.f        Removed some tape stuff for S2 and K4. got rid of extraneous arguments. 
-../skrut/write_return_if_needed.f     Replaced "End subroutine" with "end"
-../skdrut/vobinp.f      Fixed a bug discovered in coding sked. 
-../skdrut/unpvt.f       Got rid of various tape related stuff ro S2 and K4.
-
-drcom.ftni              Got rid of unused 'iperm'.  
-init_hardware_common.f, hardware.ftni.  Added support for Mark6.
-snap.f                  Added support for Mark6
-prtmp.f                 Do chmod of temporary file that will be printed.
-drchmd.f                Removed unused argument in arg list.
-skdshft.f               Removed unused argument in arg list of drchmod.f
-point.f                 Removed unused argument in arg list to drchomd.
-proc_from_sked.f        Routine to read sked file and write out procs embedded in it.
-sread.f                 Aadded call to read_broad_band_section.f 
-read_broadband_section.f   Read $BROADBAND section from sked file and extract idata_mbps and isink_mbps
-find_recorder_speed.f   Return recorder speed (=isink_mbps) for Mark6 recorders.
-drset.f                Added read of MARK6_OFF from $PARAM section of sked file.
-snap_ready.f             modified for Mark6
------------------------------------------------------------------------------------------------------------  
-
+2015Mar30.  Got rid of obsolete parameter 'iperm' in call to drchmod.f
+  drchmod.f, poiont.f, procs.f, prtmp.f, skdshft.f, snap.f
 2015Jan29.  
 ../vmoinp.f  2014Dec09 change removed. Now all sidebands are treated as if normal LO. 
 proc_disk_trakcs.f:   Flip sideband if inverted LOs. 
@@ -46,14 +141,11 @@ proc_disk_tracks.f, proc_trakcs.f
                       Also added "ignore_mark5b_bad_mask"  flag. If mask is bad, will issue warning and continue. 
                       User needs to set flag in $misc section of skedf.ctl
 procs.f               Previously did silent 'abort' if BBC frequencies were wrong. Now mushes on. 
-
-
-
+---------------------------------------------------------------------------------------------------------------
 2015Jan22 (Incorporate changes made from Jan13) Changes by JMG and JFHQ
 Modifications to support astro2 and astro3 modes with DBBC 
 BW written out to 3 places. Abort conditions all go to label 900.
 ../proc_disk_tracks.f 
-
 
 2014Dec09 Changes to support 'inverted' IF.
 ../vmoinp.f.   Flip Sideband if LO freq>sky_freqls 

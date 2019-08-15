@@ -29,6 +29,11 @@ long ip[5];                           /* ipc parameters */
 
       int kdiff;
 
+      if(DBBC_DDC != shm_addr->equip.rack_type &&
+	 DBBC_DDC_FILA10G != shm_addr->equip.rack_type) {
+	ierr=-501;
+	goto error;
+      }
       if (command->equal != '=') {            /* read module */
 	out_recs=0;
 	out_class=0;
@@ -53,7 +58,7 @@ parse:
       count=1;
       while( count>= 0) {
         ptr=arg_next(command,&ilast);
-        ierr=dbbc_cont_cal_dec(&lcl,&count, ptr);
+        ierr=dbbc_cont_cal_dec(&lcl,&count, ptr, shm_addr->dbbccontcalpol);
         if(ierr !=0 ) goto error;
       }
 

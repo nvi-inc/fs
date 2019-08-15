@@ -1,17 +1,32 @@
 ! Allowed rack types, recorder types.
 C     Number of defined rack and recorder names.
       integer max_rack_type, max_rec_type, max_rec2_type
-! 2016Jun10  Increased MAX_RACK_TYPE to 21 to accomadate BB
+! Note:
+! If you change length of character strings, also need to make changes in:
+!    statn.ftni, skdrut/kvalid_rack.f, skdrut/kvalid_rec.f, and other places.
+!
+! Valid hardwrae is defined in skdrut/valid_hardware_blk.f 
+!
+
+
+! History in reverse order. 
+!
+! 2016Jan05  JMG. Change rack type from char*12 to char*20, and max_rack_Type-->24
+! 2015Jun05  JMG. Incraesed MAX_RACK_TYPE2 to 22 for Chinese VLBAC and CDAS 
+! 2015May19  JMG. Increased MAX_REC_TYPE to 17 for flexbuf
+! 2015May08  JMG. Increased MAX_RACK_TYPE 20 to accomadate DBBC/Fila10G
+! 2012Sep04  JMG. Increased MAX_RACK_TYPE to 19 to accomodate DBBC
 ! 2010Jan27  JMGipson. Increased number of recorder types to accomodate Mark5C.
-! 2012Sep04  JMG.  Increased MAX_RACK_TYPE to 19 to accomodate DBBC
-      PARAMETER (MAX_RACK_TYPE= 20)
+
+
+      PARAMETER (MAX_RACK_TYPE= 24)
       PARAMETER (MAX_REC_TYPE = 17)
       PARAMETER (MAX_REC2_TYPE = 7)
 
-      character*8 crack_type(max_rack_type)    	! valid rack type
-      character*8 crack_type_cap(max_rack_type) !    capitalized version
-      character*8 crec_type(max_rec_type)       ! valid recorder type
-      character*8 crec_type_cap(max_rec_type)   !   capitalized version
+      character*20 crack_type(max_rack_type)    	! valid rack type
+      character*20 crack_type_cap(max_rack_type)        !    capitalized version
+      character*12 crec_type(max_rec_type)              ! valid recorder type
+      character*12 crec_type_cap(max_rec_type)          !   capitalized version
 
       COMMON /rack_rec_CH/crack_type,crack_type_cap,
      >                  crec_type,crec_type_cap

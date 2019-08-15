@@ -5,6 +5,9 @@
 #include "../include/dpi.h"
 #include "../include/params.h"
 #include "../include/fs_types.h"
+#include "../include/fscom.h"
+
+extern struct fscom *shm_addr;
 
 #include "sample_ds.h"
 
@@ -17,7 +20,11 @@ void wcounts(label,azoff,eloff,onoff,accum, rack)
 {
   char buff[256];
   int i, kfirst;
+  int dbbc2_pfb;
 
+  dbbc2_pfb =shm_addr->equip.rack==DBBC && 
+    (shm_addr->equip.rack_type == DBBC_PFB ||
+     shm_addr->equip.rack_type == DBBC_PFB_FILA10G);
   buff[0]=0;
 
   kfirst=TRUE;
@@ -30,8 +37,14 @@ void wcounts(label,azoff,eloff,onoff,accum, rack)
        (rack!=RDBE && ((onoff->intp==1 &&strlen(buff)>70)
 		       ||(onoff->intp!=1 &&strlen(buff)>61))) ||
        (rack==RDBE && ((onoff->intp==1 &&strlen(buff)>68)
-		       ||(onoff->intp!=1 &&strlen(buff)>59)))
-       ){
+		       ||(onoff->intp!=1 &&strlen(buff)>59))) ||
+       (dbbc2_pfb && 
+        ((onoff->intp==1 &&strlen(buff)>68)
+            ||(onoff->intp!=1 &&strlen(buff)>59))) ||
+       (!dbbc2_pfb &&
+        ((onoff->intp==1 &&strlen(buff)>70)
+         ||(onoff->intp!=1 &&strlen(buff)>61)))
+    ){
       logit(buff,0,NULL);
       buff[0]=0;
     }
@@ -55,21 +68,27 @@ void wcounts(label,azoff,eloff,onoff,accum, rack)
     memcpy(buff+strlen(buff),onoff->devices[i].lwhat,4);
     strcat(buff," ");
     if(onoff->intp==1) {
-      if(rack!=RDBE)
-	flt2str(buff,(float) accum->avg[i],-7,0);
-      else
+      if(rack==RDBE)
 	dble2str(buff,       accum->avg[i],-9,0);
+      else if(dbbc2_pfb)
+	dble2str(buff,       accum->avg[i],-8,3);
+      else
+	flt2str(buff,(float) accum->avg[i],-7,0);
       buff[strlen(buff)-1]=0;
     } else {
-      if(rack!=RDBE)
-	flt2str(buff,(float) accum->avg[i],-8,1);
-      else
+      if(rack==RDBE)
 	dble2str(buff,       accum->avg[i],-9,1);
-      strcat(buff," ");
-      if(rack!=RDBE)
-	flt2str(buff,(float) accum->sig[i],-8,1);
-      else
+	strcat(buff," ");
 	dble2str(buff,       accum->sig[i],-9,1);
+      else if(dbbc2_pfb) {
+	dble2str(buff,       accum->avg[i],-9,4);
+	strcat(buff," ");
+	dble2str(buff,       accum->sig[i],-9,4);
+      } else {
+	flt2str(buff,(float) accum->avg[i],-8,1);
+	strcat(buff," ");
+	flt2str(buff,(float) accum->sig[i],-8,1);
+      }
     }
   }
   if(strlen(buff)!=0)

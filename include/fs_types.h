@@ -87,3 +87,6 @@
 #include "dbbc3_bbcnn_ds.h"
 #include "dbbc3_cont_cal_ds.h"
 #include "dbbc3_iftpx_ds.h"
+#include "fila10g_mode_ds.h"
+#include "dbbc_vsix_ds.h"
+#include "dbbc_pfbx_ds.h"

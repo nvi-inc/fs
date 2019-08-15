@@ -61,6 +61,7 @@ C          no input points
       data feclon/0.0/,feclat/0.0/
 C
       call fc_setup_ids
+      call fmperror_standalone_set(1)
 c
       ic=ib2as(mpts,ldum,1,o'100000'+6)
       call fc_rte_time(it,it(6))

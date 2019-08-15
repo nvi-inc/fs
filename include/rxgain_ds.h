@@ -1,4 +1,4 @@
-#define MAX_TCAL 600
+#define MAX_TCAL 1200
 #define MAX_SPILL 20
 
 struct rxgain_ds {

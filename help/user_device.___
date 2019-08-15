@@ -1,8 +1,8 @@
                  user_dev - define User Detector Device (all racks)
 
-            Syntax:     user_dev=chan,freq,sb,pol,ifcenter
+            Syntax:     user_dev=chan,freq,sb,pol,ifcenter,zero
 
-            Response:   user_dev/chan,freq,sb,pol,ifcenter
+            Response:   user_dev/chan,freq,sb,pol,ifcenter,zero
 
 
 Settable parameters:
@@ -16,11 +16,12 @@ Settable parameters:
                  Default is unknown.
         ifcenter Center frequency for this detector, relative to the
                  LO frequency, in MHz. No default.
+        zero     Zero level measuring supported: yes or no. Default
+                 yes.
 
 Monitor-only Parameters: none
 
 Comments:
-
 This command specifies the characteristics for user (station)
 detectors 1 and 2 for use with Tsys, Fivept, and Onoff commands.
 
@@ -40,6 +41,20 @@ Mark IV, VLBA, VLBA4, LBA, or LBA4. They can however be used for
 Fivept and Onoff regardless of the rack type. There may be issues with
 the implementation for LBA racks, but they are not supported at this
 time anyway.
+
+The "zero" parameter specifies whether measuring the "no signal" level
+of the device can be measured under FS control, for example using the
+"sigoff" and "sigon" procedures described in the FIVEPT and ONOFF help
+pages.  Detectors need to have their zero level measured if the their
+no signal level is a significant fraction, say greater than 1%, of the
+normal Tsys level.  Typically analog detectors need to have the level
+measured, but digital detectors do not.  The zero level is basically a
+bias in the measurements; a negative bias (which appears as zero) is
+not a way around the need to measure the level.  However a small bias
+may be tolerable. An uncorrected 1% bias makes a 1% error in the
+measured Tsys level.  If "no" is selected, there is no need to measure
+"tpzero" when measuring Tsys (typically in the "caltsys" procedure).
+Further if "tpzero" is measured in this case, the value is ignored.
 
 An user_device= with no parameters clears all user_device values.
 

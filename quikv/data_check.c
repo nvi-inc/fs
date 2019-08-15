@@ -29,6 +29,17 @@ long ip[5];                           /* ipc parameters */
 		  sizeof(shm_addr->last_check.string));
       shm_addr->last_check.ip2=0;
 
+      if(! (shm_addr->equip.drive[shm_addr->select] == MK5 &&
+	  (shm_addr->equip.drive_type[shm_addr->select] == MK5A ||
+	   shm_addr->equip.drive_type[shm_addr->select] == MK5A_BS ||
+	   shm_addr->equip.drive_type[shm_addr->select] == MK5B ||
+	   shm_addr->equip.drive_type[shm_addr->select] == MK5B_BS ||
+	   shm_addr->equip.drive_type[shm_addr->select] == MK5C ||
+	   shm_addr->equip.drive_type[shm_addr->select] == MK5C_BS))
+	 ) {
+	ierr=-404;
+	goto error;
+      }
       if (command->equal == '=' ) {
 	ierr=-301;
 	goto error;

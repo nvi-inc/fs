@@ -28,6 +28,12 @@ static char *lwhat[ ]={
 static char lwhat3i[ ]="abcdefgh";
 
 
+static char *lwhati[ ]={
+"ifa","ifb","ifc","ifd"};
+
+static char *lwhati2[ ]={
+"ia","ib","ic","id"};
+
 static char *lmark[ ]={
   "v1","v2","v3","v4","v5","v6","v7","v8","v9","va","vb","vc","vd","ve",
   "i1","i2","i3"};
@@ -136,9 +142,9 @@ char *ptr;
       }
       for(i=(sizeof(luser)/sizeof(char *))-2;i<sizeof(luser)/sizeof(char *);i++) {
 	if(strcmp(ptr,luser[i])==0) {
-	  lcl->itpis[MAX_DBBC3_DET+i]=1;
-	  strncpy(lcl->devices[MAX_DBBC3_DET+i].lwhat,luser[i],2);
-	  memcpy(lcl->devices[MAX_DBBC3_DET+i].lwhat+2,"  ",2);
+	  lcl->itpis[MAX_GLOBAL_DET+i]=1;
+	  strncpy(lcl->devices[MAX_GLOBAL_DET+i].lwhat,luser[i],3);
+	  memcpy(lcl->devices[MAX_GLOBAL_DET+i].lwhat+2,"  ",2);
 	  goto done;
 	}
       }
@@ -169,7 +175,8 @@ char *ptr;
 	     (shm_addr->equip.drive_type[0]==MK5B ||
 	      shm_addr->equip.drive_type[0]==MK5B_BS ||
 	      shm_addr->equip.drive_type[0]==MK5C ||
-	      shm_addr->equip.drive_type[0]==MK5C_BS) )
+	      shm_addr->equip.drive_type[0]==MK5C_BS ||
+	      shm_addr->equip.drive_type[0]==FLEXBUFF) )
 	    mk5vcd(itpis_test); 
 	  else if(shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA)
 	    mk4vcd(itpis_test);
@@ -198,7 +205,8 @@ char *ptr;
 	     (shm_addr->equip.drive_type[0]==MK5B ||
 	      shm_addr->equip.drive_type[0]==MK5B_BS ||
 	      shm_addr->equip.drive_type[0]==MK5C ||
-	      shm_addr->equip.drive_type[0]==MK5C_BS) )
+	      shm_addr->equip.drive_type[0]==MK5C_BS ||
+	      shm_addr->equip.drive_type[0]==FLEXBUFF) )
 	    mk5vcd(itpis_test); 
 	  else if(shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA)
 	    mk4vcd(itpis_test);
@@ -288,7 +296,8 @@ char *ptr;
 	     (shm_addr->equip.drive_type[0]==MK5B ||
 	      shm_addr->equip.drive_type[0]==MK5B_BS ||
 	      shm_addr->equip.drive_type[0]==MK5C ||
-	      shm_addr->equip.drive_type[0]==MK5C_BS) )
+	      shm_addr->equip.drive_type[0]==MK5C_BS ||
+	      shm_addr->equip.drive_type[0]==FLEXBUFF) )
 	    mk5bbcd(lcl->itpis); 
 	  else if(shm_addr->equip.rack==VLBA4)
 	    mk4bbcd(&lcl->itpis);
@@ -319,7 +328,8 @@ char *ptr;
 	     (shm_addr->equip.drive_type[0]==MK5B ||
 	      shm_addr->equip.drive_type[0]==MK5B_BS ||
 	      shm_addr->equip.drive_type[0]==MK5C ||
-	      shm_addr->equip.drive_type[0]==MK5C_BS) )
+	      shm_addr->equip.drive_type[0]==MK5C_BS ||
+	      shm_addr->equip.drive_type[0]==FLEXBUFF) )
 	    mk5bbcd(itpis_test); 
 	  else if(shm_addr->equip.rack==VLBA4)
 	    mk4bbcd(&itpis_test);
@@ -367,7 +377,9 @@ char *ptr;
 	  ierr=-207;
 	  return ierr;
 	}
-      } else if(shm_addr->equip.rack==DBBC) {
+      } else if(shm_addr->equip.rack==DBBC && 
+	    (shm_addr->equip.rack_type == DBBC_DDC ||
+	     shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
 	if(strcmp(ptr,"allbbc")==0) {
 	  for (i=0;i<MAX_DBBC_BBC;i++) {
 	    lcl->itpis[i]=1;
@@ -421,7 +433,8 @@ char *ptr;
 	     (shm_addr->equip.drive_type[0]==MK5B ||
 	      shm_addr->equip.drive_type[0]==MK5B_BS ||
 	      shm_addr->equip.drive_type[0]==MK5C ||
-	      shm_addr->equip.drive_type[0]==MK5C_BS) )
+	      shm_addr->equip.drive_type[0]==MK5C_BS ||
+	      shm_addr->equip.drive_type[0]==FLEXBUFF) )
 	    mk5dbbcd(lcl->itpis); 
 	  else
 	    for(i=0;i<2*MAX_DBBC_BBC;i++)
@@ -451,7 +464,8 @@ char *ptr;
 	     (shm_addr->equip.drive_type[0]==MK5B ||
 	      shm_addr->equip.drive_type[0]==MK5B_BS ||
 	      shm_addr->equip.drive_type[0]==MK5C ||
-	      shm_addr->equip.drive_type[0]==MK5C_BS) )
+	      shm_addr->equip.drive_type[0]==MK5C_BS ||
+	      shm_addr->equip.drive_type[0]==FLEXBUFF) )
 	    mk5dbbcd(itpis_test); 
 	  for (j=0;j<MAX_DBBC_IF;j++)
 	    for(i=0;i<MAX_DBBC_BBC;i++)
@@ -469,6 +483,90 @@ char *ptr;
 	      lcl->itpis[i]=1;
 	      strncpy(lcl->devices[i].lwhat,lwhat[i],2);
 	      memcpy(lcl->devices[i].lwhat+2,"  ",2);
+	      goto done;
+	    }
+	  }
+	}
+	ierr=-207;
+	return ierr;
+      } else if(shm_addr->equip.rack==DBBC && 
+	    (shm_addr->equip.rack_type == DBBC_PFB ||
+	     shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+	int icore, ik;
+
+	if(strcmp(ptr,"allbbc")==0||
+	   strcmp(ptr,"alli")==0||
+	   strcmp(ptr,"all")==0) {
+	  if(strcmp(ptr,"allbbc")==0||
+	     strcmp(ptr,"alli")!=0) {
+	    for(i=0;i<shm_addr->dbbc_cond_mods;i++) {
+	      for(j=0;j<shm_addr->dbbc_como_cores[i];j++) {
+		icore++;
+		for(k=1;k<16;k++) {
+		  ik=k+(icore-1)*16;
+		  lcl->itpis[ik]=1;
+		  snprintf(lcl->devices[ik].lwhat,4,"%c%02d",
+			   lwhati[i][2],k+j*16);
+		}
+	      }
+	    }
+	  }
+	  if(strcmp(ptr,"alli")==0||
+	     strcmp(ptr,"allbbc")!=0) {
+	    for(i=0;i<shm_addr->dbbc_cond_mods;i++) {
+	      lcl->itpis[i+MAX_DBBC_PFB]=1;
+	      strncpy(lcl->devices[i+MAX_DBBC_PFB].lwhat,lwhati[i],4);
+	    }
+	  }
+	  goto done;
+	} else if(strcmp(ptr,"formbbc")==0||strcmp(ptr,"formif")==0) {
+	  for(i=0;i<MAX_ONOFF_DET;i++)
+	    itpis_test[i]=0;
+	  if( shm_addr->equip.drive[0]==MK5 &&
+	     (shm_addr->equip.drive_type[0]==MK5B ||
+	      shm_addr->equip.drive_type[0]==MK5B_BS ||
+	      shm_addr->equip.drive_type[0]==MK5C ||
+	      shm_addr->equip.drive_type[0]==MK5C_BS ||
+	      shm_addr->equip.drive_type[0]==FLEXBUFF) )
+	    mk5dbbcd_pfb(itpis_test);
+	  icore=0;
+	  for(i=0;i<shm_addr->dbbc_cond_mods;i++) {
+	    for(j=0;j<shm_addr->dbbc_como_cores[i];j++) {
+	      icore++;
+	      for(k=1;k<16;k++) {
+		ik=k+(icore-1)*16;
+		if(itpis_test[ik]==1)
+		  if(strcmp(ptr,"formbbc")==0) {
+		    lcl->itpis[ik]=1;
+		    snprintf(lcl->devices[ik].lwhat,4,"%c%02d",
+			     lwhati[i][2],k+j*16);
+		  } else if(strcmp(ptr,"formif")==0) {
+		    lcl->itpis[i+MAX_DBBC_PFB]=1;
+		    strncpy(lcl->devices[i+MAX_DBBC_PFB].lwhat,lwhati[i],4);
+		  }
+	      }
+	    }
+	  }
+	  goto done;
+	} else { 
+	  icore=0;
+	  for(i=0;i<shm_addr->dbbc_cond_mods;i++) {
+	    for(j=0;j<shm_addr->dbbc_como_cores[i];j++) {
+	      char idevice[4];
+	      icore++;
+	      for(k=1;k<16;k++) {
+		ik=k+(icore-1)*16;
+		snprintf(idevice,4,"%c%02d",lwhati[i][2],k+j*16);
+		if(strcmp(idevice,ptr)==0) {
+		    lcl->itpis[ik]=1;
+		    strncpy(lcl->devices[ik].lwhat,idevice,4);
+		    goto done;
+		}
+	      }
+	    }
+	    if(strcmp(ptr,lwhati[i])==0||strcmp(ptr,lwhati2[i])==0) {
+	      lcl->itpis[i+MAX_DBBC_PFB]=1;
+	      strncpy(lcl->devices[i+MAX_DBBC_PFB].lwhat,lwhati[i],4);
 	      goto done;
 	    }
 	  }
@@ -681,7 +779,7 @@ char *ptr;
 	return ierr;
       }
     }
-    done:
+ done:
     if(ierr!=0) ierr-=*count;
     if(*count>0) (*count)++;
     return ierr;
@@ -694,6 +792,7 @@ struct onoff_cmd *lcl;
 {
   int ivalue,i,j,k,lenstart,limit;
   static int inext;
+  char *fmt;
 
   output=output+strlen(output);
 
@@ -730,8 +829,14 @@ struct onoff_cmd *lcl;
 	else
 	  iwide=4;
 	if(lcl->setup) { 
-	  sprintf(output+strlen(output),
-		  "%.*s,%d,%c,%.4f,%.2f,%.2lf,%.3f,%.3f,%.6f,%.4f,%.6f",iwide,
+	  if(shm_addr->equip.rack==DBBC && 
+	     (shm_addr->equip.rack_type == DBBC_PFB ||
+	      shm_addr->equip.rack_type == DBBC_PFB_FILA10G))
+	    fmt="%3.3s,%d,%c,%.4f,%.2f,%.2lf,%.3f,%.3f,%.6f,%.4f,%.6f";
+	  else
+	    fmt="%2.2s,%d,%c,%.4f,%.2f,%.2lf,%.3f,%.3f,%.6f,%.4f,%.6f";
+	  
+	  sprintf(output+strlen(output),fmt,
 		  lcl->devices[i].lwhat,lcl->devices[i].ifchain,
 		  lcl->devices[i].pol,
 		  lcl->devices[i].fwhm*RAD2DEG,
@@ -740,8 +845,13 @@ struct onoff_cmd *lcl;
 		  lcl->devices[i].dpfu,lcl->devices[i].gain,
 		  lcl->devices[i].dpfu*lcl->devices[i].gain);
 	} else {
-	  sprintf(output+strlen(output),"%.*s,,,,,,,,,,",iwide,
-		  lcl->devices[i].lwhat);
+	  if(shm_addr->equip.rack==DBBC && 
+	     (shm_addr->equip.rack_type == DBBC_PFB ||
+	      shm_addr->equip.rack_type == DBBC_PFB_FILA10G))
+	    fmt="%3.3s,,,,,,,,,,";
+	  else
+	    fmt="%2.2s,,,,,,,,,,";
+	  sprintf(output+strlen(output),fmt,lcl->devices[i].lwhat);
 	}
 	return;
       }

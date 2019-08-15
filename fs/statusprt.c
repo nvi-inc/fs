@@ -36,7 +36,7 @@ int status;
         if (code != 0 && code <= (sizeof(sigmsg)/sizeof(char *)))
             fprintf(stderr,"-%s",sigmsg[code]);
         else
-            fprintf(stderr,"Signal # %d",code);
+            fprintf(stderr,"-Signal # %d",code);
         if ((status & 0200) == 0200)
             fprintf(stderr,"-core dumped");
     }

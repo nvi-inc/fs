@@ -26,9 +26,9 @@ C
       integer*4 lproc1(4,1),lproc2(4,1)
 C                   Command names list, and procedure lists
       integer*4 itscb(13,1)          !  time scheduling control block
-      integer*2 ibuf(256)         !  input buffer containing command
-      integer*2 ibuf2(256),ibufd(3)
-      character*512 ibc
+      integer*2 ibuf(513)         !  input buffer containing command
+      integer*2 ibuf2(513),ibufd(3)
+      character*1024 ibc
       equivalence (ibc,ibuf)
       dimension itime(9)         !  time array returned from spars
       dimension it(6)          !  time from system 
@@ -45,7 +45,7 @@ C                         Ref times for operator and schedule streams
       dimension lnamef(10),tmpchr(10) !  file name, general use
       equivalence (lnamef,cnamef),(tmpchr,tmpstr)
       character*28 pathname
-      integer idcbp1(2),idcbp2(2),fc_system,fc_skd_end_insnp
+      integer idcbp1(2),idcbp2(2),fc_system,fc_skd_end_insnp,fc_if_cmd
       save idcbp1,idcbp2
 C                         DCB's for procedures from lists 1 and 2
       dimension istksk(42),istkop(42)        !  stacks for nested procedures
@@ -82,7 +82,7 @@ C     ICLASS - general variable for class with command/response
 C     ICLOP2 - secondary operator class after immediate commands
 C             have been stripped
 C     MAXPR1,2 - Maximum number of procs allowed in each lists
-      data iblen/256/
+      data iblen/512/
       data kskblk/.true./,kopblk/.false./,kxdisp/.false./,kxlog/.false./
       data istksk/40,2,40*0/, istkop/40,2,40*0/
       data lstksk/MAX_PROC_PARAM_COUNT,2,MAX_PROC_PARAM_COUNT*0/
@@ -430,6 +430,22 @@ C
           end if
         end if
         call rmpar(ip)
+        if (ip(3).ne.0) then
+           call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        endif
+        if (ip(3).lt.0) then
+          if (kts) iclass=0
+C                   If we got ICLASS from time-scheduling, don't kill
+C                   it here, wait until CANTS
+          if(iwait.ne.0) then
+             ipinsnp(3)=ip(3)
+             ipinsnp(4)=ip(4)
+             ipinsnp(5)=ip(5)
+          endif
+          call clrcl(iclass)
+          if(kts) call cants(itscb,ntscb,5,index,indts)
+          if (ip(1).eq.0) goto 200
+        endif
 C                   Don't leave just yet!  See if there is any
 C                   message in spite of our error.
         if (ip(1).ne.0) then
@@ -446,21 +462,6 @@ C                   message in spite of our error.
         endif
         if (kts) iclass = 0
         call clrcl(iclass)
-c
-        if (ip(3).lt.0) then
-          if (kts) iclass=0
-C                   If we got ICLASS from time-scheduling, don't kill
-C                   it here, wait until CANTS
-          call logit7(0,0,0,0,ip(3),ip(4),ip(5))
-          if(iwait.ne.0) then
-             ipinsnp(3)=ip(3)
-             ipinsnp(4)=ip(4)
-             ipinsnp(5)=ip(5)
-          endif
-          call clrcl(iclass)
-          if(kts) call cants(itscb,ntscb,5,index,indts)
-          if (ip(1).eq.0) goto 200
-        endif
 C
 C     5.2 Handle CONT command.  Set KHALT to false now.
 C
@@ -529,6 +530,11 @@ C  User requested schedule name, format response and log it.
                ipinsnp(2)=ipinsnp(2)+1
             endif
             goto 600
+         endif
+         call fs_get_disk_record_record(disk_record_record)
+         if(disk_record_record.eq.1) then
+             call logit7ci(0,0,0,0,-262,'bo',0)
+             goto 600
           endif
          call fs_get_disk_record_record(disk_record_record)
          if(disk_record_record.eq.1) then
@@ -707,6 +713,10 @@ C
         else
           call logit7ci(0,0,0,0,-159,'bo',0)
         end if
+        scan_name_old(1:1)=char(0)
+        call fs_set_scan_name_old(scan_name_old)
+        scan_name(1:1)=char(0)
+        call fs_set_scan_name(scan_name)
         idum=ichmv_ch(ibuf,1,"exper_initi")
         nchar=idum-1
         idum=ichmv_ch(lsor,1,"::")
@@ -823,6 +833,20 @@ C
            iret=fc_skd_end_insnp('boss ',ipinsnp)
            if(iret.ne.0) then
               call clrcl(ipinsnp(1))
+           endif
+        endif
+        call fc_antcn_term(iout)
+        if(iout.ge.0) then
+           ip(1)=iout
+           call run_prog('antcn','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
+           call rmpar(ip)
+           ierr = ip(3)
+           if (ierr.ne.0) then
+              call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+              call logit7ci(0,0,0,1,-998,'bo',ierr)
+           else
+              call fc_rte_sleep(10)
+              call fc_putln('antenna termination succeeded')
            endif
         endif
         call fc_rte_sleep( 10)
@@ -1109,6 +1133,22 @@ c
                  endif
               endif
            endif
+        endif
+      else if (mbranch.eq.22) then
+c
+c if= command
+c
+        ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
+        nchar = min0(ireg(2),iblen*2)
+        call pchar(ibuf,nchar+1,0)
+        iret=fc_if_cmd(ibuf,nchar)
+        if(iret.lt.0) then
+           call logit7ci(0,0,0,0,-312+iret,'bo',0)
+        else if(iret.gt.0) then
+           nchar=iret
+           if (.not.kts) call clrcl(iclass)
+           if (kts.and.klast) call cants(itscb,ntscb,5,index,indts)
+           goto 320
         endif
       endif
       mbranch = 0

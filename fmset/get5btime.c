@@ -13,7 +13,6 @@ extern long ip[5];           /* parameters for fs communications */
 extern int synch;
 extern int rack, rack_type;
 extern int m5b_crate;
-extern int source;
 
 extern dbbc_sync;
 extern WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
@@ -21,7 +20,8 @@ extern WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
 void rte2secs();
 
 void get5btime(unixtime,unixhs,fstime,fshs,formtime,formhs,raw,
-m5sync,sz_m5sync,m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock)
+	       m5sync,sz_m5sync,m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,
+	       sz_m5clock,ierr)
 time_t *unixtime; /* computer time */
 int    *unixhs;
 time_t *fstime; /* field system time */
@@ -37,6 +37,7 @@ char *m5freq;
 int sz_m5freq;
 char *m5clock;
 int sz_m5clock;
+int *ierr;
 {
 	long centisec[6], centiavg, centidiff, hsdiff;
         int it[6];
@@ -60,7 +61,7 @@ int sz_m5clock;
 	  mvwaddstr( maindisp, 6, 6+15,
 		     "                                       ");
 	  mvwaddstr( maindisp, 6, 6+15+39 , "               ");
-	  if(source == DBBC && dbbc_sync) {
+	  if(rack == DBBC && dbbc_sync) {
 	    dbbc_sync=0;
 	    out_recs=0;
 	    out_class=0;
@@ -226,6 +227,7 @@ int sz_m5clock;
 	if( ip[2] != 0 ) {
 	  logita(NULL,ip[2],ip+3,ip+4);
 	  logit(NULL,-8,"fv");
+	  *ierr=ip[2];
 	  *formtime=-1;
 	  *raw=0;
 	  return;

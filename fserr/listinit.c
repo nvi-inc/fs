@@ -23,9 +23,10 @@ struct errorlst{
   char message[120];
 };
 
-void listinit(tdcb,list)
+void listinit(tdcb,list,file)
 FILE *tdcb;
 struct errorlst list[MAXERRORS];
+char *file;
 {
 
   int hashcount;
@@ -35,24 +36,38 @@ struct errorlst list[MAXERRORS];
   int errnum;
   char buffer[MAXSTR];
   int err;
+  int next_line;
 
   struct {
     char buf[2];
     int off;
   } entryfs;
 
+  next_line=1;
   while (fgets(buffer,MAXSTR,tdcb)!=NULL) {
-    inum = sscanf(buffer,"%s",dquote);
-
-    if (fgets(buffer,MAXSTR,tdcb)==NULL) {
-      printf("ERROR reading control file\n");
+    if(1!=(inum = sscanf(buffer,"%1s",dquote))) {
+      printf("fserr: ERROR in control file, double quote, line %d, file %s\n",
+	     next_line,file);
       exit(-1);
     }
 
-    inum = sscanf(buffer,"%s%d",entryfs.buf,&entryfs.off);
-
+    next_line++;
     if (fgets(buffer,MAXSTR,tdcb)==NULL) {
-      printf("ERROR reading control file\n");
+      printf("fserr: ERROR reading control file, mnemonic, line %d, file %s\n",
+	     next_line,file);
+      exit(-1);
+    }
+    
+    if(2!=(inum = sscanf(buffer,"%2s%d",entryfs.buf,&entryfs.off))) {
+      printf("fserr: ERROR in control file, mnemonic, line %d file %s\n",
+	     next_line,file);
+      exit(-1);
+    }
+    
+    next_line++;
+    if (fgets(buffer,MAXSTR,tdcb)==NULL) {
+      printf("fserr: ERROR reading control file, message, line %d file %s\n",
+	     next_line,file);
       exit(-1);
     }
 
@@ -72,5 +87,7 @@ struct errorlst list[MAXERRORS];
     memcpy(list[hash].mnemonic,entryfs.buf,2);
     list[hash].ierr=entryfs.off;
     memcpy(list[hash].message,buffer,120);
+
+    next_line++;
   }
 }

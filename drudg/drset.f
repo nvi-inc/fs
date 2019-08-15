@@ -23,7 +23,7 @@ C   LOCAL VARIABLES
 C               - Key word, longest is 22 characters
       character*2 ckey
       integer MaxPr
-      parameter (MaxPr=49)
+      parameter (MaxPr=48)
       character*15 listPr(MaxPr)
       character*2  listPrShort(MaxPr)
 
@@ -37,7 +37,6 @@ C               - Key word, longest is 22 characters
      > "GET",       "HEAD",       "IDLE",       "JAVA",
      > "LOOKAHEAD", "MAXSCAN",    "MIDOB",      "MIDTP",
      > "MINBETWEEN","MINIMUM",    "MINSCAN",    "MINSUBNET",
-     > "MARK6_OFF",
      > "MODSCAN",   "MODULAR",    "NOREWIND",
      > "PARITY",     "POSTOB",
      > "POSTPASS",  "PREOB",      "PREPASS",    "PRFLAG",
@@ -53,7 +52,6 @@ C               - Key word, longest is 22 characters
      >"GT","HD","ID","JA",
      >"LO","XS","MI","MT",
      >"MB","MN","MS","SM",
-     >"M6", 
      >"MD","MO","NR","PA","PO",
      >"PS","PR","PP","PF",
      >"PI","SP","SA","SO",
@@ -117,7 +115,7 @@ C  Character values
 C  Numerical values
       elseif  (ckey.eq.'SP'.OR.ckey.eq.'PA'.OR.ckey.eq.'SO'.OR.
      .         ckey.eq.'HD'.OR.ckey.eq.'TP'.OR.ckey.eq.'TE'.or.
-     >         ckey.eq.'CH'.or.ckey .eq.'M6') then
+     >         ckey.eq.'CH') then
         INUM = IAS2B(LINSTQ(2),IC1,IC2-IC1+1)
         IF  (INUM.lt.0) THEN
           write(luscn,'("DRSET04 - Invalid parameter value.")')
@@ -125,8 +123,6 @@ C  Numerical values
         END IF
         IF (ckey.eq.'SP') THEN
           ISETTM = INUM
-        else if(ckey .eq. 'M6') then
-          imark6_off=inum
         ELSE IF (ckey.eq.'CH') THEN
           ITCTIM = INUM                    !tape change time.
         ELSE IF (ckey.eq.'PA') THEN

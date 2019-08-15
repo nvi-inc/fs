@@ -5,52 +5,63 @@
             Response:   tpzero/zero levels
 
 
-Settable parameters: 
-            list        List of modules for which zero levels are to be
-            measured. Standard detector mnemonics allowed.  In addition for
-            VLBA/4/5 formif and formbbc are permitted, for Mark III/IV/5,
-            formif and formvc are permitted.
+Settable parameters:
+ 
+            list         List of modules for which zero levels are to
+                         be measured.  Standard detector mnemonics
+                         allowed.  In addition: for VLBA/4/5/DBBC
+                         'formif' and 'formbbc' are permitted; for
+                         Mark III/IV/5, 'formif' and 'formvc' are
+                         permitted; station detectors 'u5' and 'u6'
+                         are permitted.
 
 Monitor-only parameters:
-            zero levels List of zero levels, counts. These values are stored
-            for use by the tsys/5/6.
+
+            zero levels  List of detector & zero level pairs.  Zero
+                         levels are in counts.  These values are
+                         stored for use by the 'tsys' command.
 
 Comments: 
-Except for station defined detectors, the results are returned
-grouped in pairs of detector mnemonic,value, the output is
-collected into lines by IF channel. Detectors that have no IF
-assigned are displayed first followed by Ifs 1-3 (Mark III/IV)
-and a-d (VLBA/4). If the output for an IF would make a long
-output line, the output is split into more than one line. For
-station defined detectors the results are just displayed in
-order: u5, u6.
 
-A time-out or other error on one more devices for a Mark
-III/IV, LBA, or VLBA/4 detector will not prevent results from
-other detectors from being displayed.  A negative integer will
-be shown for each channel that had an error that prevented an
-actual measurement from being displayed. An overflow value,
-65535, is displayed as dollar signs, $$$$$.
+The results are returned grouped in pairs of 'mnemonic,value' per
+device.  The output is collected into lines by IF channel.  Detectors
+that have no IF assigned are displayed first followed by those for IFs
+'1'-'3' (Mark III/IV) and 'a'-'d' (VLBA/4/5/DBBC).  If the output for
+an IF would make a long output line, the output is split into more
+than one line.  For station detectors, the values are displayed on one
+line.
 
-For Mark III/IV and LBA4 racks the detector mnemonics for the
-VCs are displayed as hs, where h is the VC number as hex and s
-is for the detector is use: d (dual for upper/lower), u
-(upper), l (lower), a digit 3-7 for other detectors or 'x' for
-unknown.
+For Mark III/IV and LBA4 racks the detector mnemonics for the VCs are
+displayed as 'hs', where 'h' is the VC number as hex and 's' is for
+the sideband: 'd' (dual for upper/lower), 'u' (upper), 'l' (lower), a
+digit '3'-'7' for other VC detectors or 'x' for unknown.
 
-For VLBA/4/5, additional mnemonics formif and formbbcc are permitted
-in the list.  These select the detectors for the IF channels and BBC
-sidebands currently being recorded by the formatter.  For Mark
-III/IV/5, formvc is accepted instead of formbbc, as well as formif.
+For VLBA/4/5/DBBC, additional mnemonics 'formif' and 'formbbc' are
+permitted in the 'list'.  These select the detectors for the IF
+channels and BBC sidebands currently being recorded by the formatter.
+For Mark III/IV/5, 'formvc' is accepted instead of 'formbbc', as well
+as 'formif'.
 
-It is assumed the noise calibration signal is off and
-attenuations is at a maximum or the signal is somehow turn-
-off.
+A time-out or other error on one more devices for a Mark III/IV, LBA,
+or VLBA/4/5/DBBC detector will not prevent results from other
+detectors from being displayed.  A negative integer will be shown for
+each channel that had an error that prevented an actual measurement
+from being reported.  An overflow value, 65535, is displayed as dollar
+signs, '$$$$$'.
 
-These zero levels are subtracted from all readings taken on
-the same module before system temperatures are computed in the
-TSYS command.
+It is assumed the noise calibration signal is off and the attenuation
+is at a maximum or the signal is somehow turned-off.
 
-This command is not used for LBA racks as the digital nature
-of their detectors ensures this value is always zero.  Any
-values measured this way will be ignored.
+Except as noted below, these zero levels are subtracted from all
+readings taken on the same module before system temperatures are
+computed in the 'tsys' command.
+
+This command is not used for LBA or DBBC racks as the digital nature
+of their detectors ensures this value is always (or nearly) zero.  Any
+values measured for these racks will be ignored.  The 'tpzero' command
+should be omitted for these racks.
+
+For station detectors, if the 'zero' parameter in the 'user_device'
+command is set to 'no', the value from 'tpzero' is ignored by the
+'tsys' command, even if it was measured.  The use of 'tpzero' should
+be omitted in this case.

@@ -1,6 +1,6 @@
 !Include file to set the version. Just change this and leave fdrudg.f alone. (you need to delete fdrudg.o prior to make though.) 
 ! below is set at compiletime
-      cversion = '2016Jul25'
+      cversion = '2018Sep25'
 !
 ! See change_log.txt for a summary of the changes.
 !  

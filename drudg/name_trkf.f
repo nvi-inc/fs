@@ -8,12 +8,13 @@
       character*(*) lnamep
       integer ilast_non_blank
 
+! 2015Jun05. Removed commented out code. 
+
       if(knopass) then
         write(lnamep,'("trkf",a)') lmode
       else
         write(lnamep,'("trkf",a,a,a1)') lmode,lpmode,lpass
       endif
-!     call squeezewrite(lufile,ldum)
       call squeezeleft(lnamep,ilast_non_blank)
       end
 

@@ -4,7 +4,7 @@
 * no blank lines or leading white space allowed
 * sections are delimited by lines that start with $, or $sections
 *
-* currently only one $section, commented out, is defined:
+* currently only one $section is defined:
 *  $config name
 *
 * where 'name' is the configuration name, maximum 16 characters (no spaces) 
@@ -18,10 +18,10 @@
 * the configuration to be used can be selected in FMSET when 's'yncing
 * the fila10g
 *
-*$config first
+$config first
 *general setup
-*arp off
-*vdif_enc on
+arp off
+vdif_enc on
 *
 *customize IPs, ports, gateways, MACs, NMs, and destinations,
 *for your station, configure appropriate ethXs
@@ -42,15 +42,15 @@
 * but it would better to just not change the port.
 *
 *eth0 follows
-*tengbcfg eth0 ip=192.168.2.11 gateway=192.168.2.1
-*tengbcfg eth0 mac=xx:xx:xx:xx:xx:xx
-*tengbcfg eth0 nm=27
-*destination 0 192.168.2.21:2630
-*tengbarp eth0 21 ??:??:??:??:??:??
+tengbcfg eth0 ip=192.168.2.11 gateway=192.168.2.1
+tengbcfg eth0 mac=xx:xx:xx:xx:xx:xx
+tengbcfg eth0 nm=27
+destination 0 192.168.2.21:2630
+tengbarp eth0 21 ??:??:??:??:??:??
 *
 *eth1 follows
-*tengbcfg eth1 ip=192.168.3.11 gateway=192.168.3.1
-*tengbcfg eth1 mac=yy:yy:yy:yy:yy:yy
-*tengbcfg eth1 nm=27
-*destination 1 192.168.3.21:2630
-*tengbarp eth1 21 ??:??:??:??:??:??
+tengbcfg eth1 ip=192.168.3.11 gateway=192.168.3.1
+tengbcfg eth1 mac=yy:yy:yy:yy:yy:yy
+tengbcfg eth1 nm=27
+destination 1 192.168.3.21:2630
+tengbarp eth1 21 ??:??:??:??:??:??

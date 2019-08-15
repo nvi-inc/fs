@@ -684,27 +684,23 @@ long ip[5];
       /* is there a trailing parameter that could contain an error message */
       ptr=strchr(outbuf,':');
       if(ptr!=NULL) {
-	char *save, *ptr2;
+	char *ptr2;
 
 	ptr2=strchr(ptr+1,';'); /* terminate the string at the ; */
 	if(ptr2!=NULL)
 	  *ptr2=0;
 
-	save=NULL;              /* initialize, nothing yet */
-
-	ptr=strtok(ptr+1,":");  /* find the last paramter */
-	while (ptr!=NULL) {
-	  save=ptr;
-	  ptr=strtok(NULL,":");
-	}
-	if(save!=NULL) {         /* if there was soemthing there */
-	  while(*save!=0 && *save==' ')
-	    save++;
-	  if(*save!=0)
-	    logite(save,-900,"m5");
-	}
+	ptr++;
+	while(*ptr!=0 && *ptr==' ')
+	  ptr++;
+	if(*ptr!=0)
+	  logite(ptr,-900,"m5");
       }
-      ip[2]=-900-ierr;
+      if(ierr==6 && strstr(ptr,"dot_set=...")) {
+	logit(NULL,-900-ierr,"m5");
+	ip[2]=-898;
+      } else 
+	ip[2]=-900-ierr;
       goto error;
     }
       
@@ -845,7 +841,7 @@ static int read_response(char *str, int num, FILE* stream,
     /* we don't know where we are in current tick, so add one to be safe */ 
     end=start+time_out_local+1; 
     
-    while(num > 1) {
+    while(num > 2) {
 
       clearerr(stream);
       c=fgetc(stream);

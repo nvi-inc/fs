@@ -6,11 +6,35 @@
 
 
 Comments: 
-This command halts execution of the schedule until a cont
-command is issued by the operator. Once the current schedule
-command is finished, no further commands of any kind will be
-read from the schedule command stream while the halt is in
-effect. Interactive commands from the operator command stream
-will still be processed. This is an immediate execution
-operator command.
 
+This command halts execution of the schedule until a cont command is
+issued by the operator. Once the current schedule command is finished,
+no further commands of any kind will be read from the schedule command
+stream while the halt is in effect. Interactive commands from the
+operator command stream will still be processed. This is an immediate
+execution operator command.
+
+Please note that a consequnce of using this command is that any
+procedure(s) executing in the schedule command stream will be halted.
+This is because the FS cannot know if the operator needs to "panic"
+stop or to just gracefully end execution of the schedule, so the
+safest action is taken.
+
+It is not possible to execute a "schedule=..." command while the
+schedule is halted with partially executed procedures.  This would
+require popping any executing procedure(s) off the schedule stack.
+The FS will not do this because procedures are considered "atomic".
+In some cases, prematurely ending a procedure may leave the system in
+an undesirable state, e.g., the noise diode might be left on of a Tsys
+procedure is exited early.
+
+If a graceful halt or (re-)start of a schedule is needed, it is
+recommended that the operator enter "halt" during a wait for a
+time-flow control ("!<time>") or a timed wait ("!+<time to wait>")
+command.  If halted during such a wait, a new "schedule=..." command
+can be executed.
+
+If it is not possible to find a suitable wait, the "terminate" command
+can always be entered to end FS execuation immediately.  It may be
+necessary to correct any undesirable state the equipment is left in as
+a result, e.g., the noise diode being left on.

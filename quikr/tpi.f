@@ -31,6 +31,7 @@ C 3.  LOCAL VARIABLES
       integer itpis(17)
       integer itpis_vlba(MAX_DET)
       integer itpis_dbbc(MAX_DBBC_DET)
+      integer itpis_dbbc_pfb(MAX_DBBC_PFB_DET)
       integer itpis_dbbc3(MAX_DBBC3_DET)
       integer itpis_lba(2*MAX_DAS)
       integer itpis_norack(2)
@@ -65,15 +66,22 @@ C
       if (iclcm.eq.0) return
 C                     Retain class for later response
       call fs_get_rack(rack)
-
+      call fs_get_rack_type(rack_type)
+c
       if(MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
         call tplis(ip,itpis)
       else if (VLBA .eq. rack .or. VLBA4.eq.rack) then
         call tplisv(ip,itpis_vlba)
       else if (LBA.eq.rack) then
         call tplisl(ip,itpis_lba)
-      else if (DBBC.eq.rack) then
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
+     &       ) then
         call tplisd(ip,itpis_dbbc)
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
+     &       ) then
+        call tplisd_pfb(ip,itpis_dbbc_pfb)
       else if (DBBC3.eq.rack) then
         call tplisd3(ip,itpis_dbbc3)
       else
@@ -120,9 +128,15 @@ C
       else if (LBA.eq.rack) then
         call fc_tpi_lba(ip,itpis_lba)
         if(ip(3).lt.0) return
-      else if (DBBC.eq.rack) then
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
+     &       ) then
         call fc_tpi_dbbc(ip,itpis_dbbc)
         if(ip(3).lt.0) return
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
+     &       ) then
+        call fc_tpi_dbbc_pfb(ip,itpis_dbbc_pfb)
       else if (DBBC3.eq.rack) then
         call fc_tpi_dbbc3(ip,itpis_dbbc3)
         if(ip(3).lt.0) return
@@ -150,8 +164,15 @@ C                     Get the command part of the response set up
       else if (LBA.eq.rack) then
         call fc_tpput_lba(ip,itpis_lba,isub,ibuf,nch,ilen)
         return
-      else if (DBBC.eq.rack) then
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_DDC.eq.rack_type.or.DBBC_DDC_FILA10G.eq.rack_type)
+     &       ) then
         call fc_tpput_dbbc(ip,itpis_dbbc,isub,ibuf,nch,ilen)
+        return
+      else if (DBBC.eq.rack.and.
+     &       (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
+     &       ) then
+        call fc_tpput_dbbc_pfb(ip,itpis_dbbc_pfb,isub,ibuf,nch,ilen)
         return
       else if (DBBC3.eq.rack) then
         call fc_tpput_dbbc3(ip,itpis_dbbc3,isub,ibuf,nch,ilen)

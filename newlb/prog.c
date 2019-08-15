@@ -19,7 +19,12 @@
 #define DBBCDDCVL_N 1
 #define DBBCDDCVS_N 16
 #define RDBE_PCAL_AMP_N 1
-#define SYSTMP_N MAX_TSYS_DET
+#define FILA10GVSI_IN_N 16
+#define DBBCPFBVL_N 1
+#define DBBCPFBVS_N 16
+#define SCANNAME_N 17
+#define SCANNAMEOLD_N 17
+#define SYSTMP_N MAX_GLOBAL_DET
 #define LFREQV_N 90
 #define FREQVC_N 15
 #define LNAANT_N 8
@@ -33,6 +38,7 @@
 #define CWRAP_N 8
 #define IDEVDS_N 64
 #define DBBC3_DDC_VS_N 16
+#define UD_ZERO_N 4*6
 #define SVERRELEASE 32
 
 extern struct fscom *shm_addr;
@@ -1104,6 +1110,17 @@ void fs_get_ichs2__(ichs2)
 	  *ichs2 = shm_addr->check.s2rec.check;
 	}
 
+void fs_set_ichdbbcfm__(ichdbbcfm)
+	int *ichdbbcfm;
+	{
+	  shm_addr->check.dbbc_form = *ichdbbcfm;
+	}
+
+void fs_get_ichdbbcfm__(ichdbbcfm)
+	int *ichdbbcfm;
+	{
+	  *ichdbbcfm = shm_addr->check.dbbc_form;
+	}
 
 void fs_set_stchk__(ichk,n)
 int *ichk,*n;
@@ -2392,6 +2409,24 @@ void fs_get_dbbcddcvs__(dbbcddcvs)
 	  memcpy(dbbcddcvs,shm_addr->dbbcddcvs,N);
 	}
 
+void fs_set_scan_name_old__(scan_name_old)
+	char *scan_name_old;
+	{
+          size_t N;
+	  N = SCANNAMEOLD_N;
+	  memcpy(shm_addr->scan_name.name_old,scan_name_old,N);
+	}
+
+
+void fs_set_scan_name__(scan_name)
+	char *scan_name;
+	{
+          size_t N;
+	  N = SCANNAME_N;
+	  memcpy(shm_addr->scan_name.name,scan_name,N);
+	}
+
+
 void fs_set_dbbcddcvc__(dbbcddcvc)
 	int *dbbcddcvc;
 	{
@@ -2402,6 +2437,30 @@ void fs_get_dbbcddcvc__(dbbcddcvc)
 	int *dbbcddcvc;
 	{
           *dbbcddcvc = shm_addr->dbbcddcvc;
+	}
+
+void fs_set_dbbcddcsubv__(dbbcddcsubv)
+	int *dbbcddcsubv;
+	{
+          shm_addr->dbbcddcsubv = *dbbcddcsubv;
+        }
+
+void fs_get_dbbcddcsubv__(dbbcddcsubv)
+	int *dbbcddcsubv;
+	{
+          *dbbcddcsubv = shm_addr->dbbcddcsubv;
+	}
+
+void fs_set_dbbccontcalpol__(dbbccontcalpol)
+	int *dbbccontcalpol;
+	{
+          shm_addr->dbbccontcalpol = *dbbccontcalpol;
+        }
+
+void fs_get_dbbccontcalpol__(dbbccontcalpol)
+	int *dbbccontcalpol;
+	{
+          *dbbccontcalpol = shm_addr->dbbccontcalpol;
 	}
 
 void fs_set_dbbcpfbv__(dbbcpfbv)
@@ -2415,6 +2474,62 @@ void fs_get_dbbcpfbv__(dbbcpfbv)
 	{
           *dbbcpfbv = shm_addr->dbbcpfbv;
 	}
+void fs_set_dbbcpfbvl__(dbbcpfbvl)
+	char *dbbcpfbvl;
+	{
+          size_t N;
+	  N = DBBCPFBVL_N;
+	  memcpy(shm_addr->dbbcpfbvl,dbbcpfbvl,N);
+	}
+
+void fs_get_dbbcpfbvl__(dbbcpfbvl)
+	char *dbbcpfbvl;
+	{
+          size_t N;
+	  N = DBBCPFBVL_N;
+	  memcpy(dbbcpfbvl,shm_addr->dbbcpfbvl,N);
+	}
+
+void fs_set_dbbcpfbvs__(dbbcpfbvs)
+	char *dbbcpfbvs;
+	{
+          size_t N;
+	  N = DBBCPFBVS_N;
+	  memcpy(shm_addr->dbbcpfbvs,dbbcpfbvs,N);
+	}
+
+void fs_get_dbbcpfbvs__(dbbcpfbvs)
+	char *dbbcpfbvs;
+	{
+          size_t N;
+	  N = DBBCPFBVS_N;
+	  memcpy(dbbcpfbvs,shm_addr->dbbcpfbvs,N);
+	}
+
+void fs_set_dbbcpfbvc__(dbbcpfbvc)
+	int *dbbcpfbvc;
+	{
+          shm_addr->dbbcpfbvc = *dbbcpfbvc;
+        }
+
+void fs_get_dbbcpfbvc__(dbbcpfbvc)
+	int *dbbcpfbvc;
+	{
+          *dbbcpfbvc = shm_addr->dbbcpfbvc;
+	}
+
+void fs_set_dbbcpfbsubv__(dbbcpfbsubv)
+	int *dbbcpfbsubv;
+	{
+          shm_addr->dbbcpfbsubv = *dbbcpfbsubv;
+        }
+
+void fs_get_dbbcpfbsubv__(dbbcpfbsubv)
+	int *dbbcpfbsubv;
+	{
+          *dbbcpfbsubv = shm_addr->dbbcpfbsubv;
+	}
+
 void fs_set_dbbc_cond_mods__(dbbc_cond_mods)
 	int *dbbc_cond_mods;
 	{
@@ -2667,6 +2782,62 @@ void fs_get_dbbc3_cont_cal_mode__(dbbc3_cont_cal_mode)
 	  *dbbc3_cont_cal_mode=shm_addr->dbbc3_cont_cal.mode;
 	}
 
+
+void fs_set_fila10gvsi_in__(fila10gvsi_in)
+	char *fila10gvsi_in;
+	{
+          size_t N;
+	  N = FILA10GVSI_IN_N;
+	  memcpy(shm_addr->fila10gvsi_in,fila10gvsi_in,N);
+	}
+
+void fs_get_fila10gvsi_in__(fila10gvsi_in)
+	char *fila10gvsi_in;
+	{
+          size_t N;
+	  N = FILA10GVSI_IN_N;
+	  memcpy(fila10gvsi_in,shm_addr->fila10gvsi_in,N);
+	}
+
+void fs_set_dbbc_como_cores__(dbbc_como_cores)
+	int *dbbc_como_cores;
+	{
+	  memcpy(shm_addr->dbbc_como_cores,
+		 dbbc_como_cores,
+		 sizeof(shm_addr->dbbc_como_cores));
+        }
+
+void fs_get_dbbc_como_cores__(dbbc_como_cores)
+	int *dbbc_como_cores;
+	{
+	  memcpy(dbbc_como_cores,
+		 shm_addr->dbbc_como_cores,
+		 sizeof(shm_addr->dbbc_como_cores));
+	}
+
+void fs_set_dbbc_cores__(dbbc_cores)
+	int *dbbc_cores;
+	{
+	  shm_addr->dbbc_cores=*dbbc_cores;
+        }
+
+void fs_get_dbbc_cores__(dbbc_cores)
+	int *dbbc_cores;
+	{
+	  *dbbc_cores=shm_addr->dbbc_cores;
+	}
+
+void fs_set_user_device_zero__(zero)
+     int *zero;
+	{
+	  memcpy(shm_addr->user_device.zero,zero,UD_ZERO_N);
+        }
+
+void fs_get_user_device_zero__(zero)
+	int *zero;
+	{
+	  memcpy(zero,shm_addr->user_device.zero,UD_ZERO_N);
+	}
 void fs_get_sverrelease_fs__(sVerRelease_FS)
 	int *sVerRelease_FS;
 	{

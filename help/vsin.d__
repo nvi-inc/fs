@@ -1,0 +1,38 @@
+          vsin - Sampler mode (DBBC racks, PFB only)
+
+            Syntax:     vsin=list
+            Response:   vsin/list
+
+n is the vsi output connector, 1 or 2
+
+Settable Parameters:
+
+            list      up to 16 parameters of the form 'xn' that define
+                      the PFB channel to be assigned to the
+                      corresponding output position on that VSI
+                      connector, null indicates that position is not
+                      defined. 'x' is one of 'a', 'b', 'c' or 'd' as
+                      defined by the Cores for each Conditionong
+                      Module in equip.ctl. 'n' is 0-15 for the for the
+                      first Core for a Conditioning Module, 16-31 for
+                      second, etc.
+
+Monitor-only Parameters: None
+
+Comments:
+As of this writing, the device does not provide a monitor response, so
+there is no FS monitor response. However, as usual you can query the FS
+internal state with a single '?' as an argument.
+
+The channels are assigned to the output in the order of the parmeters,
+i.e., parameter one is for output position (pins 0 and 1), parameter
+two for output position two (pins 2 and 3), etc. up through parameter
+16 for output channel 16 (pins 30 and 31). Each PFB channel use two
+pins, one for sign and one for magnitude. Consequently there can only
+be 16 PFB channels per VSI connector.
+
+If the list is empty the device is commanded to remove all channels.
+
+With the vsi1=... and/or vsi2=.. commands are used, the "form=flex"
+command must be used to indicate that the channels are defined by
+these commands.

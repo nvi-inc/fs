@@ -1,0 +1,296 @@
+Field System Display Client/Server User Guide
+=============================================
+
+D. Horsley
+Sep 2018
+
+Introduction
+------------
+
+The Field System has the capability to be run in server mode. This
+allows the operational part of the FS to be detached from the user
+interface. An operator, or multiple operators, can then freely attach
+and detach with the use of the FS client.
+
+
+          +-------fsserver--------+
+          |  +--+ +---------+     |
+          |  |fs| | autoftp | ... |
+          |  +--+ +---------+     |
+          +-----------------------+
+                     |
+                     |
+    +----------+     |     +----------+
+    | fsclient <----/ \----> fsclient |
+    +----------+           +----------+
+
+This separation of the user interface programs from the operational
+programs adds additional resilience to the FS and many advantages:
+
+-   The FS is unaffected by log-outs, closed windows, or X server crashes.
+-   The FS will not exit if certain windows are closed
+-   The FS can be started and run in the background, simplifying remote operations
+-   All interface programs (monit, etc) start with the clients and don't affect the FS.
+-   Unlike a simple "tail -f /usr2/`lognm`.log", no intervention
+    required if the log changes, and all messages printed to the FS
+    terminal are visible on the client.  This is important as some
+    fatal errors are not printed to the FS log.
+
+
+Installation
+------------
+
+In FS 9.13.0, by default the display server and client are build
+but their functionality is disabled. It can be enabled by setting the
+FS_DISPLAY_SERVER environment variable.
+
+For example, using tcsh with the command 
+
+    setenv FS_DISPLAY_SERVER 1
+
+or with bash:
+
+    export FS_DISPLAY_SERVER=1
+
+If you wish to use the server by default, add the command above
+command to the '.login' (tcsh) or ".profile" (bash) file in the oper
+home directory.
+
+If you are upgrading from a pre v9.13.0 version of the FS, some
+control files will need to be modified for correct operation of
+the display client/server.
+
+The first control file you will need to create or change is the client
+programs control file `clpgm.ctl`. This determines the commands that
+are available in fsclient. You can copy the default into your local
+control file folder:
+
+    cp /usr2/fs/st.default/control/clpgm.ctl /usr2/control/
+
+The second control file you will need to edit is `stnpgm.ctl`, which
+typically determines station programs that are started with the FS. With
+the display client/server enabled, FS graphical programs which signified
+by an 'x' option in the control files
+
+    /usr2/control/stnpgm.ctl
+    /usr2/fs/control/fspgm.ctl
+
+are opened by the `fsclient` rather than `fs`. This allows graphical
+program to be closed without causing `fs` to exit. Because of this, it
+is important to edit your `stpgm.ctl` to ensure any items that use xterm
+or another X11 program, or in general should be started with the client
+are marked with the 'x' flag. Note `fspgm.ctl` is maintained and
+distributed as part of the Field System and in general does not need to
+be edited.
+
+An example edit, if your "stpgm.ctl" file contains:
+
+    erchk n xterm -geom 99x16+0+518 -title ERRORS -e erchk &
+
+it should be changed to:
+
+    erchk x xterm -geom 99x16+0+518 -title ERRORS -e erchk &
+
+
+Usage
+-----
+
+Generally using the Field System should be identical to using it
+without the server. If you start the Field System use the usual
+command:
+
+    fs
+
+you will see the Field System startup with all interface windows
+displayed and you can now interact with the FS as usual.
+
+While this looks the same, what happens here is different: the Field
+System has started in the background, and a Field System client as
+connected to it. You can close the client by pressing the keys Ctrl+C
+in the main terminal or typing `client=exit` in the oprin window.
+
+The FS will continue running in the background without a client
+attached. You can even log out. Care has been taken to be sure an
+unintentional termination of a client will not harm the running FS.
+
+To reconnect to the Field System, start a new client with:
+
+    fsclient
+
+When you first connect you will notice fsclient will only show new log
+messages; you can print historical messages with the "--scrollback/-s" flag:
+
+    fsclient -s
+
+If you only want the log messages with not graphical programs started,
+for example with a log monitor, use the `--no-x`/`-n` option:
+
+    fsclient -n
+
+Earlier we mentioned you can enter special "client" commands in oprin
+--- we showed "client=exit". Other client commands are specified in
+the file `/usr2/control/clpgm.ctl`, for example, entering:
+
+    client=fmset
+
+will start fmset. This is useful if you are running the client over
+ssh with X forwarding. Beware, using "sy=xterm -e fmset" may not work
+as expected, since this will be executed by the FS.
+
+You can list all client windows by typing entering:
+
+   client=
+
+There is also a client version of the "sy" command, allowing arbitrary
+shell commands to be run in the current client's context rather than
+the Field System's. If you need to start any graphical windows, this
+is the method to use. 
+
+With the server, you also have the option of starting the FS entirely
+in the background with
+
+    fs -b
+
+Customization
+-------------
+
+Client commands accessed by "client=" in oprin are found in
+/usr2/control/clpgm.ctl. Commands specified in this file follow the
+syntax
+
+    client_command flags shell_command
+
+Where `client_command` is the name used to run the command in oprin,
+`shell_command` is the command that will be executed by `/bin/sh`, and
+`flags` determine how the command is run. This has two options:
+
+-   "attached" denoted with 'a', means the program will end with the
+    starting client
+-   "detached" denoted with 'd', means the program will continue running
+    if the starting client is exited.
+
+The display server stores a scroll-back buffer of of messages the
+clients can access with the "-s" flag. By default the scroll-back buffer
+is 1024 lines long. This can be customized by editing
+`FS_DISPLAY_SCROLLBACK_LEN` in `fs/include/params.h`
+
+
+Disabling
+---------
+
+To start the fs without the display server, use 
+
+    fs --foreground
+
+or 
+
+    fs -f
+
+To permanently disable, it unset the FS_DISPLAY_SERVER environment
+variable, eg: 
+
+In '.login' removed the line:
+
+    setenv FS_DISPLAY_SERVER  1
+
+and in '.bashrc', remove:
+
+    export FS_DISPLAY_SERVER=1
+
+
+Technical Details 
+=================
+
+With this first version of the display server/client design, while we
+have done extensive testing, we expect additional requirements will be
+exposed after extended use. This means we anticipate this section may
+change, potentially substantially, and the API should not be relied
+upon just yet.
+
+That said, we will try to keep the user interface described as
+consistent as possible.
+
+Server
+------
+
+The "fsserver" program is, in essence, a terminal multiplexer for for
+read only terminals, along with a few other FS specific features.  The
+server manages a set of "windows", the main of which runs the fs.
+This is pseudo-terminal with "fs" started on the slave side, and a
+stream multiplexer on the master. Other terminal based programs can
+also be started in fsserver windows and will be multiplexed to the
+clients.  These feature was primarily added to support autoftp. FS
+server windows are read only.
+
+Communication with fsserver happens via JSON-RPC over a "scalability
+protocols" request socket. This a messaging lary implemented by, among
+others, nanomsg, nng and mangos. For this work we use nng. FS server
+communicates with clients via JSON-RPC over a pub/sub socket. The fs
+server windows are handled by spub/ssub, explained later. Currenly all
+these sockets are unix sockets under /var/run/fsserver, though the
+library allows these to be over raw TCP or over websockets, the latter
+allowing browser based FS clients.
+
+To enable backwards compatibility, fsserver installs "shims" for xterm
+and "fs.prompt", stored compiled into fs/bin/shim. When fsserver
+starts "fs", it first adds this path to the PATH env var. The
+fs.prompt shim makes a json-rpc call to fsserver with the prompt
+command. This is then broadcast to the clients. The standard client
+uses the real "fs.prompt" program to implement its prompt behaviour.
+
+The xterm shim, to prevent unexpected read-only behaviour, checks if
+the program is on a white-list (which can be found the source of the
+program). If the specified command is on the list, it is then passed
+to fsserver to be multipled to the clients. If it is not, the shim
+prints a warning and calls the real xterm program.
+
+When you call "fs", it checks if the program "fsserver" is running, if
+not, fs start fsserver. Then, it then instructs the server to start
+the FS, and becomes an instance of fsclient.
+
+FS client
+---------
+
+The fsserver is designed to eventually support multiple client
+implementations. The "reference" client, fsclient, replicates the
+traditional Field System display. A text-only version, designed for high
+latency connections where the X11 protocol us unusable, is also in
+development.
+
+On startup, fsclient connects to the servers "clients command" socket
+which streams commands from the server. The client also queries the
+server for the state of prompts and windows, opening each one.
+
+Fsclient opens the main fs window in the calling terminal. Additional
+windows are opened in using ssub in new xterm terminals.
+
+Fsclient uses "fs.prompt" to implement the "prompt" command. When this
+window is closed, fsclient sends a "prompt_close" command to the
+server with the corresponding prompt id number.
+
+spub & ssub
+-----------
+
+The underlying communication between fsserver windows and clients is
+provided by the pair of programs `spub` and `ssub`, so named for
+"stream publish" and "stream subscribe". These are standalone programs
+that create a reliable, buffered, fan-out stream of arbitrary data. 
+
+The program `spub` reads from stdin and writes the data stream to a
+nanomsg socket, which can be connected to a unix socket file raw TCP
+port or websockets port. Its complement, `ssub`, connects to this
+socket, reads from the stream writes the data stream to stdout.
+Multiple copies of `ssub` can connect to an instance of `spub`.
+
+To ensure messages are not lost during network interruptions, `spub`
+keeps a buffer of past messages which can be requested by the clients.
+These "replay" requests are performed over a separate nanomsg
+request/reply socket. Currently, nanomsg only supports one nanomsg
+socket per port, which has the unfortunate consequence that sspub
+currently requires two sockets to operate. This is expected to change
+with an upcoming version of nanomsg. In principle, these can stream to
+a websocket and be accessed through a browser.
+
+When shutting down, spub sends a special end-of-transmission message
+which triggers client `ssub` instances to exit, unless they are
+started with the `-w/--wait` flag.

@@ -167,6 +167,121 @@ end:
     return ierr;
 }
 
+int arg_long_long_uns(ptr,iptr,dflt,flag)   /* parse arg string for int */
+char *ptr;                           /* ptr to string */
+unsigned long long *iptr;                           /* ptr to store result */
+unsigned long long dflt;                            /* default result value */
+int flag;                            /* TRUE if default is okay */
+
+/* this routine handles SNAP argument interpretation for int arguments */
+/* "*" use current value (already stored in *iptr) on entry */
+/* ""  (empty string) use default if flag is TRUE, if FALSE, error */
+/* other strings are decoded as int */
+/* return value: 0 no errror, -100 no default allowed and arg was "" */
+/*                            -200 wouldn't decode                   */
+{
+    int ierr,i;
+
+    ierr=0;
+
+    if(ptr == NULL || *ptr == '\0') {
+      if (flag)
+        *iptr=dflt;
+      else
+        ierr=-100;
+      return ierr;
+    }
+    if(0==strcmp(ptr,"*")) return ierr;
+
+    if(strncmp(ptr,"0x",2)==0||strncmp(ptr,"0X",2)==0) {
+      if(1 != sscanf(ptr,"%llx",iptr)) ierr=-200;
+      for(i=strlen(ptr)-1;i>1;i--)
+	if(NULL==strchr("0123456789abcdefABCDEF \t\n",ptr[i])) {
+	  ierr=-200;
+	  goto end;
+	}
+    } else {
+      if(1 != sscanf(ptr,"%llu",iptr)) ierr=-200;
+      for(i=strlen(ptr)-1;i>-1;i--)
+	if(NULL==strchr("+0123456789 \t\n",ptr[i])) {
+	  ierr=-200;
+	  goto end;
+	}
+    }
+end:
+    return ierr;
+}
+
+int arg_long_long_uns_scal(ptr,iptr,dflt,flag,scal)
+/* parse arg string for int */
+char *ptr;                           /* ptr to string */
+unsigned long long *iptr;                           /* ptr to store result */
+unsigned long long dflt;                            /* default result value */
+int flag;                            /* TRUE if default is okay */
+int scal;                            /*power of ten for decimal point */
+/* this routine handles SNAP argument interpretation for int arguments */
+/* "*" use current value (already stored in *iptr) on entry */
+/* ""  (empty string) use default if flag is TRUE, if FALSE, error */
+/* other strings are decoded as int */
+/* return value: 0 no errror, -100 no default allowed and arg was "" */
+/*                            -200 wouldn't decode                   */
+{
+  int ierr,i,j;
+  static char digits[ ]="0123456789";
+  char *pptr;
+  unsigned long long ivalue;
+
+    ierr=0;
+
+    if(ptr == NULL || *ptr == '\0') {
+      if (flag)
+        *iptr=dflt;
+      else
+        ierr=-100;
+      return ierr;
+    }
+    if(0==strcmp(ptr,"*")) return ierr;
+
+    
+    *iptr=0;
+    i=-1;
+    while(0!=ptr[++i] && NULL!=(pptr=strchr(digits,ptr[i]))) {
+      *iptr=10**iptr+(pptr-digits);
+    }
+    if(NULL==strchr(".",ptr[i])) {
+      ierr=-200;
+      return ierr;
+    }
+
+    for(j=0;j<scal;j++)
+      *iptr*=10;
+
+    ivalue=0;
+    if(0!=ptr[i]) {
+      while(0!=ptr[++i] && NULL!=(pptr=strchr(digits,ptr[i]))) {
+	if(scal<=0) {
+	  if(pptr!=digits) {
+	    ierr=-200;
+	    return ierr;
+	  }
+	}	else {
+	  ivalue=10*ivalue+pptr-digits;
+	  scal--;
+	}
+      }
+      if(0!=ptr[i]) {
+	ierr=-200;
+	return ierr;
+      }
+      for(j=0;j<scal;j++)
+	ivalue*=10;
+    }
+    *iptr+=ivalue;
+
+end:
+    return ierr;
+}
+
 int arg_float(ptr,fptr,dflt,flag)  /* parse arg string for float */
 char *ptr;                         /* ptr to string */
 float *fptr;                       /* ptr to store result */

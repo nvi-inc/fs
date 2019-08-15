@@ -36,10 +36,17 @@ c
       integer MK5A_BS       ! MK5A_BS comparison bit variable
       integer MK45          ! MK45 comparison bit variable
       integer VLBA45        ! VLBA45 comparison bit variable
+      integer DBBC_DDC      ! FILA10G_DDC comparison bit variable
+      integer DBBC_DDC_FILA10G       ! FILA10G_DDC_FILA10G comparison bit variable
+      integer DBBC_PFB      ! FILA10G_PFB comparison bit variable
+      integer DBBC_PFB_FILA10G       ! FILA10G_PFB_FILA10G comparison bit variable
+      integer VLBA4C        ! VLBA4C comparison bit variable
+      integer VLBA4CDAS     ! VLBA4CDAS comparison bit variable
       integer MK5B          ! MK5B comparison bit variable
       integer MK5B_BS       ! MK5B_BS comparison bit variable
       integer MK5C          ! MK5C comparison bit variable
       integer MK5C_BS       ! MK5C_BS comparison bit variable
+      integer FLEXBUFF      ! FLEXBUFF comparison bit variable
       integer MAX_DAS       ! Max number of LBA DAS allowed
       integer RDBE          ! RDBE comparison bit variable
       integer MK6           ! MK6 comparison bit variable
@@ -54,6 +61,8 @@ c
       integer MAX_DBBC_BBC
       integer MAX_DBBC_IF
       integer MAX_DBBC_DET
+      integer MAX_DBBC_PFB
+      integer MAX_DBBC_PFB_DET
       integer MAX_MK6
       integer MAX_RDBE_IF
       integer MAX_RDBE_CH
@@ -61,7 +70,7 @@ c
       integer MAX_DBBC3_BBC
       integer MAX_DBBC3_IF
       integer MAX_DBBC3_DET
-      integer MAX_TSYS_DET
+      integer MAX_GLOBAL_DET
       integer CH_PRIOR      ! chekr        realtime priority
       integer CL_PRIOR      ! clock func.  realtime priority
       integer FS_PRIOR      ! Field System realtime priority
@@ -76,6 +85,11 @@ c
 c
       integer MAX_PROC1, MAX_PROC2
       PARAMETER (MAX_PROC1=256, MAX_PROC2=1500)
+C
+C these parameter are not used extensively, but it is start
+      integer MAX_CLS_MSG_BYTES, MAX_CLS_MSG_I2
+      parameter (MAX_CLS_MSG_BYTES=1024)
+      parameter (MAX_CLS_MSG_I2=(MAX_CLS_MSG_BYTES+1)/2)
 c
       parameter ( INT_BITS = 32 )
       parameter ( INT_CHARS=  4 )
@@ -117,10 +131,17 @@ C rack/drive _types
       parameter ( MK5A_BS  = z'8000000'  )
       parameter ( MK45     = z'10000000'  )
       parameter ( VLBA45   = z'20000000'  )
+      parameter ( DBBC_DDC_FILA10G  = z'40000000'  )
+      parameter ( DBBC_DDC = z'1'  )
+      parameter ( DBBC_PFB_FILA10G  = z'2'  )
+      parameter ( DBBC_PFB = z'4'  )
+      parameter ( VLBA4C   = z'1' )
+      parameter ( VLBA4CDAS= z'2' )
       parameter ( MK5B     = z'40000000'  )
       parameter ( MK5B_BS  = z'10000000'  )
       parameter ( MK5C     = z'1'  )
       parameter ( MK5C_BS  = z'2'  )
+      parameter ( FLEXBUFF = z'4'  )
 C
       parameter ( MAX_MK6 = 2 )
       parameter ( MAX_RDBE = 4 )
@@ -138,11 +159,13 @@ C
       parameter ( MAX_DBBC_BBC  =16)
       parameter ( MAX_DBBC_IF   = 4)
       parameter ( MAX_DBBC_DET  = 2*MAX_DBBC_BBC+MAX_DBBC_IF)
+      parameter ( MAX_DBBC_PFB  =64)
+      parameter ( MAX_DBBC_PFB_DET  = MAX_DBBC_PFB+MAX_DBBC_IF)
 C
       parameter ( MAX_DBBC3_BBC  =128)
       parameter ( MAX_DBBC3_IF   = 8)
       parameter ( MAX_DBBC3_DET  = 2*MAX_DBBC3_BBC+MAX_DBBC3_IF)
-      parameter ( MAX_TSYS_DET = MAX_DBBC3_DET)
+      parameter ( MAX_GLOBAL_DET = MAX_DBBC3_DET)
 C
       parameter ( CH_PRIOR=-04)
       parameter ( CL_PRIOR=-08)

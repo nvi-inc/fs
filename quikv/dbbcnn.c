@@ -28,6 +28,12 @@ long ip[5];                           /* ipc parameters */
       void dbbcnn_dis();
       void skd_run(), skd_par();      /* program scheduling utilities */
 
+      if(DBBC_DDC != shm_addr->equip.rack_type &&
+	 DBBC_DDC_FILA10G != shm_addr->equip.rack_type) {
+	ierr=-501;
+	goto error;
+      }
+
       ind=itask-1;                    /* index for this converter */
 
       if(1==ind%2 &&  NULL != index("ef",shm_addr->dbbcddcvl[0])) {

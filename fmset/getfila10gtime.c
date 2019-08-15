@@ -61,7 +61,7 @@ int    *formhs;
 		     "                                       ");
 	  mvwaddstr( maindisp, 6, 10+15+39 , "               ");
 
-	  if(source == DBBC && dbbc_sync) {
+	  if(rack == DBBC && dbbc_sync) {
 	    dbbc_sync=0;
 	    out_recs=0;
 	    out_class=0;
@@ -204,16 +204,26 @@ int    *formhs;
 	  out_recs=0;
 	  out_class=0;
 	  
+	  { int ilast; 
+	    char *plastp1;
+	    plastp1=memchr(shm_addr->fila10gvsi_in,' ',
+			   sizeof(shm_addr->fila10gvsi_in));
+	    if(plastp1) 
+	      ilast=plastp1-shm_addr->fila10gvsi_in;
+	    else
+	      ilast=sizeof(shm_addr->fila10gvsi_in);
+	    sprintf(outbuf,"fila10g=inputselect %.*s",ilast,
+		    shm_addr->fila10gvsi_in);
+	  }
+	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+	  out_recs++;
+
           decimate=1;
-	  /* we don't have these variables yet */
-	  /*
 	  if(shm_addr->fila10g_mode.decimate.state.known)
 	    decimate=shm_addr->fila10g_mode.decimate.decimate;
 
-	  */
  	  sprintf(outbuf,"fila10g=vsi_samplerate %d %d",
 		  (int) (shm_addr->m5b_crate*1.0e6+0.5),decimate);
-
 	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
 	  out_recs++;
 

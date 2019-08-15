@@ -3,7 +3,7 @@ C
 C     DRUDG HANDLES ALL OF THE DRUDGE WORK FOR SKED
 C
 C  Common blocks:
-      implicit none 
+      include 'drver_com.ftni'
       include 'hardware.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
@@ -38,7 +38,12 @@ C LOCAL:
       logical kequip_over,knew_sked
       integer nch,nci
       character*2  response,scode
-      character*8 dr_rack_type, crec_def(2)
+      character*12 crec_def(2)      !from skedf.ctl file 
+      character*20 crack_type_def   !from skedf.ctl file
+      character*2 cfirstrec_def     !from skedf.ctl
+      character*20 crack_tmp_cap
+      character*12 crec_tmp_cap
+ 
       integer inew,ivexnum
       integer i,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn
       integer inext,isatl,ifunc,nstnx
@@ -51,7 +56,8 @@ C LOCAL:
       character*39 clabline  !used to hold label description,e.g. 6= Make Postscript label
       character*39 clabprint !used to hold print line
       logical krec2_found
-       character*20 cstat_tmp
+      character*20 cstat_tmp
+  
 C
 C  DATE   WHO CHANGES
 C  830427 NRV ADDED TYPE-6 CARTRIDGE TO IRP CALLS
@@ -208,13 +214,20 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2013Jan23 JMGipson. Modified so that equipment_override is done when in batch mode. 
 ! 2013Jun18 JMGipson. Capitalize original rack equipment. 
 ! 2013Jul11 JMGipson. Issue error if file is not found and stop.
+! 2015Jun05 JMG.      Increased size of crack_type_def, crec_def from Char*8-->char*12
+! 2015Jul06 JMG.      If recorder or rack is "UNKNOWN" change to none. 
+! 2015Aug31 JMG.      Don't quit on "q"
+! 2016May07 WEH.      Increased size of crack_type_def, crack_tmp_cap from Char*12-->char*20
+! 2016Jul28 JMG.      Now also set cfirstrec_def in 'equipment override'
+! 2018Jun17 JMG.      Removed debugging statement whichr wrote out first recorder
 ! Get the version
       include 'fdrudg_date.ftni'
-      call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS)
-
+      call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS,crel_FS)
+ 
 C Initialize FS version
 
-
+C PeC Permissions on output files
+      iperm=o'0666'
 C Initialize LU's
       LU_INFILE = 20
       LU_OUTFILE =21
@@ -258,7 +271,7 @@ c Initialize no. entries in lband (freqs.ftni)
       ierr=0
       tpid_prompt = 'no'
       itpid_period = 0
-      contcal_prompt='OFF'
+      cont_cal_prompt='OFF'
       do i=1,4
         ldbbc_if_inputs(i)=" "
       end do 
@@ -272,11 +285,10 @@ C***********************************************************
 
 
       call drudg_rdctl(csked,csnap,cproc,ctmpnam,            
-     >           dr_rack_type,crec_def,kequip_over)
-      kdr_type = .not.(dr_rack_type.eq.'unknown'.and.
-     >               crec_def(1).eq.'unknown'.and.crec_def(2).eq.'none')
+     >           crack_type_def,crec_def,cfirstrec_def,kequip_over)
+      kdr_type = .not.(crack_type_def.eq.' '.and.
+     >               crec_def(1).eq.' '.and.crec_def(2).eq.' ')
       klabel_ps = clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO'
-!      stop 
 
 C
 C     2. Initialize local variables
@@ -337,27 +349,33 @@ C 3. Get the schedule file name
           endif
 C       Opening message
           WRITE(LUSCN,'(a)')
-     >   ' DRUDG: Experiment Preparation Drudge Work (NRV & JMGipson '//
+     >   ' DRUDG: Experiment Preparation Drudge Work (JMGipson '//
      >    cversion(1:trimlen(cversion))//')'
-	  write(luscn,'("Version: ",i2,2(".",i2.2))') iverMajor_fs,
+       
+ 	  write(luscn,'("Version: ",i2,2(".",i2.2), $)') iverMajor_fs,
      >     iverMinor_fs,iverpatch_fs
+          if(crel_FS .eq. " ") then
+            write(luscn, '(a)') " "
+          else 
+            write(luscn,'(a)') "-"//Crel_FS(1:trimlen(Crel_FS))
+          endif
+  
 
           nch = trimlen(cfile)
           if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
             if (kbatch) goto 990
-            write(luscn,'(a)')
-     >       " Enter schedule file name (.skd or .drg default <return> "
+            write(luscn,'(a,$)')
+     >" Enter schedule file name (.skd, .vex or .drg default <return> "
             write(luscn,
-     >          '("if using a .snp file, :: or q to quit) ?",$)')
+     >          '("if using a .snp file, :: to quit) ?",$)')
             read(luusr,'(a)') cbuf
             nch=trimlen(cbuf)
           else ! command line file name
             cbuf=cfile
           endif 
-        endif
-    
+        endif     
         IF (NCH.GT.0) THEN !got a name
-          if(cbuf(1:2) .eq. "::" .or. cbuf(1:1) .eq. "q") goto 990
+          if(cbuf(1:2) .eq. "::" ) goto 990
           if (cbuf(1:1) .eq. "." .or. cbuf(1:1) .eq."/") then
             lskdfi = cbuf(1:nch)
           else  ! no path given
@@ -410,7 +428,7 @@ C       Opening message
      >         "ERROR!  Did not find file "//lskdfi(1:trimlen(lskdfi))
             stop
           endif           
-
+        
           ixp=1
           ix=1
           do while (ix.ne.0) ! find the last '/'
@@ -548,8 +566,7 @@ C
              krec2_found=.true.
            endif 
            cstrec(istn,2)="none"
-          endif 
- 
+          endif  
 
 ! Make a copy of the original configuration now
           cstrack_orig(istn) =cstrack(istn)
@@ -629,24 +646,32 @@ C
         if (istn.gt.0) then !one station
 C  Set equipment from control file, if equipment is unknown, and
 C  if it was not set by the schedule.      
-          kknown = .not.
-     >     (cstrec(istn,1).eq.'unknown'.or. cstrack(istn).eq.'unknown')
-          if (.not.kknown.and.kdr_type .or.
-     >        kdr_type .and. kequip_over.and.knew_sked) then ! equipment is in control file
-            if(cstrack(istn) .ne. dr_rack_type .or.
+ 
+          crec_tmp_cap=cstrec(istn,1)
+          call capitalize(crec_tmp_cap)
+          if(crec_tmp_cap .eq. "UNKNOWN") cstrec(istn,1)="none"
+
+          crack_tmp_cap=cstrack(istn)
+          call capitalize(crack_tmp_cap)
+          if(crack_tmp_cap .eq. "UNKNOWN") cstrack(istn)="none" 
+
+          if (kdr_type .and. kequip_over.and.knew_sked) then ! equipment is in control file
+            if(cstrack(istn) .ne. crack_type_def .or.
      >         cstrec(istn,1) .ne. crec_def(1) .or.
-     >         cstrec(istn,2) .ne. crec_def(2)) then
+     >         cstrec(istn,2) .ne. crec_def(2) .or.
+     >         cfirstrec(istn).ne. cfirstrec_def) then
               Write(luscn,*)
-     >           "WARNING! Using equipment from control file:"
+     >           "WARNING! Using equipment from skedf.ctl:"
               write(luscn,  '(5x,"Replacing rack ",a," by ", a)')
-     >          cstrack(istn), dr_rack_type
+     >          cstrack(istn), crack_type_def
               do i=1,2
-                write(luscn,'(5x,"Replacing rec",i1,1x, a, " by ",a)')
+                write(luscn,'(5x,"Replacing rec",i1,5x, a, " by ",a)')
      >              i, cstrec(istn,i), crec_def(i)
               end do
-              cstrack(istn) =dr_rack_type
+              cstrack(istn) =crack_type_def
               cstrec(istn,1)=crec_def(1)
               cstrec(istn,2)=crec_def(2)
+              cfirstrec(istn)=cfirstrec_def    
             endif
 !This keeps us from only doing the override when the schedlue is read in.
             knew_sked=.false.

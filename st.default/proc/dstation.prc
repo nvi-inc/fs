@@ -32,14 +32,8 @@ define  midob         00000000000
 onsource
 wx
 cable
-ifa
-ifb
-ifc
-ifd
-bbc01
-bbc05
-bbc09
-bbc13
+iread
+bread
 " the shown order of the commands from here to the end of this procedure is
 " strongly recommended
 "add your station command to measure the gps to fm output clock offset
@@ -47,7 +41,6 @@ bbc13
 mk5b_mode
 !+1s
 mk5=dot?
-mk5=bank_set?
 sy=run setcl adapt &
 enddef
 define  midtp         00000000000
@@ -73,22 +66,23 @@ enddef
 define  postob        00000000000
 enddef
 define  ifman         00000000000
-ifa=*,man,*
-ifb=*,man,*
-ifc=*,man,*
-ifd=*,man,*
+if=ifa,ifa=*\,man\,*\,*
+if=ifb,ifb=*\,man\,*\,*
+if=ifc,ifc=*\,man\,*\,*
+if=ifd,ifd=*\,man\,*\,*
 enddef
 define  ifagc         00000000000
-ifa=*,agc,*
-ifb=*,agc,*
-ifc=*,agc,*
-ifd=*,agc,*
+if=ifa,ifa=*\,agc\,*\,*
+if=ifb,ifb=*\,agc\,*\,*
+if=ifc,ifc=*\,agc\,*\,*
+if=ifd,ifd=*\,agc\,*\,*
 enddef
 define  preob         00000000000
-!*
+if=cont_cal,tpicd=tsys,!*
 onsource
-!*+4s
-caltsys_man
+"more commands can be added until total execution times between first two if's is just under four seconds
+if=cont_cal,,!*+4s
+if=cont_cal,,caltsys_man
 enddef
 define  ready_disk    00000000000
 mk5close
@@ -107,7 +101,7 @@ bank_check
 mk5=DTS_id?
 mk5=OS_rev?
 mk5=SS_rev?
-mk5=status?
+mk5_status
 "uncomment the following if your station uses in2net transfers
 "mk5=net_protocol=tcp:4194304:2097152;
 enddef
@@ -115,19 +109,20 @@ define  setupa        00000000000
 pcalon
 bbcsx8
 cont_cal=off
+"cont_cal=on
 form=geo
 mk5b_mode=ext,0x55555555,2
 ifdsx
 bbc_gain=all,agc
 enddef
 define  caltsys       00000000000
-caltsys_man
-ifagc
-bbc_gain=all,agc
+if=cont_cal,tpicd=tsys,caltsys_man
+if=cont_cal,,ifagc
+if=cont_cal,,if=ddc\,bbc_gain=all\\\,agc
 enddef
 define  caltsys_man   00000000000
 ifman
-bbc_gain=all,man
+if=ddc,bbc_gain=all\,man
 !+2s
 tpi=formbbc,formif
 calon
@@ -157,28 +152,32 @@ bbc15=300.000000,d,8,1
 bbc16=300.000000,d,8,1
 enddef
 define  iread         00000000000
-ifa
-ifb
-ifc
-ifd
+if=ifa,ifa
+if=ifb,ifb
+if=ifc,ifc
+if=ifd,ifd
 enddef
 define  bread         00000000000
-bbc01
-bbc02
-bbc03
-bbc04
-bbc05
-bbc06
-bbc07
-bbc08
-bbc09
-bbc10
-bbc11
-bbc12
-bbc13
-bbc14
-bbc15
-bbc16
+if=bbc01,bbc01
+if=bbc02,bbc02
+if=bbc03,bbc03
+if=bbc04,bbc04
+if=bbc05,bbc05
+if=bbc06,bbc06
+if=bbc07,bbc07
+if=bbc08,bbc08
+if=bbc09,bbc09
+if=bbc10,bbc10
+if=bbc11,bbc11
+if=bbc12,bbc12
+if=bbc13,bbc13
+if=bbc14,bbc14
+if=bbc15,bbc15
+if=bbc16,bbc16
+if=pfb,if=core1\,pfb1
+if=pfb,if=core2\,pfb2
+if=pfb,if=core3\,pfb3
+if=pfb,if=core4\,pfb4
 enddef
 define  pcalon        00000000000
 "no phase cal control is implemented here
@@ -210,7 +209,7 @@ mk5=get_stats?
 mk5=get_stats?
 mk5=get_stats?
 mk5=get_stats?
-mk5=status?
+mk5_status
 enddef
 define  greplog       00000000000x
 sy=xterm -name greplog -e sh -c 'grep -i $ /usr2/log/`lognm`.log|less' &

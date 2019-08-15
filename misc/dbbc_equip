@@ -1,0 +1,171 @@
+#!/usr/bin/perl
+# Usage: dbbc_equip 'coresA [coresB [coresC [coresD]]]' files
+
+require "getopts.pl";
+
+&Getopts("f");
+
+if ($#ARGV < 0) {
+    print "\n Usage: dbbc_equip 'coresA [coresB [coresC [coresD]]]' files\n\n";
+    print "  Fixes equip.ctl files to use dbbc_ddc and dbbc_ddc/filag10 in place of\n";
+    print "   equipment types dbbc and dbbc/fila10g, respectively. Also, re-writes\n";
+    print "   non-comment line 21 to list the number of cores per conditioning module in\n";
+    print "   order of A, B, C and D, as specified in the first argument to the script.\n";
+    print "   The cores must be specified as one argument, e.g., within quotes '....',\n";
+    print "   separated by whitespace, with a value 0-4 for each conditioning module that\n";
+    print "   is present. The number of entries implicitly specifies the number of\n";
+    print "   conditioning modules. The number of conditioning modules must be in the\n";
+    print "   range 1-4. The total number of cores must be in the range 1-4.\n\n";
+    print "  The script will remove the comment that preceeded non-comment line 21 in the\n";
+    print "   previous standard equip.ctl if there is an exact match. In any event it adds\n";
+    print "   comments describing the new line format.\n\n";
+    print "  The script will warn if there is a mismatch between the number of IF power\n";
+    print "   conversions and the number of CoMos, so the user can fix it.\n\n";
+    print "  The original files are preserved with a '.bak' extension.\n";
+    exit -1;
+} elsif($#ARGV < 1) {
+    die "Must have at least two arguments, enter 'dbbc_equip' for help\n";
+}
+
+@fields=split(' ',$ARGV[0]);
+$num=$#fields+1;
+
+if($num < 1 || $num > 4) {
+   die "First argument must have 1-4 fields, enter 'dbbc_equip' for help\n";
+}
+
+if ($fields[0] lt '0' || $fields[0] gt '4') {
+    die "coresA is not 0-4\n";
+} 
+if ($fields[1] ne "" && ($fields[1] lt '0' || $fields[1] gt '4')) {
+    die "coresB is not 0-4\n";
+} 
+if ($fields[2] ne "" && ($fields[2] lt '0' || $fields[2] gt '4')) {
+    die "coresC is not 0-4\n";
+} 
+if ($fields[3] ne "" && ($fields[3] lt '0' || $fields[3] gt '4')) {
+    die "coresD is not 0-4\n";
+} 
+
+$sum=0;
+foreach $i (0..$#fields) {
+    $sum+= $fields[$i];
+}
+if($sum <p || $sum >4) {
+    die "sum of fields in argument 1 must be 1-4\n";
+}
+
+shift(@ARGV);
+foreach $name (@ARGV) {
+
+    $bak = $name . ".bak";
+    $out = $name;
+    if (!-e $name) {
+	die "Can't find $name Quitting.\n";
+    }
+
+# rename the original if we can and open the files
+
+    if (-e $bak) {
+	die "Backup-file $bak already exists, giving up.\n";
+    }
+
+    rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
+ 
+    if(!open(BAK,$bak)) {
+	print "Failed to open $bak: $!\n";
+	if(!rename($bak,$out)) {
+	    print "Unable to rename $bak to $out: $!\n";
+	    die "Please fix whatever the problem is and rename it yourself.\n";
+	} else {
+	    die "I renamed $bak to $out for you.\n";
+	}
+    }
+    
+    if(!open(OUT,">" . $out)) {
+	print "Failed to open $out: $!\n";
+	if((!close(BAK)) || (!rename($bak,$out))) { 
+	    print "Unable to rename $bak to $out: $!\n";
+	    die "Please fix whatever the problem is and rename it yourself.\n";
+	} else {
+	    die "I renamed $bak to $out for you.\n";
+	}
+    }
+
+
+#process
+
+    $line=0;
+    $uncommented=0;
+    $change=0;
+    while(<BAK>) {
+	$line++;
+        if(/^\*DBBC number of conditioning modules/) {
+	    $line--;
+	    $change=1;
+	    next;
+	}
+	if(/^\*/) {
+	    print OUT;
+	    next;
+	}
+	$uncommented++;
+	if($uncommented == 1) {
+	    if(/^\s*dbbc\/fila10g (.*)/i) {
+		print OUT "dbbc_ddc/filag10 $1\n";
+		$change=1;
+		next;
+	    }
+	    if(/^\s*dbbc (.*)/i) {
+		print OUT "dbbc_ddc $1\n";
+		next;
+	    }
+	} elsif($uncommented == 21) {
+	    print OUT "*Cores per CoMo in order A-D, values are 0-4, must total < 5\n";
+	    print OUT "* Number of entries implies number of CoMos, must be 1 to 4\n";
+	    print OUT "@fields\n";
+	    $line+=2;
+	    $comoline=$line;
+	    $change=1;
+	    next;
+	} elsif($uncommented == 22) {
+	    @fieldst=split(' ',$_);
+	    $numt=$#fieldst+1;
+	    if(($numt != $num && $num < 4) || ($numt <4 && $num == 4)) {
+		print "Warning: number of IF power conversions does not agree with number of CoMos.\n";
+		print "This must be fixed before the FS will start succesfully.\n";	
+		print "The IF power conversions are on line $line of output file.\n";
+		print "The number of CoMos is the sum of the values on line $comoline of output file.\n";
+	    }
+	}
+	print OUT;
+	next;
+    }
+
+    $rename=0;
+    if(!close(OUT)) {
+	$rename=1;
+	print "Warning: Unable to close to $out: $!\n";
+    }
+    if(!close(BAK)) {
+	$rename=1;
+	print "Warning: Unable to close to $bak: $!\n";
+    }
+
+    if($rename || $change == 0) {
+	if(!rename($bak,$out)) { 
+	    print "Warning: Unable to rename '$bak' to '$out': $!\n";
+	    if($rename) {
+		print "Warning: Please fix whatever the problem is and rename it yourself,\n";
+		print "Warning: probably using 'mv $bak $out'\n";
+	    } else {
+		print "Warning: It appears that $out did not need any changes,\n";
+		print "Warning: but to be safe you should probably \"";
+		print "Warning: use 'mv $bak $out'\n";
+	    }
+	} elsif($rename) {
+	    print "Warning: I renamed '$bak' to '$out' for you.\n";
+
+	}
+    }
+}

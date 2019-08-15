@@ -5,18 +5,20 @@
 
 Settable Parameters:
 
-            mode      output mode: astro, geo, wastro, test, lba, astro2, or
-                      astro3.  No default. The "astro2" mode is not available
-                      for DDC versions before 104. The "astro3" mode is
-                      only available on E/F DDC versions, which start with
-                      version 105.  For E/F versions only ""astro3" and
-                      "test" modes are available and there is no output on
-                      VSI2.  Output pin assignments described in the comments
-                      below.
+            mode      output mode (DDC): astro, geo, wastro, test,
+                      lba, astro2, astro3, or geo2; (PFB): flex, full,
+                      full_auto, or spol.  No default.  The "astro2"
+                      mode is not available for DDC versions before
+                      104. The "astro3" mode is only available on E/F
+                      DDC versions, which start with version 105.  For
+                      E/F DDC versions only ""astro3" and "test" modes
+                      are available and there is no output on VSI2.
+                      DDC Output pin assignments described in the
+                      comments below. See comments for PFB output.
 
-            test      Test mode: 0, 1, bin, tvg. No default. Ignored unless
-                      mode=test. Not available for readback from dbbc in
-                      DBBC version v100.
+            test      DDC only Test mode: 0, 1, bin, tvg. No default.
+                      Ignored unless mode=test. Not available for
+                      readback from dbbc in DBBC version v100.
 
 Monitor-only Parameters: None
 
@@ -25,79 +27,88 @@ DBBC DDC v100 does not support monitor for the "test" values.
 
 DBBC DDC versions before v104 do not support "astro2".
 
-Only DBBC DDC vXXXe/f (XXX=105 or greater) support "astro3".
+DBBC DDC versions before v105 do not support "astro2" on VSI2.
 
-DBBC versions vXXXe/f (XXX=105 or greater) use only VSI1 and support
+Only DBBC DDC vXXXe/f, XXX=105 or greater, support "astro3".
+
+DBBC versions vXXXe/f, XXX=105 or greater, use only VSI1 and support
 only "astro3" and "test" modes.
 
-The output pin assignments for the modes are:
+Only DBBC DDC vXXX, XXX=106 or greater, support "geo2".
 
-VSI1 GEO ASTRO WASTRO ASTRO2 ASTRO3 LBA TEST_0 TEST_1 TEST_BIN TEST_TVG
- 1   1US   1US    1US    1US   1US  1US   0      1     BinC0     TVG0
- 2   1UM   1UM    1UM    1UM   1UM  1UM   0      1     BinC1     TVG1
- 3   2US   2US    2US    2US   3US  2US   0      1     BinC2     TVG2
- 4   2UM   2UM    2UM    2UM   3UM  2UM   0      1     BinC3     TVG3
- 5   3US   3US    3US    3US   5US  5US   0      1     BinC4     TVG4
- 6   3UM   3UM    3UM    3UM   5UM  5UM   0      1     BinC5     TVG5
- 7   4US   4US    4US    4US   7US  6US   0      1     BinC6     TVG6
- 8   4UM   4UM    4UM    4UM   7UM  6UM   0      1     BinC7     TVG7
- 9   5US   5US    5US    9US   9US  3US   0      1     BinC8     TVG8
-10   5UM   5UM    5UM    9UM   9UM  3UM   0      1     BinC9     TVG9
-11   6US   6US    6US   10US  11US  4US   0      1     BinC10    TVG10
-12   6UM   6UM    6UM   10UM  11UM  4UM   0      1     BinC11    TVG11
-13   7US   7US    7US   11US  13US  7US   0      1     BinC12    TVG12
-14   7UM   7UM    7UM   11UM  13UM  7UM   0      1     BinC13    TVG13
-15   8US   8US    8US   12US  15US  8US   0      1     BinC14    TVG14
-16   8UM   8UM    8UM   12UM  15UM  8UM   0      1     BinC15    TVG15
-17   1LS   1LS    1LS    1LS   1LS  1LS   0      1     BinC16    TVG16
-18   1LM   1LM    1LM    1LM   1LM  1LM   0      1     BinC17    TVG17
-19   8LS   2LS    2LS    2LS   3LS  2LS   0      1     BinC18    TVG18
-20   8LM   2LM    2LM    2LM   3LM  2LM   0      1     BinC19    TVG19
-21   9US   3LS    3LS    3LS   5LS  5LS   0      1     BinC20    TVG20
-22   9UM   3LM    3LM    3LM   5LM  5LM   0      1     BinC21    TVG21
-23  10US   4LS    4LS    4LS   7LS  6LS   0      1     BinC22    TVG22
-24  10UM   4LM    4LM    4LM   7LM  6LM   0      1     BinC23    TVG23
-25  11US   5LS    5LS    9LS   9LS  3LS   0      1     BinC24    TVG24
-26  11UM   5LM    5LM    9LM   9LM  3LM   0      1     BinC25    TVG25
-27  12US   6LS    6LS   10LS  11LS  4LS   0      1     BinC26    TVG26
-28  12UM   6LM    6LM   10LM  11LM  4LM   0      1     BinC27    TVG27
-29  13US   7LS    7LS   11LS  13LS  7LS   0      1     BinC28    TVG28
-30  13UM   7LM    7LM   11LM  13LM  7LM   0      1     BinC29    TVG29
-31  14US   8LS    8LS   12LS  15LM  8LS   0      1     BinC30    TVG30
-32  14UM   8LM    8LM   12LM  15LS  8LM   0      1     BinC31    TVG31 
-VSI1 GEO ASTRO WASTRO ASTRO2 ASTRO3 LBA TEST_0 TEST_1 TEST_BIN TEST_TVG
+For the PFB "flex" mode is supported by the FS.  The output is
+determined by preceeding "vsi1=..." and "vsi2=..." commands.  Although
+the modes are not suppported by the FS, the "form" command will accept
+the "full", "full_auto", and "spol" modes for 'off-label use'.
+
+The output pin assignments for the DDC modes are:
+
+VSI1 GEO ASTRO WASTRO ASTRO2 ASTRO3 LBA TEST_0 TEST_1 TEST_BIN TEST_TVG GEO2
+ 1   1US   1US    1US    1US   1US  1US   0      1     BinC0     TVG0    1US
+ 2   1UM   1UM    1UM    1UM   1UM  1UM   0      1     BinC1     TVG1    1UM
+ 3   2US   2US    2US    2US   3US  2US   0      1     BinC2     TVG2    2US
+ 4   2UM   2UM    2UM    2UM   3UM  2UM   0      1     BinC3     TVG3    2UM
+ 5   3US   3US    3US    3US   5US  5US   0      1     BinC4     TVG4    3US
+ 6   3UM   3UM    3UM    3UM   5UM  5UM   0      1     BinC5     TVG5    3UM
+ 7   4US   4US    4US    4US   7US  6US   0      1     BinC6     TVG6    4US
+ 8   4UM   4UM    4UM    4UM   7UM  6UM   0      1     BinC7     TVG7    4UM
+ 9   5US   5US    5US    9US   9US  3US   0      1     BinC8     TVG8    5US
+10   5UM   5UM    5UM    9UM   9UM  3UM   0      1     BinC9     TVG9    5UM
+11   6US   6US    6US   10US  11US  4US   0      1     BinC10    TVG10   6US
+12   6UM   6UM    6UM   10UM  11UM  4UM   0      1     BinC11    TVG11   6UM
+13   7US   7US    7US   11US  13US  7US   0      1     BinC12    TVG12   7US
+14   7UM   7UM    7UM   11UM  13UM  7UM   0      1     BinC13    TVG13   7UM
+15   8US   8US    8US   12US  15US  8US   0      1     BinC14    TVG14   8US
+16   8UM   8UM    8UM   12UM  15UM  8UM   0      1     BinC15    TVG15   8UM
+17   1LS   1LS    1LS    1LS   1LS  1LS   0      1     BinC16    TVG16   9US
+18   1LM   1LM    1LM    1LM   1LM  1LM   0      1     BinC17    TVG17   9UM
+19   8LS   2LS    2LS    2LS   3LS  2LS   0      1     BinC18    TVG18  10US
+20   8LM   2LM    2LM    2LM   3LM  2LM   0      1     BinC19    TVG19  10UM
+21   9US   3LS    3LS    3LS   5LS  5LS   0      1     BinC20    TVG20  11US
+22   9UM   3LM    3LM    3LM   5LM  5LM   0      1     BinC21    TVG21  11UM
+23  10US   4LS    4LS    4LS   7LS  6LS   0      1     BinC22    TVG22  12US
+24  10UM   4LM    4LM    4LM   7LM  6LM   0      1     BinC23    TVG23  12UM
+25  11US   5LS    5LS    9LS   9LS  3LS   0      1     BinC24    TVG24  13US
+26  11UM   5LM    5LM    9LM   9LM  3LM   0      1     BinC25    TVG25  13UM
+27  12US   6LS    6LS   10LS  11LS  4LS   0      1     BinC26    TVG26  14US
+28  12UM   6LM    6LM   10LM  11LM  4LM   0      1     BinC27    TVG27  14UM
+29  13US   7LS    7LS   11LS  13LS  7LS   0      1     BinC28    TVG28  15US
+30  13UM   7LM    7LM   11LM  13LM  7LM   0      1     BinC29    TVG29  15UM
+31  14US   8LS    8LS   12LS  15LM  8LS   0      1     BinC30    TVG30  16US
+32  14UM   8LM    8LM   12LM  15LS  8LM   0      1     BinC31    TVG31  16UM
+VSI1 GEO ASTRO WASTRO ASTRO2 ASTRO3 LBA TEST_0 TEST_1 TEST_BIN TEST_TVG GEO2
 	       	            
-VSI2 GEO ASTRO WASTRO ASTRO2 LBA TEST_0 TEST_1 TEST_BIN TEST_TVG
- 1   1US   1US    9US    1US 1US   0      1     BinC0     TVG0
- 2   1UM   1UM    9UM    1UM 1UM   0      1     BinC1     TVG1
- 3   2US   2US   10US    2US 2US   0      1     BinC2     TVG2
- 4   2UM   2UM   10UM    2UM 2UM   0      1     BinC3     TVG3
- 5   3US   3US   11US    3US 5US   0      1     BinC4     TVG4
- 6   3UM   3UM   11UM    3UM 5UM   0      1     BinC5     TVG5
- 7   4US   4US   12US    4US 6US   0      1     BinC6     TVG6
- 8   4UM   4UM   12UM    4UM 6UM   0      1     BinC7     TVG7
- 9   5US   5US   13US    9US 3US   0      1     BinC8     TVG8
-10   5UM   5UM   13UM    9UM 3UM   0      1     BinC9     TVG9
-11   6US   6US   14US   10US 4US   0      1     BinC10    TVG10
-12   6UM   6UM   14UM   10UM 4UM   0      1     BinC11    TVG11
-13   7US   7US   15US   11US 7US   0      1     BinC12    TVG12
-14   7UM   7UM   15UM   11UM 7UM   0      1     BinC13    TVG13
-15   8US   8US   16US   12US 8US   0      1     BinC14    TVG14
-16   8UM   8UM   16UM   12UM 8UM   0      1     BinC15    TVG15
-17   1LS   1LS    9LS    1LS 1LS   0      1     BinC16    TVG16
-18   1LM   1LM    9LM    1LM 1LM   0      1     BinC17    TVG17
-19   8LS   2LS   10LS    2LS 2LS   0      1     BinC18    TVG18
-20   8LM   2LM   10LM    2LM 2LM   0      1     BinC19    TVG19
-21   9US   3LS   11lS    3LS 5LS   0      1     BinC20    TVG20
-22   9UM   3LM   11LM    3LM 5LM   0      1     BinC21    TVG21
-23  10US   4LS   12LS    4LS 6LS   0      1     BinC22    TVG22
-24  10UM   4LM   12LM    4LM 6LM   0      1     BinC23    TVG23
-25  11US   5LS   13LS    9LS 3LS   0      1     BinC24    TVG24
-26  11UM   5LM   13LM    9LM 3LM   0      1     BinC25    TVG25
-27  12US   6LS   14LS   10LS 4LS   0      1     BinC26    TVG26
-28  12UM   6LM   14LM   10LM 4LM   0      1     BinC27    TVG27
-29  13US   7LS   15LS   11LS 7LS   0      1     BinC28    TVG28
-30  13UM   7LM   15LM   11LM 7LM   0      1     BinC29    TVG29
-31  14US   8LS   16LS   12LS 8LS   0      1     BinC30    TVG30
-32  14UM   8LM   16LM   12LM 8LM   0      1     BinC31    TVG31
-VSI2 GEO ASTRO WASTRO ASTRO2 LBA TEST_0 TEST_1 TEST_BIN TEST_TVG
+VSI2 GEO ASTRO WASTRO ASTRO2 LBA TEST_0 TEST_1 TEST_BIN TEST_TVG GEO2
+ 1   1US   1US    9US    1US 1US   0      1     BinC0     TVG0    1LS
+ 2   1UM   1UM    9UM    1UM 1UM   0      1     BinC1     TVG1    1LM
+ 3   2US   2US   10US    2US 2US   0      1     BinC2     TVG2    2LS
+ 4   2UM   2UM   10UM    2UM 2UM   0      1     BinC3     TVG3    2LM
+ 5   3US   3US   11US    3US 5US   0      1     BinC4     TVG4    3LS
+ 6   3UM   3UM   11UM    3UM 5UM   0      1     BinC5     TVG5    3LM
+ 7   4US   4US   12US    4US 6US   0      1     BinC6     TVG6    4LS
+ 8   4UM   4UM   12UM    4UM 6UM   0      1     BinC7     TVG7    4LM
+ 9   5US   5US   13US    9US 3US   0      1     BinC8     TVG8    5LS
+10   5UM   5UM   13UM    9UM 3UM   0      1     BinC9     TVG9    5LM
+11   6US   6US   14US   10US 4US   0      1     BinC10    TVG10   6LS
+12   6UM   6UM   14UM   10UM 4UM   0      1     BinC11    TVG11   6LM
+13   7US   7US   15US   11US 7US   0      1     BinC12    TVG12   7LS
+14   7UM   7UM   15UM   11UM 7UM   0      1     BinC13    TVG13   7LM
+15   8US   8US   16US   12US 8US   0      1     BinC14    TVG14   8LS
+16   8UM   8UM   16UM   12UM 8UM   0      1     BinC15    TVG15   8LM
+17   1LS   1LS    9LS    1LS 1LS   0      1     BinC16    TVG16   9LS
+18   1LM   1LM    9LM    1LM 1LM   0      1     BinC17    TVG17   9LM
+19   8LS   2LS   10LS    2LS 2LS   0      1     BinC18    TVG18  10LS
+20   8LM   2LM   10LM    2LM 2LM   0      1     BinC19    TVG19  10LM
+21   9US   3LS   11lS    3LS 5LS   0      1     BinC20    TVG20  11LS
+22   9UM   3LM   11LM    3LM 5LM   0      1     BinC21    TVG21  11LM
+23  10US   4LS   12LS    4LS 6LS   0      1     BinC22    TVG22  12LS
+24  10UM   4LM   12LM    4LM 6LM   0      1     BinC23    TVG23  12LM
+25  11US   5LS   13LS    9LS 3LS   0      1     BinC24    TVG24  13LS
+26  11UM   5LM   13LM    9LM 3LM   0      1     BinC25    TVG25  13LM
+27  12US   6LS   14LS   10LS 4LS   0      1     BinC26    TVG26  14LS
+28  12UM   6LM   14LM   10LM 4LM   0      1     BinC27    TVG27  14LM
+29  13US   7LS   15LS   11LS 7LS   0      1     BinC28    TVG28  15LS
+30  13UM   7LM   15LM   11LM 7LM   0      1     BinC29    TVG29  15LM
+31  14US   8LS   16LS   12LS 8LS   0      1     BinC30    TVG30  16LS
+32  14UM   8LM   16LM   12LM 8LM   0      1     BinC31    TVG31  16LM
+VSI2 GEO ASTRO WASTRO ASTRO2 LBA TEST_0 TEST_1 TEST_BIN TEST_TVG GEO2

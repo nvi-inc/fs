@@ -1,0 +1,13 @@
+          dbbcrelink - re-establish the DBBC connection
+
+            Syntax:     dbbcrelink
+
+            Response:   none
+
+
+Comments:
+This command can be used to open a new connection to the DBBC. If the
+connection is already open, it will be closed and new one
+established. Opening a new connection is needed after the DBBC's
+control program has been restarted or its power has been cycled.
+

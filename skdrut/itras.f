@@ -1,3 +1,11 @@
+! BEGIN Modified 2015-Jun-02. JMGipson.
+!   Previously tape recording assumed that Sign and magnitude bits were recorded on separate tracks.
+!   To support DIFX correlation we need to add the possibility that they will be on same track.
+!   This is done by storing TWO track tables--one for sign, and one for magnitude. The rest of 
+!   the logic is basically the same. 
+! 
+! END 2015-Jun-02
+!
 ! These routines return the track mapping in Mark4 format.
 ! NOTE: SIDEBANDS assume normal LO. If inverted need to fix downstream. 
 ! 
@@ -11,45 +19,49 @@
 !      integer function itras(isb,ibit,ihead,ichn,ipass,istn,icode)
 ! This returns the track number assigned to this combination if there is one.
 ! If not, it returns -99.
-! Originally this information was stored in an array of dimension
+! Originally (pre 2001) this information was stored in an array of dimension
 ! 2*2*Max_head*Max_chan*Max_stn*max_pass*Max_frq--which was huge
 ! =2*2*2      *32      *30     *(14*36) *20 =77,414,400 entries.
 ! This can be simplified considerably when you consider that
 ! A) For most codes, many stations share the same track assignments.
 !    So all you need to do is store distinct track assignments.
 ! B) A given track assignment is UNIQUELY specified by noting which data is
-!    is on what tracks on what pass. This involves 32 X Number of headstacks.
+!    is on what tracks on what pass. 
 !
-! A track assginment is stored as a 33 element array (element 1 is not used.)
-! In each slot is stored the (Isb,ibit,ihead,ich,ipass) code which is recorded there.
-! If a slot is not used, then -99 is stored there.
-
-! Setting up the Table.
-! 1.  The first step is to build up the track assignment.
-! This is done in frinp.f (actually unpco.f) and vmoinp.f
-! For each track J that is recorded, the function
-!    itras_ind(isb,ibit,ihead,ich,ipass)
-! assigns a unique integer to each possible combination.
-! This number is putinto itrk(J).
+! A track assignment is stored as an array of dimension:  itrack_map(2,ihead,max_track)
+! The 2 is for Sign/magnitude. For Tape recording code not record sign/magnitude on the same track.
+! However, under VDIF you can.
+! 
+! USage:
+!  call init_tras()       This initilizes the routines.
 !
-! 2. When all the tracks for a given mode/station combination are done,
-!    the routine add_trk_map is called.
-!   This checks to see if this track map is in the array itrk_map.
-!   If not it adds it.  In any case, it updates the array istn_cod(istn,icod)
-!   with a pointer to the correct track_map.
-
-! To see the track a particular bit/pass/etc combination is written on, if any,
-! the function itras is called.
-! The first thing this does is get the track map key from istn_cod(istn,icod).
-! Then it computes the unique identifier from itras_ind, and sees if this matches
-! any of the 32 possible combinations in itrk_map(itrk_key,ihead,*).  If so, it
-! returns the track. If not, it returns -99.
-
+!  call new_track_map()   This indicates that we are processing a new track map. 
+!                         NOTE--this may be identical to an existing one--we just don't know.
+!
+!  call add_track(itrack,isb,ibit,ihead,ichan,ipas) 
+!                         We add a track. This track records isb,ibit,ihead,ichan,ipas.
+!                         This also updates information like number of passes, number of bits, etc. 
+!
+!  call add_track_map(istn,icode) 
+!                         This is called when we have added all of the tracks to a given track map.
+!                         If neccessary it adds this map to the list  itrack_map_vec.
+!                         In any case, it updateds the array istn_code_key, pointing to the correct map.
+!
+! itemp=itras(isb,ibit,ihead,ichn,ipass,istn,icode)
+!                         Returns track this info is written on, or -99 if no track. 
+!                   
+!     ktrack_match(istn1,icod1,istn2,icod2)   
+!                         True if the tracks are the same for the two cases.
+!  
+!  call itras_params(istn,icode,npass,ntracks,nhead,nbits)
+!                         For (istn,icode), return number of passes, number of tracks, number of heads, 1 or 2 bit recording. 
+!
 !*************************************************************************
-      integer function itras(isb,ibit,ihead,ichn,ipass,istn,icode)
-      include '../skdrincl/itras_cmn.ftni'
-
-      integer*4 itras_ind
+      integer function itras(isb,ibit,ihead,ichn,ipass,istn,icode)      
+      include 'itras_cmn.ftni'
+! Return the trackt used for recording for isb,ibit,ihead,ichn,ipass,istn,icode.
+! If no track, return -99. 
+     
 ! passed variables.
       integer isb
       integer ibit
@@ -58,162 +70,238 @@
       integer ipass
       integer istn
       integer icode
+! function
+      integer*4 itras_magic 
 
 ! local
-      integer i
-      integer*4 ind
-      integer itrk_key
+      integer*4 imagic    !magic number. Unique number for (isb,ibit,ichn,ipass)
+      integer imap
+      integer itrack 
 ! Return track that this is written on, or -99 if no track.
 
-      itras=-99
-      itrk_key=istn_cod(istn,icode)
-      if(itrk_key .eq. 0) then
-         if(num_trk_map .ne. 0) then
+! Check to see if this mode has been defined for this station.
+      imap=istn_code_key(istn,icode)
+      if(imap .eq. 0) then
+         if(num_track_map .ne. 0) then
 !           write(*,*) "ITRAS: Mode # ",icode,
 !     >       " not defined for station # ",istn
           endif
          return
       endif
 
-      ind=itras_ind(isb,ibit,ichn,ipass)
-      do i=1,max_trk
-       if(itrk_map(itrk_key,ihead,i) .eq. ind) then
-         itras=i
-         return
-       endif
+! Mode defined. Now find the special number for this. 
+      imagic=itras_magic(isb,ibit,ichn,ipass)
+      do itras=1,max_tracks(imap) 
+!        write(*,*) ibit,ihead,itras,imap
+        if(itrack_map_vec(ibit,ihead,itras,imap) .eq. imagic) 
+     >      goto 100                 !found a match.     
       end do
+      itras=-99 
+100   continue  
+  
+     
       return
       end
 !*************************************************************
       logical function ktrack_match(istn1,icode1,istn2,icode2)
-      include '../skdrincl/itras_cmn.ftni'
+      include 'itras_cmn.ftni'
 
       integer istn1,icode1,istn2,icode2
 
-      ktrack_match=istn_cod(istn1,icode1).eq. istn_cod(istn2,icode2)
+      ktrack_match=istn_code_key(istn1,icode1).eq.
+     &             istn_code_key(istn2,icode2)
+      return
+      end
+! ******************************************************
+      subroutine new_track_map()  
+      include 'itras_cmn.ftni'
+      integer ihd,itrack,ibit
+! Set all of 'itrack_map' to -99=not recorded. 
+      kdebug_itras=.false. 
+
+      do ihd=1,max_headstack
+        do ibit=1,2
+          do itrack=1,max_track
+            itrack_map(ibit,ihd,itrack)=-99
+          end do
+        end do 
+      end do
+!      write(*,*) "New map"
+      if(kdebug_itras) then 
+          write(*,'(a)') 
+     &      "   Trk Magic    SB   Bit   Chan   Pass" 
+      endif 
+      itrack_map_key=0
+
+
+      num_tracks_new=0
+      max_tracks_new =0
+      num_pass_new=0
+      num_head_new=0
+      num_bits_new=0
+      return
+      end
+! ************************************************************   
+      subroutine add_track(itrack,isb,ibit,ihead,ichan,ipas) 
+      include 'itras_cmn.ftni'
+! Add a new track to itrack_map.
+      integer itrack,isb,ibit,ihead,ichan,ipas
+
+      integer*4 itras_magic 
+      if(itrack_map(ibit,ihead,itrack) .ne. -99) then
+        write(*,*) 
+     >   "ITRAS(add_Track):  Track is already used in this mode!"
+         stop
+      endif  
+      itrack_map(ibit,ihead,itrack)=itras_magic(isb,ibit,ichan,ipas)
+
+      if(kdebug_itras) then 
+         write(*,'(6i6)') itrack, itrack_map(ibit,ihead,itrack),
+     &   isb,ibit,ichan,ipas
+      endif 
+
+      num_tracks_new = num_tracks_new+1      
+      num_pass_new   = max(num_pass_new,ipas)
+      num_head_new   = max(num_head_new,ihead)
+      num_bits_new   = max(num_bits_new,ibit)
+      max_tracks_new = max(max_tracks_new,itrack) 
+   
       return
       end
 ! ***************************************************
-      subroutine add_trk_map(istn,icod,itrack)
-      include '../skdrincl/itras_cmn.ftni'
-      integer istn,icod
-      integer*4 itrack(max_headstack,max_trk)  !to add
+      subroutine add_track_map(istn,icod) 
+      include 'itras_cmn.ftni'
+      integer istn       !station
+      integer icod       !code
 
-! local
-      integer itrk_key,ihd
-      integer j
-      integer isb,ibit,ichn,ipass
+! Add the track map "itrack_map" to the list of track maps for (istn,icode) 
+   
+! local 
+      integer imap                !counters over track_maps
+      integer ibit,ihd,itrack     !indices
 
-      do itrk_key=1,num_trk_map
+! If it was already added, return. 
+      if(itrack_map_key .ne. 0) then
+!        write(*,*) "Previous map " 
+        istn_code_key(istn,icod)=itrack_map_key
+        return
+      endif 
+ 
+! Don't know where this map belongs (if it does.)
+! Check if in list of previous track maps.         
+
+      do imap=1,num_track_map
         do ihd=1,max_headstack
-          do j=1,max_trk
-            if(itrack(ihd,j) .ne. itrk_map(itrk_key,ihd,j)) goto 100
+          do ibit=1,2
+          do itrack=1,max_track
+            if(itrack_map(ibit,ihd,itrack) .ne. 
+     >         itrack_map_vec(ibit,ihd,itrack,imap)) then
+               if(kdebug_itras) then 
+                 write(*,*) "mismatch at: ",itrack,ihd,ibit,imap," | ",
+     >            itrack_map(ibit,ihd,itrack),
+     >            itrack_map_vec(ibit,ihd,itrack,imap)
+               endif
+              goto 100
+            endif 
           end do
+          end do 
         end do
         goto 200   ! a match
 100     continue
       end do
+
 ! No match.  Add it in.
-      if(num_trk_map .lt. max_trk_map) then
-         num_trk_map=num_trk_map+1
+      if(num_track_map .lt. max_track_map) then
+         num_track_map=num_track_map+1
       else
         write(*,*) "Exceeded number of tracks maps!"
         write(*,*) "Change itras_cmn and Recompile itras.f"
         stop
       endif
-      itrk_key=num_trk_map
-
-      num_pass(itrk_key)=0
-      num_trks(itrk_key)=0
-      num_head(itrk_key)=0
-      num_bits(itrk_key)=1
-
+      imap=num_track_map
+! Copy itrack_knew into itrack_map_vec
+      do ibit=1,2
       do ihd=1,max_headstack
-        do j=1,max_trk
-          itrk_map(itrk_key,ihd,j)=itrack(ihd,j)
-          if(itrack(ihd,j) .ne. -99) then
-            khead(ihd,istn)=.true.
-            num_trks(itrk_key)=num_trks(itrk_key)+1
-            num_head(itrk_key)=ihd
-
-            call itras_ind_2_sb_bit_chn_pass(itrack(ihd,j),
-     >             isb,ibit,ichn,ipass)
-            if(ibit .eq. 2) then
-               num_bits(itrk_key)=2
-            endif
-            if(ipass .gt. num_pass(itrk_key)) then
-               num_pass(itrk_key)=ipass
-            endif
-          end if
-        end do
+      do itrack=1,max_track
+        itrack_map_vec(ibit,ihd,itrack,imap)=itrack_map(ibit,ihd,itrack)
       end do
+      end do
+      end do           
 
-! At this point itrk_key points to correct track code.
-200   continue
-      istn_cod(istn,icod)=itrk_key
+
+200   continue     
+      if(kdebug_itras) then 
+        write(*,*) "Added map: ", imap
+      endif
+      istn_code_key(istn,icod)=imap
+      itrack_map_key=imap 
+     
+      max_tracks(imap)=max_tracks_new
+      num_tracks(imap)=num_tracks_new
+  
+      num_bits(imap)  =num_bits_new  
+      num_head(imap)  =num_head_new
+      num_pass(imap)  =num_pass_new
+
+      if(kdebug_itras) then 
+        write(*,*) "Mx_trk #trks #bits #pass #head"
+        write(*,'(6i6)')  max_tracks_new,num_tracks_new,num_bits_new,
+     &  num_head_new,num_pass_new
+      endif
+
       return
       end
-! ******************************************************
-      subroutine init_itrk_map(itrk)
-      include '../skdrincl/skparm.ftni'
-      integer*4 itrk(max_headstack,max_trk)
-      integer ihd,j
 
-      do ihd=1,max_headstack
-        do j=1,max_trk
-           itrk(ihd,j)=-99
-        end do
-      end do
-      return
-      end
 ! ***********************************************************************
-      subroutine itras_params(istn,icode,npass,ntrks,nhead,nbits)
-      include '../skdrincl/itras_cmn.ftni'
-
+      subroutine itras_params(istn,icode,npass,ntracks,nhead,nbits)
+      include 'itras_cmn.ftni'
 ! passed
       integer istn
       integer icode
 ! returned
-      integer npass,ntrks,nhead,nbits
+      integer npass,ntracks,nhead,nbits
 ! local
-      integer itrk_key
+      integer imap
 
-      itrk_key=istn_cod(istn,icode)
-      if(itrk_key .eq. 0) then
+      imap=istn_code_key(istn,icode)
+      if(imap .eq. 0) then
          npass=0
-         ntrks=0
+         ntracks=0
          nhead=0
          nbits=0
 !        write(*,*) "ITRAS_PARAMS: Invalid Station/Code pair ",istn,icode
         return
       endif
 
-      npass=num_pass(itrk_key)
-      ntrks=num_trks(itrk_key)
-      nhead=num_head(itrk_key)
-      nbits=num_bits(itrk_key)
+      npass=num_pass(imap)
+      ntracks=num_tracks(imap)
+      nhead=num_head(imap)
+      nbits=num_bits(imap)
       return
       end
 ! **********************************************************************
-      integer*4 function itras_ind(isb,ibit,ichn,ipass)
+      integer*4 function itras_magic(isb,ibit,ichn,ipass)
       include '../skdrincl/skparm.ftni'
+! Return a unique number based on isb,ibit,ichn,ipass
 
       integer isb,ibit,ichn,ipass
-      itras_ind =         isb-1   +
+      itras_magic =      isb-1   +
      >                 2*(ibit-1  +
      >                 2*(ichn-1  +
      >          max_chan*(ipass-1)))
       return
       end
 ! **********************************************************************
-      subroutine itras_ind_2_sb_bit_chn_pass(ind_in,isb,ibit,ichn,ipass)
-! opposite of itras_ind
+      subroutine itras_magic_2_sb_bit_chn_pass(imagic,isb,ibit,ichn,
+     &    ipass)
+! Based on on itras_magic, return isb,ibit,icn,ipass
+! 
       include '../skdrincl/skparm.ftni'
-      integer*4 ind_in
+      integer*4 imagic 
       integer isb,ibit,ichn,ipass
       integer*4 ind
 
-      ind=ind_in
+      ind=imagic
 
       isb=mod(ind,2)
       ind=(ind-isb)/2
@@ -230,9 +318,10 @@
       ipass=ind+1
       return
       end
- ! **************************************************************
+
+! **************************************************************
       logical function kheaduse(ihead,istn)
-      include '../skdrincl/itras_cmn.ftni'
+      include 'itras_cmn.ftni'
       integer ihead,istn
       if(ihead .le. max_headstack .and. istn .le. max_stn) then
          kheaduse=khead(ihead,istn)
@@ -241,18 +330,18 @@
       end
 ! *********************************************************
       subroutine init_itras()
-      include '../skdrincl/itras_cmn.ftni'
+      include 'itras_cmn.ftni'
 
       integer ihead
       integer istn,ifrq
 
-      num_trk_map=0
-
+      num_track_map=0
+  
       do ihead=1,max_headstack
       do istn=1,max_stn
         khead(ihead,istn)=.false.
         do ifrq=1,max_frq
-          istn_cod(istn,ifrq)=0
+          istn_code_key(istn,ifrq)=0
         end do
       end do
       end do

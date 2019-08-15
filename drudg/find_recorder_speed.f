@@ -1,5 +1,4 @@
       subroutine find_recorder_speed(icode,spd_rec,kskd)
-      implicit none 
       include 'hardware.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
@@ -10,7 +9,6 @@
       logical kskd                      ! do we have a sked file? need to get speed for Mark5A or Mark5P
 
 ! 2013Sep19  JMGipson made sample rate station dependent
-! 2015Mar30  JMG. Added support for Mark6. 
 !
 
 ! returned
@@ -40,8 +38,6 @@
           endif
 	  spd_rec=spd_rec/ifan_fact
         endif
-      else if(km6disk) then        
-          spd_rec=idata_mbps(istn)/8  
       else if(kk4) then
          if(kskd) then
            conv = 55.389387393d0 ! counts/sec

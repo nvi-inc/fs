@@ -2,7 +2,6 @@
 C PROCS writes procedure file for the Field System.
 C Version 9.0 is supported with this routine.
 
-      implicit none 
       include 'hardware.ftni'           !common block containing info on hardware
       include 'drcom.ftni'
       include '../skdrincl/freqs.ftni'
@@ -10,10 +9,6 @@ C Version 9.0 is supported with this routine.
       include '../skdrincl/skobs.ftni'
       include '../skdrincl/data_xfer.ftni'
       include 'bbc_freq.ftni'
-
-! Now put in history in reverse order.
-!
-! 2016Jun10  JMG. Trigger in RACK_TYPE="BB" to generate procs from sked file.
 C
 C History
 C 930714  nrv  created,copied from procs
@@ -276,10 +271,8 @@ C 2003Sep04 JMGipson. Added postob_mk5a for mark5a modes.
 ! 2012.09.20 JMG. If an error in some routine, then delete the partial ".prc" file that was written 
 ! 2012.02.21 JMG. Modified to issue TPICD only in some cases. WEH changed his mind. 
 ! 2014.01.17 JMG. Moved 'setup' stuff into separate subroutine. Got rid of unused variables.
-! 2014Jan21 JMG.  Commented out calls to loader/unloader since no more tapes.      
-! 2015Mar20 JMG.  Added ability to generate proc file from sked file for Mark6 recorders. 
-!                 Removed old 'proc_sked_proc' call which did same thing in a different way!!. 
-! 2015Mar30 JMG. got rid of obsolete arg in drchmod
+! 2014Jan21 JMG.  Commented out calls to loader/unloader since no more tapes.  
+! 2015Mar30 JMG. Removed obsolete arg from drchmod.    
 
 C Called by: FDRUDG
 C Calls: TRKALL,IADDTR,IADDPC,IADDK4,SET_TYPE,PROCINTR
@@ -314,7 +307,8 @@ C     integer nspd
       logical ktrkf                     !write out trf procedure?
       character*1 lwhich8               ! which8 BBCs used: F=first, L=last
       character*2 cifinp_save(max_chan,max_frq)
-
+  
+C
 C INITIALIZED VARIABLES:      
 
       if (kmissing) then
@@ -392,17 +386,7 @@ C
 9131    FORMAT(' PROCS02 - Error ',I6,' creating file ',A)
         return
       END IF
-! Write out the header information.
       call procintr
-! For a BB rack generate the proc file from the schedule. 
-       if(cstrack(istn) .eq. "BB") then
-        write(luscn,"(' Reading $PROC$ from sked file... ',$)") 
-        call proc_from_sked(ierr)   
-        call drchmod(prcname,ierr)    
-        return 
-      endif 
-
-
 ! write short exper_init
       call proc_write_define(lu_outfile,luscn," ")  !this initializes this routine
 
@@ -519,7 +503,7 @@ C Therefore, use index 1 for all the tests in this section.
       if (kpcal_d) then 
 !      if (kvrec(ir).or.kv4rec(ir).or.km3rec(ir).or.km4rec(ir)
 !     >   .or.Km5Disk) then
-        if ((km4rack.or.kvracks.or.kv5rack).and.
+        if ((km4rack.or.kvracks).and.
      .      (.not.kpiggy_km3mode.or.klsblo
      .      .or.((km3be.or.km3ac).and.k8bbc))) then
           call proc_pcalf(icode,lwhich8)
@@ -548,12 +532,12 @@ C 9. Write out standard tape loading and unloading procedures
 
 C 10. Finally, write out the procedures in the $PROC section of the sked file.
 C Read each line and if our station is mentioned, write out the proc.
-!      if(ksked_proc) then
-!        call proc_sked_proc(ierr)
-!        if(ierr .ne. 0) then
-!          write(*,*) "Error writing sked_proc section"
-!        endif
-!      endif
+      if(ksked_proc) then
+        call proc_sked_proc(ierr)
+        if(ierr .ne. 0) then
+          write(*,*) "Error writing sked_proc section"
+        endif
+      endif
 
 9000  continue
       call proc_write_define(-1,luscn," ")  !this flushes a buffer.

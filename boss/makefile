@@ -2,8 +2,8 @@
 all: ../bin/boss ../bin/helpsh
 #
 LIBES = ../bosslb/bosslb.a ../lnfch/lnfch.a ../fslb/fslb.a ../newlb/newlb.a \
-../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../fmpsee/fmpsee.a\
-../rtelb/rtelb.a
+../flib/flib.a ../fclib/fclib.a ../fmpsee/fmpsee.a ../poclb/poclb.a \
+../clib/clib.a ../rtelb/rtelb.a
 #
 OBJECTS = boss.o binit.o bwork.o cants.o fshelp.o\
 getcm.o getts.o lists.o newpf.o newpr.o \

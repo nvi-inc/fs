@@ -20,11 +20,21 @@
       character*4 cpmode
       integer ierr
 ! functions
-   
+      integer iwhere_in_string_list
+! 2015Jun05 JMG. Replaced squeezewrite by drudg_write. 
+! 2015Jul17 JMG. Added cont_cal_polarity.
+! 2015Jul20 JMG. Only write cont_cal_polarity if "cont_cal=on"
+! 2015Jul21 JMg. If cont_cal_polarity is "ASK" then do ask. 
+! 2016Jan19 JMG. Distinguish between DBBC_DDC and DBBC_PFB
+! 2016May24 PdV  check first 8 (not 10) characters of rack for continuous cal
+! 2016Sep11 JMG. For cont_cal prompt, make input appear on same line as prompt. 
+! 2017Dec23 JMG. Updating handling of cont_cal prompt   
+! 2018Apr20 JMG. Fixed bug introduced in the above.   
+! 2018Jun18 JMG. Yet another attempt to fix cont_cal. In skedf.ctl, if 'cont_cal off' then emit cont_cal=off              
 
 ! local
       character*12 cnamep
-      character*4 contcal_out
+      character*4 cont_cal_out
       integer ipass              !No longer have tapes
       integer ichan, ic          !counters.
       integer ifan_fact
@@ -37,13 +47,16 @@
       logical kroll              !barrel roll on
       logical kman_roll          !manual barrel roll on   
       logical ktpicd
+      integer iwhere
     
       real samptest
       integer num_chans_obs         	!number of channels observed
       integer num_tracks_rec_mk5        !number we record=num obs * ifan
-      integer NumTracks
-     
+      integer NumTracks     
+    
       character*80 ldum          !temporary string
+      character*4 lvalid_polarity(5)
+      data lvalid_polarity/"0","1","2","3","NONE"/
      
 ! Start of code
       ipass=1
@@ -82,7 +95,7 @@ c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
      >        " This is a Mode A or C experiment at an 8-BBC station."
          lwhich8=" "
          do while (lwhich8 .ne. "F" .or. lwhich8 .ne. "L")
-           write(luscn,'(a)')
+           write(luscn,'(a,$)')
      >          " Do you want the first or last 8 channels(F/L) ? "
            read(luusr,'(A)') lwhich8
            call capitalize(lwhich8)          
@@ -90,19 +103,32 @@ c-----------make sure piggy for mk3 on mk4 terminal too--2hd---
       endif
 
 
-! Initialize contcal_out
-      if(kdbbc_rack) then
-        contcal_out=contcal_prompt
-        call lowercase(contcal_out)
-        write(*,*) "Contcal: ",contcal_out
-        do while(.not. (contcal_out .eq. "on".or.
-     >                  contcal_out .eq. "off".or.
-     >                  contcal_out .eq. "no" .or. 
-     >                  contcal_out .eq. " "))      
-         write(*,*) "Enter in cont_cal action: (on/off)"
-         read(*,*) contcal_out
-         call lowercase(contcal_out)
-       end do
+! Initialize cont_cal_out   
+      if(cstrack_cap(istn)(1:8) .eq. "DBBC_DDC") then
+        cont_cal_out=cont_cal_prompt
+        call lowercase(cont_cal_out)
+        write(*,*) "cont_cal: ",cont_cal_out
+        do while(.not. (cont_cal_out .eq. "on".or.
+     >                  cont_cal_out .eq. "off".or.
+     >                  cont_cal_out .eq. "no" .or. 
+     >                  cont_cal_out .eq. " "))      
+          write(*,'(a,$)') "Enter in cont_cal action: (on/off) "
+          read(*,*) cont_cal_out
+          call lowercase(cont_cal_out)
+          kcont_cal = cont_cal_out .eq. "on"
+        end do     
+        if(kcont_cal .and. cont_cal_polarity .eq. "ASK") then
+          iwhere=0
+          do while(iwhere .eq. 0)       
+            write(*,'(a, $)')
+     >       "Enter in cont_cal_polarity (0-3, or none): "
+            read(*,*) cont_cal_polarity
+            call capitalize(cont_cal_polarity)
+            iwhere = iwhere_in_string_list(lvalid_polarity,5,
+     &                                        cont_cal_polarity)
+            if(cont_cal_polarity .eq. "NONE") cont_cal_polarity=" " 
+          end do 
+        end if      
       endif 
 
 
@@ -190,7 +216,7 @@ C !* to mark the time
               else
                  write(ldum,'("rec_mode=",i3)') irecbw
               endif
-              call squeezewrite(lu_outfile,ldum)
+              call drudg_write(lu_outfile,ldum)
               write(lu_outfile,'("!*")')
             endif ! type 2 rec_mode
 C  RECPff
@@ -221,22 +247,32 @@ C  For 8-BBC stations, use "M" for Mk3 modes
       endif ! kvracks or km3rac.or.km4rack but not S2 or K4
 
 C  BBCffb, IFPffb  or VCffb
-      if (kbbc .or. kifp .or. kvc.or. kdbbc_rack) then
+      cname_vc=" "
+      if (kbbc .or. kifp .or. kvc.or.
+     &   cstrack_cap(istn)(1:8) .eq. "DBBC_DDC") then
          call proc_vcname(kk4vcab,                    !Make the VC procedure name.
      >        ccode(icode),vcband(1,istn,icode),cname_vc)
-
-         write(lu_outfile,'(a)') cname_vc
+          write(lu_outfile,'(a)') cname_vc
+      endif 
+ 
+      if (kbbc .or. kifp .or. kvc.or.                  
+     &   cstrack_cap(istn)(1:4) .eq. "DBBC") then
          cname_ifd="ifd"//codtmp
          writE(lu_outfile,'(a)') cname_ifd
        endif ! kbbc kvc kfid
 
-       if(kdbbc_rack) then   
-          write(lu_outfile,'("cont_cal=", a)') contcal_out
+       if(cstrack_cap(istn)(1:8) .eq. "DBBC_DDC") then   
+          if(kcont_cal) then 
+             write(lu_outfile,'("cont_cal=on,",a)') cont_cal_polarity
+          else 
+             write(lu_outfile,'("cont_cal=off")')
+          endif   
+            
           ldum="bbc_gain=all,agc"
           if(idbbc_bbc_target .gt. 0) then
              write(ldum(20:30),'(",",i5)') idbbc_bbc_target
           endif 
-          call squeezewrite(lu_outfile,ldum)           
+          call drudg_write(lu_outfile,ldum)           
        endif        
 
 C  FORM=RESET

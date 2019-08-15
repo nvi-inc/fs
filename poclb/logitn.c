@@ -23,7 +23,7 @@ char *who;           /* 2-char string identifying the error  */
 int  what;          /* int with more info                   */
 
 {
-  char buf[513];    /* Holds the complete log entry */
+  char buf[1025];    /* Holds the complete log entry */
   char name[5];     /* The name of our main program */
   int it[6],ip1,ip2,l;
  
@@ -63,8 +63,16 @@ int  what;          /* int with more info                   */
     memcpy(buf+l,name,5);
     buf[l+5]='\0';
     strcat(buf,"#");
-    if(msg!=NULL)
-      strncat(buf,msg,sizeof(buf)-strlen(buf)-1);
+    if(msg!=NULL) {
+      int n;
+      int bufl=strlen(buf);
+      int msgl=strlen(msg);
+      n=sizeof(buf)-bufl-1;
+      if(msgl < n)
+	n=msgl;
+      memcpy(buf+bufl,msg,n);
+      buf[bufl+n]=0;
+    }
   }
 /* Send the complete log entry to ddout via class.
 */

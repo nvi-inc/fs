@@ -8,11 +8,16 @@
 #define WORD_BIT    32
 #define PAGE_SIZE   4096
 
-#define C_RES       136*PAGE_SIZE /* reserves bytes for Fscom     */
+#define C_RES       154*PAGE_SIZE /* reserves bytes for Fscom     */
+/* for C_RES */
+/* take 'x' size from " setup_ids: Fscom C structure too large: x bytes */
+/* divide by PAGE_SIZE, round up to next integer */
 #define SHM_SIZE    C_RES+2*PAGE_SIZE /* should be a multiple of 4096 */
 
 #define CLS_SIZE    20480
 #define MAX_CLS     40
+#define MAX_CLS_MSG_BYTES  1024 /* not used anywhere yet, parallel to
+				   FORTRAN parameter */
 
 #define SKD_SIZE    4096
 
@@ -54,17 +59,20 @@
 #define MAX_DET         (MAX_BBC*2+MAX_IF)
 #define MAX_RDBE_DET    (MAX_RDBE_CH*MAX_RDBE_IF*MAX_RDBE)
 #define MAX_USER_DEV    6
-//#define MAX_ONOFF_DET    (MAX_DET+MAX_USER_DEV)
-#define MAX_ONOFF_DET    (MAX_DBBC3_DET+MAX_USER_DEV)
-#define MAX_TSYS_DET     MAX_DBBC3_DET
-
 #define MAX_DBBC_BBC   16
 #define MAX_DBBC_IF     4
 #define MAX_DBBC_DET    (2*MAX_DBBC_BBC+MAX_DBBC_IF)
+#define MAX_DBBC_PFB    64
+#define MAX_DBBC_PFB_DET  (MAX_DBBC_PFB+MAX_DBBC_IF)
 
 #define MAX_DBBC3_BBC   128
 #define MAX_DBBC3_IF    8     
 #define MAX_DBBC3_DET    (2*MAX_DBBC3_BBC+MAX_DBBC3_IF)
+
+/* must be the largest number of detectors possible */
+#define MAX_GLOBAL_DET    MAX_DBBC3_DET
+#define MAX_ONOFF_DET   (MAX_GLOBAL_DET+MAX_USER_DEV)
+
 
 #define DEV_VFM     "fm"
 #define DEV_VIA     "ia"
@@ -75,7 +83,7 @@
 
 /* rack/drive, some are also _types.
    Hierarchy: rack/drive, then rack_type/drive_type
-   "*_type" must be unique within each "equip" */ 
+   "*_type" must be unqiue within each specific rack or drive */ 
 #define DBBC3       0x4000
   /* rack_types: DBBC3, drive_types: none  */
 #define RDBE        0x2000
@@ -128,6 +136,15 @@
 #define VLBA42      0x2000000
 #define MK45        0x10000000
 #define VLBA45      0x20000000
+#define DBBC_DDC_FILA10G     0x40000000
+#define DBBC_DDC    0x1
+#define DBBC_PFB_FILA10G    0x2
+#define DBBC_PFB    0x4
+
+/*sub types of VLBA4 rack, like VLBA45 */
+
+#define VLBA4C        0x1
+#define VLBA4CDAS     0x2
 
 /* Mark 5 drive_types */
 
@@ -138,6 +155,8 @@
 
 #define MK5C        0x1
 #define MK5C_BS     0x2
+#define FLEXBUFF    0x4
+
 
 /*
  * The number of DAS allowed must be less than 8, currently we allow 2

@@ -7,7 +7,7 @@ c
 
       REAL AZOFF, DECOFF, ELOFF, ISTPTP(2), ITACTP(2), RAOFF,
      . XOFF, YOFF, ep1950, tempwx, preswx, humiwx, speedwx,
-     . cablev, systmp(MAX_TSYS_DET), epoch, height, diaman, slew1,
+     . cablev, systmp(MAX_GLOBAL_DET), epoch, height, diaman, slew1,
      . slew2, lolim1, lolim2, uplim1, uplim2,
      . HORAZ(MAX_HOR), HOREL(MAX_HOR), motorv(2), inscint(2),inscsl(2),
      . outscint(2), outscsl(2), wrvolt(2), rateti_fs, POSNHD(2,2),
@@ -38,7 +38,8 @@ c
      $ ibds, ndas, idasfilt, idasbits, ichlba(2*MAX_DAS), mk4sync_dflt,
      $ icomputer, satellite, dbbcddcv, dbbcpfbv, dbbc_cond_mods,
      $ dbbc_if_factors(MAX_DBBC_IF), dbbc_cont_cal_mode, m5b_crate,
-     $ dbbcddcvc,
+     $ dbbcddcvc, dbbcddcsubv, dbbccontcalpol, dbbcpfbvc, dbbcpfbsubv,
+     $ dbbc_como_cores(4),dbbc_cores, ichdbbcfm, user_device_zero(6)
      $  mk6_units(MAX_MK6), mk6_active(MAX_MK6),
      $  rdbe_units(MAX_RDBE), rdbe_active(MAX_RDBE),
      $  dbbc3_ddc_v, dbbc3_ddc_vc, dbbc3_ddc_bbcs_per_if, dbbc3_ddc_ifs,
@@ -86,11 +87,12 @@ c
      $ ibds, ndas, idasfilt, idasbits, ichlba, mk4sync_dflt,
      $ icomputer, satellite, dbbcddcv, dbbcpfbv, dbbc_cond_mods,
      $ dbbc_if_factors, dbbc_cont_cal_mode, m5b_crate, dbbcddcvc,
+     $ dbbcddcsubv, dbbccontcalpol, dbbcpfbvc, dbbcpfbsubv,
+     $ dbbc_como_cores,dbbc_cores, ichdbbcfm, user_device_zero,
      $ mk6_units, mk6_active,
      $ rdbe_units, rdbe_active,
      $ dbbc3_ddc_v, dbbc3_ddc_vc, dbbc3_ddc_bbcs_per_if, dbbc3_ddc_ifs,
      $ dbbc3_cont_cal_mode,
-
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 
@@ -99,13 +101,18 @@ c
      . idevds, hostpc_fs, wx_host
 c
       CHARACTER*8 LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP
-      character*16 dbbcddcvs
-      character*1 dbbcddcvl
+      character*16 dbbcddcvs, dbbcpfbvs
+      character*1 dbbcddcvl, dbbcpfbvl
+      character*16 fila10gvsi_in
+      character*17 scan_name,scan_name_old
       character*1 rdbe_pcal_amp
       character*16 dbbc3_ddc_vs
       character*32 sVerRelease_FS
 c
       common/fscom_dum2/ LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP,
-     $                   dbbcddcvs, dbbcddcvl, rdbe_pcal_amp,   
+     $                   dbbcddcvs, dbbcpfbvs, fila10gvsi_in, dbbcddcvl,
+     $			 dbbcpfbvl,scan_name,scan_name_old,
+     $                   rdbe_pcal_amp,
      $                   dbbc3_ddc_vs,
      $                   sVerRelease_FS
+

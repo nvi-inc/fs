@@ -36,7 +36,8 @@ long ip[5];                           /* ipc parameters */
       } else if(15 == itask && !
 		(shm_addr->equip.drive[shm_addr->select] == MK5 &&
 		 (shm_addr->equip.drive_type[shm_addr->select] == MK5C ||
-		  shm_addr->equip.drive_type[shm_addr->select] == MK5C_BS))
+		  shm_addr->equip.drive_type[shm_addr->select] == MK5C_BS ||
+		  shm_addr->equip.drive_type[shm_addr->select] == FLEXBUFF))
 		) {
 	ierr=-403;
 	goto error;
@@ -67,11 +68,6 @@ long ip[5];                           /* ipc parameters */
 /* if we get this far it is a set-up command so parse it */
 
 parse:
-      m5state_init(&lcl.source.state);
-      m5state_init(&lcl.mask.state);
-      m5state_init(&lcl.decimate.state);
-      m5state_init(&lcl.fpdp.state);
-      m5state_init(&lcl.disk.state);
 
       ilast=0;                                      /* last argv examined */
       memcpy(&lcl,&shm_addr->mk5b_mode,sizeof(lcl));
@@ -79,7 +75,7 @@ parse:
       count=1;
       while( count>= 0) {
         ptr=arg_next(command,&ilast);
-        ierr=mk5b_mode_dec(&lcl,&count, ptr);
+        ierr=mk5b_mode_dec(&lcl,&count, ptr, itask);
         if(ierr !=0 ) goto error;
       }
 
@@ -109,6 +105,52 @@ parse:
       mk5b_mode_2_m5(outbuf,&lcl,itask);
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
       out_recs++;
+
+      if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
+	 shm_addr->equip.drive_type[shm_addr->select] == FLEXBUFF) {	
+	if(lcl.source.state.known && lcl.source.source == 3) { /* VDIF */
+	  strcpy(outbuf,"mtu = 9000 ; \n");
+	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+	  out_recs++;
+
+	  /* check if this should be "pudp" for RDBE, when supported */
+
+	  strcpy(outbuf,"net_protocol = udpsnor : 32000000 : 256000000 : 4 ;\n");
+	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+	  out_recs++;
+
+	} else if(lcl.source.state.known && lcl.source.source == 4) { /* mk5b */
+	  strcpy(outbuf,"mtu = 6000 ; \n");
+	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+	  out_recs++;
+
+	  strcpy(outbuf,"net_protocol = udpsnor : 32000000 : 256000000 : 4 ;\n");
+	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+	  out_recs++;
+	}
+      }
+
+      if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
+	 (shm_addr->equip.drive_type[shm_addr->select] == MK5C ||
+	  shm_addr->equip.drive_type[shm_addr->select] == MK5C_BS)) {
+
+	/* make sure there are no left over net_protocols that might cause a
+	   problem if memory buffering is enabled on the 5C */
+
+        strcpy(outbuf,"net_protocol = : 128k : 2M : 4;\n");
+        cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+        out_recs++;
+
+	if(lcl.source.state.known && lcl.source.source == 3) { /* VDIF */
+	  strcpy(outbuf,"packet = 36 : 0 : 8032 : 0 : 0 ;\n");
+	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+	  out_recs++;
+	} else if(lcl.source.state.known && lcl.source.source == 4) { /* mk5b */
+	  strcpy(outbuf,"packet = 36 : 0 : 5008 : 0 : 0 ;\n");
+	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+	  out_recs++;
+	}
+      }
 
 mk5cn:
       ip[0]=1;

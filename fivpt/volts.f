@@ -75,6 +75,7 @@ C
       endif
 C
       call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
       if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         id=-1
         goto 11
@@ -83,7 +84,14 @@ c       do nothing
       else if(LBA.eq.rack) then
         id=-1
         goto 11
-      else if(DBBC.eq.rack) then
+      else if(DBBC.eq.rack.and.
+     &       (rack_type.eq.DBBC_DDC.or.rack_type.eq.DBBC_DDC_FILA10G)
+     &       )then
+        id=-1
+        goto 11
+      else if(DBBC.eq.rack.and.
+     &       (rack_type.eq.DBBC_PFB.or.rack_type.eq.DBBC_PFB_FILA10G)
+     &       )then
         id=-1
         goto 11
       else if(RDBE.eq.rack) then
@@ -97,7 +105,7 @@ c
 c  check M3 devices
 c
       do 8 i=1,ndev 
-        if (icmnd(1,i).ne.ldevfp(1)) goto 8 
+        if (ichcm(icmnd(1,i),1,ldevfp,1,2).ne.0) goto 8 
         id=i 
         goto 11 
 8     continue 
@@ -171,13 +179,19 @@ C
            call matcn(icmnd(2,id),-5,iques,indata,nin, 9,ierr)
         else if(LBA.eq.rack) then
            call dscon(dtpi,ierr)
-        else if(DBBC.eq.rack) then
+        else if(DBBC.eq.rack.and.
+     &          (rack_type.eq.DBBC_DDC.or.rack_type.eq.DBBC_DDC_FILA10G)
+     &          ) then
            call dbbcn(dtpi,dtpi2,ierr,icont,isamples)
            if(imode.ne.0.and.i.eq.1.and.icont.ne.0) then
               if(isamples.gt.intp) then
                  intp=isamples
               endif
            endif
+        else if(DBBC.eq.rack.and.
+     &          (rack_type.eq.DBBC_PFB.or.rack_type.eq.DBBC_PFB_FILA10G)
+     &          ) then
+           call dbbcn_pfb(dtpi,ierr)
         else if(RDBE.eq.rack) then
            call rdbcn(dtpi,dtpi2,ierr,icont,isamples)
            if(imode.ne.0.and.i.eq.1.and.icont.ne.0) then
@@ -210,7 +224,13 @@ c         write(6,9953) dtpi,(cjchar(indata,i),i=1,12)
 C 
 C       CHECK FOR TPI SATURATION
 C 
-        if (dtpi.lt.65534.5d0.or.RDBE.eq.rack) goto 16 
+        if(DBBC.eq.rack.and.
+     &       (rack_type.eq.DBBC_PFB.or.rack_type.eq.DBBC_PFB_FILA10G)
+     &       ) then
+           if(dpti.lt.1600000.5d0) goto 16
+        else
+           if (dtpi.lt.65534.5d0.or.RDBE.eq.rack) goto 16 
+        endif
         call logit7(idum,idum,idum,-1,-80,lwho,lwhat) 
         itry=itry-1
         if (itry.le.0) goto 80010

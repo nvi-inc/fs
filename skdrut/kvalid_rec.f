@@ -17,21 +17,20 @@
       integer iwhere_in_string_list
 ! local
       integer iwhere
-      character*8 crectmp 
+      character*8 crectmp
 
       kvalid_rec=.true. 
-      iwhere=iwhere_in_string_list(crec_type, max_rec_type,crec)   
-      if(iwhere .ne. 0) return           !valid rec type.
+      iwhere=iwhere_in_string_list(crec_type, max_rec_type,crec)
+      if(iwhere .eq. 0) return           !valid rec type.
 
 ! Didn't find. Capitalize and try again.
       crectmp=crec
       call capitalize(crectmp)
-      iwhere= iwhere_in_string_list(crec_type_cap,max_rec_type,crectmp)  
+      iwhere= iwhere_in_string_list(crec_type_cap,max_rec_type,crectmp)
       if(iwhere .ne. 0) then
         crec=crec_type(iwhere)       
       else
         kvalid_rec=.false.
       endif
- 
       return
       end

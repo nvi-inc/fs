@@ -23,6 +23,7 @@
 ! 2007Jul09. Split off from procs.
 ! 2008Feb26 JMG.  Write out comment if unused BBCs are present.
 ! 2010May11 JMG.  Changed DRF and DRLO to double precision. In computing rfvc was losing precision.
+! 2016Jan18 JMG. Only write out name if cname_vc <> " "   
 
 ! local variables.
       character*80 cbuf2        !temporary text buffer.
@@ -48,7 +49,8 @@ C       we should do one or both procs
      .     ((kuse(1).and.kuse(2)).and.(irec.eq.1.or.
      .                (irec.eq.2.and.kk4vcab)))) then ! do this
 
-          call proc_write_define(lu_outfile,luscn,cname_vc)
+          if(cname_vc .ne. " ") 
+     &       call proc_write_define(lu_outfile,luscn,cname_vc)
 
 C         Initialize the bbc array to "not written yet"
           do ib=1,max_bbc
@@ -166,7 +168,8 @@ C         For K4, use bandwidth of channel 1
               write(lu_outfile,'(a)') cbuf(1:nch)
             end do
           endif 
-          write(lu_outfile,"(a)") 'enddef'
+          if(cname_vc .ne. " ") 
+     &        write(lu_outfile,"(a)") 'enddef'
         endif ! do this
       enddo ! loop on recorders
       end
