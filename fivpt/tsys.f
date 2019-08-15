@@ -60,8 +60,8 @@ C
      &     (rack.eq.DBBC.and.rack_type.eq.DBBC_PFB).or.
      &     (rack.eq.DBBC.and.rack_type.eq.DBBC_PFB_FILA10G).or.
      &     (rack.eq.DBBC.and.
-     &        (rack_type.eq.DBBC_DDC.or.rack_type.eq.DBBC_DDC_FILA10G).and.
-     &        dbbc_cont_cal_mode.eq.0).or.
+     &     (rack_type.eq.DBBC_DDC.or.rack_type.eq.DBBC_DDC_FILA10G).and.
+     &     dbbc_cont_cal_mode.eq.0).or.
      &     (rack.eq.DBBC3.and.dbbc3_cont_cal_mode.eq.0))) then
          call scmds('calofffp',1)
       endif
