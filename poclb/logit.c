@@ -88,7 +88,7 @@ char *type;          /* data type NULL = "fs", "nd" = no display */
 	n=msgl;
       memcpy(buf+bufl,msg,n);
       buf[bufl+n]=0;
-    else
+    } else
       strcat(buf,"empty message, program error");
   }
 /* Send the complete log entry to ddout via class.
