@@ -396,6 +396,18 @@ int itask;
   }
   return;
 }
+mk5c_clock_set_2_m5(ptr,lclc)
+char *ptr;
+struct mk5b_mode_cmd *lclc;
+{
+  strcpy(ptr,"clock_set = ");
+
+  sprintf(ptr+strlen(ptr),"%d : ext ; \n",
+	  shm_addr->m5b_crate/lclc->decimate.decimate);
+
+  return;
+}
+
 m5_2_mk5b_mode(ptr_in,lclc,lclm,itask,ip) /* return values:
 				  *  0 == no error
 				  *  0 != error
