@@ -8,10 +8,10 @@ mk3     type of rack (mk3, vlba, vlbag, mk4, vlba4, mk5, vlba5
 *                     k42, k42a, k42b, k42bu, k42c, k42/k3, k42a/k3,
 *                     k42bu/k3, k42/mk4, k42a/mk4, k42b/mk4, k42bu/mk4
 *                     k42c/mk4, lba, lba4, s2, dbbc_ddc, dbbc_ddc/fila10g,
-*                     dbbc_pfb, dbbc_pfb/fila10g, vlbac, cdas, or none)
+*                     dbbc_pfb, dbbc_pfb/fila10g, vlbac, cdas, rdbe, or none)
 mk3     type of recorder 1 (mk3, vlba, vlba2, vlbab, vlba4, vlba42, mk4,
 *		    mk4b, s2, k41, k41/dms, k42, k42/dms, mk5a, mk5a_bs,
-*                   mk5b, mk5b_bs, mk5c, mk5c_bs, flexbuff, or none)
+*                   mk5b, mk5b_bs, mk5c, mk5c_bs, flexbuff, mk6, or none)
 mk3     type of recorder 2 (mk3, vlba, vlba2, vlbab, vlba4, vba42, mk4,
 *                           mk4b, or none)
 mk3     type of decoder (mk3, dqa, mk4, or none)
@@ -67,3 +67,5 @@ cdp     cdp or metserver port & host, use cdp if you don't have either
    32   one of: none, nominal, 2, 4, 8, 16, 32, 64
 *FiLa10G input select, one of: vsi1, vsi2, vsi1-2, vsi1-2-3-4, gps, tvg
 vsi1
+* DBBC3 firmware version, bbcs/if, ifs
+  v223 16 8
