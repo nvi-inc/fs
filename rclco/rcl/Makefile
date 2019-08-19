@@ -16,8 +16,8 @@ CPPFLAGS=
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $*.c
 
 
+.PHONY: all
 all: $(OBJS)
-	touch all
 
 # rule to build "mini" test program
 test: $(OBJS) test.o
