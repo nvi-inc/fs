@@ -1,7 +1,6 @@
-CFLAGS = 
 LIBS = ../clib/clib.a ../rtelb/rtelb.a
-OBJECTS = 
+OBJECTS = lognm.o 
 
-../bin/lognm : lognm.o $(OBJECTS)
-	cc -o ../bin/lognm lognm.o $(OBJECTS) $(LIBS)
-	strip ../bin/lognm
+../bin/lognm : $(OBJECTS) $(LIBS)
+
+include ../include.mk

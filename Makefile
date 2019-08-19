@@ -1,13 +1,11 @@
-#
-pwd = $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
-# TODO fallback to this for non-git paths
-# FS_VERSION := $(shell echo $(pwd) | cut -d- -f2-)
-FS_VERSION := $(shell git describe --tags --dirty)
+pwd := $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
+#FS_VERSION := $(shell echo $(pwd) | cut -d- -f2-)
+FS_VERSION := $(shell git describe --always --tags | cut -c2- ) 
 VERSION    := $(shell echo $(FS_VERSION) | cut -d. -f1 )
 SUBLEVEL   := $(shell echo $(FS_VERSION) | cut -d. -f2 )
 PATCHLEVEL := $(shell echo $(FS_VERSION) | cut -d. -f3 | cut -d- -f1)
 RELEASE    := $(shell echo $(FS_VERSION) | cut -d- -f2- -s)
-#
+
 ifeq ($(VERSION),)
 $(error no VERSION value)
 endif
@@ -29,20 +27,31 @@ print-%  : ; @echo $* = $($*)
 #
 LIB_DIR = clib flib bosslb fclib fmpsee fslb lnfch newlb polb port rtelb vis \
 poclb skdrut vex rclco/rcl s2das third_party
-#
-EXEC_DIR = antcn aquir autoftp be_client boss brk chekr dbbcn ddout drudg dscon \
-erchk error fesh fivpt flagr fmset fs fs.prompt fsalloc fserr fsserver \
-fsvue gndat gnfit gnplt gnplt1 go headp holog ibcon incom inject_snap \
-labck lgerr logex lognm logpl logpl1 matcn mcbcn mcicn mk5cn mk6cn monit \
-monpcal moon msg onoff oprin pcald pcalr pdplt pfmed plog popen predict \
-quikr quikv rack rclcn rdbcn rdtcn resid run rwand s_client setcl sigma \
-spubsub systests tpicd udceth0 xtrac
+
+EXE_DIR = rwand chekr fserr ddout fs fsalloc incom matcn oprin pcalr onoff \
+fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \
+quikv mcbcn brk moon logex headp fmset ibcon quikr go drudg rclcn pdplt logpl \
+lognm pcald msg fsvue fs.prompt inject_snap erchk mk5cn tpicd flagr \
+gnfit gndat gnplt dscon systests autoftp monpcal logpl1 holog gnplt1 predict \
+dbbcn rdbcn rdtcn mk6cn popen udceth0 rack mcicn be_client s_client lgerr fesh\
+plog spubsub fsserver
 
 export LDFLAGS += -L$(shell pwd)/third_party/lib
 export CPPFLAGS += -I$(shell pwd)/third_party/include
 
-all:	libs execs
-#
+.PHONY: all libs execs $(LIB_DIR) $(EXE_DIR)
+
+all: libs exes
+
+libs: $(LIB_DIR)
+exes: $(EXE_DIR)
+
+$(EXE_DIR): libs
+
+$(LIB_DIR) $(EXE_DIR):
+	$(MAKE) -C $@
+
+.PHONY: dist clean rmexe rmdoto install
 dist:
 	rm -rf /tmp/fs-$(FS_VERSION).tgz /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION) -name 'core' -type f -print >  /tmp/fsdist-exclude
@@ -62,7 +71,7 @@ dist:
 	echo usr2/fs-$(FS_VERSION)/rclco/rcl/all                     >> /tmp/fsdist-exclude
 	cd /; tar -czf /tmp/fs-$(FS_VERSION).tgz -X /tmp/fsdist-exclude usr2/fs-$(FS_VERSION)
 	chmod a+rw /tmp/fs-$(FS_VERSION).tgz
-#
+
 clean:
 	rm -f `find . -name 'core' -type f -print`
 	rm -f `find . -name '#*#' -print`
@@ -74,7 +83,7 @@ clean:
 #
 rmexe:
 	rm -fr bin/*
-#
+
 rmdoto:
 	rm -f `find . -name '*.[oas]' -print`
 	rm -rf oprin/readline-2.0

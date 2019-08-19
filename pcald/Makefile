@@ -1,10 +1,6 @@
-LIBES = ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a
-#
-../bin/pcald: pcald.o $(OBJECTS)
-	cc  -o ../bin/pcald pcald.o $(OBJECTS) $(LIBES)
-	strip ../bin/pcald
+LIBS = ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a
+OBJECTS =  pcald.o
 
-pcald:
-	rm -f ../bin/pcald
-	make
-#
+../bin/pcald: $(OBJECTS) $(LIBS)
+
+include ../include.mk
