@@ -187,7 +187,7 @@ Continue:
       logit(buf,0,NULL);
       break;
 
-  case 10: /*normally triggered on FS termination if evironment variable
+  case 10: /*normally triggered on FS termination if environment variable
 	     FS_ANTCN_TERMINATION has been defined */
       ierr = 0;
       strcpy(buf,"Termination mode");
