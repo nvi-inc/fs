@@ -1,4 +1,4 @@
-        tpicd - tpi (LBA4, Mark III/IV, VLBA, VLBA4, DBBC racks)
+        tpicd - tpi (LBA4, Mark III/IV, VLBA, VLBA4, DBBC, RDBE racks)
 
             Syntax:     tpicd=cont,cycle
                         tpicd
@@ -33,12 +33,14 @@ current set-up information.
 If tpicd is being controlled by the data_valid command, it begins and
 stops sampling and recording data within one second of a request to do
 so. In other words within one second of the execution of a
-"data_valid=..."  command.
+"data_valid=..."  command.  In this mode no data is logged if a
+schedule is not active or if the schedule is halted.
 
-The form "tpicd=tsys" can be used only if continuous cal is selected.
-It will cause the tsys to be calculated from the next set of samples.
-The number of samples is specified by the cont_cal command.  This does
-not disturb the behavior otherwise.
+The form "tpicd=tsys" can be used only if continuous cal is
+selected. It will cause the tsys to be calculated from the next set of
+samples (not yet supported for RDBEs).  The number of samples is
+specified by the cont_cal command.  This does not disturb the behavior
+otherwise.
 
 This command controls the tpicd TPI measurement daemon.  The remaining
 comments describe the daemon.
