@@ -6,7 +6,7 @@
 
 
 Comments:
-bThis command can be used to open a new connection to the Mark 5
+This command can be used to open a new connection to the Mark 5
 recorder. If the connection is already open, it will be closed and new
 one established. Opening a new connection is needed after the Mark 5's
 control program has been restarted or its power has been cycled. This
