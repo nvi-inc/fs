@@ -68,7 +68,7 @@ and rate is for Mark5A recorders. The second form of the response with
 parameters type. code, and total is for all non-Mark5A recorders
 including Mark 5B, Mark 5C, FlexBuff, as well as Mark6.
 
-If a schedule is running and if "scan_name=..." command has been
+If a schedule is running and if "scan_name=..." command has not been
 executed twice since the schedule was started, the command is a no-op
 that ends with a warning.  This is to prevent extraneous errors when a
 schedule is started in the middle.  The literal string "force" can be
