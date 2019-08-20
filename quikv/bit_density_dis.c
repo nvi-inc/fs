@@ -14,7 +14,7 @@
 void bit_density_dis(command,itask,ip,indx)
 struct cmd_ds *command;
 int itask,indx;
-long ip[5];
+int ip[5];
 {
       int lclc;
       int count, i;

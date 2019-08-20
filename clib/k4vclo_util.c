@@ -28,7 +28,7 @@ char *ptr;
     char buffer[80];
     int ilen, flen, ipos;
     char *decloc, *fract;
-    long freq, ifreq, ffreq;
+    int freq, ifreq, ffreq;
 
     ierr=0;
     if(ptr == NULL) ptr="";
@@ -146,7 +146,7 @@ struct k4vclo_mon *lcl;
 }
 
 k4vclo_req_q(ip,itask)
-long ip[5];
+int ip[5];
 int itask;
 {
  char *device;
@@ -168,7 +168,7 @@ int itask;
 }
 
 k4vclo_req_c(ip,lclc,ivc,itask)
-long ip[5];
+int ip[5];
 struct k4vclo_cmd *lclc;
 int ivc,itask;
 {
@@ -208,7 +208,7 @@ int ivc,itask;
 k4vclo_res_q(lclc,lclm,ip,itask)
 struct k4vclo_cmd *lclc;
 struct k4vclo_mon *lclm;
-long ip[5];
+int ip[5];
 int itask;
 {
   char buffer[MAX_BUF];

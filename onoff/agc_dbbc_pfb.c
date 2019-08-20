@@ -24,7 +24,7 @@ int *ierr;
 {
   static int agc[MAX_DBBC_IF], att[MAX_DBBC_IF], mode[MAX_DBBC_IF];
   int i, j, icore, k,ifchain;
-  long ip[5];                                     /* ipc array */
+  int ip[5];                                     /* ipc array */
   int out_recs, out_class;
   char buf[BUFSIZE];
 

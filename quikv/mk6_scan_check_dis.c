@@ -15,8 +15,8 @@
 void mk6_scan_check_dis(command,itask,iwhich,ip,out_class,out_recs)
 struct cmd_ds *command;
 int itask, iwhich;
-long ip[5];
-long *out_class;
+int ip[5];
+int *out_class;
 int *out_recs;
 {
       int ierr, count, i;
@@ -28,7 +28,7 @@ int *out_recs;
       int nchars;
       char inbuf[BUFSIZE];
       struct mk6_scan_check_mon lclm;
-      long class, nrecs;
+      int class, nrecs;
       char *params;
       char what[3];
 

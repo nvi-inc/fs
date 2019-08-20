@@ -9,7 +9,7 @@
 
 void opn_rclcn_res(buffer,ip)      /* initialize (open) response structs */
 struct rclcn_res_buf *buffer;        /* work struct */
-long ip[5];                    /* ip information from mcbcn */
+int ip[5];                    /* ip information from mcbcn */
 {
     buffer->class_fs = ip[0];
     buffer->count = ip[1];
@@ -177,7 +177,7 @@ int get_rclcn_time_set(struct rclcn_res_buf *buffer)
 }
 int get_rclcn_time_read(struct rclcn_res_buf *buffer, int *year, int *day,
 			int *hour, int *min, int *sec, ibool *validated,
-			long *centisec)
+			int *centisec)
 {
   int ierr=get_rclcn_res(buffer);
 
@@ -208,7 +208,7 @@ int get_rclcn_time_read(struct rclcn_res_buf *buffer, int *year, int *day,
   if(ierr!=0)
     return ierr;
 
-  ierr=get_rclcn_res_data(buffer,centisec ,6*sizeof(long));
+  ierr=get_rclcn_res_data(buffer,centisec ,6*sizeof(int));
 
   return ierr;
 }
@@ -379,26 +379,26 @@ int get_rclcn_delay_set(struct rclcn_res_buf *buffer)
   return get_rclcn_res(buffer);
 }
 int get_rclcn_delay_read(struct rclcn_res_buf *buffer,
-			 long int *nanosec)
+			 int *nanosec)
 {
   int ierr=get_rclcn_res(buffer);
 
   if(ierr!=0)
     return ierr;
 
-  ierr=get_rclcn_res_data(buffer,nanosec, sizeof(long int));
+  ierr=get_rclcn_res_data(buffer,nanosec, sizeof(int));
 
   return ierr;
 }
 int get_rclcn_delaym_read(struct rclcn_res_buf *buffer,
-			 long int *nanosec)
+			 int *nanosec)
 {
   int ierr=get_rclcn_res(buffer);
 
   if(ierr!=0)
     return ierr;
 
-  ierr=get_rclcn_res_data(buffer,nanosec, sizeof(long int));
+  ierr=get_rclcn_res_data(buffer,nanosec, sizeof(int));
 
   return ierr;
 }
@@ -442,12 +442,12 @@ int get_rclcn_position_read(struct rclcn_res_buf *buffer,int *code,
   switch (*code) {
   case 0:
     ierr=get_rclcn_res_data(buffer,&position->overall.position,
-			    sizeof(long int));
+			    sizeof(int));
     if(ierr!=0)
       return ierr;
 
     ierr=get_rclcn_res_data(buffer,&position->overall.posvar  ,
-			    sizeof(long int));
+			    sizeof(int));
     break;
   case 1:
     ierr=get_rclcn_res_data(buffer,&position->individual.num_entries,
@@ -457,7 +457,7 @@ int get_rclcn_position_read(struct rclcn_res_buf *buffer,int *code,
 
     ierr=get_rclcn_res_data(buffer, position->individual.position,
 			    position->individual.
-			    num_entries*sizeof(long int));
+			    num_entries*sizeof(int));
     break;
   default:
     ierr=-403;
@@ -561,10 +561,10 @@ int get_rclcn_mk3_form_read(struct rclcn_res_buf *buffer, ibool *mk3)
 }
 int get_rclcn_transport_times(struct rclcn_res_buf *buffer, int *num_entries,
 			      unsigned short serial[],
-			      unsigned long tot_on_time[],
-			      unsigned long tot_head_time[],
-			      unsigned long head_use_time[],
-			      unsigned long in_service_time[])
+			      unsigned int tot_on_time[],
+			      unsigned int tot_head_time[],
+			      unsigned int head_use_time[],
+			      unsigned int in_service_time[])
 {
   int ierr=get_rclcn_res(buffer);
 
@@ -579,24 +579,24 @@ int get_rclcn_transport_times(struct rclcn_res_buf *buffer, int *num_entries,
   if(ierr!=0)
     return ierr;
 
-  ierr=get_rclcn_res_data(buffer,tot_on_time, 8*sizeof(unsigned long));
+  ierr=get_rclcn_res_data(buffer,tot_on_time, 8*sizeof(unsigned int));
   if(ierr!=0)
     return ierr;
 
-  ierr=get_rclcn_res_data(buffer,tot_head_time, 8*sizeof(unsigned long));
+  ierr=get_rclcn_res_data(buffer,tot_head_time, 8*sizeof(unsigned int));
   if(ierr!=0)
     return ierr;
 
-  ierr=get_rclcn_res_data(buffer,head_use_time, 8*sizeof(unsigned long));
+  ierr=get_rclcn_res_data(buffer,head_use_time, 8*sizeof(unsigned int));
   if(ierr!=0)
     return ierr;
 
-  ierr=get_rclcn_res_data(buffer,in_service_time, 8*sizeof(unsigned long));
+  ierr=get_rclcn_res_data(buffer,in_service_time, 8*sizeof(unsigned int));
 
   return ierr;
 }
 int get_rclcn_station_info_read(struct rclcn_res_buf *buffer, int *station,
-				long int *serialnum, char *nickname)
+				int *serialnum, char *nickname)
 {
   int ierr=get_rclcn_res(buffer);
 
@@ -607,7 +607,7 @@ int get_rclcn_station_info_read(struct rclcn_res_buf *buffer, int *station,
   if(ierr!=0)
     return ierr;
 
-  ierr=get_rclcn_res_data(buffer,serialnum, sizeof(long int));
+  ierr=get_rclcn_res_data(buffer,serialnum, sizeof(int));
   if(ierr!=0)
     return ierr;
 
@@ -621,7 +621,7 @@ int get_rclcn_consolecmd(struct rclcn_res_buf *buffer)
 }
 int get_rclcn_postime_read(struct rclcn_res_buf *buffer, int *year, int *day,
 			   int *hour, int *min, int *sec, int *frame,
-			   long int *position)
+			   int *position)
 {
   int ierr=get_rclcn_res(buffer);
 
@@ -652,7 +652,7 @@ int get_rclcn_postime_read(struct rclcn_res_buf *buffer, int *year, int *day,
   if(ierr!=0)
     return ierr;
 
-  ierr=get_rclcn_res_data(buffer,position,sizeof(long int));
+  ierr=get_rclcn_res_data(buffer,position,sizeof(int));
 
   return ierr;
 }
@@ -728,19 +728,19 @@ int get_rclcn_diag(struct rclcn_res_buf *buffer)
 {
   return get_rclcn_res(buffer);
 }
-int get_rclcn_berdcb(struct rclcn_res_buf *buffer,long int *err_bits,
-		     long int *tot_bits)
+int get_rclcn_berdcb(struct rclcn_res_buf *buffer,int *err_bits,
+		     int *tot_bits)
 {
   int ierr=get_rclcn_res(buffer);
 
   if(ierr!=0)
     return ierr;
 
-  ierr=get_rclcn_res_data(buffer,err_bits, sizeof(long int));
+  ierr=get_rclcn_res_data(buffer,err_bits, sizeof(int));
   if(ierr!=0)
     return ierr;
 
-  ierr=get_rclcn_res_data(buffer,tot_bits, sizeof(long int));
+  ierr=get_rclcn_res_data(buffer,tot_bits, sizeof(int));
 
   return ierr;
 }

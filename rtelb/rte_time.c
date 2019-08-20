@@ -16,7 +16,7 @@ int it[5],*it6;
 {
      struct tm *ptr;
      time_t clock;
-     long centisec;
+     int centisec;
 
      rte_rawt(&centisec);  /* retrieve the raw time */
 

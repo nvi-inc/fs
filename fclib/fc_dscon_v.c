@@ -1,7 +1,7 @@
 void fc_dscon_d__(device,ierr,ip)
 char device[2];
 int *ierr;
-long ip[5];
+int ip[5];
 {
     void dscon_d();
 
@@ -10,7 +10,7 @@ long ip[5];
 }
 void fc_dscon_v__(dtpi,ip)
 double *dtpi;
-long ip[5];
+int ip[5];
 {
     void dscon_v();
 

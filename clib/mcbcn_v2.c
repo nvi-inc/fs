@@ -22,7 +22,7 @@ void mcbcn_d2(device1, device2, ierr, ip)
 char device1[2],device2[2];             /* device mnemonics */
 int *ierr;                             /* error return, -1 if no such device */
                                        /*                0 okay              */
-long ip[5];
+int ip[5];
 {
     struct req_rec request1[2];
     struct req_buf buffer;
@@ -129,7 +129,7 @@ long ip[5];
 
 void mcbcn_v2(dtpi1,dtpi2,ip)
 double *dtpi1,*dtpi2;                      /* return counts */
-long ip[5];
+int ip[5];
 {
     struct req_buf buffer;
     struct res_buf buff_res;
@@ -166,7 +166,7 @@ long ip[5];
 }
 
 void mcbcn_r2(ip)
-long ip[5];
+int ip[5];
 {
     struct req_rec request1[2];
     struct req_buf buffer;

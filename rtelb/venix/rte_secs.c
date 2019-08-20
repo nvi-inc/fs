@@ -6,10 +6,10 @@
 
 void rte_rawt();
 
-long rte_secs()
+int rte_secs()
 {
      time_t clock1, clock2;
-     long centisec;
+     int centisec;
 
      clock1=0;
      centisec=1;

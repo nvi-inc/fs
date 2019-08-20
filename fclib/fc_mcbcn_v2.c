@@ -1,7 +1,7 @@
 void fc_mcbcn_d2__(device1,device2,ierr,ip)
 char device1[2],device2[2];
 int *ierr;
-long ip[5];
+int ip[5];
 {
     void mcbcn_d2();
 
@@ -10,7 +10,7 @@ long ip[5];
 }
 void fc_mcbcn_v2__(dtpi1,dtpi2,ip)
 double *dtpi1,*dtpi2;
-long ip[5];
+int ip[5];
 {
     void mcbcn_v2();
 
@@ -18,7 +18,7 @@ long ip[5];
     return;
 }
 void fc_mcbcn_r2__(ip)
-long ip[5];
+int ip[5];
 {
     void mcbcn_r2();
 

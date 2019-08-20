@@ -12,14 +12,14 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-long lba_tpi_from_level(unsigned short level);
+int lba_tpi_from_level(unsigned short level);
 
 static char ch[ ]={"123456789abcdef"};
 static char *lwhat[ ]={
 "p1","p2","p3","p4","p5","p6","p7","p8","p9","pa","pb","pc","pd","pe","pf"};
 
 void tpi_lba(ip,itpis_lba)                    /* sample tpi(s) */
-long ip[5];                                     /* ipc array */
+int ip[5];                                     /* ipc array */
 int itpis_lba[2*MAX_DAS]; /* detector selection array */
                       /* in order: ifp1...ifp16, value: 0=don't use, 1=use */
 {
@@ -45,7 +45,7 @@ int itpis_lba[2*MAX_DAS]; /* detector selection array */
 }
 
 void tpput_lba(ip,itpis_lba,isubin,ibuf,nch,ilen) /* put results of tpi */
-long ip[5];                                    /* ipc array */
+int ip[5];                                    /* ipc array */
 int itpis_lba[2*MAX_DAS]; /* device selection array, see tpi_lba for details */
 int isubin;                /* which task: 3=tpi, 4=tpical */
 char *ibuf;              /* out array, formatted results placed here */
@@ -54,7 +54,7 @@ int *nch;                /* next available char index in ibuf on entry */
 int ilen;                /* number of characters ibuf can hold, ignored */
 {
     struct ds_mon lclm;
-    long *ptr;
+    int *ptr;
     int i,j,iclass,nrec,lenstart,isub,ierr;
 
     isub=abs(isubin);
@@ -133,7 +133,7 @@ int ilen;                /* number of characters ibuf can hold, ignored */
 }
 
 void tsys_lba(ip,itpis_lba,ibuf,nch,itask)
-long ip[5];                                    /* ipc array */
+int ip[5];                                    /* ipc array */
 int itpis_lba[2*MAX_DAS]; /* device selection array, see tpi_lba for details */
 char *ibuf;              /* out array, formatted results placed here */
 int *nch;                /* next available char index in ibuf on entry */

@@ -13,7 +13,7 @@ void recchk_(icherr,ierr,indxtp,stat)
 int icherr[];
 int *ierr,*indxtp,*stat;
 {
-  long ip[5];                   /* ipc parameters */
+  int ip[5];                   /* ipc parameters */
   struct req_rec request;       /* mcbcn request record */
   struct req_buf buffer;        /* mcbcn request buffer */
   struct vst_cmd lcl;

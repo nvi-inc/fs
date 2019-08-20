@@ -11,7 +11,7 @@
 
 /* S2 diag SNAP command */
 
-void s2diag(struct cmd_ds *command , int itask , long *ip )
+void s2diag(struct cmd_ds *command , int itask , int *ip )
 {
  int   ierr, code;
  char *parm = 0;

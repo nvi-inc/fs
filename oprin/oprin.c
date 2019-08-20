@@ -48,14 +48,14 @@ extern struct fscom *shm_addr;
 /* External FS functions, perhaps these should eventually go into a '.h'? */
 extern void setup_ids(void);
 extern void sig_ignore(void);
-extern void cls_snd(long *class, char *buffer, int length, int parm3,
+extern void cls_snd(int *class, char *buffer, int length, int parm3,
                     int parm4);
-extern void skd_run(char name[5], char w, long ip[5]);
+extern void skd_run(char name[5], char w, int ip[5]);
 
 unsigned rte_sleep(unsigned);
 int nsem_test(char name[5]);
 
-static long ipr[5] = {0, 0, 0, 0, 0};
+static int ipr[5] = {0, 0, 0, 0, 0};
 
 /* Our prompt at the beginning of a line. */
 static char prompt[] = ">";

@@ -9,9 +9,9 @@
 
 extern struct fscom *shm_addr;
 
-extern void skd_run(char name[5], char w, long ip[5]);
+extern void skd_run(char name[5], char w, int ip[5]);
 
-static long ip[5] = { 0, 0, 0, 0, 0};
+static int ip[5] = { 0, 0, 0, 0, 0};
 
 #define MAX_BUF 512
 
@@ -82,7 +82,7 @@ main(int argc, char **argv)
 	printf("%s\n",buf);
     }
     if(ip[2]!=0) {
-      long class, ipf[5], rtn1f,rtn2f;
+      int class, ipf[5], rtn1f,rtn2f;
       char ibur[MAX_BUF];
       int iburl;
       if(ip[4]==0)

@@ -22,7 +22,7 @@ struct entrystruc{
 
 void hashcode(entry, hash)
 struct entrystruc *entry;
-long *hash;
+int *hash;
 
 {
   int i;

@@ -55,13 +55,13 @@ extern void logit(char* msg, int ierr, char* who);
  *  queue. I.e. after clearing an error, we issue another "status?" to check
  *  if more errors remain.
  */
-long mk5_status(command, itask, ip)
+int mk5_status(command, itask, ip)
     struct cmd_ds *command;                /* parsed command structure */
     int itask;                            /* sub-task (not used?) */
-    long ip[5];                           /* ipc parameters */
+    int ip[5];                           /* ipc parameters */
 {
     int                nch;
-    long               ierr, out_class = 0;  /* out_class init to 0 means "get next available" */
+    int               ierr, out_class = 0;  /* out_class init to 0 means "get next available" */
     char               buf[ 256 ];
     unsigned int       statusword, nmsg = 0;
     const unsigned int maxmsg_per_iter = 11; /* Send only a limited amount of messages per invocation
@@ -114,7 +114,7 @@ long mk5_status(command, itask, ip)
     /* Inform the caller about the number of messages and under which class
      * (== message ID) we sent them back */
     ip[ 0 ] = out_class;
-    ip[ 1 ] = (long)nmsg;
+    ip[ 1 ] = (int)nmsg;
     ip[ 2 ] = 0;
     return ip[ 2 ];
 }

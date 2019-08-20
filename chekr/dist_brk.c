@@ -11,7 +11,7 @@
 
 void dist_brk(imod,ip,icherr,ierr)
 int *imod;
-long ip[5];
+int ip[5];
 int icherr[5];
 int *ierr;
 {

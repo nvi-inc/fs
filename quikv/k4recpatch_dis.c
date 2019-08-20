@@ -14,7 +14,7 @@
 void k4recpatch_dis(command,lclc,ip)
 struct cmd_ds *command;
 struct k4recpatch_cmd *lclc;
-long ip[5];
+int ip[5];
 {
       int i, count, start_len;
       char output[MAX_OUT];

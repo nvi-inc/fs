@@ -10,7 +10,7 @@
 
 void set_k3aux(lauxfm,ip)
 char lauxfm[12];
-long ip[5];
+int ip[5];
 {
   char buffer[20];
   int i;

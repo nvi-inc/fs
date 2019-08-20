@@ -16,7 +16,7 @@ extern struct fscom *shm_addr;
 #define MAX_TEXT  1024
 
 struct  cls_buf {
-	long	mtype;
+	int	mtype;
         struct {
           int     parm[2];
           unsigned char    mtext[ MAX_TEXT];
@@ -25,7 +25,7 @@ struct  cls_buf {
 
 static int msqid;
 
-static long cls_alc_s();
+static int cls_alc_s();
 static int cls_chk();
 
 int cls_get( key, size)
@@ -59,7 +59,7 @@ void cls_ini( key)
 key_t key;
 {
 int	status, i;
-long    msgtype;
+int    msgtype;
 void    sem_take(),sem_put();
 struct  cls_buf msg;
 
@@ -99,7 +99,7 @@ key_t key;
 }
 
 void cls_snd( class, buffer, length , parm3, parm4)
-long    *class;		/* message queue id in which to place buffer */
+int    *class;		/* message queue id in which to place buffer */
 char	*buffer;	/* contains message for process */
 int	length;	/* length of buffer in bytes */
 int     parm3;
@@ -108,7 +108,7 @@ int     parm4;
 int	status, i;
 size_t  nchars;
 struct  cls_buf msg;
-long    msgtype;
+int    msgtype;
 char    *s1;
 void sem_take(), sem_put();
 
@@ -142,9 +142,9 @@ if ( status == -1 ) {
 }
 }
 
-long cls_alc()
+int cls_alc()
 {
-long    class;
+int    class;
 void    sem_take(), sem_put();
 
 sem_take( SEM_CLS);
@@ -152,10 +152,10 @@ class=cls_alc_s();
 sem_put( SEM_CLS);
 return( class);
 }
-static long cls_alc_s()
+static int cls_alc_s()
 {
 int	i;
-long    class;
+int    class;
 int    imod;
 
   class=0;
@@ -187,7 +187,7 @@ int    imod;
 
 int cls_rcv( class, buffer, length, rtn1, rtn2, msgflg, save)
 int	length, *rtn1, *rtn2, msgflg, save;
-long	class;
+int	class;
 char	*buffer;
 {
 int     nchars, sb, sc, nw;
@@ -265,7 +265,7 @@ copy:
 }
 
 void cls_clr( class)
-long    class;
+int    class;
 {
 struct  cls_buf msg;
 void sem_take(), sem_put();
@@ -306,7 +306,7 @@ if(-1==msgctl( msqid, IPC_RMID, NULL )) {
 }
 
 static int cls_chk( class, action, save)
-long class;
+int class;
 int action, save;
 {
 

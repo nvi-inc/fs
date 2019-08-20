@@ -127,7 +127,7 @@ const char* strapp5(const char* a, const char* b, const char* c,
    return(result);
 }
 
-long int str_to_int(const char* a)
+int str_to_int(const char* a)
 /*
  * This function converts a string to integer format, returning the resulting
  * integer. The string must be interpretable as an integer by sscanf,
@@ -140,14 +140,14 @@ long int str_to_int(const char* a)
  */
 {
    int err;
-   long int result;
+   int result;
 
    if (strneq(a,"0x",2))
-      err=sscanf((char*) a+2,"%lx",&result);  /* (cast: sscanf defined wrong) */
+      err=sscanf((char*) a+2,"%x",&result);  /* (cast: sscanf defined wrong) */
    else if (strneq(a,"$",1))
-      err=sscanf((char*) a+1,"%lx",&result);
+      err=sscanf((char*) a+1,"%x",&result);
    else
-      err=sscanf((char*) a,"%ld",&result);
+      err=sscanf((char*) a,"%d",&result);
    if (err!=1)  {
       printf("Warning --- bad str_to_int conversion of %s\n",a);
       return(0);
@@ -156,7 +156,7 @@ long int str_to_int(const char* a)
    return(result);
 }
 
-const char* int_to_str(long int a, int f)
+const char* int_to_str(int a, int f)
 /*
  * Keywords: FS, lib, misc
  * Imports: sprintf()
@@ -182,9 +182,9 @@ const char* int_to_str(long int a, int f)
       space=f;
    result=(char*)malloc2(space+2);
    if (f>=0)
-      sprintf(result,"%*ld",f,a);
+      sprintf(result,"%*d",f,a);
    else
-      sprintf(result,"%0*ld",-f,a);
+      sprintf(result,"%0*d",-f,a);
    return(result);
 }
 
@@ -198,14 +198,14 @@ double str_to_double(const char* a)
 {
    int err;
    double result;
-   long int iresult;
+   int iresult;
 
    if (strneq(a,"0x",2))  {
-      err=sscanf((char*) a+2,"%lx",&iresult); /* (cast: sscanf defined wrong) */
+      err=sscanf((char*) a+2,"%x",&iresult); /* (cast: sscanf defined wrong) */
       result=iresult;
    }
    else if (strneq(a,"$",1))  {
-      err=sscanf((char*) a+1,"%lx",&iresult);
+      err=sscanf((char*) a+1,"%x",&iresult);
       result=iresult;
    }
    else  {
@@ -459,8 +459,8 @@ void malloc_out_of_space(char* routine, int code)
 #ifdef UNIX
 /* Provide replacement routines for some of the things in the DOS Borland C++
      console I/O library for Unix, using curses instead. */
-int cprintf(const char* format, long int arg1, long int arg2, long int arg3,
-                                long int arg4, long int arg5, long int arg6)
+int cprintf(const char* format, int arg1, int arg2, int arg3,
+                                int arg4, int arg5, int arg6)
 {
    int result;
 

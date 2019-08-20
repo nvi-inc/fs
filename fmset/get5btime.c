@@ -9,7 +9,7 @@
 
 #include "fmset.h"
 
-extern long ip[5];           /* parameters for fs communications */
+extern int ip[5];           /* parameters for fs communications */
 extern int synch;
 extern int rack, rack_type;
 extern int m5b_crate;
@@ -28,7 +28,7 @@ time_t *fstime; /* field system time */
 int    *fshs;
 time_t *formtime; /* formatter time received from mcbcn */
 int    *formhs;
-long *raw;
+int *raw;
 char *m5sync;
 int sz_m5sync;
 char *m5pps;
@@ -39,12 +39,12 @@ char *m5clock;
 int sz_m5clock;
 int *ierr;
 {
-	long centisec[6], centiavg, centidiff, hsdiff;
+	int centisec[6], centiavg, centidiff, hsdiff;
         int it[6];
 	char *name;
 	char *str;
 	int out_recs;
-	long out_class;
+	int out_class;
 	char buff[80];
 
 	if(synch) {

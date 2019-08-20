@@ -191,7 +191,7 @@ mout3()
 
       for (i=1;i<=MAX_BBC;i++) {
 	if(shm_addr->equip.rack == VLBA || shm_addr->equip.rack == VLBA4) {
-	  long bbc2freq(),freqv;
+	  int bbc2freq(),freqv;
 	  if(MAX_VLBA_BBC < i)
 	    continue;
 	  freqv=bbc2freq(shm_addr->bbc[i-1].freq);

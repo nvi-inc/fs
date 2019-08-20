@@ -193,7 +193,7 @@ struct k4rec_mode_cmd *lclc;
 }
 
 k4rec_mode_req_q(ip)
-long ip[5];
+int ip[5];
 {
  ib_req7(ip,device,16,"SPM?");
  ib_req7(ip,device,16,"FMT?");
@@ -202,7 +202,7 @@ long ip[5];
 }
 
 k4rec_mode_req_c(ip,lclc)
-long ip[5];
+int ip[5];
 struct k4rec_mode_cmd *lclc;
 {
   char buffer[MAX_BUF];
@@ -226,7 +226,7 @@ struct k4rec_mode_cmd *lclc;
 k4rec_mode_res_q(lclc,lclm,ip)
 struct k4rec_mode_cmd *lclc;
 struct k4rec_mode_mon *lclm;
-long ip[5];
+int ip[5];
 {
   char buffer[MAX_BUF],*ptr;
   int max,i;

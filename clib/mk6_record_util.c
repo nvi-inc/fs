@@ -216,7 +216,7 @@ m6_2_mk6_record(ptr_in,lclc,lclm,ip,who) /* return values:
 
      struct mk6_record_cmd *lclc;  /* result structure with parameters */
      struct mk6_record_mon *lclm;  /* result structure with parameters */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
      char *who;
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
@@ -265,7 +265,7 @@ m6_2_mk6_record(ptr_in,lclc,lclm,ip,who) /* return values:
 	}
 	break;
       case 2:
-	if(m5sscanf(ptr,"%ld",&lclm->scan.scan,&lclm->scan.state)) {
+	if(m5sscanf(ptr,"%d",&lclm->scan.scan,&lclm->scan.state)) {
 	  ierr=-502;
 	  goto error2;
 	}

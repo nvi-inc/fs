@@ -16,7 +16,7 @@ static char device[]={"r1"};           /* device menemonics */
 void s2label(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, ichold, i, count;
       int verr, iset;

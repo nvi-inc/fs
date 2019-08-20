@@ -12,10 +12,10 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-long lba_tpi_from_level(unsigned short level);
+int lba_tpi_from_level(unsigned short level);
 
 int tpget_lba(ip,itpis_lba,ierr,tpi) /* get results of tpi */
-long ip[5];                                    /* ipc array */
+int ip[5];                                    /* ipc array */
 int itpis_lba[2*MAX_DAS]; /* device selection array, see tpi_lba for details */
 int *ierr;
 float tpi[2*MAX_DAS]; /* detector value array */

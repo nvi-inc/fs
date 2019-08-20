@@ -11,11 +11,11 @@
 
 void rte_fixt( poClock, plCentiSec)
 time_t *poClock;
-long *plCentiSec;
+int *plCentiSec;
 {
      if(shm_addr->time.model != 'n') {
      	int iIndex;
-     	long lEpoch, lAddHs;
+     	int lEpoch, lAddHs;
 
         iIndex = 01 & shm_addr->time.index;
 	lAddHs = shm_addr->time.offset[iIndex];

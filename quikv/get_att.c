@@ -22,8 +22,8 @@ char *isave3
   short int buff[MAX_BUF];
   int ierr=0, nrec, i, j, isave2[6];
   int nchar,idum;
-  long ip[5];
-  long iclass;
+  int ip[5];
+  int iclass;
 
   /* okay get the IF attenuation */
   if(patched_ifs[0]>0 || patched_ifs[1]>0) {

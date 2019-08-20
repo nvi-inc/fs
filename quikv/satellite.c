@@ -17,7 +17,7 @@
 void satellite(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, count;
       char *ptr;
@@ -27,7 +27,7 @@ long ip[5];                           /* ipc parameters */
 		   +sizeof(FS_ROOT)];
       FILE *fd,*fdqth, *fdtle;
       int id, idqth, idtle, iret, i, it[6], idinyr;
-      long seconds;
+      int seconds;
       char tempname[30],qthfile[30];
       char tle0[75], tle1[75],tle2[75], name[25], *pret;
       double azcmd,elcmd;
@@ -218,7 +218,7 @@ parse:
       }
 
       snprintf(buff,sizeof(buff),
-	       "predict -t %s -q %s -f '%s' %ld +%d -o %s >/dev/null",
+	       "predict -t %s -q %s -f '%s' %d +%d -o %s >/dev/null",
 	       tlefile,qthfile,lcl.name,seconds,MAX_EPHEM-1,tempname);
 
       ierr=system(buff);
@@ -261,7 +261,7 @@ parse:
       }
 	
       for (i=0;i<MAX_EPHEM;i++) {
-	iret=fscanf(fd,"%ld%*21c %lf %lf%*[^\n]%*c",
+	iret=fscanf(fd,"%d%*21c %lf %lf%*[^\n]%*c",
 		    &shm_addr->ephem[i].t,
 		    &shm_addr->ephem[i].el,
 		    &shm_addr->ephem[i].az);

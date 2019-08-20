@@ -1,5 +1,5 @@
 void fc_tpi_dbbc3__(ip,itpis_dbbc3)
-long ip[5];
+int ip[5];
 int *itpis_dbbc3;
 {
     void tpi_dbbc3();
@@ -10,7 +10,7 @@ int *itpis_dbbc3;
 }
     
 void fc_tpput_dbbc3__(ip,itpis_dbbc3,isub,ibuf,nch,ilen)
-long ip[5];
+int ip[5];
 int *itpis_dbbc3;
 int *isub;
 char *ibuf;
@@ -25,7 +25,7 @@ int *ilen;
 }
 
 void fc_tsys_dbbc3__(ip,itpis_dbbc3,ibuf,nch,itask)
-long ip[5];
+int ip[5];
 int *itpis_dbbc3;
 char *ibuf;
 int *nch;

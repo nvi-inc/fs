@@ -14,7 +14,7 @@
 void k3fm_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
   struct k3fm_cmd lclc;
   struct k3fm_cmd lclm;

@@ -846,7 +846,7 @@ int rcl_tapeinfo_read_pb(int addr, unsigned char* table)
    return(RCL_ERR_NONE);
 }
 
-int rcl_delay_set(int addr, ibool relative, long int nanosec)
+int rcl_delay_set(int addr, ibool relative, int nanosec)
 /*
  * Sets the S2 station delay in absolute or relative terms. This can be
  * used to implement clock offsets or corrections during record and 
@@ -875,7 +875,7 @@ int rcl_delay_set(int addr, ibool relative, long int nanosec)
    return(err);
 }
 
-int rcl_delay_read(int addr, long int* nanosec)
+int rcl_delay_read(int addr, int* nanosec)
 /*
  * Reads the S2 station delay setting from the last rcl_delay_set() call.
  * This is not necessarily the same as the station delay measurement returned
@@ -905,13 +905,13 @@ int rcl_delay_read(int addr, long int* nanosec)
 
    /* Assemble bytes to make long int. Note: parm[] must be unsigned for
         following to work */
-   *nanosec=((long int)parm[0]<<24) | ((long int)parm[1]<<16)
-             | ((long int)parm[2]<<8) | (long int)parm[3];
+   *nanosec=((int)parm[0]<<24) | ((int)parm[1]<<16)
+             | ((int)parm[2]<<8) | (int)parm[3];
 
    return(RCL_ERR_NONE);
 }
 
-int rcl_delaym_read(int addr, long int* nanosec)
+int rcl_delaym_read(int addr, int* nanosec)
 /*
  * Reads the current S2 station delay measurement.
  * 'nanosec' returns the signed delay measurement in nanoseconds. Possible
@@ -940,8 +940,8 @@ int rcl_delaym_read(int addr, long int* nanosec)
 
    /* Assemble bytes to make long int. Note: parm[] must be unsigned for
         following to work */
-   *nanosec=((long int)parm[0]<<24) | ((long int)parm[1]<<16)
-             | ((long int)parm[2]<<8) | (long int)parm[3];
+   *nanosec=((int)parm[0]<<24) | ((int)parm[1]<<16)
+             | ((int)parm[2]<<8) | (int)parm[3];
 
    return(RCL_ERR_NONE);
 }
@@ -996,7 +996,7 @@ int rcl_barrelroll_read(int addr, ibool* barrelroll)
    return(RCL_ERR_NONE);
 }
 
-int rcl_errmes(int addr, long int error)
+int rcl_errmes(int addr, int error)
 /*
  * This command is used to synchronize the S2 recorder's playback rate
  * when the system-clock PLL is in errmes mode. 'error' indicates the
@@ -1031,7 +1031,7 @@ int rcl_errmes(int addr, long int error)
 }
 
 int rcl_align_abs(int addr, int year, int day, int hour, int min, int sec,
-                  long int nanosec)
+                  int nanosec)
 /*
  * Performs absolute playback tape alignment. Works by slewing the transports
  * and (if necessary) adjusting the station delay setting. Do not use this
@@ -1082,7 +1082,7 @@ int rcl_align_abs(int addr, int year, int day, int hour, int min, int sec,
 }
 
 int rcl_align_rel(int addr, ibool negative, int hour, int min, int sec,
-                  long int nanosec)
+                  int nanosec)
 /*
  * Performs relative playback tape alignment. Works by slewing the transports
  * and (if necessary) adjusting the station delay setting. Do not use this
@@ -1174,7 +1174,7 @@ int rcl_align_selfalign(int addr)
    return(err);
 }
 
-int rcl_position_set(int addr, int code, long int position)
+int rcl_position_set(int addr, int code, int position)
 /*
  * Initiates tape positioning on all currently selected transports.
  * The same position value is used for all transports. Use rcl_state_read()
@@ -1212,7 +1212,7 @@ int rcl_position_set(int addr, int code, long int position)
    return(err);
 }
 
-int rcl_position_set_ind(int addr, int code, long int position[])
+int rcl_position_set_ind(int addr, int code, int position[])
 /*
  * Initiates tape positioning on currently selected transports. Individual
  * position values may be specified for each transport. The desired position
@@ -1284,7 +1284,7 @@ int rcl_position_reestablish(int addr)
    return(err);
 }
 
-int rcl_position_read(int addr, long int* position, long int* posvar)
+int rcl_position_read(int addr, int* position, int* posvar)
 /*
  * Reads the current overall tape position, which is defined as the mid-point
  * of the individual transport tape positions. Only the transports selected
@@ -1334,20 +1334,20 @@ int rcl_position_read(int addr, long int* position, long int* posvar)
    if (rdata[0]!=0)
       return(RCL_ERR_PKTFORMAT);
 
-   *position=((long int)rdata[1]<<24)
-              | ((long int)rdata[2]<<16)
-              | ((long int)rdata[3]<<8)
-              | (long int)rdata[4];
+   *position=((int)rdata[1]<<24)
+              | ((int)rdata[2]<<16)
+              | ((int)rdata[3]<<8)
+              | (int)rdata[4];
 
-   *posvar=  ((long int)rdata[5]<<24)
-              | ((long int)rdata[6]<<16)
-              | ((long int)rdata[7]<<8)
-              | (long int)rdata[8];
+   *posvar=  ((int)rdata[5]<<24)
+              | ((int)rdata[6]<<16)
+              | ((int)rdata[7]<<8)
+              | (int)rdata[8];
 
    return(RCL_ERR_NONE);
 }
 
-int rcl_position_read_ind(int addr, int* num_entries, long int position[])
+int rcl_position_read_ind(int addr, int* num_entries, int position[])
 /*
  * Reads the current tape position of all 8 individual transports.
  * 'num_entries' returns the number of entries in the list, always 8.
@@ -1389,10 +1389,10 @@ int rcl_position_read_ind(int addr, int* num_entries, long int position[])
    *num_entries=rdata[1];
 
    for (tran=0; tran<*num_entries; tran++)  {
-      position[tran]=((long int)rdata[tran*4+2]<<24)
-                       | ((long int)rdata[tran*4+3]<<16)
-                       | ((long int)rdata[tran*4+4]<<8)
-                       | (long int)rdata[tran*4+5];
+      position[tran]=((int)rdata[tran*4+2]<<24)
+                       | ((int)rdata[tran*4+3]<<16)
+                       | ((int)rdata[tran*4+4]<<8)
+                       | (int)rdata[tran*4+5];
    }
 
    return(RCL_ERR_NONE);
@@ -1637,10 +1637,10 @@ int rcl_mk3_form_read(int addr, ibool* mk3)
 
 int rcl_transport_times(int addr, int* num_entries,
                         unsigned short serial[],
-                        unsigned long tot_on_time[],
-                        unsigned long tot_head_time[],
-                        unsigned long head_use_time[],
-                        unsigned long in_service_time[])
+                        unsigned int tot_on_time[],
+                        unsigned int tot_head_time[],
+                        unsigned int head_use_time[],
+                        unsigned int in_service_time[])
 /*
  * Reads all 8 transports' total head-use time, total
  * power-on time, last service time and last head-change time.
@@ -1693,28 +1693,28 @@ int rcl_transport_times(int addr, int* num_entries,
    for (tran=0; tran<*num_entries; tran++)  {
       serial[tran]=((unsigned short)rdata[tran*spacing+1]<<8)
                       | (unsigned short)rdata[tran*spacing+2];
-      tot_on_time[tran]=((unsigned long)rdata[tran*spacing+3]<<24)
-                      | ((unsigned long)rdata[tran*spacing+4]<<16)
-                      | ((unsigned long)rdata[tran*spacing+5]<<8)
-                      | (unsigned long)rdata[tran*spacing+6];
-      tot_head_time[tran]=((unsigned long)rdata[tran*spacing+7]<<24)
-                      | ((unsigned long)rdata[tran*spacing+8]<<16)
-                      | ((unsigned long)rdata[tran*spacing+9]<<8)
-                      | (unsigned long)rdata[tran*spacing+10];
-      head_use_time[tran]=((unsigned long)rdata[tran*spacing+11]<<24)
-                      | ((unsigned long)rdata[tran*spacing+12]<<16)
-                      | ((unsigned long)rdata[tran*spacing+13]<<8)
-                      | (unsigned long)rdata[tran*spacing+14];
-      in_service_time[tran]=((unsigned long)rdata[tran*spacing+15]<<24)
-                      | ((unsigned long)rdata[tran*spacing+16]<<16)
-                      | ((unsigned long)rdata[tran*spacing+17]<<8)
-                      | (unsigned long)rdata[tran*spacing+18];
+      tot_on_time[tran]=((unsigned int)rdata[tran*spacing+3]<<24)
+                      | ((unsigned int)rdata[tran*spacing+4]<<16)
+                      | ((unsigned int)rdata[tran*spacing+5]<<8)
+                      | (unsigned int)rdata[tran*spacing+6];
+      tot_head_time[tran]=((unsigned int)rdata[tran*spacing+7]<<24)
+                      | ((unsigned int)rdata[tran*spacing+8]<<16)
+                      | ((unsigned int)rdata[tran*spacing+9]<<8)
+                      | (unsigned int)rdata[tran*spacing+10];
+      head_use_time[tran]=((unsigned int)rdata[tran*spacing+11]<<24)
+                      | ((unsigned int)rdata[tran*spacing+12]<<16)
+                      | ((unsigned int)rdata[tran*spacing+13]<<8)
+                      | (unsigned int)rdata[tran*spacing+14];
+      in_service_time[tran]=((unsigned int)rdata[tran*spacing+15]<<24)
+                      | ((unsigned int)rdata[tran*spacing+16]<<16)
+                      | ((unsigned int)rdata[tran*spacing+17]<<8)
+                      | (unsigned int)rdata[tran*spacing+18];
    }
 
    return(RCL_ERR_NONE);
 }
 
-int rcl_station_info_read(int addr, int* station, long int* serialnum,
+int rcl_station_info_read(int addr, int* station, int* serialnum,
                           char* nickname)
 /*
  * Reads S2 station-related information: station number, system serial
@@ -1742,8 +1742,8 @@ int rcl_station_info_read(int addr, int* station, long int* serialnum,
       return(RCL_ERR_PKTUNEX);
 
    *station=(int)rdata[0];
-   *serialnum=((long int)rdata[1]<<8)
-              | (long int)rdata[2];
+   *serialnum=((int)rdata[1]<<8)
+              | (int)rdata[2];
    strncpy(nickname,(char*)(rdata+3),RCL_MAXSTRLEN_NICKNAME);
 
    return(RCL_ERR_NONE);
@@ -1782,7 +1782,7 @@ int rcl_consolecmd(int addr, const char* command)
 }
 
 int rcl_postime_read(int addr, int tran, int* year, int* day, int* hour,
-                     int* min, int* sec, int* frame, long int* position)
+                     int* min, int* sec, int* frame, int* position)
 /*
  * **This command is for SGL internal use when running tests to check and
  * calibrate the internal transport positioning software. It is not documented
@@ -1841,10 +1841,10 @@ int rcl_postime_read(int addr, int tran, int* year, int* day, int* hour,
    *sec=parm[6];
    *frame=parm[7];
 
-   *position=((long int)parm[8]<<24)
-              | ((long int)parm[9]<<16)
-              | ((long int)parm[10]<<8)
-              | (long int)parm[11];
+   *position=((int)parm[8]<<24)
+              | ((int)parm[9]<<16)
+              | ((int)parm[10]<<8)
+              | (int)parm[11];
 
    return(RCL_ERR_NONE);
 }
@@ -2095,7 +2095,7 @@ int rcl_diag(int addr, int type)
 }
 
 int rcl_berdcb(int addr, int op_type, int chan, int meas_time,
-               unsigned long* err_bits, unsigned long* tot_bits)
+               unsigned int* err_bits, unsigned int* tot_bits)
 /*
  * Performs one of 3 types of statistical measurements on
  * a given data channel: Formatter bit-error rate, UI bit-error rate, and
@@ -2164,15 +2164,15 @@ int rcl_berdcb(int addr, int op_type, int chan, int meas_time,
    if (resp_length!=8)
       return(RCL_ERR_PKTLEN);
 
-   *err_bits=((long int)rdata[0]<<24)
-              | ((long int)rdata[1]<<16)
-              | ((long int)rdata[2]<<8)
-              | (long int)rdata[3];
+   *err_bits=((int)rdata[0]<<24)
+              | ((int)rdata[1]<<16)
+              | ((int)rdata[2]<<8)
+              | (int)rdata[3];
 
-   *tot_bits=  ((long int)rdata[4]<<24)
-              | ((long int)rdata[5]<<16)
-              | ((long int)rdata[6]<<8)
-              | (long int)rdata[7];
+   *tot_bits=  ((int)rdata[4]<<24)
+              | ((int)rdata[5]<<16)
+              | ((int)rdata[6]<<8)
+              | (int)rdata[7];
 
    return(RCL_ERR_NONE);
 }

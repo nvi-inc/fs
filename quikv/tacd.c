@@ -35,7 +35,7 @@ char *cmd[5] = {"$PCNSL,TICLOG,STATUS\r\n",       /* TAC filename and status */
 void tacd(command,itask,ip)
 struct cmd_ds *command;                /* command structure */
 int itask;
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
   /*
    * Local variables

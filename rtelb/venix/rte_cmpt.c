@@ -11,7 +11,7 @@
 
 void rte_cmpt( poClock, plCentiSec)
 time_t *poClock;
-long *plCentiSec;
+int *plCentiSec;
 {
 
     *poClock = (*plCentiSec/100) + shm_addr->time.secs_off;

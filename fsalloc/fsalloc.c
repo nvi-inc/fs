@@ -22,7 +22,7 @@ main()
     int size, nsems, shm_id, sem_id, cls_id, skd_id, brk_id;
     key_t key;
     void shm_att();
-    long rte_secs();
+    int rte_secs();
 
     key = SHM_KEY;
     size = SHM_SIZE;

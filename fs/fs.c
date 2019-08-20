@@ -40,7 +40,7 @@
 /* rdg  010529  Interchange of 'n' for nowait and 'w' for wait      */
 /*              status for consistency.                             */
 
-long cls_alc();
+int cls_alc();
 void shm_att(),sem_att(),cls_ini(),brk_ini();
 int parse();
 char *fgets();
@@ -53,7 +53,7 @@ void skd_ini(int);
 static int npids, pids[ MAX_PIDS], ipids;
 static char p_names[MAX_PIDS][6];
 extern struct fscom *shm_addr;
-static long ip[]={0,0,0,0,0};
+static int ip[]={0,0,0,0,0};
 
 
 void start_server() {
@@ -228,7 +228,7 @@ main(int argc_in,char *argv_in[])
 
     if(100!=sysconf(_SC_CLK_TCK)) {
       printf("sysconf(_SC_CLK_TCK) not equal to 100 on this system,");
-      printf(" measured value is %ld.\nFS can't run, aborting.\n",
+      printf(" measured value is %d.\nFS can't run, aborting.\n",
 	      sysconf(_SC_CLK_TCK));
 	exit(-1);
     }

@@ -172,7 +172,7 @@ int *ierr;
 	  if(ifchain<1||ifchain>4)
 	    ifchain=0;
 	  if(ifchain!=0) {
-	    long bbc2freq();
+	    int bbc2freq();
 	    float freq, bbcbw;
 	    
 	    freq=bbc2freq(shm_addr->bbc[i%MAX_BBC].freq)/100.0;

@@ -588,7 +588,7 @@ int execute(const char* command)
       int day;
       int s2ser;
       int tcpser;
-      long int delay;                           /* station delay in ns */
+      int delay;                           /* station delay in ns */
 
       err=rcl_tapeinfo_read_pb(S2Addr,table);
       if (err!=RCL_ERR_NONE)  {
@@ -673,14 +673,14 @@ int execute(const char* command)
 
             /* print station delay in nanoseconds; assemble bytes to make 
                  long int. Note: table[] must be unsigned for this to work. */
-            delay=((long int)table[offset+48]<<24)
-                   | ((long int)table[offset+49]<<16)
-                   | ((long int)table[offset+50]<<8)
-                   | (long int)table[offset+51];
+            delay=((int)table[offset+48]<<24)
+                   | ((int)table[offset+49]<<16)
+                   | ((int)table[offset+50]<<8)
+                   | (int)table[offset+51];
             if (delay==0x7fffffffL)
                printf("  unknown ");
             else
-               printf("%10ld", delay);
+               printf("%10d", delay);
 
             /* we end up exactly on next line, so no need for \n */
          }
@@ -691,7 +691,7 @@ int execute(const char* command)
 
    case CMD_DELAY_SET:
    {
-      long nanosec;
+      int nanosec;
 
       nextparm(command,parm,&pos,PARM_DELIM);
       nanosec=str_to_int(parm);
@@ -709,7 +709,7 @@ int execute(const char* command)
 
    case CMD_DELAY_READ:
    {
-      long int nanosec;
+      int nanosec;
 
       err=rcl_delay_read(S2Addr,&nanosec);
       if (err!=RCL_ERR_NONE)  {
@@ -717,14 +717,14 @@ int execute(const char* command)
          return(err);
       }
 
-      printf("Current station delay setting is %ld ns\n",nanosec);
+      printf("Current station delay setting is %d ns\n",nanosec);
 
       return(ERR_NONE);
    }
 
    case CMD_DELAYM_READ:
    {
-      long int nanosec;
+      int nanosec;
 
       err=rcl_delaym_read(S2Addr,&nanosec);
       if (err!=RCL_ERR_NONE)  {
@@ -732,7 +732,7 @@ int execute(const char* command)
          return(err);
       }
 
-      printf("Current station delay measurement is %ld ns\n",nanosec);
+      printf("Current station delay measurement is %d ns\n",nanosec);
 
       return(ERR_NONE);
    }
@@ -770,8 +770,8 @@ int execute(const char* command)
 
    case CMD_ERRMES:
    {
-      long int error;
-      long int nanosec;
+      int error;
+      int nanosec;
       int chanrate;
       ibool async;
       int reprate;        /* in ms */
@@ -849,7 +849,7 @@ int execute(const char* command)
 
                if (!async)
                   printf("*[%02d] ",dumsec);
-               printf("Sending ERRMES %ld\n",error);
+               printf("Sending ERRMES %d\n",error);
                err=rcl_errmes(S2Addr,error);
                if (err!=RCL_ERR_NONE)  {
                   printf("*rcl_errmes(): ");
@@ -920,7 +920,7 @@ int execute(const char* command)
       int hour;
       int min;
       int sec;
-      long int nanosec;
+      int nanosec;
 
       nextparm(command,parm,&pos,PARM_DELIM);
 
@@ -999,8 +999,8 @@ int execute(const char* command)
       int hour;
       int min;
       int sec;
-      long int position;
-      long int posarray[8]; /* individual position array */
+      int position;
+      int posarray[8]; /* individual position array */
 
       nextparm(command,parm,&pos," :");
 
@@ -1074,9 +1074,9 @@ int execute(const char* command)
       int min;
       int sec;
       ibool negative;        /* TRUE if position is (was) negative */
-      long int position;    /* overall position holder */
-      long int posvar;      /* overall position variance holder */
-      long int posarray[8]; /* individual position array */
+      int position;    /* overall position holder */
+      int posvar;      /* overall position variance holder */
+      int posarray[8]; /* individual position array */
       int pos_n;            /* number of entries filled in above */
 
       nextparm(command,parm,&pos,PARM_DELIM);
@@ -1145,7 +1145,7 @@ int execute(const char* command)
    
          if (posvar<60)  {
            /* show variance as 00 s */
-            printf("%02ld s\n",posvar);
+            printf("%02d s\n",posvar);
          }
          else  {
            /* show variance as 0h00 (00 s) */
@@ -1317,10 +1317,10 @@ int execute(const char* command)
    {
       int tran;                 /* transport loop index */
       unsigned short serial[8]; /* serial numbers */
-      unsigned long tot_on_time[8];
-      unsigned long tot_head_time[8];
-      unsigned long head_use_time[8];
-      unsigned long in_service_time[8];
+      unsigned int tot_on_time[8];
+      unsigned int tot_head_time[8];
+      unsigned int head_use_time[8];
+      unsigned int in_service_time[8];
       int time_n;               /* number of entries filled in above */
 
       nextparm(command,parm,&pos,PARM_DELIM);
@@ -1337,11 +1337,11 @@ int execute(const char* command)
 
       for (tran=0; tran<time_n; tran++)  {
          /* this doesn't work unless we do it in two pieces for some reason! */
-         printf(" %2d %7u  %7luh %02lum  %7luh %02lum",
+         printf(" %2d %7u  %7uh %02um  %7uh %02um",
                 tran, serial[tran],
                 tot_on_time[tran]/60, tot_on_time[tran] % 60,
                 tot_head_time[tran]/60, tot_head_time[tran] % 60);
-         printf(" %8luh %02lum  %9luh %02lum\n",
+         printf(" %8uh %02um  %9uh %02um\n",
                 head_use_time[tran]/60, head_use_time[tran] % 60,
                 in_service_time[tran]/60, in_service_time[tran] % 60);
       }
@@ -1352,7 +1352,7 @@ int execute(const char* command)
    case CMD_STATION_INFO_READ:
    {
       int station;
-      long int serialnum;
+      int serialnum;
       char nickname[RCL_MAXSTRLEN_NICKNAME];
 
       err=rcl_station_info_read(S2Addr,&station,&serialnum,nickname);
@@ -1364,7 +1364,7 @@ int execute(const char* command)
       printf("Info for S2 at %s address %d:\n\n",
                          (RclSocketCnt>0 ? "reference" : "RCL"), S2Addr);
       printf("   S2 station #: %d\n",station);
-      printf("System serial #: %ld\n",serialnum);
+      printf("System serial #: %d\n",serialnum);
       printf("       Nickname: \"%s\"\n",nickname);
 
       return(ERR_NONE);
@@ -1392,7 +1392,7 @@ int execute(const char* command)
       int min;
       int sec;
       int frame;
-      long int position;    /* position holder */
+      int position;    /* position holder */
       ibool negative;        /* TRUE if position is (was) negative */
       int phour;
       int pmin;
@@ -1639,8 +1639,8 @@ int execute(const char* command)
       int op_type;
       int chan;
       int meas_time;
-      unsigned long err_bits;
-      unsigned long tot_bits;
+      unsigned int err_bits;
+      unsigned int tot_bits;
 
       nextparm(command,parm,&pos,PARM_DELIM);
       if (streq(parm,"formber"))
@@ -1674,19 +1674,19 @@ int execute(const char* command)
       case 1:
          printf("Results of %d-second FORM BER measurement on channel %d:\n",
                 meas_time, chan);
-         printf("Raw error count: %lu  (out of %lu bits)\n",err_bits,tot_bits);
+         printf("Raw error count: %u  (out of %u bits)\n",err_bits,tot_bits);
          printf("     Error rate: %.2e\n",(float)err_bits/tot_bits);
          break;
       case 2:
          printf("Results of %d-second UI BER measurement on user channel %d:\n",
                 meas_time, chan);
-         printf("Raw error count: %lu  (out of %lu bits)\n",err_bits,tot_bits);
+         printf("Raw error count: %u  (out of %u bits)\n",err_bits,tot_bits);
          printf("     Error rate: %.2e\n",(float)err_bits/tot_bits);
          break;
       case 3:
          printf("Results of %d-second UI DC-bias measurement on user channel %d:\n",
                 meas_time, chan);
-         printf("Raw 1-bit count: %lu  (out of %lu bits)\n",err_bits,tot_bits);
+         printf("Raw 1-bit count: %u  (out of %u bits)\n",err_bits,tot_bits);
          printf("        DC bias: %4.1f%%\n",(float)err_bits*100/tot_bits);
          break;
       }

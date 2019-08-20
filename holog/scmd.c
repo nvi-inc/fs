@@ -14,7 +14,7 @@ extern struct fscom *shm_addr;
 void scmd(mess)
      char *mess;
 {
-  long ip[5];
+  int ip[5];
 
   cls_snd( &(shm_addr->iclopr), mess, strlen(mess) , 0, 0);
   skd_run("boss ",'n',ip);

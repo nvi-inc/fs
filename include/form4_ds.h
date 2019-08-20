@@ -3,7 +3,7 @@
 struct form4_cmd {
   int mode;         /* MK3 mode 0=m,a,b1,b2,c1,c2,d1,...d28 */
   int rate;         /* (1<<rate)*0.125 MHz, 0<=rate<=8 */
-  unsigned long enable[2]; /*track enables 1=enable, 0=off */
+  unsigned int enable[2]; /*track enables 1=enable, 0=off */
   unsigned aux[2];   /* aux data */
   int codes[64];     /* sampler pin codes for output tracks */
   int bits;          /* 1 or 2 for number of bits being used */

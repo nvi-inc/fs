@@ -12,7 +12,7 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
 void rwff_v(ip,isub,ierr)
-long ip[5];
+int ip[5];
 int *isub;
 int *ierr;
 {

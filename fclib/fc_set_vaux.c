@@ -1,6 +1,6 @@
 void fc_set_vaux__(lauxfm,ip)
 char lauxfm[12];
-long ip[5];
+int ip[5];
 {
   void set_vaux();
 

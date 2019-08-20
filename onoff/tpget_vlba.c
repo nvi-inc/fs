@@ -13,7 +13,7 @@
 #include "../include/shm_addr.h"
 
 int tpget_vlba(ip,itpis_vlba,ierr,tpi) /* get results of tpi */
-long ip[5];                                    /* ipc array */
+int ip[5];                                    /* ipc array */
 int itpis_vlba[MAX_DET]; /* device selection array, see tpi_vlba for details */
 int *ierr;
 float tpi[MAX_DET]; /* detector value array */

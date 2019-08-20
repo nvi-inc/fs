@@ -38,8 +38,8 @@ int sz_m5clock;
 int *vdif_epoch;
 int *ierr;
 {
-  static long phase =-1;
-  long raw, sleep, rawch;
+  static int phase =-1;
+  int raw, sleep, rawch;
   int it[6];
 
   *ierr=0;

@@ -7,9 +7,9 @@
 #include "../include/res_ds.h"
 
 get_vtime(centisec,fm_tim,ip,to)
-long centisec[6];
+int centisec[6];
 int fm_tim[6];
-long ip[5];                          /* ipc array */
+int ip[5];                          /* ipc array */
 int to;
 {
       struct req_buf buffer;

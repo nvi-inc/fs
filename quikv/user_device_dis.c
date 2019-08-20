@@ -13,7 +13,7 @@
 
 void user_device_dis(command,ip)
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 {
       struct user_device_cmd lclc;
       int kcom, i, ierr, count, start;

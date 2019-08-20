@@ -18,7 +18,7 @@ struct scan_check_mon *lcl;
   
   switch (*count) {
   case 1:
-    m5sprintf(output,"%ld",&lcl->scan.scan,&lcl->scan.state);
+    m5sprintf(output,"%d",&lcl->scan.scan,&lcl->scan.state);
     break;
   case 2:
     m5sprintf(output,"%s",lcl->label.label,&lcl->label.state);
@@ -98,7 +98,7 @@ m5_2_scan_check(ptr_in,lclm,ip) /* return values:
      char *ptr_in;           /* input buffer to be parsed */
 
      struct scan_check_mon *lclm;  /* result structure with parameters */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr, mk5b;
@@ -151,7 +151,7 @@ m5_2_scan_check(ptr_in,lclm,ip) /* return values:
     while (ptr!=NULL) {
       switch (++count) {
       case 1:
-	if(m5sscanf(ptr,"%ld",&lclm->scan.scan, &lclm->scan.state)) {
+	if(m5sscanf(ptr,"%d",&lclm->scan.scan, &lclm->scan.state)) {
 	  ierr=-500-count;
 	  goto error2;
 	}

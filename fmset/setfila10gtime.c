@@ -19,9 +19,9 @@ void cls_clr();
 
 extern unsigned char inbuf[512];      /* class i-o buffer */
 extern unsigned char outbuf[512];     /* class i-o buffer */
-extern long inclass;         /* input class number */
-extern long outclass;        /* output class number */
-extern long ip[5];           /* parameters for fs communications */
+extern int inclass;         /* input class number */
+extern int outclass;        /* output class number */
+extern int ip[5];           /* parameters for fs communications */
 extern int rtn1, rtn2, msgflg, save; /* unused cls_get args */
 extern iDBBC;
 

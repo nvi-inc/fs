@@ -16,14 +16,14 @@ char *arg_next( struct cmd_ds *command, int *last );
 
 /* --------------------------------------------------------------------------*/
 
-int bbc_set( char *s2dev, char index, unsigned long lofreq, char ifsrc
+int bbc_set( char *s2dev, char index, unsigned int lofreq, char ifsrc
            , char *bw, unsigned short tpiavg, char agcctl );
-int bbc_read( char *s2dev, char index, char *state, unsigned long *lofreq
+int bbc_read( char *s2dev, char index, char *state, unsigned int *lofreq
             , char *ifsrc, char *bw, unsigned short *tpiavg, char *agcmode
-            , short *gain, char *lolock, char *agclock, unsigned long *tpi );
+            , short *gain, char *lolock, char *agclock, unsigned int *tpi );
 int ifx_set( char *s2dev, char *attn , char *src , unsigned short tpiavg );
 int ifx_read( char *s2dev, char *state, char *attn, char *src
-            , unsigned short *tpiavg , unsigned long *tpi );
+            , unsigned short *tpiavg , unsigned int *tpi );
 int encode_set( char *s2dev, char scheme );
 int encode_read( char *s2dev, char *scheme );
 int agc_set( char *s2dev, char mode );
@@ -45,16 +45,16 @@ int fs_save( char *s2dev, char *name );
 int fs_init( char *s2dev, char numstates , unsigned short period );
 int source_set( char *s2dev, char *name , char *ra , char *dec , char *epoch );
 int source_read( char *s2dev, char *name, char *ra, char *dec, char *epoch );
-int delay_set( char *s2dev, char setting , long delay );
-int delay_read( char *s2dev, char type , long *delay );
-int tonedet_set( char *s2dev, unsigned long *freq, char *sb
+int delay_set( char *s2dev, char setting , int delay );
+int delay_read( char *s2dev, char type , int *delay );
+int tonedet_set( char *s2dev, unsigned int *freq, char *sb
                , unsigned short avep );
-int tonedet_read( char *s2dev, unsigned long *freq, char *sb
+int tonedet_read( char *s2dev, unsigned int *freq, char *sb
                 , unsigned short *avep);
-int tonedet_meas( char *s2dev, char bbc, char state, unsigned long *amplitude
-                , long *phase, char *timestamp );
+int tonedet_meas( char *s2dev, char bbc, char state, unsigned int *amplitude
+                , int *phase, char *timestamp );
 int tpi_read( char *s2dev, char state, unsigned short tpiavg, char type
-            , char *input , char *swt , unsigned long *tpi );
+            , char *input , char *swt , unsigned int *tpi );
 int station_info_read( char *s2dev, char *nbr , unsigned short *serial
                    , char *nickname , char *wlon , char *lat , char *height );
 int status_read( char *s2dev, char id, char type, char reread, char *summary

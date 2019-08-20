@@ -56,7 +56,7 @@ int rddev_(mode,devid,buf,buflen,error, ipcode, timeout, no_after, kecho,
    error. If a bus error occurs, rddev returns the system error variable.
 */
 int *mode,*devid;
-long *ipcode;
+int *ipcode;
 unsigned char *buf;
 int *buflen;  /* buffer length in characters */
 int *error;
@@ -69,7 +69,7 @@ int *interface_clear_after_read;
   int iret, ierr;
   unsigned char lret;
   int val, icopy;
-  long centisec[2];
+  int centisec[2];
 
   *error = 0;
   *ipcode = 0;

@@ -1,5 +1,5 @@
 void fc_cls_snd__( iclass, buffer, nchars, parm3, parm4)
-long *iclass;
+int *iclass;
 char *buffer;
 int *nchars, *parm3, *parm4;
 {

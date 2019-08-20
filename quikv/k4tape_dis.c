@@ -14,7 +14,7 @@
 
 void k4tape_dis(command,ip)
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 {
   struct k4tape_mon lcl;
   int i, ierr, count;

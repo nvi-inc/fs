@@ -195,7 +195,7 @@ static void parse_xargs_to_winsz(char *const xargs[], struct winsize **size) {
 		goto cleanup;
 	}
 
-	long l;
+	int l;
 	l     = 0;
 	errno = 0;
 	l     = strtol(p, NULL, 10);
@@ -435,7 +435,7 @@ int server_cmd_window_kill(server_t *s, json_t *rep_msg, int argc, const char *c
 	window_t *w = list_pop(&s->windows, window_by_id, &id);
 	nng_mtx_unlock(s->mtx);
 	if (w == NULL) {
-		json_object_sprintf(rep_msg, "message", "window %li is not running", id);
+		json_object_sprintf(rep_msg, "message", "window %i is not running", id);
 		return 1;
 	}
 

@@ -148,10 +148,10 @@ struct dqa_mon *lcl;
 unsigned uarray[32];
 {
     struct dqa_data {            /* raw data unpacked from uarray */
-       unsigned long cos;
-       unsigned long sin;
-       unsigned long cos_tot;
-       unsigned long sin_tot;
+       unsigned int cos;
+       unsigned int sin;
+       unsigned int cos_tot;
+       unsigned int sin_tot;
     } a;                        /* channel A */
     struct dqa_data b;          /* channel B */
 

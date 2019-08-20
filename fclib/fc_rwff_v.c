@@ -1,5 +1,5 @@
 void fc_rwff_v__(ip,isub,ierr)
-long ip[5];
+int ip[5];
 int *isub;
 int *ierr;
 {

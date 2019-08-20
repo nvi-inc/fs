@@ -5,7 +5,7 @@
 int fc_rte_sett__( poFmClock, piFmHs, plCentiSec, pcMode, iLenMode)
 time_t *poFmClock;
 int *piFmHs;
-long *plCentiSec;
+int *plCentiSec;
 char *pcMode;
 int iLenMode;
 {

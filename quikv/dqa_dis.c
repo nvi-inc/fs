@@ -14,7 +14,7 @@
 void dqa_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
       struct dqa_cmd lclc;
       struct dqa_mon lclm;

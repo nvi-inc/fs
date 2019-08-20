@@ -26,7 +26,7 @@ static int GetTestIndex( char *Name )
      return i;
  return -1;
 }
-void s2chkr( struct cmd_ds *command , int itask , long *ip )
+void s2chkr( struct cmd_ds *command , int itask , int *ip )
 {
  int  i, n, last = 0;
  char *parm;

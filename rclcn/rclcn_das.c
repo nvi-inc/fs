@@ -19,7 +19,7 @@
 
 /* ********************************************************************* */
 int process_s2das(ip)    /* process the input class buffers */
-long ip[5];
+int ip[5];
 {
  char cmd_buf[RCLCN_REQ_BUF_MAX];
  char rsp_buf[RES_MAXLEN];
@@ -29,12 +29,12 @@ long ip[5];
  int  i, nchars;
  int ierr   = 0;
 
- long outclass = 0;
- long outrecs  = 0;
+ int outclass = 0;
+ int outrecs  = 0;
 
- long iclass = ip[1];
- long nrecs  = ip[2];
- long timeout = ip[4] == 0 ? RCL_TIMEOUT : ip[4];
+ int iclass = ip[1];
+ int nrecs  = ip[2];
+ int timeout = ip[4] == 0 ? RCL_TIMEOUT : ip[4];
  int rtn1, rtn2, addr;
 
  for( i = 0 ; i < nrecs ; i++ ) 

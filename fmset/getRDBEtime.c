@@ -12,7 +12,7 @@
 
 #include "fmset.h"
 
-extern long ip[5];           /* parameters for fs communications */
+extern int ip[5];           /* parameters for fs communications */
 extern int synch;
 extern int rack, rack_type;
 extern int iRDBE;
@@ -27,17 +27,17 @@ time_t *fstime; /* field system time */
 int    *fshs;
 time_t *formtime; /* formatter time received from mcbcn */
 int    *formhs;
-long *raw;
+int *raw;
 int *vdif_epoch;
 {
-	long centisec[6], centiavg, centidiff, hsdiff;
+	int centisec[6], centiavg, centidiff, hsdiff;
         int it[6];
 	char *name;
 	char *str;
 	int out_recs;
-	long out_class;
+	int out_class;
 	char *digits[ ]={"8","7","6","5","4","3","2","1","0"};
-	long start_raw,now_raw;
+	int start_raw,now_raw;
 
 	if(synch) {
           int i;

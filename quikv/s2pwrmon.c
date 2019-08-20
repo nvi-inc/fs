@@ -45,7 +45,7 @@ int validate_board( char *string , int *start , int *end )
 }
 /* --------------------------------------------------------------------------*/
 /* S2 powermon SNAP command */
-void s2pwrmon( struct cmd_ds *command , int itask , long *ip )
+void s2pwrmon( struct cmd_ds *command , int itask , int *ip )
 {
  unsigned short voltage[12];
  char output[MAX_OUT];

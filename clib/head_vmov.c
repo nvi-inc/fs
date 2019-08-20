@@ -14,9 +14,9 @@ void head_vmov(ihead,idir,ispdhd,jm,ip,indxtp)
 int ihead;                     /* head 1-4 */
 int idir;                      /* direction (0|1 = SLOW|FAST) */
 int ispdhd;                    /* speed (0|1 = IN|OUT) */
-long jm;                       /* duration in units of 40 microseconds */
+int jm;                       /* duration in units of 40 microseconds */
                                /* already limited to 16 bits by caller */
-long ip[5];                    /* ipc array */
+int ip[5];                    /* ipc array */
 int indxtp;
 {
       struct req_buf buffer;           /* request buffer */
@@ -24,7 +24,7 @@ int indxtp;
       struct res_buf buffer_out;       /* response buffer */
       struct res_rec response;         /* respones record */
       struct tms tms_buff;
-      long end;
+      int end;
       int indx;
 
       if(indxtp == 1) {

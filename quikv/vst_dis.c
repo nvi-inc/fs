@@ -13,7 +13,7 @@
 
 void vst_dis(command,ip,indx)
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 int indx;
 {
       struct vst_cmd lclc;

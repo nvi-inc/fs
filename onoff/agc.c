@@ -26,7 +26,7 @@ int *ierr;
     struct bbc_cmd bbc;
     static int mode[MAX_BBC];
     int i;
-    long ip[5];                                     /* ipc array */
+    int ip[5];                                     /* ipc array */
 
     ini_req(&buffer);
     request.type=20;

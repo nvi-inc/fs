@@ -7,9 +7,9 @@ main()
 {
   time_t clock1, clock2, clock1_old, clock2_old;
      struct timeval tv;
-     long times();
+     int times();
      struct tms buffer;
-     long lRawTime,lRawTime_old, tv_sec_old;
+     int lRawTime,lRawTime_old, tv_sec_old;
 
      clock1=0;
      clock2=1;
@@ -23,7 +23,7 @@ main()
 	clock2=time(&clock2);
 	//	if(clock1!=clock1_old||lRawTime!=lRawTime_old ||
 	//   tv.tv_sec!=tv_sec_old||clock2!=clock2_old) {
-	  printf(" clock1 %10ld raw %10ld secs %10ld usc %10ld clock2 %10ld\n",
+	  printf(" clock1 %10d raw %10d secs %10d usc %10d clock2 %10d\n",
 		 clock1,lRawTime,tv.tv_sec,tv.tv_usec,clock2);
 	  //  clock1_old=clock1;
 	  //  lRawTime_old=lRawTime;

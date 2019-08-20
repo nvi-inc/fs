@@ -97,7 +97,7 @@ int *count;
 struct form4_cmd *lcl;
 {
     int i;
-    static unsigned long enable[2];
+    static unsigned int enable[2];
 
     if (*count == 1) {
       enable[0]=lcl->enable[0];

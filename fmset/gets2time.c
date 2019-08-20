@@ -7,8 +7,8 @@
 
 #include "fmset.h"
 
-extern long ip[5];           /* parameters for fs communications */
-extern long nanosec;
+extern int ip[5];           /* parameters for fs communications */
+extern int nanosec;
 
 void rte2secs();
 
@@ -21,7 +21,7 @@ int    *fshs;
 time_t *formtime; /* formatter time received from mcbcn */
 int    *formhs;
 {
-  long centisec[6], centiavg, centidiff;
+  int centisec[6], centiavg, centidiff;
   int it[6], icount;
 
   icount=0;

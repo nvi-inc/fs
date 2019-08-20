@@ -14,12 +14,12 @@
 
 void k4ib_dis(command,ip,ireq)
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 int ireq;
 {
   int ierr, i, nch, max;
   char output[MAX_OUT];
-  long class, nrecs;
+  int class, nrecs;
   
   if(ip[0] == 0 || ip[1] == 0) {
     if(ip[1] == 0 && ip[0] != 0) {

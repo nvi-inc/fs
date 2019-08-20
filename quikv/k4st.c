@@ -12,10 +12,10 @@
 void k4st(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, ichold, i, count, tcoff;
-      long sqn;
+      int sqn;
       char *ptr;
       struct k4st_cmd lcl;
 

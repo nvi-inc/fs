@@ -30,13 +30,13 @@ void skd_run();
 void skd_par();
 
 /* --------------------------------------------------------------------------*/
-unsigned long Byte2ULong( unsigned char *data )
+unsigned int Byte2ULong( unsigned char *data )
 {
- unsigned long val = (data[0]<<24) | (data[1]<<16) | (data[2]<<8) | data[3];
+ unsigned int val = (data[0]<<24) | (data[1]<<16) | (data[2]<<8) | data[3];
  return val;
 }
 /* --------------------------------------------------------------------------*/
-long Byte2Long( unsigned char *data )
+int Byte2Long( unsigned char *data )
 {
  return (data[0]<<24) | (data[1]<<16) | (data[2]<<8) | data[3];
 }
@@ -51,7 +51,7 @@ short Byte2Short( unsigned char *data )
  return (data[0]<<8) | data[1];
 }
 /* --------------------------------------------------------------------------*/
-void ULong2Char( unsigned long data , char *byte )
+void ULong2Char( unsigned int data , char *byte )
 {
  byte[0] = data >> 24 & 0xff;
  byte[1] = data >> 16 & 0xff;
@@ -59,7 +59,7 @@ void ULong2Char( unsigned long data , char *byte )
  byte[3] = data       & 0xff;
 }
 /* --------------------------------------------------------------------------*/
-void Long2Char( long data , char *byte )
+void Long2Char( int data , char *byte )
 {
  byte[0] = data >> 24 & 0xff;
  byte[1] = data >> 16 & 0xff;
@@ -73,7 +73,7 @@ void UShort2Char( unsigned short data , char *byte )
  byte[1] = data & 0xff;
 }
 /* --------------------------------------------------------------------------*/
-void ULong2Byte( unsigned long data , unsigned char *byte )
+void ULong2Byte( unsigned int data , unsigned char *byte )
 {
  byte[0] = data >> 24 & 0xff;
  byte[1] = data >> 16 & 0xff;
@@ -94,7 +94,7 @@ int send_to_rclcn( char *device , char *byte , char size , char answer
                  , char *data , int datasize , char *string , int timeout )
 {
  struct rclcn_req_buf buffer;           /* rclcn request buffer */
- long   ip[5];
+ int   ip[5];
  char   rsp_code;
  int    ierr;
 
@@ -133,7 +133,7 @@ int send_to_rclcn( char *device , char *byte , char size , char answer
  return ierr;
 }
 /* --------------------------------------------------------------------------*/
-int bbc_set( char *s2dev, char index, unsigned long lofreq, char ifsrc
+int bbc_set( char *s2dev, char index, unsigned int lofreq, char ifsrc
            , char *bw, unsigned short tpiavg, char agcctl )
 {
  char byte[12];
@@ -154,9 +154,9 @@ int bbc_set( char *s2dev, char index, unsigned long lofreq, char ifsrc
  return send_to_rclcn( s2dev, byte, 12, RESP_ERR, 0, 0, 0, RCL_TIMEOUT );    
 }
 /* --------------------------------------------------------------------------*/
-int bbc_read( char *s2dev, char index, char *state, unsigned long *lofreq
+int bbc_read( char *s2dev, char index, char *state, unsigned int *lofreq
             , char *ifsrc, char *bw, unsigned short *tpiavg, char *agcmode
-            , short *gain, char *lolock, char *agclock, unsigned long *tpi)
+            , short *gain, char *lolock, char *agclock, unsigned int *tpi)
 {
  int ierr = 0;
  char byte[3];
@@ -210,7 +210,7 @@ int ifx_set( char *s2dev, char *attn , char *src , unsigned short tpiavg )
 }
 /* --------------------------------------------------------------------------*/
 int ifx_read( char *s2dev, char *state, char *attn, char *src
-            , unsigned short *tpiavg , unsigned long *tpi )
+            , unsigned short *tpiavg , unsigned int *tpi )
 {
  int ierr = 0;
  int  i, j;
@@ -483,7 +483,7 @@ int source_read( char *s2dev, char *name , char *ra , char *dec , char *epoch )
  return ierr;
 }
 /* --------------------------------------------------------------------------*/
-int delay_set( char *s2dev, char setting , long delay )
+int delay_set( char *s2dev, char setting , int delay )
 {
  char byte[6];
 
@@ -494,7 +494,7 @@ int delay_set( char *s2dev, char setting , long delay )
  return send_to_rclcn(s2dev,byte,6,RESP_ERR,0,0,0,RCL_TIMEOUT );
 }   
 /* --------------------------------------------------------------------------*/
-int delay_read( char *s2dev, char type , long *delay )
+int delay_read( char *s2dev, char type , int *delay )
 {
  int ierr = 0;
  char byte[1];
@@ -508,7 +508,7 @@ int delay_read( char *s2dev, char type , long *delay )
  return ierr;
 }
 /* --------------------------------------------------------------------------*/
-int tonedet_set( char *s2dev, unsigned long *freq, char *sb, unsigned short avep )
+int tonedet_set( char *s2dev, unsigned int *freq, char *sb, unsigned short avep )
 {
  unsigned char byte[13];
 
@@ -522,7 +522,7 @@ int tonedet_set( char *s2dev, unsigned long *freq, char *sb, unsigned short avep
  return send_to_rclcn(s2dev,(char*)byte,13,RESP_ERR,0,0,0,RCL_TIMEOUT );    
 }
 /* --------------------------------------------------------------------------*/
-int tonedet_read( char *s2dev, unsigned long *freq, char *sb, unsigned short *avep )
+int tonedet_read( char *s2dev, unsigned int *freq, char *sb, unsigned short *avep )
 {
  int ierr = 0;
  char byte[1];
@@ -544,8 +544,8 @@ int tonedet_read( char *s2dev, unsigned long *freq, char *sb, unsigned short *av
  return ierr;
 }
 /* --------------------------------------------------------------------------*/
-int tonedet_meas( char *s2dev, char bbc, char state, unsigned long *amplitude
-                , long *phase, char *timestamp )
+int tonedet_meas( char *s2dev, char bbc, char state, unsigned int *amplitude
+                , int *phase, char *timestamp )
 {
  int ierr = 0;
  int i, j;
@@ -572,7 +572,7 @@ int tonedet_meas( char *s2dev, char bbc, char state, unsigned long *amplitude
 }
 /* --------------------------------------------------------------------------*/
 int tpi_read( char *s2dev, char state, unsigned short tpiavg, char type
-            , char *input , char *swt, unsigned long *tpi )
+            , char *input , char *swt, unsigned int *tpi )
 {
  int ierr = 0;
  char byte[5];
@@ -630,7 +630,7 @@ int status_read( char *s2dev, char id, char type, char reread, char *summary
                , char *nbr, S2_STATUS *list )
 {
  struct rclcn_req_buf buffer;           /* rclcn request buffer */
- long   ip[5];
+ int   ip[5];
  char   rsp_code, answer;
  int    ierr, i;
  char   byte[4];

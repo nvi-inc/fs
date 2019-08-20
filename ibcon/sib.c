@@ -24,7 +24,7 @@ int ibser;
 #include "sib.h"
 
 int sib(int hpib, char *buffer, int len_in, int max_out, int timeout,
-	int itime, long centisec[2])
+	int itime, int centisec[2])
 {
 
   int lf=0x0a;

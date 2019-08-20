@@ -4,7 +4,7 @@
 */
 
 /* internals */
-long bblvcode ();	/* return code for given level */
+int bblvcode ();	/* return code for given level */
 
 /* lookup table for level conversions */
 static double table[] = 
@@ -43,7 +43,7 @@ static double table[] =
   };
 
 /********************************************************************/
-long bblvcode (dB)	/* return BBC hardware code for given level */
+int bblvcode (dB)	/* return BBC hardware code for given level */
 double dB;
 /*
 * RETURNS

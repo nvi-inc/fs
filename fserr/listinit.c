@@ -30,7 +30,7 @@ char *file;
 {
 
   int hashcount;
-  long hash;
+  int hash;
   int inum;
   char dquote[2];
   int errnum;

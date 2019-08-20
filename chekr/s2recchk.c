@@ -15,7 +15,7 @@ void s2recchk_(icherr,lwho)
 int icherr[];
 char *lwho;
 {
-  long ip[5];            /* ipc parameters */
+  int ip[5];            /* ipc parameters */
   struct rclcn_req_buf req_buf;        /* rclcn request buffer */
   struct rclcn_res_buf res_buf;
   struct s2rec_check s2rec;
@@ -42,7 +42,7 @@ char *lwho;
     logita(NULL,-500,lwho,"rc");
   } else {
 
-    long int nanosec;
+    int nanosec;
     
     opn_rclcn_res(&res_buf,ip);
     ierr=get_rclcn_delaym_read(&res_buf,&nanosec);
@@ -52,7 +52,7 @@ char *lwho;
     } else {
       char outbuf[80];
       if(nanosec!=0) {
-	sprintf(outbuf,"measured delay not ZERO, actual value %ld nanseconds",
+	sprintf(outbuf,"measured delay not ZERO, actual value %d nanseconds",
 		nanosec);
 	logite(outbuf,-499,"ch");
       }

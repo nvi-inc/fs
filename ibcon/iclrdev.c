@@ -48,7 +48,7 @@ int iclrdev_(devid,error, ipcode, timeout, kecho)
    error. If a bus error occurs, statbrd returns the system error variable.
 */
 int *devid;
-long *ipcode;
+int *ipcode;
 int *error;
 int *timeout;
 int *kecho;
@@ -60,7 +60,7 @@ int *kecho;
   int ibsta1;
   int value;
   char buf[20];
-  long centisec[2];
+  int centisec[2];
 
   *error = 0;
   *ipcode = 0;

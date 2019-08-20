@@ -42,7 +42,7 @@ int opbrd_(dev,devlen,error,ipcode, no_online,set_remote_enable,
 int *dev;
 int *devlen;
 int *error;
-long *ipcode;
+int *ipcode;
 int *no_online;
 int *set_remote_enable;
 int *no_interface_clear_board;
@@ -52,7 +52,7 @@ int *interface_clear_converter;
   char device[65];
   char *nameend;
   int ierr;
-  long centisec[2];
+  int centisec[2];
 
   *error=0;
   *ipcode = 0;
@@ -91,7 +91,7 @@ int *interface_clear_converter;
     return -1;
 #endif
   } else {
-    long baud;
+    int baud;
     int len, parity, bits, stop;
     len = strlen(device);
     baud=38400;

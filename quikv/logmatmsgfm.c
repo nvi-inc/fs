@@ -12,12 +12,12 @@
 void logmatmsgfm(output,command,ip)
 char *output;
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 {
   char buff[MAX_BUF];
 
   int i, nchar, ilen, idum, icopy, nrec, cls_rcv(), iend, iack;
-  long iclass;
+  int iclass;
   void cls_clr();
 
   strcpy(output,command->name);

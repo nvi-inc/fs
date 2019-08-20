@@ -4,7 +4,7 @@
 #include "../include/res_ds.h"
 
 void mvdis_v(ip,ibuf,nch)
-long ip[5];
+int ip[5];
 char *ibuf;
 int *nch;
 {

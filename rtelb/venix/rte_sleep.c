@@ -11,9 +11,9 @@ void pause();
 unsigned rte_sleep( centisec)
 unsigned centisec;
 {
-     long times();
+     int times();
      struct tms buffer;
-     long now, end;
+     int now, end;
      unsigned iret;
      int time,wait;
 

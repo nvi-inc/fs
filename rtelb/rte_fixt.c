@@ -11,7 +11,7 @@
 
 void rte_fixt( poClock, plCentiSec)
 time_t *poClock;
-long *plCentiSec;
+int *plCentiSec;
 {
   
   int iIndex;
@@ -20,7 +20,7 @@ long *plCentiSec;
   if(shm_addr->time.model != 'n' && shm_addr->time.model != 'c' &&
      shm_addr->time.epoch[iIndex]!=0 && shm_addr->time.icomputer[iIndex]==0) {
 
-        long lEpoch, lAddHs;
+        int lEpoch, lAddHs;
 
         lEpoch = shm_addr->time.epoch[iIndex];
 	lAddHs = shm_addr->time.offset[iIndex];

@@ -15,7 +15,7 @@
 void bank_check(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ierr, i, j;
       char *ptr;
@@ -174,7 +174,7 @@ parse:
 	    shm_addr->equip.drive_type[shm_addr->select]== MK5C_BS ||
 	    shm_addr->equip.drive_type[shm_addr->select]== MK5A_BS)) ||
 	   shm_addr->equip.drive[shm_addr->select] != MK5) )){
-	long before, after;
+	int before, after;
 	unsigned isleep;
 
 	increment=TRUE;
@@ -199,7 +199,7 @@ parse:
        
 	if(itask!=8 &&
 	   strcmp(bank_warned,bank_set_mon.active_bank.active_bank)!=0) {
-	  long ip[5];
+	  int ip[5];
 	  char mess[80]="change_pack=";
 	  strcat(mess,bank_set_mon.active_bank.active_bank);
 	  strncpy(bank_warned,bank_set_mon.active_bank.active_bank,

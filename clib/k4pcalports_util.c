@@ -109,7 +109,7 @@ struct k4pcalports_mon *lclm;
 
 
 k4pcalports_req_q(ip)
-long ip[5];
+int ip[5];
 {
 
  ib_req7(ip,device,20,"PCA?");
@@ -117,7 +117,7 @@ long ip[5];
 
 }
 k4pcalports_req_c(ip,lclc)
-long ip[5];
+int ip[5];
 struct k4pcalports_cmd *lclc;
 {
   char buffer[30];
@@ -144,7 +144,7 @@ struct k4pcalports_cmd *lclc;
 k4pcalports_res_q(lclc,lclm,ip)
 struct k4pcalports_cmd *lclc;
 struct k4pcalports_mon *lclm;
-long ip[5];
+int ip[5];
 {
   char buffer[MAX_BUF];
   int max,i;

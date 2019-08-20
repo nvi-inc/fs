@@ -17,7 +17,7 @@ int logmsg_dbbc();
 void dbbcgain_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
       struct dbbcgain_cmd lclc;
       struct dbbcgain_mon lclm;

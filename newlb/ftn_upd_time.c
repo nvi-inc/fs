@@ -6,7 +6,7 @@
 ftn_upd_time___(path,time,ierr,len)
 char *path;
 int len,*ierr;
-long *time;
+int *time;
 {
      struct stat sb;
 

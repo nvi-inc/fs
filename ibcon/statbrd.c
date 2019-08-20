@@ -48,7 +48,7 @@ int statbrd_(buf,error, ipcode, timeout, kecho)
    error. If a bus error occurs, statbrd returns the system error variable.
 */
 unsigned char *buf; /* points to area at least sizeof(int) in extent */
-long *ipcode;
+int *ipcode;
 int *error;
 int *timeout;
 int *kecho;
@@ -59,7 +59,7 @@ int *kecho;
   int val, icopy;
   int ibsta1;
   int ivalue;
-  long centisec[2];
+  int centisec[2];
 
   *error = 0;
   *ipcode = 0;

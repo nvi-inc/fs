@@ -30,7 +30,7 @@ void dbbcn_pfb_d(device, ierr,ip)
 char device[4];                        /* device mnemonic */
 int *ierr;                             /* error return, -1 if no such device */
                                        /*                0 okay              */
-long ip[5];
+int ip[5];
 {
   struct dbbcifx_cmd lclc;
   struct dbbcifx_mon lclm;
@@ -141,7 +141,7 @@ long ip[5];
 
 void dbbcn_pfb_v(dtpi,ip)
 double *dtpi;                      /* return counts */
-long ip[5];
+int ip[5];
 {
   int rtn1;    /* argument for cls_rcv - unused */
   int rtn2;    /* argument for cls_rcv - unused */
@@ -255,7 +255,7 @@ long ip[5];
 /* restore if gain */
 
 void dbbcn_pfb_r(ip)
-long ip[5];
+int ip[5];
 {
     if(savec.agc!=0) {
       int out_recs, out_class;

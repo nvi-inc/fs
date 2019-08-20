@@ -14,7 +14,7 @@ main(int argc, char *argv[])
   struct timeval tv0, tv;
 
   clock_t ticks;
-  long unsigned ticks0, ticks_diff, ticks0_save;
+  unsigned int ticks0, ticks_diff, ticks0_save;
   int first=1;
   
   while(first || ticks0!=ticks0_save) {
@@ -48,10 +48,10 @@ main(int argc, char *argv[])
     if(0==
        (((tv.tv_sec-tv0.tv_sec)*1000000ll+(tv.tv_usec-tv0.tv_usec))/1000)%1000) {
 
-    printf("%llu %lu %llu\n",
+    printf("%llu %u %llu\n",
 	   ((tv.tv_sec-tv0.tv_sec)*1000000ll+(tv.tv_usec-tv0.tv_usec))/1000,
-	   (unsigned long)ticks-ticks0,
-	   ((unsigned long)ticks-ticks0)-
+	   (unsigned int)ticks-ticks0,
+	   ((unsigned int)ticks-ticks0)-
 	   (((tv.tv_sec-tv0.tv_sec)*1000000ll+(tv.tv_usec-tv0.tv_usec))/10000)
 	   );
     fflush(stdout);

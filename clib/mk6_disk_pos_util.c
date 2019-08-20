@@ -45,7 +45,7 @@ m5_2_mk6_disk_pos(ptr_in,lclm,ip,who) /* return values:
 				    * blank means empty response
 				    * null means no response
 				    */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
      char *who;
 {
   char *new_str, *ptr, *ptr2, *ptr_save;

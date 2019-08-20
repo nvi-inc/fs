@@ -18,7 +18,7 @@ extern struct fscom *shm_addr;
 
 main()
 {
-  long ip[5],ip1[5];
+  int ip[5],ip1[5];
   struct holog_cmd holog;
   int i,it[6], ierr, j, ierr1, nwt, koff;
   double az,el, xoff, yoff, azoff, eloff, haoff, decoff;

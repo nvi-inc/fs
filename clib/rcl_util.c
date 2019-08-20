@@ -313,7 +313,7 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
 
   } else if(strcmp(ptr,"delay_set")==0) {
     ibool relative;
-    long int nanosec;
+    int nanosec;
     *icmd=RCL_CMD_DELAY_SET;
     ptr=arg_next(command,&ilast);
     if(ptr==NULL)
@@ -328,7 +328,7 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
     ptr=arg_next(command,&ilast);
     if(ptr==NULL)
       return -204;
-    else if(1!=sscanf(ptr,"%li",&nanosec))
+    else if(1!=sscanf(ptr,"%i",&nanosec))
       return -204;
 
     add_rclcn_delay_set(buffer,device,relative,nanosec);
@@ -378,7 +378,7 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
 
     if(strcmp(ptr,"absolute")==0 || (idecode && type==0)) {
       int year, day, hour, min, sec;
-      long int nanosec;
+      int nanosec;
 
       ptr=arg_next(command,&ilast);
       if(ptr==NULL || 1!=sscanf(ptr,"%i",&year))
@@ -401,14 +401,14 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
 	return -208;
 
       ptr=arg_next(command,&ilast);
-      if(ptr==NULL || 1!=sscanf(ptr,"%li",&nanosec))
+      if(ptr==NULL || 1!=sscanf(ptr,"%i",&nanosec))
 	return -209;
 
       add_rclcn_align(buffer,device,year,day,hour,min,sec,nanosec);
     } else if(strcmp(ptr,"relative")==0 || (idecode && type==1)) {
       ibool negative;
       int hour, min, sec;
-      long int nanosec;
+      int nanosec;
 
       ptr=arg_next(command,&ilast);
       if(ptr==NULL)
@@ -433,7 +433,7 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
 	return -207;
 
       ptr=arg_next(command,&ilast);
-      if(ptr==NULL || 1!=sscanf(ptr,"%li",&nanosec))
+      if(ptr==NULL || 1!=sscanf(ptr,"%i",&nanosec))
 	return -208;
 
       add_rclcn_align_rel(buffer,device,negative,hour,min,sec,nanosec);
@@ -467,7 +467,7 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
 
     if(-1 < code && code < 3) {
       int num,i;
-      long int position[8];
+      int position[8];
 
       ptr=arg_next(command,&ilast);
       if(ptr==NULL)
@@ -486,7 +486,7 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
 	  position[i]=RCL_POS_UNSEL;
 	else if (code == 2 && strcmp(ptr,"unknown")==0)
 	  position[i]=RCL_POS_UNKNOWN;
-	else if (1!=sscanf(ptr,"%li",position+i))
+	else if (1!=sscanf(ptr,"%i",position+i))
 	  return -205-i;
       }
       switch (num) {
@@ -524,10 +524,10 @@ int rcl_dec(struct cmd_ds *command,struct rclcn_req_buf *buffer,int *icmd)
     return 0;
 
   } else if(strcmp(ptr,"errmes")==0) {
-    long int error;
+    int error;
     *icmd=RCL_CMD_ERRMES;
     ptr=arg_next(command,&ilast);
-    if(ptr==NULL || 1!=sscanf(ptr,"%li",&error))
+    if(ptr==NULL || 1!=sscanf(ptr,"%i",&error))
       return -203;
 
     add_rclcn_errmes(buffer,device,error);

@@ -1,5 +1,5 @@
 void fc_tpi_dbbc_pfb__(ip,itpis_dbbc_pfb)
-long ip[5];
+int ip[5];
 int itpis_dbbc_pfb[];
 {
     void tpi_dbbc_pfb();
@@ -10,7 +10,7 @@ int itpis_dbbc_pfb[];
 }
     
 void fc_tpput_dbbc_pfb__(ip,itpis_dbbc_pfb,isub,ibuf,nch,ilen)
-long ip[5];
+int ip[5];
 int itpis_dbbc_pfb[];
 int *isub;
 char *ibuf;
@@ -25,7 +25,7 @@ int *ilen;
 }
 
 void fc_tsys_dbbc_pfb__(ip,itpis_dbbc_pfb,ibuf,nch,itask)
-long ip[5];
+int ip[5];
 int itpis_dbbc_pfb[];
 char *ibuf;
 int *nch;

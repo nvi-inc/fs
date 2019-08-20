@@ -67,7 +67,7 @@ struct req_rec *request;
 }
 
 void end_req(ip,buffer)        /* end buffer, send if partial */
-long ip[5];
+int ip[5];
 struct req_buf *buffer;
 {
      if(buffer->nchars>0) {

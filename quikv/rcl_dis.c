@@ -16,12 +16,12 @@
 void rcl_dis(command,icmd,itask,ip)
 struct cmd_ds *command;
 int icmd, itask;
-long ip[5];
+int ip[5];
 {
   int ierr, i;
   struct rclcn_res_buf buffer;
   char output[MAX_OUT];
-  long class, nrecs;
+  int class, nrecs;
   char *start;
   
   strcpy(output,command->name);
@@ -171,7 +171,7 @@ long ip[5];
   case RCL_CMD_TIME_READ: {
     int year, day, hour, min, sec;
     ibool validated;
-    long centisec[6];
+    int centisec[6];
     
     ierr=get_rclcn_time_read(&buffer,&year,&day,&hour,&min,&sec,
 			     &validated, centisec);
@@ -186,7 +186,7 @@ long ip[5];
     else
       strcat(output,",not-valid");
 
-    sprintf(output+strlen(output),",%ld,%ld",
+    sprintf(output+strlen(output),",%d,%d",
 	    centisec[0],centisec[1]);
     
     break;
@@ -333,7 +333,7 @@ long ip[5];
 
     for (i=0;i<8;i++) {
       unsigned char *tabler=table+i*52;
-      long int delay;
+      int delay;
 
       strcat(output,",\\");
       cls_snd(&class,output,strlen(output),0,0);
@@ -346,8 +346,8 @@ long ip[5];
 	      tabler[38],tabler[39],tabler[40],tabler[41],
 	      tabler[42],tabler[43],tabler[44],
 	      tabler[45]<<8|tabler[46],tabler[47]<<8|tabler[48]);
-      delay  = (long) tabler[49]<<24;
-      delay |= (long) tabler[50]<<16;
+      delay  = (int) tabler[49]<<24;
+      delay |= (int) tabler[50]<<16;
       delay |= tabler[51]<<8;
       delay |= tabler[52];
       if(delay == 0x7FFFFFFF)
@@ -362,24 +362,24 @@ long ip[5];
     ierr=get_rclcn_delay_set(&buffer);
     break;
   case RCL_CMD_DELAY_READ: {
-    long int nanosec;
+    int nanosec;
 
     ierr=get_rclcn_delay_read(&buffer,&nanosec);
     if(ierr!=0)
       break;
 
-    sprintf(output+strlen(output),",%li",nanosec);
+    sprintf(output+strlen(output),",%i",nanosec);
 
     break;
   }
   case RCL_CMD_DELAYM_READ: {
-    long int nanosec;
+    int nanosec;
 
     ierr=get_rclcn_delaym_read(&buffer,&nanosec);
     if(ierr!=0)
       break;
 
-    sprintf(output+strlen(output),",%li",nanosec);
+    sprintf(output+strlen(output),",%i",nanosec);
 
     break;
   }
@@ -419,11 +419,11 @@ long ip[5];
       if (position.overall.position == RCL_POS_UNKNOWN)
 	strcat(output,",unknown");
       else
-	sprintf(output+strlen(output),",%li",position.overall.position);
+	sprintf(output+strlen(output),",%i",position.overall.position);
       if (position.overall.posvar == RCL_POS_UNKNOWN)
 	strcat(output,",unknown");
       else
-	sprintf(output+strlen(output),",%li",position.overall.posvar);
+	sprintf(output+strlen(output),",%i",position.overall.posvar);
       break;
     case 1: {
       int i;
@@ -433,7 +433,7 @@ long ip[5];
 	else if (position.individual.position[i] == RCL_POS_UNSEL)
 	  strcat(output,",unselected");
 	else
-	  sprintf(output+strlen(output),",%li",
+	  sprintf(output+strlen(output),",%i",
 		  position.individual.position[i]);
       break;
     }
@@ -554,10 +554,10 @@ long ip[5];
   case RCL_CMD_TRANSPORT_TIMES: {
     int num_entries;
     unsigned short serial[8];
-    unsigned long tot_on_time[8];
-    unsigned long tot_head_time[8];
-    unsigned long head_use_time[8];
-    unsigned long in_service_time[8];
+    unsigned int tot_on_time[8];
+    unsigned int tot_head_time[8];
+    unsigned int head_use_time[8];
+    unsigned int in_service_time[8];
     int i;
 
     ierr=get_rclcn_transport_times(&buffer,&num_entries,serial,tot_on_time,
@@ -573,7 +573,7 @@ long ip[5];
       strcat(start,",\\");
       cls_snd(&class,output,strlen(output),0,0);
       nrecs+=1;
-      sprintf(start,"%hu,%lu,%lu,%lu,%lu",
+      sprintf(start,"%hu,%u,%u,%u,%u",
 	      serial[i],tot_on_time[i],tot_head_time[i],
 	      head_use_time[i],in_service_time[i]);
     }
@@ -582,7 +582,7 @@ long ip[5];
   }
   case RCL_CMD_STATION_INFO_READ: {
     int station;
-    long int serialnum;
+    int serialnum;
     char nickname[RCL_MAXSTRLEN_NICKNAME];
     
     ierr=get_rclcn_station_info_read(&buffer,&station,&serialnum,nickname);
@@ -598,14 +598,14 @@ long ip[5];
     break;
   case RCL_CMD_POSTIME_READ: {
     int year, day, hour, min, sec, frame;
-    long int position;
+    int position;
     
     ierr=get_rclcn_postime_read(&buffer,&year,&day,&hour,&min,&sec,
 				&frame,&position);
     if(ierr!=0)
       break;
 
-    sprintf(output+strlen(output),",%d,%d,%d,%d,%d,%d,%ld",
+    sprintf(output+strlen(output),",%d,%d,%d,%d,%d,%d,%d",
 	    year,day,hour,min,sec,frame,position);
     
     break;
@@ -756,7 +756,7 @@ long ip[5];
     ierr=get_rclcn_diag(&buffer);
     break;
   case RCL_CMD_BERDCB: {
-    unsigned long err_bits, tot_bits;
+    unsigned int err_bits, tot_bits;
     
     ierr=get_rclcn_berdcb(&buffer,&err_bits,&tot_bits);
     if(ierr!=0)

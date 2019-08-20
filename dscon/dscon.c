@@ -125,8 +125,8 @@ static int initialized;		/* has program been initialized ? */
 
 static int no_pending = 0;	/* No of packets written but not read */
 
-static long ip[5];		/* scheduling parameters */
-static long outclass;		/* output class number */
+static int ip[5];		/* scheduling parameters */
+static int outclass;		/* output class number */
 static int nbufout;		/* number of output buffers */
 
 static unsigned char secho[80];
@@ -358,7 +358,7 @@ int doinit()
 
 int doproc()	/* process the input class buffers */
 {
-  long inclass;		/* input class number */
+  int inclass;		/* input class number */
   int nbufin;		/* number of input buffers */
   unsigned char inbuf[REQUEST_SIZE+2];		/* input buffer */
   unsigned char addr;	/* address of dataset */
@@ -520,7 +520,7 @@ int read_bus(buffer,nbyte)	/* Receive nbyte bytes from Datsset device */
    static unsigned char next_ack = NUL;
    int cnt, ibyte, esc;
    struct tms tms_buff;
-   long end;
+   int end;
    int iret;
 
    end = rte_times(&tms_buff)+TIME_OUT+1;	/* calculate end time */
@@ -656,7 +656,7 @@ int write_bus(buffer,nbyte)	/* Send nbyte bytes from buffer to Dataset device */
 {
     unsigned char packet[PACKET_SIZE];
     int ibyte, ipkt, iret;
-    unsigned long statusReg;
+    unsigned int statusReg;
 
     /* Construct dataset bus packet */
     ipkt = 0;

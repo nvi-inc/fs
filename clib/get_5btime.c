@@ -11,9 +11,9 @@
 
 get_5btime(centisec,fm_tim,ip,to,m5sync,sz_m5sync,m5pps,sz_m5pps,
 	   m5freq,sz_m5freq,m5clock,sz_m5clock)
-long centisec[6];
+int centisec[6];
 int fm_tim[6];
-long ip[5];                          /* ipc array */
+int ip[5];                          /* ipc array */
 int to;
 char *m5sync;
 int sz_m5sync;
@@ -25,7 +25,7 @@ char *m5clock;
 int sz_m5clock;
 {
       int out_recs, nrecs, irec, ierr;
-      long out_class, iclass;
+      int out_class, iclass;
       char *str;
       struct pps_source_cmd pps_lclc;
       struct clock_set_cmd clock_lclc;

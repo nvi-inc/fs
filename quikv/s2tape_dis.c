@@ -15,7 +15,7 @@
 
 void s2tape_dis(command,ip)
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 {
       int kcom, i, ierr, count, start;
       struct res_buf buffer;
@@ -52,7 +52,7 @@ long ip[5];
 	else if (position.individual.position[i] == RCL_POS_UNSEL)
 	  strcat(output,"<uns>,");
 	else
-	  sprintf(output+strlen(output),"%li,",
+	  sprintf(output+strlen(output),"%i,",
 		  position.individual.position[i]);
 
       if(strlen(output)>0) output[strlen(output)-1]='\0';

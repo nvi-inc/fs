@@ -14,7 +14,7 @@
 void k4oldtp(command,itask,ip)
 struct cmd_ds *command;           /* parsed command structure */
 int itask;
-long ip[5];                       /* ipc parameters */
+int ip[5];                       /* ipc parameters */
 {
       int i;
       char *tpnum, tape[10];

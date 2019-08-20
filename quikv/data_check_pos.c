@@ -4,10 +4,10 @@
 #define BUFSIZE 512
 
 int data_check_pos(ip)
-long ip[5];
+int ip[5];
 {
 
-  long out_class;
+  int out_class;
   int out_recs, ierr, icount;
   double pos;
   char outbuf[BUFSIZE];
@@ -18,7 +18,7 @@ long ip[5];
   int save=0;    /* argument for cls_rcv - unused */
   int nchars;
   char *ptr;
-  long class, nrecs;
+  int class, nrecs;
   int i;
 
   out_recs=0;

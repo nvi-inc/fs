@@ -8,7 +8,7 @@
 #include "../include/shm_addr.h"
 
 void lvdofn_v(ip,indxtp)
-long ip[5];
+int ip[5];
 int indxtp;
 {
       struct req_buf buffer;

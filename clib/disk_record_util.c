@@ -121,7 +121,7 @@ struct disk_record_mon *lcl;
 
     switch (*count) {
     case 1:
-      m5sprintf(output,"%ld",&lcl->scan.scan,&lcl->scan.state);
+      m5sprintf(output,"%d",&lcl->scan.scan,&lcl->scan.state);
       break;
     default:
       *count=-1;
@@ -159,7 +159,7 @@ m5_2_disk_record(ptr_in,lclc,lclm,ip) /* return values:
 
      struct disk_record_cmd *lclc;  /* result structure with parameters */
      struct disk_record_mon *lclm;  /* result structure with parameters */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr;
@@ -207,7 +207,7 @@ m5_2_disk_record(ptr_in,lclc,lclm,ip) /* return values:
 	}
 	break;
       case 2:
-	if(m5sscanf(ptr,"%ld",&lclm->scan.scan,&lclm->scan.state)) {
+	if(m5sscanf(ptr,"%d",&lclm->scan.scan,&lclm->scan.state)) {
 	  ierr=-502;
 	  goto error2;
 	}

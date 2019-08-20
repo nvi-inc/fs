@@ -17,10 +17,10 @@
 #define FS_SKD_NAMED (1 << 29)
 
 struct skd_buf {
-	long	mtype;
+	int	mtype;
         struct {
-	    long    ip[5];
-	    long    rtype;
+	    int    ip[5];
+	    int    rtype;
 	    int     dad;
 	    int timed_out;
             int run_index;
@@ -30,24 +30,24 @@ struct skd_buf {
 } ;
 
 static int msqid;
-static long rtype=0;
+static int rtype=0;
 static int dad=0;
 static int run_index=0;
 static char prog_name[5];
 static char return_name[5];
-static long save_ip[5];
+static int save_ip[5];
 static char arg[MAX_BUF+1];
 static char arg_buff[MAX_BUF+1];
 static char *argv[(MAX_BUF+1)/2];
 static int  argc = -1;
-static long wait_rtype=0;
-static long ipr[5] = { 0, 0, 0, 0, 0};
+static int wait_rtype=0;
+static int ipr[5] = { 0, 0, 0, 0, 0};
 
-static long mtype();
+static int mtype();
 static void nullfcn();
 static void skd_end_to();
 void skd_end();
-static skd_run_arg_cls_to(char *name, char w, long ip[5], char *arg,
+static skd_run_arg_cls_to(char *name, char w, int ip[5], char *arg,
 			  char nsem[6],unsigned to, int *run_index);
 
 int skd_get( key, size)
@@ -119,7 +119,7 @@ key_t key;
 }
 
 void skd_boss_inject_w(iclass, buffer, length)
-long    *iclass;
+int    *iclass;
 char	*buffer;	/* contains message for process */
 int	length;	/* length of buffer in bytes */
 {
@@ -140,7 +140,7 @@ int	length;	/* length of buffer in bytes */
 }
 void skd_run( name, w, ip)
 char    name[5], w;
-long    ip[5];
+int    ip[5];
 {
   skd_run_arg_cls_to( name, w, ip, (char *) NULL, (char *) NULL,
 		      (unsigned) 0, (int *) NULL);
@@ -148,7 +148,7 @@ long    ip[5];
 
 void skd_run_p( name, w, ip, run_index)
      char    name[5], w;
-long    ip[5];
+int    ip[5];
 int *run_index;
 {
   skd_run_arg_cls_to( name, w, ip, (char *) NULL, (char *) NULL,
@@ -157,7 +157,7 @@ int *run_index;
 
 void skd_run_arg( name, w, ip, arg)
 char	name[5], w, *arg;	
-long	ip[5];
+int	ip[5];
 /* arg maximum length is 256 characters, longer values are truncated */
 {
   skd_run_arg_cls_to( name, w, ip, arg, (char *) NULL,
@@ -166,7 +166,7 @@ long	ip[5];
 
 int skd_run_to( name, w, ip, to)
 char    name[5], w;
-long    ip[5];
+int    ip[5];
 unsigned to;
 {  
   return skd_run_arg_cls_to( name, w, ip, (char *) NULL, (char *) NULL,
@@ -175,7 +175,7 @@ unsigned to;
 
 static skd_run_arg_cls_to( name, w, ip, arg, nsem,to, run_index)
 char	name[5], w, *arg;	
-long	ip[5];
+int	ip[5];
 char nsem[6];
 unsigned to;
 int *run_index;
@@ -280,7 +280,7 @@ if(w != 'w')
  
 }
 void skd_par( ip)
-long ip[5];
+int ip[5];
 {
 int i;
 
@@ -341,11 +341,11 @@ int  n,len;
 
 int skd_chk( name, ip)
 char    name[ 5];
-long	ip[5];
+int	ip[5];
 {
 int	status,i;
 struct skd_buf	sched;
-long    type;
+int    type;
 char *s1;
 
 
@@ -389,11 +389,11 @@ return 1;
 }
 int skd_end_inject_snap( name, ip)
 char    name[ 5];
-long	ip[5];
+int	ip[5];
 {
 int	status,i;
 struct skd_buf	sched;
-long    type;
+int    type;
 char *s1;
 
  if(strncmp("boss ",name,5)==0) {
@@ -462,11 +462,11 @@ strcpy(arg_buff,arg);
 void skd_wait( name, ip, centisec)
 char    name[ 5];
 unsigned centisec;
-long	ip[5];
+int	ip[5];
 {
 int	status,i;
 struct skd_buf	sched;
-long    type;
+int    type;
 char *s1;
 
 
@@ -542,14 +542,14 @@ strcpy(arg_buff,arg);
 }
 
 void skd_end(ip)
-long ip[5];
+int ip[5];
 {
   skd_end_to(ip,&rtype,0,run_index);
 }
 
 static void skd_end_to(ip,rtype_in,timed_out,run_index)
-long ip[5];
-long *rtype_in;
+int ip[5];
+int *rtype_in;
 int timed_out;
 int run_index;
 {
@@ -584,7 +584,7 @@ char    name[ 5];
 {
 int	status;
 struct skd_buf	sched;
-long    type;
+int    type;
 char *s1;
 
 type=mtype(name);
@@ -643,7 +643,7 @@ return( 0);
 
 */
 
-static long mtype(char name[5]) {
+static int mtype(char name[5]) {
 	/*
       The algorithm treats the string as base b numbers. However, we can simply
       do this as, for eg, "aa" would then be treated as the same as "a". We
@@ -668,8 +668,8 @@ static long mtype(char name[5]) {
       The number in base b and the offset are evaluated with Horner's scheme.
 
 	 */
-	long val    = 0;
-	long offset = 0;
+	int val    = 0;
+	int offset = 0;
 	int i;
 	char *ptr;
 	char symbols[] = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -700,7 +700,7 @@ void skd_set_return_name(char *name) {
 // skd_clr_ret clears all elements of the skd queue with named return
 // values set to the value specified with `skd_set_return_name`.
 int skd_clr_ret(ip)
-     long ip[5];
+     int ip[5];
 {
   struct skd_buf sched;
   int status, i;
@@ -710,7 +710,7 @@ int skd_clr_ret(ip)
     exit(EXIT_FAILURE);
   }
   
-  long rtype = FS_SKD_WAIT | FS_SKD_NAMED | mtype(return_name);
+  int rtype = FS_SKD_WAIT | FS_SKD_NAMED | mtype(return_name);
   
  waitr:
   status = msgrcv(msqid, (struct msgbuf *)&sched,

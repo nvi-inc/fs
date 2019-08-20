@@ -3,18 +3,18 @@
 #include <sys/types.h>
 #include <sys/times.h>
 
-static unsigned long ticks_off;
+static unsigned int ticks_off;
 static void ticks0()
 {
   struct tms buf;
   time_t t;
 
-  ticks_off= (unsigned long) times(&buf);
+  ticks_off= (unsigned int) times(&buf);
 }
 
-static long ticks(struct tms *buf)
+static int ticks(struct tms *buf)
 {
-  return (long) ((unsigned long) times(buf) - ticks_off);
+  return (int) ((unsigned int) times(buf) - ticks_off);
 }
 
 int portread_(port, buff, count, maxc, termch, to)
@@ -32,10 +32,10 @@ unsigned char *buff;   /* hollerith */
   and portopen for details
 */
 {
-  unsigned long unsl;
+  unsigned int unsl;
   unsigned char inch;
   struct tms tms_buff;
-  long end;
+  int end;
   int iret;
 
   ticks0();

@@ -7,9 +7,9 @@ int it[5],*it6;
 {
      struct tm *ptr;
      time_t clock1, clock2;
-     long times();
+     int times();
      struct tms buffer;
-     long centisec;
+     int centisec;
 
      clock1=time(&clock1);
      centisec=times(&buffer);

@@ -14,7 +14,7 @@
 void scan_name(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ierr, i;
       char output[MAX_OUT];
@@ -33,10 +33,10 @@ long ip[5];                           /* ipc parameters */
 	strcat(output,shm_addr->scan_name.station);
 	strcat(output,",");
 	if(shm_addr->scan_name.duration > 0)
-	  sprintf(output+strlen(output),"%ld",shm_addr->scan_name.duration);
+	  sprintf(output+strlen(output),"%d",shm_addr->scan_name.duration);
 	strcat(output,",");
 	if(shm_addr->scan_name.continuous > 0)
-	  sprintf(output+strlen(output),"%ld",shm_addr->scan_name.continuous);
+	  sprintf(output+strlen(output),"%d",shm_addr->scan_name.continuous);
 	for (i=0;i<5;i++) ip[i]=0;
 	cls_snd(&ip[0],output,strlen(output),0,0);
 	ip[1]++;
@@ -95,7 +95,7 @@ long ip[5];                           /* ipc parameters */
 	ierr=-304;
 	goto error;
       } else if
-	(1!=sscanf(command->argv[3],"%ld",&shm_addr->scan_name.duration)||
+	(1!=sscanf(command->argv[3],"%d",&shm_addr->scan_name.duration)||
 	 shm_addr->scan_name.duration < 0){
 	ierr=-204;
 	printf(" argv[3] '%s' strlen %d\n",command->argv[3],
@@ -110,7 +110,7 @@ long ip[5];                           /* ipc parameters */
 	ierr=-305;
 	goto error;
       } else if
-	(1!=sscanf(command->argv[4],"%ld",&shm_addr->scan_name.continuous)||
+	(1!=sscanf(command->argv[4],"%d",&shm_addr->scan_name.continuous)||
 	 shm_addr->scan_name.continuous < 0){
 	ierr=-205;
 	goto error;

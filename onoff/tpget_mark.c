@@ -4,7 +4,7 @@
 #define MAX_BUF 256
 
 void tpget_mark(ip,itpis,tpi)
-long ip[5];                                     /* ipc array */
+int ip[5];                                     /* ipc array */
 int itpis[MAX_DET]; /* detector selection array */
 float tpi[MAX_DET]; /* detector value array */
 {
@@ -15,7 +15,7 @@ float tpi[MAX_DET]; /* detector value array */
   iclass = ip[0];
   nr=0;
   for(i=0;i<17;i++) {
-    long ipwr;
+    int ipwr;
     if (itpis[i]==0)
       continue;
     if(i!=15||itpis[14]==0) {

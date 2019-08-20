@@ -17,7 +17,7 @@ static int ia,ib,ic,id;                /* which if chains are in use */
 
 void vget_att(lwho,ip,ichain1,ichain2)
 char lwho[2];
-long ip[5];
+int ip[5];
 int ichain1,ichain2;
 {
     struct req_buf buffer;
@@ -81,7 +81,7 @@ int ichain1,ichain2;
 
 void vset_zero(lwho,ip)            /* max. atten. (zeroes signal) */
 char lwho[2];
-long ip[5];
+int ip[5];
 {
     struct req_buf buffer;
     struct req_rec request;
@@ -144,7 +144,7 @@ long ip[5];
 }
 void vrst_att(lwho,ip)            /* restore attenuators */
 char lwho[2];
-long ip[5];
+int ip[5];
 {
     struct req_buf buffer;
     struct req_rec request;

@@ -27,7 +27,7 @@ mout6()
   int tone, chan;
   int iping[4];
   int it[6];
-  long seconds,dot2pps;
+  int seconds,dot2pps;
   struct tm *tm;
   int inv_vdif[4],vdif_should,inv_pps;
 

@@ -10,7 +10,7 @@
 
 void set_vrptrk(itrk, ip,indxtp) /* set vlba reproduce tracks */
 int itrk[2];              /* Mark III tracks requested */
-long ip[5];               /* ipc array */
+int ip[5];               /* ipc array */
 int indxtp;
 {
   struct req_buf buffer;
@@ -51,12 +51,12 @@ int indxtp;
 }
 void get_verate(jperr,jsync,jbits,itrk,itper,ip)
 /* retrieve vlba error counts */
-long jperr[2];            /* returned parity errors */
-long jsync[2];            /* returned re-sync counts */
-long jbits[2];            /* returned bits processed */
+int jperr[2];            /* returned parity errors */
+int jsync[2];            /* returned re-sync counts */
+int jbits[2];            /* returned bits processed */
 int itrk[2];              /* Mark III tracks that are set-up */
 int itper;                /* time period to sample for, 10s milliseconds */
-long ip[5];
+int ip[5];
 {
   struct req_buf buffer;
   struct req_rec request;
@@ -146,7 +146,7 @@ long ip[5];
   get_res(&response, &buffer);        /* fetch index set responses */
   get_res(&response, &buffer);
   for (i=28;i<36;i++) {              /* array contents */
-    long unsigned tx;
+    unsigned int tx;
     get_res(&response, &buffer); iarray[i]=response.data;
   }
 
@@ -171,7 +171,7 @@ long ip[5];
 void get_vaux(iaux,itrk,ip) /* check if aux data is correct */
 int iaux[2];  /* returned, 1=no match, 0=match, -1=this channel not checked */
 int itrk[2];  /* tracks are selected reproduce, 0=no track selected */
-long ip[5];   /* ipc array */
+int ip[5];   /* ipc array */
 
 /* arrays iaux and itrk are indexed by channel a=0, b=1 */
 /* it is an error if the formatter is not configured for aux capture */

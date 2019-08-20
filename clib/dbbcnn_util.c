@@ -18,7 +18,7 @@ static char *agc_key[ ]={"man","agc"};
 #define NBW_KEY sizeof(bw_key)/sizeof( char *)
 #define NAGC_KEY sizeof(agc_key)/sizeof( char *)
 
-static int dbbc_freq(unsigned long *,char *);
+static int dbbc_freq(unsigned int *,char *);
 
 int dbbcnn_dec(lcl,count,ptr,itask)
 struct dbbcnn_cmd *lcl;
@@ -283,7 +283,7 @@ char *buff;
   return 0;
 }
 static int dbbc_freq(pulFreq,sptr)
-unsigned long *pulFreq;
+unsigned int *pulFreq;
 char *sptr;
 {
   int start, decpt, outw, outf, len, i, j, iwhole, ifract;
@@ -345,7 +345,7 @@ char *sptr;
   for(i=0;i<(6-outf);i++)
     ifract*=10;
 
-  *pulFreq=((long unsigned) iwhole)*1000000+ifract;
+  *pulFreq=((unsigned int ) iwhole)*1000000+ifract;
 
   return 0;
 }

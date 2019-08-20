@@ -47,7 +47,7 @@ int wrdev_(mode,devid,buffer,buflen,error,ipcode,timeout, no_after, kecho,
 	   itime, centisec,no_write_ren)
 
 int *mode,*devid;
-long *ipcode;
+int *ipcode;
 unsigned char *buffer;
 int *buflen;  		/* length of the message in buffer, characters */
 int *error;
@@ -55,7 +55,7 @@ int *timeout;
 int *no_after;
 int *kecho;
 int *itime;
-long centisec[2];
+int centisec[2];
 int *no_write_ren;
 {
   int val;

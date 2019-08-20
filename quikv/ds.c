@@ -16,7 +16,7 @@ void ds_dis();                       /* ds SNAP command display */
 void ds(command,itask,ip)
 struct cmd_ds *command;               /* parsed command structure */
 int itask;                            /* sub-task - unused */
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, count, i;
       struct ds_cmd lcl;            /* local Dataset request buffer */

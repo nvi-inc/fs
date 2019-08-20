@@ -17,7 +17,7 @@ int logmsg_dbbc3();
 void dbbc3_ifx_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
       struct dbbc3_ifx_cmd lclc;
       struct dbbc3_ifx_mon lclm;

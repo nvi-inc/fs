@@ -18,7 +18,7 @@ static int rel_addr_v2[ ]={0,0,0,0,0,0x60,0x61,0};
 void get_vatod(ichan,volts,ip,indxtp)
 int ichan;                           /* M3 style channel number */
 float *volts;                        /* pointer to store result */
-long ip[5];                          /* ipc array */
+int ip[5];                          /* ipc array */
 int indxtp;
 {
       struct req_buf buffer;
@@ -27,7 +27,7 @@ int indxtp;
       struct res_rec response;
       int counts;
       struct tms tms_buff;
-      long end;
+      int end;
       int indx;
 
       if(indxtp == 1) {

@@ -363,9 +363,9 @@ int itask;
       strcat(ptr+strlen(ptr)," ; \n ");
 
   } else { /* Mark 5C/FlexBuff */
-    long long unsigned bitmask=lclc->mask.mask;
+    unsigned long long bitmask=lclc->mask.mask;
     int bits_p_chan = 0 ;
-    long long unsigned data_rate = 0;
+    unsigned long long data_rate = 0;
     int channels = 0;
     int i;
         
@@ -406,7 +406,7 @@ m5_2_mk5b_mode(ptr_in,lclc,lclm,itask,ip) /* return values:
      struct mk5b_mode_cmd *lclc;  /* result structure with parameters */
      struct mk5b_mode_mon *lclm;  /* result structure with parameters */
      int itask;
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr;

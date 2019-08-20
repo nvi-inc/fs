@@ -236,7 +236,7 @@ int str2tonedet( char *string , char *tone )
  return 1;
 }
 /* --------------------------------------------------------------------------*/
-int str2lofreq( char *string , unsigned long *lofreq )
+int str2lofreq( char *string , unsigned int *lofreq )
 {
  double freq;
 
@@ -251,7 +251,7 @@ int str2lofreq( char *string , unsigned long *lofreq )
  freq = atof( string );
  if( freq < 100.0 || freq > 1000.0 ) return 0;
 
- *lofreq = (unsigned long)( freq * 1.0E6 + 0.5 );
+ *lofreq = (unsigned int)( freq * 1.0E6 + 0.5 );
 
  return 1;
 }
@@ -321,7 +321,7 @@ int str2period( char *string , unsigned short *period )
  return( *period > 1 );
 }
 /* --------------------------------------------------------------------------*/
-char *lofreq2str( unsigned long lofreq )
+char *lofreq2str( unsigned int lofreq )
 {
  static char string[12];
  int sig = lofreq % 100 ? 6 : 2;
@@ -360,7 +360,7 @@ char *encode2str( int code )
  return name[code];
 }
 /* --------------------------------------------------------------------------*/
-void s2err( int err , long *ip , char *code )
+void s2err( int err , int *ip , char *code )
 {
  char message[400];
  int i, das;
@@ -419,7 +419,7 @@ void s2_old_attn__( int *ierr )
 /* --------------------------------------------------------------------------*/
 void s2_get_tpi__( char *dev , double *tpi , int *ierr )
 {
- unsigned long  lofreq, TPI[4];
+ unsigned int  lofreq, TPI[4];
  unsigned short tpiavg  = 0;
  short          gain[2];
  char           ifsrc, bw[2], agcmode, lolock, agclock, index;
@@ -443,7 +443,7 @@ void s2_get_tpi__( char *dev , double *tpi , int *ierr )
 /* --------------------------------------------------------------------------*/
 void s2_get_bbc_source__( int *source , int *bbc_id )
 {
- unsigned long  lofreq, tpi[2];
+ unsigned int  lofreq, tpi[2];
  unsigned short tpiavg  = 0;
  short          gain[2];
  char           ifsrc, bw[2], agcmode, lolock, agclock, index, state;
@@ -462,9 +462,9 @@ void s2_get_bbc_source__( int *source , int *bbc_id )
 				   ,1024, 2048, 4096, 8192, 16384, 32768
                                    , 65536, 131072, */
 /* --------------------------------------------------------------------------*/
-void SetBitState( unsigned long *flag , int index , int state )
+void SetBitState( unsigned int *flag , int index , int state )
 {
- unsigned long mask = ( 0x0001 << index );
+ unsigned int mask = ( 0x0001 << index );
 
  if( !state )
    *flag &= ~mask;
@@ -472,9 +472,9 @@ void SetBitState( unsigned long *flag , int index , int state )
    *flag |=  mask;
 }
 /* --------------------------------------------------------------------------*/
-int GetBitState( unsigned long flag , int index )
+int GetBitState( unsigned int flag , int index )
 {
- unsigned long mask = ( 0x0001 << index );
+ unsigned int mask = ( 0x0001 << index );
  return( ( flag & mask ) != 0 );
 }
 /* --------------------------------------------------------------------------*/

@@ -25,7 +25,7 @@ void skd_run(), skd_par();      /* program scheduling utilities */
 void ifadjust(command,itask,ip)
      struct cmd_ds *command;                /* parsed command structure */
      int itask;                            /* sub-task, ifd number +1  */
-     long ip[5];                           /* ipc parameters */
+     int ip[5];                           /* ipc parameters */
 {
   short int buff[MAX_BUF];
   int i, j, k, l, ierr=0, itry;
@@ -33,7 +33,7 @@ void ifadjust(command,itask,ip)
 				the save ORs for the IF3 switches. */
   int nchar,idum;
   int nrec, itp, itpz[14], iuse[14];
-  long iclass;
+  int iclass;
   int iact,imin[3],imax[3],imxv[3],imnv[3],icur[3],inew[3];
   int below[3], lu[2];
   int vcnum_l[14], vcnum_u[14], sb_flag;/* place holders */

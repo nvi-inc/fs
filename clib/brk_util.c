@@ -14,10 +14,10 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
-static long mtype();
+static int mtype();
 
 struct brk_buf {
-	long	mtype;
+	int	mtype;
 } ;
 
 static int msqid;
@@ -100,7 +100,7 @@ char    name[ 5];
 {
 int	status, ret;
 struct brk_buf	brbuf;
-long    type;
+int    type;
 
 type=mtype(name);
 
@@ -129,11 +129,11 @@ if(-1==msgctl( msqid, IPC_RMID, NULL )) {
 return( 0);
 }
 
-static long mtype(name)
+static int mtype(name)
 char name[5];
 {
     int i;
-    long val;
+    int val;
 
     val=0;
     for (i=0;i<5;i++) if(name[i] != ' ') val+=(tolower(name[i])-'a')<<(5*i);

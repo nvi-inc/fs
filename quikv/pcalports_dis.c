@@ -15,11 +15,11 @@
 void pcalports_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
       struct pcalports_cmd lclc;
       int ind,kcom,i,j,ich, ierr, count, nrec, nchar, idum;
-      long iclass;
+      int iclass;
 
       char output[MAX_OUT];
       char buff[MAX_BUF];

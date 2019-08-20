@@ -276,25 +276,25 @@ void fs_get_epoch__(epoch)
 	}
 
 void fs_set_iclopr__(iclopr)
-	long *iclopr;
+	int *iclopr;
 	{
 	  shm_addr->iclopr = *iclopr;
 	}
 
 void fs_get_iclopr__(iclopr)
-	long *iclopr;
+	int *iclopr;
 	{
 	  *iclopr = shm_addr->iclopr;
 	}
 
 void fs_set_iclbox__(iclbox)
-	long *iclbox;
+	int *iclbox;
 	{
 	  shm_addr->iclbox = *iclbox;
 	}
 
 void fs_get_iclbox__(iclbox)
-	long *iclbox;
+	int *iclbox;
 	{
 	  *iclbox = shm_addr->iclbox;
 	}
@@ -432,7 +432,7 @@ void fs_get_ispeed__(ispeed,i)
 	}
 
 void fs_get_cips__(cips,i)
-	long *cips,*i;
+	int *cips,*i;
 	{
 	  if(*i==1)
 	    cips[0] = shm_addr->cips[0];
@@ -1185,7 +1185,7 @@ void fs_get_ilokvc__(ILOKVC)
 	}
 
 void fs_set_tpivc__(TPIVC,i)
-	unsigned long *TPIVC;
+	unsigned int *TPIVC;
 	int *i;
 	{
 	  if(*i >0 && *i < 16)
@@ -1193,14 +1193,14 @@ void fs_set_tpivc__(TPIVC,i)
 	}
 
 void fs_get_tpivc__(TPIVC,i)
-	unsigned long *TPIVC;
+	unsigned int *TPIVC;
 	int *i;
 	{
 	  if(*i >0 && *i < 16)
 	    TPIVC[*i-1] = shm_addr->TPIVC[*i-1];
 	}
 void fs_set_mifd_tpi__(MIFD_TPI,i)
-	unsigned long *MIFD_TPI;
+	unsigned int *MIFD_TPI;
 	int *i;
 	{
 	  if(*i >0 && *i < 4)
@@ -1208,14 +1208,14 @@ void fs_set_mifd_tpi__(MIFD_TPI,i)
 	}
 
 void fs_get_mifd_tpi__(MIFD_TPI,i)
-	long *MIFD_TPI;
+	int *MIFD_TPI;
 	int *i;
 	{
 	  if(*i >0 && *i < 4)
 	    MIFD_TPI[*i-1] = shm_addr->mifd_tpi[*i-1];
 	}
 void fs_set_bbc_tpi__(bbc_tpi,i)
-	unsigned long bbc_tpi[2];
+	unsigned int bbc_tpi[2];
 	int *i;
 	{
 	  if(*i >0 && *i < 15) {
@@ -1225,7 +1225,7 @@ void fs_set_bbc_tpi__(bbc_tpi,i)
 	}
 
 void fs_get_bbc_tpi__(bbc_tpi,i)
-	unsigned long bbc_tpi[2];
+	unsigned int bbc_tpi[2];
 	int *i;
 	{
 	  if(*i >0 && *i < 15) {
@@ -1234,7 +1234,7 @@ void fs_get_bbc_tpi__(bbc_tpi,i)
 	  }
 	}
 void fs_set_vifd_tpi__(VIFD_TPI,i)
-	unsigned long *VIFD_TPI;
+	unsigned int *VIFD_TPI;
 	int *i;
 	{
 	  if(*i >0 && *i < 5)
@@ -1242,7 +1242,7 @@ void fs_set_vifd_tpi__(VIFD_TPI,i)
 	}
 
 void fs_get_vifd_tpi__(VIFD_TPI,i)
-	long *VIFD_TPI;
+	int *VIFD_TPI;
 	int *i;
 	{
 	  if(*i >0 && *i < 5)
@@ -1639,7 +1639,7 @@ void fs_set_i20kch__(i20kch)
 	}
 
 void fs_get_time_coeff__(secs_off,epoch,offset,rate,span,model,icomputer)
-        long *secs_off,*epoch,*offset,*span;
+        int *secs_off,*epoch,*offset,*span;
 	float *rate;
 	char *model;
 	int *icomputer;
@@ -1657,7 +1657,7 @@ void fs_get_time_coeff__(secs_off,epoch,offset,rate,span,model,icomputer)
 	}
 
 void fs_set_time_coeff__(secs_off,epoch,offset,rate,span,model,icomputer)
-        long *secs_off,*epoch,*offset,*span;
+        int *secs_off,*epoch,*offset,*span;
 	float *rate;
 	char *model;
 	int *icomputer;
@@ -1703,7 +1703,7 @@ void fs_get_vfmenablelo__(vfmenablelo)
 	}
 
 void fs_get_fm4enable__(fm4enable)
-        long fm4enable[];
+        int fm4enable[];
 	{
 	  fm4enable[0] = shm_addr->form4.enable[0];
 	  fm4enable[1] = shm_addr->form4.enable[1];
@@ -2006,13 +2006,13 @@ void fs_get_user_dev2_value__(user_dev2_value)
 	}
 
 void fs_set_freqif3__(freqif3)
-	long *freqif3;
+	int *freqif3;
 	{
 	  shm_addr->freqif3 = *freqif3;
 	}
 
 void fs_get_freqif3__(freqif3)
-	long *freqif3;
+	int *freqif3;
 	{
 	  *freqif3 = shm_addr->freqif3;
 	}
@@ -2291,7 +2291,7 @@ void fs_get_ichlba__(ichlba,N)
 	}
 
 void fs_set_ifp_tpi__(ifp_tpi,i)
-	unsigned long ifp_tpi;
+	unsigned int ifp_tpi;
 	int *i;
 	{
 	  if(*i >0 && *i < 2*MAX_DAS+1) {
@@ -2300,7 +2300,7 @@ void fs_set_ifp_tpi__(ifp_tpi,i)
 	}
 
 void fs_get_ifp_tpi__(ifp_tpi,i)
-	unsigned long ifp_tpi;
+	unsigned int ifp_tpi;
 	int *i;
 	{
 	  if(*i >0 && *i < 2*MAX_DAS+1) {
@@ -2308,13 +2308,13 @@ void fs_get_ifp_tpi__(ifp_tpi,i)
 	  }
 	}
 void fs_set_logchg__(logchg)
-	long *logchg;
+	int *logchg;
 	{
 	  shm_addr->logchg = *logchg;
 	}
 
 void fs_get_logchg__(logchg)
-	long *logchg;
+	int *logchg;
 	{
 	  *logchg = shm_addr->logchg;
 	}

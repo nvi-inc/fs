@@ -22,7 +22,7 @@ m5_2_dot(ptr_in,lclm,ip) /* return values:
      char *ptr_in;           /* input buffer to be parsed */
 
      struct dot_mon *lclm;  /* result structure with parameters */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr;

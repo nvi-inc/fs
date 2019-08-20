@@ -14,7 +14,7 @@
 void k4rec_mode_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
   struct k4rec_mode_cmd lclc;
   struct k4rec_mode_mon lclm;

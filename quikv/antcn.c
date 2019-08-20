@@ -10,7 +10,7 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-int antcn(long ip[5])
+int antcn(int ip[5])
 {
   int ip0;
 

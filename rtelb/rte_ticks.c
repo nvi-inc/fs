@@ -10,7 +10,7 @@
 #include "../include/shm_addr.h"
 
 void rte_ticks(lRawTicks)
-long *lRawTicks;
+int *lRawTicks;
 {
      struct tms buffer;
      clock_t ticks;
@@ -20,7 +20,7 @@ long *lRawTicks;
        perror("using times()");
        exit(-1);
      }
-     *lRawTicks=(signed) ((unsigned long) ticks - shm_addr->time.ticks_off);
+     *lRawTicks=(signed) ((unsigned int) ticks - shm_addr->time.ticks_off);
 
      return;
 }

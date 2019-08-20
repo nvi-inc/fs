@@ -14,7 +14,7 @@
 void lba_cor_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
       struct ifp lcl;
       int ind,kcom,i, ierr, count;

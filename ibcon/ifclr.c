@@ -27,7 +27,7 @@ extern int ID_hpib;
 void ifclr_(error,ipcode)
 
 int *error;
-long *ipcode;
+int *ipcode;
 
 {
 	*error = 0;

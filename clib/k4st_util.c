@@ -82,18 +82,18 @@ struct k4st_cmd *lcl;
 }
 
 k4st_req_q(ip)
-long ip[5];
+int ip[5];
 {
  ib_req7(ip,device,10,"DRC?");
 }
 k4st_reqs_q(ip)
-long ip[5];
+int ip[5];
 {
  ib_req7(ip,device,20,"SQN?");
 }
 
 k4st_req_c(ip,lclc,tcoff,sqn)
-long ip[5],sqn;
+int ip[5],sqn;
 struct k4st_cmd *lclc;
 int tcoff;
 {
@@ -109,9 +109,9 @@ int tcoff;
     ib_req2(ip,device,buffer);
   } else if(lclc->record==1) {
     if(tcoff) {
-      sprintf(buffer,"REC=%ld;TSM=ON,%s,%d",sqn,ftfb[shm_addr->k4rec_mode.im],shm_addr->k4rec_mode.nm);
+      sprintf(buffer,"REC=%d;TSM=ON,%s,%d",sqn,ftfb[shm_addr->k4rec_mode.im],shm_addr->k4rec_mode.nm);
     } else {
-      sprintf(buffer,"REC=%ld",sqn);
+      sprintf(buffer,"REC=%d",sqn);
     }
     ib_req2(ip,device,buffer);
   } else
@@ -120,7 +120,7 @@ int tcoff;
 
 k4st_res_q(lclc,ip)
 struct k4st_cmd *lclc;
-long ip[5];
+int ip[5];
 {
   char buffer[MAX_BUF];
   int max;
@@ -158,8 +158,8 @@ long ip[5];
    
 }
 k4st_ress_q(ip,sqn)
-long *sqn;
-long ip[5];
+int *sqn;
+int ip[5];
 {
   char buffer[MAX_BUF];
   int max;
@@ -168,6 +168,6 @@ long ip[5];
   ib_res_ascii(buffer,&max,ip);
   if(max < 0)
     *sqn=-1;
-  else if(1!=sscanf(buffer,"SQN=%ld",sqn))
+  else if(1!=sscanf(buffer,"SQN=%d",sqn))
     *sqn=-1;
 }

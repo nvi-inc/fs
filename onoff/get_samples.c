@@ -10,7 +10,7 @@ extern struct fscom *shm_addr;
 #include "sample_ds.h"
 
 int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
-     long ip[5];
+     int ip[5];
      int cont[MAX_ONOFF_DET],itpis[MAX_ONOFF_DET], intg, *ierr;
      float rut;
      struct sample *accum, *accum2;

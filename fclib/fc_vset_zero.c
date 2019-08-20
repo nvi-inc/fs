@@ -1,6 +1,6 @@
 void fc_vget_att__(lwho,ip,ichain1,ichain2)
 char lwho[2];
-long ip[5];
+int ip[5];
 int *ichain1,*ichain2;
 {
     void vget_att();
@@ -10,7 +10,7 @@ int *ichain1,*ichain2;
 }
 void fc_vset_zero__(lwho,ip)
 char lwho[2];
-long ip[5];
+int ip[5];
 {
     void vset_zero();
 
@@ -19,7 +19,7 @@ long ip[5];
 }
 void fc_vrst_att__(lwho,ip)
 char lwho[2];
-long ip[5];
+int ip[5];
 {
     void vrst_att();
 

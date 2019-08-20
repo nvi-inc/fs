@@ -14,7 +14,7 @@ unsigned short track_mask;
 void lba_trkfrm(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       unsigned short track_old;
       int ilast, ierr, ichold, i, count;

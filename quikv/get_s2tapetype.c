@@ -9,7 +9,7 @@
 
 #include "../rclco/rcl/rcl_def.h"
 
-void get_s2tapetype(char *tapetype, long ip[], char *lwho)
+void get_s2tapetype(char *tapetype, int ip[], char *lwho)
 {
   struct rclcn_req_buf req_buf;        /* rclcn request buffer */
   struct rclcn_res_buf res_buf;

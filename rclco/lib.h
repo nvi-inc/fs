@@ -8,8 +8,8 @@ const char* strapp (const char* a, const char* b, const char* c);
 const char* strapp5(const char* a, const char* b, const char* c,
                     const char* d, const char* e);
 
-long int str_to_int(const char* a);
-const char* int_to_str(long int a, int f);
+int str_to_int(const char* a);
+const char* int_to_str(int a, int f);
 
 double str_to_double(const char* a);
 const char* double_to_str(double a);

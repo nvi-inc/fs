@@ -40,7 +40,7 @@ int check_tle(char *ptr)
 void tle(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
   int i, ierr, ilast, iline, catnum, num, check;
   char *ptr, buf[120], *start;
@@ -62,15 +62,15 @@ long ip[5];                           /* ipc parameters */
     start=buf+strlen(buf);
     sizebuf=sizeof(buf)-strlen(buf)-1;
 
-    snprintf(start,sizebuf,"0,%ld,%s",
+    snprintf(start,sizebuf,"0,%d,%s",
 	     shm_addr->tle.catnum[0],shm_addr->tle.tle0);
     cls_snd(&ip[0],buf,strlen(buf),0,0);
 
-    snprintf(start,sizebuf,"1,%ld,%s",
+    snprintf(start,sizebuf,"1,%d,%s",
 	     shm_addr->tle.catnum[1],shm_addr->tle.tle1);
     cls_snd(&ip[0],buf,strlen(buf),0,0);
 
-    snprintf(start,sizebuf,"2,%ld,%s",
+    snprintf(start,sizebuf,"2,%d,%s",
 	     shm_addr->tle.catnum[2],shm_addr->tle.tle2);
     cls_snd(&ip[0],buf,strlen(buf),0,0);
 

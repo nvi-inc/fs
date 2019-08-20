@@ -52,7 +52,7 @@ FILE *dcbfs;
 
 main(){
   int fserr_rcv();
-  long class, ip[5];
+  int class, ip[5];
   int rtn1, rtn2;
   char inbuf[120];
   int i;
@@ -134,7 +134,7 @@ Repeat:
     struct rclcn_res_buf res_buf;
     char err_msg[RCL_MAXSTRLEN_ERROR_DECODE];
     int ierr;
-    long ip[5];
+    int ip[5];
     char *first;
     struct error_struct *ptr,*new,*last=NULL,**clean_up;
 

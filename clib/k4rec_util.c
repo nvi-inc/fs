@@ -68,7 +68,7 @@ struct k4rec_mon *lcl;
 }
 
 k4rec_req_q(ip)
-long ip[5];
+int ip[5];
 {
   ib_req7(ip,device,20,"SQN?");
   ib_req7(ip,device,20,"DRM?");
@@ -78,49 +78,49 @@ long ip[5];
 }
 
 k4rec_req_eject(ip)
-long ip[5];
+int ip[5];
 {
   ib_req2(ip,device,"UNL");
 }
 
 k4rec_req_ini(ip)
-long ip[5];
+int ip[5];
 {
   ib_req2(ip,device,"INI");
 }
 
 k4rec_req_xsy(ip)
-long ip[5];
+int ip[5];
 {
   ib_req2(ip,device,"XSY");
 }
 
 k4rec_req_drum_on(ip)
-long ip[5];
+int ip[5];
 {
   ib_req2(ip,device,"DRM=ON");
 }
 
 k4rec_req_drum_off(ip)
-long ip[5];
+int ip[5];
 {
   ib_req2(ip,device,"DRM=OFF");
 }
 
 k4rec_req_synch_on(ip)
-long ip[5];
+int ip[5];
 {
   ib_req2(ip,device,"SYT=ON");
 }
 
 k4rec_req_synch_off(ip)
-long ip[5];
+int ip[5];
 {
   ib_req2(ip,device,"SYT=OFF");
 }
 
 k4rec_req_prl(ip,ptr)
-long ip[5];
+int ip[5];
 char *ptr;
 {
   char buff[12];
@@ -138,7 +138,7 @@ char *ptr;
 
 k4rec_res_q(lcl,ip)
 struct k4rec_mon *lcl;
-long ip[5];
+int ip[5];
 {
   unsigned char buffer[MAX_BUF];
   int max;

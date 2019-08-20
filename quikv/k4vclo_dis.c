@@ -14,7 +14,7 @@
 void k4vclo_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
   struct k4vclo_cmd lclc;
   struct k4vclo_mon lclm;

@@ -1,7 +1,7 @@
 void fc_dbbcn_pfb_d__(device,ierr,ip)
 char device[2];
 int *ierr;
-long ip[5];
+int ip[5];
 {
     void dbbcn_pfb_d();
 
@@ -10,7 +10,7 @@ long ip[5];
 }
 void fc_dbbcn_pfb_v__(dtpi,ip)
 double *dtpi;
-long ip[5];
+int ip[5];
 {
     void dbbcn_pfb_v();
 
@@ -18,7 +18,7 @@ long ip[5];
     return;
 }
 void fc_dbbcn_pfb_r__(ip)
-long ip[5];
+int ip[5];
 {
     void dbbcn_pfb_r();
 

@@ -14,7 +14,7 @@
 void venable_dis(command,itask,ip,indx)
 struct cmd_ds *command;
 int itask,indx;
-long ip[5];
+int ip[5];
 {
       struct venable_cmd lclc;
       int ind,kcom,i,ich, ierr, count;

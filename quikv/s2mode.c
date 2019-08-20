@@ -14,7 +14,7 @@
 char *arg_next( struct cmd_ds *command, int *last );
 
 /* S2 mode SNAP command */
-void s2mode( struct cmd_ds *command, int itask, long *ip )
+void s2mode( struct cmd_ds *command, int itask, int *ip )
 {
  int   ierr = 0;
  int   i;

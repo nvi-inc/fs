@@ -232,14 +232,14 @@ struct m5state *state;
       sprintf(ptr,format,*((float *)value));
     else if(strcmp(format,"%d")==0)
       sprintf(ptr,format,*((int *)value));
-    else if(strcmp(format,"%ld")==0)
-      sprintf(ptr,format,*((long *)value));
-    else if(strcmp(format,"%lx")==0)
-      sprintf(ptr,format,*((unsigned long *)value));
+    else if(strcmp(format,"%d")==0)
+      sprintf(ptr,format,*((int *)value));
+    else if(strcmp(format,"%x")==0)
+      sprintf(ptr,format,*((unsigned int *)value));
     else if(strcmp(format,"%Ld")==0)
       sprintf(ptr,format,*((long long *)value));
     else if(strcmp(format,"%llx")==0)
-      sprintf(ptr,format,*((long long unsigned *)value));
+      sprintf(ptr,format,*((unsigned long long *)value));
 
   if(state->error) {
     if(state->known)

@@ -138,12 +138,12 @@ struct fila10g_mode_cmd *lclc;
     case 1:
       if(lclc->mask2.state.known && lclc->mask2.mask2) {
 	strcpy(output,"0x");
-	m5sprintf(output+2,"%lx",&lclc->mask2.mask2,&lclc->mask2.state);
+	m5sprintf(output+2,"%x",&lclc->mask2.mask2,&lclc->mask2.state);
       }
       break;
     case 2:
       strcpy(output,"0x");
-      m5sprintf(output+2,"%lx",&lclc->mask1.mask1,&lclc->mask1.state);
+      m5sprintf(output+2,"%x",&lclc->mask1.mask1,&lclc->mask1.state);
       break;
     case 3:
       m5sprintf(output,"%d",&lclc->decimate.decimate,&lclc->decimate.state);

@@ -44,7 +44,7 @@ struct data_check_mon *lcl;
       if(!tvgss)
 	m5sprintf(output,"%s",lcl->submode.submode,&lcl->submode.state);
       else
-	m5sprintf(output,"%ld",&lcl->submode.first,&lcl->submode.state);
+	m5sprintf(output,"%d",&lcl->submode.first,&lcl->submode.state);
     }
     break;
   case 3:
@@ -61,7 +61,7 @@ struct data_check_mon *lcl;
       if(!tvgss)
 	m5time_encode(output,&lcl->time.time,&lcl->time.state);
       else
-	m5sprintf(output,"%ld",&lcl->time.bad,&lcl->time.state);
+	m5sprintf(output,"%d",&lcl->time.bad,&lcl->time.state);
     }
     break;
   case 4:
@@ -76,9 +76,9 @@ struct data_check_mon *lcl;
 	(strcmp(lcl->mode.mode,"tvg") == 0 ||
 	 strcmp(lcl->mode.mode,"SS") == 0);
       if(!tvgss)
-	m5sprintf(output,"%ld",&lcl->offset.offset,&lcl->offset.state);
+	m5sprintf(output,"%d",&lcl->offset.offset,&lcl->offset.state);
       else
-	m5sprintf(output,"%ld",&lcl->offset.size,&lcl->offset.state);
+	m5sprintf(output,"%d",&lcl->offset.size,&lcl->offset.state);
     }
     break;
   case 5:
@@ -100,7 +100,7 @@ struct data_check_mon *lcl;
 	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
       m5sprintf(output,"%f",&lcl->total.total,&lcl->total.state);
     } else {
-      m5sprintf(output,"%ld",&lcl->bytes.bytes,&lcl->bytes.state);
+      m5sprintf(output,"%d",&lcl->bytes.bytes,&lcl->bytes.state);
     }
     break;
   case 7:
@@ -109,7 +109,7 @@ struct data_check_mon *lcl;
 	shm_addr->equip.drive_type[0] == MK5B_BS ||
         shm_addr->equip.drive_type[0] ==MK5C ||
 	shm_addr->equip.drive_type[0] == MK5C_BS) ) {
-      m5sprintf(output,"%ld",&lcl->byte.byte,&lcl->byte.state);
+      m5sprintf(output,"%d",&lcl->byte.byte,&lcl->byte.state);
     } else {
       m5sprintf(output,"%Ld",&lcl->missing.missing,&lcl->missing.state);
     }
@@ -138,7 +138,7 @@ m5_2_data_check(ptr_in,lclm,ip) /* return values:
      char *ptr_in;           /* input buffer to be parsed */
 
      struct data_check_mon *lclm;  /* result structure with parameters */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr;
@@ -224,7 +224,7 @@ m5_2_data_check(ptr_in,lclm,ip) /* return values:
 	      goto error2;
 	    }
 	  } else
-	    if(m5sscanf(ptr,"%ld",&lclm->submode.first,&lclm->submode.state)) {
+	    if(m5sscanf(ptr,"%d",&lclm->submode.first,&lclm->submode.state)) {
 	      ierr=-522;
 	      goto error2;
 	    }
@@ -246,7 +246,7 @@ m5_2_data_check(ptr_in,lclm,ip) /* return values:
 	      goto error2;
 	    }
 	  } else
-          if(m5sscanf(ptr,"%ld",&lclm->time.bad,&lclm->time.state)) {
+          if(m5sscanf(ptr,"%d",&lclm->time.bad,&lclm->time.state)) {
             ierr=-523;
             goto error2;
 	  }
@@ -263,12 +263,12 @@ m5_2_data_check(ptr_in,lclm,ip) /* return values:
 	    (strcmp(lclm->mode.mode,"tvg") == 0 ||
 	     strcmp(lclm->mode.mode,"SS") == 0);
 	  if(!tvgss) {
-	    if(m5sscanf(ptr,"%ld",&lclm->offset.offset, &lclm->offset.state)) {
+	    if(m5sscanf(ptr,"%d",&lclm->offset.offset, &lclm->offset.state)) {
 	      ierr=-504;
 	      goto error2;
 	    }
 	  } else
-	    if(m5sscanf(ptr,"%ld",&lclm->offset.size,&lclm->offset.state)) {
+	    if(m5sscanf(ptr,"%d",&lclm->offset.size,&lclm->offset.state)) {
 	      ierr=-524;
 	      goto error2;
 	    }
@@ -294,7 +294,7 @@ m5_2_data_check(ptr_in,lclm,ip) /* return values:
 	break;
       case 6:
 	if(!mk5b) {
-	  if(m5sscanf(ptr,"%ld",&lclm->bytes.bytes, &lclm->bytes.state)) {
+	  if(m5sscanf(ptr,"%d",&lclm->bytes.bytes, &lclm->bytes.state)) {
 	    ierr=-506;
 	    goto error2;
 	  }

@@ -5,7 +5,7 @@
 #include <time.h>
 #include <errno.h>
 
-long rte_secs(long *usec_off,unsigned long *ticks_off,int *error, int *perrno)
+int rte_secs(int *usec_off,unsigned int *ticks_off,int *error, int *perrno)
 {
   struct tms buf;
   struct timeval tv;
@@ -28,7 +28,7 @@ long rte_secs(long *usec_off,unsigned long *ticks_off,int *error, int *perrno)
 
   *error=0;
   *perrno=0;
-  *ticks_off=(unsigned long) ticks;
+  *ticks_off=(unsigned int) ticks;
   *usec_off=tv.tv_usec;
   return tv.tv_sec;
 

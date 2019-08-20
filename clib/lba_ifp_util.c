@@ -142,12 +142,12 @@ struct ifp *lcl;
    return;
 }
 
-long lba_tpi_from_level(level)
+int lba_tpi_from_level(level)
 unsigned short level;
 {
    if ((level & 0x00FF) == 0x0000) return (65535);
    else if ((level & 0x00FF) == 0x00FF) return (0);
-   else return((long)(16384*exp((128-(level & 0x00FF))*log(10.0)/220.0)));
+   else return((int)(16384*exp((128-(level & 0x00FF))*log(10.0)/220.0)));
 }
 
 void lba_ifp_mon(output,count,lcl)
@@ -155,7 +155,7 @@ char *output;
 int *count;
 struct ifp *lcl;
 {
-    long tpi;
+    int tpi;
 
     output=output+strlen(output);
 
@@ -1399,11 +1399,11 @@ int n_ifp;
 
    /* Set the Fine Tuner NCO Local Oscillator Frequency
       (currently the timer mechanism implicitly adds 1 to value) */
-   lcl->ft.nco_centre_value = (unsigned long)
+   lcl->ft.nco_centre_value = (unsigned int)
 	floor(lcl->ft_lo * pow(2,32) / 32.0);
 
    /* Set the Fine Tuner NCO Local Oscillator Offset Frequency */
-   lcl->ft.nco_offset_value = (unsigned long)
+   lcl->ft.nco_offset_value = (unsigned int)
 	floor(0.5 + lcl->ft_offs * pow(2,32) / 32.0);
 
    /* No need to use NCO Frequency Offset unless set */
@@ -1412,7 +1412,7 @@ int n_ifp;
    else	lcl->ft.nco_use_offset = _OFF;
 
    /* Set the Fine Tuner NCO Local Oscillator Phase */
-   lcl->ft.nco_phase_value = (unsigned long)
+   lcl->ft.nco_phase_value = (unsigned int)
 	floor(0.5 + lcl->ft_phase * pow(2,32) / 360.0);
 
    /* Need to resynchronise phase every 1PPS for VLBI !! */
@@ -1431,7 +1431,7 @@ int n_ifp;
 	/* Compensate for incorrect addition of 1 by timer mechanism */
 	lcl->ft.nco_centre_value--;
    } else {
-	lcl->ft.nco_timer_value = (unsigned long)
+	lcl->ft.nco_timer_value = (unsigned int)
 		floor(0.5 + (pow(2,32) * pow(2,lcl->bs.clock_decimation)
 				/ 32.0e6 / c_err));
 	lcl->ft.nco_use_timer = _ON;
@@ -1565,7 +1565,7 @@ int reset_err_flags(int n_ifp)
   unsigned char chan, n_das;
   struct ds_cmd lcl;
   struct ds_mon lclm;
-  long ip[5];
+  int ip[5];
   int i, ierr;
 
   n_das = n_ifp / 2;
@@ -1599,7 +1599,7 @@ int wait_for_sync(int n_ifp)
   unsigned char chan, n_das;
   struct ds_cmd lcl;
   struct ds_mon lclm;
-  long ip[5];
+  int ip[5];
   int i, ierr, timer, sync = 0;
 
   n_das = n_ifp / 2;
@@ -1651,7 +1651,7 @@ int lba_ifp_write(int n_ifp)
 
   struct ds_cmd lcl;
   struct ds_mon lclm;
-  long ip[5];
+  int ip[5];
   int i, ierr;
 
   n_das = n_ifp / 2;
@@ -1943,7 +1943,7 @@ int lba_ifp_read(int n_ifp, int chekr)
   unsigned char chan, n_das;
   struct ds_cmd lcl;
   struct ds_mon lclm;
-  long ip[5];
+  int ip[5];
   int i, ierr;
 
   n_das = n_ifp / 2;

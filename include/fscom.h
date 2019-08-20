@@ -1,9 +1,9 @@
 /* shared memory (fscom C data structure) layout */
 
 typedef struct fscom {
-        long iclbox;
-        long iclopr;
-        long nums[MAX_CLS];
+        int iclbox;
+        int iclopr;
+        int nums[MAX_CLS];
 	float AZOFF;
 	float DECOFF;
 	float ELOFF;
@@ -15,7 +15,7 @@ typedef struct fscom {
 	int ILOKVC;
 	int ITRAKA[2];
 	int ITRAKB[2];
-	unsigned long TPIVC[15];
+	unsigned int TPIVC[15];
 	float ISTPTP[2];
 	float ITACTP[2];
 	int KHALT;
@@ -58,13 +58,13 @@ typedef struct fscom {
         char idevant[64];
         char idevgpib[64];
         char idevlog[64][5];
-        long ndevlog;
+        int ndevlog;
 	int imodfm;
         int ipashd[2][2];
 	int iratfm;
 	int ispeed[2];
 	int idirtp[2];
-	long cips[2];
+	int cips[2];
         int bit_density[2];
 	int ienatp[2];
 	int inp1if;
@@ -90,23 +90,23 @@ typedef struct fscom {
         } sem;
         struct {
 	  int bbc[ MAX_BBC];
-	  long bbc_time[ MAX_BBC];
+	  int bbc_time[ MAX_BBC];
 	  int dist[ MAX_VLBA_DIST];
 	  int vform;
-	  long fm_cn_tm;
+	  int fm_cn_tm;
 	  int rec[2];
 	  int vkrepro[2];
 	  int vkenable[2];
 	  int vkmove[2];
 	  int systracks[2];
-	  long rc_mv_tm[2];
+	  int rc_mv_tm[2];
 	  int vklowtape[2];
 	  int vkload[2];
-	  long rc_ld_tm[2];
+	  int rc_ld_tm[2];
 	  struct s2rec_check s2rec;
 	  struct k4rec_check k4rec;
 	  int ifp[2*MAX_DAS];
-	  long ifp_time[2*MAX_DAS];
+	  int ifp_time[2*MAX_DAS];
 	  int dbbc_form;
         } check;
         char stcnm[4][2];
@@ -116,9 +116,9 @@ typedef struct fscom {
 
         struct bbc_cmd bbc[ MAX_BBC];
 
-        long tpi[ MAX_GLOBAL_DET];
-        long tpical[ MAX_GLOBAL_DET];
-        long tpizero[ MAX_GLOBAL_DET];
+        int tpi[ MAX_GLOBAL_DET];
+        int tpical[ MAX_GLOBAL_DET];
+        int tpizero[ MAX_GLOBAL_DET];
 
         struct {
            int rack;
@@ -155,15 +155,15 @@ typedef struct fscom {
         int i20kch;
         struct {
           float rate[2];
-          long offset[2];
-          long epoch[2];
-          long span[2];
-          long secs_off;
+          int offset[2];
+          int epoch[2];
+          int span[2];
+          int secs_off;
           int index;
 	  int icomputer[2];
           char model;
-	  long unsigned ticks_off;
-	  long usecs_off;
+	  unsigned int ticks_off;
+	  int usecs_off;
 	  int init_error;
 	  int init_errno;
         } time;
@@ -183,8 +183,8 @@ typedef struct fscom {
 	  struct {
 	    int rstate;
 	    int rstate_valid;
-	    long int position;
-	    long int posvar;
+	    int position;
+	    int posvar;
 	    int position_valid;
 	  } s2rec[2];
 	  int s2rec_inuse;
@@ -211,7 +211,7 @@ typedef struct fscom {
 	struct pcalform_cmd pcalform;
 	struct pcald_cmd pcald;
 	float extbwvc[15];
-        long freqif3;
+        int freqif3;
         int imixif3;
 	struct pcalports_cmd pcalports;
 	int k4_rec_state;
@@ -240,15 +240,15 @@ typedef struct fscom {
         int erchk;
         int ifd_set;
         int if3_set;
-        unsigned long bbc_tpi[MAX_BBC][2];
-        unsigned long vifd_tpi[4];
-        unsigned long mifd_tpi[3];
+        unsigned int bbc_tpi[MAX_BBC][2];
+        unsigned int vifd_tpi[4];
+        unsigned int mifd_tpi[3];
 	float cablevl;
         float cablediff;
         int imk4fmv;
         struct tpicd_cmd tpicd;
         int ITPIVC[15];
-        long tpigain[ MAX_GLOBAL_DET];
+        int tpigain[ MAX_GLOBAL_DET];
         int iapdflg;
         int k4rec_mode_stat; /* should be moved after k4rec_mode next chance */
         struct onoff_cmd onoff;
@@ -257,8 +257,8 @@ typedef struct fscom {
   int ipcalif3;
   struct flux_ds flux[MAX_FLUX];
 
-  long tpidiff[ MAX_GLOBAL_DET];
-  long tpidiffgain[ MAX_GLOBAL_DET];
+  int tpidiff[ MAX_GLOBAL_DET];
+  int tpidiffgain[ MAX_GLOBAL_DET];
   float caltemps[ MAX_GLOBAL_DET];
   struct calrx_cmd calrx;
 
@@ -268,12 +268,12 @@ typedef struct fscom {
        unsigned char lba_image_reject_filters;	/* Station default setting */
        enum bits lba_digital_input_format;	/* Station default setting */
        struct das das[MAX_DAS];	/* Up to MAX_DAS LBA DASs allowed */
-       unsigned long ifp_tpi[2*MAX_DAS];
+       unsigned int ifp_tpi[2*MAX_DAS];
        unsigned char m_das;		/* Current DAS in Monit4 */
 
   char mk5vsn[33];
-  long mk5vsn_logchg;
-  long logchg;
+  int mk5vsn_logchg;
+  int logchg;
   struct user_device_cmd user_device;
   struct disk_record_cmd disk_record;
   struct {
@@ -429,7 +429,7 @@ typedef struct fscom {
     int dot2pps_ns;
   } monit6;
 
-  long rdbe_sync[MAX_RDBE];
+  int rdbe_sync[MAX_RDBE];
 
   int  dbbc3_ddc_v;
   char dbbc3_ddc_vs[16];

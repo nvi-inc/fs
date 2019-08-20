@@ -21,12 +21,12 @@
  * ierr non-zero only if mode is 's' and stime fails
  */
 
-long rte_secs();
+int rte_secs();
 
 int rte_sett( oFmClock, iFmHs, lCentiSec, sMode)
 time_t oFmClock;
 int iFmHs;
-long lCentiSec;
+int lCentiSec;
 char *sMode;
 {
     int iIndex, ierr;
@@ -42,7 +42,7 @@ char *sMode;
     } else {
        time_t oCpuClock;
        int iCpuHs;
-       long lEpoch, lOffset, lDiffHs, lSpan;
+       int lEpoch, lOffset, lDiffHs, lSpan;
        float fRate;
 
        oCpuClock=lCentiSec/100+shm_addr->time.secs_off;

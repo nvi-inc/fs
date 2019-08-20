@@ -5,7 +5,7 @@ struct mk6_scan_check_mon {
   /* M6 scan check monitor parameters */
 
   struct {
-    long scan;
+    int scan;
     struct m5state state;
   } scan;
   struct {

@@ -67,7 +67,7 @@ int read_ssub() {
 }
 
 int read_skd() {
-  long ip[5];
+  int ip[5];
   char buffer[MAX_LEN] = {0};
 
   int pipefd[2];

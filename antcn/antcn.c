@@ -74,7 +74,7 @@ main()
   int dum = 0;
   int r1, r2;
   int imode,i,nchar;
-  long ip[5], class, clasr;
+  int ip[5], class, clasr;
   char buf[80], buf2[100];
 
 /* Set up IDs for shared memory, then assign the pointer to

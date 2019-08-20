@@ -13,7 +13,7 @@
 
 void dbbcchk_( char *lwho )
 {
-  long ip[5];
+  int ip[5];
   int i,ierr;
   int rtn1;    /* argument for cls_rcv - unused */
   int rtn2;    /* argument for cls_rcv - unused */

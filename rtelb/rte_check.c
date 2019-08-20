@@ -20,12 +20,12 @@ int *iErr;
      if(ticks == -1) {
        logit(NULL,errno,"un");
        *iErr=-5;
-     } else if(((unsigned long) ticks - shm_addr->time.ticks_off)
+     } else if(((unsigned int) ticks - shm_addr->time.ticks_off)
 	     /(86400L*100*248) > 0)
        *iErr = -1;  /* already passed 248 days */
      else if(ticks > -1 && ticks < shm_addr->time.ticks_off)
        *iErr = -2;   /* already passed -1 */
-     else if(((unsigned long) ticks - shm_addr->time.ticks_off)
+     else if(((unsigned int) ticks - shm_addr->time.ticks_off)
 	     /(86400L*100*219) > 0)
        *iErr = -3;  /* less than 30 days to go */
      else if(ticks < -1 && -ticks/(100*86400*30) < 1)

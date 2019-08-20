@@ -131,7 +131,7 @@ struct disk2file_mon *lcl;
 
     switch (*count) {
     case 1:
-      m5sprintf(output,"%ld",&lcl->scan_number.scan_number,
+      m5sprintf(output,"%d",&lcl->scan_number.scan_number,
 		&lcl->scan_number.state);
       break;
     case 2:
@@ -203,7 +203,7 @@ m5_2_disk2file(ptr_in,lclc,lclm,ip) /* return values:
 
      struct disk2file_cmd *lclc;  /* result structure with parameters */
      struct disk2file_mon *lclm;  /* result structure with parameters */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr;
@@ -320,7 +320,7 @@ m5_scan_set_2_disk2file(ptr_in,lclc,lclm,ip) /* return values:
 
      struct disk2file_cmd *lclc;  /* result structure with parameters */
      struct disk2file_mon *lclm;  /* result structure with parameters */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr, mk5b;

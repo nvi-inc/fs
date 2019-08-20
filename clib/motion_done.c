@@ -9,7 +9,7 @@
 #include "../include/shm_addr.h"
 
 int motion_done(ip,indx)
-long ip[5];                          /* ipc array */
+int ip[5];                          /* ipc array */
 int indx;
 {
       struct req_buf buffer;
@@ -18,7 +18,7 @@ int indx;
       struct res_rec response;
       int counts,motion,imotion;
       struct tms tms_buff;
-      long end;
+      int end;
 
       ini_req(&buffer);                      /* format the buffer */
       if(indx == 0) 

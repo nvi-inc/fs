@@ -13,8 +13,8 @@ logmsg_rdbe(output,command,itask,iwhich,ip,out_class,out_recs)
 char *output;
 struct cmd_ds *command;
 int itask,iwhich;
-long ip[5];
-long *out_class;
+int ip[5];
+int *out_class;
 int *out_recs;
 {
   int rtn1;    /* argument for cls_rcv - unused */

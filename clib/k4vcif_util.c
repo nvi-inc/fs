@@ -56,13 +56,13 @@ struct k4vcif_cmd *lcl;
 }
 
 k4vcif_req_q(ip)
-long ip[5];
+int ip[5];
 {
  ib_req7(ip,device,13*16+2,"RD");
 
 }
 k4vcif_req_c(ip,lclc)
-long ip[5];
+int ip[5];
 struct k4vcif_cmd *lclc;
 {
   char buffer[30];
@@ -75,7 +75,7 @@ struct k4vcif_cmd *lclc;
 
 k4vcif_res_q(lclc,ip)
 struct k4vcif_cmd *lclc;
-long ip[5];
+int ip[5];
 {
   char buffer[MAX_BUF];
   int max,i;

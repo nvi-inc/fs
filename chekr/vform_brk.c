@@ -10,7 +10,7 @@
 #include "../include/shm_addr.h"
 
 void vform_brk(ip,icherr,ierr)
-long ip[5];
+int ip[5];
 int icherr[5];
 int *ierr;
 {

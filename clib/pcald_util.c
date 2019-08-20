@@ -25,7 +25,7 @@ static char *bits_key[ ]={"auto","1","2"};
 #define CONT_KEY sizeof(cont_key)/sizeof( char *)
 #define BITS_KEY sizeof(cont_key)/sizeof( char *)
 
-long bbc2freq(long unsigned);
+int bbc2freq(unsigned int );
 
 int pcald_dec(lcl,count,ptr)
 struct pcald_cmd *lcl;

@@ -14,7 +14,7 @@
 void get_err(buffer,maxlen,ip)
 char buffer[];
 int maxlen;
-long ip[5];
+int ip[5];
 {
 
   skd_arg_buff(buffer,maxlen);

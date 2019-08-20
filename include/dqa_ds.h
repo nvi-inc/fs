@@ -11,12 +11,12 @@ struct dqa_mon {         /* monitor only parameters */
        float amp;        /* phase-cal amplitude in voltage percent */
        float phase;      /* phase-cal phase in radians */
                              /* error counts: */
-       unsigned long parity;     /* parity errors */
-       unsigned long crcc_a;     /* crcc-'a' errors */
-       unsigned long crcc_b;     /* crcc-'b' errors */
-       unsigned long resync;     /* resync errors */
-       unsigned long nosync;     /* nosync errors */
-       unsigned long num_bits;   /* number of bits actually sampled */
+       unsigned int parity;     /* parity errors */
+       unsigned int crcc_a;     /* crcc-'a' errors */
+       unsigned int crcc_b;     /* crcc-'b' errors */
+       unsigned int resync;     /* resync errors */
+       unsigned int nosync;     /* nosync errors */
+       unsigned int num_bits;   /* number of bits actually sampled */
      } a;                /* one struct for channel a */
      struct dqa_chan b;  /* one struct for channel b */
      };

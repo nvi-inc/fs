@@ -13,7 +13,7 @@
 
 void holog_dis(command,ip)
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 {
       struct holog_cmd lclc;
       int kcom, i, ierr, count, start;

@@ -12,12 +12,12 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-#define round(x) ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
+#define round(x) ((x)>=0?(int)((x)+0.5):(int)((x)-0.5))
 
 void satoff(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, count;
       char *ptr;
@@ -25,7 +25,7 @@ long ip[5];                           /* ipc parameters */
       char buff[120];
       FILE *fd;
       int id, iret, i, it[6], idinyr;
-      long seconds;
+      int seconds;
       float epoch;
       double azcmd,elcmd;
 

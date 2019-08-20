@@ -42,7 +42,7 @@ main(int argc, char *argv[])
 
   /* presenting a time stamp */
   char *ctime(), *time_only, *today;
-  long thetime, time();
+  int thetime, time();
 
   if ( argc <= 1)
     {

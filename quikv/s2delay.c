@@ -15,12 +15,12 @@
 static char code[3] = { DELAYM_READ, WVFDELAYM_READ, GPSDELAYM_READ };
 
 /* S2 delay SNAP command */
-void s2delay( struct cmd_ds *command , int itask , long *ip )
+void s2delay( struct cmd_ds *command , int itask , int *ip )
 {
  int  err = 0;
  int  i;
  char output[MAX_OUT];
- long delay;
+ int delay;
  char Txt[3][100];
 
  if( command->equal == '=' )
@@ -28,7 +28,7 @@ void s2delay( struct cmd_ds *command , int itask , long *ip )
 
  for( i = 0 ; i < 3 ; i++ )
      if( ( err = delay_read( DAS , code[i] , &delay ) ) == ERR_NONE )
-        sprintf( Txt[i] , "%ld" , delay );
+        sprintf( Txt[i] , "%d" , delay );
      else
         sprintf( Txt[i] , "err(%d)" , err );
 

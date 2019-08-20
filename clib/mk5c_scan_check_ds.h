@@ -5,7 +5,7 @@ struct mk5c_scan_check_mon {
   /* M5C montior parameters */
 
   struct {
-    long scan;
+    int scan;
     struct m5state state;
   } scan;
   struct {

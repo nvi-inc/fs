@@ -15,7 +15,7 @@
 #include "fmset.h"
 #include "fila10g_cfg.h"
 
-extern long ip[5];           /* parameters for fs communications */
+extern int ip[5];           /* parameters for fs communications */
 extern unsigned char outbuf[512];     /* class i-o buffer */
 extern int synch;
 extern int rack, rack_type;
@@ -36,13 +36,13 @@ int    *fshs;
 time_t *formtime; /* formatter time received from mcbcn */
 int    *formhs;
 {
-	long centisec[6], centiavg, centidiff, hsdiff;
+	int centisec[6], centiavg, centidiff, hsdiff;
         int it[6], sleep;
 	struct tm *formtm;
 	char *str;
 	char *name;
 	int out_recs;
-	long out_class;
+	int out_class;
 	int decimate;
 
 	if(synch) {

@@ -2,11 +2,11 @@
 
 struct fila10g_mode_cmd {
   struct {
-    unsigned long mask2;
+    unsigned int mask2;
     struct m5state state;
   } mask2;
   struct {
-    unsigned long mask1;
+    unsigned int mask1;
     struct m5state state;
   } mask1;
   struct {

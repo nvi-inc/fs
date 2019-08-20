@@ -59,7 +59,7 @@ void add_rclcn_request_string(struct rclcn_req_buf *buffer, char *device,
   return;
 }
 
-void end_rclcn_req(long ip[5],struct rclcn_req_buf *buffer)
+void end_rclcn_req(int ip[5],struct rclcn_req_buf *buffer)
 /* end buffer, send if partial */
 {
      if(buffer->nchars>0) {
@@ -371,12 +371,12 @@ void add_rclcn_tapeinfo_read_pb(struct rclcn_req_buf *buffer, char *device)
   return;
 }
 void add_rclcn_delay_set(struct rclcn_req_buf *buffer, char *device,
-			 ibool relative, long int nanosec)
+			 ibool relative, int nanosec)
 {
-  char bytes[1+sizeof(ibool)+sizeof(long int)];
+  char bytes[1+sizeof(ibool)+sizeof(int)];
   bytes[0]=RCL_CMD_DELAY_SET;
   memcpy(bytes+1,              &relative,sizeof(ibool)   );
-  memcpy(bytes+1+sizeof(ibool),&nanosec ,sizeof(long int));
+  memcpy(bytes+1+sizeof(ibool),&nanosec ,sizeof(int));
 
   add_rclcn_request(buffer,device,bytes,sizeof(bytes));
   
@@ -422,9 +422,9 @@ void add_rclcn_barrelroll_read(struct rclcn_req_buf *buffer, char *device)
 }
 void add_rclcn_align(struct rclcn_req_buf *buffer, char *device,
 		     int year, int day, int hour, int min, int sec,
-		     long int nanosec)
+		     int nanosec)
 {
-  char bytes[2+5*sizeof(int)+sizeof(long int)];
+  char bytes[2+5*sizeof(int)+sizeof(int)];
   bytes[0]=RCL_CMD_ALIGN;
   bytes[1]=0;
   memcpy(bytes+2,              &year    ,sizeof(int)     );
@@ -432,7 +432,7 @@ void add_rclcn_align(struct rclcn_req_buf *buffer, char *device,
   memcpy(bytes+2+2*sizeof(int),&hour    ,sizeof(int)     );
   memcpy(bytes+2+3*sizeof(int),&min     ,sizeof(int)     );
   memcpy(bytes+2+4*sizeof(int),&sec     ,sizeof(int)     );
-  memcpy(bytes+2+5*sizeof(int),&nanosec ,sizeof(long int));
+  memcpy(bytes+2+5*sizeof(int),&nanosec ,sizeof(int));
 
   add_rclcn_request(buffer,device,bytes,sizeof(bytes));
   
@@ -440,16 +440,16 @@ void add_rclcn_align(struct rclcn_req_buf *buffer, char *device,
 }
 void add_rclcn_align_rel(struct rclcn_req_buf *buffer, char *device,
 		     ibool negative, int hour, int min, int sec,
-		     long int nanosec)
+		     int nanosec)
 {
-  char bytes[2+sizeof(ibool)+3*sizeof(int)+sizeof(long int)];
+  char bytes[2+sizeof(ibool)+3*sizeof(int)+sizeof(int)];
   bytes[0]=RCL_CMD_ALIGN;
   bytes[1]=1;
   memcpy(bytes+2,                            &negative,sizeof(ibool)   );
   memcpy(bytes+2+sizeof(ibool)              ,&hour    ,sizeof(int)     );
   memcpy(bytes+2+sizeof(ibool)+  sizeof(int),&min     ,sizeof(int)     );
   memcpy(bytes+2+sizeof(ibool)+2*sizeof(int),&sec     ,sizeof(int)     );
-  memcpy(bytes+2+sizeof(ibool)+3*sizeof(int),&nanosec ,sizeof(long int));
+  memcpy(bytes+2+sizeof(ibool)+3*sizeof(int),&nanosec ,sizeof(int));
 
   add_rclcn_request(buffer,device,bytes,sizeof(bytes));
   
@@ -476,30 +476,30 @@ void add_rclcn_align_selfalign(struct rclcn_req_buf *buffer, char *device)
   return;
 }
 void add_rclcn_position_set(struct rclcn_req_buf *buffer, char *device,
-		     int code, long int position)
+		     int code, int position)
 {
-  char bytes[1+2*sizeof(int)+sizeof(long int)];
+  char bytes[1+2*sizeof(int)+sizeof(int)];
   int num=1;
 
   bytes[0]=RCL_CMD_POSITION_SET;
   memcpy(bytes+1              ,&code    ,sizeof(int)     );
   memcpy(bytes+1+  sizeof(int),&num     ,sizeof(int)     );
-  memcpy(bytes+1+2*sizeof(int),&position,sizeof(long int));
+  memcpy(bytes+1+2*sizeof(int),&position,sizeof(int));
 
   add_rclcn_request(buffer,device,bytes,sizeof(bytes));
   
   return;
 }
 void add_rclcn_position_set_ind(struct rclcn_req_buf *buffer, char *device,
-		     int code, long int position[])
+		     int code, int position[])
 {
-  char bytes[1+2*sizeof(int)+8*sizeof(long int)];
+  char bytes[1+2*sizeof(int)+8*sizeof(int)];
   int num=8;
 
   bytes[0]=RCL_CMD_POSITION_SET;
   memcpy(bytes+1              ,&code    ,  sizeof(int)     );
   memcpy(bytes+1+  sizeof(int),&num     ,  sizeof(int)     );
-  memcpy(bytes+1+2*sizeof(int), position,8*sizeof(long int));
+  memcpy(bytes+1+2*sizeof(int), position,8*sizeof(int));
 
   add_rclcn_request(buffer,device,bytes,sizeof(bytes));
   
@@ -531,12 +531,12 @@ void add_rclcn_position_read(struct rclcn_req_buf *buffer, char *device,
   return;
 }
 void add_rclcn_errmes(struct rclcn_req_buf *buffer, char *device,
-			 long int error)
+			 int error)
 {
-  char bytes[1+sizeof(long int)];
+  char bytes[1+sizeof(int)];
 
   bytes[0]=RCL_CMD_ERRMES;
-  memcpy(bytes+1,&error,sizeof(long int));
+  memcpy(bytes+1,&error,sizeof(int));
 
   add_rclcn_request(buffer,device,bytes,sizeof(bytes));
   

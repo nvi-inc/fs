@@ -52,7 +52,7 @@ void skd_wait();
 main()
 {
     int ierr;
-    long ip[5];
+    int ip[5];
 
     /* loop forever for message received */
 
@@ -210,7 +210,7 @@ int get_da_addr(char *inbuf )
 }
 /* ********************************************************************* */
 
-int init(long ip[5])
+int init(int ip[5])
 {
   FILE *fp;   /* general purpose file pointer */
   char errmsg[80]; 
@@ -281,22 +281,22 @@ int init(long ip[5])
 /* ********************************************************************* */
 
 int process(ip)    /* process the input class buffers */
-long ip[5];
+int ip[5];
 {
 
   char inbuf[RCLCN_REQ_BUF_MAX];
   char outbuf[RES_MAXLEN];
   int inpos, old_outpos, i, nchars;
-  long start;
+  int start;
 
   int outpos = 0;
   int ierr = 0;
 
-  long outclass = 0;
-  long outrecs = 0;
+  int outclass = 0;
+  int outrecs = 0;
 
-  long iclass=ip[1];
-  long nrecs=ip[2];
+  int iclass=ip[1];
+  int nrecs=ip[2];
 
   int msgflg=0;
   int save=0;
@@ -709,7 +709,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
     {
       int year,day,hour,min,sec;
       ibool validated;
-      long centisec[6];
+      int centisec[6];
       
       if(iecho)
 	strcpy(echobuf,"[time_read]");
@@ -733,7 +733,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	  strcat(echobuf,"<valid>");
 	else
 	  strcat(echobuf,"<not-valid>");
-	sprintf(echobuf+strlen(echobuf),"{%ld}{%ld}{%ld}{%ld}{%ld}{%ld}",
+	sprintf(echobuf+strlen(echobuf),"{%d}{%d}{%d}{%d}{%d}{%d}",
 		centisec[0],centisec[2],centisec[4],
 		centisec[1],centisec[3],centisec[5]);
       }
@@ -1132,7 +1132,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	int i;
 	for (i=0;i<8;i++) {
 	  unsigned char *tabler=table+i*52;
-	  long int delay;
+	  int delay;
 
 	  sprintf(echobuf+strlen(echobuf),
   "\\\n<%d><%d><%s><%s><%d><%d><%d><%d><%d><%d><%d><%d><%d><%u><%u>",
@@ -1141,8 +1141,8 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 		  tabler[38],tabler[39],tabler[40],tabler[41],
 		  tabler[42],tabler[43],tabler[44],
 		  tabler[45]<<8|tabler[46],tabler[47]<<8|tabler[48]);
-	  delay  = (long) tabler[49]<<24;
-	  delay |= (long) tabler[50]<<16;
+	  delay  = (int) tabler[49]<<24;
+	  delay |= (int) tabler[50]<<16;
 	  delay |= tabler[51]<<8;
 	  delay |= tabler[52];
 	  if(delay == 0x7FFFFFFF)
@@ -1160,7 +1160,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
   case RCL_CMD_DELAY_SET:
     {
       ibool relative;
-      long int nanosec;
+      int nanosec;
       
       memcpy(&relative,inbuf+inpos,sizeof(relative));
       inpos+=sizeof(relative);
@@ -1185,7 +1185,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
     }
   case RCL_CMD_DELAY_READ:
     {
-      long int nanosec;
+      int nanosec;
       
       if(iecho)
 	strcpy(echobuf,"[delay_read]");
@@ -1208,7 +1208,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
     }
   case RCL_CMD_DELAYM_READ:
     {
-      long int nanosec;
+      int nanosec;
       
       if(iecho)
 	strcpy(echobuf,"[delaym_read]");
@@ -1284,7 +1284,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
       case 0:
 	{
 	  int year, day, hour, min, sec;
-	  long int nanosec;
+	  int nanosec;
 	  
 	  memcpy(&year,inbuf+inpos,sizeof(year)); inpos+=sizeof(year);
 	  memcpy(&day ,inbuf+inpos,sizeof(day )); inpos+=sizeof(day );
@@ -1296,7 +1296,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	  
 	  if(iecho) {
 	    strcpy(echobuf,"[align][absolute]");
-	    sprintf(echobuf+strlen(echobuf),"[%d][%d][%d][%d][%d][%ld]",
+	    sprintf(echobuf+strlen(echobuf),"[%d][%d][%d][%d][%d][%d]",
 		    year,day,hour,min,sec,nanosec);
 	  }
 
@@ -1311,7 +1311,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	{
 	  ibool negative;
 	  int hour, min, sec;
-	  long int nanosec;
+	  int nanosec;
 	  
 	  memcpy(&negative,inbuf+inpos,sizeof(negative));
 	  inpos+=sizeof(negative);
@@ -1327,7 +1327,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	      strcat(echobuf,"[-]");
 	    else
 	      strcat(echobuf,"[+]");
-	    sprintf(echobuf+strlen(echobuf),"[%d][%d][%d][%ld]",
+	    sprintf(echobuf+strlen(echobuf),"[%d][%d][%d][%d]",
 		    hour,min,sec,nanosec);
 	  }
 	  ierr=rcl_align_rel(addr,negative,hour,min,sec,nanosec);
@@ -1379,7 +1379,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	  switch (num) {
 	  case 1:
 	    {
-	      long int position;
+	      int position;
 	      
 	      memcpy(&position,inbuf+inpos,sizeof(position));
 	      inpos+=sizeof(position);
@@ -1402,7 +1402,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 		else if(position == RCL_POS_UNKNOWN && code==2)
 		  strcat(echobuf,"[unknown]");
 		else		    
-		  sprintf(echobuf+strlen(echobuf),"[%li]",position);
+		  sprintf(echobuf+strlen(echobuf),"[%i]",position);
 	      }
 
 	      ierr=rcl_position_set(addr,code,position);
@@ -1414,7 +1414,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	    }
 	  case 8:
 	    {
-	      long int position[8];
+	      int position[8];
 	      
 	      memcpy(&position,inbuf+inpos,sizeof(position));
 	      inpos+=sizeof(position);
@@ -1439,7 +1439,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 		  else if(position[i] == RCL_POS_UNKNOWN && code==2)
 		    strcat(echobuf,"[unknown]");
 		  else		    
-		    sprintf(echobuf+strlen(echobuf),"[%li]",position[i]);
+		    sprintf(echobuf+strlen(echobuf),"[%i]",position[i]);
 	      }
 
 	      ierr=rcl_position_set_ind(addr,code,position);
@@ -1478,7 +1478,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
       switch (num) {
       case 0:
 	{
-	  long int position, posvar;
+	  int position, posvar;
 	  
 	  if(iecho)
 	    strcpy(echobuf,"[position_read][0]");
@@ -1495,11 +1495,11 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	    if(position == RCL_POS_UNKNOWN)
 	      strcat(echobuf,"<unknown>");
 	    else		    
-	      sprintf(echobuf+strlen(echobuf),"<%li>",position);
+	      sprintf(echobuf+strlen(echobuf),"<%i>",position);
 	    if(posvar == RCL_POS_UNKNOWN)
 	      strcat(echobuf,"<unknown>");
 	    else		    
-	      sprintf(echobuf+strlen(echobuf),"<%li>",posvar);
+	      sprintf(echobuf+strlen(echobuf),"<%i>",posvar);
 	  }
 	  
 	  {
@@ -1519,7 +1519,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
       case 1:
 	{
 	  int num_entries;
-	  long int position[8];
+	  int position[8];
 	  
 	  if(iecho)
 	    strcpy(echobuf,"[position_read][1]");
@@ -1541,7 +1541,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	      else if(position[i] == RCL_POS_UNSEL)
 		strcat(echobuf,"<unselected>");
 	      else		    
-		sprintf(echobuf+strlen(echobuf),"<%li>",position[i]);
+		sprintf(echobuf+strlen(echobuf),"<%i>",position[i]);
 	  }
 
 	  {
@@ -1566,14 +1566,14 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
     }
   case RCL_CMD_ERRMES:
     {
-      long int error;
+      int error;
       
       memcpy(&error,inbuf+inpos,sizeof(error));
       inpos+=sizeof(error);
       
       if(iecho) {
 	strcpy(echobuf,"[cmd_errmes]");
-	sprintf(echobuf+strlen(echobuf),"[%li]",error);
+	sprintf(echobuf+strlen(echobuf),"[%i]",error);
       }
 
       ierr=rcl_errmes(addr, error);
@@ -1613,7 +1613,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
       if(iecho) {
 	int i,j;
 
-	sprintf(echobuf+strlen(echobuf),"<%li>",num_entries);
+	sprintf(echobuf+strlen(echobuf),"<%i>",num_entries);
 	
 	j=0;
 	for (i=0;i<num_entries;i++) {
@@ -1664,7 +1664,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
       if(iecho) {
 	int i,j;
 
-	sprintf(echobuf+strlen(echobuf),"<%li>",num_entries);
+	sprintf(echobuf+strlen(echobuf),"<%i>",num_entries);
 	
 	j=0;
 	for (i=0;i<num_entries;i++) {
@@ -1854,10 +1854,10 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
     {
       int num_entries;
       unsigned short serial[8];
-      unsigned long tot_on_time[8];
-      unsigned long tot_head_time[8];
-      unsigned long head_use_time[8];
-      unsigned long in_service_time[8];
+      unsigned int tot_on_time[8];
+      unsigned int tot_head_time[8];
+      unsigned int head_use_time[8];
+      unsigned int in_service_time[8];
       
       if(iecho)
 	strcpy(echobuf,"[transport_times]");
@@ -1877,7 +1877,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 
 	sprintf(echobuf+strlen(echobuf),"<%d>",num_entries);
 	for(i=0;i<num_entries;i++) {
-	  sprintf(echobuf+strlen(echobuf),"\\\n<%hu><%lu><%lu><%lu><%lu>",
+	  sprintf(echobuf+strlen(echobuf),"\\\n<%hu><%u><%u><%u><%u>",
 		  serial[i],tot_on_time[i],tot_head_time[i],
 		  head_use_time[i],in_service_time[i]);
 	}
@@ -1905,7 +1905,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
   case RCL_CMD_STATION_INFO_READ:
     {
       int station;
-      long int serialnum;
+      int serialnum;
       char nickname[RCL_MAXSTRLEN_NICKNAME];
       
       if(iecho)
@@ -1920,7 +1920,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	break;
 
       if(iecho)
-	sprintf(echobuf+strlen(echobuf),"<%d><%ld><%s>",
+	sprintf(echobuf+strlen(echobuf),"<%d><%d><%s>",
 		station,serialnum,nickname);
       
       memcpy(outbuf+outpos,&station,sizeof(station));
@@ -1953,7 +1953,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
   case RCL_CMD_POSTIME_READ:
     {
       int tran, year, day, hour, min, sec, frame;
-      long int position;
+      int position;
       
       memcpy(&tran,inbuf+inpos,sizeof(tran));
       inpos+=sizeof(tran);
@@ -1973,7 +1973,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 	break;
 
       if(iecho)
-	sprintf(echobuf+strlen(echobuf),"<%d><%d><%d><%d><%d><%d><%ld>",
+	sprintf(echobuf+strlen(echobuf),"<%d><%d><%d><%d><%d><%d><%d>",
 		year,day,hour,min,sec,frame,position);
 
       memcpy(outbuf+outpos,&year    ,sizeof(year    ));
@@ -2284,7 +2284,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
   case RCL_CMD_BERDCB:
     {
       int op_type, chan, meas_time;
-      unsigned long err_bits, tot_bits;
+      unsigned int err_bits, tot_bits;
 
       memcpy(&op_type,inbuf+inpos,sizeof(op_type));
       inpos+=sizeof(op_type);
@@ -2305,7 +2305,7 @@ int command(int addr, char *inbuf, int *inpos_ptr, char *outbuf,
 
       if(iecho) {
 	echo_add_error(echobuf,ierr);
-	sprintf(echobuf+strlen(echobuf),"<%lu><%lu>",err_bits,tot_bits);
+	sprintf(echobuf+strlen(echobuf),"<%u><%u>",err_bits,tot_bits);
       }
       
       memcpy(outbuf+outpos,&err_bits,sizeof(err_bits));

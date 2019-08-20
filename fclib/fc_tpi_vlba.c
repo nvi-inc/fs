@@ -1,5 +1,5 @@
 void fc_tpi_vlba__(ip,itpis_vlba,isub)
-long ip[5];
+int ip[5];
 int itpis_vlba[34];
 int *isub;
 {
@@ -11,7 +11,7 @@ int *isub;
 }
     
 void fc_tpput_vlba__(ip,itpis_vlba,isub,ibuf,nch,ilen)
-long ip[5];
+int ip[5];
 int itpis_vlba[34];
 int *isub;
 char *ibuf;
@@ -26,7 +26,7 @@ int *ilen;
 }
 
 void fc_tsys_vlba__(ip,itpis_vlba,ibuf,nch,itask)
-long ip[5];
+int ip[5];
 int itpis_vlba[34];
 char *ibuf;
 int *nch;

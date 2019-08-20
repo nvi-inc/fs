@@ -152,7 +152,7 @@ m5_2_in2net(ptr_in,lclc,lclm,ip) /* return values:
 
      struct in2net_cmd *lclc;  /* result structure with parameters */
      struct in2net_mon *lclm;  /* result structure with parameters */
-     long ip[5];   /* standard parameter array */
+     int ip[5];   /* standard parameter array */
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr;

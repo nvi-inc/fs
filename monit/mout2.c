@@ -70,7 +70,7 @@ int iyear;
   void preint();
   int len;
   int inuse, rstate, rstate_valid, position_valid;
-  long int position,posvar;
+  int position,posvar;
 
   ptfeet = &feet[0];
   checkln = &checkarr[0];
@@ -559,14 +559,14 @@ int iyear;
     else if(position == RCL_POS_UNKNOWN)
       printw("unknown");
     else 
-      printw("%5ld  ",position);
+      printw("%5d  ",position);
     move(ROW1+4,COL1+17);
     if(!position_valid)
       printw("       ");
     else if(posvar == RCL_POS_UNKNOWN)
       printw("unknown");
     else 
-      printw("%5ld  ",posvar);
+      printw("%5d  ",posvar);
   } else if(kK4drive[selectm]) {
     move(ROW1+4,COL1+0);
     printw("        ");

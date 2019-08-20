@@ -15,7 +15,7 @@
 void disk_pos_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
       int ierr, count, i;
       char output[MAX_OUT],*start;
@@ -24,11 +24,11 @@ long ip[5];
       int msgflg=0;  /* argument for cls_rcv - unused */
       int save=0;    /* argument for cls_rcv - unused */
       int nchars;
-      long out_class=0;
+      int out_class=0;
       int out_recs=0;
       char inbuf[BUFSIZE];
       struct disk_pos_mon lclm;
-      long iclass, nrecs;
+      int iclass, nrecs;
 
    /* format output buffer */
 

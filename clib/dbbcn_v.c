@@ -29,7 +29,7 @@ void dbbcn_d(device, ierr,ip)
 char device[2];                        /* device mnemonic */
 int *ierr;                             /* error return, -1 if no such device */
                                        /*                0 okay              */
-long ip[5];
+int ip[5];
 {
   struct dbbcifx_cmd lclc;
   struct dbbcifx_mon lclm;
@@ -138,7 +138,7 @@ long ip[5];
 
 void dbbcn_v(dtpi,dtpi2,ip,icont,isamples)
 double *dtpi,*dtpi2;                      /* return counts */
-long ip[5];
+int ip[5];
 int *icont, *isamples;
 {
   int rtn1;    /* argument for cls_rcv - unused */
@@ -232,7 +232,7 @@ int *icont, *isamples;
 /* restore if gain */
 
 void dbbcn_r(ip)
-long ip[5];
+int ip[5];
 {
     if(savec.agc!=0 || (shm_addr->dbbcddcv > 102 && det < 2*MAX_DBBC_BBC)) {
       int out_recs, out_class;

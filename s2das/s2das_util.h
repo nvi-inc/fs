@@ -10,11 +10,11 @@
 
 #define ERR_NONE 0
 
-void ini2_output( long *ip, char *buffer , char *title );
-void add_output(  long *ip, char *buffer, char *title, char *new );
-void end_output(  long *ip, char *buffer );
+void ini2_output( int *ip, char *buffer , char *title );
+void add_output(  int *ip, char *buffer, char *title, char *new );
+void end_output(  int *ip, char *buffer );
 
-void s2err( int err , long *ip , char *code );
+void s2err( int err , int *ip , char *code );
 
 int valids2detector( char *name );
 void check_s2dev__( char *dev , int *ierr );
@@ -38,8 +38,8 @@ int   str2ifsrc( char *string , char *code , char *src );
 
 char *lock2str( int code );
 
-char *lofreq2str( unsigned long lofreq );
-int   str2lofreq( char *string , unsigned long *lofreq );
+char *lofreq2str( unsigned int lofreq );
+int   str2lofreq( char *string , unsigned int *lofreq );
 
 char *src2str( int code );
 int   str2src( char *string , char *code );

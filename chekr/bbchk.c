@@ -17,7 +17,7 @@ int *imod;
 int icherr[10];
 int *ierr;
 {
-  long ip[5];                           /* ipc parameters */
+  int ip[5];                           /* ipc parameters */
   int ind;
   struct req_rec request;      /* mcbcn request record */
   struct req_buf buffer;       /* mcbcn request buffer */

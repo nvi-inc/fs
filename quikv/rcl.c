@@ -12,7 +12,7 @@
 void rcl(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ierr, icmd;
       struct rclcn_req_buf buffer;           /* rclcn request buffer */

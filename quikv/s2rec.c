@@ -14,13 +14,13 @@ static char device[]={"r1"};           /* device menemonics */
 void s2rec(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;
-long ip[5];                           /* ipc parameters */
+int ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, i, count;
       int verr;
       char *ptr;
       struct rclcn_req_buf buffer;        /* rclcn request buffer */
-      long int position[8];
+      int position[8];
 
       int s2tape_dec();                 /* parsing utilities */
       char *arg_next();

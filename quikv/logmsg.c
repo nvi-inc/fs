@@ -8,7 +8,7 @@
 void logmsg(output,command,ip)
 char *output;
 struct cmd_ds *command;
-long ip[5];
+int ip[5];
 {
    struct res_buf buffer;
    struct res_rec response;

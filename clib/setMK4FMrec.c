@@ -2,7 +2,7 @@
 
 setMK4FMrec(val,ip)
 int val;
-long ip[5];
+int ip[5];
 {
 
   short int buff[80];

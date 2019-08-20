@@ -19,7 +19,7 @@ static int first=1;
 void s2recstatus_(lwho)
 char *lwho;
 {
-  long ip[5];                          /* ipc parameters */
+  int ip[5];                          /* ipc parameters */
   struct rclcn_req_buf req_buf;        /* rclcn request buffer */
   struct rclcn_req_buf res_buf;        /* rclcn respnse buffer */
   int ierr=0;
@@ -36,12 +36,12 @@ char *lwho;
   int summary, num_entries;
   unsigned char status_list[RCL_STATUS_MAX*2];
   int i, target;
-  static long unsigned pos_err_count=0;
-  static long pos_err=0;
-  static long unsigned code_err_count=0;
-  static long code_err=0;
-  static long unsigned end_err_count=0;
-  static long end_err=0;
+  static unsigned int pos_err_count=0;
+  static int pos_err=0;
+  static unsigned int code_err_count=0;
+  static int code_err=0;
+  static unsigned int end_err_count=0;
+  static int end_err=0;
 
   target=1&(shm_addr->actual.s2rec_inuse+1);
   shm_addr->actual.s2rec[target].rstate_valid=FALSE;

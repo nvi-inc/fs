@@ -20,7 +20,7 @@ double dbbc_if_power(unsigned counts, int como);
 static char ch[ ]={"abcd"};
 
 int tpget_dbbc_pfb(ip,itpis_dbbc_pfb,dtpi,ierr) /* put results of tpi */
-long ip[5];                                    /* ipc array */
+int ip[5];                                    /* ipc array */
 int itpis_dbbc_pfb[MAX_DBBC_PFB_DET]; /* device selection array, see tpi_dbbc_PFB for details */
 double dtpi[MAX_DBBC_PFB_DET];
 int *ierr;

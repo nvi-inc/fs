@@ -5,7 +5,7 @@
 
 void opn_res(buffer,ip)      /* initialize (open) response structs */
 struct res_buf *buffer;        /* work struct */
-long ip[5];                    /* ip information from mcbcn */
+int ip[5];                    /* ip information from mcbcn */
 {
     buffer->class_fs = ip[0];
     buffer->count = ip[1];

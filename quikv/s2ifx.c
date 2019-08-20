@@ -17,7 +17,7 @@ static char ATTN[4] = {-128, -128, -128, -128 };
 static char SRC[4]  = {-128, -128, -128, -128 };
 static unsigned short TPIavg = 0;
 
-char *tpi2str( unsigned long tpi )
+char *tpi2str( unsigned int tpi )
 {
  static char txt[20];
  sprintf( txt , "%u" , tpi );
@@ -25,9 +25,9 @@ char *tpi2str( unsigned long tpi )
 }
 /* --------------------------------------------------------------------------*/
 /* S2 ifx SNAP command */
-void s2ifx( struct cmd_ds *command, int id, long *ip )
+void s2ifx( struct cmd_ds *command, int id, int *ip )
 {
- unsigned long  tpi[4];
+ unsigned int  tpi[4];
  unsigned short tpiavg;
  char state, period, attn[4], src[4];
  char output[MAX_OUT];

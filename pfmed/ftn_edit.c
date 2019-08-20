@@ -18,7 +18,7 @@ char *iname, *editor;
 int *ierr,*ichange,len, len_editor;
 {
      struct stat sb;
-     long tmone, tmtwo;
+     int tmone, tmtwo;
      int error;
      char string[MAX_STRING+1],*s1;
      char path[MAX_STRING+1],*s2;
@@ -65,7 +65,7 @@ int *ierr,*ichange,len, len_editor;
         *ierr=-3;
         return;
      }
-     tmone=(long) sb.st_mtime;
+     tmone=(int) sb.st_mtime;
 
      *ierr=system(string);
      if (*ierr<0) {
@@ -82,7 +82,7 @@ int *ierr,*ichange,len, len_editor;
         *ierr=-4;
         return;
      }
-     tmtwo=(long) sb.st_mtime;
+     tmtwo=(int) sb.st_mtime;
 
      if (tmone != tmtwo)
        *ichange=1;

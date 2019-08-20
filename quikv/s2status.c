@@ -15,7 +15,7 @@ char *arg_next( struct cmd_ds *command, int *last );
 
 /* --------------------------------------------------------------------------*/
 /* S2 status SNAP command */
-void s2status( struct cmd_ds *command , int itask , long *ip )
+void s2status( struct cmd_ds *command , int itask , int *ip )
 {
  int  ierr = 0;
  int  rec  = 0;
@@ -96,7 +96,7 @@ void s2status( struct cmd_ds *command , int itask , long *ip )
  return;
 }
 /* --------------------------------------------------------------------------*/
-void s2decode(struct cmd_ds *command , int itask , long *ip )
+void s2decode(struct cmd_ds *command , int itask , int *ip )
 {
  int  ierr = 0;
  int  i;

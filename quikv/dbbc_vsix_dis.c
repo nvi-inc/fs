@@ -17,7 +17,7 @@ int logmsg_dbbc();
 void dbbc_vsix_dis(command,itask,ip)
 struct cmd_ds *command;
 int itask;
-long ip[5];
+int ip[5];
 {
       struct dbbc_vsix_cmd lclc;
       int kcom,i,ich, ierr, count;
