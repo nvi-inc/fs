@@ -16,14 +16,14 @@ logwx(
 {
   static char file[] =
     "                                                                ";
- /*  1234567890123456789012345678901234567890123456789012345678901234
+ /*  1234567890123456789012345678901234567890123456789012345678901234 */
  /*  /usr2/log/wx/wx99001gg.log   */
   char new[sizeof(file)];
   int error,total,ncopy;
   time_t t;
   char ch;
-  static FILE *fildes= (FILE *) NULL;
-  int offset;
+  static FILE *fildes= NULL;
+  long offset;
   int kopen;
   int len;
   size_t size;
@@ -53,7 +53,7 @@ logwx(
   kopen=0;
   if(strcmp(new,file)!=0) {
     kopen=1;
-    if(fildes != (FILE *) NULL) {
+    if(fildes != NULL) {
       if(EOF == fclose(fildes)) {
 	err_report("Closing old log in logwx",file,errno,0);
 	return;
@@ -67,7 +67,7 @@ logwx(
 
     if(fd == -1 && errno == EEXIST) {
       fildes=fopen(new,"a+");
-      if(fildes == (FILE *) NULL) {
+      if(fildes == NULL) {
 	err_report("Opening existing log in logwx",new,errno,0);
 	return;
       }
@@ -80,7 +80,7 @@ logwx(
 	return;
       }
       fildes=fdopen(fd,"a+");
-      if(fildes == (FILE *) NULL) {
+      if(fildes == NULL) {
       err_report("fdopen-ing new log in logwx",new,errno,0);
       return;
       }
@@ -89,7 +89,7 @@ logwx(
     strncpy(file,new,sizeof(file));
 
     /* position to end for our reading here */
-    if(EOF==fseek(fildes, (int) 0,SEEK_END)) {
+    if(EOF==fseek(fildes, 0,SEEK_END)) {
       err_report("Error positioning to EOF in logwx",new,errno,0);
       return;
     }
@@ -101,7 +101,7 @@ logwx(
     }
 
     if(offset!=(int)0){
-      if(EOF==fseek(fildes, (int) -1,SEEK_END)) {
+      if(EOF==fseek(fildes, -1,SEEK_END)) {
 	err_report("Error positioning log in logwx",new,errno,0);
 	return;
       }
@@ -110,7 +110,7 @@ logwx(
 	return;
       }
       /* must seek between reads and writes */
-      if(EOF==fseek(fildes, (int) 0,SEEK_END)) { 
+      if(EOF==fseek(fildes, 0,SEEK_END)) { 
 	err_report("Error positioning to EOF2 in logwx",new,errno,0);
 	return;
       }

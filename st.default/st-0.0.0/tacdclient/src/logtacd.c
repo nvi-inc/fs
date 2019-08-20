@@ -21,8 +21,8 @@ logtacd(
   time_t t;
   char buffer[MAX_BUF];
   char ch;
-  static FILE *fildes= (FILE *) NULL;
-  int offset;
+  static FILE *fildes=  NULL;
+  long offset;
 
   t=time(NULL);
   if(((time_t) -1) == t) {
@@ -42,7 +42,7 @@ logtacd(
     return;
   }
   if(strcmp(new,file)!=0) {
-    if(fildes != (FILE *) NULL) {
+    if(fildes !=  NULL) {
       if(EOF == fclose(fildes)) {
 	err_report("Closing old log in logtacd",file,1,0);
 	return;
@@ -50,7 +50,7 @@ logtacd(
     }
 
     fildes=(fopen(new,"a+"));
-    if(fildes == (FILE *) NULL) {
+    if(fildes ==  NULL) {
       err_report("Opening new log in logtacd",new,1,0);
       return;
     }
@@ -61,12 +61,12 @@ logtacd(
 
     strncpy(file,new,sizeof(file));
     offset=ftell(fildes);
-    if(offset==(int)-1) {
+    if(offset==-1) {
       err_report("Opening checking log position in logtacd",new,1,0);
       return;
     }
-    if(offset!=(int)0){
-      if(EOF==fseek(fildes, (int) -1,SEEK_END)) {
+    if(offset!=0){
+      if(EOF==fseek(fildes, -1,SEEK_END)) {
 	err_report("Error positioning log in logtacd",new,1,0);
 	return;
       }

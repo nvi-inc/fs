@@ -47,7 +47,7 @@ static int mtype();
 static void nullfcn();
 static void skd_end_to();
 void skd_end();
-static skd_run_arg_cls_to(char *name, char w, int ip[5], char *arg,
+static int skd_run_arg_cls_to(char *name, char w, int ip[5], char *arg,
 			  char nsem[6],unsigned to, int *run_index);
 
 int skd_get( key, size)
@@ -133,8 +133,8 @@ int	length;	/* length of buffer in bytes */
   /* Execute this SNAP command via "boss". */
   
   cls_snd( iclass, buffer, length, 0, 1);
-  skd_run_arg_cls_to("boss ",'w',ipr,(char *) NULL,insnp,
-		     (unsigned) 0, (int *) NULL);
+  skd_run_arg_cls_to("boss ",'w',ipr, NULL,insnp,
+		      0, NULL);
 
 
 }
@@ -142,8 +142,7 @@ void skd_run( name, w, ip)
 char    name[5], w;
 int    ip[5];
 {
-  skd_run_arg_cls_to( name, w, ip, (char *) NULL, (char *) NULL,
-		      (unsigned) 0, (int *) NULL);
+  skd_run_arg_cls_to( name, w, ip, NULL, NULL, 0, NULL);
 }
 
 void skd_run_p( name, w, ip, run_index)
@@ -151,8 +150,7 @@ void skd_run_p( name, w, ip, run_index)
 int    ip[5];
 int *run_index;
 {
-  skd_run_arg_cls_to( name, w, ip, (char *) NULL, (char *) NULL,
-		      (unsigned) 0, run_index);
+  skd_run_arg_cls_to( name, w, ip, NULL,  NULL, 0, run_index);
 }
 
 void skd_run_arg( name, w, ip, arg)
@@ -160,8 +158,7 @@ char	name[5], w, *arg;
 int	ip[5];
 /* arg maximum length is 256 characters, longer values are truncated */
 {
-  skd_run_arg_cls_to( name, w, ip, arg, (char *) NULL,
-		      (unsigned) 0, (int *) NULL);
+  skd_run_arg_cls_to( name, w, ip, arg, NULL, 0, NULL);
 }
 
 int skd_run_to( name, w, ip, to)
@@ -169,11 +166,10 @@ char    name[5], w;
 int    ip[5];
 unsigned to;
 {  
-  return skd_run_arg_cls_to( name, w, ip, (char *) NULL, (char *) NULL,
-			     to, (int *) NULL);
+  return skd_run_arg_cls_to( name, w, ip, NULL, NULL, to, NULL);
 }
 
-static skd_run_arg_cls_to( name, w, ip, arg, nsem,to, run_index)
+static int skd_run_arg_cls_to( name, w, ip, arg, nsem,to, run_index)
 char	name[5], w, *arg;	
 int	ip[5];
 char nsem[6];
