@@ -3,7 +3,7 @@
 
 #include <jansson.h>
 
-typedef int window_id_t;
+typedef long window_id_t;
 
 /* Linked list of windows*/
 typedef struct window {
