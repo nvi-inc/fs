@@ -15,7 +15,7 @@ extern struct fscom *shm_addr;
 #define MAX_TEXT  120
 
 struct  cls_buf {
-	int	mtype;
+	long	mtype;
         struct {
           int     parm[2];
           char    mtext[ MAX_TEXT];
@@ -27,7 +27,7 @@ static int msqid;
 main()
 {
 key_t key;
-int    class;
+long    class;
 struct  cls_buf msg;
 void sem_take(), sem_put();
 int nchars,i;

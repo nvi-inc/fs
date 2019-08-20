@@ -17,7 +17,7 @@
 static int mtype();
 
 struct brk_buf {
-	int	mtype;
+	long	mtype;
 } ;
 
 static int msqid;

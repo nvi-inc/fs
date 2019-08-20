@@ -17,7 +17,7 @@
 #define FS_SKD_NAMED (1 << 29)
 
 struct skd_buf {
-	int	mtype;
+	long	mtype;
         struct {
 	    int    ip[5];
 	    int    rtype;
