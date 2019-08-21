@@ -4,7 +4,7 @@ ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 FC = f95
 
-CFLAGS += -Werror=int-conversion -Werror=int-to-pointer-cast
+CFLAGS += -Werror=int-to-pointer-cast
 
 ifeq ($(FC),fort77)
 FLIBS   += -lf2c -lm
