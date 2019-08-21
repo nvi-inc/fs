@@ -11,3 +11,4 @@ monit2 a xterm -name monit2 -title monit2 -e monit2
 monit3 a xterm -name monit3 -title monit3 -e monit3
 monit4 a xterm -name monit4 -title monit4 -e monit4
 monit5 a xterm -name monit5 -title monit5 -e monit5
+monit6 a xterm -name monit6 -title monit6 -e monit6
