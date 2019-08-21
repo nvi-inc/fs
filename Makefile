@@ -1,6 +1,5 @@
 pwd := $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
-#FS_VERSION := $(shell echo $(pwd) | cut -d- -f2-)
-FS_VERSION := $(shell git describe --always --tags | cut -c2- ) 
+FS_VERSION := $(shell git describe --always --tags --dirty )
 VERSION    := $(shell echo $(FS_VERSION) | cut -d. -f1 )
 SUBLEVEL   := $(shell echo $(FS_VERSION) | cut -d. -f2 )
 PATCHLEVEL := $(shell echo $(FS_VERSION) | cut -d. -f3 | cut -d- -f1)
