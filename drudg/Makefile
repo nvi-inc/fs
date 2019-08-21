@@ -65,16 +65,9 @@ wrdate.o wrday.o wrdur.o wrhead.o write_drudg_version_line.o wrsor.o wrtap.o wrt
 # Set compiling and linking flags
 #
 # -C checks for out of bounds during execution and aborts if found
-<<<<<<< HEAD
-FFLAGS= -C -c -cpp -DVERSION=$(VERSION) \
--DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL) -DRELEASE=$(RELEASE) -DFS_PC=$(FS_PC) 
-# f2c needs this others don't
-CFLAGS= -c  -DF2C -DRELEASE=$(RELEASE)
-#
-=======
-FFLAGS += -C 
+FFLAGS += -C -cpp
 CPPFLAGS += -DF2C -DVERSION=$(VERSION) -DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL)
->>>>>>> fixed drudg makefiles
+FFLAGS += $(CPPFLAGS)
 
 LIBS=$(UT)skdrut.a ../lnfch/lnfch.a ../fslb/fslb.a \
 ../newlb/newlb.a ../flib/flib.a ../fclib/fclib.a ../clib/clib.a \
