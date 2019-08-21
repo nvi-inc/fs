@@ -76,7 +76,6 @@ C 2004May14 JMGipson. Removed physical constants-->constants.ftni
 C
 C********************************************************************
 C
-      implicit none
 C
 C     The maximum number of stations which can be selected for
 C     an experiment at one time.  Used in SKED and DRUDG.

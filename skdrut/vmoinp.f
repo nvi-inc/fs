@@ -251,7 +251,7 @@ C         (Get other procedure timing info later.)
      &      ivexnum,iret,ierr,lu,cpre)
           if (ierr.ne.0) then
             write(lu,'("VMOINP03 - Error getting $PROCEDURES for mode ",
-     &      ,a," station ",a/" iret=",i5," ierr=",i5)') 
+     &      a," station ",a/" iret=",i5," ierr=",i5)') 
      &      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
      &      iret,ierr
             call errormsg(iret,ierr,'PROCEDURES',lu)

@@ -48,7 +48,7 @@
           write(cbuf,'(a,"=",",0x",Z8.8,",,,")')
      >      lmode_cmd, imask_lo
         else
-          write(cbuf,'(a,"=",2(0x,Z8.8,","),",,")') 
+          write(cbuf,'(a,"=",2("0x",Z8.8,","),",,")') 
      >      lmode_cmd, imask_hi,imask_lo
         endif
       else 

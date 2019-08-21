@@ -21,7 +21,7 @@
       double precision DRF,DLO
       integer isb
       integer isb_out
-      integer ibit, isb
+      integer ibit
       character*2 lsb(2)
       integer ibit_out 
       character*2 lvid_sb, lnet_sb 

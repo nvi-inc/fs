@@ -66,7 +66,6 @@ C  LOCAL VARIABLES
       character*4 lvalid_polarity(6)
       character*6 lvalid_vsi_align(4)
       integer ifs_PC
-      logical kexist
 
 
       integer ifile_beg,ifile_end
