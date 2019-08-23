@@ -62,6 +62,7 @@ int *ierr;
     else if(strncmp(device,"u6",2) == 0)
       ifchain=MAX_LO+6;
 
+    if(ifchain!=0) {
     center=shm_addr->user_device.center[ifchain-(1+MAX_LO)];
     switch(shm_addr->user_device.sideband[ifchain-(1+MAX_LO)]) {
     case 1:
@@ -72,6 +73,11 @@ int *ierr;
       break;
     default:
       *ierr=-302;
+	goto error;
+	break;
+      }
+    } else {
+      *ierr=-309;
       goto error;
     }
   } else if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4
