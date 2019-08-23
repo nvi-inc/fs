@@ -430,24 +430,8 @@ C
           end if
         end if
         call rmpar(ip)
-        if (ip(3).ne.0) then
-           call logit7(0,0,0,0,ip(3),ip(4),ip(5))
-        endif
-        if (ip(3).lt.0) then
-          if (kts) iclass=0
-C                   If we got ICLASS from time-scheduling, don't kill
-C                   it here, wait until CANTS
-          if(iwait.ne.0) then
-             ipinsnp(3)=ip(3)
-             ipinsnp(4)=ip(4)
-             ipinsnp(5)=ip(5)
-          endif
-          call clrcl(iclass)
-          if(kts) call cants(itscb,ntscb,5,index,indts)
-          if (ip(1).eq.0) goto 200
-        endif
 C                   Don't leave just yet!  See if there is any
-C                   message in spite of our error.
+C                   messages, regardless if there is an error or not.
         if (ip(1).ne.0) then
           do i=1,ip(2)
             ireg(2) = get_buf(ip(1),ibuf,-iblen*2,idum,idum)
@@ -462,6 +446,28 @@ C                   message in spite of our error.
         endif
         if (kts) iclass = 0
         call clrcl(iclass)
+c
+c   now check for errors and warnings
+c
+        if (ip(3).ne.0) then
+           call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        endif
+c
+c now clean-up from an error
+c
+        if (ip(3).lt.0) then
+          if (kts) iclass=0
+C                   If we got ICLASS from time-scheduling, don't kill
+C                   it here, wait until CANTS
+          if(iwait.ne.0) then
+             ipinsnp(3)=ip(3)
+             ipinsnp(4)=ip(4)
+             ipinsnp(5)=ip(5)
+          endif
+          call clrcl(iclass)
+          if(kts) call cants(itscb,ntscb,5,index,indts)
+          if (ip(1).eq.0) goto 200
+        endif
 C
 C     5.2 Handle CONT command.  Set KHALT to false now.
 C
