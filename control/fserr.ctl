@@ -711,7 +711,7 @@ query response not found
 program error: strdup() failed
 ""
 5K -301
-scan_check command does not accept parameters
+scan_check command does not accept parameters, except 'force'
 ""
 5K  302
 There have not been two scan_name=... commands since the schedule started, use scan_check=force to force check
