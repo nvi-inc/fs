@@ -4176,7 +4176,7 @@ NF  -16
 Device communication failed getting TPI
 ""
 NF  -17
-Error retrieving reponses.
+Error retrieving responses.
 ""
 NF  -18
 Error decoding response.
