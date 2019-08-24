@@ -406,7 +406,7 @@ ifa          qkr 09501 01 0800FFFFFFFF
 ifb          qkr 09502 01 0800FFFFFFFF
 ifc          qkr 09503 01 0800FFFFFFFF
 ifd          qkr 09504 01 0800FFFFFFFF
-bbc_gain     qkr 09600 01 0800FFFFFFFF
+bbc_gain     qkr 09600 01 4800FFFFFFFF
 vsi1         qkr 09700 01 0800FFFFFFFF
 vsi2         qkr 09701 01 0800FFFFFFFF
 pfb1         qkr 09801 01 0800FFFFFFFF
