@@ -143,7 +143,7 @@ char *ptr;
       for(i=(sizeof(luser)/sizeof(char *))-2;i<sizeof(luser)/sizeof(char *);i++) {
 	if(strcmp(ptr,luser[i])==0) {
 	  lcl->itpis[MAX_GLOBAL_DET+i]=1;
-	  strncpy(lcl->devices[MAX_GLOBAL_DET+i].lwhat,luser[i],3);
+	  strncpy(lcl->devices[MAX_GLOBAL_DET+i].lwhat,luser[i],2);
 	  memcpy(lcl->devices[MAX_GLOBAL_DET+i].lwhat+2,"  ",2);
 	  goto done;
 	}
@@ -499,6 +499,7 @@ char *ptr;
 	   strcmp(ptr,"all")==0) {
 	  if(strcmp(ptr,"allbbc")==0||
 	     strcmp(ptr,"alli")!=0) {
+      icore=0;
 	    for(i=0;i<shm_addr->dbbc_cond_mods;i++) {
 	      for(j=0;j<shm_addr->dbbc_como_cores[i];j++) {
 		icore++;
@@ -792,7 +793,6 @@ struct onoff_cmd *lcl;
 {
   int ivalue,i,j,k,lenstart,limit;
   static int inext;
-  char *fmt;
 
   output=output+strlen(output);
 
@@ -829,14 +829,8 @@ struct onoff_cmd *lcl;
 	else
 	  iwide=4;
 	if(lcl->setup) { 
-	  if(shm_addr->equip.rack==DBBC && 
-	     (shm_addr->equip.rack_type == DBBC_PFB ||
-	      shm_addr->equip.rack_type == DBBC_PFB_FILA10G))
-	    fmt="%3.3s,%d,%c,%.4f,%.2f,%.2lf,%.3f,%.3f,%.6f,%.4f,%.6f";
-	  else
-	    fmt="%2.2s,%d,%c,%.4f,%.2f,%.2lf,%.3f,%.3f,%.6f,%.4f,%.6f";
-	  
-	  sprintf(output+strlen(output),fmt,
+	  sprintf(output+strlen(output),
+		  "%.*s,%d,%c,%.4f,%.2f,%.2lf,%.3f,%.3f,%.6f,%.4f,%.6f",iwide,
 		  lcl->devices[i].lwhat,lcl->devices[i].ifchain,
 		  lcl->devices[i].pol,
 		  lcl->devices[i].fwhm*RAD2DEG,
@@ -845,13 +839,11 @@ struct onoff_cmd *lcl;
 		  lcl->devices[i].dpfu,lcl->devices[i].gain,
 		  lcl->devices[i].dpfu*lcl->devices[i].gain);
 	} else {
-	  if(shm_addr->equip.rack==DBBC && 
-	     (shm_addr->equip.rack_type == DBBC_PFB ||
-	      shm_addr->equip.rack_type == DBBC_PFB_FILA10G))
-	    fmt="%3.3s,,,,,,,,,,";
-	  else
-	    fmt="%2.2s,,,,,,,,,,";
-	  sprintf(output+strlen(output),fmt,lcl->devices[i].lwhat);
+	  sprintf(output+strlen(output),"%.*s,,,,,,,,,,",iwide,
+		  lcl->devices[i].lwhat);
+	}
+	return;
+      }
 	}
 	return;
       }
