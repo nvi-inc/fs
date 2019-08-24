@@ -401,8 +401,6 @@ loop:
 	dbbcgain(&command,itask,ip);
 	break;
       case 97:
-/* TODO: Ed needs to look at this */
-/*
 	switch (itask) {
 	case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
 	  dbbc3_ifx(&command,itask,ip);
@@ -420,19 +418,18 @@ loop:
       case 98:
 	dbbc3_bbcnn(&command,itask,ip);
 	break;
-    */
       case 100:
 	mk6(&command,itask,ip);
 	break;
 	//      case 101:
 	//mk6_record(&command,itask,ip);
 	//break;
-      case 102:
-	mk6_disk_pos(&command,itask,ip);
-	break;
-      case 111:
-	mk6_scan_check(&command,itask,ip);
-	break;
+//      case 102:
+//	mk6_disk_pos(&command,itask,ip);
+//	break;
+//    case 111:
+//	mk6_scan_check(&command,itask,ip);
+//	break;
       case 112:
 	mk6_active(&command,itask,ip);
 	break;
@@ -444,6 +441,12 @@ loop:
 	break;
       case 122:
 	rdbe_atten(&command,itask,ip);
+	break;
+      case 130:
+	dbbc_vsix(&command,itask,ip);
+	break;
+      case 131:
+	dbbc_pfbx(&command,itask,ip);
 	break;
 /* end modified mb */
       default:

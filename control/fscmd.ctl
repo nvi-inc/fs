@@ -407,12 +407,6 @@ ifb          qkr 09502 01 0800FFFFFFFF
 ifc          qkr 09503 01 0800FFFFFFFF
 ifd          qkr 09504 01 0800FFFFFFFF
 bbc_gain     qkr 09600 01 4800FFFFFFFF
-vsi1         qkr 09700 01 0800FFFFFFFF
-vsi2         qkr 09701 01 0800FFFFFFFF
-pfb1         qkr 09801 01 0800FFFFFFFF
-pfb2         qkr 09802 01 0800FFFFFFFF
-pfb3         qkr 09803 01 0800FFFFFFFF
-pfb4         qkr 09804 01 0800FFFFFFFF
 ifa          qkr 09701 01 4000FFFFFFFF
 ifb          qkr 09702 01 4000FFFFFFFF
 ifc          qkr 09703 01 4000FFFFFFFF
@@ -595,6 +589,13 @@ rdbe_attena  qkr 12201 01 FFFFFFFFFFFF
 rdbe_attenb  qkr 12202 01 FFFFFFFFFFFF
 rdbe_attenc  qkr 12203 01 FFFFFFFFFFFF
 rdbe_attend  qkr 12204 01 FFFFFFFFFFFF
+*dbbc pfb
+vsi1         qkr 13000 01 0800FFFFFFFF
+vsi2         qkr 13001 01 0800FFFFFFFF
+pfb1         qkr 13101 01 0800FFFFFFFF
+pfb2         qkr 13102 01 0800FFFFFFFF
+pfb3         qkr 13103 01 0800FFFFFFFF
+pfb4         qkr 13104 01 0800FFFFFFFF
 * boss internal
 cont         *xx 00000 02 FFFFFFFFFFFF
 halt         *xx 00000 03 FFFFFFFFFFFF
