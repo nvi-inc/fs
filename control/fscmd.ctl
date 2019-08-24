@@ -329,12 +329,12 @@ mk5c_mode    qkr 07815 01 FFFFEFFFFFFF
 dbbc         qkr 07820 01 FFFFFFFFFFFF
 mk5_status   qkr 07821 01 FFFFFFFFFFFF
 fila10g      qkr 07822 01 FFFFFFFFFFFF
-fila10g_mode qkr 07823 01 FFFFFFFFFFFF
-dbbcrelink   qkr 07824 01 FFFFFFFFFFFF
-dbbcclose    qkr 07825 01 FFFFFFFFFFFF
 dbbc2        qkr 07823 01 FFFFFFFFFFFF
 fila10g2     qkr 07824 01 FFFFFFFFFFFF
 dbbc3        qkr 07825 01 FFFFFFFFFFFF
+fila10g_mode qkr 07826 01 FFFFFFFFFFFF
+dbbcrelink   qkr 07827 01 FFFFFFFFFFFF
+dbbcclose    qkr 07828 01 FFFFFFFFFFFF
 rollform     qkr 07901 01 0254FFFFFFFF
 tpicd        qkr 08001 01 FFFFFFFFFFFF
 onoff        qkr 08101 01 FFFFFFFFFFFF

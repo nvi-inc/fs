@@ -254,11 +254,11 @@ loop:
 	  data_check(&command,itask,ip);
 	  break;
 	case 5:
-	case 24:
+	case 27:
 	  mk5relink(&command,itask,ip);
 	  break;
 	case 6:
-	case 25:
+	case 28:
 	  mk5close(&command,itask,ip);
 	  break;
 	case 7:
@@ -284,17 +284,15 @@ loop:
 	  break;
 	case 20:
 	case 22:
-/* TODO Ed needs to look at this
 	case 23:
 	case 24:
 	case 25:
-    */
 	  dbbc(&command,itask,ip);
 	  break;
     case 21:
       mk5_status(&command, itask, ip);
       break;
-	case 23:
+	case 26:
 	  fila10g_mode(&command, itask, ip);
 	  break;
 	default:

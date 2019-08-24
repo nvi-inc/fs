@@ -36,7 +36,7 @@ mk5cn:
       ip[2]=0;
       if(itask == 5)
 	skd_run("mk5cn",'w',ip);
-      else // (itask == 24)
+      else // (itask == 27)
 	skd_run("dbbcn",'w',ip);
       skd_par(ip);
 
