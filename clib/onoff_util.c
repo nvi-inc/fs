@@ -725,10 +725,10 @@ char *ptr;
 	  goto done;
 
 	} else if(strcmp(ptr,"formbbc")==0) {
-	  ierr= -309;
+	  ierr= -310;
 	  return ierr;
 	} else if(strcmp(ptr,"formif")==0) {
-	  ierr= -309;
+	  ierr= -310;
 	  return ierr;
 	} else { 
 	  int ibc;

@@ -897,7 +897,7 @@ Upper or lower 32 bits of mask must be zero for Mark 5B.
 For Mark 5B recorder minimum implied sample rate is 2 MHz. Check Mark 5B clock rate in equip.ctl.
 ""
 5T -214
-Clock rate (from equip.ctl) divided by sample rate must be integer 1, 2, 4, 8, or 16 within 0.1 percent.
+For Mark 5B recorder implied decimation must be integer 1, 2, 4, 8, or 16. Check Mark 5B clock rate in equip.ctl.
 ""
 5T -223
 Decimation not supported for VDIF.
@@ -2274,7 +2274,7 @@ DF -455
 DBBC version does not agree with equip.ctl; dbbc has v102: September 07 2012
 ""
 DF -456
-DBBC version does not agree with equip.ctl; see next message for DBBC's version.
+DBBC version does not agree with equip.ctl; see message above for DBBC's version.
 ""
 DF -457
 DBBC version does not agree with equip.ctl; dbbc has (unsupported) v103: DDC,103,October 04 2012
@@ -2289,10 +2289,10 @@ DF -460
 DBBC has unsupported date code for version 104, ddbc has: DDC,104,March 19 2013
 ""
 DF -461
-DBBC version should be DDC, but is PFB; see next message for DBBC's version.
+DBBC version should be DDC, but is PFB; see message above for DBBC's version.
 ""
 DF -462
-DBBC version should be PFB, but is DDC; see next message for DBBC's version.
+DBBC version should be PFB, but is DDC; see message above for DBBC's version.
 ""
 DF -463
 Unknown rack type in logmsg_dbbc().
@@ -2420,24 +2420,6 @@ Error decoding dbbcifX/ response, could be a DBBC version mis-match, see error D
 DI -451
 Class buffer error from command response.
 ""
-DP -301
-No command form of pfbX command.
-""
-DP -302
-Error response from DBBC in pfbX command.
-""
-DP -401
-Class buffer error from monitor response.
-""
-DP -402 Place Holder
-
-""
-DP -403
-Error decoding power/ response, could be a DBBC version mis-match, see error DP -402 for text.
-""
-DP -501
-Only DBBC PFB rack types supported in pfbX commands.
-""
 DJ -101
 No default for IF input.
 ""
@@ -2483,6 +2465,9 @@ Error decoding bandwidth, must be one of: 2, 4, 8, 16, or 32.
 DK -204
 Averaging period must be a positive integer 60 or less.
 ""
+DK -302
+IF source exceeds number of conditioning modules
+""
 DK -401
 Class buffer error from monitor response.
 ""
@@ -2491,6 +2476,24 @@ Error decoding dbbcNN/ response, could be a DBBC version mis-match, see error DC
 ""
 DK -451
 Class buffer error from command response.
+""
+DP -301
+No command form of pfbX command.
+""
+DP -302
+Error response from DBBC in pfbX command.
+""
+DP -401
+Class buffer error from monitor response.
+""
+DP -402 Place Holder
+
+""
+DP -403
+Error decoding power/ response, could be a DBBC version mis-match, see error DP -402 for text.
+""
+DP -501
+Only DBBC PFB rack types supported in pfbX commands.
 ""
 DQ -1
 Invalid state number for bbc (0 to 64).
@@ -2699,18 +2702,6 @@ Error decoding dbbctpifX/ response, could be a DBBC3 version mis-match, see erro
 DT -451
 Class buffer error from command response.
 ""
-ER -902
-Unable to find ":" in S2 error decode response.
-""
-FL   -1
-Previous source in this schedule not reached before new source was commanded
-""
-FL   -2
-FLAGR detected error in ANTCN, see above for error.
-""
-FM  007
-Checksum error
-""
 DV -201
 Error decoding channel number of parameter 1
 ""
@@ -2864,21 +2855,6 @@ Device returned wrong number of characters
 FP  -72
 Device communication failed too many times
 ""
-FP  -73
-device rdbe multicast sample time changed while reading data.
-""
-FP  -74
-device rdbe multicast may not be running: error decoding multicast time
-""
-FP  -75
-device rdbe multicast may not be running: error converting multicast time
-""
-FP  -76
-device rdbe error converting FS time
-""
-FP  -77
-device rdbe multicast may not be running: multicast time more than 2 seconds in past
-""
 FP  -80
 TPI Overflowed
 ""
@@ -2922,7 +2898,7 @@ FP -111
 Couldn't set manual gain control
 ""
 FP -112
-Couldn't restore automatic gain control (AGC)
+Couldn't restore automatic gain control (AGC), or for VLBA to previous value.
 ""
 FP -401
 Class buffer error, from monitor response for DBBC IF gain control.
@@ -4533,6 +4509,9 @@ Q1 -308
 Unknown IF filter.
 ""
 Q1 -309
+Unknown IF filter or unsupported IF filter for PFB BBC.
+""
+Q1 -310
 formbbc and formif not currently supported for DBBC3.
 ""
 Q2 -201
@@ -5039,6 +5018,9 @@ TPIs are ALL, FORMBBC, FORMIF, IFX (IX), X01-Xnn, X=available CoMos A-D, nn=16*C
 QK -207
 FORMBBC and FORMIF are not implemented for DBBC3.
 ""
+QK -208
+TPIs are ALL,EVENU,ODDU,EVENL,ODDL,IA-IH(IFA-IFH),1u,1l,...128u,128l,FORMBBC,FORMIF.
+""
 QK -211
 Tsys value for device ?W overflowed or was less than zero.
 ""
@@ -5094,7 +5076,7 @@ QK -401
 Error retrieving device response buffers.
 ""
 QK -402
-Error in DBBC communication in tpput_dbbc.
+Error decoding device response buffers.
 ""
 QL -101
 No default for the MAT address.
@@ -5454,10 +5436,13 @@ QZ -217
 bbc not set-up.
 ""
 QZ -218
-Unrecognized RDBE detector.
+Detector must be one of IFX (IX), X01-Xnn, X=available CoMos A-D, nn=16*Cores available on CoMo X
 ""
 QZ -219
 Unrecognized DBBC3 detector.
+""
+QZ -220
+Unrecognized RDBE detector.
 ""
 QZ -301
 FIVPT is not dormant.

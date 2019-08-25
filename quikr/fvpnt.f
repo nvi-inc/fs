@@ -367,7 +367,7 @@ c
          if(irdbe.lt.1.or.irdbe.gt.MAX_RDBE .or.
      *        ifc.lt.1.or.ifc.gt.MAX_RDBE_IF.or.
      *        ichan.lt.0.or.ichan.ge.MAX_RDBE_CH) then
-            ierr=-218
+            ierr=-220
             goto 990
          endif
       else if(DBBC3.eq.rack) then

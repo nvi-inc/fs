@@ -102,6 +102,6 @@ error:
       ip[1]=0;
  error2:
       ip[2]=ierr;
-      memcpy(ip+3,"dc",2);
+      memcpy(ip+3,"dk",2);
       return;
 }
