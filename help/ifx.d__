@@ -21,7 +21,7 @@ Settable Parameters:
   results, which may only differ from correct results in subtle hard to
   detect ways.  Users are encouraged to make sure that ifX modules
   being used in an standalone operations have been fully set-up in the
-  FS first.  As of FS of the first offical release after 9.11.8, a
+  FS first.  As of the first offical release after 9.11.8, a
   plan is being developed to eliminate this problem.
 
             input     input channel, 1 to 4, No default.
@@ -83,4 +83,4 @@ the (C-language) expression:
 
 Assuming a 512 MHz wide input bandpass, the nominal operating count
 level is 38000-45000 for the DDC personality, and 40000-45000 for the
-PFB the DDC personality.
+PFB personality.
