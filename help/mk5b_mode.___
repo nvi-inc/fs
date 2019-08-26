@@ -11,7 +11,7 @@ Response:   mk5b_mode/source,mask,decimation,sample,fpdp
 source:     data source or format
             For mk5b_mode: ext, tvg, or ramp; default: ext.
             For mk5c_mode: vdif or  mark5b; default: vdif.
-	    Ignored for bit_streams.
+            Ignored for bit_streams.
 
             For mark5c_mode, the monitor value is the "magic"
             recording mode specifier used by 'jive5ab'.
@@ -26,11 +26,11 @@ mask:       bit-stream mask, hex, non-zero 64-bit wide maximum,
             See comments for notes about the mask for 'mk5b_mode'.
 
 decimation: decimation factor
-	    For mk5b_mode: 1, 2, 4, 8, or 16.  No default unless
+            For mk5b_mode: 1, 2, 4, 8, or 16.  No default unless
             sample (next parameter) is specified.
             For mk5c_mode: only available for source 'mark5b'.
             There is no monitor value for Ethernet recorders.
-	    Ignored for bit_streams.
+            Ignored for bit_streams.
 
             For mk5b_mode, and mk5c_mode with 5b/Ethernet, the minimum
             implied sample rate (relative to the VSI-H/Mark5B clock
@@ -47,11 +47,11 @@ sample:     sample rate: in MHz.  For mk5b_mode: the possible range of
             comments; no default.  Ignored for bit_streams.
 
 fpdp:       fpdp mode: 1 or 2. Default: no command sent to recorder.
-	    Ignored for mk5c_mode and bit_streams.
+            Ignored for mk5c_mode and bit_streams.
 
 okay        overide to allow command while recording, literal ascii:
             disk_record_ok
-	    Ignored for mk5c_mode and bit_streams.
+            Ignored for mk5c_mode and bit_streams.
 
 Monitor only parameter:
 format      VDIF or possibly others (see 'jive5ab' mode? query response)
