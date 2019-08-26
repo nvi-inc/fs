@@ -36,7 +36,7 @@ clock       input clock rate in Hz
 Comments:
 The effective sample rate can be specified in the SNAP command either
 explicitly with the 'sample' parameter or implicitly with the
-'decimatation' parameter.  Only one of 'sample' and 'decimation' may
+'decimation' parameter.  Only one of 'sample' and 'decimation' may
 be specified.  The device does not respond with the commanded
 effective sample rate.  In the query response for this command, the
 commanded sample rate, if it was explicitly commanded, is shown in
