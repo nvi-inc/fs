@@ -366,7 +366,7 @@ do 	{
 		  mk5b_1pps,sizeof(mk5b_1pps),
 		  mk5b_clock_freq,sizeof(mk5b_clock_freq),
 		  mk5b_clock_source,sizeof(mk5b_clock_source),
-		  &vdif_epoch); /* get times */
+		  &vdif_epoch,&ierr); /* get times */
 
 	vdif_should=-1;
 	if(formtime>=0) {
