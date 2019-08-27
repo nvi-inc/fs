@@ -6732,7 +6732,7 @@ TC -202
 Cycle period must be a non-negative integer.
 ""
 TC -301
-Continuous cal not enabled for DBBC DDC.
+Continuous cal not enabled for DBBC or DBBC3.
 ""
 TC -302
 TPICD not set-up: no detectors selected.
