@@ -68,7 +68,6 @@ long ip[5];                           /* ipc parameters */
 /* if we get this far it is a set-up command so parse it */
 
 parse:
-
       ilast=0;                                      /* last argv examined */
       memcpy(&lcl,&shm_addr->mk5b_mode,sizeof(lcl));
 
@@ -95,12 +94,6 @@ parse:
 
       out_recs=0;
       out_class=0;
-
-      if(15 == itask && shm_addr->m5b_crate != 0) {
-	mk5c_clock_set_2_m5(outbuf,&lcl);
-	cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-	out_recs++;
-      }
 
       mk5b_mode_2_m5(outbuf,&lcl,itask);
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
