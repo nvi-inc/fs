@@ -1,4 +1,4 @@
-1File: /usr2/fs/misc/fs9131up.txt         Version: 9.6  Date: 190412
+sFile: /usr2/fs/misc/fs9131up.txt         Version: 9.9  Date: 190826
 
 		       FS 9.13.1 Update Notice
 
@@ -37,6 +37,8 @@ below.
 We encourage all non-VGOS stations to upgrade now even if they do not
 need the new features and bug fixes because doing so will make future
 upgrades easier.  Upgrading from 9.11.19 is relatively easy.
+Upgrading from 9.13.0 is even easier.  There is a path to upgrade from
+older versions.
 
 The most significant changes in version 9.13.1 are:
 
@@ -132,7 +134,9 @@ The most significant changes in version 9.13.1 are:
        the recommended FS time model is now 'computer'.  Please see
        '/usr2/fs/misc/ntp.txt' for more details.  Please note that the
        use of 'setcl' in 'midob' is still required to monitor the
-       formatter time.
+       formatter time.  As of 9.13.1, the file was updated to remove
+       an incorrect suggestion to add a call to the 'check_ntp'
+       procedure in 'exper_initi' to instead put in 'sched_initi'.
 
 (viii) The VEX parser now support units for the rate in 'clock_early'
        statements.
@@ -148,7 +152,9 @@ The most significant changes in version 9.13.1 are:
        remote instances of 'metserver'.
 
    (x) Small improvements were made to 'gnplt': more Tcal points per
-       band and non-default font sizes.
+       band,  non-default font sizes, and the labeling of plots was
+       improved to allow labels for larger values to be displayed
+       correctly.
 
   (xi) Support in the 'tsys', 'onoff', and 'fivept' commands for user
        devices that can't have a "zero" level measured.
@@ -164,10 +170,14 @@ mentioned.
 II. Installation
 
 Detailed instructions are provided below for installing 9.13.1 as an
-upgrade to 9.11.19, the previous stable release.  If you are upgrading
-from verison 9.13.0, you only need to use steps (1)-(7) and (10);
-testing in step (15) and backing up in step (17) are highly
-recommended.
+upgrade to 9.11.19, the previous stable release. 
+
+If you are upgrading from version 9.13.0, you only need to use steps
+(1)-(7) and (10); testing in step (15) and backing up in step (17) are
+highly recommended.  Please check step (12.ii) to correct an error
+that was in the 9.13.0 instructions for using NTP.  Please also
+considering completing any of the steps from 9.13.0 that you may have
+deferred.
 
 If you have an older version than 9.11.19, please refer to the
 appendix, which is described next, for more information.
@@ -197,16 +207,14 @@ The installation steps for upgrading from 9.11.19 are listed below.
  (1) Place a copy of the fs-9.13.1 archive in your FS machine's
      '/tmp' directory.  For example, you might do the following:
 
-       a. navigate to URL 'https://vlbi.gsfc.nasa.gov/software/fs'
+       a. navigate to URL 'http://www.metsahovi.fi/fs'
        b. enter your FS account name and password at the prompt
        c. click on the 'dist' link
        d. download 'fs-9.13.1.tgz'
        e. 'scp' transfer 'fs-9.13.1.tgz' to your FS machine, placing
           it in the '/tmp' directory
 
-     Another FS server is available at: 'http://www.metsahovi.fi/fs/'.
-
-     Your institution must have an account on the servers in order to
+     Your institution must have an account on the server in order to
      download files.  Please contact Ed (Ed.Himwich@nasa.gov), if you
      need an account or can't find your password.
 
@@ -314,7 +322,11 @@ The installation steps for upgrading from 9.11.19 are listed below.
           available.  This can can be deferred until the rest of the
           installation of 9.13.1 is complete.  When you make this
           change, please refer to '/usr2/fs/misc/ntp.txt' for
-          requirements and instructions.
+          requirements and instructions.  (Please note that in 9.13.0,
+          the 'ntp.txt' file incorrectly recommended putting a call to
+          'check_ntp' in 'exper_initi'.  It should go in
+          'sched_initi'.  Please correct this if you have not
+          already.)
 
 (13) This step is for updates to your SNAP procedure files.  There are
      two changes.  The first (i) is required if you use a Mark 5
@@ -489,9 +501,21 @@ The following is a summary of FS changes since 9.11.19. Items up to
 22. Support for two VSI output DBBC2 DDC modes.
 23. Support for DBBC DDC v107 with 32 and 64 MHz channel BWs.
 24. Improvements in display server.
-25. The FS 'cont_cal' command now fully implemnents support for the
+25. The FS 'cont_cal' command now fully implements support for the
     DBBC DDC v106 and v107 (or later) 'cont_cal' command.
 26. Fixed two bugs in the 'schedule' command.
+27. The schedule procedure library is left open after an "schedule='
+    command that closes a schedule.
+28. The 'vsi_clk' command is used on 'fmset' and checked by 'chekr'
+    for DBBC2 DDC v107 and later.
+29. Support for DBBC2 DDC v106 and later 'cont_cal' command included.
+30. Fixed issues with conversion to 'gfortran' (which is not
+    implemented yet).
+31. Fixed a bug in 'ddout' and improved warning message when opening
+    already large log files.
+32. The plot labels for 'gnplt' were improved.
+33. Files are no longer created "world writable".
+34. Changed 'fix_perm' script to set permissions to 'rw-rw-r--'.
 
 A more detailed discussion of these changes follows.
 
@@ -807,7 +831,7 @@ A more detailed discussion of these changes follows.
     backward compatibility, this command remembers the previously
     commanded state of the 'polarity', 'frequency', and 'option'
     parameters and uses them as the defaults. Until defaults are set
-    in this waym these parameters are not sent the device.  Thus if a
+    in this way, these parameters are not sent the device.  Thus if a
     station requires a particular value for 'frequency' or 'option',
     they can put a command in 'initi' that commands those values and
     those values will used in all subsequent uses of the 'cont_cal'
@@ -819,7 +843,49 @@ A more detailed discussion of these changes follows.
     'polarity' value selected when the schedule procedures are
     generated.  Please see 'help=cont_cal' for more information.
 
-26. Fixed two bugs in the 'schedule' command.
+26. Fixed two bugs in the 'schedule' command.  Fixed a bug that caused
+    'boss' to crash if there was an attempt to execute a procedure in
+    a now closed schedule procedure library.  Fixed a bug that cause
+    'exper_initi' to execute if starting a schedule failed if 'pfmed'
+    was running.
+
+27. The schedule procedure library is left open after an "schedule='
+    command that stops execution of a schedule.  This behavior is
+    parallel to what happens when the end of the schedule is reached.
+    The previous behavior left the library open but made the
+    procedures inaccessible, which was confusing.
+
+28. The 'vsi_clk' command is used on 'fmset' and checked by 'chekr'
+    for DBBC2 DDC v107 and later.  This allows the correct clock rate
+    to be set for Mark 5B (64) and FiLa10G (128) recording if the
+    'nominal' clock rate value is used in 'equip.ctl'.
+
+29. Support for DBBC2 DDC v106 and later 'cont_cal' command included.
+    This had been overlooked for v106 previously.
+
+30. Fixed issues with conversion to 'gfortran' (which is not
+    implemented yet).  The 'gtdbl.f' routine was incorrectly declared
+    single precision; this was benign under 'f2c'.  The 'pfmed' 'st'
+    command was fixed to not open one file on two different logical
+    units when copying within a library; this was allowed under 'f2c'.
+
+31. Fixed a bug in 'ddout' and improved warning message when opening
+    already large log files.  An initialized variable could cause
+    'fserr' to terminate the first time it was used. A time-out was
+    also added in case 'fserr' doesn't respond.  The warning message
+    now only occurs if the file is more than 100MB.
+
+32. The plot labels for 'gnplt' were improved.  This allows labels for
+    larger variables to be displayed correctly.  Thanks to Eskil
+    Varenius at Jodrell Bank for reporting this.
+
+33. Files are no longer created "world writable".  Although none of
+    the files created are a security risk, this had flagged as a
+    weakness.  Files are still created writable for the owner and
+    group (the latter usually 'rtx').
+
+34. Changed 'fix_perm' script to set permissions to 'rw-rw-r--'.  This
+    was done to avoid having "world writable" files.
 
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/misc/changes.txt.
@@ -928,7 +994,7 @@ A more detailed discussion of these changes follows.
     'drudg' has no knowledge of, so it can't verify that they are
     correct.  The FS does know what firmware is in use and does check
     that the BW selected is correct and the decimation is correct.  As
-    has always been the csase, it is necessary to make sure that all
+    has always been the Case, it is necessary to make sure that all
     the setup procedures for an experiment run without errors to
     verify that the schedule is correct for the equipment in use.
 
@@ -1319,8 +1385,8 @@ please contact Ed.
 
 It is recommended that your local files for operations (control, proc,
 log, and sched directories and their contents) have the default
-ownership ('oper.rtx') and permissions ('rw-rw-rw', for directories
-'rwxrwxrwx').  To force this, please execute the script (as 'root'):
+ownership ('oper.rtx') and permissions ('rw-rw-r-', for directories
+'rwxrwxr-x').  To force this, please execute the script (as 'root'):
 
   /usr2/fs/misc/fix_perm
 
