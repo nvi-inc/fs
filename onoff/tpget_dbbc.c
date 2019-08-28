@@ -87,7 +87,7 @@ float tpi[MAX_DBBC_DET],tpi2[MAX_DBBC_DET];
 	     cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
 	  if(ip[1]>0) 
 	    cls_clr(ip[0]);
-	  *ierr=-17;
+	  *ierr=-19;
 	  return -1;
 	}
 	inbuf[nchars]=0;
@@ -97,7 +97,7 @@ float tpi[MAX_DBBC_DET],tpi2[MAX_DBBC_DET];
 	if( dbbc_2_dbbcifx(&lclc,&lclm,inbuf) !=0) {
 	  if(ip[1]>0) 
 	    cls_clr(ip[0]);
-	  *ierr=-18;
+	  *ierr=-21;
 	  return -1;
 	} else
 	  tpi[i]=dbbc_if_power(lclm.tp,i-2*MAX_DBBC_BBC);

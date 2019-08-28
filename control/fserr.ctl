@@ -4152,13 +4152,19 @@ NF  -16
 Device communication failed getting TPI
 ""
 NF  -17
-Error retrieving responses.
+Error retrieving DBBC BBC responses.
 ""
 NF  -18
-Error decoding response.
+Error decoding DBBC BBC response.
+""
+NF  -19
+Error retrieving DBBC IF responses.
 ""
 NF  -20
 Did not reach source in allotted time
+""
+NF  -21
+Error decoding DBBC IF response.
 ""
 NF  -30
 ANTCN failed too many times
