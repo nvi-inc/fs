@@ -38,7 +38,7 @@ main()
   int use_cal;
   int ita[6];
   char lsorna2[sizeof(shm_addr->lsorna)+1];
-  int cont0, cont[MAX_ONOFF_DET], station_det, non_station_det;
+  int cont0, cont[MAX_ONOFF_DET], rack_det, station_det;
   int ifchain;
 
 /* connect to the FS */
@@ -116,8 +116,8 @@ main()
     }
 
   use_cal=FALSE;
-  non_station_det=FALSE;
   station_det=FALSE;
+  rack_det=FALSE;
   cont0=shm_addr->equip.rack==DBBC  &&
 	      (shm_addr->equip.rack_type == DBBC_DDC ||
 	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
@@ -129,10 +129,10 @@ main()
     if(onoff.itpis[j]!=0) {
       use_cal=use_cal ||onoff.devices[j].tcal>0.0;
       if(j<MAX_GLOBAL_DET) {
-	station_det=TRUE;
+	rack_det=TRUE;
 	cont[j]=cont0;
       } else {
-	non_station_det=TRUE;
+	station_det=TRUE;
 	cont[j]=0;
       }
       source_type[j]='x';
@@ -150,7 +150,7 @@ main()
   }
   if(cont0) {
     use_cal=FALSE;
-    if(!station_det)
+    if(!rack_det)
       cont0=FALSE;
   }
 
