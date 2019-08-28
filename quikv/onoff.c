@@ -498,26 +498,26 @@ long ip[5];                           /* ipc parameters */
 	/* user devices */
 	for (i=MAX_GLOBAL_DET;i<MAX_ONOFF_DET;i++)
 	    if(lcl.itpis[i]!=0) {
-	      lcl.devices[i].ifchain=i-MAX_GLOBAL_DET+1;
+	      lcl.devices[i].ifchain=i-MAX_GLOBAL_DET+MAX_LO+1;
 	      lcl.devices[i].lwhat[0]='u';
 	      lcl.devices[i].lwhat[1]=hex[i-MAX_GLOBAL_DET+1];
 	      lcl.devices[i].center=
-		shm_addr->user_device.center[lcl.devices[i].ifchain-1];
-	      switch(shm_addr->user_device.sideband[lcl.devices[i].ifchain-1]) {
+		shm_addr->user_device.center[lcl.devices[i].ifchain-(1+MAX_LO)];
+	      switch(shm_addr->user_device.sideband[lcl.devices[i].ifchain-(1+MAX+LO)]) {
 	      case 1:
 		lcl.devices[i].center=
-		  shm_addr->user_device.lo[lcl.devices[i].ifchain-1]
+		  shm_addr->user_device.lo[lcl.devices[i].ifchain-(1+MAX_LO)]
 		  +lcl.devices[i].center;
 		break;
 	      case 2:
 		lcl.devices[i].center=
-		  shm_addr->user_device.lo[lcl.devices[i].ifchain-1]
+		  shm_addr->user_device.lo[lcl.devices[i].ifchain-(1+MAX_LO)]
 		  -lcl.devices[i].center;
 		break;
 	      default:
 /*
 		printf(" user device sideband %d ifchain %d \n",
-		      shm_addr->user_device.sideband[lcl.devices[i].ifchain-1],
+		      shm_addr->user_device.sideband[lcl.devices[i].ifchain-(1+MAX_LO)],
 		      lcl.devices[i].ifchain);
 */
 		ierr=-302;
