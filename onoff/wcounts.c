@@ -11,16 +11,18 @@ extern struct fscom *shm_addr;
 
 #include "sample_ds.h"
 
-void wcounts(label,azoff,eloff,onoff,accum, rack)
+void wcounts(label,azoff,eloff,onoff,accum)
      char *label;
      double azoff,eloff;
      struct onoff_cmd *onoff;
      struct sample *accum;
-     int rack;
 {
   char buff[256];
   int i, kfirst;
   int dbbc2_pfb;
+  int rack;
+
+  rack=shm_addr->equip.rack;
 
   dbbc2_pfb =shm_addr->equip.rack==DBBC && 
     (shm_addr->equip.rack_type == DBBC_PFB ||

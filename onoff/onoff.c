@@ -283,10 +283,10 @@ main()
 
     if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
       goto error_recover;
-    wcounts("ONSO",0.0,0.0,&onoff,&sample,shm_addr->equip.rack);
+    wcounts("ONSO",0.0,0.0,&onoff,&sample);
     inc_accum(&onoff.itpis,&ons,&sample);
     if(cont0) {
-      wcounts("ONSC",0.0,0.0,&onoff,&sampl2,shm_addr->equip.rack);
+      wcounts("ONSC",0.0,0.0,&onoff,&sampl2);
       inc_accum(&onoff.itpis,&onscal,&sampl2);
     }
 
@@ -302,7 +302,7 @@ main()
       scmds("calonnf");
       if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
 	goto error_recover;
-      wcounts("ONSC",0.0,0.0,&onoff,&sample,shm_addr->equip.rack);
+      wcounts("ONSC",0.0,0.0,&onoff,&sample);
       inc_accum(&onoff.itpis,&onscal,&sample);
     }
 
@@ -316,7 +316,7 @@ main()
     if(use_cal) {
       if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
 	goto error_recover;
-      wcounts("OFFC",isgn*astep,isgn*estep,&onoff,&sample,shm_addr->equip.rack);
+      wcounts("OFFC",isgn*astep,isgn*estep,&onoff,&sample);
       inc_accum(&onoff.itpis,&ofscal,&sample);
 
       scmds("caloffnf");
@@ -324,10 +324,10 @@ main()
     if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
       goto error_recover;
     if(cont0) {
-      wcounts("OFFC",isgn*astep,isgn*estep,&onoff,&sampl2,shm_addr->equip.rack);
+      wcounts("OFFC",isgn*astep,isgn*estep,&onoff,&sampl2);
       inc_accum(&onoff.itpis,&ofscal,&sampl2);
     }
-    wcounts("OFFS",isgn*astep,isgn*estep,&onoff,&sample,shm_addr->equip.rack);
+    wcounts("OFFS",isgn*astep,isgn*estep,&onoff,&sample);
     inc_accum(&onoff.itpis,&ofs,&sample);
 
     if(onoff.proc[0]!=0 && i==0) {
@@ -342,7 +342,7 @@ main()
       if(tzero(cont,ip,&onoff,rut,&sample,&ierr)) {
 	goto error_recover;
       }
-      wcounts("ZERO",isgn*astep,isgn*estep,&onoff,&sample,shm_addr->equip.rack);
+      wcounts("ZERO",isgn*astep,isgn*estep,&onoff,&sample);
       inc_accum(&onoff.itpis,&zero,&sample);
     }
 
@@ -356,10 +356,10 @@ main()
 
   if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
     goto error_recover;
-  wcounts("ONSO",0.0,0.0,&onoff,&sample,shm_addr->equip.rack);
+  wcounts("ONSO",0.0,0.0,&onoff,&sample);
   inc_accum(&onoff.itpis,&ons,&sample);
   if(cont0) {
-    wcounts("ONSC",0.0,0.0,&onoff,&sampl2,shm_addr->equip.rack);
+    wcounts("ONSC",0.0,0.0,&onoff,&sampl2);
     inc_accum(&onoff.itpis,&onscal,&sampl2);
   }
   
@@ -367,7 +367,7 @@ main()
     scmds("calonnf");
     if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
       goto error_recover;
-    wcounts("ONSC",0.0,0.0,&onoff,&sample,shm_addr->equip.rack);
+    wcounts("ONSC",0.0,0.0,&onoff,&sample);
     inc_accum(&onoff.itpis,&onscal,&sample);
 
     scmds("caloffnf");
