@@ -12417,7 +12417,7 @@ Version 9.13.1-rc1 181115
            add DBBC vsi_clk setting
 
 190408 WEH clib/dbbcnn_util.c
-           reallow 1 and 2 MHz BW fof v107
+           reallow 1 and 2 MHz BW for v107
 
 190411 WEH control/fserr.ctl
            fix boss error messages about the schedule procedure library
@@ -12435,3 +12435,36 @@ Version 9.13.1-rc1 181115
 
 Version 9.13.1-rc2 190412
 
+190702 WEH misc/ntp.txt
+           change use of 'exper_initi' to 'sched_initi'
+
+190711 WEH polb/gtdbl.f
+           fixed declaration of func return to dble, old was
+             incorrect, but not a bug with default flags for f2c
+
+190712 WEH ddout/ddout.c
+           set ip[0]=0 before running fserr
+           added time-out support in case fserr hangs/aborts
+
+190715 WEH pfmed/ffmp.f
+           make 'st' command tolerant of gfortran
+
+190716 DEH gnplt/main.py
+           fix rounding on x & y label digits
+
+190716 WEH ddout/ddout.c
+           ddout/recover_log.c
+           drudg/fdrudg.f
+           newlb/fopen.f
+           polb/koutp.f
+           quikv/save_file.c
+           changed all file persmissions to 0664
+
+190722 WEH control/fserr.ctl
+           ddout/ddout.c
+           increase log file size warning to 100 MB
+
+190826 WEH misc/fix_perm
+           changed to permissions 'rw-rw-r--'
+
+Version 9.13.1 190826
