@@ -36,16 +36,13 @@ void wcounts(label,azoff,eloff,onoff,accum)
       continue;
 
     if(
-       (rack!=RDBE && ((onoff->intp==1 &&strlen(buff)>70)
-		       ||(onoff->intp!=1 &&strlen(buff)>61))) ||
        (rack==RDBE && ((onoff->intp==1 &&strlen(buff)>68)
 		       ||(onoff->intp!=1 &&strlen(buff)>59))) ||
        (dbbc2_pfb && 
         ((onoff->intp==1 &&strlen(buff)>68)
             ||(onoff->intp!=1 &&strlen(buff)>59))) ||
-       (!dbbc2_pfb &&
-        ((onoff->intp==1 &&strlen(buff)>70)
-         ||(onoff->intp!=1 &&strlen(buff)>61)))
+       ((onoff->intp==1 &&strlen(buff)>70)
+		       ||(onoff->intp!=1 &&strlen(buff)>61))
     ){
       logit(buff,0,NULL);
       buff[0]=0;
