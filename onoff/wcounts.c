@@ -72,6 +72,7 @@ void wcounts(label,azoff,eloff,onoff,accum)
     if(onoff->intp==1) {
       if(rack==RDBE) {
 	dble2str(buff,       accum->avg[i],-9,0);
+      buff[strlen(buff)-1]=0;
       } else if(dbbc2_pfb) {
 	dble2str(buff,       accum->avg[i],-8,3);
       } else {
