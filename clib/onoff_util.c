@@ -844,9 +844,6 @@ struct onoff_cmd *lcl;
 	}
 	return;
       }
-	}
-	return;
-      }
     }
     *count=-1;
   }
