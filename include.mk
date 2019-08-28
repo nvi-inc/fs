@@ -16,7 +16,7 @@ endif
 LDFLAGS += -L$(ROOT)/third_party/lib
 CPPFLAGS += -I$(ROOT)/third_party/include
 
-DEBUG_FLAGS = -g3 -ggdb -Og
+DEBUG_FLAGS = -g3 -ggdb
 
 ifeq ($(DEBUG),1)
 FFLAGS  += $(DEBUG_FLAGS)
