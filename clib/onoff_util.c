@@ -428,8 +428,7 @@ char *ptr;
 	  goto done;
 
 	} else if(strcmp(ptr,"formbbc")==0) {
-	  if(shm_addr->equip.rack==DBBC &&
-	     shm_addr->equip.drive[0]==MK5 &&
+	  if(shm_addr->equip.drive[0]==MK5 &&
 	     (shm_addr->equip.drive_type[0]==MK5B ||
 	      shm_addr->equip.drive_type[0]==MK5B_BS ||
 	      shm_addr->equip.drive_type[0]==MK5C ||
@@ -459,8 +458,7 @@ char *ptr;
 	} else if(strcmp(ptr,"formif")==0) {
 	  for(i=0;i<MAX_ONOFF_DET;i++)
 	    itpis_test[i]=0;
-	  if(shm_addr->equip.rack==DBBC &&
-	     shm_addr->equip.drive[0]==MK5 &&
+	  if(shm_addr->equip.drive[0]==MK5 &&
 	     (shm_addr->equip.drive_type[0]==MK5B ||
 	      shm_addr->equip.drive_type[0]==MK5B_BS ||
 	      shm_addr->equip.drive_type[0]==MK5C ||
