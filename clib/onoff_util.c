@@ -495,8 +495,7 @@ char *ptr;
 	if(strcmp(ptr,"allbbc")==0||
 	   strcmp(ptr,"alli")==0||
 	   strcmp(ptr,"all")==0) {
-	  if(strcmp(ptr,"allbbc")==0||
-	     strcmp(ptr,"alli")!=0) {
+	  if(strcmp(ptr,"alli")!=0) {
       icore=0;
 	    for(i=0;i<shm_addr->dbbc_cond_mods;i++) {
 	      for(j=0;j<shm_addr->dbbc_como_cores[i];j++) {
@@ -510,8 +509,7 @@ char *ptr;
 	      }
 	    }
 	  }
-	  if(strcmp(ptr,"alli")==0||
-	     strcmp(ptr,"allbbc")!=0) {
+	  if(strcmp(ptr,"allbbc")!=0) {
 	    for(i=0;i<shm_addr->dbbc_cond_mods;i++) {
 	      lcl->itpis[i+MAX_DBBC_PFB]=1;
 	      strncpy(lcl->devices[i+MAX_DBBC_PFB].lwhat,lwhati[i],4);
