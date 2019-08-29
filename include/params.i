@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2022, 2023 NVI, Inc.
+* Copyright (c) 2020, 2022-2024 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -68,6 +68,7 @@ c
       integer FLEXBUFF      ! FLEXBUFF comparison bit variable
       integer MAX_DAS       ! Max number of LBA DAS allowed
       integer RDBE          ! RDBE comparison bit variable
+      integer R2DBE         ! R2DBE comparison bit variable
       integer MK6           ! MK6 comparison bit variable
       integer DBBC3         ! DBBC3 comparison bit variable
       integer DBBC3_DDCU    ! DBBC3_DDCU comparison bit variable
@@ -167,6 +168,7 @@ C rack/drive _types
       parameter ( DBBC3_DDCU = int(z'1')  )
       parameter ( DBBC3_DDCV = int(z'2')  )
       parameter ( DBBC3_DDCE = int(z'4')  )
+      parameter ( R2DBE    = int (z'1'  ) )
 C
       parameter ( MAX_MK6 = 2 )
       parameter ( MAX_RDBE = 4 )

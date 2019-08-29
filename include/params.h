@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2023 NVI, Inc.
+ * Copyright (c) 2020, 2022-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -106,7 +106,7 @@
 #define DBBC3       0x4000
   /* rack_types: DDCU, DDCV , drive_types: none  */
 #define RDBE        0x2000
-  /* rack_types: RDBE, drive_types: none  */
+  /* rack_types: RDBE, R2DBE, drive_types: none  */
 #define MK6        0x1000
   /* rack_types: none, drive_types: MK6  */
 #define DBBC        0x800
@@ -167,6 +167,8 @@
 
 #define VLBA4C        0x1
 #define VLBA4CDAS     0x2
+
+#define R2DBE       0x1
 
 /* Mark 5 drive_types */
 

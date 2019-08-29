@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021, 2023 NVI, Inc.
+* Copyright (c) 2020-2021, 2023-2024 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -173,6 +173,9 @@ C **** end modify mb
       else if (ichcm_ch(ibuf,ic1,'rdbe').eq.0.and.il.eq.4) then
         rack = RDBE
         rack_type = RDBE
+      else if (ichcm_ch(ibuf,ic1,'r2dbe').eq.0.and.il.eq.5) then
+        rack = RDBE
+        rack_type = R2DBE
       else if (ichcm_ch(ibuf,ic1,'dbbc3_ddc_u').eq.0.and.il.eq.11) then
         rack = DBBC3
         rack_type = DBBC3_DDCU

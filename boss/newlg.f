@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021, 2023 NVI, Inc.
+* Copyright (c) 2020-2021, 2023-2024 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -270,8 +270,10 @@ c
         nch=ichmv_ch(ib,nch,'dbbc3_ddc_v')
       else if(rack.eq.DBBC3.and.rack_type.eq.DBBC3_DDCE) then
         nch=ichmv_ch(ib,nch,'dbbc3_ddc_e')
-      else if(rack.eq.RDBE) then
+      else if(rack.eq.RDBE.and.rack_type.eq.RDBE) then
         nch=ichmv_ch(ib,nch,'rdbe')
+      else if(rack.eq.RDBE.and.rack_type.eq.R2DBE) then
+        nch=ichmv_ch(ib,nch,'r2dbe')
       else if(rack.eq.0) then
         nch=ichmv_ch(ib,nch,'none')
       endif
