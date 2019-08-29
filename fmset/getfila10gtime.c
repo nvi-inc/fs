@@ -19,7 +19,6 @@ extern long ip[5];           /* parameters for fs communications */
 extern unsigned char outbuf[512];     /* class i-o buffer */
 extern int synch;
 extern int rack, rack_type;
-extern int source;
 
 extern dbbc_sync;
 extern WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
@@ -61,7 +60,7 @@ int    *formhs;
 		     "                                       ");
 	  mvwaddstr( maindisp, 6, 10+15+39 , "               ");
 
-	  if(rack == DBBC && dbbc_sync) {
+	  if(dbbc_sync) {
 	    dbbc_sync=0;
 	    out_recs=0;
 	    out_class=0;

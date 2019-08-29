@@ -62,6 +62,8 @@ int *ierr;
 		     "                                       ");
 	  mvwaddstr( maindisp, 6, 6+15+39 , "               ");
 	  if(rack == DBBC && dbbc_sync) {
+      /* we can't get here for source==DBBC unless rack == DBBC &&
+       * drive==MK5B, i.e., source is irrelevant */
 	    dbbc_sync=0;
 	    out_recs=0;
 	    out_class=0;

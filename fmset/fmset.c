@@ -266,8 +266,9 @@ mvwaddstr( maindisp, 2, 3, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B
    hint_row=12;
    form="Mark 5B";
   mvwaddstr( maindisp, 4, column, "Mark 5B     " );
- }  else if (rack==DBBC 
-         && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)
+ }  else if (source==DBBC 
+    /* was:
+     * rack==DBBC &&(rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G) */
 	     ) {
    if(0==iDBBC) {
      mvwaddstr( maindisp, 4, column, "FiLa10G     " );
@@ -313,8 +314,10 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  }
  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
-		     (rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)
-		      ) || source==RDBE)) {
+		     source==DBBC 
+    /* was:
+     * rack==DBBC &&(rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G) */
+		      || source==RDBE)) {
    sprintf(buffer, "    's'/'S' to SYNC %s (VERY rarely needed)",form);
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  } 
@@ -476,7 +479,9 @@ do 	{
 	     (rack == VLBA4 && rack_type == VLBA4C ) || 
 	     (rack == VLBA4 && rack_type == VLBA4CDAS ) || 
 	     (rack == MK4   && rack_type == MK45  ) || 
-	     (rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G))
+	     source==DBBC
+	    /* was:
+       * rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G) */
 	     ) {
 	    if(strcmp(mk5b_1pps,"vsi")==0)
 	      pps_status="- okay                         ";
@@ -651,8 +656,10 @@ do 	{
 	  for (i=hint_row;i<hint_row+irow;i++)
 	    mvwaddstr( maindisp, i, 1, blank);
 	  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
-			      (rack==DBBC && 
-			       (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G)) || source == RDBE) &&
+			      source==DBBC 
+   /* was:
+    * rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G) */
+			       || source == RDBE) &&
 	     asksure( maindisp,m5rec,1)) {
 	    synch=1;
 	    if(source == S2 && s2type == 1)
@@ -660,9 +667,10 @@ do 	{
 	    else
 	      changedfm=1;
 	  }
-	  if (synch && rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||
-			     rack_type==DBBC_PFB_FILA10G) &&
-	      NULL!=fila10g_cfg) {
+	  if (synch && source==DBBC
+        /* was:
+	       * (rack==DBBC && (rack_type==DBBC_DDC_FILA10G || rack_type==DBBC_PFB_FILA10G)) */
+	      && NULL!=fila10g_cfg) {
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
 	    fila10g_cfg_use=ask_fila10g_cfg(maindisp,fila10g_cfg);

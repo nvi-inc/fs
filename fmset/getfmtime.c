@@ -85,7 +85,10 @@ int *ierr;
     } else if(*formhs > -1 && *formhs < 100) {
       phase=(100+*formhs-rawch%100)%100;
     }
-  } else if (rack == DBBC && (rack_type == DBBC_DDC_FILA10G || rack_type == DBBC_PFB_FILA10G)) {
+  } else if (source == DBBC 
+   /* was:
+    * rack == DBBC && (rack_type == DBBC_DDC_FILA10G || rack_type == DBBC_PFB_FILA10G) */
+	     ) {
     getfila10gtime(unixtime,unixhs,fstime,fshs,formtime,formhs);
   }  else if (source == S2) {
     gets2time(s2dev[s2type],unixtime,unixhs,fstime,fshs,formtime,formhs);
