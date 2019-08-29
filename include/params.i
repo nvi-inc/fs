@@ -42,6 +42,7 @@ c
       integer MK5C_BS       ! MK5C_BS comparison bit variable
       integer MAX_DAS       ! Max number of LBA DAS allowed
       integer RDBE          ! RDBE comparison bit variable
+      integer R2DBE         ! R2DBE comparison bit variable
       integer MK6           ! MK6 comparison bit variable
       integer DBBC3         ! DBBC3 comparison bit variable
       character*5 FS_ROOT
@@ -117,6 +118,7 @@ C rack/drive _types
       parameter ( MK5A_BS  = z'8000000'  )
       parameter ( MK45     = z'10000000'  )
       parameter ( VLBA45   = z'20000000'  )
+      parameter ( R2DBE    = z'1'  )
       parameter ( MK5B     = z'40000000'  )
       parameter ( MK5B_BS  = z'10000000'  )
       parameter ( MK5C     = z'1'  )

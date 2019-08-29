@@ -217,8 +217,10 @@ c
         nch=ichmv_ch(ib,nch,'s2')
       else if(rack.eq.DBBC) then
         nch=ichmv_ch(ib,nch,'dbbc')
-      else if(rack.eq.RDBE) then
+      else if(rack.eq.RDBE.and.rack_type.eq.RDBE) then
         nch=ichmv_ch(ib,nch,'rdbe')
+      else if(rack.eq.RDBE.and.rack_type.eq.R2DBE) then
+        nch=ichmv_ch(ib,nch,'r2dbe')
       else if(rack.eq.DBBC3) then
         nch=ichmv_ch(ib,nch,'dbbc3')
       else if(rack.eq.0) then

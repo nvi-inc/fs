@@ -130,6 +130,9 @@ C **** end modify mb
       else if (ichcm_ch(ibuf,ic1,'rdbe').eq.0.and.il.eq.4) then
         rack = RDBE
         rack_type = RDBE
+      else if (ichcm_ch(ibuf,ic1,'r2dbe').eq.0.and.il.eq.5) then
+        rack = RDBE
+        rack_type = R2DBE
       else if (ichcm_ch(ibuf,ic1,'dbbc3').eq.0.and.il.eq.5) then
         rack = DBBC3
         rack_type = DBBC3

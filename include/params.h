@@ -79,7 +79,7 @@
 #define DBBC3       0x4000
   /* rack_types: DBBC3, drive_types: none  */
 #define RDBE        0x2000
-  /* rack_types: RDBE, drive_types: none  */
+  /* rack_types: RDBE, R2DBE, drive_types: none  */
 #define MK6        0x1000
   /* rack_types: none, drive_types: MK6  */
 #define DBBC        0x800
@@ -128,6 +128,7 @@
 #define VLBA42      0x2000000
 #define MK45        0x10000000
 #define VLBA45      0x20000000
+#define R2DBE       0x1
 
 /* Mark 5 drive_types */
 
