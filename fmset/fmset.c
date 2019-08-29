@@ -685,7 +685,7 @@ do 	{
 } while ( running );
 
 endwin ();
- if(changedfm && source !=RDBE) {
+ if(changedfm && rack !=RDBE) {
    logit("Formatter time reset.",0,NULL);
    if(shm_addr->time.model != 'c' && shm_addr->time.model!='n'
       && shm_addr->time.icomputer[01 & shm_addr->time.index]==0)
