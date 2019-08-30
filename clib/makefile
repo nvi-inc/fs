@@ -47,7 +47,7 @@ dbbc_if_power.o dbbcgain_util.o mk6_disk_pos_util.o\
 mk6_scan_check_util.o get_RDBEtime.o rdbe_dot_util.o rdbcn_v.o\
 rdbe_atten_util.o fserr_cls.o rdbe_2_tsysx.o get_fila10gtime.o daymy.o\
 dbbc3_ifx_util.o dbbc3_bbcnn_util.o dbbc3n_v.o dbbc3_if_power.o tpi_dbbc3.o\
-dbbc3_cont_cal_util.o dbbc3_iftpx_util.o helpstr.o
+dbbc3_cont_cal_util.o dbbc3_iftpx_util.o helpstr.o r2dbe_2_tsysx.o r2dbcn_v.o
 # mk6_record_util.o 
 #
 #FFLAGS = 

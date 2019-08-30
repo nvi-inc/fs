@@ -343,7 +343,8 @@ long ip[5];                           /* ipc parameters */
 	      }
 	    }
 	  }
-	} else if(shm_addr->equip.rack==RDBE) {
+	} else if(shm_addr->equip.rack==RDBE &&
+		  shm_addr->equip.rack_type==RDBE) {
 	  int ifch, ichan, irdbe, ifchain;
 	  for(i=0;i<MAX_RDBE_DET;i++) {
 	    irdbe=i/(MAX_RDBE_IF*MAX_RDBE_CH);
@@ -352,6 +353,17 @@ long ip[5];                           /* ipc parameters */
 	    ichan=(i%(MAX_RDBE_IF*MAX_RDBE_CH))%MAX_RDBE_CH;
 	    lcl.devices[i].ifchain=ifchain;
 	    lcl.devices[i].center=shm_addr->lo.lo[ifchain-1]+1024-32*ichan;
+	  }
+	} else if(shm_addr->equip.rack==RDBE &&
+		  shm_addr->equip.rack_type==R2DBE) {
+	  int ifch, ichan, irdbe, ifchain;
+	  for(i=0;i<MAX_R2DBE_DET;i++) {
+	    irdbe=i/(MAX_R2DBE_IF*MAX_R2DBE_CH);
+	    ifch=(i%(MAX_R2DBE_IF*MAX_R2DBE_CH))/MAX_R2DBE_CH;
+	    ifchain=irdbe*MAX_R2DBE_IF+ifch+1;
+	    ichan=(i%(MAX_R2DBE_IF*MAX_R2DBE_CH))%MAX_R2DBE_CH;
+	    lcl.devices[i].ifchain=ifchain;
+	    lcl.devices[i].center=shm_addr->lo.lo[ifchain-1]+32*ichan;
 	  }
 	} else if(shm_addr->equip.rack==DBBC3) {
 	  for (i=0;i<MAX_DBBC3_BBC*2;i++) {
@@ -413,20 +425,20 @@ long ip[5];                           /* ipc parameters */
 	  }
 	}
 	/* user devices */
-	for (i=MAX_DBBC3_DET;i<MAX_ONOFF_DET;i++)
+	for (i=MAX_R2DBE_DET;i<MAX_ONOFF_DET;i++)
 	    if(lcl.itpis[i]!=0) {
-	      lcl.devices[i].ifchain=i-MAX_DBBC3_DET+1;
+	      lcl.devices[i].ifchain=i-MAX_R2DBE_DET+1+MAX_LO;
 	      lcl.devices[i].center=
-		shm_addr->user_device.center[i-MAX_DBBC3_DET];
-	      switch(shm_addr->user_device.sideband[i-MAX_DBBC3_DET]) {
+		shm_addr->user_device.center[i-MAX_R2DBE_DET];
+	      switch(shm_addr->user_device.sideband[i-MAX_R2DBE_DET]) {
 	      case 1:
 		lcl.devices[i].center=
-		  shm_addr->user_device.lo[i-MAX_DBBC3_DET]
+		  shm_addr->user_device.lo[i-MAX_R2DBE_DET]
 		  +lcl.devices[i].center;
 		break;
 	      case 2:
 		lcl.devices[i].center=
-		  shm_addr->user_device.lo[i-MAX_DBBC3_DET]
+		  shm_addr->user_device.lo[i-MAX_R2DBE_DET]
 		  -lcl.devices[i].center;
 		break;
 	      default:

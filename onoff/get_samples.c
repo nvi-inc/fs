@@ -145,10 +145,20 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
 	  sample.avg[j]=tpi[j];
 	  sample2.avg[j]=tpi2[j];
 	}
-    } else if(shm_addr->equip.rack==RDBE) {
+    } else if(shm_addr->equip.rack==RDBE &&
+	      shm_addr->equip.rack_type==RDBE) {
       if(tpget_rdbe(cont,ip,itpis,ierr,dtpi,dtpi2))
 	return -1;
       for(j=0;j<MAX_RDBE_DET;j++)
+	if(itpis[j]!=0) {
+	  sample.avg[j]=dtpi[j];
+	  sample2.avg[j]=dtpi2[j];
+	}
+    } else if(shm_addr->equip.rack==RDBE &&
+	      shm_addr->equip.rack_type==R2DBE) {
+      if(tpget_r2dbe(cont,ip,itpis,ierr,dtpi,dtpi2))
+	return -1;
+      for(j=0;j<MAX_R2DBE_DET;j++)
 	if(itpis[j]!=0) {
 	  sample.avg[j]=dtpi[j];
 	  sample2.avg[j]=dtpi2[j];

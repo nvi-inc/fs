@@ -53,9 +53,13 @@
 #define MAX_VLBA_IF     (2*MAX_VLBA_DIST)
 #define MAX_DET         (MAX_BBC*2+MAX_IF)
 #define MAX_RDBE_DET    (MAX_RDBE_CH*MAX_RDBE_IF*MAX_RDBE)
+#define MAX_R2DBE_DET    (MAX_R2DBE_CH*MAX_R2DBE_IF*MAX_RDBE)
 #define MAX_USER_DEV    6
+//MAX_ONOFF_DET uses the device with the largest number of detectors
+//currently R2DBE, was DBBC3, but was VLBA/DBBC2
 //#define MAX_ONOFF_DET    (MAX_DET+MAX_USER_DEV)
-#define MAX_ONOFF_DET    (MAX_DBBC3_DET+MAX_USER_DEV)
+//#define MAX_ONOFF_DET    (MAX_DBBC3_DET+MAX_USER_DEV)
+#define MAX_ONOFF_DET    (MAX_R2DBE_DET+MAX_USER_DEV)
 #define MAX_TSYS_DET     MAX_DBBC3_DET
 
 #define MAX_DBBC_BBC   16
@@ -170,5 +174,7 @@
 #define MAX_RDBE    4
 #define MAX_RDBE_CH  16
 #define MAX_RDBE_IF   2
+#define MAX_R2DBE_CH  64
+#define MAX_R2DBE_IF   2
 
 #define MAX_LO     (MAX_RDBE*MAX_RDBE_IF)

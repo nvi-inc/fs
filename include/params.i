@@ -58,6 +58,8 @@ c
       integer MAX_MK6
       integer MAX_RDBE_IF
       integer MAX_RDBE_CH
+      integer MAX_R2DBE_IF
+      integer MAX_R2DBE_CH
       integer MAX_RDBE
       integer MAX_DBBC3_BBC
       integer MAX_DBBC3_IF
@@ -128,6 +130,8 @@ C
       parameter ( MAX_RDBE = 4 )
       parameter ( MAX_RDBE_IF = 2 )
       parameter ( MAX_RDBE_CH = 16 )
+      parameter ( MAX_R2DBE_IF = 2 )
+      parameter ( MAX_R2DBE_CH = 64 )
       parameter ( MAX_DAS = 2 )
       parameter ( FS_ROOT='/usr2')
 C
