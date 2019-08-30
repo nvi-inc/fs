@@ -1,5 +1,11 @@
+TARGETS = ../bin/fsserver ../bin/fsclient $(SHIMS)
+SHIMS = ../bin/shims/xterm ../bin/shims/fs.prompt
+OBJECTs = fsserver.o server.o window.o list.o prompt.o fsclient.o window.o list.o prompt.o ./shims/fs.prompt.o 
+
 .PHONY: all
-all: ../bin/fsserver ../bin/fsclient shims
+.PHONY: shims
+all: $(TARGETS)
+shims: $(SHIMS)
 
 CFLAGS += -g -std=gnu99 -Wall -Wextra -Werror=implicit-function-declaration
 LIBS = ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a
@@ -7,24 +13,19 @@ LDLIBS += -lutil -lrt -pthread -lnng -ljansson
 CPPFLAGS += -pthread
 
 ../bin/fsserver: fsserver.o server.o window.o list.o prompt.o
-	$(LINK.o) $^ $(LOADLIBES) -o $@ $(LDLIBS)
-
 ../bin/fsclient: fsclient.o window.o list.o prompt.o $(LIBS)
-	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-../bin/shims/fs.prompt: ./shims/fs.prompt.o $(LIBS)
-	mkdir -p ../bin/shims/
-	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@
+../bin/shims/fs.prompt: shims/fs.prompt.o $(LIBS)
+	@mkdir -p ../bin/shims/
+	$(LINK.o) $+ $(LOADLIBES) $(LDLIBS) -o $@
+
+shims/fs.prompt.o: shims/fs.prompt.c
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
+	$(POSTCOMPILE)
 
 ../bin/shims/xterm: shims/xterm
-	mkdir -p ../bin/shims/
+	@mkdir -p ../bin/shims/
 	cp -a shims/xterm ../bin/shims/
 
-.PHONY: shims
-shims: ../bin/shims/xterm ../bin/shims/fs.prompt
 
-
-.PHONY: clean
-clean:
-	-rm *.o
-	-rm ../bin/fsserver
+include ../include.mk
