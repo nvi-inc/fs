@@ -1403,6 +1403,15 @@ Error reading TACD.CTL FMP ?FFF
 BO -407
 Error decoding TACD.CTL line ?WWW
 ""
+BO -410
+Illegal version string in DBBC3 DDC version in EQUIP.CTL line ?WWW
+""
+BO -411
+DBBC DDC BBCs per IF must be on of 8, 12, or 16 in EQUIP.CTL line ?WWW
+""
+BO -412
+DBBC DDC IFs must 1-8 in EQUIP.CTL line ?WWW
+""
 BO -501
 Error following experiment procedure file name link.
 ""

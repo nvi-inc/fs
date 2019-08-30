@@ -848,20 +848,20 @@ C
          if(dbbcv(i:i).ne.' ') idbbcvc=i
       enddo
       if(idbbcvc.gt.16) then
-         call logit7ci(0,0,0,1,-141,'bo',24)
+         call logit7ci(0,0,0,1,-410,'bo',24)
          goto 990
       endif
       idbbcv=0
       do i=1,3
         ind=index('01234567890',dbbcv(i:i))
         if(ind.eq.0) then
-           call logit7ci(0,0,0,1,-141,'bo',24)
+           call logit7ci(0,0,0,1,-410,'bo',24)
            goto 990
         endif
         idbbcv=idbbcv*10+(ind-1)
       enddo
       if(idbbcv.lt.121) then
-         call logit7ci(0,0,0,1,-141,'bo',24)
+         call logit7ci(0,0,0,1,-410,'bo',24)
          goto 990
       endif
 c
@@ -876,7 +876,7 @@ c
       if (dbbc3_ddc_bbcs_per_if.ne.8.and.
      &     dbbc3_ddc_bbcs_per_if.ne.12.and.
      &     dbbc3_ddc_bbcs_per_if.ne.16) then
-         call logit7ci(0,0,0,1,-140,'bo',24)
+         call logit7ci(0,0,0,1,-411,'bo',24)
          goto 990
       endif
 c
@@ -890,7 +890,7 @@ c
       dbbc3_ddc_ifs = ias2b(ibuf,ic1,ic2-ic1+1)
       if ( dbbc3_ddc_ifs.lt.1.or.
      &     dbbc3_ddc_ifs.gt.8) then
-         call logit7ci(0,0,0,1,-140,'bo',24)
+         call logit7ci(0,0,0,1,-412,'bo',24)
          goto 990
       endif
 
