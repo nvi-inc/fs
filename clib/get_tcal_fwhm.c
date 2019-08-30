@@ -330,7 +330,8 @@ int *ierr;
 	break;
       }
     }
-  } else if(shm_addr->equip.rack==RDBE) {
+  } else if(shm_addr->equip.rack==RDBE &&
+	    shm_addr->equip.rack_type==RDBE) {
     int iscan, ifc, irdbe, ichan;
     char *prdbe, crdbe;
 
@@ -347,6 +348,28 @@ int *ierr;
       ifchain=0;
     if(ifchain!=0 && 0 <= ichan && ichan <= MAX_RDBE_CH) {
       center=shm_addr->lo.lo[ifchain-1]+1024-32*ichan;
+    } else {
+      *ierr=-306;
+      goto error;
+    }
+  } else if(shm_addr->equip.rack==RDBE &&
+	    shm_addr->equip.rack_type==R2DBE) {
+    int iscan, ifc, irdbe, ichan;
+    char *prdbe, crdbe;
+
+    iscan=sscanf(device,"%2d%1c%1d",&ichan,&crdbe,&ifc);
+//    printf(" iscan %d ichan %d crdbe %c ifc %d\n",iscan,ichan,crdbe,ifc);
+    prdbe=strchr(lets,crdbe);
+    if(prdbe!=NULL)
+      irdbe=prdbe-lets;
+    ifchain=1+irdbe*MAX_R2DBE_IF+ifc;
+//    printf(" ifchain1 %d\n",ifchain);
+    if(iscan!=3 ||
+       prdbe == NULL || irdbe <0 || irdbe >= MAX_RDBE ||
+       ifc < 0 || ifc >= MAX_R2DBE_IF)
+      ifchain=0;
+    if(ifchain!=0 && 0 <= ichan && ichan <= MAX_R2DBE_CH) {
+      center=shm_addr->lo.lo[ifchain-1]+32*ichan;
     } else {
       *ierr=-306;
       goto error;

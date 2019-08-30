@@ -23,7 +23,8 @@ fc_mk4bbcd.o fc_get_rxgain_files.o fc_get_flux_file.o fc_get_tcal_fwhm.o \
 fc_lbaifpd.o fc_tpi_lba.o fc_dscon_v.o fc_ntp_synch.o fc_rte_cmpt.o\
 fc_rte_ticks.o fc_readlink.o fc_perror.o fc_mk5vcd.o fc_mk5bbcd.o\
 fc_get_5btime.o fc_play_wav.o fc_rte_check.o fc_putln2.o fc_mk5dbbcd.o\
-fc_tpi_dbbc.o fc_dbbcn_v.o fc_rdbcn_v.o fc_dbbc3n_v.o fc_tpi_dbbc3.o
+fc_tpi_dbbc.o fc_dbbcn_v.o fc_rdbcn_v.o fc_dbbc3n_v.o fc_tpi_dbbc3.o\
+fc_r2dbcn_v.o
 #
 #CFLAGS = 
 #FFLAGS = 

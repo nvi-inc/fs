@@ -75,6 +75,7 @@ C
       endif
 C
       call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
       if(VLBA.eq.rack.or.VLBA4.eq.rack) then
         id=-1
         goto 11
@@ -178,8 +179,16 @@ C
                  intp=isamples
               endif
            endif
-        else if(RDBE.eq.rack) then
+        else if(RDBE.eq.rack.and.RDBE.eq.rack_type) then
            call rdbcn(dtpi,dtpi2,ierr,icont,isamples)
+           if(imode.ne.0.and.i.eq.1.and.icont.ne.0) then
+              if(isamples.gt.intp) then
+                 intp=isamples
+              endif
+           endif
+c           write(6,*) 'volts ',dtpi,dtpi2
+        else if(RDBE.eq.rack.and.R2DBE.eq.rack_type) then
+           call r2dbcn(dtpi,dtpi2,ierr,icont,isamples)
            if(imode.ne.0.and.i.eq.1.and.icont.ne.0) then
               if(isamples.gt.intp) then
                  intp=isamples
