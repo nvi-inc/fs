@@ -9,8 +9,8 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-#define MAX_OUT 512
-#define BUFSIZE 513
+#define MAX_OUT 2048
+#define BUFSIZE 2049
 extern char unit_letters[];
 
 void rdbe_dis(command,itask,iwhich,ip,out_class,out_recs)

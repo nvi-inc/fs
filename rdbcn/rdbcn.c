@@ -45,7 +45,7 @@ extern void herror(const char * s); /* Needed on HP-UX */
 
 extern struct fscom *shm_addr;
 
-#define BUFSIZE 1024 /* size of the input and output buffers */
+#define BUFSIZE 2048 /* size of the input and output buffers */
 /*#define DEBUG
  */
 static unsigned char inbuf[BUFSIZE];   /* input message buffer */
@@ -704,7 +704,7 @@ long ip[5];
       outbuf[strlen(outbuf)-1]=0;
 
     if(outbuf[0]!=0 && ip[2] <=0) {
-      outbuf[511]=0; /* truncate to maximum class record size, cls_snd
+      outbuf[BUFSIZE-1]=0; /* truncate to maximum class record size, cls_snd
 			can't do this because it doesn't know it is a string,
 			cls_rcv() calling should do it either since this 
 			would require many more changes */

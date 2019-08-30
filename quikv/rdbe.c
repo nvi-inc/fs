@@ -9,7 +9,7 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-#define BUFSIZE 512
+#define BUFSIZE 2048
 extern char unit_letters[];
 
 void rdbe(command,itask,ip)
