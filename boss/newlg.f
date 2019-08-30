@@ -454,7 +454,7 @@ c
 c
       nch=mcoma(ib,nch)
       call fs_get_m5b_crate(m5b_crate)
-      nch = nch + ib2as(m5b_crate,ib,nch,z'8002')
+      nch = nch + ib2as(m5b_crate,ib,nch,z'8003')
 c
       nch=mcoma(ib,nch)
       call fs_get_fila10gvsi_in(fila10gvsi_in)

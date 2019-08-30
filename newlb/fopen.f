@@ -26,7 +26,7 @@ C  IERR: Error value, returns negative if an error is detected
         return
       END IF
       IF(.not.kexist) then
-         permissions = o'0666'
+         permissions = o'0664'
          ilen=trimlen(filename)
          call fc_chmod(filename,permissions,ilen,ierr)
       endif

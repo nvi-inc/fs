@@ -569,7 +569,6 @@ C  User requested schedule name, format response and log it.
              call rn_put('pfmed')
              goto 600
           endif           
-          nproc1 = 0
           istksk(2) = 2
           lstksk(2) = 2
           call cants(itscb,ntscb,4,0,0)
@@ -713,6 +712,7 @@ C
           idum = fmpsetpos(idcbsk,ierr,irec,id)
         else
           call logit7ci(0,0,0,0,-159,'bo',0)
+          goto 600
         end if
         scan_name_old(1:1)=char(0)
         call fs_set_scan_name_old(scan_name_old)
@@ -946,6 +946,7 @@ C
             lprc='none'
             call char2hol(lprc,ilprc,1,8)
             call fs_set_lprc(ilprc)
+            nproc1 = 0
             call rn_put('pfmed')
           else
             call logit7ci(0,0,0,0,-157,'bo',0)

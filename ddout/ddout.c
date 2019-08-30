@@ -13,7 +13,7 @@
 #include "../include/fscom.h"
 
 #define NULLPTR (char *) 0
-#define PERMISSIONS 0666
+#define PERMISSIONS 0664
 #define MAX_BUF 1024
 /* not Y10K compliant */
 #define FIRST_CHAR 21
@@ -65,11 +65,13 @@ main()
     char *offon[ ]= {"off","on"};
     int knl=FALSE;
     unsigned last_sync,now;
+    int skd_run_to();
 
 /* SECTION 1 */
     
     setup_ids();
     sig_ignore();
+    skd_set_return_name("ddout");
     lnamef[0]=0;
     umask(0);
 
@@ -330,7 +332,7 @@ Messenger:
 	  read(fd,&ch,1);
 	  if(ch != '\n')
 	    write(fd, "\n", 1);
-	  if(offset > 1024L*1024L*10L)
+	  if(offset > 1000L*1000L*100L)
 	    logit(NULL,-999,"bo");
 	} else if(offset < 0) {
 	  shm_addr->abend.other_error=1;
@@ -428,10 +430,17 @@ Ack:    ich = strtok(NULL, ",");
 	}
       } else {
 	fserr_snd(buf, 80);
-	skd_run("fserr", 'w', ip); 
-	iburl=fserr_rcv(ibur, 118);
-
-	ibur[iburl]='\0';
+	while (skd_clr_ret(ip)) // clear any old ones from possible time-outs
+	  ;
+	ip[0]=0;
+	if(skd_run_to("fserr", 'w', ip,500)==1) {
+	  strcpy(ibur,"fserr not responding, if this persists, consider restarting the FS");
+	  iburl=strlen(ibur);
+	} else {
+	  iburl=fserr_rcv(ibur, 118);
+	  ibur[iburl]='\0';
+	}
+	
 	if((iburl==4) && (strncmp(ibur, "nono", 4) == 0)) {
 	  ibur[0]=0;
 	  goto Append;

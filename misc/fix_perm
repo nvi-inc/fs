@@ -25,7 +25,7 @@ sub fix {
     } elsif (-e "@_")  {
 	print "Fixing @_ \n";
     system("chown -R oper.rtx @_");
-    system("chmod -R a+rw @_");
+    system("chmod -R ug+rw,o+r,o-w @_");
     } else {
 	print "No @_ directory\n";
     }
@@ -50,7 +50,7 @@ if ($#ARGV >= 0) {
 print "*****************************************************************************\n";
 print "*  This script will 'fix' the ownership and permissions of the directories  *\n";
 print "*  /usr2: /control/, /proc/, /sched/, /log/, and their contents. The        *\n";
-print "*  correct owner.group is oper.rtx and permissions is 'rw-rw-rw-'           *\n";
+print "*  correct owner.group is oper.rtx and permissions is 'rw-rw-r--'           *\n";
 print "*                                                                           *\n";
 print "*  If you don't want these ownership and permissions, answer 'n' to the     *\n";
 print "*  next question.                                                           *\n";

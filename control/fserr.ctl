@@ -1302,10 +1302,10 @@ BO -210
 Procedure library is too big, trailing procedures ignored.
 ""
 BO -211
-Can't open a new schedule when an experiment procedure is executing
+Can't open a new schedule when a procedure from the schedule library is executing
 ""
 BO -212
-Can't change experiment procedure library when an experiment procedure is executing
+Can't change schedule procedure library when a procedure from the schedule procedure library is executing
 ""
 BO -219
 Error opening drivev1.ctl ?FFF
@@ -1473,28 +1473,28 @@ BO -407
 Error decoding TACD.CTL line ?WWW
 ""
 BO -501
-Error following experiment procedure file name link.
+Error following schedule procedure library file name link.
 ""
 BO -502
-Procedure library link was empty.
+Schedule procedure library link was empty.
 ""
 BO -503
-Final procedure library link does contain '.prc'.
+Final schedule procedure library link does contain '.prc'.
 ""
 BO -506
-Error following experiment procedure file name link.
+Error following station procedure library file name link.
 ""
 BO -507
-Procedure library link was empty.
+Station procedure library link was empty.
 ""
 BO -508
-Final procedure library link does contain '.prc'.
+Final station procedure library link does contain '.prc'.
 ""
 BO -998
 ANTCN termination mode failed, see above error.
 ""
 BO -999
-WARNING: Log file just opened is already larger than 10 MB.
+WARNING: Log file just opened is already larger than 100 MB.
 ""
 CD  -1
 Error from DBBCN in TPICD, see above for error.
@@ -2030,6 +2030,15 @@ Incorrect response from DBBC.
 CH -813
 DBBC firmware version/personality does not match equip.ctl, compare to dbbc=version.
 ""
+CH -814
+Incorrect response while checking version, unable to verify DBBC firmware version/personality, please check.
+""
+CH -815
+Failed to deconde DBBC vsi_clk response, can't check value.
+""
+CH -816
+DBBC vsi_clk setting is incorrect, please use fmset 's' command to correct.
+""
 DB   -1
 dbbc.: error opening dbb?W.ctl
 ""
@@ -2142,7 +2151,7 @@ DC -202
 Error decoding IF source, must be A, B, C, or D.
 ""
 DC -203
-Error decoding bandwidth, must be one of: 1, 2, 4, 8, 16, or 32.
+Error decoding bandwidth, must be one of: 1, 2, 4, 8, 16, 32, or 64.
 ""
 DC -204
 Averaging period must be a positive integer 60 or less.
@@ -2151,7 +2160,10 @@ DC -213
 BW 1 can only be used with non-lettered (NOT e/f) DDC versions.
 ""
 DC -223
-BW 32 can only be used with lettered (e/f) DDC versions.
+BW 32 can only be used with lettered (e/f) DDC versions or v107 or later.
+""
+DC -233
+BW 64 can only be used with v107 or later.
 ""
 DC -301
 Even BBCs not supported for DDC firmware E/F.
@@ -2175,13 +2187,25 @@ DD -201
 Mode must be one of: off, on.
 ""
 DD -202
-Polarity control must one of: 0, 1, 2, or 3.
+Polarity control must one of: 0, 1, 2, or 3  (or -1 to not command).
 ""
 DD -212
 Continuous cal polarity control not supported for firmware versions < 105x_1.
 ""
 DD -203
 Samples must be a positive integer.
+""
+DD -204
+Frequency must one in range [8,300000] (or -1 to not command).
+""
+DD -214
+Frequency not supported for firmware versions < 106.
+""
+DD -205
+Option must be 0 or 1 (or -1 to not command).
+""
+DD -215
+Option not supported for firmware versions < 106.
 ""
 DD -401
 Class buffer error from monitor response.

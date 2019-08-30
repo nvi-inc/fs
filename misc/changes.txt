@@ -12374,6 +12374,101 @@ Version 9.13.0-rc2 180925
 
 Version 9.13.0 180928
 
+181115 DEH boss/newlg.f
+           add fsserver enabled status to log
+
+181115 DEH fsserver/fsclient.c
+           print exiting message on "Ctrl+C"
+
+181115 DEH plog/plog
+           fix typo in help message
+
+181115 WEH st.default/control/equip.ctl
+           control/fserr.ctl
+           clib/dbbcnn_util.c
+           incom/equip.f
+           boss/newlg.f
+           add support for DBBC DDC v107
+
+Version 9.13.1-rc1 181115
+
+190201 WEH boss/bwork.f
+           help/schedule.___
+           leave schedule proc available after 'schedule='
+
+190201 WEH boss/bwork.f
+           fix bug that caused a crash if attempting to execute a procedure
+           in a now closed schedule proc library
+
+190201 WEH boss/bwork.f
+           fix bug that caused 'exper_initi' to execute if opening a 
+           schedule failed because PFMED was running
+
+190408 WEH include/fs_types.h
+           clib/Makefile
+           include/dbbcvsi_clk_ds.h
+           clib/dbbcvsi_clk_util.c
+           chekr/dbbcchk.c
+           add DBBC vsi_clk checking to chekr
+
+190408 WEH fmset/getfila10gtime.c
+           fmset/get5btime.c
+           fmset/fmset.c
+           add DBBC vsi_clk setting
+
+190408 WEH clib/dbbcnn_util.c
+           reallow 1 and 2 MHz BW for v107
+
+190411 WEH control/fserr.ctl
+           fix boss error messages about the schedule procedure library
+             to not mention experiment procedure library
+           fix station procedure file symbolic link error message to
+             mention station procedure library
+
+190411 WEH include/dbbc_cont_cal_ds.h
+           clib/cshm_init.c
+           incom/equip.f
+           control/fserr.ctl
+190412 WEH help/cont_cal.d__
+           clib/dbbc_cont_cal_util.c
+           add support for v106 and v107 cont_cal control
+
+Version 9.13.1-rc2 190412
+
+190702 WEH misc/ntp.txt
+           change use of 'exper_initi' to 'sched_initi'
+
+190711 WEH polb/gtdbl.f
+           fixed declaration of func return to dble, old was
+             incorrect, but not a bug with default flags for f2c
+
+190712 WEH ddout/ddout.c
+           set ip[0]=0 before running fserr
+           added time-out support in case fserr hangs/aborts
+
+190715 WEH pfmed/ffmp.f
+           make 'st' command tolerant of gfortran
+
+190716 DEH gnplt/main.py
+           fix rounding on x & y label digits
+
+190716 WEH ddout/ddout.c
+           ddout/recover_log.c
+           drudg/fdrudg.f
+           newlb/fopen.f
+           polb/koutp.f
+           quikv/save_file.c
+           changed all file persmissions to 0664
+
+190722 WEH control/fserr.ctl
+           ddout/ddout.c
+           increase log file size warning to 100 MB
+
+190826 WEH misc/fix_perm
+           changed to permissions 'rw-rw-r--'
+
+Version 9.13.1 190826
+
 130312 WEH ddout/ddout.c
            append who to "un" errors to identify source device
 
@@ -12601,3 +12696,4 @@ Version 9.13.0 180928
            pre_FSL9_RAID.docx
            pre_FSL9_RAID.pdf
            moved to FTP server
+=======

@@ -21,7 +21,7 @@ data_check_util.o data_valid_util.o daymy.o dbbc3_bbcnn_util.o \
 dbbc3_cont_cal_util.o dbbc3_if_power.o dbbc3_iftpx_util.o dbbc3_ifx_util.o \
 dbbc3n_v.o dbbc_cont_cal_util.o dbbc_if_power.o dbbc_pfbx_util.o \
 dbbc_version_check.o dbbc_vsix_util.o dbbcform_util.o dbbcgain_util.o \
-dbbcifx_util.o dbbcn_pfb_v.o dbbcn_v.o dbbcnn_util.o disk2file_util.o \
+dbbcifx_util.o dbbcn_pfb_v.o dbbcn_v.o dbbcnn_util.o dbbcvsi_clk_util.o disk2file_util.o \
 disk_pos_util.o disk_record_util.o disk_serial_util.o dist_util.o dot_util.o \
 dqa4_cnvrt.o dqa_util.o ds_util.o dscon_util.o dscon_v.o dtlkup.o et_v.o \
 fila10g_mode_util.o find_next_noncomment.o flux_val.o form4_util.o freq2bbc.o \

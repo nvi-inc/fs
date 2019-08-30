@@ -3338,7 +3338,7 @@ class Plot(Canvas, Coordinate):
         [x,y] = self.getCanvasXY([0, trec])
         x = self.x_margin+4
         self.create_oval(x-4,y-4,x+4,y+4, fill = 'black', tags = ('trec_marker'))
-        text = self.roundNumber(trec, 1)
+        text = self.roundNumber(trec, 1, 0)
         self.create_text(x-6,y, text = text, anchor = E, tags = ('trec_text'))
         
         
@@ -3706,7 +3706,7 @@ class Plot(Canvas, Coordinate):
             if self.yname == 'Time':
                 y_label = self.numTools.num2date(text_y)
             else:
-                y_label = self.roundNumber(text_y, self.maxY-self.minY)
+                y_label = self.roundNumber(text_y, self.maxY,self.minY)
             self.create_text(self.x_margin-5, y, text = y_label, anchor = E, tags = ('y_ticks',))
         #x-ticks
         for x in self.xticks:
@@ -3714,23 +3714,22 @@ class Plot(Canvas, Coordinate):
             if self.xname == 'Time':
                 x_label = self.numTools.num2date(text_x)
             else:
-                x_label = self.roundNumber(text_x, self.maxX-self.minY)
+                x_label = self.roundNumber(text_x, self.maxX,self.minY)
             self.create_text(x, height-self.y_margin+10, text = x_label, tags = ('x_ticks',))
     
-    def roundNumber(self, unrounded, delta):
+    def roundNumber(self, unrounded, maxi, mini):
         """roundNumber receives a number and the percentage change of max and min in the series the number comes from. 
         Returns the number with appropriate number of digits"""
         try:
-            number_of_digits = len(str(int(1/delta)))+1
-        except ZeroDivisionError:
-            number_of_digits = 2 #if delta is zero, this number is pretty irrelevant, so 2 is as good as any. 
-        unrounded = str(unrounded)
-        num = len(unrounded.split('.'))
-        if num == 1:
-            return unrounded
-        else:
-            expr = '%.' + str(number_of_digits) +'f'
-            return expr % float(unrounded)
+            number_of_digits = int(max(0,math.ceil(1-math.log10(abs(maxi-mini)))))
+        except (ZeroDivisionError, ValueError):
+            number_of_digits = 2 
+
+        expr = '%.' + str(number_of_digits) +'f'
+        if maxi > 100000:
+            # TODO: fix
+            expr = '%.' + str(number_of_digits) +'e'
+        return expr % unrounded
     
     def expandRect(self, event):
         """expands selection rectangle if there is one, else create it. 

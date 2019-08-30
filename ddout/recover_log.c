@@ -11,7 +11,7 @@
 
 extern struct fscom *shm_addr;
 
-#define PERMISSIONS 0666
+#define PERMISSIONS 0664
 #define BUFFSIZE 131072
 
 int recover_log(lnamef,fd)
