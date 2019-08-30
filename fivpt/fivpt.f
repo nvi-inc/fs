@@ -99,6 +99,7 @@ C lock gain if a bbc
 C
       if(ichcm_ch(ldevfp,1,'u').ne.0) then
          call fs_get_rack(rack)
+         call fs_get_rack_type(rack_type)
          if(VLBA.eq.rack.or.VLBA4.eq.rack) then
             call fc_mcbcn_d(ldevfp,ierr,ip)
             if(ierr.ne.0) then
@@ -129,8 +130,14 @@ C           do nothing ...
                ierr=-111
                goto 80010
             endif
-         else if(RDBE.eq.rack) then
+         else if(RDBE.eq.rack.and.RDBE.eq.rack_type) then
             call fc_rdbcn_d(ldevfp,ierr,ip)
+            if(ierr.ne.0) then
+               ierr=-81
+               goto 80010
+            endif
+         else if(RDBE.eq.rack.and.R2DBE.eq.rack_type) then
+            call fc_r2dbcn_d(ldevfp,ierr,ip)
             if(ierr.ne.0) then
                ierr=-81
                goto 80010

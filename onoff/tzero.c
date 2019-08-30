@@ -169,10 +169,22 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
         accum->sig[i]=0.0;
       }
     accum->count=1;
-  } else if(shm_addr->equip.rack==RDBE) {
+  } else if(shm_addr->equip.rack==RDBE
+            && shm_addr->equip.rack_type==RDBE) {
 
     /* digital detetector - assume tpzero=0 */
     for (i=0; i<MAX_RDBE_DET; i++) 
+      if (onoff->itpis[i]) {
+        accum->avg[i]=0.0;
+        accum->sig[i]=0.0;
+      }
+    accum->count=1;
+
+  } else if(shm_addr->equip.rack==RDBE
+            && shm_addr->equip.rack_type==R2DBE) {
+
+    /* digital detetector - assume tpzero=0 */
+    for (i=0; i<MAX_R2DBE_DET; i++) 
       if (onoff->itpis[i]) {
         accum->avg[i]=0.0;
         accum->sig[i]=0.0;
