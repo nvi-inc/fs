@@ -31,9 +31,41 @@ DEPDIR := .d
 $(shell mkdir -p $(DEPDIR) >/dev/null)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
 
+CP = cp
+
+ifndef V
+CCCOLOR="\033[34m"
+LINKCOLOR="\033[34;1m"
+SRCCOLOR="\033[33m"
+BINCOLOR="\033[37;1m"
+MAKECOLOR="\033[32;1m"
+ENDCOLOR="\033[0m"
+
+OLD_CC := $(CC)
+OLD_FC := $(FC)
+OLD_LINK := $(LINK)
+OLD_AR := $(AR)
+OLD_INSTALL := $(INSTALL)
+OLD_MAKE := $(MAKE)
+
+QUIET_CC      = @printf '    %b %b\n' $(CCCOLOR)CC$(ENDCOLOR) $(SRCCOLOR)$@$(ENDCOLOR) 1>&2;
+QUIET_FC      = @printf '    %b %b\n' $(CCCOLOR)FC$(ENDCOLOR) $(SRCCOLOR)$@$(ENDCOLOR) 1>&2;
+QUIET_AR      = @printf '    %b %b\n' $(LINKCOLOR)AR$(ENDCOLOR) $(BINCOLOR)$@$(ENDCOLOR) 1>&2;
+QUIET_LINK    = @printf '    %b %b\n' $(LINKCOLOR)LINK$(ENDCOLOR) $(BINCOLOR)$@$(ENDCOLOR) 1>&2;
+QUIET_MAKE    = @printf '    %b %b\n' $(MAKECOLOR)MAKE$(ENDCOLOR) $@ 1>&2;
+
+CC   = $(QUIET_CC)$(OLD_CC)
+FC   = $(QUIET_FC)$(OLD_FC)
+LD   = $(QUIET_LINK)$(OLD_LD)
+AR   = $(QUIET_AR)$(OLD_AR)
+MAKE = $(QUIET_MAKE)$(OLD_MAKE) --no-print-directory
+
+endif
+
+
 COMPILE.c = $(CC) $(DEPFLAGS) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
 COMPILE.cc = $(CXX) $(DEPFLAGS) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
-POSTCOMPILE = mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
+POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
 
 %.o : %.c
 %.o : %.c $(DEPDIR)/%.d
@@ -59,7 +91,7 @@ include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(OBJECTS))))
 	$(LINK.o) $+ $(LOADLIBES) $(LDLIBS) -o $@
 
 %.a:
-	ar rcs $@ $^
+	$(AR) rcs $@ $^
 
 clean: 
 	-rm -f $(OBJECTS)

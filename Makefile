@@ -89,12 +89,12 @@ rmdoto:
 #
 libs:
 	for dir in $(LIB_DIR); do\
-		make --no-print-directory -C $$dir ;\
+		$(MAKE) --no-print-directory -C $$dir ;\
 	done
 #
 execs:
 	for dir in $(EXEC_DIR); do \
-		make --no-print-directory -C $$dir; \
+		$(MAKE) --no-print-directory -C $$dir; \
 	done
 install:
 	sh misc/fsinstall
