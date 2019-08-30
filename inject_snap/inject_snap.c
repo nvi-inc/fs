@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -32,7 +32,7 @@ extern void skd_run(char name[5], char w, int ip[5]);
 
 static int ip[5] = { 0, 0, 0, 0, 0};
 
-#define MAX_BUF 512
+#define MAX_BUF MAX_CLS_MSG_BYTES
 
 static char buf[MAX_BUF+1];
 

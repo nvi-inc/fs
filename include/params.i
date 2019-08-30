@@ -111,7 +111,7 @@ c
 C
 C these parameter are not used extensively, but it is start
       integer MAX_CLS_MSG_BYTES, MAX_CLS_MSG_I2
-      parameter (MAX_CLS_MSG_BYTES=1024)
+      parameter (MAX_CLS_MSG_BYTES=2048)
       parameter (MAX_CLS_MSG_I2=(MAX_CLS_MSG_BYTES+1)/2)
 c
       parameter ( INT_BITS = 32 )

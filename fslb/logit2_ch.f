@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2024 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -22,7 +22,7 @@
 
       include '../include/fscom.i'
 
-      integer*2 lmessg(128)
+      integer*2 lmessg(MAX_CLS_MSG_I2)
       dimension lprocn(1)
       lwhat=0
       lwho=0
@@ -30,11 +30,10 @@
       lprocn(1)=0
       lsor=0
       nchar=len(cmessg)
-      if(nchar.gt.256) then
-         call put_stderr('logit2_ch message length >256\n'//char(0))
-         stop 999
+      if(nchar.gt.MAX_CLS_MSG_BYTES-27) then
+         call put_stderr('logit2_ch message too long\n'//char(0))
       endif
-       call char2hol(cmessg,lmessg,1,nchar)
+      call char2hol(cmessg,lmessg,1,min(nchar,MAX_CLS_MSG_BYTES-27))
       call logit(lmessg,nchar,lsor,lprocn,ierr,lwho,lwhat,2)
       return
       end 
