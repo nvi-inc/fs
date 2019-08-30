@@ -167,8 +167,36 @@ int main(int argc, char *argv[])
   }
   putpname(me);
 
+Loop:
   skd_wait(me,ip,(unsigned) 0);
   
+ {
+   int i;
+   char lets[]="abcdefghijklm";
+   int octet,dum;
+   irdbe=-1;
+   for(i=0;i<MAX_RDBE;i++)
+     if(me[4]==lets[i]) {
+       if(0!=shm_addr->rdbehost[i][0]) {
+           strncpy(multicast_addr,shm_addr->rdbe_multicast_addr[i],
+                   sizeof(multicast_addr));
+               multicast_addr[sizeof(multicast_addr)-1]=0;
+	 localSock.sin_port = htons(shm_addr->rdbe_multicast_port[i]);
+	 irdbe=i;
+	 break;
+       }
+     }
+   if(irdbe<0) {
+     printf(" no rdbe found %s\n",me);
+     exit(-1);
+   }
+  if(!strcmp(multicast_addr,"-")) {
+      logita(NULL,-3,"rz",who);
+      goto Loop;  // wait forever since there is nothing to do
+  }
+
+   //   printf("%s addr %s  port %d\n",me,multicast_addr,ntohs(localSock.sin_port));
+ }
 /* Create a datagram socket on which to receive. */
 sd = socket(AF_INET, SOCK_DGRAM, 0);
 if(sd < 0)
@@ -198,26 +226,6 @@ exit(1);
 memset((char *) &localSock, 0, sizeof(localSock));
 localSock.sin_family = AF_INET;
 
- {
-   int i;
-   char lets[]="abcdefghijklm";
-   int octet,dum;
-   irdbe=-1;
-   for(i=0;i<MAX_RDBE;i++)
-     if(me[4]==lets[i]) {
-       if(0!=shm_addr->rdbehost[i][0]) {
-	 sprintf(multicast_addr,"239.0.2.%d",(i+1)*10);
-	 localSock.sin_port = htons(20020+i+1);
-	 irdbe=i;
-	 break;
-       }
-     }
-   if(irdbe<0) {
-     printf(" no rdbe found %s\n",me);
-     exit(-1);
-   }
-   //   printf("%s addr %s  port %d\n",me,multicast_addr,ntohs(localSock.sin_port));
- }
 
  //1 localSock.sin_addr.s_addr = INADDR_ANY;
  localSock.sin_addr.s_addr = htonl(INADDR_ANY);

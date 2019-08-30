@@ -63,7 +63,9 @@ static jmp_buf sig_buf;
 static int sock; /* Socket */ 
 static FILE * fsock; /* Socket also as a stream */ 
 static char host[129]; /* maximum width plus one */
+static char multicast_addr[129]; /* maximum width plus one */
 static int port;
+static int multicast_port;
 static int is_open=FALSE;
 static int first_transaction=FALSE;
 static int time_out;
@@ -169,6 +171,9 @@ int doinit()
     FILE *fp;   /* general purpose file pointer */
     char check;
     int error;
+    int icount;
+    char buf[258];
+    char *ptr;
 
     if ( (fp = fopen(control_file,"r")) == NULL) {
 #ifdef DEBUG
@@ -190,10 +195,19 @@ int doinit()
       return 0;
     else if(ungetc(check, fp)==EOF)
       return -2;
-   
-    if ( fscanf(fp,"%80s %d %d",host,&port, &time_out)!=3) /* read a line */
-      return -3;
 
+   /* read a line */
+    ptr=fgets(buf,sizeof(buf),fp);
+    if(NULL==ptr) {
+       logita(NULL,errno,"un",who);
+       return -4;
+    } else if(strlen(buf)>0 && '\n'!=buf[strlen(buf)-1])
+      return -5;
+
+    icount=sscanf(buf,"%80s %d %d %80s %d",
+            host,&port, &time_out,&multicast_addr,&multicast_port);
+    if ( icount!=5 && icount !=3)
+      return -3;
     else {
       int i;
       char lets[]="abcdefghijklm";
@@ -202,6 +216,13 @@ int doinit()
 	  strcpy(shm_addr->rdbehost[i],host);
 	  shm_addr->rdbe_units[i]=1;
 	  shm_addr->rdbe_active[i]=1;
+      if(icount==5) {
+        strcpy(shm_addr->rdbe_multicast_addr[i],multicast_addr);
+        shm_addr->rdbe_multicast_port[i]=multicast_port;
+      } else {
+        sprintf(shm_addr->rdbe_multicast_addr[i],"239.0.2.%d",(i+1)*10);
+        shm_addr->rdbe_multicast_port[i]=20020+i+1;
+      }
 	}
     }
     {
@@ -244,6 +265,10 @@ int open_rdbe(char *host, int port)
   int retval, iret;
   int error,serror;
   long flags;
+
+  if(!strcmp(host,"-")) {
+    return -10;
+  }
 
   /* * Create a socket * */ 
   if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) { /* Errors? */ 

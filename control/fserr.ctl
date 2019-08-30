@@ -5604,7 +5604,16 @@ RA   -2
 rdbc.: error pushing back on rdb?W.ctl
 ""
 RA   -3
-rdbc.: first non-comment line in rdb?W.ctl did not contain three tokens
+rdbc.: first non-comment line in rdb?W.ctl must contain three or five tokens
+""
+RA   -4
+rdbc.: error reading first non-comment line in rdb?W.ctl
+""
+RA   -5
+rdbc.: first non-comment line in rdb?W.ctl is too long, more than 256 characters
+""
+RA  -10
+rdb?W: rdbe communication disabled, specified ip address is '-'
 ""
 RA  -11
 rdb?W: error opening socket
@@ -6208,6 +6217,9 @@ rdt?W: Error from select(), see above message for details.
 ""
 RZ   -2
 rdt?W: multicast may not be running, no message received
+""
+RZ   -3
+rdt?W: multicast disabled, specified multicast_address is '-'.
 ""
 SC   -1
 setcl: incorrect number of class buffers.

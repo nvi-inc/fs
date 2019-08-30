@@ -428,4 +428,7 @@ typedef struct fscom {
 
   char sVerRelease_FS[33];
 
+  char rdbe_multicast_addr[MAX_RDBE][129];
+  int rdbe_multicast_port[MAX_RDBE];
+
 } Fscom;
