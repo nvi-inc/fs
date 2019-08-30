@@ -14,7 +14,7 @@
 
 #define NULLPTR (char *) 0
 #define PERMISSIONS 0666
-#define MAX_BUF 512
+#define MAX_BUF 2048
 /* not Y10K compliant */
 #define FIRST_CHAR 21
 

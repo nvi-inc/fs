@@ -23,7 +23,7 @@ char *who;           /* 2-char string identifying the error  */
 char *what;          /* 2-char string with more info         */
 
 {
-  char buf[513];    /* Holds the complete log entry */
+  char buf[2049];    /* Holds the complete log entry */
   char name[5];     /* The name of our main program */
   int it[6],ip1,ip2,l;
  

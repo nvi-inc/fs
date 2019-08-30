@@ -19,7 +19,7 @@ void rte_time();
 logitf(msg)
 char *msg;           /* a message to be logged, NULL if none */
 {
-  char buf[513];    /* Holds the complete log entry */
+  char buf[2049];    /* Holds the complete log entry */
   char name[5];     /* The name of our main program */
   int it[6],ip1,ip2,l;
  

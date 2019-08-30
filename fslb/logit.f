@@ -38,7 +38,7 @@ C
 C  LOCAL: 
 C 
 C     NCH - character counter in IBUF 
-      integer*2 ibuf(256)
+      integer*2 ibuf(1024)
 C      - buffer in which log entry is formatted 
 C     NARGS - number of arguments passed to us
       character*2 copt2

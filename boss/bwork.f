@@ -26,9 +26,9 @@ C
       integer*4 lproc1(4,1),lproc2(4,1)
 C                   Command names list, and procedure lists
       integer*4 itscb(13,1)          !  time scheduling control block
-      integer*2 ibuf(256)         !  input buffer containing command
-      integer*2 ibuf2(256),ibufd(3)
-      character*512 ibc
+      integer*2 ibuf(1024)         !  input buffer containing command
+      integer*2 ibuf2(1024),ibufd(3)
+      character*2048 ibc
       equivalence (ibc,ibuf)
       dimension itime(9)         !  time array returned from spars
       dimension it(6)          !  time from system 
@@ -82,7 +82,7 @@ C     ICLASS - general variable for class with command/response
 C     ICLOP2 - secondary operator class after immediate commands
 C             have been stripped
 C     MAXPR1,2 - Maximum number of procs allowed in each lists
-      data iblen/256/
+      data iblen/1024/
       data kskblk/.true./,kopblk/.false./,kxdisp/.false./,kxlog/.false./
       data istksk/40,2,40*0/, istkop/40,2,40*0/
       data lstksk/MAX_PROC_PARAM_COUNT,2,MAX_PROC_PARAM_COUNT*0/
