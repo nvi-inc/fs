@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -32,7 +32,7 @@
 
 extern struct fscom *shm_addr;
 
-#define MAX_TEXT  1024
+#define MAX_TEXT  MAX_CLS_MSG_BYTES
 
 struct  cls_buf {
 	long	mtype;

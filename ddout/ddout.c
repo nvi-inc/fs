@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2022, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -33,7 +33,7 @@
 
 #define NULLPTR (char *) 0
 #define PERMISSIONS 0664
-#define MAX_BUF 1024
+#define MAX_BUF MAX_CLS_MSG_BYTES
 /* not Y10K compliant */
 #define FIRST_CHAR 21
 #define DEFAULT_WARN_SIZE 100

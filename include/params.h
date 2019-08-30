@@ -36,8 +36,9 @@
 
 #define CLS_SIZE    20480
 #define MAX_CLS     40
-#define MAX_CLS_MSG_BYTES  1024 /* not used anywhere yet, parallel to
-				   FORTRAN parameter */
+#define MAX_CLS_MSG_BYTES  2048
+#define MAX_CLS_MSG_I2 =(MAX_CLS_MSG_BYTES+1)/2)
+/* _I2 not used anywhere yet, parallel to FORTRAN parameter */
 
 #define SKD_SIZE    4096
 

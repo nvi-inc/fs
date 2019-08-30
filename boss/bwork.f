@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023 NVI, Inc.
+* Copyright (c) 2020, 2023-2024 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -46,9 +46,9 @@ C
       integer*4 lproc1(4,1),lproc2(4,1)
 C                   Command names list, and procedure lists
       integer*4 itscb(13,1)          !  time scheduling control block
-      integer*2 ibuf(513)         !  input buffer containing command
-      integer*2 ibuf2(513),ibufd(3)
-      character*1024 ibc
+      integer*2 ibuf(MAX_CLS_MSG_I2+1)         !  input buffer containing command
+      integer*2 ibuf2(MAX_CLS_MSG_I2+1),ibufd(3)
+      character*(MAX_CLS_MSG_BYTES) ibc
       equivalence (ibc,ibuf)
       dimension itime(9)         !  time array returned from spars
       dimension it(6)          !  time from system 
@@ -109,7 +109,7 @@ C     MAXPR1,2 - Maximum number of procs allowed in each lists
 
       external stat
 
-      data iblen/512/
+      data iblen/MAX_CLS_MSG_I2/
       data kskblk/.true./,kopblk/.false./,kxdisp/.false./,kxlog/.false./
       data istksk/40,2,40*0/, istkop/40,2,40*0/
       data lstksk/MAX_PROC_PARAM_COUNT,2,MAX_PROC_PARAM_COUNT*0/

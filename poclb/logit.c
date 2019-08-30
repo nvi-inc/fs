@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -78,7 +78,7 @@ char *type;          /* data type NULL = "fs", "nd" = no display */
 char lsor;           /* char identifying source usually ':' or '/' */
 
 {
-  char buf[1025];    /* Holds the complete log entry */
+  char buf[MAX_CLS_MSG_BYTES+1];    /* Holds the complete log entry */
   char name[5];     /* The name of our main program */
   int it[6],ip1,ip2,l;
   char ssor[2];
