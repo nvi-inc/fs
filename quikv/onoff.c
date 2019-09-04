@@ -503,7 +503,7 @@ int ip[5];                           /* ipc parameters */
 	      lcl.devices[i].lwhat[1]=hex[i-MAX_GLOBAL_DET+1];
 	      lcl.devices[i].center=
 		shm_addr->user_device.center[lcl.devices[i].ifchain-(1+MAX_LO)];
-	      switch(shm_addr->user_device.sideband[lcl.devices[i].ifchain-(1+MAX+LO)]) {
+	      switch(shm_addr->user_device.sideband[lcl.devices[i].ifchain-(1+MAX_LO)]) {
 	      case 1:
 		lcl.devices[i].center=
 		  shm_addr->user_device.lo[lcl.devices[i].ifchain-(1+MAX_LO)]
