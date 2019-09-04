@@ -9,10 +9,9 @@
 #define BUFSIZE 2048
 extern char unit_letters[];
 
-logmsg_rdbe(output,command,itask,iwhich,ip,out_class,out_recs)
+logmsg_rdbe(output,command,ip,out_class,out_recs)
 char *output;
 struct cmd_ds *command;
-int itask,iwhich;
 long ip[5];
 long *out_class;
 int *out_recs;
@@ -25,14 +24,8 @@ int *out_recs;
   char inbuf[BUFSIZE];
   int i;
 
- /* format output buffer */
+ /* output buffer comes formatter from caller */
 
-  if(itask == 0 && iwhich!=0)
-    sprintf(output,"%s%c",command->name,unit_letters[iwhich]);
-  else
-    strcpy(output,command->name);
-  strcat(output,"/");
- 
   for (i=0;i<ip[1];i++) {
     char *ptr;
     if ((nchars =
@@ -46,12 +39,12 @@ int *out_recs;
     
   cls_snd(out_class,output,strlen(output),0,0);
   (*out_recs)++;
-  
   ip[2]=0;
   
   return 0;
 
 error:
-  cls_clr(ip[0]);
+  if(i<ip[1])
+    cls_clr(ip[0]);
   return -1;
 }

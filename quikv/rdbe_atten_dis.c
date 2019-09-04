@@ -37,15 +37,24 @@ int *out_recs;
 
       ierr = 0;
 
-      if(itask == 0)
+      if(itask == 0 && iwhich !=0)
 	sprintf(output,"%s%c",command->name,unit_letters[iwhich]);
       else
 	strcpy(output,command->name);
+      strcat(output,"/");
 
       kcom= command->argv[0] != NULL &&
             *command->argv[0] == '?' && command->argv[1] == NULL;
 
-      if(kcom) {
+   if ((!kcom)
+     && command->equal == '=' && shm_addr->equip.rack_type == R2DBE) {
+     ierr=logmsg_rdbe(output,command,ip,out_class,out_recs);
+	   if(ierr!=0) {
+	     ierr+=-450;
+	     goto error2;
+	   }
+	   return;
+   } else if(kcom) {
          memcpy(&lclc,&shm_addr->rdbe_atten[itask],sizeof(lclc));
       } else {
 	who[1]=unit_letters[iwhich];
@@ -69,14 +78,6 @@ int *out_recs;
 	    }
 	}
       }
-
-   /* format output buffer */
-
-      if(itask == 0 && iwhich!=0)
-	sprintf(output,"%s%c",command->name,unit_letters[iwhich]);
-      else
-	strcpy(output,command->name);
-      strcat(output,"/");
 
       if(kcom) {
 	count=0;
