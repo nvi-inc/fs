@@ -35,6 +35,9 @@ error retrieving class for IF0 query for dbe_atten, rdb?W
 2B -402
 error retrieving class for IF1 query for dbe_atten, rdb?W
 ""
+2B -451
+Class buffer error from command response.
+""
 2B -501
 error decording first IF for dbe_atten, rdb?W
 ""
