@@ -8,6 +8,7 @@
 
 extern int rack;
 extern rack_type;
+extern int source;
 
 void rte2secs();
 
