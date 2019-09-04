@@ -15,6 +15,8 @@
 
 #include "mon6.h"
 
+extern int kr2dbe;
+
 m6init()
 {
   mvaddstr(ROW_TITLE0,COL_RDBE-1,   "RDBE");
@@ -22,8 +24,14 @@ m6init()
   mvaddstr(ROW_TITLE0,COL_EPOCH-1,    "EPOCH");
   mvaddstr(ROW_TITLE0,COL_DOT2GPS+4,  "DOT2GPS");
   mvaddstr(ROW_TITLE0,COL_DOT2PPS,    "DOT2PPS");
-  mvaddstr(ROW_TITLE0,COL_RAW,      "IF  RMS");
-  mvaddstr(ROW_TITLE0,COL_TSYS,     "IF0  TSys IF1  TSys");
-  mvaddstr(ROW_TITLE0,COL_PCAL,     " Tone    Amp  Phase");
+  if(!kr2dbe) {
+    mvaddstr(ROW_TITLE0,COL_RAW,      "IF  RMS");
+    mvaddstr(ROW_TITLE0,COL_TSYS,     "IF0  TSys IF1  TSys");
+    mvaddstr(ROW_TITLE0,COL_PCAL,     " Tone    Amp  Phase");
+  } else {
+    mvaddstr(ROW_TITLE0,COL_RAW,      "RMS0 RMS1");
+    mvaddstr(ROW_TITLE0,COL_TSYS2,    "IF0  TSys IF1  TSys");
+    mvaddstr(ROW_TITLE0,COL_PCAL2,    " Tone    Amp  Phase");
+  }
 
 } 

@@ -17,6 +17,8 @@
 
 extern struct fscom *fs;
 
+extern int kr2dbe;
+
 static char unit_letters[ ] = {" abcdefghijklm"}; /* mk6/rdbe unit letters */
 
 mout6()
@@ -156,17 +158,36 @@ mout6()
     printw(" ");
 
     move(ROW_A+i,COL_RAW);
-    printw("%2d ",local[i].raw_ifx);
-    if(local[i].sigma < fs->rdbe_equip.rms_min ||
-       local[i].sigma > fs->rdbe_equip.rms_max) 
-      standout();
-    printw("%4.1f",local[i].sigma);
-    if(local[i].sigma < fs->rdbe_equip.rms_min ||
-       local[i].sigma > fs->rdbe_equip.rms_max) 
-      standend();
-    
+    if(!kr2dbe) {
+      printw("%2d ",local[i].raw_ifx);
+      if(local[i].sigma < fs->rdbe_equip.rms_min ||
+         local[i].sigma > fs->rdbe_equip.rms_max) 
+        standout();
+      printw("%4.1f",local[i].sigma);
+      if(local[i].sigma < fs->rdbe_equip.rms_min ||
+         local[i].sigma > fs->rdbe_equip.rms_max) 
+        standend();
+    } else {
+      if(local[i].sigma0 < fs->rdbe_equip.rms_min ||
+         local[i].sigma0 > fs->rdbe_equip.rms_max) 
+        standout();
+      printw("%4.1f",local[i].sigma0);
+      if(local[i].sigma0 < fs->rdbe_equip.rms_min ||
+         local[i].sigma0 > fs->rdbe_equip.rms_max) 
+        standend();
+      printw(" ");
+      if(local[i].sigma1 < fs->rdbe_equip.rms_min ||
+         local[i].sigma1 > fs->rdbe_equip.rms_max) 
+        standout();
+      printw("%4.1f",local[i].sigma1);
+      if(local[i].sigma1 < fs->rdbe_equip.rms_min ||
+         local[i].sigma1 > fs->rdbe_equip.rms_max) 
+        standend();
+    } 
+
     chan=fs->monit6.tsys[0][i];
     if(local[i].tsys[chan][0]>=-1e12) {
+    if(!kr2dbe) {
       move(ROW_A+i,COL_TSYS);
       if(chan==MAX_RDBE_CH)
 	printw("Avg",chan);
@@ -175,12 +196,23 @@ mout6()
       else
 	printw(" %02d",chan);
       move(ROW_A+i,COL_TSYS+4);
+     } else {
+       move(ROW_A+i,COL_TSYS2);
+       if(chan==MAX_R2DBE_CH)
+         printw("Avg",chan);
+       else if(chan==MAX_R2DBE_CH+1)
+         printw("Sum",chan);
+       else
+         printw(" %02d",chan);
+       move(ROW_A+i,COL_TSYS2+4);
+     }
       outflt[0]=0;
       flt2str(outflt,local[i].tsys[chan][0],-5,1);
       printw("%s",outflt);
     }
     chan=fs->monit6.tsys[1][i];
     if(local[i].tsys[chan][1]>=-1e12) {
+      if(!kr2dbe) {
       move(ROW_A+i,COL_TSYS+10);
       if(chan==MAX_RDBE_CH)
 	printw("Avg",chan);
@@ -189,6 +221,16 @@ mout6()
       else
 	printw(" %02d",chan);
       move(ROW_A+i,COL_TSYS+14);
+      } else {
+        move(ROW_A+i,COL_TSYS2+10);
+        if(chan==MAX_R2DBE_CH)
+          printw("Avg",chan);
+        else if(chan==MAX_R2DBE_CH+1)
+          printw("Sum",chan);
+        else
+          printw(" %02d",chan);
+        move(ROW_A+i,COL_TSYS2+14);
+      }
       outflt[0]=0;
       flt2str(outflt,local[i].tsys[chan][1],-5,1);
       printw("%s",outflt);

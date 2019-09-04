@@ -19,6 +19,8 @@
 
 #include "mon6.h"
 
+extern int kr2dbe;
+
 #define MAXLINE   5
 
 int gmonit6(monit6_file, monit6)
@@ -32,6 +34,7 @@ int gmonit6(monit6_file, monit6)
   int nc;
   char controller[33];
   char string[33];
+  int max_ch;
 
   file = fopen(monit6_file,"r");
   if (file == (FILE *)NULL) {
@@ -64,14 +67,19 @@ int gmonit6(monit6_file, monit6)
 	  else
 	    goto Derror;
 	}
+  if(!kr2dbe) 
+    max_ch=MAX_RDBE_CH;
+  else
+    max_ch=MAX_R2DBE_CH;
+
 	if(strcasecmp("avg",string1)==0)
-	  monit6->tsys[0][iline-1]=MAX_RDBE_CH;
+	  monit6->tsys[0][iline-1]=max_ch;
 	else if(strcasecmp("sum",string1)==0)
-	  monit6->tsys[0][iline-1]=MAX_RDBE_CH+1;
+	  monit6->tsys[0][iline-1]=max_ch+1;
 	else if(1!=sscanf(string1,"%d", &value) ||
-		value<0 || value >MAX_RDBE_CH-1) {
+		value<0 || value >max_ch-1) {
 	  snprintf(msg,sizeof(msg),"Must be 'avg', 'sum' or 0-%d.",
-		   MAX_RDBE_CH-1);
+		   max_ch-1);
 	  logite(msg,-1,"mn");
 	  nc=0;
 	  iline--;
@@ -80,13 +88,13 @@ int gmonit6(monit6_file, monit6)
 	  monit6->tsys[0][iline-1]=value;
 
 	if(strcasecmp("avg",string2)==0)
-	  monit6->tsys[1][iline-1]=MAX_RDBE_CH;
+	  monit6->tsys[1][iline-1]=max_ch;
 	else if(strcasecmp("sum",string2)==0)
-	  monit6->tsys[1][iline-1]=MAX_RDBE_CH+1;
+	  monit6->tsys[1][iline-1]=max_ch+1;
 	else if(1!=sscanf(string2,"%d", &value) ||
-		value<0 || value >MAX_RDBE_CH-1) {
+		value<0 || value >max_ch-1) {
 	  snprintf(msg,sizeof(msg),"Must be 'avg', 'sum' or 0-%d.",
-		   MAX_RDBE_CH-1);
+		   max_ch-1);
 	  logite(msg,-1,"mn");
 	  nc=1;
 	  iline--;

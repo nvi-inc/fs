@@ -48,7 +48,31 @@ struct mcast {
    unsigned char raw_samples[4096];
    unsigned char raw_samples_pad[6];
   };
- 
+
+struct mcast_r2dbe {
+char read_time[32]; // [YEARx4][DAYx3][HOURx2][MINx2][SECx2]
+unsigned short pkt_size;
+unsigned short epoch_ref;
+unsigned long epoch_sec;
+char tsys_header[20]; // "tsys_header"
+uint32_t tsys0_on[64];
+uint32_t tsys0_off[64];
+uint32_t tsys1_on[64];
+uint32_t tsys1_off[64];
+char pcal_header[20]; // "pcal_header"
+unsigned short pcal_ifx;
+unsigned short pcal_ifx_pad; // This is different from Reggie's.
+int pcal_sin[4096];  // Reggie had long
+int pcal_cos[4096];  // Reggie had long
+char raw_header[20]; // "raw_header"
+double mu0;
+double sigma0;
+double mu1;
+double sigma1;
+double pps_offset;
+double gps_offset;
+};
+
 static unsigned short xbe16toh(unsigned short big_endian)
 {
    static union {
@@ -124,7 +148,7 @@ struct sockaddr_in localSock;
 struct ip_mreq group;
 int sd;
 int datalen;
-char databuf[sizeof(struct mcast)];
+char databuf[sizeof(struct mcast_r2dbe)];
 
 static char who[ ]="cn";
 static char what[ ]="ad";
@@ -136,7 +160,7 @@ int main(int argc, char *argv[])
 {
 
   struct rdbe_tsys_cycle local;
-  unsigned long tpi[MAX_RDBE_CH*MAX_RDBE_IF][2];
+  unsigned long tpi[MAX_R2DBE_CH*MAX_R2DBE_IF][2];
   int iping;
   char multicast_addr[129];
   long ip[5];
@@ -146,14 +170,21 @@ int main(int argc, char *argv[])
   unsigned long long llvalue;
   double dot2pps,dot2gps, sigma, mu;
   int multicast_error;
-  double sum_on[MAX_RDBE_IF];
-  double sum_off[MAX_RDBE_IF];
-  double sum_tcal[MAX_RDBE_IF];
-  double rsum_tsys[MAX_RDBE_IF];
-  int tsys_count[MAX_RDBE_IF];
+  double sum_on[MAX_R2DBE_IF];
+  double sum_off[MAX_R2DBE_IF];
+  double sum_tcal[MAX_R2DBE_IF];
+  double rsum_tsys[MAX_R2DBE_IF];
+  int tsys_count[MAX_R2DBE_IF];
   int loop_count=-1;
   double lo[MAX_LO];
   char epoch[14];
+  int kr2dbe;
+  int max_if,max_ch,act_ch,max_total_ch;;
+  int multicast_port;
+  double mu0;
+  double sigma0;
+  double mu1;
+  double sigma1;
 
   setup_ids();    /* attach to the shared memory */
   rte_prior(FS_PRIOR);
@@ -181,7 +212,7 @@ Loop:
            strncpy(multicast_addr,shm_addr->rdbe_multicast_addr[i],
                    sizeof(multicast_addr));
                multicast_addr[sizeof(multicast_addr)-1]=0;
-	 localSock.sin_port = htons(shm_addr->rdbe_multicast_port[i]);
+	             multicast_port=shm_addr->rdbe_multicast_port[i];
 	 irdbe=i;
 	 break;
        }
@@ -192,10 +223,10 @@ Loop:
    }
   if(!strcmp(multicast_addr,"-")) {
       logita(NULL,-3,"rz",who);
-      goto Loop;  // wait forever since there is nothing to do
+      goto Loop;
   }
 
-   //   printf("%s addr %s  port %d\n",me,multicast_addr,ntohs(localSock.sin_port));
+//     printf("%s addr %s  port %d\n",me,multicast_addr,multicast_port);
  }
 /* Create a datagram socket on which to receive. */
 sd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -225,6 +256,7 @@ exit(1);
 /* specified as INADDR_ANY. */
 memset((char *) &localSock, 0, sizeof(localSock));
 localSock.sin_family = AF_INET;
+	 localSock.sin_port = htons(multicast_port);
 
 
  //1 localSock.sin_addr.s_addr = INADDR_ANY;
@@ -258,9 +290,19 @@ exit(1);
 //else
   //printf("Adding multicast group...OK.\n");
  
-/* Read from the socket. */
-  datalen = sizeof(databuf);
+kr2dbe=shm_addr->equip.rack==RDBE
+       && shm_addr->equip.rack_type==R2DBE;
+
+if(!kr2dbe)
+    datalen = sizeof(struct mcast);
+  else
+    datalen = sizeof(struct mcast_r2dbe);
+
+    // printf(" datalen %d\n",datalen);
+
  multicast_error=FALSE;
+
+/* Read from the socket. */
 
 while (1) {
   char time[15];
@@ -329,7 +371,8 @@ while (1) {
       unsigned long long on, off;
       int i;
 
-      /* message structure, big endian
+      /*
+          RDBE message structure, big endian
    char read_time[20];                    0   20
    unsigned short pkt_size;              20    2
    unsigned short epoch_ref;             22    2
@@ -355,6 +398,30 @@ while (1) {
    unsigned char raw_samples[4096];   11842 4102
    unsigned char raw_samples_pad[6];
                                       15944
+
+          R2DBE message structure, big endian
+   char read_time[32];                    0    32
+   unsigned short pkt_size;              32     2
+   unsigned short epoch_ref;             34     2
+   unsigned long epoch_sec;              36     4
+   char tsys_header[20];                 40    20
+   uint32_t tsys0_on[64];                60   256
+   uint32_t tsys0_off[64];              316   256
+   uint32_t tsys1_on[64];               572   256
+   uint32_t tsys1_off[64];              828   256
+   char pcal_header[20];               1084    20
+   unsigned short pcal_ifx;            1104     2
+   unsigned short pcal_ifx_pad;        1106     2
+   int pcal_sin[4096];                 1108 16384
+   int pcal_cos[4096];                17492 16384
+   char raw_header[20];               33876    20
+   double mu0;                        33896     8
+   double sigma0;                     33904     8
+   double mu1;                        33912     8
+   double sigma1;                     33920     8
+   double pps_offset;                 33928     8
+   double gps_offset;                 33936     8
+                                      33944
       */
       memcpy(epoch,databuf,14);
       memcpy(&local.epoch,databuf,14);
@@ -365,11 +432,24 @@ while (1) {
       //strcpy(epoch+14,">");
       //logit(epoch,0,NULL);
       //      }
-      memcpy(&usvalue,databuf+22,2);
+
+      if(!kr2dbe)
+        memcpy(&usvalue,databuf+22,2);
+      else
+        memcpy(&usvalue,databuf+34,2);
       epoch_vdif=xbe16toh(usvalue);
       local.epoch_vdif=epoch_vdif;
 
-      for (j=0;j<MAX_RDBE_IF;j++) {
+      if(!kr2dbe) {
+        max_if=MAX_RDBE_IF;
+        max_ch=MAX_RDBE_CH;
+      } else {
+        max_if=MAX_R2DBE_IF;
+        max_ch=MAX_R2DBE_CH;
+      }
+      max_total_ch=max_if*max_ch;
+
+      for (j=0;j<max_if;j++) {
 	int ifchain;
 
 	sum_on[j]=0.0;
@@ -377,25 +457,42 @@ while (1) {
 	sum_tcal[j]=0.0;
 	rsum_tsys[j]=0.0;
 
-	ifchain=irdbe*MAX_RDBE_IF+j+1;
+	ifchain=irdbe*max_if+j+1;
 	lo[ifchain-1]=shm_addr->lo.lo[ifchain-1];
       }
 
-      for(i=0;i<MAX_RDBE_CH*MAX_RDBE_IF;i++) {
+      for(i=0;i<max_ch*max_if;i++) {
         unsigned long value;
 	double diff;
 	int ifchain;
 	double center;
 	float fwhm, tcal, dpfu, gain;
 
-        memcpy(&value,databuf+52+i*4,4);
-	tpi[i][1]=xbe32toh(value); /* on */
-	memcpy(&value,databuf+308+i*4,4);
-	tpi[i][0]=xbe32toh(value); /* off */
+        if(!kr2dbe) {
+          memcpy(&value,databuf+52+i*4,4);
+          tpi[i][1]=xbe32toh(value); /* on */
+          memcpy(&value,databuf+308+i*4,4);
+	        tpi[i][0]=xbe32toh(value); /* off */
+        } else {
+          /* R2DBE on/off order seems to be inverted */
+          if(i<max_ch)
+            memcpy(&value,databuf+60+i*4,4);
+          else
+            memcpy(&value,databuf+572+(i-max_ch)*4,4);
+          tpi[i][0]=xbe32toh(value); /* on */
+          if(i<max_ch)
+            memcpy(&value,databuf+316+i*4,4);
+          else
+            memcpy(&value,databuf+828+(i-max_ch)*4,4);
+	        tpi[i][1]=xbe32toh(value); /* off */
+        }
 
-	ifchain=irdbe*MAX_RDBE_IF+i/MAX_RDBE_CH+1;
+	ifchain=irdbe*max_if+i/max_ch+1;
 	if(lo[ifchain-1] >= 0.0) {
-	  center=lo[ifchain-1]+1024-32*(i%MAX_RDBE_CH);
+          if(!kr2dbe)
+	    center=lo[ifchain-1]+1024-32*(i%max_ch);
+          else 
+	    center=lo[ifchain-1]+32*(i%max_ch);
 	  get_gain_par(ifchain,center,
 		       &fwhm,&dpfu,NULL,&tcal);
 
@@ -404,66 +501,75 @@ while (1) {
 
 	  diff=(double) tpi[i][1]-(double) tpi[i][0];
 	  if (tcal <=0.0)
-	    local.tsys[i%MAX_RDBE_CH][i/MAX_RDBE_CH]=-9e12;
+	    local.tsys[i%max_ch][i/max_ch]=-9e12;
 	  else if(diff <= 0.5)  /* no divide by zero or negative values */
-	    local.tsys[i%MAX_RDBE_CH][i/MAX_RDBE_CH]=-9e6;
+	    local.tsys[i%max_ch][i/max_ch]=-9e6;
 	  else {
-	    local.tsys[i%MAX_RDBE_CH][i/MAX_RDBE_CH]=
+	    local.tsys[i%max_ch][i/max_ch]=
 	      (tcal/diff)*0.5*(tpi[i][1]+tpi[i][0]);
 	  }
 
-	  sum_on[i/MAX_RDBE_CH]+=tpi[i][1];
-	  sum_off[i/MAX_RDBE_CH]+=tpi[i][0];
 
-	  if(tcal <=0.0)
-	    sum_tcal[i/MAX_RDBE_CH]=-9e12;
-	  else if(sum_tcal[i/MAX_RDBE_CH] > -1e12)
-	    sum_tcal[i/MAX_RDBE_CH]+=tcal;
+          if(!kr2dbe
+             || kr2dbe && i>16+max_ch*(i%max_ch) && i<48+max_ch*(i%max_ch)) {
+	    sum_on[i/max_ch]+=tpi[i][1];
+	    sum_off[i/max_ch]+=tpi[i][0];
 
-	  if(tcal <=0.0)
-	    rsum_tsys[i/MAX_RDBE_CH]=-9e12;
-	  else if(rsum_tsys[i/MAX_RDBE_CH] > -1e12)
-	    rsum_tsys[i/MAX_RDBE_CH]+=diff/(tcal*0.5*(tpi[i][1]+tpi[i][0]));
+	    if(tcal <=0.0)
+	      sum_tcal[i/max_ch]=-9e12;
+	    else if(sum_tcal[i/max_ch] > -1e12)
+	      sum_tcal[i/max_ch]+=tcal;
+
+	    if(tcal <=0.0)
+	      rsum_tsys[i/max_ch]=-9e12;
+	    else if(rsum_tsys[i/max_ch] > -1e12)
+	      rsum_tsys[i/max_ch]+=diff/(tcal*0.5*(tpi[i][1]+tpi[i][0]));
+          }
 
 	} else {
-	  local.tsys[i%MAX_RDBE_CH][i/MAX_RDBE_CH]=-9e12;
-	  sum_tcal[i/MAX_RDBE_CH]=-9e12;
-	  rsum_tsys[i/MAX_RDBE_CH]=-9e12;
+	  local.tsys[i%max_ch][i/max_ch]=-9e12;
+	  sum_tcal[i/max_ch]=-9e12;
+	  rsum_tsys[i/max_ch]=-9e12;
 	}  
       }
-      for (j=0;j<MAX_RDBE_IF;j++) {
+      if(!kr2dbe)
+        act_ch=max_ch;
+      else
+        act_ch=30;
+      for (j=0;j<max_if;j++) {
 	double diff;
 	int ifchain;
 
-	ifchain=irdbe*MAX_RDBE_IF+j+1;
+	ifchain=irdbe*max_if+j+1;
 	if(lo[ifchain-1] >= 0.0) {
 	  diff=sum_on[j]-sum_off[j];
 
 	  if (sum_tcal[j] <= 0.0)
-	    local.tsys[MAX_RDBE_CH+1][j]=-9e12;
+	    local.tsys[max_ch+1][j]=-9e12;
 	  else if(diff <= 0.5) /* no divide by zero or negative values */
-	    local.tsys[MAX_RDBE_CH+1][j]=-9e6;
+	    local.tsys[max_ch+1][j]=-9e6;
 	  else {
-	    local.tsys[MAX_RDBE_CH+1][j]=
-	      (sum_tcal[j]/(MAX_RDBE_CH*diff))*0.5*(sum_on[j]+sum_off[j]);
+	    local.tsys[max_ch+1][j]=
+	      (sum_tcal[j]/(act_ch*diff))*0.5*(sum_on[j]+sum_off[j]);
 	  }
 
 	  if(rsum_tsys[j] < -1e12)
-	    local.tsys[MAX_RDBE_CH][j]=-9e12;
+	    local.tsys[max_ch][j]=-9e12;
 	  else if(rsum_tsys[j] < 1e-6)
-	    local.tsys[MAX_RDBE_CH][j]=-9e6;
+	    local.tsys[max_ch][j]=-9e6;
 	  else
-	    local.tsys[MAX_RDBE_CH][j]=MAX_RDBE_CH/rsum_tsys[j];
+	    local.tsys[max_ch][j]=act_ch/rsum_tsys[j];
 
 	} else {
-	  local.tsys[MAX_RDBE_CH][j]=-9e12;
-	  local.tsys[MAX_RDBE_CH+1][j]=-9e12;
+	  local.tsys[max_ch][j]=-9e12;
+	  local.tsys[max_ch+1][j]=-9e12;
 	}
-	// printf(" irdbe %d j %d local.tsys[MAX_RDBE_CH][j] %f\n",
-	//       irdbe, j,  local.tsys[MAX_RDBE_CH][j]);
+	// printf(" irdbe %d j %d local.tsys[max_ch][j] %f\n",
+	//       irdbe, j,  local.tsys[max_ch][j]);
       }
     }
 
+    if(!kr2dbe) {
     memcpy(&usvalue,databuf+584,2);
     pcal_ifx=xbe16toh(usvalue);
     local.pcal_ifx=pcal_ifx;
@@ -482,7 +588,26 @@ while (1) {
     local.sigma=sigma;
 
     //printf(" sigma %f\n",sigma);
+    } else {
+    memcpy(&llvalue,databuf+33896,8);
+    llvalue=xbe64toh(llvalue);
+    memcpy(&mu0,&llvalue,8);
 
+    memcpy(&llvalue,databuf+33904,8);
+    llvalue=xbe64toh(llvalue);
+    memcpy(&sigma0,&llvalue,8);
+    local.sigma0=sigma0;
+
+    memcpy(&llvalue,databuf+33912,8);
+    llvalue=xbe64toh(llvalue);
+    memcpy(&mu1,&llvalue,8);
+
+    memcpy(&llvalue,databuf+33920,8);
+    llvalue=xbe64toh(llvalue);
+    memcpy(&sigma1,&llvalue,8);
+    local.sigma1=sigma1;
+    }
+    if(!kr2dbe) {
   for(i=0;i<1024;i++) {
     unsigned int uvalue;
     int value;
@@ -568,13 +693,19 @@ while (1) {
       //  printf(" epoch %14.14s i %4d amp %f phase %f\n",databuf,i,amp,phase);
     }
   }
-
+    }
+    if(!kr2dbe)
   memcpy(&llvalue,databuf+11824,8);
+    else
+  memcpy(&llvalue,databuf+33928,8);
   llvalue=xbe64toh(llvalue);
   memcpy(&dot2pps,&llvalue,8);
   local.dot2pps=dot2pps;
 
+    if(!kr2dbe)
   memcpy(&llvalue,databuf+11832,8);
+    else
+  memcpy(&llvalue,databuf+33936,8);
   llvalue=xbe64toh(llvalue);
   memcpy(&dot2gps,&llvalue,8);
   local.dot2gps=dot2gps;
@@ -615,12 +746,19 @@ while (1) {
   sprintf(buf,"dot2gps/%12.9e",dot2gps);
   logit(buf,0,NULL);
 
-  sprintf(buf,"sigma/%hu%c,%4.1f,%4.1f",raw_ifx,letter,sigma,mu);
-  logit(buf,0,NULL);
+  if(!kr2dbe)
+    sprintf(buf,"sigma/%hu%c,%4.1f,%4.1f",raw_ifx,letter,sigma,mu);
+  else  {
+    sprintf(buf,"sigma/%hu%c,%4.1f,%4.1f",0,letter,sigma0,mu0);
+    logit(buf,0,NULL);
+    sprintf(buf,"sigma/%hu%c,%4.1f,%4.1f",1,letter,sigma1,mu1);
+    logit(buf,0,NULL);
+  }
 
   buf[0]=0;
-  for (i=0;i<32; i++ ) {
-    if(strlen(buf) >  100 || i == 16 && buf[0]!=0 ) {
+
+  for (i=0;i<max_total_ch; i++ ) {
+    if(strlen(buf) >  100 || i == max_ch && buf[0]!=0 ) {
       buf[strlen(buf)-1]=0;
       logit(buf,0,NULL);
       buf[0]=0;
@@ -629,19 +767,23 @@ while (1) {
       strcpy(buf,"tpcont/");
       slen=strlen(buf);
     }
-    
+    if(kr2dbe &&
+        (i <max_ch && (i<=16 || i>=48)||
+         i>=max_ch && (i<=max_ch+16 || i>=max_ch+48)))
+       continue;
+
     start=buf+strlen(buf);
-    snprintf(start,sizeof(buf)-strlen(buf)," %02d%c%d,",i%16,letter,i/16);
-    if(tpi[i][1] >= 16*100000)
+    snprintf(start,sizeof(buf)-strlen(buf)," %02d%c%d,",i%max_ch,letter,i/max_ch);
+    if(tpi[i][1] >= 16*100000000)
       strcat(buf,"$$$$$,");
     else {
-      int2str(buf,tpi[i][1],-7,0);
+      int2str(buf,tpi[i][1],-10,0);
       strcat(buf,",");
     }
-    if(tpi[i][1] >= 16*100000)
+    if(tpi[i][1] >= 16*100000000)
       strcat(buf,"$$$$$,");
     else {
-      int2str(buf,tpi[i][0],-7,0);
+      int2str(buf,tpi[i][0],-10,0);
       strcat(buf,",");
     }
   }

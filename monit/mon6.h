@@ -10,4 +10,6 @@
 #define COL_RAW     46
 #define COL_TSYS    54
 #define COL_PCAL    75
+#define COL_TSYS2   56
+#define COL_PCAL2   77
 #define COL_HOLD    COL_DOT+17

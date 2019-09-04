@@ -17,6 +17,8 @@
 
 struct fscom *fs;
 
+int kr2dbe;
+
 void resize()
 {
   clear();
@@ -43,6 +45,9 @@ main()
     sleep(10);
     exit(-1);
   }
+
+  kr2dbe=shm_addr->equip.rack==RDBE
+    && shm_addr->equip.rack_type==R2DBE;
 
   strcpy(buff,FS_ROOT);
   strncat(buff,"/control/monit6.ctl",sizeof(buff)-strlen(buff)-1);

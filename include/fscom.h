@@ -363,12 +363,14 @@ typedef struct fscom {
     struct rdbe_tsys_cycle {;
       char epoch[14];
       int epoch_vdif;
-      float tsys[MAX_RDBE_CH+2][MAX_RDBE_IF];
-      float pcal_amp[512];
-      float pcal_phase[512];
+      float tsys[MAX_R2DBE_CH+2][MAX_RDBE_IF];
+      float pcal_amp[2048];
+      float pcal_phase[2048];
       int pcal_ifx;
       float sigma;
       int raw_ifx;
+      float sigma0;
+      float sigma1;
       double dot2gps;
       double dot2pps;
       double pcaloff;
