@@ -56,55 +56,55 @@ int *out_recs;
 
       ierr = 0;
 
-      if(itask == 0)
-	sprintf(output,"%s%c",command->name,unit_letters[iwhich]);
+      if(itask == 0 && iwhich !=0)
+        sprintf(output,"%s%c",command->name,unit_letters[iwhich]);
       else
-	strcpy(output,command->name);
+        strcpy(output,command->name);
+      strcat(output,"/");
 
       kcom= command->argv[0] != NULL &&
             *command->argv[0] == '?' && command->argv[1] == NULL;
 
       if(kcom) {
-         memcpy(&lclc,&shm_addr->rdbe_atten[itask],sizeof(lclc));
+        memcpy(&lclc,&shm_addr->rdbe_atten[itask],sizeof(lclc));
+      } else if (command->equal == '=' && shm_addr->equip.rack_type == R2DBE) {
+        ierr=logmsg_rdbe(output,command,ip,out_class,out_recs);
+        if(ierr!=0) {
+          ierr+=-450;
+          goto error2;
+        }
+        return;
       } else {
-	who[1]=unit_letters[iwhich];
-	iclass=ip[0];
-	nrecs=ip[1];
-	for (i=0;i<nrecs;i++) {
-	  char *ptr;
-	  if ((nchars =
-	       cls_rcv(iclass,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
-	    ierr = -401-i;
-	    if(i<nrecs-1)
-	      cls_clr(iclass);
-	    goto error2;
-	  }
-	  if(i==0)
-	    if(0!=rdbe_2_rdbe_atten(inbuf,&lclm,ip)) {
-	      memcpy(ip+4,who,2);
-	      if(i<nrecs-1)
-		cls_clr(iclass);
-	      goto error;
-	    }
-	}
+        who[1]=unit_letters[iwhich];
+        iclass=ip[0];
+        nrecs=ip[1];
+        for (i=0;i<nrecs;i++) {
+          char *ptr;
+          if ((nchars =
+                cls_rcv(iclass,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
+            ierr = -401-i;
+            if(i<nrecs-1)
+              cls_clr(iclass);
+            goto error2;
+          }
+          if(i==0)
+            if(0!=rdbe_2_rdbe_atten(inbuf,&lclm,ip)) {
+              memcpy(ip+4,who,2);
+              if(i<nrecs-1)
+                cls_clr(iclass);
+              goto error;
+            }
+        }
       }
 
-   /* format output buffer */
-
-      if(itask == 0 && iwhich!=0)
-	sprintf(output,"%s%c",command->name,unit_letters[iwhich]);
-      else
-	strcpy(output,command->name);
-      strcat(output,"/");
-
       if(kcom) {
-	count=0;
-	while( count>= 0) {
-	  if (count > 0) strcat(output,",");
-	  count++;
-	  rdbe_atten_enc(output,&count,&lclc);
-	}
-	
+        count=0;
+        while( count>= 0) {
+          if (count > 0) strcat(output,",");
+          count++;
+          rdbe_atten_enc(output,&count,&lclc);
+        }
+
       }	else {
         count=0;
         while( count>= 0) {
@@ -112,23 +112,23 @@ int *out_recs;
           count++;
           rdbe_atten_mon(output,&count,&lclm);
         }
-	for(i=1;i>-1;i--) {
-	  if ((command->equal != '=' ||
-	      !lclm.ifc[i].atten.state.known ||
-	       lclm.ifc[i].atten.atten != 63) &&
-	      lclm.ifc[i].RMS.state.known == 1)  {
-	    if(shm_addr->rdbe_equip.rms_min > lclm.ifc[i].RMS.RMS){
-	      if(0!=ierr)
-		logita(NULL,ierr,"2b",who);
-	      ierr=-302-i;
-	    }
-	    if(shm_addr->rdbe_equip.rms_max < lclm.ifc[i].RMS.RMS) {
-	      if(0!=ierr)
-		logita(NULL,ierr,"2b",who);
-	      ierr=-304-i;
-	    }
-	  }
-	}
+        for(i=1;i>-1;i--) {
+          if ((command->equal != '=' ||
+                !lclm.ifc[i].atten.state.known ||
+                lclm.ifc[i].atten.atten != 63) &&
+              lclm.ifc[i].RMS.state.known == 1)  {
+            if(shm_addr->rdbe_equip.rms_min > lclm.ifc[i].RMS.RMS){
+              if(0!=ierr)
+                logita(NULL,ierr,"2b",who);
+              ierr=-302-i;
+            }
+            if(shm_addr->rdbe_equip.rms_max < lclm.ifc[i].RMS.RMS) {
+              if(0!=ierr)
+                logita(NULL,ierr,"2b",who);
+              ierr=-304-i;
+            }
+          }
+        }
       }  
 
       if(strlen(output)>0) output[strlen(output)-1]='\0';

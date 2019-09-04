@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -28,10 +28,9 @@
 #define BUFSIZE 2048
 extern char unit_letters[];
 
-logmsg_rdbe(output,command,itask,iwhich,ip,out_class,out_recs)
+logmsg_rdbe(output,command,ip,out_class,out_recs)
 char *output;
 struct cmd_ds *command;
-int itask,iwhich;
 int ip[5];
 int *out_class;
 int *out_recs;
@@ -41,17 +40,11 @@ int *out_recs;
   int msgflg=0;  /* argument for cls_rcv - unused */
   int save=0;    /* argument for cls_rcv - unused */
   int nchars;
-  char inbuf[BUFSIZE];
+  char inbuf[BUFSIZE+1];
   int i;
 
- /* format output buffer */
+ /* output buffer comes formatter from caller */
 
-  if(itask == 0 && iwhich!=0)
-    sprintf(output,"%s%c",command->name,unit_letters[iwhich]);
-  else
-    strcpy(output,command->name);
-  strcat(output,"/");
- 
   for (i=0;i<ip[1];i++) {
     char *ptr;
     if ((nchars =
@@ -60,17 +53,21 @@ int *out_recs;
     }
     if(i!=0)
       strcat(output,",");
-    strcat(output,"ack");
+    inbuf[nchars]=0;
+    if(NULL!=strstr(inbuf,"success"))
+      strcat(output,"ack");
+    else
+      strcat(output,inbuf);
   }
     
   cls_snd(out_class,output,strlen(output),0,0);
   (*out_recs)++;
-  
   ip[2]=0;
   
   return 0;
 
 error:
-  cls_clr(ip[0]);
+  if(i<ip[1])
+    cls_clr(ip[0]);
   return -1;
 }
