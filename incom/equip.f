@@ -723,7 +723,10 @@ c                    12345678901234567890123456
       endif
       icont_cal_pol=0
       if(idbbcv.ge.106 .or.(idbbcv.eq.105.and.idbbcddc_subv.ge.1)) then
-         icont_cal_pol=1
+         icont_cal_pol=icont_cal_pol+1
+      endif
+      if(idbbcv.ge.106) then
+         icont_cal_pol=icont_cal_pol+2
       endif
 c
       dbbcddcv =idbbcv
@@ -904,21 +907,26 @@ C 5B clock rate
      &         drive_type(1).eq.FLEXBUFF)) then
 C note that MK45/VLBA45/VLBAC/VLBACDAS cannot connect to MK5C/MK5C_BS/FLEXBUFF,
 c      so only DBBC matters for 5C/5C_BS/FLEXBUFF
-            if((rack.eq.MK4.and.rack_type.eq.MK45) .or.
-     &           (rack.eq.VLBA4.and.rack_type.eq.VLBA45).or.
-     &           (rack.eq.VLBA4.and.rack_type.eq.VLBA4C).or.
-     &           (rack.eq.DBBC.and.(rack_type.eq.DBBC_DDC.or.
-     &           rack_type.eq.DBBC_DDC_FILA10G).and.
-     &           (dbbcddcv.le.104.or.dbbcddcvl.eq.' '))) then
-               m5b_crate=32
+            if (rack.eq.DBBC.and.rack_type.eq.DBBC_DDC_FILA10G
+     &              .and.(dbbcddcv.ge.107.and.dbbcddcvl.eq.' ')) then
+               m5b_crate=128
             else if((rack.eq.VLBA4.and.rack_type.eq.VLBA4CDAS).or.
      &              (rack.eq.DBBC.and.(rack_type.eq.DBBC_DDC.or.
      &              rack_type.eq.DBBC_DDC_FILA10G).and.
      &              (dbbcddcv.ge.105.and.
      &              0.ne.index('ef',dbbcddcvl))).or.
      &              (rack.eq.DBBC.and.(rack_type.eq.DBBC_PFB.or.
-     &              rack_type.eq.DBBC_PFB_FILA10G))) then
+     &              rack_type.eq.DBBC_PFB_FILA10G)).or.
+     &              (rack.eq.DBBC.and.rack_type.eq.DBBC_DDC.and.
+     &              (dbbcddcv.ge.107.and.dbbcddcvl.eq.' '))) then
                m5b_crate=64
+            else if((rack.eq.MK4.and.rack_type.eq.MK45) .or.
+     &           (rack.eq.VLBA4.and.rack_type.eq.VLBA45).or.
+     &           (rack.eq.VLBA4.and.rack_type.eq.VLBA4C).or.
+     &           (rack.eq.DBBC.and.(rack_type.eq.DBBC_DDC.or.
+     &           rack_type.eq.DBBC_DDC_FILA10G).and.
+     &           (dbbcddcv.le.104.or.dbbcddcvl.eq.' '))) then
+               m5b_crate=32
             else if(rack.eq.DBBC.and.
      &             (dbbcddcv.ge.105.and.(rack_type.eq.DBBC_DDC.or.
      &              rack_type.eq.DBBC_DDC_FILA10G).and.
@@ -926,7 +934,7 @@ c      so only DBBC matters for 5C/5C_BS/FLEXBUFF
                call logit7ci(0,0,0,1,-142,'bo',23)
                goto 990
             else if(rack.eq.0) then
-               call logit7ci(0,0,0,1,-140,'bo',23)
+               call logit7ci(0,0,0,1,-142,'bo',23)
                goto 990
             else
                m5b_crate=0
@@ -938,7 +946,7 @@ c      so only DBBC matters for 5C/5C_BS/FLEXBUFF
          m5b_crate=0
       else
          m5b_crate = ias2b(ibuf,ic1,ic2-ic1+1)
-         do i=1,6
+         do i=1,7
             if(m5b_crate.eq.2**i) then
                goto 2300
             endif

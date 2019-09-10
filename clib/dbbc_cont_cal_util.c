@@ -29,11 +29,11 @@ char *ptr;
 	ierr=arg_key(ptr,mode_key,NMODE_KEY,&lcl->mode,0,TRUE);
         break;
       case 2:
-	if(polarity_control) {
+	if(0x1 & polarity_control) {
 	  ierr=arg_int(ptr,&lcl->polarity,0,FALSE);
 	  if(ierr==-100)
 	    ierr=0;  /*old value is the default */
-	  else if(ierr==0 && (lcl->polarity < 0 ||lcl->polarity > 3))
+	  else if(ierr==0 && (lcl->polarity < -1 ||lcl->polarity > 3))
 	    ierr=-200;
 	} else {
 	  ierr=arg_int(ptr,&lcl->polarity,0,FALSE);
@@ -45,13 +45,48 @@ char *ptr;
 	  }
 	}
 	break;
-      case 3:
-        ierr=arg_int(ptr,&lcl->samples,10,TRUE);
-	if(ierr == 0 && lcl->samples < 1)
+    case 3:
+      ierr=arg_int(ptr,&lcl->samples,10,TRUE);
+      if(ierr == 0 && lcl->samples < 1)
+	ierr=-200;
+      break;
+    case 4:
+      if(0x2 & polarity_control) {
+	ierr=arg_int(ptr,&lcl->freq,0,FALSE);
+	if(ierr==-100)
+	  ierr=0;  /*old value is the default */
+	else if(ierr==0 && (lcl->freq < 8 ||lcl->freq > 300000)
+		&& lcl->freq!=-1)
 	  ierr=-200;
-        break;
-      default:
-       *count=-1;
+      } else {
+	ierr=arg_int(ptr,&lcl->freq,0,FALSE);
+	if(ierr!=-100)
+	  ierr=-210;
+	else {
+	  ierr=0;
+	  lcl->freq=-1;
+	}
+      }
+      break;
+    case 5:
+      if(0x2 & polarity_control) {
+	ierr=arg_int(ptr,&lcl->option,0,FALSE);
+	if(ierr==-100)
+	  ierr=0;  /*old value is the default */
+	else if(ierr==0 && (lcl->option < -1 ||lcl->option > 1))
+	  ierr=-200;
+      } else {
+	ierr=arg_int(ptr,&lcl->option,0,FALSE);
+	if(ierr!=-100)
+	  ierr=-210;
+	else {
+	  ierr=0;
+	  lcl->option=-1;
+	}
+      }
+      break;
+    default:
+      *count=-1;
    }
 
    if(ierr!=0) ierr-=*count;
@@ -83,6 +118,14 @@ struct dbbc_cont_cal_cmd *lcl;
       case 3:
 	sprintf(output,"%d",lcl->samples);
         break;
+      case 4:
+	if(lcl->freq>=0)
+	  sprintf(output,"%d",lcl->freq);
+        break;
+      case 5:
+	if(lcl->option>=0)
+	  sprintf(output,"%d",lcl->option);
+        break;
       default:
        *count=-1;
    }
@@ -106,6 +149,12 @@ struct dbbc_cont_cal_cmd *lcl;
   if(lcl->polarity >= 0)
     sprintf(buff+strlen(buff),",%d",lcl->polarity);
 
+  if(lcl->freq >= 0)
+    sprintf(buff+strlen(buff),",%d",lcl->freq);
+
+  if(lcl->option >= 0)
+    sprintf(buff+strlen(buff),",%d",lcl->option);
+
   return;
 }
 
@@ -127,6 +176,16 @@ char *buff;
 
   ptr=strtok(NULL,",");
   ierr=arg_int(ptr,&lclc->polarity,-1,TRUE);
+  if(ierr!=0)
+    return -1;
+
+  ptr=strtok(NULL,",");
+  ierr=arg_int(ptr,&lclc->freq,-1,TRUE);
+  if(ierr!=0)
+    return -1;
+
+  ptr=strtok(NULL,",");
+  ierr=arg_int(ptr,&lclc->option,-1,TRUE);
   if(ierr!=0)
     return -1;
 

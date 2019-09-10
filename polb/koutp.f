@@ -23,7 +23,7 @@ C
 C
 2000  continue
       if(.not.kexist) then
-        permissions = o'0666'
+        permissions = o'0664'
         ilen=trimlen(ipbuf)
         call fc_chmod(ipbuf,permissions,ilen,ierr)
       endif

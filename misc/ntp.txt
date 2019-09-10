@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/ntp.txt                  Version: 0.4  Date: 180614
+File: /usr2/fs/misc/ntp.txt                  Version: 0.5  Date: 190702
 
 			 NTP recommendations
 
@@ -136,7 +136,7 @@ sy=popen 'ntpq -np 2>&1|grep -v "^[- x#]" 2>&1' -n ntpq &
    6b. Put a call to 'check_ntp' at the end of 'initi' for a visible
        initial check at FS start up.
 
-   6c. Put a call to 'check_ntp' at the start of 'exper_initi' to
+   6c. Put a call to 'check_ntp' at the start of 'sched_initi' to
        record the ntp state in the experiment log at the experiment
        start (and restarts) for troubleshooting.
 

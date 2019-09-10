@@ -13,6 +13,7 @@ extern int ip[5];           /* parameters for fs communications */
 extern int synch;
 extern int rack, rack_type;
 extern int m5b_crate;
+extern int dbbcddcv;
 
 extern dbbc_sync;
 extern WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
@@ -61,6 +62,46 @@ int *ierr;
 	  mvwaddstr( maindisp, 6, 6+15,
 		     "                                       ");
 	  mvwaddstr( maindisp, 6, 6+15+39 , "               ");
+
+	  if(rack == DBBC && dbbcddcv>=107) {
+	    out_recs=0;
+	    out_class=0;
+
+	    sprintf(buff,"vsi_clk=%d",m5b_crate);
+	    cls_snd(&out_class, buff, strlen(buff) , 0, 0);
+	    out_recs++;
+	    sprintf(buff,"DBBC vsi_clk (%d MHz) command sent.",m5b_crate);
+	    logit(buff,0,NULL);
+
+	    ip[0]=1;
+	    ip[1]=out_class;
+	    ip[2]=out_recs;
+	  
+	    nsem_take("fsctl",0);
+	    name="dbbcn";
+	    while(skd_run_to(name,'w',ip,120)==1) {
+	      if (nsem_test("fs   ") != 1) {
+		endwin();
+		fprintf(stderr,"Field System not running - fmset aborting\n");
+		rte_sleep(SLEEP_TIME);
+		exit(0);
+	      }
+	      name=NULL;
+	    }
+	    skd_par(ip);
+	    nsem_put("fsctl");
+	    if(ip[1]!=0)
+	      cls_clr(ip[0]);
+	    if(ip[2] != 0) {
+	      logita(NULL,ip[2],ip+3,ip+4);
+	      logit(NULL,-9,"fv");
+	      *formtime=-1;
+	      *raw=0;
+	      return;
+	    }
+	    rte_sleep(150); 
+	  }
+
 	  if(rack == DBBC && dbbc_sync) {
       /* we can't get here for source==DBBC unless rack == DBBC &&
        * drive==MK5B, i.e., source is irrelevant */

@@ -13,7 +13,7 @@ C Local
       integer nch 
 
       nch=trimlen(cname)
-      ierr= system("chmod 666 "//cname(1:nch)//char(0))
+      ierr= system("chmod 664 "//cname(1:nch)//char(0))
       return
 
       end

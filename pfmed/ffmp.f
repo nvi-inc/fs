@@ -67,6 +67,7 @@ C               - file names
       integer trimlen, fnblnk
       character*40 cmessage
       logical kerr
+      logical kactive
 
       character*12 ibsrt(1)  ! 010816 pb 
       integer nprc,scanp,npx 
@@ -414,6 +415,16 @@ C     Read until procedure found.
               pathname = FS_ROOT//'/proc/'//lpf(:nch)//lfr(1:4)
            endif
         endif
+C
+        kactive=lpf(:nch).eq.lproc(:trimlen(lproc))
+        if(kactive) then
+C                
+C close the active file in case if it is the one being copied from because
+C gfortran doesn't allow a file to be opened on more than one unit
+C 
+            call fclose(idcb3,ierr)
+            if(kerr(ierr,'ffmp','closing',pathname,0,0)) return
+        endif
         call fopen(idcb1,pathname,ierr)
         if(ierr.lt.0) then
           write(lui,1117) lpf(:nch)
@@ -462,6 +473,11 @@ C     Write ENDDEF.
 C     Release lock.
         call pfblk(2,lpf,lfr)
 C     Copy active file.
+        if(kactive) then
+C has to be reopened if it was closed above
+            call fopen(idcb3,pathname,ierr)
+            if(kerr(ierr,'ffmp','opening',pathname,0,0)) return
+        endif
         call f_rewind(idcb3,ierr)
         if(kerr(ierr,'ffmp','rewinding',' ',0,0)) return
         len = 0

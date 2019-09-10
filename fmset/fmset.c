@@ -43,6 +43,7 @@ int  s2type=0;
 char s2dev[2][3] = {"r1","da"};
 int m5rec;
 int m5b_crate;
+int dbbcddcv;
 struct fila10g_cfg *fila10g_cfg_use = NULL;
 struct fila10g_cfg *ask_fila10g_cfg();
 int iRDBE;
@@ -132,6 +133,7 @@ rack_type=shm_addr->equip.rack_type;
 drive=shm_addr->equip.drive[0];
 drive_type=shm_addr->equip.drive_type[0];
 m5b_crate=shm_addr->m5b_crate;
+dbbcddcv=shm_addr->dbbcddcv;
 
  nRDBE=0;
  for(i=0;i<4;i++) 
