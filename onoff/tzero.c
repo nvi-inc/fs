@@ -36,9 +36,13 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
   if(kst2)
     kst2z=shm_addr->user_device.zero[5];
 
-  for(i=0;i<MAX_GLOBAL_DET;i++)
-    if(onoff->itpis[i]!=0)
-      ifc[onoff->devices[i].ifchain-1]=TRUE;
+  if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||
+     shm_addr->equip.rack==LBA4||shm_addr->equip.rack==VLBA||
+     shm_addr->equip.rack==VLBA4) {
+	  for(i=0;i<MAX_GLOBAL_DET;i++)
+		  if(onoff->itpis[i]!=0)
+			  ifc[onoff->devices[i].ifchain-1]=TRUE;
+  }
 
   if((kst1 && kst1z)||(kst2 && kst2z))
     scmds("sigoffnf");
