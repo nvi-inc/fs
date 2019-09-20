@@ -135,6 +135,26 @@ CALOFFFP: caloff
 calon and caloff are local procedures that do whatever is
 necessary to turn the noise source on and off, respectively.
 
+If you are using a DBBC with continuous and/or non-continuous cal, these
+procedures should be modified slightly to be:
+
+CALONFP:  if=cont_cal,,calon
+          !+1s
+          sy=go fivpt &
+
+CALOFFFP: if=cont_cal,,caloff
+          !+1s
+          sy=go fivpt &
+
+They should be available no matter what cal method is used.  This change will
+make the procedures independent of which type of cal is in use.  While it is
+not strictly necessary to have these procedures for continuous cal, their being
+available will prevent the fivpt program from being paused by their not being
+present if continuous cal is desired, but was not turned on. In the other
+words, the program won't get get stuck even if the cal configuration is not
+correct. Whether you will get useful results if it is misconfigured is a
+different question.
+
 If the number of pts is negative, this will disable the initial system
 temperature measuement. This may be useful for station dependent
 detectors u5 and u6 if there is no way to make a "zero" measurement. A
