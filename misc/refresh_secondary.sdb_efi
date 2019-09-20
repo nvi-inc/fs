@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+# for GPT EFI LVM RAID arrays, adds a "stale" secondary disk into the array
+if [[ -n `mdadm --detail /dev/md0 | grep /dev/sdb` ]]; then
+        echo "ERROR: \"Secondary\" disk /dev/sdb is already active !!"
+        exit 1
+fi
+
+echo "Installing GRUB bootloader on \"Secondary\" disk /dev/sdb ... "
+grub-install -v /dev/sdb
+# Is this needed? ... let's see
+#update-grub
+echo "done."
+echo "Adding \"Secondary\" disk /dev/sdb to RAID array /dev/md2 ... "
+echo "(This may safely be interrupted with 'Control-C' if you don't want to wait)"
+mdadm /dev/md0 -a /dev/sdb2
+while [[ -n `grep recovery /proc/mdstat` ]]; do 
+	recovery=`grep recovery /proc/mdstat | cut -c32-`
+	echo -e -n '\r'$recovery
+	sleep 1;
+done
+echo -e "\ndone."
