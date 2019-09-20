@@ -61,7 +61,8 @@ int    *formhs;
 		     "                                       ");
 	  mvwaddstr( maindisp, 6, 10+15+39 , "               ");
 
-	  if(rack == DBBC && dbbcddcv>=107) {
+	  if(rack == DBBC && rack_type == DBBC_DDC_FILA10G &&
+             dbbcddcv>=107) {
 	    out_recs=0;
 	    out_class=0;
 
