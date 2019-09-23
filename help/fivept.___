@@ -2,7 +2,7 @@
 
             Syntax:   fivept=axis,rep,pts,stp,intp,dev,wait
 
-          Response:   fivept/axis,rep,pts,stp,intp,dev,cal,wait,beam,flux,chain
+          Response:   fivept/axis,rep,pts,stp,intp,dev,wait,cal,beam,flux,chain
 
 
 Settable parameters:
@@ -33,7 +33,8 @@ Settable parameters:
                     command. The module which has the specified detector 
                     must have been set up. The IF distributor must be
                     set up and, for Mark III, must be in remote. Default
-                    detector is i1 for Mark III/IV, ia for VLBA/4 and DBBC.
+                    detector is i1 for Mark III/IV, ia for VLBA/4 and DBBC,
+                    01a0 for RDBE, and 001u for DBBC3.
                     Station dependent detectors u5 and u6 may be
                     available.
           wait      seconds to wait for onsource for each point, 1-1200
