@@ -7,21 +7,19 @@ int itpis[MAX_ONOFF_DET];
 struct sample *accum, *sample;
 {
   int j;
-  double t;
+  double dri,dim1;
 
-  t= ++accum->count;
+  dri=1.0/(double) ++(accum->count);
+  dim1=accum->count-1;
 
   /* recursive mean for time value */
-
-  accum->stm=accum->stm*(t-1)/t+sample->stm/t;
+  accum->stm=(accum->stm*dim1+sample->stm)*dri;
 
   for(j=0;j<MAX_ONOFF_DET;j++)
     if(itpis[j]!=0) {
   /* recursive mean for samples */
-      accum->avg[j]=accum->avg[j]*(t-1)/t+sample->avg[j]/t;
-  /* recursive mean sqaure scatter for samples */
-      if(accum->count > 1)
-	accum->sig[j]=accum->sig[j]*(t-1)/t+
-	  (sample->avg[j]-accum->avg[j])*(sample->avg[j]-accum->avg[j])/(t-1);
+      accum->avg[j]=(accum->avg[j]*dim1+sample->avg[j])*dri;
+  /* recursive mean for squares of samples */
+      accum->sig[j]=(accum->sig[j]*dim1+sample->avg[j]*sample->avg[j])*dri;
     }
 }
