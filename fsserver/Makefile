@@ -20,8 +20,7 @@ CPPFLAGS += -pthread
 	$(LINK.o) $+ $(LOADLIBES) $(LDLIBS) -o $@
 
 shims/fs.prompt.o: shims/fs.prompt.c
-	$(COMPILE.c) $(OUTPUT_OPTION) $<
-	$(POSTCOMPILE)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c $< -o shims/fs.prompt.o
 
 ../bin/shims/xterm: shims/xterm
 	@mkdir -p ../bin/shims/
