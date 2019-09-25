@@ -16,7 +16,7 @@ C 990427 nrv Require 4-digit input year.
 ! 2007Jan24 JMG. Input part modified.
 ! 2013Jul17 JMG. No longer need to find 'modular' or 'prepass' or 'cont'
 ! 2015Mar30 JMG. got rid of obsolete arg in drchmod
-      implicit none 
+! 2019Jun10 JMG. Got rid of call to NR caldat. Replaced with gdate. 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       include '../skdrincl/skobs.ftni'
@@ -117,7 +117,7 @@ C Output:
         TimeExpSkd=(TimeExpSkd-Julian)*86400.d0     !this is fractional part.
         call seconds2hms(TimeExpSkd,ih_skd,im_skd,is_skd)
         julian=julian+2440000
-        call caldat(julian,imon_skd,id_skd,iy_skd)
+        call gdate(julian,iy_skd,imon_skd,id_skd)
         write(luscn,'(a,i4,2("/",i2.2)," ",i2.2,2(":",i2.2),"   ",$)')
      >       cpre, iy_skd,imon_skd,id_skd, ih_skd,im_skd,is_skd
       end do
@@ -330,7 +330,7 @@ C
         call seconds2hms(dsecond,ih_skd,im_skd,is_skd)
 
         julian=julian+2440000
-        call caldat(julian,imon_skd,id_skd,iy_skd)
+        call gdate(julian,iy_skd,imon_skd,id_skd)
         IDOY_skd = IDAY0(IY_skd,IMon_skd) + ID_skd
         iy_skd=iy_skd-2000
         cbuf=cskobs(iobs)

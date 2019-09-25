@@ -2,6 +2,7 @@
       implicit none 
 ! 2013Jan15 JMGipson. Rewritten and modified.
 ! 2015Mar30 JMG. Got rid of obsolete argument iperm. 
+! 2019Aug21 JMG.  "666-->664" because of NASA IT requirements. Do not want world-writable
 C Input
       character*128 cname   
 C Output

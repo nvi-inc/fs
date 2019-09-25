@@ -20,6 +20,7 @@ C 970114 nrv Remove polarization, shift up all subsequent field numbers.
 C            (pol was not read or stored anyway)
 C 970124 nrv Move initialization to start.
 C 971208 nrv Add phase cal ref.
+!  2018Aug06 JMGipson. If the VEX file does not contain the 1-letter band identifier, try to figure it out. 
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -81,7 +82,8 @@ C  1.1 Subgroup
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get subgroup
         
         if (iret.ne.0) return
-        NCH = fvex_len(cout)       
+        NCH = fvex_len(cout)  
+        csg(ic)=" "             
         if (nch.gt.1) then
           ierr = -1
           write(lu,'("VUNPFRQ02 - Band ID must be 1 character.")')
@@ -107,6 +109,17 @@ C  1.2 RF frequency
         else
           frf(ic) = d/1.d6
         ENDIF 
+   
+! Figure out the Band if it is was not specified.
+        if(csg(ic) .eq. " ") then
+           if(frf(ic) .gt. 2000.0 .and. frf(ic) .lt. 3000.0) then
+              csg(ic)="S"
+           else if(frf(ic) .gt. 3700.0 .and. frf(ic) .lt. 6500.0) then
+              csg(ic)="C" 
+           else if(frf(ic) .gt. 8000.0 .and. frf(ic) .lt. 9500.0) then
+              csg(ic)="X"
+           endif
+        endif  
 
 C  1.3 Net SB
 
@@ -135,6 +148,8 @@ C  1.4 Bandwidth
         else
           vbw(ic) = d/1.d6
         endif
+
+ 
 
 C  1.5 Channel ID
 

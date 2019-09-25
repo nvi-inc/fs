@@ -1,4 +1,5 @@
       real*4 FUNCTION CABLW(ISTN,AZNOW,LWRCUR,AZNEW,LWRNEW)
+      implicit none
 C
 C  CABLW returns the azimuth difference between the NOW and the
 C              NEW source positions, taking into account cable wraps.

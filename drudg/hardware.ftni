@@ -1,7 +1,10 @@
       include '../skdrincl/skparm.ftni'
+! History
+! Modified 2019Aug25. Merged S/X and VGOS togethher 
+
 ! This file contains all of the info about the hardware.
       real   speed_inches
-      common /hardware/speed_inches  	!tape speed in inches. Changes with mode.\
+      common /hardware_real/speed_inches  	!tape speed in inches. Changes with mode.\
       integer luFile  			!where we write to.
       integer iftold            	!Tape footage after last command.
       integer MaxTapeLen                !Tape length
@@ -70,11 +73,12 @@
       logical kk42rec(2)
       logical kk5rec(2)
       logical knorec(2)
+      logical km6rec(2)    
       logical kflexbuff 
 
       common /hardware/km3rec,km4rec,km5Arec,km5Brec,km5Crec,km5aPigWire
       common /hardware/km5prec,ks2rec,kvrec,kv4rec
-      common /hardware/kk41rec,kk42rec,kk5rec,knorec,kflexbuff
+      common /hardware/kk41rec,kk42rec,kk5rec,knorec,km6rec,kflexbuff
 
       integer irec              !active recorder
       logical kuse(2)           !true if the recorder is in use.
@@ -86,11 +90,13 @@
       logical km5p
       logical km5A                !config info
       logical km5B
-      logical km5C 
-      
+      logical km5C       
       logical km5disk
+      logical km6disk
+      logical kdisk
       logical knopass
-      common /hardware/ks2,kk4,kk5,km5A,km5B,km5C,km5p,km5disk,knopass
+      common /hardware/ks2,kk4,kk5,km5A,km5B,km5C,km5p,km5disk,km6disk
+      common /hardware/kdisk,knopass
 
       logical km5A_piggy,km5P_piggy
       logical kpiggy_km3mode         !piggy back on 2nd headstack

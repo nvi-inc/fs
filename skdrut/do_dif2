@@ -1,1 +1,0 @@
-diff -iywd $1 /usr2/fs-9.11.7/skdrut/$1 | more

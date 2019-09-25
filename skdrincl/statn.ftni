@@ -1,6 +1,8 @@
 !     STATION INFORMATION COMMON BLOCK
 ! 2007Aug10  JMGipson. Obsolete variables removed and reorganized.
-
+! 2015Mar19  JMG. Added idata_mbps,isink_mbps; moved bb_bw here. 
+! 2015Apr20  JMG Changed size or rack,recorder: char*8--->char*12
+! 2016Jan05  JMG Changed size of rack to char*20
 
 C
 C two_letter_code is a unique identifier for each DAS.
@@ -49,7 +51,10 @@ C             false if it's step functions
 
       real  SEFDST(MAX_BAND,MAX_STN)             !SEFD
       real  sefdpar(max_sefdpar,max_band,max_stn)  !function to determine el dependent SEFD
-      real  sefdstel(max_band,max_stn)          !elevation dependent SEFD
+      real  sefdstel(max_band,max_stn)           !elevation dependent SEFD
+      integer  iData_mbps(max_stn)               !maximum rate data is acquired. 
+      integer  iSink_mbps(max_stn)               !maximum rate data is absorbed. May be more than data_mbps becuase of buffering.   
+      real  BB_BW(max_stn)                       !Effective Broadband BW per band in Hz (assuming 1-bit sampling)
 
 
 ! Integer/logical
@@ -67,7 +72,7 @@ C             false if it's step functions
      >       diaman,
      >       STNLIM,STNRAT,
      >       AZHORZ,ELHORZ, CO1MASK,CO2MASK,STNELV,
-     >       SEFDST,    sefdpar,     sefdstel
+     >       SEFDST,    sefdpar,     sefdstel, BB_BW
 
       common/statn_int/
      .       NSTATN,
@@ -82,7 +87,7 @@ C             false if it's step functions
      .       ibitden_save(max_stn),
      .       itearl(max_stn),itlate(max_stn),itgap(max_stn),
      .       ns2tapes(max_stn),
-     .       klineseg(max_stn)
+     .       klineseg(max_stn),idata_mbps,isink_mbps
 
 ! Start of character data.
       character*8 cstnna(max_stn)            	!Position name.
@@ -98,7 +103,7 @@ C             false if it's step functions
       character*2 cpocod(max_stn)               !Position code for station.
       character*2 chccod(max_Stn)               !Horizon maske code
       character*1 cstcod(max_stn)               !Single letter code. Only used internally.
-      character*20 cstrack_orig(max_stn)        !This keeps track of original configuration.
+      character*20 cstrack_orig(max_stn)         !This keeps track of original configuration.
       character*8 cstrec_orig(max_stn,2)
       character*20 cstrack_cap(max_stn)
 

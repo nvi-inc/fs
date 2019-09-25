@@ -2,7 +2,6 @@
 
 C Write a file or a tape with pointing controls
 C
-      implicit none 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'

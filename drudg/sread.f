@@ -36,6 +36,8 @@ C  Local:
 
 C
 C  History
+! 2019Aug25.  Merged S/X and broadband. 
+
 C  900413 NRV Added re-reading of $CODES section
 C  910306 NRV Added reading new parameters: HEAD, EARLY
 C  930407 nrv implicit none
@@ -311,6 +313,10 @@ C
       isortm = 5
       ihdtm = 6
       call drprrd(ivexnum)
+! Added 2019Aug25 JMG
+      if(.not.kvex) then
+        call read_broadband_section
+      endif 
       if (.not.kgeo) kpostpass=.true.
 C      if (.not.kgeo) kpostpass=.false.
 C

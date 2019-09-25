@@ -40,6 +40,7 @@ C            and the first recorder is S2, then the second field is mode.
 ! 2015Jun30  JMG. Changed Rack, recorder length from 8-->12 chars.
 ! 2016Jul28  JMG. Changed Rack length to 20 characters
 ! 2016Nov21  JMG.  Map DBBC to DBBC_DDC on input
+! 2017Mar13  JMG. If an unknown rack or recorder, write warning, but continue on. 
 C
 C  INPUT:
       integer*2 IBUF_in(*)
@@ -319,15 +320,14 @@ C Rack field
         nch = min0(ic2-ic1+1,20)
         crack=cbuf(ic1:ic1+nch-1)
         call capitalize(crack)
-! Map DBBC rack to DBBC_DDC 
+! Map DBBC rack to DBBC_DDC    
         if(crack .eq. "DBBC") crack = "DBBC_DDC" 
         if(crack .eq. "DBBC/FILA10G") crack ="DBBC_DDC/FILA10G"
 ! 
-        iwhere=iwhere_in_string_list(crack_type_cap,max_rack_type,crack)
+        iwhere=iwhere_in_string_list(crack_type_cap,max_rack_type,crack)  
         if(iwhere .eq. 0) then
-          crack="unknown"
-          ierr=-10-2*npar(1)
-          return
+          write(*,*) "UNPVT: Unknown rack type:     ", crack
+          ierr=-10-2*npar(1)        
         else
           crack=crack_type(iwhere)
         endif
@@ -338,10 +338,10 @@ C Rec A field
           nch = min0(ic2-ic1+1,12)
           creca=cbuf(ic1:ic1+nch-1)
           call capitalize(creca)
-          iwhere=iwhere_in_string_list(crec_type_cap,max_rec_type,creca)
+          iwhere=iwhere_in_string_list(crec_type_cap,max_rec_type,creca) 
           if(iwhere .eq. 0) then
-            ierr=-11-2*npar(1)
-            return
+             write(*,*) "UNPVT: Unknown recorder type: ", creca   
+            ierr=-11-2*npar(1)    
           else
             creca=crec_type(iwhere)
           endif
@@ -358,8 +358,8 @@ C Rec B field or S2 mode
               iwhere=iwhere_in_string_list(crec_type_cap,max_rec_type,
      >             crecb)
               if(iwhere .eq. 0) then
-                 ierr=-12-2*npar(1)
-                 return
+                 write(*,*) "UNPVT: Unknown recorder type: ", crecb 
+                 ierr=-12-2*npar(1)             
               else
                  crecb=crec_type(iwhere)
               endif

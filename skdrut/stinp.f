@@ -136,8 +136,9 @@ C
 ! 2013Mar22  JMG. Fix problem if first antenna limit is negative. (i.e., (-270,270) instead of (90, 630) 
 ! 2013Sep17  JMG. Fixed incorrect error message for latitude. Said "A line" but was "B line". 
 ! 2015Jun30  JMG. Changed Rack, recorder length from 8-->12 chars.
-! 201Jul28   JMG. Changed rack length to 20 chars.  
+! 2016Jul28  JMG. Changed rack length to 20 chars.  
 !                 Initialize cfirtrec(i)="1" even if have problems reading "T " line. 
+! 2017Mar13  JMG. If rack or recorder are not recongnized, set them to 'unknown' and continue.
 ! 
       cbufin=" "
 ! AEM 20050314 init vars
@@ -385,7 +386,8 @@ C
         cstrec(i,2)="NONE"
         cs2speed(i)=" "
 ! This ierr is from unpvt and indicates a problem in parsing the line.
-        if(ierr .ne. 0) goto 910   
+!        if(ierr .ne. 0) goto 910   
+! 2017Mar13. Continue on. 
 
 ! Assume the terminal id line is correct.
         if(cidt .ne. " " .and. cidt .ne. "--") then
@@ -396,12 +398,10 @@ C  Got a match. Initialize names.
 
 
 C  Store equipment names.
-        if (crack .ne. " ") then
-          if(.not.kvalid_rack(crack)) crack='UNKNOWN'
+        if (crack .ne. " ") then   
           cstrack(i)=crack
         endif       
-        if (crec1 .ne. " ") then
-           if(.not.kvalid_rec(crec1)) crec1='UNKNOWN'  
+        if (crec1 .ne. " ") then      
            cstrec(i,1)=crec1               
         endif   
             

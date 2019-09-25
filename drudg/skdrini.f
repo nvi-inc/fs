@@ -31,6 +31,7 @@ C 2003Jul23  JMG   Added Mk5PigW
 ! 2007Jul02  JMG. Removed initializaiotn of fluxes. Done elsewhere.
 ! 2007Aug07  JMG. Moved rack, recorder type initialization to block data statement in
 !                 "valid_hardware.f"
+! 2019Aug22  JMG. Initialized lcode here and not in frinit. 
 C
 C LOCAL
       integer ix,ib,i,j,l,itx,ity,itz,idef,iy,ir
@@ -235,6 +236,7 @@ C Initialize non-standard roll tables to -99.
       call init_iroll_def()
 
       do i=1,max_frq
+        lcode(ic)=0
         do j=1,max_stn
           iroll_inc_period(j,i) = 0
           iroll_reinit_period(j,i) = 0

@@ -18,6 +18,7 @@
 ! History
 ! 2015Jun10 JMG First version. 
 ! 2018Aug18 JMG Setup so that can have 64 bit mask. 
+! 2019Aug26 Always initialize both masks to 0.
 ! local
       integer*4 itemp
       integer ic    !counter
@@ -28,7 +29,7 @@
       kdebug=.true.   
       kdebug=.false.
       imask(1)=0
-      if(num_csb .gt. 32) imask(2)=0
+      imask(2)=0
     
       if(kdebug) then 
 ! Write out list to check against. 

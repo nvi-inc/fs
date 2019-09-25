@@ -32,13 +32,12 @@ C Local
 C 1. If iret is non-zero, print the appropriate message.
 
       if (iret.ne.0) then
-        if (iret.eq.-3) cmsg='-3 = not found'
+        if (iret.eq.-3) cmsg='-3 = parameter not found'
         if (iret.eq.-4) cmsg='-4 = variable/def/name did not fit '
         if (iret.eq.-6) cmsg='-6 = field out of range'
         if (iret.eq.-7) cmsg='-7 = not a valid real or integer'
         if (iret.eq.-8) cmsg='-8 = unknown units'
-        write(luscn,9100) cmsg(1:trimlen(cmsg))
-9100    format('ERRORMSG01 'a)
+        write(luscn,'("ERROR: ",a, $)') cmsg(1:trimlen(cmsg))
       endif
 
 C     2. Print error messages by group.
@@ -146,8 +145,7 @@ C     2. Print error messages by group.
           if (ierr.eq.6) cmsg='6 = pointing sector'
           if (ierr.eq.7) cmsg='7 = druve number'
         endif ! group name
-        write(luscn,9200) cmsg(1:trimlen(cmsg))
-9200    format('ERRORMSG02 'a)
+        write(luscn,'(": ",a)') cmsg(1:trimlen(cmsg))
       endif ! non-zero ierr
 
       return

@@ -3,8 +3,8 @@ C
 C     DRUDG HANDLES ALL OF THE DRUDGE WORK FOR SKED
 C
 C  Common blocks:
-      include 'drver_com.ftni'
       include 'hardware.ftni'
+      include 'drver_com.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/sourc.ftni'
@@ -60,6 +60,9 @@ C LOCAL:
   
 C
 C  DATE   WHO CHANGES
+!
+! 2019Aug21 JMG.  Got rid of iperm
+!
 C  830427 NRV ADDED TYPE-6 CARTRIDGE TO IRP CALLS
 C  830818 NRV ADDED SATELLITES
 C  840813 MWH Added printer LU lock
@@ -226,8 +229,6 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
  
 C Initialize FS version
 
-C PeC Permissions on output files
-      iperm=o'0664'
 C Initialize LU's
       LU_INFILE = 20
       LU_OUTFILE =21
@@ -251,8 +252,10 @@ C Codes for passes and bandwidths
 c Initialize no. entries in lband (freqs.ftni)
       NBAND= 2
 
-      luscn = STDOUT
-      luusr = STDIN
+!      luscn = STDOUT
+!      luusr = STDIN
+      luusr = 5
+      luscn = 6
       csked = './'
       csnap = './'
       cproc = './'

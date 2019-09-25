@@ -1,6 +1,8 @@
       subroutine addscan(irec,istn,icod,idstart,idend,
      .ifeet,ipas,idrive,cbl,ierr)
 
+      implicit none 
+
 C   ADDSCAN adds a new station to an existing scan.
 C*** ib2as accepts only character indices up to 256
 

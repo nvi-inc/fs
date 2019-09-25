@@ -1,5 +1,6 @@
       SUBROUTINE vunptrk(modef,stdef,km5rec,ivexnum,iret,ierr,lu,
      &     cm,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac,modu)
+      implicit none
 C
 C     VUNPTRK gets the track assignments and fanout information
 C     for station STDEF and mode MODEF and converts it.

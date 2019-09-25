@@ -33,7 +33,7 @@ C 971208 nrv Add call to VUNPPCAL.
 C 991110 nrv Save modedefname as catalog name.
 C 011119 nrv Clean up logic so that information isn't saved if there
 C            aren't any chan_defs.
-C 020112 nrv Add roll parameters to VUNPROLL call. Add call to CKROLL.
+C 020112 nrv Add roll parameters to VUNPROLL call. Add call to CKROLL.!
 C 020327 nrv Add data modulation paramter to VUNPTRK.
 C 021111 jfq Extend S2 mode to support LBA rack
 ! 2006Oct06. Made arguments to vunpif all ASCII.
@@ -43,9 +43,16 @@ C 021111 jfq Extend S2 mode to support LBA rack
 ! 2010.06.15 Fixed bug if recorder was K5. Wasn't initializing tracks. 
 ! 2012Sep14  Fixed bug with not initializing bbc_present for VEX schedules
 ! 2015Jun05  JMG Modified to use new version of itras. 
-! 2016Jan19 JMG. Changed dim of variables: max_track-->2*max_track since sign& magnitude can be on same track 
+! 2016Jan19  JMG. Changed dim of variables: max_track-->2*max_track since sign& magnitude can be on same  track 
 ! 2016Jan19 Also re-arranged definition of parameters to group like to together
+! 2017Feb27  Skip some stuff dealing with headstack for Disk recording.
+! 2018Oct09  Preserve mode and band if VEX created from sked previously.  Previously was setting to numerical value, first mode=01, 2nd 02.
+!            Also keep better track of number of  freq-channels. If everything except for side-band is the same, assume same freq-channels
+!            which means use same BBC. 
+! 2019Aug27 Above was good, but did not check if from sked file.  
+   
 
+      implicit none 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
@@ -63,8 +70,8 @@ C          vunpfrq, vunpbbc,vunpif,vunpprc,vunptrk,vunphead,
 C          vunroll,ckroll
 ! function
       integer iwhere_in_string_list   
-      integer ptr_ch,fvex_len,fget_mode_def
-C
+      integer ptr_ch,fvex_len,fget_mode_def,fget_all_lowl
+
 C  LOCAL:  
       logical kadd_track_map
 
@@ -134,10 +141,26 @@ C  LOCAL:
       logical kvunppcal_first    !first call to vunppcall
       character*1 lq 
 
+      integer ifc            !number of frequency channels. 
+      integer ib_old 
+
+      integer ind
+      integer itmp
+      logical kvex_from_sked
+
 !*********************************************************************************************
 ! Start of code
       lq="'"
       kvunppcal_first=.true. 
+      indexp=0             !initialize 
+
+
+! See if has $SCHEDULING_PARAMS
+       iret=fget_all_lowl(ptr_ch(char(0)),ptr_ch(char(0)),
+     .  ptr_ch('literals'//char(0)),
+     .  ptr_ch('SCHEDULING_PARAMS'//char(0)),ivexnum)      
+      kvex_from_sked=iret .eq. 0
+      write(*,*) "Kvex_from_from_sked: ", kvex_from_sked 
  
 ! 1. First get all the mode def names. 
 !    Station names have already been gotten and saved.
@@ -160,24 +183,38 @@ C  LOCAL:
           endif
           cmode_cat(ncodes)=cout(1:il)
           write(*,*) "Found mode: ", cout(1:il)
+! This is the default
+          write(ccode(ncodes)(1:2),'(i2.2)') ncodes
+          cnafrq(ncodes)=ccode(ncodes)
+          ind=index(cout(1:il),".") 
+          if(kvex_from_sked.and. ind .ne. 0) then 
+            itmp=min(8,ind-1)
+            if(itmp .gt. 0) then
+              itmp=min(8,ind-1) 
+              cnafrq(ncodes)=cout(1:itmp)
+              ccode(ncodes)=cout(ind+1:ind+2)
+              write(*,*) cnafrq(ncodes), " ", ccode(ncodes) 
+            endif 
+          endif 
         END IF
         iret = fget_mode_def(ptr_ch(cout),len(cout),0) ! get next one
       enddo
-
+  
 C 1.5 Now initialize arrays using nstatn and ncodes.
-
       call frinit(nstatn,ncodes)
-
+ 
 C 2. Call routines to retrieve and store all the mode/station 
 C    information, one mode/station at a time. Not all modes are
 C    defined for all stations. 
 
       ierr1=0
-      do icode=1,ncodes ! get all mode information
+      do icode=1,ncodes ! get all mode information 
 
+! START pre-2018OCT09 way of assigning codes. 
 C    Assign a code to the mode and the same to the name
-        write(ccode(icode)(1:2),'(i2.2)') icode
-        cnafrq(icode)=ccode(icode)
+!        write(ccode(icode)(1:2),'(i2.2)') icode
+!        cnafrq(icode)=ccode(icode)
+! End old way of assigning codes. 
         do istn=1,nstatn ! for one station at a time
 
 ! Initialize this array.
@@ -250,8 +287,8 @@ C         (Get other procedure timing info later.)
           call vunpprc(modedefnames(icode),stndefnames(istn),
      &      ivexnum,iret,ierr,lu,cpre)
           if (ierr.ne.0) then
-            write(lu,'("VMOINP03 - Error getting $PROCEDURES for mode ",
-     &      a," station ",a/" iret=",i5," ierr=",i5)') 
+            write(lu,'("VMOINP03 - Error getting $PROCEDURES for mode "
+     &      ,a," station ",a/" iret=",i5," ierr=",i5)') 
      &      modedefnames(icode)(1:il),stndefnames(istn)(1:im),
      &      iret,ierr
             call errormsg(iret,ierr,'PROCEDURES',lu)
@@ -311,7 +348,7 @@ C         Get $TRACKS statements (i.e. fanout).
             endif
             ierr1=4
           endif
-
+       
 C         Get $HEAD_POS and $PASS_ORDER statements.
           if (ks2rec) then
             call vunps2g(modedefnames(icode),stndefnames(istn),ivexnum,
@@ -321,7 +358,7 @@ C         Get $HEAD_POS and $PASS_ORDER statements.
             nhdpos=1
             cpassl(1)="1A"
             csubpassl(1)="A"
-          else
+          else                   
             call vunphp(modedefnames(icode),stndefnames(istn),ivexnum,
      .        iret,ierr,lu,
      .        indexp,posh,nhdpos,nhd,cpassl,indexl,csubpassl,npl)
@@ -386,26 +423,47 @@ C         else ! non-S2
 ! 2014Sep22 
 
 C         endif ! S2/not
- 
+
+! prior to 2018Oct03, did not use ifc.
+! 'ifc' keeps track of number of independnent channels.
+!  if have same channel configuration except for sidebands,  corresponds to same ifc.
+!  Because of this  final ifc can less than nchdefs. 
+  
+          
+          ifc=1   !initialize
 C    Save the chan_def info and its links.
           do i=1,nchdefs ! each chan_def line
-            invcx(i,istn,icode)=i ! save channel index number 
-            cSUBVC(i,istn,ICODE) = cSG(i) ! sub-group, i.e. S or X
-            FREQRF(i,istn,ICODE) = Frf(i) ! RF frequency
-            cnetsb(i,istn,icode) = csb(i) ! net sideband
-!            write(*,*) "CSB: ", csb(i) 
-            VCBAND(i,istn,ICODE) = VBw(i) ! video bandwidth
-            ifan(istn,icode)=ifanfac ! fanout factor
-            cset(i,istn,icode) = cs(i) ! switching 
-C           BBC refs
             ib=iwhere_in_string_list(cbbcref,nbbcdefs,cfrbbref(i))
+! Check if previous was the same as this. If so, same frequency channel. 
+            if(i .gt.1) then
+              if(frf(i) .ne. frf(i-1) .or.
+     >           csg(i) .ne. csg(i-1) .or.
+     >           vbw(i) .ne. vbw(i-1) .or.
+     >           cs(i)  .ne. cs(i-1)  .or.
+     >           ib     .ne. ib_old ) then 
+                 ifc=ifc+1  
+              endif 
+            endif 
+            ib_old=ib                   
+
+            invcx(ifc,istn,icode)=ifc ! save channel index number 
+            cSUBVC(ifc,istn,ICODE) = cSG(i) ! sub-group, i.e. S or X
+            FREQRF(ifc,istn,ICODE) = Frf(i) ! RF frequency
+!            cnetsb(i,istn,icode) = csb(i) ! net sideband
+! Actual value of sideband determined by tracklayout (ITRAS below) 
+            cnetsb(ifc,istn,icode) = "U"
+!            write(*,*) "CSB: ", csb(i) 
+            VCBAND(ifc,istn,ICODE) = VBw(i) ! video bandwidth
+            ifan(istn,icode)=ifanfac ! fanout factor
+            cset(ifc,istn,icode) = cs(i) ! switching 
+C           BBC refs
 
             if(ib .eq. 0) then
               write(lu,'("VMOINP09 - BBC link missing for channel ",i3,
      &        " for mode ",a," station ",a)') i,
      &        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
             else
-              ibbcx(i,istn,icode) = ivc(ib) ! BBC number
+              ibbcx(ifc,istn,icode) = ivc(ib) ! BBC number
             endif
             ic=iwhere_in_string_list(cifdref,nifdefs,cbbifdref(ib))
            
@@ -413,18 +471,16 @@ C           BBC refs
               write(lu,'("VMOINP10 - IFD link missing for channel ",i3,
      &        " for mode ",a," station ",a)') i,
      &        modedefnames(icode)(1:il),stndefnames(istn)(1:im)
-            else
-              cifinp(i,istn,icode) = cin2(ic) ! IF input channel          
-              cosb(i,istn,icode)   = cs2(ic)  ! LO sideband
-              cpol(i,istn,icode)   = cp2(ic)  ! polarization
-              freqlo(i,istn,icode) = flo(ic)  ! LO frequency
-              freqpcal(i,istn,icode) = fpcal(ic) ! pcal frequency
-              freqpcal_base(i,istn,icode) = fpcal_base(ic) ! pcal_base frequency
+            else   
+              cifinp(ifc,istn,icode) = cin2(ic) ! IF input channel          
+              cosb(ifc,istn,icode)   = cs2(ic)  ! LO sideband
+              cpol(ifc,istn,icode)   = cp2(ic)  ! polarization
+              freqlo(ifc,istn,icode) = flo(ic)  ! LO frequency
+              freqpcal(ifc,istn,icode) = fpcal(ic) ! pcal frequency
+              freqpcal_base(ifc,istn,icode) = fpcal_base(ic) ! pcal_base frequency
             endif
 C           Phase cal refs
             ipc=iwhere_in_string_list(cpcalref,npcaldefs,cfrpcalref(i))
-!            write(*,*) "pncaldefs: ", npcaldefs
-!            write(*,*) "cfrpcalref: ", cfrpcalref(i) 
 
             if (ipc.eq. 0) then
               in=fvex_len(cfrpcalref(i))
@@ -453,7 +509,7 @@ C           Track assignments
                   ism=1 ! sign
                   if (csm(ix).eq.'m') ism=2 ! magnitude
                   iul=1 ! usb
-                  if(cnetsb(i,istn,icode) .eq. "L") iul=2
+                  if(csb(i) .eq. "L") iul=2
 !                  if(freqlo(i,istn,icode).gt.freqrf(i,istn,icode)) then
 ! This flips the sign of the sideband that is recorded. 
 !                      iul=3-iul     
@@ -469,13 +525,15 @@ C           Track assignments
                        if (Frf(i).gt.Frf(ia)) iul=1 ! IFP USB channel
                     endif
                   endif 
-                 call add_track(itrk(ix),iul,ism,ihdn(ix),i,ip)            
+                 call add_track(itrk(ix),iul,ism,ihdn(ix),ifc,ip)            
                  kadd_track_map=.true.
                 endif
               endif ! matched link
             enddo ! check each fandef
             endif ! m3/4 or v rec
           enddo ! each chan_def line
+          nchan(istn,icode)=ifc
+         
 C
 C    3.2 Save the non-channel specific info for this mode.
 C         Recording format, "Mark3", "Mark4", "VLBA".
@@ -494,6 +552,10 @@ C         Sample rate.
             cs2mode(istn,icode)=cs2m
             cs2data(istn,icode)=cs2d
             cmode(istn,icode)=cs2m
+          else if(kdiskrec) then
+! 2017Feb27. Skip some stuff dealing with headstack for Disk recording.
+            continue 
+
           else ! m3/m4/vrec
 C         Set bit density depending on the mode and rack type
             if(cmode(istn,icode)(1:1) .eq. "V") then
@@ -520,6 +582,7 @@ C       Check number of passes and pass order indices
               write(lu,'("VMOINP13 - Inconsistent pass order list")')
               write(*,*) "npl, nhdpos, nsubpass: ",npl, nhdpos, nsubpass 
             endif
+
             do ip=1,npl ! number of passes in list
               ix=1
               do while (ix.le.nhdpos.and.indexl(ip).ne.indexp(ix))

@@ -179,6 +179,9 @@ C         For K4, use bandwidth of channel 1
       character*(*) cif
       character*(*) crack        
       write(*,*) " " 
+      write(*,*) "Cbbc ", cbbc
+      write(*,*) "cif  ", cif
+      write(*,*) "crack ", crack 
       write(luscn,'("Invalid_IF: Error! For ",a, " IF ",a,
      >  " is inconsistent with rack ", a)') cbbc,  cif, crack
   

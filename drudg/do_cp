@@ -1,1 +1,0 @@
-cp -p /usr2/fs-9.11.3/drudg/$1 . 

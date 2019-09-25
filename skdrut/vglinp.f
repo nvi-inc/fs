@@ -9,6 +9,8 @@ C History
 C 960603 nrv New.
 C 970124 nrv Add iret to call.
 ! 2006Nov18 JMGipson. Converted lexper to ASCII.
+! 2018Dec22.  Added implicit none.  Previuosly used undefined variable 'ccorname'
+      implicit none
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/skobs.ftni'
@@ -36,11 +38,11 @@ C Initialize.
       ccorname=' '
 
 C 1. Get experiment name
+!      write(*,*) "VGLINP 1" 
 
       ierr=1
       iret = fget_global_lowl(ptr_ch('exper_name'//char(0)),
-     .ptr_ch('EXPER'//char(0)),
-     .ivexnum)
+     & ptr_ch('EXPER'//char(0)),ivexnum)
       if (iret.ne.0) return
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       nch=fvex_len(cout)
@@ -52,11 +54,11 @@ C 1. Get experiment name
       cexper=cout(1:nch)
 
 C 2. Get experiment description
+!      write(*,*) "VGLINP 2" 
 
       ierr=2
       iret = fget_global_lowl(ptr_ch('exper_description'//char(0)),
-     .ptr_ch('EXPER'//char(0)),
-     .ivexnum)
+     & ptr_ch('EXPER'//char(0)),ivexnum)
       if (iret.ne.0) return
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       nch=fvex_len(cout)
@@ -68,11 +70,10 @@ C 2. Get experiment description
       if (nch.gt.0) cexperdes=cout(1:nch)
 
 C 3. Get PI name
-
+!      write(*,*) "VGLINP 3" 
       ierr=3
       iret = fget_global_lowl(ptr_ch('PI_name'//char(0)),
-     .ptr_ch('EXPER'//char(0)),
-     .ivexnum)
+     &  ptr_ch('EXPER'//char(0)),ivexnum)
       if (iret.ne.0) return
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       nch=fvex_len(cout)
@@ -84,12 +85,13 @@ C 3. Get PI name
       if (nch.gt.0) cpiname=cout(1:nch)
 
 C 4. Get correlator
-
+!      write(*,*) "VGLINP 4" 
       ierr=4
+
       iret = fget_global_lowl(ptr_ch('target_correlator'//char(0)),
-     .ptr_ch('EXPER'//char(0)),
-     .ivexnum)
+     & ptr_ch('EXPER'//char(0)),ivexnum)
       if (iret.ne.0) return
+
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       nch=fvex_len(cout)
       if (nch.gt.128) then
@@ -97,8 +99,11 @@ C 4. Get correlator
      .  "using first 128 characters")') 
         nch=128
       endif
-      if (nch.gt.0) ccorname=cout(1:nch)
-
+      if (nch.gt.0) then 
+         ccorname=cout(1:nch)
+      endif
+      call capitalize(ccorname)
+  
       ierr=0
       return
       end

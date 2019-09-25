@@ -13,6 +13,7 @@ C 021111 jfq Add initialization of LS2DATA
 C 31Jul2003  JMG Made itras virtual.
 C 26Aug2003  JMG made cbarrel, cinfip character strings.
 ! 2013Sep19  JMGipson made sample rate station dependent
+! 2018Oct03  JMG. Don't initialize lcode. Done elsewhere. 
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -56,9 +57,7 @@ C Local
           enddo
         enddo
       enddo
-      do i=1,nco
-        lcode(i)=0
-      enddo
+ 
       do i=1,nco
         do j=1,nst
           do k=1,max_chan

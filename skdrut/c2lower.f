@@ -1,4 +1,5 @@
       subroutine c2lower(cbuf_in,cbuf_out)
+      implicit none
 
 C Convert a character string to upper case.
 C The number of characters converted is the shorter
@@ -15,6 +16,7 @@ C              removed trailing RETURN
 C Local
       integer iin,iout
       character*1 c
+      integer i
 
       iin=len(cbuf_in)
       iout=len(cbuf_out)

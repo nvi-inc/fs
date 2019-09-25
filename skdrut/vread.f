@@ -15,6 +15,8 @@ C 970124 nrv Add a call to VGLINP, and a call to errormsg
 C 990921 nrv Save the VEX version number.
 C 020619 nrv Add call to VPRINP to read scheduling parameters
 ! 2010.05.16 JMG. Got rid of trailing char(0) on some output
+! 2019.08.14 JMG  Set 'iret=0' after reading exper. this prevents
+!             announcing error after return from vread 
 
 C Input
       character*(*) cfile ! VEX file path name
@@ -57,6 +59,7 @@ C  2. Read the sections
         write(lu,'("VREAD00 - Error reading experiment info.")')
         call errormsg(iret,ierr,'EXPER',lu)
       endif
+      iret=0
   
       write(lu,'("$STATIONS")') 
       call vstinp(ivexnum,lu,ierr) ! stations
@@ -68,8 +71,8 @@ C  2. Read the sections
       if (ierr.ne.0) then
         write(lu,'("VREAD02 - Error reading modes.")')
       endif
-      write(lu,'("$SOURCES")')
-      call vsoinp(ivexnum,lu,ierr) ! sources
+      write(lu,'("$SOURCES")') 
+      call vsoinp(ivexnum,lu,ierr) ! sources 
       if (ierr.ne.0) then
         write(lu,'("VREAD03 - Error reading sources.")')
       endif

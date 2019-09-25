@@ -2,6 +2,9 @@
      .IPAS,LDIR,IFT,LPRE,IYR,IDAYR,IHR,iMIN,ISC,IDUR,LMID,
      .LPST,NSTN,lstn,lcable,MJD,UT,GST,IMON,IDA,LMON,
      .LDAY,KERR,KFLG,ioff)
+
+! 2019Sep04 
+      implicit none
 C
 C    UNPSK unpacks the record found in IBUF and puts the data into
 C              the output variables
@@ -68,7 +71,8 @@ C 980910 nrv Move JULDA call to after CLNDR so that the year
 C            is the full 4-digit value.
 C 2013Jan08  Modified so that if hour is 24:00:00 
 C
-      integer*2 LPASS(56)
+! 2019Sep04  JMGipson. Got rid of finding pass. Just return 1
+    
 C
 C     1. We decode all of the entries in the buffer.
 C     **CAUTION** No error checking is done.  It is assumed
@@ -86,10 +90,7 @@ C
 c added 900628
       integer Z20,Z59
       data Z20/Z'20'/, Z59/Z'59'/
-      DATA LPASS  /2H12,2H34,2H56,2H78,2H9A,2HBC,2HDE,2HFG,2HHI,2HJK,
-     .             2HLM,2HNO,2HPQ,2HRS,2hTU,2hVW,2hXY,2hZa,2hbc,2hde,
-     .             2hfg,2hhi,2hjk,2hlm,2hno,2hpq,2hrs,2htu,2hvw,2hxy,
-     .             2hz , 25*0 /
+ 
 
       KERR = 0
       ICH = 1
@@ -139,10 +140,10 @@ c     IDLE = IAS2B(IBUF,IC1,IC2-IC1+1)
       DO 120 I=1,NSTN
         CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2) ! 1F12345
         ICP = JCHAR(IBUF,IC1)
-        IPAS(I) = ISCNC(LPASS,1,56,ICP)
+        ipas(i)=1 
         call char2hol('  ',LDIR(I),1,2)
-	  IDUMMY = ICHMV(LDIR(I),1,IBUF,IC1+1,1)
-	  IFT(I) = IAS2B(IBUF,IC1+2,ic2-ic1-1)
+        IDUMMY = ICHMV(LDIR(I),1,IBUF,IC1+1,1)
+	IFT(I) = IAS2B(IBUF,IC1+2,ic2-ic1-1)
 120     CONTINUE
         CALL GTFLD(IBUF,ICH,IBLEN,IC1,IC2)
         DO I=1,4

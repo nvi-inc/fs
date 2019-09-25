@@ -1,5 +1,6 @@
 C
       subroutine axtyp(caxis,iaxis,ix)
+      implicit none
 
 C     AXTYP converts between the hollerith names
 C     of axis type and the code number used in SKED

@@ -1,5 +1,7 @@
       SUBROUTINE CKOBS(cSOR,cSTN,NSTNSK,cCOD,ISOR,ISTNSK,ICOD)
 C
+! 2019Sep04
+      implicit none      
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'

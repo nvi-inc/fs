@@ -1,4 +1,5 @@
       SUBROUTINE ATAPE(LINSTQ,luscn,ludsp)
+      implicit none
 C
 C     ATAPE reads/writes station tape allocation type. This routine 
 C     reads the TAPE_ALLOCATION lines in the schedule file and handles 

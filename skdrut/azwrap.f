@@ -1,5 +1,6 @@
       real*4 FUNCTION azwrap(az,cwrap,azwrap_limits)
-! Given input value, compute azimuth including wrap.
+! Given input value, compute azimuth including wrap
+      implicit none
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/constants.ftni'
 

@@ -1,3 +1,0 @@
-rm dum
-dos2ux $1 >dum
-mv dum $1

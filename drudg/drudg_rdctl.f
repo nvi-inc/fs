@@ -71,7 +71,7 @@ C  LOCAL VARIABLES
       integer ifile_beg,ifile_end
       character*32 cskedf(3)   
       data cskedf/
-     > "/usr/local/bin/skedf.ctl",  "skedf.ctl",
+     > "/etc/skedf.ctl",  "skedf.ctl",
      > "/usr2/control/skedf.ctl"/
   
       data lvalid_dbbc_if_inputs/"1","2","3","4"/ 
@@ -80,7 +80,13 @@ C  LOCAL VARIABLES
 
 ! this is set in makefile. if it is set to 1, then on FS_PC.
 
-      ifs_PC=FS_PC
+#ifdef FS_PC
+        ifs_PC=1        
+#ELIF
+        ifs_PC=0
+#endif 
+      ifs_PC=0
+      write(*,*) "ifs_PC", ifs_PC 
 
       if(ifs_PC .eq. 1) then
         ifile_beg=3

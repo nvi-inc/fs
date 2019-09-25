@@ -1,26 +1,28 @@
       subroutine delete_file(lfilnam,lutmp)
 ! Delete a file, and write an error message if a problem.
+! 2017Dec04.  JMGipson. Some cleanup
       integer lutmp
       character*(*) lfilnam
-! function
-      integer trimlen
 
 ! local
-      logical kexist
-      integer nch
-
+      logical kexist   
+     
       inquire(file=lfilnam,exist=kexist)
-      if(kexist) then
-        OPEN (lutmp,status='unknown',file=lfilnam,iostat=ierr)
-        CLOSE (lutmp,status='delete')
-      else
-        return
+      if(.not. kexist) return
+   
+      OPEN (lutmp,  file=lfilnam,iostat=ierr)
+      IF (ierr.NE.0) then
+         WRITE(*,"('delete_file: I/O error ',i3, ' opening file ',a)")
+     >    ierr,trim(lfilnam) 
+         return
       endif
 
+      CLOSE (lutmp,status='delete',iostat=ierr)
       IF (ierr.NE.0) then
-        nch=trimlen(lfilnam)
-        WRITE(*,9170) ierr,lfilnam(1:nch)
-9170    FORMAT('delete_file: Error ',I3,' purging old file ',A)
+         WRITE(*,"('delete_file: I/O error ',i3, ' purging file ',a)")
+     >    ierr,trim(lfilnam)         
       endif
+
+
       return
       end

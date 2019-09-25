@@ -1,4 +1,5 @@
-      subroutine add_slash_if_needed(lstring)
+      subroutine add_slash_if_needed(lstring)  
+      implicit none 
 ! Make sure last character is a slash. If not, make it one.
 ! passed & returned string
       character*(*) lstring

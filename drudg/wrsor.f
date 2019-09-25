@@ -6,7 +6,6 @@ C 970509 nrv New. Extracted from VLBAT.
 C 980409 nrv Get rid of data statement to clean up output.
 ! 2006Sep26. Rewritten to use standard fortran write.\
 ! 2017Oct24. Handle case where RA seconds is written as 60.0s
-      implicit none 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       include '../skdrincl/sourc.ftni'

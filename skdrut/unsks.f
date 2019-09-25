@@ -7,6 +7,7 @@
      .            PARALX,PMRA,PMDEC,
      .NCOM,IVER,IDATE,LCOMP,
      .LPROT,PCOUNT)
+      implicit none
 C
 C     UNSKS unpacks the record holding information on a source entry version
 C           This routine may be called only the first 30 parameters

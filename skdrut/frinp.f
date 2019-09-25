@@ -4,6 +4,7 @@ C     This routine reads and decodes one line in the $CODES section.
 C     Call in a loop to get all values in freqs.ftni filled in,
 C     then call SETBA to figure out which frequency bands are there.
 C
+      implicit none
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
@@ -22,7 +23,6 @@ C     IERR - error number
       integer iwhere_in_string_list
       integer igetstatnum
       integer ias2b,igtfr
-
 
 C  LOCAL:
       integer ix,n
@@ -66,7 +66,6 @@ C
 C  History
 C     880310 NRV DE-COMPC'D
 C     891116 NRV Cleaned up format, added fill-in of LBAND
-C            nrv implicit none
 C     930421 nrv Re-added: store track assignments
 C 951019 nrv Add extension of LO lines to include per channel
 C 951116 nrv Change to frequency sequencey per station
@@ -101,10 +100,13 @@ C 020114 nrv Fill in roll defs.
 C 2003Jul25 JMG  ITRAS changed to function
 ! 2005May2  JMG  Converted losb and lifinp to Characters
 ! 2008Sep25 JMG. Modified so won;'t set bitdens if recorder is Mark5 or K5
-! 2011Aug11  JMG. Reformatted some warning messages
-! 2013Sep19  JMGipson made sample rate station dependent
+! 2011Aug11 JMG. Reformatted some warning messages
+! 2013Sep19 JMGipson made sample rate station dependent
 ! 2015Jun05 JMG Modified to use new version of itras. 
 ! 2016Dec05 JMG. Fixed bug in reading in samplate rate. Previously  applied the sample rate to "1,ns". Now to "1,nstatn" 
+! 2018Jul05 JMG. Better error messages. Previously error code printed as ****
+! 2018Oct. Modifed so samprate applies only to stations specified in preceding "F" line.
+! 2018Dec22 JMG. Fixed bug using undefinfed variable 'nstav' and added implicit none. 
 C
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -149,8 +151,9 @@ C 1.5 If there are errors, handle them first.
 C
       IF  (IERR.NE.0) THEN
         IERR = -(IERR+100)
-        write(lu,9201) ierr,(ibuf(i),i=2,ilen)
-9201    format('FRINP01 - Error in field ',I3,' of this line:'/40a2)
+        write(lu,*) "FRINP01: Error in field ",ierr, " of this line: "
+        write(lu,'("--->  ", 40a2)') ibuf(1:40) 
+
         RETURN
       END IF 
 C  Lines need not be in order, so we may encounter a new code
@@ -392,8 +395,11 @@ C           idum= ICHMV(LNAFRsub(1,i,ICODE),1,lsub,1,8)
 C
 C 5. This is the sample rate line.
 
-      if (lchar.eq. "R") then ! sample rate  
-        do is=1,nstatn 
+! 2018Oct. Modifed so samprate applies only to stations specified in preceding "F" line.
+! Previously applied to all stations!
+      if (lchar.eq. "R") then ! sample rate    
+        do j=1,nstatn
+          is=istsav(j)
           samprate(is,icode)=srate
         end do 
       endif ! sample rate

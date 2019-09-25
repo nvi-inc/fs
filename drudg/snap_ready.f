@@ -2,8 +2,9 @@
 ! write out ready commands
       include 'hardware.ftni'
       integer ntape
-! 2015Jun05 JMG. Repalced squeezewrite by drudg_write. 
 ! local
+! History
+!  2019Aug25  Replace squeezewrite by drudg_write
       character*7 lprefix
       integer nch
       character*40 ldum
@@ -25,6 +26,11 @@
         write(luFile,'(a)') 'ready_disk'
         kfirst_tape=.false.
       endif
+      
+      if(km6disk) then
+         kfirst_tape=.false.
+         return
+      endif 
 
       if(km5disk) then
          return              !don't need to do tape ready.

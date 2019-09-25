@@ -1,4 +1,5 @@
       SUBROUTine VOBINP(ivexnum,LU,iret,IERR)
+      implicit none 
 
 C  This routine gets all the observations from the vex file.
 C
@@ -10,6 +11,12 @@ C            observations scan by scan.
 ! 2005May05 JMG.  Removed refrences to irec, which is never used.
 ! 2006Jul17 JMG. Got rid of using ivtgso, replaced by iwhere_in_string_list
 ! 2006Nov06 JMG. Initialize iret
+! 2014Jul08 JMG. Some modifications to handle the case where scans contain stations which were not in VEX $STATION section.
+!                In this case Drudg will issue a warning and if the user likes, proceed. 
+! 2014Sep16 JMG. Fixed a bug introduced in 2014Jul08.  Previously would generate a new scan for each 
+!                station in a scan because kfirst_staiton was always getting reinitialized. 
+!                Moved initialization out of station loop. 
+! 2019Aug27 JMG. Fixed bug in converting date. Need to initialize istart because conversion routine is only setting lower bytes
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -56,9 +63,12 @@ C  LOCAL:
       integer ixfer_cnt
       integer istat
       character*1 cbl
+      character*1 lchar
+      logical kfirst_station
 
       integer itemp
       integer nch
+      logical kignore_error
 ! 0. Initialize data transfer info.
       ixfer_cnt=0
 
@@ -73,6 +83,7 @@ C  LOCAL:
         kstat_in2net(i)=.false.
         kstat_disk2file(i)=.false.
       end do
+      kignore_error=.false.
 
 C 1. Get scans one by one.
 
@@ -100,6 +111,7 @@ C 1. Get scans one by one.
       
         if (mod(nobs,100).eq.0) write(lu,'(i5,$)') nobs
 
+        istart=0
         iret = fvex_date(ptr_ch(cstart),istart,start_sec)
         ierr=8 ! date/time
         if (iret.ne.0) return
@@ -124,24 +136,35 @@ C 1. Get scans one by one.
 C-------------------------------------------------------------
 C       Now get each station line that is part of this scan.
         cout=" "
-        do istn_scan=1,Max_Stn
-          if(fget_station_scan(istn_scan) .ne. 0) goto 100
-          iret = fvex_field(1,ptr_ch(cout),len(cout))
+!        write(*,*) "***New scan****, NSTATN: ",nstatn 
+        kfirst_station=.true.  
+        do istn_scan=1,nstatn  
+!          write(*,*) "nobs, istn_scan ", nobs, istn_Scan,              fget_station_scan(istn_scan)            
+          if(fget_station_scan(istn_scan) .ne. 0) goto 100                  
+          cout=" " 
+          iret = fvex_field(1,ptr_ch(cout),len(cout))     
           ierr=1
           if (iret.ne.0) then
             return
           endif
-                il = fvex_len(cout)
+        
+          il = fvex_len(cout)
           if (ivgtst(cout,istn).le.0) then
-            write(lu,*) " " 
-            write(lu,'(a)')
-     >    "  ERROR:  VOBINP04 - While processing scans. Station >> "//
-     >     cout(1:il)//" << not found in station list!"
-            write(lu,*) " Fix the schedule and restart program. "
-            stop
- 
-            return
+            if(kignore_error) goto 100            
+            write(lu,*) "VOBINP04 - Station ",cout(1:il)," not found!"
+            lchar="-"
+            do while(lchar .ne. "Y" .and. lchar .ne. "N") 
+              write(*,*)  "Ignore this error? (Y/N)"
+              read(*,*) lchar
+              call capitalize(lchar)
+              if(lchar .eq. "N") return
+            end do 
+            kignore_error=.true. 
+            goto 100 
           endif
+         
+!          write(*,*) "station #: ", " >"//cout(1:4)//"< ",istn 
+!          pause 
           if (nchan(istn,icod).eq.0) then ! code not defined          
             write(lu,*) "VOBINP03 - Mode ",
      >      cmo(1:fvex_len(cmo))," not defined for station: ", 
@@ -192,8 +215,7 @@ C       Keep good data offset and duration separate
           else
             ip =iwhere_in_string_list(cpassorderl(1,istn,icod),
      >         npassl(istn,icod),cout(1:il))
-          endif
-            
+          endif            
 
           if(ip .eq. 0) return     ! pass not found
 
@@ -216,25 +238,27 @@ C       Keep good data offset and duration separate
           idrive=i
 
 C  Make the new scan if this is the first source.
+!         write(*,*) "Here!! ",kfirst_station
 
-         if (istn_scan.eq.1) then  ! first station in this scan--new scan.
+         if (kfirst_station) then  ! first station in this scan--new scan.
            call newscan(istn,isor,icod,istart,idstart,
      .        idend,ifeet,ip,idrive,cbl,ierr)
            il = fvex_len(cscan_id)
            scan_name(iskrec(nobs)) = cscan_id(1:il)
            if (ierr.ne.0) write (lu,9108) ierr
 9108       format('VOBINP05 - Error ',i5,' from newscan')
+           kfirst_station=.false. 
          else ! add
            call addscan(nobs,istn,icod,idstart,idend,
      .        ifeet,ip,idrive,cbl,ierr)
            if (ierr.ne.0) then
              write(lu,9103) ierr,istn,istart
 9103         format('VOBINP06 - addscan error ',i3,' istn=',i3,
-     >         'istart=',5i5)
+     >         ' istart=',i4,1x,i3,1x,3i2)
            endif
          endif ! new or add
+100       continue      !come here on quick exit. 
         enddo  ! get all stations in this scan
-100     continue
 
 ! Now process the data_transfer lines
         ixfer_beg(nobs)=ixfer_cnt+1
@@ -250,14 +274,10 @@ C  Make the new scan if this is the first source.
 ! Check to see if a valid station.
 ! Should check to see if this station is in this scan?
           il = fvex_len(cout)
-          istat= ivgtst(cout,istn)        
+          istat= ivgtst(cout,istn)
 
           if(istat .le. 0) then
-            write(lu,*) " "
-            write(lu,*) "*****VOBINP14 - Station ",cout(1:il),
-     >          " not found in station list!"
-            write(lu,*) "Fix problem and restart. Program will abort."
-            stop 
+            write(lu,*) "VOBINP14 - Station ",cout(1:il)," not found!"
             return
           endif
           ixfer_stat(ixfer_cnt)=istat

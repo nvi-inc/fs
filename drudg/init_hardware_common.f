@@ -56,6 +56,7 @@ C Equipment type has been set by schedule file, Option 11, or control file.
         km5Crec(i) =cstrec(istn,i)  .eq. "Mark5C"
         Km5APigwire(i) =cstrec(istn,i) .eq. "Mk5APigW"
         Km5Prec(i) =cstrec(istn,i)  .eq. "Mark5P"
+        Km6rec(i)  =cstrec(istn,i) .eq. "Mark6"
         KK5Rec(i)  =cstrec(istn,i) .eq. "K5"
         Knorec(i)  =cstrec(istn,i) .eq. "none"
       end do
@@ -81,11 +82,13 @@ C Equipment type has been set by schedule file, Option 11, or control file.
       km5B=km5Brec(1) .or. km5Brec(2)
       km5C=km5Crec(1) .or. km5Crec(2)
       km5disk = km5A .or. km5B .or. Km5C .or. kflexbuff 
+      km6disk=km6rec(1)
+      kdisk = km5disk .or. km6disk
 
       kk4=kk41rec(1) .or. kk41rec(2) .or. kk42rec(1) .or. kk42rec(2)
 
 ! set flag to indicate that recorder does not do "passes".
-      knopass=km5disk    !Mark5 disks have no passes.
+      knopass=kdisk    !Mark5 disks have no passes.
 ! other kinds of disks do as well
       do i=1,2
         if(ks2rec(i).or.kk41rec(i).or.kk42rec(i)) knopass=.true.

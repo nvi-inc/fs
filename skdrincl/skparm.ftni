@@ -12,7 +12,8 @@ C so that drudg will compile and load.
 C********************************************************************
 C
 ! Now put in recent changes at the top.
-!
+! 2019Aug25 JMG  Max_trk
+! 2019Aug23 JMG  MAX_OBS changed to 40000
 ! 2017Oct24 JMG MAX_SOR-->5000, MAX_CEL-->4990
 !
 C 890623 by NRV to add windows parameters
@@ -82,7 +83,7 @@ C     an experiment at one time.  Used in SKED and DRUDG.
 C
       integer max_stn,max_baseline,max_hor,max_cor,max_headstack,
      .max_track,max_pass,max_ifd,max_bbc,max_index,max_chan,
-     .max_subpass,max_tone,max_roll_def,max_change_list
+     .max_subpass,max_tone,max_roll_def
 
       PARAMETER (MAX_STN = 40)
 C
@@ -133,11 +134,11 @@ C
 C     The maximum number of frequency codes which can be selected
 C     for use in an experiment at one time.  Used in SKED and DRUDG.
 C
-      PARAMETER (MAX_FRQ = 40)
+      PARAMETER (MAX_FRQ = 50)
 
 !     Maximum number of tracks.  Mark4 goes from 2:33 usable tracks.
       integer max_trk
-      parameter (max_trk=33)
+      parameter (max_trk=128)
 
 C
 C     The maximum number of phase cal tones that can be detected
@@ -220,11 +221,6 @@ C     in VEX file, so this probably has to be 32 now.
 C
       PARAMETER (MAX_CHAN = 32)
 
-C     Maximum number of tapes for which tape change times will be
-C     displayed in the summary listing. This does not limit
-C     the number of tapes that can be scheduled.
-
-      PARAMETER (max_change_list = 10)
 
 C     Lengths for thick and thin tape.
 
@@ -322,6 +318,6 @@ C
 C
 C     The maximum number of scans allowed in a schedule
 C
-      PARAMETER (MAX_OBS = 20000)
+      PARAMETER (MAX_OBS = 40000)
 
 

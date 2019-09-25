@@ -11,6 +11,9 @@ C     Number of defined rack and recorder names.
 
 ! History in reverse order. 
 !
+! 2019Aug27  JMG. Increased MAX_RACK_TYPE to add 'BB' type 
+! 2018Oct17  JMG. Increase  MAX_RACK_TYPE, MAX_REC_TYPE to accomadate RDBE, MARK6
+! 2018Aug02  JMG. Increased MAX_RACK_TYPE to accomadate DBBC_DDC/VSI2
 ! 2016Jan05  JMG. Change rack type from char*12 to char*20, and max_rack_Type-->24
 ! 2015Jun05  JMG. Incraesed MAX_RACK_TYPE2 to 22 for Chinese VLBAC and CDAS 
 ! 2015May19  JMG. Increased MAX_REC_TYPE to 17 for flexbuf
@@ -19,8 +22,8 @@ C     Number of defined rack and recorder names.
 ! 2010Jan27  JMGipson. Increased number of recorder types to accomodate Mark5C.
 
 
-      PARAMETER (MAX_RACK_TYPE= 24)
-      PARAMETER (MAX_REC_TYPE = 17)
+      PARAMETER (MAX_RACK_TYPE= 27)
+      PARAMETER (MAX_REC_TYPE = 18)
       PARAMETER (MAX_REC2_TYPE = 7)
 
       character*20 crack_type(max_rack_type)    	! valid rack type

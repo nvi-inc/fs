@@ -1,5 +1,4 @@
       subroutine proc_mracks_vc(icode,ic,ib,ichan) 
-      implicit none 
 ! Write out the VC commands. 
  
 !  2012Sep12  JMGipson. First version. Split off of old routine proc_vc. 

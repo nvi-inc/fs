@@ -1,4 +1,7 @@
 C  Common Block statement for DRUDG
+! Newer changes now at top
+! 2019Aug25.  Added imark6_off to support broadband
+! 2019Aug21.  Got rid of iperm which whas not used
 C
 C  MWH 890518 Changed file names to character
 C             Added Fmp call declarations
@@ -100,7 +103,7 @@ c
      .  nlab,nllab,
      .  icrty6,
      .  itctim,ilabrow,ilabcol,inewpage,
-     .  nchanr,iperm,fileptr,itpid_period
+     .  nchanr,fileptr,itpid_period
 
       integer lu_outfile,luprt,luscn
 C
@@ -111,6 +114,7 @@ C
       integer nbbcbuf(2)
 
       integer ical_time_staggered           !override time for the calibration.
+      integer imark6_off
 
       COMMON/DRCOM_int/
   
@@ -123,8 +127,9 @@ C
      .       ICRTY6,
      .       ilabrow,ilabcol,inewpage,
      .       luscn,itpid_period,
-     .       nchanr,iperm,fileptr,
-     .       ibbcbuf,ibbclen,nbbcbuf,ical_time_staggered
+     .       nchanr,fileptr,
+     .       ibbcbuf,ibbclen,nbbcbuf,ical_time_staggered,
+     >       imark6_off
 
       common/drcom_real/
      >       RA50,DEC50,rlabsize
