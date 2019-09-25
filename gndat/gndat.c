@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
       if(NULL == (cptr = strtok(NULL," \t\n")) || (1!=sscanf(cptr, "%lf", &dpfu_gcurve_ass)) || dpfu_gcurve_ass < 0) {
 	dpfu_gcurve_ass = BADVALUE;
       }
-      if(NULL == (cptr = strtok(NULL," \t\n")) || (1!=sscanf(cptr, "%lf", &LO)) || LO <= 0) {
+      if(NULL == (cptr = strtok(NULL," \t\n")) || (1!=sscanf(cptr, "%lf", &LO)) || LO < 0) {
 	LO = BADVALUE;
       }
       if(NULL == (cptr = strtok(NULL," \t\n")) || (1!=sscanf(cptr, "%s", sourcetype))) {

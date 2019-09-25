@@ -132,11 +132,21 @@ void client_cmd(const char *arg0, const char *cmd) {
 		}
 	}
 
+    /* some commands are shortcuts for client commands.
+     * Eg: 
+     *      help=blag
+     *
+     * is a shortcut for 
+     *
+     *      client=help=blag
+     *
+     * when the client is available
+     */
 	if (strcmp(arg0, "client") != 0) {
 		fprintf(f, "%s=", arg0);
 	}
-
-	fprintf(f, "%s\n", cmd);
+	if (cmd) fprintf(f, "%s", cmd);
+	fprintf(f, "\n");
 	fflush(f);
 }
 

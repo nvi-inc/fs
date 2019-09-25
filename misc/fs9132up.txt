@@ -1,6 +1,6 @@
-sFile: /usr2/fs/misc/fs9131up.txt         Version: 9.9  Date: 190826
+File: /usr2/fs/misc/fs9132up.txt        Version: 9.94  Date: 190924
 
-		       FS 9.13.1 Update Notice
+		       FS 9.13.2 Update Notice
 
 
 I. Introduction
@@ -13,34 +13,46 @@ This document is divided into four sections:
   A.   Reference Appendix for Installation
 
 This update is intended for all stations using a FS with a version
-number of 9.11.19 or earlier or 9.13.0.  Installing this update is
-trivial for stations already running 9.13.0.  It is not for stations
-using one of the 9.12 versions.  The 9.12 branch of the FS is for VGOS
-operations only.  In the future, the VGOS branch will be merged into
-the 9.13 branch, which is the main branch.
+number of 9.11.19 or earlier or a previous 9.13 version. Installing
+this update is trivial for stations already running a previous 9.13
+version.  It is not for stations using one of the 9.12 versions.  The
+9.12 branch of the FS is for VGOS operations only.  In the future, the
+VGOS branch will be merged into the 9.13 branch, which is the main
+branch.
 
-In addition to several small improvements, the most important change
-in this version is support for client/server split between the user
-interface and the core of the FS.  This allows multiple simultaneous
-full-featured user interfaces.  Another major change is support in
-'drudg' for 'sched' staggered start mode which schedules different
-recording start times at different stations.  This cannot work
-optimally because it does not follow the 'sked' observation time-line
-that 'drudg' assumes.  However, the new support will reduce wasted
-recording time, improve the quality of the Tsys measurements, and
-maximize the time that the data is marked valid after the Tsys
-measurements.  This version also provides support for modes using two
-DBBC2 VSI outputs when used with a FiLa10G and Ethernet recorder.  A
-more expansive summary of the changes in this version is given farther
-below.
+The most significant change in 9.13.2 is a fix for a bug in 'drudg'
+that caused extra bits to be turned on in the bit mask for the
+'bit_mask=...'  command.  This bug was benign.  It only caused some
+extra channels to have Tsys data recorded. It did not affer the bit
+streams recorded for eVLBI (which is the only use of 'bit_streams='.
+A bug was also fixed that cause the DBBC2 DDC v107 'vsi_clk' command
+to be used incorrectly with the PFB personallity, in some cases.
+
+The most significant change in 9.13.1 was support for DBBC2 DDC
+firmware v107 to allow 32 and 64 MHz channel BWs.
+
+More generally, in addition to several small improvements, the most
+important change in in 9.13.0 versions is was support for client/server
+split between the user interface and the core of the FS.  This allows
+multiple simultaneous full-featured user interfaces.  Another major
+change is support in 'drudg' for 'sched' staggered start mode which
+schedules different recording start times at different stations.  This
+cannot work optimally because it does not follow the 'sked'
+observation time-line that 'drudg' assumes.  However, the new support
+will reduce wasted recording time, improve the quality of the Tsys
+measurements, and maximize the time that the data is marked valid
+after the Tsys measurements.  This version also provides support for
+modes using two DBBC2 VSI outputs when used with a FiLa10G and
+Ethernet recorder.  A more expansive summary of the changes in this
+version is given farther below.
 
 We encourage all non-VGOS stations to upgrade now even if they do not
 need the new features and bug fixes because doing so will make future
 upgrades easier.  Upgrading from 9.11.19 is relatively easy.
-Upgrading from 9.13.0 is even easier.  There is a path to upgrade from
-older versions.
+Upgrading from 9.13.0 or 9.13.1 is even easier.  There is a path to
+upgrade from older versions.
 
-The most significant changes in version 9.13.1 are:
+The most significant changes in version 9.13.0-9.13.2 are:
 
    (i) Availability of a server for the user interface.  This allows
        multiple independent user interfaces to be used with the FS.
@@ -169,15 +181,15 @@ mentioned.
 
 II. Installation
 
-Detailed instructions are provided below for installing 9.13.1 as an
+Detailed instructions are provided below for installing 9.13.2 as an
 upgrade to 9.11.19, the previous stable release. 
 
-If you are upgrading from version 9.13.0, you only need to use steps
-(1)-(7) and (10); testing in step (15) and backing up in step (17) are
-highly recommended.  Please check step (12.ii) to correct an error
-that was in the 9.13.0 instructions for using NTP.  Please also
-considering completing any of the steps from 9.13.0 that you may have
-deferred.
+If you are upgrading from version 9.13.0 or 9.13.1, you only need to
+use steps (1)-(7), (10), and optional step (13.iii); testing in step
+(15) and backing up in step (17) are highly recommended.  Please also
+check step (12.ii) to correct an error that was in the 9.13.0
+instructions for using NTP.  Please also considering completing any of
+the steps from 9.13.0 or 9.13.1 that you may have deferred.
 
 If you have an older version than 9.11.19, please refer to the
 appendix, which is described next, for more information.
@@ -204,14 +216,14 @@ The installation steps for upgrading from 9.11.19 are listed below.
      wrong with the installation.  For more details, please see
      sub-section 'A.4. Making a back-up before installing'.
 
- (1) Place a copy of the fs-9.13.1 archive in your FS machine's
+ (1) Place a copy of the fs-9.13.2 archive in your FS machine's
      '/tmp' directory.  For example, you might do the following:
 
        a. navigate to URL 'http://www.metsahovi.fi/fs'
        b. enter your FS account name and password at the prompt
        c. click on the 'dist' link
-       d. download 'fs-9.13.1.tgz'
-       e. 'scp' transfer 'fs-9.13.1.tgz' to your FS machine, placing
+       d. download 'fs-9.13.2.tgz'
+       e. 'scp' transfer 'fs-9.13.2.tgz' to your FS machine, placing
           it in the '/tmp' directory
 
      Your institution must have an account on the server in order to
@@ -223,12 +235,12 @@ The installation steps for upgrading from 9.11.19 are listed below.
  (3) Extract the source from the archive:
 
        cd /
-       tar xzpf /tmp/fs-9.13.1.tgz
+       tar xzpf /tmp/fs-9.13.2.tgz
 
  (4) Set the link for the new FS version:
 
        cd /usr2
-       ln -sfn fs-9.13.1 fs
+       ln -sfn fs-9.13.2 fs
 
  (5) Having the wrong ownership and/or permissions on the operational
      files (procedure libraries, control files, schedules, and logs)
@@ -320,7 +332,7 @@ The installation steps for upgrading from 9.11.19 are listed below.
      (ii) This change is to convert the FS to use NTP time internally.
           This change is recommended if you have reliable NTP
           available.  This can can be deferred until the rest of the
-          installation of 9.13.1 is complete.  When you make this
+          installation of 9.13.2 is complete.  When you make this
           change, please refer to '/usr2/fs/misc/ntp.txt' for
           requirements and instructions.  (Please note that in 9.13.0,
           the 'ntp.txt' file incorrectly recommended putting a call to
@@ -329,37 +341,65 @@ The installation steps for upgrading from 9.11.19 are listed below.
           already.)
 
 (13) This step is for updates to your SNAP procedure files.  There are
-     two changes.  The first (i) is required if you use a Mark 5
+     three changes.  The first (i) is required if you use a Mark 5
      recorder.  The second (ii) is optional and only needed if you
      want the 'sched_end' procedure to push experiment logs for you.
+     The third (iii) is optional and only needed for stations that use
+     DBBC2 continuous cal.
 
-      i.  If you use a Mark 5 recorder, the previous standard was to
-          record the bank in use in the 'midob' procedure.  It is now
-          recognized that this may fail.  Instead the set-up procedure
-          generated by 'drudg' now includes:
+       i.  If you use a Mark 5 recorder, the previous standard was to
+           record the bank in use in the 'midob' procedure.  It is now
+           recognized that this may fail.  Instead the set-up
+           procedure generated by 'drudg' now includes:
 
-            mk5=bank_set?
+             mk5=bank_set?
 
-          command after the 'bank_check' command if (and only if) a
-          Mark 5 recorder is in use.
+           command after the 'bank_check' command if (and only if) a
+           Mark 5 recorder is in use.
 
-          Previous instructions sent on the FS mail list recommended
-          that the above command be removed from 'midob' and for
-          stations using Mark 5 recorders only, to place it in the
-          'checkmk5' procedure.  For stations that switch between Mark
-          5 and FlexBuff, it was recommended that they manage it as
-          they wished, but if the above command was used with
-          FlexBuff, it would fail.
+           Previous instructions sent on the FS mail list recommended
+           that the above command be removed from 'midob' and for
+           stations using Mark 5 recorders only, to place it in the
+           'checkmk5' procedure.  For stations that switch between
+           Mark 5 and FlexBuff, it was recommended that they manage it
+           as they wished, but if the above command was used with
+           FlexBuff, it would fail.
 
-          Accordingly, please review your 'midob' and 'checkmk5'
-          procedures in all versions of your station procedure library
-          that you maintain and remove any instances of the above
-          command.
+           Accordingly, please review your 'midob' and 'checkmk5'
+           procedures in all versions of your station procedure
+           library that you maintain and remove any instances of the
+           above command.
 
-     ii.  If you wish you can update your 'sched_end' procedures to
-          automatically push logs as described below in the FS changes
-          section under item #12.  Please refer to that item for a
-          description of the changes.
+      ii.  If you wish you can update your 'sched_end' procedures to
+           automatically push logs as described below in the FS
+           changes section under item #12.  Please refer to that item
+           for a description of the changes.
+
+     iii.  This is optional and only suggested for stations that use
+           DBBC2 continuous cal.  In order to make the use the cal
+           control procudures for 'fivpt' and 'onoff', it is
+           recommeded that stations change their 'calonfp', 'calofffp,
+           'calonnf', and 'caloffnf' procedures to:
+
+             CALONFP: if=cont_cal,,calon
+                      !+1s
+                      sy=go fivpt &
+
+            CALOFFFP: if=cont_cal,,caloff
+                      !+1s
+                      sy=go fivpt &
+
+             CALONNF: if=cont_cal,,calon
+                      !+1s
+                      sy=go onoff & 
+
+            CALOFFNF: if=cont_cal,,caloff
+                      !+1s
+                      sy=go onoff & 
+
+     Where 'calon' and 'caloff' are the local procedurs for turning
+     the cal on and off, respectively.  You should retain any
+     additional lines in your procedures beyond the ones shown here.
 
 (14) This step is for miscellaneous FS related changes.  There are
      three.  The first (i) is recommended if you have been using
@@ -459,8 +499,9 @@ description.
 
 			 A. Changes in the FS
 
-The following is a summary of FS changes since 9.11.19. Items up to
-(22) were part of 9.13.0.
+The following is a summary of FS changes since 9.11.19. Items up thru
+(22) were part of 9.13.0.  Items (23)-(34) were added in 9.13.1.  Items
+after (34) were addded in 9.13.2.
 
  1. Full support of 'jive5ab' sample/bit-rate capabilities for Mark 5C
     and FlexBuff.
@@ -516,6 +557,14 @@ The following is a summary of FS changes since 9.11.19. Items up to
 32. The plot labels for 'gnplt' were improved.
 33. Files are no longer created "world writable".
 34. Changed 'fix_perm' script to set permissions to 'rw-rw-r--'.
+35. Fixed "bare" 'help' command when display server is in use.
+36. Recommend more robust 'fivpt'/'onoff' control SNAP procedures for
+    DBBC2 with continuous cal.
+37. Allow LO values of '0.0' in 'gndat' and hence in 'gnplt'.
+38. Use 64 MHz for clock for DBBC DDC v107 if recorder is Mark5B when
+    clock rate is 'nominal' in 'equip.ctl'.
+39. Not use the 'vsi_clk' DBBC2 DDDC v107 setting when the PFB
+    personality is in use.
 
 A more detailed discussion of these changes follows.
 
@@ -576,7 +625,7 @@ A more detailed discussion of these changes follows.
 
        find /usr2 -name '.urs_cookies'
 
-    This step is included in the installation instructions for 9.13.1.
+    This step is included in the installation instructions for 9.13.2.
 
     'plog' now has a version flag to aid debugging.
 
@@ -740,7 +789,7 @@ A more detailed discussion of these changes follows.
 
     e.g.,
 
-      fs-9.13.1-rc1
+      fs-9.13.2-rc1
 
     For standard releases, the trailing '-string' is omitted.
 
@@ -887,16 +936,48 @@ A more detailed discussion of these changes follows.
 34. Changed 'fix_perm' script to set permissions to 'rw-rw-r--'.  This
     was done to avoid having "world writable" files.
 
+35. Fixed "bare" 'help' command whern display server is in use.  This
+    bug caused the client to get in a difficult state to work with if
+    a bare 'help' command was issued.  This did not affect the core FS
+    operation or other clients that may be running.  This problem was
+    reported by Jun Yang (Onsala).
+
+36. Recommend more robust 'fivpt'/'onoff' control SNAP procedures for
+    DBBC2 with continuous cal.  If the user's intent was to use
+    continuous cal with 'fivpt' or 'onoff' and it was misconfigured
+    (off) and no cal control procedurea were available, the programs
+    would pause and recovering was difficult.  New recommended SNAP
+    procedures are described in the 'help' files for 'fivept' and
+    'onoff'.  This problem was reported by Jun Yang (Onsala).
+
+37. Allow LO values of '0.0' in 'gndat' and hence in 'gnplt'.  The
+    'gndat' program filtered out obervations for bands with an LO
+    value of zero.  This was not an issue for routine non-VGOS work,
+    but does occur for VGOS operations with DBBC3s.  This was fixed
+    and will be included in all future non-VGOS and VGOS branches.
+    This problem was reported by Eskil Varenius (Onsala).
+
+38. Use 64 MHz for clock for DBBC DDC v107 if recorder is Mark5B when
+    clock rate is 'nominal' in 'equip.ctl'.  This allows Mark 5B to be
+    feed by a FiLa10G with DDC v107 software.  Previously this case
+    use 128 whenever a FiLa10G was in use.
+
+39. Not use the 'vsi_clk' DBBC2 DDDC v107 setting when the PFB
+    personality is in use.  The use of this setting was not correctly
+    masked off the PFB personality.  This problem was reported by
+    Javier González García (Yebes).
+
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/misc/changes.txt.
 
 
 			B. Changes in 'drudg'
 				   
-'drudg' opening message date is 2018Nov13.
+'drudg' opening message date is 2019Sep23.
 
 The following is a summary of 'drudg' changes since 9.11.19.  Items up
-to (7) were part of 9.13.0.
+to (7) were part of 9.13.0.  There were no changes for 9.13.1. Change (8)
+is in 9.13.2.
 
  1. Ad hoc support for 'sched' stagger start mode.
  2. The 'mk5=bank_set?' query was added to the setup procedure for
@@ -906,6 +987,8 @@ to (7) were part of 9.13.0.
  5. Support for the FS release string.
  6. Only the 'skedf.ctl' control file in /usr2/control is used.
  7. Support for higher channel BWs for DBBC DDC.
+ 8. Don't round-up the number of bits in the bit-mask for the
+    'bit_streams=' command (recorder=none).
 
 A more detailed discussion of these changes follows.
 
@@ -997,6 +1080,13 @@ A more detailed discussion of these changes follows.
     has always been the Case, it is necessary to make sure that all
     the setup procedures for an experiment run without errors to
     verify that the schedule is correct for the equipment in use.
+
+ 8. Don't round-up the number of bits in the bit-mask for the
+    'bit_streams=' command (recorder=none).  Previously, 'drudg'
+    rounded up the number of tracks selected for the most extreme
+    requirement of a recorder, Mark 5A.  This was was a fairly benign
+    bug.  It caused some extra channels of Tsys data to be recorded in
+    eVLBI observations, in some cases.
 
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/drudg/change_log.txt.

@@ -78,7 +78,9 @@ dbbcn:
 
   /* only check vsi_clk if we verified the vesion number and is >= 107 */
 
-  if(shm_addr->dbbcddcv>=107) {
+  if(shm_addr->dbbcddcv>=107 &&
+     (shm_addr->equip.rack_type == DBBC_DDC ||
+      shm_addr->equip.rack_type == DBBC_DDC_FILA10G) ) {
     out_recs=0;
     out_class=0;
     strcpy(outbuf,"vsi_clk");

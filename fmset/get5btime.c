@@ -63,7 +63,9 @@ int *ierr;
 		     "                                       ");
 	  mvwaddstr( maindisp, 6, 6+15+39 , "               ");
 
-	  if(rack == DBBC && dbbcddcv>=107) {
+	  if(rack == DBBC &&
+             (rack_type == DBBC_DDC || rack_type == DBBC_DDC_FILA10G) &&
+             dbbcddcv>=107) {  // could be a 5B feed through a FiLa10G
 	    out_recs=0;
 	    out_class=0;
 
