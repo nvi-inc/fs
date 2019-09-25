@@ -1,4 +1,5 @@
 This file contains a summary of changes made and why.
+2019Sep23 proc_disk_tracks.f: If recorder=none do not round up channels recorded to power of 2. 
 2018Nov13 proc_disk_tracks.f: Removed checking of BW/samplerate. This will now be handled by the FS. 
 2018Sep25 Makefile, drudg_rdctl.f: Location of skedf.ctl varies depending on whether computer is PC-FS or not. 
 2018Sep11

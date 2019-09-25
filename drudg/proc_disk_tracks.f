@@ -16,6 +16,7 @@
 
 ! History.
 ! Now put in changes in reverse order.
+! 2019Sep23 JMG. If the recorder is 'none' do not round up number of recorded channels to a power of 2. 
 ! 2018Nov13 JMG. Removed check of bandwidth. This will now be caught by FS. 
 ! 2018Sep14 JMG. Check wastro before geo2.
 ! 2018Sep09 JMG. Modified comments and some logic based on 2018Sep06 email from Ed. 
@@ -49,6 +50,7 @@
 ! 2016Apr07 JMG. Fixed format in writing out fila10g. Was writing, ",=" instead of "=," 
 ! 2016Sep11 JMG. Increased dim lsked_csb: max_csb-->2*max_csb.  Schedule fr036 HH caused problems
 ! 2018Aug18 JMG. Increased size of mask to 64 bits. Added support for wastro, geo2 for vsi1 and vsi2. 
+! 2019Aug26 JMG. Removed deubugging statement
 
 
 ! local
@@ -335,7 +337,7 @@
       if(kcdas_rack) then 
         lbit_mask_mode="geo"
         nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch)  
+            
         call check_csb_list(lgeo_csb,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300       
@@ -498,7 +500,11 @@
 300   continue
       write(*,*) " " 
       write(*,'(a)') " Success! mode="//lbit_mask_mode 
+
 !      write(*,'(a)') " Using: ",lbit_mask_mode
+
+      write(*,*) "REC =", cstrec(istn,1) 
+      if(cstrec(istn, 1) .eq. "none") goto 305
 
 ! Previously checked that num_tracks <= max_csb so we don't need to check that here.
 ! Mark5A record a minimum of 8 channels.
@@ -522,6 +528,8 @@
         endif
         itemp=ishft(itemp,1)            !shift the bit.
       end do
+
+305   continue
 
       if(kcomment_only) then             
         call drudg_write_comment(lu_outfile,
