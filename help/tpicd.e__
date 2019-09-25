@@ -1,4 +1,4 @@
-        tpicd - tpi (LBA4, Mark III/IV, VLBA, VLBA4, DBBC, RDBE racks)
+  tpicd - tpi (LBA4, Mark III/IV, VLBA, VLBA4, DBBC, RDBE, DBBC3 racks)
 
             Syntax:     tpicd=cont,cycle
                         tpicd
