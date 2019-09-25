@@ -899,7 +899,9 @@ C 5B clock rate
 C note that MK45/VLBA45/VLBAC/VLBACDAS cannot connect to MK5C/MK5C_BS/FLEXBUFF,
 c      so only DBBC matters for 5C/5C_BS/FLEXBUFF
             if (rack.eq.DBBC.and.rack_type.eq.DBBC_DDC_FILA10G
-     &              .and.(dbbcddcv.ge.107.and.dbbcddcvl.eq.' ')) then
+     &              .and.(dbbcddcv.ge.107.and.dbbcddcvl.eq.' ')
+     &              .and..not.(drive(1).eq.MK5.and.
+     &     (drive_type(1).eq.MK5B.or.drive_type(1).eq.MK5B_BS))) then
                m5b_crate=128
             else if((rack.eq.VLBA4.and.rack_type.eq.VLBA4CDAS).or.
      &              (rack.eq.DBBC.and.(rack_type.eq.DBBC_DDC.or.
@@ -908,7 +910,8 @@ c      so only DBBC matters for 5C/5C_BS/FLEXBUFF
      &              0.ne.index('ef',dbbcddcvl))).or.
      &              (rack.eq.DBBC.and.(rack_type.eq.DBBC_PFB.or.
      &              rack_type.eq.DBBC_PFB_FILA10G)).or.
-     &              (rack.eq.DBBC.and.rack_type.eq.DBBC_DDC.and.
+     &              (rack.eq.DBBC.and.(rack_type.eq.DBBC_DDC.or.
+     &               rack_type.eq.DBBC_DDC_FILA10G).and.
      &              (dbbcddcv.ge.107.and.dbbcddcvl.eq.' '))) then
                m5b_crate=64
             else if((rack.eq.MK4.and.rack_type.eq.MK45) .or.
