@@ -12468,3 +12468,24 @@ Version 9.13.1-rc2 190412
            changed to permissions 'rw-rw-r--'
 
 Version 9.13.1 190826
+
+190919 DEH oprin/oprin.c
+           fix oprin send (null) to client, for 'help'
+
+190920 WEH help/onoff.___
+190920 WEH help/fivept.___
+           Recommend more robust DBBC2 cal control procedures
+
+190920 WEH gndat/gndat.c
+           allow LO=0
+
+190923 WEH incom/equip.f
+           stay at 64 clock for DBBC v107 if Mark 5B
+
+190924 WEH fmset/get5btime.c
+           fmset/getfila10gtime.c
+           chekr/dbbcchk.c
+           don't use vsi_clk for PFB
+
+Version 9.13.2 190924
+
