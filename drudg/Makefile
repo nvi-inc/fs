@@ -170,23 +170,30 @@ OBJECTS=    \
 
 LDFLAGS:=\
 ../skdrut/skdrut.a \
-../../sked_dev/lnfch/lnfch.a \
-../../sked_dev/curses/curses.a \
-../../sked_dev/vex/vex64.a \
--lz -lm -lc \
+../lnfch/lnfch.a \
+../newlb/newlb.a \
+../vex/vex.a \
+-lm -lc \
  -lfl
 
 #-Lusr/src/atlas-3.4.1/lib/Linux_P4SSE2/ -lf77blas -latlas \
 
 # NOTE: Use /lib/crt0 if you are NOT using the profiler.
 #       Use /lib/gcrt0 if you ARE using the profiler.
-$(PROGRAM): $(OBJECTS)
+CPPFLAGS+=-DF2C
+
+../bin/$(PROGRAM): $(OBJECTS)
 	@echo Linking DRUDG...
-#       @f77 -o $(SK)$(PROGRAM) $(OBJECTS) $(LDFLAGS)
-	$(FC) -o $(SK)$(PROGRAM) $(OBJECTS) $(LDFLAGS) -L/usr/lib/gcc-lib/i586-mandrake-linux-gnu/3.3.1 -D READ_LINE
+#      @f77 -o $(SK)$(PROGRAM) $(OBJECTS) $(LDFLAGS)
+	$(FC) -o ../bin/$(PROGRAM) $(OBJECTS) $(LDFLAGS)
 	@echo done.
+
+get_version.o: FFLAGS += -cpp -DVERSION=$(VERSION) -DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL)
+
+CPPFLAGS+=-DF2C
+
+FFLAGS+=-ff2c -I/usr2/fs-git//include -fno-range-check -finit-local-zero -fbackslash
+# -fno-automatic
 
 clean:
 	rm -f *.o; rm -f *.a; rm -f sked
-
-
