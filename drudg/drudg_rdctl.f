@@ -80,13 +80,7 @@ C  LOCAL VARIABLES
 
 ! this is set in makefile. if it is set to 1, then on FS_PC.
 
-#ifdef FS_PC
         ifs_PC=1        
-#ELIF
-        ifs_PC=0
-#endif 
-      ifs_PC=0
-      write(*,*) "ifs_PC", ifs_PC 
 
       if(ifs_PC .eq. 1) then
         ifile_beg=3
