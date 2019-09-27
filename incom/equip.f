@@ -10,13 +10,15 @@ c
       double precision das2b
       character*7 m5bcrate
       logical kmove
-      integer*2 line1(16),line2(2)
+      integer*2 line1(16),line2(2),line3(13)
 c
       include '../include/fscom.i'
 c                 1    2    3    4    5    6    7    8    9   10
       data line1/25,2heq,2hui,2hp.,2hct,2hl ,2hli,2hne,2h t,2hha,
      &         2ht ,2hfa,2hil,2hed,2h: ,2h' /
       data line2/ 1,2h' /
+      data line3/24,2heq,2hui,2hp.,2hct,2hl ,2hat,2h e,2hnd,2h o,
+     &         2hf ,2hfi,2hle /
 
       call fmpopen(idcb,name,ierr,'r',idum)
       if (ierr.lt.0) then
@@ -990,14 +992,14 @@ c
 c DBBC3 DDC firmware version
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
-        call logit7ci(0,0,0,1,-140,'bo',24)
+        call logit7ci(0,0,0,1,-140,'bo',25)
         goto 990
       endif
       call lower(ibuf,ilen)
       ifc=1
       call gtfld(ibuf,ifc,ilen,ic1,ic2)
       if (ic1.eq.0) then
-        call logit7ci(0,0,0,1,-140,'bo',24)
+        call logit7ci(0,0,0,1,-140,'bo',25)
         goto 990
       endif
 C
@@ -1010,26 +1012,26 @@ C
          if(dbbcv(i:i).ne.' ') idbbcvc=i
       enddo
       if(idbbcvc.gt.16) then
-         call logit7ci(0,0,0,1,-141,'bo',24)
+         call logit7ci(0,0,0,1,-141,'bo',25)
          goto 990
       endif
       idbbcv=0
       do i=1,3
         ind=index('01234567890',dbbcv(i:i))
         if(ind.eq.0) then
-           call logit7ci(0,0,0,1,-141,'bo',24)
+           call logit7ci(0,0,0,1,-141,'bo',25)
            goto 990
         endif
         idbbcv=idbbcv*10+(ind-1)
       enddo
       if(idbbcv.lt.121) then
-         call logit7ci(0,0,0,1,-141,'bo',24)
+         call logit7ci(0,0,0,1,-141,'bo',25)
          goto 990
       endif
 c
       call gtfld(ibuf,ifc,ilen,ic1,ic2)
       if (ic1.eq.0) then
-        call logit7ci(0,0,0,1,-140,'bo',24)
+        call logit7ci(0,0,0,1,-140,'bo',25)
         goto 990
       else
          il=ic2-ic1+1
@@ -1038,13 +1040,13 @@ c
       if (dbbc3_ddc_bbcs_per_if.ne.8.and.
      &     dbbc3_ddc_bbcs_per_if.ne.12.and.
      &     dbbc3_ddc_bbcs_per_if.ne.16) then
-         call logit7ci(0,0,0,1,-140,'bo',24)
+         call logit7ci(0,0,0,1,-140,'bo',25)
          goto 990
       endif
 c
       call gtfld(ibuf,ifc,ilen,ic1,ic2)
       if (ic1.eq.0) then
-        call logit7ci(0,0,0,1,-140,'bo',24)
+        call logit7ci(0,0,0,1,-140,'bo',25)
         goto 990
       else
          il=ic2-ic1+1
@@ -1052,7 +1054,7 @@ c
       dbbc3_ddc_ifs = ias2b(ibuf,ic1,ic2-ic1+1)
       if ( dbbc3_ddc_ifs.lt.1.or.
      &     dbbc3_ddc_ifs.gt.8) then
-         call logit7ci(0,0,0,1,-140,'bo',24)
+         call logit7ci(0,0,0,1,-140,'bo',25)
          goto 990
       endif
 
@@ -1068,9 +1070,13 @@ c
       return
 c
  990  continue
-      call put_cons_raw(line1(2),line1(1))
-      call put_cons_raw(ibuf,ilen)
-      call put_cons(line2(2),line2(1))
+      if(ierr.eq.0.and.ilen.eq.-1) then
+        call put_cons(line3(2),line3(1))
+      else
+        call put_cons_raw(line1(2),line1(1))
+        call put_cons_raw(ibuf,ilen)
+        call put_cons(line2(2),line2(1))
+      endif
  991  continue
       call fmpclose(idcb,ierr)
   995  continue
