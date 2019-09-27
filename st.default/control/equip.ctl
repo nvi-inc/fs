@@ -76,6 +76,5 @@ cdp     cdp or metserver port & host, use cdp if you don't have either
   nominal   one of: none, nominal, 2, 4, 8, 16, 32, 64, 128
 *FiLa10G input select, one of: vsi1, vsi2, vsi1-2, vsi1-2-3-4, gps, tvg
 vsi1-2
-vsi1
 * DBBC3 firmware version, bbcs/if, ifs
   v223 16 8
