@@ -28,9 +28,7 @@ fi
 if ! (echo $PATH | fgrep . >/dev/null); then 
  PATH=${PATH}:.
 fi
-EDITOR=vi
-export EDITOR
-LESS=-X
-export LESS
+export EDITOR=vi
+export LESS=-XR
 #FS_CHECK_NTP=
 #export FS_CHECK_NTP

@@ -31,17 +31,9 @@ fi
 if ! (echo $PATH | fgrep . >/dev/null); then 
  PATH=${PATH}:.
 fi
-EDITOR=emacs
-export EDITOR
-LESS=-X
-export LESS
-if [ x`which fort77 2>/dev/null` == x ]; then
-# No fort77 command, use f77.
- FC=f77
-else
- FC=fort77
-fi
-export FC
+export EDITOR=vim
+export LESS=-XR
+export FC=f95
 #export FS_CHECK_NTP=
 #export FS_SERIAL_CLOCAL=1
 #export FS_TINFO_LIB=1
