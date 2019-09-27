@@ -148,7 +148,7 @@ if [ ! -e /usr2/control ]; then
    find control -print|cpio -pmdu /usr2
    chown -R oper /usr2/control
    chgrp -R rtx  /usr2/control
-   chmod -R a+rw /usr2/control
+   chmod -R a+r,ug+w,o-w /usr2/control
 fi
 #
 if [ ! -e /usr2/proc ]; then
@@ -157,7 +157,7 @@ if [ ! -e /usr2/proc ]; then
    find proc/station.prc -print|cpio -pmdu /usr2
    chown -R oper /usr2/proc
    chgrp -R rtx  /usr2/proc
-   chmod -R a+rw /usr2/proc
+   chmod -R a+r,ug+w,o-w /usr2/proc
 fi
 #
 if [ ! -e /usr2/sched ]; then
@@ -166,7 +166,7 @@ if [ ! -e /usr2/sched ]; then
    find sched -print|cpio -pmdu /usr2
    chown -R oper /usr2/sched
    chgrp -R rtx  /usr2/sched
-   chmod -R a+rw /usr2/sched
+   chmod -R a+r,ug+w,o-w /usr2/sched
 fi
 #
 if [ ! -e /usr2/log ]; then
@@ -174,7 +174,7 @@ if [ ! -e /usr2/log ]; then
    mkdir /usr2/log
    chown -R oper /usr2/log
    chgrp -R rtx  /usr2/log
-   chmod -R a+rw /usr2/log
+   chmod -R a+r,ug+w,o-w /usr2/log
 fi
 #
 if [ -e /etc/gpib.conf ]; then
@@ -191,7 +191,7 @@ if [ ! -e /usr2/tle_files ]; then
    find tle_files/station.qth -print|cpio -pmdu /usr2
    chown -R oper /usr2/tle_files
    chgrp -R rtx  /usr2/tle_files
-   chmod -R a+rw /usr2/tle_files
+   chmod -R a+r,ug+w,o-w /usr2/tle_files
 fi
 #
 echo "Done."
