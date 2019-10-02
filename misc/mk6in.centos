@@ -1,0 +1,53 @@
+#!/usr/bin/perl
+#
+use Time::HiRes qw( usleep);
+
+open(my $pipe, '-|', '/usr/bin/cat /proc/net/dev') or die $!;
+while (my $line = <$pipe>) {
+#    print "start: $line";
+    if($line =~ /^ *([^:]+): *(\d+)/) {
+        $intf=$1;
+	$bytes{0}{$intf}=$2;
+#	print "0intf $intf, bytes $bytes{0}{$intf}\n";
+    }
+}
+
+$slept=usleep(250000);
+if($slept < 100000) {
+    print "sleep too short: ", $slept*1e-6," seconds\n";
+    exit;
+}
+
+open(my $pipe, '-|', '/usr/bin/cat /proc/net/dev') or die $!;
+while (my $line = <$pipe>) {
+    if($line =~ /^ *([^:]+): *(\d+)/) {
+        $intf=$1;
+	$bytes{1}{$intf}=$2;
+#	print "1intf $intf, bytes $bytes{1}{$intf}\n";
+    }
+}
+$fact=8e-9/(1e-6*$slept);
+foreach $key (sort(keys %{ $bytes{0}})) {
+    if($key ne "eth0" && $key ne "lo" && $key ne "eth1") {
+	if(!defined($bytes{1}{$key})) {
+	    print "second measurement missing interface $key\n";
+	    exit;
+	}
+    }
+}
+foreach $key (sort(keys %{ $bytes{1}})) {
+    if($key ne "eth0" && $key ne "lo" && $key ne "eth1") {
+	if(!defined($bytes{0}{$key})) {
+	    print "first measurement missing interface $key\n";
+	    exit;
+	}
+    }
+}
+foreach $key (sort(keys %{ $bytes{1}})) {
+    if($key ne "eth0" && $key ne "lo" && $key ne "eth1") {
+        print "$key ";
+        printf "%.3f",$fact*($bytes{1}{$key}-$bytes{0}{$key});
+        print " ";
+    }
+}
+print "Gb/s\n";
