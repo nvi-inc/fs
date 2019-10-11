@@ -1,12 +1,18 @@
-echo "********************************************************************"
-echo "*  This is the INSTALLATION script for Field System version $FS_VERSION *"
-echo "*  This script must be excuted by root to work correctly.          *"
-echo "*  Please refer to instructions in the Update Notice.              *"
-echo "********************************************************************"
+#!/bin/bash
+#
+if ! [ $(id -u) = 0 ]; then
+   echo "This script must be run as root."
+   exit 1
+fi
+#
 if [ ! $FS_VERSION ]; then
    echo "This script must be run by 'make install' in '/usr2/fs', aborting."
    exit
 fi
+echo "********************************************************************"
+echo "*  This is the INSTALLATION script for Field System version        *"
+echo "*  $FS_VERSION *"
+echo "********************************************************************"
 echo "CAUTION: This script will automatically modify some of your directories."
 echo "On /usr2 each of the following directories will be created and filled"
 echo "  with their default contents (unless they already exist): oper, prog,"
@@ -25,19 +31,19 @@ echo "  standard system. To get the default versions of any already existing"
 echo "  directories, you will need to delete them before continuing with this"
 echo "  script."
 echo "** This script must be excuted by root to work correctly. ** "
-echo -e "Do you wish to continue with the INSTALLATION? (y=yes, n=no) : \c" 
+echo -n "Do you wish to continue with the INSTALLATION? (y=yes, n=no) : " 
 badans=true
 while [ "$badans" = "true" ]
 do
   read ans
   case "$ans" in
-    y|yes) echo -e "\nO.K. Continuing with install ... "
+    y|yes) echo "O.K. Continuing with install ... "
            badans=false
            ;;
-    n|no)  echo -e "\nO.K. Exiting."
+    n|no)  echo "O.K. Exiting."
            exit
            ;;
-    *)     echo -e "\nPlease answer with y=yes or n=no : \c"
+    *)     echo -n "Please answer with y=yes or n=no : "
   esac
 done
 #
@@ -51,19 +57,22 @@ if [ -e fs ]; then
   echo "possibly destroying your data. Please move or remove /usr2/fs."
   exit
 fi
-ln -s fs-$FS_VERSION fs
+ln -s $FS_DIRECTORY fs
 #
 echo "Setting /usr2/fs permissions ..."
 cd /usr2
-chown -R prog fs fs-$FS_VERSION
-chgrp -R rtx fs fs-$FS_VERSION
-chmod -R a+r,u+w,go-w fs fs-$FS_VERSION
+chown -R prog fs $FS_DIRECTORY
+chgrp -R rtx fs $FS_DIRECTORY
+chmod -R a+r,u+w,go-w fs $FS_DIRECTORY
 #
 if [ ! -e st-0.0.0 -a ! -e st ]; then
   echo "Creating /usr2/st default directory structure..."
   mkdir /usr2/st-0.0.0
   cd /usr2/fs/st.default/st-0.0.0
-  find Makefile misc help bin -print|cpio -pmdu /usr2/st-0.0.0
+  find Makefile misc -print|cpio -pmdu /usr2/st-0.0.0
+  cd /usr2/st-0.0.0
+  mkdir help
+  mkdir bin
   cd /usr2
   rm -f st
   ln -s st-0.0.0 st
@@ -74,7 +83,7 @@ fi
 #
 # the following works for both /home and /usr2 separate OR /home -> /usr2
 #
-if [ ! -e /usr2/oper/.xsession ]; then
+if [ ! -e /usr2/oper/bin ]; then
    echo "Setting up /usr2/oper ..."
    if [ -e /home/oper.FSCOPY -o -L /home/oper.FSCOPY ]; then
       if [ -e /home/oper -o -L /home/oper ]; then
@@ -109,7 +118,7 @@ fi
 #
 # the following works for both /home and /usr2 separate OR /home -> /usr2
 #
-if [ ! -e /usr2/prog/.xsession ]; then
+if [ ! -e /usr2/prog/bin ]; then
    echo "Setting up /usr2/prog ..."
    if [ -e /home/prog.FSCOPY -o -L /home/prog.FSCOPY ]; then
       if [ -e /home/prog -o -L /home/prog ]; then
@@ -162,8 +171,7 @@ fi
 #
 if [ ! -e /usr2/sched ]; then
    echo "Setting up /usr2/sched ..."
-   cd /usr2/fs/st.default
-   find sched -print|cpio -pmdu /usr2
+   mkdir /usr2/sched
    chown -R oper /usr2/sched
    chgrp -R rtx  /usr2/sched
    chmod -R a+r,ug+w,o-w /usr2/sched
