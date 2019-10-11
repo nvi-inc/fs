@@ -1,8 +1,19 @@
+#
 pwd := $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
-FS_VERSION := $(shell git describe --always --tags --dirty )
-VERSION    := $(shell echo $(FS_VERSION) | cut -d. -f1 )
-SUBLEVEL   := $(shell echo $(FS_VERSION) | cut -d. -f2 )
-PATCHLEVEL := $(shell echo $(FS_VERSION) | cut -d. -f3 | cut -d- -f1)
+FS_DIRECTORY := $(shell echo $(pwd) | rev | cut -d/ -f1 | rev )
+#look for git first
+FS_VERSION := $(shell git describe --always --tags --dirty 2>/dev/null)
+#alternatvely an archive version
+ifeq ($(FS_VERSION),)
+# there should be no other dashes except in the basename:
+#  fs-VERSION.SUBLEVEL.PATCHLEVEL-RELEASE
+#  -RELEASE is optional
+FS_VERSION := $(shell echo $(pwd) | cut -d- -f2-)
+endif
+#
+VERSION    := $(shell echo $(FS_VERSION) | cut -d. -f1 -s )
+SUBLEVEL   := $(shell echo $(FS_VERSION) | cut -d. -f2 -s )
+PATCHLEVEL := $(shell echo $(FS_VERSION) | cut -d. -f3 -s | cut -d- -f1)
 RELEASE    := $(shell echo $(FS_VERSION) | cut -d- -f2- -s)
 
 ifeq ($(VERSION),)
@@ -14,8 +25,8 @@ endif
 ifeq ($(PATCHLEVEL),)
 $(error no PATCHLEVEL value)
 endif
-export VERSION SUBLEVEL PATCHLEVEL FS_VERSION RELEASE
-# print variable,  use 'make print-version' to print VERSION
+export VERSION SUBLEVEL PATCHLEVEL FS_VERSION RELEASE FS_DIRECTORY
+# print variable,  use 'make print-VERSION' to print VERSION
 print-%  : ; @echo $* = $($*)
 #
 # If environment variable FS_SERIAL_CLOCAL is define with a non-empty value
@@ -42,12 +53,15 @@ export CPPFLAGS += -I$(shell pwd)/third_party/include
 
 all: $(EXE_DIR)
 
-$(EXE_DIR): $(LIB_DIR)
+$(EXE_DIR): bin $(LIB_DIR)
+
+bin:
+	mkdir bin
 
 $(LIB_DIR) $(EXE_DIR):
 	$(MAKE) -C $@
 
-.PHONY: dist clean rmexe rmdoto install
+.PHONY: dist clean rmexe rmdoto install archive
 dist:
 	rm -rf /tmp/fs-$(FS_VERSION).tgz /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION) -name 'core' -type f -print >  /tmp/fsdist-exclude
@@ -98,3 +112,8 @@ execs:
 	done
 install:
 	sh misc/fsinstall
+#
+# use 'make TAG=value archive' to make a archive for a git tag
+# TO DO: detect missing TAG value and print error
+archive:
+	git archive --format=tgz --prefix=usr2/fs-$(TAG)/ -o /tmp/fs-$(TAG).tgz $(TAG)
