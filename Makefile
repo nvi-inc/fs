@@ -3,6 +3,7 @@ pwd := $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
 FS_DIRECTORY := $(shell echo $(pwd) | rev | cut -d/ -f1 | rev )
 #look for git first
 FS_VERSION := $(shell git describe --always --tags --dirty 2>/dev/null)
+FS_COMMIT := $(shell git describe --always --tags 2>/dev/null)
 #alternatvely an archive version
 ifeq ($(FS_VERSION),)
 # there should be no other dashes except in the basename:
@@ -61,7 +62,7 @@ bin:
 $(LIB_DIR) $(EXE_DIR):
 	$(MAKE) -C $@
 
-.PHONY: dist clean rmexe rmdoto install archive
+.PHONY: dist clean rmexe rmdoto install tag_archive archive
 dist:
 	rm -rf /tmp/fs-$(FS_VERSION).tgz /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION) -name 'core' -type f -print >  /tmp/fsdist-exclude
@@ -113,7 +114,12 @@ execs:
 install:
 	sh misc/fsinstall
 #
-# use 'make TAG=value archive' to make a archive for a git tag
+# use 'make TAG=value tag_archive' to make an archive for a git tag
 # TO DO: detect missing TAG value and print error
-archive:
+tag_archive:
 	git archive --format=tgz --prefix=usr2/fs-$(TAG)/ -o /tmp/fs-$(TAG).tgz $(TAG)
+#
+# the following works to make an archive for commits after 10.0.0-alpha2
+# checkout the commit and then 'make archive'
+archive:
+	git archive --format=tgz --prefix=usr2/fs-$(FS_COMMIT)/ -o /tmp/fs-$(FS_COMMIT).tgz HEAD
