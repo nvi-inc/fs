@@ -3,6 +3,11 @@ set -e
 # For UEFI systems with GPT LVM RAID arrays, copies the partition table
 # onto the second disk and adds a disk into the array
 
+if ! lsblk | grep -q ^sdb; then
+        echo "ERROR: \"Secondary\" device sdb not inserted/turned-on!!"
+        exit 1
+fi
+
 if mdadm --detail /dev/md0 | grep -q /dev/sdb; then
         echo "ERROR: \"Secondary\" disk /dev/sdb is already active!!"
         exit 1
@@ -32,8 +37,13 @@ mount /dev/sda1 /boot/efi
 echo "Adding \"Secondary\" disk /dev/sdb to RAID array /dev/md0 ... "
 echo "(This may safely be interrupted with 'Control-C' if you don't want to wait)"
 mdadm /dev/md0 -a /dev/sdb2
+while ! grep -q recovery /proc/mdstat; do 
+	echo "Waiting for recovery ..."
+	sleep 1;
+done
+#
 while grep -q recovery /proc/mdstat; do 
-    recovery=$(grep recovery /proc/mdstat | cut -c32-$)
+    recovery=$(grep recovery /proc/mdstat | cut -c32-)
 	echo -e -n "\r$recovery"
 	sleep 1;
 done
