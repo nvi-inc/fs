@@ -45,13 +45,9 @@ set savehist = 50
 umask 022
 set ignoreeof
 setenv PAGER "less -i"
-setenv EDITOR emacs
-setenv LESS -X
-if (-X fort77) then
- setenv FC fort77
-else
- setenv FC f77
-endif
+setenv EDITOR vim
+setenv LESS -XR
+setenv FC f95
 #check for mail on login
 test ! -f /var/mail/prog || from
 #setenv FS_CHECK_NTP

@@ -42,8 +42,8 @@ set savehist = 50
 umask 022
 set ignoreeof
 setenv PAGER "less -i"
-setenv EDITOR vi
-setenv LESS -X
+setenv EDITOR vim
+setenv LESS -XR
 #check for mail on login
 test ! -f /var/mail/oper || from 
 #setenv FS_CHECK_NTP

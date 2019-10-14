@@ -31,6 +31,7 @@ fi
 if ! (echo $PATH | fgrep . >/dev/null); then 
  PATH=${PATH}:.
 fi
+umask 022
 export EDITOR=vim
 export LESS=-XR
 export FC=f95

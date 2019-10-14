@@ -28,7 +28,8 @@ fi
 if ! (echo $PATH | fgrep . >/dev/null); then 
  PATH=${PATH}:.
 fi
-export EDITOR=vi
+umask 022
+export EDITOR=vim
 export LESS=-XR
 #FS_CHECK_NTP=
 #export FS_CHECK_NTP
