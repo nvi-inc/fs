@@ -12,7 +12,7 @@ C
       integer iwpos(msorc)
 C
       logical kfild,kreof,kopn,kread,kif
-      integer idcb(1)
+      integer idcb(2)
 C
       integer fmpread, ichcm_ch, trimlen
       integer*2 lnosr( 9),l2mny(18),lnosrs,l2mnys
