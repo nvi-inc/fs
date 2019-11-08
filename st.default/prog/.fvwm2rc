@@ -253,6 +253,9 @@ Style "*"          Color black/khaki
 Style "monit*" NeverFocus
 Style "monpcal" NeverFocus
 Style "xconsole" NeverFocus
+Style "erchk" NeverFocus
+Style "scnch" NeverFocus
+Style "monan" NeverFocus
 Style "Field System Prompt*" StaysOnTop
 IgnoreModifiers L2
 
