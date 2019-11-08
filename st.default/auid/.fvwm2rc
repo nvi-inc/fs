@@ -253,6 +253,9 @@ Style "*"          Color black/khaki
 Style "monit*" NeverFocus
 Style "monpcal" NeverFocus
 Style "xconsole" NeverFocus
+Style "monan" NeverFocus
+Style "scnch" NeverFocus
+Style "erchk" NeverFocus
 Style "Field System Prompt*" StaysOnTop
 IgnoreModifiers L2
 
@@ -488,7 +491,7 @@ AddToMenu "Utilities" "Utilities" Title
 
 # Root menu
 AddToMenu "Root Menu" "Root Menu" Title
-+              "New Window" Exec exec xterm -ls -g 80x24+75+75 -rw
++              "New Window" Exec exec xterm -title 'AUID xterm' -ls -g 80x24+125+125 -rw
 #	CirculateUp	"Shuffle Up"
 #	CirculateDown	"Shuffle Down"
 +              "Refresh" Refresh
@@ -515,19 +518,20 @@ AddToMenu "Window Ops" "Window Ops" Title
 
 # Operator menu
 AddToMenu "Operator Menu" "Operator Menu" Title
-+              "Monit: time C-S-1" Exec exec xterm -name monit1 -e monit1
-+              "Monit: status C-S-2" Exec exec xterm -name monit2 -e monit2
-+              "Monit: Tsys C-S-3" Exec exec xterm -name monit3 -e monit3
-+              "Monit: LBA C-S-4" Exec exec xterm -name monit4 -e monit4
-+              "Monit: Mark 5 C-S-5" Exec exec xterm -name monit5 -e monit5
-+              "Monit: PCal C-S-6" Exec exec monpcal
-+              "Chekr C-S-C" Exec exec run -w chekr
-+              "Emacs C-S-E" Exec exec emacs
-+              "Logex C-S-L" Exec exec xterm -name logex -e logex
-+              "Pfmed C-S-P" Exec exec xterm -name pfmed -e pfmed
-+              "Setcl C-S-S" Exec exec run -w setcl
-+              "Fmset C-S-T" Exec exec xterm -name fmset -e fmset
-+              "New window C-S-W" Exec exec xterm -ls -g 80x24+75+75
++              "Monit: time C-S-1" Exec exec oper_account xterm -name monit1 -e monit1
++              "Monit: status C-S-2" Exec exec oper_account xterm -name monit2 -e monit2
++              "Monit: Tsys C-S-3" Exec exec oper_account xterm -name monit3 -e monit3
++              "Monit: LBA C-S-4" Exec exec oper_account xterm -name monit4 -e monit4
++              "Monit: Mark 5 C-S-5" Exec exec oper_account xterm -name monit5 -e monit5
++              "Monit: PCal C-S-6" Exec exec oper_account monpcal
++              "Chekr C-S-C" Exec exec oper_account run -w chekr
++              "Emacs C-S-E" Exec exec oper_account emacs
++              "Logex C-S-L" Exec exec oper_account xterm -name logex -e logex
++              "Pfmed C-S-P" Exec exec oper_account xterm -name pfmed -e pfmed
++              "Setcl C-S-S" Exec exec oper_account run -w setcl
++              "Fmset C-S-T" Exec exec oper_account xterm -name fmset -e fmset
++              "New window C-S-W" Exec exec oper_account xterm -ls -g 80x24+75+75
++              "prog window C-S-X" Exec exec prog_account xterm -title 'prog xterm' -ls -g 80x24+175+175
 +              "" Nop
 +              "Window Ops" Popup Window Ops
 
@@ -614,19 +618,20 @@ Mouse 3         W       M       RaiseLower
 ############################################################################
 # Now some keyboard shortcuts.
 
-Key 1 A CS Exec exec xterm -name monit1 -e monit1
-Key 2 A CS Exec exec xterm -name monit2 -e monit2
-Key 3 A CS Exec exec xterm -name monit3 -e monit3
-Key 4 A CS Exec exec xterm -name monit4 -e monit4
-Key 5 A CS Exec exec xterm -name monit5 -e monit5
-Key 6 A CS Exec exec monpcal
-Key c A CS Exec exec run -w chekr
-Key e A CS Exec exec emacs
-Key l A CS Exec exec xterm -name logex -e logex
-Key p A CS Exec exec xterm -name pfmed -e pfmed
-Key s A CS Exec exec run -w setcl
-Key t A CS Exec exec xterm -name fmset -e fmset
-Key w A CS Exec exec xterm -ls -g 80x24+75+75 -rw
+Key 1 A CS Exec exec oper_account xterm -name monit1 -e monit1
+Key 2 A CS Exec exec oper_account xterm -name monit2 -e monit2
+Key 3 A CS Exec exec oper_account xterm -name monit3 -e monit3
+Key 4 A CS Exec exec oper_account xterm -name monit4 -e monit4
+Key 5 A CS Exec exec oper_account xterm -name monit5 -e monit5
+Key 6 A CS Exec exec oper_account monpcal
+Key c A CS Exec exec oper_account run -w chekr
+Key e A CS Exec exec oper_account emacs
+Key l A CS Exec exec oper_account xterm -name logex -e logex
+Key p A CS Exec exec oper_account xterm -name pfmed -e pfmed
+Key s A CS Exec exec oper_account run -w setcl
+Key t A CS Exec exec oper_account xterm -name fmset -e fmset
+Key w A CS Exec exec oper_account xterm -ls -g 80x24+75+75 -rw
+Key x A CS Exec exec prog_account xterm -ls -title 'prog xterm' -g 80x24+175+175 -rw
 #Key Escape	A	SC	CirculateDown
 #Key Escape	A	C	CirculateUp
 Key Escape      A       C       Prev (AcceptsFocus) Focus

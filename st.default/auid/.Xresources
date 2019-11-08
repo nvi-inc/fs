@@ -7,72 +7,11 @@
 !emacs needs a font with a better boldface
 emacs.geometry:		80x26
 emacs*font:		-bitstream-terminal-medium-r-normal--*-*-*-*-*-*-iso8859-1
-!
-! Utilities
-! xclock
-XClock*geometry:	84x84-0+0
-XClock*padding:		2
-XClock*chime:		true
-XClock*update:		1
-XClock*borderWidth:	1
-XClock*title:		UT
-! xcalc
-XCalc*geometry:		-0-0
-! xload
-XLoad*geometry:		-0-0
-!
-! FS windows
-! fmset
-fmset*geometry:	80x24+75+75
-fmset*scrollBar:	false
-! logex
-logex*geometry:		80x24+75+75
-logex*scrollBar:	true
-! pfmed
-pfmed*geometry:		80x24+75+75
-pfmed*scrollBar:	true
-! oprin
-oprin.title:		Operator Input
-oprin*geometry:		80x5+0-0
-oprin*scrollBar:	true
-oprin*saveLines:	100
-oprin*VT100.Translations:	#override\
-	~Ctrl ~Meta <Btn2Up>:	ignore()
-! monit1 (single line, time)
-monit1*geometry:	40x1-0+0
-monit1.title:		Field System Time
-monit1*border:		PaleGreen3
-! monit2 (standard display, 6 lines)
-monit2*geometry:	81x6-0+0
-monit2.title:		System Status Monitor
-monit2.input:		false
-! monit3 (Tsys display, 19 lines)
-monit3*geometry:	32x19-0+120
-monit3.title:		System Temperatures
-! monit4 (LBA display, 24 lines)
-monit4*geometry:	80x24-0+160
-monit4.title:		LBA DAS Monitor
-monit4*font:		fixed
-! monit5 (Mark 5 display, 24 lines)
-monit5*geometry:	46x3-0+157
-monit5.title:		Mark 5 Remaining Capacity
-! monit6 (RDBE display, 5 lines)
-monit6*geometry:        94x5-0+156
-monit6.title:           RDBE Monitor
-monit6.input:           false
 !login shell
 login_sh.title:		login shell
 login_sh*scrollBar:	true
 login_sh*saveLines:	500
-login_sh*geometry:	99x24+0+0
+login_sh*geometry:	140x24+0+0
+login_sh*font:		10x20
 login_sh*VT100.Translations:	#override\
 	~Ctrl ~Meta <Btn2Up>:	ignore()
-!xterm
-xterm.input:            false
-xterm*scrollBar:	true
-xterm*jumpScroll:	false
-!autoftp
-autoftp*geometry:	80x5-0+253
-autoftp*title:		autoftp
-!greplog
-greplog*title:		greplog

@@ -8,4 +8,4 @@ xset s 3600
 xmodmap -e "clear Mod5"
 xsetroot -solid SlateGrey
 fvwm &
-xterm -C -ls  -name login_sh -fn 10x20 -geometry 99x24+0+0
+xterm -C -ls  -name login_sh
