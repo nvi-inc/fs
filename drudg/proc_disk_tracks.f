@@ -50,7 +50,8 @@
 ! 2016Apr07 JMG. Fixed format in writing out fila10g. Was writing, ",=" instead of "=," 
 ! 2016Sep11 JMG. Increased dim lsked_csb: max_csb-->2*max_csb.  Schedule fr036 HH caused problems
 ! 2018Aug18 JMG. Increased size of mask to 64 bits. Added support for wastro, geo2 for vsi1 and vsi2. 
-! 2019Aug26 JMG. Removed deubugging statement
+! 2019Aug26 JMG. Removed deubugging statement.
+! 2019Nov08 JMG. Made writing out which mode checking contingent on kdebug=.true.
 
 
 ! local
@@ -308,7 +309,7 @@
 !         endif 
        endif   
 
-       write(*,'(a,$)') "Checking bit_masks: "
+       if(kdebug) write(*,'(a,$)') "Checking bit_masks: "
 
 ! ************************END OF GENERATING TRACK LIST****************************
 
@@ -317,7 +318,7 @@
 ! Check vlba mode.    
         lbit_mask_mode="vlba" 
         nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
+        if(kdebug)  write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
         call check_csb_list(lvlba_csb,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300   
@@ -325,7 +326,7 @@
 ! check vlbac_geo mode. 
         lbit_mask_mode="geo"
         nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
+        if(kdebug)  write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
         call check_csb_list(lvlbac_geo,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300 
@@ -345,7 +346,7 @@
 
         lbit_mask_mode="vlba"
         nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
+        if(kdebug)  write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
         call check_csb_list(lvlba_csb,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300       
@@ -353,14 +354,14 @@
 
         lbit_mask_mode="geo_t"
         nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch)  
+        if(kdebug) write(*,'(1x,a,$)') lbit_mask_mode(1:nch)  
         call check_csb_list(lcdas_geo_t,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300 
       
         lbit_mask_mode="geo_r"
         nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
+        if(kdebug) write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
         call check_csb_list(lcdas_geo_r,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300 
@@ -368,7 +369,7 @@
     
         lbit_mask_mode="vlba_l"
         nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
+        if(kdebug) write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
         call check_csb_list(lcdas_vlba_l,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300        
@@ -376,7 +377,7 @@
 
         lbit_mask_mode="vlba_u" 
         nch=trimlen(lbit_mask_mode)
-        write(*,'(1x,a,$)') lbit_mask_mode(1:nch)  
+        if(kdebug) write(*,'(1x,a,$)') lbit_mask_mode(1:nch)  
         call check_csb_list(lcdas_vlba_u,max_csb,  
      >                      lsked_csb,num_tracks,imask,ierr)
         if(ierr .eq. 0) goto 300           
@@ -391,7 +392,7 @@
       if(.not.(kdbbc_rack .or. kcomment_only)) goto 110
       lbit_mask_mode="astro3"
       nch=trimlen(lbit_mask_mode)
-      write(*,'(1x,a,$)') lbit_mask_mode(1:nch)   
+      if(kdebug) write(*,'(1x,a,$)') lbit_mask_mode(1:nch)   
       call check_csb_list(lastro3_csb,max_csb,  
      >                    lsked_csb,  num_tracks,imask,ierr)
       if(ierr .ne. 0) goto 110
@@ -420,7 +421,7 @@
 ! Check to see if a valid geo mode.
       lbit_mask_mode="geo" 
       nch=trimlen(lbit_mask_mode)
-      write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
+      if(kdebug) write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
       call check_csb_list(lgeo_csb, max_csb,
      >                    lsked_csb,num_tracks,imask,ierr)
       if(ierr .eq. 0) goto 300           
@@ -429,7 +430,7 @@
 ! Note: astro is the same as the first half of wastro. 
       lbit_mask_mode="astro"
       nch=trimlen(lbit_mask_mode)
-      write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
+      if(kdebug) write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
       call check_csb_list(lastro_csb, max_csb,
      >                    lsked_csb,num_tracks,imask,ierr)
       if(ierr .eq. 0) goto 300         
@@ -438,7 +439,7 @@
 ! Check to see if a valid astro2 mode.
       lbit_mask_mode="astro2" 
       nch=trimlen(lbit_mask_mode)
-      write(*,'(1x,a,$)') lbit_mask_mode(1:nch)   
+      if(kdebug) write(*,'(1x,a,$)') lbit_mask_mode(1:nch)   
       call check_csb_list(lastro2_csb, max_csb,
      >                    lsked_csb,num_tracks,imask,ierr)   
       if(ierr .eq. 0) goto 300             
@@ -452,7 +453,7 @@
 ! Check to see if a valid geo2 mode with VSI1
       lbit_mask_mode="geo2" 
       nch=trimlen(lbit_mask_mode)
-      write(*,'(1x,a,$)') lbit_mask_mode(1:nch)//"-vsi1-2"
+      if(kdebug) write(*,'(1x,a,$)') lbit_mask_mode(1:nch)//"-vsi1-2"
       call check_csb_list(lgeo2_csb, max_csb*2,
      >                    lsked_csb,num_tracks,imask,ierr)   
 
@@ -463,7 +464,7 @@
 ! check wastro mode in vsi1-2    
       lbit_mask_mode="wastro"
       nch=trimlen(lbit_mask_mode)  
-      write(*,'(1x,a,$)') lbit_mask_mode(1:nch)//"-vsi1-2"
+      if(kdebug) write(*,'(1x,a,$)') lbit_mask_mode(1:nch)//"-vsi1-2"
       call check_csb_list(lwastro_csb, 2*max_csb,
      >                    lsked_csb,num_tracks,imask,ierr)
       kwastro = ierr .eq. 0
@@ -498,12 +499,13 @@
 !
 ! A little bit of cleanup.
 300   continue
-      write(*,*) " " 
-      write(*,'(a)') " Success! mode="//lbit_mask_mode 
+      if(kdebug) then
+        write(*,*) " " 
+        write(*,'(a)') " Success! mode="//lbit_mask_mode 
+      endif 
 
 !      write(*,'(a)') " Using: ",lbit_mask_mode
 
-      write(*,*) "REC =", cstrec(istn,1) 
       if(cstrec(istn, 1) .eq. "none") goto 305
 
 ! Previously checked that num_tracks <= max_csb so we don't need to check that here.

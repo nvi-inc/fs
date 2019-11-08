@@ -772,8 +772,7 @@ C         Force new tape on the first scan on tape.
           if(km6disk) then           
              idata_mk6_scan_mb=
      >       (itearl(istn)+itlate(istn)+idur(istnsk))*idata_mbps(istn)
-            write(*,*) idata_mk6_scan_mb
-    
+     
             if(itime_tape_start_prev(1) .ne. 0) then 
               imk6_buf_time= imark6_off + 
      >           float(idata_mk6_scan_mb_prev)/isink_mbps(istn)              
@@ -1081,9 +1080,7 @@ C prior to this scan. Do only on a new pass for continuous.
             call drudg_write(lufile,csetup_name)                         
            
             if(km6disk) then
-              write(*,*) "idata... ",idata_mk6_scan_mb
-             write(*,*) "idata... ",idata_mk6_scan_mb/(1024*8)
-
+ 
               write(ldum,'("mk6=record=",
      >         i4.4,"y",i3.3,"d",i2.2,"h", i2.2,"m",i2.2,"s",":",
      >         i6,":",i6,":",a,":",a,":",a,";")')
@@ -1092,7 +1089,6 @@ C prior to this scan. Do only on a new pass for continuous.
      >         trim(scan_name(iskrec(iobs_now))) ,trim(lsession),
      >         cpocod(istn)                             
               call drudg_write(lufile,ldum)     
-              write(*,*) ldum 
 !              stop  
             endif            
        
