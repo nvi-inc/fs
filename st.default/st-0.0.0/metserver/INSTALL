@@ -34,7 +34,10 @@ Field System software.
      |-- Makefile    - The make file for compiling Library, Server and Client.
      |-- INSTALL     - Installation instructions for server and client(s).
      |-- README      - Information.
-     |-- metserver.sh - bootup script.
+     |-- metserver.sh - bootup script for init.d.
+     |-- metserver.sh.example - example bootup script for systemd.
+     |-- metserver_systemd.sh - bootup script for init.d.
+     |-- metserver_systemd.sh.example - example bootup script for systemd.
      |-- metserver   - executable.
      |-- port        - Source directory for opening and closing selected ports.
      |   |-- Makefile - The make file for making port.a library archive.
