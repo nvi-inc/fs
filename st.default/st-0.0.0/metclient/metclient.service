@@ -1,0 +1,9 @@
+[Unit]
+Description=metclient service.
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /usr2/st/metclient/metclient_systemd.sh
+
+[Install]
+WantedBy=multi-user.target
