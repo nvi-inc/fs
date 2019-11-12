@@ -109,7 +109,7 @@ IMPORTANT NOTE: You must supply values (even if the default) for all
                   the fan is monitored and an error is reported. Any other
                   values are currently equivalent to MET4, which also supports
                   MET3.
-		The sixth parameter is an error suppression flagR. If the MET
+		The sixth parameter is an error suppression flag. If the MET
                   device consistently returns a bad value for a field, the
                   error can be suppressed. It is an integer value, usually hex.
                   It is an "OR" of the individual flags:
@@ -117,16 +117,18 @@ IMPORTANT NOTE: You must supply values (even if the default) for all
                       0x2   ignore temperature errors
                       0x4   ignore pressure errors
 
-    prompt> log in as root
-    prompt> /usr2/st/metserver/metserver /dev/ttyS19 /dev/ttyS18 50001 &
+    prompt> /usr2/st/metserver/metserver /dev/ttyS19 /dev/ttyS18 50001 remote MET4A 0x3
                                          (metsensor) (windsensor)
 
-2.) If you would like metserver to startup at boot time.
-    Special NOTICE: Please edit the script to use your port locations,
-                    before you proceed.
+2.) If you would like metserver to startup at boot time and your system uses
+    init.d. See #3 below for systemd instructions.
+
+    Special NOTICE: Please edit the script to use your port locations
+                    and other settings before you proceed.
 
     Modify MET= and WIND= with your own port numbers and PORT= with your
     own network port number (if not default) in the metserver.sh file.
+    Also set LOCAL=, DEVICE=, and FLAGS= as appropriate.
 
     prompt> log in as root
     prompt> cd /etc/init.d
@@ -161,7 +163,36 @@ IMPORTANT NOTE: You must supply values (even if the default) for all
               should have been deleted already. Flag '-f' will force removal
               of symlinks even if /etc/init.d/metserver.sh still exists.   
 
- ===== Read the README information. =====
+3.) If you would like metserver to startup at boot time and your system uses
+    systemd. See #2 above for init.d instructions.
+
+    Special NOTICE: Please edit the script to use your port locations
+                    and other settings before you proceed.
+
+    Modify MET= and WIND= with your own port numbers and PORT= with your
+    own network port number (if not default) in the metserver.sh file.
+    Also set LOCAL=, DEVICE=, and FLAGS= as appropriate.
+
+    prompt> log in as root
+    prompt> cd /usr2/st/metserver
+    prompt> cp -i metserver.service /etc/systemd/system/
+    prompt> chmod 644 /etc/systemd/system/metserver.service
+    prompt> systemctl start metserver
+    prompt> systemctl enable metserver
+
+    a.) If you wish to stop the metserver for some reason.
+        as root:
+
+        systemctl stop     metserver   (will stop the metserver)
+        systemctl start    metserver   (will start it up again)
+        systemctl restart  metserver   (will stop then start)
+
+    b.) If you no longer want the server to startup at boot time you
+        disable it.
+        
+        systemctl disable metserver
+ 
+4.)  ===== Read the README information. =====
 
 You're done!
 
