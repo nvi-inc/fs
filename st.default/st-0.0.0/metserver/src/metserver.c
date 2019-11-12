@@ -19,7 +19,7 @@
 #include <netdb.h>      /* For structure addrinfo. */
 #include <time.h>
 
-char *metget(char*, char*); 
+char *metget(char*, char*, unsigned int); 
 
 #define MYPORT 50001    /* the port users will be connecting to */
 
