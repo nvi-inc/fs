@@ -527,10 +527,11 @@ AddToMenu "Operator Menu" "Operator Menu" Title
 +              "Chekr C-S-C" Exec exec oper_account run -w chekr
 +              "Emacs C-S-E" Exec exec oper_account emacs
 +              "Logex C-S-L" Exec exec oper_account xterm -name logex -e logex
++              "msg   C-S-M" Exec exec oper_account msg
 +              "Pfmed C-S-P" Exec exec oper_account xterm -name pfmed -e pfmed
 +              "Setcl C-S-S" Exec exec oper_account run -w setcl
 +              "Fmset C-S-T" Exec exec oper_account xterm -name fmset -e fmset
-+              "New window C-S-W" Exec exec oper_account xterm -ls -g 80x24+75+75
++              "oper window C-S-W" Exec exec oper_account xterm -ls -g 80x24+75+75
 +              "prog window C-S-X" Exec exec prog_account xterm -title 'prog xterm' -ls -g 80x24+175+175
 +              "" Nop
 +              "Window Ops" Popup Window Ops
@@ -627,6 +628,7 @@ Key 6 A CS Exec exec oper_account monpcal
 Key c A CS Exec exec oper_account run -w chekr
 Key e A CS Exec exec oper_account emacs
 Key l A CS Exec exec oper_account xterm -name logex -e logex
+Key m A CS Exec exec oper_account msg
 Key p A CS Exec exec oper_account xterm -name pfmed -e pfmed
 Key s A CS Exec exec oper_account run -w setcl
 Key t A CS Exec exec oper_account xterm -name fmset -e fmset

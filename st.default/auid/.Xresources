@@ -15,3 +15,8 @@ login_sh*geometry:	140x24+0+0
 login_sh*font:		10x20
 login_sh*VT100.Translations:	#override\
 	~Ctrl ~Meta <Btn2Up>:	ignore()
+!xterm
+xterm.input:            false
+xterm*scrollBar:	true
+xterm*jumpScroll:	false
+xterm*font:		10x20
