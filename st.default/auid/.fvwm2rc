@@ -531,7 +531,7 @@ AddToMenu "Operator Menu" "Operator Menu" Title
 +              "Pfmed C-S-P" Exec exec oper_account xterm -name pfmed -e pfmed
 +              "Setcl C-S-S" Exec exec oper_account run -w setcl
 +              "Fmset C-S-T" Exec exec oper_account xterm -name fmset -e fmset
-+              "oper window C-S-W" Exec exec oper_account xterm -ls -g 80x24+75+75
++              "oper window C-S-W" Exec exec oper_account xterm -title 'oper xterm' -ls -g 80x24+75+75
 +              "prog window C-S-X" Exec exec prog_account xterm -title 'prog xterm' -ls -g 80x24+175+175
 +              "" Nop
 +              "Window Ops" Popup Window Ops
@@ -632,7 +632,7 @@ Key m A CS Exec exec oper_account msg
 Key p A CS Exec exec oper_account xterm -name pfmed -e pfmed
 Key s A CS Exec exec oper_account run -w setcl
 Key t A CS Exec exec oper_account xterm -name fmset -e fmset
-Key w A CS Exec exec oper_account xterm -ls -g 80x24+75+75 -rw
+Key w A CS Exec exec oper_account xterm -ls -title 'oper xterm' -g 80x24+75+75 -rw
 Key x A CS Exec exec prog_account xterm -ls -title 'prog xterm' -g 80x24+175+175 -rw
 #Key Escape	A	SC	CirculateDown
 #Key Escape	A	C	CirculateUp
