@@ -47,6 +47,7 @@ int *ierr;
 	int out_recs;
 	int out_class;
 	char buff[80];
+        int formtime32;
 
 	if(synch) {
 	  int i, iwait;
@@ -299,6 +300,7 @@ int *ierr;
 	  *unixhs=*unixhs%100;
 	}
 
-        rte2secs(it,formtime);
+        rte2secs(it,&formtime32);
+        *formtime=formtime32;
         *formhs=it[0];
 }

@@ -25,6 +25,7 @@ int kfirst;
 int i,j;
 struct tm *tp;
 int fila10g;
+int ut32;
 
 month[0] = 365; month[1] = 31; month[2] = 28; month[3] = 31; month[4] = 30;
 month[5] = 31; month[6] = 30; month[7] = 31; month[8] = 31;
@@ -141,7 +142,8 @@ it[3]=sethh;
 it[4]=yday;
 it[5]=setyy;
   /* not Y2038 compliant */
-rte2secs(it,&ut);
+rte2secs(it,&ut32);
+ut=ut32;
 if(ut >= 0)
   *flag=TRUE;
 

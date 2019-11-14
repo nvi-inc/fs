@@ -12,7 +12,8 @@ void rte_rawt();
 void rte_fixt();
 
 void secs2rte(secs,it)
-time_t *secs;
+//time_t *secs;
+int    *secs;
 int it[5];
 {
      struct tm *ptr;

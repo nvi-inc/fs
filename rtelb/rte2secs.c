@@ -15,6 +15,7 @@
 void rte2secs(it,seconds)
 int it[6];
 int *seconds;
+//time_t *seconds;
 {
  
   int year,numleap,nonleap;

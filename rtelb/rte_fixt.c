@@ -10,7 +10,8 @@
 #include "../include/shm_addr.h"
 
 void rte_fixt( poClock, plCentiSec)
-time_t *poClock;
+//time_t *poClock;
+int    *poClock;
 int *plCentiSec;
 {
   
