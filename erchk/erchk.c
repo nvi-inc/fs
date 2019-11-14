@@ -60,7 +60,7 @@ int read_ssub() {
 
   close(pipefd[READ_END]);
   dup2(pipefd[WRITE_END], STDOUT_FILENO);
-  execlp("ssub", "ssub", "-w", FS_SERVER_URL_BASE "/windows/fs/pub", FS_SERVER_URL_BASE "/windows/fs/rep", NULL);
+  execlp("ssub", "ssub", "-w", "-s", FS_SERVER_URL_BASE "/windows/fs/pub", FS_SERVER_URL_BASE "/windows/fs/rep", NULL);
   perror("erchk: error starting ssub");
   exit(EXIT_FAILURE);
 
