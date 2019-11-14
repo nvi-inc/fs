@@ -24,7 +24,8 @@
 int rte_secs();
 
 int rte_sett( oFmClock, iFmHs, lCentiSec, sMode)
-time_t oFmClock;
+//time_t oFmClock;
+int    oFmClock;
 int iFmHs;
 int lCentiSec;
 char *sMode;

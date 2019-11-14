@@ -38,6 +38,7 @@ int *vdif_epoch;
 	int out_class;
 	char *digits[ ]={"8","7","6","5","4","3","2","1","0"};
 	int start_raw,now_raw;
+        int formtime32;
 
 	if(synch) {
           int i;
@@ -222,6 +223,7 @@ int *vdif_epoch;
 	  *unixhs=*unixhs%100;
 	}
 
-        rte2secs(it,formtime);
+        rte2secs(it,&formtime32);
+        *formtime=formtime32;
         *formhs=it[0];
 }
