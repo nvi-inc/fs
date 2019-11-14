@@ -17,9 +17,6 @@ endif
 if (! { (echo $PATH |fgrep /usr/games >/dev/null) } ) then
   setenv PATH ${PATH}:/usr/games
 endif
-if (! { (echo $PATH |fgrep . >/dev/null) } ) then
-  setenv PATH ${PATH}:.
-endif
 #
 set tty=`tty`
 stty echoe kill ^X erase '^?' intr ^C

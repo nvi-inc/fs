@@ -28,9 +28,7 @@ fi
 if ! (echo $PATH | fgrep /usr/games >/dev/null); then 
  PATH=${PATH}:/usr/games
 fi
-if ! (echo $PATH | fgrep . >/dev/null); then 
- PATH=${PATH}:.
-fi
+#
 umask 022
 export EDITOR=vim
 export LESS=-XR
