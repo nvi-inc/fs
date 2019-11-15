@@ -251,11 +251,9 @@ Style "oprin"	   NoButton 1, NoButton 2, NoButton 4, NoHandles
 Style "fmset"      NoButton 1, NoButton 2, NoButton 4, NoHandles
 Style "*"          Color black/khaki
 Style "monit*" NeverFocus
-Style "monpcal" NeverFocus
 Style "xconsole" NeverFocus
 Style "erchk" NeverFocus
 Style "scnch" NeverFocus
-Style "monan" NeverFocus
 Style "Field System Prompt*" StaysOnTop
 IgnoreModifiers L2
 

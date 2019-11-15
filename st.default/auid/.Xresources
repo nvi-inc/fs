@@ -1,6 +1,7 @@
 ! .Xresources file
 *background:		linen
 *font:			10x20
+*vt100*font:		10x20
 *VT100*foreground:	black
 *VT100*background:	linen
 !emacs
@@ -11,12 +12,6 @@ emacs*font:		-bitstream-terminal-medium-r-normal--*-*-*-*-*-*-iso8859-1
 login_sh.title:		login shell
 login_sh*scrollBar:	true
 login_sh*saveLines:	500
-login_sh*geometry:	140x24+0+0
-login_sh*font:		10x20
+login_sh*geometry:	109x24+0+0
 login_sh*VT100.Translations:	#override\
 	~Ctrl ~Meta <Btn2Up>:	ignore()
-!xterm
-xterm.input:            false
-xterm*scrollBar:	true
-xterm*jumpScroll:	false
-xterm*font:		10x20
