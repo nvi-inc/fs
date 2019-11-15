@@ -37,6 +37,8 @@ int *raw;
 	char *name;
 	char buff[80];
 	int isynch;
+        int formtime32;
+        int fstime32;
 
 	if (tmget[0] == 0) {
 		tmget[0]=-54;
@@ -127,7 +129,9 @@ int *raw;
 
 	sscanf(inbuf+2,"%d %d %d:%d:%d.%d",it+5,it+4,it+3,it+2,it+1,&ms);
         it[0]=ms/10;
-        rte2secs(it,formtime);
+//        rte2secs(it,formtime);
+        rte2secs(it,&formtime32);
+        *formtime=formtime32;
         *formhs = (ms+5)/10;
 	if(*formhs>99) {
 	  *formhs-=100;
@@ -154,7 +158,9 @@ int *raw;
         centiavg= centisec[0]+centidiff/2;
 	*raw=centiavg;
 
-        rte_fixt(fstime,&centiavg);
+//        rte_fixt(fstime,&centiavg);
+        rte_fixt(&fstime32,&centiavg);
+        *fstime=fstime32;
         *fshs=centiavg;
         
 }

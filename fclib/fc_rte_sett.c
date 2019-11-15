@@ -3,7 +3,8 @@
 #include <time.h>
 
 int fc_rte_sett__( poFmClock, piFmHs, plCentiSec, pcMode, iLenMode)
-time_t *poFmClock;
+//time_t *poFmClock;
+int *poFmClock;
 int *piFmHs;
 int *plCentiSec;
 char *pcMode;

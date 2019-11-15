@@ -47,6 +47,8 @@ int    *formhs;
 	int out_class;
 	int decimate;
 	char buff[80];
+        int formtime32;
+        int fstime32;
 
 	if(synch) {
 	  int i, iwait;
@@ -359,7 +361,9 @@ int    *formhs;
 	
         centidiff =centisec[1]-centisec[0];
         centiavg= centisec[0]+centidiff/2;
-        rte_fixt(fstime,&centiavg);
+//        rte_fixt(fstime,&centiavg);
+        rte_fixt(&fstime32,&centiavg);
+        *fstime=fstime32;
         *fshs=centiavg;
 
 	hsdiff=(centisec[3]-centisec[2])*100+centisec[5]-centisec[4];
@@ -370,7 +374,9 @@ int    *formhs;
 	  *unixhs=*unixhs%100;
 	}
 
-        rte2secs(it,formtime);
+//        rte2secs(it,formtime);
+        rte2secs(it,&formtime32);
+        *formtime=formtime32;
         *formhs=0;
 }
 
