@@ -303,11 +303,10 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
  mvwaddstr( maindisp, hint_row+2, column, buffer);
  sprintf(buffer, "    '.'     to set %s time to Field System time.",form);
  mvwaddstr( maindisp, hint_row+3, column, buffer);
- irow=3;
+ irow=4;
  if(source==RDBE) {
    if(vdif_epoch < vdif_should) {
      sprintf(buffer,"    '>'     to increment %s VDIF epoch." ,form);
-     irow++;
    }
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
    sprintf(buffer,"    '<'     to decrement %s VDIF epoch." ,form);
