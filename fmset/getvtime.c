@@ -21,6 +21,8 @@ int    *formhs;
 {
 	int centisec[6], centiavg, centidiff, hsdiff;
         int it[6];
+        int formtime32;
+        int fstime32;
 
         nsem_take("fsctl",0);
         if(get_vtime(centisec,it,ip,1)!=0) {
@@ -46,7 +48,9 @@ int    *formhs;
 	
         centidiff =centisec[1]-centisec[0];
         centiavg= centisec[0]+centidiff/2;
-        rte_fixt(fstime,&centiavg);
+//        rte_fixt(fstime,&centiavg);
+        rte_fixt(&fstime32,&centiavg);
+        *fstime=fstime32;
         *fshs=centiavg;
 
 	hsdiff=(centisec[3]-centisec[2])*100+centisec[5]-centisec[4];
@@ -57,6 +61,8 @@ int    *formhs;
 	  *unixhs=*unixhs%100;
 	}
 
-        rte2secs(it,formtime);
+//        rte2secs(it,formtime);
+        rte2secs(it,&formtime32);
+        *formtime=formtime32;
         *formhs=0;
 }

@@ -39,6 +39,7 @@ int *vdif_epoch;
 	char *digits[ ]={"8","7","6","5","4","3","2","1","0"};
 	int start_raw,now_raw;
         int formtime32;
+        int fstime32;
 
 	if(synch) {
           int i;
@@ -212,7 +213,9 @@ int *vdif_epoch;
         centiavg= centisec[0]+centidiff/2;
 	*raw=centiavg;
 
-        rte_fixt(fstime,&centiavg);
+//        rte_fixt(fstime,&centiavg);
+        rte_fixt(&fstime32,&centiavg);
+        *fstime=fstime32;
         *fshs=centiavg;
 
 	hsdiff=(centisec[3]-centisec[2])*100+centisec[5]-centisec[4];
@@ -223,6 +226,7 @@ int *vdif_epoch;
 	  *unixhs=*unixhs%100;
 	}
 
+//        rte2secs(it,formtime);
         rte2secs(it,&formtime32);
         *formtime=formtime32;
         *formhs=it[0];
