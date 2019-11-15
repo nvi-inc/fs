@@ -16,11 +16,14 @@ int it[5],*it6;
 {
      struct tm *ptr;
      time_t clock;
+     int clock32;
      int centisec;
 
      rte_rawt(&centisec);  /* retrieve the raw time */
 
-     rte_fixt(&clock, &centisec);	/* correct for clock drift model */
+//     rte_fixt(&clock, &centisec);	/* correct for clock drift model */
+     rte_fixt(&clock32, &centisec);	/* correct for clock drift model */
+     clock=clock32;
 
      ptr=gmtime(&clock);            /* store in rte exec(11 time buffer */
      it[0] = centisec%100;

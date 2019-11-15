@@ -48,6 +48,7 @@ int *ierr;
 	int out_class;
 	char buff[80];
         int formtime32;
+  int fstime32;
 
 	if(synch) {
 	  int i, iwait;
@@ -289,7 +290,9 @@ int *ierr;
         centiavg= centisec[0]+centidiff/2;
 	*raw=centiavg;
 
-        rte_fixt(fstime,&centiavg);
+//        rte_fixt(fstime,&centiavg);
+        rte_fixt(&fstime32,&centiavg);
+        *fstime=fstime32;
         *fshs=centiavg;
 
 	hsdiff=(centisec[3]-centisec[2])*100+centisec[5]-centisec[4];
@@ -300,6 +303,7 @@ int *ierr;
 	  *unixhs=*unixhs%100;
 	}
 
+//        rte2secs(it,formtime);
         rte2secs(it,&formtime32);
         *formtime=formtime32;
         *formhs=it[0];

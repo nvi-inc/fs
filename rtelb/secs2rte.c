@@ -17,8 +17,11 @@ int    *secs;
 int it[5];
 {
      struct tm *ptr;
+     time_t secs_t;
 
-     ptr=gmtime(secs);            /* store in rte exec(11 time buffer */
+//     ptr=gmtime(secs);            /* store in rte exec(11 time buffer */
+     secs_t=*secs;
+     ptr=gmtime(&secs_t);            /* store in rte exec(11 time buffer */
                                   /* assume centiseconds have been set */
      it[1]=ptr->tm_sec;
      it[2]=ptr->tm_min;
