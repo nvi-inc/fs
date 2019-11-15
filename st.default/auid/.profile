@@ -1,3 +1,7 @@
+#Most login shell commands go here in ~/.profile
+#bash specifc login shell commands go in ~/.bashrc_profile
+#Per shell, not just login shell, commands go in ~/.bashrc
+#
 if ! (echo $PATH | fgrep ~/bin >/dev/null); then 
  PATH=~/bin:${PATH}
 fi
@@ -20,6 +24,5 @@ if ! (echo $PATH | fgrep /usr/games >/dev/null); then
  PATH=${PATH}:/usr/games
 fi
 #
-umask 022
 export EDITOR=vim
 export LESS=-XR

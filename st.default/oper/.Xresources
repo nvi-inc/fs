@@ -1,6 +1,7 @@
 ! .Xresources file
 *background:		linen
 *font:			10x20
+*vt100*font:		10x20
 *VT100*foreground:	black
 *VT100*background:	linen
 !emacs
@@ -25,15 +26,12 @@ XLoad*geometry:		-0-0
 ! fmset
 fmset*geometry:	80x24+75+75
 fmset*scrollBar:	false
-fmset*font:		10x20
 ! logex
 logex*geometry:		80x24+75+75
 logex*scrollBar:	true
-logex*font:		10x20
 ! pfmed
 pfmed*geometry:		80x24+75+75
 pfmed*scrollBar:	true
-pfmed*font:		10x20
 ! oprin
 oprin.title:		Operator Input
 oprin*geometry:		140x5+0-0
@@ -41,34 +39,27 @@ oprin*scrollBar:	true
 oprin*saveLines:	100
 oprin*VT100.Translations:	#override\
 	~Ctrl ~Meta <Btn2Up>:	ignore()
-oprin*font:		10x20
 ! monit1 (single line, time)
 monit1*geometry:	40x1-0+0
 monit1.title:		Field System Time
 monit1*border:		PaleGreen3
-monit1*font:		10x20
 ! monit2 (standard display, 6 lines)
 monit2*geometry:	81x6-0+0
 monit2.title:		System Status Monitor
 monit2.input:		false
-monit2*font:		10x20
 ! monit3 (Tsys display, 19 lines)
 monit3*geometry:	32x19-0+120
 monit3.title:		System Temperatures
-monit3*font:		10x20
 ! monit4 (LBA display, 24 lines)
 monit4*geometry:	80x24-0+160
 monit4.title:		LBA DAS Monitor
-monit4*font:		10x20
 ! monit5 (Mark 5 display, 24 lines)
 monit5*geometry:	46x3-0+157
 monit5.title:		Mark 5 Remaining Capacity
-monit5*font:		10x20
 ! monit6 (RDBE display, 5 lines)
 monit6*geometry:        94x5-0+153
 monit6.title:           RDBE Monitor
 monit6.input:           false
-monit6*font:		10x20
 !erchk shell
 erchk.title:            Errors
 erchk*scrollBar:        true
@@ -76,7 +67,6 @@ erchk*saveLines:        500
 erchk*geometry:         140x10+0+706
 erchk*VT100.Translations:       #override\
         ~Ctrl ~Meta <Btn2Up>:   ignore()
-erchk*font:		10x20
 !scnch shell
 scnch.title:            scan_check
 scnch*scrollBar:        true
@@ -84,7 +74,6 @@ scnch*saveLines:        500
 scnch*geometry:         140x8+0+516
 scnch*VT100.Translations:       #override\
         ~Ctrl ~Meta <Btn2Up>:   ignore()
-scnch*font:		10x20
 !login shell
 login_sh.title:		login shell
 login_sh*scrollBar:	true
@@ -96,11 +85,8 @@ login_sh*VT100.Translations:	#override\
 xterm.input:            false
 xterm*scrollBar:	true
 xterm*jumpScroll:	false
-xterm*font:		10x20
 !autoftp
 autoftp*geometry:	80x5-0+253
 autoftp*title:		autoftp
-autoftp*font:		10x20
 !greplog
 greplog*title:		greplog
-greplog*font:		10x20
