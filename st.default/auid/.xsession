@@ -1,7 +1,7 @@
 #!/bin/sh
 source .profile
-#set blanking time to 1 hour
-xset s 3600
+#set blanking time to 1h5m
+xset s 3900 -dpms
 #adjusts bell if uncommented
 #xset b 100 2500 50
 # mask off Scroll Lock
