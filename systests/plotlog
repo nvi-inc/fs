@@ -756,13 +756,13 @@ $first=1;
 goto EXTRAS
     if defined($opt_1)||defined($opt_a)||defined($opt_n)||defined($opt_w)||defined($opt_p);
 
-if(defined(@wxtime)) {
+if(@wxtime) {
     &vu(\@wxtime, \@temp,"Temperature");
     &vu(\@wxtime, \@pres,"Pressure");
     &vu(\@wxtime, \@humid,"Humidity");
 }
 
-if(defined(@cablet)) {
+if(@cablet) {
     if(!defined($opt_r)) {
         for($i=0;$i<=$#cable;$i++) {
 	    next unless $cable[$i]=~/^$float_pattern$/ ;
@@ -821,7 +821,7 @@ if(defined(@cablet)) {
         &vu(\@cablet, \@cable,"Cable Counter (ms)");
     }
 }
-if(defined(@gpst)) {
+if(@gpst) {
     $avg=0;
     $count=0;
     for($i=0;$i<$gpsn;$i++) {
@@ -856,7 +856,7 @@ if(defined(@gpst)) {
     }
     &vu(\@gpst, \@gpsv,$label);
 }
-if(defined(@setcl)) {
+if(@setcl) {
      &vu(\@setclt, \@setcl,"setcl offset (0.01 s)");
 }
 for($i=1;$i<17;$i++) {
