@@ -2,10 +2,11 @@
 pwd := $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
 FS_DIRECTORY := $(shell echo $(pwd) | rev | cut -d/ -f1 | rev )
 #look for git first
-FS_VERSION := $(shell git describe --always --tags --dirty 2>/dev/null)
 FS_COMMIT := $(shell git describe --always --tags 2>/dev/null)
+ifneq ($(FS_COMMIT),)
+FS_VERSION := $(FS_COMMIT)$(shell git diff --quiet || echo "-dirty")
 #alternatvely an archive version
-ifeq ($(FS_VERSION),)
+else
 # there should be no other dashes except in the basename:
 #  fs-VERSION.SUBLEVEL.PATCHLEVEL-RELEASE
 #  -RELEASE is optional

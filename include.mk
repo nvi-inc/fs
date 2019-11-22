@@ -2,7 +2,9 @@
 
 ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
+ifndef FC
 FC = f95
+endif
 
 CFLAGS += -Werror=int-to-pointer-cast
 
@@ -86,6 +88,9 @@ $(DEPDIR)/%.d: ;
 .PRECIOUS: $(DEPDIR)/%.d
 
 include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(OBJECTS))))
+
+../bin/%: | %.f
+	$(FC) $+ $(LOADLIBES) $(LDLIBS) -o $@
 
 ../bin/%:
 	$(LINK.o) $+ $(LOADLIBES) $(LDLIBS) -o $@
