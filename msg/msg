@@ -775,9 +775,9 @@ set problem_scans_id [expr $problem_scans_id+1]
 #**********************************************************************************************#
 if {$form==0} {
 label  .gps_frame -width 25 -height 3 -bg SteelBlue3 -relief flat
-radiobutton .gps_fmout -text " GPS-FMOUT " -bg SteelBlue3 -fg white -relief flat -variable gps \
+radiobutton .gps_fmout -text " GPS-FMOUT " -bg SteelBlue3   -variable gps \
 -value 1
-radiobutton .fmout_gps -text " FMOUT-GPS " -bg SteelBlue3 -fg white -variable gps \
+radiobutton .fmout_gps -text " FMOUT-GPS " -bg SteelBlue3   -variable gps \
 -value 0
 entry  .gps-fmout_entry -width 12 -relief sunken -textvariable gps_fmout
 label  .gps_unit_label -text "microseconds" -bg SteelBlue3 -fg white -width 15
@@ -862,16 +862,16 @@ frame  .larger_frame -width 2c -height 1c -relief flat -bg SteelBlue3
 frame  .is_frame -width 2c -height 1c -relief flat -bg SteelBlue3
 label  .cable_label -text "Cable difference is:" -bg SteelBlue3 -fg white -width 25
 label  .longer_cable_label -text "longer cable makes the reading" -bg SteelBlue3 -fg white -width 31
-radiobutton .plus -text "larger " -bg SteelBlue3 -fg white -relief flat -variable cabel_sign \
+radiobutton .plus -text "larger " -bg SteelBlue3  -relief flat -variable cabel_sign \
 -value 1
-radiobutton .minus -text "smaller" -bg SteelBlue3 -fg white -variable cabel_sign \
+radiobutton .minus -text "smaller" -bg SteelBlue3  -variable cabel_sign \
 -value 0
 label  .cable_border -text "" -bg SteelBlue3 -width 1
 entry  .cable_entry -width 7 -relief sunken -textvariable cable_differens
 label  .unit_label -text " microseconds " -bg SteelBlue3 -fg white -width 15
-radiobutton .is -text "Is    " -bg SteelBlue3 -fg white -relief flat -variable nominal \
+radiobutton .is -text "Is    " -bg SteelBlue3  -relief flat -variable nominal \
 -value 1
-radiobutton .is_not -text "Is not" -bg SteelBlue3 -fg white -variable nominal \
+radiobutton .is_not -text "Is not" -bg SteelBlue3  -variable nominal \
 -value 0
 label  .nominal_label -text "nominal" -bg SteelBlue3 -fg white -width 10
 pack   .plus  .minus -in .larger_frame -side top
@@ -951,7 +951,7 @@ pack   .send_button_frame -in .internal16 -side top
 pack   .send_button -in .send_button_frame -side left -pady 1m
 
  if {$form==0} {
-  checkbutton .auto -text "Auto start" -bg SteelBlue3 -fg white -variable auto_start
+  checkbutton .auto -text "Auto start" -bg SteelBlue3  -variable auto_start
   pack   .auto -in .send_button_frame -side left -pady 1m -padx 2m
  }
 
