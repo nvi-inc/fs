@@ -18,7 +18,7 @@ C
 C   LOCAL VARIABLES
 C        NCHAR  - number of characters in buffer
 C        NCH    - character counter
-      integer*2 ibuf(20)                    !  class buffer
+      integer*2 ibuf(40)                    !  class buffer
       dimension ireg(2)                     !  registers from exec calls
       dimension iparm(2)                    !  parameters from gtparm
       equivalence (reg,ireg(1))
