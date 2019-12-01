@@ -18,7 +18,7 @@ C
 C   LOCAL VARIABLES
 C        NCHAR  - number of characters in buffer
 C        NCH    - character counter
-      integer*2 ibuf(40)                    !  class buffer
+      integer*2 ibuf(30)                    !  class buffer
       dimension ireg(2)                     !  registers from exec calls
       dimension iparm(2)                    !  parameters from gtparm
       equivalence (reg,ireg(1))
@@ -46,6 +46,7 @@ C                   Put / to indicate a response
       idum=iflch(sVerRelease_FS,32)
       if(idum.ne.0) then
          nch = ichmv_ch(ibuf,nch,'-')
+         if(idum+nch.gt.61) idum=idum-(idum+nch-61)
          nch = ichmv(ibuf,nch,sVerRelease_FS,1,idum)
       endif
       nch = nch-1
