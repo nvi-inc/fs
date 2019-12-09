@@ -55,18 +55,18 @@ readline-2.0/libreadline.a: readline-2.0.tar.gz patch-rl-2.0
 	# Configure and make.
 	(cd readline-2.0; ./configure; make)
 endif
-clean:
+clean_oprin:
 	rm -rf *~ *.o readline-2.0 ../bin/oprin
 	rm -rf $(OBJECTS)
 
 # Make a "distribution" ie. the tar archive 'oprin.tar' besides
 # the 'oprin' directory.  (Distribution needs to be 'clean' ie.
 # no object files etc. lying around.)
-dist: ../oprin.tar clean
+dist: ../oprin.tar clean_oprin
 
 # Creating a tar archive with naming just the directory
 # requires that objects et al are cleaned first.
-../oprin.tar: clean
+../oprin.tar: clean_oprin
 	(cd ..; tar cvf oprin.tar oprin)
 
 # Transfer the distribution to ftp area.
