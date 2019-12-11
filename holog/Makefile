@@ -4,6 +4,6 @@ LIBS = ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a
 
 ../bin/holog: $(OBJECTS) $(LIBS)
 
-LDLIBS += $(FLIBS)
+LDLIBS += -lm
 
 include ../include.mk

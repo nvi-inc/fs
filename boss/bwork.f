@@ -82,6 +82,9 @@ C     ICLASS - general variable for class with command/response
 C     ICLOP2 - secondary operator class after immediate commands
 C             have been stripped
 C     MAXPR1,2 - Maximum number of procs allowed in each lists
+
+      external stat
+
       data iblen/512/
       data kskblk/.true./,kopblk/.false./,kxdisp/.false./,kxlog/.false./
       data istksk/40,2,40*0/, istkop/40,2,40*0/
@@ -89,8 +92,6 @@ C     MAXPR1,2 - Maximum number of procs allowed in each lists
       data lstkop/MAX_PROC_PARAM_COUNT,2,MAX_PROC_PARAM_COUNT*0/
       data nproc1/0/, nproc2/0/
       data lsors/2h::/
-
-      external stat
 C
 C**********************************************************************
 C
