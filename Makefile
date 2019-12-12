@@ -51,9 +51,12 @@ plog spubsub fsserver
 export LDFLAGS += -L$(shell pwd)/third_party/lib
 export CPPFLAGS += -I$(shell pwd)/third_party/include
 
-.PHONY: all $(LIB_DIR) $(EXE_DIR)
+.PHONY: all $(LIB_DIR) $(EXE_DIR) release
 
-all: $(EXE_DIR)
+all: release $(EXE_DIR)
+
+release:
+	rm -f drudg/get_version.o drudg/crelease.o incom/sincom.o incom/crelease.o
 
 $(EXE_DIR): bin $(LIB_DIR)
 

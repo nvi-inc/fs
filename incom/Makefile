@@ -6,12 +6,14 @@ SUBLEVEL = 0
 endif
 
 OBJECTS = incom.o sincom.o equip.o drivem.o drivev.o head.o driveall.o\
-get_rxgain_files.o get_flux.o\
-get_flux_file.o rdbe_equip.o
+get_rxgain_files.o get_flux.o get_flux_file.o rdbe_equip.o crelease.o
+
+crelease.o: CFLAGS += -DRELEASE=$(RELEASE)
 
 LDLIBS += $(FLIBS)
 
-FFLAGS += -cpp -DVERSION=$(VERSION) -DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL)
+sincom.o: FFLAGS += -cpp -DVERSION=$(VERSION) -DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL)
+
 LIBS = ../bosslb/bosslb.a ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a\
 ../flib/flib.a ../fclib/fclib.a ../fmpsee/fmpsee.a ../poclb/poclb.a \
 ../clib/clib.a ../rtelb/rtelb.a

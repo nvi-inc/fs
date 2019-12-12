@@ -10,8 +10,8 @@
       iVerMajor = VERSION
       iVerMinor = SUBLEVEL
       iVerPatch = PATCHLEVEL  
-!      crel_FS=" "
-!      call crelease(crel_FS)   
+      crel_FS=" "
+      call crelease(crel_FS)   
 
 ! Replace NULL with space 
       ind=index(crel_fs,char(0))

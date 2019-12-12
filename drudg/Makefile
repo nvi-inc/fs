@@ -190,6 +190,8 @@ CPPFLAGS+=-DF2C
 
 get_version.o: FFLAGS += -cpp -DVERSION=$(VERSION) -DSUBLEVEL=$(SUBLEVEL) -DPATCHLEVEL=$(PATCHLEVEL)
 
+crelease.o: CFLAGS += -DRELEASE=$(RELEASE)
+
 CPPFLAGS+=-DF2C
 
 FFLAGS+=-ff2c -I/usr2/fs-git//include -fno-range-check -finit-local-zero -fbackslash

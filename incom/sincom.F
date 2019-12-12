@@ -178,6 +178,7 @@ C
       sVerMajor_FS = VERSION
       sVerMinor_FS = SUBLEVEL
       sVerPatch_FS = PATCHLEVEL
+      call crelease
 C                   Initialize the time-like variables
 C                   Initialize previous segment name for LINKP
       do i=1,15

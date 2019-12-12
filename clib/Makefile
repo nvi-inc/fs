@@ -1,11 +1,9 @@
 #
-CFLAGS += -DRELEASE=$(RELEASE)
 # set environment variable NO_FTOK_FS non-empty if ftok() is not available
 # if you use csh/tcsh add this to your .login file:
 #   setenv NO_FTOK_FS TRUE
 # and log-out and back in
 #
-CFLAGS += -DRELEASE=$(RELEASE)
 ifdef NO_FTOK_FS
 override CFLAGS +=  -DNO_FTOK_FS
 endif
