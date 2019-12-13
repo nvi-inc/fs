@@ -196,21 +196,6 @@ main(int argc_in,char *argv_in[])
     strcpy(line,"/usr/bin/tee ");
     strcat(line,file);
     
-             /* ignore signals that might accidently abort */
-             /* note this behaviour trickles down by default to all children */
-
-    if (!arg_internal) {
-        if (SIG_ERR==signal(SIGINT,SIG_IGN)) {
-            perror("fs: ignoring SIGINT");
-            exit(-1);
-        }
-
-        if (SIG_ERR==signal(SIGQUIT,SIG_IGN)) {
-            perror("fs: ignoring SIGQUIT");
-            exit(-1);
-        }
-    }
-
     tee = popen(line,"w");
     if(tee!=NULL) {
       setvbuf(tee, NULL, _IONBF, BUFSIZ);
@@ -416,14 +401,6 @@ cleanup:
 /* send a message to LES manager to terminate */
        if(lesm >=0 && pids[lesm] != 0 )
           cls_snd( &(shm_addr->iclbox), "", -1, fs, -1);
-
-    if (SIG_ERR==signal(SIGINT,SIG_DFL)) {
-      perror("fs: restoring default action for SIGINT");
-    }
-
-    if (SIG_ERR==signal(SIGQUIT,SIG_DFL)) {
-      perror("fs: restoring default action for SIGQUIT");
-    }
 
 waitfor:    
      while (npids > 0) {
