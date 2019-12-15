@@ -161,6 +161,8 @@ struct rdbe_atten_mon *lclm;
   case 1:
     if(lclm->ifc[i].ifc.state.known == 1) 
       if(lclm->ifc[i].ifc.ifc >= 0 && lclm->ifc[i].ifc.ifc <NIF_KEY) { 
+        strcat(output," ");
+        output=output+strlen(output);
 	m5key_encode(output,if_key,NIF_KEY,
 		     lclm->ifc[i].ifc.ifc,&lclm->ifc[i].ifc.state);
       } else if(lclm->ifc[i].ifc.ifc == -1) {
@@ -172,6 +174,10 @@ struct rdbe_atten_mon *lclm;
     if(lclm->ifc[i].atten.state.known == 1) 
       if(lclm->ifc[i].atten.atten >= 0 &&
 	 lclm->ifc[i].atten.atten <NATTEN_KEY) { 
+        if(lclm->ifc[i].atten.atten < 16) {
+          strcat(output," ");
+          output=output+strlen(output);
+        }
 	m5key_encode(output,atten_key,NATTEN_KEY,
 		     lclm->ifc[i].atten.atten,&lclm->ifc[i].atten.state);
       } else if(lclm->ifc[i].atten.atten == -1) {
@@ -181,7 +187,7 @@ struct rdbe_atten_mon *lclm;
     break;
   case 3:
     if(lclm->ifc[i].RMS.state.known == 1)  {
-      sprintf(output,"%.1f",lclm->ifc[i].RMS.RMS);
+      sprintf(output,"%4.1f",lclm->ifc[i].RMS.RMS);
       m5state_encode(output,&lclm->ifc[i].RMS.state);
     }
     break;
