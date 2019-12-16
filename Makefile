@@ -4,7 +4,7 @@ FS_DIRECTORY := $(shell echo $(pwd) | rev | cut -d/ -f1 | rev )
 #look for git first
 FS_COMMIT := $(shell git describe --always --tags 2>/dev/null)
 ifneq ($(FS_COMMIT),)
-FS_VERSION := $(FS_COMMIT)$(shell git diff --quiet || echo "-dirty")
+FS_VERSION := $(FS_COMMIT)$(shell git diff HEAD --quiet || echo "-dirty")
 #alternatvely an archive version
 else
 # there should be no other dashes except in the basename:
