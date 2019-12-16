@@ -104,11 +104,11 @@ these procedures is:
 
 CALONNF:  calon
           !+1s
-          sy=go onoff & 
+          sy=rte_go onoff & 
 
 CALOFFNF: caloff
           !+1s
-          sy=go onoff & 
+          sy=rte_go onoff & 
 
 calon and caloff are local procedures that do whatever is necessary to
 turn the noise source on and off, respectively.
@@ -118,11 +118,11 @@ procedures should be modified slightly to be:
 
 CALONNF:  if=cont_cal,,calon
           !+1s
-          sy=go onoff & 
+          sy=rte_go onoff & 
 
 CALOFFNF: if=cont_cal,,caloff
           !+1s
-          sy=go onoff & 
+          sy=rte_go onoff & 
 
 They should be available no matter what cal method is used.  This change will
 make the procedures independent of which type of cal is in use.  While it is
@@ -140,11 +140,11 @@ recommended form of this procedures is:
 
 SIGONNF:  sigon
           !+1s 
-          sy=go onoff &
+          sy=rte_go onoff &
 
 SIGOFFNF: sigoff
           !+1s 
-          sy=go onoff &
+          sy=rte_go onoff &
 
 sigon and sigoff are local procedures that do whatever is necessary to
 turn the signal to the station dependent detectors on and off,
@@ -165,9 +165,9 @@ to be repeated in each procedure. In other words after the first line,
 each procedure should contain:
 
           !+1s
-          sy=go onoff &
+          sy=rte_go onoff &
           !+1s
-          sy=go onoff &
+          sy=rte_go onoff &
 
 The indication that this is needed is if onoff seems to hang after
 executing one of these procedures. Please see the "Known Bugs" section
@@ -210,9 +210,9 @@ measurement procedure. The following is a sample procedure , "onoffi"
 "ibad.ctl"):
 
 ONOFFI:   hpib=sa,...
-          sy=go onoff & 
+          sy=rte_go onoff & 
           !+1s
-          sy=go onoff & 
+          sy=rte_go onoff & 
 
 The "..." would be replaced with an appropriate initialization string,
 possibly including the procedures argument (represented by "$").
@@ -228,9 +228,9 @@ Signal Analyzer. It uses the analyzer (HPIB device "SA", defined in
 ONOFFP:   hpib=sa,trac:type aver
           !+18s
           hpib=sa,mmem:stor:trac:data trace1,"$.csv"
-          sy=go onoff &
+          sy=rte_go onoff &
           !+1s
-          sy=go onoff &
+          sy=rte_go onoff &
 
 Each time they are run, the initialization and meaurement procedures
 are given an argument in the form:

@@ -17,7 +17,7 @@ wx
 azeloff=0d,0d
 !+2s
 track
-sy=go aquir &
+sy=rte_go aquir &
 enddef
 define  presun        00000000000
 ifd=+18,+23,*,*
@@ -40,10 +40,10 @@ if3=-7,*,*,*,*,*,*
 postp
 enddef
 define  postp         00000000000
-sy=go aquir &
+sy=rte_go aquir &
 enddef
 define  termp         00000000000
-sy=go aquir &
+sy=rte_go aquir &
 enddef
 define  initp         00000000000
 setupa
@@ -57,7 +57,7 @@ fivept=azel,-2,9,.4,1,ia,120
 " sample onoff set-up for VLBA/4 or DBBC
 onoff=2,1,75,3,,120,allu,ia,ib,ic
 check=
-sy=go aquir &
+sy=rte_go aquir &
 enddef
 define  acquire       00000000000
 sy=run aquir /usr2/control/ctlpo.ctl $ &
@@ -71,27 +71,27 @@ fivept
 enddef
 define  calonfp       00000000000
 calon
-sy=go fivpt &
+sy=rte_go fivpt &
 !+1s
-sy=go fivpt &
+sy=rte_go fivpt &
 enddef
 define  calofffp      00000000000
 caloff
-sy=go fivpt &
+sy=rte_go fivpt &
 !+1s
-sy=go fivpt &
+sy=rte_go fivpt &
 enddef
 define  caloffnf      00000000000
 caloff
-sy=go onoff &
+sy=rte_go onoff &
 !+1s
-sy=go onoff &
+sy=rte_go onoff &
 enddef
 define  calonnf       00000000000
 calon
-sy=go onoff &
+sy=rte_go onoff &
 !+1s
-sy=go onoff &
+sy=rte_go onoff &
 enddef
 define  axis          00000000000
 fivept=$,*,*,*,*,*

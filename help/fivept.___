@@ -127,11 +127,11 @@ The recommended form for these procedures is:
 
 CALONFP:  calon
           !+1s
-          sy=go fivpt &
+          sy=rte_go fivpt &
 
 CALOFFFP: caloff
           !+1s
-          sy=go fivpt &
+          sy=rte_go fivpt &
 
 calon and caloff are local procedures that do whatever is
 necessary to turn the noise source on and off, respectively.
@@ -141,11 +141,11 @@ procedures should be modified slightly to be:
 
 CALONFP:  if=cont_cal,,calon
           !+1s
-          sy=go fivpt &
+          sy=rte_go fivpt &
 
 CALOFFFP: if=cont_cal,,caloff
           !+1s
-          sy=go fivpt &
+          sy=rte_go fivpt &
 
 They should be available no matter what cal method is used.  This change will
 make the procedures independent of which type of cal is in use.  While it is
@@ -174,11 +174,11 @@ these procedures is:
 
 SIGONFP:  sigon
           !+1s
-          sy=go fivpt &
+          sy=rte_go fivpt &
 
 SIGOFFFP: sigoff
           !+1s
-          sy=go fivpt &
+          sy=rte_go fivpt &
 
 sigon and sugoff are local procedures that turn the signal to
 the station dependent detectors on and off, respectively.
@@ -189,9 +189,9 @@ two lines to be repeated in each procedure. In other words
 after the first line each procedure should contain:
 
           !+1s
-          sy=go fivpt &
+          sy=rte_go fivpt &
           !+1s
-          sy=go fivpt &
+          sy=rte_go fivpt &
 
 The indication that this is needed is if  fivpt seems to hang
 after executing one of these procedures. Please see the "Known

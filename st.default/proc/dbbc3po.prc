@@ -239,27 +239,27 @@ onoff=2,1,,,,,all
 enddef
 define  calonfp       00000000000
 calon
-sy=go fivpt &
+sy=rte_go fivpt &
 !+1s
-sy=go fivpt &
+sy=rte_go fivpt &
 enddef
 define  calofffp      00000000000
 caloff
-sy=go fivpt &
+sy=rte_go fivpt &
 !+1s
-sy=go fivpt &
+sy=rte_go fivpt &
 enddef
 define  caloffnf      00000000000
 caloff
-sy=go onoff &
+sy=rte_go onoff &
 !+1s
-sy=go onoff &
+sy=rte_go onoff &
 enddef
 define  calonnf       00000000000
 calon
-sy=go onoff &
+sy=rte_go onoff &
 !+1s
-sy=go onoff &
+sy=rte_go onoff &
 enddef
 define  cont_enable   18336194838
 sy=popen 'ncal_en 1 2>&1' -n noise

@@ -124,7 +124,7 @@ HOLOGP:   scan_name=$
           !+2s
           disk_record=off
           disk_pos
-          sy=go holog & 
+          sy=rte_go holog & 
 
 where "scriptp" is a shell script to run on the remote host.  Note
 that since there is no ampersand "&" at the end of the "sy=ssh ..."
@@ -134,7 +134,7 @@ than one second to execute, a line:
 
           !+1s
 
-should be inserted before the "sy=go holog &" line to avoid race
+should be inserted before the "sy=rte_go holog &" line to avoid race
 conditions in the coordination with the holog program.
 
 The remote computer should be set to accept a connection from the FS
@@ -152,7 +152,7 @@ run. A sample script, "hologi" ("holog"+"i") is:
 
 HOLOGI:   sy=ssh host scripti $
           !+1s
-          sy=go holog & 
+          sy=rte_go holog & 
 
 where "scripti" is shell script to run on remote host.  Note that
 since there is no ampersand "&" at the end of the "sy=ssh ..." command

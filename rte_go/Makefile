@@ -1,6 +1,6 @@
 LIBS = ../clib/clib.a ../rtelb/rtelb.a
-OBJECTS = go.o
+OBJECTS = rte_go.o
 
-../bin/go : $(OBJECTS) $(LIBS)
+../bin/rte_go : $(OBJECTS) $(LIBS)
 
 include ../include.mk
