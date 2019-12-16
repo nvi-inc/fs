@@ -51,12 +51,23 @@ plog spubsub fsserver rdbemsg
 export LDFLAGS += -L$(shell pwd)/third_party/lib
 export CPPFLAGS += -I$(shell pwd)/third_party/include
 
-.PHONY: all $(LIB_DIR) $(EXE_DIR) release
+.PHONY: all $(LIB_DIR) $(EXE_DIR) version
 
-all: release $(EXE_DIR)
+all: version $(EXE_DIR)
 
-release:
+FS_VERSION_FILE=.fs_version
+ifeq ($(FS_VERSION_FILE),$(wildcard $(FS_VERSION_FILE)))
+	FS_VERSION_FILE_STRING :=$(shell cat $(FS_VERSION_FILE))
+else
+	FS_VERSION_FILE_STRING =
+endif
+
+version:
+ifneq ($(FS_VERSION),$(FS_VERSION_FILE_STRING))
 	rm -f drudg/get_version.o drudg/crelease.o incom/sincom.o incom/crelease.o
+else
+	
+endif
 
 $(EXE_DIR): bin $(LIB_DIR)
 
@@ -65,6 +76,7 @@ bin:
 
 $(LIB_DIR) $(EXE_DIR):
 	$(MAKE) -C $@
+	echo -n $(FS_VERSION) >$(FS_VERSION_FILE)
 
 .PHONY: dist clean rmexe rmdoto install tag_archive archive
 dist:
