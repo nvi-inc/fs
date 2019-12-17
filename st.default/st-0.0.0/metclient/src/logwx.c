@@ -63,7 +63,7 @@ logwx(
     /* have to open O_EXCL to see if we need chmod() */
 
     fd=open(new,O_RDWR|O_APPEND|O_CREAT|O_EXCL,
-	    S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+	    S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
 
     if(fd == -1 && errno == EEXIST) {
       fildes=fopen(new,"a+");
@@ -75,7 +75,7 @@ logwx(
       err_report("Opening new log in logwx",new,errno,0);
       return;
     } else {
-      if(0!=chmod(new,S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH)) {
+      if(0!=chmod(new,S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH)) {
 	err_report("Setting permissions in logwx",new,errno,0);
 	return;
       }
