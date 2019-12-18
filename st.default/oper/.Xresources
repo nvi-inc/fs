@@ -1,6 +1,5 @@
 ! .Xresources file
 *background:		linen
-*font:			10x20
 *vt100*font:		10x20
 *VT100*foreground:	black
 *VT100*background:	linen
