@@ -653,7 +653,7 @@ class msg_tk(Tkinter.Tk):
 		TEXT = TEXT +\
 			"========POINTING-INFORMATION======\n" + \
 			" SOURCE: " + self.pSRC.get() + " | TIME: " + self.pTIM.get() + " | DETECTOR: " + self.detec.get() + "\n" + \
-			" Lon: " + self.lat.get() + " | Lat: " + self.lon.get() +"\n" + \
+			" Lon: " + self.lon.get() + " | Lat: " + self.lat.get() +"\n" + \
 			" OFFSETS: X-Lat: " + self.xlatoff.get() + " | Lat: " + self.latoff.get() +"\n" + \
 			" QCs: X-Lat: " + self.xlatqc.get() + " | Lat: " + self.latqc.get()
 
