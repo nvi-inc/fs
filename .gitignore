@@ -64,3 +64,4 @@ third_party/include/
 third_party/lib/
 
 .fs_version
+.DS_Store
