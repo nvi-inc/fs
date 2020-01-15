@@ -29,7 +29,7 @@
        azeloff=0d,0d
        onsource=30
        track
-       sy=go holog &
+       sy=rte_go holog &
        
      maskp:
 
@@ -38,7 +38,7 @@
        xlog=off
        !+1s
        rdbe=dbe_tsys?0;
-       sy=go holog &
+       sy=rte_go holog &
 
    You an replace these procedures for ones that use other detectors.
 
