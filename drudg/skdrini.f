@@ -236,7 +236,7 @@ C Initialize non-standard roll tables to -99.
       call init_iroll_def()
 
       do i=1,max_frq
-        lcode(ic)=0
+        lcode(i)=0
         do j=1,max_stn
           iroll_inc_period(j,i) = 0
           iroll_reinit_period(j,i) = 0
