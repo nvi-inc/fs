@@ -26,6 +26,7 @@ C     IERR - error number
 
 C  LOCAL:
       integer ix,n
+      integer iii
 
       integer*4 itrk_map(max_headstack,max_trk)  !Has map of track mappings.
 
@@ -152,7 +153,7 @@ C
       IF  (IERR.NE.0) THEN
         IERR = -(IERR+100)
         write(lu,*) "FRINP01: Error in field ",ierr, " of this line: "
-        write(lu,'("--->  ", 40a2)') ibuf(1:40) 
+        write(lu,'("--->  ", 40a2)') (ibuf(iii),iii=1,40)
 
         RETURN
       END IF 

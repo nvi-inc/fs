@@ -54,7 +54,7 @@ C  LOCAL:
 
       character*128 cmo,cstart,cout,cunit,cscan_id
       character*(max_sorlen) csor
-      integer istart(5)
+      integer istart(5),iii
       double precision d,start_sec
       integer idstart,idend
       logical ks2
@@ -111,7 +111,9 @@ C 1. Get scans one by one.
       
         if (mod(nobs,100).eq.0) write(lu,'(i5,$)') nobs
 
-        istart=0
+        do iii=1,5
+          istart(iii)=0
+        enddo
         iret = fvex_date(ptr_ch(cstart),istart,start_sec)
         ierr=8 ! date/time
         if (iret.ne.0) return

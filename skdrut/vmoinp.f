@@ -126,6 +126,7 @@ C  LOCAL:
 !things that depend pass.
       double precision posh(max_index,max_headstack)
       integer indexp(max_index),indexl(max_pass)
+      integer iii
       character*1 csubpassl(max_pass),csubpass(max_subpass)
       character*3 cpassl(max_pass)
 
@@ -152,7 +153,9 @@ C  LOCAL:
 ! Start of code
       lq="'"
       kvunppcal_first=.true. 
-      indexp=0             !initialize 
+      do iii=1,max_index
+        indexp(iii)=0             !initialize 
+      enddo
 
 
 ! See if has $SCHEDULING_PARAMS
