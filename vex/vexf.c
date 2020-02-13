@@ -9,7 +9,7 @@
 #ifdef F2C
 #include "f2c.h"
 #else
-typedef int integer;
+typedef long int integer;
 typedef int ftnlen;
 typedef double doublereal;
 #endif
@@ -1364,7 +1364,7 @@ integer *int__;
 /*   integer (return value)    - error code, zero indicates no error */
 /*                               -7 = field was not a valid int */
 {
-  if(1!=sscanf(*field,"%d",int__))
+  if(1!=sscanf(*field,"%ld",int__))
     return -7;
 
   return 0;
@@ -1406,7 +1406,7 @@ doublereal *seconds;
 {
   int count;
 
-  count=sscanf(*field,"%dy%dd%dh%dm%lfs",
+  count=sscanf(*field,"%ldy%ldd%ldh%ldm%lfs",
 	       iarray,iarray+1,iarray+2,iarray+3,seconds);
 
   if (count<2)
