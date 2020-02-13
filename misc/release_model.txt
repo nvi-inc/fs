@@ -1,0 +1,244 @@
+= Straw man Release Model
+
+This document briefly describes the version strings, release model,
+and branches used in the FS git repo. It also outlines the steps in
+initial and update installs of the FS, making an archive and
+installing from it, and sending changes to the maintainers.
+
+== Version Strings
+
+An example version string is:
+
+   10.1.0-beta1
+
+The general form of FS release numbers is:
+
+   VERSION.SUBLEVEL.PATCHLEVEL-STRING
+
+Where:
+
+   VERSION, a number, indicates a major release, e.g., 10.
+
+   SUBLEVEL, a number, indicates a minor release, e.g., 1.
+
+   PATCHLEVEL, a number, indicate the patch number, e.g. 0. Non-zero
+   patch numbers are only used for fixes to minor releases (before
+   version 10.0.0, non-zero patchlevels were used in regular
+   releases).
+
+   STRING, a string, which is optional and when non-blank provides
+   additional information. If the RELEASE is empty the dash "-" is
+   omitted.
+
+When a FS release is made, a particular commit is tagged with the
+version string. Note that version strings do not start with an
+alphabetic character. Official releases never have a non-blank
+STRING.  However, alpha and beta releases will have appropriate
+STRING values, e.g. "alpha1", "beta2", etc. Other values may be
+used as needed.
+
+When the FS is "made", the version string is inserted in the FS (and
+DRUDG) code and compiled in, if it has changed since the last time the
+FS was "made".  If the version that is "made" does not correspond to a
+version string tagged commit, additional information is automatically
+appended to identify the specific commit, e.g.:
+
+  10.0.0-alpha2-58-g229f696e
+
+The general form of what is appended is:
+
+  -n-gSHA-dirty
+
+where:
+
+   n is the number of commits that have been been made since the last
+   commit tagged with a version string, e.g., 58.
+
+   SHA is the (unique) SHA prefix of this commit, e.g., 229f696e.
+
+   -dirty is appended if the working directory contains changes that
+   have not been committed. When -dirty appears, the ability to identify
+   what version was run is lost. This should be avoided.
+
+This format is only guaranteed to be present for versions 10.0.0-alpha2
+and later.
+
+== Release Model
+
+In addition to the version string tag, when a release is made it is
+given a tag that starts with an alphabetic character. Typically these
+tags are one of "release", "alpha", or "beta" (in some circumstances
+    other special tags may be used.). If these <tag>s are present in
+the repo, they identify:
+    
+    release - the latest stable release, for operational use.
+
+    alpha   - the latest alpha release, usually only for testing by
+    developers
+
+    beta    - the latest beta release, for testing by users.
+
+Any of these <tag>s, if present, can be selected by using:
+
+     git checkout <tag>
+
+Generally speaking, when an operational  release is made, the <tag>s
+"alpha" and "beta" are deleted, if they exist.
+
+Versions tagged "release" will include installation notes.  Versions
+ tagged "alpha" or "beta" might not include installation notes. The
+ installation notes for the latest release with installation notes can
+ be found in /usr2/fs/misc/update.txt (which is a link pointing to the
+     appropriate file in /usr2/fs/misc).
+
+Other <tag>s that start with alphabetic characters can be used on any
+commit for special purposes, such a identifying  a commit for
+developer or user testing.
+
+It is always possible to get a specific release version by checking
+out the <tag> for its version string.
+
+== Branches
+
+The main branch in the repo is "master". This is the branch that is
+checked out after a clone operation.
+
+The "master" branch represents the main line of development. It should
+not have a version <tag> with a non-zero patch level. Generally,
+    <tag>s of "alpha" and "beta" should only be used on the "master"
+    branch.
+
+There may be maintenance branches for specific minor releases, they
+are named for the minor release, e.g., 10.2. When needed, they can be
+created with (assuming the working directory is clean), e.g.::
+
+   git checkout -b 10.2 10.2.0
+
+Commits on minor release branches may be tagged with non-zero patch
+levels for release.  The <tag> "release" can be used on a minor
+release branch if the corresponding commit with a non-on-zero patch
+level <tag> becomes the operational release. These branches can be
+deleted when they are no longer needed, but note that then any commit
+past the last tagged commit will be lost (but can be recovered until
+    the next git garbage collection). It may make sense to retain
+maintenance branches long term, if for no other reason that it will
+easier to find a tagged releases on that branch if the <tag> was
+accidentally deleted.
+
+Generally speaking, all other branches are feature or bug fix
+branches. Once they are considered to be stabilized enough they are
+merged into the appropriate branch, "master" or a maintenance branch,
+       and then deleted.
+
+Commits that do not have a version string <tag> are not considered
+releases. Users can check them out, but they may have bugs and/or
+incompatibilities with local files and station software of the
+previous version string tagged commit. The last commit on a <branch>,
+         checked out with:
+
+    git checkout <branch>
+
+is the "bleeding" edge of that branch.
+
+== First time FS installation
+
+Typically the string "release" should be used as the <tag> below. In
+some cases users may receive directions to use other strings. If there
+hasn't been an operational release of FS version yet, i.e., the
+checkout with "release" generates an error, try the string "beta" as
+<tag>.
+
+As root, execute: 
+
+.   cd /usr2
+.   git clone https://github.com/nvi-inc/fs fs-git
+.   (you may be prompted to enter your github credentials)
+.   cd fs-git
+.   git checkout <tag>
+.   make install
+.   (answer y to confirm installation)
+.   (log out as root and log in as prog)
+.   make >&/dev/null
+.   make -s
+.   (if there is no output from the above command, then the "make" was successful)
+.   reboot
+
+You can then login as "oper" and run the FS, but you will need to
+customize the control files in "/usr2/control" before you can do
+anything useful. Additionally, you may need to add station software,
+         particularly "antcn" if you want to control an antenna
+
+== Installing FS Updates
+
+Typically the string "release" should be used as the <tag> below. In
+some cases users may receive directions to use other strings. If there
+hasn't been an operational release of FS version yet, i.e., the
+checkout with "release" generates an error, try the string "beta" as
+<tag>.
+
+As prog:
+
+.   cd /usr2/fs-git
+.   git pull
+.   (you may be prompted to enter your github credentials)
+.   git checkout <tag>
+.   make >&/dev/null
+.   make -s
+.   (if there is no output of the above command, then the "make" was successful)
+.   cd /usr2/st
+.   make rmexe rmdoto all
+.   reboot
+
+You will need to make any changes specified in update notes, which are
+in /usr2/fs/misc/update.txt (which is a link pointing to the
+    appropriate file in /usr2/fs/misc).
+
+== Installing from an archive
+
+The main method of distributing the FS is with the git repo. However, if
+it is not possible for some one to use git, they can be supplied with
+a traditional '.tgz' archive. Note that such an archive contains only
+the <version> in archive name, e.g., fs-10.0.0.tgz only contains
+<version> 10.0.0.
+
+An archive can be made (by developers) using the prog account with
+(<commit> can be a tagged version (use only tags that are a
+version string starting with a number), a branch name, or the
+SHA of the commit):
+
+.   cd /usr2/fs
+.   git checkout <commit>
+.   make archive
+
+The  archive will be placed on /tmp/fs-<version>.tgz
+
+To install from the archive:
+
+.   (place the archive on /tmp)
+.   (log in as root)
+.   cd /
+.   tar -xzf /tmp/fs-<version>.tgz
+.   cd /usr2/fs-<version>
+.   make install
+.   (answer y to confirm installation)
+.   (log out as root and log in as prog)
+.   make >&/dev/null
+.   make -s
+.   (if there is no output of the above command, then the "make" was successful)
+.   (if you have station software, you will probably need  to recompile/reload it)
+.   reboot
+
+If this is a first time installation, you can then login as "oper" and
+run the FS, but you will need to customize the control files in
+"/usr2/control" before you can do anything useful.  Additionally, you
+may need to add station software, particularly "antcn" if you want to
+control an antenna.
+
+If this an update, you will need to make any changes specified in
+update notes, which are in /usr2/fs/misc/update.txt (which is a link
+    pointing to the appropriate file in /usr2/fs/misc).
+
+== Users sending code changes to developer
+
+TBD: patches? fork/pull-request?. It would be good to preserve commit SHAs
+for tracing versions using stations, if possible.
