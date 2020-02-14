@@ -750,7 +750,7 @@ fget_station_scan__
 fget_station_scan
 #endif
 (n)
-int *n;
+integer *n;
 /*<      integer function fget_station_scan(n) >*/
 /*<      implicit none >*/
 /*<      integer n >*/
@@ -799,7 +799,7 @@ fget_data_transfer_scan__
 fget_data_transfer_scan
 #endif
 (n)
-int *n;
+integer *n;
 /*<      integer function fget_data_transfer_scan(n) >*/
 /*<      implicit none >*/
 /*<      integer n >*/
