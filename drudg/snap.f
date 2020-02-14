@@ -248,6 +248,8 @@ C     data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
 C
 C History:
 ! Now put in most recent first. 
+! 2019Nov20 JMG. Fixed bug in index.  
+! 2019Nov20 WEH. changed line from f90 to f77 for backwards  compatibility
 ! 2019Aug25 JMG. Merged in changes from BB version. Also removed some tape stuff, and changed lcbnew, lcbpre to ASCII
 !
 ! 2018May02 snap.f: Fine tuning staggered start. If the station offset for OUR station is zero, assume non-staggered.
@@ -1085,8 +1087,8 @@ C prior to this scan. Do only on a new pass for continuous.
            
             if(km6disk) then
  
-              ic1=min(1,trimlen(scan_name(iskrec(iobs_now))))
-              ic2=min(1,trimlen(lsession))
+              ic1=max(1,trimlen(scan_name(iskrec(iobs_now))))
+              ic2=max(1,trimlen(lsession))
               write(ldum,'("mk6=record=",
      >         i4.4,"y",i3.3,"d",i2.2,"h", i2.2,"m",i2.2,"s",":",
      >         i6,":",i6,":",a,":",a,":",a,";")')

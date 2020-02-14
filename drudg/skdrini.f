@@ -1,4 +1,5 @@
       SUBROUTINE SKDRINI
+      implicit none
 C
 C  SKDRINI initializes common variables used by SKED and DRUDG
 C
@@ -32,6 +33,7 @@ C 2003Jul23  JMG   Added Mk5PigW
 ! 2007Aug07  JMG. Moved rack, recorder type initialization to block data statement in
 !                 "valid_hardware.f"
 ! 2019Aug22  JMG. Initialized lcode here and not in frinit. 
+! 2019Nov20  WEH. Fixed bug in index
 C
 C LOCAL
       integer ix,ib,i,j,l,itx,ity,itz,idef,iy,ir

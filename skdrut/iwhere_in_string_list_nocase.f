@@ -1,6 +1,7 @@
-!     Last change:  JG   12 May 2000    8:09 am
 !*************************************************************************
       function iwhere_in_string_list_nocase(list,num_list,lvalue)
+      implicit none
+! 2019Nov20 WEH  made list_tmp, lvalue_tmp fixed lenght for backward compatibility with f77
 ! find a string match ignoring case
       INTEGER iwhere_in_string_list_nocase
       INTEGER num_list

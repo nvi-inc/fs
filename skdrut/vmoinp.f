@@ -50,6 +50,7 @@ C 021111 jfq Extend S2 mode to support LBA rack
 !            Also keep better track of number of  freq-channels. If everything except for side-band is the same, assume same freq-channels
 !            which means use same BBC. 
 ! 2019Aug27 Above was good, but did not check if from sked file.  
+! 2019Nov20 WEH. Changed f90 line to f77 for backwards compatibility
    
 
       implicit none 

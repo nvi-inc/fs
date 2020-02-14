@@ -17,6 +17,7 @@ C            observations scan by scan.
 !                station in a scan because kfirst_staiton was always getting reinitialized. 
 !                Moved initialization out of station loop. 
 ! 2019Aug27 JMG. Fixed bug in converting date. Need to initialize istart because conversion routine is only setting lower bytes
+! 2019Nov20 WEH. Changed f77 line to f90 for backward compatibility
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -54,7 +55,8 @@ C  LOCAL:
 
       character*128 cmo,cstart,cout,cunit,cscan_id
       character*(max_sorlen) csor
-      integer istart(5),iii
+      integer istart(5)
+      integer iii
       double precision d,start_sec
       integer idstart,idend
       logical ks2
