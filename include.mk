@@ -2,7 +2,7 @@
 
 ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
-ifndef FC
+ifeq ($(FC),f77)
 FC = f95
 endif
 
