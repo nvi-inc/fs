@@ -65,6 +65,7 @@ endif
 version:
 ifneq ($(FS_VERSION),$(FS_VERSION_FILE_STRING))
 	rm -f drudg/get_version.o drudg/crelease.o incom/sincom.o incom/crelease.o
+	echo -n $(FS_VERSION) >$(FS_VERSION_FILE)
 else
 	
 endif
@@ -76,7 +77,6 @@ bin:
 
 $(LIB_DIR) $(EXE_DIR):
 	$(MAKE) -C $@
-	echo -n $(FS_VERSION) >$(FS_VERSION_FILE)
 
 .PHONY: dist clean rmexe rmdoto install tag_archive archive
 dist:
