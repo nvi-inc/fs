@@ -28,7 +28,7 @@ struct	shmid_ds	str_shmid,  /* shared memory id struct */
 buf = & str_shmid;  /* make buf point to str_shmid */
 
                                             /* create, new key, permit all */
-shmid = shmget ( key, size, (IPC_CREAT|0664));
+shmid = shmget ( key, size, (IPC_CREAT|0666));
 if ( shmid == -1 ) {
         perror("shm_get: allocating segment");
 	return ( -1);
