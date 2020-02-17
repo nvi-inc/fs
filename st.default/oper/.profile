@@ -16,36 +16,15 @@ if [ -n "$BASH_VERSION" ]; then
     fi
 fi
 
+#set initial PATH explcitly (or some one can make it insert the sbin's)
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games"
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"
 fi
-#
-if ! (echo $PATH | fgrep /usr/local/bin >/dev/null); then 
- PATH=/usr/local/bin:${PATH}
-fi
-if ! (echo $PATH | fgrep /sbin >/dev/null); then 
- PATH=/sbin:${PATH}
-fi
-if ! (echo $PATH | fgrep /usr/sbin >/dev/null); then 
- PATH=/usr/sbin:${PATH}
-fi
-if ! (echo $PATH | fgrep /usr/local/sbin >/dev/null); then 
- PATH=/usr/local/sbin:${PATH}
-fi
-if ! (echo $PATH | fgrep /usr2/fs/bin >/dev/null); then 
- PATH=/usr2/fs/bin:${PATH}
-fi
-if ! (echo $PATH | fgrep /usr2/st/bin >/dev/null); then 
- PATH=/usr2/st/bin:${PATH}
-fi
-if ! (echo $PATH | fgrep /usr/bin/X11 >/dev/null); then 
- PATH=${PATH}:/usr/bin/X11
-fi
-if ! (echo $PATH | fgrep /usr/games >/dev/null); then 
- PATH=${PATH}:/usr/games
-fi
-#
+#and the FS
+PATH="/usr2/st/bin:/usr2/fs/bin:$PATH"
+
 export EDITOR=vim
 export LESS=-XR
 #export FS_CHECK_NTP=1
