@@ -78,7 +78,7 @@ FFLAGS=-C -c
 CFLAGS= -c -DF2C
 LDFLAGS += -lf2c
 else
-FFLAGS=-fno-range-check -fno-underscoring -g -D READ_LINE
+FFLAGS=-fno-range-check -fno-underscoring -g -D READ_LINE -finit-local-zero -fno-automatic -fbackslash
 ifeq ($(shell uname -m),x86_64)
 FFLAGS+=-fdefault-integer-8 -finteger-4-integer-8
 endif
