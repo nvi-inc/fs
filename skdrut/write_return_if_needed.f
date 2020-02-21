@@ -3,7 +3,7 @@
       integer lu
       logical kwrite_return
       if(kwrite_return) then
-         write(luscn,*) " "
+         write(lu,*) " "
          kwrite_return=.false.
       endif
       return 
