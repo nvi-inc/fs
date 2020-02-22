@@ -246,7 +246,7 @@ cddis() {
     info "Copying file to CDDIS..."
 
     local quiet=""
-    if [[ -z "$QUIET" ]]; then 
+    if [[ -n "$QUIET" ]]; then 
         local quiet="-s -S"
     fi
 
