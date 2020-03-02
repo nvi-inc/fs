@@ -17,6 +17,7 @@ C            observations scan by scan.
 !                station in a scan because kfirst_staiton was always getting reinitialized. 
 !                Moved initialization out of station loop. 
 ! 2019Aug27 JMG. Fixed bug in converting date. Need to initialize istart because conversion routine is only setting lower bytes
+! 2019Nov20 WEH. Changed f77 line to f90 for backward compatibility
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -55,6 +56,7 @@ C  LOCAL:
       character*128 cmo,cstart,cout,cunit,cscan_id
       character*(max_sorlen) csor
       integer istart(5)
+      integer iii
       double precision d,start_sec
       integer idstart,idend
       logical ks2
@@ -111,7 +113,9 @@ C 1. Get scans one by one.
       
         if (mod(nobs,100).eq.0) write(lu,'(i5,$)') nobs
 
-        istart=0
+        do iii=1,5
+          istart(iii)=0
+        enddo
         iret = fvex_date(ptr_ch(cstart),istart,start_sec)
         ierr=8 ! date/time
         if (iret.ne.0) return

@@ -1,7 +1,13 @@
 #include <string.h>
 #include <stdio.h>
 
-void crelease_(char *lstring, int llen)
+void
+#ifdef F2C
+crelease_
+#else
+crelease
+#endif
+(char *lstring, int llen)
 {
 
 int i,j;

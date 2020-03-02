@@ -137,6 +137,7 @@ C          3) force checks Y or N <<<<<<< removed
 ! end source position.
 
       integer nch,nch2,nch3
+      integer ic1,ic2
 
       integer l,idirp,idurp,iftchk,idirn,ilatestop
       integer ic,ichk,iset,isppl,mjdpre
@@ -197,6 +198,7 @@ C        beginning the current observation
       integer itime_disk2file_beg(5)
       integer itime_disk2file_end(5)
       integer itime_buf_write_end(5)     !end of time to write buffer
+      integer iii
 
       integer itime_pass_end(5)              !Time when we reach the end of this pass
       real    speed_ft          !Speed in feet.
@@ -246,6 +248,8 @@ C     data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
 C
 C History:
 ! Now put in most recent first. 
+! 2019Nov20 JMG. Fixed bug in index.  
+! 2019Nov20 WEH. changed line from f90 to f77 for backwards  compatibility
 ! 2019Aug25 JMG. Merged in changes from BB version. Also removed some tape stuff, and changed lcbnew, lcbpre to ASCII
 !
 ! 2018May02 snap.f: Fine tuning staggered start. If the station offset for OUR station is zero, assume non-staggered.
@@ -779,7 +783,9 @@ C         Force new tape on the first scan on tape.
                call TimeAdd(itime_tape_start_prev,imk6_buf_time,
      >              itime_buf_write_end)                       
             else
-              itime_buf_write_end(1:5)=itime_scan_beg(1:5) 
+              do iii=1,5
+                itime_buf_write_end(iii)=itime_scan_beg(iii) 
+              enddo
             endif 
           endif                 
          
@@ -1081,12 +1087,15 @@ C prior to this scan. Do only on a new pass for continuous.
            
             if(km6disk) then
  
+              ic1=max(1,trimlen(scan_name(iskrec(iobs_now))))
+              ic2=max(1,trimlen(lsession))
               write(ldum,'("mk6=record=",
      >         i4.4,"y",i3.3,"d",i2.2,"h", i2.2,"m",i2.2,"s",":",
      >         i6,":",i6,":",a,":",a,":",a,";")')
      >         (itime_scan_beg(i),i=1,5),
      >         idur(istnsk), idata_mk6_scan_mb/(1024*8) ,       
-     >         trim(scan_name(iskrec(iobs_now))) ,trim(lsession),
+     >         scan_name(iskrec(iobs_now))(1:ic1),
+     >         lsession(1:ic2),
      >         cpocod(istn)                             
               call drudg_write(lufile,ldum)     
 !              stop  

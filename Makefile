@@ -38,7 +38,7 @@ print-%  : ; @echo $* = $($*)
 #  portopen(), including ibcon.
 #
 LIB_DIR = clib flib bosslb fclib fmpsee fslb lnfch newlb polb port rtelb vis \
-poclb skdrut vex rclco/rcl s2das third_party
+poclb skdrlnfch skdrut vex rclco/rcl s2das third_party
 
 EXE_DIR = rwand chekr fserr ddout fs fsalloc incom matcn oprin pcalr onoff \
 fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \
