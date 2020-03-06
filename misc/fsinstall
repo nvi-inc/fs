@@ -20,11 +20,12 @@ echo "  with their default contents (unless they already exist): oper, prog,"
 echo "  control, sched, proc, log, and st. The permissions and ownerships of all"
 echo "  the files will be set (including for /etc/gpib.conf)."
 echo "If the /usr2/oper directory is created, any existing /home/oper directory"
-echo "  will be renamed to /home/oper.FSCOPY (unless it exists already), and if"
-echo "  /home is a link (it must be a symbolic link to /usr2), any existing"
-echo "  /usr2/oper will be renamed to /usr2/oper.FSCOPY (unless it exists already)."
-echo "  If /home is not a symbolic link, /home/oper will be made a link to"
-echo "  /usr2/oper. A parallel operation will occur for /usr2/prog".
+echo "  will be renamed to /home/oper.FSCOPY (unless it exists already), any"
+echo "  existing /usr2/oper will be renamed to /usr2/oper.FSCOPY (unless it"
+echo "  exists already), and if /home is not a symbolic link and /home/oper"
+echo "  already existed, /home/oper will be made a symbolic link to /usr2/oper."
+echo "  N.B. If /home is a link (it must be a symbolic link to /usr2)."
+echo "A parallel operation will occur for /usr2/prog".
 echo "The link /usr2/fs will be deleted and made to point to this version of"
 echo "  the Field System. A similar link structure will be used for /usr2/st."
 echo "This is a fairly benign operation on most systems and always safe on a"
@@ -83,6 +84,7 @@ if [ ! -e st-0.0.0 -a ! -e st ]; then
 fi
 #
 # the following works for both /home and /usr2 separate OR /home -> /usr2
+# and for the home directory originally on /home or /usr2
 #
 if [ ! -e /usr2/oper/bin ]; then
    echo "Setting up /usr2/oper ..."
@@ -92,10 +94,20 @@ if [ ! -e /usr2/oper/bin ]; then
          exit
       fi
    fi
+   if [ -e /usr2/oper.FSCOPY -o -L /usr2/oper.FSCOPY ]; then
+      if [ -e /usr2/oper -o -L /usr2/oper ]; then
+         echo "/usr2/oper.FSCOPY already exists. Please move or remove it."
+         exit
+      fi
+   fi
 #
    cd /home
    if [ -e oper -o -L oper ]; then
       mv oper oper.FSCOPY
+      if [ ! -L /home ]; then
+         cd /home
+         ln -s /usr2/oper oper
+      fi
    fi
 #
 # in case /usr2 is distinct
@@ -110,14 +122,10 @@ if [ ! -e /usr2/oper/bin ]; then
    chgrp -R rtx  /usr2/oper
    chmod -R a+r,u+w,go-w /usr2/oper
 #
-   if [ ! -L /home ]; then
-     cd /home
-     ln -s /usr2/oper oper
-   fi
-#
 fi
 #
 # the following works for both /home and /usr2 separate OR /home -> /usr2
+# and for the home directory originally on /home or /usr2
 #
 if [ ! -e /usr2/prog/bin ]; then
    echo "Setting up /usr2/prog ..."
@@ -127,10 +135,20 @@ if [ ! -e /usr2/prog/bin ]; then
          exit
       fi
    fi
+   if [ -e /usr2/prog.FSCOPY -o -L /usr2/prog.FSCOPY ]; then
+      if [ -e /usr2/prog -o -L /usr2/prog ]; then
+         echo "/usr2/prog.FSCOPY already exists. Please move or remove it."
+         exit
+      fi
+   fi
 #
    cd /home
    if [ -e prog -o -L prog ]; then
       mv prog prog.FSCOPY
+      if [ ! -L /home ]; then
+         cd /home
+         ln -s /usr2/prog prog
+      fi
    fi
 #
 # in case /usr2 is distinct
@@ -144,11 +162,6 @@ if [ ! -e /usr2/prog/bin ]; then
    chown -R prog /usr2/prog
    chgrp -R rtx  /usr2/prog
    chmod -R a+r,u+w,go-w /usr2/prog
-#
-   if [ ! -L /home ]; then
-     cd /home
-     ln -s /usr2/prog prog
-   fi
 #
 fi
 #
