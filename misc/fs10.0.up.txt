@@ -11,8 +11,8 @@ This document is divided into four sections:
   II.  Installation as an upgrade to a previous main branch version
   III. Installation as an upgrade to a previous VGOS branch version
   IV.  Fresh install of the FS
-  V.   Changes Since Version 9.11.19
-  VI.  Changes Since Version 9.12.0
+  V.   Changes since version 9.13.2
+  VI.  Changes since version 9.12.12
   A.   Reference Appendix for Installation
 
 This update is intended for all stations using FS. This includes both
@@ -25,19 +25,20 @@ The most significant changes 10.0 are:
 
 1. Support for use on both 32- and 64-bit systems.
 
-   The new version should run on existing 32-bit without any issues.
+   The new version should run on existing 32-bit systems without any
+   issues.
 
-   A new FS Linux distributioni, FSL10, is now available for 64-bit
-   (and 32-bit) use.  We recommend this distribution if you would like
-   to move to using a 64-bit. OS This may require some relatively
-   simple changes to you startion software.  Release of FSL10 will
-   occur separately.
+   A new FS Linux distributioni, FSL10, is now available or will be
+   shortly, for 64-bit (and 32-bit) use.  We recommend this
+   distribution if you would like to move to using a 64-bit OS. This
+   may require some relatively simple changes to your startion
+   software.  Release of FSL10 will occur separately.
 
 2. One unified version for all FS users
 
-   Both non-VGOS and VGOS operations are supported bt the new
-   versions. Previous users of the main (non-VGOS) branch will need to
-   update some of their local files.
+   Both non-VGOS and VGOS operations are supported by the new
+   versions.  Previous users of the main (non-VGOS) branch will need
+   to update some of their local files.
 
    Generally speaking no new functionality has been added in this
    version; the emphasis has been on merging the different branches
@@ -63,7 +64,7 @@ a version that would support 32- and 64-bit systems.
 Dave also single handedly imported the entire existent history of FS
 source code into git. This includes over 130 FS 9 versions (under
 Linux), 17 FS 8 versions (under VENIX), and two older versions
-under HP RTE-A/1000 going back to version 5.5 in 1988.  Havig the
+under HP RTE-A/1000 going back to version 5.5 in 1988.  Having the
 source code in git greatly simplified the task of merging the non-VGOS
 and VGOS versions. Dave also did the most critical work on that and
 was an excellent tutor in how to use git. Having the historical code
@@ -81,8 +82,9 @@ II.  Installation as an upgrade to a previous main branch version
 The main branch versions are number 9.13.x and 9.11.x or older.
 Specifically, versions 9.12.x are not part of the main branch.
 
-Detailed instructions are provided below for installing 10.0 as an
-upgrade to 9.13.2, the previous stable release. 
+Detailed instructions are provided in this section, below, for
+installing 10.0 as an upgrade to 9.13.2, the previous stable release. 
+It is assumed that you are upgrading on a 32-bit system.
 
 If you have a main branch version older version 9.13.2, please refer
 to the appendix, which is described next, for more information.
@@ -111,7 +113,7 @@ The installation steps for upgrading from 9.13.2 are listed below.
 
  (1) Login as 'root'.
  
- (2) Place a copy of the Fs git repository in the /usr2 directory on
+ (2) Place a copy of the FS git repository in the /usr2 directory on
      your computer For example, you might do the following:
 
        a. cd /usr2
@@ -134,8 +136,8 @@ The installation steps for upgrading from 9.13.2 are listed below.
 
        error: pathspec 'release' did not match any file(s) known to git
 
-     Try 'beta' as <tag>, which should give you latest Beta release if
-     it exists.  You may have received soome other specific value for
+     try 'beta' as <tag>, which should give you latest Beta release if
+     it exists.  You may have received some other specific value for
      <tag> to checkout in an announcement. If so, use that as <tag>. 
 
  (4) Set the link for the new FS version:
@@ -144,11 +146,12 @@ The installation steps for upgrading from 9.13.2 are listed below.
        b. make install
           (answer y to confirm installation)
 
-      The 'make install' step may also create and possibly renaming
-      some exisiting directories if the FS was never installed on this
-      system before.  However, since the instructions are installing
-      the FS as an upgrade that should not be the case.
-      
+      The 'make install' step may also create and possibly rename some
+      exisiting directories if the FS was never installed on this
+      system before.  However, if you are following the instructions
+      in this section, you should be installing the FS as an upgrade,
+      so this should not be an issue.
+
  (5) Having the wrong ownership and/or permissions on the operational
      files (procedure libraries, control files, schedules, and logs)
      can cause errors during FS operations.  If this needs to be
@@ -164,26 +167,23 @@ The installation steps for upgrading from 9.13.2 are listed below.
 
      and then
 
-       make
+       make -s
     
-     to confirm that everything compiled correctly.
+     to confirm that everything compiled correctly (no news is good
+     news).
 
      Note that if you have problems loading programs that use
      'ncurses' (e.g., the 'monit' family of programs, 'fmset', and
-     'predict'), using the 'FS_TINFO_LIB' environment variable may fix
-     the problem.  Please see FS change item #19 for details on its
-     use.
+     'predict') on your system, using the 'FS_TINFO_LIB' environment
+     variable may fix the problem.  Please see FS change item #19 in
+     /usr2/fs/misc/fs9132up.txt for details on its use.
 
  (8) This step is for modifying your local programs. That should not
-     be necessary for this update, but we do recommend that you
-     recompile and relink your programs against the new FS version as
-     described in the next step.
-
-     However, if you use 'metserver' and/or 'metclient', we recommend
-     that you update your local copies with the new versions.  You can
-     defer this until the FS itself has been updated successfully.
-     The new FS will work with the old version of 'metserver' if you
-     update your 'equip.ctl' as described in step (12) below.
+     be necessary for this update, but you should recompile and relink
+     your programs against the new FS version as described in the next
+     step. If you have FORTRAN station code, you may need to convert it
+     to use f95. If you have issues with your station code, please contact
+     Ed.Himwich@nviinc.com.
 
  (9) Remake your local software.  If '/usr2/st/Makefile' is set-up in
      the standard way, you can do this with:
@@ -201,7 +201,47 @@ The installation steps for upgrading from 9.13.2 are listed below.
 (11) Log-in as 'oper'.
      
 (12) This step is for updates to the local control files.  There are
-     two possible changes that may be needed.  The first change (i) is
+     two possible changes that may be needed.
+
+     You will need to execute the following commands to copy new files
+     that are needed (cut-and-paste is your friend)::
+
+       cd /usr2/control
+       cp /usr2/st.default/control/dbba2.ctl .
+       cp /usr2/st.default/control/mk6c?.ctl .
+       cp /usr2/st.default/control/monit6.ctl .
+       cp /usr2/st.default/control/rdbc?.ctl .
+       cp /usr2/st.default/control/rdbe.ctl .
+       cp /usr2/st.default/control/rdbemsg.ctl .
+
+     You will need to add the final two lines of the default equip.ctl file
+     to yours:
+
+       cd /usr2/control
+       tail -n 2 /usr2/fs/st.default/control/equip.ctl >>equip.ctl
+
+     You should compare your version of the following files:
+
+       clpgm.ctl
+       equip.ctl
+       stpgm.ctl
+
+     to default examples, e.g.:
+
+       cd /usr2/control
+       diff clpgm.ctl /usr2/fs/st.default/control/
+
+     and consider whether you should make any changes.  In the case of
+     'clpgm.ctl' you might just be able to replace your copy with the new one.
+
+     of A brief
+     rundown of wh
+
+     differences.
+     You should also review the following files in /usr2/control directory:
+
+       clpgm.ctl
+       equip.ctl
      only required if you are use 'metserver' to serve meteorological
      data to the FS.  If you aren't, it is still recommended that you
      make the corresponding changes in the comments in 'equip.ctl' to
