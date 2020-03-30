@@ -6,10 +6,15 @@
    C Version 1.0
    June, 1996
 
-   U. S. Naval Observatory
-   Astronomical Applications Dept.
-   3450 Massachusetts Ave., NW
-   Washington, DC  20392-5420
+   NOVAS has no licensing requirements.  If you use NOVAS in an
+   application, an acknowledgement of the Astronomical Applications
+   Department of the U.S. Naval Observatory would be appropriate. Your
+   input helps us justify continued development of NOVAS. 
+
+   The User's Guide is the official reference for NOVAS C3.1 and may be cited as:
+
+       Bangert, J., Puatua, W., Kaplan, G., Bartlett, J., Harris, W., Fredericks, A., & Monet, A. 
+       2011, User's Guide to NOVAS Version C3.1 (Washington, DC: USNO).
 */
 
 #ifndef _CONSTS_
