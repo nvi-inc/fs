@@ -1,0 +1,1071 @@
+File: /usr2/fs/misc/fs10.0.0up.txt        Version: 10.0  Date: 200419
+
+                       FS 10.0.0 Update Notice
+
+
+I. Introduction
+
+This document is divided into four sections:
+
+  I.   Introduction
+  II.  Installation as an upgrade to a previous version
+  III. Upgrading to 64-bit
+  IV.  Changes from previous versions
+  A.   Reference Appendix for Installation
+
+This update is intended for all stations using FS. This includes both
+stations on the main (non-VGOS) branch (latest version 9.13.2) and the
+VGOS branch (latest version 9.12.13). Installing the new version as
+update 9.12.13 (and as far back as 9.12.10) is fairly simple.
+Installing the new version as an update from 9.13.2 is a little more
+involved but is straightforward.
+
+The most significant changes in 10.0.0 are:
+
+1. Support for use on both 32- and 64-bit systems.
+
+   The new version should run on existing 32-bit systems that currently
+   support the FS without major issues.
+
+   A new FS Linux distribution, FSL10, is now available or will be
+   shortly, for 64-bit (and 32-bit) use.  We recommend this
+   distribution if you would like to move to using a 64-bit OS or need
+   an OS still under support. This may require some relatively simple
+   changes to your station software.  Release of FSL10 will occur
+   separately.
+
+2. One unified version for all FS users
+
+   Both non-VGOS and VGOS operations are supported by the new
+   versions.  Previous users of the main (non-VGOS) branch will need
+   to update some of their local files.
+
+   The most significant change due to this is that former main branch
+   users will find that the FS input is now case sensitive, as it was
+   in the VGOS branch.
+
+3. Version control with git.
+
+   The FS source is now managed using git and github is used as the 
+   distribution method.
+
+   The details of the model used for FS releases under git are described
+   in /usr2/fs/misc/release_model.txt. 
+
+Very significant contributions, in fact essential, were made by Dave
+Horsley and Tetsuro Kondo (NICT, Japan and SHAO, China). Kondo-san
+pioneered the 64-bit support in the FS with his 64-bit implementations
+for Sejong and Ishioka stations. Dave built on his work in developing
+a version that would support 32- and 64-bit systems.
+
+Dave also single handedly imported the entire existent history of FS
+source code into git. This includes over 130 FS9 versions (under
+Linux), 17 FS8 versions (under VENIX), and two older versions
+under HP RTE-A/1000 going back to version 5.5 in 1988.  Having the
+source code in git greatly simplified the task of merging the non-VGOS
+and VGOS versions. Dave also did the most critical work on that and
+was an excellent tutor in how to use git. Having the historical code
+in git is great resource for understand the evolution of the code.
+
+As always, we are deeply indebted to Jonathan Quick (HartRAO) for his
+many significant contributions that go far beyond what is explicitly
+mentioned below. In this particular case it includes testing and
+insights for adapting the code for 64-bits and for support for older
+FSL distributions, particularly FSL8.
+
+
+II.  Installation as an upgrade to a previous version
+
+Since this section is written as upgrade to an exisiting installation,
+it is assumed that you are using a 32-bit system.
+
+An appendix 'A. Reference Appendix for Installation' is provided at
+the end of this document.  It includes seven sub-sections:
+
+ A.1. Upgrading from FS versions before the previous stable
+ A.2. Example standard procedure libraries
+ A.3. Cut-and-paste installation tips
+ A.4. Making a back-up before installing
+ A.5. Disk space requirements
+ A.6. Set operations file permissions
+ A.7. Fix '.prc' file 'define' lines
+
+If you haven't upgraded or installed the FS before, you may want to
+review the appendix.  It is STRONGLY recommended that you back-up your
+operational system before upgrading.
+
+There are two possibilities: upgrading from a main branch version or
+upgrading from a VGOS branch version. There are some general
+considerations that depend on which branch you are updating from.:
+
+  1. Upgrading from a main branch version. The main branch versions
+     are numbered 9.13.x and 9.11.x or older.  Specifically, versions
+     9.12.x are not part of the main branch.  The instructions
+     provided in this section, below, are for installing 10.0.0 as an
+     upgrade to 9.13.2, the previous stable release.  If you have a
+     main branch version older than version 9.13.2 you should upgrade
+     to 9.13.2 first, please refer to appendix A.1. 'Upgrading from FS
+     versions before the previous stable', for more information.
+
+  2. Upgrading from a VGOS branch version.  The VGOS branch versions
+     are numbered 9.12.x.  The instructions provided in this section,
+     below, are for installing 10.0.0 as an upgrade to versions
+     9.12.10-9.12.13, the latest VGOS branch releases. As far as we
+     know, no other VGOS versions are in use.  If you have a different
+     version, please contact Ed Himwich (Ed.Himwich@nviinc.com).
+
+The upgrade instructions for the two cases differ only in step (12)
+below.
+
+The installation steps for upgrading are:
+
+ (0) Back-up your operational system.  Having a back-up to return to
+     will allow you to continue operations in case something goes
+     wrong with the installation.  For more details, please see
+     sub-section 'A.4. Making a back-up before installing'.  N.B. If
+     you are using FSL10, that section will point you to the
+     improved backup and test procedure that is available.
+
+ (1) Login as 'root'.
+ 
+ (2) Place a copy of the FS git repository in the /usr2 directory on
+     your computer For example, you might do the following:
+
+       cd /usr2
+       git clone https://github.com/nvi-inc/fs.git fs-git
+
+ (3) Checkout the version you will use from the local repository.
+
+       cd fs-git
+       git checkout 10.0.0-beta1
+
+ (4) Set the link for the new FS version:
+
+       a. cd /usr2/fs-git
+       b. make install
+          (answer 'y' to confirm installation)
+
+     The 'make install' step may also create and possibly rename some
+     existing directories if the FS was never installed on this system
+     before.  However, if you are following the instructions in this
+     section, you should be installing the FS as an upgrade, so this
+     should not be an issue.
+
+ (5) Having the wrong ownership and/or permissions on the operational
+     files (procedure libraries, control files, schedules, and logs)
+     can cause errors during FS operations.  If this needs to be
+     fixed, please refer to sub-section: 'A.6. Set operations file
+     permissions' to make sure they are all set to the correct values.
+
+ (6) ** VERY IMPORTANT **
+
+     Log-out as 'root', and log-in as 'prog'.
+
+     ** VERY IMPORTANT **
+
+ (7) Make the FS itself:
+
+     a. Set the compiler. Starting with version 10.0.0, the standard
+        FORTRAN compiler for use with the FS is 'f95' and we recommend
+        that you use it. On the 32-bit systems you can still use
+        'fort77', and you may prefer to if you any FORTRAN station
+        code, see step (8) for more details.
+
+        To select 'f95' as your compiler, you will need to set the
+        'FC' variable to this value. If your shell is 'tcsh' you can
+        use:
+
+          setenv FC f95
+
+        If your shell is 'bash', you can use:
+
+          export FC=f95
+
+        For beta testing, you may not want to make this change
+        permanent since it is incompatible with pre-10.0.0 versions.
+        If you do, you can add the appropriate command to the
+        appropriate "rc" file depending on your login shell:
+        '~prog/.login' for 'tcsh' or probably '~prog/.profile' for
+        'bash'.
+
+     b. Make the FS:
+
+          cd /usr2/fs
+          make >& /dev/null
+
+        and then
+
+          make -s
+    
+        to confirm that everything compiled correctly (no news is good
+        news).
+
+ (8) This step is for modifying your station programs, in '/usr2/st'.
+     That should not be necessary for this update on a 32-bit system
+     if none of your local programs are in FORTRAN. You should
+     recompile and relink your programs against the new FS version, in
+     any event, as described in step (9).
+
+     If you have station programs in FORTRAN, please contact Ed
+     Himwich (Ed.Himwich@nviinc.com), but basically you have two
+     options:
+
+        i. Continue to use 'fort77' as the compiler for both the FS,
+           see step (7), and your station programs.
+
+       ii. Use 'f95' for both the FS, see step (7), and your station
+           programs. To do this you will need to adapt your
+           'Makefiles' to use the same compiler options as the FS,
+           which an be found in '/usr2/fs/include.mk'.  This approach
+           will be necessary when moving to a 64-bit system.
+
+           As a first cut, it may work to add the following two lines
+           to your 'Makefile's for FORTRAN programs:
+
+FFLAGS  += -ff2c -I../../fs/include -fno-range-check -finit-local-zero -fno-automatic -fbackslash
+FLIBS   += -lgfortran -lm
+
+ (9) Remake your local software.  If '/usr2/st/Makefile' is set-up in
+     the standard way, you can do this with:
+
+       cd /usr2/st   
+       make rmdoto rmexe all
+
+(10) ** VERY IMPORTANT **
+
+     Reboot the computer.  This is important for re-initializing
+     shared memory with the new version.
+
+     ** VERY IMPORTANT **
+
+(11) Log-in as 'oper'.
+     
+(12) This step is for updates to the local control files. There are
+     four changes that are needed, listed here as A-D. Differences
+     for updating from different versions are noted. 
+
+     A. The 'stcmd.ctl' file needs another digit added to the
+        subroutine number. This step is only need for updates to
+        9.13.2. You can fix your file with the commands:
+
+          cd /usr2/control
+          /usr2/fs/misc/cmdctlfix6 stcmd.ctl
+
+        You may also want to expand the (typically) second comment
+        line to correspond to the new format by adding a 'U' after
+        character 18 to read as:
+
+*COMMAND     SEG SUBPA BO
+
+     B. You will need to execute the following commands to copy new
+        files that are needed (cut-and-paste is your friend). There are
+        three cases depending on what your old version was:
+
+          i. If your old version was 9.12.10-9.12.12:  
+
+               cd /usr2/control
+               cp /usr2/st.default/control/rdbemsg.ctl .
+               cp /usr2/st.default/control/clpgm.ctl .
+
+         ii. If your old version was 9.12.13:  
+
+               cd /usr2/control
+               cp /usr2/st.default/control/rdbemsg.ctl .
+
+         iii. If your old version was 9.13.2:
+
+               cd /usr2/control
+               cp /usr2/st.default/control/dbba2.ctl .
+               cp /usr2/st.default/control/mk6c?.ctl .
+               cp /usr2/st.default/control/monit6.ctl .
+               cp /usr2/st.default/control/rdbc?.ctl .
+               cp /usr2/st.default/control/rdbe.ctl .
+               cp /usr2/st.default/control/rdbemsg.ctl .
+
+     C. If your old version was 9.12.10-9.12.12 or 9.13.2, you will
+        need to add the final two lines of the default 'equip.ctl' file
+        to yours:
+
+          cd /usr2/control
+          tail -n 2 /usr2/fs/st.default/control/equip.ctl >>equip.ctl
+
+     D. You should compare your versions of the following files:
+
+          clpgm.ctl
+          equip.ctl
+          stpgm.ctl
+
+        to the default examples, e.g.:
+
+          cd /usr2/control
+          diff clpgm.ctl /usr2/fs/st.default/control/
+
+        and consider whether you should make any changes to your copy.
+        In the case of 'clpgm.ctl' you might just be able to replace
+        your copy with the new one.
+
+        The following is a summary of changes in these files:
+
+           clpgm.ctl - This file was not present for 9.12.10-9.12.12,
+                       so if your old version was one of those, the
+                       new default version (copied by commands in step
+                       B above) should not require modification.
+
+                     - If your old FS version was 9.12.13 or 9.13.2:
+                       the title parameter for each window was removed
+                       so that it is uniquely supplied by the
+                       '.Xresources' file.
+
+                     - If your old FS version was 9.12.13 or 9.13.2:
+                       new lines were added for the useful display
+                       window 'scnch', and the useful RDBE display
+                       windows: 'monit6', and 'monX' ('X'=[a-b]). The
+                       'monan' program was added since it is used at
+                       several sites, but can be removed if you don't
+                       have one.
+
+           equip.ctl - A new line for the DBBC3 configuration was
+                       added at the end, but step C above should have
+                       handled that if it wasn't present before.
+
+                     - Comment lines were added or modified for new
+                       equipment types.  You should consider
+                       adding/changing these in your version since
+                       they can be helpful in the future.
+
+           stpgm.ctl - New lines were added for 'erchk', 'monit2', and
+                       'scnch' to be started by 'fsclient' when the
+                       display server is in use.
+
+(13) This step is for updates to your SNAP ',prc' procedure libraries.
+     Only one change is needed, to convert use of the old FS 'go'
+     program to use 'rte_go'. This change came about because the
+     compiler for the 'go' language conflicts with the old name. This
+     is necessary even if you do not have the 'go' language compiler
+     installed.
+
+     To make this change for all your '.prc' procedure libraries,
+     exeucte:
+
+        cd /usr2/proc
+        /usr2/fs/misc/go_fix *.prc
+
+     Files that are changed will have a pre-change back-up copy with
+     the extension '.bak'.
+
+(14) This step is for miscellaneous FS related changes.  There are
+     are none for this update.
+
+(15) This step is for miscellaneous FSLx changes. None are required
+     for this update.
+
+(16) Test the FS as 'oper'.  Generally speaking, a fairly thorough
+     test is to run a test experiment.  Start with using 'drudg' to
+     rotate a schedule, 'drudg'-ing it to make '.snp' and '.prc'
+     files, making listings, and any other pre-experiment preparation
+     and tests you normally do, then execute part of schedule, and
+     perform any normal post-experiment plotting and clean-up that you
+     do.  The idea here is to verify that everything works as you
+     expect for normal operations.
+
+(17) Consider when to update your back-ups. This step may not be
+     appropriate if you are beta testing since the beta test versions
+     are not intended for operations yet.  You certainly should not
+     update them until you have performed the tests described in step
+     (16).  It would be prudent to wait until you have successfully
+     run an experiment or two and preferably received word that the
+     experiment(s) produced good data.  The chances of needing to use
+     your back-up should be small.  If something does happen, you can
+     copy the back-up to the (now assumed bad) updated disk.  You can
+     then either use the restored disk or apply the FS update again.
+     The FSL10 test procedure has more options for recovery.  Managing
+     this is a lot safer if you have a third disk.
+
+(18) We encourage you to enable the display server interface of the FS
+     if you aren't already using it. Instructions for enabling this
+     feature (and disabling it, if that should become necessary) can
+     be found in '/usr2/fs/misc/display_server.txt'.  This file also
+     includes a explanation of how the user interface is different
+     from the non-display server.
+
+III.  Upgrading to 64-bit
+
+To upgrade your installation to 64-bit, the easiest approach is to
+probably to first upgrade the FS installation on your 32-bit system to
+run FS 10.0, then transfer it to a 64-bit system. This will allow you
+verify the upgrade before trying to move it.
+
+An alternate method would be to move the station files from your
+32-bit system and the perform the upgrade. This will allow you to
+upgrade without modifying your existing system.  These two methods
+only differ in when the files are copied to the new machine.
+
+The instructions below assume that you are using a standard FS
+configuration in terms of directories and permissions.  If your system
+is different (using different symbolic links and/or other
+directories), you will need to adjust what you do accordingly,
+but you may still find this outline of steps useful.  Please follow
+these steps:
+
+ 1. Install a 64-bit system on a different (hopefully new) computer
+    according to:
+
+      https://nvi-inc.github.io/fsl10/
+
+    You can install a different distribution. However, we can't provide
+    as much support in that situation.
+
+ 2. Rename the existing default station specific FS related directories
+    on this computer to get them out of the way, e.g.:
+
+      cd /usr2
+      mv control control.DEFAULT
+      mv sched   sched.DEFAULT
+      mv proc    proc.DEFAULT
+
+    If you use the 'tle' directory on your old computer, you can also
+    rename it:
+
+      cd /usr2
+      mv tle     tle.default
+
+    The 'log' and 'st-0.0.0' directories were not included, but could
+    also be renamed if you prefer.
+
+ 3. There are two options:
+
+    A. If you are upgrading your installation on your old computer,
+       please follow the directions in section II above for your old
+       system. Then return here and follow the steps in "Copying your
+       files" below, then you should be finished.
+
+    B. If you are moving your files first, follow the steps in "Copying
+       your files" below, then follow the directions in section II above to
+       upgrade, then you should be finished.
+
+                           Copying your files
+
+       Your station specific FS related files can be copied from the
+       old computer using any convenient method.  If both systems are
+       on the network this can be particularly easy. The following
+       example steps use this approach. You should replace the example
+       hostname 'old' with your old systems hostname. You maybe need to
+       provide the appropriate password for each 'scp' command. These
+       commands must be executed as 'root':
+
+
+         i. Transfer operations directories:
+
+              cd /usr2
+              scp -pqr oper@old:/usr2/control .
+              scp -pqr oper@old:/usr2/sched .
+              scp -pqr oper@old:/usr2/proc .
+
+            Note that your 'sched' and 'proc' directories could be
+            large and take a significant amount of time to transfer.
+            You can transfer your 'log' directory similarly, but that
+            could be even larger:
+
+              cd /usr2
+              scp -pqr oper@old:/usr2/log .
+
+            If you use the 'tle' directory on your old computer, you
+            can also transfer it:
+
+              cd /usr2
+              scp -pqr oper@old:/usr2/tle .
+
+        ii. Fix the permissions on the operations directories/files you
+            transferred. You can fix their permissions and ownerships
+            to the standard with:
+
+              /usr2/fs/misc/fix_perm
+
+            Answer 'y' to confirm.
+
+            If you transferred the '/usr2/tle' directory, you set its
+            permissions and ownerships with:
+
+              cd /usr2
+              chown -R oper.rtx tle
+              chmod -R ug+rw,o+r,o-w tle
+
+       iii. Make back-up copies of the operations directories. This
+            step is optional but may be useful to create a reference
+            for later use:
+
+              cd /usr2
+              cp -a proc     proc-old
+              cp -a control  control-old
+              cp -a sched    sched-old
+
+            and possibly:
+
+              cd /usr2
+              cp -a log      log-old
+              cp -a tle      tle-old
+
+        iv. Transfer your station software directory. This is usually
+            in the directory pointed to by the '/usr2/st' symbolic
+            link. On your old computer, you can find its name with:
+
+              ls -l /usr2/st
+    
+            In the rest of this step, the target 'st-1.0.0' will be used as an
+            example, but you should replace it with your actual target.
+
+            On the new computer, copy the target from the old computer to the
+            new computer, e.g.:
+
+              cd /usr2
+              scp -pqr oper@old:/usr2/st-1.0.0 .
+
+            On the new computer, set the '/usr2/st' symbolic link to point to
+            the target directory:
+
+              cd /usr2
+              ln -fsn st-1.0.0 st
+
+            You can set its permissions and for ownership by 'prog' with:
+
+              cd /usr2
+              chown -R prog.rtx st-1.0.0
+              chmod -R ug+rw,o+r,o-w st-1.0.0
+
+         v. Copy your 'oper' and 'prog' directories to the new
+            computer. This step is optional. The FSL10 installation
+            made default home directories for these users on '/usr2'.
+            If you did not have customized content for the users on the
+            old computer, you could just use the versions on the new
+            computer. Still it may be useful to have a copy of your old
+            directories on the new system for reference or in case they
+            have additional programs and files you want to use on
+            the new system. You can accomplish the tranfers as 'root'
+            using:
+
+              cd /usr2
+              scp -pqr oper@old:~ oper-old
+              scp -pqr prog@old:~ prog-old
+
+            You can customize the home directories on the new computer
+            to include any features you want from the old system.
+
+        vi. At this point you are principle done transferring files.
+            However, it is also possible that you may need or want
+            other changes such as:
+
+            . Copying other files or programs from the old system
+            . Install additional Debian packages
+            . Set-up additional configuration files, such as:
+
+                /etc/hosts
+                /etc/ntp.conf
+
+            You can use a similar process to the one above to tranfer
+            more files and directories.
+
+
+IV. Changes from previous versions
+
+This section is divided into four sub-sections: A. Changes compared to 9.13.2,
+B. Changes from VGOS branch versions, C.  Changes in 'drudg', and D. Known FS
+Bugs.  Each sub-section starts with a summary of the items covered followed by
+a more detailed description.
+
+						 A. Changes compared to 9.13.2
+
+The following is a summary of FS changes since 9.13.2.
+
+TO BE WRITTEN
+
+ 1. Source version control is maintained with 'git'.
+ 2. Source code now works on 32- and 64-bit platforms.
+ 3. Input is now case sensitive.
+
+A more detailed discussion of these changes follows.
+
+TO BE WRITTEN
+
+ 1. Source version control is maintained with 'git'.
+ 2. Source code now works on 32- and 64-bit platforms.
+ 3. Input is now case sensitive.
+
+A complete history of the routines changed can be found using the 'git log'
+command.
+
+					  B. Changes compared to VGOS versions
+
+The following is a summary of FS changes compared to VGOS versions.
+
+TO BE WRITTEN
+
+ 1. Source version control is maintained with 'git'.
+ 2. Source code now works on 32- and 64-bit platforms.
+
+A more detailed discussion of these changes follows.
+
+TO BE WRITTEN
+
+ 1. Source version control is maintained with 'git'.
+ 2. Source code now works on 32- and 64-bit platforms.
+
+A complete history of the routines changed can be found using the 'git log'
+command.
+
+							 C. Changes in 'drudg'
+				   
+TO BE WRITTEN
+
+'drudg' opening message date is 2019Sep23.
+
+The following is a summary of 'drudg' changes
+
+TO BE WRITTEN
+
+ 1. Source version control is maintained with 'git'.
+ 2. Source code now works on 32- and 64-bit platforms.
+
+A more detailed discussion of these changes follows.
+
+TO BE WRITTEN
+
+ 1. Source version control is maintained with 'git'.
+ 2. Source code now works on 32- and 64-bit platforms.
+
+A complete history of the various changes and the routines they affect
+is in /usr2/fs/drudg/change_log.txt.
+
+								D. Known FS Bugs
+
+(There have been no changes in this section since the previous version.)
+
+The following is a summary list of known bugs. They are described in more
+detail after the list.
+
+ 1. Do not run 'fmset' for extended periods.
+ 2. 'odd' and 'even' head types not supported for Mark IV & VLBA4.
+ 3. 'odd'/'even' head types not supported for VLBA style tapeforms.
+ 4. 'chekr' does not check the status of the Mark IV formatter or Mark 5
+    recorder.
+ 5. Extraneous errors when tape is stopped by low tape sensor.
+ 6. 'Comm=' command in logex extracts only the first command.
+ 7. S2 error scheme clumsy.
+ 8. No extra spaces allowed in 'ibad.ctl' file.
+ 9. ONOFF and FIVPT programs hang.
+10. FS SNAP command pages don't list tape drive suffix numbers.
+11. LBA rack TPI detector is not usable.
+12. mk5b_mode and bit_stream commands only report the expected sample
+    rate.
+13. Some fmpsee routines do not report file I/O error through the log
+    system.
+14. Some systems calls, particularly in mk5cn and dbbcn, use separate
+    UN errors to elaborate on errors in system calls.
+
+A more detailed discussion of these bugs follows.
+
+ 1. Do not run 'fmset' for extended periods.  For stations that have
+    formatter that can be set with 'fmset', the program should not be
+    run for extended periods of time.  The 'fmset' program should be
+    used only to set or briefly verify that the formatter time is
+    correct.  Do not leave 'fmset' running after completing either of
+    these tasks, especially during an experiment.
+
+    The 'fmset' program dominates the Field System when it is running
+    and this is likely to interfere with the running of an experiment
+    or other activities.  The only way to detect the time from the
+    VLBA formatter with greater precision than one second it to wait
+    for the seconds response from the formatter to change.  This
+    requires the FS to communicate with the formatter almost
+    continuously.  A similar problem exists for the S2 recorder.  This
+    problem is less severe for other formatters, but extended use of
+    'fmset' in this case should be avoided as well.  A reminder about
+    this is included in the 'fmset' menu.
+
+ 2. 'odd'/'even' head types not supported for Mark IV & VLBA4.  The
+    Mark IV and VLBA4 rack version of the 'form' command and the Mark
+    IV and VLBA4 recorder versions of the 'repro' and 'parity'
+    commands do not support the 'odd' and 'even' parameters for the
+    read and write head types and reproduce electronics in the
+    'head.ctl' control file.  This means that automatic substitution
+    of odd or even head in passes that use only even or odd heads
+    respectively does not occur.  The only correct settings for the
+    read and write head parameters and reproduce electronics is 'all'.
+    This will be fixed in a future revision.  Please let Ed know if
+    you are missing some tracks and need to work around this
+    limitation.
+
+ 3. 'odd'/'even' head types not supported for VLBA style tapeforms.
+    For any mode recorded with VLBA style tapeform (14 index
+    positions), the only correct setting of the read and write head
+    types on the 'head.ctl' is 'all'.  This will be fixed in a future
+    revision.  Please let Ed know if you are missing some tracks and
+    need to work around this limitation.
+
+ 4. 'chekr' does not check the status of the Mark IV formatter or Mark
+    5 recorder.  Now that most communication problems with the Mark IV
+    formatter have been solved, this will be possible and will be done
+    in the future.  'chekr' support will be implemented for Mark 5
+    despite communication problems, they will have to be ignored
+    unless they extend beyond a certain amount of time.
+
+ 5. Extraneous errors when tape is stopped by low tape sensor.  When a
+    tape drive has been commanded to move the tape and then stops
+    because it hit the low tape sensor (or when S2 recorders hit the
+    BOT or EOT), 'chekr' will complain periodically that the tape
+    drive is not in the correct state.  In principle the FS should be
+    smarter about this.  However, if the tape is managed correctly by
+    the schedule this error message should never occur.  If it does,
+    then it it an indication that there is either a problem with: (1)
+    the schedule, (2) the check procedures, (3) the recorder, or (4)
+    the tape is too short.  If any of these cases apply they should be
+    corrected.  It is more likely that this error message will occur
+    when the tape is being controlled manually.  In this case, issuing
+    an 'ET' command will convince the FS that the tape drive should be
+    stopped and the error message will cease.
+
+ 6. 'comm=' command in 'logex' extracts only the first command.  The
+    'comm=' command in 'logex' extracts only the first command
+    commanded and displayed.  This problem was noted by Giuseppe
+    Maccaferri (Medicina).
+
+ 7. S2 error scheme clumsy.  The error and status response number
+    reporting scheme for S2 recorders is clumsy.  FS errors that have
+    mnemonic 'rl' are mostly error responses from the recorder or the
+    RCL interface library that is used to communicate with the
+    recorder.  If the numeric part of an 'rl' error is greater than
+    -130, then it is the error code returned by the recorder.  If the
+    numeric part is less than -130, but greater than -300, then add
+    130 to the value, the absolute value of the result is the error
+    response code from the RCL library.  For values less than or equal
+    to -300, a FS error has been detected.  Status response codes are
+    all reported with mnemonic 'rz' and the numeric value is the
+    negative of the status response code.  In all cases an appropriate
+    error or status message is displayed.  These messages are retained
+    in the log.
+
+ 8. No extra spaces allowed in 'ibad.ctl' file.  The format of the
+    'ibad.ctl' must not contain any leading or embedded spaces.  In
+    systems that use the LLP AT-GPIB driver (pre-FS Linux 4), if
+    either the option 'no_untalk/unlisten_after' is misspelled or an
+    incorrect device name is supplied, the driver will cause a
+    segmentation violation when it is initialized and the FS will
+    terminate.  Unfortunately there is no way to prevent this problem
+    in a general way; it reflects a limitation in the driver.
+
+ 9. 'onoff' and 'fivpt' programs hang.  The 'onoff' and 'fivpt'
+    programs have been known to 'hang' mysteriously.  This seems to be
+    caused by some problem with the 'go' mechanism that is used to
+    restart the program when it pauses to allow a SNAP procedure, such
+    as 'calon' or 'caloff' to execute.  The 'go' that is used to
+    restart the program fails for some reason.  This has been
+    exceedingly difficult to debug because it is intermittent and
+    fairly rare.  There is however a good work around for it.  The
+    'calon' and 'caloff' procedures are called by procedures 'calonfp'
+    and 'calofffp' for 'fivpt' and 'calonnf' and 'caloffnf' for
+    'onoff'.  'fivpt' and 'onoff' may hang during (or actually just
+    after) the execution of one these procedures that FIVPT and ONOFF
+    will typically hang.  If this happens, you will have to terminate
+    the FS to recover.  You can prevent it from happening again (for
+    this procedure) by adding the lines:
+
+      !+1s
+      sy=go fivpt &
+
+    to the end of 'calonfp' and 'calonfffp'.  For 'calonnf' and
+    'caloffnf', please add:
+
+      !+1s
+      sy=go onoff &
+
+    If you see other situations where 'fivpt' and 'onoff' hang, please
+    let Ed know.
+
+10. FS SNAP command pages don't list tape drive suffix numbers.  The
+    FS SNAP manual pages and the help pages available through the
+    'help=' command do not reflect when multiple versions are
+    available with different suffixes depending on the number of drive
+    specified in the control files.  For example, there is only a
+    'tape' page, no 'tape1' or 'tape2' page.  However, the help
+    facility will display the version of the command with no suffix
+    when an available command with a suffix is used.  For example, if
+    two drives are defined, then 'help=tape1' and 'help=tape2' will
+    work, but 'help=tape' will not and vice-versa if only one drive is
+    defined.
+
+11. LBA rack TPI detector is not usable.  The Australian LBA Data
+    Acquisition System currently lacks a functional total power
+    detector though support has been included.  To allow approximate
+    system temperature calibration, all the setup commands and the TPI
+    detectors of the modules of a co-existing Mark IV rack are
+    currently also available when the rack type is specified to be
+    LBA4.
+
+12. 'mk5b_mode' and 'bit_streams' commands only report the expected
+    sample rate.  The value of the actual clock rate is not read back
+    from the recorder in order to calculate the actual effective
+    sample rate.  Consequently, the query log output includes
+    parenthesis around the sample rate as indication that it is not
+    read, but expected.  The 'mk5c_mode' command does report the
+    actual sample sample rate.
+
+13. Some 'fmpsee' routines do not generally report file I/O error
+    through the log system for programs within the FS, specifically
+    'boss', 'incom', and 'aquir'.  The 'fmpopen()' routine does use
+    the log system to report errors.  Those are the most common
+    errors.  However other routines report errors with terminal
+    output.  These other routines should eventually use the log
+    system.
+
+14. Some systems calls, particularly in 'mk5cn' and 'dbbcn', use
+    separate UN errors to elaborate on errors in system calls.  These
+    should eventually be integrated into the main error message, but
+    whether this makes the errors messages too long (maximum 120
+    characters) should be considered.
+
+
+A. Reference Appendix for Installation
+
+This appendix collects several topics that are useful for installation
+in general, but are usually not needed for routine updates.
+
+      A.1. Upgrading from FS versions before the previous stable
+
+This sub-section only covers upgrading from "main" branch versions,
+i.e., versions 9.12.x are exlcuded.
+
+If you are installing FS9 for the first time with this version, please
+follow the installation instructions in Section 4.5 of the FS9
+'Computer Reference' manual.  In this case you should also get a copy
+of the current FS9 'Control Files and Field System Initialization'
+manual.
+
+For reference, the list of the most recent 'critical updates,' since
+version 9.3.13, is given below.  These are updates that must be
+applied sequentially.  Please start with the next update with a later
+version number than what you have and apply it and the following
+listed versions before upgrading to the new version.  You can find the
+latest versions of installation notes for these FS versions in the
+'/usr2/fs/misc' directory.  The list of critical updates is:
+
+  9.4.0
+  9.5.3
+  9.5.12
+  9.6.9
+  9.7.7
+  9.9.2
+  9.10.4
+  9.11.6
+  9.11.8
+  9.11.19
+  9.13.2
+
+Strictly speaking you do not need to actually use the source archives
+(.tgz files) of the previous versions.  You can just follow the steps
+in the upgrade notices for your local files for the corresponding FS
+versions.  However, it can be very helpful to actually install each
+version to help make sure that all of the upgrade steps have been
+completed and that the FS will run *and* to test it as described.
+This can be particularly helpful when the upgrade requires some
+modifications to your local programs.  So it probably best to actually
+install *and* test each version along the way.  This is especially
+true if you have to upgrade through more than one previous version.
+Otherwise if a step was overlooked, it might be hard to identify for
+which version the error was made.
+
+You can find the archives for old versions at:
+
+  https://vlbi.gsfc.nasa.gov/software/fs/dist/old/
+
+or
+
+  http://www.metsahovi.fi/fs/dist/old/
+
+If you have a version older than 9.3.13, please contact Ed
+(Ed.Himwich@nasa.gov).
+
+	      A.2. Example standard procedure libraries
+
+For reference purposes, information about the example station
+libraries for different equipment configurations is given here.  The
+files are found in /usr2/fs/st.default/proc.  They can be referred to
+and compared to what you have in '/usr2/proc/station.prc'.
+
+**ONLY** for new installations (or complete re-installs), you can copy
+the default version for your equipment to '/usr2/proc' renaming it to
+'station.prc' in the process, e.g.:
+
+  cd /usr2/proc
+  cp -i /usr2/fs/st.default/proc/3station.prc station.prc
+  chmod a+rw station.prc
+
+The '-i' option will prompt before overwriting an existing
+'station.prc' to give you a chance to recover if you did not realize
+you already had a 'station.prc' file.  The table of correspondence
+between equipment types and default library names is given next.
+
+      Equipment        Prefix letters  Station Library
+      Rack/Drive1/Drive2
+
+      k42/k42              k42         k42station.prc
+      k42k3/vlba           k42k3v      k42k3vstation.prc
+      k42mk4/vlba          k42mk4v     k42mk4vstation.prc
+      k42mk4/vlbab/vlbab   k42mk4vb    k42mk4vstation2.prc
+      k42/k5               k42k5       k42k5station.prc
+      lba/s2               ls2         ls2station.prc
+      lba4/s2              l4s2        l4s2station.prc
+      mk3/mk3a             3           3station.prc
+      mk4/mk4              4           4station.prc
+      mk4/mk5a             45          45station.prc
+      mk4/vlba4            4v4         4v4station.prc
+      mk5/mk5b             5           5station.prc
+      none/s2              s2          s2station.prc
+      vlba/s2              vs2         vs2station.prc
+      vlba/vlba            v           vstation.prc
+      vlba/vlba2           v2          v2station.prc
+      vlba/vlba/vlba       v           vstation2.prc
+      vlba4/vlba4          v4          v4station.prc
+      vlba4/mk5a           v45         v45station.prc
+      vlba4/vlba42         v42         v42station.prc
+      vlba5/mk5b           v5          v5station.prc
+      dbbc/mk5b            d           dstation.prc
+
+If an example for your equipment type is listed, please let Ed
+('Ed.Himwich@nasa.gov') know so that it can be added.
+
+		 A.3. Cut-and-paste installation tips
+
+You can use cut-and-paste to reduce the amount of typing involved in
+the installation.  This reduces the chances of missing required spaces
+and other easily missed characters (like '.') in the commands.  The
+basic idea is to have two different terminals open, EITHER (preferred)
+two different xterm terminals either on the local X display or
+remotely logged in OR (more cumbersome) two different VT text
+terminals (Control-Alt-F*, where * is 1-6) on the FS computer you are
+upgrading.  You can then switch back and forth between the terminals,
+reading the instructions as you scroll through them (with 'more' or
+'less') on one terminal and entering commands on the other.  You can
+cut-and-paste complicated commands from the terminal with the
+instructions to the terminal where you are entering commands as
+needed.  You can use 'ssh' or 'su' to 'switch' to users as needed on
+the terminal where you are entering commands. For example, you can
+change to being 'prog' by executing:
+
+ ssh -X prog@localhost
+
+or
+
+ su - prog
+
+Please don't forget to log back out when you need to change users
+again or you may develop a series of 'nested' logins.  Any steps that
+require rebooting will of course completely log out all of your
+terminals; you will need to re-login again from scratch to continue.
+At the end of the update, it is recommended that you login as 'oper'
+on the local X display for the final testing.  Please also note that
+in order to paste into the X display login shell window for 'oper' and
+'prog', you typically must use Shift-Insert.  If you have any
+questions about how to cut-and-paste please contact Ed
+(Ed.Himwich@nasa.gov).
+
+	       A.4. Making a back-up before installing
+
+Before you begin the upgrade make sure you have a current back-up of
+your system in case something goes wrong. If you are using one of the FSLx
+distributions, there are optiions for each
+
+  FSL10 (stretch) - See the procedure at:
+
+https://nvi-inc.github.io/fsl10/raid.html#_test_upgrade_of_fs_system_updates_or_other_significant_changes
+
+  FSL9 (wheezy)  - If the system is configured as a RAID,please see
+                   /usr2/fs/misc/FSL9_RAID.pdf section APPLYING AN
+                   UPDATE for directions for applying an update. i
+
+  FSL8 (lenny), FSL7, (etch), FSL6 (sarge)
+                 - If the system is configured as a RAID, please see
+                   /usr2/fs/misc/RAID.pdf section APPLYING AN UPDATE
+                   for directions for applying an update.
+
+  FSL5 (woody) - We recommend you use the tar based back-up that is
+                 part of the rotating disk back-up scheme.  A draft
+                 document that describes this method is available in
+                 the 'docs' sub-directory on the FS file servers as
+                 'backups2.pdf'.
+
+If you have an even older FS Linux distribution, please use the
+disk-to-disk back scheme described in Section 5.8 of the FS9 'Computer
+Reference' manual.
+
+If you are running one of the FSL distributions and do not have
+documentation on how to make a back-up, please contact Ed Himwich
+(Ed.Himwich@nviinc.com).
+
+If you have SCSI disks, Section 5.7 of the FS9 'Computer Reference'
+manual has a discussion of drive ID numbers if you are unsure about
+these.
+
+Except for FSL10 (which as a different scheme), you would normally
+choose to install the update on your primary disk after having made
+and verified your back-up.  Once the installation is complete, has
+been tested, and used for a little while, you can copy over your
+back-up with the upgraded primary.  If the upgrade fails, you should
+restore the back-up to the primary for operations.  You can then try
+to upgrade again when it is convenient.  In a desperate situation, you
+can use the back-up for operations.  You may choose to install the FS
+on your back-up disk for testing and then later copy the back-up onto
+the primary once you are satisfied with the new version.  In any
+event, please be sure to make a fresh back-up (and put it safely away)
+before attempting an update installation.
+
+		     A.5. Disk space requirements
+
+Please be sure that you have at least 50 MB of free space (use the
+'df' UNIX command to check free space) on your '/usr2' partition
+before starting the upgrade.  This would probably only be an issue for
+stations with 200 MB disks.  If you are tight on space, you may want
+to delete old log files and old versions of the FS (except your most
+recent one if you can avoid it of course).  Since you should have
+backed-up your system, you can even delete the '*.[oas]' and
+executable files of your old versions with no risk.  You might want to
+keep the source of the previous versions around for reference if you
+have room.  You can eliminate the non-source files by 'cd'-ing to each
+of the old FS directories in turn as 'prog' and executing:
+
+  make rmdoto rmexe
+
+as shell command.  If you have any questions about how to do this,
+please contact Ed.
+
+		 A.6. Set operations file permissions
+
+It is recommended that your local files for operations (control, proc,
+log, and sched directories and their contents) have the default
+ownership ('oper.rtx') and permissions ('rw-rw-r-', for directories
+'rwxrwxr-x').  To force this, please execute the script (as 'root'):
+
+  /usr2/fs/misc/fix_perm
+
+Answer 'y' to the prompt if you wish to proceed.  It is a good idea to
+do this, unless you have purposely changed the ownership and
+permissions to some other values.  If you don't want to restore the
+defaults, answer 'n' (this is the last chance to abort the execution
+of the script).
+
+		 A.7. Fix '.prc' file 'define' lines
+
+Sometimes due to errors (possibly caused during manual editing,
+instead of using 'pfmed'), the 'define' statements in '.prc' files can
+be damaged.  This can lead to other problems including causing the
+contents of procedures being logged every time they are executed
+rather than just the first time they are used in a given log file.
+You can use the utility, '/usr2/fs/misc/fix_define', to fix this. You
+can run it when the FS is *not active* (as 'oper'):
+
+  cd /usr2/proc
+  /usr2/fs/misc/fix_define -t *.prc
+
+in 'test' mode to see if there any 'define' statements that need to be
+fixed.  If there are, they will be displayed.  If you choose to fix
+them, you can re-run the second command above without the '-t' flag to
+apply the fix.  An original of each '.prc' file that is changed is
+retained with an added '.bak' extension.
