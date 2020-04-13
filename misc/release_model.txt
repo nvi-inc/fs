@@ -228,16 +228,18 @@ Additionally, you will need to follow installation instructions in the
 
 === Installing from an archive
 
-The main method of distributing the FS is with the git repo. That will make
-updates much easier. However, if it is not possible to use git, you can get a
-'.tar.gz' archive from the release page.
+The main method of distributing the FS is with the git repo. That will
+make updates, particularly patches,  much easier. However, if it is
+not possible to use git, you can get a '.tar.gz' archive from the
+release page.
 
 To install from the archive:
 
-.   (place the archive on '/tmp')
 .   (log in as 'root')
+.   cd /tmp
+.   wget https://github.com/nvi-inc/fs/archive/<tag>.tar.gz
 .   cd /usr2
-.   tar -xzf /tmp/fs-<tag>.tgz
+.   tar -xzf /tmp/<tag>.tar.gz
 .   cd /usr2/fs-<tag>
 .   make install
     (answer 'y' to confirm installation)
