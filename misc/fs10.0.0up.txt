@@ -16,7 +16,7 @@ This document is divided into four sections:
 This update is intended for all stations using FS. This includes both
 stations on the main (non-VGOS) branch (latest version 9.13.2) and the
 VGOS branch (latest version 9.12.13). Installing the new version as
-update 9.12.13 (and as far back as 9.12.10) is fairly simple.
+update from 9.12.13 (and as far back as 9.12.10) is fairly simple.
 Installing the new version as an update from 9.13.2 is a little more
 involved but is straightforward.
 
@@ -28,7 +28,7 @@ The most significant changes in 10.0.0 are:
    support the FS without major issues.
 
    A new FS Linux distribution, FSL10, is now available or will be
-   shortly, for 64-bit (and 32-bit) use.  We recommend this
+   shortly, for 64-bit (and 32-bit) use.  We recommend using this
    distribution if you would like to move to using a 64-bit OS or need
    an OS still under support. This may require some relatively simple
    changes to your station software.  Release of FSL10 will occur
@@ -37,12 +37,12 @@ The most significant changes in 10.0.0 are:
 2. One unified version for all FS users
 
    Both non-VGOS and VGOS operations are supported by the new
-   versions.  Previous users of the main (non-VGOS) branch will need
+   version.  Previous users of the main (non-VGOS) branch will need
    to update some of their local files.
 
    The most significant change due to this is that former main branch
    users will find that the FS input is now case sensitive, as it was
-   in the VGOS branch.
+   already in the VGOS branch.
 
 3. Version control with git.
 
@@ -65,7 +65,7 @@ under HP RTE-A/1000 going back to version 5.5 in 1988.  Having the
 source code in git greatly simplified the task of merging the non-VGOS
 and VGOS versions. Dave also did the most critical work on that and
 was an excellent tutor in how to use git. Having the historical code
-in git is great resource for understand the evolution of the code.
+in git is great resource for understanding the evolution of the code.
 
 As always, we are deeply indebted to Jonathan Quick (HartRAO) for his
 many significant contributions that go far beyond what is explicitly
@@ -96,7 +96,7 @@ operational system before upgrading.
 
 There are two possibilities: upgrading from a main branch version or
 upgrading from a VGOS branch version. There are some general
-considerations that depend on which branch you are updating from.:
+considerations that depend on which branch you are updating from:
 
   1. Upgrading from a main branch version. The main branch versions
      are numbered 9.13.x and 9.11.x or older.  Specifically, versions
@@ -133,6 +133,11 @@ The installation steps for upgrading are:
 
        cd /usr2
        git clone https://github.com/nvi-inc/fs.git fs-git
+
+     or, alternatively, if you need to use ssh instead:
+
+       cd /usr2
+       git clone git@github.com:nvi-inc/fs fs-git
 
  (3) Checkout the version you will use from the local repository.
 
@@ -245,7 +250,7 @@ FLIBS   += -lgfortran -lm
      for updating from different versions are noted. 
 
      A. The 'stcmd.ctl' file needs another digit added to the
-        subroutine number. This step is only need for updates to
+        subroutine number. This step is only need for updates from
         9.13.2. You can fix your file with the commands:
 
           cd /usr2/control
@@ -390,13 +395,13 @@ FLIBS   += -lgfortran -lm
 
 III.  Upgrading to 64-bit
 
-To upgrade your installation to 64-bit, the easiest approach is to
+To upgrade your installation to 64-bit, the easiest approach is
 probably to first upgrade the FS installation on your 32-bit system to
 run FS 10.0, then transfer it to a 64-bit system. This will allow you
 verify the upgrade before trying to move it.
 
 An alternate method would be to move the station files from your
-32-bit system and the perform the upgrade. This will allow you to
+32-bit system and then perform the upgrade. This will allow you to
 upgrade without modifying your existing system.  These two methods
 only differ in when the files are copied to the new machine.
 
@@ -449,7 +454,7 @@ these steps:
        old computer using any convenient method.  If both systems are
        on the network this can be particularly easy. The following
        example steps use this approach. You should replace the example
-       hostname 'old' with your old systems hostname. You maybe need to
+       hostname 'old' with your old systems hostname. You may need to
        provide the appropriate password for each 'scp' command. These
        commands must be executed as 'root':
 
@@ -561,7 +566,7 @@ these steps:
                 /etc/hosts
                 /etc/ntp.conf
 
-            You can use a similar process to the one above to tranfer
+            You can use a similar process to the one above to transfer
             more files and directories.
 
 
@@ -831,7 +836,7 @@ in general, but are usually not needed for routine updates.
       A.1. Upgrading from FS versions before the previous stable
 
 This sub-section only covers upgrading from "main" branch versions,
-i.e., versions 9.12.x are exlcuded.
+i.e., versions 9.12.x are excluded.
 
 If you are installing FS9 for the first time with this version, please
 follow the installation instructions in Section 4.5 of the FS9
@@ -881,7 +886,7 @@ or
   http://www.metsahovi.fi/fs/dist/old/
 
 If you have a version older than 9.3.13, please contact Ed
-(Ed.Himwich@nasa.gov).
+(Ed.Himwich@nviinc.com).
 
 	      A.2. Example standard procedure libraries
 
@@ -930,7 +935,7 @@ between equipment types and default library names is given next.
       dbbc/mk5b            d           dstation.prc
 
 If an example for your equipment type is listed, please let Ed
-('Ed.Himwich@nasa.gov') know so that it can be added.
+('Ed.Himwich@nviinc.com') know so that it can be added.
 
 		 A.3. Cut-and-paste installation tips
 
@@ -965,7 +970,7 @@ on the local X display for the final testing.  Please also note that
 in order to paste into the X display login shell window for 'oper' and
 'prog', you typically must use Shift-Insert.  If you have any
 questions about how to cut-and-paste please contact Ed
-(Ed.Himwich@nasa.gov).
+(Ed.Himwich@nviinc.com).
 
 	       A.4. Making a back-up before installing
 
