@@ -73,11 +73,11 @@ changes, but also occur when a patch is not just a "quick" install for the
 users. A patch that requires significant changes, including, but not limited to
 reboots due to changes in shared memory size, should be promoted to being a
 feature release. The goal is that patch releases should be safe for operational
-stations to install without a significant amount of time, testing, and being a
-risk to operations.
+stations to install without needing a significant amount of time, testing, or
+otherwise being a risk to operations.
 
 For each release, there should be an "update" notice
-fsVERSION.SUBLEVEL.PATCHLEVELup.txt (hearafter fs<tag>up.txt) file in
+fsVERSION.SUBLEVEL.PATCHLEVELup.txt (hereafter fs<tag>up.txt) file in
 '/usr2/fs/misc', documenting the changes in the version and installation
 instructions. Note that there are no files with -string in <tag>, at least for
 alpha and beta releases. For feature releases, the file should have a complete
@@ -96,7 +96,7 @@ after a clone operation from gitbub.  The 'master' branch represents the main
 line of development and should include most of the feature releases. Typically,
 patch releases will not occur on 'master'.  However, if a patch is needed and
 there have been no changes on 'master' since the corresponding feature release,
-the patch can be  released on the 'master' (probably have been developed on a
+the patch can be released on the 'master' (probably having been developed on a
 "feature" branch first). Otherwise, a "maintenance" branch should be made from
 the corresponding feature release, e.g., to create such a branch for feature
 release 10.2:
@@ -112,7 +112,7 @@ example to make a 10.3 maintenance branch from the 10.2 maintenance branch:
    git checkout 10.2
    git checkout -b 10.3
 
-and the new feature release is place on the new branch. If no maintenance
+and the new feature release is placed on the new branch. If no maintenance
 branch exists for the previous feature branch, it can be created at that point:
 
    git checkout -b 10.3 10.2.0
@@ -121,7 +121,7 @@ The changes for either type of maintenance release should be rebased onto
 'master' as soon as possible, unless they were created there first.
 
 It may make sense to retain maintenance branches long term, if for no other
-reason that it will easier to find a tagged releases on that branch if the
+reason that it will easier to find a tagged release on that branch if the
 version tag was accidentally deleted.
 
 Generally speaking, all other branches are feature or bug fix branches. Once
@@ -145,7 +145,7 @@ be in a state that is releasable. However, it is helpful to developers, and to
 a lessor extent for users, for the branch tips be in a usable state. This is
 largely achieved by not merging or rebasing feature branches into the branch
 that aren't in a fairly complete state.  However, it is acceptable to make new
-comments significantly changing the impact of previous commits, if they still
+commits significantly changing the impact of previous commits, if they still
 result in a usable tip.
 
 == Making a release
@@ -229,8 +229,8 @@ Additionally, you will need to follow installation instructions in the
 === Installing from an archive
 
 The main method of distributing the FS is with the git repo. That will
-make updates, particularly patches,  much easier. However, if it is
-not possible to use git, you can get a '.tar.gz' archive from the
+make updates, particularly patches,  much easier to install. However, if
+it is not possible to use git, you can get a '.tar.gz' archive from the
 release page.
 
 To install from the archive:
@@ -247,6 +247,7 @@ To install from the archive:
 .   make >&/dev/null
 .   make -s
     (if there is no output of the above command, then the 'make' was successful)
+.   reboot
 
 If this is a first time installation, you can then login as 'oper' and
 run the FS, but you will need to customize the control files in
