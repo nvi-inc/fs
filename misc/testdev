@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -e
+sudo unshare --ipc --mount bash -c "$(tail -n +5 "$0")" "$0" "$USER" "$@"
+exit $?
+
+# The real script starts here
+U="$1"
+shift
+
+mount --bind /usr2/fs-dev /usr2/fs
+mount --bind /usr2/fs-dev/st.default/control /usr2/control
+mount -t tmpfs tmpfs /var/run/fsserver
+
+/usr2/fs/bin/fsalloc
+[ -f /usr2/st/bin/stalloc ] && /usr2/st/bin/stalloc
+
+sudo -u "$U" -i
