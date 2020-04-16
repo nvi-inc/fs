@@ -1,0 +1,1 @@
+typedef struct buffered_stream buffered_stream_t;

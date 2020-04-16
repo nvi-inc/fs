@@ -54,7 +54,14 @@
 #include <nng/compat/nanomsg/reqrep.h>
 #include <pthread.h>
 
+#include <nng/nng.h>
+#include <nng/protocol/pubsub0/pub.h>
+#include <nng/protocol/reqrep0/rep.h>
+#include <nng/protocol/reqrep0/req.h>
+#include <nng/supplemental/util/platform.h>
+
 #include "msg.h"
+#include "stream.h"
 
 const int heartbeat_millis = 500;
 const int shutdown_heartbeat_millis = 200;
@@ -69,97 +76,111 @@ void term_handler(int i) {
 	terminate = i;
 }
 
-void fatal(const char *msg, int err) {
-	if (err != 0)
-		fprintf(stderr, "spub error %s: %s\n", msg, nn_strerror(err));
-	else
-		fprintf(stderr, "spub error %s\n", msg);
-	exit(EXIT_FAILURE);
-}
+#define fatal(msg, rv)                                                                             \
+	do {                                                                                       \
+		fprintf(stderr, "%s:%d (%s) error %s: %s\n", __FILE__, __LINE__, __FUNCTION__,     \
+		        msg, nng_strerror(rv));                                                    \
+		exit(1);                                                                           \
+	} while (0)
 
-// Thread to manange out-of-band sync rep socket recieves the sequence numer it
-// last saw and replies with all messages after that in the buffer
-void *sync_manager(void *arg) {
-	int fd = (intptr_t)arg;
 
-	void *buf;
-	for (;;) {
-		int rc = nn_recv(fd, &buf, NN_MSG, 0);
-		if (rc < 0) {
-			if (nn_errno() == EBADF) {
-				return NULL; // Socket closed by another thread.
-			}
-			/*  Any error here is unexpected. */
-			fatal("in sync_manager recv", errno);
-		}
-		uint64_t req_seq;
-		int n = uint64_unmarshal_le(&req_seq, buf, rc);
-		nn_freemsg(buf);
-		if (n < 0) {
-			fprintf(stderr, "spub: bad msg");
-			continue;
-		}
+struct buffered_stream {
+    uint64_t seq; // Next message sequence ID to send
 
-		if (pthread_mutex_lock(&msg_buffer_lock) < 0) {
-			fatal("locking msgs for read", errno);
-			continue;
-		}
+	nng_aio *aio;
+	nng_mtx *mtx;
 
-		if (seq == 0 || req_seq >= seq) {
-			nn_send(fd, "", 1, 0);
-			goto unlock;
-		}
+    int heartbeat_millis;
+    int shutdown_heartbeat_millis;
 
-		// Cache of msgs,
-		// Find the first message requested
-		int first = seq % msg_buffer_len; // oldest message
-		if (msg_buffer[first].data == NULL)
-			first = 0; // if buffer hasn't filled yet
-		while (msg_buffer[first].seq < req_seq) {
-			first = (first + 1) % msg_buffer_len;
-		}
+    size_t msg_buffer_len;
+    msg_t *msg_buffer; // Ring buffer of messages
 
-		size_t rep_msg_size = 0;
+	char *cmd_url;
+	char *rep_url;
+	nng_socket pub;
+	nng_socket rep;
+};
 
-		// NB (seq-1) is the last seq posted
-		for (int j = first;; j = (j + 1) % msg_buffer_len) {
-			rep_msg_size += msg_marshaled_len(&msg_buffer[j]);
-			if (msg_buffer[j].seq == seq - 1)
-				break;
-		}
+// cmd_cb is a callback to manange out-of-band sync for the buffered stream. 
+// The rep socket recieves the sequence numer the client last saw and
+// cmd_cb replies with all messages after that in the buffer.
+void *cmd_cb(void *arg) {
+	buffered_stream_t *s = arg;
+	nng_msg *msg, *reply_msg;
+	int rv;
 
-		uint8_t *rep_msg = nn_allocmsg(rep_msg_size, 0);
-		if (!rep_msg) {
-			fatal("allocating reply msg", errno);
-		}
+    msg = nng_aio_get_msg(s->aio);
 
-		uint8_t *rep_ptr = rep_msg;
-		size_t msg_len   = 0;
+    uint64_t req_seq;
+    int n = uint64_unmarshal_le(&req_seq, buf,  nng_msg_len(msg));
+	nng_msg_free(msg);
 
-		for (int j = first;; j = (j + 1) % msg_buffer_len) {
-			n = msg_marshal(&msg_buffer[j], rep_ptr, rep_msg_size - msg_len);
-			if (n < 0) {
-				fatal("marshaling msg", 0);
-			}
-			rep_ptr += n;
-			msg_len += n;
+    if (n < 0) {
+        fprintf(stderr, "spub: bad msg");
+        goto end;
+    }
 
-			if (msg_buffer[j].seq == seq - 1)
-				break;
-		}
+	nng_mtx_lock(s->mtx);
 
-		if (msg_len != rep_msg_size) {
-			fatal("msg smaller than anticipated", 0);
-		}
+    if (s->seq == 0 || req_seq >= s->seq) {
+        nng_send(s->cmd, "", 1, 0);
+        goto end_unlock;
+    }
 
-		rc = nn_send(fd, &rep_msg, NN_MSG, 0);
+    // Find the first message requested
+    
+    int first = s->seq % msg_buffer_len; // oldest message
+    if (s->msg_buffer[first].data == NULL)
+        first = 0; // if buffer hasn't filled yet
 
-	unlock:
-		if (pthread_mutex_unlock(&msg_buffer_lock) < 0) {
-			fatal("error unlocking msgs from read", 0);
-		}
-	}
-	return NULL;
+    while (msg_buffer[first].seq < req_seq) {
+        first = (first + 1) % msg_buffer_len;
+    }
+
+    size_t rep_msg_size = 0;
+
+    // NB (seq-1) is the last seq posted
+    for (int j = first;; j = (j + 1) % msg_buffer_len) {
+        rep_msg_size += msg_marshaled_len(&msg_buffer[j]);
+        if (msg_buffer[j].seq == seq - 1)
+            break;
+    }
+
+    rv = nng_msg_alloc(&rep_msg, rep_msg_size);
+    if (rv != 0) {
+        fatal("allocating new message", rv)
+    }
+
+    uint8_t *rep_ptr = nng_msg_body(reply_msg);
+    size_t msg_len   = 0;
+
+    for (int j = first;; j = (j + 1) % msg_buffer_len) {
+        n = msg_marshal(&msg_buffer[j], rep_ptr, rep_msg_size - msg_len);
+        if (n < 0) {
+            fatal("marshaling msg", 0);
+        }
+        rep_ptr += n;
+        msg_len += n;
+
+        if (msg_buffer[j].seq == seq - 1)
+            break;
+    }
+
+    if (msg_len != rep_msg_size) {
+        fatal("msg smaller than anticipated", 0);
+    }
+
+    rv = nng_sendmsg(s->cmd, rep, 0);
+    if (rv != 0) {
+		nng_msg_free(reply_msg);
+    }
+
+end_unlock:
+    nng_mtx_unlock(s->mtx);
+end:
+	nng_recv_aio(s->cmd, s->aio);
+	return;
 }
 
 ssize_t send_msg(int nnsock, msg_t *m) {
