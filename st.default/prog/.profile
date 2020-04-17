@@ -20,7 +20,7 @@ fi
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games"
 # for go
 #export GOPATH=~/go
-#PATH="$GOPATH/bin:$PATH"
+#PATH="$GOPATH/bin:/usr/local/go/bin:$PATH"
 # set PATH so it includes oper's private bin if it exists
 if [ -d "/usr2/oper/bin" ] ; then
     PATH="/usr2/oper/bin:$PATH"
