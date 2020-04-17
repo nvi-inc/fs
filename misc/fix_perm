@@ -50,7 +50,7 @@ if ($#ARGV >= 0) {
 print "*****************************************************************************\n";
 print "*  This script will 'fix' the ownership and permissions of the directories  *\n";
 print "*  on /usr2: control/, proc/, sched/, log/, tle_files/, and their contents. *\n";
-print "*  The correct owner.group is oper.rtx and permissions is 'rw-rw-r--'.      *\n";
+print "*  The correct owner.group is oper.rtx and permissions is 'ug+rw,o+r,o-w'.  *\n";
 print "*                                                                           *\n";
 print "*  If you don't want these ownership and permissions, answer 'n' to the     *\n";
 print "*  next question.                                                           *\n";
