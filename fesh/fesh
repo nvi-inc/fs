@@ -1,6 +1,4 @@
 #!/bin/bash
-SHA1SUM=0dcd4f633cf50a0d786adbd0dadf409c8cde1c6a
-VERSION=2017-10-10
 #
 # Copyright (c) 2020 NVI, Inc.
 #
@@ -21,14 +19,10 @@ VERSION=2017-10-10
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-version(){
-    local sha=$(tail -n+4 $0 | sha1sum | cut -f1 -d' ')
+VERSION=UNKNOWN-VERSION
 
-    if [[ $SHA1SUM =~ $sha ]]; then
-        echo "fesh $VERSION"
-    else
-        echo "fesh $VERSION (modified)"
-    fi
+version(){
+    echo "fesh $VERSION"
 }
 
 #enable 'strict' mode
@@ -137,6 +131,7 @@ fi
 
 year=$(date +%Y)
 cd "$SCHED_PATH"
+version
 echo -n Fetching schedule from server...
 #TODO: if not found, maybe check next or previous years?
 wget -nv  --backups=1 ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd
