@@ -81,7 +81,7 @@ while getopts 'ndhfvV' opt; do
             verbose=1
             ;;
         V)
-            version $0
+            version
             exit 0
             ;;
         *)
@@ -89,7 +89,7 @@ while getopts 'ndhfvV' opt; do
             exit 1
     esac
 done
-shift $(($OPTIND - 1))
+shift $((OPTIND - 1))
 
 if [[ $# -eq 0 ]] ; then
     usage >&2
@@ -116,14 +116,14 @@ if [[ -n "$run_drudg" ]]; then
             echo "$SCHED_PATH/$sched$STATION.snp exists, delete or use '-f' to re-drudg >&2"
             exit 1
         fi
-        rm $SCHED_PATH/$sched$STATION.snp
+        rm "$SCHED_PATH/$sched$STATION.snp"
     fi
     if [[ -e $PROC_PATH/$sched$STATION.prc ]]; then
         if [[ -z "$force" ]]; then
-            echo $PROC_PATH/$sched$STATION.prc exists, delete or use '-f' to re-drudg >&2
+            echo "$PROC_PATH/$sched$STATION.prc exists, delete or use '-f' to re-drudg" >&2
             exit 1
         fi
-        rm $PROC_PATH/$sched$STATION.prc
+        rm "$PROC_PATH/$sched$STATION.prc"
     fi
 fi
 
@@ -134,7 +134,7 @@ cd "$SCHED_PATH"
 version
 echo -n Fetching schedule from server...
 #TODO: if not found, maybe check next or previous years?
-wget -nv  --backups=1 ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd
+wget -nv --backups=1 "ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
 echo Done
 
 drudg_out="/dev/null"
@@ -144,7 +144,7 @@ fi
 
 if [[ -n "$run_drudg" ]]; then
 echo -n Drudging schedule... >&2
-cat <<EOF | $FS_PATH/bin/drudg $sched.skd > $drudg_out
+cat <<EOF | "$FS_PATH/bin/drudg" "$sched.skd" > "$drudg_out"
 $STATION
 3
 12
