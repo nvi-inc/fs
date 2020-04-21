@@ -167,14 +167,16 @@ hard, since previous patch notes can be included explicitly.
 To make a release:
 
 . Finalize release, including release notes, committing all changes.
+  Final commit title "Finalize <tag>"
 . git push
-. Tag the commit with version tag
+. Tag the commit with <tag>
 . git push --tags
 . On the github page for the repo, select "release"
 . Select "Draft a new release"
 . Enter version string as an existing tag and select branch
-. Enter title and description
-  (do not include "pre-release or the version tag in title since they are automatically prepended)
+. Enter release notes as Description, leave Title Blank
+  (do not include "pre-release or the version tag in title since they
+   are automatically prepended to e-mail)
 . If not for production, select "This is a pre-release"
 . Select "Publish Release"
 
