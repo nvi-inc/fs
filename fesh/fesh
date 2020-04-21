@@ -100,7 +100,7 @@ sched=$1
 
 ## Conflict check
 if [[ -e $SCHED_PATH/$sched.skd && -z "$force" ]]; then
-    echo "$SCHED_PATH/$sched.skd exits, delete or use '-f' to get fresh schedule" >&2
+    echo "$SCHED_PATH/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
     exit 1
 fi
 
