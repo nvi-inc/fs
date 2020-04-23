@@ -158,6 +158,10 @@ The installation steps for upgrading are:
        cd fs-git
        git checkout 10.0.0-beta1
 
+     NOTE: The second command may generate a 'detached HEAD' warning
+           message. This is benign and can be ignored as long as it
+           ends with 'HEAD is now at 259e2033 Finalize 10.0.0-beta1'
+
  (4) Set the link for the new FS version:
 
        cd /usr2/fs-git
