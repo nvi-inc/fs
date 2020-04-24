@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/fs10.0.0up.txt        Version: 10.0  Date: 200420
+File: /usr2/fs/misc/fs10.0.0up.txt        Version: 10.0  Date: 200424
 
                      FS 10.0.0 Beta Update Notice
 
@@ -323,15 +323,15 @@ FLIBS   += -lgfortran -lm
 
      B. You will need to execute the following commands to copy new
         files that are needed (cut-and-paste is your friend). There
-        are three cases depending on what your old version was:
+        are three cases depending on what your old version was.
 
-          i. If your old version was 9.12.10-9.12.12:  
+          i. If your old version was 9.12.10 or 9.12.11:  
 
                cd /usr2/control
                cp /usr2/st.default/control/clpgm.ctl .
                cp /usr2/st.default/control/rdbemsg.ctl .
 
-         ii. If your old version was 9.12.13:  
+         ii. If your old version was 9.12.12 or 9.12.13:  
 
                cd /usr2/control
                cp /usr2/st.default/control/rdbemsg.ctl .
@@ -346,22 +346,30 @@ FLIBS   += -lgfortran -lm
                cp /usr2/st.default/control/rdbe.ctl .
                cp /usr2/st.default/control/rdbemsg.ctl .
 
-     C. Update your 'equip.ctl' file for the DBBC3 configuration line.
-        There are two cases, please check which, if either, applies
-        for you.
+     C. Update your 'equip.ctl' file, adding up to two lines at the
+        end: the FiLa10G input select and the DBBC3 configuration
+        lines.  There are three cases, please check which applies for
+        you.  In any event, you should compare your 'equip.ctl' to the
+        example as described when you get to sub-step D, to make sure
+        there are no duplicated lines or other problems caused by the
+        commands in the current sub-step.
 
-         i. If your old version was 9.12.10-9.12.13, you will need to
-            add the final four lines of the example 'equip.ctl' file
-            to yours:
+          i. If your old version was 9.12.10 or 9.12.11, you will need
+             to add the final four lines of the example 'equip.ctl'
+             file to yours:
 
-              cd /usr2/control
-              tail -n 4 /usr2/fs/st.default/control/equip.ctl >>equip.ctl
+               cd /usr2/control
+               tail -n 4 /usr2/fs/st.default/control/equip.ctl >>equip.ctl
 
-        ii. If your old version was 9.13.2, you will need to add the
-            final two lines of the example 'equip.ctl' file to yours:
+         ii. If your old version was 9.12.12 or 9.12.13, you will need
+             to insert two lines before the final two lines.  This is
+             covered in sub-step D.
 
-              cd /usr2/control
-              tail -n 2 /usr2/fs/st.default/control/equip.ctl >>equip.ctl
+        iii. If your old version was 9.13.2, you will need to add the
+             final two lines of the example 'equip.ctl' file to yours:
+
+               cd /usr2/control
+               tail -n 2 /usr2/fs/st.default/control/equip.ctl >>equip.ctl
 
      D. You should compare your versions of the following files:
 
@@ -375,27 +383,30 @@ FLIBS   += -lgfortran -lm
           diff clpgm.ctl /usr2/fs/st.default/control/ | less
 
         and consider whether you should make any changes to your
-        copies.  In the case of 'clpgm.ctl', you might just be able to
+        copies.  In the case of 'clpgm.ctl', you may be able to just
         replace your copy with the new one.
 
-        The following is a list of changes in these files:
+        The following is a list of changes in these files. You will
+        need to make the corresponding changes to your copies of the
+        files.
 
-           clpgm.ctl - This file was not present for 9.12.10-9.12.12,
-                       so if your old version was one of those, the
-                       new default version (copied by commands in step
-                       B above) should not require modification.
+           clpgm.ctl - This file was not present for 9.12.10 or
+                       9.12.11, so if your old version was one of
+                       those, the new default version (copied by
+                       commands in sub-step B above) should not require
+                       modification.
 
-                     - If your old version was 9.12.13 or 9.13.2: the
-                       '-title ...'  parameter for each window was
-                       removed so that it is uniquely supplied by the
-                       '.Xresources' file.
+                     - If your old version was 9.12.12, 9.12.13 or
+                       9.13.2: the '-title ...'  parameter for each
+                       window was removed so that it is uniquely
+                       supplied by the '.Xresources' file.
 
-                     - If your old version was 9.12.13 or 9.13.2: new
-                       lines were added for the useful display window
-                       'scnch', and the useful RDBE display windows:
-                       'monit6', and 'monX' ('X'=[a-b]). The 'monan'
-                       program was added since it is used at several
-                       sites.
+                     - If your old version was 9.12.12, 9.12.13, or
+                       9.13.2: new lines were added for the useful
+                       display window 'scnch', and the useful RDBE
+                       display windows: 'monit6', and 'monX'
+                       ('X'=[a-b]). The 'monan' program was added to
+                       the default since it is used at several sites.
 
            equip.ctl - This file has the most complicated changes.
                        Please read all clauses to make sure you see
@@ -410,22 +421,22 @@ FLIBS   += -lgfortran -lm
                           Non-comment lines
 
                      - If your old version was 9.12.10-9.12.13, the
-                       line for DBBC PFB version should be changed to
-                       (shown here with the typical preceding
-                       comment):
+                       line for DBBC PFB version was changed to have a
+                       minimum version number of 'v15_1'. The line is
+                       shown here with the typical preceding comment:
 
 *DBBC PFB version
 v15_1    v15_1 or later
 
                      - If your old FS version was 9.12.10-9.12.13, the
                        line that defines the DBBC2 CoMo configuration
-                       has changed. Please see item (12) in the
+                       was changed. Please see item (12) in the
                        installation instructions in 'fs91119up.txt'
                        for full details on handling this. However, the
-                       following commands will probably work if you
-                       don't have a DBBC2 or if your DBBC2
-                       configuration is four CoMos with one Core per
-                       CoMo:
+                       following commands will probably make the
+                       needed change if you don't have a DBBC2 or if
+                       your DBBC2 configuration is four CoMos with one
+                       Core per CoMo:
 
                          cd /usr2/control
                          /usr2/fs/misc/dbbc_equip '1 1 1 1' equip.ctl
@@ -437,9 +448,26 @@ v15_1    v15_1 or later
                        conversions, adjusting the CoMo configuration,
                        or both.
 
-                     - If your old version was 9.12.10-9.12.12 or
+                     - If your old version was 9.12.10 or 9.12.11, a
+                       FiLa10G input select line was added, but
+                       sub-step C above should have handled that.
+
+                     - If your old version was 9.12.12 or 9.12.13, a
+                       "stanza" (actually one comment and one FiLa10G
+                       input select line) was inserted before the
+                       final "stanza" (typically one comment and one
+                       DBBC3 configuration line). An example of the
+                       lines inserted can be found near the end of the
+                       default example 'equip.ctl' file. They are
+                       listed here as well (one comment and one
+                       FiLa10G input select line):
+
+*FiLa10G input select, one of: vsi1, vsi2, vsi1-2, vsi1-2-3-4, gps, tvg
+vsi1-2
+
+                     - If your old version was 9.12.10, 9.12.11 or
                        9.13.2, a new line for the DBBC3 configuration
-                       was added at the end, but step C above should
+                       was added at the end, but sub-step C above should
                        have handled that.
 
                             Comment lines
@@ -463,8 +491,8 @@ v15_1    v15_1 or later
                        'scnch' to be started by 'fsclient' when the
                        display server is in use. The new 'erchk' line
                        differs from the previous commented version in
-                       that the '-title ...' parameter has been
-                       removed so that it is uniquely supplied by the
+                       that the '-title ...' parameter was removed so
+                       that it is uniquely supplied by the
                        '.Xresources' file.
 
 (13) This step is for updates to your SNAP '.prc' procedure libraries.
