@@ -23,7 +23,6 @@ void buffered_stream_set_heartbeat(buffered_stream_t *s, int heartbeat_millis);
 
 // buffered_stream_set_shutdown sets the number of milliseconds the socket will
 // remain accessible in "shutdown" state after buffered_steram_close is called.
-// If set to 0, socket will remain 
 void buffered_stream_set_shutdown_period(buffered_stream_t *s, int shutdown_millis);
 
 // buffered_stream_kill kills a buffered stream left in the shutdown state.

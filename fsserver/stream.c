@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,14 +44,16 @@
 
 struct buffered_stream {
 	uint64_t seq; // Next message sequence ID to send
+	bool shutting_down;
 
 	nng_aio *rep_aio;
 	nng_aio *heartbeat_aio;
+	nng_aio *shutdown_aio;
 	nng_mtx *mtx;
 
 	int heartbeat_millis;
 	int shutdown_millis;
-    int shutdown_heartbeat_millis;
+	int shutdown_heartbeat_millis;
 
 	size_t msg_buffer_len;
 	msg_t *msg_buffer; // Ring buffer of messages
@@ -58,7 +61,6 @@ struct buffered_stream {
 	nng_socket pub;
 	nng_socket rep;
 };
-
 
 void buffered_stream_set_heartbeat(buffered_stream_t *s, int heartbeat_millis) {
 	nng_mtx_lock(s->mtx);
@@ -84,7 +86,8 @@ int buffered_stream_set_len(buffered_stream_t *s, size_t len) {
 // replies with all messages after that in the buffer.
 //
 // TODO: this should be limit the size, otherwise clients might reject the nng message.
-// clients must then check if they've recieved enough and send a second sync.
+// clients must then check if they've recieved enough and send a second sync. Perhaps can
+// be done without protocol change.
 void cmd_cb(void *arg) {
 	nng_msg *msg, *reply_msg;
 	int rv;
@@ -231,6 +234,9 @@ void heartbeat_cb(void *arg) {
 		return;
 	nng_mtx_lock(s->mtx);
 	msg_t m = {HEARTBEAT, s->seq, 0, NULL};
+	if (s->shutting_down) {
+		m.type = END_OF_SESSION;
+	}
 	if (send_msg(s, &m) < 0) {
 		fatal("sending HEARTBEAT", errno);
 	}
@@ -239,7 +245,7 @@ void heartbeat_cb(void *arg) {
 }
 
 int buffered_stream_open(buffered_stream_t **bs) {
-    buffered_stream_t *s = (*bs) = calloc(1, sizeof(buffered_stream_t));
+	buffered_stream_t *s = (*bs) = calloc(1, sizeof(buffered_stream_t));
 	int rv;
 
 	s->heartbeat_millis          = 500;
@@ -282,29 +288,63 @@ error:
 
 int buffered_stream_listen(buffered_stream_t *s, const char *pub_url, const char *rep_url) {
 	int rv;
+	nng_mtx_lock(s->mtx);
 	rv = nng_listen(s->pub, pub_url, NULL, 0);
 	if (rv != 0) {
+		nng_mtx_unlock(s->mtx);
 		return rv;
 	}
 	rv = nng_listen(s->rep, rep_url, NULL, 0);
 	if (rv != 0) {
+		nng_mtx_unlock(s->mtx);
 		return rv;
 	}
+	nng_mtx_unlock(s->mtx);
 	return 0;
 }
 
-void buffered_stream_close(buffered_stream_t *s) {
-	nng_aio_stop(s->rep_aio);
-	nng_aio_stop(s->heartbeat_aio);
-
-	// TODO: handle shutdown
-	nng_close(s->pub);
-	nng_close(s->rep);
-	nng_aio_free(s->rep_aio);
-	nng_aio_free(s->heartbeat_aio);
-	nng_mtx_free(s->mtx);
-	free(s->msg_buffer);
-    free(s);
+void shutdown_cb(void *arg) {
+    buffered_stream_kill(arg);
 }
 
+void buffered_stream_close(buffered_stream_t *s) {
+	if (s->shutdown_heartbeat_millis == 0) {
+        buffered_stream_kill(s);
+		return;
+	}
 
+    nng_mtx_lock(s->mtx);
+    s->heartbeat_millis = s->shutdown_heartbeat_millis;
+    s->shutting_down = true;
+	nng_aio_alloc(&s->shutdown_aio, shutdown_cb, s);
+	nng_sleep_aio(s->shutdown_millis, s->shutdown_aio);
+    nng_mtx_unlock(s->mtx);
+	// TODO: handle shutdown
+}
+
+void buffered_stream_kill(buffered_stream_t *s) {
+	nng_close(s->pub);
+	nng_close(s->rep);
+
+	nng_aio_stop(s->rep_aio);
+	nng_aio_stop(s->heartbeat_aio);
+	if (s->shutdown_aio) {
+		nng_aio_stop(s->heartbeat_aio);
+	}
+
+	nng_aio_free(s->rep_aio);
+	nng_aio_free(s->heartbeat_aio);
+    if (s->shutdown_aio) nng_aio_free(s->shutdown_aio);
+	nng_mtx_free(s->mtx);
+
+	if (s->msg_buffer) {
+		for (size_t i = 0; i < s->msg_buffer_len; i++) {
+			if (s->msg_buffer[i].data == NULL) {
+				break;
+			}
+			free(s->msg_buffer[i].data);
+		}
+		free(s->msg_buffer);
+	}
+	free(s);
+}
