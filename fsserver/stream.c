@@ -193,11 +193,7 @@ ssize_t send_msg(buffered_stream_t *s, msg_t *m) {
 }
 
 ssize_t buffered_stream_send(buffered_stream_t *s, const void *buf, size_t n) {
-	nng_aio_stop(s->heartbeat_aio); // MUST BE DONE BEFORE MTX LOCK
-
 	nng_mtx_lock(s->mtx);
-
-	nng_sleep_aio(s->heartbeat_millis, s->heartbeat_aio);
 
 	size_t i = s->seq % s->msg_buffer_len;
 
@@ -230,7 +226,7 @@ ssize_t buffered_stream_send(buffered_stream_t *s, const void *buf, size_t n) {
 
 void heartbeat_cb(void *arg) {
 	buffered_stream_t *s = arg;
-	if (nng_aio_result(s->heartbeat_aio) != 0)
+	if (nng_aio_result(s->heartbeat_aio) == NNG_ECANCELED)
 		return;
 	nng_mtx_lock(s->mtx);
 	msg_t m = {HEARTBEAT, s->seq, 0, NULL};
@@ -249,7 +245,7 @@ int buffered_stream_open(buffered_stream_t **bs) {
 	int rv;
 
 	s->heartbeat_millis          = 500;
-	s->shutdown_millis           = 500;
+	s->shutdown_millis           = 2000;
 	s->shutdown_heartbeat_millis = 100;
 	s->msg_buffer_len            = 1000;
 
