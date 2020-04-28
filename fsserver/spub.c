@@ -35,11 +35,6 @@
 #include "msg.h"
 #include "stream.h"
 
-static volatile int terminate = 0;
-void term_handler(int i) {
-	terminate = i;
-}
-
 #define fatal(msg)                                                                                 \
 	do {                                                                                       \
 		fprintf(stderr, "error [%s:%d (%s)]: %s\n", __FILE__, __LINE__, __FUNCTION__,      \
@@ -110,10 +105,6 @@ int main(int argc, char *argv[]) {
 		repaddr = argv[optind + 1];
 	}
 
-	if (signal(SIGTERM, term_handler) == SIG_ERR || signal(SIGINT, term_handler) == SIG_ERR) {
-		fatal("setting signal handler");
-	}
-
 	char buf[8192];
 	ssize_t n;
 
@@ -121,17 +112,17 @@ int main(int argc, char *argv[]) {
 	if ((buffered_stream_open(&s)) != 0)
 		fatal("opening stream");
 
-    if( buffered_stream_listen(s,pubaddr,repaddr) != 0)
+	if (buffered_stream_listen(s, pubaddr, repaddr) != 0)
 		fatal("opening listening");
-        ;
 
 	for (;;) {
 		if ((n = read(STDIN_FILENO, buf, sizeof(buf))) <= 0) {
 			break;
 		}
-        buffered_stream_send(s,buf,n);
+		buffered_stream_send(s, buf, n);
 	}
-    buffered_stream_close(s);
+
+	buffered_stream_close(s);
 
 	return EXIT_SUCCESS;
 }
