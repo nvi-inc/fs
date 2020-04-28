@@ -15,7 +15,7 @@ Error decoding attenuator value, must be auto, 0, 0.5, 1.0, ..., 31.0,31.5.
 Error decoding target RMS value, must be between 0.0 and 128.0, inclusive.
 ""
 2B -301
-No active rdbes defined for parallel operation.
+No RDBEs active, see active_rdbes command.
 ""
 2B -302
 IF 0 RMS too low, rdb?W
@@ -66,7 +66,7 @@ program error: strdup() failed for dbe_atten
 must specify at least 1 argument for rdbe command
 ""
 2M -302
-No RDBEs active, see rdbe_active command.
+No RDBEs active, see active_rdbes command.
 ""
 2M -401
 error retrieving class from ?W
@@ -123,7 +123,7 @@ program error: strdup() failed
 command does not accept parameters
 ""
 3K -302
-No Mark 5Cs active, see mk5c_active command.
+No Mark 6s active, see active_mk6s command.
 ""
 3K -401
 error retrieving class for scan_check response, ?W
@@ -174,7 +174,7 @@ program error: strdup() failed
 must specify at least 1 argument for mk5c command
 ""
 3M -302
-No Mark 5Cs active, see mk5c_active command.
+No Mark 6s active, see active_mk6s command.
 ""
 3M -401
 error retrieving class from ?W
@@ -183,7 +183,7 @@ error retrieving class from ?W
 command does not accept parameters
 ""
 3P -302
-No Mark 5Cs active, see mk5c_active command.
+No Mark 6s active, see active_mk6s command.
 ""
 3P -401
 error retrieving class, ?W
@@ -213,7 +213,7 @@ record parameter must be 'on' or 'off'.
 scan label parameter too long
 ""
 3R -301
-No Mark 5Cs active, see mk5c_active command.
+No Mark 6s active, see active_mk6s command.
 ""
 3R -302
 scan_name defined scan label too long
