@@ -348,3 +348,7 @@ void buffered_stream_kill(buffered_stream_t *s) {
 	}
 	free(s);
 }
+
+void buffered_stream_join(buffered_stream_t *s) {
+    nng_aio_wait(s->shutdown_aio);
+}

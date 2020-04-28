@@ -35,6 +35,9 @@
 #include "msg.h"
 #include "stream.h"
 
+#include <nng/nng.h>
+#include <nng/supplemental/util/platform.h>
+
 #define fatal(msg)                                                                                 \
 	do {                                                                                       \
 		fprintf(stderr, "error [%s:%d (%s)]: %s\n", __FILE__, __LINE__, __FUNCTION__,      \
@@ -123,6 +126,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	buffered_stream_close(s);
+	buffered_stream_join(s);
 
 	return EXIT_SUCCESS;
 }

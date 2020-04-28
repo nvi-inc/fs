@@ -31,3 +31,5 @@ void buffered_stream_kill(buffered_stream_t *s);
 // buffered_stream_set_len sets the length of the buffered stream's buffer.
 // It is an error to do this after the first send.
 int buffered_stream_set_len(buffered_stream_t *s, size_t len);
+
+void buffered_stream_join(buffered_stream_t *s);
