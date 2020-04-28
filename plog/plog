@@ -1,7 +1,5 @@
 #!/bin/bash
 #NB "strict" mode is used if run as a script
-SHA1SUM=9727578f8e158490091b3869cc5b442c50fbdc37
-PLOG_VERSION=2018-11-14
 #
 # Copyright (c) 2020 NVI, Inc.
 #
@@ -22,14 +20,10 @@ PLOG_VERSION=2018-11-14
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-version(){
-    local sha=$(tail -n+4 $0 | sha1sum | cut -f1 -d' ')
+VERSION=UNKNOWN-VERSION
 
-    if [[ $SHA1SUM =~ $sha ]]; then
-        echo "plog $PLOG_VERSION"
-    else
-        echo "plog $PLOG_VERSION (modified)"
-    fi
+version(){
+    echo "plog $VERSION"
 }
 
 FS_BASE="${FS_BASE:-/usr2}"
