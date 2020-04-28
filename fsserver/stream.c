@@ -91,6 +91,9 @@ void cmd_cb(void *arg) {
 
 	buffered_stream_t *s = arg;
 
+	if (nng_aio_result(s->rep_aio) != 0)
+		return;
+
 	msg = nng_aio_get_msg(s->rep_aio);
 
 	uint32_t req_seq;
