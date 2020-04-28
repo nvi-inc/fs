@@ -59,6 +59,7 @@ struct buffered_stream {
 	nng_socket rep;
 };
 
+
 void buffered_stream_set_heartbeat(buffered_stream_t *s, int heartbeat_millis) {
 	nng_mtx_lock(s->mtx);
 	s->heartbeat_millis = heartbeat_millis;
@@ -185,7 +186,7 @@ ssize_t send_msg(buffered_stream_t *s, msg_t *m) {
 	return pub_len;
 }
 
-ssize_t buffered_stream_write(buffered_stream_t *s, const void *buf, size_t n) {
+ssize_t buffered_stream_send(buffered_stream_t *s, const void *buf, size_t n) {
 	nng_aio_stop(s->heartbeat_aio); // MUST BE DONE BEFORE MTX LOCK
 
 	nng_mtx_lock(s->mtx);
@@ -234,8 +235,8 @@ void heartbeat_cb(void *arg) {
 	nng_mtx_unlock(s->mtx);
 }
 
-int buffered_stream_open(buffered_stream_t *s) {
-	/* buffered_stream_t *s = *bs = calloc(1, sizeof(buffered_stream_t)); */
+int buffered_stream_open(buffered_stream_t **bs) {
+    buffered_stream_t *s = (*bs) = calloc(1, sizeof(buffered_stream_t));
 	int rv;
 
 	s->heartbeat_millis          = 500;
@@ -300,6 +301,7 @@ void buffered_stream_close(buffered_stream_t *s) {
 	nng_aio_free(s->heartbeat_aio);
 	nng_mtx_free(s->mtx);
 	free(s->msg_buffer);
+    free(s);
 }
 
 

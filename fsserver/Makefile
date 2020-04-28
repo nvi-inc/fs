@@ -12,7 +12,7 @@ LIBS = ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a
 LDLIBS += -lutil -lrt -lanl -lnsl -pthread -lnng -ljansson 
 CPPFLAGS += -pthread -D_GNU_SOURCE
 
-../bin/spub: spub.o msg.o
+../bin/spub: spub.o stream.o msg.o
 ../bin/ssub: ssub.o msg.o
 ../bin/fsserver: fsserver.o server.o window.o list.o prompt.o
 ../bin/fsclient: fsclient.o window.o list.o prompt.o $(LIBS)
