@@ -115,6 +115,9 @@ int main(int argc, char *argv[]) {
 	if ((buffered_stream_open(&s)) != 0)
 		fatal("opening stream");
 
+	buffered_stream_set_shutdown_period(s, wait_seconds * 1000);
+	buffered_stream_set_len(s, msg_buffer_len);
+
 	if (buffered_stream_listen(s, pubaddr, repaddr) != 0)
 		fatal("opening listening");
 
