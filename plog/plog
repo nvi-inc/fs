@@ -1,6 +1,6 @@
 #!/bin/bash
 #NB "strict" mode is used if run as a script
-SHA1SUM=465ef2f17fb7a73be5cfc7b5248ce8013f8d9fb1
+SHA1SUM=9727578f8e158490091b3869cc5b442c50fbdc37
 PLOG_VERSION=2018-11-14
 #
 # Copyright (c) 2020 NVI, Inc.
@@ -94,13 +94,21 @@ with a space. E.g. add the following to your login script
 
 If DATA_CENTERS is empty, plog defaults to CDDIS.
 
-Data center login must be configured in "~/.netrc".  For example, for CDDIS
+Data center login must be configured in ".netrc" which by default is in "~".
+For example, for CDDIS:
 
     machine urs.earthdata.nasa.gov
         login mycddisuser
         password secret
 
-See NETRC(5) for more details.
+If your curl supports the "--netrc-file" option (see "man curl") , you can
+change the directory for ".netrc" by setting the NETRC_DIR environment
+variable.  E.g. add the following to your login script
+
+    setenv NETRC_DIR "/usr2/control" ${blue}#tcsh${normal}
+    export NETRC_DIR="/usr2/control" ${blue}#bash${normal}
+
+See "man 5 netrc" for more details on ".netrc".
 
 Examples of usage:
     ${blue}# push log for latest session, sending reduced if needed${normal}
@@ -226,12 +234,12 @@ cddis() {
         fatal "'curl' not found"
     fi
 
-    if [[ ! -e "$HOME/.netrc" ]]; then
-        fatal "$HOME/.netrc not found, see usage"
+    if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
+        fatal "$NETRC_DIR/.netrc not found, see usage"
     fi
 
-    if ! grep -q urs.earthdata.nasa.gov "$HOME/.netrc"; then
-        fatal "$HOME/.netrc does not contain CDDIS login information, see usage"
+    if ! grep -q urs.earthdata.nasa.gov "$NETRC_DIR/.netrc"; then
+        fatal "$NETRC_DIR/.netrc does not contain CDDIS login information, see usage"
     fi
 
     local DRY=${DRY:-" >/dev/null"}
@@ -257,6 +265,7 @@ cddis() {
         -k \
         -f -s -S \
         -L \
+        $CURL_NETRC_FILE_OPTION \
         $CDDIS_URL/login 
 
     info "Done"
@@ -290,12 +299,12 @@ opar() {
         fatal "'curl' not found"
     fi
 
-    if [[ ! -e "$HOME/.netrc" ]]; then
-        fatal "$HOME/.netrc not found, see usage"
+    if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
+        fatal "$NETRC_DIR/.netrc not found, see usage"
     fi
 
-    if ! grep -q ivsopar.obspm.fr "$HOME/.netrc"; then
-        fatal "$HOME/.netrc does not contain OPAR login information, see usage"
+    if ! grep -q ivsopar.obspm.fr "$NETRC_DIR/.netrc"; then
+        fatal "$NETRC_DIR/.netrc does not contain OPAR login information, see usage"
     fi
 
     local DRY=${DRY:-" >/dev/null"}
@@ -305,6 +314,7 @@ opar() {
         eval $DRY curl \
             -n \
             -k \
+            $CURL_NETRC_FILE_OPTION \
             -F "fichier=@$1" -F 'mode=upload' $OPAR_URL
         shift
     done
@@ -412,6 +422,16 @@ main () {
     PUSH_PROC=
     COMPRESS=
     QUIET=
+
+    set +u
+    if [[ -z "$NETRC_DIR" ]]; then
+        NETRC_DIR=$HOME
+        CURL_NETRC_FILE_OPTION=
+    else
+        CURL_NETRC_FILE_OPTION=" --netrc-file $NETRC_DIR/.netrc"
+    fi
+    set -u
+
     while getopts hltqpzvc: opt; do
         case $opt in
             l)
