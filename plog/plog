@@ -32,6 +32,13 @@ FS_LOG_PATH="${FS_LOG_PATH:-${FS_BASE}/log}"
 FS_PROC_PATH="${FS_PROC_PATH:-${FS_BASE}/proc}"
 FS_SCHED_PATH="${FS_SCHED_PATH:-${FS_BASE}/sched}"
 
+if [[ -z "${NETRC_DIR:-}" ]]; then
+    NETRC_DIR=$HOME
+    CURL_NETRC_FILE_OPTION=
+else
+    CURL_NETRC_FILE_OPTION=" --netrc-file $NETRC_DIR/.netrc"
+fi
+
 # Lines to remove from log file to make "reduced" logs
 # Use egrep syntax
 PLOG_REDUCE_PATTERN="${PLOG_REDUCE_PATTERN:-^[:.0-9]*#rdtc}"
@@ -416,15 +423,6 @@ main () {
     PUSH_PROC=
     COMPRESS=
     QUIET=
-
-    set +u
-    if [[ -z "$NETRC_DIR" ]]; then
-        NETRC_DIR=$HOME
-        CURL_NETRC_FILE_OPTION=
-    else
-        CURL_NETRC_FILE_OPTION=" --netrc-file $NETRC_DIR/.netrc"
-    fi
-    set -u
 
     while getopts hltqpzvc: opt; do
         case $opt in
