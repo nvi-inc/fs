@@ -436,6 +436,7 @@ void fetch_state(void) {
 	json_object_set_new(json, "method", json_string("status"));
 	json_t *json_args = json_array();
 	json_object_set_new(json, "params", json_args);
+	json_object_set_new(json, "id", json_string("client"));
 
 	size_t size = json_dumpb(json, NULL, 0, 0);
 	char *buf   = nng_alloc(size);
