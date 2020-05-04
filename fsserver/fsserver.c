@@ -74,6 +74,7 @@ int cli_main(int argc, char *argv[]) {
 
 	json_t *json = json_object();
 	json_object_set_new(json, "method", json_string(argv[1]));
+	json_object_set_new(json, "id", json_string("cli"));
 
 	json_t *json_args = json_array();
 
