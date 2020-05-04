@@ -475,6 +475,7 @@ void fetch_state(void) {
 	if (reply_error) {
 		json_t *msg = json_object_get(reply_error, "message");
 		fprintf(stderr, "server error: %s\n", json_string_value(msg));
+		goto error;
 	}
 
 	json_t *result = json_object_get(json, "result");
