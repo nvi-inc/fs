@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#define _GNU_SOURCE
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <pthread.h>
 #include <pty.h>
 #include <signal.h>
 #include <stdio.h>
@@ -30,9 +30,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <utmp.h>
-#include <wordexp.h>
 
+#include "stream.h"
 #include "window.h"
+
+#define WINDOW_SHUTDOWN_PERIOD 5 * 1000
 
 void window_free(window_t *s) {
 	char **ptr;
@@ -58,6 +60,65 @@ void window_free(window_t *s) {
 window_t *window_new() {
 	window_t *s = calloc(sizeof(window_t), 1);
 	return s;
+}
+
+struct bsmht_args {
+	int pty_master;
+	buffered_stream_t *s;
+};
+
+void *buffered_stream_master_handler_thread(void *args) {
+	struct bsmht_args a = *((struct bsmht_args *)args);
+	free(args);
+
+	char buf[8192];
+	ssize_t n;
+	for (;;) {
+		if ((n = read(a.pty_master, buf, sizeof(buf))) <= 0) {
+			break;
+		}
+		buffered_stream_send(a.s, buf, n);
+	}
+
+	buffered_stream_close(a.s);
+	buffered_stream_join(a.s);
+
+	return NULL;
+}
+
+int buffered_stream_master_handler(window_t *w, int pty_master) {
+	/* pipe used to handle exec error in child */
+	buffered_stream_t *s;
+	if ((buffered_stream_open(&s)) != 0) {
+		return -1;
+	}
+
+	buffered_stream_set_shutdown_period(s, WINDOW_SHUTDOWN_PERIOD);
+	buffered_stream_set_len(s, w->scrollback_len);
+
+	char *pubaddr;
+	if (asprintf(&pubaddr, "%s/pub", w->addr) < 0) {
+		return -1;
+	}
+
+	char *repaddr;
+	if (asprintf(&repaddr, "%s/rep", w->addr) < 0) {
+		return -1;
+	}
+
+	if (buffered_stream_listen(s, pubaddr, repaddr) != 0) {
+		return -1;
+	}
+
+	pthread_t thread;
+	struct bsmht_args *args = malloc(sizeof(struct bsmht_args));
+	args->pty_master        = pty_master;
+	args->s                 = s;
+	if (pthread_create(&thread, NULL, buffered_stream_master_handler_thread, args) < 0) {
+		return -1;
+	}
+
+	return 0;
 }
 
 int spub_master_handler(window_t *w, int pty_master) {
@@ -144,7 +205,7 @@ int window_start_master(window_t *s, int pty_master) {
 	assert(s != NULL);
 	assert(s->addr != NULL);
 	if (s->master_handler == NULL) {
-		s->master_handler = spub_master_handler;
+		s->master_handler = buffered_stream_master_handler;
 	}
 	return s->master_handler(s, pty_master);
 }
@@ -269,7 +330,7 @@ int window_unmarshal_json(window_t *w, json_t *j) {
 	if (rv < 0)
 		return -1;
 
-    w->addr = strdup(w->addr);
+	w->addr = strdup(w->addr);
 
 	json_t *command = json_object_get(j, "command");
 	if (json_is_array(command)) {
