@@ -24,7 +24,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "../window.h"
+#include "../window.c"
 
 int dummy_manger(window_t *w, int pty_master) {
 	/* pipe used to handle exec error in child */
@@ -52,6 +52,7 @@ int dummy_manger(window_t *w, int pty_master) {
 
 		if (child_errno != 0) {
 			errno = child_errno;
+			perror("exec");
 			return -1;
 		}
 
@@ -70,7 +71,7 @@ int dummy_manger(window_t *w, int pty_master) {
 		goto error;
 	}
 
-	int fd = open(w->pubaddr + 6, O_WRONLY | O_CREAT, 0660);
+	int fd = open(w->addr + 6, O_WRONLY | O_CREAT, 0660);
 	if (fd < 0) {
 		goto error;
 	}
@@ -85,134 +86,89 @@ error:
 	_exit(EXIT_FAILURE);
 }
 
+char *non_exist_args[] = {"thiscommandshouldnotexist", NULL};
+char *watch_args[]     = {"watch", "ls", NULL};
+
+static char **stradup(char **argv) {
+	char **ptr = argv;
+	while (*ptr != NULL)
+		ptr++;
+	size_t len = ptr - argv;
+
+	char **ret = calloc(len + 1, sizeof(char *));
+	char **to  = ret;
+
+	char **from = argv;
+	size_t n    = 0;
+	while (n < len && *from) {
+		*to++ = strdup(*from++);
+		n++;
+	}
+	return ret;
+}
+
 Main({
 	Test("Window operations", {
 		window_t *w = window_new();
-		Convey("allocation works", { So(w != NULL); });
+		Convey("allocation works", {
+			So(w != NULL);
+			window_free(w);
+		});
 		w->id             = 1;
-		w->pubaddr        = strdup("ipc:///tmp/testpub");
-		w->repaddr        = strdup("ipc:///tmp/reppub");
+		w->addr           = strdup("ipc:///tmp/testpub");
 		w->master_handler = dummy_manger;
-		Convey("Given new window", {
-			Convey("unknown child commands are handled", {
-				w->command = strdup("thiscommandshouldnotexist");
-				So(window_start_child(w) == -1 && errno == ENOENT);
-			});
-
-			Convey("start master works", {
-				w->command = strdup("watch ls");
-				int pty    = window_start_child(w);
-				So(w->pid > 0);
-				So(pty >= 0);
-				int master_pid = window_start_master(w, pty);
-				So(master_pid > 0);
-				window_kill(w);
-				kill(master_pid, SIGTERM);
-				window_free(w);
-			});
+		Convey("unknown child commands are handled", {
+			w->command_args = stradup(non_exist_args);
+			So(window_start_child(w) == -1 && errno == ENOENT);
+			window_free(w);
 		});
-	});
 
-	Test("Window list operations", {
-		Convey("Given empty list", {
-			window_list_t *wl = NULL;
-
-			Convey("we can append", {
-				window_t *w = window_new();
-				w->id       = 1;
-				window_list_append(&wl, w);
-				So(wl != NULL);
-				So(wl->window != NULL);
-				So(wl->window->id == 1);
-
-				w = window_new();
-				So(w != NULL);
-				w->id = 2;
-				window_list_append(&wl, w);
-
-				Convey("and window list preserves order", {
-					So(wl->window->id == 1);
-					So(wl->next->window->id == 2);
-				});
-
-				Convey("find by id works", {
-					w = window_list_find_by_id(&wl, 1);
-					So(w != NULL);
-					So(w->id == 1);
-					w = window_list_find_by_id(&wl, 2);
-					So(w != NULL);
-					So(w->id == 2);
-				});
-
-				Convey("find by id handles not found",
-				       { So(window_list_find_by_id(&wl, 3) == NULL); });
-
-				Convey("pop works", {
-					w = window_list_pop(&wl);
-					So(w != NULL);
-					So(w->id == 1);
-					w = window_list_pop(&wl);
-					So(w != NULL);
-					So(w->id == 2);
-					w = window_list_pop(&wl);
-					So(w == NULL);
-				});
-
-				Convey("pop by id works", {
-					w = window_list_pop_by_id(&wl, 2);
-					So(w != NULL);
-					So(w->id == 2);
-					So(wl->next == NULL);
-					window_free(w);
-				});
-
-				Convey("pop can handle missing element", {
-					window_list_pop_by_id(&wl, 2);
-					w = window_list_pop_by_id(&wl, 2);
-					So(w == NULL);
-				});
-
-				Convey("pop can empty list ", {
-					window_list_pop_by_id(&wl, 1);
-					window_list_pop_by_id(&wl, 2);
-					So(wl == NULL);
-				});
-
-				Convey("Given a running window", {
-					w                 = window_list_find_by_id(&wl, 2);
-					w->pubaddr        = strdup("ipc:///tmp/testpub");
-					w->repaddr        = strdup("ipc:///tmp/reppub");
-					w->command        = strdup("watch ls");
-					w->master_handler = dummy_manger;
-
-					int pty = window_start_child(w);
-					So(pty >= 0);
-					int master_pid = window_start_master(w, pty);
-					So(master_pid >= 0);
-					int pid = w->pid;
-					So(pid >= 0);
-
-					Reset({
-						window_kill(w);
-						kill(master_pid, SIGTERM);
-					});
-
-					Convey("find by pid works", {
-						w = window_list_find_by_pid(&wl, pid);
-						So(w != NULL);
-						So(w->id = 2);
-						So(w->pid = pid);
-					});
-					Convey("pop by pid works", {
-						So(pid >= 0);
-						w = window_list_pop_by_pid(&wl, pid);
-						So(w != NULL);
-						So(w->id = 2);
-						So(w->pid = pid);
-						window_kill(w);
-					})
-				});
-			});
+		Convey("start master works", {
+			w->command_args = stradup(watch_args);
+			int pty         = window_start_child(w);
+			So(w->pid > 0);
+			So(pty >= 0);
+			int master_pid = window_start_master(w, pty);
+			So(master_pid > 0);
+			window_kill(w);
+			kill(master_pid, SIGTERM);
+			window_free(w);
 		});
+
+		window_free(w);
 	});
 });
+// TODO: test this again
+/* Convey("Given a running ", { */
+/* 	w                 = _list_find_by_id(&wl, 2); */
+/* 	w->pubaddr        = strdup("ipc:///tmp/testpub"); */
+/* 	w->repaddr        = strdup("ipc:///tmp/reppub"); */
+/* 	w->command        = strdup("watch ls"); */
+/* 	w->master_handler = dummy_manger; */
+/*  */
+/* 	int pty = _start_child(w); */
+/* 	So(pty >= 0); */
+/* 	int master_pid = _start_master(w, pty); */
+/* 	So(master_pid >= 0); */
+/* 	int pid = w->pid; */
+/* 	So(pid >= 0); */
+/*  */
+/* 	Reset({ */
+/* 		_kill(w); */
+/* 		kill(master_pid, SIGTERM); */
+/* 	}); */
+/*  */
+/* 	Convey("find by pid works", { */
+/* 		w = list_find(&wl, pid); */
+/* 		So(w != NULL); */
+/* 		So(w->id = 2); */
+/* 		So(w->pid = pid); */
+/* 	}); */
+/* 	Convey("pop by pid works", { */
+/* 		So(pid >= 0); */
+/* 		w = _list_pop_by_pid(&wl, pid); */
+/* 		So(w != NULL); */
+/* 		So(w->id = 2); */
+/* 		So(w->pid = pid); */
+/* 	}) */
+/* }); */

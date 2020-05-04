@@ -54,6 +54,11 @@ dkms.conf
 # Vim swap files
 *.swp
 
+# gcov files
+*.gcov
+*.gcda
+*.gcno
+
 /bin/
 
 vex/y.tab.h
