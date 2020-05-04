@@ -165,11 +165,11 @@ void handler(int sig) {
  */
 
 void setup_signals() {
-	sigset_t fullset;
+	sigset_t fullset = {};
 	sigfillset(&fullset);
 	pthread_sigmask(SIG_BLOCK, &fullset, NULL);
 
-	struct sigaction sa;
+	struct sigaction sa = {};
 	sa.sa_handler = handler;
 	sigfillset(&sa.sa_mask);
 
@@ -249,8 +249,8 @@ int daemonize() {
  * intercepted by the server.
  */
 void install_shims() {
-	char path[1024];
-	char basepath[1024];
+	char path[1024] = {};
+	char basepath[1024] = {};
 	ssize_t sz;
 	sz = readlink("/proc/self/exe", basepath, sizeof(basepath));
 	if (sz < 0) {
