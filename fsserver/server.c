@@ -859,10 +859,11 @@ void server_cmd_cb(void *arg) {
 	}
 
 	char *reply_str = json_dumps(reply, 0);
+
+end:
 	nng_msg_append(reply_msg, reply_str, strlen(reply_str));
 	free(reply_str);
 	json_decref(reply);
-
 	rv = nng_sendmsg(s->server_cmd_sock, reply_msg, 0);
 	if (rv != 0) {
 		nng_msg_free(reply_msg);
@@ -870,24 +871,13 @@ void server_cmd_cb(void *arg) {
 		return;
 	}
 
-end:
 	json_decref(request);
 	nng_recv_aio(s->server_cmd_sock, s->aio);
 	return;
 
 error:
-	if (request) {
-		json_decref(request);
-	}
 	json_object_set_new(reply, "error", error);
 	reply_str = json_dumps(reply, 0);
-	nng_msg_append(reply_msg, reply_str, strlen(reply_str));
-	free(reply_str);
-	json_decref(reply);
-	rv = nng_sendmsg(s->server_cmd_sock, reply_msg, 0);
-	if (rv != 0) {
-		nng_msg_free(reply_msg);
-	}
 	goto end;
 }
 
