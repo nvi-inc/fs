@@ -815,6 +815,7 @@ void server_cmd_cb(void *arg) {
 		json_object_set_new(error, "message",
 		                    json_string("Invalid Request: id not speficied"));
 		json_object_set_new(error, "code", json_integer(JSONRCP_STATUS_INVALID_REQUEST));
+		goto error;
 	}
 
 	method = json_object_get(request, "method");
