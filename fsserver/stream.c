@@ -369,7 +369,7 @@ static void *dup_thread(void *args) {
 		buffered_stream_send(a.s, buf, n);
 	}
 
-    close(a.fd);
+	close(a.fd);
 
 	buffered_stream_close(a.s);
 	return NULL;

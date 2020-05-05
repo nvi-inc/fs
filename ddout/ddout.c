@@ -84,6 +84,16 @@ main()
     int knl=FALSE;
     unsigned last_sync,now;
     int skd_run_to();
+    int serverfd;
+    char* serverfdst;
+
+    serverfd = -1;
+    serverfdst = getenv("FS_SERVER_LOG_FD");
+    if (serverfdst && *serverfdst) {
+        serverfd  = atoi(serverfdst);
+    }
+
+
 
 /* SECTION 1 */
     
@@ -611,6 +621,11 @@ Ack:    ich = strtok(NULL, ",");
       }
       strcat(buf,"\n");
       bull = strlen(buf);
+
+      if (serverfd >= 0) {
+          write(serverfd, buf, bull);
+      }
+
       ret = write(fd, buf, bull);
       if(bull != ret ) {
 	shm_addr->abend.other_error=1;

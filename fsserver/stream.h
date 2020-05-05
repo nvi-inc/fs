@@ -3,9 +3,9 @@
 // buffered_stream_t represents the publisher side of a buffered stream of bytes.
 typedef struct buffered_stream buffered_stream_t;
 
-// buffered_stream_open performs the setup of a buffered_stream_socket 
+// buffered_stream_open performs the setup of a buffered_stream_socket
 int buffered_stream_open(buffered_stream_t **s);
-int buffered_stream_listen(buffered_stream_t *s, const char* pub_url, const char* rep_url);
+int buffered_stream_listen(buffered_stream_t *s, const char *pub_url, const char *rep_url);
 
 ssize_t buffered_stream_send(buffered_stream_t *s, const void *buf, size_t n);
 

@@ -19,6 +19,7 @@
  */
 #include <assert.h>
 #include <errno.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <signal.h>
@@ -33,7 +34,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <wordexp.h>
 
 #include <nng/nng.h>
 #include <nng/protocol/pubsub0/pub.h>
@@ -47,7 +47,15 @@
 #include "list.h"
 #include "prompt.h"
 #include "server.h"
+#include "stream.h"
 #include "window.h"
+
+#define fatal(msg, rv)                                                                             \
+	do {                                                                                       \
+		fprintf(stderr, "%s:%d (%s) error %s: %s\n", __FILE__, __LINE__, __FUNCTION__,     \
+		        msg, nng_strerror(rv));                                                    \
+		exit(1);                                                                           \
+	} while (0)
 
 enum { JSONRPC_STATUS_PARSE_ERROR      = -32700,
        JSONRPC_STATUS_INVALID_REQUEST  = -32600,
@@ -55,6 +63,9 @@ enum { JSONRPC_STATUS_PARSE_ERROR      = -32700,
        JSONRPC_STATUS_INVALID_PARAMS   = -32702,
        JSONRPC_STATUS_INTERNAL_ERROR   = -32703,
 };
+
+const int LOG_SHUTDOWN_PERIOD_MILLIS = 2000;
+const size_t LOG_BUFFER_LEN          = 1000;
 
 struct server {
 	nng_mtx *mtx;
@@ -71,6 +82,7 @@ struct server {
 	unsigned next_window_id;
 	list_t *windows;
 	window_t *fs;
+	buffered_stream_t *log;
 
 	unsigned next_prompt_id;
 	list_t *prompts;
@@ -521,6 +533,63 @@ int server_cmd_status(server_t *s, json_t *rep, int argc, const char *const argv
 	return 0;
 }
 
+// returns the write end of the pipe, which needs to be closed after fs has started
+int server_setup_log_stream(server_t *s) {
+	if ((buffered_stream_open(&s->log)) != 0) {
+		return -1;
+	}
+
+	buffered_stream_set_shutdown_period_millis(s->log, LOG_SHUTDOWN_PERIOD_MILLIS);
+	buffered_stream_set_len(s->log, LOG_BUFFER_LEN);
+
+#ifdef FS_SERVER_SOCKET_PATH
+	mkdir_p(FS_SERVER_SOCKET_PATH "/log");
+#endif
+
+	char *pubaddr;
+	if (asprintf(&pubaddr, "%s/pub", FS_SERVER_URL_BASE "/log") < 0) {
+		return -1;
+	}
+
+	char *repaddr;
+	if (asprintf(&repaddr, "%s/rep", FS_SERVER_URL_BASE "/log") < 0) {
+		return -1;
+	}
+
+	if (buffered_stream_listen(s->log, pubaddr, repaddr) != 0) {
+		free(repaddr);
+		free(pubaddr);
+		return -1;
+	}
+	free(repaddr);
+	free(pubaddr);
+
+	if (s->log == NULL) {
+		fatal("fsserver: setting up log steram", errno);
+	}
+
+	int fds[2];
+	if (pipe(fds) < 0) {
+		fatal("fsserver: error on pipe", errno);
+	}
+	// children shouldn't be reading from the pipe
+	if (fcntl(fds[0], F_SETFD, fcntl(fds[0], F_GETFD) | FD_CLOEXEC) < 0) {
+		fatal("fsserver: error setting close-on-exec flag", errno);
+	}
+
+	if (buffered_stream_copy_fd(s->log, fds[0]) != 0) {
+		return -1;
+	}
+
+	char buf[256];
+	snprintf(buf, sizeof(buf), "%d", fds[1]);
+	if (setenv("FS_SERVER_LOG_FD", buf, 1) < 0) {
+		fatal("fsserver: error setenv", errno);
+	}
+
+	return fds[1];
+}
+
 int server_cmd_fs_start(server_t *s, json_t *rep_msg, int argc, const char *const argv[]) {
 	if (argc > 1) {
 		json_object_sprintf(rep_msg, "message", "unknown argument to fs start \"%s\"",
@@ -555,11 +624,20 @@ int server_cmd_fs_start(server_t *s, json_t *rep_msg, int argc, const char *cons
 	s->fs->addr           = strdup(FS_SERVER_URL_BASE "/windows/fs");
 	s->fs->scrollback_len = 3000;
 
+	int log_pipe_in_fd = server_setup_log_stream(s);
+	if (log_pipe_in_fd < 0) {
+		json_object_sprintf(rep_msg, "message", "error starting setting up log stream:",
+		                    strerror(errno));
+		goto error;
+	}
+
 	int pty = window_start_child(s->fs);
 	if (pty < 0) {
 		json_object_sprintf(rep_msg, "message", "error starting fs: %s", strerror(errno));
 		goto error;
 	}
+
+	close(log_pipe_in_fd);
 
 	if (window_start_master(s->fs, pty) < 0) {
 		json_object_sprintf(rep_msg, "message", "error starting fs: %s", strerror(errno));
@@ -888,7 +966,6 @@ void server_sigchld_cb(server_t *s, pid_t pid, int status) {
 		s->fs->status = status;
 		s->fs->pid    = 0;
 		nng_mtx_unlock(s->mtx);
-		server_shutdown(s);
 		return;
 	}
 	window_t *w = list_pop(&s->windows, window_by_pid, &pid);
@@ -897,7 +974,7 @@ void server_sigchld_cb(server_t *s, pid_t pid, int status) {
 		return;
 	}
 	w->status = status;
-    /* TODO: could broadcast this to clients. */
+	/* TODO: could broadcast this to clients. */
 	window_free(w);
 	return;
 }
