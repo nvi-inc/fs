@@ -191,12 +191,12 @@ int main(int argc, char **argv) {
 	int nargs = argc - optind;
 	if (nargs > 0) {
 		if (nargs < 2) {
-			fprintf(stderr, "ssub: pub address specified without "
-			                "rep address\n");
-			exit(EXIT_FAILURE);
+			asprintf(&pubaddr, "%s/pub", argv[optind]);
+			asprintf(&repaddr, "%s/rep", argv[optind]);;
+		} else {
+			pubaddr = argv[optind];
+			repaddr = argv[optind + 1];
 		}
-		pubaddr = argv[optind];
-		repaddr = argv[optind + 1];
 	}
 
 	// Now we're configured, let's get down to business...
