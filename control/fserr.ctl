@@ -6121,10 +6121,10 @@ Program error: impossible type code for rclcn_res_position_read for device ?W
 ""
 RC -1
 Tape drive has no vacuum.
-"
+""
 RC -2
 Tape drive has an error condition, not ready.
-"
+""
 RC -201
 Parameter must be reboot,load,unload,bot,eot,release,<feet>,feet,or zero.
 ""
@@ -6335,19 +6335,19 @@ No default for write voltage for head 1.
 RO -102
 No default for write voltage for head 2.
 ""
-RN -201
+RO -201
 Error in write voltage commanded for head 1.
 ""
-RN -202
+RO -202
 Error in write voltage commanded for head 2.
 ""
-RN -301
+RO -301
 No previous "*" value for head 1 available until a succesful command.
 ""
-RN -302
+RO -302
 No previous "*" value for head 2 available until a succesful command.
 ""
-RN -401
+RO -401
 Command not supported for VLBA2/VLBA42.
 ""
 RR -101
