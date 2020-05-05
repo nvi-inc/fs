@@ -21,7 +21,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
-#include <pthread.h>
 #include <pty.h>
 #include <signal.h>
 #include <stdio.h>
@@ -62,30 +61,6 @@ window_t *window_new() {
 	return s;
 }
 
-struct bsmht_args {
-	int pty_master;
-	buffered_stream_t *s;
-};
-
-void *buffered_stream_master_handler_thread(void *args) {
-	struct bsmht_args a = *((struct bsmht_args *)args);
-	free(args);
-
-	char buf[8192];
-	ssize_t n;
-	for (;;) {
-		if ((n = read(a.pty_master, buf, sizeof(buf))) <= 0) {
-			break;
-		}
-		buffered_stream_send(a.s, buf, n);
-	}
-
-	buffered_stream_close(a.s);
-	buffered_stream_join(a.s);
-
-	return NULL;
-}
-
 int buffered_stream_master_handler(window_t *w, int pty_master) {
 	/* pipe used to handle exec error in child */
 	buffered_stream_t *s;
@@ -110,14 +85,9 @@ int buffered_stream_master_handler(window_t *w, int pty_master) {
 		return -1;
 	}
 
-	pthread_t thread;
-	struct bsmht_args *args = malloc(sizeof(struct bsmht_args));
-	args->pty_master        = pty_master;
-	args->s                 = s;
-	if (pthread_create(&thread, NULL, buffered_stream_master_handler_thread, args) < 0) {
+	if (buffered_stream_copy_fd(s, pty_master) != 0) {
 		return -1;
 	}
-
 	return 0;
 }
 
