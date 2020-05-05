@@ -68,7 +68,7 @@ int buffered_stream_master_handler(window_t *w, int pty_master) {
 		return -1;
 	}
 
-	buffered_stream_set_shutdown_period(s, WINDOW_SHUTDOWN_PERIOD);
+	buffered_stream_set_shutdown_period_millis(s, WINDOW_SHUTDOWN_PERIOD);
 	buffered_stream_set_len(s, w->scrollback_len);
 
 	char *pubaddr;

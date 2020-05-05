@@ -69,7 +69,7 @@ void buffered_stream_set_heartbeat(buffered_stream_t *s, int heartbeat_millis) {
 	nng_mtx_unlock(s->mtx);
 }
 
-void buffered_stream_set_shutdown_period(buffered_stream_t *s, int shutdown_millis) {
+void buffered_stream_set_shutdown_period_millis(buffered_stream_t *s, int shutdown_millis) {
 	nng_mtx_lock(s->mtx);
 	s->shutdown_millis = shutdown_millis;
 	nng_mtx_unlock(s->mtx);
