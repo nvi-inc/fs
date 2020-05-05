@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#define _GNU_SOURCE
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
+#include <limits.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -244,7 +244,7 @@ void handler(int sig) {
 	switch (sig) {
 	case SIGTERM:
 		fprintf(stderr, "seg fault, attempting clean shutdown...\n");
-		/* fallthrough */
+	/* fallthrough */
 	case SIGSEGV:
 	case SIGINT:
 	case SIGQUIT:
@@ -269,7 +269,7 @@ char *strsplit(char *in, char delim) {
 }
 
 void help(const char *arg) {
-	char help_file[256] = {0};
+	char help_file[PATH_MAX] = {0};
 
 	int err = 0;
 	int i   = (int)(strlen(arg));
