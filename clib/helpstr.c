@@ -48,7 +48,8 @@ static char *check_help_dirs(char *name) {
 	char *path;
 
 	for (dir = help_dirs; *dir != NULL; dir++) {
-		if (asprintf(&path, "%s/%s", *dir, name) < 0)
+		if (asprintf(&path, "%s/%s", *dir, name) < 0) {
+			perror("error during asprintf in check_help_dirs");
 			return NULL;
 		}
 		if (access(path, R_OK)) {
@@ -71,8 +72,10 @@ static char **ls_prefix(char **dirs, char *prefix) {
 	// length of allocated buffer
 	size_t len = 10;
 	char **ret = calloc(len + 1, sizeof(char *));
-	if (!ret)
+	if (!ret) {
+		perror("error calloc asprintf in ls_prefix");
 		return NULL;
+	}
 
 	DIR *dp;
 	struct dirent *ep;
@@ -81,8 +84,10 @@ static char **ls_prefix(char **dirs, char *prefix) {
 	char **d;
 	for (d = dirs; *d != NULL; d++) {
 		dp = opendir(*d);
-		if (dp == NULL)
+		if (dp == NULL) {
+			perror("error opening help directory");
 			continue;
+		}
 		while ((ep = readdir(dp))) {
 			if (strncmp(prefix, ep->d_name, prefix_len) != 0) {
 				continue;
@@ -99,8 +104,10 @@ static char **ls_prefix(char **dirs, char *prefix) {
 				}
 			}
 
-			if (asprintf(&ret[nmatches - 1], "%s/%s", *d, ep->d_name) < 0)
+			if (asprintf(&ret[nmatches - 1], "%s/%s", *d, ep->d_name) < 0) {
+				perror("error during asprintf in ls_prefix");
 				return NULL;
+			}
 		}
 		closedir(dp);
 	}
