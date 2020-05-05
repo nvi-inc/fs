@@ -101,7 +101,11 @@ static char **ls_prefix(char **dirs, char *prefix) {
 
 			if (nmatches > len) {
 				len += len;
-				ret = realloc(ret, len + 1);
+				ret = realloc(ret, (len + 1) * (sizeof(char *)));
+				size_t i;
+				for (i = len / 2; i <= len; i++) {
+					*ret[i] = 0;
+				}
 			}
 
 			if (asprintf(&ret[nmatches - 1], "%s/%s", *d, ep->d_name) < 0)
