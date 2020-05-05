@@ -99,8 +99,8 @@ static char **ls_prefix(char **dirs, char *prefix) {
 				len += len;
 				ret = realloc(ret, (len + 1) * (sizeof(char *)));
 				size_t i;
-				for (i = len / 2; i <= len; i++) {
-					*ret[i] = 0;
+				for (i = len / 2; i < len + 1; i++) {
+					ret[i] = NULL;
 				}
 			}
 
