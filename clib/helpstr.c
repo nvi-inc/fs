@@ -112,7 +112,8 @@ static char **ls_prefix(char **dirs, char *prefix) {
 	return ret;
 }
 
-void helpstr_(cnam, clength, runstr, rack, drive1, drive2, ierr, clen, rlen) char *cnam;
+void helpstr_(cnam, clength, runstr, rack, drive1, drive2, ierr, clen, rlen)
+char *cnam;
 int *clength;
 char *runstr;
 int *rack;
@@ -163,13 +164,17 @@ int rlen;
 		ch1 = *(decloc + 1);
 		ch2 = *(decloc + 2);
 		ch3 = *(decloc + 3);
-		if ((ch1 == '_' || (ch1 == '3' && K4K3 == *rack) || (ch1 == 'm' && MK3 == *rack) ||
+		if (
+		    (ch1 == '_' ||
+		     (ch1 == '3' && K4K3 == *rack) ||
+		     (ch1 == 'm' && MK3 == *rack) ||
 		     (ch1 == 'n' && (MK3 == *rack || MK4 == *rack || LBA4 == *rack)) ||
 		     (ch1 == 'e' && (MK3 == *rack || MK4 == *rack || VLBA == *rack ||
 		                     VLBA4 == *rack || LBA4 == *rack || DBBC == *rack)) ||
 		     (ch1 == 'f' && (MK3 == *rack || MK4 == *rack || K4K3 == *rack ||
 		                     K4MK4 == *rack || K4 == *rack || LBA4 == *rack)) ||
-		     (ch1 == '4' && MK4 == *rack) || (ch1 == 's' && S2 == *rack) ||
+		     (ch1 == '4' && MK4 == *rack) ||
+		     (ch1 == 's' && S2 == *rack) ||
 		     (ch1 == 'g' && (MK4 == *rack || VLBA == *rack || VLBA4 == *rack ||
 		                     K4MK4 == *rack || LBA4 == *rack)) ||
 		     (ch1 == 'h' &&
@@ -181,7 +186,10 @@ int rlen;
 		     (ch1 == 'k' && (K4K3 == *rack || K4MK4 == *rack || K4 == *rack)) ||
 		     (ch1 == 'l' && (LBA == *rack || LBA4 == *rack)) ||
 		     (ch1 == 'd' && DBBC == *rack) || (ch1 == 'a' && 0 != *rack)) &&
-		    (ch2 == '_' || ch2 == '+' || (ch2 == 'k' && K4 == *drive1) ||
+
+		    (ch2 == '_' ||
+		     ch2 == '+' ||
+		     (ch2 == 'k' && K4 == *drive1) ||
 		     (ch2 == 'm' && MK3 == *drive1) ||
 		     (ch2 == 'n' && (MK3 == *drive1 || MK4 == *drive1)) ||
 		     (ch2 == '4' && MK4 == *drive1) || (ch2 == 's' && S2 == *drive1) ||
@@ -189,17 +197,23 @@ int rlen;
 		     (ch2 == 'a' && 0 != *drive1) ||
 		     (ch2 == 'l' &&
 		      (MK3 == *drive1 || MK4 == *drive1 || VLBA == *drive1 || VLBA4 == *drive1))) &&
-		    (ch3 == '_' || ch3 == '+' || (ch3 == 'k' && K4 == *drive2) ||
+
+		    (ch3 == '_' ||
+		     ch3 == '+' ||
+		     (ch3 == 'k' && K4 == *drive2) ||
 		     (ch3 == 'm' && MK3 == *drive2) ||
 		     (ch3 == 'n' && (MK3 == *drive2 || MK4 == *drive2)) ||
-		     (ch3 == '4' && MK4 == *drive2) || (ch3 == 's' && S2 == *drive2) ||
+		     (ch3 == '4' && MK4 == *drive2) ||
+		     (ch3 == 's' && S2 == *drive2) ||
 		     (ch3 == 'w' && (VLBA == *drive2 || VLBA4 == *drive2)) ||
 		     (ch3 == 'a' && 0 != *drive2) ||
 		     (ch3 == 'l' &&
 		      (MK3 == *drive2 || MK4 == *drive2 || VLBA == *drive2 || VLBA4 == *drive2))) &&
+
 		    ((*drive1 != 0 && *drive2 != 0 &&
 		      ((ch2 == '+' || ch3 == '+') || (ch2 == '_' && ch3 == '_'))) ||
 		     ((*drive1 == 0 || *drive2 == 0) && (ch2 != '+' && ch3 != '+')))) {
+
 			strcpy(runstr, path);
 			*ierr = 0;
 			goto cleanup;
