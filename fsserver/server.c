@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#define _GNU_SOURCE
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -50,11 +49,11 @@
 #include "server.h"
 #include "window.h"
 
-enum { JSONRCP_STATUS_PARSE_ERROR      = -32700,
-       JSONRCP_STATUS_INVALID_REQUEST  = -32600,
-       JSONRCP_STATUS_METHOD_NOT_FOUND = -32601,
-       JSONRCP_STATUS_INVALID_PARAMS   = -32702,
-       JSONRCP_STATUS_INTERNAL_ERROR   = -32703,
+enum { JSONRPC_STATUS_PARSE_ERROR      = -32700,
+       JSONRPC_STATUS_INVALID_REQUEST  = -32600,
+       JSONRPC_STATUS_METHOD_NOT_FOUND = -32601,
+       JSONRPC_STATUS_INVALID_PARAMS   = -32702,
+       JSONRPC_STATUS_INTERNAL_ERROR   = -32703,
 };
 
 struct server {
@@ -93,6 +92,7 @@ int json_object_sprintf(json_t *obj, const char *key, char *const format, ...) {
 	return 0;
 }
 
+#ifdef FS_SERVER_SOCKET_PATH
 static int mkdir_p(char *const path) {
 	/* Adapted from http://stackoverflow.com/a/2336245/119527 */
 	const size_t len = strlen(path);
@@ -122,6 +122,7 @@ static int mkdir_p(char *const path) {
 
 	return 0;
 }
+#endif
 
 static char *addr_by_id(unsigned id) {
 	char *s;
@@ -483,7 +484,7 @@ int server_cmd_window(server_t *s, json_t *rep_msg, int argc, const char *const 
 	}
 
 	json_object_sprintf(rep_msg, "message", "unknown command \"window %s\"", argv[1]);
-	json_object_set_new(rep_msg, "code", json_integer(JSONRCP_STATUS_METHOD_NOT_FOUND));
+	json_object_set_new(rep_msg, "code", json_integer(JSONRPC_STATUS_METHOD_NOT_FOUND));
 	return 1;
 };
 
@@ -603,7 +604,7 @@ int server_cmd_fs(server_t *s, json_t *rep_msg, int argc, const char *const argv
 	}
 
 	json_object_sprintf(rep_msg, "message", "unknown command \"%s\"", argv[1]);
-	json_object_set_new(rep_msg, "code", json_integer(JSONRCP_STATUS_METHOD_NOT_FOUND));
+	json_object_set_new(rep_msg, "code", json_integer(JSONRPC_STATUS_METHOD_NOT_FOUND));
 	return 1;
 }
 
@@ -619,7 +620,7 @@ int server_cmd_prompt(server_t *s, json_t *rep_msg, int argc, const char *const 
 			json_object_set_new(rep_msg, "message",
 			                    json_string("prompt requires a message"));
 			json_object_set_new(rep_msg, "code",
-			                    json_integer(JSONRCP_STATUS_INVALID_PARAMS));
+			                    json_integer(JSONRPC_STATUS_INVALID_PARAMS));
 			return 1;
 		}
 
@@ -638,7 +639,7 @@ int server_cmd_prompt(server_t *s, json_t *rep_msg, int argc, const char *const 
 		if (!msg) {
 			json_object_sprintf(rep_msg, "message", "error allocating new msg");
 			json_object_set_new(rep_msg, "code",
-			                    json_integer(JSONRCP_STATUS_INTERNAL_ERROR));
+			                    json_integer(JSONRPC_STATUS_INTERNAL_ERROR));
 			nng_mtx_unlock(s->mtx);
 			return 1;
 		}
@@ -649,7 +650,7 @@ int server_cmd_prompt(server_t *s, json_t *rep_msg, int argc, const char *const 
 			                    "error sending message to clients: %s",
 			                    nng_strerror(rv));
 			json_object_set_new(rep_msg, "code",
-			                    json_integer(JSONRCP_STATUS_INTERNAL_ERROR));
+			                    json_integer(JSONRPC_STATUS_INTERNAL_ERROR));
 			nng_mtx_unlock(s->mtx);
 			return 1;
 		}
@@ -667,7 +668,7 @@ int server_cmd_prompt(server_t *s, json_t *rep_msg, int argc, const char *const 
 			json_object_set_new(rep_msg, "message",
 			                    json_string("close requires a prompt id"));
 			json_object_set_new(rep_msg, "code",
-			                    json_integer(JSONRCP_STATUS_INVALID_PARAMS));
+			                    json_integer(JSONRPC_STATUS_INVALID_PARAMS));
 			return 1;
 		}
 
@@ -678,7 +679,7 @@ int server_cmd_prompt(server_t *s, json_t *rep_msg, int argc, const char *const 
 			json_object_sprintf(rep_msg, "message", "invalid prompt id \"%s\"",
 			                    argv[2]);
 			json_object_set_new(rep_msg, "code",
-			                    json_integer(JSONRCP_STATUS_INVALID_PARAMS));
+			                    json_integer(JSONRPC_STATUS_INVALID_PARAMS));
 			return 1;
 		}
 
@@ -690,7 +691,7 @@ int server_cmd_prompt(server_t *s, json_t *rep_msg, int argc, const char *const 
 			json_object_sprintf(rep_msg, "message", "prompt with id \"%s\" not open",
 			                    argv[2]);
 			json_object_set_new(rep_msg, "code",
-			                    json_integer(JSONRCP_STATUS_INVALID_PARAMS));
+			                    json_integer(JSONRPC_STATUS_INVALID_PARAMS));
 			return 1;
 		}
 
@@ -705,7 +706,7 @@ int server_cmd_prompt(server_t *s, json_t *rep_msg, int argc, const char *const 
 			/* this probably should be fatal since it means OOM*/
 			json_object_sprintf(rep_msg, "message", "error allocating msg to clients");
 			json_object_set_new(rep_msg, "code",
-			                    json_integer(JSONRCP_STATUS_INTERNAL_ERROR));
+			                    json_integer(JSONRPC_STATUS_INTERNAL_ERROR));
 			return 1;
 		}
 
@@ -715,7 +716,7 @@ int server_cmd_prompt(server_t *s, json_t *rep_msg, int argc, const char *const 
 			                    "error sending message to clients: %s",
 			                    nng_strerror(rv));
 			json_object_set_new(rep_msg, "code",
-			                    json_integer(JSONRCP_STATUS_INTERNAL_ERROR));
+			                    json_integer(JSONRPC_STATUS_INTERNAL_ERROR));
 			return 1;
 		}
 
@@ -724,7 +725,7 @@ int server_cmd_prompt(server_t *s, json_t *rep_msg, int argc, const char *const 
 	}
 
 	json_object_sprintf(rep_msg, "message", "unknown command \"prompt %s\"", argv[1]);
-	json_object_set_new(rep_msg, "code", json_integer(JSONRCP_STATUS_METHOD_NOT_FOUND));
+	json_object_set_new(rep_msg, "code", json_integer(JSONRPC_STATUS_METHOD_NOT_FOUND));
 	return 1;
 }
 
@@ -756,7 +757,7 @@ int server_cmd(server_t *s, json_t *rep_msg, int argc, const char **const argv) 
 	}
 
 	json_object_sprintf(rep_msg, "message", "unknown command \"%s\"", argv[0]);
-	json_object_set_new(rep_msg, "code", json_integer(JSONRCP_STATUS_METHOD_NOT_FOUND));
+	json_object_set_new(rep_msg, "code", json_integer(JSONRPC_STATUS_METHOD_NOT_FOUND));
 	return 1;
 }
 
@@ -796,7 +797,7 @@ void server_cmd_cb(void *arg) {
 	if (!request) {
 		error = json_object();
 		json_object_set_new(error, "message", json_string(err.text));
-		json_object_set_new(error, "code", json_integer(JSONRCP_STATUS_PARSE_ERROR));
+		json_object_set_new(error, "code", json_integer(JSONRPC_STATUS_PARSE_ERROR));
 		goto error;
 	}
 
@@ -805,7 +806,7 @@ void server_cmd_cb(void *arg) {
 		/* TODO: handled batch requets */
 		error = json_object();
 		json_object_set_new(error, "message", json_string("request must be an object"));
-		json_object_set_new(error, "code", json_integer(JSONRCP_STATUS_INVALID_REQUEST));
+		json_object_set_new(error, "code", json_integer(JSONRPC_STATUS_INVALID_REQUEST));
 		goto error;
 	}
 
@@ -814,7 +815,7 @@ void server_cmd_cb(void *arg) {
 		error = json_object();
 		json_object_set_new(error, "message",
 		                    json_string("Invalid Request: id not speficied"));
-		json_object_set_new(error, "code", json_integer(JSONRCP_STATUS_INVALID_REQUEST));
+		json_object_set_new(error, "code", json_integer(JSONRPC_STATUS_INVALID_REQUEST));
 		goto error;
 	}
 
@@ -823,7 +824,7 @@ void server_cmd_cb(void *arg) {
 		error = json_object();
 		json_object_set_new(error, "message",
 		                    json_string("Invalid Request: method not a string"));
-		json_object_set_new(error, "code", json_integer(JSONRCP_STATUS_INVALID_REQUEST));
+		json_object_set_new(error, "code", json_integer(JSONRPC_STATUS_INVALID_REQUEST));
 		goto error;
 	}
 
@@ -832,7 +833,7 @@ void server_cmd_cb(void *arg) {
 		error = json_object();
 		json_object_set_new(error, "message",
 		                    json_string("Invalid Request: params not an array"));
-		json_object_set_new(error, "code", json_integer(JSONRCP_STATUS_INVALID_REQUEST));
+		json_object_set_new(error, "code", json_integer(JSONRPC_STATUS_INVALID_REQUEST));
 		goto error;
 	}
 
