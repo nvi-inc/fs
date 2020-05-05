@@ -33,3 +33,8 @@ void buffered_stream_kill(buffered_stream_t *s);
 int buffered_stream_set_len(buffered_stream_t *s, size_t len);
 
 void buffered_stream_join(buffered_stream_t *s);
+
+// buffered_stream_copy_fd creates a new thread that reads from fd and writes
+// to the buffered stream. Once the fd is closed, the bufered stream enters the
+// shutdown state. Stream should not be killed any other way.
+int buffered_stream_copy_fd(buffered_stream_t *s, int fd);

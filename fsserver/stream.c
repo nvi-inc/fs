@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -300,21 +301,21 @@ int buffered_stream_listen(buffered_stream_t *s, const char *pub_url, const char
 }
 
 void shutdown_cb(void *arg) {
-    buffered_stream_kill(arg);
+	buffered_stream_kill(arg);
 }
 
 void buffered_stream_close(buffered_stream_t *s) {
 	if (s->shutdown_heartbeat_millis == 0) {
-        buffered_stream_kill(s);
+		buffered_stream_kill(s);
 		return;
 	}
 
-    nng_mtx_lock(s->mtx);
-    s->heartbeat_millis = s->shutdown_heartbeat_millis;
-    s->shutting_down = true;
+	nng_mtx_lock(s->mtx);
+	s->heartbeat_millis = s->shutdown_heartbeat_millis;
+	s->shutting_down    = true;
 	nng_aio_alloc(&s->shutdown_aio, shutdown_cb, s);
 	nng_sleep_aio(s->shutdown_millis, s->shutdown_aio);
-    nng_mtx_unlock(s->mtx);
+	nng_mtx_unlock(s->mtx);
 	// TODO: handle shutdown
 }
 
@@ -330,7 +331,8 @@ void buffered_stream_kill(buffered_stream_t *s) {
 
 	nng_aio_free(s->rep_aio);
 	nng_aio_free(s->heartbeat_aio);
-    if (s->shutdown_aio) nng_aio_free(s->shutdown_aio);
+	if (s->shutdown_aio)
+		nng_aio_free(s->shutdown_aio);
 	nng_mtx_free(s->mtx);
 
 	if (s->msg_buffer) {
@@ -346,5 +348,39 @@ void buffered_stream_kill(buffered_stream_t *s) {
 }
 
 void buffered_stream_join(buffered_stream_t *s) {
-    nng_aio_wait(s->shutdown_aio);
+	nng_aio_wait(s->shutdown_aio);
+}
+
+struct dup_thread_args {
+	int fd;
+	buffered_stream_t *s;
+};
+
+static void *dup_thread(void *args) {
+	struct dup_thread_args a = *((struct dup_thread_args *)args);
+	free(args);
+
+	char buf[8192];
+	ssize_t n;
+	for (;;) {
+		if ((n = read(a.fd, buf, sizeof(buf))) <= 0) {
+			break;
+		}
+		buffered_stream_send(a.s, buf, n);
+	}
+
+	buffered_stream_close(a.s);
+	return NULL;
+}
+
+int buffered_stream_copy_fd(buffered_stream_t *s, int fd) {
+	pthread_t thread;
+	struct dup_thread_args *args = malloc(sizeof(struct dup_thread_args));
+	args->fd                     = fd;
+	args->s                      = s;
+	if (pthread_create(&thread, NULL, dup_thread, args) < 0) {
+		return -1;
+	}
+
+	return 0;
 }
