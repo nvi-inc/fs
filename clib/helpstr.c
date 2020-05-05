@@ -39,16 +39,6 @@
 
 #define MAX_STRING 256
 
-// fileexists check if file exists and is readable
-static int fileexists(const char *filename) {
-	FILE *file;
-	if ((file = fopen(filename, "r"))) {
-		fclose(file);
-		return 1;
-	}
-	return 0;
-}
-
 static char *help_dirs[] = {FS_ROOT "/st/help", FS_ROOT "/fs/help", NULL};
 
 // check_help_dirs looks for file "name" in help dirs and returns first match as a
@@ -60,7 +50,8 @@ static char *check_help_dirs(char *name) {
 	for (dir = help_dirs; *dir != NULL; dir++) {
 		if (asprintf(&path, "%s/%s", *dir, name) < 0)
 			return NULL;
-		if (fileexists(path)) {
+		}
+		if (access(path, R_OK)) {
 			return path;
 		}
 		free(path);
