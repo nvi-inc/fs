@@ -1,0 +1,424 @@
+#!/usr/bin/python
+#
+# Copyright (c) 2020 NVI, Inc.
+#
+# This file is part of VLBI Field System
+# (see http://github.com/nvi-inc/fs).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+import os
+import subprocess 
+import getopt
+import sys
+import shutil
+
+def there(path):
+    if not os.path.exists(path):
+        print path,"doesn't exist"
+        return False
+    return True
+
+def flavor(name,save):
+    return not subprocess.call(["cmp","-s",name,save])
+
+def same(name1,name2):
+    if not subprocess.call(["cmp","-s",name1,name2]):
+        print "Error: "+name1+" is the same as "+name2
+        return True
+    else:
+        return False
+
+def copy(src,dst):
+    try:
+        shutil.copyfile(src,dst)
+    except Exception as err:
+        print(str(err))
+        sys.exit('try '+os.path.basename(os.path.splitext(sys.argv[0])[0])+' -h')
+
+def creat_copy(src,dst,force):
+    if force:
+        flags = os.O_CREAT | os.O_WRONLY
+    else:
+        flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
+
+    try:
+        fd = os.open(dst,flags,0o666)
+    except Exception as err:
+        print("os.open: "+str(err))
+        return False
+
+    try:
+        df=os.fdopen(fd,'w')
+    except Exception as err:
+        print("os.fdopen: "+str(err))
+        return False
+
+    try:
+       sf=open(src)
+    except Exception as err:
+        print("open")
+        print("open: "+str(err))
+        return False
+
+    try:
+         shutil.copyfileobj(sf, df)
+    except Exception as err:
+        print("copyfileobj: "+str(err))
+        return False
+
+    return True
+
+def creat_writ(dst,line,force):
+
+    if force:
+        flags = os.O_CREAT | os.O_WRONLY
+    else:
+        flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
+    try:
+        fd = os.open(dst,flags,0o666)
+    except Exception as err:
+        print("os.open: "+str(err))
+        return False
+
+    try:
+        os.write(fd,line)
+    except Exception as err:
+        print("os.write: "+str(err))
+        return False
+
+    try:
+        os.close(fd)
+    except Exception as err:
+        print("close: "+str(err))
+        return False
+
+    return True
+
+#main
+name=os.path.basename(os.path.splitext(sys.argv[0])[0])
+force=False
+create=False
+repair=False
+mk6in=False
+
+try:
+    options, remainder = getopt.getopt(
+    sys.argv[1:],
+    'cfhir')
+
+except getopt.GetoptError as err:
+    print("getopt ERROR:", err)
+    sys.exit("ry "+name+" -cfhir")
+
+for opt,arg in options:
+    if opt == '-h':
+        print(name+": select, display, or manage FS Mark 6 configuration")
+        print("")
+        print("Command line: "+name+" -cfhir a|b|both|none|")
+        print("")
+        print("Usage:")
+        print("  Once setup, this script can be used to change which Mark 6 is selected. e.g.:")
+        print("    "+name+" a")
+        print("  or:")
+        print("    "+name+" b")
+        print("  The FS must be restarted to use a changed configuration.")
+        print("  You can check what is currently selected with:")
+        print("    "+name)
+        print("  This script is always non-destructive as long as '-f' is not used.")
+        print("  Check 'Setup' below for configuration instructions.")
+        print("  Check 'Problem recovery' below for hints for dealing with problems.")
+        print("  A detailed description of the script follows.")
+        print("")
+        print("Arguments: a|b|both|none|")
+        print("  a|b|both|none - select that configuration if not already selected")
+        print("    All the required files must be present or any selection will be rejected.")
+        print("    There will be no change if the current configuration is 'other' unless '-f'")
+        print("      is used. See 'Problem recovery' below for advice before using '-f'.")
+        print("    The FS must be restarted to use a changed configuration.")
+        print("  With no argument, the current configuration is shown. If each file is not")
+        print("    consistent with 'a|b|none|both', the overall configuration is 'other'.")
+        print("")
+#              12345678901234567890123456789012345678901234567890123456789012345678901234567890
+        print("Options: -cfhir")
+        print("  Options '-c', '-i', and '-r' cannot be used together in any combination")
+        print("  -c - 'create' needed files in '/usr2/control'")
+        print("         'mk6ca.ctl' and 'mk6cb.ctl' must exist already configured for Mark6a")
+        print("            and Mark 6b, respectively; if they are same or if one or both are")
+        print("            empty, this option is rejected.")
+        print("         'mk6ca.ctl' will be copied to reference copy 'mk6ca.ctl.select'")
+        print("         'mk6cb.ctl' will be copied to reference copy 'mk6cb.ctl.select'")
+        print("         The following files will be created:")
+        print("           mk6in.save_file             - save_file input for mk6in procedure")
+        print("           mk6in.save_file.a.select    - reference copy for 'a'")
+        print("           mk6in.save_file.b.select    - reference copy for 'b'")
+        print("           mk6in.save_file.both.select - reference copy for 'both'")
+        print("           mk6in.save_file.none.select - reference copy for 'none'")
+        print("         All non-'.select' files will be in the 'both' configuration afterwards.")
+        print("  -f - 'force':")
+        print("         USE WITH CARE! This may delete/destroy information.")
+        print("         With a non-blank argument, this will override not changing if the")
+        print("           current configuration is 'other'; see 'Problem recovery' below for")
+        print("           advice before using in this case.")
+        print("         For '-c' this will overwrite existing 'mk6c?.ctl.select' files,")
+        print("           overwriting any changes that have been made to them, with the")
+        print("           corresponding 'mk6c?.ctl' files.")
+        print("         For '-c' and '-i', this will overwrite existing 'mk6in.save_file*'")
+        print("           files, returning them to their default state, overwriting any")
+        print("           changes that have been made.")
+        print("         For '-r' this  will overwrite only existing 'mk6c?.ctl.select' files")
+        print("           with corresponding 'mk6c?.ctl' files that aren't empty")
+        print("  -h -  'help' - print this help information")
+        print("  -i -  'in' - like '-c' but will create 'mk6in.save_file*' files only")
+        print("          The 'mk6in.save_file' will be in the 'both' configuration afterwards.")
+        print("  -r -  'repair' - like '-c' but will only create 'mk6c?.ctl.select' files from")
+        print("          'mk6c?.ctl' that are not empty, only overwriting if '-f' is used")
+        print("         This option is rejected if the 'mk6c?.ctl files are the same.")
+        print("         This option cannot be used with '-i' and/or '-m'")
+        print("")
+        print("Setup:")
+        print("To enable use of this script, the following steps are needed. Some may already")
+        print("  have been done, particularly the earlier ones.")
+        print("")
+        print("1. 'mk6c?.ctl' setup")
+        print("   a. Set 'mk6ca.ctl' for Mark 6a.")
+        print("   b. Set 'mk6cb.ctl' for Mark 6b.")
+        print("2. 'mk6in' setup")
+        print("   a. define aliases 'mark6a' and 'mark6b' in '/etc/hosts'")
+        print("        This must be done by 'root', instructions are not provided here.")
+        print("   b. set keyed login on Mark 6s for 'oper'. As 'oper' on FS computer:")
+        print("        i. Generate key")
+        print("             ssh-keygen")
+        print("               (press 'Enter' at all prompts)")
+        print("       ii. Copy key to 'oper' on Mark 6a:")
+        print("             ssh-copy-id oper@mark6a")
+        print("               (enter password when prompted)")
+        print("      iii. Copy key to 'oper' on Mark 6b:")
+        print("             ssh-copy-id oper@mark6b")
+        print("               (enter password when prompted)")
+        print("       iv. Copy 'mk6in' script to Mark 6a:")
+        print("             scp -p /usr2/fs/misc/mk6in.centos mark6a:bin/mk6in")
+        print("               (use /usr2/fs/misc/mk6in if Mark 6a is Debian)")
+        print("        v. Copy 'mk6in' script to Mark 6b:")
+        print("             scp -p /usr2/fs/misc/mk6in.centos mark6b:bin/mk6in")
+        print("               (use /usr2/fs/misc/mk6in if Mark 6b is Debian)")
+        print("3. 'station' SNAP procedure library setup (don't include leading spaces)")
+        print("   a. Create procedure 'mk6in_a' with contents:")
+        print("        sy=popen 'ssh oper\@mark6a bin/mk6in 2>&1' -n mk6ina &")
+        print("   b. Create procedure 'mk6in_b' with contents:")
+        print("        sy=popen 'ssh oper\@mark6b bin/mk6in 2>&1' -n mk6inb &")
+        print("   c. Create procedure 'mk6in_both' with contents:")
+        print("        mk6in_a")
+        print("        mk6in_b")
+        print("   d. Create procedure 'mk6in' with contents:")
+        print("        save_file=mk6in.save_file")
+        print("4. Create '.select' files")
+        print("   a. Verify no previous set-up")
+        print("        "+name)
+        print("          (the output should show seven missing files, none ending in '.ctl')")
+        print("   a. Create files")
+        print("        "+name+" -c")
+        print("           (no news is good news, now files are in the 'both' configuration")
+        print("5. Select Mark 6a initially")
+        print("     "+name+" a")
+        print("")
+        print("Problem recovery:")
+        print("  This script assumes that the '.select' files contain the reference copies of")
+        print("    the corresponding files. In general to make a change to the setup the")
+        print("    easiest approach is change the affected '.select' files and then reselect")
+        print("    the desired configuration.") 
+        print("")
+        print("    Note that there is a fundamental asymmetry between the 'mk6c?.ctl*' files")
+        print("    and 'mk6in.save_files'. For the former, how they are initially defined")
+        print("    determines the contents of the '.select' files. For the latter, the default")
+        print("    content is generated by this script.")
+        print("")
+        print("  The most likely problem is having changed a 'mk6c?.ctl' file directly and")
+        print("    not having updated the corresponding '.select' file. The change may have")
+        print("    been made and after awhile forgotten. Then when trying to change the")
+        print("    configuration, the overall configuration is reported as 'other' with one or")
+        print("    both 'mk6c?.ctl' files' listed as: not 'a'/'b' and not empty, so 'other'.")
+        print("")
+        print("    If the changes to the 'mk6?.ctl' files(s) should be preserved, the easiest")
+        print("    recovery may be to use the '-rf' options, which will overwrite the")
+        print("    'mk6c?.ctl.select' files with any corresponding non-'.select' files that")
+        print("    aren't empty:")
+        print("      "+name+" -rf")
+        print("    Changing configuration should then work if tried again.")
+        print("")
+        print("    Alternatively, if the 'mk6c?.ctl' (and/or the 'mk6in.save_file') have been")
+        print("    incorrectly changed, you can return to the setup in the '.select' files'")
+        print("    by using the '-f' option with configuration you want, e.g., for 'a':")
+        print("      "+name+" -f a")
+        print("    Note that this also overwrites the 'mk6in.save_file' file as well.")
+        print("")
+        print("  If the 'mk6in.save_file' has changed and the new version should become")
+        print("    permanent, the easiest thing to do may be to copy it over the one it")
+        print("    should replace, for example it update the '.select' file for 'a':")
+        print("       cd /usr2/control")
+        print("       cp mk6in.save_file mk6in.save_file.a.select")
+        print("")
+        print("    Alternatively, it the mk6in,save_file' should not be preserved, it can be")
+        print("    overwritten by the '.select' version by using the '-f' option with")
+        print("    configuration you want, e.g., for 'a':")
+        print("      "+name+" -f a")
+        print("    Note that this also overwrites the 'mk6c?.ctl' files as well.")
+        sys.exit(0)
+    elif opt == '-f':
+        force = True
+    elif opt == '-c':
+        if repair or mk6in:
+            sys.exit("None of '-c', '-i', or '-r' can be used together.")
+        create = True
+    elif opt == '-i':
+        if create or repair:
+            sys.exit("None of '-c', '-i', or '-r' can be used together.")
+        mk6in = True
+    elif opt == '-r':
+        if create or mk6in:
+            sys.exit("None of '-c', '-i', or '-r' can be used together.")
+        repair = True
+
+if len(remainder) > 1:
+    print('too many arguments')
+    sys.exit('try '+name+' -h')
+
+os.chdir("/usr2/control")
+
+if create or repair or mk6in:
+    okay = True
+    if create or repair:
+        an=flavor("mk6ca.ctl","/dev/null")
+        bn=flavor("mk6cb.ctl","/dev/null")
+        if an:
+            print("mk6ca.ctl' is empty")
+        if bn:
+            print("mk6cb.ctl' is empty")
+        if an and bn:
+            sys.exit("It looks like you have no Mark 6s configured")
+        elif an != bn and not repair:
+            sys.exit("It looks like you only have one Mark 6 configured")
+        elif same("mk6ca.ctl","mk6cb.ctl"):
+            sys.exit("These files must be different.")
+           
+        if not an:
+            okay = creat_copy("mk6ca.ctl","mk6ca.ctl.select",force) and okay
+        if not bn:
+            okay = creat_copy("mk6cb.ctl","mk6cb.ctl.select",force) and okay
+    if create or mk6in:
+        okay = creat_writ("mk6in.save_file.a.select","mk6in_a\n",force) and okay
+        okay = creat_writ("mk6in.save_file.b.select","mk6in_b\n",force) and okay
+        okay = creat_writ("mk6in.save_file.none.select",'"No Mark 6s configured\n',force) \
+            and okay
+        okay = creat_writ("mk6in.save_file.both.select","mk6in_both\n",force) \
+            and okay
+        okay = creat_copy("mk6in.save_file.both.select","mk6in.save_file",force) \
+            and okay
+    if not okay:
+        print("Some files not created properly, you may need to clean-up.")
+        sys.exit("You can use '-f' to force recreation of existing files")
+    else:
+        sys.exit(0)
+
+okay = True
+okay = there("mk6ca.ctl") and okay
+okay = there("mk6ca.ctl.select") and okay
+okay = there("mk6cb.ctl") and okay
+okay = there("mk6cb.ctl.select") and okay
+okay = there("mk6in.save_file") and okay
+okay = there("mk6in.save_file.a.select") and okay
+okay = there("mk6in.save_file.b.select") and okay
+okay = there("mk6in.save_file.both.select") and okay
+okay = there("mk6in.save_file.none.select") and okay
+
+if not okay:
+    sys.exit("Not all required files are present, see above")
+
+af=flavor("mk6ca.ctl","mk6ca.ctl.select")
+an=flavor("mk6ca.ctl","/dev/null")
+bf=flavor("mk6cb.ctl","mk6cb.ctl.select")
+bn=flavor("mk6cb.ctl","/dev/null")
+
+ma=flavor("mk6in.save_file","mk6in.save_file.a.select")
+mb=flavor("mk6in.save_file","mk6in.save_file.b.select")
+mboth=flavor("mk6in.save_file","mk6in.save_file.both.select")
+mnone=flavor("mk6in.save_file","mk6in.save_file.none.select")
+
+if af and bn and ma:
+    config='a'
+elif an and bf and mb:
+    config='b'
+elif af and bf and mboth:
+    config='both'
+elif an and bn and mnone:
+    config='none'
+else:
+    config='other'
+
+if len(remainder)==0:
+    if config == 'a' or config == 'b':
+        print("Configuration is Mark6"+config)
+    else:
+        print("Configuration is "+config)
+    if config == 'other':
+        if af:
+            print("mk6ca.ctl is 'a', so 'a' or 'both'")
+        elif an:
+            print("mk6ca.ctl is empty, so 'b' or 'none'")
+        else:
+            print("mk6ca.ctl is not 'a' and not empty, so 'other'")
+        if bf:
+            print("mk6cb.ctl is 'b', so 'b' or 'both'")
+        elif bn:
+            print("mk6cb.ctl is empty, so 'a' or 'none'")
+        else:
+            print("mk6cb.ctl in not 'b' and not empty, so 'other'")
+
+
+        if ma:
+            print("mk6in.save_file is 'a'")
+        elif mb:
+            print("mk6in.save_file is 'b'")
+        elif mboth:
+            print("mk6in.save_file is 'both'")
+        elif mnone:
+            print("mk6in.save_file is 'none'")
+        else:
+            print("mk6in.save_file is not any of: 'a', 'b', 'both', or 'none', so 'other'.")
+    sys.exit(0)
+
+if same("mk6ca.ctl.select","mk6cb.ctl.select"):
+    sys.exit("Can't continue if 'mk6ca.ctl.select' and 'mk6cb.ctl.select' are the same")
+elif config == 'other' and not force:
+    sys.exit("Can't continue with 'other' configuration unless '-f'")
+elif remainder[0] == config:
+    print("Configuration is already "+config)
+    sys.exit(0)
+elif remainder[0] == 'a':
+    copy('mk6ca.ctl.select','mk6ca.ctl')
+    copy('/dev/null','mk6cb.ctl')
+    copy('mk6in.save_file.a.select','mk6in.save_file')
+elif remainder[0] == 'b':
+    copy('/dev/null','mk6ca.ctl')
+    copy('mk6cb.ctl.select','mk6cb.ctl')
+    copy('mk6in.save_file.b.select','mk6in.save_file')
+elif remainder[0] == 'both':
+    copy('mk6ca.ctl.select','mk6ca.ctl')
+    copy('mk6cb.ctl.select','mk6cb.ctl')
+    copy('mk6in.save_file.both.select','mk6in.save_file')
+elif remainder[0] == 'none':
+    copy('/dev/null','mk6ca.ctl')
+    copy('/dev/null','mk6cb.ctl')
+    copy('mk6in.save_file.none.select','mk6in.save_file')
