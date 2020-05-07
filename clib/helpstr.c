@@ -41,13 +41,13 @@
 
 static char *help_dirs[] = {FS_ROOT "/st/help", FS_ROOT "/fs/help", NULL};
 
-// check_help_dirs looks for file "name" in help dirs and returns first match as a
+// is_in_dirs looks for file "name" in dirs and returns first match as a
 // string.  Resulting string must be released with free
-static char *check_help_dirs(char *name) {
+static char *is_in_dir(char *name, char **dirs) {
 	char **dir;
 	char *path;
 
-	for (dir = help_dirs; *dir != NULL; dir++) {
+	for (dir = dirs; *dir != NULL; dir++) {
 		if (asprintf(&path, "%s/%s", *dir, name) < 0) {
 			perror("error during asprintf in check_help_dirs");
 			return NULL;
@@ -145,7 +145,7 @@ int rlen;
 
 	decloc = strchr(name, '.');
 	if (decloc != NULL) {
-		char *p = check_help_dirs(name);
+		char *p = is_in_dir(name, help_dirs);
 		if (p == NULL) {
 			return;
 		}
