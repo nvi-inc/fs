@@ -52,7 +52,7 @@ static char *check_help_dirs(char *name) {
 			perror("error during asprintf in check_help_dirs");
 			return NULL;
 		}
-		if (access(path, R_OK)) {
+		if (access(path, R_OK) == 0) {
 			return path;
 		}
 		free(path);
