@@ -131,7 +131,8 @@ int rlen;
 
 	*ierr = -3;
 
-	if (*clength > MAX_STRING) {
+    // one for null byte and one for potential '.'
+	if (*clength > MAX_STRING + 2) {
 		*ierr = -2;
 		return;
 	}
@@ -153,6 +154,9 @@ int rlen;
 		free(p);
 		return;
 	}
+
+	// prevent unintended prefix matches
+	strcat(name, ".");
 
 	char **paths = ls_prefix(help_dirs, name);
 	if (!paths) {
