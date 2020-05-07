@@ -60,7 +60,7 @@ static char *is_in_dir(char *name, char **dirs) {
 	return NULL;
 }
 
-// check_help_dirs_prefix returns a null terminated list of files that start with
+// ls_prefix returns a null terminated list of files that start with
 // prefix. Returns NULL on error.
 // List and its elements must be released by free.
 static char **ls_prefix(char **dirs, char *prefix) {
