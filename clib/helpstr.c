@@ -139,6 +139,9 @@ int rlen;
 	strncpy(name, cnam, *clength);
 	name[*clength] = '\0';
 
+	// prevent directory traversal
+	if (strchr(name, '/')) return;
+
 	decloc = strchr(name, '.');
 	if (decloc != NULL) {
 		char *p = check_help_dirs(name);
