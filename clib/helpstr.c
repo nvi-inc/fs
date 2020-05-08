@@ -43,7 +43,7 @@ static char *help_dirs[] = {FS_ROOT "/st/help", FS_ROOT "/fs/help", NULL};
 
 // is_in_dirs looks for file "name" in dirs and returns first match as a
 // string.  Resulting string must be released with free
-static char *is_in_dir(char *name, char **dirs) {
+static char *is_in_dirs(char **dirs, char *name) {
 	char **dir;
 	char *path;
 
@@ -145,7 +145,7 @@ int rlen;
 
 	decloc = strchr(name, '.');
 	if (decloc != NULL) {
-		char *p = is_in_dir(name, help_dirs);
+		char *p = is_in_dirs(help_dirs, name);
 		if (p == NULL) {
 			return;
 		}
