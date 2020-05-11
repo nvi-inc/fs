@@ -63,9 +63,9 @@ ln -s $FS_DIRECTORY fs
 #
 echo "Setting /usr2/fs permissions ..."
 cd /usr2
-chown -R prog fs $FS_DIRECTORY
-chgrp -R rtx fs $FS_DIRECTORY
-chmod -R a+r,u+w,go-w fs $FS_DIRECTORY
+chown -R prog $FS_DIRECTORY
+chgrp -R rtx $FS_DIRECTORY
+chmod -R a+r,u+w,go-w $FS_DIRECTORY
 #
 if [ ! -e st-0.0.0 -a ! -e st ]; then
   echo "Creating /usr2/st default directory structure..."
@@ -78,9 +78,9 @@ if [ ! -e st-0.0.0 -a ! -e st ]; then
   cd /usr2
   rm -f st
   ln -s st-0.0.0 st
-  chown -R prog st st-0.0.0
-  chgrp -R rtx  st st-0.0.0
-  chmod -R a+r,u+w,go-w st st-0.0.0
+  chown -R prog st-0.0.0
+  chgrp -R rtx st-0.0.0
+  chmod -R a+r,u+w,go-w st-0.0.0
 fi
 #
 # the following works for both /home and /usr2 separate OR /home -> /usr2
