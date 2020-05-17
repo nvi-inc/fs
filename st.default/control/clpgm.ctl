@@ -13,6 +13,7 @@ monit4 a xterm -name monit4 -e monit4
 monit5 a xterm -name monit5 -e monit5
 monit6 a xterm -name monit6 -e monit6
 scnch  a xterm -name scnch  -e 'fsclient -n -w -s | grep \!scan_check'
+xterm  d xterm
 monan  a xterm -name monan  -e monan 
 mona   a popen 'cd /tmp;rdbe30_mon.py -h 239.0.2.10 -p 20021 -H rdbea 2>&1' -n rdbemona
 monb   a popen 'cd /tmp;rdbe30_mon.py -h 239.0.2.20 -p 20022 -H rdbeb 2>&1' -n rdbemonb

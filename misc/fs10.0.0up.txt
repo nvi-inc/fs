@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/fs10.0.0up.txt        Version: 10.0  Date: 200424
+File: /usr2/fs/misc/fs10.0.0up.txt        Version: 10.0  Date: 200517
 
                      FS 10.0.0 Beta Update Notice
 
@@ -328,23 +328,23 @@ FLIBS   += -lgfortran -lm
           i. If your old version was 9.12.10 or 9.12.11:  
 
                cd /usr2/control
-               cp /usr2/st.default/control/clpgm.ctl .
-               cp /usr2/st.default/control/rdbemsg.ctl .
+               cp /usr2/fs/st.default/control/clpgm.ctl .
+               cp /usr2/fs/st.default/control/rdbemsg.ctl .
 
          ii. If your old version was 9.12.12 or 9.12.13:  
 
                cd /usr2/control
-               cp /usr2/st.default/control/rdbemsg.ctl .
+               cp /usr2/fs/st.default/control/rdbemsg.ctl .
 
          iii. If your old version was 9.13.2:
 
                cd /usr2/control
-               cp /usr2/st.default/control/dbba2.ctl .
-               cp /usr2/st.default/control/mk6c?.ctl .
-               cp /usr2/st.default/control/monit6.ctl .
-               cp /usr2/st.default/control/rdbc?.ctl .
-               cp /usr2/st.default/control/rdbe.ctl .
-               cp /usr2/st.default/control/rdbemsg.ctl .
+               cp /usr2/fs/st.default/control/dbba2.ctl .
+               cp /usr2/fs/st.default/control/mk6c?.ctl .
+               cp /usr2/fs/st.default/control/monit6.ctl .
+               cp /usr2/fs/st.default/control/rdbc?.ctl .
+               cp /usr2/fs/st.default/control/rdbe.ctl .
+               cp /usr2/fs/st.default/control/rdbemsg.ctl .
 
      C. Update your 'equip.ctl' file, adding up to two lines at the
         end: the FiLa10G input select and the DBBC3 configuration
@@ -399,14 +399,20 @@ FLIBS   += -lgfortran -lm
                      - If your old version was 9.12.12, 9.12.13 or
                        9.13.2: the '-title ...'  parameter for each
                        window was removed so that it is uniquely
-                       supplied by the '.Xresources' file.
+                       supplied by the '.Xresources' file. The 'xterm'
+                       program was added. The value of the '-name'
+                       parameter for 'erchk' was changed from 'ERRORS'
+                       to 'erchk'.
 
                      - If your old version was 9.12.12, 9.12.13, or
                        9.13.2: new lines were added for the useful
                        display window 'scnch', and the useful RDBE
                        display windows: 'monit6', and 'monX'
-                       ('X'=[a-b]). The 'monan' program was added to
-                       the default since it is used at several sites.
+                       ('X'=[a-b]). The 'xterm' program was added. The
+                       'monan' program was added to the default since
+                       it is used at several sites. The value of the
+                       '-name' parameter for 'erchk' was changed from
+                       'ERRORS' to 'erchk'.
 
            equip.ctl - This file has the most complicated changes.
                        Please read all clauses to make sure you see
@@ -476,9 +482,9 @@ vsi1-2
                        were added or modified for new equipment type
                        options. 
 
-                     - If your old version was 9.12.10-9.12.13, a
-                       comment line describing the met sensor was
-                       changed.
+                     - If your old version was 9.12.10-9.12.13, the
+                       trailing comment on the line for met device was
+                       reworded.
 
                      - If your old version was 9.12.10-9.12.13, the
                        comment lines describing the available clock
@@ -487,13 +493,24 @@ vsi1-2
                        was appended to the end of the comment on
                        clock rate line itself.
 
-           stpgm.ctl - New lines were added for 'erchk', 'monit2', and
-                       'scnch' to be started by 'fsclient' when the
-                       display server is in use. The new 'erchk' line
-                       differs from the previous commented version in
-                       that the '-title ...' parameter was removed so
-                       that it is uniquely supplied by the
-                       '.Xresources' file.
+           stpgm.ctl - The 'erchk' was updated and new lines were
+                       added for 'monit2', and 'scnch' for when the
+                       display server is in use.  All these lines are
+                       commented out by default.
+
+                       The new 'erchk' line differs from the previous
+                       commented version with the addition of the
+                       '-name erchk' parameter and removal of the
+                       '-title ...' and '-geom ...' parameters, so
+                       that the latter two are uniquely supplied by
+                       the '.Xresources' file.
+
+                       If you are using the FS display server, we
+                       recommend you uncomment the lines for 'erchk',
+                       'mont2'. and 'scnch'.  You may want to add
+                       other 'mont?' programs. If so, you may want to
+                       add resources for them in the '~/.Xresources'
+                       files for 'oper' and 'prog'.
 
 (13) This step is for updates to your SNAP '.prc' procedure libraries.
      Only one change is needed, to convert use of the old FS 'go'
@@ -511,8 +528,28 @@ vsi1-2
      Files that are changed will have a pre-change back-up copy with
      the extension '.bak'.
 
-(14) This step is for miscellaneous FS related changes.  There are
-     are none for this update.
+(14) This step is for miscellaneous FS related changes. There is only
+     one, the '~/.Xresources' file was updated for the 'oper' and
+     'prog' accounts.  The main change was to add values for the
+     'erchk' and 'scnch' windows.  There were some minor changes for
+     other windows, but what to use for the changed values may depend
+     on the resolution of the display.  The example values worked well
+     for an FSL10 installation on a system with a non-GPU CPU.
+
+     As 'oper', you can find the differences between your file and the
+     example file with:
+
+       cd
+       diff .Xresources /usr2/fs/st.default/oper
+
+     Please make any changes to your file that you find appropriate,
+     but at a minimum you should probably add the lines for 'erchk'
+     and 'scnch', if not already present. You will need to logout and
+     login again (or reload the Xresources a different way) for the
+     changes to become effective.
+
+     You can update 'prog's '.Xresources' file similarly, but you will
+     need to be logged in as 'prog'.
 
 (15) This step is for miscellaneous FSLx changes. None are required
      for this update.
