@@ -1,0 +1,71 @@
+# Unofficial Makefile for nanomsg for Linux without cmake version >= 3.17
+
+NNG_VERSION := ${VERSION}
+NNG_DIR     := nng-$(NNG_VERSION)
+NNG_ARCHIVE := $(NNG_DIR).tar.gz
+NNG_LIBRARY := $(NNG_DIR)/libnng.a
+
+PREFIX?=/usr/local
+
+ifndef V
+	CCCOLOR="\033[34m"
+	LINKCOLOR="\033[34;1m"
+	SRCCOLOR="\033[33m"
+	BINCOLOR="\033[37;1m"
+	MAKECOLOR="\033[32;1m"
+	ENDCOLOR="\033[0m"
+
+OLD_CC := $(CC)
+OLD_LINK := $(LINK)
+OLD_AR := $(AR)
+OLD_INSTALL := $(INSTALL)
+
+QUIET_CC      = @printf '    %b %b\n' $(CCCOLOR)CC$(ENDCOLOR) $(SRCCOLOR)$@$(ENDCOLOR) 1>&2;
+QUIET_AR      = @printf '    %b %b\n' $(LINKCOLOR)AR$(ENDCOLOR) $(BINCOLOR)$@$(ENDCOLOR) 1>&2;
+QUIET_LINK    = @printf '    %b %b\n' $(LINKCOLOR)LINK$(ENDCOLOR) $(BINCOLOR)$@$(ENDCOLOR) 1>&2;
+QUIET_INSTALL = @printf '    %b %b\n' $(LINKCOLOR)INSTALL$(ENDCOLOR) $(BINCOLOR)$@$(ENDCOLOR) 1>&2;
+
+CC =$(QUIET_CC)$(OLD_CC)
+LD =$(QUIET_LINK)$(OLD_LD)
+AR =$(QUIET_AR)$(OLD_AR)
+
+INSTALL:=$(QUIET_INSTALL)$(OLD_INSTALL)
+endif
+
+
+all: $(NNG_LIBRARY)
+
+SOURCES := ${SOURCES}
+
+SOURCES := $(addprefix $(NNG_DIR)/src/, $(SOURCES))
+
+HEADERS =  ${HEADERS}
+
+HEADERS_SRC = $(addprefix $(NNG_DIR)/include/, $(HEADERS))
+
+
+$(SOURCES): $(NNG_ARCHIVE)
+	tar xzmf $(NNG_ARCHIVE)
+
+
+CFLAGS += -g ${CFLAGS}
+CPPFLAGS = ${CPPFLAGS}
+
+OBJECTS :=  $(SOURCES:.c=.o)
+$(NNG_LIBRARY): $(OBJECTS)
+	$(AR) cr $@ $^
+
+
+.PHONY : clean
+clean :
+	@rm -rf $(NNG_DIR)
+
+
+
+.PHONY: install
+install: $(NNG_LIBRARY) $(HEADERS_SRC)
+	install -m 0644 -D $(NNG_LIBRARY) $(PREFIX)/lib/libnng.a
+	for h in $(HEADERS); do \
+		install -m 0644 -D $(NNG_DIR)/include/$$h $(PREFIX)/include/$$h ; \
+	done
+

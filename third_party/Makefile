@@ -2,7 +2,7 @@ all: lib/libnng.a lib/libjansson.a
 
 export PREFIX = $(shell pwd)
 
-lib/libnng.a: src/nng-1.0.1.tar.gz
+lib/libnng.a: src/nng-1.3.0.tar.gz
 	$(MAKE) -C src -f nng.make install
 
 lib/libjansson.a: src/jansson-2.11.tar.gz
