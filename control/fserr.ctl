@@ -1410,10 +1410,10 @@ BO -302
 TNX action parameter must be 'on' or 'off'.
 ""
 BO -303
-This error has not occured yet, so it can't be turned 'off'.
+This error has not occurred yet, so its state can't be changed (trying to turn 'off').
 ""
 BO -304
-This error has not occured yet, so it can't be turned 'on'.
+This error has not occurred yet, so its state can't be changed (trying to turn 'on').
 ""
 BO -305
 TNX=... command cannot be executed from a procedure.
