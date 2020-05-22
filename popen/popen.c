@@ -21,9 +21,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/time.h>
+#include <setjmp.h>
+#include <errno.h>
+#include <signal.h>
 
 #define BUFF_SIZE 512
 #define OUT_SIZE  512
+
+static void nullfcn();
+static jmp_buf sig_buf;
 
 static err_out(char *out)
 {
@@ -43,7 +50,8 @@ char buffer[BUFF_SIZE];
 char out[BUFF_SIZE];
 
  char *name, *command, *send;
- int c, index, no_display, error;
+ int c, index, no_display, error,to;
+ struct itimerval value;
 
  setup_ids();
  putpname(argv[0]);
@@ -52,10 +60,14 @@ char out[BUFF_SIZE];
  command = NULL;
  no_display=0;
  error=NULL==getenv("FS_POPEN_NO_STDERR");
+ to=0;
 
  opterr = 0;
- while ((c = getopt (argc, argv, "lc:en:")) != -1) {
+ while ((c = getopt (argc, argv, "lc:en:t:")) != -1) {
    switch (c) {
+   case 't':
+     to = atoi(optarg);
+     break;
    case 'n':
      name = optarg;
      break;
@@ -118,7 +130,27 @@ char out[BUFF_SIZE];
    err_out(out);
  }
 
- /* needs timout detection */
+ /* timout detection */
+
+ if ( to > 0 ) {
+    if(signal(SIGALRM,nullfcn) == SIG_ERR){
+      snprintf(out,OUT_SIZE,"%s:%s:%s",name,"setting signal handler",
+              strerror(errno));
+      err_out(out);
+    }
+    value.it_interval.tv_sec=0L;
+    value.it_interval.tv_usec=0L;
+    value.it_value.tv_sec=to;
+    value.it_value.tv_usec=0;
+
+    if(-1==setitimer(ITIMER_REAL,&value,0)) {
+        snprintf(out,OUT_SIZE,"%s:%s:%s",name,"setting timer",strerror(errno));
+        err_out(out);
+     }
+     if (setjmp(sig_buf)) {
+       goto time_out;
+     }
+ }
 
  while (fgets(buffer, BUFF_SIZE, fp) != NULL) {
    if(strlen(buffer) > 0 && buffer[strlen(buffer)-1] == '\n')
@@ -133,7 +165,17 @@ char out[BUFF_SIZE];
      printf("%s\n",out);
    }
  }
-   
+ if ( to > 0 ) {
+    value.it_value.tv_sec=0 ;
+    value.it_value.tv_usec=0;
+
+    if(-1==setitimer(ITIMER_REAL,&value,0)) {
+        snprintf(out,OUT_SIZE,"%s:%s:%s",name,"resetting timer",
+                strerror(errno));
+        err_out(out);
+     }
+ }
+
  status = pclose(fp);
  if (status == -1) {
    snprintf(out,OUT_SIZE,"%s:%s",name,"pclose() failed");
@@ -141,7 +183,26 @@ char out[BUFF_SIZE];
  } else if(status!=0) {
    /* Use macros described under wait() to inspect `status' in order
       to determine success/failure of command executed by popen() */
-   snprintf(out,OUT_SIZE,"%s:exit status %d",name,status);
+   snprintf(out,OUT_SIZE,"%s:exit status %04.4x",name,status);
    err_out(out);
- }
+ } else
+     exit(0);
+
+time_out:
+   snprintf(out,OUT_SIZE,"%s:%s",name,"timed-out");
+   err_out(out);
+}
+static void nullfcn(sig)
+int sig;
+{
+
+  if(signal(sig,SIG_IGN) == SIG_ERR ) {
+    perror("popen:nullfcn: error ignoring signal");
+    exit(-1);
+  }
+  
+  longjmp (sig_buf, 1);
+
+  fprintf(stderr,"popen:nullfcn: can't get here\n");
+  exit(-1);
 }
