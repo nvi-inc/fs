@@ -1,4 +1,3 @@
-function n=m2n(m,Tblock,Tr,Ts)
 % Copyright (c) 2020 NVI, Inc.
 %
 % This file is part of VLBI Field System
@@ -17,6 +16,7 @@ function n=m2n(m,Tblock,Tr,Ts)
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+function n=m2n(m,Tblock,Tr,Ts)
 %convert factor m in Tsys to equivalent to factor n increase in SEFD for 
 % partially blocking object
 %input:

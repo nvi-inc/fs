@@ -1,4 +1,3 @@
-function plot_mask(mask,new,elmax,azmin,azmax)
 % Copyright (c) 2020 NVI, Inc.
 %
 % This file is part of VLBI Field System
@@ -17,6 +16,7 @@ function plot_mask(mask,new,elmax,azmin,azmax)
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+function plot_mask(mask,new,elmax,azmin,azmax)
 % plot mask
 %input:
 % mask -  vector of [az,el,...,final], odd positions are azs, even are els

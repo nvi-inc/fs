@@ -1,4 +1,3 @@
-function grid=holog(file,detector,columns)
 % Copyright (c) 2020 NVI, Inc.
 %
 % This file is part of VLBI Field System
@@ -17,6 +16,7 @@ function grid=holog(file,detector,columns)
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+function grid=holog(file,detector,columns)
 % read in holog grid from row ordered file made by holog_rdbe script
 % input:
 % file     = with space delimited data, one detector per column

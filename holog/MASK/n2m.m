@@ -1,4 +1,3 @@
-function m=n2m(n,Tblock,Tr,Ts)
 % Copyright (c) 2020 NVI, Inc.
 %
 % This file is part of VLBI Field System
@@ -17,6 +16,7 @@ function m=n2m(n,Tblock,Tr,Ts)
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+function m=n2m(n,Tblock,Tr,Ts)
 %convert factor n increase in SEFD to equivalent factor m in Tsys
 % partially blocking object
 %input:
