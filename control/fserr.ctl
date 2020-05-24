@@ -1289,14 +1289,35 @@ Error initiliazing mk6cb, internal error ?WWW
 BO -198
 More than ?WWW Mark6s requires mods to binit.f (plus fspgm.ctl, fserr.ctl, and mk6cn.c).
 ""
+BO -200
+File name too long in caccess(), while checking .prc permissions/existence
+""
 BO -201
-Error vacuum switching field (line 1) in SW.CTL
+Mode length must be greater than zero in caccess(), while checking .prc permissions/existence
 ""
 BO -202
-Error reading decoder field (line 2) in SW.CTL
+Unrecognized mode caccess(), while .prc checking permissions/existence
+""
+BO -203
+Can't access new procedure library, UNIX ?FFF
+""
+BO -204
+Unrecognized error from caccess(), while checking .snp permissions/existence
+""
+BO -205
+File name too long in caccess(), while checking .snp permissions/existence
+""
+BO -206
+Mode length must be greater than zero in caccess(), while checking .snp permissions/existence
+""
+BO -207
+Unrecognized mode caccess(), while checking .snp permissions/existence
+""
+BO -208
+Can't access new schedule file, UNIX ?FFF
 ""
 BO -209
-Error reading SW.CTL, UNIX ?FFF
+Unrecognized error from caccess(), while checking .snp permissions/existence
 ""
 BO -210
 Procedure library is too big, trailing procedures ignored.

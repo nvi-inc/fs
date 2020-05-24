@@ -56,6 +56,7 @@ c
       integer*2 lsors
       integer*4 irec,id
       integer fmpsetpos, fmpposition, fmpreadstr
+      integer perror
 c
       integer*4 secsnow,secswait,delta
       dimension iotref(3),istref(3)
@@ -119,6 +120,10 @@ C
       call fc_rte_time(itmlog,itmlog(6))
       iclass = 0
       iclop2 = 0
+      idcbp1(1)=0
+      idcbp1(2)=0
+      idcbp2(1)=0
+      idcbp2(2)=0
       call fc_rte_time(it,it(6))
       iotref(1) = (it(6)-1970)*1024 + it(5)
       iotref(2) = it(4)*60 + it(3)
@@ -581,6 +586,20 @@ C  User requested schedule name, format response and log it.
           if(ich.le.ic4-1) then
              cnamef = ibc(ich:ic4-1)
           endif
+          if(cnamef.ne.' ') then
+              call fc_access(
+     &            FS_root//'/sched/'//ibc(ich:ic4-1)//'.snp','r',
+     &            ierr,perror)
+              if(ierr.ne.0) then
+                  if(ierr.gt.0.or.ierr.lt.-4) then
+                      call logit7ci(0,0,0,1,-209,'bo',perror)
+                  else
+                      call logit7ci(0,0,0,1,-204+ierr,'bo',perror)
+                  endif
+                  call rn_put('pfmed')
+                  goto 600
+              endif
+          endif
           if(kstak(istkop,istksk,1)) then
              call logit7ci(0,0,0,0,-211,'bo',0)
              if(iwait.ne.0) then
@@ -597,6 +616,7 @@ C  User requested schedule name, format response and log it.
           call cants(itscb,ntscb,2,0,0)
 C  if the scehdule file name is blank don't try to open it.
           if(cnamef.eq.' ') then
+             call fmpclose(idcbsk,ierr)
              kskblk = .true.
              lskd = 'none'
              call char2hol(lskd,ilskd,1,8)
@@ -658,16 +678,20 @@ C  a valid schedule or all is set to zero.
           kskblk = .false.
           khalt = .false.
           call fs_set_khalt(khalt)
-          call fs_get_lskd(ilskd)
-          call hol2char(ilskd,1,8,lskd)
-          if (lskd.eq.'station') then
-            call fs_get_lprc(ilprc)
-            call hol2char(ilprc,1,8,lprc)
-            if ((lprc.ne.'none').or.(lprc.ne.' ')) then
+c    
+          call fs_get_lprc(ilprc)
+          call hol2char(ilprc,1,8,lprc)
+          if(lprc.ne.'none'.and.lprc.ne.' ') then
               call fmpclose(idcbp1,ierr)
               lprc='none'
               call char2hol(lprc,ilprc,1,8)
               call fs_set_lprc(ilprc)
+              nproc1 = 0
+          endif
+c
+          call fs_get_lskd(ilskd)
+          call hol2char(ilskd,1,8,lskd)
+          if (lskd.eq.'station') then
               call logit7ci(0,0,0,1,-158,'bo',ierr)
               if(iwait.ne.0) then
                  ipinsnp(3)=-158
@@ -676,8 +700,8 @@ C  a valid schedule or all is set to zero.
               endif
               call rn_put('pfmed')
               goto 600
-            end if
           end if
+c
           call fs_get_lskd(ilskd)
           call hol2char(ilskd,1,8,lskd)
           call opnpf(lskd,idcbp1,ibuf,iblen,lproc1,maxpr1,nproc1,ierr,
@@ -1007,12 +1031,30 @@ C  the station procedure library is opened on startup and remains open
 C  therefore, station as a procedure command parameter is an error.
             call logit7ci(0,0,0,0,-136,'bo',0)
           else
+C check for write access/existence
+            call fc_access(
+     &         FS_root//'/proc/'//ibc(ich:ic2-1)//'.prc','rw',
+     &         ierr,perror)
+            if(ierr.ne.0) then
+                if(ierr.gt.0.or.ierr.lt.-4) then
+                    call logit7ci(0,0,0,1,-204,'bo',perror)
+                else
+                    call logit7ci(0,0,0,1,-199+ierr,'bo',perror)
+                endif
+                goto 5152
+            endif
             irnprc = rn_take('pfmed',1)
             if (irnprc.eq.0) then
               call fs_get_lprc(ilprc)
               call hol2char(ilprc,1,8,lprc)
               if (lprc.ne.ibc(ich:ic2-1)) call cants(itscb,ntscb,2,0,0)
 C                   Cancel procs from the old library
+C                   not doing it when the new proc is the same is questionable
+              call fmpclose(idcbp1,ierr)
+              lprc='none'
+              call char2hol(lprc,ilprc,1,8)
+              call fs_set_lprc(ilprc)
+              nproc1 = 0
               lprc = ibc(ich:ic2-1)
               call char2hol(lprc,ilprc,1,8)
               call fs_set_lprc(ilprc)

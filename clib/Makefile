@@ -46,7 +46,8 @@ tape_util.o tpi_dbbc.o tpi_dbbc3.o tpi_dbbc_pfb.o tpi_lba.o tpi_norack.o \
 tpi_vlba.o tpicd_util.o tracks4_util.o tracks_util.o trkfrm4_util.o \
 trkfrm_util.o user_device_util.o user_info_util.o v2_head_vmov.o \
 v2_motion_done.o v2_vlt_head.o v_vlt_head.o vacuum.o venable_util.o vform_util.o \
-vlbabbcd.o vrepro_util.o vset_zero.o vsi4_util.o vst_util.o wvolt_util.o
+vlbabbcd.o vrepro_util.o vset_zero.o vsi4_util.o vst_util.o wvolt_util.o \
+caccess.o
 
 clib.a: $(OBJECTS)
 
