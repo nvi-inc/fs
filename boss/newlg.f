@@ -96,6 +96,10 @@ C
       nch = nch-1
       call logit3(ibuf,nch,lsor)
 C
+C   add OS info to log
+C
+      call log_uname
+C
 C     Send configuration info from control files to log
 C
       nch = 1

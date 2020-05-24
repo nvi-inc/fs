@@ -35,13 +35,22 @@ void pname();
 void rte_time();
 static logit0();
 
+logits(msg,ierr,who,lsor)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+char lsor;           /* char identifying source usually ':' or '/' */
+
+{
+  logit0(msg,ierr,who,NULL,lsor);
+}
 logit(msg,ierr,who)
 char *msg;           /* a message to be logged, NULL if none */
 int ierr;            /* error number, 0 if no error          */
 char *who;           /* 2-char string identifying the error  */
 
 {
-  logit0(msg,ierr,who,NULL);
+  logit0(msg,ierr,who,NULL,'/');
 }
 logit_nd(msg,ierr,who)
 char *msg;           /* a message to be logged, NULL if none */
@@ -49,18 +58,20 @@ int ierr;            /* error number, 0 if no error          */
 char *who;           /* 2-char string identifying the error  */
 
 {
-  logit0(msg,ierr,who,"nd");
+  logit0(msg,ierr,who,"nd",'/');
 }
-static logit0(msg,ierr,who,type)
+static logit0(msg,ierr,who,type,lsor)
 char *msg;           /* a message to be logged, NULL if none */
 int ierr;            /* error number, 0 if no error          */
 char *who;           /* 2-char string identifying the error  */
 char *type;          /* data type NULL = "fs", "nd" = no display */
+char lsor;           /* char identifying source usually ':' or '/' */
 
 {
   char buf[1025];    /* Holds the complete log entry */
   char name[5];     /* The name of our main program */
   int it[6],ip1,ip2,l;
+  char ssor[2];
  
 /* First get the time and put dddhhmmss into the log entry.
 */
@@ -97,7 +108,9 @@ char *type;          /* data type NULL = "fs", "nd" = no display */
       buf[l+5]='\0';
       strcat(buf,"#");
     } else
-      strcat(buf,"/");
+      ssor[0]=lsor;
+      ssor[1]=0;
+      strcat(buf,ssor);
     if(msg!=NULL) {
       int n;
       int bufl=strlen(buf);

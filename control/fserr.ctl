@@ -1289,6 +1289,9 @@ Error initiliazing mk6cb, internal error ?WWW
 BO -198
 More than ?WWW Mark6s requires mods to binit.f (plus fspgm.ctl, fserr.ctl, and mk6cn.c).
 ""
+BO -199
+Error getting uname info, UNIX ?FFF
+""
 BO -200
 File name too long in caccess(), while checking .prc permissions/existence
 ""

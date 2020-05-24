@@ -35,7 +35,7 @@ C
       integer idcbsk(1)                 !  dcss for schedule
       dimension lnames(13,1)            !  list of command names
       integer*4 itscb(13,1)             !  time-scheduling control block
-      integer ibuf(50)                  !  input buffer containing command
+      integer*2 ibuf(100)               !  input buffer containing command
       integer itime(9)                  !  time array returned from spars
       integer lseg(2)                   !  segment name (obsolete)
       integer*4 icloprx
