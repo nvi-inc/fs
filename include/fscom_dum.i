@@ -108,11 +108,12 @@ c
       character*1 rdbe_pcal_amp
       character*16 dbbc3_ddc_vs
       character*32 sVerRelease_FS
+      character*32 fortran
 c
       common/fscom_dum2/ LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP,
      $                   dbbcddcvs, dbbcpfbvs, fila10gvsi_in, dbbcddcvl,
      $			 dbbcpfbvl,scan_name,scan_name_old,
      $                   rdbe_pcal_amp,
      $                   dbbc3_ddc_vs,
-     $                   sVerRelease_FS
+     $                   sVerRelease_FS,fortran
 

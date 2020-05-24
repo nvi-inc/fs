@@ -59,6 +59,7 @@
 #define DBBC3_DDC_VS_N 16
 #define UD_ZERO_N 4*6
 #define SVERRELEASE 32
+#define FORTRAN 32
 
 extern struct fscom *shm_addr;
 
@@ -2857,10 +2858,18 @@ void fs_get_user_device_zero__(zero)
 	{
 	  memcpy(zero,shm_addr->user_device.zero,UD_ZERO_N);
 	}
+
 void fs_get_sverrelease_fs__(sVerRelease_FS)
 	int *sVerRelease_FS;
 	{
           size_t N;
 	  N = SVERRELEASE;
 	  memcpy(sVerRelease_FS,shm_addr->sVerRelease_FS,N);
+	}
+void fs_get_fortran__(fortran)
+	int *fortran;
+	{
+          size_t N;
+	  N = FORTRAN;
+	  memcpy(fortran,shm_addr->fortran,N);
 	}

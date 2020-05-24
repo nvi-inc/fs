@@ -100,6 +100,19 @@ C   add OS info to log
 C
       call log_uname
 C
+C   fortran info
+C
+      nch = 1
+      nch=ichmv_ch(ibuf,nch,'fortran')
+      nch=mcoma(ibuf,nch)
+      call fs_get_fortran(fortran)
+      idum=iflch(fortran,32)
+      if(idum.ne.0) then
+         nch = ichmv(ibuf,nch,fortran,1,idum)
+      endif
+      nch = nch-1
+      call logit3(ibuf,nch,lsor)
+C
 C     Send configuration info from control files to log
 C
       nch = 1
@@ -484,7 +497,8 @@ c
       ilast=index(fila10gvsi_in,' ')
       if(ilast.eq.0) ilast=len(fila10gvsi_in)
       call char2hol(fila10gvsi_in,ib,nch,nch+ilast-1)
-      nch=nch+ilast
+      nch=nch+ilast-1
+      nch=mcoma(ib,nch)
 c
       nch=ichmv_ch(ib,nch,'v')
       call fs_get_dbbc3_ddc_vs(dbbc3_ddc_vs)

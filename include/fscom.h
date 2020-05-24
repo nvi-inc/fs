@@ -464,4 +464,6 @@ typedef struct fscom {
 
   char sVerRelease_FS[33];
 
+  char fortran[33];
+
 } Fscom;

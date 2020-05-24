@@ -5,10 +5,12 @@ PATCHLEVEL = 0
 SUBLEVEL = 0
 endif
 
+FC1 := $(FC)
+
 OBJECTS = incom.o sincom.o equip.o drivem.o drivev.o head.o driveall.o\
 get_rxgain_files.o get_flux.o get_flux_file.o rdbe_equip.o crelease.o
 
-crelease.o: CFLAGS += -DRELEASE=$(RELEASE)
+crelease.o: CFLAGS += -DRELEASE=$(RELEASE) -DFC1=$(FC1)
 
 LDLIBS += $(FLIBS)
 
