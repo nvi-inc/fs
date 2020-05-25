@@ -617,3 +617,4 @@ help         *xx 00000 18 FFFFFFFFFFFF
 date         *xx 00000 19 FFFFFFFFFFFF
 op_stream    *xx 00000 20 FFFFFFFFFFFF
 tnx          *xx 00000 21 FFFFFFFFFFFF
+if           *xx 00000 22 FFFFFFFFFFFF
