@@ -125,10 +125,21 @@ C
 c
 c fix century wrap
 c
-      if(itpr(6).lt.mod(itmlog(6),100)) then
-         itpr(6)=itpr(6)+(itmlog(6)/100+1)*100
+c    this code will never see another century change anyway
+c    if it does, it will have to be fixed for 2038 first
+c    which 18 years away seems unlikely, of course
+c    in 1982 it didn't seem like it would make it to 2000
+c
+c    require a .lt. 50 year difference around the cut and:
+c      itpr(6) 50-99 is previous century if itmlog(6) is  0-49
+c      itpr(6)  0-49 is next     century if itmlog(6) is 50-99
+c
+      if(itpr(6)-mod(itmlog(6),100).ge.50) then
+        itpr(6)=itpr(6)+(itmlog(6)/100-1)*100
+      else if(mod(itmlog(6),100)-itpr(6).ge.50) then
+        itpr(6)=itpr(6)+(itmlog(6)/100+1)*100
       else
-         itpr(6)=itpr(6)+itmlog(6)-mod(itmlog(6),100)
+         itpr(6)=itpr(6)+(itmlog(6)/100)*100
       endif
 c
       itpr(5)=ias2b(ib,25,3)
@@ -136,17 +147,21 @@ c
       itpr(3)=ias2b(ib,30,2)
       itpr(2)=ias2b(ib,32,2)
       itpr(1)=0
+c
+c if day zero, then it hasn't been logged since the .prc was opened
+c
       if(itpr(5).eq.0) goto 400 
       call fc_rte2secs(itpr,prsecs)
       if(prsecs.lt.0) call logit7ci(0,0,0,1,-257,'bo',0)
 C
 C     Finally check the times
 C
-C the .gt. vs .ge.
-C  will cause procedures that were executed the second the log opened
-C (like initi when the FS starts and opens station.log) to be logged
-C the second time they are executed (sometimes), but will make sure
-C all procedures are logged at least once in the log.
+C .gt. vs .ge.:
+C the .gt. may cause procedures that were executed the second the log opened
+C (like from initi when the FS starts and opens station.log) to be logged
+C a second time they are executed (very rarely), but will make sure
+C all procedures are logged at least once in the log even if were executed
+C in the old log in the second the log change was made
 C
       if (prsecs.gt.logsecs) goto 600
 C
