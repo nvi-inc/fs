@@ -694,6 +694,14 @@ int server_cmd_prompt(server_t *s, json_t *rep_msg, int argc, const char *const 
 	}
 	int rv;
 
+	if (argc < 2) {
+		json_object_set_new(rep_msg, "message",
+			    json_string("prompt requires open or close"));
+		json_object_set_new(rep_msg, "code",
+			    json_integer(JSONRPC_STATUS_METHOD_NOT_FOUND));
+		return 1;
+	}
+
 	if (strcmp(argv[1], "open") == 0) {
 		if (argc < 3) {
 			json_object_set_new(rep_msg, "message",
