@@ -1094,6 +1094,9 @@ void server_destroy(server_t *s) {
 	nng_mtx_lock(s->mtx);
 	window_t *w;
 	while ((w = list_pop(&s->windows, NULL, NULL)) != NULL) {
+		// TODO: would be better to kill, then loop through again and free
+		// since window_free now does a join
+		// ditto with fs and ddout below
 		window_kill(w);
 		window_free(w);
 	}
@@ -1107,7 +1110,6 @@ void server_destroy(server_t *s) {
 	if (s->fs != NULL) {
 		window_kill(s->fs);
 		buffered_stream_close(s->log);
-		window_join(s->fs);
 		window_free(s->fs);
 		buffered_stream_join(s->log);
 		buffered_stream_free(s->log);
