@@ -368,6 +368,10 @@ int buffered_stream_listen(buffered_stream_t *s, const char *pub_url, const char
 }
 
 void shutdown_cb(void *arg) {
+	buffered_stream_t *s = arg;
+	if (nng_aio_result(s->shutdown_aio) == NNG_ECANCELED) {
+		return;
+	}
 	buffered_stream_kill(arg);
 }
 
@@ -391,16 +395,15 @@ void buffered_stream_kill(buffered_stream_t *s) {
 
 	nng_aio_stop(s->rep_aio);
 	nng_aio_stop(s->heartbeat_aio);
-	if (s->shutdown_aio) {
-		nng_aio_stop(s->heartbeat_aio);
-	}
+
+	nng_mtx_lock(s->mtx);
+	nng_mtx *mtx = s->mtx;
 
 	nng_aio_free(s->rep_aio);
 	nng_aio_free(s->heartbeat_aio);
 	if (s->shutdown_aio) {
 		async_free(s->shutdown_aio);
 	}
-	nng_mtx_free(s->mtx);
 
 	if (s->msg_buffer) {
 		for (size_t i = 0; i < s->msg_buffer_len; i++) {
@@ -411,12 +414,24 @@ void buffered_stream_kill(buffered_stream_t *s) {
 		}
 		free(s->msg_buffer);
 	}
+	s->mtx = NULL;
 	free(s);
+	nng_mtx_unlock(mtx);
+	nng_mtx_free(mtx);
 }
 
 void buffered_stream_join(buffered_stream_t *s) {
-	// TODO: this is racy
-	nng_aio_wait(s->shutdown_aio);
+	if (!s || !s->mtx)
+		return;
+	nng_mtx_lock(s->mtx);
+	nng_aio *aio = s->shutdown_aio;
+	nng_mtx_unlock(s->mtx);
+
+	if (!aio) {
+		return;
+	}
+
+	nng_aio_wait(aio);
 }
 
 struct dup_thread_args {

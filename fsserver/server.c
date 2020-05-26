@@ -607,6 +607,7 @@ int server_cmd_fs_start(server_t *s, json_t *rep_msg, int argc, const char *cons
 			return 1;
 		}
 		/* TODO: could reuse structure (and even buffer if we merge spub into server) */
+		window_join(s->fs);
 		window_free(s->fs);
 	}
 

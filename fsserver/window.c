@@ -61,12 +61,26 @@ window_t *window_new() {
 	return s;
 }
 
-int buffered_stream_master_handler(window_t *w, int pty_master) {
+void window_join(window_t *w) {
+	if (!w->master_join)
+		return;
+	w->master_join(w);
+}
+
+static void buffered_stream_master_join(window_t *w) {
+	if (!w->master)
+		return;
+	buffered_stream_join(w->master);
+}
+
+static int buffered_stream_master_handler(window_t *w, int pty_master) {
 	/* pipe used to handle exec error in child */
 	buffered_stream_t *s;
 	if ((buffered_stream_open(&s)) != 0) {
 		return -1;
 	}
+	w->master      = s;
+	w->master_join = buffered_stream_master_join;
 
 	buffered_stream_set_shutdown_period_millis(s, WINDOW_SHUTDOWN_PERIOD);
 	buffered_stream_set_len(s, w->scrollback_len);
