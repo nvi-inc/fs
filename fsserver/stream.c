@@ -37,10 +37,10 @@
 #include "msg.h"
 #include "stream.h"
 
-#define fatal(msg, rv)                                                                             \
+#define fatal(msg, s)                                                                             \
 	do {                                                                                       \
 		fprintf(stderr, "%s:%d (%s) error %s: %s\n", __FILE__, __LINE__, __FUNCTION__,     \
-		        msg, nng_strerror(rv));                                                    \
+		        msg, s);                                                    \
 		exit(1);                                                                           \
 	} while (0)
 
@@ -57,7 +57,7 @@ struct _reaper {
 void *reaper_thread(void *arg) {
 	// don't fear the reaper
 	if (arg != NULL) {
-		fatal("unexpected arg", 0);
+		fatal("in reaper thread", "unexpected arg");
 	}
 
 	nng_mtx_lock(reaper.mtx);
@@ -87,15 +87,15 @@ static void init() {
 	}
 
 	if ((rv = nng_mtx_alloc(&reaper.mtx)) != 0) {
-		fatal("init mtx", rv);
+		fatal("init mtx", nng_strerror(rv));
 	}
 
 	if ((rv = nng_cv_alloc(&reaper.cv, reaper.mtx)) != 0) {
-		fatal("init cv", rv);
+		fatal("init cv", nng_strerror(rv));
 	}
 
 	if (pthread_create(&reaper.thread, NULL, reaper_thread, NULL) < 0) {
-		fatal("creating reaper thread", errno);
+		fatal("creating reaper thread", strerror(errno));
 	}
 	pthread_mutex_unlock(&init_lock);
 }
@@ -202,7 +202,7 @@ void cmd_cb(void *arg) {
 
 	rv = nng_msg_alloc(&reply_msg, rep_msg_size);
 	if (rv != 0) {
-		fatal("allocating new message", rv);
+		fatal("allocating new message", nng_strerror(rv));
 	}
 
 	uint8_t *rep_ptr = nng_msg_body(reply_msg);
@@ -211,7 +211,7 @@ void cmd_cb(void *arg) {
 	for (int j = first;; j = (j + 1) % s->msg_buffer_len) {
 		int n = msg_marshal(&s->msg_buffer[j], rep_ptr, rep_msg_size - msg_len);
 		if (n < 0) {
-			fatal("marshaling msg", 0);
+			fatal("marshaling msg", "not enough buffer space");
 		}
 		rep_ptr += n;
 		msg_len += n;
@@ -221,7 +221,7 @@ void cmd_cb(void *arg) {
 	}
 
 	if (msg_len != rep_msg_size) {
-		fatal("msg smaller than anticipated", 0);
+		fatal("marhsalling message", "msg smaller than anticipated");
 	}
 
 	rv = nng_sendmsg(s->rep, reply_msg, 0);
@@ -243,7 +243,7 @@ ssize_t send_msg(buffered_stream_t *s, msg_t *m) {
 
 	rv = nng_msg_alloc(&msg, pub_len);
 	if (rv != 0) {
-		fatal("allocating new message", rv);
+		fatal("allocating new message", nng_strerror(rv));
 	}
 
 	if (msg_marshal(m, nng_msg_body(msg), pub_len) < 0) {
@@ -275,7 +275,7 @@ ssize_t buffered_stream_send(buffered_stream_t *s, const void *buf, size_t n) {
 
 	char *data = malloc(n);
 	if (data == NULL) {
-		fatal("allocating msg", errno);
+		fatal("allocating msg", strerror(errno));
 	}
 
 	s->msg_buffer[i].type = DATA;
@@ -284,7 +284,7 @@ ssize_t buffered_stream_send(buffered_stream_t *s, const void *buf, size_t n) {
 	s->msg_buffer[i].seq  = s->seq++;
 
 	if (send_msg(s, &s->msg_buffer[i]) < 0) {
-		fatal("sending msg", errno);
+		fatal("sending msg", strerror(errno));
 	}
 
 	nng_mtx_unlock(s->mtx);
@@ -301,7 +301,7 @@ void heartbeat_cb(void *arg) {
 		m.type = END_OF_SESSION;
 	}
 	if (send_msg(s, &m) < 0) {
-		fatal("sending HEARTBEAT", errno);
+		fatal("sending HEARTBEAT", strerror(errno));
 	}
 	nng_sleep_aio(s->heartbeat_millis, s->heartbeat_aio);
 	nng_mtx_unlock(s->mtx);

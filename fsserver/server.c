@@ -50,10 +50,10 @@
 #include "stream.h"
 #include "window.h"
 
-#define fatal(msg, rv)                                                                             \
+#define fatal(msg, s)                                                                             \
 	do {                                                                                       \
 		fprintf(stderr, "%s:%d (%s) error %s: %s\n", __FILE__, __LINE__, __FUNCTION__,     \
-		        msg, nng_strerror(rv));                                                    \
+		        msg, s);                                                    \
 		exit(1);                                                                           \
 	} while (0)
 
@@ -565,16 +565,16 @@ int server_setup_log_stream(server_t *s) {
 	free(pubaddr);
 
 	if (s->log == NULL) {
-		fatal("fsserver: setting up log steram", errno);
+		fatal("fsserver: setting up log steram", strerror(errno));
 	}
 
 	int fds[2];
 	if (pipe(fds) < 0) {
-		fatal("fsserver: error on pipe", errno);
+		fatal("fsserver: error on pipe", strerror(errno));
 	}
 	// children shouldn't be reading from the pipe
 	if (fcntl(fds[0], F_SETFD, fcntl(fds[0], F_GETFD) | FD_CLOEXEC) < 0) {
-		fatal("fsserver: error setting close-on-exec flag", errno);
+		fatal("fsserver: error setting close-on-exec flag", strerror(errno));
 	}
 
 	if (buffered_stream_copy_fd(s->log, fds[0]) != 0) {
@@ -584,7 +584,7 @@ int server_setup_log_stream(server_t *s) {
 	char buf[256];
 	snprintf(buf, sizeof(buf), "%d", fds[1]);
 	if (setenv("FS_SERVER_LOG_FD", buf, 1) < 0) {
-		fatal("fsserver: error setenv", errno);
+		fatal("fsserver: error setenv", strerror(errno));
 	}
 
 	return fds[1];

@@ -53,10 +53,10 @@
 #include "prompt.h"
 #include "window.h"
 
-#define fatal(msg, rv)                                                                             \
+#define fatal(msg, s)                                                                              \
 	do {                                                                                       \
 		fprintf(stderr, "%s:%d (%s) error %s: %s\n", __FILE__, __LINE__, __FUNCTION__,     \
-		        msg, nng_strerror(rv));                                                    \
+		        msg, s);                                                                   \
 		kill_children();                                                                   \
 		exit(1);                                                                           \
 	} while (0)
@@ -132,7 +132,7 @@ static int prompt_close_cmd(json_t *params) {
 static int prompt_open_cmd(json_t *params) {
 	prompt_t *p = prompt_new();
 	if (!p)
-		fatal("allocating prompt", errno);
+		fatal("allocating prompt", strerror(errno));
 
 	if (prompt_unmarshal_json(p, params) < 0) {
 		prompt_free(p);
@@ -162,7 +162,8 @@ static int prompt_open_cmd(json_t *params) {
 	clear_sigmask();
 	execvp(exec_argv[0], exec_argv);
 	/* TODO handle error better?*/
-	fatal("starting fs.prompt", errno);
+	perror("fs.prompt");
+	fatal("starting fs.prompt", strerror(errno));
 	return 1;
 }
 
@@ -193,7 +194,7 @@ static int window_open_cmd(json_t *params) {
 	int exec_argc    = 0;
 	char **exec_argv = calloc(1024, sizeof(char *));
 	if (!exec_argv) {
-		fatal("allocating memory", errno);
+		fatal("allocating memory", strerror(errno));
 	}
 
 	exec_argv[exec_argc++] = "xterm";
@@ -219,7 +220,7 @@ static int window_open_cmd(json_t *params) {
 
 	execvp(exec_argv[0], exec_argv);
 	/* TODO handle error better?*/
-	fatal("starting xterm", errno);
+	fatal("starting xterm", strerror(errno));
 	exit(EXIT_FAILURE);
 }
 
@@ -306,7 +307,7 @@ void help(const char *arg) {
 
 	switch (fork()) {
 	case -1:
-		fatal("fsclient: error forking", errno);
+		fatal("fsclient: error forking", strerror(errno));
 	case 0:
 		clear_sigmask();
 		execlp("helpsh", "helpsh", help_file, NULL);
@@ -332,17 +333,17 @@ void *signal_thread_fn(void *arg) {
 		int ret = pselect(0, NULL, NULL, NULL, NULL, &emptyset);
 
 		if (ret == -1 && errno != EINTR) {
-			fatal("fsclient pselect error", errno);
+			fatal("fsclient pselect error", strerror(errno));
 		}
 
 		if (child) {
 			child = 0;
 			if (signal(SIGCHLD, handler) == SIG_IGN)
-				fatal("fsclient: error setting signal handler", errno);
+				fatal("fsclient: error setting signal handler", strerror(errno));
 			for (;;) {
 				pid_t pid = waitpid(-1, NULL, WNOHANG);
 				if (pid < 0 && errno != ECHILD) {
-					fatal("poll", errno);
+					fatal("poll", strerror(errno));
 				}
 
 				if (pid <= 0) {
@@ -380,20 +381,20 @@ void *server_cmd_thread_fn(void *arg) {
 	nng_msg *msg;
 
 	if ((rv = nng_sub0_open(&sock)) != 0) {
-		fatal("nng_socket", rv);
+		fatal("nng_socket", nng_strerror(rv));
 	}
 	rv = nng_setopt(sock, NNG_OPT_SUB_SUBSCRIBE, NULL, 0);
 
 	if (rv != 0)
-		fatal("nng_setopt", rv);
+		fatal("nng_setopt", nng_strerror(rv));
 
 	if ((rv = nng_dial(sock, url, NULL, NNG_FLAG_NONBLOCK)) != 0) {
-		fatal("nng_dial", rv);
+		fatal("nng_dial", nng_strerror(rv));
 	}
 
 	for (;;) {
 		if ((rv = nng_recvmsg(sock, &msg, 0)) != 0) {
-			fatal("nng_recv", rv);
+			fatal("nng_recv", nng_strerror(rv));
 			/* TODO handle this better */
 		}
 		json_error_t err;
@@ -425,11 +426,11 @@ void fetch_state(void) {
 	int rv;
 
 	if ((rv = nng_req0_open(&server_cmd_sock)) != 0) {
-		fatal("unable to open open a socket", rv);
+		fatal("unable to open open a socket", nng_strerror(rv));
 	}
 
 	if ((rv = nng_dial(server_cmd_sock, server_cmd_url, NULL, 0)) != 0) {
-		fatal("unable to connect to server", rv);
+		fatal("unable to connect to server", nng_strerror(rv));
 	}
 
 	json_t *json = json_object();
@@ -441,20 +442,20 @@ void fetch_state(void) {
 	size_t size = json_dumpb(json, NULL, 0, 0);
 	char *buf   = nng_alloc(size);
 	if (buf == NULL) {
-		fatal("unable to allocate a new message", rv);
+		fatal("unable to allocate a new message", nng_strerror(rv));
 	}
 	json_dumpb(json, buf, size, 0);
 	json_decref(json);
 
 	rv = nng_send(server_cmd_sock, buf, size, NNG_FLAG_ALLOC);
 	if (rv != 0) {
-		fatal("unable to send message to server", rv);
+		fatal("unable to send message to server", nng_strerror(rv));
 	}
 
 	nng_msg *msg;
 	rv = nng_recvmsg(server_cmd_sock, &msg, 0);
 	if (rv != 0) {
-		fatal("error receiving message", rv);
+		fatal("error receiving message", nng_strerror(rv));
 	}
 
 	nng_close(server_cmd_sock);
@@ -604,7 +605,7 @@ void call(char *command, char *flags) {
 	case 0:
 		break;
 	case -1:
-		fatal("fsclient: error creating new process", errno);
+		fatal("fsclient: error creating new process", strerror(errno));
 	}
 
 	switch (flags[0]) {
@@ -619,7 +620,7 @@ void call(char *command, char *flags) {
 		case 0:
 			break;
 		case -1:
-			fatal("fsclient: error creating new process", errno);
+			fatal("fsclient: error creating new process", strerror(errno));
 		}
 
 		break;
@@ -699,7 +700,7 @@ pid_t start_ssub(bool arg_scrollback, bool arg_wait) {
 
 	pid_t ssub_pid = fork();
 	if (ssub_pid < 0) {
-		fatal("fsclient: error forking", errno);
+		fatal("fsclient: error forking", strerror(errno));
 	}
 	if (ssub_pid == 0) {
 		clear_sigmask();
@@ -781,7 +782,7 @@ int main(int argc, char **argv) {
 	if (signal(SIGINT, handler) == SIG_ERR || signal(SIGQUIT, handler) == SIG_ERR ||
 	    signal(SIGTERM, handler) == SIG_ERR || signal(SIGCHLD, handler) == SIG_ERR ||
 	    signal(SIGSEGV, handler) == SIG_ERR) {
-		fatal("fsclient: error setting signals", errno);
+		fatal("fsclient: error setting signals", strerror(errno));
 	}
 
 	// signals are handled by other thread, block in this thread
@@ -794,11 +795,11 @@ int main(int argc, char **argv) {
 	// setup pipe for children (oprin) to give commands to client
 	int fds[2];
 	if (pipe(fds) < 0) {
-		fatal("fsclient: error on pipe", errno);
+		fatal("fsclient: error on pipe", strerror(errno));
 	}
 	// children shouldn't be reading from the pipe
 	if (fcntl(fds[0], F_SETFD, fcntl(fds[0], F_GETFD) | FD_CLOEXEC) < 0) {
-		fatal("fsclient: error setting close-on-exec flag", errno);
+		fatal("fsclient: error setting close-on-exec flag", strerror(errno));
 	}
 
 	char buf[256];
@@ -813,27 +814,27 @@ int main(int argc, char **argv) {
 		int ret;
 		ret = run_pgm_ctl(FSPGM_CTL);
 		if (ret < 0)
-			fatal("fsclient: error starting fs programs", errno);
+			fatal("fsclient: error starting fs programs", strerror(errno));
 		ret = run_pgm_ctl(STPGM_CTL);
 		if (ret < 0)
-			fatal("fsclient: error starting station programs", errno);
+			fatal("fsclient: error starting station programs", strerror(errno));
 	}
 
 	close(fds[1]);
 
 	rv = nng_mtx_alloc(&prompt_list_mux);
 	if (rv != 0) {
-		fatal("fsclient: error on mtx_alloc", rv);
+		fatal("fsclient: error on mtx_alloc", nng_strerror(rv));
 	}
 
 	// setup signal  ssub terminates, terminate client
 	pthread_t signal_thread;
 	if (pthread_create(&signal_thread, NULL, signal_thread_fn, &ssub_pid)) {
-		fatal("fsclient: error on pthread_create", errno);
+		fatal("fsclient: error on pthread_create", strerror(errno));
 	}
 	pthread_t server_cmd_thread;
 	if (pthread_create(&server_cmd_thread, NULL, server_cmd_thread_fn, clients_cmd_url)) {
-		fatal("fsclient: error on pthread_create", errno);
+		fatal("fsclient: error on pthread_create", strerror(errno));
 	}
 
 	fetch_state();
