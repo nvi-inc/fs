@@ -415,9 +415,15 @@ void buffered_stream_kill(buffered_stream_t *s) {
 		free(s->msg_buffer);
 	}
 	s->mtx = NULL;
-	free(s);
 	nng_mtx_unlock(mtx);
 	nng_mtx_free(mtx);
+}
+
+void buffered_stream_free(buffered_stream_t *s) {
+	if (s->mtx != NULL) {
+		fatal("can't free stream", "stream not stopped");
+	}
+	free(s);
 }
 
 void buffered_stream_join(buffered_stream_t *s) {

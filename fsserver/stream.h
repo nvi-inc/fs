@@ -3,9 +3,12 @@
 // buffered_stream_t represents the publisher side of a buffered stream of bytes.
 typedef struct buffered_stream buffered_stream_t;
 
-// buffered_stream_open performs the setup of a buffered_stream_socket
+// buffered_stream_open performs the setup of a buffered_stream_socket.
+// Caller is responsible for calling buffered_stream_free.
+
 int buffered_stream_open(buffered_stream_t **s);
 int buffered_stream_listen(buffered_stream_t *s, const char *pub_url, const char *rep_url);
+void buffered_stream_free(buffered_stream_t *s);
 
 ssize_t buffered_stream_send(buffered_stream_t *s, const void *buf, size_t n);
 
@@ -32,6 +35,8 @@ void buffered_stream_kill(buffered_stream_t *s);
 // It is an error to do this after the first send.
 int buffered_stream_set_len(buffered_stream_t *s, size_t len);
 
+// buffered_stream_join waits for a buffered stream in the shutdown state to
+// finalize. Must not be called on a non-shutdown state stream.
 void buffered_stream_join(buffered_stream_t *s);
 
 // buffered_stream_copy_fd creates a new thread that reads from fd and writes

@@ -36,6 +36,7 @@ typedef struct window {
 	char *addr;
 	int (*master_handler)(struct window *, int);
 	void (*master_join)(struct window *);
+	void (*master_free)(struct window *);
 	void *master;
 } window_t;
 

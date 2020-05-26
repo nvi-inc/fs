@@ -39,6 +39,9 @@ void window_free(window_t *s) {
 	char **ptr;
 	if (s == NULL)
 		return;
+	if (s->master_free) {
+		s->master_free(s);
+	}
 	if (s->command_args != NULL) {
 		ptr = s->command_args;
 		while (*ptr != NULL)
@@ -73,6 +76,12 @@ static void buffered_stream_master_join(window_t *w) {
 	buffered_stream_join(w->master);
 }
 
+static void buffered_stream_master_free(window_t *w) {
+	if (!w->master)
+		return;
+	buffered_stream_free(w->master);
+}
+
 static int buffered_stream_master_handler(window_t *w, int pty_master) {
 	/* pipe used to handle exec error in child */
 	buffered_stream_t *s;
@@ -81,6 +90,7 @@ static int buffered_stream_master_handler(window_t *w, int pty_master) {
 	}
 	w->master      = s;
 	w->master_join = buffered_stream_master_join;
+	w->master_free = buffered_stream_master_free;
 
 	buffered_stream_set_shutdown_period_millis(s, WINDOW_SHUTDOWN_PERIOD);
 	buffered_stream_set_len(s, w->scrollback_len);
