@@ -79,6 +79,7 @@ static void buffered_stream_master_join(window_t *w) {
 static void buffered_stream_master_free(window_t *w) {
 	if (!w->master)
 		return;
+	buffered_stream_join(w->master);
 	buffered_stream_free(w->master);
 }
 

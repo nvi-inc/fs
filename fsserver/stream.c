@@ -37,79 +37,17 @@
 #include "msg.h"
 #include "stream.h"
 
-#define fatal(msg, s)                                                                             \
+#define fatal(msg, s)                                                                              \
 	do {                                                                                       \
 		fprintf(stderr, "%s:%d (%s) error %s: %s\n", __FILE__, __LINE__, __FUNCTION__,     \
-		        msg, s);                                                    \
+		        msg, s);                                                                   \
 		exit(1);                                                                           \
 	} while (0)
-
-pthread_mutex_t init_lock = PTHREAD_MUTEX_INITIALIZER;
-bool inited               = 0;
-
-struct _reaper {
-	nng_mtx *mtx;
-	nng_cv *cv;
-	list_t *list;
-	pthread_t thread;
-} reaper;
-
-void *reaper_thread(void *arg) {
-	// don't fear the reaper
-	if (arg != NULL) {
-		fatal("in reaper thread", "unexpected arg");
-	}
-
-	nng_mtx_lock(reaper.mtx);
-	while (reaper.list == NULL) {
-		nng_cv_wait(reaper.cv);
-	}
-
-	nng_aio *aio;
-	while ((aio = list_pop(&reaper.list, NULL, NULL)) != NULL) {
-		nng_aio_free(aio);
-	}
-
-	nng_mtx_unlock(reaper.mtx);
-	return NULL;
-}
-
-static void init() {
-	int rv;
-	if (inited) {
-		return;
-	}
-
-	pthread_mutex_lock(&init_lock);
-	if (inited) { // check again under the lock to be sure
-		pthread_mutex_unlock(&init_lock);
-		return;
-	}
-
-	if ((rv = nng_mtx_alloc(&reaper.mtx)) != 0) {
-		fatal("init mtx", nng_strerror(rv));
-	}
-
-	if ((rv = nng_cv_alloc(&reaper.cv, reaper.mtx)) != 0) {
-		fatal("init cv", nng_strerror(rv));
-	}
-
-	if (pthread_create(&reaper.thread, NULL, reaper_thread, NULL) < 0) {
-		fatal("creating reaper thread", strerror(errno));
-	}
-	pthread_mutex_unlock(&init_lock);
-}
-
-static void async_free(nng_aio *aio) {
-	nng_mtx_lock(reaper.mtx);
-	list_push(&reaper.list, aio);
-	nng_cv_wake(reaper.cv);
-	nng_mtx_unlock(reaper.mtx);
-}
 
 struct buffered_stream {
 	uint64_t seq; // Next message sequence ID to send
 	bool shutting_down;
+	bool dead;
 
 	nng_aio *rep_aio;
 	nng_aio *heartbeat_aio;
@@ -126,7 +64,7 @@ struct buffered_stream {
 	nng_socket pub;
 	nng_socket rep;
 
-	pthread_t dup_thread;
+	pthread_t *dup_thread;
 };
 
 void buffered_stream_set_heartbeat(buffered_stream_t *s, int heartbeat_millis) {
@@ -308,7 +246,6 @@ void heartbeat_cb(void *arg) {
 }
 
 int buffered_stream_open(buffered_stream_t **bs) {
-	init();
 	buffered_stream_t *s = (*bs) = calloc(1, sizeof(buffered_stream_t));
 	int rv;
 
@@ -397,12 +334,24 @@ void buffered_stream_kill(buffered_stream_t *s) {
 	nng_aio_stop(s->heartbeat_aio);
 
 	nng_mtx_lock(s->mtx);
-	nng_mtx *mtx = s->mtx;
+	s->dead = true;
+	nng_mtx_unlock(s->mtx);
+}
+
+void buffered_stream_free(buffered_stream_t *s) {
+	nng_mtx_lock(s->mtx);
+	if (!s->dead) {
+		fatal("can't free stream", "stream not stopped");
+	}
 
 	nng_aio_free(s->rep_aio);
 	nng_aio_free(s->heartbeat_aio);
+
+	if (s->dup_thread) {
+		free(s->dup_thread);
+	}
 	if (s->shutdown_aio) {
-		async_free(s->shutdown_aio);
+		nng_aio_free(s->shutdown_aio);
 	}
 
 	if (s->msg_buffer) {
@@ -414,15 +363,8 @@ void buffered_stream_kill(buffered_stream_t *s) {
 		}
 		free(s->msg_buffer);
 	}
-	s->mtx = NULL;
-	nng_mtx_unlock(mtx);
-	nng_mtx_free(mtx);
-}
-
-void buffered_stream_free(buffered_stream_t *s) {
-	if (s->mtx != NULL) {
-		fatal("can't free stream", "stream not stopped");
-	}
+	nng_mtx_unlock(s->mtx);
+	nng_mtx_free(s->mtx);
 	free(s);
 }
 
@@ -430,9 +372,15 @@ void buffered_stream_join(buffered_stream_t *s) {
 	if (!s || !s->mtx)
 		return;
 	nng_mtx_lock(s->mtx);
-	nng_aio *aio = s->shutdown_aio;
+	pthread_t *thread = s->dup_thread;
 	nng_mtx_unlock(s->mtx);
 
+	if (thread)
+		pthread_join(*thread, NULL);
+
+	nng_mtx_lock(s->mtx);
+	nng_aio *aio = s->shutdown_aio;
+	nng_mtx_unlock(s->mtx);
 	if (!aio) {
 		return;
 	}
@@ -467,9 +415,19 @@ static void *dup_thread(void *args) {
 int buffered_stream_copy_fd(buffered_stream_t *s, int fd) {
 	nng_mtx_lock(s->mtx);
 	struct dup_thread_args *args = malloc(sizeof(struct dup_thread_args));
-	args->fd                     = fd;
-	args->s                      = s;
-	if (pthread_create(&s->dup_thread, NULL, dup_thread, args) < 0) {
+	if (!args) {
+		fatal("allocating dupe thread args", strerror(errno));
+	}
+
+	args->fd = fd;
+	args->s  = s;
+
+	s->dup_thread = calloc(1, sizeof(pthread_t));
+	if (!s->dup_thread) {
+		fatal("allocating dupe thread", strerror(errno));
+	}
+
+	if (pthread_create(s->dup_thread, NULL, dup_thread, args) < 0) {
 		nng_mtx_unlock(s->mtx);
 		return -1;
 	}

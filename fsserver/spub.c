@@ -130,6 +130,7 @@ int main(int argc, char *argv[]) {
 
 	buffered_stream_close(s);
 	buffered_stream_join(s);
+	buffered_stream_free(s);
 
 	return EXIT_SUCCESS;
 }

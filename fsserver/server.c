@@ -535,6 +535,10 @@ int server_cmd_status(server_t *s, json_t *rep, int argc, const char *const argv
 
 // returns the write end of the pipe, which needs to be closed after fs has started
 int server_setup_log_stream(server_t *s) {
+	if (s->log) {
+		buffered_stream_join(s->log);
+		buffered_stream_free(s->log);
+	}
 	if ((buffered_stream_open(&s->log)) != 0) {
 		return -1;
 	}
@@ -1102,7 +1106,11 @@ void server_destroy(server_t *s) {
 	/* TODO maybe send terminate to fs */
 	if (s->fs != NULL) {
 		window_kill(s->fs);
+		buffered_stream_close(s->log);
+		window_join(s->fs);
 		window_free(s->fs);
+		buffered_stream_join(s->log);
+		buffered_stream_free(s->log);
 	}
 
 	nng_mtx_unlock(s->mtx);
