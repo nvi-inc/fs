@@ -62,6 +62,13 @@
 		exit(1);                                                                           \
 	} while (0)
 
+
+// Flags
+bool arg_scrollback = false;
+bool arg_wait       = false;
+bool arg_force      = false;
+bool arg_no_x       = false;
+
 const char *pubaddr_suffix = "/pub";
 const char *repaddr_suffix = "/rep";
 
@@ -167,6 +174,10 @@ static int window_open_cmd(json_t *params) {
 		fprintf(stderr, "fsclient: error parsing window message from server");
 		window_free(w);
 		return -1;
+	}
+
+	if (arg_no_x) {
+		return 0;
 	}
 
 	switch (fork()) {
@@ -720,10 +731,6 @@ static struct option long_options[] = {
 
 int main(int argc, char **argv) {
 	int rv;
-	bool arg_scrollback = false;
-	bool arg_wait       = false;
-	bool arg_force      = false;
-	bool arg_no_x       = false;
 
 	// TODO: check if X11 available
 	// TODO: todo add CLI flag
