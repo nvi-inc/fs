@@ -33,6 +33,7 @@
 #include <nng/protocol/reqrep0/req.h>
 #include <nng/supplemental/util/platform.h>
 
+#include "list.h"
 #include "msg.h"
 #include "stream.h"
 
@@ -42,6 +43,69 @@
 		        msg, nng_strerror(rv));                                                    \
 		exit(1);                                                                           \
 	} while (0)
+
+pthread_mutex_t init_lock = PTHREAD_MUTEX_INITIALIZER;
+bool inited               = 0;
+
+struct _reaper {
+	nng_mtx *mtx;
+	nng_cv *cv;
+	list_t *list;
+	pthread_t thread;
+} reaper;
+
+void *reaper_thread(void *arg) {
+	// don't fear the reaper
+	if (arg != NULL) {
+		fatal("unexpected arg", 0);
+	}
+
+	nng_mtx_lock(reaper.mtx);
+	while (reaper.list == NULL) {
+		nng_cv_wait(reaper.cv);
+	}
+
+	nng_aio *aio;
+	while ((aio = list_pop(&reaper.list, NULL, NULL)) != NULL) {
+		nng_aio_free(aio);
+	}
+
+	nng_mtx_unlock(reaper.mtx);
+	return NULL;
+}
+
+static void init() {
+	int rv;
+	if (inited) {
+		return;
+	}
+
+	pthread_mutex_lock(&init_lock);
+	if (inited) { // check again under the lock to be sure
+		pthread_mutex_unlock(&init_lock);
+		return;
+	}
+
+	if ((rv = nng_mtx_alloc(&reaper.mtx)) != 0) {
+		fatal("init mtx", rv);
+	}
+
+	if ((rv = nng_cv_alloc(&reaper.cv, reaper.mtx)) != 0) {
+		fatal("init cv", rv);
+	}
+
+	if (pthread_create(&reaper.thread, NULL, reaper_thread, NULL) < 0) {
+		fatal("creating reaper thread", errno);
+	}
+	pthread_mutex_unlock(&init_lock);
+}
+
+static void async_free(nng_aio *aio) {
+	nng_mtx_lock(reaper.mtx);
+	list_push(&reaper.list, aio);
+	nng_cv_wake(reaper.cv);
+	nng_mtx_unlock(reaper.mtx);
+}
 
 struct buffered_stream {
 	uint64_t seq; // Next message sequence ID to send
@@ -61,6 +125,8 @@ struct buffered_stream {
 
 	nng_socket pub;
 	nng_socket rep;
+
+	pthread_t dup_thread;
 };
 
 void buffered_stream_set_heartbeat(buffered_stream_t *s, int heartbeat_millis) {
@@ -242,6 +308,7 @@ void heartbeat_cb(void *arg) {
 }
 
 int buffered_stream_open(buffered_stream_t **bs) {
+	init();
 	buffered_stream_t *s = (*bs) = calloc(1, sizeof(buffered_stream_t));
 	int rv;
 
@@ -316,7 +383,6 @@ void buffered_stream_close(buffered_stream_t *s) {
 	nng_aio_alloc(&s->shutdown_aio, shutdown_cb, s);
 	nng_sleep_aio(s->shutdown_millis, s->shutdown_aio);
 	nng_mtx_unlock(s->mtx);
-	// TODO: handle shutdown
 }
 
 void buffered_stream_kill(buffered_stream_t *s) {
@@ -331,8 +397,9 @@ void buffered_stream_kill(buffered_stream_t *s) {
 
 	nng_aio_free(s->rep_aio);
 	nng_aio_free(s->heartbeat_aio);
-	if (s->shutdown_aio)
-		nng_aio_free(s->shutdown_aio);
+	if (s->shutdown_aio) {
+		async_free(s->shutdown_aio);
+	}
 	nng_mtx_free(s->mtx);
 
 	if (s->msg_buffer) {
@@ -348,6 +415,7 @@ void buffered_stream_kill(buffered_stream_t *s) {
 }
 
 void buffered_stream_join(buffered_stream_t *s) {
+	// TODO: this is racy
 	nng_aio_wait(s->shutdown_aio);
 }
 
@@ -376,13 +444,15 @@ static void *dup_thread(void *args) {
 }
 
 int buffered_stream_copy_fd(buffered_stream_t *s, int fd) {
-	pthread_t thread;
+	nng_mtx_lock(s->mtx);
 	struct dup_thread_args *args = malloc(sizeof(struct dup_thread_args));
 	args->fd                     = fd;
 	args->s                      = s;
-	if (pthread_create(&thread, NULL, dup_thread, args) < 0) {
+	if (pthread_create(&s->dup_thread, NULL, dup_thread, args) < 0) {
+		nng_mtx_unlock(s->mtx);
 		return -1;
 	}
 
+	nng_mtx_unlock(s->mtx);
 	return 0;
 }
