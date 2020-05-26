@@ -95,7 +95,10 @@ static int buffered_stream_master_handler(window_t *w, int pty_master) {
 		return -1;
 	}
 
-	if (buffered_stream_listen(s, pubaddr, repaddr) != 0) {
+	int rv = buffered_stream_listen(s, pubaddr, repaddr);
+	free(pubaddr);
+	free(repaddr);
+	if (rv != 0) {
 		return -1;
 	}
 
