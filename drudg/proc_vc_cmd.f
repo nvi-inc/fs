@@ -19,6 +19,7 @@
 *
       subroutine proc_vc_cmd(cname_vc, icode, kk4vcab, lwhich8,ierr)     
 ! Write out VC commands.
+      implicit none 
       include 'hardware.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
@@ -193,21 +194,24 @@ C         For K4, use bandwidth of channel 1
       enddo ! loop on recorders
       end
 ! **************************************************************
-      subroutine invalid_if(cbbc, cif, crack)
+      subroutine invalid_if(luscn,cbbc, cif, crack)
+! 2020Feb20 JMG. Added implicit none, changed argument list
+      implicit none
+      integer luscn
       character*(*) cbbc
       character*(*) cif
       character*(*) crack        
       write(*,*) " " 
-      write(*,*) "Cbbc ", cbbc
-      write(*,*) "cif  ", cif
-      write(*,*) "crack ", crack 
-      write(luscn,'("Invalid_IF: Error! For ",a, " IF ",a,
+         write(luscn,'("Invalid_IF: Error! For ",a, " IF=",a,
      >  " is inconsistent with rack ", a)') cbbc,  cif, crack
   
       return
       end 
 ! ****************************************************************
-      subroutine invalid_bbc_freq(cbbc,rfvc,rfmin,rfmax)
+      subroutine invalid_bbc_freq(luscn,cbbc,rfvc,rfmin,rfmax)
+! 2020Feb20 JMG. Added implicit none, changed argument list. 
+      implicit none 
+      integer luscn 
       character*(*) cbbc
       real*8 rfvc,rfmin,rfmax
             

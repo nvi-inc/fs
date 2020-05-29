@@ -22,6 +22,7 @@
 !  2012Sep12  JMGipson. First version. Split off of old routine proc_vc. 
 !
 ! Write out VC commands.
+!  2020Feb20 JMGipson. Added implicit none. Added luscn to arg list for invalid_if and invalid_bbc
       include 'hardware.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
@@ -104,13 +105,13 @@ C          U+U is produced via flipped L + U
    
       if(.not.(cifinp(ic,istn,icode)(1:1) .ge. "1" .or.
      >    cifinp(ic,istn,icode)(1:1) .le. "4")) then     
-       call invalid_if(cbbc,cifinp(ic,istn,icode), cstrack(istn))      
+       call invalid_if(luscn,cbbc,cifinp(ic,istn,icode), cstrack(istn))      
       endif
 
       rfmin=0.0
       rfmax=192.0
       if(fvc(ib) .lt. rfmin .or. fvc(ib) .gt. rfmax) then     
-        call invalid_bbc_freq(cbbc,fvc(ib),rfmin,rfmax)
+        call invalid_bbc_freq(luscn,cbbc,fvc(ib),rfmin,rfmax)
       endif       
    
       NCH = nch + IR2AS(real(fvc(ib)),IBUF,nch,7,2) ! converter freq

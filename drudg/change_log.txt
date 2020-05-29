@@ -1,4 +1,7 @@
 This file contains a summary of changes made and why.
+2020May29 snap.f. Fixed bug where if a station had early start then there would be no PREOB. 
+2020Feb20 proc_dbbc_bbc.f, proc_lba_ifp.f, proc_mracks_vc.f proc_vracks_bbc.f,proc_vc_cmd.f. Added implicit none.
+          Also added luscn to routines invalid_if
 2019Nov20 Several changes to replace f90 code by f77 code(by Ed Himwich):
           skdrini.f, snap.f, ../skdrut/vmoinp.f, vobinp.f, frinp.f, iwhere_in_string_list_nocase.f
 2019Nov20 Bug fixes in snap.f and in sdrini.f.  Indices of arrays used wrong variables, eg. foo(ic) should be foo(i)

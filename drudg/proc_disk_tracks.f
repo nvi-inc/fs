@@ -35,6 +35,7 @@
 
 ! History.
 ! Now put in changes in reverse order.
+! 2020Feb20 JMG. Change ASTRO-->VLBA if not DBBC or 
 ! 2019Sep23 JMG. If the recorder is 'none' do not round up number of recorded channels to a power of 2. 
 ! 2018Nov13 JMG. Removed check of bandwidth. This will now be caught by FS. 
 ! 2018Sep14 JMG. Check wastro before geo2.
@@ -404,7 +405,7 @@
       end if 
 
 !***********************************************************************************
-! Ckeck DBBC racks....     
+! Ckeck DBBC racks and Mark5B     
 100   continue
 ! Pre-check to see if a valid astro3 mode, but only for DBBC/Unknown racks
       
@@ -447,7 +448,11 @@
       
 200   continue 
 ! Note: astro is the same as the first half of wastro. 
-      lbit_mask_mode="astro"
+      if(kdbbc_rack) then
+          lbit_mask_mode="astro"
+      else
+          lbit_mask_mode="vlba"
+      endif 
       nch=trimlen(lbit_mask_mode)
       if(kdebug) write(*,'(1x,a,$)') lbit_mask_mode(1:nch) 
       call check_csb_list(lastro_csb, max_csb,
@@ -623,6 +628,7 @@
          call drudg_write(lu_outfile,cbuf)
          write(lu_outfile,'("vsi4")') 
       else 
+! Change the bit_mask_mode to "vlba" from "astro" (these have same tracks)     
         if(lbit_mask_mode .eq. "geo" .or.
      &     lbit_mask_mode .eq. "vlba") then
           cbuf="vsi4="//lbit_mask_mode

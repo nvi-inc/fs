@@ -22,6 +22,7 @@
    
 ! Note: Also calculate and store in common BBC freqs, lo freqs. 
 ! History
+!  2020Feb20 JMGipson. Added implicit none. Added luscn to arg list for invalid_if and invalid_bbc
 !  2012Sep12  JMGipson. First version. Split off of old routine proc_vc. 
 ! Write out VC commands.
       include 'hardware.ftni'
@@ -51,14 +52,14 @@
      >   cifinp(ic,istn,icode)(1:1) .le. "D") then 
         continue
       else
-        call invalid_if(cbbc,cifinp(ic,istn,icode), cstrack(istn)) 
+        call invalid_if(luscn,cbbc,cifinp(ic,istn,icode), cstrack(istn)) 
       endif
 
       rfmin=450.0d0
       rfmax=1050.0d0
 !      if(.true.) then 
        if(fvc(ib) .lt. rfmin .or. fvc(ib) .gt. rfmax) then     
-        call invalid_bbc_freq(cbbc,fvc(ib),rfmin,rfmax)
+        call invalid_bbc_freq(luscn,cbbc,fvc(ib),rfmin,rfmax)
       endif  
           
       if (kk42rec(irec)) then

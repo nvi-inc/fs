@@ -22,6 +22,7 @@
   
 ! Note: Also calculate and store in common BBC freqs, lo freqs. 
 ! History
+!  2020Feb20 JMGipson. Added implicit none. Added luscn to arg list for invalid_if and invalid_bbc
 !  2012Sep12 JMGipson. First version. Modeled proc_vracks_bbc.
 !  2016Jan19 JMGipson. Modified for new DBBC versions. 
 !  2016Nov21 JMGipson. Don't check original rack type anymore. 
@@ -117,7 +118,7 @@
       rfmin=10.0
       rfmax=2200.0
       if(fvc(ib) .lt. rfmin .or. fvc(ib) .gt. rfmax) then     
-        call invalid_bbc_freq(cbbc,fvc(ib),rfmin,rfmax)
+        call invalid_bbc_freq(luscn,cbbc,fvc(ib),rfmin,rfmax)
       endif       
 
       cbbc_pol(ib)=cpol(ic,istn,icode) 

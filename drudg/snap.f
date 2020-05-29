@@ -156,7 +156,6 @@ C          3) force checks Y or N <<<<<<< removed
 ! end source position.
 
       integer nch,nch2,nch3
-      integer ic1,ic2
 
       integer l,idirp,idurp,iftchk,idirn,ilatestop
       integer ic,ichk,iset,isppl,mjdpre
@@ -217,8 +216,7 @@ C        beginning the current observation
       integer itime_disk2file_beg(5)
       integer itime_disk2file_end(5)
       integer itime_buf_write_end(5)     !end of time to write buffer
-      integer iii
-
+     
       integer itime_pass_end(5)              !Time when we reach the end of this pass
       real    speed_ft          !Speed in feet.
       real    rmax_scan_time    !Length of scan in time.
@@ -267,6 +265,8 @@ C     data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
 C
 C History:
 ! Now put in most recent first. 
+! 2020May29 JMG. Fixed bug in schedules with early starts. Schedules were not getting written out.
+!                Also got rid of element-by-element copy of one itime_xx to another itime_yy. 
 ! 2019Nov20 JMG. Fixed bug in index.  
 ! 2019Nov20 WEH. changed line from f90 to f77 for backwards  compatibility
 ! 2019Aug25 JMG. Merged in changes from BB version. Also removed some tape stuff, and changed lcbnew, lcbpre to ASCII
@@ -802,9 +802,7 @@ C         Force new tape on the first scan on tape.
                call TimeAdd(itime_tape_start_prev,imk6_buf_time,
      >              itime_buf_write_end)                       
             else
-              do iii=1,5
-                itime_buf_write_end(iii)=itime_scan_beg(iii) 
-              enddo
+               call copy_time(itime_scan_beg,itime_buf_write_end)
             endif 
           endif                 
          
@@ -1105,16 +1103,14 @@ C prior to this scan. Do only on a new pass for continuous.
             call drudg_write(lufile,csetup_name)                         
            
             if(km6disk) then
- 
-              ic1=max(1,trimlen(scan_name(iskrec(iobs_now))))
-              ic2=max(1,trimlen(lsession))
+              nch=trimlen(scan_name(iskrec(iobs_now)))
               write(ldum,'("mk6=record=",
      >         i4.4,"y",i3.3,"d",i2.2,"h", i2.2,"m",i2.2,"s",":",
      >         i6,":",i6,":",a,":",a,":",a,";")')
      >         (itime_scan_beg(i),i=1,5),
      >         idur(istnsk), idata_mk6_scan_mb/(1024*8) ,       
-     >         scan_name(iskrec(iobs_now))(1:ic1),
-     >         lsession(1:ic2),
+     >         scan_name(iskrec(iobs_now))(1:nch),
+     >         lsession(1:trimlen(lsession)),
      >         cpocod(istn)                             
               call drudg_write(lufile,ldum)     
 !              stop  
@@ -1125,19 +1121,48 @@ C prior to this scan. Do only on a new pass for continuous.
 !        pause 
 
 C Early start 
-        if (idir.ne.0.and.krec) then ! this is a non-zero recording scan
-        if (itearl(istn).gt.0) then ! early start
-        if (.not.kcont.or.(kcont.and..not.krunning)) then ! continuous
+        if(idir.ne.0.and.krec) then ! this is a non-zero recording scan
+        if(itearl(istn).gt.0) then ! early start
+        if(.not.kcont.or.(kcont.and..not.krunning)) then ! continuous
 C       always do unless continuous and already running
        
 C  Wait until ITEARL before start time
-          if (.not.krunning) ituse=1 ! Don't use early start if already running              
-          call snap_wait_time(lufile,itime_tape_start)
-              
-          call snap_monitor(kin2net)
-          if(.not. krunning) then
-            call snap_start_recording(kin2net)
-           endif
+          if (.not.krunning) ituse=1 ! Don't use early start if already running      
+! Two options.
+! 1. ical < itearl(istn). In this case start recording, then do cal.
+! 2. ical > itearl(istn). in this case do cal, then start recording.
+
+! Case 1.         
+          if(ical .le. itearl(istn)) then 
+            call snap_wait_time(lufile,itime_tape_start)             
+            call snap_monitor(kin2net)
+            if(.not. krunning) then
+              call snap_start_recording(kin2net)
+! Preob procedure. 
+              call snap_wait_time(lufile,itime_cal)
+              call drudg_write(lufile,cpre) 
+              if(km6disk) then 
+                write(ldum,'("mk6=rtime?",i10,";")') idata_mbps(istn)
+                call drudg_write(lufile,ldum)       
+              endif  
+            endif
+          else
+            if(.not.krunning) then
+! Preob procedure. 
+              call snap_wait_time(lufile,itime_cal)
+              call drudg_write(lufile,cpre) 
+              if(km6disk) then 
+                write(ldum,'("mk6=rtime?",i10,";")') idata_mbps(istn)
+                call drudg_write(lufile,ldum)       
+              endif  
+            endif
+            call snap_wait_time(lufile,itime_tape_start)             
+            call snap_monitor(kin2net)
+            if(.not. krunning) then
+              call snap_start_recording(kin2net)
+            endif
+          endif 
+
         endif ! continuous
         endif !start tape early/issue ST again
         endif !non-zero scan
@@ -1151,13 +1176,13 @@ C Wait until CAL time. Antenna is on-source as of this time.
           IF (ICAL.GE.1.and. .not. 
      >      (kPhaseRefPrev.or.krunning)) then ! PREOB          
             
+! Preob procedure. 
            call snap_wait_time(lufile,itime_cal)
-C PREOB procedure       
            call drudg_write(lufile,cpre) 
-          if(km6disk) then 
-            write(ldum,'("mk6=rtime?",i10,";")') idata_mbps(istn)
-            call drudg_write(lufile,ldum)       
-          endif  
+           if(km6disk) then 
+             write(ldum,'("mk6=rtime?",i10,";")') idata_mbps(istn)
+             call drudg_write(lufile,ldum)       
+           endif  
                  
           ENDIF ! cal and preob
         endif 
@@ -1170,7 +1195,7 @@ C PREOB procedure
           if (kvex.and.kadap.and.krunning) then ! don't write time
             continue 
           else ! do write it             
-!  Write out monitor command. 
+! Write out monitor command. 
 ! If doing staggered start, wait until we are on source. 
             if(kstaggered_start) then 
               call snap_wait_time(lufile,itime_data_valid)

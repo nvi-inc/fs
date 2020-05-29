@@ -20,6 +20,7 @@
       subroutine proc_mracks_vc(icode,ic,ib,ichan) 
 ! Write out the VC commands. 
  
+!  2020Feb20 JMGipson. Added implicit none. Added luscn to arg list for invalid_if and invalid_bbc
 !  2012Sep12  JMGipson. First version. Split off of old routine proc_vc. 
 !  2014Jun02  JMGipson. Changed starting count in looping over channels from 'ic' to 1 
 !  2015Jan29  JMGipson. Handle case of inverted LO. 
@@ -89,7 +90,7 @@
      >   cifinp(ic,istn,icode) .eq. "3A") then
         continue
       else
-        call invalid_if(cbbc,cifinp(ic,istn,icode), cstrack(istn))         
+        call invalid_if(luscn,cbbc,cifinp(ic,istn,icode), cstrack(istn))         
       endif 
 
       if(kmracks) then
@@ -105,7 +106,7 @@
         continue
       endif
       if(fvc(ib) .lt. rfmin .or. fvc(ib) .gt. rfmax) then     
-        call invalid_bbc_freq(cbbc,fvc(ib),rfmin,rfmax)
+        call invalid_bbc_freq(luscn,cbbc,fvc(ib),rfmin,rfmax)
       endif     
 
       if((km3rack.or. kk41rack).and. vcband(ic,istn,icode).gt.7.9) then
