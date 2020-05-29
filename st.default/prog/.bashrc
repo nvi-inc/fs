@@ -2,6 +2,9 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
+#uncomment for no auto-logout
+#unset TMOUT
+
 # Not group or world writeable by default for prog
 umask 022
 # use physical directories

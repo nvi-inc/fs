@@ -2,8 +2,12 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
+#uncomment for no auto-logout
+#unset TMOUT
+
 # Not world writeable by default for oper
 umask 002
+
 # use physical directories
 set -o physical
 set -o noclobber

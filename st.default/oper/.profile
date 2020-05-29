@@ -6,6 +6,7 @@
 
 # the default umask is set in /etc/profile; for setting the umask
 # for ssh logins, install and configure the libpam-umask package.
+# set in ~/.bashrc for oper
 #umask 022
 
 # if running bash
@@ -29,4 +30,3 @@ export EDITOR=vim
 export LESS=-XR
 #export FS_CHECK_NTP=1
 #export FS_DISPLAY_SERVER=on
-#unset TMOUT
