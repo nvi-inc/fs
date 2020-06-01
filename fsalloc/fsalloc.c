@@ -31,9 +31,11 @@
 #include "../include/shm_addr.h"
 
 void setupdirs(void) {
+#ifdef FS_SERVER_SOCKET_PATH
     system("mkdir -p " FS_SERVER_SOCKET_PATH);
     system("chgrp rtx " FS_SERVER_SOCKET_PATH);
     system("chmod 770 " FS_SERVER_SOCKET_PATH);
+#endif
 }
 
 main()

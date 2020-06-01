@@ -141,7 +141,7 @@ const char *usage_long_str =
 "  -p, --print-timeout print a message to stderr when waiting for connection \n";
 
 
-const static struct option long_options[] = {
+static const struct option long_options[] = {
     {"scrollback",    no_argument, NULL, 's'},
     {"wait",          no_argument, NULL, 'w'},
     {"help",          no_argument, NULL, 'h'},
@@ -155,8 +155,8 @@ const static struct option long_options[] = {
 int main(int argc, char **argv) {
 
 	// Default config
-	char *pubaddr             = "tcp://localhost:4444";
-	char *repaddr             = "tcp://localhost:4445";
+	char *pubaddr             = "tcp://127.0.0.1:4444";
+	char *repaddr             = "tcp://127.0.0.1:4445";
 	int perform_first_sync    = false;
 	int exit_on_terminate_msg = true;
 	int print_timeout         = false;
@@ -191,12 +191,12 @@ int main(int argc, char **argv) {
 	int nargs = argc - optind;
 	if (nargs > 0) {
 		if (nargs < 2) {
-			fprintf(stderr, "ssub: pub address specified without "
-			                "rep address\n");
-			exit(EXIT_FAILURE);
+			asprintf(&pubaddr, "%s/pub", argv[optind]);
+			asprintf(&repaddr, "%s/rep", argv[optind]);;
+		} else {
+			pubaddr = argv[optind];
+			repaddr = argv[optind + 1];
 		}
-		pubaddr = argv[optind];
-		repaddr = argv[optind + 1];
 	}
 
 	// Now we're configured, let's get down to business...

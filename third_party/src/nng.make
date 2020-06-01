@@ -1,6 +1,6 @@
-# Unofficial Makefile for nanomsg for Linux without cmake version >= 2.8
+# Unofficial Makefile for nanomsg for Linux without cmake version >= 3.17
 
-NNG_VERSION := 1.0.1
+NNG_VERSION := 1.3.0
 NNG_DIR     := nng-$(NNG_VERSION)
 NNG_ARCHIVE := $(NNG_DIR).tar.gz
 NNG_LIBRARY := $(NNG_DIR)/libnng.a
@@ -35,183 +35,102 @@ endif
 
 all: $(NNG_LIBRARY)
 
-SOURCES := \
-	$(NNG_DIR)/src/nng.c\
-	\
-	$(NNG_DIR)/src/core/aio.c\
-	$(NNG_DIR)/src/core/clock.c\
-	$(NNG_DIR)/src/core/device.c\
-	$(NNG_DIR)/src/core/dialer.c\
-	$(NNG_DIR)/src/core/file.c\
-	$(NNG_DIR)/src/core/idhash.c\
-	$(NNG_DIR)/src/core/init.c\
-	$(NNG_DIR)/src/core/list.c\
-	$(NNG_DIR)/src/core/listener.c\
-	$(NNG_DIR)/src/core/message.c\
-	$(NNG_DIR)/src/core/msgqueue.c\
-	$(NNG_DIR)/src/core/options.c\
-	$(NNG_DIR)/src/core/pollable.c\
-	$(NNG_DIR)/src/core/panic.c\
-	$(NNG_DIR)/src/core/pipe.c\
-	$(NNG_DIR)/src/core/protocol.c\
-	$(NNG_DIR)/src/core/random.c\
-	$(NNG_DIR)/src/core/reap.c\
-	$(NNG_DIR)/src/core/socket.c\
-	$(NNG_DIR)/src/core/strs.c\
-	$(NNG_DIR)/src/core/taskq.c\
-	$(NNG_DIR)/src/core/thread.c\
-	$(NNG_DIR)/src/core/timer.c\
-	$(NNG_DIR)/src/core/transport.c\
-	$(NNG_DIR)/src/core/url.c\
-	\
-	$(NNG_DIR)/src/platform/posix/posix_alloc.c\
-	$(NNG_DIR)/src/platform/posix/posix_atomic.c\
-	$(NNG_DIR)/src/platform/posix/posix_clock.c\
-	$(NNG_DIR)/src/platform/posix/posix_debug.c\
-	$(NNG_DIR)/src/platform/posix/posix_epdesc.c\
-	$(NNG_DIR)/src/platform/posix/posix_file.c\
-	$(NNG_DIR)/src/platform/posix/posix_ipc.c\
-	$(NNG_DIR)/src/platform/posix/posix_pipe.c\
-	$(NNG_DIR)/src/platform/posix/posix_pipedesc.c\
-	$(NNG_DIR)/src/platform/posix/posix_rand.c\
-	$(NNG_DIR)/src/platform/posix/posix_resolv_gai.c\
-	$(NNG_DIR)/src/platform/posix/posix_sockaddr.c\
-	$(NNG_DIR)/src/platform/posix/posix_tcp.c\
-	$(NNG_DIR)/src/platform/posix/posix_thread.c\
-	$(NNG_DIR)/src/platform/posix/posix_udp.c\
-	$(NNG_DIR)/src/platform/posix/posix_pollq_poll.c\
-	\
-	$(NNG_DIR)/src/compat/nanomsg/nn.c\
-	\
-	$(NNG_DIR)/src/protocol/pipeline0/pull.c\
-	$(NNG_DIR)/src/protocol/pipeline0/push.c\
-	$(NNG_DIR)/src/protocol/pair0/pair.c\
-	$(NNG_DIR)/src/protocol/pair1/pair.c\
-	$(NNG_DIR)/src/protocol/reqrep0/xreq.c\
-	$(NNG_DIR)/src/protocol/reqrep0/rep.c\
-	$(NNG_DIR)/src/protocol/reqrep0/req.c\
-	$(NNG_DIR)/src/protocol/reqrep0/xrep.c\
-	$(NNG_DIR)/src/protocol/survey0/respond.c\
-	$(NNG_DIR)/src/protocol/survey0/survey.c\
-	$(NNG_DIR)/src/protocol/survey0/xrespond.c\
-	$(NNG_DIR)/src/protocol/survey0/xsurvey.c\
-	$(NNG_DIR)/src/protocol/bus0/bus.c\
-	$(NNG_DIR)/src/protocol/pubsub0/sub.c\
-	$(NNG_DIR)/src/protocol/pubsub0/pub.c\
-	$(NNG_DIR)/src/supplemental/http/http_msg.c\
-	$(NNG_DIR)/src/supplemental/http/http_conn.c\
-	$(NNG_DIR)/src/supplemental/http/http_client.c\
-	$(NNG_DIR)/src/supplemental/http/http_public.c\
-	$(NNG_DIR)/src/supplemental/http/http_server.c\
-	$(NNG_DIR)/src/supplemental/sha1/sha1.c\
-	$(NNG_DIR)/src/supplemental/websocket/websocket.c\
-	$(NNG_DIR)/src/supplemental/tls/none/tls.c\
-	$(NNG_DIR)/src/supplemental/base64/base64.c\
-	$(NNG_DIR)/src/supplemental/util/options.c\
-	$(NNG_DIR)/src/supplemental/util/platform.c\
-	\
-	$(NNG_DIR)/src/transport/tcp/tcp.c\
-	$(NNG_DIR)/src/transport/inproc/inproc.c\
-	$(NNG_DIR)/src/transport/tls/tls.c\
-	$(NNG_DIR)/src/transport/ipc/ipc.c\
-	$(NNG_DIR)/src/transport/ws/websocket.c
+SOURCES := nng.c\
+compat/nanomsg/nn.c\
+protocol/bus0/bus.c\
+protocol/pair0/pair.c\
+protocol/pair1/pair.c\
+protocol/pair1/pair1_poly.c\
+protocol/pipeline0/push.c\
+protocol/pipeline0/pull.c\
+protocol/pubsub0/pub.c\
+protocol/pubsub0/sub.c\
+protocol/pubsub0/xsub.c\
+protocol/reqrep0/req.c\
+protocol/reqrep0/xreq.c\
+protocol/reqrep0/rep.c\
+protocol/reqrep0/xrep.c\
+protocol/survey0/survey.c\
+protocol/survey0/xsurvey.c\
+protocol/survey0/respond.c\
+protocol/survey0/xrespond.c\
+transport/inproc/inproc.c\
+transport/ipc/ipc.c\
+transport/tcp/tcp.c\
+transport/tls/tls.c\
+supplemental/sha1/sha1.c\
+supplemental/tcp/tcp.c\
+supplemental/tls/tls_common.c\
+supplemental/util/options.c\
+supplemental/util/platform.c\
+supplemental/websocket/websocket.c\
+core/aio.c\
+core/clock.c\
+core/device.c\
+core/dialer.c\
+core/file.c\
+core/idhash.c\
+core/init.c\
+core/list.c\
+core/listener.c\
+core/lmq.c\
+core/message.c\
+core/msgqueue.c\
+core/options.c\
+core/pollable.c\
+core/panic.c\
+core/pipe.c\
+core/protocol.c\
+core/reap.c\
+core/socket.c\
+core/stats.c\
+core/stream.c\
+core/strs.c\
+core/taskq.c\
+core/thread.c\
+core/timer.c\
+core/transport.c\
+core/url.c\
+platform/posix/posix_alloc.c\
+platform/posix/posix_atomic.c\
+platform/posix/posix_clock.c\
+platform/posix/posix_debug.c\
+platform/posix/posix_file.c\
+platform/posix/posix_ipcconn.c\
+platform/posix/posix_ipcdial.c\
+platform/posix/posix_ipclisten.c\
+platform/posix/posix_pipe.c\
+platform/posix/posix_resolv_gai.c\
+platform/posix/posix_sockaddr.c\
+platform/posix/posix_tcpconn.c\
+platform/posix/posix_tcpdial.c\
+platform/posix/posix_tcplisten.c\
+platform/posix/posix_thread.c\
+platform/posix/posix_udp.c\
+platform/posix/posix_pollq_epoll.c\
+platform/posix/posix_rand_urandom.c\
+transport/ws/websocket.c\
+supplemental/base64/base64.c\
+supplemental/http/http_public.c\
+supplemental/http/http_client.c\
+supplemental/http/http_chunk.c\
+supplemental/http/http_conn.c\
+supplemental/http/http_msg.c\
+supplemental/http/http_server.c\
 
+SOURCES := $(addprefix $(NNG_DIR)/src/, $(SOURCES))
 
-HEADERS = \
-		  protocol/pubsub0/pub.h\
-		  protocol/pubsub0/sub.h\
-		  protocol/survey0/respond.h\
-		  protocol/survey0/survey.h\
-		  protocol/pair0/pair.h\
-		  protocol/reqrep0/req.h\
-		  protocol/reqrep0/rep.h\
-		  protocol/pipeline0/push.h\
-		  protocol/pipeline0/pull.h\
-		  protocol/pair1/pair.h\
-		  protocol/bus0/bus.h\
-		  platform/posix/posix_pollq.h\
-		  platform/posix/posix_impl.h\
-		  platform/posix/posix_aio.h\
-		  platform/posix/posix_config.h\
-		  platform/windows/win_impl.h\
-		  supplemental/websocket/websocket.h\
-		  supplemental/sha1/sha1.h\
-		  supplemental/base64/base64.h\
-		  supplemental/tls/tls_api.h\
-		  supplemental/tls/tls.h\
-		  supplemental/http/http_api.h\
-		  supplemental/http/http.h\
-		  supplemental/util/options.h\
-		  supplemental/util/platform.h\
-		  transport/inproc/inproc.h\
-		  transport/ipc/ipc.h\
-		  transport/ws/websocket.h\
-		  transport/tcp/tcp.h\
-		  transport/zerotier/zerotier.h\
-		  transport/tls/tls.h\
-		  nng.h\
-		  compat/nanomsg/pair.h\
-		  compat/nanomsg/reqrep.h\
-		  compat/nanomsg/inproc.h\
-		  compat/nanomsg/bus.h\
-		  compat/nanomsg/pipeline.h\
-		  compat/nanomsg/pubsub.h\
-		  compat/nanomsg/survey.h\
-		  compat/nanomsg/tcp.h\
-		  compat/nanomsg/ipc.h\
-		  compat/nanomsg/ws.h\
-		  compat/nanomsg/nn.h
+HEADERS =  nng/compat/nanomsg/ipc.h nng/compat/nanomsg/inproc.h nng/compat/nanomsg/pubsub.h nng/compat/nanomsg/survey.h nng/compat/nanomsg/pipeline.h nng/compat/nanomsg/ws.h nng/compat/nanomsg/nn.h nng/compat/nanomsg/reqrep.h nng/compat/nanomsg/tcp.h nng/compat/nanomsg/bus.h nng/compat/nanomsg/pair.h nng/nng.h nng/protocol/reqrep0/rep.h nng/protocol/reqrep0/req.h nng/protocol/pair1/pair.h nng/protocol/survey0/respond.h nng/protocol/survey0/survey.h nng/protocol/pipeline0/push.h nng/protocol/pipeline0/pull.h nng/protocol/pubsub0/pub.h nng/protocol/pubsub0/sub.h nng/protocol/pair0/pair.h nng/protocol/bus0/bus.h nng/transport/tls/tls.h nng/transport/inproc/inproc.h nng/transport/ws/websocket.h nng/transport/zerotier/zerotier.h nng/transport/ipc/ipc.h nng/transport/tcp/tcp.h nng/supplemental/tls/engine.h nng/supplemental/tls/tls.h nng/supplemental/util/options.h nng/supplemental/util/platform.h nng/supplemental/http/http.h 
 
-HEADERS_SRC = $(addprefix $(NNG_DIR)/src/, $(HEADERS))
+HEADERS_SRC = $(addprefix $(NNG_DIR)/include/, $(HEADERS))
 
 
 $(SOURCES): $(NNG_ARCHIVE)
 	tar xzmf $(NNG_ARCHIVE)
 
 
-CFLAGS +=  -g -Wall -Wextra -fno-omit-frame-pointer -std=gnu99 -isystem $(NNG_DIR)/src
-CPPFLAGS += \
-			-DNNG_HAVE_ALLOCA=1 \
-			-DNNG_HAVE_BACKTRACE=1 \
-			-DNNG_HAVE_BUS0 \
-			-DNNG_HAVE_CLOCK_GETTIME=1 \
-			-DNNG_HAVE_FLOCK=1 \
-			-DNNG_HAVE_LIBNSL=1 \
-			-DNNG_HAVE_LOCKF=1 \
-			-DNNG_HAVE_MSG_CONTROL=1 \
-			-DNNG_HAVE_PAIR0 \
-			-DNNG_HAVE_PAIR1 \
-			-DNNG_HAVE_PUB0 \
-			-DNNG_HAVE_PULL0 \
-			-DNNG_HAVE_PUSH0 \
-			-DNNG_HAVE_REP0 \
-			-DNNG_HAVE_REQ0 \
-			-DNNG_HAVE_RESPONDENT0 \
-			-DNNG_HAVE_SEMAPHORE_PTHREAD=1 \
-			-DNNG_HAVE_SOPEERCRED=1 \
-			-DNNG_HAVE_STRCASECMP=1 \
-			-DNNG_HAVE_STRNCASECMP=1 \
-			-DNNG_HAVE_STRNLEN=1 \
-			-DNNG_HAVE_SUB0 \
-			-DNNG_HAVE_SURVEYOR0 \
-			-DNNG_HAVE_UNIX_SOCKETS=1 \
-			-DNNG_HIDDEN_VISIBILITY \
-			-DNNG_LITTLE_ENDIAN \
-			-DNNG_PLATFORM_LINUX \
-			-DNNG_PLATFORM_POSIX \
-			-DNNG_PRIVATE \
-			-DNNG_STATIC_LIB \
-			-DNNG_SUPP_HTTP \
-			-DNNG_TRANSPORT_INPROC \
-			-DNNG_TRANSPORT_IPC \
-			-DNNG_TRANSPORT_TCP \
-			-DNNG_TRANSPORT_WS \
-			-D_GNU_SOURCE \
-			-D_POSIX_PTHREAD_SEMANTICS \
-			-D_REENTRANT \
-			-D_THREAD_SAFE \
-			-DNNG_HAVE_EPOLL=1  \
-			-DNNG_HAVE_EPOLL_CREATE1=1
+CFLAGS += -g -Wall -Wextra -fno-omit-frame-pointer     -std=gnu99
+CPPFLAGS = -DNNG_ENABLE_STATS -DNNG_HAVE_BACKTRACE=1 -DNNG_HAVE_BUS0 -DNNG_HAVE_CLOCK_GETTIME=1 -DNNG_HAVE_EPOLL=1 -DNNG_HAVE_EPOLL_CREATE1=1 -DNNG_HAVE_EVENTFD=1 -DNNG_HAVE_FLOCK=1 -DNNG_HAVE_LIBNSL=1 -DNNG_HAVE_LOCKF=1 -DNNG_HAVE_MSG_CONTROL=1 -DNNG_HAVE_PAIR0 -DNNG_HAVE_PAIR1 -DNNG_HAVE_PTHREAD_ATFORK_PTHREAD=1 -DNNG_HAVE_PUB0 -DNNG_HAVE_PULL0 -DNNG_HAVE_PUSH0 -DNNG_HAVE_REP0 -DNNG_HAVE_REQ0 -DNNG_HAVE_RESPONDENT0 -DNNG_HAVE_SEMAPHORE_PTHREAD=1 -DNNG_HAVE_SOPEERCRED=1 -DNNG_HAVE_STRCASECMP=1 -DNNG_HAVE_STRNCASECMP=1 -DNNG_HAVE_STRNLEN=1 -DNNG_HAVE_SUB0 -DNNG_HAVE_SURVEYOR0 -DNNG_HAVE_UNIX_SOCKETS=1 -DNNG_HIDDEN_VISIBILITY -DNNG_LITTLE_ENDIAN -DNNG_MAX_TASKQ_THREADS=16 -DNNG_PLATFORM_LINUX -DNNG_PLATFORM_POSIX -DNNG_PRIVATE -DNNG_STATIC_LIB -DNNG_SUPP_HTTP -DNNG_TRANSPORT_INPROC -DNNG_TRANSPORT_IPC -DNNG_TRANSPORT_TCP -DNNG_TRANSPORT_TLS -DNNG_TRANSPORT_WS -DNNG_USE_EVENTFD -D_GNU_SOURCE -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT -D_THREAD_SAFE -I/usr2/fs/third_party/src/nng-1.3.0/include -isystem /usr2/fs/third_party/src/nng-1.3.0/src 
 
 OBJECTS :=  $(SOURCES:.c=.o)
 $(NNG_LIBRARY): $(OBJECTS)
@@ -226,8 +145,8 @@ clean :
 
 .PHONY: install
 install: $(NNG_LIBRARY) $(HEADERS_SRC)
-	install -D $(NNG_LIBRARY) $(PREFIX)/lib/libnng.a
+	install -m 0644 -D $(NNG_LIBRARY) $(PREFIX)/lib/libnng.a
 	for h in $(HEADERS); do \
-		install -D $(NNG_DIR)/src/$$h $(PREFIX)/include/nng/$$h ; \
+		install -m 0644 -D $(NNG_DIR)/include/$$h $(PREFIX)/include/$$h ; \
 	done
 

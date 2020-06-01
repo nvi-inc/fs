@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
 #include <pthread.h>
@@ -43,17 +42,19 @@
 static bool opt_daemon = true;
 int error_fd           = -1;
 
-static void fatal(char *const func, int rv) {
-	if (opt_daemon && error_fd != -1) {
-		char buf[1024];
-		snprintf(buf, sizeof(buf), "fsserver %s: %s\n", func, nng_strerror(rv));
-		write(error_fd, buf, strlen(buf));
-		close(error_fd);
-		exit(1);
-	}
-	fprintf(stderr, "fsserver %s: %s\n", func, nng_strerror(rv));
-	exit(1);
-}
+#define fatal(msg, s)                                                                              \
+	do {                                                                                       \
+		if (opt_daemon && error_fd != -1) {                                                \
+			FILE *f = fdopen(error_fd, "w");                                           \
+			fprintf(f, "%s:%d (%s) error %s: %s\n", __FILE__, __LINE__, __FUNCTION__,  \
+			        msg, s);                                                           \
+			fclose(f);                                                                 \
+			exit(1);                                                                   \
+		}                                                                                  \
+		fprintf(stderr, "%s:%d (%s) error %s: %s\n", __FILE__, __LINE__, __FUNCTION__,     \
+		        msg, s);                                                                   \
+		exit(1);                                                                           \
+	} while (0)
 
 int cli_main(int argc, char *argv[]) {
 	if (argc < 2) {
@@ -65,15 +66,16 @@ int cli_main(int argc, char *argv[]) {
 	int rv;
 
 	if ((rv = nng_req0_open(&server_cmd_sock)) != 0) {
-		fatal("unable to open open a socket", rv);
+		fatal("unable to open open a socket", nng_strerror(rv));
 	}
 
 	if ((rv = nng_dial(server_cmd_sock, FS_SERVER_URL_BASE "/cmd", NULL, 0)) != 0) {
-		fatal("unable to connect to server", rv);
+		fatal("unable to connect to server", nng_strerror(rv));
 	}
 
 	json_t *json = json_object();
 	json_object_set_new(json, "method", json_string(argv[1]));
+	json_object_set_new(json, "id", json_string("cli"));
 
 	json_t *json_args = json_array();
 
@@ -85,7 +87,7 @@ int cli_main(int argc, char *argv[]) {
 	size_t size = json_dumpb(json, NULL, 0, 0);
 	char *buf   = nng_alloc(size);
 	if (buf == NULL) {
-		fatal("unable to allocate a new message", rv);
+		fatal("unable to allocate a new message", nng_strerror(rv));
 	}
 
 	json_dumpb(json, buf, size, 0);
@@ -93,13 +95,13 @@ int cli_main(int argc, char *argv[]) {
 
 	rv = nng_send(server_cmd_sock, buf, size, NNG_FLAG_ALLOC);
 	if (rv != 0) {
-		fatal("unable to send message to server", rv);
+		fatal("unable to send message to server", nng_strerror(rv));
 	}
 
 	nng_msg *msg;
 	rv = nng_recvmsg(server_cmd_sock, &msg, 0);
 	if (rv != 0) {
-		fatal("error receiving message", rv);
+		fatal("error receiving message", nng_strerror(rv));
 	}
 
 	nng_close(server_cmd_sock);
@@ -164,17 +166,17 @@ void handler(int sig) {
  */
 
 void setup_signals() {
-	sigset_t fullset;
+	sigset_t fullset = {};
 	sigfillset(&fullset);
 	pthread_sigmask(SIG_BLOCK, &fullset, NULL);
 
-	struct sigaction sa;
-	sa.sa_handler = handler;
+	struct sigaction sa = {};
+	sa.sa_handler       = handler;
 	sigfillset(&sa.sa_mask);
 
 	if (sigaction(SIGINT, &sa, NULL) != 0 || sigaction(SIGQUIT, &sa, NULL) != 0 ||
 	    sigaction(SIGTERM, &sa, NULL) != 0 || sigaction(SIGCHLD, &sa, NULL) != 0) {
-		fatal("setting signals", errno);
+		fatal("setting signals", strerror(errno));
 	}
 }
 
@@ -190,13 +192,13 @@ int daemonize() {
 	int fds[2];
 
 	if (pipe(fds) < 0) {
-		fatal("making a pipe", errno);
+		fatal("making a pipe", strerror(errno));
 	}
 
 	pid_t spid = fork();
 
 	if (spid < 0) {
-		fatal("forking", errno);
+		fatal("forking", strerror(errno));
 	}
 
 	if (spid > 0) {
@@ -205,7 +207,7 @@ int daemonize() {
 		close(fds[1]);
 		sz = read(fds[0], buf, sizeof(buf));
 		if (sz < 0) {
-			fatal("reading from pipe", errno);
+			fatal("reading from pipe", strerror(errno));
 		}
 		if (sz > 0) {
 			fprintf(stderr, "%.*s", (int)sz, buf);
@@ -216,16 +218,16 @@ int daemonize() {
 	}
 
 	if (close(fds[0]) < 0) {
-		fatal("closing pipe", errno);
+		fatal("closing pipe", strerror(errno));
 	}
 
 	if (setsid() < 0) {
-		fatal("creating a new session", errno);
+		fatal("creating a new session", strerror(errno));
 	}
 
 	spid = fork();
 	if (spid < 0) {
-		fatal("forking", errno);
+		fatal("forking", strerror(errno));
 	}
 
 	if (spid > 0) {
@@ -234,11 +236,11 @@ int daemonize() {
 
 	int nulldev = open("/dev/null", O_WRONLY);
 	if (nulldev < 0)
-		fatal("open devnul", errno);
+		fatal("open devnul", strerror(errno));
 
 	if (dup2(nulldev, STDIN_FILENO) < 0 || dup2(nulldev, STDOUT_FILENO) < 0 ||
 	    dup2(nulldev, STDERR_FILENO) < 0)
-		fatal("closing fds", errno);
+		fatal("closing fds", strerror(errno));
 
 	return fds[1];
 }
@@ -248,8 +250,8 @@ int daemonize() {
  * intercepted by the server.
  */
 void install_shims() {
-	char path[1024];
-	char basepath[1024];
+	char path[1024]     = {};
+	char basepath[1024] = {};
 	ssize_t sz;
 	sz = readlink("/proc/self/exe", basepath, sizeof(basepath));
 	if (sz < 0) {
@@ -272,7 +274,7 @@ void install_shims() {
 
 	sz = snprintf(path, sizeof(path), "%s/shims:%s", basepath, old_path);
 	if (sz < 0) {
-		fatal("installing shims", errno);
+		fatal("installing shims", strerror(errno));
 	}
 
 	if ((size_t)sz >= sizeof(path)) {
@@ -281,7 +283,7 @@ void install_shims() {
 	}
 
 	if (setenv("PATH", path, true) < 0) {
-		fatal("modifying PATH", errno);
+		fatal("modifying PATH", strerror(errno));
 	}
 }
 
@@ -311,19 +313,19 @@ int server_main(int argc, char *argv[]) {
 	server_t *s;
 	rv = server_new(&s);
 	if (rv != 0) {
-		fatal("error creating a new server", rv);
+		fatal("error creating a new server", nng_strerror(rv));
 	}
 
 	sigset_t emptyset;
 
 	int shutdown_fd = server_finished_fd(s);
 	if (shutdown_fd < 0) {
-		fatal("error geting sever finished fd", errno);
+		fatal("error geting sever finished fd", strerror(errno));
 	}
 
 	rv = server_start(s);
 	if (rv != 0) {
-		fatal("error starting server", rv);
+		fatal("error starting server", nng_strerror(rv));
 	}
 
 	if (error_fd != -1) {
@@ -342,7 +344,7 @@ int server_main(int argc, char *argv[]) {
 		int ret = pselect(maxfd + 1, &fdset, NULL, NULL, NULL, &emptyset);
 
 		if (ret == -1 && errno != EINTR) {
-			fatal("pselect", errno);
+			fatal("pselect", strerror(errno));
 		}
 
 		if (child) {
@@ -351,7 +353,7 @@ int server_main(int argc, char *argv[]) {
 				int status;
 				pid_t pid = waitpid(-1, &status, WNOHANG);
 				if (pid < 0 && errno != ECHILD) {
-					fatal("waitpid faild", errno);
+					fatal("waitpid faild", strerror(errno));
 				}
 				if (pid <= 0) {
 					break;

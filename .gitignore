@@ -54,12 +54,17 @@ dkms.conf
 # Vim swap files
 *.swp
 
+# gcov files
+*.gcov
+*.gcda
+*.gcno
+
 /bin/
 
 vex/y.tab.h
 
 third_party/src/jansson-2.11/
-third_party/src/nng-1.0.1/
+third_party/src/nng-1.*/
 third_party/include/
 third_party/lib/
 

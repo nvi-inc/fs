@@ -35,6 +35,9 @@ typedef struct window {
 	int scrollback_len;
 	char *addr;
 	int (*master_handler)(struct window *, int);
+	void (*master_join)(struct window *);
+	void (*master_free)(struct window *);
+	void *master;
 } window_t;
 
 bool window_by_pid(void *, void *);
@@ -63,3 +66,10 @@ int window_start_child(window_t *s);
  * returns -1 on error.
  */
 int window_start_master(window_t *s, int pty_master);
+
+/*
+ * window_join waits for the window to finish it's shutdown period. If the
+ * period has finished, the function returns immediately.
+ *
+ */
+void window_join(window_t *s);
