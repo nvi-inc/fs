@@ -130,6 +130,9 @@ static int prompt_close_cmd(json_t *params) {
  * prompt_cmd handles the "prompt" command from fsserver.
  */
 static int prompt_open_cmd(json_t *params) {
+	if (arg_no_x) {
+		return 0;
+	}
 	prompt_t *p = prompt_new();
 	if (!p)
 		fatal("allocating prompt", strerror(errno));
