@@ -33,7 +33,7 @@
 #include "stream.h"
 #include "window.h"
 
-#define WINDOW_SHUTDOWN_PERIOD 5 * 1000
+#define WINDOW_SHUTDOWN_PERIOD 2 * 1000
 
 void window_free(window_t *s) {
 	char **ptr;
