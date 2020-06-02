@@ -3,6 +3,7 @@ Field System Display Client/Server User Guide
 
 D. Horsley
 Sep 2018
+Revised Jun 2020.
 
 Introduction
 ------------
@@ -144,7 +145,7 @@ You can list all client windows by typing entering:
 There is also a client version of the "sy" command, allowing arbitrary
 shell commands to be run in the current client's context rather than
 the Field System's. If you need to start any graphical windows, this
-is the method to use. 
+is the method to use.
 
 With the server, you also have the option of starting the FS entirely
 in the background with
@@ -178,11 +179,11 @@ is 1024 lines long. This can be customized by editing
 Disabling
 ---------
 
-To start the fs without the display server, use 
+To start the fs without the display server, use
 
     fs --foreground
 
-or 
+or
 
     fs -f
 
@@ -198,7 +199,7 @@ and in '.bashrc', remove:
     export FS_DISPLAY_SERVER=1
 
 
-Technical Details 
+Technical Details
 =================
 
 With this first version of the display server/client design, while we
@@ -214,7 +215,7 @@ Server
 ------
 
 The "fsserver" program is, in essence, a terminal multiplexer for for
-read only terminals, along with a few other FS specific features.  The
+read only terminals, along with a few other FS specific features. The
 server manages a set of "windows", the main of which runs the fs.
 This is pseudo-terminal with "fs" started on the slave side, and a
 stream multiplexer on the master. Other terminal based programs can
@@ -223,28 +224,43 @@ clients.  These feature was primarily added to support autoftp. FS
 server windows are read only.
 
 Communication with fsserver happens via JSON-RPC over a "scalability
-protocols" request socket. This a messaging lary implemented by, among
-others, nanomsg, nng and mangos. For this work we use nng. FS server
-communicates with clients via JSON-RPC over a pub/sub socket. The fs
-server windows are handled by spub/ssub, explained later. Currenly all
-these sockets are unix sockets under /var/run/fsserver, though the
-library allows these to be over raw TCP or over websockets, the latter
-allowing browser based FS clients.
+protocols" request socket. This a messaging layer implemented by,
+among others, nanomsg, nng and mangos, though for this work we use
+nng. FS server also communicates with clients via JSON-RPC over a
+pub/sub socket. The fs server windows are handled by "reliable"
+buffered streams, explained in a later section.  All sockets for
+commanding and buffered are found at a sub path under the base URL.
+By default the base URL is:
 
-To enable backwards compatibility, fsserver installs "shims" for xterm
-and "fs.prompt", stored compiled into fs/bin/shim. When fsserver
-starts "fs", it first adds this path to the PATH env var. The
-fs.prompt shim makes a json-rpc call to fsserver with the prompt
+     ws://127.0.0.1:7083
+
+(Here 70 and 83 are decimal ASCII encoding of 'F' and 'S'.)
+
+For example, the buffered stream of the FS display window can be found at:
+
+    ws://127.0.0.1:7083/windows/fs
+
+The base URL can be changed by editing FS_SERVER_URL_BASE in
+include/params.h; however, we will likely introduce command-line flag
+and/or environment variable to set this in the future.  In previous
+versions, they live as UNIX sockets under /var/run/fsserver. though
+the library allows these to be over raw TCP or over websockets, the
+latter allowing browser based FS clients.
+
+To enable backwards compatibility, fsserver installs "shims" for
+`xterm` and `fs.prompt`, stored compiled into fs/bin/shim. When
+fsserver starts "fs", it first adds this path to the PATH env var. The
+`fs.prompt` shim makes a JSON-RPC call to fsserver with the prompt
 command. This is then broadcast to the clients. The standard client
-uses the real "fs.prompt" program to implement its prompt behaviour.
+uses the real `fs.prompt` program to implement its prompt behavior.
 
-The xterm shim, to prevent unexpected read-only behaviour, checks if
+The `xterm` shim, to prevent unexpected read-only behavior, checks if
 the program is on a white-list (which can be found the source of the
 program). If the specified command is on the list, it is then passed
-to fsserver to be multipled to the clients. If it is not, the shim
+to fsserver to be multiplexed to the clients. If it is not, the shim
 prints a warning and calls the real xterm program.
 
-When you call "fs", it checks if the program "fsserver" is running, if
+When you call `fs`, it checks if the program `fsserver` is running, if
 not, fs start fsserver. Then, it then instructs the server to start
 the FS, and becomes an instance of fsclient.
 
@@ -268,29 +284,54 @@ Fsclient uses "fs.prompt" to implement the "prompt" command. When this
 window is closed, fsclient sends a "prompt_close" command to the
 server with the corresponding prompt id number.
 
-spub & ssub
------------
+Buffered streams, spub & ssub
+--------------------------------
 
-The underlying communication between fsserver windows and clients is
-provided by the pair of programs `spub` and `ssub`, so named for
-"stream publish" and "stream subscribe". These are standalone programs
-that create a reliable, buffered, fan-out stream of arbitrary data. 
+The underlying communication of the content of windows between
+fsserver and clients is provided through a buffered stream design,
+implemented in NNG. Conceptually, the name says it all: this is a
+stream of data with a buffer which can be queried if some of the  data
+is missed.
 
-The program `spub` reads from stdin and writes the data stream to a
-nanomsg socket, which can be connected to a unix socket file raw TCP
-port or websockets port. Its complement, `ssub`, connects to this
-socket, reads from the stream writes the data stream to stdout.
-Multiple copies of `ssub` can connect to an instance of `spub`.
+The implementation in `fs/fsserver/stream.c` relies on two nng
+sockets: a `pub` (publish) socket which streams messages of data
+"live", and a `rep` (reply) socket which can be queried to get
+previously posted messages. A stream is located by a nng URL, but
+since two sockets are required, the are given the sub paths of `pub`
+and `rep`. For example the FS display window stream, by default, is
+published at
 
-To ensure messages are not lost during network interruptions, `spub`
-keeps a buffer of past messages which can be requested by the clients.
-These "replay" requests are performed over a separate nanomsg
-request/reply socket. Currently, nanomsg only supports one nanomsg
-socket per port, which has the unfortunate consequence that sspub
-currently requires two sockets to operate. This is expected to change
-with an upcoming version of nanomsg. In principle, these can stream to
-a websocket and be accessed through a browser.
+    ws://127.0.0.1:7083/windows/fs
 
-When shutting down, spub sends a special end-of-transmission message
-which triggers client `ssub` instances to exit, unless they are
+The pub and rep sockets can then be found at
+
+    ws://127.0.0.1:7083/windows/fs/pub
+    ws://127.0.0.1:7083/windows/fs/rep
+
+However, by default, the implementation assumes these suffixes. (Note,
+to use these assumed addresses, use IPC or websocket transports)
+
+Clients of the stream subscribe to the `pub` socket with a `sub`
+socket, and read the live messages. Each message starts with a 64-bit
+(little-endian) sequence number. The client, can determine if it has
+missed one more messages by examining the sequence number. In this
+case, sends a query to the server consisting of the last sequence
+number it saw. The server then replies with all messages in the buffer
+published since that sequence number was published.
+
+To ensure clients discover they have missed messages, even when the
+stream is quiescent, the publisher issues "heartbeat" messages
+periodically, indicating the last message sent. When shutting down,
+the publisher sends a special end-of-transmission (EOT) message, along with
+the last sequence number of the stream. To ensure the pub socket is
+drained and clients have a chance to receive the EOT message, the
+publisher stays in this shutdown state, periodically re-sending the
+EOT message, for a fixed period of time before finally exiting.
+
+The implementation is accessible from the two programs programs `spub`
+and `ssub`, for "stream publish" and "stream subscribe". The program
+`spub` reads from standard input and publishes on the address given in
+the command line arguments. The program `sub` subscribes to the
+stream given as an argument and exits upon the EOT unless they are
 started with the `-w/--wait` flag.
+
