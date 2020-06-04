@@ -134,7 +134,6 @@ int main(int argc, char * argv[])
       /* ** Initialize ** */ 
       fail=TRUE;
       result = doinit();
-      ip[4]=fail;
       break;
     case 1:
     case 4:

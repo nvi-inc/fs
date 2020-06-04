@@ -305,7 +305,7 @@ main()
 #endif
       tpi_dbbc(ip,tpicd.itpis);   /* sample tpi(s) */
       if(ip[2]<0) {
-	logit(NULL,ip[2],ip+3);
+	logita(NULL,ip[2],ip+3,ip+4);
 	if(ip[0]!=0) {
 	  cls_clr(ip[0]);
 	  ip[0]=ip[1]=0;
@@ -384,7 +384,7 @@ main()
 #endif
       tpi_dbbc_pfb(ip,tpicd.itpis);   /* sample tpi(s) */
       if(ip[2]<0) {
-	logit(NULL,ip[2],ip+3);
+	logita(NULL,ip[2],ip+3,ip+4);
 	if(ip[0]!=0) {
 	  cls_clr(ip[0]);
 	  ip[0]=ip[1]=0;
@@ -411,7 +411,7 @@ main()
 #endif
       tpi_dbbc3(ip,tpicd.itpis);   /* sample tpi(s) */
       if(ip[2]<0) {
-	logit(NULL,ip[2],ip+3);
+	logita(NULL,ip[2],ip+3,ip+4);
 	if(ip[0]!=0) {
 	  cls_clr(ip[0]);
 	  ip[0]=ip[1]=0;

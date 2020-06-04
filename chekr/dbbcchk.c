@@ -69,7 +69,7 @@ dbbcn:
 
 
   if(ip[2]<0) {
-    logitn(NULL,ip[2],ip+3,ip[4]);
+    logita(NULL,ip[2],ip+3,ip+4);
     logit(NULL,-810,lwho);
     return;
   }
@@ -120,7 +120,7 @@ dbbcn1:
 
 
     if(ip[2]<0) {
-      logitn(NULL,ip[2],ip+3,ip[4]);
+      logita(NULL,ip[2],ip+3,ip+4);
       logit(NULL,-810,lwho);
       return;
     }
