@@ -1,11 +1,11 @@
-  tpicd - tpi (LBA4, Mark III/IV, VLBA, VLBA4, DBBC, RDBE, DBBC3 racks)
+  tpicd - tpicd daemon control (LBA4, Mark III/IV, VLBA, VLBA4, DBBC, RDBE, DBBC3 racks)
 
             Syntax:     tpicd=cont,cycle
                         tpicd
                         tpicd=stop
                         tpicd=tsys
-			tpicd=display_on
-			tpicd=display_off
+                        tpicd=display_on
+                        tpicd=display_off
                         tpicd=?
 
             Response:   tpicd/cont,cycle
@@ -14,7 +14,7 @@
 
 Settable parameters:
               cont          Whether to sample continuously or not: no
-                            (default) or yes. If no, samplng is stopped and
+                            (default) or yes. If no, sampling is stopped and
                             started by the data_valid=...  command.
               cycle         Number of centiseconds per cycle, 0 disables
                             sampling.
@@ -30,11 +30,14 @@ Comments: The form "tpicd" is used to start the extraction. The form
 "tpicd=stop" is used to halt it. The form "tpicd=?" returns the
 current set-up information.
 
-If tpicd is being controlled by the data_valid command, it begins and
-stops sampling and recording data within one second of a request to do
-so. In other words within one second of the execution of a
-"data_valid=..."  command.  In this mode no data is logged if a
-schedule is not active or if the schedule is halted.
+If the 'cont' parameter is 'no', then 'tpicd' is being controlled
+by the 'data_valid' command. If 'data_valid' is 'on', it will record
+data. It begins and stops sampling and recording data within one
+second of a request to do so. In other words within one second of the
+execution of a "data_valid=..."  command.  In this mode no data is
+logged if a schedule is not active or if the schedule is halted; this
+feature is to prevent "run-away" logging if the schedule is closed or
+halted while 'data_valid' is 'on'.
 
 The form "tpicd=tsys" can be used only if continuous cal is
 selected. It will cause the tsys to be calculated from the next set of
