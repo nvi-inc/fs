@@ -23,6 +23,9 @@
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
+      include '../skdrincl/broadband.ftni' 
+
+! 2020Jun08.  Added in ibb_off parameter.  Added in new broadband.ftni 
 
 ! function
       integer iwhere_in_string_list
@@ -32,7 +35,7 @@
       integer istat   
 
       integer NumToken,MaxToken
-      parameter(MaxToken=4)
+      parameter(MaxToken=5)
       character*12 ltoken(MaxToken)  
       logical kend  
     
@@ -41,6 +44,9 @@
      
       do istat=1,nstatn
          bb_bw(istat) =0.0       !set these all to 0. 
+         idata_mbps(istat)=0
+         isink_mbps(istat)=0
+         ibb_off(istat)=0 
       end do 
 100   continue
       cbuf=" "
@@ -60,7 +66,10 @@
      >      read(ltoken(3),*, err=550) idata_mbps(istat)
          if(NumToken .ge. 4) 
      >      read(ltoken(4),*,err=550)  isink_mbps(istat)
-        end if
+         end if
+         if(NumToken .ge. 5) 
+     >      read(ltoken(5),*,err=550)  ibb_off(istat)
+
 !        read(lu_infile,'(a80)',end=500) cbuf 
         call read_nolf(lu_infile,cbuf,kend)
         if(kend) goto 500

@@ -1,0 +1,12 @@
+! Common block to contain info about broadband stuff
+! Must occur in file after 'skparm.ftni'
+
+! 2020Jun08. Removed from statn.ftni 
+
+      integer  iData_mbps(max_stn)   !maximum rate data is acquired. 
+      integer  iSink_mbps(max_stn)   !maximum rate data is absorbed. May be > because of  buffering.   
+      integer ibb_off(max_stn)       !Additional time-offset for Broadband stations to write to disk.
+      real  BB_BW(max_stn)           !Effective Broadband BW per band in Hz (assuming 1-bit sampling)
+
+      common /broaband_int/   idata_mbps,isink_mbps,ibb_off
+      common /broadband_real/ BB_BW

@@ -25,6 +25,7 @@ C
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/statn.ftni'
+      include '../skdrincl/broadband.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
 C
@@ -48,11 +49,13 @@ C 021111 jfq Add LBA rack type
 C 2003Apr17  JMG   Added Mark5p
 C 2003Jul23  JMG   Added Mk5PigW
 ! 2007May25  JMG   Added Mark5B recorder, MK4V and VLAB4V racks.
-! 2007Jul02  JMG. Removed initializaiotn of fluxes. Done elsewhere.
+! 2007Jul02  JMG. Removed initialization of fluxes. Done elsewhere.
 ! 2007Aug07  JMG. Moved rack, recorder type initialization to block data statement in
 !                 "valid_hardware.f"
 ! 2019Aug22  JMG. Initialized lcode here and not in frinit. 
 ! 2019Nov20  WEH. Fixed bug in index
+! 2020Jun08  JMG. Initialized various broadband values. 
+! 2020Jun08  JMG Added reference to broadband.ftni 
 C
 C LOCAL
       integer ix,ib,i,j,l,itx,ity,itz,idef,iy,ir
@@ -169,6 +172,13 @@ C  In statn.ftni
         cantna(i)=" "
       END DO  ! Initialize current variables
 
+! Initialize BB values
+      do i=1,max_stn
+         bb_bw(i) =0.0       !set these all to 0. 
+         idata_mbps(i)=0
+         isink_mbps(i)=0
+         ibb_off(i)=0 
+      end do 
 
 
 C  Number of selected sources, stations, codes

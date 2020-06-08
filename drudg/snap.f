@@ -18,7 +18,6 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
         SUBROUTINE SNAP(cr2)
-
 ! 2019Sep04
       implicit none 
 C
@@ -27,6 +26,7 @@ C
       include 'hardware.ftni'           !This contains info only about the recorders.
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
+      include '../skdrincl/broadband.ftni'
       include '../skdrincl/constants.ftni'
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
@@ -504,6 +504,7 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
 ! 2015Mar31 JMG. More changes to fix issues with phase_reference.
 ! 2015Apr04 JMG. Removed special handling if same source in consecutive scans. 
 ! 2015Jun05 JMG. Replaced squeezewrite by drudg_write. 
+! 2020Jun08 JMG. Added new broadband.ftni.  Added ibb_off to buffereing time
     
       kdebug=.false.
       kfirst_obs=.true. 
@@ -797,7 +798,7 @@ C         Force new tape on the first scan on tape.
      >       (itearl(istn)+itlate(istn)+idur(istnsk))*idata_mbps(istn)
      
             if(itime_tape_start_prev(1) .ne. 0) then 
-              imk6_buf_time= imark6_off + 
+              imk6_buf_time= imark6_off + ibb_off(istn)+
      >           float(idata_mk6_scan_mb_prev)/isink_mbps(istn)              
                call TimeAdd(itime_tape_start_prev,imk6_buf_time,
      >              itime_buf_write_end)                       

@@ -22,6 +22,7 @@
       include 'hardware.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
+      include '../skdrincl/broadband.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
 ! passed
@@ -29,7 +30,8 @@
       logical kskd                      ! do we have a sked file? need to get speed for Mark5A or Mark5P
 
 ! 2013Sep19  JMGipson made sample rate station dependent
-! 2015Mar30  JMG. Added support for Mark6. 
+! 2015Mar30  JMG. Added support for Mark6.
+! 2020Jun08  JMG Added reference to broadband.ftni 
 !
 
 ! returned

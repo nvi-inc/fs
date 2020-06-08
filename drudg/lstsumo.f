@@ -28,6 +28,7 @@
       include '../skdrincl/constants.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
+      include '../skdrincl/broadband.ftni'
       include '../skdrincl/skobs.ftni'
       include '../skdrincl/freqs.ftni'
       include 'lstsum.ftni'
@@ -69,6 +70,7 @@ C 021011 nrv Another digit for printing gap time.
 ! 2008Jan07 JMGipson.  Changed so that will ALWAYS print line numbers if recorder type is none.
 !             Previously relied on recorder starting and stopping info, which is absent in the "none" case.
 ! 2014Jan17 JMGipson. Modified call to setup_name.  Removed pass info. 
+! 2020Jun08 JMG. Included new broadband.ftni
 
 ! Functions
       integer julda
