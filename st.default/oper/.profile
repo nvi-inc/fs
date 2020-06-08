@@ -29,4 +29,4 @@ PATH="/usr2/st/bin:/usr2/fs/bin:$PATH"
 export EDITOR=vim
 export LESS=-XR
 #export FS_CHECK_NTP=1
-#export FS_DISPLAY_SERVER=on
+export FS_DISPLAY_SERVER=on
