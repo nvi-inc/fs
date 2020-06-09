@@ -39,53 +39,44 @@ before schedule execution can continue.  However, if the command
 blocks for an extended period of time, the schedule may be delayed.
 
 Output from the command can be included in the log by using the FS
-utility program, 'popen' (pronounced "p-open"), which uses the popen()
-system call, in the 'sy=...' command.  It accepts options:
+utility program, 'popen' (pronounced "p-open"), which uses the
+'popen()' system call, in the 'sy=...' command.  It accepts options:
 
   -c command   command to send, default is the first non-option argument
-  -e           disable error reporting to log
   -n name      name to use for log entries, default 'popen'
   -t time-out  time-out in seconds, default is none
   -l           suppress display of output, it will only be logged
 
 Quotes around the 'command' to be executed and its arguments are
 required unless there are no interior spaces, i.e., there is a single
-token. An example:
+token.
 
-  sy=popen 'uptime -p' -n uptime &
+Any errors reported to 'stderr' can be written to the log by including
+'2>&1' in the command, inside the quotes around the command, usually
+at the end. If this is omitted, any errors will just be displayed, not
+logged. Generally speaking it is desirable to log errors. Note that if
+the command is UNIX pipeline command (two or more commands separated
+by "pipe" ('|'), the '2>&1' would need to be included for each
+separate command.
+
+An example of 'popen' usage:
+
+  sy=popen 'uptime -p 2>&1' -n uptime &
 
 In this case, the 'popen' program executes the 'uptime' command with
-option '-p' in background (due to the '&'), reads the command's
-_stdout_ output, and logs it in the FS log. Any output to _stderr_
-would also be logged. All log entries will start with 'uptime/'. An
-example display result is:
+option '-p' in background (due to the trailing '&'), reads the
+command's _stdout_ output, and logs it in the FS log. Any output to
+_stderr_ would also be logged. All log entries will start with
+'uptime/'. An example display result is:
 
-21:46:20;sy=popen 'uptime -p' -n uptime &
+21:46:20;sy=popen 'uptime -p 2>&1' -n uptime &
 21:46:20#popen#uptime/up 7 hours, 19 minutes
 
 The '-t' option can be used to set a time-out. This can be especially
 useful to prevent an 'sy=...' command without an ampersand from
-blocking execution. If the command being run by 'popen' has its own
-time-out facility, it is recommended that it be used instead.
-
-The '-e' option can used to suppress logging errors. Its use is not
-recommended since it will prevent recording errors in the log.
-Previous versions of 'popen' did not automatically log errors. When
-this functionality was needed, a '2>&1' had to be included at the end
-of the 'command'.  However, logging errors is so useful it was made
-standard. If the 'command' contains '2>&1' at the end, errors will be
-logged regardless of '-e' being set. A '2>&1' being included at the
-end of the 'command' is also benign if '-e' is not present.
-
-If a user needs 'popen' to not log errors automatically (i.e., revert
-to the previous behavior), they can set the environment variable
-FS_POPEN_NO_STDERR before running the FS. For 'bash' users:
-
-   export FS_POPEN_NO_STDERR=1
-
-For tcsh users:
-
-   setenv FS_POPEN_NO_STDERR 1
+blocking execution indefinitely. If the command being run by 'popen'
+has its own time-out facility, it is recommended that it be used
+instead.
 
 If python 2.7 is available, an external program 's_client' can be used
 in 'sy=...' commands for simple ASCII transactions with devices over
@@ -100,4 +91,4 @@ Ethernet sockets. It accepts options:
 The following is an example of using 's_client' with 'popen' to log
 command results (and errors):
 
-sy=popen 's_client -h hubpc -c "mci_data? pmc_vacuum" -t 20' -n hpccn &
+sy=popen 's_client -h hubpc -c "mci_data? pmc_vacuum" -t 20 2>&1' -n hpccn &
