@@ -73,16 +73,9 @@ recommended since it will prevent recording errors in the log.
 Previous versions of 'popen' did not automatically log errors. When
 this functionality was needed, a '2>&1' had to be included at the end
 of the 'command'.  However, logging errors is so useful it was made
-standard.
-
-If the 'command' contains '2>&1' at the end, errors will be
+standard. If the 'command' contains '2>&1' at the end, errors will be
 logged regardless of '-e' being set. A '2>&1' being included at the
 end of the 'command' is also benign if '-e' is not present.
-
-Note that if the command is a UNIX "pipe-line" command (multiple
-commands separated by the "pipe" character '|'), the '2>&1' must still
-be included in all commands before the last one to have their errors
-logged.
 
 If a user needs 'popen' to not log errors automatically (i.e., revert
 to the previous behavior), they can set the environment variable
