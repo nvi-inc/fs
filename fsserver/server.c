@@ -45,6 +45,7 @@
 
 #include "../include/params.h"
 
+#include "inject_snap.h"
 #include "jsonutils.h"
 #include "list.h"
 #include "prompt.h"
@@ -52,10 +53,10 @@
 #include "stream.h"
 #include "window.h"
 
-#define fatal(msg, s)                                                                             \
+#define fatal(msg, s)                                                                              \
 	do {                                                                                       \
 		fprintf(stderr, "%s:%d (%s) error %s: %s\n", __FILE__, __LINE__, __FUNCTION__,     \
-		        msg, s);                                                    \
+		        msg, s);                                                                   \
 		exit(1);                                                                           \
 	} while (0)
 
@@ -660,6 +661,26 @@ int server_cmd_fs_status(server_t *s, json_t *rep_msg, int argc, const char *con
 	return 0;
 }
 
+int server_cmd_fs_snap(server_t *s, json_t *rep_msg, int argc, const char *const argv[]) {
+	if (argc < 2) {
+		json_object_sprintf(rep_msg, "message",
+		                    "Invalid Parameters: fs snap requires an argument");
+		json_object_set_new(rep_msg, "code", json_integer(JSONRPC_STATUS_INVALID_PARAMS));
+		return 1;
+	}
+
+	nng_mtx_lock(s->mtx);
+	if (s->fs == NULL || s->fs->pid == 0) {
+		nng_mtx_unlock(s->mtx);
+		json_object_sprintf(rep_msg, "message", "Invalid Request: fs not running");
+		json_object_set_new(rep_msg, "code", json_integer(JSONRPC_STATUS_INVALID_REQUEST));
+		return 1;
+	}
+	int ret = inject_snap(rep_msg, argv[1]);
+	nng_mtx_unlock(s->mtx);
+	return ret;
+}
+
 int server_cmd_fs(server_t *s, json_t *rep_msg, int argc, const char *const argv[]) {
 	if (argc <= 1) {
 		/* TODO: usage */
@@ -672,6 +693,10 @@ int server_cmd_fs(server_t *s, json_t *rep_msg, int argc, const char *const argv
 	}
 	if (strcmp(argv[1], "status") == 0) {
 		return server_cmd_fs_status(s, rep_msg, argc - 1, argv + 1);
+	}
+
+	if (strcmp(argv[1], "snap") == 0) {
+		return server_cmd_fs_snap(s, rep_msg, argc - 1, argv + 1);
 	}
 
 	json_object_sprintf(rep_msg, "message", "unknown command \"%s\"", argv[1]);
@@ -688,9 +713,8 @@ int server_cmd_prompt(server_t *s, json_t *rep_msg, int argc, const char *const 
 
 	if (argc < 2) {
 		json_object_set_new(rep_msg, "message",
-			    json_string("prompt requires open or close"));
-		json_object_set_new(rep_msg, "code",
-			    json_integer(JSONRPC_STATUS_METHOD_NOT_FOUND));
+		                    json_string("prompt requires open or close"));
+		json_object_set_new(rep_msg, "code", json_integer(JSONRPC_STATUS_METHOD_NOT_FOUND));
 		return 1;
 	}
 
