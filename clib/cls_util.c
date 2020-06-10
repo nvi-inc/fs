@@ -209,7 +209,8 @@ int	length, *rtn1, *rtn2, msgflg, save;
 int	class;
 char	*buffer;
 {
-int     nchars, sb, sc, nw;
+ssize_t nchars;
+int     sb, sc, nw;
 struct  cls_buf msg;
 char *s1;
 void sem_take(), sem_put();

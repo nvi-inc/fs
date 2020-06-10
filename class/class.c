@@ -49,7 +49,8 @@ key_t key;
 long    class;
 struct  cls_buf msg;
 void sem_take(), sem_put();
-int nchars,i;
+ssize_t nchars;
+int i;
    setup_ids();
 
 printf(" allocated sem %d\n",shm_addr->sem.allocated);

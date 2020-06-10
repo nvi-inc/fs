@@ -102,7 +102,8 @@ void skd_ini( key)
 key_t key;
 {
 struct skd_buf sched;
-int status;
+ssize_t status;
+
 
 msqid = msgget( key, 0);
 
@@ -195,7 +196,8 @@ char nsem[6];
 unsigned to;
 int *run_index;
 {
-int	status, i, n;
+ssize_t status;
+int	i, n;
 struct skd_buf sched;
 
   if (w == 'w' || w == 'p') {
@@ -358,7 +360,8 @@ int skd_chk( name, ip)
 char    name[ 5];
 int	ip[5];
 {
-int	status,i;
+ssize_t status;
+int	i;
 struct skd_buf	sched;
 int    type;
 char *s1;
@@ -406,7 +409,8 @@ int skd_end_inject_snap( name, ip)
 char    name[ 5];
 int	ip[5];
 {
-int	status,i;
+ssize_t status;
+int	i;
 struct skd_buf	sched;
 int    type;
 char *s1;
@@ -479,7 +483,8 @@ char    name[ 5];
 unsigned centisec;
 int	ip[5];
 {
-int	status,i;
+ssize_t status;
+int	i;
 struct skd_buf	sched;
 int    type;
 char *s1;
@@ -597,7 +602,8 @@ int run_index;
 void skd_clr( name)
 char    name[ 5];
 {
-int	status;
+ssize_t status;
+
 struct skd_buf	sched;
 int    type;
 char *s1;
@@ -718,7 +724,8 @@ int skd_clr_ret(ip)
      int ip[5];
 {
   struct skd_buf sched;
-  int status, i;
+  ssize_t status;
+  int i;
   
   if (!return_name[0]) {
     fprintf(stderr, "skd_clr_ret: called without return_name set\n");
