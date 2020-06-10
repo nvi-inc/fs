@@ -91,7 +91,8 @@ dist:
 	cd /; find usr2/fs-$(FS_VERSION)/bin -mindepth 1 \
 	                                            -name '*' -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION)/third_party/src/* \
-			! -iname '*.tar.gz' \
+			! -iname '*.tar.gz'   \
+			! -iname '*.template' \
 			! -iname '*.make'                     -print >> /tmp/fsdist-exclude 
 	echo usr2/fs-$(FS_VERSION)/third_party/lib                   >> /tmp/fsdist-exclude
 	echo usr2/fs-$(FS_VERSION)/third_party/include               >> /tmp/fsdist-exclude
@@ -106,7 +107,11 @@ clean:
 	rm -f `find . -name '.*~' -print`
 	rm -f `find . -name '*.pyc' -print`
 	rm -rf third_party/include third_party/lib third_party/bin
-	find third_party/src/* ! -iname '*.tar.gz' ! -iname '*.make' -delete
+	find third_party/src/* \
+		! -iname '*.tar.gz' \
+		! -iname '*.make' \
+		! -iname '*.template' \
+		-delete
 #
 rmexe:
 	rm -fr bin/*
@@ -116,7 +121,11 @@ rmdoto:
 	rm -rf oprin/readline-2.0
 	rm -f `find . -name '*.pyc' -print`
 	rm -rf third_party/include third_party/lib third_party/bin
-	find third_party/src/* ! -iname '*.tar.gz' ! -iname '*.make' -delete
+	find third_party/src/* \
+		! -iname '*.tar.gz' \
+		! -iname '*.make' \
+		! -iname '*.template' \
+		-delete
 #
 libs:
 	for dir in $(LIB_DIR); do\
