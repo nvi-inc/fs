@@ -37,6 +37,8 @@
 #include <nng/supplemental/util/platform.h>
 
 #include "../include/params.h"
+
+#include "jsonutils.h"
 #include "server.h"
 
 static bool opt_daemon = true;
@@ -75,7 +77,9 @@ int cli_main(int argc, char *argv[]) {
 
 	json_t *json = json_object();
 	json_object_set_new(json, "method", json_string(argv[1]));
-	json_object_set_new(json, "id", json_string("cli"));
+	time_t t;
+	srand((unsigned)time(&t));
+	json_object_sprintf(json, "id", "cli-%d", rand());
 
 	json_t *json_args = json_array();
 

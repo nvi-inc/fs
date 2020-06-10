@@ -867,7 +867,7 @@ void server_cmd_cb(void *arg) {
 
 	json_t *reply = json_object();
 	json_object_set_new(reply, "jsonrpc", json_string("2.0"));
-	json_object_set_new(request, "id", json_null());
+	json_object_set_new(reply, "id", json_null());
 
 	json_error_t err;
 	request = json_loadb(nng_msg_body(msg), nng_msg_len(msg), 0, &err);
@@ -897,6 +897,7 @@ void server_cmd_cb(void *arg) {
 		json_object_set_new(error, "code", json_integer(JSONRPC_STATUS_INVALID_REQUEST));
 		goto error;
 	}
+	json_object_set(reply, "id", id);
 
 	method = json_object_get(request, "method");
 	if (!json_is_string(method)) {
