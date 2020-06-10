@@ -44,6 +44,8 @@
 #include <jansson.h>
 
 #include "../include/params.h"
+
+#include "jsonutils.h"
 #include "list.h"
 #include "prompt.h"
 #include "server.h"
@@ -89,20 +91,6 @@ struct server {
 };
 
 char const *fs_command[] = {"fs", "-i", NULL};
-
-int json_object_sprintf(json_t *obj, const char *key, char *const format, ...) {
-	va_list args;
-	char *buf;
-	va_start(args, format);
-	int sz = vasprintf(&buf, format, args);
-	if (sz < 0)
-		return NNG_ENOMEM;
-	va_end(args);
-	json_t *jstr = json_string(buf);
-	json_object_set_new(obj, key, jstr);
-	free(buf);
-	return 0;
-}
 
 #ifdef FS_SERVER_SOCKET_PATH
 static int mkdir_p(char *const path) {

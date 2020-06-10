@@ -14,7 +14,7 @@ CPPFLAGS += -pthread -D_GNU_SOURCE
 
 ../bin/spub: spub.o stream.o msg.o list.o
 ../bin/ssub: ssub.o msg.o
-../bin/fsserver: fsserver.o window.o server.o list.o prompt.o stream.o msg.o 
+../bin/fsserver: fsserver.o window.o server.o list.o prompt.o stream.o msg.o jsonutils.o
 ../bin/fsclient: fsclient.o window.o stream.o msg.o list.o prompt.o $(LIBS)
 
 ../bin/shims/fs.prompt: shims/fs.prompt.o $(LIBS)
