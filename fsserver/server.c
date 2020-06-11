@@ -957,7 +957,7 @@ void server_cmd_cb(void *arg) {
 	cmd_rv      = server_cmd(s, ret, json_array_size(params) + 1, args);
 	free(args);
 
-	if (cmd_rv > 0) {
+	if (cmd_rv != 0) {
 		json_object_set_new(reply, "error", ret);
 	} else {
 		json_object_set_new(reply, "result", ret);
