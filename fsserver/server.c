@@ -851,7 +851,7 @@ int server_cmd(server_t *s, json_t *rep_msg, int argc, const char **const argv) 
 		return server_cmd_window(s, rep_msg, argc, argv);
 	}
 
-	if (strcmp(argv[0], "shutdown") == 0) {
+	if (strcmp(argv[0], "shutdown") == 0 || strcmp(argv[0], "stop") == 0)  {
 		return server_cmd_shutdown(s, rep_msg, argc, argv);
 	}
 
