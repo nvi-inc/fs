@@ -708,9 +708,9 @@ class Gui(Frame):
         cpoly = poly[:]
         cpoly.reverse()
         
-        stat = 'Coefficients:\t'
+        stat = 'Coefficients*DPFU:\t'
         for k,coeff in enumerate(cpoly):
-            stat += 'x^%s : %.3g\n\t\t' % (len(cpoly)-k-1,coeff)
+            stat += 'x^%s : %.3g\n\t\t' % (k,coeff)
         stat += '\nDPFU:\t%.3g\n\n' % DPFU
         
         self.statistics.set(stat)
@@ -1768,7 +1768,7 @@ class Gui(Frame):
         #stat = 'Polynomial: %s\nComputed DPFU: %s\nRMS/DPFU: %s' % (str(cpoly), dpfu, dpfu_div_rms)
         stat = 'Coefficients:\t'
         for k,coeff in enumerate(cpoly):
-            stat += 'x^%s : %.3g\n\t\t' % (len(cpoly)-k-1,coeff)
+            stat += 'x^%s : %.3g\n\t\t' % (k,coeff)
         stat += '\nComputed DPFU:\t%.3g\n\n' % dpfu
         stat += '\nRMS/DPFU:\t%.3g' % dpfu_div_rms
         self.statistics.set(stat)
@@ -1785,8 +1785,8 @@ class Gui(Frame):
         poly = map(lambda x: x*DPFU, poly)
         self.plot.drawFittedLine(poly, tags = ('fitted_dpfu_line',))
         stat = 'Coefficients:\t'
-        for coeff in cpoly:
-            stat += '%.3g\n\t\t' % coeff
+        for k,coeff in enumerate(cpoly):
+            stat += 'x^%s : %.3g\n\t\t' % (k,coeff)
         stat += '\nComputed DPFU:\t%.3g\n\n' % DPFU
         
         self.statistics.set(stat)
