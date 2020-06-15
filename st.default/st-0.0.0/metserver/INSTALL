@@ -64,6 +64,10 @@ Field System software.
    serial ports are usually male DTE).  Typically only transmit,
    receive, and ground need to be connected.
 
+   To set the factory RPM limit to 2500 for the MET4A, use the command:
+
+     *0100EZ*0100FL=2500 
+
    A WMT70x should be set to autosend the NMEA message (#19) with 1
    second or less interval.
 
