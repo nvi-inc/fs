@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine frinit(nst,nco)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C  FRINIT initializes arrays in freqs.ftni before reading from a schedule file.
 
@@ -32,7 +33,7 @@ C 021111 jfq Add initialization of LS2DATA
 C 31Jul2003  JMG Made itras virtual.
 C 26Aug2003  JMG made cbarrel, cinfip character strings.
 ! 2013Sep19  JMGipson made sample rate station dependent
-! 2018Oct03  JMG. Don't initialize lcode. Done elsewhere. 
+! 2018Oct03  JMG. Don't initialize lcode. Done elsewhere.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -42,10 +43,10 @@ C Input
 
 C Local
       integer i,j,k,ih
-    
+
       do j=1,nco
         do i=1,nst
-          samprate(i,j)=0.d0 
+          samprate(i,j)=0.d0
           nchan(i,j)=0
           do k=1,max_band
             trkn(k,i,j)=0.0
@@ -55,7 +56,7 @@ C Local
           cs2mode(i,j)=" "
           cs2data(i,j)=" "
         enddo
-      enddo 
+      enddo
       do i=1,nco
         do j=1,nst
           do k=1,max_chan
@@ -76,7 +77,7 @@ C Local
           enddo
         enddo
       enddo
- 
+
       do i=1,nco
         do j=1,nst
           do k=1,max_chan

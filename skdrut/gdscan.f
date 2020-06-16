@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       integer function gdscan(ibuf,nch,igdata)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C GDSCAN add the "good data offset" to the scan line
 C NOTE: ibuf and nch are modified on return.
@@ -35,6 +36,7 @@ C Local
       integer*2 ibufx(4)
       integer i
       integer ib2as ! function
+      integer ichmv ! function
 
 C  Convert the integer into a temporary buffer because
 C  ib2as can't handle array indices greater than 256.

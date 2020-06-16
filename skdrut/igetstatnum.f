@@ -19,6 +19,7 @@
 *
       integer function igetstatnum(c1)
 ! Check 1 character station ID, and return station #, or 0 if not found.
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/statn.ftni'
 

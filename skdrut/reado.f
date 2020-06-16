@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine reado(ivexnum,istn,lu,iret,ierr)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C     READO calls the routines to read a observations
 C     from a VEX file.

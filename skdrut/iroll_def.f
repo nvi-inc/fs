@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       integer function iroll_def(istep,idef,istn,icode)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
       include '../skdrincl/iroll_def_cmn.ftni'
 

@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine xfer_override(lutmp)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/skobs.ftni'
       include '../skdrincl/data_xfer.ftni'

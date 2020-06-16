@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine snap_et
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 !     JMGipson   2002Jan02  V1.00
       include 'hardware.ftni'
 
@@ -34,7 +35,7 @@
 
       return
 
-100   continue 
+100   continue
       return
       end
 

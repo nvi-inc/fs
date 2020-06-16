@@ -20,6 +20,7 @@
       SUBROUTINE VUNPDAS(stdef,ivexnum,iret,ierr,lu,
      > cidter,cnater,nstack,maxtaplen,nrec,lb,sefd,par,npar,
      > crec,crack,ctapemo,ite,itl,itg,cs2sp,ns2tap,ctlc)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     VUNPDAS gets the recording terminal information for station
 C     STDEF and converts it. Returns on error from any vex routine.
@@ -52,7 +53,7 @@ C            them, set NSTACK=2.
 C 020110 nrv Check S2 tape speed, must be LP or SLP. Make upper case.
 ! 2006Nov16 JMG Fixed initialization of ltlc.
 ! 2016Nov29 JMG. Mapps obsolete DBBC-->DBBC_DDC & DBBC/FILA10G ---> DBBC_DDC/FIL10G
-! 2016Nov29 JMG. Rack changed to character*20 from character*8 
+! 2016Nov29 JMG. Rack changed to character*20 from character*8
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -73,20 +74,20 @@ C                    section had vex error, <0 is invalid value
       character*8 crec   ! recorder
       character*20 crack ! rack
       character*128 ctapemo ! tape motion type
-      integer ite,itl,itg ! early, late, gap 
+      integer ite,itl,itg ! early, late, gap
       character*4 cs2sp ! S2 tape speed
       integer ns2tap ! number of S2 tapes
       character*2 ctlc ! two_letter_code, if none use LIDTER
 ! functions
       integer fvex_double,fvex_int,fget_station_lowl,fvex_field
       integer fvex_units,ptr_ch,fvex_len ! function
-  
+
 C
 C  LOCAL:
       character*128 cout,cunit,ctemp
       double precision d
       integer i,nch
-      logical ks2 ! true for an S2 recorder   
+      logical ks2 ! true for an S2 recorder
 C
 C
 C  Initialize in case we have to leave early.
@@ -103,7 +104,7 @@ C  Initialize in case we have to leave early.
       nrec = 1 ! default
       ite=0
       itl=0
-      itg=0 
+      itg=0
       ctapemo=''
       ks2=.false.
 
@@ -118,41 +119,41 @@ C
         if (iret.ne.0) return
         NCH = fvex_len(cout)
         IF  (NCH.GT.8.or.NCH.le.0) THEN  !
-          write(lu,'("VUNPDAS01 - Recorder type name too long: ",a)') 
+          write(lu,'("VUNPDAS01 - Recorder type name too long: ",a)')
      .    cout(1:nch)
           ierr=-1
         else
-          crec=cout(1:nch)        
+          crec=cout(1:nch)
           ks2 = cout(1:2).eq.'S2'
         endif
       endif
 
 C  2. The rack type
-C    
- 
+C
+
       ierr = 2
       iret = fget_station_lowl(ptr_ch(stdef),
      .ptr_ch('electronics_rack_type'//char(0)),
-     .ptr_ch('DAS'//char(0)),ivexnum)  
+     .ptr_ch('DAS'//char(0)),ivexnum)
       if (iret.eq.0) then
-        iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get rack name  
+        iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get rack name
         if (iret.ne.0) return
-        NCH = fvex_len(cout) 
+        NCH = fvex_len(cout)
         IF (NCH.GT.20.or.NCH.le.0) THEN  !
-          write(lu,'("VUNPDAS02 - Rack type name too long: ",a)') 
+          write(lu,'("VUNPDAS02 - Rack type name too long: ",a)')
      .    cout(1:nch)
           ierr=-2
         else
-          crack=cout(1:nch)    
+          crack=cout(1:nch)
           call capitalize(crack)
-! Map DBBC rack to DBBC_DDC 
-          if(crack .eq. "DBBC") crack = "DBBC_DDC" 
-          if(crack .eq. "DBBC/FILA10G") crack ="DBBC_DDC/FILA10G"   
+! Map DBBC rack to DBBC_DDC
+          if(crack .eq. "DBBC") crack = "DBBC_DDC"
+          if(crack .eq. "DBBC/FILA10G") crack ="DBBC_DDC/FILA10G"
         endif
       endif
-    
+
 C
-C  3. The terminal ID. 
+C  3. The terminal ID.
 C
       ierr = 3
       iret = fget_station_lowl(ptr_ch(stdef),
@@ -194,7 +195,7 @@ C  5. Number of headstacks at this station.
      .ptr_ch('headstack'//char(0)),
      .ptr_ch('DAS'//char(0)),ivexnum)
       if (iret.eq.0) then
-        iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get headstack number 
+        iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get headstack number
         if (iret.ne.0) return
         iret = fvex_int(ptr_ch(cout),i) ! convert to binary
         if (i.le.0.or.iret.ne.0.or.i.gt.2) then
@@ -208,7 +209,7 @@ C  5. Number of headstacks at this station.
      .ptr_ch('headstack'//char(0)),
      .ptr_ch('DAS'//char(0)),0) ! get second headstack statement
       if (iret.eq.0) then ! got a second one
-        iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get headstack number 
+        iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get headstack number
         if (iret.ne.0) return
         iret = fvex_int(ptr_ch(cout),i) ! convert to binary
         if (i.le.0.or.iret.ne.0.or.i.gt.2) then
@@ -274,7 +275,7 @@ C
           endif
         endif ! S2 speed and number of tapes
       endif
- 
+
 C  7. Number of recorders
 
       ierr = 7
@@ -294,7 +295,7 @@ C  7. Number of recorders
         endif
       endif
 
-C  8. Tape motion, early start, late stop, gap time. 
+C  8. Tape motion, early start, late stop, gap time.
 
       ierr = 8
       iret = fget_station_lowl(ptr_ch(stdef),
@@ -311,7 +312,7 @@ C  8. Tape motion, early start, late stop, gap time.
           call c2upper(cout(1:nch),ctapemo)
         endif
         iret = fvex_field(2,ptr_ch(cout),len(cout))  ! early start
-        if (iret.eq.0) then 
+        if (iret.eq.0) then
           iret = fvex_units(ptr_ch(cunit),len(cunit))
           if (iret.ne.0) return
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
@@ -322,9 +323,9 @@ C  8. Tape motion, early start, late stop, gap time.
           else
             ite = d ! convert to integer seconds
           endif
-        endif 
+        endif
         iret = fvex_field(3,ptr_ch(cout),len(cout))  ! late stop
-        if (iret.eq.0) then 
+        if (iret.eq.0) then
           iret = fvex_units(ptr_ch(cunit),len(cunit))
           if (iret.ne.0) return
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
@@ -335,9 +336,9 @@ C  8. Tape motion, early start, late stop, gap time.
           else
             itl = d ! convert to integer seconds
           endif
-        endif 
+        endif
         iret = fvex_field(4,ptr_ch(cout),len(cout))  ! time gap
-        if (iret.eq.0) then 
+        if (iret.eq.0) then
           iret = fvex_units(ptr_ch(cunit),len(cunit))
           if (iret.ne.0) return
           iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d) ! convert to binary
@@ -348,7 +349,7 @@ C  8. Tape motion, early start, late stop, gap time.
           else
             itg = d ! convert to integer seconds
           endif
-        endif 
+        endif
       endif
 
       iret=0

@@ -1,6 +1,9 @@
 This file contains a summary of changes made and why.
+2020Jun16 ../skdrut/gnpas.f Got rid of a bunch of stuff dealing with headstacks.
+          drudg/*.f and ../skdrut/*.f.  Added implicit none to all routines EXCEPT xat.f
+          Fixed some variables that were not defined
 2020Jun08 Removed broadband stuff from ../skdrincl/statn.ftni and put in ../skdrincl/broadband.
-2020Jun08 Added staiton dependent parameter ibb_off for extra time in writing: 
+2020Jun08 Added station dependent parameter ibb_off for extra time in writing: 
           skrdrini.f, sanp.f, read_broadband_section.f. Also initialize to 0 broadband stuff in skdrini.f
 2020May29 snap.f. Fixed bug where if a station had early start then there would be no PREOB. 
 2020Feb20 proc_dbbc_bbc.f, proc_lba_ifp.f, proc_mracks_vc.f proc_vracks_bbc.f,proc_vc_cmd.f. Added implicit none.

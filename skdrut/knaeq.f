@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       LOGICAL FUNCTION KNAEQ(L1,L2,ILEN)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     Returns TRUE if all words of names L1 and L2 are equal.  This is
 C     a test of equality of string names.

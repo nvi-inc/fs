@@ -22,9 +22,10 @@
      .LDSIGN,LDCDMS,IDECD,IDECM,DECS,DECRAD,EPOCH,
      .OINC,OECC,OPER,ONOD,OANM,OAXS,OMOT,IEPY,OEDY,
      .pcount)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     UNPSO unpacks the record holding information on a source entry version
-C     ****pcount UNIMPLEMENTED**** 
+C     ****pcount UNIMPLEMENTED****
 C     pcount=5 gets only source names
 C            17 gets names, ra, dec
 C            26 gets satellite info
@@ -47,7 +48,7 @@ C  OUTPUT:
       integer*2 ldsign
 C     IERR - error, 0=OK, -100-n=error reading nth field in the record
 C IAU and common names
-      integer*2 LNAME1(max_sorlen/2), LNAME2(max_sorlen/2) 
+      integer*2 LNAME1(max_sorlen/2), LNAME2(max_sorlen/2)
 C   Celestial Source Info:
       integer*2 LRAHMS(8)
 C          - right ascension, in form hhmmss.ssssssss

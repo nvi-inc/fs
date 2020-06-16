@@ -19,8 +19,9 @@
 *
       SUBROUTINE vunpif(modef,stdef,ivexnum,iret,ierr,lu,
      .cifref,flo,cs,cin,cp,fpcal,fpcal_base,nifdefs)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
-C     VUNPIF gets the IFD def statements 
+C     VUNPIF gets the IFD def statements
 C     for station STDEF and mode MODEF and converts it.
 C     All statements are gotten and checked before returning.
 C     Any invalid values are not loaded into the returned
@@ -37,17 +38,17 @@ C
 C
 C  History:
 C 960522 nrv New.
-C 970114 nrv For Vex 1.5 get IF name from def directly instead of ref name, 
+C 970114 nrv For Vex 1.5 get IF name from def directly instead of ref name,
 C            and add polarization to call.
 C 970124 nrv Move initialization to front.
-C 971208 nrv Add phase cal spacing and base frequency. 
+C 971208 nrv Add phase cal spacing and base frequency.
 C 990910 nrv Change default LO value to -1.0 meaning none.
 C 991110 nrv Allow IF type 3N to be valid.
 ! 2004Oct19 JMGipson.  Removed warning message if LO was negative.
 ! 2006Oct06 JMGipson.  changed ls,lin,lp --> (ASCII) cs,cin,cp
 !                      Made IF="1" a valid choice. An S2 VEX schedule had this.
 ! 2012Sep17 JMGipson.  Madef a1,a2..a4,...d4 valid choices since this is what DBBCs expect.
-!            Also if an unrecognized value, issue warning message but leave alone. 
+!            Also if an unrecognized value, issue warning message but leave alone.
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -73,7 +74,7 @@ C                    <0 indicates invalid value for a field
 
       integer num_valid_if
       parameter (num_valid_if=29)
-      character*2 cvalid_if(num_valid_if) 
+      character*2 cvalid_if(num_valid_if)
 
 C
 C  LOCAL:
@@ -122,7 +123,7 @@ C  1.1 IF def
         endif
 
 C  1.2 IF input
-  
+
         ierr = 12
         iret = fvex_field(2,ptr_ch(cout),len(cout)) ! get input
         if (iret.ne.0) return
@@ -132,17 +133,17 @@ C  1.2 IF input
           write(lu,'(a)')
      >       "VUNPIF04 - IF input must be 1 or 2 characters"
         else
-          cin(id)=cout(1:nch) 
-          cin_tmp=cin(id) 
+          cin(id)=cout(1:nch)
+          cin_tmp=cin(id)
           call capitalize(cin_tmp)
-          iwhere=iwhere_in_string_list(cvalid_if,num_valid_if,cin_tmp) 
-          if(iwhere .eq. 0) then                     
-            write(lu,'("VUNPIF05: Warning. Unrecognized IF ",a)') 
+          iwhere=iwhere_in_string_list(cvalid_if,num_valid_if,cin_tmp)
+          if(iwhere .eq. 0) then
+            write(lu,'("VUNPIF05: Warning. Unrecognized IF ",a)')
      >        cin(id)
           endif
         endif
 
-C  1.3 Polarization 
+C  1.3 Polarization
 
         ierr = 13
         iret = fvex_field(3,ptr_ch(cout),len(cout)) ! get IFD ref

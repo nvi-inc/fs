@@ -26,7 +26,7 @@ equip_type.o fakesum.o fdrudg.o find_num_chans_rec.o find_recorder_speed.o \
 get_version.o getqual.o  getstr.o gtsnp.o \
  iaddpc.o iaddtr.o init_hardware_common.o kcheckgrpor.o \
 label.o lablog.o labsnp.o lists.o lspin.o lstsum.o lstsum_info.o lstsumo.o \
-luff.o lv_open.o  nhdif.o \
+luff.o lv_open.o   \
 point.o port.o prcov.o prcov_vex.o proc_check8bbc.o \
 proc_exper_initi.o proc_form.o proc_ifd.o proc_lo.o  \
 proc_mk5_init1.o proc_mk5_init2.o proc_disk_tracks.o proc_norack.o \
@@ -78,7 +78,7 @@ FFLAGS=-C -c
 CFLAGS= -c -DF2C
 LDFLAGS += -lf2c
 else
-FFLAGS=-fno-range-check -fno-underscoring -g -D READ_LINE -finit-local-zero -fno-automatic -fbackslash
+FFLAGS=-fno-range-check -fno-underscoring -g -D READ_LINE
 ifeq ($(shell uname -m),x86_64)
 FFLAGS+=-fdefault-integer-8 -finteger-4-integer-8
 endif

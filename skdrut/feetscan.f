@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       integer function feetscan(ibuf,nch,ipas,ifeet,idrive,istn,icod)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C  FEETSCAN converts the footage and pass number and
 C  puts them into the scan buffer.
@@ -33,7 +34,7 @@ C Common blocks
 
 C Input and Output
       integer*2 ibuf(*)
-      integer nch ! character to start with, updated 
+      integer nch ! character to start with, updated
       integer istn,icod
       integer ipas,ifeet,idrive
 
@@ -68,6 +69,6 @@ C  Max length is 5 characters, as set up in newscan.
       nchx=ib2as(ifeet,ibufx,1,5+o'40000'+o'400'*5)
       nch=ichmv(ibuf,nch,ibufx,1,5)
       feetscan=nch
-       
+
       return
       end

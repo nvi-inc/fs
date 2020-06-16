@@ -19,6 +19,7 @@
 *
       SUBROUTINE wrdur(ksw,istart,idur,iqual,ih,im,is,
      .  iz2,iz3,lu,isetup)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C  WRDUR writes the dur lines for the VLBA
 C  pointing schedules.

@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine prcov_vex
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C Print PI cover letter from VEX files
 C 000516 nrv New.

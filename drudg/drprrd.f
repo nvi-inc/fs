@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine drprrd(ivexnum)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C   DRPRRD reads the lines in the $PARAM section needed by drudg.
       include '../skdrincl/skparm.ftni'

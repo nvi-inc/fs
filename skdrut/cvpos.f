@@ -19,6 +19,7 @@
 *
       SUBROUTINE CVPOS(NSOR,ISTN,MJD,UT,AZ,EL,HA,DC,X30,Y30,X85,Y85,
      .                 KUP)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C   CVPOS converts source ra and dec into az,el,ha,x, and y; or satellite
 C         elememts into the same plus dec.
@@ -32,7 +33,7 @@ C        NSOR   - Source index number into DB arrays
 C        ISTN   - Station index number into DB arrays
 C        MJD    - Modified Julian date (from JULDA)
       real*8 UT ! UT for which positions requested
-     
+
 C  OUTPUT VARIABLES:
       real*4 az,el,ha,dc,x30,y30,x85,y85
 C        AZ,EL,HA,DC,X30,Y30,X85,Y85 - az,el,ha,dc,and x,y at input date and time
@@ -84,14 +85,14 @@ C     WEH  830523  Add satellites, add DC to arguments.
 C     NRV  880315  DE-COMPC'D
 C     GAG  881221  ADDED HORIZON AND COORDINATE MASK CHECK WRITTEN BY NRV
 C     NRV  900125  Added type 6 = SEST with 30 degree sun avoidance
-C     NRV  900208  Reversed XYEW and XYNS for schedule dates after 
+C     NRV  900208  Reversed XYEW and XYNS for schedule dates after
 C                  April 1, 1990 (this corrects the erroneous designations)
 C     NRV  900309  Added call to SUNAZEL for SEST limit check
 C     931012 nrv Remove statement functions for acos, asin//REPLACED
 C                Remove DMOD and check HA for 2PI
 C     940804 nrv Changed limit on horizon check to i<nhorz because the
 C                value is checked between (i) and (i+1).
-C 960223 nrv Change to using (az,el) points actually on the horizon 
+C 960223 nrv Change to using (az,el) points actually on the horizon
 C            and interpolating between the line segments. Keep the
 C            coordinate mask unchanges.
 C
@@ -203,7 +204,7 @@ C         (1 = ha/dec, 5 = Richmond)
      .      (DC.LT.CO1MASK(I,ISTN).OR.DC.GE.CO1MASK(I+1,ISTN)))
             I=I+1
           ENDDO
-          KUP=KUP.AND.ABS(HA).LE.CO2MASK(I,ISTN) 
+          KUP=KUP.AND.ABS(HA).LE.CO2MASK(I,ISTN)
         ENDIF
 C         For x,y mounts with fixed axis oriented EW, check x and y
 C      (2=XYEW)
@@ -280,7 +281,7 @@ C     Now check horizon mask for stations that have one.
           else
             eli=((elhorz(i+1,istn)-elhorz(i,istn))/
      .      (azhorz(i+1,istn)-azhorz(i,istn)))
-     .      *(az-azhorz(i,istn)) + elhorz(i,istn) 
+     .      *(az-azhorz(i,istn)) + elhorz(i,istn)
           endif ! inf slope
         endif
         KUP=KUP.AND.EL.GE.eli

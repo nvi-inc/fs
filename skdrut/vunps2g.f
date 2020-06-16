@@ -19,9 +19,10 @@
 *
       SUBROUTINE vunps2g(modef,stdef,ivexnum,iret,ierr,lu,
      .cpassl,npassl)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
-C     VUNPS2G gets the group order for S2 recorders 
-C     for station STDEF and mode MODEF. 
+C     VUNPS2G gets the group order for S2 recorders
+C     for station STDEF and mode MODEF.
 C     All statements are gotten and checked before returning.
 C     Any invalid values are not loaded into the returned
 C     parameters.
@@ -73,7 +74,7 @@ C  1.1 <group>
       ierr = 11
       i=1
       do while (i.le.max_pass.and.iret.eq.0)
-        iret = fvex_field(i,ptr_ch(cout),len(cout)) ! get field 
+        iret = fvex_field(i,ptr_ch(cout),len(cout)) ! get field
         if (iret.eq.0) then
           il=fvex_len(cout)
           cpassl(i)=cout(1:il) ! save the pass-order list

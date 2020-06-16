@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE SLATE(LINSTQ,luscn,ludsp)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     SLATE reads/writes station late stops
 C

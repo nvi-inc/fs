@@ -19,6 +19,7 @@
 *
       SUBROUTINE unpco(IBUF,ILEN,IERR,
      .LCODE,LSUBGR,FREQRF,FREQPC,Ichan,LMODE,VCBAND,itrk_map,cswit,ivc)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     UNPCO unpacks the record holding information on a frequency code
 C     element.
@@ -39,7 +40,7 @@ C 970206 nrv Remove itr2 and add headstack index
 C 970206 nrv Change max_pass to max_subpass
 C 991122 nrv Change LMODE to allow 16 characters.
 ! 2006Nov09 JMG. Changed logical for checking valid bandwidths
-! 2010.06.15 JMG. Better error message if bad track #. 
+! 2010.06.15 JMG. Better error message if bad track #.
 ! 2010.10.11 JMG. Increased number of valid BWs
 ! 2015Jun05  JMG Modified to use new version of itras.
 
@@ -243,8 +244,8 @@ C                              (        Find the opening parenthesis
             if (ihead.le.max_headstack)  then
                ibit=(icnt-1)/2
                isb=icnt-2*ibit
-               ibit=ibit+1  
-               call add_track(itx,isb,ibit,ihead,ichan,ipas)       
+               ibit=ibit+1
+               call add_track(itx,isb,ibit,ihead,ichan,ipas)
             endif
           endif
           ict=ict+ind

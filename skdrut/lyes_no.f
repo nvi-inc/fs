@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       character*3 function lyes_no(kdum)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
       logical kdum
       if(kdum) then

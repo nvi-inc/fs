@@ -28,6 +28,7 @@ C 03July11 JMG Modified to use sktime.
 ! 04Oct15  JMGipson. Completely rewritten.
 ! 2005Nov30. Made the num_obs an argument. Previously used nobs.
 ! 2006OCt03. Modified to use ctime2dmjd to find djday
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/skobs.ftni'
 C Input

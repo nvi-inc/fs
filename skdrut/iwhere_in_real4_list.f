@@ -21,6 +21,7 @@ C     Last change:  JG    9 Nov 2006    9:19 am
 !     Last change
 !*************************************************************************
       function iwhere_in_real4_list(r4list,num_list,value)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       INTEGER iwhere_in_real4_list
       INTEGER num_list
       real*4 r4list(*),value

@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE READS(IUNIT,KERR,IBUF,IBLEN,IL,IMODE)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C  READS reads the schedule file lines.
 C
@@ -38,7 +39,7 @@ C  OUTPUT:
 C      ibuf - buffer for reading
 C     IL - length of record read IN CHARACTERS, -1 means EOF
 C     KERR - error return from FMP
-C 
+C
 C  LOCAL:
       integer jchar ! function
 C HISTORY:
@@ -47,7 +48,7 @@ C                 CLEAR BUFFER BEFORE EACH READ!  810705
 C    880315 NRV DE-COMPC'D
 C    880524 PMR changed READF to READL
 C               added char2hol calls
-C    900205 NRV Added check for zero-length records, if found read 
+C    900205 NRV Added check for zero-length records, if found read
 C               another record.
 C    930225 nrv implicit none
 C    951002 nrv Add mode 3 = read next line of any type
@@ -77,7 +78,7 @@ C
 C
 C     2. This section handles mode 2: get next line until "$".
 C
-      IF  (IMODE.EQ.2) THEN 
+      IF  (IMODE.EQ.2) THEN
         call char2hol ('**',IBUF,1,2)
         DO WHILE (JCHAR(IBUF,1).EQ.OSTAR.AND.IL.NE.-1.AND.KERR.EQ.0.AND.
      .         JCHAR(IBUF,1).NE.ODOLLAR.or.il.eq.0)
@@ -87,7 +88,7 @@ C
         END DO  !
       END IF  !
 C
-C     3. This section handles mode 3: get next line 
+C     3. This section handles mode 3: get next line
 
       if (imode.eq.3) then
           CALL IFILL(IBUF,1,IBLEN*2,oblank)

@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       integer function durscan(ibuf,nch,idur)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include '../skdrincl/skparm.ftni'
 C DURSCAN add the duration to the scan line
 C NOTE: ibuf and nch are modified on return.

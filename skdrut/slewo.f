@@ -19,6 +19,7 @@
 *
       SUBROUTINE SLEWo(NSNOW,MJD,UT,NSNEW,ISTN,cwrap_cur,cwrap_new,
      > TSLEW,lookah,trise)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C   SLEWT calculates the slew time and the cable wrap
 C   ***NOTE*** This is the version as of 10/93 before the pre-calculated
@@ -74,7 +75,7 @@ C   LOCAL VARIABLES
       character*2 cwrap1, cwrap2
       character cwraptmp
       integer idir     !<>0, some error on kcont
-      
+
 
       LOGICAL KUP ! Returned from CVPOS, TRUE if source within limits
 C        TSLEWP,TSLEWC - previous, current slew times.  For iterating.
@@ -122,7 +123,7 @@ C                    this calculates the current telescope position
       NLOOPS = 0
 100   NLOOPS = NLOOPS + 1
       TSLEWP = TSLEWC
-    
+
 C     This calculates the new source location:
       CALL CVPOS(NSNEW,ISTN,MJD,UT+TSLEWC,
      >   AZNEW,ELNEW,HANEW,DECNEW,X30NEW,Y30NEW,X85NEW,Y85NEW,KUP)
@@ -154,7 +155,7 @@ C       Compute slewing time to this position.
       endif !check within an hour
       IF (.NOT.KUP) GOTO 980
 C
-      AZ1=AZNOW      
+      AZ1=AZNOW
       cwrap1=cwrap_cur
       AZ2=AZNEW
       cwrap2=cwrap_new
@@ -206,7 +207,7 @@ C     We get here if the slew has converged OR we iterated 5 times.
         RSTCON(2) = FLOAT(ISTCON(2,ISTN))
         IF(TSLEW.LE.(AMAX1(RSTCON(1),RSTCON(2))+5.))   TSLEW=0.0
         cwrap_new=cwrap2
-      
+
 C       Final slewing time is the larger of
 C       "time to rise" (trise) and "slew to risen position" (tslew
 C       calculated using az,el at UT+trise).

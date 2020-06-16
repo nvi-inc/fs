@@ -20,6 +20,7 @@
       SUBROUTINE snap_fast(idirSpin,ISPM,SPS,nrec)
 ! write out commands:
 !    sfastf, fastf, fastr, sfastr
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 !
 !    JMGipson   2002Jan02  V1.00  output command to move tape fast forward or reverse.
       include 'hardware.ftni'

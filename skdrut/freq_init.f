@@ -20,6 +20,7 @@
       subroutine freq_init
 ! intilize the frequency part
 C   COMMON BLOCKS USED
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
 ! local

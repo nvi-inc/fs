@@ -19,6 +19,7 @@
 *
       subroutine CheckMk5xlat(itrk,ifan_fact,num_chans_obs,
      >itrack_off,ierr)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 !     Check to see if we can translate Mk5 tracks simply.
       include '../skdrincl/skparm.ftni'
 

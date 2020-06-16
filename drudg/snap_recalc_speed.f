@@ -19,6 +19,7 @@
 *
       subroutine snap_recalc_speed(luscn,kvex,speed_ft,cs2speed,
      >   cspeed,ierr)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
       include 'hardware.ftni'
       integer ierr

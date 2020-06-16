@@ -25,6 +25,7 @@
      .            IYR2,IDAYR2,IHR2,MIN2,ISC2,LU,IDAYP,
      .            idayrp,ihrp,minp,iscp,iobs,irecp,
      .            idayr_save,ihr_save,min_save,isc_save)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     VLBAT makes an observing file for VLBA DAR/REC systemsf
 C
@@ -54,16 +55,16 @@ C  LOCAL
       integer itemp
       character*1 cspdir ! tape direction
       integer irec,idir,ispinoff,ihead,idx
-     
+
       integer iwr
       integer isp,ispm,itu
       real sps
       logical ktape,ktrack,kcont,kauto
-     
+
       logical kspinoff ! true if we need to spin the tape down
 C                          to the end before changing it
-     
-   
+
+
       integer*2 ldirr
       LOGICAL KNEWTP,KNEWT !true for a new tape; new tape routine
       real tspin ! functions
@@ -73,7 +74,7 @@ C                          to the end before changing it
 
 C  INITIALIZED:
       DATA ldirr/2HR /
-     
+
 C
 C
 C  HISTORY:
@@ -144,7 +145,7 @@ C
 C  Add a comment if a new tape is to mounted before the next observation
 
       kauto = tape_allocation(istn).eq.'AUTO'
-     
+
       irec=irecp
       if (kauto) irec = 1 ! always, for dynamic
       IDIR=+1
@@ -170,7 +171,7 @@ Cdyn
           if (iobs.le.1) then
             irec=1
           else ! Turn off recording on the current tape and postpass it
-            
+
           endif
         write(lu,*) " "
         write(lu,'(a)') '!*   ** NEW TAPE **   *!'
@@ -195,28 +196,28 @@ C         pause here
           itemp=1
         endif
 C  The "corresponding pass" within the mode may be 1-28 depending on the
-C  mode. It is not simply the direction, except for modes B and C. 
+C  mode. It is not simply the direction, except for modes B and C.
 
 C  Calculate tape spin time and block stop time
 
-     
+
 C  If this observation starts at either end of the tape,
 C  then we don't need to have the spin blocks, just put REWIND in setup block.
 
-   
+
       if (iobs.eq.0.or.idayr.gt.idayrp) call wrdate(lu,iyr,idayr)
 C     Setup block. None needed for continuous unless change of direction.
-  
+
 C  Source name, ra, dec in J2000 coordinates
 
       call wrsor(csname,irah2,iram2,ras2,ldsign2,idecd2,idecm2,decs2,lu)
       write(lu,'(a)') "qual=999"
       write(lu,'(a)') "disk=off"
-      write(lu,'("stop=",i2.2,"h",i2.2,"m",i2.2,"s ","!NEXT!")') 
+      write(lu,'("stop=",i2.2,"h",i2.2,"m",i2.2,"s ","!NEXT!")')
      >   ihr,imin,isc
       write(lu,'(a)') "qual=  0"
       write(lu,'(a)') "disk=off"
-      write(lu,'("stop=",i2.2,"h",i2.2,"m",i2.2,"s ","!NEXT!")') 
+      write(lu,'("stop=",i2.2,"h",i2.2,"m",i2.2,"s ","!NEXT!")')
      >  ihr2,min2,isc2
 
 C  Set up tracks for forward or reverse
@@ -238,10 +239,10 @@ Cdyn
 C************************************************
 C       call vlbap(lu,icod,ierr)
 C************************************************
-    
+
 
 C  This is the block for recording
-  
+
       if (idayr2.gt.idayr) call wrdate(lu,iyr2,idayr2)
 
 C *** First cycle: specify channel assignments
@@ -257,9 +258,9 @@ Cdyn  The tape direction has already been set up above
 Cdyn  Comment out the above for auto
       iwr = 1
       ktape=.false.
- 
+
 C  Loop begins in this block
-  
+
 
 C  (save the last write for the end of outer loop)
 C  Save tape info for checking on next pass
@@ -270,7 +271,7 @@ C    .              SPEED(ICOD,istn))
       itu=itearl(istn)
       if (tape_motion_type(istn).eq.'CONTINUOUS'.and.
      .idir.eq.idirp) itu=0
-  
+
       IDAYP=IDAYR
       idayrp=idayr2
       ihrp=ihr2

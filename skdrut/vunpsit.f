@@ -19,6 +19,7 @@
 *
       SUBROUTINE vunpsit(stdef,ivexnum,iret,ierr,lu,
      .cidpos,cNAPOS,POSXYZ,POSLAT,POSLON,cOCCUP,nhz,azh,elh)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     VUNPSIT gets the site information for station
 C     STDEF and converts it.
@@ -99,7 +100,7 @@ C  2. Site ID. Standard 2-letter code.
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       if (iret.ne.0) return
       NCH = fvex_len(cout)
-      IF  (NCH.gt.2) THEN 
+      IF  (NCH.gt.2) THEN
         write(lu,'("VUNPSIT02 - Site code must be 2 characters")')
         ierr=-2
       else

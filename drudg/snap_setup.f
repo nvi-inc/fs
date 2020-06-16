@@ -19,6 +19,7 @@
 *
       subroutine snap_setup(ipas,istnsk,icod,iobs,kerr)
 ! include files.
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'           !This contains info only about the recorders.
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
@@ -28,8 +29,8 @@
 ! History
 !  2006Nov30. JMG. Code type is 1 for no recorder.
 !  2007Jul27  JMG  Made Mark5 no recorder.
-!  2012Oct09  JMG. If no recorder don't issue pass number etc. 
-! 2015Jun05 JMG. Repalced squeezewrite by drudg_write. 
+!  2012Oct09  JMG. If no recorder don't issue pass number etc.
+! 2015Jun05 JMG. Repalced squeezewrite by drudg_write.
 ! passed variables
       integer istnsk    !index #.
       integer ipas(*)   !Pass number
@@ -61,10 +62,10 @@
         endif
       endif
 
-      call setup_name(icod,cnamep)     
+      call setup_name(icod,cnamep)
 
 C     Don't use the pass number for Mk5-only OR for no recorder.
-      if(km5disk .or. knorec(1)) then 
+      if(km5disk .or. knorec(1)) then
          write(lufile,"(a)") cnamep
       else
          write(ldum,"(a,'=',i3)") cnamep,ipas(istnsk)

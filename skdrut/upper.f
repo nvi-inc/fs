@@ -21,6 +21,7 @@ C@UPPER
 
 ! AEM 20041223 char -> char*1
       character*1 function upper(c)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C        if c is a character, return its uppercase value.  otherwise
 C     return it unchanged.

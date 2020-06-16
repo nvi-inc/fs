@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       integer FUNCTION IGetsrcNum(lsrc)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/sourc.ftni'
 
@@ -37,7 +38,7 @@ C 970406 nrv Minimum matching
 
 !AEM20080731 initialize
       igetsrcnum = 0
-      
+
 ! first, see if we can read a number.
 !      read(lsrc,*,err=100) igetSrcNum
 !AEM20080731 bugfix, assume we read an integer number

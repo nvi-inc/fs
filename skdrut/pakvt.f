@@ -18,8 +18,9 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine pakvt(ibuf)
-C Format the "T" line 
+C Format the "T" line
 C 990621 nrv New, actually re-new. Removed from snapintr.
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/statn.ftni'
@@ -29,7 +30,7 @@ C Input
 
 C     Write terminal line
 C Example:
-C T 102  KO-VLBA  1x56000  17640   X   900   S   750 
+C T 102  KO-VLBA  1x56000  17640   X   900   S   750
 C          X 1.0 0.9453 0.0547 S 1.0 0.9 695 0.0305
 
 C     begin PAKVT

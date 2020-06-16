@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine proc_enable_repro(icode,khead2active)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/freqs.ftni'
@@ -44,7 +45,7 @@ C  Remember that tracks are VLBA track numbers in itrk.
       integer i                 ! loop counter
       integer itrkrate
       logical kgrp              !a  group of tracks
-      logical kok 
+      logical kok
 
       integer z8000
       data Z8000/Z'8000'/

@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE idchk(inum,cstnid,luscn)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C  This subroutine checks for identical station id characters and
 C  replaces the second with the next character alphabetically.

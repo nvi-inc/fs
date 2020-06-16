@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE DRSET(LINSTQ)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C   DRSET reads certain parameter values from the $PARAM section
 C
@@ -72,7 +73,7 @@ C               - Key word, longest is 22 characters
      >"GT","HD","ID","JA",
      >"LO","XS","MI","MT",
      >"MB","MN","MS","SM",
-     >"M6", 
+     >"M6",
      >"MD","MO","NR","PA","PO",
      >"PS","PR","PP","PF",
      >"PI","SP","SA","SO",
@@ -164,10 +165,10 @@ C  Numerical values
       else if(ckey .eq. 'SF') then   !srcfloor takes two parameters. Read 2nd.
           CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
       endif
- 
+
 C  5.  Test to see if there is more to the line which we need to
 C      decode.  If so, go back to parse some more.
- 
+
 900   IF ((LINSTQ(1)-ICH).GT.0) GOTO 100
 C
       RETURN

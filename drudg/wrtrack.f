@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE wrtrack(idx,lu,iblen,icod)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C  wrtrack writes the track lines for VLBA pointing files.
 C

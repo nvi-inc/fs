@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       real function counter_init(km5,k4,ks2,iTapeLength)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       logical k4
       logical ks2
       logical km5

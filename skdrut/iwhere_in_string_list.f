@@ -20,6 +20,7 @@
 !     Last change:  JG   12 May 2000    8:09 am
 !*************************************************************************
       function iwhere_in_string_list(list,num_list,lvalue)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       INTEGER iwhere_in_string_list
       INTEGER num_list
       CHARACTER*(*) list(*),lvalue

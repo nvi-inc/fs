@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE PROCINTR
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C This routine writes out the header information for proc files.
 C into lu_outfile.
@@ -40,7 +41,7 @@ C 991210 nrv Write equipment name from common.
 C 991214 nrv Remove calling parameters, not nneeded.
 ! 2005Aug08 JMGipson.  Simplified.
 ! 2006Nov30 Use cstrec(istn,irec) instead of 2 different arrays
-! 2018Jul20 Moved writing of drudg version to subrotine. 
+! 2018Jul20 Moved writing of drudg version to subrotine.
 
 C Input
 !    None.
@@ -59,7 +60,7 @@ C
      > cprfx,cexper,cstnna(istn),cpocod(istn)
 
       call write_drudg_version_line(lu_outfile)
-   
+
 
       write(lu_outfile,'(5a,$)')
      >   '"< ',cstrack(istn),' rack >< ',cstrec(istn,1), ' recorder 1>'

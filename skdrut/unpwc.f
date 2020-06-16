@@ -21,6 +21,7 @@
      .LRAHMS,IRAH,IRAM,RAS,RARAD,
      .LDSIGN,LDCDMS,IDECD,IDECM,DECS,DECRAD,
      .EPOCH,ICH)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     UNPWC unpacks celestial source information from source entry record.
 C           This routine is a utility for unpso.

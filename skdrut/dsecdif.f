@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       double precision function dsecdif(mjd1,ut1,mjd2,ut2)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C  ISECDIF coputes the number of seconds different between time
 C  1 and time 2, in the sense of (time1 minus time2).

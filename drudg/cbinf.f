@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine cbinf(cable,wrap)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C     CBINF returns a printable string telling which wrap
 C     corresponds to the single hollerith character input.
@@ -46,4 +47,4 @@ C  Initialized
 
       return
       end
-      
+

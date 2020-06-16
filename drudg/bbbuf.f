@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 	subroutine bbbuf(imode,icod,fr)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C     BBBUF creates buffers that hold the lines with bbsynth commands
 C     This routine is called only for switched sequences
@@ -51,7 +52,7 @@ C LOCAL
       do ix=1,nchan(istn,icod)
         if(mod(iz,5) .eq. 0) then
           cbuf= ' bbsynth = '
-	  iy = 11 
+	  iy = 11
         endif
 
 	if (fr(ix).ne.0.0) then

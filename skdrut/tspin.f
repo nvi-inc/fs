@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       REAL FUNCTION TSPIN(IFEET,ISPM,SPS,iTapeSpinDelay)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     TSPIN computes the time required to spin the tape at 270 ips=22.5 fps
 C     IFEET is the number of feet to move

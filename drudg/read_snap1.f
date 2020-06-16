@@ -18,10 +18,11 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine read_snap1(cbuf,cexper,iyear,cstn,cid1,cid2,ierr)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C Read the first comment line of a SNAP file in free-field format.
 C Format:
-C" VT2       1996 SHANG     S  
+C" VT2       1996 SHANG     S
 C           read(cbuf,9001) cexper,iyear,cstn,cid !header line
 C9001        format(2x,a8,2x,i4,1x,a8,2x,a2)
 
@@ -40,7 +41,7 @@ C Output
       integer ierr
 ! local
 
-      ierr=0 
+      ierr=0
       cbuf(1:1)=" "   !get rid of first character.
       read(cbuf,*) cexper,iyear,cstn,cid1,cid2
       write(*,*) cexper,iyear,cstn,cid1,cid2

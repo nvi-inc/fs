@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine lv_open(ierr)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -69,6 +70,6 @@ C  1. Prompt for output file name cfile=''
             return
           endif
         endif ! file exists/new file
-      enddo 
+      enddo
       return
       end

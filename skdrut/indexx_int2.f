@@ -19,7 +19,8 @@
 *
       SUBROUTINE indexx_int2(n,arr,indx)
 ! From numerical recipes
-! on return indx is key into values. 
+! on return indx is key into values.
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       INTEGER n,indx(n),M,NSTACK
       integer*2 arr(n)
       PARAMETER (M=7,NSTACK=50)

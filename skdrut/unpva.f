@@ -20,6 +20,7 @@
       SUBROUTINE unpva(IBUF,ILEN,IERR,LIDANT,LNAANT,LAXIS,
      .AXISOF,SLRATE,ANLIM1,ANLIM2,DIAMAN,LIDPOS,LIDTER,lidhor,
      .ISLCON,ipcount)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     UNPVA unpacks a record containing antenna information.
 C
@@ -83,7 +84,7 @@ C
      .   ((JCHAR(IBUF,IC1).LT.OCAPA.OR.JCHAR(IBUF,IC1).GT.OCAPZ)
      ..and.(jchar(ibuf,ic1).lt.OSMALLA.or.jchar(ibuf,ic1).gt.OSMALLZ)
      ..and.(JCHAR(IBUF,IC1).LT.Oone .OR.JCHAR(IBUF,IC1).GT.Onine)))
-     .  THEN 
+     .  THEN
         IERR = -101
         RETURN
       END IF
@@ -182,7 +183,7 @@ C     else
 C       idter = id
 C     END IF
 C
-C     The horizon ID (optional, blank if not there). 
+C     The horizon ID (optional, blank if not there).
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       call char2hol ('  ',LIDHOR,1,2)

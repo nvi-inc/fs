@@ -20,6 +20,7 @@
       subroutine put_esc_in_string(ldum)
 ! Very simple routine to put an escape if it see a naked "@"
 ! passed
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       character*(*) ldum
 ! function
       integer trimlen
@@ -27,6 +28,7 @@
       character*1024 ltemp
       integer i,ind,iptr
       character*1 lslash
+      integer nch
 
       lslash=char(92)          !\
 

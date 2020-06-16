@@ -19,6 +19,7 @@
 *
       SUBROUTINE LSPIN(iDIR,ISPM,SPS,IBUF2,NCH,crec,nrec)
 C LSPIN  forms a buffer with the SNAP command FASTx=nnMmmS or SFASTx
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
       include '../skdrincl/skparm.ftni'
 C
@@ -26,7 +27,7 @@ C Input:
       integer idir,ispm,nch,nrec
       real sps
       integer*2 IBUF2(ibuf_len)
-      character*1 crec 
+      character*1 crec
 C
 C MODIFICATIONS - 880411 NRV DE-COMPC'D
 C nrv 930407 implicit none

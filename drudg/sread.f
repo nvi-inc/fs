@@ -17,10 +17,11 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
-      SUBROUTINE SREAD(IERR,ivexnum)   
-C Reads schedule file. 
-C Calls VREAD for VEX files. 
+      SUBROUTINE SREAD(IERR,ivexnum)
+C Reads schedule file.
+C Calls VREAD for VEX files.
 C Calls READS to read lines and sked subroutines to parse SKED format.
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -55,7 +56,7 @@ C  Local:
 
 C
 C  History
-! 2019Aug25.  Merged S/X and broadband. 
+! 2019Aug25.  Merged S/X and broadband.
 
 C  900413 NRV Added re-reading of $CODES section
 C  910306 NRV Added reading new parameters: HEAD, EARLY
@@ -96,7 +97,7 @@ C 021021 nrv Don't set default tape motion parameters for VEX files
 C            because they have already been read in.
 C
 ! 2006Jul24 JMGipson. Got rid of ilocf, reio. (Remnants of old operating system no longer used.)
-! 2018Jun17 JMGipson. Got rid of extra space in output after return from vread. 
+! 2018Jun17 JMGipson. Got rid of extra space in output after return from vread.
 
       close(unit=LU_INFILE)
       open(unit=LU_INFILE,file=LSKDFI,status='old',iostat=IERR)
@@ -142,7 +143,7 @@ C       read stations, codes, sources
 C       Write out experiment information now.
         write(luscn,'("Experiment name: ",a)') cexper
         i=trimlen(cexperdes)
-        if (i.gt.0) write(luscn,'("Experiment description: ",a)') 
+        if (i.gt.0) write(luscn,'("Experiment description: ",a)')
      .  cexperdes(1:i)
         i=trimlen(cpiname)
         if (i.gt.0) write(luscn,'("PI name: ",a)') cpiname(1:i)
@@ -289,7 +290,7 @@ C Re-read $HEAD section if needed.
         write(luscn,'(" Re-reading ... ",$)')
         rewind(LU_INFILE)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-        DO WHILE (ILEN.GT.0) 
+        DO WHILE (ILEN.GT.0)
           IF (cBUF(1:5) .eq. "$HEAD") THEN
             write(luscn,*) cbuf(1:ilen)
 
@@ -298,10 +299,10 @@ C Re-read $HEAD section if needed.
               ILEN=(ILEN+1)/2
               CALL HDINP(IBUF,ILEN,LUSCN,IERR)
               CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-            enddo 
+            enddo
           endif
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-        enddo 
+        enddo
       endif
 C       Look for the string "Cover Letter" in .drg file
         ireccv=0
@@ -335,7 +336,7 @@ C
 ! Added 2019Aug25 JMG
       if(.not.kvex) then
         call read_broadband_section
-      endif 
+      endif
       if (.not.kgeo) kpostpass=.true.
 C      if (.not.kgeo) kpostpass=.false.
 C

@@ -20,8 +20,9 @@
 !     Last change:  JMG  23 Sep 1999   11:19 am
 !***********************************************************************
       subroutine capitalize(lstring)
-
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       CHARACTER*(*) lstring
+      integer i,idiff, ilen
       idiff=ICHAR("a")-ICHAR("A")
       ilen=LEN(lstring)
       do i=1,ilen

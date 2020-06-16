@@ -21,6 +21,7 @@
 ! Parse source info contained in cbuf.
 ! 2007Jul03 JMG. Rewritten to use ASCII
 ! This can handle both sources and satellites (although we don't use satellites anywhere?)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 ! Typical source line looks like:
 !  0008-264 $        00 11  1.24676914  -26 12 33.3762017 2000.0 0.0
@@ -154,9 +155,9 @@ C  OUTPUT:
 ! Read in the epoch.
         ierr=9
         read(ltoken(9),*,end=900) epoch
-        
+
         IF  (EPOCH.NE.2000.0) THEN  !"convert to J2000"
-          IEP = EPOCH+.01 
+          IEP = EPOCH+.01
           IF  (IEP.EQ.1950) THEN ! reference frame rotation
             call prefr(rarad,decrad,1950,r,d)
             RARAD = R
@@ -173,7 +174,7 @@ C  OUTPUT:
       endif
       nsourc=nsourc+1
 
-      
+
       ierr=0
       RETURN
 

@@ -19,6 +19,7 @@
 *
       subroutine ctime2YDhms(ctime,iyear,iday,ihour,imin,isec,ierr)
 ! Convert an ascii string to iyear, idoy, ihour,imin,isec
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 ! All dashes, spaces and colons are stripped out.
 ! Remaining string must be set number of characters long
 ! Valid formats are:

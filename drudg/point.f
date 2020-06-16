@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE POINT(cr1,cr2,cr3,cr4)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C Write a file or a tape with pointing controls
 C
@@ -136,15 +137,15 @@ C 000815 nrv Remove all but VLBA option.
 9991      format(' Invalid pointing output selection.')
           return
         endif
-      else  
+      else
         i=iwhere_in_string_list(lvlba_stat,10, cantna(istn))
         if(i .eq. 0) return        !station not in vlba list.
-        istin=6  
+        istin=6
         if(tape_allocation(istn) .ne. "AUTO") then
            write(*,*) "WARNING! Skipping ",cantna(istn),
      >      " because allocation is not AUTO!"
-           return 
-        endif        
+           return
+        endif
       endif
 C
 C 2. First get output file or LU for pointing commands.
@@ -395,7 +396,7 @@ C
      .       idayrp,ihrp,minp,iscp,iobss,irecp,
      .       idayr_save,ihr_save,min_save,isc_save)
             iobss=iobss+1 ! increment this station's obs
-            icodp=icod              
+            icodp=icod
 C
 	    END IF !if istin
 C
@@ -414,10 +415,10 @@ C  When finished with vlba point file, write the quit statement
 C  at the end.
       if (istin.eq.5.or.istin.eq.6) then !vlba observe file
 	 CALL TMADD(IYR2,IDAYR2,IHR2,MIN2,5, ISC2,IYR,IDAYR,
-     .         IHR,iMIN,ISC)      
+     .         IHR,iMIN,ISC)
         write(lu_outfile,'(a)') "disk=off"
         write(lu_outfile,
-     >    '("stop=",i2.2,"h",i2.2,"m",i2.2,"s ","!NEXT!")') 
+     >    '("stop=",i2.2,"h",i2.2,"m",i2.2,"s ","!NEXT!")')
      >    ihr,imin,isc
          write(lu_outfile,"('!QUIT!')")
       end if
@@ -430,9 +431,9 @@ C at the end.  **NOTE: this outputs for first freq. code ONLY.
 C
 	IF (IERR.NE.0) WRITE(LUSCN,9901) IERR
 9901  FORMAT(/' POINT05 - ERROR ',I3,' READING FILE'/)
-990   CLOSE(LU_OUTFILE)   
+990   CLOSE(LU_OUTFILE)
       call drchmod(pntname,ierr)
-     
+
 
 900   continue
       RETURN

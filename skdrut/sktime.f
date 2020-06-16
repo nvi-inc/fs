@@ -19,6 +19,7 @@
 *
 C@skTIME
       subroutine sktime(cbuf,ctime)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     sktime: returns the time field for an observation record
       include '../skdrincl/skparm.ftni'

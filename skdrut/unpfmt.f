@@ -19,6 +19,7 @@
 *
       SUBROUTINE unpfmt(IBUF,ILEN,IERR,
      .LCODE,lst,ns,lfmt)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     UNPFMT  unpacks the recording format line
 C
@@ -70,7 +71,7 @@ C
         nx=nx+1
         if (ic1.gt.0) then ! station name
           NCH = IC2-IC1+1
-          IF  (NCH.GT.8) THEN 
+          IF  (NCH.GT.8) THEN
             IERR = -101-nx
             RETURN
           END IF
@@ -85,7 +86,7 @@ C
         nx=nx+1
         if (ic1.gt.0) then ! format
           NCH = IC2-IC1+1
-          IF  (NCH.GT.3) THEN 
+          IF  (NCH.GT.3) THEN
             IERR = -101-nx
             RETURN
           END IF

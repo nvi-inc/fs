@@ -19,6 +19,7 @@
 *
       subroutine snap_ready(ntape,kfirst_tape)
 ! write out ready commands
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
       integer ntape
 ! local
@@ -45,11 +46,11 @@
         write(luFile,'(a)') 'ready_disk'
         kfirst_tape=.false.
       endif
-      
+
       if(km6disk) then
          kfirst_tape=.false.
          return
-      endif 
+      endif
 
       if(km5disk) then
          return              !don't need to do tape ready.

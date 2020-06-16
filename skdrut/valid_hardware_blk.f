@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine valid_hardware_blk()
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 !      block data
 ! Used to initialize by block data, but doesn't work for some linux systems.
 !
@@ -41,14 +42,14 @@
       crack_type(15)=    'LBA'
       crack_type(16)=    'Mark5'
       crack_type(17)=    'VLBA5'
-      crack_type(18)=    'DBBC_DDC'                              
+      crack_type(18)=    'DBBC_DDC'
       crack_type(19)=    'DBBC_DDC/Fila10g'
       crack_type(20)=    'DBBC_DDC/VSI2'
-      crack_type(21)=    'DBBC_PFB'                         
-      crack_type(22)=    'DBBC_PFB/Fila10g'    
-      crack_type(23)=    'RDBE'  
+      crack_type(21)=    'DBBC_PFB'
+      crack_type(22)=    'DBBC_PFB/Fila10g'
+      crack_type(23)=    'RDBE'
       crack_type(24)=    'VLBAC'
-      crack_type(25)=    'CDAS'   
+      crack_type(25)=    'CDAS'
       crack_type(26)=    'BB'
       crack_type(27)=    'unknown'
 

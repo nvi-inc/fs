@@ -21,6 +21,7 @@
 C  Return the character corresponding to the pass index.
 C 960527 nrv New.
 C 970530 nrv "d" and "e" reversed!
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
       integer i
       character*61 cp ! pass numbers

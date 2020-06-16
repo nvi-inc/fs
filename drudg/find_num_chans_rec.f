@@ -19,6 +19,7 @@
 *
       subroutine find_num_chans_rec(ipass,istn,icode,
      > ifan,nchan_obs,nchan_rec_mk5)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include '../skdrincl/skparm.ftni'
 
       integer itras
@@ -31,7 +32,7 @@ C  INPUT:
 ! local
       integer isb,ibit,ihd,ichan,it
       integer i
-      
+
       nchan_obs=0
       do isb=1,2
         do ibit=1,2

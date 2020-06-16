@@ -18,13 +18,14 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine errormsg(iret,ierr,cgroup,luscn)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C ERRORMSG prints informatiave error messages about VEX
 C parsing and interpreting errors. Errors that sked/drudg
 C catch are printed from within the VUNPxxx routines.
-C A positive IERR returned from the VUNPxxx routines means 
-C there was a problem in the parser and IERR indicates which 
-C field. 
+C A positive IERR returned from the VUNPxxx routines means
+C there was a problem in the parser and IERR indicates which
+C field.
 C A negative IERR returned from the VUNPxxx routines means
 C an error in the content that sked/drudg caught and an
 C error message is printed at that time, but no message
@@ -168,5 +169,5 @@ C     2. Print error messages by group.
       endif ! non-zero ierr
 
       return
-      end  
+      end
 

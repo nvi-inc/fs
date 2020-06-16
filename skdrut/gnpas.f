@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
        SUBROUTINE gnpas(luscn,ierr,iserr)
+       implicit none
 C
 C     GNPAS derives the number of sub-passes in each frequency code
 C and checks for compatibility between track assignments and head
@@ -90,170 +91,16 @@ C
       IF (NCODES.LE.0) RETURN     
 !      pause 
 C     
-      DO  Ic=1,NCODES ! codes
-        do is=1,nstatn
-          if (nchan(is,ic).gt.0) then ! this station has this mode defined
-          npassf(is,ic)=0                 !initialize. May be set later. 
-          if(cstrec(is,1)(1:2).eq."S2".or.
-     >       cstrec(is,1)(1:2).eq."K4") then
-            npassf(is,ic)=1
-          else ! not S2 or K4
-            iserr(is)=0          
-            do ih=1,max_headstack ! for each headstack
-              np(ih)=0
-              DO  J=1,max_subpass ! count sub-passes
-                itrk(j,ih)=0
-                IT(ih) = 0
-                do k=1,nchan(is,ic) ! channels
-                  do l=1,2 ! upper/lower
-                    do m=1,2 ! sign/mag
-!                      write(*,'("gnpas:  ",8i4)') l,m,ih,k,j,is,ic
-                      if (itras(l,m,ih,k,j,is,ic).ne.-99) then
-                        it(ih)=it(ih)+1
-                      endif
-!                    write(*,'("gnpas2: ",8i4)') l,m,ih,k,j,is,ic,ncodes
-      
-                    enddo
-                  END DO ! upper/lower
-                enddo ! channels
-                if (it(ih).gt.0) then
-                  np(ih)=np(ih)+1
-                  if (np(ih).le.max_subpass) itrk(np(ih),ih)=it(ih)
-                endif
-              END DO  ! count sub-passes
-              ipmax(ih)=0
-              do j=1,max_pass ! check sub-passes
-                if (ihddir(ih,j,is,ic).gt.ipmax(ih)) 
-     >              ipmax(ih)=ihddir(ih,j,is,ic)
-              enddo ! check sub-passes             
-              if (ih.eq.1 .and. np(ih) .ge. 1) then ! set npassf and increment ntrakf   
-       
-                npassf(is,ic)=np(ih)             
-                ntrakf(is,ic)=ntrakf(is,ic)+itrk(np(ih),ih)
-                nhstack(is,ic) = 1
-              else ! must be the same for both headstacks 
-                if (np(ih).eq.0) then ! one head
-                  nhstack(is,ic) = 1
-                else ! check second
-                  nhstack(is,ic) = ih
-                  if (np(ih).ne.npassf(is,ic)) then ! inconsistent
-                    write(luscn,9907) lcode(ic),cstnna(is)
-9907                format('GNPAS07 - Inconsistent number of ',
-     >              'sub-passes between headstacks 1 and 2 for code ',
-     >               a2,' at ', a)
-                  endif ! check for consistency
-                  if (itrk(1,1).ne.itrk(1,ih)) then ! inconsistent 
-                    write(luscn,9908) lcode(ic),cstnna(is)
-9908                format('GNPAS08 - Inconsistent number of tracks ',
-     .              'per pass between  headstacks 1 and 2 for code',
-     >               a2,' at ', a)
-                  endif
-                endif ! one head/check second
-              endif ! set/check
-            enddo ! for each headstack 
-            if(cstrec(is,1)(1:5) .eq. "Mark5" .or. 
-     >         cstrec(is,1)(1:2) .eq. "K5") then
-              npassf(is,ic)=1
-            else
-! check various consistency things for tapes.
-              if (nhstack(is,ic).gt.nheadstack(is)) then ! can't do it
-                write(luscn,9910) cstnna(is),nheadstack(is),
-     .          lcode(ic),nhstack(is,ic)
-9910            format('GNPAS10 - Station ',a,' has only ',i1,
-     .          ' headstack but code ',a2,' uses ',i1,' headstacks.')
-              endif ! can't do it
-              if (ipmax(1).ne.npassf(is,ic)) then ! inconsistent
-                write(*,*) ipmax(1), npassf(is,ic)
-                ierr=1
-                iserr(is)=1
-                write(luscn,9904) lcode(ic),cstnna(is)
-9904            format('GNPAS04 - Inconsistent number of sub-passes ',
-     .          'between tracks and headpos for ',a2,' at ',a)
-              endif
-              j=1
-              do while (j.lt.np(1).and.itrk(j,1).eq.itrk(j+1,1))
-                j=j+1
-              enddo
-              if (itrk(1,1).eq.0.or.np(1).eq.0.or.j.lt.np(1).or.
-     .          np(1).gt.max_subpass) then
-                ierr=1
-                if (itrk(1,1).eq.0.or.np(1).eq.0) then
-                  write(luscn,9903) lcode(ic),cstnna(is)
-9903              format('GNPAS03 - No passes found in trck assignments'
-     .            ,' for ',a2,', at ',a)
-                endif
-                if (j.lt.np(1).or.np(1).gt.max_subpass) then
-                  write(luscn,9901) lcode(ic),cstnna(is)
-9901              format('GNPAS01 - Inconsistent pass/track assignments'
-     .            ,' for ',a2,', at ',a)
-                endif
-              endif
-            endif
-          endif ! S2/K4 or not
-          endif ! defined
-        enddo ! stations
-      END DO  ! codes
-C
-C  2. Now count up the number of passes, i.e. different head positions.
-C     Look in ihddir and count the non-zero entries. Do this only for
-C     frequency code 1 because "maxpas" is only dimensioned by station.
-C     Check for different numbers of passes used in different frequency
-C     codes--this should not be attempted in a single experiment. 
+      do ic=1,ncodes
+      do is=1,nstatn
+        npassf(is,ic)=1
+      end do
+      end do
 
-      do is=1,nstatn ! stations
-        if (cstrec(is,1)(1:2).ne.'S2'    .and. 
-     >      cstrec(is,1)(1:2).ne.'K4'    .and.
-     >      cstrec(is,1)(1:5).ne.'Mark5' .and. 
-     >      cstrec(is,1)(1:2).ne.'K5') then
-        
-        ic1=0
-        do ic=1,ncodes ! codes
-          if (nchan(is,ic).gt.0) then ! this station has this mode defined
-          if (ic1.eq.0) ic1=ic ! first ic for this station
-          do ih=1,nhstack(is,ic) ! check each headstack in use
-            ip(ih)=0
-            do j=1,max_pass
-              if (ihddir(ih,j,is,ic).eq.1) ip(ih)=ip(ih)+1
-            enddo
-            if (ip(ih).eq.0) then
-              ierr=1
-              iserr(is)=1
-              write(luscn,9902) ih,lcode(ic),cstnna(is)
-9902          format('GNPAS02 - No passes found in $HEAD section ',
-     .        'for head ',i1,' for ',a2,' at ',a)
-            endif
-            if (ih.eq.1) then
-              maxp(ic)=ip(ih)
-            else
-              if (ip(ih).gt.0.and.ip(ih).ne.ip(1)) then
-                write(luscn,9909) lcode(ic),cstnna(is)
-9909            format('GNPAS09 - Inconsistent number of passes in',
-     .          ' $HEAD between headstacks 1 and 2 for ',a2,' at ',a)
-              endif
-            endif
-          enddo ! each headstack
-          endif ! defined
-        enddo ! codes
-        if (ic1.gt.0) then ! some code is defined
-          iprr=0
-          do ic=1,ncodes
-            if (nchan(is,ic).gt.0) then ! this station has this mode defined
-              if (maxp(ic).ne.maxp(ic1)) iprr=1
-            endif ! defined
-          enddo
-          if (iprr.ne.0) then
-            ierr=1
-            iserr(is)=1
-            write(luscn,9905) cstnna(is)
-9905        format('GNPAS05 - Warning: different frequency codes ',
-     .      'in this experiment have different numbers of passes at ',a)
-          endif
-          maxpas(is)=maxp(ic1)
-        endif ! some code is defined
-        endif ! not for S2
-      enddo ! stations
-C
+! 2020Jun06. Got rid of a bunch of obsolete code deallng with headstacks, passes. 
+     
 C 3. Check for LOs present and issue warning if not.
+300   continue
 
       do ic=1,ncodes
         do is=1,nstatn
@@ -271,13 +118,6 @@ C 3. Check for LOs present and issue warning if not.
               endif
             enddo                
           endif ! defined
-        enddo
-      enddo
-
-C  Check for Mk3 modes and modify LMODE.
-      do ic=1,ncodes
-        do is=1,nstatn
-          call m3mode(is,ic)
         enddo
       enddo
 

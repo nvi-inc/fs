@@ -19,6 +19,7 @@
 *
       subroutine sname(idayr,ihr,imin,scan_namep,scan_name,
      .idayr_next,ihr_next,imin_next)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C SNAME creates the scan ID for the scan_name command in the SNAP file.
 
@@ -64,7 +65,7 @@ C             145-1402
       nch = nch + ib2as(ihr,scan_name,nch,Z4000+2*Z100+2)
       nch = nch + ib2as(imin,scan_name,nch,Z4000+2*Z100+2)
       if (ichcm_ch(scan_namep,1,' ').eq.0) then ! no previous scan name
-        if (idayr_next.ge.0.and.ichcm(scan_name,1,scan_next,1,8).eq.0) 
+        if (idayr_next.ge.0.and.ichcm(scan_name,1,scan_next,1,8).eq.0)
      .    nch = ichmv_ch(scan_name,nch,'a') ! next one is duplicate
       else ! got a previous scan
         if (ichcm(scan_name,1,scan_namep,1,8).eq.0) then ! same as previous

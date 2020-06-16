@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 	SUBROUTINE wrhead(lu,ierr,cs,isig,idoub,ldoub,ido,imode,icod)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C   wrhead writes the header lines period, bbfilter, level,
 C   baseband, ifchan, and sideband for a VLBA schedule pointing
@@ -82,26 +83,26 @@ C  loop on the number of channels read from schedule file
           endif
 
           ichan=invcx(ix,istn,icod) ! ichan=total#channel index
-! End change 
+! End change
           do im=1,imode
             nch = ichmv_ch(ibuf,nch,'(')
             iy=iy+1
 !            if (imode.eq.1) then !only one entry, use ix
 ! Changed 2014May21
-!              iy=ix-1         
+!              iy=ix-1
 !            else !two entries, use iy
-!              iy = (ix-1)*2 + im      
+!              iy = (ix-1)*2 + im
 !            endif
             nch = nch + ib2as(iy,ibuf,nch,ileft)
 
             nch = ichmv_ch(ibuf,nch,',')
 
 	  if ((ido.eq.1).or.(ido.eq.2)) then ! single value
-            nch = nch + ib2as(isig,ibuf,nch,ileft) 
+            nch = nch + ib2as(isig,ibuf,nch,ileft)
           endif
 
 	  if (ido.eq.2) then ! append M
-            nch = ichmv_ch(ibuf,nch,'M') 
+            nch = ichmv_ch(ibuf,nch,'M')
 	  else if (ido.eq.3) then ! use integer array
             nch = nch + ib2as(idoub(ichan,istn,icod),ibuf,nch,ileft)
 	  else if (ido.eq.4) then ! use character array
@@ -128,8 +129,8 @@ C             For the lsb, take the other one
 C  write out buffer if reached 8 channels written into it
           if(mod(iout,4).eq.0) then
 !	  if (mod(iout,8).eq.0) then
-            write(lu,'(a)') cbuf(1:nch)    
-            return 
+            write(lu,'(a)') cbuf(1:nch)
+            return
 	  else
             nch = ichmv_ch(ibuf,nch,',')
 	  end if
@@ -138,7 +139,7 @@ C  write out buffer if reached 8 channels written into it
 
 C  write out buffer if there is something to write
 	if (nchan(istn,icod).ne.8) then
-          write(lu,'(a)') cbuf(1:nch-2)     !skip terminal ","          
+          write(lu,'(a)') cbuf(1:nch-2)     !skip terminal ","
 	end if
 C
 	RETURN

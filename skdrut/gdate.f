@@ -19,6 +19,7 @@
 *
       SUBROUTINE GDATE (JD, YEAR,MONTH,DAY)
 ! Source:
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 ! aa.usno.navy.mil/faq/docs/JD_formula.php
 ! Copied by JMGipson on 2019.06.06
 !
@@ -26,6 +27,7 @@
 !   GIVEN THE JULIAN DATE (JD).
 !
       INTEGER JD,YEAR,MONTH,DAY,I,J,K
+      integer L,N
 !
       L= JD+68569
       N= 4*L/146097

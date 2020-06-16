@@ -18,5 +18,6 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
        subroutine yywrap()
+      implicit none  !2020Jun15 JMGipson automatically inserted.
        return
        end

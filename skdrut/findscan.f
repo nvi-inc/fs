@@ -18,9 +18,10 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine findscan(isor,icod,istart,irec)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C   FINDSCAN looks through the list of scans for a match
-C   on the source, code, and start time. 
+C   on the source, code, and start time.
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/skobs.ftni'
@@ -66,9 +67,9 @@ C Local
      >  istart(4),istart(5)
 
 C 1. Loop through all observations so far.  Check source, code, and time.
-C     source   cal code preob start 
+C     source   cal code preob start
 C     Example:
-C     3C84      120 SX PREOB 80092120000  
+C     3C84      120 SX PREOB 80092120000
 C                            yydddhhmmss
 C iob is the observation to start with in the existing scan array.
 

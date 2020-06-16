@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       REAL FUNCTION TRUN(IFEET,spd,ISPM,ISPS)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     TRUN computes the time required to run the tape at record speed
 C     IFEET is the number of feet to move
@@ -27,7 +28,7 @@ C
 C
       real spd
       integer ifeet,ispm,isps
-          TRUN = (FLOAT(IFEET))/spd 
+          TRUN = (FLOAT(IFEET))/spd
       IF (IFEET.LE.0) TSPIN=0
               ISPM = IFIX(TRUN/60.0)
               ISPS = IFIX(TRUN-ISPM*60)

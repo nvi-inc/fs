@@ -19,28 +19,29 @@
 *
       subroutine proc_ifd(cname_ifd,icode,kpcal)
 ! write out IFD and LO procedures
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
-      
+
       include 'bbc_freq.ftni'
-      include 'drcom.ftni' 
+      include 'drcom.ftni'
 
 !History
 ! 2007Jul09. Split off from procs.
-! 2012Sep05 JMG.  Changes to support DBBC. 
-!                 fvc,fvc_lo, fvc_hi put in bbc_freq.ftni 
-! 2012Sep19  Checking of valid IFs made case independnent. 
+! 2012Sep05 JMG.  Changes to support DBBC.
+!                 fvc,fvc_lo, fvc_hi put in bbc_freq.ftni
+! 2012Sep19  Checking of valid IFs made case independnent.
 ! 2013Jul11 JMG. Added "if_targets"
-! 2016Jan19 JMG. Modified to handle DBBC_PFB which can have several DBBs with same number. 
+! 2016Jan19 JMG. Modified to handle DBBC_PFB which can have several DBBs with same number.
 
 ! passed
       character*12 cname_ifd   !name of procedure.
       integer icode     ! Code
-      logical kpcal     ! do pcal 
-   
+      logical kpcal     ! do pcal
+
 ! functions
-      integer ichmv_ch  !lnfch  
+      integer ichmv_ch  !lnfch
 
 C    for VLBA:  IFDAB=0,0,nor,nor
 C               IFDCD=0,0,nor,nor
@@ -60,17 +61,17 @@ C               lo=same as Mk3
 C    for K4-1:  patch=lo1,1-4,5-8,etc.
 C    for LBA:   lo=same as Mk3 ( but allow up to 4 IFs)
 !    for DBBC   ifX=input,agc,filter#,target  where X=A,B,C,D and input=1,2,3,4, target=1-65535
-! 
+!
 
-C Later: add a check of patching to determine how the IF3 switches should really be set. 
+C Later: add a check of patching to determine how the IF3 switches should really be set.
 C         if (VC3  is LOW) switch 1 = 1, else 2
 C         if (VC11 is LOW) switch 2 = 1, else 2
 
 ! local
       integer ifd(4)            !ifd(j)<>0 indicates we have IF
-      integer ibd(4)            !ib(j)<>   is one of the BBCs the IF connects to. 
+      integer ibd(4)            !ib(j)<>   is one of the BBCs the IF connects to.
                                 !This is used because we can find the filter from the BBC#.
-     
+
       character*4 lvalid_if     !Valid IF characters
       integer ivc3_patch        !VC3,VC10 patch hi or lo?
       integer ivc10_patch
@@ -81,13 +82,13 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
       integer iv                !channel#
       integer ilo               !LO index
       integer j                 !loop index
-      integer nch               !character counter  
+      integer nch               !character counter
       character*2  cif          !Holds IF name.
-      character*1 ch1           !Single character 
+      character*1 ch1           !Single character
       real*8  rlo_dif31         !LO freq3-lo freq1 (if both definied)
-      real*8  tol               !tolerance: How close to zero do we need to be. 
-      logical kdone_bbc(max_bbc)       
- 
+      real*8  tol               !tolerance: How close to zero do we need to be.
+      logical kdone_bbc(max_bbc)
+
       tol=0.00001
       call proc_write_define(lu_outfile,luscn,cname_ifd)
 
@@ -98,36 +99,36 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
       end do
 
       do ib=1,max_bbc
-         kdone_bbc(ib)=.false. 
+         kdone_bbc(ib)=.false.
       enddo
-     
-      if(kbbc .or. kdbbc_rack) then 
-        lvalid_if="ABCD"     
-      else 
+
+      if(kbbc .or. kdbbc_rack) then
+        lvalid_if="ABCD"
+      else
         lvalid_if="1234"
-      endif 
-! 
+      endif
+!
       do ichan=1,nchan(istn,icode) ! which IFs are in use
-        ic=invcx(ichan,istn,icode) ! channel number       
+        ic=invcx(ichan,istn,icode) ! channel number
         ib=ibbcx(ic,istn,icode) ! BBC number
         if(.false.) then
           call write_return_if_needed(luscn,kwrite_return)
           write(luscn,'(3i4,a,1x,a)') ichan,  ic, ib," Cifinp-->",
-     >    cifinp(ic,istn,icode)     
+     >    cifinp(ic,istn,icode)
         endif
-       
+
 ! Note: For PFB can have several BBCs with the same number...
         if(freqrf(ic,istn,icode) .gt. 0 .and.
-     &    (.not.kdone_bbc(ib) .or. 
-     &      cstrack_cap(istn)(1:8) .eq."DBBC_PFB")) then 
+     &    (.not.kdone_bbc(ib) .or.
+     &      cstrack_cap(istn)(1:8) .eq."DBBC_PFB")) then
 
           ch1=cifinp(ic,istn,icode)(1:1)
-  
-          call capitalize(ch1) 
+
+          call capitalize(ch1)
           j=index(lvalid_if,ch1)
           if(j .ge. 1) then
-            if(ifd(j) .eq. 0) ifd(j)=ic     
-            if(ibbc_present(ib,istn,icode) .gt. 0) ibd(j)=ib           
+            if(ifd(j) .eq. 0) ifd(j)=ic
+            if(ibbc_present(ib,istn,icode) .gt. 0) ibd(j)=ib
           endif
         endif
 
@@ -136,34 +137,34 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
       if(ifd(1)+ifd(2)+ifd(3)+ifd(4) .eq. 0) then
         write(*,*)
         write(*,*) "ERROR (proc_ifd):  No valid LO inputs in schedule!"
-      endif 
- 
-!      write(*,*) "IFD: ", ifd(1:4) 
+      endif
+
+!      write(*,*) "IFD: ", ifd(1:4)
       if(kdbbc_rack) then
         do j=1,4      !upto 4 IFs
           iv=ifd(j)
-          if(ifd(j) .ne. 0) then  
-            cif=cifinp(iv,istn,icode)  
-            write(cbuf,'("if",a1,"=",a1,",agc,",i1)') 
-     >          cif(1:1), cif(2:2), ibbc_filter(ibd(j))     
+          if(ifd(j) .ne. 0) then
+            cif=cifinp(iv,istn,icode)
+            write(cbuf,'("if",a1,"=",a1,",agc,",i1)')
+     >          cif(1:1), cif(2:2), ibbc_filter(ibd(j))
            if(idbbc_if_targets(j) .ge. 0) then
-              write(cbuf(15:20),'(",",i5)') idbbc_if_targets(j) 
-            endif 
-            call squeezeleft(cbuf,nch)      
+              write(cbuf(15:20),'(",",i5)') idbbc_if_targets(j)
+            endif
+            call squeezeleft(cbuf,nch)
             call lowercase_and_write(lu_outfile,cbuf)
           endif
         end do
         write(lu_outfile,'(a)') 'lo='
-        do ilo=1,4         
+        do ilo=1,4
           iv=ifd(ilo)
-          if(iv .ne. 0) then      
-!            write(*,*) "ilo ", ilo, " iv ", iv        
-            call proc_lo(iv,icode,lvalid_if(ilo:ilo)) 
+          if(iv .ne. 0) then
+!            write(*,*) "ilo ", ilo, " iv ", iv
+            call proc_lo(iv,icode,lvalid_if(ilo:ilo))
            endif ! this LO in use
-        end do   
+        end do
 !        writE(*,*) "freq: ", (freqlo(j,istn,1), j=1,16)
-      endif 
- 
+      endif
+
       if(kmracks) then ! mk3/4/5 IFD
         cbuf="ifd=,"
         nch=6
@@ -210,26 +211,26 @@ C  First determine the patching for VC3 and VC10.
             endif
           endif
         enddo
-      endif 
+      endif
 
 ! Mk3/4, K4  and LBA
 ! Put out IF3 if it exits
-      if(kvc .or. klrack) then 
-        if(ifd(1) .ne. 0 .and. ifd(3) .ne. 0) then 
+      if(kvc .or. klrack) then
+        if(ifd(1) .ne. 0 .and. ifd(3) .ne. 0) then
           rlo_dif31=freqlo(ifd(3),istn,icode)-freqlo(ifd(1),istn,icode)
-          if(rlo_dif31 .eq. 0.d0 .or. abs(rlo_dif31-500.1).lt.tol) then 
-  
+          if(rlo_dif31 .eq. 0.d0 .or. abs(rlo_dif31-500.1).lt.tol) then
+
 ! Make a string that looks something like:
 !          if3=,in,ivc3_patch,ivc_10_path,,,on
             cbuf="if3=,in,"    !default case.
             nch=9
 ! check " if3=,out" possibility. Different for VEX and non-vex.
             if(kvex.and.cifinp(ifd(3),istn,ICODE)(2:2).eq. 'O' .or.
-     >         .not.kvex  .and. rlo_dif31 .eq. 0.d0) then      
+     >         .not.kvex  .and. rlo_dif31 .eq. 0.d0) then
            cbuf="if3=,out,"
            nch=10
           endif
-          write(cbuf(nch:nch+5),'(i1,",",i1,",,,")') 
+          write(cbuf(nch:nch+5),'(i1,",",i1,",,,")')
      >         ivc3_patch,ivc10_patch
            nch=nch+6
 C              Add phase cal on/off info as 7th parameter.
@@ -239,27 +240,27 @@ C              Add phase cal on/off info as 7th parameter.
             nch=ichmv_ch(ibuf,nch,'off')
           endif ! value/off
           write(lu_outfile,'(a)') cbuf(1:nch)
-          endif 
-        endif ! we know/don't know about IF3  
-      endif 
+          endif
+        endif ! we know/don't know about IF3
+      endif
 
 C LO command for Mk3/4 and K4 and LBA
 C           First reset all
-      if(kvc .or.klrack) then        
+      if(kvc .or.klrack) then
         write(lu_outfile,'(a)') "lo="
         do ilo=1,4 ! up to 4 LOs
           iv=ifd(ilo)
-          if(iv .ne. 0) then             
-            call proc_lo(iv,icode, lvalid_if(ilo:ilo)) 
+          if(iv .ne. 0) then
+            call proc_lo(iv,icode, lvalid_if(ilo:ilo))
            endif ! this LO in use
         enddo ! up to 4 LOs
-      endif 
-   
+      endif
+
 C
 C PATCH command for Mk3/4 and K4
 C           First reset all
       if (kvc) then
-         call proc_patch(icode,ifd) 
+         call proc_patch(icode,ifd)
       endif ! m3rack IFD, LO, PATCH commands
 
       if (kbbc) then ! vlba IFD, LO commands
@@ -271,16 +272,16 @@ C IFDAB, IFDCD commands
 
 C LO command for VLBA
           write(lu_outfile,'(a)') 'lo='
-          do ilo=1,4         
+          do ilo=1,4
            iv=ifd(ilo)
-           if(iv .ne. 0) then             
-             call proc_lo(iv,icode,lvalid_if(ilo:ilo)) 
+           if(iv .ne. 0) then
+             call proc_lo(iv,icode,lvalid_if(ilo:ilo))
             endif ! this LO in use
-          end do 
+          end do
         endif
         if(klo_config) then
-          write(lu_outfile,'(a)') "lo_config" 
-        endif 
+          write(lu_outfile,'(a)') "lo_config"
+        endif
 
 
         write(lu_outfile,"(a)") 'enddef'

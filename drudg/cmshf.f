@@ -19,6 +19,7 @@
 *
 	SUBROUTINE CMSHF(IY,IYR,IDOYR,INDOYR,IMODP,ISSHFT,IMSHFT,
      .                 IHSHFT,IDSHFT)      !COMPUTE SIDEREAL SHIFT
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C CMSHF computes the appropriate sidereal shift in days,hours,
 C minutes and seconds (to the nearest IMODP seconds).
@@ -34,22 +35,22 @@ C
       IDSHFT = IDELT
 C ADJUST BY 364/365 TO ACCOUNT FOR SHIFT
 C     DSHFT = -IDELT*.002737909D0
-      DSHFT = -IDELT*.002730408D0 
-C 
-      DSSHFT = DSHFT*86400. 
-      DMSHFT = DSSHFT/60. 
-      DHSHFT = DMSHFT/60. 
+      DSHFT = -IDELT*.002730408D0
+C
+      DSSHFT = DSHFT*86400.
+      DMSHFT = DSSHFT/60.
+      DHSHFT = DMSHFT/60.
       IDSHFT = IDSHFT+IDINT(DHSHFT)/24
-C 
-      ISSHFT = DMOD(DSSHFT,60.D0) 
-      INC = IMODP/2 
+C
+      ISSHFT = DMOD(DSSHFT,60.D0)
+      INC = IMODP/2
 	IF(IDELT.GT.0) INC = -INC
-      ISSHFT = ((ISSHFT+INC)/IMODP)*IMODP 
-C 
-      IMSHFT = DMOD(DMSHFT,60.D0) 
-      IMSHFT = IMSHFT + ISSHFT/60 
-      ISSHFT = MOD(ISSHFT,60) 
-      IHSHFT = DMOD(DHSHFT,24.D0) 
-C 
+      ISSHFT = ((ISSHFT+INC)/IMODP)*IMODP
+C
+      IMSHFT = DMOD(DMSHFT,60.D0)
+      IMSHFT = IMSHFT + ISSHFT/60
+      ISSHFT = MOD(ISSHFT,60)
+      IHSHFT = DMOD(DHSHFT,24.D0)
+C
       RETURN
-      END 
+      END

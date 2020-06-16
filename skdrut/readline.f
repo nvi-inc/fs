@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE READline(IUNIT,lstring,keof,ierr,imode)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C  READS reads the schedule file lines.
 C

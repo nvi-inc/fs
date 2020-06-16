@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE SNAPINTR(IFUNC,IYR)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C This routine writes out the header information for snap files and
 C vlba pointing files in the LU_OUTFILE.
@@ -64,7 +65,7 @@ C
 ! this is the start of the line
 ! 2006Nov30 Use cstrec(istn,irec) instead of 2 different arrays
 ! 2007Dec07 Modified so that  prints version as ....
-! 2018Jul20 Moved writing of drudg version to subrotine. 
+! 2018Jul20 Moved writing of drudg version to subrotine.
 
       IF (IFUNC.EQ.1) THEN
         cprfx='"'

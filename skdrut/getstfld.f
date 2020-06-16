@@ -19,6 +19,7 @@
 *
       subroutine getstfld(stdef,stmt,prim,ivexnum,cout,nfields,
      .lu,ierr)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C     Get all the fields associated with one statement for
 C     a station.

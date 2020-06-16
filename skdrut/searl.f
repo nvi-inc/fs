@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE SEARL(LINSTQ,luscn,ludsp)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     SEARL reads/writes station early starts
 C
@@ -47,7 +48,7 @@ C MODIFICATIONS:
 C 970314 NRV New. Copied from SELEV.
 C 970317 nrv Early must be > CAL.
 C 970321 nrv Add warning that this works only for non-Mk3 correlators.
-! 2010Mar20 JMG. Removed obsolete warning message. 
+! 2010Mar20 JMG. Removed obsolete warning message.
 C
 
 C     1. Check for some input.  If none, write out current.
@@ -70,7 +71,7 @@ C
 C     2. Something is specified.  Get each station/time combination.
 C
 C      if (itsync.gt.0) then
-C        write(luscn,9200) 
+C        write(luscn,9200)
 C9200    format('SEARL04 - Error: parameter CORSYNCH must be 0 to use ',
 C     .  ' early start.')
 C        return

@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine proc_s2_comments(icode,kroll)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
       include 'drcom.ftni'
       include '../skdrincl/freqs.ftni'

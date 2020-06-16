@@ -19,6 +19,7 @@
 *
       SUBROUTINE unpvp(IBUF,ILEN,IERR,LIDPOS,LNAPOS,
      .POSXYZ,LPOSX,LPOSY,LPOSZ,POSLAT,POSLON,LOCCUP)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     UNPVP unpacks a record containing position information.
 C

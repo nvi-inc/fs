@@ -19,6 +19,7 @@
 *
       SUBROUTINE unpbar(IBUF,ILEN,IERR,
      .LCODE,lst,ns,lbar)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     UNPBAR  unpacks the barrel roll line
 C
@@ -71,7 +72,7 @@ C
         nx=nx+1
         if (ic1.gt.0) then ! station name
           NCH = IC2-IC1+1
-          IF  (NCH.GT.8) THEN 
+          IF  (NCH.GT.8) THEN
             IERR = -101-nx
             RETURN
           END IF
@@ -86,7 +87,7 @@ C
         nx=nx+1
         if (ic1.gt.0) then ! barrel roll
           NCH = IC2-IC1+1
-          IF  (NCH.GT.4) THEN 
+          IF  (NCH.GT.4) THEN
             IERR = -101-nx
             RETURN
           END IF

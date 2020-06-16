@@ -19,6 +19,7 @@
 *
       subroutine proc_tape(icode,codtmp,cpmode)
 ! Issue TAPEF*** command
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
       include 'hardware.ftni'
       include '../skdrincl/statn.ftni'

@@ -19,9 +19,10 @@
 *
       SUBROUTINE vunppcal(modef,stdef,ivexnum,iret,ierr,lu,
      .cpcalref,ipct,ntones,npcaldefs,kfirst_call)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
-C     VUNPPCAL gets the PHASE_CAL_DETECT def statements 
-C     for station STDEF and mode MODEF. 
+C     VUNPPCAL gets the PHASE_CAL_DETECT def statements
+C     for station STDEF and mode MODEF.
 C     All statements are gotten and checked before returning.
 C     Any invalid values are not loaded into the returned parameters.
 C     Only generic error messages are written. The calling
@@ -54,11 +55,11 @@ C  LOCAL:
       integer i,ip,nch,it,j
       integer fvex_int,fvex_len,fvex_field,ptr_ch,fget_all_lowl
       logical kwarning_large_tone_number
-      
+
       if(kfirst_call) then
-         kfirst_call=.false. 
+         kfirst_call=.false.
          kwarning_large_tone_number=.false.
-      endif 
+      endif
 C
 C  Initialize
       npcaldefs=0
@@ -93,20 +94,20 @@ C  1.1 IF def
         endif
 
 C  1.2 List of tones
-  
+
         ierr = 12
         i=2 ! fields 2 and up may be tones
         iret = fvex_field(i,ptr_ch(cout),len(cout)) ! get tone
         do while (i.le.max_tone+1.and.iret.eq.0) ! get tones
           if (iret.eq.0) then ! a tone
-            iret = fvex_int(ptr_ch(cout),j) ! convert to binary   
-            if (j.lt.0.or.j.gt.max_tone) then              
+            iret = fvex_int(ptr_ch(cout),j) ! convert to binary
+            if (j.lt.0.or.j.gt.max_tone) then
               if(.not.kwarning_large_tone_number) then
                  kwarning_large_tone_number=.true.
-                 write(lu,'(a)') 
+                 write(lu,'(a)')
      >             'VUNPPCAL01: Warning! All phase tones greater'//
      >              ' than 16 ignored at all stations'
-               endif          
+               endif
             else
               ipct(ip,i-1)=j
             endif
@@ -116,7 +117,7 @@ C  1.2 List of tones
         enddo ! get tones
         ntones(ip) = i-2
 C       Now check whether there are more tones than allowed.
-        if (iret.eq.0) 
+        if (iret.eq.0)
      .  write(lu,'("VUNPPCAL02 - Too many tones, max is ",i3)') max_tone
 
 C       Get next pcal def statement

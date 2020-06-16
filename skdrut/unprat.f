@@ -19,6 +19,7 @@
 *
       SUBROUTINE unprat(IBUF,ILEN,IERR,
      .LCODE,srate)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     UNPRATE unpacks the sample rate line
 C
@@ -64,7 +65,7 @@ C
       call char2hol ('  ',LCODE,1,2)
       IDUMY = ICHMV(LCODE,1,IBUF,IC1,NCH)
 C
-C     Sample rate 
+C     Sample rate
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       D = DAS2B(IBUF,IC1,IC2-IC1+1,IERR)

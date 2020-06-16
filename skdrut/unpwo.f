@@ -19,6 +19,7 @@
 *
       SUBROUTINE unpwo(IBUF,ILEN,IERR,
      .  OINC,OECC,OPER,ONOD,OANM,OAXS,OMOT,IEPY,OEDY,ICH)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     UNPWO unpacks the satellite specific information in a source record.
 C           This routine is a utility to unpso.

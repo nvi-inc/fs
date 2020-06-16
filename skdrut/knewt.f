@@ -19,6 +19,7 @@
 *
 	LOGICAL FUNCTION KNEWT(IFT,IPAS,IPASP,IDIR,IDIRP,IFTOLD)
 C KNEWT RETURNS TRUE IF THIS RUN WOULD START A NEW TAPE
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
       include '../skdrincl/skparm.ftni'
 C

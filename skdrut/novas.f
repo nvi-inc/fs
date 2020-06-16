@@ -1,17 +1,18 @@
 * Naval Observatory Vector Astronomy Software (NOVAS)
-* 
+*
 * NOVAS has no licensing requirements.  If you use NOVAS in an
 * application, an acknowledgement of the Astronomical Applications
 * Department of the U.S. Naval Observatory would be appropriate. Your
-* input helps us justify continued development of NOVAS. 
+* input helps us justify continued development of NOVAS.
 *
 * The User's Guide is the official reference for NOVAS C3.1 and may be cited as:
-*    Bangert, J., Puatua, W., Kaplan, G., Bartlett, J., Harris, W., Fredericks, A., & Monet, A. 
+*    Bangert, J., Puatua, W., Kaplan, G., Bartlett, J., Harris, W., Fredericks, A., & Monet, A.
 *    2011, User's Guide to NOVAS Version C3.1 (Washington, DC: USNO).
-       
+
 *   MEMBER 'VASUP1' FOLLOWS
 *
       SUBROUTINE APSTAR (TJD,N,RAM,DECM,PMRA,PMDEC,PARLAX,RADVEL,RA,DEC)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       SAVE
 C
 C     THIS SUBROUTINE COMPUTES THE APPARENT PLACE OF A STAR,
@@ -34,12 +35,15 @@ C          DEC    = APPARENT DECLINATION IN DEGREES, REFERRED TO
 C                   TRUE EQUATOR AND EQUINOX OF DATE (OUT)
 C
 C
+      integer N
+      integer ierr
+      integer j
       real*8 TJD,UJD,RAM,DECM,PMRA,PMDEC,PARLAX,RADVEL,
      /     GLON,GLAT,HT,RA,DEC,T0,T1,TLAST,
      /     X,SECDIF,EQEQ,ST,GAST,RM,DM,PMR,PMD,PI,RV,TLIGHT,R,D,
      /     PEB,VEB,PES,VES,POG,VOG,PB,VB,PS,VS,
      /     POS1,VEL1,POS2,VEL2,POS3,POS4,POS5,POS6,POS7
-  
+
       DIMENSION PEB(3), VEB(3), PES(3), VES(3), POG(3), VOG(3),
      /     PB(3), VB(3), PS(3), VS(3),
      /     POS1(3), VEL1(3), POS2(3), VEL2(3),
@@ -423,7 +427,7 @@ C
      /     X,SECDIF,EQEQ,ST,GAST,TLIGHT,R,D,S,
      /     PEB,VEB,PES,VES,POG,VOG,PB,VB,PS,VS,
      /     POS1,VEL1,POS2,VEL2,POS3,POS4
-   
+
       DIMENSION PEB(3), VEB(3), PES(3), VES(3), POG(3), VOG(3),
      /     PB(3), VB(3), PS(3), VS(3),
      /     POS1(3), VEL1(3), POS2(3), VEL2(3),
@@ -1461,7 +1465,7 @@ C          DEPS = NUTATION IN OBLIQUITY IN SECONDS OF ARC (OUT)
 C
 C
       real*8 T,DPSI,DEPS,SECCON,L,LP,F,D,OM,ARG
-  
+
       DIMENSION X(9,106),X1(90),X2(90),X3(90),X4(90),X5(90),X6(90),
      /     X7(90),X8(90),X9(90),XA(90),XB(54)
       EQUIVALENCE(X(1,  1),X1(1))

@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
         SUBROUTINE LABEL(PCODE,kskd,cr1,cr2,cr3,cr4,inew)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C This routine types labels for Mark III tapes
 
@@ -127,7 +128,7 @@ C            C routines.
 C 970228 nrv Remove IIN and use CLABTYP to determine what type of output.
 C 970228 nrv Use labname for output file.
 C 970312 nrv Add call to READ_SNAP1 to read first line freeform.
-C 970827 nrv Add startlab to make_pslabel call. Add prompts for 
+C 970827 nrv Add startlab to make_pslabel call. Add prompts for
 C            starting position of label.
 C 971014 nrv Add better S2 logic.
 C 971028 nrv Force new tape when starting a schedule (this was needed for
@@ -217,7 +218,7 @@ C  we assume it is already open.
           ENDIF
 
           IF (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'.or.
-     .        cprttyp.eq.'FILE') THEN 
+     .        cprttyp.eq.'FILE') THEN
 C                            !set up laser printer
             NLAB=3           !3 labels across on laser paper
             if (kbatch) then
@@ -269,7 +270,7 @@ C
         endif
         if (inew.eq.1) then ! start a new file
           if (cprport.eq.'PRINT') then ! temp file name
-            cout = labname 
+            cout = labname
           else ! specified file name
             cout = cprport
           endif
@@ -359,7 +360,7 @@ C             leave it alone
                       ilabcol=ilabcolin
                     else ! try again
                       goto 910
-                    endif ! take it/try again 
+                    endif ! take it/try again
                   endif ! force/ask
                 else ! take it
                   ilabrow=ilabrowin
@@ -518,7 +519,7 @@ C         NOB(NOUT) = NOB(NOUT)+1
       else
         IF (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'
      .        .or.cprttyp.eq.'FILE') THEN !close laser printer
-          WRITE(luprt,'(a)') CHAR(27)//'&l6D'//CHAR(27)//'(8U'// 
+          WRITE(luprt,'(a)') CHAR(27)//'&l6D'//CHAR(27)//'(8U'//
      >      CHAR(27)//'(s3T'// char(13)
         ENDIF
 C if pcode is 1 (one station) or 3 (last station) then close file

@@ -19,6 +19,7 @@
 *
       real*4 FUNCTION CABLW(ISTN,AZNOW,LWRCUR,AZNEW,LWRNEW)
 C
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C  CABLW returns the azimuth difference between the NOW and the
 C              NEW source positions, taking into account cable wraps.
 C
@@ -82,7 +83,7 @@ C        The first thing is to adjust the azimuths to put them into the
 C        range as found in the data base.  Then if we are currently on
 C        the outer overlapped portion, add another 2pi.
 C
-      IF(IAXIS(ISTN).EQ.3.or.iaxis(istn).eq.6.or.iaxis(istn).eq.7) 
+      IF(IAXIS(ISTN).EQ.3.or.iaxis(istn).eq.6.or.iaxis(istn).eq.7)
       >  GOTO 100
 C     If we don't have an azel mount, delta-az=0 and return.
       CABLW = 0.D0
@@ -96,7 +97,7 @@ C
       IF (AZNEW.LT.STNLIM(1,1,ISTN)) AZNEW=AZNEW+2.0*PI
       IF (ichcm_ch(LWRCUR,1,'C ').eq.0) AZNOW=AZNOW+2.0*PI
 C
-      if (ichcm_ch(lwrnew,1,'V ').eq.0) goto 500 !special section for VLBA slewing 
+      if (ichcm_ch(lwrnew,1,'V ').eq.0) goto 500 !special section for VLBA slewing
       IF (ichcm_ch(LWRNEW,1,'C ').eq.0 .or.
      &    ichcm_ch(LWRNEW,1,'W ').eq.0 ) GOTO 300
 C
@@ -153,13 +154,13 @@ C     We are actually on the unique portion.
 
 C     5. VLBA slewing algorithm. "Don't go through south unless
 C     necessary." This algorithm was in effect during Jan. 1994
-C     and spring of 1994. 
+C     and spring of 1994.
 
 500   aznew1 = aznew ! initial trial value
       aznew2 = -1.0
       if (aznew+2.0*pi .lt. stnlim(2,1,istn))
      .  aznew2 = aznew1+2.0*pi
-      if (aznew-2.0*pi .gt. stnlim(1,1,istn)) 
+      if (aznew-2.0*pi .gt. stnlim(1,1,istn))
      .  aznew2 = aznew1-2.0*pi
       if (aznew2 .gt. 0.0) then
         if (aznow .lt. 3.0*pi) then
@@ -176,7 +177,7 @@ C     and spring of 1994.
      .  call char2hol ('W ',LWRNEW,1,2)
       goto 990
 
-C 6. Special NOTO slewing logic. 
+C 6. Special NOTO slewing logic.
 
 C     True if moving from quadrant 2 to 4
 600   kq24 = aznow_orig.gt.0.5*pi.and.aznow_orig.le.    pi.and.
@@ -189,7 +190,7 @@ C     True if moving from quadrant 1 to 3
         aznew1 = aznew
         if (aznew+2.0*pi .lt. stnlim(2,1,istn))
      .    aznew2 = aznew1+2.0*pi
-        if (aznew-2.0*pi .gt. stnlim(1,1,istn)) 
+        if (aznew-2.0*pi .gt. stnlim(1,1,istn))
      .    aznew2 = aznew1-2.0*pi
         if (kq31) aznew=amin1(aznew1,aznew2)
         if (kq24) aznew=amax1(aznew1,aznew2)

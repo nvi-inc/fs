@@ -19,6 +19,7 @@
 *
       LOGICAL FUNCTION KCONTn(MJD,UT,DUR,ISOR,IST,LCABL)
 C
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C     This checks that an observation is continuous, i.e. that it
 C     doesn't end on a different part of the cable from which it began.
 C     KCONT is returned TRUE if the observation is continuous.

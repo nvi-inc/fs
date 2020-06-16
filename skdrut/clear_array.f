@@ -20,6 +20,7 @@
 C@CLEAR_ARRAY
 
         subroutine clear_array(cbuf)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C  This routine simply loads a character buffer with blanks
 C

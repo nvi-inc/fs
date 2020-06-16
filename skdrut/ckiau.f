@@ -19,6 +19,7 @@
 *
       subroutine ckiau(ciau,ccom,rarad,decrad,lu)
 
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C    CKIAU generates the IAU name and checks it against
 C    the name of the source. Only the first 8 char are
 C    checked.

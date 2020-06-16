@@ -19,6 +19,7 @@
 *
       subroutine proc_form(icode,ipass,kroll,kman_roll,lform)
 ! 2013Sep19  JMGipson made sample rate station dependent
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C  FORM=m,r,fan,barrel,modu   (m=mode,r=rate=2*b)
 C  For 8-BBC stations, use "M" for Mk3 modes

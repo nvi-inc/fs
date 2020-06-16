@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE wrtap(cspdir,ispin,ihead,lu,iwr,ktape,irec,kauto)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C  WRTAP writes the tape lines for the VLBA pointing schedules.
 C

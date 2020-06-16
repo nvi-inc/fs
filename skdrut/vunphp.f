@@ -19,6 +19,7 @@
 *
       SUBROUTINE vunphp(modef,stdef,ivexnum,iret,ierr,lu,
      .index,posh,nhdpos,nheads,cpassl,indexl,csubl,npassl)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     VUNPHP gets the head positions and pass information
 C     for station STDEF and mode MODEF and converts it.
@@ -90,7 +91,7 @@ C
      .ptr_ch('headstack_pos'//char(0)),
      .ptr_ch('HEAD_POS'//char(0)),ivexnum)
       ip=1
-      do while (ip.le.max_index.and.iret.eq.0) ! get all head pos 
+      do while (ip.le.max_index.and.iret.eq.0) ! get all head pos
 
 C  1.1 Index number
 
@@ -162,7 +163,7 @@ C  2.1 <index><subpass>
       ierr = 21
       i=1
       do while (i.le.max_pass.and.iret.eq.0)
-        iret = fvex_field(i,ptr_ch(cout),len(cout)) ! get field 
+        iret = fvex_field(i,ptr_ch(cout),len(cout)) ! get field
         if (iret.eq.0) then
           il=fvex_len(cout)
           cpassl(i)=cout(1:il) ! save the pass-order list

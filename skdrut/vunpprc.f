@@ -18,8 +18,9 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE vunpprc(modef,stdef,ivexnum,iret,ierr,lu, cpre)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
-C     VUNPPRE gets the procedure prefix if any 
+C     VUNPPRE gets the procedure prefix if any
 C     for station STDEF and mode MODEF and converts it.
 C     All statements are gotten and checked before returning.
 C     Any invalid values are not loaded into the returned
@@ -67,7 +68,7 @@ C
         if (nch.gt.8) then
           ierr = -1
           write(lu,'("VUNPPRC01 - Prefix must be <=8 characters.")')
-        else 
+        else
           cpre=cout(1:nch)
         endif
       endif ! got one

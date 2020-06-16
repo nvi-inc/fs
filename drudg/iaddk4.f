@@ -19,6 +19,7 @@
 *
       integer function iaddk4(ibuf,nc1,it,ib,isb,
      .kk41rack,kk42rack,km3rack,km4rack,kvrack,kv4rack)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C     IADDK4 adds a track to the RECPATCH= command line buffer
 C     NOTE: ibuf is modified upon return.
@@ -43,7 +44,7 @@ C Local:
       data csb(1)/'u'/,csb(2)/'l'/
       data z8000/z'8000'/
 
-      izero2 = 2+Z8000 
+      izero2 = 2+Z8000
       nch = nc1
       nch = nch + ib2as(it,ibuf,nch,izero2)
       nch = mcoma(ibuf,nch)
@@ -61,7 +62,7 @@ C Local:
       endif
       nch = ichmv_ch(ibuf,nch,csb(isb))
       nch = mcoma(ibuf,nch) ! trailing comma
-      
+
       iaddk4=nch
 
       return

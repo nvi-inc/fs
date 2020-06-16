@@ -19,8 +19,9 @@
 *
       SUBROUTINE vunproll(modef,stdef,ivexnum,iret,ierr,lu,
      .croll,itrk,inc_period,reinit_period,ndefs,nsteps)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
-C     VUNPROLL gets the barrel roll definitions 
+C     VUNPROLL gets the barrel roll definitions
 C     for station STDEF and mode MODEF and converts it.
 C     All statements are gotten and checked before returning.
 C     Any invalid values are not loaded into the returned
@@ -31,7 +32,7 @@ C
       include '../skdrincl/skparm.ftni'
 C
 C  History:
-C 961020 nrv New. 
+C 961020 nrv New.
 C 970128 nrv Cleanup on initialization. Add max_headstack.
 C 020111 nrv Read inc_period and reinit_period. Return more
 C            parameters including the tracks.
@@ -76,7 +77,7 @@ C  1. Roll on or off -- not there in version 1.3
       if (croll.eq.'off') return ! no more to do
 C
 C  2. roll_inc_period statement.
-C 
+C
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('roll_inc_period'//char(0)),
      .ptr_ch('ROLL'//char(0)),ivexnum)
@@ -141,7 +142,7 @@ C  2.2 Home track. Checked and saved.
           ierr=-3
         else
           itrk(2,ndefs) = j
-        ENDIF 
+        ENDIF
 
 C  2.3 Track list. Checked and counted.
 
@@ -170,7 +171,7 @@ C       Check for consistent fanout
         do j=1,max_track
           if (it(j).ne.-99) nn=nn+1 ! count the tracks in the def
         enddo
-        if (ndefs.eq.1) then 
+        if (ndefs.eq.1) then
           nsteps=nn ! save number of tracks in the first roll
 C         if (nn.eq.8) then
 C           croll='8:1 '
@@ -190,7 +191,7 @@ C       Save the roll tracks for this def statement
         do i=1,nsteps
           itrk(i+2,ndefs) = it(i)
         enddo
-        
+
 C       Get next roll def statement
         iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .  ptr_ch('roll'//char(0)),

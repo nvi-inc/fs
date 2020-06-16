@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE VOB1INP(ivexnum,istn,LU,IERR,iret,nobs_stn)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C  This routine gets all the observations for one station
 C  from the vex file.
@@ -33,7 +34,7 @@ C 970110 nrv Add code index to cpassorderl
 C 970121 nrv Add station and code index to npassl
 C 970129 nrv Add nobs_stn to call
 C 970307 nrv Find the time field by skipping fields, not using absolute
-C            character counts. 
+C            character counts.
 C 970523 nrv TEMPORARY fix -- remove time ordering!
 C 970717 nrv Read the "drive" field as the record/norecord flag
 C 991020 nrv Fix time ordering.
@@ -55,7 +56,7 @@ C  OUTPUT:
       integer ierr ! error from this routine
       integer nobs_stn ! number of scans found for this station
 
-C  CALLED BY: 
+C  CALLED BY:
 C  CALLS:  fget_scan_station         (get station lines)
 C          fvex_scan_source          (get sources in a scan)
 c          newscan                   (form new scan)
@@ -219,7 +220,7 @@ C    and mode. If there is one, add this station to the observation.
 C    If there is not one, make a new observation.
 
 C    Getting scans for only one station doesn't require the findscan call.
-     
+
 C           call findscan(isor,icod,istart,irec)
 C           if (irec.ne.0) then ! add this station
 C             call addscan(irec,istn,icod,idstart,idend,

@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       integer FUNCTION IGTKY(LINSTQ,ITYPE,LFUNC)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C   IGTKY determines the key word typed in using minimum-matching
 C
@@ -74,7 +75,7 @@ C  2         VI = VIS
 C  2         CO = CONFIRM
 C  2         CR = CORSYNCH
 C  2         SA = SNR auto/ask
-C  2         TE = EARLY  
+C  2         TE = EARLY
 C  2         SM = MINSUBNET
 C  2         BR = BARREL
 C  2         DE = DESCRIPTION (experiment description)
@@ -84,7 +85,7 @@ C  2         ST = nominal start time
 C  2         EN = nominal end time
 C  2         JA = start java parameters program
 C  2         GT = get parameters from java program
-C  2         PS = POSTPASS 
+C  2         PS = POSTPASS
 C  3         TA = TAPE shift
 C  3         TI = TIME shift
 C  3         ID = IDLE for CHECK
@@ -104,7 +105,7 @@ C 11         OV = OVERWRITE
 C 12         FT = FEET parameter for XLIST
 C 12         AZ = AZEL parameter for XLIST, only az and el
 C 12         DU = DUR parameter for XLIST
-C 12         SX = SNR parameter for XLIST 
+C 12         SX = SNR parameter for XLIST
 C 12         MX = MAXIMUM for XLIST
 C 12         FL = FLUX for observed flux for XLIST
 C 12         A2 = AZEL including HA for XLIST
@@ -136,8 +137,8 @@ C 16         AL = ALL parameters
 C 16         NO = for the NOtes file
 C For SNR command
 C 17         MR = MARGIN parameter for SNR
-C For the 
-C 18         AU = AUTO, MA = MAN 
+C For the
+C 18         AU = AUTO, MA = MAN
 C 18         ON = ON, OF = OFF
 C 18         SU = SUB, AL = ALL
 C 18         YE = YES, NO = NO
@@ -167,7 +168,7 @@ C 23         LP = LP (S2 speed)
 C For CATALOG command
 C 24         ST = START
 C 24         GT = GET
-C 
+C
 C     CALLING SUBROUTINES: PRSET, NEWOB, CHCMD, xxSEL, SNRCM
 C                          SUMPR, NEXTPR, XLCMD, XNCMD
 C
@@ -218,7 +219,7 @@ C  Initialized
      .'TAPE','TIME','IDLE',
      .'SELECT','LIST',
      .'ON','OFF',
-     .'PART', 
+     .'PART',
      .'PLOT',
      .'TOTAL',
      .'LASER',

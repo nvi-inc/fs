@@ -19,8 +19,10 @@
 *
 	SUBROUTINE TimeSub(iTimeStart,idur,iTimeEnd)
 ! passed
-        integer itimeStart(5),itimeEnd(5)
-        integer idur
+      implicit none  !2020Jun15 JMGipson automatically inserted.
+      integer itimeStart(5),itimeEnd(5)
+      integer idur
+      integer iday0
 ! local
         integer i
 C
@@ -41,7 +43,7 @@ C     IYR2 - Year of stop time
 C     IDAYR2 - day of stop
 C     IHR2, MIN2, ISC2 - stop time
 C
-	logical LEAP
+      logical LEAP
 C
 C  MODIFICATIONS
 C  880411 NRV DE-COMPC'D

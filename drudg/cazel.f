@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 	SUBROUTINE CAZEL(ra,dec,xpos,ypos,zpos,mjd,ut,AZ,EL)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C   CAZEL calculates az,el given a source position, station location,
 C         and time.

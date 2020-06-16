@@ -18,10 +18,11 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       double precision function hms2seconds(ih,im,is)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       integer ih,im,is
 ! convert time in hours, minutes,seconds format to seconds
 !      hms2seconds=ih*3600+im*60.+is
-! AEM 20041227 
+! AEM 20041227
       hms2seconds=ih*3600.d0+im*60.d0+is
       return
       end

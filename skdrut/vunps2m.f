@@ -20,9 +20,10 @@
       SUBROUTINE vunps2m(modef,stdef,ivexnum,iret,ierr,lu,
      > cs2m,cs2d,
      > cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
-C     VUNPS2M gets the S2 mode from the $TRACKS section 
-C     for station STDEF and mode MODEF. 
+C     VUNPS2M gets the S2 mode from the $TRACKS section
+C     for station STDEF and mode MODEF.
 C     All statements are gotten and checked before returning.
 C     Any invalid values are not loaded into the returned
 C     parameters.
@@ -38,7 +39,7 @@ C 970117 nrv Remove "track_frame_format", irrelevant for S2.
 C 970124 nrv Remove "lsm" from call.
 C 021111 jfq Add ls2d,cp,cchref,csm,itrk,nfandefs,ihdn,ifanfac
 C            - supporting S2_data_source and fanout_def
-! 2013Sep19 JMGipson. Fixed problem if sub-pass was missing.Nowjust assign it "a") 
+! 2013Sep19 JMGipson. Fixed problem if sub-pass was missing.Nowjust assign it "a")
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -54,7 +55,7 @@ C                    <0 indicates invalid value for a field
 !      integer*2 ls2m(8) ! recording format
 !      integer*2 ls2d(4) ! data source
       character*8 cs2d   ! recording format
-      character*16 cs2m  ! data source        
+      character*16 cs2m  ! data source
       character*1 cp(max_track) ! subpass
       character*6 cchref(max_track) ! channel ID ref
       character*1 csm(max_track) ! sign/mag
@@ -127,13 +128,13 @@ C  2.1 Subpass
         if (iret.ne.0) return
         NCH = fvex_len(cout)
         if(nch .eq. 0) then
-          cp(in)="A"        
+          cp(in)="A"
         else if(nch .eq.  1) then
           cp(in) = cout(1:1)
-        else 
+        else
           ierr = -2
           write(lu,'("VUNPS2M02 - Subpass must be 1 character.")')
-          write(lu,'("    got: ", a)') cout(1:nch)              
+          write(lu,'("    got: ", a)') cout(1:nch)
         endif
 C
 C  2.2 Chan ref
@@ -147,7 +148,7 @@ C  2.2 Chan ref
           ierr=-3
         else
           cchref(in) = cout(1:nch)
-        ENDIF 
+        ENDIF
 
 C  2.3 Sign/magnitude
 
@@ -199,7 +200,7 @@ C  2.5 Track list
           i=i+1
         enddo
         iret = fvex_field(10,ptr_ch(cout),len(cout)) ! get track
-        if (iret.eq.0) 
+        if (iret.eq.0)
      .  write(lu,'("VUNPS2M16 - Too many fanout tracks, max is 4")')
 
 C       Check for consistent fanout
@@ -207,7 +208,7 @@ C       Check for consistent fanout
         do j=1,4
           if (it(j).ne.-99) nn=nn+1 ! count the fanned tracks
         enddo
-        if (in.eq.1) then 
+        if (in.eq.1) then
           ifanfac=nn ! save first fanout value
         else ! check subsequent ones
           if (nn.ne.ifanfac) then
@@ -215,7 +216,7 @@ C       Check for consistent fanout
             write(lu,'("VUNPS2M07 - Inconsistent fanout defs.")')
           endif
         endif ! save first/check subsequent defs
-        
+
 C       Get next fanout def statement
         iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .  ptr_ch('fanout_def'//char(0)),

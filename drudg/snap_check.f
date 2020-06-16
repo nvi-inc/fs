@@ -19,6 +19,7 @@
 *
       subroutine snap_check(BitDens,idirp)
 ! passed
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
       double precision BitDens
       integer idirp

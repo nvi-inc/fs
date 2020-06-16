@@ -19,6 +19,7 @@
 *
       subroutine sec2minsec(isec_in,imin_out,isec_out)
 ! convert seconds to minutes and seconds.
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       integer isec_in
       integer imin_out,isec_out
 

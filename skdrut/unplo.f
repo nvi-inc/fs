@@ -19,6 +19,7 @@
 *
       SUBROUTINE unplo(IBUF,ILEN,IERR,LIDSTN,LCODE,LSUBGR,LIFINP,FREQLO,
      >   iv,ls,nv)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     UNPLO unpacks the record holding information on a LO configuration
 C
@@ -105,9 +106,9 @@ C
 C
 C     IF distributor channel and input
 C     May be: IFA,IFB,IFC,IFD or IF1N,IF2N,IF1A,IF2A,IF3O,IF3I
-C         or A,B,C,D or 1N,2N,1A,2A,3O,3I 
+C         or A,B,C,D or 1N,2N,1A,2A,3O,3I
 C         or 1,2,3 (i.e. allow blank after the digit)
-C         Interpret 3N as 3I 
+C         Interpret 3N as 3I
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       i=ias2b(ibuf,ic1,1) ! decode first character
@@ -192,7 +193,7 @@ C              trailing "L" or "H" means patching
             call gtfld(ibuf,ich,ilen*2,ic1,ic2)
             nch=ic2-ic1+1
           enddo
-          return ! no more on the line 
+          return ! no more on the line
         else
           IERR = -106
           RETURN

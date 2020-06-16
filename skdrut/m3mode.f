@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE m3mode(istn,icode)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C  M3MODE looks at the track assignments and determines if they
 C  correspond to any of the standard Mark3 modes.
@@ -39,7 +40,7 @@ c LOCAL
 C History
 C 020909 nrv If a station has all the tracks of a standard mode
 C            plus some others, it should not be classified as a
-C            standard mode.  Count tracks in itras and compare 
+C            standard mode.  Count tracks in itras and compare
 C            to 28.
 C 25Jul2003 JMG  Changed itras to be a function.
 !           JMG  Quick exit if ntra<>28

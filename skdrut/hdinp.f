@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE HDINP(IBUF,ILEN,LU,IERR)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C     This routine reads and decodes one line in the $HEAD section.
 C     Call this routine in a loop to get all the head positions
@@ -68,7 +69,7 @@ C
         write(lu,9201) ierr,(ibuf(i),i=2,ilen)
 9201    format('HDINP01 - Error in field ',I3,' of:'/40a2)
         RETURN
-      END IF 
+      END IF
 C
       istn=IGetstatnum(cstn)
       IF  (istn.EQ.0) THEN !not recognized
@@ -86,7 +87,7 @@ C
       END IF  !not recognized
 
 C     2. Now store this information
-C        ip=list of sequential pass numbers, 
+C        ip=list of sequential pass numbers,
 C        idir=list of subpasses,
 C        ihd=list of head positions
 C        n = number of entries in the lists
@@ -105,7 +106,7 @@ C     Check recorder type, not the terminal name
             ihdpos(ih,ip(i)-100,istn,icode) = ihd(i)
             ihddir(ih,ip(i)-100,istn,icode) = idir(i)
           endif
-        END DO 
+        END DO
       endif ! save offsets and subpasses
 C
       IERR = 0

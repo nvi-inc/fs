@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine name_trkf(lmode,lpmode,lpass,lnamep)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
 ! passed.
       character*(*) lmode
@@ -27,7 +28,7 @@
       character*(*) lnamep
       integer ilast_non_blank
 
-! 2015Jun05. Removed commented out code. 
+! 2015Jun05. Removed commented out code.
 
       if(knopass) then
         write(lnamep,'("trkf",a)') lmode

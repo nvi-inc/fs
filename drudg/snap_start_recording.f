@@ -17,20 +17,21 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
-      subroutine snap_start_recording(kin2net) 
+      subroutine snap_start_recording(kin2net)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
       logical kin2net
 ! 2005Jul28  JMGipson.  Added "disk_record" after disk_record_on
-! 2014Jan30  JMGipson. Removed disk crap. 
-      
+! 2014Jan30  JMGipson. Removed disk crap.
+
       if(km5disk) then
         if(kin2net) then
             write(lufile,'(a)') "in2net=on"
         else
            write(luFile,'("disk_record=on")')
-           write(luFile,'("disk_record")')  
+           write(luFile,'("disk_record")')
         endif
-      endif 
+      endif
       krunning=.true.           !turn on running flag.
 
       return

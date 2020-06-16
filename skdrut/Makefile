@@ -23,8 +23,6 @@ OBJECTS=\
     cablw.o \
     capitalize.o \
     ckiau.o ckroll.o clndr.o cvpos.o \
-    check_rec_type.o \
-    check_rack_type.o \
     count_freq_tracks.o \
     ctime2ydhms.o \
     ctime2dmjd.o c2lower.o c2upper.o \
@@ -46,7 +44,6 @@ OBJECTS=\
     kvalid_rack.o kvalid_rec.o \
     lower.o lowercase.o lowercase_and_write.o lyes_no.o \
     mjd2yrdoy.o mpstar_rad.o m3mode.o \
-    make_unit_vector.o \
     newscan.o novas.o null_term.o obs_sort.o pid_str.o \
     plh.o pnum.o prefr.o printer.o purge_file.o  put_esc_in_string.o \
     raded.o  readf_asc.o reads.o \
@@ -91,7 +88,7 @@ ifeq ($(FC),fort77)
 FFLAGS=-C -c
 CFLAGS= -c -DF2C
 else
-FFLAGS=-fno-range-check -fno-underscoring -g -D READ_LINE -finit-local-zero -fno-automatic -fbackslash
+FFLAGS=-fno-range-check -fno-underscoring -g -D READ_LINE
 ifeq ($(shell uname -m),x86_64)
 FFLAGS+=-fdefault-integer-8 -finteger-4-integer-8
 endif

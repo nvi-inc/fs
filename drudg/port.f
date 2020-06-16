@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE PORT
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C   This routine will change the printer output destination and
 C   the printer type and the output width.

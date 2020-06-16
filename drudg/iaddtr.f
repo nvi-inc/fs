@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       integer function iaddtr(ibuf,nc1,it,ichan,isb,ibit)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C     IADDTR adds a track to the TRACKFORM= command line buffer
 C     NOTE: ibuf is modified upon return.
@@ -51,7 +52,7 @@ C Local:
       nch = ichmv_ch(ibuf,nch,csb(isb))
       nch = ichmv_ch(ibuf,nch,cbit(ibit))
       nch = mcoma(ibuf,nch)
-      
+
       iaddtr=nch
 
       return

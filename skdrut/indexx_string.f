@@ -19,6 +19,7 @@
 *
       SUBROUTINE indexx_String(n,arr,indx)
 ! From numerical recipes
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       INTEGER*4 n
       integer*4 indx(n),M,NSTACK
       CHARACTER*(*) arr(n)

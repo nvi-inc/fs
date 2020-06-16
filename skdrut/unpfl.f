@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE unpfl(IBUF,ILEN,IERR,LNAME,lb,cfl,nfl,fl)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     unpfl unpacks a record containing flux information
 C

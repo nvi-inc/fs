@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine proc_tracks(icode,num_tracks_rec_mk5)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
       include '../skdrincl/statn.ftni'
       include 'drcom.ftni'
@@ -53,10 +54,10 @@
       if(cstrack_cap(istn)(1:8) .eq. "DBBC_PFB") then
         call proc_dbbc_pfb_tracks(lu_outfile,istn,icode)
         return
-      endif 
+      endif
 
-! Output Mark5B  recorder stuff.       
-      if(km5rack.or.kv5rack.or.kdbbc_rack.or.km5b.or. knorack) then 
+! Output Mark5B  recorder stuff.
+      if(km5rack.or.kv5rack.or.kdbbc_rack.or.km5b.or. knorack) then
         call proc_disk_tracks(lu_outfile,istn,icode,
      >                  kignore_mark5b_bad_mask)
         return
@@ -76,7 +77,7 @@
           else
             writE(*,*) "Proc_track error: Should never get here!"
             write(*,*) "email: john.m.gipson@nasa.gov"
-            stop            
+            stop
           endif
         else
           if(num_tracks_rec_mk5 .eq. 8) then

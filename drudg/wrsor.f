@@ -19,6 +19,7 @@
 *
       subroutine wrsor(csname,irah,iram,ras,ldsign2,idecd,idecm,decs,lu)
 ! Write out VLBA source name in the format:
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 !     sname='1053+704'  ra=10h56m53.6s dec=+70d11'46"
 C Write the line in the VLBA flies with the source name
 C 970509 nrv New. Extracted from VLBAT.
@@ -41,7 +42,7 @@ C Input
       real decs
       integer lu
 C Local
-! Hold local copies of the time. 
+! Hold local copies of the time.
       integer irah_in,iram_in
       real ras_in
       integer idecd_in,idecm_in,idecs_in
@@ -59,17 +60,17 @@ C Local
 
       irah_in=irah
       iram_in=iram
-      ras_in=ras   
+      ras_in=ras
 ! This handles special case where seconds > 59.95, which gets written as 60.0
-      if(ras_in+0.05 .gt. 60.0) then 
+      if(ras_in+0.05 .gt. 60.0) then
          ras_in=0
          iram_in=iram_in+1
       endif
       if(iram_in .eq. 60) then
          iram_in=0
          irah_in=irah_in+1
-      endif   
-   
+      endif
+
       write(lra,'(i2.2,"h",i2.2,"m",f4.1,"s")') irah_in,iram_in,ras_in
 !        120h56m53.6s
 !        123456789x12345
@@ -97,5 +98,5 @@ C Local
       write(lu,'("sname=",a,"  ra=",a," dec=",a)')
      >       lsq//csname(1:trimlen(csname))//lsq, lra,ldec
       return
-      stop 
+      stop
       end

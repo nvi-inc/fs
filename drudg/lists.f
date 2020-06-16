@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE LISTS()    !LIST ONE STATION'S SCHEDULE
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C This routine lists on the printer a schedule
 C
@@ -69,7 +70,7 @@ C LOCAL:
       character*2 cwrap_new
       double precision UT,GST,utpre ! previous value required for slewing
       integer nstnsk,istnsk,isor,nsat
-      character*7 cwrap ! cable wrap string returned from CBINF 
+      character*7 cwrap ! cable wrap string returned from CBINF
 C NSTNSK - number of stations in current observation
 C ISTNSK - which station corrresponds to ISTN
       integer nlobs,nlines,ntapes,ierr,ilen,npage
@@ -142,7 +143,7 @@ C 970307 nrv Use pointer array ISKREC to insure time order of obs.
 C 971003 nrv Add a check for S2 and determine tape changes for it separately.
 C 980916 nrv Change date header on source page to yyyy.ddd
 C 981202 nrv Add warning message about negative slewing times.
-C 990527 nrv Add option for S2 and K4 non-VEX outputs. 
+C 990527 nrv Add option for S2 and K4 non-VEX outputs.
 C 991118 nrv Removed LAXIS variable and use AXTYP subroutine.
 C 991209 nrv Add ITUSE to iftold calculation.
 ! 2007   jmg Removed obsolete call to m3inf.  Not used.
@@ -223,8 +224,8 @@ C
       MJDPRE = MJD
       UTPRE = UT
       ISPRE = ISOR
-     
-      cwrap_pre=" " 
+
+      cwrap_pre=" "
 C
       IC = TRIMLEN(LSKDFI)
       WRITE(LUSCN,100) cSTNNA(ISTN),LSKDFI(1:ic) ! new
@@ -346,13 +347,13 @@ C
       if (kwrap) then ! print cable wrap
         IF (cs.EQ.'S') THEN
           WRITE(LUPRT,1137)
-        ELSE 
+        ELSE
           WRITE(luprt,1080)
         ENDIF
       else ! no cable wrap output
         IF (cs.EQ.'S') THEN
           WRITE(LUPRT,9137)
-        ELSE 
+        ELSE
           WRITE(luprt,9080)
         ENDIF
       endif
@@ -464,13 +465,13 @@ C CONVERT BACK TO DOUBLE
      .           LHSIGN,IHAH,IHAM,HAS)
           ENDIF
 C
-          if (tslew.lt.0.0) then 
+          if (tslew.lt.0.0) then
             WRITE(luprt,9331)
 9331        FORMAT('  THE FOLLOWING SOURCE REQUIRES NEGATIVE ',
      .             'SLEWING TIME.  INFORM THE SCHEDULER!'/)
                   NLINES = NLINES + 2
           endif
-          IF (KUP) THEN !source is up 
+          IF (KUP) THEN !source is up
             cwrap_new=ccable(istnsk)
             CALL SLEWo(ISPRE,MJDPRE,UTPRE,ISOR,ISTN,
      >            cwrap_pre,cwrap_new,TSLEW,0,dum)
@@ -574,7 +575,7 @@ C     5. Now write out the observation line.
             else
               write(luprt,8516) IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK)
 8516          format(I3,A1,' ',I5,' ',' ________________'/)
-            endif 
+            endif
           endif ! wid 137/80
           endif ! cable/no cable
 C

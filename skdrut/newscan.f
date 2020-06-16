@@ -19,8 +19,9 @@
 *
       subroutine newscan(istn,isor,icod,istart,
      .      idstart,idend,ifeet,ipas,idrive,cbl,ierr)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
-C   NEWSCAN forms the inputs into a standard sked/drudg hollerith 
+C   NEWSCAN forms the inputs into a standard sked/drudg hollerith
 C   observation. This routine and ADDSCAN determine the internal
 C   format for the observation.
 
@@ -77,7 +78,7 @@ C     Cal time. Define as 10 for now
       nch = nch + 1 + IB2AS(ICAL,IBUF,NCH+1,3)
 C     Freq code
       NCH = ICHMV(IBUF,NCH+1,LCODE(ICOD),1,2)
-C     Preob 
+C     Preob
       NCH = 1 + ICHMV_ch(IBUF,NCH+1,'PREOB ')
 C     Start time
       if (istart(1).ge.2000) iyr = istart(1)-2000

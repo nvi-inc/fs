@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE VPRINP(ivexnum,lu,ierr)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     This routine gets the scheduling parameter literal block.
 C NOT USED -- see sked/prread.f and drudg drprrd.f
@@ -30,7 +31,7 @@ C History:
 C 020619 nrv New.
 C
 C INPUT:
-      integer ivexnum ! vex file number 
+      integer ivexnum ! vex file number
       integer lu ! unit for writing error messages
 C
 C OUTPUT:
