@@ -1,4 +1,5 @@
 This file contains a summary of changes made and why.
+2020Jun17 lstsum.f.  Initilized itime_start,itime_stop, itime_start_p, and itime_stop_p to 0
 2020Jun16 ../skdrut/gnpas.f Got rid of a bunch of stuff dealing with headstacks.
           drudg/*.f and ../skdrut/*.f.  Added implicit none to all routines EXCEPT xat.f
           Fixed some variables that were not defined

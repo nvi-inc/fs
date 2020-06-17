@@ -123,7 +123,7 @@ C 021014 nrv Read new FAST commands from the .snp file with fractional seconds.
 !            calculating line position.
 ! 2007Jul28 JMGipson. Replace kdisk by km5disk which is hardware.ftni.
 ! 2015Feb30 JMG. Simplified code. Got rid of a lot of stuff for Tape recorders. Added support for Mark6.
-!
+! 2020Jun17 JMG. Initialize itime_start_p and itime_stop_p and itime_start, itime_stop 
 
       implicit none 
       include 'hardware.ftni'
@@ -213,7 +213,6 @@ C Local:
       character*2 csize                 !what is paper orientation, font size
                                          !values are ls,ll,ps,pl
 
-
 C 1.0  Check existence of SNAP file.
       IC = TRIMLEN(CINNAME)
       INQUIRE(FILE=CINNAME,EXIST=kexist)
@@ -259,11 +258,16 @@ C 3. Initialize local variables
       kdata_stop=.false.
       krunning=.false.
      
+! initialize some times. 
       do i=1,5
         itime_tape_stop(i)=0
         itime_tape_start(i)=0
+        itime_stop_p(i)=0
+        itime_start_p(i)=0
+        itime_stop(i)=0
+        itime_start(i)=0
       end do
-     
+          
       cpass_old="NO"
       cpass= " "
 
