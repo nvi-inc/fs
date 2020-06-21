@@ -79,7 +79,7 @@
        azs    is the azimuth step size span/(points-1), 5 from the example
                  above
        elc    is the center of the scan in elevation, 12 from the example above
-       els    is the elevation step size span/(points-1), 5 from the example
+       els    is the elevation step size span/(points-1), 1 from the example
                  above
        levels is an optional argument that can be used to specify contour
                  levels, otherwise the MATLAB default levels are used
