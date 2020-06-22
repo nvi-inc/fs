@@ -30,6 +30,7 @@ int if_cmd(ibuf,nchar)
 {
   char *ptr, *ptr_cond, *ptr_true, *ptr_false, ifchar;
   int ddc,pfb,itpis_test[MAX_DBBC_PFB_DET], i, ibbc, ifc, ic;
+  int dbbc3;
   char ifs[ ]={"abcd"};
 
   ptr=memchr(ibuf,'=',*nchar);
@@ -106,6 +107,8 @@ int if_cmd(ibuf,nchar)
     (shm_addr->equip.rack_type == DBBC_PFB ||
      shm_addr->equip.rack_type == DBBC_PFB_FILA10G);
 
+  dbbc3=shm_addr->equip.rack==DBBC3;
+
   for(i=0;i<MAX_DBBC_PFB_DET;i++)
     itpis_test[i]=0;
 
@@ -145,7 +148,8 @@ int if_cmd(ibuf,nchar)
       strcpy(ibuf,ptr_false);
 
   else if(!strcmp("cont_cal",ptr_cond))
-    if((ddc||pfb) && 1==shm_addr->dbbc_cont_cal.mode)
+    if((ddc||pfb) && 1==shm_addr->dbbc_cont_cal.mode
+            || dbbc3 && 1==shm_addr->dbbc3_cont_cal.mode)
       strcpy(ibuf,ptr_true);
     else
       strcpy(ibuf,ptr_false);      
