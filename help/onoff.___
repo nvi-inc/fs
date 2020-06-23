@@ -8,45 +8,66 @@
 
 Settable parameters:
           rep       Number of repetitions, 1 to 99. Default is 2. 
+
           intp      Integration period, 1 to 100 seconds. Default is 1. 
+
           cutoff    Elevation above which to step in elevation rather
                     than azimuth, in degrees, default 75.
+
           ste       Distance off source for off source and calibration
                     points, in multiples of a beamwidth. Default is 3.0.
+
           proc      Snap procedure base name. See comments. No default.
+
           wait      Seconds to wait for onsource for each point, 1-1200
                     seconds allowed, default 120.
+
           devices   One or more of all standard device mnemonics for
                     Mark III/IV/5, VLBA/4/5 and DBBC, plus all, allvc,
                     formvc, and formif for Mark III/IV/5, plus allbbc,
                     allu, alll, formbbc, and formif for VLBA/4/5 and
-                    DBBC. For RDBE, each detector can be named, or each IF,
-                    or all detectors (see comments for details).
-                    For all racks: station defined detectors u5
-                    and u6 are supported if the station has them
+                    DBBC. For DBBC3, the same additional detectors are
+                    supported except formbbc and formif. For RDBE,
+                    each detector can be named, or each IF, or all
+                    detectors (see comments for details).  For all
+                    racks (including none): station defined detectors
+                    u5 and u6 are supported if the station has them
                     implemented.
 
 Monitor-only parameters:
           ssize     source size, degrees
+
           mfwhm     maximum full-width-half-maximum of all selected
                     devices, degrees
+
           device    selected device's mnemonic 
+
           if        IF chain for device, 1-3 for Mark III/IV/5 and LBA4,
                     a-d for VLBA/4/5 and DBBC
+
           pol       polarization for device, l for left and r for right
+
           fwhm      full-width-half-maximum for device, degrees
+
           center    center frequency for device, MHz
+
           tcal      Noise diode temperature for center, degrees K
+
           flux      Source flux for center, Janskys
+
           corr      Source flux correction for center frequency relative to
                     fwhm, dimensionless
+
           dpfu      Degrees-per-Flux-Unit, for band of device, in
                     degrees/Janskys
+
           gain      gain curve value for band of device at current
                     elevation, dimensionless
+
           product   dpfu*gain for device, degrees/Janskys
 
 Comments:
+
 The parameters should be setup by issuing a onoff=...  command. A
 measurement is started by issuing a simple onoff.  This will recover
 the current values for the display only parameters and schedule the
@@ -111,27 +132,20 @@ CALOFFNF: caloff
           sy=rte_go onoff & 
 
 calon and caloff are local procedures that do whatever is necessary to
-turn the noise source on and off, respectively.
+turn the noise source on and off, respectively. Continuous cal does
+not use these procedures, but it is still recommended that they be
+available. This will prevent 'onoff' from hanging if continuous cal is
+accidentally not enabled.  If 'onoff' hang does hang in this
+situation, it can be restarted again with:
 
-If you are using a DBBC with continuous and/or non-continuous cal, these
-procedures should be modified slightly to be:
-
-CALONNF:  if=cont_cal,,calon
-          !+1s
           sy=rte_go onoff & 
 
-CALOFFNF: if=cont_cal,,caloff
-          !+1s
-          sy=rte_go onoff & 
+Of course, if continuous cal is not enabled when it should be, the
+data is unlikely to be useful.
 
-They should be available no matter what cal method is used.  This change will
-make the procedures independent of which type of cal is in use.  While it is
-not strictly necessary to have these procedures for continuous cal, their being
-available will prevent the onoff program from being paused by their not being
-present if continuous cal is desired, but was not turned on. In the other
-words, the program won't get get stuck even if the cal configuration is not
-correct. Whether you will get useful results if it is misconfigured is a
-different question.
+It is not possible to useful get results for all detectors if both
+continuous cal detectors and station detectors (which are necessarily
+non-continuous cal) are both selected.
 
 If station dependent detectors, u5 and/or u6, are used that support zero
 level measurement (see 'help=user_device'), two additional procedures
@@ -154,7 +168,7 @@ respectively.  The signal needs to be turned off to determine the
 Please note that if both u5 and u6 are used and only one supports
 measuring a zero level, both devices will be sampled, but the "zero"
 measurement for the device not supporting a zero level will be
-discarded.  Similiarly, if other devices supporting a zero level are
+discarded.  Similarly, if other devices supporting a zero level are
 being used, e.g., Mark IV or VLBA4 racks, any station specific
 detector used will have its "zero" level sampled, but the
 measurement will be discarded if a zero level is not supported.
@@ -171,26 +185,67 @@ each procedure should contain:
 
 The indication that this is needed is if onoff seems to hang after
 executing one of these procedures. Please see the "Known Bugs" section
-of the latest update notice for more details.
+of the latest update notice for more details.  Please also see the
+information above on why the calon/caloff procedures should be
+available to prevent an accidental hang if continuous cal is in use.
 
 The "formbbc", "formif", and "formvc" detector device parameters will
 cause the BBCs, IFs, or VCs (respectively) that are current defined
 for recording by the formatter to be selected as detectors. This is
 useful for checking SEFDs in all channels to be used in an experiment
-when the rack has been set-up in the configration of the experiment.
+when the rack has been set-up in the configuration of the experiment.
 
 The default wait time for of 120 seconds is generous, but can be
 adjusted if necessary. Slower antennas may need a longer time. Shorter
 times are only useful to make onoff give-up sooner if there is a
 problem getting on-source.
 
-If continous cal is in use ("cont_cal=on,..."), the noise diode
+If continuous cal is in use ("cont_cal=on,..."), the noise diode
 temperature is expected to be a small fraction of Tsys, a few percent.
 Consequently, it may be necessary to take a large number of samples
 beat the noise level down enough to get reliable gain compression
 results and to calibrate the noise diode. However, SEFD measurements
 should only be about 41% noisier than when the same integration is
 used with non-continuous calibration is used.
+
+ Continuous vs non-continuous cal switching considerations
+
+If for 'fivept' and 'onoff' only continuous cal is used, you can set
+it up in 'initp' in the 'point' procedure library and run 'initp'
+before using 'fivept' and 'onoff' to make sure it is enabled. 
+
+You may need to switch back and forth between continuous and
+non-continuous cal with 'fivpt' and 'onoff' rather than just using one
+or the other. This might be needed because some receivers support
+continuous cal and others do not or it may be useful to use
+non-continuous cal sometimes because that cal is stronger.
+
+To switch back and forth, the simplest approach is probably to enable
+or disable it explicitly in 'initp' and have different setups for
+'aquir' for each case. This can be a good match for changing set-ups
+for different receivers. It may require redundant 'aquir' setups to
+occasionally use non-continuous cal for receivers that have continuous
+cal.
+
+Alternatively, if you want to sometimes use non-continuous cal even
+for a receiver that has continuous cal, you could make the
+corresponding 'initp' be independent of the cal setup. Then the cal
+setup can be changed by manually run SNAP procedures that saves the
+setup with the SNAP 'save_file' command to a file to be re-executed
+with 'save_file' in the 'initi' procedure when the FS is restarted.
+This has the weakness that if the continuous cal selection is changed
+by a VLBI observation, its setup will not have been recorded in the
+"saved" file. This can be overcome by having using 'save_file' command
+to re-execute the setup in 'initp' procedures as well; however as
+noted before, it may not agree with what is used in the VLBI
+observation.
+
+The final tweak on this alternative approach is to also have a manual
+receiver change SNAP procedures that will also use the "saved" file to
+save the correct cal setup. Again, it may not agree with what is used
+in the VLBI observation.
+
+                  Using a measurement SNAP procedure
 
 If "proc" in non-null, it is the 'base' name for a user defined SNAP
 procedure, referred to hereafter as the measurement SNAP procedure,

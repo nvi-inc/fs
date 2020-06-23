@@ -11,21 +11,26 @@ Settable parameters:
                       azel = Azimuth/Elevation
                       xyns = X/Y, +X East
                       xyew = X/Y, +X South  (unimplemented)
+    `
           rep       Number of repetitions: -10 to -1 and 1 to 10
                     allowed. Default is -2. Negative repetition counts
                     are described in the fivpt manual. The absolute
                     value implies a maximum repetitions count, but once
                     the scans are well entered on both axes,
                     additional repetitions will be skipped.
+
           pts       Number of points on each axis, if even, it is
                     increased by 1. pts must be between -31 to -3 or  3
                     to 31, inclusive. Default is 7. Negative point
                     counts cause the system temperature measurement to
                     be skipped. The absolute value is used as the number
                     of points.
+
           stp       Step size for distance between points, in multiples
                     of a beamwidth. Default is 0.5. 
+
           intp      Integration period, 1 to 32 seconds.
+
           dev       Mnemonic for the device to be used as the detector.
                     Standard devices are allowed. Note that for Mark III
                     equipment, the whether the video converter USB or
@@ -37,6 +42,7 @@ Settable parameters:
                     01a0 for RDBE, and 001u for DBBC3.
                     Station dependent detectors u5 and u6 may be
                     available.
+
           wait      seconds to wait for onsource for each point, 1-1200
                     seconds allowed, default 120.
 
@@ -50,6 +56,7 @@ Display-only parameters:
                    defined detectors u5 and u6 the value are determined
                    from the user_device=u5,... and user_device=u6,...
                    commands respectively.
+
           beam     The full width half maximum beam size degrees. For
                    standard detectors this is determined from the .rxg
                    file cal temperature table interpolated using
@@ -59,6 +66,7 @@ Display-only parameters:
                    defined detectors u5 and u6 the values are determined
                    from the user_device=u5,... and user_device=u6,...
                    commands respectively.
+
           flux     The apparent flux of the source. For standard
                    detectors this is determined from the flux.ctl
                    file cal using information from the lo command and
@@ -67,6 +75,7 @@ Display-only parameters:
                    For station defined detectors u5 and u6 the value are
                    determined from the user_device=u5,... and
                    user_device=u6,... commands respectively.
+
           chain    The IF chain, 1-6, that the detector is on. Chains 5
                    and 6 are for station specific detectors u5 and u6.
                    Mark III/IV and LBA4 racks use IFs 1-3. For VLBA/4
@@ -85,10 +94,10 @@ The scan is performed about the current commanded position.  Any
 offsets that are in use are included. If the scan is successful the
 total offsets for the selected axis type are updated.
 
-It is recommended that nothing else be done, e.g. running a schedule,
+It is recommended that nothing else be done, e.g., running a schedule,
 while this command is executing. Since this command may run for an
 extended period of time, a mechanism has been supplied for aborting:
-enter sy=brk fivpt & as a SNAP command.  The program will return the
+enter 'sy=brk fivpt &' as a SNAP command.  The program will return the
 antenna to the last good offset for each axis. If there was no good
 offset measurement on an axis, then the original offset is used.
 
@@ -113,7 +122,7 @@ temperature. The SEFD should still be useful measurement.
 
 For continuous calibration with a DBBC rack with an IF detector
 selected, there is no noise diode available. In this case the diode
-temperature is assumed to be -100 and the effects of the preceeding
+temperature is assumed to be -100 and the effects of the preceding
 paragraph apply.
 
 For continuous calibration with a DBBC, the Tsys measurements samples
@@ -133,28 +142,21 @@ CALOFFFP: caloff
           !+1s
           sy=rte_go fivpt &
 
-calon and caloff are local procedures that do whatever is
-necessary to turn the noise source on and off, respectively.
+calon and caloff are local procedures that do whatever is necessary to
+turn the noise source on and off, respectively. Continuous cal does
+not use these procedures, but it is still recommended that they be
+available. This will prevent 'fivpt' from hanging if continuous cal is
+accidentally not enabled.  If 'fivpt' hang does hang in this
+situation, it can be restarted again with:
 
-If you are using a DBBC with continuous and/or non-continuous cal, these
-procedures should be modified slightly to be:
+          sy=rte_go fivpt & 
 
-CALONFP:  if=cont_cal,,calon
-          !+1s
-          sy=rte_go fivpt &
+Of course, if continuous cal is not enabled when it should be, the
+data is unlikely to be useful.
 
-CALOFFFP: if=cont_cal,,caloff
-          !+1s
-          sy=rte_go fivpt &
-
-They should be available no matter what cal method is used.  This change will
-make the procedures independent of which type of cal is in use.  While it is
-not strictly necessary to have these procedures for continuous cal, their being
-available will prevent the fivpt program from being paused by their not being
-present if continuous cal is desired, but was not turned on. In the other
-words, the program won't get get stuck even if the cal configuration is not
-correct. Whether you will get useful results if it is misconfigured is a
-different question.
+For issues related to switching between continuous and non-continuous
+call, please see the 'Continuous vs non-continuous cal switching
+considerations' section of the 'Comments' in 'help=onoff'.
 
 If the number of pts is negative, this will disable the initial system
 temperature measuement. This may be useful for station dependent
