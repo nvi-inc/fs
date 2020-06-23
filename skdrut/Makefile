@@ -26,7 +26,6 @@ OBJECTS=\
     count_freq_tracks.o \
     ctime2ydhms.o \
     ctime2dmjd.o c2lower.o c2upper.o \
-    delete_file.o \
     dsecdif.o dot8.o durscan.o \
     errormsg.o extractnexttoken.o fc_gwinsz.o fc_gwinw.o \
     feetscan.o findscan.o freq_init.o frinit.o  frinp.o \
