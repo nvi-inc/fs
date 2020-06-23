@@ -125,9 +125,10 @@ C 2003Jul25 JMG  ITRAS changed to function
 ! 2015Jun05 JMG Modified to use new version of itras. 
 ! 2016Dec05 JMG. Fixed bug in reading in samplate rate. Previously  applied the sample rate to "1,ns". Now to "1,nstatn" 
 ! 2018Jul05 JMG. Better error messages. Previously error code printed as ****
-! 2018Oct. Modifed so samprate applies only to stations specified in preceding "F" line.
+! 2018Oct   JMG  Modified so samprate applies only to stations specified in preceding "F" line.
 ! 2018Dec22 JMG. Fixed bug using undefinfed variable 'nstav' and added implicit none. 
-C
+! 2020Jun22 JMG Fixed bug introduced 2018OCT. 
+
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C
@@ -417,9 +418,12 @@ C 5. This is the sample rate line.
 
 ! 2018Oct. Modifed so samprate applies only to stations specified in preceding "F" line.
 ! Previously applied to all stations!
+! Undo this change!  Schedule files produced by sked have only one R line. 
+! Also the commented code below would have is=0 for some stations. 
       if (lchar.eq. "R") then ! sample rate    
         do j=1,nstatn
-          is=istsav(j)
+!          is=istsav(j)
+          is=j
           samprate(is,icode)=srate
         end do 
       endif ! sample rate
