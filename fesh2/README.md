@@ -13,11 +13,11 @@ Similarly, checks on schedule files are only done if the time since the
 last check exceeds a specified time. Checks can be forced on the command line.
 If new or updated schedules are found, they are optionally processed with **Drudg** 
 to produce `snp`, `prc` and `lst` files. By default, once the files have been
-checked **fesh2** will provide a summary of the files and then go into a wait
+checked, **fesh2** will provide a summary and then go into a wait
 state before carrying out another check. **Fesh2** can also be run once for a 
 single check and not go into a wait state.
 
-## Main Features
+## Compatibility
   * **Fesh2** has been tested for the following Python versions:
     * 2.7.16
     * 3.7.3
@@ -34,8 +34,9 @@ You will then need to edit the **fesh2** configuration file for your station(s).
 More information is provided below in the Configuration section.
 
 ## Configuration
-Fesh2 looks for a configuration file in `/usr2/control` called `fesh2.config
-`. This will need to be set up for your station before running **fesh2**. Use
+**Fesh2** looks for a configuration file in `/usr2/control` called `fesh2.config`. 
+*This will need to be set up for your station before running **fesh2** for
+ the first time.* Use
  your favourite text editor to modify the file. The comments in the file
   describe the parameters but here are a few points to note:
 ### Station settings
@@ -68,8 +69,8 @@ In many cases, **Fesh2** can be started by just typing
 ```
 fesh2
 ```
-which start it in its default mode. However comman-line options exist to
- change many of the configuration parameters and allow for a one-off check
+which starts it in its default mode. However command-line options exist to
+ change many of the configuration parameters, allow for a one-off checks
   (no wait mode), forcing of file downloads etc. Command-line parameters are
    as follows:  
 
