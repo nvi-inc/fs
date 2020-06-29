@@ -2,3 +2,4 @@
 2.0rc2, 24 June 2020 -- Second pre-release
 2.0rc3, 25 June 2020 -- Third pre-release
 2.0rc4, 25 June 2020 -- Fourth pre-release
+2.0rc5, 29 June 2020 -- Fifth pre-release

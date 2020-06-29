@@ -12,15 +12,15 @@ import threading
 import time
 import string
 
-from fesh2.fesh2.SchedUpdateConfig import Config
-from fesh2.fesh2.MasterSession import Session
-from fesh2.fesh2.Drudgery import Drudg
-from fesh2.fesh2 import SchedServer
+from fesh2.FeshConfig import Config
+from fesh2.MasterSession import Session
+from fesh2.Drudgery import Drudg
+from fesh2 import SchedServer
 from os import path
 from datetime import datetime, timedelta
 
 
-# TODO: Test with different Python versions back to v 3.5.3 and v 2.7
+# TODO: Test with different Python versions. 2.7.3, 3.2.3 on pcfshb back to v 3.5.3 and v 2.7
 # TODO: Test on old versions of Debian: Etch, Wheezy
 # TODO: Logging to MAS?
 
@@ -32,7 +32,7 @@ log_filename = 'fesh2.log'
 
 def main_task(config):
     """
-    When triggered, this willcheck for master and schedule files and process them with Drudg.
+    When triggered, this will check for master and schedule files and process them with Drudg.
 
     :param config: Configuration parameters
     :type config: Config Class
@@ -287,6 +287,7 @@ def drudg_session(ses, config, got_sched_file, new, sched_type):
         update_stns = []
         drg = Drudg(config.config['Drudg']['binary'],
                     config.config['FS']['sched_dir'],
+                    config.config['FS']['proc_dir'],
                     sched_type,
                     config.config['Drudg']['lst_dir'])
 
@@ -316,6 +317,8 @@ def drudg_session(ses, config, got_sched_file, new, sched_type):
             for s in update_stns:
                 (o1, o2, o3) = drg.godrudg(s, ses.code, config)
                 logging.info("Drudg created the following files: {} {} {}".format(o1, o2, o3))
+                # put them in the locations specified by the config file
+
 
 def show_summary(config, mstrs, sessions_to_process):
     """
@@ -684,7 +687,7 @@ def main():
     logging.basicConfig(filename=log_file_str,
                         filemode='a',
                         format=format_txt_main,
-                        level=logging.INFO,
+                        level=logging.DEBUG,
                         datefmt='%Y-%m-%d %H:%M:%S')
 
     logging.Formatter.converter = time.gmtime

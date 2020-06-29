@@ -1,3 +1,3 @@
 # __init__.py
 
-__version__ = "2.0rc4"
+__version__ = "2.0rc5"

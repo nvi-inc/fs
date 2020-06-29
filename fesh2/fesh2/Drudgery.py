@@ -8,7 +8,7 @@ from os import path
 class Drudg:
     """ Tasks for managing interactions with Drudg"""
 
-    def __init__(self, which_drudg, sched_dir, sched_type, lst_dir):
+    def __init__(self, which_drudg, sched_dir, proc_dir, sched_type, lst_dir):
         """
 
         :param which_drudg: Location of drudg executable (usually /usr2/fs/bin/drudg)
@@ -20,6 +20,7 @@ class Drudg:
         self.timeout_s = 3
         self.drudg_exec = which_drudg
         self.sched_dir = sched_dir
+        self.proc_dir = proc_dir
         self.sched_type = sched_type
         self.lst_dir = lst_dir
         pass
@@ -93,6 +94,14 @@ class Drudg:
         child.sendline('0')
         child.expect('DRUDG DONE', timeout=self.timeout_s)
 
+        # Make sure the output files go to the right directories.
+        # The LST file should be fine because we specify location during Drudg.
+        outfile_snp_target = "{}/{}{}.snp".format(self.sched_dir,code,station)
+        os.rename(outfile_snp, outfile_snp_target)
+        outfile_snp = outfile_snp_target
+        outfile_prc_target = "{}/{}{}.prc".format(self.proc_dir,code,station)
+        os.rename(outfile_prc, outfile_prc_target)
+        outfile_prc = outfile_prc_target
         logging.debug("outfiles = {}, {}, {}".format(outfile_snp,outfile_prc,outfile_lst))
 
         return(outfile_snp,outfile_prc,outfile_lst)
