@@ -19,6 +19,9 @@
 *
       subroutine fdrudg(cfile,cstnin,command,cr1,cr2,cr3,cr4)
       implicit none  !2020Jun15 JMGipson automatically inserted.
+
+! Recent History (older below).
+! 2020Jun30. Got rid of kmissing and test on iserr, both of which are obsolete.
 C
 C     DRUDG HANDLES ALL OF THE DRUDGE WORK FOR SKED
 C
@@ -67,7 +70,7 @@ C LOCAL:
       integer inew,ivexnum
       integer i,k,l,ncs,ix,ixp,ic,ierr,iret,nobs_stn
       integer inext,isatl,ifunc,nstnx
-      integer nch1,nch2,nch3,iserr(max_stn)
+      integer nch1,nch2,nch3
       logical kexist
 
       character*2 cbnd(2)   !used in count_freq_tracks
@@ -345,8 +348,6 @@ C
       km5P_piggy = .false.
       km5A_piggy = .false.
 
-C  In drcom.ftni
-      kmissing = .false.
 
 ! Check for log file processing
 201   continue
@@ -527,7 +528,7 @@ C     Reset for the next time through.
           kdrgfile = .false.
 C
 C     Derive number of passes for each code
-          CALL GNPAS(luscn,ierr,iserr)
+          CALL GNPAS(luscn,ierr)
           call count_freq_tracks(cbnd,nbnd,luscn)
           if (ierr.ne.0) then ! can't continue
             write(luscn,9999)
@@ -535,11 +536,6 @@ C     Derive number of passes for each code
      .      'pass/track/head information.'/
      .      ' SNAP or procedure output may be incorrect',
      .      ' or may cause a program abort for:'/)
-            do i=1,nstatn
-              if (iserr(i).ne.0) write(luscn,9998) cstnna(i)
-9998          format(1x,a,1x,$)
-            enddo
-            write(luscn,'()')
           endif
 C
           WRITE(LUSCN,'(a,i4)')
@@ -646,7 +642,7 @@ C     Convert to convention upper/lower for 2 letters
       nstatn=1
       cpocod(1)=cstn
       endif !check for validID
-      kmissing=iserr(istn) .ne. 0
+
 699   continue
       if(kvex) then !get the station's observations now
 C getting all the scans (needed to generate scan names)
@@ -871,8 +867,6 @@ C
       I = 1
       do while (I.le.nstnx)  !loop over stations
         IF (cSTN.eq. "=") ISTN = I
-        kmissing=.false.
-        if (iserr(istn).ne.0) kmissing=.true.
         IX = INDEX(cexpna,'.')-1
         if (ix.lt.0) ix=trimlen(cexpna)
         scode=cpocod(istn)

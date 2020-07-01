@@ -17,7 +17,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
-       SUBROUTINE gnpas(luscn,ierr,iserr)
+       SUBROUTINE gnpas(luscn,ierr)
        implicit none
 C
 C     GNPAS derives the number of sub-passes in each frequency code
@@ -42,7 +42,6 @@ C  Input
       integer luscn ! for error messages
 C  Output
       integer ierr ! non-zero if inconsistent track counts per pass
-      integer iserr(max_stn) ! error by station
 
 C  LOCAL VARIABLES:
       integer ih,ip(max_headstack),is
@@ -50,6 +49,9 @@ C  LOCAL VARIABLES:
       integer j,k,l,itrk(max_subpass,max_headstack),ic1,maxp(max_frq)
       integer ix,iprr,ipmax(max_headstack),ic,m,nvc
       logical kmiss,kfirst
+
+! Now put recent changes on top
+! 2020Jun30. Got rid of argument iserr which is no longer used. 
 C
 C     880310 NRV DE-COMPC'D
 C     930225 nrv implicit none

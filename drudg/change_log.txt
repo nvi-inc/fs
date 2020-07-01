@@ -1,4 +1,7 @@
 This file contains a summary of changes made and why.
+2020Jun30 snapintr.f. Got rid of residual line that put out #passes, length. Instead now puts out recorder type.
+          Got rid of 'kmissing' and tests that depend on it in fdrudg.f, proc.f, snap.f, drcom.ftni
+          ../skdrut/gnpas.f. Got rid of obsolete iserr argument 
 2020Jun22 Removed bug in frinp.f introduced on 2018OCT?. Changed documented in source code but not below. 
 2020Jun17 lstsu.f. Initilize itime_start,itime_stop,itime_start_p,itime_stop_p
 2020Jun16 ../skdrut/gnpas.f Got rid of a bunch of stuff dealing with headstacks.

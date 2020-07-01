@@ -1,5 +1,6 @@
 C  Common Block statement for DRUDG
 ! Newer changes now at top
+! 2020Jun30   Got rid of kmissing (see if pass information is absent)
 ! 2019Aug25.  Added imark6_off to support broadband
 ! 2019Aug21.  Got rid of iperm which whas not used
 C
@@ -54,7 +55,7 @@ C 2003Jul11 JMG added itctim
 ! 2016Dec23 JMG. Added ical_time_staggered, kcont_cal
 ! 2018Jul20 JMG. removed cversion and put in drver_com.ftni 
 c
-      logical klab,kvex,KSPINT,KFLG,kbatch,kmissing,kparity,kdrg_infile,
+      logical klab,kvex,KSPINT,KFLG,kbatch,kparity,kdrg_infile,
      .          kprepass,kdr_type,kgeo,kpostpass
       logical klabel_ps  !is the label printer Postscript?
       logical ksked_proc
@@ -64,7 +65,7 @@ c
       logical kcont_cal
 
       common/drcom_logical/
-     .       kvex,klab,KSPINT,KFLG(4),kbatch,kmissing,kparity,
+     .       kvex,klab,KSPINT,KFLG(4),kbatch,kparity,
      .       kdrg_infile,kprepass,kdr_type,kgeo,
      .       kpostpass,klabel_ps,ksked_proc,
      >       klo_config,ktarget_time,kignore_Mark5b_bad_mask,

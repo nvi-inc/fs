@@ -265,6 +265,7 @@ C     data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
 C
 C History:
 ! Now put in most recent first. 
+! 2020Jun30 JMG. Got rid of test on kmissing (which indicated missing tape info)
 ! 2020May29 JMG. Fixed bug in schedules with early starts. Schedules were not getting written out.
 !                Also got rid of element-by-element copy of one itime_xx to another itime_yy. 
 ! 2019Nov20 JMG. Fixed bug in index.  
@@ -513,12 +514,6 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
 
       icod_old=-1
       iblen = ibuf_len*2
-      if (kmissing) then
-        write(luscn,'(a)')
-     >  ' SNAP00 - Missing or inconsistent head/track/pass information.'
-        write(luscn,'(a)')
-     >  ' Your SNAP file may be incorrect or  cause a program abort.'
-      endif
 
       if(cstrack(istn) .eq. "unknown" .or.
      >    cstrec(istn,1) .eq. "unknown") then

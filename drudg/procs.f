@@ -30,7 +30,8 @@ C Version 9.0 is supported with this routine.
       include '../skdrincl/data_xfer.ftni'
 C
 C History Now with most recent at top. 
-! 2019Aug255  Merged in changes from VGOS version. Mostly reading PROCS section from schedule file
+! 2020Jun30  Got rid of test on kmissing (which checked if missing tape info)
+! 2019Aug25  Merged in changes from VGOS version. Mostly reading PROCS section from schedule file
 !
 !  
 C 930714  nrv  created,copied from procs
@@ -331,13 +332,6 @@ C     integer nspd
       character*2 cifinp_save(max_chan,max_frq)
   
 C INITIALIZED VARIABLES:      
-
-      if (kmissing) then
-        write(luscn,'(a)') 
-     > ' PROCS00: Missing or inconsistent head/track/pass information.'
-        write(luscn,'(a)')
-     >' Your procedures may be incorrect, or may cause a program abort.'
-      endif
 
       if(cstrack(istn).eq. "unknown" .or.
      >   cstrec(istn,1) .eq. "unknown") then

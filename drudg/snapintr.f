@@ -66,6 +66,7 @@ C
 ! 2006Nov30 Use cstrec(istn,irec) instead of 2 different arrays
 ! 2007Dec07 Modified so that  prints version as ....
 ! 2018Jul20 Moved writing of drudg version to subrotine.
+! 2020Jun30 Don't output tape pases, lenghth. Instead print out terid, terna, recorder.
 
       IF (IFUNC.EQ.1) THEN
         cprfx='"'
@@ -94,14 +95,21 @@ C     write antenna line
      > cpocod(istn), cstnna(istn),
      > (stnxyz(i,istn),i=1,3), coccup(istn)
 
+! 2020Jun30
+        write(lu_outfile,'(a,a,1x,a8,1x,a)') cprfx,
+     >   cterid(istn)(1:4),cterna(istn)(1:8),cstrec(istn,1)
+
+! Below commented out
 C     Write terminal line
-      if(cstrec(istn,1) .eq. "Mark5A") then
-        write(lu_outfile,'(a,a4,1x,a8,1x,"Mark5A")') cprfx,
-     >   cterid(istn)(1:4),cterna(istn)(1:8)
-      else
-        write(lu_outfile,'(a,a4,1x,a8,1x,i4,1x,i8)') cprfx,
-     >   cterid(istn)(1:4),cterna(istn)(1:8),maxpas(istn),maxtap(istn)
-      endif
+!      if(cstrec(istn,1) .eq. "Mark5A") then
+!        write(lu_outfile,'(a,a,1x,a8,1x,"Mark5A")') cprfx,
+!     >   cterid(istn)(1:4),cterna(istn)(1:8)
+!      else
+!        write(lu_outfile,'(a,a4,1x,a8,1x,i4,1x,i8)') cprfx,
+!     >   cterid(istn)(1:4),cterna(istn)(1:8),maxpas(istn),maxtap(istn)
+!      endif
+!      write(*,*) "TERID ", cterid(istn)
+!      write(*,*) "TERNA ", cterna(istn)
 
 C  Write drudg version
       call write_drudg_version_line(lu_outfile)
