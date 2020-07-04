@@ -107,10 +107,11 @@ char lsor;           /* char identifying source usually ':' or '/' */
       memcpy(buf+l,name,5);
       buf[l+5]='\0';
       strcat(buf,"#");
-    } else
+    } else {
       ssor[0]=lsor;
       ssor[1]=0;
       strcat(buf,ssor);
+    }
     if(msg!=NULL) {
       int n;
       int bufl=strlen(buf);
