@@ -11,20 +11,17 @@ else:
     skip_pre_and_post = False
 
 this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, 'README.md')) as f:
+with open(path.join(this_directory, "README.md")) as f:
     long_description = f.read()
 # package dependencies are diffierent in python versions 2 and 3
 if sys.version_info.major == 2:
     install_requires = [
         "pexpect >= 4.7.0",
         "pycurl >=7.43.0.2",
-        "configparser >= 4.0.0"
+        "configparser >= 4.0.0",
     ]
 else:
-    install_requires = [
-        "pexpect >= 4.7.0",
-        "pycurl >=7.43.0.2]"
-    ]
+    install_requires = ["pexpect >= 4.7.0", "pycurl >=7.43.0.2]"]
 
 
 def _pre_install():
@@ -56,44 +53,56 @@ def _post_install():
     target_station_config_file = path.join(station_config_dir, config_file_name)
     if path.exists(target_template_config_file):
         remove(target_template_config_file)
-    print("Placing a copy of the template config file {} in {}".format(config_file_name, template_control_file_dir))
+    print(
+        "Placing a copy of the template config file {} in {}".format(
+            config_file_name, template_control_file_dir
+        )
+    )
     copy2(template_config_file, target_template_config_file)
 
     print("\n#############\n")
     copy_cfg_to_control = False
     if not path.exists(target_station_config_file):
-        print("Placing a copy of the template configration file {} in {}.".format(config_file_name,
-                                                                                  template_control_file_dir))
+        print(
+            "Placing a copy of the template configration file {} in {}.".format(
+                config_file_name, template_control_file_dir
+            )
+        )
         print("It will need editing for your site.")
         copy_cfg_to_control = True
     else:
-        print("A version of the config file {} already exists in {}. ".format(config_file_name, station_config_dir))
-        print("Compare it with the template in {} and make any changes if necessary.".format(template_control_file_dir))
+        print(
+            "A version of the config file {} already exists in {}. ".format(
+                config_file_name, station_config_dir
+            )
+        )
+        print(
+            "Compare it with the template in {} and make any changes if necessary.".format(
+                template_control_file_dir
+            )
+        )
     if copy_cfg_to_control:
         copy2(template_config_file, target_station_config_file)
     print("\n#############\n\n")
+
 
 if not skip_pre_and_post:
     _pre_install()
 
 setup(
-    name='fesh2',
-    version='2.0rc5',
-    url='https://github.com/nvi-inc/fs',
-    license='GPL v3',
-    author='Jim Lovell',
-    author_email='jejlovell@gmail.com',
-    description='Geodetic VLBI schedule management and processing',
+    name="fesh2",
+    version="2.0rc5",
+    url="https://github.com/nvi-inc/fs",
+    license="GPL v3",
+    author="Jim Lovell",
+    author_email="jejlovell@gmail.com",
+    description="Geodetic VLBI schedule management and processing",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),
     install_requires=install_requires,
     include_package_data=True,
-    entry_points={
-        "console_scripts": [
-            "fesh2=fesh2.__main__:main",
-        ]
-    },
+    entry_points={"console_scripts": ["fesh2=fesh2.__main__:main",]},
 )
 
 if not skip_pre_and_post:
