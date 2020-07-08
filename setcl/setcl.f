@@ -469,16 +469,20 @@ c
       call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
      &     rateti_fs,spanti_fs,modelti_fs,icomputer)
 c
-      if (kfm.and.cjchar(modelti_fs,1).ne.'c') then
-         call fc_rte_check(iErr)
-         if(iErr.eq.-5) then
-            call logit7ci(idum,idum,idum,-1,-25,'sc',0)
-         else if(iErr.ne.0) then
-            call logit7ci(idum,idum,idum,-1,-5+iErr,'sc',0)
-         endif
+c we must always check for the 248 day problem until
+c the clock logic is re-written, both for 'computer' and 64-bit
+c
+      call fc_rte_check(iErr)
+      if(iErr.eq.-5) then
+         call logit7ci(idum,idum,idum,-1,-25,'sc',0)
+      else if(iErr.ne.0) then
+         call logit7ci(idum,idum,idum,-1,-5+iErr,'sc',0)
+      endif
+c and computer compared to the formatter?
+      if(kfm) then
          if(abs(dble(secsoffti_fs)-dble(secs_fm)).gt.86400*248) then
-            call logit7ci(idum,idum,idum,-1,-4,'sc',0)
-            goto 999
+           call logit7ci(idum,idum,idum,-1,-4,'sc',0)
+           goto 999
          endif
       endif
 c
