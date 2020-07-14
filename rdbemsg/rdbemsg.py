@@ -557,7 +557,7 @@ class msg_tk(Tkinter.Tk):
 	def GetCryoVals(self):
                 print "Updating Cryo Values"
 		c = self.stationcode.get()
-		proc20 = subprocess.Popen(["ssh", "oper@" + self._mci, "tail", "-n", "64", "mci_" + c + "_" + self._mcilogtime + ".txt", "|", "egrep", "'AD214|AD215'"], stdout=subprocess.PIPE)
+		proc20 = subprocess.Popen(["ssh", "oper@" + self._mci, "tail", "-n", "100", "mci_" + c + "_" + self._mcilogtime + ".txt", "|", "egrep", "'AD214|AD215'"], stdout=subprocess.PIPE)
                 text =proc20.stdout.read()
 		for line in text.split('\n'):
 			if "AD214" in line:
