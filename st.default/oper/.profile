@@ -17,7 +17,7 @@ if [ -n "$BASH_VERSION" ]; then
     fi
 fi
 
-#set initial PATH explcitly (or some one can make it insert the sbin's)
+#set initial PATH explicitly (or some one can make it insert the sbin's)
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games"
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] ; then
