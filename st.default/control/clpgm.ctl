@@ -14,8 +14,8 @@ monit5 a xterm -name monit5 -e monit5
 monit6 a xterm -name monit6 -e monit6
 scnch  a xterm -name scnch  -e 'fsclient -n -w -s | grep \!scan_check'
 xterm  d xterm
-monan  a xterm -name monan  -e monan 
-mona   a popen 'cd /tmp;rdbe30_mon.py -h 239.0.2.10 -p 20021 -H rdbea 2>&1' -n rdbemona
-monb   a popen 'cd /tmp;rdbe30_mon.py -h 239.0.2.20 -p 20022 -H rdbeb 2>&1' -n rdbemonb
-monc   a popen 'cd /tmp;rdbe30_mon.py -h 239.0.2.30 -p 20023 -H rdbec 2>&1' -n rdbemonc
-mond   a popen 'cd /tmp;rdbe30_mon.py -h 239.0.2.40 -p 20024 -H rdbed 2>&1' -n rdbemond
+monan  a xterm -name monan  -e monan
+mona   d popen 'cd /tmp;rdbe30_mon.py -h 239.0.2.10 -p 20021 -H rdbea 2>&1' -n rdbemona
+monb   d popen 'cd /tmp;rdbe30_mon.py -h 239.0.2.20 -p 20022 -H rdbeb 2>&1' -n rdbemonb
+monc   d popen 'cd /tmp;rdbe30_mon.py -h 239.0.2.30 -p 20023 -H rdbec 2>&1' -n rdbemonc
+mond   d popen 'cd /tmp;rdbe30_mon.py -h 239.0.2.40 -p 20024 -H rdbed 2>&1' -n rdbemond
