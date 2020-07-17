@@ -1,6 +1,6 @@
-File: /usr2/fs/misc/fs10.0.0up.txt        Version: 10.0  Date: 200517
+File: /usr2/fs/misc/fs10.0.0up.txt        Version: 10.3  Date: 200717
 
-                     FS 10.0.0 Beta Update Notice
+                     FS 10.0.0 Beta2 Update Notice
 
 
 I. Introduction
@@ -13,10 +13,13 @@ This document is divided into five sections:
   IV.  Changes from previous versions
   A.   Reference Appendix for Installation
 
-This update is intended for all stations using the FS. This includes
-both stations using the main (non-VGOS) branch (latest version 9.13.2)
-and the VGOS branch (latest versions 9.12.10-9.12.13). Installing the
-new version as update in either case is fairly simple.
+This update is intended as a test version for all stations using the
+FS. This includes both stations using the main (non-VGOS) branch
+(latest version 9.13.2) and the VGOS branch (latest versions
+9.12.10-9.12.13). It is also an update for stations that have been
+testing 10.0.0-beta1.  Installing the new version as update for these
+cases is fairly simple but has several steps; the update from '-beta1'
+is less involved (see II.c).
 
 The most significant changes in 10.0.0 are:
 
@@ -27,22 +30,22 @@ The most significant changes in 10.0.0 are:
    new local control files.
 
    The most significant change is that previous main branch users will
-   find that in the new FS input is case sensitive, as it was already
+   find that in the new FS, input is case sensitive, as it was already
    in the VGOS branch.
 
 2. Support for use on both 32- and 64-bit systems.
 
-   The new version should run on existing 32-bit systems that
-   currently support the FS, as well as on 64-bit systems. The update
-   notice includes instructions for transitioning to 64-bit systems,
-   which may require some relatively simple changes to station
-   software.
+   The new version should run on 32-bit systems that currently support
+   the FS, as well as on 64-bit systems. The update notice includes
+   instructions for transitioning to a 64-bit system, which may require
+   some relatively simple changes to station software.
 
-   A new FS Linux distribution, FSL10, is now available or will be
-   shortly, for 64-bit (and 32-bit) use. We recommend using this
+   A new FS Linux distribution, FSL10 (based on Debian Stretch), is
+   now available for 64-bit (and 32-bit) use. We recommend using this
    distribution if you would like to move to using a 64-bit OS or need
-   a 32-bit OS that is still under support (FSL9 is no longer under
-   support). Release of FSL10 will occur separately.
+   a 32-bit OS that is still under support (the base Debian
+   distribution, Wheezy, used for FSL9 is no longer under support).
+   Release of FSL10 occurred separately.
 
 3. Version control with 'git'.
 
@@ -52,12 +55,24 @@ The most significant changes in 10.0.0 are:
    The details of the model used for FS releases under 'git' are
    described in /usr2/fs/misc/release_model.txt. 
 
+   This change increases the importance of not modifying the
+   '/usr2/fs' directory tree since such changes will make it more
+   difficult to simply 'pull' updates to install bug fixes and new
+   features.
+
+4. Use of the FS display server is now the default.
+
+   This change is new as of the '-beta2' release.
+
+Please also see section IV.A for details of changes since the
+10.0.0-beta1 release.
+
 Very significant contributions, in fact essential, were made by Dave
-Horsley (UTAS, Australia and GSFC) and Tetsuro Kondo (NICT, Japan and
-SHAO, China). Kondo-san pioneered 64-bit support in the FS with his
-64-bit implementations for Sejong and Ishioka stations. Dave built on
-his work in developing a version that would support 32- and 64-bit
-systems.
+Horsley (UTAS, Australia and NVI/GSFC) and Tetsuro Kondo (NICT, Japan
+and SHAO, China). Kondo-san pioneered 64-bit support in the FS with
+his 64-bit implementations for the Sejong and Ishioka stations. Dave
+built on his work in developing a version that would support 32- and
+64-bit systems.
 
 Dave also single-handedly imported the entire existent history of FS
 source code into 'git'. This includes over 130 FS9 versions (under
@@ -70,21 +85,23 @@ is a great resource for understanding the evolution of the code.
 
 As always, we are deeply indebted to Jonathan Quick (HartRAO, South
 Africa) for his many significant contributions that go far beyond what
-is explicitly mentioned below. In this particular case, this includes
-testing and insights for adapting the code for 64-bit use, patiently
-solving various problems, developing FSL10, and working out support
-for older FSL distributions, particularly FSL8.
+is explicitly mentioned below. In this particular case, his
+contributions include testing and insights for adapting the code for
+64-bit use, patiently solving various problems, developing FSL10, and
+working out support for older FSL distributions, particularly FSL8.
 
 
 II.  Installation as an upgrade to a previous version
 
-Since this section is written as upgrade to an existing installation,
-it is assumed that you are using a 32-bit system. However, only a few
-things here are different for 64-bit systems. As result this section
-is also in the instructions for converting to a 64-bit system, with
-appropriate embedded information along the way. Please see section III
-'Converting to a 64-bit system', for overall instructions for
-converting to 64-bit.
+This section describes upgrading an existing version before
+'10.0.0-beta2'. This includes an upgrade path from '10.0.0-beta1', in
+step II.c below, for both 32- and 64-bit systems.  Otherwise, it is
+assumed that you are using a 32-bit system.  However, only a few
+things here are different for 64-bit systems. As a result this section
+is also used in the instructions for converting from 32-bit to a
+64-bit system, with appropriate embedded information along the way.
+Please see section III 'Converting to a 64-bit system', for overall
+instructions for converting to 64-bit.
 
 An appendix A. 'Reference Appendix for Installation' is provided at
 the end of this document.  It includes seven sub-sections:
@@ -101,11 +118,12 @@ If you haven't upgraded or installed the FS before, you may want to
 review the appendix.  It is STRONGLY recommended that you back-up your
 operational system before upgrading.
 
-There are two possible paths for upgrading: from a main branch
-version or from a VGOS branch version. There are some general
-considerations that depend on which branch you are updating from:
+There are three possible paths for upgrading: (a) from a main branch
+version, (b) from a VGOS branch version, or (c) from the
+'10.0.0-beta1' release.  There are some general considerations that
+depend on which version you are updating from:
 
-  1. Upgrading from a main branch version. The main branch versions
+  a. Upgrading from a main branch version. The main branch versions
      are numbered 9.13.x and 9.11.x or older.  Specifically, versions
      9.12.x are not part of the main branch.  If you are upgrading
      from a main branch version, it is assumed that upgrade is from
@@ -114,17 +132,129 @@ considerations that depend on which branch you are updating from:
      first, please refer to appendix sub-section A.1. 'Upgrading from
      FS versions before the previous stable', for more information.
 
-  2. Upgrading from a VGOS branch version.  The VGOS branch versions
+  b. Upgrading from a VGOS branch version.  The VGOS branch versions
      are numbered 9.12.x.  The instructions provided in this section,
      below, are for installing as an upgrade to versions
      9.12.10-9.12.13, the latest VGOS branch releases. As far as we
      know, no other VGOS versions are in use.  If you have a different
      version, please contact Ed (Ed.Himwich@nviinc.com).
 
-The upgrade instructions for the two paths differ only in step (12)
-below.
+  c. Updating from the '10.0.0-beta1' release. If you made it through
+     the '-beta1' update despite the errors and omissions in the
+     instructions (now corrected, we apologize), the update`
+     instructions from the '-beta1' are much simpler. The overall
+     method is described here:
 
-The installation steps for upgrading are:
+        i. If you are using 'git' as is recommended, then as 'prog'
+           execute:
+
+             cd /usr2/fs-git
+             git fetch
+             git checkout -q 10.0.0-beta2
+             make -s
+
+       ii. Recompile your station code. If your '/usr2/st/Makefile' is
+           set-up in the usual way, as 'prog' execute:
+
+             cd /usr2/st
+             make rmdoto rmexe all
+
+      iii. Reboot.
+
+       iv. If your old version before the '-beta1' update was 9.12.12,
+           you should review steps in sections II.12.A-II.12.D to make
+           sure your control files were handled correctly. There were
+           two changes related to that old version to consider:
+
+             A. Step II.12.B. Your 'clpgm.ctl' file may have been
+                needlessly overwritten. We think is is unlikely that
+                any local customizations were lost, but if they were,
+                we apologize. Hopefully you made a backup before
+                trying the update. In which case, you should be able
+                to recover the file from the backup. Otherwise,
+                hopefully the changes needed are small.
+
+             B. Step II.12.C. You may have ended up with extra lines
+                at the end of 'equip.ctl' because, according to the
+                '-beta1' installation instruction, the FiLa10G input
+                select lines (including the comment line) were added
+                after the DBBC3 configuration lines (including the
+                comment line) and extra DBBC3 configuration lines were
+                added. Presumably you have already sorted this out
+                because the FS would probably not have run if the file
+                was changed as previously described. If you have not
+                sorted this out, the change that is needed is to move
+                the FiLa10G input select lines before the DBBC3
+                configuration lines and to delete any additional lines
+                after the DBBC3 configurations lines. In case it is
+                helpful, more detail is provided in step II.12.D.
+
+        v. If you initially upgraded from 9.13.2, there is an optional
+           clean-up of your 'calonnf', 'calonfp', caloffnf', and
+           'calofffp' procedures, probably located in your 'point'
+           procedure library in step II.13.B.
+
+       vi. There were two changes to the 'clpgm.ctl' control file:
+
+           A. The flags for the 'monX' programs in 'clpgm.ctl' have
+              changed from 'a' to 'd' since '-beta1'.
+
+           B. The line for the 'scnch' window has been generalized to
+              cover Mark 5 recorders as well as Mark 6.
+
+           Please update your file accordingly after comparing to the
+           new default:
+
+             cd /usr2/control
+             diff clpgm.ctl /usr2/fs/st.default/control
+
+      vii. Similarly, in the 'stpgm.ctl' control file the line for
+           the 'scnch' window has been generalized to cover Mark 5
+           recorders as well as Mark 6 since '-beta1'.
+
+           Please update your file accordingly after comparing to the
+           new default:
+
+             cd /usr2/control
+             diff stpgm.ctl /usr2/fs/st.default/control
+
+     viii. Please review step II.14.A. This step did not exist for the
+           '-beta1' release.  It contains information about making use
+           of the display server the default, which is strongly
+           recommended.
+
+       ix. Please review step II.14.B. This step did not exist for the
+           '-beta1' release.  It contains information about updates
+           needed to the '~/.Xresources' files for 'oper' and 'prog'.
+           Please follow those directions.
+
+        x. If you have installed the '-beta1' as part of installing
+           FSL10, you can optionally rearrange your '.bashrc' and
+           file to agree with the new default.
+
+           As 'oper', you can find the differences between your
+           '~/.bashrc' file and the default using:
+
+             cd
+             diff .bashrc  /usr2/fs/st.default/oper
+
+           Likewise you can do this similarly for 'prog' (and any AUID
+           accounts if you are using those).
+
+       xi. If you updated to a 64-bit platform and installed the 'go'
+           language as part of that, according to step III.4.C.ii, then
+           you should register for 'golang' announcements as is now
+           described in that step.
+
+      xii. Please review section IV.A for a detailed listed of changes
+           since the '-beta1' release.
+
+     This is the end of the instructions for upgrading from
+     '10.0.0-beta1'.
+
+The upgrade instructions for the update from the main branch and the
+VGOS branch differ only in step (12) below. The installation steps for
+upgrading are:
 
  (0) Back-up your operational system.  Having a back-up to return to
      will allow you to continue operations in case something goes
@@ -153,10 +283,10 @@ The installation steps for upgrading are:
        cd /usr2
        git clone git@github.com:nvi-inc/fs fs-git
 
- (3) Checkout the beta release from the local repository.
+ (3) Checkout the '-beta2' release from the local repository:
 
        cd fs-git
-       git checkout -q 10.0.0-beta1
+       git checkout -q 10.0.0-beta2
 
  (4) Set the link for the new FS version:
 
@@ -185,7 +315,8 @@ The installation steps for upgrading are:
   
        /usr2/fs/misc/fix_perm
 
-     Answer 'y' to the prompt if you wish to proceed. 
+     Answer 'y' to the prompt if you wish to proceed. It is
+     recommended for most stations.
 
  (6) ** VERY IMPORTANT **
 
@@ -196,11 +327,12 @@ The installation steps for upgrading are:
  (7) Make the FS itself:
 
      A. Set the compiler. Starting with version 10.0.0, the standard
-        FORTRAN compiler for use with the FS is 'f95' and we recommend
-        that you use it. On the 32-bit systems you can still use
-        'fort77', but you should only use it if you either you don't
-        have 'f95' or if you have any FORTRAN station code that is too
-        difficult to convert to 'f95', see step (8) for more details.
+        FORTRAN compiler for use with the FS is 'f95' (gfortran) and
+        we recommend that you use it. On the 32-bit systems you can
+        still use 'fort77', but you should only use it if you either
+        you don't have 'f95' or if you have FORTRAN station code that
+        is too difficult to convert to 'f95', see step (8) for more
+        details.
 
         To select 'f95' as your compiler, you will need to set the
         'FC' variable to this value. If your shell is 'tcsh' you can
@@ -233,12 +365,12 @@ The installation steps for upgrading are:
         to confirm that everything compiled correctly (no news is good
         news).
 
- (8) This step is for modifying your station programs, in '/usr2/st'.
+ (8) This step is for modifying your station programs in '/usr2/st'.
      There are two possible issues: (sub-step A) the impact of FS
      input being case sensitive on the 'antenna=...' command, and (B)
      conversion of FORTRAN code. Even if neither of these issues
-     affect you, you must recompile and relink your programs against
-     the new FS version in any event, as described in step (9).
+     affect you, you must still recompile and re-link your programs
+     against the new FS version, as described in step (9).
 
      A. If your antenna, or your side of the antenna interface,
         requires that the strings passed by the 'antenna=...' command
@@ -247,39 +379,40 @@ The installation steps for upgrading are:
          i. Convert your code. For simple backward compatibility,
             change you 'antcn' program to always convert the
             'antenna=...' strings to upper case. Alternatively, make
-            your code case insensitive.
+            your code case insensitive as you chose.
 
         ii. Convert the strings in your 'antenna=...' commands
             wherever they occur: SNAP procedures, SNAP schedules,
-            external programs, or scripts, to upper case.
+            external programs, or scripts, to upper case. Field system
+            input is now case sensitive.
 
         The former choice (A) is probably the easier, but in some
         cases (B) may be better. If you have question about which to
         use and how to do it, please contact Ed (Ed.Himwich@nviinc.com).
 
-      B. Conversion of FORTRAN code. If you have station programs in
-         FORTRAN, please contact Ed (Ed.Himwich@nviinc.com), but
-         basically you have two options:
+     B. Conversion of FORTRAN code. If you have station programs in
+        FORTRAN, please contact Ed (Ed.Himwich@nviinc.com) so he is
+        aware, but basically you have two options:
 
-          i. Use 'f95' for both the FS, see step (7), and your station
-             FORTRAN programs. You will need to adapt your 'Makefiles'
-             to use the same compiler options as the FS, which can be
-             found in '/usr2/fs/include.mk'.  It is recommended that
-             you follow this approach for 32-bit systems and it is
-             necessary when moving to a 64-bit system.
+         i. Use 'f95' for both the FS, see step (7), and your station
+            FORTRAN programs. You will need to adapt your 'Makefiles'
+            to use the same compiler options as the FS, which can be
+            found in '/usr2/fs/include.mk'.  It is recommended that
+            you follow this approach for 32-bit systems and it is
+            necessary when moving to a 64-bit system.
 
-             As a first cut, it may work to add the following two
-             lines to your 'Makefile's for FORTRAN programs:
+            As a first cut, it may work to add the following two lines
+            to your 'Makefile's for FORTRAN programs:
 
 FFLAGS  += -ff2c -I../../fs/include -fno-range-check -finit-local-zero -fno-automatic -fbackslash
 FLIBS   += -lgfortran -lm
 
-         ii. Continue to use 'fort77' as the compiler for both the FS,
-             see step (7), and your station programs. You should
-             follow this approach ONLY if you are on a 32-bit system
-             and it is too difficult to convert to 'f95'.
+        ii. Continue to use 'fort77' as the compiler for both the FS,
+            see step (7), and your station programs. You should follow
+            this approach ONLY if you are on a 32-bit system and it is
+            too difficult to convert to 'f95'.
 
-     When done, be sure to recompile and relink your programs against
+     When done, be sure to recompile and re-link your programs against
      the new FS version in any event, as described in step (9).
 
  (9) Remake your local software.  If '/usr2/st/Makefile' is set-up in
@@ -323,7 +456,7 @@ FLIBS   += -lgfortran -lm
 
      B. You will need to execute the following commands to copy new
         files that are needed (cut-and-paste is your friend). There
-        are three cases depending on what your old version was.
+        are three cases depending on what your old version was:
 
           i. If your old version was 9.12.10 or 9.12.11:  
 
@@ -346,13 +479,13 @@ FLIBS   += -lgfortran -lm
                cp /usr2/fs/st.default/control/rdbe.ctl .
                cp /usr2/fs/st.default/control/rdbemsg.ctl .
 
-     C. Update your 'equip.ctl' file, adding up to two lines at the
-        end: the FiLa10G input select and the DBBC3 configuration
-        lines.  There are three cases, please check which applies for
-        you.  In any event, you should compare your 'equip.ctl' to the
-        example as described when you get to sub-step D, to make sure
-        there are no duplicated lines or other problems caused by the
-        commands in the current sub-step.
+     C. Update your 'equip.ctl' file, adding lines at the end: the
+        FiLa10G input select and the DBBC3 configuration lines.  There
+        are three cases, please check which applies for you.  In any
+        event, you should compare your 'equip.ctl' to the example as
+        described when you get to sub-step D, to make sure there are
+        no duplicated lines or other problems caused by the commands
+        in the current sub-step (C).
 
           i. If your old version was 9.12.10 or 9.12.11, you will need
              to add the final four lines of the example 'equip.ctl'
@@ -393,8 +526,8 @@ FLIBS   += -lgfortran -lm
            clpgm.ctl - This file was not present for 9.12.10 or
                        9.12.11, so if your old version was one of
                        those, the new default version (copied by
-                       commands in sub-step B above) should not require
-                       modification.
+                       commands in sub-step B above) should not
+                       require modification.
 
                      - If your old version was 9.12.12, 9.12.13 or
                        9.13.2: the '-title ...'  parameter for each
@@ -493,10 +626,17 @@ vsi1-2
                        was appended to the end of the comment on
                        clock rate line itself.
 
-           stpgm.ctl - The 'erchk' was updated and new lines were
+           stpgm.ctl - The 'erchk' line was updated and new lines were
                        added for 'monit2', and 'scnch' for when the
-                       display server is in use.  All these lines are
-                       commented out by default.
+                       display server is in use. Using the display
+                       server is now the default and strongly
+                       recommended.
+
+                       If you are NOT planning to use the FS display
+                       server, we recommend you comment out the lines
+                       for 'erchk', 'mont2', and 'scnch'. If they are
+                       used without the display server and they are
+                       accidentally closed, the FS will be killed.
 
                        The new 'erchk' line differs from the previous
                        commented version with the addition of the
@@ -505,51 +645,112 @@ vsi1-2
                        that the latter two are uniquely supplied by
                        the '.Xresources' file.
 
-                       If you are using the FS display server, we
-                       recommend you uncomment the lines for 'erchk',
-                       'mont2'. and 'scnch'.  You may want to add
-                       other 'mont?' programs. If so, you may want to
-                       add resources for them in the '~/.Xresources'
-                       files for 'oper' and 'prog'.
+                       If you are using the display server you may
+                       want to add other 'mont?' programs. If so, you
+                       may also want to add resources for them (if
+                        they aren't already there) in the
+                       '~/.Xresources' files for 'oper' and 'prog'.
 
 (13) This step is for updates to your SNAP '.prc' procedure libraries.
-     Only one change is needed, to convert use of the old FS 'go'
-     program to use 'rte_go'. This change came about because the
-     compiler for the 'go' language conflicts with the old name. This
-     change is necessary even if you do not have the 'go' language
-     compiler installed.
+     Only one change is required: (A) converting from using the 'go'
+     FS program to 'rte_go',` which is required. A second change is
+     optional and only relevant if upgrading from 9.13.2: (B) remove
+     'if=cont_cal,,' from the 'fivpt' and 'onoff' procedures for
+     'calon' and 'caloff' procedures
 
-     To make this change for all your '.prc' procedure libraries,
-     execute:
+     A. Convert use of the old FS 'go' program to use 'rte_go'. This
+        change came about because the compiler for the 'go' language
+        conflicts with the old name. This change is necessary even if
+        you do not have the 'go' language compiler installed.
 
-        cd /usr2/proc
-        /usr2/fs/misc/go_fix *.prc
+        To make this change for all your '.prc' procedure libraries,
+        execute:
 
-     Files that are changed will have a pre-change back-up copy with
-     the extension '.bak'.
+           cd /usr2/proc
+           /usr2/fs/misc/go_fix *.prc
 
-(14) This step is for miscellaneous FS related changes. There is only
-     one, the '~/.Xresources' file was updated for the 'oper' and
-     'prog' accounts.  The main change was to add values for the
-     'erchk' and 'scnch' windows.  There were some minor changes for
-     other windows, but what to use for the changed values may depend
-     on the resolution of the display.  The example values worked well
-     for an FSL10 installation on a system with a non-GPU CPU.
+        Files that are changed will have a pre-change back-up copy
+        with the extension '.bak'.
 
-     As 'oper', you can find the differences between your file and the
-     example file with:
+     B. This step is optional and only relevant if you are upgrading
+        from 9.13.2. You can remove the 'if=cal,,' from before the
+        'calon' and caloff' commands in you 'calonnf', 'calonfp',
+        caloffnf', and 'calofffp' procedures, probably located in your
+        'point' procedure library. This is just a clean-up and not
+        making this change will have no impact.
 
-       cd
-       diff .Xresources /usr2/fs/st.default/oper
+(14) This step is for miscellaneous FS related changes. There are two
+     changes: (A) set the FS_DISPLAY_SERVER environment variable for
+     'oper' and 'prog' (this is only needed if you were not running
+     the FS display server before) and (B) update the '~/.Xresources'
+     file for the 'oper' and 'prog' accounts.
 
-     Please make any changes to your file that you find appropriate,
-     but at a minimum you should probably add the lines for 'erchk'
-     and 'scnch', if not already present. You will need to logout and
-     login again (or reload the Xresources a different way) for the
-     changes to become effective.
+     A. Set the FS_DISPLAY_SERVER environment for 'oper' and 'prog'.
+        This will make using the display server for the default for
+        your system.  We strongly recommend this, but if it is not
+        suitable for you for some reason you can skip this (if you
+        don't use the display server, you may want to update the
+        'stpgm.ctl' file for that case as described in step II.12.D).
+        If you are already using the display server, you can also skip
+        this step.
 
-     You can update 'prog's '.Xresources' file similarly, but you will
-     need to be logged in as 'prog'.
+        If 'oper' uses the 'bash' shell then in the '~oper/.profile'
+        file, you can uncomment or insert
+
+          export FS_DISPLAY_SERVER=on 
+
+        If 'oper' uses the 'tcsh' shell then in the '~oper/.login'
+        file, you can uncomment or insert
+
+          setenv  FS_DISPLAY_SERVER on 
+
+        You should log-out and login again after making this change.
+
+        Please make the corresponding change for 'prog' while logged
+        in as 'prog'.
+
+     B. Update the '~/.Xresources' file for the 'oper' and 'prog'
+        accounts.  The main change was to add values for the 'erchk',
+        'scnch', and 'helpsh'  windows.  There were some minor changes
+        for other windows, but what to use for the changed values may
+        depend on the resolution of your display.  The example values
+        worked well for an FSL10 installation on a system with a
+        non-GPU CPU.
+
+        As 'oper', you can find the differences between your file and
+        the example file with:
+
+          cd
+          diff .Xresources /usr2/fs/st.default/oper
+
+        Please make any changes to your file that you find
+        appropriate, but at a minimum you should probably add the
+        lines for 'erchk' 'scnch', and 'helpsh' if not already
+        present. You will need to logout and login again (or reload
+        the Xresources a different way) for the changes to become
+        effective.
+
+        All the new lines are at the end of the file, if need to add
+        lines for 'monit6', 'erchk', 'scnch', and 'helpsh', you can
+        use:
+
+          cd
+          tail -n 24 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
+
+        To add lines for just 'erchk', 'scnch', and 'helpsh', you can
+        use:
+
+          cd
+          tail -n 20 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
+
+        To add lines for just 'helpsh', you can
+        use:
+
+          cd
+          tail -n 6 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
+
+        You can update 'prog's '.Xresources' file similarly, but you
+        will need to be logged in as 'prog'.
 
 (15) This step is for miscellaneous FSLx changes. None are required
      for this update.
@@ -557,12 +758,12 @@ vsi1-2
 (16) Test the FS as 'oper'.
 
      NOTE: If you are following the process in this section on your
-           32-bit system as part of converting to 64-bit (section
-           III below), you may prefer to save extensive testing until
-           you are verifying the 64-bit installation. You could always
-           go back and do more testing on the 32-bit system to help
-           resolve the origin of problems that are noticed on the
-           64-bit system.
+           32-bit system as part of converting to 64-bit (section III
+           below), you may prefer to only do a quick check now and
+           save extensive testing until you are verifying the 64-bit
+           installation. You could always go back and do more testing
+           on the 32-bit system to help resolve the origin of problems
+           that are noticed on the 64-bit system.
 
      Generally speaking, a fairly thorough test is to run a test
      experiment.  Start with using 'drudg' to rotate a schedule,
@@ -586,14 +787,7 @@ vsi1-2
      copy the back-up to the (now assumed bad) updated disk.  You can
      then either use the restored disk or apply the FS update again.
      The FSL10 test procedure has more options for recovery.  Managing
-     this is a lot safer if you have a third disk.
-
-(18) We encourage you to enable the display server interface of the FS
-     if you aren't already using it. Instructions for enabling this
-     feature (and disabling it, if that should become necessary) can
-     be found in '/usr2/fs/misc/display_server.txt'.  This file also
-     includes a explanation of how the user interface is different
-     from the non-display server.
+     this is a lot easier and safer if you have a third disk.
 
 III. Converting to a 64-bit system
 
@@ -611,7 +805,7 @@ the update instructions in section II above are used, step (3) or step
 
 The instructions below assume that the existing system you are using
 has a standard FS configuration in terms of symbolic links and
-directories.  If your system is different,  you will need to adjust
+directories.  If your system is different, you will need to adjust
 what you do accordingly, but you may still find the outline of steps
 useful.
 
@@ -624,7 +818,7 @@ Please follow these steps:
 
     NOTE: Despite what the URL above says about which version of the
           FS to check-out, at this time you should check-out
-          '10.0.0-beta1',
+          '10.0.0-beta2',
 
     You can install a different distribution. However, we can't
     provide as much support in that case. The FSL10 distribution is
@@ -650,7 +844,7 @@ Please follow these steps:
       mv tle_files tle_files.DEFAULT
 
     If your station software is in '/usr2/st-0.0.0' on your old computer,
-    you should rename in on the new computer:
+    you should rename it on the new computer:
 
       cd /usr2
       mv st-0.0.0  st-0.0.0.DEFAULT
@@ -669,8 +863,9 @@ Please follow these steps:
        your old system. Then return here and follow the steps in
        "Copying your files" below, then proceed to step (4) below.
 
-    B. If you are copying your files first, follow the steps in
-       "Copying your files" below, then proceed to step (4) below.
+    B. If you are not upgrading your old computer first, follow the
+       steps in "Copying your files" below, then proceed to step (4)
+       below.
 
                            Copying your files
 
@@ -678,11 +873,12 @@ Please follow these steps:
        old computer using any convenient method.  If both systems are
        on the network this can be particularly easy. The following
        example steps use this approach. You should replace the example
-       hostname 'old' with your old systems hostname. You may need to
-       provide the appropriate password for each 'scp' command (if so,
-       you can simplify the process by coping your 'root' 'ssh' keys
-       to the new machine with 'ssh-copy-id' first). These commands
-       must be executed as 'root':
+       host name 'old' (and in file names) with your old system's host
+       name. You may need to provide the appropriate password for each
+       'scp' command (if so, you can simplify the process by coping
+       your 'root' 'ssh' keys to the new machine with 'ssh-copy-id'
+       first). These commands must be executed as 'root', and except
+       where noted, from the (new) 64-bit system.
 
          i. Transfer operations directories:
 
@@ -718,10 +914,10 @@ Please follow these steps:
             get a message that there is no such directory. That is
             benign unless you expect such a directory to be there.
 
-       iii. Make back-up copies of the operations directories. This
-            step is optional but may be useful so there are unmodified
-            copies of the directories from the old machine to use for
-            reference:
+       iii. Make back-up copies of the operational directories. This
+            step is optional but may be useful so that there are
+            unmodified copies of the directories from the old machine
+            to use for reference:
 
               cd /usr2
               cp -a proc      proc-old
@@ -762,7 +958,7 @@ Please follow these steps:
 
               cd /usr2
               chown -R prog.rtx st-1.0.0
-              chmod -R ug+rw,o+r,o-w st-1.0.0
+              chmod -R a+r,u+w,go-w st-1.0.0
 
             You can make a reference copy with:
 
@@ -784,14 +980,14 @@ Please follow these steps:
               scp -pqr oper@old:~ oper-old
               scp -pqr prog@old:~ prog-old
 
-            You may want set their permission and ownership so the
+            You may want to set their permission and ownership so the
             appropriate user can access them:
 
               chown -R oper.rtx /usr2/oper-old
-              chmod -R a+r,u+w,go-w /usr2/oper-old
+              chmod -R u+rw,go-rw /usr2/oper-old
 
               chown -R prog.rtx /usr2/prog-old
-              chmod -R a+r,u+w,go-w /usr2/prog-old
+              chmod -R u+rw,go-rw /usr2/prog-old
 
             You can customize the home directories on the new computer
             to include any features you want from the old system.
@@ -835,7 +1031,7 @@ Please follow these steps:
 
     C. If you have C station code, it should work as written unless
        you have declared integers that interface to the FS as 'long'.
-       For a start at fixing this, please see the URL:
+       For a start at fixing those, please see the URL:
 
          https://github.com/dehorsley/unlongify
 
@@ -855,9 +1051,19 @@ Please follow these steps:
         ii. You can install the latest version of 'go', but this is
             outside the normal security mechanism. In this case, you
             will need to manage your own updates, which may not be
-            suitable for an operational environment. Both the initial
-            install and updates are handled by the 'fsadapt' script,
-            as 'root':
+            suitable for an operational environment. If you use this
+            method it is recommended that you sign-up for 'go'
+            language announcements so that you will be informed when a
+            security update is available.  You can sign-up at:
+
+              https://groups.google.com/forum/#!forum/golang-announce
+
+            Another alternative is to delete the recent 'go' ('rm -rf
+            /usr/local/go') after you have made 'unlongify'. You can
+            always re-install it if you need it again.
+
+            Both the initial install and updates are handled by the
+            'fsadapt' script, as 'root':
 
               cd /root/fsl10
               ./fsadapt
@@ -897,38 +1103,402 @@ Please follow these steps:
     Once your code 'make's successfully proceed to step (5). You may
     still need to debug it.
 
-(5) If you upgraded to FS10 before copying your files and have made
-    any needed changes in your station code as described in step (4)
-    above, you should re-test your system, in fact following all the
-    steps in section II starting with step (16).
+(5) If you upgraded to FS10 on your old system before copying your
+    files to the new systems and have made any needed changes in your
+    station code as described in step (4) above, you should re-test
+    your system, in fact following all the steps in section II
+    starting with step (16).
 
-    If you copied your files before upgrading to FS10, and have made
-    any needed changes in your station code as described in step (4)
-    above, you should complete the upgrade by starting with step (10)
-    in section II and completing it and all the following steps.
+    If you did not upgrade your old system before copying your files,
+    but have now copied them and have made any needed changes in your
+    station code as described in step (4) above, you should complete
+    the upgrade by starting with step (10) in section II and
+    completing it and all the following steps.
 
 
 IV. Changes from previous versions
 
-This section is divided into four sub-sections:
+This section is divided into five sub-sections:
 
-  A. FS Changes compared to 9.13.2
-  B. FS Changes compered to VGOS versions
-  C. Changes in 'drudg'
-  D. Known FS Bugs
+  A. FS changes compared to 10.0.0-beta1
+  B. FS Changes compared to 9.13.2
+  C. FS Changes compared to VGOS versions
+  D. Changes in 'drudg' since 10.0.0-beta1
+  E. Changes in 'drudg' since 9.13.2
+  F. Changes in 'drudg' since VGOS versions
+  G. Known FS Bugs
 
 Each sub-section starts with a summary of the items covered followed
 by a more detailed description.
 
-                   A. FS Changes compared to 9.13.2
+                A. FS Changes compared to 10.0.0-beta1
 
-The following is a summary of FS changes since 9.13.2.
+The following is a summary of FS changes since 10.0.0-beta1:
+
+ 1. Improve 'fesh' (closes #34).
+ 2. Update example 'equip.ctl' (closes #35).
+ 3. Fix some error messages (closes #43 & #22).
+ 4. Improve 'plog'.
+ 5. Restore 'if' command.
+ 6. Update GPL in files.
+ 7. Remove usage of 'system()' call to find 'help' file (closes #40 &
+    #3).
+ 8. No longer set '/usr2/fs' and '/usr2/st' to be owned by 'prog'.
+ 9. Add checking for a procedure or schedule file before attempting to
+    open it (closes #45).
+10. Add more log header lines.
+11. Fix year wrap error message in procedure logging (closes #23).
+12. Fix remaining case of a closed procedure library causing a crash if
+    there was an attempt to execute a procedure from the library was
+    fixed.
+13. Move X resources for 'helpsh' to '~/.Xresources'.
+14. Move unsetting of 'TMOUT' environment variable for 'oper' to
+    '~/.bashrc' in the default files.
+15. Improve error logging for 'dbbcn'.
+16. Improve "help" page for 'tpicd'.
+17. Add 'popen' time-out feature.
+18. Make use of the FS display server the default.
+19. Make 'fsclient' honor the '-n' flag properly (closes #48).
+20. Make 'fsclient' ignore prompt in no-X11 mode (closes #49).
+21. Add 'fsserver' improvements and log support (closes #29 & #25).
+22. Eliminate 'cls_chk' error from 'inject_snap -w ...' command when
+    an error occurs (partly closes #50).
+23. Fix labels in 'gnplt' windows that display the gain curve
+    coefficients (closes #51).
+24. Improve holog/MASK.
+25. Fix 'onoff' for the DBBC3 rack (closes #52).
+26. Add support for DBBC3 to 'if=cont_cal,...' (closes #54).
+27. Update help pages for 'onoff' and 'fivpt'.
+28. Always check for day 248 problem in 'setcl' (closes #56).
+29. Change the flags for the 'monX' programs in 'clpgm.ctl' from 'a'
+    to 'd'.
+30. Generalize the 'scnch' window to cover Mark 5 recorders (closes
+    #61).
+31. Update 'misc/release_model.txt'.
+32. Improve update notes (this document).
+
+A more detailed discussion of these changes follows.
+
+ 1. Improve 'fesh' (closes #34). A typo in the error message for when
+    the schedule is already downloaded was fixed. This was reported by
+    Morgan Goodrich (KPGO).
+
+    The internal version number as replaced with the FS version
+    number.
+
+ 2. Update example 'equip.ctl' (closes #35). The example DBBC3
+    firmware is now more sensible. Thanks to Eskil Varenius (Onsala)
+    for reporting this.
+
+    The minimum DBBC3 firmware version required was added in a comment.
+
+ 3. Fix some error messages (closes #43 & #22). Fixed errors in
+    'control/fserr.ctl'.  Errors in some double double-quotes ("")
+    lines and some incorrectly reused error codes were fixed (closes
+    #43).  Thanks to Alexander Neidhardt (Wettzell) for reporting
+    these.
+
+    The errors for a 'tnx' command error not being found when
+    attempting to manipulate its display setting were clarified
+    (closes #22).  Thanks to Jon Quick (HartRAO) for reporting this.
+
+    Error messages that should refer to the (not yet implemented)
+    'active_rdbes' and 'active_mk6s' commands were corrected to no
+    longer incorrectly refer to the 'rdbe_active' and 'mk5c_active'
+    commands, respectively.
+    
+    Obsolete errors for the, no longer used, 'sw.ctl' control file
+    were removed.
+
+ 4. Improve 'plog'. Use of an environment variable 'NETRC_DIR' was
+    added to support not having the '.netrc' file in the user's home
+    directory was added. Please see 'plog -h' for details on how to
+    use this.
+
+    The internal version number as replaced with the FS version
+    number.
+
+ 5. Restore 'if' command. It had accidentally been overlooked in
+    '-beta1'. Thanks to Beppe Maccaferri (Medicina) for reporting
+    this.
+
+ 6. Update GPL in files. The GPL header was added to the
+    'holog/MASK/*.m' and 'misc/mk6in*' scripts and removed from
+    'fserver/tests/convey.*'.
+
+ 7. Remove usage of 'system()' call to find 'help' file (closes #40 &
+    #3). The 'help' command no longer uses the 'system()' find the
+    correct "help" file to display.
+
+ 8. No longer set '/usr2/fs' and '/usr2/st' to be owned by 'prog'. This
+    was an error in the 'misc/fsinstall' script.
+
+ 9. Add checking for a procedure or schedule file before attempting to
+    open it (closes #45). This change is to avoid accidentally closing
+    an active procedure or schedule file if the new one specified in
+    the 'proc=...' or schedule=...' commands, respectively, does not
+    exist (or has incorrect permissions).  Previously, if the files
+    did not exist (or did not have the correct permission), the old
+    file would be closed. Thanks to Jon Quick (HartRAO) for pointing
+    out this inconsistency.
+
+    The old behavior was partly a consequence of how the original file
+    handling worked on the HP-RTE, but is not sensible for how the
+    SNAP commands should work.  Note that this is a non-backward
+    compatible change in how the SNAP commands seem to behave.
+    Previously supplying a non-existent procedure or schedule file
+    name would cause the closure of the corresponding file. Now to
+    close an open procedure or schedule without opening a new one, a
+    null parameter must be supplied, i.e., 'proc=' or 'schedule='.  As
+    before, the latter will not close an open schedule procedure
+    library.
+
+10. Add more log header lines. Log header lines were added for
+    'uname()' system information and the compile time value of the
+    'FC' environment variable were added.
+
+11. Fix year wrap error message in procedure logging (closes #23).
+    This fixed a benign and spurious error message if a log was kept
+    open past the end of the year and any procedures that had last
+    been logged in the previous year were executed again.  Thanks to
+    Eskil Varenius (Onsala) and Alexander Neidhardt (Wettzell) for
+    reporting this.
+
+12. Fix remaining case of a closed procedure library causing a crash if
+    there was an attempt to execute a procedure from the library was
+    fixed. This case could happen if the schedule that was opened was
+    named 'station', which would lead to the closure of an already
+    open schedule procedure library (there cannot be 'station'
+    schedule procedure library since 'station' can only be opened
+    once).
+
+13. Move X resources for 'helpsh' to '~/.Xresources'. This allows the
+    geometry and other parameter of the FS help display 'xterm' to be
+    controller locally.
+
+14. Move unsetting of 'TMOUT' environment variable for 'oper' to
+    '~/.bashrc' in the default files. This allows all interactive
+    shells to disable the time-out. Additionally, some settings were
+    rearranged in '~/.bashrc' to make then only apply to interactive
+    shells (this was also done for 'prog' and AUID accounts). This
+    change is only relevant for stations using FSL10.
+   
+15. Improve error logging for 'dbbcn'. The name of the program is now
+    correctly displayed.
+
+16. Improve "help" page for 'tpicd'. Made it clearer that when in the
+    'no' mode, 'data_valid=on' will only start logging of 'tpicd' data
+    when a schedule is running and not-blocked.  This behavior was
+    inherited from the VGOS branch where accidentally leaving 'tpicd'
+    logging RDBE multi-cast data after closing a schedule or halting
+    it creates a lot of extra log entries. This is probable beneficial
+    for all back-ends. The fact that is changed from 9.13.2 is now
+    noted in the section IV.B 'FS Changes compared to 9.13.2' below.
+
+17. Add 'popen' time-out feature. There is a now a '-t ...' time-out
+    option. If the command being run has a time-out feature, it is
+    generally better to use the command's feature. See 'help=sy' for
+    more details.
+
+18. Make use of the FS display server the default. This was changed as
+    of the '-beta2' release.
+
+19. Make 'fsclient' honor the '-n' flag properly (closes #48). This
+    eliminates opening "double" windows if 'fsclient' is run with '-n'
+    under an already running 'fsclient'.
+
+20. Make 'fsclient' ignore prompt in no-X11 mode (closes #49). If FS
+    client is in no-X11 mode, it created a 'fs.prompt' when instructed
+    by the server. This change removes that behaviour, though it may
+    cause an issue if no other clients exist to dismiss the prompt,
+    see issue #49. If this is a problem for anyone's use case we will
+    need a new feature here.
+
+#1. Add 'fsserver' improvements and log support (closes #29 & #25).
+    These changes introduce new functionality to fsserver, as well as
+    simplifies some use cases.
+
+    The first major change is that the server now only needs to use
+    one socket when using websockets -- address which start with
+    "ws://" (closes #29). The new default base url for all fsserver
+    streams and control channels is now:
+
+        ws://127.0.0.1:7083
+
+    (70 83 are decimal ASCII encoding of 'F' and 'S'.)
+
+    This can be changed by editing 'FS_SERVER_URL_BASE' in
+    'include/params.h'; however, we will likely introduce command-line
+    flag and/or environment variable to set this in the future.
+
+    This is should be safe to expose on the network (rather than just
+    the loopback), but users may wish to use an HTTP(s) as a proxy to
+    provide some authentication/authorisation.
+
+    This was enabled by factoring out functionality 'spub' into a
+    reusable "buffered stream" library, which has been incorporated
+    into FS server. All the behaviour of streams are now managed
+    within the fsserver process rather than an external 'spub'
+    instance.
+
+    The second major change of this patch is the addition of the FS
+    log to the streams available from the server (closes #25).
+    (Previously only the "display" was available, which has a reduced
+    timestamp format and filters some output.)
+
+    This is available at
+
+        FS_SERVER_URL_BASE/log
+
+    that is, by default
+
+        ws://127.0.0.1:7083/log
+
+    A third change is that the server now continues running after the
+    FS is terminated. This allows clients to detect the FS termination
+    and prevents a socket conflict if the FS is terminated and
+    restarted in quick succession. The only user visible impact will
+    be a slight delay if the FS is restarted quickly after termination
+    while the old session is finishing up. This also means, after an
+    FS upgrade, it's important to either shutdown the server
+    ('fsserver stop') or restart the system.
+
+    Fourth, the server can now accept snap commands to be sent to FS,
+    e.g.:
+
+       fsserver fs snap "terminate"
+
+    This allows clients to interact with the FS directly through
+    fsserver rather than needing access to `inject_snap`.
+
+    No filtering or authorisation is implemented on this command
+    channel, so it effectively allows complete command execution
+    privileges in the FS context to anyone with access to the socket.
+    Note this is also true for `inject_snap` on a standard system. If
+    a station wishes to limit local access they can use
+    iptables/nftables, or use the server in UNIX socket mode and use
+    file system permissions. Stations that would like to enable remote
+    access should implement their own authentication/authorisation
+    that suits their needs, eg ssh port forwarding or HTTP proxying.
+
+    Finally, this patch also upgrades the included messaging library
+    NNG to version 1.3.0, which brings with it some performance
+    improvements and bug fixes, the most obvious to FS users caused
+    some 'ssub' instances in "wait" mode to use a high amount of CPU
+    time.
+
+22. Eliminate 'cls_chk' error from 'inject_snap -w ...' command when
+    an error occurs (partly closes #50). This was caused by
+    'inject_snap' not implementing the new linkage that was added for
+    'fserr'. This is covered in issue #50. To correctly retrieve the
+    error message would have required making a new interface to
+    'fserr' or subsuming it into library routine that both 'ddout'
+    'inject_snap' could use. It was not possible to do either in the
+    available, Instead 'inject_snap' was modified to output the error
+    without the message, but pointing out that the message can be
+    found in the log and display. Thanks to Dave Horsley (Hobart) for
+    reporting this.
+
+23. Fix labels in 'gnplt' windows that display the gain curve
+    coefficients (closes #51). Previously the labels, when displayed
+    were in reverse order. In one window, there were no coefficient
+    labels at all. Thanks to Beppe Maccaferri (Medicina) for reporting
+    this and testing the solution.
+
+24. Improve holog/MASK. The elevation spacing was corrected for the
+    example in step #3, using 'holog.m'. Axis titles were added to
+    plot_mask.m.
+
+25. Fix 'onoff' for the DBBC3 rack (closes #52). A code block from
+    9.12.13 in 'onoff/get_samples.c' had been omitted, preventing
+    sampling of the TPI values and causing 'onoff' to crash. Thanks to
+    Eskil Varenius (Onsala) for reporting that this caused a crash.
+
+26. Add support for DBBC3 to 'if=cont_cal,...' (closes #54).  Thanks
+    to Eskil Varenius (Onsala) for reporting that this was missing.
+
+27. Update help pages for 'onoff' and 'fivpt'. Added a section on
+    switching between continuous and non-continuous cal.  Removed
+    'if=cont_cal,,' in 'calon'/'off' 'nf'/'fp' procedures.  Add
+    recovery method for mis-configured cal.
+
+28. Always check for day 248 problem in 'setcl' (closes #56).
+    Previously 'setcl' only checked for the day 248 problem (due to
+    use of 32-bit arithmetic in the time handling code), if the time
+    model was _not_ 'computer'.` In principle, when the model is
+    'computer' there is no need to check for this issue.  However,
+    since the time is still managed with the same 32-bit arithmetic as
+    for the non-'computer' models, it is still necessary to check.
+    Not doing so was an oversight. The result was that there were no
+    warnings of an impending 248 day time problem if the model was
+    'computer'.  This is now fixed. Thanks to Richard Blaauw (WSRT),
+    and subsequently Jon Quick (HartRAO) for reporting this.
+
+29. Change the flags for the 'monX' programs in 'clpgm.ctl' from 'a'
+    to 'd'.  Since they do not depend on the FS, they can continue
+    running after the client is closed.
+
+30. Generalize the 'scnch' window to cover Mark 5 recorders (closes
+    #61).  The 'scnch' window was initially developed for Mark 6
+    recorders. The form has now been generalized to cover Mark 5
+    recorders as wekk
+
+31. Update 'misc/release_model.txt'. The release steps were
+    clarified.
+
+32. Improve update notes (this document). The '-q' option was added to
+    the 'pull' to suppress the detached HEAD warning.
+
+    A sentence was added to the description of the change to using
+    'git' that it now even more important to not change the contents
+    of the '/usr2/fs' source tree.  Changing the source tree will make
+    it harder to install bug fixes and updates.
+
+    The paths to the example control files now include the needed
+    intermediate directory 'fs/'.
+
+    Some conditional steps in section II.12 were corrected to properly
+    depend or not depend on the old version being 9.12.12. If you
+    installed the '-beta1' version and your old version was 9.12.12
+    you should review the instructions in step II.12 to verify
+    everything has been covered.
+
+    A step was added to make using the FS display server the default.
+    If you installed '-beta1' you should check step II.14.A for
+    changes that are needed.
+
+    A step was added for updating the '~/.Xresources' file for 'oper'
+    and 'prog'. If you installed '-beta1' you should check step
+    II.14.B for changes that are needed.
+
+    A step to update where the 'TMOUT' environment variable is unset
+    for stations using FSL10 was added. If this applies to you to
+    please check step II.14.C.
+
+    A recommendation was added to sign-up for the 'go' language
+    announcements to be informed of security updates if you are
+    installing the latest version of 'go' as described in step
+    III.4.C.ii. If you used that method it is recommended that you
+    sign-up for the announcements.
+
+    The update instructions now include advice on updating from
+    '-beta1' to '-beta2', in II.c.
+
+    This subsection on changes in release '-beta2' was added.
+
+                   B. FS Changes compared to 9.13.2
+
+The following is a summary of FS changes since 9.13.2. It does not
+include changes made since the '-beta1' release. Those are covered in
+IV.A above.
 
 *TO BE WRITTEN*
 
  1. Source version control is maintained with 'git'.
  2. Source code now works on 32- and 64-bit platforms.
  3. Input is now case sensitive.
+ 4. 'tpicd=no' requires a running (not halted) schedule to log
+    data.
 
 A more detailed discussion of these changes follows.
 
@@ -937,13 +1507,17 @@ A more detailed discussion of these changes follows.
  1. Source version control is maintained with 'git'.
  2. Source code now works on 32- and 64-bit platforms.
  3. Input is now case sensitive.
+ 4. 'tpicd=no' requires a running (not halted) schedule to log
+    data.
 
 A complete history of the routines changed can be found using the 'git log'
 command.
 
-                 B. FS Changes compared to VGOS versions
+                 C. FS Changes compared to VGOS versions
 
 The following is a summary of FS changes compared to VGOS versions.
+It does not include changes made since the '-beta1' release. Those are
+covered in IV.A above.
 
 *TO BE WRITTEN*
 
@@ -960,30 +1534,79 @@ A more detailed discussion of these changes follows.
 A complete history of the routines changed can be found using the 'git log'
 command.
 
-                        C. Changes in 'drudg'
+               D. Changes in 'drudg' since 10.0.0-beta1
 				   
-*TO BE WRITTEN*
+'drudg' opening message date is 2020Jun30.
 
-'drudg' opening message date is 2019Nov20.
+The following is a summary of 'drudg' changes since 10.0.0-beta1
 
-The following is a summary of 'drudg' changes
-
-*TO BE WRITTEN*
-
- 1. Source version control is maintained with 'git'.
- 2. Source code now works on 32- and 64-bit platforms.
+ 1. Fix uninitialized variables
+ 2. Fix missing 'preob' when 'EARLY' start non-zero.
+ 3. Add support for additional wait at the end of recording for broadband.
+ 4. Update comment on line three of '.snp' files.
 
 A more detailed discussion of these changes follows.
 
-*TO BE WRITTEN*
+ 1. Fix uninitialized variables. Several previously uninitialized variables are
+    now initialized. As part of this 'implicit none' was added to all FORTRAN
+    routines that did not have it before, except for 'xat.f'.
 
- 1. Source version control is maintained with 'git'.
- 2. Source code now works on 32- and 64-bit platforms.
+ 2. Fix missing 'preob' when 'EARLY' start non-zero. This was broken
+    in the implementation of staggered start for FS 9.13.0 and has been
+    restored.
+
+ 3. Add support for additional wait at the end of recording for
+    broadband. This allows schedules to include a fixed amount of
+    additional wait for buffering per station. This seems to be needed
+    for Mark 6 recorders in configurations that otherwise would
+    require no buffer time for disks that are slower than nominal.
+
+ 4. Update comment on line three of '.snp' files. Previously at the
+    end of line, the number of passes and the tape length were
+    listed. Since there is no tape support, these fields were replaced
+    with the recorder type.
 
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/drudg/change_log.txt.
 
-                           D. Known FS Bugs
+                  E. Changes in 'drudg' since 9.13.2
+
+The following is a summary of 'drudg' changes since 9.13.2. It does
+not include changes made since the '-beta1' release. Those are covered
+in IV.D above.
+
+*TO BE WRITTEN*
+
+ 1. Source version control is maintained with 'git'.
+ 2. Source code now works on 32- and 64-bit platforms.
+
+A more detailed discussion of these changes follows.
+
+*TO BE WRITTEN*
+
+ 1. Source version control is maintained with 'git'.
+ 2. Source code now works on 32- and 64-bit platforms.
+
+              F. Changes in 'drudg' since VGOS versions
+
+The following is a summary of 'drudg' changes since the VGOS versions.
+It does not include changes made since the '-beta1' release. Those are
+covered in IV.D above.
+
+
+*TO BE WRITTEN*
+
+ 1. Source version control is maintained with 'git'.
+ 2. Source code now works on 32- and 64-bit platforms.
+
+A more detailed discussion of these changes follows.
+
+*TO BE WRITTEN*
+
+ 1. Source version control is maintained with 'git'.
+ 2. Source code now works on 32- and 64-bit platforms.
+
+                           E. Known FS Bugs
 
 (There have been no changes in this section since the previous version.)
 
