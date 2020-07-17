@@ -6,6 +6,7 @@
 
 # the default umask is set in /etc/profile; for setting the umask
 # for ssh logins, install and configure the libpam-umask package.
+# set in ~/.bashrc for AUID acccounts
 #umask 022
 
 # if running bash
