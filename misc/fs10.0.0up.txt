@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/fs10.0.0up.txt        Version: 10.3  Date: 200717
+File: /usr2/fs/misc/fs10.0.0up.txt        Version: 10.4  Date: 200723
 
                      FS 10.0.0 Beta2 Update Notice
 
@@ -19,7 +19,9 @@ FS. This includes both stations using the main (non-VGOS) branch
 9.12.10-9.12.13). It is also an update for stations that have been
 testing 10.0.0-beta1.  Installing the new version as update for these
 cases is fairly simple but has several steps; the update from '-beta1'
-is less involved (see II.c).
+is less involved (see II.c). Further changes for installing from a
+specific commit farther along the 'master' branch are described in
+II.d.
 
 The most significant changes in 10.0.0 are:
 
@@ -246,15 +248,51 @@ depend on which version you are updating from:
            you should register for 'golang' announcements as is now
            described in that step.
 
-      xii. Please review section IV.A for a detailed listed of changes
+      xii. If you use RDBEs in your back-end and want to use the
+           'rdbemsg' utility to send operations messages, please
+           customize your '/usr2/control/rdbemsg.ctl' control file.
+           Full instructions are provided in step II.12.E.
+
+     xiii. Please review section IV.B for a detailed listed of changes
            since the '-beta1' release.
 
      This is the end of the instructions for upgrading from
      '10.0.0-beta1'.
 
+  d. Updating from the '10.0.0-beta2' release. This sub-section covers
+     updating from the '-beta2' release if you choose to install a
+     later commit on the 'master' branch, which is somewhat
+     experimental. All changes are cumulative from the '-beta2' commit
+     to the commit checked-out in step (i), which requires some
+     familiarity with 'git'. Changes for later commits are not
+     covered here yet.
+
+        i. If you are using 'git' as is recommended, then as 'prog'
+           execute:
+
+             cd /usr2/fs-git
+             git fetch
+             git checkout master
+             (using 'git log' to locate the 2nd commit _after_ 10.0.0-beta2)
+             (use the SHA1 for  _that_ commit in place of ... in the next command)
+             git checkout -q ...
+             make -s
+
+       ii.  If you use RDBEs in your back-end and want to use the
+            'rdbemsg' utility to send operations messages, please
+            customize your '/usr2/control/rdbemsg.ctl' control file.
+            Full instructions are provided in step II.12.E, which is
+            new since 10.0.0-beta2.
+
+      iii. Please review section IV.A for a detailed listed of changes
+           since the '-beta2' release.
+
+     This is the end of the instructions for upgrading from
+     '10.0.0-beta2'.
+
 The upgrade instructions for the update from the main branch and the
-VGOS branch differ only in step (12) below. The installation steps for
-upgrading are:
+VGOS branch are next and differ only in step (12). The installation
+steps for upgrading are:
 
  (0) Back-up your operational system.  Having a back-up to return to
      will allow you to continue operations in case something goes
@@ -435,7 +473,7 @@ FLIBS   += -lgfortran -lm
 (11) Log-in as 'oper'.
      
 (12) This step is for updates to the local control files. There are
-     four changes that are needed, listed here as steps A-D.
+     five changes that are needed, listed here as steps A-E.
      Differences for updating from different versions are noted.
      Please read each step, including sub-steps, carefully to make
      sure you find all the clauses for your old version; sometimes an
@@ -650,6 +688,29 @@ vsi1-2
                        may also want to add resources for them (if
                         they aren't already there) in the
                        '~/.Xresources' files for 'oper' and 'prog'.
+
+     E. If you have RDBEs for your back-end and will use the 'rdbemsg'
+        utility to send operations messages, you will need to
+        customize your '/usr2/contro/rdbemsg.ctl'.
+
+        You will need to update the 'station' two letter code (lower
+        case) and the 'name' station name to your station's values. The
+        station name is usually defined in the
+        '/usr2/control/location.ctl' file.
+ 
+        If you don't have a HubPC ('mci') node for front end monitor
+        and control, you should comment out that line.
+
+        You should set the addresses for the RBDE-A ('R-A') through
+        RDBE-D ('R-D'). The example file uses aliases that might be
+        defined in '/etc/hosts', 'rdbea' through 'rdbed'.  Likewise,
+        if you have an 'mci' node, you should set its address.
+
+        The default e-mail address 'to' is for the ivs-vgos-ops mail
+        list. You can of course change that to whatever you like. You
+        can also temporarily over-ride the address in the 'rdbemsg'
+        utility itself.
+
 
 (13) This step is for updates to your SNAP '.prc' procedure libraries.
      Only one change is required: (A) converting from using the 'go'
@@ -1120,20 +1181,45 @@ IV. Changes from previous versions
 
 This section is divided into five sub-sections:
 
-  A. FS changes compared to 10.0.0-beta1
-  B. FS Changes compared to 9.13.2
-  C. FS Changes compared to VGOS versions
-  D. Changes in 'drudg' since 10.0.0-beta1
-  E. Changes in 'drudg' since 9.13.2
-  F. Changes in 'drudg' since VGOS versions
-  G. Known FS Bugs
+  A. FS changes compared to 10.0.0-beta2
+  B. FS changes compared to 10.0.0-beta1
+  C. FS Changes compared to 9.13.2
+  D. FS Changes compared to VGOS versions
+  E. Changes in 'drudg' since 10.0.0-beta1
+  F. Changes in 'drudg' since 10.0.0-beta1
+  G. Changes in 'drudg' since 9.13.2
+  H. Changes in 'drudg' since VGOS versions
+  I. Known FS Bugs
 
 Each sub-section starts with a summary of the items covered followed
 by a more detailed description.
 
-                A. FS Changes compared to 10.0.0-beta1
+                A. FS Changes compared to 10.0.0-beta2
 
-The following is a summary of FS changes since 10.0.0-beta1:
+The following is a summary of FS changes since 10.0.0-beta2
+
+ 1. Update installation notes to include missing customization of
+    '/usr2/control/rdbemsg.ctl'.
+ 2. Add steps for updating to a specific commit after '-beta2'.
+ 3. Remove hardcoding of station name in 'rdbemsg' (closes #62).
+
+A more detailed discussion of these changes follows.
+
+ 1. Update installation notes to include missing customization of
+    '/usr2/control/rdbemsg.ctl'. This uses new step II.12.E.
+
+ 2. Add steps for updating to a specific commit after '-beta2'.  This
+    is section II.d, which requires some familiarity with 'git'.
+
+ 3. Remove hardcoding of station name in 'rdbemsg' (closes #62). The
+    staton name name is now set using the 'name' line in
+    '/usr2/control/rdbemsg.ctl'. This allows it to be customized by
+    station.
+
+                B. FS Changes compared to 10.0.0-beta1
+
+The following is a summary of FS changes since 10.0.0-beta1 but not
+included in 10.0.0-beta2 or later.
 
  1. Improve 'fesh' (closes #34).
  2. Update example 'equip.ctl' (closes #35).
@@ -1486,11 +1572,11 @@ A more detailed discussion of these changes follows.
 
     This subsection on changes in release '-beta2' was added.
 
-                   B. FS Changes compared to 9.13.2
+                   C. FS Changes compared to 9.13.2
 
 The following is a summary of FS changes since 9.13.2. It does not
 include changes made since the '-beta1' release. Those are covered in
-IV.A above.
+IV.A and IV.B above.
 
 *TO BE WRITTEN*
 
@@ -1517,7 +1603,7 @@ command.
 
 The following is a summary of FS changes compared to VGOS versions.
 It does not include changes made since the '-beta1' release. Those are
-covered in IV.A above.
+covered in IV.A and IV.B above.
 
 *TO BE WRITTEN*
 
@@ -1534,11 +1620,16 @@ A more detailed discussion of these changes follows.
 A complete history of the routines changed can be found using the 'git log'
 command.
 
-               D. Changes in 'drudg' since 10.0.0-beta1
+               E. Changes in 'drudg' since 10.0.0-beta2
+
+There are no changes since '-beta2' at this point
+
+               F. Changes in 'drudg' since 10.0.0-beta1
 				   
 'drudg' opening message date is 2020Jun30.
 
-The following is a summary of 'drudg' changes since 10.0.0-beta1
+The following is a summary of 'drudg' changes since 10.0.0-beta1, but
+not include in 10.0.0-beta2 or later.
 
  1. Fix uninitialized variables
  2. Fix missing 'preob' when 'EARLY' start non-zero.
@@ -1569,7 +1660,7 @@ A more detailed discussion of these changes follows.
 A complete history of the various changes and the routines they affect
 is in /usr2/fs/drudg/change_log.txt.
 
-                  E. Changes in 'drudg' since 9.13.2
+                  G. Changes in 'drudg' since 9.13.2
 
 The following is a summary of 'drudg' changes since 9.13.2. It does
 not include changes made since the '-beta1' release. Those are covered
@@ -1587,7 +1678,7 @@ A more detailed discussion of these changes follows.
  1. Source version control is maintained with 'git'.
  2. Source code now works on 32- and 64-bit platforms.
 
-              F. Changes in 'drudg' since VGOS versions
+              H. Changes in 'drudg' since VGOS versions
 
 The following is a summary of 'drudg' changes since the VGOS versions.
 It does not include changes made since the '-beta1' release. Those are
@@ -1606,12 +1697,13 @@ A more detailed discussion of these changes follows.
  1. Source version control is maintained with 'git'.
  2. Source code now works on 32- and 64-bit platforms.
 
-                           E. Known FS Bugs
+                           I. Known FS Bugs
 
 (There have been no changes in this section since the previous version.)
 
 The following is a summary list of known bugs. They are described in more
-detail after the list.
+detail after the list. (Please also check the github issues at:
+https://github.com/nvi-inc/fs/issues)
 
  1. Do not run 'fmset' for extended periods.
  2. 'odd' and 'even' head types not supported for Mark IV & VLBA4.
