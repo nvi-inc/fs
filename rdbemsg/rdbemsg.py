@@ -72,6 +72,8 @@ class msg_tk(Tkinter.Tk):
                                 self._type = self.val[1].rstrip('\r\n')
                         elif (self.val[0] == "station"):
                                 self._station = self.val[1].rstrip('\r\n')
+                        elif (self.val[0] == "name"):
+                                self._name = self.val[1].rstrip('\r\n')
                         elif (self.val[0] == "R-A"):
                                 self._bandA[0] = self.val[1].rstrip('\r\n')
                         elif (self.val[0] == "R-B"):
@@ -639,7 +641,7 @@ class msg_tk(Tkinter.Tk):
 
 	def sendMessage(self):
 		TO = self.addressTo.get()
-		SUBJECT = self.sessionname.get() + ", KPGO12M, " + self.typeVariable.get() + " message"
+		SUBJECT = self.sessionname.get() + " " + self._name + " " + self.typeVariable.get() + " message"
 		TEXT = 	" Comment:\n" +\
 			" " + self.commentBox.get('1.0',Tkinter.END) + "\n" +\
 			" Maser Offset: " + self.maser.get() + "\n\n" + \
