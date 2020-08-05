@@ -3024,6 +3024,101 @@ char **str;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_chan_def2__
+#else
+fcreate_chan_def2
+#endif
+(str, str2, str3, str4, str5, str6, str7, str8, str9, str10)
+char **str;
+char **str2;
+char **str3;
+char **str4;
+char **str5;
+char **str6;
+char **str7;
+char **str8;
+char **str9;
+char **str10;
+/*<      subroutine fcreate_chan_def2(ptr_ch(str)//(char *)0, >*/
+/*<                                  ptr_ch(str2)//(char *)0, >*/
+/*<                                  ptr_ch(str3)//(char *)0, >*/
+/*<                                  ptr_ch(str4)//(char *)0, >*/
+/*<                                  ptr_ch(str5)//(char *)0, >*/
+/*<                                  ptr_ch(str6)//(char *)0, >*/
+/*<                                  ptr_ch(str7)//(char *)0, >*/
+/*<                                  ptr_ch(str8)//(char *)0, >*/
+/*<                                  ptr_ch(str9)//(char *)0, >*/
+/*<                                  ptr_ch(str10)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+/*<      character*(*) str4 >*/
+/*<      character*(*) str5; >*/
+/*<      character*(*) str6; >*/
+/*<      character*(*) str7 >*/
+/*<      character*(*) str8; >*/
+/*<      character*(*) str9; >*/
+/*<      character*(*) str10; >*/
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+/*   character*(*) str3      - string */
+/*   character*(*) str4      - string */
+/*   character*(*) str5      - string */
+/*   character*(*) str6      - string */
+/*   character*(*) str7      - string */
+/*   character*(*) str8      - string */
+/*   character*(*) str9      - string */
+/*   character*(*) str10     - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_chan_def2(*str,
+		  *str2,
+		  *str3,
+		  *str4,
+		  *str5,
+		  *str6,
+		  *str7,
+		  *str8,
+		  *str9,
+		  *str10);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
+fcreate_chan_def_states2__
+#else
+fcreate_chan_def_states2
+#endif
+(str)
+char **str;
+/*<      subroutine fcreate_chan_def_states2(ptr_ch(str)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+
+  create_chan_def_states2(*str);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_sample_rate__
 #else
 fcreate_sample_rate

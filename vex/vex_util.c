@@ -520,9 +520,9 @@ struct chan_def  *make_chan_def(int ver, char *band_id, struct dvalue *sky_freq,
 				char *chan_id, char *bbc_id, char *chan_name, 
 				char *pcal_id, struct llist *states)
 {
-  if(ver < 2 && !vex_version.lessthan2) {
+  if(ver == 1 && !vex_version.lessthan2) {
     yyerror("VEX1 chan_def present");
-  } else if(ver > 1 && vex_version.lessthan2) {
+  } else if(ver == 2 && vex_version.lessthan2) {
     yyerror("VEX2 chan_def present");
     exit(1);
   }

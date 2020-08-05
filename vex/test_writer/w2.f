@@ -425,6 +425,85 @@ c
      &     ptr_ch('settings'//char(0)) )
       call fend_def
 c
+      call fcreate_block(ptr_ch('FREQ'//char(0)))
+      call fcreate_def(ptr_ch('SX'//char(0)))
+      call fcreate_chan_def2(ptr_ch('X'//char(0)),
+     &                      ptr_ch('8500.99'//char(0)),
+     &                      ptr_ch('MHz'//char(0)),
+     &                      ptr_ch('U'//char(0)),
+     &                      ptr_ch('2'//char(0)),
+     &                      ptr_ch('MHz'//char(0)),
+     &                      ptr_ch('CH1'//char(0)),
+     &                      ptr_ch('BBCa'//char(0)),
+     &                      ptr_ch('CHname'//char(0)),
+     &                      ptr_ch('USB_CAL'//char(0)))
+      call fcreate_chan_def_states2(ptr_ch(char(0)))
+c
+      call fcreate_chan_def2(ptr_ch(char(0)),
+     &                      ptr_ch('8500.99'//char(0)),
+     &                      ptr_ch('MHz'//char(0)),
+     &                      ptr_ch('U'//char(0)),
+     &                      ptr_ch('2'//char(0)),
+     &                      ptr_ch('MHz'//char(0)),
+     &                      ptr_ch('CH1'//char(0)),
+     &                      ptr_ch('BBCa'//char(0)),
+     &                      ptr_ch('CHname'//char(0)),
+     &                      ptr_ch('USB_CAL'//char(0)))
+      call fcreate_chan_def_states2(ptr_ch(char(0)))
+c
+      call fcreate_chan_def2(ptr_ch('X'//char(0)),
+     &                      ptr_ch('8500.99'//char(0)),
+     &                      ptr_ch('MHz'//char(0)),
+     &                      ptr_ch('U'//char(0)),
+     &                      ptr_ch('2'//char(0)),
+     &                      ptr_ch('MHz'//char(0)),
+     &                      ptr_ch(char(0)),
+     &                      ptr_ch('BBCa'//char(0)),
+     &                      ptr_ch('CHname'//char(0)),
+     &                      ptr_ch('USB_CAL'//char(0)))
+      call fcreate_chan_def_states2(ptr_ch(char(0)))
+c
+      call fcreate_chan_def2(ptr_ch('X'//char(0)),
+     &                      ptr_ch('8500.99'//char(0)),
+     &                      ptr_ch('MHz'//char(0)),
+     &                      ptr_ch('U'//char(0)),
+     &                      ptr_ch('2'//char(0)),
+     &                      ptr_ch('MHz'//char(0)),
+     &                      ptr_ch('CH1'//char(0)),
+     &                      ptr_ch('BBCa'//char(0)),
+     &                      ptr_ch('CHname'//char(0)),
+     &                      ptr_ch(char(0)))
+      call fcreate_chan_def_states2(ptr_ch(char(0)))
+c
+      call fcreate_chan_def2(ptr_ch('S'//char(0)),
+     &                      ptr_ch('2500.99'//char(0)),
+     &                      ptr_ch('MHz'//char(0)),
+     &                      ptr_ch('U'//char(0)),
+     &                      ptr_ch('2'//char(0)),
+     &                      ptr_ch('MHz'//char(0)),
+     &                      ptr_ch('CH1'//char(0)),
+     &                      ptr_ch('BBCa'//char(0)),
+     &                      ptr_ch('CHname'//char(0)),
+     &                      ptr_ch('USB_CAL'//char(0)))
+      call fcreate_chan_def_states2(ptr_ch('1'//char(0)))
+      call fcreate_chan_def_states2(ptr_ch('2'//char(0)))
+      call fcreate_chan_def_states2(ptr_ch(char(0)))
+c
+      call fcreate_chan_def2(ptr_ch('S'//char(0)),
+     &                      ptr_ch('2500.99'//char(0)),
+     &                      ptr_ch('MHz'//char(0)),
+     &                      ptr_ch('U'//char(0)),
+     &                      ptr_ch('2'//char(0)),
+     &                      ptr_ch('MHz'//char(0)),
+     &                      ptr_ch('CH1'//char(0)),
+     &                      ptr_ch('BBCa'//char(0)),
+     &                      ptr_ch('CHname'//char(0)),
+     &                      ptr_ch(char(0)))
+      call fcreate_chan_def_states2(ptr_ch('1'//char(0)))
+      call fcreate_chan_def_states2(ptr_ch('2'//char(0)))
+      call fcreate_chan_def_states2(ptr_ch(char(0)))
+c
+      call fend_def
       call fcreate_vex(ptr_ch(char(0)))
 c
       END

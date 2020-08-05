@@ -1134,6 +1134,14 @@ void *
 create_chan_def_states(char *str);
 
 void *
+create_chan_def2(char *str, char *str2, char *str3, char *str4,
+		char *str5, char *str6, char *str7, char *str8,
+		char *str9, char *str10);
+
+void *
+create_chan_def_states2(char *str);
+
+void *
 create_sample_rate(char *str, char *str2);
 
 void *
