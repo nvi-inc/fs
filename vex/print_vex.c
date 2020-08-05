@@ -204,9 +204,10 @@ void print_lowl(struct llist *items)
 void print_lowl_st(int statement, void *ptr)
 {
   char *value, *units;
-  int link, name, i, ierr;
+  int link, name, i, ierr, j, jcount;
 
   ierr=0;
+  jcount=1;
   for (i=0;ierr==0;i++) {
     ierr=vex_field(statement,ptr,i,&link,&name,&value,&units);
     if(ierr!=0)
@@ -216,23 +217,27 @@ void print_lowl_st(int statement, void *ptr)
 /*	fprintf(fp, "   ");*/
 	fprintf(fp, "\n   "); 
     } else if(i==1)
-	fprintf(fp, " =");
-    else
-	fprintf(fp, " :");
+	  fprintf(fp, " =");
     if(value!=NULL && *value!='\0') {
-      if(statement!=T_VEX_REV || i !=0)
-	fprintf(fp, " ");
-      if(link)
-	fprintf(fp, "&");
-      if(name)
-	print_svalue(value);
-      else
-	fprintf(fp, "%s",value);
-      if(units!=NULL && *units!='\0') {
-	fprintf(fp, " ");
-	fprintf(fp, "%s",units);
+      if (i >=2) {
+        for (j=0;j<jcount;j++)
+	      fprintf(fp, " :");
+        jcount=1;
       }
-    }
+      if(statement!=T_VEX_REV || i !=0)
+	    fprintf(fp, " ");
+       if(link)
+         fprintf(fp, "&");
+       if(name)
+	     print_svalue(value);
+       else
+	     fprintf(fp, "%s",value);
+       if(units!=NULL && *units!='\0') {
+	     fprintf(fp, " ");
+	     fprintf(fp, "%s",units);
+       }
+    } else if(i>1) /* make up for null fields if there is one not null */
+      jcount++;
   }
   if(ierr==-1) {
     fprintf(stderr,"Unknown lowl %d",statement);
