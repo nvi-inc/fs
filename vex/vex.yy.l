@@ -40,9 +40,10 @@
 static char *find_end(char *buffer, char *text);
 
 static int ref=0;
-static trailing=0;
+static int trailing=0;
 int lines=1;
 static int version=1;
+void yyerror(const char *s);
 %}
 %option noyywrap
 
@@ -266,7 +267,7 @@ char *quote()
       }
     }
     if(inch == 0) {
-      yyerror("Null byte specified at line %d\n",lines);
+      yyerror("Null byte specified");
     }
     buffer[count++] = inch;
     if(count >= max_size) {
@@ -276,7 +277,7 @@ char *quote()
     inch = input();
   }
   if(inch == EOF || inch == '\n') {
-    yyerror("Unterminated string at line %d\n",lines);
+    yyerror("Unterminated string");
   }
   buffer[count]='\0';
   if(strlen(buffer) > 128) {

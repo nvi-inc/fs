@@ -720,6 +720,56 @@ get_station_def_next();
 
 char *
 get_station_def(struct vex *vex_in);
+//new
+void *
+end_def();
+
+void *
+create_ref(char *str, char *str2);
+
+void *
+end_scan();
+
+void *
+create_stream_def(char *str, char *str2, char *str3, char *str4, char *str5);
+
+void *
+create_stream_sample_rate(char *str, char *str2, char *str3);
+
+void *
+create_stream_label(char *str, char *str2);
+
+void *
+create_dvalue_list(char *str, char *str2);
+
+void *
+create_svalue_list(char *str);
+
+void *
+create_lvalue_list(char *str);
+
+void *
+create_datastream(char *str, char *str2, char *str3);
+
+void *
+create_thread(char *str, char *str2, char *str3, char *str4, char *str5,
+	      char *str6, char *str7, char *str8, char *str9);
+
+void *
+create_channel(char *str, char *str2, char *str3, char *str4);
+
+void *
+create_merged_datastream(char *str, char *str2);
+
+void *
+create_eop_origin(char *str, char *str2);
+
+void *
+create_nut_origin(char *str, char *str2);
+
+void *
+create_headstack_pos(char *str, char *str2);
+//end of new
 
 void *
 get_all_lowl_next();

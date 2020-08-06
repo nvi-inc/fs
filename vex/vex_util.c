@@ -19,9 +19,12 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "vex.h"
 #include "y.tab.h"
+
+void yyerror(const char *s);
 
 char *filename;
 FILE *fp;
@@ -119,7 +122,7 @@ get_merged_datastream_field(Merged_datastream *merged_datastream,int n,
 static int
 get_eop_origin_field(Eop_origin *eop_origin,int n,
 		     int *link,  int *name, char **value, char **units);
-static
+static int
 get_nut_origin_field(Nut_origin *nutp_origin,int n,
 		     int *link,  int *name, char **value, char **units);
 static int
@@ -2383,7 +2386,7 @@ get_datastream_field(Datastream *datastream,int n,int *link,
   }
   return 0;
 }
-static
+static int
 get_thread_field(Thread *thread,int n,int *link,
 		 int *name, char **value, char **units)
 {
@@ -3007,6 +3010,7 @@ get_site_position_field(Site_position *site_position,int n,int *link,
   }
   return 0;
 }
+static int
 get_site_velocity_field(Site_velocity *site_velocity,int n,int *link,
 		 int *name, char **value, char **units)
 {
