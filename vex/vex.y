@@ -1310,7 +1310,7 @@ if_lowl:	if_def_st		{$$=make_lowl(T_IF_DEF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 ;
-if_def_st:	T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME ':' unit_value ':' unit_value ';'
+if_def_st:	T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME ':' unit_value ':' unit_value2 ';'
 			{$$=make_if_def($3,$5,$7,$9,$11,$13,$15);}
 		| T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME ';'
 			{$$=make_if_def($3,$5,$7,$9,$11,NULL,NULL);}
@@ -1319,8 +1319,6 @@ if_def_st:	T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME '
 		| T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME ':' ';'
 			{$$=make_if_def($3,$5,$7,$9,$11,NULL,NULL);}
 		| T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME ':' unit_value ';'
-			{$$=make_if_def($3,$5,$7,$9,$11,$13,NULL);}
-		| T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME ':' unit_value ':' ';'
 			{$$=make_if_def($3,$5,$7,$9,$11,$13,NULL);}
 ;
 /* $PASS_ORDER block */
