@@ -527,7 +527,6 @@ struct chan_def  *make_chan_def(int ver, char *band_id, struct dvalue *sky_freq,
     yyerror("VEX1 chan_def present");
   } else if(ver == 2 && vex_version.lessthan2) {
     yyerror("VEX2 chan_def present");
-    exit(1);
   }
 
   NEWSTRUCT(new,chan_def);
@@ -953,8 +952,17 @@ struct headstack_pos *make_headstack_pos(struct dvalue *index,
 struct if_def *make_if_def(char *if_id, char *physical, char *polar,
 			   struct dvalue *lo, char *sb,
 			   struct dvalue *pcal_spacing,
-			   struct dvalue *pcal_base)
+			   struct dvalue *pcal_base,
+               struct dvalue *samp_rate)
 {
+  if(physical == NULL || strlen(physical) == 0 ) {
+    if(vex_version.lessthan2) {
+      yyerror("VEX2 if_def present");
+    }
+  } else if(!vex_version.lessthan2) {
+    yyerror("VEX1 if_def present");
+  }
+
   NEWSTRUCT(new,if_def);
 
   new->if_id=if_id;
@@ -964,6 +972,7 @@ struct if_def *make_if_def(char *if_id, char *physical, char *polar,
   new->sb=sb;
   new->pcal_spacing=pcal_spacing;
   new->pcal_base=pcal_base;
+  new->samp_rate=samp_rate;
 
   return new;
 }
@@ -2738,16 +2747,23 @@ get_if_def_field(If_def *if_def,int n,int *link,
     break;
   case 6:
     if(if_def->pcal_spacing == NULL)
-      return -1;
+      return 0;
     *value=if_def->pcal_spacing->value;
     *units=if_def->pcal_spacing->units;
     *name=0;
     break;
   case 7:
     if(if_def->pcal_base == NULL)
-      return -1;
+      return 0;
     *value=if_def->pcal_base->value;
     *units=if_def->pcal_base->units;
+    *name=0;
+    break;
+  case 8:
+    if(if_def->samp_rate == NULL)
+      return 0;
+    *value=if_def->samp_rate->value;
+    *units=if_def->samp_rate->units;
     *name=0;
     break;
   default:

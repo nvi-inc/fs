@@ -502,8 +502,78 @@ c
       call fcreate_chan_def_states2(ptr_ch('1'//char(0)))
       call fcreate_chan_def_states2(ptr_ch('2'//char(0)))
       call fcreate_chan_def_states2(ptr_ch(char(0)))
-c
       call fend_def
+c
+      call fcreate_block(ptr_ch('IF'//char(0)))
+      call fcreate_def(ptr_ch('SX'//char(0)))
+      call fcreate_if_def2(ptr_ch('IF_XR1'//char(0)),
+     &                    ptr_ch('R'//char(0)),
+     &                    ptr_ch('7600'//char(0)),
+     &                    ptr_ch('MHz'//char(0)),
+     &                    ptr_ch('U'//char(0)),
+     &                    ptr_ch('1'//char(0)),
+     &                    ptr_ch('MHz'//char(0)),
+     &                    ptr_ch('0'//char(0)),
+     &                    ptr_ch('Hz'//char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch(char(0)))
+      call fcreate_if_def2(ptr_ch('IF_XR1'//char(0)),
+     &                    ptr_ch('R'//char(0)),
+     &                    ptr_ch('7600'//char(0)),
+     &                    ptr_ch('MHz'//char(0)),
+     &                    ptr_ch('U'//char(0)),
+     &                    ptr_ch('1'//char(0)),
+     &                    ptr_ch('MHz'//char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch(char(0)))
+      call fcreate_if_def2(ptr_ch('IF_XR1'//char(0)),
+     &                    ptr_ch('R'//char(0)),
+     &                    ptr_ch('7600'//char(0)),
+     &                    ptr_ch('MHz'//char(0)),
+     &                    ptr_ch('U'//char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch(char(0)))
+      call fcreate_if_def2(ptr_ch('IF_XR1'//char(0)),
+     &                    ptr_ch('R'//char(0)),
+     &                    ptr_ch('7600'//char(0)),
+     &                    ptr_ch('MHz'//char(0)),
+     &                    ptr_ch('U'//char(0)),
+     &                    ptr_ch('1'//char(0)),
+     &                    ptr_ch('MHz'//char(0)),
+     &                    ptr_ch('0'//char(0)),
+     &                    ptr_ch('Hz'//char(0)),
+     &                    ptr_ch('4096'//char(0)),
+     &                    ptr_ch('Ms/sec'//char(0)))
+      call fcreate_if_def2(ptr_ch('IF_XR1'//char(0)),
+     &                    ptr_ch('R'//char(0)),
+     &                    ptr_ch('7600'//char(0)),
+     &                    ptr_ch('MHz'//char(0)),
+     &                    ptr_ch('U'//char(0)),
+     &                    ptr_ch('1'//char(0)),
+     &                    ptr_ch('MHz'//char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch('4096'//char(0)),
+     &                    ptr_ch('Ms/sec'//char(0)))
+      call fcreate_if_def2(ptr_ch('IF_XR1'//char(0)),
+     &                    ptr_ch('R'//char(0)),
+     &                    ptr_ch('7600'//char(0)),
+     &                    ptr_ch('MHz'//char(0)),
+     &                    ptr_ch('U'//char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch(char(0)),
+     &                    ptr_ch('4096'//char(0)),
+     &                    ptr_ch('Ms/sec'//char(0)))
+      call fend_def
+c
       call fcreate_vex(ptr_ch(char(0)))
 c
       END

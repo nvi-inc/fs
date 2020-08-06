@@ -951,6 +951,7 @@ $DAS; *data-acquisition system parameters
     connection = &ifb : &rdbea : in2 : in : analog;
     connection = &ifc : &rdbeb : in1 : b : analog;
     record_method = start_stop : 10 seconds : 20 minutes;
+    record_method = start_stop : : 20 minutes;
     record_method = continuous : 11 hours;
     record_method = adaptive : : 21 days;
     record_control = master;
@@ -1250,24 +1251,27 @@ $IF; *receiver and IF parameters
   def VLBA/X;
 *           IF    Physical Pol  Total     Net    Phase-cal     P-cal base
 *           ID      Name         LO        SB   freq spacing      freq
-    if_def = &IF_XR1 : AN : R : 7600 MHz : U : 1 MHz : 0 Hz;
-    if_def = &IF_XR2 : BN : R : 9600 MHz : L : 1 MHz : 0 Hz;
-    if_def = &IF_XL1 : CN : L : 7600 MHz : U : 1 MHz : 0 Hz;
-    if_def = &IF_XL2 : DN : L : 9600 MHz : L : 1 MHz : 0 Hz;
+    if_def = &IF_XR1 : : R : 7600 MHz : U : 1 MHz : 0 Hz;
+    if_def = &IF_XR1 : : R : 7600 MHz : U : 1 MHz : 0 Hz : 4096 Ms/s;
+    if_def = &IF_XR1 : : R : 7600 MHz : U : 1 MHz : : 4096 Ms/s;
+    if_def = &IF_XR1 : : R : 7600 MHz : U : : : 4096 Ms/s;
+    if_def = &IF_XR2 : : R : 9600 MHz : L : 1 MHz : 0 Hz;
+    if_def = &IF_XL1 : : L : 7600 MHz : U : 1 MHz : 0 Hz;
+    if_def = &IF_XL2 : : L : 9600 MHz : L : 1 MHz : 0 Hz;
   enddef;
 *
   def VLBA/S;
 *           IF    Physical Pol  Total     Net  
 *           ID       ID          LO        SB  
-    if_def = &IF_SR : AE : R : 2900 MHz : L; *no phase-cal
-    if_def = &IF_SL : BE : L : 2900 MHz : L; *no phase-cal
+    if_def = &IF_SR : : R : 2900 MHz : L; *no phase-cal
+    if_def = &IF_SL : : L : 2900 MHz : L; *no phase-cal
   enddef;
 *
   def CDP/SX_WIDE;
 *           IF    Physical Pol  Total     Net    Phase-cal
 *           ID       ID   :      LO        SB   freq spacing
-    if_def = &IF_XR : 1A : R : 8080 MHz : U : 1 MHz;
-    if_def = &IF_SR : 2A : R : 2020 MHz : U : 1 MHz;
+    if_def = &IF_XR : : R : 8080 MHz : U : 1 MHz;
+    if_def = &IF_SR : : R : 2020 MHz : U : 1 MHz;
   enddef;
 *
 *----------------------------------------------------------------------------------------------------------------------

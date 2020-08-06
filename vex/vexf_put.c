@@ -3354,6 +3354,81 @@ char **str10;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_if_def2__
+#else
+fcreate_if_def2
+#endif
+(str, str3, str4, str5, str6, str7, str8, str9,str10,str11,str12)
+char **str;
+char **str3;
+char **str4;
+char **str5;
+char **str6;
+char **str7;
+char **str8;
+char **str9;
+char **str10;
+char **str11;
+char **str12;
+/*<      subroutine fcreate_if_def(ptr_ch(str)//(char *)0, >*/
+/*<                                ptr_ch(str3)//(char *)0, >*/
+/*<                                ptr_ch(str4)//(char *)0, >*/
+/*<                                ptr_ch(str5)//(char *)0, >*/
+/*<                                ptr_ch(str6)//(char *)0, >*/
+/*<                                ptr_ch(str7)//(char *)0, >*/
+/*<                                ptr_ch(str8)//(char *)0, >*/
+/*<                                ptr_ch(str9)//(char *)0, >*/
+/*<                                ptr_ch(str10)//(char *)0, >*/
+/*<                                ptr_ch(str11)//(char *)0, >*/
+/*<                                ptr_ch(str12)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str3; >*/
+/*<      character*(*) str4 >*/
+/*<      character*(*) str5; >*/
+/*<      character*(*) str6; >*/
+/*<      character*(*) str7 >*/
+/*<      character*(*) str8; >*/
+/*<      character*(*) str9; >*/
+/*<      character*(*) str10; >*/
+/*<      character*(*) str11; >*/
+/*<      character*(*) str12; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string  */
+/*   character*(*) str3      - string  */
+/*   character*(*) str4      - string  */
+/*   character*(*) str5      - string  */
+/*   character*(*) str6      - string  */
+/*   character*(*) str7      - string  */
+/*   character*(*) str8      - string  */
+/*   character*(*) str9      - string  */
+/*   character*(*) str10     - string  */
+/*   character*(*) str11     - string  */
+/*   character*(*) str12     - string  */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_if_def2(*str,
+		*str3,
+		*str4,
+		*str5,
+		*str6,
+		*str7,
+		*str8,
+		*str9,
+		*str10,
+		*str11,
+		*str12);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_phase_cal_detect__
 #else
 fcreate_phase_cal_detect

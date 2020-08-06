@@ -2637,7 +2637,8 @@ create_if_def(char *str, char *str2, char *str3, char *str4,
 				     make_dvalue(s4,s5),
 				     s6,
 				     NULL,
-				     NULL)));
+				     NULL,
+                     NULL)));
     }
   else if(str9==NULL || strlen(str9)==0 ||
 	  str10==NULL || strlen(str10)==0)
@@ -2655,7 +2656,8 @@ create_if_def(char *str, char *str2, char *str3, char *str4,
 				     make_dvalue(s4,s5),
 				     s6,
 				     make_dvalue(s7,s8),
-				     NULL)));
+				     NULL,
+                     NULL)));
     }
   else
     {
@@ -2674,8 +2676,48 @@ create_if_def(char *str, char *str2, char *str3, char *str4,
 				     make_dvalue(s4,s5),
 				     s6,
 				     make_dvalue(s7,s8),
-				     make_dvalue(s9,s10))));
+				     make_dvalue(s9,s10),
+                     NULL)));
     }
+}
+void *
+create_if_def2(char *str, char *str3, char *str4,
+	      char *str5, char *str6, char *str7, char *str8,
+	      char *str9, char *str10, char *str11, char *str12)
+{
+  char *s1, *s3, *s4, *s5, *s6, *s7, *s8, *s9, *s10, *s11, *s12;
+  struct dvalue *d7, *d9, *d11;
+
+  if(str7==NULL || strlen(str7)==0 ||
+     str8==NULL || strlen(str8)==0) {
+     d7=NULL;
+  }  else {
+     d7=make_dvalue(str7,str8);
+  }
+  if(str9==NULL || strlen(str9)==0 ||
+     str10==NULL || strlen(str10)==0) {
+     d9=NULL;
+  }  else {
+     d9=make_dvalue(str9,str10);
+  }
+  if(str11==NULL || strlen(str11)==0 ||
+     str12==NULL || strlen(str12)==0) {
+     d11=NULL;
+  }  else {
+     d11=make_dvalue(str11,str12);
+  }
+      s1=(char *)strdup(str);
+      s3=(char *)strdup(str3);
+      s4=(char *)strdup(str4);
+      s5=(char *)strdup(str5);
+      s6=(char *)strdup(str6);
+      qref_list = add_list(qref_list,make_lowl(T_IF_DEF,
+				     make_if_def(s1,NULL,s3,
+				     make_dvalue(s4,s5),
+				     s6,
+				     d7,
+				     d9,
+                     d11)));
 }
 /*-------------------------------------------------------------------*/
 /* PASS_ORDER block builders                                         */
