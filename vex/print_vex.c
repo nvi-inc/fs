@@ -45,31 +45,31 @@ void print_vex_blocks(struct llist *blocks)
   char *ptr;
 
   while (blocks!=NULL) {
-    struct block *this=(struct block *)blocks->ptr;
-    switch (this->block) {
+    struct block *this_=(struct block *)blocks->ptr;
+    switch (this_->block) {
     case B_GLOBAL:
       fprintf(fp, "\n$GLOBAL;");
-      print_qref_block(this->items);
+      print_qref_block(this_->items);
       break;
     case B_STATION:
       fprintf(fp, "\n$STATION;");
-      print_def_block(this->items,print_qref_block);
+      print_def_block(this_->items,print_qref_block);
       break;
     case B_MODE:
       fprintf(fp, "\n$MODE;");
-      print_def_block(this->items,print_qref_block);
+      print_def_block(this_->items,print_qref_block);
       break;
     case T_COMMENT:
-      print_comment((char *)this->items);
+      print_comment((char *)this_->items);
       break;
     case T_COMMENT_TRAILING:
-      print_comment_trailing((char *)this->items);
+      print_comment_trailing((char *)this_->items);
       break;
     default:
       fprintf(fp,"\n");
-      print_block_name(this->block);
+      print_block_name(this_->block);
       fprintf(fp,";");
-      print_def_block(this->items,print_lowl);
+      print_def_block(this_->items,print_lowl);
       break;
     }
     blocks=blocks->next;
@@ -78,10 +78,10 @@ void print_vex_blocks(struct llist *blocks)
 void print_def_block(struct llist *items,void func())
 {
   while (items!=NULL) {
-    struct lowl *this=(struct lowl *)items->ptr;
-    switch(this->statement) {
+    struct lowl *this_=(struct lowl *)items->ptr;
+    switch(this_->statement) {
     case T_DEF:
-      {struct def *def=(struct def *)this->item;
+      {struct def *def=(struct def *)this_->item;
 
       /* new */
       if(!strstr(def->name,"comment")) {
@@ -108,7 +108,7 @@ void print_def_block(struct llist *items,void func())
       */
       /*end old*/
     case T_SCAN:
-      {struct def *def=(struct def *)this->item;
+      {struct def *def=(struct def *)this_->item;
       fprintf(fp, "\n  scan ");
       print_svalue(def->name);
       fprintf(fp, ";");
@@ -119,13 +119,13 @@ void print_def_block(struct llist *items,void func())
       }
       break;
     case T_COMMENT:
-      print_comment((char *)this->item);
+      print_comment((char *)this_->item);
       break;
     case T_COMMENT_TRAILING:
-      print_comment_trailing((char *)this->item);
+      print_comment_trailing((char *)this_->item);
       break;
     default:
-      fprintf(stderr,"Unknown def_lowl %d\n",this->statement);
+      fprintf(stderr,"Unknown def_lowl %d\n",this_->statement);
       exit(1);
     }
     items=items->next;
@@ -134,10 +134,10 @@ void print_def_block(struct llist *items,void func())
 void print_qref_block(struct llist *items)
 {
   while (items!=NULL) {
-    struct lowl *this=(struct lowl *)items->ptr;
-    switch(this->statement) {
+    struct lowl *this_=(struct lowl *)items->ptr;
+    switch(this_->statement) {
     case T_REF:
-      { struct qref *qref=(struct qref *)this->item;
+      { struct qref *qref=(struct qref *)this_->item;
       fprintf(fp, "\n    ref ");
       print_block_name(qref->primitive);
       fprintf(fp, " = ");
@@ -147,13 +147,13 @@ void print_qref_block(struct llist *items)
       }
       break;
     case T_COMMENT:
-      print_comment((char *)this->item);
+      print_comment((char *)this_->item);
       break;
     case T_COMMENT_TRAILING:
-      print_comment_trailing((char *)this->item);
+      print_comment_trailing((char *)this_->item);
       break;
     default:
-      fprintf(stderr,"Unknown def_lowl %d\n",this->statement);
+      fprintf(stderr,"Unknown def_lowl %d\n",this_->statement);
       exit(1);
     }
     items=items->next;
@@ -173,31 +173,31 @@ void print_block_name(int block)
 void print_qualifiers(struct llist *items)
 {
   while (items!=NULL) {
-    char *this=(char *)items->ptr;
+    char *this_=(char *)items->ptr;
 	fprintf(fp, ":");
-    print_svalue(this);
+    print_svalue(this_);
     items=items->next;
   }
 }
 void print_lowl(struct llist *items)
 {
   while (items!=NULL) {
-    struct lowl *this=(struct lowl *)items->ptr;
-    switch (this->statement) {
+    struct lowl *this_=(struct lowl *)items->ptr;
+    switch (this_->statement) {
     case T_LITERAL:
-      print_literal_list((struct llist *) this->item);
+      print_literal_list((struct llist *) this_->item);
       break;
     case T_REF:
-      print_external((struct external *) this->item);
+      print_external((struct external *) this_->item);
       break;
     case T_COMMENT:
-      print_comment((char *) this->item);
+      print_comment((char *) this_->item);
       break;
     case T_COMMENT_TRAILING:
-      print_comment_trailing((char *) this->item);
+      print_comment_trailing((char *) this_->item);
       break;
     default:
-      print_lowl_st(this->statement,this->item);
+      print_lowl_st(this_->statement,this_->item);
     }
     items=items->next;
   }
@@ -249,16 +249,16 @@ void print_lowl_st(int statement, void *ptr)
   }
     fprintf(fp, ";");
 }
-void print_external(struct external *this)
+void print_external(struct external *this_)
 {
     fprintf(fp, "\n    ref ");
-  print_svalue(this->file);
+  print_svalue(this_->file);
 
     fprintf(fp, ":");
-  print_block_name(this->primitive);
+  print_block_name(this_->primitive);
 
     fprintf(fp, " = ");
-  print_svalue(this->name);
+  print_svalue(this_->name);
     fprintf(fp, ";");
 
 }

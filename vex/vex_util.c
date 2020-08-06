@@ -514,12 +514,12 @@ struct block *make_block(int block,struct llist *items)
   return new;
 }
 
-struct vex *make_vex(struct llist *version, struct llist *blocks)
+struct vex *make_vex(struct llist *version, struct llist *vblocks)
 {
   NEWSTRUCT(new,vex);
 
   new->version=version;
-  new->blocks=blocks;
+  new->blocks=vblocks;
 
   return new;
 }
@@ -1738,8 +1738,6 @@ static int
 get_data_transfer_field(Data_transfer *data_transfer,int n,int *link,
 			int *name,char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -1786,8 +1784,6 @@ static int
 get_axis_type_field(Axis_type *axis_type,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -1818,8 +1814,6 @@ static int
 get_antenna_motion_field(Antenna_motion *antenna_motion,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -1849,8 +1843,6 @@ static int
 get_pointing_sector_field(Pointing_sector *pointing_sector,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -1913,8 +1905,6 @@ static int
 get_nasmyth_field(Nasmyth *namsyth,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -1938,8 +1928,6 @@ static int
 get_bbc_assign_field(Bbc_assign *bbc_assign,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -1969,8 +1957,6 @@ static int
 get_stream_def_field(Stream_def *stream_def,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2012,8 +1998,6 @@ static int
 get_stream_sample_rate_field(Stream_sample_rate *stream_sample_rate,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2041,8 +2025,6 @@ static int
 get_stream_label_field(Stream_label *stream_label,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2068,8 +2050,6 @@ static int
 get_clock_early_field(Clock_early *clock_early,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2135,8 +2115,6 @@ static int
 get_headstack_field(Headstack *headstack,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2164,8 +2142,6 @@ static int
 get_tape_length_field(Tape_Length *tape_length,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2200,8 +2176,6 @@ static int
 get_tape_motion_field(Tape_Motion *tape_motion,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2241,8 +2215,6 @@ static int
 get_equip_field(Equip *equip,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2366,8 +2338,6 @@ static int
 get_connection_field(Connection *connection,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2404,8 +2374,6 @@ static int
 get_record_method_field(Record_method *record_method,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2440,8 +2408,6 @@ static int
 get_datastream_field(Datastream *datastream,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2469,8 +2435,6 @@ static int
 get_thread_field(Thread *thread,int n,int *link,
 		 int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2518,8 +2482,6 @@ static int
 get_channel_field(Channel *channel,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2584,8 +2546,6 @@ static int
 get_eop_origin_field(Eop_origin *eop_origin,int n,int *link,
 		     int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2609,8 +2569,6 @@ static int
 get_nut_origin_field(Nut_origin *nut_origin,int n,int *link,
 		     int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2634,8 +2592,6 @@ static int
 get_exper_name_field(Exper_name *exper_name,int n,int *link,
 		     int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2660,8 +2616,6 @@ get_scheduling_software_field(Scheduling_software *scheduling_software,
                               int n,int *link,int *name, char **value,
 			      char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2694,8 +2648,6 @@ get_vex_file_writer_field(Vex_file_writer *vex_file_writer,
 			  int n,int *link,int *name, char **value,
 			  char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2789,8 +2741,6 @@ static int
 get_if_def_field(If_def *if_def,int n,int *link,
 		 int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2845,8 +2795,6 @@ static int
 get_receiver_name_field(Receiver_name *receiver_name,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2929,8 +2877,6 @@ static int
 get_switched_power_field(Switched_power *switched_power,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -2990,8 +2936,6 @@ static int
 get_setup_always_field(Setup_always *setup_always,int n,int *link,
 		 int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3014,8 +2958,6 @@ static int
 get_parity_check_field(Parity_check *parity_check,int n,int *link,
 		 int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3039,8 +2981,6 @@ static int
 get_tape_prepass_field(Tape_prepass *tape_prepass,int n,int *link,
 		 int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3064,8 +3004,6 @@ static int
 get_preob_cal_field(Preob_cal *preob_cal,int n,int *link,
 		 int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3092,8 +3030,6 @@ static int
 get_midob_cal_field(Midob_cal *midob_cal,int n,int *link,
 		 int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3120,8 +3056,6 @@ static int
 get_postob_cal_field(Postob_cal *postob_cal,int n,int *link,
 		 int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3183,8 +3117,6 @@ static int
 get_site_position_field(Site_position *site_position,int n,int *link,
 		 int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3215,8 +3147,6 @@ static int
 get_site_velocity_field(Site_velocity *site_velocity,int n,int *link,
 		 int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3247,8 +3177,6 @@ static int
 get_ocean_load_vert_field(Ocean_load_vert *ocean_load_vert,int n,int *link,
 		 int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3274,8 +3202,6 @@ static int
 get_ocean_load_horiz_field(Ocean_load_horiz *ocean_load_horiz,int n,int *link,
 		 int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3301,8 +3227,6 @@ static int
 get_source_model_field(Source_model *source_model,int n,int *link,
 		 int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3357,8 +3281,6 @@ static int
 get_vsn_field(Vsn *vsn,int n,int *link,
 	      int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3519,8 +3441,6 @@ static int
 get_vlba_frmtr_sys_trk_field(Vlba_frmtr_sys_trk *vlba_frmtr_sys_trk,int n,
 			     int *link, int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3556,8 +3476,6 @@ static int
 get_s2_data_source_field(S2_data_source *s2_data_source,int n,int *link,
 			  int *name, char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3588,8 +3506,6 @@ static int
 get_dvalue_field(Dvalue *dvalue,int n,int *link,int *name,char **value,
 		   char **units)
 {
-  int ierr;
-
   *link=0;
   *name=0;
   *units=NULL;
@@ -3634,8 +3550,6 @@ static int
 get_svalue_field(char *svalue,int n,int *link,int *name, char **value,
 		   char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -3702,8 +3616,6 @@ static int
 get_date_field(char *date,int n,int *link, int *name, char **value,
 		   char **units)
 {
-  int ierr;
-
   *link=0;
   *name=0;
   *units=NULL;
@@ -3724,8 +3636,6 @@ static int
 get_time_field(char *time,int n,int *link, int *name, char **value,
 		   char **units)
 {
-  int ierr;
-
   *link=0;
   *name=0;
   *units=NULL;
@@ -3746,8 +3656,6 @@ static int
 get_angle_field(char *angle,int n,int *link, int *name, char **value,
 		   char **units)
 {
-  int ierr;
-
   *link=0;
   *name=0;
   *units=NULL;

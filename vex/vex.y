@@ -32,7 +32,7 @@ struct vex *vex_ptr=NULL;
 extern int lines;
 
 int yylex();
-void yyerror(const char *s);
+void yyerror(char const* s);
 %}
 
 %union
@@ -1931,7 +1931,7 @@ empty_name: /* empty */   {$$=NULL;}
 %%
 
 void yyerror(s)
-const char *s;
+char const *s;
 {
   fprintf(stderr,"%s at line %d\n",s,lines);
   exit(1);

@@ -89,7 +89,6 @@ get_scan_source(Llist *lowls_scan_in)
     state=FALSE;
   }
 
-lstate:
   lowls=find_lowl(lowls,T_SOURCE);
   if(lowls==NULL)
     goto ldone;
@@ -653,7 +652,7 @@ get_station_lowl(char *station_in,
   static Llist *refs;
   static Llist *lowls;
 
-  Llist *qualifiers, *lowls_this;
+  Llist *lowls_this;
   Llist *defs;
   char *def;
 
@@ -755,7 +754,6 @@ get_source_lowl(char *source_in, int statement_in, struct vex *vex_in)
 
   Llist *lowls_this;
   Llist *defs;
-  char *def;
 
   static char *source;
   static struct vex *vex;
@@ -792,8 +790,6 @@ get_source_lowl(char *source_in, int statement_in, struct vex *vex_in)
 
   lowls=((Def *)((Lowl *)defs->ptr)->item)->refs;
 
-lstart:
-
 lstate:
   lowls=find_lowl(lowls,statement);
   if(lowls==NULL)
@@ -828,7 +824,7 @@ get_global_lowl(int statement_in,
   static Llist *lowls;
 
   Llist *defs;
-  Llist *qualifiers, *lowls_this;
+  Llist *lowls_this;
   char *def;
 
   static struct vex *vex;
@@ -1049,11 +1045,9 @@ get_literal_lowl(char *source_in, struct vex *vex_in)
 
   Llist *lowls_this;
   Llist *defs;
-  char *def;
 
   static char *source;
   static struct vex *vex;
-  static int statement;
 
   static int state=FALSE;
 
@@ -1088,8 +1082,6 @@ get_literal_lowl(char *source_in, struct vex *vex_in)
     goto ldone;*/
 
   lowls=((Def *)((Lowl *)defs->ptr)->item)->refs;
-
-lstart:
 
 lstate:
   lowls=find_lowl(lowls,T_LITERAL);
@@ -1129,7 +1121,7 @@ get_a_literal(struct llist *literals, char **text)
   return literals->next;
 }
 /*---------------------------------------------------------------------------*/
-char *
+void *
 get_all_literals(struct llist *literals, char *array[])
 {
   int i=0;

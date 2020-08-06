@@ -43,7 +43,11 @@ static int ref=0;
 static int trailing=0;
 int lines=1;
 static int version=1;
-void yyerror(const char *s);
+
+struct llist *lit();
+char *quote();
+
+void yyerror(char const *s);
 %}
 %option noyywrap
 
@@ -62,230 +66,6 @@ DOUBLE		{MANTISSA}{EXPONENT}?
 SEC		[0-9]{1,2}|{DOUBLE}
 ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 %%
-%{
-struct llist *lit()
-{
-  int inch, count, max_size;
-  char *buffer, *last, *text;
-  struct llist *llist;
-
-  buffer = malloc(ALLOC_SIZE);
-  if(buffer == NULL)
-    yyerror("out of memory in literal 1");
-
-/* find text inside start_literal() */
-
-  max_size = ALLOC_SIZE;
-  count=0;
-  inch= input();
-  while(inch !=EOF && inch != ')' && inch != 0 && inch != '\n') {
-    buffer[count++]=inch;
-    if(count >= max_size) {
-      buffer=realloc(buffer,max_size+ALLOC_SIZE);
-      if(buffer == NULL)
-	yyerror("out of memory in literal 2");
-      max_size += ALLOC_SIZE;
-    }
-    inch=input();
-  }
-  if(inch == EOF)
-    yyerror("End of file in literal block delimiting text\n");
-  else if (inch == 0)
-    yyerror("Illegal character (\\0) in literal delimiting text\n");
-  else if (inch == '\n')
-    yyerror("Illegal character (\\n) in literal delimiting text\n");
-
-  buffer[count++]='\0';
-  buffer=realloc(buffer,count);
-  if(buffer == NULL)
-    yyerror("out of memory in literal 3");
-
-  text=buffer;
-  llist=add_list(NULL,buffer);
-
-/* skip to ';' */
-
-  inch=input();
-  while(inch !=EOF & inch != ';' && inch != '\0') {
-    if(inch == '\n')
-      lines++;
-    else if(NULL == strchr(" \t\r",inch))
-      yyerror("Illegal character after start_literal()");
-    inch=input();
-  }
-  if(inch == EOF)
-    yyerror("End of file in literal block");
-  else if (inch == 0)
-    yyerror("Illegal character (\\0) after start_literal()");
-
-  /* skip to '\n' */
-
-  inch=input();
-  while(inch !=EOF && inch != '\n' && inch != '\0') {
-    if(NULL == strchr(" \t\r",inch))
-      yyerror("Illegal Xcharacter after start_literal();");
-    inch=input();
-  }
-  if(inch == EOF)
-    yyerror("End of file in literal block");
-  else if (inch == 0)
-    yyerror("Illegal character (\\0) after start_literal();");
-  else if(inch == '\n')
-    lines++;
-
-  /* read lines */
-  
-  buffer = malloc(ALLOC_SIZE);
-  if(buffer == NULL)
-    yyerror("out of memory in literal 4");
-
-  max_size = ALLOC_SIZE;
-  count=0;
-  inch= input();
-  while(inch !=EOF && inch != 0) {
-    if(inch != '\n') {
-      buffer[count++]=inch;
-      if(count >= max_size) {
-	buffer=realloc(buffer,max_size+ALLOC_SIZE);
-	if(buffer == NULL)
-	  yyerror("out of memory in literal 8");
-	max_size += ALLOC_SIZE;
-      }
-    } else {
-      buffer[count++]='\0';
-      last=find_end(buffer,text);
-      if(last != NULL)
-	goto done;
-      lines++;
-      buffer=realloc(buffer,count);
-      if(buffer == NULL)
-	yyerror("out of memory in literal 6");
-      llist=add_list(llist,buffer);
-      buffer = malloc(ALLOC_SIZE);
-      if(buffer == NULL)
-	yyerror("out of memory in literal 7");
-      max_size = ALLOC_SIZE;
-      count=0;
-    }
-    inch=input();
-  }
-  if(inch == EOF)
-    yyerror("End of file in literal block\n");
-  else if (inch == 0)
-    yyerror("Illegal character (\\0) in literal block\n");
-
- done:
-  {
-    int i=strlen(last)-1;
-
-    unput('\n'); 
-    while ( i >= 0) {
-       unput(last[i]);
-    i--;
-    } 
-  }
-  free(buffer);
-
-  return llist;
-}
-char *quote()
-{
-  int inch, count, max_size;
-  char *buffer;
-  int temp, ch;
- 
-  buffer = malloc(ALLOC_SIZE);
-  max_size = ALLOC_SIZE;
-  inch=input();
-  count=0;
-  while(inch != EOF && inch != '"' && inch != '\n') {
-    if(inch=='\\') {
-      inch=input();
-      ch=0;
-      switch (inch) {
-      case '\n':
-	lines++;
-	inch=input();
-	break;
-      case 'b':
-	inch='\b';
-	break;
-      case 't':
-	inch='\t';
-	break;
-      case 'n':
-	inch='\n';
-	break;
-      case 'v':
-	inch='\v';
-	break;
-      case 'f':
-	inch='\f';
-	break;
-      case 'r':
-	inch='\r';
-	break;
-      case 'X':
-	ch='X';
-      case 'x':
-	inch=input();
-	if(isxdigit(inch)){
-	  temp=hextoint(toupper(inch));
-	  inch=input();
-	  if(isxdigit(inch)){
-	    temp=(temp <<4) + hextoint(toupper(inch));
-	  } else {
-	    unput(inch);
-	  }
-	  inch=temp;
-	} else {
-	  unput(inch);
-	  if (ch=='X') {
-	    inch='X';
-	  } else {
-	    inch='x';
-	  }
-	}
-	break;
-      default:
-	if(isodigit(inch)) {
-	  temp=inch-'0';
-	  inch=input();
-	  if(isodigit(inch)){
-	    temp = (temp << 3) + (inch - '0');
-	    inch=input();
-	    if(isodigit(inch)){
-	      temp = (temp << 3) + (inch - '0');
-	    } else {
-	      unput(inch);
-	    }
-	  } else {
-	    unput(inch);
-	  }
-	  inch=temp;
-	}
-      }
-    }
-    if(inch == 0) {
-      yyerror("Null byte specified");
-    }
-    buffer[count++] = inch;
-    if(count >= max_size) {
-      buffer = realloc(buffer,max_size + ALLOC_SIZE);
-      max_size += ALLOC_SIZE;
-    }
-    inch = input();
-  }
-  if(inch == EOF || inch == '\n') {
-    yyerror("Unterminated string");
-  }
-  buffer[count]='\0';
-  if(strlen(buffer) > 128) {
-    yyerror("quoted string too long");
-  }
-  return buffer;
-}
-%}
 		{if(version)BEGIN(VERSION);version=0;}
 
 <VERSION>"*"     	{yyerror("Comment not allowed before end of VEX_REV statement\n");}
@@ -532,6 +312,131 @@ char *quote()
 
 <<EOF>>         {version=1;ref=0;trailing=0;lines=1;yyterminate();}
 %%
+struct llist *lit()
+{
+  int inch, count, max_size;
+  char *buffer, *last, *text;
+  struct llist *llist;
+
+  buffer = malloc(ALLOC_SIZE);
+  if(buffer == NULL)
+    yyerror("out of memory in literal 1");
+
+/* find text inside start_literal() */
+
+  max_size = ALLOC_SIZE;
+  count=0;
+  inch= input();
+  while(inch !=EOF && inch != ')' && inch != 0 && inch != '\n') {
+    buffer[count++]=inch;
+    if(count >= max_size) {
+      buffer=realloc(buffer,max_size+ALLOC_SIZE);
+      if(buffer == NULL)
+	yyerror("out of memory in literal 2");
+      max_size += ALLOC_SIZE;
+    }
+    inch=input();
+  }
+  if(inch == EOF)
+    yyerror("End of file in literal block delimiting text\n");
+  else if (inch == 0)
+    yyerror("Illegal character (\\0) in literal delimiting text\n");
+  else if (inch == '\n')
+    yyerror("Illegal character (\\n) in literal delimiting text\n");
+
+  buffer[count++]='\0';
+  buffer=realloc(buffer,count);
+  if(buffer == NULL)
+    yyerror("out of memory in literal 3");
+
+  text=buffer;
+  llist=add_list(NULL,buffer);
+
+/* skip to ';' */
+
+  inch=input();
+  while(inch !=EOF && inch != ';' && inch != '\0') {
+    if(inch == '\n')
+      lines++;
+    else if(NULL == strchr(" \t\r",inch))
+      yyerror("Illegal character after start_literal()");
+    inch=input();
+  }
+  if(inch == EOF)
+    yyerror("End of file in literal block");
+  else if (inch == 0)
+    yyerror("Illegal character (\\0) after start_literal()");
+
+  /* skip to '\n' */
+
+  inch=input();
+  while(inch !=EOF && inch != '\n' && inch != '\0') {
+    if(NULL == strchr(" \t\r",inch))
+      yyerror("Illegal Xcharacter after start_literal();");
+    inch=input();
+  }
+  if(inch == EOF)
+    yyerror("End of file in literal block");
+  else if (inch == 0)
+    yyerror("Illegal character (\\0) after start_literal();");
+  else if(inch == '\n')
+    lines++;
+
+  /* read lines */
+
+  buffer = malloc(ALLOC_SIZE);
+  if(buffer == NULL)
+    yyerror("out of memory in literal 4");
+
+  max_size = ALLOC_SIZE;
+  count=0;
+  inch= input();
+  while(inch !=EOF && inch != 0) {
+    if(inch != '\n') {
+      buffer[count++]=inch;
+      if(count >= max_size) {
+	buffer=realloc(buffer,max_size+ALLOC_SIZE);
+	if(buffer == NULL)
+	  yyerror("out of memory in literal 8");
+	max_size += ALLOC_SIZE;
+      }
+    } else {
+      buffer[count++]='\0';
+      last=find_end(buffer,text);
+      if(last != NULL)
+	goto done;
+      lines++;
+      buffer=realloc(buffer,count);
+      if(buffer == NULL)
+	yyerror("out of memory in literal 6");
+      llist=add_list(llist,buffer);
+      buffer = malloc(ALLOC_SIZE);
+      if(buffer == NULL)
+	yyerror("out of memory in literal 7");
+      max_size = ALLOC_SIZE;
+      count=0;
+    }
+    inch=input();
+  }
+  if(inch == EOF)
+    yyerror("End of file in literal block\n");
+  else if (inch == 0)
+    yyerror("Illegal character (\\0) in literal block\n");
+
+ done:
+  {
+    int i=strlen(last)-1;
+
+    unput('\n');
+    while ( i >= 0) {
+       unput(last[i]);
+    i--;
+    }
+  }
+  free(buffer);
+
+  return llist;
+}
 static char *find_end(char *buffer, char *text)
 {
   char *ptr, *start;
@@ -551,4 +456,101 @@ static char *find_end(char *buffer, char *text)
 	}
 
   return NULL;
+}
+char *quote()
+{
+  int inch, count, max_size;
+  char *buffer;
+  int temp, ch;
+
+  buffer = malloc(ALLOC_SIZE);
+  max_size = ALLOC_SIZE;
+  inch=input();
+  count=0;
+  while(inch != EOF && inch != '"' && inch != '\n') {
+    if(inch=='\\') {
+      inch=input();
+      ch=0;
+      switch (inch) {
+      case '\n':
+	lines++;
+	inch=input();
+	break;
+      case 'b':
+	inch='\b';
+	break;
+      case 't':
+	inch='\t';
+	break;
+      case 'n':
+	inch='\n';
+	break;
+      case 'v':
+	inch='\v';
+	break;
+      case 'f':
+	inch='\f';
+	break;
+      case 'r':
+	inch='\r';
+	break;
+      case 'X':
+	ch='X';
+      case 'x':
+	inch=input();
+	if(isxdigit(inch)){
+	  temp=hextoint(toupper(inch));
+	  inch=input();
+	  if(isxdigit(inch)){
+	    temp=(temp <<4) + hextoint(toupper(inch));
+	  } else {
+	    unput(inch);
+	  }
+	  inch=temp;
+	} else {
+	  unput(inch);
+	  if (ch=='X') {
+	    inch='X';
+	  } else {
+	    inch='x';
+	  }
+	}
+	break;
+      default:
+	if(isodigit(inch)) {
+	  temp=inch-'0';
+	  inch=input();
+	  if(isodigit(inch)){
+	    temp = (temp << 3) + (inch - '0');
+	    inch=input();
+	    if(isodigit(inch)){
+	      temp = (temp << 3) + (inch - '0');
+	    } else {
+	      unput(inch);
+	    }
+	  } else {
+	    unput(inch);
+	  }
+	  inch=temp;
+	}
+      }
+    }
+    if(inch == 0) {
+      yyerror("Null byte specified");
+    }
+    buffer[count++] = inch;
+    if(count >= max_size) {
+      buffer = realloc(buffer,max_size + ALLOC_SIZE);
+      max_size += ALLOC_SIZE;
+    }
+    inch = input();
+  }
+  if(inch == EOF || inch == '\n') {
+    yyerror("Unterminated string");
+  }
+  buffer[count]='\0';
+  if(strlen(buffer) > 128) {
+    yyerror("quoted string too long");
+  }
+  return buffer;
 }
