@@ -390,6 +390,13 @@ struct if_def {
 
 typedef struct if_def If_def; 
 
+struct receiver_name {
+  char *link;
+  char *name;
+};
+
+typedef struct receiver_name Receiver_name;
+
 struct phase_cal_detect {
   char *pcal_id;
   struct llist *tones;
@@ -630,6 +637,7 @@ struct if_def *make_if_def(char *if_id, char *physical, char *polar,
 			   struct dvalue *pcal_spacing,
 			   struct dvalue *pcal_base,
                struct dvalue *samp_rate);
+struct receiver_name *make_receiver_name(char *link, char *name);
 struct phase_cal_detect *make_phase_cal_detect(char *pcal_id,
 					       struct llist *tones);
 struct setup_always *make_setup_always(char *state, struct dvalue *time);
@@ -1237,6 +1245,8 @@ void *
 create_if_def2(char *str, char *str3, char *str4,
 	      char *str5, char *str6, char *str7, char *str8,
 	      char *str9, char *str10, char *str11, char *str12);
+void *
+create_receiver_name(char *str, char *str2);
 /*-------------------------------------------------------------------*/
 /* PASS_ORDER block builders                                         */
 /*-------------------------------------------------------------------*/

@@ -94,6 +94,7 @@ struct extension       *etptr;
 struct headstack_pos   *hpptr;
 
 struct if_def          *ifptr;
+struct receiver_name   *rnptr;
 
 struct phase_cal_detect *pdptr;
 
@@ -161,7 +162,7 @@ struct s2_data_source  *dsptr;
 
 %token <ival>   T_HEADSTACK_POS
 
-%token <ival>   T_IF_DEF
+%token <ival>   T_IF_DEF T_RECEIVER_NAME
 
 %token <ival>   T_PASS_ORDER
 %token <ival>   T_S2_GROUP_ORDER
@@ -340,6 +341,7 @@ struct s2_data_source  *dsptr;
 %type  <dfptr>  if_def
 %type  <lwptr>  if_lowl if_defx
 %type  <ifptr>  if_def_st
+%type  <rnptr>  receiver_name
 
 %type  <llptr>  pass_order_block pass_order_defs pass_order_lowls 
 %type  <dfptr>  pass_order_def
@@ -1305,7 +1307,8 @@ if_def:		T_DEF T_NAME ';' if_lowls T_ENDDEF ';'	{$$=make_def($2,$4);}
 if_lowls:	if_lowls if_lowl		{$$=add_list($1,$2);}
 		| if_lowl			{$$=add_list(NULL,$1);}
 ;
-if_lowl:	if_def_st		{$$=make_lowl(T_IF_DEF,$1);}
+if_lowl:  if_def_st		{$$=make_lowl(T_IF_DEF,$1);}
+        | receiver_name		{$$=make_lowl(T_RECEIVER_NAME,$1);}
 		| external_ref		{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
@@ -1340,6 +1343,9 @@ if_def_st:	T_IF_DEF '=' T_LINK ':' T_NAME ':' T_NAME ':' unit_value ':' T_NAME '
 			{$$=make_if_def($3,NULL,$6,$8,$10,NULL,NULL,$14);}
 		| T_IF_DEF '=' T_LINK ':' ':' T_NAME ':' unit_value ':' T_NAME ':' unit_value ':' ':' unit_value ';'
 			{$$=make_if_def($3,NULL,$6,$8,$10,$12,NULL,$15);}
+;
+receiver_name: T_RECEIVER_NAME '=' T_LINK ':' T_NAME ';'
+                {$$=make_receiver_name($3,$5);}
 ;
 /* $PASS_ORDER block */
 

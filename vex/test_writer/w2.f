@@ -572,6 +572,10 @@ c
      &                    ptr_ch(char(0)),
      &                    ptr_ch('4096'//char(0)),
      &                    ptr_ch('Ms/sec'//char(0)))
+      call fcreate_receiver_name(ptr_ch('IF_XR1'//char(0)),
+     &                    ptr_ch('3cm'//char(0)))
+      call fcreate_receiver_name(ptr_ch('IF_SR1'//char(0)),
+     &                    ptr_ch('13cm'//char(0)))
       call fend_def
 c
       call fcreate_vex(ptr_ch(char(0)))

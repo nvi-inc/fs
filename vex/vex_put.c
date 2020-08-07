@@ -2719,6 +2719,27 @@ create_if_def2(char *str, char *str3, char *str4,
 				     d9,
                      d11)));
 }
+void *
+create_receiver_name(char *str, char *str2)
+{
+  char *receiver_name_link, *name;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0)
+    {
+      printf("%s \'receiver_name\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      receiver_name_link=(char *)strdup(str);
+      name=(char *)strdup(str2);
+
+      qref_list = add_list(qref_list,make_lowl(T_RECEIVER_NAME,
+					       make_receiver_name(receiver_name_link,
+							       name)));
+    }
+}
 /*-------------------------------------------------------------------*/
 /* PASS_ORDER block builders                                         */
 /*-------------------------------------------------------------------*/

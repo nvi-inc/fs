@@ -431,6 +431,7 @@ char *quote()
 <LINE>headstack_pos		{BEGIN(INITIAL);return T_HEADSTACK_POS;}
 
 <LINE>if_def			{BEGIN(INITIAL);return T_IF_DEF;}
+<LINE>receiver_name	        {BEGIN(INITIAL);return T_RECEIVER_NAME;}
 
 <LINE>pass_order		{BEGIN(INITIAL);return T_PASS_ORDER;}
 <LINE>S2_group_order		{BEGIN(INITIAL);return T_S2_GROUP_ORDER;}

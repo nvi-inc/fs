@@ -3429,6 +3429,35 @@ char **str12;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_receiver_name__
+#else
+fcreate_receiver_name
+#endif
+(str, str2)
+char **str;
+char **str2;
+/*<      subroutine fcreate_receiver_name(ptr_ch(str)//(char *)0, >*/
+/*<                                    ptr_ch(str2)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_receiver_name(*str,*str2);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_phase_cal_detect__
 #else
 fcreate_phase_cal_detect
