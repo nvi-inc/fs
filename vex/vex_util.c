@@ -151,6 +151,10 @@ static int
 get_receiver_name_field(Receiver_name *receiver_name,int n,int *link,
 			  int *name, char **value, char **units);
 static int
+get_sub_lo_frequencies_field(Sub_lo_frequencies *sub_lo_frequencies,int n,int *link,
+			  int *name, char **value, char **units);
+
+static int
 get_phase_cal_detect_field(Phase_cal_detect *phase_cal_detect,int n,int *link,
 		 int *name, char **value, char **units);
 static int
@@ -359,6 +363,7 @@ static  struct {
   
   {"if_def", T_IF_DEF},
   {"receiver_name", T_RECEIVER_NAME},
+  {"sub_lo_frequencies", T_SUB_LO_FREQUENCIES},
   
   {"pass_order", T_PASS_ORDER},
   {"S2_group_order", T_S2_GROUP_ORDER},
@@ -989,6 +994,17 @@ struct receiver_name *make_receiver_name(char *link,char *name)
 
   return new;
 }
+struct sub_lo_frequencies *make_sub_lo_frequencies(char *link,
+                                         struct llist *los)
+{
+  NEWSTRUCT(new,sub_lo_frequencies);
+
+  new->link=link;
+  new->los=los;
+
+  return new;
+}
+
 struct phase_cal_detect *make_phase_cal_detect(char *pcal_id,
 					       struct llist *tones)
 {
@@ -1456,6 +1472,9 @@ char **units)
     break;
   case T_RECEIVER_NAME:
     ierr=get_receiver_name_field(ptr,n,link,name,value,units);
+    break;
+  case T_SUB_LO_FREQUENCIES:
+    ierr=get_sub_lo_frequencies_field(ptr,n,link,name,value,units);
     break;
   case T_PASS_ORDER:
   case T_SOURCE_TYPE:
@@ -2808,6 +2827,36 @@ get_receiver_name_field(Receiver_name *receiver_name,int n,int *link,
     break;
   default:
     return -1;
+  }
+  return 0;
+}
+static int
+get_sub_lo_frequencies_field(Sub_lo_frequencies *sub_lo_frequencies,int n,int *link,
+                          int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=sub_lo_frequencies->link;
+    *link=1;
+    break;
+  default:
+    if(n < 1 )
+      return -1;
+    ierr=get_dvalue_list_field(sub_lo_frequencies->los,n-1,link,name,
+                               value, units);
+    if(ierr==-1)
+      return -1;
+    else if (ierr!=0) {
+      fprintf(stderr,"unknown error in get_sub_lo_frequencies_field %d\n",ierr);
+      exit(1);
+    }
   }
   return 0;
 }

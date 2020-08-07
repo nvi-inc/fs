@@ -432,6 +432,7 @@ char *quote()
 
 <LINE>if_def			{BEGIN(INITIAL);return T_IF_DEF;}
 <LINE>receiver_name	        {BEGIN(INITIAL);return T_RECEIVER_NAME;}
+<LINE>sub_lo_frequencies	        {BEGIN(INITIAL);return T_SUB_LO_FREQUENCIES;}
 
 <LINE>pass_order		{BEGIN(INITIAL);return T_PASS_ORDER;}
 <LINE>S2_group_order		{BEGIN(INITIAL);return T_S2_GROUP_ORDER;}

@@ -576,6 +576,16 @@ c
      &                    ptr_ch('3cm'//char(0)))
       call fcreate_receiver_name(ptr_ch('IF_SR1'//char(0)),
      &                    ptr_ch('13cm'//char(0)))
+c
+      call fcreate_dvalue_list(ptr_ch('8000'//char(0)),
+     &     ptr_ch('MHz'//char(0)) )
+      call fcreate_sub_lo_frequencies(ptr_ch('IF_XR1'//char(0)))
+c
+      call fcreate_dvalue_list(ptr_ch('2000'//char(0)),
+     &     ptr_ch('MHz'//char(0)) )
+      call fcreate_dvalue_list(ptr_ch('900'//char(0)),
+     &     ptr_ch(char(0)) )
+      call fcreate_sub_lo_frequencies(ptr_ch('IF_SR1'//char(0)))
       call fend_def
 c
       call fcreate_vex(ptr_ch(char(0)))

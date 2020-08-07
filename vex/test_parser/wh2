@@ -1267,6 +1267,9 @@ $IF; *receiver and IF parameters
     if_def = &IF_SL : : L : 2900 MHz : L; *no phase-cal
     receiver_name = &IF_SR : 13cm;
     receiver_name = &IF_SL : 13cm;
+    sub_lo_frequencies = &IF_SR : 2900 MHz;
+    sub_lo_frequencies = &IF_SL : 2000 MHz : 900;
+    sub_lo_frequencies = &IF_SL : 2000 MHz : 400 MHZ : 100 : 400 MHz;
   enddef;
 *
   def CDP/SX_WIDE;

@@ -2741,6 +2741,26 @@ create_receiver_name(char *str, char *str2)
     }
 }
 /*-------------------------------------------------------------------*/
+void *
+create_sub_lo_frequencies(char *str)
+{
+  char *s1;
+
+  if(str==NULL || strlen(str)==0 ||
+     q_list==NULL)
+    {
+      printf("%s \'sub_lo_frequencies\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *) strdup(str);
+      qref_list = add_list(qref_list,make_lowl(T_SUB_LO_FREQUENCIES,
+				     make_sub_lo_frequencies(s1, q_list)));
+      q_list=NULL;
+    }
+}
+/*-------------------------------------------------------------------*/
 /* PASS_ORDER block builders                                         */
 /*-------------------------------------------------------------------*/
 void *
