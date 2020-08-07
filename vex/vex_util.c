@@ -153,7 +153,9 @@ get_receiver_name_field(Receiver_name *receiver_name,int n,int *link,
 static int
 get_sub_lo_frequencies_field(Sub_lo_frequencies *sub_lo_frequencies,int n,int *link,
 			  int *name, char **value, char **units);
-
+static int
+get_sub_lo_sidebands_field(Sub_lo_sidebands *sub_lo_sidebands,int n,int *link,
+			  int *name, char **value, char **units);
 static int
 get_phase_cal_detect_field(Phase_cal_detect *phase_cal_detect,int n,int *link,
 		 int *name, char **value, char **units);
@@ -364,6 +366,7 @@ static  struct {
   {"if_def", T_IF_DEF},
   {"receiver_name", T_RECEIVER_NAME},
   {"sub_lo_frequencies", T_SUB_LO_FREQUENCIES},
+  {"sub_lo_sidebands", T_SUB_LO_SIDEBANDS},
   
   {"pass_order", T_PASS_ORDER},
   {"S2_group_order", T_S2_GROUP_ORDER},
@@ -1005,6 +1008,17 @@ struct sub_lo_frequencies *make_sub_lo_frequencies(char *link,
   return new;
 }
 
+struct sub_lo_sidebands *make_sub_lo_sidebands(char *link,
+					 struct llist *sbs)
+{
+  NEWSTRUCT(new,sub_lo_sidebands);
+
+  new->link=link;
+  new->sbs=sbs;
+
+  return new;
+}
+
 struct phase_cal_detect *make_phase_cal_detect(char *pcal_id,
 					       struct llist *tones)
 {
@@ -1475,6 +1489,9 @@ char **units)
     break;
   case T_SUB_LO_FREQUENCIES:
     ierr=get_sub_lo_frequencies_field(ptr,n,link,name,value,units);
+    break;
+  case T_SUB_LO_SIDEBANDS:
+    ierr=get_sub_lo_sidebands_field(ptr,n,link,name,value,units);
     break;
   case T_PASS_ORDER:
   case T_SOURCE_TYPE:
@@ -2855,6 +2872,36 @@ get_sub_lo_frequencies_field(Sub_lo_frequencies *sub_lo_frequencies,int n,int *l
       return -1;
     else if (ierr!=0) {
       fprintf(stderr,"unknown error in get_sub_lo_frequencies_field %d\n",ierr);
+      exit(1);
+    }
+  }
+  return 0;
+}
+static int
+get_sub_lo_sidebands_field(Sub_lo_sidebands *sub_lo_sidebands,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=sub_lo_sidebands->link;
+    *link=1;
+    break;
+  default:
+    if(n < 1 )
+      return -1;
+    ierr=get_svalue_list_field(sub_lo_sidebands->sbs,n-1,link,name,
+			       value, units);
+    if(ierr==-1)
+      return -1;
+    else if (ierr!=0) {
+      fprintf(stderr,"unknown error in get_sub_lo_sidebands_field %d\n",ierr);
       exit(1);
     }
   }

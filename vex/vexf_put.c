@@ -3483,6 +3483,31 @@ char **str;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_sub_lo_sidebands__
+#else
+fcreate_sub_lo_sidebands
+#endif
+(str)
+char **str;
+/*<      subroutine fcreate_sub_lo_sidebands(ptr_ch(str)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_sub_lo_sidebands(*str);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_phase_cal_detect__
 #else
 fcreate_phase_cal_detect

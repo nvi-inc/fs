@@ -96,6 +96,7 @@ struct headstack_pos   *hpptr;
 struct if_def          *ifptr;
 struct receiver_name   *rnptr;
 struct sub_lo_frequencies   *sfptr;
+struct sub_lo_sidebands   *sbptr;
 
 struct phase_cal_detect *pdptr;
 
@@ -164,6 +165,7 @@ struct s2_data_source  *dsptr;
 %token <ival>   T_HEADSTACK_POS
 
 %token <ival>   T_IF_DEF T_RECEIVER_NAME T_SUB_LO_FREQUENCIES
+%token <ival>   T_SUB_LO_SIDEBANDS
 
 %token <ival>   T_PASS_ORDER
 %token <ival>   T_S2_GROUP_ORDER
@@ -344,6 +346,7 @@ struct s2_data_source  *dsptr;
 %type  <ifptr>  if_def_st
 %type  <rnptr>  receiver_name
 %type  <sfptr>  sub_lo_frequencies
+%type  <sbptr>  sub_lo_sidebands
 
 %type  <llptr>  pass_order_block pass_order_defs pass_order_lowls 
 %type  <dfptr>  pass_order_def
@@ -1312,6 +1315,7 @@ if_lowls:	if_lowls if_lowl		{$$=add_list($1,$2);}
 if_lowl:  if_def_st		{$$=make_lowl(T_IF_DEF,$1);}
         | receiver_name		{$$=make_lowl(T_RECEIVER_NAME,$1);}
         | sub_lo_frequencies		{$$=make_lowl(T_SUB_LO_FREQUENCIES,$1);}
+        | sub_lo_sidebands		{$$=make_lowl(T_SUB_LO_SIDEBANDS,$1);}
 		| external_ref		{$$=make_lowl(T_REF,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
@@ -1352,6 +1356,9 @@ receiver_name: T_RECEIVER_NAME '=' T_LINK ':' T_NAME ';'
 ;
 sub_lo_frequencies: T_SUB_LO_FREQUENCIES '=' T_LINK ':' unit_list ';'
                 {$$=make_sub_lo_frequencies($3,$5);}
+;
+sub_lo_sidebands: T_SUB_LO_SIDEBANDS '=' T_LINK ':' name_list ';'
+                {$$=make_sub_lo_sidebands($3,$5);}
 ;
 /* $PASS_ORDER block */
 
