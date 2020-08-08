@@ -2780,6 +2780,35 @@ create_sub_lo_sidebands(char *str)
       q_list=NULL;
     }
 }
+void *
+create_switched_power(char *str, char *str2, char *str3, char *str4)
+{
+  char *link, *name, *value, *units;
+  struct dvalue *frequency;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0)    {
+      printf("%s \'switched_power\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      link=(char *)strdup(str);
+      name=(char *)strdup(str2);
+
+      if(str3==NULL || strlen(str3)==0 ||
+         str4==NULL || strlen(str4)==0)
+	     frequency=NULL;
+      else {
+	     value=(char *)strdup(str3);
+	     units=(char *)strdup(str4);
+         frequency=make_dvalue(value,units);
+      }
+      qref_list = add_list(qref_list,make_lowl(T_SWITCHED_POWER,
+					       make_switched_power(link,name,
+					       frequency)));
+    }
+}
 /*-------------------------------------------------------------------*/
 /* PASS_ORDER block builders                                         */
 /*-------------------------------------------------------------------*/

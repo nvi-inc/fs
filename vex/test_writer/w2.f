@@ -594,6 +594,15 @@ c
       call fcreate_svalue_list(ptr_ch('L'//char(0)))
       call fcreate_svalue_list(ptr_ch('Z'//char(0)))
       call fcreate_sub_lo_sidebands(ptr_ch('IF_SR1'//char(0)))
+c
+      call fcreate_switched_power(ptr_ch('IF_SR'//char(0)),
+     &     ptr_ch('Off'//char(0)),
+     &     ptr_ch(char(0)),
+     &     ptr_ch(char(0)) )
+      call fcreate_switched_power(ptr_ch('IF_SL'//char(0)),
+     &     ptr_ch('On'//char(0)),
+     &     ptr_ch('80'//char(0)),
+     &     ptr_ch('Hz'//char(0)) )
       call fend_def
 c
       call fcreate_vex(ptr_ch(char(0)))

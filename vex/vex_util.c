@@ -157,6 +157,9 @@ static int
 get_sub_lo_sidebands_field(Sub_lo_sidebands *sub_lo_sidebands,int n,int *link,
 			  int *name, char **value, char **units);
 static int
+get_switched_power_field(Switched_power *switched_power,int n,int *link,
+			  int *name, char **value, char **units);
+static int
 get_phase_cal_detect_field(Phase_cal_detect *phase_cal_detect,int n,int *link,
 		 int *name, char **value, char **units);
 static int
@@ -367,6 +370,7 @@ static  struct {
   {"receiver_name", T_RECEIVER_NAME},
   {"sub_lo_frequencies", T_SUB_LO_FREQUENCIES},
   {"sub_lo_sidebands", T_SUB_LO_SIDEBANDS},
+  {"switched_power", T_SWITCHED_POWER},
   
   {"pass_order", T_PASS_ORDER},
   {"S2_group_order", T_S2_GROUP_ORDER},
@@ -1018,6 +1022,17 @@ struct sub_lo_sidebands *make_sub_lo_sidebands(char *link,
 
   return new;
 }
+struct switched_power *make_switched_power(char *link,char *name,
+                       struct dvalue *frequency)
+{
+  NEWSTRUCT(new,switched_power);
+
+  new->link=link;
+  new->name=name;
+  new->frequency=frequency;
+
+  return new;
+}
 
 struct phase_cal_detect *make_phase_cal_detect(char *pcal_id,
 					       struct llist *tones)
@@ -1492,6 +1507,9 @@ char **units)
     break;
   case T_SUB_LO_SIDEBANDS:
     ierr=get_sub_lo_sidebands_field(ptr,n,link,name,value,units);
+    break;
+  case T_SWITCHED_POWER:
+    ierr=get_switched_power_field(ptr,n,link,name,value,units);
     break;
   case T_PASS_ORDER:
   case T_SOURCE_TYPE:
@@ -2904,6 +2922,37 @@ get_sub_lo_sidebands_field(Sub_lo_sidebands *sub_lo_sidebands,int n,int *link,
       fprintf(stderr,"unknown error in get_sub_lo_sidebands_field %d\n",ierr);
       exit(1);
     }
+  }
+  return 0;
+}
+static int
+get_switched_power_field(Switched_power *switched_power,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=switched_power->link;
+    *link=1;
+    break;
+  case 2:
+    *value=switched_power->name;
+    break;
+  case 3:
+    if(switched_power->frequency == NULL)
+      return 0;
+    *value=switched_power->frequency->value;
+    *units=switched_power->frequency->units;
+    *name=0;
+    break;
+  default:
+    return -1;
   }
   return 0;
 }

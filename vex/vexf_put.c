@@ -3508,6 +3508,43 @@ char **str;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_switched_power__
+#else
+fcreate_switched_power
+#endif
+(str,str2,str3,str4)
+char **str;
+char **str2;
+char **str3;
+char **str4;
+/*<      subroutine fcreate_switched_power(ptr_ch(str)//(char *)0, >*/
+/*<                               ptr_ch(str2)//(char *)0, >*/
+/*<                               ptr_ch(str3)//(char *)0, >*/
+/*<                               ptr_ch(str4)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+/*<      character*(*) str4; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+/*   character*(*) str3      - string */
+/*   character*(*) str4      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_switched_power(*str,*str2,*str3,*str4);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_phase_cal_detect__
 #else
 fcreate_phase_cal_detect

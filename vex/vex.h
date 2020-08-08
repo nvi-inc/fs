@@ -411,6 +411,14 @@ struct sub_lo_sidebands {
 
 typedef struct sub_lo_sidebands Sub_lo_sidebands;
 
+struct switched_power {
+  char *link;
+  char *name;
+  struct dvalue *frequency;
+};
+
+typedef struct switched_power Switched_power;
+
 struct phase_cal_detect {
   char *pcal_id;
   struct llist *tones;
@@ -656,6 +664,8 @@ struct sub_lo_frequencies *make_sub_lo_frequencies (char *link,
 					 struct llist *los);
 struct sub_lo_sidebands *make_sub_lo_sidebands (char *link,
 					 struct llist *sbs);
+struct switched_power *make_switched_power(char *link,char *name,
+				   struct dvalue *frequency);
 struct phase_cal_detect *make_phase_cal_detect(char *pcal_id,
 					       struct llist *tones);
 struct setup_always *make_setup_always(char *state, struct dvalue *time);
@@ -1269,6 +1279,8 @@ void *
 create_sub_lo_frequencies(char *str);
 void *
 create_sub_lo_sidebands(char *str);
+void *
+create_switched_power(char *str, char *str2, char *str3, char *str4);
 /*-------------------------------------------------------------------*/
 /* PASS_ORDER block builders                                         */
 /*-------------------------------------------------------------------*/

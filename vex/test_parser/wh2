@@ -1272,6 +1272,8 @@ $IF; *receiver and IF parameters
     sub_lo_frequencies = &IF_SL : 2000 MHz : 400 MHZ : 100 : 400 MHz;
     sub_lo_sidebands = &IF_SR : U;
     sub_lo_sidebands = &IF_SL : U : L : Y : Z;
+    switched_power = &IF_SR : Off;
+    switched_power = &IF_SL : On : 80 Hz;
   enddef;
 *
   def CDP/SX_WIDE;
