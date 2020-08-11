@@ -28,7 +28,7 @@
 extern int yydebug;
 extern int lines;
 
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   void *ptr;
   Llist *lowls,*lowls2;
@@ -44,7 +44,7 @@ main(int argc, char *argv[])
     fprintf(stderr,"error opening and parsing vex file %s\n",argv[1]);
 #ifdef YES
   print_vex(vex);
-  return;
+  return 0;
 #endif
   
   lowls=get_scan(&cptr,vex);
@@ -72,7 +72,7 @@ main(int argc, char *argv[])
     lowls=get_scan_next(&cptr);
   }
   
-  return;
+  return 0;
 #ifdef NO
   while(lowls != NULL) {
     printf("\n scanid %s",cptr);
@@ -97,7 +97,7 @@ main(int argc, char *argv[])
     lowls=get_scan_next(&cptr);
   }
   
-  return;
+  return 0;
 
   ptr=get_all_lowl("EF","SX_VLBA",T_CHAN_DEF,B_FREQ,vex);
   if(ptr==NULL)
