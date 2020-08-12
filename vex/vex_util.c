@@ -46,6 +46,9 @@ static int
 get_switching_cycle_field(Switching_cycle *switching_cycle,int n,int *link,
 			  int *name, char **value, char **units);
 static int
+get_source_field(Source *source,int n,int *link, int * name,
+		  char **value, char **units);
+static int
 get_station_field(Station *station,int n,int *link, int * name,
 		  char **value, char **units);
 static int
@@ -586,6 +589,18 @@ struct switching_cycle *make_switching_cycle(char *origin,
 
   new->origin=origin;
   new->periods=periods;
+
+  return new;
+}
+
+struct source  *make_source(char *key, struct dvalue *center,
+			      struct dvalue *correlate)
+{
+  NEWSTRUCT(new,source);
+
+  new->key=key;
+  new->center=center;
+  new->correlate=correlate;
 
   return new;
 }
@@ -1358,7 +1373,6 @@ char **units)
     break;
   case T_VEX_REV:
   case T_MODE:
-  case T_SOURCE:
   case T_RECORD_TRANSPORT_TYPE:
   case T_ELECTRONICS_RACK_TYPE:
   case T_TAPE_CONTROL:
@@ -1391,6 +1405,9 @@ char **units)
   case T_S2_RECORDING_MODE:
   case T_COMMENT:
     ierr=get_svalue_field(ptr,n,link,name,value,units);
+    break;
+  case T_SOURCE:
+    ierr=get_source_field(ptr,n,link,name,value,units);
     break;
   case T_STATION:
     ierr=get_station_field(ptr,n,link,name,value,units);
@@ -1679,6 +1696,40 @@ get_switching_cycle_field(Switching_cycle *switching_cycle,int n,int *link,
       fprintf(stderr,"unknown error in get_switching_cycle_field %d\n",ierr);
       exit(1);
     }
+  }
+  return 0;
+}
+static int
+get_source_field(Source *source,int n,int *link,int *name,char **value,
+		   char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=source->key;
+    break;
+  case 2:
+    if(source->center==NULL)
+        return 0;
+    *value=source->center->value;
+    *units=source->center->units;
+    *name=0;
+    break;
+  case 3:
+    if(source->correlate==NULL)
+        return 0;
+    *value=source->correlate->value;
+    *units=source->correlate->units;
+    *name=0;
+    break;
+  default:
+    return -1;
   }
   return 0;
 }

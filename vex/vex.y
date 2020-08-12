@@ -51,6 +51,7 @@ struct chan_def        *cdptr;
 struct switching_cycle *scptr;
 
 struct station         *snptr;
+struct source          *soptr;
 struct data_transfer   *dtptr;
 
 struct axis_type       *atptr;
@@ -236,7 +237,8 @@ struct s2_data_source  *dsptr;
 %type  <llptr>  sched_block sched_defs sched_lowls
 %type  <dfptr>	sched_def
 %type  <lwptr>  sched_lowl sched_defx
-%type  <sval>	start source mode
+%type  <sval>	start mode
+%type  <soptr>	source
 %type  <dvptr>	start_position
 %type  <snptr>	station
 %type  <llptr>  drives
@@ -606,7 +608,12 @@ start:		T_START '=' T_NAME ';'	{$$=$3;}
 ;
 mode:		T_MODE '=' T_NAME ';'	{$$=$3;}
 ;
-source:		T_SOURCE '=' T_NAME ';'	{$$=$3;}
+source:  T_SOURCE '=' T_NAME ':' value2 ':' value2 ';'
+                {$$=make_source($3,$5,$7);}
+                | T_SOURCE '=' T_NAME ':' value2 ';'
+                {$$=make_source($3,$5,NULL);}
+                | T_SOURCE '=' T_NAME ';'
+                {$$=make_source($3,NULL,NULL);}
 ;
 station:	T_STATION '=' T_NAME ':'	/* name */
 		unit_value ':'			/* data start */

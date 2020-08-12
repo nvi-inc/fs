@@ -622,21 +622,21 @@ $SCHED; *schedule block
   scan 263-062000;
     start = 1995y263d06h20m00s;
     mode = SX;
-    source = HD123456;
+    source = HD123456 : 1 : 1;
     station = HS : 20 sec : 120 sec : 0 ft : 1A : &n : 1;
     station = JB : 0 sec : 150 sec : 0 ft : 1A : : 1;
   endscan;
   scan 263-063000;
     start = 1995y263d06h30m00s;
     mode = SX;
-    source = 3C123;
+    source = 3C123 : : 0;
     station = EF : 10 sec : 300 sec : 2000 ft : 1B : &n : 1;
     station = FD : 0 sec : 300 sec : 2000 ft : 1B : &np : 1; *’plunge’ mode
   endscan;
   scan 263-063500;
     start = 1995y263d06h35m00s;
     mode = SX;
-    source = 3C123;
+    source = 3C123 : 1;
     station = HS : 20 sec : 300 sec : 1500 ft : 1B : &ccw : 1;
     station = JB : 0 sec : 300 sec : 1700 ft : 1B : : 1;
   endscan;

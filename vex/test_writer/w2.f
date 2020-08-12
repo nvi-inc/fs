@@ -30,6 +30,18 @@ c
      &     ptr_ch('n'//char(0)))
       call fcreate_station_drive_list(ptr_ch('1'//char(0)))
       call fcreate_station_drive_list(ptr_ch(char(0)))
+      call fcreate_source2(ptr_ch('3c123'//char(0)),
+     &     ptr_ch('1'//char(0)),
+     &     ptr_ch('0'//char(0)))
+      call fcreate_source2(ptr_ch('3c123'//char(0)),
+     &     ptr_ch(char(0)),
+     &     ptr_ch('0'//char(0)))
+      call fcreate_source2(ptr_ch('3c123'//char(0)),
+     &     ptr_ch('1'//char(0)),
+     &     ptr_ch(char(0)))
+      call fcreate_source2(ptr_ch('3c123'//char(0)),
+     &     ptr_ch(char(0)),
+     &     ptr_ch(char(0)))
       call fend_scan
       call fcreate_comment(ptr_ch('t'//char(0)),
      &     ptr_ch('* comment 3'//char(0)))

@@ -468,8 +468,35 @@ create_source(char *str)
 {
   char *scan_source;
 
-  scan_source=(char *)strdup(str);
-  qref_list = add_list(qref_list,make_lowl(T_SOURCE,scan_source));
+  create_source2( str, NULL, NULL);
+}
+/*-------------------------------------------------------------------*/
+void *
+create_source2(char *str, char *str2, char *str3)
+{
+  char *s1;
+  struct dvalue *s2, *s3;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'source\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      s1=(char *)strdup(str);
+      if(str2==NULL || strlen(str2)==0)
+        s2=NULL;
+      else
+        s2=make_dvalue(str2,NULL);
+      if(str3==NULL || strlen(str3)==0)
+        s3=NULL;
+      else
+        s3=make_dvalue(str3,NULL);
+      qref_list = add_list(qref_list,
+			   make_lowl(T_SOURCE,
+				     make_source(s1,s2,s3)));
+    }
 }  
 /*-------------------------------------------------------------------*/
 void *
