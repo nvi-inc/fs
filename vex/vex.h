@@ -140,6 +140,16 @@ struct intent {
 
 typedef struct intent Intent;
 
+struct pointing_offset {
+  char *key;
+  char *coord1;
+  struct dvalue *offset1;
+  char *coord2;
+  struct dvalue *offset2;
+};
+
+typedef struct pointing_offset Pointing_offset;
+
 struct axis_type {
   char *axis1;
   char *axis2;
@@ -604,6 +614,9 @@ struct data_transfer  *make_data_transfer(char *key, char *method,
 					  char *options);
 struct intent  *make_intent(char *key, char *identifier,
                   char *value);
+struct pointing_offset  *make_pointing_offset(char *key,
+                  char *coord1, struct dvalue *offset1,
+                  char *coord2, struct dvalue *offset2);
 struct axis_type *make_axis_type(char *axis1, char *axis2,
 				 struct dvalue *orientation);
 struct antenna_motion *make_antenna_motion(char *axis,struct dvalue *rate,
@@ -1025,6 +1038,10 @@ create_data_transfer(char *str, char *str2, char *str3, char *str4,
 
 void *
 create_intent(char *str, char *str2, char *str3);
+
+void *
+create_pointing_offset(char *str, char *str2, char *str3, char *str4,
+	       char *str5, char *str6, char *str7);
 
 /*---------------------------------------------------------------------------*/
 /* ANTENNA block builders                                                    */

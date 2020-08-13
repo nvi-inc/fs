@@ -48,6 +48,20 @@ c
       call fcreate_intent(ptr_ch(char(0)),
      &     ptr_ch('QUALIFIER_CODE'//char(0)),
      &     ptr_ch('1'//char(0)))
+      call fcreate_pointing_offset(ptr_ch('Wf'//char(0)),
+     &     ptr_ch('az'//char(0)),
+     &     ptr_ch('1'//char(0)),
+     &     ptr_ch('deg'//char(0)),
+     &     ptr_ch('el'//char(0)),
+     &     ptr_ch('2'//char(0)),
+     &     ptr_ch('deg'//char(0)))
+      call fcreate_pointing_offset(ptr_ch(char(0)),
+     &     ptr_ch('x'//char(0)),
+     &     ptr_ch('3'//char(0)),
+     &     ptr_ch('mdeg'//char(0)),
+     &     ptr_ch('yns'//char(0)),
+     &     ptr_ch('4'//char(0)),
+     &     ptr_ch('mdeg'//char(0)))
       call fend_scan
       call fcreate_comment(ptr_ch('t'//char(0)),
      &     ptr_ch('* comment 3'//char(0)))

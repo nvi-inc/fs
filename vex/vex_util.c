@@ -60,6 +60,9 @@ static int
 get_intent_field(Intent *intent,int n,int *link, int * name,
 		  char **value, char **units);
 static int
+get_pointing_offset_field(Pointing_offset *pointing_offset,
+          int n,int *link, int * name, char **value, char **units);
+static int
 get_axis_type_field(Axis_type *axis_type,int n,int *link,
 			  int *name, char **value, char **units);
 static int
@@ -297,6 +300,7 @@ static  struct {
   {"station", T_STATION},
   {"data_transfer", T_DATA_TRANSFER},
   {"intent", T_INTENT},
+  {"pointing_offset", T_POINTING_OFFSET},
     
   {"antenna_diam", T_ANTENNA_DIAM},
   {"axis_type", T_AXIS_TYPE},
@@ -656,6 +660,21 @@ struct intent  *make_intent(char *key, char *identifier,
   new->key=key;
   new->identifier=identifier;
   new->value=value;
+
+  return new;
+}
+
+struct pointing_offset  *make_pointing_offset(char *key,
+                  char *coord1, struct dvalue *offset1, 
+                  char *coord2, struct dvalue *offset2) 
+{
+  NEWSTRUCT(new,pointing_offset);
+
+  new->key=key;
+  new->coord1=coord1;
+  new->offset1=offset1;
+  new->coord2=coord2;
+  new->offset2=offset2;
 
   return new;
 }
@@ -1440,6 +1459,9 @@ char **units)
   case T_INTENT:
     ierr=get_intent_field(ptr,n,link,name,value,units);
     break;
+  case T_POINTING_OFFSET:
+    ierr=get_pointing_offset_field(ptr,n,link,name,value,units);
+    break;
   case T_AXIS_TYPE:
     ierr=get_axis_type_field(ptr,n,link,name,value,units);
     break;
@@ -1878,6 +1900,42 @@ get_intent_field(Intent *intent,int n,int *link,int *name,char **value,
     break;
   case 3:
     *value=intent->value;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static int
+get_pointing_offset_field(Pointing_offset *pointing_offset,
+           int n,int *link,int *name,char **value, char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=pointing_offset->key;
+    break;
+  case 2:
+    *value=pointing_offset->coord1;
+    break;
+  case 3:
+    *value=pointing_offset->offset1->value;
+    *units=pointing_offset->offset1->units;
+    *name=0;
+    break;
+  case 4:
+    *value=pointing_offset->coord2;
+    break;
+  case 5:
+    *value=pointing_offset->offset2->value;
+    *units=pointing_offset->offset2->units;
+    *name=0;
     break;
   default:
     return -1;

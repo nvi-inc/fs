@@ -622,6 +622,51 @@ create_intent(char *str, char *str2, char *str3)
                  make_intent(s1,s2,s3)));
 }
 /*-------------------------------------------------------------------*/
+void *
+create_pointing_offset(char *str, char *str2, char *str3, char *str4,
+        char *str5, char *str6, char *str7)
+{
+  char *station;
+  char *coord1;
+  char *offset1_value;
+  char *offset1_units;
+  char *coord2;
+  char *offset2_value;
+  char *offset2_units;
+  struct dvalue *offset1, *offset2;
+
+  if(str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0 ||
+     str4==NULL || strlen(str4)==0 ||
+     str5==NULL || strlen(str5)==0 ||
+     str6==NULL || strlen(str6)==0 ||
+     str7==NULL || strlen(str7)==0 )
+    {
+      printf("%s \'pointing_offset\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+  {
+  if(str==NULL || strlen(str)==0)
+    station=NULL;
+  else
+    station=(char *)strdup(str);
+
+  coord1=(char *) strdup(str2);
+  offset1_value=(char *) strdup(str3);
+  offset1_units=(char *) strdup(str4);
+  coord2=(char *) strdup(str5);
+  offset2_value=(char *) strdup(str6);
+  offset2_units=(char *) strdup(str7);
+
+  qref_list = add_list(qref_list,
+           make_lowl(T_POINTING_OFFSET,
+                 make_pointing_offset(station,
+                     coord1,make_dvalue(offset1_value,offset1_units),
+                     coord2,make_dvalue(offset2_value,offset2_units))));
+  }
+}
+/*-------------------------------------------------------------------*/
 /* ANTENNA block builders                                            */
 /*-------------------------------------------------------------------*/
 void *

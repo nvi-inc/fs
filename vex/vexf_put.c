@@ -649,6 +649,55 @@ char **str3;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_pointing_offset__
+#else
+fcreate_pointing_offset
+#endif
+(str,str2,str3,str4,str5,str6,str7)
+char **str;
+char **str2;
+char **str3;
+char **str4;
+char **str5;
+char **str6;
+char **str7;
+/*<      subroutine fcreate_pointing_offset(ptr_ch(str)//(char *)0, >*/
+/*<                                      ptr_ch(str2)//(char *)0, >*/
+/*<                                      ptr_ch(str3)//(char *)0, >*/
+/*<                                      ptr_ch(str4)//(char *)0, >*/
+/*<                                      ptr_ch(str5)//(char *)0, >*/
+/*<                                      ptr_ch(str6)//(char *)0, >*/
+/*<                                     ptr_ch(str7)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+/*<      character*(*) str2; >*/
+/*<      character*(*) str3; >*/
+/*<      character*(*) str4; >*/
+/*<      character*(*) str5; >*/
+/*<      character*(*) str6; >*/
+/*<      character*(*) str7; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+/*   character*(*) str2      - string */
+/*   character*(*) str3      - string */
+/*   character*(*) str4      - string */
+/*   character*(*) str5      - string */
+/*   character*(*) str6      - string */
+/*   character*(*) str7      - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_pointing_offset(*str,*str2,*str3,*str4,*str5,*str6,*str7);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_antenna_diam__
 #else
 fcreate_antenna_diam

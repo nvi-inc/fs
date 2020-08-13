@@ -54,6 +54,7 @@ struct station         *snptr;
 struct source          *soptr;
 struct intent          *inptr;
 struct data_transfer   *dtptr;
+struct pointing_offset *ptptr;
 
 struct axis_type       *atptr;
 struct antenna_motion  *amptr;
@@ -133,6 +134,7 @@ struct s2_data_source  *dsptr;
 %token <ival>	T_CHAN_DEF T_SAMPLE_RATE T_BITS_PER_SAMPLE T_SWITCHING_CYCLE
 
 %token <ival>	T_START T_SOURCE T_MODE T_STATION T_DATA_TRANSFER T_INTENT
+%token <ival>	T_POINTING_OFFSET
 
 %token <ival>	T_ANTENNA_DIAM T_AXIS_OFFSET T_ANTENNA_MOTION T_POINTING_SECTOR
 %token <ival>   T_AXIS_TYPE T_NASMYTH
@@ -246,6 +248,7 @@ struct s2_data_source  *dsptr;
 %type  <sval>	pass sector
 %type  <dtptr>	data_transfer
 %type  <inptr>	intent
+%type  <ptptr>	pointing_offset
 %type  <sval>	scan_id method destination options
 %type  <dvptr>  unit_value2
 
@@ -604,6 +607,7 @@ sched_lowl:	start			{$$=make_lowl(T_START,$1);}
 		| station		{$$=make_lowl(T_STATION,$1);}
 		| data_transfer		{$$=make_lowl(T_DATA_TRANSFER,$1);}
 		| intent		{$$=make_lowl(T_INTENT,$1);}
+		| pointing_offset		{$$=make_lowl(T_POINTING_OFFSET,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 ;
@@ -643,6 +647,13 @@ data_transfer:	T_DATA_TRANSFER '=' scan_id ':' /* name */
 ;
 intent:  T_INTENT '=' name_or_not ':' name_value ':' name_value ';'
                 {$$=make_intent($3,$5,$7);}
+;
+pointing_offset:	T_POINTING_OFFSET '=' name_or_not ':'	/* name */
+		name_value ':'			/* coord1 */
+		unit_value ':'			/* offset1 */
+		name_value ':'			/* coord2 */
+		unit_value ';'			/* offset2 */
+		{$$=make_pointing_offset($3,$5,$7,$9,$11);}
 ;
 start_position:	/* empty */			{$$=NULL;}
 		| unit_value			{$$=$1;}
