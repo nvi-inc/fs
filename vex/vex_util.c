@@ -609,6 +609,12 @@ struct station  *make_station(char *key, struct dvalue *start,
 			      struct dvalue *stop, struct dvalue *start_pos,
 			      char *pass, char *sector, struct llist *drives)
 {
+  if(pass != NULL && strlen(pass) != 0 ) {
+   if(!vex_version.lessthan2) {
+    yyerror("VEX1 station present");
+   }
+  }
+
   NEWSTRUCT(new,station);
 
   new->key=key;

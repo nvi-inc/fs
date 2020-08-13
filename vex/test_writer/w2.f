@@ -26,7 +26,7 @@ c
      &     ptr_ch('sec'//char(0)),
      &     ptr_ch('10877'//char(0)),
      &     ptr_ch('ft'//char(0)),
-     &     ptr_ch('3A'//char(0)),
+     &     ptr_ch(char(0)),
      &     ptr_ch('n'//char(0)))
       call fcreate_station_drive_list(ptr_ch('1'//char(0)))
       call fcreate_station_drive_list(ptr_ch(char(0)))
@@ -55,7 +55,7 @@ c
      &     ptr_ch('sec'//char(0)),
      &     ptr_ch('10877'//char(0)),
      &     ptr_ch('ft'//char(0)),
-     &     ptr_ch('3A'//char(0)),
+     &     ptr_ch(char(0)),
      &     ptr_ch('n'//char(0)))
       call fcreate_station_drive_list(ptr_ch('1'//char(0)))
       call fcreate_station_drive_list(ptr_ch(char(0)))
