@@ -132,6 +132,14 @@ struct data_transfer {
 	
 typedef struct data_transfer Data_transfer;
 
+struct intent {
+  char *key;
+  char *identifier;
+  char *value;
+};
+
+typedef struct intent Intent;
+
 struct axis_type {
   char *axis1;
   char *axis2;
@@ -594,6 +602,8 @@ struct data_transfer  *make_data_transfer(char *key, char *method,
 					  struct dvalue *start,
 					  struct dvalue *stop, 
 					  char *options);
+struct intent  *make_intent(char *key, char *identifier,
+                  char *value);
 struct axis_type *make_axis_type(char *axis1, char *axis2,
 				 struct dvalue *orientation);
 struct antenna_motion *make_antenna_motion(char *axis,struct dvalue *rate,
@@ -1012,6 +1022,9 @@ create_station_drive_list(char *str);
 void *
 create_data_transfer(char *str, char *str2, char *str3, char *str4,
 		     char *str5, char *str6, char *str7, char *str8);
+
+void *
+create_intent(char *str, char *str2, char *str3);
 
 /*---------------------------------------------------------------------------*/
 /* ANTENNA block builders                                                    */

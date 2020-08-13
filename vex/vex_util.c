@@ -57,6 +57,9 @@ get_data_transfer_field(Data_transfer *data_transfer,int n,int *link,
 			char **value,
 			char **units);
 static int
+get_intent_field(Intent *intent,int n,int *link, int * name,
+		  char **value, char **units);
+static int
 get_axis_type_field(Axis_type *axis_type,int n,int *link,
 			  int *name, char **value, char **units);
 static int
@@ -293,6 +296,7 @@ static  struct {
   {"mode", T_MODE},
   {"station", T_STATION},
   {"data_transfer", T_DATA_TRANSFER},
+  {"intent", T_INTENT},
     
   {"antenna_diam", T_ANTENNA_DIAM},
   {"axis_type", T_AXIS_TYPE},
@@ -641,6 +645,18 @@ struct data_transfer  *make_data_transfer(char *key, char *method,
   new->start=start;
   new->stop=stop;
   new->options=options;
+  return new;
+}
+
+struct intent  *make_intent(char *key, char *identifier,
+			      char *value)
+{
+  NEWSTRUCT(new,intent);
+
+  new->key=key;
+  new->identifier=identifier;
+  new->value=value;
+
   return new;
 }
 
@@ -1421,6 +1437,9 @@ char **units)
   case T_DATA_TRANSFER:
     ierr=get_data_transfer_field(ptr,n,link,name,value,units);
     break;
+  case T_INTENT:
+    ierr=get_intent_field(ptr,n,link,name,value,units);
+    break;
   case T_AXIS_TYPE:
     ierr=get_axis_type_field(ptr,n,link,name,value,units);
     break;
@@ -1834,6 +1853,34 @@ get_data_transfer_field(Data_transfer *data_transfer,int n,int *link,
       fprintf(stderr,"unknown error in get_data_transfer_field %d\n",ierr);
       exit(1);
       }*/
+  }
+  return 0;
+}
+static int
+get_intent_field(Intent *intent,int n,int *link,int *name,char **value,
+		   char **units)
+{
+  int ierr;
+
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    if(intent->key==NULL)
+        return 0;
+    *value=intent->key;
+    break;
+  case 2:
+    *value=intent->identifier;
+    break;
+  case 3:
+    *value=intent->value;
+    break;
+  default:
+    return -1;
   }
   return 0;
 }

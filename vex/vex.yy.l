@@ -135,6 +135,7 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>mode		{BEGIN(INITIAL);return T_MODE;}
 <LINE>station		{BEGIN(INITIAL);return T_STATION;}
 <LINE>data_transfer	{BEGIN(INITIAL);return T_DATA_TRANSFER;}
+<LINE>intent		{BEGIN(INITIAL);return T_INTENT;}
 
 <LINE>antenna_diam	{BEGIN(INITIAL);return T_ANTENNA_DIAM;}
 <LINE>axis_type	{BEGIN(INITIAL);return T_AXIS_TYPE;}

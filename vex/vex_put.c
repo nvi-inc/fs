@@ -597,6 +597,31 @@ create_data_transfer(char *str, char *str2, char *str3, char *str4,
   q_list=NULL;
 }
 /*-------------------------------------------------------------------*/
+void *
+create_intent(char *str, char *str2, char *str3)
+{
+  char *s1, *s2, *s3;
+
+  if(str==NULL || strlen(str)==0)
+    s1=NULL;
+  else
+    s1=(char *)strdup(str);
+
+  if(str2==NULL || strlen(str2)==0)
+    s2=NULL;
+  else
+    s2=(char *)strdup(str2);
+
+  if(str3==NULL || strlen(str3)==0)
+    s3=NULL;
+  else
+    s3=(char *)strdup(str3);
+
+  qref_list = add_list(qref_list,
+           make_lowl(T_INTENT,
+                 make_intent(s1,s2,s3)));
+}
+/*-------------------------------------------------------------------*/
 /* ANTENNA block builders                                            */
 /*-------------------------------------------------------------------*/
 void *

@@ -621,6 +621,8 @@ $SCHED; *schedule block
     station = FD : 0 sec : 180 sec : 0 ft : : &cw : 1;
     station = FD : 0 sec : 180 sec : : : &cw : 1;
     station = FD : 0 sec : 180 sec : : : &cw : -1;
+    intent = HD123456 : CLOCK_CHECK : True;
+    intent = : QUALIFIER_CODE : 1;
   endscan;
   scan 263-062000;
     start = 1995y263d06h20m00s;

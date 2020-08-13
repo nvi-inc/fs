@@ -42,6 +42,12 @@ c
       call fcreate_source2(ptr_ch('3c123'//char(0)),
      &     ptr_ch(char(0)),
      &     ptr_ch(char(0)))
+      call fcreate_intent(ptr_ch('3c123'//char(0)),
+     &     ptr_ch('CLOCK_CHECK'//char(0)),
+     &     ptr_ch('True'//char(0)))
+      call fcreate_intent(ptr_ch(char(0)),
+     &     ptr_ch('QUALIFIER_CODE'//char(0)),
+     &     ptr_ch('1'//char(0)))
       call fend_scan
       call fcreate_comment(ptr_ch('t'//char(0)),
      &     ptr_ch('* comment 3'//char(0)))
