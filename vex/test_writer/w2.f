@@ -642,6 +642,22 @@ c
       call fcreate_site_id2(ptr_ch('EF'//char(0)),ptr_ch('g'//char(0)))
       call fend_def
 c
+      call fcreate_block(ptr_ch('SOURCE'//char(0)))
+      call fcreate_def(ptr_ch('3c123'//char(0)))
+      call fcreate_source_type2(ptr_ch('star'//char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch(char(0)))
+      call fcreate_source_type2(ptr_ch('star'//char(0)),
+     &                         ptr_ch('calibator'//char(0)),
+     &                         ptr_ch(char(0)))
+      call fcreate_source_type2(ptr_ch('star'//char(0)),
+     &                         ptr_ch('calibrator'//char(0)),
+     &                         ptr_ch('radec'//char(0)))
+      call fcreate_source_type2(ptr_ch('star'//char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch('radec'//char(0)))
+      call fend_def
+c
       call fcreate_vex(ptr_ch(char(0)))
 c
       END

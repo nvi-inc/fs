@@ -119,6 +119,7 @@ struct site_velocity   *svptr;
 struct ocean_load_vert *ovptr;
 struct ocean_load_horiz *ohptr;
 
+struct source_type     *stptr;
 struct source_model    *smptr;
 
 struct vsn             *vsptr;
@@ -416,10 +417,10 @@ struct s2_data_source  *dsptr;
 %type  <llptr>  source_block source_defs source_lowls 
 %type  <dfptr>  source_def
 %type  <lwptr>  source_lowl source_defx
-%type  <llptr>  source_type
 %type  <sval>   source_name iau_name ra dec source_position_ref ref_coord_frame
 %type  <sval>	source_position_epoch
 %type  <dvptr>  ra_rate dec_rate velocity_wrt_lsr
+%type  <stptr>  source_type
 %type  <smptr>  source_model
 
 %type  <llptr>  tapelog_obs_block tapelog_obs_defs tapelog_obs_lowls 
@@ -1772,9 +1773,12 @@ source_lowl:	source_type		{$$=make_lowl(T_SOURCE_TYPE,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 ;
-source_type:	T_SOURCE_TYPE '=' T_NAME ';'	{$$=add_list(NULL,$3);}
+source_type:	T_SOURCE_TYPE '=' T_NAME ';'
+                   {$$=make_source_type($3,NULL,NULL);}
 		| T_SOURCE_TYPE '=' T_NAME ':' T_NAME ';'
-					{$$=add_list(add_list(NULL,$3),$5);}
+                   {$$=make_source_type($3,$5,NULL);}
+		| T_SOURCE_TYPE '=' T_NAME ':' name_or_not ':' T_NAME ';'
+                   {$$=make_source_type($3,$5,$7);}
 ;
 source_name:	T_SOURCE_NAME '=' T_NAME ';'	{$$=$3;}
 ;

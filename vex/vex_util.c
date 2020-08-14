@@ -208,6 +208,9 @@ static int
 get_ocean_load_horiz_field(Ocean_load_horiz *ocean_load_horiz,int n,int *link,
 		 int *name, char **value, char **units);
 static int
+get_source_type_field(Source_type *source_type,int n,int *link,
+		 int *name, char **value, char **units);
+static int
 get_source_model_field(Source_model *source_model,int n,int *link,
 		 int *name, char **value, char **units);
 static int
@@ -1225,6 +1228,17 @@ struct ocean_load_horiz *make_ocean_load_horiz(struct dvalue *amp,
 
   return new;
 }
+struct source_type *make_source_type(char *generic, char *experiment,
+        char *coordinate)
+{
+  NEWSTRUCT(new,source_type);
+
+  new->generic=generic;
+  new->experiment=experiment;
+  new->coordinate=coordinate;
+
+  return new;
+}
 struct source_model *make_source_model(struct dvalue *component,
 				       char *band_id, struct dvalue *flux,
 				       struct dvalue *majoraxis,
@@ -1587,7 +1601,6 @@ char **units)
     ierr=get_switched_power_field(ptr,n,link,name,value,units);
     break;
   case T_PASS_ORDER:
-  case T_SOURCE_TYPE:
     ierr=get_svalue_list_field(ptr,n,link,name,value,units);
     break;
   case T_PHASE_CAL_DETECT:
@@ -1634,6 +1647,9 @@ char **units)
     break;
   case T_DEC:
     ierr=get_angle_field(ptr,n,link,name,value,units);
+    break;
+  case T_SOURCE_TYPE:
+    ierr=get_source_type_field(ptr,n,link,name,value,units);
     break;
   case T_SOURCE_MODEL:
     ierr=get_source_model_field(ptr,n,link,name,value,units);
@@ -3414,6 +3430,34 @@ get_ocean_load_horiz_field(Ocean_load_horiz *ocean_load_horiz,int n,int *link,
     *value=ocean_load_horiz->phase->value;
     *units=ocean_load_horiz->phase->units;
     *name=0;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+static int
+get_source_type_field(Source_type *source_type,int n,int *link,
+		 int *name, char **value, char **units)
+{
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=source_type->generic;
+    break;
+  case 2:
+    if(source_type->experiment == NULL)
+        return 0;
+    *value=source_type->experiment;
+    break;
+  case 3:
+    if(source_type->coordinate == NULL)
+        return 0;
+    *value=source_type->coordinate;
     break;
   default:
     return -1;

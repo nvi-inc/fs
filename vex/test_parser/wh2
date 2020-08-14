@@ -1605,6 +1605,8 @@ $SOURCE; *source parameters
 * 
   def HD123456;
     source_type = star : calibrator; *source type may be declared as ‘dummy’ if for pointing purposes only
+    source_type = star : calibrator : radec; *source type may be declared as ‘dummy’ if for pointing purposes only
+    source_type = star : : radec; *source type may be declared as ‘dummy’ if for pointing purposes only
     source_name = HD123456;
     IAU_name = 0102-0304;
     ra = 01h02m03.456s;

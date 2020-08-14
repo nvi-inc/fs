@@ -3496,20 +3496,54 @@ create_orbit_epoch(char *str)
 void *
 create_source_type(char *str, char *str2)
 {
-  char *s1, *s2;
+  char *generic, *experiment;
 
-  if(str!=NULL && strlen(str)!=0)
+  if(str==NULL || strlen(str)==0)
     {
-      s1=(char *)strdup(str);
-      q_list = add_list(NULL,s1);
+      printf("%s \'source_type2\' %s %s block\n",
+	     err1, err2, int2block(blk));
     }
-  if(str2!=NULL && strlen(str2)!=0)
+  else
     {
-      s2=(char *)strdup(str2);
-      q_list = add_list(q_list,s2);
+      generic=(char *)strdup(str);
+
+      if(str2==NULL || strlen(str2)==0)
+        experiment=NULL;
+      else
+        experiment=(char *)strdup(str2);
+
+      qref_list = add_list(qref_list,make_lowl(T_SOURCE_TYPE,
+					       make_source_type(generic,experiment,NULL)));
     }
-  qref_list = add_list(qref_list,make_lowl(T_SOURCE_TYPE,q_list));
-  q_list=NULL;
+}
+/*-------------------------------------------------------------------*/
+void *
+create_source_type2(char *str, char *str2, char *str3)
+{
+  char *generic, *experiment, *coordinate;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'source_type2\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      generic=(char *)strdup(str);
+
+      if(str2==NULL || strlen(str2)==0)
+        experiment=NULL;
+      else
+        experiment=(char *)strdup(str2);
+
+      if(str3==NULL || strlen(str3)==0)
+        coordinate=NULL;
+      else
+        coordinate=(char *)strdup(str3);
+
+      qref_list = add_list(qref_list,make_lowl(T_SOURCE_TYPE,
+					       make_source_type(generic,experiment,coordinate)));
+    }
 }
 /*-------------------------------------------------------------------*/
 void *

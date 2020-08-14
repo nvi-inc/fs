@@ -542,6 +542,14 @@ struct ocean_load_horiz {
 
 typedef struct ocean_load_horiz Ocean_load_horiz;
 
+struct source_type {
+  char *generic;
+  char *experiment;
+  char *coordinate;
+};
+
+typedef struct source_type Source_type;
+
 struct source_model {
   struct dvalue *component;
   char *band_id;
@@ -727,6 +735,8 @@ struct ocean_load_vert *make_ocean_load_vert(struct dvalue *amp,
 					     struct dvalue *phase);
 struct ocean_load_horiz *make_ocean_load_horiz(struct dvalue *amp,
 					       struct dvalue *phase);
+struct source_type *make_source_type(char *generic, char *experiment,
+                       char *coordinate);
 struct source_model *make_source_model(struct dvalue *component,
 				       char *band_id, struct dvalue *flux,
 				       struct dvalue *majoraxis,
@@ -1493,9 +1503,6 @@ create_orbit_epoch(char *str);
 /* SOURCE block builders                                             */
 /*-------------------------------------------------------------------*/
 void *
-create_source_type(char *str, char *str2);
-
-void *
 create_source_name(char *str);
 
 void *
@@ -1524,6 +1531,12 @@ create_dec_rate(char *str, char *str2);
 
 void *
 create_velocity_wrt_LSR(char *str, char *str2);
+
+void *
+create_source_type(char *str, char *str2);
+
+void *
+create_source_type2(char *str, char *str2, char *str3);
 
 void *
 create_source_model(char *str, char *str2, char *str3, char *str4,
