@@ -662,6 +662,7 @@ c
      &                         ptr_ch(char(0)),
      &                         ptr_ch(char(0)))
       call fcreate_bsp_file_name(ptr_ch('xyz.dat'//char(0)))
+      call fcreate_bsp_object_id(ptr_ch('1'//char(0)))
       call fend_def
 c
       call fcreate_vex(ptr_ch(char(0)))

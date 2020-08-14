@@ -1645,6 +1645,7 @@ $SOURCE; *source parameters
     source_type = bsp;
     source_name = SAT2;
     bsp_file_name = xyz.dat;
+    bsp_object_id = 1;
   enddef;
 *
 *-------------------------------------------------------------------------------------------------------------- -------

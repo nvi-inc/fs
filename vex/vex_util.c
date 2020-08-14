@@ -449,6 +449,7 @@ static  struct {
   {"velocity_wrt_LSR", T_VELOCITY_WRT_LSR},
   {"source_model", T_SOURCE_MODEL},
   {"bsp_file_name", T_BSP_FILE_NAME},
+  {"bsp_object_id", T_BSP_OBJECT_ID},
   
   {"VSN", T_VSN},
   
@@ -1468,6 +1469,7 @@ char **units)
   case T_SOURCE_POSITION_REF:
   case T_SOURCE_POSITION_EPOCH:
   case T_BSP_FILE_NAME:
+  case T_BSP_OBJECT_ID:
   case T_TRACK_FRAME_FORMAT:
   case T_DATA_MODULATION:
   case T_S2_RECORDING_MODE:

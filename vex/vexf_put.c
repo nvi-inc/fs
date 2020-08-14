@@ -5484,6 +5484,31 @@ char **str;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_bsp_object_id__
+#else
+fcreate_bsp_object_id
+#endif
+(str)
+char **str;
+/*<      subroutine fcreate_bsp_object_id(ptr_ch(str)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_bsp_object_id(*str);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_vsn__
 #else
 fcreate_vsn

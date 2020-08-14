@@ -3694,6 +3694,23 @@ create_bsp_file_name(char *str)
     }
 }
 /*-------------------------------------------------------------------*/
+void *
+create_bsp_object_id(char *str)
+{
+  char *s1;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'bsp_object_id\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+  s1=(char *)strdup(str);
+  qref_list = add_list(qref_list,make_lowl(T_BSP_OBJECT_ID,s1));
+    }
+}
+/*-------------------------------------------------------------------*/
 /* TAPELOG_OBS block builders                                        */
 /*-------------------------------------------------------------------*/
 void *

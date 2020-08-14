@@ -278,6 +278,7 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>velocity_wrt_LSR	{BEGIN(INITIAL);return T_VELOCITY_WRT_LSR;}
 <LINE>source_model		{BEGIN(INITIAL);return T_SOURCE_MODEL;}
 <LINE>bsp_file_name		{BEGIN(INITIAL);return T_BSP_FILE_NAME;}
+<LINE>bsp_object_id		{BEGIN(INITIAL);return T_BSP_OBJECT_ID;}
 
 <LINE>VSN			{BEGIN(INITIAL);return T_VSN;}
 
