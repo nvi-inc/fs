@@ -636,6 +636,11 @@ c
      &     ptr_ch('80'//char(0)),
      &     ptr_ch('Hz'//char(0)) )
       call fend_def
+      call fcreate_block(ptr_ch('SITE'//char(0)))
+      call fcreate_def(ptr_ch('EF'//char(0)))
+      call fcreate_site_id2(ptr_ch('EF'//char(0)),ptr_ch(char(0)))
+      call fcreate_site_id2(ptr_ch('EF'//char(0)),ptr_ch('g'//char(0)))
+      call fend_def
 c
       call fcreate_vex(ptr_ch(char(0)))
 c

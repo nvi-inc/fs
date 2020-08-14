@@ -505,6 +505,13 @@ struct sefd {
 
 typedef struct sefd Sefd;
 
+struct site_id {
+  char *code2;
+  char *code1;
+};
+
+typedef struct site_id Site_id;
+
 struct site_position {
   struct dvalue *x;
   struct dvalue *y;
@@ -711,6 +718,7 @@ struct midob_cal *make_midob_cal(char *state, struct dvalue *time,
 struct postob_cal *make_postob_cal(char *state, struct dvalue *time,
 				 char *name);
 struct sefd *make_sefd(char *if_id, struct dvalue *flux, struct llist *params);
+struct site_id *make_site_id(char *code2, char *code1);
 struct site_position *make_site_position(struct dvalue *x, struct dvalue *y,
 					 struct dvalue *z);
 struct site_velocity *make_site_velocity(struct dvalue *x, struct dvalue *y,
@@ -1416,6 +1424,9 @@ create_site_type(char *str);
 
 void *
 create_site_ID(char *str);
+
+void *
+create_site_ID2(char *str, char *str2);
 
 void *
 create_site_position(char *str, char *str2, char *str3, char *str4,

@@ -113,6 +113,7 @@ struct postob_cal      *poptr;
 
 struct sefd            *septr;
 
+struct site_id         *siptr;
 struct site_position   *spptr;
 struct site_velocity   *svptr;
 struct ocean_load_vert *ovptr;
@@ -401,8 +402,9 @@ struct s2_data_source  *dsptr;
 %type  <llptr>  site_block site_defs site_lowls 
 %type  <dfptr>  site_def
 %type  <lwptr>  site_lowl site_defx
-%type  <sval>   site_type site_name site_id occupation_code orbit_epoch
+%type  <sval>   site_type site_name occupation_code orbit_epoch
 %type  <sval>	site_position_epoch site_position_ref
+%type  <siptr>  site_id
 %type  <spptr>  site_position
 %type  <svptr>  site_velocity
 %type  <llptr>  horizon_map_az horizon_map_el
@@ -1677,7 +1679,10 @@ site_type:	T_SITE_TYPE '=' T_NAME ';' {$$=$3;}
 ;
 site_name:	T_SITE_NAME '=' T_NAME ';' {$$=$3;}
 ;
-site_id:	T_SITE_ID '=' T_NAME ';' {$$=$3;}
+site_id:    T_SITE_ID '=' T_NAME ';'
+            {$$=make_site_id($3,NULL);}
+          | T_SITE_ID '=' T_NAME ':' T_NAME ';'
+            {$$=make_site_id($3,$5);}
 ;
 site_position:	T_SITE_POSITION '=' unit_value ':' unit_value ':'
 		unit_value ';'

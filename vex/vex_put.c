@@ -3251,8 +3251,30 @@ create_site_ID(char *str)
   char *s1;
 
   s1=(char *)strdup(str);
-  qref_list = add_list(qref_list,make_lowl(T_SITE_ID,s1));
+  qref_list = add_list(qref_list,make_lowl(T_SITE_ID,
+              make_site_id(s1,NULL)));
 }  
+/*-------------------------------------------------------------------*/
+void *
+create_site_ID2(char *str, char *str2)
+{
+  char *s1, *s2;
+
+  if(str==NULL || strlen(str)==0) {
+      printf("%s \'site_ID2\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+  {
+  s1=(char *)strdup(str);
+  if(str2==NULL || strlen(str2)==0)
+    s2=NULL;
+  else
+    s2=(char *)strdup(str2);
+  qref_list = add_list(qref_list,make_lowl(T_SITE_ID,
+              make_site_id(s1,s2)));
+  }
+}
 /*-------------------------------------------------------------------*/
 void *
 create_site_position(char *str, char *str2, char *str3, char *str4,

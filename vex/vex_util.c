@@ -193,6 +193,9 @@ static int
 get_sefd_field(Sefd *sefd,int n,int *link,
 		 int *name, char **value, char **units);
 static int
+get_site_id_field(Site_id *site_id,int n,int *link,
+		 int *name, char **value, char **units);
+static int
 get_site_position_field(Site_position *site_position,int n,int *link,
 		 int *name, char **value, char **units);
 static int
@@ -1171,6 +1174,15 @@ struct sefd *make_sefd(char *if_id, struct dvalue *flux, struct llist *params)
   return new;
 }
 
+struct site_id *make_site_id(char *code2, char *code1)
+{
+  NEWSTRUCT(new,site_id);
+
+  new->code2=code2;
+  new->code1=code1;
+
+  return new;
+}
 struct site_position *make_site_position(struct dvalue *x, struct dvalue *y,
 					 struct dvalue *z)
 {
@@ -1432,7 +1444,6 @@ char **units)
   case T_SEFD_MODEL:
   case T_SITE_TYPE:
   case T_SITE_NAME:
-  case T_SITE_ID:
   case T_SITE_POSITION_EPOCH:
   case T_SITE_POSITION_REF:
   case T_OCCUPATION_CODE:
@@ -1602,6 +1613,9 @@ char **units)
     break;
   case T_SEFD:
     ierr=get_sefd_field(ptr,n,link,name,value,units);
+    break;
+  case T_SITE_ID:
+    ierr=get_site_id_field(ptr,n,link,name,value,units);
     break;
   case T_SITE_POSITION:
     ierr=get_site_position_field(ptr,n,link,name,value,units);
@@ -3272,6 +3286,27 @@ get_sefd_field(Sefd *sefd,int n,int *link,
       fprintf(stderr,"unknown error in get_sefd_field %d\n",ierr);
       exit(1);
     }
+  }
+  return 0;
+}
+static int
+get_site_id_field(Site_id *site_id,int n,int *link,
+		 int *name, char **value, char **units)
+{
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=site_id->code2;
+    break;
+  case 2:
+    *value=site_id->code1;
+    break;
+  default:
+    return -1;
   }
   return 0;
 }

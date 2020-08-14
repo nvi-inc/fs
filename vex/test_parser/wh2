@@ -1559,6 +1559,7 @@ $SITE; *site parameters
     site_type = fixed;
     site_name = EFLSBERG; *full station name
     site_ID = EF; *standard 2-char identifier 
+    site_ID = EF : g; *standard 2-char identifier & ad hoc 1-char
 *                   x           y            z
     site_position = 123456.4 m : 5432112.6 m : 563675.2 m;
     site_position_epoch = 1994y1d;
