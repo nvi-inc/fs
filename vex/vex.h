@@ -1543,6 +1543,9 @@ create_source_model(char *str, char *str2, char *str3, char *str4,
 		    char *str5, char *str6, char *str7, char *str8,
 		    char *str9, char *str10, char *str11, char *str12,
 		    char *str13);
+
+void *
+create_bsp_file_name(char *str);
 /*-------------------------------------------------------------------*/
 /* TAPELOG_OBS block builders                                        */
 /*-------------------------------------------------------------------*/

@@ -3676,6 +3676,24 @@ create_source_model(char *str, char *str2, char *str3, char *str4,
 				 make_dvalue(s12,s13))));
 }  
 /*-------------------------------------------------------------------*/
+void *
+create_bsp_file_name(char *str)
+{
+  char *s1;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'bsp_file_name\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+
+  s1=(char *)strdup(str);
+  qref_list = add_list(qref_list,make_lowl(T_BSP_FILE_NAME,s1));
+    }
+}
+/*-------------------------------------------------------------------*/
 /* TAPELOG_OBS block builders                                        */
 /*-------------------------------------------------------------------*/
 void *

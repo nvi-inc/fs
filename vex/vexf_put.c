@@ -5459,6 +5459,31 @@ char **str13;
 /* ----------------------------------------------------------------------- */
 void
 #ifdef F2C
+fcreate_bsp_file_name__
+#else
+fcreate_bsp_file_name
+#endif
+(str)
+char **str;
+/*<      subroutine fcreate_bsp_file_name(ptr_ch(str)//(char *)0) >*/
+/*<      implicit none >*/
+/*<      character*(*) str; >*/
+
+/* ... */
+
+/* input: */
+/*   character*(*) str       - string */
+
+/* output: */
+/*   VEX format */
+/* */
+{
+  create_bsp_file_name(*str);
+  return;
+}
+/* ----------------------------------------------------------------------- */
+void
+#ifdef F2C
 fcreate_vsn__
 #else
 fcreate_vsn
