@@ -450,6 +450,9 @@ static  struct {
   {"source_model", T_SOURCE_MODEL},
   {"bsp_file_name", T_BSP_FILE_NAME},
   {"bsp_object_id", T_BSP_OBJECT_ID},
+  {"tle0", T_TLE0},
+  {"tle1", T_TLE1},
+  {"tle2", T_TLE2},
   
   {"VSN", T_VSN},
   
@@ -1470,6 +1473,9 @@ char **units)
   case T_SOURCE_POSITION_EPOCH:
   case T_BSP_FILE_NAME:
   case T_BSP_OBJECT_ID:
+  case T_TLE0:
+  case T_TLE1:
+  case T_TLE2:
   case T_TRACK_FRAME_FORMAT:
   case T_DATA_MODULATION:
   case T_S2_RECORDING_MODE:

@@ -279,6 +279,9 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>source_model		{BEGIN(INITIAL);return T_SOURCE_MODEL;}
 <LINE>bsp_file_name		{BEGIN(INITIAL);return T_BSP_FILE_NAME;}
 <LINE>bsp_object_id		{BEGIN(INITIAL);return T_BSP_OBJECT_ID;}
+<LINE>tle0		{BEGIN(INITIAL);return T_TLE0;}
+<LINE>tle1		{BEGIN(INITIAL);return T_TLE1;}
+<LINE>tle2		{BEGIN(INITIAL);return T_TLE2;}
 
 <LINE>VSN			{BEGIN(INITIAL);return T_VSN;}
 

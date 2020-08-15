@@ -657,12 +657,22 @@ c
      &                         ptr_ch(char(0)),
      &                         ptr_ch('radec'//char(0)))
       call fend_def
+c
       call fcreate_def(ptr_ch('SAT1'//char(0)))
       call fcreate_source_type2(ptr_ch('bsp'//char(0)),
      &                         ptr_ch(char(0)),
      &                         ptr_ch(char(0)))
       call fcreate_bsp_file_name(ptr_ch('xyz.dat'//char(0)))
       call fcreate_bsp_object_id(ptr_ch('1'//char(0)))
+      call fend_def
+c
+      call fcreate_def(ptr_ch('SAT2'//char(0)))
+      call fcreate_source_type2(ptr_ch('tle'//char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch(char(0)))
+      call fcreate_tle0(ptr_ch('xyz dat'//char(0)))
+      call fcreate_tle1(ptr_ch('abc dat'//char(0)))
+      call fcreate_tle2(ptr_ch('pqr dat'//char(0)))
       call fend_def
 c
       call fcreate_vex(ptr_ch(char(0)))

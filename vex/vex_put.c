@@ -3711,6 +3711,57 @@ create_bsp_object_id(char *str)
     }
 }
 /*-------------------------------------------------------------------*/
+void *
+create_tle0(char *str)
+{
+  char *s1;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'tle0\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+  s1=(char *)strdup(str);
+  qref_list = add_list(qref_list,make_lowl(T_TLE0,s1));
+    }
+}
+/*-------------------------------------------------------------------*/
+void *
+create_tle1(char *str)
+{
+  char *s1;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'tle1\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+  s1=(char *)strdup(str);
+  qref_list = add_list(qref_list,make_lowl(T_TLE1,s1));
+    }
+}
+/*-------------------------------------------------------------------*/
+void *
+create_tle2(char *str)
+{
+  char *s1;
+
+  if(str==NULL || strlen(str)==0)
+    {
+      printf("%s \'tle2\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+  s1=(char *)strdup(str);
+  qref_list = add_list(qref_list,make_lowl(T_TLE2,s1));
+    }
+}
+/*-------------------------------------------------------------------*/
 /* TAPELOG_OBS block builders                                        */
 /*-------------------------------------------------------------------*/
 void *

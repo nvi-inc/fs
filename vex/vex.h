@@ -1549,6 +1549,15 @@ create_bsp_file_name(char *str);
 
 void *
 create_bsp_object_id(char *str);
+
+void *
+create_tle0(char *str);
+
+void *
+create_tle1(char *str);
+
+void *
+create_tle2(char *str);
 /*-------------------------------------------------------------------*/
 /* TAPELOG_OBS block builders                                        */
 /*-------------------------------------------------------------------*/

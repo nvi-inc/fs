@@ -200,6 +200,7 @@ struct s2_data_source  *dsptr;
 %token <ival>   T_SOURCE_POSITION_EPOCH T_REF_COORD_FRAME
 %token <ival>   T_VELOCITY_WRT_LSR T_SOURCE_MODEL
 %token <ival>   T_BSP_FILE_NAME T_BSP_OBJECT_ID
+%token <ival>   T_TLE0 T_TLE1 T_TLE2
 
 %token <ival>	T_VSN
 
@@ -420,6 +421,7 @@ struct s2_data_source  *dsptr;
 %type  <lwptr>  source_lowl source_defx
 %type  <sval>   source_name iau_name ra dec source_position_ref ref_coord_frame
 %type  <sval>	source_position_epoch bsp_file_name bsp_object_id
+%type  <sval>	tle0 tle1 tle2
 %type  <dvptr>  ra_rate dec_rate velocity_wrt_lsr
 %type  <stptr>  source_type
 %type  <smptr>  source_model
@@ -1773,6 +1775,9 @@ source_lowl:	source_type		{$$=make_lowl(T_SOURCE_TYPE,$1);}
 		| external_ref		{$$=make_lowl(T_REF,$1);}
 		| bsp_file_name     {$$=make_lowl(T_BSP_FILE_NAME,$1);}
 		| bsp_object_id     {$$=make_lowl(T_BSP_OBJECT_ID,$1);}
+		| tle0              {$$=make_lowl(T_TLE0,$1);}
+		| tle1              {$$=make_lowl(T_TLE1,$1);}
+		| tle2              {$$=make_lowl(T_TLE2,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 ;
@@ -1817,6 +1822,12 @@ source_model:	T_SOURCE_MODEL '=' value ':'
 bsp_file_name:	T_BSP_FILE_NAME '=' T_NAME ';'	{$$=$3;}
 ;
 bsp_object_id:		T_BSP_OBJECT_ID '=' T_NAME ';'		{$$=$3;}
+;
+tle0:           T_TLE0 '=' T_NAME ';'		{$$=$3;}
+;
+tle1:           T_TLE1 '=' T_NAME ';'		{$$=$3;}
+;
+tle2:           T_TLE2 '=' T_NAME ';'		{$$=$3;}
 ;
 /* $TAPELOG_OBS block */
 
