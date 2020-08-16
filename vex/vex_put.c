@@ -3769,14 +3769,51 @@ create_vsn(char *str, char *str2, char *str3, char *str4)
 {
   char *s1, *s2, *s3, *s4;
 
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0 ||
+     str4==NULL || strlen(str4)==0)
+    {
+      printf("%s \'vsn\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
   s1=(char *)strdup(str);
   s2=(char *)strdup(str2);
   s3=(char *)strdup(str3);
   s4=(char *)strdup(str4);
   qref_list = add_list(qref_list,make_lowl(T_VSN,
 				 make_vsn(make_dvalue(s1,NULL),
-				 s2,s3,s4)));
-}  
+				 s2,s3,s4,NULL)));
+    }
+}
+
+void *
+create_vsn2(char *str, char *str2, char *str3, char *str4)
+{
+  char *s1, *s2, *s3, *s4;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0 ||
+     str4==NULL || strlen(str4)==0)
+    {
+      printf("%s \'vsn2\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+  s1=(char *)strdup(str);
+  s2=(char *)strdup(str2);
+  s3=(char *)strdup(str3);
+  s4=(char *)strdup(str4);
+  qref_list = add_list(qref_list,make_lowl(T_VSN,
+				 make_vsn(make_dvalue(s1,NULL),
+				 s2,s3,s4,q_list)));
+      q_list=NULL;
+    }
+}
 
 /*-------------------------------------------------------------------*/
 /* TRACKS block builders                                             */

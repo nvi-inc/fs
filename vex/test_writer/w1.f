@@ -265,6 +265,14 @@ c
      &                         ptr_ch('calibator'//char(0)))
       call fend_def
 c
+      call fcreate_block(ptr_ch('TAPELOG_OBS'//char(0)))
+      call fcreate_def(ptr_ch('Jb'//char(0)))
+      call fcreate_vsn(ptr_ch('1'//char(0)),
+     &                         ptr_ch('MET-0011'//char(0)),
+     &                         ptr_ch('2010y064d01h29m59s'//char(0)),
+     &                         ptr_ch('2010y064d14h45m25s'//char(0)))
+      call fend_def
+c
       call fcreate_vex(ptr_ch(char(0)))
 c
       END

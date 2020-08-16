@@ -568,6 +568,7 @@ struct vsn {
   char *label;
   char *start;
   char *stop;
+  struct llist *link;
 };
 
 typedef struct vsn Vsn;
@@ -745,7 +746,7 @@ struct source_model *make_source_model(struct dvalue *component,
 				       struct dvalue *raoff,
 				       struct dvalue *decoff);
 struct vsn *make_vsn(struct dvalue *drive, char *label, char *start,
-		     char *stop);
+		     char *stop, struct llist *link);
 struct fanin_def *make_fanin_def(char *subpass, struct dvalue *hdstk,
 				 struct dvalue *track,
 				 struct llist *bitstreams);
@@ -1563,6 +1564,8 @@ create_tle2(char *str);
 /*-------------------------------------------------------------------*/
 void *
 create_vsn(char *str, char *str2, char *str3, char *str4);
+void *
+create_vsn2(char *str, char *str2, char *str3, char *str4);
 /*-------------------------------------------------------------------*/
 /* TRACKS block builders                                             */
 /*-------------------------------------------------------------------*/

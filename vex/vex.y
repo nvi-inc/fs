@@ -1859,7 +1859,9 @@ tapelog_obs_lowl:	vsn		{$$=make_lowl(T_VSN,$1);}
 				 {$$=make_lowl(T_COMMENT_TRAILING,$1);}
 ;
 vsn:		T_VSN '=' value ':' T_NAME ':' T_NAME ':' T_NAME ';'
-		{$$=make_vsn($3,$5,$7,$9);}
+		{$$=make_vsn($3,$5,$7,$9,NULL);}
+          | T_VSN '=' value ':' T_NAME ':' T_NAME ':' T_NAME ':' link_list';'
+		{$$=make_vsn($3,$5,$7,$9,$11);}
 ;
 /* $TRACKS */
 

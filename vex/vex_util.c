@@ -1266,7 +1266,7 @@ struct source_model *make_source_model(struct dvalue *component,
   return new;
 }
 struct vsn *make_vsn(struct dvalue *drive, char *label, char *start,
-		     char *stop)
+		     char *stop, struct llist *link)
 {
   NEWSTRUCT(new,vsn);
 
@@ -1274,6 +1274,7 @@ struct vsn *make_vsn(struct dvalue *drive, char *label, char *start,
   new->label=label;
   new->start=start;
   new->stop=stop;
+  new->link=link;
 
   return new;
 }
@@ -3532,6 +3533,8 @@ static int
 get_vsn_field(Vsn *vsn,int n,int *link,
 	      int *name, char **value, char **units)
 {
+  int ierr;
+
   *link=0;
   *name=1;
   *units=NULL;
@@ -3555,7 +3558,15 @@ get_vsn_field(Vsn *vsn,int n,int *link,
     *name=0;
     break;
   default:
-    return -1;
+    if(n < 1 )
+      return -1;
+    ierr=get_lvalue_list_field(vsn->link,n-4,link,name,value,units);
+    if(ierr==-1)
+      return -1;
+    else if (ierr!=0) {
+      fprintf(stderr,"unknown error in get_vsn_field %d\n",ierr);
+      exit(1);
+    }
   }
   return 0;
 }

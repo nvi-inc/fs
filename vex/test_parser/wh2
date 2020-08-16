@@ -1671,6 +1671,8 @@ $TAPELOG_OBS; *tape log
   def FD;
     VSN = 1 : VLBA0075 : 1995y243d06h00m : 1995y243d12h0m;
     VSN = 2 : VLBA0076 : 1995y243d12h01m : 1995y243d15h30m;
+    VSN = 3 : VLBA0077 : 1995y243d12h01m : 1995y243d15h30m : &ds1;
+    VSN = 4 : VLBA0078 : 1995y243d12h01m : 1995y243d15h30m : &ds1 : &ds2;
   enddef;
 *
   def HS;
