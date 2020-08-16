@@ -1130,7 +1130,6 @@ $FREQ; *frequency and channel parameters
     chan_def = &X : 8210.99 MHz : L : 2 MHz : &CH2 : &BBCa : : &LSB_CAL;
     chan_def = &X : 8212.99 MHz : U : 2 MHz : &CH3 : &BBCb : : &USB_CAL;
     chan_def = &X : 8212.99 MHz : L : 2 MHz : &CH4 : &BBCb : : &LSB_CAL;
-    sample_rate = 4 Ms/sec;
   enddef;
 * 
   def S4;
@@ -1140,7 +1139,6 @@ $FREQ; *frequency and channel parameters
     chan_def = &S : 2210.99 MHz : L : 2 MHz : &CH6 : &BBCc : : &LSB_CAL;
     chan_def = &S : 2212.99 MHz : U : 2 MHz : &CH7 : &BBCd : : &USB_CAL;
     chan_def = &S : 2212.99 MHz : L : 2 MHz : &CH8 : &BBCd : : &LSB_CAL;
-    sample_rate = 4 Ms/sec;
   enddef;
 *
   def X4_SWITCHED; *Frequency-switched geodetic sequence
@@ -1163,7 +1161,6 @@ $FREQ; *frequency and channel parameters
     chan_def = &X : 8732.99 MHz : U : 2 MHz : &CH3 : &BBCc : : &LSB_CAL : 1;
     chan_def = &X : 8912.99 MHz : U : 2 MHz : &CH3 : &BBCc : : &USB_CAL : 2;
     chan_def = &X : 8932.99 MHz : U : 2 MHz : &CH4 : &BBCd : : &LSB_CAL : 1 : 2;
-    sample_rate = 4 Ms/sec;
   enddef;
 *
   def SX14; *example of standard Mark IIIA geodetic 14-frequency setup
@@ -1183,7 +1180,6 @@ $FREQ; *frequency and channel parameters
     chan_def = &S : 2305.99 MHz : U : 2 MHz : &CH12 : &BBCl : : &LSB_CAL;
     chan_def = &S : 2340.99 MHz : U : 2 MHz : &CH13 : &BBCm : : &USB_CAL;
     chan_def = &S : 2345.99 MHz : U : 2 MHz : &CH14 : &BBCn : : &LSB_CAL;
-    sample_rate = 4 Ms/sec;
   enddef;
 *----------------------------------------------------------------------------------------------------------------------
 $HEAD_POS; *headstack-position parameters
@@ -1895,6 +1891,10 @@ $TRACKS; *track mapping/multiplex parameters
     fanout_def = B : &CH12 : sign : 1 : 27;
     fanout_def = B : &CH13 : sign : 1 : 29;
     fanout_def = B : &CH14 : sign : 1 : 31;
+  enddef;
+*
+  def XSAMPLE_RATE;
+    sample_rate = 4 Ms/sec;
   enddef;
 *
   def VLBA_TRK_FORMAT;

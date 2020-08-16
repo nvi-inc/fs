@@ -1887,6 +1887,7 @@ tracks_lowl:	fanin_def	{$$=make_lowl(T_FANIN_DEF,$1);}
 		| fanout_def	{$$=make_lowl(T_FANOUT_DEF,$1);}
 		| track_frame_format
 				{$$=make_lowl(T_TRACK_FRAME_FORMAT,$1);}
+		| sample_rate		{$$=make_lowl(T_SAMPLE_RATE,$1);}
 		| data_modulation	{$$=make_lowl(T_DATA_MODULATION,$1);}
 		| vlba_frmtr_sys_trk
 				{$$=make_lowl(T_VLBA_FRMTR_SYS_TRK,$1);}

@@ -273,6 +273,12 @@ c
      &                         ptr_ch('2010y064d14h45m25s'//char(0)))
       call fend_def
 c
+      call fcreate_block(ptr_ch('FREQ'//char(0)))
+      call fcreate_def(ptr_ch('SAMPLE_RATE'//char(0)))
+      call fcreate_sample_rate(ptr_ch('4'//char(0)),
+     &                         ptr_ch('Ms/sec'//char(0)))
+      call fend_def
+c
       call fcreate_vex(ptr_ch(char(0)))
 c
       END
