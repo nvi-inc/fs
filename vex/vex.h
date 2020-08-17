@@ -573,6 +573,18 @@ struct datum {
 
 typedef struct datum Datum;
 
+struct vector {
+  char *time;
+  struct dvalue *x;
+  struct dvalue *y;
+  struct dvalue *z;
+  struct dvalue *vx;
+  struct dvalue *vy;
+  struct dvalue *vz;
+};
+
+typedef struct vector Vector;
+
 struct vsn {
   struct dvalue *drive;
   char *label;
@@ -757,6 +769,13 @@ struct source_model *make_source_model(struct dvalue *component,
 				       struct dvalue *decoff);
 struct datum *make_datum(char *time, char *ra, char *dec,
                      struct dvalue *ra_rate, struct dvalue *dec_rate);
+struct vector *make_vector(char *time,
+                          struct dvalue *x,
+                          struct dvalue *y,
+                          struct dvalue *z,
+                          struct dvalue *vx,
+                          struct dvalue *vy,
+                          struct dvalue *vz);
 struct vsn *make_vsn(struct dvalue *drive, char *label, char *start,
 		     char *stop, struct llist *link);
 struct fanin_def *make_fanin_def(char *subpass, struct dvalue *hdstk,
@@ -1575,6 +1594,11 @@ create_tle2(char *str);
 void *
 create_datum(char *str, char *str2, char *str3, char *str4, char *str5,
         char *str6, char *str7);
+
+void *
+create_vector(char *str, char *str2, char *str3, char *str4, char *str5,
+        char *str6, char *str7, char *str8, char *str9, char *str10,
+        char *str11, char *str12, char *str13);
 /*-------------------------------------------------------------------*/
 /* TAPELOG_OBS block builders                                        */
 /*-------------------------------------------------------------------*/

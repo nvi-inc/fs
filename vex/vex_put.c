@@ -3799,6 +3799,55 @@ create_datum(char *str, char *str2, char *str3, char *str4, char *str5,
     }
 }
 /*-------------------------------------------------------------------*/
+void *
+create_vector(char *str, char *str2, char *str3, char *str4, char *str5,
+        char *str6, char *str7, char *str8, char *str9, char *str10,
+        char *str11, char *str12, char *str13)
+{
+  char *time;
+  struct dvalue *x, *y, *z, *vx, *vy, *vz;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0 ||
+     str4==NULL || strlen(str4)==0 ||
+     str5==NULL || strlen(str5)==0 ||
+     str6==NULL || strlen(str6)==0 ||
+     str7==NULL || strlen(str7)==0)
+    {
+      printf("%s \'vector\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      time=(char *) strdup(str);
+      x=make_dvalue(str2,str3);
+      y=make_dvalue(str4,str5);
+      z=make_dvalue(str6,str7);
+
+	  if(str8==NULL || strlen(str8)==0 ||
+	     str9==NULL || strlen(str9)==0)
+          vx=NULL;
+      else
+          vx=make_dvalue(str8,str9);
+
+	  if(str10==NULL || strlen(str10)==0 ||
+	     str11==NULL || strlen(str11)==0)
+          vy=NULL;
+      else
+          vy=make_dvalue(str10,str11);
+
+	  if(str12==NULL || strlen(str12)==0 ||
+	     str13==NULL || strlen(str13)==0)
+          vz=NULL;
+      else
+          vz=make_dvalue(str12,str13);
+
+	  qref_list = add_list(qref_list,make_lowl(T_VECTOR,make_vector(
+                  time,x,y,z,vx,vy,vz)));
+    }
+}
+/*-------------------------------------------------------------------*/
 /* TAPELOG_OBS block builders                                        */
 /*-------------------------------------------------------------------*/
 void *

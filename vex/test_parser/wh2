@@ -1661,6 +1661,22 @@ $SOURCE; *source parameters
     datum = 2010y270d21h00m00s : 01h32m03.456s : -03d34'04.567" : : -0.004 asec/yr;
   enddef;
 *
+  def DeathAsteroid; *Note: eVLBI needed for this experiment
+    source_type = ephemeris : : retarded;
+    source_name = KILLER1;
+    vector = 2010y270d18h00m00s : 0 km : 0 km : 1000 km : 0 km/sec : 0 km/sec : -100 km/sec;
+    vector = 2010y270d18h00m06s : 0 km : 0 km : 300 km : 1 km/sec : 2 cm/sec : -123 in/sec;
+    vector = 2010y270d18h00m07s : 7 km : 8 cm : 300 in : 4 um/sec : 5 mm/sec : -124 ft/sec;
+    vector = 2010y270d18h00m06s : 0 km : 0 km : 300 km : 0 km/sec : 0 km/sec : -120 km/sec;
+    vector = 2010y270d18h00m06s : 0 km : 0 km : 300 km : : 0 km/sec : -120 km/sec;
+    vector = 2010y270d18h00m06s : 0 km : 0 km : 300 km : 0 km/sec : : -120 km/sec;
+    vector = 2010y270d18h00m06s : 0 km : 0 km : 300 km : 0 km/sec : 0 km/sec;
+    vector = 2010y270d18h00m06s : 0 km : 0 km : 300 km : : : -120 km/sec;
+    vector = 2010y270d18h00m06s : 0 km : 0 km : 300 km : : 0 km/sec;
+    vector = 2010y270d18h00m06s : 0 km : 0 km : 300 km : 0 km/sec;
+    ref_coord_frame = GCRF;
+  enddef;
+*
 *-------------------------------------------------------------------------------------------------------------- -------
 $TAPELOG_OBS; *tape log
 *-------------------------------------------------------------------------------------------------------------- -------

@@ -217,6 +217,9 @@ static int
 get_datum_field(Datum *datum,int n,int *link,
 			  int *name, char **value, char **units);
 static int
+get_vector_field(Vector *vector,int n,int *link,
+			  int *name, char **value, char **units);
+static int
 get_vsn_field(Vsn *vsn,int n,int *link,
 	      int *name, char **value, char **units);
 static int
@@ -457,6 +460,7 @@ static  struct {
   {"tle1", T_TLE1},
   {"tle2", T_TLE2},
   {"datum", T_DATUM},
+  {"vector", T_VECTOR},
   
   {"VSN", T_VSN},
   
@@ -1282,6 +1286,26 @@ struct datum *make_datum(char *time, char *ra, char *dec,
 
   return new;
 }
+struct vector *make_vector(char *time,
+                     struct dvalue *x,
+                     struct dvalue *y,
+                     struct dvalue *z,
+                     struct dvalue *vx,
+                     struct dvalue *vy,
+                     struct dvalue *vz)
+{
+  NEWSTRUCT(new,vector);
+
+  new->time=time;
+  new->x=x;
+  new->y=y;
+  new->z=z;
+  new->vx=vx;
+  new->vy=vy;
+  new->vz=vz;
+
+  return new;
+}
 struct vsn *make_vsn(struct dvalue *drive, char *label, char *start,
 		     char *stop, struct llist *link)
 {
@@ -1684,6 +1708,9 @@ char **units)
     break;
   case T_DATUM:
     ierr=get_datum_field(ptr,n,link,name,value,units);
+    break;
+  case T_VECTOR:
+    ierr=get_vector_field(ptr,n,link,name,value,units);
     break;
   case T_VSN:
     ierr=get_vsn_field(ptr,n,link,name,value,units);
@@ -3581,6 +3608,60 @@ get_datum_field(Datum *datum,int n,int *link,
         return 0;
     *value=datum->dec_rate->value;
     *units=datum->dec_rate->units;
+    *name=0;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+int
+get_vector_field(Vector *vector,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=vector->time;
+    break;
+  case 2:
+    *value=vector->x->value;
+    *units=vector->x->units;
+    *name=0;
+    break;
+  case 3:
+    *value=vector->y->value;
+    *units=vector->y->units;
+    *name=0;
+    break;
+  case 4:
+    *value=vector->z->value;
+    *units=vector->z->units;
+    *name=0;
+    break;
+  case 5:
+    if(vector->vx == NULL)
+        return 0;
+    *value=vector->vx->value;
+    *units=vector->vx->units;
+    *name=0;
+    break;
+  case 6:
+    if(vector->vy == NULL)
+        return 0;
+    *value=vector->vy->value;
+    *units=vector->vy->units;
+    *name=0;
+    break;
+  case 7:
+    if(vector->vz == NULL)
+        return 0;
+    *value=vector->vz->value;
+    *units=vector->vz->units;
     *name=0;
     break;
   default:
