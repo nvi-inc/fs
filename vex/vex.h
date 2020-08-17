@@ -563,6 +563,16 @@ struct source_model {
 
 typedef struct source_model Source_model;
 
+struct datum {
+  char *time;
+  char *ra;
+  char *dec;
+  struct dvalue *ra_rate;
+  struct dvalue *dec_rate;
+};
+
+typedef struct datum Datum;
+
 struct vsn {
   struct dvalue *drive;
   char *label;
@@ -745,6 +755,8 @@ struct source_model *make_source_model(struct dvalue *component,
 				       struct dvalue *angle,
 				       struct dvalue *raoff,
 				       struct dvalue *decoff);
+struct datum *make_datum(char *time, char *ra, char *dec,
+                     struct dvalue *ra_rate, struct dvalue *dec_rate);
 struct vsn *make_vsn(struct dvalue *drive, char *label, char *start,
 		     char *stop, struct llist *link);
 struct fanin_def *make_fanin_def(char *subpass, struct dvalue *hdstk,
@@ -1559,6 +1571,10 @@ create_tle1(char *str);
 
 void *
 create_tle2(char *str);
+
+void *
+create_datum(char *str, char *str2, char *str3, char *str4, char *str5,
+        char *str6, char *str7);
 /*-------------------------------------------------------------------*/
 /* TAPELOG_OBS block builders                                        */
 /*-------------------------------------------------------------------*/

@@ -122,6 +122,8 @@ struct ocean_load_horiz *ohptr;
 struct source_type     *stptr;
 struct source_model    *smptr;
 
+struct datum           *dmptr;
+
 struct vsn             *vsptr;
 
 struct fanin_def	*fiptr;
@@ -200,7 +202,7 @@ struct s2_data_source  *dsptr;
 %token <ival>   T_SOURCE_POSITION_EPOCH T_REF_COORD_FRAME
 %token <ival>   T_VELOCITY_WRT_LSR T_SOURCE_MODEL
 %token <ival>   T_BSP_FILE_NAME T_BSP_OBJECT_ID
-%token <ival>   T_TLE0 T_TLE1 T_TLE2
+%token <ival>   T_TLE0 T_TLE1 T_TLE2 T_DATUM
 
 %token <ival>	T_VSN
 
@@ -425,6 +427,7 @@ struct s2_data_source  *dsptr;
 %type  <dvptr>  ra_rate dec_rate velocity_wrt_lsr
 %type  <stptr>  source_type
 %type  <smptr>  source_model
+%type  <dmptr>  datum
 
 %type  <llptr>  tapelog_obs_block tapelog_obs_defs tapelog_obs_lowls 
 %type  <dfptr>  tapelog_obs_def
@@ -1778,6 +1781,7 @@ source_lowl:	source_type		{$$=make_lowl(T_SOURCE_TYPE,$1);}
 		| tle0              {$$=make_lowl(T_TLE0,$1);}
 		| tle1              {$$=make_lowl(T_TLE1,$1);}
 		| tle2              {$$=make_lowl(T_TLE2,$1);}
+		| datum             {$$=make_lowl(T_DATUM,$1);}
 		| T_COMMENT   		{$$=make_lowl(T_COMMENT,$1);}
 		| T_COMMENT_TRAILING	{$$=make_lowl(T_COMMENT_TRAILING,$1);}
 ;
@@ -1828,6 +1832,13 @@ tle0:           T_TLE0 '=' T_NAME ';'		{$$=$3;}
 tle1:           T_TLE1 '=' T_NAME ';'		{$$=$3;}
 ;
 tle2:           T_TLE2 '=' T_NAME ';'		{$$=$3;}
+;
+datum:	T_DATUM '=' name_value ':' name_value ':' T_ANGLE ';'
+                {$$=make_datum($3,$5,$7,NULL,NULL);}
+      | T_DATUM '=' name_value ':' name_value ':' T_ANGLE ':' unit_value ';'
+                {$$=make_datum($3,$5,$7,$9,NULL);}
+      | T_DATUM '=' name_value ':' name_value ':' T_ANGLE ':' unit_value2 ':' unit_value ';'
+                {$$=make_datum($3,$5,$7,$9,$11);}
 ;
 /* $TAPELOG_OBS block */
 

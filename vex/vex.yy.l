@@ -282,6 +282,7 @@ ANGLE		[+-]?([0-9]{1,2})d([0-9]{1,2})\'{SEC}\"
 <LINE>tle0		{BEGIN(INITIAL);return T_TLE0;}
 <LINE>tle1		{BEGIN(INITIAL);return T_TLE1;}
 <LINE>tle2		{BEGIN(INITIAL);return T_TLE2;}
+<LINE>datum     {BEGIN(INITIAL);return T_DATUM;}
 
 <LINE>VSN			{BEGIN(INITIAL);return T_VSN;}
 

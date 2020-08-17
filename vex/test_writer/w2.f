@@ -675,6 +675,40 @@ c
       call fcreate_tle2(ptr_ch('pqr dat'//char(0)))
       call fend_def
 c
+      call fcreate_def(ptr_ch('STARX'//char(0)))
+      call fcreate_source_type2(ptr_ch('ephemeris'//char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch(char(0)))
+      call fcreate_datum(ptr_ch('2010y270d18h00m00s'//char(0)),
+     &                   ptr_ch('01h02m03.456s'//char(0)),
+     &                   ptr_ch('-03d04''04.567"'//char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch(char(0)))
+      call fcreate_datum(ptr_ch('2010y270d18h00m00s'//char(0)),
+     &                   ptr_ch('01h02m03.456s'//char(0)),
+     &                   ptr_ch('-03d14''04.567"'//char(0)),
+     &                         ptr_ch('0.001'//char(0)),
+     &                         ptr_ch('asec/yr'//char(0)),
+     &                         ptr_ch('-0.002'//char(0)),
+     &                         ptr_ch('asec/yr'//char(0)))
+      call fcreate_datum(ptr_ch('2010y270d18h00m00s'//char(0)),
+     &                   ptr_ch('01h02m03.456s'//char(0)),
+     &                   ptr_ch('-03d14''04.567"'//char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch('-0.002'//char(0)),
+     &                         ptr_ch('asec/yr'//char(0)))
+      call fcreate_datum(ptr_ch('2010y270d18h00m00s'//char(0)),
+     &                   ptr_ch('01h02m03.456s'//char(0)),
+     &                   ptr_ch('-03d14''04.567"'//char(0)),
+     &                         ptr_ch('0.001'//char(0)),
+     &                         ptr_ch('asec/yr'//char(0)),
+     &                         ptr_ch(char(0)),
+     &                         ptr_ch(char(0)))
+      call fend_def
+c
       call fcreate_block(ptr_ch('TAPELOG_OBS'//char(0)))
       call fcreate_def(ptr_ch('Jb'//char(0)))
       call fcreate_vsn2(ptr_ch('1'//char(0)),

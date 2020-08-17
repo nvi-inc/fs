@@ -3762,6 +3762,43 @@ create_tle2(char *str)
     }
 }
 /*-------------------------------------------------------------------*/
+void *
+create_datum(char *str, char *str2, char *str3, char *str4, char *str5,
+        char *str6, char *str7)
+{
+  char *time, *ra, *dec;
+  struct dvalue *ra_rate, *dec_rate;
+
+  if(str==NULL || strlen(str)==0 ||
+     str2==NULL || strlen(str2)==0 ||
+     str3==NULL || strlen(str3)==0)
+    {
+      printf("%s \'datum\' %s %s block\n",
+	     err1, err2, int2block(blk));
+    }
+  else
+    {
+      time=(char *) strdup(str);
+      ra  =(char *) strdup(str2);
+      dec =(char *) strdup(str3);
+
+	  if(str4==NULL || strlen(str4)==0 ||
+	     str5==NULL || strlen(str5)==0)
+          ra_rate=NULL;
+      else
+          ra_rate=make_dvalue(str4,str5);
+
+	  if(str6==NULL || strlen(str6)==0 ||
+	     str7==NULL || strlen(str7)==0)
+          dec_rate=NULL;
+      else
+          dec_rate=make_dvalue(str6,str7);
+
+	  qref_list = add_list(qref_list,make_lowl(T_DATUM,make_datum(
+                  time,ra,dec,ra_rate,dec_rate)));
+    }
+}
+/*-------------------------------------------------------------------*/
 /* TAPELOG_OBS block builders                                        */
 /*-------------------------------------------------------------------*/
 void *

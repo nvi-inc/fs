@@ -214,6 +214,9 @@ static int
 get_source_model_field(Source_model *source_model,int n,int *link,
 		 int *name, char **value, char **units);
 static int
+get_datum_field(Datum *datum,int n,int *link,
+			  int *name, char **value, char **units);
+static int
 get_vsn_field(Vsn *vsn,int n,int *link,
 	      int *name, char **value, char **units);
 static int
@@ -453,6 +456,7 @@ static  struct {
   {"tle0", T_TLE0},
   {"tle1", T_TLE1},
   {"tle2", T_TLE2},
+  {"datum", T_DATUM},
   
   {"VSN", T_VSN},
   
@@ -1265,6 +1269,19 @@ struct source_model *make_source_model(struct dvalue *component,
 
   return new;
 }
+struct datum *make_datum(char *time, char *ra, char *dec,
+                     struct dvalue *ra_rate, struct dvalue *dec_rate)
+{
+  NEWSTRUCT(new,datum);
+
+  new->time=time;
+  new->ra=ra;
+  new->dec=dec;
+  new->ra_rate=ra_rate;
+  new->dec_rate=dec_rate;
+
+  return new;
+}
 struct vsn *make_vsn(struct dvalue *drive, char *label, char *start,
 		     char *stop, struct llist *link)
 {
@@ -1664,6 +1681,9 @@ char **units)
     break;
   case T_SOURCE_MODEL:
     ierr=get_source_model_field(ptr,n,link,name,value,units);
+    break;
+  case T_DATUM:
+    ierr=get_datum_field(ptr,n,link,name,value,units);
     break;
   case T_VSN:
     ierr=get_vsn_field(ptr,n,link,name,value,units);
@@ -3522,6 +3542,45 @@ get_source_model_field(Source_model *source_model,int n,int *link,
   case 8:
     *value=source_model->decoff->value;
     *units=source_model->decoff->units;
+    *name=0;
+    break;
+  default:
+    return -1;
+  }
+  return 0;
+}
+int
+get_datum_field(Datum *datum,int n,int *link,
+			  int *name, char **value, char **units)
+{
+  *link=0;
+  *name=1;
+  *units=NULL;
+  *value=NULL;
+
+  switch(n) {
+  case 1:
+    *value=datum->time;
+    break;
+  case 2:
+    *value=datum->ra;
+    break;
+  case 3:
+    *value=datum->dec;
+    *name=0;
+    break;
+  case 4:
+    if(datum->ra_rate == NULL)
+        return 0;
+    *value=datum->ra_rate->value;
+    *units=datum->ra_rate->units;
+    *name=0;
+    break;
+  case 5:
+    if(datum->dec_rate == NULL)
+        return 0;
+    *value=datum->dec_rate->value;
+    *units=datum->dec_rate->units;
     *name=0;
     break;
   default:
