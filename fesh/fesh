@@ -134,7 +134,7 @@ cd "$SCHED_PATH"
 version
 echo -n Fetching schedule from server...
 #TODO: if not found, maybe check next or previous years?
-wget -nv --backups=1 "ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+wget -nv --backups=1 --ftp-user anonymous "ftps://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
 echo Done
 
 drudg_out="/dev/null"
