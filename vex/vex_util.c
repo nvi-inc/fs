@@ -1838,8 +1838,6 @@ static int
 get_source_field(Source *source,int n,int *link,int *name,char **value,
 		   char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -1970,8 +1968,6 @@ static int
 get_intent_field(Intent *intent,int n,int *link,int *name,char **value,
 		   char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
@@ -1998,8 +1994,6 @@ static int
 get_pointing_offset_field(Pointing_offset *pointing_offset,
            int n,int *link,int *name,char **value, char **units)
 {
-  int ierr;
-
   *link=0;
   *name=1;
   *units=NULL;
