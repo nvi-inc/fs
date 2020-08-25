@@ -33,6 +33,7 @@ FS_PATH=${FS_PATH:-"${FS_BASE}/fs"}
 LOG_PATH=${LOG_PATH:-"${FS_BASE}/log"}
 PROC_PATH=${PROC_PATH:-"${FS_BASE}/proc"}
 SCHED_PATH=${SCHED_PATH:-"${FS_BASE}/sched"}
+SNAP_PATH=${SNAP_PATH:-"${FS_BASE}/sched"}
 
 usage() {
     cat <<EOF
@@ -50,11 +51,27 @@ Options:
     -h     Print this message
 
 fesh requires the STATION environment variable be set to the lower case
-two-letter station code in. E.g. add the following ~/.login:
+two-letter station code in, e.g.:
 
-    setenv STATION gs #tcsh or
-    export STATION=gs #bash
+    setenv STATION gs #in ~/.login for tcsh or
+    export STATION=gs #in ~/.profile for bash
 
+fesh (curl actually) will prompt for an email to use as the password
+for the anonymous ftp-ssl access. This can be avoided by setting a
+working email address in the FESH_EMAIL variable, e.g.:
+
+    setenv FESH_EMAIL user2@address #in ~/.login for tcsh or
+    export FESH_EMAIL=user2@address #in ~/.profile for bash
+
+The directories for .skd, .snp, and .prc files can be changed from
+the usual by similarly setting SCHED_PATH, SNAP_PATH, and PROC_PATH.
+These settings must agree with /usr2/control/skedf.ctl. For example,
+to use /usr2/exper as the SCHED_DIR in fesh:
+
+    setenv SCHED_PATH /usr2/exper #in ~/.login for tcsh or
+    export SCHED_PATH=/usr2/exper #in ~/.profile for bash
+
+Tne listing file goes under SCHED_PATH.
 EOF
 }
 
@@ -111,12 +128,12 @@ if [[ -n "$run_drudg" ]]; then
         exit 1
     fi
     set -u
-    if [[ -e $SCHED_PATH/$sched$STATION.snp ]]; then
+    if [[ -e $SNAP_PATH/$sched$STATION.snp ]]; then
         if [[ -z "$force" ]]; then
-            echo "$SCHED_PATH/$sched$STATION.snp exists, delete or use '-f' to re-drudg >&2"
+            echo "$SNAP_PATH/$sched$STATION.snp exists, delete or use '-f' to re-drudg >&2"
             exit 1
         fi
-        rm "$SCHED_PATH/$sched$STATION.snp"
+        rm "$SNAP_PATH/$sched$STATION.snp"
     fi
     if [[ -e $PROC_PATH/$sched$STATION.prc ]]; then
         if [[ -z "$force" ]]; then
@@ -126,15 +143,18 @@ if [[ -n "$run_drudg" ]]; then
         rm "$PROC_PATH/$sched$STATION.prc"
     fi
 fi
-
-
-
+ 
+if [[ -z "${FESH_EMAIL:-}" ]]; then
+    user=anonymous
+else
+    user="anonymous:$FESH_EMAIL"
+fi
 year=$(date +%Y)
 cd "$SCHED_PATH"
 version
-echo -n Fetching schedule from server...
+echo Fetching schedule from server...
 #TODO: if not found, maybe check next or previous years?
-wget -nv --backups=1 --ftp-user anonymous "ftps://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+curl -u "$user" -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
 echo Done
 
 drudg_out="/dev/null"
