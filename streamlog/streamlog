@@ -1,0 +1,43 @@
+#!/bin/bash
+# Print the Field System log to stdout
+set -euo pipefail
+
+if fsserver status &> /dev/null; then
+    FS_SERVER_URL_BASE=$(awk '/FS_SERVER_URL_BASE/ {gsub(/"/, "", $3); print $3}' /usr2/fs/include/params.h)
+    exec ssub "$FS_SERVER_URL_BASE/log"
+fi
+
+
+#Kill child tail on exit
+trap 'kill $(jobs -p)' EXIT
+
+LOG=
+PID=
+
+while true; do
+    # FS isn't running or hasn't created new log yet 
+    if ! NEW=$(lognm) || [[ ! -e  "/usr2/log/${NEW}.log" ]]; then
+        sleep 1
+        continue
+    fi
+
+    if [[ "$NEW" != "$LOG" ]]; then
+
+        # Kill old tail process, disowning it so shell doesn't announce it.
+        if [[ -n "$PID" ]]; then
+            disown "$PID"
+            kill "$PID"
+        fi
+
+        # Only print the whole file it was created recently.
+        # This avoids, e.g., printing the whole stations log when switching to it.
+        if [ "$(stat --printf="%s" "/usr2/log/${NEW}.log")" -lt 4000 ]; then
+            tail -n+1 -f "/usr2/log/${NEW}.log" &
+        else
+            tail -n 0 -f "/usr2/log/${NEW}.log" &
+        fi
+        PID=$!
+        LOG=$NEW
+    fi
+    sleep 1
+done
