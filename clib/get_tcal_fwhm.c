@@ -478,7 +478,7 @@ int *ierr;
       if(ifchain!=0) {
 	float freq, bbcbw;
 	
-	freq=shm_addr->dbbcnn[det%MAX_DBBC3_BBC].freq/1.e6;
+	freq=shm_addr->dbbc3_bbcnn[det%MAX_DBBC3_BBC].freq/1.e6;
 	bbcbw=bw_dbbc3[shm_addr->dbbc3_bbcnn[det%MAX_DBBC3_BBC].bw];
 	if(det<MAX_DBBC3_BBC)
 	  freq-=bbcbw*.5;
