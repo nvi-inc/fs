@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/fs10.0.0up.txt        Version: 10.5  Date: 200821
+File: /usr2/fs/misc/fs10.0.0up.txt        Version: 10.6  Date: 200826
 
                      FS 10.0.0 Beta2 Update Notice
 
@@ -283,10 +283,13 @@ depend on which version you are updating from:
            recommend that you set the 'FESH_EMAIL' environment
            variable with a working email address for anonymous ftp-ssl
            access (which is new in this release); this will remove the
-           need to enter it manually for each use.  This version of
-           'fesh' also supports separate '.skd' and '.snp' directory
-           paths.  Please see 'fesh -h' for the details on how to
-           implement both features.
+           need to enter it manually for each use. If you have FSL8 or
+           other old distribution that does not support 'curl' ssl
+           connections to CDDIS, it is possible to restore the
+           previous non-ssl ftp access.  This version of 'fesh' also
+           supports separate '.skd' and '.snp' directory paths.
+           Please see 'fesh -h' for the details on how to implement
+           all of these features.
 
      This is the end of the instructions for upgrading from
      '10.0.0-beta2'.
@@ -1202,8 +1205,8 @@ The following is a summary of FS changes since 10.0.0-beta2
  1. Modify steps for updating to a specific commit after '-beta2' to
     use the latest commit on 'master' instead.
  2. Add 'new_ifdbb' script for (RDBE) VGOS stations.
- 3. 'fesh' uses ftp-ssl  and supports separate '.snp' and '.skd'
-    directories.
+ 3. 'fesh' uses ftp-ssl (closes #36)  and supports separate '.snp' and
+    '.skd' directories.
 
 A more detailed discussion of these changes follows.
 
@@ -1227,20 +1230,24 @@ A more detailed discussion of these changes follows.
     needed changes into schedules. If the script is run without other
     command line arguments, it will output "help" information.
 
- 3. 'fesh' uses ftp-ssl and supports separate '.snp' and '.skd'
-    directories. The use of ftp-ssl for CDDIS access will allow use of
-    CDDIS after non-ssl ftp is disabled there, expected at the end of
-    October 2020. This requires a working email address which can be
-    entered manually when prompted or configured with an environment
-    variable.
+ 3. 'fesh' uses ftp-ssl (closes #36)  and supports separate '.snp' and
+    '.skd' directories.  The use of ftp-ssl for CDDIS access will
+    allow use of CDDIS after non-ssl ftp access is disabled there,
+    expected at the end of October 2020. This requires a working email
+    address which can be entered manually when prompted or configured
+    with an environment variable, 'FESH_EMAIL'.
+    
+    If you have FSL8 or other old distribution that does not support
+    'curl' ssl connections to CDDIS, it is possible to restore the
+    previous non-ssl ftp access by setting the 'FESH_CDDIS_NOSSL'
+    environment variable.  However, this method will no longer work
+    once non-ssl ftp access ends.
 
     The ability to have separate '.snp' and '.skd' directories, allows
     the use of one directory for '.skd' and '.lst' files (perhaps
     '/usr2/exper') separate from '/usr2/sched' for '.snp' files.
 
-    Please see 'fesh -h' for the details on setting an email address
-    for anonymous ftp-ssl and for setting separate directories for
-    '.skd' and '.prc' files.
+    Please see 'fesh -h' for the details on using these features.
 
                 B. FS Changes compared to 10.0.0-beta1
 

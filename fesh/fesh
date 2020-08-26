@@ -43,7 +43,7 @@ Fetch schedule file for OBSERVATION from CDDIS
 Options:
     -n     Fetch next observation in master schedule
     -d     DRUDG schedule with default settings 
-           (needs STATION enviroment variable set to two letter id)
+           (needs STATION environment variable set to two letter id)
     -v     Verbose mode, drudg output printed to stdout
     -V     Print version and exit.
     -f     Force downloading of schedule from server and, if given 
@@ -71,7 +71,18 @@ to use /usr2/exper as the SCHED_DIR in fesh:
     setenv SCHED_PATH /usr2/exper #in ~/.login for tcsh or
     export SCHED_PATH=/usr2/exper #in ~/.profile for bash
 
-Tne listing file goes under SCHED_PATH.
+The listing file goes under SCHED_PATH.
+
+If you have FSL8 or other old distribution that does not support
+curl ftp-ssl to CDDIS, but worked with the previous versions of
+fesh that used wget for non-ssl ftp, you can restore the previous
+behaviour with:
+
+    setenv FESH_CDDIS_NOSSL 1 #in ~/.login for tcsh or
+    export FESH_CDDIS_NOSSL=1 #in ~/.profile for bash
+
+However, this method will no longer work when CDDIS stops support
+of non-ssl ftp, which is expected at the end of October 2020.
 EOF
 }
 
@@ -154,7 +165,11 @@ cd "$SCHED_PATH"
 version
 echo Fetching schedule from server...
 #TODO: if not found, maybe check next or previous years?
-curl -u "$user" -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+if [[ -z "${FESH_CDDIS_NOSSL:-}" ]]; then
+    curl -u "$user" -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+else
+    wget -nv --backups=1 "ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+fi
 echo Done
 
 drudg_out="/dev/null"
