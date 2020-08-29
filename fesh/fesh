@@ -47,10 +47,15 @@ else
     SCHED_PATH=${SCHED_PATH:-"."}
 fi
 
+FESH_DATA_CENTER=${FESH_DATA_CENTER:-'cddis'}
+
 usage() {
     cat <<EOF
-Usage: $0 [options] OBSERVATION
-Fetch schedule file for OBSERVATION from CDDIS
+Usage: $0 [options] OBSERVATION [DATA_CENTER]
+Fetch schedule file for OBSERVATION from DATA_CENTER.
+
+DATA_CENTER is optional, defaults to cddis. Other
+accepted values are bkg and opar.
 
 Options:
     -n     Fetch next observation in master schedule
@@ -68,9 +73,16 @@ two-letter station code in, e.g.:
     setenv STATION gs #in ~/.login for tcsh or
     export STATION=gs #in ~/.profile for bash
 
+The default data center can be changed by setting it in the
+FESH_DATA_CENTER environment variable. Accepted values are bkg,
+cddis, and opar. For example, to make the default bkg, use:
+
+    setenv FESH_DATA_CENTER bkg #in ~/.login for tcsh or
+    export FESH_DATA_CENTER=bkg #in ~/.profile for bash
+
 fesh (curl actually) will prompt for an email to use as the password
-for the anonymous ftp-ssl access. This can be avoided by setting a
-working email address in the FESH_EMAIL variable, e.g.:
+for anonymous ftp-ssl access for cddis. This can be suppressed by
+setting a working email address in the FESH_EMAIL variable, e.g.:
 
     setenv FESH_EMAIL user2@address #in ~/.login for tcsh or
     export FESH_EMAIL=user2@address #in ~/.profile for bash
@@ -135,6 +147,15 @@ fi
 
 sched=$1
 
+if [[ ! -z "${2:-}" ]]; then
+    FESH_DATA_CENTER=$2
+fi
+
+if [[ ! "$FESH_DATA_CENTER" =~ ^(cddis|opar|bkg) ]]; then
+   echo "Unknown data center: $FESH_DATA_CENTER."
+   exit 1
+fi
+
 ## Conflict check
 if [[ -e $SCHED_PATH/$sched.skd && -z "$force" ]]; then
     echo "$SCHED_PATH/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
@@ -174,10 +195,16 @@ cd "$SCHED_PATH"
 version
 echo Fetching schedule from server...
 #TODO: if not found, maybe check next or previous years?
-if [[ -z "${FESH_CDDIS_NOSSL:-}" ]]; then
-    curl -u "$user" -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-else
-    wget -nv --backups=1 "ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
+    if [[ -z "${FESH_CDDIS_NOSSL:-}" ]]; then
+        curl -u "$user" -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+    else
+        wget -nv --backups=1 "ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+    fi
+elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
+wget -nv --backups=1 "ftp://ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
+wget -nv --backups=1 "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
 fi
 echo Done
 
