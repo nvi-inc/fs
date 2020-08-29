@@ -30,10 +30,22 @@ set -euo pipefail
 
 FS_BASE=${FS_BASE:-'/usr2'}
 FS_PATH=${FS_PATH:-"${FS_BASE}/fs"}
+CONTROL_PATH=${CONTROL_PATH:-"${FS_BASE}/control"}
 LOG_PATH=${LOG_PATH:-"${FS_BASE}/log"}
-PROC_PATH=${PROC_PATH:-"${FS_BASE}/proc"}
-SCHED_PATH=${SCHED_PATH:-"${FS_BASE}/sched"}
-SNAP_PATH=${SNAP_PATH:-"${FS_BASE}/sched"}
+# check for skedf.ctl
+if [[ -e $CONTROL_PATH/skedf.ctl ]]; then
+    proc_path=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$proc/     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif (/^[ \t]*([^* \t].*?)\/* *$/) {$_=$1;exit;}}}' <$CONTROL_PATH/skedf.ctl)
+    snap_path=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$snap/     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif (/^[ \t]*([^* \t].*?)\/* *$/) {$_=$1;exit;}}}' <$CONTROL_PATH/skedf.ctl)
+    sched_path=$(perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$schedules/) {while (<>){if(/^\$/) {$_=".";exit;} elsif (/^[ \t]*([^* \t].*?)\/* *$/) {$_=$1;exit;}}}' <$CONTROL_PATH/skedf.ctl)
+    PROC_PATH=${PROC_PATH:-"${proc_path}"}
+    SNAP_PATH=${SNAP_PATH:-"${snap_path}"}
+    SCHED_PATH=${SCHED_PATH:-"${sched_path}"}
+else
+# drudg won't run without skedf.ctl, maybe some day it will
+# we can still get the schedule
+# use current directory without other information
+    SCHED_PATH=${SCHED_PATH:-"."}
+fi
 
 usage() {
     cat <<EOF
@@ -63,15 +75,8 @@ working email address in the FESH_EMAIL variable, e.g.:
     setenv FESH_EMAIL user2@address #in ~/.login for tcsh or
     export FESH_EMAIL=user2@address #in ~/.profile for bash
 
-The directories for .skd, .snp, and .prc files can be changed from
-the usual by similarly setting SCHED_PATH, SNAP_PATH, and PROC_PATH.
-These settings must agree with /usr2/control/skedf.ctl. For example,
-to use /usr2/exper as the SCHED_DIR in fesh:
-
-    setenv SCHED_PATH /usr2/exper #in ~/.login for tcsh or
-    export SCHED_PATH=/usr2/exper #in ~/.profile for bash
-
-The listing file goes under SCHED_PATH.
+The directories for .skd, .snp, and .prc files are obtained from
+the skedf.ctl control file. The listing files go with the .skd files.
 
 If you have FSL8 or other old distribution that does not support
 curl ftp-ssl to CDDIS, but worked with the previous versions of
@@ -96,6 +101,10 @@ while getopts 'ndhfvV' opt; do
             exit 1
             ;;
         d)
+            if [[ ! -e $CONTROL_PATH/skedf.ctl ]]; then
+                echo "$CONTROL_PATH/skedf.ctl doesn't exist, can't run drudg, don't use '-d'" >&2
+                exit 1
+            fi
             run_drudg=1
             ;;
         f)
@@ -141,7 +150,7 @@ if [[ -n "$run_drudg" ]]; then
     set -u
     if [[ -e $SNAP_PATH/$sched$STATION.snp ]]; then
         if [[ -z "$force" ]]; then
-            echo "$SNAP_PATH/$sched$STATION.snp exists, delete or use '-f' to re-drudg >&2"
+            echo "$SNAP_PATH/$sched$STATION.snp exists, delete or use '-f' to re-drudg" >&2
             exit 1
         fi
         rm "$SNAP_PATH/$sched$STATION.snp"
