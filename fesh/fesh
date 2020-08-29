@@ -34,9 +34,9 @@ CONTROL_PATH=${CONTROL_PATH:-"${FS_BASE}/control"}
 LOG_PATH=${LOG_PATH:-"${FS_BASE}/log"}
 # check for skedf.ctl
 if [[ -e $CONTROL_PATH/skedf.ctl ]]; then
-    proc_path=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$proc/     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif (/^[ \t]*([^* \t].*?)\/* *$/) {$_=$1;exit;}}}' <$CONTROL_PATH/skedf.ctl)
-    snap_path=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$snap/     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif (/^[ \t]*([^* \t].*?)\/* *$/) {$_=$1;exit;}}}' <$CONTROL_PATH/skedf.ctl)
-    sched_path=$(perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$schedules/) {while (<>){if(/^\$/) {$_=".";exit;} elsif (/^[ \t]*([^* \t].*?)\/* *$/) {$_=$1;exit;}}}' <$CONTROL_PATH/skedf.ctl)
+    proc_path=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$proc/i     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*$/) {}elsif(/^[ \t]*([^* \t].*?)\/* *$/) {$_=$1;exit;}}}' <$CONTROL_PATH/skedf.ctl)
+    snap_path=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$snap/i     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*$/) {}elsif(/^[ \t]*([^* \t].*?)\/* *$/) {$_=$1;exit;}}}' <$CONTROL_PATH/skedf.ctl)
+    sched_path=$(perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$schedules/i) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*$/) {}elsif(/^[ \t]*([^* \t].*?)\/* *$/) {$_=$1;exit;}}}' <$CONTROL_PATH/skedf.ctl)
     PROC_PATH=${PROC_PATH:-"${proc_path}"}
     SNAP_PATH=${SNAP_PATH:-"${snap_path}"}
     SCHED_PATH=${SCHED_PATH:-"${sched_path}"}
