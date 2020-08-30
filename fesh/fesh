@@ -49,29 +49,36 @@ fi
 
 FESH_DATA_CENTER=${FESH_DATA_CENTER:-'cddis'}
 
+year=$(date +%Y)
+
 usage() {
     cat <<EOF
-Usage: $0 [options] OBSERVATION [DATA_CENTER]
-Fetch schedule file for OBSERVATION from DATA_CENTER.
-
-DATA_CENTER is optional, defaults to cddis. Other
-accepted values are bkg and opar.
++Usage: $0 [options] OBSERVATION
++Fetch schedule file for OBSERVATION
 
 Options:
-    -n     Fetch next observation in master schedule
-    -d     DRUDG schedule with default settings 
-           (needs STATION environment variable set to two letter id)
-    -v     Verbose mode, drudg output printed to stdout
-    -V     Print version and exit.
-    -f     Force downloading of schedule from server and, if given 
-           with '-d', re-run drudg
-    -h     Print this message
+    -n      Fetch next observation in master schedule
+    -d      DRUDG schedule with default settings
+            (needs STATION environment variable set to two letter id)
+    -D dc   User alternate data center; dc=bkg, cddis, or opar
+            (see more below about setting the default data center)
+    -v      Verbose mode, drudg output printed to stdout
+    -V      Print version and exit.
+    -y yyyy Specify different (four-digit) year than the current one
+            (see more below about specifying the year)
+    -f      Force downloading of schedule from server and, if given
+            with '-d', re-run drudg
+    -h      Print this message
 
-fesh requires the STATION environment variable be set to the lower case
-two-letter station code in, e.g.:
+For the '-d' option, the STATION environment variable must be set to
+the lower case two-letter station code in, e.g.:
 
     setenv STATION gs #in ~/.login for tcsh or
     export STATION=gs #in ~/.profile for bash
+
+By default fesh gets an observation for the current year, but this can
+be overridden with '-y' option. That option can be used to get a
+schedule for the next year.
 
 The default data center can be changed by setting it in the
 FESH_DATA_CENTER environment variable. Accepted values are bkg,
@@ -80,12 +87,14 @@ cddis, and opar. For example, to make the default bkg, use:
     setenv FESH_DATA_CENTER bkg #in ~/.login for tcsh or
     export FESH_DATA_CENTER=bkg #in ~/.profile for bash
 
+The '-D' option can be used to specify an alternate data center.
+
 fesh (curl actually) will prompt for an email to use as the password
 for anonymous ftp-ssl access for cddis. This can be suppressed by
 setting a working email address in the FESH_EMAIL variable, e.g.:
 
-    setenv FESH_EMAIL user2@address #in ~/.login for tcsh or
-    export FESH_EMAIL=user2@address #in ~/.profile for bash
+    setenv FESH_EMAIL user@address #in ~/.login for tcsh or
+    export FESH_EMAIL=user@address #in ~/.profile for bash
 
 The directories for .skd, .snp, and .prc files are obtained from
 the skedf.ctl control file. The listing files go with the .skd files.
@@ -106,7 +115,7 @@ EOF
 run_drudg=
 force=
 verbose=
-while getopts 'ndhfvV' opt; do
+while getopts 'ndD:hfvVy:' opt; do
     case $opt in
         n)
             echo "next" not implimented.
@@ -119,8 +128,14 @@ while getopts 'ndhfvV' opt; do
             fi
             run_drudg=1
             ;;
+        D)
+            FESH_DATA_CENTER=$OPTARG
+            ;;
         f)
             force=1
+            ;;
+        y)
+            year=$OPTARG
             ;;
         h)
             usage
@@ -134,7 +149,7 @@ while getopts 'ndhfvV' opt; do
             exit 0
             ;;
         *)
-            usage >&2
+            echo "Try the '-h' option for help" >&2
             exit 1
     esac
 done
@@ -190,7 +205,6 @@ if [[ -z "${FESH_EMAIL:-}" ]]; then
 else
     user="anonymous:$FESH_EMAIL"
 fi
-year=$(date +%Y)
 cd "$SCHED_PATH"
 version
 echo Fetching schedule from server...
