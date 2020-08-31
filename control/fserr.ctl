@@ -5520,7 +5520,7 @@ Q* -201
 Chan is lo1-3:MK3/4/5+K4, loa-d:VLBA/4/5, lo1-4:LBA/4, loa-d,2a-2d:DBBC, loa0-d0,a1-d1:RDBE, loa-h:DBBC3, lo1-8:others
 ""
 Q* -202
-LO frequency must be a positive real number
+LO frequency must be a non-negative real number
 ""
 Q* -203
 LO sideband must be one of unknown, usb, or lsb.
