@@ -162,10 +162,6 @@ fi
 
 sched=$1
 
-if [[ ! -z "${2:-}" ]]; then
-    FESH_DATA_CENTER=$2
-fi
-
 if [[ ! "$FESH_DATA_CENTER" =~ ^(cddis|opar|bkg) ]]; then
    echo "Unknown data center: $FESH_DATA_CENTER."
    exit 1
