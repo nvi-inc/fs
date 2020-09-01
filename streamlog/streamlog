@@ -6,7 +6,7 @@ if [[ -n ${FS_DISPLAY_SERVER:-} ]]; then
     if ! fsserver status &> /dev/null; then echo fsserver not running; exit 1 ; fi
     if ! fsserver fs status &> /dev/null; then echo fs not running; exit 1; fi
     FS_SERVER_URL_BASE=$(awk '/FS_SERVER_URL_BASE/ {gsub(/"/, "", $3); print $3}' /usr2/fs/include/params.h)
-    exec ssub "$FS_SERVER_URL_BASE/log"
+    exec ssub -w "$FS_SERVER_URL_BASE/log"
 fi
 
 
