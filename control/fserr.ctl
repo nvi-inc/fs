@@ -1263,28 +1263,28 @@ BO -189
 Error reading TIME.CTL, UNIX ?FFF
 ""
 BO -190
-Error initiliazing mcbcn, internal error ?WWW
+Error initializing mcbcn, internal error ?WWW
 ""
 BO -191
-Error initiliazing rclcn, internal error ?WWW
+Error initializing rclcn, internal error ?WWW
 ""
 BO -192
-Error initiliazing mk5cn, internal error ?WWW
+Error initializing mk5cn, internal error ?WWW
 ""
 BO -193
-Error initiliazing dscon, internal error ?WWW
+Error initializing dscon, internal error ?WWW
 ""
 BO -194
-Error initiliazing dbbcn, internal error ?WWW
+Error initializing dbbcn, internal error ?WWW
 ""
 BO -195
-Error initiliazing dbbc2, internal error ?WWW
+Error initializing dbbc2, internal error ?WWW
 ""
 BO -196
-Error initiliazing mk6ca, internal error ?WWW
+Error initializing mk6ca, internal error ?WWW
 ""
 BO -197
-Error initiliazing mk6cb, internal error ?WWW
+Error initializing mk6cb, internal error ?WWW
 ""
 BO -198
 More than ?WWW Mark6s requires mods to binit.f (plus fspgm.ctl, fserr.ctl, and mk6cn.c).
