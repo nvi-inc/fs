@@ -2067,10 +2067,16 @@ DB   -1
 dbbc.: error opening dbb?W.ctl
 ""
 DB   -2
-dbbc.: error pushing back on dbb?W.ctl
+dbbc.: line too long in dbb?W.ctl
 ""
 DB   -3
-dbbc.: first non-comment line in dbb?W.ctl did not contain three tokens
+dbbc.: first non-comment line in dbb?W.ctl must contain at least three tokens
+""
+DB   -4
+dbbc.: first non-comment line in dbb?W.ctl must contain three, six, or more tokens
+""
+DB   -5
+dbbc.: error reading dbb?W.ctl
 ""
 DB  -11
 dbb?W: error opening socket

@@ -468,4 +468,13 @@ typedef struct fscom {
 
   struct rxgain_files_ds rxgain_files[MAX_RXGAIN];
 
+  struct dbbab {
+      char host[129];
+      int port;
+      int time_out;
+      char mcast_addr[129];
+      int mcast_port;
+      char mcast_if[16];
+  } dbbad;
+
 } Fscom;

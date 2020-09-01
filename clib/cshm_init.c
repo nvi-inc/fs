@@ -521,6 +521,12 @@ void cshm_init()
   shm_addr->dbbc3_cont_cal.option=-1;
   shm_addr->dbbc3_cont_cal.samples=10;
 
+  shm_addr->dbbad.host[0]=0;
+  shm_addr->dbbad.port=0;
+  shm_addr->dbbad.time_out=0;
+  shm_addr->dbbad.mcast_addr[0]=0;
+  shm_addr->dbbad.mcast_port=0;
+  shm_addr->dbbad.mcast_if[0]=0;
 
   return;
 }

@@ -191,6 +191,10 @@ int doinit()
     FILE *fp;   /* general purpose file pointer */
     char check;
     int error;
+#define MAX_BUFF 258
+    char buff[MAX_BUFF], s;
+    char *p;
+    int ip[5];
 
     if ( (fp = fopen(control_file,"r")) == NULL) {
 #ifdef DEBUG
@@ -199,26 +203,63 @@ int doinit()
         return -1 ;
     }
 
-    check=fgetc(fp);
-    while(check == '*' && check != EOF) {
-      check=fgetc(fp);
-      while(check != '\n' && check != EOF)
-	check=fgetc(fp);
-      if(check != EOF) 
-	check=fgetc(fp);
+    buff[0]=0;
+    while( NULL != fgets(buff,MAX_BUFF,fp)) {
+        int len=strlen(buff);
+        if ('\n'!=buff[len-1])
+            return -2;
+        if('*' == buff[0])
+            continue;
+        if(shm_addr->equip.rack ==DBBC3 && who[1]=='n') {
+            char mcast_addr[129];
+            int mcast_port;
+            char mcast_if[16];
+            int ic=sscanf(buff,"%128s %d %d %128s %d %15s",
+                    host,&port, &time_out,mcast_addr,&mcast_port,mcast_if);
+            if (6==ic) {
+                p=memccpy(shm_addr->dbbad.mcast_addr,mcast_addr,0,
+                        sizeof(shm_addr->dbbad.mcast_addr));
+                if(NULL==p)
+                    shm_addr->dbbad.mcast_addr[sizeof(shm_addr->dbbad.mcast_addr)-1]=0;
+
+                shm_addr->dbbad.mcast_port=mcast_port;
+
+                p=memccpy(shm_addr->dbbad.mcast_if,mcast_if,0,
+                        sizeof(shm_addr->dbbad.mcast_if));
+                if(NULL==p)
+                    shm_addr->dbbad.mcast_if[sizeof(shm_addr->dbbad.mcast_if)-1]=0;
+            } else if (3!=ic)
+                return -4;
+            break;
+         } else {
+            if(3!=sscanf(buff,"%128s %d %d", host,&port, &time_out))
+              return -3;
+            break;
+         }
     }
-    if (check == EOF)
-      /* ended in comment */      
-      return 0;
-    else if(ungetc(check, fp)==EOF)
-      return -2;
-   
-    if ( fscanf(fp,"%80s %d %d",host,&port, &time_out)!=3) /* read a line */
-      return -3;
+    if(ferror(fp)) {
+        logit(NULL,errno,"un");
+        return -5;
+    } else if(feof(fp))
+        return 0;
 
     if(time_out <200)
       time_out= 200;
     
+    if('n' == who[1]) {
+        p=memccpy(shm_addr->dbbad.host,host, 0, sizeof(shm_addr->dbbad.host));
+        if(NULL==p)
+           shm_addr->dbbad.host[sizeof(shm_addr->dbbad.host)-1]=0;
+        shm_addr->dbbad.port=port;
+        shm_addr->dbbad.time_out=time_out;
+    }
+
+    /* start dbtcn to collect multcast */
+
+     if(shm_addr->equip.rack ==DBBC3 && who[1]=='n') {
+        skd_run("dbtcn",'n',ip);
+     }
+
 #ifdef DEBUG
     printf ("Host %s port %d time_out %d\n",host,port,time_out);
 #endif
