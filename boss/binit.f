@@ -240,8 +240,8 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-190,'bo',ierr)
         call logit7(0,0,0,1,ip(3),ip(4),ip(5))
+        call logit7ci(0,0,0,1,-190,'bo',ierr)
         call fc_putln('mcbcn initialization failed')
         return
       else
@@ -256,8 +256,8 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-191,'bo',ierr)
         call logit7(0,0,0,1,ip(3),ip(4),ip(5))
+        call logit7ci(0,0,0,1,-191,'bo',ierr)
         call fc_putln('rclcn initialization failed')
         ierr=0
       else
@@ -272,8 +272,8 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-192,'bo',ierr)
         call logit7(0,0,0,1,ip(3),ip(4),ip(5))
+        call logit7ci(0,0,0,1,-192,'bo',ierr)
         call fc_putln('mk5cn initialization failed')
         if(ip(5).eq.0) then
            ip(3)=0
@@ -291,8 +291,8 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-193,'bo',ierr)
         call logit7(0,0,0,1,ip(3),ip(4),ip(5))
+        call logit7ci(0,0,0,1,-193,'bo',ierr)
         call fc_putln('dscon initialization failed')
         return
       else
@@ -307,8 +307,8 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-194,'bo',ierr)
         call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call logit7ci(0,0,0,1,-194,'bo',ierr)
         call fc_putln('dbbcn initialization failed')
         if(ip(5).eq.0) then
            ip(3)=0
@@ -326,8 +326,8 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-195,'bo',ierr)
         call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call logit7ci(0,0,0,1,-195,'bo',ierr)
         call fc_putln('dbbc2 initialization failed')
         ierr=0
       else
@@ -342,8 +342,8 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-196,'bo',ierr)
         call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call logit7ci(0,0,0,1,-196,'bo',ierr)
         call fc_putln('mk6ca initialization failed')
         ierr=0
       else
@@ -359,8 +359,8 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-197,'bo',ierr)
         call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call logit7ci(0,0,0,1,-197,'bo',ierr)
         call fc_putln('mk6cb initialization failed')
         ierr=0
       else
@@ -382,8 +382,8 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-295,'bo',ierr)
         call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call logit7ci(0,0,0,1,-295,'bo',ierr)
         call fc_putln('rdbca initialization failed')
         ierr=0
       else
@@ -399,8 +399,8 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-296,'bo',ierr)
         call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call logit7ci(0,0,0,1,-296,'bo',ierr)
         call fc_putln('rdbcb initialization failed')
         ierr=0
       else
@@ -416,8 +416,8 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-297,'bo',ierr)
         call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call logit7ci(0,0,0,1,-297,'bo',ierr)
         call fc_putln('rdbcc initialization failed')
         ierr=0
       else
@@ -433,8 +433,8 @@ c
       call rmpar(ip)
       ierr=ip(3)
       if (ierr.ne.0) then
-        call logit7ci(0,0,0,1,-298,'bo',ierr)
         call logit7(0,0,0,0,ip(3),ip(4),ip(5))
+        call logit7ci(0,0,0,1,-298,'bo',ierr)
         call fc_putln('rdbcd initialization failed')
         ierr=0
       else
