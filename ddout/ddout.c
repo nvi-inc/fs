@@ -406,7 +406,8 @@ Ack:    ich = strtok(NULL, ",");
 
     kpcald = strncmp(buf+FIRST_CHAR-1,"#pcald#",7)==0 ||
       strncmp(buf+FIRST_CHAR-1,"#tpicd#",7)==0 || /*phasecal or tsys record */
-      strncmp(buf+FIRST_CHAR-1,"#rdtc",5)==0;
+      strncmp(buf+FIRST_CHAR-1,"#rdtc",5)==0 ||
+      strncmp(buf+FIRST_CHAR-1,"#dbtcn#",7)==0;
 
     knd= memcmp("nd",prtn1,2)==0;  /* no display */
     if(kxd || !(kp || kack || kdebug || knd || kpcald) || kpcald && kpd ){

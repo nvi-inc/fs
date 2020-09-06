@@ -61,6 +61,7 @@ main()
   double dbbc3_tpi[MAX_DBBC3_DET],dbbc3_tpical[MAX_DBBC3_DET];
 
   struct rdtcn_control rdtcn_control[MAX_RDBE];
+  struct dbtcn_control dbtcn_control;
   int iping[MAX_RDBE];
 
 /* connect to the FS */
@@ -116,6 +117,19 @@ main()
 	     sizeof(struct rdtcn_control));
       shm_addr->rdtcn[i].iping=iping[i];
     }
+    goto loop;
+  } else if(DBBC3 == shm_addr->equip.rack) {
+      dbtcn_control.continuous=shm_addr->tpicd.continuous;
+      dbtcn_control.cycle=shm_addr->tpicd.cycle;
+      dbtcn_control.stop_request=shm_addr->tpicd.stop_request;
+      memcpy(&dbtcn_control.data_valid,&data_valid,
+	     sizeof(struct data_valid_cmd));
+      iping[0]=1-shm_addr->dbtcn.iping;
+      if(iping[0]!=0)
+	iping[0]=1;
+      memcpy(&shm_addr->dbtcn.control[iping[0]],&dbtcn_control,
+	     sizeof(struct dbtcn_control));
+      shm_addr->dbtcn.iping=iping[0];
     goto loop;
   }
 

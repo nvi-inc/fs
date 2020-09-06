@@ -477,4 +477,14 @@ typedef struct fscom {
       char mcast_if[16];
   } dbbad;
 
+  struct dbtcn {
+    struct dbtcn_control {
+      int continuous;
+      int cycle;
+      int stop_request;
+      struct data_valid_cmd data_valid;
+    } control[2];
+    int iping;
+  } dbtcn;
+
 } Fscom;

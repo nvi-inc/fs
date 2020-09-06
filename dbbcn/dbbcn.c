@@ -254,12 +254,6 @@ int doinit()
         shm_addr->dbbad.time_out=time_out;
     }
 
-    /* start dbtcn to collect multcast */
-
-     if(shm_addr->equip.rack ==DBBC3 && who[1]=='n') {
-        skd_run("dbtcn",'n',ip);
-     }
-
 #ifdef DEBUG
     printf ("Host %s port %d time_out %d\n",host,port,time_out);
 #endif
@@ -276,10 +270,15 @@ int doinit()
 #ifdef DEBUG
       printf ("Cannot open mk5 host %s port %d error %d\n",host,port,error);
 #endif
-      fail=FALSE;
-      return error;
     }
-    return 0;
+
+    /* start dbtcn to collect multcast */
+
+     if(shm_addr->equip.rack ==DBBC3 && who[1]=='n') {
+        skd_run("dbtcn",'n',ip);
+     }
+
+    return error;
 }
 
 /* ********************************************************************* */
@@ -546,6 +545,7 @@ int open_mk5(char *host, int port)
   (void) printf("%s Ready\n", me); 
 #endif
 
+  fail = FALSE;
   is_open=TRUE;
   first_transaction=TRUE;
   return 0;

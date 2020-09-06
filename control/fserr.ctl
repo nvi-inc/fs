@@ -2531,6 +2531,45 @@ Error decoding dbbcNN/ response, could be a DBBC version mis-match, see error DC
 DK -451
 Class buffer error from command response.
 ""
+DN   21
+DBBC3 multicast: error from select() cleared.
+""
+DN   20
+DBBC3 multicast: receiving multicast messages again.
+""
+DN   -1
+DBBC3 multicast: error unpacking, packet too small.
+""
+DN  -20
+DBBC3 multicast: no message received, multicast may not be running
+""
+DN  -21
+DBBC3 multicast: error from select(), UNIX?FFF
+""
+DN  -22
+DBBC3 multicast: error from recvfrom(), UNIX?FFF
+""
+DN  -11
+DBBC3 multicast: opening datagram socket, UNIX?FFF
+""
+DN  -12
+DBBC3 multicast: setting SO_REUSEADDR, UNIX?FFF
+""
+DN  -13
+DBBC3 multicast: binding datagram socket (wrong port?), UNIX?FFF
+""
+DN  -14
+DBBC3 multicast: adding multicast group (wrong address?), UNIX?FFF
+""
+DN  -16
+DBBC3 multicast: interface name too long to get address, maximum is?WWW
+""
+DN  -17
+DBBC3 multicast: opening socket to get interface address, UNIX?FF
+""
+DN  -18
+DBBC3 multicast: retrieving interface address from socket (wrong interface?), UNIX?FFF
+""
 DP -301
 No command form of pfbX command.
 ""

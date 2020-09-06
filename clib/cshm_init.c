@@ -528,6 +528,14 @@ void cshm_init()
   shm_addr->dbbad.mcast_port=0;
   shm_addr->dbbad.mcast_if[0]=0;
 
+  for (j=0;j<2;j++) {
+      shm_addr->dbtcn.control[j].continuous=0;
+      shm_addr->dbtcn.control[j].cycle=0;
+      shm_addr->dbtcn.control[j].stop_request=1;
+      shm_addr->dbtcn.control[j].data_valid.user_dv=0;
+  }
+  shm_addr->dbtcn.iping=0;
+
   return;
 }
 

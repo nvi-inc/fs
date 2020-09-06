@@ -19,12 +19,15 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
-#define TO_CENTISECONDS  420
+#include "packet.h"
+#include "packet_unpack.h"
+#include "dbtcn.h"
 
 extern struct fscom *shm_addr;
 
@@ -32,27 +35,67 @@ static char me[]="dbtcn";
 
 int main(int argc, char *argv[])
 {
-  int ip[5];
+    int ip[5];
+    char buf[sizeof(dbbc3_ddc_multicast_t)];
 
-  setup_ids();    /* attach to the shared memory */
-  rte_prior(FS_PRIOR);
+    setup_ids();    /* attach to the shared memory */
+    rte_prior(FS_PRIOR);
 
-  putpname("dbtcn");
+    putpname(me);
 
-  printf(" running %s\n",me);
+    skd_wait(me,ip,(unsigned) 0);
 
-  skd_wait(me,ip,(unsigned) 0);
+    if(0==shm_addr->dbbad.mcast_addr[0])
+        goto idle;
 
-  printf(" me %s\n",me);
-  printf(" host %s\n",shm_addr->dbbad.host);
-  printf(" port %d\n",shm_addr->dbbad.port);
-  printf(" time_out %d\n",shm_addr->dbbad.time_out);
-  printf(" mcast_addr %s\n",shm_addr->dbbad.mcast_addr);
-  printf(" mcast_port %d\n",shm_addr->dbbad.mcast_port);
-  printf(" mcast_if %s\n",shm_addr->dbbad.mcast_if);
-  printf(" me %s done\n",me);
+    int error_no;
+    int sock = open_mcast(shm_addr->dbbad.mcast_addr,
+        shm_addr->dbbad.mcast_port,
+        shm_addr->dbbad.mcast_if,
+        &error_no);
 
-  for(;;)
-      rte_sleep(100);
+    if(0>sock) {
+        logitn(NULL,-10+sock,"dn",error_no);
+        goto idle;
+    }
 
+    size_t n;
+    struct dbtcn_control dbtcn_control;
+    int loop_count = 0;
+    dbbc3_ddc_multicast_t packet = {};
+    for (;;) {
+        n = read_mcast(sock,buf,sizeof(buf));
+
+        /* check control to get the last state */
+
+        memcpy(&dbtcn_control,
+        &shm_addr->dbtcn.control[shm_addr->dbtcn.iping],
+        sizeof(dbtcn_control));
+
+        if (1==dbtcn_control.stop_request ||
+            (dbtcn_control.continuous == 0 &&
+            (dbtcn_control.data_valid.user_dv ==0 || shm_addr->KHALT !=0 ||
+            0==strncmp(shm_addr->LSKD,"none    ",8)))) {
+            loop_count=-1;
+            continue;
+        }
+        if (loop_count < -1 || loop_count >= (dbtcn_control.cycle+99)/100)
+            loop_count=-1;
+
+        ++loop_count;
+        loop_count=loop_count%((dbtcn_control.cycle+99)/100);
+        if (loop_count!=0)
+            continue;
+
+        if (unmarshal_dbbc3_ddc_multicast_t(&packet, buf, n) < 0) {
+            logit(NULL,-1,"dn");
+            continue;
+        }
+
+        log_mcast(&packet);
+    }
+
+idle:
+    for (;;)
+        skd_wait(me,ip,(unsigned) 0);
 }
