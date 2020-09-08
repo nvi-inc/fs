@@ -26,6 +26,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "../include/poclb.h"
+
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/shm_addr.h"      /* shared memory pointer */
@@ -35,7 +37,7 @@ void cls_snd();
 void pname();
 void rte_time();
 
-logitn(msg,ierr,who, what)
+void logitn(msg,ierr,who, what)
 char *msg;           /* a message to be logged, NULL if none */
 int ierr;            /* error number, 0 if no error          */
 char *who;           /* 2-char string identifying the error  */

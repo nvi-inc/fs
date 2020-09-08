@@ -17,25 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-/* pname, putpname
 
-   Put/get program name for logging 
-*/
-#include <string.h>
+// rte_prior.c
+int rte_prior(int ivalue);
 
-#include "../include/poclb.h"
-
-static char sname[5]={' ',' ',' ',' ',' '};
-
-void putpname(name)
-char *name;
-{
-  memcpy(sname,name,5);
-}
-
-void pname(name)
-char *name;
-{
-  memcpy(name,sname,5);
-}
-
+// rte_sleep.c
+unsigned rte_sleep( unsigned centisec);

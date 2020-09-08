@@ -17,25 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-/* pname, putpname
 
-   Put/get program name for logging 
-*/
-#include <string.h>
+// pname.c
+void putpname(char *name);
+void pname(char *name);
 
-#include "../include/poclb.h"
+// logit.c
+void logits( char *msg, int ierr, char *who, char lsor);
+void logit( char *msg, int ierr, char *who);
+void logit_nd( char *msg, int ierr, char *who);
 
-static char sname[5]={' ',' ',' ',' ',' '};
-
-void putpname(name)
-char *name;
-{
-  memcpy(sname,name,5);
-}
-
-void pname(name)
-char *name;
-{
-  memcpy(name,sname,5);
-}
-
+// logitn.c
+void logitn( char *msg, int ierr, char *who, int what);

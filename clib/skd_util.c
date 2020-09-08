@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "../include/clib.h"
+
 #define  MAX_BUF       256
 
 #define FS_SKD_WAIT (1 << 30)
@@ -254,7 +256,7 @@ if(nsem!=NULL && nsem[0]!=0)
   nsem_put(nsem);
 
 if(w != 'w')
-  return;
+  return 0;
 
  if(to !=0) {
    if(signal(SIGALRM,nullfcn) == SIG_ERR){
@@ -759,7 +761,6 @@ static void nullfcn(sig)
 int sig;
 {
     int i;
-    void skd_run();
 
     if(signal(sig,SIG_IGN) == SIG_ERR ) {
       perror("nullfcn: error ignoring signal");

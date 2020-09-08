@@ -24,6 +24,9 @@
 #include <netinet/in.h>
 #include <sys/select.h>
 
+#include "../include/poclb.h"
+#include "../include/rtelb.h"
+
 #include "packet.h"
 #include "packet_unpack.h"
 #include "dbtcn.h"

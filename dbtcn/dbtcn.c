@@ -25,6 +25,10 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
+#include "../include/clib.h"
+#include "../include/rtelb.h"
+#include "../include/poclb.h"
+
 #include "packet.h"
 #include "packet_unpack.h"
 #include "dbtcn.h"

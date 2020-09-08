@@ -21,6 +21,8 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include "../include/clib.h"
+
 #include "../include/params.h"
 
 void uns2str(output,uvalue,width)

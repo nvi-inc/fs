@@ -23,6 +23,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "../include/rtelb.h"
+
 clock_t rte_times(struct tms *buf);
 
 unsigned rte_sleep( centisec)
