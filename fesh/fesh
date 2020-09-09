@@ -29,22 +29,23 @@ version(){
 set -euo pipefail
 
 FS_BASE=${FS_BASE:-'/usr2'}
-FS_PATH=${FS_PATH:-"${FS_BASE}/fs"}
-CONTROL_PATH=${CONTROL_PATH:-"${FS_BASE}/control"}
-LOG_PATH=${LOG_PATH:-"${FS_BASE}/log"}
+FS_DIR=${FS_DIR:-"${FS_BASE}/fs"}
+CONTROL_DIR=${CONTROL_DIR:-"${FS_BASE}/control"}
+LOG_DIR=${LOG_DIR:-"${FS_BASE}/log"}
 # check for skedf.ctl
-if [[ -e $CONTROL_PATH/skedf.ctl ]]; then
-    proc_path=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$proc/i     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t]*$/) {$_=$1;exit;}}}' <$CONTROL_PATH/skedf.ctl)
-    snap_path=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$snap/i     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t]*$/) {$_=$1;exit;}}}' <$CONTROL_PATH/skedf.ctl)
-    sched_path=$(perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$schedules/i) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t]*$/) {$_=$1;exit;}}}' <$CONTROL_PATH/skedf.ctl)
-    PROC_PATH=${PROC_PATH:-"${proc_path}"}
-    SNAP_PATH=${SNAP_PATH:-"${snap_path}"}
-    SCHED_PATH=${SCHED_PATH:-"${sched_path}"}
+if [[ -e $CONTROL_DIR/skedf.ctl ]]; then
+    proc_path=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$proc/i     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t]*$/) {$_=$1;exit;}}}' <$CONTROL_DIR/skedf.ctl)
+    snap_path=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$snap/i     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t]*$/) {$_=$1;exit;}}}' <$CONTROL_DIR/skedf.ctl)
+    sched_path=$(perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$schedules/i) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t]*$/) {$_=$1;exit;}}}' <$CONTROL_DIR/skedf.ctl)
+    PROC_DIR=${PROC_DIR:-"${proc_path}"}
+    SNAP_DIR=${SNAP_DIR:-"${snap_path}"}
+    SCHED_DIR=${SCHED_DIR:-"${sched_path}"}
+    LIST_DIR=${LIST_DIR:-${SCHED_DIR}}
 else
 # drudg won't run without skedf.ctl, maybe some day it will
 # we can still get the schedule
 # use current directory without other information
-    SCHED_PATH=${SCHED_PATH:-"."}
+    SCHED_DIR=${SCHED_DIR:-"."}
 fi
 
 FESH_DATA_CENTER=${FESH_DATA_CENTER:-'cddis'}
@@ -97,7 +98,12 @@ setting a working email address in the FESH_EMAIL variable, e.g.:
     export FESH_EMAIL=user@address #in ~/.profile for bash
 
 The directories for .skd, .snp, and .prc files are obtained from
-the skedf.ctl control file. The listing files go with the .skd files.
+the skedf.ctl control file. The listing files go with the .skd files
+by default, but can be over-ridden with the LIST_DIR environment
+variable. For example to make it the current directory, use:
+
+    setenv LIST_DIR . #in ~/.login for tcsh or
+    export LIST_DIR=. #in ~/.profile for bash
 
 If you have FSL8 or other old distribution that does not support
 curl ftp-ssl to CDDIS, but worked with the previous versions of
@@ -122,8 +128,8 @@ while getopts 'ndD:hfvVy:' opt; do
             exit 1
             ;;
         d)
-            if [[ ! -e $CONTROL_PATH/skedf.ctl ]]; then
-                echo "$CONTROL_PATH/skedf.ctl doesn't exist, can't run drudg, don't use '-d'" >&2
+            if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
+                echo "$CONTROL_DIR/skedf.ctl doesn't exist, can't run drudg, don't use '-d'" >&2
                 exit 1
             fi
             run_drudg=1
@@ -168,8 +174,8 @@ if [[ ! "$FESH_DATA_CENTER" =~ ^(cddis|opar|bkg) ]]; then
 fi
 
 ## Conflict check
-if [[ -e $SCHED_PATH/$sched.skd && -z "$force" ]]; then
-    echo "$SCHED_PATH/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
+if [[ -e $SCHED_DIR/$sched.skd && -z "$force" ]]; then
+    echo "$SCHED_DIR/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
     exit 1
 fi
 
@@ -180,19 +186,26 @@ if [[ -n "$run_drudg" ]]; then
         exit 1
     fi
     set -u
-    if [[ -e $SNAP_PATH/$sched$STATION.snp ]]; then
+    if [[ -e $SNAP_DIR/$sched$STATION.snp ]]; then
         if [[ -z "$force" ]]; then
-            echo "$SNAP_PATH/$sched$STATION.snp exists, delete or use '-f' to re-drudg" >&2
+            echo "$SNAP_DIR/$sched$STATION.snp exists, delete or use '-f' to re-drudg" >&2
             exit 1
         fi
-        rm "$SNAP_PATH/$sched$STATION.snp"
+        rm "$SNAP_DIR/$sched$STATION.snp"
     fi
-    if [[ -e $PROC_PATH/$sched$STATION.prc ]]; then
+    if [[ -e $PROC_DIR/$sched$STATION.prc ]]; then
         if [[ -z "$force" ]]; then
-            echo "$PROC_PATH/$sched$STATION.prc exists, delete or use '-f' to re-drudg" >&2
+            echo "$PROC_DIR/$sched$STATION.prc exists, delete or use '-f' to re-drudg" >&2
             exit 1
         fi
-        rm "$PROC_PATH/$sched$STATION.prc"
+        rm "$PROC_DIR/$sched$STATION.prc"
+    fi
+    if [[ -e $LIST_DIR/$sched$STATION.lst ]]; then
+        if [[ -z "$force" ]]; then
+            echo "LIST_DIR/$sched$STATION.lst exists, delete or use '-f' to re-drudg" >&2
+            exit 1
+        fi
+        rm "$LIST_DIR/$sched$STATION.lst"
     fi
 fi
  
@@ -201,7 +214,7 @@ if [[ -z "${FESH_EMAIL:-}" ]]; then
 else
     user="anonymous:$FESH_EMAIL"
 fi
-cd "$SCHED_PATH"
+pushd "$SCHED_DIR"
 version
 echo Fetching schedule from server...
 #TODO: if not found, maybe check next or previous years?
@@ -217,6 +230,7 @@ elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
 wget -nv --backups=1 "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
 fi
 echo Done
+popd
 
 drudg_out="/dev/null"
 if [[ -n "$verbose" ]]; then
@@ -225,12 +239,12 @@ fi
 
 if [[ -n "$run_drudg" ]]; then
 echo -n Drudging schedule... >&2
-cat <<EOF | "$FS_PATH/bin/drudg" "$sched.skd" > "$drudg_out"
+cat <<EOF | "$FS_DIR/bin/drudg" "$sched.skd" > "$drudg_out"
 $STATION
 3
 12
 9
-$sched$STATION.lst
+$LIST_DIR/$sched$STATION.lst
 
 
 
