@@ -53,9 +53,14 @@ cdp     cdp or metserver port & host, use cdp if you don't have either
   1 1 1 1    
 *DBBC IF power conversion factors, one for each module specified above, no trailing comments or extra fields
   15000 15000 15000 15000
-*VSI-H/Mark5B clock rate (MHz): "nominal" is 32 for rack=Mark5 or VLBA5,
-*                                                   rack=DBBC DDC, letter ' ',
+*VSI-H/Mark5B clock rate (MHz): "nominal" is: 
+*                                            32 for rack=Mark5 or VLBA5,
+*                                                   rack=DBBC DDC, any letter,
 *                                                        v104 or less,
+*                                                        with and without
+*                                                        FiLa10G
+*                                                   rack=DBBC DDC, letter ' ',
+*                                                        v105-v106,
 *                                                        with and without
 *                                                        FiLa10G
 *                                                   rack=VLBAC
