@@ -97,13 +97,15 @@ int deci;         /* digits after decimal point, >=0 blank fill for right   */
 	}
       }
 
-      if(strlen(string)>wide || !isnum) {     /* too wide or nan/inf, $ fill */
+      if(strlen(string)>wide && string[wide-1]!='.' && string[wide]!='.' || !isnum) {     /* too wide or nan/inf, $ fill */
         for (i=0; i< wide; i++) 
           output[i]='$';
         output[wide]='\0';
         return;
-      } else
+      } else {
+        string[wide]=0;
         strcat(output,string);      /* okay, append result */
+      }
 
        return;
 }
@@ -160,13 +162,15 @@ int deci;         /* digits after decimal point, >=0 blank fill for right   */
 	}
       }
 
-      if(strlen(string)>wide || !isnum) {     /* too wide or nan/inf, $ fill */
+      if(strlen(string)>wide && string[wide-1]!='.' && string[wide]!='.' || !isnum) {     /* too wide or nan/inf, $ fill */
         for (i=0; i< wide; i++) 
           output[i]='$';
         output[wide]='\0';
         return;
-      } else
+      } else {
+        string[wide]=0;
         strcat(output,string);      /* okay, append result */
+      }
 
        return;
 }
