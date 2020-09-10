@@ -532,6 +532,7 @@ void cshm_init()
       shm_addr->dbtcn.control[j].continuous=0;
       shm_addr->dbtcn.control[j].cycle=0;
       shm_addr->dbtcn.control[j].stop_request=1;
+      shm_addr->dbtcn.control[j].to_error_off=0;
       shm_addr->dbtcn.control[j].data_valid.user_dv=0;
   }
   shm_addr->dbtcn.iping=0;

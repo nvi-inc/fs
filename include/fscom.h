@@ -482,6 +482,7 @@ typedef struct fscom {
       int continuous;
       int cycle;
       int stop_request;
+      int to_error_off;
       struct data_valid_cmd data_valid;
     } control[2];
     int iping;

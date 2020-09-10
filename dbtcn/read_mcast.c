@@ -35,7 +35,7 @@
 #define TIME_OUT        400
 #define ERROR_PERIOD   2000
 
-size_t read_mcast(int sock, char buf[], size_t buf_size)
+ssize_t read_mcast(int sock, char buf[], size_t buf_size, int to_report)
 {
     ssize_t n;
     struct sockaddr_in from;
@@ -44,50 +44,51 @@ size_t read_mcast(int sock, char buf[], size_t buf_size)
     struct timeval to;
     fd_set readfds;
     int return_select;
-    int mcast_error = 0;
-    int mcast_to    = 0;
-    int old_error = 0;
+    static int mcast_error = 0;
+    static int mcast_to    = 0;
+    static int old_error = 0;
 
-    for (;;) {
-        /* Read when data available */
-        FD_ZERO(&readfds);
-        FD_SET(sock, &readfds);
-        to.tv_sec=TIME_OUT/100;
-        to.tv_usec=(TIME_OUT%100)*10000;
+    /* Read when data available */
+    FD_ZERO(&readfds);
+    FD_SET(sock, &readfds);
+    to.tv_sec=TIME_OUT/100;
+    to.tv_usec=(TIME_OUT%100)*10000;
 
-        return_select = select(sock + 1, &readfds, NULL, NULL, &to);
-        if(return_select == 0) {
+    return_select = select(sock + 1, &readfds, NULL, NULL, &to);
+    if(return_select == 0) {
+        if(to_report) {
             mcast_to=mcast_to%(ERROR_PERIOD/TIME_OUT) + 1;
             if(1==mcast_to) {
               logit(NULL,-20,"dn");
             }
-          continue;
-        } else if (return_select < 0) { /* error */
-            if(old_error != errno)
-                mcast_error = 0;
-          mcast_error=mcast_error%(ERROR_PERIOD/100) + 1;
-          if(1==mcast_error) {
-            logitn(NULL,-21,"dn",errno);
-          }
-          old_error=errno;
-          rte_sleep(100);
-          continue;
         }
-        if(mcast_to) {
-          mcast_to=0;
-          logit(NULL,20,"dn");
-        }
-        if(mcast_error) {
-          mcast_error=0;
-          old_error = 0;
-          logit(NULL,21,"dn");
-        }
-
-        if ((n = recvfrom(sock, buf, buf_size, 0,
-            (struct sockaddr *)&from, &len)) < 0) {
-            logitn(NULL,-22,"dn",errno);
-            continue;
-        }
-        return n;
+      return -1;
+    } else if (return_select < 0) { /* error */
+        if(old_error != errno)
+            mcast_error = 0;
+      mcast_error=mcast_error%(ERROR_PERIOD/100) + 1;
+      if(1==mcast_error) {
+        logitn(NULL,-21,"dn",errno);
+      }
+      old_error=errno;
+      rte_sleep(100);
+      return -1;
     }
+    if(mcast_to) {
+      mcast_to=0;
+      logit(NULL,20,"dn");
+    }
+    if(mcast_error) {
+      mcast_error=0;
+      old_error = 0;
+      logit(NULL,21,"dn");
+    }
+
+    if ((n = recvfrom(sock, buf, buf_size, 0,
+        (struct sockaddr *)&from, &len)) < 0) {
+        logitn(NULL,-22,"dn",errno);
+        rte_sleep(100);
+        return -1;
+    }
+    return n;
 }

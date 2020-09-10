@@ -122,6 +122,7 @@ main()
       dbtcn_control.continuous=shm_addr->tpicd.continuous;
       dbtcn_control.cycle=shm_addr->tpicd.cycle;
       dbtcn_control.stop_request=shm_addr->tpicd.stop_request;
+      dbtcn_control.to_error_off=shm_addr->tpicd.stop_request;
       memcpy(&dbtcn_control.data_valid,&data_valid,
 	     sizeof(struct data_valid_cmd));
       iping[0]=1-shm_addr->dbtcn.iping;

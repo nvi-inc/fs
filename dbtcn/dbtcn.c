@@ -63,12 +63,21 @@ int main(int argc, char *argv[])
         goto idle;
     }
 
-    size_t n;
+    ssize_t n;
     struct dbtcn_control dbtcn_control;
-    int loop_count = 0;
+    int to_report;
     dbbc3_ddc_multicast_t packet = {};
+    int loop_count = -1;
     for (;;) {
-        n = read_mcast(sock,buf,sizeof(buf));
+        memcpy(&dbtcn_control,
+        &shm_addr->dbtcn.control[shm_addr->dbtcn.iping],
+        sizeof(dbtcn_control));
+
+        to_report=1!=dbtcn_control.to_error_off;
+
+        n = read_mcast(sock,buf,sizeof(buf),to_report);
+        if(n<0)
+            continue;
 
         /* check control to get the last state */
 
@@ -83,8 +92,6 @@ int main(int argc, char *argv[])
             loop_count=-1;
             continue;
         }
-        if (loop_count < -1 || loop_count >= (dbtcn_control.cycle+99)/100)
-            loop_count=-1;
 
         ++loop_count;
         loop_count=loop_count%((dbtcn_control.cycle+99)/100);
@@ -95,7 +102,6 @@ int main(int argc, char *argv[])
             logit(NULL,-1,"dn");
             continue;
         }
-
         log_mcast(&packet);
     }
 
