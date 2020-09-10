@@ -50,6 +50,8 @@ fi
 
 FESH_DATA_CENTER=${FESH_DATA_CENTER:-'cddis'}
 
+FESH_CDDIS_METHOD=${FESH_CDDIS_METHOD:-'ftp-ssl'}
+
 year=$(date +%Y)
 
 usage() {
@@ -110,8 +112,8 @@ curl ftp-ssl to CDDIS, but worked with the previous versions of
 fesh that used wget for non-ssl ftp, you can restore the previous
 behaviour with:
 
-    setenv FESH_CDDIS_NOSSL 1 #in ~/.login for tcsh or
-    export FESH_CDDIS_NOSSL=1 #in ~/.profile for bash
+    setenv FESH_CDDIS_METHOD ftp #in ~/.login for tcsh or
+    export FESH_CDDIS_METHOD=ftp #in ~/.profile for bash
 
 However, this method will no longer work when CDDIS stops support
 of non-ssl ftp, which is expected at the end of October 2020.
@@ -168,8 +170,13 @@ fi
 
 sched=$1
 
-if [[ ! "$FESH_DATA_CENTER" =~ ^(cddis|opar|bkg) ]]; then
+if [[ ! "$FESH_DATA_CENTER" =~ ^(cddis|opar|bkg)$ ]]; then
    echo "Unknown data center: $FESH_DATA_CENTER."
+   exit 1
+fi
+
+if [[ ! "$FESH_CDDIS_METHOD" =~ ^(ftp|ftp-ssl)$ ]]; then
+   echo "Unknown cddis method: $FESH_CDDIS_METHOD."
    exit 1
 fi
 
@@ -219,10 +226,10 @@ version
 echo Fetching schedule from server...
 #TODO: if not found, maybe check next or previous years?
 if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
-    if [[ -z "${FESH_CDDIS_NOSSL:-}" ]]; then
-        curl -u "$user" -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-    else
+    if [[ "$FESH_CDDIS_METHOD" =~ ^ftp$ ]]; then
         wget -nv --backups=1 "ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+    else
+        curl -u "$user" -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
     fi
 elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
 wget -nv --backups=1 "ftp://ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
