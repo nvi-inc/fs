@@ -49,3 +49,7 @@ void uns2str( char *output, unsigned uvalue, int width);
 void flt2str( char *output, float fvalue, int width, int deci);
 void dble2str( char *output, double fvalue, int width, int deci);
 void int2str( char *output, int ivalue, int width, int zorb);
+
+// get_gain_par.c
+void get_gain_par( int ifchain, double center, float *fwhm, float *dpfu,
+        float *gain, float *tcal);

@@ -21,13 +21,15 @@
 #include <sys/types.h>
 #include <math.h>
 
+#include "../include/clib.h"
+
 #include "../include/dpi.h"
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-get_gain_par(ifchain,center,fwhm,dpfu,gain,tcal)
+void get_gain_par(ifchain,center,fwhm,dpfu,gain,tcal)
      int ifchain;
      double center;
      float *fwhm, *tcal, *dpfu, *gain;

@@ -33,23 +33,32 @@
 
 extern struct fscom *shm_addr;
 
-static void cattp(char buf[],int tp)
+static float bw_key[ ]={2,4,8,16,32,64,128};
+#define NBW_KEY sizeof(bw_key)/sizeof( float)
+
+static void tp_cat(char buf[],int tp)
 {
     int2str(buf,tp,-5,0);
     strcat(buf,",");
 }
 
-static void logtp(char buf[],int force)
+static void ts_cat(char buf[],double ts)
+{
+    dble2str(buf,ts,-4,1);
+    strcat(buf,",");
+}
+
+static void log_out(char buf[],char *string)
 {
     static int slen = 0;
 
-    if((strlen(buf) >  100 || force ) && strlen(buf) > slen) {
+    if((strlen(buf) >  100 || strlen(string)==0) && strlen(buf) > slen) {
         buf[strlen(buf)-1]=0;
         logit(buf,0,NULL);
         buf[0]=0;
     }
-    if(buf[0]==0 && !force) {
-        strcpy(buf,"tpcont/");
+    if(buf[0]==0 && strlen(string) !=0) {
+        strcpy(buf,string);
         slen=strlen(buf);
     }
 }
@@ -72,28 +81,142 @@ void log_mcast(dbbc3_ddc_multicast_t *t)
 
     return;
 */
+    double on, off;
+    char *start;
+    int len;
     char buf[256] = "";
+    int cont_cal=shm_addr->dbbc3_cont_cal.mode == 1;
     for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
         for (j=0;j<shm_addr->dbbc3_ddc_bbcs_per_if;j++) {
 
-            int ibbc = (j/9)*64+i*8+1+j;
+            int ibbc = (j/9)*64+i*8+j;
 
-            logtp(buf, FALSE);
-            char *start=buf+strlen(buf);
-            int len=sizeof(buf)-strlen(buf);
-            snprintf(start,len," %03dl,",ibbc);
+            if(cont_cal)
+                log_out(buf, "tpcont/");
+            else
+                log_out(buf, "tpi/");
 
-            cattp(buf,t->bbc[ibbc-1].total_power_lsb_cal_on);
-            cattp(buf,t->bbc[ibbc-1].total_power_lsb_cal_off);
-
-            logtp(buf, FALSE);
             start=buf+strlen(buf);
             len=sizeof(buf)-strlen(buf);
-            snprintf(start,len," %03du,",ibbc);
+            snprintf(start,len," %03dl,",ibbc+1);
 
-            cattp(buf,t->bbc[ibbc-1].total_power_usb_cal_on);
-            cattp(buf,t->bbc[ibbc-1].total_power_usb_cal_off);
+            on =t->bbc[ibbc].total_power_lsb_cal_on;
+            off=t->bbc[ibbc].total_power_lsb_cal_off;
+            if(shm_addr->dbbc3_ddc_v<125) {
+                on =t->bbc[ibbc].total_power_lsb_cal_off;
+                off=t->bbc[ibbc].total_power_lsb_cal_on;
+            }
+            tp_cat(buf,on);
+            if(cont_cal)
+                tp_cat(buf,off);
+
+            if(cont_cal)
+                log_out(buf, "tpcont/");
+            else
+                log_out(buf, "tpi/");
+
+            start=buf+strlen(buf);
+            len=sizeof(buf)-strlen(buf);
+            snprintf(start,len," %03du,",ibbc+1);
+
+            on =t->bbc[ibbc].total_power_usb_cal_on;
+            off=t->bbc[ibbc].total_power_usb_cal_off;
+            if(shm_addr->dbbc3_ddc_v<125) {
+                on =t->bbc[ibbc].total_power_usb_cal_off;
+                off=t->bbc[ibbc].total_power_usb_cal_on;
+            }
+            tp_cat(buf,on);
+            if(cont_cal)
+                tp_cat(buf,off);
         }
-        logtp(buf, TRUE);
+        log_out(buf, "");
+    }
+    if(cont_cal) {
+        double freq, on, off, diff, tsys;
+        float fwhm, tcal, dpfu, gain;
+        char *start;
+        int len;
+        for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+            for (j=0;j<shm_addr->dbbc3_ddc_bbcs_per_if;j++) {
+
+                int ibbc = (j/9)*64+i*8+j;
+
+	            int ifchain=shm_addr->dbbc3_bbcnn[ibbc].source;
+                if(ifchain < 0 || ifchain >= MAX_LO ||
+                        shm_addr->lo.lo[ifchain]<0.0)
+                    continue;
+
+	            int ibw=shm_addr->dbbc3_bbcnn[ibbc].bw;
+                if(ibw<0 || ibw >= NBW_KEY)
+                    continue;
+
+                freq=shm_addr->dbbc3_bbcnn[ibbc].freq*1e-6-bw_key[ibw]*0.5;
+                if(shm_addr->lo.sideband[ifchain]==2) // LSB first LO
+                    freq=shm_addr->lo.lo[ifchain]-freq;
+                else if(shm_addr->lo.sideband[ifchain]==1) // USB first LO
+                    freq=shm_addr->lo.lo[ifchain]+freq;
+                else
+                    goto usb;
+
+                get_gain_par(ifchain+1,freq,&fwhm,&dpfu,NULL,&tcal);
+
+                on =t->bbc[ibbc].total_power_lsb_cal_on;
+                off=t->bbc[ibbc].total_power_lsb_cal_off;
+                if(shm_addr->dbbc3_ddc_v<125) {
+                    on =t->bbc[ibbc].total_power_lsb_cal_off;
+                    off=t->bbc[ibbc].total_power_lsb_cal_on;
+                }
+                diff=on-off;
+
+                if (tcal <=0.0)
+                    tsys=-9e12;
+                else if(diff <= 0.5)  /* no divide by zero or negative values */
+                    tsys=-9e6;
+                else {
+                    tsys= (tcal/diff)*0.5*(on+off);
+                }
+
+                log_out(buf, "tsys/");
+                start=buf+strlen(buf);
+                len=sizeof(buf)-strlen(buf);
+                snprintf(start,len," %03dl,",ibbc+1);
+                ts_cat(buf,tsys);
+
+usb:
+                freq=shm_addr->dbbc3_bbcnn[ibbc].freq*1e-6+bw_key[ibw]*0.5;
+                if(shm_addr->lo.sideband[ifchain]==2) // LSB first LO
+                    freq=shm_addr->lo.lo[ifchain]-freq;
+                else if(shm_addr->lo.sideband[ifchain]==1) // USB first LO
+                    freq=shm_addr->lo.lo[ifchain]+freq;
+                else
+                    continue;
+
+                get_gain_par(ifchain+1,freq,&fwhm,&dpfu,NULL,&tcal);
+
+                on =t->bbc[ibbc].total_power_usb_cal_on;
+                off=t->bbc[ibbc].total_power_usb_cal_off;
+                if(shm_addr->dbbc3_ddc_v<125) {
+                    on =t->bbc[ibbc].total_power_usb_cal_off;
+                    off=t->bbc[ibbc].total_power_usb_cal_on;
+                }
+                diff=on-off;
+
+                if (tcal <=0.0)
+                    tsys=-9e12;
+                else if(diff <= 0.5)  /* no divide by zero or negative values */
+                    tsys=-9e6;
+                else {
+                    tsys= (tcal/diff)*0.5*(on+off);
+                }
+
+                log_out(buf, "tsys/");
+                start=buf+strlen(buf);
+                len=sizeof(buf)-strlen(buf);
+                snprintf(start,len," %03du,",ibbc+1);
+                ts_cat(buf,tsys);
+
+            }
+            log_out(buf, "");
+        }
     }
 }
