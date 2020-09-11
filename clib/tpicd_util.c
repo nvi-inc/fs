@@ -313,6 +313,7 @@ int *count;
 struct tpicd_cmd *lcl;
 {
   int ivalue,i,j,k,lenstart,limit;
+  static int j_start,k_start;
 
   output=output+strlen(output);
 
@@ -325,9 +326,10 @@ struct tpicd_cmd *lcl;
     strcat(output,",");
 
     sprintf(output+strlen(output),"%d",lcl->cycle);
-    goto end;
-  }
-  if(*count >= 2 && *count <=11 ) {
+
+    j_start = 0;
+    k_start = 0;
+  } else if (shm_addr->equip.rack!=DBBC3 && *count >= 2 && *count <=11 ) {
     for(j=*count-2;j<9;j++) {
       *count=j+2;
       if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||
@@ -354,9 +356,6 @@ struct tpicd_cmd *lcl;
 	limit=MAX_DBBC_PFB_DET;
       }else if (shm_addr->equip.rack==RDBE) {
 	limit=0; /* we always do all */
-      }else if (shm_addr->equip.rack==DBBC3) {
-	sprintf(output+strlen(output),"%c",chan3[j]);
-	limit=MAX_DBBC3_DET;
       }
       lenstart=strlen(output);
 
@@ -379,11 +378,6 @@ struct tpicd_cmd *lcl;
 	    i=MAX_DBBC_BBC*(k%2)+k/2;
 	  else
 	    i=k;
-	}else if (shm_addr->equip.rack==DBBC3) {
-	  if(k<2*MAX_DBBC3_BBC)
-	    i=MAX_DBBC3_BBC*(k%2)+k/2;
-	  else
-	    i=k;
 	}else if (shm_addr->equip.rack==DBBC && 
 		  (shm_addr->equip.rack_type == DBBC_PFB ||
 		   shm_addr->equip.rack_type == DBBC_PFB_FILA10G)
@@ -402,13 +396,6 @@ struct tpicd_cmd *lcl;
 	    strncat(output,lcl->lwhat[i],2);
 	    output[len+2]=0;
 	  }
-	  if(shm_addr->equip.rack!=DBBC3) {
-	    strncat(output,lcl->lwhat[i],2);
-	    output[len+2]=0;
-	  } else {
-	    strncat(output,lcl->lwhat[i],4);
-	    output[len+4]=0;
-          }	
 	}
       }
       if(output[lenstart]!=0 ) {
@@ -417,7 +404,35 @@ struct tpicd_cmd *lcl;
       output[lenstart-1]=0;
     }
     *count=-1;
-  }
+  } else if (shm_addr->equip.rack==DBBC3 && *count >= 2) {
+        for (j=j_start;j<MAX_DBBC3_IF+1;j++) {
+            j_start=j;
+            sprintf(output + strlen(output), "%c", chan3[j]);
+            lenstart=strlen(output);
+            for (k=k_start;k<MAX_DBBC3_DET;k++) {
+                k_start=k;
+                if (k < 2 * MAX_DBBC3_BBC)
+                    i = MAX_DBBC3_BBC * (k % 2) + k / 2;
+                else
+                    i = k;
+                if(lcl->itpis[i] && lcl->ifc[i]==j) {
+                    int len=strlen(output);
+                    if(len>100)
+                        goto end;
+                    strcat(output,",");
+	                strncat(output,lcl->lwhat[i],4);
+	                output[len+5]=0;
+                }
+            }
+            k_start = 0;
+            j_start++;
+            if (output[lenstart] != 0) {
+                goto end;
+            }
+                output[lenstart - 1] = 0;
+        }
+        *count=-1;
+    }
  end:
   return;
 }
