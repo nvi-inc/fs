@@ -36,7 +36,13 @@ extern struct fscom *shm_addr;
 static float bw_key[ ]={2,4,8,16,32,64,128};
 #define NBW_KEY sizeof(bw_key)/sizeof( float)
 
-static void tp_cat(char buf[],int tp)
+static void if_cat(char buf[],int tp)
+{
+    int2str(buf,tp,-8,0);
+    strcat(buf,",");
+}
+
+static void bb_cat(char buf[],int tp)
 {
     int2str(buf,tp,-5,0);
     strcat(buf,",");
@@ -45,6 +51,15 @@ static void tp_cat(char buf[],int tp)
 static void ts_cat(char buf[],double ts)
 {
     dble2str(buf,ts,-4,1);
+    strcat(buf,",");
+}
+static void dt_cat(char buf[],char dt[4])
+{
+    strcat(buf," ");
+
+    int len=strlen(buf);
+    strncat(buf,dt,4);
+    buf[len+4]=0;
     strcat(buf,",");
 }
 
@@ -63,160 +78,198 @@ static void log_out(char buf[],char *string)
     }
 }
 
-void log_mcast(dbbc3_ddc_multicast_t *t)
+static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
 {
-    int i,j;
+    int on, off;
 
-/*
-    for (i=0;i<8;i++) {
-        printf(" i %d freq %d bw %d usb: on %d  off %d, lsb: on %d off %d\n",
-                i+1,
-                t->bbc[i].frequency,
-                t->bbc[i].bandwidth,
-                t->bbc[i].total_power_usb_cal_on,
-                t->bbc[i].total_power_usb_cal_off,
-                t->bbc[i].total_power_lsb_cal_on,
-                t->bbc[i].total_power_lsb_cal_off);
-    }
+    for (int j=0;j<MAX_DBBC3_IF+1;j++) {
+        for (int k=0;k<MAX_DBBC3_BBC;k++) {
+            if (shm_addr->tpicd.itpis[k] && shm_addr->tpicd.ifc[k] == j) {
+                if(cont_cal)
+                    log_out(buf, "tpcont/");
+                else
+                    log_out(buf, "tpi/");
 
-    return;
-*/
-    double on, off;
-    char *start;
-    int len;
-    char buf[256] = "";
-    int cont_cal=shm_addr->dbbc3_cont_cal.mode == 1;
-    for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
-        for (j=0;j<shm_addr->dbbc3_ddc_bbcs_per_if;j++) {
+                dt_cat(buf,shm_addr->tpicd.lwhat[k]);
+                on =t->bbc[k].total_power_lsb_cal_on;
+                off=t->bbc[k].total_power_lsb_cal_off;
+                if(shm_addr->dbbc3_ddc_v<125 && cont_cal) {
+                    on =t->bbc[k].total_power_lsb_cal_off;
+                    off=t->bbc[k].total_power_lsb_cal_on;
+                }
+                bb_cat(buf,on);
+                if(cont_cal)
+                    bb_cat(buf,off);
+            }
+            if (shm_addr->tpicd.itpis[k+MAX_DBBC3_BBC] && shm_addr->tpicd.ifc[k+MAX_DBBC3_BBC] == j) {
+                if(cont_cal)
+                    log_out(buf, "tpcont/");
+                else
+                    log_out(buf, "tpi/");
 
-            int ibbc = (j/9)*64+i*8+j;
-
+                dt_cat(buf,shm_addr->tpicd.lwhat[k+MAX_DBBC3_BBC]);
+                on =t->bbc[k].total_power_usb_cal_on;
+                off=t->bbc[k].total_power_usb_cal_off;
+                if(shm_addr->dbbc3_ddc_v<125 && cont_cal) {
+                    on =t->bbc[k].total_power_usb_cal_off;
+                    off=t->bbc[k].total_power_usb_cal_on;
+                }
+                bb_cat(buf,on);
+                if(cont_cal)
+                    bb_cat(buf,off);
+            }
+        }
+        if (j!= 0 && shm_addr->tpicd.itpis[j-1+MAX_DBBC3_BBC*2]) {
             if(cont_cal)
                 log_out(buf, "tpcont/");
             else
                 log_out(buf, "tpi/");
 
-            start=buf+strlen(buf);
-            len=sizeof(buf)-strlen(buf);
-            snprintf(start,len," %03dl,",ibbc+1);
-
-            on =t->bbc[ibbc].total_power_lsb_cal_on;
-            off=t->bbc[ibbc].total_power_lsb_cal_off;
-            if(shm_addr->dbbc3_ddc_v<125) {
-                on =t->bbc[ibbc].total_power_lsb_cal_off;
-                off=t->bbc[ibbc].total_power_lsb_cal_on;
+            dt_cat(buf,shm_addr->tpicd.lwhat[j-1+MAX_DBBC3_BBC*2]);
+            on = t->core3h[j-1].total_power_cal_on;
+            off= t->core3h[j-1].total_power_cal_off;
+            if(shm_addr->dbbc3_ddc_v<125 && cont_cal) {
+                on = t->core3h[j-1].total_power_cal_off;
+                off= t->core3h[j-1].total_power_cal_on;
             }
-            tp_cat(buf,on);
+            if_cat(buf,on);
             if(cont_cal)
-                tp_cat(buf,off);
-
-            if(cont_cal)
-                log_out(buf, "tpcont/");
-            else
-                log_out(buf, "tpi/");
-
-            start=buf+strlen(buf);
-            len=sizeof(buf)-strlen(buf);
-            snprintf(start,len," %03du,",ibbc+1);
-
-            on =t->bbc[ibbc].total_power_usb_cal_on;
-            off=t->bbc[ibbc].total_power_usb_cal_off;
-            if(shm_addr->dbbc3_ddc_v<125) {
-                on =t->bbc[ibbc].total_power_usb_cal_off;
-                off=t->bbc[ibbc].total_power_usb_cal_on;
-            }
-            tp_cat(buf,on);
-            if(cont_cal)
-                tp_cat(buf,off);
+                if_cat(buf,off);
         }
         log_out(buf, "");
     }
-    if(cont_cal) {
-        double freq, on, off, diff, tsys;
-        float fwhm, tcal, dpfu, gain;
-        char *start;
-        int len;
-        for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
-            for (j=0;j<shm_addr->dbbc3_ddc_bbcs_per_if;j++) {
+}
+static void log_ts( dbbc3_ddc_multicast_t *t, char buf[])
+{
+    int on, off, diff;
+    double freq, tsys;
+    float fwhm, tcal, dpfu, gain;
 
-                int ibbc = (j/9)*64+i*8+j;
+    for (int j=0;j<MAX_DBBC3_IF+1;j++) {
+        for (int k=0;k<MAX_DBBC3_BBC;k++) {
 
-	            int ifchain=shm_addr->dbbc3_bbcnn[ibbc].source;
-                if(ifchain < 0 || ifchain >= MAX_LO ||
-                        shm_addr->lo.lo[ifchain]<0.0)
-                    continue;
+            int ifchain=shm_addr->dbbc3_bbcnn[k].source;
+            if(ifchain < 0 || ifchain >= MAX_LO ||
+                    shm_addr->lo.lo[ifchain]<0.0)
+                continue;
 
-	            int ibw=shm_addr->dbbc3_bbcnn[ibbc].bw;
-                if(ibw<0 || ibw >= NBW_KEY)
-                    continue;
+            int ibw=shm_addr->dbbc3_bbcnn[k].bw;
+            if(ibw<0 || ibw >= NBW_KEY)
+                continue;
 
-                freq=shm_addr->dbbc3_bbcnn[ibbc].freq*1e-6-bw_key[ibw]*0.5;
+            if(shm_addr->lo.sideband[ifchain]!=1 &&
+                    shm_addr->lo.sideband[ifchain]!=2 )
+                continue;
+
+            if (shm_addr->tpicd.itpis[k] && shm_addr->tpicd.ifc[k] == j) {
+
+                freq=shm_addr->dbbc3_bbcnn[k].freq*1e-6 - bw_key[ibw]*0.5;
                 if(shm_addr->lo.sideband[ifchain]==2) // LSB first LO
-                    freq=shm_addr->lo.lo[ifchain]-freq;
-                else if(shm_addr->lo.sideband[ifchain]==1) // USB first LO
-                    freq=shm_addr->lo.lo[ifchain]+freq;
-                else
-                    goto usb;
+                    freq=shm_addr->lo.lo[ifchain] - freq;
+                else // USB first LO
+                    freq=shm_addr->lo.lo[ifchain] + freq;
 
                 get_gain_par(ifchain+1,freq,&fwhm,&dpfu,NULL,&tcal);
 
-                on =t->bbc[ibbc].total_power_lsb_cal_on;
-                off=t->bbc[ibbc].total_power_lsb_cal_off;
+                on =t->bbc[k].total_power_lsb_cal_on;
+                off=t->bbc[k].total_power_lsb_cal_off;
                 if(shm_addr->dbbc3_ddc_v<125) {
-                    on =t->bbc[ibbc].total_power_lsb_cal_off;
-                    off=t->bbc[ibbc].total_power_lsb_cal_on;
+                    on =t->bbc[k].total_power_lsb_cal_off;
+                    off=t->bbc[k].total_power_lsb_cal_on;
                 }
                 diff=on-off;
 
                 if (tcal <=0.0)
                     tsys=-9e12;
-                else if(diff <= 0.5)  /* no divide by zero or negative values */
+                else if(diff <= 0 || on >= 65535 || off >= 65535)
+                    /* no divide by zero, negative values, or overflows */
                     tsys=-9e6;
                 else {
                     tsys= (tcal/diff)*0.5*(on+off);
                 }
 
                 log_out(buf, "tsys/");
-                start=buf+strlen(buf);
-                len=sizeof(buf)-strlen(buf);
-                snprintf(start,len," %03dl,",ibbc+1);
+                dt_cat(buf,shm_addr->tpicd.lwhat[k]);
                 ts_cat(buf,tsys);
+            }
+            if (shm_addr->tpicd.itpis[k+MAX_DBBC3_BBC] && shm_addr->tpicd.ifc[k+MAX_DBBC3_BBC] == j) {
 
-usb:
-                freq=shm_addr->dbbc3_bbcnn[ibbc].freq*1e-6+bw_key[ibw]*0.5;
+                freq=shm_addr->dbbc3_bbcnn[k].freq*1e-6 + bw_key[ibw]*0.5;
                 if(shm_addr->lo.sideband[ifchain]==2) // LSB first LO
-                    freq=shm_addr->lo.lo[ifchain]-freq;
-                else if(shm_addr->lo.sideband[ifchain]==1) // USB first LO
-                    freq=shm_addr->lo.lo[ifchain]+freq;
-                else
-                    continue;
+                    freq=shm_addr->lo.lo[ifchain] - freq;
+                else // USB first LO
+                    freq=shm_addr->lo.lo[ifchain] + freq;
 
                 get_gain_par(ifchain+1,freq,&fwhm,&dpfu,NULL,&tcal);
 
-                on =t->bbc[ibbc].total_power_usb_cal_on;
-                off=t->bbc[ibbc].total_power_usb_cal_off;
+                on =t->bbc[k].total_power_usb_cal_on;
+                off=t->bbc[k].total_power_usb_cal_off;
                 if(shm_addr->dbbc3_ddc_v<125) {
-                    on =t->bbc[ibbc].total_power_usb_cal_off;
-                    off=t->bbc[ibbc].total_power_usb_cal_on;
+                    on =t->bbc[k].total_power_usb_cal_off;
+                    off=t->bbc[k].total_power_usb_cal_on;
                 }
                 diff=on-off;
 
                 if (tcal <=0.0)
                     tsys=-9e12;
-                else if(diff <= 0.5)  /* no divide by zero or negative values */
+                else if(diff <= 0 || on >= 65535 || off >= 65535)
+                    /* no divide by zero, negative values, or overflows */
                     tsys=-9e6;
                 else {
                     tsys= (tcal/diff)*0.5*(on+off);
                 }
 
                 log_out(buf, "tsys/");
-                start=buf+strlen(buf);
-                len=sizeof(buf)-strlen(buf);
-                snprintf(start,len," %03du,",ibbc+1);
+                dt_cat(buf,shm_addr->tpicd.lwhat[k+MAX_DBBC3_BBC]);
                 ts_cat(buf,tsys);
 
             }
-            log_out(buf, "");
         }
+        if (j!= 0 && shm_addr->tpicd.itpis[j-1+MAX_DBBC3_BBC*2]) {
+
+            freq=2048.0;
+            if(shm_addr->lo.sideband[j-1]==2) // LSB first LO
+                freq=shm_addr->lo.lo[j-1]-freq;
+            else if(shm_addr->lo.sideband[j-1]==1) // USB first LO
+                freq=shm_addr->lo.lo[j-1]+freq;
+            else
+                continue;
+
+            get_gain_par(j,freq,&fwhm,&dpfu,NULL,&tcal);
+
+            on = t->core3h[j-1].total_power_cal_on;
+            off= t->core3h[j-1].total_power_cal_off;
+            if(shm_addr->dbbc3_ddc_v<125) {
+                on = t->core3h[j-1].total_power_cal_off;
+                off= t->core3h[j-1].total_power_cal_on;
+            }
+            diff=on-off;
+
+            if (tcal <=0.0)
+                tsys=-9e12;
+            else if(diff < 0)
+                /* no divide by zero or negative values */
+                tsys=-9e6;
+            else {
+                tsys= (tcal/diff)*0.5*(on+off);
+            }
+
+            log_out(buf, "tsys/");
+            dt_cat(buf,shm_addr->tpicd.lwhat[j-1+MAX_DBBC3_BBC*2]);
+            ts_cat(buf,tsys);
+        }
+        log_out(buf, "");
     }
+}
+
+void log_mcast(dbbc3_ddc_multicast_t *t)
+{
+    char buf[256] = "";
+    int cont_cal=shm_addr->dbbc3_cont_cal.mode == 1;
+
+    log_tp( t, buf, cont_cal);
+
+    if(cont_cal)
+        log_ts( t, buf);
+
 }
