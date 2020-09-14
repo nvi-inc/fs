@@ -503,10 +503,10 @@ c
       nch=mcoma(ib,nch)
 c
       nch=ichmv_ch(ib,nch,'v')
-      call fs_get_dbbc3_ddc_vs(dbbc3_ddc_vs)
-      call fs_get_dbbc3_ddc_vc(dbbc3_ddc_vc)
-      call char2hol(dbbc3_ddc_vs,ib,nch,nch+dbbc3_ddc_vc-1)
-      nch=nch+dbbc3_ddc_vc
+      call fs_get_dbbc3_ddcu_vs(dbbc3_ddcu_vs)
+      call fs_get_dbbc3_ddcu_vc(dbbc3_ddcu_vc)
+      call char2hol(dbbc3_ddcu_vs,ib,nch,nch+dbbc3_ddcu_vc-1)
+      nch=nch+dbbc3_ddcu_vc
 c
       nch=mcoma(ib,nch)
       call fs_get_dbbc3_ddc_bbcs_per_if(dbbc3_ddc_bbcs_per_if)

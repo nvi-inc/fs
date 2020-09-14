@@ -1078,11 +1078,11 @@ c
       endif
 
       dbbc3_ddcv =idbbcv
-      dbbc3_ddc_vs= dbbcv
-      dbbc3_ddc_vc=idbbcvc
-      call fs_set_dbbc3_ddc_v(dbbc3_ddc_v)
-      call fs_set_dbbc3_ddc_vs(dbbc3_ddc_vs)
-      call fs_set_dbbc3_ddc_vc(dbbc3_ddc_vc)
+      dbbc3_ddcu_vs= dbbcv
+      dbbc3_ddcu_vc=idbbcvc
+      call fs_set_dbbc3_ddcu_v(dbbc3_ddcu_v)
+      call fs_set_dbbc3_ddcu_vs(dbbc3_ddcu_vs)
+      call fs_set_dbbc3_ddcu_vc(dbbc3_ddcu_vc)
       call fs_set_dbbc3_ddc_bbcs_per_if(dbbc3_ddc_bbcs_per_if)
       call fs_set_dbbc3_ddc_ifs(dbbc3_ddc_ifs)
 c

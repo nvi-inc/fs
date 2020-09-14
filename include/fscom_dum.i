@@ -61,7 +61,8 @@ c
      $ dbbc_como_cores(4),dbbc_cores, ichdbbcfm, user_device_zero(6),
      $  mk6_units(MAX_MK6), mk6_active(MAX_MK6),
      $  rdbe_units(MAX_RDBE), rdbe_active(MAX_RDBE),
-     $  dbbc3_ddc_v, dbbc3_ddc_vc, dbbc3_ddc_bbcs_per_if, dbbc3_ddc_ifs,
+     $  dbbc3_ddcu_v, dbbc3_ddcu_vc, dbbc3_ddc_bbcs_per_if,
+     $  dbbc3_ddc_ifs,
      $  dbbc3_cont_cal_mode
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
@@ -110,7 +111,8 @@ c
      $ dbbc_como_cores,dbbc_cores, ichdbbcfm, user_device_zero,
      $ mk6_units, mk6_active,
      $ rdbe_units, rdbe_active,
-     $ dbbc3_ddc_v, dbbc3_ddc_vc, dbbc3_ddc_bbcs_per_if, dbbc3_ddc_ifs,
+     $ dbbc3_ddcu_v, dbbc3_ddcu_vc, dbbc3_ddc_bbcs_per_if,
+     $ dbbc3_ddc_ifs,
      $ dbbc3_cont_cal_mode,
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
@@ -125,7 +127,7 @@ c
       character*16 fila10gvsi_in
       character*17 scan_name,scan_name_old
       character*1 rdbe_pcal_amp
-      character*16 dbbc3_ddc_vs
+      character*16 dbbc3_ddcu_vs
       character*32 sVerRelease_FS
       character*32 fortran
 c
@@ -133,6 +135,6 @@ c
      $                   dbbcddcvs, dbbcpfbvs, fila10gvsi_in, dbbcddcvl,
      $			 dbbcpfbvl,scan_name,scan_name_old,
      $                   rdbe_pcal_amp,
-     $                   dbbc3_ddc_vs,
+     $                   dbbc3_ddcu_vs,
      $                   sVerRelease_FS,fortran
 

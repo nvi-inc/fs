@@ -2720,44 +2720,44 @@ void fs_get_rdbe_pcal_amp__(rdbe_pcal_amp)
 	  memcpy(rdbe_pcal_amp,shm_addr->rdbe_equip.pcal_amp,N);
 	}
 
-void fs_set_dbbc3_ddc_v__(dbbc3_ddc_v)
-	int *dbbc3_ddc_v;
+void fs_set_dbbc3_ddcu_v__(dbbc3_ddcu_v)
+	int *dbbc3_ddcu_v;
 	{
-          shm_addr->dbbc3_ddc_v = *dbbc3_ddc_v;
+          shm_addr->dbbc3_ddcu_v = *dbbc3_ddcu_v;
         }
 
-void fs_get_dbbc3_ddc_v__(dbbc3_ddc_v)
-	int *dbbc3_ddc_v;
+void fs_get_dbbc3_ddcu_v__(dbbc3_ddcu_v)
+	int *dbbc3_ddcu_v;
 	{
-          *dbbc3_ddc_v = shm_addr->dbbc3_ddc_v;
+          *dbbc3_ddcu_v = shm_addr->dbbc3_ddcu_v;
 	}
 
-void fs_set_dbbc3_ddc_vs__(dbbc3_ddc_vs)
-	char *dbbc3_ddc_vs;
+void fs_set_dbbc3_ddcu_vs__(dbbc3_ddcu_vs)
+	char *dbbc3_ddcu_vs;
 	{
           size_t N;
 	  N = DBBC3_DDC_VS_N;
-	  memcpy(shm_addr->dbbc3_ddc_vs,dbbc3_ddc_vs,N);
+	  memcpy(shm_addr->dbbc3_ddcu_vs,dbbc3_ddcu_vs,N);
 	}
 
-void fs_get_dbbc3_ddc_vs__(dbbc3_ddc_vs)
-	char *dbbc3_ddc_vs;
+void fs_get_dbbc3_ddcu_vs__(dbbc3_ddcu_vs)
+	char *dbbc3_ddcu_vs;
 	{
           size_t N;
 	  N = DBBC3_DDC_VS_N;
-	  memcpy(dbbc3_ddc_vs,shm_addr->dbbc3_ddc_vs,N);
+	  memcpy(dbbc3_ddcu_vs,shm_addr->dbbc3_ddcu_vs,N);
 	}
 
-void fs_set_dbbc3_ddc_vc__(dbbc3_ddc_vc)
-	int *dbbc3_ddc_vc;
+void fs_set_dbbc3_ddcu_vc__(dbbc3_ddcu_vc)
+	int *dbbc3_ddcu_vc;
 	{
-          shm_addr->dbbc3_ddc_vc = *dbbc3_ddc_vc;
+          shm_addr->dbbc3_ddcu_vc = *dbbc3_ddcu_vc;
         }
 
-void fs_get_dbbc3_ddc_vc__(dbbc3_ddc_vc)
-	int *dbbc3_ddc_vc;
+void fs_get_dbbc3_ddcu_vc__(dbbc3_ddcu_vc)
+	int *dbbc3_ddcu_vc;
 	{
-          *dbbc3_ddc_vc = shm_addr->dbbc3_ddc_vc;
+          *dbbc3_ddcu_vc = shm_addr->dbbc3_ddcu_vc;
 	}
 
 void fs_set_dbbc3_ddc_bbcs_per_if__(dbbc3_ddc_bbcs_per_if)

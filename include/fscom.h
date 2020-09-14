@@ -450,9 +450,9 @@ typedef struct fscom {
 
   int rdbe_sync[MAX_RDBE];
 
-  int  dbbc3_ddc_v;
-  char dbbc3_ddc_vs[16];
-  int  dbbc3_ddc_vc;
+  int  dbbc3_ddcu_v;
+  char dbbc3_ddcu_vs[16];
+  int  dbbc3_ddcu_vc;
   int  dbbc3_ddc_bbcs_per_if;
   int  dbbc3_ddc_ifs;
 
