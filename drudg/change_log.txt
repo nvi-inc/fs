@@ -1,4 +1,6 @@
 This file contains a summary of changes made and why.
+2020Sep14 reads.f; Fixed bug in sread.f that happened if $HEAD was last section in file.
+          ../skdrut/readf_asc.f.  Simplifiled and got rid of etraneous code.
 2020Jun30 snapintr.f. Got rid of residual line that put out #passes, length. Instead now puts out recorder type.
           Got rid of 'kmissing' and tests that depend on it in fdrudg.f, proc.f, snap.f, drcom.ftni
           ../skdrut/gnpas.f. Got rid of obsolete iserr argument 

@@ -282,7 +282,10 @@ C  needed, because it was checked before.
               CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
             enddo !read $CODES section
           endif
-        CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
+! Need to have this because if we had EOF previously next read will cause problem.
+          if(ilen .gt. 0) then
+            CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
+          endif
         enddo !read schedule file
       endif
 C Re-read $HEAD section if needed.
@@ -293,7 +296,6 @@ C Re-read $HEAD section if needed.
         DO WHILE (ILEN.GT.0)
           IF (cBUF(1:5) .eq. "$HEAD") THEN
             write(luscn,*) cbuf(1:ilen)
-
             CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
             DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
               ILEN=(ILEN+1)/2
@@ -301,7 +303,10 @@ C Re-read $HEAD section if needed.
               CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
             enddo
           endif
-        CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
+! Need to have this because if we had EOF previously next read will cause problem.
+          if(ilen .gt. 0) then
+            CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
+          endif
         enddo
       endif
 C       Look for the string "Cover Letter" in .drg file
@@ -315,6 +320,7 @@ C       Look for the string "Cover Letter" in .drg file
           enddo !read schedule file
           write(luscn,'()')
         endif ! .drg file
+        ierr=0
 C
 C Order the observations, in case they were not so in the $SKED section.
 C Not needed for VEX because they are read in when station is selected.
