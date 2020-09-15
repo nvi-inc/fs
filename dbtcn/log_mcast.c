@@ -82,6 +82,11 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
 {
     int on, off;
 
+    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcu_v<125 ||
+        DBBC3_DDCV == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcv_v<125;
+
     for (int j=0;j<MAX_DBBC3_IF+1;j++) {
         for (int k=0;k<MAX_DBBC3_BBC;k++) {
             if (shm_addr->tpicd.itpis[k] && shm_addr->tpicd.ifc[k] == j) {
@@ -93,7 +98,7 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
                 dt_cat(buf,shm_addr->tpicd.lwhat[k]);
                 on =t->bbc[k].total_power_lsb_cal_on;
                 off=t->bbc[k].total_power_lsb_cal_off;
-                if(shm_addr->dbbc3_ddcu_v<125 && cont_cal) {
+                if(v124 && cont_cal) {
                     on =t->bbc[k].total_power_lsb_cal_off;
                     off=t->bbc[k].total_power_lsb_cal_on;
                 }
@@ -110,7 +115,7 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
                 dt_cat(buf,shm_addr->tpicd.lwhat[k+MAX_DBBC3_BBC]);
                 on =t->bbc[k].total_power_usb_cal_on;
                 off=t->bbc[k].total_power_usb_cal_off;
-                if(shm_addr->dbbc3_ddcu_v<125 && cont_cal) {
+                if(v124 && cont_cal) {
                     on =t->bbc[k].total_power_usb_cal_off;
                     off=t->bbc[k].total_power_usb_cal_on;
                 }
@@ -128,7 +133,7 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
             dt_cat(buf,shm_addr->tpicd.lwhat[j-1+MAX_DBBC3_BBC*2]);
             on = t->core3h[j-1].total_power_cal_on;
             off= t->core3h[j-1].total_power_cal_off;
-            if(shm_addr->dbbc3_ddcu_v<125 && cont_cal) {
+            if(v124 && cont_cal) {
                 on = t->core3h[j-1].total_power_cal_off;
                 off= t->core3h[j-1].total_power_cal_on;
             }
@@ -144,6 +149,11 @@ static void log_ts( dbbc3_ddc_multicast_t *t, char buf[])
     int on, off, diff;
     double freq, tsys;
     float fwhm, tcal, dpfu, gain;
+
+    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcu_v<125 ||
+        DBBC3_DDCV == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcv_v<125;
 
     for (int j=0;j<MAX_DBBC3_IF+1;j++) {
         for (int k=0;k<MAX_DBBC3_BBC;k++) {
@@ -173,7 +183,7 @@ static void log_ts( dbbc3_ddc_multicast_t *t, char buf[])
 
                 on =t->bbc[k].total_power_lsb_cal_on;
                 off=t->bbc[k].total_power_lsb_cal_off;
-                if(shm_addr->dbbc3_ddcu_v<125) {
+                if(v124) {
                     on =t->bbc[k].total_power_lsb_cal_off;
                     off=t->bbc[k].total_power_lsb_cal_on;
                 }
@@ -204,7 +214,7 @@ static void log_ts( dbbc3_ddc_multicast_t *t, char buf[])
 
                 on =t->bbc[k].total_power_usb_cal_on;
                 off=t->bbc[k].total_power_usb_cal_off;
-                if(shm_addr->dbbc3_ddcu_v<125) {
+                if(v124) {
                     on =t->bbc[k].total_power_usb_cal_off;
                     off=t->bbc[k].total_power_usb_cal_on;
                 }
@@ -239,7 +249,7 @@ static void log_ts( dbbc3_ddc_multicast_t *t, char buf[])
 
             on = t->core3h[j-1].total_power_cal_on;
             off= t->core3h[j-1].total_power_cal_off;
-            if(shm_addr->dbbc3_ddcu_v<125) {
+            if(v124) {
                 on = t->core3h[j-1].total_power_cal_off;
                 off= t->core3h[j-1].total_power_cal_on;
             }

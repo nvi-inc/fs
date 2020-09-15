@@ -104,7 +104,7 @@
    Hierarchy: rack/drive, then rack_type/drive_type
    "*_type" must be unqiue within each specific rack or drive */ 
 #define DBBC3       0x4000
-  /* rack_types: DBBC3, drive_types: none  */
+  /* rack_types: DDCU, DDCV , drive_types: none  */
 #define RDBE        0x2000
   /* rack_types: RDBE, drive_types: none  */
 #define MK6        0x1000
@@ -159,6 +159,8 @@
 #define DBBC_DDC    0x1
 #define DBBC_PFB_FILA10G    0x2
 #define DBBC_PFB    0x4
+#define DBBC3_DDCU  0x1
+#define DBBC3_DDCV  0x2
 
 /*sub types of VLBA4 rack, like VLBA45 */
 

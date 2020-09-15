@@ -2873,3 +2873,43 @@ void fs_get_fortran__(fortran)
 	  N = FORTRAN;
 	  memcpy(fortran,shm_addr->fortran,N);
 	}
+void fs_set_dbbc3_ddcv_v__(dbbc3_ddcv_v)
+	int *dbbc3_ddcv_v;
+	{
+          shm_addr->dbbc3_ddcv_v = *dbbc3_ddcv_v;
+        }
+
+void fs_get_dbbc3_ddcv_v__(dbbc3_ddcv_v)
+	int *dbbc3_ddcv_v;
+	{
+          *dbbc3_ddcv_v = shm_addr->dbbc3_ddcv_v;
+	}
+
+void fs_set_dbbc3_ddcv_vs__(dbbc3_ddcv_vs)
+	char *dbbc3_ddcv_vs;
+	{
+          size_t N;
+	  N = DBBC3_DDC_VS_N;
+	  memcpy(shm_addr->dbbc3_ddcv_vs,dbbc3_ddcv_vs,N);
+	}
+
+void fs_get_dbbc3_ddcv_vs__(dbbc3_ddcv_vs)
+	char *dbbc3_ddcv_vs;
+	{
+          size_t N;
+	  N = DBBC3_DDC_VS_N;
+	  memcpy(dbbc3_ddcv_vs,shm_addr->dbbc3_ddcv_vs,N);
+	}
+
+void fs_set_dbbc3_ddcv_vc__(dbbc3_ddcv_vc)
+	int *dbbc3_ddcv_vc;
+	{
+          shm_addr->dbbc3_ddcv_vc = *dbbc3_ddcv_vc;
+        }
+
+void fs_get_dbbc3_ddcv_vc__(dbbc3_ddcv_vc)
+	int *dbbc3_ddcv_vc;
+	{
+          *dbbc3_ddcv_vc = shm_addr->dbbc3_ddcv_vc;
+	}
+

@@ -49,7 +49,8 @@ int main(int argc, char *argv[])
 
     skd_wait(me,ip,(unsigned) 0);
 
-    if(0==shm_addr->dbbad.mcast_addr[0])
+    if( DBBC3 != shm_addr->equip.rack ||
+            0==shm_addr->dbbad.mcast_addr[0])
         goto idle;
 
     int error_no;

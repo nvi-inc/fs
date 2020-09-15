@@ -70,6 +70,8 @@ c
       integer RDBE          ! RDBE comparison bit variable
       integer MK6           ! MK6 comparison bit variable
       integer DBBC3         ! DBBC3 comparison bit variable
+      integer DBBC3_DDCU    ! DBBC3_DDCU comparison bit variable
+      integer DBBC3_DDCV    ! DBBC3_DDCV comparison bit variable
       character*5 FS_ROOT
       integer MAX_BBC
       integer MAX_VLBA_BBC
@@ -161,6 +163,8 @@ C rack/drive _types
       parameter ( MK5C     = z'1'  )
       parameter ( MK5C_BS  = z'2'  )
       parameter ( FLEXBUFF = z'4'  )
+      parameter ( DBBC3_DDCU = z'1'  )
+      parameter ( DBBC3_DDCV = z'2'  )
 C
       parameter ( MAX_MK6 = 2 )
       parameter ( MAX_RDBE = 4 )

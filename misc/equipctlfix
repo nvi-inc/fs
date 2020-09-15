@@ -1,0 +1,141 @@
+#!/usr/bin/perl
+# Usage: equipctlfix file
+
+if ($#ARGV < 0) {
+    print "Usage: $0 file
+
+Creates a /usr2/control/dbbc3.ctl file and fixes equip.ctl moving the
+dbbc3 data to former from the latter.
+
+file is the equip.ctl control file to be fixed.
+
+The original file is renamed with a '.bak' extension.
+
+This script should be run in /usr2/control.
+
+The old equip.ctl is truncated just after FiLa10G VSI input select
+line. The parameters from the DBBC3 line are placed in the appropriate
+lines of a copy of the default dbbc3.ctl file, placed in
+/usr2/control. (Comments from the default version are preserved.) It
+will use the existing firmware version number for both the ddcu and
+ddcv personalities. Please adjust them as necessary.
+
+If you wish to retain the dbbc3 line comments from the old equip.ctl
+file, you should not use this script, instead copy the default
+/usr2/fs/st.default/control/dbbc3.ctl file to /usr2/control/dbbc3.ctl
+and adjust the contents as needed. In that case, be sure to delete the
+lines after the FiLa10G VSI input select line in your equip.ctl
+file.\n";
+
+    exit -1;
+}
+
+if  ($#ARGV < 0 || $#ARGV >0) {
+    print "incorrect number of arguments\n";
+    print "Try 'mdlctlfix' for more information.\n";
+    exit -1;
+}
+
+# get the file names
+
+$name=$ARGV[0];
+
+if ($name =~ /(.*)\..*$/ ) {
+    $bak = $1 . ".bak";
+    $out = $name;
+    if (!-e $out) {
+        die "Can't find $out. Quitting.\n";
+    }
+}
+
+$new="/usr2/control/dbbc3.ctl";
+if (-e $new) {
+    die "$new already exists, giving up.\n";
+}
+$old="/usr2/fs/st.default/control/dbbc3.ctl";
+if (!-e $old) {
+    die "$old doesn't exist, giving up.\n";
+}
+
+if(!open(OLD,$old)) {
+    die "Failed to open $old: $!\n";
+}
+if(!open(NEW,">" . $new)) {
+    die "Failed to open $new: $!\n";
+}
+
+# rename the original if we can and open the files
+
+if (-e $bak) {
+    die "Backup-file $bak already exists, giving up.\n";
+}
+
+rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
+ 
+if(!open(BAK,$bak)) {
+    print "Failed to open $bak: $!\n";
+    if(!rename($bak,$out)) {
+        print "In the process of trying to restore order after the error,\n";
+        print "I was unable to rename $bak to $out: $!\n";
+        die "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+        print "In order to restore order after the error,\n";
+        die "I renamed $bak to $out for you.\n";
+    }
+}
+
+if(!open(OUT,">" . $out)) {
+    print "Failed to open $out: $!\n";
+    if((!close(BAK)) || (!rename($bak,$out))) { 
+        print "In the process of trying to restore order after the error,\n";
+        print "I was unable to rename $bak to $out: $!\n";
+        die "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+        print "In order to restore order after the error,\n";
+        die "I renamed $bak to $out for you.\n";
+    }
+}
+
+
+#okay now process the file
+
+$count = 0;
+
+while(<BAK>) {
+    if (/^\*/) {
+        print OUT;
+        next;
+    }
+
+    if(++$count < 24 ) {
+        print OUT;
+        next;
+    }
+    print OUT;
+    last;
+}
+close OUT;
+while(<BAK>) {
+    if (/^\*/) {
+        next;
+    }
+    chomp;
+    @array=split ' ';
+    last;
+}
+close BAK;
+
+$count=0;
+while(<OLD>) {
+    if (/^\*/) {
+    print NEW;
+    next;
+    }
+
+    if(++$count == 1) {
+        print NEW " $array[1] $array[2]\n";
+        next;
+    } elsif ($count == 2 || $count == 3) {
+        print NEW " $array[0]\n";
+    }
+}

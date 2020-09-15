@@ -578,6 +578,12 @@ C
       call equip(idcb,FS_ROOT//'/control/equip.ctl',ip)
       if(ip(3).ne.0) return
 c
+      call fs_get_rack(rack)
+      if(rack.eq.DBBC3) then
+          call dbbc3_equip(idcb,FS_ROOT//'/control/dbbc3.ctl',ip)
+          if(ip(3).ne.0) return
+      endif
+c
       call fs_get_drive(drive)
       if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4) then
          call drivev(idcb,FS_ROOT//'/control/drivev1.ctl',ip,-219,1)
@@ -597,8 +603,11 @@ c
 C
 C RDBE.ctl
 C
-      call rdbe_equip(idcb,FS_ROOT//'/control/rdbe.ctl',ip,-231)
-      if(ip(3).ne.0) return
+      call fs_get_rack(rack)
+      if(rack.eq.RDBE) then
+        call rdbe_equip(idcb,FS_ROOT//'/control/rdbe.ctl',ip,-231)
+        if(ip(3).ne.0) return
+      endif
 C
 320   continue
 C
@@ -1048,7 +1057,7 @@ C
       ilen=0
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
-        call logit7ci(0,0,0,1,-189,'bo',ierr)
+        call logit7ci(0,0,0,1,-184,'bo',ierr)
         goto 990
       endif
       ifc=1

@@ -1259,8 +1259,14 @@ Error decoding span field in TIME.CTL
 BO -183
 Error decoding model field in TIME.CTL
 ""
-BO -189
+BO -184
 Error reading TIME.CTL, UNIX ?FFF
+""
+BO -185
+Error opening DBBC3.CTL ?FFF
+""
+BO -186
+Error decoding DBBC3.CTL line ?WWW
 ""
 BO -190
 Error initializing mcbcn, internal error ?WWW

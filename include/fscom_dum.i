@@ -63,7 +63,8 @@ c
      $  rdbe_units(MAX_RDBE), rdbe_active(MAX_RDBE),
      $  dbbc3_ddcu_v, dbbc3_ddcu_vc, dbbc3_ddc_bbcs_per_if,
      $  dbbc3_ddc_ifs,
-     $  dbbc3_cont_cal_mode
+     $  dbbc3_cont_cal_mode,
+     $  dbbc3_ddcv_v, dbbc3_ddcv_vc
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3,2), lgen(2,2),
@@ -114,6 +115,7 @@ c
      $ dbbc3_ddcu_v, dbbc3_ddcu_vc, dbbc3_ddc_bbcs_per_if,
      $ dbbc3_ddc_ifs,
      $ dbbc3_cont_cal_mode,
+     $ dbbc3_ddcv_v, dbbc3_ddcv_vc,
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 
@@ -130,11 +132,13 @@ c
       character*16 dbbc3_ddcu_vs
       character*32 sVerRelease_FS
       character*32 fortran
+      character*16 dbbc3_ddcv_vs
 c
       common/fscom_dum2/ LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP,
      $                   dbbcddcvs, dbbcpfbvs, fila10gvsi_in, dbbcddcvl,
      $			 dbbcpfbvl,scan_name,scan_name_old,
      $                   rdbe_pcal_amp,
      $                   dbbc3_ddcu_vs,
-     $                   sVerRelease_FS,fortran
+     $                   sVerRelease_FS,fortran,
+     $                   dbbc3_ddcv_vs
 
