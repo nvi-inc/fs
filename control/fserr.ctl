@@ -2684,6 +2684,93 @@ Invalid state number (0 to 64).
 DQ -70
 Invalid device for ping (da ro r1).
 ""
+DR -201
+mask2 parameter, must specify an integer, usually as a hex value, e.g., 0xf
+""
+DR -202
+mask1 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
+""
+DR -203
+decimate parameter, must be 1-255
+""
+DR -204
+Sample rate must be a number greater than 0.124
+""
+DR -205
+okay parameter must be disk_record_ok or null
+""
+DR -213
+For DBBC3 DDCV decimate must be 2
+""
+DR -214
+Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255.
+""
+DR -224
+Can't specify sample rate and decimate parameters simultaneously
+""
+DR -234
+For DBBC3 DDCV sample rate must imply a decimate of 2
+""
+DR -301
+Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the fifth parameter.
+""
+DR -302
+mask2 cannot be used unless DDBC3 is DDCU.
+""
+DR -303
+Can't specify mask2 for more BBCs per IF set in dbbc3.ctl.
+""
+DR -304
+core3h_mode command only accepts one parameter.
+""
+DR -305
+state parameter must be either 'begin' or 'end'.
+""
+DR -306
+Core3h board number exceeds IFs in dbbc3.ctl.
+""
+DR -400
+error retrieving acknowledgement of command
+""
+DR -401
+error retrieving class
+""
+DR -451
+Class buffer error from command response.
+""
+DR -452
+DBBC version does not agree with dbbc3.ctl; see message above for DBBC3's version.
+""
+DR -453
+DBBC3 version should be DDCU, but is DDCV; see message above for DBBC3's version.
+""
+DR -454
+DBBC3 version should be DDCV, but is DDCU; see message above for DBBC3's version.
+""
+DR -455
+Uknown personality from DBBC3; see message above for DBBC3's personality.
+""
+DR -456
+Unknown rack type in logmsg_dbbc3().
+""
+DR -501
+error decoding vsi_bitmask response
+""
+DR -502
+error decoding vsi_samplerate response
+""
+DR -503
+error decoding sysstat output response
+""
+DR -511
+could not find vsi_bitmask response
+""
+DR -512
+could not find vsi_samplerate response
+""
+DR -513
+could not find sysstat output response
+""
 DS   -1
 Unable to open dsad.ctl file.
 ""

@@ -492,4 +492,6 @@ typedef struct fscom {
   char dbbc3_ddcv_vs[16];
   int  dbbc3_ddcv_vc;
 
+  struct dbbc3_core3h_modex_cmd dbbc3_core3h_modex[MAX_DBBC3_IF];
+
 } Fscom;

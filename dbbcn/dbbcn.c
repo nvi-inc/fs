@@ -141,6 +141,7 @@ int main(int argc, char * argv[])
     case 6:
     case 7:
     case 8:
+    case 9:
       if(!is_init) {
 	cls_clr(ip[1]);
 	ip[0]=ip[1]=0;
@@ -616,272 +617,274 @@ int ip[5];
 
   msgflg = save = 0;
   for (i=0;i<in_recs;i++) {
-    if ((nchars = cls_rcv(in_class,inbuf,BUFSIZE-2,&rtn1,&rtn2,msgflg,save)) <= 0) {
+      if ((nchars = cls_rcv(in_class,inbuf,BUFSIZE-2,&rtn1,&rtn2,msgflg,save)) <= 0) {
 #ifdef DEBUG
-      printf ("%s failed to get a request buffer\n",me);
+          printf ("%s failed to get a request buffer\n",me);
 #endif
-      ip[2] = -101;
-      goto error;
-    }
+          ip[2] = -101;
+          goto error;
+      }
 #ifdef DEBUG
-    { int j;
-      (void) fprintf(stderr, /* Yes */ 
-		     "%s DEBUG:  Got inbuf [] = ", me); 
-      for (j=0;j<nchars;j++)
-	fprintf(stderr,"%c",inbuf[j]);
-      fprintf(stderr,"\n");
-    }
+      { int j;
+          (void) fprintf(stderr, /* Yes */
+                  "%s DEBUG:  Got inbuf [] = ", me);
+          for (j=0;j<nchars;j++)
+              fprintf(stderr,"%c",inbuf[j]);
+          fprintf(stderr,"\n");
+      }
 #endif
-    // not needed as v101    inbuf[nchars++]='\n';  /* new-line */
-    inbuf[nchars++]=0;  /* zero */
+      // not needed as v101    inbuf[nchars++]='\n';  /* new-line */
+      inbuf[nchars++]=0;  /* zero */
 
-    /* * Send command * */ 
-    flags=0;
+      /* * Send command * */
+      flags=0;
 #ifdef MSG_NOSIGNAL
-    flags|=MSG_NOSIGNAL;
+      flags|=MSG_NOSIGNAL;
 #endif
 #ifdef MSG_DONTWAIT
-    flags|=MSG_DONTWAIT;
+      flags|=MSG_DONTWAIT;
 #endif
-    if(!first_transaction) {
-      ip[2] = drain_input_stream(fsock);
-      if(ip[2]!=0) {
-	logita(NULL,ip[2],"db",who);
-	close_socket();
-	if (0 > (error = open_mk5(host,port))) { /* open mk5 unit */
-	  ip[2]=error;
-	  goto error;
-	} else {
-	  rte_sleep(100); /* seem to need a 100 centisecond sleep here, is this
-			     a Mark 5 or Linux problem? */
-	  logita(NULL,-114,"db",who);
-	  first_transaction=FALSE;
-	}
-      }
-    } else {
-      first_transaction=FALSE;
-    }
-      
-    /* determine time-out */
-
-    time_out_local=time_out;
-    for (j=0;list[j].string[0]!=0;j++) {
-      if(NULL!=strstr(inbuf,list[j].string)) {
-	time_out_local+=list[j].to;
-      }
-    }
-
-    /*check for ddctrk... to allow delay */
-
-    if(NULL != strstr(inbuf,"dbbctrk")) {
- /* make sure "dbbctrk" commands have at least a one second between
-    them, we might be able to save a little time by distinguishing
-    between dbbctrk1, dbbctrk2, abd dbbctrk commands, but it is very
-    little savings and a lot more complication (and testing), so not
-    for now, this may also need some adjustment if these commands get
-    a monitor form so that isn't too slow */
-      rte_ticks(&now);
-      if(dbbctrk) {
-	if(now-last_dbbctrk < 102) {
-	  rte_sleep(102-(now-last_dbbctrk));
-	}
-      }
-      last_dbbctrk=now;
-      dbbctrk=TRUE;
-    }
-    
-    if(6 == mode || 4 == mode | 7 == mode)
-      fila10g=TRUE;
-    else
-      fila10g=FALSE;
-
-    if(8 == mode)
-      dbbc3=TRUE;
-    else
-      dbbc3=FALSE;
-
-    newline = 7 == mode || 8 == mode;
-
-    first=TRUE;
-    changed=FALSE;
-    end=rte_times(&tms_buff)+130;  /* calculate ending time */
-    while(first ||
-	  (mode==4 && ip[2]==0 && end > rte_times(&tms_buff) && !changed) ) {
-      outbuf[0]=0;
-
-      if(iecho && strlen(secho)> 0) {
-	logit(secho,0,NULL);
-	secho[0]=0;
-      }
-      if(iecho) {
-	int in, out;
-	strcpy(secho,"[");
-	for(in=0,out=strlen(secho);in <nchars;in++) {
-	  if(inbuf[in]=='\n') {
-	    secho[out++]='\\';
-	    secho[out++]='n';
-	  } else if(inbuf[in]==0) {
-	    secho[out++]='\\';
-	    secho[out++]='0';
-	  } else
-	    secho[out++]=inbuf[in];
-	}
-	secho[out]=0;
-	strcat(secho,"]");
+      if(!first_transaction) {
+          ip[2] = drain_input_stream(fsock);
+          if(ip[2]!=0) {
+              logita(NULL,ip[2],"db",who);
+              close_socket();
+              if (0 > (error = open_mk5(host,port))) { /* open mk5 unit */
+                  ip[2]=error;
+                  goto error;
+              } else {
+                  rte_sleep(100); /* seem to need a 100 centisecond sleep here, is this
+                                     a Mark 5 or Linux problem? */
+                  logita(NULL,-114,"db",who);
+                  first_transaction=FALSE;
+              }
+          }
+      } else {
+          first_transaction=FALSE;
       }
 
-      if(mode==4) {
-	rte_cmpt(centisec+2,centisec+4);
-	rte_ticks (centisec);
+      /* determine time-out */
+
+      time_out_local=time_out;
+      for (j=0;list[j].string[0]!=0;j++) {
+          if(NULL!=strstr(inbuf,list[j].string)) {
+              time_out_local+=list[j].to;
+          }
       }
 
-      if (send(sock, inbuf, nchars, flags) < nchars) { /* Send to socket, OK? */ 
-#ifdef DEBUG
-	(void) fprintf(stderr, /* Nope */ 
-		       "%s ERROR: \007 send() on socket returned ",me); 
-	perror("error"); 
-#endif
-	logit(NULL,errno,"un");
-	ip[2] = -102; /* Error */
-	goto error0;
-      }
-#ifdef DEBUG
-      (void) fprintf(stderr, /* Yes */ 
-		     "%s DEBUG:  Sent inLine[%s] to socket\n",
-		     me, inbuf,sock); 
-#endif
+      /*check for ddctrk... to allow delay */
 
-      /* * Read reply * */ 
-    read:
-      ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local,
-			    fila10g, newline, dbbc3);
-      
-      if(mode==4) {
-	rte_ticks (centisec+1);
-	rte_cmpt(centisec+3,centisec+5);
+      if(NULL != strstr(inbuf,"dbbctrk")) {
+          /* make sure "dbbctrk" commands have at least a one second between
+             them, we might be able to save a little time by distinguishing
+             between dbbctrk1, dbbctrk2, abd dbbctrk commands, but it is very
+             little savings and a lot more complication (and testing), so not
+             for now, this may also need some adjustment if these commands get
+             a monitor form so that isn't too slow */
+          rte_ticks(&now);
+          if(dbbctrk) {
+              if(now-last_dbbctrk < 102) {
+                  rte_sleep(102-(now-last_dbbctrk));
+              }
+          }
+          last_dbbctrk=now;
+          dbbctrk=TRUE;
       }
 
-      if(mode == 4)
-	if(first)
-	  strcpy(saved,outbuf);
-	else
-	  changed = strcmp(saved,outbuf);
-
-      first=FALSE;
-
-      if(iecho) {
-	int in, out;
-	strcat(secho,"<");
-	for(in=0,out=strlen(secho);outbuf[in]!=0;in++) {
-	  if(outbuf[in]=='\n') {
-	    secho[out++]='\\';
-	    secho[out++]='n';
-	  } else if(outbuf[in]=='\r') {
-	    secho[out++]='\\';
-	    secho[out++]='r';
-	  } else if(outbuf[in]==0) {
-	    secho[out++]='\\';
-	    secho[out++]='0';
-	  } else
-	    secho[out++]=outbuf[in];
-	}
-	secho[out]=0;
-	strcat(secho,">");
-	logit(secho,0,NULL);
-	secho[0]=0;
-      }
-    }
-
-#ifdef DEBUG
-    /* * Print reply * */ 
-    (void) fputs(outbuf, stdout); /* Print to stdout */ 
-#endif
-
-    /*trim a trailing new-line */
-
-    if(outbuf[0]!=0 && outbuf[strlen(outbuf)-1]=='\n')
-      outbuf[strlen(outbuf)-1]=0;
-    if(1==ip[2]) {
-      int i, is;
-      char *failed =strstr(outbuf,"Failed");
-
-      if(8==mode)
-        strcpy(lbuf,"dbbc3/");
+      if(6 == mode || 4 == mode | 7 == mode)
+          fila10g=TRUE;
       else
-        strcpy(lbuf,"fila10g/");
-      is=strlen(lbuf);
-      for(i=0;outbuf[i]!=0;i++)
-	if(isprint(outbuf[i]))
-	  lbuf[is++]=outbuf[i];
-      lbuf[is]=0;
-      logit(lbuf,0,NULL);
-      if(failed!=NULL) {
-	logite(failed,-200,"db");
-	logita(NULL,-201,"db",who);
+          fila10g=FALSE;
+
+      if(8 == mode || 9 == mode)
+          dbbc3=TRUE;
+      else
+          dbbc3=FALSE;
+
+      newline = 7 == mode || 8 == mode || 9 == mode;
+
+      first=TRUE;
+      changed=FALSE;
+      end=rte_times(&tms_buff)+130;  /* calculate ending time */
+      while(first ||
+              (mode==4 && ip[2]==0 && end > rte_times(&tms_buff) && !changed) ) {
+          outbuf[0]=0;
+
+          if(iecho && strlen(secho)> 0) {
+              logit(secho,0,NULL);
+              secho[0]=0;
+          }
+          if(iecho) {
+              int in, out;
+              strcpy(secho,"[");
+              for(in=0,out=strlen(secho);in <nchars;in++) {
+                  if(inbuf[in]=='\n') {
+                      secho[out++]='\\';
+                      secho[out++]='n';
+                  } else if(inbuf[in]==0) {
+                      secho[out++]='\\';
+                      secho[out++]='0';
+                  } else
+                      secho[out++]=inbuf[in];
+              }
+              secho[out]=0;
+              strcat(secho,"]");
+          }
+
+          if(mode==4) {
+              rte_cmpt(centisec+2,centisec+4);
+              rte_ticks (centisec);
+          }
+
+          if (send(sock, inbuf, nchars, flags) < nchars) { /* Send to socket, OK? */
+#ifdef DEBUG
+              (void) fprintf(stderr, /* Nope */
+                      "%s ERROR: \007 send() on socket returned ",me);
+              perror("error");
+#endif
+              logit(NULL,errno,"un");
+              ip[2] = -102; /* Error */
+              goto error0;
+          }
+#ifdef DEBUG
+          (void) fprintf(stderr, /* Yes */
+                  "%s DEBUG:  Sent inLine[%s] to socket\n",
+                  me, inbuf,sock);
+#endif
+
+          /* * Read reply * */
+read:
+          ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local,
+                  fila10g, newline, dbbc3);
+
+          if(mode==4) {
+              rte_ticks (centisec+1);
+              rte_cmpt(centisec+3,centisec+5);
+          }
+
+          if(mode == 4)
+              if(first)
+                  strcpy(saved,outbuf);
+              else
+                  changed = strcmp(saved,outbuf);
+
+          first=FALSE;
+
+          if(iecho) {
+              int in, out;
+              strcat(secho,"<");
+              for(in=0,out=strlen(secho);outbuf[in]!=0;in++) {
+                  if(outbuf[in]=='\n') {
+                      secho[out++]='\\';
+                      secho[out++]='n';
+                  } else if(outbuf[in]=='\r') {
+                      secho[out++]='\\';
+                      secho[out++]='r';
+                  } else if(outbuf[in]==0) {
+                      secho[out++]='\\';
+                      secho[out++]='0';
+                  } else
+                      secho[out++]=outbuf[in];
+              }
+              secho[out]=0;
+              strcat(secho,">");
+              logit(secho,0,NULL);
+              secho[0]=0;
+          }
       }
-      outbuf[0]=0;
-      goto read;
-    }
 
-    outbuf[1023]=0; /* truncate to maximum class record size, cls_snd
-                      can't do this because it doesn't know it is a string,
-                      cls_rcv() calling should do it either since this 
-                      would require many more changes */
-    cls_snd(&out_class, outbuf, strlen(outbuf)+1 , 0, 0);
-    out_recs++;
-    if(mode==4) {
-      cls_snd(&out_class, centisec, sizeof(centisec) , 0, 0);
+#ifdef DEBUG
+      /* * Print reply * */
+      (void) fputs(outbuf, stdout); /* Print to stdout */
+#endif
+
+      /*trim a trailing new-line */
+
+      if(outbuf[0]!=0 && outbuf[strlen(outbuf)-1]=='\n')
+          outbuf[strlen(outbuf)-1]=0;
+      if(1==ip[2] && mode != 9) {
+          int i, is;
+          char *failed =strstr(outbuf,"Failed");
+
+          if(8==mode)
+              strcpy(lbuf,"dbbc3/");
+          else
+              strcpy(lbuf,"fila10g/");
+          is=strlen(lbuf);
+          for(i=0;outbuf[i]!=0;i++)
+              if(isprint(outbuf[i]))
+                  lbuf[is++]=outbuf[i];
+          lbuf[is]=0;
+          logit(lbuf,0,NULL);
+          if(failed!=NULL) {
+              logite(failed,-200,"db");
+              logita(NULL,-201,"db",who);
+          }
+          outbuf[0]=0;
+          goto read;
+      }
+
+      outbuf[1023]=0; /* truncate to maximum class record size, cls_snd
+                         can't do this because it doesn't know it is a string,
+                         cls_rcv() calling should do it either since this
+                         would require many more changes */
+      cls_snd(&out_class, outbuf, strlen(outbuf)+1 , 0, 0);
       out_recs++;
-    }
+      if(mode==4) {
+          cls_snd(&out_class, centisec, sizeof(centisec) , 0, 0);
+          out_recs++;
+      }
 
-    /* check errors */
+      /* check errors */
 
-    if(ip[2]!=0) {
-      if(ip[2]!=-109)
-	close_socket();
-      goto error;
-    }
+      if(ip[2]!=0 && mode !=9 || ip[2]<0 && mode == 9) {
+          if(ip[2]!=-109)
+              close_socket();
+          goto error;
+      }
 
-    if(mode==5)   /* no error report here */
-      continue;
+      if(mode==5)   /* no error report here */
+          continue;
 
-    if(7!= mode && 6 != mode && 8!= mode &&
-       (index(outbuf,'/')==NULL || strstr(outbuf,"ERROR")!=NULL)) {
-      logite(outbuf,-200,"db");
-      ip[2]=-201;
-      goto error;
-    } else if ((7==mode || 6==mode || 8==mode) &&
-	       (strstr(outbuf,"Failed")!=NULL 
-		||strstr(outbuf,"ERROR")!=NULL
-		||strstr(outbuf,"WARNING")!=NULL)
-	       ) {
-      char *failed=strstr(outbuf,"Failed");
-      char *warning=strstr(outbuf,"WARNING");
-      int i;
+      if(7!= mode && 6 != mode && 8!= mode && 9!=mode &&
+              (index(outbuf,'/')==NULL || strstr(outbuf,"ERROR")!=NULL)) {
+          logite(outbuf,-200,"db");
+          ip[2]=-201;
+          goto error;
+      } else if ((7==mode || 6==mode || 8==mode || 9==mode) &&
+              (strstr(outbuf,"Failed")!=NULL
+               ||strstr(outbuf,"ERROR")!=NULL
+               ||strstr(outbuf,"WARNING")!=NULL)
+              ) {
+          char *failed=strstr(outbuf,"Failed");
+          char *warning=strstr(outbuf,"WARNING");
+          int i;
 
-      if(NULL==failed)
-	failed=strstr(outbuf,"ERROR");
-      if(NULL!=failed) {
-	for(i=0;failed[i]!=0;i++)
-	  if(index("\r\n",failed[i])!=NULL) {
-	    failed[i]=0;
-	    break;
-	  }
-	  logite(failed,-200,"db");
-      } else if(NULL!=warning) {
-	for(i=0;warning[i]!=0;i++)
-	  if(index("\r\n",warning[i])!=NULL) {
-	    warning[i]=0;
-	    break;
-	  }
-	  logite(warning,-200,"db");
-      } else
-	logite(outbuf,-200,"db"); /* for safety, just in case */
-      ip[2]=-201;
-      goto error;
-    }
+          if(NULL==failed)
+              failed=strstr(outbuf,"ERROR");
+          if(NULL!=failed) {
+              for(i=0;failed[i]!=0;i++)
+                  if(index("\r\n",failed[i])!=NULL) {
+                      failed[i]=0;
+                      break;
+                  }
+              logite(failed,-200,"db");
+          } else if(NULL!=warning) {
+              for(i=0;warning[i]!=0;i++)
+                  if(index("\r\n",warning[i])!=NULL) {
+                      warning[i]=0;
+                      break;
+                  }
+              logite(warning,-200,"db");
+          } else
+              logite(outbuf,-200,"db"); /* for safety, just in case */
+          ip[2]=-201;
+          goto error;
+      }
+      if(1==ip[2] && 9 == mode)
+          goto read;
 
-  } /* End of for loop  */ 
+  } /* End of for loop  */
 
   ip[0]=out_class;
   ip[1]=out_recs;

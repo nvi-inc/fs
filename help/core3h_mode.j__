@@ -1,0 +1,129 @@
+core3h_modex - set core3h mode (DBBC3 rack)
+
+Syntax:   core3h_mode=state
+          core3h_modeX=mask2,mask1,decimation,sample,okay
+          core3h_modeX=stop
+
+Response: core3h_modeX/mask2,mask1,decimation,sample,clock
+          core3h_modeX/stopped
+
+Settable parameters:
+
+state:      begin or end. No default, see 'Comments' section for more
+            details.
+
+X           1 to 8, but is limited to the number of IFs boards specified in
+            dbbc3.ctl
+
+mask2:      VSI2 input bit-stream mask, usually hex, 32-bit wide maximum,
+            for example: 0xf, default 0, null on display if zero. See
+            the 'Comments' section for more details.
+
+mask1:      VSI1 input bit-stream mask, usually hex, non-zero 32-bit wide
+            maximum, for example: 0xf, default 0xffffffff
+
+decimation: decimation factor: 1-255. No default unless sample (next
+            parameter) is specified. For DDCV, only '2' is permitted.
+
+sample:     sample rate in Ms/s: must be greater than 0.499.  The
+            value divided into the maximum data rate (256 Ms/s) for
+            DDCU must yield a valid decimation factor. For DDCV, only
+            64 Ms/s is accepted.  Unless a decimation factor was
+            specified, the default for DDCU is 256 Ms/s (decimation
+            1); for DDCV, 64 Ms/s (decimation 2).  For response, since
+            the sample rate is not reported by the device, the
+            reported 'decimation' implied sample rate is shown in
+            parenthesizes for reference.
+
+okay        override to allow command while recording, literal text:
+            'disk_record_ok'
+
+stop        literal 'stop' to end board output, this is the only way
+            to disable output from the board
+
+Monitor only parameter:
+stopped     literal 'stopped' if board output has been stopped
+clock       input clock rate in Hz
+
+Comments:
+
+The effective sample rate can be specified in the SNAP command either
+explicitly with the 'sample' parameter or implicitly with the
+'decimation' parameter.  Only one of 'sample' and 'decimation' may be
+specified.  The device does not respond with the commanded effective
+sample rate.  In the query response for this command, the implied
+sample rate is shown in parentheses for informational purposes only.
+
+The state values of 'begin' and 'end' mark the beginning and end of
+Core3h configuration for a mode. For example:
+
+   core3h_mode=begin
+   core3h_mode1=...
+   ...
+   core3h_mode=end
+
+Up to the total number of Core3h boards in the rack (the maximum is
+set in dbbc3.ctl) can be set-up between the 'begin' and 'end'. Any
+boards that are not set will have their output disabled (stopped) by
+the "end".  This is to turn off output from boards that had previously
+been used if they are not used in the current mode.
+
+To use a non-zero 'mask2', the DBBC3 personality must be DDCU.
+Additionally, there can't bits turned on for BBCs in 'mask2' that
+exceed the number available as set by the number of BBCs per IF in
+'dbbc3.ctl'.
+
+The meaning of the bits in the mask are given in the following table.
+Mask1 represents the first eight BBCs for a Core3h board; mask2, the
+second eight. In the table, the first eight BBCs for a board are
+generically numbered 1-8; the second eight, 9-16.
+
+ Bit   Mask1    Mask2
+  1     1US      9US
+  2     1UM      9UM
+  3     1LS      9LS
+  4     1LM      9LM
+  5     2US     10US
+  6     2UM     10UM
+  7     2LS     10LS
+  8     2LM     10LM
+  9     3US     11US
+ 10     3UM     11UM
+ 11     3LS     11LS
+ 12     3LM     11LM
+ 13     4US     12US
+ 14     4UM     12UM
+ 15     4LS     12LS
+ 16     4LM     12LM
+ 17     5US     13US
+ 18     5UM     13UM
+ 19     5LS     13LS
+ 20     5LM     13LM
+ 21     6US     14US
+ 22     6UM     14UM
+ 23     6LS     14LS
+ 24     6LM     14LM
+ 25     7US     15US
+ 26     7UM     15UM
+ 27     7LS     15LS
+ 28     7LM     15LM
+ 29     8US     16US
+ 30     8UM     16UM
+ 31     8LS     16LS
+ 32     8LM     16LM
+ 
+The number of BBCs available per board may be 8, 12, or 16 depending on the
+hardware configuration. The BBCs for each mask for each board are:
+
+Board  Mask1     Mask2
+  1     1- 8    65- 72
+  2     9-16    73- 80
+  3    17-24    81- 88
+  4    25-32    89- 96
+  5    33-40    97-104
+  6    41-48   105-112
+  7    49-56   113-120
+  8    57-64   121-128
+
+For a DBBC3 DDCV personality only a decimation of '2' or sample rate
+of '64' are allowed.

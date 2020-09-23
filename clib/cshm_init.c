@@ -537,6 +537,13 @@ void cshm_init()
   }
   shm_addr->dbtcn.iping=0;
 
+  for(i=0;i<MAX_DBBC3_IF;i++) {
+      shm_addr->dbbc3_core3h_modex[i].set=0;
+      m5state_init(&shm_addr->dbbc3_core3h_modex[i].mask2.state);
+      m5state_init(&shm_addr->dbbc3_core3h_modex[i].mask1.state);
+      m5state_init(&shm_addr->dbbc3_core3h_modex[i].decimate.state);
+  }
+
   return;
 }
 

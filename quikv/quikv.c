@@ -317,6 +317,17 @@ loop:
 	case 26:
 	  fila10g_mode(&command, itask, ip);
 	  break;
+	case 29:
+	case 30:
+	case 31:
+	case 32:
+	case 33:
+	case 34:
+	case 35:
+	case 36:
+	case 37:
+	  dbbc3_core3h_modex(&command, itask, ip);
+	  break;
 	default:
 	  ierr=-4;
 	  goto error;
