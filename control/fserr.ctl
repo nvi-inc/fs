@@ -1478,6 +1478,9 @@ No default for IF command condition.
 BO -315
 Unknown condition in IF command.
 ""
+BO -390
+setup procedure name must be 12 characters or less.
+""
 BO -400
 Error opening flagr.ctl, UNIX ?FFF
 ""
