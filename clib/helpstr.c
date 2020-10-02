@@ -194,7 +194,8 @@ int rlen;
 		     (ch1 == 'w' && (VLBA == *rack || VLBA4 == *rack)) ||
 		     (ch1 == 'k' && (K4K3 == *rack || K4MK4 == *rack || K4 == *rack)) ||
 		     (ch1 == 'l' && (LBA == *rack || LBA4 == *rack)) ||
-		     (ch1 == 'd' && DBBC == *rack) || (ch1 == 'a' && 0 != *rack)) &&
+		     (ch1 == 'd' && DBBC == *rack) || (ch1 == 'a' && 0 != *rack) ||
+             (ch1 == 'j' && DBBC3 == *rack)) &&
 
 		    (ch2 == '_' ||
 		     ch2 == '+' ||
