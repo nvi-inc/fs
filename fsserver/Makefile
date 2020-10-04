@@ -1,6 +1,6 @@
 TARGETS = ../bin/fsserver ../bin/fsclient ../bin/spub ../bin/ssub $(SHIMS) 
 SHIMS = ../bin/shims/xterm ../bin/shims/fs.prompt
-OBJECTs = fsserver.o server.o window.o list.o prompt.o fsclient.o window.o list.o prompt.o ./shims/fs.prompt.o 
+OBJECTS = fsserver.o server.o window.o list.o prompt.o fsclient.o window.o list.o prompt.o ./shims/fs.prompt.o
 
 .PHONY: all
 .PHONY: shims
