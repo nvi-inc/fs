@@ -105,10 +105,14 @@ void cmd_cb(void *arg) {
 	msg = nng_aio_get_msg(s->rep_aio);
 
 	uint64_t req_seq;
-	rv = nng_msg_chop_u64(msg, &req_seq);
+
+	uint8_t *msg_body = nng_msg_body(msg);
+	size_t msg_len    = nng_msg_len(msg);
+
+	rv = uint64_unmarshal_le(&req_seq, msg_body, msg_len);
 	nng_msg_free(msg);
 
-	if (rv != 0) {
+	if (rv < 0) {
 		fprintf(stderr, "spub: bad msg");
 		goto end;
 	}
@@ -144,21 +148,21 @@ void cmd_cb(void *arg) {
 	}
 
 	uint8_t *rep_ptr = nng_msg_body(reply_msg);
-	size_t msg_len   = 0;
+	size_t len       = 0;
 
 	for (int j = first;; j = (j + 1) % s->msg_buffer_len) {
-		int n = msg_marshal(&s->msg_buffer[j], rep_ptr, rep_msg_size - msg_len);
+		int n = msg_marshal(&s->msg_buffer[j], rep_ptr, rep_msg_size - len);
 		if (n < 0) {
 			fatal("marshaling msg", "not enough buffer space");
 		}
 		rep_ptr += n;
-		msg_len += n;
+		len += n;
 
 		if (s->msg_buffer[j].seq == s->seq - 1)
 			break;
 	}
 
-	if (msg_len != rep_msg_size) {
+	if (len != rep_msg_size) {
 		fatal("marhsalling message", "msg smaller than anticipated");
 	}
 
