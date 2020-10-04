@@ -494,4 +494,23 @@ typedef struct fscom {
 
   struct dbbc3_core3h_modex_cmd dbbc3_core3h_modex[MAX_DBBC3_IF];
 
+  struct dbbc3_tsys_data {
+      struct dbbc3_tsys_cycle {
+          struct dbbc3_tsys_ifc {
+              double lo;
+              int sideband;
+              int delay;
+              int time;
+              int time_correct;
+              float tsys;
+              int set;
+          } ifc[MAX_DBBC3_IF];
+          struct dbbc3_tsys_bbc {
+              float tsys_lsb;
+              float tsys_usb;
+              unsigned freq;
+          } bbc[MAX_DBBC3_BBC];
+      } data[2];
+      int iping;
+  } dbbc3_tsys_data;
 } Fscom;

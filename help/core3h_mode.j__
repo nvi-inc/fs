@@ -39,7 +39,8 @@ okay        override to allow command while recording, literal text:
             'disk_record_ok'
 
 stop        literal 'stop' to end board output, this is the only way
-            to disable output from the board
+            to disable output from the board.  The FS's memory of the
+            bit masks for the board is cleared as well.
 
 Monitor only parameter:
 stopped     literal 'stopped' if board output has been stopped

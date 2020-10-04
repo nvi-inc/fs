@@ -544,6 +544,12 @@ void cshm_init()
       m5state_init(&shm_addr->dbbc3_core3h_modex[i].decimate.state);
   }
 
+  for (i=0;i<MAX_DBBC3_IF;i++) {
+      shm_addr->dbbc3_tsys_data.data[0].ifc[i].set=0;
+      shm_addr->dbbc3_tsys_data.data[1].ifc[i].set=0;
+  }
+  shm_addr->dbbc3_tsys_data.iping=0;
+
   return;
 }
 

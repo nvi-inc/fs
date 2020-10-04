@@ -34,8 +34,6 @@ void mk5dbbc3d(itpis)
 int itpis[MAX_DBBC3_DET];
 {
     for (int i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
-        if(0 == shm_addr->dbbc3_core3h_modex[i].set)
-            continue;
 
         if(shm_addr->dbbc3_core3h_modex[i].mask1.state.known)
             for (int j=0;j<8;j++) {
@@ -50,10 +48,10 @@ int itpis[MAX_DBBC3_DET];
         if(shm_addr->dbbc3_core3h_modex[i].mask2.state.known)
             for (int j=0;j<8;j++) {
                 if(shm_addr->dbbc3_core3h_modex[i].mask2.mask2 & 0xcu<<j*4) {
-                    itpis[i*8+j+64]=1;
+                    itpis[i*8+j+MAX_DBBC3_BBC/2]=1;
                 }
                 if(shm_addr->dbbc3_core3h_modex[i].mask2.mask2 & 0x3u<<j*4) {
-                    itpis[i*8+j+64+MAX_DBBC3_BBC]=1;
+                    itpis[i*8+j+MAX_DBBC3_BBC/2+MAX_DBBC3_BBC]=1;
                 }
             }
     }

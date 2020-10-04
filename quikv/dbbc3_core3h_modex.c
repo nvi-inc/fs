@@ -62,6 +62,8 @@ void dbbc3_core3h_modex(command,itask,ip)
             out_class=0;
             for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
                 if(0==shm_addr->dbbc3_core3h_modex[i].set) {
+                    shm_addr->dbbc3_core3h_modex[i].mask2.mask2=0;
+                    shm_addr->dbbc3_core3h_modex[i].mask1.mask1=0;
                     strcpy(str,"core3h=");
                     strcat(str,board[i]);
                     strcat(str,",stop");
@@ -117,6 +119,8 @@ void dbbc3_core3h_modex(command,itask,ip)
             char str[BUFSIZE];
 
             shm_addr->dbbc3_core3h_modex[itask-30].set=0;
+            shm_addr->dbbc3_core3h_modex[itask-30].mask2.mask2=0;
+            shm_addr->dbbc3_core3h_modex[itask-30].mask1.mask1=0;
             out_recs=0;
             out_class=0;
 
@@ -163,7 +167,6 @@ parse:
             goto error;
         }
     }
-
 
     memcpy(&shm_addr->dbbc3_core3h_modex[itask-30],&lcl,sizeof(lcl));
 

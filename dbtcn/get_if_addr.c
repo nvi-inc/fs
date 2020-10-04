@@ -30,6 +30,10 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"
+
 #include "packet.h"
 #include "dbtcn.h"
 

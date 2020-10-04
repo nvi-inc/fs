@@ -131,6 +131,14 @@ main()
       memcpy(&shm_addr->dbtcn.control[iping[0]],&dbtcn_control,
 	     sizeof(struct dbtcn_control));
       shm_addr->dbtcn.iping=iping[0];
+      /* this will make sure a to_error_off request is respected before
+         the tpicd=stop request command returns; if instead we waited for
+         dbtcn to return, it could take a while time-out period if it is
+         timing out already, in that case the user shouldn't be too annoyed
+         by one more time-out message anyway; it would be faster by an average of
+         0.5 seconds is we waited and wasn't already timing out. */
+      if(shm_addr->tpicd.stop_request)
+          rte_sleep(101);
     goto loop;
   }
 

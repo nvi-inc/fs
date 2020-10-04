@@ -27,6 +27,11 @@
 #include <unistd.h>
 
 #include "packet.h"
+
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"
+
 #include "dbtcn.h"
 
 int open_mcast(char mcast_addr[], int mcast_port, char mcast_if[], int *error_no) {

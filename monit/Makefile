@@ -1,4 +1,5 @@
-all: ../bin/monit1 ../bin/monit2 ../bin/monit3 ../bin/monit4 ../bin/monit5 ../bin/monit6
+all: ../bin/monit1 ../bin/monit2 ../bin/monit3 ../bin/monit4 ../bin/monit5 ../bin/monit6\
+        ../bin/monit7
 
 CPPFLAGS  +=  -I/usr/include/ncurses
 LDLIBS += -lm -lncurses
@@ -33,5 +34,9 @@ OBJECTS5 = monit5.o die.o pre_str.o m5init.o\
 OBJECTS6 = monit6.o die.o m6init.o mout6.o gmonit6.o
 
 ../bin/monit6: $(OBJECTS6) $(LIBS)
+
+OBJECTS7 = monit7.o die.o mout7.o
+
+../bin/monit7: $(OBJECTS7) $(LIBS)
 
 include ../include.mk

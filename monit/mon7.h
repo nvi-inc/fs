@@ -17,12 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#define ROW_HOLD     0
 
-int open_mcast(char mcast_addr[], int mcast_port, char mcast_if[], int *error_no);
-int get_if_addr(char *name, char **address, int *error_no);
-ssize_t read_mcast(int sock, char buf[], size_t buf_size, int to_report);
-void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
-        int cont_cal);
-void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle);
-void log_mcast(dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
-        int cont_cal);
+#define COL_HOLD    0

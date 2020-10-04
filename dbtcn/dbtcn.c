@@ -66,30 +66,43 @@ int main(int argc, char *argv[])
 
     ssize_t n;
     struct dbtcn_control dbtcn_control;
+    struct dbbc3_tsys_cycle cycle = {};
     int to_report;
     dbbc3_ddc_multicast_t packet = {};
     int loop_count = -1;
     for (;;) {
+        int cont_cal=shm_addr->dbbc3_cont_cal.mode == 1;
+
         memcpy(&dbtcn_control,
-        &shm_addr->dbtcn.control[shm_addr->dbtcn.iping],
-        sizeof(dbtcn_control));
+                &shm_addr->dbtcn.control[shm_addr->dbtcn.iping],
+                sizeof(dbtcn_control));
 
         to_report=1!=dbtcn_control.to_error_off;
 
         n = read_mcast(sock,buf,sizeof(buf),to_report);
+
         if(n<0)
             continue;
 
-        /* check control to get the last state */
+        if (unmarshal_dbbc3_ddc_multicast_t(&packet, buf, n) < 0) {
+            logit(NULL,-1,"dn");
+            continue;
+        }
+
+        calc_ts(&packet,&cycle, cont_cal);
+
+        update_shm(&packet,&cycle);
+
+        /* check control to get the last state before logging */
 
         memcpy(&dbtcn_control,
-        &shm_addr->dbtcn.control[shm_addr->dbtcn.iping],
-        sizeof(dbtcn_control));
+                &shm_addr->dbtcn.control[shm_addr->dbtcn.iping],
+                sizeof(dbtcn_control));
 
         if (1==dbtcn_control.stop_request ||
-            (dbtcn_control.continuous == 0 &&
-            (dbtcn_control.data_valid.user_dv ==0 || shm_addr->KHALT !=0 ||
-            0==strncmp(shm_addr->LSKD,"none    ",8)))) {
+                (dbtcn_control.continuous == 0 &&
+                 (dbtcn_control.data_valid.user_dv ==0 || shm_addr->KHALT !=0 ||
+                  0==strncmp(shm_addr->LSKD,"none    ",8)))) {
             loop_count=-1;
             continue;
         }
@@ -99,11 +112,7 @@ int main(int argc, char *argv[])
         if (loop_count!=0)
             continue;
 
-        if (unmarshal_dbbc3_ddc_multicast_t(&packet, buf, n) < 0) {
-            logit(NULL,-1,"dn");
-            continue;
-        }
-        log_mcast(&packet);
+        log_mcast(&packet,&cycle,cont_cal);
     }
 
 idle:

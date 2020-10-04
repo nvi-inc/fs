@@ -29,6 +29,11 @@
 
 #include "packet.h"
 #include "packet_unpack.h"
+
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"
+
 #include "dbtcn.h"
 
 // These are in centiseconds
