@@ -34,9 +34,9 @@ CONTROL_DIR=${CONTROL_DIR:-"${FS_BASE}/control"}
 LOG_DIR=${LOG_DIR:-"${FS_BASE}/log"}
 # check for skedf.ctl
 if [[ -e $CONTROL_DIR/skedf.ctl ]]; then
-    proc_dir=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$proc/i     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t]*$/) {$_=$1;exit;}}}' <$CONTROL_DIR/skedf.ctl)
-    snap_dir=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$snap/i     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t]*$/) {$_=$1;exit;}}}' <$CONTROL_DIR/skedf.ctl)
-    sched_dir=$(perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$schedules/i) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t]*$/) {$_=$1;exit;}}}' <$CONTROL_DIR/skedf.ctl)
+    proc_dir=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$proc/i     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t\r]*$/) {$_=$1;exit;}}}' <$CONTROL_DIR/skedf.ctl)
+    snap_dir=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$snap/i     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t\r]*$/) {$_=$1;exit;}}}' <$CONTROL_DIR/skedf.ctl)
+    sched_dir=$(perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$schedules/i) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t\r]*$/) {$_=$1;exit;}}}' <$CONTROL_DIR/skedf.ctl)
     PROC_DIR=${PROC_DIR:-"${proc_dir}"}
     SNAP_DIR=${SNAP_DIR:-"${snap_dir}"}
     SCHED_DIR=${SCHED_DIR:-"${sched_dir}"}
