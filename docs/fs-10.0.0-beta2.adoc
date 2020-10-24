@@ -1,8 +1,8 @@
 //
 // Copyright (c) 2020 NVI, Inc.
 //
-// This file is part of the FSL10 Linux distribution.
-// (see http://github.com/nvi-inc/fsl10).
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
