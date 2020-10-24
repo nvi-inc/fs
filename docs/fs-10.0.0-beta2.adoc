@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.3 - October 2020
+Version 0.4 - October 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -49,7 +49,7 @@ the latest commit as described in
 
 The most significant changes in _10.0.0_ are:
 
-. One unified version for all FS users
+. One unified version for all FS users.
 
 +
 
@@ -98,16 +98,16 @@ the distribution method.
 +
 
 The details of the model used for FS releases under _git_ are
-described in _/usr2/fs/misc/release_model.txt_. 
+described in _/usr2/fs/misc/release_model.txt_.
 
 +
 
 This change increases the importance of not modifying the
 _/usr2/fs_ directory tree since such changes will make it more
-difficult to simply `*pull*` updates to install bug fixes and new
+difficult to simply `pull` updates to install bug fixes and new
 features.
 
-. Use of the FS display server is now recommended for normal use. 
+. Use of the FS display server is now recommended for normal use.
 
 +
 
@@ -175,25 +175,30 @@ execute:
              git checkout master
              make -s
 
-=== Updates for fesh
+=== Updates
 
-If you are using _fesh_ to pull schedules from _cddis_, it is
+. If you are using _fesh_ to pull schedules from _cddis_, it is
 recommend that you set the `FESH_EMAIL` environment variable with a
-working email address to use as the password for _anonymous_ FTP-SSL access (which is new in
-this release); this will remove the need to enter it manually for each
-use. HTTPS connections to _cddis_ are also supported as an option.
+working email address to use as the password for _anonymous_ FTP-SSL
+access (which is new in this release); this will remove the need to
+enter it manually for each use.
++
 
 If you have FSL8 or other old distribution that does not support
-_curl_ SSL or HTTPS connections to _cddis_, it is possible to restore
+_curl_ SSL connections to _cddis_, it is possible to restore
 the previous non-SSL FTP access. That can only be a temporary solution
 since _cddis_ is planning to end non-SSL FTP access at the end of
-October 2020.  This version of _fesh_ supports pulling schedules
-from _bkg_ and _opar_. That may be an alternative, particularly if
-your distribution will not support SSL or HTTPS connections. Using
-separate directories for  _.skd_ and _.snp_ files is now supported.
+October 2020.
++
 
-Please see `*fesh -h*` for the details on how
-to use all of these features. 
+Please see `*fesh -h*` for the details on how to use all of these
+features.
+
+. If you use RDBEs in your back-end and want to use the _rdbemsg_
+utility to send operations messages, please customize your
+_/usr2/control/rdbemsg.ctl_ control file by adding the _name_ line to
+the file if you haven't already.  Full instructions are provided in
+sub-step <<Update rdbemsg.ctl>>.
 
 === Review other changes
 
@@ -267,9 +272,9 @@ helpful, more detail is provided in sub-step <<Review control files>>.
 . There were two changes to the _clpgm.ctl_ control file:
 
 .. The flags for the _monX_ programs in _clpgm.ctl_ have
-changed from *`a`* to *`d`*.
+changed from `a` to `d`.
 +
-Please check the file to see if those lines are present. If so, and the second field is *`a`*, please change it to *`d`* for each occurrence.
+Please check the file to see if those lines are present. If so, and the second field is `a`, please change it to `d` for each occurrence.
 
 .. The line for the _scnch_ window has been generalized to
 cover Mark 5 recorders as well as Mark 6.
@@ -297,6 +302,12 @@ customize your _/usr2/control/rdbemsg.ctl_ control file.
 In particular, you should add the _station_ line to the
 file.  Full instructions are provided in sub-step <<Update rdbemsg.ctl>>,
 which is a new sub-step since _-beta1_.
++
+
+NOTE: The instructions at <<Update rdbemsg.ctl>> also include setting
+the `name` line in _rdbemsg.ctl_. That setting is not available as of
+_-beta2_; it is provided in a later update. However, setting it for
+_-beta2_ is benign and forward compatible.
 
 === Update .prc files from 10.0.0-beta1
 
@@ -305,7 +316,7 @@ clean-up of your `calonnf`, `calonfp`, `caloffnf`, and
 `calofffp` procedures, probably located in your _point_
 procedure library in sub-step <<Remove extra if commands>>.
 
-=== Other changes
+=== Other updates
 
 . Please review sub-step <<Set FS_DISPLAY_SERVER>>. This sub-step did not exist for the
 _-beta1_ release.  It contains information about making use
@@ -403,7 +414,7 @@ symbolic links.
 === Login as root
 
 Login as _root_.
- 
+
 === Download the FS
 
 Place a copy of the FS _git_ repository to the _/usr2_ directory on
@@ -419,7 +430,7 @@ distribution, or otherwise need to use _ssh_ instead:
        git clone git@github.com:nvi-inc/fs fs-git
 
 NOTE: Using _ssh_ requires you to have a _gitub_ account and for you
-to add an _ssh_ public key from your machine's _root_ account to your _github_ account. For more information, go to 
+to add an _ssh_ public key from your machine's _root_ account to your _github_ account. For more information, go to
 https://github.com/join and
 https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/adding-a-new-ssh-key-to-your-github-account.
 
@@ -443,7 +454,7 @@ NOTE: This step will change your _/usr2/fs_ symbolic to point to
            _/usr2/fs-git_. You will need to change the link manually
            to switch back to your old version.
 
-The `*make install*` command may create and possibly rename some
+The `make install` command may create and possibly rename some
 existing directories if the FS was never installed on this system
 before.  However, if you are using this step as part of upgrading
 on your 32-bit system (this step is not used on a 64-bit system
@@ -459,14 +470,14 @@ For stations where all the operational files are
 expected to owned by user _oper_ in group _rtx_, with permissions
 (`ug+rw,o+r,o-w`) the following command will enforce this (note
 that the _execute_/_search_ bits are not changed):
-  
+
        /usr2/fs/misc/fix_perm
 
 Answer `y` to the prompt if you wish to proceed. It is recommended for most stations.
 
 === Login as prog
 
-IMPORTANT: Logout as `root`, and login as `prog`.
+IMPORTANT: Logout as _root_, and login as _prog_.
 
 === Set compiler
 
@@ -505,14 +516,14 @@ for _bash_.
 and then
 
           make -s
-    
+
 to confirm that everything compiled correctly (no news is good
 news).
 
 === Update station programs
 
 This step is for modifying your station programs in _/usr2/st_.  There
-are two possible issues: 
+are two possible issues:
 
 ==== Case sensitive strings in antenna= commands
 
@@ -567,10 +578,10 @@ _f95_.
 
 If _/usr2/st/Makefile_ is set-up in the standard way, you can do this with:
 
-       cd /usr2/st   
+       cd /usr2/st
        make rmdoto rmexe all
 
-NOTE: At this point, you are only trying to verify the code will `*make*`
+NOTE: At this point, you are only trying to verify the code will _make_
 successfully.  You may still need to debug it in the step <<Test the FS>>
 below.
 
@@ -601,7 +612,7 @@ _9.13.2_. You can fix your file with the commands:
   /usr2/fs/misc/cmdctlfix6 stcmd.ctl
 
 You may also want to expand the (typically) second comment
-line to correspond to the new format by adding a `*U*` after
+line to correspond to the new format by adding a `U` after
 character 18 to read as:
 
     *COMMAND     SEG SUBPA BO
@@ -612,13 +623,13 @@ You will need to execute the following commands to copy new
 files that are needed (cut-and-paste is your friend). There
 are three cases depending on what your old version was:
 
-. Old versions _9.12.10_ and _9.12.11_:  
+. Old versions _9.12.10_ and _9.12.11_:
 
                cd /usr2/control
                cp /usr2/fs/st.default/control/clpgm.ctl .
                cp /usr2/fs/st.default/control/rdbemsg.ctl .
 
-. Old versions _9.12.12_ and _9.12.13_:  
+. Old versions _9.12.12_ and _9.12.13_:
 
                cd /usr2/control
                cp /usr2/fs/st.default/control/rdbemsg.ctl .
@@ -652,7 +663,7 @@ file to yours:
 
 . If your old version was _9.12.12_ or _9.12.13_, you will need
 to insert two lines before the final two lines.  This is
-covered in sub-step <<Review control files>> below. 
+covered in sub-step <<Review control files>> below.
 
 . If your old version was _9.13.2_, you will need to add the
 final two lines of the example _equip.ctl_ file to yours:
@@ -777,7 +788,7 @@ A new line for the DBBC3 configuration was added at the end, but sub-step
 +
 Compared to all old versions, comment lines
 were added or modified for new equipment type
-options. 
+options.
 +
 . Old versions _9.12.10_-_9.12.13_:
 +
@@ -904,12 +915,12 @@ case as described in sub-step <<Review stpgm.ctl>> above.
 If _oper_ uses the _bash_ shell then in the _~oper/.profile_
 file, you can uncomment or insert
 
-          export FS_DISPLAY_SERVER=on 
+          export FS_DISPLAY_SERVER=on
 
 If _oper_ uses the _tcsh_ shell then in the _~oper/.login_
 file, you can uncomment or insert
 
-          setenv  FS_DISPLAY_SERVER on 
+          setenv  FS_DISPLAY_SERVER on
 
 You should logout and login again after making this change.
 
@@ -1079,7 +1090,7 @@ first, please follow the directions in section
 your old system. Then return here and follow the steps in
 <<Copying files>> below.
 
-. If you are not upgrading your old computer first, proceed 
+. If you are not upgrading your old computer first, proceed
 directly to <<Copying files>> below.
 
 In either case, proceed to <<Handling station code>> after copying your files.
@@ -1318,9 +1329,9 @@ _fsadapt_ script, as _root_:
 In the first window select *only* the option (i.e., only that line has a `*`):
 
   goinst    Install (or 'Update') Go programming language
- 
+
 Then press kbd:[Enter] while `OK` is highlighted. On the next screen, press kbd:[Tab]
-to highlight `Cancel` and the press kbd:[Enter]. 
+to highlight `Cancel` and the press kbd:[Enter].
 
 ===== Configure prog account for go language
 
@@ -1345,7 +1356,7 @@ for _prog_, re-execute the file:
 Then you should be able to execute the installation step given
 at the URL above (as _prog_):
 
-  cd 
+  cd
   go get github.com/dehorsley/unlongify
 
 Please read the _README.md_ file, which is displayed at the
@@ -1381,7 +1392,7 @@ Each sub-section covers both FS and _drudg_ changes since specific
 versions. The changes are listed incrementally. Thus the cumulative
 changes are constructed by combining the changes for the relevant
 versions. A summary of the changes is given in each sub-section,
-followed by a more detailed description. References such as 
+followed by a more detailed description. References such as
 https://github.com/nvi-inc/fs/issues/36[#36] refer to specific issues
 reported at https://github.com/nvi-inc/fs/issues.
 
@@ -1392,31 +1403,36 @@ The contents of this section are:
 . <<Changes since 9.13.2>>
 . <<Changes since VGOS versions>>
 
+A complete history of changes can be found using the `git log`
+command.
+
+The file _/usr2/fs/misc/changes.txt_ contains the old history of
+changes in FS9. The file _/usr2/fs/misc/VENIX_changes.txt_ contains
+the old history of changes in FS8. However these two files have been
+merged into the history given by `git log`.
+
+The history of _drudg_ is also described in more detail in
+_/usr2/fs/drudg/change_log.txt_.
+
+
 === Changes since 10.0.0-beta2
 
 This sub-section covers changes in the latest commit since _-beta2_.
 
 ==== Summary of FS changes since 10.0.0-beta2
 
-. Modify steps for updating to a specific commit after _-beta2_ to
-use the latest commit instead.
-
 . Add _new_ifdbb_ script for (RDBE) VGOS stations.
 
-. _fesh_ uses FTP-SSL (closes https://github.com/nvi-inc/fs/issues/36[#36])  and supports separate _.snp_ and
-    _.skd_ directories.
- 
-==== Details of FS changes since 10.0.0-beta2
+. _fesh_ uses FTP-SSL (closes https://github.com/nvi-inc/fs/issues/36[#36]).
 
-. Modify steps for updating to a specific commit after _-beta2_ to
-use the latest commit instead. As well as being
-simpler, this is part of a new approach to try to keep the update
-notes current with the latest commit. It is important
-to be aware that the latest commit is not a version
-intended for operations. We make every effort to make sure it is
-bug free, but problems may occur. Since it represents the
-"bleeding edge" of development, features may not as stable nor
-use as reliable as released (tagged) versions.
+. The station name in _rdbemsg_ is no longer hard coded (closes
+https://github.com/nvi-inc/fs/issues/62[#62]).
+
+. Restore `help` for DBBC3 commands.
+. Improvements in _fsserver_ (includes tentatively closing https://github.com/nvi-inc/fs/issues/69[#69]).
+. Improvements to update notes (this document):
+
+==== Details of FS changes since 10.0.0-beta2
 
 . Add _new_ifdbb_ script for (RDBE) VGOS stations. This script is
 intended as a tool to allow stations, and schedule writers, a way
@@ -1428,28 +1444,70 @@ conditions at the station. The provides a way to incorporate
 needed changes into schedules. If the script is run without other
 command line arguments, it will output "help" information.
 
-. _fesh_ uses FTP-SSL (closes https://github.com/nvi-inc/fs/issues/36[#36])  and supports separate _.snp_ and
-_.skd_ directories.  The use of FTP-SSL for _cddis_ access will
-allow use of _cddis_ after non-SSL FTP access is disabled there,
-expected at the end of October 2020. This requires a working email
-address which can be entered manually when prompted or configured
-with an environment variable, `FESH_EMAIL`.
+. _fesh_ uses FTP-SSL (closes
+https://github.com/nvi-inc/fs/issues/36[#36]). The use of FTP-SSL for
+_cddis_ access will allow use of _cddis_ after non-SSL FTP access is
+disabled there, expected at the end of October 2020. It is
+recommended that the `FESH_EMAIL` environment variable be set to
+avoid the need to provide an email address each time use as the
+_anonymous_ FTP-SSL password.
 +
+
 If you have FSL8 or other old distribution that does not support
 _curl_ SSL connections to _cddis_, it is possible to restore the
 previous non-SSL FTP access by setting the `FESH_CDDIS_METHOD`
 environment variable to `ftp`.  However, this method will no longer work
 once non-SSL FTP access ends.
 +
-The ability to have separate _.snp_ and _.skd_ directories, allows
-the use of one directory for _.skd_ and _.lst_ files (perhaps
-_/usr2/exper_) separate from _/usr2/sched_ for _.snp_ files.
-+
 Please see `*fesh -h*` for the details on using these features.
+
+. The station name in _rdbemsg_ is no longer hard coded (closes
+https://github.com/nvi-inc/fs/issues/62[#62]). The station name is now
+set in _rdbemsg.ctlr_ control file. Thanks to Chevo Terraza (MGO) for
+reporting this.
+
+. Restore `help` for DBBC3 commands. The selection of DBBC3 specific commands
+was lost in the merge of the VGOS and main branches. It is now restored.
+
+. Improvements in _fsserver_ (includes tentatively closing https://github.com/nvi-inc/fs/issues/69[#69]).
+
+.. _spub_/_ssub_ occasionally froze (tentatively closing
+https://github.com/nvi-inc/fs/issues/69[#69]). This may have been
+caused be the byte order being wrong in buffered stream `cb` This
+situation is still being monitored to verify that it is fixed.
+
+.. Fixed `clean` function in _Makefile_.
+.. Fixed _sspub_ to support more than 2^32^ messages.
+
+. Improvements to update notes (this document).
+
+.. Modify steps for updating to a specific commit after _-beta2_ to
+use the latest commit instead. As well as being
+simpler, this is part of a new approach to try to keep the update
+notes current with the latest commit. It is important
+to be aware that the latest commit is not a version
+intended for operations. We make every effort to make sure it is
+bug free, but problems may occur. Since it represents the
+"bleeding edge" of development, features may not be as stable nor
+use as reliable as released (tagged) versions.
+
+.. Add missing _rdbemsg.ctl_ customization.
+.. Include items added since _-beta2_.
+
+.. Reorganized as an _.adoc_ file and now available as a web page at:
+https://nvi-inc.github.io/fs/.
+.. Improve structure and correct some errors from original _.txt_ version.
+.. Some typo/wording fixes.
 
 ==== Summary of drudg changes since 10.0.0-beta2
 
-There are no changes since _-beta2_ at this point
+_drudg_ opening message date is `2020Sep14`.
+
+. Fix crash if `$HEAD` is the last block in a `.skd` file.
+
+==== Details of drudg changes since 10.0.0-beta2
+
+. Fix crash if `$HEAD` is the last block in a `.skd` file. Fixed bug in _reads.f_.
 
 === Changes since 10.0.0-beta1
 
@@ -1460,9 +1518,9 @@ This sub-section covers changes in _-beta2_ since _-beta1_.
 The following is a summary of FS changes since _10.0.0-beta1_ but not
 included in _10.0.0-beta2_ or later.
 
-. Improve _fesh_ (closes https://github.com/nvi-inc/fs/issues/34[#34]).
-. Update example _equip.ctl_ (closes https://github.com/nvi-inc/fs/issues/35[#35]).
-. Fix some error messages (closes https://github.com/nvi-inc/fs/issues/43[#43] & https://github.com/nvi-inc/fs/issues/22[#22]).
+. Improve _fesh_ (includes closing https://github.com/nvi-inc/fs/issues/34[#34]).
+. Update example _equip.ctl_ (includes closing https://github.com/nvi-inc/fs/issues/35[#35]).
+. Fix some error messages (includes closing https://github.com/nvi-inc/fs/issues/43[#43] & https://github.com/nvi-inc/fs/issues/22[#22]).
 . Improve _plog_.
 . Restore `if` command.
 . Update GPL in files.
@@ -1482,7 +1540,7 @@ there was an attempt to execute a procedure from the library was fixed.
 . Make use of the FS display server the default.
 . Make _fsclient_ honor the `-n` flag properly (closes https://github.com/nvi-inc/fs/issues/48[#48]).
 . Make _fsclient_ ignore prompt in no-X11 mode (closes https://github.com/nvi-inc/fs/issues/49[#49]).
-. Add _fsserver_ improvements and log support (closes https://github.com/nvi-inc/fs/issues/29[#29] & https://github.com/nvi-inc/fs/issues/25[#25]).
+. Add _fsserver_ improvements and log support (includes closing https://github.com/nvi-inc/fs/issues/29[#29] & https://github.com/nvi-inc/fs/issues/25[#25]).
 . Eliminate `cls_chk` error from `inject_snap -w ...` command when
     an error occurs (partly closes https://github.com/nvi-inc/fs/issues/50[#50]).
 . Fix labels in _gnplt_ windows that display the gain curve
@@ -1492,8 +1550,8 @@ there was an attempt to execute a procedure from the library was fixed.
 . Add support for DBBC3 to `if=cont_cal,...` (closes https://github.com/nvi-inc/fs/issues/54[#54]).
 . Update `help` pages for _onoff_ and _fivpt_.
 . Always check for day 248 problem in _setcl_ (closes https://github.com/nvi-inc/fs/issues/56[#56]).
-. Change the flags for the _monX_ programs in _clpgm.ctl_ from `*a*`
-    to `*d*`.
+. Change the flags for the _monX_ programs in _clpgm.ctl_ from `a`
+    to `d`.
 . Generalize the _scnch_ window to cover Mark 5 recorders (closes
     https://github.com/nvi-inc/fs/issues/61[#61]).
 . Update _misc/release_model.txt_.
@@ -1501,20 +1559,23 @@ there was an attempt to execute a procedure from the library was fixed.
 
 ==== Details of FS changes since 10.0.0-beta1
 
-. Improve _fesh_ (closes https://github.com/nvi-inc/fs/issues/34[#34]). A typo in the error message for when
-the schedule is already downloaded was fixed. This was reported by
-Morgan Goodrich (KPGO).
-+
-The internal version number was replaced with the FS version
-number.
+. Improve _fesh_ (includes closing https://github.com/nvi-inc/fs/issues/34[#34]).
 
-. Update example _equip.ctl_ (closes https://github.com/nvi-inc/fs/issues/35[#35]). The example DBBC3
-firmware is now more sensible. Thanks to Eskil Varenius (Onsala)
+.. A typo in the error message for when
+the schedule is already downloaded was fixed (closes https://github.com/nvi-inc/fs/issues/34[#34]). Thanks to
+Morgan Goodrich (KPGO) for reporting this.
+
+.. The internal version number was replaced with the FS version.
+
+. Update example _equip.ctl_ (includes closing https://github.com/nvi-inc/fs/issues/35[#35]).
+
+.. The example DBBC3
+firmware is now more sensible (closes https://github.com/nvi-inc/fs/issues/35[#35]). Thanks to Eskil Varenius (Onsala)
 for reporting this.
-+
-The minimum DBBC3 firmware version required was added in a comment.
 
-. Fix some error messages (closes https://github.com/nvi-inc/fs/issues/43[#43] & https://github.com/nvi-inc/fs/issues/22[#22]).
+.. The minimum DBBC3 firmware version required was added in a comment.
+
+. Fix some error messages (includes closing https://github.com/nvi-inc/fs/issues/43[#43] & https://github.com/nvi-inc/fs/issues/22[#22]).
 
 .. Fixed errors in
 _control/fserr.ctl_.  Errors in some double double-quotes (`""`)
@@ -1534,13 +1595,14 @@ commands, respectively.
 .. Obsolete errors for the, no longer used, _sw.ctl_ control file
 were removed.
 
-. Improve _plog_. Use of an environment variable `NETRC_DIR` was
+. Improve _plog_.
+
+.. Use of an environment variable `NETRC_DIR` was
 added to support not having the _.netrc_ file in the user's home
 directory was added. Please see `*plog -h*` for details on how to
 use this.
-+
-The internal version number was replaced with the FS version
-number.
+
+.. The internal version number was replaced with the FS version.
 
 . Restore `if` command. It had accidentally been overlooked in
 _-beta1_. Thanks to Beppe Maccaferri (Medicina) for reporting
@@ -1603,10 +1665,10 @@ controlled locally.
 . Move unsetting of `TMOUT` environment variable for _oper_ to
 _~/.bashrc_ in the default files. This allows all interactive
 shells to disable the time-out. Additionally, some settings were
-rearranged in _~/.bashrc_ to make then only apply to interactive
+rearranged in _~/.bashrc_ to make them only apply to interactive
 shells (this was also done for _prog_ and AUID accounts). This
 change is only relevant for stations using FSL10.
-   
+
 . Improve error logging for _dbbcn_. The name of the program is now
 correctly displayed.
 
@@ -1638,7 +1700,7 @@ cause an issue if no other clients exist to dismiss the prompt,
 see issue https://github.com/nvi-inc/fs/issues/49[#49]. If this is a problem for anyone's use case we will
 need a new feature here.
 
-. Add _fsserver_ improvements and log support (closes https://github.com/nvi-inc/fs/issues/29[#29] & https://github.com/nvi-inc/fs/issues/25[#25]).
+. Add _fsserver_ improvements and log support (includes closing https://github.com/nvi-inc/fs/issues/29[#29] & https://github.com/nvi-inc/fs/issues/25[#25]).
 These changes introduce new functionality to _fsserver_, as well as
 simplifies some use cases.
 
@@ -1758,8 +1820,8 @@ warnings of an impending 248 day time problem if the model was
 `computer`.  This is now fixed. Thanks to Richard Blaauw (WSRT),
 and subsequently Jon Quick (HartRAO) for reporting this.
 
-. Change the flags for the _monX_ programs in _clpgm.ctl_ from `*a*`
-to `*d*`.  Since they do not depend on the FS, they can continue
+. Change the flags for the _monX_ programs in _clpgm.ctl_ from `a`
+to `d`.  Since they do not depend on the FS, they can continue
 running after the client is closed.
 
 . Generalize the _scnch_ window to cover Mark 5 recorders (closes
@@ -1801,7 +1863,7 @@ and _prog_. If you installed _-beta1_ you should check sub-step
 for stations using FSL10 was added in
 <<Upgrading from 10.0.0-beta1 to 10.0.0-beta2>>.
  If this applies to you to
-please check sub-step <<Other changes>> in that section above.
+please check sub-step <<Other updates>> in that section above.
 
 .. A recommendation was added to sign-up for the _go_ language
 announcements to be informed of security updates if you are
@@ -1815,9 +1877,9 @@ _-beta1_ to _-beta2_, in <<Upgrading from 10.0.0-beta1 to 10.0.0-beta2>>.
 .. This sub-section on changes in release _-beta2_ was added.
 
 ==== Summary of drudg changes since 10.0.0-beta1
-				   
+
 _drudg_ opening message date is `2020Jun30`.
- 
+
 The following is a summary of _drudg_ changes since _10.0.0-beta1_, but
 not include in _10.0.0-beta2_ or later.
 
@@ -1847,9 +1909,6 @@ not include in _10.0.0-beta2_ or later.
     listed. Since there is no tape support, these fields were replaced
     with the recorder type.
 
-A complete history of the various changes and the routines they affect
-is in _/usr2/fs/drudg/change_log.txt_.
-
 === Changes since 9.13.2
 
 This sub-section covers changes in _beta1_ since _9.13.2_, the last
@@ -1868,9 +1927,6 @@ version of the FS9 main branch.
 
 #TODO: Complete this sub-section.#
 
-A complete history of the routines changed can be found using the `*git log*`
-command.
-
 ==== Summary of drudg changes since 9.13.2
 
 #TODO: Write this sub-section.#
@@ -1881,9 +1937,6 @@ command.
 ==== Details of drudg changes since 9.13.2
 
 #TODO: Write this sub-section.#
-
-A complete history of the various changes and the routines they affect
-is in _/usr2/fs/drudg/change_log.txt_.
 
 === Changes since VGOS versions
 
@@ -1900,9 +1953,6 @@ This sub-section covers changes in _beta1_ since the FS9 VGOS branch, last versi
 
 #TODO: Write this sub-section.#
 
-A complete history of the routines changed can be found using the `*git log*`
-command.
-
 ==== Summary of drudg changes since VGOS versions
 
 #TODO: Write this sub-section.#
@@ -1913,9 +1963,6 @@ command.
 ==== Details of drudg changes since VGOS versions
 
 #TODO: Write this sub-section.#
-
-A complete history of the various changes and the routines they affect
-is in _/usr2/fs/drudg/change_log.txt_.
 
 == Known Bugs
 
@@ -2321,11 +2368,11 @@ your operational FS version and the FS you want to test is in
 _/usr2/fs-git_ and that _/usr2/st-1.0.0_ is the directory with your
 station software; you should substitute the correct directories if
 they are different. All commands must be entered as _root_. Extra
-white space has been added only to improve legibility. 
+white space has been added only to improve legibility.
 
-If you have aliased _rm_ to _rm -i_ and _mv_ to _mv -i_ and _cp_ to
-_cp -i_, you will prompted to confirm before anything destructive
-occurs. If so and if everything is set-up properly below, the only
+If you have aliased `rm` to `rm -i` and `mv` to `mv -i` and `cp` to
+`cp -i`, you will prompted to confirm before anything destructive
+occurs. If so, and if everything is set-up properly below, the only
 cases where you should only be asked to confirm is for deleting the
 symbolic links in examples for <<Switch permanently to new version>>
 and <<Switch permanently to old operational version>>.
