@@ -183,13 +183,33 @@ cont_cal_polarity, a fixed answer can be provided by setting the
 environment variables: FESH_GEO_TPICD, FESH_GEO_VSI_ALIGN,
 FESH_GEO_CONT_CAL, and FESH_CONT_CAL_POLARITY, respectively. These
 settings can be overridden when running the script with the options:
-'-t', '-a', '-c', and '-p' respectively. NOTE: This will only work for
-schedules with a single mode. NOTE: if any of these environment
-variables or options are used, the corresponding prompts must be
-enabled in 'skedf.ctl'. If there isn't agreement, incorrect .prc files
-may be created without an obvious indication of a problem. Be careful in
-particular of FESH_GEO_VSI_ALIGN and the '-a' option since the
-corresponding prompt will only occur if a DBBC3 PFB mode is in use.
+'-t', '-a', '-c', and '-p' respectively. Using '' as the value for an
+option will unset the corresponding value supplied as an environment
+variable.  Please be sure to read the follow four NOTES:
+
+  NOTE: If used incorrectly, this feature can fail in complicated ways
+  with no obvious indication. Use at your own risk. Simple use with
+  single mode schedules should be fine.
+
+  NOTE: If there is more than mode in the schedule, it is not possible
+  to supply answers in this way. 'drudg' will have to be run manually.
+
+  NOTE: If any of these environment variables or options are used, the
+  corresponding prompts must be enabled in 'skedf.ctl'. If there isn't
+  agreement, incorrect .prc files may be created without an obvious
+  indication of a problem. Be careful in particular of
+  FESH_GEO_VSI_ALIGN and the '-a' option since the corresponding
+  prompt will only occur if a DBBC3 PFB mode is in use.
+
+  NOTE: To provide minimal protection, the script will reject:
+
+   -setting an answer for vsi_align and answers either for cont_cal and/or
+    cont_cal_polarity
+   -setting an answer for cont_cal_polarity if the answer for cont_cal is off
+   -setting the tpicd answer to anything but a non-negative integer
+   -setting the cont_cal answer to anything but on or off
+   -setting the cont_cal_polarity to answer anything but 0, 1, 2, 3, or none
+   -setting the vsi_align answer to anything but 0, 1, or none
 EOF
 }
 
@@ -230,16 +250,16 @@ while getopts 'a:c:ndD:hfp:t:vVy:' opt; do
             exit 0
             ;;
         t)
-            tpicd=$OPTARG
+            if [ ! -z ${OPTARG} ]; then tpicd=$OPTARG; fi
             ;;
         c)
-            cont_cal=$OPTARG
+            if [ ! -z ${OPTARG} ]; then cont_cal=$OPTARG; fi
             ;;
         p)
-            cont_cal_polarity=$OPTARG
+            if [ ! -z ${OPTARG} ]; then cont_cal_polarity=$OPTARG; fi
             ;;
         a)
-            vsi_align=$OPTARG
+            if [ ! -z ${OPTARG} ]; then vsi_align=$OPTARG; fi
             ;;
         *)
             echo "Try the '-h' option for help" >&2
@@ -265,6 +285,7 @@ if [[ ! "$FESH_CDDIS_METHOD" =~ ^(ftp|ftp-ssl|https)$ ]]; then
    exit 1
 fi
 
+# build optional answers
 tpicd_answer=
 if [ ! -z ${tpicd+x} ]; then tpicd_answer=$tpicd$'\n'; fi
 cont_cal_answer=
@@ -273,6 +294,49 @@ cont_cal_polarity_answer=
 if [ ! -z ${cont_cal_polarity+x} ]; then cont_cal_polarity_answer=$cont_cal_polarity$'\n'; fi
 vsi_align_answer=
 if [ ! -z ${vsi_align+x} ]; then vsi_align_answer=$vsi_align$'\n'; fi
+
+#prevent simple errors in answers
+if [[ ! "$tpicd_answer" =~ ^([0-9]+$'\n'|)$ ]]; then
+   echo -n "tpicd must be a non-negative integer or not set, was $tpicd_answer"
+   exit 1
+fi
+if [[ ! "$cont_cal_answer" =~ ^(on$'\n'|off$'\n'|)$ ]]; then
+   echo -n "CONT_CAL must be on, off, or not set, was $cont_cal_answer"
+   exit 1
+fi
+if [[ ! "$cont_cal_polarity_answer" =~ ^([0-3]+$'\n'|none$'\n'|)$ ]]; then
+   echo -n "CONT_CAL_POLARITY must be 0, 1, 2, 3, none, or not set, was $cont_cal_polarity_answer"
+   exit 1
+fi
+if [[ ! "$vsi_align_answer" =~ ^([0-1]+$'\n'|none$'\n'|)$ ]]; then
+   echo -n "VSI_ALIGN must be 0, 1, none, or not set, was $vsi_align_answer"
+   exit 1
+fi
+if [ ! -z "$vsi_align_answer"  ]
+then
+    if [ ! -z "$cont_cal_answer" ]
+    then
+        if [ ! -z "$cont_cal_polarity_answer" ]
+        then
+            echo "setting VSI_ALIGN is not compatible with setting CONT_CAL and CONT_CAL_POLARITY"
+            exit 1
+        fi
+        echo "setting VSI_ALIGN is not compatible with setting CONT_CAL"
+        exit 1
+    fi
+    if [ ! -z "$cont_cal_polarity_answer" ]
+    then
+        echo "setting VSI_ALIGN is not compatible with setting CONT_CAL_POLARITY"
+        exit 1
+    fi
+fi
+if [[ "$cont_cal_answer" =~ off  ]]; then
+    if [ ! -z "$cont_cal_polarity_answer" ]
+    then
+        echo "setting CONT_CAL_POLARITY with CONT_CAL off is not supported"
+        exit 1
+    fi
+fi
 
 ## Conflict check
 if [[ -e $SCHED_DIR/$sched.skd && -z "$force" ]]; then
