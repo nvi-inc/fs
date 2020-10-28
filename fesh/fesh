@@ -56,6 +56,18 @@ FESH_DATA_CENTER=${FESH_DATA_CENTER:-'cddis'}
 
 FESH_CDDIS_METHOD=${FESH_CDDIS_METHOD:-'ftp-ssl'}
 
+if [[ ! -z "${FESH_GEO_TPICD:-}" ]]; then
+    tpicd=$FESH_GEO_TPICD
+fi
+if [[ ! -z "${FESH_GEO_CONT_CAL:-}" ]]; then
+    cont_cal=$FESH_GEO_CONT_CAL
+fi
+if [[ ! -z "${FESH_GEO_CONT_CAL_POLARITY:-}" ]]; then
+    cont_cal_polarity=$FESH_GEO_CONT_CAL_POLARITY
+fi
+if [[ ! -z "${FESH_GEO_VSI_ALIGN:-}" ]]; then
+    vsi_align=$FESH_GEO_VSI_ALIGN
+fi
 if [[ -z "${NETRC_DIR:-}" ]]; then
     NETRC_DIR=$HOME
     CURL_NETRC_FILE_OPTION=
@@ -87,6 +99,10 @@ Options:
              (see more below about specifying the year)
  -f       Force downloading of schedule from server and, if given
           with '-d', re-run drudg
+ -a val   Override DRUDG VSI_ALIGN answer to val
+ -c val   Override DRUDG CONT_CAL answer to val
+ -p val   Override DRUDG CONT_CAL_POLARITY answer to val
+ -t val   Override DRUDG TPICD answer to val
  -h       Print this message
 
 For the '-d' option, the STATION environment variable must be set to
@@ -94,6 +110,9 @@ the lower case two-letter station code in, e.g.:
 
     setenv STATION gs #in ~/.login for tcsh or
     export STATION=gs #in ~/.profile for bash
+
+Please see the end of this message about handling optional prompting
+specified in 'skedf.ctl' for 'drudg'.
 
 By default fesh gets an observation for the current year, but this can
 be overridden with '-y' option. That option can be used to get a
@@ -157,13 +176,27 @@ previous behaviour with:
 
 However, this method will no longer work when CDDIS stops support
 of non-ssl ftp, which is expected at the end of October 2020.
+
+With the '-d' option, if the 'skedf.ctl' control file specifies
+prompting for any of: tpicd, vsi_align, cont_cal, or
+cont_cal_polarity, a fixed answer can be provided by setting the
+environment variables: FESH_GEO_TPICD, FESH_GEO_VSI_ALIGN,
+FESH_GEO_CONT_CAL, and FESH_CONT_CAL_POLARITY, respectively. These
+settings can be overridden when running the script with the options:
+'-t', '-a', '-c', and '-p' respectively. NOTE: This will only work for
+schedules with a single mode. NOTE: if any of these environment
+variables or options are used, the corresponding prompts must be
+enabled in 'skedf.ctl'. If there isn't agreement, incorrect .prc files
+may be created without an obvious indication of a problem. Be careful in
+particular of FESH_GEO_VSI_ALIGN and the '-a' option since the
+corresponding prompt will only occur if a DBBC3 PFB mode is in use.
 EOF
 }
 
 run_drudg=
 force=
 verbose=
-while getopts 'ndD:hfvVy:' opt; do
+while getopts 'a:c:ndD:hfp:t:vVy:' opt; do
     case $opt in
         n)
             echo "next" not implimented.
@@ -196,6 +229,18 @@ while getopts 'ndD:hfvVy:' opt; do
             version
             exit 0
             ;;
+        t)
+            tpicd=$OPTARG
+            ;;
+        c)
+            cont_cal=$OPTARG
+            ;;
+        p)
+            cont_cal_polarity=$OPTARG
+            ;;
+        a)
+            vsi_align=$OPTARG
+            ;;
         *)
             echo "Try the '-h' option for help" >&2
             exit 1
@@ -219,6 +264,15 @@ if [[ ! "$FESH_CDDIS_METHOD" =~ ^(ftp|ftp-ssl|https)$ ]]; then
    echo "Unknown cddis method: $FESH_CDDIS_METHOD."
    exit 1
 fi
+
+tpicd_answer=
+if [ ! -z ${tpicd+x} ]; then tpicd_answer=$tpicd$'\n'; fi
+cont_cal_answer=
+if [ ! -z ${cont_cal+x} ]; then cont_cal_answer=$cont_cal$'\n'; fi
+cont_cal_polarity_answer=
+if [ ! -z ${cont_cal_polarity+x} ]; then cont_cal_polarity_answer=$cont_cal_polarity$'\n'; fi
+vsi_align_answer=
+if [ ! -z ${vsi_align+x} ]; then vsi_align_answer=$vsi_align$'\n'; fi
 
 ## Conflict check
 if [[ -e $SCHED_DIR/$sched.skd && -z "$force" ]]; then
@@ -289,6 +343,7 @@ wget -nv --backups=1 "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$s
 fi
 echo Done
 popd >/dev/null
+nine=$'9'
 
 drudg_out="/dev/null"
 if [[ -n "$verbose" ]]; then
@@ -301,14 +356,13 @@ cat <<EOF | "$FS_DIR/bin/drudg" "$sched.skd" > "$drudg_out"
 $STATION
 3
 12
-9
+$tpicd_answer$cont_cal_answer$cont_cal_polarity_answer$vsi_align_answer$nine
 $LIST_DIR/$sched$STATION.lst
 
 
 
 5
 0
-
 EOF
 
 echo Done. >&2
