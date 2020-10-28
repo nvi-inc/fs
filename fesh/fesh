@@ -76,18 +76,18 @@ usage() {
 +Fetch schedule file for OBSERVATION
 
 Options:
-    -n      Fetch next observation in master schedule
-    -d      DRUDG schedule with default settings
-            (needs STATION environment variable set to two letter id)
-    -D dc   Use alternate data center; dc=bkg, cddis, or opar
-            (see more below about setting the default data center)
-    -v      Verbose mode, drudg output printed to stdout
-    -V      Print version and exit.
-    -y yyyy Specify different (four-digit) year than the current one
-            (see more below about specifying the year)
-    -f      Force downloading of schedule from server and, if given
-            with '-d', re-run drudg
-    -h      Print this message
+ -n       Fetch next observation in master schedule
+ -d       DRUDG schedule with default settings
+          (needs STATION environment variable set to two letter id)
+ -D dc    Use alternate data center; dc=bkg, cddis, or opar
+          (see more below about setting the default data center)
+ -v       Verbose mode, drudg output printed to stdout
+ -V       Print version and exit.
+ -y yyyy  Specify different (four-digit) year than the current one
+             (see more below about specifying the year)
+ -f       Force downloading of schedule from server and, if given
+          with '-d', re-run drudg
+ -h       Print this message
 
 For the '-d' option, the STATION environment variable must be set to
 the lower case two-letter station code in, e.g.:
