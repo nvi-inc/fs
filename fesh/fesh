@@ -81,6 +81,7 @@ fatal(){
 }
 
 year=$(date +%Y)
+month=$(date +%b%y|tr [:upper:] [:lower:])
 
 usage() {
     cat <<EOF
@@ -88,21 +89,23 @@ usage() {
 +Fetch schedule file for OBSERVATION
 
 Options:
- -n       Fetch next observation in master schedule
- -d       DRUDG schedule with default settings
+ -n       Fetch next schedule in master file (not supported yet)
+ -d       drudg schedule with default settings, not supported for vlbeer
           (needs STATION environment variable set to two letter id)
- -D dc    Use alternate data center; dc=bkg, cddis, or opar
+ -D dc    Use alternate data center; dc=bkg, cddis, opar, or vlbeer
           (see more below about setting the default data center)
  -v       Verbose mode, drudg output printed to stdout
  -V       Print version and exit.
+ -m mmmyy Specify three character month and two digit year for the vlbeer
+          data center (see more below about specifying the month/year)
  -y yyyy  Specify different (four-digit) year than the current one
-             (see more below about specifying the year)
+          for geo data centers (see more below about specifying the year)
  -f       Force downloading of schedule from server and, if given
           with '-d', re-run drudg
- -a val   Override DRUDG VSI_ALIGN answer to val
- -c val   Override DRUDG CONT_CAL answer to val
- -p val   Override DRUDG CONT_CAL_POLARITY answer to val
- -t val   Override DRUDG TPICD answer to val
+ -a val   Override drudg VSI_ALIGN answer to val
+ -c val   Override drudg CONT_CAL answer to val
+ -p val   Override drudg CONT_CAL_POLARITY answer to val
+ -t val   Override drudg TPICD answer to val
  -h       Print this message
 
 For the '-d' option, the STATION environment variable must be set to
@@ -111,26 +114,35 @@ the lower case two-letter station code in, e.g.:
     setenv STATION gs #in ~/.login for tcsh or
     export STATION=gs #in ~/.profile for bash
 
-Please see the end of this message about handling optional prompting
-specified in 'skedf.ctl' for 'drudg'.
+Please see the end of this message about handling optional 'skedf.ctl'
+specified prompting for 'drudg'.
 
-By default fesh gets an observation for the current year, but this can
-be overridden with '-y' option. That option can be used to get a
-schedule for the next year.
+The '-d' option is not supported for data center 'vlbeer'.
 
 The default data center is CDDIS but can be changed by setting the
 FESH_DATA_CENTER environment variable. Accepted values are bkg, cddis,
-and opar. For example, to make the default bkg, use:
+opar (the three 'geo` centers) or vlbeer. For example, to make the default
+bkg, use:
 
     setenv FESH_DATA_CENTER bkg #in ~/.login for tcsh or
     export FESH_DATA_CENTER=bkg #in ~/.profile for bash
 
 The '-D' option can be used to specify an alternate data center when
-running the script.
+running the script.  If the data center is vlbeer, the '-d' option
+cannot be used.
+
+For geo data centers, fesh by default gets a schedule for the current
+year, but this can be overridden with '-y yyyy' option to specify a
+four digit year 'yyyy'. That option can be used to get a schedule for
+the next year. For vlbeer, fesh by defaults gets a schedule for the
+current month, but this can be overridden with '-m mmmyy' to specify
+a three character month abbreviation 'jan', 'feb', 'mar', 'apr', 'may',
+'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec' as 'mmm' and a two
+digit year 'yy'.
 
 fesh (curl actually) will prompt for an email to use as the password
-for anonymous ftp-ssl access for CDDIS. This can be suppressed by
-setting a working email address in the FESH_EMAIL variable, e.g.:
+for anonymous ftp-ssl access for CDDIS. The prompt can be suppressed
+by setting a working email address in the FESH_EMAIL variable, e.g.:
 
     setenv FESH_EMAIL user@address #in ~/.login for tcsh or
     export FESH_EMAIL=user@address #in ~/.profile for bash
@@ -216,10 +228,10 @@ EOF
 run_drudg=
 force=
 verbose=
-while getopts 'a:c:ndD:hfp:t:vVy:' opt; do
+while getopts 'a:c:ndD:hfm:p:t:vVy:' opt; do
     case $opt in
         n)
-            echo "next" not implimented.
+            echo "'next' not implemented."
             exit 1
             ;;
         d)
@@ -235,8 +247,13 @@ while getopts 'a:c:ndD:hfp:t:vVy:' opt; do
         f)
             force=1
             ;;
+        m)
+            month=$OPTARG
+            month_option=1
+            ;;
         y)
             year=$OPTARG
+            year_option=1
             ;;
         h)
             usage
@@ -275,9 +292,23 @@ fi
 
 sched=$1
 
-if [[ ! "$FESH_DATA_CENTER" =~ ^(cddis|opar|bkg)$ ]]; then
+if [[ ! "$FESH_DATA_CENTER" =~ ^(cddis|opar|bkg|vlbeer)$ ]]; then
    echo "Unknown data center: $FESH_DATA_CENTER."
    exit 1
+fi
+if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+    if [[ -n "$run_drudg" ]]; then
+        echo "Option -d (drudg) is not supported for the vlbeer data center."
+        echo "To fetch the schedule, rerun without -d."
+        exit 1
+    fi
+    if [[ ! -z  "${year_option:-}" ]]; then
+        echo "The -y option can't be used for the vlbeer data center"
+        exit 1
+    fi
+elif [[ ! -z "${month_option:-}" ]]; then
+        echo "The -m option can't be used for a geo data center"
+        exit 1
 fi
 
 if [[ ! "$FESH_CDDIS_METHOD" =~ ^(ftp|ftp-ssl|https)$ ]]; then
@@ -347,7 +378,7 @@ fi
 if [[ -n "$run_drudg" ]]; then
     set +u
     if [[ -z "$STATION" ]]; then
-        >&2 echo "$0: ERROR: STATION enviroment variable not set; should be set to two-letter station code if using drudg."
+        >&2 echo "$0: ERROR: STATION environment variable not set; should be set to two-letter station code if using drudg."
         exit 1
     fi
     set -u
@@ -404,6 +435,8 @@ elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
 wget -nv --backups=1 "ftp://ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
 elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
 wget -nv --backups=1 "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+elif [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+wget -nv --backups=1 "ftp://www.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
 fi
 echo Done
 popd >/dev/null
