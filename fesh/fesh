@@ -85,8 +85,8 @@ month=$(date +%b%y|tr [:upper:] [:lower:])
 
 usage() {
     cat <<EOF
-+Usage: $0 [options] OBSERVATION
-+Fetch schedule file for OBSERVATION
+Usage: $0 [options] schedule
+Fetch schedule file
 
 Options:
  -n       Fetch next schedule in master file (not supported yet)
@@ -121,7 +121,7 @@ The '-d' option is not supported for data center 'vlbeer'.
 
 The default data center is CDDIS but can be changed by setting the
 FESH_DATA_CENTER environment variable. Accepted values are bkg, cddis,
-opar (the three 'geo` centers) or vlbeer. For example, to make the default
+opar (the three 'geo' centers) or vlbeer. For example, to make the default
 bkg, use:
 
     setenv FESH_DATA_CENTER bkg #in ~/.login for tcsh or
@@ -135,10 +135,13 @@ For geo data centers, fesh by default gets a schedule for the current
 year, but this can be overridden with '-y yyyy' option to specify a
 four digit year 'yyyy'. That option can be used to get a schedule for
 the next year. For vlbeer, fesh by defaults gets a schedule for the
-current month, but this can be overridden with '-m mmmyy' to specify
-a three character month abbreviation 'jan', 'feb', 'mar', 'apr', 'may',
+current month, but this can be overridden with '-m mmmyy' to specify a
+three character month abbreviation 'jan', 'feb', 'mar', 'apr', 'may',
 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec' as 'mmm' and a two
-digit year 'yy'.
+digit year 'yy'. The 'yyyy' and 'mmmyy' values are not checked for
+validity and the download will fail if they are not correct. The
+default value for the current month may be wrong if your locale is not
+en_US.utf8.
 
 fesh (curl actually) will prompt for an email to use as the password
 for anonymous ftp-ssl access for CDDIS. The prompt can be suppressed
@@ -170,7 +173,7 @@ which by default is in "~".  For example:
 
 If your curl supports the "--netrc-file" option (see "man curl") , you
 can change the directory used for ".netrc" by setting the NETRC_DIR
-environment variable.  The matches plog. E.g., add the following to
+environment variable.  This matches plog. E.g., add the following to
 your login script
 
     setenv NETRC_DIR "/usr2/control" #in ~/.login for tcsh or
@@ -195,7 +198,7 @@ cont_cal_polarity, a fixed answer can be provided by setting the
 environment variables: FESH_GEO_TPICD, FESH_GEO_VSI_ALIGN,
 FESH_GEO_CONT_CAL, and FESH_CONT_CAL_POLARITY, respectively. These
 settings can be overridden when running the script with the options:
-'-t', '-a', '-c', and '-p' respectively. Using '' as the value for an
+'-t', '-a', '-c', and '-p', respectively. Using '' as the value for an
 option will unset the corresponding value supplied as an environment
 variable.  Please be sure to read the follow four NOTES:
 
