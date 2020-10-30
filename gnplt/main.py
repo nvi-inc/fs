@@ -1484,7 +1484,7 @@ class Gui(Frame):
         """displays tkMessageBox.showinfo with version number
         """
         title = 'About'
-        message = 'GnPlt2 version 2.06'
+        message = 'GnPlt2 version 2.07'
         tkMessageBox.showinfo(title, message)
     
     def shortcuts(self):
@@ -1995,6 +1995,16 @@ class Gui(Frame):
         #leave record in log
         todays_date = time.localtime()
         record = ['* RXG file updated by GnPlt2 on %s-%s-%s\n' % (todays_date[0], todays_date[1], todays_date[2])]
+
+        #update date
+        lineCount = 0
+        for i,line in enumerate(nonComments):
+            if line[0] != '*':
+                lineCount += 1
+            if lineCount == 2 and line[0] != '*':
+                nonComments[i]="{} {} {}\n".format(todays_date[0], todays_date[1], todays_date[2])
+                break
+
         final = record + nonComments + data
         working_rxg.writelines(final)
         original_rxg.close()
