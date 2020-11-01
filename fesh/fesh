@@ -108,6 +108,9 @@ Options:
  -t val   Override drudg TPICD answer to val
  -h       Print this message
 
+NOTE: If you specify a schedule that doesn't exist, you will get a
+file or a directory error from the server.
+
 For the '-d' option, the STATION environment variable must be set to
 the lower case two-letter station code in, e.g.:
 
