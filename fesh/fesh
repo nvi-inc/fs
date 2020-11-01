@@ -141,8 +141,9 @@ the next year. For vlbeer, fesh by defaults gets a schedule for the
 current month, but this can be overridden with '-m mmmyy' to specify a
 three character month abbreviation 'jan', 'feb', 'mar', 'apr', 'may',
 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec' as 'mmm' and a two
-digit year 'yy'. The 'yyyy' and 'mmmyy' values are not checked for
-validity and the download will fail if they are not correct. The
+digit year 'yy'. You can append '/.latest' to 'mmmyy' value to use the
+'.latest' sub-directory. The 'yyyy' and 'mmmyy' values are not checked
+for validity and the download will fail if they are not correct. The
 default value for the current month may be wrong if your locale is not
 en_US.utf8.
 
