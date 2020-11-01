@@ -377,7 +377,12 @@ if [[ "$cont_cal_answer" =~ off  ]]; then
 fi
 
 ## Conflict check
-if [[ -e $SCHED_DIR/$sched.skd && -z "$force" ]]; then
+if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+    if [[ -e $SCHED_DIR/$sched.vex && -z "$force" ]]; then
+        echo "$SCHED_DIR/$sched.vex exists, delete or use '-f' to get fresh schedule" >&2
+        exit 1
+    fi
+elif [[ -e $SCHED_DIR/$sched.skd && -z "$force" ]]; then
     echo "$SCHED_DIR/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
     exit 1
 fi
