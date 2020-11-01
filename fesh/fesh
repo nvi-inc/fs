@@ -441,7 +441,7 @@ if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
             $CURL_NETRC_FILE_OPTION \
             -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
     else
-        curl -u "$user" -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+        curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
     fi
 elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
 wget -nv --backups=1 "ftp://ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
