@@ -98,6 +98,8 @@ Options:
  -V       Print version and exit.
  -m mmmyy Specify three character month and two digit year for the vlbeer
           data center (see more below about specifying the month/year)
+          uses the hidden .latest sub-directory by default, use -H to suppress
+ -H       suppress use of the hidden .last sub-directory for vlbeer
  -y yyyy  Specify different (four-digit) year than the current one
           for geo data centers (see more below about specifying the year)
  -f       Force downloading of schedule from server and, if given
@@ -137,15 +139,18 @@ cannot be used.
 For geo data centers, fesh by default gets a schedule for the current
 year, but this can be overridden with '-y yyyy' option to specify a
 four digit year 'yyyy'. That option can be used to get a schedule for
-the next year. For vlbeer, fesh by defaults gets a schedule for the
-current month, but this can be overridden with '-m mmmyy' to specify a
-three character month abbreviation 'jan', 'feb', 'mar', 'apr', 'may',
-'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec' as 'mmm' and a two
-digit year 'yy'. You can append '/.latest' to 'mmmyy' value to use the
-'.latest' sub-directory. The 'yyyy' and 'mmmyy' values are not checked
-for validity and the download will fail if they are not correct. The
-default value for the current month may be wrong if your locale is not
-en_US.utf8.
+the next year. The 'yyyy' is not checked for validity and the
+download will fail if it is not correct.
+
+For vlbeer, fesh by default gets a schedule from the hidden .latest
+sub-directory for the current month, but this can be overridden with
+'-m mmmyy' to specify a three character month abbreviation 'jan',
+'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov',
+'dec' as 'mmm' and a two digit year 'yy'. The hidden .latest
+sub-directory of the specified month will be used.  The adding of
+/.latest to the current or '-m' specified directory can be suppressed
+the -H option.  The 'mmmyy' is not checked for validity and the
+download will fail if it is not correct.
 
 fesh (curl actually) will prompt for an email to use as the password
 for anonymous ftp-ssl access for CDDIS. The prompt can be suppressed
@@ -235,7 +240,7 @@ EOF
 run_drudg=
 force=
 verbose=
-while getopts 'a:c:ndD:hfm:p:t:vVy:' opt; do
+while getopts 'a:c:nfdD:hHm:p:t:vVy:' opt; do
     case $opt in
         n)
             echo "'next' not implemented."
@@ -257,6 +262,9 @@ while getopts 'a:c:ndD:hfm:p:t:vVy:' opt; do
         m)
             month=$OPTARG
             month_option=1
+            ;;
+        H)
+            not_hidden=1
             ;;
         y)
             year=$OPTARG
@@ -312,6 +320,9 @@ if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
     if [[ ! -z  "${year_option:-}" ]]; then
         echo "The -y option can't be used for the vlbeer data center"
         exit 1
+    fi
+    if [[ -z  "${not_hidden:-}" ]]; then
+        month="${month}/.latest"
     fi
 elif [[ ! -z "${month_option:-}" ]]; then
         echo "The -m option can't be used for a geo data center"
