@@ -81,7 +81,7 @@ fatal(){
 }
 
 year=$(date +%Y)
-month=$(date +%b%y|tr [:upper:] [:lower:])
+month=$(LANG=C date +%b%y|tr [:upper:] [:lower:])
 
 usage() {
     cat <<EOF
