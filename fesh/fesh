@@ -378,13 +378,19 @@ fi
 
 ## Conflict check
 if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-    if [[ -e $SCHED_DIR/$sched.vex && -z "$force" ]]; then
-        echo "$SCHED_DIR/$sched.vex exists, delete or use '-f' to get fresh schedule" >&2
+    if [[ -e $SCHED_DIR/$sched.vex ]]; then
+        if [[ -z "$force" ]]; then
+            echo "$SCHED_DIR/$sched.vex exists, delete or use '-f' to get fresh schedule" >&2
+            exit 1
+        fi
+        rm "$SCHED_DIR/$sched.vex"
+    fi
+elif [[ -e $SCHED_DIR/$sched.skd ]]; then
+    if [[ -z "$force" ]]; then
+        echo "$SCHED_DIR/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
         exit 1
     fi
-elif [[ -e $SCHED_DIR/$sched.skd && -z "$force" ]]; then
-    echo "$SCHED_DIR/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
-    exit 1
+    rm "$SCHED_DIR/$sched.skd"
 fi
 
 if [[ -n "$run_drudg" ]]; then
@@ -428,7 +434,7 @@ echo Fetching schedule from server...
 #TODO: if not found, maybe check next or previous years?
 if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
     if [[ "$FESH_CDDIS_METHOD" =~ ^ftp$ ]]; then
-        wget -nv --backups=1 "ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+        wget -nv "ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
     elif [[ "$FESH_CDDIS_METHOD" =~ ^https$ ]]; then
         if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
             fatal "$NETRC_DIR/.netrc not found, see usage"
@@ -444,11 +450,11 @@ if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
         curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
     fi
 elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
-wget -nv --backups=1 "ftp://ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+wget -nv "ftp://ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
 elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
-wget -nv --backups=1 "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+wget -nv "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
 elif [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-wget -nv --backups=1 "ftp://www.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
+wget -nv "ftp://www.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
 fi
 echo Done
 popd >/dev/null
