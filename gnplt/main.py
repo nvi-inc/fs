@@ -2002,7 +2002,7 @@ class Gui(Frame):
             if line[0] != '*':
                 lineCount += 1
             if lineCount == 2 and line[0] != '*':
-                nonComments[i]="{} {} {}\n".format(todays_date[0], todays_date[1], todays_date[2])
+                nonComments[i]='%s %s %s\n' % (todays_date[0], todays_date[1], todays_date[2])
                 break
 
         final = record + nonComments + data
@@ -3751,7 +3751,7 @@ class Plot(Canvas, Coordinate):
         Returns the number with appropriate number of digits"""
         try:
             number_of_digits = int(max(0,math.ceil(1-math.log10(abs(maxi-mini)))))
-        except (ZeroDivisionError, ValueError):
+        except (ZeroDivisionError, ValueError, OverflowError):
             number_of_digits = 2 
 
         expr = '%.' + str(number_of_digits) +'f'
