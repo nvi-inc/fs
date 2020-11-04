@@ -1,13 +1,39 @@
        dbbc - general DBBC communication
 
-            Syntax:     dbbc=data
+            Syntax:     dbbc=data_to
+                        dbbc2=data_to
+                        dbbc3=data_to
 
-            Response:   dbbc/data
+            Response:   dbbc/data_from
+                        dbbc2/data_from
+                        dbbc3/data_from
 
 
 Settable parameters:
-            data        complete message to be sent to DBBC system,
+            data_to     complete message to be sent to DBBC system,
                         No checking is done.
 
 Monitor-only parameters:
-            data        response of DBBC system, if any.
+            data_from   response of DBBC system, if any.
+
+Comments:
+
+These commands are used for low-level communication with a DBBC2 or
+DBBC3.
+
+The commands for a DBBC2 are dbbc and dbbc2. The first, dbbc, is used
+for communication with the first, or only, DBBC2 in a system, which is
+defined in the dbbad.ctl control file.  This is the DBBC2 used for
+normal DBBC2 operations.
+
+The second command, dbbc2, is for use in systems with two DBBC2s and
+communicates with the second one, defined in the dbba2.ctl control
+file. The (limited) FS support for a second DBBC2 is provided to
+enable two DBBC2 VGOS operations.
+
+The command for a DBBC3 is dbbc3. The dbbc3 is defined in the
+dbbad.ctl control file.
+
+For multi-line responses from DBBC2s and DBBC3s, the dbbcn program
+logs all lines except the last. The dbbcn logged lines use #dbbcn# in
+the log entires. The last line is logged as a normal response.
