@@ -38,7 +38,11 @@ print-%  : ; @echo $* = $($*)
 #  portopen(), including ibcon.
 #
 LIB_DIR = clib flib bosslb fclib fmpsee fslb lnfch newlb polb port rtelb vis \
-poclb skdrlnfch skdrut vex rclco/rcl s2das third_party
+poclb skdrlnfch skdrut vex rclco/rcl s2das
+
+ifndef FS_NO_SERVER_MAKE
+LIB_DIR += third_party
+endif
 
 EXE_DIR = rwand chekr fserr ddout fs fsalloc incom matcn oprin pcalr onoff \
 fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \
@@ -46,7 +50,12 @@ quikv mcbcn brk moon logex headp fmset ibcon quikr rte_go drudg rclcn pdplt logp
 lognm pcald msg fsvue fs.prompt inject_snap erchk mk5cn tpicd flagr \
 gnfit gndat gnplt dscon systests autoftp monpcal logpl1 holog gnplt1 predict \
 dbbcn rdbcn rdtcn mk6cn popen udceth0 rack mcicn be_client s_client lgerr fesh\
-plog fsserver rdbemsg new_ifdbb
+plog rdbemsg new_ifdbb
+
+ifndef FS_NO_SERVER_MAKE
+LIB_DIR += fsserver
+endif
+
 
 export LDFLAGS += -L$(shell pwd)/third_party/lib
 export CPPFLAGS += -I$(shell pwd)/third_party/include
