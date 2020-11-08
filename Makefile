@@ -53,7 +53,7 @@ dbbcn rdbcn rdtcn mk6cn popen udceth0 rack mcicn be_client s_client lgerr fesh\
 plog rdbemsg new_ifdbb
 
 ifndef FS_NO_SERVER_MAKE
-LIB_DIR += fsserver
+EXE_DIR += fsserver
 endif
 
 
