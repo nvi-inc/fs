@@ -18,18 +18,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-DOC_DIR = misc 10.0.0
-
-.PHONY: all $(DOC_DIR)
-
-all: index.html $(DOC_DIR)
+all: index.html fs-10.0.0-beta2.html
 
 index.html: index.adoc
-
-$(DOC_DIR):
-	$(MAKE) -C $@
-
+fs-10.0.0-beta2.html: fs-10.0.0-beta2.adoc
 
 %.html: %.adoc
-	asciidoctor $^
+	asciidoctor -a toc $^
 
