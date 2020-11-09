@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.4 - October 2020
+Version 0.5 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -369,7 +369,7 @@ converting to a 64-bit system, as described in
 <<Converting to a 64-bit system>>.
 To accommodate that, there are few embedded
 references to handle 64-bit systems. Otherwise the instructions are
-completely independent which type of system they are being used for.
+completely independent of which type of system they are being used for.
 
 There are two possible paths for upgrading:
 
@@ -448,11 +448,11 @@ Set the link for the new FS version:
        cd /usr2/fs-git
        make install
 
-Answer `y` to confirm installation.
+Answer `*y*` to confirm installation.
 
-NOTE: This step will change your _/usr2/fs_ symbolic to point to
-           _/usr2/fs-git_. You will need to change the link manually
-           to switch back to your old version.
+NOTE: This step will change your _/usr2/fs_ symbolic link to point to
+           _/usr2/fs-git_. To switch back to your old version, you
+           will need to change the link manually.
 
 The `make install` command may create and possibly rename some
 existing directories if the FS was never installed on this system
@@ -473,7 +473,7 @@ that the _execute_/_search_ bits are not changed):
 
        /usr2/fs/misc/fix_perm
 
-Answer `y` to the prompt if you wish to proceed. It is recommended for most stations.
+Answer `*y*` to the prompt if you wish to proceed. It is recommended for most stations.
 
 === Login as prog
 
@@ -1141,7 +1141,7 @@ to the standard with:
 
   /usr2/fs/misc/fix_perm
 +
-Answer `y` to confirm.
+Answer `*y*` to confirm.
 +
 If you don't have a _/usr2/tle_files_ directory, you will
 get a message that there is no such directory. That is
@@ -1326,7 +1326,7 @@ _fsadapt_ script, as _root_:
   cd /root/fsl10
   ./fsadapt
 
-In the first window select *only* the option (i.e., only that line has a `*`):
+In the first window select _only_ the option (i.e., only that line has a `*`):
 
   goinst    Install (or 'Update') Go programming language
 
@@ -1430,6 +1430,8 @@ https://github.com/nvi-inc/fs/issues/62[#62]).
 
 . Restore `help` for DBBC3 commands.
 . Improvements in _fsserver_ (includes tentatively closing https://github.com/nvi-inc/fs/issues/69[#69]).
+. Improvements in _gnplt_ (closes https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
+. Improvements in `help` files (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
 . Improvements to update notes (this document):
 
 ==== Details of FS changes since 10.0.0-beta2
@@ -1478,6 +1480,31 @@ situation is still being monitored to verify that it is fixed.
 
 .. Fixed `clean` function in _Makefile_.
 .. Fixed _sspub_ to support more than 2^32^ messages.
+
+. Improvements in _gnplt_ (closes https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
+
+.. _gnplt_ now updates the date in updated _.rxg_ files (closes
+https://github.com/nvi-inc/fs/issues/72[#72]).  The original developer,
+(Tomas Gille), did very good work developing this second version of
+_gnplt_, but ran out of time in his internship and was unable to include
+this minor but important feature.
+
+.. _gnplt now works on FSL8 (Lenny) again (closes
+https://github.com/nvi-inc/fs/issues/73[#73]).  Some reccent
+improvements in _gnplt_ made it fail for FSL8.
+
+. Improvements in `help` files (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
+
+.. The `help` file for the `ddbc` command was expanded to also support
+the `dbbc2` and `dbbc3` commands and now includes a description of the
+output for multi-line responses for these commands (closes
+https://github.com/nvi-inc/fs/issues/75[#75]). The `help` command now
+works for the `dbbc2` and `dbbc3` commands.
+
+.. The `help` file for the `fila10g` command was expanded to also
+support the `fila10g2` command. The `help` command now works for the
+`fila10g2` command.
+
 
 . Improvements to update notes (this document).
 
@@ -2357,7 +2384,7 @@ Ed for advice.
 
 ==== Using symbolic links
 
-*After* you have made a backup (to allow recovery in case something
+_After_ you have made a backup (to allow recovery in case something
 bad should happen), you can use symbolic links to your directories to
 change between your operational and test directories.  This may allow
 you to more easily switch between an operational and testing
@@ -2550,10 +2577,10 @@ _root_):
 
   /usr2/fs/misc/fix_perm
 
-Answer `y` to the prompt if you wish to proceed.  It is a good idea to
+Answer `*y*` to the prompt if you wish to proceed.  It is a good idea to
 do this, unless you have purposely changed the ownership and
 permissions to some other values.  If you don't want to restore the
-defaults, answer `n` (this is the last chance to abort the execution
+defaults, answer `*n*` (this is the last chance to abort the execution
 of the script). If you don't have a _/usr2/tle_files_ directory,
 you will get a message that there is no such directory.
 
