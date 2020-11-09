@@ -18,23 +18,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-Requires asciidoctor
+= Index of fs/misc/
+Version 0.1 - Nov 2020
 
-Source in docs/
-
-To update:
-
-  git add $(find . -name \*.doc)
-  git commit
-  git push
-  git branch -f gh-pages <branch>
-     <branch> is whatever is to be used, usually master
-  git checkout gh-pages
-  make
-  git add -f $(find . -name \*.html)
-  git commit -m Update
-  git push --force
-
-View at:
-
-https://nvi-inc.github.io/fs/
+<<release_model.adoc#,Release model>>
