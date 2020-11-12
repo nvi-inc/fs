@@ -18,11 +18,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= Index of fs/releases/misc/
+= Index of fs/releases/
 Version 0.1 - Nov 2020
 
-<<release_model.adoc#,Release model>> document
+== Links to sub-directories
 
-<<install_reference.adoc#,Installation reference>> document
+<<10.0.0/index#,Release 10.0.0>> documents
 
-<<known_bugs.adoc#,Known bugs>> document, as of FS9
+<<misc/index#,Miscellaneous>> documents
+
