@@ -18,7 +18,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= Straw man Release Model
+= Strawman Release Model
 Version 0.2 - Apr 2020
 
 :sectnums:

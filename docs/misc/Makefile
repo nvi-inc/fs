@@ -18,10 +18,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-all: index.html release_model.html
+all: index.html release_model.html install_reference.html known_bugs.html
 
 index.html: index.adoc
 release_model.html: release_model.adoc
+install_reference.html: install_reference.adoc
+known_bugs.html: known_bugs.adoc
 
 %.html: %.adoc
 	asciidoctor -a toc $^

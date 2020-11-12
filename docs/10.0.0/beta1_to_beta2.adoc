@@ -1,0 +1,632 @@
+//
+// Copyright (c) 2020 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= FS 10.0.0-beta1 to FS 10.0.0-beta2 update notes
+Version 0.1 - November 2020
+
+//:hide-uri-scheme:
+:sectnums:
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+:toclevels: 4
+
+== Introduction
+
+The document covers updating from the _beta1_ pre-release to the
+_beta2_ pre-release. Like all _beta_ pre-releases, this version is not
+intended to operations.
+
+== Upgrading from 10.0.0-beta1 to 10.0.0-beta2
+
+You must have already upgraded to the https://raw.githubusercontent.com/nvi-inc/fs/259e203330fff145dba5ea6b2f48c8bcd23b4333/misc/fs10.0.0up.txt[10.0.0-beta1]
+release before installing this update.
+
+If you made it through the _beta1_ update despite the errors and
+omissions in the instructions (now corrected, we apologize), the
+update instructions from the _beta1_ are much simpler. The overall
+method is described here:
+
+=== Fetch and make the release
+
+If you are using _git_ as is recommended, then as _prog_
+execute:
+
+             cd /usr2/fs-git
+             git fetch
+             git checkout -q 10.0.0-beta2
+             make -s
+
+=== Recompile station code
+
+Recompile your station code. If your _/usr2/st/Makefile_ is
+set-up in the usual way, then as _prog_ execute:
+
+             cd /usr2/st
+             make rmdoto rmexe all
+
+=== Reboot
+
+IMPORTANT: Reboot the computer.  This is important for initializing shared
+memory for the new version.
+
+=== Login in as oper
+
+The remaining steps assume you are logged in as _oper_.
+
+=== Update control files
+
+. If your old version before the _beta1_ update was _9.12.12_, you
+should review the sub-steps in the <<beta2.adoc#_update_control_files,Update control files>>
+step of the <<beta2.adoc#,beta2 update notes>> document. In particular,
+there were two changes related to that old version to review:
+
+.. In the <<beta2.adoc#\_copy_control_files,Copy control files>>
+sub-step, as shown in the <<beta2.adoc#,beta2 update notes>> document, your _clpgm.ctl_ file may have been
+needlessly overwritten. We think is is unlikely that any local
+customizations were lost, but if they were, we apologize. Hopefully
+you made a backup before trying the update. In which case, you should
+be able to recover the file from the backup. Otherwise, hopefully the
+changes needed are small. Additional changes to _clpgm.ctl_ are
+covered farther below.
+
+.. In the <<beta2.adoc#\_update_equip_ctl,Update equip.ctl>>
+sub-step, as shown in the <<beta2.adoc#,beta2 update notes>> document,
+you may have ended up with extra lines
+at the end of _equip.ctl_ because, according to the
+_beta1_ installation instruction, the FiLa10G input
+select lines (including the comment line) were added
+after the BBC3 configuration lines (including the
+comment line) and extra DBBC3 configuration lines were
+added. Presumably you have already sorted this out
+because the FS would probably not have run if the file
+was changed as previously described. If you have not
+sorted this out, the change that is needed is to move
+the FiLa10G input select lines before the DBBC3
+configuration lines and to delete any additional lines
+after the DBBC3 configurations lines. In case it is
+helpful, more detail is provided in the
+<<beta2.adoc#_review_control_files,Review_control_files>>
+sub-step of the <<beta2.adoc#,beta2 update notes>> document.
+
+. There were two changes to the _clpgm.ctl_ control file:
+
+.. The flags for the _monX_ programs in _clpgm.ctl_ have
+changed from `a` to `d`.
++
+Please check the file to see if those lines are present. If so, and the second field is `a`, please change it to `d` for each occurrence.
+
+.. The line for the _scnch_ window has been generalized to
+cover Mark 5 recorders as well as Mark 6.
++
+
+Please update your file accordingly after comparing to the
+new default:
+
+             cd /usr2/control
+             diff clpgm.ctl /usr2/fs/st.default/control
+
+. In the _stpgm.ctl_ control file, the line for
+the _scnch_ window has been generalized to cover Mark 5
+recorders as well as Mark 6.
++
+Please update your file accordingly after comparing to the
+new default:
+
+             cd /usr2/control
+             diff stpgm.ctl /usr2/fs/st.default/control
+
+. If you use RDBEs in your back-end and want to use the
+_rdbemsg_ utility to send operations messages, please
+customize your _/usr2/control/rdbemsg.ctl_ control file.
+In particular, you should add the _station_ line to the
+file.  Full instructions are provided in the
+<<beta2.adoc#\_update_rdbemsg_ctl,Update rdbemsg.ctl>>
+sub-step of the <<beta2.adoc#,beta2 update notes>> document.
+which is a new sub-step since _beta1_.
++
+
+NOTE: The instructions it <<beta2.adoc#\_update_rdbemsg_ctl,Update rdbemsg,ctl>>
+sub-step also include setting
+the `name` line in _rdbemsg.ctl_. That setting is not available as of
+_beta2_; it is provided in a later update. However, setting it for
+_beta2_ is benign and forward compatible.
+
+=== Update .prc files from 10.0.0-beta1
+
+If you initially upgraded from _9.13.2_, there is an optional
+clean-up of your `calonnf`, `calonfp`, `caloffnf`, and
+`calofffp` procedures, probably located in your _point_
+procedure library in the
+<<beta2.adoc#_remove_extra_if_commands,Remove extra if commands>>
+sub-step of the <<beta2.adoc#,beta2 update notes>> document.
+
+=== Other updates
+
+. Please review the
+<<beta2.adoc#\_set_fs_display_server,Set FS_DISPLAY_SERVER>>
+sub-step of the <<beta2.adoc#,beta2 update notes>> document.
+This sub-step did not exist for the
+_beta1_ release.  It contains information about making use
+of the display server the default, which is strongly
+recommended.
+
+. Please review the 
+<<beta2.adoc#\_update_xresources,Update .Xresources>>
+sub-step of the <<beta2.adoc#,beta2 update notes>> document.
+This sub-step did not exist for the
+_beta1_ release.  It contains information about updates
+needed to the _~/.Xresources_ files for _oper_ and _prog_.
+Please follow those directions.
+
+. If you have installed the _beta1_ as part of installing
+FSL10, you can optionally rearrange your _.bashrc_ and _.profile_
+files to agree with the new default.
++
+As _oper_, you can find the differences between your
+_~/.bashrc_ and _~/.profile_ files and the new defaults using, e.g.,:
++
+
+             cd
+             diff .bashrc  /usr2/fs/st.default/oper
++
+The main changes are:
+
+.. Move certain commands within _~/.bashrc_ so they are only used by interactive shells.
+.. Move `unset TMOUT` from _~/.profile_ to _~/.bashrc_.
+.. Enable the display server in _~/.profile_, as also mentioned above.
+
++
+Likewise you can do this similarly for _prog_ (and any AUID
+accounts if you are using those).
+
+. If you updated to a 64-bit platform and installed the _go_
+language as part of that, according the
+<<64-bit_conversion.adoc#\_option_b_installing_latest_go_language,Option B - Installing latest go language>>
+sub-step of the <<64-bit_conversion.adoc#,Converting to a 64-bit system>> document,
+then
+you should register for _golang_ announcements as is now
+described in that sub-step.
+
+=== Review other changes
+
+Please see the section <<Changes since 10.0.0-beta1>> below
+for details of the changes in 10.0.0-beta2 compared to the
+10.0.0-beta1 release.
+
+== Changes since 10.0.0-beta1
+
+There are separate sub-sections with summaries of changes in the FS
+and _drudg_. Following those are sub-sections giving the details of the
+changes.  [[details]] Each summary item has a clickable <<details,More details>>
+link that leads to the detailed description of that item.
+
+Clickable links such as
+https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
+reported at https://github.com/nvi-inc/fs/issues.
+
+A complete history of changes can be found using the `git log`
+command.
+
+The file _/usr2/fs/misc/changes.txt_ contains the old history of
+changes in FS9. The file _/usr2/fs/misc/VENIX_changes.txt_ contains
+the old history of changes in FS8. However these two files have been
+merged into the history given by `git log`.
+
+The history of _drudg_ is also described in more detail in
+_/usr2/fs/drudg/change_log.txt_.
+
+=== Summary of FS changes
+
+. Improve _fesh_ (includes closing https://github.com/nvi-inc/fs/issues/34[#34]). <<fesh,More details>>.
+. Update example _equip.ctl_ (includes closing https://github.com/nvi-inc/fs/issues/35[#35]). <<equip.ctl,More details>>.
+. Fix some error messages (includes closing https://github.com/nvi-inc/fs/issues/43[#43] & https://github.com/nvi-inc/fs/issues/22[#22]). <<fixmess,More details>>.
+. Improve _plog_. <<plog,More details>>.
+. Restore `if` command. <<if,More details>>.
+. Update GPL in files. <<gpl,More details>>.
+. Remove usage of `system()` call to find _help_ file_(closes https://github.com/nvi-inc/fs/issues/40[#40] & https://github.com/nvi-inc/fs/issues/3[#3]). <<help,More details>>.
+. No longer set _/usr2/fs_ and _/usr2/st_ to be owned by _prog_. <<symlinks,More details>>.
+. Add checking for a procedure or schedule file before attempting to open it (closes https://github.com/nvi-inc/fs/issues/45[#45]). <<prc,More details>>.
+. Add more log header lines. <<header_lines,More details>>.
+. Fix year wrap error message in procedure logging (closes https://github.com/nvi-inc/fs/issues/23[#23]). <<year,More details>>.
+. Fix remaining case of a closed procedure library causing a crash if
+there was an attempt to execute a procedure from the library was fixed. <<prc2,More details>>.
+. Move X resources for _helpsh_ to _~/.Xresources_. <<helpsh,More details>>.
+. Move unsetting of `TMOUT` environment variable for _oper_ to
+    _~/.bashrc_ in the default files. <<tmout,More details>>.
+. Improve error logging for _dbbcn_. <<dbbcn,More details>>.
+. Improve `help` page for _tpicd_. <<tpicd,More details>>.
+. Add `popen` time-out feature. <<popen,More details>>.
+. Make use of the FS display server the default. <<server2,More details>>.
+. Make _fsclient_ honor the `-n` flag properly (closes https://github.com/nvi-inc/fs/issues/48[#48]). <<clientn,More details>>.
+. Make _fsclient_ ignore prompt in no-X11 mode (closes https://github.com/nvi-inc/fs/issues/49[#49]). <<clientnx,More details>>. 
+. Add _fsserver_ improvements and log support (includes closing https://github.com/nvi-inc/fs/issues/29[#29] & https://github.com/nvi-inc/fs/issues/25[#25]). <<fsserver,More details>>.
+. Eliminate `cls_chk` error from `inject_snap -w ...` command when
+    an error occurs (partly closes https://github.com/nvi-inc/fs/issues/50[#50]). <<cls_chk,More details>>.
+. Fix labels in _gnplt_ windows that display the gain curve
+    coefficients (closes https://github.com/nvi-inc/fs/issues/51[#51]). <<gnplt,More details>>.
+. Improve holog/MASK. <<holog,More details>>.
+. Fix _onoff_ for the DBBC3 rack (closes https://github.com/nvi-inc/fs/issues/52[#52]). <<onoff,More details>>.
+. Add support for DBBC3 to `if=cont_cal,...` (closes https://github.com/nvi-inc/fs/issues/54[#54]). <<cont_cal,More details>>.
+. Update `help` pages for _onoff_ and _fivpt_. <<onoff_fivpt,More details>>.
+. Always check for day 248 problem in _setcl_ (closes https://github.com/nvi-inc/fs/issues/56[#56]). <<day248,More details>>.
+. Change the flags for the _monX_ programs in _clpgm.ctl_ from `a`
+    to `d`. <<monx,More details>>.
+. Generalize the _scnch_ window to cover Mark 5 recorders (closes
+    https://github.com/nvi-inc/fs/issues/61[#61]). <<scnch,More details>>.
+. Update _misc/release_model.txt_. <<release_model,More details>>.
+. Improve update notes. <<notes,More details>>.
+
+=== Summary of drudg changes
+
+_drudg_ opening message date is `2020Jun30`.
+
+. Fix uninitialized variables. <<uninit,More details>>.
+. Fix missing `preob` when `EARLY` start non-zero. <<preob,More details>>.
+. Add support for additional wait at the end of recording for broadband. <<wait,More details>>.
+. Update comment on line three of _.snp_ files. <<comment,More details>>.
+
+=== Details of FS changes
+
+. [[fesh]] Improve _fesh_ (includes closing https://github.com/nvi-inc/fs/issues/34[#34]).
+
+.. A typo in the error message for when
+the schedule is already downloaded was fixed (closes https://github.com/nvi-inc/fs/issues/34[#34]). Thanks to
+Morgan Goodrich (KPGO) for reporting this.
+
+.. The internal version number was replaced with the FS version.
+
+. [[equip.ctl]] Update example _equip.ctl_ (includes closing https://github.com/nvi-inc/fs/issues/35[#35]).
+
+.. The example DBBC3
+firmware is now more sensible (closes https://github.com/nvi-inc/fs/issues/35[#35]). Thanks to Eskil Varenius (Onsala)
+for reporting this.
+
+.. The minimum DBBC3 firmware version required was added in a comment.
+
+. [[fixmess]] Fix some error messages (includes closing https://github.com/nvi-inc/fs/issues/43[#43] & https://github.com/nvi-inc/fs/issues/22[#22]).
+
+.. Fixed errors in
+_control/fserr.ctl_.  Errors in some double double-quotes (`""`)
+lines and some incorrectly reused error codes were fixed (closes
+https://github.com/nvi-inc/fs/issues/43[#43]).  Thanks to Alexander Neidhardt (Wettzell) for reporting
+these.
+
+.. The errors for a `tnx` command not being found when
+attempting to manipulate its display setting were clarified
+(closes https://github.com/nvi-inc/fs/issues/22[#22]).  Thanks to Jon Quick (HartRAO) for reporting this.
+
+.. Error messages that should refer to the (not yet implemented)
+`active_rdbes` and `active_mk6s` commands were corrected to no
+longer incorrectly refer to the `rdbe_active` and `mk5_active`
+commands, respectively.
+
+.. Obsolete errors for the, no longer used, _sw.ctl_ control file
+were removed.
+
+. [[plog]] Improve _plog_.
+
+.. Use of an environment variable `NETRC_DIR` was
+added to support not having the _.netrc_ file in the user's home
+directory was added. Please see `*plog -h*` for details on how to
+use this.
+
+.. The internal version number was replaced with the FS version.
+
+. [[if]] Restore `if` command. It had accidentally been overlooked in
+_beta1_. Thanks to Beppe Maccaferri (Medicina) for reporting
+this.
+
+. [[gpl]] Update GPL in files. The GPL header was added to the
+_holog/MASK/*.m_ and _misc/mk6in*_ scripts and removed from
+_fserver/tests/convey.*_.
+
+. [[help]] Remove usage of `system()` call to find `help` files (closes https://github.com/nvi-inc/fs/issues/40[#40] &
+https://github.com/nvi-inc/fs/issues/3[#3]). The `help` command no longer uses the `system()` to find the
+correct `help` file to display.
+
+. [[symlinks]] No longer set _/usr2/fs_ and _/usr2/st_ to be owned by _prog_. This
+was an error in the _misc/fsinstall_ script.
+
+. [[prc]] Add checking for a procedure or schedule file before attempting to
+open it (closes https://github.com/nvi-inc/fs/issues/45[#45]). This change is to avoid accidentally closing
+an active procedure or schedule file if the new one specified in
+the `proc=...` or `schedule=...` commands, respectively, does not
+exist (or has incorrect permissions).  Previously, if the files
+did not exist (or did not have the correct permission), the old
+file would be closed. Thanks to Jon Quick (HartRAO) for pointing
+out this inconsistency.
++
+The old behavior was partly a consequence of how the original file
+handling worked on the HP-RTE, but is not sensible for how the
+SNAP commands should work.  Note that this is a non-backward
+compatible change in how the SNAP commands seem to behave.
+Previously supplying a non-existent procedure or schedule file
+name would cause the closure of the corresponding file. Now to
+close an open procedure or schedule without opening a new one, a
+null parameter must be supplied, i.e., `proc=` or `schedule=`.  As
+before, the latter will not close an open schedule procedure
+library.
+
+. [[header_lines]]  Add more log header lines. Log header lines were added for
+`uname()` system information and the compile time value of the
+`FC` environment variable were added.
+
+. [[year]] Fix year wrap error message in procedure logging (closes https://github.com/nvi-inc/fs/issues/23[#23]).
+This fixed a benign and spurious error message if a log was kept
+open past the end of the year and any procedures that had last
+been logged in the previous year were executed again.  Thanks to
+Eskil Varenius (Onsala) and Alexander Neidhardt (Wettzell) for
+reporting this.
+
+. [[prc2]] Fix remaining case of a closed procedure library causing a crash if
+there was an attempt to execute a procedure from the library was
+fixed. This case could happen if the schedule that was opened was
+named _station_, which would lead to the closure of an already
+open schedule procedure library (there cannot be _station_
+schedule procedure library since _station_ can only be opened
+once).
+
+. [[helpsh]] Move X resources for _helpsh_ to _~/.Xresources_. This allows the
+geometry and other parameter of the FS `help` display _xterm_ to be
+controlled locally.
+
+. [[tmout]] Move unsetting of `TMOUT` environment variable for _oper_ to
+_~/.bashrc_ in the default files. This allows all interactive
+shells to disable the time-out. Additionally, some settings were
+rearranged in _~/.bashrc_ to make them only apply to interactive
+shells (this was also done for _prog_ and AUID accounts). This
+change is only relevant for stations using FSL10.
+
+. [[dbbcn]] Improve error logging for _dbbcn_. The name of the program is now
+correctly displayed.
+
+. [[tpicd]] Improve `help` page for _tpicd_. Made it clearer that when in the
+`no` mode, `data_valid=on` will only start logging of _tpicd_ data
+when a schedule is running and not-blocked.  This behavior was
+inherited from the VGOS branch where accidentally leaving _tpicd_
+logging RDBE multi-cast data after closing a schedule or halting
+it creates a lot of extra log entries. This is probable beneficial
+for all back-ends. The fact that this changed relative to the main branch
+is is now noted in <<beta2.adoc#_changes_from_previous_versions,Changes from previous versions>> section
+of <<beta2.adoc#,beta2 update notes>> document.
+
+. [[popen]] Add _popen_ time-out feature. There is a now a `-t ...` time-out
+option. If the command being run has a time-out feature, it is
+generally better to use the command's feature. See `help=sy` for
+more details.
+
+. [[server2]] Make use of the FS display server the default. This was changed as
+of the _beta2_ release.
+
+. [[clientn]] Make _fsclient_ honor the `-n` flag properly (closes https://github.com/nvi-inc/fs/issues/48[#48]). This
+eliminates opening "double" windows if _fsclient_ is run with `-n`
+under an already running _fsclient_.
+
+. [[clientnx]] Make _fsclient_ ignore prompt in no-X11 mode (closes https://github.com/nvi-inc/fs/issues/49[#49]). If FS
+client is in no-X11 mode, it created a _fs.prompt_ when instructed
+by the server. This change removes that behaviour, though it may
+cause an issue if no other clients exist to dismiss the prompt,
+see issue https://github.com/nvi-inc/fs/issues/49[#49]. If this is a problem for anyone's use case we will
+need a new feature here.
+
+. [[fsserver]] Add _fsserver_ improvements and log support (includes closing https://github.com/nvi-inc/fs/issues/29[#29] & https://github.com/nvi-inc/fs/issues/25[#25]).
+These changes introduce new functionality to _fsserver_, as well as
+simplifies some use cases.
+
+.. The first major change is that the server now only needs to use
+one socket when using _websockets_ -- address which start with
+"ws://" (closes https://github.com/nvi-inc/fs/issues/29[#29]). The new default base URL for all _fsserver_
+streams and control channels is now:
+
+    ws://127.0.0.1:7083
++
+(70 83 are decimal ASCII encoding of `F` and `S`.)
++
+This can be changed by editing `FS_SERVER_URL_BASE` in
+_include/params.h_; however, we will likely introduce command-line
+flag and/or environment variable to set this in the future.
++
+This is should be safe to expose on the network (rather than just
+the loop-back), but users may wish to use an HTTP(S) as a proxy to
+provide some authentication/authorisation.
++
+This was enabled by factoring out functionality _spub_ into a
+reusable "buffered stream" library, which has been incorporated
+into _fsserver_. All the behaviour of streams are now managed
+within the _fsserver_ process rather than an external _spub_
+instance.
+
+.. The second major change of this patch is the addition of the FS
+log to the streams available from the server (closes https://github.com/nvi-inc/fs/issues/25[#25]).
+(Previously only the "display" was available, which has a reduced
+time-stamp format and filters some output.)
++
+This is available at
+
+    FS_SERVER_URL_BASE/log
++
+that is, by default
+
+    ws://127.0.0.1:7083/log
+
+.. A third change is that the server now continues running after the
+FS is terminated. This allows clients to detect the FS termination
+and prevents a socket conflict if the FS is terminated and
+restarted in quick succession. The only user visible impact will
+be a slight delay if the FS is restarted quickly after termination
+while the old session is finishing up. This also means, after an
+FS upgrade, it's important to either shutdown the server
+(`*fsserver stop*`) or restart the system.
+
+.. Fourth, the server can now accept snap commands to be sent to FS,
+e.g.:
+
+   fsserver fs snap "terminate"
++
+This allows clients to interact with the FS directly through
+fsserver rather than needing access to _inject_snap_.
++
+No filtering or authorisation is implemented on this command
+channel, so it effectively allows complete command execution
+privileges in the FS context to anyone with access to the socket.
+Note this is also true for _inject_snap_ on a standard system. If
+a station wishes to limit local access they can use
+iptables/nftables, or use the server in UNIX socket mode and use
+file system permissions. Stations that would like to enable remote
+access should implement their own authentication/authorisation
+that suits their needs, e.g. SSH port forwarding or HTTP proxying.
+
+.. Finally, this patch also upgrades the included messaging library
+_nng_ to version _1.3.0_, which brings with it some performance
+improvements and bug fixes, the most obvious to FS users caused
+some _ssub_ instances in "wait" mode to use a high amount of CPU
+time.
+
+. [[cls_chk]] Eliminate `cls_chk` error from `inject_snap -w ...` command when
+an error occurs (partly closes https://github.com/nvi-inc/fs/issues/50[#50]). This was caused by
+_inject_snap_ not implementing the new linkage that was added for
+_fserr_. This is covered in issue https://github.com/nvi-inc/fs/issues/50[#50]. To correctly retrieve the
+error message would have required making a new interface to
+_fserr_ or subsuming it into library routine that both _ddout_
+and _inject_snap_ could use. It was not possible to do either in the
+available time. Instead _inject_snap_ was modified to output the error
+without the message, but pointing out that the message can be
+found in the log and display. Thanks to Dave Horsley (Hobart) for
+reporting this.
+
+. [[gnplt]] Fix labels in _gnplt_ windows that display the gain curve
+coefficients (closes https://github.com/nvi-inc/fs/issues/51[#51]). Previously the labels, when displayed
+were in reverse order. In one window, there were no coefficient
+labels at all. Thanks to Beppe Maccaferri (Medicina) for reporting
+this and testing the solution.
+
+. [[holog]] Improve _holog/MASK_. The elevation spacing was corrected for the
+example in step (3), using _holog.m_. Axis titles were added to
+_plot_mask.m_.
+
+. [[onoff]] Fix _onoff_ for the DBBC3 rack (closes https://github.com/nvi-inc/fs/issues/52[#52]). A code block from
+_9.12.13_ in _onoff/get_samples.c_ had been omitted, preventing
+sampling of the TPI values and causing _onoff_ to crash. Thanks to
+Eskil Varenius (Onsala) for reporting that this caused a crash.
+
+. [[cont_cal]] Add support for DBBC3 to `if=cont_cal,...` (closes https://github.com/nvi-inc/fs/issues/54[#54]).  Thanks
+to Eskil Varenius (Onsala) for reporting that this was missing.
+
+. [[onoff_fivpt]] Update `help` pages for _onoff_ and _fivpt_. Added a section on
+switching between continuous and non-continuous cal.  Removed
+`if=cont_cal,,` in `calon`/`off`-`nf`/`fp` procedures.  Add
+recovery method for misconfigured cal.
+
+. [[day248]] Always check for day 248 problem in _setcl_ (closes https://github.com/nvi-inc/fs/issues/56[#56]).
+Previously _setcl_ only checked for the day 248 problem (due to
+use of 32-bit arithmetic in the time handling code), if the time
+model was _not_ `computer`. In principle, when the model is
+`computer` there is no need to check for this issue.  However,
+since the time is still managed with the same 32-bit arithmetic as
+for the non-`computer` models, it is still necessary to check.
+Not doing so was an oversight. The result was that there were no
+warnings of an impending 248 day time problem if the model was
+`computer`.  This is now fixed. Thanks to Richard Blaauw (WSRT),
+and subsequently Jon Quick (HartRAO) for reporting this.
+
+. [[monx]] Change the flags for the _monX_ programs in _clpgm.ctl_ from `a`
+to `d`.  Since they do not depend on the FS, they can continue
+running after the client is closed.
+
+. [[scnch]] Generalize the _scnch_ window to cover Mark 5 recorders (closes
+https://github.com/nvi-inc/fs/issues/61[#61]).  The _scnch_ window was initially developed for Mark 6
+recorders. The form has now been generalized to cover Mark 5
+recorders as wekk
+
+. [[release_model]] Update _misc/release_model.txt_. The release steps were
+clarified.
+
+. [[notes]] Improve update notes.
+
+.. The `-q` option was added to
+the `pull` to suppress the detached HEAD warning.
+
+.. A sentence was added to the description of the change to using
+_git_ that it now even more important to not change the contents
+of the _/usr2/fs_ source tree.  Changing the source tree will make
+it harder to install bug fixes and updates.
+
+.. The paths to the example control files now include the needed
+intermediate directory _fs/_.
+
+.. Some conditional changes in
+the <<beta2.adoc#\_update_control_files,Update control files>>
+step of the <<beta2.adoc#,beta2 update notes>> document
+were corrected to properly
+depend or not depend on the old version being _9.12.12_. If you
+installed the _beta1_ version and your old version was _9.12.12_
+you should review the instructions in
+<<beta2.adoc#_update_control_files,Update control files>>
+step to verify everything has been covered.
+
+.. A sub-step was added to make using the FS display server the default.
+If you installed _beta1_ you should check the 
+the <<beta2.adoc#_set_fs_display_server,Set FS_DISPLAY_SERVER>>
+sub-step of the <<beta2.adoc#,beta2 update notes>> document
+for changes that are needed.
+
+.. A sub-step was added for updating the _~/.Xresources_ file for _oper_
+and _prog_. If you installed _beta1_ you should check the
+<<beta2.adoc#_update_xresources,Update .Xresources>>
+sub-step of the <<beta2.adoc#,beta2 update notes>> document
+for changes that are needed.
+
+.. A sub-step to update where the `TMOUT` environment variable is unset
+for stations using FSL10 was added.
+
+.. A recommendation was added to sign-up for the _go_ language
+announcements to be informed of security updates if you are
+installing the latest version of _go_ as described in the
+<<64-bit_conversion.adoc#_option_b_installing_latest_go_language,Option B - Installing latest go language>>
+sub-step of the <<64-bit_conversion.adoc#,Converting to a 64-bit system>> document.
+If you used that method it is recommended that you
+sign-up for the announcements.
+
+.. The update instructions now include advice on updating from
+_beta1_ to _beta2_.
+
+=== Details of drudg changes
+
+. [[uninit]] Fix uninitialized variables. Several previously uninitialized variables are
+    now initialized. As part of this `implicit none` was added to all FORTRAN
+    routines that did not have it before, except for _xat.f_.
+
+. [[preob]] Fix missing `preob` when `EARLY` start non-zero. This was broken
+    in the implementation of staggered start for FS _9.13.0_ and has been
+    restored.
+
+. [[wait]] Add support for additional wait at the end of recording for
+    broadband. This allows schedules to include a fixed amount of
+    additional wait for buffering per station. This seems to be needed
+    for Mark 6 recorders in configurations that otherwise would
+    require no buffer time for disks that are slower than nominal.
+
+. [[comment]] Update comment on line three of _.snp_ files. Previously at the
+    end of line, the number of passes and the tape length were
+    listed. Since there is no tape support, these fields were replaced
+    with the recorder type.
+

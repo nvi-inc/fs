@@ -21,9 +21,11 @@
 = Index of fs/
 Version 0.1 - Nov 2020
 
-<<10.0.0/fs-10.0.0-beta2.adoc#,Latest release>>
+== Direct Links
 
-== Sub-directories
+<<10.0.0/beta2.adoc#,10.0.0-beta2>> release notes (latest)
+
+== Links to sub-directories
 
 <<10.0.0/index#,Release 10.0.0>>
 
