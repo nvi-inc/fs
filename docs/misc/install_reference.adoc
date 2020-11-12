@@ -1,0 +1,441 @@
+//
+// Copyright (c) 2020 NVI, Inc.
+//
+// This file is part of the FSL10 Linux distribution.
+// (see http://github.com/nvi-inc/fsl10).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= Installation reference
+Version 0.1 - Apr 2020
+
+:sectnums:
+:experimental:
+
+This document collects several topics that are useful for installation
+in general, but are usually not needed for routine updates.
+
+== Upgrading from FS versions before the previous stable
+
+This sub-section only covers upgrading from "main" branch versions,
+i.e., versions _9.12.x_ are excluded.
+
+For reference, the list of the most recent _critical updates_, since
+version _9.3.13_, is given below.  These are updates that must be
+applied sequentially.  Please start with the next update with a later
+version number than what you have and apply it and the following
+listed versions before upgrading to the new version.  You can find the
+latest versions of installation notes for these FS versions in the
+_/usr2/fs/misc_ directory.  The list of critical updates is:
+
+  9.4.0
+  9.5.3
+  9.5.12
+  9.6.9
+  9.7.7
+  9.9.2
+  9.10.4
+  9.11.6
+  9.11.8
+  9.11.19
+  9.13.2
+
+Strictly speaking you do not need to actually use the source archives
+(_.tgz_ files) of the previous versions.  You can just follow the steps
+in the upgrade notices for your local files for the corresponding FS
+versions.  However, it can be very helpful to actually install each
+version to help make sure that all of the upgrade steps have been
+completed and that the FS will run _and_ to test it as described.
+This can be particularly helpful when the upgrade requires some
+modifications to your local programs.  So it probably best to actually
+install _and_ test each version along the way.  This is especially
+true if you have to upgrade through more than one previous version.
+Otherwise if a step was overlooked, it might be hard to identify for
+which version the error was made.
+
+You can find the archives for old versions at: http://www.metsahovi.fi/fs/dist/old/
+
+They can also be extracted from a local FS _git_ repo with, e.g.:
+
+  git checkout 9.11.19
+
+If you have a version older than _9.3.13_, please email
+Ed for more information.
+
+== Example standard procedure libraries
+
+For reference purposes, information about the example station
+libraries for different equipment configurations is given here.  The
+files are found in _/usr2/fs/st.default/proc_.  They can be referred to
+and compared to what you have in _/usr2/proc/station.prc_.
+
+_Only_ for new installations (or complete re-installs), you can copy
+the default version for your equipment to _/usr2/proc_ renaming it to
+_station.prc_ in the process, e.g.:
+
+  cd /usr2/proc
+  cp -i /usr2/fs/st.default/proc/3station.prc station.prc
+  chmod a+rw station.prc
+
+The `-i` option will prompt before overwriting an existing
+_station.prc_ to give you a chance to recover if you did not realize
+you already had a _station.prc_ file.  The table of correspondence
+between equipment types and default library names is given next.
+
+.Example station.prc libraries
+|=============================================================
+|Equipment - Rack/Drive1/Drive2 |Prefix letters |Station Library
+|k42/k42             |k42        |k42station.prc
+|k42k3/vlba          |k42k3v     |k42k3vstation.prc
+|k42mk4/vlba         |k42mk4v    |k42mk4vstation.prc
+|k42mk4/vlbab/vlbab  |k42mk4vb   |k42mk4vstation2.prc
+|k42/k5              |k42k5      |k42k5station.prc
+|lba/s2              |ls2        |ls2station.prc
+|lba4/s2             |l4s2       |l4s2station.prc
+|mk3/mk3a            |3          |3station.prc
+|mk4/mk4             |4          |4station.prc
+|mk4/mk5a            |45         |45station.prc
+|mk4/vlba4           |4v4        |4v4station.prc
+|mk5/mk5b            |5          |5station.prc
+|none/s2             |s2         |s2station.prc
+|vlba/s2             |vs2        |vs2station.prc
+|vlba/vlba           |v          |vstation.prc
+|vlba/vlba2          |v2         |v2station.prc
+|vlba/vlba/vlba      |v          |vstation2.prc
+|vlba4/vlba4         |v4         |v4station.prc
+|vlba4/mk5a          |v45        |v45station.prc
+|vlba4/vlba42        |v42        |v42station.prc
+|vlba5/mk5b          |v5         |v5station.prc
+|dbbc/mk5b           |d          |dstation.prc
+|=============================================================
+
+If an example for your equipment type is listed, please email
+Ed about it so that it can be added.
+
+== Cut-and-paste installation tips
+
+You can use cut-and-paste to reduce the amount of typing involved in
+the installation.  This reduces the chances of missing required spaces
+and other easily missed characters (like `.`) in the commands.  The
+basic idea is to have two different terminals open, _either_ (preferred)
+two different xterm terminals either on the local X display or
+remotely logged in _or_ (more cumbersome) two different VT text
+terminals (kbd:[Control+Alt+Fn]) on the FS computer you are
+upgrading.  You can then switch back and forth between the terminals,
+reading the instructions as you scroll through them (with _more_ or
+_less_) on one terminal and entering commands on the other.  You can
+cut-and-paste complicated commands from the terminal with the
+instructions to the terminal where you are entering commands as
+needed.  You can use _ssh_ or _su_ to switch users as needed on
+the terminal where you are entering commands. For example, you can
+change to being _prog_ by executing:
+
+ ssh -X prog@localhost
+
+or
+
+ su - prog
+
+Please don't forget to log back out when you need to change users
+again or you may develop a series of _nested_ logins.  Any steps that
+require rebooting will of course completely log out all of your
+terminals; you will need to re-login again from scratch to continue.
+At the end of the update, it is recommended that you login as _oper_
+on the local X display for the final testing.  Please also note that
+in order to paste into the X display login shell window for _oper_ and
+_prog_, you typically must use kbd:[Shift+Insert].  If you have any
+questions about how to cut-and-paste please email Ed.
+
+== Making a back-up before installing
+
+This sub-section has two parts. The first covers back-ups. The second
+covers using symbolic links to switch between operational and test
+set-ups.
+
+=== Back-ups
+
+Before you begin the upgrade make sure you have a current back-up of
+your system in case something goes wrong. If you are using one of the
+FSLx distributions, there are options for each below
+
+If you have SCSI disks, Section 5.7 of the FS9 _Computer Reference_
+manual has a discussion of drive ID numbers if you are unsure about
+these.
+
+Except for FSL10 (which uses a different scheme), you would normally
+choose to install the update on your primary disk after having made
+and verified your back-up.  Once the installation is complete, has
+been tested, and used for a little while, you can copy over your
+back-up with the upgraded primary.  If the upgrade fails, you should
+restore the back-up to the primary for operations.  You can then try
+to upgrade again when it is convenient.  In a desperate situation, you
+can use the back-up for operations.  You may choose to install the FS
+on your back-up disk for testing and then later copy the back-up onto
+the primary once you are satisfied with the new version.  In any
+event, please be sure to make a fresh back-up (and put it safely away)
+before attempting an update installation.
+
+====  FSL10 (stretch)
+
+See the procedure at: https://nvi-inc.github.io/fsl10/raid.html#_recoverable_testing
+
+====  FSL9 (wheezy)
+
+If the system is configured as a RAID, please see
+_/usr2/fs/misc/FSL9_RAID.pdf_ section "APPLYING AN UPDATE" for directions
+for applying an update.
+
+====  FSL8 (lenny), FSL7, (etch), and FSL6 (sarge)
+
+If the system is configured as a RAID, please see http://www.metsahovi.fi/fs/docs/pre_FSL9_RAID.pdf
+section "APPLYING AN UPDATE" for directions for
+applying an update.
+
+====  FSL5 (woody)
+
+We recommend you use the _tar_ based back-up that is part of the
+rotating disk back-up scheme.  A draft document that describes this
+method is available in http://www.metsahovi.fi/fs/docs/backups2.pdf.
+
+====  FSL4 (potato) and earlier
+
+If you have an even older FS Linux distribution, please use the
+disk-to-disk back scheme described in Section 5.8 of the FS9 _Computer
+Reference_ manual.
+
+If you are running one of these FSLx distributions and do not have
+documentation on how to make a back-up, please email
+Ed for advice.
+
+=== Using symbolic links
+
+_After_ you have made a backup (to allow recovery in case something
+bad should happen), you can use symbolic links to your directories to
+change between your operational and test directories.  This may allow
+you to more easily switch between an operational and testing
+configuration.
+
+In the following examples, it is assumed that _/usr2/fs-9.13.2_ is
+your operational FS version and the FS you want to test is in
+_/usr2/fs-git_ and that _/usr2/st-1.0.0_ is the directory with your
+station software; you should substitute the correct directories if
+they are different. All commands must be entered as _root_. Extra
+white space has been added only to improve legibility.
+
+If you have aliased `rm` to `rm -i` and `mv` to `mv -i` and `cp` to
+`cp -i`, you will prompted to confirm before anything destructive
+occurs. If so, and if everything is set-up properly below, the only
+cases where you should only be asked to confirm is for deleting the
+symbolic links in examples for <<Switch permanently to new version>>
+and <<Switch permanently to old operational version>>.
+
+==== To set-up initially for testing:
+
+Your operational station software is assumed to be in _/usr2/st-1.0.0_. Make appropriate adjustments if they are different.
+
+. Make sure the FS is not running.
+
+. Enter the command:
+
+  cd /usr2
++
+Make sure there are no existing directories: _control-ops_,
+_proc-ops_, _st-1.0.0-ops_, _control-test_, _proc-test_,
+_st-1.0.0-test_, or use different names and adjust this and
+other examples accordingly.
+
+. Enter the commands:
++
+....
+mv control   control-ops
+mv proc      proc-ops
+mv st-1.0.0  st-1.0.0-ops
+
+cp -a control-ops   control-test
+cp -a proc-ops      proc-test
+cp -a st-1.0.0-ops  st-1.0.0-test
+
+ln -sfn control-test  control
+ln -sfn proc-test     proc
+ln -sfn st-1.0.0-test st
+....
+
+. Then follow the installation instructions, you will be
+modifying the _-test_ versions.
+
+==== Switch temporarily to operational version
+
+Your operational FS version is assumed here to be in _/usr2/fs-9.13.2_
+and your operational station software is assumed to be in
+_/usr2/st-1.0.0_.  Make appropriate adjustments if they are different.
+
+. Make sure the FS is not running.
+
+. Enter the commands:
++
+....
+cd /usr2
+ln -sfn control-ops   control
+ln -sfn proc-ops      proc
+ln -sfn st-1.0.0-ops  st
+ln -sfn fs-9.13.2     fs
+....
+
+. Reboot.
+
+The above commands (even rebooting if you like) can be put in
+a script if you need to do this multiple times.
+
+==== Switch temporarily to test version
+
+Your test FS version is assumed here to be in _/usr2/fs-git_
+and your test station software is assumed to be in
+_/usr2/st-1.0.0-test_.  Make appropriate adjustments if they are different.
+
+. Make sure the FS is not running.
+
+. Enter the commands:
++
+....
+cd /usr2
+ln -sfn control-test   control
+ln -sfn proc-test      proc
+ln -sfn st-1.0.0-test  st
+ln -sfn fs-git         fs
+....
+
+. Reboot.
+
+The above commands (even rebooting if you like) can be put in
+a script if you need to do this multiple times.
+
+==== Switch permanently to new version
+
+When you are satisfied with the testing of the new system
+you can switch permanently.
+
+Your test FS version is assumed here to be in _/usr2/fs-git_
+and your test station software is assumed to be in
+_/usr2/st-1.0.0-test_.  Make appropriate adjustments if they are different.
+
+. Make sure the FS is not running.
+
+. Enter the commands:
++
+....
+cd /usr2
+
+rm  control
+rm  proc
+
+mv control-test   control
+mv proc-test      proc
+mv st-1.0.0-test  st-1.0.0
+
+ln -sfn st-1.0.0  st
+ln -sfn fs-git    fs
+....
+
+. Reboot.
+
+Your old operational directories (named _*-ops_) are left for possible future
+reference.
+
+==== Switch permanently to old operational version
+
+Follow these steps if you need to switch back permanently, perhaps
+because the installation failed.
+
+Your operational FS version is assumed here to be in _/usr2/fs-9.13.2_
+and your operational station software is assumed to be in
+_/usr2/st-1.0.0_.  Make appropriate adjustments if they are different.
+
+. Make sure the FS is not running.
+
+. Enter the commands:
++
+....
+cd /usr2
+
+rm control
+rm proc
+
+mv control-ops   control
+mv proc-ops      proc
+mv st-1.0.0-ops  st-1.0.0
+
+ln -sfn st-1.0.0  st
+ln -sfn fs-9.13.2 fs
+....
+
+. Reboot.
+
+Your old test directories (named _*-test_) are left for possible future reference.
+
+== Disk space requirements
+
+Please be sure that you have at least 50 MB of free space (use the
+_df_ UNIX command to check free space) on your _/usr2_ partition
+before starting the upgrade.  This would probably only be an issue for
+stations with 200 MB disks.  If you are tight on space, you may want
+to delete old log files and old versions of the FS (except your most
+recent one if you can avoid it of course).  Since you should have
+backed-up your system, you can even delete the _*.[oas]_ and
+executable files of your old versions with no risk.  You might want to
+keep the source of the previous versions around for reference if you
+have room.  You can eliminate the non-source files by _cd_-ing to each
+of the old FS directories in turn as _prog_ and executing:
+
+  make rmdoto rmexe
+
+as a shell command.  If you have any questions about how to do this,
+please email Ed.
+
+== Set operations file permissions
+
+It is recommended that your local files for operations (_control_, _proc_,
+_log_, _sched_, _tle_files_ directories and their contents) have the default
+ownership (`oper.rtx`) and permissions (for regular files `rw-rw-r-`,
+for directories `rwxrwxr-x`).  To force this (however, this will not
+change the "execute/search" permissions), please execute the script (as
+_root_):
+
+  /usr2/fs/misc/fix_perm
+
+Answer `*y*` to the prompt if you wish to proceed.  It is a good idea to
+do this, unless you have purposely changed the ownership and
+permissions to some other values.  If you don't want to restore the
+defaults, answer `*n*` (this is the last chance to abort the execution
+of the script). If you don't have a _/usr2/tle_files_ directory,
+you will get a message that there is no such directory.
+
+== Fix .prc file define lines
+
+Sometimes due to errors (possibly caused during manual editing,
+instead of using _pfmed_), the `define` statements in _.prc_ files can
+be damaged.  This can lead to other problems including causing the
+contents of procedures being logged every time they are executed
+rather than just the first time they are used in a given log file.
+You can use the utility, _/usr2/fs/misc/fix_define_, to fix this. You
+can run it when the FS is _not active_ (as _oper_):
+
+  cd /usr2/proc
+  /usr2/fs/misc/fix_define -t *.prc
+
+in _test_ mode to see if there any `define` statements that need to be
+fixed.  If there are, they will be displayed.  If you choose to fix
+them, you can re-run the second command above without the `-t` flag to
+apply the fix.  An original of each _.prc_ file that is changed is
+retained with an added _.bak_ extension.
