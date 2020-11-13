@@ -74,6 +74,9 @@ if [[ -z "${NETRC_DIR:-}" ]]; then
 else
     CURL_NETRC_FILE_OPTION=" --netrc-file $NETRC_DIR/.netrc"
 fi
+if [[ ! -z "${STATION:-}" ]]; then
+    station=$STATION
+fi
 
 fatal(){
     echo -e "ERROR: fesh:" "$*" >&2
@@ -91,7 +94,7 @@ Fetch schedule file
 Options:
  -n       Fetch next schedule in master file (not supported yet)
  -d       drudg schedule with default settings, not supported for vlbeer
-          (needs STATION environment variable set to two letter id)
+          (needs STATION environment variable or -s set with two letter id)
  -D dc    Use alternate data center; dc=bkg, cddis, opar, or vlbeer
           (see more below about setting the default data center)
  -v       Verbose mode, drudg output printed to stdout
@@ -105,6 +108,7 @@ Options:
  -f       Force downloading of schedule from server and, if given
           with '-d', re-run drudg
  -x       download corresponding .txt file as well (geo only)
+ -s xx    Override STATION environment variable
  -a val   Override drudg VSI_ALIGN answer to val
  -c val   Override drudg CONT_CAL answer to val
  -p val   Override drudg CONT_CAL_POLARITY answer to val
@@ -114,11 +118,13 @@ Options:
 NOTE: If you specify a schedule that doesn't exist, you will get a
 file or a directory error from the server.
 
-For the '-d' option, the STATION environment variable must be set to
-the lower case two-letter station code in, e.g.:
+For the '-d' option, the STATION environment variable or the -s option must be
+set with the lower case two-letter station code in, e.g., for STATION:
 
     setenv STATION gs #in ~/.login for tcsh or
     export STATION=gs #in ~/.profile for bash
+
+If -s is also set, it overrides STATION.
 
 Please see the end of this message about handling optional 'skedf.ctl'
 specified prompting for 'drudg'.
@@ -245,7 +251,7 @@ run_drudg=
 force=
 verbose=
 txt=
-while getopts 'a:c:nfdD:hHm:p:t:vVxy:' opt; do
+while getopts 'a:c:nfdD:hHm:p:s:t:vVxy:' opt; do
     case $opt in
         n)
             echo "'next' not implemented."
@@ -288,6 +294,9 @@ while getopts 'a:c:nfdD:hHm:p:t:vVxy:' opt; do
             ;;
         x)
             txt=1
+            ;;
+        s)
+            station=$OPTARG
             ;;
         t)
             if [ ! -z ${OPTARG} ]; then tpicd=$OPTARG; fi
@@ -429,31 +438,31 @@ fi
 
 if [[ -n "$run_drudg" ]]; then
     set +u
-    if [[ -z "$STATION" ]]; then
-        >&2 echo "$0: ERROR: STATION environment variable not set; should be set to two-letter station code if using drudg."
+    if [[ -z "$station" ]]; then
+        >&2 echo "$0: ERROR: Neither STATION environment variable nor -s are set; should be set to two-letter station code if using drudg."
         exit 1
     fi
     set -u
-    if [[ -e $SNAP_DIR/$sched$STATION.snp ]]; then
+    if [[ -e $SNAP_DIR/$sched$station.snp ]]; then
         if [[ -z "$force" ]]; then
-            echo "$SNAP_DIR/$sched$STATION.snp exists, delete or use '-f' to re-drudg" >&2
+            echo "$SNAP_DIR/$sched$station.snp exists, delete or use '-f' to re-drudg" >&2
             exit 1
         fi
-        rm "$SNAP_DIR/$sched$STATION.snp"
+        rm "$SNAP_DIR/$sched$station.snp"
     fi
-    if [[ -e $PROC_DIR/$sched$STATION.prc ]]; then
+    if [[ -e $PROC_DIR/$sched$station.prc ]]; then
         if [[ -z "$force" ]]; then
-            echo "$PROC_DIR/$sched$STATION.prc exists, delete or use '-f' to re-drudg" >&2
+            echo "$PROC_DIR/$sched$station.prc exists, delete or use '-f' to re-drudg" >&2
             exit 1
         fi
-        rm "$PROC_DIR/$sched$STATION.prc"
+        rm "$PROC_DIR/$sched$station.prc"
     fi
-    if [[ -e $LIST_DIR/$sched$STATION.lst ]]; then
+    if [[ -e $LIST_DIR/$sched$station.lst ]]; then
         if [[ -z "$force" ]]; then
-            echo "LIST_DIR/$sched$STATION.lst exists, delete or use '-f' to re-drudg" >&2
+            echo "$LIST_DIR/$sched$station.lst exists, delete or use '-f' to re-drudg" >&2
             exit 1
         fi
-        rm "$LIST_DIR/$sched$STATION.lst"
+        rm "$LIST_DIR/$sched$station.lst"
     fi
 fi
  
@@ -519,11 +528,11 @@ fi
 if [[ -n "$run_drudg" ]]; then
 echo -n Drudging schedule... >&2
 cat <<EOF | "$FS_DIR/bin/drudg" "$sched.skd" > "$drudg_out"
-$STATION
+$station
 3
 12
 $tpicd_answer$cont_cal_answer$cont_cal_polarity_answer$vsi_align_answer$nine
-$LIST_DIR/$sched$STATION.lst
+$LIST_DIR/$sched$station.lst
 
 
 
