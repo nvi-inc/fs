@@ -99,7 +99,7 @@ Options:
  -m mmmyy Specify three character month and two digit year for the vlbeer
           data center (see more below about specifying the month/year)
           uses the hidden .latest sub-directory by default, use -H to suppress
- -H       suppress use of the hidden .last sub-directory for vlbeer
+ -H       suppress use of the hidden .latest sub-directory for vlbeer
  -y yyyy  Specify different (four-digit) year than the current one
           for geo data centers (see more below about specifying the year)
  -f       Force downloading of schedule from server and, if given
