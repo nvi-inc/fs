@@ -505,7 +505,7 @@ wget -nv "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
         wget -nv "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
     fi
 elif [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-wget -nv "ftp://www.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
+wget -nv "ftp://vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
 fi
 echo Done
 popd >/dev/null
