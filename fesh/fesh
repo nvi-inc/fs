@@ -104,6 +104,7 @@ Options:
           for geo data centers (see more below about specifying the year)
  -f       Force downloading of schedule from server and, if given
           with '-d', re-run drudg
+ -x       download corresponding .txt file as well (geo only)
  -a val   Override drudg VSI_ALIGN answer to val
  -c val   Override drudg CONT_CAL answer to val
  -p val   Override drudg CONT_CAL_POLARITY answer to val
@@ -166,6 +167,9 @@ variable. For example to make it the current directory, use:
 
     setenv LIST_DIR . #in ~/.login for tcsh or
     export LIST_DIR=. #in ~/.profile for bash
+
+If the -x option is used to download the .txt file (for geo schedules
+only), the file is placed in the same directory as the .skd file.
 
 The default transfer method from CDDIS is ftp-ssl.  You can use https
 as the method with CDDIS if you set:
@@ -240,7 +244,8 @@ EOF
 run_drudg=
 force=
 verbose=
-while getopts 'a:c:nfdD:hHm:p:t:vVy:' opt; do
+txt=
+while getopts 'a:c:nfdD:hHm:p:t:vVxy:' opt; do
     case $opt in
         n)
             echo "'next' not implemented."
@@ -281,6 +286,9 @@ while getopts 'a:c:nfdD:hHm:p:t:vVy:' opt; do
             version
             exit 0
             ;;
+        x)
+            txt=1
+            ;;
         t)
             if [ ! -z ${OPTARG} ]; then tpicd=$OPTARG; fi
             ;;
@@ -312,7 +320,11 @@ if [[ ! "$FESH_DATA_CENTER" =~ ^(cddis|opar|bkg|vlbeer)$ ]]; then
    exit 1
 fi
 if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-    if [[ -n "$run_drudg" ]]; then
+    if [[ -n "$txt" ]]; then
+        echo "Option -x (.txt) is not supported for the vlbeer data center."
+        echo "To fetch the schedule, rerun without -x."
+        exit 1
+    elif [[ -n "$run_drudg" ]]; then
         echo "Option -d (drudg) is not supported for the vlbeer data center."
         echo "To fetch the schedule, rerun without -d."
         exit 1
@@ -396,12 +408,23 @@ if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
         fi
         rm "$SCHED_DIR/$sched.vex"
     fi
-elif [[ -e $SCHED_DIR/$sched.skd ]]; then
-    if [[ -z "$force" ]]; then
-        echo "$SCHED_DIR/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
-        exit 1
+else
+    if [[ -e $SCHED_DIR/$sched.skd ]]; then
+        if [[ -z "$force" ]]; then
+            echo "$SCHED_DIR/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
+            exit 1
+        fi
+        rm "$SCHED_DIR/$sched.skd"
     fi
-    rm "$SCHED_DIR/$sched.skd"
+    if [[ -n "$txt" ]]; then
+        if [[ -e $SCHED_DIR/$sched.txt ]]; then
+            if [[ -z "$force" ]]; then
+                echo "$SCHED_DIR/$sched.txt exists, delete or use '-f' to get fresh schedule" >&2
+                exit 1
+            fi
+            rm "$SCHED_DIR/$sched.txt"
+        fi
+    fi
 fi
 
 if [[ -n "$run_drudg" ]]; then
@@ -446,6 +469,9 @@ echo Fetching schedule from server...
 if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
     if [[ "$FESH_CDDIS_METHOD" =~ ^ftp$ ]]; then
         wget -nv "ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+        if [[ -n "$txt" ]]; then
+            wget -nv "ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+        fi
     elif [[ "$FESH_CDDIS_METHOD" =~ ^https$ ]]; then
         if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
             fatal "$NETRC_DIR/.netrc not found, see usage"
@@ -457,13 +483,27 @@ if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
         curl  -k  -f -c /dev/null -n \
             $CURL_NETRC_FILE_OPTION \
             -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+        if [[ -n "$txt" ]]; then
+            curl  -k  -f -c /dev/null -n \
+                $CURL_NETRC_FILE_OPTION \
+                -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+        fi
     else
         curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+        if [[ -n "$txt" ]]; then
+            curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+        fi
     fi
 elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
 wget -nv "ftp://ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+    if [[ -n "$txt" ]]; then
+        wget -nv "ftp://ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+    fi
 elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
 wget -nv "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+    if [[ -n "$txt" ]]; then
+        wget -nv "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+    fi
 elif [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
 wget -nv "ftp://www.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
 fi
