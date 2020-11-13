@@ -454,7 +454,7 @@ if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
         if ! grep -q urs.earthdata.nasa.gov "$NETRC_DIR/.netrc"; then
             fatal "$NETRC_DIR/.netrc does not contain CDDIS login information, see usage"
         fi
-        curl  -k  -c /dev/null -n \
+        curl  -k  -f -c /dev/null -n \
             $CURL_NETRC_FILE_OPTION \
             -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
     else
