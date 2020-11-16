@@ -19,8 +19,8 @@
 *
       SUBROUTINE VUNPDAS(stdef,ivexnum,iret,ierr,lu,
      > cidter,cnater,nstack,maxtaplen,nrec,lb,sefd,par,npar,
-     > crec,crack,ctapemo,ite,itl,itg,cs2sp,ns2tap,ctlc)
-      implicit none  !2020Jun15 JMGipson automatically inserted.
+     > crec,crack,ctapemo,ite,itl,itg,ctlc)
+      implicit none
 C
 C     VUNPDAS gets the recording terminal information for station
 C     STDEF and converts it. Returns on error from any vex routine.
@@ -54,6 +54,7 @@ C 020110 nrv Check S2 tape speed, must be LP or SLP. Make upper case.
 ! 2006Nov16 JMG Fixed initialization of ltlc.
 ! 2016Nov29 JMG. Mapps obsolete DBBC-->DBBC_DDC & DBBC/FILA10G ---> DBBC_DDC/FIL10G
 ! 2016Nov29 JMG. Rack changed to character*20 from character*8
+! 2020Oct02  JMG. Removed all references to S2
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -75,8 +76,7 @@ C                    section had vex error, <0 is invalid value
       character*20 crack ! rack
       character*128 ctapemo ! tape motion type
       integer ite,itl,itg ! early, late, gap
-      character*4 cs2sp ! S2 tape speed
-      integer ns2tap ! number of S2 tapes
+
       character*2 ctlc ! two_letter_code, if none use LIDTER
 ! functions
       integer fvex_double,fvex_int,fget_station_lowl,fvex_field
@@ -87,8 +87,7 @@ C  LOCAL:
       character*128 cout,cunit,ctemp
       double precision d
       integer i,nch
-      logical ks2 ! true for an S2 recorder
-C
+
 C
 C  Initialize in case we have to leave early.
 
@@ -99,14 +98,12 @@ C  Initialize in case we have to leave early.
       cnater=" "
       nstack=1 ! default
       maxtaplen = MAX_TAPE
-      cs2sp=" "
-      ns2tap=0
       nrec = 1 ! default
       ite=0
       itl=0
       itg=0
       ctapemo=''
-      ks2=.false.
+
 
 C  1. The recorder type
 C
@@ -124,7 +121,6 @@ C
           ierr=-1
         else
           crec=cout(1:nch)
-          ks2 = cout(1:2).eq.'S2'
         endif
       endif
 
@@ -240,40 +236,8 @@ C
           write(lu,'("VUNPDAS07 - Invalid tape length")')
           ierr=-6
         else
-          if (.not.ks2) then
-            maxtaplen = d*100.d0/(12.d0*2.54) ! convert from m to feet
-          else
-            maxtaplen = d ! seconds
-          endif
+          maxtaplen = d*100.d0/(12.d0*2.54) ! convert from m to feet
         endif
-        if (ks2) then ! S2 speed and number of tapes
-          iret = fvex_field(2,ptr_ch(cout),len(cout)) ! tape speed
-          if (iret.ne.0) return
-          NCH = fvex_len(cout)
-          IF  (NCH.GT.128.or.NCH.le.0) THEN  !
-            write(lu,'("VUNPDAS17 - Tape motion speed too long")')
-            ierr=-17
-          else
-            call c2upper(cout(1:nch),ctemp)
-            if (ctemp(1:2).ne.'LP'.and.ctemp(1:3).ne.'SLP') then ! check S2 speed
-              write(lu,'("VUNPDAS17 - Invalid S2 speed, must be LP",
-     .                  " or SLP")')
-              ierr=-19
-            else
-              cs2sp=ctemp(1:nch)
-            endif ! check S2 speed
-          endif
-          iret = fvex_field(3,ptr_ch(cout),len(cout)) ! number of tapes
-          if (iret.ne.0) return
-          iret = fvex_int(ptr_ch(cout),i) ! convert to binary
-          if (iret.ne.0) return
-          if (i.le.0) then
-            write(lu,'("VUNPDAS18 - Invalid number of S2 tapes")')
-            ierr=-18
-          else
-            ns2tap = i
-          endif
-        endif ! S2 speed and number of tapes
       endif
 
 C  7. Number of recorders

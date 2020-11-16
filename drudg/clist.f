@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE CLIST(kskd)
+      implicit none
 C
 C This routine reads a SNAP schedule file and makes a
 C listing with all of the commands for one observation
@@ -164,7 +165,7 @@ C END OF FILE DETECTED
 C
 C WE HAVE A COMMAND IN THE BUFFER
 
-C125   IF ((ctmp(1:6).NE.'SOURCE'.and.ctmp(1:6).ne.'source') 
+C125   IF ((ctmp(1:6).NE.'SOURCE'.and.ctmp(1:6).ne.'source')
 C     ..and. (ctmp(1:6).NE.'SCAN_N'.and.ctmp(1:6).ne.'scan_n')
 125   IF ((ctmp(1:6).NE.'SCAN_N'.and.ctmp(1:6).ne.'scan_n')
      ..and. ((ctmp(1:1).eq.CHAR(34).and.il.lt.40)

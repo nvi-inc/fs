@@ -18,12 +18,13 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine ckiau(ciau,ccom,rarad,decrad,lu)
+      implicit none
 
-      implicit none  !2020Jun15 JMGipson automatically inserted.
 C    CKIAU generates the IAU name and checks it against
 C    the name of the source. Only the first 8 char are
 C    checked.
 !    2003Dec09 JMGipson changed hollerith to ascii
+!    2020Jun04 JMGipson. Inserted comma into format statement.
 
       include '../skdrincl/skparm.ftni'
 
@@ -41,8 +42,9 @@ C Local:
 
       if(ltest .ne. ciau .and. lu .gt. 0) then
          write(lu,
-     >    '("NOTE: IAU name for ",a, " should be ",a " not ",a)')
+     >    '("NOTE: IAU name for ",a, " should be ",a, " NOT ",a)')
      >    ccom,ltest,ciau
+
       endif
 
       return

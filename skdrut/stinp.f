@@ -18,7 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE STINP(IBUFX,ILEN,LU,IERR)
-      implicit none  
+      implicit none
 C
 C     This routine reads and decodes a station entry
 C
@@ -88,9 +88,7 @@ C      - these are used in unpacking station info
       double precision chklat,chklon,rht
       integer ibitden
       integer nstack
-      character*4 cs2sp
 
-      real s2sp
       integer nch
 
 ! These are used to parse the input line.
@@ -159,10 +157,11 @@ C
 ! 2016Jul28  JMG. Changed rack length to 20 chars.
 !                 Initialize cfirtrec(i)="1" even if have problems reading "T " line.
 ! 2017Mar13  JMG. If rack or recorder are not recongnized, set them to 'unknown' and continue.
+! 2020Oct02  JMG. Removed all references to S2
 ! 2020Nov11  JMG. Catch bug if Station ID has wrong format in horizon mask. 
+
       cbufin=" "
 ! AEM 20050314 init vars
-      cs2sp = " "
       caxis = " "
       cname = " "
       crack = " "
@@ -195,7 +194,7 @@ C
 !      call capitalize(cbufin)
       call splitNtokens(cbufin,ltoken,Maxtoken,NumToken)
       nch=trimlen(cbufin)
-
+   
 ! Antenna line
 ! ID  Name    Caxis axix_off rate1 con1 low1   high1  rate2 con2  low2  high2 diam  Cidpos cidt cidhor
 !  1   2       3      4       5    6     7     8       9    10   11    12     13     14     15 16
@@ -250,7 +249,7 @@ C
           cidhor=ltoken(16)
           if(cidhor .eq. "--".or.cidhor.eq."-") cidhor=" "
         endif
-
+        
         i=iwhere_in_string_list(cstcod(i),nstatn,c1)
         if(i .eq. 0) then        !new entry.
           if(nstatn .lt. Max_stn) then
@@ -382,7 +381,7 @@ C
 
         j=8
         CALL UNPVT(IBUFX(2),ILEN-1,IERR,cIDT,cNAME,ibitden,
-     >   nstack,maxt,nr,cs2sp,cb,sefd,j,par,npar,crack,crec1,crec2)
+     >   nstack,maxt,nr,cb,sefd,j,par,npar,crack,crec1,crec2)
 !
 ! Try to get the station by looking at the terminal ID at station name.
 !
@@ -401,10 +400,6 @@ C
 ! Initialize to default values. Must do here before error exit.
         cfirstrec(i)="1 "
 
-        cstrack(i)="UNKNOWN"
-        cstrec(i,1)="UNKNOWN"
-        cstrec(i,2)="NONE"
-        cs2speed(i)=" "
 ! This ierr is from unpvt and indicates a problem in parsing the line.
 !        if(ierr .ne. 0) goto 910
 ! 2017Mar13. Continue on.
@@ -429,28 +424,10 @@ C       If second recorder is specified and the first recorder was S2
 C       then save the second recorder field as the S2 mode.
         if (crec2 .eq. " ") then
          if(nr .eq. 2) nr=1
-        else
-          if(crec1 .eq. 'S2')then
-             cs2mode(i,1)=crec2
-          else
-            if(.not.kvalid_rec(crec2)) crec2='none'
-            cstrec(i,2)=crec2
-          endif
         endif
 
-C    Now set the S2 and K4 switches depending on the recorder type.
         nrecst(i) = nr
-        if (cstrec(i,1)(1:2) .eq. "S2") then ! set S2 variables
-          cs2speed(i)=cs2sp
-          if(cs2sp.eq.   "LP") then
-            s2sp=SPEED_LP
-          else if(cs2sp .eq. "SLP") then
-            s2sp=SPEED_SLP
-          endif
-          nheadstack(i)=1
-          ibitden_save(i)=1
-          maxtap(i)=maxt*5.0*s2sp ! convert from minutes to feet
-        else if (cstrec(i,1)(1:2) .eq. "K4")  then ! set K4 variables
+        if (cstrec(i,1)(1:2) .eq. "K4")  then ! set K4 variables
           nheadstack(i)=1
           maxtap(i) = maxt ! conversion??
           ibitden_save(i)=1
@@ -541,8 +518,8 @@ C           error for no matching value, which is ok
           endif
           return
         ENDIF
-
         i=iwhere_in_String_list(chccod,nstatn,cid)
+  
         if (i.eq.0 ) then !check position codes too
           write(lu,*) "STINP251 - Horizon mask pointer not found. "//
      >      "Checking position code."

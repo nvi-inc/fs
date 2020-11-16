@@ -65,15 +65,12 @@ C  LOCAL
 C                          to the end before changing it
 
 
-      integer*2 ldirr
       LOGICAL KNEWTP,KNEWT !true for a new tape; new tape routine
       real tspin ! functions
       integer iSpinDelay
 
       Data iSpinDelay/0/
 
-C  INITIALIZED:
-      DATA ldirr/2HR /
 
 C
 C
@@ -137,6 +134,7 @@ C 021014 nrv Change "seconds" argument in TSPIN to real.
 C 2003Nov13 JMGipson.  Added extra argument to TSPIn
 ! 2006Sep28 JMGipson. Got rid of holleriths. Changed lspdir to ASCII
 ! 2014Feb04 JMGipson. Modified for new VLBI hardware.
+! 2020Nov11 JMGipson got rid of some stuff dealing with headstacks
 C
 C  Initialization
 
@@ -149,7 +147,6 @@ C  Add a comment if a new tape is to mounted before the next observation
       irec=irecp
       if (kauto) irec = 1 ! always, for dynamic
       IDIR=+1
-      IF (LDIR(ISTNSK).EQ.ldirr) IDIR=-1
       KNEWTP = KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,
      .    IDIRP,IFTOLD)
         ispinoff=0
@@ -187,10 +184,10 @@ C  Set up tape parameters
 
       if (kauto) cspdir="+"
 C  ihead is the head offset position in microns
-      IHEAD=ihdpos(1,IPAS(ISTNSK),istn,icod)
+      IHEAD=1
 C  ihddir is not really "direction", it is the corresponding pass within
 C  the mode. Use it to tell the wrtrack routine which tracks to record.
-        idx = ihddir(1,ipas(istnsk),istn,icod)
+        idx = 1
         if (idx.eq.0) then
 C         pause here
           itemp=1

@@ -1,14 +1,20 @@
 This file contains a summary of changes made and why.
+
+2020Oct02 Got rid of references and code dealing with S2 stations:  prout.f
+          In skdrut: frinit.f , speed.f, stinp.f, ttape.f, unpvt.f vstinp.f, vunpdas.f
+          In skdrincl: freqs.ftni, statn.f 
+2020Oct02 vmoinp.f Got read of references to passes, headstacks, S2       
 2020Sep14 reads.f; Fixed bug in sread.f that happened if $HEAD was last section in file.
-          ../skdrut/readf_asc.f.  Simplifiled and got rid of etraneous code.
+          ../skdrut/readf_asc.f.  Simplifiled and got rid of etraneous code. 
 2020Jun30 snapintr.f. Got rid of residual line that put out #passes, length. Instead now puts out recorder type.
           Got rid of 'kmissing' and tests that depend on it in fdrudg.f, proc.f, snap.f, drcom.ftni
           ../skdrut/gnpas.f. Got rid of obsolete iserr argument 
 2020Jun22 Removed bug in frinp.f introduced on 2018OCT?. Changed documented in source code but not below. 
-2020Jun17 lstsu.f. Initilize itime_start,itime_stop,itime_start_p,itime_stop_p
+2020Jun17 lstsum.f. Initilize itime_start,itime_stop,itime_start_p,itime_stop_p
 2020Jun16 ../skdrut/gnpas.f Got rid of a bunch of stuff dealing with headstacks.
           drudg/*.f and ../skdrut/*.f.  Added implicit none to all routines EXCEPT xat.f
           Fixed some variables that were not defined
+2020Jun09 ../skdrincl/ttape.f. got rid of "THIN","THICK","SHORT", added "MARK6","FLEXBUFF"
 2020Jun08 Removed broadband stuff from ../skdrincl/statn.ftni and put in ../skdrincl/broadband.
 2020Jun08 Added station dependent parameter ibb_off for extra time in writing: 
           skrdrini.f, sanp.f, read_broadband_section.f. Also initialize to 0 broadband stuff in skdrini.f

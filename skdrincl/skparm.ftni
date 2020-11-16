@@ -229,11 +229,8 @@ C     Lengths for thick and thin tape.
       parameter (THICK_LENGTH = 8700)
       parameter (SHORT_LENGTH = 2700)
 
-C     Speeds for S2.
-      real*4 speed_lp, speed_slp
-      parameter (SPEED_LP = 6.3) ! in/sec
-      parameter (SPEED_SLP = 4.2) ! in/sec
-
+      double precision small
+      parameter (small=1.d-12)         !small diagonal element of normal
 
       integer max_par_esti,max_par_opti,max_dim_esti
       integer max_sor_esti,max_trial

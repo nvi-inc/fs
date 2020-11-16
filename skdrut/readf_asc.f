@@ -26,7 +26,7 @@ C  ASCII only version of READF
 C 880523  -written by P. Ryan
 C 960212 nrv Extend buffer
 C 000907 nrv Call IFILL with IBL instead of 80
-! 2020Sep14 JMGipson. Cleanup, get rid of some obsolete stuff.
+! 2020Sep14 JMGipson. Cleanup, get rid of some obsolete stuff. 
 
 
 C  Input:
@@ -36,21 +36,18 @@ C  Input:
 C
 C  Output:
        integer il      ! number of characters read in
-       integer*2 ibuf(*) !buffer that stuff is stored in.
+       integer*2 ibuf(*) !buffer that stuff is stored in. 
 
 
 C  Local:
        character*1024 ch   ! character buffer for initial input
        integer    trimlen  ! find number of character read in
-       integer*4 k         !ioerr
+       integer*4 k         !ioerr 
        integer oblank
        data oblank /O'40'/
 
 !       inquire(iunit,exist=ex,opened=opn,name=nam)
        read(iunit,'(a1024)',end=20,iostat=k) ch
-       if(k .ne. 0) then
-          writE(*,*) "ch ", ch
-       endif
        kerr = k
        il   = trimlen(ch)
        if(il .gt. 0 .and. ch(il:il) .eq. char(13)) then

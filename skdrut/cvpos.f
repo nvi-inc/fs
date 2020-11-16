@@ -19,7 +19,7 @@
 *
       SUBROUTINE CVPOS(NSOR,ISTN,MJD,UT,AZ,EL,HA,DC,X30,Y30,X85,Y85,
      .                 KUP)
-      implicit none  !2020Jun15 JMGipson automatically inserted.
+      implicit none
 C
 C   CVPOS converts source ra and dec into az,el,ha,x, and y; or satellite
 C         elememts into the same plus dec.
@@ -268,11 +268,14 @@ C     Check for station elevation limit, set within SKED
       KUP=KUP.AND.EL.GT.STNELV(ISTN)
 C     Now check horizon mask for stations that have one.
       IF (NHORZ(ISTN).GT.0) THEN
-        I=1
-        DO WHILE(I.LT.NHORZ(ISTN).AND.
-     .    (AZ.LT.AZHORZ(I,ISTN).OR.AZ.GE.AZHORZ(I+1,ISTN)))
-          I=I+1 ! find AZ between i and i+1
-        ENDDO
+        eli=100.d0
+        do i=1, Nhorz(istn)
+          if(az .ge. azhorz(i,istn)) exit
+        end do 
+!        DO WHILE(I.LT.NHORZ(ISTN)+1.AND.
+!     .    (AZ.LT.AZHORZ(I,ISTN).OR.AZ.GE.AZHORZ(I+1,ISTN)))
+!          I=I+1 ! find AZ between i and i+1
+!        ENDDO
         if (.not.klineseg(istn)) then ! use step functions
           eli=elhorz(i,istn)
         else ! interpolate horizon mask line segment end points

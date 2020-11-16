@@ -18,7 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine proc_lba_ifp(icode,ic,ib,ichan)
-      implicit none  !2020Jun15 JMGipson automatically inserted.
+      implicit none  
 
 !  2012Sep12  JMGipson. First version. Split off of old routine proc_vc.
 !
@@ -140,7 +140,7 @@ C              Normally LSB so login inverts
         endif
       endif
       NCH = MCOMA(IBUF,NCH)
-      cbuf(nch:nch+7)=cs2data(istn,icode)
+!      cbuf(nch:nch+7)=cs2data(istn,icode)
       call lowercase_and_write(lu_outfile,cbuf)
       return
       end

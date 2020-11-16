@@ -219,8 +219,6 @@ C         Get the first line of this section
               CALL STINP(IBUF,ILEN,LUSCN,IERR)
             else IF(ctype .eq. "FR" .and. ksta) then
               CALL FRINP(IBUF,ILEN,LUSCN,IERR)
-            else IF(ctype .eq. "HD" .and. kcod) then
-              CALL HDINP(IBUF,ILEN,LUSCN,IERR)
             END IF
 C           Do not return on error.  Information messages from
 C           xxINP routines provide sufficient warnings.
@@ -282,32 +280,11 @@ C  needed, because it was checked before.
               CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
             enddo !read $CODES section
           endif
-! Need to have this because if we had EOF previously next read will cause problem.
-          if(ilen .gt. 0) then
+! Need to have this because if we had EOF previously next read will cause problem.  
+          if(ilen .gt. 0) then 
             CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-          endif
+          endif 
         enddo !read schedule file
-      endif
-C Re-read $HEAD section if needed.
-      if (.not.khed) then
-        write(luscn,'(" Re-reading ... ",$)')
-        rewind(LU_INFILE)
-        CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-        DO WHILE (ILEN.GT.0)
-          IF (cBUF(1:5) .eq. "$HEAD") THEN
-            write(luscn,*) cbuf(1:ilen)
-            CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-            DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
-              ILEN=(ILEN+1)/2
-              CALL HDINP(IBUF,ILEN,LUSCN,IERR)
-              CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-            enddo
-          endif
-! Need to have this because if we had EOF previously next read will cause problem.
-          if(ilen .gt. 0) then
-            CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-          endif
-        enddo
       endif
 C       Look for the string "Cover Letter" in .drg file
         ireccv=0
@@ -320,7 +297,7 @@ C       Look for the string "Cover Letter" in .drg file
           enddo !read schedule file
           write(luscn,'()')
         endif ! .drg file
-        ierr=0
+        ierr=0 
 C
 C Order the observations, in case they were not so in the $SKED section.
 C Not needed for VEX because they are read in when station is selected.

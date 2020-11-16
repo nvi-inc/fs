@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine check_rack_type(crack,kvalid)
+      implicit none
       include '../skdrincl/valid_hardware.ftni'
 
 ! Passed.
@@ -36,7 +37,7 @@
 ! local
       integer iwhere
       character*8 cracktmp
-     
+
       iwhere=iwhere_in_string_list(crack_type, max_rack_type,crack)
       if(iwhere .ne. 0) return           !valid rack type.
 

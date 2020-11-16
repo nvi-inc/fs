@@ -18,8 +18,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE unpvt(IBUF_in,ILEN,IERR,cIDTER,cNATER,ibitden,
-     .nstack,mxtap,nrec,cs2sp,cb,sefd,pcount,par,npar,crack,creca,crecb)
-      implicit none  !2020Jun15 JMGipson automatically inserted.
+     .nstack,mxtap,nrec,cb,sefd,pcount,par,npar,crack,creca,crecb)
+      implicit none
 C
 C     UNPVT unpacks a record containing Mark III terminal information.
 C
@@ -61,6 +61,7 @@ C            and the first recorder is S2, then the second field is mode.
 ! 2016Jul28  JMG. Changed Rack length to 20 characters
 ! 2016Nov21  JMG.  Map DBBC to DBBC_DDC on input
 ! 2017Mar13  JMG. If an unknown rack or recorder, write warning, but continue on.
+! 2020Oct02  JMG. Removed all references to S2
 C
 C  INPUT:
       integer*2 IBUF_in(*)
@@ -84,7 +85,6 @@ C     mxtap - maximum tape length for this station
       integer npar(*)   ! sefds
       character*20 crack
       character*12 creca,crecb  !rack, recorder, names
-      character*4 cs2sp
 C
 
 ! functions
@@ -183,38 +183,6 @@ C       endif
           IERR = -105
           RETURN
         END IF
-C S2 recorder
-      else if (ks2) then ! speed, nominal length of tape
-C first field tape speed, either LP or SLP
-        CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
-        if (ic1.eq.0) return
-        nch=ic2-ic1+1
-        if(nch .gt. 8) then
-           ierr=-104
-           return
-        endif
-        cs2sp=cbuf(ic1:ic1+nch-1)
-        if(cs2sp .ne. "LP" .and. cs2sp .ne. "SLP") then
-          ierr=-104
-          return
-        endif
-C field 2 number of recorders and length of tape
-        CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
-        nrec = 1
-        if (cbuf(ic1:ic1+1) .eq. "2x") then ! dual recs
-          nrec = 2
-          ic1 = ic1+2
-        endif
-        if (cbuf(ic1:ic1+3) .eq. "AUTO") then
-          mxtap = -1
-        else
-          NCH = IC2-IC1+1
-          mxtap = IAS2B(IBUF,IC1,NCH)
-        endif
-        IF  (mxtap.le.0.and.mxtap.ne.-1) THEN  !
-          IERR = -104
-          RETURN
-        END IF  !
 C Mk34/VLBA tapes
       else ! Mk34/VLBA headstacksxdensity, nominal length of tape
 C first field headstacks and density

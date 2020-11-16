@@ -20,7 +20,7 @@
       subroutine proc_setup(icode,codtmp,ktrkf,kpcal,kpcal_d,kk4vcab,
      >   itpicd_period_use,cname_ifd,cname_vc,lwhich8,cpmode,ierr)
 ! include
-      implicit none  !2020Jun15 JMGipson automatically inserted.
+      implicit none  
       include 'hardware.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
@@ -51,6 +51,7 @@
 ! 2017Dec23 JMG. Updating handling of cont_cal prompt
 ! 2018Apr20 JMG. Fixed bug introduced in the above.
 ! 2018Jun18 JMG. Yet another attempt to fix cont_cal. In skedf.ctl, if 'cont_cal off' then emit cont_cal=off
+! 2020Oct28 JMG. Got rid of S2  stuff
 
 ! local
       character*12 cnamep
@@ -219,11 +220,6 @@ C  PCALFff
      >    km4rec(irec) .or.Km5disk .or. knorec(irec)) then
         call proc_tracks(icode,num_tracks_rec_mk5)
       endif
-
-! Output S2 Mode stuff.
-      if (ks2rec(irec)) then ! S2 mode
-         call proc_s2_comments(icode,kroll)
-      endif ! ks2rec
 
 C REC_MODE=<mode> for K4
 C !* to mark the time
