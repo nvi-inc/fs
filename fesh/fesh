@@ -477,9 +477,9 @@ echo Fetching schedule from server...
 #TODO: if not found, maybe check next or previous years?
 if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
     if [[ "$FESH_CDDIS_METHOD" =~ ^ftp$ ]]; then
-        wget -nv "ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+        wget -nv "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
         if [[ -n "$txt" ]]; then
-            wget -nv "ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+            wget -nv "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
         fi
     elif [[ "$FESH_CDDIS_METHOD" =~ ^https$ ]]; then
         if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
@@ -504,17 +504,17 @@ if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
         fi
     fi
 elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
-wget -nv "ftp://ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+wget -nv "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
     if [[ -n "$txt" ]]; then
-        wget -nv "ftp://ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+        wget -nv "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
     fi
 elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
-wget -nv "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
     if [[ -n "$txt" ]]; then
-        wget -nv "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+        wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
     fi
 elif [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-wget -nv "ftp://vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
+wget -nv "ftp://ftp@vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
 fi
 echo Done
 popd >/dev/null
