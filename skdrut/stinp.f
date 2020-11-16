@@ -18,7 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE STINP(IBUFX,ILEN,LU,IERR)
-      implicit none  !2020Jun15 JMGipson automatically inserted.
+      implicit none  
 C
 C     This routine reads and decodes a station entry
 C
@@ -159,7 +159,7 @@ C
 ! 2016Jul28  JMG. Changed rack length to 20 chars.
 !                 Initialize cfirtrec(i)="1" even if have problems reading "T " line.
 ! 2017Mar13  JMG. If rack or recorder are not recongnized, set them to 'unknown' and continue.
-!
+! 2020Nov11  JMG. Catch bug if Station ID has wrong format in horizon mask. 
       cbufin=" "
 ! AEM 20050314 init vars
       cs2sp = " "
@@ -517,29 +517,31 @@ C           error for no matching value, which is ok
         J = 8
         CALL UNPVH(IBUFX(2),ILEN-1,IERR,LID,NHZ,AZH,ELH)
         kline=.true.
-        IF (IERR.NE.0) THEN
-          if (ierr.lt.-200) then
-            write(lu,*) "STINP252 - Horizon mask azimuths are out "//
-     >      "of order. Error in field ", -(ierr+200)
-            nch=trimlen(cbufin0)
-            write(lu,'(a)') cbufin0(1:nch)
-            RETURN
-          endif
-          if (ierr.eq.-99)then
-            write(lu,'(a,i5)')
-     >       "STINP250 - Too many horizon mask az/el pairs. Max is ",
-     >        max_hor
-            write(lu,'(a)') cbufin0(1:80)
-            RETURN
-          endif
-          if (ierr.eq.-103) then
-C           write(lu,'("STINP251 - No matching el for last azimuth,",
-C    .      " wraparound value used.")')
-C           write(lu,'(80a2)') (ibufx(i),i=2,ilen)
+! Not really an error. 
+        if (ierr.eq.-103) then
+!           write(lu,'("STINP251 - No matching el for last azimuth,",
+!     >      " wraparound value used.")')
             elh(nhz)=elh(1)
             kline=.false.
-          endif
+            ierr=0          
         END IF   !
+
+! Real errors 
+        IF (IERR.NE.0) THEN
+          write(*,*) "Error parsing horizon mask: "//trim(cbufin0)
+          if(ierr .eq. -101) then
+            write(*,*) "Incorrect form for station ID (2nd arg)" 
+          else if (ierr.lt.-200) then
+            write(lu,*) "STINP252 - Horizon mask azimuths are out "//
+     >      "of order. Error in field ", -(ierr+200)                                
+          else if (ierr.eq.-99)then
+            write(lu,'(a,i5)')
+     >     "STINP250 - Too many horizon mask az/el pairs. Max is ",
+     >        max_hor          
+          endif
+          return
+        ENDIF
+
         i=iwhere_in_String_list(chccod,nstatn,cid)
         if (i.eq.0 ) then !check position codes too
           write(lu,*) "STINP251 - Horizon mask pointer not found. "//
