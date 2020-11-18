@@ -19,7 +19,7 @@
 //
 
 = Latest Commit update notes
-Version 0.1 - November 2020
+Version 0.2 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -74,7 +74,8 @@ features.
 utility to send operations messages, please customize your
 _/usr2/control/rdbemsg.ctl_ control file by adding the _name_ line to
 the file if you haven't already.  Full instructions are provided in
-sub-step <<beta2.adoc,Update rdbemsg.ctl>> from the latest update notes..
+the <<beta2.adoc#_update_rdbemsg_ctl,Update rdbemsg.ctl>> sub-step in the
+<<beta2.adoc#,beta2 update notes>> document.
 
 === Review other changes
 

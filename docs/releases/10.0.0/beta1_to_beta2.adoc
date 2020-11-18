@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta1 to FS 10.0.0-beta2 update notes
-Version 0.1 - November 2020
+Version 0.2 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -32,7 +32,7 @@ Version 0.1 - November 2020
 == Introduction
 
 The document covers updating from the _beta1_ pre-release to the
-_beta2_ pre-release. Like all _beta_ pre-releases, this version is not
+_beta2_ pre-release. Like all beta pre-releases, _beta2_ is not
 intended to operations.
 
 == Upgrading from 10.0.0-beta1 to 10.0.0-beta2
@@ -65,7 +65,7 @@ set-up in the usual way, then as _prog_ execute:
 
 === Reboot
 
-IMPORTANT: Reboot the computer.  This is important for initializing shared
+IMPORTANT: Reboot the computer.  This is necessary to allocate FS, and possibly station, shared
 memory for the new version.
 
 === Login in as oper
@@ -75,12 +75,12 @@ The remaining steps assume you are logged in as _oper_.
 === Update control files
 
 . If your old version before the _beta1_ update was _9.12.12_, you
-should review the sub-steps in the <<beta2.adoc#_update_control_files,Update control files>>
+should review the sub-steps in the <<beta2.adoc#\_update_control_files,Update control files>>
 step of the <<beta2.adoc#,beta2 update notes>> document. In particular,
-there were two changes related to that old version to review:
+there were two changes from the _beta1_ version to review:
 
-.. In the <<beta2.adoc#\_copy_control_files,Copy control files>>
-sub-step, as shown in the <<beta2.adoc#,beta2 update notes>> document, your _clpgm.ctl_ file may have been
+.. In the _beta1_ version of the now _corrected_ <<beta2.adoc#\_copy_control_files,Copy control files>>
+sub-step in the <<beta2.adoc#,beta2 update notes>> document, your _clpgm.ctl_ file may have been
 needlessly overwritten. We think is is unlikely that any local
 customizations were lost, but if they were, we apologize. Hopefully
 you made a backup before trying the update. In which case, you should
@@ -88,13 +88,13 @@ be able to recover the file from the backup. Otherwise, hopefully the
 changes needed are small. Additional changes to _clpgm.ctl_ are
 covered farther below.
 
-.. In the <<beta2.adoc#\_update_equip_ctl,Update equip.ctl>>
-sub-step, as shown in the <<beta2.adoc#,beta2 update notes>> document,
+.. In the _beta1_ version of the now _corrected_ <<beta2.adoc#\_update_equip_ctl,Update equip.ctl>>
+sub-step in the <<beta2.adoc#,beta2 update notes>> document,
 you may have ended up with extra lines
-at the end of _equip.ctl_ because, according to the
+at the end of _equip.ctl_ because in the
 _beta1_ installation instruction, the FiLa10G input
 select lines (including the comment line) were added
-after the BBC3 configuration lines (including the
+after the DBBC3 configuration lines (including the
 comment line) and extra DBBC3 configuration lines were
 added. Presumably you have already sorted this out
 because the FS would probably not have run if the file
@@ -255,7 +255,7 @@ there was an attempt to execute a procedure from the library was fixed. <<prc2,M
 . Improve error logging for _dbbcn_. <<dbbcn,More details>>.
 . Improve `help` page for _tpicd_. <<tpicd,More details>>.
 . Add `popen` time-out feature. <<popen,More details>>.
-. Make use of the FS display server the default. <<server2,More details>>.
+. The FS display server is now recommended for normal use. <<server,More details>>.
 . Make _fsclient_ honor the `-n` flag properly (closes https://github.com/nvi-inc/fs/issues/48[#48]). <<clientn,More details>>.
 . Make _fsclient_ ignore prompt in no-X11 mode (closes https://github.com/nvi-inc/fs/issues/49[#49]). <<clientnx,More details>>. 
 . Add _fsserver_ improvements and log support (includes closing https://github.com/nvi-inc/fs/issues/29[#29] & https://github.com/nvi-inc/fs/issues/25[#25]). <<fsserver,More details>>.
@@ -297,7 +297,7 @@ Morgan Goodrich (KPGO) for reporting this.
 . [[equip.ctl]] Update example _equip.ctl_ (includes closing https://github.com/nvi-inc/fs/issues/35[#35]).
 
 .. The example DBBC3
-firmware is now more sensible (closes https://github.com/nvi-inc/fs/issues/35[#35]). Thanks to Eskil Varenius (Onsala)
+firmware version is now more sensible (closes https://github.com/nvi-inc/fs/issues/35[#35]). Thanks to Eskil Varenius (Onsala)
 for reporting this.
 
 .. The minimum DBBC3 firmware version required was added in a comment.
@@ -356,9 +356,9 @@ file would be closed. Thanks to Jon Quick (HartRAO) for pointing
 out this inconsistency.
 +
 The old behavior was partly a consequence of how the original file
-handling worked on the HP-RTE, but is not sensible for how the
+handling worked on HP-RTE systems, but is not sensible for how the
 SNAP commands should work.  Note that this is a non-backward
-compatible change in how the SNAP commands seem to behave.
+compatible change in how the SNAP commands behave.
 Previously supplying a non-existent procedure or schedule file
 name would cause the closure of the corresponding file. Now to
 close an open procedure or schedule without opening a new one, a
@@ -368,7 +368,7 @@ library.
 
 . [[header_lines]]  Add more log header lines. Log header lines were added for
 `uname()` system information and the compile time value of the
-`FC` environment variable were added.
+`FC` environment variable.
 
 . [[year]] Fix year wrap error message in procedure logging (closes https://github.com/nvi-inc/fs/issues/23[#23]).
 This fixed a benign and spurious error message if a log was kept
@@ -405,17 +405,15 @@ when a schedule is running and not-blocked.  This behavior was
 inherited from the VGOS branch where accidentally leaving _tpicd_
 logging RDBE multi-cast data after closing a schedule or halting
 it creates a lot of extra log entries. This is probable beneficial
-for all back-ends. The fact that this changed relative to the main branch
-is is now noted in <<beta2.adoc#_changes_from_previous_versions,Changes from previous versions>> section
-of <<beta2.adoc#,beta2 update notes>> document.
+for all back-ends.
 
 . [[popen]] Add _popen_ time-out feature. There is a now a `-t ...` time-out
 option. If the command being run has a time-out feature, it is
 generally better to use the command's feature. See `help=sy` for
 more details.
 
-. [[server2]] Make use of the FS display server the default. This was changed as
-of the _beta2_ release.
+. [[server]] The FS display server is now recommended for
+normal use. This was changed as of the _beta2_ release.
 
 . [[clientn]] Make _fsclient_ honor the `-n` flag properly (closes https://github.com/nvi-inc/fs/issues/48[#48]). This
 eliminates opening "double" windows if _fsclient_ is run with `-n`
@@ -573,41 +571,21 @@ it harder to install bug fixes and updates.
 .. The paths to the example control files now include the needed
 intermediate directory _fs/_.
 
-.. Some conditional changes in
-the <<beta2.adoc#\_update_control_files,Update control files>>
-step of the <<beta2.adoc#,beta2 update notes>> document
-were corrected to properly
-depend or not depend on the old version being _9.12.12_. If you
-installed the _beta1_ version and your old version was _9.12.12_
-you should review the instructions in
-<<beta2.adoc#_update_control_files,Update control files>>
-step to verify everything has been covered.
+.. The sub-steps for updating the control files were corrected
+to properly
+depend or not depend on the old version being _9.12.12_.
 
 .. A sub-step was added to make using the FS display server the default.
-If you installed _beta1_ you should check the 
-the <<beta2.adoc#_set_fs_display_server,Set FS_DISPLAY_SERVER>>
-sub-step of the <<beta2.adoc#,beta2 update notes>> document
-for changes that are needed.
 
 .. A sub-step was added for updating the _~/.Xresources_ file for _oper_
-and _prog_. If you installed _beta1_ you should check the
-<<beta2.adoc#_update_xresources,Update .Xresources>>
-sub-step of the <<beta2.adoc#,beta2 update notes>> document
-for changes that are needed.
+and _prog_.
 
 .. A sub-step to update where the `TMOUT` environment variable is unset
 for stations using FSL10 was added.
 
 .. A recommendation was added to sign-up for the _go_ language
 announcements to be informed of security updates if you are
-installing the latest version of _go_ as described in the
-<<64-bit_conversion.adoc#_option_b_installing_latest_go_language,Option B - Installing latest go language>>
-sub-step of the <<64-bit_conversion.adoc#,Converting to a 64-bit system>> document.
-If you used that method it is recommended that you
-sign-up for the announcements.
-
-.. The update instructions now include advice on updating from
-_beta1_ to _beta2_.
+installing the latest version of _go_ language.
 
 === Details of drudg changes
 

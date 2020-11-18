@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 update notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.5 - November 2020
+Version 0.6 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -47,12 +47,12 @@ The most significant changes in _10.0.0_ are:
 +
 
 Both non-VGOS and VGOS operations are supported by the new version.
-Previous users of the main (non-VGOS) branch will need to add some new
-local control files.
+Previous installations of the main (non-VGOS) branch will need to have
+some new local control files added.
 
 +
 
-The most significant change is that previous main branch users will
+The most significant change for users is that previous main branch users will
 find that in the new FS input is case sensitive, as it was already
 in the VGOS branch.
 
@@ -85,8 +85,8 @@ instructions for FSL10 can be found at
 
 +
 
-The FS source is now managed using _git_ and _github_ is used as
-the distribution method.
+The FS source is now managed using _git_ and _github_ is used for
+distribution. The source code is now under the GPL3 license.
 
 +
 
@@ -100,29 +100,27 @@ _/usr2/fs_ directory tree since such changes will make it more
 difficult to simply `pull` updates to install bug fixes and new
 features.
 
-. Use of the FS display server is now recommended for normal use.
+. The FS display server is now recommended for normal use.
 
 +
 
 This change is new as of the _beta2_ release.
 
-Please also see the section <<Changes from previous versions>> below,
-and its sub-sections, for details of the changes compared to the
-latest FS9 versions.
+Please also see the section <<Changes from FS9>> below for details of
+the changes compared to the latest FS9 versions.
 
-Very significant contributions, in fact essential, were made by Dave
-Horsley (UTAS, Australia and NVI/GSFC) and Tetsuro Kondo (NICT, Japan
-and SHAO, China). Kondo-san pioneered 64-bit support in the FS with
-his 64-bit implementations for the Sejong and Ishioka stations. Dave
-built on his work in developing a version that would support 32- and
-64-bit systems.
+Essential contributions were made by Dave Horsley (UTAS, Australia and
+NVI/GSFC) and Tetsuro Kondo (NICT, Japan and SHAO, China). Kondo-san
+pioneered 64-bit support in the FS with his 64-bit implementations for
+the Sejong and Ishioka stations. Dave built on his work in developing
+a version that would support 32- and 64-bit systems.
 
 Dave also single-handedly imported the entire existent history of FS
 source code into _git_. This includes over 130 FS9 versions (under
 Linux), 17 FS8 versions (under VENIX), and two older versions (under HP
 RTE-1000/A) going back to version 5.5 in 1988.  Having the source code
-in _git_ greatly simplified the task of merging the non-VGOS and VGOS
-versions. Dave also did the most critical work on that and provided
+in _git_ greatly simplified the task of merging the main and VGOS
+branches. Dave also did the most critical work on that and provided
 excellent guidance on using _git_. Having the historical code in _git_
 is a great resource for understanding the evolution of the code.
 
@@ -130,8 +128,15 @@ As always, we are deeply indebted to Jonathan Quick (HartRAO, South
 Africa) for his many significant contributions that go far beyond what
 is explicitly mentioned below. In this particular case, his
 contributions include testing and insights for adapting the code for
-64-bit use, patiently solving various problems, developing FSL10, and
-working out support for older FSLx distributions, particularly FSL8.
+64-bit use, patiently solving various problems, developing FSL10,
+making many helpful suggestions for changes, testing, and providing feedback.
+
+We also think Beppe Maccaferri (Medicina) for being a diligent beta
+tester, reporting bugs, helping test several fixes, and making helpful
+suggestions for changes.
+
+We would also like thank Eskil Varenius (Onsala) bug reports and
+feedback, particularly on DBBC3 related issues.
 
 == Other useful documents
 
@@ -147,7 +152,7 @@ Converting to a <<64-bit_conversion.adoc#,64-bit system>>.
 
 Upgrading to the <<latest_commit.adoc#,latest commit>>.
 
-=== Misc
+=== Miscellaneous
 
 <<../misc/known_bugs.adoc#,Known bugs>> document with the known bugs list from FS9.
 
@@ -170,12 +175,11 @@ operational system before upgrading.
 == Upgrading from an FS9 version
 
 This section covers upgrading from FS9, which was always 32-bit
-only, to _10.0.0-beta2_.  However, this section is also utilized when
-converting to a 64-bit system, as described in
+only, to _10.0.0-beta2_.  Certain steps are also utilized for
+converting to a 64-bit system, as described in the
 <<64-bit_conversion.adoc#,Converting to a 64-bit system>> document.
 To accommodate that, there are a few embedded
-comments for handling 64-bit systems. Otherwise the instructions are
-completely independent of which type of system they are being used for.
+comments for handling 64-bit systems.
 
 There are two possible paths for upgrading:
 
@@ -185,9 +189,9 @@ _9.12.x_ are not part of the main branch.  If you are upgrading
 from a main branch version, it is assumed that upgrade is from
 _9.13.2_, the previous stable release.  If you have a main branch
 version older than version _9.13.2_ you should upgrade to _9.13.2_
-first, please refer to 
+first, please refer to the
 <<../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
-in the
+section in the
 <<../misc/install_reference.adoc#,Installation reference>> document
 for more information.
 
@@ -216,7 +220,7 @@ NOTE: If you are using FSL10 with a RAID, that sub-section points you to the
 improved backup and test procedure that is available with
 that distribution.
 
-NOTE: That sub-section also includes a description of how to
+NOTE: That section also includes a description of how to
 preserve your operational files and switch back and forth
 between an operational and a test set-up by changing
 symbolic links.
@@ -227,7 +231,7 @@ Login as _root_.
 
 === Download the FS
 
-Place a copy of the FS _git_ repository to the _/usr2_ directory on
+Place a copy of the FS _git_ repository in the _/usr2_ directory on
 your computer. For example, you might do the following:
 
        cd /usr2
@@ -276,12 +280,12 @@ Having the wrong ownership and/or permissions on the operational
 files (procedure libraries, control files, schedules, and logs)
 can cause errors during FS operations.  For a full discussion,
 please refer to the
-<<../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
+<<../misc/install_reference.adoc#\_set_operations_file_permissions,Set operations file permissions>>
 section of the
 <<../misc/install_reference.adoc#,Installation reference>> document.
 For stations where all the operational files are
 expected to owned by user _oper_ in group _rtx_, with permissions
-(`ug+rw,o+r,o-w`) the following command will enforce this (note
+`ug+rw,o+r,o-w`, the following command will enforce this (note
 that the _execute_/_search_ bits are not changed):
 
        /usr2/fs/misc/fix_perm
@@ -292,14 +296,14 @@ Answer `*y*` to the prompt if you wish to proceed. It is recommended for most st
 
 IMPORTANT: Logout as _root_, and login as _prog_.
 
-=== Set compiler
+=== Set FORTRAN compiler
 
-Starting with version 10.0.0, the standard
-FORTRAN compiler for use with the FS is _f95_ (_gfortran_) and
-we recommend that you use it. On the 32-bit systems you can
+Starting with version _10.0.0_, the standard
+FORTRAN compiler for use with the FS is _f95_ (_gfortran_).
+We recommend that you use it. On the 32-bit systems you can
 still use _fort77_, but you should only use it if you either
-you don't have _f95_ or if you have FORTRAN station code that
-is too difficult to convert to _f95_, see step <<Update station programs>> for more
+don't have _f95_ or if you have FORTRAN station code that
+is too difficult to convert to _f95_, see sub-step <<Conversion of FORTRAN code>> for more
 details.
 
 To select _f95_ as your compiler, you will need to set the
@@ -342,7 +346,7 @@ are two possible issues:
 
 In FS9 versions, the strings used in `antenna=...` commands were always
 converted to uppercase before being sent to _antcn_.  An part of the FS
-input being case sensitive that this no longer happens.  If your
+input being case sensitive that no longer happens.  If your
 antenna, or your side of the antenna interface, requires that the
 strings passed by the `antenna=...` command are uppercase, you have
 two options:
@@ -365,7 +369,7 @@ use and how to do it, please email Ed.
 
 If you have station programs in
 FORTRAN, please email Ed so he is
-aware, but basically you have two options (also see step <<Set compiler>>):
+aware, but basically you have two options (also see step <<Set FORTRAN compiler>>):
 
 . Change to using _f95_ for both the FS and your station
 FORTRAN programs.   It is recommended that
@@ -373,11 +377,11 @@ you follow this approach for 32-bit systems and it is
 necessary when moving to a 64-bit system.
 +
 
-You will need to adapt your __Makefile__-s
+You will need to adapt your __Makefile__s
 to use the same compiler options as the FS, which can be
 found in _/usr2/fs/include.mk_.
 As a first cut, it may work to add the following two lines
-to your __Makefile__-s for FORTRAN programs:
+to your __Makefile__s for FORTRAN programs:
 
     FFLAGS  += -ff2c -I../../fs/include -fno-range-check -finit-local-zero -fno-automatic -fbackslash
     FLIBS   += -lgfortran -lm
@@ -400,7 +404,7 @@ below.
 
 === Reboot
 
-IMPORTANT: Reboot the computer.  This is important for initializing shared
+IMPORTANT: Reboot the computer.  This is necessary to allocate FS, and possibly station, shared
 memory for the new version.
 
 === Login as oper
@@ -410,10 +414,18 @@ The remaining steps assume you are logged in as _oper_.
 === Update control files
 
 This step is for updates to the local control files. There are five
-sub-sections.  Differences for updating from different versions are
-noted.  Please read all cases in each sub-section carefully to make
+sub-steps:
+
+. <<Update stcmd.ctl>>
+. <<Copy control files>>
+. <<Update equip.ctl>>
+. <<Review control files>>
+. <<Update rdbemsg.ctl>>
+
+Differences for updating from different previous versions are
+noted.  Please read all cases in each sub-step carefully to make
 sure you find all the cases for your old version; sometimes an old
-version is included in more than one case in a sub-section.
+version is included in more than one case in a sub-step.
 
 ==== Update stcmd.ctl
 
@@ -459,13 +471,13 @@ are three cases depending on what your old version was:
 
 ==== Update equip.ctl
 
-Add lines at the end: the
-FiLa10G input select and the DBBC3 configuration lines.  There
+It is necessary to add lines for the
+FiLa10G input select and the DBBC3 configuration.  There
 are three cases, please check which applies for you.  In any
 event, you should compare your _equip.ctl_ to the example as
-described when you get to sub-step <<review-control-files,Review control files>>, to make sure there are
+described when you get to sub-step <<Review control files>> below, to make sure there are
 no duplicated lines or other problems caused by the commands
-in this current sub-step, i.e., <<update-equip.ctl,Update equip.ctl>>.
+in this current sub-step, i.e., <<Update equip.ctl>>.
 
 . If your old version was _9.12.10_ or _9.12.11_, you will need
 to add the final four lines of the example _equip.ctl_
@@ -500,7 +512,7 @@ to the examples, e.g., using:
 and consider whether and what changes you should make to your
 copies.
 
-The following is a list of changes in these files. You will
+The following sub-sections give the details of the changes in these files. You will
 need to make the corresponding changes to your copies of the
 files.
 
@@ -515,30 +527,34 @@ commands in sub-step <<Copy control files>> above) should not
 require modification.
 
 . Old versions _9.12.12_, _9.12.13_, and _9.13.2_:
-+
-The `-title ...`  parameter for each
+
+.. The `-title ...`  parameter for each
 window was removed so that it is uniquely
-supplied by the _.Xresources_ file. The _xterm_
-program was added. The value of the `-name`
+supplied by the _.Xresources_ file.
+
+.. The value of the `-name`
 parameter for _erchk_ was changed from `ERRORS`
 to `erchk`.
-+
-New lines were added for the useful
-display window _scnch_, and the useful RDBE
-display windows: _monit6_, and _monX_
-(_X_=[_a_-_d_]). The _xterm_ program was added. The
-_monan_ program was added to the default since
-it is used at several sites. The value of the
-`-name` parameter for _erchk_ was changed from
-`ERRORS` to `erchk`.
+
+.. The useful display window _scnch_ was added.
+
+.. The _xterm_
+program was added.
+
+.. For RDBE systems, the useful RDBE display windows: _monit6_,
+and _monX_ (_X_=[_a_-_d_]) were added. The _monan_ program was added
+to the default since it is used at several sites. If these are not
+relevant for your site, you may prefer to not add them.
 
 ===== Review equip.ctl
 
 This file has the most complicated changes.
 Please read all clauses to make sure you see
-all that apply to your old version. The first
+all that apply to your old version.
+
+There are two sub-sections. The first
 sub-section covers changes to non-comment lines; the
-second, comments. The former are essential. The
+second, comments. The former are required. The
 later are in some sense optional, especially
 when they refer to equipment you don't (or
 never will) have. However, changing them now
@@ -547,15 +563,15 @@ may help avoid confusion at a later date.
 ======  Non-comment lines
 
 .  Old versions _9.12.10_-_9.12.13_:
-+
-The line for DBBC PFB version was changed to have a
+
+.. The line for DBBC PFB version was changed to have a
 minimum version number of `v15_1`. The line is
 shown here with the typical preceding comment:
 
     *DBBC PFB version
     v15_1    v15_1 or later
-+
-The line that defines the DBBC2 CoMo configuration was changed. Please
+
+.. The line that defines the DBBC2 CoMo configuration was changed. Please
 see item (12) in the installation instructions in _/usr2/fs/misc/fs91119up.txt_ for
 full details on handling this. However, the following commands will
 probably make the needed change if you don't have a DBBC2 or if your
@@ -619,25 +635,22 @@ the clock rate line itself.
 ===== Review stpgm.ctl
 
 . All old versions
-+
-The line for _erchk_ line was updated and new lines were
-added for _monit2_, and _scnch_ for when the
-display server is in use. Using the display
-server is now the default and strongly
-recommended.
-+
+
 IMPORTANT: If you are _not_ planning to use the FS display
 server, we recommend you comment out the lines
-for _erchk_, _mont2_, and _scnch_. If they are
-used without the display server and they are
+for _erchk_, _monit2_, and _scnch_ and not add any other _monitX_ programs. If they are
+used in _stpgm.ctl_ without the display server and they are
 accidentally closed, the FS will be killed.
-+
-The new line for _erchk_ differs from the previous
-commented version with the addition of the
-`-name erchk` parameter and removal of the
-`-title ...` and `-geom ...` parameters, so
-that the latter two are uniquely supplied by
-the _.Xresources_ file.
+
+.. The line for _erchk_ is now uncommented and differs from the
+previous commented version with the addition of the `-name erchk`
+parameter and the removal of the `-title ...` and `-geom ...` parameters,
+so that the latter two are uniquely supplied by the _.Xresources_
+file.
+
+.. New lines were
+added for _monit2_, and _scnch_ for when the
+display server is in use.
 +
 If you are using the display server you may
 want to add other _monitX_ programs. If so, you
@@ -649,7 +662,7 @@ _~/.Xresources_ files for _oper_ and _prog_.
 
 If you have RDBEs for your back-end and will use the _rdbemsg_
 utility to send operations messages, you will need to
-customize your _/usr2/control/rdbemsg.ctl_.
+customize your _/usr2/control/rdbemsg.ctl_ file.
 
 . You will need to update the `station` two letter code (lower
 case) and the `name` station name to your station's values. The
@@ -669,22 +682,24 @@ addresses in _rdbemsg.ctl_.
 
 . The default email address `to` is for the `ivs-vgos-ops` mail
 list. You can of course change that to whatever you like. You
-can also temporarily over-ride the address in the _rdbemsg_
+can also temporarily override the address in the _rdbemsg_
 utility itself.
 
 === Update .prc files
 
 This step is for updates to your SNAP _.prc_ procedure libraries.
-Only one change is required: converting from using the _go_
-FS program to _rte_go_. A second change is
+The are two sub-steps. 
+Only the  change in the first is required: converting from using the
+old FS _go_
+program to _rte_go_. The change in the second is
 optional and only relevant if upgrading from _9.13.2_: removing
 `if=cont_cal,,` from the `fivpt` and `onoff` procedures for
-`calon` and `caloff` procedures. These two changes are described next:
+`calon` and `caloff` procedures.
 
 ==== Convert from go to rte_go
 
 Convert use of the old FS _go_ program to use _rte_go_. This
-change came about because the compiler for the _go_ language
+is required because the compiler for the _go_ language
 conflicts with the old program name _go_. This change is necessary even if
 you do not have the _go_ language compiler installed.
 
@@ -695,7 +710,8 @@ execute:
            /usr2/fs/misc/go_fix *.prc
 
 Files that are changed will have a pre-change back-up copy
-with the extension _.bak_.
+with the extension _.bak_. You can use the _.bak_ file to
+recover in case of a problem.
 
 ==== Remove extra if commands
 
@@ -737,18 +753,38 @@ file, you can uncomment or insert
 
 You should logout and login again after making this change.
 
-Please make the corresponding change for _prog_ while logged
+You should  make the corresponding change for _prog_ while logged
 in as _prog_.
 
 ==== Update .Xresources
 
-Update the _~/.Xresources_ file for the _oper_ and _prog_
-accounts.  The main change was to add values for the `erchk`,
-`scnch`, and _helpsh_  windows.  There were some minor changes
+The main change was to add values for the _erchk_,
+_scnch_, and _helpsh_  windows.  There were some minor changes
 for other windows, but what to use for the changed values may
 depend on the resolution of your display.  The example values
 worked well for an FSL10 installation on a system with a
 non-GPU CPU.
+
+[TIP]
+====
+
+A strategy for setting the `geometry` resource for a window is:
+
+. Manually adjust the position of the window with the mouse to where you want it to be.
+
+. Run the _xwininfo_ program
+
+. Position the cursor on the window and click.
+
+. Copy the string output for the `-geometry` parameter, e.g, `80x24+0+0`.
+
+. Paste the string as the value for `geometry` resource for that window in the _~/.Xresources_ file.
+
+You will need to logout and login again (or reload
+the X-resources a different way) for the change to become
+effective.
+====
+
 
 As _oper_, you can find the differences between your file and
 the example file with:
@@ -758,7 +794,7 @@ the example file with:
 
 Please make any changes to your file that you find
 appropriate, but at a minimum you should probably add the
-lines for _erchk_, _scnch_, and _helpsh_ if not already
+lines for _monit6_, _erchk_, _scnch_, and _helpsh_ if not already
 present. You will need to logout and login again (or reload
 the X-resources a different way) for the changes to become
 effective.
@@ -802,7 +838,7 @@ that are noticed on the 64-bit system.
 
 Generally speaking, a fairly thorough test is to run a test
 experiment.  Start with using _drudg_ to rotate a schedule,
-_drudg_-ing it to make _.snp_ and _.prc_ files, making listings,
+__drudg__ing it to make _.snp_ and _.prc_ files, making listings,
 and any other pre-experiment preparation and tests you normally
 do, then execute part of schedule, and perform any normal
 post-experiment plotting and clean-up that you do.  The idea here
@@ -824,31 +860,31 @@ then either use the restored disk or apply the FS update again.
 The FSL10 test procedure has more options for recovery.  Managing
 this is a lot easier and safer if you have a third disk.
 
-== Changes from previous versions
+== Changes from FS9
 
-There are separate sub-sections with summaries of changes in the FS
-and _drudg_. Following those are sub-sections giving the details of the
-changes.
-[[details]] Each summary item has a clickable <<details,More details>>
-link that leads to the detailed description of that item.
+[[details]] There are separate sub-sections with summaries of changes
+in the FS and _drudg_. Following those are sub-sections giving the
+details of the changes.  Each summary item has a clickable
+<<details,More details>> link that leads to the detailed description
+of that item.
 
-Each sub-section is divided further into three sub-sections:
+Each sub-section is divided into three parts:
 
 . Changes that are in common since FS9
 +
-These sub-sections cover changes compared
+These parts cover changes compared
 to both FS9 branches. These are changes that have been introduced in version _10.0.0_.
 
-. Changes relative to the main branch (9.13.2)
+. Changes relative to the main branch
 +
-These sub-sections cover changes that are only relative to the main
-branch. These are primarily features that were in the VGOS branch but
+These parts cover changes that are only relative to the main
+branch, specifically version _9.13.2_. These are primarily features that were in the VGOS branch but
 not in the main branch.
 
 . Changes relative to the VGOS branch
 +
-These sub-sections cover changes that are only relative to the VOGS
-branch.  These are primarily features that were in the main branch but
+These sparts cover changes that are only relative to the VGOS
+branch, specifically version _9.12.13_.  These are primarily features that were in the main branch but
 not in the VGOS branch.
 
 
@@ -869,16 +905,14 @@ _/usr2/fs/drudg/change_log.txt_.
 
 === Summary of FS changes
 
-This sub-section is divided further into three sub-sections. Please
-see <<Changes from previous versions>> above for an explanation of the
-division.
+This sub-section is divided into three parts. Please see
+<<Changes from FS9>> above for an explanation of the parts.
 
 ==== Changes that are in common since FS9
 
 .  One unified version for all FS users. <<unified,More details>>.
 .  Support for use on both 32- and 64-bit systems. <<bit3264,More details>>.
 .  Version control with _git_. <<usegit,More details>>.
-.  Use of the FS display server is now recommended for normal use. <<useserver,More details>>.
 . The FS uses a new _Makefile_ scheme. <<makefile,More details>>.
 
 . Improve _fesh_ (includes closing https://github.com/nvi-inc/fs/issues/34[#34]). <<fesh,More details>>.
@@ -900,7 +934,7 @@ there was an attempt to execute a procedure from the library was fixed. <<prc2,M
 . Improve error logging for _dbbcn_. <<dbbcn,More details>>.
 . Improve `help` page for _tpicd_. <<tpicd,More details>>.
 . Add `popen` time-out feature. <<popen,More details>>.
-. Make use of the FS display server the default. <<server2,More details>>.
+. The FS display server is now recommended for normal use. <<server,More details>>.
 . Make _fsclient_ honor the `-n` flag properly (closes https://github.com/nvi-inc/fs/issues/48[#48]). <<clientn,More details>>.
 . Make _fsclient_ ignore prompt in no-X11 mode (closes https://github.com/nvi-inc/fs/issues/49[#49]). <<clientnx,More details>>. 
 . Add _fsserver_ improvements and log support (includes closing https://github.com/nvi-inc/fs/issues/29[#29] & https://github.com/nvi-inc/fs/issues/25[#25]). <<fsserver,More details>>.
@@ -920,7 +954,7 @@ there was an attempt to execute a procedure from the library was fixed. <<prc2,M
 . Update _misc/release_model.txt_. <<release_model,More details>>.
 . Improve update notes. <<notes,More details>>.
 
-==== Changes relative to the main branch (9.13.2)
+==== Changes relative to the main branch
 
 #TODO: Complete this sub-section.#
 
@@ -933,9 +967,8 @@ there was an attempt to execute a procedure from the library was fixed. <<prc2,M
 
 === Summary of drudg changes
 
-This sub-section is divided further into three sub-sections. Please
-see <<Changes from previous versions>> above for an explanation of the
-division.
+This sub-section is divided into three parts. Please see
+<<Changes from FS9>> above for an explanation of the parts.
 
 ==== Changes that are in common since FS9
 
@@ -949,7 +982,7 @@ _drudg_ opening message date is `2020Jun30`.
 . Add support for additional wait at the end of recording for broadband. <<wait,More details>>.
 . Update comment on line three of _.snp_ files. <<comment,More details>>.
 
-==== Changes relative to the main branch (9.13.2)
+==== Changes relative to the main branch
 
 #TODO: Complete this sub-section.#
 
@@ -959,9 +992,8 @@ _drudg_ opening message date is `2020Jun30`.
 
 === Details of FS changes
 
-This sub-section is divided further into three sub-sections. Please
-see <<Changes from previous versions>> above for an explanation of the
-division.
+This sub-section is divided into three parts. Please see
+<<Changes from FS9>> above for an explanation of the parts.
 
 ==== Changes that are in common since FS9
 
@@ -970,12 +1002,12 @@ division.
 +
 
 Both non-VGOS and VGOS operations are supported by the new version.
-Previous users of the main (non-VGOS) branch will need to add some new
-local control files.
+Previous installations of the main (non-VGOS) branch will need to have
+some new local control files added.
 
 +
 
-The most significant change is that previous main branch users will
+The most significant change for users is that previous main branch users will
 find that in the new FS input is case sensitive, as it was already
 in the VGOS branch.
 
@@ -993,7 +1025,7 @@ contains instructions for transitioning to a 64-bit system.
 +
 
 The key change to the source code to make this compatibility possible
-is avoiding use of ``long int``s except where they are required for
+is avoiding use of ``long int``s, except where they are required for
 system calls, particularly in fixed length data structures. A tool,
 _unlongify_ was developed by Dave Horsley to help convert the FS code.
 It is available to help convert station code. It use is described in 
@@ -1007,8 +1039,8 @@ section of the
 
 +
 
-The FS source is now managed using _git_ and _github_ is used as
-the distribution method.
+The FS source is now managed using _git_ and _github_ is used for
+distribution. The source code is now under the GPL3 license.
 
 +
 
@@ -1022,17 +1054,11 @@ _/usr2/fs_ directory tree since such changes will make it more
 difficult to simply `pull` updates to install bug fixes and new
 features.
 
-. [[useserver]] Use of the FS display server is now recommended for normal use.
-
-+
-
-This change is new as of the _beta2_ release.
-
 . [[makefile]] The FS uses a new _Makefile_ scheme. This is
 accomplished by including the _/usr2/fs/include.mk_ file in every
 Makefile except for _drudg_ and its libraries. The scheme is "opt-in"
 so it is not necessary for every program or station programs to
-participate. Within the FS proper, only _drudg_ and its libraries
+participate. Within the FS source tree, only _drudg_ and its libraries
 don't use it.  An explanation of the new scheme is provided in
 _/usr2/fs/misc/fs10_makefile.md_.
 
@@ -1047,7 +1073,7 @@ Morgan Goodrich (KPGO) for reporting this.
 . [[equip.ctl]] Update example _equip.ctl_ (includes closing https://github.com/nvi-inc/fs/issues/35[#35]).
 
 .. The example DBBC3
-firmware is now more sensible (closes https://github.com/nvi-inc/fs/issues/35[#35]). Thanks to Eskil Varenius (Onsala)
+firmware version is now more sensible (closes https://github.com/nvi-inc/fs/issues/35[#35]). Thanks to Eskil Varenius (Onsala)
 for reporting this.
 
 .. The minimum DBBC3 firmware version required was added in a comment.
@@ -1106,9 +1132,9 @@ file would be closed. Thanks to Jon Quick (HartRAO) for pointing
 out this inconsistency.
 +
 The old behavior was partly a consequence of how the original file
-handling worked on the HP-RTE, but is not sensible for how the
+handling worked on HP-RTE systems, but is not sensible for how the
 SNAP commands should work.  Note that this is a non-backward
-compatible change in how the SNAP commands seem to behave.
+compatible change in how the SNAP commands behave.
 Previously supplying a non-existent procedure or schedule file
 name would cause the closure of the corresponding file. Now to
 close an open procedure or schedule without opening a new one, a
@@ -1118,7 +1144,7 @@ library.
 
 . [[header_lines]]  Add more log header lines. Log header lines were added for
 `uname()` system information and the compile time value of the
-`FC` environment variable were added.
+`FC` environment variable.
 
 . [[year]] Fix year wrap error message in procedure logging (closes https://github.com/nvi-inc/fs/issues/23[#23]).
 This fixed a benign and spurious error message if a log was kept
@@ -1155,17 +1181,15 @@ when a schedule is running and not-blocked.  This behavior was
 inherited from the VGOS branch where accidentally leaving _tpicd_
 logging RDBE multi-cast data after closing a schedule or halting
 it creates a lot of extra log entries. This is probable beneficial
-for all back-ends. The fact that this changed relative to the main branch
-is is now noted in <<beta2.adoc#_changes_from_previous_versions,Changes from previous versions>> section
-of <<beta2.adoc#,beta2 update notes>> document.
+for all back-ends.
 
 . [[popen]] Add _popen_ time-out feature. There is a now a `-t ...` time-out
 option. If the command being run has a time-out feature, it is
 generally better to use the command's feature. See `help=sy` for
 more details.
 
-. [[server2]] Make use of the FS display server the default. This was changed as
-of the _beta2_ release.
+. [[server]] The FS display server is now recommended for
+normal use. This was changed as of the _beta2_ release.
 
 . [[clientn]] Make _fsclient_ honor the `-n` flag properly (closes https://github.com/nvi-inc/fs/issues/48[#48]). This
 eliminates opening "double" windows if _fsclient_ is run with `-n`
@@ -1323,43 +1347,23 @@ it harder to install bug fixes and updates.
 .. The paths to the example control files now include the needed
 intermediate directory _fs/_.
 
-.. Some conditional changes in
-the <<beta2.adoc#\_update_control_files,Update control files>>
-step of the <<beta2.adoc#,beta2 update notes>> document
-were corrected to properly
-depend or not depend on the old version being _9.12.12_. If you
-installed the _beta1_ version and your old version was _9.12.12_
-you should review the instructions in
-<<beta2.adoc#_update_control_files,Update control files>>
-step to verify everything has been covered.
+.. The sub-steps for updating the control files were corrected
+to properly
+depend or not depend on the old version being _9.12.12_.
 
 .. A sub-step was added to make using the FS display server the default.
-If you installed _beta1_ you should check the 
-the <<beta2.adoc#_set_fs_display_server,Set FS_DISPLAY_SERVER>>
-sub-step of the <<beta2.adoc#,beta2 update notes>> document
-for changes that are needed.
 
 .. A sub-step was added for updating the _~/.Xresources_ file for _oper_
-and _prog_. If you installed _beta1_ you should check the
-<<beta2.adoc#_update_xresources,Update .Xresources>>
-sub-step of the <<beta2.adoc#,beta2 update notes>> document
-for changes that are needed.
+and _prog_.
 
 .. A sub-step to update where the `TMOUT` environment variable is unset
 for stations using FSL10 was added.
 
 .. A recommendation was added to sign-up for the _go_ language
 announcements to be informed of security updates if you are
-installing the latest version of _go_ as described in the
-<<64-bit_conversion.adoc#_option_b_installing_latest_go_language,Option B - Installing latest go language>>
-sub-step of the <<64-bit_conversion.adoc#,Converting to a 64-bit system>> document.
-If you used that method it is recommended that you
-sign-up for the announcements.
+installing the latest version of _go_ lnaguage.
 
-.. The update instructions now include advice on updating from
-_beta1_ to _beta2_.
-
-==== Changes relative to the main branch (9.13.2)
+==== Changes relative to the main branch
 
 #TODO: Complete this sub-section.#
 
@@ -1395,9 +1399,8 @@ feature.
 
 === Details of drudg changes
 
-This sub-section is divided further into three sub-sections. Please
-see <<Changes from previous versions>> above for an explanation of the
-division.
+This sub-section is divided into three parts. Please see
+<<Changes from FS9>> above for an explanation of the parts.
 
 ==== Changes that are in common since FS9
 
@@ -1433,7 +1436,7 @@ itself in _git_ but it is still useful.
     listed. Since there is no tape support, these fields were replaced
     with the recorder type.
 
-==== Changes relative to the main branch (9.13.2)
+==== Changes relative to the main branch
 
 #TODO: Complete this sub-section.#
 

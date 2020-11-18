@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit system
-Version 0.1 - November 2020
+Version 0.2 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -40,7 +40,7 @@ An alternate method is to copy the station files from your 32-bit
 system and then perform the upgrade. This will allow you to upgrade
 without modifying your existing system.
 
-These two methods only primarily in when the work for the
+These two methods differ primarily in when the work for the
 <<Update local files>>
 step occurs. If you upgrade the your 32-bit system
 first, that is when this step will occur; otherwise, it is part of the
@@ -297,17 +297,16 @@ There are two options for this step:
 
 . If you had already installed FS _10.0_ on your old system, you can skip this step.
 
-. If you are converting directly to a 64-bit system, you should:
-
-.. Using the <<beta2.adoc#,FS update>>
-document, follow the upgrade instructions starting with step
+. If you are converting directly to a 64-bit system, you should
+follow the follow the steps in the <<beta2.adoc#,FS update>> document,
+starting with step
 <<beta2.adoc#_update_control_files,Update control files>>
 and ending with step
 <<beta2.adoc#_miscellaneous_fslx_changes,Miscellaneous FSLx changes>>.
 
 === Finishing up
 
-You should follow the 
+You should follow the
 <<beta2.adoc#_test_the_fs,Test the fs>> step, and following steps, from
 the <<beta2.adoc#,FS update>>
 document.

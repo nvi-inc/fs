@@ -24,7 +24,8 @@ Source in docs/
 
 To update:
 
-  git add $(find . -name \*.doc)
+  git add $(find . -name \*.adoc)
+  rm -f $(find . -name \*.html)
   git commit
   git push
   git branch -f gh-pages <branch>
