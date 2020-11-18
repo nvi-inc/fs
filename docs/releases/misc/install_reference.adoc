@@ -19,7 +19,7 @@
 //
 
 = Installation reference
-Version 0.1 - Apr 2020
+Version 0.2 - November 2020
 
 :sectnums:
 :experimental:
@@ -29,7 +29,7 @@ in general, but are usually not needed for routine updates.
 
 == Upgrading from FS versions before the previous stable
 
-This sub-section only covers upgrading from "main" branch versions,
+This section only covers upgrading from "main" branch versions,
 i.e., versions _9.12.x_ are excluded.
 
 For reference, the list of the most recent _critical updates_, since
@@ -160,7 +160,7 @@ questions about how to cut-and-paste please email Ed.
 
 == Making a back-up before installing
 
-This sub-section has two parts. The first covers back-ups. The second
+This section has two parts. The first covers back-ups. The second
 covers using symbolic links to switch between operational and test
 set-ups.
 
