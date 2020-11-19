@@ -140,8 +140,6 @@ extern struct vex *vex_ptr;
  * definitions can be found in the "VEX File Definition/Example" doc. *
  * and the VEX Parameters Tables                                      *
  *                                                                    *
- * for VEX2 create_pointing_sector takes the first field as the       *
- * last argument, for VEX1 that field must be zero lenght string      *
  * ------------------------------------------------------------------ *
  * These are all purpose routines that help utilities build lists.    *
  * ------------------------------------------------------------------ *
@@ -798,23 +796,22 @@ create_pointing_sector(char *str, char *str2, char *str3, char *str4,
   char *lolimit1_units;
   char *hilimit1_value;
   char *hilimit1_units;
+  struct dvalue *lolimit1;
+  struct dvalue *hilimit1;
   char *axis2;
   char *lolimit2_value;
   char *lolimit2_units;
   char *hilimit2_value;
   char *hilimit2_units;
+  struct dvalue *lolimit2;
+  struct dvalue *hilimit2;
 
   if(str==NULL || strlen(str)==0 ||
      str2==NULL || strlen(str2)==0 ||
      str3==NULL || strlen(str3)==0 ||
      str4==NULL || strlen(str4)==0 ||
      str5==NULL || strlen(str5)==0 ||
-     str6==NULL || strlen(str6)==0 ||
-     str7==NULL || strlen(str7)==0 ||
-     str8==NULL || strlen(str8)==0 ||
-     str9==NULL || strlen(str9)==0 ||
-     str10==NULL || strlen(str10)==0 ||
-     str11==NULL || strlen(str11)==0 )
+     str6==NULL || strlen(str6)==0 )
        
     {
       printf("%s \'pointing_sector\' %s %s block\n",
@@ -824,29 +821,43 @@ create_pointing_sector(char *str, char *str2, char *str3, char *str4,
     {
       sector=(char *)strdup(str);
       axis1=(char *)strdup(str2);
+
       lolimit1_value=(char *)strdup(str3);
       lolimit1_units=(char *)strdup(str4);
+      lolimit1=make_dvalue(lolimit1_value,lolimit1_units);
+
       hilimit1_value=(char *)strdup(str5);
       hilimit1_units=(char *)strdup(str6);
-      axis2=(char *)strdup(str7);
-      lolimit2_value=(char *)strdup(str8);
-      lolimit2_units=(char *)strdup(str9);
-      hilimit2_value=(char *)strdup(str10);
-      hilimit2_units=(char *)strdup(str11);
+      hilimit1=make_dvalue(hilimit1_value,hilimit1_units);
 
+      if(str7==NULL || strlen(str7)==0)
+	axis2=NULL;
+      else
+	axis2=(char *)strdup(str7);
+
+      if( str8==NULL || strlen(str8)==0 ||
+	  str9==NULL || strlen(str9)==0)
+	lolimit2=NULL;
+      else {
+	lolimit2_value=(char *)strdup(str8);
+	lolimit2_units=(char *)strdup(str9);
+	lolimit2=make_dvalue(lolimit2_value,lolimit2_units);
+      }
+      if( str10==NULL || strlen(str10)==0 ||
+	  str11==NULL || strlen(str11)==0)
+	hilimit2=NULL;
+      else {
+	hilimit2_value=(char *)strdup(str10);
+	hilimit2_units=(char *)strdup(str11);
+	hilimit2=make_dvalue(hilimit2_value,hilimit2_units);
+      }
       qref_list = add_list(qref_list,
 			   make_lowl(T_POINTING_SECTOR,
-				     make_pointing_sector(NULL,
-				     sector, axis1,
-				     make_dvalue(lolimit1_value,
-						 lolimit1_units),
-				     make_dvalue(hilimit1_value,
-						 hilimit1_units),
-				     axis2,
-				     make_dvalue(lolimit2_value,
-						 lolimit2_units),
-				     make_dvalue(hilimit2_value,
-						 hilimit2_units))));
+				     make_pointing_sector(sector, axis1,
+							  lolimit1,hilimit1,
+							  axis2,
+							  lolimit2,hilimit2,
+                              NULL)));
     }
 }  
 /*-------------------------------------------------------------------*/
@@ -855,7 +866,6 @@ create_pointing_sector2(char *str, char *str2, char *str3, char *str4,
 		       char *str5, char *str6, char *str7, char *str8,
 		       char *str9, char *str10, char *str11, char *str12)
 {
-  char *name;
   char *sector;
   char *axis1;
   char *lolimit1_value;
@@ -871,14 +881,15 @@ create_pointing_sector2(char *str, char *str2, char *str3, char *str4,
   char *hilimit2_units;
   struct dvalue *lolimit2;
   struct dvalue *hilimit2;
+  char *name;
 
-  if((str2==NULL || strlen(str2)==0 ||
+  if((str==NULL || strlen(str)==0 ||
+      str2==NULL || strlen(str2)==0 ||
       str3==NULL || strlen(str3)==0 ||
       str4==NULL || strlen(str4)==0 ||
       str5==NULL || strlen(str5)==0 ||
-      str6==NULL || strlen(str6)==0 ||
-      str7==NULL || strlen(str7)==0) ||
-     ((str==NULL || strlen(str)==0) &&
+      str6==NULL || strlen(str6)==0) ||
+     ((str12==NULL || strlen(str12)==0) &&
       !vex_version.lessthan2))
     {
       printf("%s \'pointing_sector2\' %s %s block\n",
@@ -886,50 +897,51 @@ create_pointing_sector2(char *str, char *str2, char *str3, char *str4,
     }
   else
     {
-      if(vex_version.lessthan2)
-	name=NULL;
-      else
-	name=(char *)strdup(str);
+      sector=(char *)strdup(str);
+      axis1=(char *)strdup(str2);
 
-      sector=(char *)strdup(str2);
-      axis1=(char *)strdup(str3);
-
-      lolimit1_value=(char *)strdup(str4);
-      lolimit1_units=(char *)strdup(str5);
+      lolimit1_value=(char *)strdup(str3);
+      lolimit1_units=(char *)strdup(str4);
       lolimit1=make_dvalue(lolimit1_value,lolimit1_units);
 
-      hilimit1_value=(char *)strdup(str6);
-      hilimit1_units=(char *)strdup(str7);
+      hilimit1_value=(char *)strdup(str5);
+      hilimit1_units=(char *)strdup(str6);
       hilimit1=make_dvalue(hilimit1_value,hilimit1_units);
 
-      if(str8==NULL || strlen(str8)==0)
+      if(str7==NULL || strlen(str7)==0)
 	axis2=NULL;
       else
-	axis2=(char *)strdup(str8);
+	axis2=(char *)strdup(str7);
 
-      if( str9==NULL || strlen(str9)==0 ||
-	  str10==NULL || strlen(str10)==0)
+      if( str8==NULL || strlen(str8)==0 ||
+	  str9==NULL || strlen(str9)==0)
 	lolimit2=NULL;
       else {
-	lolimit2_value=(char *)strdup(str9);
-	lolimit2_units=(char *)strdup(str10);
+	lolimit2_value=(char *)strdup(str8);
+	lolimit2_units=(char *)strdup(str9);
 	lolimit2=make_dvalue(lolimit2_value,lolimit2_units);
       }
-      if( str11==NULL || strlen(str11)==0 ||
-	  str12==NULL || strlen(str12)==0)
+      if( str10==NULL || strlen(str10)==0 ||
+	  str11==NULL || strlen(str11)==0)
 	hilimit2=NULL;
       else {
-	hilimit2_value=(char *)strdup(str11);
-	hilimit2_units=(char *)strdup(str12);
+	hilimit2_value=(char *)strdup(str10);
+	hilimit2_units=(char *)strdup(str11);
 	hilimit2=make_dvalue(hilimit2_value,hilimit2_units);
       }
 
+      if(vex_version.lessthan2)
+	name=NULL;
+      else
+	name=(char *)strdup(str12);
+
       qref_list = add_list(qref_list,
 			   make_lowl(T_POINTING_SECTOR,
-				     make_pointing_sector(name,sector, axis1,
+				     make_pointing_sector(sector, axis1,
 							  lolimit1,hilimit1,
 							  axis2,
-							  lolimit2,hilimit2)));
+							  lolimit2,hilimit2,
+                              name)));
     }
 }  
 /*-------------------------------------------------------------------*/

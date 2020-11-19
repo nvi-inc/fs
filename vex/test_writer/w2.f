@@ -102,8 +102,7 @@ c
      &                       ptr_ch(char(0)),
      &                       ptr_ch(char(0)),
      &                       ptr_ch(char(0)))
-      call fcreate_pointing_sector2(ptr_ch('ccw'//char(0)),
-     &                       ptr_ch('ccwl'//char(0)),
+      call fcreate_pointing_sector2(ptr_ch('ccwl'//char(0)),
      &                       ptr_ch('az'//char(0)),
      &                       ptr_ch('-90'//char(0)),
      &                       ptr_ch('deg'//char(0)),
@@ -113,9 +112,9 @@ c
      &                       ptr_ch(char(0)),
      &                       ptr_ch(char(0)),
      &                       ptr_ch(char(0)),
-     &                       ptr_ch(char(0)))
-      call fcreate_pointing_sector2(ptr_ch('cw'//char(0)),
-     &                       ptr_ch('cwl'//char(0)),
+     &                       ptr_ch(char(0)),
+     &                       ptr_ch('ccw'//char(0)))
+      call fcreate_pointing_sector2(ptr_ch('cwl'//char(0)),
      &                       ptr_ch('az'//char(0)),
      &                       ptr_ch('270'//char(0)),
      &                       ptr_ch('deg'//char(0)),
@@ -125,7 +124,8 @@ c
      &                       ptr_ch('0'//char(0)),
      &                       ptr_ch('deg'//char(0)),
      &                       ptr_ch('88'//char(0)),
-     &                       ptr_ch('deg'//char(0)))
+     &                       ptr_ch('deg'//char(0)),
+     &                       ptr_ch('cw'//char(0)))
       call fcreate_nasmyth(ptr_ch('X'//char(0)),
      &                       ptr_ch('left'//char(0)))
       

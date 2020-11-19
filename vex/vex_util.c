@@ -722,16 +722,24 @@ struct antenna_motion *make_antenna_motion(char *axis,struct dvalue *rate,
   return new;
 }
 
-struct pointing_sector *make_pointing_sector(char *name, char *sector, char *axis1,
+struct pointing_sector *make_pointing_sector(char *sector, char *axis1,
 					     struct dvalue *lolimit1,
 					     struct dvalue *hilimit1,
 					     char *axis2,
 					     struct dvalue *lolimit2,
-					     struct dvalue *hilimit2)
+					     struct dvalue *hilimit2,
+                         char *name)
 {
   NEWSTRUCT(new,pointing_sector);
 
-  new->name=name;
+  if(name == NULL || strlen(name) == 0 ) {
+    if(!vex_version.lessthan2) {
+      yyerror("VEX1 pointing_sector  present");
+    }
+  } else if(vex_version.lessthan2) {
+    yyerror("VEX2 pointing_sector if_def present");
+  }
+
   new->sector=sector;
   new->axis1=axis1;
   new->lolimit1=lolimit1;
@@ -739,6 +747,7 @@ struct pointing_sector *make_pointing_sector(char *name, char *sector, char *axi
   new->axis2=axis2;
   new->lolimit2=lolimit2;
   new->hilimit2=hilimit2;
+  new->name=name;
 
   return new;
 }
@@ -2092,15 +2101,7 @@ get_pointing_sector_field(Pointing_sector *pointing_sector,int n,int *link,
   *units=NULL;
   *value=NULL;
 
-  if(!vex_version.lessthan2)
-    n--;
-
   switch(n) {
-  case 0:
-    if(vex_version.lessthan2)
-      return -1;
-    *value=pointing_sector->name;
-    break;
   case 1:
     *value=pointing_sector->sector;
     *link=1;
@@ -2119,25 +2120,32 @@ get_pointing_sector_field(Pointing_sector *pointing_sector,int n,int *link,
     *name=0;
     break;
   case 5:
-    if(pointing_sector->axis2==NULL)
-      return -1;
     *value=pointing_sector->axis2;
     break;
   case 6:
-    if(pointing_sector->lolimit2->value==NULL||
-       pointing_sector->lolimit2->units==NULL)
-      return -1;
-    *value=pointing_sector->lolimit2->value;
-    *units=pointing_sector->lolimit2->units;
+    if(pointing_sector->lolimit2 == NULL) {
+      *value=NULL;
+      *units=NULL;
+    } else {
+      *value=pointing_sector->lolimit2->value;
+      *units=pointing_sector->lolimit2->units;
+    }
     *name=0;
     break;
   case 7:
-    if(pointing_sector->hilimit2->value==NULL||
-       pointing_sector->hilimit2->units==NULL)
-      return -1;
-    *value=pointing_sector->hilimit2->value;
-    *units=pointing_sector->hilimit2->units;
+    if(pointing_sector->hilimit2 == NULL) {
+      *value=NULL;
+      *units=NULL;
+    } else {
+      *value=pointing_sector->hilimit2->value;
+      *units=pointing_sector->hilimit2->units;
+    }
     *name=0;
+    break;
+  case 8:
+    if(vex_version.lessthan2)
+      return -1;
+    *value=pointing_sector->name;
     break;
   default:
     return -1;

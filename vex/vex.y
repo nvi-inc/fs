@@ -744,26 +744,30 @@ pointing_sector:	T_POINTING_SECTOR '=' T_LINK ':'
 			T_NAME ':'
 			unit_value ':'
 			unit_value ';'
-                      {$$=make_pointing_sector(NULL,$3,$5,$7,$9,$11,$13,$15);}
+                      {$$=make_pointing_sector($3,$5,$7,$9,$11,$13,$15,NULL);}
                       | T_POINTING_SECTOR '=' T_LINK ':'
 			T_NAME ':'
 			unit_value ':'
 			unit_value ';'
-	              {$$=make_pointing_sector(NULL,$3,$5,$7,$9,NULL,NULL,NULL);}
-                      | T_POINTING_SECTOR '=' T_NAME ':' T_LINK ':'
+	              {$$=make_pointing_sector($3,$5,$7,$9,NULL,NULL,NULL,NULL);}
+                      | T_POINTING_SECTOR '=' T_LINK ':'
 			T_NAME ':'
 			unit_value ':'
 			unit_value ':'
 			T_NAME ':'
 			unit_value ':'
-			unit_value ';'
+			unit_value ':'
+            T_NAME ';'
 		      {$$=make_pointing_sector($3,$5,$7,$9,$11,$13,$15,$17);}
-                      | T_POINTING_SECTOR '=' T_NAME ':' T_LINK ':'
+                      | T_POINTING_SECTOR '=' T_LINK ':'
 			T_NAME ':'
 			unit_value ':'
-			unit_value ';'
-		      {$$=make_pointing_sector($3,$5,$7,$9,$11,
-					       NULL,NULL,NULL);}
+			unit_value ':'
+            ':'
+			':'
+            ':'
+            T_NAME ';'
+		      {$$=make_pointing_sector($3,$5,$7,$9,NULL,NULL,NULL,$14);}
 ;
 nasmyth:	      T_NASMYTH '=' T_LINK ':' T_NAME ';'
 		      {$$=make_nasmyth($3,$5);}

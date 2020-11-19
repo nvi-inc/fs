@@ -167,7 +167,6 @@ struct antenna_motion {
 typedef struct antenna_motion Antenna_motion;
 
 struct pointing_sector {
-  char *name;
   char *sector;
   char *axis1;
   struct dvalue *lolimit1;
@@ -175,6 +174,7 @@ struct pointing_sector {
   char *axis2;
   struct dvalue *lolimit2;
   struct dvalue *hilimit2;
+  char *name;
 };
 
 typedef struct pointing_sector Pointing_sector;
@@ -659,12 +659,13 @@ struct axis_type *make_axis_type(char *axis1, char *axis2,
 				 struct dvalue *orientation);
 struct antenna_motion *make_antenna_motion(char *axis,struct dvalue *rate,
 					   struct dvalue *offset); 
-struct pointing_sector *make_pointing_sector(char *name, char *sector, char *axis1,
+struct pointing_sector *make_pointing_sector(char *sector, char *axis1,
 					     struct dvalue *lolimit1,
 					     struct dvalue *hilimit1,
 					     char *axis2,
 					     struct dvalue *lolimit2,
-					     struct dvalue *hilimit2);
+					     struct dvalue *hilimit2,
+                         char *name);
 struct nasmyth *make_nasmyth(char *band, char *platform);
 struct bbc_assign *make_bbc_assign(char *bbc_id,struct dvalue *physical,
 				   char *if_id);
