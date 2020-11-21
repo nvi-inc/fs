@@ -18,14 +18,19 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-all: index.html beta2.html beta1_to_beta2.html latest_commit.html 10.0.0_with_64-bit.html
+DOC_DIR =
+
+.PHONY: all $(DOC_DIR)
+
+all: index.html 64-bit_conversion.html $(DOC_DIR)
 
 index.html: index.adoc
-beta2.html: beta2.adoc
-beta1_to_beta2.html: beta1_to_beta2.adoc
-latest_commit.html: latest_commit.adoc
-10.0.0_with_64-bit.html: 10.0.0_with_64-bit.adoc
+64-bit_conversion.html: 64-bit_conversion.adoc
+
+$(DOC_DIR):
+	$(MAKE) -C $@
+
 
 %.html: %.adoc
-	asciidoctor -a toc $^
+	asciidoctor $^
 

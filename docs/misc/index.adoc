@@ -18,15 +18,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= Index of fs/
+= Index of fs/misc/
 Version 0.1 - Nov 2020
 
-== Direct Links
-
-<<releases/10.0.0/beta2.adoc#,10.0.0-beta2>> release notes (latest)
-
-== Links to sub-directories
-
-<<releases/index#,Releases>>
-
-<<misc/index#,misc>>
+<<64-bit_conversion.adoc#,Conversion to 64-bits from a 32-bit system>>

@@ -27,4 +27,4 @@ Version 0.1 - Nov 2020
 
 <<latest_commit.adoc#,Update from -beta2 to latest commit>> notes
 
-<<64-bit_conversion.adoc#,Converting to 64-bit system>> document
+<<10.0.0_with_64-bit.adoc#,Converting to 64-bit system>> document
