@@ -27,6 +27,6 @@ Version 0.1 - Nov 2020
 
 == Links to sub-directories
 
-<<releases/index#,Releases>>
+<<releases/#,Releases>>
 
-<<misc/index#,misc>>
+<<misc/#,misc>>
