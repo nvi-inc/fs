@@ -18,8 +18,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= Converting to a 64-bit system
-Version 0.2 - November 2020
+= Converting to a 64-bit system with upgrading to 10.0.0
+Version 0.1 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -31,20 +31,12 @@ Version 0.2 - November 2020
 
 == Introduction
 
-To upgrade your installation to 64-bit, the easiest approach is
-probably to first upgrade the FS installation on your 32-bit system to
-run FS _10.0_, then transfer it to a 64-bit system. This will allow you
-verify the upgrade before trying to transfer it.
+This document covers converting to a 64-bit system while upgrading
+from FS9 to 10.0.0. This approach assumes you will be installing a
+64-bit system on a new computer. Doing so will allow you to upgrade to
+10.0.0 and 64-bit without disturbing you operational 32-bit system.
 
-An alternate method is to copy the station files from your 32-bit
-system and then perform the upgrade. This will allow you to upgrade
-without modifying your existing system.
-
-These two methods differ primarily in when the work for the
-<<Update local files>>
-step occurs. If you upgrade the your 32-bit system
-first, that is when this step will occur; otherwise, it is part of the
-process below.
+All operations are performed on the new, 64-bit, system.
 
 == Convert to using a 64-bit system
 
@@ -261,63 +253,24 @@ and/or make reference copies of more files and directories.
 
 === Login as prog
 
-Login as _prog_.
+Working on the new system, login as _prog_.
 
 === Update station code
 
-. Follow the <<beta2.adoc#_update_station_programs,Update station programs>>
+IMPORTANT: All work is to be done on the new system.
+
+There are two sub-steps. The first is for that covered by the 
+ <<beta2.adoc#,FS update>> document. The second is to convert any C language code.
+
+==== 10.0.0 code update steps
+
+Follow the <<beta2.adoc#_update_station_programs,Update station programs>>
 step from the <<beta2.adoc#,FS update>> document.
-+
-NOTE: If you update your station code as part of installing FS _10.0_
-on your old system, you should have already done this.  However, if
-you use FORTRAN in your station code and did not make the conversion
-to _f95_, you will need to do that now.
+ 
+NOTE: If
+you use FORTRAN in your station code you must convert to using _f95_.
 
-. Follow the directions in the <<Handling C station code>> section below
-to convert any C language station code you have.
-
-. [[makelocalsw]] Follow the <<beta2.adoc#_make_local_software,Make local software>>
-step from the <<beta2.adoc#,FS update>> document.
-+
-NOTE: Make sure to resolve all build errors. However, debugging may be needed in the <<Finishing up>> step below.
-
-=== Reboot
-
-IMPORTANT: Reboot the computer.  This is important for initializing shared
-memory for the new version.
-
-
-=== Login as oper
-
-The remaining steps assume you are logged in as _oper_.
-
-=== Update local files
-
-There are two options for this step:
-
-. If you had already installed FS _10.0_ on your old system, you can skip this step.
-
-. If you are converting directly to a 64-bit system, you should
-follow the follow the steps in the <<beta2.adoc#,FS update>> document,
-starting with step
-<<beta2.adoc#_update_control_files,Update control files>>
-and ending with step
-<<beta2.adoc#_miscellaneous_fslx_changes,Miscellaneous FSLx changes>>.
-
-=== Finishing up
-
-You should follow the
-<<beta2.adoc#_test_the_fs,Test the fs>> step, and following steps, from
-the <<beta2.adoc#,FS update>>
-document.
-
-You may need to debug your station code as part of the testing
-process, particularly if you made changes in the <<Update station code>>
-step above.
-
-== Handling C station code
-
-NOTE: This section is referenced by the <<Update station code>> section above.
+==== Handling C station code
 
 If you have C station code, it should work as written unless
 you have declared integers that interface to the FS as `long`.
@@ -325,7 +278,7 @@ For a start at fixing those, please see
 https://github.com/dehorsley/unlongify.
 The following steps describe how to install the _unlongify_ tool.
 
-=== Install go language
+===== Install go language
 
 If you haven't already, you will need to first install the _go_
 language. If you are using FSL10, you can install the _go_ language in
@@ -339,7 +292,7 @@ _unlongify_ tool. After installing the _go_ language, continue the
 _unlongify_ installation instructions starting at
 <<Configure prog account for go language>>.
 
-==== Option A - Installing golang package
+====== Option A - Installing golang package
 
 You can use the Debian package management system to
 install _go_.  This will give you an older version of _go_
@@ -349,7 +302,7 @@ this way, as _root_ use:
 
   apt-get install golang
 
-==== Option B - Installing latest go language
+====== Option B - Installing latest go language
 
 You can install the latest version of _go_, but this is
 outside the normal security mechanism. In this case, you
@@ -377,7 +330,7 @@ In the first window select _only_ the option (i.e., only that line has a `*`):
 Then press kbd:[Enter] while `OK` is highlighted. On the next screen, press kbd:[Tab]
 to highlight `Cancel` and the press kbd:[Enter].
 
-=== Configure prog account for go language
+===== Configure prog account for go language
 
 Once you have the _go_ language installed, you need to define
 the `GOPATH` environment variable and include it in _prog_'s
@@ -395,7 +348,7 @@ for _prog_, re-execute the file:
   . ~/.profile
 ....
 
-=== Install unlongify
+===== Install unlongify
 
 Then you should be able to execute the installation step given
 at the URL above (as _prog_):
@@ -403,7 +356,7 @@ at the URL above (as _prog_):
   cd
   go get github.com/dehorsley/unlongify
 
-=== Use unlongify
+===== Use unlongify
 
 Please read the _README.md_ file, which is displayed at the
 URL above. Alternatively, it can be viewed at
@@ -411,8 +364,15 @@ _~/prog/go/src/github.com/dehorsley/unlongify/README.md_ where
 it was installed by the above command. Please pay particular
 attention to the `Note` about system calls.
 
-NOTE: Once your code __make__s successful, if you using the section as part
-of <<Update station code>> step above, you will probably want to return
-to the <<makelocalsw,making local software>> sub-step.  You may still
-need to debug your code in the <<Finishing up>> step above.
+Once your code __make__s successfully, you can continue, but you may need to debug
+it when testing ih <<Follow remaining 10.0.0 update steps>> step below.
 
+
+=== Follow remaining 10.0.0 update steps
+
+Continuing to work on the new computer, follow the remaining steps in the 
+<<beta2.adoc#,FS update>> document starting with 
+<<beta2.adoc#_make_local_software,Make local software>> step.
+
+NOTE: You may need to debug your station code in the 
+<<beta2.adoc#_test_the_fs,Test the fs>> step
