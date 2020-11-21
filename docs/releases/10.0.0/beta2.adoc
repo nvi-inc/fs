@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 update notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.6 - November 2020
+Version 0.7 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -65,7 +65,7 @@ the FS (we expect to support as far back as FSL8, but currently FSL9
 is the limit), as well as on 64-bit systems. The update notice
 includes instructions for transitioning to a 64-bit system, which may
 require some relatively simple changes to station software. See the
-<<64-bit_conversion.adoc#,64-bit conversion>> document for more details.
+<<../../misc/64-bit_conversion.adoc#,64-bit conversion>> document for more details.
 
 +
 
@@ -148,7 +148,7 @@ Upgrading from <<beta1_to_beta2.adoc#,beta1 to beta2>>.
 
 // . Upgrading to https://raw.githubusercontent.com/nvi-inc/fs/259e203330fff145dba5ea6b2f48c8bcd23b4333/misc/fs10.0.0up.txt[beta1].
 
-Converting to a <<64-bit_conversion.adoc#,64-bit system>>.
+Upgrading to <<with_64-bit.adoc#,10.0.0 with 64-bit>>.
 
 Upgrading to the <<latest_commit.adoc#,latest commit>>.
 
@@ -174,12 +174,10 @@ operational system before upgrading.
 
 == Upgrading from an FS9 version
 
-This section covers upgrading from FS9, which was always 32-bit
-only, to _10.0.0-beta2_.  Certain steps are also utilized for
-converting to a 64-bit system, as described in the
-<<64-bit_conversion.adoc#,Converting to a 64-bit system>> document.
-To accommodate that, there are a few embedded
-comments for handling 64-bit systems.
+This section covers upgrading from FS9, which was always 32-bit only,
+to _10.0.0-beta2_.  Certain steps are also utilized for upgrading and
+converting to a 64-bit system at the same time, as described in the
+<<with_64-bit.adoc#,10.0.0 with 64-bit>> document.
 
 There are two possible paths for upgrading:
 
@@ -270,9 +268,9 @@ NOTE: This step will change your _/usr2/fs_ symbolic link to point to
 
 The `make install` command may create and possibly rename some
 existing directories if the FS was never installed on this system
-before.  However, if you are using this step as part of upgrading
-on your 32-bit system (this step is not used on a 64-bit system
-you may be converting to), this should not be an issue.
+before. However, since you should only be following this path if
+you are upgrading an FS9 installation, there
+should not be any problem.
 
 === Fix file permissions
 
@@ -342,6 +340,34 @@ news).
 This step is for modifying your station programs in _/usr2/st_.  There
 are two possible issues:
 
+==== Conversion of FORTRAN code
+
+If you don't have any FORTRAN station code, you can skip this sub-step.
+If you do have some, please email Ed so he is
+aware.
+
+Basically you have two options (also see step <<Set FORTRAN compiler>>):
+
+. Change to using _f95_ for both the FS and your station
+FORTRAN programs.   It is recommended that
+you follow this approach for 32-bit systems and it is
+necessary when moving to a 64-bit system.
++
+
+You will need to adapt your __Makefile__s
+to use the same compiler options as the FS, which can be
+found in _/usr2/fs/include.mk_.
+As a first cut, it may work to add the following two lines
+to your __Makefile__s for FORTRAN programs:
+
+    FFLAGS  += -ff2c -I../../fs/include -fno-range-check -finit-local-zero -fno-automatic -fbackslash
+    FLIBS   += -lgfortran -lm
+
+. Continue to use _fort77_ for both the
+FS and your station programs. You should follow this approach _only_ if
+you are on a 32-bit system and it is too difficult to convert to
+_f95_.
+
 ==== Case sensitive strings in antenna= commands
 
 In FS9 versions, the strings used in `antenna=...` commands were always
@@ -364,32 +390,6 @@ input is now case sensitive.
 The former choice is probably the easier, but in some
 cases the second  may be better. If you have questions about which to
 use and how to do it, please email Ed.
-
-==== Conversion of FORTRAN code
-
-If you have station programs in
-FORTRAN, please email Ed so he is
-aware, but basically you have two options (also see step <<Set FORTRAN compiler>>):
-
-. Change to using _f95_ for both the FS and your station
-FORTRAN programs.   It is recommended that
-you follow this approach for 32-bit systems and it is
-necessary when moving to a 64-bit system.
-+
-
-You will need to adapt your __Makefile__s
-to use the same compiler options as the FS, which can be
-found in _/usr2/fs/include.mk_.
-As a first cut, it may work to add the following two lines
-to your __Makefile__s for FORTRAN programs:
-
-    FFLAGS  += -ff2c -I../../fs/include -fno-range-check -finit-local-zero -fno-automatic -fbackslash
-    FLIBS   += -lgfortran -lm
-
-. Continue to use _fort77_ for both the
-FS and your station programs. You should follow this approach _only_ if
-you are on a 32-bit system and it is too difficult to convert to
-_f95_.
 
 === Make local software
 
@@ -827,15 +827,6 @@ None are required for this update.
 
 ===  Test the FS
 
-NOTE: If you are following this step on your
-32-bit system as part of the process in the 
-<<64-bit_conversion.adoc#,Converting to a 64-bit system>>
-docment, you may prefer to only do a quick check now and
-save extensive testing until you are verifying the 64-bit
-installation. You could always go back and do more testing
-on the 32-bit system to help resolve the origin of problems
-that are noticed on the 64-bit system.
-
 Generally speaking, a fairly thorough test is to run a test
 experiment.  Start with using _drudg_ to rotate a schedule,
 __drudg__ing it to make _.snp_ and _.prc_ files, making listings,
@@ -1019,7 +1010,7 @@ in the VGOS branch.
 The new version should run on 32-bit systems that currently support
 the FS (we expect to support as far back as FSL8, but currently FSL9
 is the limit), as well as on 64-bit systems. The
-<<64-bit_conversion.adoc#,Converting to a 64-bit system>> document
+<<../../misc/64-bit_conversion.adoc#,Converting to a 64-bit system>> document
 contains instructions for transitioning to a 64-bit system.
 
 +
@@ -1028,10 +1019,10 @@ The key change to the source code to make this compatibility possible
 is avoiding use of ``long int``s, except where they are required for
 system calls, particularly in fixed length data structures. A tool,
 _unlongify_ was developed by Dave Horsley to help convert the FS code.
-It is available to help convert station code. It use is described in 
-<<64-bit_conversion.adoc#_handling_c_station_code,Handling C station code>>
-section of the
-<<64-bit_conversion.adoc#,Converting to a 64-bit system>> document.
+It is available to help convert station code. It use is described in the
+<<../../misc/64-bit_conversion.adoc#_conversion_of_c_code,Conversion of C code>>
+sub-step of the
+<<../../misc/64-bit_conversion.adoc#,Converting to a 64-bit system>> document.
 
 +
 

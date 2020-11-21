@@ -18,19 +18,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-DOC_DIR =
+.PHONY: all
 
-.PHONY: all $(DOC_DIR)
-
-all: index.html 64-bit_conversion.html $(DOC_DIR)
+all: index.html 64-bit_conversion.html
 
 index.html: index.adoc
 64-bit_conversion.html: 64-bit_conversion.adoc
 
-$(DOC_DIR):
-	$(MAKE) -C $@
-
-
 %.html: %.adoc
-	asciidoctor $^
+	asciidoctor -a toc $^
 

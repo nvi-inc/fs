@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit system
-Version 0.3 - November 2020
+Version 0.4 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -31,16 +31,23 @@ Version 0.3 - November 2020
 
 == Introduction
 
-This document covers converting to a 64-bit system from an exisiting
-32-bit FS 10.0.0 system.  This approach assumes you will be installing
-a 64-bit system on a new computer. Doing so will allow you to upgrade
-to 10.0.0 and 64-bit without disturbing you operational 32-bit system.
+This document covers converting to a 64-bit system from an existing
+32-bit FS10 system. It is also used as part of the upgrade path to go
+directly to 64-bit system while upgrading to _10.0.0_, which is
+covered more fully in the
+<<../releases/10.0.0/with_64-bit.adoc#,Upgrading to 10.0.0 with 64-bit>>
+document, which mostly references this (the current) and the
+<<../releases/10.0.0/beta2.adoc#,beta2 update>> document.
 
-All operations are performed on the new, 64-bit, system.
+The approach here assumes you will be installing a 64-bit system on a new
+computer. Doing so will allow you to convert to 64-bit without
+disturbing you operational 32-bit system.
 
 == Convert to using a 64-bit system
 
-Please follow these steps:
+IMPORTANT: All operations are performed on the new, 64-bit, system.
+
+Please follow the steps below.
 
 === Install a 64-bit system
 
@@ -236,9 +243,12 @@ to include any features you want from the old system.
 
 . At this point you are principle done transferring files.
 However, it is also possible that you may need or want
-other changes such as:
+other files or changes such as:
 
 .. Copy other files or programs from the old system
++
+This might include directories and log files that exist as copies from even older computers.
+
 .. Install additional Debian packages
 .. Copy/merge additional configuration files, such as:
 
@@ -255,7 +265,33 @@ and/or make reference copies of more files and directories.
 
 Login as _prog_.
 
-=== Handling C station code
+=== Update station programs
+
+This step is for modifying your station programs in _/usr2/st_.  There
+are two possible issues, conversion of FORTRAN code and conversion of
+C code.
+
+==== Conversion of FORTRAN code
+
+If you don't have any FORTRAN station code or you have already
+converted it to _f95_, skip this sub-step.
+
+Use of _f95_ is necessary
+on 64-bit systems. If you have station programs
+in FORTRAN, please email Ed so he is aware.
+
+You will need to adapt your __Makefile__s
+to use the same compiler options as the FS, which can be
+found in _/usr2/fs/include.mk_.
+As a first cut, it may work to add the following two lines
+to your __Makefile__s for FORTRAN programs:
+
+    FFLAGS  += -ff2c -I../../fs/include -fno-range-check -finit-local-zero -fno-automatic -fbackslash
+    FLIBS   += -lgfortran -lm
+
+==== Conversion of C code
+
+If you don't have any C station code, you can skip this sub-step.
 
 If you have C station code, it should work as written unless
 you have declared integers that interface to the FS as `long`.
@@ -263,7 +299,7 @@ For a start at fixing those, please see
 https://github.com/dehorsley/unlongify.
 The following steps describe how to install and use the _unlongify_ tool.
 
-==== Install go language
+===== Install go language
 
 If you haven't already, you will need to first install the _go_
 language. If you are using FSL10, you can install the _go_ language in
@@ -277,7 +313,7 @@ _unlongify_ tool. After installing the _go_ language, continue the
 _unlongify_ installation instructions starting at
 <<Configure prog account for go language>>.
 
-===== Option A - Installing golang package
+====== Option A - Installing golang package
 
 You can use the Debian package management system to
 install _go_.  This will give you an older version of _go_
@@ -287,7 +323,7 @@ this way, as _root_ use:
 
   apt-get install golang
 
-===== Option B - Installing latest go language
+====== Option B - Installing latest go language
 
 You can install the latest version of _go_, but this is
 outside the normal security mechanism. In this case, you
@@ -315,7 +351,7 @@ In the first window select _only_ the option (i.e., only that line has a `*`):
 Then press kbd:[Enter] while `OK` is highlighted. On the next screen, press kbd:[Tab]
 to highlight `Cancel` and the press kbd:[Enter].
 
-==== Configure prog account for go language
+===== Configure prog account for go language
 
 Once you have the _go_ language installed, you need to define
 the `GOPATH` environment variable and include it in _prog_'s
@@ -333,7 +369,7 @@ for _prog_, re-execute the file:
   . ~/.profile
 ....
 
-==== Install unlongify
+===== Install unlongify
 
 Then you should be able to execute the installation step given
 at the URL above (as _prog_):
@@ -341,13 +377,24 @@ at the URL above (as _prog_):
   cd
   go get github.com/dehorsley/unlongify
 
-==== Use unlongify
+===== Use unlongify
 
 Please read the _README.md_ file, which is displayed at the
 URL above. Alternatively, it can be viewed at
 _~/prog/go/src/github.com/dehorsley/unlongify/README.md_ where
 it was installed by the above command. Please pay particular
 attention to the `Note` about system calls.
+
+=== Make local software
+
+If _/usr2/st/Makefile_ is set-up in the standard way, you can do this with:
+
+       cd /usr2/st
+       make rmdoto rmexe all
+
+NOTE: At this point, you are only trying to verify the code will _make_
+successfully.  You may still need to debug it in the <<Test the FS>> step
+below.
 
 Once our code __make__s successfully, you can continue, but you may need to debug
 it in the <<Test the FS>> step below.
