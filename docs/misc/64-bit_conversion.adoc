@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit system
-Version 0.4 - November 2020
+Version 0.6 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -33,15 +33,11 @@ Version 0.4 - November 2020
 
 This document covers converting to a 64-bit system from an existing
 32-bit FS10 system. It is also used as part of the upgrade path to go
-directly to 64-bit system while upgrading to _10.0.0_, which is
-covered more fully in the
-<<../releases/10.0.0/with_64-bit.adoc#,Upgrading to 10.0.0 with 64-bit>>
-document, which mostly references this (the current) and the
-<<../releases/10.0.0/beta2.adoc#,beta2 update>> document.
+directly to 64-bit system while upgrading the FS.
 
 The approach here assumes you will be installing a 64-bit system on a new
 computer. Doing so will allow you to convert to 64-bit without
-disturbing you operational 32-bit system.
+disturbing your operational 32-bit system.
 
 == Convert to using a 64-bit system
 
@@ -52,8 +48,9 @@ Please follow the steps below.
 === Install a 64-bit system
 
 Install a 64-bit system on a different (hopefully new) computer. We
-recommend https://nvi-inc.github.io/fsl10/, which is based on Debian
-_Stretch_ and tuned for FS use. That process installs a base FS.
+recommend FSL10. The FSL10 installation guide can be found at
+https://nvi-inc.github.io/fsl10/, which is based on Debian _Stretch_
+and tuned for FS use. That process installs a base FS.
 
 NOTE: As indicated in that document, you should checkout the latest release of FS10, which may be a pre-release.
 
@@ -130,7 +127,7 @@ useful.
        scp -pqr oper@old:/usr2/sched .
        scp -pqr oper@old:/usr2/proc .
 +
-Note that your _sched_ and _proc_ directories could be
+NOTE: Your _sched_ and _proc_ directories could be
 large and take a significant amount of time to transfer.
 
 .. Transfer _log_:
@@ -157,7 +154,7 @@ to the standard with:
 +
 Answer `*y*` to confirm.
 +
-If you don't have a _/usr2/tle_files_ directory, you will
+WARNING: If you don't have a _/usr2/tle_files_ directory, you will
 get a message that there is no such directory. That is
 benign unless you expect such a directory to be there.
 
@@ -386,6 +383,9 @@ it was installed by the above command. Please pay particular
 attention to the `Note` about system calls.
 
 === Make local software
+
+IMPORTANT: If you are installing a 64-bit system as part of upgrading
+the FS, you should return to the FS update instructions at this point.
 
 If _/usr2/st/Makefile_ is set-up in the standard way, you can do this with:
 

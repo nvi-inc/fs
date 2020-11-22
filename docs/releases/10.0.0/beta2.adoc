@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 update notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.7 - November 2020
+Version 0.8 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -148,8 +148,6 @@ Upgrading from <<beta1_to_beta2.adoc#,beta1 to beta2>>.
 
 // . Upgrading to https://raw.githubusercontent.com/nvi-inc/fs/259e203330fff145dba5ea6b2f48c8bcd23b4333/misc/fs10.0.0up.txt[beta1].
 
-Upgrading to <<with_64-bit.adoc#,10.0.0 with 64-bit>>.
-
 Upgrading to the <<latest_commit.adoc#,latest commit>>.
 
 === Miscellaneous
@@ -175,10 +173,7 @@ operational system before upgrading.
 == Upgrading from an FS9 version
 
 This section covers upgrading from FS9, which was always 32-bit only,
-to _10.0.0-beta2_.  Certain steps are also utilized for upgrading and
-converting to a 64-bit system at the same time, as described in the
-<<with_64-bit.adoc#,10.0.0 with 64-bit>> document.
-
+to _10.0.0-beta2_. It is assumed you are upgrading on a 32-bit system.
 There are two possible paths for upgrading:
 
 . Upgrading from a main branch version. The main branch versions
@@ -202,8 +197,42 @@ version, please email Ed for more information.
 
 The upgrade instructions for the update from the old main branch and
 the old VGOS branch differ only in the step
-<<Update control files>>. The
-installation steps for upgrading are:
+<<Update control files>>.
+
+[TIP]
+====
+
+It is also possible to upgrade to a new installation on a 64-bit
+system. Doing so will allow you to upgrade to _10.0.0_ and 64-bit
+without disturbing your operational 32-bit system. However, the upgrade may
+be more involved because it may require additional changes and
+testing for your station software.  The instructions for combining the
+FS and 64-bit upgrade are:
+
+. Follow the steps in the
+<<../../misc/64-bit_conversion.adoc#,64-bit Conversion>> document 
+down to the 
+<<../../misc/64-bit_conversion.adoc#_make_local_software,Make local software>>
+step. Instead of following that step, return to the next item in this *TIP*.
++
+
+This step will result in a base FS10 installation on a 64-bit system
+with your local software, control files, and procedure files from your
+FS9 32-bit system. This is an inconsistent configuration, which will
+not work. The local software will have been updated for 64-bit, but
+not tested. Your local software and other local files need to be
+updated for _10.0.0_, which is covered in the next step.
+
+. To update your local software and other local files for _10.0.0_,
+follow the instructions in this document, beginning with the
+<<beta2.adoc#_case_sensitive_strings_in_antenna_commands,Case sensitive strings in antenna= commands>>
+sub-step and continue with remaining steps.
++
+When you get to the <<Test the FS>> sub-step, you may need to debug your station software.
+
+====
+
+To upgrade from FS9 to FS10 on a 32-bit system, please follow the steps below.
 
 === Back-up your operational system
 

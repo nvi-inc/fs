@@ -19,12 +19,10 @@
 //
 
 = Index of fs/releases/10.0.0/
-Version 0.2 - Nov 2020
+Version 0.3 - Nov 2020
 
 <<beta2.adoc#,10.0.0-beta2>> release notes (latest)
 
 <<beta1_to_beta2.adoc#,Update from -beta1 to -beta2>> notes
 
 <<latest_commit.adoc#,Update from -beta2 to latest commit>> notes
-
-<<with_64-bit.adoc#,Converting to 64-bit system>> document
