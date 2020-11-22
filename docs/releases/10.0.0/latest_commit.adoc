@@ -1,0 +1,233 @@
+//
+// Copyright (c) 2020 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= Latest Commit update notes
+Version 0.3 - November 2020
+
+//:hide-uri-scheme:
+:sectnums:
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+:toclevels: 4
+
+== Introduction
+
+The document covers updating from the latest pre-release to the latest
+commit. The latest commit is somewhat experimental.  We make ever
+effort to keep the latest commit usable. However commits that are not
+tagged for release are not intended for operations.
+
+== Upgrading from 10.0.0-beta2 to the latest commit
+
+You must have already upgraded to the <<beta2.adoc,10.0.0-beta2>>
+release before installing this update.
+
+=== Fetch and make the latest commit
+
+If you are using _git_, as is recommended, then as _prog_
+execute:
+
+             cd /usr2/fs-git
+             git fetch
+             git checkout master
+             make -s
+
+=== Additional steps
+
+. If you are using _fesh_ to pull schedules from _cddis_, it is
+recommend that you set the `FESH_EMAIL` environment variable with a
+working email address to use as the password for _anonymous_ FTP-SSL
+access (which is new in this release); this will remove the need to
+enter it manually for each use.
++
+
+If you have FSL8 or other old distribution that does not support
+_curl_ SSL connections to _cddis_, it is possible to restore
+the previous non-SSL FTP access. That can only be a temporary solution
+since _cddis_ is planning to end non-SSL FTP access at the end of
+October 2020.
++
+
+Please see `*fesh -h*` for the details on how to use all of these
+features.
+
+. If you use RDBEs in your back-end and want to use the _rdbemsg_
+utility to send operations messages, please customize your
+_/usr2/control/rdbemsg.ctl_ control file by adding the _name_ line to
+the file if you haven't already.  Full instructions are provided in
+the <<beta2.adoc#_update_rdbemsg_ctl,Update rdbemsg.ctl>> sub-step in the
+<<beta2.adoc#,beta2 update notes>> document.
+
+=== Review other changes
+
+Please see the sub-section <<Changes since 10.0.0-beta2>> below
+for details of the changes since that release.
+
+== Changes since 10.0.0-beta2
+
+There are separate sub-sections with summaries of changes in the FS
+and _drudg_. Following those are sub-sections giving the details of the
+changes.  [[details]] Each summary item has a clickable <<details,More details>>
+link that leads to the detailed description of that item.
+
+Clickable links such as
+https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
+reported at https://github.com/nvi-inc/fs/issues.
+
+A complete history of changes can be found using the `git log`
+command.
+
+The file _/usr2/fs/misc/changes.txt_ contains the old history of
+changes in FS9. The file _/usr2/fs/misc/VENIX_changes.txt_ contains
+the old history of changes in FS8. However these two files have been
+merged into the history given by `git log`.
+
+The history of _drudg_ is also described in more detail in
+_/usr2/fs/drudg/change_log.txt_.
+
+=== Summary of FS changes
+
+. Add _new_ifdbb_ script for (RDBE) VGOS stations. <<new_ifdbb,More details>>.
+
+. _fesh_ uses FTP-SSL (closes https://github.com/nvi-inc/fs/issues/36[#36]).
+<<fesh,More details>>.
+
+. The station name in _rdbemsg_ is no longer hard coded (closes
+https://github.com/nvi-inc/fs/issues/62[#62]).
+<<stationrdbemsg,More details>>.
+
+. Restore `help` for DBBC3 commands. <<help,More details>>.
+
+. Improvements in _fsserver_ (includes tentatively closing https://github.com/nvi-inc/fs/issues/69[#69]).
+<<fsserver,More details>>.
+
+. Improvements in _gnplt_ (closes https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
+<<gnplt,More details>>.
+
+. Improvements in `help` files (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
+<<helpfiles,More details>>.
+
+. Improvements to update notes (this document):
+<<updatenotes,More details>>.
+
+=== Summary of drudg changes
+
+_drudg_ opening message date is `2020Sep14`.
+
+. Fix crash if `$HEAD` is the last block in a `.skd` file. <<head,More details>>.
+
+=== Details of FS changes
+
+. [[new_ifdbb]] Add _new_ifdbb_ script for (RDBE) VGOS stations. This script is
+intended as a tool to allow stations, and schedule writers, a way
+to update schedules for changes in the _ifdbb_ procedure used by
+VGOS stations, particularly those with RDBE back-ends. For RDBE
+stations, the attenuation used in the signal chain, which is set
+by the schedule, depends on the observing mode being used and the
+conditions at the station. The provides a way to incorporate
+needed changes into schedules. If the script is run without other
+command line arguments, it will output "help" information.
+
+. [[fesh]] _fesh_ uses FTP-SSL (closes
+https://github.com/nvi-inc/fs/issues/36[#36]). The use of FTP-SSL for
+_cddis_ access will allow use of _cddis_ after non-SSL FTP access is
+disabled there, expected at the end of October 2020. It is
+recommended that the `FESH_EMAIL` environment variable be set to
+avoid the need to provide an email address each time use as the
+_anonymous_ FTP-SSL password.
++
+
+If you have FSL8 or other old distribution that does not support
+_curl_ SSL connections to _cddis_, it is possible to restore the
+previous non-SSL FTP access by setting the `FESH_CDDIS_METHOD`
+environment variable to `ftp`.  However, this method will no longer work
+once non-SSL FTP access ends.
++
+Please see `*fesh -h*` for the details on using these features.
+
+. [[stationrdbemsg]] The station name in _rdbemsg_ is no longer hard coded (closes
+https://github.com/nvi-inc/fs/issues/62[#62]). The station name is now
+set in _rdbemsg.ctlr_ control file. Thanks to Chevo Terraza (MGO) for
+reporting this.
+
+. [[help]] Restore `help` for DBBC3 commands. The selection of DBBC3 specific commands
+was lost in the merge of the VGOS and main branches. It is now restored.
+
+. [[fsserver]] Improvements in _fsserver_ (includes tentatively closing https://github.com/nvi-inc/fs/issues/69[#69]).
+
+.. _spub_/_ssub_ occasionally froze (tentatively closing
+https://github.com/nvi-inc/fs/issues/69[#69]). This may have been
+caused be the byte order being wrong in buffered stream `cb` This
+situation is still being monitored to verify that it is fixed.
+
+.. Fixed `clean` function in _Makefile_.
+.. Fixed _sspub_ to support more than 2^32^ messages.
+
+. [[gnplt]] Improvements in _gnplt_ (closes https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
+
+.. _gnplt_ now updates the date in updated _.rxg_ files (closes
+https://github.com/nvi-inc/fs/issues/72[#72]).  The original developer,
+(Tomas Gille), did very good work developing this second version of
+_gnplt_, but ran out of time in his internship and was unable to include
+this minor but important feature.
+
+.. _gnplt now works on FSL8 (Lenny) again (closes
+https://github.com/nvi-inc/fs/issues/73[#73]).  Some reccent
+improvements in _gnplt_ made it fail for FSL8.
+
+. [[helpfiles]] Improvements in `help` files (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
+
+.. The `help` file for the `ddbc` command was expanded to also support
+the `dbbc2` and `dbbc3` commands and now includes a description of the
+output for multi-line responses for these commands (closes
+https://github.com/nvi-inc/fs/issues/75[#75]). The `help` command now
+works for the `dbbc2` and `dbbc3` commands.
+
+.. The `help` file for the `fila10g` command was expanded to also
+support the `fila10g2` command. The `help` command now works for the
+`fila10g2` command.
+
+
+. [[updatenotes]] Improvements to update notes (this document).
+
+.. Modify steps for updating to a specific commit after _beta2_ to
+use the latest commit instead. As well as being
+simpler, this is part of a new approach to try to keep the update
+notes current with the latest commit. It is important
+to be aware that the latest commit is not a version
+intended for operations. We make every effort to make sure it is
+bug free, but problems may occur. Since it represents the
+"bleeding edge" of development, features may not be as stable nor
+use as reliable as released (tagged) versions.
+
+.. Add missing _rdbemsg.ctl_ customization.
+.. Include items added since _beta2_.
+
+.. Reorganized as _.adoc_ files in the _doc/_ sub-directory  and available as web pages at:
+https://nvi-inc.github.io/fs/.
+.. Improve structure and correct some errors from original _.txt_ version.
+.. Some typo/wording fixes.
+
+=== Details of drudg changes
+
+. [[head]] Fix crash if `$HEAD` is the last block in a `.skd` file. Fixed bug in _reads.f_.
+

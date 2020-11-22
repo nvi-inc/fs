@@ -1,0 +1,214 @@
+//
+// Copyright (c) 2020 NVI, Inc.
+//
+// This file is part of the FSL10 Linux distribution.
+// (see http://github.com/nvi-inc/fsl10).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= Known Bugs
+Version 0.1 - November 2020
+
+== Introduction
+
+This document contains the know bugs list at end of FS9. It has not been updated since.
+
+For more recent reports, please also check the github issues at: https://github.com/nvi-inc/fs/issues.
+
+== Summary of known bugs
+
+The following is a summary list of known bugs. They are described in more
+detail iin the next section.
+
+. Do not run _fmset_ for extended periods.
+. `odd` and `even` head types not supported for Mark IV & VLBA4.
+. `odd`/`even` head types not supported for VLBA style tapeforms.
+. _chekr_ does not check the status of the Mark IV formatter or Mark 5 recorder.
+. Extraneous errors when tape is stopped by low tape sensor.
+. `comm=` command in _logex_ extracts only the first command.
+. S2 error scheme clumsy.
+. No extra spaces allowed in _ibad.ctl_ file.
+. _onoff_ and _fivpt_ programs hang.
+. FS SNAP command pages don't list tape drive suffix numbers.
+. LBA rack TPI detector is not usable.
+. `mk5b_mode` and `bit_stream` commands only report the expected sample rate.
+. Some _fmpsee_ routines do not report file I/O error through the log system.
+. Some systems calls, particularly in _mk5cn_ and _dbbcn_, use separate
+`UN` errors to elaborate on errors in system calls.
+
+== Details of known bugs
+
+A detailed discussion of these bugs follows.
+
+. Do not run _fmset_ for extended periods.  For stations that have
+formatter that can be set with _fmset_, the program should not be
+run for extended periods of time.  The _fmset_ program should be
+used only to set or briefly verify that the formatter time is
+correct.  Do not leave _fmset_ running after completing either of
+these tasks, especially during an experiment.
++
+The _fmset_ program dominates the Field System when it is running
+and this is likely to interfere with the running of an experiment
+or other activities.  The only way to detect the time from the
+VLBA formatter with greater precision than one second it to wait
+for the seconds response from the formatter to change.  This
+requires the FS to communicate with the formatter almost
+continuously.  A similar problem exists for the S2 recorder.  This
+problem is less severe for other formatters, but extended use of
+_fmset_ in this case should be avoided as well.  A reminder about
+this is included in the _fmset_ menu.
+
+. `odd`/`even` head types not supported for Mark IV & VLBA4.  The
+Mark IV and VLBA4 rack version of the `form` command and the Mark
+IV and VLBA4 recorder versions of the `repro` and `parity`
+commands do not support the `odd` and `even` parameters for the
+read and write head types and reproduce electronics in the
+_head.ctl_ control file.  This means that automatic substitution
+of odd or even head in passes that use only even or odd heads
+respectively does not occur.  The only correct settings for the
+read and write head parameters and reproduce electronics is `all`.
+This will be fixed in a future revision.  Please email Ed if
+you are missing some tracks and need to work around this
+limitation.
+
+. `odd`/`even` head types not supported for VLBA style tapeforms.
+For any mode recorded with VLBA style tapeform (14 index
+positions), the only correct setting of the read and write head
+types on the _head.ctl_ is `all`.  This will be fixed in a future
+revision.  Please email Ed if you are missing some tracks and
+need to work around this limitation.
+
+. _chekr_ does not check the status of the Mark IV formatter or Mark
+5 recorder.  Now that most communication problems with the Mark IV
+formatter have been solved, this will be possible and will be done
+in the future.  _chekr_ support will be implemented for Mark 5
+despite communication problems, they will have to be ignored
+unless they extend beyond a certain amount of time.
+
+. Extraneous errors when tape is stopped by low tape sensor.  When a
+tape drive has been commanded to move the tape and then stops
+because it hit the low tape sensor (or when S2 recorders hit the
+BOT or EOT), _chekr_ will complain periodically that the tape
+drive is not in the correct state.  In principle the FS should be
+smarter about this.  However, if the tape is managed correctly by
+the schedule this error message should never occur.  If it does,
+then it it an indication that there is either a problem with: (1)
+the schedule, (2) the check procedures, (3) the recorder, or (4)
+the tape is too short.  If any of these cases apply they should be
+corrected.  It is more likely that this error message will occur
+when the tape is being controlled manually.  In this case, issuing
+an `et` command will convince the FS that the tape drive should be
+stopped and the error message will cease.
+
+. `comm=` command in _logex_ extracts only the first command.  The
+`comm=` command in _logex_ extracts only the first command
+commanded and displayed.  This problem was noted by Giuseppe
+Maccaferri (Medicina).
+
+. S2 error scheme clumsy.  The error and status response number
+reporting scheme for S2 recorders is clumsy.  FS errors that have
+mnemonic `rl` are mostly error responses from the recorder or the
+RCL interface library that is used to communicate with the
+recorder.  If the numeric part of an `rl` error is greater than
+-130, then it is the error code returned by the recorder.  If the
+numeric part is less than -130, but greater than -300, then add
+130 to the value, the absolute value of the result is the error
+response code from the RCL library.  For values less than or equal
+to -300, a FS error has been detected.  Status response codes are
+all reported with mnemonic `rz` and the numeric value is the
+negative of the status response code.  In all cases an appropriate
+error or status message is displayed.  These messages are retained
+in the log.
+
+. No extra spaces allowed in _ibad.ctl_ file.  The format of the
+_ibad.ctl_ must not contain any leading or embedded spaces.  In
+systems that use the LLP AT-GPIB driver (pre-FS Linux 4), if
+either the option `no_untalk/unlisten_after` is misspelled or an
+incorrect device name is supplied, the driver will cause a
+segmentation violation when it is initialized and the FS will
+terminate.  Unfortunately there is no way to prevent this problem
+in a general way; it reflects a limitation in the driver.
+
+. _onoff_ and _fivpt_ programs hang.  The _onoff_ and _fivpt_ programs
+have been known to _hang_ mysteriously.  This seems to be caused by
+some problem with the _rte_go_ mechanism that is used to restart the
+program when it pauses to allow a SNAP procedure, such as `calon` or
+`caloff` to execute.  The _rte_go_ that is used to restart the program
+fails for some reason.  This has been exceedingly difficult to debug
+because it is intermittent and fairly rare.  There is however a good
+work around for it.  The `calon` and `caloff` procedures are called by
+procedures `calonfp` and `calofffp` for _fivpt_ and `calonnf` and
+`caloffnf` for _onoff_.  _fivpt_ and _onoff_ may hang during (or
+actually just after) the execution of one these procedures that
+_fivpt_ and _onoff_ will typically hang.  Using `sy=rte_go fivpt &` or
+`sy=rte_go onoff &`, as appropriate, may help get the FS unstuck, but
+the measurement results should probably be discarded.  If that doesn't
+help, you will have to terminate the FS to recover. You can prevent it
+from happening again (for this procedure) by adding the lines:
+
+  !+1s
+  sy=rte_go fivpt &
++
+to the end of `calonfp` and `calonfffp`.  For `calonnf` and
+`caloffnf`, please add:
+
+  !+1s
+  sy=rte_go onoff &
++
+If you see other situations where _fivpt_ and _onoff_ hang, please
+email Ed about it.
+
+. FS SNAP command pages don't list tape drive suffix numbers.  The
+FS SNAP manual pages and the `help` pages available through the
+`help=` command do not reflect when multiple versions are
+available with different suffixes depending on the number of drive
+specified in the control files.  For example, there is only a
+`tape` page, no `tape1` or `tape2` page.  However, the `help`
+facility will display the version of the command with no suffix
+when an available command with a suffix is used.  For example, if
+two drives are defined, then `help=tape1` and `help=tape2` will
+work, but `help=tape` will not and vice-versa if only one drive is
+defined.
+
+. LBA rack TPI detector is not usable.  The Australian LBA Data
+Acquisition System currently lacks a functional total power
+detector though support has been included.  To allow approximate
+system temperature calibration, all the setup commands and the TPI
+detectors of the modules of a co-existing Mark IV rack are
+currently also available when the rack type is specified to be
+LBA4.
+
+. `mk5b_mode` and `bit_streams` commands only report the expected
+sample rate.  The value of the actual clock rate is not read back
+from the recorder in order to calculate the actual effective
+sample rate.  Consequently, the query log output includes
+parenthesis around the sample rate as indication that it is not
+read, but expected.  The `mk5c_mode` command does report the
+actual sample rate.
+
+. Some _fmpsee_ routines do not generally report file I/O error
+through the log system for programs within the FS, specifically
+_boss_, _incom_, and _aquir_.  The `fmpopen()` routine does use
+the log system to report errors.  Those are the most common
+errors.  However other routines report errors with terminal
+output.  These other routines should eventually use the log
+system.
+
+. Some systems calls, particularly in _mk5cn_ and _dbbcn_, use
+separate UN errors to elaborate on errors in system calls.  These
+should eventually be integrated into the main error message, but
+whether this makes the errors messages too long (maximum 120
+characters) should be considered.
+
