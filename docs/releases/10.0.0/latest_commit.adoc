@@ -19,7 +19,7 @@
 //
 
 = Latest Commit update notes
-Version 0.2 - November 2020
+Version 0.3 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -222,7 +222,7 @@ use as reliable as released (tagged) versions.
 .. Add missing _rdbemsg.ctl_ customization.
 .. Include items added since _beta2_.
 
-.. Reorganized as an _.adoc_ file and now available as a web page at:
+.. Reorganized as _.adoc_ files in the _doc/_ sub-directory  and available as web pages at:
 https://nvi-inc.github.io/fs/.
 .. Improve structure and correct some errors from original _.txt_ version.
 .. Some typo/wording fixes.

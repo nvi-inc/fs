@@ -19,7 +19,7 @@
 //
 
 = Index of fs/
-Version 0.1 - Nov 2020
+Version 0.2 - Nov 2020
 
 == Direct Links
 
@@ -27,6 +27,6 @@ Version 0.1 - Nov 2020
 
 == Links to sub-directories
 
-<<releases/#,Releases>>
+<<releases/index.adoc#,Release>> documents
 
-<<misc/#,misc>>
+<<misc/index.adoc#,Miscellaneous>> documents
