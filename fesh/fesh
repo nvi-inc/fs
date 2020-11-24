@@ -29,77 +29,257 @@ version(){
 set -euo pipefail
 
 FS_BASE=${FS_BASE:-'/usr2'}
-FS_PATH=${FS_PATH:-"${FS_BASE}/fs"}
-LOG_PATH=${LOG_PATH:-"${FS_BASE}/log"}
-PROC_PATH=${PROC_PATH:-"${FS_BASE}/proc"}
-SCHED_PATH=${SCHED_PATH:-"${FS_BASE}/sched"}
-SNAP_PATH=${SNAP_PATH:-"${FS_BASE}/sched"}
+FS_DIR=${FS_DIR:-"${FS_BASE}/fs"}
+CONTROL_DIR=${CONTROL_DIR:-"${FS_BASE}/control"}
+LOG_DIR=${LOG_DIR:-"${FS_BASE}/log"}
+# check for skedf.ctl
+if [[ -e $CONTROL_DIR/skedf.ctl ]]; then
+    proc_dir=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$proc/i     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t\r]*$/) {$_=$1;exit;}}}' <$CONTROL_DIR/skedf.ctl)
+    snap_dir=$( perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$snap/i     ) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t\r]*$/) {$_=$1;exit;}}}' <$CONTROL_DIR/skedf.ctl)
+    sched_dir=$(perl -ne 'END {if(eof) {$_=".";} print;} if(/^\$schedules/i) {while (<>){if(/^\$/) {$_=".";exit;} elsif(/^[ \t]*([^* \t\n].*?)\/*[ \t\r]*$/) {$_=$1;exit;}}}' <$CONTROL_DIR/skedf.ctl)
+    PROC_DIR=${PROC_DIR:-"${proc_dir}"}
+    SNAP_DIR=${SNAP_DIR:-"${snap_dir}"}
+    SCHED_DIR=${SCHED_DIR:-"${sched_dir}"}
+#do not use the above the three *_DIR environment variables
+#to override what is in skedf.ctl; they can be used to override
+#what is placed in the corresponding *_dir variables if the
+#perl directory extracts get the wrong result
+    LIST_DIR=${LIST_DIR:-${SCHED_DIR}}
+else
+# drudg won't run without skedf.ctl, maybe some day it will
+# we can still get the schedule
+# use current directory without other information
+    SCHED_DIR=${SCHED_DIR:-"."}
+fi
+
+FESH_DATA_CENTER=${FESH_DATA_CENTER:-'cddis'}
+
+FESH_CDDIS_METHOD=${FESH_CDDIS_METHOD:-'ftp-ssl'}
+
+if [[ ! -z "${FESH_GEO_TPICD:-}" ]]; then
+    tpicd=$FESH_GEO_TPICD
+fi
+if [[ ! -z "${FESH_GEO_CONT_CAL:-}" ]]; then
+    cont_cal=$FESH_GEO_CONT_CAL
+fi
+if [[ ! -z "${FESH_GEO_CONT_CAL_POLARITY:-}" ]]; then
+    cont_cal_polarity=$FESH_GEO_CONT_CAL_POLARITY
+fi
+if [[ ! -z "${FESH_GEO_VSI_ALIGN:-}" ]]; then
+    vsi_align=$FESH_GEO_VSI_ALIGN
+fi
+if [[ -z "${NETRC_DIR:-}" ]]; then
+    NETRC_DIR=$HOME
+    CURL_NETRC_FILE_OPTION=
+else
+    CURL_NETRC_FILE_OPTION=" --netrc-file $NETRC_DIR/.netrc"
+fi
+if [[ ! -z "${STATION:-}" ]]; then
+    station=$STATION
+fi
+
+fatal(){
+    echo -e "ERROR: fesh:" "$*" >&2
+    exit 1
+}
+
+year=$(date +%Y)
+month=$(LANG=C date +%b%y|tr [:upper:] [:lower:])
 
 usage() {
     cat <<EOF
-Usage: $0 [options] OBSERVATION
-Fetch schedule file for OBSERVATION from CDDIS
+Usage: $0 [options] schedule
+Fetch schedule file
 
 Options:
-    -n     Fetch next observation in master schedule
-    -d     DRUDG schedule with default settings 
-           (needs STATION environment variable set to two letter id)
-    -v     Verbose mode, drudg output printed to stdout
-    -V     Print version and exit.
-    -f     Force downloading of schedule from server and, if given 
-           with '-d', re-run drudg
-    -h     Print this message
+ -n       Fetch next schedule in master file (not supported yet)
+ -d       drudg schedule with default settings, not supported for vlbeer
+          (needs STATION environment variable or -s set with two letter id)
+ -D dc    Use alternate data center; dc=bkg, cddis, opar, or vlbeer
+          (see more below about setting the default data center)
+ -v       Verbose mode, drudg output printed to stdout
+ -V       Print version and exit.
+ -m mmmyy Specify three character month and two digit year for the vlbeer
+          data center (see more below about specifying the month/year)
+          uses the hidden .latest sub-directory by default, use -H to suppress
+ -H       suppress use of the hidden .latest sub-directory for vlbeer
+ -y yyyy  Specify different (four-digit) year than the current one
+          for geo data centers (see more below about specifying the year)
+ -f       Force downloading of schedule from server and, if given
+          with '-d', re-run drudg
+ -x       download corresponding .txt file as well (geo only)
+ -s xx    Override STATION environment variable
+ -a val   Override drudg VSI_ALIGN answer to val
+ -c val   Override drudg CONT_CAL answer to val
+ -p val   Override drudg CONT_CAL_POLARITY answer to val
+ -t val   Override drudg TPICD answer to val
+ -h       Print this message
 
-fesh requires the STATION environment variable be set to the lower case
-two-letter station code in, e.g.:
+NOTE: If you specify a schedule that doesn't exist, you will get a
+file or a directory error from the server.
+
+For the '-d' option, the STATION environment variable or the -s option must be
+set with the lower case two-letter station code in, e.g., for STATION:
 
     setenv STATION gs #in ~/.login for tcsh or
     export STATION=gs #in ~/.profile for bash
 
+If -s is also set, it overrides STATION.
+
+Please see the end of this message about handling optional 'skedf.ctl'
+specified prompting for 'drudg'.
+
+The '-d' option is not supported for data center 'vlbeer'.
+
+The default data center is CDDIS but can be changed by setting the
+FESH_DATA_CENTER environment variable. Accepted values are bkg, cddis,
+opar (the three 'geo' centers) or vlbeer. For example, to make the default
+bkg, use:
+
+    setenv FESH_DATA_CENTER bkg #in ~/.login for tcsh or
+    export FESH_DATA_CENTER=bkg #in ~/.profile for bash
+
+The '-D' option can be used to specify an alternate data center when
+running the script.  If the data center is vlbeer, the '-d' option
+cannot be used.
+
+For geo data centers, fesh by default gets a schedule for the current
+year, but this can be overridden with '-y yyyy' option to specify a
+four digit year 'yyyy'. That option can be used to get a schedule for
+the next year. The 'yyyy' is not checked for validity and the
+download will fail if it is not correct.
+
+For vlbeer, fesh by default gets a schedule from the hidden .latest
+sub-directory for the current month, but this can be overridden with
+'-m mmmyy' to specify a three character month abbreviation 'jan',
+'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov',
+'dec' as 'mmm' and a two digit year 'yy'. The hidden .latest
+sub-directory of the specified month will be used.  The adding of
+/.latest to the current or '-m' specified directory can be suppressed
+the -H option.  The 'mmmyy' is not checked for validity and the
+download will fail if it is not correct.
+
 fesh (curl actually) will prompt for an email to use as the password
-for the anonymous ftp-ssl access. This can be avoided by setting a
-working email address in the FESH_EMAIL variable, e.g.:
+for anonymous ftp-ssl access for CDDIS. The prompt can be suppressed
+by setting a working email address in the FESH_EMAIL variable, e.g.:
 
-    setenv FESH_EMAIL user2@address #in ~/.login for tcsh or
-    export FESH_EMAIL=user2@address #in ~/.profile for bash
+    setenv FESH_EMAIL user@address #in ~/.login for tcsh or
+    export FESH_EMAIL=user@address #in ~/.profile for bash
 
-The directories for .skd, .snp, and .prc files can be changed from
-the usual by similarly setting SCHED_PATH, SNAP_PATH, and PROC_PATH.
-These settings must agree with /usr2/control/skedf.ctl. For example,
-to use /usr2/exper as the SCHED_DIR in fesh:
+The directories for .skd, .snp, and .prc files are obtained from
+the skedf.ctl control file. The listing files go with the .skd files
+by default, but can be over-ridden with the LIST_DIR environment
+variable. For example to make it the current directory, use:
 
-    setenv SCHED_PATH /usr2/exper #in ~/.login for tcsh or
-    export SCHED_PATH=/usr2/exper #in ~/.profile for bash
+    setenv LIST_DIR . #in ~/.login for tcsh or
+    export LIST_DIR=. #in ~/.profile for bash
 
-The listing file goes under SCHED_PATH.
+If the -x option is used to download the .txt file (for geo schedules
+only), the file is placed in the same directory as the .skd file.
 
-If you have FSL8 or other old distribution that does not support
-curl ftp-ssl to CDDIS, but worked with the previous versions of
-fesh that used wget for non-ssl ftp, you can restore the previous
-behaviour with:
+The default transfer method from CDDIS is ftp-ssl.  You can use https
+as the method with CDDIS if you set:
 
-    setenv FESH_CDDIS_NOSSL 1 #in ~/.login for tcsh or
-    export FESH_CDDIS_NOSSL=1 #in ~/.profile for bash
+    setenv FESH_CDDIS_METHOD https #in ~/.login for tcsh or
+    export FESH_CDDIS_METHOD=https #in ~/.profile for bash
+
+For the CDDIS https method, the login must be configured in ".netrc"
+which by default is in "~".  For example:
+
+    machine urs.earthdata.nasa.gov
+        login mycddisuser
+        password secret
+
+If your curl supports the "--netrc-file" option (see "man curl") , you
+can change the directory used for ".netrc" by setting the NETRC_DIR
+environment variable.  This matches plog. E.g., add the following to
+your login script
+
+    setenv NETRC_DIR "/usr2/control" #in ~/.login for tcsh or
+    export NETRC_DIR="/usr2/control" #in ~/.profile for bash
+
+See "man 5 netrc" for more details on ".netrc".
+
+If you have FSL8 or another old distribution that does not support
+curl ftp-ssl or https with CDDIS, but worked with the previous
+versions of fesh that used wget for non-ssl ftp, you can restore the
+previous behaviour with:
+
+    setenv FESH_CDDIS_METHOD ftp #in ~/.login for tcsh or
+    export FESH_CDDIS_METHOD=ftp #in ~/.profile for bash
 
 However, this method will no longer work when CDDIS stops support
 of non-ssl ftp, which is expected at the end of October 2020.
+
+With the '-d' option, if the 'skedf.ctl' control file specifies
+prompting for any of: tpicd, vsi_align, cont_cal, or
+cont_cal_polarity, a fixed answer can be provided by setting the
+environment variables: FESH_GEO_TPICD, FESH_GEO_VSI_ALIGN,
+FESH_GEO_CONT_CAL, and FESH_CONT_CAL_POLARITY, respectively. These
+settings can be overridden when running the script with the options:
+'-t', '-a', '-c', and '-p', respectively. Using '' as the value for an
+option will unset the corresponding value supplied as an environment
+variable.  Please be sure to read the follow four NOTES:
+
+  NOTE: If used incorrectly, this feature can fail in complicated ways
+  with no obvious indication. Use at your own risk. Simple use with
+  single mode schedules should be fine.
+
+  NOTE: If there is more than mode in the schedule, it is not possible
+  to supply answers in this way. 'drudg' will have to be run manually.
+
+  NOTE: If any of these environment variables or options are used, the
+  corresponding prompts must be enabled in 'skedf.ctl'. If there isn't
+  agreement, incorrect .prc files may be created without an obvious
+  indication of a problem. Be careful in particular of
+  FESH_GEO_VSI_ALIGN and the '-a' option since the corresponding
+  prompt will only occur if a DBBC3 PFB mode is in use.
+
+  NOTE: To provide minimal protection, the script will reject:
+
+   -setting an answer for vsi_align and answers either for cont_cal and/or
+    cont_cal_polarity
+   -setting an answer for cont_cal_polarity if the answer for cont_cal is off
+   -setting the tpicd answer to anything but a non-negative integer
+   -setting the cont_cal answer to anything but on or off
+   -setting the cont_cal_polarity to answer anything but 0, 1, 2, 3, or none
+   -setting the vsi_align answer to anything but 0, 1, or none
 EOF
 }
 
 run_drudg=
 force=
 verbose=
-while getopts 'ndhfvV' opt; do
+txt=
+while getopts 'a:c:nfdD:hHm:p:s:t:vVxy:' opt; do
     case $opt in
         n)
-            echo "next" not implimented.
+            echo "'next' not implemented."
             exit 1
             ;;
         d)
+            if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
+                echo "$CONTROL_DIR/skedf.ctl doesn't exist, can't run drudg, don't use '-d'" >&2
+                exit 1
+            fi
             run_drudg=1
+            ;;
+        D)
+            FESH_DATA_CENTER=$OPTARG
             ;;
         f)
             force=1
+            ;;
+        m)
+            month=$OPTARG
+            month_option=1
+            ;;
+        H)
+            not_hidden=1
+            ;;
+        y)
+            year=$OPTARG
+            year_option=1
             ;;
         h)
             usage
@@ -112,8 +292,26 @@ while getopts 'ndhfvV' opt; do
             version
             exit 0
             ;;
+        x)
+            txt=1
+            ;;
+        s)
+            station=$OPTARG
+            ;;
+        t)
+            if [ ! -z ${OPTARG} ]; then tpicd=$OPTARG; fi
+            ;;
+        c)
+            if [ ! -z ${OPTARG} ]; then cont_cal=$OPTARG; fi
+            ;;
+        p)
+            if [ ! -z ${OPTARG} ]; then cont_cal_polarity=$OPTARG; fi
+            ;;
+        a)
+            if [ ! -z ${OPTARG} ]; then vsi_align=$OPTARG; fi
+            ;;
         *)
-            usage >&2
+            echo "Try the '-h' option for help" >&2
             exit 1
     esac
 done
@@ -126,32 +324,145 @@ fi
 
 sched=$1
 
+if [[ ! "$FESH_DATA_CENTER" =~ ^(cddis|opar|bkg|vlbeer)$ ]]; then
+   echo "Unknown data center: $FESH_DATA_CENTER."
+   exit 1
+fi
+if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+    if [[ -n "$txt" ]]; then
+        echo "Option -x (.txt) is not supported for the vlbeer data center."
+        echo "To fetch the schedule, rerun without -x."
+        exit 1
+    elif [[ -n "$run_drudg" ]]; then
+        echo "Option -d (drudg) is not supported for the vlbeer data center."
+        echo "To fetch the schedule, rerun without -d."
+        exit 1
+    fi
+    if [[ ! -z  "${year_option:-}" ]]; then
+        echo "The -y option can't be used for the vlbeer data center"
+        exit 1
+    fi
+    if [[ -z  "${not_hidden:-}" ]]; then
+        month="${month}/.latest"
+    fi
+elif [[ ! -z "${month_option:-}" ]]; then
+        echo "The -m option can't be used for a geo data center"
+        exit 1
+fi
+
+if [[ ! "$FESH_CDDIS_METHOD" =~ ^(ftp|ftp-ssl|https)$ ]]; then
+   echo "Unknown cddis method: $FESH_CDDIS_METHOD."
+   exit 1
+fi
+
+# build optional answers
+tpicd_answer=
+if [ ! -z ${tpicd+x} ]; then tpicd_answer=$tpicd$'\n'; fi
+cont_cal_answer=
+if [ ! -z ${cont_cal+x} ]; then cont_cal_answer=$cont_cal$'\n'; fi
+cont_cal_polarity_answer=
+if [ ! -z ${cont_cal_polarity+x} ]; then cont_cal_polarity_answer=$cont_cal_polarity$'\n'; fi
+vsi_align_answer=
+if [ ! -z ${vsi_align+x} ]; then vsi_align_answer=$vsi_align$'\n'; fi
+
+#prevent simple errors in answers
+if [[ ! "$tpicd_answer" =~ ^([0-9]+$'\n'|)$ ]]; then
+   echo -n "tpicd must be a non-negative integer or not set, was $tpicd_answer"
+   exit 1
+fi
+if [[ ! "$cont_cal_answer" =~ ^(on$'\n'|off$'\n'|)$ ]]; then
+   echo -n "CONT_CAL must be on, off, or not set, was $cont_cal_answer"
+   exit 1
+fi
+if [[ ! "$cont_cal_polarity_answer" =~ ^([0-3]+$'\n'|none$'\n'|)$ ]]; then
+   echo -n "CONT_CAL_POLARITY must be 0, 1, 2, 3, none, or not set, was $cont_cal_polarity_answer"
+   exit 1
+fi
+if [[ ! "$vsi_align_answer" =~ ^([0-1]+$'\n'|none$'\n'|)$ ]]; then
+   echo -n "VSI_ALIGN must be 0, 1, none, or not set, was $vsi_align_answer"
+   exit 1
+fi
+if [ ! -z "$vsi_align_answer"  ]
+then
+    if [ ! -z "$cont_cal_answer" ]
+    then
+        if [ ! -z "$cont_cal_polarity_answer" ]
+        then
+            echo "setting VSI_ALIGN is not compatible with setting CONT_CAL and CONT_CAL_POLARITY"
+            exit 1
+        fi
+        echo "setting VSI_ALIGN is not compatible with setting CONT_CAL"
+        exit 1
+    fi
+    if [ ! -z "$cont_cal_polarity_answer" ]
+    then
+        echo "setting VSI_ALIGN is not compatible with setting CONT_CAL_POLARITY"
+        exit 1
+    fi
+fi
+if [[ "$cont_cal_answer" =~ off  ]]; then
+    if [ ! -z "$cont_cal_polarity_answer" ]
+    then
+        echo "setting CONT_CAL_POLARITY with CONT_CAL off is not supported"
+        exit 1
+    fi
+fi
+
 ## Conflict check
-if [[ -e $SCHED_PATH/$sched.skd && -z "$force" ]]; then
-    echo "$SCHED_PATH/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
-    exit 1
+if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+    if [[ -e $SCHED_DIR/$sched.vex ]]; then
+        if [[ -z "$force" ]]; then
+            echo "$SCHED_DIR/$sched.vex exists, delete or use '-f' to get fresh schedule" >&2
+            exit 1
+        fi
+        rm "$SCHED_DIR/$sched.vex"
+    fi
+else
+    if [[ -e $SCHED_DIR/$sched.skd ]]; then
+        if [[ -z "$force" ]]; then
+            echo "$SCHED_DIR/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
+            exit 1
+        fi
+        rm "$SCHED_DIR/$sched.skd"
+    fi
+    if [[ -n "$txt" ]]; then
+        if [[ -e $SCHED_DIR/$sched.txt ]]; then
+            if [[ -z "$force" ]]; then
+                echo "$SCHED_DIR/$sched.txt exists, delete or use '-f' to get fresh schedule" >&2
+                exit 1
+            fi
+            rm "$SCHED_DIR/$sched.txt"
+        fi
+    fi
 fi
 
 if [[ -n "$run_drudg" ]]; then
     set +u
-    if [[ -z "$STATION" ]]; then
-        >&2 echo "$0: ERROR: STATION enviroment variable not set; should be set to two-letter station code if using drudg."
+    if [[ -z "$station" ]]; then
+        >&2 echo "$0: ERROR: Neither STATION environment variable nor -s are set; should be set to two-letter station code if using drudg."
         exit 1
     fi
     set -u
-    if [[ -e $SNAP_PATH/$sched$STATION.snp ]]; then
+    if [[ -e $SNAP_DIR/$sched$station.snp ]]; then
         if [[ -z "$force" ]]; then
-            echo "$SNAP_PATH/$sched$STATION.snp exists, delete or use '-f' to re-drudg >&2"
+            echo "$SNAP_DIR/$sched$station.snp exists, delete or use '-f' to re-drudg" >&2
             exit 1
         fi
-        rm "$SNAP_PATH/$sched$STATION.snp"
+        rm "$SNAP_DIR/$sched$station.snp"
     fi
-    if [[ -e $PROC_PATH/$sched$STATION.prc ]]; then
+    if [[ -e $PROC_DIR/$sched$station.prc ]]; then
         if [[ -z "$force" ]]; then
-            echo "$PROC_PATH/$sched$STATION.prc exists, delete or use '-f' to re-drudg" >&2
+            echo "$PROC_DIR/$sched$station.prc exists, delete or use '-f' to re-drudg" >&2
             exit 1
         fi
-        rm "$PROC_PATH/$sched$STATION.prc"
+        rm "$PROC_DIR/$sched$station.prc"
+    fi
+    if [[ -e $LIST_DIR/$sched$station.lst ]]; then
+        if [[ -z "$force" ]]; then
+            echo "$LIST_DIR/$sched$station.lst exists, delete or use '-f' to re-drudg" >&2
+            exit 1
+        fi
+        rm "$LIST_DIR/$sched$station.lst"
     fi
 fi
  
@@ -160,17 +471,54 @@ if [[ -z "${FESH_EMAIL:-}" ]]; then
 else
     user="anonymous:$FESH_EMAIL"
 fi
-year=$(date +%Y)
-cd "$SCHED_PATH"
+pushd "$SCHED_DIR" >/dev/null
 version
 echo Fetching schedule from server...
 #TODO: if not found, maybe check next or previous years?
-if [[ -z "${FESH_CDDIS_NOSSL:-}" ]]; then
-    curl -u "$user" -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-else
-    wget -nv --backups=1 "ftp://cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
+    if [[ "$FESH_CDDIS_METHOD" =~ ^ftp$ ]]; then
+        wget -nv "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+        if [[ -n "$txt" ]]; then
+            wget -nv "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+        fi
+    elif [[ "$FESH_CDDIS_METHOD" =~ ^https$ ]]; then
+        if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
+            fatal "$NETRC_DIR/.netrc not found, see usage"
+        fi
+
+        if ! grep -q urs.earthdata.nasa.gov "$NETRC_DIR/.netrc"; then
+            fatal "$NETRC_DIR/.netrc does not contain CDDIS login information, see usage"
+        fi
+        curl  -k  -f -c /dev/null -n \
+            $CURL_NETRC_FILE_OPTION \
+            -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+        if [[ -n "$txt" ]]; then
+            curl  -k  -f -c /dev/null -n \
+                $CURL_NETRC_FILE_OPTION \
+                -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+        fi
+    else
+        curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+        if [[ -n "$txt" ]]; then
+            curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+        fi
+    fi
+elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
+wget -nv "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+    if [[ -n "$txt" ]]; then
+        wget -nv "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+    fi
+elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
+wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+    if [[ -n "$txt" ]]; then
+        wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+    fi
+elif [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+wget -nv "ftp://ftp@vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
 fi
 echo Done
+popd >/dev/null
+nine=$'9'
 
 drudg_out="/dev/null"
 if [[ -n "$verbose" ]]; then
@@ -179,18 +527,17 @@ fi
 
 if [[ -n "$run_drudg" ]]; then
 echo -n Drudging schedule... >&2
-cat <<EOF | "$FS_PATH/bin/drudg" "$sched.skd" > "$drudg_out"
-$STATION
+cat <<EOF | "$FS_DIR/bin/drudg" "$sched.skd" > "$drudg_out"
+$station
 3
 12
-9
-$sched$STATION.lst
+$tpicd_answer$cont_cal_answer$cont_cal_polarity_answer$vsi_align_answer$nine
+$LIST_DIR/$sched$station.lst
 
 
 
 5
 0
-
 EOF
 
 echo Done. >&2
