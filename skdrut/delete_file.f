@@ -27,21 +27,24 @@
 
 ! local
       logical kexist
+      integer trimlen,nch
 
       inquire(file=lfilnam,exist=kexist)
       if(.not. kexist) return
 
       OPEN (lutmp,  file=lfilnam,iostat=ierr)
       IF (ierr.NE.0) then
+         nch=max(1,trimlen(lfilnam))
          WRITE(*,"('delete_file: I/O error ',i3, ' opening file ',a)")
-     >    ierr,trim(lfilnam)
+     >    ierr,lfilnam(:nch)
          return
       endif
 
       CLOSE (lutmp,status='delete',iostat=ierr)
       IF (ierr.NE.0) then
+         nch=max(1,trimlen(lfilnam))
          WRITE(*,"('delete_file: I/O error ',i3, ' purging file ',a)")
-     >    ierr,trim(lfilnam)
+     >    ierr,lfilnam(:nch)
       endif
 
 

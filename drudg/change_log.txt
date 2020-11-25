@@ -1,5 +1,8 @@
 This file contains a summary of changes made and why.
 
+2020Nov20 snap.f: If  no observations return with warning. Previously could crash
+2020Nov17 cvpos.f. Replaced repeated code with call to subroutine iwhere_in_range4.f
+2020Nov17 lists.f, label.f: Got rid of hollerith that indicated tape direction. Got rid of some S2 tests. 
 2020Oct02 Got rid of references and code dealing with S2 stations:  prout.f
           In skdrut: frinit.f , speed.f, stinp.f, ttape.f, unpvt.f vstinp.f, vunpdas.f
           In skdrincl: freqs.ftni, statn.f 

@@ -200,9 +200,10 @@ C
         cstrack(i)=crack         
 
         if(.not.kvalid_rec(crec)) then        
+            nch=max(1,trimlen(crec))
             write(lu,'(a)') "VSTINP: for station "// 
      >         stndefnames(i)(1:il)//" unrecognized recorder type: "//
-     >         trim(crec)// "setting to none!"
+     >         crec(:nch)// "setting to none!"
             crec='none'
         endif   
         cstrec(i,1)=crec

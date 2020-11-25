@@ -27,8 +27,8 @@
 ! local
 
       integer imon_offset(12)
-      data imon_offset/0,31,59,90,120,151,181,212,243,273,304,334/
       integer ileap_day
+      data imon_offset/0,31,59,90,120,151,181,212,243,273,304,334/
 
       if(mod(iyear,400) .eq. 0) then
          ileap_day=1

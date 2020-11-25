@@ -505,7 +505,8 @@ C           error for no matching value, which is ok
 
 ! Real errors 
         IF (IERR.NE.0) THEN
-          write(*,*) "Error parsing horizon mask: "//trim(cbufin0)
+          nch=max(1,trimlen(cbufin0))
+          write(*,*) "Error parsing horizon mask: "//cbufin(:nch)
           if(ierr .eq. -101) then
             write(*,*) "Incorrect form for station ID (2nd arg)" 
           else if (ierr.lt.-200) then

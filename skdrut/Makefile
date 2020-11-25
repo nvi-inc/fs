@@ -36,7 +36,7 @@ OBJECTS=\
     igtba.o igtfr.o  \
     indexx_string.o \
     iroll_def.o itras.o itimedifsec.o iday0.o igetstatnum.o igetstatnum2.o igetsrcnum.o \
-    istringminmatch.o ivgtmo.o ivgtst.o \
+    istringminmatch.o ivgtmo.o ivgtst.o iwhere_in_range4.o \
     iwhere_in_string_list.o iwhere_in_string_list_nocase.o iwhere_in_int_list.o iwhere_in_real8_list.o ind.o i2long.o \
     julda.o \
     kbit.o kcont.o kearl.o knewt.o ktimedif.o kget_response.o \

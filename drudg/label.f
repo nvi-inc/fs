@@ -79,7 +79,6 @@ C NLAB - number of labels across a page
       character*1 cid1
       character*2 cid2
       character*20 response
-      integer*2 hhr
       integer i
       character upper
 
@@ -90,7 +89,7 @@ C NLAB - number of labels across a page
 
 C INITIALIZED:
       DATA IPASP/-1/, IFTOLD/0/
-      DATA  HHR/2HR /
+    
 
 C SUBROUTINES CALLED:
 C  UNPSK - unpacks schedule file entry
@@ -152,6 +151,7 @@ C 000705 nrv Use standard KNEWT for S2 also.
 !            tape_label ctape_num. This is so we can use this for VSN#s
 ! 2006Oct17 JMGipson. Added argument to cclose(fp, clabtyp). Clabyp indicates kind of printer.
 ! 2007May25 JMGipson made lstcod, lstnna, lexper ASCII (cstcod,cstnna,cexper)
+! 2020Oct17 Got rid of HDDR 
 
 C 1. First get set up with schedule or SNAP file.
 
@@ -412,9 +412,7 @@ C
      .    CALL TMADD(IYR,IDAYR,IHR,iMIN,ISC,IDUR(ISTNSK),IYR2,IDAYR2,
      .               IHR2,iMIN2,ISC2)
           IDIR=+1
-          IF (ISTNSK.NE.0)  THEN
-            IF (LDIR(ISTNSK).EQ.HHR) IDIR=-1
-          ENDIF
+        
           KNEW=.TRUE.
           IF(ISTNSK.NE.0) then
 C           if (ks2) then

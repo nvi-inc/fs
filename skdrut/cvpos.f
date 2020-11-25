@@ -42,6 +42,10 @@ C
 C   COMMON BLOCKS USED
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/statn.ftni'
+! Function
+      integer iwhere_in_range4
+
+
 C
 C     LOCAL VARIABLES:
       real*4 slat,clat,sha,cha,saz,sel,cel,azx,
@@ -199,11 +203,13 @@ C         (1 = ha/dec, 5 = Richmond)
      .       (DC.GT.STNLIM(1,2,ISTN)).AND.
      .       (DC.LT.STNLIM(2,2,ISTN)))
         IF (NCORD(ISTN).GT.0) THEN
-          I=1
-          DO WHILE(I.LE.NCORD(ISTN).AND.
-     .      (DC.LT.CO1MASK(I,ISTN).OR.DC.GE.CO1MASK(I+1,ISTN)))
-            I=I+1
-          ENDDO
+          i=iwhere_in_range4(co1mask(1,istn),ncord(istn),DC)
+          if(i .eq. 0) then   
+            write(*,*) "Problem in Co1mask ",
+     >        (Co1mask(i,istn),i=1,ncord(istn))
+            write(*,*) " or DC ", DC
+            stop
+          endif 
           KUP=KUP.AND.ABS(HA).LE.CO2MASK(I,ISTN)
         ENDIF
 C         For x,y mounts with fixed axis oriented EW, check x and y
@@ -214,11 +220,13 @@ C      (2=XYEW)
      .       (Y30.GT.STNLIM(1,2,ISTN)).AND.
      .       (Y30.LT.STNLIM(2,2,ISTN)))
         IF (NCORD(ISTN).GT.0) THEN
-          I=1
-          DO WHILE(I.LE.NCORD(ISTN).AND.
-     .      (X30.LT.CO1MASK(I,ISTN).OR.X30.GE.CO1MASK(I+1,ISTN)))
-            I=I+1
-          ENDDO
+          I=iwhere_in_range4(CO1mask(1,istn),ncord(istn),X30)
+          if(i .eq. 0) then   
+             write(*,*) "Problem in Co1mask ",
+     >         (Co1mask(i,istn),i=1,ncord(istn))       
+            write(*,*) " or X30 ", X30
+            stop
+          endif 
           KUP=KUP.AND.Y30.GE.CO2MASK(I,ISTN)
         ENDIF
 C         For az/el mounts, check elevation only (azimuth cable
@@ -229,12 +237,14 @@ C       (3 = AZEL)  (check 6=SEST and 7=ALGO here too)
         KUP=((EL.GT.STNLIM(1,2,ISTN)).AND.
      .       (EL.LT.STNLIM(2,2,ISTN)))
         IF (NCORD(ISTN).GT.0) THEN
-          I=1
-          DO WHILE(I.LE.NCORD(ISTN).AND.
-     .      (AZ.LT.CO1MASK(I,ISTN).OR.AZ.GE.CO1MASK(I+1,ISTN)))
-            I=I+1
-          ENDDO
-          KUP=KUP.AND.EL.GE.CO2MASK(I,ISTN)
+          I=iwhere_in_range4(CO1mask(1,istn),ncord(istn),az)
+          if(i .eq. 0) then
+            write(*,*) "Problem in Co1mask ",
+     >        (Co1mask(i,istn),i=1,ncord(istn))
+            write(*,*) " or AZ ", AZ
+            stop
+          endif 
+           KUP=KUP.AND.EL.GE.CO2MASK(I,ISTN)
         ENDIF
 C         For x,y mounts with fixed axis oriented NS, check x and y
 C       (4 = XYNS)
@@ -244,11 +254,13 @@ C       (4 = XYNS)
      .       (Y85.GT.STNLIM(1,2,ISTN)).AND.
      .       (Y85.LT.STNLIM(2,2,ISTN)))
         IF (NCORD(ISTN).GT.0) THEN
-          I=1
-          DO WHILE(I.LE.NCORD(ISTN).AND.
-     .      (X85.LT.CO1MASK(I,ISTN).OR.X85.GE.CO1MASK(I+1,ISTN)))
-            I=I+1
-          ENDDO
+          I=iwhere_in_range4(CO1mask(1,istn),ncord(istn),X85)
+          if(i .eq. 0) then  
+            write(*,*) "Problem in Co1mask ",
+     >        (Co1mask(i,istn),i=1,ncord(istn)) 
+            write(*,*) " or X30 ", X85
+            stop
+          endif 
           KUP=KUP.AND.Y85.GE.CO2MASK(I,ISTN)
         ENDIF
       ENDIF
@@ -269,13 +281,14 @@ C     Check for station elevation limit, set within SKED
 C     Now check horizon mask for stations that have one.
       IF (NHORZ(ISTN).GT.0) THEN
         eli=100.d0
-        do i=1, Nhorz(istn)
-          if(az .ge. azhorz(i,istn)) exit
-        end do 
-!        DO WHILE(I.LT.NHORZ(ISTN)+1.AND.
-!     .    (AZ.LT.AZHORZ(I,ISTN).OR.AZ.GE.AZHORZ(I+1,ISTN)))
-!          I=I+1 ! find AZ between i and i+1
-!        ENDDO
+          I=iwhere_in_range4(azhorz(1,istn),nhorz(istn),az)
+          if(i .eq. 0) then
+            write(*,*) "Problem in azhorz ", 
+     >         (azhorz(i,istn),i=1,ncord(istn))
+            write(*,*) " or AZ ", AZ
+            stop
+          endif 
+
         if (.not.klineseg(istn)) then ! use step functions
           eli=elhorz(i,istn)
         else ! interpolate horizon mask line segment end points
