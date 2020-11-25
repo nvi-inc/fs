@@ -40,7 +40,7 @@ print-%  : ; @echo $* = $($*)
 LIB_DIR = clib flib bosslb fclib fmpsee fslb lnfch newlb polb port rtelb vis \
 poclb skdrlnfch skdrut vex rclco/rcl s2das
 
-ifndef FS_NO_SERVER_MAKE
+ifndef FS_NO_DISPLAY_SERVER_MAKE
 LIB_DIR += third_party
 endif
 
@@ -52,7 +52,7 @@ gnfit gndat gnplt dscon systests autoftp monpcal logpl1 holog gnplt1 predict \
 dbbcn rdbcn rdtcn mk6cn popen udceth0 rack mcicn be_client s_client lgerr fesh\
 plog rdbemsg new_ifdbb
 
-ifndef FS_NO_SERVER_MAKE
+ifndef FS_NO_DISPLAY_SERVER_MAKE
 EXE_DIR += fsserver
 endif
 
