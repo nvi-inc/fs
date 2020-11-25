@@ -131,6 +131,10 @@ main(int argc_in,char *argv_in[])
 
     if(getenv("FS_DISPLAY_SERVER") != NULL) {
         arg_no_server = false;
+#ifdef FS_NO_SERVER_MAKE
+		fprintf(stderr, "Server was not built into the FS, can't run with FS_DISPLAY_SERVER set.\n");
+		exit(EXIT_FAILURE);
+#endif
     }
 
 	static struct option long_options[] = {
