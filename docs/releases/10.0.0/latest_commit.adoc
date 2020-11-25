@@ -18,8 +18,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= Latest Commit update notes
-Version 0.3 - November 2020
+= Latest commit update notes
+Version 0.4 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -32,9 +32,16 @@ Version 0.3 - November 2020
 == Introduction
 
 The document covers updating from the latest pre-release to the latest
-commit. The latest commit is somewhat experimental.  We make ever
+commit. The latest commit is somewhat experimental. We make ever
 effort to keep the latest commit usable. However commits that are not
 tagged for release are not intended for operations.
+
+This document is up to date with commit
+https://github.com/nvi-inc/fs/commit/746f40d670a36093ff613167139e4e2c77afae56[746f40d6].
+Due to small increments, such as adding this document, this may not be
+the literal last commit, but the differences should be small unless
+you happen to `fetch` between a significant change and this document
+being updated.
 
 == Upgrading from 10.0.0-beta2 to the latest commit
 
@@ -53,29 +60,62 @@ execute:
 
 === Additional steps
 
-. If you are using _fesh_ to pull schedules from _cddis_, it is
-recommend that you set the `FESH_EMAIL` environment variable with a
-working email address to use as the password for _anonymous_ FTP-SSL
-access (which is new in this release); this will remove the need to
-enter it manually for each use.
-+
-
-If you have FSL8 or other old distribution that does not support
-_curl_ SSL connections to _cddis_, it is possible to restore
-the previous non-SSL FTP access. That can only be a temporary solution
-since _cddis_ is planning to end non-SSL FTP access at the end of
-October 2020.
-+
-
-Please see `*fesh -h*` for the details on how to use all of these
-features.
-
 . If you use RDBEs in your back-end and want to use the _rdbemsg_
 utility to send operations messages, please customize your
-_/usr2/control/rdbemsg.ctl_ control file by adding the _name_ line to
+_/usr2/control/rdbemsg.ctl_ control file by adding the `name` line to
 the file if you haven't already.  Full instructions are provided in
-the <<beta2.adoc#_update_rdbemsg_ctl,Update rdbemsg.ctl>> sub-step in the
-<<beta2.adoc#,beta2 update notes>> document.
+the, revised, <<beta2.adoc#_update_rdbemsg_ctl,Update rdbemsg.ctl>>
+sub-step in the <<beta2.adoc#,beta2 update notes>> document.
+
+
+. If you use the _fesh_ script there is one required change (listed
+first below) and a few optional changes that depend on your situation:
+
+.. If not already set, specify a directory for _.skd_ files in the
+`$schedules` block of the _/usr2/fs/skedf.ctl_ control file. You can
+use any value you want, but to be backward compatible with the
+previous behavior of _fesh_ it must be _/usr2/sched_.
+
+.. Likewise, directories should be specified in the `$snap` and `$proc`
+blocks of _/usr2/contol/skedf.ctl_. You can use any
+values you want, but typically they should be set to _/usr2/sched_ and
+_/usr2/proc_, respectively, to agree with the FS.
+
+.. The _fesh_ script uses _cddis_ as the default data center. You can
+specify a different data center by setting the `FESH_DATA_CENTER`
+environment variable. Available data centers for geodesy are _bkg_,
+_cddis_, and _opar_; for astronomy, _vlbeer_.
++
+
+NOTE: For FSL8 and other old Linux distributions, access to
+_cddis_ may not be possible, due to out of date certificates.  In that
+case, _bkg_ or _opar_ may be suitable alternatives.
+
+
+.. The _fesh_ script uses FTP-SSL as the default access method for the
+_cddis_ data center. For this case, you an avoid having to answer a
+prompt for your email address each time you run _fesh_  by setting your
+email address in the `FESH_EMAIL` environment variable.
++
+
+WARNING: The FTP-SSL method may not work from behind some firewalls.
+If it doesn't work for you, either use a different data center (see
+above) or use HTTPS for _cddis_ (see below).
+
+.. You can change the access method for _cddis_ to HTTPS, by setting
+the `FESH_CDDIS_METHOD` environment variable to `https`.
++
+
+NOTE: Using HTTPS requires an _EarthData_ login and setting it in
+your _.netrc_ file.  If you don’t have an _EarthData_ login, you
+should be able to get one by selecting `REGISTER` at:
+https://urs.earthdata.nasa.gov/.
+
++
+
+Please see `*fesh -h*` for more information on using these features.
+A more complete description of the changes to _fesh_ is included in
+the current document at <<fesh,details>>.
 
 === Review other changes
 
@@ -84,9 +124,9 @@ for details of the changes since that release.
 
 == Changes since 10.0.0-beta2
 
-There are separate sub-sections with summaries of changes in the FS
+[[details]] There are separate sub-sections with summaries of changes in the FS
 and _drudg_. Following those are sub-sections giving the details of the
-changes.  [[details]] Each summary item has a clickable <<details,More details>>
+changes. Each summary item has a clickable <<details,More details>>
 link that leads to the detailed description of that item.
 
 Clickable links such as
@@ -108,14 +148,16 @@ _/usr2/fs/drudg/change_log.txt_.
 
 . Add _new_ifdbb_ script for (RDBE) VGOS stations. <<new_ifdbb,More details>>.
 
-. _fesh_ uses FTP-SSL (closes https://github.com/nvi-inc/fs/issues/36[#36]).
+. _fesh_ updated and expanded (includes closing
+https://github.com/nvi-inc/fs/issues/36[#36],
+https://github.com/nvi-inc/fs/issues/37[#37],
+https://github.com/nvi-inc/fs/issues/65[#65], and partially closing
+https://github.com/nvi-inc/fs/issues/38[#38]).
 <<fesh,More details>>.
 
 . The station name in _rdbemsg_ is no longer hard coded (closes
 https://github.com/nvi-inc/fs/issues/62[#62]).
 <<stationrdbemsg,More details>>.
-
-. Restore `help` for DBBC3 commands. <<help,More details>>.
 
 . Improvements in _fsserver_ (includes tentatively closing https://github.com/nvi-inc/fs/issues/69[#69]).
 <<fsserver,More details>>.
@@ -123,11 +165,10 @@ https://github.com/nvi-inc/fs/issues/62[#62]).
 . Improvements in _gnplt_ (closes https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
 <<gnplt,More details>>.
 
-. Improvements in `help` files (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
+. Improvements in `help` command (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
 <<helpfiles,More details>>.
 
-. Improvements to update notes (this document):
-<<updatenotes,More details>>.
+. Improvements to update notes. <<updatenotes,More details>>.
 
 === Summary of drudg changes
 
@@ -147,30 +188,150 @@ conditions at the station. The provides a way to incorporate
 needed changes into schedules. If the script is run without other
 command line arguments, it will output "help" information.
 
-. [[fesh]] _fesh_ uses FTP-SSL (closes
-https://github.com/nvi-inc/fs/issues/36[#36]). The use of FTP-SSL for
-_cddis_ access will allow use of _cddis_ after non-SSL FTP access is
-disabled there, expected at the end of October 2020. It is
-recommended that the `FESH_EMAIL` environment variable be set to
-avoid the need to provide an email address each time use as the
-_anonymous_ FTP-SSL password.
+. [[fesh]] _fesh_ updated and expanded (includes closing
+https://github.com/nvi-inc/fs/issues/36[#36],
+https://github.com/nvi-inc/fs/issues/37[#37],
+https://github.com/nvi-inc/fs/issues/65[#65], and partially closing
+https://github.com/nvi-inc/fs/issues/38[#38]).
+
+.. _fesh_ supports encrypted access to _cddis_ using FTP-SSL and HTTPS
+(closes https://github.com/nvi-inc/fs/issues/36[#36]). This allows
+use of _cddis_ after non-SSL FTP access was disabled there at
+the end of October 2020. FTP-SSL is the default method.
+
 +
 
-If you have FSL8 or other old distribution that does not support
-_curl_ SSL connections to _cddis_, it is possible to restore the
-previous non-SSL FTP access by setting the `FESH_CDDIS_METHOD`
-environment variable to `ftp`.  However, this method will no longer work
-once non-SSL FTP access ends.
+For FTP-SSL, it is recommended that the
+`FESH_EMAIL` environment variable be set to avoid having to provide
+an email address as the _anonymous_ FTP-SSL password for each
+invocation.
+
 +
-Please see `*fesh -h*` for the details on using these features.
+
+WARNING: The FTP-SSL method may not work from behind some firewalls.
+If it doesn't work for you, you can either use HTTPS for _cddis_  or
+use a different data center (see below).
+
++
+
+NOTE: The use of FTP-SSL by _cddis_ may be deprecated in the future.
+
++
+
+Using HTTPS can be activated for _cddis_ by setting the
+`FESH_CDDIS_METHOD` environment variable to `https`.
+
++
+
+NOTE: Using HTTPS for _cddis_ requires an _EarthData_ login and
+setting it in your _.netrc_ file.  If you don’t have an _EarthData_
+login, you should be able to get one by selecting `REGISTER` at:
+https://urs.earthdata.nasa.gov/.
+
+.. _fesh_ supports _bkg_, _cddis_, _opar_, and _vlbeer_ data centers
+(closes https://github.com/nvi-inc/fs/issues/37[#37]). The data center
+can be selected with the `FESH_DATA_CENTER` environment variable or
+the `-D` command line option. The default data center is _cddis_. For
+_vlbeer_ only _.vex_ files are supported; for the others only, _.skd_.
+Running _drudg_ automatically is not supported for _vlbeer_.
+
+.. _fesh_ respects the _/usr2/control/skedf.ctl_ control file (closes
+https://github.com/nvi-inc/fs/issues/65[#65]). Previously _fesh_
+assumed that the directory for _.skd_ files was _/usr2/sched/_
+regardless of what was in the `$schedules` block of
+_/usr2/control/skedf.ctl_. This only worked if the directory specified
+was _/usr2/sched_ or was the working directory (i.e., not specified or
+`.`). This prevented use with different directories, such as
+_/usr2/exper_, for _.skd_ files.  Thanks to Jon Quick (HartRAO) for
+reporting this.
+
+.. _fesh_ provides support for _drudg_ optional prompts for geodesy
+schedules (partially closing
+https://github.com/nvi-inc/fs/issues/38[#38]). It is assumed that for
+geodesy the answers to these questions for a station do not vary. This
+feature is intended to allow stations that observe both astronomy and
+geodesy schedules to use _fesh_ for geodesy schedules.  The
+environment variables `FESH_GEO_TPICD`, `FESH_GEO_CONT_CAL`,
+`FESH_GEO_CONT_CAL_POLARITY`, and `FESH_GEO_VSI_ALIGN` or the command
+line options `-tcpa` can be used to supply answers to the
+corresponding _drudg_ prompts.
+
++
+
+WARNING: _Let the user beware._ This feature must be used with extreme
+care.  The answers that are specified must correspond exactly to the
+questions that _drudg_ will ask. If they don't correspond correctly,
+_drudg_ may produce subtly incorrect output with no obvious indication
+of a problem. The _fesh_ script does what consistency checking it can,
+e.g., if `FESH_CONT_CAL` is specified as `off`, no answer can be
+supplied for `FESH_CONT_CAL_POLARITY` since that question will not be
+asked. It is important to verify that correct output is being
+produced.
+
++
+
+WARNING: The feature will not work for schedules that have more than
+mode. It is extremely rare for geodesy schedules to have more than one
+mode, but it is possible.
+
+.. Use of an environment variable, `LIST_DIR`, was added to specify the
+directory for _drudg_ listings. If not set, the `.skd` file directory
+is used.
+
+.. Use of an environment variable, `NETRC_DIR`, was added to specify a
+directory other than the user's home directory (__~__) for the `.netrc`
+file used with HTTPS access for _cddis_.  The same variable is used by
+the _plog_ script for the same purpose.
+
++
+
+Normally, the _.netrc_  file would be in the user's home directory.
+However, some systems have security policies that forbid that. This
+variable provides a way to have the _.netrc_ file in a different
+directory.
+
++
+
+.. The user name for the unencrypted FTP access to _bkg_, _opar_, and
+_vlbeer_, is explicitly set to _ftp_ to avoid potential conflicts with
+other accounts specified in _~/.netrc_ (this is not redirected by
+`NETRC_DIR`).
+
+.. Several new command line options were added:
+
+... `-y` to override the year directory accessed for a geodesy data
+center (the default is the current year).
++
+
+This is particularly useful for getting schedules for the next year.
+
+... `-t` to trigger also downloading the _.txt_ file associated with a
+geodesy schedule.`
+
+... `-m` to override the month directory accessed for _vlbeer_ (the
+default is the current month).
++
+
+This is particularly useful for getting schedules for a future month.
+
+... `-H` to disable the default use of the _.latest_ sub-directory of
+the month directory for _vlbeer_.
+
+... `-D` to override the data center if the `FESH_DATA_CENTER`
+environment variable is set, or change the data center from the
+default if it is not set.
+
+... `-s` to override the station code if the `STATION` environment
+variable is set, or set it if it is not set.
+
++
+
+Please see `*fesh -h*` for more information on using these features.
 
 . [[stationrdbemsg]] The station name in _rdbemsg_ is no longer hard coded (closes
 https://github.com/nvi-inc/fs/issues/62[#62]). The station name is now
 set in _rdbemsg.ctlr_ control file. Thanks to Chevo Terraza (MGO) for
 reporting this.
-
-. [[help]] Restore `help` for DBBC3 commands. The selection of DBBC3 specific commands
-was lost in the merge of the VGOS and main branches. It is now restored.
 
 . [[fsserver]] Improvements in _fsserver_ (includes tentatively closing https://github.com/nvi-inc/fs/issues/69[#69]).
 
@@ -188,26 +349,30 @@ situation is still being monitored to verify that it is fixed.
 https://github.com/nvi-inc/fs/issues/72[#72]).  The original developer,
 (Tomas Gille), did very good work developing this second version of
 _gnplt_, but ran out of time in his internship and was unable to include
-this minor but important feature.
+this minor but important feature. Thanks to Beppe Maccaferri (Medicina)
+for reporting this.
 
-.. _gnplt now works on FSL8 (Lenny) again (closes
-https://github.com/nvi-inc/fs/issues/73[#73]).  Some reccent
+.. _gnplt_ now works on FSL8 (Lenny) again (closes
+https://github.com/nvi-inc/fs/issues/73[#73]).  Some recent
 improvements in _gnplt_ made it fail for FSL8.
 
-. [[helpfiles]] Improvements in `help` files (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
+. [[helpfiles]] Improvements in `help` command (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
 
-.. The `help` file for the `ddbc` command was expanded to also support
-the `dbbc2` and `dbbc3` commands and now includes a description of the
-output for multi-line responses for these commands (closes
-https://github.com/nvi-inc/fs/issues/75[#75]). The `help` command now
-works for the `dbbc2` and `dbbc3` commands.
+.. The `help` file for the `ddbc` command was expanded to also
+describe the `dbbc2` and `dbbc3` commands and now includes a
+description of the output for multi-line responses for all of these
+commands (closes https://github.com/nvi-inc/fs/issues/75[#75]). The
+`help` command now works for the `dbbc2` and `dbbc3` commands.
 
 .. The `help` file for the `fila10g` command was expanded to also
 support the `fila10g2` command. The `help` command now works for the
 `fila10g2` command.
 
+.. Restore `help` command for DBBC3 commands. The selection of DBBC3
+specific commands was lost in the merge of the VGOS and main branches.
+It is now restored.
 
-. [[updatenotes]] Improvements to update notes (this document).
+. [[updatenotes]] Improvements to update notes.
 
 .. Modify steps for updating to a specific commit after _beta2_ to
 use the latest commit instead. As well as being
@@ -220,10 +385,13 @@ bug free, but problems may occur. Since it represents the
 use as reliable as released (tagged) versions.
 
 .. Add missing _rdbemsg.ctl_ customization.
-.. Include items added since _beta2_.
 
-.. Reorganized as _.adoc_ files in the _doc/_ sub-directory  and available as web pages at:
-https://nvi-inc.github.io/fs/.
+.. Reorganized as _.adoc_ files in the _docs/_ sub-directory  and
+available as web pages at: https://nvi-inc.github.io/fs/. Hopefully,
+this will make the update notes easier to read and navigate. Among
+other improvements, there are clickable links to other sections within
+a document as well as to other related documents.
+
 .. Improve structure and correct some errors from original _.txt_ version.
 .. Some typo/wording fixes.
 

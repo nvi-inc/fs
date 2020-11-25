@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta1 to FS 10.0.0-beta2 update notes
-Version 0.2 - November 2020
+Version 0.3 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -214,9 +214,9 @@ for details of the changes in 10.0.0-beta2 compared to the
 
 == Changes since 10.0.0-beta1
 
-There are separate sub-sections with summaries of changes in the FS
+[[details]] There are separate sub-sections with summaries of changes in the FS
 and _drudg_. Following those are sub-sections giving the details of the
-changes.  [[details]] Each summary item has a clickable <<details,More details>>
+changes. Each summary item has a clickable <<details,More details>>
 link that leads to the detailed description of that item.
 
 Clickable links such as
