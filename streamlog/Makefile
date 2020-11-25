@@ -1,0 +1,2 @@
+../bin/streamlog: streamlog
+	cp $^ $@
