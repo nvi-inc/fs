@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 update notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.8 - November 2020
+Version 0.9 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -31,6 +31,10 @@ Version 0.8 - November 2020
 :toclevels: 4
 
 == Introduction
+
+CAUTION: The _beta2_ pre-release of the  FS does not _make_ on older
+Linux distributions such as FSL8. The _beta1_ pre-release does _make_
+on FSL8. There is a work-around in _beta3_.
 
 This update is intended as a test version for all stations using the
 FS. This includes both stations using the main (non-VGOS) branch
@@ -172,6 +176,10 @@ operational system before upgrading.
 
 == Upgrading from an FS9 version
 
+CAUTION: The _beta2_ pre-release of the  FS does not _make_ on older
+Linux distributions such as FSL8. The _beta1_ pre-release does _make_
+on FSL8. There is a work-around in _beta3_.
+
 This section covers upgrading from FS9, which was always 32-bit only,
 to _10.0.0-beta2_. It is assumed you are upgrading on a 32-bit system.
 There are two possible paths for upgrading:
@@ -218,10 +226,10 @@ step. Instead of following that step, return to the next item in this *TIP*.
 
 This step will result in a base FS10 installation on a 64-bit system
 with your local software, control files, and procedure files from your
-FS9 32-bit system. This is an inconsistent configuration, which will
-not work. The local software will have been updated for 64-bit, but
-not tested. Your local software and other local files need to be
-updated for _10.0.0_, which is covered in the next step.
+FS9 32-bit system. That is an inconsistent configuration, which will
+not work properly. The local software will have been updated for
+64-bit, but not tested. Your local software and other local files need
+to be updated for _10.0.0_, which is covered in the next step.
 
 . To update your local software and other local files for _10.0.0_,
 follow the instructions in this document, beginning with the
@@ -270,7 +278,7 @@ distribution, or otherwise need to use _ssh_ instead:
        cd /usr2
        git clone git@github.com:nvi-inc/fs fs-git
 
-NOTE: Using _ssh_ requires you to have a _gitub_ account and for you
+TIP: Using _ssh_ requires you to have a _gitub_ account and for you
 to add an _ssh_ public key from your machine's _root_ account to your _github_ account. For more information, go to
 https://github.com/join and
 https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/adding-a-new-ssh-key-to-your-github-account.
@@ -291,7 +299,7 @@ Set the link for the new FS version:
 
 Answer `*y*` to confirm installation.
 
-NOTE: This step will change your _/usr2/fs_ symbolic link to point to
+CAUTION: This step will change your _/usr2/fs_ symbolic link to point to
            _/usr2/fs-git_. To switch back to your old version, you
            will need to change the link manually.
 
@@ -343,7 +351,7 @@ If your shell is _bash_, you can use:
 
           export FC=f95
 
-NOTE: For beta testing on a 32-bit system, you may not want to
+WARNING: For beta testing on a 32-bit system, you may not want to
 make this change permanent since it is incompatible with
 pre-_10.0.0_ versions.
 
@@ -353,6 +361,10 @@ shell: _~prog/.login_ for _tcsh_ or probably _~prog/.profile_
 for _bash_.
 
 === Make the FS
+
+CAUTION: The _beta2_ pre-release of the  FS does not _make_ on older
+Linux distributions such as FSL8. The _beta1_ pre-release does _make_
+on FSL8. There is a work-around in _beta3_.
 
           cd /usr2/fs
           make >& /dev/null
@@ -665,7 +677,7 @@ the clock rate line itself.
 
 . All old versions
 
-IMPORTANT: If you are _not_ planning to use the FS display
+WARNING: If you are _not_ planning to use the FS display
 server, we recommend you comment out the lines
 for _erchk_, _monit2_, and _scnch_ and not add any other _monitX_ programs. If they are
 used in _stpgm.ctl_ without the display server and they are
@@ -766,7 +778,7 @@ your system.  We strongly recommend this, but if it is not suitable
 for you for some reason you can skip this.  If you are
 already using the display server, you can also skip this sub-step.
 
-IMPORTANT: If you don't use the
+WARNING: If you don't use the
 display server, you will probably need to update the _stpgm.ctl_ file for that
 case as described in sub-step <<Review stpgm.ctl>> above.
 
@@ -867,7 +879,7 @@ operations.
 
 === Consider when to update your back-ups
 
-NOTE: This step may not be appropriate if you are beta testing
+WARNING: This step may not be appropriate if you are beta testing
 since the beta test versions are not intended for
 operations.
 

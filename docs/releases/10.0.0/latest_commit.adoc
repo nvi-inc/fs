@@ -19,7 +19,7 @@
 //
 
 = Latest commit update notes
-Version 0.4 - November 2020
+Version 0.5 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -37,7 +37,7 @@ effort to keep the latest commit usable. However commits that are not
 tagged for release are not intended for operations.
 
 This document is up to date with commit
-https://github.com/nvi-inc/fs/commit/746f40d670a36093ff613167139e4e2c77afae56[746f40d6].
+https://github.com/nvi-inc/fs/commit/e01f03e951ac381071e0b313a9415189e63df919[e01f03e9].
 Due to small increments, such as adding this document, this may not be
 the literal last commit, but the differences should be small unless
 you happen to `fetch` between a significant change and this document
@@ -49,6 +49,29 @@ You must have already upgraded to the <<beta2.adoc,10.0.0-beta2>>
 release before installing this update.
 
 === Fetch and make the latest commit
+
+[NOTE]
+====
+If you are using FSL8 or other old distribution that is not
+compatible with the latest update of the server, you can still use the
+FS without the server. To do this you will need to remove the server
+from the _make_ process by setting the `FS_NO_DISPLAY_SERVER_MAKE`
+environment variable before executing the _make_. Later in the
+installation process it will be necessary to make sure the
+`FS_DISPLAY_SERVER` environment variable is not set for accounts that
+will run the FS. For now, as _prog_:
+
+* If you use _tcsh_, add the following to _~/.login_:
+
+  setenv FS_NO_DISPLAY_SERVER_MAKE 1
+
+* If you use _bash_, add the following to _~/.profile_:
+
+  export FS_NO_DISPLAY_SERVER_MAKE=1
+
+Log-out of and then back into the _prog_ account before
+continuing.
+====
 
 If you are using _git_, as is recommended, then as _prog_
 execute:
@@ -87,10 +110,9 @@ environment variable. Available data centers for geodesy are _bkg_,
 _cddis_, and _opar_; for astronomy, _vlbeer_.
 +
 
-NOTE: For FSL8 and other old Linux distributions, access to
-_cddis_ may not be possible, due to out of date certificates.  In that
-case, _bkg_ or _opar_ may be suitable alternatives.
-
+TIP: For FSL8 and other old Linux distributions, access to _cddis_ may
+not be possible, due to out-of-date certificates. If you are in that
+situation, _bkg_ or _opar_ may be suitable alternatives.
 
 .. The _fesh_ script uses FTP-SSL as the default access method for the
 _cddis_ data center. For this case, you an avoid having to answer a
@@ -98,8 +120,8 @@ prompt for your email address each time you run _fesh_  by setting your
 email address in the `FESH_EMAIL` environment variable.
 +
 
-WARNING: The FTP-SSL method may not work from behind some firewalls.
-If it doesn't work for you, either use a different data center (see
+TIP: The FTP-SSL method may not work from behind some firewalls.  If
+it doesn't work for you, either use a different data center (see
 above) or use HTTPS for _cddis_ (see below).
 
 .. You can change the access method for _cddis_ to HTTPS, by setting
@@ -116,6 +138,20 @@ https://urs.earthdata.nasa.gov/.
 Please see `*fesh -h*` for more information on using these features.
 A more complete description of the changes to _fesh_ is included in
 the current document at <<fesh,details>>.
+
+. If you removed the display server from the _make_ process as
+described above, you must also make sure that the `FS_DISPLAY_SERVER`
+environment variable is not set for accounts that will run the FS.
+
+.. As  _oper_:
+
+... Delete or comment out any lines in the _~/.login_
+file (if using _tcsh_) or _~/.profile_ (if using _bash_) setting
+the variable.
+
+... Log-out and back in before attempting to run the FS.
+
+.. Repeat the above steps as _prog_.
 
 === Review other changes
 
@@ -168,6 +204,9 @@ https://github.com/nvi-inc/fs/issues/62[#62]).
 . Improvements in `help` command (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
 <<helpfiles,More details>>.
 
+. Add option to not include the display server in the FS _make_
+(partially closes https://github.com/nvi-inc/fs/issues/76[#76]). <<noserver,More details>>.
+
 . Improvements to update notes. <<updatenotes,More details>>.
 
 === Summary of drudg changes
@@ -208,13 +247,13 @@ invocation.
 
 +
 
-WARNING: The FTP-SSL method may not work from behind some firewalls.
+TIP: The FTP-SSL method may not work from behind some firewalls.
 If it doesn't work for you, you can either use HTTPS for _cddis_  or
 use a different data center (see below).
 
 +
 
-NOTE: The use of FTP-SSL by _cddis_ may be deprecated in the future.
+CAUTION: The use of FTP-SSL by _cddis_ may be deprecated in the future.
 
 +
 
@@ -227,6 +266,12 @@ NOTE: Using HTTPS for _cddis_ requires an _EarthData_ login and
 setting it in your _.netrc_ file.  If you don’t have an _EarthData_
 login, you should be able to get one by selecting `REGISTER` at:
 https://urs.earthdata.nasa.gov/.
+
++
+
+TIP: For FSL8 and other old Linux distributions, access to _cddis_ may
+not be possible, due to out-of-date certificates. If you are in that
+situation, _bkg_ or _opar_ may be suitable alternatives.
 
 .. _fesh_ supports _bkg_, _cddis_, _opar_, and _vlbeer_ data centers
 (closes https://github.com/nvi-inc/fs/issues/37[#37]). The data center
@@ -258,19 +303,19 @@ corresponding _drudg_ prompts.
 
 +
 
-WARNING: _Let the user beware._ This feature must be used with extreme
-care.  The answers that are specified must correspond exactly to the
-questions that _drudg_ will ask. If they don't correspond correctly,
-_drudg_ may produce subtly incorrect output with no obvious indication
-of a problem. The _fesh_ script does what consistency checking it can,
-e.g., if `FESH_CONT_CAL` is specified as `off`, no answer can be
-supplied for `FESH_CONT_CAL_POLARITY` since that question will not be
-asked. It is important to verify that correct output is being
-produced.
+IMPORTANT: _Let the user beware._ This feature must be used with
+extreme care.  The answers that are specified must correspond exactly
+to the questions that _drudg_ will ask. If they don't correspond
+correctly, _drudg_ may produce subtly incorrect output with no obvious
+indication of a problem. The _fesh_ script does what consistency
+checking it can, e.g., if `FESH_CONT_CAL` is specified as `off`, no
+answer can be supplied for `FESH_CONT_CAL_POLARITY` since that
+question will not be asked. It is important to verify that correct
+output is being produced.
 
 +
 
-WARNING: The feature will not work for schedules that have more than
+IMPORTANT: The feature will not work for schedules that have more than
 mode. It is extremely rare for geodesy schedules to have more than one
 mode, but it is possible.
 
@@ -372,6 +417,18 @@ support the `fila10g2` command. The `help` command now works for the
 specific commands was lost in the merge of the VGOS and main branches.
 It is now restored.
 
+. [[noserver]] Add option to not include the display server in the FS
+_make_ (partially closes
+https://github.com/nvi-inc/fs/issues/76[#76]). The _beta2_ update to
+the display server inadvertently caused it to be impossible to _make_
+the FS on FSL8 and other old distributions. A new _make_ time
+environment variable, `FS_NO_DISPLAY_SERVER_MAKE` was added to
+optionally remove the display server from the _make_. If this option
+is used, the display obviously can't be used. As a result, the
+`FS_DISPLAY_SERVER` environment variable must not be set when running
+the FS. We are looking into make it possible to use the display server
+on at least some of the older distributions.
+
 . [[updatenotes]] Improvements to update notes.
 
 .. Modify steps for updating to a specific commit after _beta2_ to
@@ -386,11 +443,16 @@ use as reliable as released (tagged) versions.
 
 .. Add missing _rdbemsg.ctl_ customization.
 
-.. Reorganized as _.adoc_ files in the _docs/_ sub-directory  and
-available as web pages at: https://nvi-inc.github.io/fs/. Hopefully,
-this will make the update notes easier to read and navigate. Among
-other improvements, there are clickable links to other sections within
-a document as well as to other related documents.
+.. Reorganized as _.adoc_ files in the _docs/_ sub-directory. All of
+the _.adoc_ files are viewable as HTML, and are hierarchically
+indexed, at https://nvi-inc.github.io/fs/. The first updates available
+in HTML are for _10.0.0-beta2_ and can be viewed at:
+https://nvi-inc.github.io/fs/releases/10.0.0/beta2.html.
++
+
+Hopefully, this change will make the update notes easier to read and
+navigate. Among other improvements, there are clickable links to other
+sections within a document as well as to other related documents.
 
 .. Improve structure and correct some errors from original _.txt_ version.
 .. Some typo/wording fixes.
