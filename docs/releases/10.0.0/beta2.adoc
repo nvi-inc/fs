@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 update notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.9 - November 2020
+Version 1.0 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -635,9 +635,9 @@ sub-step <<Update equip.ctl>> above should have handled that.
 
 . Old versions _9.12.12_ and _9.12.13_:
 +
-A "stanza" (actually one comment and one FiLa10G
+A "`stanza`" (actually one comment and one FiLa10G
 input select line) was inserted before the
-final "stanza" (typically one comment and one
+final "`stanza`" (typically one comment and one
 DBBC3 configuration line). An example of the
 lines inserted can be found near the end of the
 default example _/usr2/fs/st.default/control/equip.ctl_ file. They are
@@ -1088,7 +1088,7 @@ features.
 
 . [[makefile]] The FS uses a new _Makefile_ scheme. This is
 accomplished by including the _/usr2/fs/include.mk_ file in every
-Makefile except for _drudg_ and its libraries. The scheme is "opt-in"
+Makefile except for _drudg_ and its libraries. The scheme is "`opt-in`"
 so it is not necessary for every program or station programs to
 participate. Within the FS source tree, only _drudg_ and its libraries
 don't use it.  An explanation of the new scheme is provided in
@@ -1224,7 +1224,7 @@ more details.
 normal use. This was changed as of the _beta2_ release.
 
 . [[clientn]] Make _fsclient_ honor the `-n` flag properly (closes https://github.com/nvi-inc/fs/issues/48[#48]). This
-eliminates opening "double" windows if _fsclient_ is run with `-n`
+eliminates opening "`double`" windows if _fsclient_ is run with `-n`
 under an already running _fsclient_.
 
 . [[clientnx]] Make _fsclient_ ignore prompt in no-X11 mode (closes https://github.com/nvi-inc/fs/issues/49[#49]). If FS
@@ -1240,7 +1240,7 @@ simplifies some use cases.
 
 .. The first major change is that the server now only needs to use
 one socket when using _websockets_ -- address which start with
-"ws://" (closes https://github.com/nvi-inc/fs/issues/29[#29]). The new default base URL for all _fsserver_
+`ws://` (closes https://github.com/nvi-inc/fs/issues/29[#29]). The new default base URL for all _fsserver_
 streams and control channels is now:
 
     ws://127.0.0.1:7083
@@ -1256,14 +1256,14 @@ the loop-back), but users may wish to use an HTTP(S) as a proxy to
 provide some authentication/authorisation.
 +
 This was enabled by factoring out functionality _spub_ into a
-reusable "buffered stream" library, which has been incorporated
+reusable "`buffered stream`" library, which has been incorporated
 into _fsserver_. All the behaviour of streams are now managed
 within the _fsserver_ process rather than an external _spub_
 instance.
 
 .. The second major change of this patch is the addition of the FS
 log to the streams available from the server (closes https://github.com/nvi-inc/fs/issues/25[#25]).
-(Previously only the "display" was available, which has a reduced
+(Previously only the "`display`" was available, which has a reduced
 time-stamp format and filters some output.)
 +
 This is available at
@@ -1304,7 +1304,7 @@ that suits their needs, e.g. SSH port forwarding or HTTP proxying.
 .. Finally, this patch also upgrades the included messaging library
 _nng_ to version _1.3.0_, which brings with it some performance
 improvements and bug fixes, the most obvious to FS users caused
-some _ssub_ instances in "wait" mode to use a high amount of CPU
+some _ssub_ instances in "`wait`" mode to use a high amount of CPU
 time.
 
 . [[cls_chk]] Eliminate `cls_chk` error from `inject_snap -w ...` command when

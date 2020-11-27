@@ -19,7 +19,7 @@
 //
 
 = Latest commit update notes
-Version 0.5 - November 2020
+Version 0.6 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -63,11 +63,11 @@ will run the FS. For now, as _prog_:
 
 * If you use _tcsh_, add the following to _~/.login_:
 
-  setenv FS_NO_DISPLAY_SERVER_MAKE 1
+  setenv FS_DISPLAY_SERVER_NO_MAKE 1
 
 * If you use _bash_, add the following to _~/.profile_:
 
-  export FS_NO_DISPLAY_SERVER_MAKE=1
+  export FS_DISPLAY_SERVER_NO_MAKE=1
 
 Log-out of and then back into the _prog_ account before
 continuing.
@@ -225,7 +225,7 @@ stations, the attenuation used in the signal chain, which is set
 by the schedule, depends on the observing mode being used and the
 conditions at the station. The provides a way to incorporate
 needed changes into schedules. If the script is run without other
-command line arguments, it will output "help" information.
+command line arguments, it will output "`help`" information.
 
 . [[fesh]] _fesh_ updated and expanded (includes closing
 https://github.com/nvi-inc/fs/issues/36[#36],
@@ -422,7 +422,8 @@ _make_ (partially closes
 https://github.com/nvi-inc/fs/issues/76[#76]). The _beta2_ update to
 the display server inadvertently caused it to be impossible to _make_
 the FS on FSL8 and other old distributions. A new _make_ time
-environment variable, `FS_NO_DISPLAY_SERVER_MAKE` was added to
+environment variable, `FS_DISPLAY_SERVER_NO_MAKE` was added to
+
 optionally remove the display server from the _make_. If this option
 is used, the display obviously can't be used. As a result, the
 `FS_DISPLAY_SERVER` environment variable must not be set when running
@@ -438,7 +439,7 @@ notes current with the latest commit. It is important
 to be aware that the latest commit is not a version
 intended for operations. We make every effort to make sure it is
 bug free, but problems may occur. Since it represents the
-"bleeding edge" of development, features may not be as stable nor
+"`bleeding edge`" of development, features may not be as stable nor
 use as reliable as released (tagged) versions.
 
 .. Add missing _rdbemsg.ctl_ customization.

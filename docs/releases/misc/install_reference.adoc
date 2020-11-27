@@ -29,7 +29,7 @@ in general, but are usually not needed for routine updates.
 
 == Upgrading from FS versions before the previous stable
 
-This section only covers upgrading from "main" branch versions,
+This section only covers upgrading from "`main`" branch versions,
 i.e., versions _9.12.x_ are excluded.
 
 For reference, the list of the most recent _critical updates_, since
@@ -194,13 +194,13 @@ See the procedure at: https://nvi-inc.github.io/fsl10/raid.html#_recoverable_tes
 ====  FSL9 (wheezy)
 
 If the system is configured as a RAID, please see
-_/usr2/fs/misc/FSL9_RAID.pdf_ section "APPLYING AN UPDATE" for directions
+_/usr2/fs/misc/FSL9_RAID.pdf_ section "`APPLYING AN UPDATE`" for directions
 for applying an update.
 
 ====  FSL8 (lenny), FSL7, (etch), and FSL6 (sarge)
 
 If the system is configured as a RAID, please see http://www.metsahovi.fi/fs/docs/pre_FSL9_RAID.pdf
-section "APPLYING AN UPDATE" for directions for
+section "`APPLYING AN UPDATE`" for directions for
 applying an update.
 
 ====  FSL5 (woody)
@@ -409,7 +409,7 @@ It is recommended that your local files for operations (_control_, _proc_,
 _log_, _sched_, _tle_files_ directories and their contents) have the default
 ownership (`oper.rtx`) and permissions (for regular files `rw-rw-r-`,
 for directories `rwxrwxr-x`).  To force this (however, this will not
-change the "execute/search" permissions), please execute the script (as
+change the "`execute/search`" permissions), please execute the script (as
 _root_):
 
   /usr2/fs/misc/fix_perm
