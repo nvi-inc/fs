@@ -20,10 +20,11 @@
 
 .PHONY: all
 
-all: index.html 64-bit_conversion.html
+all: index.html 64-bit_conversion.html font_conventions.html
 
 index.html: index.adoc
 64-bit_conversion.html: 64-bit_conversion.adoc
+font_conventions.html: font_conventions.adoc
 
 %.html: %.adoc
 	asciidoctor -a toc $^

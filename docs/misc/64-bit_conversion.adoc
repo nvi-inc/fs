@@ -18,7 +18,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= Converting to a 64-bit system
+= Converting to a 64-bit System
 Version 0.6 - November 2020
 
 //:hide-uri-scheme:

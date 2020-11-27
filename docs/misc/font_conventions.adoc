@@ -1,0 +1,172 @@
+//
+// Copyright (c) 2020 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= DRAFT FS Document Font Conventions
+Version 0.1 - November 2020
+
+:sectnums:
+
+== Introduction
+
+This document cover font and other typographic conventions for FS HTML
+documents using _asciidoctor_ source.
+
+== Conventions
+
+=== In-line text
+
+* _italics_ are used for names (files, programs, accounts, UNIX
+commands, versions, nodes, websites, etc, but not people, FSx, or
+FSLx), emphasis, and the first use of technical terms.
+
+* `monospace` is used for data: code, program input/output, contents
+of files, FS commands, and explicit command/option examples.
+
+* `*monospace bold*`  for explicit input/commands to be entered by the
+user.
+
+* `_monospace italic_` for replaceable items in explicit
+input/commands to be entered by the user.
+
+=== Code blocks
+
+Code blocks are usually all simple monospace, but italics may be useful in some cases for
+replaceable items.
+
+=== Document titles
+
+Document titles use normal important word capitalization.
+
+=== Section and sub-section titles
+
+The first word and proper names in sections and sub-section titles
+start with capital letters. Upper case is used for acronyms and
+technical terms that are normally upper case. Other words are all
+lower case.
+
+There are no special fonts in section and sub-section titles for
+simplicity. Such formatting may also trigger different results for
+different _asciidoctor_ versions.
+
+=== General guidelines for admonitions
+
+These are not firm distinctions.
+
+TIP: Advice
+
+NOTE: Non-essential, supplemental,  information
+
+CAUTION: Could cause a minor issue
+
+WARNING: Could cause a major issue
+
+IMPORTANT: Will result in a major issue
+
+== Source examples
+
+=== Italics 
+
+  Use single underscores around _words_ to be in italics; double underscores for __char__acters.
+
+Results in:
+
+Use single underscores around _words_ to be n italics; double underscores for __char__acters.
+
+=== Monospace
+
+  Use single backticks around `words` to be in monospace; double backticks for ``char``acters.
+
+Results in:
+
+Use single backticks around `words` to be in monospace; double backticks for ``char``acters.
+
+=== Monospace bold
+
+  Use single backticks and asterisks around `*words*` to be in monospace bold; double backticks and single asterisks for ``*char*``acters.
+
+Results in:
+
+Use single backticks and asterisks around `*words*` to be in monospace bold; double backticks and single asterisks for ``*char*``acters.
+
+=== Monospace italic
+ 
+  Use single backticks and underscores around `_words_` to be in monospace italics; double backticks and single underscores for ``_char_``acters.
+
+Results in:
+
+Use single backticks and underscores around `_words_` to be in
+monospace italics; double backticks and single underscores for
+``_char_``acters.
+
+=== Curved quotes
+
+ Add backticks inside '`quotes`' to make them "`curved.`"
+
+Results in:
+
+Add backticks inside '`quotes`' to make them "`curved.`"
+
+=== Code blocks
+
+Code blocks are created by indenting text, or preceding and following it with four periods.
+
+=== Italics in code blocks
+
+    [subs="+quotes"]
+    ....
+    login: _account_
+    ....
+
+Results in:
+
+[subs="+quotes"]
+....
+login: _account_
+....
+
+=== Admonitions
+
+Admonitions are created by starting a line with the admonition in
+capital letter followed by a colon and space.
+
+For admonitions with complex content, a _block_ can be made by putting
+the capitalized admonition in square brackets, then on the next line
+four equal signs, then ending the block with a line of four equal
+signs.
+
+....
+[TIP]
+====
+Suggestion:
+
+. Step
+. Another step
+====
+....
+
+Results in:
+
+[TIP]
+====
+Suggestion:
+
+. Step
+. Another step
+====

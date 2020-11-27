@@ -21,8 +21,8 @@
 = Index of fs/releases/misc/
 Version 0.1 - Nov 2020
 
-<<release_model.adoc#,Release model>> document
+<<release_model.adoc#,Release Model>> document
 
-<<install_reference.adoc#,Installation reference>> document
+<<install_reference.adoc#,Installation Reference>> document
 
-<<known_bugs.adoc#,Known bugs>> document, as of FS9
+<<known_bugs.adoc#,Known Bugs>> document, as of FS9

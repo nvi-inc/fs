@@ -18,7 +18,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= Installation reference
+= Installation Reference
 Version 0.2 - November 2020
 
 :sectnums:

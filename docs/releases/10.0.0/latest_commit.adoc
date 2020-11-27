@@ -18,7 +18,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= Latest commit update notes
+= Latest Commit Update Notes
 Version 0.7 - November 2020
 
 //:hide-uri-scheme:
