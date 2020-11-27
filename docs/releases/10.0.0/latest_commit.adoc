@@ -19,7 +19,7 @@
 //
 
 = Latest commit update notes
-Version 0.6 - November 2020
+Version 0.7 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -31,10 +31,16 @@ Version 0.6 - November 2020
 
 == Introduction
 
-The document covers updating from the latest pre-release to the latest
-commit. The latest commit is somewhat experimental. We make ever
-effort to keep the latest commit usable. However commits that are not
-tagged for release are not intended for operations.
+The document covers updating from the latest pre-release to the _latest
+commit_ on its branch until the next release. The latest commit is
+somewhat experimental. We make ever effort to keep the latest commit
+usable. However commits that are not tagged for release are not
+intended for operations.
+
+CAUTION: It is expected that those using the latest commit are experts
+and will manage the differences for updating to the next official
+release themselves. Advice is usually available, but no documentation
+is provided.
 
 This document is up to date with commit
 https://github.com/nvi-inc/fs/commit/e01f03e951ac381071e0b313a9415189e63df919[e01f03e9].

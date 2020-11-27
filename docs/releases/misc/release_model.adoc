@@ -19,18 +19,18 @@
 //
 
 = Strawman Release Model
-Version 0.2 - Apr 2020
+Version 0.3 - November 2020
 
 :sectnums:
 
-This document briefly describes the version tags, release model, and branches
-used in the FS git repo. It also outlines the steps in initial and update
-installs of the FS, including from an archive, and sending changes to the
-maintainers.
+This document briefly describes the version tags, release model,
+update notice, version checkout, and branches used with the FS _git_
+repo. It also outlines the steps in initial and update installs of the
+FS, including from an archive, and sending changes to the maintainers.
 
 == Version tags
 
-An example version tag is:
+An example version _tag_ is:
 
    10.1.0-beta1
 
@@ -40,22 +40,24 @@ The general form of FS version tags is:
 
 Where:
 
-   VERSION, a number, indicates a major release, e.g., '10'.  Note that VERSION
-   does not start with a 'v'.
+* `VERSION`, a number, indicates a major release, e.g., `10`.  Note
+   that `VERSION` does not start with a `v`.
 
-   SUBLEVEL, a number, indicates a minor release, e.g., '1'.
+*  `SUBLEVEL`, a number, indicates a minor release, e.g., `1`.
 
-   PATCHLEVEL, a number, indicate the patch number, e.g., '0'. Non-zero patch
-   numbers are only used for fixes to VERSION.SUBLEVEL releases (before version
-   '10.0.0', non-zero PATCHLEVELS were used in regular releases).
+*  `PATCHLEVEL`, a number, indicate the patch number, e.g., `0`.
+   Non-zero patch numbers are only used for fixes to
+   `VERSION.SUBLEVEL` releases (before version _10.0.0_, non-zero
+   ``PATCHLEVEL``s were used in regular releases).
 
-   STRING, a string, which is optional and when non-blank provides
-   additional information, e.g., 'beta1'. If STRING is empty the dash "-" is
-   omitted.
+*  `STRING`, a string, which is optional and when non-blank provides
+   additional information, e.g., `beta`. If `STRING` is empty, the
+   dash `-` is omitted.
 
-When the FS is "made", the version tag is inserted in the FS (and 'drudg') code
-and compiled in, if it has changed since the last time the FS was "made".  If
-the version that is "made" does not correspond to a tagged commit, additional
+If the version tag has changed since the last time the FS was _made_,
+the version tag is inserted in the FS (and _drudg_) code
+and compiled in.  If
+the version that is made does not correspond to a tagged commit, additional
 information is automatically appended to identify the specific commit, e.g.:
 
   10.0.0-beta1-58-g229f696e
@@ -66,139 +68,174 @@ The general form of what is appended is:
 
 where:
 
-   n is the number of commits that have been been made since the last
-   commit tagged with a version string, e.g., 58.
+*  `n` is the number of commits that have been been made since the last
+   commit tagged with a version string, e.g., `58`.
 
-   SHA is the (unique) SHA prefix of this commit, e.g., 229f696e.
+*  `SHA` is the (unique) SHA prefix of this commit, e.g., `229f696e`.
 
-   -dirty is appended if the working directory contains changes that
+*  `-dirty` is appended if the working directory contains changes that
    have not been committed. When -dirty appears, the ability to identify
    what version was run is lost. This should be avoided.
 
-This format is only guaranteed to be present for versions '10.0.0-alpha2'
+This format is only guaranteed to be present for versions _10.0.0-alpha2_
 and later.
 
-== Release Model
+== Release model
 
 When an FS release is made, a particular commit is tagged with the version. A
 lightweight tag is sufficient, but an annotated tag can be used.  Official
-releases never have a non-blank STRING.  However, alpha and beta releases will
-have appropriate STRING values, e.g. 'alpha1', 'beta2', etc.  Other values may
+releases never have a non-blank `STRING`.  However, alpha and beta releases will
+have appropriate `STRING` values, e.g. _alpha1_, _beta2_, etc.  Other values may
 be used as needed.
 
-There is a basic distinction between VERSION.SUBLEVEL.0. i.e., with zero
-PATCHLEVEL, or "feature" releases, and ones with non-zero PATCHLEVEL, which are
-"patch" releases.  Generally feature releases include significant feature
-changes, but also occur when a patch is not just a "quick" install for the
+There is a basic distinction between `VERSION.SUBLEVEL.0`, i.e., with zero
+`PATCHLEVEL`, a _feature release_, and non-zero `PATCHLEVEL`, a
+_patch release_.  Generally feature releases include significant feature
+changes, but also occur when a patch is not just a "`quick`" install for the
 users. A patch that requires significant changes, including, but not limited to
 reboots due to changes in shared memory size, should be promoted to being a
 feature release. The goal is that patch releases should be safe for operational
 stations to install without needing a significant amount of time, testing, or
 otherwise being a risk to operations.
 
-For each release, there should be an "update" notice
-fsVERSION.SUBLEVEL.PATCHLEVELup.txt (hereafter fs<tag>up.txt) file in
-'/usr2/fs/misc', documenting the changes in the version and installation
-instructions. Note that there are no files with -string in <tag>, at least for
-alpha and beta releases. For feature releases, the file should have a complete
-description of the changes and installation instructions from the previous
-feature release. For patch releases, the description and instructions should be
-complete for an update from the corresponding feature release and include those
-instructions (by reference). Note that feature release should include
-instructions to use (by reference) for the last patch of the previous feature
-release, unless they have no impact on the installation of the new feature
-release from the previous one.
+== Update notices
+
+For each release, there should be an _update notice_ in a file of the form
+
+ /usr2/fs/docs/releases/VERSION.SUBLEVEL.PATCHLEVEL/release.adoc
+
+documenting the changes in the version and installation instructions.
+There may also be _string.adoc_ and other files associated with the
+release in the same sub-directory, e.g., _beta1.adoc_, _beta2.adoc_,
+_beta1_to_beta2.adoc_, and _latest_commit.adoc_. All these files
+should be visible on the _gh-pages_.
+
+For feature releases, the notice should have a complete description of
+the changes and installation instructions from the previous feature
+release. For patch releases, the description and instructions should
+be complete for an update from the corresponding feature release and
+include those instructions (by reference).
+
+The _latest_commit.adoc_ file covers changes on that branch since the
+most recent feature or maintenance release. It starts as basically
+empty for a new release. It accumulates the changes that occur until
+the next release. It helps provide content for the next release update
+notes. It should be retained for reference after that release.
+
+NOTE: Those using the latest commit are understood to be experts and
+are expected to manage differences in the update steps when updating to
+the next release themselves. Advice may be helpful of course, but
+documentation is not provided.
 
 == Branches
 
-The main branch in the repo is 'master'. This is the branch that is checked out
-after a clone operation from gitbub.  The 'master' branch represents the main
-line of development and should include most of the feature releases. Typically,
-patch releases will not occur on 'master'.  However, if a patch is needed and
-there have been no changes on 'master' since the corresponding feature release,
-the patch can be released on the 'master' (probably having been developed on a
-"feature" branch first). Otherwise, a "maintenance" branch should be made from
-the corresponding feature release, e.g., to create such a branch for feature
-release 10.2:
+The main branch in the repo is _master_. This is the branch that is
+checked out after a clone operation from _github_.  The _master_
+branch represents the main line of development and should include most
+of the feature releases.
+
+In order to patch an existing feature release, a _maintenance branch_
+is normally used.  For example, to create a maintenance branch _10.2_
+for feature release _10.2.0_:
 
    git checkout -b 10.2 10.2.0
 
-Despite feature releases normally being on the 'master' branch, a feature
-release may occur on a different branch for a patch that has been promoted to a
-feature release.  In this case, a maintenance branch for new feature release is
-created at the tip of the existing maintenance branch, if it exists. For
-example to make a 10.3 maintenance branch from the 10.2 maintenance branch:
+The changes created on any maintenance release should be _rebased_
+onto _master_ as soon as they are stable. Maintenance branches should
+be retained long term both for possible future extension and to
+preserve the history.
 
-   git checkout 10.2
-   git checkout -b 10.3
+To develop a new feature, a _feature branch_ can be created at any
+point. Likewise, for _bug fix_ branches.  Once they are considered to
+be stabilized enough they are merged into the appropriate branch,
+_master_ or a maintenance branch, and then deleted.
 
-and the new feature release is placed on the new branch. If no maintenance
-branch exists for the previous feature branch, it can be created at that point:
+Patch releases are normally made on maintenance branches.  However, if
+a patch is needed and there have been no changes on _master_ since the
+corresponding feature release, the patch can be released on the
+_master_ (probably having been developed on a bug fix branch first).
+Otherwise, a maintenance branch should be made.
 
-   git checkout -b 10.3 10.2.0
+Despite feature releases normally being on the _master_ branch, a
+feature release may occur on a different branch for a patch that has
+been promoted to a feature release.  In this case, a maintenance
+branch for a new feature release is created at the tip of the existing
+maintenance branch, if it exists. For example, to make a _10.3_
+maintenance branch off the _10.2_ maintenance branch:
 
-The changes for either type of maintenance release should be rebased onto
-'master' as soon as possible, unless they were created there first.
+   git checkout -b 10.3 10.2
 
-It may make sense to retain maintenance branches long term, if for no other
-reason that it will easier to find a tagged release on that branch if the
-version tag was accidentally deleted.
+and the new feature release is placed on the new branch.  Likewise, a
+maintenance branch can created from a patch release on _master_:
 
-Generally speaking, all other branches are feature or bug fix branches. Once
-they are considered to be stabilized enough they are merged into the
-appropriate branch, 'master' or a maintenance branch, and then deleted.
+   git checkout -b 10.2 10.2.1
+
+== Version checkout
+
+It is always possible to get a specific release version by checking
+out the `_tag_` for its version string:
+
+[subs="+quotes"]
+....
+git checkout _tag_
+....
 
 Commits that do not have a version tag are not considered releases.  Users can
 check them out, but they may have bugs and/or incompatibilities with local
-files and station software of the previous tagged version.  The
-last commit on a <branch>, the tip, is checked out with:
+files and station software of the previous tagged version.
 
-    git checkout <branch>
+The last commit on a branch, the _tip_, is checked out with:
 
-It is always possible to get a specific release version by checking
-out the <tag> for its version string:
+[subs="+quotes"]
+....
+git checkout _branch_
+....
 
-    git checkout <tag>
-
-It is not necessary that unreleased commits on 'master' or a maintenance branch
+It is not necessary that unreleased commits on _master_ or a maintenance branch
 be in a state that is releasable. However, it is helpful to developers, and to
 a lessor extent for users, for the branch tips be in a usable state. This is
-largely achieved by not merging or rebasing feature branches into the branch
+largely achieved by not _merging_ or _rebasing_ feature branches into the branch
 that aren't in a fairly complete state.  However, it is acceptable to make new
 commits significantly changing the impact of previous commits, if they still
 result in a usable tip.
 
 == Making a release
 
-Before a release is made, the update notes should be prepared. They should be
-in a file named /usr2/fs/misc/fs<tag>up.txt (no -alpha or -beta strings in
-<tag>). For feature releases, the instructions should include all steps to
-upgrade from the previous feature release. If there were significant changes in
-patch releases for that version, they can be included by reference to the last
-patch release instructions at the time of the new feature release. A
-description of the changes should be included as well.
+Before a release is made, the update notes should be prepared. For
+feature releases, the instructions should include all steps to upgrade
+from the previous feature release. If there were significant changes
+in patch releases for that version, they can be included by reference
+to the last patch release instructions at the time of the new feature
+release. A description of the changes should be included as well.
 
-For patch releases, the installation instructions can be abbreviated to cover
-just what is necessary to upgrade from the corresponding feature and all
-previous patches for that feature release.  A description of what has been
-fixed should included. Covering all the previous patch releases, should not be
-hard, since previous patch notes can be included explicitly.
+For patch releases, the installation instructions can be abbreviated
+to cover just what is necessary to upgrade from the corresponding
+feature release plus instructions for all previous patches for that
+feature release.  Covering all the previous patch releases, should not
+be hard, since previous patch notes can be included explicitly or by
+reference.  A description of what has been fixed should included.
 
 To make a release:
 
-. Finalize release, including release notes, committing all changes.
-  Final commit title "Finalize <tag>"
-. git push
-. Tag the commit with <tag>
-. git push --tags
-. On the github page for the repo, select "release"
-. Select "Draft a new release"
+. Finalize release, including update notes, committing all changes.
++
+Final commit message: ``**Finalize** _tag_``
+
+. ``**git push**``
+. ``**git tag** __tag__``
+. ``**git push --tags**``
+. On the github page for the repo, select `release`
+. Select `Draft a new release`
 . Enter version string as an existing tag and select branch
-. Enter release notes as Description, leave Title Blank
-  (do not include "pre-release or the version tag in title since they
-   are automatically prepended to e-mail)
-. If not for production, select "This is a pre-release"
-. Select "Publish Release"
+. Enter a release message as the `Description`
+. Leave `Title` blank
++  
+Do not include `*pre-release*` or the version `_tag_` in `Title` since they
+are automatically prepended to the announcement email.
+. If not for production, select `This is a pre-release`
+. Select `Publish Release`
+. Change to the _docs/_ sub-directory 
+. Generate and push the _.html_ files to the _gh-pages_ branch on _github_.
 
 == Installation 
 
@@ -206,85 +243,102 @@ To find the most recent release for installation, go to:
 
 https://github.com/nvi-inc/fs/releases
 
-Typically, you should use the most recent feature release, i.e., version string
-ending in zero, for versions starting with '10' or later, e.g., '10.0.0'.
-Versions with a trailing *-string* are not intended for production. If there is
-a more recent patch release for the latest feature release, use that most
-recent patch release.  Use the tag of the release you have chosen for <tag> in
-the instructions below.
+Typically, you should use the most recent patch release for the most
+recent feature release. If there have not been any patch releases for
+that feature release, use that feature release itself, i.e., with the
+version string ending in zero. Versions with a trailing _-string_ are
+not intended for production.  Use the tag of the release you have
+chosen for `_tag_` in the instructions below.
 
 === First time FS installation
 
-As 'root', execute: 
+As _root_, execute: 
 
-.   cd /usr2
-.   git clone https://github.com/nvi-inc/fs fs-git
-.   cd fs-git
-.   git checkout <tag>
-.   make install
-    (answer 'y' to confirm installation)
-.   (log out as 'root' and log in as 'prog')
-.   make >&/dev/null
-.   make -s
-    (if there is no output from the above command, then the 'make' was successful)
-.   reboot
+.   ``**cd /usr2**``
+.   ``**git clone https://github.com/nvi-inc/fs fs-git**``
+.   ``**cd fs-git**``
+.   ``**git checkout -q** _tag_``
++
 
-You can then login as 'oper' and run the FS, but you will need to
-customize the control files in '/usr2/control' before you can do
+Use the version `_tag_` of the release you are installing.
+.   ``**make install**``
++
+Answer `*y*` to confirm installation
+.   Log-out as _root_ and log-in as _prog_
+.   ``**make >&/dev/null**``
+.   ``**make -s**``
++
+If there is no output from the above command, then the _make_ was successful.
+.   Reboot
+
+You can then login as _oper_ and run the FS, but you will need to
+customize the control files in _/usr2/control_ before you can do
 anything useful. Additionally, you may need to add station software,
-particularly 'antcn' if you want to control an antenna
+particularly _antcn_ if you want to control an antenna
 
-=== Installing FS Updates
+=== Installing FS updates
 
-As 'prog':
+As _prog_:
 
-.   cd /usr2/fs-git
-.   git pull
-.   git checkout <tag>
-.   make >&/dev/null
-.   make -s
-    (if there is no output of the above command, then the 'make' was successful)
+.   ``**cd /usr2/fs-git**``
+.   ``**git pull**``
+.   ``**git checkout -q** _tag_``
 
-Additionally, you will need to follow installation instructions in the
-/usr2/fs/misc.fs<tag>up.txt for the release you have selected.
++
+
+Use the version `_tag_` of the release you are installing.
+.   ``**make >&/dev/null**``
+.   ``**make -s**``
++
+If there is no output from the above command, then the _make_ was successful.
+.   Reboot
++
+A patch update may not require a reboot, please check the instructions.
+
+Additionally, you will need to follow the update instructions, usually
+found within https://nvi-inc.github.io/fs/releases/.  The release
+announcement should include a link to the specific document.
 
 === Installing from an archive
 
-The main method of distributing the FS is with the git repo. That will
-make updates, particularly patches,  much easier to install. However, if
-it is not possible to use git, you can get a '.tar.gz' archive from the
-release page.
+The main method of distributing the FS is with the _git_ repo from
+_github_. This makes updates, particularly patches,  much easier
+to install. However, if it is not possible to use _git_, you can get a
+_.tar.gz_ archive from the release page.
 
-To install from the archive:
+To install from the archive (use the `_tag_` of the release you are installing):
 
-.   (log in as 'root')
-.   cd /tmp
-.   wget https://github.com/nvi-inc/fs/archive/<tag>.tar.gz
-.   cd /usr2
-.   tar -xzf /tmp/<tag>.tar.gz
-.   cd /usr2/fs-<tag>
-.   make install
-    (answer 'y' to confirm installation)
-.   (log out as 'root' and log in as 'prog')
-.   make >&/dev/null
-.   make -s
-    (if there is no output of the above command, then the 'make' was successful)
-.   reboot
+.   Log in as _root_
+.   ``**cd /tmp**``
+.   ``**wget https://github.com/nvi-inc/fs/archive/**__tag__**.tar.gz**``
+.   ``**cd /usr2**``
+.   ``**tar -xzf /tmp/**__tag__**.tar.gz**``
+.   ``**cd /usr2/fs-**__tag__``
+.   ``**make install**``
++
+Answer `*y*` to confirm installation
+.   Log out as _root_ and log in as _prog_
+.   ``**make >&/dev/null**``
+.   ``**make -s**``
++
+If there is no output from the above command, then the _make_ was successful.
+.   Reboot
 
-If this is a first time installation, you can then login as 'oper' and
+If this is a first time installation, you can then login as _oper_ and
 run the FS, but you will need to customize the control files in
-'/usr2/control' before you can do anything useful.  Additionally, you
-may need to add station software, particularly 'antcn' if you want to
+_/usr2/control_ before you can do anything useful.  Additionally, you
+may need to add station software, particularly _antcn_ if you want to
 control an antenna.
 
-If this an update, you will need to follow installation instructions in the
-/usr2/fs/misc/fs<tag>up.txt for the release you have selected.
+If this an update, you will need to follow the update instructions,
+usually found within https://nvi-inc.github.io/fs/releases/.  The
+release announcement should include a link to the specific document.
 
-== Managing testing of FS Updates
+== Managing testing of FS updates
 
-To be written ...
+#TODO: develop and write#
 
 == Users sending code changes to developer
 
-TBD: patches? fork/pull-request?. It would be good to preserve commit SHAs
-for tracing versions using stations, if possible.
+#TODO: patches? fork/pull-request?. It would be good to preserve commit SHAs
+for tracing versions using stations, if possible.#
