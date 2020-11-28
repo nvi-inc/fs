@@ -1263,36 +1263,37 @@ chan_def:	T_CHAN_DEF '=' link_or_not	/* band_id */
 		':' unit_value			/* sky frequency */
 		':' T_NAME			/* net sb */
 		':' unit_value			/* channel BW */
-		':' T_LINK			/* chan ID */
+		':' link_or_not			/* chan ID */
+		':' T_LINK ';'			/* BBC ID */
+                {$$=make_chan_def($3,$5,$7,$9,$11,$13,NULL,NULL);}
+        | T_CHAN_DEF '=' link_or_not	/* band_id */
+		':' unit_value			/* sky frequency */
+		':' T_NAME			/* net sb */
+		':' unit_value			/* channel BW */
+		':' link_or_not			/* chan ID */
 		':' T_LINK			/* BBC ID */
-		':' T_LINK ';'	/* phase-cal ID */
-                {$$=make_chan_def(1,$3,$5,$7,$9,$11,$13,NULL,$15,NULL);}
+		':' link_or_not ';'	/* phase-cal ID */
+                {$$=make_chan_def($3,$5,$7,$9,$11,$13,$15,NULL);}
 		| T_CHAN_DEF '=' link_or_not	/* band_id */
 		':' unit_value			/* sky frequency */
 		':' T_NAME			/* net sb */
 		':' unit_value			/* channel BW */
-		':' T_LINK			/* chan ID */
+		':' link_or_not			/* chan ID */
 		':' T_LINK			/* BBC ID */
-		':' T_LINK switch_states ';'	/* phase-cal ID */
-		{$$=make_chan_def(1,$3,$5,$7,$9,$11,$13,NULL,$15,$16);}
-                | T_CHAN_DEF '=' link_or_not	/* band_id */
-		':' unit_value			/* sky frequency */
-		':' T_NAME			/* net sb */
-		':' unit_value			/* channel BW */
-		':' T_LINK			/* chan ID */
-		':' T_LINK			/* BBC ID */
-		':' name_or_not              	/* chan name */
-		':' T_LINK ';'	                /* phase-cal ID */
-                {$$=make_chan_def(2,$3,$5,$7,$9,$11,$13,$15,$17,NULL);}
+		':' link_or_not 	/* phase-cal ID */
+/* first "switched state" could be channel name for VEX2*/
+        switch_states ';'	/* switched states */
+		{$$=make_chan_def($3,$5,$7,$9,$11,$13,$15,$16);}
 		| T_CHAN_DEF '=' link_or_not	/* band_id */
 		':' unit_value			/* sky frequency */
 		':' T_NAME			/* net sb */
 		':' unit_value			/* channel BW */
-		':' T_LINK			/* chan ID */
+		':' link_or_not			/* chan ID */
 		':' T_LINK			/* BBC ID */
-		':' name_or_not              	/* chan name */
-		':' T_LINK switch_states ';'	/* phase-cal ID */
-		{$$=make_chan_def(2,$3,$5,$7,$9,$11,$13,$15,$17,$18);}
+		':' link_or_not       /* phase-cal ID */
+        ':'                   /* null channel name */
+        switch_states ';'	/* switched states */
+		{$$=make_chan_def($3,$5,$7,$9,$11,$13,$15,ins_list(make_dvalue(NULL,NULL),$17));}
 ;
 switch_states:	switch_states switch_state	{$$=add_list($1,$2);}
 		| switch_state			{$$=add_list(NULL,$1);}

@@ -2473,13 +2473,10 @@ create_chan_def(char *str, char *str2, char *str3, char *str4,
 		char *str9)
 {
   if(str!=NULL && strlen(str)!=0)
-    {
       string[0] = (char *)strdup(str);
-    }
   else
-    {
       string[0] = str;
-    }
+
   string[1] = (char *)strdup(str2);
   string[2] = (char *)strdup(str3);
   string[3] = (char *)strdup(str4);
@@ -2502,8 +2499,7 @@ create_chan_def_states(char *str)
     }
   else
     {
-      if(string[0]==NULL)
-	{
+      s2=string[0];
 	  s3=string[1];
 	  s4=string[2];
 	  s5=string[3];
@@ -2513,34 +2509,13 @@ create_chan_def_states(char *str)
 	  s9=string[7];
 	  s10=string[8];
 	  qref_list = add_list(qref_list,make_lowl(T_CHAN_DEF,
-					 make_chan_def(0,NULL,
+					 make_chan_def(s2,
 				         make_dvalue(s3,s4),
 				         s5,
 				         make_dvalue(s6,s7),
-					 s8, s9, NULL, s10,
+					 s8, s9, s10,
 				         q_list)));
 	  q_list=NULL;
-	}
-      else
-	{
-	  s2=string[0];
-	  s3=string[1];
-	  s4=string[2];
-	  s5=string[3];
-	  s6=string[4];
-	  s7=string[5];
-	  s8=string[6];
-	  s9=string[7];
-	  s10=string[8];
-	  qref_list = add_list(qref_list,make_lowl(T_CHAN_DEF,
-					 make_chan_def(0,s2,
-				         make_dvalue(s3,s4),
-				         s5,
-				         make_dvalue(s6,s7),
-					 s8, s9, NULL, s10,
-				         q_list)));
-	  q_list=NULL;
-	}
     }
 }
 /*-------------------------------------------------------------------*/
@@ -2550,13 +2525,10 @@ create_chan_def2(char *str, char *str2, char *str3, char *str4,
 		char *str9, char *str10)
 {
   if(str!=NULL && strlen(str)!=0)
-    {
       string[0] = (char *)strdup(str);
-    }
   else
-    {
       string[0] = str;
-    }
+
   string[1] = (char *)strdup(str2);
   string[2] = (char *)strdup(str3);
   string[3] = (char *)strdup(str4);
@@ -2565,7 +2537,11 @@ create_chan_def2(char *str, char *str2, char *str3, char *str4,
   string[6] = (char *)strdup(str7);
   string[7] = (char *)strdup(str8);
   string[8] = (char *)strdup(str9);
-  string[9] = (char *)strdup(str10);
+
+  if(str10!=NULL && strlen(str10)!=0)
+      string[9] = (char *)strdup(str10);
+  else
+      string[9] = NULL;
 }
 /*-------------------------------------------------------------------*/
 void *
@@ -2580,8 +2556,7 @@ create_chan_def_states2(char *str)
     }
   else
     {
-      if(string[0]==NULL)
-	{
+      s2=string[0];
 	  s3=string[1];
 	  s4=string[2];
 	  s5=string[3];
@@ -2592,35 +2567,13 @@ create_chan_def_states2(char *str)
 	  s10=string[8];
 	  s11=string[9];
 	  qref_list = add_list(qref_list,make_lowl(T_CHAN_DEF,
-					 make_chan_def(0,NULL,
+					 make_chan_def(s2,
 				         make_dvalue(s3,s4),
 				         s5,
 				         make_dvalue(s6,s7),
-					 s8, s9, s10, s11,
-				         q_list)));
+					 s8, s9, s10,
+				         ins_list(make_dvalue(s11,NULL),q_list))));
 	  q_list=NULL;
-	}
-      else
-	{
-	  s2=string[0];
-	  s3=string[1];
-	  s4=string[2];
-	  s5=string[3];
-	  s6=string[4];
-	  s7=string[5];
-	  s8=string[6];
-	  s9=string[7];
-	  s10=string[8];
-	  s11=string[9];
-	  qref_list = add_list(qref_list,make_lowl(T_CHAN_DEF,
-					 make_chan_def(0,s2,
-				         make_dvalue(s3,s4),
-				         s5,
-				         make_dvalue(s6,s7),
-					 s8, s9, s10, s11,
-				         q_list)));
-	  q_list=NULL;
-	}
     }
 }
 /*-------------------------------------------------------------------*/

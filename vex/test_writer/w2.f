@@ -467,8 +467,8 @@ c
      &                      ptr_ch('MHz'//char(0)),
      &                      ptr_ch('CH1'//char(0)),
      &                      ptr_ch('BBCa'//char(0)),
-     &                      ptr_ch('CHname'//char(0)),
-     &                      ptr_ch('USB_CAL'//char(0)))
+     &                      ptr_ch('USB_CAL'//char(0)),
+     &                      ptr_ch(char(0)))
       call fcreate_chan_def_states2(ptr_ch(char(0)))
 c
       call fcreate_chan_def2(ptr_ch(char(0)),
@@ -479,8 +479,8 @@ c
      &                      ptr_ch('MHz'//char(0)),
      &                      ptr_ch('CH1'//char(0)),
      &                      ptr_ch('BBCa'//char(0)),
-     &                      ptr_ch('CHname'//char(0)),
-     &                      ptr_ch('USB_CAL'//char(0)))
+     &                      ptr_ch('USB_CAL'//char(0)),
+     &                      ptr_ch(char(0)))
       call fcreate_chan_def_states2(ptr_ch(char(0)))
 c
       call fcreate_chan_def2(ptr_ch('X'//char(0)),
@@ -491,8 +491,8 @@ c
      &                      ptr_ch('MHz'//char(0)),
      &                      ptr_ch(char(0)),
      &                      ptr_ch('BBCa'//char(0)),
-     &                      ptr_ch('CHname'//char(0)),
-     &                      ptr_ch('USB_CAL'//char(0)))
+     &                      ptr_ch('USB_CAL'//char(0)),
+     &                      ptr_ch(char(0)))
       call fcreate_chan_def_states2(ptr_ch(char(0)))
 c
       call fcreate_chan_def2(ptr_ch('X'//char(0)),
@@ -503,7 +503,7 @@ c
      &                      ptr_ch('MHz'//char(0)),
      &                      ptr_ch('CH1'//char(0)),
      &                      ptr_ch('BBCa'//char(0)),
-     &                      ptr_ch('CHname'//char(0)),
+     &                      ptr_ch(char(0)),
      &                      ptr_ch(char(0)))
       call fcreate_chan_def_states2(ptr_ch(char(0)))
 c
@@ -515,8 +515,8 @@ c
      &                      ptr_ch('MHz'//char(0)),
      &                      ptr_ch('CH1'//char(0)),
      &                      ptr_ch('BBCa'//char(0)),
-     &                      ptr_ch('CHname'//char(0)),
-     &                      ptr_ch('USB_CAL'//char(0)))
+     &                      ptr_ch('USB_CAL'//char(0)),
+     &                      ptr_ch(char(0)))
       call fcreate_chan_def_states2(ptr_ch('1'//char(0)))
       call fcreate_chan_def_states2(ptr_ch('2'//char(0)))
       call fcreate_chan_def_states2(ptr_ch(char(0)))
@@ -529,8 +529,8 @@ c
      &                      ptr_ch('MHz'//char(0)),
      &                      ptr_ch('CH1'//char(0)),
      &                      ptr_ch('BBCa'//char(0)),
-     &                      ptr_ch('CHname'//char(0)),
-     &                      ptr_ch(char(0)))
+     &                      ptr_ch(char(0)),
+     &                      ptr_ch('name'//char(0)))
       call fcreate_chan_def_states2(ptr_ch('1'//char(0)))
       call fcreate_chan_def_states2(ptr_ch('2'//char(0)))
       call fcreate_chan_def_states2(ptr_ch(char(0)))
