@@ -19,7 +19,7 @@
 //
 
 = Latest Commit Update Notes
-Version 0.7 - November 2020
+Version 0.8 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -56,28 +56,10 @@ release before installing this update.
 
 === Fetch and make the latest commit
 
-[NOTE]
-====
-If you are using FSL8 or other old distribution that is not
+NOTE: If you are using FSL8 or other old distribution that is not
 compatible with the latest update of the server, you can still use the
-FS without the server. To do this you will need to remove the server
-from the _make_ process by setting the `FS_NO_DISPLAY_SERVER_MAKE`
-environment variable before executing the _make_. Later in the
-installation process it will be necessary to make sure the
-`FS_DISPLAY_SERVER` environment variable is not set for accounts that
-will run the FS. For now, as _prog_:
-
-* If you use _tcsh_, add the following to _~/.login_:
-
-  setenv FS_DISPLAY_SERVER_NO_MAKE 1
-
-* If you use _bash_, add the following to _~/.profile_:
-
-  export FS_DISPLAY_SERVER_NO_MAKE=1
-
-Log-out of and then back into the _prog_ account before
-continuing.
-====
+FS without the server by removing it from the _make_ process. Please
+follow the steps at <<noserver,more details>>.
 
 If you are using _git_, as is recommended, then as _prog_
 execute:
@@ -145,20 +127,6 @@ Please see `*fesh -h*` for more information on using these features.
 A more complete description of the changes to _fesh_ is included in
 the current document at <<fesh,details>>.
 
-. If you removed the display server from the _make_ process as
-described above, you must also make sure that the `FS_DISPLAY_SERVER`
-environment variable is not set for accounts that will run the FS.
-
-.. As  _oper_:
-
-... Delete or comment out any lines in the _~/.login_
-file (if using _tcsh_) or _~/.profile_ (if using _bash_) setting
-the variable.
-
-... Log-out and back in before attempting to run the FS.
-
-.. Repeat the above steps as _prog_.
-
 === Review other changes
 
 Please see the sub-section <<Changes since 10.0.0-beta2>> below
@@ -190,30 +158,32 @@ _/usr2/fs/drudg/change_log.txt_.
 
 . Add _new_ifdbb_ script for (RDBE) VGOS stations. <<new_ifdbb,More details>>.
 
-. _fesh_ updated and expanded (includes closing
+. Update and expand _fesh_ (includes closing
 https://github.com/nvi-inc/fs/issues/36[#36],
 https://github.com/nvi-inc/fs/issues/37[#37],
 https://github.com/nvi-inc/fs/issues/65[#65], and partially closing
 https://github.com/nvi-inc/fs/issues/38[#38]).
 <<fesh,More details>>.
 
-. The station name in _rdbemsg_ is no longer hard coded (closes
+. Remove hard coding of the station name in _rdbemsg_ (closes
 https://github.com/nvi-inc/fs/issues/62[#62]).
 <<stationrdbemsg,More details>>.
 
-. Improvements in _fsserver_ (includes tentatively closing https://github.com/nvi-inc/fs/issues/69[#69]).
+. Improve _fsserver_ (includes tentatively closing https://github.com/nvi-inc/fs/issues/69[#69]).
 <<fsserver,More details>>.
 
-. Improvements in _gnplt_ (closes https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
+. Improve _gnplt_ (closes https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
 <<gnplt,More details>>.
 
-. Improvements in `help` command (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
+. Improve `help` command (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
 <<helpfiles,More details>>.
 
-. Add option to not include the display server in the FS _make_
-(partially closes https://github.com/nvi-inc/fs/issues/76[#76]). <<noserver,More details>>.
+. Add option to not build the display server into the FS (partially closes
+https://github.com/nvi-inc/fs/issues/76[#76]). <<noserver,More
+details>>.
 
-. Improvements to update notes. <<updatenotes,More details>>.
+. Improve update notes (includes closing
+https://github.com/nvi-inc/fs/issues/71[#71]). <<updatenotes,More details>>.
 
 === Summary of drudg changes
 
@@ -233,7 +203,7 @@ conditions at the station. The provides a way to incorporate
 needed changes into schedules. If the script is run without other
 command line arguments, it will output "`help`" information.
 
-. [[fesh]] _fesh_ updated and expanded (includes closing
+. [[fesh]] Update and expand _fesh_ (includes closing
 https://github.com/nvi-inc/fs/issues/36[#36],
 https://github.com/nvi-inc/fs/issues/37[#37],
 https://github.com/nvi-inc/fs/issues/65[#65], and partially closing
@@ -379,12 +349,12 @@ variable is set, or set it if it is not set.
 
 Please see `*fesh -h*` for more information on using these features.
 
-. [[stationrdbemsg]] The station name in _rdbemsg_ is no longer hard coded (closes
+. [[stationrdbemsg]] Remove hard coding of the station name in _rdbemsg_ (closes
 https://github.com/nvi-inc/fs/issues/62[#62]). The station name is now
 set in _rdbemsg.ctlr_ control file. Thanks to Chevo Terraza (MGO) for
 reporting this.
 
-. [[fsserver]] Improvements in _fsserver_ (includes tentatively closing https://github.com/nvi-inc/fs/issues/69[#69]).
+. [[fsserver]] Improve _fsserver_ (includes tentatively closing https://github.com/nvi-inc/fs/issues/69[#69]).
 
 .. _spub_/_ssub_ occasionally froze (tentatively closing
 https://github.com/nvi-inc/fs/issues/69[#69]). This may have been
@@ -394,7 +364,7 @@ situation is still being monitored to verify that it is fixed.
 .. Fixed `clean` function in _Makefile_.
 .. Fixed _sspub_ to support more than 2^32^ messages.
 
-. [[gnplt]] Improvements in _gnplt_ (closes https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
+. [[gnplt]] Improve _gnplt_ (closes https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
 
 .. _gnplt_ now updates the date in updated _.rxg_ files (closes
 https://github.com/nvi-inc/fs/issues/72[#72]).  The original developer,
@@ -407,7 +377,7 @@ for reporting this.
 https://github.com/nvi-inc/fs/issues/73[#73]).  Some recent
 improvements in _gnplt_ made it fail for FSL8.
 
-. [[helpfiles]] Improvements in `help` command (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
+. [[helpfiles]] Improve `help` command (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
 
 .. The `help` file for the `ddbc` command was expanded to also
 describe the `dbbc2` and `dbbc3` commands and now includes a
@@ -423,20 +393,49 @@ support the `fila10g2` command. The `help` command now works for the
 specific commands was lost in the merge of the VGOS and main branches.
 It is now restored.
 
-. [[noserver]] Add option to not include the display server in the FS
-_make_ (partially closes
-https://github.com/nvi-inc/fs/issues/76[#76]). The _beta2_ update to
-the display server inadvertently caused it to be impossible to _make_
-the FS on FSL8 and other old distributions. A new _make_ time
-environment variable, `FS_DISPLAY_SERVER_NO_MAKE` was added to
+. [[noserver]] Add option to not build the display server into the FS
+(partially closes https://github.com/nvi-inc/fs/issues/76[#76]).  The
+latest version of the server does not _make_ successfully on some
+older Linux distributions such as FSL8. To help users in that
+situation, an option was added to disable inclusion of the server by
+setting the `FS_NO_DISPLAY_SERVER_MAKE` environment variable before
+__make__-ing the FS. Follow the steps below to remove the server.
 
-optionally remove the display server from the _make_. If this option
-is used, the display obviously can't be used. As a result, the
-`FS_DISPLAY_SERVER` environment variable must not be set when running
-the FS. We are looking into make it possible to use the display server
-on at least some of the older distributions.
+.. As _prog_:
 
-. [[updatenotes]] Improvements to update notes.
++
+
+* If you use _tcsh_, add the following to _~/.login_:
+
+  setenv FS_DISPLAY_SERVER_NO_MAKE 1
+
++
+
+* If you use _bash_, add the following to _~/.profile_:
+
+  export FS_DISPLAY_SERVER_NO_MAKE=1
+
++
+
+.. Log-out of and then back into the _prog_ account before
+__make__-ing the FS.
+
+.. It is also necessary to also make sure that users running the FS do
+not have the `FS_DISPLAY_SERVER` environment variable set.
+
+... As  _oper_:
+
+.... Delete or comment out any lines in the _~/.login_
+file (if using _tcsh_) or _~/.profile_ (if using _bash_) setting
+the variable.
+
+.... Log-out and back in before attempting to run the FS.
+
+... Repeat the above steps as _prog_.
+
+
+. [[updatenotes]] Improve update notes (includes closing
+https://github.com/nvi-inc/fs/issues/71[#71]).
 
 .. Modify steps for updating to a specific commit after _beta2_ to
 use the latest commit instead. As well as being
@@ -450,16 +449,18 @@ use as reliable as released (tagged) versions.
 
 .. Add missing _rdbemsg.ctl_ customization.
 
-.. Reorganized as _.adoc_ files in the _docs/_ sub-directory. All of
-the _.adoc_ files are viewable as HTML, and are hierarchically
-indexed, at https://nvi-inc.github.io/fs/. The first updates available
-in HTML are for _10.0.0-beta2_ and can be viewed at:
-https://nvi-inc.github.io/fs/releases/10.0.0/beta2.html.
+.. Reorganized as _.adoc_ files in the _docs/_ sub-directory (closes
+https://github.com/nvi-inc/fs/issues/71[#71]).
 +
-
+All of the _.adoc_
+files are viewable as HTML, and are hierarchically indexed, at
+https://nvi-inc.github.io/fs/. The first update notes available in
+HTML are for <<beta2.adoc#,10.0.0-beta2>>.
 Hopefully, this change will make the update notes easier to read and
 navigate. Among other improvements, there are clickable links to other
 sections within a document as well as to other related documents.
+<<../../misc/font_conventions.adoc#,Font conventions>> similar to the
+traditional printed FS manuals are used.
 
 .. Improve structure and correct some errors from original _.txt_ version.
 .. Some typo/wording fixes.

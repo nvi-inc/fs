@@ -19,13 +19,13 @@
 //
 
 = DRAFT FS Document Font Conventions
-Version 0.1 - November 2020
+Version 0.2 - November 2020
 
 :sectnums:
 
 == Introduction
 
-This document cover font and other typographic conventions for FS HTML
+This document covers font and other typographic conventions for FS HTML
 documents using _asciidoctor_ source.
 
 == Conventions
@@ -144,7 +144,7 @@ login: _account_
 === Admonitions
 
 Admonitions are created by starting a line with the admonition in
-capital letter followed by a colon and space.
+capital letters followed by a colon and space.
 
 For admonitions with complex content, a _block_ can be made by putting
 the capitalized admonition in square brackets, then on the next line

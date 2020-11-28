@@ -470,12 +470,18 @@ version is included in more than one case in a sub-step.
 
 ==== Update stcmd.ctl
 
+. Old version 9.13.2:
+
++
+
 The non-comments lines need another digit added to the
 subroutine number. This sub-step is only need for updates from
 _9.13.2_. You can fix your file with the commands:
 
   cd /usr2/control
   /usr2/fs/misc/cmdctlfix6 stcmd.ctl
+
++
 
 You may also want to expand the (typically) second comment
 line to correspond to the new format by adding a `U` after
@@ -541,9 +547,9 @@ final two lines of the example _equip.ctl_ file to yours:
 
 You should compare your versions of the following files:
 
-. _clpgm.ctl_
-. _equip.ctl_
-. _stpgm.ctl_
+* _clpgm.ctl_
+* _equip.ctl_
+* _stpgm.ctl_
 
 to the examples, e.g., using:
 
@@ -589,7 +595,7 @@ relevant for your site, you may prefer to not add them.
 
 ===== Review equip.ctl
 
-This file has the most complicated changes.
+CAUTION: This sub-step has the most complicated changes.
 Please read all clauses to make sure you see
 all that apply to your old version.
 
@@ -675,7 +681,9 @@ the clock rate line itself.
 
 ===== Review stpgm.ctl
 
-. All old versions
+. All old versions:
+
++
 
 WARNING: If you are _not_ planning to use the FS display
 server, we recommend you comment out the lines
@@ -701,19 +709,23 @@ _~/.Xresources_ files for _oper_ and _prog_.
 
 ==== Update rdbemsg.ctl
 
+. Versions 9.12.10-9.12.13:
+
++
+
 If you have RDBEs for your back-end and will use the _rdbemsg_
 utility to send operations messages, you will need to
 customize your _/usr2/control/rdbemsg.ctl_ file.
 
-. You will need to update the `station` two letter code (lower
+.. You will need to update the `station` two letter code (lower
 case) and the `name` station name to your station's values. The
 station name is usually defined in the
 _/usr2/control/location.ctl_ file.
 
-. If you don't have a _HubPC_ (_mci_) node for front end monitor
+.. If you don't have a _HubPC_ (_mci_) node for front end monitor
 and control, you should comment out that line.
 
-. You should set the addresses for the RBDE-A (`R-A`) through RDBE-D
+.. You should set the addresses for the RBDE-A (`R-A`) through RDBE-D
 (`R-D`). The example file uses aliases, _rdbea_ through _rdbed_, that
 you can define in _/etc/hosts_.  Likewise, if you have an _mci_ node,
 you should set its alias, _hubpc_, in _/etc/hosts_. (It is usually
@@ -721,7 +733,7 @@ necessary to have _root_ access to modify _/etc/hosts_.)  Alternatively
 of course, you can use any scheme you prefer for defining these
 addresses in _rdbemsg.ctl_.
 
-. The default email address `to` is for the `ivs-vgos-ops` mail
+.. The default email address `to` is for the `ivs-vgos-ops` mail
 list. You can of course change that to whatever you like. You
 can also temporarily override the address in the _rdbemsg_
 utility itself.
@@ -811,7 +823,7 @@ non-GPU CPU.
 
 A strategy for setting the `geometry` resource for a window is:
 
-. Manually adjust the position of the window with the mouse to where you want it to be.
+. Manually adjust the size and position of the window with the mouse to what you want.
 
 . Run the _xwininfo_ program
 
@@ -822,7 +834,7 @@ A strategy for setting the `geometry` resource for a window is:
 . Paste the string as the value for `geometry` resource for that window in the _~/.Xresources_ file.
 
 You will need to logout and login again (or reload
-the X-resources a different way) for the change to become
+the X resources a different way) for the change to become
 effective.
 ====
 
