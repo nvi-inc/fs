@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 0.2 - November 2020
+Version 0.3 - November 2020
 
 :sectnums:
 :experimental:
@@ -439,3 +439,24 @@ fixed.  If there are, they will be displayed.  If you choose to fix
 them, you can re-run the second command above without the `-t` flag to
 apply the fix.  An original of each _.prc_ file that is changed is
 retained with an added _.bak_ extension.
+
+== Setting geometry values in .Xresources
+
+A strategy for setting the `geometry` resource for a window is:
+
+. Adjust the position (and maybe the size) of the window to what you
+want.
+
+. Run the _xwininfo_ program
+
+. Position the cursor on the window and click.
+
+. Copy the string output for the `-geometry` parameter, e.g,
+`80x24+0+0`.
+
+. Paste the string as the value for `geometry` resource for that
+window in the _~/.Xresources_ file.
+
+You will need to logout and login again (or reload
+the X resources a different way) for the change to become
+effective.

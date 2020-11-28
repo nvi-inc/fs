@@ -417,7 +417,7 @@ __make__-ing the FS. Follow the steps below to remove the server.
 
 +
 
-.. Log-out of and then back into the _prog_ account before
+.. Logout of and then back into the _prog_ account before
 __make__-ing the FS.
 
 .. It is also necessary to also make sure that users running the FS do
@@ -429,7 +429,7 @@ not have the `FS_DISPLAY_SERVER` environment variable set.
 file (if using _tcsh_) or _~/.profile_ (if using _bash_) setting
 the variable.
 
-.... Log-out and back in before attempting to run the FS.
+.... Logout and back in before attempting to run the FS.
 
 ... Repeat the above steps as _prog_.
 

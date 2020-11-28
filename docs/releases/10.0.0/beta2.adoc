@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.0 - November 2020
+Version 1.1 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -159,7 +159,7 @@ Upgrading to the <<latest_commit.adoc#,latest commit>>.
 <<../misc/known_bugs.adoc#,Known bugs>> document with the known bugs list from FS9.
 
 <<../misc/install_reference.adoc#,Installation reference>> document with other useful install
-information is available.  It includes seven sub-sections:
+information is available.  It includes eight sub-sections:
 
 
 . <<../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
@@ -169,6 +169,7 @@ information is available.  It includes seven sub-sections:
 . <<../misc/install_reference.adoc#_disk_space_requirements,Disk space requirements>>
 . <<../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
 . <<../misc/install_reference.adoc#_fix_prc_file_define_lines,Fix .prc file define lines>>
+. <<../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting geometry values in .Xresources>>
 
 If you haven't upgraded or installed the FS before, you may want to
 review the appendix.  It is _strongly_ recommended that you back-up your
@@ -823,15 +824,18 @@ non-GPU CPU.
 
 A strategy for setting the `geometry` resource for a window is:
 
-. Manually adjust the size and position of the window with the mouse to what you want.
+. Adjust the position (and maybe the size) of the window to what you
+want.
 
 . Run the _xwininfo_ program
 
 . Position the cursor on the window and click.
 
-. Copy the string output for the `-geometry` parameter, e.g, `80x24+0+0`.
+. Copy the string output for the `-geometry` parameter, e.g,
+`80x24+0+0`.
 
-. Paste the string as the value for `geometry` resource for that window in the _~/.Xresources_ file.
+. Paste the string as the value for `geometry` resource for that
+window in the _~/.Xresources_ file.
 
 You will need to logout and login again (or reload
 the X resources a different way) for the change to become
