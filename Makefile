@@ -101,6 +101,7 @@ dist:
 	                                            -name '*' -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION)/third_party/src/* \
 			! -iname '*.tar.gz'   \
+			! -iname '*.patch'   \
 			! -iname '*.template' \
 			! -iname '*.make'                     -print >> /tmp/fsdist-exclude 
 	echo usr2/fs-$(FS_VERSION)/third_party/lib                   >> /tmp/fsdist-exclude
@@ -118,6 +119,7 @@ clean:
 	rm -rf third_party/include third_party/lib third_party/bin
 	find third_party/src/* \
 		! -iname '*.tar.gz' \
+		! -iname '*.patch' \
 		! -iname '*.make' \
 		! -iname '*.template' \
 		-delete
@@ -132,6 +134,7 @@ rmdoto:
 	rm -rf third_party/include third_party/lib third_party/bin
 	find third_party/src/* \
 		! -iname '*.tar.gz' \
+		! -iname '*.patch' \
 		! -iname '*.make' \
 		! -iname '*.template' \
 		-delete

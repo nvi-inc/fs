@@ -1,0 +1,12 @@
+--- nng-1.3.0/src/platform/posix/posix_pollq_epoll.c.orig	2020-11-30 10:45:05.000000000 +0000
++++ nng-1.3.0/src/platform/posix/posix_pollq_epoll.c	2020-11-30 10:47:07.000000000 +0000
+@@ -17,7 +17,9 @@
+ #include <stdio.h>
+ #include <string.h> /* for strerror() */
+ #include <sys/epoll.h>
++#ifdef NNG_HAVE_EVENTFD
+ #include <sys/eventfd.h>
++#endif // NNG_HAVE_EVENTFD
+ #include <unistd.h>
+ 
+ #include "core/nng_impl.h"
