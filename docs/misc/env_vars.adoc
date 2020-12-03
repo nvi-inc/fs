@@ -1,0 +1,337 @@
+//
+// Copyright (c) 2020 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= FS Environment Variables
+Version 0.3 - December 2020
+
+:sectnums:
+
+== Introduction
+
+This document describes user settable Linux environment variables used
+by the FS.  There are two categories: _make_ time and runtime.
+
+// Some environment variables used internally are also listed.
+
+== Make time variables
+
+These variables, if used, are usually set for the _prog_ account since
+it is used to build the FS. For _prog_ users with _bash_ as their
+login shell, they are usually set in _~/.profile_ using the _export_
+command; with _tcsh_, in _~/.login_, using _setenv_.
+
+=== FS_DISPLAY_SERVER_NO_MAKE
+
+Nominal value is `1`.
+
+If set, this variable suppresses building the display server into the
+FS. This may be useful to allow building the FS usable on systems that
+can't support the display server.
+
+This was introduced in _10.0.0-beta3_.
+
+=== FS_SERIAL_CLOCAL
+
+Nominal value is `1`.
+
+If set, this variable causes the opening of serial ports to be
+preceded by:
+
+. An `open()` with `O_NONBLOCK`
+. Setting the port to `CLOCAL`
+. Closing it
+
+This works-around a problem that causes the normal `open()` to block.
+Apparently starting with FSL9 (_Wheezy_), the system boots with the
+ports initially as `-CLOCAL`.
+
+This was introduced in _9.11.6_, August, 2014.
+
+=== FS_TINFO_LIB
+
+Nominal value is `1`.
+
+If set, this variable causes the _tinfo_ library to be explicitly
+searched when building programs that use _ncurses_.  This should only
+be needed/used if the _ncurses_ library on the systems does not
+include the _tinfo_ library. This issue was reported by Mamoru Sekido
+(Kashima).
+
+This was introduced in _9.13.0_, September, 2018.
+
+=== NO_FTOK_FS
+
+Nominal value is `TRUE`.
+
+If set, removes use of _ftok()_ in setting _System V_ IPC key valuess.
+This is needed for some old OSs that do not have the function. Using
+this variable will increase the likelihood of a conflict with other
+_System V_ IPC key values, which may cause some very difficult to
+diagnose problems.
+
+This was introduced in _9.7.0_, July, 2004.
+
+== Runtime variables
+
+These variables, if used, are usually set for the _oper_ and _prog_
+accounts since they are used to run the FS. For users with _bash_ as
+their login shell, they are usually set in _~/.profile_ using the
+_export_ command; with _tcsh_, in _~/.login_, using _setenv_.
+
+
+=== DATA_CENTERS
+
+Nominal value is a, space separated, list, of data centers. Supported
+data centers are `BKG`, `CDDIS`, `HAYSTACK` (VGOS only), and `OPAR`.
+
+This variable is used by _plog_ to determine the default data centers
+to upload files to.
+
+This was introduced in _9.11.18_, January 2016.
+
+=== EDITOR
+
+Possible values are any editor installed the system, this _may_ include:
+_emacs_, _ex_, _nano_, _pico_, _vi_, and  _vim_.
+
+Used by _pfmed_ as the editor run by the `ed` command.
+
+This was introduced in _8.9.0_, circa 1995.
+
+=== FESH_EMAIL
+
+Nominal value is an email address.
+
+If set, this is used as the password in _fesh_ for the anonymous
+FTP-SSL method for _cddis_.
+
+This was introduced in _10.0.0-beta3_.
+
+=== FESH_DATA_CENTER
+
+Possible values are `bkg`, `cddis`, `opar` or `vlbeer`.
+
+If set, this changes the default data center in _fesh_ to the
+specified value.
+
+This was introduced in _10.0.0-beta3_.
+
+=== FESH_CDDIS_METHOD
+
+Possible values are `ftp-ssl` or `https`.
+
+If set, this changes the default access method for _cddis_ in _fesh_
+to the specified value.
+
+This was introduced in _10.0.0-beta3_.
+
+=== FESH_GEO_TPICD
+
+Possible values are non-negative integers.
+
+If set, the value is provided as the answer for the _drudg_ prompt for
+the _tpicd_ interval for geodesy schedules.
+
+IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
+value, the _drudg_ output files  will be incorrect and there may be no
+clear indication of that.
+
+This was introduced in _10.0.0-beta3_.
+
+=== FESH_GEO_CONT_CAL
+
+Possible values are `on` or `off`
+
+If set, the value is provided as the answer for the _drudg_ prompt for
+continuous cal use for geodesy schedules.
+
+IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
+value, the _drudg_ output files  will be incorrect and there may be no
+clear indication of that.
+
+This was introduced in _10.0.0-beta3_.
+
+=== FESH_GEO_CONT_CAL_POLARITY
+
+Possible values are `0`, `1`, `2`, `3`, or `none`.
+
+If set, the value is provided as the answer for the _drudg_ prompt for
+the continuous cal polarity for geodesy schedules.
+
+IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
+value, the _drudg_ output files  will be incorrect and there may be no
+clear indication of that.
+
+This was introduced in _10.0.0-beta3_.
+
+=== FESH_GEO_VSI_ALIGN
+
+Possible values are `0`, `1`, or `none`.
+
+If set, the value is provided as the answer for the _drudg_ prompt for
+using `vsi_align` for geodesy schedules.
+
+IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
+value, the _drudg_ output files  will be incorrect and there may be no
+clear indication of that.
+
+This was introduced in _10.0.0-beta3_.
+
+=== FS_ANTCN_TERMINATION
+
+Nominal value is `10`.
+
+If set, this variable causes the FS, when terminating, to run _antcn_
+in the mode defined by the value set. If not a positive integer, the
+value will default to `10`. The intent is to give a way to signal to
+the antenna that it should shutdown.
+
+The _antcn_ termination mode (normally 10) must complete execution
+promptly.  If it does not, termination of the FS may be delayed, which
+can cause difficulties as well as frustration for the operator.  It is
+recommended that if execution will take more than a fraction of
+second, execution should be passed to another process that persists
+after FS termination.  It may be necessary to coordinate with that
+other process in the _antcn_ initialization mode to make sure there is
+no conflict when the FS is restarted. Thanks to J. Quick (HartRAO) for
+suggesting this.
+
+This was introduced in _9.11.7_, February 2015.
+
+=== FS_CHECK_NTP
+
+Nominal value is `1`.
+
+If this variable is set, the _fmset_ and _setcl_ programs will attempt
+to check the status of NTP when run, reporting `sync'd`/`sync` or
+`not{nbsp} sync'd`/`no_sync`.  This is not enabled by default in case
+NTP is not available or for some reason the check is slow. If used and
+an error is detected in either _fmset_ or _setcl_ or both, the check
+will be disabled for the affected program until the next FS restart.
+If the NTP status can't be determined it is shown as `unknown`.
+
+This was introduced in _9.7.1_, September 2004.
+
+=== FS_DISPLAY_SERVER
+
+Nominal value is `on`.
+
+If set, the display server is enabled. It must also be set in sessions
+that use the client.
+
+It must not be set if `FS_DISPLAY_SERVER_NO_MAKE` was set when the FS
+was _made_.
+
+This was introduced in _9.13.0_, September 2018.
+
+=== FS_ERROR_WAV
+
+Nominal value is a path to a _.wav_ file.
+
+If set, the value is taken as the path to _.wav_ file to play when an
+error is reported. This can be used to increase the volume of the
+alert used to report an error when it occurs.
+
+This was introduced in _9.10.5_, October 2012.
+
+=== FS_FLAGR_SUPPRESS_ANTCN_ERRORS
+
+Nominal value is `1`.
+
+If this variable is defined, _flagr_ will suppress reporting of errors
+from _antcn_. It was introduced when a bug in _flagr_ was corrected so
+that it would report these errors. It was intended to temporarily
+restore the previous behavior until the station implementation of
+_antcn_ could be fixed.
+
+This was introduced in _9.11.6_, August 2014.
+
+=== FS_WAKEUP_WAV
+
+Nominal value is a path to a _.wav_ file.
+
+If set, the value is taken as the path to _.wav_ file to play when an
+`wakeup` command is executed. This can be used to increase the volume
+of the alert used to "`wake up`" the operator.
+
+This was introduced in _9.10.5_, October 2012.
+
+=== HOME
+
+Used by _predict_ to determine where the _.predict_ directory of
+default information is located.
+
+This was introduced in _9.10.5_, October 2012.
+
+=== LIST_DIR
+
+Nominal value is a directory path, typically _/usr2/sched_.
+
+If set, used by _fesh_ to determine where _drudg_ listing files are
+placed, overriding use of the same directory as _.skd_ files.
+
+This was introduced in _10.0.0-beta3_.
+
+=== NETRC_DIR
+
+Nominal value is a directory path, possibly _/usr2/control_.
+
+Used in _fesh_ and _plog_ to set a different directory then  _~_ for
+the _.netrc_ file.
+
+This was introduced in 10.0.0-beta2, July 2020.
+
+=== S2_PING
+
+If set, S2 devices will be __ping__ed to verify connectivity before
+opening them.
+
+This was introduced in 9.3.204, December 1998.
+
+=== STATION
+
+Nominal value is the lowercase two-letter station code.
+
+Used by _fesh_ and _plog_.
+
+This was introduced in 9.11.18, January 2016.
+
+=== TERM
+
+Used by _predict_ to determine if running in an _xterm_.
+
+Used by (not normally built) _rclco_ to determine if a terminal is in
+use.
+
+This was introduced in _9.10.5_, October 2012.
+
+//== Used internally
+//
+//=== PATH
+//
+//Used internally by _fsserver_ to insert shims to intercept certain X11 programs when run by the user.
+//
+//=== FS_SERVER_LOG_FD
+//
+//Used by _fserver_ to pass the file descriptor to _ddout_ for  writing log entries.
+//
+//=== FS_CLIENT_PIPE_FD
+//
+//Used by _fsclient_ to receive commands from _oprin_.

@@ -19,7 +19,7 @@
 //
 
 = Latest Commit Update Notes
-Version 0.8 - November 2020
+Version 0.9 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -452,15 +452,16 @@ use as reliable as released (tagged) versions.
 .. Reorganized as _.adoc_ files in the _docs/_ sub-directory (closes
 https://github.com/nvi-inc/fs/issues/71[#71]).
 +
-All of the _.adoc_
-files are viewable as HTML, and are hierarchically indexed, at
-https://nvi-inc.github.io/fs/. The first update notes available in
-HTML are for <<beta2.adoc#,10.0.0-beta2>>.
-Hopefully, this change will make the update notes easier to read and
-navigate. Among other improvements, there are clickable links to other
-sections within a document as well as to other related documents.
+
+All of the _.adoc_ files are viewable as HTML, and are hierarchically
+indexed, at https://nvi-inc.github.io/fs/. The first update notes
+available in HTML are for <<beta2.adoc#,10.0.0-beta2>>.  Hopefully,
+this change will make the update notes easier to read and navigate.
+Among other improvements, there are clickable links to other sections
+within documents as well as to sections in other related documents.
 <<../../misc/font_conventions.adoc#,Font conventions>> similar to the
-traditional printed FS manuals are used.
+traditional printed FS manuals are used. A document describing
+<<../../misc/env_vars.adoc#,FS environment variable>> use was added.
 
 .. Improve structure and correct some errors from original _.txt_ version.
 .. Some typo/wording fixes.
