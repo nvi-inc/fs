@@ -18,12 +18,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-all: index.html beta2.html beta1_to_beta2.html beta2_to_latest.html
+all: index.html beta2.html beta1_to_beta2.html beta2_to_latest.html\
+    beta3.html beta3_to_latest.html
 
 index.html: index.adoc
 beta2.html: beta2.adoc
+beta3.html: beta3.adoc
 beta1_to_beta2.html: beta1_to_beta2.adoc
 beta2_to_latest.html: beta2_to_latest.adoc
+beta3_to_latest.html: beta3_to_latest.adoc
 
 %.html: %.adoc
 	asciidoctor -a toc $^

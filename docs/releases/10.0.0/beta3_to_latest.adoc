@@ -1,0 +1,113 @@
+//
+// Copyright (c) 2020 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= FS 10.0.0-beta3 to Latest Commit Update Notes
+Version 0.1 - December 2020
+
+//:hide-uri-scheme:
+:sectnums:
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+:toclevels: 4
+
+== Introduction
+
+The document covers updating from the latest pre-release to the
+_latest commit_ on its branch. The latest commit is somewhat
+experimental. We make ever effort to keep the latest commit usable.
+However commits that are not tagged for release are not intended for
+operations.
+
+CAUTION: It is expected that those using the latest commit are experts
+and will manage the differences for updating to the next official
+release themselves. What needs to done will depend on what commit
+you had last updayted to. Advice is usually available, but no
+documentation is provided.
+
+This document is up to date with commit
+https://github.com/nvi-inc/fs/commit/e01f03e951ac381071e0b313a9415189e63df919[e01f03e9].
+Due to small increments, such as adding this document, this may not be
+the literal last commit, but the differences should be small unless
+you happen to `fetch` between a significant change and this document
+being updated.
+
+== Upgrading from 10.0.0-beta3 to the latest commit
+
+You must have already upgraded to the <<beta3.adoc,10.0.0-beta3>>
+release before installing this update.
+
+=== Fetch and make the latest commit
+
+If you are using _git_, as is recommended, then as _prog_
+execute:
+
+             cd /usr2/fs-git
+             git fetch
+             git checkout master
+             make -s
+
+=== Additional steps
+
+There are no additional steps need at this time.
+
+=== Review changes
+
+Please see the sub-section <<Changes since 10.0.0-beta3>> below
+for details of the changes since that pre-release.
+
+== Changes since 10.0.0-beta3
+
+[[details]] There are separate sub-sections with summaries of changes in the FS
+and _drudg_. Following those are sub-sections giving the details of the
+changes. Each summary item has a clickable <<details,More details>>
+link that leads to the detailed description of that item.
+
+Clickable links such as
+https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
+reported at https://github.com/nvi-inc/fs/issues.
+
+A complete history of changes can be found using the `git log`
+command.
+
+The file _/usr2/fs/misc/changes.txt_ contains the old history of
+changes in FS9. The file _/usr2/fs/misc/VENIX_changes.txt_ contains
+the old history of changes in FS8. However these two files have been
+merged into the history given by `git log`.
+
+The history of _drudg_ is also described in more detail in
+_/usr2/fs/drudg/change_log.txt_.
+
+=== Summary of FS changes
+
+There are no changes at this time.
+
+=== Summary of drudg changes
+
+There are no changes at this time.
+
+=== Details of FS changes
+
+There are no changes at this time.
+
+=== Details of drudg changes
+
+There are no changes at this time.
