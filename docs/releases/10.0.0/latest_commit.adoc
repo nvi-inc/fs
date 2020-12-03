@@ -19,7 +19,7 @@
 //
 
 = Latest Commit Update Notes
-Version 0.9 - November 2020
+Version 1.0 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -59,7 +59,7 @@ release before installing this update.
 NOTE: If you are using FSL8 or other old distribution that is not
 compatible with the latest update of the server, you can still use the
 FS without the server by removing it from the _make_ process. Please
-follow the steps at <<noserver,more details>>.
+follow the steps in <<noserver, not building the display server>>.
 
 If you are using _git_, as is recommended, then as _prog_
 execute:
@@ -398,7 +398,7 @@ It is now restored.
 latest version of the server does not _make_ successfully on some
 older Linux distributions such as FSL8. To help users in that
 situation, an option was added to disable inclusion of the server by
-setting the `FS_NO_DISPLAY_SERVER_MAKE` environment variable before
+setting the `FS_DISPLAY_SERVER_NO_MAKE` environment variable before
 __make__-ing the FS. Follow the steps below to remove the server.
 
 .. As _prog_:
