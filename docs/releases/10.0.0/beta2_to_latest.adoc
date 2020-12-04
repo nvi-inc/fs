@@ -18,8 +18,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= Latest Commit Update Notes
-Version 1.0 - December 2020
+= FS 10.0.0-beta2 to the Latest Commit Update Notes
+Version 1.1 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -31,19 +31,20 @@ Version 1.0 - December 2020
 
 == Introduction
 
-The document covers updating from the latest pre-release to the _latest
-commit_ on its branch until the next release. The latest commit is
-somewhat experimental. We make ever effort to keep the latest commit
-usable. However commits that are not tagged for release are not
-intended for operations.
+The document covers updating from the _beta2_ pre-release to the
+_latest commit_ on its branch. The latest commit is somewhat
+experimental. We make ever effort to keep the latest commit usable.
+However commits that are not tagged for release are not intended for
+operations.
 
 CAUTION: It is expected that those using the latest commit are experts
 and will manage the differences for updating to the next official
-release themselves. Advice is usually available, but no documentation
-is provided.
+release themselves. What needs to done will depend on what commit
+you had last updated to. Advice is usually available, but no
+documentation is provided.
 
 This document is up to date with commit
-https://github.com/nvi-inc/fs/commit/e01f03e951ac381071e0b313a9415189e63df919[e01f03e9].
+https://github.com/nvi-inc/fs/commit/61d3c3b2034494921096cedace4833ac94b39527[61d3c3b2].
 Due to small increments, such as adding this document, this may not be
 the literal last commit, but the differences should be small unless
 you happen to `fetch` between a significant change and this document

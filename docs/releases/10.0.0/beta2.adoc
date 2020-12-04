@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.1 - November 2020
+Version 1.2 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -146,13 +146,14 @@ feedback, particularly on DBBC3 related issues.
 
 This section provides links to some other useful documents.
 
-=== Other upgrade paths
+=== Other related upgrade documents
+
+Upgrading from <<beta2_to_latest.adoc#,beta2 to the latest commit>>.
 
 Upgrading from <<beta1_to_beta2.adoc#,beta1 to beta2>>.
 
-// . Upgrading to https://raw.githubusercontent.com/nvi-inc/fs/259e203330fff145dba5ea6b2f48c8bcd23b4333/misc/fs10.0.0up.txt[beta1].
-
-Upgrading to the <<latest_commit.adoc#,latest commit>>.
+Upgrading from FS9 to _10.0.0-beta1_ (text document):
+https://raw.githubusercontent.com/nvi-inc/fs/259e203330fff145dba5ea6b2f48c8bcd23b4333/misc/fs10.0.0up.txt.
 
 === Miscellaneous
 
