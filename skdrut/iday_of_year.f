@@ -17,29 +17,35 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
-      subroutine hol2lower(iarr,ilen)
+      integer function iday_of_year(iyear,imonth,iday)
       implicit none
-c
-c Convert any upper case to lower.
-C 930601 NRV Input is hollerith. In this routine, change to a
-C            string, convert, then change back.
-C 960213 nrv Make local string bigger
-c
-C Input:
-      integer*2 iarr(*)!NOTE: iarr is modified upon return
-      integer ilen ! length in characters
-C Local:
-      integer i,ival
-C ***********NOTE*********** change this when ibuf is changed
-      character*1024 string
-c
-      call hol2char(iarr,1,ilen,string)
-      do i=1,ilen
-        ival=ichar(string(i:i))
-        if(ival.ge.65.and.ival.le.90) string(i:i)=char(ival+32)
-      enddo
-      call char2hol(string,iarr,1,ilen)
-c
+! Return the day of year.
+      integer iyear,imonth,iday
+! 2019May15 JMGipson. First version
+! 2019Sep04 JMGipson. Second version.  Take into account that we only add leapday after February
+
+! local
+
+      integer imon_offset(12)
+      integer ileap_day
+      data imon_offset/0,31,59,90,120,151,181,212,243,273,304,334/
+
+      if(mod(iyear,400) .eq. 0) then
+         ileap_day=1
+      else if(mod(iyear,100) .eq.0) then
+         ileap_day=0
+      else if(mod(iyear,4) .eq. 0) then
+         ileap_day=1
+      else
+         ileap_day=0
+      endif
+
+      iday_of_year=imon_offset(imonth)+iday
+      if(imonth .gt. 2) then
+        iday_of_year=iday_of_year+ileap_day
+      endif
+
       return
-      end
+      end function
+
 

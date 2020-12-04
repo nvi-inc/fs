@@ -40,6 +40,8 @@ C 020327 nrv Get data_modulation.
 C 021111 jfq Don't allow track 0 or headstack 0
 ! 2004Dec8. Changed lm from holerrith to ASCII
 ! 2016Jan19 JMG.  Doubled dimension of several variables that had max_track to 2*max_track becuase now sign& magnitude can be on same track 
+! 2019Sep03 JMG. 1) Added implicit none.  Truncate track-frame format to 8 characters
+!
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -68,6 +70,7 @@ C  LOCAL:
       character*128 cout
       integer it(4),j,nn,in,i,nch
       integer fvex_len,fvex_int,fvex_field,fget_all_lowl,ptr_ch
+      integer is
 C
 C  Initialize
 C
@@ -83,16 +86,23 @@ C
 
 C  1. The recording format
 C
+      
       ierr = 1
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('track_frame_format'//char(0)),
      .ptr_ch('TRACKS'//char(0)),ivexnum)
-      if (iret.ne.0) return
+      if (iret.ne.0) then
+        write(*,*)"VUNPTRK00 did not find track_frame_format ", iret 
+        return
+      endif
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       NCH = fvex_len(cout)
-      IF  (NCH.GT.8.or.NCH.le.0) THEN  !
-        write(lu,'("VUNPTRK01 - Track format name too long")')
-        iret=-1
+      IF  (NCH.GT.16) THEN  !
+        is=fvex_len(stdef)
+        write(lu,'("VUNPTRK01 -  for station ", a,
+     >   " track format name too long: ",a, " Using first 16 chars")') 
+     >    stdef(1:is), cout(1:nch)
+        cm=cout(1:8)       
       else
          cm=cout(1:nch)
       END IF  !

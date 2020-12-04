@@ -18,7 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       real FUNCTION SPEED(ICODE,is)
-      implicit none  !2020Jun15 JMGipson automatically inserted.
+      implicit none
 
 C   SPEED returns the actual tape speed in feet per second
 C   Restrictions:
@@ -53,6 +53,7 @@ C 030109 jmg Back to m/s on K4
 ! 2006Nov29 JMG.  Changed to use cstrec(istn,irec)
 ! 2009Oct01 JMG.  Made special speed for disk recording
 ! 2013Sep19  JMGipson made sample rate station dependent
+! 2020Oct02  JMG. Removed all references to S2
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -76,17 +77,7 @@ C
       endif
 
 C Determine type of equipment.
-      if (cstrec(is,1)(1:2) .eq. "S2") then
-        if (cs2speed(is)(1:2) .eq. "LP") then
-          sp = speed_lp ! ips
-        else if (cs2speed(is)(1:3) .eq. "SLP") then
-          sp = speed_slp ! ips
-        else ! unknown
-          speed=-1.0
-          return
-        endif
-        sp=sp/12.0 ! convert to fps
-      else if (cstrec(is,1)(1:2) .eq. "K4") then
+      if (cstrec(is,1)(1:2) .eq. "K4") then
         totrate=samprate(is,icode)*(ntrkn(1,is,icode)+ntrkn(2,is,icode))
         if (totrate.gt.129.0) then
           sp = 423.8 ! mm/sec for 256 Mbps

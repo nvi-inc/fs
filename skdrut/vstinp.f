@@ -18,11 +18,11 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE VSTINP(ivexnum,lu,ierr)
-      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     This routine gets all the station information
 C     and stores it in common.
 C
+      implicit none
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/constants.ftni'
@@ -37,10 +37,12 @@ C 991123 nrv Recorder 1 and 2, not a and b.
 C 001114 nrv For two recorders save second type same as first.
 C 010615 nrv Initialize lstrec2 to blanks.
 ! 2006Nov30 JMGipson. Modified to check recorder type.
-! 2016Nov29 JMG. Rack changed to character*20 from character*8
+! 2016Nov29 JMG. Rack changed to character*20 from character*8 
+! 2019Sep03 JMG. Correct length for station name.  Added implicit none 
+! 2020Oct02  JMG. Removed all references to S2 
 C
 C INPUT:
-      integer ivexnum ! vex file number
+      integer ivexnum ! vex file number 
       integer lu ! unit for writing error messages
 C
 C OUTPUT:
@@ -50,19 +52,18 @@ C OUTPUT:
       integer ptr_ch,fget_station_def,fvex_len
       integer trimlen
       logical kvalid_rack
-      logical kvalid_rec
+      logical kvalid_rec  
 
 C LOCAL:
       logical kline
       integer ierr1
       real SLRATE(2),ANLIM1(2),ANLIM2(2)
-      character*4 cs2sp
       character*8 cocc,crec
       character*20 crack
       character*8 cant,cter,csit
       character*4 caxis
 
-      integer islcon(2),ns2tp
+      integer islcon(2)
       real AZH(MAX_HOR),ELH(MAX_HOR)
       real DIAM
       real sefd(max_band),par(max_sefdpar,max_band)
@@ -78,10 +79,10 @@ C LOCAL:
       integer il,ite,itl,itg
       integer iret ! return from vex routines
       character*128 cout,ctapemo
-      integer nch
+      integer nch 
 
 C
-C     1. First get all the def names
+C     1. First get all the def names 
 C
       nstatn=0
       iret = fget_station_def(ptr_ch(cout),len(cout),ivexnum) ! get first one
@@ -94,7 +95,7 @@ C
           nstatn=nstatn+1
           stndefnames(nstatn)=cout
           iret = fget_station_def(ptr_ch(cout),len(cout),0) ! get next one
-        END IF
+        END IF 
       enddo
 
 C     2. Now call routines to retrieve all the station information.
@@ -104,8 +105,8 @@ C     2. Now call routines to retrieve all the station information.
 
         il=fvex_len(stndefnames(i))
         CALL vunpant(stndefnames(i),ivexnum,iret,ierr,lu,
-     .    cant,cAXIS,AOFF,SLRATE,ANLIM1,ANLIM2,DIAM,ISLCON)
-        if (iret.ne.0.or.ierr.ne.0) then
+     .    cant,cAXIS,AOFF,SLRATE,ANLIM1,ANLIM2,DIAM,ISLCON)      
+        if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,
      >    '(a, a,/,"iret=",i5," ierr=",i5)')
      >     "VSTINP01 - Error getting $ANTENNA information for ",
@@ -115,8 +116,8 @@ C     2. Now call routines to retrieve all the station information.
         endif
         CALL vunpsit(stndefnames(i),ivexnum,iret,IERR,lu,
      .    CID,csit,POSXYZ,POSLAT,POSLON,cOCC,nhz,azh,elh)
-
-        if (iret.ne.0.or.ierr.ne.0) then
+         
+        if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,'(a,a,/,"iret=",i5," ierr=",i5)')
      >     "VSTINP02 - Error getting $SITE information for ",
      >      stndefnames(i)(1:il),  iret,ierr
@@ -126,9 +127,9 @@ C     2. Now call routines to retrieve all the station information.
 
         CALL vunpdas(stndefnames(i),ivexnum,iret,IERR,lu,
      .    cIDT,cter,nstack,maxt,nr,lb,sefd,par,npar,
-     .    crec,crack,ctapemo,ite,itl,itg,cs2sp,ns2tp,ctlc)
-
-        if (iret.ne.0.or.ierr.ne.0) then
+     .    crec,crack,ctapemo,ite,itl,itg,ctlc)
+   
+        if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,'(a,a,/,"iret=",i5," ierr=",i5)')
      >    "VSTINP03 - Error getting $DAS information for ",
      >    stndefnames(i)(1:il),  iret,ierr
@@ -164,7 +165,7 @@ C       For VEX 1.3, antenna name is not there, so use site name
        endif
        if(cantna(i) .eq. "TIGOCONC") then
           cantna(i) ="TIGO"
-       endif
+       endif 
 
 
 C
@@ -187,25 +188,26 @@ C
            cterna(i)=cter
         endif
 
-        nch = trimlen(stndefnames(i))
+        nch = trimlen(stndefnames(i)) 
 
 
-        if(.not.kvalid_rack(crack)) then
-            write(lu,'(a)') "VSTINP: for station "//
-     >        stndefnames(i)(1:nch)//" unrecognized rack type: "//
+        if(.not.kvalid_rack(crack)) then        
+            write(lu,'(a)') "VSTINP: for station "// 
+     >        stndefnames(i)(1:il)//" unrecognized rack type: "//
      >        crack// "setting to none!"
             crack='none'
-        endif
-        cstrack(i)=crack
+        endif 
+        cstrack(i)=crack         
 
-        if(.not.kvalid_rec(crec)) then
-            write(lu,'(a)') "VSTINP: for station "//
-     >         stndefnames(i)(1:nch)//" unrecognized recorder type: "//
-     >         crec(1:nch)// "setting to none!"
+        if(.not.kvalid_rec(crec)) then        
+            nch=max(1,trimlen(crec))
+            write(lu,'(a)') "VSTINP: for station "// 
+     >         stndefnames(i)(1:il)//" unrecognized recorder type: "//
+     >         crec(:nch)// "setting to none!"
             crec='none'
-        endif
+        endif   
         cstrec(i,1)=crec
-
+        
         if(nr .eq. 1) then
           cstrec(i,2)='none'
         else
@@ -217,9 +219,6 @@ C
         nheadstack(i)=nstack ! number of headstacks
         maxtap(i) = maxt     ! tape length
         nrecst(i) = nr       ! number of recorders
-        ns2tapes(i) = ns2tp  ! number of S2 tapes
-!        idummy = ichmv(ls2speed(1,i),1,ls2sp,1,4) ! rack type
-        cs2speed(i)=cs2sp(1:4)
         tape_motion_type(i)=ctapemo   ! tape motion
         itearl(i)=ite                 ! early start time
         itlate(i)=itl                 ! late stop time
@@ -227,7 +226,7 @@ C
 C Skip SEFDs for now
 C       do ib=1,2
 C         idum = igtba(lb(ib),ii)
-C         if (ii.ne.0) then
+C         if (ii.ne.0) then 
 C           sefdst(ii,i) = sefd(ib)
 C           do j=1,npar(ii)
 C             sefdpar(j,ii,i) = par(j,ii)

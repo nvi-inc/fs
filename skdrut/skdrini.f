@@ -162,7 +162,6 @@ C  In statn.ftni
         do j=1,max_frq
           bitdens(i,j)=0.0
           tape_dens(i,j)=0.0
-          cnahdpos(i,j)=" "
           do l=1,max_bbc
              ibbc_present(l,i,j)=0
           end do

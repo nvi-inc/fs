@@ -1,3 +1,22 @@
+*
+* Copyright (c) 2020 NVI, Inc.
+*
+* This file is part of VLBI Field System
+* (see http://github.com/nvi-inc/fs).
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
 C********************************************************************
 C
 C     SKPARM.FTNI HOLDS PARAMETERS FOR THE SKED FAMILY OF PROGRAMS.
@@ -229,11 +248,8 @@ C     Lengths for thick and thin tape.
       parameter (THICK_LENGTH = 8700)
       parameter (SHORT_LENGTH = 2700)
 
-C     Speeds for S2.
-      real*4 speed_lp, speed_slp
-      parameter (SPEED_LP = 6.3) ! in/sec
-      parameter (SPEED_SLP = 4.2) ! in/sec
-
+      double precision small
+      parameter (small=1.d-12)         !small diagonal element of normal
 
       integer max_par_esti,max_par_opti,max_dim_esti
       integer max_sor_esti,max_trial

@@ -230,13 +230,6 @@ C         modify this when it gets user input on the formatter type.
 C         This is used by SPEED.
 !          idum = ichmv(LMFMT(1,is,ICODE),1,LM,1,16) ! recording format
           cmfmt(is,icode)=cm
-C         Initialize S2 mode to blank. It's probably safe to put 
-C         LMODE into LS2MODE.
-C         Not safe because the mode may be already there from the equip line.
-          if(cs2mode(is,icode) .eq. " ") then
-             cs2mode(is,icode) = cm
-             cmode(is,icode) = " "
-          endif
 C         Determine fanout factor here. Fan-in code is commented for now.
           ifan(is,icode)=0
           ix=index(cmode(is,icode), "1:")

@@ -53,8 +53,7 @@ C LOCAL:
      .iras,isra,idecs
       integer*2 ldsign,lhsign,ldsign2,lhsign2,ldsn
       integer*2 LPROC(4) !  The procedure name for NRAO
-      integer*2 ldirr !REV,FOR
-      integer nchar,itnum
+         integer nchar,itnum
       real dut,eeq
       integer ih
       integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
@@ -84,7 +83,6 @@ Cinteger*4 ifbrk
 
 C Initialized:
 C record word lengths
-      data ldirr/2hR /
       data lu_outfil2/42/
 
 C LAST MODIFIED:
@@ -128,6 +126,7 @@ C 000815 nrv Remove all but VLBA option.
 ! 2006Sep26 JMGipson. Changed call for vlbat of lsname to ASCII csname.
 ! 2008Aug19 JMGipson. Check to see if tape motion type is "AUTO" for vlba"
 ! 2015Mar30 JMG. got rid of obsolete arg in drchmod
+! 2020Nov10 JMG. Got rid of somestuff dealing with headstacks. 
 
       kintr = .false.
       if (kbatch) then
@@ -152,17 +151,7 @@ C 2. First get output file or LU for pointing commands.
 C If problems, quit.
 
       icodp=0
-      if (istin.eq.5.or.istin.eq.6) then
-        ih=0
-        do i=1,max_pass
-          if (ihdpos(1,i,istn,1).ne.0) ih=ih+1
-        enddo
-        if (ih.eq.0) then
-          write(luscn,9211) cantna(istn)
-9211      format(/'POINT03 - No head position information for ',a/)
-          return
-        endif
-      end if
+
 
       WRITE(LUSCN,9900) cSTNNA(ISTN), LSKDFI(1:trimlen(lskdfi))
 9900  FORMAT(' POINTING FILE FOR ',A,' FROM SCHEDULE ',A,/
@@ -325,7 +314,7 @@ C          For each observation, write out command line
      .         IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
      .         LHSIGN2,IHAH2,IHAM2,HAS2)
 	      idir=1
-	      if (ldir(istnsk).eq.ldirr) idir=-1
+	     
 	      KNEWTP = KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,
      .        IDIRP,IFTOLD)
 	      itype = 1

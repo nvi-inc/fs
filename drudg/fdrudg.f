@@ -18,7 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine fdrudg(cfile,cstnin,command,cr1,cr2,cr3,cr4)
-      implicit none  !2020Jun15 JMGipson automatically inserted.
+      implicit none  
 
 ! Recent History (older below).
 ! 2020Jun30. Got rid of kmissing and test on iserr, both of which are obsolete.
@@ -528,7 +528,7 @@ C     Reset for the next time through.
           kdrgfile = .false.
 C
 C     Derive number of passes for each code
-          CALL GNPAS(luscn,ierr)
+!          CALL GNPAS(luscn,ierr)
           call count_freq_tracks(cbnd,nbnd,luscn)
           if (ierr.ne.0) then ! can't continue
             write(luscn,9999)

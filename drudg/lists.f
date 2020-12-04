@@ -90,7 +90,6 @@ C     integer*2 LAXIS(2,7),
       integer iobs
       LOGICAL KUP ! true if source is up at station
       logical kwrap
-      integer*2 HHR
       character*2 csize
       integer iheader_Space
 
@@ -99,7 +98,7 @@ C     integer*2 LAXIS(2,7),
       double precision conv_s2 ! speed scaling for feet-->minutes
       integer ifeet
       double precision ffeet0_k4 ! initial counts
-      DATA HHR/2HR /
+   
 C
 C SUBROUTINES CALLED:
 C  FMP routines to read schedule file
@@ -421,13 +420,9 @@ C THEN BEGIN new page
 C ENDT new page
           ENDIF
           IDIR=+1
-          IF (LDIR(ISTNSK).EQ.HHR)IDIR=-1
-          if (ks2) then
-C           knewtp = ift(istnsk).eq.0.and.ipas(istnsk).eq.0
-C           replaced with:
-            knewtp = IPAS(istnsk).LT.IPASP.OR.
-     .      (IPAS(istnsk).EQ.IPASP.AND.(IFT(istnsk).LT.(IFTOLD-300)))
-          else if (idir.ne.0) then
+      
+   
+          if (idir.ne.0) then
             KNEWTP = KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,
      .      IDIRP,IFTOLD)
           else

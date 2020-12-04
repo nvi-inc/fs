@@ -30,14 +30,13 @@ luff.o lv_open.o   \
 point.o port.o prcov.o prcov_vex.o proc_check8bbc.o \
 proc_exper_initi.o proc_form.o proc_ifd.o proc_lo.o  \
 proc_mk5_init1.o proc_mk5_init2.o proc_disk_tracks.o proc_norack.o \
-proc_patch.o proc_pcalf.o proc_s2_comments.o proc_sked_proc.o proc_setup.o \
+proc_patch.o proc_pcalf.o  proc_sked_proc.o proc_setup.o \
 proc_dbbc_pfb_tracks.o proc_tracks.o proc_trkf.o \
 proc_vcname.o proc_vc_cmd.o proc_vracks_bbc.o proc_lba_ifp.o proc_mracks_vc.o proc_dbbc_bbc.o \
 proc_track_mask_lines.o \
 proc_write_define.o procintr.o procs.o \
 prtmp.o prtxt.o psbar.o read_snap1.o read_snap6.o \
 setprint.o setup_name.o setup_printer.o skdshft.o \
-skdrini.o \
  snap.o \
 snap_bit_density.o snap_check.o snap_data_valid.o snap_disk_check.o \
 snap_disk_end.o snap_disk2file_abort.o snap_enable.o snap_et.o snap_fast.o \

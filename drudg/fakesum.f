@@ -109,7 +109,7 @@ C THEN BEGIN Current station in observation
           if (cdir(istnsk)(1:1) .eq. "R") idir=-1
           IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ituse*ITEARL(istn)+
      .      IDUR(ISTNSK)) *speed(icod,istn))
-          IHEAD=ihdpos(1,IPAS(ISTNSK),istn,icod)
+          IHEAD=1
 C       Create scan ID from start time and source
 C       ddd-hhmm_source
 C       Use scan IDs already generated.

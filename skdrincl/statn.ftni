@@ -1,9 +1,29 @@
+*
+* Copyright (c) 2020 NVI, Inc.
+*
+* This file is part of VLBI Field System
+* (see http://github.com/nvi-inc/fs).
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
 !     STATION INFORMATION COMMON BLOCK
 ! 2007Aug10  JMGipson. Obsolete variables removed and reorganized.
 ! 2015Mar19  JMG. Added idata_mbps,isink_mbps; moved bb_bw here. 
 ! 2015Apr20  JMG Changed size or rack,recorder: char*8--->char*12
 ! 2016Jan05  JMG Changed size of rack to char*20
 ! 2020Jun08  JMG Moved broadband stuff to 'broadband.ftni' 
+! 2020Oct02  JMG. Removed all references to S2 
 
 C
 C two_letter_code is a unique identifier for each DAS.
@@ -58,7 +78,7 @@ C             false if it's step functions
 ! Integer/logical
       integer nstatn,iaxis,maxpas,istcon,nhorz,ncord,maxtap,nsefdpar
       integer nrecst,nheadstack,ibitden_save
-      integer itearl,itlate,itgap,ns2tapes,tape_length
+      integer itearl,itlate,itgap,tape_length
       logical klineseg
 
       COMMON/STATN_dbl/
@@ -84,7 +104,6 @@ C             false if it's step functions
      .       nrecst(max_stn),nheadstack(max_stn),
      .       ibitden_save(max_stn),
      .       itearl(max_stn),itlate(max_stn),itgap(max_stn),
-     .       ns2tapes(max_stn),
      .       klineseg(max_stn)
 
 ! Start of character data.
@@ -97,7 +116,6 @@ C             false if it's step functions
       character*4 cterid(max_stn)               !Terminal ID
       character*2 cfirstrec(max_stn)            !First recorder: "1" or "2"
       character*2 cbsefd(max_band,max_stn)      !Code for station dependent SEFD
-      character*4 cs2speed(max_stn)             !Speed for S2 recordes
       character*2 cpocod(max_stn)               !Position code for station.
       character*2 chccod(max_Stn)               !Horizon maske code
       character*1 cstcod(max_stn)               !Single letter code. Only used internally.
@@ -107,7 +125,7 @@ C             false if it's step functions
 
 
       common /statn_ch/cstnna,cantna,coccup,cterna,cstrec,cstrack
-      common /statn_ch/cterid,cfirstrec,cbsefd,cs2speed
+      common /statn_ch/cterid,cfirstrec,cbsefd
       common /statn_ch/cpocod,chccod,cstcod
       common /statn_ch/cstrack_orig, cstrec_orig
       common /statn_ch/cstrack_cap

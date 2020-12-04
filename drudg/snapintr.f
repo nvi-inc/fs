@@ -18,7 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE SNAPINTR(IFUNC,IYR)
-      implicit none  !2020Jun15 JMGipson automatically inserted.
+      implicit none  
 C
 C This routine writes out the header information for snap files and
 C vlba pointing files in the LU_OUTFILE.

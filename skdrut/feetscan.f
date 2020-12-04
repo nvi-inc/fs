@@ -1,4 +1,4 @@
-*
+
 * Copyright (c) 2020 NVI, Inc.
 *
 * This file is part of VLBI Field System
@@ -18,7 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       integer function feetscan(ibuf,nch,ipas,ifeet,idrive,istn,icod)
-      implicit none  !2020Jun15 JMGipson automatically inserted.
+      implicit none
 
 C  FEETSCAN converts the footage and pass number and
 C  puts them into the scan buffer.
@@ -51,19 +51,9 @@ C  whether this is a forward or reverse pass by the
 C  evenness or oddness of the pass number.
 C  If it's a non-recording scan, set the pass to '0'.
 
-      if (cstrec(istn,1) .eq. "S2") then
-        kfor=.true. ! always forward
-        nch=ichmv_ch(ibuf,nch+1,cpassorderl(ipas,istn,icod)(1:1)) ! group number
-      else ! non-S2
-        NCH = ICHMV_ch(IBUF,NCH+1,pnum(ipas))
-        i=ipas/2
-        kfor= ipas.ne.i*2 ! always odd forward, even reverse
-      endif
-      if (kfor) cdir='F'
-      if (.not.kfor) cdir='R'
-      if (idrive.eq.0) cdir='0'
-C  Insert the direction
-      NCH = ICHMV_ch(IBUF,NCH,cdir)
+     
+      
+      NCH = ICHMV_ch(IBUF,NCH+1,"1F")         
 C  Put in footage. For S2 this is in seconds.
 C  Max length is 5 characters, as set up in newscan.
       nchx=ib2as(ifeet,ibufx,1,5+o'40000'+o'400'*5)

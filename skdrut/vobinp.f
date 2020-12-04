@@ -228,17 +228,7 @@ C       Keep good data offset and duration separate
           if (iret.ne.0) return
           il = fvex_len(cout)
 ! fixup for Mark5.     
-          if((cstrec(istn,1)(1:5) .eq. "Mark5" .or.   
-     >        cstrec(istn,1)(1:4) .eq. "none"  .or.  
-     >        cstrec(istn,1)(1:5) .eq. "Mark6") .and. il .eq. 0) then
-             ip=1
-             if(npassl(istn,icod) .eq. 0) then
-                npassl(istn,icod)=1
-              endif
-          else
-            ip =iwhere_in_string_list(cpassorderl(1,istn,icod),
-     >         npassl(istn,icod),cout(1:il))
-          endif            
+          ip=1
 
           if(ip .eq. 0) return     ! pass not found
 

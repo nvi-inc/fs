@@ -265,6 +265,7 @@ C     data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
 C
 C History:
 ! Now put in most recent first. 
+! 2020Nov20 JMG. If no observations return with warning. 
 ! 2020Jun30 JMG. Got rid of test on kmissing (which indicated missing tape info)
 ! 2020May29 JMG. Fixed bug in schedules with early starts. Schedules were not getting written out.
 !                Also got rid of element-by-element copy of one itime_xx to another itime_yy. 
@@ -506,6 +507,11 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
 ! 2015Apr04 JMG. Removed special handling if same source in consecutive scans. 
 ! 2015Jun05 JMG. Replaced squeezewrite by drudg_write. 
 ! 2020Jun08 JMG. Added new broadband.ftni.  Added ibb_off to buffereing time
+
+      if(nobs .eq. 0) then 
+         write(*,*) "Snap: Schedule has no observations. Returning."
+         return
+      endif 
     
       kdebug=.false.
       kfirst_obs=.true. 

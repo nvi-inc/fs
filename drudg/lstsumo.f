@@ -229,8 +229,7 @@ C  1. Headers.
 
           do icode=1,ncodes
             do irec=1,num_recs ! loop on number of recorders
-              num_sub_pass=npassf(istn,icode)
-              if(kdisk)  num_sub_pass=1
+              num_sub_pass=1
               write(luprt, '(" Mode",i2," Setup proc(s): ",$)') icode
               call setup_name(ccode(icode),csetup_name)                
               write(luprt,'(a,1x,$)') csetup_name            
