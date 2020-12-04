@@ -25,4 +25,4 @@ Version 0.3 - Nov 2020
 
 <<beta1_to_beta2.adoc#,Update from beta1 to beta2>> notes
 
-<<latest_commit.adoc#,Update from beta2 to Latest Commit>> notes
+<<beta2_to_latest.adoc#,Update from beta2 to Latest Commit>> notes
