@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta2 to the Latest Commit Update Notes
-Version 1.1 - December 2020
+Version 1.2 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -183,6 +183,8 @@ https://github.com/nvi-inc/fs/issues/62[#62]).
 https://github.com/nvi-inc/fs/issues/76[#76]). <<noserver,More
 details>>.
 
+. Add GPL to files. <<gpl,More details>>.
+
 . Improve update notes (includes closing
 https://github.com/nvi-inc/fs/issues/71[#71]). <<updatenotes,More details>>.
 
@@ -191,6 +193,11 @@ https://github.com/nvi-inc/fs/issues/71[#71]). <<updatenotes,More details>>.
 _drudg_ opening message date is `2020Sep14`.
 
 . Fix crash if `$HEAD` is the last block in a `.skd` file. <<head,More details>>.
+. Fix crash if error in mask (closes
+https://github.com/nvi-inc/fs/issues/74[#74]).
+<<mask,More details>>.
+. Clean-up source.
+<<drudgsource,More details>>.
 
 === Details of FS changes
 
@@ -434,6 +441,8 @@ the variable.
 
 ... Repeat the above steps as _prog_.
 
+. [[gpl]] Add GPL to files. The GPL was missing from the _include/*.i_
+files.
 
 . [[updatenotes]] Improve update notes (includes closing
 https://github.com/nvi-inc/fs/issues/71[#71]).
@@ -471,3 +480,17 @@ traditional printed FS manuals are used. A document describing
 
 . [[head]] Fix crash if `$HEAD` is the last block in a `.skd` file. Fixed bug in _reads.f_.
 
+. [[mask]] Fix crash if error in mask (closes
+https://github.com/nvi-inc/fs/issues/74[#74]). A particular error in
+the mask format intermittently excited an uninitialized variable bug.
+Thanks to Beppe Maccaferri (Medicina) for reporting this. He
+discovered it while testing with _r1971.skd_ (which was not an
+experiment that included Medicina).
+
+. [[drudgsource]] Clean-up source.
+
+.. Remove references to pass, headstacks, and S2.
+
+.. Add the GPL to files it was missing from.
+
+.. Unify source between __sked__ and the FS.
