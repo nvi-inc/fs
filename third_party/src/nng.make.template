@@ -3,7 +3,6 @@
 NNG_VERSION := ${VERSION}
 NNG_DIR     := nng-$(NNG_VERSION)
 NNG_ARCHIVE := $(NNG_DIR).tar.gz
-NNG_PATCH   := $(NNG_DIR).patch
 NNG_LIBRARY := $(NNG_DIR)/libnng.a
 
 PREFIX?=/usr/local
@@ -45,9 +44,8 @@ HEADERS =  ${HEADERS}
 HEADERS_SRC = $(addprefix $(NNG_DIR)/include/, $(HEADERS))
 
 
-$(SOURCES): $(NNG_ARCHIVE) $(NNG_PATCH)
+$(SOURCES): $(NNG_ARCHIVE)
 	tar xzmf $(NNG_ARCHIVE)
-	patch -p0 < $(NNG_PATCH)
 
 
 CFLAGS += -g ${CFLAGS}
