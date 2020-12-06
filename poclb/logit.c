@@ -35,6 +35,15 @@ void pname();
 void rte_time();
 static logit0();
 
+logit_nds(msg,ierr,who,lsor)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+char lsor;           /* char identifying source usually ':' or '/' */
+
+{
+  logit0(msg,ierr,who,"nd",lsor);
+}
 logits(msg,ierr,who,lsor)
 char *msg;           /* a message to be logged, NULL if none */
 int ierr;            /* error number, 0 if no error          */

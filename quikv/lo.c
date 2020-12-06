@@ -37,6 +37,8 @@ int ip[5];                           /* ipc parameters */
       int verr;
       char *ptr;
       struct lo_cmd lcl;
+      int lo;
+      char output[256];
 
       int lo_dec();                 /* parsing utilities */
       char *arg_next();
@@ -62,15 +64,24 @@ parse:
       ilast=0;                                      /* last argv examined */
       memcpy(&lcl,&shm_addr->lo,sizeof(lcl));
       count=1;
+      lo=-1;
       while( count>= 0) {
         ptr=arg_next(command,&ilast);
-        ierr=lo_dec(&lcl,&count, ptr);
+        ierr=lo_dec(&lcl,&count, ptr,&lo);
         if(ierr !=0 ) goto error;
       }
 
 /* all parameters parsed okay, update common */
 
       memcpy(&shm_addr->lo,&lcl,sizeof(lcl));
+
+      if(lo!=-1) {
+          strcpy(output,command->name);
+          strcat(output,"/");
+          lo_rxg_enc(output,lo,&lcl);
+          logit(output,0,NULL);
+          log_rxgfile(lo);
+      }
 
       ip[0]=ip[1]=ip[2]=ierr=0;
 

@@ -279,6 +279,7 @@ Messenger:
 
     if(memcmp(cp2,"nl",2)==0 || rtn2 == -1){
       knl=TRUE;
+      clear_rxgain_files_log();
       if (fd >=0) {
 	fd=recover_log(lnamef,fd);  /* recover log if necessary */
 	if(close(fd) < 0) {

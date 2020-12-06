@@ -68,6 +68,15 @@ int ip[5];
 	  output[start]='\0';
 	}
       }
+      count=-1;
+      while( ++count<MAX_LO) {
+          if(lclc.lo[count]>=0.0) {
+              lo_rxg_enc(output,count,&lclc);
+              cls_snd(&ip[0],output,strlen(output),0,0);
+              ip[1]++;
+              output[start]='\0';
+          }
+      }
       return;
 
 error:
