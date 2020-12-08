@@ -5,7 +5,6 @@
             Response:   lo/chan,freq,sb,pol,pcspace,pcoff
                         lo/rxg,chan,freq,pol,rxg_file,year,month,day,pol1,dpfu1,pol2,dpfu2
 
-
 Settable parameters:
 
          chan   loX, where X is one of:
@@ -35,7 +34,7 @@ Monitor-only Parameters:
                  file info for the LO 'chan'
         rxg_file name of the '.rxg' file that matched the LO value;
                  'undefined' if there was no match, in that case the
-                 remaining fields are missing
+                 remaining fields are omitted
         year     the year from the date in the '.rxg' file
         month    the month from the date in the '.rxg' file
         day      the day from the date in the '.rxg' file
@@ -77,9 +76,15 @@ The 'lo/rxg,...' line is displayed for each LO as it is set
 give the operator feedback to verify that the correct version of the
 '.rxg' file is in use. Additionally, when an LO is set, the contents
 of the '.rxg' file are logged, but not displayed, in lines starting
-with ':rxg_file,'. The contents for a given '.rxg' file are only
-logged the first time a matching LO frequency is set, after the most
-recent opening of the current log.
+with ':rxg_file,'. After a log is opened, the contents for a given
+'.rxg' file are only logged the first time a matching LO frequency is
+set.
+
+The 'FS_LO_ANTCN_MODE' environment variable can be set to trigger
+running antcn in the specified local mode (greater than 99) to
+configure the LO being set. The index of the LO being set (numbering
+starting as 0) is passed as the value of fourth element of the run
+parameter array (usually `ip[3]` in C).
 
 In the future, for K4 type 1, the range of LO values should be 1-4,
 for K4 type 2, 1-16.

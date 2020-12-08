@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 0.3 - December 2020
+Version 0.4 - December 2020
 
 :sectnums:
 
@@ -262,6 +262,17 @@ restore the previous behavior until the station implementation of
 _antcn_ could be fixed.
 
 This was introduced in _9.11.6_, August 2014.
+
+=== FS_LO_ANTCN_MODE
+
+Nominal value is a local _antcn_ mode, i.e., an integer greater than 99.
+
+If set, the value is taken as the mode to run _antcn_ with to set the
+local LO. The index of the LO to be set (numbering starting at `0`) is
+passed as the value of fourth element of the run parameter array
+(usually `ip[3]` in C).
+
+This was introduced in _10.0.0-beta3_.
 
 === FS_WAKEUP_WAV
 

@@ -20,6 +20,7 @@
 /* lo snap command */
 
 #include <stdio.h> 
+#include <stdlib.h>
 #include <string.h> 
 #include <sys/types.h>
 
@@ -39,6 +40,8 @@ int ip[5];                           /* ipc parameters */
       struct lo_cmd lcl;
       int lo;
       char output[256];
+      char *antcn_mode_st;
+      int antcn_mode;
 
       int lo_dec();                 /* parsing utilities */
       char *arg_next();
@@ -85,6 +88,19 @@ parse:
 
       ip[0]=ip[1]=ip[2]=ierr=0;
 
+      antcn_mode_st=getenv("FS_LO_ANTCN_MODE");
+      if (antcn_mode_st && *antcn_mode_st) {
+          antcn_mode = atoi(antcn_mode_st);
+          if(antcn_mode > 99) {
+              ip[0]=antcn_mode;
+              ip[3]=lo;
+              antcn(ip);
+              if(ip[2]<0)
+                  return;
+          } else
+              ierr=-501;
+              goto error;
+      }
       lo_dis(command,ip);
       return;
 
