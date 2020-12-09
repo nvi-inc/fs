@@ -5558,6 +5558,9 @@ LO channel position exceeds number of conditioning modules
 Q* -501
 FS_LO_ANTCN_MODE must be 100 or greater.
 ""
+Q* -502
+FS_LO_CONFIG_ANTCN_MODE must be 100 or greater.
+""
 Q- -101
 No default for User Device channel
 ""

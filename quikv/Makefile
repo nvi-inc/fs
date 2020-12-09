@@ -43,7 +43,8 @@ mk6_disk_pos.o mk6_disk_pos_dis.o mk6_scan_check.o\
 mk6_scan_check_dis.o rdbe.o rdbe_dis.o mk6_active.o active_rdbes.o\
 logm6msg.o rdbe_atten.o rdbe_atten_dis.o logmsg_rdbe.o dbbc3_ifx.o\
 dbbc3_ifx_dis.o logmsg_dbbc3.o dbbc3_bbcnn.o dbbc3_bbcnn_dis.o\
-dbbc3_cont_cal.o dbbc3_cont_cal_dis.o dbbc3_iftpx.o dbbc3_iftpx_dis.o
+dbbc3_cont_cal.o dbbc3_cont_cal_dis.o dbbc3_iftpx.o dbbc3_iftpx_dis.o\
+lo_config.o
 #mk6_record.o mk6_record_dis.o 
 
 LDLIBS += -lm

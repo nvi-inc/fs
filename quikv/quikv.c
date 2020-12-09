@@ -175,6 +175,9 @@ loop:
 	case 2:
 	  user_device(&command,itask,ip);
 	  break;
+	case 3:
+	  lo_config(&command,itask,ip);
+	  break;
 	default:
 	  ierr=-4;
 	  break;

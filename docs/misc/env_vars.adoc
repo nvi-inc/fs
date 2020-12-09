@@ -274,6 +274,20 @@ passed as the value of fourth element of the run parameter array
 
 This was introduced in _10.0.0-beta3_.
 
+=== FS_LO_CONFIG_ANTCN_MODE
+
+Nominal value is a local _antcn_ mode, i.e., an integer greater than 99.
+
+If set, the value is taken as the mode to run _antcn_ with from the
+`lo_config` command (after all `lo=...` commands in an IF setup
+procedure), to configure all the LOs in one step rather than one at a
+time by `lo=...` commands. The `if_config` is added to the end of IF
+setup procedure by _drudg_ if the `lo_config` keyword in `skedf.ctl`
+is set to `yes`. It can be added manually to IF set-up procedures
+written by hand.
+
+This was introduced in _10.0.0-beta3_.
+
 === FS_WAKEUP_WAV
 
 Nominal value is a path to a _.wav_ file.

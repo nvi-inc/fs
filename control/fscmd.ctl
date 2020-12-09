@@ -256,6 +256,7 @@ wvolt        qk2 05002 01 FFFFFFFF0012
 wvolt2       qk3 05002 01 FFFFFFFF0012
 lo           qkr 05101 01 FFFFFFFFFFFF
 user_device  qkr 05102 01 FFFFFFFFFFFF
+lo_config    qkr 05103 01 FFFFFFFFFFFF
 pcalform     qkr 05201 01 FFFFFFFFFFFF
 pcald        qkr 05301 01 FFFFFFFFFFFF
 pcalports    qkr 05401 01 0254FFFFFFFF
