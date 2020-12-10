@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta2 to the Latest Commit Update Notes
-Version 1.2 - December 2020
+Version 1.3 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -39,12 +39,15 @@ operations.
 
 CAUTION: It is expected that those using the latest commit are experts
 and will manage the differences for updating to the next official
-release themselves. What needs to done will depend on what commit
-you had last updated to. Advice is usually available, but no
-documentation is provided.
+release themselves. No specific documentation will be provided. What
+commit you had last updated to will determine what needs to be done. A
+reasonable approach would be to review the update steps in the new
+release to make sure everything has been covered. Alternatively, it might
+work to verify that all the steps in the latest version of this
+document were completed.
 
 This document is up to date with commit
-https://github.com/nvi-inc/fs/commit/61d3c3b2034494921096cedace4833ac94b39527[61d3c3b2].
+https://github.com/nvi-inc/fs/commit/8e18f8edd851c175ab3d80044eef13f2b24b1392[8e18f8ed].
 Due to small increments, such as adding this document, this may not be
 the literal last commit, but the differences should be small unless
 you happen to `fetch` between a significant change and this document
@@ -57,10 +60,11 @@ release before installing this update.
 
 === Fetch and make the latest commit
 
-NOTE: If you are using FSL8 or other old distribution that is not
-compatible with the latest update of the server, you can still use the
-FS without the server by removing it from the _make_ process. Please
-follow the steps in <<noserver, not building the display server>>.
+NOTE: If you are using FSL7 or other old distribution that may not be
+compatible with the latest update of the server, you may still be able
+to use the FS without the server by removing it from the _make_
+process. Please follow the steps in <<noserver, not building the
+display server>> below.
 
 If you are using _git_, as is recommended, then as _prog_
 execute:
@@ -125,8 +129,29 @@ https://urs.earthdata.nasa.gov/.
 +
 
 Please see `*fesh -h*` for more information on using these features.
-A more complete description of the changes to _fesh_ is included in
-the current document at <<fesh,details>>.
+A more complete description of the changes is in <<fesh,fesh changes>>
+below.
+
+. If you have a local (station) `lo` command, you will need to update
+it (or replace it, see the next paragraph) to get full support for
+rack types that were not in your previous FS9 version and implement
+the new capability described in <<logrxg,logging _.rxg_ files>>
+below.
++
+
+To reduce the maintenance burden of updating your local `lo` (and, if
+you have it, an `lo_config`) command in the future, you should
+consider switching to use the newly provided `lo` command
+<<lohooks,hooks>> described below. This approach may not be suitable
+for all stations, but if it will work for your station, it should
+reduce, and in most cases eliminate, the need to update your local
+software when the FS `lo` command changes in the future.
+
+. Update _/usr2/control/skedf.ctl_. Due to an <<skedf.ctl,error>> in
+the example _/usr2/fs/st.defaut/control/skedf.ctl_ file, most stations
+probably incorrectly show the `lo_config` keyword as `if_config` in
+their local version. Please check your local copy and update any
+occurrences, even in comments,  of `if_config` to `lo_config`.
 
 === Review other changes
 
@@ -166,20 +191,23 @@ https://github.com/nvi-inc/fs/issues/65[#65], and partially closing
 https://github.com/nvi-inc/fs/issues/38[#38]).
 <<fesh,More details>>.
 
-. Remove hard coding of the station name in _rdbemsg_ (closes
+. Remove hard coding of the station name in _rdbemsg_ (closing
 https://github.com/nvi-inc/fs/issues/62[#62]).
 <<stationrdbemsg,More details>>.
 
-. Improve _fsserver_ (includes tentatively closing https://github.com/nvi-inc/fs/issues/69[#69]).
-<<fsserver,More details>>.
+. Improve _fsserver_ (includes closing
+https://github.com/nvi-inc/fs/issues/69[#69],
+https://github.com/nvi-inc/fs/issues/78[#78], and re-closing
+https://github.com/nvi-inc/fs/issues/76[#76]).  <<fsserver,More
+details>>.
 
-. Improve _gnplt_ (closes https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
+. Improve _gnplt_ (closing https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
 <<gnplt,More details>>.
 
 . Improve `help` command (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
 <<helpfiles,More details>>.
 
-. Add option to not build the display server into the FS (partially closes
+. Add option to not build the display server into the FS (partially closing
 https://github.com/nvi-inc/fs/issues/76[#76]). <<noserver,More
 details>>.
 
@@ -188,12 +216,25 @@ details>>.
 . Improve update notes (includes closing
 https://github.com/nvi-inc/fs/issues/71[#71]). <<updatenotes,More details>>.
 
+. Add _.rxg_ file logging to `lo` command. <<logrxg,More details>>.
+
+. Add hooks for local LO control to `lo` and `lo_config` commands.
+<<lohooks,More details>>.
+
+. Fix example _/usr2/fs/st.default/control.skedf.ctl_ (closing
+https://github.com/nvi-inc/fs/issues/81[#81]).
+<<skedf.ctl,More details>>.
+
+. Fix ignoring _antcn_ errors in the `satellite` and `satoff` commands. (closing
+https://github.com/nvi-inc/fs/issues/82[#82]).
+<<saterrors,More details>>.
+
 === Summary of drudg changes
 
 _drudg_ opening message date is `2020Sep14`.
 
 . Fix crash if `$HEAD` is the last block in a `.skd` file. <<head,More details>>.
-. Fix crash if error in mask (closes
+. Fix crash if error in mask (closing
 https://github.com/nvi-inc/fs/issues/74[#74]).
 <<mask,More details>>.
 . Clean-up source.
@@ -217,9 +258,9 @@ https://github.com/nvi-inc/fs/issues/37[#37],
 https://github.com/nvi-inc/fs/issues/65[#65], and partially closing
 https://github.com/nvi-inc/fs/issues/38[#38]).
 
-.. _fesh_ supports encrypted access to _cddis_ using FTP-SSL and HTTPS
-(closes https://github.com/nvi-inc/fs/issues/36[#36]). This allows
-use of _cddis_ after non-SSL FTP access was disabled there at
+.. _fesh_ now supports encrypted access to _cddis_ using FTP-SSL and
+HTTPS (closing https://github.com/nvi-inc/fs/issues/36[#36]). This
+allows use of _cddis_ after non-SSL FTP access was disabled there at
 the end of October 2020. FTP-SSL is the default method.
 
 +
@@ -257,16 +298,17 @@ TIP: For FSL8 and other old Linux distributions, access to _cddis_ may
 not be possible, due to out-of-date certificates. If you are in that
 situation, _bkg_ or _opar_ may be suitable alternatives.
 
-.. _fesh_ supports _bkg_, _cddis_, _opar_, and _vlbeer_ data centers
-(closes https://github.com/nvi-inc/fs/issues/37[#37]). The data center
-can be selected with the `FESH_DATA_CENTER` environment variable or
-the `-D` command line option. The default data center is _cddis_. For
-_vlbeer_ only _.vex_ files are supported; for the others only, _.skd_.
-Running _drudg_ automatically is not supported for _vlbeer_.
+.. _fesh_ now supports _bkg_, _cddis_, _opar_, and _vlbeer_ data
+centers (closing https://github.com/nvi-inc/fs/issues/37[#37]). The
+data center can be selected with the `FESH_DATA_CENTER` environment
+variable or the `-D` command line option. The default data center is
+_cddis_. For _vlbeer_ only _.vex_ files are supported; for the others
+only, _.skd_.  Running _drudg_ automatically is not supported for
+_vlbeer_.
 
-.. _fesh_ respects the _/usr2/control/skedf.ctl_ control file (closes
-https://github.com/nvi-inc/fs/issues/65[#65]). Previously _fesh_
-assumed that the directory for _.skd_ files was _/usr2/sched/_
+.. _fesh_ now respects the _/usr2/control/skedf.ctl_ control file
+(closing https://github.com/nvi-inc/fs/issues/65[#65]). Previously
+_fesh_ assumed that the directory for _.skd_ files was _/usr2/sched/_
 regardless of what was in the `$schedules` block of
 _/usr2/control/skedf.ctl_. This only worked if the directory specified
 was _/usr2/sched_ or was the working directory (i.e., not specified or
@@ -274,8 +316,8 @@ was _/usr2/sched_ or was the working directory (i.e., not specified or
 _/usr2/exper_, for _.skd_ files.  Thanks to Jon Quick (HartRAO) for
 reporting this.
 
-.. _fesh_ provides support for _drudg_ optional prompts for geodesy
-schedules (partially closing
+.. _fesh_ now provides support for _drudg_ optional prompts for
+geodesy schedules (partially closing
 https://github.com/nvi-inc/fs/issues/38[#38]). It is assumed that for
 geodesy the answers to these questions for a station do not vary. This
 feature is intended to allow stations that observe both astronomy and
@@ -357,31 +399,43 @@ variable is set, or set it if it is not set.
 
 Please see `*fesh -h*` for more information on using these features.
 
-. [[stationrdbemsg]] Remove hard coding of the station name in _rdbemsg_ (closes
+. [[stationrdbemsg]] Remove hard coding of the station name in _rdbemsg_ (closing
 https://github.com/nvi-inc/fs/issues/62[#62]). The station name is now
 set in _rdbemsg.ctlr_ control file. Thanks to Chevo Terraza (MGO) for
 reporting this.
 
-. [[fsserver]] Improve _fsserver_ (includes tentatively closing https://github.com/nvi-inc/fs/issues/69[#69]).
+. [[fsserver]] Improve _fsserver_ (includes closing
+https://github.com/nvi-inc/fs/issues/69[#69],
+https://github.com/nvi-inc/fs/issues/78[#78], and re-closing
+https://github.com/nvi-inc/fs/issues/76[#76]).
 
-.. _spub_/_ssub_ occasionally froze (tentatively closing
-https://github.com/nvi-inc/fs/issues/69[#69]). This may have been
-caused be the byte order being wrong in buffered stream `cb` This
-situation is still being monitored to verify that it is fixed.
+.. _spub_/_ssub_ occasionally froze (closing
+https://github.com/nvi-inc/fs/issues/69[#69]). This may
+have been caused be the byte order being wrong in buffered stream `cb`
+We believe that this issue is fixed. The situation is still being
+monitored.  Please report any instance of this problem that occurs. It
+happens very rarely so it is challenging to get enough usage to verify
+that it is not happening.  If it does happen, restarting the client
+has been a successful strategy for recovery.
 
 .. Fixed `clean` function in _Makefile_.
 .. Fixed _sspub_ to support more than 2^32^ messages.
+.. Modified the build so that it will work for FSL8 (closing
+https://github.com/nvi-inc/fs/issues/78[#78], and re-closing
+https://github.com/nvi-inc/fs/issues/76[#76]). Thanks to Jon Quick
+(HartRAO) for special effort on this including adding documentation
+to assist with future upgrades of _nng_.
+ 
+. [[gnplt]] Improve _gnplt_ (closing https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
 
-. [[gnplt]] Improve _gnplt_ (closes https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
+.. _gnplt_ now updates the date in updated _.rxg_ files (closing
+https://github.com/nvi-inc/fs/issues/72[#72]).  The original
+developer, Tomas Gille (NVI), did very good work developing this
+second version of _gnplt_, but ran out of time in his internship and
+was unable to include this minor but important feature. Thanks to
+Beppe Maccaferri (Medicina) for reporting this.
 
-.. _gnplt_ now updates the date in updated _.rxg_ files (closes
-https://github.com/nvi-inc/fs/issues/72[#72]).  The original developer,
-(Tomas Gille), did very good work developing this second version of
-_gnplt_, but ran out of time in his internship and was unable to include
-this minor but important feature. Thanks to Beppe Maccaferri (Medicina)
-for reporting this.
-
-.. _gnplt_ now works on FSL8 (Lenny) again (closes
+.. _gnplt_ now works on FSL8 (Lenny) again (closing
 https://github.com/nvi-inc/fs/issues/73[#73]).  Some recent
 improvements in _gnplt_ made it fail for FSL8.
 
@@ -390,7 +444,7 @@ improvements in _gnplt_ made it fail for FSL8.
 .. The `help` file for the `ddbc` command was expanded to also
 describe the `dbbc2` and `dbbc3` commands and now includes a
 description of the output for multi-line responses for all of these
-commands (closes https://github.com/nvi-inc/fs/issues/75[#75]). The
+commands (closing https://github.com/nvi-inc/fs/issues/75[#75]). The
 `help` command now works for the `dbbc2` and `dbbc3` commands.
 
 .. The `help` file for the `fila10g` command was expanded to also
@@ -402,9 +456,9 @@ specific commands was lost in the merge of the VGOS and main branches.
 It is now restored.
 
 . [[noserver]] Add option to not build the display server into the FS
-(partially closes https://github.com/nvi-inc/fs/issues/76[#76]).  The
-latest version of the server does not _make_ successfully on some
-older Linux distributions such as FSL8. To help users in that
+(partially closing https://github.com/nvi-inc/fs/issues/76[#76]).  The
+latest version of the server may not _make_ successfully on some
+older Linux distributions such as FSL7. To help users in that
 situation, an option was added to disable inclusion of the server by
 setting the `FS_DISPLAY_SERVER_NO_MAKE` environment variable before
 __make__-ing the FS. Follow the steps below to remove the server.
@@ -425,10 +479,11 @@ __make__-ing the FS. Follow the steps below to remove the server.
 
 +
 
-.. Logout of and then back into the _prog_ account before
-__make__-ing the FS.
+.. Logout of and then back into the _prog_ account.
 
-.. It is also necessary to also make sure that users running the FS do
+.. _make_ the FS.
+
+.. It is also necessary to make sure that users running the FS do
 not have the `FS_DISPLAY_SERVER` environment variable set.
 
 ... As  _oper_:
@@ -459,7 +514,7 @@ use as reliable as released (tagged) versions.
 
 .. Add missing _rdbemsg.ctl_ customization.
 
-.. Reorganized as _.adoc_ files in the _docs/_ sub-directory (closes
+.. Reorganized as _.adoc_ files in the _docs/_ sub-directory (closing
 https://github.com/nvi-inc/fs/issues/71[#71]).
 +
 
@@ -476,11 +531,108 @@ traditional printed FS manuals are used. A document describing
 .. Improve structure and correct some errors from original _.txt_ version.
 .. Some typo/wording fixes.
 
+. [[logrxg]] Add _.rxg_ file logging to `lo` command.
+
+.. Summary information logging.
++
+
+When an LO is configured (or monitored) with the `lo` command, a
+summary of information from the matching _.rxg_ file is displayed and
+logged.  Details of the format are available with `help=lo`.  This is
+intended to give the operator feedback that the correct version of the
+_.rxg_ file is in use. Thanks to Alastair Gunn (Jodrell Bank) for
+suggesting this.
+
+.. Full logging of _.rxg_ file non-comment lines.
++
+
+When an LO is configured with the `lo` command, the contents of the
+corresponding _.rxg_ file are logged, but not displayed. This only
+occurs if this is the first time this _.rxg_ file matched an LO being
+configured since the most recent opening of the current log. Each
+logged line starts with `:rxg_file,` followed by the name of the
+_.rxg_ file, and then the values from a single non-comment line in the
+file. The lines are logged in the order from the _.rxg_ file. This is
+intended to provide historical information about the values being used
+in FS calculations.
+
+. [[lohooks]] Add hooks for local LO control to `lo` and `lo_config`
+commands.
+
+.. Hook in `lo` command.
++
+
+While the FS has an option for any built-in command to have a local
+version, having such a local overriding command can create a
+maintenance burden if the FS command is updated.  Some commands very
+rarely change, but others change fairly often. The more often they
+change, the more maintenance burden there is.  Unfortunately the `lo`
+command changes fairly often.
++
+
+To address this issue, a hook has been added to the FS version of the
+`lo` command to run _antcn_ in a particular local mode to configure an
+LO when it is commanded.  This is triggered with the environment
+variable `FS_LO_ANTCN_MODE`.  The details of the interface are
+available in the `Comments` section show with `help=lo`. This may not
+be a suitable solution in all situations.  If you have (or need) a
+local `lo` command you can continue to use it (or implement one), but
+it will need to be updated to get new capabilities such as new racks
+and <<logrxg,logging _.rxg_ files>> when they come along.
++
+
+NOTE: This change does not currently provide a way to display LO
+configuration information read back from the device.
+
+.. Hook in `lo_config` command.
++
+
+The _drudg_ program provides a means to include the calling of a
+`lo_config` command at the end of each IF setup procedure it
+generates. This is intended to provide stations that implement
+commanding the LO configuration to device(s) with a way to do it in
+one step for a mode as to opposed individually with
+`lo=...` commands. It can also be used to implement command of the
+LO setup for a mode instead of with the `lo` command to reduce (but not
+eliminate) the maintenance burden that is  needed if a local `lo`
+command is used.  See the example
+_/usr2/fs/st.default/control/skedf.ctl_ file for how to trigger
+``drudg``'s use of this command (also see the related
+<<skedf.ctl,skedf.ctl fix>> in this sub-section.
++
+
+Until now the `lo_config` command has been a station only command,
+i.e., it had to implemented as a local command. With this update, there
+is now a built-in command that can used for this functionality, if it
+is suitable. If it is not suitable, the local command can still be
+used or implemented.
++
+
+By default the built-in `lo_config` command is a no-op. However,
+it has a hook that can used to run _antcn_ in a particular local mode
+to implement configuring the LOs.  This is triggered with the
+environment variable `FS_LO_CONFIG_ ANTCN_MODE`. The details of the
+interface are available in the `Comments` section shown with
+`help=lo_config`.
+
+. [[skedf.ctl]] Fix example _/usr2/fs/st.default/control.skedf.ctl_
+(closing https://github.com/nvi-inc/fs/issues/81[#81]). The example
+_sked.ctl_ file incorrectly identified the `lo_config` keyword as
+`if_config`. This has been fixed. It is recommended that you check
+and, if needed update your local copy in
+_/usr2/control/skedf.ctl_ appropriately, including the comments.
+
+. [[saterrors]] Fix ignoring _antcn_ errors in the `satellite` and
+`satoff` commands. (closing
+https://github.com/nvi-inc/fs/issues/82[#82]). This bug caused errors
+from _antcn_ to be ignored for _only_ these commands. It has been
+fixed.
+
 === Details of drudg changes
 
 . [[head]] Fix crash if `$HEAD` is the last block in a `.skd` file. Fixed bug in _reads.f_.
 
-. [[mask]] Fix crash if error in mask (closes
+. [[mask]] Fix crash if error in mask (closing
 https://github.com/nvi-inc/fs/issues/74[#74]). A particular error in
 the mask format intermittently excited an uninitialized variable bug.
 Thanks to Beppe Maccaferri (Medicina) for reporting this. He
@@ -489,7 +641,7 @@ experiment that included Medicina).
 
 . [[drudgsource]] Clean-up source.
 
-.. Remove references to pass, headstacks, and S2.
+.. Remove references to passes, headstacks, and S2.
 
 .. Add the GPL to files it was missing from.
 
