@@ -18,8 +18,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= FS 10.0.0-beta2 to the Latest Commit Update Notes
-Version 1.3 - December 2020
+= FS 10.0.0-beta2 to FS 10.0.0-beta3 Update Notes
+Version 1.4 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -578,7 +578,7 @@ available in the `Comments` section show with `help=lo`. This may not
 be a suitable solution in all situations.  If you have (or need) a
 local `lo` command you can continue to use it (or implement one), but
 it will need to be updated to get new capabilities such as new racks
-and <<logrxg,logging _.rxg_ files>> when they come along.
+and <<logrxg,logging .rxg files>> when they come along.
 +
 
 NOTE: This change does not currently provide a way to display LO

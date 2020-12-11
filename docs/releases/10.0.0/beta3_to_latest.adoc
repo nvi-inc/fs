@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to Latest Commit Update Notes
-Version 0.1 - December 2020
+Version 0.2 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -31,7 +31,7 @@ Version 0.1 - December 2020
 
 == Introduction
 
-The document covers updating from the latest pre-release to the
+The document covers updating from the _beta3_ pre-release to the
 _latest commit_ on its branch. The latest commit is somewhat
 experimental. We make ever effort to keep the latest commit usable.
 However commits that are not tagged for release are not intended for
@@ -39,12 +39,15 @@ operations.
 
 CAUTION: It is expected that those using the latest commit are experts
 and will manage the differences for updating to the next official
-release themselves. What needs to done will depend on what commit
-you had last updayted to. Advice is usually available, but no
-documentation is provided.
+release themselves. No specific documentation will be provided. What
+commit you had last updated to will determine what needs to be done. A
+reasonable approach would be to review the update steps in the new
+release to make sure everything has been covered. Alternatively, it might
+work to verify that all the steps in the latest version of this
+document were completed.
 
-This document is up to date with commit
-https://github.com/nvi-inc/fs/commit/e01f03e951ac381071e0b313a9415189e63df919[e01f03e9].
+
+This document is up to date with the tagged 10.0.0-beta3_ release.
 Due to small increments, such as adding this document, this may not be
 the literal last commit, but the differences should be small unless
 you happen to `fetch` between a significant change and this document

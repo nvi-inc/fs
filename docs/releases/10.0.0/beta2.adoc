@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.2 - December 2020
+Version 1.3 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -148,7 +148,7 @@ This section provides links to some other useful documents.
 
 === Other related upgrade documents
 
-Upgrading from <<beta2_to_latest.adoc#,beta2 to the latest commit>>.
+Upgrading from <<beta2_to_beta3.adoc#,beta2 to beta3>>.
 
 Upgrading from <<beta1_to_beta2.adoc#,beta1 to beta2>>.
 
