@@ -198,6 +198,7 @@ void log_rxgfile(lo)
                     ",%.6e",shm_addr->rxgain[ir].trec[1]);
         logit_nds(output,0,NULL,':');
 
+        iend=shm_addr->rxgain[ir].spill_ntable;
         if(iend > MAX_SPILL)
             iend=MAX_SPILL;
         for (i=0;i<iend;i++) {
