@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta3 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.2 - December 2020
+Version 0.3 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -1082,9 +1082,31 @@ This sub-section is divided into three parts. Please see
 ==== Changes that are in common since FS9
 
 .  One unified version for all FS users. <<unified,More details>>.
-.  Support for use on both 32- and 64-bit systems. <<bit3264,More details>>.
+
+.  Support for use on both 32- and 64-bit systems.
+<<bit3264,More details>>.
+
 .  Version control with _git_. <<usegit,More details>>.
-. The FS uses a new _Makefile_ scheme. <<makefile,More details>>.
+
+. The FS display server is now recommended for normal use.
+<<server,More details>>.
+
+.  Reorganize update notes as HTML viewable on the web (closing
+https://github.com/nvi-inc/fs/issues/71[#71]).
+<<adoc,More details>>.
+
+. Add _.rxg_ file logging to `lo` command. <<logrxg,More details>>.
+
+. Add _fsserver_ improvements and log support (includes closing
+https://github.com/nvi-inc/fs/issues/29[#29],
+https://github.com/nvi-inc/fs/issues/25[#25], and tentatively closing
+https://github.com/nvi-inc/fs/issues/69[#69]).
+<<fsserver,More details>>.
+
+. Improve _gnplt_ (closing
+https://github.com/nvi-inc/fs/issues/51[#51] and
+https://github.com/nvi-inc/fs/issues/72[#72]).
+<<gnplt,More details>>.
 
 . Update and expand _fesh_ (includes closing
 https://github.com/nvi-inc/fs/issues/34[#34],
@@ -1094,11 +1116,37 @@ https://github.com/nvi-inc/fs/issues/65[#65], and partially closing
 https://github.com/nvi-inc/fs/issues/38[#38]).
 <<fesh,More details>>.
 
-. Update example _equip.ctl_ for DBBC3 (includes closing https://github.com/nvi-inc/fs/issues/35[#35]). <<equip.ctl,More details>>.
-. Fix some error messages (includes closing https://github.com/nvi-inc/fs/issues/43[#43] & https://github.com/nvi-inc/fs/issues/22[#22]). <<fixmess,More details>>.
-. Improve _plog_. <<plog,More details>>.
-. Restore `if` command. <<if,More details>>.
-. Update GPL in files. <<gpl,More details>>.
+. Add hooks for local LO control to `lo` and `lo_config` commands.
+<<lohooks,More details>>.
+
+. Make _fsclient_ honor the `-n` flag properly (closing
+https://github.com/nvi-inc/fs/issues/48[#48]).
+<<clientn,More details>>.
+
+. Make _fsclient_ ignore prompt in no-X11 mode (closing
+https://github.com/nvi-inc/fs/issues/49[#49]).
+<<clientnx,More details>>. 
+
+. Move X resources for _helpsh_ to _~/.Xresources_.
+<<helpsh,More details>>.
+
+. Always check for "`day 248`" problem in _setcl_ (closing
+https://github.com/nvi-inc/fs/issues/56[#56]).
+<<day248,More details>>.
+
+. Generalize the _scnch_ window to cover Mark 5 recorders (closing
+https://github.com/nvi-inc/fs/issues/61[#61]). <<scnch,More details>>.
+
+. Add support for DBBC3 to `if=cont_cal,...` (closing
+https://github.com/nvi-inc/fs/issues/54[#54]). <<cont_cal,More
+details>>.
+
+. Add _new_ifdbb_ script for (RDBE) VGOS stations.
+<<new_ifdbb,More details>>.
+
+. Add checking for a procedure or schedule file before attempting to
+open it (closing https://github.com/nvi-inc/fs/issues/45[#45]).
+<<prc,More details>>.
 
 . Improve `help` command (includes closing
 https://github.com/nvi-inc/fs/issues/40[#40],
@@ -1106,80 +1154,81 @@ https://github.com/nvi-inc/fs/issues/3[#3], and
 https://github.com/nvi-inc/fs/issues/75[#75]).
 <<help,More details>>.
 
-. Restore `help` command for DBBC3 commands. <<dbbc3help,More details>>.
+. Improve _plog_. <<plog,More details>>.
 
-. No longer set _/usr2/fs_ and _/usr2/st_ to be owned by _prog_. <<symlinks,More details>>.
-. Add checking for a procedure or schedule file before attempting to open it (closing https://github.com/nvi-inc/fs/issues/45[#45]). <<prc,More details>>.
-. Add more log header lines. <<header_lines,More details>>.
-. Fix year wrap error message in procedure logging (closing https://github.com/nvi-inc/fs/issues/23[#23]). <<year,More details>>.
-. Fix the remaining case of a closed procedure library causing a crash if
-there was an attempt to execute a procedure from the library was fixed. <<prc2,More details>>.
-. Move X resources for _helpsh_ to _~/.Xresources_. <<helpsh,More details>>.
-. Move unsetting of `TMOUT` environment variable for _oper_ to
-    _~/.bashrc_ in the default files. <<tmout,More details>>.
-. Improve error logging for _dbbcn_. <<dbbcn,More details>>.
 . Add `popen` time-out feature. <<popen,More details>>.
-. The FS display server is now recommended for normal use. <<server,More details>>.
-. Make _fsclient_ honor the `-n` flag properly (closing https://github.com/nvi-inc/fs/issues/48[#48]). <<clientn,More details>>.
-. Make _fsclient_ ignore prompt in no-X11 mode (closing https://github.com/nvi-inc/fs/issues/49[#49]). <<clientnx,More details>>. 
-
-. Add _fsserver_ improvements and log support (includes closing
-https://github.com/nvi-inc/fs/issues/29[#29],
-https://github.com/nvi-inc/fs/issues/25[#25], and tentatively closing
-https://github.com/nvi-inc/fs/issues/69[#69]).
-<<fsserver,More details>>.
-
-. Eliminate `cls_chk` error from `inject_snap -w ...` command when
-    an error occurs (partly closing https://github.com/nvi-inc/fs/issues/50[#50]). <<cls_chk,More details>>.
-
-. Improve _gnplt_ (closing
-https://github.com/nvi-inc/fs/issues/51[#51],
-https://github.com/nvi-inc/fs/issues/72[#72],
-and https://github.com/nvi-inc/fs/issues/73[#73]).
-<<gnplt,More details>>.
-
-. Improve holog/MASK. <<holog,More details>>.
-. Fix _onoff_ for the DBBC3 rack (closing https://github.com/nvi-inc/fs/issues/52[#52]). <<onoff,More details>>.
-. Add support for DBBC3 to `if=cont_cal,...` (closing https://github.com/nvi-inc/fs/issues/54[#54]). <<cont_cal,More details>>.
-. Always check for "`day 248`" problem in _setcl_ (closing https://github.com/nvi-inc/fs/issues/56[#56]). <<day248,More details>>.
-. Change the flags for the _monX_ programs in _clpgm.ctl_ from `a`
-    to `d`. <<monx,More details>>.
-. Generalize the _scnch_ window to cover Mark 5 recorders (closing
-    https://github.com/nvi-inc/fs/issues/61[#61]). <<scnch,More details>>.
-
-. Add _new_ifdbb_ script for (RDBE) VGOS stations. <<new_ifdbb,More details>>.
 
 . Remove hard coding of the station name in _rdbemsg_ (closing
 https://github.com/nvi-inc/fs/issues/62[#62]).
 <<stationrdbemsg,More details>>.
 
-. Add option to not build the display server into the FS (partially closing
-https://github.com/nvi-inc/fs/issues/76[#76]). <<noserver,More
-details>>.
+. Fix the remaining case of attempting to execute a procedure from a
+closed library causing a crash.  <<prc2,More details>>.
 
-. Improve update notes. <<updatenotes,More details>>.
+. Fix year wrap error message in procedure logging (closing
+https://github.com/nvi-inc/fs/issues/23[#23]). <<year,More details>>.
 
-.  Reorganize update notes as HTML viewable on the web (closing
-https://github.com/nvi-inc/fs/issues/71[#71]).
-<<adoc,More details>>.
+. Add more log header lines. <<header_lines,More details>>.
 
-. Add _.rxg_ file logging to `lo` command. <<logrxg,More details>>.
+. Improve holog/MASK. <<holog,More details>>.
 
-. Add hooks for local LO control to `lo` and `lo_config` commands.
-<<lohooks,More details>>.
-
-. Fix example _/usr2/fs/st.default/control.skedf.ctl_ (closing
-https://github.com/nvi-inc/fs/issues/81[#81]).
-<<skedf.ctl,More details>>.
+. Change the flags for the _monX_ programs in _clpgm.ctl_ from `a` to
+`d`. <<monx,More details>>.
 
 . Fix ignoring _antcn_ errors in the `satellite` and `satoff`
 commands. (closing https://github.com/nvi-inc/fs/issues/82[#82]).
 <<saterrors,More details>>.
 
-. Modified the display server build so that it will work for FSL8
+. Eliminate `cls_chk` error from `inject_snap -w ...` command when an
+error occurs (partly closing
+https://github.com/nvi-inc/fs/issues/50[#50]).
+<<cls_chk,More details>>.
+
+. Fix some error messages (includes closing
+https://github.com/nvi-inc/fs/issues/43[#43] &
+https://github.com/nvi-inc/fs/issues/22[#22]).
+<<fixmess,More details>>.
+
+. Improve error logging for _dbbcn_ initialization.
+<<dbbcn,More details>>.
+
+. Fix example _/usr2/fs/st.default/control.skedf.ctl_ (closing
+https://github.com/nvi-inc/fs/issues/81[#81]).
+<<skedf.ctl,More details>>.
+
+. The FS uses a new _Makefile_ scheme. <<makefile,More details>>.
+
+. Add option to not build the display server into the FS (partially
+closing https://github.com/nvi-inc/fs/issues/76[#76]).
+<<noserver,More details>>.
+
+. No longer set _/usr2/fs_ and _/usr2/st_ to be owned by _prog_.
+<<symlinks,More details>>.
+
+. Update example _equip.ctl_ for DBBC3 (includes closing https://github.com/nvi-inc/fs/issues/35[#35]). <<equip.ctl,More details>>.
+
+. Modify the display server build so that it will work for FSL8
 (closing https://github.com/nvi-inc/fs/issues/78[#78], and re-closing
-https://github.com/nvi-inc/fs/issues/76[#76]).  <<serverbuild,More
-details>>.
+https://github.com/nvi-inc/fs/issues/76[#76]).
+<<serverbuild,More details>>.
+
+. Restore `if` command. <<if,More details>>.
+
+.  Make _gnplt_ work on FSL8 (_Lenny_) again (closing
+https://github.com/nvi-inc/fs/issues/73[#73]).  Some recent
+<<gnpltfsl8,More details>>.
+
+. Fix _onoff_ for the DBBC3 rack (closing
+https://github.com/nvi-inc/fs/issues/52[#52]). <<onoff,More details>>.
+
+. Restore `help` command for DBBC3 commands.
+<<dbbc3help,More details>>.
+
+. Update GPL in files. <<gpl,More details>>.
+
+. Fixes to _~/.bashrc_ for FSL10.  <<bash,More details>>.
+
+. Improve update notes. <<updatenotes,More details>>.
 
 ==== Changes relative to the main branch
 
@@ -1253,20 +1302,20 @@ The new version should run on 32-bit systems that currently support
 the FS (we support as far back as FSL8, we have not yet been able to
 test with FSL7 or other even older systems), as well as on 64-bit
 systems. The <<../../misc/64-bit_conversion.adoc#,Converting to a
-64-bit system>> document contains instructions for transitioning to a
+64-bit System>> document contains instructions for transitioning to a
 64-bit system.
 
 +
 
 The key change to the source code to make this compatibility possible
-is avoiding use of ``long``s in C, particularly in fixed length data
-structures. However, some system calls do require ``long``s. A tool,
-_unlongify_ was developed by Dave Horsley to help convert the FS code.
-It is available to help convert station code. It use is described in
-the
+is removing use of ``long``s as 32-bit ``int``s in C, particularly in
+fixed length data structures. Note that  some system calls do require
+``long``s. A tool, _unlongify_ was developed by Dave Horsley to help
+convert the FS code.  It is available to help convert station code. It
+use is described in the
 <<../../misc/64-bit_conversion.adoc#_conversion_of_c_code,Conversion
 of C code>> sub-step of the
-<<../../misc/64-bit_conversion.adoc#,Converting to a 64-bit system>>
+<<../../misc/64-bit_conversion.adoc#,Converting to a 64-bit System>>
 document.
 
 +
@@ -1295,13 +1344,177 @@ _/usr2/fs_ directory tree since such changes will make it more
 difficult to simply `pull` updates to install bug fixes and new
 features.
 
-. [[makefile]] The FS uses a new _Makefile_ scheme. This is
-accomplished by including the _/usr2/fs/include.mk_ file in every
-Makefile except for _drudg_ and its libraries. The scheme is "`opt-in`"
-so it is not necessary for every program or station programs to
-participate. Within the FS source tree, only _drudg_ and its libraries
-don't use it.  An explanation of the new scheme is provided in
-_/usr2/fs/misc/fs10_makefile.md_.
+. [[server]] The FS display server is now recommended for
+normal use. (This was changed as of the _beta2_ release.)
+
+. [[adoc]] Reorganize update notes as HTML viewable on the web.
+(closing https://github.com/nvi-inc/fs/issues/71[#71]).
++
+
+Hopefully, this change will make the update notes easier to read and
+navigate.  Among other improvements, there are clickable links to
+other sections within documents as well as to sections in other
+related documents.
+
+.. Reorganized update notes as _.adoc_ files in the _docs/_
+sub-directory.
+
+.. All of the _.adoc_ files are viewable as HTML, and are hierarchically
+indexed, at https://nvi-inc.github.io/fs/.
+
+.. The first update notes available in HTML are for
+<<beta2.adoc#,10.0.0-beta2>>.
+
+..  <<../../misc/font_conventions.adoc#,Font Conventions>> similar to
+the traditional printed FS manuals are used.
+
+.. Add <<../misc/release_model.adoc#,Release Model>> document  describing
+steps in making a release.
+
+.. Add <<../../misc/env_vars.adoc#,FS Environment Variables>>
+document. This document describes user settable environment variables
+for both _make_ time and runtime.
+
+.. Improve structure and correct some errors from original _.txt_ version.
+
+.. Make many typo/wording fixes.
+
+. [[logrxg]] Add _.rxg_ file logging to `lo` command.
+
+.. Summary information logging.
++
+
+When an LO is configured (or monitored) with the `lo` command, a
+summary of information from the matching _.rxg_ file is displayed and
+logged.  Details of the format are available with `help=lo`.  This is
+intended to give the operator feedback that the correct version of the
+_.rxg_ file is in use. The format of these lines may be adjusted in
+future releases based on feedback from users about what is most
+useful.  Thanks to Alastair Gunn (Jodrell Bank) for suggesting this.
+
+.. Full logging of _.rxg_ file non-comment lines.
++
+
+When an LO is configured with the `lo` command, the contents of the
+corresponding _.rxg_ file are logged, but not displayed. This only
+occurs if this is the first time this _.rxg_ file matched an LO being
+configured since the most recent opening of the current log. After the
+time-tag, each logged line starts with `:rxg_file,` followed by the
+name of the _.rxg_ file, and then the values from a single non-comment
+line in the file. The lines are logged in the order from the _.rxg_
+file. This is intended to provide historical information about the
+values being used in FS calculations.
+
+. [[fsserver]] Add _fsserver_ improvements and log support (includes
+closing https://github.com/nvi-inc/fs/issues/29[#29],
+https://github.com/nvi-inc/fs/issues/25[#25], and tentatively closing
+https://github.com/nvi-inc/fs/issues/69[#69]).  These changes
+introduce new functionality to _fsserver_, as well as simplify some
+use cases.
+
+.. The first major change is that the server now only needs to use one
+socket when using _websockets_ -- addresses that start with `ws://`
+(closing https://github.com/nvi-inc/fs/issues/29[#29]). The new
+default base URL for all _fsserver_ streams and control channels is
+now:
+
+    ws://127.0.0.1:7083
++
+(70 83 are decimal ASCII encoding of `F` and `S`.)
++
+This can be changed by editing `FS_SERVER_URL_BASE` in
+_include/params.h_; however, we will likely introduce command-line
+flag and/or environment variable to set this in the future.
++
+This should be safe to expose on the network (rather than just
+the loop-back), but users may wish to use an HTTP(S) as a proxy to
+provide some authentication/authorisation.
++
+This was enabled by factoring out functionality _spub_ into a
+reusable "`buffered stream`" library, which has been incorporated
+into _fsserver_. All the behaviour of streams are now managed
+within the _fsserver_ process rather than an external _spub_
+instance.
+
+.. The second major change of this patch is the addition of the FS log
+to the streams available from the server (closing
+https://github.com/nvi-inc/fs/issues/25[#25]).  (Previously only the
+"`display`" was available, which has a reduced time-stamp format and
+filters some output.)
++
+This is available at
+
+    FS_SERVER_URL_BASE/log
++
+that is, by default
+
+    ws://127.0.0.1:7083/log
+
+.. A third change is that the server now continues running after the
+FS is terminated. This allows clients to detect the FS termination and
+prevents a socket conflict if the FS is terminated and restarted in
+quick succession. The only user visible impact will be a slight delay
+if the FS is restarted quickly after termination while the old session
+is finishing up. This also means that after an FS upgrade or changing
+environment variable values, it's important to either shutdown the
+server (`*fsserver stop*`) or reboot the system.
+
+.. Fourth, the server can now accept snap commands to be sent to FS,
+e.g.:
+
+   fsserver fs snap "terminate"
++
+This allows clients to interact with the FS directly through
+fsserver rather than needing access to _inject_snap_.
++
+No filtering or authorisation is implemented on this command
+channel, so it effectively allows complete command execution
+privileges in the FS context to anyone with access to the socket.
+Note this is also true for _inject_snap_ on a standard system. If
+a station wishes to limit local access they can use
+iptables/nftables, or use the server in UNIX socket mode and use
+file system permissions. Stations that would like to enable remote
+access should implement their own authentication/authorisation
+that suits their needs, e.g. SSH port forwarding or HTTP proxying.
+
+.. The fifth and final major change is that this patch also upgrades
+the included messaging library _nng_ to version _1.3.0_, which brings
+with it some performance improvements and bug fixes, the most obvious
+to FS users caused some _ssub_ instances in "`wait`" mode to use a
+high amount of CPU time.  However, some or all of the speed
+improvement may have been lost in <<serverbuild,making the server
+build work for FSL8 (_Lenny_)>>.
+
+.. Fixed _spub_/_ssub_ occasionally freezing (tentatively closing
+https://github.com/nvi-inc/fs/issues/69[#69]). This may have been
+caused be the byte order being wrong in buffered stream `cb`. The
+situation is still being monitored.  Please report any instance of
+this problem that occurs. It happens very rarely so it is challenging
+to get enough usage to verify that it is not happening. If it does
+happen, restarting the client has been a successful strategy for
+recovery.
+
+.. Fixed `clean` function in _Makefile_.
+
+.. Fixed _sspub_ to support more than 2^32^ messages.
+
+. [[gnplt]] Improve _gnplt_ (closing
+https://github.com/nvi-inc/fs/issues/51[#51] and
+https://github.com/nvi-inc/fs/issues/72[#72]).
+<<gnplt,More details>>.
+
+.. Fix labels in _gnplt_ windows that display the gain curve
+coefficients (closing https://github.com/nvi-inc/fs/issues/51[#51]).
+Previously the labels, when displayed were in reverse order. In one
+window, there were no coefficient labels at all. Thanks to Beppe
+Maccaferri (Medicina) for reporting this and testing the solution.
+
+.. _gnplt_ now updates the date in updated _.rxg_ files (closing
+https://github.com/nvi-inc/fs/issues/72[#72]).  The original developer,
+(Tomas Gille), did very good work developing this second version of
+_gnplt_, but ran out of time in his internship and was unable to include
+this minor but important feature. Thanks to Beppe Maccaferri (Medicina)
+for reporting this.
 
 . [[fesh]] Update and expand _fesh_ (includes closing
 https://github.com/nvi-inc/fs/issues/34[#34],
@@ -1310,18 +1523,20 @@ https://github.com/nvi-inc/fs/issues/37[#37],
 https://github.com/nvi-inc/fs/issues/65[#65], and partially closing
 https://github.com/nvi-inc/fs/issues/38[#38]).
 
-.. A typo in the error message for when
-the schedule is already downloaded was fixed (closing https://github.com/nvi-inc/fs/issues/34[#34]). Thanks to
-Morgan Goodrich (KPGO) for reporting this.
+.. A typo in the error message for when the schedule is already
+downloaded was fixed (closing
+https://github.com/nvi-inc/fs/issues/34[#34]). Thanks to Morgan
+Goodrich (KPGO) for reporting this.
 
 .. The internal version number was replaced with the FS version.
 
-.. _fesh_ now supports _bkg_, _cddis_, _opar_, and _vlbeer_ data centers
-(closing https://github.com/nvi-inc/fs/issues/37[#37]). The data center
-can be selected with the `FESH_DATA_CENTER` environment variable or
-the `-D` command line option. The default data center is _cddis_. For
-_vlbeer_ only _.vex_ files are supported; for the others, only _.skd_.
-Running _drudg_ automatically is not supported for _vlbeer_.
+.. _fesh_ now supports _bkg_, _cddis_, _opar_, and _vlbeer_ data
+centers (closing https://github.com/nvi-inc/fs/issues/37[#37]). The
+data center can be selected with the `FESH_DATA_CENTER` environment
+variable or the `-D` command line option. The default data center is
+_cddis_. For _vlbeer_ only _.vex_ files are supported; for the others,
+only _.skd_.  Running _drudg_ automatically is not supported for
+_vlbeer_.
 +
 
 TIP: For FSL8 and other old Linux distributions, access to _cddis_ may
@@ -1329,17 +1544,16 @@ not be possible, due to out-of-date certificates (for both FTP-SSL or
 HTTPS). If you are in that situation, _bkg_ or _opar_ may be suitable
 alternatives.
 
-.. _fesh_ now supports encrypted access to _cddis_ using FTP-SSL and HTTPS
-(closing https://github.com/nvi-inc/fs/issues/36[#36]). This allows
-use of _cddis_ after non-SSL FTP access was disabled there at
+.. _fesh_ now supports encrypted access to _cddis_ using FTP-SSL and
+HTTPS (closing https://github.com/nvi-inc/fs/issues/36[#36]). This
+allows use of _cddis_ after non-SSL FTP access was disabled there at
 the end of October 2020. FTP-SSL is the default method.
 
 +
 
-For FTP-SSL, it is recommended that the
-`FESH_EMAIL` environment variable be set to avoid having to provide
-an email address as the _anonymous_ FTP-SSL password for each
-invocation.
+For FTP-SSL, it is recommended that the `FESH_EMAIL` environment
+variable be set to avoid having to provide an email address as the
+_anonymous_ FTP-SSL password for each invocation.
 
 +
 
@@ -1363,9 +1577,9 @@ setting it in your _.netrc_ file.  If you don’t have an _EarthData_
 login, you should be able to get one by selecting `REGISTER` at:
 https://urs.earthdata.nasa.gov/.
 
-.. _fesh_ now respects the _/usr2/control/skedf.ctl_ control file (closing
-https://github.com/nvi-inc/fs/issues/65[#65]). Previously _fesh_
-assumed that the directory for _.skd_ files was _/usr2/sched/_
+.. _fesh_ now respects the _/usr2/control/skedf.ctl_ control file
+(closing https://github.com/nvi-inc/fs/issues/65[#65]). Previously
+_fesh_ assumed that the directory for _.skd_ files was _/usr2/sched/_
 regardless of what was in the `$schedules` block of
 _/usr2/control/skedf.ctl_. This only worked if the directory specified
 was _/usr2/sched_ or was the working directory (i.e., not specified or
@@ -1373,8 +1587,8 @@ was _/usr2/sched_ or was the working directory (i.e., not specified or
 _/usr2/exper_, for _.skd_ files.  Thanks to Jon Quick (HartRAO) for
 reporting this.
 
-.. _fesh_ now provides support for _drudg_ optional prompts for geodesy
-schedules (partially closing
+.. _fesh_ now provides support for _drudg_ optional prompts for
+geodesy schedules (partially closing
 https://github.com/nvi-inc/fs/issues/38[#38]). It is assumed that for
 geodesy the answers to these questions for a station do not vary. This
 feature is intended to allow stations that observe both astronomy and
@@ -1456,489 +1670,6 @@ variable is set, or set it if it is not set.
 
 Please see `*fesh -h*` for more information on using these features.
 
-. [[equip.ctl]] Update example _equip.ctl_ for DBBC3 (includes closing https://github.com/nvi-inc/fs/issues/35[#35]).
-
-.. The example DBBC3 firmware version is now more sensible (closing
-https://github.com/nvi-inc/fs/issues/35[#35]). (This error was
-introduced in _beta1_ and fixed in _beta2_.) Thanks to Eskil Varenius
-(Onsala) for reporting this.
-
-.. The minimum DBBC3 firmware version required was added in a comment.
-
-. [[fixmess]] Fix some error messages (includes closing https://github.com/nvi-inc/fs/issues/43[#43] & https://github.com/nvi-inc/fs/issues/22[#22]).
-
-.. Fixed errors in
-_control/fserr.ctl_.  Errors in some double double-quote (`""`)
-lines and some incorrectly reused error codes were fixed (closing
-https://github.com/nvi-inc/fs/issues/43[#43]).  Thanks to Alexander Neidhardt (Wettzell) for reporting
-these.
-
-.. The error messages for a error not being found when attempting to
-manipulate its display setting were clarified (closing
-https://github.com/nvi-inc/fs/issues/22[#22]).  Thanks to Jon Quick
-(HartRAO) for reporting this.
-
-.. Error messages that should refer to the (not yet implemented)
-`active_rdbes` and `active_mk6s` commands were corrected to no
-longer incorrectly refer to the `rdbe_active` and `mk5_active`
-commands, respectively.
-
-.. Obsolete errors for the, no longer used, _sw.ctl_ control file
-were removed.
-
-. [[plog]] Improve _plog_.
-
-.. Use of an environment variable `NETRC_DIR` was added to support not
-having the _.netrc_ file in the user's home directory was added.
-Please see `*plog -h*` for details on how to use this.  The same
-variable is used by the _fesh_ script for the same purpose.
-+
-
-NOTE: Normally, the _.netrc_  file would be in the user's home directory.
-However, some systems have security policies that forbid that. This
-variable provides a way to have the _.netrc_ file in a different
-directory, perhaps _/usr2/control_.
-
-.. The internal version number was replaced with the FS version.
-
-. [[if]] Restore `if` command. (It had accidentally been overlooked in
-the merge of the VGOS and main branched. It was first missing in
-_beta1_ and was restored in _beta2_.) Thanks to Beppe Maccaferri
-(Medicina) for reporting this.
-
-. [[gpl]] Update GPL in files. The GPL header was added to the
-_holog/MASK/\*.m_, _misc/mk6in/*_, and the _include/*.i_ files. It was
-removed from the _fserver/tests/convey.*_ files. (The GPL was left out
-of these files in _beta1_. They were corrected in _beta2_ and _beta3_.)
-
-. [[help]] Improve `help` command (includes closing
-https://github.com/nvi-inc/fs/issues/40[#40],
-https://github.com/nvi-inc/fs/issues/3[#3], and
-https://github.com/nvi-inc/fs/issues/75[#75]).
-
-.. Remove usage of `system()` call to find `help` files (closing
-https://github.com/nvi-inc/fs/issues/40[#40] and
-https://github.com/nvi-inc/fs/issues/3[#3]).
-
-.. Improve `help` page for _tpicd_. Made it clearer that when in the
-`no` mode, `data_valid=on` will only start logging of _tpicd_ data
-when a schedule is running and not-blocked.  This behavior was
-inherited from the VGOS branch where accidentally leaving _tpicd_
-logging RDBE multi-cast data after closing a schedule or halting
-it creates a lot of extra log entries. This is probable beneficial
-for all back-ends.
-
-.. Update `help` pages for _onoff_ and _fivpt_. Added a section on
-switching between continuous and non-continuous cal.  Removed
-`if=cont_cal,,` in `calon`/`off`-`nf`/`fp` procedures.  Add
-recovery method for misconfigured cal.
-
-.. The `help` file for the `ddbc` command was expanded to also
-describe the `dbbc2` and `dbbc3` commands and now includes a
-description of the output for multi-line responses for all of these
-commands (closing https://github.com/nvi-inc/fs/issues/75[#75]). The
-`help` command now works for the `dbbc2` and `dbbc3` commands.
-
-.. The `help` file for the `fila10g` command was expanded to also
-support the `fila10g2` command. The `help` command now works for the
-`fila10g2` command.
-
-. [[dbbc3help]] Restore `help` command for DBBC3 commands. (The selection of DBBC3
-specific `help` commands was lost in _beta1_ from the merge of VGOS
-and main.  branches.  It was restored in _beta3_).
-
-. [[symlinks]] No longer set _/usr2/fs_ and _/usr2/st_ to be owned by _prog_. This
-was a long standing but benign error in the _misc/fsinstall_ script.
-
-. [[prc]] Add checking for a procedure or schedule file before attempting to
-open it (closing https://github.com/nvi-inc/fs/issues/45[#45]). This change is to avoid accidentally closing
-an active procedure or schedule file if the new one specified in
-the `proc=...` or `schedule=...` commands, respectively, does not
-exist (or has incorrect permissions).  Previously, if the files
-did not exist (or did not have the correct permission), the old
-file would be closed. Thanks to Jon Quick (HartRAO) for pointing
-out this inconsistency.
-+
-
-NOTE: The old behavior was partly a consequence of how the original
-file handling worked on HP-RTE systems, but is not sensible for how
-the SNAP commands should work.
-+
-
-CAUTION: Note that this is a non-backward compatible change in how the
-SNAP commands behave.  Previously supplying a non-existent procedure
-or schedule file name would cause the closure of the corresponding
-file. Now to close an open procedure or schedule without opening a new
-one, a null parameter must be supplied, i.e., `proc=` or `schedule=`.
-As before, the latter will not close an open schedule procedure
-library.
-
-. [[header_lines]]  Add more log header lines. Log header lines were added for
-`uname()` system information and the compile time value of the
-`FC` environment variable.
-
-. [[year]] Fix year wrap error message in procedure logging (closing https://github.com/nvi-inc/fs/issues/23[#23]).
-This fixed a benign and spurious error message if a log was kept
-open past the end of the year and any procedures that had last
-been logged in the previous year were executed again.  Thanks to
-Eskil Varenius (Onsala) and Alexander Neidhardt (Wettzell) for
-reporting this.
-
-. [[prc2]] Fix the remaining case of a closed procedure library
-causing a crash if there was an attempt to execute a procedure from
-the library was fixed. This case could happen if the schedule that was
-opened was named _station_, which would lead to the closure of an
-already open schedule procedure library (there cannot be _station_
-schedule procedure library since _station_ can only be opened once).
-
-. [[helpsh]] Move X resources for _helpsh_ to _~/.Xresources_. This allows the
-geometry and other parameter of the FS `help` display _xterm_ to be
-controlled locally.
-
-. [[tmout]] Move unsetting of `TMOUT` environment variable for _oper_ to
-_~/.bashrc_ in the default files. This allows all interactive
-shells to disable the time-out. Additionally, some settings were
-rearranged in _~/.bashrc_ to make them only apply to interactive
-shells (this was also done for _prog_ and AUID accounts). This
-change is only relevant for stations using FSL10.
-
-. [[dbbcn]] Improve error logging for _dbbcn_. The name of the program is now
-correctly displayed.
-
-. [[popen]] Add _popen_ time-out feature. There is a now a `-t ...` time-out
-option. If the command being run has a time-out feature, it is
-generally better to use the command's feature. See `help=sy` for
-more details.
-
-. [[server]] The FS display server is now recommended for
-normal use. (This was changed as of the _beta2_ release.)
-
-. [[clientn]] Make _fsclient_ honor the `-n` flag properly (closing https://github.com/nvi-inc/fs/issues/48[#48]). This
-eliminates opening "`double`" windows if _fsclient_ is run with `-n`
-under an already running _fsclient_.
-
-. [[clientnx]] Make _fsclient_ ignore prompt in no-X11 mode (closing https://github.com/nvi-inc/fs/issues/49[#49]). If FS
-client is in no-X11 mode, it created a _fs.prompt_ when instructed
-by the server. This change removes that behaviour, though it may
-cause an issue if no other clients exist to dismiss the prompt,
-see issue https://github.com/nvi-inc/fs/issues/49[#49]. If this is a problem for anyone's use case we will
-need a new feature here.
-
-. [[fsserver]] Add _fsserver_ improvements and log support (includes closing
-https://github.com/nvi-inc/fs/issues/29[#29],
-https://github.com/nvi-inc/fs/issues/25[#25], and tentatively closing
-https://github.com/nvi-inc/fs/issues/69[#69]).
-These changes introduce new functionality to _fsserver_, as well as
-simplify some use cases.
-
-.. The first major change is that the server now only needs to use
-one socket when using _websockets_ -- address which start with
-`ws://` (closing https://github.com/nvi-inc/fs/issues/29[#29]). The new default base URL for all _fsserver_
-streams and control channels is now:
-
-    ws://127.0.0.1:7083
-+
-(70 83 are decimal ASCII encoding of `F` and `S`.)
-+
-This can be changed by editing `FS_SERVER_URL_BASE` in
-_include/params.h_; however, we will likely introduce command-line
-flag and/or environment variable to set this in the future.
-+
-This should be safe to expose on the network (rather than just
-the loop-back), but users may wish to use an HTTP(S) as a proxy to
-provide some authentication/authorisation.
-+
-This was enabled by factoring out functionality _spub_ into a
-reusable "`buffered stream`" library, which has been incorporated
-into _fsserver_. All the behaviour of streams are now managed
-within the _fsserver_ process rather than an external _spub_
-instance.
-
-.. The second major change of this patch is the addition of the FS
-log to the streams available from the server (closing https://github.com/nvi-inc/fs/issues/25[#25]).
-(Previously only the "`display`" was available, which has a reduced
-time-stamp format and filters some output.)
-+
-This is available at
-
-    FS_SERVER_URL_BASE/log
-+
-that is, by default
-
-    ws://127.0.0.1:7083/log
-
-.. A third change is that the server now continues running after the
-FS is terminated. This allows clients to detect the FS termination and
-prevents a socket conflict if the FS is terminated and restarted in
-quick succession. The only user visible impact will be a slight delay
-if the FS is restarted quickly after termination while the old session
-is finishing up. This also means that after an FS upgrade or changing
-environment variable values, it's important to either shutdown the
-server (`*fsserver stop*`) or reboot the system.
-
-.. Fourth, the server can now accept snap commands to be sent to FS,
-e.g.:
-
-   fsserver fs snap "terminate"
-+
-This allows clients to interact with the FS directly through
-fsserver rather than needing access to _inject_snap_.
-+
-No filtering or authorisation is implemented on this command
-channel, so it effectively allows complete command execution
-privileges in the FS context to anyone with access to the socket.
-Note this is also true for _inject_snap_ on a standard system. If
-a station wishes to limit local access they can use
-iptables/nftables, or use the server in UNIX socket mode and use
-file system permissions. Stations that would like to enable remote
-access should implement their own authentication/authorisation
-that suits their needs, e.g. SSH port forwarding or HTTP proxying.
-
-.. The fifth and final major change is that this patch also upgrades
-the included messaging library _nng_ to version _1.3.0_, which brings
-with it some performance improvements and bug fixes, the most obvious
-to FS users caused some _ssub_ instances in "`wait`" mode to use a
-high amount of CPU time.  However, some or all of the speed
-improvement may have been lost in <<serverbuild,making the server
-build work for FSL8 (Lenny)>>.
-
-.. Fixed _spub_/_ssub_ occasionally freezing (tentatively closing
-https://github.com/nvi-inc/fs/issues/69[#69]). This may have been
-caused be the byte order being wrong in buffered stream `cb`. The
-situation is still being monitored.  Please report any instance of
-this problem that occurs. It happens very rarely so it is challenging
-to get enough usage to verify that it is not happening. If it does
-happen, restarting the client has been a successful strategy for
-recovery.
-
-.. Fixed `clean` function in _Makefile_.
-
-.. Fixed _sspub_ to support more than 2^32^ messages.
-
-. [[cls_chk]] Eliminate `cls_chk` error from `inject_snap -w ...` command when
-an error occurs (partly closing https://github.com/nvi-inc/fs/issues/50[#50]). This was caused by
-_inject_snap_ not implementing the new linkage that was added for
-_fserr_. This is covered in issue https://github.com/nvi-inc/fs/issues/50[#50]. To correctly retrieve the
-error message would have required making a new interface to
-_fserr_ or subsuming it into library routine that both _ddout_
-and _inject_snap_ could use. It was not possible to do either in the
-available time. Instead _inject_snap_ was modified to output the error
-without the message, but pointing out that the message can be
-found in the log and display. Thanks to Dave Horsley (Hobart) for
-reporting this.
-
-. [[gnplt]] Improve _gnplt_ (closing
-https://github.com/nvi-inc/fs/issues/51[#51],
-https://github.com/nvi-inc/fs/issues/72[#72],
-and https://github.com/nvi-inc/fs/issues/73[#73]).
-<<gnplt,More details>>.
-
-.. Fix labels in _gnplt_ windows that display the gain curve
-coefficients (closing https://github.com/nvi-inc/fs/issues/51[#51]). Previously the labels, when displayed
-were in reverse order. In one window, there were no coefficient
-labels at all. Thanks to Beppe Maccaferri (Medicina) for reporting
-this and testing the solution.
-
-.. _gnplt_ now updates the date in updated _.rxg_ files (closing
-https://github.com/nvi-inc/fs/issues/72[#72]).  The original developer,
-(Tomas Gille), did very good work developing this second version of
-_gnplt_, but ran out of time in his internship and was unable to include
-this minor but important feature. Thanks to Beppe Maccaferri (Medicina)
-for reporting this.
-
-.. _gnplt_ now works on FSL8 (Lenny) again (closing
-https://github.com/nvi-inc/fs/issues/73[#73]).  Some recent
-improvements in _gnplt_ made it fail for FSL8.
-
-. [[holog]] Improve _holog/MASK_. The elevation spacing was corrected for the
-example in step (3), using _holog.m_. Axis titles were added to
-_plot_mask.m_.
-
-. [[onoff]] Fix _onoff_ for the DBBC3 rack (closing
-https://github.com/nvi-inc/fs/issues/52[#52]). A code block from
-_9.12.13_ in _onoff/get_samples.c_ had been omitted in the merge,
-preventing sampling of the TPI values and causing _onoff_ to crash.
-(This error was introduced in _beta1_ and fixed in _beta2_.) Thanks to
-Eskil Varenius (Onsala) for reporting that this caused a crash.
-
-. [[cont_cal]] Add support for DBBC3 to `if=cont_cal,...` (closing https://github.com/nvi-inc/fs/issues/54[#54]).  Thanks
-to Eskil Varenius (Onsala) for reporting that this was missing.
-
-. [[day248]] Always check for "`day 248`" problem in _setcl_ (closing https://github.com/nvi-inc/fs/issues/56[#56]).
-Previously _setcl_ only checked for this problem (which is due to
-use of 32-bit arithmetic in the time handling code), if the time
-model was _not_ `computer`. In principle, when the model is
-`computer` there is no need to check for this issue.  However,
-since the time is still managed with the same 32-bit arithmetic as
-for the non-`computer` models, it is still necessary to check.
-Not doing so was an oversight. The result was that there were no
-warnings of an impending 248 day time problem if the model was
-`computer`.  This is now fixed. Thanks to Richard Blaauw (WSRT),
-and subsequently Jon Quick (HartRAO) for reporting this.
-
-. [[monx]] Change the flags for the _monX_ programs in _clpgm.ctl_ from `a`
-to `d`.  Since they do not depend on the FS, they can continue
-running after the client is closed.
-
-. [[scnch]] Generalize the _scnch_ window to cover Mark 5 recorders
-(closing https://github.com/nvi-inc/fs/issues/61[#61]).  The _scnch_
-window was initially developed for Mark 6 recorders. The form has now
-been generalized to cover Mark 5 recorders as well.
-
-. [[new_ifdbb]] Add _new_ifdbb_ script for (RDBE) VGOS stations. This script is
-intended as a tool to allow stations, and schedule writers, a way
-to update schedules for changes in the _ifdbb_ procedure used by
-VGOS stations, particularly those with RDBE back-ends. For RDBE
-stations, the attenuation used in the signal chain, which is set
-by the schedule, depends on the observing mode being used and the
-conditions at the station. The provides a way to incorporate
-needed changes into schedules. If the script is run without other
-command line arguments, it will output "`help`" information.
-
-. [[stationrdbemsg]] Remove hard coding of the station name in _rdbemsg_ (closing
-https://github.com/nvi-inc/fs/issues/62[#62]). The station name is now
-set in _rdbemsg.ctlr_ control file. Thanks to Chevo Terraza (MGO) for
-reporting this.
-
-. [[noserver]] Add option to not build the display server into the FS
-(partially closing https://github.com/nvi-inc/fs/issues/76[#76]).  The
-latest version of the server may not _make_ successfully on some
-older Linux distributions such as FSL7. To help users in that
-situation, an option was added to disable inclusion of the server by
-setting the `FS_DISPLAY_SERVER_NO_MAKE` environment variable before
-__make__-ing the FS. Follow the steps below to remove the server.
-
-.. As _prog_:
-
-+
-
-* If you use _tcsh_, add the following to _~/.login_:
-
-  setenv FS_DISPLAY_SERVER_NO_MAKE 1
-
-+
-
-* If you use _bash_, add the following to _~/.profile_:
-
-  export FS_DISPLAY_SERVER_NO_MAKE=1
-
-+
-
-.. Logout of and then back into the _prog_ account before
-__make__-ing the FS.
-
-.. It is also necessary to also make sure that users running the FS do
-not have the `FS_DISPLAY_SERVER` environment variable set.
-
-... As  _oper_:
-
-.... Delete or comment out any lines in the _~/.login_
-file (if using _tcsh_) or _~/.profile_ (if using _bash_) setting
-the variable.
-
-.... Logout and back in before attempting to run the FS.
-
-... Repeat the above steps as _prog_.
-
-. [[updatenotes]] Improve update notes. (These changes were
-made after _beta1_.)
-
-.. The `-q` option was added to
-the `pull` to suppress the detached HEAD warning.
-
-.. A sentence was added to the description of the change to using
-_git_ that it now even more important to not change the contents
-of the _/usr2/fs_ source tree.  Changing the source tree will make
-it harder to install bug fixes and updates.
-
-.. The paths to the example control files now include the needed
-intermediate directory _fs/_.
-
-.. The sub-steps for updating the control files were corrected
-to properly
-depend or not depend on the old version being _9.12.12_.
-
-.. A sub-step was added to make using the FS display server the default.
-
-.. A sub-step was added for updating the _~/.Xresources_ file for _oper_
-and _prog_.
-
-.. A sub-step to update where the `TMOUT` environment variable is unset
-for stations using FSL10 was added.
-
-.. A recommendation was added to sign-up for the _go_ language
-announcements to be informed of security updates if you are
-installing the latest version of _go_ language.
-
-.. Modify steps for updating to a specific commit after _beta2_ to
-use the latest commit instead. As well as being
-simpler, this is part of a new approach to try to keep the update
-notes current with the latest commit. It is important
-to be aware that the latest commit is not a version
-intended for operations. We make every effort to make sure it is
-bug free, but problems may occur. Since it represents the
-"`bleeding edge`" of development, features may not be as stable nor
-use as reliable as released (tagged) versions.
-
-.. Add missing _rdbemsg.ctl_ customization.
-
-. [[adoc]] Reorganize update notes as HTML viewable on the web. (closing
-https://github.com/nvi-inc/fs/issues/71[#71]).
-+
-
-Hopefully, this change will make the update notes easier to read and
-navigate.  Among other improvements, there are clickable links to
-other sections within documents as well as to sections in other
-related documents.
-
-.. Reorganized update notes as _.adoc_ files in the _docs/_
-sub-directory.
-
-.. All of the _.adoc_ files are viewable as HTML, and are hierarchically
-indexed, at https://nvi-inc.github.io/fs/.
-
-.. The first update notes available in HTML are for
-<<beta2.adoc#,10.0.0-beta2>>.
-
-..  <<../../misc/font_conventions.adoc#,Font Conventions>> similar to
-the traditional printed FS manuals are used.
-
-.. Add <<../misc/release_model.adoc#,Release Model>> document  describing
-steps in making a release.
-
-.. Add <<../../misc/env_vars.adoc#,FS Environment Variables>>
-document. This document describes user settable environment variables
-for both _make_ time and runtime.
-
-.. Improve structure and correct some errors from original _.txt_ version.
-.. Make many typo/wording fixes.
-
-. [[logrxg]] Add _.rxg_ file logging to `lo` command.
-
-.. Summary information logging.
-+
-
-When an LO is configured (or monitored) with the `lo` command, a
-summary of information from the matching _.rxg_ file is displayed and
-logged.  Details of the format are available with `help=lo`.  This is
-intended to give the operator feedback that the correct version of the
-_.rxg_ file is in use. The format of these lines may be adjusted in
-future releases based on feedback from users about what is most
-useful.  Thanks to Alastair Gunn (Jodrell Bank) for suggesting this.
-
-.. Full logging of _.rxg_ file non-comment lines.
-+
-
-When an LO is configured with the `lo` command, the contents of the
-corresponding _.rxg_ file are logged, but not displayed. This only
-occurs if this is the first time this _.rxg_ file matched an LO being
-configured since the most recent opening of the current log. After the
-time-tag, each logged line starts with `:rxg_file,` followed by the
-name of the _.rxg_ file, and then the values from a single non-comment
-line in the file. The lines are logged in the order from the _.rxg_
-file. This is intended to provide historical information about the
-values being used in FS calculations.
-
 . [[lohooks]] Add hooks for local LO control to `lo` and `lo_config`
 commands.
 
@@ -1998,12 +1729,172 @@ environment variable `FS_LO_CONFIG_ANTCN_MODE`. The details of the
 interface are available in the `Comments` section shown with
 `help=lo_config`.
 
-. [[skedf.ctl]] Fix example _/usr2/fs/st.default/control.skedf.ctl_
-(closing https://github.com/nvi-inc/fs/issues/81[#81]). The example
-_sked.ctl_ file incorrectly identified the `lo_config` keyword as
-`if_config`. This has been fixed. It is recommended that you check
-and, if needed update your local copy in
-_/usr2/control/skedf.ctl_ appropriately, including the comments.
+. [[clientn]] Make _fsclient_ honor the `-n` flag properly (closing
+https://github.com/nvi-inc/fs/issues/48[#48]). This eliminates opening
+"`double`" windows if _fsclient_ is run with `-n` under an already
+running _fsclient_.
+
+. [[clientnx]] Make _fsclient_ ignore prompt in no-X11 mode (closing
+https://github.com/nvi-inc/fs/issues/49[#49]). If FS client is in
+no-X11 mode, it created a _fs.prompt_ when instructed by the server.
+This change removes that behaviour, though it may cause an issue if no
+other clients exist to dismiss the prompt, see issue
+https://github.com/nvi-inc/fs/issues/49[#49]. If this is a problem for
+anyone's use case we will need a new feature here.
+
+. [[helpsh]] Move X resources for _helpsh_ to _~/.Xresources_. This
+allows the geometry and other parameter of the FS `help` display
+_xterm_ to be controlled locally.
+
+. [[day248]] Always check for "`day 248`" problem in _setcl_ (closing
+https://github.com/nvi-inc/fs/issues/56[#56]).  Previously _setcl_
+only checked for this problem (which is due to use of 32-bit
+arithmetic in the time handling code), if the time model was _not_
+`computer`. In principle, when the model is `computer` there is no
+need to check for this issue.  However, since the time is still
+managed with the same 32-bit arithmetic (to keep it the same on both
+32- and 64-bit systems) as for the non-`computer` models, it is still
+necessary to check.  Not doing so was an oversight. The result was
+that there were no warnings of an impending 248 day time problem if
+the model was `computer`.  This is now fixed.  Thanks to Richard
+Blaauw (WSRT), and subsequently Jon Quick (HartRAO) for reporting
+this.
+
+. [[scnch]] Generalize the _scnch_ window to cover Mark 5 recorders
+(closing https://github.com/nvi-inc/fs/issues/61[#61]).  The _scnch_
+window was initially developed for Mark 6 recorders. The form has now
+been generalized to cover Mark 5 recorders as well.
+
+. [[cont_cal]] Add support for DBBC3 to `if=cont_cal,...` (closing
+https://github.com/nvi-inc/fs/issues/54[#54]).  Thanks to Eskil
+Varenius (Onsala) for reporting that this was missing.
+
+. [[new_ifdbb]] Add _new_ifdbb_ script for (RDBE) VGOS stations. This
+script is intended as a tool to allow stations, and schedule writers,
+a way to update schedules for changes in the _ifdbb_ procedure used by
+VGOS stations, particularly those with RDBE back-ends. For RDBE
+stations, the attenuation used in the signal chain, which is set by
+the schedule, depends on the observing mode being used and the
+conditions at the station. The provides a way to incorporate needed
+changes into schedules. If the script is run without other command
+line arguments, it will output "`help`" information.
+
+. [[prc]] Add checking for a procedure or schedule file before
+attempting to open it (closing
+https://github.com/nvi-inc/fs/issues/45[#45]). This change is to avoid
+accidentally closing an active procedure or schedule file if the new
+one specified in the `proc=...` or `schedule=...` commands,
+respectively, does not exist (or has incorrect permissions).
+Previously, if the files did not exist (or did not have the correct
+permission), the old file would be closed. Thanks to Jon Quick
+(HartRAO) for pointing out this inconsistency.
++
+
+NOTE: The old behavior was partly a consequence of how the original
+file handling worked on HP-RTE systems, but is not sensible for how
+the SNAP commands should work.
++
+
+CAUTION: This is a non-backward compatible change in how the SNAP
+commands behave.  Previously supplying a non-existent procedure or
+schedule file name would cause the closure of the corresponding file.
+Now to close an open procedure or schedule without opening a new one,
+a null parameter must be supplied, i.e., `proc=` or `schedule=`.  As
+before, the latter will not close an open schedule procedure library.
+
+. [[help]] Improve `help` command (includes closing
+https://github.com/nvi-inc/fs/issues/40[#40],
+https://github.com/nvi-inc/fs/issues/3[#3], and
+https://github.com/nvi-inc/fs/issues/75[#75]).
+
+.. Remove usage of `system()` call to find `help` files (closing
+https://github.com/nvi-inc/fs/issues/40[#40] and
+https://github.com/nvi-inc/fs/issues/3[#3]).
+
+.. Improve `help` page for _tpicd_. Made it clearer that when in the
+`no` mode, `data_valid=on` will only start logging of _tpicd_ data
+when a schedule is running and not-blocked.  This behavior was
+inherited from the VGOS branch where accidentally leaving _tpicd_
+logging RDBE multi-cast data after closing a schedule or halting
+it creates a lot of extra log entries. This is probable beneficial
+for all back-ends.
+
+.. Update `help` pages for _onoff_ and _fivpt_.
+
+... Add section on switching between continuous and non-continuous
+cal.
+
+... Remove `if=cont_cal,,` in `calon`/`off`-`nf`/`fp` procedures.
+
+... Add recovery method for misconfigured cal.
+
+.. The `help` file for the `ddbc` command was expanded to also
+describe the `dbbc2` and `dbbc3` commands and now includes a
+description of the output for multi-line responses for all of these
+commands (closing https://github.com/nvi-inc/fs/issues/75[#75]). The
+`help` command now works for the `dbbc2` and `dbbc3` commands.
+
+.. The `help` file for the `fila10g` command was expanded to also
+support the `fila10g2` command. The `help` command now works for the
+`fila10g2` command.
+
+. [[plog]] Improve _plog_.
+
+.. Use of an environment variable `NETRC_DIR` was added to support not
+having the _.netrc_ file in the user's home directory was added.
+Please see `*plog -h*` for details on how to use this.  The same
+variable is used by the _fesh_ script for the same purpose.
++
+
+NOTE: Normally, the _.netrc_  file would be in the user's home
+directory.  However, some systems have security policies that forbid
+that. This variable provides a way to have the _.netrc_ file in a
+different directory, perhaps _/usr2/control_.
+
+.. The internal version number was replaced with the FS version.
+
+. [[popen]] Add _popen_ time-out feature. There is a now a `-t ...`
+time-out option. If the command being run has a time-out feature, it
+is generally better to use that command's feature. See `help=sy` for
+more details.
+
+. [[stationrdbemsg]] Remove hard coding of the station name in
+_rdbemsg_ (closing https://github.com/nvi-inc/fs/issues/62[#62]). The
+station name is now set in _rdbemsg.ctlr_ control file. Thanks to
+Chevo Terraza (MGO) for reporting this.
+
+. [[prc2]] Fix the remaining case of attempting to execute a procedure
+from a closed library causing a crash. There are very few cases in the
+code where a procedure library is closed; one was overlooked. This
+case could happen if the schedule that was opened was named _station_,
+which would lead to the automatic closure of an already open schedule
+procedure library (there cannot be _station_ schedule procedure
+library since _station_ can only be opened once).
+
+. [[year]] Fix year wrap error message in procedure logging (closing
+https://github.com/nvi-inc/fs/issues/23[#23]).  This fixed a benign
+and spurious error message if a log was kept open past the end of the
+year and any procedures that had last been logged in the previous year
+were executed again.  Thanks to Eskil Varenius (Onsala) and Alexander
+Neidhardt (Wettzell) for reporting this.
+
+. [[header_lines]]  Add more log header lines.
+
+.. A log header line was added for `uname()` system information.
+
+.. A log header line was added for the compile time value of the `FC`
+environment variable.
+
+. [[holog]] Improve _holog/MASK_.
+
+.. The elevation spacing was corrected for the example in step (3)
+of _mask-HOWTO.txt_.
+
+.. Axis titles were added to _plot_mask.m_.
+
+. [[monx]] Change the flags for the _monX_ programs in _clpgm.ctl_
+from `a` to `d`.  Since they do not depend on the FS, they can
+continue running after the client is closed.
 
 . [[saterrors]] Fix ignoring _antcn_ errors in the `satellite` and
 `satoff` commands. (closing
@@ -2011,13 +1902,205 @@ https://github.com/nvi-inc/fs/issues/82[#82]). This bug caused errors
 from _antcn_ to be ignored for _only_ these commands. It has been
 fixed.
 
-. [[serverbuild]] Modified the display server build so that it will
+. [[cls_chk]] Eliminate `cls_chk` error from `inject_snap -w ...`
+command when an error occurs (partly closing
+https://github.com/nvi-inc/fs/issues/50[#50]). This was caused by
+_inject_snap_ not implementing the new linkage that was added for
+_fserr_. This is covered in issue
+https://github.com/nvi-inc/fs/issues/50[#50]. To correctly retrieve
+the error message would have required making a new interface to
+_fserr_ or subsuming it into library routine that both _ddout_ and
+_inject_snap_ could use. It was not possible to do either in the
+available time. Instead _inject_snap_ was modified to output the error
+without the message, but pointing out that the message can be found in
+the log and display. Thanks to Dave Horsley (Hobart) for reporting
+this.
+
+. [[fixmess]] Fix some error messages (includes closing
+https://github.com/nvi-inc/fs/issues/43[#43] &
+https://github.com/nvi-inc/fs/issues/22[#22]).
+
+.. Fixed errors in _control/fserr.ctl_.  Errors in some double
+double-quote (`""`) lines and some incorrectly reused error codes were
+fixed (closing https://github.com/nvi-inc/fs/issues/43[#43]).  Thanks
+to Alexander Neidhardt (Wettzell) for reporting these.
+
+.. The error messages for a error not being found when attempting to
+manipulate its display setting were clarified (closing
+https://github.com/nvi-inc/fs/issues/22[#22]).  Thanks to Jon Quick
+(HartRAO) for reporting this.
+
+.. Error messages that should refer to the (not yet implemented)
+`active_rdbes` and `active_mk6s` commands were corrected to no longer
+incorrectly refer to the `rdbe_active` and `mk5_active` commands,
+respectively.
+
+.. Obsolete errors for the, no longer used, _sw.ctl_ control file were
+removed.
+
+. [[dbbcn]] Improve error logging for _dbbcn_ initialization. The
+instance of the program is now correctly reported. It could be _dbbcn_
+or _dbbc2_.
+
+. [[skedf.ctl]] Fix example _/usr2/fs/st.default/control.skedf.ctl_
+(closing https://github.com/nvi-inc/fs/issues/81[#81]). The example
+_sked.ctl_ file incorrectly identified the `lo_config` keyword as
+`if_config`. This has been fixed. It is recommended that you check
+and, if needed update your local copy in _/usr2/control/skedf.ctl_
+appropriately, including the comments.
+
+. [[makefile]] The FS uses a new _Makefile_ scheme. This is
+accomplished by including the _/usr2/fs/include.mk_ file in every
+Makefile except for _drudg_ and its libraries. The scheme is
+"`opt-in`" so it is not necessary for every program or station
+programs to participate. Within the FS source tree, only _drudg_ and
+its libraries don't use it.  An explanation of the new scheme is
+provided in _/usr2/fs/misc/fs10_makefile.md_.
+
+. [[noserver]] Add option to not build the display server into the FS
+(partially closing https://github.com/nvi-inc/fs/issues/76[#76]).  The
+latest version of the server may not _make_ successfully on some older
+Linux distributions such as FSL7. To help users in that situation, an
+option was added to disable inclusion of the server by setting the
+`FS_DISPLAY_SERVER_NO_MAKE` environment variable before __make__-ing
+the FS. Follow the steps below to remove the server.
+
+.. As _prog_:
+
++
+
+* If you use _tcsh_, add the following to _~/.login_:
+
+  setenv FS_DISPLAY_SERVER_NO_MAKE 1
+
++
+
+* If you use _bash_, add the following to _~/.profile_:
+
+  export FS_DISPLAY_SERVER_NO_MAKE=1
+
++
+
+.. Logout of and then back into the _prog_ account before
+__make__-ing the FS.
+
+.. It is also necessary to also make sure that users running the FS do
+not have the `FS_DISPLAY_SERVER` environment variable set.
+
+... As  _oper_:
+
+.... Delete or comment out any lines in the _~/.login_
+file (if using _tcsh_) or _~/.profile_ (if using _bash_) setting
+the variable.
+
+.... Logout and back in before attempting to run the FS.
+
+... Repeat the above steps as _prog_.
+
+. [[symlinks]] No longer set _/usr2/fs_ and _/usr2/st_ to be owned by
+_prog_. This was a long standing but benign error in the
+_misc/fsinstall_ script.
+
+. [[serverbuild]] Modify the display server build so that it will
 work for FSL8 (closing https://github.com/nvi-inc/fs/issues/78[#78],
 and re-closing https://github.com/nvi-inc/fs/issues/76[#76]). (The
-change that prevented it from building on FSL8 was introduced in _beta2_ and
-fixed in _beta3_.) Thanks to Jon Quick (HartRAO) for special effort on
-this including adding documentation to assist with future upgrades of
-_nng_.
+change that prevented it from building on FSL8 was introduced in
+_beta2_ and fixed in _beta3_.) Thanks to Jon Quick (HartRAO) for
+special effort on this including adding documentation to assist with
+future upgrades of _nng_.
+
+. [[if]] Restore `if` command. (It had accidentally been overlooked in
+the merge of the VGOS and main branched. It was first missing in
+_beta1_ and was restored in _beta2_.) Thanks to Beppe Maccaferri
+(Medicina) for reporting this.
+
+. [[gnpltfsl8]] Make _gnplt_ work on FSL8 (_Lenny_) again (closing
+https://github.com/nvi-inc/fs/issues/73[#73]).  Some recent
+improvements in _gnplt_ made it fail for FSL8. (These errros were
+introduced in _beta1_ and fixed in _beta3_.)
+
+. [[onoff]] Fix _onoff_ for the DBBC3 rack (closing
+https://github.com/nvi-inc/fs/issues/52[#52]). A code block from
+_9.12.13_ in _onoff/get_samples.c_ had been omitted in the merge,
+preventing sampling of the TPI values and causing _onoff_ to crash.
+(This error was introduced in _beta1_ and fixed in _beta2_.) Thanks to
+Eskil Varenius (Onsala) for reporting that this caused a crash.
+
+. [[dbbc3help]] Restore `help` command for DBBC3 commands. (The
+selection of DBBC3 specific `help` commands was lost in _beta1_ from
+the merge of VGOS and main.  branches.  It was restored in _beta3_).
+
+. [[equip.ctl]] Update example _equip.ctl_ for DBBC3 (includes closing
+https://github.com/nvi-inc/fs/issues/35[#35]).
+
+.. The example DBBC3 firmware version is now more sensible (closing
+https://github.com/nvi-inc/fs/issues/35[#35]). (This error was
+introduced in _beta1_ and fixed in _beta2_.) Thanks to Eskil Varenius
+(Onsala) for reporting this.
+
+.. The minimum DBBC3 firmware version required was added in a comment.
+
+. [[gpl]] Update GPL in files. The GPL header was added to the
+_holog/MASK/\*.m_, _misc/mk6in/*_, and the _include/*.i_ files. It was
+removed from the _fserver/tests/convey.*_ files. (The GPL was left out
+of these files in _beta1_. They were corrected in _beta2_ and _beta3_.)
+
+. [[bash]] Fixes to _~/.bashrc_ for FSL10.  (This changed from _beta1_
+to  _beta2_.)
+
+.. Move unsetting of `TMOUT` environment variable for _oper_ to
+_~/.bashrc_ in the default files. This allows all interactive shells
+to disable the time-out.
+
+.. Additionally, some settings were rearranged in _~/.bashrc_ to make
+them only apply to interactive shells for _oper_, _prog_, and AUID
+accounts.
+
++
+
+These changes are only relevant for stations using FSL10.
+
+. [[updatenotes]] Improve update notes. (These changes were
+made after _beta1_.)
+
+.. The `-q` option was added to
+the `pull` to suppress the detached HEAD warning.
+
+.. A sentence was added to the description of the change to using
+_git_ that it now even more important to not change the contents
+of the _/usr2/fs_ source tree.  Changing the source tree will make
+it harder to install bug fixes and updates.
+
+.. The paths to the example control files now include the needed
+intermediate directory _fs/_.
+
+.. The sub-steps for updating the control files were corrected
+to properly
+depend or not depend on the old version being _9.12.12_.
+
+.. A sub-step was added to make using the FS display server the default.
+
+.. A sub-step was added for updating the _~/.Xresources_ file for _oper_
+and _prog_.
+
+.. A sub-step to update where the `TMOUT` environment variable is unset
+for stations using FSL10 was added.
+
+.. A recommendation was added to sign-up for the _go_ language
+announcements to be informed of security updates if you are
+installing the latest version of _go_ language.
+
+.. Modify steps for updating to a specific commit after _beta2_ to
+use the latest commit instead. As well as being
+simpler, this is part of a new approach to try to keep the update
+notes current with the latest commit. It is important
+to be aware that the latest commit is not a version
+intended for operations. We make every effort to make sure it is
+bug free, but problems may occur. Since it represents the
+"`bleeding edge`" of development, features may not be as stable nor
+use as reliable as released (tagged) versions.
+
+.. Add missing _rdbemsg.ctl_ customization.
 
 ==== Changes relative to the main branch
 
