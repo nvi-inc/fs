@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta1 to FS 10.0.0-beta2 Update Notes
-Version 0.5 - November 2020
+Version 0.6 - November 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -83,24 +83,24 @@ The remaining steps assume you are logged in as _oper_.
 === Update control files
 
 . If your old version before the _beta1_ update was _9.12.12_, you
-should review the sub-steps in the <<beta2.adoc#\_update_control_files,Update control files>>
+should review the sub-steps in the <<beta2.adoc#_update_control_files,Update control files>>
 step of the <<beta2.adoc#,beta2 update notes>> document. In particular,
-there were two changes from the _beta1_ version to review:
+there were two changes from the __beta1__ version to review:
 
-.. In the _beta1_ version of the now _corrected_ <<beta2.adoc#\_copy_control_files,Copy control files>>
-sub-step in the <<beta2.adoc#,beta2 update notes>> document, your _clpgm.ctl_ file may have been
+.. In the _beta1_ version of the now _corrected_ <<beta2.adoc#_copy_control_files,Copy control files>>
+sub-step in the <<beta2.adoc#,beta2 update notes>> document, your __clpgm.ctl__ file may have been
 needlessly overwritten. We think is is unlikely that any local
 customizations were lost, but if they were, we apologize. Hopefully
 you made a backup before trying the update. In which case, you should
 be able to recover the file from the backup. Otherwise, hopefully the
-changes needed are small. Additional changes to _clpgm.ctl_ are
+changes needed are small. Additional changes to __clpgm.ctl__ are
 covered farther below.
 
-.. In the _beta1_ version of the now _corrected_ <<beta2.adoc#\_update_equip_ctl,Update equip.ctl>>
+.. In the _beta1_ version of the now _corrected_ <<beta2.adoc#_update_equip_ctl,Update equip.ctl>>
 sub-step in the <<beta2.adoc#,beta2 update notes>> document,
 you may have ended up with extra lines
-at the end of _equip.ctl_ because in the
-_beta1_ installation instruction, the FiLa10G input
+at the end of __equip.ctl__ because in the
+__beta1__ installation instruction, the FiLa10G input
 select lines (including the comment line) were added
 after the DBBC3 configuration lines (including the
 comment line) and extra DBBC3 configuration lines were
@@ -147,16 +147,16 @@ _rdbemsg_ utility to send operations messages, please
 customize your _/usr2/control/rdbemsg.ctl_ control file.
 In particular, you should add the _station_ line to the
 file.  Full instructions are provided in the
-<<beta2.adoc#\_update_rdbemsg_ctl,Update rdbemsg.ctl>>
+<<beta2.adoc#_update_rdbemsg_ctl,Update rdbemsg.ctl>>
 sub-step of the <<beta2.adoc#,beta2 update notes>> document.
-which is a new sub-step since _beta1_.
+which is a new sub-step since __beta1__.
 +
 
-NOTE: The instructions it <<beta2.adoc#\_update_rdbemsg_ctl,Update rdbemsg,ctl>>
+NOTE: The instructions it <<beta2.adoc#_update_rdbemsg_ctl,Update rdbemsg,ctl>>
 sub-step also include setting
-the `name` line in _rdbemsg.ctl_. That setting is not available as of
-_beta2_; it is provided in a later update. However, setting it for
-_beta2_ is benign and forward compatible.
+the `name` line in __rdbemsg.ctl__. That setting is not available as of
+__beta2__; it is provided in a later update. However, setting it for
+__beta2__ is benign and forward compatible.
 
 === Update .prc files from 10.0.0-beta1
 
@@ -170,19 +170,19 @@ sub-step of the <<beta2.adoc#,beta2 update notes>> document.
 === Other updates
 
 . Please review the
-<<beta2.adoc#\_set_fs_display_server,Set FS_DISPLAY_SERVER>>
+<<beta2.adoc#_set_fs_display_server,Set FS_DISPLAY_SERVER>>
 sub-step of the <<beta2.adoc#,beta2 update notes>> document.
 This sub-step did not exist for the
-_beta1_ release.  It contains information about making use
+__beta1__ release.  It contains information about making use
 of the display server the default, which is strongly
 recommended.
 
 . Please review the 
-<<beta2.adoc#\_update_xresources,Update .Xresources>>
+<<beta2.adoc#_update_xresources,Update .Xresources>>
 sub-step of the <<beta2.adoc#,beta2 update notes>> document.
 This sub-step did not exist for the
-_beta1_ release.  It contains information about updates
-needed to the _~/.Xresources_ files for _oper_ and _prog_.
+__beta1__ release.  It contains information about updates
+needed to the __~/.Xresources__ files for __oper__ and __prog__.
 Please follow those directions.
 
 . If you have installed the _beta1_ as part of installing
@@ -208,10 +208,10 @@ accounts if you are using those).
 
 . If you updated to a 64-bit platform and installed the _go_
 language as part of that, according the
-<<64-bit_conversion.adoc#\_option_b_installing_latest_go_language,Option B - Installing latest go language>>
-sub-step of the <<64-bit_conversion.adoc#,Converting to a 64-bit system>> document,
+<<../../misc/64-bit_conversion.adoc#_option_b_installing_latest_go_language,Option B - Installing latest go language>>
+sub-step of the <<../../misc/64-bit_conversion.adoc#,Converting to a 64-bit system>> document,
 then
-you should register for _golang_ announcements as is now
+you should register for __golang__ announcements as is now
 described in that sub-step.
 
 === Review other changes

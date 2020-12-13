@@ -74,11 +74,14 @@ The monitor form of lo shows all defined LO values.
 The 'lo/rxg,...' line is displayed for each LO as it is set
 (commanded) and for each LO in monitor responses. This is intended to
 give the operator feedback to verify that the correct version of the
-'.rxg' file is in use. Additionally, when an LO is set, the contents
-of the '.rxg' file are logged, but not displayed, in lines starting
-with ':rxg_file,'. After a log is opened, the contents for a given
-'.rxg' file are only logged the first time a matching LO frequency is
-set.
+'.rxg' file is in use. The format of these lines may be adjusted in
+future releases based on feedback from users about what is most
+useful.
+
+Additionally, when an LO is set, the contents of the '.rxg' file are
+logged, but not displayed, in lines starting with ':rxg_file,'. After
+a log is opened, the contents for a given '.rxg' file are only logged
+the first time a matching LO frequency is set.
 
 The 'FS_LO_ANTCN_MODE' environment variable can be set to trigger
 running antcn in the specified local mode (greater than 99) to
