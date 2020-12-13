@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta3 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.4 - December 2020
+Version 0.5 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -68,7 +68,7 @@ older systems, such as FSL7.
 
 There are also instructions for transitioning to a 64-bit system,
 which may require some relatively simple changes to station software.
-See the <<../../misc/64-bit_conversion.adoc#,64-bit conversion>>
+See the <<../../misc/64-bit_conversion.adoc#,Converting to a 64-bit System>>
 document for more details. Also see the *TIP* in
 <<Upgrading from an FS9 version>>.
 
@@ -155,21 +155,21 @@ This section provides links to some other useful documents.
 
 === Other update documents
 
-* Upgrading from <<beta3_to_latest.adoc#,beta3 to the latest commit>>.
+* <<beta3_to_latest.adoc#,FS 10.0.0-beta3 to Latest Commit Update Notes>>
 
-* Upgrading from <<beta2_to_beta3.adoc#,beta2 to beta3>>.
+* <<beta2_to_beta3.adoc#,FS 10.0.0-beta2 to FS 10.0.0-beta3 Update Notes>>
 
-* Upgrading from <<beta2.adoc#,FS9 to beta2>>.
+* <<beta2.adoc#,FS 10.0.0-beta2 Update Notes>>
 
-* Upgrading from <<beta1_to_beta2.adoc#,beta1 to beta2>>.
+* <<beta1_to_beta2.adoc#,FS 10.0.0-beta1 to FS 10.0.0-beta2 Update Notes>>
 
-* Upgrading from https://raw.githubusercontent.com/nvi-inc/fs/259e203330fff145dba5ea6b2f48c8bcd23b4333/misc/fs10.0.0up.txt[FS9 to beta1].
+* https://raw.githubusercontent.com/nvi-inc/fs/259e203330fff145dba5ea6b2f48c8bcd23b4333/misc/fs10.0.0up.txt[FS 10.0.0 Beta[1\] Update Notice]
 
 === Miscellaneous documents
 
-* <<../misc/known_bugs.adoc#,Known bugs>> document with the known bugs list from FS9.
+* <<../misc/known_bugs.adoc#,Known Bugs>> document with the known bugs list from FS9.
 
-* <<../misc/install_reference.adoc#,Installation reference>> document with other useful install
+* <<../misc/install_reference.adoc#,Installation Reference>> document with other useful install
 information is available.  It includes eight sub-sections:
 
 
@@ -206,7 +206,7 @@ version older than version _9.13.2_ you should upgrade to _9.13.2_
 first, please refer to the
 <<../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
 section in the
-<<../misc/install_reference.adoc#,Installation reference>> document
+<<../misc/install_reference.adoc#,Installation Reference>> document
 for more information.
 
 . Upgrading from a VGOS branch version.  The VGOS branch versions
@@ -232,7 +232,7 @@ testing for your station software.  The instructions for combining the
 FS and 64-bit upgrade are:
 
 . Follow the steps in the
-<<../../misc/64-bit_conversion.adoc#,64-bit Conversion>> document 
+<<../../misc/64-bit_conversion.adoc#,Converting to a 64-bit System>> document
 down to the 
 <<../../misc/64-bit_conversion.adoc#_make_local_software,Make local software>>
 step. Instead of following that step, return to the next step in this *TIP*.
@@ -262,7 +262,7 @@ will allow you to continue operations in case something goes
 wrong with the installation.  For more details, please see the
 <<../misc/install_reference.adoc#_making_a_back_up_before_installing,Making a back-up before installing>>
 section in the
-<<../misc/install_reference.adoc#,Installation reference>> document.
+<<../misc/install_reference.adoc#,Installation Reference>> document.
 
 NOTE: If you are using FSL10 with a RAID, that sub-section points you to the
 improved backup and test procedure that is available with
@@ -329,7 +329,7 @@ can cause errors during FS operations.  For a full discussion,
 please refer to the
 <<../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
 section of the
-<<../misc/install_reference.adoc#,Installation reference>> document.
+<<../misc/install_reference.adoc#,Installation Reference>> document.
 For stations where all the operational files are
 expected to owned by user __oper__ in group __rtx__, with permissions
 `ug+rw,o+r,o-w`, the following command will enforce this (note
@@ -377,9 +377,10 @@ for _bash_.
 NOTE: If you are using sn old distribution that is not compatible with
 the latest update of the server, you can still use the FS without the
 server by removing it from the _make_ process. If building the server
-fails, Please follow the steps in <<noserver, not building the display
-server>>. Please email Ed about needing to do this or if you still
-can't build the FS.
+fails, Please follow the steps in the description of
+<<noserver, not building the display server>>.
+Please email Ed about needing to do this or if you still can't
+build the FS.
 
           cd /usr2/fs
           make >& /dev/null
@@ -458,7 +459,7 @@ have questions about which to use and how to do it, please email Ed.
 . If you have a local (station) `lo` command, you will need to update
 it (or replace it, see the next paragraph) to get full support for
 rack types that were not in your previous FS9 version and implement
-the new capability described in <<logrxg,logging _.rxg_ files>>
+the new capability described in <<logrxg,logging .rxg files>>
 below.
 +
 
@@ -998,8 +999,8 @@ should be able to get one by selecting `REGISTER` at:
 https://urs.earthdata.nasa.gov/.
 
 Please see `*fesh -h*` for more information on using these features.
-A more complete description of the changes to _fesh_ is included in
-the current document at <<fesh,details>>.
+A more complete description is available in <<fesh,changes to fesh>>
+below.
 
 === Miscellaneous FSLx changes
 
@@ -1205,8 +1206,6 @@ closing https://github.com/nvi-inc/fs/issues/76[#76]).
 . No longer set _/usr2/fs_ and _/usr2/st_ to be owned by _prog_.
 <<symlinks,More details>>.
 
-. Update example _equip.ctl_ for DBBC3 (includes closing https://github.com/nvi-inc/fs/issues/35[#35]). <<equip.ctl,More details>>.
-
 . Modify the display server build so that it will work for FSL8
 (closing https://github.com/nvi-inc/fs/issues/78[#78], and re-closing
 https://github.com/nvi-inc/fs/issues/76[#76]).
@@ -1224,9 +1223,13 @@ https://github.com/nvi-inc/fs/issues/52[#52]). <<onoff,More details>>.
 . Restore `help` command for DBBC3 commands.
 <<dbbc3help,More details>>.
 
-. Update GPL in files. <<gpl,More details>>.
+. Update example _equip.ctl_ for DBBC3 (includes closing
+https://github.com/nvi-inc/fs/issues/35[#35]).
+<<equip.ctl,More details>>.
 
 . Fixes to _~/.bashrc_ for FSL10.  <<bash,More details>>.
+
+. Update GPL in files. <<gpl,More details>>.
 
 . Improve update notes. <<updatenotes,More details>>.
 
@@ -1501,7 +1504,6 @@ recovery.
 . [[gnplt]] Improve _gnplt_ (closing
 https://github.com/nvi-inc/fs/issues/51[#51] and
 https://github.com/nvi-inc/fs/issues/72[#72]).
-<<gnplt,More details>>.
 
 .. Fix labels in _gnplt_ windows that display the gain curve
 coefficients (closing https://github.com/nvi-inc/fs/issues/51[#51]).
@@ -1906,7 +1908,7 @@ fixed.
 command when an error occurs (partly closing
 https://github.com/nvi-inc/fs/issues/50[#50]). This was caused by
 _inject_snap_ not implementing the new linkage that was added for
-_fserr_. This is covered in issue
+_fserr_. This is covered in more detail in issue
 https://github.com/nvi-inc/fs/issues/50[#50]. To correctly retrieve
 the error message would have required making a new interface to
 _fserr_ or subsuming it into library routine that both _ddout_ and
@@ -2040,13 +2042,13 @@ introduced in _beta1_ and fixed in _beta2_.) Thanks to Eskil Varenius
 
 .. The minimum DBBC3 firmware version required was added in a comment.
 
+. [[bash]] Fixes to _~/.bashrc_ for FSL10.  (This changed from _beta1_
+to  _beta2_.)
+
 . [[gpl]] Update GPL in files. The GPL header was added to the
 _holog/MASK/\*.m_, _misc/mk6in/*_, and the _include/*.i_ files. It was
 removed from the _fserver/tests/convey.*_ files. (The GPL was left out
 of these files in _beta1_. They were corrected in _beta2_ and _beta3_.)
-
-. [[bash]] Fixes to _~/.bashrc_ for FSL10.  (This changed from _beta1_
-to  _beta2_.)
 
 .. Move unsetting of `TMOUT` environment variable for _oper_ to
 _~/.bashrc_ in the default files. This allows all interactive shells
