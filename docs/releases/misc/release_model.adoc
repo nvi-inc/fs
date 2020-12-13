@@ -19,7 +19,7 @@
 //
 
 = Strawman Release Model
-Version 0.3 - November 2020
+Version 0.4 - December 2020
 
 :sectnums:
 
@@ -224,6 +224,11 @@ Final commit message: ``**Finalize** _tag_``
 . ``**git push**``
 . ``**git tag** __tag__``
 . ``**git push --tags**``
+. Change to the _docs/_ sub-directory
+. Generate and push the _.html_ files to the _gh-pages_ branch on _github_.
++
+Directions are in _making_gh-pages.txt_.
+
 . On the github page for the repo, select `release`
 . Select `Draft a new release`
 . Enter version string as an existing tag and select branch
@@ -234,8 +239,6 @@ Do not include `*pre-release*` or the version `_tag_` in `Title` since they
 are automatically prepended to the announcement email.
 . If not for production, select `This is a pre-release`
 . Select `Publish Release`
-. Change to the _docs/_ sub-directory 
-. Generate and push the _.html_ files to the _gh-pages_ branch on _github_.
 
 == Installation 
 
