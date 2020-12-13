@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta3 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.3 - December 2020
+Version 0.4 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -327,7 +327,7 @@ Having the wrong ownership and/or permissions on the operational
 files (procedure libraries, control files, schedules, and logs)
 can cause errors during FS operations.  For a full discussion,
 please refer to the
-<<../misc/install_reference.adoc#\_set_operations_file_permissions,Set operations file permissions>>
+<<../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
 section of the
 <<../misc/install_reference.adoc#,Installation reference>> document.
 For stations where all the operational files are

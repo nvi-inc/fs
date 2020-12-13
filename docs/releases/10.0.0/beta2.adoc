@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.3 - December 2020
+Version 1.4 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -317,13 +317,13 @@ Having the wrong ownership and/or permissions on the operational
 files (procedure libraries, control files, schedules, and logs)
 can cause errors during FS operations.  For a full discussion,
 please refer to the
-<<../misc/install_reference.adoc#\_set_operations_file_permissions,Set operations file permissions>>
+<<../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
 section of the
 <<../misc/install_reference.adoc#,Installation reference>> document.
 For stations where all the operational files are
-expected to owned by user _oper_ in group _rtx_, with permissions
+expected to owned by user __oper__ in group __rtx__, with permissions
 `ug+rw,o+r,o-w`, the following command will enforce this (note
-that the _execute_/_search_ bits are not changed):
+that the __execute__/__search__ bits are not changed):
 
        /usr2/fs/misc/fix_perm
 

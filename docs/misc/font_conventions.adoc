@@ -19,7 +19,7 @@
 //
 
 = DRAFT FS Document Font Conventions
-Version 0.2 - November 2020
+Version 0.3 - December 2020
 
 :sectnums:
 
@@ -170,3 +170,37 @@ Suggestion:
 . Step
 . Another step
 ====
+
+== Workarounds
+
+This section covers some ad hoc workarounds for issues with _asciidoctor_.
+
+=== Effect of references to sections in other documents on italics
+
+In some cases a reference to a section header in a different document, e.g.,:
+
+  <<beta2.adoc#_update_control_files,Update control files>>
+
+may fail to link properly if there are italicized words (implemented
+as single underscores on each side of the word) later in the same
+paragraph.
+
+There are two possible fixes. The first is preferred.
+
+. Change the single underscores around all the following words to be
+italicized in the same paragraph to be double underscores.
++
+
+This treats them as _characters_ to be italicized, which is
+syntactically correct, if somewhat typographically redundant. This is
+the preferred approach since it stays within the normal syntax.
+
+. Change the `\#\_` in the reference to `#\_`.
++
+
+While more compact typographically, this is not preferred because it
+is outside the normal syntax. And although it fixes the link, single
+underscores for italics will then not work for words that follow in
+that paragraph.
+
+See also: https://github.com/asciidoctor/asciidoctor/issues/3278
