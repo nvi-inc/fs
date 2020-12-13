@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta3 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.5 - December 2020
+Version 0.6 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -238,20 +238,22 @@ down to the
 step. Instead of following that step, return to the next step in this *TIP*.
 +
 
-Following the, current, step above will result in a base FS10
-installation on a 64-bit system with your local software, control
-files, and procedure files from your FS9 32-bit system. That is an
-inconsistent configuration, which will not work properly. The local
-software will have been updated for 64-bit, but not tested. Your local
-software and other local files need to be updated for _10.0.0_, which
-is covered in the next step.
+NOTE: After completing this step, you will have a base
+FS10 installation on a 64-bit system with your local software (updated
+for 64-bit), control files, and procedure files from your FS9 32-bit
+system. That is an inconsistent configuration that will not work
+properly.  Your local software and other local files need to be
+updated for _10.0.0_, which is covered in the next step in this *TIP*.
 
 . To update your local software and other local files for _10.0.0_,
-follow the instructions in this document, beginning with the
+follow the instructions beginning with the
 <<Case sensitive strings in antenna= commands>>
 sub-step below and continue with the remaining sub-steps and steps.
+
 +
-When you get to the <<Test the FS>> sub-step, you may need to debug your station software.
+
+When you get to the <<Test the FS>> sub-step, you may need to debug
+your, 64-bit converted, station software.
 
 ====
 
