@@ -43,12 +43,10 @@ void log_rxgfile(lo)
     if(ir<0)
         return;
     
-    if (0==strncmp(shm_addr->LLOG,shm_addr->rxgain_files[ir].log,
-                sizeof(shm_addr->LLOG)))
+    if (shm_addr->rxgain_files[ir].logged)
         return;
-
-    strncpy(shm_addr->rxgain_files[ir].log,shm_addr->LLOG,
-                sizeof(shm_addr->LLOG));
+    else
+        shm_addr->rxgain_files[ir].logged=TRUE;
 
     strcpy(output,"rxg_file,");
     strcat(output,shm_addr->rxgain_files[ir].file);
@@ -228,7 +226,6 @@ void clear_rxgain_files_log()
     int i;
 
     for (i=0;i<MAX_RXGAIN;i++)
-    strncpy(shm_addr->rxgain_files[i].log,"        ",
-                sizeof(shm_addr->LLOG));
+        shm_addr->rxgain_files[i].logged=FALSE;
 
 }

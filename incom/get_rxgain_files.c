@@ -59,7 +59,7 @@ void get_rxgain_files(ierr)
     if(*ierr==0) {
         if(strlen(outbuf)-dirlen<-1+sizeof(((struct rxgain_files_ds *) 0)->file)) {
             strcpy(shm_addr->rxgain_files[icount].file,outbuf+dirlen);
-            shm_addr->rxgain_files[icount].log[0]=0;
+            shm_addr->rxgain_files[icount].logged=FALSE;;
         } else
             *ierr=-996;
     }

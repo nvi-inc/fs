@@ -62,5 +62,5 @@ struct rxgain_ds {
 
 struct rxgain_files_ds {
     char file[129];
-    char log[8];
+    int logged;
 };
