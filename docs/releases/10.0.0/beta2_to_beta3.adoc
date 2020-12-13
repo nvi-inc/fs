@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta2 to FS 10.0.0-beta3 Update Notes
-Version 1.4 - December 2020
+Version 1.5 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -32,33 +32,20 @@ Version 1.4 - December 2020
 == Introduction
 
 The document covers updating from the _beta2_ pre-release to the
-_latest commit_ on its branch. The latest commit is somewhat
-experimental. We make ever effort to keep the latest commit usable.
-However commits that are not tagged for release are not intended for
-operations.
+_beta3_ pre-release. Before the _beta3_ release, the contents of this
+document covered updating from _beta2_ to the latest commit.
 
-CAUTION: It is expected that those using the latest commit are experts
-and will manage the differences for updating to the next official
-release themselves. No specific documentation will be provided. What
-commit you had last updated to will determine what needs to be done. A
-reasonable approach would be to review the update steps in the new
-release to make sure everything has been covered. Alternatively, it might
-work to verify that all the steps in the latest version of this
-document were completed.
+== Upgrading from 10.0.0-beta2 to 10.0.0-beta3
 
-This document is up to date with commit
-https://github.com/nvi-inc/fs/commit/8e18f8edd851c175ab3d80044eef13f2b24b1392[8e18f8ed].
-Due to small increments, such as adding this document, this may not be
-the literal last commit, but the differences should be small unless
-you happen to `fetch` between a significant change and this document
-being updated.
+You must have already upgraded to the <<beta2.adoc#,10.0.0-beta2>>
+release to use the instructions in this document.
 
-== Upgrading from 10.0.0-beta2 to the latest commit
+For instructions for other upgrade paths, see the
+<<beta3.adoc#_other_update_documents,Other update documents>>
+sub-section of the
+<<beta3.adoc#,FS 10.0.0-beta3 Update Notes>> document.
 
-You must have already upgraded to the <<beta2.adoc,10.0.0-beta2>>
-release before installing this update.
-
-=== Fetch and make the latest commit
+=== Fetch and make 10.0.0-beta3
 
 NOTE: If you are using FSL7 or other old distribution that may not be
 compatible with the latest update of the server, you may still be able
@@ -71,7 +58,7 @@ execute:
 
              cd /usr2/fs-git
              git fetch
-             git checkout master
+             git checkout -q 10.0.0-beta3
              make -s
 
 === Additional steps
