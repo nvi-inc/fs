@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.4 - December 2020
+Version 1.5 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -34,7 +34,8 @@ Version 1.4 - December 2020
 
 CAUTION: The _beta2_ pre-release of the  FS does not _make_ on older
 Linux distributions such as FSL8. The _beta1_ pre-release does _make_
-on FSL8. There is a work-around in _beta3_.
+on FSL8. This is fixed for FSL8 in _beta3_, which also has a
+workaround for even older distributions.
 
 This update is intended as a test version for all stations using the
 FS. This includes both stations using the main (non-VGOS) branch
@@ -180,7 +181,8 @@ operational system before upgrading.
 
 CAUTION: The _beta2_ pre-release of the  FS does not _make_ on older
 Linux distributions such as FSL8. The _beta1_ pre-release does _make_
-on FSL8. There is a work-around in _beta3_.
+on FSL8. This is fixed for FSL8 in _beta3_, which also has a
+workaround for even older distributions.
 
 This section covers upgrading from FS9, which was always 32-bit only,
 to _10.0.0-beta2_. It is assumed you are upgrading on a 32-bit system.
@@ -366,7 +368,8 @@ for _bash_.
 
 CAUTION: The _beta2_ pre-release of the  FS does not _make_ on older
 Linux distributions such as FSL8. The _beta1_ pre-release does _make_
-on FSL8. There is a work-around in _beta3_.
+on FSL8. This is fixed for FSL8 in _beta3_, which also has a
+workaround for even older distributions.
 
           cd /usr2/fs
           make >& /dev/null

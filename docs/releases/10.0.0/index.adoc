@@ -19,14 +19,14 @@
 //
 
 = Index of fs/releases/10.0.0/
-Version 0.4 - December 2020
-
-<<beta3.adoc#,FS 10.0.0-beta3 Update Notes>> (latest pre-release)
-
-<<beta2.adoc#,FS 10.0.0-beta2 Update Notes>> (old)
+Version 0.5 - December 2020
 
 <<beta3_to_latest.adoc#,FS 10.0,0-beta3 to the Latest Commit Update Notes>>
 
-<<beta2_to_latest.adoc#,FS 10.0,0-beta2 to FS-10.0.0-beta3 Update Notes>>
+<<beta3.adoc#,FS 10.0.0-beta3 Update Notes>> (latest pre-release)
+
+<<beta2_to_beta3.adoc#,FS 10.0,0-beta2 to FS-10.0.0-beta3 Update Notes>>
+
+<<beta2.adoc#,FS 10.0.0-beta2 Update Notes>> (old)
 
 <<beta1_to_beta2.adoc#,FS 10.0.0-beta1 to FS 10.0.0-beta2 Update Notes>>

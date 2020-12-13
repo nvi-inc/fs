@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta3 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.6 - December 2020
+Version 0.7 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -376,13 +376,13 @@ for _bash_.
 
 === Make the FS
 
-NOTE: If you are using sn old distribution that is not compatible with
+TIP: If you are using an old distribution that is not compatible with
 the latest update of the server, you can still use the FS without the
-server by removing it from the _make_ process. If building the server
-fails, Please follow the steps in the description of
-<<noserver, not building the display server>>.
-Please email Ed about needing to do this or if you still can't
-build the FS.
+server by removing it from the _make_ process. If your first attempt
+to build the FS fails because of the server (most likely for
+_third_party/_), Please follow the steps in the description of
+<<noserver, not building the display server>>.  Please email Ed about
+needing to do this or if you still can't build the FS.
 
           cd /usr2/fs
           make >& /dev/null

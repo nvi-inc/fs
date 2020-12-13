@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta1 to FS 10.0.0-beta2 Update Notes
-Version 0.6 - November 2020
+Version 0.7 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -33,7 +33,8 @@ Version 0.6 - November 2020
 
 CAUTION: The _beta2_ pre-release of the  FS does not _make_ on older
 Linux distributions such as FSL8. The _beta1_ pre-release does _make_
-on FSL8. There is a work-around in _beta3_.
+on FSL8. This is fixed for FSL8 in _beta3_, which also has a
+workaround for even older distributions.
 
 The document covers updating from the _beta1_ pre-release to the
 _beta2_ pre-release. Like all beta pre-releases, _beta2_ is not
@@ -53,7 +54,8 @@ method is described here:
 
 CAUTION: The _beta2_ pre-release of the  FS does not _make_ on older
 Linux distributions such as FSL8. The _beta1_ pre-release does _make_
-on FSL8. There is a work-around in _beta3_.
+on FSL8. This is fixed for FSL8 in _beta3_, which also has a
+workaround for even older distributions.
 
 If you are using _git_ as is recommended, then as _prog_
 execute:

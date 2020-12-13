@@ -19,11 +19,11 @@
 //
 
 = Index of fs/
-Version 0.2 - Nov 2020
+Version 0.3 - December 2020
 
 == Direct Links
 
-<<releases/10.0.0/beta2.adoc#,10.0.0-beta2>> Update Notes (latest)
+<<releases/10.0.0/beta3.adoc#,10.0.0-beta3>> Update Notes (latest)
 
 == Links to sub-directories
 
