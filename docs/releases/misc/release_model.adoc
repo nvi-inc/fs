@@ -19,7 +19,7 @@
 //
 
 = Strawman Release Model
-Version 0.4 - December 2020
+Version 0.5 - December 2020
 
 :sectnums:
 
@@ -315,7 +315,7 @@ To install from the archive (use the `_tag_` of the release you are installing):
 .   ``**cd /tmp**``
 .   ``**wget https://github.com/nvi-inc/fs/archive/**__tag__**.tar.gz**``
 .   ``**cd /usr2**``
-.   ``**tar -xzf /tmp/**__tag__**.tar.gz**``
+.   ``**tar xzf /tmp/**__tag__**.tar.gz**``
 .   ``**cd /usr2/fs-**__tag__``
 .   ``**make install**``
 +

@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta3 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.7 - December 2020
+Version 0.8 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -32,13 +32,12 @@ Version 0.7 - December 2020
 
 == Introduction
 
-This update is intended as a test version for all stations using 
-FS9. This includes both stations using the main (non-VGOS) branch
-(latest version _9.13.2_) and the VGOS branch (latest versions
-_9.12.10_-_9.12.13_). Installing the new version as update for these
-cases is fairly simple but has several steps, see the
-<<Upgrading from an FS9 version>>
-section below.
+This update is intended as a test version for all stations using FS9.
+This includes both stations using the main, non-VGOS, branch (latest
+version _9.13.2_) and the VGOS branch (latest versions
+_9.12.10_-_9.12.13_). Installing the new version as an update for
+these cases is fairly simple but has several steps, see the
+<<Upgrading from an FS9 version>> section below.
 
 The most significant changes in _10.0.0_ are:
 
@@ -297,6 +296,34 @@ TIP: Using _ssh_ requires you to have a _gitub_ account and for you
 to add an _ssh_ public key from your machine's _root_ account to your _github_ account. For more information, go to
 https://github.com/join and
 https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/adding-a-new-ssh-key-to-your-github-account.
+
+[TIP]
+====
+
+If you don't have _git_, you may be able to install it. Some older
+Linux distributions, e.g., FSL8, have the _git_ package available
+under a different name, _git-core_. To install _git_, we recommend
+trying to install the _git-core_ package first.  In older Debian-based
+distributions this should install the required package instead of
+another package that was named _git_ in those distributions (Gnu IT).
+If you don’t see anything named _git-core_, then try installing _git_
+instead.
+
+If you are unable to install _git_ (or _git-core_), you can install
+the FS from an archive. please follow these
+directions:
+
+. Stopping before the `*make install*` step, execute the steps in the
+<<../misc/release_model.adoc#_installing_from_an_archive,Installating from an archive>>
+sub-section in the
+<<../misc/release_model.adoc#,Release Model>> document.
+
+. Return to the current document, jumping ahead to the
+<<Set the /usr2/fs link>>
+step below and continue the installation, but skip the
+`*cd /usr2/fs-git*` command in that step.
+
+====
 
 === Checkout the release
 

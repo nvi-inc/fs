@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 0.3 - November 2020
+Version 0.4 - November 2020
 
 :sectnums:
 :experimental:
@@ -224,8 +224,8 @@ Ed for advice.
 _After_ you have made a backup (to allow recovery in case something
 bad should happen), you can use symbolic links to your directories to
 change between your operational and test directories.  This may allow
-you to more easily switch between an operational and testing
-configuration.
+you to more easily switch between operational and testing
+configurations.
 
 In the following examples, it is assumed that _/usr2/fs-9.13.2_ is
 your operational FS version and the FS you want to test is in
@@ -253,8 +253,8 @@ Your operational station software is assumed to be in _/usr2/st-1.0.0_. Make app
 +
 Make sure there are no existing directories: _control-ops_,
 _proc-ops_, _st-1.0.0-ops_, _control-test_, _proc-test_,
-_st-1.0.0-test_, or use different names and adjust this and
-other examples accordingly.
+_st-1.0.0-test_, or use different names and adjust the commands
+below accordingly.
 
 . Enter the commands:
 +
@@ -350,8 +350,8 @@ ln -sfn fs-git    fs
 
 . Reboot.
 
-Your old operational directories (named _*-ops_) are left for possible future
-reference.
+Your old operational directories (named _*-ops_) remain available for
+future reference.
 
 ==== Switch permanently to old operational version
 
@@ -382,7 +382,8 @@ ln -sfn fs-9.13.2 fs
 
 . Reboot.
 
-Your old test directories (named _*-test_) are left for possible future reference.
+Your old test directories (named _*-test_) remain available for future
+reference.
 
 == Disk space requirements
 
