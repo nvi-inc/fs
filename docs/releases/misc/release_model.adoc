@@ -19,7 +19,7 @@
 //
 
 = Strawman Release Model
-Version 0.5 - December 2020
+Version 0.6 - December 2020
 
 :sectnums:
 
@@ -321,6 +321,7 @@ To install from the archive (use the `_tag_` of the release you are installing):
 +
 Answer `*y*` to confirm installation
 .   Log out as _root_ and log in as _prog_
+.   ``**cd /usr2/fs-**__tag__``
 .   ``**make >&/dev/null**``
 .   ``**make -s**``
 +
