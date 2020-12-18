@@ -19,7 +19,7 @@
 //
 
 = Strawman Release Model
-Version 0.6 - December 2020
+Version 0.7 - December 2020
 
 :sectnums:
 
@@ -314,19 +314,49 @@ To install from the archive (use the `_tag_` of the release you are installing):
 .   Log in as _root_
 .   ``**cd /tmp**``
 .   ``**wget https://github.com/nvi-inc/fs/archive/**__tag__**.tar.gz**``
++
+
+TIP: If you don't have `wget` or if there another problem with it,
+like its TLS version is too old, you can retrieve the archive on a
+different local machine and move it to _/tmp_ on the FS machine.
+
+
 .   ``**cd /usr2**``
 .   ``**tar xzf /tmp/**__tag__**.tar.gz**``
 .   ``**cd /usr2/fs-**__tag__``
-.   ``**make install**``
+
+. At this point you have two options:
+
+..  Set _/usr2/fs_ link, file ownerships, and file permissions
++
+
+If this is a first time installation of the FS or it is an update that
+you want to use immediately, then execute:
+
+   make install
 +
 Answer `*y*` to confirm installation
+
+.. Set only the ownerships and permissions
++
+
+If you only want to build this version and not make it operational
+yet, then execute:
+
+  chown -R prog.rtx .
+  chmod -R a+r,u+w,go-w .
+
 .   Log out as _root_ and log in as _prog_
 .   ``**cd /usr2/fs-**__tag__``
 .   ``**make >&/dev/null**``
 .   ``**make -s**``
 +
-If there is no output from the above command, then the _make_ was successful.
-.   Reboot
+
+If there is no output from the above command, then the _make_ was
+successful.
+
+. If you set the _/usr2/fs_ link by using `make install` above, then
+reboot.
 
 If this is a first time installation, you can then login as _oper_ and
 run the FS, but you will need to customize the control files in
