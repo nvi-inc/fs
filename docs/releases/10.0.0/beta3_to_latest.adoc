@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to Latest Commit Update Notes
-Version 0.3 - December 2020
+Version 0.4 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -66,6 +66,7 @@ execute:
              cd /usr2/fs-git
              git fetch
              git checkout master
+             make clean rmdoto rmexe
              make -s
 
 === Additional steps
