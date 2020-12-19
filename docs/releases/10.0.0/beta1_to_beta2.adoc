@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta1 to FS 10.0.0-beta2 Update Notes
-Version 0.8 - December 2020
+Version 0.9 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -64,7 +64,10 @@ execute:
              git fetch
              git checkout -q 10.0.0-beta2
              make clean rmdoto rmexe
+             make >& /dev/null
              make -s
+
+No output on the last step indicates a successful _make_.
 
 === Recompile station code
 

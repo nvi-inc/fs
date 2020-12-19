@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to Latest Commit Update Notes
-Version 0.4 - December 2020
+Version 0.6 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -67,7 +67,10 @@ execute:
              git fetch
              git checkout master
              make clean rmdoto rmexe
+             make >& /dev/null
              make -s
+
+No output on the last step indicates a successful _make_.
 
 === Additional steps
 
@@ -102,6 +105,9 @@ _/usr2/fs/drudg/change_log.txt_.
 
 === Summary of FS changes
 
+. Add _make_ commands after `git checkout` for incremental updates.
+<<makeinc,More details>>.
+
 There are no changes at this time.
 
 === Summary of drudg changes
@@ -110,7 +116,12 @@ There are no changes at this time.
 
 === Details of FS changes
 
-There are no changes at this time.
+. [[makeinc]] Add _make_ commands after `git checkout` for incremental updates.
++
+
+For incremental updates it is necessary to clean the old compiled
+code. This is due to _drudg_ not participating in the new _Makefile_
+scheme. Thanks to Carlo Migoni (Sardinia) for reporting this.
 
 === Details of drudg changes
 
