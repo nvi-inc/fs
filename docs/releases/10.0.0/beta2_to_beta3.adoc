@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta2 to FS 10.0.0-beta3 Update Notes
-Version 1.7 - December 2020
+Version 1.8 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -63,7 +63,7 @@ execute:
              make >& /dev/null
              make -s
 
-No output on the last step indicates a successful _make_.
+No output from the last command indicates a successful _make_.
 
 === Additional steps
 

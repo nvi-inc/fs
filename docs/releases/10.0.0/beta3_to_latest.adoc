@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to Latest Commit Update Notes
-Version 0.6 - December 2020
+Version 0.7 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -64,13 +64,13 @@ If you are using _git_, as is recommended, then as _prog_
 execute:
 
              cd /usr2/fs-git
-             git fetch
              git checkout master
+             git pull
              make clean rmdoto rmexe
              make >& /dev/null
              make -s
 
-No output on the last step indicates a successful _make_.
+No output from the last command indicates a successful _make_.
 
 === Additional steps
 
