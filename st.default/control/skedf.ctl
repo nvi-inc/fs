@@ -207,6 +207,7 @@ $misc
 *  DBBC_pfb/FILA10G |
 *  VLABC        |
 *  CDAS         |
+*  BB           | Mark6
 *
 * Relationship between skedf.ctl and equip.ctl file names:
 *
