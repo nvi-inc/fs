@@ -19,7 +19,7 @@
 //
 
 = Strawman Release Model
-Version 0.7 - December 2020
+Version 0.8 - December 2020
 
 :sectnums:
 
@@ -316,9 +316,10 @@ To install from the archive (use the `_tag_` of the release you are installing):
 .   ``**wget https://github.com/nvi-inc/fs/archive/**__tag__**.tar.gz**``
 +
 
-TIP: If you don't have `wget` or if there another problem with it,
-like its TLS version is too old, you can retrieve the archive on a
-different local machine and move it to _/tmp_ on the FS machine.
+TIP: If you don't have _wget_ or if there another problem with it,
+such as its TLS version is too old (this is the case for FSL8), you can
+retrieve the archive on a different local machine and move it to
+_/tmp_ on the FS machine.
 
 
 .   ``**cd /usr2**``
@@ -364,9 +365,9 @@ _/usr2/control_ before you can do anything useful.  Additionally, you
 may need to add station software, particularly _antcn_ if you want to
 control an antenna.
 
-If this an update, you will need to follow the update instructions,
-usually found within https://nvi-inc.github.io/fs/releases/.  The
-release announcement should include a link to the specific document.
+If this an update, you will need to follow the update instructions.
+There is usually a link to them in the release announcement, which can
+be found at https://nvi-inc.github.io/fs/releases/.
 
 == Managing testing of FS updates
 
