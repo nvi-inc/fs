@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta3 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 0.9 - December 2020
+Version 1.0 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -304,8 +304,8 @@ https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/
 
 CAUTION: We also recommend you add a _ssh_ public key from your _prog_
 account. This will make it easier to install later updates from
-_github_ by doing them as _prog_. All instructions for further
-_github_ use are written for _prog_.
+_github_ as _prog_. All instructions for further _github_ use are
+written for _prog_.
 
 ====
 
@@ -970,33 +970,49 @@ the example file with:
   cd
   diff .Xresources /usr2/fs/st.default/oper
 
-Please make any changes to your file that you find
-appropriate, but at a minimum you should probably add the
-lines for _monit6_, _erchk_, _scnch_, and _helpsh_ if not already
-present. You will need to logout and login again (or reload
-the X-resources a different way) for the changes to become
-effective.
+Please make any changes to your file that you find appropriate, but at
+a minimum you should probably add the lines for _monit6_, _erchk_,
+_scnch_, and _helpsh_ if not already present.  You will need to logout
+and login again (or reload the X-resources a different way) for the
+changes to become effective.
 
-All the new lines are at the end of the file, so if you need to add
+[CAUTION]
+====
+
+The example _.Xresource_ file for _9.13.2_ did not have any of these
+items, but you may have already included some in your local file.
+Similarly, the example files for the _9.12.x_ versions only had
+_monit6_ included.  However, you may have already included some of the
+others in your local file.
+
+You should be careful to _not_ specify values for a window more than
+once.  So don't use the suggested commands below if they cover windows
+that already values in your _.Xresources_ file. Instead you will need
+to hand edit to make the appropriate changes.
+
+Every station will probably need the lines for _helpsh_.
+
+====
+
+* All the new lines are at the end of the file, so if you need to add
 lines for _monit6_, _erchk_, _scnch_, and _helpsh_, you can use:
 
   cd
   tail -n 24 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
 
-To add lines for just _erchk_, _scnch_, and _helpsh_, you can
+* To add lines for just _erchk_, _scnch_, and _helpsh_, you can
 use:
 
   cd
   tail -n 20 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
 
-To add lines for just _helpsh_, you can
-use:
+* To add lines for just _helpsh_, you can use:
 
   cd
   tail -n 6 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
 
-You can update _prog_'s _.Xresources_ file similarly, but you
-will need to be logged in as _prog_.
+You can update _prog_'s _.Xresources_ file similarly, but you will
+need to be logged in as _prog_.
 
 ==== Set environment variables for fesh
 
