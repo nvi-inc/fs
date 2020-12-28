@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta3 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.1 - December 2020
+Version 1.2 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -2118,9 +2118,9 @@ not mentioned for _beta1_ or _beta2_.
 ==== FS changes relative to the main branch
 
 This update merges the VGOS branch into the main branch. The VGOS
-branch diverged from the main branch at _9.11.2_. This sub-section
-covers the changes that were introduced in VGOS branch and have been
-incorporated into the main branch as of _10.0.0_.
+branch diverged from the main branch just after _9.11.2_. This
+sub-section covers FS changes that were introduced in the VGOS branch
+and have been incorporated into the main branch as of _10.0.0_.
 
 . [[case]] Input is now case sensitive.
 +
@@ -2233,18 +2233,18 @@ A second instance, _dbbc2_, of the DBBC2 control program, _dbbcn_, is
 used for communication with the second DBBC2. The _dbba2.ctl_ control
 file is used for the second DBBC2.
 
-. [[sclient]] New _s_client_ external program for TCP device
-communication.
+. [[sclient]] Replace deprecated VGOS branch TCP clients with
+_s_client_ +
+
+Th _s_client_ script should be used to replace several other similar,
+new but deprecated, TCP scripts from the VGOS branch: _be_client_,
+_mcicn_, and _udceth0_.
 +
 
-This utility is a generalization of Haystack's _be_client_ script.
-Errors are reported as `lg   -1` errors in the log if the FS is running.
-The details on its use are available from `help=sy`.
-+
-
-This command should be used to replace several other similar, new but
-deprecated, TCP scripts from the VGOS branch: _be_client_, _mcicn_,
-and _udceth0_.
+The _s_client_ script is a generalization of Haystack's _be_client_
+script that was in both the main and VGOS branches. Errors are
+reported as `lg   -1` errors in the log if the FS is running.  The
+details on its use are available from `help=sy`.
 
 . [[argspaces]] Ignore leading spaces in keyword parameters for C
 based FS commands.
@@ -2360,7 +2360,95 @@ ignored.
 
 ==== FS changes relative to the VGOS branch
 
-#TODO: Complete this sub-section.#
+This update merges the VGOS branch into the main branch. The VGOS
+branch diverged from the main branch at _9.11.2_. This sub-section
+covers FS changes that occurred in the main branch between _9.11.2_
+and _10.0.0_. These changes are covered extensively in several update
+notes in the _misc/_ subdirectory:
+
+* _fs9116up.txt_
+* _fs9118up.txt_
+* _fs91119up.txt_
+* _fs9132up.txt_
+
+Rather that cover them fully here as well, only a brief summary is
+provided below.  Please check the files listed above for the full
+details.
+
+. Fix Tsys to work if the recorder type is `none`.
+
+. Prevent changing schedules when recording is occurring.
+
+. Fix a bug that caused _tpicd_ to crash for DBBC2.
+
+. Add a _flagr_ error if a source is not reached before the next is
+commanded.
+
+. Add a time-out feature in the `onsouce` command to enable waiting
+for the source to be reached.
+
+. Add support for FSL9.
+
+. Add support for DBBC2 racks with FiLa10G units.
+
+. Add support for FlexBuff recorders.
+
+. Add support for DBBC2 DDC with continuous calibration.
+
+. Add partial support for VLBAC and CDAS racks.
+
+. Add a new _termination_ mode in _antcn_.
+
+. Make use of the `mk5_status` command standard in place of
+`mk5=status?`.
+
+. Fix a bug that prevented _scan_check_ from reporting an error for
+non-zero missing bytes for Mark 5B.
+
+. Add support for the DBBC2 PFB personality.
+
+. Add unification of station procedures for DBBC2 DDC with continuous
+and non-continuous calibration, as well as with PFB (non-continuous
+calibration).
+
+. Add new `if` command for conditional execution of SNAP commands.
+
+. Change the _scan_check_ command to only give a warning if there are
+missing bytes from 5C and FlexBuff recorders.
+
+. Add improvements in the _holog_ program (some VGOS branch versions
+had these improvements).
+
+. Fix a bug that caused local versions of _sterp_ to fail if an
+error message was longer than 256 characters.
+
+. Add _fesh_ and _plog_.
+
+. The _s_client_ utility was made Python 2.5 (FSL5, _Woody_) compatible.
+
+. Change the _fmset_ programs to offer a set of (station defined)
+FiLa10G configurations to send as part of syncing.
+
+. Add support for DBBC2 DDC firmware versions _v105_, _v105_1_, _v105E_,
+_v105F_, _v106_, and _v107_.
+
+. Add the FS display server (some VGOS branch versions also had this
+feature).
+
+. Add support two VSI outputs for DBBC2 racks feeding a FiLa10G.
+
+. Provide support in the `mk5c_mode` command for the full range of
+total data rates that can be specified in a 64-bit integer for
+_jive5ab_ with VDIF and 5B/Ethernet recording.
+
+. Add a case specific error message to _fmset_ if _jive5ab_ complains
+that there has been no `dot_set=...` yet for a Mark 5B recorder.
+
+. Improve _gnplt_ to allow more Tcal points per band, support user
+define font sizes, and use better plot axis labels for large values.
+
+. Add support for user devices that can't (or don't need to) measure a
+_zero_ level.
 
 === drudg changes
 
@@ -2447,9 +2535,9 @@ was not an experiment that included Medicina).
 ==== drudg changes relative to the main branch
 
 This update merges the VGOS branch into the main branch. The VGOS
-branch diverged from the main branch at _9.11.2_. This sub-section
-covers _drudg_  changes that were introduced on VGOS branch and have
-been incorporated into the main branch as of _10.0.0_.
+branch diverged from the main branch just after  _9.11.2_. This
+sub-section covers _drudg_ changes that were introduced in the VGOS
+branch and have been incorporated into the main branch as of _10.0.0_.
 
 . Effective support for _broad band_ systems
 +
@@ -2579,5 +2667,39 @@ the scan files, in case there are slow disks. Finally, the
 
 ==== drudg changes relative to the VGOS branch
 
-#TODO: Complete this sub-section.#
+This update merges the VGOS branch into the main branch. The VGOS
+branch diverged from the main branch just after _9.11.2_. This
+sub-section covers _drudg_ changes that occurred in the main branch
+between _9.11.2_ and _10.0.0_. These changes are covered extensively
+in several update notes in the _misc/_ subdirectory:
 
+* _fs9116up.txt_
+* _fs9118up.txt_
+* _fs91119up.txt_
+* _fs9132up.txt_
+
+Rather that cover them fully here as well, only a brief summary is
+provided below.  Please check the files listed above for the full
+details.
+
+. Fix for a bug that caused the IF configuration to be lost if the schedule
+specified an unrecognized rack type.
+
+. Allow different stations to use different BWs.
+
+. Avoid failing if some stations have unsupported rack and recorder types in
+the schedule.
+
+. Allow more than 16 phase-cal tones in a channel.
+
+. Fix Tsys to work if the recorder type is `none`.
+
+. Make _drudg_ backward compatible with old DBBC2 DDC rack types,
+treating them as DDC.
+
+. Change to always treating equipment types as case insensitive.
+
+. Fix bugs preventing use of  _.skd_ schedules that used non-Nyquist
+sampling rates.
+
+. Add ad hoc support for so-called "staggered start" mode.
