@@ -1,0 +1,178 @@
+//
+// Copyright (c) 2020 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= FS DBBC3 Support
+Version 0.1 - December 2020
+
+:sectnums:
+:toc:
+
+== Introduction
+
+This document covers DBBC3 support in FS _10.0.0_. This support does
+not provide the complete command set and functionality usually
+provided by the FS for a rack. However, it is sufficient for normal FS
+for VGOS observations if the schedule procedure library is provided by
+a specially crafted _.skd_ schedule file (see the
+<<drudg changes relative to the main branch>>
+sub-section below for more details).
+
+== FS DBBC3 support features
+
+The following table gives the IFs and BBCs available based on the
+number of BBCs per IF and the number of IFs.
+
+.DBBC3 IF lettering and BBC numbering
+[cols="^,^,^,^,^,^,^,^,^",options="header"]
+|=================
+| BBCs/IF 
+8+|IFs
+
+.2+|         
+| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+| IFA | IFB | IFC |IFD | IFE| IFF | IFG | IFH
+
+|  8      | 1-8 | 9-16| 17-24 | 25-32| 33-40| 41-48| 49-56 | 57-64
+
+.2+|  12
+| 1-8 | 9-16| 17-24 | 25-32| 33-40| 41-48| 49-56 | 57-64
+| 65-68 | 73-76| 81-84|  89-92| 97-100| 105-109 | 113-116 | 121-124
+
+.2+|  16
+| 1-8 | 9-16| 17-24 | 25-32| 33-40| 41-48| 49-56 | 57-64
+| 65-72 | 73-80| 81-88|  89-96| 97-104| 105-112 | 113-120 | 121-128
+|=================
+
+=== FS DBBC3 channel labels
+
+FS DBBC3 channels labels are constructed as `_nnns_`, where:
+
+* `_nnn_` is the BBC number `000`-`128`
+* `_s_` is the side-band, `l`, `u`, etc.
+
+For example, `032u` is BBC 32, upper side-band.
+
+=== Polarization designations
+
+Polarizations used in _.rxg_ files and the `LO` command are `lcp` or
+`rcp` (in _onoff_ output `l` or `r`) regardless of the actual
+polarization pair in use. The pairs are: H and V; L and R; and X and
+Y. This will be fixed eventually (see
+https://github.com/nvi-inc/fs/issues/42[#42]). For now, since there
+are are at most two polarizations per receiver, the designations
+follow the _alphabetical_ (in English) rule.  This is, what matters is
+the alphabetical order of the first letter of the names in a
+polarization pair. Thus:
+
+* `l` (or `lcp`) can represent horizontal linear polarization, LCP, or "`X`"
+
+* `r` (or `rcp`) can represent vertical linear polarization, RCP, or "`Y`"
+
+=== Low level dbbc3 command
+
+Direct low-level device communication is available with the `dbbc3`
+command. Multi-line responses are supported, please use `*help=dbbc3*`
+for more information.
+
+=== BBC bbcNNN commands
+
+Commands are provided for command and monitoring of individual BBCs.
+The commands have the form `bbc__NNN__`, where `_NNN_` runs `001` to
+`128`. Please use `*help=bbcnnn*` for more information. Only a
+subset of these commands may be available depending on the DBBC
+configuration.
+
+=== IF conditioning module ifX command
+
+Commands are provided for command and monitoring of individual IF
+conditioning modules.  The commands are of the form `if__X__`, where
+`_X_` runs from `a` to `h`. Please use `*help=ifx*` for more
+information. Only a subset of these commands may be available
+depending on the DBBC configuration.
+
+=== IF total power iftpX command
+
+Commands are provided for monitoring of total power data for individual IF
+conditioning modules.  The commands are of the form `iftp__X__`, where
+`_X_` runs from `a` to `h`. Please use `*help=iftpx*` for more
+information. Only a subset of these commands may be available
+depending on the DBBC configuration.
+
+=== BBC gain control bbc_gain command
+
+The `bbc_gain` command can be used to control DBBC3 BBC gain control
+for individual or all BBCs. Please use `*help=bbc_gain*` for more
+information.
+
+=== Continuous calibration control cont_cal command
+
+The use of continuous calibration control, can be controlled and
+monitored using the `cont_cal` command. This includes whether
+continuous calibration is turned on and the polarity of the signal.
+Please use `*help=cont_cal*` for more information.
+
+=== Tsys measurements
+
+Tsys measurements are supported for both continuous and non-continuous
+calibration. The support is basically the same as it is for the DBBC2.
+DBBC3 BBCs can be selected individual or as `evenl`, `evenu`, `oddl`,
+and `oddl`.  IFs can be selected individually. All detectors can be
+selected using `all`. The `formbbc` and `formif` selections are not
+supported yet.
+
+Due to the heavy communication load required for this, measuring Tsys
+in schedules is not practical (it may be usable if the number of BBCs
+involved is very small). As a result, effective Tsys measurements for
+observations won't be possible until there is support for multicast
+data.
+
+=== Pointing and SEFD measurements
+
+The `fivept` and `onoff` command support continuous and non-continuous
+calibration radiometer using individual DBBC3 detectors. For `onff`,
+the detectors can be selected as individually or as `allbbc`, `all`,
+`allu`, `alll`, or `alli`. The `formbbc` and `formif` selections are
+not supported yet.
+
+NOTE: See `*help=fivept*` and `*help=onoff*` for more information on
+using these commands.
+
+=== Example procedure libraries
+
+Temporary example DBBC3 station (_dbbc3st.prc_) and pointing
+(_dbbc3po.prc_) are available in _st.default/proc_.
+
+=== New line in equip.ctl
+
+The _equip.ctl_ file has a new line at the end for the DBBC3. Its
+fields are:
+
+. DBBC3 firmware version: `v121` or greater
+. BBCs per IF: `8`, `12`, or `16`
+. IFs: `1`-`8`
+
+You can see _st.default/control/equip.ctl_ for an example.
+
+=== Communication control program
+
+Communication with DBBC3 is handled by the _dbbcn_ control program.
+This implies that a DBBC3 can only be used simultaneously with a DBBC2
+if it is accessed as the _secondary_ DBBC2 with the `dbbc2` and
+`fila10g2` commands and _fmset_ for time setting.

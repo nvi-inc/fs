@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to Latest Commit Update Notes
-Version 0.8 - December 2020
+Version 0.9 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -81,7 +81,24 @@ No output from the last command indicates a successful _make_.
 
 === Additional steps
 
-There are no additional steps needed at this time.
+. If you are updating from the VGOS branch, and haven't already, you
+should remove use of the deprecated _be_client_, _mcicn_, and
+_udceth0_ scripts with the more general _s_client_ script.
++
+
+You can find instances of the deprecated scripts commands, using,
+e.g., for _be_client_:
+
+   cd /usr2/proc
+   grep be_client *.prc
+
++
+
+You can use `less` to identify the SNAP procedures in each file that
+uses the script. Use _pfmed_ to make the changes.
++
+
+Information about using _s_client_ can be found using `*help=sy*`.
 
 === Review changes
 
@@ -111,6 +128,8 @@ For incremental updates it is necessary to clean the old compiled
 code. This is due to _drudg_ not participating in the new _Makefile_
 scheme, but it is generally cleaner too. Thanks to Carlo Migoni
 (Sardinia) for reporting this.
+
+. Add switching to _s_client_ to the update notes.
 
 === drudg changes
 

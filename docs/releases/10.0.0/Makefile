@@ -19,7 +19,7 @@
 #
 
 all: index.html beta2.html beta1_to_beta2.html beta2_to_beta3.html\
-    beta3.html beta3_to_latest.html
+    beta3.html beta3_to_latest.html rdbe.html mk6.html dbbc3.html
 
 index.html: index.adoc
 beta2.html: beta2.adoc
@@ -27,6 +27,9 @@ beta3.html: beta3.adoc
 beta1_to_beta2.html: beta1_to_beta2.adoc
 beta2_to_beta3.html: beta2_to_beta3.adoc
 beta3_to_latest.html: beta3_to_latest.adoc
+rdbe.html: rdbe.adoc
+mk6.html: mk6.adoc
+dbbc3.html: dbbc3.adoc
 
 %.html: %.adoc
 	asciidoctor -a toc $^

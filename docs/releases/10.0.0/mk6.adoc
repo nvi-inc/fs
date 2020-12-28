@@ -1,0 +1,157 @@
+//
+// Copyright (c) 2020 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= FS Mark 6 Support
+Version 0.1 - December 2020
+
+:sectnums:
+:toc:
+
+== Introduction
+
+This document describes Mark 6 support in FS 10.0 when the Mark6 is
+used with the _cplane_/_dplane_ control programs. Use of a Mark 6 with
+_jive5ab_ is supported in the FS as a _FlexBuff_ recorder and is not
+covered here.
+
+The support for a Mark 6 with _cplane_/_dplane_ does not provide the
+complete command set and functionality usually provided by the FS for
+a recorder.  However, it is sufficient for normal FS for VGOS
+observations if the schedule procedure library is provided by a
+specially crafted _.skd_ schedule file (see the <<drudg changes
+relative to the main branch>> sub-section below for more details). The
+Mark 6 recorder features included are:
+
+== FS Mark 6 support features
+
+The Mark 6 features included are:
+ 
+=== Up to two Mark 6 are supported
+
+If two Mark 6s are available, one or the other can be used for
+recording if only that one has a control file that defines a recorder.
+This gives an effective way to switch back and forth between two
+recorders without having to change the commands used. This uses the
+parallel execution form of commands, i.e., without a trailing device
+letter in the command names, as described below in
+<<Parallel command execution>>, but with only one recorder defined.
+
+If more than one Mark 6 is used, it would typically be for parallel
+recording of different data streams. This has not been tested.
+
+It should possible in the future to record sequentially, but this will
+require modifications to dynamically change which recorder is
+considered active.
+
+=== Parallel command execution
+
+Parallel execution of commands for multiple Mark 6s is supported
+(currently the only other device that has this is RDBE racks).
+Currently the only Mark 6 command is `mk6`.
+
+* Multiple instances of a device are designated by the letters, `a`,
+`b`, etc.
+
+* Commands that support parallel operation always start with
+`_device_` mnemonic, in this case `mk6`. If a letter for the device,
+e.g., `a`, is appended to the command, e.g., `mk6a`, the command
+operates only on that device.  If no letter is appended, the command
+operates on all active instances of the device.
+
+* By default all available devices are active.  Which devices are
+active can be changed with an `active___device__` command, in this
+case `active_mk6`.
+
+* Which devices are available are defined by which have control files
+that have non-comment entries. In others words, a device is not
+available if its control file is commented out.
+
+* If any errors occur during communication with the devices, they are
+all reported. All but the last are reported by the command itself. The
+last is returned and reported as the final status of the command.
+
+* Logged responses from the devices may appear in what appears to be
+in random order. Although communication with devices is initiated in
+sequential order, variations in response time can cause the responses
+to arrive in a different order. The responses are logged in the order
+received.
+
+=== Low level RDBE communication command
+
+The `mk6` command can be used to communicate directly with an
+individual Mark 6 or all active Mark 6s in parallel, as described in
+<<Parallel command execution>> sub-section above.  A semi-colon is
+appended to any string being sent if it not the last character
+already. A newline (`0xa`) is also appended. Please see the Mark 6
+documentation for full details of the Mark 6 command set.
+
+=== Communication control programs
+
+* Each Mark 6 has its own control program, _mk6ca_ and _mk6cb_.
+
+* Each control program uses a similarly named control file,
+_mk6ca.ctl_ and _mk6cb.ctl_.
++
+
+These files have one non-comment line, containing three fields:
+
+. The IP or hostname of the device
++
+
+NOTE: For systems where IP addresses and/or hostnames are sensitive
+information, it is recommend to use an alias, such _rdbea_ that has
+its IP address set in _/etc/hosts_.
+
+. The control port for the device.
++
+
+Usually `2620`.
+
+. The time-out for the device in centiseconds.
++
+
+A value of `100` (one second) is usually suitable for local devices.
+
+=== mk6in external program.
+
+A script _mk6in_ is provided as a diagnostic utility to report the
+data rate being received at the Mark 6 inputs.  The script is
+available in _misc/mk6in_. It should be installed in the Mark 6
+_~oper/bin_ directory and made executable. A CentOS version is
+available in _misc/mk6in.centos_.
+
+To use the script as a FS command, add a `mk6in` SNAP procedure to the
+_station_ library, containing:
+
+  sy=popen -n mk6in 'ssh oper\@mark6a bin/mk6in 2>&1' &
+
+An example is available in _st.default/rdbestation.prc_.  You can
+substitute the IP, nodename, alias (from _/etc/hosts_) for your Mark 6
+in place of the `mark6a` in the above command.  You can have different
+SNAP procedure versions, maybe `mk6ina` and `mk6inb` for two different
+Mark 6s.
+
+To use this seamlessly, it will be necessary to copy the FS _oper_ SSH
+public key to the Mark 6 _oper_ account. For example, as _oper_ on the
+FS machine, you could use:
+
+  ssh-copy-id oper@mark6a
+
+Answer the prompts appropriately.
