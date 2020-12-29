@@ -1,0 +1,147 @@
+//
+// Copyright (c) 2020 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= FS 10.0.0 fsserver Changes
+Version 0.1 - December 2020
+
+//:hide-uri-scheme:
+:sectnums:
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+:toclevels: 4
+
+== Introduction
+
+This document covers changes in the _fsserver_ for FS _10.0.0_.
+
+== fsserver changes
+
+These changes introduce new functionality to _fsserver_, as well as
+simplify some use cases.
+
+=== Use one websocket
+
+The first major change is that the server now only needs to use one
+socket when using _websockets_ -- addresses that start with `ws://`
+(closing https://github.com/nvi-inc/fs/issues/29[#29]).
+
+The new default base URL for all _fsserver_ streams and control
+channels is now:
+
+    ws://127.0.0.1:7083
+
+(70 83 are decimal ASCII encoding of `F` and `S`.)
+
+This can be changed by editing `FS_SERVER_URL_BASE` in
+_include/params.h_; however, we will likely introduce command-line
+flag and/or environment variable to set this in the future.
+ 
+This should be safe to expose on the network (rather than just
+the loop-back), but users may wish to use an HTTP(S) as a proxy to
+provide some authentication/authorisation.
+
+This was enabled by factoring out functionality _spub_ into a
+reusable "`buffered stream`" library, which has been incorporated
+into _fsserver_. All the behaviour of streams are now managed
+within the _fsserver_ process rather than an external _spub_
+instance.
+
+=== FS log stream
+
+The second major change of this patch is the addition of the FS log
+to the streams available from the server (closing
+https://github.com/nvi-inc/fs/issues/25[#25]).
+
+Previously only the
+"`display`" was available, which has a reduced time-stamp format and
+filters some output. The log stream is available at
+
+    FS_SERVER_URL_BASE/log
+
+that is, by default
+
+    ws://127.0.0.1:7083/log
+
+=== Server continues running after FS termination
+
+A third change is that the server now continues running after the
+FS is terminated.
+
+This allows clients to detect the FS termination and prevents a socket
+conflict if the FS is terminated and restarted in quick succession.
+The only user visible impact will be a slight delay if the FS is
+restarted quickly after termination while the old session is finishing
+up.
+
+IMPORTANT: After an FS upgrade or changing environment variable
+values, it's necessary to either shutdown the server (`*fsserver
+stop*`) or reboot the system before re-starting the FS.
+
+=== Server accepts SNAP commands
+
+Fourth, the server can now accept snap commands to be sent to FS,
+e.g.:
+
+   fsserver fs snap "terminate"
+
+This allows clients to interact with the FS directly through
+fsserver rather than needing access to _inject_snap_.
+
+No filtering or authorisation is implemented on this command
+channel, so it effectively allows complete command execution
+privileges in the FS context to anyone with access to the socket.
+Note this is also true for _inject_snap_ on a standard system. If
+a station wishes to limit local access they can use
+iptables/nftables, or use the server in UNIX socket mode and use
+file system permissions. Stations that would like to enable remote
+access should implement their own authentication/authorisation
+that suits their needs, e.g. SSH port forwarding or HTTP proxying.
+
+=== Updated nng library
+
+The fifth and final major change is that this patch also upgrades
+the included messaging library _nng_ to version _1.3.0_.
+
+This brings with it some performance improvements and bug fixes, the
+most obvious to FS users caused some _ssub_ instances in "`wait`" mode
+to use a high amount of CPU time.  However, some or all of the speed
+improvement may have been lost in
+<<changes_10.0.0.adoc#serverbuild,making the server build work for FSL8 (_Lenny_)>>
+described in the 
+<<changes_10.0.0.adoc#,Changes from FS9>> document.
+
+=== Bug fixes
+
+. Fixed _spub_/_ssub_ occasionally freezing (tentatively closing
+https://github.com/nvi-inc/fs/issues/69[#69]).
++
+
+This may have been caused be the byte order being wrong in buffered
+stream `cb`. The situation is still being monitored.  Please report
+any instance of this problem that occurs. It happens very rarely so it
+is challenging to get enough usage to verify that it is not happening
+anymore.  If it does happen, restarting the client has been a
+successful strategy for recovery.
+
+. Fixed `clean` function in _Makefile_.
+
+. Fixed _sspub_ to support more than 2^32^ messages.

@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 0.4 - December 2020
+Version 0.5 - December 2020
 
 :sectnums:
 
@@ -262,6 +262,15 @@ restore the previous behavior until the station implementation of
 _antcn_ could be fixed.
 
 This was introduced in _9.11.6_, August 2014.
+
+=== FS_GNPLT_SIZE
+
+
+Nominal value is `8`.
+
+If set, this overrides the default _gnplt_ font size of `8`.
+
+This was introduced in _9.13.2_, September 2019.
 
 === FS_LO_ANTCN_MODE
 

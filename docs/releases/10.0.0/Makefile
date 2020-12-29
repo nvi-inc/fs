@@ -19,7 +19,8 @@
 #
 
 all: index.html beta2.html beta1_to_beta2.html beta2_to_beta3.html\
-    beta3.html beta3_to_latest.html rdbe.html mk6.html dbbc3.html
+    beta3.html beta3_to_latest.html rdbe.html mk6.html dbbc3.html\
+    changes_10.0.0.html fesh_changes.html fsserver_changes.html
 
 index.html: index.adoc
 beta2.html: beta2.adoc
@@ -30,6 +31,9 @@ beta3_to_latest.html: beta3_to_latest.adoc
 rdbe.html: rdbe.adoc
 mk6.html: mk6.adoc
 dbbc3.html: dbbc3.adoc
+changes_10.0.0.html: changes_10.0.0.adoc
+fesh_changes.html: fesh_changes.adoc
+fsserver_changes.html: fsserver_changes.adoc
 
 %.html: %.adoc
 	asciidoctor -a toc $^

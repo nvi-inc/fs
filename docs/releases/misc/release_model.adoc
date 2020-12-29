@@ -19,7 +19,7 @@
 //
 
 = Strawman Release Model
-Version 0.8 - December 2020
+Version 0.9 - December 2020
 
 :sectnums:
 
@@ -353,7 +353,7 @@ yet, then execute:
 .   ``**make -s**``
 +
 
-If there is no output from the above command, then the _make_ was
+If there is no output from this command, then the _make_ was
 successful.
 
 . If you set the _/usr2/fs_ link by using `make install` above, then
