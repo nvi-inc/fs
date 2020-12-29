@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta3 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.3 - December 2020
+Version 1.4 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -74,7 +74,7 @@ older systems, such as FSL7.
 
 There are also instructions for transitioning to a 64-bit system,
 which may require some relatively simple changes to station software.
-See the <<../../misc/64-bit_conversion.adoc#,Converting to a 64-bit System>>
+See the <<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit System>>
 document for more details. Also see the *TIP* in
 <<Upgrading from an FS9 version>>.
 
@@ -102,15 +102,15 @@ distribution. The source code is now under the GPL3 license.
 +
 
 The details of the model used for FS releases under _git_ are
-described in the <<../misc/release_model.adoc#,Release Model>> document.
+described in the <<../../misc/release_model.adoc#,Release Model>> document.
 
 +
 
 We expect updates in the future to require fewer steps, typically less
-than in FS9 updates. This is in part due to the fact that we expect
-that distributing the FS via _github_ will make it easier to have
-smaller incremental updates instead of having to collect lots of
-changes for infrequent updates.
+than in FS9 updates. This is in part due to the fact that distributing
+the FS via _github_ will make it easier to have smaller incremental
+updates instead of having to collect lots of changes for infrequent
+updates.
 
 +
 
@@ -156,12 +156,12 @@ contributions include testing and insights for adapting the code for
 issues with the new version on FSL8, developing FSL10, making many
 helpful suggestions for changes, testing, and providing feedback.
 
-We also thank Beppe Maccaferri (Medicina) for being a diligent beta
-tester, reporting bugs, helping test several fixes, and making helpful
-suggestions for changes.
+We also thank Beppe Maccaferri (Medicina, Italy) for being a diligent
+beta tester, reporting bugs, helping test several fixes, and making
+helpful suggestions for changes.
 
-We would also like to thank Eskil Varenius (Onsala) for bug reports
-and feedback, particularly on DBBC3 related issues.
+We would also like to thank Eskil Varenius (Onsala, Sweden) for bug
+reports and feedback, particularly on DBBC3 related issues.
 
 == Other useful documents
 
@@ -183,20 +183,20 @@ This section provides links to some other useful documents.
 
 === Miscellaneous documents
 
-* <<../misc/known_bugs.adoc#,Known Bugs>> document with the known bugs list from FS9.
+* <<../../misc/known_bugs.adoc#,Known Bugs>> document with the known bugs list from FS9.
 
-* <<../misc/install_reference.adoc#,Installation Reference>> document with other useful install
+* <<../../misc/install_reference.adoc#,Installation Reference>> document with other useful install
 information is available.  It includes eight sub-sections:
 
 
-. <<../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
-. <<../misc/install_reference.adoc#_example_standard_procedure_libraries,Example standard procedure libraries>>
-. <<../misc/install_reference.adoc#_cut_and_paste_installation_tips,Cut-and-paste installation tips>>
-. <<../misc/install_reference.adoc#_making_a_back_up_before_installing,Making a back-up before installing>>
-. <<../misc/install_reference.adoc#_disk_space_requirements,Disk space requirements>>
-. <<../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
-. <<../misc/install_reference.adoc#_fix_prc_file_define_lines,Fix .prc file define lines>>
-. <<../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting geometry values in .Xresources>>
+. <<../../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
+. <<../../misc/install_reference.adoc#_example_standard_procedure_libraries,Example standard procedure libraries>>
+. <<../../misc/install_reference.adoc#_cut_and_paste_installation_tips,Cut-and-paste installation tips>>
+. <<../../misc/install_reference.adoc#_making_a_back_up_before_installing,Making a back-up before installing>>
+. <<../../misc/install_reference.adoc#_disk_space_requirements,Disk space requirements>>
+. <<../../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
+. <<../../misc/install_reference.adoc#_fix_prc_file_define_lines,Fix .prc file define lines>>
+. <<../../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting geometry values in .Xresources>>
 
 If you haven't upgraded or installed the FS before, you may want to
 review the appendix.  It is _strongly_ recommended that you back-up your
@@ -220,9 +220,9 @@ from a main branch version, it is assumed that upgrade is from
 _9.13.2_, the previous stable release.  If you have a main branch
 version older than version _9.13.2_ you should upgrade to _9.13.2_
 first, please refer to the
-<<../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
+<<../../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
 section in the
-<<../misc/install_reference.adoc#,Installation Reference>> document
+<<../../misc/install_reference.adoc#,Installation Reference>> document
 for more information.
 
 . Upgrading from a VGOS branch version.  The VGOS branch versions
@@ -248,9 +248,9 @@ testing for your station software.  The instructions for combining the
 FS and 64-bit upgrade are:
 
 . Follow the steps in the
-<<../../misc/64-bit_conversion.adoc#,Converting to a 64-bit System>> document
+<<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit System>> document
 down to the 
-<<../../misc/64-bit_conversion.adoc#_make_local_software,Make local software>>
+<<../../../misc/64-bit_conversion.adoc#_make_local_software,Make local software>>
 step. Instead of following that step, return to the next step in this *TIP*.
 +
 
@@ -279,9 +279,9 @@ your, 64-bit converted, station software.
 Having a back-up to return to
 will allow you to continue operations in case something goes
 wrong with the installation.  For more details, please see the
-<<../misc/install_reference.adoc#_making_a_back_up_before_installing,Making a back-up before installing>>
+<<../../misc/install_reference.adoc#_making_a_back_up_before_installing,Making a back-up before installing>>
 section in the
-<<../misc/install_reference.adoc#,Installation Reference>> document.
+<<../../misc/install_reference.adoc#,Installation Reference>> document.
 
 NOTE: If you are using FSL10 with a RAID, that sub-section points you to the
 improved backup and test procedure that is available with
@@ -343,9 +343,9 @@ the FS from an archive. Please follow these
 directions:
 
 . Stopping _before_ the `*make install*` step, execute the steps in the
-<<../misc/release_model.adoc#_installing_from_an_archive,Installating from an archive>>
+<<../../misc/release_model.adoc#_installing_from_an_archive,Installating from an archive>>
 sub-section in the
-<<../misc/release_model.adoc#,Release Model>> document.
+<<../../misc/release_model.adoc#,Release Model>> document.
 
 . Return to the current document, jumping ahead to the
 <<Set the /usr2/fs link>>
@@ -385,9 +385,9 @@ Having the wrong ownership and/or permissions on the operational
 files (procedure libraries, control files, schedules, and logs)
 can cause errors during FS operations.  For a full discussion,
 please refer to the
-<<../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
+<<../../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
 section of the
-<<../misc/install_reference.adoc#,Installation Reference>> document.
+<<../../misc/install_reference.adoc#,Installation Reference>> document.
 For stations where all the operational files are
 expected to owned by user __oper__ in group __rtx__, with permissions
 `ug+rw,o+r,o-w`, the following command will enforce this (note

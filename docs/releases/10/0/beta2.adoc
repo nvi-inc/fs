@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.5 - December 2020
+Version 1.6 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -70,7 +70,7 @@ the FS (we expect to support as far back as FSL8, but currently FSL9
 is the limit), as well as on 64-bit systems. The update notice
 includes instructions for transitioning to a 64-bit system, which may
 require some relatively simple changes to station software. See the
-<<../../misc/64-bit_conversion.adoc#,64-bit conversion>> document for more details.
+<<../../../misc/64-bit_conversion.adoc#,64-bit conversion>> document for more details.
 
 +
 
@@ -96,7 +96,7 @@ distribution. The source code is now under the GPL3 license.
 +
 
 The details of the model used for FS releases under _git_ are
-described in the <<../misc/release_model.adoc#,Release Model>> document.
+described in the <<../../misc/release_model.adoc#,Release Model>> document.
 
 +
 
@@ -158,20 +158,20 @@ https://raw.githubusercontent.com/nvi-inc/fs/259e203330fff145dba5ea6b2f48c8bcd23
 
 === Miscellaneous
 
-<<../misc/known_bugs.adoc#,Known bugs>> document with the known bugs list from FS9.
+<<../../misc/known_bugs.adoc#,Known bugs>> document with the known bugs list from FS9.
 
-<<../misc/install_reference.adoc#,Installation reference>> document with other useful install
+<<../../misc/install_reference.adoc#,Installation reference>> document with other useful install
 information is available.  It includes eight sub-sections:
 
 
-. <<../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
-. <<../misc/install_reference.adoc#_example_standard_procedure_libraries,Example standard procedure libraries>>
-. <<../misc/install_reference.adoc#_cut_and_paste_installation_tips,Cut-and-paste installation tips>>
-. <<../misc/install_reference.adoc#_making_a_back_up_before_installing,Making a back-up before installing>>
-. <<../misc/install_reference.adoc#_disk_space_requirements,Disk space requirements>>
-. <<../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
-. <<../misc/install_reference.adoc#_fix_prc_file_define_lines,Fix .prc file define lines>>
-. <<../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting geometry values in .Xresources>>
+. <<../../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
+. <<../../misc/install_reference.adoc#_example_standard_procedure_libraries,Example standard procedure libraries>>
+. <<../../misc/install_reference.adoc#_cut_and_paste_installation_tips,Cut-and-paste installation tips>>
+. <<../../misc/install_reference.adoc#_making_a_back_up_before_installing,Making a back-up before installing>>
+. <<../../misc/install_reference.adoc#_disk_space_requirements,Disk space requirements>>
+. <<../../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
+. <<../../misc/install_reference.adoc#_fix_prc_file_define_lines,Fix .prc file define lines>>
+. <<../../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting geometry values in .Xresources>>
 
 If you haven't upgraded or installed the FS before, you may want to
 review the appendix.  It is _strongly_ recommended that you back-up your
@@ -195,9 +195,9 @@ from a main branch version, it is assumed that upgrade is from
 _9.13.2_, the previous stable release.  If you have a main branch
 version older than version _9.13.2_ you should upgrade to _9.13.2_
 first, please refer to the
-<<../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
+<<../../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
 section in the
-<<../misc/install_reference.adoc#,Installation reference>> document
+<<../../misc/install_reference.adoc#,Installation reference>> document
 for more information.
 
 . Upgrading from a VGOS branch version.  The VGOS branch versions
@@ -222,9 +222,9 @@ testing for your station software.  The instructions for combining the
 FS and 64-bit upgrade are:
 
 . Follow the steps in the
-<<../../misc/64-bit_conversion.adoc#,64-bit Conversion>> document 
+<<../../../misc/64-bit_conversion.adoc#,64-bit Conversion>> document 
 down to the 
-<<../../misc/64-bit_conversion.adoc#_make_local_software,Make local software>>
+<<../../../misc/64-bit_conversion.adoc#_make_local_software,Make local software>>
 step. Instead of following that step, return to the next item in this *TIP*.
 +
 
@@ -251,9 +251,9 @@ To upgrade from FS9 to FS10 on a 32-bit system, please follow the steps below.
 Having a back-up to return to
 will allow you to continue operations in case something goes
 wrong with the installation.  For more details, please see the
-<<../misc/install_reference.adoc#_making_a_back_up_before_installing,Making a back-up before installing>>
+<<../../misc/install_reference.adoc#_making_a_back_up_before_installing,Making a back-up before installing>>
 section in the
-<<../misc/install_reference.adoc#,Installation reference>> document.
+<<../../misc/install_reference.adoc#,Installation reference>> document.
 
 NOTE: If you are using FSL10 with a RAID, that sub-section points you to the
 improved backup and test procedure that is available with
@@ -319,9 +319,9 @@ Having the wrong ownership and/or permissions on the operational
 files (procedure libraries, control files, schedules, and logs)
 can cause errors during FS operations.  For a full discussion,
 please refer to the
-<<../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
+<<../../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
 section of the
-<<../misc/install_reference.adoc#,Installation reference>> document.
+<<../../misc/install_reference.adoc#,Installation reference>> document.
 For stations where all the operational files are
 expected to owned by user __oper__ in group __rtx__, with permissions
 `ug+rw,o+r,o-w`, the following command will enforce this (note
@@ -1071,7 +1071,7 @@ in the VGOS branch.
 The new version should run on 32-bit systems that currently support
 the FS (we expect to support as far back as FSL8, but currently FSL9
 is the limit), as well as on 64-bit systems. The
-<<../../misc/64-bit_conversion.adoc#,Converting to a 64-bit system>> document
+<<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit system>> document
 contains instructions for transitioning to a 64-bit system.
 
 +
@@ -1081,9 +1081,9 @@ is avoiding use of ``long int``s, except where they are required for
 system calls, particularly in fixed length data structures. A tool,
 _unlongify_ was developed by Dave Horsley to help convert the FS code.
 It is available to help convert station code. It use is described in the
-<<../../misc/64-bit_conversion.adoc#_conversion_of_c_code,Conversion of C code>>
+<<../../../misc/64-bit_conversion.adoc#_conversion_of_c_code,Conversion of C code>>
 sub-step of the
-<<../../misc/64-bit_conversion.adoc#,Converting to a 64-bit system>> document.
+<<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit system>> document.
 
 +
 
@@ -1097,7 +1097,7 @@ distribution. The source code is now under the GPL3 license.
 +
 
 The details of the model used for FS releases under _git_ are
-described in the <<../misc/release_model.adoc#,Release Model>> document.
+described in the <<../../misc/release_model.adoc#,Release Model>> document.
 
 +
 

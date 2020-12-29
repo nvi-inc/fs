@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 0.1 - December 2020
+Version 0.2 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -100,7 +100,7 @@ VGOS branch.
 The new version should run on 32-bit systems that currently support
 the FS (we support as far back as FSL8, we have not yet been able to
 test with FSL7 or other even older systems), as well as on 64-bit
-systems. The <<../../misc/64-bit_conversion.adoc#,Converting to a
+systems. The <<../../../misc/64-bit_conversion.adoc#,Converting to a
 64-bit System>> document contains instructions for transitioning to a
 64-bit system.
 
@@ -112,9 +112,9 @@ fixed length data structures. Note that  some system calls do require
 ``long``s. A tool, _unlongify_ was developed by Dave Horsley to help
 convert the FS code.  It is available to help convert station code.
 Its use is described in the
-<<../../misc/64-bit_conversion.adoc#_conversion_of_c_code,Conversion
+<<../../../misc/64-bit_conversion.adoc#_conversion_of_c_code,Conversion
 of C code>> sub-step of the
-<<../../misc/64-bit_conversion.adoc#,Converting to a 64-bit System>>
+<<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit System>>
 document.
 
 +
@@ -134,7 +134,7 @@ distribution. The source code is now under the GPL3 license.
 +
 
 The details of the model used for FS releases under _git_ are
-described in the <<../misc/release_model.adoc#,Release Model>> document.
+described in the <<../../misc/release_model.adoc#,Release Model>> document.
 
 +
 
@@ -171,13 +171,13 @@ indexed, at https://nvi-inc.github.io/fs/.
 .. The first update notes available in HTML are for
 <<beta2.adoc#,10.0.0-beta2>>.
 
-..  <<../../misc/font_conventions.adoc#,Font Conventions>> similar to
+..  <<../../../misc/font_conventions.adoc#,Font Conventions>> similar to
 the traditional printed FS manuals are used.
 
-.. Add <<../misc/release_model.adoc#,Release Model>> document  describing
+.. Add <<../../misc/release_model.adoc#,Release Model>> document  describing
 steps in making a release.
 
-.. Add <<../../misc/env_vars.adoc#,FS Environment Variables>>
+.. Add <<../../../misc/env_vars.adoc#,FS Environment Variables>>
 document. This document describes user settable environment variables
 for both _make_ time and runtime.
 
@@ -1251,7 +1251,7 @@ procedure's name in the _.snp_ file is `setupbb`.
 +
 
 WARNING: If a different recorder, including `none`, is selected,
-`setupsx` is used the _.snp_ file instead.
+`setupsx` is used in the _.snp_ file instead.
 +
 
 IMPORTANT: There must be agreement between the _.prc_ and _.snp_ file
