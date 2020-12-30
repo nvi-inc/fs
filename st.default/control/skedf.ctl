@@ -205,7 +205,7 @@ $misc
 *  DBBC_ddc/FILA10G |
 *  DBBC_pfb     |
 *  DBBC_pfb/FILA10G |
-*  VLABC        |
+*  VLBAC        |
 *  CDAS         |
 *  BB           | Mark6
 *
