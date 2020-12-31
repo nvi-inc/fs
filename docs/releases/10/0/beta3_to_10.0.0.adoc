@@ -18,8 +18,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= FS 10.0.0-beta3 to Latest Commit Update Notes
-Version 0.9 - December 2020
+= FS 10.0.0-beta3 to FS 10.0.0 Update Notes
+Version 1.0 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -32,35 +32,14 @@ Version 0.9 - December 2020
 == Introduction
 
 The document covers updating from the _beta3_ pre-release to the
-_latest commit_ on its branch. The latest commit is experimental. We
-make ever effort to keep the latest commit usable, but any commit that
-is not tagged for release is not intended for operations. The intended
-use of this document is to collect update information, as it becomes
-available, before the next release.
+FS _10.0.0_.
 
-IMPORTANT: Commits that are not tagged for release may have
-significant issues including: not building, crashing, and
-incompatibilities with operational observation schedule files. Such
-commits are intended for testing only. _Let the user beware._
+For instructions for other upgrade paths, see the
+<<10.0.0.adoc#_other_update_documents,Other update documents>>
+sub-section of the
+<<10.0.0.adoc#,FS 10.0.0 Update Notes>> document.
 
-CAUTION: It is expected that those using the latest commit are experts
-and will manage the differences for updating to the next official
-release themselves. No specific documentation will be provided. What
-commit was last updated to will determine what needs to be done.  It
-might work to verify that all the steps in the latest version of this
-document, appropriately renamed as an update from the old release to
-the new release, were completed. An alternate, but necessarily
-complete, approach would be to review the update steps in the new
-release to make sure everything has been covered. _Let the user
-beware._
-
-This document is up to date with the tagged _10.0.0-beta3_ release.
-Due to small increments, such as updating this document, this may not be
-the literal last commit, but the differences should be small unless
-you happen to `fetch` between a significant change and this document
-being updated.
-
-== Upgrading from 10.0.0-beta3 to the latest commit
+== Upgrading from 10.0.0-beta3 to 10.0.0
 
 You must have already upgraded to the <<beta3.adoc#,10.0.0-beta3>>
 release before installing this update.
@@ -71,7 +50,7 @@ If you are using _git_, as is recommended, then as _prog_
 execute:
 
              cd /usr2/fs-git
-             git checkout master
+             git checkout -q 10.0.0
              git pull
              make clean rmdoto rmexe
              make >& /dev/null
@@ -133,4 +112,4 @@ scheme, but it is generally cleaner too. Thanks to Carlo Migoni
 
 === drudg changes
 
-There are no changes at this time.
+There are no changes.

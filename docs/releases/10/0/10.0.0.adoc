@@ -18,9 +18,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= FS 10.0.0-beta3 Update Notes
+= FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.4 - December 2020
+Version 1.5 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -36,14 +36,19 @@ This document covers the steps needed to update from FS9 to _10.0.0_.
 The changes in the FS and _drudg_ for _10.0.0_ are covered in the
 separate <<changes_10.0.0.adoc#,Changes from FS9>> document.
 
-This update is intended as a test version for all stations using FS9.
-This includes both stations using the main, non-VGOS, branch (latest
-version _9.13.2_) and the VGOS branch (latest versions
-_9.12.10_-_9.12.13_). Installing the new version as an update for
-these cases is fairly simple but has several steps, see the
-<<Upgrading from an FS9 version>> section below.  This update has more
-steps than usual due to the unification of the main and VGOS branches
-as well as several loose ends being cleaned-up.
+This update is intended for all stations using FS9, both the main,
+non-VGOS, branch (latest version _9.13.2_) and the VGOS branch (latest
+versions _9.12.10_-_9.12.13_).
+
+It has been tested for several configurations but not all possible ones.
+You should test it carefully before using it for operations. Please
+email Ed, if you encounter problems so that we can resolve them.
+
+Installing the new version as an update is fairly simple but has
+several steps, see the <<Upgrading from an FS9 version>> section
+below. This update has more steps than usual due to the unification
+of the main and VGOS branches as well as several loose ends being
+cleaned-up.
 
 
 The most significant changes in _10.0.0_ are:
@@ -179,7 +184,9 @@ This section provides links to some other useful documents.
 
 * <<beta2_to_beta3.adoc#,FS 10.0.0-beta2 to FS 10.0.0-beta3 Update Notes>>
 
-* <<beta3_to_latest.adoc#,FS 10.0.0-beta3 to Latest Commit Update Notes>>
+* <<beta3_to_10.0.0.adoc#,FS 10.0.0-beta3 to FS 10.0.0 Update Notes>>
+
+* <<10.0.0_to_latest.adoc#,FS 10.0.0 to Latest Commit Update Notes>>
 
 === Miscellaneous documents
 
@@ -210,7 +217,7 @@ earlier distribution please email Ed with your experience. If it
 doesn't work we will try to help resolve any issues.
 
 This section covers upgrading from FS9, which was always 32-bit only,
-to _10.0.0-beta3_. It is assumed you are upgrading on a 32-bit system.
+to _10.0.0_. It is assumed you are upgrading on a 32-bit system.
 There are two possible paths for upgrading:
 
 . Upgrading from a main branch version. The main branch versions
@@ -356,10 +363,10 @@ step below and continue the installation, but skip the
 
 === Checkout the release
 
-Checkout the _beta3_ release from the local repository:
+Checkout the _10.0.0_ release from the local repository:
 
        cd fs-git
-       git checkout -q 10.0.0-beta3
+       git checkout -q 10.0.0
 
 === Set the /usr2/fs link
 
@@ -421,9 +428,9 @@ If your shell is _bash_, you can use:
 
           export FC=f95
 
-WARNING: For beta testing on a 32-bit system, you may not want to
-make this change permanent since it is incompatible with
-pre-_10.0.0_ versions.
+WARNING: If you are testing the installation on a 32-bit system, you
+may not want to make this change permanent since it is incompatible
+with pre-_10.0.0_ versions.
 
 To make this change permanent, you should add the appropriate
 command to the appropriate _rc_ file depending on your login
@@ -1159,10 +1166,6 @@ edited the old version.
 want to preserve them.
 
 === Consider when to update your back-ups
-
-WARNING: This step may not be appropriate if you are beta testing
-since the beta test versions are not intended for
-operations.
 
 It would be prudent to wait until you have successfully run an
 experiment or two and preferably received word that the
