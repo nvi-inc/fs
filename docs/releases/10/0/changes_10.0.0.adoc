@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 0.2 - December 2020
+Version 0.3 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -903,15 +903,16 @@ file is used for the second DBBC2.
 _s_client_.
 +
 
-Thie _s_client_ script should be used to replace several other similar,
+The _s_client_ script should be used to replace several other similar,
 new but deprecated, TCP scripts from the VGOS branch: _be_client_,
 _mcicn_, and _udceth0_.
 +
 
-The _s_client_ script is a generalization of Haystack's _be_client_
-script that was in both the main and VGOS branches. Errors are
-reported as `lg   -1` errors in the log if the FS is running.  The
-details on its use are available from `*help=sy*`.
+The _s_client_ script was already present in both the main and VGOS
+branches. It is a generalization of the _be_client_ script written by
+Chet Ruszczyk (Haystack). Errors are reported as `lg   -1` errors in
+the log if the FS is running.  The details on its use are available
+from `*help=sy*`.
 
 . [[argspaces]] Ignore leading spaces in keyword parameters for C
 based FS commands.
@@ -1132,6 +1133,10 @@ define font sizes, and use better plot axis labels for large values.
 
 . Add support for user devices that can't (or don't need to) measure a
 _zero_ level.
+
+. In _metserver_, add command line argument for suppressing errors
+from specific devices, if broken; add support for `FS_SERIAL_CLOCAL`
+_make_ time environment variable for FSL9 and later.
 
 == drudg changes
 

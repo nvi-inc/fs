@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.5 - December 2020
+Version 1.6 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -236,14 +236,12 @@ for more information.
 are numbered _9.12.x_.  The instructions provided in this section
 are for installing as an upgrade to versions
 _9.12.10_-_9.12.13_, the latest VGOS branch releases. As far as we
-know, no other VGOS versions are in use.  If you have a different
+know, no other VGOS versions are in use. If you have a different
 version, please email Ed for more information.
 
-The upgrade instructions for the update from the main branch and the
-VGOS branch differ only in the details of step
-<<Update control files>>
-and two sub-steps of <<Update .prc files>>. To upgrade from
-FS9 to FS10 on a 32-bit system, please follow the steps below.
+The differences in upgrading the main branch and the VGOS branch are
+almost entirely in the <<Update control files>> step below. To upgrade
+from FS9 to FS10 on a 32-bit system, please follow the steps below.
 
 [TIP]
 ====
@@ -538,6 +536,27 @@ approach may not be suitable for all stations, but it may will work
 well for your station. If so, it should reduce, and in most cases
 eliminate, the need to update your local software when the FS `lo`
 command changes in the future.
+
+==== Update metserver
+
+If you don't use _metserver_ as a local program or are upgrading from
+_9.13.2_, you can skip this sub-step. Otherwise, you may want to
+update to the new _metserver_ version. It has several new features
+compared to the VGOS branch version:
+
+.. A new command line argument to disable errors messages for specific
+sensors if they are broken.
+
+.. Support for `FS_SERIAL_CLOCAL` _make_ time environment variable for
+FSL9 and later.
+
+.. Improved reporting of errors when opening serial devices.
+
+.. Reduction in the threshold for old data being declared _stale_ to
+10 seconds, which is more than sufficient.
+
+See _st.default/st-0.0.0/metserver/INSTALL_ for the installation
+instructions.
 
 === Make local software
 

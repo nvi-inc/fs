@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to FS 10.0.0 Update Notes
-Version 1.0 - December 2020
+Version 1.1 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -60,9 +60,17 @@ No output from the last command indicates a successful _make_.
 
 === Additional steps
 
-. If you are updating from the VGOS branch, and haven't already, you
-should remove use of the deprecated _be_client_, _mcicn_, and
-_udceth0_ scripts with the more general _s_client_ script.
+. If you use _metserver_ as a local program and you updated to FS10
+from a VGOS branch, you may want to update to the new version. It
+includes several improvements, see the <<metserver,metserver>> change
+item below for more details. See
+_st.default/st-0.0.0/metserver/INSTALL_ for the installation
+instructions. 
+
+. If you original updated to FS10 from a VGOS branch version, and
+haven't already, you should remove use of the deprecated _be_client_,
+_mcicn_, and _udceth0_ scripts with the more general _s_client_
+script.
 +
 
 You can find instances of the deprecated scripts commands, using,
@@ -109,6 +117,21 @@ scheme, but it is generally cleaner too. Thanks to Carlo Migoni
 (Sardinia) for reporting this.
 
 . Add switching to _s_client_ to the update notes.
+
+. [[metserver]] Add instructions for switching to the new _metserver_.
+It has several new features for former users of the old VGOS branch
+versions:
+
+.. A new command line argument to disable errors messages for specific
+sensors if they are broken.
+
+.. Support for `FS_SERIAL_CLOCAL` _make_ time environment variable for
+FSL9 and later.
+
+.. Improved reporting of errors when opening serial devices.
+
+.. Reduction in the threshold for old data being declared _stale_ to
+10 seconds, which is more than sufficient.
 
 === drudg changes
 
