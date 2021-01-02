@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.6 - December 2020
+Version 1.7 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -80,8 +80,8 @@ older systems, such as FSL7.
 There are also instructions for transitioning to a 64-bit system,
 which may require some relatively simple changes to station software.
 See the <<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit System>>
-document for more details. Also see the *TIP* in
-<<Upgrading from an FS9 version>>.
+document for more details. Also see the *TIP* in the
+<<Upgrading from an FS9 version>> section below.
 
 +
 
@@ -193,7 +193,7 @@ This section provides links to some other useful documents.
 * <<../../misc/known_bugs.adoc#,Known Bugs>> document with the known bugs list from FS9.
 
 * <<../../misc/install_reference.adoc#,Installation Reference>> document with other useful install
-information is available.  It includes eight sub-sections:
+information is available.  It includes eight sections:
 
 
 . <<../../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
@@ -275,7 +275,7 @@ thereafter.
 
 +
 
-When you get to the <<Test the FS>> step, you may need to debug
+When you get to the <<Test the FS>> step below, you may need to debug
 your, 64-bit converted, station software.
 
 ====
@@ -408,13 +408,12 @@ IMPORTANT: Logout as _root_, and login as _prog_.
 
 === Set FORTRAN compiler
 
-Starting with version _10.0.0_, the standard
-FORTRAN compiler for use with the FS is _f95_ (_gfortran_).
-We recommend that you use it. On the 32-bit systems you can
-still use _fort77_, but you should only use it if you either
-don't have _f95_ or if you have FORTRAN station code that
-is too difficult to convert to _f95_, see sub-step
-<<Conversion of FORTRAN code>> below for more details.
+Starting with version _10.0.0_, the standard FORTRAN compiler for use
+with the FS is _f95_ (_gfortran_).  We recommend that you use it. On
+the 32-bit systems you can still use _fort77_, but you should only use
+it if you either don't have _f95_ or if you have FORTRAN station code
+that is too difficult to convert to _f95_, see the
+<<Conversion of FORTRAN code>> sub-step below for more details.
 
 To select _f95_ as your compiler, you will need to set the
 `FC` variable to this value. If your shell is _tcsh_ you can
@@ -441,11 +440,14 @@ TIP: If you are using an old distribution that is not compatible with
 the latest update of the server, you can still use the FS without the
 server by removing it from the _make_ process. If your first attempt
 to build the FS fails because of the server (most likely in
-_third_party/_), please follow the steps in the description of
-<<changes_10.0.0.adoc#noserver, not building the display server>>
-item of the <<changes_10.0.0.adoc#,Changes from FS9>> document.
-Please email Ed about needing to do this or if you still can't build
-the FS.
+_third_party/_), please follow the steps in the description of the
+<<changes_10.0.0.adoc#noserver,not building the display server>> change
+(in the
+<<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
+sub-section of the
+<<changes_10.0.0.adoc#,Changes from FS9>>
+document).  Please email Ed about needing to do this or if you still
+can't build the FS.
 
           cd /usr2/fs
           make >& /dev/null
@@ -460,21 +462,22 @@ news).
 === Update station programs
 
 This step is for modifying your station programs in _/usr2/st_.  There
-are three possible issues:
+are four possible issues:
 
 . <<Conversion of FORTRAN code>>
 . <<Case sensitive strings in antenna= commands>>
 . <<Update local lo command>>
+. <<Update metserver>>
 
 They are discussed next.
 
 ==== Conversion of FORTRAN code
 
-If you don't have any FORTRAN station code, you can skip this sub-step.
-If you do have some, please email Ed so he is
-aware.
+If you don't have any FORTRAN station code, you should skip this
+sub-step. If you do have some, please email Ed so he is aware.
 
-Basically you have two options (also see step <<Set FORTRAN compiler>>):
+Basically you have two options (also see the <<Set FORTRAN compiler>>
+step above):
 
 . Change to using _f95_ for both the FS and your station
 FORTRAN programs.   It is recommended that
@@ -498,9 +501,12 @@ _f95_.
 
 ==== Case sensitive strings in antenna= commands
 
-In FS9 versions, the strings used in `antenna=...` commands were always
-converted to uppercase before being sent to _antcn_.  An part of the FS
-input being case sensitive that no longer happens.  If your
+If you don't have a local `antenna=...` command, you should skip this
+sub-step.
+
+In FS9 versions, the strings used in `antenna=...` commands were
+always converted to uppercase before being sent to _antcn_. That no
+longer happens due to FS input becoming case sensitive. If your
 antenna, or your side of the antenna interface, requires that the
 strings passed by the `antenna=...` command are uppercase, you have
 two options:
@@ -512,8 +518,7 @@ your code case insensitive.
 
 . Convert the strings in your `antenna=...` commands
 wherever they occur: SNAP procedures, SNAP schedules,
-external programs, or scripts, to upper case. Field system
-input is now case sensitive.
+external programs, or scripts, to upper case.
 
 The former choice is probably easier, but in some cases the second is
 probably better (it keeps with the spirit of case sensitivity). If you
@@ -521,17 +526,22 @@ have questions about which to use and how to do it, please email Ed.
 
 ==== Update local lo command
 
+If you don't have a local `lo` command, you should skip this sub-step.
+
 If you have a local (station) `lo` command, you will need to update it
 (or replace it, see the next paragraph) to get full support for rack
 types that were not in your previous FS9 version and to implement the
 new capability described in the
-<<changes_10.0.0.adoc#logrxg,logging .rxg files>>
-item of the <<changes_10.0.0.adoc#,Changes from FS9>> document.
-
+<<changes_10.0.0.adoc#logrxg,logging .rxg files>> change (in the
+<<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
+sub-section of the
+<<changes_10.0.0.adoc#,Changes from FS9>> document).
 
 You should consider switching to use the new version of the  `lo`
-command described in the <<changes_10.0.0.adoc#lohooks,LO hooks>> item
-of the <<changes_10.0.0.adoc#,Changes from FS9>> document.  This
+command described in the <<changes_10.0.0.adoc#lohooks,LO hooks>> change (in the
+<<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
+sub-section of the
+<<changes_10.0.0.adoc#,Changes from FS9>> document). This
 approach may not be suitable for all stations, but it may will work
 well for your station. If so, it should reduce, and in most cases
 eliminate, the need to update your local software when the FS `lo`
@@ -539,10 +549,14 @@ command changes in the future.
 
 ==== Update metserver
 
-If you don't use _metserver_ as a local program or are upgrading from
-_9.13.2_, you can skip this sub-step. Otherwise, you may want to
-update to the new _metserver_ version. It has several new features
-compared to the VGOS branch version:
+If you don't use _metserver_ as a local program, you should skip this
+sub-step.
+
+This sub-step is optional even if you use _metserver_. You should
+consider it if you are upgrading from the VGOS branch or you are
+upgrading from the old main branch and have not already updated to the
+latest _metserver_ from that branch. The latest version of _metserver_
+has several improvements:
 
 .. A new command line argument to disable errors messages for specific
 sensors if they are broken.
@@ -646,13 +660,13 @@ depending on what your old version was:
 
 ==== Update equip.ctl
 
-It is necessary to add lines for the
-FiLa10G input select and the DBBC3 configuration.  There
-are three cases, please check which applies for you.  In any
-event, you should compare your _equip.ctl_ to the example as
-described when you get to sub-step <<Review control files>> below, to make sure there are
-no duplicated lines or other problems caused by the commands
-in this current sub-step, i.e., <<Update equip.ctl>>.
+It is necessary to add lines for the FiLa10G input select and the
+DBBC3 configuration.  There are three cases, please check which
+applies for you.  In any event, you should compare your _equip.ctl_ to
+the example as described when you get to the <<Review control files>>
+sub-step below, to make sure there are no duplicated lines or other
+problems caused by the commands in this current sub-step (i.e.,
+<<Update equip.ctl>>).
 
 . If your old version was _9.12.10_ or _9.12.11_, you will need
 to add the final four lines of the example _equip.ctl_
@@ -663,7 +677,7 @@ file to yours:
 
 . If your old version was _9.12.12_ or _9.12.13_, you will need
 to insert two lines before the final two lines.  This is
-covered in sub-step <<Review control files>> below.
+covered in the <<Review control files>> sub-step below.
 
 . If your old version was _9.13.2_, you will need to add the
 final two lines of the example _equip.ctl_ file to yours:
@@ -698,7 +712,7 @@ You may be able to just replace your copy with the new one.
 . Old versions _9.12.10_ and _9.12.11_:
 +
 This file was not present so the new default version (copied by
-commands in sub-step <<Copy control files>> above) should not
+commands in the <<Copy control files>> sub-step above) should not
 require modification.
 
 . Old versions _9.12.12_, _9.12.13_, and _9.13.2_:
@@ -764,8 +778,8 @@ or both.
 
 . Old versions _9.12.10_ and _9.12.11_:
 +
-A FiLa10G input select line was added, but
-sub-step <<Update equip.ctl>> above should have handled that.
+A FiLa10G input select line was added, but the <<Update equip.ctl>>
+sub-step above should have handled that.
 
 . Old versions _9.12.12_ and _9.12.13_:
 +
@@ -783,8 +797,8 @@ FiLa10G input select line):
 
 . Old versions _9.12.10_, _9.12.11_, and _9.13.2_:
 +
-A new line for the DBBC3 configuration was added at the end, but sub-step
-<<Update equip.ctl>>  above should have handled that.
+A new line for the DBBC3 configuration was added at the end, but
+the <<Update equip.ctl>> sub-step above should have handled that.
 
 ====== Comment lines
 
@@ -820,8 +834,12 @@ used in _stpgm.ctl_ without the display server and they are
 accidentally closed, the FS will be killed.
 This applies as well if you built the FS without
 the display server as described in the
-<<changes_10.0.0.adoc#noserver, not building the display server>>
-item of the <<changes_10.0.0.adoc#,Changes from FS9>> document.
+<<changes_10.0.0.adoc#noserver,not building the display server>> change
+(in the
+<<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
+sub-section of the
+<<changes_10.0.0.adoc#,Changes from FS9>>
+document).
 
 .. The line for _erchk_ is now uncommented and differs from the
 previous commented version with the addition of the `-name erchk`
@@ -892,8 +910,16 @@ blocks of _/usr2/control/skedf.ctl_. You can use any
 values you want, but typically they should be set to _/usr2/sched_ and
 _/usr2/proc_, respectively, to agree with the FS.
 
-.. Due to an <<changes_10.0.0.adoc#skedf.ctl,error>> (described in
-the <<changes_10.0.0.adoc#,Changes from FS9>> document) in the example
+
+
+.. Due to an <<changes_10.0.0.adoc#skedf.ctl,error>> (as described in
+the
+<<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
+sub-section of the
+<<changes_10.0.0.adoc#,Changes from FS9>>
+document).
+
+in the example
 _/usr2/fs/st.defaut/control/skedf.ctl_ file in previous releases,
 most stations probably incorrectly show the `lo_config` keyword as
 `if_config` in their local _/usr2/control/skedf.ctl_ version. Please
@@ -979,12 +1005,17 @@ for some reason you can skip this. If you are already using the
 display server, you should also skip this. You should not implement
 this step (or instead remove setting the variable if already being
 set), if you built the FS without the display server as described in
-the <<changes_10.0.0.adoc#noserver, not building the display server>>
-item of the <<changes_10.0.0.adoc#,Changes from FS9>> document.
+the <<changes_10.0.0.adoc#noserver,not building the display server>>
+change
+(in the
+<<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
+sub-section of the
+<<changes_10.0.0.adoc#,Changes from FS9>>
+document).
 
 WARNING: If you don't use the
 display server, you will probably need to update the _stpgm.ctl_ file for that
-case as described in the *WARNING* in sub-step <<Review stpgm.ctl>> above.
+case as described in the *WARNING* in the <<Review stpgm.ctl>> sub-step above.
 
 . As _oper_:
 

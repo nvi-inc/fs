@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to FS 10.0.0 Update Notes
-Version 1.1 - December 2020
+Version 1.2 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -41,8 +41,9 @@ sub-section of the
 
 == Upgrading from 10.0.0-beta3 to 10.0.0
 
-You must have already upgraded to the <<beta3.adoc#,10.0.0-beta3>>
-release before installing this update.
+You must have already upgraded to _10.0.0-beta3_ according to the
+<<beta3.adoc#,FS 10.0.0-beta3 Update Notes>> document before
+installing this update.
 
 === Fetch and make the latest commit
 
@@ -63,7 +64,7 @@ No output from the last command indicates a successful _make_.
 . If you use _metserver_ as a local program and you updated to FS10
 from a VGOS branch, you may want to update to the new version. It
 includes several improvements, see the <<metserver,metserver>> change
-item below for more details. See
+(in the <<FS changes>> sub-section below) for more details. See
 _st.default/st-0.0.0/metserver/INSTALL_ for the installation
 instructions. 
 
@@ -89,7 +90,7 @@ Information about using _s_client_ can be found using `*help=sy*`.
 
 === Review changes
 
-Please see the sub-section <<Changes since 10.0.0-beta3>> below
+Please see the <<Changes since 10.0.0-beta3>> section below
 for details of the changes since that pre-release.
 
 == Changes since 10.0.0-beta3

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 0.4 - November 2020
+Version 0.5 - January 2021
 
 :sectnums:
 :experimental:
@@ -38,7 +38,7 @@ applied sequentially.  Please start with the next update with a later
 version number than what you have and apply it and the following
 listed versions before upgrading to the new version.  You can find the
 latest versions of installation notes for these FS versions in the
-_/usr2/fs/misc_ directory.  The list of critical updates is:
+_/usr2/fs/misc_ sub-directory.  The list of critical updates is:
 
   9.4.0
   9.5.3
@@ -65,14 +65,52 @@ true if you have to upgrade through more than one previous version.
 Otherwise if a step was overlooked, it might be hard to identify for
 which version the error was made.
 
-You can find the archives for old versions at: http://www.metsahovi.fi/fs/dist/old/
+If you have a version older than _9.3.13_, please email Ed for more
+information.
 
-They can also be extracted from a local FS _git_ repo with, e.g.:
+[NOTE]
+====
 
-  git checkout 9.11.19
+There are three suggested methods for getting archives of old versions
+if you need them:
 
-If you have a version older than _9.3.13_, please email
-Ed for more information.
+. You can find archives for old versions at:
+http://www.metsahovi.fi/fs/dist/old/
+
+. The _.tgz_ archives can  be extracted from a local FS _git_ repo. In
+the following, use the tag of the release you want to extract, e.g.,
+_9.11.19_, in place of _tag_ in:
+
++
+
+[subs="+quotes"]
+....
+cd /usr2/fs-git
+make TAG=_tag_ tag_archive
+....
++
+
+This will place the `fs-_tag_.tgz` archive in _/tmp_. In these
+archives, the files will have the prefix `usr2/fs-_tag_/`.
+
+. You can get a _.tar.gz_ archive from _github_ with:
+
++
+
+[subs="+quotes"]
+....
+wget https://github.com/nvi-inc/fs/archive/_tag_.tar.gz
+....
++
+
+This will place the `fs-_tag_.tar.gz` archive in the current
+directory. In these archives, the files will have the prefix
+`fs-_tag_/`.
+
+The latter two methods will work for the versions listed above as far
+back as _9.5.3_. It could be extended to older versions if needed.
+
+====
 
 == Example standard procedure libraries
 
@@ -160,9 +198,13 @@ questions about how to cut-and-paste please email Ed.
 
 == Making a back-up before installing
 
-This section has two parts. The first covers back-ups. The second
-covers using symbolic links to switch between operational and test
-set-ups.
+This section has two sub-sections:
+
+. <<Back-ups>> covering how to make back-ups on varions FSL__x__
+distributions.
+
+. <<Using symbolic links>> for using symbolic links to switch between
+operational and test set-ups.
 
 === Back-ups
 
@@ -174,18 +216,18 @@ If you have SCSI disks, Section 5.7 of the FS9 _Computer Reference_
 manual has a discussion of drive ID numbers if you are unsure about
 these.
 
-Except for FSL10 (which uses a different scheme), you would normally
-choose to install the update on your primary disk after having made
-and verified your back-up.  Once the installation is complete, has
-been tested, and used for a little while, you can copy over your
-back-up with the upgraded primary.  If the upgrade fails, you should
-restore the back-up to the primary for operations.  You can then try
-to upgrade again when it is convenient.  In a desperate situation, you
-can use the back-up for operations.  You may choose to install the FS
-on your back-up disk for testing and then later copy the back-up onto
-the primary once you are satisfied with the new version.  In any
-event, please be sure to make a fresh back-up (and put it safely away)
-before attempting an update installation.
+If you are using a RAID, except for FSL10 (which uses a different
+scheme), you would normally choose to install the update on your
+primary disk after having made and verified your back-up.  Once the
+installation is complete, has been tested, and used for a little
+while, you can copy over your back-up with the upgraded primary.  If
+the upgrade fails, you should restore the back-up to the primary for
+operations.  You can then try to upgrade again when it is convenient.
+In a desperate situation, you can use the back-up for operations.  You
+may choose to install the FS on your back-up disk for testing and then
+later copy the back-up onto the primary once you are satisfied with
+the new version.  In any event, please be sure to make a fresh back-up
+(and put it safely away) before attempting an update installation.
 
 ====  FSL10 (stretch)
 
@@ -202,6 +244,11 @@ for applying an update.
 If the system is configured as a RAID, please see http://www.metsahovi.fi/fs/docs/pre_FSL9_RAID.pdf
 section "`APPLYING AN UPDATE`" for directions for
 applying an update.
+
+That _.pdf_ file can also be extracted from a local FS _git_ repo with:
+
+  cd /usr2/fs-git
+  git show 9.11.0:misc/RAID.pdf >/tmp/pre_FSL9_RAID.pdf
 
 ====  FSL5 (woody)
 
@@ -234,12 +281,31 @@ station software; you should substitute the correct directories if
 they are different. All commands must be entered as _root_. Extra
 white space has been added only to improve legibility.
 
+[NOTE]
+====
+
+You can also use this scheme to switch back and forth between
+different FS _git_ repos, but you will have to give the new git repo a
+different name than the old repo, which may be in _/usr2/fs-git_.  One
+possible scheme is to clone a new repo for each new version and
+include the version tag in the name of the _git_ repo. For example,
+_10.0.0_ could go in _/usr2/fs-git-10.0.0_.
+
+This approach goes against the spirit of _git_,  with which it is
+possible to `checkout` and re__make__ the executables for any version
+included in the repo. However, it may be more reassuring to know that
+you have preserved the current, known to work, executables of your
+operational system.
+
+====
+
 If you have aliased `rm` to `rm -i` and `mv` to `mv -i` and `cp` to
 `cp -i`, you will prompted to confirm before anything destructive
 occurs. If so, and if everything is set-up properly below, the only
 cases where you should only be asked to confirm is for deleting the
-symbolic links in examples for <<Switch permanently to new version>>
-and <<Switch permanently to old operational version>>.
+symbolic links in the examples for
+<<Switch permanently to new version>> and
+<<Switch permanently to old operational version>> below.
 
 ==== To set-up initially for testing:
 
@@ -388,16 +454,18 @@ reference.
 == Disk space requirements
 
 Please be sure that you have at least 50 MB of free space (use the
-_df_ UNIX command to check free space) on your _/usr2_ partition
-before starting the upgrade.  This would probably only be an issue for
-stations with 200 MB disks.  If you are tight on space, you may want
-to delete old log files and old versions of the FS (except your most
-recent one if you can avoid it of course).  Since you should have
-backed-up your system, you can even delete the _*.[oas]_ and
-executable files of your old versions with no risk.  You might want to
-keep the source of the previous versions around for reference if you
-have room.  You can eliminate the non-source files by _cd_-ing to each
-of the old FS directories in turn as _prog_ and executing:
+`*df -h /usr2*` UNIX command to check free space on your _/usr2_
+partition) before starting the upgrade. This would probably only be
+an issue for stations with 200 GB, or smaller, disks.
+
+If you are tight on space, you may want to compress old log files and
+delete old versions of the FS (except your most recent one of course).
+Since you should have backed-up your system that should be safe. You
+can be safer, if you only delete the _*.[oas]_ and executable files of
+your old versions (except your most recent one of course).  You might
+want to keep the source of the previous versions around for reference
+if you have room.  You can eliminate the non-source files by _cd_-ing
+to each of the old FS directories in turn as _prog_ and executing:
 
   make rmdoto rmexe
 

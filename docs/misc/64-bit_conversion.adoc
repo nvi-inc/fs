@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit System
-Version 0.6 - November 2020
+Version 0.7 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -41,16 +41,17 @@ disturbing your operational 32-bit system.
 
 == Convert to using a 64-bit system
 
-IMPORTANT: All operations are performed on the new, 64-bit, system.
+IMPORTANT: All operations,except where noted, are performed on the
+new, 64-bit, system.
 
 Please follow the steps below.
 
 === Install a 64-bit system
 
 Install a 64-bit system on a different (hopefully new) computer. We
-recommend FSL10. The FSL10 installation guide can be found at
-https://nvi-inc.github.io/fsl10/, which is based on Debian _Stretch_
-and tuned for FS use. That process installs a base FS.
+recommend FSL10, which is based on Debian _Stretch_ and tuned for FS
+use. The FSL10 installation guide can be found at
+https://nvi-inc.github.io/fsl10/. That process installs a base FS.
 
 NOTE: As indicated in that document, you should checkout the latest release of FS10, which may be a pre-release.
 
@@ -69,9 +70,9 @@ Login as _root_.
 
 === Rename default directories
 
-NOTE: This step assumes you has installed a base FS, either along with FSL10
-or using your own methods.  If the latter and the normal default FS
-directories were not created, you can skip this step.
+NOTE: This step assumes you have installed a base FS, either along
+with FSL10 or using your own methods. If the latter and the normal
+default FS directories were not created, you can skip this step.
 
 . Rename the existing default station specific FS related directories
 on the 64-bit computer to get them out of the way:
@@ -104,75 +105,106 @@ renamed if you prefer:
 
 Your station specific FS related files can be transferred from the old
 computer using any convenient method.  If both systems are on the
-network this can be particularly easy. The following example sub-steps use
-this approach. You should replace the example host name _old_ (and in
-file names) with your old system's host name. You may need to provide
-the appropriate password for each _scp_ command (if so, you can
-simplify the process by coping your 64-bit computer's _root_ _ssh_
-keys to the old machine with _ssh-copy-id_ first). These commands must
-be executed as _root_, and except where noted, from the 64-bit system.
+network this can be particularly easy. The following example sub-steps
+use this approach. You should replace the _old_ host name in the
+examples (and in file names) with your old system's host name. These
+commands must be executed as _root_, and except where noted, from the
+64-bit system.
 
-CAUTION: The instructions below assume that the existing system you are using
-has a standard FS configuration in terms of symbolic links and
-directories. If your system is different, you will need to adjust
+NOTE: You may need to provide the appropriate password for each _scp_
+command. If so, you can simplify the process by copying your 64-bit
+computer's _root_ SSH keys to the old machine _oper_ and _prog_
+accounts with _ssh-copy-id_ first.
+
+CAUTION: It is assumed that the new installation is on new hardware
+with disks more than large enough to accommodate all the data being
+transferred. However, if you installed the new Linux on old hardware
+with small disks, there may be a space issue.
+
+WARNING: The instructions below assume that the existing system you
+are using has a standard FS configuration in terms of symbolic links
+and directories. If your system is different, you will need to adjust
 what you do accordingly, but you may still find the outline of steps
 useful.
 
 . Transfer operations directories:
 
 .. Transfer _control_, _sched_, and _proc_:
-
-       cd /usr2
-       scp -pqr oper@old:/usr2/control .
-       scp -pqr oper@old:/usr2/sched .
-       scp -pqr oper@old:/usr2/proc .
 +
+
+[subs="+quotes"]
+....
+cd /usr2
+scp -pqr oper@_old_:/usr2/control .
+scp -pqr oper@_old_:/usr2/sched .
+scp -pqr oper@_old_:/usr2/proc .
+....
++
+
 NOTE: Your _sched_ and _proc_ directories could be
 large and take a significant amount of time to transfer.
 
 .. Transfer _log_:
 +
 It can be useful to have your old log files on the new
-computer, but that transfer could be even larger:
+computer, but that transfer could take a long time:
++
 
-  cd /usr2
-  scp -pqr oper@old:/usr2/log .
+[subs="+quotes"]
+....
+cd /usr2
+scp -pqr oper@_old_:/usr2/log .
+....
 
 .. Transfer _tle_files_:
 +
 If you use the _/usr2/tle_files_ directory on your old
 computer, you can also transfer it:
++
 
-  cd /usr2
-  scp -pqr oper@old:/usr2/tle_files .
+[subs="+quotes"]
+....
+cd /usr2
+scp -pqr oper@_old_:/usr2/tle_files .
+....
 
 . Fix the permissions on the operations directories/files you
 transferred. You can fix their permissions and ownerships
 to the standard with:
 
-  /usr2/fs/misc/fix_perm
+    /usr2/fs/misc/fix_perm
 +
 Answer `*y*` to confirm.
 +
-WARNING: If you don't have a _/usr2/tle_files_ directory, you will
-get a message that there is no such directory. That is
-benign unless you expect such a directory to be there.
+
+NOTE: If you don't have a _/usr2/tle_files_ directory, you will get a
+message that there is no such directory. That is benign unless you
+expect such a directory to be there.
 
 . Make back-up copies of the operational directories. This
 sub-step is optional but may be useful so that there are
 unmodified copies of the directories from the old machine
 to use for reference:
-
-  cd /usr2
-  cp -a proc      proc-old
-  cp -a control   control-old
-  cp -a sched     sched-old
 +
-and possibly:
 
-  cd /usr2
-  cp -a log       log-old
-  cp -a tle_files tle_files-old
+[subs="+quotes"]
+....
+cd /usr2
+cp -a proc      proc-_old_
+cp -a control   control-_old_
+cp -a sched     sched-_old_
+....
++
+
+and possibly:
++
+
+[subs="+quotes"]
+....
+cd /usr2
+cp -a log       log-_old_
+cp -a tle_files tle_files-_old_
+....
 
 . Transfer your station software directory (and make a
 reference copy). This is usually the target directory
@@ -181,58 +213,86 @@ computer, you can find its name with:
 
   ls -l /usr2/st
 +
-In the rest of this sub-step, the target _st-1.0.0_ will be used as an
-example, but you should replace it with your actual target. If your
-target is _st-0.0.0_ you should rename the default on the new
-computer first as described in sub-step <<Rename default directories>> above.
+
+In the rest of this sub-step, the target _st-version_ will be used.
+You sould replace __version__ with your version number. For example,
+_1.0.0_, to make a target _st-1.0.0_. If your target is _st-0.0.0_ you
+should rename the default on the new computer first as described in
+the <<Rename default directories>> step above.
 
 .. On the new computer, copy the target from the old computer to the
 new computer, e.g.:
++
 
-  cd /usr2
-  scp -pqr oper@old:/usr2/st-1.0.0 .
+[subs="+quotes"]
+....
+cd /usr2
+scp -pqr oper@__old__:/usr2/st-_version_ .
+....
 
 .. On the new computer, set the _/usr2/st_ symbolic link to point to
 the target directory:
++
 
-  cd /usr2
-  ln -fsn st-1.0.0 st
+[subs="+quotes"]
+....
+cd /usr2
+ln -fsn st-_version_ st
+....
 
-.. You can set its permissions and ownership for _prog_ with:
+.. On the new computer, you can set its permissions and ownership for
+_prog_ with:
++
 
-  cd /usr2
-  chown -R prog.rtx st-1.0.0
-  chmod -R a+r,u+w,go-w st-1.0.0
+[subs="+quotes"]
+....
+cd /usr2
+chown -R prog.rtx st-_version_
+chmod -R a+r,u+w,go-w st-_version_
+....
 
-.. You can make a reference copy with:
+.. On the new computer, you can make a reference copy with (_old_ is
+the name of your old computer):
++
 
-  cd /usr2
-  cp -a st-1.0.0 st-1.0.0-old
+[subs="+quotes"]
+....
+cd /usr2
+cp -a st-_version_ st-_version-old_
+....
 
-. Copy your _oper_ and _prog_ directories to the new
-computer. This sub-step is optional. The FSL10 installation
-made default home directories for these users on _/usr2_.
-If you did not have customized content for the users on
-the old computer, you could just use the versions on the
-new computer. Still it may be useful to have a copy of
-your old directories on the new system for reference,
-especially if you realize later that there were additional
-programs and files you want to use on the new system.
+. Copy your _oper_ and _prog_ directories to the new computer. This
+sub-step is optional. The FSL10 installation made default home
+directories for these users on _/usr2_.  If you did not have
+customized content for the users on the old computer, you could just
+use the versions on the new computer. Still it may be useful to have a
+copy of your old directories on the new system for reference,
+especially if you realize later that there were additional programs
+and files you want to use on the new system. In the commands below
+_old_ is the name of your old computer.
 
 .. You can accomplish the transfers as _root_ using:
++
 
-  cd /usr2
-  scp -pqr oper@old:~ oper-old
-  scp -pqr prog@old:~ prog-old
+[subs="+quotes"]
+....
+cd /usr2
+scp -pqr oper@_old_:~ oper-_old_
+scp -pqr prog@_old_:~ prog-_old_
+....
 
 .. You probably want to set their permission and ownership so the
 appropriate users are allow to access them:
++
 
-  chown -R oper.rtx /usr2/oper-old
-  chmod -R u+rw,go-rw /usr2/oper-old
+[subs="+quotes"]
+....
+chown -R oper.rtx /usr2/oper-_old_
+chmod -R u+rw,go-rw /usr2/oper-_old_
 
-  chown -R prog.rtx /usr2/prog-old
-  chmod -R u+rw,go-rw /usr2/prog-old
+chown -R prog.rtx /usr2/prog-_old_
+chmod -R u+rw,go-rw /usr2/prog-_old_
+....
 
 +
 You can customize the home directories on the new computer
@@ -307,28 +367,26 @@ one of two ways listed below:
 
 We recommend the first way for those that are only using _go_ for the
 _unlongify_ tool. After installing the _go_ language, continue the
-_unlongify_ installation instructions starting at
-<<Configure prog account for go language>>.
+<<Conversion of C code>> instructions starting at
+<<Configure prog account for go language>> sub-step below.
 
 ====== Option A - Installing golang package
 
-You can use the Debian package management system to
-install _go_.  This will give you an older version of _go_
-that is perfectly adequate for the task at hand and is
-supported by the normal security mechanism. To install it
-this way, as _root_ use:
+You can use the Debian package management system to install _go_.
+This will give you an older version of _go_ that is perfectly adequate
+for the task at hand and is supported by the normal security update
+mechanism. To install it this way, as _root_ use:
 
   apt-get install golang
 
 ====== Option B - Installing latest go language
 
-You can install the latest version of _go_, but this is
-outside the normal security mechanism. In this case, you
-will need to manage your own updates, which may not be
-suitable for an operational environment. If you use this
-method it is recommended that you sign-up for _go_
-language announcements so that you will be informed when a
-security update is available.  You can sign-up at
+You can install the latest version of _go_, but this is outside the
+normal security update mechanism. In this case, you will need to
+manage your own updates, which may not be suitable for an operational
+environment.  If you use this method it is recommended that you
+sign-up for _go_ language announcements so that you will be informed
+when a security update is available.  You can sign-up at
 https://groups.google.com/forum/#!forum/golang-announce.
 
 Another alternative is to delete the latest _go_ (`*rm -rf
@@ -346,7 +404,7 @@ In the first window select _only_ the option (i.e., only that line has a `*`):
   goinst    Install (or 'Update') Go programming language
 
 Then press kbd:[Enter] while `OK` is highlighted. On the next screen, press kbd:[Tab]
-to highlight `Cancel` and the press kbd:[Enter].
+to highlight `Cancel` and then press kbd:[Enter].
 
 ===== Configure prog account for go language
 
@@ -363,7 +421,7 @@ and log back in again as _prog_ or, in a current login session
 for _prog_, re-execute the file:
 
 ....
-  . ~/.profile
+. ~/.profile
 ....
 
 ===== Install unlongify

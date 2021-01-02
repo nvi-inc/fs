@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = DRAFT FS Document Font Conventions
-Version 0.3 - December 2020
+Version 0.4 - January 2021
 
 :sectnums:
 
@@ -30,29 +30,85 @@ documents using _asciidoctor_ source.
 
 == Conventions
 
+=== Terminology
+
+* All top-level document sections are referred to as _sections_.
+
+* All sections below the top-level are referred to as _sub-sections_.
+
+* All steps at the top-level of instructions are referred to as
+_steps_.
+
+* All steps below the top-level are referred to as _sub-steps_.
+
+NOTE: Steps often occur as sub-sections. If a section, or sub-section,
+is a step, or sub-step, it should referred to as a step, or sub-step,
+as appropriate.
+
 === In-line text
 
-* _italics_ are used for names (files, programs, accounts, UNIX
-commands, versions, nodes, websites, etc, but not people, FSx, or
-FSLx), emphasis, and the first use of technical terms.
+The default body font is used for all text, except:
 
-* `monospace` is used for data: code, program input/output, contents
-of files, FS commands, and explicit command/option examples.
+* _italics_ are used for names (filenames, filename extensions,
+directory paths, libraries, programs, accounts, UNIX commands,
+versions, nodes, domain names, websites, URLs, URIs, email addresses,
+etc., but not people, FSx, or FSLx), emphasis, and the first use of
+technical terms.
+
+* `monospace` is used for data (code, program input/output, contents
+of files, UNIX command options, FS commands, etc.), fixed parts of
+items that would be italic when there are replaceable elements
+present, and explicit command/option examples.
 
 * `*monospace bold*`  for explicit input/commands to be entered by the
 user.
 
-* `_monospace italic_` for replaceable items in explicit
-input/commands to be entered by the user.
+* `_monospace italic_` (no bold) for replaceable items, including in
+explicit input/commands to be entered by the user.
 
 === Code blocks
 
-Code blocks are usually all simple monospace, but italics may be useful in some cases for
-replaceable items.
+Code (data) blocks are usually all simple monospace, but italics may
+be useful in some cases for replaceable items.
+
+=== Links
+
+The anchor text in all links is normal body text for simplicity. The
+text used depends on the reference:
+
+** External URLs -- These are references to web pages outside of the
+FS. The anchor text should be the full URL. Shorter anchor text can be
+used if explained; this is useful for repetitive forms.
+
+** Other FS documents -- These are references to other FS documents.
+The anchor text should be the full title of the document.  The
+surrounding text should identify it as a document.
+
+** Sections (or steps that appear as sections) in other FS documents
+-- The anchor text should be the full section/step title. The
+surrounding text should identify it as a section or sub-section (or
+step or sub-step) and include a link to the document.
+
+** References to other anchors in other FS documents -- The anchor
+text should show content related text. The surrounding text should
+identify it as something other than a section/step (perhaps _change_
+if appropriate) and include links to its section/step and document.
+
+** References to sections/steps of the current document -- The anchor
+text should be the full section/step title. The surrounding text
+should identify it as a section or sub-section (or step or sub-step).
+Including whether it is _above_ and _below_ is helpful.
+
+** References to other anchors in the current document -- The anchor
+text should show content related text. The surrounding text should
+identify it as something other than a section/step (perhaps _change_
+if appropriate) and include a link to its section/step.
 
 === Document titles
 
-Document titles use normal important word capitalization.
+Document titles use normal important word capitalization.  Upper case
+is used for acronyms and technical terms that are normally upper case.
+There are no special fonts in document titles.
 
 === Section and sub-section titles
 

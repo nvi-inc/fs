@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 0.3 - December 2020
+Version 0.4 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -74,7 +74,7 @@ _/usr2/fs/drudg/change_log.txt_.
 == FS changes
 
 This section is divided into three sub-sections. Please see the
-<<Introduction>> above for an explanation of the sub-sections.
+<<Introduction>> section above for an explanation of the sub-sections.
 
 === FS changes that are in common since FS9
 
@@ -172,8 +172,9 @@ indexed, at https://nvi-inc.github.io/fs/.
 .. The first update notes available in HTML are for
 <<beta2.adoc#,10.0.0-beta2>>.
 
-..  <<../../../misc/font_conventions.adoc#,Font Conventions>> similar to
-the traditional printed FS manuals are used.
+..  Add <<../../../misc/font_conventions.adoc#,Font Conventions>>
+document. These conventions are similar to the ones in the traditional
+printed FS manuals.
 
 .. Add <<../../misc/release_model.adoc#,Release Model>> document  describing
 steps in making a release.
@@ -243,11 +244,13 @@ available in the `Comments` section shown with `*help=lo*`.
 +
 
 Using the hook may remove the need to have a local version of the `lo`
-command. This may not be a suitable solution in all stations. If
-you have (or need) a local `lo` command you can continue to use it (or
+command. This may not be a suitable solution in all stations. If you
+have (or need) a local `lo` command you can continue to use it (or
 implement one), but it will need to be updated to get new capabilities
-such as new racks and <<logrxg,logging .rxg files>> when they come
+such as new racks, which occurs in this update, and the
+<<logrxg,logging .rxg files>> change, described below, when they come
 along.
+
 +
 
 NOTE: This feature does not currently provide a way to read back
@@ -267,7 +270,7 @@ eliminate) the maintenance burden that is  needed if a local `lo`
 command is used.  See the example
 _/usr2/fs/st.default/control/skedf.ctl_ file for how to trigger
 ``drudg``'s use of this command (also see the related
-<<skedf.ctl,skedf.ctl fix>> in this sub-section.
+<<skedf.ctl,skedf.ctl fix>> change in this sub-section.
 +
 
 Until now the `lo_config` command has been a station only command,
@@ -674,7 +677,7 @@ Some recent improvements in _gnplt_ made it fail for FSL8. These were
 fixed (closing https://github.com/nvi-inc/fs/issues/73[#73]).
 
 . [[onoff]] Fix _onoff_ for the DBBC3 rack. (This error was introduced
-in _beta1_ and fixed in _beta2_.) +
+in _beta1_ and fixed in _beta2_.)
 +
 
 A code block from _9.12.13_ in _onoff/get_samples.c_ had been omitted
@@ -834,9 +837,9 @@ This support does not provide the complete command set and
 functionality usually provided by the FS for a rack. However, it is
 sufficient for normal FS operations for VGOS observations if the
 schedule procedure library is provided by a specially crafted _.skd_
-schedule file (see the item about the <<procs,$PROCS block>> in the
-<<drudg changes relative to the main branch>> sub-section below for
-more details).
+schedule file (see the <<procs,$PROCS block>> change in the
+<<drudg changes relative to the main branch>>
+sub-section below for more details).
 +
 
 The details of RDBE features are described in the
@@ -851,7 +854,7 @@ This support does not provide the complete command set and
 functionality usually provided by the FS for a rack. However, it is
 sufficient for normal FS operations for VGOS observations if the
 schedule procedure library is provided by a specially crafted _.skd_
-schedule file (see the item about the <<procs,$PROCS block>> in the
+schedule file (see the <<procs,$PROCS block>> change in the
 <<drudg changes relative to the main branch>> sub-section below for
 more details).
 +
@@ -867,7 +870,7 @@ section of the
 This support does not provide the complete command set and
 functionality usually provided by the FS for a recorder. However, it
 is sufficient for normal FS operations for VGOS observations. (see
-the <<mk6drudg,Mark 6>> item in the
+the <<mk6drudg,Mark 6>> change in the
 <<drudg changes relative to the main branch>>
 sub-section below for more details).
 +
@@ -890,7 +893,7 @@ _fmset_.
 This support is sufficient for normal FS operations for VGOS
 observations with two DBBC2/FiLa10G units if the schedule procedure
 library is provided by a specially crafted _.skd_ schedule file (see
-the item about the <<procs,$PROCS block>> in the
+the <<procs,$PROCS block>> change in the
 <<drudg changes relative to the main branch>>
 sub-section below for more details).
 +
@@ -1141,7 +1144,7 @@ _make_ time environment variable for FSL9 and later.
 == drudg changes
 
 This section is divided into three sub-sections. Please see the
-<<Introduction>> above for an explanation of the sub-sections.
+<<Introduction>> section above for an explanation of the sub-sections.
 
 === drudg changes that are in common since FS9
 
@@ -1235,10 +1238,10 @@ _drudg_ provides effective, but not complete, support for broad band
 because the FS commands for the broad band systems are under
 development. As a result, _drudg_ does not currently generate the
 schedule procedures. Instead they are provided verbatim by the _.skd_
-schedule file. Additionally, _drudg_ only provides preliminary
-support for Mark 6 recorders (see <<mk6drudg,Mark 6 recorder support>>
-below) for use with RDBEs.  The features for broad band support are:
-
+schedule file. Additionally, _drudg_ only provides preliminary support
+for Mark 6 recorders (see the <<mk6drudg,Mark 6 recorder support>>
+change below) for use with RDBEs.  The features for broad band support
+are:
 
 * New `$BROADBAND` block in _.skd_ file.
 +

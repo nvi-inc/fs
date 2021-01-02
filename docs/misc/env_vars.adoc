@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 0.5 - December 2020
+Version 0.6 - January 2021
 
 :sectnums:
 
@@ -45,7 +45,7 @@ If set, this variable suppresses building the display server into the
 FS. This may be useful to allow building the FS usable on systems that
 can't support the display server.
 
-This was introduced in _10.0.0-beta3_.
+This was introduced in _10.0.0-beta3_, December 2020.
 
 === FS_SERIAL_CLOCAL
 
@@ -122,7 +122,7 @@ Nominal value is an email address.
 If set, this is used as the password in _fesh_ for the anonymous
 FTP-SSL method for _cddis_.
 
-This was introduced in _10.0.0-beta3_.
+This was introduced in _10.0.0-beta3_, December 2020.
 
 === FESH_DATA_CENTER
 
@@ -131,7 +131,7 @@ Possible values are `bkg`, `cddis`, `opar` or `vlbeer`.
 If set, this changes the default data center in _fesh_ to the
 specified value.
 
-This was introduced in _10.0.0-beta3_.
+This was introduced in _10.0.0-beta3_, December 2020.
 
 === FESH_CDDIS_METHOD
 
@@ -140,7 +140,7 @@ Possible values are `ftp-ssl` or `https`.
 If set, this changes the default access method for _cddis_ in _fesh_
 to the specified value.
 
-This was introduced in _10.0.0-beta3_.
+This was introduced in _10.0.0-beta3_, December 2020.
 
 === FESH_GEO_TPICD
 
@@ -153,7 +153,7 @@ IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
 value, the _drudg_ output files  will be incorrect and there may be no
 clear indication of that.
 
-This was introduced in _10.0.0-beta3_.
+This was introduced in _10.0.0-beta3_, December 2020.
 
 === FESH_GEO_CONT_CAL
 
@@ -166,7 +166,7 @@ IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
 value, the _drudg_ output files  will be incorrect and there may be no
 clear indication of that.
 
-This was introduced in _10.0.0-beta3_.
+This was introduced in _10.0.0-beta3_, December 2020.
 
 === FESH_GEO_CONT_CAL_POLARITY
 
@@ -179,7 +179,7 @@ IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
 value, the _drudg_ output files  will be incorrect and there may be no
 clear indication of that.
 
-This was introduced in _10.0.0-beta3_.
+This was introduced in _10.0.0-beta3_, December 2020.
 
 === FESH_GEO_VSI_ALIGN
 
@@ -192,7 +192,7 @@ IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
 value, the _drudg_ output files  will be incorrect and there may be no
 clear indication of that.
 
-This was introduced in _10.0.0-beta3_.
+This was introduced in _10.0.0-beta3_, December 2020.
 
 === FS_ANTCN_TERMINATION
 
@@ -281,7 +281,7 @@ local LO. The index of the LO to be set (numbering starting at `0`) is
 passed as the value of fourth element of the run parameter array
 (usually `ip[3]` in C).
 
-This was introduced in _10.0.0-beta3_.
+This was introduced in _10.0.0-beta3_, December 2020.
 
 === FS_LO_CONFIG_ANTCN_MODE
 
@@ -295,7 +295,7 @@ setup procedure by _drudg_ if the `lo_config` keyword in `skedf.ctl`
 is set to `yes`. It can be added manually to IF set-up procedures
 written by hand.
 
-This was introduced in _10.0.0-beta3_.
+This was introduced in _10.0.0-beta3_, December 2020.
 
 === FS_WAKEUP_WAV
 
@@ -321,7 +321,7 @@ Nominal value is a directory path, typically _/usr2/sched_.
 If set, used by _fesh_ to determine where _drudg_ listing files are
 placed, overriding use of the same directory as _.skd_ files.
 
-This was introduced in _10.0.0-beta3_.
+This was introduced in _10.0.0-beta3_, December 2020.
 
 === NETRC_DIR
 
