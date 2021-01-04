@@ -18,11 +18,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= Index of fs/releases/
-Version 0.2 - December 2020
+= Index of fs/releases/10/
+Version 0.1 - December 2020
 
 == Links to sub-directories
 
-<<10/index#,Release 10>> documents
-
-<<misc/index#,Miscellaneous>> documents
+<<0/index#,Release 10.0>> documents

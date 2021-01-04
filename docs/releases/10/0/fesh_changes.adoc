@@ -1,0 +1,180 @@
+//
+// Copyright (c) 2020 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= FS 10.0.0 fesh Changes
+Version 0.1 - December 2020
+
+:sectnums:
+:toc:
+
+== Introduction
+
+This document covers the extensive changes to _fesh_ for FS _10.0.0_.
+
+== fesh changes
+
+Please use `*fesh -h*` for more information on using these features.
+
+=== Encrypted access to cddis
+
+_fesh_ now supports encrypted access to _cddis_ using FTP-SSL and
+HTTPS (closing https://github.com/nvi-inc/fs/issues/36[#36]).
+
+This allows use of _cddis_ after non-SSL FTP access was disabled there
+at the end of October 2020. FTP-SSL is the default method.
+
+For FTP-SSL, it is recommended that the `FESH_EMAIL` environment
+variable be set to avoid having to provide an email address as the
+_anonymous_ FTP-SSL password for each invocation.
+
+TIP: The FTP-SSL method may not work from behind some firewalls.
+If it doesn't work for you, you can either use HTTPS for _cddis_  or
+use a different data center (see <<Additional data centers>> below).
+
+CAUTION: The use of FTP-SSL by _cddis_ may be deprecated in the future.
+
+Using HTTPS can be activated for _cddis_ by setting the
+`FESH_CDDIS_METHOD` environment variable to `https`.
+
+NOTE: Using HTTPS for _cddis_ requires an _EarthData_ login and
+setting it in your _.netrc_ file.  If you don’t have an _EarthData_
+login, you should be able to get one by selecting `REGISTER` at:
+https://urs.earthdata.nasa.gov/.
+
+=== Additional data centers
+
+_fesh_ now supports _bkg_, _cddis_, _opar_, and _vlbeer_ data
+centers (closing https://github.com/nvi-inc/fs/issues/37[#37]).
+
+The data center can be selected with the `FESH_DATA_CENTER`
+environment variable or the `-D` command line option. The default data
+center is _cddis_. For _vlbeer_ only _.vex_ files are supported; for
+the others, only _.skd_.  Running _drudg_ automatically is not
+supported for _vlbeer_.
+
+TIP: For FSL8 and other old Linux distributions, access to _cddis_ may
+not be possible, due to out-of-date certificates (for both FTP-SSL or
+HTTPS). If you are in that situation, _bkg_ or _opar_ may be suitable
+alternatives.
+
+=== Respect skedf.ctl
+
+_fesh_ now respects the _/usr2/control/skedf.ctl_ control file
+(closing https://github.com/nvi-inc/fs/issues/65[#65]).
+
+Previously _fesh_ assumed that the directory for _.skd_ files was
+_/usr2/sched/_ regardless of what was in the `$schedules` block of
+_/usr2/control/skedf.ctl_. This only worked if the directory specified
+was _/usr2/sched_ or was the working directory (i.e., not specified or
+`.`). This prevented use with different directories, such as
+_/usr2/exper_, for _.skd_ files.  Thanks to Jon Quick (HartRAO) for
+reporting this.
+
+=== Optional drudg prompts for geodesy
+
+_fesh_ now provides support for _drudg_ optional prompts for
+geodesy schedules (partially closing
+https://github.com/nvi-inc/fs/issues/38[#38]).
+
+It is assumed that for geodesy the answers to these questions for a
+station do not vary. This feature is intended to allow stations that
+observe both astronomy and geodesy schedules to use _fesh_ to _drudg_
+geodesy schedules.  The environment variables `FESH_GEO_TPICD`,
+`FESH_GEO_CONT_CAL`, `FESH_GEO_CONT_CAL_POLARITY`, and
+`FESH_GEO_VSI_ALIGN` or the command line options `-tcpa` can be used
+to supply answers to the corresponding _drudg_ prompts.
+
+IMPORTANT: _Let the user beware._ This feature must be used with
+extreme care.  The answers that are specified must correspond exactly
+to the questions that _drudg_ will ask. If they don't correspond
+correctly, _drudg_ may produce subtly incorrect output with no obvious
+indication of a problem. The _fesh_ script does what consistency
+checking it can, e.g., if `FESH_CONT_CAL` is specified as `off`, no
+answer can be supplied for `FESH_CONT_CAL_POLARITY` since that
+question will not be asked. It is important to verify that correct
+output is being produced.
+
+IMPORTANT: The feature will not work for schedules that have more than
+mode. It is extremely rare for geodesy schedules to have more than one
+mode, but it is possible.
+
+=== New environment variable LIST_DIR
+
+Use of an environment variable, `LIST_DIR`, was added to specify the
+directory for _drudg_ listings. If not set, the `.skd` file directory is used.
+
+=== New environment variable NETRC_DIR
+
+Use of an environment variable, `NETRC_DIR`, was added to specify a
+directory other than the user's home directory (__~__) for the
+`.netrc` file used with HTTPS access for _cddis_. The same variable is
+used by the _plog_ script for the same purpose.
+
+NOTE: Normally, the _.netrc_  file would be in the user's home directory.
+However, some systems have security policies that forbid that. This
+variable provides a way to have the _.netrc_ file in a different
+directory, perhaps _/usr2/control_.
+
+=== User name ftp used for FTP
+
+The user name for the unencrypted FTP access to _bkg_, _opar_, and
+_vlbeer_, is explicitly set to _ftp_ to avoid potential conflicts with
+other accounts specified in _~/.netrc_ (this is not redirected by
+`NETRC_DIR`).
+
+=== New command line options
+
+Several new command line options were added:
+
+* `-y` to override the year directory accessed for a geodesy data
+center (the default is the current year).
++
+
+This is particularly useful for getting schedules for the next year.
+
+* `-t` to trigger also downloading the _.txt_ file associated with a
+geodesy schedule.`
+
+* `-m` to override the month directory accessed for _vlbeer_ (the
+default is the current month).
++
+
+This is particularly useful for getting schedules for a future month.
+
+* `-H` to disable the default use of the _.latest_ sub-directory of
+the month directory for _vlbeer_.
+
+* `-D` to override the data center if the `FESH_DATA_CENTER`
+environment variable is set, or change the data center from the
+default if it is not set.
+
+* `-s` to override the station code if the `STATION` environment
+variable is set, or set it if it is not set.
+
+=== Typo in error message fixed
+
+A typo in the error message for when the schedule is already
+downloaded was fixed (closing
+https://github.com/nvi-inc/fs/issues/34[#34]). Thanks to Morgan
+Goodrich (KPGO) for reporting this.
+
+=== Internal version number removed
+
+The internal version number was replaced with the FS version.

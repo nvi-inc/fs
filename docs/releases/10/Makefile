@@ -18,7 +18,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-DOC_DIR = misc 10
+DOC_DIR = 0
 
 .PHONY: all $(DOC_DIR)
 

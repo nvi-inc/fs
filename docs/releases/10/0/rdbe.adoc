@@ -1,0 +1,373 @@
+//
+// Copyright (c) 2020 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= FS RDBE Support
+Version 0.1 - December 2020
+
+:sectnums:
+:toc:
+
+== Introduction
+
+This document covers RDBE support in FS _10.0.0_. This support does
+not provide the complete command set and functionality usually
+provided by the FS for a rack. However, it is sufficient for normal FS
+for VGOS observations if the schedule procedure library is provided by
+a specially crafted _.skd_ schedule file (see the <<drudg changes
+relative to the main branch>> sub-section below for more details).
+
+== FS RDBE support features
+
+The RDBE features included are:
+ 
+=== Up to four RDBEs are supported
+
+Each RDBE is typically for one frequency band with a different
+polarization for that band on each of the two IFs.
+
+.Typical RDBE VGOS configuration
+[cols="^,^,^,^,^,^,^,^"]
+|=================
+| RDBE |Band|Frequency| IF0 pol| IF1 pol| Control File| Control Program| Mult-cast program
+
+|  A   | A  | 3 GHz   |  H     |  V     | _rdbca.ctl_ | _rdbca_        | _rdtca_
+|  B   | B  | 5 GHz   |  H     |  V     | _rdbcb.ctl_ | _rdbcb_        | _rdtcb_
+|  C   | C  | 6 GHz   |  H     |  V     | _rdbcc.ctl_ | _rdbcc_        | _rdtcc_
+|  D   | D  | 10 GHz  |  H     |  V     | _rdbcd.ctl_ | _rdbcd_        | _rdtcd_
+|=================
+
+=== Parallel command execution
+
+Parallel execution of commands for multiple RDBEs is supported
+(currently the only other device that has this is Mark 6 recorders).
+Currently the only RDBE commands are `rdbe` and `rdbe_atten`.
+
+* Multiple instances of a device are designated by the letters, `a`,
+`b`, etc.
+
+* Commands that support parallel operation always start with
+`_device_` mnemonic, in this case `rdbe`. If a letter for the device,
+e.g., `a`, is appended to the command, e.g., `rdbea`, the command
+operates only on that device.  If no letter is appended, the command
+operates on all active instances of the device.
+
+* By default all available devices are active.  Which devices are
+active can be changed with an `active___device__` command, in this
+case `active_rdbe`.
+
+* Which devices are available are defined by which have control files
+that have non-comment entries. In others words, a device is not
+available if its control file is commented out.
+
+* If any errors occur during communication with the devices, they are
+all reported. All but the last are reported by the command itself. The
+last is returned and reported as the final status of the command.
+
+* Logged responses from the devices may appear in what appears to be
+in random order. Although communication with devices is initiated in
+sequential order, variations in response time can cause the responses
+to arrive in a different order. The responses are logged in the order
+received.
+
+=== FS RDBE channel labels
+
+FS RDBE channels labels are constructed as `_nnbi_`, where:
+
+* `_nn_` is the channel number `00`-`15`
+* `_b_` is the band, `a`, `b`, etc.
+* `_i_` is the IF channel: `0` or `1`
+
+For example, `15d0` is band D, IF 0, channel 15.
+
+CAUTION: Channel `0` is not usually a useful channel, being split
+between the top and bottom of the band.
+
+=== FS RDBE phase-cal tone labels
+
+FS RDBE phase-cal tone labels are constructed as `_ibnnnn_`, where:
+
+* `_i_` is the IF channel: `0` or `1`
+* `_b_` is the band, `a`, `b`, etc.
+* `_nnnn_` is tone number in the IF `0001`-`0511` (MHz)
+
+For example, `0d0030` is band D, IF 0, tone 30.
+
+=== Polarization designations.
+
+Polarizations used in _.rxg_ files and the `LO` command are `lcp` or
+`rcp` (in _onoff_ output `l` or `r`) regardless of the actual
+polarization pair in use. The pairs are: H and V; L and R; and X and
+Y. This will be fixed eventually (see
+https://github.com/nvi-inc/fs/issues/42[#42]). For now, since there
+are are at most two polarizations per receiver, the designations
+follow the _alphabetical_ (in English) rule.  This is, what matters is
+the alphabetical order of the first letter of the names in a
+polarization pair. Thus:
+
+* `l` (or `lcp`) can represent horizontal linear polarization, LCP, or "`X`"
+
+* `r` (or `rcp`) can represent vertical linear polarization, RCP, or "`Y`"
+
+=== Low level RDBE communication command
+
+The `rdbe` command can be used to communicate directly with an
+individual RDBE or all active RBEs in parallel, as described in
+<<Parallel command execution>> sub-section above.  A semi-colon is
+appended to any string being sent if it not the last character
+already. A newline (`0xa`) is also appended. Please see the RDBE
+documentation for full details, but you can query a single RDBE, say
+`a`, with:
+
+  rdbea=help?
+
+for some information.
+
+=== Attenuation control and monitoring
+
+The `rdbe_atten` command can be used to command or monitor an for
+individual RDBE or all active RBEs in parallel, as described
+<<Parallel command execution>> sub-section above. For setting the
+attenuation, the default target RMS value is set in the _rdbe.ctl_
+control file. That file also specifies the threshold levels for
+out-of-range RMS values.
+
+IMPORTANT: Before connecting an input signal to an IF port, the
+attenuation for that IF should be set to its maximum value, `31.5`, to
+avoid possible damage from from overloading the sampler.
+
+=== Logging of RDBE multicast data
+
+* Multicast messages are generated at a 1 Hz rate by each RDBE. However,
+since multicast uses the UDP protocol, fewer messages may be received due
+to network congestion and other issues.
+
+* Logged multicast messages from different RDBEs typically occur
+interleaved in the log. In order to be able to identify the
+originating RDBE, each record is preceded by `\#rdtc__X__#`, where
+`_X_` is the band designation of the RDBE, i.e., `a`, `b`, etc.
++
+
+NOTE: There is a separate program to receive multicast messages from each
+RDBE. They are named: _rdtca_, _rdtcb_, etc. These names give rise to
+the `\#rdtc__X__#` labels.
+
+* For all multicast messages received, the `dot` time, `dot2pps` and
+`dot2gps` offsets, and the `sigma` values are logged.
+
+* This logging is controlled by the existing `tpicd` command function
+for background logging. Normally for observations logging in toggled
+on and off by the `data_valid` so that it only logged during
+recording.
+
+* Regardless of what channels have VLBI data being recorded, Tsys is
+logged for all channels. Only continuous-cal is supported. The raw
+counts for labeled by channel in `tpcont` records. The values are in
+order of cal "`on`", then cal "`off`". If a Tcal value is defined for
+the channel, the calculated Tsys value is logged `tsys`. Overall IF
+Tsys values is also logged using two different calculations:
+
+** The `AV` value is the reciprocal of the average of the reciprocals
+of the per channel Tsys values (intended to reduce the impact of RFI).
+
+** The `SM` value is calculated from the sum of the "`on`" and "`off`"
+over all the channels.
+
+* Phase-cal phase and amplitude are labelled by IF and the MHz of
+the tone in the IF, e.g., the tone at 5MHz in IF 0 for band B is
+labeled `0b0005`. Only expected tones are logged. The scaling of the
+amplitude is set by the _rdbe.ctl_ control file.
+
+=== RDBE monitor display
+
+* A monitor display for the RDBEs is provided as the _monit6_
+program.  The display shows information for up four active RDBEs: A,
+B, C, and D updating at a 1 Hz rate. Some values are displayed in
+inverse to warn of possible problems.  The information displayed is:
+
+** DOT time
+** VDIF epoch
++
+The value is shown in inverse video if:
+
+.. The values for all RDBEs are different and this value does not agree with the nominal value.
+.. The value does not agree with the majority.
++
+In case of a tie, the later lettered RDBEs have their values in inverse video.
+
+** `dot2gps`, &mu;s
+** `dot2pps`, ns
++
+This value is displayed in inverse video if it exceeds the absolute
+value threshold specified in _monit6.ctl_.
+
+** RMS, alternating between IF0 and IF1
++
+The value is shown in inverse video if it outside the range defined in _rdbe.ctl_.
+* Tsys for both IF0 and IF1 displayed for the channel or whole IF value specified in _monit6.ctl_.
+
+** Phase-cal phase and amplitude for the tones selected in _monti6.ctl_, alternating between IF0 and IF1.
++
+The amplitude scaling is determined by the setting in _rdbe.ctl_.
+
+* The _monit6_ program has an eponymously named control file
+_monit6.ctl_.  This control file is used to adjust the configuration
+of the _monit6_ RDBE display. Unlike other FS control files, it is read
+each time the _monit6_ program is started. The file has five lines.
+The first four control the Tsys and phase-cal display of the four
+RDBEs, in order. There are four field on these lines:
++
+--
+. The channel (`0`-`15`) or whole IF calculation (`avg` or `sum`) to display for the IF0 Teys.
+. The channel (`0`-`15`) or whole IF calculation (`avg` or `sum`) to display for the IF0 Teys
+. The tone number (`0`-`511`) of the phase-cal tone to display for IF0.
+. The tone number (`0`-`511`) of the phase-cal tone to display for IF1.
+--
++
+
+The final line specifies the absolute value threshold, in nanoseconds,
+for displaying the `dot2pps` in inverse video. Typically, this is set
+to `100`.
+
+* Resources for the _monit6_ window were added to _.Xresources_.
+
+=== Pointing and SEFD measurements
+
+The `fivept` and `onoff` command support continuous radiometer using
+individual RDBE detectors. A set of individual detectors, or `all`,
+can be specified for `onoff`.
+
+NOTE: See `*help=fivept*` and `*help=onoff*` for more information on
+using these commands.
+
+=== Time and VDIF epoch setting
+
+The _fmset_ program supports display and setting of RDBE time, one
+RDBE at a time.
+
+IMPORTANT: Whenever a RDBE is rebooted, its time _must_ be verified
+with _fmset_ and if not correct, set properly.
+
+* The RDBE to be worked with can be selected by entering its letter,
+`a`, `b`, etc.
+
+* There are new single character commands: `>` and `<`, to increment
+and decrement the VDIF epoch.
++
+
+NOTE: The VDIF epoch increments 0000 UT every January 1 and July 1.
+The RDBE does not automatically advance the VDIF epoch it is using.
+Ths allows data to be recorded continuously across these epochs with
+the same VDIF epoch.
++
+
+IMPORTANT: All RDBEs must be using the same epoch even if it is an old
+epoch. Otherwise the Mark 6 recorder will not accept the data.
++
+
+IMPORTANT:  It is recommended that at the first opportunity when not
+running a schedule after 0000 UT January 1 and July 1, that _fmset_ be
+used to increment the VDIF epochs of all the RDBEs. With this
+approach, if one is rebooted for some reason its VDIF epoch will agree
+with the others.
++
+
+IMPORTANT: If an RDBE is rebooted after 0000 UT January 1 or July 1
+during a schedule that spans one of those epochs, its VDIF will
+disagree with the other RDBEs preventing data from being recorded. In
+this case, the VDIF for the affected RDBE should be decremented to
+agree with the others.
+
+* The `s` command can be used to sync an RDBE:
++
+
+[IMPORTANT]
+====
+
+If an RDBE needs to be synced, its data transmission _must_ be turned
+before syncing:
+
+  rdbe=dbe_data_send=off;
+
++
+Afterwards it _must_ be turned on again with:
+
+  rdbe=dbe_data_send=on;
+
++
+Failure to do so may corrupt the data.
+
+====
+
+=== Communication control programs
+
+* Each RDBE has its own control program, _rdbca_, _rdbcb_, etc.
+
+* Each control program uses a similarly named control file,
+_rdbca.ctl_, _rdbcb.ctl_, etc.
++
+
+These files have one non-comment line, containing three fields:
+
+. The IP or hostname of the device
++
+
+NOTE: For systems where IP addresses and/or hostnames are sensitive
+information, it is recommend to use an alias, such _rdbea_ that has
+its IP address set in _/etc/hosts_.
+
+. The control port for the device.
++
+
+Usually `5000`.
+
+. The time-out for the device in centiseconds.
++
+
+A value of `100` (one second) is usually suitable for local devices.
+
+=== rdbe.ctl
+
+The values from the file are recorded in the `rdbe` log file header
+line each time a log is opened.
+
+
+NOTE: The values can change each time the FS restarted and  the log is
+re-opened.
+
+
+This file sets the following values on individual lines in this order:
+
+. Target RMS value for setting attenuators, typically `20`.
+. Minimum threshold for acceptable RMS values, typically `12`.
+. Maximum threshold for acceptable RMS values, typically `28`.
+. The scaling to be used for phase-cal amplitudes:
++
+--
+* `raw` -- detected level (scaled by 1e-7)
+* `normalized` --  normalized for the signal level in its channel (and scaled by 1.25e-5)
+* `correlator` --  `normalized` corrected by 32 MHz band pass shape
+--
++
+The `normalized` scaling is the most useful for routine use.
+
+=== Example station procedure library.
+
+An example _station_ library with some useful procedures is provided
+in _st.default/proc/rdbestation.prc_ 

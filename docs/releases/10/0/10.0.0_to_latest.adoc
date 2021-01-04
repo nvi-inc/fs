@@ -1,0 +1,110 @@
+//
+// Copyright (c) 2020-2021 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= FS 10.0.0 to Latest Commit Update Notes
+Version 1.1 - January 2021
+
+//:hide-uri-scheme:
+:sectnums:
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+:toclevels: 4
+
+== Introduction
+
+The document covers updating from FS _10.0.0_ to the _latest commit_
+on its branch. The latest commit is experimental. We make ever effort
+to keep the latest commit usable, but any commit that is not tagged
+for release is not intended for operations. The intended use of this
+document is to collect update information, as it becomes available,
+before the next release.
+
+IMPORTANT: Commits that are not tagged for release may have
+significant issues including: not building, crashing, and
+incompatibilities with operational observation schedule files. Such
+commits are intended for testing only. _Let the user beware._
+
+CAUTION: It is expected that those using the latest commit are experts
+and will manage the differences for updating to the next official
+release themselves. No specific documentation will be provided. What
+commit was last updated to will determine what needs to be done.  It
+might work to verify that all the steps in the latest version of this
+document, appropriately renamed as an update from the old release to
+the new release, were completed. An alternate, but necessarily
+complete, approach would be to review the update steps in the new
+release to make sure everything has been covered. _Let the user
+beware._
+
+This document is up to date with the tagged _10.0.0_ release.  Due to
+small increments, such as updating this document, this may not be the
+literal last commit, but the differences should be small unless you
+happen to `pull` between a significant change and this document being
+updated.
+
+== Upgrading from 10.0.0 to the latest commit
+
+You must have already upgraded to _10.0.0_ according to the
+<<10.0.0.adoc#,FS 10.0.0 Update Notes>> document before installing
+this update.
+
+=== Fetch and make the latest commit
+
+If you are using _git_, as is recommended, then as _prog_
+execute:
+
+             cd /usr2/fs-git
+             git checkout master
+             git pull
+             make clean rmdoto rmexe
+             make >& /dev/null
+             make -s
+
+No output from the last command indicates a successful _make_.
+
+=== Additional steps
+
+No additional steps are needed at this time.
+
+=== Review changes
+
+Please see the <<Changes since 10.0.0>> section below for details of
+the changes since that release.
+
+== Changes since 10.0.0
+
+There are separate sub-sections with summaries of changes in the FS
+and _drudg_.
+
+Clickable links such as
+https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
+reported at https://github.com/nvi-inc/fs/issues.
+
+A complete history of changes can be found using the `git log` command
+from within the FS _git_ archive directory, usually _/usr2/fs-git_.
+
+=== FS changes
+
+There have been no changes at this time.
+
+=== drudg changes
+
+There have been no changes at this time.

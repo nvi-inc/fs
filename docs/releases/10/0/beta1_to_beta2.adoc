@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta1 to FS 10.0.0-beta2 Update Notes
-Version 1.1 - December 2020
+Version 1.2 - December 2020
 
 //:hide-uri-scheme:
 :sectnums:
@@ -206,8 +206,8 @@ accounts if you are using those).
 
 . If you updated to a 64-bit platform and installed the _go_
 language as part of that, according the
-<<../../misc/64-bit_conversion.adoc#_option_b_installing_latest_go_language,Option B - Installing latest go language>>
-sub-step of the <<../../misc/64-bit_conversion.adoc#,Converting to a 64-bit system>> document,
+<<../../../misc/64-bit_conversion.adoc#_option_b_installing_latest_go_language,Option B - Installing latest go language>>
+sub-step of the <<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit system>> document,
 then
 you should register for __golang__ announcements as is now
 described in that sub-step.
