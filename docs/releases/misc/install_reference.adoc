@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 0.5 - January 2021
+Version 0.6 - January 2021
 
 :sectnums:
 :experimental:
@@ -511,7 +511,8 @@ retained with an added _.bak_ extension.
 
 == Setting geometry values in .Xresources
 
-A strategy for setting the `geometry` resource for a window is:
+A strategy for setting the `geometry` resource for an _xterm_ window
+(and others with a `name` property) is:
 
 . Adjust the position (and maybe the size) of the window to what you
 want.
@@ -526,6 +527,233 @@ want.
 . Paste the string as the value for `geometry` resource for that
 window in the _~/.Xresources_ file.
 
-You will need to logout and login again (or reload
-the X resources a different way) for the change to become
-effective.
+After adding resources in the _~.Xresources_ file, you will need to
+load them to make them active. This can done by logging out and back
+in again or loading them in another way, such as using the shell alias
+_rlxr_ that is available by default for _oper_ and _prog_.
+
+== Opening additional windows
+
+This section describes how to set-up your system to open additional
+useful windows on your display. This could be for additional status
+displays or utilities.
+
+CAUTION: All these techniques create the potential for opening
+multiple instances of a window. This might be confusing if it is not
+what you intended. In particular, windows with fixed placement may
+have multiple instances overlaying each other and not all be visible.
+
+NOTE: The FS protects against having more than one instance of certain
+programs, such as _fmset_, running.
+
+NOTE: FS display programs, such _monit2_, and other `monit__x__`
+programs end automatically if the FS is terminated.
+
+Some windows, in particular _xterm_ windows, have a `name` property
+that allows them to associated wth resources in the _~/.Xresources_
+file. This allows you to define other properties of the window, such
+as placement, size, title, and colors. See the <<Setting .Xresources>>
+sub-section below for details on this.
+
+=== Configuring additional windows
+
+Three possible approaches are suggested. The first includes a method
+that uses keyboard _shortcuts_ to open a window with a minimal number
+of key strokes, but can only be used on the local X-display console.
+The others can be used on any display.
+
+==== Window manager
+
+This approach only works for local X-display console for an FSL__x__
+system that is running the _fvwm2_ window manager (the default). There
+may be equivalent options for other window managers. This approach has
+two methods, which can used individually, but it is beneficial to use
+both. These methods require adding lines to the user's _~/.Xresources_
+file. You can see examples in the _st.default/oper/.fvwm2rc_ file.
+
+. Keyboard shortcuts
++
+
+This method can be particularly convenient since it only involves
+holding down two modifier keys, kbd:[Control+Shift], and pressing one
+other key, a quick shortcut. Using the existing example line for
+_monit2_ as an example, you can add a line similar to:
+
++
+
+....
+Key 2 A CS Exec exec xterm -name monit2 -e monit2
+....
++
+
+In this example, the shortcut is kbd:[Control+Shift+2 ]. You should
+replace the `2` with another number or lower case letter not already
+in use to make a unique key combination. You could replace the `xterm
+...` portion of the line with program you want to run, whether it
+opens a window or not.
++
+
+In the above example for _monit2_, the `-name monit2` option  sets the
+_xterm_'s name to `monit2` string. You can replace `monit2` token with
+the appropriate name.
++
+
+The `-e monit2` option tells the _xterm_ to run the _monit2_ program
+in the _xterm_. You can run any program you want in the _xterm_ or
+just get your default shell by leaving off the entire `-e ...`.
+
+. Menu selections
++
+
+As a complement to a keyboard shortcut, you can add a menu selection
+to the middle mouse button menu for the same program. This menu can
+show the shortcut key sequence for the window, making it a convenient
+reminder.
++
+
+Continuing the example for _monit2_, the following line is included in
+the example file for the `AddToMenu "Operator Menu" "Operator Menu"
+Title` definition:
++
+
+....
++              "Monit: status C-S-2" Exec exec xterm -name monit2 -e monit2
+....
++
+
+You can add a similar line, replacing `Monit: status` with a similar
+short text description of the function being performed.  The `2` in
+the `C-S-2` would be replaced with the unique character in the
+shortcut. The `exec ...` would be replaced with the corresponding text
+from your shortcut line.
+
+In order to try your changes you must restart _fvwm2_: left click on
+the background, select the `Restart` item, and then confirm that you
+do want to restart _fvwm2_. You could also log out and back in again.
+
+==== Display server client
+
+If you using the display server, there are two methods for opening
+more windows. You can define windows to be opened automatically when
+an instance of the client is started and you can define windows to be
+opened with the `client=...` command. If you use the former for a
+window, also setting up the latter will give you an easy way to
+re-open a start-up client window if it is accidentally closed, without
+having to exit the client and restart it.
+
+These methods can be used on any display, not just the local X-display
+console.
+
+. Client start-up windows
++
+
+Windows to be opened automatically when a client starts can be listed
+in the _/usr2/control/stpgm.ctl_ file. For example for _monit2_, you
+can add:
++
+
+....
+moni2 x xterm -name monit2 -e monit2 &
+....
++
+
+The first field is a five character name of your choosing for the
+program within the FS. It must not conflict with a name of another
+program within the FS. The second field must be `x` to indicate that
+this is a client window. The remainder of the line, up to but not
+including the final `&`, is the command to run. The last field must be
+`&` to cause the program/window to be run as a background process.
+This program/window will be started for each client instance and will
+be automatically terminated when that client ends.
++
+
+IMPORTANT: This method should not be used if you aren't using the
+display server. While it will cause the window to be opened when the
+FS is started, if the window is closed by accident, it will cause the
+FS to abort.
+
+. Windows opened with the `client=...` command.
++
+
+This method defines the window in the _/usr2/control/clpgm.ctl_
+control file.  This can be used to open a window with the `client=...`
+command.
++
+
+You can find an example for a `monit2` window in
+_st.default/control/clpgm.ctl_:
++
+
+....
+monit2 a xterm -name monit2 -e monit2
+....
++
+
+It is similar to what is used in _/usr2/control/stpgm.ctl_ file,
+except:
+
+.. The first field is not restricted to five characters.
+
+.. The second field is set to one of:
++
+--
+* `a` -- for _attached_, to have the window closed when the client exits
+* `d` -- for _detached_, to have it continue after the client exits
+--
++
+
+Usually `a` is the best choice unless there is a reason to use `d`.
+
+.. There is no final `&`.
+
++
+--
+
+After adding a new window to _/usr2/control/clpgm.ctl_ and starting or
+restarting _fsclient_, you can open the window with:
+
+[subs="+quotes"]
+....
+client=_name_
+....
+
+where _name_ is the first field on the line in _clpgm.ctl_.
+--
+
+==== SNAP commands
+
+If you are _not_ running the display server, you can define SNAP
+procedures to open windows. This approach can be used on any display.
+Closing such windows will not cause the FS to abort.
+
+Continuing the example of _monit2_, you could define a `monit2`
+procedure in your  _station_ procedure library that contains:
+
+....
+sy=xterm -name monit2 -e monit2 &
+....
+
+CAUTION: The trailing `&` is necessary to prevent the FS from waiting
+for the window to close.
+
+Then entering `monit2` as operator input would open an instance of a
+_monit_ window.
+
+=== Setting .Xresources
+
+The window's name can be used to access resources defined the
+_~/.Xresources_ file. This allows you to set properties of the window,
+such as placement, size, title, and colors.  Not all windows can have
+their properties defined in this way. In particular, _xterm_ windows
+can, but _python_ based windows cannot.
+
+You can look at the example lines for _monit2_, and others, in
+_st.default/oper/.Xresources_ for examples for how to define
+resources for a named window. Please also see the
+<<Setting geometry values in .Xresources>>
+section above for a strategy to set `geometry` resources.
+
+After adding resources in the _~/.Xresources_ file, you will need to
+load them to make them active. This can done by logging out and back
+in again or loading them in another way, such as using the shell alias
+_rlxr_ that is available by default for _oper_ and _prog_.

@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.7 - January 2021
+Version 1.8 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -193,7 +193,7 @@ This section provides links to some other useful documents.
 * <<../../misc/known_bugs.adoc#,Known Bugs>> document with the known bugs list from FS9.
 
 * <<../../misc/install_reference.adoc#,Installation Reference>> document with other useful install
-information is available.  It includes eight sections:
+information is available. It includes nine sections:
 
 
 . <<../../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
@@ -204,6 +204,7 @@ information is available.  It includes eight sections:
 . <<../../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
 . <<../../misc/install_reference.adoc#_fix_prc_file_define_lines,Fix .prc file define lines>>
 . <<../../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting geometry values in .Xresources>>
+. <<../../misc/install_reference.adoc#_opening_additional_windows,Opening additional windows>>
 
 If you haven't upgraded or installed the FS before, you may want to
 review the appendix.  It is _strongly_ recommended that you back-up your
@@ -727,8 +728,7 @@ to `erchk`.
 
 .. The useful display window _scnch_ was added.
 
-.. The _xterm_
-program was added.
+.. The _xterm_ program was added.
 
 .. For RDBE systems, the useful RDBE display windows: _monit6_,
 and _monX_ (_X_=[_a_-_d_]) were added. The _monan_ program was added
@@ -1049,26 +1049,13 @@ non-GPU CPU.
 [TIP]
 ====
 
-A strategy for setting the `geometry` resource for a window is:
+You can find an effective strategy to help with setting the `geometry`
+resource for an _xterm_ window (and others with a `name` property) in the
+<<../../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting geometry values in .Xresources>>
+section of the
+<<../../misc/install_reference.adoc#,Installation Reference>> document.
 
-. Adjust the position (and maybe the size) of the window to what you
-want.
-
-. Run the _xwininfo_ program
-
-. Position the cursor on the window and click.
-
-. Copy the string output for the `-geometry` parameter, e.g,
-`80x24+0+0`.
-
-. Paste the string as the value for `geometry` resource for that
-window in the _~/.Xresources_ file.
-
-You will need to logout and login again (or reload
-the X resources a different way) for the change to become
-effective.
 ====
-
 
 As _oper_, you can find the differences between your file and
 the example file with:

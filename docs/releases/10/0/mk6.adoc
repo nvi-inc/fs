@@ -19,7 +19,7 @@
 //
 
 = FS Mark 6 Support
-Version 0.1 - December 2020
+Version 0.2 - December 2020
 
 :sectnums:
 :toc:
@@ -122,14 +122,14 @@ its IP address set in _/etc/hosts_.
 . The control port for the device.
 +
 
-Usually `2620`.
+Usually `14242`.
 
 . The time-out for the device in centiseconds.
 +
 
 A value of `100` (one second) is usually suitable for local devices.
 
-=== mk6in external program.
+=== mk6in external program
 
 A script _mk6in_ is provided as a diagnostic utility to report the
 data rate being received at the Mark 6 inputs.  The script is
