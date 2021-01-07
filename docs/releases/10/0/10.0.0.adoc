@@ -19,8 +19,8 @@
 //
 
 = FS 10.0.0 Update Notes
-E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.8 - January 2021
+E. Himwich, D. Horsley, J. Quick, J. Gipson
+Version 2.0 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -349,7 +349,7 @@ the FS from an archive. Please follow these
 directions:
 
 . Stopping just _after_ the `*cd /usr2/fs-__tag__*` step, execute the steps in the
-<<../../misc/release_model.adoc#_installing_from_an_archive,Installating from an archive>>
+<<../../misc/release_model.adoc#_installing_from_an_archive,Installing from an archive>>
 sub-section in the
 <<../../misc/release_model.adoc#,Release Model>> document.
 
@@ -513,7 +513,7 @@ strings passed by the `antenna=...` command are uppercase, you have
 two options:
 
 . Convert your code. For simple backward compatibility,
-change you _antcn_ program to always convert the
+change your _antcn_ program to always convert the
 `antenna=...` strings to upper case. Alternatively, make
 your code case insensitive.
 
@@ -543,7 +543,7 @@ command described in the <<changes_10.0.0.adoc#lohooks,LO hooks>> change (in the
 <<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
 sub-section of the
 <<changes_10.0.0.adoc#,Changes from FS9>> document). This
-approach may not be suitable for all stations, but it may will work
+approach may not be suitable for all stations, but it may work
 well for your station. If so, it should reduce, and in most cases
 eliminate, the need to update your local software when the FS `lo`
 command changes in the future.
@@ -617,7 +617,7 @@ version is included in more than one case in a given sub-step.
 
 +
 
-The non-comments lines need another digit added to the
+The non-comment lines need another digit added to the
 subroutine number. This sub-step is only needed for updates from
 _9.13.2_. You can fix your file with the commands:
 
@@ -708,7 +708,7 @@ copies of the files.
 
 ===== Review clpgm.ctl
 
-You may be able to just replace your copy with the new one.
+You may only need to replace your copy with the new one.
 
 . Old versions _9.12.10_ and _9.12.11_:
 +
@@ -733,7 +733,7 @@ to `erchk`.
 .. For RDBE systems, the useful RDBE display windows: _monit6_,
 and _monX_ (_X_=[_a_-_d_]) were added. The _monan_ program was added
 to the default since it is used at several sites. If these are not
-relevant for your site, you may prefer to not add them.
+relevant for your site, you may not want to add them.
 
 ===== Review equip.ctl
 
@@ -827,19 +827,17 @@ the clock rate line itself.
 
 +
 
-WARNING: If you are _not_ planning to use the FS display
-server, we recommend you comment out the lines
-for _erchk_, _monit2_, and _scnch_ and not add any other _monitX_ programs. If they are
-used in _stpgm.ctl_ without the display server and they are
-accidentally closed, the FS will be killed.
-This applies as well if you built the FS without
-the display server as described in the
-<<changes_10.0.0.adoc#noserver,not building the display server>> change
-(in the
-<<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
-sub-section of the
-<<changes_10.0.0.adoc#,Changes from FS9>>
-document).
+WARNING: If you are _not_ planning to use the FS display server, we
+recommend that you comment out the lines for _erchk_, _monit2_, and
+_scnch_ and not add any other _monitX_ programs. If they are used in
+_stpgm.ctl_ without the display server and they are accidentally
+closed, the FS will be killed.  This applies as well if you built the
+FS without the display server as described in the
+<<changes_10.0.0.adoc#noserver,not building the display server>>
+change (in the
+<<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS
+changes that are in common since FS9>> sub-section of the
+<<changes_10.0.0.adoc#,Changes from FS9>> document).
 
 .. The line for _erchk_ is now uncommented and differs from the
 previous commented version with the addition of the `-name erchk`
@@ -910,21 +908,17 @@ blocks of _/usr2/control/skedf.ctl_. You can use any
 values you want, but typically they should be set to _/usr2/sched_ and
 _/usr2/proc_, respectively, to agree with the FS.
 
-
-
 .. Due to an <<changes_10.0.0.adoc#skedf.ctl,error>> (as described in
 the
 <<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
 sub-section of the
 <<changes_10.0.0.adoc#,Changes from FS9>>
-document).
-
-in the example
-_/usr2/fs/st.defaut/control/skedf.ctl_ file in previous releases,
-most stations probably incorrectly show the `lo_config` keyword as
-`if_config` in their local _/usr2/control/skedf.ctl_ version. Please
-check your local copy and update any occurrences, even in comments,
-of `if_config` to `lo_config`.
+document) in the example __/usr2/fs/st.defaut/control/skedf.ctl__ file
+in previous releases, most stations probably incorrectly show the
+`lo_config` keyword as `if_config` in their local
+__/usr2/control/skedf.ctl__ version. Please check your local copy and
+update any occurrences, even in comments, of `if_config` to
+`lo_config`.
 
 === Update .prc files
 
@@ -969,11 +963,11 @@ change will have no impact.
 
 ==== Switch to using s_client
 
-This sub-step is optional and only relevant if were using the VGOS
+This sub-step is optional and only relevant if you were using the VGOS
 branch, versions _9.12.x_. You should replace use of the deprecated
-scripts, _be_client_, _mcicn_, and _udceth0_ with the more general
-_s_client_. You can find instances of these commands, using, e.g., for
-_be_client_:
+scripts, _be_client_, _mcicn_, and _udceth0_, if you were using them,
+with the more general _s_client_. You can find instances of these
+commands, using, e.g., for _be_client_:
 
    cd /usr2/proc
    grep be_client *.prc
@@ -1091,18 +1085,18 @@ Every station will probably need the lines for _helpsh_.
 lines for _monit6_, _erchk_, _scnch_, and _helpsh_, you can use:
 
   cd
-  tail -n 24 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
+  tail -n 24 /usr2/fs/st.default/oper/.Xresources >>.Xresources
 
 * To add lines for just _erchk_, _scnch_, and _helpsh_, you can
 use:
 
   cd
-  tail -n 20 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
+  tail -n 20 /usr2/fs/st.default/oper/.Xresources >>.Xresources
 
 * To add lines for just _helpsh_, you can use:
 
   cd
-  tail -n 6 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
+  tail -n 6 /usr2/fs/st.default/oper/.Xresources >>.Xresources
 
 You can update _prog_'s _.Xresources_ file similarly, but you will
 need to be logged in as _prog_.
@@ -1161,7 +1155,7 @@ experiment. Start with using _drudg_ to rotate a schedule,
 __drudg__ing it to make _.snp_ and _.prc_ files, making listings, and
 any other pre-experiment preparation and tests you normally do, then
 execute part of schedule, and perform any normal post-experiment
-plotting and clean-up that you do.  The idea here is to verify that
+plotting and clean-up that you do. The idea here is to verify that
 everything works as you expect for normal operations.
 
 . _fesh_, if you use it:

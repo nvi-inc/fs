@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit System
-Version 0.7 - January 2021
+Version 0.8 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -215,7 +215,7 @@ computer, you can find its name with:
 +
 
 In the rest of this sub-step, the target _st-version_ will be used.
-You sould replace __version__ with your version number. For example,
+You should replace __version__ with your version number. For example,
 _1.0.0_, to make a target _st-1.0.0_. If your target is _st-0.0.0_ you
 should rename the default on the new computer first as described in
 the <<Rename default directories>> step above.
