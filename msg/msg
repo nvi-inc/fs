@@ -1213,6 +1213,8 @@ global session station send_to cc current_form auto_start put_into_log session F
     exec mailx -s "$session, $station, Stop-message" -c $cc $send_to < "/tmp/text_message.txt.$pid" &
    }
  
+   #check for log file
+   run_lognm
    if {$FS_is_running==1} {
     if {$put_into_log==1} {
      put_message_into_log
