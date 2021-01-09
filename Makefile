@@ -4,9 +4,16 @@ FS_DIRECTORY := $(shell echo $(pwd) | rev | cut -d/ -f1 | rev )
 #look for git first
 FS_COMMIT := $(shell git describe --always --tags 2>/dev/null)
 ifneq ($(FS_COMMIT),)
+#for old git, 1.5.6.5 in FSL8 anyway, --dirty isn't supported by
+# git describe, so we do a git diff HEAD instead (for all versions)
+# further, in 1.5.6.5, git diff HEAD --quiet thinks there is a change
+# after root does a make install, redirecting output has the opposite
+# problem, no changes are detected, but doing a git status first
+# seems to clean it up and seems benign for other versions
+FS_VERSION := $(shell git status 2>&1 >/dev/null)
 FS_VERSION := $(FS_COMMIT)$(shell git diff HEAD --quiet || echo "-dirty")
-#alternatvely an archive version
 else
+#alternatively, an archive version
 # there should be no other dashes except in the basename:
 #  fs-VERSION.SUBLEVEL.PATCHLEVEL-RELEASE
 #  -RELEASE is optional
