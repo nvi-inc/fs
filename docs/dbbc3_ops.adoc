@@ -1,0 +1,212 @@
+//
+// Copyright (c) 2021 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= VERY ROUGH DRAFT FS DBBC3 Operations Manual
+Version 0.1 - January 2021
+
+:toc:
+:sectnums:
+
+== Introduction
+
+This manual is intended to outline the model for FS operations with the DBBC3.
+
+== DBBC3 operations
+
+=== Initial configuration of the DBBC3
+
+When the DBBC3 is booted, it is assumed it is set-up according to 
+the "`Setting up the DBBC3 for DDC_U mode`" document.
+
+=== Ethernet configuration
+
+The Ethernet configuration of a Core3H board can be changed on demand with a
+predefined SNAP procedure with contents such as:
+
+....
+dbbc3=core3h=1,tengbcfg eth0 ip=192.168.1.16 gateway=192.168.1.1 nm=27
+dbbc3=core3h=1,tengbcfg eth1 ip=192.168.1.17 gateway=192.168.1.1 nm=27
+dbbc3=core3h=1,tengbarp eth0 2 00:60:dd:44:47:60
+dbbc3=core3h=1,tengbarp eth1 3 00:60:dd:44:47:61
+dbbc3=core3h=1,destination 0 192.168.1.2:46220
+dbbc3=core3h=1,destination 1 192.168.1.3:46221
+....
+
+NOTE: The above example is for one board. Multiple boards can combined in one
+procedure or one procedure can call a separate sub-procedure for each board.
+
+====
+
+Questions:
+
+. Is anything else needed for the Ethernet configuration?
+
+. Are there other things that would be useful to set from the FS? The mode is
+covered below.
+
+====
+
+=== Experiment mode configuration
+
+Due to certain changes in Core3H setup requiring a time sync afterwards, only
+one mode can be used schedule. The issue is that there is reluctance to perform
+the time sync without operator supervision.
+
+As a result, during the schedule, only the configuration of the Core3H boards
+are checked. A mechanism is provided to force the setting of the mode
+configuration. This can be used before the experiment starts to place the
+Core3H boards in the correct configuration without having to decode the
+schedule configuration and set the Core3H boards up manually.
+
+==== Configuring Core3H boards
+
+To force the Core3H boards to be configured:
+
+. _drudg_ the schedule to make the _.prc_ (and _.snp_) file
+. Start the FS
+. Open the experiment procedure library, e.g.:
+
+  proc=r4849kk
+
+. Execute the normal setup procedure with the `force` parameter, e.g.:
+
+  setup01=force
+
+For each Core3H that is in use, the following information will be sent, in this
+order:
+
+. Decimation
+. Bitmask
+. `vdif_frame ...`
+. `start vdif`
+
+For example:
+
+....
+core3h=1,vsi_samplerate 128000000 2
+core3h=1,vsi_bitmask 0xcccccccc
+core3h=1,vdif_frame 2 8 8000
+core3h=1,start vdif
+....
+
+If the board is not being used by the current mode, then the following is sent:
+
+....
+core3h=1,stop
+....
+
+==== Time sync
+
+Then the operator needs to sync each Core3H that is sending data, e.g.:
+
+....
+core3h=1,timesync
+core3h=1,start vdif
+....
+
+====
+Questions:
+
+[start=3]
+. Is this sufficient?
+
+. Since there is concern that this may not work correctly, how does one tell if
+was successful?
+
+. Can we skip the `start vdif` when setting the mode?
+
+====
+
+=== equip.ctl
+
+For DBBC3 use, the rack type in equip.ctl_ should be `dbbc3_ddc`.
+
+====
+
+Questions:
+
+[start=6]
+. Should we support  DDC_V?
++
+We can use `dbbc3_ddcu` and `dbbc3_ddcv`.
+
+. If we are supporting DDC_V, are there any differences besides:
++
+
+* Sending only one mask per board instead of four
+* Only having 32 MHz BW
+* Is splitmode always on?
+
+====
+
+== Other Features
+
+=== Minimizing use of setup procedures
+
+Normally, the FS sets the mode for each scan (unless there is continuous
+recording). If this takes too long or makes the equipment unstable, the _drudg_
+option `setup_proc yes` (#TODO: check final spelling#) in
+_skedf.ctl_ can be used to minimize the execution of the set-up.
+
+WARNING: Not executing the setup each scan may not be as robust if the
+equipment sometimes loses it configuration. It is up to the station to
+determine whether minimizing its use is better than always using it.
+
+With this enabled, _drudg_ will replace the calls to setup procedures (e.g.,
+`setup01`) in the _.snp_ file with, e.g.:
+
+ setup_proc=setup01
+
+When the FS encounters this command, it will conditionally execute the setup
+procedure if either of the following is true:
+
+* This is first setup since the schedule was last opened.
++
+
+This will make sure the setup is run at the start and any restart of the
+schedule.
+
+* If there was mode change, i.e., the name of the setup procedure changed.
+
+[NOTE]
+====
+
+The `setup_proc` option (#TODO: check final spelling#) in _skedf.ctl_ has three
+possible settings:
+
+* `yes` -- use the `setup_proc` command
+
+* `no`  -- do not use the `setup_proc` command
+
+* `ask` -- to prompt for `yes` or `no` for each schedule
+
+If the option is not used, it defaults to `no`.
+
+====
+
+NOTE: The `setup_proc` option applies to all systems, not just DBBC3
+
+=== jive5ab_cnfg procedure
+
+#TODO: Write this section#
+
+NOTE: This also applies to other Mark 5C and FlexBuff systems.
+
+//A new station procedure, `jive5an_cfng` is in
