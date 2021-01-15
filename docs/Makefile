@@ -22,14 +22,15 @@ DOC_DIR = releases misc
 
 .PHONY: all $(DOC_DIR)
 
-all: index.html $(DOC_DIR)
+all: index.html $(DOC_DIR) dbbc3_ops.html
 
 index.html: index.adoc
+dbbc3_ops.html: dbbc3_ops.adoc
 
 $(DOC_DIR):
 	$(MAKE) -C $@
 
 
 %.html: %.adoc
-	asciidoctor $^
+	asciidoctor -a toc $^
 
