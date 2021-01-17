@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 0.7 - January 2021
+Version 0.8 - January 2021
 
 :sectnums:
 :experimental:
@@ -164,21 +164,56 @@ Ed about it so that it can be added.
 
 == Cut-and-paste installation tips
 
-You can use cut-and-paste to reduce the amount of typing involved in
-the installation.  This reduces the chances of missing required spaces
-and other easily missed characters (like `.`) in the commands.  The
-basic idea is to have two different terminals open, _either_ (preferred)
-two different xterm terminals either on the local X display or
-remotely logged in _or_ (more cumbersome) two different VT text
-terminals (kbd:[Control+Alt+Fn]) on the FS computer you are
-upgrading.  You can then switch back and forth between the terminals,
-reading the instructions as you scroll through them (with _more_ or
-_less_) on one terminal and entering commands on the other.  You can
-cut-and-paste complicated commands from the terminal with the
-instructions to the terminal where you are entering commands as
-needed.  You can use _ssh_ or _su_ to switch users as needed on
-the terminal where you are entering commands. For example, you can
-change to being _prog_ by executing:
+You can use cut-and-paste (technically copy-and-paste) to reduce the
+amount of typing involved in the installation. This reduces the
+chances of missing required spaces and other easily missed characters
+(like `.`) in the commands.
+
+The basic approach is to view the instructions in a Web browser (or
+PDF viewer) window while working in a shell window that contains a
+session on the FS computer. This allows you to read the instructions
+and copy commands from them, pasting them into the shell window as
+needed.
+
+There are least two ways to arrange this:
+
+. Work from a different computer with a comfortable display, tools for
+Web browsing (or PDF viewing), and _ssh_ to reach the target computer.
++
+
+In this case you can read the instructions on the other computer,
+performing the installation steps in a shell window where you have
+connected to the FS computer. You can use the normal cut-and-paste
+tools of the other computer to copy input from the document and paste
+them into the session on the FS computer. If this is possible, it is
+often the most convenient.
+
+. Work on the X display of the FS.
++
+
+In this case you can use a Web browser (or PDF viewer) on the FS
+computer to read the document and a terminal to enter commends. This
+is very similar to the previous option, but may not have as much
+screen real estate to work with. You can switch between windows using
+the kbd:[Alt+Tab] short-cut.
++
+
+TIP: You may prefer to work in an _xterm_ other than the `login shell`
+since that _xterm_ normally requires using kbd:[Shift+Insert] to
+paste.
+
+NOTE: For previous updates a possible technique was to use console
+text terminals on the FS computer. You can use (kbd:[Control+Alt+Fn])
+to switch between a terminal to view the text instructions (with
+_less_) and a terminal for entering commands. This was always a
+cumbersome option. Now with the installation document in HTML format,
+it may no longer feasible unless you have a way to make a usable text
+version of the document. If you do, please let Ed know so that can be
+included here for others to use.
+
+You can use _ssh_ or _su_ to switch users as needed on in the window
+where you are entering commands. For example, you can change to being
+_prog_ by executing:
 
  ssh -X prog@localhost
 
@@ -190,11 +225,10 @@ Please don't forget to log back out when you need to change users
 again or you may develop a series of _nested_ logins.  Any steps that
 require rebooting will of course completely log out all of your
 terminals; you will need to re-login again from scratch to continue.
+
 At the end of the update, it is recommended that you login as _oper_
-on the local X display for the final testing.  Please also note that
-in order to paste into the X display login shell window for _oper_ and
-_prog_, you typically must use kbd:[Shift+Insert].  If you have any
-questions about how to cut-and-paste please email Ed.
+for testing with whatever configuration you usually use for
+operations.
 
 == Making a back-up before installing
 
