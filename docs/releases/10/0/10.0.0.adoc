@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 2.0 - January 2021
+Version 2.1 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -89,7 +89,7 @@ A new FS Linux distribution, FSL10 (based on Debian _Stretch_), is now
 available for 64-bit (and 32-bit) use. We recommend using this
 distribution if you would like to move to using a 64-bit OS or need a
 32-bit OS that is still under support (the base Debian distribution,
-_Wheezy_, used for FSL9, and those for older FSLx versions, are no
+_Wheezy_, used for FSL9, and those for older FSL__x__ versions, are no
 longer under support). This also may be an alternative for users with
 distributions (such as FSL7) that may be too old to support the
 current FS.  Installation instructions for FSL10 can be found at
@@ -348,7 +348,7 @@ If you are unable to install _git_ (or _git-core_), you can install
 the FS from an archive. Please follow these
 directions:
 
-. Stopping just _after_ the `*cd /usr2/fs-__tag__*` step, execute the steps in the
+. Stopping just _after_ the `**cd /usr2/fs-**__tag__` step, execute the steps in the
 <<../../misc/release_model.adoc#_installing_from_an_archive,Installing from an archive>>
 sub-section in the
 <<../../misc/release_model.adoc#,Release Model>> document.

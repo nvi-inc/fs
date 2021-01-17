@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 0.6 - January 2021
+Version 0.7 - January 2021
 
 :sectnums:
 :experimental:
@@ -79,7 +79,7 @@ http://www.metsahovi.fi/fs/dist/old/
 
 . The _.tgz_ archives can  be extracted from a local FS _git_ repo. In
 the following, use the tag of the release you want to extract, e.g.,
-_9.11.19_, in place of _tag_ in:
+_9.11.19_, in place of `_tag_` in:
 
 +
 
@@ -90,7 +90,7 @@ make TAG=_tag_ tag_archive
 ....
 +
 
-This will place the `fs-_tag_.tgz` archive in _/tmp_. In these
+This will place the _fs-<tag>.tgz_ archive in _/tmp_. In these
 archives, the files will have the prefix `usr2/fs-_tag_/`.
 
 . You can get a _.tar.gz_ archive from _github_ with:
@@ -103,7 +103,7 @@ wget https://github.com/nvi-inc/fs/archive/_tag_.tar.gz
 ....
 +
 
-This will place the `fs-_tag_.tar.gz` archive in the current
+This will place the _fs-<tag>.tar.gz_ archive in the current
 directory. In these archives, the files will have the prefix
 `fs-_tag_/`.
 
@@ -210,7 +210,7 @@ operational and test set-ups.
 
 Before you begin the upgrade make sure you have a current back-up of
 your system in case something goes wrong. If you are using one of the
-FSLx distributions, there are options for each below
+FSL__x__ distributions, there are options for each below.
 
 If you have SCSI disks, Section 5.7 of the FS9 _Computer Reference_
 manual has a discussion of drive ID numbers if you are unsure about
@@ -262,9 +262,8 @@ If you have an even older FS Linux distribution, please use the
 disk-to-disk back scheme described in Section 5.8 of the FS9 _Computer
 Reference_ manual.
 
-If you are running one of these FSLx distributions and do not have
-documentation on how to make a back-up, please email
-Ed for advice.
+If you are running one of these FSL__x__ distributions and do not have
+documentation on how to make a back-up, please email Ed for advice.
 
 === Using symbolic links
 
@@ -546,7 +545,7 @@ have multiple instances overlaying each other and not all be visible.
 NOTE: The FS protects against having more than one instance of certain
 programs, such as _fmset_, running.
 
-NOTE: FS display programs, such _monit2_, and other `monit__x__`
+NOTE: FS display programs, such _monit2_, and other _monit<x>_`
 programs end automatically if the FS is terminated.
 
 Some windows, in particular _xterm_ windows, have a `name` property

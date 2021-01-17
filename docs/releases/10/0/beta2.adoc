@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.6 - December 2020
+Version 1.7 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -78,7 +78,7 @@ A new FS Linux distribution, FSL10 (based on Debian _Stretch_), is now
 available for 64-bit (and 32-bit) use. We recommend using this
 distribution if you would like to move to using a 64-bit OS or need a
 32-bit OS that is still under support (the base Debian distribution,
-_Wheezy_, used for FSL9, and those for older FSLx versions, is no longer under
+_Wheezy_, used for FSL9, and those for older FSL__x__ versions, is no longer under
 support). This also may be an alternative for users with distributions
 (such as FSL7) that are too old to support the current FS.  Installation
 instructions for FSL10 can be found at
