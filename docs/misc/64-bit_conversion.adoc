@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit System
-Version 0.8 - January 2021
+Version 1.0 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -439,6 +439,17 @@ URL above. Alternatively, it can be viewed at
 _~/prog/go/src/github.com/dehorsley/unlongify/README.md_ where
 it was installed by the above command. Please pay particular
 attention to the `Note` about system calls.
+
+TIP: The _unlongify_ program attempts to process all _*.h_ and _*.c_
+files in the path specified as its argument. If it encounters a file
+with a syntax error, an error message will be printed and processing
+will stop. Presumably, this would not happen for files that are in
+active use, e.g., are referred to in __Makefile__s. However, there may
+be code with issues in files that are not currently used. If an error
+occurs, the messages should help you identify files with issues, which
+can moved (re)moved or corrected as appropriate. Thanks to Carlo
+Migoni (Sardinia) for reporting this and spurring the addition of file
+names to the error messages.
 
 === Make local software
 
