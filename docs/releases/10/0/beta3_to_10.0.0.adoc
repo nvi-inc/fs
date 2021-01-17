@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to FS 10.0.0 Update Notes
-Version 1.2 - January 2021
+Version 1.3 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -87,6 +87,24 @@ uses the script. Use _pfmed_ to make the changes.
 +
 
 Information about using _s_client_ can be found using `*help=sy*`.
+
+. If you initially installed a beta version from scratch (and in
+particular on FSL10) and are using _bash_ as your shell, you can
+change your configuration to prevent the _cd_ command from changing
+the `login shell` window title, if you would like. Doing so will keep
+the title of this dedicated-use window consistent with the
+documentation.
++
+
+To make this change, add the line:
+
+  login_sh*allowTitleOps: false
++
+
+to the `login shell` stanzas of your _~oper/.Xresources_ and
+_~prog/.Xresources_ files. See _st.default/~oper/.Xresources_ for an
+example. You will need to log-out and log back in again to make the
+change fully active.
 
 === Review changes
 
