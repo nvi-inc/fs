@@ -57,6 +57,7 @@ monit5*geometry:	46x3-0+157
 monit5.title:		Mark 5 Remaining Capacity
 !login shell
 login_sh.title:		login shell
+login_sh*allowTitleOps: false
 login_sh*scrollBar:	true
 login_sh*saveLines:	500
 login_sh*geometry:	107x24+0+0
