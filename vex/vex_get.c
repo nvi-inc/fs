@@ -28,6 +28,7 @@
 
 extern FILE * yyin;
 extern struct vex *vex_ptr;
+extern struct vex_version vex_version;
 
 /*---------------------------------------------------------------------------*/
 int vex_open(char *name, struct vex **vex)
@@ -97,7 +98,11 @@ get_scan_source(Llist *lowls_scan_in)
 
   lowls_this=lowls;
   lowls=lowls->next;
-  return ((Lowl *)lowls_this->ptr)->item;
+  if(vex_version.lessthan2)
+      return ((Lowl *)lowls_this->ptr)->item;
+  else
+      return ((Source *)((Lowl *)lowls_this->ptr)->item)->key;
+
 
 ldone:
   state=FALSE;
