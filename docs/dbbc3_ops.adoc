@@ -211,7 +211,7 @@ includes a call to the `jive5ab_cnfg` SNAP procedure. This procedure call is
 inserted immediately after the `mk5c_mode`/`fb_mode` command. The procedure
 is mode independent, i.e., the same procedure is used for all modes.
 
-This procedure a local `station` library procedure to allow tuning of the
+This procedure is a local `station` library procedure to allow tuning of the
 configuration of _jive5ab_ for the specifics of the recorder, including
 overriding the "`default`" configuration given by the `mk5c_mode`/`fb_mode`
 command.
@@ -219,14 +219,14 @@ command.
 ==== Default configuration
 
 The `mk5c_mode`/`fb_mode` command sends the follow commands depending on
-whether the recorder select in _equip.ctl_ is `mk5c` or `flexbuff`. It does
+whether the recorder selected in _equip.ctl_ is `mk5c` or `flexbuff`. It does
 _not_ depend on which command is used; `fb_mode` is just an alias for
-`mk5c_mode`. It does depends on the data type, VDIF or 5B/Ethernet. Thus there
+`mk5c_mode`. It does depend on the data type, VDIF or 5B/Ethernet. Thus there
 are two options for each recorder type. These are given below.
 
 ===== FlexBuff recorder
 
-For FlexBuff recorders, there is a variable field `_buffer_` in `net_protocol`
+For FlexBuff recorders, there is a variable field `_socketbuffer_` in the `net_protocol`
 command sent to the recorder.
 
 . VDIF data
@@ -235,7 +235,7 @@ command sent to the recorder.
 [subs="+quotes"]
 ....
 mtu = 9000 ;
-net_protocol = udpsnor : _buffer_ : 256000000 : 4 ;
+net_protocol = udpsnor : _socketbuffer_ : 256000000 : 4 ;
 ....
 
 . 5B/Ethernet data
@@ -244,14 +244,16 @@ net_protocol = udpsnor : _buffer_ : 256000000 : 4 ;
 [subs="+quotes"]
 ....
 mtu = 6000 ;
-net_protocol = udpsnor : _buffer_ : 256000000 : 4 ;
+net_protocol = udpsnor : _socketbuffer_ : 256000000 : 4 ;
 ....
 
-Where the _buffer_ field depends on the total data rate:
+Where the _socketbuffer_ field depends on the total data rate:
 
 *   32000000 -- data rate < 1 Gbps
 *   64000000 -- 1 Gbps < data rate <= 4 Gbps
 *  128000000 -- data rate > 4 Gbps
+
+The _socketbuffer_ parameter is an important setting trying to minimize risk of packet loss when starting the recording. For (very) high data rates, the `jive5ab_cnfg` procedure can be used to increase the _socketbuffer_ size to values appropriate for that. This assumes that the FlexBuff has been tuned (especially the kernel network buffer sizes) along the lines of https://www.jive.eu/~verkout/flexbuff/flexbuf.recording.txt[this flexbuff tuning documentation].
 
 ===== Mark 5C recorder
 
@@ -304,7 +306,7 @@ makes it a comment.
 
 If you use different values for `net_protocol`, you can leave any field blank
 that your don't need to change from what the FS has already sent. For example
-to only set the buffer size to `64000000` for all cases, use:
+to only set the socketbuffer size to `64000000` for all cases, use:
 
 ....
 net_protocol = : 64000000
@@ -316,12 +318,15 @@ Questions:
 
 [start=8]
 . Is the description correct for the above?
+Yes
 
 . Should we add guidelines for tuning parameters depending on the recorder?
+I've put in a link to the flexbuff tuning document
 
 . Are there other examples we should give?
 
 . Should `net_protocol` for Mark 5C have a value?
+No, Mark5C recording ignores the `net_protocol` - all is configured through `packet=...`
 
 . I know we decided to put this single file per thread option in
 `jive5ab_cnfg`, but I can't remember now if we thought it was because it would
@@ -330,6 +335,10 @@ am now thinking we might be able to add it as an option. A question is whether
 it is worthwhile. I don't know how many stations would use it. I guess Eskil
 would, but if so, is it better that commenting/un-commenting the relevant line
 in `jive5ab_cnf`?
+
+Actually - having it as a DRUDG option wouldn't be too bad! I think there is wider interest in this feature.
+And it would make it more predictable and convenient: stations can change as per experiment's request.
+
 +
 
 If we made it an option, it might be controlled by a _skedf.ctl_ option
@@ -351,5 +360,7 @@ Maybe we could have `skip` option (do nothing) for `ask` as well if it would be
 helpful.
 
 * The `thread` procedure would come after `mk5c_mode`/`fb_mode` and before `jive5ab_cnfg`.
+
+Yup, that would allow stations to still override things the FS and DRUDG have done so far
 
 ====
