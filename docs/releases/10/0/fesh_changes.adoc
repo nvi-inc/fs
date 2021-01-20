@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 fesh Changes
-Version 0.1 - December 2020
+Version 0.2 - December 2020
 
 :sectnums:
 :toc:
@@ -175,6 +175,6 @@ downloaded was fixed (closing
 https://github.com/nvi-inc/fs/issues/34[#34]). Thanks to Morgan
 Goodrich (KPGO) for reporting this.
 
-=== Internal version number removed
+=== Internal version print-out was changed.
 
-The internal version number was replaced with the FS version.
+The format of the version print-out was changed.

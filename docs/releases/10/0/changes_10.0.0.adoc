@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 0.4 - January 2021
+Version 0.5 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -31,9 +31,9 @@ Version 0.4 - January 2021
 
 == Introduction
 
-This document covers changes in FS _10.0.0_ compared to all versions
-FS9.  There are separate sections for the changes in the FS and
-_drudg_.  Each section is divided into three sub-sections:
+This document covers changes in FS _10.0.0_ compared to the latest
+versions of FS9. There are separate sections for the changes in the FS
+and _drudg_. Each section is divided into three sub-sections:
 
 . Changes that are in common since FS9
 +
@@ -45,16 +45,16 @@ VGOS. These are changes that have been introduced in version _10.0.0_.
 +
 
 These parts cover changes in comparison to the old main branch,
-specifically version _9.13.2_.  These are primarily features that were
+specifically version _9.13.2_. These are primarily features that were
 in the VGOS branch but not in the main branch.
 
 . Changes relative to the VGOS branch
 +
 
-These parts cover changes that in comparison to the VGOS branch,
-typically version _9.12.13_.  The VGOS branch diverged from the main
-branch at _9.11.2_. These parts primarily cover features that were
-introduced into the old main branch after _9.11.2_.
+These parts cover changes in comparison to the VGOS branch, typically
+version _9.12.13_. The VGOS branch diverged from the main branch at
+_9.11.2_. These parts primarily cover features that were introduced
+into the main branch after _9.11.2_.
 
 Clickable links such as
 https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
@@ -465,7 +465,7 @@ directory.  However, some systems have security policies that forbid
 that. This variable provides a way to have the _.netrc_ file in a
 different directory, perhaps _/usr2/control_.
 
-.. The internal version number was replaced with the FS version.
+.. The format of the version print-out was changed.
 
 . [[popen]] Add _popen_ time-out feature.
 +
@@ -804,9 +804,9 @@ The biggest consequence of this change is perhaps that strings sent in
 `antenna=...` commands to the antenna are not by default mapped to
 upper case. If this an issue for your antenna, it may require
 changes to your _antcn_ program. This is covered in the
-<<beta3.adoc#_case_sensitive_strings_in_antenna_commands,Case sensitive strings in antenna= commands>>
+<<10.0.0.adoc#_case_sensitive_strings_in_antenna_commands,Case sensitive strings in antenna= commands>>
 sub-step of the
-<<beta3.adoc#,FS 10.0.0-beta3 Update notes>> document.
+<<10.0.0.adoc#,FS 10.0.0-beta3 Update notes>> document.
 
 . [[tpicdno]] `tpicd=no` now requires a running (not halted) schedule
 to log data.
@@ -827,7 +827,7 @@ Currently this is only supported for RDBE racks and Mark 6 recorders.
 Please see the <<rdbe.adoc#_parallel_command_execution,Parallel
 command execution>> sub-section of the <<rdbe.adoc#,FS RDBE support>>
 document and the <<mk6.adoc#_parallel_command_execution,Parallel
-command execution>> sub-section of the <<mk6.adoc,FS Mark 6 support>>
+command execution>> sub-section of the <<mk6.adoc#,FS Mark 6 support>>
 document for more details.
 
 . [[rdbe]] Partial support for RDBE racks.
@@ -967,15 +967,17 @@ This change was made to accomodate having eight IFs for VGOS.
 This impacted the format of the _control/fscmd.ctl_ and
 _/usr2/st/stcmd.ctl_.
 
-. [[scripts]] A few experimental utilities were added.
+. [[scripts]] A few experimental, user beware, utilities were added.
 +
 
-CAUTION: These may change in the future.
+CAUTION: These may not work well for their intended purpose or at all.
+They are only intended for developers.  They may change in the future.
+
 +
 --
 In _misc/_:
 
-* _nptmon_ -- Simple NTP monitoring
+* _ntpmon_ -- Simple NTP monitoring
 
 * _time_delay_ -- Simple source acquisition time delay listing
 
@@ -984,8 +986,9 @@ In _misc/_:
 
 +
 
-The _chk_time_ directory contains a simple utility for checking for
-NTP time jumps.
+In _chk_time_/:
+
+*  _chk_time_ a simple utility for checking for NTP time jumps.
 
 . [[bugfixes]] Some bugs inherited from the main branch were fixed in
 the VGOS branch.  These fixes have now been included in the main
@@ -999,25 +1002,24 @@ apparently was relatively benign. Incorrect behavior, if any, was
 probably limited to using leading zeros, instead of blanks, in some
 fields.
 
-.. For the DBBC, incorrect logging of errors if here a problem
+.. For the DBBC, incorrect logging of errors if there was a problem
 retrieving class buffers of TPI data.
 
-.. The DBBC `cont_cal` error responses was incorrectly using the `df`
+.. The DBBC `cont_cal` error responses were incorrectly using the `df`
 code instead of `dd`.
 
-.. The `diskfile`, `disk_record`, `in2net` commands incorrectly
+.. The `disk_record`, `disk2file`, `in2net` commands incorrectly
 cleared the class number of responses twice if there was an error
 retrieving them when the recorder was commanded.
 +
 
 NOTE: The `disk_pos` command still has this error.
 
-.. Fixed checking unintialized variable for error in return to
-nominal position after an error in _fivpt_.
+.. Fixed checking uninitialized variable for an error when returning
+to nominal position after an error in _fivpt_.
 +
 
-This was apparently a relatively rare circumstance and relatively
-benign.
+This was apparently a benign bug.
 
 .. Corrected the order of `_wait_` and `_cal_` response fields in
 `fivept` `help` page,
@@ -1055,9 +1057,6 @@ details.
 . Prevent changing schedules while recording.
 
 . Fix a bug that caused _tpicd_ to crash for DBBC2.
-
-. Add a _flagr_ error if a source is not reached before the next is
-commanded.
 
 . Add a time-out feature in the `onsource` command to enable waiting
 for the source to be reached.
@@ -1176,21 +1175,6 @@ Several previously uninitialized variables are now initialized. As
 part of this `implicit none` was added to all FORTRAN routines that
 did not have it before, except for _xat.f_.
 
-. [[preob]] Fix missing `preob` when `EARLY` start is non-zero.
-+
-
-This was broken in the implementation of staggered start for FS
-_9.13.0_ and has been restored.
-
-. [[wait]] Add support for an additional wait at the end of recording
-for broadband.
-+
-
-This allows schedules to include a fixed amount of additional wait for
-buffering per station. This seems to be needed for Mark 6 recorders in
-configurations that otherwise would require no buffer time for disks
-that are slower than nominal.
-
 . [[comment]] Update comment on line three of _.snp_ files.
 +
 
@@ -1203,7 +1187,7 @@ replaced with the recorder type.
 
 Fixed bug in _reads.f_.
 
-. [[mask]] Fix crash if error in mask (closing
+. [[mask]] Fix crash due to an  error in a mask (closing
 https://github.com/nvi-inc/fs/issues/74[#74]).
 +
 
@@ -1226,9 +1210,17 @@ was not an experiment that included Medicina).
 === drudg changes relative to the main branch
 
 This update merges the VGOS branch into the main branch. The VGOS
-branch diverged from the main branch just after  _9.11.2_. This
-sub-section covers _drudg_ changes that were introduced in the VGOS
-branch and have been incorporated into the main branch as of _10.0.0_.
+branch diverged from the main branch just after  _9.11.2_. Except for
+the first item, this sub-section covers _drudg_ changes that were
+introduced in the VGOS branch and have been incorporated into the main
+branch as of _10.0.0_. The first item is a fix for a bug that
+originated on the main branch.
+
+. [[preob]] Fix missing `preob` when `EARLY` start is non-zero.
++
+
+This was broken in the implementation of staggered start for FS
+_9.13.0_ and has been restored.
 
 . Effective support for _broad band_ racks
 +
@@ -1255,7 +1247,7 @@ in the schedule:
 .. The total data rate used for observing
 .. The _drain rate_, the rate at which data is recorded.
 +
-If larger than the total rate, it is necessary to allow time after
+If smaller than the total rate, it is necessary to allow time after
 scan for the record buffer to drain.
 --
 +
@@ -1362,10 +1354,11 @@ is used to check the recording quality.
 === drudg changes relative to the VGOS branch
 
 This update merges the VGOS branch into the main branch. The VGOS
-branch diverged from the main branch just after _9.11.2_. This
-sub-section covers _drudg_ changes that occurred in the main branch
-from _9.11.2_ through _9.13.2_. These changes are covered extensively
-in several update notes in the _misc/_ subdirectory:
+branch diverged from the main branch just after _9.11.2_.  Except for
+the first item, this sub-section covers _drudg_ changes that occurred
+in the main branch from _9.11.2_ through _9.13.2_. Those changes are
+covered extensively in several update notes in the _misc/_
+subdirectory:
 
 * _fs9116up.txt_
 * _fs9118up.txt_
@@ -1373,8 +1366,18 @@ in several update notes in the _misc/_ subdirectory:
 * _fs9132up.txt_
 
 Rather that cover them fully here as well, only a brief summary is
-provided below.  Please check the files listed above for the full
-details.
+provided below. Please check the files listed above for the full
+details. The first item below is an enhancement that was added for
+VGOS use.
+
+. [[wait]] Add support for an additional wait at the end of recording
+for broadband.
++
+
+This allows schedules to include a fixed amount of additional wait for
+buffering per station. This seems to be needed for Mark 6 recorders in
+configurations that otherwise would require no buffer time for disks
+that are slower than nominal.
 
 . Fix for a bug that caused the IF configuration to be lost if the
 schedule specified an unrecognized rack type.
@@ -1398,7 +1401,7 @@ types in the schedule.
 . Add support for the DBBC2 PFB personality, rack types: `dbbc_pfb`
 and `dbbc_pfb/fila10g`.
 
-. Add support two VSI outputs for DBBC2 racks feeding a FiLa10G.
+. Add support for two VSI outputs for DBBC2 racks feeding a FiLa10G.
 
 . Make _drudg_ backward compatible with old DBBC2 `dbbc` and
 `dbbc/fila10g` rack types, treating them as `dbbc_ddc` and
