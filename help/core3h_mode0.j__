@@ -79,52 +79,52 @@ Mask1 represents the first eight BBCs for a Core3h board; mask2, the
 second eight. In the table, the first eight BBCs for a board are
 generically numbered 1-8; the second eight, 9-16.
 
- Bit   Mask1    Mask2
-  1     1US      9US
-  2     1UM      9UM
-  3     1LS      9LS
-  4     1LM      9LM
-  5     2US     10US
-  6     2UM     10UM
-  7     2LS     10LS
-  8     2LM     10LM
-  9     3US     11US
- 10     3UM     11UM
- 11     3LS     11LS
- 12     3LM     11LM
- 13     4US     12US
- 14     4UM     12UM
- 15     4LS     12LS
- 16     4LM     12LM
- 17     5US     13US
- 18     5UM     13UM
- 19     5LS     13LS
- 20     5LM     13LM
- 21     6US     14US
- 22     6UM     14UM
- 23     6LS     14LS
- 24     6LM     14LM
- 25     7US     15US
- 26     7UM     15UM
- 27     7LS     15LS
- 28     7LM     15LM
- 29     8US     16US
- 30     8UM     16UM
- 31     8LS     16LS
- 32     8LM     16LM
- 
+ Bit   Mask2  Mask1
+  1     9US    1US
+  2     9UM    1UM
+  3     9LS    1LS
+  4     9LM    1LM
+  5    10US    2US
+  6    10UM    2UM
+  7    10LS    2LS
+  8    10LM    2LM
+  9    11US    3US
+ 10    11UM    3UM
+ 11    11LS    3LS
+ 12    11LM    3LM
+ 13    12US    4US
+ 14    12UM    4UM
+ 15    12LS    4LS
+ 16    12LM    4LM
+ 17    13US    5US 
+ 18    13UM    5UM 
+ 19    13LS    5LS 
+ 20    13LM    5LM 
+ 21    14US    6US
+ 22    14UM    6UM
+ 23    14LS    6LS
+ 24    14LM    6LM
+ 25    15US    7US
+ 26    15UM    7UM
+ 27    15LS    7LS
+ 28    15LM    7LM
+ 29    16US    8US
+ 30    16UM    8UM
+ 31    16LS    8LS
+ 32    16LM    8LM
+
 The number of BBCs available per board may be 8, 12, or 16 depending on the
 hardware configuration. The BBCs for each mask for each board are:
 
-Board  Mask1     Mask2
-  1     1- 8    65- 72
-  2     9-16    73- 80
-  3    17-24    81- 88
-  4    25-32    89- 96
-  5    33-40    97-104
-  6    41-48   105-112
-  7    49-56   113-120
-  8    57-64   121-128
+Board  Mask2  Mask1
+  1   65- 72   1- 8
+  2   73- 80   9-16
+  3   81- 88  17-24
+  4   89- 96  25-32
+  5   97-104  33-40
+  6  105-112  41-48
+  7  113-120  49-56
+  8  121-128  57-64
 
 For a DBBC3 DDCV personality only a decimation of '2' or sample rate
 of '64' are allowed.
