@@ -1,6 +1,6 @@
 core3h_modex - set core3h mode (DBBC3 rack)
 
-Syntax:   core3h_mode=state
+Syntax:   core3h_mode0=state
           core3h_modeX=mask2,mask1,decimation,sample,okay
           core3h_modeX=stop
 
@@ -58,10 +58,10 @@ sample rate is shown in parentheses for informational purposes only.
 The state values of 'begin' and 'end' mark the beginning and end of
 Core3h configuration for a mode. For example:
 
-   core3h_mode=begin
+   core3h_mode0=begin
    core3h_mode1=...
    ...
-   core3h_mode=end
+   core3h_mode0=end
 
 Up to the total number of Core3h boards in the rack (the maximum is
 set in dbbc3.ctl) can be set-up between the 'begin' and 'end'. Any

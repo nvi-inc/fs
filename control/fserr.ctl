@@ -2724,7 +2724,7 @@ DR -303
 Can't specify mask2 for more BBCs per IF set in dbbc3.ctl.
 ""
 DR -304
-core3h_mode command only accepts one parameter.
+core3h_mode0 command only accepts one parameter.
 ""
 DR -305
 state parameter must be either 'begin' or 'end'.
