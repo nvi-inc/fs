@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 0.5 - January 2021
+Version 0.6 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -363,7 +363,7 @@ https://github.com/nvi-inc/fs/issues/56[#56]). Thanks to Richard
 Blaauw (WSRT), and subsequently Jon Quick (HartRAO) for reporting
 this.
 
-. [[scnch]] Generalize the _scnch_ window to cover Mark 5 recorders. 
+. [[scnch]] Generalize the _scnch_ window to cover Mark 5 recorders.
 +
 
 The _scnch_ window was initially developed for Mark 6 recorders. The
@@ -598,7 +598,7 @@ _skdrutil/_, _vex/_, and the _drudg/_ sub-directories
 +
 
 NOTE: Since _third_party_ has no other dependencies, it does not have
-this issue. 
+this issue.
 
 . [[noserver]] Add option to not build the display server into the FS.
 +
@@ -1222,7 +1222,7 @@ originated on the main branch.
 This was broken in the implementation of staggered start for FS
 _9.13.0_ and has been restored.
 
-. Effective support for _broad band_ racks
+. [[broadband]] Effective support for _broad band_ racks
 +
 
 _drudg_ provides effective, but not complete, support for broad band
@@ -1413,3 +1413,9 @@ and `dbbc_pfb/fila10g`.
 sampling rates.
 
 . Add ad hoc support for so-called "`staggered start`" mode.
+
+. Add support for DBBC2 `geo` mode.
+
+. Add support for DBBC2 use of the _VSI2_ output by itself and with _VSI1_.
+
+. Use only the _skedf.ctl_ control file in _/usr2/control/_.
