@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta1 to FS 10.0.0-beta2 Update Notes
-Version 1.2 - December 2020
+Version 1.3 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -397,10 +397,13 @@ controlled locally.
 
 . [[tmout]] Move unsetting of `TMOUT` environment variable for _oper_ to
 _~/.bashrc_ in the default files. This allows all interactive
-shells to disable the time-out. Additionally, some settings were
-rearranged in _~/.bashrc_ to make them only apply to interactive
-shells (this was also done for _prog_ and AUID accounts). This
-change is only relevant for stations using FSL10.
+shells to disable the time-out.
++
+
+Additionally, some settings were rearranged in _~/.bashrc_ to make
+them only apply to interactive shells (this was also done for _prog_
+and AUID accounts). This change is only relevant for stations using
+FSL10.
 
 . [[dbbcn]] Improve error logging for _dbbcn_. The name of the program is now
 correctly displayed.

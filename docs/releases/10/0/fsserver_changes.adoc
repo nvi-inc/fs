@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 fsserver Changes
-Version 0.1 - December 2020
+Version 0.2 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -118,16 +118,14 @@ that suits their needs, e.g. SSH port forwarding or HTTP proxying.
 
 === Updated nng library
 
-The fifth and final major change is that this patch also upgrades
-the included messaging library _nng_ to version _1.3.0_.
+The fifth and final major change is that this patch also upgrades the
+included messaging library _nng_ to version _1.3.0_. This brings with
+it some performance improvements and bug fixes.
 
-This brings with it some performance improvements and bug fixes, the
-most obvious to FS users caused some _ssub_ instances in "`wait`" mode
-to use a high amount of CPU time.  However, some or all of the speed
-improvement may have been lost in
-<<changes_10.0.0.adoc#serverbuild,making the server build work for FSL8 (_Lenny_)>>
-described in the 
-<<changes_10.0.0.adoc#,Changes from FS9>> document.
+Thanks to Jon Quick (HartRAO) for special effort fixing the _Makefile_
+for FSL8. He also added documentation file
+_third_party/src/README_nng.make_ to assist with future upgrades of
+_nng_.
 
 === Bug fixes
 

@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 0.6 - January 2021
+Version 0.7 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -649,134 +649,6 @@ _prog_.
 
 This was a long standing but benign error in the _misc/fsinstall_
 script.
-
-. [[serverbuild]] Modify the display server build so that it will
-work for FSL8. (The
-change that prevented it from building on FSL8 was introduced in
-_beta2_ and fixed in _beta3_.)
-+
-
-Thanks to Jon Quick (HartRAO) for special effort on this (fully
-closing https://github.com/nvi-inc/fs/issues/76[#76] and closing
-https://github.com/nvi-inc/fs/issues/78[#78]) including adding
-documentation, _third_party/src/README_nng.make_, to assist with
-future upgrades of _nng_.
-
-. [[if]] Restore `if` command. (It had accidentally been overlooked in
-the merge of the VGOS and main branches. It was first missing in
-_beta1_ and was restored in _beta2_.)
-+
-
-Thanks to Beppe Maccaferri (Medicina) for reporting this.
-
-. [[gnpltfsl8]] Make _gnplt_ work on FSL8 (_Lenny_) again. (These
- errors were introduced in _beta1_ and fixed in _beta3_.)
-+
-
-Some recent improvements in _gnplt_ made it fail for FSL8. These were
-fixed (closing https://github.com/nvi-inc/fs/issues/73[#73]).
-
-. [[onoff]] Fix _onoff_ for the DBBC3 rack. (This error was introduced
-in _beta1_ and fixed in _beta2_.)
-+
-
-A code block from _9.12.13_ in _onoff/get_samples.c_ had been omitted
-in the merge of the main and VGOS branches, preventing sampling of the
-TPI values and causing _onoff_ to crash. This has been fixed
-(closing https://github.com/nvi-inc/fs/issues/52[#52]). Thanks to
-Eskil Varenius (Onsala) for reporting that this caused a crash.
-
-. [[dbbc3help]] Restore `help` command for DBBC3 commands. (The
-selection of DBBC3 specific `help` commands was lost in _beta1_ from
-the merge of VGOS and main branches.  It was restored in _beta3_).
-
-. [[stationrdbemsg]] Remove hard coding of the station name in
-_rdbemsg_. (This error was introduced in _beta1_ and fixed in _beta3_.)
-+
-
-The station name is now set in _rdbemsg.ctl_ control file (closing
-https://github.com/nvi-inc/fs/issues/62[#62]). Thanks to Chevo Terraza
-(MGO) for reporting this issue.
-
-. [[equip.ctl]] Update example _equip.ctl_ for DBBC3.
-
-.. The example DBBC3 firmware version is now more sensible (closing
-https://github.com/nvi-inc/fs/issues/35[#35]). (This error was
-introduced in _beta1_ and fixed in _beta2_.) Thanks to Eskil Varenius
-(Onsala) for reporting this.
-
-.. The minimum DBBC3 firmware version required was added in a comment.
-
-. [[bash]] Fixes to _~/.bashrc_ for FSL10.  (This changed from _beta1_
-to  _beta2_.)
-
-.. Move unsetting of `TMOUT` environment variable for _oper_ to
-_~/.bashrc_ in the default files. This allows disabling the time-out
-for all interactive shells.
-
-.. Some settings were rearranged in _~/.bashrc_ to make them only
-apply to interactive shells for _oper_, _prog_, and AUID accounts.
-
-+
-
-These changes are only relevant for stations using FSL10.
-
-. [[gpl]] Update GPL in files. (The GPL was left out of some files and
-incorrectly include in some others in _beta1_. These errors were
-corrected in _beta2_ and _beta3_.)
-+
-
-The GPL header was added to the _holog/MASK/\*.m_, _misc/mk6in/*_, and
-the _include/*.i_ files. It was removed from the
-_fserver/tests/convey.*_ files.
-
-. [[updatenotes]] Improve update notes. (These changes were
-made after _beta1_.)
-
-.. The `-q` option was added to the `pull` to suppress the detached
-HEAD warning.
-
-.. A sentence was added to the description of the change to using
-_git_ that it now even more important to not change the contents
-of the _/usr2/fs_ source tree.  Changing the source tree will make
-it harder to install bug fixes and updates.
-
-.. The paths to the example control files now include the needed
-intermediate directory _fs/_.
-
-.. The sub-steps for updating the control files were corrected
-to properly
-depend or not depend on the old version being _9.12.12_.
-
-.. A sub-step was added to make using the FS display server the default.
-
-.. A sub-step was added for updating the _~/.Xresources_ file for _oper_
-and _prog_.
-
-.. A sub-step to update where the `TMOUT` environment variable is unset
-for stations using FSL10 was added.
-
-.. A recommendation was added to sign-up for the _go_ language
-announcements to be informed of security updates if you are
-installing the latest version of _go_ language.
-
-.. Modify steps for updating to a specific commit after _beta2_ to
-use the latest commit instead. As well as being
-simpler, this is part of a new approach to try to keep the update
-notes current with the latest commit. It is important
-to be aware that the latest commit is not a version
-intended for operations. We make every effort to make sure it is
-bug free, but problems may occur. Since it represents the
-"`bleeding edge`" of development, features may not be as stable nor
-use as reliable as released (tagged) versions.
-
-.. Add the inclusion of the new _rdbemsg_ utility as a change. It was
-not mentioned for _beta1_ or _beta2_.
-
-.. Add _rdbemsg.ctl_ customization. It was missing in _beta1_.
-
-.. Add replacing obsolete TCP client scripts with _s_client_. It was
-added in _beta3_.
 
 === FS changes relative to the main branch
 
