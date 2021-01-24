@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 2.1 - January 2021
+Version 2.2 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -184,6 +184,8 @@ This section provides links to some other useful documents.
 
 * <<beta2_to_beta3.adoc#,FS 10.0.0-beta2 to FS 10.0.0-beta3 Update Notes>>
 
+* <<beta3.adoc#,FS 10.0.0-beta3 Update Notes>>
+
 * <<beta3_to_10.0.0.adoc#,FS 10.0.0-beta3 to FS 10.0.0 Update Notes>>
 
 * <<10.0.0_to_latest.adoc#,FS 10.0.0 to Latest Commit Update Notes>>
@@ -256,7 +258,7 @@ FS and 64-bit upgrade are:
 
 . Follow the steps in the
 <<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit System>> document
-down to the 
+down to the
 <<../../../misc/64-bit_conversion.adoc#_make_local_software,Make local software>>
 step. Instead of following that step, return to the next step in this *TIP*.
 +
@@ -467,7 +469,7 @@ are four possible issues:
 
 . <<Conversion of FORTRAN code>>
 . <<Case sensitive strings in antenna= commands>>
-. <<Update local lo command>>
+. <<Update local lo/lo_config commands>>
 . <<Update metserver>>
 
 They are discussed next.
@@ -525,18 +527,23 @@ The former choice is probably easier, but in some cases the second is
 probably better (it keeps with the spirit of case sensitivity). If you
 have questions about which to use and how to do it, please email Ed.
 
-==== Update local lo command
+==== Update local lo/lo_config commands
 
-If you don't have a local `lo` command, you should skip this sub-step.
+If you don't have a local (station) `lo` or `lo_config` command, you
+should skip this sub-step.
 
-If you have a local (station) `lo` command, you will need to update it
-(or replace it, see the next paragraph) to get full support for rack
-types that were not in your previous FS9 version and to implement the
-new capability described in the
+* Local `lo` command
++
+
+If you have a local `lo` command, you will need to update it (or
+replace it, see the next paragraph) to get full support for rack types
+that were not in your previous FS9 version and to implement the new
+capability described in the
 <<changes_10.0.0.adoc#logrxg,logging .rxg files>> change (in the
 <<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
 sub-section of the
 <<changes_10.0.0.adoc#,Changes from FS9>> document).
++
 
 You should consider switching to use the new version of the  `lo`
 command described in the <<changes_10.0.0.adoc#lohooks,LO hooks>> change (in the
@@ -547,6 +554,17 @@ approach may not be suitable for all stations, but it may work
 well for your station. If so, it should reduce, and in most cases
 eliminate, the need to update your local software when the FS `lo`
 command changes in the future.
+
+* Local `lo_config` command
++
+
+Likewise, if you have a local `lo_config` command, it will need to be
+updated to get full support for the new rack types. You should also
+consider switching to using the new hook for this
+described in the <<changes_10.0.0.adoc#lohooks,LO hooks>> change (in the
+<<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
+sub-section of the
+<<changes_10.0.0.adoc#,Changes from FS9>> document).
 
 ==== Update metserver
 

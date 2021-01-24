@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to FS 10.0.0 Update Notes
-Version 1.3 - January 2021
+Version 1.4 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -60,6 +60,16 @@ execute:
 No output from the last command indicates a successful _make_.
 
 === Additional steps
+
+. If you have a station `lo_config` command, you should make sure it
+has been updated as described in the
+<<10.0.0.adoc#_update_local_lolo_config_commands,Update local lo/lo config commands>>
+sub-step of the
+<<10.0.0.adoc#_update_station_programs,Update station programs>>
+step in the <<10.0.0.adoc#,FS 10.0.0 Update Notes>> document. Although
+updating the `lo` command was mentioned for the update to
+__10.0.0-beta3__, updating the `lo_config` command was omitted from
+some versions of the instructions.
 
 . If you use _metserver_ as a local program and you updated to FS10
 from a VGOS branch, you may want to update to the new version. It
