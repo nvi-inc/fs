@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 0.7 - January 2021
+Version 0.8 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -182,6 +182,13 @@ steps in making a release.
 .. Add <<../../../misc/env_vars.adoc#,FS Environment Variables>>
 document. This document describes user settable environment variables
 for both _make_ time and runtime.
+
+.. Add strategy for setting the `geometry` resource for an _xterm_
+window (and others with a `name` property) in the
+<<../../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting
+geometry values in .Xresources>> section of the
+<<../../misc/install_reference.adoc#,Installation Reference>>
+document.
 
 .. Improve structure and correct some errors from original _.txt_ version.
 

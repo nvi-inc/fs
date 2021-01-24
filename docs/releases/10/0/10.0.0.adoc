@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 2.2 - January 2021
+Version 2.3 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -997,16 +997,19 @@ Information about using _s_client_ can be found using `*help=sy*`.
 
 === Miscellaneous FS related changes
 
-There are three changes:
+There are four changes:
 
 . <<Set FS_DISPLAY_SERVER>> environment variable for _oper_ and
 _prog_. This is only needed if you were not running the FS display
 server before.
 
-. <<Update .Xresources>> file for the _oper_ and _prog_ accounts.
-
 . <<Set environment variables for fesh>>. These are optional changes
 to consider if you use _fesh_.
+
+. <<Update .Xresources>> file for the _oper_ and _prog_ accounts.
+
+. <<Update .fvwm2rc>> file to prevent some new windows from getting
+the focus.
 
 ==== Set FS_DISPLAY_SERVER
 
@@ -1048,6 +1051,44 @@ file, you can uncomment or insert
 
 . You should  make the corresponding change for _prog_ while logged
 in as _prog_.
+
+==== Set environment variables for fesh
+
+These are optional changes that should be considered if you use _fesh_.
+
+. The _fesh_ script uses _cddis_ as the default data center. You can
+specify a different data center by setting the `FESH_DATA_CENTER`
+environment variable. Available data centers for geodesy are _bkg_,
+_cddis_, and _opar_; for astronomy, _vlbeer_.
++
+
+TIP: For FSL8 and other old Linux distributions, access to _cddis_ may
+not be possible, due to out-of-date certificates (for both FTP-SSL or
+HTTPS). If you are in that situation, _bkg_ or _opar_ may be suitable
+alternatives.
+
+. The _fesh_ script uses FTP-SSL as the default access method for the
+_cddis_ data center. For this case, you can avoid having to answer a
+prompt for your email address each time you run _fesh_  by setting
+your email address in the `FESH_EMAIL` environment variable.
++
+
+TIP: The FTP-SSL method may not work from behind some firewalls.  If
+it doesn't work for you, either use a different data center (see
+above) or use HTTPS for _cddis_ (see below).
+
+. You can change the access method for _cddis_ to HTTPS, by setting
+the `FESH_CDDIS_METHOD` environment variable to `https`.
++
+
+NOTE: Using HTTPS requires an _EarthData_ login and setting it in
+your _.netrc_ file.  If you don’t have an _EarthData_ login, you
+should be able to get one by selecting `REGISTER` at:
+https://urs.earthdata.nasa.gov/.
+
+A more complete description of the new features in _fesh_ is available
+in the <<fesh_changes.adoc#,FS 10.0.0 fesh Changes>> document. Please
+use `*fesh -h*` for more information on using these features.
 
 ==== Update .Xresources
 
@@ -1119,43 +1160,24 @@ use:
 You can update _prog_'s _.Xresources_ file similarly, but you will
 need to be logged in as _prog_.
 
-==== Set environment variables for fesh
+==== Update .fvwm2rc
 
-These are optional changes that should be considered if you use _fesh_.
+. If you use the X display on console, you may want to update your
+_~/.fvm2rc_ files for the new programs _erchk_, _scnch_, and _monan_,
+so they will never get the focus. This done by adding the lines:
 
-. The _fesh_ script uses _cddis_ as the default data center. You can
-specify a different data center by setting the `FESH_DATA_CENTER`
-environment variable. Available data centers for geodesy are _bkg_,
-_cddis_, and _opar_; for astronomy, _vlbeer_.
+  Style "erchk" NeverFocus
+  Style "scnch" NeverFocus
+  Style "monan" NeverFocus
 +
 
-TIP: For FSL8 and other old Linux distributions, access to _cddis_ may
-not be possible, due to out-of-date certificates (for both FTP-SSL or
-HTTPS). If you are in that situation, _bkg_ or _opar_ may be suitable
-alternatives.
+You can compare _oper_'s version of the file with the new default
+using:
 
-. The _fesh_ script uses FTP-SSL as the default access method for the
-_cddis_ data center. For this case, you can avoid having to answer a
-prompt for your email address each time you run _fesh_  by setting
-your email address in the `FESH_EMAIL` environment variable.
-+
+  cd
+  diff .fvwm2rc /usr2/fs/st.default/oper
 
-TIP: The FTP-SSL method may not work from behind some firewalls.  If
-it doesn't work for you, either use a different data center (see
-above) or use HTTPS for _cddis_ (see below).
-
-. You can change the access method for _cddis_ to HTTPS, by setting
-the `FESH_CDDIS_METHOD` environment variable to `https`.
-+
-
-NOTE: Using HTTPS requires an _EarthData_ login and setting it in
-your _.netrc_ file.  If you don’t have an _EarthData_ login, you
-should be able to get one by selecting `REGISTER` at:
-https://urs.earthdata.nasa.gov/.
-
-A more complete description of the new features in _fesh_ is available
-in the <<fesh_changes.adoc#,FS 10.0.0 fesh Changes>> document. Please
-use `*fesh -h*` for more information on using these features.
+. You can make the same change for _prog_, after logging into that account,
 
 === Miscellaneous FSLx changes
 
