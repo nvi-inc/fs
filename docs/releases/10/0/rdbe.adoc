@@ -19,7 +19,7 @@
 //
 
 = FS RDBE Support
-Version 0.2 - January 2021
+Version 0.3 - January 2021
 
 :sectnums:
 :toc:
@@ -49,7 +49,7 @@ polarization for that band on each of the two IFs.
 .Typical RDBE VGOS configuration
 [cols="^,^,^,^,^,^,^,^"]
 |=================
-| RDBE |Band|Frequency| IF0 pol| IF1 pol| Control File| Control Program| Mult-cast program
+| RDBE |Band|Frequency| IF0 pol| IF1 pol| Control File| Control Program| Multi-cast program
 
 |  A   | A  | 3 GHz   |  H     |  V     | _rdbca.ctl_ | _rdbca_        | _rdtca_
 |  B   | B  | 5 GHz   |  H     |  V     | _rdbcb.ctl_ | _rdbcb_        | _rdtcb_
@@ -85,7 +85,7 @@ all reported. All but the last are reported by the command itself. The
 last is returned and reported as the final status of the command.
 
 * Logged responses from the devices may occur in what appears to be
-in random order. Although communication with devices is initiated in
+random order. Although communication with devices is initiated in
 sequential order, variations in response time can cause the responses
 to arrive in a different order. The responses are logged in the order
 received.
@@ -138,9 +138,13 @@ The `rdbe` command can be used to communicate directly with an
 individual RDBE or all active RDBEs in parallel, as described in
 the <<Parallel command execution>> sub-section above. A semi-colon is
 appended to any string being sent if it not the last character
-already. A newline (`0xa`) is also appended. Please see the RDBE
-documentation for full details, but you can query a single RDBE, say
-`a`, with:
+already. A newline (`0xa`) is also appended.
+
+For full details on the RDBE command set, see the RDBE documentation:
+
+https://www.haystack.mit.edu/wp-content/uploads/2020/07/memo_mark-5_090.1.pdf
+
+Additionally, you can query a single RDBE, say `a`, with:
 
   rdbea=help?
 
