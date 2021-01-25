@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -925,7 +925,9 @@ C 5B clock rate
       call fs_get_dbbcddcvl(dbbcddcvl)
       call fs_get_dbbcddcv(dbbcddcv)
       if(m5bcrate.eq.'nominal') then
-         if(drive(1).eq.MK5.and.
+         if(rack.eq.DBBC3) then
+           m5b_crate=128
+         else if(drive(1).eq.MK5.and.
      &        (drive_type(1).eq.MK5B.or.drive_type(1).eq.MK5B_BS.or.
      &         drive_type(1).eq.MK5C.or.drive_type(1).eq.MK5C_BS.or.
      &         drive_type(1).eq.FLEXBUFF)) then
