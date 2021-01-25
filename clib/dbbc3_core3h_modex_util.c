@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -238,9 +238,8 @@ void vsi_samplerate_2_dbbc3_core3h(ptr,lclc,board)
     struct dbbc3_core3h_modex_cmd *lclc;
     char board[ ];
 {
-// Disabled for now
-//    sprintf(ptr,"core3h=%1.1s,vsi_samplerate %d  %d",board,
-//            (int) (shm_addr->m5b_crate*1.0e6+0.5),lclc->decimate.decimate);
+    sprintf(ptr,"core3h=%1.1s,vsi_samplerate %d  %d",board,
+            (int) (shm_addr->m5b_crate*1.0e6+0.5),lclc->decimate.decimate);
 
 }
 void vdif_frame_2_dbbc3_core3h(ptr,lclc,board)

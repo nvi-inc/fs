@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -184,19 +184,17 @@ parse:
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
-    /* do we need this?
-       vsi_samplerate_2_dbbc3_core3h(outbuf,&lcl,board[itask-30]);
-       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-       out_recs++;
-     */
-
-    vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[itask-30]);
+    vsi_samplerate_2_dbbc3_core3h(outbuf,&lcl,board[itask-30]);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
     strcpy(outbuf,"core3h=");
     strcat(outbuf,board[itask-30]);
-    strcat(outbuf,",start vdif");
+    strcat(outbuf,",reset");
+    cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+    out_recs++;
+
+    vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[itask-30]);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
