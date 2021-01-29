@@ -3,7 +3,7 @@
             Syntax:     lo=chan,freq,sb,pol,pcspace,pcoff
 
             Response:   lo/chan,freq,sb,pol,pcspace,pcoff
-                        lo/rxg,chan,freq,pol,rxg_file,year,month,day,pol1,dpfu1,pol2,dpfu2
+                        lo/rxg,chan,freq,pol,file,type,lo1,lo2,year,month,day,pol1,dpfu1,pol2,dpfu2
 
 Settable parameters:
 
@@ -31,17 +31,20 @@ Settable parameters:
 Monitor-only Parameters:
 
         rxg      literal text, 'rxg', to indicate this line has '.rxg'
-                 file info for the LO 'chan'
-        rxg_file name of the '.rxg' file that matched the LO value;
+                 file information for the LO 'chan'
+        file     name of the '.rxg' file that matched the LO value;
                  'undefined' if there was no match, in that case the
                  remaining fields are omitted
+        type     LO type from '.rxg' file: 'fixed' or 'range'
+        lo1      first LO value from '.rxg' file, MHz
+        lo2      second LO value from '.rxg' file, if present, MHz
         year     the year from the date in the '.rxg' file
         month    the month from the date in the '.rxg' file
         day      the day from the date in the '.rxg' file
         pol1     first polarization from the '.rxg' file
         dpfu1    DPFU of the first polarization in the '.rxg' file
-        pol2     second polarization from the '.rxg' file
-        dpfu2    DPFU of the second polarization in the '.rxg' file
+        pol2     second polarization from the '.rxg' file, if present
+        dpfu2    DPFU of the second polarization in the '.rxg' file, if present
 
 Comments: 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -38,6 +38,7 @@ void log_rxgfile(lo)
 
     size_t start;
     char output[256];
+    int idec, pos;
 
     ir=get_gain_rxg(lo+1,&shm_addr->lo);
     if(ir<0)
@@ -61,15 +62,40 @@ void log_rxgfile(lo)
     else if(shm_addr->rxgain[ir].type=='r')
         strcat(output,"range");
     strcat(output,",");
-    snprintf(output+strlen(output),
-            sizeof(output)-strlen(output),
-            "%.6f",shm_addr->rxgain[ir].lo[0]);
+
+    idec=6;
+    if(shm_addr->rxgain[ir].lo[0] >= 1.0) {
+        idec-=log10(shm_addr->rxgain[ir].lo[0]);
+        if(idec < 0)
+            idec=0;
+    }
+    dble2str(output,shm_addr->rxgain[ir].lo[0],35,idec);
+    pos=strlen(output)-1;
+    while(output[pos]=='0') {
+        output[pos]='\0';
+        pos=strlen(output)-1;
+    }
+    pos=strlen(output)-1;
+    if(output[pos]=='.')
+        output[pos]='\0';
 
     if(shm_addr->rxgain[ir].lo[1]>=0) {
         strcat(output,",");
-        snprintf(output+strlen(output),
-                sizeof(output)-strlen(output),
-                "%.6f",shm_addr->rxgain[ir].lo[1]);
+        idec=6;
+        if(shm_addr->rxgain[ir].lo[1] >= 1.0) {
+            idec-=log10(shm_addr->rxgain[ir].lo[1]);
+            if(idec < 0)
+                idec=0;
+        }
+        dble2str(output,shm_addr->rxgain[ir].lo[1],35,idec);
+        pos=strlen(output)-1;
+        while(output[pos]=='0') {
+            output[pos]='\0';
+            pos=strlen(output)-1;
+        }
+        pos=strlen(output)-1;
+        if(output[pos]=='.')
+            output[pos]='\0';
     }
 
 

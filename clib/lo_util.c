@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -344,6 +344,49 @@ void lo_rxg_enc(output,lo,lcl)
     else {
         strcat(output,shm_addr->rxgain_files[ir].file);
         strcat(output,",");
+
+        if(shm_addr->rxgain[ir].type=='f')
+            strcat(output,"fixed");
+        else if(shm_addr->rxgain[ir].type=='r')
+            strcat(output,"range");
+        strcat(output,",");
+
+        idec=6;
+        if(shm_addr->rxgain[ir].lo[0] >= 1.0) {
+            idec-=log10(shm_addr->rxgain[ir].lo[0]);
+            if(idec < 0)
+                idec=0;
+        }
+        dble2str(output,shm_addr->rxgain[ir].lo[0],35,idec);
+        pos=strlen(output)-1;
+        while(output[pos]=='0') {
+            output[pos]='\0';
+            pos=strlen(output)-1;
+        }
+        pos=strlen(output)-1;
+        if(output[pos]=='.')
+            output[pos]='\0';
+        strcat(output,",");
+
+        if(shm_addr->rxgain[ir].lo[1]>=0) {
+            idec=6;
+            if(shm_addr->rxgain[ir].lo[1] >= 1.0) {
+                idec-=log10(shm_addr->rxgain[ir].lo[1]);
+                if(idec < 0)
+                    idec=0;
+            }
+            dble2str(output,shm_addr->rxgain[ir].lo[1],35,idec);
+            pos=strlen(output)-1;
+            while(output[pos]=='0') {
+                output[pos]='\0';
+                pos=strlen(output)-1;
+            }
+            pos=strlen(output)-1;
+            if(output[pos]=='.')
+                output[pos]='\0';
+        }
+        strcat(output,",");
+
         sprintf(output+strlen(output),"%d,%d,%d",
                 shm_addr->rxgain[ir].year,
                 shm_addr->rxgain[ir].month,
