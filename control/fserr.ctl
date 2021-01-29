@@ -2523,7 +2523,7 @@ DK -202
 Error decoding IF source, must be A, B, C, D, E, F, G, or H.
 ""
 DK -203
-Error decoding bandwidth, must be one of: 2, 4, 8, 16, or 32.
+Error decoding bandwidth, must be one of: 2, 4, 8, 16, 32, 64, or 128.
 ""
 DK -204
 Averaging period must be a positive integer 60 or less.

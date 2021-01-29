@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -31,7 +31,7 @@
 
 static char *if_key[ ]={ "a", "b", "c", "d", "e", "f", "g", "h" };
                                                          /* if input source */
-static char *bw_key[ ]={"2","4","8","16","32"};
+static char *bw_key[ ]={"2","4","8","16","32","64","128"};
 static char *agc_key[ ]={"man","agc"};
 
 #define NIF_KEY sizeof(if_key)/sizeof( char *)
