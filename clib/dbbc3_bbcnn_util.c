@@ -69,22 +69,7 @@ char *ptr;
 	  ierr = -200;
         break;
       case 2:
-	if(itask <= 8)
-	  idefault = 0;
-	else if (itask <= 16)
-	  idefault = 1;
-	else if (itask <= 24)
-	  idefault = 2;
-	else if (itask <= 32)
-	  idefault = 3;
-	else if (itask <= 40)
-	  idefault = 4;
-	else if (itask <= 48)
-	  idefault = 5;
-	else if (itask <= 64)
-	  idefault = 6;
-	else
-	  idefault = 0;
+        idefault=(itask-1)%64/8;
         ierr=arg_key(ptr,if_key,NIF_KEY,&lcl->source,idefault,TRUE);
 	if(ierr==0 && lcl->source >= shm_addr->dbbc3_ddc_ifs)
 	  ierr=-300;
