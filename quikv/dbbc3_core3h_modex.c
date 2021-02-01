@@ -248,6 +248,18 @@ parse:
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
+    int ddcu=  DBBC3_DDCU == shm_addr->equip.rack_type;
+
+    strcpy(outbuf,"core3h=");
+    strcat(outbuf,board[itask-30]);
+
+    if(ddcu)
+        strcat(outbuf,",splitmode on");
+    else
+        strcat(outbuf,",splitmode off");
+    cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+    out_recs++;
+
     int masks=1;
     if(DBBC3_DDCU==shm_addr->equip.rack_type)
         masks=4;
