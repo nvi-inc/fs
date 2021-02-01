@@ -88,6 +88,10 @@ char *file;
       printf("fserr: ERROR reading control file, message, line %d file %s\n",
 	     next_line,file);
       exit(-1);
+    } else if(strlen(buffer)>0 && '\n' != buffer[strlen(buffer)-1]) {
+      printf("fserr: ERROR reading control file, line too long (MAX %d characters) or no ending newline on last line, line %d file %s\n",
+	     MAXSTR-2,next_line,file);
+      exit(-1);
     }
 
     hashcode(&entryfs,&hash);
