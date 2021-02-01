@@ -48,34 +48,66 @@ void dbbc3_core3h_modex(command,itask,ip)
     void skd_run(), skd_par();      /* program scheduling utilities */
 
     if (29==itask) {
-        if(NULL != command->argv[1]) {
-            ierr=-304;
+        int force = 0;
+        int okay = 0;
+
+        if(NULL==command->argv[0] ||
+            NULL!=command->argv[0] &&
+            0!=strcmp("begin",command->argv[0]) &&
+            0!=strcmp("end"  ,command->argv[0])) {
+            ierr=-308;
             goto error;
-        } else if(0==strcmp(command->argv[0],"begin")) {
-            for (i=0;i<MAX_DBBC3_IF;i++)
-                shm_addr->dbbc3_core3h_modex[i].set=0;
+        }
+        if(NULL != command->argv[1]) {
+            force=0==strcmp("force",command->argv[1]);
+            if(!force && 0!=strcmp("$",command->argv[1]) &&
+                    0!=strlen(command->argv[1])) {
+                ierr=-304;
+                goto error;
+            }
+            if(NULL != command->argv[2]) {
+                okay=0==strcmp("disk_record_ok",command->argv[2]);
+                if(!okay && 0!=strlen(command->argv[2])) {
+                    ierr=-307;
+                    goto error;
+                }
+            }
+        }
+
+        if(0==strcmp(command->argv[0],"begin")) {
+            if(force)
+                for (i=0;i<MAX_DBBC3_IF;i++)
+                    shm_addr->dbbc3_core3h_modex[i].set=0;
             ip[0]=ip[1]=ip[2]=0;
             return;
         } else if(0==strcmp(command->argv[0],"end")) {
             char str[BUFSIZE];
-            out_recs=0;
-            out_class=0;
-            for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
-                if(0==shm_addr->dbbc3_core3h_modex[i].set) {
-                    shm_addr->dbbc3_core3h_modex[i].mask2.mask2=0;
-                    shm_addr->dbbc3_core3h_modex[i].mask1.mask1=0;
-                    strcpy(str,"core3h=");
-                    strcat(str,board[i]);
-                    strcat(str,",stop");
-                    cls_snd(&out_class, str, strlen(str) , 0, 0);
-                    out_recs++;
-                }
-            if(0<out_recs)
-                goto dbbcn;
-            else {
+
+            if(!force) {
                 ip[0]=ip[1]=ip[2]=0;
                 return;
             }
+
+            if(shm_addr->disk_record.record.record==1 &&
+                    shm_addr->disk_record.record.state.known==1)
+                if(!okay) {
+                    ierr=-301;
+                    goto error;
+                }
+
+            out_recs=0;
+            out_class=0;
+            for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+                strcpy(str,"core3h=");
+                strcat(str,board[i]);
+                if(0==shm_addr->dbbc3_core3h_modex[i].set)
+                    strcat(str,",stop");
+                else
+                    strcat(str,",start vdif");
+                cls_snd(&out_class, str, strlen(str) , 0, 0);
+                out_recs++;
+            }
+            goto dbbcn;
         } else {
             ierr=-305;
             goto error;
@@ -111,27 +143,62 @@ void dbbc3_core3h_modex(command,itask,ip)
         goto dbbcn;
     } else if (command->argv[0]==NULL)
         goto parse;  /* simple equals */
-    else if (command->argv[1]==NULL) /* special cases */
-        if (*command->argv[0]=='?') {
+    else if (*command->argv[0]=='?') {
             dbbc3_core3h_modex_dis(command,itask,ip);
             return;
-        } else if (0==strcmp(command->argv[0],"stop")) {
-            char str[BUFSIZE];
+    } else if (0==strcmp(command->argv[0],"stop") ||
+            0==strcmp(command->argv[0],"start")) {
+        char str[BUFSIZE];
+        int force = 0;
+        int okay = 0;
 
-            shm_addr->dbbc3_core3h_modex[itask-30].set=0;
-            shm_addr->dbbc3_core3h_modex[itask-30].mask2.mask2=0;
-            shm_addr->dbbc3_core3h_modex[itask-30].mask1.mask1=0;
-            out_recs=0;
-            out_class=0;
-
-            strcpy(str,"core3h=");
-            strcat(str,board[itask-30]);
-            strcat(str,",stop");
-            cls_snd(&out_class, str, strlen(str) , 0, 0);
-            out_recs++;
-
-            goto dbbcn;
+        if(NULL != command->argv[1]) {
+            force=0==strcmp("force",command->argv[1]);
+            if(!force && 0!=strcmp("$",command->argv[1]) &&
+                    0!=strlen(command->argv[1])) {
+                ierr=-304;
+                goto error;
+            }
+            if(NULL != command->argv[2]) {
+                okay=0==strcmp("disk_record_ok",command->argv[2]);
+                if(!okay && 0!=strlen(command->argv[2])) {
+                    ierr=-307;
+                    goto error;
+                }
+            }
         }
+
+        if(!force) {
+            ip[0]=ip[1]=ip[2]=0;
+            return;
+        }
+
+        if(shm_addr->disk_record.record.record==1 &&
+                shm_addr->disk_record.record.state.known==1)
+            if(!okay) {
+                ierr=-301;
+                goto error;
+            }
+
+        out_recs=0;
+        out_class=0;
+
+        strcpy(str,"core3h=");
+        strcat(str,board[itask-30]);
+
+        if(0==strcmp(command->argv[0],"stop")) {
+            shm_addr->dbbc3_core3h_modex[itask-30].set=0;
+            strcat(str,",stop");
+        } else {
+            shm_addr->dbbc3_core3h_modex[itask-30].set=1;
+            strcat(str,",start vdif");
+        }
+
+        cls_snd(&out_class, str, strlen(str) , 0, 0);
+        out_recs++;
+
+        goto dbbcn;
+    }
 
     /* if we get this far it is a set-up command so parse it */
 
@@ -177,14 +244,14 @@ parse:
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
+    vsi_samplerate_2_dbbc3_core3h(outbuf,&lcl,board[itask-30]);
+    cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+    out_recs++;
+
     int masks=1;
     if(DBBC3_DDCU==shm_addr->equip.rack_type)
         masks=4;
     vsi_bitmask_2_dbbc3_core3h(outbuf,&lcl,board[itask-30],masks);
-    cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-    out_recs++;
-
-    vsi_samplerate_2_dbbc3_core3h(outbuf,&lcl,board[itask-30]);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 

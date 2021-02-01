@@ -2688,7 +2688,7 @@ DQ -70
 Invalid device for ping (da ro r1).
 ""
 DR -201
-mask2 parameter, must specify an integer, usually as a hex value, e.g., 0xf
+First parameter is either 'mask2', an integer, usually as a hex value, e.g., 0xf, or 'toggle': 'start' or 'stop'.
 ""
 DR -202
 mask1 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
@@ -2700,7 +2700,10 @@ DR -204
 Sample rate must be a number greater than 0.124
 ""
 DR -205
-okay parameter must be disk_record_ok or null
+The 'force' parameter must be 'force', '$', or null.
+""
+DR -206
+The 'okay' parameter must be 'disk_record_ok' or null.
 ""
 DR -213
 For DBBC3 DDCV decimate must be 2
@@ -2715,7 +2718,7 @@ DR -234
 For DBBC3 DDCV sample rate must imply a decimate of 2
 ""
 DR -301
-Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the fifth parameter.
+Can't change mode while recording, use disk_record=off first or (dangerous) use 'disk_record_ok' as 'okay' parameter.
 ""
 DR -302
 mask2 cannot be used unless DDBC3 is DDCU.
@@ -2724,13 +2727,19 @@ DR -303
 Can't specify mask2 for more BBCs per IF set in dbbc3.ctl.
 ""
 DR -304
-core3h_mode0 command only accepts one parameter.
+The 'force' parameter must be 'force', '$', or null.
 ""
 DR -305
-state parameter must be either 'begin' or 'end'.
+core3h_mode0 'state' parameter must be either 'begin' or 'end'.
 ""
 DR -306
 Core3h board number exceeds IFs in dbbc3.ctl.
+""
+DR -307
+The 'okay' parameter must be 'disk_record_ok' or null.
+""
+DR -308
+The 'state' parameter must be 'begin' or 'end'.
 ""
 DR -400
 error retrieving acknowledgement of command

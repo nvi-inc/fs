@@ -1,8 +1,8 @@
 core3h_modex - set core3h mode (DBBC3 rack)
 
-Syntax:   core3h_mode0=state
-          core3h_modeX=mask2,mask1,decimation,sample,okay
-          core3h_modeX=stop
+Syntax:   core3h_mode0=state,force,okay
+          core3h_modeX=mask2,mask1,decimation,sample,force,okay
+          core3h_modeX=toggle,force,okay
 
 Response: core3h_modeX/mask2,mask1,decimation,sample,clock
           core3h_modeX/stopped
@@ -11,6 +11,8 @@ Settable parameters:
 
 state:      begin or end. No default, see 'Comments' section for more
             details.
+
+force:      force setup: literal 'force', '$', nor null. See comments.
 
 X           1 to 8, but is limited to the number of IFs boards specified in
             dbbc3.ctl
@@ -38,22 +40,14 @@ sample:     sample rate in Ms/s: must be greater than 0.499.  The
 okay        override to allow command while recording, literal text:
             'disk_record_ok'
 
-stop        literal 'stop' to end board output, this is the only way
-            to disable output from the board.  The FS's memory of the
-            bit masks for the board is cleared as well.
+toggle      literal 'stop' to end board output or literal 'start' to
+            restart board output. See comments.
 
 Monitor only parameter:
 stopped     literal 'stopped' if board output has been stopped
 clock       input clock rate in Hz
 
 Comments:
-
-The effective sample rate can be specified in the SNAP command either
-explicitly with the 'sample' parameter or implicitly with the
-'decimation' parameter.  Only one of 'sample' and 'decimation' may be
-specified.  The device does not respond with the commanded effective
-sample rate.  In the query response for this command, the implied
-sample rate is shown in parentheses for informational purposes only.
 
 The state values of 'begin' and 'end' mark the beginning and end of
 Core3h configuration for a mode. For example:
@@ -65,9 +59,57 @@ Core3h configuration for a mode. For example:
 
 Up to the total number of Core3h boards in the rack (the maximum is
 set in dbbc3.ctl) can be set-up between the 'begin' and 'end'. Any
-boards that are not set will have their output disabled (stopped) by
-the "end".  This is to turn off output from boards that had previously
-been used if they are not used in the current mode.
+boards that are not set-up will have their output disabled (stopped)
+by the 'end' command (which will also start the output of boards that
+are set-up). This is to make sure only the set-up boards will send
+data.
+
+By default, these commands only check the state of the Core3H board.
+This occurs if the 'force' parameter is '$' or null. If it is literal
+'force', the board will be configured. Using '$' as a synonym for null
+is to support allowing the operator to use 'force' as the argument for
+a setup procedure from 'drudg' to force setup, while making only
+checking the default for schedules. The 'drudg' generated setup
+procedures will be called from schedules with no argument, for
+example:
+
+    setup01
+
+To setup the Core3H boards, the operator can use the same procedure
+with 'force' as its argument:
+
+    setup01=force
+
+The 'force' will be passed to Core3H setup sub-procedure, which will
+pass it to the Core3H setup commands. Due to the structure of SNAP, if
+no argument is given, a '$' will appear as the value of the 'force'
+parameter in Core3H set-up commands. Hence the command accepts a '$'
+for the 'force' parameter to preserve the checking functionality.
+
+This approach is used because after the Core3H boards are configured,
+the operator must sync them. Once that is completed, the operator will
+need to start/stop the data transmission for the mode, by executing
+the command:
+
+    core3h_mode0=end,force
+
+Using the setup procedure with 'force' will also execute this command,
+but it will fail for the first board to be started because the Core3H
+boards have not been synced. This error can serve as reminder to the
+operator to sync the boards and execute the above 'end' command again.
+
+Once the DBBC3 has been synced the 'toggle' parameter can be used to
+stop or start the output for individual boards.
+
+The effective sample rate can be specified in the SNAP command either
+explicitly with the 'sample' parameter or implicitly with the
+'decimation' parameter.  Only one of 'sample' and 'decimation' may be
+specified.  The device does not respond with the commanded effective
+sample rate.  In the query response for this command, the implied
+sample rate is shown in parentheses for informational purposes only.
+
+For a DBBC3 DDCV personality only a decimation of '2' or sample rate
+of '64' are allowed.
 
 To use a non-zero 'mask2', the DBBC3 personality must be DDCU.
 Additionally, there can't bits turned on for BBCs in 'mask2' that
@@ -125,6 +167,3 @@ Board  Mask2  Mask1
   6  105-112  41-48
   7  113-120  49-56
   8  121-128  57-64
-
-For a DBBC3 DDCV personality only a decimation of '2' or sample rate
-of '64' are allowed.

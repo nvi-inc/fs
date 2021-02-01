@@ -32,8 +32,10 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
+static char *force_key[ ]=         { "$", "force" };
 static char *disk_key[ ]=         { "disk_record_ok" };
 
+#define NFORCE_KEY sizeof(force_key)/sizeof( char *)
 #define NDISK_KEY sizeof(disk_key)/sizeof( char *)
 
 char *m5trim();
@@ -132,6 +134,15 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
             }
             break;
         case 5:
+            ierr=arg_key(ptr,force_key,NFORCE_KEY,&lcl->force.force,0,TRUE);
+            m5state_init(&lcl->force.state);
+            if(ierr==0) {
+                lcl->force.state.known=1;
+            } else {
+                lcl->force.state.error=1;
+            }
+            break;
+        case 6:
             ierr=arg_key(ptr,disk_key,NDISK_KEY,&lcl->disk.disk,-1,TRUE);
             m5state_init(&lcl->disk.state);
             if(ierr==0) {
