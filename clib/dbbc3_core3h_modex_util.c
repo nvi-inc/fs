@@ -258,28 +258,76 @@ void vdif_frame_2_dbbc3_core3h(ptr,lclc,board)
     struct dbbc3_core3h_modex_cmd *lclc;
     char board[ ];
 {
-    int bits=0;
+    int bits1=0;
+    int bits2=0;
     unsigned bitmask2=lclc->mask2.mask2;
     unsigned bitmask1=lclc->mask1.mask1;
     int bits_p_chan = 0 ;
     int channels = 0;
+    int bits_p_chan1 = 0 ;
+    int bits_p_chan2 = 0 ;
+    int channels1 = 0;
+    int channels2 = 0;
     int i;
 
     for(i=0;i<32;i++) {
-        if(bitmask2 & 0x1<<i)
-            bits++;
-        if(bitmask1 & 0x1<<i)
-            bits++;
+        if(bitmask2 & 0x1U<<i)
+            bits2++;
+        if(bitmask1 & 0x1U<<i)
+            bits1++;
     }
 
-    if((0xaaaaaaaU & bitmask2 || 0xaaaaaaaU & bitmask1 ) &&
-            (0x5555555U & bitmask2 || 0x5555555U & bitmask1 ))
-        bits_p_chan = 2 ;
-    else if(bitmask1 || bitmask2)
-        bits_p_chan = 1 ;
+    if(0xaaaaaaaU & bitmask1 && 0x5555555U & bitmask1 )
+        bits_p_chan1 = 2 ;
+    else if(bitmask1)
+        bits_p_chan1 = 1 ;
 
-    if(bits_p_chan > 0)
-        channels = bits/bits_p_chan;
+    if(0xaaaaaaaU & bitmask2 && 0x5555555U & bitmask2 )
+        bits_p_chan2 = 2 ;
+    else if(bitmask1)
+        bits_p_chan2 = 1 ;
+
+    if(bits_p_chan1 > 0)
+        channels1 = bits1/bits_p_chan1;
+
+    if(bits_p_chan2 > 0)
+        channels2 = bits2/bits_p_chan2;
+
+    bits_p_chan = bits_p_chan1;
+    if(bits_p_chan2 > bits_p_chan)
+        bits_p_chan = bits_p_chan2;
+
+    switch (channels1) {
+        case 3:
+            channels1=4;
+            break;
+        case 5: case 6: case 7:
+            channels1=8;
+            break;
+        case 9: case 10: case 11: case 12: case 13: case 14: case 15:
+            channels1=16;
+            break;
+        default:
+            break;
+    }
+
+    switch (channels2) {
+        case 3:
+            channels2=4;
+            break;
+        case 5: case 6: case 7:
+            channels2=8;
+            break;
+        case 9: case 10: case 11: case 12: case 13: case 14: case 15:
+            channels2=16;
+            break;
+        default:
+            break;
+    }
+
+    channels = channels1;
+    if(channels2 > channels)
+        channels = channels2;
 
     sprintf(ptr,"core3h=%1.1s,vdif_frame %d %d 8000", board,
             bits_p_chan,channels);
