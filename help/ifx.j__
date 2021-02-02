@@ -18,6 +18,9 @@ Settable Parameters:
                       or "man" are displayed (attV monitor parameter
                       is the current value).  Default is "agc".
 
+            filter    IF filter, a non-negative integer, 0 means to not
+                      command. Default is zero.
+
             target    level target for AGC, 0-65535. Default is not to
                       command. This normally is not set here, but by
                       the DBBC3 configuration file.

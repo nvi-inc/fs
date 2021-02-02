@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -68,6 +68,11 @@ char *ptr;
 	}
         break;
       case 3:
+        ierr=arg_int(ptr,&lcl->filter,0,TRUE);
+	if(ierr == 0 && lcl->filter < 0)
+	  ierr=-200;
+        break;
+      case 4:
 	if(0==strcmp(ptr,"*")) {
 	  if(strlen(ptr)!=1)
 	    ierr=-200;
@@ -111,6 +116,10 @@ struct dbbc3_ifx_cmd *lcl;
           strcpy(output,BAD_VALUE);
         break;
       case 3:
+        if (lcl->filter > 0)
+            sprintf(output,"%d",lcl->filter);
+        break;
+      case 4:
 	if(lcl->target_null!=1)
 	  sprintf(output,"%u",lcl->target);
         break;
@@ -168,8 +177,11 @@ struct dbbc3_ifx_cmd *lcl;
     strcat(buff,agc_key[ivalue]);
   strcat(buff,",");  
 
+  if(lcl->filter > 0)
+      sprintf(buff+strlen(buff),"%d",lcl->filter);
+
   if(lcl->target_null == 0 && lcl->target <= 65535u) {
-    strcat(buff,",");  
+    strcat(buff,",");
     sprintf(buff+strlen(buff),"%u",lcl->target);
   }
 
@@ -208,7 +220,7 @@ char *buff;
   ptr=strtok(NULL,",");
   if(ptr==NULL)
     return -1;
-  if(1!=sscanf(ptr,"%d%c",&idum,&ch))
+  if(1!=sscanf(ptr,"%d%c",&lclc->filter,&ch))
     return -1;
 
   ptr=strtok(NULL,",");

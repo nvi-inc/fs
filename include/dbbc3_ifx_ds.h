@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -23,6 +23,8 @@ struct dbbc3_ifx_cmd {
      int input;        /* channel: 1, 2, 3, 4 */
      int att;          /* attenuation, steps 0-64; -1==NULL */
      int agc;          /* gain control 0=man, 1=agc */
+     int filter;       /* not used by device, 0= do not command
+                          otherwise positive integer */
      int target_null;  /* 1==NULL */
      unsigned target;  /* target value for AGC, 0-65535 */
     };
