@@ -19,14 +19,14 @@
 //
 
 = VERY ROUGH DRAFT FS DBBC3 Operations Manual
-Version 0.3 - January 2021
+Version 0.4 - February 2021
 
 :toc:
 :sectnums:
 
 == Introduction
 
-This manual is intended to outline the model for FS operations with the DBBC3.
+This document outlines the model for FS operations with the DBBC3.
 
 == DBBC3 operations
 
@@ -37,8 +37,9 @@ the "`Setting up the DBBC3 for DDC_U mode`" document.
 
 === Ethernet configuration
 
-The Ethernet configuration of a Core3H board can be changed on demand with a
-predefined SNAP procedure with contents such as:
+The Ethernet configuration of a Core3H board can be set in the DBBC3 boot
+configuration file. It can be changed on demand with a predefined SNAP
+procedure with contents such as:
 
 ....
 dbbc3=core3h=1,tengbcfg eth0 ip=192.168.1.16 gateway=192.168.1.1 nm=27
@@ -52,11 +53,16 @@ dbbc3=core3h=1,destination 1 192.168.1.3:46221
 NOTE: The above example is for one board. Multiple boards can combined in one
 procedure or one procedure can call a separate sub-procedure for each board.
 
+NOTE: A reset and sync is not required for Ethernet configuration changes.
+
 ====
 
 Questions:
 
 . Is anything else needed for the Ethernet configuration?
++
+
+Sven: no
 
 . Are there other things that would be useful to set from the FS? The mode is
 covered below.
@@ -85,58 +91,155 @@ To force the Core3H boards to be configured:
 
   proc=r4849kk
 
-. Execute the normal setup procedure with the `force` parameter, e.g.:
+. Execute the normal setup procedure, with the `force` parameter, e.g.:
 
   setup01=force
++
 
-For each Core3H that is in use, the following information will be sent, in this
-order:
+For each Core3H that is in use, the following information will be set, in
+this order:
++
+--
 
-. Decimation
-. Bitmask
-. `vdif_frame ...`
-. `start vdif`
+* Decimation
+* Splitmode
+* Bitmask
+* `reset`
+* `vdif_frame ...`
+
+--
++
 
 For example:
++
 
 ....
 core3h=1,vsi_samplerate 128000000 2
+core3h=1,splitmode on
 core3h=1,vsi_bitmask 0xcccccccc
+core3h=1,reset
 core3h=1,vdif_frame 2 8 8000
-core3h=1,start vdif
 ....
 
-If the board is not being used by the current mode, then the following is sent:
 
-....
-core3h=1,stop
-....
+[NOTE]
+====
+
+The FS makes some simplifying assumptions when forming the `vdif_frame`
+command. These are believed to agree with limitations in the DBBC3:
+
+* For the number of bits per channel:
++
+
+If any channel on a board uses two bits, it is assumed that all do.
+
+* For the number of channels:
++
+
+The BBCs are handled as two groups: 1-8 and 9-16. This splits the BBCs in
+agreement with the Ethernet ports where their channels are destined. The
+number of channels in the group with largest number of channels is rounded up
+to the next power of two, if it is not a power of two already. The resulting,
+possible rounded value, is used as the number of channels.
+
+====
 
 ==== Time sync
 
-Then the operator needs to sync each Core3H that is sending data, e.g.:
+After the Core3H boards are configured, the operator needs to sync each Core3H
+and sync the PPS. In principle, this would consist of:
 
 ....
-core3h=1,timesync
-core3h=1,start vdif
+dbbc3=core3h=1,timesync
+dbbc3=core3h=2,timesync
+dbbc3=core3h=3,timesync
+dbbc3=core3h=4,timesync
+dbbc3=core3h=5,timesync
+dbbc3=core3h=6,timesync
+dbbc3=core3h=7,timesync
+dbbc3=core3h=8,timesync
+dbbc3=pps_sync
 ....
+
+IMPORTANT: All the Core3H boards in the system need to synced, then a
+`pps_sync` must be issued within 20 seconds of the first `timesync`. This is
+not currently possible since each `timesync` requires about six seconds. A new
+DBBC3 feature is being developed to allow syncing the boards in parallel and
+issue a timely `pps_sync`.
+
+NOTE: The sync was successful if there no errors reported and all the boards
+have the same time.
 
 ====
 Questions:
 
 [start=3]
 . Is this sufficient?
++
+Sven: No, the pps sync is missing (but it requires a new command to implement properly).)
 
 . Since there is concern that this may not work correctly, how does one tell if
 it was successful?
++
 
-. Can we then skip the `start vdif` when setting the mode?
+Sven: The sync was successful if there no errors reported and all the boards
+have the same time.
+
+. Can we then skip `start vdif` before the `timesync`?
++
+
+Sven: Yes.
 
 ====
 
-=== equip.ctl
+==== Starting data transmission
 
-For DBBC3 use, the rack type in equip.ctl_ should be `dbbc3_ddc`.
+After the boards are synced, data transmission needs to started or stopped for
+each board, as appropriate for the mode. This can be accomplished with the
+command:
+
+....
+core3h_mode0=end,force
+....
+
+[NOTE]
+====
+
+After the boards have been synced, data transmission can be freely started and
+stopped on individual boards as needed. For example to start transmission on
+board `1`, you can use:
+
+....
+dbbc3=core3h=1,start vdif
+....
+
+To stop transmission, use:
+
+....
+dbbc3=core3h=1,stop
+....
+
+====
+
+==== Checking the mode
+
+After the data transmission has been started, the setup procedure can be
+re-executed without the `force` to parameter to check that the setup is
+correct:
+
+  setup01
+
+Any deviations will be reported as errors. This is how the setup is checked
+within a schedule.
+
+=== Control files
+
+==== equip.ctl
+
+For DBBC3 use, the rack type in equip.ctl_ should be `dbbc3_ddcu` or
+`dbbc3_ddcv` depending on the firmware that is loaded.
+
+The clock rate should be set to `nominal`, which gives the 128 MHz fixed value.
 
 ====
 
@@ -151,22 +254,45 @@ We can use `dbbc3_ddcu` and `dbbc3_ddcv`.
 +
 
 * Sending only one mask per board instead of four
-* Only having 32 MHz BW
+* Only having 32 MHz BW, decimation 2
 * Is splitmode always on?
++
+Sven: For DDC_V, it is always off; DDC_U, always on.
 
 ====
 
-== Other Features
+==== dbbc3.ctl
 
-=== Minimizing use of setup procedures
+The DBBC3 specific control file parameters are in the _dbbc3.ctl_ control file. An example of the contents are:
+
+....
+* bbcs/if (8, 12, or 16), ifs (1-8)
+  8 8
+* DDCU firmware version (v121 or later)
+ v124
+* DDCV firmware version (v121 or later)
+ v124
+....
+
+=== Tsys monitor display
+
+#TO DO: Write this section#
+
+=== Multicast logging
+
+#TO DO: Write this section#
+
+== Related Features
+
+=== Minimizing the use of setup procedures
 
 Normally, the FS sets the mode for each scan (unless there is continuous
 recording). If this takes too long or makes the equipment unstable, the _drudg_
 option `use_setup_proc yes` in _skedf.ctl_ can be used to minimize the
-execution of the set-up.
+execution of the setup procedure.
 
-WARNING: Not executing the setup each scan may not be as robust if the
-equipment sometimes loses it configuration. It is up to the station to
+WARNING: Not executing the setup each scan may not be robust if the equipment
+sometimes loses it configuration. It is up to the individual stations to
 determine whether minimizing its use is better than always using it.
 
 With this enabled, _drudg_ will replace the calls to setup procedures (e.g.,
@@ -183,10 +309,7 @@ procedure if either of the following is true:
 This will make sure the setup is run at the start and any restart of the
 schedule.
 
-* If there was mode change, i.e., the name of the setup procedure changed.
-
-[NOTE]
-====
+* If there was a mode change, i.e., the name of the setup procedure changed.
 
 The `use_setup_proc` option in _skedf.ctl_ has three possible settings:
 
@@ -198,9 +321,44 @@ The `use_setup_proc` option in _skedf.ctl_ has three possible settings:
 
 If the option is not used, it defaults to `no`.
 
-====
+NOTE: The `use_setup_proc` option applies to all systems, not just ones using a
+DBBC3.
 
-NOTE: The `use_setup_proc` option applies to all systems, not just DBBC3
+=== Thread procedure
+
+When a Mark 5C or FlexBuff recorder is in use, _drudg_ can optionally insert a
+`thread__suffix__` procedure in each setup procedure (where `__suffix__` is a
+mode specific suffix). This can be used to control whether the recordings for an
+experiment as multi-threaded or single thread per file.
+
+The contents of the procedure is same for every mode in the schedule. This
+feature is controlled by the `vdif_single_thread_per_file` option in
+_skedf.ctl_ control file. The option only needs to be used by stations that
+need to always use a single thread per file or switch between experiments. If
+the option is not present, no ``thread__suffix__`` procedure is inserted.  If
+it is present, the possible setting are:
+
+* `yes` -- to store a single thread per file, in which case, the
+``thread__suffix__`` procedure contents are:
+
++
+....
+jive5ab=datastream=clear
+jive5ab=datastream=add:{thread}:*
+jive5ab=datastream=reset
+....
+
+* `no` -- for normal multi-threaded recordings, in which case, the
+``thread__suffix__`` procedure contents are:
+
++
+....
+jive5ab=datastream=clear
+jive5ab=datastream=reset
+....
+
+
+* `ask` -- to be prompted once per schedule for what to do
 
 === jive5ab_cnfg procedure
 
@@ -208,8 +366,9 @@ NOTE: This also applies to any system using a Mark 5C or FlexBuff recorder.
 
 Each mode SNAP procedure produced by _drudg_ for Mark 5C and FlexBuff recorders
 includes a call to the `jive5ab_cnfg` SNAP procedure. This procedure call is
-inserted immediately after the `mk5c_mode`/`fb_mode` command. The procedure is
-mode independent, i.e., the same procedure is used for all modes.
+inserted immediately after the `mk5c_mode`/`fb_mode` command (_and_ immediately
+after the optional <<Thread procedure>> call). The procedure is mode independent,
+i.e., the same procedure is used for all modes.
 
 This procedure is a local `station` library procedure to allow tuning of the
 configuration of _jive5ab_ for the specifics of the recorder, including
@@ -278,35 +437,17 @@ net_protocol = : 128k : 2M : 4;
 packet = 36 : 0 : 5008 : 0 : 0 ;
 ....
 
-==== Overriding the default
+==== Overriding the defaults
 
 You can override the commands sent by the `mk5c_mode`/`fb_mode` command or add
 more by putting them in your local `jive5ab_cnfg`. This works because
-`jive5ab_cnfg` is called after `mk5c_mode`/`fb_mode` in the setup procedure. An
-example of local customizations is given in the sub-sections below.
+`jive5ab_cnfg` is called after `mk5c_mode`/`fb_mode` command (_and_ after the
+call to the optional <<Thread procedure>>) in the setup procedure. An example
+of local customizations is given in the sub-sections below.
 
 CAUTION: If put any commands in `jive5ab_cnfg` that depend on the data type,
 VDIF or 5B/Ethernet, you would need to change them if there is a change in the
 data type. This is not a concern for most stations.
-
-===== Multi-threaded
-
-The FlexBuff recorders place all threads in one file by default. If instead you
-need one thread per file, you can add the following commands to `jive5ab_cnfg`:
-
-....
-jive5ab=datastream=clear
-jive5ab=datastream=add:{thread}:*
-jive5ab=datastream=reset
-....
-
-If you need to switch between all threads in one file and each thread in its
-own file, you can accomplish this by commenting out, or un-commenting, the
-`jive5ab=datastream=add:{thread}:*` line, respectively. This will need to be
-done an experiment-by-experiment basis depending on each experiment's needs.
-
-NOTE: In SNAP, putting a double quote `"` as the first character in a line
-makes it a comment.
 
 ===== Changing net_protocol
 
@@ -338,7 +479,9 @@ Harro: I've put in a link to the FlexBuff tuning document
 . Should `net_protocol` for Mark 5C have a value?
 +
 
-Harro: No, Mark5C recording ignores the `net_protocol` - all is configured through `packet=...`
+Harro: No, Mark5C recording ignores the `net_protocol` (the current command is
+just to clear out any possible stale settings) - all is configured through
+`packet=...`
 
 . I know we decided to put this single file per thread option in
 `jive5ab_cnfg`, but I can't remember now if we thought it was because it would
@@ -351,10 +494,10 @@ in `jive5ab_cnfg`?
 
 Harro: Actually - having it as a _drudg_ option wouldn't be too bad! I think
 there is wider interest in this feature. And it would make it more predictable
-and convenient: stations can change as per experiment's request.
+and convednient: stations can change as per experiment's request.
 +
 
-If we made it an option, it might be controlled by a _skedf.ctl_ option
+Ed: If we made it an option, it might be controlled by a _skedf.ctl_ option
 `vdif_single_thread_per_file`:
 
 * If the option is not present _drudg_ does nothing.
