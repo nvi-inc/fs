@@ -47,7 +47,7 @@ int *count;
 char *ptr;
 int itask;
 {
-    int ierr, i, arg_key();
+    int ierr, i, j, arg_key();
     int isample;
     int decimate;
     char *sptr,*dptr;
@@ -89,25 +89,53 @@ int itask;
       } 
       break;
     case 2:
+      if(15==itask & shm_addr->equip.rack==DBBC3) {
+          if (0!=strlen(ptr)) {
+              ierr=-220;
+          } else {
+              m5state_init(&lcl->mask.state);
+              lcl->mask.state.known=0;
+              lcl->mask.bits=0;
+              for (j=0;j<shm_addr->dbbc3_ddc_ifs;j++) {
+                  if(shm_addr->dbbc3_core3h_modex[j].set) {
+                      int bits1=0;
+                      int bits2=0;
+                      int bits=0;
+                      for(i=0;i<32;i++) {
+                          if(shm_addr->dbbc3_core3h_modex[j].mask2.mask2 & 0x1U<<i)
+                              bits2++;
+                          if(shm_addr->dbbc3_core3h_modex[j].mask1.mask1 & 0x1U<<i)
+                              bits1++;
+                      }
+                      bits=bits1;
+                      if ( bits2 > bits )
+                          bits=bits2;
+                      lcl->mask.bits+=bits;
+
+                  }
+              }
+              break;
+          }
+      }
       ierr=arg_long_long_uns(ptr,&lcl->mask.mask , 0xffffffffULL,TRUE);
       if(0==lcl->mask.mask) {
-	ierr=-200;
+          ierr=-200;
       } else if((shm_addr->equip.drive[shm_addr->select] == MK5 &&
-		 (shm_addr->equip.drive_type[shm_addr->select] == MK5B ||
-		  shm_addr->equip.drive_type[shm_addr->select] == MK5B_BS)) &&
-		lcl->mask.mask & 0xffffffffULL &&
-		lcl->mask.mask & 0xffffffff00000000ULL)
-	ierr=-210;
+                  (shm_addr->equip.drive_type[shm_addr->select] == MK5B ||
+                   shm_addr->equip.drive_type[shm_addr->select] == MK5B_BS)) &&
+              lcl->mask.mask & 0xffffffffULL &&
+              lcl->mask.mask & 0xffffffff00000000ULL)
+          ierr=-210;
       m5state_init(&lcl->mask.state);
       if(ierr==0) {
-	lcl->mask.bits=0;
-	for(i=0;i<64;i++) 
-	  if(lcl->mask.mask & 0x1ULL<<i)
-	    lcl->mask.bits++;
-	
-	lcl->mask.state.known=1;
+          lcl->mask.bits=0;
+          for(i=0;i<64;i++)
+              if(lcl->mask.mask & 0x1ULL<<i)
+                  lcl->mask.bits++;
+
+          lcl->mask.state.known=1;
       } else {
-	lcl->mask.state.error=1;
+          lcl->mask.state.error=1;
       } 
       break;
     case 3:
@@ -386,21 +414,103 @@ int itask;
     int bits_p_chan = 0 ;
     unsigned long long data_rate = 0;
     int channels = 0;
-    int i;
+    int i, j;
         
-    if((0xaaaaaaaaaaaaaaaaULL & bitmask) && (0x555555555555555ULL & bitmask))
-      bits_p_chan = 2 ;
-    else if(bitmask)
-      bits_p_chan = 1 ;  
-    
-    if(bits_p_chan > 0)
-      channels = lclc->mask.bits/bits_p_chan;
-    
-    if(lclc->decimate.state.known)
-      data_rate = lclc->decimate.datarate;
-    else 
-      data_rate = lclc->samplerate.datarate;
-    
+    if(shm_addr->equip.rack==DBBC3) {
+        for (j=0;j<shm_addr->dbbc3_ddc_ifs;j++) {
+            if(shm_addr->dbbc3_core3h_modex[j].set) {
+                int bits1=0;
+                int bits2=0;
+                int bits_p_chan1 = 0 ;
+                int bits_p_chan2 = 0 ;
+                int channels1 = 0;
+                int channels2 = 0;
+                for(i=0;i<32;i++) {
+                    if(shm_addr->dbbc3_core3h_modex[j].mask2.mask2 & 0x1U<<i)
+                        bits2++;
+                    if(shm_addr->dbbc3_core3h_modex[j].mask1.mask1 & 0x1U<<i)
+                        bits1++;
+                }
+
+                if(0xaaaaaaaU & shm_addr->dbbc3_core3h_modex[j].mask1.mask1 &&
+                        0x5555555U & shm_addr->dbbc3_core3h_modex[j].mask1.mask1 )
+                    bits_p_chan1 = 2 ;
+                else if(shm_addr->dbbc3_core3h_modex[j].mask1.mask1)
+                    bits_p_chan1 = 1 ;
+
+                if(0xaaaaaaaU & shm_addr->dbbc3_core3h_modex[j].mask2.mask2 &&
+                        0x5555555U & shm_addr->dbbc3_core3h_modex[j].mask2.mask2 )
+                    bits_p_chan2 = 2 ;
+                else if(shm_addr->dbbc3_core3h_modex[j].mask2.mask2)
+                    bits_p_chan2 = 1 ;
+
+                if (bits_p_chan1 > bits_p_chan)
+                    bits_p_chan = bits_p_chan1;
+
+                if (bits_p_chan2 > bits_p_chan)
+                    bits_p_chan = bits_p_chan2;
+
+                if(bits_p_chan1 > 0)
+                    channels1 = bits1/bits_p_chan1;
+
+                if(bits_p_chan2 > 0)
+                    channels2 = bits2/bits_p_chan2;
+
+                switch (channels1) {
+                    case 3:
+                        channels1=4;
+                        break;
+                    case 5: case 6: case 7:
+                        channels1=8;
+                        break;
+                    case 9: case 10: case 11: case 12: case 13: case 14: case 15:
+                        channels1=16;
+                        break;
+                    default:
+                        break;
+                }
+
+                switch (channels2) {
+                    case 3:
+                        channels2=4;
+                        break;
+                    case 5: case 6: case 7:
+                        channels2=8;
+                        break;
+                    case 9: case 10: case 11: case 12: case 13: case 14: case 15:
+                        channels2=16;
+                        break;
+                    default:
+                        break;
+                }
+
+                if(channels2 >= channels1 && channels1!=0)
+                    channels += 2*channels2;
+                else if(channels1 >= channels2 && channels2!=0)
+                    channels += 2*channels1;
+                else if(channels2==0)
+                    channels += channels1;
+                else if(channels1==0)
+                    channels += channels2;
+            }
+        }
+        data_rate = lclc->samplerate.datarate;
+    } else {
+
+        if((0xaaaaaaaaaaaaaaaaULL & bitmask) && (0x555555555555555ULL & bitmask))
+            bits_p_chan = 2 ;
+        else if(bitmask)
+            bits_p_chan = 1 ;
+
+        if(bits_p_chan > 0)
+            channels = lclc->mask.bits/bits_p_chan;
+
+        if(lclc->decimate.state.known)
+            data_rate = lclc->decimate.datarate;
+        else
+            data_rate = lclc->samplerate.datarate;
+
+    }
     if(4==lclc->source.source)
       strcpy(lclc->source.magic,"mark5b-");
     else

@@ -899,6 +899,9 @@ For Mark 5B recorder minimum implied sample rate is 2 MHz. Check Mark 5B clock r
 5T -214
 For Mark 5B recorder implied decimation must be integer 1, 2, 4, 8, or 16. Check Mark 5B clock rate in equip.ctl.
 ""
+5T -222
+Mask must be null for DBBC3.
+""
 5T -223
 Decimation not supported for VDIF.
 ""
