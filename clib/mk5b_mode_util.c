@@ -379,10 +379,11 @@ struct mk5b_mode_mon *lclm;
    return;
 }
 
-mk5b_mode_2_m5(ptr,lclc,itask)
+mk5b_mode_2_m5(ptr,lclc,itask,data_rate)
 char *ptr;
 struct mk5b_mode_cmd *lclc;
 int itask;
+unsigned long long *data_rate;
 {
   if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
        (shm_addr->equip.drive_type[shm_addr->select] == MK5B ||
@@ -412,10 +413,10 @@ int itask;
   } else { /* Mark 5C/FlexBuff */
     unsigned long long bitmask=lclc->mask.mask;
     int bits_p_chan = 0 ;
-    unsigned long long data_rate = 0;
     int channels = 0;
     int i, j;
         
+    *data_rate = 0;
     if(shm_addr->equip.rack==DBBC3) {
         for (j=0;j<shm_addr->dbbc3_ddc_ifs;j++) {
             if(shm_addr->dbbc3_core3h_modex[j].set) {
@@ -494,7 +495,7 @@ int itask;
                     channels += channels2;
             }
         }
-        data_rate = lclc->samplerate.datarate;
+        *data_rate = lclc->samplerate.datarate;
     } else {
 
         if((0xaaaaaaaaaaaaaaaaULL & bitmask) && (0x555555555555555ULL & bitmask))
@@ -506,9 +507,9 @@ int itask;
             channels = lclc->mask.bits/bits_p_chan;
 
         if(lclc->decimate.state.known)
-            data_rate = lclc->decimate.datarate;
+            *data_rate = lclc->decimate.datarate;
         else
-            data_rate = lclc->samplerate.datarate;
+            *data_rate = lclc->samplerate.datarate;
 
     }
     if(4==lclc->source.source)
@@ -517,7 +518,7 @@ int itask;
       strcpy(lclc->source.magic,"VDIF_8000-");
     snprintf(lclc->source.magic+strlen(lclc->source.magic),
 	     sizeof(lclc->source.magic)-strlen(lclc->source.magic)-1,
-	     "%llu-%d-%d",data_rate/1000000,channels,bits_p_chan);
+	     "%llu-%d-%d",*data_rate/1000000,channels,bits_p_chan);
     strncpy(shm_addr->mk5b_mode.source.magic,lclc->source.magic,
 	    sizeof(shm_addr->mk5b_mode.source.magic));
     sprintf(ptr,"mode = %s ; \n",lclc->source.magic);

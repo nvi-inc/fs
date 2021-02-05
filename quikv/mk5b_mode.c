@@ -42,6 +42,7 @@ int ip[5];                           /* ipc parameters */
       char outbuf[BUFSIZE];
       struct mk5b_mode_cmd lcl;
       int increment;
+      unsigned long long data_rate;
 
       void skd_run(), skd_par();      /* program scheduling utilities */
 
@@ -114,54 +115,55 @@ parse:
       out_recs=0;
       out_class=0;
 
-      mk5b_mode_2_m5(outbuf,&lcl,itask);
+      mk5b_mode_2_m5(outbuf,&lcl,itask,&data_rate);
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
       out_recs++;
 
       if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
-	 shm_addr->equip.drive_type[shm_addr->select] == FLEXBUFF) {	
-	if(lcl.source.state.known && lcl.source.source == 3) { /* VDIF */
-	  strcpy(outbuf,"mtu = 9000 ; \n");
-	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-	  out_recs++;
+              shm_addr->equip.drive_type[shm_addr->select] == FLEXBUFF) {
+          if(lcl.source.state.known && lcl.source.source == 3) { /* VDIF */
+              strcpy(outbuf,"mtu = 9000 ; \n");
+              cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+              out_recs++;
 
-	  /* check if this should be "pudp" for RDBE, when supported */
+          } else if(lcl.source.state.known && lcl.source.source == 4) { /* mk5b */
+              strcpy(outbuf,"mtu = 6000 ; \n");
+              cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+              out_recs++;
 
-	  strcpy(outbuf,"net_protocol = udpsnor : 32000000 : 256000000 : 4 ;\n");
-	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-	  out_recs++;
+          }
+          /* check if this should be "pudp" for RDBE, when supported */
 
-	} else if(lcl.source.state.known && lcl.source.source == 4) { /* mk5b */
-	  strcpy(outbuf,"mtu = 6000 ; \n");
-	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-	  out_recs++;
-
-	  strcpy(outbuf,"net_protocol = udpsnor : 32000000 : 256000000 : 4 ;\n");
-	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-	  out_recs++;
-	}
+          if( data_rate <= 1000000000ull)
+              strcpy(outbuf,"net_protocol = udpsnor : 32000000 : 256000000 : 4 ;\n");
+          else if( data_rate <= 4000000000ull)
+              strcpy(outbuf,"net_protocol = udpsnor : 64000000 : 256000000 : 4 ;\n");
+          else
+              strcpy(outbuf,"net_protocol = udpsnor : 128000000 : 256000000 : 4 ;\n");
+          cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+          out_recs++;
       }
 
       if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
-	 (shm_addr->equip.drive_type[shm_addr->select] == MK5C ||
-	  shm_addr->equip.drive_type[shm_addr->select] == MK5C_BS)) {
+              (shm_addr->equip.drive_type[shm_addr->select] == MK5C ||
+               shm_addr->equip.drive_type[shm_addr->select] == MK5C_BS)) {
 
-	/* make sure there are no left over net_protocols that might cause a
-	   problem if memory buffering is enabled on the 5C */
+          /* make sure there are no left over net_protocols that might cause a
+             problem if memory buffering is enabled on the 5C */
 
-        strcpy(outbuf,"net_protocol = : 128k : 2M : 4;\n");
-        cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-        out_recs++;
+          strcpy(outbuf,"net_protocol = : 128k : 2M : 4;\n");
+          cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+          out_recs++;
 
-	if(lcl.source.state.known && lcl.source.source == 3) { /* VDIF */
-	  strcpy(outbuf,"packet = 36 : 0 : 8032 : 0 : 0 ;\n");
-	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-	  out_recs++;
-	} else if(lcl.source.state.known && lcl.source.source == 4) { /* mk5b */
-	  strcpy(outbuf,"packet = 36 : 0 : 5008 : 0 : 0 ;\n");
-	  cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-	  out_recs++;
-	}
+          if(lcl.source.state.known && lcl.source.source == 3) { /* VDIF */
+              strcpy(outbuf,"packet = 36 : 0 : 8032 : 0 : 0 ;\n");
+              cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+              out_recs++;
+          } else if(lcl.source.state.known && lcl.source.source == 4) { /* mk5b */
+              strcpy(outbuf,"packet = 36 : 0 : 5008 : 0 : 0 ;\n");
+              cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+              out_recs++;
+          }
       }
 
 mk5cn:
