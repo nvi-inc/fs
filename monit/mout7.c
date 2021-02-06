@@ -37,6 +37,7 @@
 extern struct fscom *fs;
 
 static char unit_letters[ ] = {"ABCDEFGH"};
+static struct tm tm_save;
 
 void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int def)
 {
@@ -107,7 +108,15 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int
     clock_t vdif=ifc.time+epoch;
     ptr=gmtime(&vdif);
 
-    if(!ifc.time_correct)
+    int tm_different =
+            ptr->tm_year != tm_save.tm_year ||
+            ptr->tm_mon  != tm_save.tm_mon  ||
+            ptr->tm_mday != tm_save.tm_mday ||
+            ptr->tm_hour != tm_save.tm_hour ||
+            ptr->tm_min  != tm_save.tm_min  ||
+            ptr->tm_sec  != tm_save.tm_sec;
+
+    if(!ifc.time_correct||!tm_different)
         standout();
 
     printw("%4d/%02d/%02d %02d:%02d:%02d",
@@ -118,8 +127,10 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int
             ptr->tm_min,
             ptr->tm_sec);
 
-    if(!ifc.time_correct)
+    if(!ifc.time_correct||!tm_different)
         standend();
+
+    memcpy(&tm_save,ptr,sizeof(tm_save));
 
     move(3,0);
     if(krf)
