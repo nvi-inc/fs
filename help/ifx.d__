@@ -45,11 +45,12 @@ Settable Parameters:
                               7 is spare,
                               8 is spare.
                               
-            target    level target for AGC, 0-65535. No default
-                      This normally is not set here, but by the DBBC
-                      configuration file. There is no command/monitor
-                      read back of this value for DBBC version v100.
-		      At least some DBBC versions do not accept "0".
+            target    level target for AGC, 0-65535. Default is to not
+                      command. This normally is not set here, but by
+                      the DBBC configuration file. There is no
+                      command/monitor read back of this value for DBBC
+                      version v100.  At least some DBBC versions do
+                      not accept "0".
 
 Monitor-only Parameters:
 
