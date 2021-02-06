@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -160,6 +160,7 @@ main()
         int iping=shm_addr->dbbc3_tsys_data.iping;
         int undef;
         int record;
+        int i;
         /* find next IF to display */
         if (0==ifc) {
             count=++count%dwell;
@@ -181,14 +182,14 @@ main()
 // some defs     all  cycle all        All  !undef  record  all
 //
                 record=FALSE;
-                for(int i=0;i<fs->dbbc3_ddc_ifs;i++)
+                for(i=0;i<fs->dbbc3_ddc_ifs;i++)
                     record=record ||
                                 (shm_addr->dbbc3_core3h_modex[i].mask1.state.known &&
                                  shm_addr->dbbc3_core3h_modex[i].mask1.mask1) ||
                                 (shm_addr->dbbc3_core3h_modex[i].mask2.state.known &&
                                  shm_addr->dbbc3_core3h_modex[i].mask2.mask2);
                 undef=TRUE;
-                for(int i=0;i<fs->dbbc3_ddc_ifs;i++)
+                for(i=0;i<fs->dbbc3_ddc_ifs;i++)
                     undef=undef &&
                         fs->dbbc3_tsys_data.data[iping].ifc[i].lo<0;
 
@@ -196,14 +197,14 @@ main()
                     if(undef) {
                         next=++next%fs->dbbc3_ddc_ifs;
                     } else {
-                        for (int i=0;i<fs->dbbc3_ddc_ifs;i++) {
+                        for (i=0;i<fs->dbbc3_ddc_ifs;i++) {
                             next=++next%fs->dbbc3_ddc_ifs;
                             if(all || fs->dbbc3_tsys_data.data[iping].ifc[next].lo>=0)
                                 break;
                         }
                     }
                 } else {
-                    for (int i=0;i<fs->dbbc3_ddc_ifs;i++) {
+                    for (i=0;i<fs->dbbc3_ddc_ifs;i++) {
                         next=++next%fs->dbbc3_ddc_ifs;
                         if(all || (shm_addr->dbbc3_core3h_modex[next].mask1.state.known &&
                                  shm_addr->dbbc3_core3h_modex[next].mask1.mask1) ||

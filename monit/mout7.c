@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -43,6 +43,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int
     struct dbbc3_tsys_ifc ifc;
     struct dbbc3_tsys_bbc bbc[MAX_DBBC3_BBC];
     char buf[128];
+    int i;
 
     memcpy(&ifc,&tsys_cycle->ifc[next],sizeof(ifc));
     memcpy(&bbc,tsys_cycle->bbc,sizeof(bbc));
@@ -130,7 +131,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int
 
     mk5dbbc3d(itpis);
 
-    for( int i=0;i<8;i++) {
+    for(i=0;i<8;i++) {
         int ibbc=next*8+i;
         move(4+i,0);
         printw("%03d",ibbc+1);
@@ -172,7 +173,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int
             printw(" %5s"," ");
     }
 
-    for( int i=8;i<fs->dbbc3_ddc_bbcs_per_if;i++) {
+    for(i=8;i<fs->dbbc3_ddc_bbcs_per_if;i++) {
         int ibbc=next*8+64+i-8;
         move(4+i,0);
         printw("%03d",ibbc+1);

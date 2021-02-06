@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -28,6 +28,7 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
+#include "ssize_t.h"
 #include "packet.h"
 #include "dbtcn.h"
 
@@ -42,13 +43,14 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
     int on, off, diff;
     double freq;
     float fwhm, tcal, dpfu, gain, tsys;
+    int j, k;
 
-    for (int k=0;k<MAX_DBBC3_BBC;k++) {
+    for (k=0;k<MAX_DBBC3_BBC;k++) {
         cycle->bbc[k].tsys_lsb=-9e18;
         cycle->bbc[k].tsys_usb=-9e18;
     }
 
-    for (int j=0;j<MAX_DBBC3_IF;j++)
+    for (j=0;j<MAX_DBBC3_IF;j++)
         cycle->ifc[j].tsys=-9e18;
 
     if (!cont_cal) /* just initialize */
@@ -59,7 +61,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         DBBC3_DDCV == shm_addr->equip.rack_type &&
         shm_addr->dbbc3_ddcv_v<125;
 
-    for (int k=0;k<MAX_DBBC3_BBC;k++) {
+    for (k=0;k<MAX_DBBC3_BBC;k++) {
 
         int ifchain=shm_addr->dbbc3_bbcnn[k].source;
         if(ifchain < 0 || MAX_LO <= ifchain ||
@@ -136,7 +138,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         cycle->bbc[k].tsys_usb=tsys;
     }
-    for (int j=0;j<MAX_DBBC3_IF;j++) {
+    for (j=0;j<MAX_DBBC3_IF;j++) {
 
         if (shm_addr->lo.lo[j]<0.0)
             continue;

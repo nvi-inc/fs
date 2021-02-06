@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -33,10 +33,11 @@
 void mk5dbbc3d(itpis)
 int itpis[MAX_DBBC3_DET];
 {
-    for (int i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+    int i, j;
+    for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
 
         if(shm_addr->dbbc3_core3h_modex[i].mask1.state.known)
-            for (int j=0;j<8;j++) {
+            for (j=0;j<8;j++) {
                 if(shm_addr->dbbc3_core3h_modex[i].mask1.mask1 & 0xcu<<j*4) {
                     itpis[i*8+j]=1;
                 }
@@ -46,7 +47,7 @@ int itpis[MAX_DBBC3_DET];
             }
 
         if(shm_addr->dbbc3_core3h_modex[i].mask2.state.known)
-            for (int j=0;j<8;j++) {
+            for (j=0;j<8;j++) {
                 if(shm_addr->dbbc3_core3h_modex[i].mask2.mask2 & 0xcu<<j*4) {
                     itpis[i*8+j+MAX_DBBC3_BBC/2]=1;
                 }

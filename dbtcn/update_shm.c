@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -29,6 +29,7 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
+#include "ssize_t.h"
 #include "packet.h"
 #include "dbtcn.h"
 
@@ -36,6 +37,8 @@ extern struct fscom *shm_addr;
 
 void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle)
 {
+    int i;
+
     int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
         shm_addr->dbbc3_ddcu_v<125 ||
         DBBC3_DDCV == shm_addr->equip.rack_type &&
@@ -55,7 +58,7 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle)
     clock_t epoch=mktime(ptr);
     int vdif=now-epoch;
 
-    for (int i=0;i<MAX_DBBC3_IF;i++) {
+    for (i=0;i<MAX_DBBC3_IF;i++) {
         cycle->ifc[i].lo=shm_addr->lo.lo[i];
         cycle->ifc[i].sideband=shm_addr->lo.sideband[i];
         cycle->ifc[i].delay=t->core3h[i].pps_delay;
@@ -67,7 +70,7 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle)
         cycle->ifc[i].set=shm_addr->dbbc3_core3h_modex[i].set;
     }
 
-    for (int i=0;i<MAX_DBBC3_BBC;i++)
+    for (i=0;i<MAX_DBBC3_BBC;i++)
         cycle->bbc[i].freq=shm_addr->dbbc3_bbcnn[i].freq;
 
     int iping=1-shm_addr->dbbc3_tsys_data.iping;

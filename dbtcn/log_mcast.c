@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -28,6 +28,7 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
+#include "ssize_t.h"
 #include "packet.h"
 #include "dbtcn.h"
 
@@ -81,14 +82,15 @@ static void log_out(char buf[],char *string)
 static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
 {
     int on, off;
+    int j, k;
 
     int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
         shm_addr->dbbc3_ddcu_v<125 ||
         DBBC3_DDCV == shm_addr->equip.rack_type &&
         shm_addr->dbbc3_ddcv_v<125;
 
-    for (int j=0;j<MAX_DBBC3_IF+1;j++) {
-        for (int k=0;k<MAX_DBBC3_BBC;k++) {
+    for (j=0;j<MAX_DBBC3_IF+1;j++) {
+        for (k=0;k<MAX_DBBC3_BBC;k++) {
             if (shm_addr->tpicd.itpis[k] && shm_addr->tpicd.ifc[k] == j) {
                 if(cont_cal)
                     log_out(buf, "tpcont/");
@@ -147,9 +149,10 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
 static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[])
 {
     double tsys;
+    int j, k;
 
-    for (int j=0;j<MAX_DBBC3_IF;j++) {
-        for (int k=0;k<MAX_DBBC3_BBC;k++) {
+    for (j=0;j<MAX_DBBC3_IF;j++) {
+        for (k=0;k<MAX_DBBC3_BBC;k++) {
 
             if (shm_addr->tpicd.itpis[k] && shm_addr->tpicd.ifc[k] == j+1) {
                 tsys=cycle->bbc[k].tsys_lsb;
