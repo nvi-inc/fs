@@ -133,7 +133,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int
     memcpy(&tm_save,ptr,sizeof(tm_save));
 
     move(3,0);
-    if(krf)
+    if(ifc.lo>=0.0 && krf)
         printw("BBC     RF    Ts-U  Ts-L");
     else
         printw("BBC     IF    Ts-U  Ts-L");
