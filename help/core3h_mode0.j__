@@ -64,6 +64,12 @@ by the 'end' command (which will also start the output of boards that
 are set-up). This is to make sure only the set-up boards will send
 data.
 
+Once a 'begin' has been executed, the FS's model of the state of
+Core3H boards is not well defined until the matching 'end' has been
+executed. No commands other than other 'core3h_modeX' command should
+be executed between them. If there such commands, the results may not
+be well defined, particularly for 'mk5c_mode'/'fb_mode' and 'tpicd'.
+
 By default, these commands only check the state of the Core3H board.
 This occurs if the 'force' parameter is '$' or null. If it is literal
 'force', the board will be configured. Using '$' as a synonym for null
