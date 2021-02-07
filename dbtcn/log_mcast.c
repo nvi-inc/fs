@@ -157,25 +157,31 @@ static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[])
             if (shm_addr->tpicd.itpis[k] && shm_addr->tpicd.ifc[k] == j+1) {
                 tsys=cycle->bbc[k].tsys_lsb;
 
-                log_out(buf, "tsys/");
-                dt_cat(buf,shm_addr->tpicd.lwhat[k]);
-                ts_cat(buf,tsys);
+                if (tsys > -1e12) {
+                    log_out(buf, "tsys/");
+                    dt_cat(buf,shm_addr->tpicd.lwhat[k]);
+                    ts_cat(buf,tsys);
+                }
             }
             if (shm_addr->tpicd.itpis[k+MAX_DBBC3_BBC] && shm_addr->tpicd.ifc[k+MAX_DBBC3_BBC] == j+1) {
                 tsys=cycle->bbc[k].tsys_usb;
 
-                log_out(buf, "tsys/");
-                dt_cat(buf,shm_addr->tpicd.lwhat[k+MAX_DBBC3_BBC]);
-                ts_cat(buf,tsys);
+                if (tsys > -1e12) {
+                    log_out(buf, "tsys/");
+                    dt_cat(buf,shm_addr->tpicd.lwhat[k+MAX_DBBC3_BBC]);
+                    ts_cat(buf,tsys);
+                }
 
             }
         }
         if (shm_addr->tpicd.itpis[j+MAX_DBBC3_BBC*2]) {
             tsys=cycle->ifc[j].tsys;
 
-            log_out(buf, "tsys/");
-            dt_cat(buf,shm_addr->tpicd.lwhat[j+MAX_DBBC3_BBC*2]);
-            ts_cat(buf,tsys);
+            if (tsys > -1e12) {
+                log_out(buf, "tsys/");
+                dt_cat(buf,shm_addr->tpicd.lwhat[j+MAX_DBBC3_BBC*2]);
+                ts_cat(buf,tsys);
+            }
         }
         log_out(buf, "");
     }

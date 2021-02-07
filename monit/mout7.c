@@ -83,7 +83,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int
         printw("%8s"," ");
 
     printw(" Tsys ");
-    if(ifc.tsys> -1e18) {
+    if(ifc.tsys> -1e12) {
         buf[0]=0;
         dble2str(buf,ifc.tsys,-5,1);
         printw("%5s",buf);
@@ -142,8 +142,10 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int
 
     mk5dbbc3d(itpis);
 
-    for(i=0;i<8;i++) {
-        int ibbc=next*8+i;
+    for(i=0;i<fs->dbbc3_ddc_bbcs_per_if;i++) {
+        int ibbc =next*8+i;
+        if(i>=8)
+            ibbc=next*8+64+i-8;
         move(4+i,0);
         printw("%03d",ibbc+1);
         if(bbc[ibbc].freq>0.0) {
@@ -159,64 +161,63 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int
         } else
             printw(" %8s"," ");
 
-        if (bbc[ibbc].tsys_usb < -1e18 && itpis[ibbc+MAX_DBBC3_BBC]) {
-            printw(" ");
-            standout();
-            printw("%5s","_____");
-            standend();
-        }else if (bbc[ibbc].tsys_usb > -1e18 && (def || all || itpis[ibbc+MAX_DBBC3_BBC]))  {
-            buf[0]=0;
-            dble2str(buf,bbc[ibbc].tsys_usb,-5,1);
-            printw(" %5s",buf);
+        if (def || all || itpis[ibbc+MAX_DBBC3_BBC]) {
+            if (bbc[ibbc].tsys_usb < -1e18) {
+                printw(" ");
+                standout();
+                printw("%5s","Nccal");
+                standend();
+            } else if (bbc[ibbc].tsys_usb < -1e16) {
+                printw(" ");
+                standout();
+                printw("%5s","N bbc");
+                standend();
+            } else if (bbc[ibbc].tsys_usb < -1e14) {
+                printw(" ");
+                standout();
+                printw("%5s","N lo ");
+                standend();
+            } else if (bbc[ibbc].tsys_usb < -1e12) {
+                printw(" ");
+                standout();
+                printw("%5s","Ntcal");
+                standend();
+            }else if (bbc[ibbc].tsys_usb > -1e12)  {
+                buf[0]=0;
+                dble2str(buf,bbc[ibbc].tsys_usb,-5,1);
+                printw(" %5s",buf);
+            }
         } else
-            printw(" %5s"," ");
+                printw(" %5s"," ");
 
-        if (bbc[ibbc].tsys_lsb < -1e18 && itpis[ibbc              ]) {
-            printw(" ");
-            standout();
-            printw("%5s","_____");
-            standend();
-        } else if (bbc[ibbc].tsys_lsb > -1e18 && (def || all || itpis[ibbc              ])) {
-            buf[0]=0;
-            dble2str(buf,bbc[ibbc].tsys_lsb,-5,1);
-            printw(" %5s",buf);
-        } else
-            printw(" %5s"," ");
-    }
-
-    for(i=8;i<fs->dbbc3_ddc_bbcs_per_if;i++) {
-        int ibbc=next*8+64+i-8;
-        move(4+i,0);
-        printw("%03d",ibbc+1);
-        if(bbc[ibbc].freq>0.0) {
-            buf[0]=0;
-            dble2str(buf,bbc[ibbc].freq*1e-6,-6,1);
-            printw("  %6s",buf);
-        } else
-            printw("  %6s"," ");
-
-        if (bbc[ibbc].tsys_usb < -1e18 && itpis[ibbc+MAX_DBBC3_BBC]) {
-            printw(" ");
-            standout();
-            printw("%5s","_____");
-            standend();
-        }else if (bbc[ibbc].tsys_usb > -1e18 && (def || all || itpis[ibbc+MAX_DBBC3_BBC]))  {
-            buf[0]=0;
-            dble2str(buf,bbc[ibbc].tsys_usb,-5,1);
-            printw(" %5s",buf);
-        } else
-            printw(" %5s"," ");
-
-        if (bbc[ibbc].tsys_lsb < -1e18 && itpis[ibbc              ]) {
-            printw(" ");
-            standout();
-            printw("%5s","_____");
-            standend();
-        } else if (bbc[ibbc].tsys_lsb > -1e18 && (def || all || itpis[ibbc              ])) {
-            buf[0]=0;
-            dble2str(buf,bbc[ibbc].tsys_lsb,-5,1);
-            printw(" %5s",buf);
+        if(def || all || itpis[ibbc              ]) {
+            if (bbc[ibbc].tsys_lsb < -1e18) {
+                printw(" ");
+                standout();
+                printw("%5s","Nccal");
+                standend();
+            } else if (bbc[ibbc].tsys_lsb < -1e16) {
+                printw(" ");
+                standout();
+                printw("%5s","N bbc");
+                standend();
+            } else if (bbc[ibbc].tsys_lsb < -1e14) {
+                printw(" ");
+                standout();
+                printw("%5s","N lo ");
+                standend();
+            } else if (bbc[ibbc].tsys_lsb < -1e12) {
+                printw(" ");
+                standout();
+                printw("%5s","Ntcal");
+                standend();
+            } else if (bbc[ibbc].tsys_lsb > -1e12) {
+                buf[0]=0;
+                dble2str(buf,bbc[ibbc].tsys_lsb,-5,1);
+                printw(" %5s",buf);
+            }
         } else
             printw(" %5s"," ");
     }
+
 }

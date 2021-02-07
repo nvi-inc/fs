@@ -45,6 +45,14 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
     float fwhm, tcal, dpfu, gain, tsys;
     int j, k;
 
+    /* special tsys values:
+       -9e18 no continuous cal
+       -9e16 BBC not setup
+       -9e14 LO not setup
+       -9e12 tcal < 0
+       -9e10 overflow
+     */
+
     for (k=0;k<MAX_DBBC3_BBC;k++) {
         cycle->bbc[k].tsys_lsb=-9e18;
         cycle->bbc[k].tsys_usb=-9e18;
@@ -56,6 +64,14 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
     if (!cont_cal) /* just initialize */
         return;
 
+    for (k=0;k<MAX_DBBC3_BBC;k++) {
+        cycle->bbc[k].tsys_lsb=-9e16;
+        cycle->bbc[k].tsys_usb=-9e16;
+    }
+
+    for (j=0;j<MAX_DBBC3_IF;j++)
+        cycle->ifc[j].tsys=-9e16;
+
     int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
         shm_addr->dbbc3_ddcu_v<125 ||
         DBBC3_DDCV == shm_addr->equip.rack_type &&
@@ -63,13 +79,18 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
     for (k=0;k<MAX_DBBC3_BBC;k++) {
 
-        int ifchain=shm_addr->dbbc3_bbcnn[k].source;
-        if(ifchain < 0 || MAX_LO <= ifchain ||
-                shm_addr->lo.lo[ifchain]<0.0)
-            continue;
-
         int ibw=shm_addr->dbbc3_bbcnn[k].bw;
         if(ibw<0 || ibw >= NBW_KEY)
+            continue;
+
+        int ifchain=shm_addr->dbbc3_bbcnn[k].source;
+        if(ifchain < 0 || MAX_LO <= ifchain)
+            continue;
+
+        cycle->bbc[k].tsys_lsb=-9e14;
+        cycle->bbc[k].tsys_usb=-9e14;
+
+        if(shm_addr->lo.lo[ifchain]<0.0)
             continue;
 
         if(shm_addr->lo.pol[ifchain]!=1 &&
@@ -85,8 +106,6 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             freq=shm_addr->lo.lo[ifchain] - freq;
         else if(shm_addr->lo.sideband[ifchain]==1) // USB first LO
             freq=shm_addr->lo.lo[ifchain] + freq;
-        else
-            continue;
 
         get_gain_par(ifchain+1,freq,&fwhm,&dpfu,NULL,&tcal);
 
@@ -102,7 +121,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             tsys=-9e12;
         else if(diff <= 0 || on >= 65535 || off >= 65535)
             /* no divide by zero, negative values, or overflows */
-            tsys=-9e6;
+            tsys=-9e10;
         else {
             tsys= (tcal/diff)*0.5*(on+off);
         }
@@ -114,8 +133,6 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             freq=shm_addr->lo.lo[ifchain] - freq;
         else if(shm_addr->lo.sideband[ifchain]==1) // USB first LO
             freq=shm_addr->lo.lo[ifchain] + freq;
-        else
-            continue;
 
         get_gain_par(ifchain+1,freq,&fwhm,&dpfu,NULL,&tcal);
 
@@ -131,7 +148,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             tsys=-9e12;
         else if(diff <= 0 || on >= 65535 || off >= 65535)
             /* no divide by zero, negative values, or overflows */
-            tsys=-9e6;
+            tsys=-9e10;
         else {
             tsys= (tcal/diff)*0.5*(on+off);
         }
@@ -169,7 +186,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             tsys=-9e12;
         else if(diff < 0)
             /* no divide by zero or negative values */
-            tsys=-9e6;
+            tsys=-9e10;
         else {
             tsys= (tcal/diff)*0.5*(on+off);
         }
