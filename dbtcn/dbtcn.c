@@ -71,8 +71,14 @@ int main(int argc, char *argv[])
     int to_report;
     dbbc3_ddc_multicast_t packet = {};
     int loop_count = -1;
+    int cont_cal_save1 = 0;
+    int cont_cal_save2 = 0;
     for (;;) {
-        int cont_cal=shm_addr->dbbc3_cont_cal.mode == 1;
+        /* wait two cylces for TPIs to catch-up to cont cal turning on */
+        int cont_cal0 = shm_addr->dbbc3_cont_cal.mode == 1;
+        int cont_cal = cont_cal0 && cont_cal_save1 && cont_cal_save2;
+        cont_cal_save2 = cont_cal_save1;
+        cont_cal_save1 = cont_cal0;
 
         memcpy(&dbtcn_control,
                 &shm_addr->dbtcn.control[shm_addr->dbtcn.iping],
