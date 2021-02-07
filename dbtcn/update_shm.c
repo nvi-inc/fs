@@ -67,7 +67,6 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle)
         else
             cycle->ifc[i].time=t->core3h[i].timestamp;
         cycle->ifc[i].time_correct=vdif==cycle->ifc[i].time;
-        cycle->ifc[i].set=shm_addr->dbbc3_core3h_modex[i].set;
     }
 
     for (i=0;i<MAX_DBBC3_BBC;i++)

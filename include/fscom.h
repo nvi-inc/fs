@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -503,7 +503,6 @@ typedef struct fscom {
               int time;
               int time_correct;
               float tsys;
-              int set;
           } ifc[MAX_DBBC3_IF];
           struct dbbc3_tsys_bbc {
               float tsys_lsb;

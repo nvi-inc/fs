@@ -100,9 +100,12 @@ void dbbc3_core3h_modex(command,itask,ip)
             for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
                 strcpy(str,"core3h=");
                 strcat(str,board[i]);
-                if(0==shm_addr->dbbc3_core3h_modex[i].set)
+                if(0==shm_addr->dbbc3_core3h_modex[i].set) {
+                    /* invalidate the masks so no Tsys logging */
+                    shm_addr->dbbc3_core3h_modex[i].mask2.state.known=0;
+                    shm_addr->dbbc3_core3h_modex[i].mask1.state.known=0;
                     strcat(str,",stop");
-                else
+                } else
                     strcat(str,",start vdif");
                 cls_snd(&out_class, str, strlen(str) , 0, 0);
                 out_recs++;
