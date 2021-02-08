@@ -265,6 +265,7 @@ C     data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
 C
 C History:
 ! Now put in most recent first. 
+! 2021-01-15 JMG In converting to GB divide by 1000, not 1024.
 ! 2020Nov20 JMG. If no observations return with warning. 
 ! 2020Jun30 JMG. Got rid of test on kmissing (which indicated missing tape info)
 ! 2020May29 JMG. Fixed bug in schedules with early starts. Schedules were not getting written out.
@@ -506,7 +507,8 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
 ! 2015Mar31 JMG. More changes to fix issues with phase_reference.
 ! 2015Apr04 JMG. Removed special handling if same source in consecutive scans. 
 ! 2015Jun05 JMG. Replaced squeezewrite by drudg_write. 
-! 2020Jun08 JMG. Added new broadband.ftni.  Added ibb_off to buffereing time
+! 2020-06-08 JMG. Added new broadband.ftni.  Added ibb_off to buffereing time
+! 2021-01-19 JMG Now use SETUPBB if rack is broadband.  Previously had to be BB and MARK6 recorder
 
       if(nobs .eq. 0) then 
          write(*,*) "Snap: Schedule has no observations. Returning."
@@ -1097,7 +1099,7 @@ C prior to this scan. Do only on a new pass for continuous.
               call snap_disk2file_abort(lufile)
               kdisk2file_prev=.false.
             endif  
-            if(km6disk) then
+            if(cstrack(istn) .eq. "BB") then 
               csetup_name="setupbb"
             else
               call setup_name(ccode(icod),csetup_name)
@@ -1110,7 +1112,7 @@ C prior to this scan. Do only on a new pass for continuous.
      >         i4.4,"y",i3.3,"d",i2.2,"h", i2.2,"m",i2.2,"s",":",
      >         i6,":",i6,":",a,":",a,":",a,";")')
      >         (itime_scan_beg(i),i=1,5),
-     >         idur(istnsk), idata_mk6_scan_mb/(1024*8) ,       
+     >         idur(istnsk), idata_mk6_scan_mb/(8*1000) ,         !convert bits to bites and to GB. 
      >         scan_name(iskrec(iobs_now))(1:nch),
      >         lsession(1:trimlen(lsession)),
      >         cpocod(istn)                             

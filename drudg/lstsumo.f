@@ -18,7 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine lstsumo(kskd,itearl_local,itlate_local,maxline,
-     >   iline,npage,num_scans,ntapes,             !These are modified by this routine
+     >   iline,npage,num_scans,            !These are modified by this routine
      >   nsline,
      >   itime_start,itime_end,itime_tape_start,itime_tape_stop,
      >   iDur,counter,cpass,cnewtap,cdir,cscan,cbuf_source)
@@ -71,6 +71,7 @@ C 021011 nrv Another digit for printing gap time.
 !             Previously relied on recorder starting and stopping info, which is absent in the "none" case.
 ! 2014Jan17 JMGipson. Modified call to setup_name.  Removed pass info. 
 ! 2020Jun08 JMG. Included new broadband.ftni
+! 2021-01-19 JMG  Changed 1024-->1000 to reflect decimal storage. 
 
 ! Functions
       integer julda
@@ -84,7 +85,7 @@ C Input
       integer itearl_local              !early start
       integer maxline                   !# of lines to output.
 
-      integer iline,npage,num_scans,ntapes !modified in this routine!!!!!!!!!!
+      integer iline,npage,num_scans     !modified in this routine!!!!!!!!!!
       integer nsline                    !snap line that scan starts.
       integer itime_start(5)            !start
       integer itime_end(5)              !end
@@ -436,7 +437,7 @@ C  Duration
 C  Footage     
       if(kdisk) then
         if(kskd) then
-          write(luprt,'(f8.1,$)') counter/1024  !convert megabytes to Gigabytes
+          write(luprt,'(f8.1,$)') counter/1000  !convert megabytes to Gigabytes
         endif    
       endif
 
@@ -444,8 +445,6 @@ C  Footage
 
       iline=iline+1
       num_scans = num_scans + 1 ! count of observations
-      if (cnewtap(1:3).eq.'XXX'.or.
-     .    cnewtap(1:3).eq.'Rec') ntapes=ntapes+1
-
+  
       return
       end

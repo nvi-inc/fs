@@ -20,6 +20,11 @@
       SUBROUTINE LSTSUM(kskd,IERR)
 
 C Create SUMMARY of SNAP file
+! Now in reverse order and different date format.
+! 2021-02-07 JMG Superbowl Sunday. Replaced 1024 by 1000 to convert ot Gb.  Removed obsolete arg num_tapes 
+! 2020-06-17 JMG. Initialize itime_start_p and itime_stop_p and itime_start, itime_stop 
+
+
 C
 C NRV 901121 New routine, modeled on CLIST.BAS
 C            NOTE: this gets pass numbers right only for 'SX' experiments
@@ -123,7 +128,7 @@ C 021014 nrv Read new FAST commands from the .snp file with fractional seconds.
 !            calculating line position.
 ! 2007Jul28 JMGipson. Replace kdisk by km5disk which is hardware.ftni.
 ! 2015Feb30 JMG. Simplified code. Got rid of a lot of stuff for Tape recorders. Added support for Mark6.
-! 2020Jun17 JMG. Initialize itime_start_p and itime_stop_p and itime_start, itime_stop 
+
 
       implicit none 
       include 'hardware.ftni'
@@ -146,7 +151,7 @@ C Output:
 C Local:
       integer itlate_local,itearl_local
       INTEGER IC
-      integer nline,num_tapes,npage,maxwidth,maxline,iline
+      integer nline,npage,maxwidth,maxline,iline
       integer inewp
       integer ieq
       real dif
@@ -274,7 +279,6 @@ C 3. Initialize local variables
       idir   = 1
       speed_snap=0
       iline  = maxline
-      num_tapes = 0
       num_scans = 0
       npage  = 0
       idur   =-1
@@ -373,7 +377,7 @@ C       Now get the source info for the new scan
 ! output tape unload correctly. 
           if (kdata_stop) then          
             call lstsumo(kskd,itearl_local,itlate_local,maxline,
-     >        iline,npage,num_scans,num_tapes,             !These are modified by this routine
+     >        iline,npage,num_scans,          !These are modified by this routine
      >        nsline_p,
      >        itime_start_p,itime_stop_p,
      >        itime_tape_start_p,itime_tape_stop,
@@ -491,7 +495,7 @@ C           Update running time
 
       if(cnewtap_store .ne. " ") cnewtap=cnewtap_store
       call lstsumo(kskd,itearl_local,itlate_local,maxline,
-     >        iline,npage,num_scans,num_tapes,             !These are modified by this routine
+     >        iline,npage,num_scans,                  !These are modified by this routine
      >        nsline,
      >        itime_start,itime_stop,
      >        itime_tape_start,itime_tape_stop,
@@ -501,10 +505,8 @@ C           Update running time
       write(luprt, "()") ! skip line
       if(kdisk) then
          data_mbyte=data_mbyte+idur*speed_recorder
-         write(luprt,   '("   Total",f8.1, " Gbytes")') data_mbyte/1024
-
-      else
-        write(luprt, '("   Total number of tapes: ",i3)')num_tapes
+         write(luprt,   '("   Total",f8.1, " Gbytes")') data_mbyte/1000
+   
       endif
       write(luprt,   '("   Total number of scans: ",i5)')num_scans
 

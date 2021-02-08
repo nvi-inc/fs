@@ -25,7 +25,13 @@ C   DRPRRD reads the lines in the $PARAM section needed by drudg.
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'
 C History
+
+! 2021-02-04 JMG Also explicitly check that we have a $PARAM section. Previously  assumed this was at the top of the file. 
+! 2021-02-02 JMG when reading a VEX files stop reading $PARAM we get to the end. 
+!  
 C 020713 nrv copied from sked
+
+   
 
 C Input
       integer ivexnum
@@ -36,6 +42,8 @@ C Input
 C Local
       integer nch,ilen,ic1,ic2,ich,idummy,ierr
       integer*2 ibufq(100)
+      character*198 cbufq
+      equivalence(ibufq(2), cbufq)
       logical kmore
 
       if (.not.kvex) then ! find $PARAM section
@@ -58,12 +66,14 @@ C  Get the initial line of parameters
         CALL READS(lu_infile,ierr,IBUF,isklen,ilen,2)
         ibufq(1) = ilen
       else ! get first literal line
-        iret=fget_literal(ibuf) ! first fget is null
-        iret=fget_literal(ibuf)
-        ibufq(1) = iret
+        do while(cbuf(1:6) .ne. "$PARAM") 
+          iret=fget_literal(ibuf) ! first fget is null
+          if(iret .lt. 0) return
+          ibufq(1) = iret
+        end do 
       endif ! sk/vex
       kmore = .true.
-
+    
 C  Loop on parameter section lines
       DO WHILE (kmore) !decode an entry
         ICH=1
@@ -102,7 +112,7 @@ C  Loop on parameter section lines
         else ! get first literal line
           iret=fget_literal(ibuf)
           ibufq(1) = iret
-          kmore = iret.gt.0
+          kmore = iret.gt.0 .and. cbuf(1:1) .ne. "$" 
         endif ! sk/vex
       enddo
 
