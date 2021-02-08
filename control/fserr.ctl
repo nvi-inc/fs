@@ -2780,14 +2780,104 @@ error decoding vsi_samplerate response
 DR -503
 error decoding sysstat output response
 ""
-DR -511
+DR -504
+error decoding splitmode response
+""
+DR -505
+error decoding sysstat Selected input response
+""
+DR -506
+error decoding vdif_frame channel width response
+""
+DR -507
+error decoding vdif_frame channels per frame response
+""
+DR -508
+error decoding vdif_frame payload size response
+""
+DR -521
 could not find vsi_bitmask response
 ""
-DR -512
+DR -522
 could not find vsi_samplerate response
 ""
-DR -513
+DR -523
 could not find sysstat output response
+""
+DR -524
+could not find splitmode response
+""
+DR -525
+could not find sysstat Selected input response
+""
+DR -526
+error decoding vdif_frame channel width response
+""
+DR -527
+could not find vdif_frame channels per frame response
+""
+DR -528
+could not find vdif_frame payload size response
+""
+DR -601
+DBBC3 Core3h board 1 configuration does not agree with command
+""
+DR -602
+DBBC3 Core3h board 2 configuration does not agree with command
+""
+DR -603
+DBBC3 Core3h board 3 configuration does not agree with command
+""
+DR -604
+DBBC3 Core3h board 4 configuration does not agree with command
+""
+DR -605
+DBBC3 Core3h board 5 configuration does not agree with command
+""
+DR -606
+DBBC3 Core3h board 6 configuration does not agree with command
+""
+DR -607
+DBBC3 Core3h board 7 configuration does not agree with command
+""
+DR -608
+DBBC3 Core3h board 8 configuration does not agree with command
+""
+DR -611
+Core3h board ?WWW mask1 does not agree with command
+""
+DR -612
+Core3h board ?WWW mask2 does not agree with command
+""
+DR -613
+Core3h board ?WWW mask3 does not agree with command
+""
+DR -614
+Core3h board ?WWW mask4 does not agree with command
+""
+DR -615
+Core3h board ?WWW decimate does not agree with command
+""
+DR -616
+Core3h board ?WWW width does not agree with command
+""
+DR -617
+Core3h board ?WWW channels does not agree with command
+""
+DR -618
+Core3h board ?WWW payload does not agree with command
+""
+DR -619
+Core3h board ?WWW splitmode should be on and it is not
+""
+DR -620
+Core3h board ?WWW splitmode should be off and it is not
+""
+DR -621
+Core3h board ?WWW vsi input should be vs1-vsi2-vsi3-vsi4 and it is not
+""
+DR -622
+Core3h board ?WWW vsi input should be vs1 and it is not
 ""
 DS   -1
 Unable to open dsad.ctl file.

@@ -30,6 +30,18 @@ struct dbbc3_core3h_modex_cmd {
     struct m5state state;
   } mask1;
   struct {
+    int width;
+    struct m5state state;
+  } width;
+  struct {
+    int channels;
+    struct m5state state;
+  } channels;
+  struct {
+    int payload;
+    struct m5state state;
+  } payload;
+  struct {
     int decimate;
     struct m5state state;
   } decimate;
@@ -48,4 +60,20 @@ struct dbbc3_core3h_modex_mon {
     int clockrate;
     struct m5state state;
   } clockrate;
+  struct {
+    int splitmode;
+    struct m5state state;
+  } splitmode;
+  struct {
+    int vsi_input;
+    struct m5state state;
+  } vsi_input;
+  struct {
+    unsigned int mask4;
+    struct m5state state;
+  } mask4;
+  struct {
+    unsigned int mask3;
+    struct m5state state;
+  } mask3;
 };

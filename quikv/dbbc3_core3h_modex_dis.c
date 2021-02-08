@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -67,6 +67,12 @@ void dbbc3_core3h_modex_dis(command,itask,ip)
         int mask = 0;
         int rate = 0;
         int output = 0;
+        int split = 0;
+        int input = 0;
+        int width = 0;
+        int channels = 0;
+        int payload = 0;
+
         iclass=ip[0];
         nrecs=ip[1];
         for (i=0;i<nrecs;i++) {
@@ -77,33 +83,78 @@ void dbbc3_core3h_modex_dis(command,itask,ip)
                 goto error;
             }
             if(!mask && NULL != strstr(inbuf,"VSI input bitmask")) {
-                if(0!=dbbc3_core3h_2_vsi_bitmask(inbuf,&lclc)) {
+                if(0!=dbbc3_core3h_2_vsi_bitmask(inbuf,&lclc,&lclm)) {
                     ierr=-501;
                     goto error;
                 }
                 mask=TRUE;
-            } else if(!rate && NULL != strstr(inbuf,"VSI sample rate")) {
+            } else if(!rate && NULL != strstr(inbuf,"Input sample rate")) {
                 if(0!=dbbc3_core3h_2_vsi_samplerate(inbuf,&lclc,&lclm)) {
                     ierr=-502;
                     goto error;
                 }
                 rate = TRUE;
             } else if(!output && NULL != strstr(inbuf," Output      ")) {
-                if(0!=dbbc3_core3h_2_output(inbuf,&lclc)) {
+                if(0!=dbbc3_core3h_2_output(inbuf,&lclc,&lclm)) {
                     ierr=-503;
                     goto error;
                 }
                 output = TRUE;
+            } else if(!split && NULL != strstr(inbuf,"Split mode")) {
+                if(0!=dbbc3_core3h_2_splitmode(inbuf,&lclc,&lclm)) {
+                    ierr=-504;
+                    goto error;
+                }
+                split = TRUE;
+            } else if(!input && NULL != strstr(inbuf,"Selected input")) {
+                if(0!=dbbc3_core3h_2_vsi_input(inbuf,&lclc,&lclm)) {
+                    ierr=-505;
+                    goto error;
+                }
+                input = TRUE;
+            } else if(!width && NULL != strstr(inbuf,"channel width (in bits)")) {
+                if(0!=dbbc3_core3h_2_width(inbuf,&lclc,&lclm)) {
+                    ierr=-506;
+                    goto error;
+                }
+                width = TRUE;
+            } else if(!channels && NULL != strstr(inbuf,"number of channels per frame")) {
+                if(0!=dbbc3_core3h_2_channels(inbuf,&lclc,&lclm)) {
+                    ierr=-507;
+                    goto error;
+                }
+                channels = TRUE;
+            } else if(!payload && NULL != strstr(inbuf,"payload size (in bytes)")) {
+                if(0!=dbbc3_core3h_2_payload(inbuf,&lclc,&lclm)) {
+                    ierr=-508;
+                    goto error;
+                }
+                payload = TRUE;
             }
         }
         if (!mask) {
-            ierr = -511;
+            ierr = -521;
             goto error;
         } else if (!rate) {
-            ierr = -512;
+            ierr = -522;
             goto error;
         } else if (!output) {
-            ierr = -513;
+            ierr = -523;
+            goto error;
+        } else if (!split) {
+            ierr = -524;
+            goto error;
+        } else if (!input) {
+            ierr = -525;
+            goto error;
+        } else if (!width) {
+            ierr = -526;
+            goto error;
+        } else if (!channels) {
+            ierr = -527;
+            goto error;
+        } else if (!payload) {
+            ierr = -528;
             goto error;
         }
     }
@@ -129,6 +180,20 @@ void dbbc3_core3h_modex_dis(command,itask,ip)
         m5state_init(&lclm.clockrate.state);
         lclm.clockrate.clockrate=shm_addr->m5b_crate*1.0e6+0.5;
         lclm.clockrate.state.known=1;
+
+        m5state_init(&lclm.splitmode.state);
+        if(DBBC3_DDCU==shm_addr->equip.rack_type)
+            lclm.splitmode.splitmode=1;
+        else
+            lclm.splitmode.splitmode=0;
+        lclm.splitmode.state.known=1;
+
+        m5state_init(&lclm.vsi_input.state);
+        if(DBBC3_DDCU==shm_addr->equip.rack_type)
+            lclm.vsi_input.vsi_input=4;
+        else
+            lclm.vsi_input.vsi_input=1;
+        lclm.vsi_input.state.known=1;
     }
     count=0;
     while( count>= 0) {
@@ -144,6 +209,73 @@ send:
         ip[i]=0;
     cls_snd(&ip[0],output,strlen(output),0,0);
     ip[1]=1;
+    if(!kcom) {
+        ierr=0;
+        if(shm_addr->dbbc3_core3h_modex[itask-30].mask1.state.known &&
+                shm_addr->dbbc3_core3h_modex[itask-30].mask1.mask1 != lclc.mask1.mask1) {
+            logitn(NULL,-611,"dr",itask-29);
+            ierr=-600-(itask-29);
+        }
+        if(DBBC3_DDCU==shm_addr->equip.rack_type) {
+            if(shm_addr->dbbc3_core3h_modex[itask-30].mask2.state.known &&
+                    shm_addr->dbbc3_core3h_modex[itask-30].mask2.mask2 != lclc.mask2.mask2) {
+                logitn(NULL,-612,"dr",itask-29);
+                ierr=-600-(itask-29);
+            }
+            if(shm_addr->dbbc3_core3h_modex[itask-30].mask1.state.known &&
+                    shm_addr->dbbc3_core3h_modex[itask-30].mask1.mask1 != lclm.mask3.mask3) {
+                logitn(NULL,-613,"dr",itask-29);
+                ierr=-600-(itask-29);
+            }
+            if(shm_addr->dbbc3_core3h_modex[itask-30].mask2.state.known &&
+                    shm_addr->dbbc3_core3h_modex[itask-30].mask2.mask2 != lclm.mask4.mask4) {
+                logitn(NULL,-614,"dr",itask-29);
+                ierr=-600-(itask-29);
+            }
+        }
+        if(shm_addr->dbbc3_core3h_modex[itask-30].decimate.state.known &&
+                shm_addr->dbbc3_core3h_modex[itask-30].decimate.decimate != lclc.decimate.decimate) {
+            logitn(NULL,-615,"dr",itask-29);
+            ierr=-600-(itask-29);
+        }
+        if(shm_addr->dbbc3_core3h_modex[itask-30].width.state.known &&
+                shm_addr->dbbc3_core3h_modex[itask-30].width.width != lclc.width.width) {
+            logitn(NULL,-616,"dr",itask-29);
+            ierr=-600-(itask-29);
+        }
+        if(shm_addr->dbbc3_core3h_modex[itask-30].channels.state.known &&
+                shm_addr->dbbc3_core3h_modex[itask-30].channels.channels != lclc.channels.channels) {
+            logitn(NULL,-617,"dr",itask-29);
+            ierr=-600-(itask-29);
+        }
+        if(shm_addr->dbbc3_core3h_modex[itask-30].payload.state.known &&
+                shm_addr->dbbc3_core3h_modex[itask-30].payload.payload != lclc.payload.payload) {
+            logitn(NULL,-618,"dr",itask-29);
+            ierr=-600-(itask-29);
+        }
+
+        if(shm_addr->dbbc3_core3h_modex[itask-30].set)
+            if(DBBC3_DDCU==shm_addr->equip.rack_type && 1!=lclm.splitmode.splitmode) {
+                logitn(NULL,-619,"dr",itask-29);
+                ierr=-600-(itask-29);
+            } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 0!=lclm.splitmode.splitmode) {
+                logitn(NULL,-620,"dr",itask-29);
+                ierr=-600-(itask-29);
+            }
+
+        if(shm_addr->dbbc3_core3h_modex[itask-30].set)
+            if(DBBC3_DDCU==shm_addr->equip.rack_type && 4!=lclm.vsi_input.vsi_input) {
+                logitn(NULL,-621,"dr",itask-29);
+                ierr=-600-(itask-29);
+            } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 1!=lclm.vsi_input.vsi_input) {
+                logitn(NULL,-622,"dr",itask-29);
+                ierr=-600-(itask-29);
+            }
+
+        if(ierr!=0) {
+            goto error2;
+        }
+    }
     return;
 
 error:
@@ -157,5 +289,3 @@ error2:
     memcpy(ip+3,"dr",2);
     return;
 }
-
-

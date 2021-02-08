@@ -4,7 +4,7 @@ Syntax:   core3h_mode0=state,force,okay
           core3h_modeX=mask2,mask1,decimation,sample,force,okay
           core3h_modeX=toggle,force,okay
 
-Response: core3h_modeX/mask2,mask1,decimation,sample,clock
+Response: core3h_modeX/mask2,mask1,decimation,sample,clock,split,input
           core3h_modeX/stopped
 
 Settable parameters:
@@ -46,6 +46,8 @@ toggle      literal 'stop' to end board output or literal 'start' to
 Monitor only parameter:
 stopped     literal 'stopped' if board output has been stopped
 clock       input clock rate in Hz
+split       split mode: 'on' or 'off'
+input       VSI input: 'tvg','vsi1','vsi2','vsi1-2','vsi1-2-3-4','gps'
 
 Comments:
 

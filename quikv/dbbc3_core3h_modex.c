@@ -127,13 +127,13 @@ void dbbc3_core3h_modex(command,itask,ip)
 
         strcpy(str,"core3h=");
         strcat(str,board[itask-30]);
-        strcat(str,",vsi_bitmask");
+        strcat(str,",splitmode");
         cls_snd(&out_class, str, strlen(str) , 0, 0);
         out_recs++;
 
         strcpy(str,"core3h=");
         strcat(str,board[itask-30]);
-        strcat(str,",vsi_samplerate");
+        strcat(str,",vdif_frame");
         cls_snd(&out_class, str, strlen(str) , 0, 0);
         out_recs++;
 
@@ -276,9 +276,25 @@ parse:
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
-    vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[itask-30]);
+    int width, channels, payload;
+    vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[itask-30],
+            &width, &channels, &payload);
+
+    m5state_init(&shm_addr->dbbc3_core3h_modex[itask-30].width.state);
+    shm_addr->dbbc3_core3h_modex[itask-30].width.width=width;
+    shm_addr->dbbc3_core3h_modex[itask-30].width.state.known=1;
+
+    m5state_init(&shm_addr->dbbc3_core3h_modex[itask-30].channels.state);
+    shm_addr->dbbc3_core3h_modex[itask-30].channels.channels=channels;
+    shm_addr->dbbc3_core3h_modex[itask-30].channels.state.known=1;
+
+    m5state_init(&shm_addr->dbbc3_core3h_modex[itask-30].payload.state);
+    shm_addr->dbbc3_core3h_modex[itask-30].payload.payload=payload;
+    shm_addr->dbbc3_core3h_modex[itask-30].payload.state.known=1;
+
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
+
 
 dbbcn:
     ip[0]=9;
