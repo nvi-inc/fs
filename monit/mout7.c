@@ -39,7 +39,8 @@ extern struct fscom *fs;
 static char unit_letters[ ] = {"ABCDEFGH"};
 static struct tm tm_save;
 
-void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int def)
+void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
+        int def, int rec)
 {
     struct dbbc3_tsys_ifc ifc;
     struct dbbc3_tsys_bbc bbc[MAX_DBBC3_BBC];
@@ -66,12 +67,12 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int
     else
         printw("%4s"," ");
 
-    if(def)
-        printw("%4s"," Def");
-    else if(all)
-        printw("%4s"," All");
-    else
+    if(rec && !all)
         printw("%4s"," Rec");
+    else if(def && !all)
+        printw("%4s"," Def");
+    else /* all || !all */
+        printw("%4s"," All");
 
     move(1,0);
     printw("Delay");
@@ -161,7 +162,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int
         } else
             printw(" %8s"," ");
 
-        if (def || all || itpis[ibbc+MAX_DBBC3_BBC]) {
+        if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+MAX_DBBC3_BBC]) {
             if (bbc[ibbc].tsys_usb < -1e18) {
                 printw(" ");
                 standout();
@@ -190,7 +191,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all, int
         } else
                 printw(" %5s"," ");
 
-        if(def || all || itpis[ibbc              ]) {
+        if(all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc              ]) {
             if (bbc[ibbc].tsys_lsb < -1e18) {
                 printw(" ");
                 standout();

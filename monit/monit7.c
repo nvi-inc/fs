@@ -169,16 +169,16 @@ main()
 //
 // not recording a/r  action           show        states
 // ------------- ---  -----            ---- -------------------
-// all undef          cycle            All   undef !record !all
-// all undef     all  cycle            All   undef !record  all
+// all undef          cycle all        All   undef !record !all
+// all undef     all  cycle all        All   undef !record  all
 // some defs          cylce defs       Def  !undef !record !all
-// some defs     all                   All  !undef !record  all
+// some defs     all  cycle all        All  !undef !record  all
 //
 // recording     a/r  action           show        states
 // ------------- ---  -----            ---- -------------------
 // all undef          cycle recording  Rec   undef  record !all
-// some defs          cycle recording  Rec  !undef  record !all
 // all undef     all  cycle all        All   undef  record  all
+// some defs          cycle recording  Rec  !undef  record !all
 // some defs     all  cycle all        All  !undef  record  all
 //
                 record=FALSE;
@@ -218,9 +218,7 @@ main()
         } else
             next=ifc-1;
 
-        mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,
-                all || (!all && !record && undef) /* all */,
-                !all && !record && !undef /* def */);
+        mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,all,!undef,record);
         move(ROW_HOLD,COL_HOLD);  /* place cursor at consistent location */
 
         refresh();
