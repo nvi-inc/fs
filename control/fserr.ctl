@@ -2772,10 +2772,10 @@ DR -456
 Unknown rack type in logmsg_dbbc3().
 ""
 DR -501
-error decoding vsi_bitmask response
+error decoding sysstat bitmask response
 ""
 DR -502
-error decoding vsi_samplerate response
+error decoding sysstat samplerate response
 ""
 DR -503
 error decoding sysstat output response
@@ -2787,7 +2787,7 @@ DR -505
 error decoding sysstat Selected input response
 ""
 DR -506
-error decoding vdif_frame channel width response
+error decoding vdif_frame width response
 ""
 DR -507
 error decoding vdif_frame channels per frame response
@@ -2796,10 +2796,10 @@ DR -508
 error decoding vdif_frame payload size response
 ""
 DR -521
-could not find vsi_bitmask response
+could not find systat bitmask response
 ""
 DR -522
-could not find vsi_samplerate response
+could not find systat amplerate response
 ""
 DR -523
 could not find sysstat output response
@@ -2820,52 +2820,52 @@ DR -528
 could not find vdif_frame payload size response
 ""
 DR -601
-DBBC3 Core3h board 1 configuration does not agree with command
+DBBC3 Core3h board 1 configuration is not correct.
 ""
 DR -602
-DBBC3 Core3h board 2 configuration does not agree with command
+DBBC3 Core3h board 2 configuration is not correct.
 ""
 DR -603
-DBBC3 Core3h board 3 configuration does not agree with command
+DBBC3 Core3h board 3 configuration is not correct.
 ""
 DR -604
-DBBC3 Core3h board 4 configuration does not agree with command
+DBBC3 Core3h board 4 configuration is not correct.
 ""
 DR -605
-DBBC3 Core3h board 5 configuration does not agree with command
+DBBC3 Core3h board 5 configuration is not correct.
 ""
 DR -606
-DBBC3 Core3h board 6 configuration does not agree with command
+DBBC3 Core3h board 6 configuration is not correct.
 ""
 DR -607
-DBBC3 Core3h board 7 configuration does not agree with command
+DBBC3 Core3h board 7 configuration is not correct.
 ""
 DR -608
-DBBC3 Core3h board 8 configuration does not agree with command
+DBBC3 Core3h board 8 configuration is not correct.
 ""
 DR -611
-Core3h board ?WWW mask1 does not agree with command
+Core3h board ?WWW mask1 is not correct.
 ""
 DR -612
-Core3h board ?WWW mask2 does not agree with command
+Core3h board ?WWW mask2 is not correct.
 ""
 DR -613
-Core3h board ?WWW mask3 does not agree with command
+Core3h board ?WWW mask3 is not correct.
 ""
 DR -614
-Core3h board ?WWW mask4 does not agree with command
+Core3h board ?WWW mask4 is not correct.
 ""
 DR -615
-Core3h board ?WWW decimate does not agree with command
+Core3h board ?WWW sysstat decimate is not correct.
 ""
 DR -616
-Core3h board ?WWW width does not agree with command
+Core3h board ?WWW vdif_frame width is not correct.
 ""
 DR -617
-Core3h board ?WWW channels does not agree with command
+Core3h board ?WWW vdif_frame channels is not correct.
 ""
 DR -618
-Core3h board ?WWW payload does not agree with command
+Core3h board ?WWW vdif_frame payload is not correct.
 ""
 DR -619
 Core3h board ?WWW splitmode should be on and it is not
@@ -2880,10 +2880,10 @@ DR -622
 Core3h board ?WWW vsi input should be vs1 and it is not
 ""
 DR -623
-Core3h board ?WWW vsi should be sending data but it is stopped
+Core3h board ?WWW should be sending data but it is stopped
 ""
 DR -624
-Core3h board ?WWW vsi should be stopped but it is sending data
+Core3h board ?WWW should be stopped but it is sending data
 ""
 DS   -1
 Unable to open dsad.ctl file.
