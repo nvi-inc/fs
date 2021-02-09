@@ -64,11 +64,16 @@ static void dt_cat(char buf[],char dt[4])
     strcat(buf,",");
 }
 
-static void log_out(char buf[],char *string)
+static void log_out(char buf[],char *string, int new)
 {
     static int slen = 0;
 
-    if((strlen(buf) >  100 || strlen(string)==0) && strlen(buf) > slen) {
+    /* time-tag is 20 charaters (+1 for ms digit, someday) +7 for #dbtcb#,
+       so usable width to 79 characters is 51 = 79-28, but we can go bigger
+        78 = 106-28 standard login shell,
+        110 = 138-28 is for Tsys of 8 BBCs SSB and 1 IF on one line
+     */
+    if((strlen(buf)+new >  110 || strlen(string)==0) && strlen(buf) > slen) {
         buf[strlen(buf)-1]=0;
         logit(buf,0,NULL);
         buf[0]=0;
@@ -93,9 +98,9 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
         for (k=0;k<MAX_DBBC3_BBC;k++) {
             if (shm_addr->tpicd.itpis[k] && shm_addr->tpicd.ifc[k] == j) {
                 if(cont_cal)
-                    log_out(buf, "tpcont/");
+                    log_out(buf, "tpcont/",17);
                 else
-                    log_out(buf, "tpi/");
+                    log_out(buf, "tpi/",17);
 
                 dt_cat(buf,shm_addr->tpicd.lwhat[k]);
                 on =t->bbc[k].total_power_lsb_cal_on;
@@ -110,9 +115,9 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
             }
             if (shm_addr->tpicd.itpis[k+MAX_DBBC3_BBC] && shm_addr->tpicd.ifc[k+MAX_DBBC3_BBC] == j) {
                 if(cont_cal)
-                    log_out(buf, "tpcont/");
+                    log_out(buf, "tpcont/",17);
                 else
-                    log_out(buf, "tpi/");
+                    log_out(buf, "tpi/",17);
 
                 dt_cat(buf,shm_addr->tpicd.lwhat[k+MAX_DBBC3_BBC]);
                 on =t->bbc[k].total_power_usb_cal_on;
@@ -128,9 +133,9 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
         }
         if (j!= 0 && shm_addr->tpicd.itpis[j-1+MAX_DBBC3_BBC*2]) {
             if(cont_cal)
-                log_out(buf, "tpcont/");
+                log_out(buf, "tpcont/",21);
             else
-                log_out(buf, "tpi/");
+                log_out(buf, "tpi/",21);
 
             dt_cat(buf,shm_addr->tpicd.lwhat[j-1+MAX_DBBC3_BBC*2]);
             on = t->core3h[j-1].total_power_cal_on;
@@ -143,7 +148,7 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
             if(cont_cal)
                 if_cat(buf,off);
         }
-        log_out(buf, "");
+        log_out(buf, "",0);
     }
 }
 static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[])
@@ -158,7 +163,7 @@ static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[])
                 tsys=cycle->bbc[k].tsys_lsb;
 
                 if (tsys > -1e12) {
-                    log_out(buf, "tsys/");
+                    log_out(buf, "tsys/",11);
                     dt_cat(buf,shm_addr->tpicd.lwhat[k]);
                     ts_cat(buf,tsys);
                 }
@@ -167,7 +172,7 @@ static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[])
                 tsys=cycle->bbc[k].tsys_usb;
 
                 if (tsys > -1e12) {
-                    log_out(buf, "tsys/");
+                    log_out(buf, "tsys/",11);
                     dt_cat(buf,shm_addr->tpicd.lwhat[k+MAX_DBBC3_BBC]);
                     ts_cat(buf,tsys);
                 }
@@ -178,12 +183,12 @@ static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[])
             tsys=cycle->ifc[j].tsys;
 
             if (tsys > -1e12) {
-                log_out(buf, "tsys/");
+                log_out(buf, "tsys/",9);
                 dt_cat(buf,shm_addr->tpicd.lwhat[j+MAX_DBBC3_BBC*2]);
                 ts_cat(buf,tsys);
             }
         }
-        log_out(buf, "");
+        log_out(buf, "",0);
     }
 }
 
