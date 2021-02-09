@@ -76,8 +76,12 @@ void dbbc3_core3h_modex(command,itask,ip)
 
         if(0==strcmp(command->argv[0],"begin")) {
             if(force)
-                for (i=0;i<MAX_DBBC3_IF;i++)
+                for (i=0;i<MAX_DBBC3_IF;i++) {
+                    m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
+                    shm_addr->dbbc3_core3h_modex[i].start.start=0;
+                    shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
                     shm_addr->dbbc3_core3h_modex[i].set=0;
+                }
             ip[0]=ip[1]=ip[2]=0;
             return;
         } else if(0==strcmp(command->argv[0],"end")) {
@@ -163,7 +167,6 @@ void dbbc3_core3h_modex(command,itask,ip)
 parse:
     ilast=0;                                      /* last argv examined */
     memcpy(&lcl,&shm_addr->dbbc3_core3h_modex[itask-30],sizeof(lcl));
-    lcl.set=1;
 
     count=1;
     while( count>= 0) {
@@ -193,6 +196,13 @@ parse:
         }
     }
 
+    lcl.set=1; /* needs to be set between the two memcpy()s,
+                  discarded for errors in any event
+                  also for start
+                */
+    m5state_init(&lcl.start.state);
+    lcl.start.start=1;
+    lcl.start.state.known=1;
     memcpy(&shm_addr->dbbc3_core3h_modex[itask-30],&lcl,sizeof(lcl));
 
     out_recs=0;
