@@ -28,7 +28,7 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-#define BUFSIZE 512
+#define BUFSIZE 2048
 
 static void add_check_queries( out_recs, out_class, board, all)
     int *out_recs;
@@ -57,7 +57,86 @@ static void add_check_queries( out_recs, out_class, board, all)
     cls_snd(out_class, str, strlen(str) , 0, 0);
     ++*out_recs;
 }
+static void check_board(iboard,board,ip,ierr_out)
+    int iboard;
+    char *board;
+    int ip[5];                           /* ipc parameters */
+    int *ierr_out;
+{
+    int out_recs=0;
+    int out_class=0;
+    int i;
+    int nchars;
+    int rtn1;    /* argument for cls_rcv - unused */
+    int rtn2;    /* argument for cls_rcv - unused */
+    int msgflg=0;  /* argument for cls_rcv - unused */
+    int save=0;    /* argument for cls_rcv - unused */
+    int iclass, nrecs;
+    char inbuf[BUFSIZE];
+    struct dbbc3_core3h_modex_cmd lclc;
+    struct dbbc3_core3h_modex_mon lclm;
+    int output = 0;
+    int ierr=0;
 
+    *ierr_out=0;
+    add_check_queries(&out_recs, &out_class, board,0);
+
+    ip[0]=9;
+    ip[1]=out_class;
+    ip[2]=out_recs;
+    skd_run("dbbcn",'w',ip);
+    skd_par(ip);
+
+    if(ip[2]<0) {
+        if(ip[0]!=0) {
+            cls_clr(ip[0]);
+            ip[0]=ip[1]=0;
+        }
+        return;
+    }
+
+    iclass=ip[0];
+    nrecs=ip[1];
+    for (i=0;i<nrecs;i++) {
+        if ((nchars =
+                    cls_rcv(iclass,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
+            ierr = -401;
+            goto error;
+        }
+        if(!output && NULL != strstr(inbuf," Output      ")) {
+            if(0!=dbbc3_core3h_2_output(inbuf,&lclc,&lclm)) {
+                ierr=-503;
+                goto error;
+            }
+            output = TRUE;
+        }
+    }
+    if (!output) {
+       ierr = -523;
+       goto error2;
+    }
+
+    if(shm_addr->dbbc3_core3h_modex[iboard].start.state.known &&
+            shm_addr->dbbc3_core3h_modex[iboard].start.start != lclc.start.start) {
+        if(lclc.start.start == 0)
+            logitn(NULL,-623,"dr",iboard+1);
+        else
+            logitn(NULL,-624,"dr",iboard+1);
+        *ierr_out=-600;
+    }
+    return;
+
+error:
+    if(i!=nrecs-1)
+        cls_clr(iclass);
+error2:
+    ip[0]=0;
+    ip[1]=0;
+    ip[2]=ierr;
+    ip[4]=0;
+    memcpy(ip+3,"dr",2);
+    return;
+}
 void dbbc3_core3h_modex(command,itask,ip)
     struct cmd_ds *command;                /* parsed command structure */
     int itask;                            /* sub-task, ifd number +1  */
@@ -117,10 +196,22 @@ void dbbc3_core3h_modex(command,itask,ip)
             char str[BUFSIZE];
 
             if(!force) {
-                ip[0]=ip[1]=ip[2]=0;
+                int ierr_overall = 0;
+                for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+                    check_board(i,board[i],ip,&ierr);
+                    if(ip[2]<0)
+                        return;
+                    if(ierr!=0)
+                        ierr_overall=-600;
+                }
+                if(0!=ierr_overall) {
+                    ip[4]=0;
+                    ierr=ierr_overall;
+                    goto error;
+                }
+                ip[0]=ip[1]=0;
                 return;
             }
-
             if(shm_addr->disk_record.record.record==1 &&
                     shm_addr->disk_record.record.state.known==1)
                 if(!okay) {
@@ -150,6 +241,7 @@ void dbbc3_core3h_modex(command,itask,ip)
                 cls_snd(&out_class, str, strlen(str) , 0, 0);
                 out_recs++;
             }
+            force_set = 1;
             goto dbbcn;
         } else {
             ierr=-305;

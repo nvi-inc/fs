@@ -2819,6 +2819,9 @@ could not find vdif_frame channels per frame response
 DR -528
 could not find vdif_frame payload size response
 ""
+DR -600
+One or more board's data transmission state is not correct.
+""
 DR -601
 DBBC3 Core3h board 1 configuration is not correct.
 ""
