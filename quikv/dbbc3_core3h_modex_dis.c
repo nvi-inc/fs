@@ -163,7 +163,7 @@ void dbbc3_core3h_modex_dis(command,itask,ip)
     strcpy(output,command->name);
     strcat(output,"/");
 
-    if(0 == lclc.set) {
+    if(0 == lclc.start.start) {
         strcat(output,"stopped");
         goto send;
     }
@@ -211,44 +211,44 @@ send:
     ip[1]=1;
     if(!kcom) {
         ierr=0;
-        if(shm_addr->dbbc3_core3h_modex[itask-30].mask1.state.known &&
+        if(shm_addr->dbbc3_core3h_modex[itask-30].set &&
                 shm_addr->dbbc3_core3h_modex[itask-30].mask1.mask1 != lclc.mask1.mask1) {
             logitn(NULL,-611,"dr",itask-29);
             ierr=-600-(itask-29);
         }
         if(DBBC3_DDCU==shm_addr->equip.rack_type) {
-            if(shm_addr->dbbc3_core3h_modex[itask-30].mask2.state.known &&
+            if(shm_addr->dbbc3_core3h_modex[itask-30].set &&
                     shm_addr->dbbc3_core3h_modex[itask-30].mask2.mask2 != lclc.mask2.mask2) {
                 logitn(NULL,-612,"dr",itask-29);
                 ierr=-600-(itask-29);
             }
-            if(shm_addr->dbbc3_core3h_modex[itask-30].mask1.state.known &&
+            if(shm_addr->dbbc3_core3h_modex[itask-30].set &&
                     shm_addr->dbbc3_core3h_modex[itask-30].mask1.mask1 != lclm.mask3.mask3) {
                 logitn(NULL,-613,"dr",itask-29);
                 ierr=-600-(itask-29);
             }
-            if(shm_addr->dbbc3_core3h_modex[itask-30].mask2.state.known &&
+            if(shm_addr->dbbc3_core3h_modex[itask-30].set &&
                     shm_addr->dbbc3_core3h_modex[itask-30].mask2.mask2 != lclm.mask4.mask4) {
                 logitn(NULL,-614,"dr",itask-29);
                 ierr=-600-(itask-29);
             }
         }
-        if(shm_addr->dbbc3_core3h_modex[itask-30].decimate.state.known &&
+        if(shm_addr->dbbc3_core3h_modex[itask-30].set &&
                 shm_addr->dbbc3_core3h_modex[itask-30].decimate.decimate != lclc.decimate.decimate) {
             logitn(NULL,-615,"dr",itask-29);
             ierr=-600-(itask-29);
         }
-        if(shm_addr->dbbc3_core3h_modex[itask-30].width.state.known &&
+        if(shm_addr->dbbc3_core3h_modex[itask-30].set &&
                 shm_addr->dbbc3_core3h_modex[itask-30].width.width != lclc.width.width) {
             logitn(NULL,-616,"dr",itask-29);
             ierr=-600-(itask-29);
         }
-        if(shm_addr->dbbc3_core3h_modex[itask-30].channels.state.known &&
+        if(shm_addr->dbbc3_core3h_modex[itask-30].set &&
                 shm_addr->dbbc3_core3h_modex[itask-30].channels.channels != lclc.channels.channels) {
             logitn(NULL,-617,"dr",itask-29);
             ierr=-600-(itask-29);
         }
-        if(shm_addr->dbbc3_core3h_modex[itask-30].payload.state.known &&
+        if(shm_addr->dbbc3_core3h_modex[itask-30].set &&
                 shm_addr->dbbc3_core3h_modex[itask-30].payload.payload != lclc.payload.payload) {
             logitn(NULL,-618,"dr",itask-29);
             ierr=-600-(itask-29);
@@ -272,6 +272,14 @@ send:
                 ierr=-600-(itask-29);
             }
 
+        if(shm_addr->dbbc3_core3h_modex[itask-30].start.state.known &&
+                shm_addr->dbbc3_core3h_modex[itask-30].start.start != lclc.start.start) {
+            if(lclc.start.start == 0)
+                logitn(NULL,-623,"dr",itask-29);
+            else
+                logitn(NULL,-624,"dr",itask-29);
+            ierr=-600-(itask-29);
+        }
         if(ierr!=0) {
             goto error2;
         }

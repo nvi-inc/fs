@@ -464,7 +464,7 @@ int dbbc3_core3h_2_output(ptr,lclc,lclm) /* return values:
     char string1[]= "stopped";
     char string2[]= "started";
 
-    lclc->set=-1;
+    m5state_init(&lclc->start.state);
 
     ptr=strstr(ptr,string);
     if(ptr == NULL) {
@@ -472,12 +472,13 @@ int dbbc3_core3h_2_output(ptr,lclc,lclm) /* return values:
     }
 
     if(strstr(ptr+strlen(string),string1))
-        lclc->set=0;
+        lclc->start.start=0;
     else if (ptr+strlen(string),string2)
-        lclc->set=1;
+        lclc->start.start=1;
     else
         return -1;
 
+    lclc->start.state.known=1;
     return 0;
 }
 int dbbc3_core3h_2_splitmode(ptr,lclc,lclm) /* return values:

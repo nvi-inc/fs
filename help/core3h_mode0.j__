@@ -107,7 +107,8 @@ boards have not been synced. This error can serve as reminder to the
 operator to sync the boards and execute the above 'end' command again.
 
 Once the DBBC3 has been synced the 'toggle' parameter can be used to
-stop or start the output for individual boards.
+stop or start the output for individual boards. This can only be used
+for boards that were already set to transmit data.
 
 The effective sample rate can be specified in the SNAP command either
 explicitly with the 'sample' parameter or implicitly with the

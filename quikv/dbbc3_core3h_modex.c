@@ -101,12 +101,19 @@ void dbbc3_core3h_modex(command,itask,ip)
                 strcpy(str,"core3h=");
                 strcat(str,board[i]);
                 if(0==shm_addr->dbbc3_core3h_modex[i].set) {
+                    m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
+                    shm_addr->dbbc3_core3h_modex[i].start.start=0;
+                    shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
                     /* invalidate the masks so no Tsys logging */
                     shm_addr->dbbc3_core3h_modex[i].mask2.state.known=0;
                     shm_addr->dbbc3_core3h_modex[i].mask1.state.known=0;
                     strcat(str,",stop");
-                } else
+                } else {
+                    m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
+                    shm_addr->dbbc3_core3h_modex[i].start.start=1;
+                    shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
                     strcat(str,",start vdif");
+                }
                 cls_snd(&out_class, str, strlen(str) , 0, 0);
                 out_recs++;
             }
@@ -183,6 +190,11 @@ void dbbc3_core3h_modex(command,itask,ip)
                 goto error;
             }
 
+        if(0==shm_addr->dbbc3_core3h_modex[itask-30].set) {
+            ierr=-309;
+            goto error;
+        }
+
         out_recs=0;
         out_class=0;
 
@@ -190,10 +202,16 @@ void dbbc3_core3h_modex(command,itask,ip)
         strcat(str,board[itask-30]);
 
         if(0==strcmp(command->argv[0],"stop")) {
-            shm_addr->dbbc3_core3h_modex[itask-30].set=0;
+            m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
+            shm_addr->dbbc3_core3h_modex[i].start.start=0;
+            shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
             strcat(str,",stop");
         } else {
-            shm_addr->dbbc3_core3h_modex[itask-30].set=1;
+            m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
+            shm_addr->dbbc3_core3h_modex[i].start.start=1;
+            shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
+            shm_addr->dbbc3_core3h_modex[i].mask2.state.known=1;
+            shm_addr->dbbc3_core3h_modex[i].mask1.state.known=1;
             strcat(str,",start vdif");
         }
 

@@ -2747,6 +2747,9 @@ The 'okay' parameter must be 'disk_record_ok' or null.
 DR -308
 The 'state' parameter must be 'begin' or 'end'.
 ""
+DR -309
+Can't toggle start/stop on a board that is not configured.
+""
 DR -400
 error retrieving acknowledgement of command
 ""
@@ -2878,6 +2881,12 @@ Core3h board ?WWW vsi input should be vs1-vsi2-vsi3-vsi4 and it is not
 ""
 DR -622
 Core3h board ?WWW vsi input should be vs1 and it is not
+""
+DR -623
+Core3h board ?WWW vsi should be sending data but it is stopped
+""
+DR -624
+Core3h board ?WWW vsi should be stopped but it is sending data
 ""
 DS   -1
 Unable to open dsad.ctl file.

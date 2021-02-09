@@ -545,6 +545,7 @@ void cshm_init()
       m5state_init(&shm_addr->dbbc3_core3h_modex[i].width.state);
       m5state_init(&shm_addr->dbbc3_core3h_modex[i].channels.state);
       m5state_init(&shm_addr->dbbc3_core3h_modex[i].payload.state);
+      m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
   }
 
   shm_addr->dbbc3_tsys_data.iping=0;

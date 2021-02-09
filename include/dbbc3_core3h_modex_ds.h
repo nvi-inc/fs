@@ -53,6 +53,10 @@ struct dbbc3_core3h_modex_cmd {
     int disk;
     struct m5state state;
   } disk;
+  struct {
+    int start;
+    struct m5state state;
+  } start;
 };
 
 struct dbbc3_core3h_modex_mon {
