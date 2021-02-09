@@ -31,10 +31,11 @@
 #define MAX_OUT 256
 #define BUFSIZE 2048
 
-void dbbc3_core3h_modex_dis(command,itask,ip)
+void dbbc3_core3h_modex_dis(command,itask,ip,force_set)
     struct cmd_ds *command;
     int itask;
     int ip[5];
+    int force_set;
 {
     int ierr, count, i;
     char output[MAX_OUT];
@@ -54,7 +55,7 @@ void dbbc3_core3h_modex_dis(command,itask,ip)
     kcom= command->argv[0] != NULL &&
         *command->argv[0] == '?' && command->argv[1] == NULL;
 
-    if((!kcom) && command->equal == '=') {
+    if((!kcom) && command->equal == '=' && force_set) {
         ierr=logmsg_dbbc3(output,command,ip);
         if(ierr!=0) {
             ierr+=-450;

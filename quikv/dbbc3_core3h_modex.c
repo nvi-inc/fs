@@ -30,6 +30,34 @@
 
 #define BUFSIZE 512
 
+static void add_check_queries( out_recs, out_class, board, all)
+    int *out_recs;
+    int *out_class;
+    char *board;
+    int all;
+{
+    char str[BUFSIZE];
+
+    if(all) {
+        strcpy(str,"core3h=");
+        strcat(str,board);
+        strcat(str,",splitmode");
+        cls_snd(out_class, str, strlen(str) , 0, 0);
+        ++*out_recs;
+
+        strcpy(str,"core3h=");
+        strcat(str,board);
+        strcat(str,",vdif_frame");
+        cls_snd(out_class, str, strlen(str) , 0, 0);
+        ++*out_recs;
+    }
+    strcpy(str,"core3h=");
+    strcat(str,board);
+    strcat(str,",sysstat");
+    cls_snd(out_class, str, strlen(str) , 0, 0);
+    ++*out_recs;
+}
+
 void dbbc3_core3h_modex(command,itask,ip)
     struct cmd_ds *command;                /* parsed command structure */
     int itask;                            /* sub-task, ifd number +1  */
@@ -42,6 +70,7 @@ void dbbc3_core3h_modex(command,itask,ip)
     char outbuf[BUFSIZE];
     struct dbbc3_core3h_modex_cmd lcl;
     int increment;
+    int force_set = 0;
 
     static char *board[]={"1","2","3","4","5","6","7","8"};
 
@@ -132,29 +161,11 @@ void dbbc3_core3h_modex(command,itask,ip)
         goto error;
     }
     if (command->equal != '=') {
-        char str[BUFSIZE];
         out_recs=0;
         out_class=0;
-
-        strcpy(str,"core3h=");
-        strcat(str,board[itask-30]);
-        strcat(str,",splitmode");
-        cls_snd(&out_class, str, strlen(str) , 0, 0);
-        out_recs++;
-
-        strcpy(str,"core3h=");
-        strcat(str,board[itask-30]);
-        strcat(str,",vdif_frame");
-        cls_snd(&out_class, str, strlen(str) , 0, 0);
-        out_recs++;
-
-        strcpy(str,"core3h=");
-        strcat(str,board[itask-30]);
-        strcat(str,",sysstat");
-        cls_snd(&out_class, str, strlen(str) , 0, 0);
-        out_recs++;
-
+        add_check_queries(&out_recs, &out_class, board[itask-30],1);
         goto dbbcn;
+
     } else if (command->argv[0]==NULL)
         goto parse;  /* simple equals */
     else if (*command->argv[0]=='?') {
@@ -208,6 +219,12 @@ parse:
     out_recs=0;
     out_class=0;
 
+    if(!lcl.force.force) {
+        add_check_queries(&out_recs, &out_class, board[itask-30],1);
+        goto dbbcn;
+    }
+
+    force_set = 1;
     strcpy(outbuf,"version");
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
@@ -275,7 +292,7 @@ dbbcn:
         }
         return;
     }
-    dbbc3_core3h_modex_dis(command,itask,ip);
+    dbbc3_core3h_modex_dis(command,itask,ip,force_set);
     return;
 
 error:
