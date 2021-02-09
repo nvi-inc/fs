@@ -2,7 +2,6 @@ core3h_modex - set core3h mode (DBBC3 rack)
 
 Syntax:   core3h_mode0=state,force,okay
           core3h_modeX=mask2,mask1,decimation,sample,force,okay
-          core3h_modeX=toggle,force,okay
 
 Response: core3h_modeX/mask2,mask1,decimation,sample,clock,split,input
           core3h_modeX/stopped
@@ -39,9 +38,6 @@ sample:     sample rate in Ms/s: must be greater than 0.499.  The
 
 okay        override to allow command while recording, literal text:
             'disk_record_ok'
-
-toggle      literal 'stop' to end board output or literal 'start' to
-            restart board output. See comments.
 
 Monitor only parameter:
 stopped     literal 'stopped' if board output has been stopped
@@ -105,10 +101,6 @@ Using the setup procedure with 'force' will also execute this command,
 but it will fail for the first board to be started because the Core3H
 boards have not been synced. This error can serve as reminder to the
 operator to sync the boards and execute the above 'end' command again.
-
-Once the DBBC3 has been synced the 'toggle' parameter can be used to
-stop or start the output for individual boards. This can only be used
-for boards that were already set to transmit data.
 
 The effective sample rate can be specified in the SNAP command either
 explicitly with the 'sample' parameter or implicitly with the

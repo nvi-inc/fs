@@ -2694,7 +2694,7 @@ DQ -70
 Invalid device for ping (da ro r1).
 ""
 DR -201
-First parameter is either 'mask2', an integer, usually as a hex value, e.g., 0xf, or 'toggle': 'start' or 'stop'.
+First parameter is either 'mask2', an integer, usually as a hex value, e.g., 0xf.
 ""
 DR -202
 mask1 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
@@ -2746,9 +2746,6 @@ The 'okay' parameter must be 'disk_record_ok' or null.
 ""
 DR -308
 The 'state' parameter must be 'begin' or 'end'.
-""
-DR -309
-Can't toggle start/stop on a board that is not configured.
 ""
 DR -400
 error retrieving acknowledgement of command

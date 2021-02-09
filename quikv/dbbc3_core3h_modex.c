@@ -104,7 +104,7 @@ void dbbc3_core3h_modex(command,itask,ip)
                     m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
                     shm_addr->dbbc3_core3h_modex[i].start.start=0;
                     shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
-                    /* invalidate the masks so no Tsys logging */
+                    /* invalidate old masks so no Tsys logging */
                     shm_addr->dbbc3_core3h_modex[i].mask2.state.known=0;
                     shm_addr->dbbc3_core3h_modex[i].mask1.state.known=0;
                     strcat(str,",stop");
@@ -156,69 +156,6 @@ void dbbc3_core3h_modex(command,itask,ip)
     else if (*command->argv[0]=='?') {
             dbbc3_core3h_modex_dis(command,itask,ip);
             return;
-    } else if (0==strcmp(command->argv[0],"stop") ||
-            0==strcmp(command->argv[0],"start")) {
-        char str[BUFSIZE];
-        int force = 0;
-        int okay = 0;
-
-        if(NULL != command->argv[1]) {
-            force=0==strcmp("force",command->argv[1]);
-            if(!force && 0!=strcmp("$",command->argv[1]) &&
-                    0!=strlen(command->argv[1])) {
-                ierr=-304;
-                goto error;
-            }
-            if(NULL != command->argv[2]) {
-                okay=0==strcmp("disk_record_ok",command->argv[2]);
-                if(!okay && 0!=strlen(command->argv[2])) {
-                    ierr=-307;
-                    goto error;
-                }
-            }
-        }
-
-        if(!force) {
-            ip[0]=ip[1]=ip[2]=0;
-            return;
-        }
-
-        if(shm_addr->disk_record.record.record==1 &&
-                shm_addr->disk_record.record.state.known==1)
-            if(!okay) {
-                ierr=-301;
-                goto error;
-            }
-
-        if(0==shm_addr->dbbc3_core3h_modex[itask-30].set) {
-            ierr=-309;
-            goto error;
-        }
-
-        out_recs=0;
-        out_class=0;
-
-        strcpy(str,"core3h=");
-        strcat(str,board[itask-30]);
-
-        if(0==strcmp(command->argv[0],"stop")) {
-            m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
-            shm_addr->dbbc3_core3h_modex[i].start.start=0;
-            shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
-            strcat(str,",stop");
-        } else {
-            m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
-            shm_addr->dbbc3_core3h_modex[i].start.start=1;
-            shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
-            shm_addr->dbbc3_core3h_modex[i].mask2.state.known=1;
-            shm_addr->dbbc3_core3h_modex[i].mask1.state.known=1;
-            strcat(str,",start vdif");
-        }
-
-        cls_snd(&out_class, str, strlen(str) , 0, 0);
-        out_recs++;
-
-        goto dbbcn;
     }
 
     /* if we get this far it is a set-up command so parse it */
