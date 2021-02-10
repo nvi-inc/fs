@@ -37,11 +37,14 @@
 extern struct fscom *shm_addr;
 
 static char me[]="dbtcn";
+static int last = 0;
 
 int main(int argc, char *argv[])
 {
     int ip[5];
     char buf[sizeof(dbbc3_ddc_multicast_t)];
+    int it[6];
+    int seconds;
 
     setup_ids();    /* attach to the shared memory */
     rte_prior(FS_PRIOR);
@@ -56,9 +59,9 @@ int main(int argc, char *argv[])
 
     int error_no;
     int sock = open_mcast(shm_addr->dbbad.mcast_addr,
-        shm_addr->dbbad.mcast_port,
-        shm_addr->dbbad.mcast_if,
-        &error_no);
+            shm_addr->dbbad.mcast_port,
+            shm_addr->dbbad.mcast_if,
+            &error_no);
 
     if(0>sock) {
         logitn(NULL,-10+sock,"dn",error_no);
@@ -70,9 +73,10 @@ int main(int argc, char *argv[])
     struct dbbc3_tsys_cycle cycle = {};
     int to_report;
     dbbc3_ddc_multicast_t packet = {};
-    int loop_count = -1;
+
     int cont_cal_save1 = 0;
     int cont_cal_save2 = 0;
+
     for (;;) {
         /* wait two cylces for TPIs to catch-up to cont cal turning on */
         int cont_cal0 = shm_addr->dbbc3_cont_cal.mode == 1;
@@ -110,15 +114,17 @@ int main(int argc, char *argv[])
                 (dbtcn_control.continuous == 0 &&
                  (dbtcn_control.data_valid.user_dv ==0 || shm_addr->KHALT !=0 ||
                   0==strncmp(shm_addr->LSKD,"none    ",8)))) {
-            loop_count=-1;
+            last=0;
             continue;
         }
 
-        ++loop_count;
-        loop_count=loop_count%((dbtcn_control.cycle+99)/100);
-        if (loop_count!=0)
+        rte_time(it,it+5);
+        rte2secs(it,&seconds);
+
+        if( 0 != last && seconds-last < (dbtcn_control.cycle+99)/100)
             continue;
 
+        last=seconds;
         log_mcast(&packet,&cycle,cont_cal);
     }
 
