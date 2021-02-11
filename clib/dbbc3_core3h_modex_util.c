@@ -425,7 +425,8 @@ int dbbc3_core3h_2_vsi_samplerate(ptr,lclc,lclm) /* return values:
     struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
 {
     char string[]= "Input sample rate   :";
-    char string2[]= "Hz /";
+    char string2[]= "Hz";
+    char string3[]= "/";
 
     m5state_init(&lclc->decimate.state);
     m5state_init(&lclm->clockrate.state);
@@ -441,8 +442,16 @@ int dbbc3_core3h_2_vsi_samplerate(ptr,lclc,lclm) /* return values:
     }
 
     ptr=strstr(ptr+strlen(string),string2);
-    if(ptr == NULL)
+    if(ptr == NULL) {
         return -1;
+    }
+
+    ptr=strstr(ptr+strlen(string2),string3);
+    if(ptr == NULL) {
+        lclc->decimate.decimate=1;
+        lclc->decimate.state.known=1;
+        return 0;
+    }
 
     if(m5sscanf(ptr+strlen(string2),"%d",
                 &lclc->decimate.decimate,&lclc->decimate.state)) {
