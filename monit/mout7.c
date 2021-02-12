@@ -92,48 +92,52 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         printw("%5s"," ");
 
     move(2,0);
-    printw("Time ");
+    printw("Time   ");
 
-    clock_t now=time(NULL);
-    struct tm *ptr=gmtime(&now);
-    if(ptr->tm_mon<6) {
-        ptr->tm_mon=0;
-        --ptr->tm_year;
-    } else
-        ptr->tm_mon=6;
-    ptr->tm_mday=1;
-    ptr->tm_hour=0;
-    ptr->tm_min=0;
-    ptr->tm_sec=0;
-    clock_t epoch=mktime(ptr);
-    clock_t vdif=ifc.time+epoch;
-    ptr=gmtime(&vdif);
+    struct tm *ptr=gmtime(&ifc.time);
 
     int tm_different =
             ptr->tm_year != tm_save.tm_year ||
-            ptr->tm_mon  != tm_save.tm_mon  ||
-            ptr->tm_mday != tm_save.tm_mday ||
+            ptr->tm_yday != tm_save.tm_yday ||
             ptr->tm_hour != tm_save.tm_hour ||
             ptr->tm_min  != tm_save.tm_min  ||
             ptr->tm_sec  != tm_save.tm_sec;
 
-    if(!ifc.time_correct||!tm_different)
+    if(!tm_different)
         standout();
 
-    printw("%4d/%02d/%02d %02d:%02d:%02d",
+    printw("%4d.%03d.%02d:%02d:%02d",
             ptr->tm_year+1900,
-            ptr->tm_mon+1,
-            ptr->tm_mday,
+            ptr->tm_yday+1,
             ptr->tm_hour,
             ptr->tm_min,
             ptr->tm_sec);
 
-    if(!ifc.time_correct||!tm_different)
+    if(!tm_different)
         standend();
 
     memcpy(&tm_save,ptr,sizeof(tm_save));
 
     move(3,0);
+    printw("Epoch ");
+//    buf[0]=0;
+//    int2str(buf,ifc.vdif_epoch,-2,0);
+//    printw("%2s",buf);
+// place holder until there is an epoch to report
+    printw("--");
+    printw(" DBBC3-FS ");
+    buf[0]=0;
+    int2str(buf,ifc.time_error,-6,0);
+
+    if(ifc.time_error)
+        standout();
+
+    printw("%6s",buf);
+
+    if(ifc.time_error)
+        standend();
+
+    move(4,0);
     if(ifc.lo>=0.0 && krf)
         printw("BBC     RF    Ts-U  Ts-L");
     else
@@ -147,7 +151,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         int ibbc =next*8+i;
         if(i>=8)
             ibbc=next*8+64+i-8;
-        move(4+i,0);
+        move(5+i,0);
         printw("%03d",ibbc+1);
         if(bbc[ibbc].freq>0.0) {
             double freq=bbc[ibbc].freq*1e-6;

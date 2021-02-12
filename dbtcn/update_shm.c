@@ -38,35 +38,41 @@ extern struct fscom *shm_addr;
 void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle)
 {
     int i;
+    int it[6];
+    int seconds;
 
     int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
         shm_addr->dbbc3_ddcu_v<125 ||
         DBBC3_DDCV == shm_addr->equip.rack_type &&
         shm_addr->dbbc3_ddcv_v<125;
 
-    clock_t now=time(NULL);
+    rte_time(it,it+5);
+    rte2secs(it,&seconds);
+    clock_t now=seconds;
     struct tm *ptr=gmtime(&now);
-    if(ptr->tm_mon<6) {
+    if(ptr->tm_mon<6)
         ptr->tm_mon=0;
-        --ptr->tm_year;
-    } else
+    else
         ptr->tm_mon=6;
     ptr->tm_mday=1;
     ptr->tm_hour=0;
     ptr->tm_min=0;
     ptr->tm_sec=0;
     clock_t epoch=mktime(ptr);
-    int vdif=now-epoch;
+
+    int	vdif_should=(ptr->tm_year-100)%32;
+    vdif_should=vdif_should*2+ptr->tm_mon/6;
 
     for (i=0;i<MAX_DBBC3_IF;i++) {
         cycle->ifc[i].lo=shm_addr->lo.lo[i];
         cycle->ifc[i].sideband=shm_addr->lo.sideband[i];
         cycle->ifc[i].delay=t->core3h[i].pps_delay;
-        if(v124) 
-            cycle->ifc[i].time=vdif;
+        if(v124)
+            cycle->ifc[i].time=seconds;
         else
-            cycle->ifc[i].time=t->core3h[i].timestamp;
-        cycle->ifc[i].time_correct=vdif==cycle->ifc[i].time;
+            cycle->ifc[i].time=t->core3h[i].timestamp+epoch;
+        cycle->ifc[i].vdif_epoch=vdif_should;
+        cycle->ifc[i].time_error=cycle->ifc[i].time-seconds;
     }
 
     for (i=0;i<MAX_DBBC3_BBC;i++)

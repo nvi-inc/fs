@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <time.h>
+
 /* shared memory (fscom C data structure) layout */
 
 typedef struct fscom {
@@ -500,8 +503,9 @@ typedef struct fscom {
               double lo;
               int sideband;
               int delay;
-              int time;
-              int time_correct;
+              time_t time;
+              int time_error;
+              int vdif_epoch;
               float tsys;
           } ifc[MAX_DBBC3_IF];
           struct dbbc3_tsys_bbc {
