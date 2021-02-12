@@ -217,14 +217,18 @@ main()
             }
         } else
             next=ifc-1;
-
+//        if(idebug++>0) {
+//            printf(" iping %d\n",iping);
+//            die();
+//            exit(0);
+//        }
         mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,all,!undef,record);
         move(ROW_HOLD,COL_HOLD);  /* place cursor at consistent location */
 
         refresh();
 
         rte_time(it,&iyear);
-        isleep=140-it[0];
+        isleep=100-it[0];
         isleep=isleep>100?100:isleep;
         isleep=isleep<1?100:isleep;
         rte_sleep((unsigned) isleep);
