@@ -19,7 +19,7 @@
 //
 
 = FS Mark 6 Support
-Version 0.3 - January 2021
+Version 0.4 - February 2021
 
 :sectnums:
 :toc:
@@ -67,8 +67,8 @@ considered active.
 |=================
 | Mark 6 | Control File| Control Program
 
-|  A     | _mk6ca.ctl_ | _mk6ca_
-|  B     | _mk6cb.ctl_ | _mk6cb_
+|  a     | _mk6ca.ctl_ | _mk6ca_
+|  b     | _mk6cb.ctl_ | _mk6cb_
 |=================
 
 === Parallel command execution
@@ -87,8 +87,8 @@ operates only on that device.  If no letter is appended, the command
 operates on all active instances of the device.
 
 * By default all available devices are active.  Which devices are
-active can be changed with an `active___device__` command, in this
-case `active_mk6`.
+active can be changed with an `active___device__s` command, in this
+case `active_mk6s`.
 
 * Which devices are available are defined by which have control files
 that have non-comment entries. In others words, a device is not
@@ -104,7 +104,7 @@ sequential order, variations in response time can cause the responses
 to arrive in a different order. The responses are logged in the order
 received.
 
-=== Low level RDBE communication command
+=== Low level Mark 6 communication command
 
 The `mk6` command can be used to communicate directly with an
 individual Mark 6 or all active Mark 6s in parallel, as described in

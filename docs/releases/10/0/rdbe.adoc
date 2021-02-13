@@ -19,7 +19,7 @@
 //
 
 = FS RDBE Support
-Version 0.3 - January 2021
+Version 0.4 - February 2021
 
 :sectnums:
 :toc:
@@ -51,10 +51,10 @@ polarization for that band on each of the two IFs.
 |=================
 | RDBE |Band|Frequency| IF0 pol| IF1 pol| Control File| Control Program| Multi-cast program
 
-|  A   | A  | 3 GHz   |  H     |  V     | _rdbca.ctl_ | _rdbca_        | _rdtca_
-|  B   | B  | 5 GHz   |  H     |  V     | _rdbcb.ctl_ | _rdbcb_        | _rdtcb_
-|  C   | C  | 6 GHz   |  H     |  V     | _rdbcc.ctl_ | _rdbcc_        | _rdtcc_
-|  D   | D  | 10 GHz  |  H     |  V     | _rdbcd.ctl_ | _rdbcd_        | _rdtcd_
+|  a   | A  | 3 GHz   |  H     |  V     | _rdbca.ctl_ | _rdbca_        | _rdtca_
+|  b   | B  | 5 GHz   |  H     |  V     | _rdbcb.ctl_ | _rdbcb_        | _rdtcb_
+|  c   | C  | 6 GHz   |  H     |  V     | _rdbcc.ctl_ | _rdbcc_        | _rdtcc_
+|  d   | D  | 10 GHz  |  H     |  V     | _rdbcd.ctl_ | _rdbcd_        | _rdtcd_
 |=================
 
 === Parallel command execution
@@ -73,8 +73,8 @@ operates only on that device.  If no letter is appended, the command
 operates on all active instances of the device.
 
 * By default all available devices are active.  Which devices are
-active can be changed with an `active___device__` command, in this
-case `active_rdbe`.
+active can be changed with an `active___device__s` command, in this
+case `active_rdbes`.
 
 * Which devices are available are defined by which have control files
 that have non-comment entries. In others words, a device is not
