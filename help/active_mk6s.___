@@ -1,0 +1,15 @@
+                    active_mk6s - set/display active Mark 6s
+
+            Syntax:     active_mk6s=<list>
+
+            Response:   active_mk6s/<list>
+
+
+Settable parameters:
+        <list>     list of comma separated Mark 6 letters: 'a','b'
+                   up to the maximum, currently two
+
+Monitor-only parameters: none
+
+Comments: 
+The letters may be given in any order. Duplicated letters are ignored.
