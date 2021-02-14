@@ -38,7 +38,7 @@
 #include "dbtcn.h"
 
 // These are in centiseconds
-#define TIME_OUT        400
+#define TIME_OUT        125
 #define ERROR_PERIOD   2000
 
 ssize_t read_mcast(int sock, char buf[], size_t buf_size, int to_report)
