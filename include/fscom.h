@@ -502,7 +502,7 @@ typedef struct fscom {
           struct dbbc3_tsys_ifc {
               double lo;
               int sideband;
-              int delay;
+              unsigned int delay;
               time_t time;
               int time_error;
               int vdif_epoch;

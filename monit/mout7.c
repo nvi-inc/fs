@@ -76,12 +76,9 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     move(1,0);
     printw("Delay");
-    if(ifc.delay>=0) {
-        buf[0]=0;
-        int2str(buf,ifc.delay,-8,0);
-        printw("%8s",buf);
-    } else
-        printw("%8s"," ");
+    buf[0]=0;
+    uns2str2(buf,ifc.delay,-8,0);
+    printw("%8s",buf);
 
     printw(" Tsys ");
     if(ifc.tsys> -1e12) {
