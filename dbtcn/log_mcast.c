@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "../include/clib.h"
 #include "../include/poclb.h"
@@ -80,6 +81,37 @@ static void log_out(char buf[],char *string, int new)
         strcpy(buf,string);
         slen=strlen(buf);
     }
+}
+static void log_time( struct dbbc3_tsys_cycle *cycle, char buf[])
+{
+    int i;
+
+    int vu125 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcu_v> 124;
+
+    if(vu125) {
+        for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+            struct tm *ptr=gmtime(&cycle->ifc[i].time);
+
+            log_out(buf, "time/",22);
+            sprintf(buf+strlen(buf)," %d, %4d.%03d.%02d:%02d:%02d,",i+1,
+                    ptr->tm_year+1900,
+                    ptr->tm_yday+1,
+                    ptr->tm_hour,
+                    ptr->tm_min,
+                    ptr->tm_sec);
+        }
+        log_out(buf, "",0);
+    }
+
+    for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+        char sbuf[128];
+
+        sprintf(sbuf," %d, %ue-9,",i+1, cycle->ifc[i].delay);
+        log_out(buf, "pps2dot/",strlen(sbuf)-1);
+        strcat(buf,sbuf);
+    }
+    log_out(buf, "",0);
 }
 
 static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
@@ -190,6 +222,8 @@ static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[])
 void log_mcast(dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle, int cont_cal)
 {
     char buf[256] = "";
+
+    log_time( cycle, buf);
 
     log_tp( t, buf, cont_cal);
 
