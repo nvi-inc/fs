@@ -40,7 +40,8 @@ static float bw_key[ ]={2,4,8,16,32,64,128};
 void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         int cont_cal)
 {
-    int on, off, diff;
+    unsigned int on, off;
+    int diff;
     double freq;
     float fwhm, tcal, dpfu, gain, tsys;
     int j, k;
@@ -71,11 +72,6 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
     for (j=0;j<MAX_DBBC3_IF;j++)
         cycle->ifc[j].tsys=-9e16;
-
-    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcu_v<125 ||
-        DBBC3_DDCV == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcv_v<125;
 
     for (k=0;k<MAX_DBBC3_BBC;k++) {
 
@@ -111,10 +107,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         on =t->bbc[k].total_power_lsb_cal_on;
         off=t->bbc[k].total_power_lsb_cal_off;
-        if(v124) {
-            on =t->bbc[k].total_power_lsb_cal_off;
-            off=t->bbc[k].total_power_lsb_cal_on;
-        }
+
         diff=on-off;
 
         if (tcal <=0.0)
@@ -138,10 +131,6 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         on =t->bbc[k].total_power_usb_cal_on;
         off=t->bbc[k].total_power_usb_cal_off;
-        if(v124) {
-            on =t->bbc[k].total_power_usb_cal_off;
-            off=t->bbc[k].total_power_usb_cal_on;
-        }
         diff=on-off;
 
         if (tcal <=0.0)
@@ -174,12 +163,12 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         get_gain_par(j+1,freq,&fwhm,&dpfu,NULL,&tcal);
 
-        on = t->core3h[j].total_power_cal_on;
-        off= t->core3h[j].total_power_cal_off;
-        if(v124) {
-            on = t->core3h[j].total_power_cal_off;
-            off= t->core3h[j].total_power_cal_on;
-        }
+//        on = t->core3h[j].total_power_cal_on;
+//        off= t->core3h[j].total_power_cal_off;
+// actually it seems to be backwards
+          on = t->core3h[j].total_power_cal_off;
+          off= t->core3h[j].total_power_cal_on;
+
         diff=on-off;
 
         if (tcal <=0.0)
