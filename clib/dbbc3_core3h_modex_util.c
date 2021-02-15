@@ -374,6 +374,10 @@ int dbbc3_core3h_2_vsi_bitmask(ptr,lclc,lclm) /* return values:
     m5state_init(&lclm->mask3.state);
     m5state_init(&lclc->mask2.state);
     m5state_init(&lclc->mask1.state);
+    lclm->mask4.mask4=0;
+    lclm->mask3.mask3=0;
+    lclc->mask2.mask2=0;
+    lclc->mask1.mask1=0;
 
     ptr=strstr(ptr,string);
     if(ptr == NULL) {
