@@ -3116,6 +3116,21 @@ Class buffer error from command response.
 DV -501
 Only DBBC PFB rack types supported in vsiX commands.
 ""
+DW -301
+mcast_time command does not accept arguments.
+""
+DW -302
+mcast_time command only supported for DBBC3 DDC_U v125 or later.
+""
+DW -303
+Multi-cast time data is stale, more than 20 seconds old.
+""
+DW -304
+Core3H board ?WWW has a non-zero time offset.
+""
+DW -305
+One or more Core3H boards have a non-zero time offset and/or the multicast data is stale, please see messages above.
+""
 ER -902
 Unable to find ":" in S2 error decode response.
 ""

@@ -1,0 +1,43 @@
+mcast_time - display time information from multicast time (DBBC3 rack)
+
+Syntax:   mcast_time
+
+Response: mcast_time/0,last,age
+          mcast_time/board,time,epoch,pps2dot,offset
+
+Settable parameters:
+
+None.
+
+Monitor only parameter:
+0           Literal '0', indicates this is the output line for the
+            Time of last multicast received
+last        Time the most recent multicast message was received
+age         Number of seconds since the last message was received
+
+board       Core3H board number, 1-8, for this output line
+time        Core3H multicast time
+epoch       Reported VDIF epoch in use, currently null.
+pps2dot     Core3H pps_delay value, seconds
+offset      Difference between 'time' for this board and 'last',
+            positive board if the board time is later
+
+Comments:
+
+This command displays the Core3H board time information from the
+most recently received multicast message.
+
+The 'time' for a board may be up to one second earlier than the
+time of the log entry, depending in when the command is executed.
+
+The values for 'time' and 'last' should agree since the latter is
+the second that the multicast was received.
+
+The format of 'time' and 'last' is:
+
+   yyyy.ddd.hh:mm:ss
+
+The lines output for the boards are columnized for readability.
+
+The VDIF epoch is currently not provided by the multicast, but it is
+expected that it will be added.

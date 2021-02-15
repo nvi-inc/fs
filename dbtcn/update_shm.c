@@ -63,6 +63,8 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle)
     int	vdif_should=(ptr->tm_year-100)%32;
     vdif_should=vdif_should*2+ptr->tm_mon/6;
 
+    cycle->last=seconds;
+
     for (i=0;i<MAX_DBBC3_IF;i++) {
         cycle->ifc[i].lo=shm_addr->lo.lo[i];
         cycle->ifc[i].sideband=shm_addr->lo.sideband[i];

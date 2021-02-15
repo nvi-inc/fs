@@ -607,6 +607,8 @@ pfb1         qkr 13101 01 0800FFFFFFFF
 pfb2         qkr 13102 01 0800FFFFFFFF
 pfb3         qkr 13103 01 0800FFFFFFFF
 pfb4         qkr 13104 01 0800FFFFFFFF
+* mcast_* commands, only dbbc3 for now
+mcast_time   qkr 13201 01 4000FFFFFFFF
 * boss internal
 cont         *xx 00000 02 FFFFFFFFFFFF
 halt         *xx 00000 03 FFFFFFFFFFFF

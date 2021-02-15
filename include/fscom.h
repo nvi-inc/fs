@@ -513,6 +513,7 @@ typedef struct fscom {
               float tsys_usb;
               unsigned freq;
           } bbc[MAX_DBBC3_BBC];
+          time_t last;
       } data[2];
       int iping;
   } dbbc3_tsys_data;

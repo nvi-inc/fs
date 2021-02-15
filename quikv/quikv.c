@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -481,6 +481,14 @@ loop:
       case 131:
 	dbbc_pfbx(&command,itask,ip);
 	break;
+      case 132:
+	switch (itask) {
+	case  1: dbbc3_mcast_time(&command,itask,ip); break;
+        default:
+	  ierr=-4;
+	  goto error;
+        }
+    break;
 /* end modified mb */
       default:
 	ierr=-4;
