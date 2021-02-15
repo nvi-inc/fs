@@ -31,7 +31,7 @@
 
 static char *if_key[ ]={ "a", "b", "c", "d", "e", "f", "g", "h" };
                                                          /* if input source */
-static char *bw_key[ ]={"2","4","8","16","32","64","128"};
+static char *bw_key[ ]={"0","2","4","8","16","32","64","128"};
 static char *agc_key[ ]={"man","agc"};
 
 #define NIF_KEY sizeof(if_key)/sizeof( char *)
@@ -75,7 +75,9 @@ char *ptr;
 	  ierr=-300;
         break;
       case 3:
-	ierr=arg_key_flt(ptr,bw_key,NBW_KEY,&lcl->bw,4,TRUE);
+	ierr=arg_key_flt(ptr,bw_key,NBW_KEY,&lcl->bw,5,TRUE);
+    if(0 == ierr && 0 == lcl->bw)
+        ierr=-200;
         break;
       case 4:
         ierr=arg_int(ptr,&lcl->avper,1,TRUE);

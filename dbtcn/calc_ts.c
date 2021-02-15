@@ -34,7 +34,7 @@
 
 extern struct fscom *shm_addr;
 
-static float bw_key[ ]={2,4,8,16,32,64,128};
+static float bw_key[ ]={0,2,4,8,16,32,64,128};
 #define NBW_KEY sizeof(bw_key)/sizeof( float)
 
 void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
