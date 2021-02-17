@@ -19,7 +19,7 @@
 //
 
 = VERY ROUGH DRAFT FS DBBC3 Operations Manual
-Version 0.4 - February 2021
+Version 0.5 - February 2021
 
 :toc:
 :sectnums:
@@ -68,6 +68,27 @@ Sven: no
 covered below.
 
 ====
+
+==== Changing thread numbers
+
+The following command changes the thread number on _eth0_ tp `3`
+(`196608/65536`) and _eth1_ to `4`.
+
+....
+dbbc3=core3h=1,regupdate vdif_header 3 196608 0x03FF0000
+....
+
+====
+
+Questions:
+
+[start=3]
+. Does this also change the thread number for _eth1_ to `4`.
++
+Sven: Yes.
+
+====
+
 
 === Experiment mode configuration
 
@@ -173,10 +194,10 @@ have the same time.
 ====
 Questions:
 
-[start=3]
+[start=4]
 . Is this sufficient?
 +
-Sven: No, the pps sync is missing (but it requires a new command to implement properly).)
+Sven: No, the `pps_sync` was missing (but it requires a new command to implement properly).
 
 . Since there is concern that this may not work correctly, how does one tell if
 it was successful?
@@ -245,7 +266,7 @@ The clock rate should be set to `nominal`, which gives the 128 MHz fixed value.
 
 Questions:
 
-[start=6]
+[start=7]
 . Should we support  DDC_V?
 +
 We can use `dbbc3_ddcu` and `dbbc3_ddcv`.
@@ -463,7 +484,7 @@ net_protocol = : 64000000
 
 Questions:
 
-[start=8]
+[start=9]
 . Is the description correct for the above?
 +
 
