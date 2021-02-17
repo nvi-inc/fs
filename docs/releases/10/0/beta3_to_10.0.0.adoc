@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to FS 10.0.0 Update Notes
-Version 1.5 - January 2021
+Version 1.6 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -152,8 +152,8 @@ from within the FS _git_ archive directory, usually _/usr2/fs-git_.
 
 === FS changes
 
-. [[makeinc]] Add _make_ commands after `git checkout` in incremental
-update notes.
+. [[makeinc]] Add `make clean rmdoto rmexe` command after `git
+checkout` in incremental update notes.
 
 +
 
@@ -162,7 +162,8 @@ code. This is due to _drudg_ not participating in the new _Makefile_
 scheme, but it is generally cleaner too. Thanks to Carlo Migoni
 (Sardinia) for reporting this.
 
-. Add switching to _s_client_ to the update notes.
+. Add switching to _s_client_ to the update notes for former VGOS
+branch users.
 
 . [[metserver]] Add update instructions for switching to the new
 _metserver_.  It has several new features for former users of the old
@@ -187,6 +188,86 @@ section of the
 
 . Add update instructions for _~/.fvwm2rc_.
 
+. Improve DBBC2 `if__x__` command help files.
+
+.. The fact that the IF target level is not command as the default was added.
+
+.. The range for IF filter 3 was corrected to 1536-2048.
+
+.. The description of the scaling of the IF power measurements was
+brought up to date.
+
+. Improve start-up error message from _fserr_ if an error message line
+is too long in _fsser.ctl_ or _ster.ctl_.
++
+
+Previously, it reported the error as being in the following `""` line.
+
+. Add the `.rxg` file LO values to the `lo/rxg` output lines.
++
+
+This change is intended to make it clearer which `.rxg` file is use,
+particularly if there are files with both `fixed` and `range` LO
+specifications that could match (`fixed` has priority).
+
+. Switch to using internal version information for `fesh` and `plog`.
++
+
+Using the FS version could make it look like the programs have changed
+when they hadn't. Using the FS version was a change in _beta2_.
+
+. Add `save` to all _fslb/novas.f_ routines.
++
+
+This is defensive in case local variable are changed to being
+automatic. The NOVAS routines seem to require static variables.
+
+. Add checking in _msg_ for the FS being active just before writing to
+the log.
++
+
+This allows `msg` to send its output to the log if it is started
+before the FS. Previously, it had to be started after the FS.
+
+. Change default _.Xresource_ files to prevent overwriting of `login
+shell` window title by _bash_.
++
+
+This maintains consistent window naming for agreement with existing
+documentation. This only affects _bash_ users.
+
+. Add missing help file for `active_mk6s`.
+
+. Fix an issue with _git_ on FSL8 causing the repo to appear "`dirty`"
+after _root_ does a `make install`.
+
 === drudg changes
 
-There are no changes.
+. Fix the GB shown in _drudg_ listings (closes
+https://github.com/nvi-inc/fs/issues/88[#88]). The values had been
+incorrectly scaled by 1000/1024 since _beta1_. This was fixed. This
+issue was introduced in the merge of the VGOS branch, which also had
+this issue. This did not have much consequence for Mark 6 users, but
+it could lead to selecting the wrong size module for Mark 5 usage.
++
+
+The size of the GB being recorded in `mk6=record=...` commands had the
+same issue dating back to the VGOS branch as well. This was also
+fixed. This error had no impact since the value is only used by the
+recorder to determine whether the disk module has enough room for the
+recording and the Mark 6 modules were not being used near their
+capacity limit.
+
+. Correct the name of the setup procedure used for `BB` racks to
+always be `setupbb` regardless of the recorder selected (closes
+https://github.com/nvi-inc/fs/issues/57[#57]).
++
+
+This makes schedules more useful with other recorders, particularly
+`none` (which is used for single dish tests).
+
+. Allow the `$PARAMS` block to occur after other blocks in _.skd_
+files.
++
+
+Previously it has to be the first block.

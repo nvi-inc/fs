@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 0.8 - January 2021
+Version 0.9 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -340,7 +340,7 @@ this second version of _gnplt_, but ran out of time in his internship
 and was unable to include this minor but important feature. Thanks to
 Beppe Maccaferri (Medicina) for reporting this.
 
-. [[addrdbemsg]] Add _rdbemsg_ utility.
+. [[addrdbemsg]] Add _rdbemsg_ utility for RDBE VGOS users.
 +
 
 This utility was originally developed by Jason Soohoo (Haystack). It
@@ -348,11 +348,25 @@ is an RDBE oriented version of the FS _msg_ utility for sending
 operations emails. Initially it ran on a different back-end computer.
 It was ported to the FS and expanded to provide pointing data.
 
+. Add checking in _msg_ for the FS being active just before writing to
+the log.
++
+
+This allows `msg` to send its output to the log if it is started
+before the FS. Previously, it had to be started after the FS.
+
 . [[helpsh]] Move X resources for _helpsh_ to _~/.Xresources_.
 +
 
 This allows the geometry and other parameter of the FS `help` display
 _xterm_ to be controlled locally.
+
+. Change default _.Xresource_ files to prevent overwriting of `login
+shell` window title by _bash_.
++
+
+This maintains consistent window naming for agreement with existing
+documentation. This only affects _bash_ users.
 
 . [[day248]] Always check for "`day 248`" issue in _setcl_.
 +
@@ -456,6 +470,15 @@ commands (closing https://github.com/nvi-inc/fs/issues/75[#75]). The
 .. The `help` file for the `fila10g` command was expanded to also
 support the `fila10g2` command. The `help` command now works for the
 `fila10g2` command.
+
+.. Improve DBBC2 `if__x__` command help files.
+
+... The fact that the IF target level is not command as the default was added.
+
+... The range for IF filter 3 was corrected to 1536-2048.
+
+... The description of the scaling of the IF power measurements was
+brought up to date.
 
 . [[plog]] Improve _plog_.
 
@@ -569,6 +592,11 @@ respectively.
 .. Obsolete errors for the, no longer used, _sw.ctl_ control file were
 removed.
 
+. Improve start-up error message from _fserr_ if an error message line
+is too long in _fsser.ctl_ or _ster.ctl_.
++
+
+Previously, it reported the error as being in the following `""` line.
 . [[dbbcn]] Improve error logging for _dbbcn_ initialization.
 +
 
@@ -649,6 +677,12 @@ the variable.
 .... Logout and back in before attempting to run the FS.
 
 ... Repeat the above steps as _prog_.
+
+. Add `save` to all _fslb/novas.f_ routines.
++
+
+This is defensive in case local variable are changed to being
+automatic. The NOVAS routines seem to require static variables.
 
 . [[symlinks]] No longer set _/usr2/fs_ and _/usr2/st_ to be owned by
 _prog_.
@@ -1026,7 +1060,7 @@ This section is divided into three sub-sections. Please see the
 
 === drudg changes that are in common since FS9
 
-_drudg_ opening message date is `2020Nov20`.
+_drudg_ opening message date is `2021Feb7`.
 
 . [[bit3264_drudg]] Source code now works on 32- and 64-bit platforms.
 +
@@ -1074,6 +1108,12 @@ A particular error in the mask format intermittently excited an
 uninitialized variable bug.  Thanks to Beppe Maccaferri (Medicina) for
 reporting this. He discovered it while testing with _r1971.skd_ (which
 was not an experiment that included Medicina).
+
+. Allow the `$PARAMS` block to occur after other blocks in _.skd_
+files.
++
+
+Previously it has to be the first block.
 
 . [[drudgsource]] Clean-up source.
 
@@ -1140,16 +1180,12 @@ slow disks.
 
 This block holds verbatim copies of the procedures for each broad band
 station.  They are used if the rack type in _drudg_ is set to `BB`.
-For this case, with the recorded selected as `Mark6`, the setup
-procedure's name in the _.snp_ file is `setupbb`.
+For this case, the setup procedure's name in the _.snp_ file is
+`setupbb`.
 +
 
-WARNING: If a different recorder, including `none`, is selected,
-`setupsx` is used in the _.snp_ file instead.
-+
-
-IMPORTANT: There must be agreement between the _.prc_ and _.snp_ file
-on the name of the setup procedure.
+IMPORTANT: The procedures in `$PROCS` block must use `setupbb` as the
+name of the setup procedure.
 +
 
 The `$PROCS` block has a section for procedures that are the same at
@@ -1169,8 +1205,8 @@ station's schedule procedure library.
 
 The procedures between the `BEGIN` and `END` lines must be complete
 procedures, starting with `define` line, including the time stamp
-field, and the `enddef` line. Both of which are part of the structure
-of a SNAP _.prc_ procedure library.
+field, and the `enddef` line. Both lines are required parts of the
+structure of a SNAP _.prc_ procedure library for each procedure.
 
 . [[mk6drudg]] Mark 6 recorder support
 +
@@ -1234,9 +1270,9 @@ is used to check the recording quality.
 
 This update merges the VGOS branch into the main branch. The VGOS
 branch diverged from the main branch just after _9.11.2_.  Except for
-the first item, this sub-section covers _drudg_ changes that occurred
-in the main branch from _9.11.2_ through _9.13.2_. Those changes are
-covered extensively in several update notes in the _misc/_
+the first three items, this sub-section covers _drudg_ changes that
+occurred in the main branch from _9.11.2_ through _9.13.2_. Those
+changes are covered extensively in several update notes in the _misc/_
 subdirectory:
 
 * _fs9116up.txt_
@@ -1246,8 +1282,8 @@ subdirectory:
 
 Rather that cover them fully here as well, only a brief summary is
 provided below. Please check the files listed above for the full
-details. The first item below is an enhancement that was added for
-VGOS use.
+details. The first threes item below are improvements to support for
+VGOS.
 
 . [[wait]] Add support for an additional wait at the end of recording
 for broadband.
@@ -1257,6 +1293,25 @@ This allows schedules to include a fixed amount of additional wait for
 buffering per station. This seems to be needed for Mark 6 recorders in
 configurations that otherwise would require no buffer time for disks
 that are slower than nominal.
+
+. Fix the GB shown in _drudg_ listings (closes
+https://github.com/nvi-inc/fs/issues/88[#88]). The values had been
+incorrectly scaled by 1000/1024 in the VGOS branch. This was fixed.
++
+
+The size of the GB being recorded in `mk6=record=...` commands had the
+same issue in the VGOS branch as well. This was also fixed. This error
+had no impact since the value is only used by the recorder to
+determine whether the disk module has enough room for the recording
+and the Mark 6 modules were not being used near their capacity limit.
+
+. Correct the name of the setup procedure used for `BB` racks to
+always be `setupbb` regardless of the recorder selected (closes
+https://github.com/nvi-inc/fs/issues/57[#57]).
++
+
+This makes schedules more useful with other recorders, particularly
+`none` (which is used for single dish tests).
 
 . Fix for a bug that caused the IF configuration to be lost if the
 schedule specified an unrecognized rack type.
