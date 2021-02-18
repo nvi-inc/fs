@@ -206,7 +206,7 @@ global pointing_id problem_scans_id current_form process_file
           .session_label2 .session_entry .session_name .start_recording_label .start_recording_entry \
           .start_recording_source .start_recording_source2 .at_label .ut_label .ut_entry .ut_time_label .ut_time_label2 \
           .source_box_label .source_box_text .source_box_scroll .waiting_frame .waiting_label .current_source_label \
-          .abort_button .send_button
+          .abort_button .send_button .auto_button
 
   #*****************************************************#
   # Destroys every singel widget in the ready and stop  #
@@ -248,7 +248,12 @@ global pointing_id problem_scans_id current_form process_file
   #*****************************************************#
   if {$current_form == "start" || $current_form == "auto start"} {
    global first_source source_time start_time ut_on_source
-   unset start_time ut_on_source 
+   if {[info exists start_time]} {
+     unset start_time
+   }
+   if {[info exists ut_on_source]} {
+     unset ut_on_source
+   }
    set first_source ""
    set source_time ""
   } elseif {$current_form == "ready"} {
@@ -365,11 +370,15 @@ global session first_source source_time
     set look_for_st 0
 
      if {[info exists logfile_name]} {
+      set logfile_name [lindex [split $logfile_name .] 0]
       set logfile_name "$logfile_name.log"
+      set process_file [open |[list process_logfile $logfile_name] r]
+      fileevent $process_file readable [list process_logfile_line $process_file]
+     } else {
+      output_error 8 " "
+      form_controler 3
      }
 
-   set process_file [open |[list process_logfile $logfile_name] r]
-   fileevent $process_file readable [list process_logfile_line $process_file]
   }
 
 
@@ -488,11 +497,14 @@ pack      .current_source_label .waiting_label -in .waiting_frame -side left -pa
 #**********************************************************************************************#
 button .abort_button -text "Abort" -bg SteelBlue3 -fg white -width 6 \
 -relief raised -command {stop_auto_start_mode 1}
+button .auto_button -text "Auto-start" -bg SteelBlue3 -fg white -width 6 \
+-relief raised -command {form_controler 2}
 button .send_button -text "Send" -bg SteelBlue3 -fg white -width 6 \
 -relief raised -command {send_mail; .send_button config -text "Go to stop" -width 12 -command {form_controler 4}} 
 
  if {$form==0} {
   pack   .send_button -in .internal6 -side top -pady 1m
+  pack  .auto_button -in .internal6 -pady 1m -pady 2m
  } elseif {$form==1} {
   pack   .abort_button -in .internal6 -side top -pady 1m
  }
@@ -1796,6 +1808,8 @@ grab     .error
   label .error.error-label -text "Error: You have to push\n one of the larger or\n smaller buttons!" -bg CadetBlue -fg white -width 27
  } elseif {$nr==7} {
   label .error.error-label -text "Error: You have to push\n one of the Is or\n Is not nominal buttons!" -bg CadetBlue -fg white -width 27
+ } elseif {$nr==8} {
+  label .error.error-label -text "Error: Schedule log file not defined\n Exit msg, then open\n log file before re-starting msg" -bg CadetBlue -fg white -width 27
  }
 button   .error.ok -text "Ok" -bg CadetBlue -fg white -width 4 -relief raised -command release_error_msg
 pack     .error.error-label .error.ok -side top -pady 1m
