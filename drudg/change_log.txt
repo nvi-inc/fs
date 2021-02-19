@@ -1,4 +1,5 @@
 This file contains a summary of changes made and why.
+2021-02-18 lstsum.f: Fixed problem with listing for staggered start
 2021-02-07 lstsum.f: Changed calculation of total Gbytes 1024-->1000. lstsum.f lstsumo.f Remove num_tapes/ntapes argument. 
 2021-02-04 drprrd.f: Space to $PARAM section. Previously assumed was second line of sked file. 
 2021-02-02 drprrd.f: Stop reading when we gertr to end of $PARAM
