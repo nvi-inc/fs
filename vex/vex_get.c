@@ -98,10 +98,8 @@ get_scan_source(Llist *lowls_scan_in)
 
   lowls_this=lowls;
   lowls=lowls->next;
-  if(vex_version.lessthan2)
-      return ((Lowl *)lowls_this->ptr)->item;
-  else
-      return ((Source *)((Lowl *)lowls_this->ptr)->item)->key;
+
+  return ((Source *)((Lowl *)lowls_this->ptr)->item)->key;
 
 
 ldone:
