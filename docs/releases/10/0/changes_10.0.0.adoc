@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 0.9 - February 2021
+Version 1.0 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -1282,7 +1282,7 @@ subdirectory:
 
 Rather that cover them fully here as well, only a brief summary is
 provided below. Please check the files listed above for the full
-details. The first threes item below are improvements to support for
+details. The first three items below are improvements to support for
 VGOS.
 
 . [[wait]] Add support for an additional wait at the end of recording

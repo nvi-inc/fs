@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to FS 10.0.0 Update Notes
-Version 1.6 - February 2021
+Version 1.7 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -244,11 +244,14 @@ after _root_ does a `make install`.
 === drudg changes
 
 . Fix the GB shown in _drudg_ listings (closes
-https://github.com/nvi-inc/fs/issues/88[#88]). The values had been
-incorrectly scaled by 1000/1024 since _beta1_. This was fixed. This
-issue was introduced in the merge of the VGOS branch, which also had
-this issue. This did not have much consequence for Mark 6 users, but
-it could lead to selecting the wrong size module for Mark 5 usage.
+https://github.com/nvi-inc/fs/issues/88[#88]).
++
+
+The values had been incorrectly scaled by 1000/1024 since _beta1_.
+This was fixed. This issue was introduced in the merge of the VGOS
+branch, which also had this issue. This did not have much consequence
+for Mark 6 users, but it could lead to selecting the wrong size module
+for Mark 5 usage.  Thanks to Jon Quick (HartRAO) for reporting this.
 +
 
 The size of the GB being recorded in `mk6=record=...` commands had the
@@ -271,3 +274,11 @@ files.
 +
 
 Previously it has to be the first block.
+
+. Restore summary listings for staggered start (closes
+https://github.com/nvi-inc/fs/issues/94[#94]).
++
+
+This bug was apparently introduced in _beta1_. It was apparently
+broken in the merge of _9.13.2_ (where it worked) and the VGOS branch.
+Thanks to Jon Quick (HartRAO) for reporting this.
