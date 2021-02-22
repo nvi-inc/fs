@@ -19,7 +19,7 @@
 //
 
 = DRAFT FS Document Font Conventions
-Version 0.4 - January 2021
+Version 0.5 - January 2021
 
 :sectnums:
 
@@ -52,19 +52,21 @@ The default body font is used for all text, except:
 * _italics_ are used for names (filenames, filename extensions,
 directory paths, libraries, programs, accounts, UNIX commands,
 versions, nodes, domain names, websites, URLs, URIs, email addresses,
-etc., but not people, FSx, or FSLx), emphasis, and the first use of
-technical terms.
+etc., but not people, FS__x__, or FSL__x__), emphasis,
+variable items, and the first use of technical terms.
 
 * `monospace` is used for data (code, program input/output, contents
-of files, UNIX command options, FS commands, etc.), fixed parts of
-items that would be italic when there are replaceable elements
-present, and explicit command/option examples.
+of files, UNIX command options, FS commands, etc.) and explicit
+command/option examples.
 
 * `*monospace bold*`  for explicit input/commands to be entered by the
 user.
 
-* `_monospace italic_` (no bold) for replaceable items, including in
-explicit input/commands to be entered by the user.
+* `_monospace italic_` (no bold) for replaceable/variable items in
+data and explicit commands/text to be entered by the user.
+
+* _<angle brackets>_ around replaceable items that would have been
+italics anyway.
 
 === Code blocks
 

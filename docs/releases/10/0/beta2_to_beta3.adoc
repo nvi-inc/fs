@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta2 to FS 10.0.0-beta3 Update Notes
-Version 1.9 - December 2020
+Version 2.0 - January 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -427,8 +427,8 @@ was unable to include this minor but important feature. Thanks to
 Beppe Maccaferri (Medicina) for reporting this.
 
 .. _gnplt_ now works on FSL8 (Lenny) again (closing
-https://github.com/nvi-inc/fs/issues/73[#73]).  Some recent
-improvements in _gnplt_ made it fail for FSL8.
+https://github.com/nvi-inc/fs/issues/73[#73]).  Some
+improvements in _beta1_ made it fail for FSL8.
 
 . [[helpfiles]] Improve `help` command (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
 
@@ -502,6 +502,9 @@ intended for operations. We make every effort to make sure it is
 bug free, but problems may occur. Since it represents the
 "`bleeding edge`" of development, features may not be as stable nor
 use as reliable as released (tagged) versions.
+
+.. Add the inclusion of the new _rdbemsg_ utility as a change. It was
+not mentioned for _beta1_ or _beta2_.
 
 .. Add missing _rdbemsg.ctl_ customization.
 

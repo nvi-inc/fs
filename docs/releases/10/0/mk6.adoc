@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = FS Mark 6 Support
-Version 0.1 - December 2020
+Version 0.4 - February 2021
 
 :sectnums:
 :toc:
@@ -35,9 +35,11 @@ The support for a Mark 6 with _cplane_/_dplane_ does not provide the
 complete command set and functionality usually provided by the FS for
 a recorder.  However, it is sufficient for normal FS for VGOS
 observations if the schedule procedure library is provided by a
-specially crafted _.skd_ schedule file (see the <<drudg changes
-relative to the main branch>> sub-section below for more details). The
-Mark 6 recorder features included are:
+specially crafted _.skd_ schedule file (see the
+<<changes_10.0.0.adoc#broadband,broad band support>> item of the
+<<changes_10.0.0.adoc#_drudg_changes_relative_to_the_main_branch,drudg
+changes relative to the main branch>> sub-section of the
+<<changes_10.0.0.adoc#,Changes from FS9>> document for more details).
 
 == FS Mark 6 support features
 
@@ -60,14 +62,23 @@ It should possible in the future to record sequentially, but this will
 require modifications to dynamically change which recorder is
 considered active.
 
+.Typical Mark 6 VGOS configuration
+[cols="^,^,^"]
+|=================
+| Mark 6 | Control File| Control Program
+
+|  a     | _mk6ca.ctl_ | _mk6ca_
+|  b     | _mk6cb.ctl_ | _mk6cb_
+|=================
+
 === Parallel command execution
 
 Parallel execution of commands for multiple Mark 6s is supported
 (currently the only other device that has this is RDBE racks).
-Currently the only Mark 6 command is `mk6`.
+Currently the only parallel Mark 6 command is `mk6`.
 
-* Multiple instances of a device are designated by the letters, `a`,
-`b`, etc.
+* Multiple instances of devices are identified by the letters,
+`a`,`b`, etc. In this case, `a` through `b`.
 
 * Commands that support parallel operation always start with
 `_device_` mnemonic, in this case `mk6`. If a letter for the device,
@@ -76,8 +87,8 @@ operates only on that device.  If no letter is appended, the command
 operates on all active instances of the device.
 
 * By default all available devices are active.  Which devices are
-active can be changed with an `active___device__` command, in this
-case `active_mk6`.
+active can be changed with an `active___device__s` command, in this
+case `active_mk6s`.
 
 * Which devices are available are defined by which have control files
 that have non-comment entries. In others words, a device is not
@@ -87,20 +98,22 @@ available if its control file is commented out.
 all reported. All but the last are reported by the command itself. The
 last is returned and reported as the final status of the command.
 
-* Logged responses from the devices may appear in what appears to be
-in random order. Although communication with devices is initiated in
+* Logged responses from the devices may occur in what appears to be
+random order. Although communication with devices is initiated in
 sequential order, variations in response time can cause the responses
 to arrive in a different order. The responses are logged in the order
 received.
 
-=== Low level RDBE communication command
+=== Low level Mark 6 communication command
 
 The `mk6` command can be used to communicate directly with an
 individual Mark 6 or all active Mark 6s in parallel, as described in
-<<Parallel command execution>> sub-section above.  A semi-colon is
+the <<Parallel command execution>> sub-section above. A semi-colon is
 appended to any string being sent if it not the last character
-already. A newline (`0xa`) is also appended. Please see the Mark 6
-documentation for full details of the Mark 6 command set.
+already. A newline (`0xa`) is also appended. For full details of the Mark 6
+command set, please see the documentation:
+
+https://www.haystack.mit.edu/wp-content/uploads/2020/07/docs_Mark6_Mark6_command_set-Release-1.0.pdf
 
 === Communication control programs
 
@@ -122,14 +135,14 @@ its IP address set in _/etc/hosts_.
 . The control port for the device.
 +
 
-Usually `2620`.
+Usually `14242`.
 
 . The time-out for the device in centiseconds.
 +
 
 A value of `100` (one second) is usually suitable for local devices.
 
-=== mk6in external program.
+=== mk6in external program
 
 A script _mk6in_ is provided as a diagnostic utility to report the
 data rate being received at the Mark 6 inputs.  The script is

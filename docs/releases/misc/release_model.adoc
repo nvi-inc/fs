@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -19,7 +19,7 @@
 //
 
 = Strawman Release Model
-Version 0.9 - December 2020
+Version 1.0 - January 2021
 
 :sectnums:
 
@@ -258,7 +258,7 @@ chosen for `_tag_` in the instructions below.
 As _root_, execute: 
 
 .   ``**cd /usr2**``
-.   ``**git clone https://github.com/nvi-inc/fs fs-git**``
+.   ``**git clone \https://github.com/nvi-inc/fs fs-git**``
 .   ``**cd fs-git**``
 .   ``**git checkout -q** _tag_``
 +
@@ -313,7 +313,7 @@ To install from the archive (use the `_tag_` of the release you are installing):
 
 .   Log in as _root_
 .   ``**cd /tmp**``
-.   ``**wget https://github.com/nvi-inc/fs/archive/**__tag__**.tar.gz**``
+.   ``**wget \https://github.com/nvi-inc/fs/archive/**__tag__**.tar.gz**``
 +
 
 TIP: If you don't have _wget_ or if there another problem with it,

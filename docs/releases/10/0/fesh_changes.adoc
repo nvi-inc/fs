@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 fesh Changes
-Version 0.1 - December 2020
+Version 0.3 - February 2021
 
 :sectnums:
 :toc:
@@ -136,8 +136,10 @@ directory, perhaps _/usr2/control_.
 
 The user name for the unencrypted FTP access to _bkg_, _opar_, and
 _vlbeer_, is explicitly set to _ftp_ to avoid potential conflicts with
-other accounts specified in _~/.netrc_ (this is not redirected by
-`NETRC_DIR`).
+other accounts specified in _~/.netrc_.
+
+NOTE: For FTP, use of `NETRC_DIR` does not affect which _.netrc_ file
+is used, i.e., FTP in _fesh_ always uses _~/.netrc_.
 
 === New command line options
 
@@ -149,7 +151,7 @@ center (the default is the current year).
 
 This is particularly useful for getting schedules for the next year.
 
-* `-t` to trigger also downloading the _.txt_ file associated with a
+* `-x` to trigger also downloading the _.txt_ file associated with a
 geodesy schedule.`
 
 * `-m` to override the month directory accessed for _vlbeer_ (the
@@ -168,6 +170,11 @@ default if it is not set.
 * `-s` to override the station code if the `STATION` environment
 variable is set, or set it if it is not set.
 
+* `-a` to set or override the `FESH_GEO_VSI_ALIGN` value
+* `-c` to set or override the `FESH_GEO_CONT_CAL` value
+* `-p` to set or override the `FESH_GEO_CONT_CAL_POLARITY` value
+* `-t` to set or override the `FESH_GEO_TPICD` value
+
 === Typo in error message fixed
 
 A typo in the error message for when the schedule is already
@@ -175,6 +182,6 @@ downloaded was fixed (closing
 https://github.com/nvi-inc/fs/issues/34[#34]). Thanks to Morgan
 Goodrich (KPGO) for reporting this.
 
-=== Internal version number removed
+=== Internal version print-out was changed.
 
-The internal version number was replaced with the FS version.
+The format of the version print-out was changed.

@@ -19,8 +19,8 @@
 //
 
 = FS 10.0.0 Update Notes
-E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.7 - January 2021
+E. Himwich, D. Horsley, J. Quick, J. Gipson
+Version 2.4 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -63,9 +63,15 @@ some new local control files added.
 
 +
 
-The most significant change for users is that previous main branch users will
-find that in the new FS input is case sensitive, as it was already
-in the VGOS branch.
+The most significant change for users is that previous main branch
+users will find that in the new FS input is case sensitive, as it was
+already in the VGOS branch.
++
+
+CAUTION: While it is possible to have different SNAP commands or
+procedures with names that differ only in case, it is strongly
+discouraged. In the future, case insensitivity may be introduced for
+command and procedure names.
 
 . Support for use on both 32- and 64-bit systems.
 
@@ -89,7 +95,7 @@ A new FS Linux distribution, FSL10 (based on Debian _Stretch_), is now
 available for 64-bit (and 32-bit) use. We recommend using this
 distribution if you would like to move to using a 64-bit OS or need a
 32-bit OS that is still under support (the base Debian distribution,
-_Wheezy_, used for FSL9, and those for older FSLx versions, are no
+_Wheezy_, used for FSL9, and those for older FSL__x__ versions, are no
 longer under support). This also may be an alternative for users with
 distributions (such as FSL7) that may be too old to support the
 current FS.  Installation instructions for FSL10 can be found at
@@ -184,6 +190,8 @@ This section provides links to some other useful documents.
 
 * <<beta2_to_beta3.adoc#,FS 10.0.0-beta2 to FS 10.0.0-beta3 Update Notes>>
 
+* <<beta3.adoc#,FS 10.0.0-beta3 Update Notes>>
+
 * <<beta3_to_10.0.0.adoc#,FS 10.0.0-beta3 to FS 10.0.0 Update Notes>>
 
 * <<10.0.0_to_latest.adoc#,FS 10.0.0 to Latest Commit Update Notes>>
@@ -193,7 +201,7 @@ This section provides links to some other useful documents.
 * <<../../misc/known_bugs.adoc#,Known Bugs>> document with the known bugs list from FS9.
 
 * <<../../misc/install_reference.adoc#,Installation Reference>> document with other useful install
-information is available.  It includes eight sections:
+information is available. It includes nine sections:
 
 
 . <<../../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
@@ -204,6 +212,7 @@ information is available.  It includes eight sections:
 . <<../../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
 . <<../../misc/install_reference.adoc#_fix_prc_file_define_lines,Fix .prc file define lines>>
 . <<../../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting geometry values in .Xresources>>
+. <<../../misc/install_reference.adoc#_opening_additional_windows,Opening additional windows>>
 
 If you haven't upgraded or installed the FS before, you may want to
 review the appendix.  It is _strongly_ recommended that you back-up your
@@ -255,7 +264,7 @@ FS and 64-bit upgrade are:
 
 . Follow the steps in the
 <<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit System>> document
-down to the 
+down to the
 <<../../../misc/64-bit_conversion.adoc#_make_local_software,Make local software>>
 step. Instead of following that step, return to the next step in this *TIP*.
 +
@@ -347,8 +356,8 @@ If you are unable to install _git_ (or _git-core_), you can install
 the FS from an archive. Please follow these
 directions:
 
-. Stopping just _after_ the `*cd /usr2/fs-__tag__*` step, execute the steps in the
-<<../../misc/release_model.adoc#_installing_from_an_archive,Installating from an archive>>
+. Stopping just _after_ the `**cd /usr2/fs-**__tag__` step, execute the steps in the
+<<../../misc/release_model.adoc#_installing_from_an_archive,Installing from an archive>>
 sub-section in the
 <<../../misc/release_model.adoc#,Release Model>> document.
 
@@ -466,7 +475,7 @@ are four possible issues:
 
 . <<Conversion of FORTRAN code>>
 . <<Case sensitive strings in antenna= commands>>
-. <<Update local lo command>>
+. <<Update local lo/lo_config commands>>
 . <<Update metserver>>
 
 They are discussed next.
@@ -512,7 +521,7 @@ strings passed by the `antenna=...` command are uppercase, you have
 two options:
 
 . Convert your code. For simple backward compatibility,
-change you _antcn_ program to always convert the
+change your _antcn_ program to always convert the
 `antenna=...` strings to upper case. Alternatively, make
 your code case insensitive.
 
@@ -524,28 +533,44 @@ The former choice is probably easier, but in some cases the second is
 probably better (it keeps with the spirit of case sensitivity). If you
 have questions about which to use and how to do it, please email Ed.
 
-==== Update local lo command
+==== Update local lo/lo_config commands
 
-If you don't have a local `lo` command, you should skip this sub-step.
+If you don't have a local (station) `lo` or `lo_config` command, you
+should skip this sub-step.
 
-If you have a local (station) `lo` command, you will need to update it
-(or replace it, see the next paragraph) to get full support for rack
-types that were not in your previous FS9 version and to implement the
-new capability described in the
+* Local `lo` command
++
+
+If you have a local `lo` command, you will need to update it (or
+replace it, see the next paragraph) to get full support for rack types
+that were not in your previous FS9 version and to implement the new
+capability described in the
 <<changes_10.0.0.adoc#logrxg,logging .rxg files>> change (in the
 <<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
 sub-section of the
 <<changes_10.0.0.adoc#,Changes from FS9>> document).
++
 
 You should consider switching to use the new version of the  `lo`
 command described in the <<changes_10.0.0.adoc#lohooks,LO hooks>> change (in the
 <<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
 sub-section of the
 <<changes_10.0.0.adoc#,Changes from FS9>> document). This
-approach may not be suitable for all stations, but it may will work
+approach may not be suitable for all stations, but it may work
 well for your station. If so, it should reduce, and in most cases
 eliminate, the need to update your local software when the FS `lo`
 command changes in the future.
+
+* Local `lo_config` command
++
+
+Likewise, if you have a local `lo_config` command, it will need to be
+updated to get full support for the new rack types. You should also
+consider switching to using the new hook for this
+described in the <<changes_10.0.0.adoc#lohooks,LO hooks>> change (in the
+<<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
+sub-section of the
+<<changes_10.0.0.adoc#,Changes from FS9>> document).
 
 ==== Update metserver
 
@@ -595,7 +620,7 @@ The remaining steps assume you are logged in as _oper_.
 
 === Update control files
 
-This step is for updates to the local control files. There are six
+This step is for updates to the local control files. There are seven
 sub-steps:
 
 . <<Update stcmd.ctl>>
@@ -603,6 +628,7 @@ sub-steps:
 . <<Update equip.ctl>>
 . <<Review control files>>
 . <<Update rdbemsg.ctl>>
+. <<Update aquir control files>>
 . <<Update skedf.ctl>>
 
 Differences for updating from different previous versions are
@@ -616,7 +642,7 @@ version is included in more than one case in a given sub-step.
 
 +
 
-The non-comments lines need another digit added to the
+The non-comment lines need another digit added to the
 subroutine number. This sub-step is only needed for updates from
 _9.13.2_. You can fix your file with the commands:
 
@@ -707,7 +733,7 @@ copies of the files.
 
 ===== Review clpgm.ctl
 
-You may be able to just replace your copy with the new one.
+You may only need to replace your copy with the new one.
 
 . Old versions _9.12.10_ and _9.12.11_:
 +
@@ -727,13 +753,12 @@ to `erchk`.
 
 .. The useful display window _scnch_ was added.
 
-.. The _xterm_
-program was added.
+.. The _xterm_ program was added.
 
 .. For RDBE systems, the useful RDBE display windows: _monit6_,
 and _monX_ (_X_=[_a_-_d_]) were added. The _monan_ program was added
 to the default since it is used at several sites. If these are not
-relevant for your site, you may prefer to not add them.
+relevant for your site, you may not want to add them.
 
 ===== Review equip.ctl
 
@@ -827,19 +852,17 @@ the clock rate line itself.
 
 +
 
-WARNING: If you are _not_ planning to use the FS display
-server, we recommend you comment out the lines
-for _erchk_, _monit2_, and _scnch_ and not add any other _monitX_ programs. If they are
-used in _stpgm.ctl_ without the display server and they are
-accidentally closed, the FS will be killed.
-This applies as well if you built the FS without
-the display server as described in the
-<<changes_10.0.0.adoc#noserver,not building the display server>> change
-(in the
-<<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
-sub-section of the
-<<changes_10.0.0.adoc#,Changes from FS9>>
-document).
+WARNING: If you are _not_ planning to use the FS display server, we
+recommend that you comment out the lines for _erchk_, _monit2_, and
+_scnch_ and not add any other _monitX_ programs. If they are used in
+_stpgm.ctl_ without the display server and they are accidentally
+closed, the FS will be killed.  This applies as well if you built the
+FS without the display server as described in the
+<<changes_10.0.0.adoc#noserver,not building the display server>>
+change (in the
+<<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS
+changes that are in common since FS9>> sub-section of the
+<<changes_10.0.0.adoc#,Changes from FS9>> document).
 
 .. The line for _erchk_ is now uncommented and differs from the
 previous commented version with the addition of the `-name erchk`
@@ -890,6 +913,35 @@ list. You can of course change that to whatever you like. You
 can also temporarily override the address in the _rdbemsg_
 utility itself.
 
+==== Update aquir control files
+
+If they are not already, convert the contents of your _aquir_
+control files to lowercase. This is usually necessary since the FS is
+now case sensitive. However, you _could_ arrange your control files
+and procedure libraries to use uppercase if you want. That would be an
+unusual situation. For the typical situation, you can convert as
+_oper_, for example, with:
+
+CAUTION: These commands will change all the uppercase in the file(s)
+to lowercase, including in comments. The change for the comments
+should be benign. While it might not be what is desired for some of
+the comments, it will enforce lowercase for lines that are currently
+commented out, but may be uncommented in the future. You can always
+use an alternative method of conversion to retain uppercase in
+comments only in places where you want it.
+
+   cd /usr2/control
+   /usr2/fs/misc/to_lower ctlpo.ctl
+
+You can repeat this for other _aquir_ control files you may have. The
+_to_lower_ script can process multiple files given on the command
+line. It will make a back-up of original files with an added _.bak_
+extension. It will not overwrite any existing _.bak_ file. It stops if
+any error is encountered.
+
+CAUTION: Each _aquir_ control file has its own horizon mask that is
+separate from the one in _location.ctl_.
+
 ==== Update skedf.ctl
 
 . All versions:
@@ -910,21 +962,17 @@ blocks of _/usr2/control/skedf.ctl_. You can use any
 values you want, but typically they should be set to _/usr2/sched_ and
 _/usr2/proc_, respectively, to agree with the FS.
 
-
-
 .. Due to an <<changes_10.0.0.adoc#skedf.ctl,error>> (as described in
 the
 <<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
 sub-section of the
 <<changes_10.0.0.adoc#,Changes from FS9>>
-document).
-
-in the example
-_/usr2/fs/st.defaut/control/skedf.ctl_ file in previous releases,
-most stations probably incorrectly show the `lo_config` keyword as
-`if_config` in their local _/usr2/control/skedf.ctl_ version. Please
-check your local copy and update any occurrences, even in comments,
-of `if_config` to `lo_config`.
+document) in the example __/usr2/fs/st.defaut/control/skedf.ctl__ file
+in previous releases, most stations probably incorrectly show the
+`lo_config` keyword as `if_config` in their local
+__/usr2/control/skedf.ctl__ version. Please check your local copy and
+update any occurrences, even in comments, of `if_config` to
+`lo_config`.
 
 === Update .prc files
 
@@ -969,11 +1017,11 @@ change will have no impact.
 
 ==== Switch to using s_client
 
-This sub-step is optional and only relevant if were using the VGOS
+This sub-step is optional and only relevant if you were using the VGOS
 branch, versions _9.12.x_. You should replace use of the deprecated
-scripts, _be_client_, _mcicn_, and _udceth0_ with the more general
-_s_client_. You can find instances of these commands, using, e.g., for
-_be_client_:
+scripts, _be_client_, _mcicn_, and _udceth0_, if you were using them,
+with the more general _s_client_. You can find instances of these
+commands, using, e.g., for _be_client_:
 
    cd /usr2/proc
    grep be_client *.prc
@@ -985,16 +1033,19 @@ Information about using _s_client_ can be found using `*help=sy*`.
 
 === Miscellaneous FS related changes
 
-There are three changes:
+There are four changes:
 
 . <<Set FS_DISPLAY_SERVER>> environment variable for _oper_ and
 _prog_. This is only needed if you were not running the FS display
 server before.
 
-. <<Update .Xresources>> file for the _oper_ and _prog_ accounts.
-
 . <<Set environment variables for fesh>>. These are optional changes
 to consider if you use _fesh_.
+
+. <<Update .Xresources>> file for the _oper_ and _prog_ accounts.
+
+. <<Update .fvwm2rc>> file to prevent some new windows from getting
+the focus.
 
 ==== Set FS_DISPLAY_SERVER
 
@@ -1037,89 +1088,6 @@ file, you can uncomment or insert
 . You should  make the corresponding change for _prog_ while logged
 in as _prog_.
 
-==== Update .Xresources
-
-The main change was to add values for the _erchk_,
-_scnch_, and _helpsh_  windows.  There were some minor changes
-for other windows, but what to use for the changed values may
-depend on the resolution of your display.  The example values
-worked well for an FSL10 installation on a system with a
-non-GPU CPU.
-
-[TIP]
-====
-
-A strategy for setting the `geometry` resource for a window is:
-
-. Adjust the position (and maybe the size) of the window to what you
-want.
-
-. Run the _xwininfo_ program
-
-. Position the cursor on the window and click.
-
-. Copy the string output for the `-geometry` parameter, e.g,
-`80x24+0+0`.
-
-. Paste the string as the value for `geometry` resource for that
-window in the _~/.Xresources_ file.
-
-You will need to logout and login again (or reload
-the X resources a different way) for the change to become
-effective.
-====
-
-
-As _oper_, you can find the differences between your file and
-the example file with:
-
-  cd
-  diff .Xresources /usr2/fs/st.default/oper
-
-Please make any changes to your file that you find appropriate, but at
-a minimum you should probably add the lines for _monit6_, _erchk_,
-_scnch_, and _helpsh_ if not already present.  You will need to logout
-and login again (or reload the X-resources a different way) for the
-changes to become effective.
-
-[CAUTION]
-====
-
-The example _.Xresource_ file for _9.13.2_ did not have any of these
-items, but you may have already included some in your local file.
-Similarly, the example files for the _9.12.x_ versions only had
-_monit6_ included.  However, you may have already included some of the
-others in your local file.
-
-You should be careful to _not_ specify values for a window more than
-once.  So don't use the suggested commands below if they cover windows
-that already values in your _.Xresources_ file. Instead you will need
-to hand edit to make the appropriate changes.
-
-Every station will probably need the lines for _helpsh_.
-
-====
-
-* All the new lines are at the end of the file, so if you need to add
-lines for _monit6_, _erchk_, _scnch_, and _helpsh_, you can use:
-
-  cd
-  tail -n 24 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
-
-* To add lines for just _erchk_, _scnch_, and _helpsh_, you can
-use:
-
-  cd
-  tail -n 20 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
-
-* To add lines for just _helpsh_, you can use:
-
-  cd
-  tail -n 6 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
-
-You can update _prog_'s _.Xresources_ file similarly, but you will
-need to be logged in as _prog_.
-
 ==== Set environment variables for fesh
 
 These are optional changes that should be considered if you use _fesh_.
@@ -1158,6 +1126,95 @@ A more complete description of the new features in _fesh_ is available
 in the <<fesh_changes.adoc#,FS 10.0.0 fesh Changes>> document. Please
 use `*fesh -h*` for more information on using these features.
 
+==== Update .Xresources
+
+The main change was to add values for the _erchk_,
+_scnch_, and _helpsh_  windows.  There were some minor changes
+for other windows, but what to use for the changed values may
+depend on the resolution of your display.  The example values
+worked well for an FSL10 installation on a system with a
+non-GPU CPU.
+
+[TIP]
+====
+
+You can find an effective strategy to help with setting the `geometry`
+resource for an _xterm_ window (and others with a `name` property) in the
+<<../../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting geometry values in .Xresources>>
+section of the
+<<../../misc/install_reference.adoc#,Installation Reference>> document.
+
+====
+
+As _oper_, you can find the differences between your file and
+the example file with:
+
+  cd
+  diff .Xresources /usr2/fs/st.default/oper
+
+Please make any changes to your file that you find appropriate, but at
+a minimum you should probably add the lines for _monit6_, _erchk_,
+_scnch_, and _helpsh_ if not already present.  You will need to logout
+and login again (or reload the X-resources a different way) for the
+changes to become effective.
+
+[CAUTION]
+====
+
+The example _.Xresource_ file for _9.13.2_ did not have any of these
+items, but you may have already included some in your local file.
+Similarly, the example files for the _9.12.x_ versions only had
+_monit6_ included.  However, you may have already included some of the
+others in your local file.
+
+You should be careful to _not_ specify values for a window more than
+once.  So don't use the suggested commands below if they cover windows
+that already values in your _.Xresources_ file. Instead you will need
+to hand edit to make the appropriate changes.
+
+Every station will probably need the lines for _helpsh_.
+
+====
+
+* All the new lines are at the end of the file, so if you need to add
+lines for _monit6_, _erchk_, _scnch_, and _helpsh_, you can use:
+
+  cd
+  tail -n 24 /usr2/fs/st.default/oper/.Xresources >>.Xresources
+
+* To add lines for just _erchk_, _scnch_, and _helpsh_, you can
+use:
+
+  cd
+  tail -n 20 /usr2/fs/st.default/oper/.Xresources >>.Xresources
+
+* To add lines for just _helpsh_, you can use:
+
+  cd
+  tail -n 6 /usr2/fs/st.default/oper/.Xresources >>.Xresources
+
+You can update _prog_'s _.Xresources_ file similarly, but you will
+need to be logged in as _prog_.
+
+==== Update .fvwm2rc
+
+. If you use the X display on console, you may want to update your
+_~/.fvm2rc_ files for the new programs _erchk_, _scnch_, and _monan_,
+so they will never get the focus. This done by adding the lines:
+
+  Style "erchk" NeverFocus
+  Style "scnch" NeverFocus
+  Style "monan" NeverFocus
++
+
+You can compare _oper_'s version of the file with the new default
+using:
+
+  cd
+  diff .fvwm2rc /usr2/fs/st.default/oper
+
+. You can make the same change for _prog_, after logging into that account,
+
 === Miscellaneous FSLx changes
 
 None are required for this update.
@@ -1174,7 +1231,7 @@ experiment. Start with using _drudg_ to rotate a schedule,
 __drudg__ing it to make _.snp_ and _.prc_ files, making listings, and
 any other pre-experiment preparation and tests you normally do, then
 execute part of schedule, and perform any normal post-experiment
-plotting and clean-up that you do.  The idea here is to verify that
+plotting and clean-up that you do. The idea here is to verify that
 everything works as you expect for normal operations.
 
 . _fesh_, if you use it:

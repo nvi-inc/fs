@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,19 +19,23 @@
 //
 
 = FS RDBE Support
-Version 0.1 - December 2020
+Version 0.4 - February 2021
 
 :sectnums:
 :toc:
 
 == Introduction
 
-This document covers RDBE support in FS _10.0.0_. This support does
-not provide the complete command set and functionality usually
-provided by the FS for a rack. However, it is sufficient for normal FS
-for VGOS observations if the schedule procedure library is provided by
-a specially crafted _.skd_ schedule file (see the <<drudg changes
-relative to the main branch>> sub-section below for more details).
+This document covers RDBE rack (the Haystack RDBE-G based on the
+Roach-1 board) support in FS _10.0.0_. This support does not provide
+the complete command set and functionality usually provided by the FS
+for a rack. However, it is sufficient for normal FS for VGOS
+observations if the schedule procedure library is provided by a
+specially crafted _.skd_ schedule file (see the
+<<changes_10.0.0.adoc#broadband,broad band support>> item of the
+<<changes_10.0.0.adoc#_drudg_changes_relative_to_the_main_branch,drudg
+changes relative to the main branch>> sub-section of the
+<<changes_10.0.0.adoc#,Changes from FS9>> document for more details).
 
 == FS RDBE support features
 
@@ -45,22 +49,22 @@ polarization for that band on each of the two IFs.
 .Typical RDBE VGOS configuration
 [cols="^,^,^,^,^,^,^,^"]
 |=================
-| RDBE |Band|Frequency| IF0 pol| IF1 pol| Control File| Control Program| Mult-cast program
+| RDBE |Band|Frequency| IF0 pol| IF1 pol| Control File| Control Program| Multi-cast program
 
-|  A   | A  | 3 GHz   |  H     |  V     | _rdbca.ctl_ | _rdbca_        | _rdtca_
-|  B   | B  | 5 GHz   |  H     |  V     | _rdbcb.ctl_ | _rdbcb_        | _rdtcb_
-|  C   | C  | 6 GHz   |  H     |  V     | _rdbcc.ctl_ | _rdbcc_        | _rdtcc_
-|  D   | D  | 10 GHz  |  H     |  V     | _rdbcd.ctl_ | _rdbcd_        | _rdtcd_
+|  a   | A  | 3 GHz   |  H     |  V     | _rdbca.ctl_ | _rdbca_        | _rdtca_
+|  b   | B  | 5 GHz   |  H     |  V     | _rdbcb.ctl_ | _rdbcb_        | _rdtcb_
+|  c   | C  | 6 GHz   |  H     |  V     | _rdbcc.ctl_ | _rdbcc_        | _rdtcc_
+|  d   | D  | 10 GHz  |  H     |  V     | _rdbcd.ctl_ | _rdbcd_        | _rdtcd_
 |=================
 
 === Parallel command execution
 
 Parallel execution of commands for multiple RDBEs is supported
 (currently the only other device that has this is Mark 6 recorders).
-Currently the only RDBE commands are `rdbe` and `rdbe_atten`.
+Currently the only parallel RDBE commands are `rdbe` and `rdbe_atten`.
 
-* Multiple instances of a device are designated by the letters, `a`,
-`b`, etc.
+* Multiple instances of devices are identified by the letters,
+`a`,`b`, etc. In this case, `a` through `d`.
 
 * Commands that support parallel operation always start with
 `_device_` mnemonic, in this case `rdbe`. If a letter for the device,
@@ -69,8 +73,8 @@ operates only on that device.  If no letter is appended, the command
 operates on all active instances of the device.
 
 * By default all available devices are active.  Which devices are
-active can be changed with an `active___device__` command, in this
-case `active_rdbe`.
+active can be changed with an `active___device__s` command, in this
+case `active_rdbes`.
 
 * Which devices are available are defined by which have control files
 that have non-comment entries. In others words, a device is not
@@ -80,8 +84,8 @@ available if its control file is commented out.
 all reported. All but the last are reported by the command itself. The
 last is returned and reported as the final status of the command.
 
-* Logged responses from the devices may appear in what appears to be
-in random order. Although communication with devices is initiated in
+* Logged responses from the devices may occur in what appears to be
+random order. Although communication with devices is initiated in
 sequential order, variations in response time can cause the responses
 to arrive in a different order. The responses are logged in the order
 received.
@@ -117,32 +121,39 @@ polarization pair in use. The pairs are: H and V; L and R; and X and
 Y. This will be fixed eventually (see
 https://github.com/nvi-inc/fs/issues/42[#42]). For now, since there
 are are at most two polarizations per receiver, the designations
-follow the _alphabetical_ (in English) rule.  This is, what matters is
+follow the _alphabetical_ (in English) rule. This is, what matters is
 the alphabetical order of the first letter of the names in a
-polarization pair. Thus:
+polarization pair. The correction interpretation is determined by
+context. Thus:
 
-* `l` (or `lcp`) can represent horizontal linear polarization, LCP, or "`X`"
+* `l` (or `lcp`) can represent horizontal linear polarization ("`h`"),
+LCP ("`l`"), or "`x`"
 
-* `r` (or `rcp`) can represent vertical linear polarization, RCP, or "`Y`"
+* `r` (or `rcp`) can represent vertical linear polarization ("`v`") ,
+RCP ("`r`"), or "`y`"
 
 === Low level RDBE communication command
 
 The `rdbe` command can be used to communicate directly with an
-individual RDBE or all active RBEs in parallel, as described in
-<<Parallel command execution>> sub-section above.  A semi-colon is
+individual RDBE or all active RDBEs in parallel, as described in
+the <<Parallel command execution>> sub-section above. A semi-colon is
 appended to any string being sent if it not the last character
-already. A newline (`0xa`) is also appended. Please see the RDBE
-documentation for full details, but you can query a single RDBE, say
-`a`, with:
+already. A newline (`0xa`) is also appended.
+
+For full details on the RDBE command set, see the RDBE documentation:
+
+https://www.haystack.mit.edu/wp-content/uploads/2020/07/memo_mark-5_090.1.pdf
+
+Additionally, you can query a single RDBE, say `a`, with:
 
   rdbea=help?
 
-for some information.
+for some rudimentary information.
 
 === Attenuation control and monitoring
 
-The `rdbe_atten` command can be used to command or monitor an for
-individual RDBE or all active RBEs in parallel, as described
+The `rdbe_atten` command can be used to command or monitor an
+individual RDBE or all active RDBEs in parallel, as described the
 <<Parallel command execution>> sub-section above. For setting the
 attenuation, the default target RMS value is set in the _rdbe.ctl_
 control file. That file also specifies the threshold levels for
@@ -172,16 +183,16 @@ the `\#rdtc__X__#` labels.
 `dot2gps` offsets, and the `sigma` values are logged.
 
 * This logging is controlled by the existing `tpicd` command function
-for background logging. Normally for observations logging in toggled
-on and off by the `data_valid` so that it only logged during
+for background logging. Normally for observations logging is toggled
+on and off by the `data_valid` command, so there is only logged during
 recording.
 
-* Regardless of what channels have VLBI data being recorded, Tsys is
-logged for all channels. Only continuous-cal is supported. The raw
-counts for labeled by channel in `tpcont` records. The values are in
-order of cal "`on`", then cal "`off`". If a Tcal value is defined for
-the channel, the calculated Tsys value is logged `tsys`. Overall IF
-Tsys values is also logged using two different calculations:
+* Regardless of what channels are being recorded, Tsys is logged for
+all channels. Only continuous-cal is supported. The raw counts are
+labeled by channel in `tpcont` records. The values are in order of cal
+"`on`", then cal "`off`". If a Tcal value is defined for the channel,
+the calculated Tsys value is logged in `tsys` records. Overall IF Tsys
+values are also logged using two different calculations:
 
 ** The `AV` value is the reciprocal of the average of the reciprocals
 of the per channel Tsys values (intended to reduce the impact of RFI).
@@ -189,10 +200,10 @@ of the per channel Tsys values (intended to reduce the impact of RFI).
 ** The `SM` value is calculated from the sum of the "`on`" and "`off`"
 over all the channels.
 
-* Phase-cal phase and amplitude are labelled by IF and the MHz of
-the tone in the IF, e.g., the tone at 5MHz in IF 0 for band B is
-labeled `0b0005`. Only expected tones are logged. The scaling of the
-amplitude is set by the _rdbe.ctl_ control file.
+* Phase-cal phase and amplitude are labelled by IF and the MHz of the
+tone in the IF, see <<FS RDBE phase-cal tone labels>> for the details.
+Only expected tones are logged. The scaling of the amplitude is set by
+the _rdbe.ctl_ control file.
 
 === RDBE monitor display
 
