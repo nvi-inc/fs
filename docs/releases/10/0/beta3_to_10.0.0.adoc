@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to FS 10.0.0 Update Notes
-Version 1.7 - February 2021
+Version 1.8 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -240,6 +240,21 @@ documentation. This only affects _bash_ users.
 
 . Fix an issue with _git_ on FSL8 causing the repo to appear "`dirty`"
 after _root_ does a `make install`.
+
+. Add feature to _msg_ to allow switching from "`manual start`" to
+"`auto-start`" (closes
+https://github.com/nvi-inc/fs/issues/87[#87]).
++
+
+By design, _msg_ only allowed "`auto-start`" to be entered from the
+`Ready` form. If the connection to the FS computer is lost (killing
+_msg_) while waiting for "`auto-start`" to complete, it was difficult
+to re-enter without sending a new `Ready` message. To help with this
+an `Auto-start` button was added to "`manual start`".  When _msg_ is
+restarted, the user can go to the `Start` form and use the
+`Auto-start` button to re-enter "`auto-start`". The log must already
+be open to the experiment log when _msg_ restarted for this to work.
+Thanks to Jon Quick (HartRAO) for suggesting this.
 
 === drudg changes
 

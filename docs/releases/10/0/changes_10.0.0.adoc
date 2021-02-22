@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 1.0 - February 2021
+Version 1.1 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -354,6 +354,21 @@ the log.
 
 This allows `msg` to send its output to the log if it is started
 before the FS. Previously, it had to be started after the FS.
+
+. Add feature to _msg_ to allow switching from "`manual start`" to
+"`auto-start`" (closes
+https://github.com/nvi-inc/fs/issues/87[#87]).
++
+
+By design, _msg_ only allowed "`auto-start`" to be entered from the
+`Ready` form. If the connection to the FS computer is lost (killing
+_msg_) while waiting for "`auto-start`" to complete, it was difficult
+to re-enter without sending a new `Ready` message. To help with this
+an `Auto-start` button was added to "`manual start`".  When _msg_ is
+restarted, the user can go to the `Start` form and use the
+`Auto-start` button to re-enter "`auto-start`". The log must already
+be open to the experiment log when _msg_ restarted for this to work.
+Thanks to Jon Quick (HartRAO) for suggesting this.
 
 . [[helpsh]] Move X resources for _helpsh_ to _~/.Xresources_.
 +
