@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 2.3 - January 2021
+Version 2.4 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -63,9 +63,15 @@ some new local control files added.
 
 +
 
-The most significant change for users is that previous main branch users will
-find that in the new FS input is case sensitive, as it was already
-in the VGOS branch.
+The most significant change for users is that previous main branch
+users will find that in the new FS input is case sensitive, as it was
+already in the VGOS branch.
++
+
+CAUTION: While it is possible to have different SNAP commands or
+procedures with names that differ only in case, it is strongly
+discouraged. In the future, case insensitivity may be introduced for
+command and procedure names.
 
 . Support for use on both 32- and 64-bit systems.
 
@@ -614,7 +620,7 @@ The remaining steps assume you are logged in as _oper_.
 
 === Update control files
 
-This step is for updates to the local control files. There are six
+This step is for updates to the local control files. There are seven
 sub-steps:
 
 . <<Update stcmd.ctl>>
@@ -622,6 +628,7 @@ sub-steps:
 . <<Update equip.ctl>>
 . <<Review control files>>
 . <<Update rdbemsg.ctl>>
+. <<Update aquir control files>>
 . <<Update skedf.ctl>>
 
 Differences for updating from different previous versions are
@@ -905,6 +912,35 @@ addresses in _rdbemsg.ctl_.
 list. You can of course change that to whatever you like. You
 can also temporarily override the address in the _rdbemsg_
 utility itself.
+
+==== Update aquir control files
+
+If they are not already, convert the contents of your _aquir_
+control files to lowercase. This is usually necessary since the FS is
+now case sensitive. However, you _could_ arrange your control files
+and procedure libraries to use uppercase if you want. That would be an
+unusual situation. For the typical situation, you can convert as
+_oper_, for example, with:
+
+CAUTION: These commands will change all the uppercase in the file(s)
+to lowercase, including in comments. The change for the comments
+should be benign. While it might not be what is desired for some of
+the comments, it will enforce lowercase for lines that are currently
+commented out, but may be uncommented in the future. You can always
+use an alternative method of conversion to retain uppercase in
+comments only in places where you want it.
+
+   cd /usr2/control
+   /usr2/fs/misc/to_lower ctlpo.ctl
+
+You can repeat this for other _aquir_ control files you may have. The
+_to_lower_ script can process multiple files given on the command
+line. It will make a back-up of original files with an added _.bak_
+extension. It will not overwrite any existing _.bak_ file. It stops if
+any error is encountered.
+
+CAUTION: Each _aquir_ control file has its own horizon mask that is
+separate from the one in _location.ctl_.
 
 ==== Update skedf.ctl
 

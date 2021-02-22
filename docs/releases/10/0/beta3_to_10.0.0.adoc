@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to FS 10.0.0 Update Notes
-Version 1.8 - February 2021
+Version 1.9 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -131,7 +131,38 @@ using:
   cd
   diff .fvwm2rc /usr2/fs/st.default/oper
 
-. You can make the same change for _prog_, after logging into that account,
+. You can make the same change for _prog_, after logging into that
+account,
+
+. If they are not already, convert the contents of your _aquir_
+control files to lowercase. This is usually necessary since the FS is
+now case sensitive. However, you _could_ arrange your control files
+and procedure libraries to use uppercase if you want. That would be an
+unusual situation. For the typical situation, you can convert as
+_oper_, for example, with:
++
+
+CAUTION: These commands will change all the uppercase in the file(s)
+to lowercase, including in comments. The change for the comments
+should be benign. While it might not be what is desired for some of
+the comments, it will enforce lowercase for lines that are currently
+commented out, but may be uncommented in the future. You can always
+use an alternative method of conversion to retain uppercase in
+comments only in places where you want it.
+
+   cd /usr2/control
+   /usr2/fs/misc/to_lower ctlpo.ctl
++
+
+You can repeat this for other _aquir_ control files you may have. The
+_to_lower_ script can process multiple files given on the command
+line. It will make a back-up of original files with an added _.bak_
+extension. It will not overwrite any existing _.bak_ file. It stops if
+any error is encountered.
++
+
+CAUTION: Each _aquir_ control file has its own horizon mask that is
+separate from the one in _location.ctl_.
 
 === Review changes
 
@@ -152,96 +183,17 @@ from within the FS _git_ archive directory, usually _/usr2/fs-git_.
 
 === FS changes
 
-. [[makeinc]] Add `make clean rmdoto rmexe` command after `git
-checkout` in incremental update notes.
+. Improvements to _msg_:
 
-+
-
-For incremental updates it is necessary to clean the old compiled
-code. This is due to _drudg_ not participating in the new _Makefile_
-scheme, but it is generally cleaner too. Thanks to Carlo Migoni
-(Sardinia) for reporting this.
-
-. Add switching to _s_client_ to the update notes for former VGOS
-branch users.
-
-. [[metserver]] Add update instructions for switching to the new
-_metserver_.  It has several new features for former users of the old
-VGOS branch versions:
-
-.. A new command line argument to disable errors messages for specific
-sensors if they are broken.
-
-.. Support for `FS_SERIAL_CLOCAL` _make_ time environment variable for
-FSL9 and later.
-
-.. Improved reporting of errors when opening serial devices.
-
-.. Reduction in the threshold for old data being declared _stale_ to
-10 seconds, which is more than sufficient.
-
-. Suggestions for how to set-up for opening additional windows
-interactively were added in the
-<<../../misc/install_reference.adoc#_opening_additional_windows,Opening additional windows>>
-section of the
-<<../../misc/install_reference.adoc#,Installation reference>> document.
-
-. Add update instructions for _~/.fvwm2rc_.
-
-. Improve DBBC2 `if__x__` command help files.
-
-.. The fact that the IF target level is not command as the default was added.
-
-.. The range for IF filter 3 was corrected to 1536-2048.
-
-.. The description of the scaling of the IF power measurements was
-brought up to date.
-
-. Improve start-up error message from _fserr_ if an error message line
-is too long in _fsser.ctl_ or _ster.ctl_.
-+
-
-Previously, it reported the error as being in the following `""` line.
-
-. Add the `.rxg` file LO values to the `lo/rxg` output lines.
-+
-
-This change is intended to make it clearer which `.rxg` file is use,
-particularly if there are files with both `fixed` and `range` LO
-specifications that could match (`fixed` has priority).
-
-. Switch to using internal version information for `fesh` and `plog`.
-+
-
-Using the FS version could make it look like the programs have changed
-when they hadn't. Using the FS version was a change in _beta2_.
-
-. Add `save` to all _fslb/novas.f_ routines.
-+
-
-This is defensive in case local variable are changed to being
-automatic. The NOVAS routines seem to require static variables.
-
-. Add checking in _msg_ for the FS being active just before writing to
-the log.
+.. Add checking in _msg_ for the FS being active just before writing to
+the log (closes https://github.com/nvi-inc/fs/issues/86[#86]).
 +
 
 This allows `msg` to send its output to the log if it is started
-before the FS. Previously, it had to be started after the FS.
+before the FS. Previously, it had to be started after the FS. Thanks
+to Jon Quick (HartRAO) for suggesting this.
 
-. Change default _.Xresource_ files to prevent overwriting of `login
-shell` window title by _bash_.
-+
-
-This maintains consistent window naming for agreement with existing
-documentation. This only affects _bash_ users.
-
-. Add missing help file for `active_mk6s`.
-
-. Fix an issue with _git_ on FSL8 causing the repo to appear "`dirty`"
-after _root_ does a `make install`.
-
-. Add feature to _msg_ to allow switching from "`manual start`" to
+.. Add feature to _msg_ to allow switching from "`manual start`" to
 "`auto-start`" (closes
 https://github.com/nvi-inc/fs/issues/87[#87]).
 +
@@ -255,6 +207,101 @@ restarted, the user can go to the `Start` form and use the
 `Auto-start` button to re-enter "`auto-start`". The log must already
 be open to the experiment log when _msg_ restarted for this to work.
 Thanks to Jon Quick (HartRAO) for suggesting this.
+
+. Add the `.rxg` file LO values to the `lo/rxg` output lines.
++
+
+This change is intended to make it clearer which `.rxg` file is use,
+particularly if there are files with both `fixed` and `range` LO
+specifications that could match (`fixed` has priority).
+
+. Change default _.Xresource_ files to prevent overwriting of `login
+shell` window title by _bash_.
++
+
+This maintains consistent window naming for agreement with existing
+documentation. This only affects _bash_ users.
+
+. Improve DBBC2 `if__x__` command help files.
+
+.. The fact that the IF target level is not command as the default was added.
+
+.. The range for IF filter 3 was corrected to 1536-2048.
+
+.. The description of the scaling of the IF power measurements was
+brought up to date.
+
+. Add missing help file for `active_mk6s`.
+
+. Make improvements to update instructions:
+
+.. [[makeinc]] Add `make clean rmdoto rmexe` command after `git
+checkout` in incremental update notes.
++
+
+For incremental updates it is necessary to clean the old compiled
+code. This is due to _drudg_ not participating in the new _Makefile_
+scheme, but it is generally cleaner too. Thanks to Carlo Migoni
+(Sardinia) for reporting this.
+
+.. Add update instructions to covert the contents of _aquir_ control
+files to lower case.
++
+
+This is necessary and was omitted in all the _beta_ update
+instructions. The distributed example _aquir_ control files were
+converted to lowercase. Thanks to Jon Quick (HartRAO) for reporting
+this.
+
+.. Add suggestions for how to set-up for opening additional windows
+interactively in the
+<<../../misc/install_reference.adoc#_opening_additional_windows,Opening additional windows>>
+section of the
+<<../../misc/install_reference.adoc#,Installation reference>> document.
+
+.. Add update instructions for _~/.fvwm2rc_.
+
+.. Add switching to _s_client_ to the update notes for former VGOS
+branch users.
+
+.. [[metserver]] Add update instructions for switching to the new
+_metserver_.  It has several new features for former users of the old
+VGOS branch versions:
+
+... A new command line argument to disable errors messages for specific
+sensors if they are broken.
+
+... Support for `FS_SERIAL_CLOCAL` _make_ time environment variable for
+FSL9 and later.
+
+... Improved reporting of errors when opening serial devices.
+
+... Reduction in the threshold for old data being declared _stale_ to
+10 seconds, which is more than sufficient.
+
+. Fix an issue with _git_ on FSL8 causing the repo to appear "`dirty`"
+after _root_ does a `make install`.
+
+. Switch back to using internal version information for `fesh` and
+`plog`.
++
+
+Using the FS version could make it look like the programs have changed
+when they hadn't. Using the FS version was a change in _beta2_.
+
+. Improve start-up error message from _fserr_ if an error message line
+is too long in _fsser.ctl_ or _ster.ctl_.
++
+
+Previously, it reported the error as being in the following `""` line.
+
+. Add `save` to all _fslb/novas.f_ routines.
++
+
+This is defensive in case local variable are changed to being
+automatic. The NOVAS routines seem to require static variables.
+
+. Add missing GPL to _wish_ scripts.
 
 === drudg changes
 
