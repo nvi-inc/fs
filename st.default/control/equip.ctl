@@ -13,7 +13,7 @@ mk3     type of rack (mk3, vlba, vlbag, mk4, vlba4, mk5, vlba5
 mk3     type of recorder 1 (mk3, vlba, vlba2, vlbab, vlba4, vlba42, mk4,
 *		    mk4b, s2, k41, k41/dms, k42, k42/dms, mk5a, mk5a_bs,
 *                   mk5b, mk5b_bs, mk5c, mk5c_bs, flexbuff, mk6, or none)
-mk3     type of recorder 2 (mk3, vlba, vlba2, vlbab, vlba4, vba42, mk4,
+none    type of recorder 2 (mk3, vlba, vlba2, vlbab, vlba4, vba42, mk4,
 *                           mk4b, or none)
 mk3     type of decoder (mk3, dqa, mk4, or none)
 *
@@ -37,9 +37,9 @@ none    type of phase cal control (if3 or none)
    1    No of LBA DAS installed (up to MAX_DAS - see "params.h")
    in   160MHz IF input filters (in or out)
   8bit	Digital input setting (8bit internal sampler or 4bit external at ATCA)
-*met sensor type: cdp or two fields for metserver: port hostname 
-*default choice for metserver is  50001 localhost      
-cdp     cdp or metserver port & host, use cdp if you don't have either
+*met sensor type: cdp or two fields for metserver: port hostname, use cdp if none
+*default choice for metserver is  50001 localhost
+cdp
 * default mk4 form command synch test value
   3     off or 0, 1, ..., 16
 *mk4 decoder transmission terminator
