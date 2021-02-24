@@ -55,6 +55,8 @@ class msg_tk(Tkinter.Tk):
                 self._70k = ""
                 self._maser = ""
                 self._mci = ""
+                self._mciCode = ""
+                self._mciParameter = ""
 
                 # read in vgosmsg conf
                 fileHandle = open ( '/usr2/control/rdbemsg.ctl' )
@@ -84,6 +86,10 @@ class msg_tk(Tkinter.Tk):
                                 self._bandD[0] = self.val[1].rstrip('\r\n')
                         elif (self.val[0] == "mci"):
                                 self._mci = self.val[1].rstrip('\r\n')
+                        elif (self.val[0] == "mci-code"):
+                                self._mciCode = self.val[1].rstrip('\r\n')
+                        elif (self.val[0] == "mci-parameter"):
+                                self._mciParameter = self.val[1].rstrip('\r\n')
                         elif (self.val[0] == "comment"):
                                 self._comment = self.val[1].rstrip('\r\n')
                         elif (self.val[0] == "schedule"):
@@ -559,6 +565,8 @@ class msg_tk(Tkinter.Tk):
 	def GetCryoVals(self):
                 print "Updating Cryo Values"
 		c = self.stationcode.get()
+		if self._mciCode != "":
+			c = self._mciCode
 		proc20 = subprocess.Popen(["ssh", "oper@" + self._mci, "tail", "-n", "100", "mci_" + c + "_" + self._mcilogtime + ".txt", "|", "egrep", "'AD214|AD215'"], stdout=subprocess.PIPE)
                 text =proc20.stdout.read()
 		for line in text.split('\n'):
@@ -567,11 +575,15 @@ class msg_tk(Tkinter.Tk):
 			if "AD215" in line:
 				self._70k=line.split(';')
 
+		c  = 2
+		if self._mciParameter != "":
+			c = int(self._mciParameter)
+
 		self.cryo20t.set(self._20k[0])
-		self.cryo20v.set(self._20k[2])
+		self.cryo20v.set(self._20k[c])
 
 		self.cryo70t.set(self._70k[0])
-                self.cryo70v.set(self._70k[2])
+                self.cryo70v.set(self._70k[c])
 
                 #print self._20k
                 #print self._70k
