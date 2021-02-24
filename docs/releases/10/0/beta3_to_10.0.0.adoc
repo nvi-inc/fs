@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to FS 10.0.0 Update Notes
-Version 1.9 - February 2021
+Version 2.0 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -290,10 +290,26 @@ Using the FS version could make it look like the programs have changed
 when they hadn't. Using the FS version was a change in _beta2_.
 
 . Improve start-up error message from _fserr_ if an error message line
-is too long in _fsser.ctl_ or _ster.ctl_.
+is too long in _fsser.ctl_ or _sterr.ctl_.
 +
 
 Previously, it reported the error as being in the following `""` line.
+
+. Add `mci-code` and `mci-parameter` options to _rdbemsg.ctl_.
++
+
+These options allow overriding of the station code in the MCI log and
+which positional parameter to extract from the data lines,
+respectively. If these lines are not specified, the values default to
+the station code and `2`, respectively. These are needed for the
+prototype MCI nodes at GGAO and Westford. GGAO requires `gg` for the
+code and `3` for the parameter position.
+
+. Update default control files:
+
+** _equip.ctl_ -- Change default second recorded to `none`.
+** _stpgm.ctl_ -- Change five character name of _monit2_ to `moni2`.
+** _rdbemsg.ctl_ -- Add example `mci-code` and `mci-parameter` lines.
 
 . Add `save` to all _fslb/novas.f_ routines.
 +

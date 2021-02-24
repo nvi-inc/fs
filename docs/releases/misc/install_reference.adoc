@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 0.8 - January 2021
+Version 0.9 - February 2021
 
 :sectnums:
 :experimental:
@@ -265,7 +265,9 @@ the new version.  In any event, please be sure to make a fresh back-up
 
 ====  FSL10 (stretch)
 
-See the procedure at: https://nvi-inc.github.io/fsl10/raid.html#_recoverable_testing
+If the system is configured as a RAID, please see the procedure at:
+
+https://nvi-inc.github.io/fsl10/raid.html#_recoverable_testing
 
 ====  FSL9 (wheezy)
 

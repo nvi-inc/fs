@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 2.4 - February 2021
+Version 2.5 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -663,13 +663,13 @@ You will need to execute the following commands to copy the new files
 that are needed (cut-and-paste is your friend). There are three cases
 depending on what your old version was:
 
-. Old versions _9.12.10_ and _9.12.11_:
+. Old versions _9.12.10_ - _9.12.12_:
 
                cd /usr2/control
                cp /usr2/fs/st.default/control/clpgm.ctl .
                cp /usr2/fs/st.default/control/rdbemsg.ctl .
 
-. Old versions _9.12.12_ and _9.12.13_:
+. Old version _9.12.13_:
 
                cd /usr2/control
                cp /usr2/fs/st.default/control/rdbemsg.ctl .
@@ -694,15 +694,15 @@ sub-step below, to make sure there are no duplicated lines or other
 problems caused by the commands in this current sub-step (i.e.,
 <<Update equip.ctl>>).
 
-. If your old version was _9.12.10_ or _9.12.11_, you will need
-to add the final four lines of the example _equip.ctl_
-file to yours:
+. If your old version was _9.12.10_ or _9.12.11_ (or _9.12.12_ at GGAO
+_only_), you will need to add the final four lines of the example
+_equip.ctl_ file to yours:
 
   cd /usr2/control
   tail -n 4 /usr2/fs/st.default/control/equip.ctl >>equip.ctl
 
-. If your old version was _9.12.12_ or _9.12.13_, you will need
-to insert two lines before the final two lines.  This is
+. If your old version was _9.12.12_ (but _not_ at GGAO) or _9.12.13_,
+you will need to insert two lines before the final two lines.  This is
 covered in the <<Review control files>> sub-step below.
 
 . If your old version was _9.13.2_, you will need to add the
@@ -735,13 +735,13 @@ copies of the files.
 
 You may only need to replace your copy with the new one.
 
-. Old versions _9.12.10_ and _9.12.11_:
+. Old versions _9.12.10_ - _9.12.12_:
 +
 This file was not present so the new default version (copied by
 commands in the <<Copy control files>> sub-step above) should not
 require modification.
 
-. Old versions _9.12.12_, _9.12.13_, and _9.13.2_:
+. Old versions _9.12.13_, and _9.13.2_:
 
 .. The `-title ...`  parameter for each
 window was removed so that it is uniquely
@@ -801,12 +801,13 @@ either by adjusting the number of power
 conversions, adjusting the CoMo configuration,
 or both.
 
-. Old versions _9.12.10_ and _9.12.11_:
+. Old versions _9.12.10_ and _9.12.11_ (and _9.12.12_ at GGAO _only_):
+
 +
 A FiLa10G input select line was added, but the <<Update equip.ctl>>
 sub-step above should have handled that.
 
-. Old versions _9.12.12_ and _9.12.13_:
+. Old versions _9.12.12_ (but _not_ at GGAO) and _9.12.13_:
 +
 A _stanza_ (actually one comment and one FiLa10G
 input select line) was inserted before the
@@ -820,7 +821,8 @@ FiLa10G input select line):
     *FiLa10G input select, one of: vsi1, vsi2, vsi1-2, vsi1-2-3-4, gps, tvg
     vsi1-2
 
-. Old versions _9.12.10_, _9.12.11_, and _9.13.2_:
+. Old versions _9.12.10_, _9.12.11_, and _9.13.2_ (and _9.12.12_ at
+GGAO _only_):
 +
 A new line for the DBBC3 configuration was added at the end, but
 the <<Update equip.ctl>> sub-step above should have handled that.
@@ -833,10 +835,10 @@ Compared to all old versions, comment lines
 were added or modified for new equipment type
 options.
 +
-. Old versions _9.12.10_-_9.12.13_:
+. All old versions:
 +
 The trailing comment on the line for the met. device was
-reworded.
+removed and the preceeding comments were reworded.
 
 . Old versions _9.12.10_-_9.12.13_:
 +
@@ -897,8 +899,17 @@ to your station's value.
 value. The station name is also defined in the
 _/usr2/control/location.ctl_ file.
 
-.. If you don't have a _HubPC_ (_mci_) node for front end monitor
+.. If you don't have an MCI (_hubpc_) node for front end monitor
 and control, you should comment out that line.
+
+.. For stations with a prototype MCI node (GGAO and Westford):
++
+
+If your MCI node uses a different station code (`gg` at GGAO) and/or
+the values are reported in a different position (`3` at  GGAO). You
+can set these values with the `mci-code` and `mci-parameter` lines.
+As needed, uncomment the example lines and update them with
+appropriate values.
 
 .. You should set the addresses for the RBDE-A (`R-A`) through RDBE-D
 (`R-D`). The example file uses aliases, _rdbea_ through _rdbed_, that
@@ -1019,9 +1030,9 @@ change will have no impact.
 
 This sub-step is optional and only relevant if you were using the VGOS
 branch, versions _9.12.x_. You should replace use of the deprecated
-scripts, _be_client_, _mcicn_, and _udceth0_, if you were using them,
-with the more general _s_client_. You can find instances of these
-commands, using, e.g., for _be_client_:
+scripts _be_client_ and _mcicn_, if you were using them, with the more
+general _s_client_. You can find instances of these commands, using,
+e.g., for _be_client_:
 
    cd /usr2/proc
    grep be_client *.prc
