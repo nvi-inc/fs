@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 2.5 - February 2021
+Version 2.6 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -1044,7 +1044,7 @@ Information about using _s_client_ can be found using `*help=sy*`.
 
 === Miscellaneous FS related changes
 
-There are four changes:
+There are three changes:
 
 . <<Set FS_DISPLAY_SERVER>> environment variable for _oper_ and
 _prog_. This is only needed if you were not running the FS display
@@ -1054,9 +1054,6 @@ server before.
 to consider if you use _fesh_.
 
 . <<Update .Xresources>> file for the _oper_ and _prog_ accounts.
-
-. <<Update .fvwm2rc>> file to prevent some new windows from getting
-the focus.
 
 ==== Set FS_DISPLAY_SERVER
 
@@ -1206,25 +1203,6 @@ use:
 
 You can update _prog_'s _.Xresources_ file similarly, but you will
 need to be logged in as _prog_.
-
-==== Update .fvwm2rc
-
-. If you use the X display on console, you may want to update your
-_~/.fvm2rc_ files for the new programs _erchk_, _scnch_, and _monan_,
-so they will never get the focus. This done by adding the lines:
-
-  Style "erchk" NeverFocus
-  Style "scnch" NeverFocus
-  Style "monan" NeverFocus
-+
-
-You can compare _oper_'s version of the file with the new default
-using:
-
-  cd
-  diff .fvwm2rc /usr2/fs/st.default/oper
-
-. You can make the same change for _prog_, after logging into that account,
 
 === Miscellaneous FSLx changes
 

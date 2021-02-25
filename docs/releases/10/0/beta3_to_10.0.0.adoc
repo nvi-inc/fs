@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to FS 10.0.0 Update Notes
-Version 2.0 - February 2021
+Version 2.1 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -115,24 +115,6 @@ to the `login shell` stanzas of your _~oper/.Xresources_ and
 _~prog/.Xresources_ files. See _st.default/~oper/.Xresources_ for an
 example. You will need to log-out and log back in again to make the
 change fully active.
-
-. If you use the X display on console, you may want to update your
-_~/.fvm2rc_ files for the new programs _erchk_, _scnch_, and _monan_,
-so they will never get the focus. This done by adding the lines:
-
-  Style "erchk" NeverFocus
-  Style "scnch" NeverFocus
-  Style "monan" NeverFocus
-+
-
-You can compare _oper_'s version of the file with the new default
-using:
-
-  cd
-  diff .fvwm2rc /usr2/fs/st.default/oper
-
-. You can make the same change for _prog_, after logging into that
-account,
 
 . If they are not already, convert the contents of your _aquir_
 control files to lowercase. This is usually necessary since the FS is
@@ -258,8 +240,6 @@ interactively in the
 <<../../misc/install_reference.adoc#_opening_additional_windows,Opening additional windows>>
 section of the
 <<../../misc/install_reference.adoc#,Installation reference>> document.
-
-.. Add update instructions for _~/.fvwm2rc_.
 
 .. Add switching to _s_client_ to the update notes for former VGOS
 branch users.
