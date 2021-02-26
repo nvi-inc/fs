@@ -10,4 +10,4 @@ mci:hubpc
 *Add mci-parameter if values are not returned in position 2
 *mci-parameter:3
 name:KPGO12m
-to:ivs-vgos-ops@lists.nasa.gov
+to:ivs-ops@lists.nasa.gov
