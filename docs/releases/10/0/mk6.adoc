@@ -19,14 +19,14 @@
 //
 
 = FS Mark 6 Support
-Version 0.4 - February 2021
+Version 0.5 - February 2021
 
 :sectnums:
 :toc:
 
 == Introduction
 
-This document describes Mark 6 support in FS 10.0 when the Mark6 is
+This document describes Mark 6 support in FS 10.0.0 when the Mark6 is
 used with the _cplane_/_dplane_ control programs. Use of a Mark 6 with
 _jive5ab_ is supported in the FS as a _FlexBuff_ recorder and is not
 covered here.

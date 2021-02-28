@@ -19,7 +19,7 @@
 //
 
 = FS RDBE Support
-Version 0.4 - February 2021
+Version 0.5 - February 2021
 
 :sectnums:
 :toc:
@@ -161,7 +161,7 @@ out-of-range RMS values.
 
 IMPORTANT: Before connecting an input signal to an IF port, the
 attenuation for that IF should be set to its maximum value, `31.5`, to
-avoid possible damage from from overloading the sampler.
+avoid possible damage from overloading the sampler.
 
 === Logging of RDBE multicast data
 
@@ -182,7 +182,7 @@ the `\#rdtc__X__#` labels.
 * For all multicast messages received, the `dot` time, `dot2pps` and
 `dot2gps` offsets, and the `sigma` values are logged.
 
-* This logging is controlled by the existing `tpicd` command function
+* The logging is controlled by the existing `tpicd` command function
 for background logging. Normally for observations logging is toggled
 on and off by the `data_valid` command, so there is only logged during
 recording.
@@ -193,70 +193,86 @@ labeled by channel in `tpcont` records. The values are in order of cal
 "`on`", then cal "`off`". If a Tcal value is defined for the channel,
 the calculated Tsys value is logged in `tsys` records. Overall IF Tsys
 values are also logged using two different calculations:
++
 
+--
 ** The `AV` value is the reciprocal of the average of the reciprocals
 of the per channel Tsys values (intended to reduce the impact of RFI).
 
 ** The `SM` value is calculated from the sum of the "`on`" and "`off`"
 over all the channels.
+--
++
+
+The raw count and Tsys data are labeled by channel, see the
+<<FS RDBE channel labels>> sub-section above for the details. The IF
+Tsys values are labeled as `AV` and `SM` channels for each IF.
 
 * Phase-cal phase and amplitude are labelled by IF and the MHz of the
-tone in the IF, see <<FS RDBE phase-cal tone labels>> for the details.
-Only expected tones are logged. The scaling of the amplitude is set by
-the _rdbe.ctl_ control file.
+tone in the IF, see the <<FS RDBE phase-cal tone labels>> sub-section
+above for the details.  Only expected tones are logged. The scaling of
+the amplitude is set by the _rdbe.ctl_ control file.  See the
+<<_rdbe_ctl,rdbe.ctl>> sub-section below for the details.
 
 === RDBE monitor display
 
-* A monitor display for the RDBEs is provided as the _monit6_
-program.  The display shows information for up four active RDBEs: A,
-B, C, and D updating at a 1 Hz rate. Some values are displayed in
-inverse to warn of possible problems.  The information displayed is:
+==== monit6
 
-** DOT time
-** VDIF epoch
+A monitor display for the RDBEs is provided as the _monit6_ program.
+The display shows information for up to four active RDBEs: A, B, C,
+and D updating at a 1 Hz rate. Some values are displayed in inverse to
+warn of possible problems.  The information displayed is:
+
+* DOT time
+* VDIF epoch
 +
 The value is shown in inverse video if:
 
-.. The values for all RDBEs are different and this value does not agree with the nominal value.
-.. The value does not agree with the majority.
+** The values for all RDBEs are different and this value does not agree with the nominal value.
+** The value does not agree with the majority.
 +
 In case of a tie, the later lettered RDBEs have their values in inverse video.
 
-** `dot2gps`, &mu;s
-** `dot2pps`, ns
+* `dot2gps`, &mu;s
+* `dot2pps`, ns
 +
 This value is displayed in inverse video if it exceeds the absolute
 value threshold specified in _monit6.ctl_.
 
-** RMS, alternating between IF0 and IF1
+* RMS, alternating between IF0 and IF1
 +
 The value is shown in inverse video if it outside the range defined in _rdbe.ctl_.
+
 * Tsys for both IF0 and IF1 displayed for the channel or whole IF value specified in _monit6.ctl_.
 
-** Phase-cal phase and amplitude for the tones selected in _monti6.ctl_, alternating between IF0 and IF1.
+* Phase-cal phase and amplitude for the tones selected in
+_monti6.ctl_, alternating between IF0 and IF1.
 +
 The amplitude scaling is determined by the setting in _rdbe.ctl_.
+See the <<_rdbe_ctl,rdbe.ctl>> sub-section below for the details.
 
-* The _monit6_ program has an eponymously named control file
+==== monit6.ctl
+
+The _monit6_ program has an eponymously named control file
 _monit6.ctl_.  This control file is used to adjust the configuration
 of the _monit6_ RDBE display. Unlike other FS control files, it is read
 each time the _monit6_ program is started. The file has five lines.
 The first four control the Tsys and phase-cal display of the four
-RDBEs, in order. There are four field on these lines:
-+
---
+RDBEs, in order. There are four fields on each of these lines:
+
 . The channel (`0`-`15`) or whole IF calculation (`avg` or `sum`) to display for the IF0 Teys.
 . The channel (`0`-`15`) or whole IF calculation (`avg` or `sum`) to display for the IF0 Teys
 . The tone number (`0`-`511`) of the phase-cal tone to display for IF0.
 . The tone number (`0`-`511`) of the phase-cal tone to display for IF1.
---
-+
 
-The final line specifies the absolute value threshold, in nanoseconds,
-for displaying the `dot2pps` in inverse video. Typically, this is set
-to `100`.
+The fifth, and final, line specifies the absolute value threshold, in
+nanoseconds, for displaying the `dot2pps` in inverse video. Typically,
+this is set to `100`.
 
-* Resources for the _monit6_ window were added to _.Xresources_.
+==== monit6 X-resources`
+
+Resources for the _monit6_ window were added to the example
+_.Xresources_ for _oper_ and _prog_.
 
 === Pointing and SEFD measurements
 
@@ -292,18 +308,18 @@ IMPORTANT: All RDBEs must be using the same epoch even if it is an old
 epoch. Otherwise the Mark 6 recorder will not accept the data.
 +
 
-IMPORTANT:  It is recommended that at the first opportunity when not
-running a schedule after 0000 UT January 1 and July 1, that _fmset_ be
-used to increment the VDIF epochs of all the RDBEs. With this
-approach, if one is rebooted for some reason its VDIF epoch will agree
-with the others.
-+
-
 IMPORTANT: If an RDBE is rebooted after 0000 UT January 1 or July 1
 during a schedule that spans one of those epochs, its VDIF will
 disagree with the other RDBEs preventing data from being recorded. In
 this case, the VDIF for the affected RDBE should be decremented to
 agree with the others.
++
+
+WARNING: It is recommended that at the first opportunity when not
+running a schedule after 0000 UT January 1 and July 1, that _fmset_ be
+used to increment the VDIF epochs of all the RDBEs. With this
+approach, if one is rebooted for some reason its VDIF epoch will agree
+with the others.
 
 * The `s` command can be used to sync an RDBE:
 +
@@ -316,15 +332,24 @@ before syncing:
 
   rdbe=dbe_data_send=off;
 
-+
-Afterwards it _must_ be turned on again with:
+Failure to do so may result in corrupt data. Afterwards it _must_ be
+turned on again with:
 
   rdbe=dbe_data_send=on;
 
-+
-Failure to do so may corrupt the data.
-
 ====
+
+=== new_ifdbb script
+
+This script is intended as a tool to allow stations, and schedule
+writers, a way to update schedules for changes in the _ifdbb_
+procedure used by VGOS stations, particularly those with RDBE
+back-ends. For RDBE stations, the attenuation used in the signal
+chain, which is set by the schedule, depends on the observing mode
+being used and the conditions at the station. The provides a way to
+incorporate needed changes into schedules. If the script is run
+without other command line arguments, it will output "`help`"
+information.
 
 === Communication control programs
 

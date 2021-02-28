@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 fesh Changes
-Version 0.3 - February 2021
+Version 0.4 - February 2021
 
 :sectnums:
 :toc:
@@ -112,8 +112,8 @@ question will not be asked. It is important to verify that correct
 output is being produced.
 
 IMPORTANT: The feature will not work for schedules that have more than
-mode. It is extremely rare for geodesy schedules to have more than one
-mode, but it is possible.
+one mode. It is extremely rare for geodesy schedules to have more than
+one mode, but it is possible.
 
 === New environment variable LIST_DIR
 

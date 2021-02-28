@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 fsserver Changes
-Version 0.2 - January 2021
+Version 0.3 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -55,9 +55,9 @@ This can be changed by editing `FS_SERVER_URL_BASE` in
 _include/params.h_; however, we will likely introduce command-line
 flag and/or environment variable to set this in the future.
  
-This should be safe to expose on the network (rather than just
-the loop-back), but users may wish to use an HTTP(S) as a proxy to
-provide some authentication/authorisation.
+This should be safe to expose on the network (rather than just the
+loop-back), but users may wish to use HTTPS proxying to provide some
+authentication/authorisation.
 
 This was enabled by factoring out functionality _spub_ into a
 reusable "`buffered stream`" library, which has been incorporated
@@ -92,9 +92,9 @@ The only user visible impact will be a slight delay if the FS is
 restarted quickly after termination while the old session is finishing
 up.
 
-IMPORTANT: After an FS upgrade or changing environment variable
-values, it's necessary to either shutdown the server (`*fsserver
-stop*`) or reboot the system before re-starting the FS.
+IMPORTANT: After an FS upgrade or changing FS runtime environment
+variable values, it's necessary to either shutdown the server
+(`*fsserver stop*`) or reboot the system before re-starting the FS.
 
 === Server accepts SNAP commands
 
@@ -106,15 +106,15 @@ e.g.:
 This allows clients to interact with the FS directly through
 fsserver rather than needing access to _inject_snap_.
 
-No filtering or authorisation is implemented on this command
-channel, so it effectively allows complete command execution
-privileges in the FS context to anyone with access to the socket.
-Note this is also true for _inject_snap_ on a standard system. If
-a station wishes to limit local access they can use
-iptables/nftables, or use the server in UNIX socket mode and use
-file system permissions. Stations that would like to enable remote
-access should implement their own authentication/authorisation
-that suits their needs, e.g. SSH port forwarding or HTTP proxying.
+No filtering or authorisation is implemented on this command channel,
+so it effectively allows complete command execution privileges in the
+FS context to anyone with access to the socket.  Note this is also
+true for _inject_snap_ on a standard system. If a station wishes to
+limit local access they can use _iptables_/_nftables_, or use the
+server in UNIX socket mode and use file system permissions. Stations
+that would like to enable remote access should implement their own
+authentication/authorisation that suits their needs, e.g. SSH port
+forwarding or HTTPS proxying.
 
 === Updated nng library
 

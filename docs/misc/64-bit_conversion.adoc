@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit System
-Version 1.0 - January 2021
+Version 1.1 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -288,10 +288,10 @@ appropriate users are allow to access them:
 [subs="+quotes"]
 ....
 chown -R oper.rtx /usr2/oper-_old_
-chmod -R u+rw,go-rw /usr2/oper-_old_
+chmod -R a+r,u+w,go-w /usr2/oper-_old_
 
 chown -R prog.rtx /usr2/prog-_old_
-chmod -R u+rw,go-rw /usr2/prog-_old_
+chmod -R a+r,u+w,go-w /usr2/prog-_old_
 ....
 
 +
@@ -465,8 +465,8 @@ NOTE: At this point, you are only trying to verify the code will _make_
 successfully.  You may still need to debug it in the <<Test the FS>> step
 below.
 
-Once our code __make__s successfully, you can continue, but you may need to debug
-it in the <<Test the FS>> step below.
+Once your code __make__s successfully, you can continue, but you may
+need to debug it in the <<Test the FS>> step below.
 
 === Reboot
 

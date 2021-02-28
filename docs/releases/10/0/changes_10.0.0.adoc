@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 1.2 - February 2021
+Version 1.4 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -156,7 +156,7 @@ difficult to simply `pull` updates to install bug fixes and new
 features.
 
 . [[server]] The FS display server is now recommended for
-normal use. (This was changed as of the _beta2_ release.)
+normal use.
 
 . [[adoc]] Reorganize update notes as HTML viewable on the web
 (closing https://github.com/nvi-inc/fs/issues/71[#71]).
@@ -174,7 +174,7 @@ sub-directory.
 .. All of the _.adoc_ files are viewable as HTML, and are hierarchically
 indexed, at https://nvi-inc.github.io/fs/.
 
-.. The first update notes available in HTML are for
+.. The first update notes available in HTML were for
 <<beta2.adoc#,10.0.0-beta2>>.
 
 ..  Add <<../../../misc/font_conventions.adoc#,Font Conventions>>
@@ -188,12 +188,27 @@ steps in making a release.
 document. This document describes user settable environment variables
 for both _make_ time and runtime.
 
-.. Add strategy for setting the `geometry` resource for an _xterm_
+.. Convert the old "Installation Reference Appendix" into the
+<<../../misc/install_reference.adoc#,Installation Reference>>
+document. Additionally:
+
+... Update
+<<../../misc/install_reference.adoc#_making_a_back_up_before_installing,Making a back-up before installing>>
+section to include using symbolic links for switching back-and-forth
+between operational and test installs.
+
+... Update
+<<../../misc/install_reference.adoc#_cut_and_paste_installation_tips,Cut-and-paste installation tips>>
+section for working from HTML or PDF instructions.
+
+... Add strategy for setting the `geometry` resource for an _xterm_
 window (and others with a `name` property) in the
 <<../../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting
-geometry values in .Xresources>> section of the
-<<../../misc/install_reference.adoc#,Installation Reference>>
-document.
+geometry values in .Xresources>> section.
+
+... Add section covering how to configure opening of new windows in the
+<<../../misc/install_reference.adoc#_opening_additional_windows,Opening additional windows>>
+section.
 
 .. Improve structure and correct some errors from original _.txt_ version.
 
@@ -256,13 +271,12 @@ available in the `Comments` section shown with `*help=lo*`.
 +
 
 Using the hook may remove the need to have a local version of the `lo`
-command. This may not be a suitable solution in all stations. If you
+command. This may not be a suitable solution for all stations. If you
 have (or need) a local `lo` command you can continue to use it (or
 implement one), but it will need to be updated to get new capabilities
 such as new racks, which occurs in this update, and the
-<<logrxg,logging .rxg files>> change, described below, when they come
+<<logrxg,logging .rxg files>> change, described above, when they come
 along.
-
 +
 
 NOTE: This feature does not currently provide a way to read back
@@ -319,12 +333,13 @@ https://github.com/nvi-inc/fs/issues/48[#48]).
 .. Make _fsclient_ ignore prompt in no-X11 mode.
 +
 
-If FS client is in no-X11 mode, it created a _fs.prompt_ when
-instructed by the server.  This change removes that behaviour (closing
+If an _fslcient_ was in no-X11 mode, it created a _fs.prompt_ when
+instructed by the server. This change removes that behaviour (closing
 https://github.com/nvi-inc/fs/issues/49[#49]), though it may cause an
-issue if no other clients exist to dismiss the prompt, as discussed in
-issue https://github.com/nvi-inc/fs/issues/49[#49]. If this is a
-problem for anyone's use case we will need a new feature here.
+issue if no other clients exist to dismiss a blocking prompt, as
+discussed in issue https://github.com/nvi-inc/fs/issues/49[#49]. If
+this is a problem for anyone's use case we will need a new feature
+here.
 
 . [[gnplt]] Improve _gnplt_.
 
@@ -345,14 +360,6 @@ this second version of _gnplt_, but ran out of time in his internship
 and was unable to include this minor but important feature. Thanks to
 Beppe Maccaferri (Medicina) for reporting this.
 
-. [[addrdbemsg]] Add _rdbemsg_ utility for RDBE VGOS users.
-+
-
-This utility was originally developed by Jason Soohoo (Haystack). It
-is an RDBE oriented version of the FS _msg_ utility for sending
-operations emails. Initially it ran on a different back-end computer.
-It was ported to the FS and expanded to provide pointing data.
-
 . Improvements to _msg_:
 
 .. Add checking in _msg_ for the FS being active just before writing to
@@ -371,12 +378,12 @@ https://github.com/nvi-inc/fs/issues/87[#87]).
 By design, _msg_ only allowed "`auto-start`" to be entered from the
 `Ready` form. If the connection to the FS computer is lost (killing
 _msg_) while waiting for "`auto-start`" to complete, it was difficult
-to re-enter without sending a new `Ready` message. To help with this
-an `Auto-start` button was added to "`manual start`".  When _msg_ is
-restarted, the user can go to the `Start` form and use the
-`Auto-start` button to re-enter "`auto-start`". The log must already
-be open to the experiment log when _msg_ restarted for this to work.
-Thanks to Jon Quick (HartRAO) for suggesting this.
+to re-enter "`auto-start`" without sending a new `Ready` message. To
+help with this an `Auto-start` button was added to "`manual start`".
+When _msg_ is restarted, the user can go to the `Start` form and use
+the `Auto-start` button to re-enter "`auto-start`". The log must
+already be open to the experiment log when _msg_ restarted for this to
+work.  Thanks to Jon Quick (HartRAO) for suggesting this.
 
 . [[helpsh]] Move X resources for _helpsh_ to _~/.Xresources_.
 +
@@ -398,40 +405,14 @@ Previously _setcl_ only checked for this issue (which is due to use of
 32-bit arithmetic in the time handling code), if the time model was
 _not_ `computer`. In principle, when the model is `computer` there is
 no need to check for this issue.  However, since the time is still
-managed with the same 32-bit arithmetic (to keep it the same on both
-32- and 64-bit systems) as for the non-`computer` models, it is still
-necessary to check.  Not doing so was an oversight. The result was
-that there were no warnings of an impending 248 day time issue if the
-model was `computer`.  This is now fixed (closing
+managed with the same 32-bit arithmetic (on both 32- and 64-bit
+systems) as for the non-`computer` models, it is still necessary to
+check.  Not doing so was an oversight. The result was that there were
+no warnings of an impending 248 day time issue if the model was
+`computer`.  This is now fixed (closing
 https://github.com/nvi-inc/fs/issues/56[#56]). Thanks to Richard
 Blaauw (WSRT), and subsequently Jon Quick (HartRAO) for reporting
 this.
-
-. [[scnch]] Generalize the _scnch_ window to cover Mark 5 recorders.
-+
-
-The _scnch_ window was initially developed for Mark 6 recorders. The
-form has now been generalized to cover Mark 5 recorders as well
-(closing https://github.com/nvi-inc/fs/issues/61[#61]).
-
-. [[cont_cal]] Add support for DBBC3 to `if=cont_cal,...` (closing
-https://github.com/nvi-inc/fs/issues/54[#54]).
-+
-
-Thanks to Eskil Varenius (Onsala) for reporting that this was missing.
-
-. [[new_ifdbb]] Add _new_ifdbb_ script for (RDBE) VGOS stations.
-+
-
-This script is intended as a tool to allow stations, and schedule
-writers, a way to update schedules for changes in the _ifdbb_
-procedure used by VGOS stations, particularly those with RDBE
-back-ends. For RDBE stations, the attenuation used in the signal
-chain, which is set by the schedule, depends on the observing mode
-being used and the conditions at the station. The provides a way to
-incorporate needed changes into schedules. If the script is run
-without other command line arguments, it will output "`help`"
-information.
 
 . [[prc]] Add checking for a procedure or schedule file before
 attempting to open it.
@@ -439,12 +420,12 @@ attempting to open it.
 
 This change is to avoid accidentally closing an active procedure or
 schedule file if the new one specified in the `proc=...` or
-`schedule=...` commands, respectively, does not exist (or has
-incorrect permissions) (closing
-https://github.com/nvi-inc/fs/issues/45[#45]).  Previously, if the
-files did not exist (or did not have the correct permission), the old
-file would be closed.  Thanks to Jon Quick (HartRAO) for pointing out
-this inconsistency.
+`schedule=...` commands, respectively, does not exist or has incorrect
+permissions (closing
+https://github.com/nvi-inc/fs/issues/45[#45]).  Previously, if the new
+files did not exist, or did not have the correct permissions, the old
+file would still be closed.  Thanks to Jon Quick (HartRAO) for
+pointing out this inconsistency.
 +
 
 CAUTION: This is a non-backward compatible change in how the SNAP
@@ -465,16 +446,6 @@ the SNAP commands should work.
 https://github.com/nvi-inc/fs/issues/3[#3], and
 https://github.com/nvi-inc/fs/issues/40[#40]).
 
-.. Improve `help` page for _tpicd_.
-+
-
-Made it clearer that when in the `no` mode, `data_valid=on` will only
-start logging of _tpicd_ data when a schedule is running and
-not-blocked.  This behavior was inherited from the VGOS branch where
-accidentally leaving _tpicd_ logging RDBE multi-cast data after
-closing or halting a schedule creates a lot of extra log entries. This
-is probably beneficial for all back-ends.
-
 .. Update `help` pages for _onoff_ and _fivpt_.
 
 ... Add section on switching between continuous and non-continuous
@@ -483,16 +454,6 @@ cal.
 ... Remove `if=cont_cal,,` in `calon`/`off`-`nf`/`fp` procedures.
 
 ... Add recovery method for misconfigured cal.
-
-.. The `help` file for the `ddbc` command was expanded to also
-describe the `dbbc2` and `dbbc3` commands and now includes a
-description of the output for multi-line responses for all of these
-commands (closing https://github.com/nvi-inc/fs/issues/75[#75]). The
-`help` command now works for the `dbbc2` and `dbbc3` commands.
-
-.. The `help` file for the `fila10g` command was expanded to also
-support the `fila10g2` command. The `help` command now works for the
-`fila10g2` command.
 
 .. Improve DBBC2 `if__x__` command help files.
 
@@ -533,7 +494,7 @@ from a closed library causing a crash.
 
 There are very few cases in the code where a procedure library is
 closed; one was overlooked in the previous fix of this issue in
-9.13.1. This case could happen if the schedule that was opened was
+_9.13.1_. This case could happen if the schedule that was opened was
 named _station_, which would lead to the automatic closure of an
 already open schedule procedure library (there cannot be a _station_
 schedule procedure library since _station_ is already the station
@@ -563,13 +524,6 @@ of _mask-HOWTO.txt_.
 
 .. Axis titles were added to _plot_mask.m_.
 
-. [[monx]] Change the flags for the _monX_ programs in _clpgm.ctl_
-from `a` to `d`.
-+
-
-Since these external programs do not depend on the FS, they can
-continue running (``d``etached) after the client is closed.
-
 . [[saterrors]] Fix ignoring _antcn_ errors in the `satellite` and
 `satoff` commands.
 +
@@ -577,23 +531,21 @@ continue running (``d``etached) after the client is closed.
 This bug caused errors from _antcn_ to be ignored for _only_ these
 commands. It has been fixed (closing
 https://github.com/nvi-inc/fs/issues/82[#82]).
-.
 
 . [[cls_chk]] Eliminate `cls_chk` error from `inject_snap -w ...`
-command when an error occurs.
+command when an error occurs (partly closing
+https://github.com/nvi-inc/fs/issues/50[#50]).
 +
 
 This was caused by _inject_snap_ not implementing the new linkage that
-was added for _fserr_. This is covered in more detail in issue
-https://github.com/nvi-inc/fs/issues/50[#50]. To correctly retrieve
-the error message would have required making a new interface to
-_fserr_ or subsuming it into a library routine that both _ddout_ and
-_inject_snap_ could use. It was not possible to do either in the
-available time. Instead _inject_snap_ was modified to output the error
-without the message, but pointing out that the message can be found in
-the log and display (partly closing
-https://github.com/nvi-inc/fs/issues/50[#50]). Thanks to Dave Horsley
-(Hobart) for reporting this.
+was added for _fserr_. To correctly retrieve the error message would
+have required making a new interface to _fserr_ or subsuming it into a
+library routine that both _ddout_ and _inject_snap_ could use. It was
+not possible to do either in the available time. Instead _inject_snap_
+was modified to output the error without the message, but pointing out
+that the message can be found in the log and display. This is covered
+in more detail in issue https://github.com/nvi-inc/fs/issues/50[#50].
+Thanks to Dave Horsley (Hobart) for reporting this.
 
 . [[fixmess]] Fix some errors in _control/fserr.ctl_.
 
@@ -607,24 +559,14 @@ manipulate its display setting (with `tnx`) were clarified (closing
 https://github.com/nvi-inc/fs/issues/22[#22]).  Thanks to Jon Quick
 (HartRAO) for reporting this.
 
-.. Error messages that should refer to the (not yet implemented)
-`active_rdbes` and `active_mk6s` commands were corrected to no longer
-incorrectly refer to the `rdbe_active` and `mk5_active` commands,
-respectively.
-
 .. Obsolete errors for the, no longer used, _sw.ctl_ control file were
 removed.
 
 . Improve start-up error message from _fserr_ if an error message line
-is too long in _fsser.ctl_ or _ster.ctl_.
+is too long in _fsser.ctl_ or _sterr.ctl_.
 +
 
 Previously, it reported the error as being in the following `""` line.
-. [[dbbcn]] Improve error logging for _dbbcn_ initialization.
-+
-
-The instance of the program is now correctly reported. It can be
-_dbbcn_ or _dbbc2_.
 
 . [[skedf.ctl]] Fix example _/usr2/fs/st.default/control/skedf.ctl_.
 +
@@ -651,12 +593,12 @@ depends on a library or include file that has changed. Since _drudg_
 has not yet opted-in, updates to it, and its libraries and include
 files, will require remaking all of the libraries and _drudg_ to be
 sure they are consistent. The _drudg_ program has its own separate
-ecosystem within the FS, consisting of the _skdrincl/_, _skdrlnfch/_,
-_skdrutil/_, _vex/_, and the _drudg/_ sub-directories
+ecosystem within the FS source tree, consisting of the _skdrincl/_,
+_skdrlnfch/_, _skdrutil/_, _vex/_, and _drudg/_ sub-directories
 +
 
-NOTE: Since _third_party_ has no other dependencies, it does not have
-this issue.
+NOTE: Since _third_party/_ has no FS dependencies, it is not
+affected by this issue.
 
 . [[noserver]] Add option to not build the display server into the FS.
 +
@@ -742,7 +684,7 @@ upper case. If this an issue for your antenna, it may require
 changes to your _antcn_ program. This is covered in the
 <<10.0.0.adoc#_case_sensitive_strings_in_antenna_commands,Case sensitive strings in antenna= commands>>
 sub-step of the
-<<10.0.0.adoc#,FS 10.0.0-beta3 Update notes>> document.
+<<10.0.0.adoc#,FS 10.0.0 Update Notes>> document.
 +
 
 CAUTION: While it is possible to have different SNAP commands or
@@ -822,6 +764,14 @@ The details of the FS Mark 6 features are described in the
 section of the
 <<mk6.adoc#,FS Mark 6 support>> document.
 
+. The _scnch_ window was added to provide a display of the
+`scan_check` results.
++
+
+This was originally developed for Mark 6 recorders in the VGOS branch,
+but has now been expanded to support Mark 5 recorders as well (closing
+https://github.com/nvi-inc/fs/issues/61[#61]).
+
 . [[dbbc2]] Limited support for a second DBBC2 and Fila10G.
 +
 
@@ -843,21 +793,6 @@ sub-section below for more details).
 A second instance, _dbbc2_, of the DBBC2 control program, _dbbcn_, is
 used for communication with the second DBBC2. The _dbba2.ctl_ control
 file is used for the second DBBC2.
-
-. [[sclient]] Replace deprecated VGOS branch TCP clients with
-_s_client_.
-+
-
-The _s_client_ script should be used to replace several other similar,
-new but deprecated, TCP scripts from the VGOS branch: _be_client_,
-_mcicn_, and _udceth0_.
-+
-
-The _s_client_ script was already present in both the main and VGOS
-branches. It is a generalization of the _be_client_ script written by
-Chet Ruszczyk (Haystack). Errors are reported as `lg   -1` errors in
-the log if the FS is running.  The details on its use are available
-from `*help=sy*`.
 
 . [[argspaces]] Ignore leading spaces in keyword parameters for C
 based FS commands.
@@ -886,7 +821,7 @@ _mat_, even if there was error.
 Previously the responses were handled by the general processing (in
 _boss_) which did not remove these characters. Instead the responses
 are now processed with the code that would handle this if there were no
-error, which does remove these characters..
+error, which does remove these characters.
 
 . [[recurse]] Recursive average calculation in _onoff_ updated.
 +
@@ -909,7 +844,8 @@ This change was made to accomodate having eight IFs for VGOS.
 This impacted the format of the _control/fscmd.ctl_ and
 _/usr2/st/stcmd.ctl_.
 
-. [[scripts]] A few experimental, user beware, utilities were added.
+. [[scripts]] A few experimental, __user beware__, utilities were
+added.
 +
 
 CAUTION: These may not work well for their intended purpose or at all.
@@ -947,7 +883,7 @@ fields.
 .. For the DBBC, incorrect logging of errors if there was a problem
 retrieving class buffers of TPI data.
 
-.. The DBBC `cont_cal` error responses were incorrectly using the `df`
+.. The DBBC2 `cont_cal` error responses were incorrectly using the `df`
 code instead of `dd`.
 
 .. The `disk_record`, `disk2file`, `in2net` commands incorrectly
@@ -980,10 +916,11 @@ ignored.
 === FS changes relative to the VGOS branch
 
 This update merges the VGOS branch into the main branch. The VGOS
-branch diverged from the main branch at _9.11.2_. This sub-section
-covers FS changes that occurred in the main branch from _9.11.2_
-through _9.13.2_. These changes are covered extensively in several
-update notes in the _misc/_ subdirectory:
+branch diverged from the main branch at _9.11.2_. Except for the first
+nine items below, this sub-section covers FS changes that occurred in
+the main branch from _9.11.2_ through _9.13.2_. These changes are
+covered extensively in several update notes in the _misc/_
+subdirectory:
 
 * _fs9116up.txt_
 * _fs9118up.txt_
@@ -991,8 +928,100 @@ update notes in the _misc/_ subdirectory:
 * _fs9132up.txt_
 
 Rather that cover them fully here as well, only a brief summary is
-provided below.  Please check the files listed above for the full
-details.
+provided below. Please check the files listed above for the full
+details. The first nine items below are changes to VGOS branch
+features, the remainder are the changes inherited from the main
+branch.
+
+. [[addrdbemsg]] Add _rdbemsg_ utility for RDBE VGOS users.
++
+
+This utility was originally developed by Jason Soohoo (Haystack) as
+_vgos-msg-gui_. It is an RDBE oriented version of the FS _msg_ utility
+for sending operations emails. Originally it ran on a different
+back-end computer. It was ported to the FS computer, expanded to
+provide pointing data, and generalized to support more systems.
+
+. [[scnch]] Generalize the _scnch_ window to cover Mark 5 recorders.
++
+
+The _scnch_ window was initially developed for Mark 6 recorders. The
+form has now been generalized to cover Mark 5 recorders as well
+(closing https://github.com/nvi-inc/fs/issues/61[#61]).
+
+. [[sclient]] Replace deprecated TCP clients with _s_client_.
++
+
+The _s_client_ script should be used to replace other similar, new but
+now deprecated, TCP scripts from the VGOS branch: _be_client_ and
+_mcicn_.
++
+
+The _s_client_ script was already present in both the main and VGOS
+branches. It is a generalization of the _be_client_ script written by
+Chet Ruszczyk (Haystack). Errors are reported as `lg   -1` errors in
+the log if the FS is running.  The details on its use are available
+from `*help=sy*`.
+
+. [[new_ifdbb]] Add _new_ifdbb_ script for VGOS stations.
++
+
+This script is intended as a tool to allow stations, and schedule
+writers, a way to update schedules for changes in the _ifdbb_
+procedure used by VGOS stations, particularly those with RDBE
+back-ends. For RDBE stations, the attenuation used in the signal
+chain, which is set by the schedule, depends on the observing mode
+being used and the conditions at the station. The provides a way to
+incorporate needed changes into schedules. If the script is run
+without other command line arguments, it will output "`help`"
+information.
+
+. [[cont_cal]] Add support for DBBC3 to `if=cont_cal,...` (closing
+https://github.com/nvi-inc/fs/issues/54[#54]).
++
+
+Thanks to Eskil Varenius (Onsala) for reporting that this was missing.
+
+. Improve `help` command.
+
+.. Improve `help` page for _tpicd_.
++
+
+Made it clearer that when in the `no` mode, `data_valid=on` will only
+start logging of _tpicd_ data when a schedule is running and
+not-blocked.  Accidentally leaving _tpicd_ logging RDBE multi-cast
+data after closing or halting a schedule creates a lot of extra log
+entries. This is probably beneficial for all back-ends.
+
+.. The `help` file for the `ddbc` command was expanded to also
+describe the `dbbc2` and `dbbc3` commands and now includes a
+description of the output for multi-line responses for all of these
+commands (closing https://github.com/nvi-inc/fs/issues/75[#75]). The
+`help` command now works for the `dbbc2` and `dbbc3` commands.
+
+.. The `help` file for the `fila10g` command was expanded to also
+support the `fila10g2` command. The `help` command now works for the
+`fila10g2` command.
+
+. [[monx]] Change the flags for the _mon<x>_ programs in _clpgm.ctl_
+from `a` to `d`.
++
+
+Since these external programs do not depend on the FS, they can
+continue running (``d``etached) after the client is closed.
+
+. [[dbbcn]] Improve error logging for _dbbcn_ initialization.
++
+
+The instance of the program is now correctly reported. It can be
+_dbbcn_ or _dbbc2_.
+
+. Fix some errors in _control/fserr.ctl_.
++
+
+Error messages that should refer to the `active_rdbes` and
+`active_mk6s` commands were corrected to no longer incorrectly refer
+to the `rdbe_active` and `mk5_active` commands, respectively.
 
 . Fix Tsys to work if the recorder type is `none`.
 
@@ -1005,8 +1034,6 @@ for the source to be reached.
 
 . Add support for FSL9.
 
-. Change `dbbc` rack type to `dbbc_ddc`.
-
 . Change format of DBBC2 CoMo line in _equip.ctl_.
 
 . Update minimum version of DBBC2 PFB firmware in _equip.ctl_.
@@ -1016,18 +1043,22 @@ for the source to be reached.
 . Add `128` as a clock rate and add new `nominal` cases to
 _equip.ctl_.
 
-. Add support for DBBC2 racks with FiLa10G units, rack type:
-`dbbc_ddc/fila10g`.
-
 . Add support for FlexBuff recorders.
 
 . Add partial support for VLBAC and CDAS racks.
+
+. Change `dbbc` rack type to `dbbc_ddc`.
+
+. Add support for DBBC2 racks with FiLa10G units, rack type:
+`dbbc_ddc/fila10g`.
 
 . Add support for the DBBC2 PFB personality, rack types: `dbbc_pfb`
 and `dbbc_pfb/fila10g`.
 
 . Add support for two VSI outputs from a DBBC2 rack feeding a
 FiLa10G.
+
+. Add support for DBBC2 `geo2` mode.
 
 . Add a new _termination_ mode in _antcn_.
 
@@ -1052,8 +1083,6 @@ had these improvements).
 . Fix a bug that caused local versions of _sterp_ to fail if an
 error message was longer than 256 characters.
 
-. Add _fesh_ and _plog_.
-
 . The _s_client_ utility was made Python 2.5 (FSL8, _Lenny_) compatible.
 
 . Change the _fmset_ programs to offer a set of (station defined)
@@ -1076,7 +1105,7 @@ that there has been no `dot_set=...` yet for a Mark 5B recorder.
 define font sizes, and use better plot axis labels for large values.
 
 . Add support for user devices that can't (or don't need to) measure a
-_zero_ level.
+_zero_ level for Tsys.
 
 . In _metserver_, add command line argument for suppressing errors
 from specific devices, if broken; add support for `FS_SERIAL_CLOCAL`
@@ -1089,7 +1118,7 @@ This section is divided into three sub-sections. Please see the
 
 === drudg changes that are in common since FS9
 
-_drudg_ opening message date is `2021Feb7`.
+_drudg_ opening message date is `2021Feb18`.
 
 . [[bit3264_drudg]] Source code now works on 32- and 64-bit platforms.
 +
@@ -1105,10 +1134,10 @@ version of _lnfch/_, in _skdrlnfch/_.
 . [[git_drudg]] Source version control is maintained with _git_.
 +
 
-The _drudg_ program is external to the FS. For each _drudg_ update the
-source in imported into the FS _git_ repo for distribution with the
-FS. This does not provide the same level of tracking as having _drudg_
-itself in _git_ but it is still useful.
+The _drudg_ program source is maintained external to the FS. For each
+_drudg_ update the source in imported into the FS _git_ repo for
+distribution with the FS. This does not provide the same level of
+tracking as having _drudg_ itself in _git_ but it is still useful.
 
 . [[uninit]] Fix uninitialized variables.
 +
@@ -1265,7 +1294,7 @@ example:
 
   mk6=rtime?8192;
 
-.. After _data_valid=on_.
+.. After _data_valid=on_
 +
 
 The remaining recording capacity is queried.
@@ -1354,21 +1383,24 @@ types in the schedule.
 
 . Fix Tsys to work if the recorder type is `none`.
 
-. Add support for DBBC2 racks with FiLa10G units, rack type:
-`dbbc_ddc/fila10g`.
-
 . Add support for FlexBuff recorders.
 
 . Add partial support for VLBAC and CDAS racks.
+
+. Add support for DBBC2 racks with FiLa10G units.
+
+. Change to using DBBC2 rack types `dbbc_ddc` and `dbbc_ddc/fila10g`,
+but accepting old types `dbbc` and `dbbc/fila10g`, respectively, in
+schedules for backward compatibility.
 
 . Add support for the DBBC2 PFB personality, rack types: `dbbc_pfb`
 and `dbbc_pfb/fila10g`.
 
 . Add support for two VSI outputs for DBBC2 racks feeding a FiLa10G.
 
-. Make _drudg_ backward compatible with old DBBC2 `dbbc` and
-`dbbc/fila10g` rack types, treating them as `dbbc_ddc` and
-`dbbc_ddc/fila10g`, respectively.
+. Add support for DBBC2 use of the _VSI2_ output by itself.
+
+. Add support for DBBC2 `geo2` mode.
 
 . Change to always treating equipment types as case insensitive.
 
@@ -1376,9 +1408,5 @@ and `dbbc_pfb/fila10g`.
 sampling rates.
 
 . Add ad hoc support for so-called "`staggered start`" mode.
-
-. Add support for DBBC2 `geo` mode.
-
-. Add support for DBBC2 use of the _VSI2_ output by itself and with _VSI1_.
 
 . Use only the _skedf.ctl_ control file in _/usr2/control/_.
