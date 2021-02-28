@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 1.1 - January 2021
+Version 1.2 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -49,7 +49,7 @@ release themselves. No specific documentation will be provided. What
 commit was last updated to will determine what needs to be done.  It
 might work to verify that all the steps in the latest version of this
 document, appropriately renamed as an update from the old release to
-the new release, were completed. An alternate, but necessarily
+the new release, were completed. An alternate, but not necessarily
 complete, approach would be to review the update steps in the new
 release to make sure everything has been covered. _Let the user
 beware._
@@ -72,8 +72,8 @@ If you are using _git_, as is recommended, then as _prog_
 execute:
 
              cd /usr2/fs-git
+             git fetch
              git checkout master
-             git pull
              make clean rmdoto rmexe
              make >& /dev/null
              make -s

@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta3 to FS 10.0.0 Update Notes
-Version 2.1 - February 2021
+Version 2.2 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -42,17 +42,19 @@ sub-section of the
 == Upgrading from 10.0.0-beta3 to 10.0.0
 
 You must have already upgraded to _10.0.0-beta3_ according to the
-<<beta3.adoc#,FS 10.0.0-beta3 Update Notes>> document before
+<<beta3.adoc#,FS 10.0.0-beta3 Update Notes>> document or the
+<<beta2_to_beta3.adoc#,FS 10.0.0-beta2 to FS 10.0.0-beta3 Update Notes>>
+before
 installing this update.
 
-=== Fetch and make the latest commit
+=== Fetch and make 10.0.0
 
 If you are using _git_, as is recommended, then as _prog_
 execute:
 
              cd /usr2/fs-git
+             git fetch
              git checkout -q 10.0.0
-             git pull
              make clean rmdoto rmexe
              make >& /dev/null
              make -s
@@ -79,9 +81,8 @@ _st.default/st-0.0.0/metserver/INSTALL_ for the installation
 instructions. 
 
 . If you original updated to FS10 from a VGOS branch version, and
-haven't already, you should remove use of the deprecated _be_client_,
-_mcicn_, and _udceth0_ scripts with the more general _s_client_
-script.
+haven't already, you should remove use of the deprecated _be_client_
+and _mcicn_ scripts with the more general _s_client_ script.
 +
 
 You can find instances of the deprecated scripts commands, using,

@@ -19,7 +19,7 @@
 //
 
 = FS DBBC3 Support
-Version 0.1 - December 2020
+Version 0.2 - February 2021
 
 :sectnums:
 :toc:
@@ -31,15 +31,18 @@ not provide the complete command set and functionality usually
 provided by the FS for a rack. However, it is sufficient for normal FS
 for VGOS observations if the schedule procedure library is provided by
 a specially crafted _.skd_ schedule file (see the
-<<drudg changes relative to the main branch>>
-sub-section below for more details).
+<<changes_10.0.0.adoc#broadband,broad band support>> item of the
+<<changes_10.0.0.adoc#_drudg_changes_relative_to_the_main_branch,drudg
+changes relative to the main branch>> sub-section of the
+<<changes_10.0.0.adoc#,Changes from FS9>> document for more details).
 
 == FS DBBC3 support features
 
 The following table gives the IFs and BBCs available based on the
 number of BBCs per IF and the number of IFs.
 
-.DBBC3 IF lettering and BBC numbering
+
+.DBBC3 IF lettering and BBC numbering [[table1]]
 [cols="^,^,^,^,^,^,^,^,^",options="header"]
 |=================
 | BBCs/IF 
@@ -47,7 +50,7 @@ number of BBCs per IF and the number of IFs.
 
 .2+|         
 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
-| IFA | IFB | IFC |IFD | IFE| IFF | IFG | IFH
+| A | B | C |D | E| F | G | H
 
 |  8      | 1-8 | 9-16| 17-24 | 25-32| 33-40| 41-48| 49-56 | 57-64
 
@@ -77,13 +80,16 @@ polarization pair in use. The pairs are: H and V; L and R; and X and
 Y. This will be fixed eventually (see
 https://github.com/nvi-inc/fs/issues/42[#42]). For now, since there
 are are at most two polarizations per receiver, the designations
-follow the _alphabetical_ (in English) rule.  This is, what matters is
+follow the _alphabetical_ (in English) rule. This is, what matters is
 the alphabetical order of the first letter of the names in a
-polarization pair. Thus:
+polarization pair. The correction interpretation is determined by
+context. Thus:
 
-* `l` (or `lcp`) can represent horizontal linear polarization, LCP, or "`X`"
+* `l` (or `lcp`) can represent horizontal linear polarization ("`h`"),
+LCP ("`l`"), or "`x`"
 
-* `r` (or `rcp`) can represent vertical linear polarization, RCP, or "`Y`"
+* `r` (or `rcp`) can represent vertical linear polarization ("`v`") ,
+RCP ("`r`"), or "`y`"
 
 === Low level dbbc3 command
 
@@ -96,8 +102,9 @@ for more information.
 Commands are provided for command and monitoring of individual BBCs.
 The commands have the form `bbc__NNN__`, where `_NNN_` runs `001` to
 `128`. Please use `*help=bbcnnn*` for more information. Only a
-subset of these commands may be available depending on the DBBC
-configuration.
+subset of these commands may be available depending on the DBBC3
+configuration. See the <<table1,table>> in the <<FS DBBC3 support features>>
+section above for the BBCs available per configuration.
 
 === IF conditioning module ifX command
 
@@ -105,15 +112,19 @@ Commands are provided for command and monitoring of individual IF
 conditioning modules.  The commands are of the form `if__X__`, where
 `_X_` runs from `a` to `h`. Please use `*help=ifx*` for more
 information. Only a subset of these commands may be available
-depending on the DBBC configuration.
+depending on the DBBC3 configuration. See the <<table1,table>> in the
+<<FS DBBC3 support features>> section above for the IFs available per
+configuration.
 
 === IF total power iftpX command
 
-Commands are provided for monitoring of total power data for individual IF
-conditioning modules.  The commands are of the form `iftp__X__`, where
-`_X_` runs from `a` to `h`. Please use `*help=iftpx*` for more
-information. Only a subset of these commands may be available
-depending on the DBBC configuration.
+Commands are provided for monitoring of total power data for
+individual IF conditioning modules.  The commands are of the form
+`iftp__X__`, where `_X_` runs from `a` to `h`. Please use
+`*help=iftpx*` for more information. Only a subset of these commands
+may be available depending on the DBBC3 configuration.  See the
+<<table1,table>> in the <<FS DBBC3 support features>> section above
+for the IFs available per configuration.
 
 === BBC gain control bbc_gain command
 
@@ -152,7 +163,7 @@ the detectors can be selected as individually or as `allbbc`, `all`,
 not supported yet.
 
 NOTE: See `*help=fivept*` and `*help=onoff*` for more information on
-using these commands.
+using those commands.
 
 === Example procedure libraries
 

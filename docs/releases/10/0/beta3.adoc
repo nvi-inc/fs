@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta3 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.5 - January 2021
+Version 1.6 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -919,9 +919,8 @@ change will have no impact.
 
 This sub-step is optional and only relevant if were using the VGOS
 branch, versions _9.12.x_. You should replace use of the deprecated
-scripts, _be_client_, _mcicn_, and _udceth0_ with the more general
-_s_client_. You can find instances of these commands, using, e.g., for
-_be_client_:
+scripts _be_client_ and _mcicn_ with the more general _s_client_. You
+can find instances of these commands, using, e.g., for _be_client_:
 
    cd /usr2/proc
    grep be_client *.prc

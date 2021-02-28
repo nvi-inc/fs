@@ -19,7 +19,7 @@
 //
 
 = DRAFT FS Document Font Conventions
-Version 0.5 - January 2021
+Version 0.6 - February 2021
 
 :sectnums:
 
@@ -198,6 +198,63 @@ Results in:
 ....
 login: _account_
 ....
+
+=== Open blocks
+
+Open blocks can be useful for better indentation in complicated
+situations. They essentially make a block that can be indented as
+needed. To put text in an open block, insert it between two lines that
+each start with two dashes. For example:
+
+....
+. A few experimental, __user beware__, utilities were
+added.
++
+
+CAUTION: These may not work well for their intended purpose or at all.
+They are only intended for developers.  They may change in the future.
+
++
+--
+In _misc/_:
+
+* _ntpmon_ -- Simple NTP monitoring
+
+* _time_delay_ -- Simple source acquisition time delay listing
+
+* _tpcont_rdbe_ -- Simple RDBE continuous TP extraction
+--
++
+
+In _chk_time_/:
+
+*  _chk_time_ a simple utility for checking for NTP time jumps.
+....
+
+Results in:
+
+. A few experimental, __user beware__, utilities were
+added.
++
+
+CAUTION: These may not work well for their intended purpose or at all.
+They are only intended for developers.  They may change in the future.
+
++
+--
+In _misc/_:
+
+* _ntpmon_ -- Simple NTP monitoring
+
+* _time_delay_ -- Simple source acquisition time delay listing
+
+* _tpcont_rdbe_ -- Simple RDBE continuous TP extraction
+--
++
+
+In _chk_time_/:
+
+*  _chk_time_ a simple utility for checking for NTP time jumps.
 
 === Admonitions
 

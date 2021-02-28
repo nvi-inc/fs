@@ -19,7 +19,7 @@
 //
 
 = Strawman Release Model
-Version 1.0 - January 2021
+Version 1.1 - February 2021
 
 :sectnums:
 
@@ -36,22 +36,25 @@ An example version _tag_ is:
 
 The general form of FS version tags is:
 
-   VERSION.SUBLEVEL.PATCHLEVEL-STRING
+[subs="+quotes"]
+....
+__MAJOR__.__MINOR__.__PATCH__-__STRING__
+....
 
 Where:
 
-* `VERSION`, a number, indicates a major release, e.g., `10`.  Note
-   that `VERSION` does not start with a `v`.
+* `_MAJOR_`, a number, indicates a major release, e.g., `10`.  Note
+   that `_MAJOR_` does not start with a `v`.
 
-*  `SUBLEVEL`, a number, indicates a minor release, e.g., `1`.
+*  `_MINOR_`, a number, indicates a minor release, e.g., `1`.
 
-*  `PATCHLEVEL`, a number, indicate the patch number, e.g., `0`.
+*  `_PATCH_`, a number, indicate the patch number, e.g., `0`.
    Non-zero patch numbers are only used for fixes to
-   `VERSION.SUBLEVEL` releases (before version _10.0.0_, non-zero
-   ``PATCHLEVEL``s were used in regular releases).
+   `__MAJOR__.__MINOR__` releases (before version _10.0.0_, non-zero
+   ``_PATCH_``s were used in regular releases).
 
-*  `STRING`, a string, which is optional and when non-blank provides
-   additional information, e.g., `beta`. If `STRING` is empty, the
+*  `_STRING_`, a string, which is optional and when non-blank provides
+   additional information, e.g., `beta1`. If `_STRING_` is empty, the
    dash `-` is omitted.
 
 If the version tag has changed since the last time the FS was _made_,
@@ -64,63 +67,73 @@ information is automatically appended to identify the specific commit, e.g.:
 
 The general form of what is appended is:
 
-  -n-gSHA-dirty
+[subs="+quotes"]
+....
+-_n_-g__SHA__-dirty
+....
 
 where:
 
-*  `n` is the number of commits that have been been made since the last
+*  `_n_` is the number of commits that have been been made since the last
    commit tagged with a version string, e.g., `58`.
 
-*  `SHA` is the (unique) SHA prefix of this commit, e.g., `229f696e`.
+*  `_SHA_` is the (unique) SHA prefix of this commit, e.g., `229f696e`.
 
 *  `-dirty` is appended if the working directory contains changes that
    have not been committed. When -dirty appears, the ability to identify
    what version was run is lost. This should be avoided.
 
-This format is only guaranteed to be present for versions _10.0.0-alpha2_
-and later.
+This format is only present for versions _10.0.0-alpha2_ and later.
 
 == Release model
 
 When an FS release is made, a particular commit is tagged with the version. A
 lightweight tag is sufficient, but an annotated tag can be used.  Official
-releases never have a non-blank `STRING`.  However, alpha and beta releases will
-have appropriate `STRING` values, e.g. _alpha1_, _beta2_, etc.  Other values may
+releases never have a non-blank `_STRING_`.  However, alpha and beta releases will
+have appropriate `_STRING_` values, e.g. _alpha1_, _beta2_, etc.  Other values may
 be used as needed.
 
-There is a basic distinction between `VERSION.SUBLEVEL.0`, i.e., with zero
-`PATCHLEVEL`, a _feature release_, and non-zero `PATCHLEVEL`, a
-_patch release_.  Generally feature releases include significant feature
-changes, but also occur when a patch is not just a "`quick`" install for the
-users. A patch that requires significant changes, including, but not limited to
-reboots due to changes in shared memory size, should be promoted to being a
-feature release. The goal is that patch releases should be safe for operational
-stations to install without needing a significant amount of time, testing, or
+There is a basic distinction between `__MAJOR__.__MINOR__.0`,
+i.e., with zero `_PATCH_`, a _feature release_, and non-zero
+`_PATCH_`, a _patch release_.  Generally feature releases include
+significant feature changes, but also occur when a patch is not just a
+"`quick`" install for the users. A patch that requires significant
+changes, including, but not limited to reboots due to changes in
+shared memory size, should be promoted to being a feature release. The
+goal is that patch releases should be safe for operational stations to
+install without needing a significant amount of time, testing, or
 otherwise being a risk to operations.
 
 == Update notices
 
 For each release, there should be an _update notice_ in a file of the form
 
- /usr2/fs/docs/releases/VERSION.SUBLEVEL.PATCHLEVEL/release.adoc
+[subs="+quotes"]
+....
+__/usr2/fs/docs/releases/<MAJOR>/<MINOR>/<tag>.adoc__
+....
 
 documenting the changes in the version and installation instructions.
-There may also be _string.adoc_ and other files associated with the
-release in the same sub-directory, e.g., _beta1.adoc_, _beta2.adoc_,
-_beta1_to_beta2.adoc_, and _latest_commit.adoc_. All these files
-should be visible on the _gh-pages_.
+There may also be documents using the `_STRING_` and other files
+associated with the release, including patches, in the same
+sub-directory, e.g., _beta1.adoc_, _beta2.adoc_,
+_beta1_to_beta2.adoc_, _<STRING>_to_latest.adoc_, and _10.0.1.adoc_.
+All these files should be visible on the _gh-pages_.
 
 For feature releases, the notice should have a complete description of
 the changes and installation instructions from the previous feature
-release. For patch releases, the description and instructions should
-be complete for an update from the corresponding feature release and
+release.
+
+For patch releases, the description and instructions should be
+complete for an update from the corresponding feature release and
 include those instructions (by reference).
 
-The _latest_commit.adoc_ file covers changes on that branch since the
+A _<tag>_to_latest.adoc_ file covers changes on that branch since the
 most recent feature or maintenance release. It starts as basically
 empty for a new release. It accumulates the changes that occur until
 the next release. It helps provide content for the next release update
-notes. It should be retained for reference after that release.
+notes. At a new release it is converted to a new _<tag>.adoc_ file for
+the new _<tag>_.
 
 NOTE: Those using the latest commit are understood to be experts and
 are expected to manage differences in the update steps when updating to
@@ -284,7 +297,7 @@ particularly _antcn_ if you want to control an antenna
 As _prog_:
 
 .   ``**cd /usr2/fs-git**``
-.   ``**git pull**``
+.   ``**git fetch**``
 .   ``**git checkout -q** _tag_``
 
 +
@@ -298,9 +311,9 @@ If there is no output from the above command, then the _make_ was successful.
 +
 A patch update may not require a reboot, please check the instructions.
 
-Additionally, you will need to follow the update instructions, usually
-found within https://nvi-inc.github.io/fs/releases/.  The release
-announcement should include a link to the specific document.
+Additionally, you will need to follow the update instructions. There
+is usually a link to them in the release announcement, which can be
+found at https://nvi-inc.github.io/fs/releases/.
 
 === Installing from an archive
 

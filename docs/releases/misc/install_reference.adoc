@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 0.9 - February 2021
+Version 1.0 - February 2021
 
 :sectnums:
 :experimental:
@@ -30,7 +30,7 @@ in general, but are usually not needed for routine updates.
 == Upgrading from FS versions before the previous stable
 
 This section only covers upgrading from "`main`" branch versions,
-i.e., versions _9.12.x_ are excluded.
+i.e., versions _9.12.<x>_ are excluded.
 
 For reference, the list of the most recent _critical updates_, since
 version _9.3.13_, is given below.  These are updates that must be
@@ -373,7 +373,7 @@ ln -sfn proc-test     proc
 ln -sfn st-1.0.0-test st
 ....
 
-. Then follow the installation instructions, you will be
+. Then follow the installation instructions. You will be
 modifying the _-test_ versions.
 
 ==== Switch temporarily to operational version
@@ -549,10 +549,16 @@ retained with an added _.bak_ extension.
 A strategy for setting the `geometry` resource for an _xterm_ window
 (and others with a `name` property) is:
 
+NOTE: Most windows used by the FS are based on _xterm_, which can have
+a `name` property for each case. However, windows opened by _python_
+scripts do not usually have a `name` property. If it is needed, it is
+possible to modify _python_ scripts to accept, and use, a geometry
+parameter.
+
 . Adjust the position (and maybe the size) of the window to what you
 want.
 
-. Run the _xwininfo_ program
+. Run the _xwininfo_ program from an shell prompt in an _xterm_.
 
 . Position the cursor on the window and click.
 
@@ -562,10 +568,15 @@ want.
 . Paste the string as the value for `geometry` resource for that
 window in the _~/.Xresources_ file.
 
-After adding resources in the _~.Xresources_ file, you will need to
-load them to make them active. This can done by logging out and back
-in again or loading them in another way, such as using the shell alias
-_rlxr_ that is available by default for _oper_ and _prog_.
+After changing or adding resources in the _~.Xresources_ file, you
+will need to load them to make them active. This can done by logging
+out and back in again or loading them in another way, such as using
+the shell alias _rlxr_ that is available by default for _oper_ and
+_prog_.
+
+NOTE: Using this method with differently named _.Xresource_ files, it
+possible to have customized window layouts for different displays and/or
+users.
 
 == Opening additional windows
 
@@ -578,17 +589,20 @@ multiple instances of a window. This might be confusing if it is not
 what you intended. In particular, windows with fixed placement may
 have multiple instances overlaying each other and not all be visible.
 
-NOTE: The FS protects against having more than one instance of certain
-programs, such as _fmset_, running.
+NOTE: Some programs, such as _fmset_, could cause problems if multiple
+instances are running. The FS protects against that in those cases.
 
-NOTE: FS display programs, such _monit2_, and other _monit<x>_`
-programs end automatically if the FS is terminated.
+CAUTION: FS display programs, such _monit2_, and other _monit<x>_
+programs end automatically if the FS is terminated. If you start
+programs that don't end automatically with the <<Window manager>> or
+<<Not using display server client>> methods below, they will continue
+running after the FS is terminated.
 
 Some windows, in particular _xterm_ windows, have a `name` property
-that allows them to associated wth resources in the _~/.Xresources_
-file. This allows you to define other properties of the window, such
-as placement, size, title, and colors. See the <<Setting .Xresources>>
-sub-section below for details on this.
+that allows them to be associated with resources in the
+_~/.Xresources_ file. This allows you to define other properties of
+the window, such as placement, size, title, font, and colors. See the
+<<Setting .Xresources>> sub-section below for details on this.
 
 === Configuring additional windows
 
@@ -666,7 +680,7 @@ In order to try your changes you must restart _fvwm2_: left click on
 the background, select the `Restart` item, and then confirm that you
 do want to restart _fvwm2_. You could also log out and back in again.
 
-==== Display server client
+==== Using display server client
 
 If you using the display server, there are two methods for opening
 more windows. You can define windows to be opened automatically when
@@ -755,7 +769,7 @@ client=_name_
 where _name_ is the first field on the line in _clpgm.ctl_.
 --
 
-==== SNAP commands
+==== Not using display server client
 
 If you are _not_ running the display server, you can define SNAP
 procedures to open windows. This approach can be used on any display.
@@ -772,7 +786,11 @@ CAUTION: The trailing `&` is necessary to prevent the FS from waiting
 for the window to close.
 
 Then entering `monit2` as operator input would open an instance of a
-_monit_ window.
+_monit2_ window.
+
+You could also add commands like these to your `initi` procedure in
+your `station` procedure library to have them open automatically when
+the FS is start.
 
 === Setting .Xresources
 

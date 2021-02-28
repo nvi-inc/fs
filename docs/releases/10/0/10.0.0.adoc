@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 2.6 - February 2021
+Version 2.7 - February 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -42,7 +42,7 @@ versions _9.12.10_-_9.12.13_).
 
 It has been tested for several configurations but not all possible ones.
 You should test it carefully before using it for operations. Please
-email Ed, if you encounter problems so that we can resolve them.
+email Ed if you encounter problems so that we can resolve them.
 
 Installing the new version as an update is fairly simple but has
 several steps, see the <<Upgrading from an FS9 version>> section
@@ -229,20 +229,20 @@ This section covers upgrading from FS9, which was always 32-bit only,
 to _10.0.0_. It is assumed you are upgrading on a 32-bit system.
 There are two possible paths for upgrading:
 
-. Upgrading from a main branch version. The main branch versions
-are numbered _9.13.x_ and _9.11.x_ or older.  Specifically, versions
-_9.12.x_ are not part of the main branch.  If you are upgrading
-from a main branch version, it is assumed that upgrade is from
-_9.13.2_, the previous stable release.  If you have a main branch
-version older than version _9.13.2_ you should upgrade to _9.13.2_
-first, please refer to the
+. Upgrading from a main branch version. The main branch versions are
+numbered _9.13.<x>_ and _9.11.<x>_ or older.  Specifically, versions
+_9.12.<x>_ are not part of the main branch.  If you are upgrading from
+a main branch version, it is assumed that upgrade is from _9.13.2_,
+the previous stable release.  If you have a main branch version older
+than version _9.13.2_ you should upgrade to _9.13.2_ first, please
+refer to the
 <<../../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
 section in the
 <<../../misc/install_reference.adoc#,Installation Reference>> document
 for more information.
 
 . Upgrading from a VGOS branch version.  The VGOS branch versions
-are numbered _9.12.x_.  The instructions provided in this section
+are numbered _9.12.<x>_. The instructions provided in this section
 are for installing as an upgrade to versions
 _9.12.10_-_9.12.13_, the latest VGOS branch releases. As far as we
 know, no other VGOS versions are in use. If you have a different
@@ -403,7 +403,7 @@ please refer to the
 section of the
 <<../../misc/install_reference.adoc#,Installation Reference>> document.
 For stations where all the operational files are
-expected to owned by user __oper__ in group __rtx__, with permissions
+expected to be owned by user __oper__ in group __rtx__, with permissions
 `ug+rw,o+r,o-w`, the following command will enforce this (note
 that the __execute__/__search__ bits are not changed):
 
@@ -448,8 +448,8 @@ for _bash_.
 TIP: If you are using an old distribution that is not compatible with
 the latest update of the server, you can still use the FS without the
 server by removing it from the _make_ process. If your first attempt
-to build the FS fails because of the server (most likely in
-_third_party/_), please follow the steps in the description of the
+to build the FS fails because of the server (most likely while working
+in _third_party/_), please follow the steps in the description of the
 <<changes_10.0.0.adoc#noserver,not building the display server>> change
 (in the
 <<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS changes that are in common since FS9>>
@@ -586,8 +586,8 @@ has several improvements:
 .. A new command line argument to disable errors messages for specific
 sensors if they are broken.
 
-.. Support for `FS_SERIAL_CLOCAL` _make_ time environment variable for
-FSL9 and later.
+.. Support for the `FS_SERIAL_CLOCAL` _make_ time environment variable
+for FSL9 and later.
 
 .. Improved reporting of errors when opening serial devices.
 
@@ -727,6 +727,12 @@ to the example files, e.g., using:
 and consider whether and what changes you should make to your
 copies.
 
+TIP: If you are familiar with _vimdiff_, you may find it a more
+convenient way to compare files and update your local copy.  Like
+_vim_, _vimdiff_ may be challenging to use until you are familiar with
+it. Some help is available from web searches. Don't use it if you
+aren't comfortable with it.
+
 The following sub-sections give the details of the changes in these
 example files. You will need to make the corresponding changes to your
 copies of the files.
@@ -755,10 +761,18 @@ to `erchk`.
 
 .. The _xterm_ program was added.
 
-.. For RDBE systems, the useful RDBE display windows: _monit6_,
-and _monX_ (_X_=[_a_-_d_]) were added. The _monan_ program was added
-to the default since it is used at several sites. If these are not
-relevant for your site, you may not want to add them.
+.. For RDBE systems, the useful RDBE display windows: _monit6_, and
+_mon<x>_ (_<x>_=[_a_-_d_]) were added. If these are not relevant for
+your site, you may not want to add them.
++
+
+The _mon<x>_ displays use the _rdbe30_mon.py_ script written by Russ
+McWhirter (Haystack). It is not distributed with the FS at this time,
+but should already be available at all stations with RDBEs.
+
+.. The _monan_ program was added to the default since it is used at
+several sites. If it is not relevant for your site, you may not want
+to add it.
 
 ===== Review equip.ctl
 
@@ -856,7 +870,7 @@ the clock rate line itself.
 
 WARNING: If you are _not_ planning to use the FS display server, we
 recommend that you comment out the lines for _erchk_, _monit2_, and
-_scnch_ and not add any other _monitX_ programs. If they are used in
+_scnch_ and not add any other _monit<x>_ programs. If they are used in
 _stpgm.ctl_ without the display server and they are accidentally
 closed, the FS will be killed.  This applies as well if you built the
 FS without the display server as described in the
@@ -877,7 +891,7 @@ added for _monit2_, and _scnch_ for when the
 display server is in use.
 +
 If you are using the display server you may
-want to add other _monitX_ programs. If so, you
+want to add other _monit<x>_ programs. If so, you
 may also want to add resources for them (if
  they aren't already there) in the
 _~/.Xresources_ files for _oper_ and _prog_.
@@ -892,14 +906,26 @@ If you have RDBEs for your back-end and will use the _rdbemsg_
 utility to send operations messages, you will need to
 customize your _/usr2/control/rdbemsg.ctl_ file.
 
-.. You will need to update the `station` two letter code (lower case)
+.. You will need to update the `station` two letter code (lowercase)
 to your station's value.
 
 .. You will need to update  the `name` station name to your station's
 value. The station name is also defined in the
 _/usr2/control/location.ctl_ file.
 
-.. If you don't have an MCI (_hubpc_) node for front end monitor
+.. You should set the addresses for the RBDE-A (`R-A`) through RDBE-D
+(`R-D`). The example file uses aliases, _rdbea_ through _rdbed_, that
+you can define in _/etc/hosts_.  Likewise, if you have an _mci_ node,
+you should set its alias, _hubpc_, in _/etc/hosts_. (It is usually
+necessary to have _root_ access to modify _/etc/hosts_.)  Alternatively
+of course, you can use any scheme you prefer for defining these
+addresses in _rdbemsg.ctl_.
+
+.. The default email address `to` is for the `ivs-ops` mail list. You
+can of course change that to whatever you like. You can also
+temporarily override the address in the _rdbemsg_ utility itself.
+
+.. If you don't have an MCI node (_hubpc_) for front end monitor
 and control, you should comment out that line.
 
 .. For stations with a prototype MCI node (GGAO and Westford):
@@ -910,19 +936,6 @@ the values are reported in a different position (`3` at  GGAO). You
 can set these values with the `mci-code` and `mci-parameter` lines.
 As needed, uncomment the example lines and update them with
 appropriate values.
-
-.. You should set the addresses for the RBDE-A (`R-A`) through RDBE-D
-(`R-D`). The example file uses aliases, _rdbea_ through _rdbed_, that
-you can define in _/etc/hosts_.  Likewise, if you have an _mci_ node,
-you should set its alias, _hubpc_, in _/etc/hosts_. (It is usually
-necessary to have _root_ access to modify _/etc/hosts_.)  Alternatively
-of course, you can use any scheme you prefer for defining these
-addresses in _rdbemsg.ctl_.
-
-.. The default email address `to` is for the `ivs-vgos-ops` mail
-list. You can of course change that to whatever you like. You
-can also temporarily override the address in the _rdbemsg_
-utility itself.
 
 ==== Update aquir control files
 
@@ -997,8 +1010,8 @@ procedures for `calon` and `caloff` procedures.
 
 The change in the third, switching to using _s_client_ from other
 deprecated TCP communication scripts, is only relevant if you are
-updating from the VGOS branch, versions _9.12.x_, and probably only if
-you had a RDBE rack.
+updating from the VGOS branch, versions _9.12.<x>_, and probably only
+if you had a RDBE rack.
 
 ==== Convert from go to rte_go
 
@@ -1021,7 +1034,7 @@ recover in case of a problem.
 
 This sub-step is optional and only relevant if you are upgrading from
 _9.13.2_. You can remove the `if=cont_cal,,` as a prefix from before
-the `calon` and `caloff` commands in you `calonnf`, `calonfp`,
+the `calon` and `caloff` commands in your `calonnf`, `calonfp`,
 `caloffnf`, and `calofffp` procedures, probably located in your
 _point_ procedure library. This is just a clean-up and not making this
 change will have no impact.
@@ -1029,7 +1042,7 @@ change will have no impact.
 ==== Switch to using s_client
 
 This sub-step is optional and only relevant if you were using the VGOS
-branch, versions _9.12.x_. You should replace use of the deprecated
+branch, versions _9.12.<x>_. You should replace use of the deprecated
 scripts _be_client_ and _mcicn_, if you were using them, with the more
 general _s_client_. You can find instances of these commands, using,
 e.g., for _be_client_:
@@ -1040,7 +1053,8 @@ e.g., for _be_client_:
 You can use `less` to identify the SNAP procedures in each file that
 uses the script. Use _pfmed_ to make the changes.
 
-Information about using _s_client_ can be found using `*help=sy*`.
+Information about using _s_client_ can be found using `*help=sy*` in
+the FS.
 
 === Miscellaneous FS related changes
 
@@ -1146,8 +1160,12 @@ non-GPU CPU.
 [TIP]
 ====
 
+Fine tuning the `geometry` values is probably best done with the
+windows open while the FS is running. So you may want to defer the
+tuning until the <<Test the FS>> step below.
+
 You can find an effective strategy to help with setting the `geometry`
-resource for an _xterm_ window (and others with a `name` property) in the
+values for an _xterm_ window (and others with a `name` property) in the
 <<../../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting geometry values in .Xresources>>
 section of the
 <<../../misc/install_reference.adoc#,Installation Reference>> document.
@@ -1160,6 +1178,12 @@ the example file with:
   cd
   diff .Xresources /usr2/fs/st.default/oper
 
+TIP: If you are familiar with _vimdiff_, you may find it a more
+convenient way to compare files and update your local copy.  Like
+_vim_, _vimdiff_ may be challenging to use until you are familiar with
+it. Some help is available from web searches. Don't use it if you
+aren't comfortable with it.
+
 Please make any changes to your file that you find appropriate, but at
 a minimum you should probably add the lines for _monit6_, _erchk_,
 _scnch_, and _helpsh_ if not already present.  You will need to logout
@@ -1171,8 +1195,8 @@ changes to become effective.
 
 The example _.Xresource_ file for _9.13.2_ did not have any of these
 items, but you may have already included some in your local file.
-Similarly, the example files for the _9.12.x_ versions only had
-_monit6_ included.  However, you may have already included some of the
+Similarly, the example files for the _9.12.<x>_ versions only had
+_monit6_ included, but you may have already included some of the
 others in your local file.
 
 You should be careful to _not_ specify values for a window more than
@@ -1210,9 +1234,15 @@ None are required for this update.
 
 === Test the FS
 
-There are two things to test:
+There is one item that might need to be completed and two things that
+need to be tested:
 
-. The FS and _drudg_:
+. Complete: You may want to tune the positions of the various windows
+on the display. For this, you can follow the suggested method from the
+*TIP* in the <<Update .Xresources>> sub-step above.
+
+
+. Test: the FS and _drudg_:
 +
 
 Generally speaking, a fairly thorough test is to run a test
@@ -1223,7 +1253,7 @@ execute part of schedule, and perform any normal post-experiment
 plotting and clean-up that you do. The idea here is to verify that
 everything works as you expect for normal operations.
 
-. _fesh_, if you use it:
+. Test: _fesh_, if you use it:
 +
 
 If you use _fesh_ to download schedules, you should test that using
@@ -1241,22 +1271,32 @@ A quick check is to just make sure the files have reasonable contents.
 If you want to make a detailed check, a strategy for that might be:
 
 .. Move an old schedule file and its the _drudg_ output, e.g.,
-_r4948.skd_, _r4948xx.lst_, _r4948xx.snp_, and _r4948xx.prc_, (where
-_xx_ is your station's two letter code) to a different directory, e.g.,
-_/tmp_.
+_r4948.skd_, _r4948<xx>.lst_, _r4948<xx>.snp_, and _r4948<xx>.prc_,
+(where _<xx>_ is your station's two letter code) to a different
+directory, e.g., _/tmp_.
 
 .. Rerun _fesh_ for that schedule.
 
-.. Compare the old and new versions with _diff_. They only differences
-should be:
+.. Compare the old and new versions with _diff_ (or _vimdiff_). They
+only differences should be:
 
 ... Comments in the _.snp_ and _.prc_ files.
+
+... Compared to _.snp_ files produced by _9.12.<x>_ versions for Mark
+6 recorders, the GB used in the `mk6=record=` commands (third
+parameter) will be slightly, by a factor of 1024/1000, larger,
+truncated to an integer.
 
 ... The timestamps in the `define` lines in the _.prc_ file. However,
 it is possible the procedures will be in a different order if you
 edited the old version.
 
-... Insignificant rounding differences in the _.lst_ file.
+... Compared to _drudg_ summary listings produced by _9.12.<x>_
+versions, the GB shown will slightly, by a factor of 1024/1000,
+larger.
+
+... Insignificant rounding differences in _drudg_ summary listing
+files.
 
 .. Copy your original files back from where you placed them, if you
 want to preserve them.
