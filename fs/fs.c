@@ -554,6 +554,10 @@ int maxl,*ampr,*les;
       fprintf(stderr," error 3a\n");
       return -1;
     }
+    if(2==*les) {
+    strcpy(line2,"setsid ");
+    ptr=strncat(line2,ptr,maxl);
+    } else
     ptr=strncpy(line2,ptr,maxl);
 
     for (i=strlen(line2)-1; i >= 0 && line2[ i] == ' '; i--)
