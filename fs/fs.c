@@ -556,7 +556,7 @@ int maxl,*ampr,*les;
     }
     if(2==*les) {
     strcpy(line2,"setsid ");
-    ptr=strncat(line2,ptr,maxl);
+    ptr=strncpy(line2+strlen(line2),ptr,maxl-strlen(line2));
     } else
     ptr=strncpy(line2,ptr,maxl);
 
