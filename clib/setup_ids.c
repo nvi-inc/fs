@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
+#include <signal.h>
 #include <unistd.h>
 #include <stdlib.h>
 
@@ -54,6 +55,22 @@ void setup_ids()
     brk_att( BRK_KEY);
 
     go_att( GO_KEY);
+
+                       /* ignore signals that might accidently abort */
+    if (SIG_ERR==signal(SIGINT,SIG_IGN)) {
+      perror("setup_ids: ignoring SIGINT");
+      exit(-1);
+    }
+
+    if (SIG_ERR==signal(SIGQUIT,SIG_IGN)) {
+      perror("setup_ids: ignoring SIGQUIT");
+      exit(-1);
+    }
+
+    if (SIG_ERR==signal(SIGFPE,SIG_IGN)) {
+      perror("setup_ids: ignoring SIGFPE");
+      exit(-1);
+    }
 
 }
 
