@@ -66,7 +66,6 @@ extern struct fscom *shm_addr;
 
 /* External FS functions, perhaps these should eventually go into a '.h'? */
 extern void setup_ids(void);
-extern void sig_ignore(void);
 extern void cls_snd(int *class, char *buffer, int length, int parm3,
                     int parm4);
 extern void skd_run(char name[5], char w, int ip[5]);
@@ -262,7 +261,6 @@ main(int argc, char **argv)
   int kfirst=1;
 
   setup_ids();
-  sig_ignore();
 
   fs_internal = argc == 2 && 0 == strcmp("-fs_internal", argv[1]);
   if (getenv("FS_DISPLAY_SERVER") != NULL) {

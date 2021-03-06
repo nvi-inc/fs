@@ -98,7 +98,6 @@ main()
 /* SECTION 1 */
     
     setup_ids();
-    sig_ignore();
     skd_set_return_name("ddout");
     lnamef[0]=0;
     umask(0);
