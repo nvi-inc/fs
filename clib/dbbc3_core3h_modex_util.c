@@ -354,7 +354,7 @@ void vdif_frame_2_dbbc3_core3h(ptr,lclc,board,width,channels_out,payload)
     *channels_out=channels;
     *payload=8000;
 
-    sprintf(ptr,"core3h=%1.1s,vdif_frame %d %d %d", board,
+    sprintf(ptr,"core3h=%1.1s,vdif_frame %d %d %d ct=off", board,
             *width,*channels_out,*payload);
 
 }
