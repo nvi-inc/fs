@@ -381,7 +381,7 @@ main(int argc_in,char *argv_in[])
         if (line[0] != '*') {
           if( (s1= strrchr( line, '\n')) != NULL) 
              *s1='\0';
-	  if(0!= parse(&line2[5],MAX_LINE,line, &ampr,&les,&name))
+	  if(0!= parse(&line2[5],MAX_LINE,line, &ampr,&les,&name,&ksetsid))
 	    goto cleanup;
 	  if(les==2) {
 	    if(arg_no_x11) {
