@@ -566,9 +566,9 @@ int maxl,*ampr,*les,*ksetsid;
      
     return 0;
 }
-int start_prog(argv,w ,les,ksetsid)
+int start_prog(argv,w ,ksetsid)
 char **argv,w;
-int les,ksetsid;
+int ksetsid;
 {
     int chpid,i,wpid,status;
 
