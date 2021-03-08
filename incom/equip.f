@@ -173,10 +173,10 @@ C **** end modify mb
       else if (ichcm_ch(ibuf,ic1,'rdbe').eq.0.and.il.eq.4) then
         rack = RDBE
         rack_type = RDBE
-      else if (ichcm_ch(ibuf,ic1,'dbbc3_ddcu').eq.0.and.il.eq.10) then
+      else if (ichcm_ch(ibuf,ic1,'dbbc3_ddc_u').eq.0.and.il.eq.11) then
         rack = DBBC3
         rack_type = DBBC3_DDCU
-      else if (ichcm_ch(ibuf,ic1,'dbbc3_ddcv').eq.0.and.il.eq.10) then
+      else if (ichcm_ch(ibuf,ic1,'dbbc3_ddc_v').eq.0.and.il.eq.11) then
         rack = DBBC3
         rack_type = DBBC3_DDCV
       else if (ichcm_ch(ibuf,ic1,'none').eq.0.and.il.eq.4) then

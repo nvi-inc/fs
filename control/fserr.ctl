@@ -2712,7 +2712,7 @@ DR -206
 The 'okay' parameter must be 'disk_record_ok' or null.
 ""
 DR -213
-For DBBC3 DDCV decimate must be 2
+For DBBC3 DDC_V decimate must be 2
 ""
 DR -214
 Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255.
@@ -2721,13 +2721,13 @@ DR -224
 Can't specify sample rate and decimate parameters simultaneously
 ""
 DR -234
-For DBBC3 DDCV sample rate must imply a decimate of 2
+For DBBC3 DDC_V sample rate must imply a decimate of 2
 ""
 DR -301
 Can't change mode while recording, use disk_record=off first or (dangerous) use 'disk_record_ok' as 'okay' parameter.
 ""
 DR -302
-mask2 cannot be used unless DDBC3 is DDCU.
+mask2 cannot be used unless DDBC3 is DDC_U.
 ""
 DR -303
 Can't specify mask2 for more BBCs per IF set in dbbc3.ctl.
@@ -2760,10 +2760,10 @@ DR -452
 DBBC version does not agree with dbbc3.ctl; see message above for DBBC3's version.
 ""
 DR -453
-DBBC3 version should be DDCU, but is DDCV; see message above for DBBC3's version.
+DBBC3 firmware should be DDC_U, but is DDC_V; see message above for DBBC3's version.
 ""
 DR -454
-DBBC3 version should be DDCV, but is DDCU; see message above for DBBC3's version.
+DBBC3 firmware should be DDC_V, but is DDC_U; see message above for DBBC3's version.
 ""
 DR -455
 Uknown personality from DBBC3; see message above for DBBC3's personality.
@@ -6888,7 +6888,7 @@ SC  -10
 setcl: failed too many times, couldn't check formatter time
 ""
 SC  -11
-setcl: cannot set fs time without Mk3/4 VLBA/4, S2, K4*/MK4, DBBC/FiLa10G rack or S2, K4, M5B recorder
+setcl: cannot set fs time without Mk3/4 VLBA/4, S2, K4*/MK4, DBBC/FiLa10G, DBBC3 rack or S2, K4, M5B recorder
 ""
 SC  -12
 setcl: FS to computer time difference 0.5 seconds or greater
@@ -6931,6 +6931,9 @@ setcl: Mark 5B syncerr_gt_3, CONSIDER using fmset 's' option to fix.
 ""
 SC  -25
 setcl: rte_check got error from times(), see above for error
+""
+SC  -26
+setcl: DBB3 time is older than 20 seconds
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W

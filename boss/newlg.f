@@ -264,9 +264,9 @@ c
       else if(rack.eq.DBBC.and.rack_type.eq.DBBC_PFB_FILA10G) then
         nch=ichmv_ch(ib,nch,'dbbc_pfb/fila10g')
       else if(rack.eq.DBBC3.and.rack_type.eq.DBBC3_DDCU) then
-        nch=ichmv_ch(ib,nch,'dbbc3_ddcu')
+        nch=ichmv_ch(ib,nch,'dbbc3_ddc_u')
       else if(rack.eq.DBBC3.and.rack_type.eq.DBBC3_DDCV) then
-        nch=ichmv_ch(ib,nch,'dbbc3_ddcv')
+        nch=ichmv_ch(ib,nch,'dbbc3_ddc_v')
       else if(rack.eq.RDBE) then
         nch=ichmv_ch(ib,nch,'rdbe')
       else if(rack.eq.0) then
