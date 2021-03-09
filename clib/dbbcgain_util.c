@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -243,16 +243,20 @@ char *buff;
     return -1;
 
   ptr=strtok(NULL,",");
+  if(ptr==NULL)
+    return -1;
   if(1!=sscanf(ptr,"%d%c",&lclc->gainL,&ch))
     return -1;
 
-  ptr=strtok(NULL,",");
+  ptr=strtok(NULL,",;");
+  if(ptr==NULL)
+    return -1;
   ierr=arg_key(ptr,agc_key,NAGC_KEY,&lclm->state,0,FALSE);
   if(ierr!=0 || 0==strcmp(ptr,"*"))
     return -1;
 
   if(lclm->state==1) {
-    ptr=strtok(NULL,",");
+    ptr=strtok(NULL,";");
     if(ptr==NULL)
     return -1;
     if(1!=sscanf(ptr,"%d%c",&lclm->target,&ch))
