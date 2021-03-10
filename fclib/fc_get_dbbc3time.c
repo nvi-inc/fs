@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -17,14 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+int fc_get_dbbc3time__(centisec,fm_tim,iold)
+int centisec[6];
+int fm_tim[6];
+int *iold;
+{
 
-int open_mcast(char mcast_addr[], int mcast_port, char mcast_if[], int *error_no);
-int get_if_addr(char *name, char **address, int *error_no);
-ssize_t read_mcast(int sock, char buf[], size_t buf_size, int to_report,
-        int it[6], int centisec[6]);
-void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
-        int cont_cal);
-void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
-        int it[6], int centisec[6]);
-void log_mcast(dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
-        int cont_cal);
+  return get_dbbc3time(centisec,fm_tim,iold);
+
+}

@@ -35,10 +35,10 @@
 
 extern struct fscom *shm_addr;
 
-void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle)
+void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
+        int it[6], int centisec[6])
 {
     int i;
-    int it[6];
     int seconds;
 
     int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
@@ -46,7 +46,6 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle)
         DBBC3_DDCV == shm_addr->equip.rack_type &&
         shm_addr->dbbc3_ddcv_v<125;
 
-    rte_time(it,it+5);
     rte2secs(it,&seconds);
     clock_t now=seconds;
     struct tm *ptr=gmtime(&now);
@@ -64,6 +63,8 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle)
     vdif_should=vdif_should*2+ptr->tm_mon/6;
 
     cycle->last=seconds;
+    memcpy(cycle->centisec,centisec,sizeof(cycle->centisec));
+    cycle->hsecs=it[0];
 
     for (i=0;i<MAX_DBBC3_IF;i++) {
         cycle->ifc[i].lo=shm_addr->lo.lo[i];

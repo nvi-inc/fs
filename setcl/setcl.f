@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -294,6 +294,15 @@ C             two return buffers with imode = -53
            nerr=nerr+1
            if(nerr.le.3) goto 50
            goto 998
+        endif
+        goto 200
+      else if (DBBC3.eq.rack) then
+        idum=fc_get_dbbc3time(centisec,it,iold)
+        centisec(2)=centisec(1)
+        unixsec(2)=unixsec(1)
+        unixhs(2)=unixhs(1)
+        if(iold.gt.20) then
+           call logit7ci(idum,idum,idum,-1,-26,'sc',0)
         endif
         goto 200
       else

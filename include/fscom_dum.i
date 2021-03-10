@@ -64,7 +64,8 @@ c
      $  dbbc3_ddcu_v, dbbc3_ddcu_vc, dbbc3_ddc_bbcs_per_if,
      $  dbbc3_ddc_ifs,
      $  dbbc3_cont_cal_mode,
-     $  dbbc3_ddcv_v, dbbc3_ddcv_vc
+     $  dbbc3_ddcv_v, dbbc3_ddcv_vc,
+     $  dbbc3_mcdelay, dbbc3_iscboard
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3,2), lgen(2,2),
@@ -116,6 +117,7 @@ c
      $ dbbc3_ddc_ifs,
      $ dbbc3_cont_cal_mode,
      $ dbbc3_ddcv_v, dbbc3_ddcv_vc,
+     $ dbbc3_mcdelay, dbbc3_iscboard,
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 

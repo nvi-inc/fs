@@ -41,7 +41,8 @@
 #define TIME_OUT        125
 #define ERROR_PERIOD   2000
 
-ssize_t read_mcast(int sock, char buf[], size_t buf_size, int to_report)
+ssize_t read_mcast(int sock, char buf[], size_t buf_size, int to_report,
+        int it[6], int centisec[6])
 {
     ssize_t n;
     struct sockaddr_in from;
@@ -96,5 +97,12 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int to_report)
         rte_sleep(100);
         return -1;
     }
+    /* get time received */
+    rte_time(it,it+5);
+    rte_ticks (centisec);
+    rte_cmpt(centisec+2,centisec+4);
+    centisec[1]=centisec[0];
+    centisec[3]=centisec[2];
+    centisec[5]=centisec[4];
     return n;
 }

@@ -43,7 +43,8 @@ int main(int argc, char *argv[])
 {
     int ip[5];
     char buf[sizeof(dbbc3_ddc_multicast_t)];
-    int it[6];
+    int it[6], itmc[6];
+    int centisec[6];
     int seconds;
 
     setup_ids();    /* attach to the shared memory */
@@ -90,7 +91,7 @@ int main(int argc, char *argv[])
 
         to_report=1!=dbtcn_control.to_error_off;
 
-        n = read_mcast(sock,buf,sizeof(buf),to_report);
+        n = read_mcast(sock,buf,sizeof(buf),to_report,itmc,centisec);
 
         if(n<0)
             continue;
@@ -102,7 +103,7 @@ int main(int argc, char *argv[])
 
         calc_ts(&packet,&cycle, cont_cal);
 
-        update_shm(&packet,&cycle);
+        update_shm(&packet,&cycle, itmc, centisec);
 
         /* check control to get the last state before logging */
 

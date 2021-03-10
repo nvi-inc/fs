@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -190,6 +190,50 @@ c
       call fs_set_dbbc3_ddcv_v(dbbc3_ddcv_v)
       call fs_set_dbbc3_ddcv_vs(dbbc3_ddcv_vs)
       call fs_set_dbbc3_ddcv_vc(dbbc3_ddcv_vc)
+c
+c DBBC3 mcast delay
+c
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-185,'bo',4)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      ifc=1
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-186,'bo',4)
+        goto 990
+      endif
+
+      dbbc3_mcdelay = ias2b(ibuf,ic1,ic2-ic1+1)
+      if (dbbc3_mcdelay.lt.0 .or. dbbc3_mcdelay.ge.100) then
+        call logit7ci(0,0,0,1,-186,'bo',4)
+        goto 990
+      endif
+      call fs_set_dbbc3_mcdelay(dbbc3_mcdelay)
+c
+c DBBC3 setcl board
+c
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-185,'bo',5)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      ifc=1
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-186,'bo',5)
+        goto 990
+      endif
+
+      dbbc3_iscboard = ias2b(ibuf,ic1,ic2-ic1+1)
+      if (dbbc3_iscboard.le.0 .or. dbbc3_iscboard.gt.8) then
+        call logit7ci(0,0,0,1,-186,'bo',5)
+        goto 990
+      endif
+      call fs_set_dbbc3_iscboard(dbbc3_iscboard)
 c
       return
 c

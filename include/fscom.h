@@ -494,11 +494,17 @@ typedef struct fscom {
   int  dbbc3_ddcv_v;
   char dbbc3_ddcv_vs[16];
   int  dbbc3_ddcv_vc;
+  int  dbbc3_mcdelay;
+  int  dbbc3_iscboard;
 
   struct dbbc3_core3h_modex_cmd dbbc3_core3h_modex[MAX_DBBC3_IF];
 
   struct dbbc3_tsys_data {
+      int iping;
       struct dbbc3_tsys_cycle {
+          time_t last;
+          int centisec[6];
+          int hsecs;
           struct dbbc3_tsys_ifc {
               double lo;
               int sideband;
@@ -513,8 +519,6 @@ typedef struct fscom {
               float tsys_usb;
               unsigned freq;
           } bbc[MAX_DBBC3_BBC];
-          time_t last;
       } data[2];
-      int iping;
   } dbbc3_tsys_data;
 } Fscom;

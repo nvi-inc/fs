@@ -62,14 +62,15 @@ void dbbc3_mcast_time(command,itask,ip)
     strcpy(output,command->name);
     strcat(output,"/");
     sprintf(output+strlen(output),
-            " %d, %4d.%03d.%02d:%02d:%02d, %d",
+            " %d, %4d.%03d.%02d:%02d:%02d, %d, %d",
             0,
             ptr->tm_year+1900,
             ptr->tm_yday+1,
             ptr->tm_hour,
             ptr->tm_min,
             ptr->tm_sec,
-            seconds-shm_addr->dbbc3_tsys_data.data[iping].last);
+            seconds-shm_addr->dbbc3_tsys_data.data[iping].last,
+            shm_addr->dbbc3_tsys_data.data[iping].hsecs);
     cls_snd(&ip[0],output,strlen(output),0,0);
     ip[1]++;
 

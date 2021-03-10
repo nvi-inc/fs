@@ -4,7 +4,11 @@
 * 
 * bbcs/if (8, 12, or 16), ifs (1-8)
   16 8
-* DDCU firmware version (v121 or later)
+* DDC_U firmware version (v121 or later)
   v121
-* DDCV firmware version (v121 or later)
+* DDC_V firmware version (v121 or later)
   v121
+* mcast delay 0-99 centiseconds
+  57
+* setcl board
+  1

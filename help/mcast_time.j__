@@ -2,7 +2,7 @@ mcast_time - display time information from multicast time (DBBC3 rack)
 
 Syntax:   mcast_time
 
-Response: mcast_time/0,last,age
+Response: mcast_time/0,last,age,hsecs
           mcast_time/board,time,epoch,pps2dot,offset
 
 Settable parameters:
@@ -14,6 +14,8 @@ Monitor only parameter:
             Time of last multicast received
 last        Time the most recent multicast message was received
 age         Number of seconds since the last message was received
+hsecs       The centiseconds of the FS time when the multicast
+            message was received.
 
 board       Core3H board number, 1-8, for this output line
 time        Core3H multicast time
@@ -38,6 +40,10 @@ The format of 'time' and 'last' is:
    yyyy.ddd.hh:mm:ss
 
 The lines output for the boards are columnized for readability.
+
+The hsecs fields can be useful as a measure of the delay of the
+multicast if the FS is running on NTP. It should agree roughly with
+the multicast delay in the dbbc3.ctl control file.
 
 The VDIF epoch is currently not provided by the multicast, but it is
 expected that it will be added.

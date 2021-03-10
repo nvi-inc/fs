@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -2913,3 +2913,26 @@ void fs_get_dbbc3_ddcv_vc__(dbbc3_ddcv_vc)
           *dbbc3_ddcv_vc = shm_addr->dbbc3_ddcv_vc;
 	}
 
+void fs_set_dbbc3_mcdelay__(dbbc3_mcdelay)
+	int *dbbc3_mcdelay;
+	{
+          shm_addr->dbbc3_mcdelay = *dbbc3_mcdelay;
+    }
+
+void fs_get_dbbc3_mcdelay__(dbbc3_mcdelay)
+	int *dbbc3_mcdelay;
+	{
+          *dbbc3_mcdelay = shm_addr->dbbc3_mcdelay;
+    }
+
+void fs_set_dbbc3_iscboard__(dbbc3_iscboard)
+	int *dbbc3_iscboard;
+	{
+          shm_addr->dbbc3_iscboard = *dbbc3_iscboard;
+    }
+
+void fs_get_dbbc3_iscboard__(dbbc3_iscboard)
+	int *dbbc3_iscboard;
+	{
+          *dbbc3_iscboard = shm_addr->dbbc3_iscboard;
+    }

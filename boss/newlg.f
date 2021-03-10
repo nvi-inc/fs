@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -529,6 +529,14 @@ c
           call char2hol(dbbc3_ddcv_vs,ib,nch,nch+dbbc3_ddcv_vc-1)
           nch=nch+dbbc3_ddcv_vc
 c
+          nch=mcoma(ib,nch)
+          call fs_get_dbbc3_mcdelay(dbbc3_mcdelay)
+          nch = nch + ib2as(dbbc3_mcdelay,ib,nch,z'8002')
+c
+          nch=mcoma(ib,nch)
+          call fs_get_dbbc3_iscboard(dbbc3_iscboard)
+          nch = nch + ib2as(dbbc3_iscboard,ib,nch,z'8002')
+
           call logit3(ib,nch-1,lsor)
       endif
 c
