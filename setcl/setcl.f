@@ -284,7 +284,7 @@ C             two return buffers with imode = -53
      &       (DBBC_DDC_FILA10G.eq.rack_type.or.
      &       DBBC_PFB_FILA10G.eq.rack_type)) then
         idum=rn_take('fsctl',0)
-        idum=fc_get_fila10gtime(centisec,it,ip,0)
+        idum=fc_get_fila10gtime(centisec,it,ip,0,1)
         call rn_put('fsctl')
         centisec(2)=centisec(1)
         unixsec(2)=unixsec(1)
