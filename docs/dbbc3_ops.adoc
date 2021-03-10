@@ -19,7 +19,7 @@
 //
 
 = DRAFT FS DBBC3 Operations Manual
-Version 0.5 - March 2021
+Version 0.6 - March 2021
 
 :experimental:
 :sectnums:
@@ -780,12 +780,19 @@ _drudg_ supports:
 
 * Up to 128 dual side-band channels and eight IFs for VEX (_.vex_) schedule files.
 
-* Up to 16 dual side-band BBCs and four IFs for Mark IV (_.skd_) schedule files.
+* Up to 16 dual side-band BBCs (`1`-`16`) and two IFs (`a` and `b`) for Mark IV
+(_.skd_) schedule files.
 
 * The new <<DBBC3 commands>> that are used in setup procedures.
 
 * The new _skedf.ctl_ options for <<Minimizing the use of setup procedures>>
 and the <<Thread procedure>>.
 
-* The existing _skedf.ctl_ options `DBBC_IF_TARGETS` and `DBBC_BBC_TARGET` for
-DBBC2s, can also be used for DBBC3s.
+* The following previously DBBC2 specific _skedf.ctl_ options can also be used
+for DBBC3s:
+
+** `cont_cal`
+** `cont_cal_polarity`
+** `dbbc_if_targets`
+** `dbbc_bbc_target`
+** `default_dbbc_if_inputs`
