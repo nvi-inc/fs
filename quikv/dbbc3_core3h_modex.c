@@ -183,18 +183,31 @@ void dbbc3_core3h_modex(command,itask,ip)
         }
 
         if(0==strcmp(command->argv[0],"begin")) {
-            if(force)
-                for (i=0;i<MAX_DBBC3_IF;i++) {
-                    m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
-                    shm_addr->dbbc3_core3h_modex[i].start.start=0;
-                    shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
-                    shm_addr->dbbc3_core3h_modex[i].set=0;
-                }
+            for (i=0;i<MAX_DBBC3_IF;i++) {
+                m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
+                shm_addr->dbbc3_core3h_modex[i].start.start=0;
+                shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
+                shm_addr->dbbc3_core3h_modex[i].set=0;
+            }
             ip[0]=ip[1]=ip[2]=0;
             return;
         } else if(0==strcmp(command->argv[0],"end")) {
             char str[BUFSIZE];
 
+            for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+                if(0==shm_addr->dbbc3_core3h_modex[i].set) {
+                    m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
+                    shm_addr->dbbc3_core3h_modex[i].start.start=0;
+                    shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
+                    /* invalidate old masks so no Tsys logging */
+                    shm_addr->dbbc3_core3h_modex[i].mask2.state.known=0;
+                    shm_addr->dbbc3_core3h_modex[i].mask1.state.known=0;
+                } else {
+                    m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
+                    shm_addr->dbbc3_core3h_modex[i].start.start=1;
+                    shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
+                }
+            }
             if(!force) {
                 int ierr_overall = 0;
                 for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
@@ -225,17 +238,8 @@ void dbbc3_core3h_modex(command,itask,ip)
                 strcpy(str,"core3h=");
                 strcat(str,board[i]);
                 if(0==shm_addr->dbbc3_core3h_modex[i].set) {
-                    m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
-                    shm_addr->dbbc3_core3h_modex[i].start.start=0;
-                    shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
-                    /* invalidate old masks so no Tsys logging */
-                    shm_addr->dbbc3_core3h_modex[i].mask2.state.known=0;
-                    shm_addr->dbbc3_core3h_modex[i].mask1.state.known=0;
                     strcat(str,",stop");
                 } else {
-                    m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
-                    shm_addr->dbbc3_core3h_modex[i].start.start=1;
-                    shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
                     strcat(str,",start vdif");
                 }
                 cls_snd(&out_class, str, strlen(str) , 0, 0);
