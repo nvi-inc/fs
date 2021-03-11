@@ -102,6 +102,20 @@ but it will fail for the first board to be started because the Core3H
 boards have not been synced. This error can serve as reminder to the
 operator to sync the boards and execute the above 'end' command again.
 
+The 'core3_mode0=end' command, with or without 'force', checks the
+DBBC3 firmwware version for agreement with the FS control files. This
+is intended to be the primary DBBC3 version check since this command
+is:
+
+- part of both a complete set-up and check of a mode, both of which
+  should executed by the operator as part of normal operations
+
+- the final command of such a set-up/check, so an error should be more
+  visible
+
+The 'core3h_modeX=...,force' command, 'x' not equal to '0', also
+checks in DBBC3 firmware version in case it is used by itself.
+
 The effective sample rate can be specified in the SNAP command either
 explicitly with the 'sample' parameter or implicitly with the
 'decimation' parameter.  Only one of 'sample' and 'decimation' may be

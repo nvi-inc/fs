@@ -38,6 +38,13 @@ static void add_check_queries( out_recs, out_class, board, all)
 {
     char str[BUFSIZE];
 
+    if(0==strcmp(board," ")) {
+        strcpy(str,"version");
+        cls_snd(out_class, str, strlen(str) , 0, 0);
+        ++*out_recs;
+        return;
+    }
+
     if(all) {
         strcpy(str,"core3h=");
         strcat(str,board);
@@ -51,17 +58,21 @@ static void add_check_queries( out_recs, out_class, board, all)
         cls_snd(out_class, str, strlen(str) , 0, 0);
         ++*out_recs;
     }
+    /* sysstat, which is slow, must be used because otherwise
+       inputselect and output, vdif/stop, are not available.
+     */
     strcpy(str,"core3h=");
     strcat(str,board);
     strcat(str,",sysstat");
     cls_snd(out_class, str, strlen(str) , 0, 0);
     ++*out_recs;
 }
-static void check_board(iboard,board,ip,ierr_out)
+static void check_board(iboard,board,ip,ierr_out,name)
     int iboard;
     char *board;
     int ip[5];                           /* ipc parameters */
     int *ierr_out;
+    char *name;
 {
     int out_recs=0;
     int out_class=0;
@@ -73,6 +84,7 @@ static void check_board(iboard,board,ip,ierr_out)
     int save=0;    /* argument for cls_rcv - unused */
     int iclass, nrecs;
     char inbuf[BUFSIZE];
+    char outbuf[BUFSIZE];
     struct dbbc3_core3h_modex_cmd lclc;
     struct dbbc3_core3h_modex_mon lclm;
     int output = 0;
@@ -103,7 +115,18 @@ static void check_board(iboard,board,ip,ierr_out)
             ierr = -401;
             goto error;
         }
-        if(!output && NULL != strstr(inbuf," Output      ")) {
+        if(0==strcmp(board," ")) {
+            if(strncmp(inbuf,"version/",8)==0) {
+                strcpy(outbuf,name);
+                strcat(outbuf,"/");
+                ierr=dbbc3_version_check(inbuf,outbuf);
+                if(ierr!=0) {
+                    logit(outbuf,0,NULL);
+                    logit(NULL,-450+ierr,"dr");
+                    *ierr_out=-600;
+                }
+            }
+        } else if(!output && NULL != strstr(inbuf," Output      ")) {
             if(0!=dbbc3_core3h_2_output(inbuf,&lclc,&lclm)) {
                 ierr=-503;
                 goto error;
@@ -111,7 +134,11 @@ static void check_board(iboard,board,ip,ierr_out)
             output = TRUE;
         }
     }
-    if (!output) {
+    if(0==strcmp(board," ")) {
+        if(0!=ierr)
+            *ierr_out=-600;
+        return;
+    } else if (!output) {
        ierr = -523;
        goto error2;
     }
@@ -151,7 +178,7 @@ void dbbc3_core3h_modex(command,itask,ip)
     int increment;
     int force_set = 0;
 
-    static char *board[]={"1","2","3","4","5","6","7","8"};
+    static char *board[]={" ","1","2","3","4","5","6","7","8"};
 
     void skd_run(), skd_par();      /* program scheduling utilities */
 
@@ -210,8 +237,8 @@ void dbbc3_core3h_modex(command,itask,ip)
             }
             if(!force) {
                 int ierr_overall = 0;
-                for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
-                    check_board(i,board[i],ip,&ierr);
+                for (i=-1;i<shm_addr->dbbc3_ddc_ifs;i++) {
+                    check_board(i,board[i+1],ip,&ierr,command->name);
                     if(ip[2]<0)
                         return;
                     if(ierr!=0)
@@ -234,9 +261,13 @@ void dbbc3_core3h_modex(command,itask,ip)
 
             out_recs=0;
             out_class=0;
+            strcpy(outbuf,"version");
+            cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+            out_recs++;
+
             for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
                 strcpy(str,"core3h=");
-                strcat(str,board[i]);
+                strcat(str,board[1+i]);
                 if(0==shm_addr->dbbc3_core3h_modex[i].set) {
                     strcat(str,",stop");
                 } else {
@@ -259,7 +290,7 @@ void dbbc3_core3h_modex(command,itask,ip)
     if (command->equal != '=') {
         out_recs=0;
         out_class=0;
-        add_check_queries(&out_recs, &out_class, board[itask-30],1);
+        add_check_queries(&out_recs, &out_class, board[1+itask-30],1);
         goto dbbcn;
 
     } else if (command->argv[0]==NULL)
@@ -316,7 +347,7 @@ parse:
     out_class=0;
 
     if(!lcl.force.force) {
-        add_check_queries(&out_recs, &out_class, board[itask-30],1);
+        add_check_queries(&out_recs, &out_class, board[1+itask-30],1);
         goto dbbcn;
     }
 
@@ -325,7 +356,7 @@ parse:
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
-    vsi_samplerate_2_dbbc3_core3h(outbuf,&lcl,board[itask-30]);
+    vsi_samplerate_2_dbbc3_core3h(outbuf,&lcl,board[1+itask-30]);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
@@ -344,18 +375,18 @@ parse:
     int masks=1;
     if(DBBC3_DDCU==shm_addr->equip.rack_type)
         masks=4;
-    vsi_bitmask_2_dbbc3_core3h(outbuf,&lcl,board[itask-30],masks);
+    vsi_bitmask_2_dbbc3_core3h(outbuf,&lcl,board[1+itask-30],masks);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
     strcpy(outbuf,"core3h=");
-    strcat(outbuf,board[itask-30]);
+    strcat(outbuf,board[1+itask-30]);
     strcat(outbuf,",reset");
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
     int width, channels, payload;
-    vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[itask-30],
+    vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[1+itask-30],
             &width, &channels, &payload);
 
     m5state_init(&shm_addr->dbbc3_core3h_modex[itask-30].width.state);
