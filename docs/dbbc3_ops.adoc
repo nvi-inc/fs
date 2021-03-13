@@ -19,7 +19,7 @@
 //
 
 = DRAFT FS DBBC3 Operations Manual
-Version 0.6 - March 2021
+Version 0.7 - March 2021
 
 :experimental:
 :sectnums:
@@ -34,10 +34,10 @@ This document outlines the model for FS operations with the DBBC3.
 === DBBC3 commands
 
 The following SNAP commands support DBBC3s. You can access help information
-with `help=_commmand_`.
+with `help=_command_`.
 
 * `bbc__nnn__` -- `_nnn_` from `001` to `128` -- BBC setup and monitoring
-* `bbc_gain` -- Setup and monitor overall BBC gain
+* `bbc_gain` -- Setup and monitor BBC gains
 * `cont_cal` -- Setup and monitor continuous calibration configuration
 * `core3h_mode__n__` -- `_n_` from `0` to `8` -- Core3H board setup and monitoring
 * `fb_mode` -- Setting the FlexBuff (_jive5ab_) recording mode -- An alias for `mk5c_mode`
@@ -46,7 +46,7 @@ with `help=_commmand_`.
 * `iftp__x__` -- `_x_` from `a` to `h` -- IF CoMo total power monitoring
 * `mcast_time` -- display of multicast time
 * `onoff` -- SEFD and antenna calibration measurements
-* `tpicd` -- TP (multicast) recording daemon setup and control
+* `tpicd` -- TPI (multicast) recording control daemon setup
 
 === FS DBBC3 channel and IF labels
 
@@ -134,7 +134,8 @@ This section covers configuration parameters that are defined per schedule.
 
 Due to certain changes in Core3H setup requiring a time sync afterwards, only
 one mode can be used per schedule. The issue is that there is reluctance to
-perform the time sync without operator supervision.
+perform the time sync without operator supervision to verify it and possibly
+re-sync it manually to correct problems.
 
 As a result, during the schedule, only the configuration of the Core3H boards
 are checked. A mechanism is provided to force the setting of the mode
@@ -143,6 +144,22 @@ Core3H boards in the correct configuration without having to decode the
 schedule configuration and set the Core3H boards up manually.
 
 ==== Configuring Core3H boards
+
+[IMPORTANT]
+====
+
+At the current time, due to the issues discussed in the
+<<Time sync>>
+sub-section below, it is not possible to use this method for configuring the
+Core3H boards. They must be configured from the boot configuration file.
+
+The method described in the <<Checking the mode>> sub-section below can, and
+should, still be used to verify that the configuration agrees with the schedule.
+
+Once the new DBBC3 time sync feature becomes available, it should be possible
+to use the configuration method described here, without requiring a FS update.
+
+====
 
 To configure the Core3H boards for the schedule mode:
 
@@ -157,8 +174,23 @@ parameter, e.g.:
 
   setup01=force
 
-NOTE: With or without the `force` the setup procedure configures all other
-aspects of the mode besides the Core3H boards.
++
+[NOTE]
+====
+
+With or without the `force` the setup procedure configures all other aspects of
+the mode besides the Core3H boards. That should be beneficial. If you only want
+to configure the Core3H configuration, you can use the corresponding Core3H
+configuration procedure instead. For example:
+
+    core3h01=force
+
+CAUTION: This is not recommended since there will be no checks that the rest of
+the DBBC3 configures without errors. However, if the schedule is started
+normally, the rest of the DBBC3 will be configured by the first setup procedure
+encountered in the schedule.
+
+====
 
 ===== The details
 
@@ -201,11 +233,12 @@ If any channel on a board uses two bits, it is assumed that all do.
 * For the number of channels:
 +
 
-The BBCs are handled as two groups: 1-8 and 9-16. This splits the BBCs in
-agreement with the Ethernet ports where their channels are destined. The
-number of channels in the group with largest number of channels is rounded up
-to the next power of two, if it is not a power of two already. The resulting,
-possibly rounded value, is used as the number of channels.
+The BBCs for each board are handled as two groups: the first eight and up to an
+additional eight. This splits the BBCs in agreement with the Ethernet ports
+where their channels are destined. The number of channels in the group with
+largest number of channels is rounded up to the next power of two, if it is not
+a power of two already. The resulting, possibly rounded value, is used as the
+number of channels.
 
 ====
 
@@ -226,16 +259,32 @@ dbbc3=core3h=8,timesync
 dbbc3=pps_sync
 ....
 
+NOTE: It may take the time on the boards a few tens of seconds to stabilize
+after the commands.
+
 IMPORTANT: All the Core3H boards in the system need to synced, then a
 `pps_sync` must be issued within 20 seconds of the first `timesync`. This is
 not currently possible since each `timesync` requires about six seconds. A new
 DBBC3 feature is being developed to allow syncing the boards in parallel and
 issue a timely `pps_sync`. Until then, the only safe way to configure a DBBC3
-is with the boot configuration. A _drudg_ setup procedure, not used with
-`force` can be used to verify the configuration.
+is with the boot configuration. A _drudg_ setup procedure without the `force`
+parameter, can still be used to verify the configuration.
 
-NOTE: The sync was successful if there no errors reported and all the boards
-have the same time and VDIF epoch.
+[NOTE]
+====
+
+The sync was successful if there no errors reported and all the boards have the
+same time and VDIF epoch.
+
+The best way to check the time for version `v125` and later is with the
+`mcast_time` command. For earlier versions the `dbbc3=time` command can be
+used, but the output can be difficult to interpret because the boards are
+sampled in different seconds.
+
+The VDIF epoch and the time can be checked per board with
+`dbbc3=core3h=__board__,time`, where `_board_` is the board number.
+
+====
 
 ====
 Questions:
@@ -263,8 +312,10 @@ synced.
 ==== Starting data transmission
 
 After the boards are synced, data transmission needs to started or stopped for
-each board, as appropriate for the mode. This can be accomplished with the
-command:
+each board, as appropriate for the mode. Assuming the setup procedure for the
+mode has been previously been with the `force` parameter as described in the
+<<Configuring Core3H boards>> sub-section above, this can be accomplished with
+the command:
 
 ....
 core3h_mode0=end,force
@@ -294,15 +345,35 @@ inconsistent with the FS configuration and may lead to problems.
 
 ==== Checking the mode
 
+IMPORTANT: It is essential to check the mode as described after it has been
+configured by either the DBBC3 boot configuration or manually as described in
+the <<Configuring Core3H boards>> sub-section above before the experiment, and
+verify that _no_ errors are reported. If there are errors the data may not be
+recorded properly.
+
 After the data transmission has been started, the setup procedure can be
 re-executed without the `force` to parameter to check that the setup is
-correct:
+correct. Assuming the schedule procedure library has already been opened as
+described in the <<Configuring Core3H boards>> sub-section above, then for
+example use:
 
   setup01
 
 Any deviations will be reported as errors. This is how the setup is checked
 within a schedule. This also checks that the personality and firmware version
 agree with the FS control files.
+
+[NOTE]
+====
+
+Using the setup procedure to check the mode will also command all the
+non-Core3H setup for the mode, which should be benign. If you really only want
+to check the Core3H configuration, you can use the corresponding Core3H
+configuration procedure instead. For example:
+
+    core3h01
+
+====
 
 === Control files
 
@@ -341,10 +412,14 @@ An example of the contents are:
 ....
 * bbcs/if (8, 12, or 16), ifs (1-8)
   8 8
-* DDCU firmware version (v121 or later)
+* DDC_U firmware version (v125 or later)
+ v125
+* DDC_V firmware version (v124 or later)
  v124
-* DDCV firmware version (v121 or later)
- v124
+* mcast delay 0-99 centiseconds
+  57
+* setcl board
+  1
 ....
 
 ==== dbbad.ctl
@@ -357,7 +432,7 @@ be disabled. An example of the contents are:
 
 ....
 * line 1: host(IP address or name), port(4000), time-out(centiseconds)
-*         multicast addr, mult-cast port, multicast interface
+*         multicast address, multicast port, multicast interface
 * using an IP address avoids name server and potential network problems
 *
 192.168.1.2 4000 800 224.0.0.19 25000  eno2
@@ -365,9 +440,19 @@ be disabled. An example of the contents are:
 
 === Tsys monitor display
 
-The Tsys monitor display is organized per IF. Some basic information: LO, time,
-delay, Tsys for each IF/Core3H board  as well as BBC information: frequencies
-and Tsys values. The display cycles through all the available IFs.
+Support for the Tsys monitor display is built on multicast capture and
+unpacking software developed by Dave Horsley (Hobart).
+
+The Tsys monitor display is organized per IF. The displayed information
+includes: LO, time, delay, Tsys for each IF/Core3H board as well as BBC
+information: frequencies and Tsys values. By default the display will cycle
+through the appropriate IFs (dwelling two seconds on each IF) depending on the
+mode as described in the <<Modes>> sub-section below.
+
+The display is designed to provide what should normally be the most useful
+information without operator intervention. However, the operator can adjust the
+display using the features described in <<Commands>> sub-section below for
+special purposes.
 
 ==== Modes
 
@@ -386,7 +471,7 @@ This may be useful for pointing or calibration runs.
 By default, if any channels are configured for recorded (selected by the bit
 masks in the `Core3H` commands), the display will go into the `Rec` mode. If
 there are no channels being recorded, but there are LOs defined for some IFs,
-it will go into the `Def` mode. If neither the `Rec` or `Def` mode is
+it will go into the `Def` mode. If neither the `Rec` nor `Def` mode is
 triggered, it will go into the `All` mode and automatically change to one of
 other modes as appropriate. It is also possible to change to the `All` mode
 from `Rec` or `Dec` with a single character (`*l*`) command. Another `*l*` will
@@ -395,23 +480,22 @@ upper right hand corner.
 
 ==== Tsys values
 
-Except for the `Rec` mode, the Tsys for all BBC side-bands on IF will be shown
-if they can be calculated. If they can't be, a hint, in inverse video, for the
-cause of the problem will be displayed the corresponding field instead. There
-may be more than issue, but only the first encountered is reported. The order
-is:
+In the `Rec` mode, only Tsys fields for side-bands being recorded are
+populated. Tsys fields for side-bands not being recorded are blank.
+
+In the `All` mode, if no IFs are defined and no channels are being recorded
+(e.g., at FS startup), Tsys fields for all side-bands are blank.
+
+For all non-blank fields, Tsys values for all BBC side-bands will be shown if
+they can be calculated. If they can't be, a hint, in inverse video, for the
+cause of the problem will be displayed in the corresponding field instead.
+There may be more than issue, but only the first encountered is reported. The
+order is:
 
 . `Nccal` -- continuous cal not enabled
 . `N bbc` -- the BBC is not configured
 . ``N lo `` -- the LO is not defined
 . `Ntcal` -- no Tcal value was found
-
-In the `Rec` mode, only Tsys fields for side-bands being recorded are
-populated; Tsys fields for side-bands not being recorded are blank.
-
-In the `All` mode, if no IFs are defined and no channels are being recorded
-(e.g., at FS startup), Tsys fields for all side-bands are blank.
-
 
 NOTE: As usual in the FS, an invalid value will be display as dollar signs:
 `$$$$$`. That usually means that a value could be calculated, but there was a
@@ -440,12 +524,9 @@ monitor the time in the DBBC3 for each scan. It will report an error if any
 Core3H boards' time differs from the FS time or if the multicast data is more
 than 20 seconds old. For future firmware versions, after `125` that report the
 VDIF epoch in the multicast, it will report if there is a VDIF epoch mismatch
-between the boards. Other checks may also be added, such as that the
-`pps_delay` is too large.
+between the boards. Other checks may also be added.
 
 === Setting FS time
-
-#TO BE IMPLEMENTED#
 
 It is expected that normally the FS computer is running on NTP and the FS time
 model is set to `computer` (see _misc/ntp.txt_ for more information). If good
@@ -457,7 +538,17 @@ poor and/or there are no local functioning NTP servers. In the case the FS
 program _setcl_ can be used with DBBC3 firmware versions `125` and later to set
 and adjust FS time (see _misc/fstime.txt_ for the details).
 
-The implementation of _setcl_ for the DBBC3 depends on two values from the _dbbc3.ctl_ control file:
+The implementation of _setcl_ for the DBBC3 depends on two values from the
+_dbbc3.ctl_ control file:
+
+* The delay of the multicast
++
+
+The amount of time that the multicast arrives after the 1 PPS seems to be
+stable. For the DDC_U v125 firmware, it is about 57 centiseconds. If it is
+different for other versions, the value in _dbbc3.ctl_ can be adjusted. It should
+be easy to measure it for a given firmware when NTP _is_ available using the
+output of the `mcast_time` command.
 
 * The board number to use for measuring the time.
 +
@@ -466,17 +557,8 @@ There can be up to eight to choose from. Board `1` will be in all systems and
 should be adequate for the purpose, but which board is used can be changed in
 the control file if need be.
 
-* The delay of the multicast
-+
-
-The amount of time that the multicast arrives after the 1 PPS seems to be
-stable. For the DDC_U v125 firmware, it is about 60 centiseconds. If it is
-different for other versions, the value in _dbbc3.ctl_ can be adjusted. It should
-be easy to measure it for a given firmware when NTP _is_ available using the
-output of the `mcast_time` command.
-
 In any event, using _setcl_ to set the FS time this way will only be useful to
-level of stability of the delay of the multicast. Network conjestion may also
+level of stability of the delay of the multicast. Network congestion may also
 cause variations, but hopefully will be minimal in situations where this method
 is needed.
 
@@ -488,10 +570,13 @@ day or more, the fractional error in the model rate should be small. The use of
 `adjust` option of _setcl_ in each `midob` should keep the FS close to the
 correct time. It should be good enough to run a schedule. In any event, it
 should better than any other approach without NTP. Since the DBBC3 will be
-running on the correct time, small variations in the FS time should typically
-not matter.
+running on the correct time, small errros in the FS time should typically not
+be significant.
 
 === Multicast logging
+
+Support for multicast logging is built on multicast capture and unpacking
+software developed by Dave Horsley (Hobart).
 
 Logging of DBBC3 multi-cast recording is controlled by the `tpicd` command.
 When logging is enabled, for each multicast message received (nominal 1 Hz
@@ -517,14 +602,11 @@ command:
 
     tpicd=stop
 
+To restart the error reports, _tpicd_ should be configured and started.
+
 When _drudg_ generated setup procedures are executing they will suppress these
-errors because they also use this command as they start. As a setup procedure
-finishes, it will restart _tpicd_. This can also be done manually with the
-command:
-
-#TO DO: Check that is works when _tpicd_ is not configured.#
-
-    tpicd
+errors because they use this command as they start. As a setup procedure
+finishes, it will restart _tpicd_.
 
 ====
 
@@ -616,9 +698,9 @@ NOTE: This also applies to any system using a Mark 5C or FlexBuff recorder.
 
 Each mode SNAP procedure produced by _drudg_ for Mark 5C and FlexBuff recorders
 includes a call to the `jive5ab_cnfg` SNAP procedure. This procedure call is
-inserted immediately after the `mk5c_mode`/`fb_mode` command (_or_ immediately
-after the optional <<Thread procedure>> call). The procedure is mode independent,
-i.e., the same procedure is used for all modes.
+inserted immediately after the `mk5c_mode`/`fb_mode` command (and after the
+optional <<Thread procedure>> call if present). The procedure is mode
+independent, i.e., the same procedure is used for all modes.
 
 This procedure is a local `station` library procedure to allow tuning of the
 configuration of _jive5ab_ for the specifics of the recorder, including
@@ -695,9 +777,9 @@ more by putting them in your local `jive5ab_cnfg`. This works because
 call to the optional <<Thread procedure>>) in the setup procedure. An example
 of local customizations is given in the sub-sections below.
 
-CAUTION: If put any commands in `jive5ab_cnfg` that depend on the data type,
-VDIF or 5B/Ethernet, you would need to change them if there is a change in the
-data type. This is not a concern for most stations.
+CAUTION: If you put any commands in `jive5ab_cnfg` that depend on the data
+type, VDIF or 5B/Ethernet, you would need to change them if there is a change
+in the data type. This is not a concern for most stations.
 
 ===== Changing net_protocol
 
@@ -778,10 +860,19 @@ _drudg_ have done so far
 
 _drudg_ supports:
 
-* Up to 128 dual side-band channels and eight IFs for VEX (_.vex_) schedule files.
+* Up to 128 dual side-band BBCs and eight IFs for VEX (_.vex_) schedule files.
 
 * Up to 16 dual side-band BBCs (`1`-`16`) and two IFs (`a` and `b`) for Mark IV
 (_.skd_) schedule files.
++
+
+NOTE: For a schedule that would nominally record 10 channels on one IF and six
+on another (for example, an _S/X_ mode), the channels for each will need to be
+rounded up the next power of two, to 16 and eight respectively. For example, an
+IF (_X_) with eight USB and two  LSB channels will need to be expanded to eight
+USB and eight LSB; an IF (_S_) with six USB channels, to eight USB. These
+changes can be in the schedule file and flow from the catalog, so it is all
+automatic for the scheduler and the station.
 
 * The new <<DBBC3 commands>> that are used in setup procedures.
 
