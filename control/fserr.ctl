@@ -4835,9 +4835,6 @@ Unknown IF filter.
 Q1 -309
 Unknown IF filter or unsupported IF filter for PFB BBC.
 ""
-Q1 -310
-formbbc and formif not currently supported for DBBC3.
-""
 Q2 -201
 Satellite name longer than 24 characters.
 ""

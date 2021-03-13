@@ -740,11 +740,65 @@ char *ptr;
 	  goto done;
 
 	} else if(strcmp(ptr,"formbbc")==0) {
-	  ierr= -310;
-	  return ierr;
+        mk5dbbc3d(&lcl->itpis);
+        for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+            jend=shm_addr->dbbc3_ddc_bbcs_per_if;
+            if(8<jend) jend=8;
+            for (j=0;j<jend;j++) {
+                if (lcl->itpis[j+i*8]) {
+                    snprintf(lwhatd,5,"%03dl",j+i*8+1);
+                    memcpy(lcl->devices[j+i*8].lwhat,lwhatd,4);
+                }
+                if(lcl->itpis[j+i*8+MAX_DBBC3_BBC]) {
+                    snprintf(lwhatd,5,"%03du",j+i*8+1);
+                    memcpy(lcl->devices[j+i*8+MAX_DBBC3_BBC].lwhat,lwhatd,4);
+                }
+            }
+            if(shm_addr->dbbc3_ddc_bbcs_per_if>8) {
+                jend=shm_addr->dbbc3_ddc_bbcs_per_if;
+                if(16<jend) jend=16;
+                for (j=8;j<jend;j++) {
+                    if(lcl->itpis[64+j-8+i*8]) {
+                        snprintf(lwhatd,5,"%03dl",64+j-8+i*8+1);
+                        memcpy(lcl->devices[64+j-8+i*8].lwhat,lwhatd,4);
+                    }
+                    if(lcl->itpis[64+j-8+i*8+MAX_DBBC3_BBC]) {
+                        snprintf(lwhatd,5,"%03du",64+j-8+i*8+1);
+                        memcpy(lcl->devices[64+j-8+i*8+MAX_DBBC3_BBC].lwhat,lwhatd,4);
+                    }
+                }
+            }
+        }
+	    goto done;
 	} else if(strcmp(ptr,"formif")==0) {
-	  ierr= -310;
-	  return ierr;
+        for(i=0;i<MAX_ONOFF_DET;i++)
+            itpis_test[i]=0;
+        mk5dbbc3d(itpis_test);
+        for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+            jend=shm_addr->dbbc3_ddc_bbcs_per_if;
+            if(8<jend) jend=8;
+            for (j=0;j<jend;j++) {
+                if(itpis_test[j+i*8])
+                    lcl->itpis[i+2*MAX_DBBC3_BBC]=1;
+                if(itpis_test[j+i*8+MAX_DBBC3_BBC])
+                    lcl->itpis[i+2*MAX_DBBC3_BBC]=1;
+            }
+            if(shm_addr->dbbc3_ddc_bbcs_per_if>8) {
+                jend=shm_addr->dbbc3_ddc_bbcs_per_if;
+                if(16<jend) jend=16;
+                for (j=8;j<jend;j++) {
+                    if(itpis_test[64+j-8+i*8])
+                        lcl->itpis[i+2*MAX_DBBC3_BBC]=1;
+                    if(itpis_test[64+j-8+i*8+MAX_DBBC3_BBC])
+                        lcl->itpis[i+2*MAX_DBBC3_BBC]=1;
+                }
+            }
+            if(lcl->itpis[i+2*MAX_DBBC3_BBC]) {
+                snprintf(lwhatd,5,"i%c  ", lwhat3i[i]);
+                memcpy(lcl->devices[i+2*MAX_DBBC3_BBC].lwhat,lwhatd,4);
+            }
+        }
+        goto done;
 	} else { 
 	  int ibc;
 	  char isb;
