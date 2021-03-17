@@ -45,11 +45,11 @@ void dbbc3_mcast_time(command,itask,ip)
         goto error;
     }
 
-    if(DBBC3_DDCU != shm_addr->equip.rack_type ||
-            shm_addr->dbbc3_ddcu_v <= 124) {
-        ierr=-302;
-        goto error;
-    }
+    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcu_v<125 ||
+        DBBC3_DDCV == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcv_v<125;
+
     rte_time(it,it+5);
     rte2secs(it,&seconds);
     time_t now = seconds;
@@ -109,18 +109,25 @@ void dbbc3_mcast_time(command,itask,ip)
 
         strcpy(output,command->name);
         strcat(output,"/");
-        sprintf(output+strlen(output),
-                " %d, %4d.%03d.%02d:%02d:%02d,, %*ue-9, %*d",
-                i+1,
-                ptr->tm_year+1900,
-                ptr->tm_yday+1,
-                ptr->tm_hour,
-                ptr->tm_min,
-                ptr->tm_sec,
-                digits_d,
-                shm_addr->dbbc3_tsys_data.data[iping].ifc[i].delay,
-                digits_e,
-                shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error);
+        if (v124)
+            sprintf(output+strlen(output),
+                    " %d,,, %*ue-9",
+                    i+1,
+                    digits_d,
+                    shm_addr->dbbc3_tsys_data.data[iping].ifc[i].delay);
+        else
+            sprintf(output+strlen(output),
+                    " %d, %4d.%03d.%02d:%02d:%02d,, %*ue-9, %*d",
+                    i+1,
+                    ptr->tm_year+1900,
+                    ptr->tm_yday+1,
+                    ptr->tm_hour,
+                    ptr->tm_min,
+                    ptr->tm_sec,
+                    digits_d,
+                    shm_addr->dbbc3_tsys_data.data[iping].ifc[i].delay,
+                    digits_e,
+                    shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error);
 
         cls_snd(&ip[0],output,strlen(output),0,0);
         ip[1]++;
@@ -128,17 +135,17 @@ void dbbc3_mcast_time(command,itask,ip)
     }
     int overall_error = 0;
     if(seconds - shm_addr->dbbc3_tsys_data.data[iping].last > 20) {
-        logit(NULL,-303,"dw");
+        logit(NULL,-302,"dw");
         overall_error=1;
     }
     for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
         if(shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error!=0) {
-            logitn(NULL,-304,"dw",i+1);
+            logitn(NULL,-303,"dw",i+1);
             overall_error=1;
         }
 
     if(overall_error) {
-        ip[2]=-305;
+        ip[2]=-304;
         memcpy(ip+3,"dw",2);
     }
     return;

@@ -31,8 +31,9 @@
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
+#include "../include/shm_addr.h"
 
-#include "mon6.h"
+#include "mon7.h"
 
 extern struct fscom *fs;
 
@@ -46,6 +47,11 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     struct dbbc3_tsys_bbc bbc[MAX_DBBC3_BBC];
     char buf[128];
     int i;
+
+    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcu_v<125 ||
+        DBBC3_DDCV == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcv_v<125;
 
     memcpy(&ifc,&tsys_cycle->ifc[next],sizeof(ifc));
     memcpy(&bbc,tsys_cycle->bbc,sizeof(bbc));
@@ -100,7 +106,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             ptr->tm_min  != tm_save.tm_min  ||
             ptr->tm_sec  != tm_save.tm_sec;
 
-    if(!tm_different)
+    if(!tm_different || v124)
         standout();
 
     printw("%4d.%03d.%02d:%02d:%02d",
@@ -110,7 +116,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             ptr->tm_min,
             ptr->tm_sec);
 
-    if(!tm_different)
+    if(!tm_different || v124)
         standend();
 
     memcpy(&tm_save,ptr,sizeof(tm_save));
@@ -129,7 +135,10 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     if(ifc.time_error)
         standout();
 
-    printw("%6s",buf);
+    if (v124)
+        printw("------");
+    else
+        printw("%6s",buf);
 
     if(ifc.time_error)
         standend();

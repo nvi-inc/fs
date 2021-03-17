@@ -86,10 +86,12 @@ static void log_time( struct dbbc3_tsys_cycle *cycle, char buf[])
 {
     int i;
 
-    int vu125 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcu_v> 124;
+    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcu_v<125 ||
+        DBBC3_DDCV == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcv_v<125;
 
-    if(vu125) {
+    if(!v124) {
         for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
             struct tm *ptr=gmtime(&cycle->ifc[i].time);
 
@@ -119,6 +121,11 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
     unsigned on, off;
     int j, k;
 
+    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcu_v<125 ||
+        DBBC3_DDCV == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcv_v<125;
+
     for (j=0;j<MAX_DBBC3_IF+1;j++) {
         for (k=0;k<MAX_DBBC3_BBC;k++) {
             if (shm_addr->tpicd.itpis[k] && shm_addr->tpicd.ifc[k] == j) {
@@ -128,11 +135,13 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
                     log_out(buf, "tpi/",11);
 
                 dt_cat(buf,shm_addr->tpicd.lwhat[k]);
-                on =t->bbc[k].total_power_lsb_cal_on;
-                off=t->bbc[k].total_power_lsb_cal_off;
-                if(!cont_cal) {
+
+                if (v124 && cont_cal) {
                     on =t->bbc[k].total_power_lsb_cal_off;
                     off=t->bbc[k].total_power_lsb_cal_on;
+                } else {
+                    on =t->bbc[k].total_power_lsb_cal_on;
+                    off=t->bbc[k].total_power_lsb_cal_off;
                 }
                 bb_cat(buf,on);
                 if(cont_cal)
@@ -145,11 +154,12 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
                     log_out(buf, "tpi/",11);
 
                 dt_cat(buf,shm_addr->tpicd.lwhat[k+MAX_DBBC3_BBC]);
-                on =t->bbc[k].total_power_usb_cal_on;
-                off=t->bbc[k].total_power_usb_cal_off;
-                if(!cont_cal) {
+                if (v124 && cont_cal) {
                     on =t->bbc[k].total_power_usb_cal_off;
                     off=t->bbc[k].total_power_usb_cal_on;
+                } else {
+                    on =t->bbc[k].total_power_usb_cal_on;
+                    off=t->bbc[k].total_power_usb_cal_off;
                 }
                 bb_cat(buf,on);
                 if(cont_cal)
@@ -163,12 +173,12 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
                 log_out(buf, "tpi/",15);
 
             dt_cat(buf,shm_addr->tpicd.lwhat[j-1+MAX_DBBC3_BBC*2]);
-            on = t->core3h[j-1].total_power_cal_on;
-            off= t->core3h[j-1].total_power_cal_off;
-// actually it seems to be backwards
-            if(cont_cal) {
+            if (v124 && cont_cal) {
                 on = t->core3h[j-1].total_power_cal_off;
                 off= t->core3h[j-1].total_power_cal_on;
+            } else {
+                on = t->core3h[j-1].total_power_cal_on;
+                off= t->core3h[j-1].total_power_cal_off;
             }
             if_cat(buf,on);
             if(cont_cal)

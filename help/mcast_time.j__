@@ -47,3 +47,7 @@ the multicast delay in the dbbc3.ctl control file.
 
 The VDIF epoch is currently not provided by the multicast, but it is
 expected that it will be added.
+
+The output for firmware v124 is abbreviated since that version does
+not provide time in the multicast. Thus, the time and offset fields
+are null.

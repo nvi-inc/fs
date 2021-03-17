@@ -46,6 +46,11 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
     float fwhm, tcal, dpfu, gain, tsys;
     int j, k;
 
+    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcu_v<125 ||
+        DBBC3_DDCV == shm_addr->equip.rack_type &&
+        shm_addr->dbbc3_ddcv_v<125;
+
     /* special tsys values:
        -9e18 no continuous cal
        -9e16 BBC not setup
@@ -105,8 +110,13 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         get_gain_par(ifchain+1,freq,&fwhm,&dpfu,NULL,&tcal);
 
-        on =t->bbc[k].total_power_lsb_cal_on;
-        off=t->bbc[k].total_power_lsb_cal_off;
+        if (v124) {
+            on =t->bbc[k].total_power_lsb_cal_off;
+            off=t->bbc[k].total_power_lsb_cal_on;
+        } else {
+            on =t->bbc[k].total_power_lsb_cal_on;
+            off=t->bbc[k].total_power_lsb_cal_off;
+        }
 
         diff=on-off;
 
@@ -129,8 +139,14 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         get_gain_par(ifchain+1,freq,&fwhm,&dpfu,NULL,&tcal);
 
-        on =t->bbc[k].total_power_usb_cal_on;
-        off=t->bbc[k].total_power_usb_cal_off;
+        if (v124) {
+            on =t->bbc[k].total_power_usb_cal_off;
+            off=t->bbc[k].total_power_usb_cal_on;
+        } else {
+            on =t->bbc[k].total_power_usb_cal_on;
+            off=t->bbc[k].total_power_usb_cal_off;
+        }
+
         diff=on-off;
 
         if (tcal <=0.0)
