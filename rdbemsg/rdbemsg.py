@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright (c) 2020 NVI, Inc.
+# Copyright (c) 2020-2021 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -31,11 +31,25 @@ import string
 import subprocess
 import datetime
 import time
+import getopt
 
 class msg_tk(Tkinter.Tk):
 	def __init__(self,parent):
 		Tkinter.Tk.__init__(self,parent)
-		fontsize=14
+		parms = {'-f': 14, '-g':''}
+		try:
+		    opts, pargs = getopt.getopt(sys.argv[1:], "f:g:")
+		except getopt.GetoptError, msg:
+		    sys.exit(msg)
+
+		for o,v in opts:
+		    #print o,v
+		    parms[o] = v
+
+		fontsize = int(parms['-f'])
+		geometry = str(parms['-g'])
+		if geometry:
+			self.geometry(geometry)
 
 		self.parent = parent
 		self.customFont = tkFont.Font(family="Helvetica", size=fontsize)
