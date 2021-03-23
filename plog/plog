@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2021-01-07
+VERSION=2021-03-23
 
 version(){
     echo "[plog $VERSION]"
@@ -41,7 +41,7 @@ fi
 
 # Lines to remove from log file to make "reduced" logs
 # Use egrep syntax
-PLOG_REDUCE_PATTERN="${PLOG_REDUCE_PATTERN:-^[:.0-9]*#rdtc}"
+PLOG_REDUCE_PATTERN="${PLOG_REDUCE_PATTERN:-^[:.0-9]*#(rdtc|dbtcn)}"
 
 # Added to filename before extension of log files with all data
 PLOG_FULL_SUFFIX="${PLOG_FULL_SUFFIX:-_full}"
@@ -69,7 +69,7 @@ ${underline}Options:${normal}
     ${black}-z${normal}            Push compressed log (full if contains multicast data)
     ${black}-v${normal}            Print plog version and exit
 
-If the log containing RDBE multicast data:
+If the log contains RDBE or DBBC3 multicast data:
 
 1.  If not already done so, the log file will be renamed to
     '$FS_LOG_PATH/<log>_full.log'
