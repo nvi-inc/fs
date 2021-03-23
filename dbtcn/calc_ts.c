@@ -38,7 +38,7 @@ static float bw_key[ ]={0,2,4,8,16,32,64,128};
 #define NBW_KEY sizeof(bw_key)/sizeof( float)
 
 void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
-        int cont_cal)
+        int cont_cal, int swap_cal)
 {
     unsigned int on, off;
     int diff;
@@ -110,7 +110,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         get_gain_par(ifchain+1,freq,&fwhm,&dpfu,NULL,&tcal);
 
-        if (v124) {
+        if (v124 && swap_cal) {
             on =t->bbc[k].total_power_lsb_cal_off;
             off=t->bbc[k].total_power_lsb_cal_on;
         } else {
@@ -139,7 +139,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         get_gain_par(ifchain+1,freq,&fwhm,&dpfu,NULL,&tcal);
 
-        if (v124) {
+        if (v124 && swap_cal) {
             on =t->bbc[k].total_power_usb_cal_off;
             off=t->bbc[k].total_power_usb_cal_on;
         } else {
@@ -179,11 +179,13 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         get_gain_par(j+1,freq,&fwhm,&dpfu,NULL,&tcal);
 
-//        on = t->core3h[j].total_power_cal_on;
-//        off= t->core3h[j].total_power_cal_off;
-// actually it seems to be backwards
-          on = t->core3h[j].total_power_cal_off;
-          off= t->core3h[j].total_power_cal_on;
+        if (v124 || swap_cal) {
+            on = t->core3h[j].total_power_cal_off;
+            off= t->core3h[j].total_power_cal_on;
+        } else {
+            on = t->core3h[j].total_power_cal_on;
+            off= t->core3h[j].total_power_cal_off;
+        }
 
         diff=on-off;
 
