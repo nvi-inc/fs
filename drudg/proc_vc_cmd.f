@@ -17,7 +17,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
-      subroutine proc_vc_cmd(cname_vc, icode, kk4vcab, lwhich8,ierr)     
+      subroutine proc_vc_cmd(cproc_vc, icode, lwhich8,ierr)     
 ! Write out VC commands.
       implicit none 
       include 'hardware.ftni'
@@ -27,10 +27,9 @@
       include 'bbc_freq.ftni'
 
 ! Passed parameters.
-      character*12 cname_vc     !Name of procedure             !
-      integer icode             !what code
-      logical kk4vcab           !For K4 systems  
-      character*1 lwhich8       ! which8 BBCs used: F=first, L=last
+      character*(*) cproc_vc      !Name of procedure             !
+      integer icode               !what code
+      character*1 lwhich8         ! which8 BBCs used: F=first, L=last
 ! Returned
       integer ierr           !<>0 is some error. 
 
@@ -40,10 +39,14 @@
       integer trimlen 
 
 ! History:
-! 2007Jul09. Split off from procs.
-! 2008Feb26 JMG.  Write out comment if unused BBCs are present.
-! 2010May11 JMG.  Changed DRF and DRLO to double precision. In computing rfvc was losing precision.
-! 2016Jan18 JMG. Only write out name if cname_vc <> " "   
+! 2020-01-05 JMG Got rid of some obsolete confusing code dealing with 2-recorders
+! 2020-12-31 JMG Got rid of KK4VCAB
+! 2020-12-30 JMG Added in call pt proc_dbbc_bbc
+! 2016-01-18 JMG Only write out name if cproc_vc <> " "   
+! 2010-05-11 JMG Changed DRF and DRLO to double precision. In computing rfvc was losing precision.
+! 2008-02-26 JMG  Write out comment if unused BBCs are present.
+! 2007-07-09 JMG Split off from procs.
+
 
 ! local variables.
       character*80 cbuf2        !temporary text buffer.
@@ -60,63 +63,59 @@
       integer nlast  
             
       kwrite_return = .true.   
-!If true, then need to write a <CR> before outputting error or warning info.     
-      do irec=1,nrecst(istn) ! loop on recorders
-C       If both recorders are in use then do the check to see if
-C       we should do one or both procs
-        
-        if((kuse(1).neqv.kuse(2).and.kuse(irec)).or.
-     .     ((kuse(1).and.kuse(2)).and.(irec.eq.1.or.
-     .                (irec.eq.2.and.kk4vcab)))) then ! do this
+      
+      if(cproc_vc .ne. " ") then 
+        call proc_write_define(lu_outfile,luscn,cproc_vc)
+      endif 
 
-          if(cname_vc .ne. " ") 
-     &       call proc_write_define(lu_outfile,luscn,cname_vc)
+C     Initialize the bbc array to "not written yet"
+      do ib=1,max_bbc
+           kdone_bbc(ib)=.false. 
+      enddo
+      
 
-C         Initialize the bbc array to "not written yet"
-          do ib=1,max_bbc
-            kdone_bbc(ib)=.false. 
-          enddo
-        
-          DO ichan=1,nchan(istn,icode) !loop on channels
-            ic=invcx(ichan,istn,icode) ! channel number
-            ib=ibbcx(ic,istn,icode)    ! BBC number
+      DO ichan=1,nchan(istn,icode) !loop on channels
+        ic=invcx(ichan,istn,icode) ! channel number
+        ib=ibbcx(ic,istn,icode)    ! BBC number  
       
 ! Check for some quick exits...
-            if(kdone_bbc(ib)) goto 500
-            if(freqrf(ic,istn,icode) .lt. 0) goto 500
-            if (k8bbc) then
+        if(kdone_bbc(ib)) goto 500
+        if(freqrf(ic,istn,icode) .lt. 0) goto 500
+        if (k8bbc) then
 C             For 8-BBC stations use the loop index number to get 1-7
               call proc_check8bbc(km3be,km3ac,lwhich8,ichan,
      >                   ib,kinclude_chan)
               if(.not. kinclude_chan) goto 500 
-            endif
-            kdone_bbc(ib) = .true.               
+          endif
+          kdone_bbc(ib) = .true.               
       
-           if (FREQLO(ic,istn,icode) .lt. 0) then
+          if (FREQLO(ic,istn,icode) .lt. 0) then
              write(luscn,9910) ic
-9910     format(/,'proc_vc:  WARNING! LO frequency forchannel ',i2,
+9910         format(/,'proc_vc:  WARNING! LO frequency forchannel ',i2,
      >       ' is missing!',/,
      >       '  BBC or VC frequency procedure will not be correct, ',
      >        'nor will IFD procedure.')
-            endif 
+          endif 
 
-            if(klrack) then
-              call proc_lba_ifp(icode,ic,ib,ichan) 
-            else if(kvracks) then
-              call proc_vracks_bbc(icode,ic,ib,ichan)
-            else if(kmracks .or. kk41rack.or.kk42rack) then 
-              call proc_mracks_vc(icode,ic,ib,ichan) 
-            else if(kdbbc_rack) then
-              call proc_dbbc_bbc(icode,ic,ib,ichan) 
-            endif 
+          if(klrack) then
+            call proc_lba_ifp(icode,ic,ib,ichan) 
+          else if(kvracks) then
+            call proc_vracks_bbc(icode,ic,ib,ichan)
+          else if(kmracks .or. kk41rack.or.kk42rack) then 
+            call proc_mracks_vc(icode,ic,ib,ichan) 
+          else if(cstrack_cap .eq. "DBBC3_DDC") then
+            call proc_dbbc3_bbc(icode,ic,ib,ichan)
+          else if(cstrack_cap(1:4) .eq. "DBBC") then 
+            call proc_dbbc_bbc(icode,ic,ib,ichan) 
+          endif 
 
-            if(rfvc_max .lt. fvc(ib)) then
-             cbuf2=cbuf         !this makes a copy of this which we will output later. 
-             rfvc_max=fvc(ib)
-            endif      
+          if(rfvc_max .lt. fvc(ib)) then
+            cbuf2=cbuf         !this makes a copy of this which we will output later. 
+            rfvc_max=fvc(ib)
+          endif      
 
 500       continue              !fast exit                    
-          ENDDO !loop on channels
+        ENDDO !loop on channels
 
 ! Here we do some checking for DBBC racks to make sure that BBCs 
 ! 1-4 are in the same frequency band, 
@@ -140,32 +139,31 @@ C             For 8-BBC stations use the loop index number to get 1-7
           else
             nch=4              ! "BBC" command.   
           endif 
-            nlast=trimlen(cbuf2) 
-            kfirst=.true.
-            do ib=1,max_bbc
-              if(ibbc_present(ib,istn,icode) .eq. -1) then  !present but not used.
-                if(kfirst) then
-                  kfirst=.false.
-                  write(lu_outfile,'(a)') 
+          nlast=trimlen(cbuf2) 
+          kfirst=.true.
+          do ib=1,max_bbc
+            if(ibbc_present(ib,istn,icode) .eq. -1) then  !present but not used.
+              if(kfirst) then
+                kfirst=.false.
+                write(lu_outfile,'(a)') 
      >           '" NOTE: following BBCs/VCs are present but not used'
-                endif
+              endif
 ! Effectively this just overwritest the number in the BBC command with highest frequency. 
-                write(lu_outfile, '(a,i2.2,a)') cbuf2(1:nch-1),ib,
+              write(lu_outfile, '(a,i2.2,a)') cbuf2(1:nch-1),ib,
      >            cbuf2(nch+2:nlast)
               endif
-            end do
-         endif        
-
-         if (kmracks) then
+          end do
+        endif        
+        if (kmracks) then
            write(lu_outfile,"('!+1s')")
            write(lu_outfile,'(a)') 'valarm'
-         endif
+        endif
 
 C         For K4, use bandwidth of channel 1
-          if (kk41rack) then ! k4-1
-            cbuf="vcbw="
-            nch=6
-            if (kk42rec(irec)) then
+        if (kk41rack) then ! k4-1
+           cbuf="vcbw="
+           nch=6
+          if (kk42rec(irec)) then
               nch = ichmv_ch(ibuf,nch,'4.0')
             else
               NCH = NCH + IR2AS(VCBAND(1,istn,ICODE),IBUF,NCH,6,3)
@@ -188,10 +186,10 @@ C         For K4, use bandwidth of channel 1
               write(lu_outfile,'(a)') cbuf(1:nch)
             end do
           endif 
-          if(cname_vc .ne. " ") 
-     &        write(lu_outfile,"(a)") 'enddef'
-        endif ! do this
-      enddo ! loop on recorders
+      if(cproc_vc .ne. " ") then 
+        write(lu_outfile,"(a)") 'enddef'
+      endif 
+  
       end
 ! **************************************************************
       subroutine invalid_if(luscn,cbbc, cif, crack)

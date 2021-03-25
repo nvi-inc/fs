@@ -47,13 +47,11 @@ C  LOCAL:
       integer ix,n
       integer iii
 
-      integer*4 itrk_map(max_headstack,max_trk)  !Has map of track mappings.
-
       integer*2 LNA(4)
       character*8 cna
       equivalence (lna,cna)
       integer ib,ic,iv,ivc,i,icode,istn,inum,is,ns,ibad,j
-      integer icx,nvlist,ivlist(max_chan),ir
+      integer icx,nvlist,ivlist(max_chan)
       integer*2 lc,lsg,lm(8),lid,lin,ls
       character*2 cs,cin
       equivalence (ls,cs), (lin,cin)
@@ -80,8 +78,14 @@ C  LOCAL:
       character*1 c1
       equivalence (c1,lid)
 
+! Updates. Now most recent at top.
+! 2021-01-05 JMG removed obsolte itrk_map 
+! 2021-01-05 JMG Replaced max_frq by max_code. (Max_frq was confusing and led to coding errors.)
+! 2020-06-22 JMG Fixed bug introduced 2018OCT. 
+! 2018-12-22 JMG Fixed bug using undefinfed variable 'nstav' and added implicit none. 
+! 2018-10-?? JMG  Modified so samprate applies only to stations specified in preceding "F" line.
+! 2018-07-05 JMG Better error messages. Previously error code printed as ****
 
-      save itrk_map
 C
 C  History
 C     880310 NRV DE-COMPC'D
@@ -124,10 +128,8 @@ C 2003Jul25 JMG  ITRAS changed to function
 ! 2013Sep19 JMGipson made sample rate station dependent
 ! 2015Jun05 JMG Modified to use new version of itras. 
 ! 2016Dec05 JMG. Fixed bug in reading in samplate rate. Previously  applied the sample rate to "1,ns". Now to "1,nstatn" 
-! 2018Jul05 JMG. Better error messages. Previously error code printed as ****
-! 2018Oct   JMG  Modified so samprate applies only to stations specified in preceding "F" line.
-! 2018Dec22 JMG. Fixed bug using undefinfed variable 'nstav' and added implicit none. 
-! 2020Jun22 JMG Fixed bug introduced 2018OCT. 
+! 2021-01-31 JMG Removed reference to barrel 
+
 
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
@@ -138,8 +140,7 @@ C
 !      write(*,'("--->",10a2)') ibuf(2:11) 
 
       if(lchar .eq. "C") then
-       CALL UNPCO(IBUF(2),ilen2,IERR,LC,LSG,F1,F2,Icx,LM,VB,itrk_map,
-     >     cswit,ivc)
+       CALL UNPCO(IBUF(2),ilen2,IERR,LC,LSG,F1,F2,Icx,LM,VB, cswit,ivc)
       else if(lchar .eq. "L") then
         CALL UNPLO(IBUF(2),ilen2,IERR,LID,LC,LSG,LIN,F,ivlist,ls,nvlist)
       else if(lchar .eq. "F") then
@@ -182,8 +183,8 @@ C  on any line. But this is a bad practice.
       IF  (IGTFR(LC,ICODE).EQ.0) THEN !a new code
         if (lchar .eq. "F") then ! "F" line
           NCODES = NCODES + 1
-          IF  (NCODES.GT.MAX_FRQ) THEN !too many codes
-            IERR = MAX_FRQ
+          IF  (NCODES.GT.max_code) THEN !too many codes
+            IERR = max_code
             ncodes=ncodes-1
             write(lu,9202) ierr
 9202        format('FRINP02 - Too many frequency codes.  Max is ',I3,
@@ -422,32 +423,7 @@ C 5. This is the sample rate line.
       endif ! sample rate
 
 C 6. This section for the barrel roll line.
-
-      if (lchar .eq. "B") then ! barrel
-        if (ns.gt.0) then ! station names on "B" line
-          do is=1,ns ! for each station name found on the line
-            i=iwhere_in_string_list(cstnna,nstatn,cst(is))
-            if (i.eq.0) then ! no match
-              write(lu,9401) cst(is)
-9401          format('FRINP06 - Station ',a,' not selected. ',
-     .        'Barrel roll for this station ignored.')
-            else ! save it
-              cbarrel(i,icode)=cbar(is)
-              if(cbarrel(i,icode)(1:1) .eq. "8") ir=1
-              if(cbarrel(i,icode)(1:2) .eq. "16") ir=2
-              if (ir.eq.1.or.ir.eq.2) then ! fill roll table
-                iroll_inc_period(i,icode) = ircan_inc(ir)
-                iroll_reinit_period(i,icode) = ircan_reinit(ir)
-                nrolldefs(i,icode)  = nrcan_defs(ir)
-                nrollsteps(i,icode) = nrcan_steps(ir)
-                call init_roll_type(is,icode,nrcan_defs(ir),
-     >              nrcan_steps(ir),icantrk(1,1,ir))
-              endif ! fill roll table
-            endif ! save it
-          enddo ! each station name found on the line
-        endif ! station names on "B" line
-      endif ! barrel
-
+ 
 C 7. This section for the recording format line.
 
       if (lchar .eq."D" ) then ! format

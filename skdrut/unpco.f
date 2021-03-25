@@ -18,7 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE unpco(IBUF,ILEN,IERR,
-     .LCODE,LSUBGR,FREQRF,FREQPC,Ichan,LMODE,VCBAND,itrk_map,cswit,ivc)
+     .LCODE,LSUBGR,FREQRF,FREQPC,Ichan,LMODE,VCBAND,cswit,ivc)
       implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     UNPCO unpacks the record holding information on a frequency code
@@ -26,6 +26,9 @@ C     element.
 C
       include '../skdrincl/skparm.ftni'
 C  History:
+!Updates
+! 2021-01-05 JMG Removed obsolete itrk_map 
+! 2020-12-30 JMG Removed unused variables
 C  950622 nrv Remove check for valid letters for mode.
 C             Check for tracks between -3 and 36.
 C 951019 nrv change "14" to max_chan, "28" to max_pass, observing mode
@@ -64,13 +67,11 @@ C     FREQPC - phase cal frequency, Hz
 C     Ichan - channel number for this frequency
 C     LMODE - observing mode, max 16 characters
 C     VCBAND - final video bandwidth, MHz
-      integer*4 itrk_map(max_headstack,max_trk) ! tracks to be recorded
-
+     
       character*3 cswit ! switching
       integer ivc ! physical BBC# for this channel
 
 ! function
-      integer*4 itras_ind
       integer iwhere_in_real8_list
       integer ichmv,ias2b,iscnc ! functions
 C
@@ -234,7 +235,7 @@ C                              (        Find the opening parenthesis
           if(cbuf(ict:ict) .ne. ",") then
             read(cbuf(ict:ict+ind-1),*,err=900) itx
             itx=itx+3
-            if(itx.lt. 1  .or. itx .gt. max_trk) then
+            if(itx.lt. 1  .or. itx .gt. max_track) then
                write(*,*) " "
                write(*,'("UNPCO: Invalid track assignment: ",i4)') itx-3
                write(*,*) "                 Valid numbers: -2 to 30"

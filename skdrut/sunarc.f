@@ -60,11 +60,11 @@ C
 C     Compute distance of the source from the sun.
 C
       IF  (NSOR.LE.NCELES) THEN  !"calculate distance from sun"
-        CRA = DCOS(SORPDA(1,NSOR)-RASUN)
+        CRA = DCOS(sorp_now(1,NSOR)-RASUN)
         CD1 = DCOS(DBLE(DECSUN))
         SD1 = DSIN(DBLE(DECSUN))
-        CD2 = DCOS(SORPDA(2,NSOR))
-        SD2 = DSIN(SORPDA(2,NSOR))
+        CD2 = DCOS(sorp_now(2,NSOR))
+        SD2 = DSIN(sorp_now(2,NSOR))
         ARG = CD1*CD2*CRA + SD1*SD2
         ARC = ATAN2(SQRT(1-ARG*ARG),ARG)
         ARCD = ARC*180./PI

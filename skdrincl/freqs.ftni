@@ -18,7 +18,13 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 C     FREQUENCY CODE INFORMATION COMMON BLOCK 
-C 
+
+!Updates now in reverse order, most recent at top.
+! 2021-01-31 JMG removed parameters dealing with barrel roll
+! 2021-01-05 JMG Replaced max_frq by max_code. (max_frq was confusing and led to coding errors.)
+! 2020-11-05 JMG. Removed references to head, pass
+! 2020-10-02 JMG. Removed all refrences to S2 
+!
 C 891117 nrv Added dimension to change NFREQ from total number of frequencies
 C 910702 nrv changed VLBA-related arrays to correspond to PC version
 C 910709 NRV Changed FREQLO,LSGINP to allow 3 LO frequencies, removed PATCH
@@ -60,11 +66,11 @@ C 000913 nrv Add roll tables here.
 C 020112 nrv All roll variables by station and code. Add canned rolls.
 C 020327 nrv Add CMODULATION for data modulation value.
 C 021111 jfq Add S2 data source for LBA rack.
-! 2020Oct02 JMG. Removed all refrences to S2 
-! 2020Nov05 JMG. Removed references to head, pass
+
 C
       double precision effreq,ffact,bitdens,freqlo,freqrf,
-     .freqpcal,freqpcal_base,tape_dens
+     &       freqpcal,freqpcal_base,tape_dens
+
 C     ffact   - frequency factor, for S/X ionosphere corrections
 C     effreq  - effective frequency for each band, for S/X ionosphere 
 C               corrections
@@ -87,11 +93,9 @@ C               for calculating SNR. Each track is assumed to be recorded
 C               at the sample rate.
 C     samprate - sample rate, per frequency code, Mb/s.
  
-      integer ncodes,nfreq,nband,nchan,invcx,ifan,
-     .ntrakf,nstsav,istsav,ibbcx,ipctone,
-     .npctone,ntrkn,nhstack,iroll_inc_period,iroll_reinit_period,
-     .nrolldefs,nrollsteps,icantrk,ircan_reinit,ircan_inc,
-     .nrcan_defs,nrcan_steps
+      integer ncodes,nfreq,nband,nchan,invcx,ifan, 
+     & ntrakf,nstsav,istsav,ibbcx,ipctone,
+     & npctone,ntrkn,nhstack
       integer ibbc_present        !0=not present.  1=present&used, -1=present & not used.
 
 C     nband  - number of entries in lband
@@ -113,9 +117,8 @@ C          p = corresponding pass, forward/reverse (1 to max_subpass,
 C              e.g. 1 for mode A, 1 or 2 for B and C, 1 to 28 for D, 
 C              1 to 4 for E)
 C          a = station index
-C          f = frequency code (1 to max_frq)
-C     ihdpos - head position offsets
-C     ihddir - corresponding pass number
+C          f = frequency code (1 to max_code)
+
 C     ntrakf - number of tracks recorded per pass for this code
 C     nstsav,istsav - number and indices of station names found on the "F" line
 C     ifan - fan-out factor, 1, 2, or 4, taken from the mode name
@@ -125,18 +128,10 @@ C     npctone - number in the above list
 C     ntrkn - integer number of tracks recorded per band. Same as trkn
 C             except it's not reduced for switched or magnitude bits.
 C     nhstack - number of headstacks per code and station
-C     roll_inc_period, roll_reinit_period - info per table
-C     nrolldefs - number of roll_def statements per table (max 64)
-C     nrollsteps - roll steps per def + head + home (max 34)
-C     iroll_def - roll tables
-C     ircan_reinit,ircan_inc  - canned roll periods
-C     icantrk - canned track lists
-C     nrcan_defs - number of defs in each canned roll
-C     nrcan_steps - number of steps in each canned roll
-C
+C  
       integer*2 lcode,lmode,lsubvc,lifinp,lnafrq,lmfmt,
-     .  lband,lpol,lnetsb,losb,lnafrsub,lbarrel,lprefix,
-     .  lmode_cat
+     &  lband,lpol,lnetsb,losb,lnafrsub,lprefix,
+     &  lmode_cat
 C     LCODE - the 2-character frequency codes 
 C     LMODE - the observing mode name for each code
 C     LMFMT - the observing mode format for each code
@@ -163,79 +158,70 @@ C
       character*3 cmodulation ! data modulation, on or off
 C
       COMMON/FREQS/
-     .       effreq(max_band,max_stn,max_frq),ffact(max_stn,max_frq),
-     .       FREQRF(MAX_CHAN,max_stn,MAX_FRQ),
-     .       FREQLO(MAX_CHAN,MAX_STN,MAX_FRQ),
-     .       FREQPCAL(MAX_CHAN,MAX_STN,MAX_FRQ),
-     .       FREQPCAL_BASE(MAX_CHAN,MAX_STN,MAX_FRQ),
-     .       bitdens(max_stn,max_frq),
-     .       tape_dens(max_stn,max_frq),
+     .       effreq(max_band,max_stn,max_code),ffact(max_stn,max_code),
+     .       FREQRF(MAX_CHAN,max_stn,max_code),
+     .       FREQLO(MAX_CHAN,MAX_STN,max_code),
+     .       FREQPCAL(MAX_CHAN,MAX_STN,max_code),
+     .       FREQPCAL_BASE(MAX_CHAN,MAX_STN,max_code),
+     .       bitdens(max_stn,max_code),
+     .       tape_dens(max_stn,max_code),
      .
-     .       VCBAND(MAX_CHAN,max_stn,MAX_FRQ),
-     .       wavei(max_band,max_stn,max_frq),
-     .       bwrms(max_band,max_stn,max_frq),
-     .       trkn(max_band,max_stn,max_frq),
-     .       samprate(max_stn,max_frq),
+     .       VCBAND(MAX_CHAN,max_stn,max_code),
+     .       wavei(max_band,max_stn,max_code),
+     .       bwrms(max_band,max_stn,max_code),
+     .       trkn(max_band,max_stn,max_code),
+     .       samprate(max_stn,max_code),
      .       NCODES,nband,
-     .       NFREQ(MAX_BAND,max_stn,MAX_FRQ), 
-     .       ntrakf(max_stn,MAX_FRQ),
-     .       nchan(max_stn,max_frq),
-     .       invcx(max_chan,max_stn,max_frq),
-     .       ibbcx(max_chan,max_stn,max_frq),
-     >       ibbc_present(max_bbc,max_stn,max_frq),
-     .       ipctone(max_tone,max_chan,max_stn,max_frq),
-     .       npctone(max_chan,max_stn,max_frq),     
+     .       NFREQ(MAX_BAND,max_stn,max_code), 
+     .       ntrakf(max_stn,max_code),
+     .       nchan(max_stn,max_code),
+     .       invcx(max_chan,max_stn,max_code),
+     .       ibbcx(max_chan,max_stn,max_code),
+     >       ibbc_present(max_bbc,max_stn,max_code),
+     .       ipctone(max_tone,max_chan,max_stn,max_code),
+     .       npctone(max_chan,max_stn,max_code),     
      .       nstsav,istsav(max_stn),
-     .       ifan(max_stn,max_frq),
-     .       ntrkn(max_band,max_stn,max_frq),
-     .       nhstack(max_stn,max_frq),
-     .       iroll_inc_period(max_stn,max_frq),
-     .       iroll_reinit_period(max_stn,max_frq),
-     .       nrolldefs(max_stn,max_frq),
-     .       nrollsteps(max_stn,max_frq),
-     .       icantrk(18,32,2),ircan_reinit(2),ircan_inc(2),
-     .       nrcan_defs(2),nrcan_steps(2),     
-     .       LNAFRQ(4,MAX_FRQ),lnafrsub(4,max_stn,max_frq),
-     .       lmode_cat(8,max_frq),
-     .       LCODE(MAX_FRQ),LMODE(8,max_stn,MAX_FRQ),
-     .       LMFMT(8,max_stn,MAX_FRQ),
-     .       LSUBVC(MAX_CHAN,max_stn,MAX_FRQ), 
-     .       LIFINP(MAX_CHAN,max_stn,MAX_FRQ),
-     .       LPOL(max_chan,max_stn,max_frq),
-     .       LNETSB(max_chan,max_stn,max_frq),
-     .       losb(max_chan,max_stn,max_frq),lband(max_band),
-     .       lbarrel(2,max_stn,max_frq),
-     .       lprefix(4,max_stn,max_frq)
+     .       ifan(max_stn,max_code),
+     .       ntrkn(max_band,max_stn,max_code),
+     .       nhstack(max_stn,max_code),
+     .       LNAFRQ(4,max_code),lnafrsub(4,max_stn,max_code),
+     .       lmode_cat(8,max_code),
+     .       LCODE(max_code),LMODE(8,max_stn,max_code),
+     .       LMFMT(8,max_stn,max_code),
+     .       LSUBVC(MAX_CHAN,max_stn,max_code), 
+     .       LIFINP(MAX_CHAN,max_stn,max_code),
+     .       LPOL(max_chan,max_stn,max_code),
+     .       LNETSB(max_chan,max_stn,max_code),
+     .       losb(max_chan,max_stn,max_code),lband(max_band),
+     .       lprefix(4,max_stn,max_code)
 
      
-      character*8 cprefix(max_Stn,max_frq)
+      character*8 cprefix(max_Stn,max_code)
       equivalence (cprefix,lprefix)
-      character*2 cnetsb(max_chan,max_stn,max_frq)
-      character*2 cosb(max_chan,max_stn,max_frq)
+      character*2 cnetsb(max_chan,max_stn,max_code)
+      character*2 cosb(max_chan,max_stn,max_code)
       equivalence (cnetsb,lnetsb),(cosb,losb)
-      character*8 cnafrq(max_frq),cnafrsub(max_stn,max_frq)
+      character*8 cnafrq(max_code),cnafrsub(max_stn,max_code)
       equivalence (cnafrq,lnafrq),(cnafrsub,lnafrsub)
-      character*16 cmode_cat(max_frq)
+      character*16 cmode_cat(max_code)
       equivalence (cmode_cat,lmode_cat)
-      character*16 cmfmt(max_stn,max_frq)
+      character*16 cmfmt(max_stn,max_code)
       equivalence (cmfmt,lmfmt)
-      character*4 cbarrel(max_stn,max_frq)
-      equivalence (cbarrel,lbarrel)
-      character*2 cifinp(max_chan,max_stn,max_frq)
+      character*2 cifinp(max_chan,max_stn,max_code)
       equivalence (cifinp,lifinp)
-      character*2 cpol(max_chan,max_stn,max_frq)
+      character*2 cpol(max_chan,max_stn,max_code)
       equivalence (cpol,lpol)
-      character*2 csubvc(max_chan,max_stn,max_frq)
+      character*2 csubvc(max_chan,max_stn,max_code)
       equivalence (csubvc,lsubvc)
-      character*2 ccode(max_frq)
+      character*2 ccode(max_code)
       equivalence (ccode,lcode)
       
-      character*16 cmode(max_stn,max_frq)
+      character*16 cmode(max_stn,max_code)
       equivalence (lmode,cmode)
 
       character*2 cband(Max_band)
       equivalence (lband,cband)
 
-      COMMON/FREQS_CH/cset(max_chan,max_stn,max_frq),
-     .       modedefnames(max_frq),
-     .       modedef_name(max_frq),cmodulation(max_stn,max_frq)
+      COMMON/FREQS_CH/cset(max_chan,max_stn,max_code),
+     .       modedefnames(max_code),
+     .       modedef_name(max_code),cmodulation(max_stn,max_code)

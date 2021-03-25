@@ -34,6 +34,7 @@ C
       include '../skdrincl/skparm.ftni'
 C
 C  History:
+! 2021-02-13 JMG Write error message if two many channels
 C 960520 nrv New.
 C 960607 nrv Initialize band ID to '-', not blank.
 C 970114 nrv Remove polarization, shift up all subsequent field numbers.
@@ -93,13 +94,17 @@ C
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      >  ptr_ch('chan_def'//char(0)),ptr_ch('FREQ'//char(0)),ivexnum)
       ic=0
-      do while (ic.lt.max_chan.and.iret.eq.0) ! get all fanout defs
+      do while (ic.le.max_chan.and.iret.eq.0) ! get all fanout defs
         ic=ic+1
 
 C  1.1 Subgroup
 
         ierr = 11
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get subgroup
+        if(ic .gt. max_chan) then
+          write(*,*) "vunpfrq: Two many channels! Max is ", max_chan
+          stop
+        endif 
 
         if (iret.ne.0) return
         NCH = fvex_len(cout)

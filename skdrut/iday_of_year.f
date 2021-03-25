@@ -46,6 +46,4 @@
       endif
 
       return
-      end function
-
-
+      end 

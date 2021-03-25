@@ -12,7 +12,7 @@
 ARC = skdrut.a
 
 #    iday_of_year.o \
-#    skdrini.o \
+#    skdrini.o 
 #    tmjd.o \
 
 OBJECTS=\
@@ -22,7 +22,7 @@ OBJECTS=\
     atape.o axtyp.o azwrap.o \
     cablw.o \
     capitalize.o check_rec_type.o \
-    ckiau.o ckroll.o clndr.o cvpos.o \
+    ckiau.o clndr.o cvpos.o \
     count_freq_tracks.o \
     ctime2ydhms.o \
     ctime2dmjd.o c2lower.o c2upper.o \
@@ -35,7 +35,7 @@ OBJECTS=\
     iday_of_year.o idchk.o ifill4.o ifirst_non_blank.o ifirst_non_white.o  \
     igtba.o igtfr.o  \
     indexx_string.o \
-    iroll_def.o itras.o itimedifsec.o iday0.o igetstatnum.o igetstatnum2.o igetsrcnum.o \
+    itras.o itimedifsec.o iday0.o igetstatnum.o igetstatnum2.o igetsrcnum.o \
     istringminmatch.o ivgtmo.o ivgtst.o iwhere_in_range4.o \
     iwhere_in_string_list.o iwhere_in_string_list_nocase.o iwhere_in_int_list.o iwhere_in_real8_list.o ind.o i2long.o \
     julda.o \
@@ -52,12 +52,12 @@ OBJECTS=\
     slewo.o soinp.o speed.o  splitntokens.o splitntokens2.o squeezeleft.o stape.o stinp.o sunarc.o \
     sunpo.o sunazel.o \
     ttape.o timesub.o timeadd.o tmadd.o tmsub.o trimlen.o tspin.o \
-    unpbar.o unpco.o unpfsk.o unpfcat.o unpfmt.o unphd.o unplo.o  unprat.o \
+    unpbar.o unpco.o unpfsk.o unpfcat.o unpfmt.o unplo.o  unprat.o \
     unpva.o unpvh.o unpvp.o unpvt.o update_string_list.o upper.o \
     valid_hardware_blk.o \
     vunpfrq.o vunptrk.o vunpant.o vunpdas.o vunpsit.o vunpant.o vglinp.o vunpso.o \
-    vunpif.o vunpbbc.o vunptrk.o vunphp.o vsoinp.o vmoinp.o vstinp.o vread.o \
-    vunps2g.o vunproll.o vunpprc.o vobinp.o  vunppcal.o \
+    vunpif.o vunpbbc.o vunptrk.o vsoinp.o vmoinp.o vstinp.o vread.o \
+    vunpprc.o vobinp.o  vunppcal.o \
     write_return_if_needed.o \
     write_error_and_pause.o \
     writf_asc.o \

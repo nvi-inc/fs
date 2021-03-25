@@ -22,6 +22,8 @@
       implicit none  !2020Jun15 JMGipson automatically inserted.
 !     sname='1053+704'  ra=10h56m53.6s dec=+70d11'46"
 C Write the line in the VLBA flies with the source name
+! Updates
+! 2020-12-30 JMG. Remove unsed variables. 
 C 970509 nrv New. Extracted from VLBAT.
 C 980409 nrv Get rid of data statement to clean up output.
 ! 2006Sep26. Rewritten to use standard fortran write.\
@@ -54,7 +56,6 @@ C Local
       character*11 lra      !used to hold RA
       character*10 ldec     !used to hold Dec strings.
 
-      integer idecs
       lsq="'"   !single quote
       ldq='"'   !double quote
 
@@ -98,5 +99,4 @@ C Local
       write(lu,'("sname=",a,"  ra=",a," dec=",a)')
      >       lsq//csname(1:trimlen(csname))//lsq, lra,ldec
       return
-      stop
       end

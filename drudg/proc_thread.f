@@ -17,10 +17,20 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
-!Include file to set the version. Just change this and leave fdrudg.f alone. (you need to delete fdrudg.o prior to make though.) 
-! below is set at compiletime
-      cversion = '2021Mar27'
-!
-! See change_log.txt for a summary of the changes.
-!  
+      subroutine proc_thread(cproc_thread)
+      implicit none 
+      include 'drcom.ftni'
+! generate new thread procedure
+      character*(*) cproc_thread
+
+      call proc_write_define(lu_outfile, luscn,cproc_thread)
+      write(lu_outfile,'(a)') "jive5ab=datastream=clear"
+      if(lvdif_thread .eq. "YES") then
+        write(lu_outfile,'(a)') "jive5ab=datastream=add:{thread}:*"
+      endif
+      write(lu_outfile,'(a)') "jive5ab=datastream=reset"
+      write(lu_outfile,'(a)') "endef"
+      end 
+   
+
 

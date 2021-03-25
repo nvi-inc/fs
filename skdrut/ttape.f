@@ -43,10 +43,10 @@ C  Calls: gtfld,  ifill, wrerr
 
 C  LOCAL
       real speed
-      double precision s2sp,k4sp
+      double precision k4sp
       integer*2 LKEYWD(12)
       integer ikey_len,ich,ic1,ic2,nch,i,istn
-      integer ival,idum,icode,ias2b
+      integer ival,idum,icode
       integer i2long,ichmv
       logical kdefault,ks2,kk4
       character*24 ckeywd
@@ -64,18 +64,18 @@ C  LOCAL
       parameter (ilist_hl=4)
       character*12 list_hl(ilist_hl)
 
-      integer ilist_lens2
-      parameter (ilist_lens2=2)
-      character*3 lists2(ilist_lens2)
-
-      integer ikey,ikeyhl,ikeys2
+       integer ikey,ikeyhl
 
       data list/"MARK5A","MARK5B","MARK5C","MARK6","FLEXBUFF","K5"/
       data list_hl/'HIGH','LOW','SUPER','DUPER'/
-      data listS2/'LP','SLP'/
-
+   
       data ikey_len/20/
-C
+
+!Updates
+! 2020-12-30 JMG Removed unused variables
+! 2020-10-02 JMG Removed all references to S2
+! 2020-06-09 JMG Added MARK6, got rid of THICK,THIN,SHORT
+
 C MODIFICATIONS:
 C 990524 nrv New. Copied from STAPE.
 C 990621 nrv Remove tape_dens and tape_length and use standard common
@@ -94,8 +94,7 @@ C 021003 nrv Adjust K4 output for speed being in dm internally.
 ! 2008Jun04 JMG fixed rounding problem with S2 tapes.  Would change the input footage
 ! 2009Sep22 JMG. Added Mark5B as a valid mode
 ! 2014Dec02 JMG. Mark5C support
-! 2020Jun09 JMG. Added MARK6, got rid of THICK,THIN,SHORT
-! 2020Oct02  JMG. Removed all references to S2
+
 
       IF  (NSTATN.LE.0.or.ncodes.le.0) THEN
         write(luscn,*)

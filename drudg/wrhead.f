@@ -31,6 +31,10 @@ C   COMMON BLOCKS USED
       include 'drcom.ftni'
 C
 C   HISTORY:
+
+! Updates. Most reecent first. 
+! 2021-01-05 JMG Replaced max_frq by max_code. (Max_frq was confusing and led to coding errors.)
+! 2008-08-99 JMG  A little cleanup and modernization.
 C     WHO   WHEN   WHAT
 C     gag   900802 CREATED
 C     gag   901025 got rid of trailing blanks
@@ -40,15 +44,14 @@ C     nrv   930708 Added imode in calling list, rewrote to simplify and
 C                  use built-in features of ib2as. Add inner loop to get
 C                  all channels for Mode A written out.
 C 960703 nrv Use ix index when writing sideband.
-! 2008Aug19 JMG.  A little cleanup and modernization.
 C
 C  INPUT:
       integer lu,iblen,icod
       character*(*) cs   ! what line to write
       integer isig    ! value to write out for each channel
       integer ido     ! mode passed from calling routine
-      integer idoub(max_chan,max_stn,max_frq)  ! two dimension array
-      integer*2 ldoub(max_chan,max_stn,max_frq)  ! two dimension array
+      integer idoub(max_chan,max_stn,max_code)  ! two dimension array
+      integer*2 ldoub(max_chan,max_stn,max_code)  ! two dimension array
       integer imode   ! 1=write out one entry per BBC
 C                           2=need double the entries
 C

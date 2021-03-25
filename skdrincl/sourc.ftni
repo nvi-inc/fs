@@ -18,19 +18,22 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 ! Source information common block.
+! 2021-01-25 JMG Although previous code said SORP50 was 1950, in code was actually at 2000.
+!                Rename SORP50-->SORP1950 and add SORP2000
 ! 2007Jul02 JMG.  Rearranged & rewritten.  Split into several common blocks.
 !                 This contains only source names and positions.
 
-      double precision SORP50(2,max_sor)  !RA & Dec in radians at 1950.
-      double precision SORPDA(2,max_sor)  !RA & DEC at epoch
-      double precision SATP50(7,max_sor)  !orbital elements: !1) inclination 2) eccentricity
+      double precision SORP1950(2,max_sor)  !RA & Dec in radians at 1950.
+      double precision SORP2000(2,max_sor)
+      double precision SORP_now(2,max_sor)  !RA & DEC at epoch
+      double precision SATPOS(7,max_sor)  !orbital elements: !1) inclination 2) eccentricity
                                           ! 3) arg of perigee (4) right ascending node
                                           ! 5) mean anomaly (6) semimajor axis (7) orbital motion
       double precision SATDY(max_sat)     !Day and fraction for satellite epoch
       integer isaty(max_sat)              !epoch year for orbital elements.
       integer nsourc,nsatel,nceles        !number of sources, satellites, celestial
 
-      COMMON/SOURC/ SORP50,SORPDA,SATP50,SATDY,
+      COMMON/SOURC/ SORP1950,SORP2000,SORP_now,SATPOS,SATDY,
      >              ISATY,
      >              NSOURC,NCELES,NSATEL
 

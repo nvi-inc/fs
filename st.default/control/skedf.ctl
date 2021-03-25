@@ -205,9 +205,10 @@ $misc
 *  DBBC_ddc/FILA10G |
 *  DBBC_pfb     |
 *  DBBC_pfb/FILA10G |
-*  VLBAC        |
+*  VLABC        |
 *  CDAS         |
 *  BB           | Mark6
+*  DBBC3_DDC
 *
 * Relationship between skedf.ctl and equip.ctl file names:
 *
@@ -244,6 +245,22 @@ $misc
 * equipment regardless of what is in the schedule. This is a useful way of 
 * forcing the recorder to be Mark5A during the transition from tape to disk.
 *  equipment_override 
+*---------------------------------
+*
+*>>>>>>  use_proc_setup
+*
+*  use_setup_proc yes   Always use setup_proc=setupXX  (where setupXX is normaly setup)
+*  use_setup_proc no    Default. Issue setupXX
+*  use_setup_proc ask   Ask when we start to generate snap commands.
+*
+*>>>>>> vdif_single_thread_per_file
+* Th threadXX procedure only applies to Mark5C or Flexbuff recorders.
+*
+* vdif_single_thread_per_file  yes
+* vdif_single_thread_per_File  no
+* vdif_single_thread_per_file  ask
+*
+*
 *--------------------------------------------------------------
 * TPI daemon setup
 *   prompt? 
@@ -290,14 +307,20 @@ $misc
 * default DBBC IF inputs when converting from a non-DBBC rack type
 * this selects the inputs that should be assumed for each IF by DRUDG
 * default is nulls if not present
+* DBBC2 example
 * default_dbbc_if_inputs 1 4 2 2
+* DBBC3 example
+* default_dbbc_if_inputs 1 1 2 2 2 2 1 1
 *--------------------------------------------------------------
 * DBBC target values for IF counts in set-up procedure, up to 4
 * values for up to four IFs, in order, this will cause an error
 * in IFx=... command execution if used for DBBC DDC versions
 * before v101 
 * default is nulls if not present
+* DBBC2 example
 * dbbc_if_targets  35000 35000 35000 35000
+* DBBC3 example
+* dbbc_if_targets  35002 12342 35002 35003 5678 6789 7890 8901
 *--------------------------------------------------------------
 * DBBC BBC TPI target levels
 * has no effect for DDC versions before v103

@@ -99,6 +99,7 @@ C                value is checked between (i) and (i+1).
 C 960223 nrv Change to using (az,el) points actually on the horizon
 C            and interpolating between the line segments. Keep the
 C            coordinate mask unchanges.
+! 2021-01-25 JMG renamed SATP50-->satpos, SORPDA-->sorp_now
 C
 C
 C     1. Define the statement function ACOS.
@@ -111,17 +112,17 @@ C     2. Now calculate hour angle and dec, and sin/cos.
 C
       IF  (NSOR.LE.NCELES) THEN  !
         CALL SIDTM(MJD,ST0,FRAC)
-        HAD = ST0+UT*FRAC - STNPOS(1,ISTN) - SORPDA(1,NSOR)
-        DEC=SORPDA(2,NSOR)
+        HAD = ST0+UT*FRAC - STNPOS(1,ISTN) - sorp_now(1,NSOR)
+        DEC=sorp_now(2,NSOR)
       ELSE  !
         NORB=NSOR-NCELES
-        OINC=SATP50(1,NORB)
-        OECC=SATP50(2,NORB)
-        OPER=SATP50(3,NORB)
-        ONOD=SATP50(4,NORB)
-        OANM=SATP50(5,NORB)
-        OAXS=SATP50(6,NORB)
-        OMOT=SATP50(7,NORB)
+        OINC=satpos(1,NORB)
+        OECC=satpos(2,NORB)
+        OPER=satpos(3,NORB)
+        ONOD=satpos(4,NORB)
+        OANM=satpos(5,NORB)
+        OAXS=satpos(6,NORB)
+        OMOT=satpos(7,NORB)
         IOEY=ISATY(NORB)
         OEDY=SATDY(NORB)
 C

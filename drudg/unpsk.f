@@ -77,9 +77,11 @@ C  LOCAL VARIABLES
       double precision ST0,FRAC
 C                    - for GST and SIDTM calculations
       integer ich,ic1,ic2,idummy,idurs,i,icp
-      integer iscnc,ichmv,julda,ias2b,jchar ! functions
+      integer ichmv,julda,ias2b,jchar ! functions
       integer ichmv_ch
 C  History
+! 2020-12-30 JMG Removed variables which were not used. 
+! 2019-09-04 JMGipson. Got rid of finding pass. Just return 1
 C     880411 NRV DE-COMPC'D
 C     890505 NRV CHANGED IDUR TO AN ARRAY, READ IN DURATIONS IF PRESENT
 C 930407 nrv implicit none
@@ -90,7 +92,7 @@ C 980910 nrv Move JULDA call to after CLNDR so that the year
 C            is the full 4-digit value.
 C 2013Jan08  Modified so that if hour is 24:00:00 
 C
-! 2019Sep04  JMGipson. Got rid of finding pass. Just return 1
+
     
 C
 C     1. We decode all of the entries in the buffer.

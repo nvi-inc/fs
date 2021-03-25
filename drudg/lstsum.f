@@ -21,7 +21,7 @@
 
 C Create SUMMARY of SNAP file
 ! Now in reverse order and different date format.
-! 2021-02-18 JMG fixed problem with staggered start listing
+! 2021-02-27 JMG Fixed problem with staggered start. Removed unused variable 'spin_speed'
 ! 2021-02-07 JMG Superbowl Sunday. Replaced 1024 by 1000 to convert ot Gb.  Removed obsolete arg num_tapes 
 ! 2020-06-17 JMG. Initialize itime_start_p and itime_stop_p and itime_start, itime_stop 
 
@@ -193,7 +193,6 @@ C Local:
 
       character*2 cpass_old
 
-      real   spin_speed                 !Speed of tape in feet/sec.
 ! flags
 ! Note: most of these flags get reset when we write out a line.
       logical kdata_start               !Started taking data
@@ -393,18 +392,15 @@ C       Now get the source info for the new scan
 
 ! Wait till time. command.
         else if (index(ctmp,'!').ne.0) then ! time
-          if(.false.) then 
           call snap_readTime(ctmp,itime_temp,kvalidtime)
           if(kvalidtime) then
-            if(krunning) then   !if recorder is going, update count.      
+! Commented out 2021-02-27 JMG
+!            if(krunning) then   !if recorder is going, update count.      
               do i=1,5
                itime_now(i)=itime_temp(i)       !update running time.
               end do
-            endif 
+!            endif 
           endif
-          endif
-          call snap_readTime(ctmp,itime_now,kvalidtime)
-
 ! Data start command.
         else if(ctmp(1:10) .eq. "DISK_START" .or.
      >          ctmp(1:10) .eq. "DISC_START" .or.

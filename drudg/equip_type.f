@@ -107,7 +107,7 @@ C 0. Determine current types.
         else
            ifirst_rec=2
         endif
-
+ 
 C 1. Batch input
 
       if (kbatch) then
@@ -142,11 +142,11 @@ C 2. Interactive input
       else ! interactive
 
 100     continue
-        WRITE(LUSCN,"(a8,' equipment: Rack=',a12,'   Recorder=',a8)")
-     &   cantna(ISTN),cstrack(istn),cstrec(istn,1)
+        WRITE(LUSCN,"(a8,' equipment: ',$)") cantna(ISTN)
+        write(luscn,"('Rack=', a, 'Recorder=',a8)") 
+     &   cstrack(istn),cstrec(istn,1)
 
-        write(luscn,'(a)')
-     &  '| Select rack          | Select Rec 1 | Select Rec 2 | Start|'
+        write(luscn,'(a)') '| Select rack          | Select Rec 1 |'
 ! We subtract 1 from max_equip_lines, max_rack_type and max_rec_type
 !  so we don't display the "unknown" option.
           do i=1,max_equip_lines-1 ! write each line
@@ -171,7 +171,8 @@ C 2. Interactive input
             else
               crec1_slot=" "
             endif
-            if(i .le. max_rec2_type) then
+            if(.false.) then 
+!            if(i .le. max_rec2_type) then
               if(irec2_in .eq. i) then
                 cstar="*"
               else
@@ -181,7 +182,8 @@ C 2. Interactive input
             else
               crec2_slot=" "
             endif
-            if(i .le. 2) then
+            if(.false.) then 
+!            if(i .le. 2) then
               if(ifirst_rec .eq. i) then
                  cstar="*"
               else
@@ -191,8 +193,7 @@ C 2. Interactive input
             else
               cfirst_slot=" "
             endif
-            write(luscn,'("| ",4(a,1x,"|",1x))') crack_slot,crec1_slot,
-     >         crec2_slot,cfirst_slot
+            write(luscn,'("| ",4(a,1x,"|",1x))') crack_slot,crec1_slot
           enddo
 !          write(luscn,'(a)')
 !     >     '|  0=no change |  0=no change |  0=no change | 0=no change'

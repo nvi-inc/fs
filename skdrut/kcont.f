@@ -20,6 +20,7 @@
       LOGICAL FUNCTION KCONT(MJD,UT,DUR,ISOR,IST,Cwrap,ierr)
 C
       implicit none  !2020Jun15 JMGipson automatically inserted.
+
 C     This checks that an observation is continuous, i.e. that it
 C     doesn't end on a different part of the cable from which it began.
 C     KCONT is returned TRUE if the observation is continuous.
@@ -34,7 +35,6 @@ C  Passed
       integer isor           !source number
       integer ist            !station
       character*(*)  cwrap   !wrap
-      integer*2 lcabl
 ! returns
       integer ierr           !-1= goes below lower wrap at end.
                               !+1= goes above upper wrap at end.
@@ -51,6 +51,8 @@ C  LOCAL:
 C
 C  COMMON:
       include '../skdrincl/statn.ftni'
+!Updates
+!2020-12-30 JMG Removed unsed variables
 C
 C   PROGRAMMER: MAH  811125
 C    MODIFICATIONS:

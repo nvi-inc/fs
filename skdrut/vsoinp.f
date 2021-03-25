@@ -30,6 +30,7 @@ C
       include '../skdrincl/sourc.ftni'
 C
 C History:
+! 2021-01-25 JMG renamed SORP50 to more accurate SORP2000
 C 960527 nrv New.
 C 970114 nrv Change 8 to max_sorlen
 C 971003 nrv Suppress messages from the IAU name checker
@@ -139,8 +140,8 @@ C
             call mpstar_rad(tjd,rarad,decrad)
           END IF  !
         END IF  !"convert to J2000"
-        SORP50(1,NCELES) = RARAD   !J2000 position
-        SORP50(2,NCELES) = DECRAD  !J2000 position
+        SORP2000(1,NCELES) = RARAD   !J2000 position
+        SORP2000(2,NCELES) = DECRAD  !J2000 position
         endif ! continue
 C
       enddo ! get each source information

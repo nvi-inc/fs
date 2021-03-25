@@ -28,8 +28,10 @@
       integer num_tracks_rec_mk5        !how many Mk5Tracks?
 
 ! History
-! 2007Jul13 JMGipson. Separated from procs.f
-! 2016Jan15 JMGipson. Added call to proc_dbbc_pfb_tracks
+! 2020-12-31 JMG  Added call for proc_dbbc3_ddc_tracks
+! 2016-01-15 JMGipson. Added call to proc_dbbc_pfb_tracks
+! 2007-07-13 JMGipson. Separated from procs.f
+
 
 ! functions
       integer mcoma     !lnfch stuff
@@ -49,17 +51,22 @@
       data Z8000/Z'8000'/
 
       izero=0
-
-! output for DBBC_PFB rack.
-      if(cstrack_cap(istn)(1:8) .eq. "DBBC_PFB") then
+    
+! output for DBBC_PFB rack.   
+      if(cstrack_cap(1:8) .eq. "DBBC_PFB") then
         call proc_dbbc_pfb_tracks(lu_outfile,istn,icode)
         return
       endif
+! output for DBBC3
+      if(cstrack_cap .eq. "DBBC3_DDC") then
+        call proc_dbbc3_ddc_tracks(lu_outfile,istn,icode)
+        return
+      endif
+ 
 
 ! Output Mark5B  recorder stuff.
       if(km5rack.or.kv5rack.or.kdbbc_rack.or.km5b.or. knorack) then
-        call proc_disk_tracks(lu_outfile,istn,icode,
-     >                  kignore_mark5b_bad_mask)
+        call proc_disk_tracks(icode)  
         return
       endif
 

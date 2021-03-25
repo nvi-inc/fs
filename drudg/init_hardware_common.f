@@ -87,8 +87,11 @@ C Equipment type has been set by schedule file, Option 11, or control file.
       endif
 ! Note: Flexbuff is like Mark5C, but is not a disk. Hence no bankcheck, etc.
 
-      cstrack_cap(istn)=cstrack(istn)
-      call capitalize(cstrack_cap(istn))
+      cstrack_cap=cstrack(istn)
+      call capitalize(cstrack_cap)
+
+      cstrec_cap=cstrec(istn,1)
+      call capitalize(cstrec_cap) 
 
 !      km5disk=.false.
 !     do i=1,2
@@ -114,45 +117,41 @@ C Equipment type has been set by schedule file, Option 11, or control file.
         if(ks2rec(i).or.kk41rec(i).or.kk42rec(i)) knopass=.true.
       end do
 
-      do i=1,max_stn
-         cstrack_cap(istn)=cstrack(istn)
-         call capitalize(cstrack_cap(istn))
-      end do
-
+  
 C Racks
-      knorack = cstrack_cap(istn) .eq. "NONE"
-      km3rack = cstrack_cap(istn) .eq. "MARK3A"
-      km4rack = cstrack_cap(istn) .eq. "MARK4"
-      km5rack = cstrack_cap(istn) .eq. "MARK5"
+      knorack = cstrack_cap .eq. "NONE"
+      km3rack = cstrack_cap .eq. "MARK3A"
+      km4rack = cstrack_cap .eq. "MARK4"
+      km5rack = cstrack_cap .eq. "MARK5"
 
-      kvrack  = cstrack_cap(istn) .eq. "VLBA" .or.
-     >          cstrack_cap(istn) .eq. "VLBA/8" .or.
-     >          cstrack_cap(istn) .eq. "VLBAG"
-      kv4rack = cstrack_cap(istn) .eq. "VLBA4" .or.
-     >          cstrack_cap(istn) .eq. "VLBA4/8"
-      kv5rack = cstrack_cap(istn) .eq. "VLBA5"
+      kvrack  = cstrack_cap .eq. "VLBA" .or.
+     >          cstrack_cap .eq. "VLBA/8" .or.
+     >          cstrack_cap .eq. "VLBAG"
+      kv4rack = cstrack_cap .eq. "VLBA4" .or.
+     >          cstrack_cap .eq. "VLBA4/8"
+      kv5rack = cstrack_cap .eq. "VLBA5"
 
-      kvlbac_rack =cstrack_cap(istn) .eq. "VLBAC"
-      kcdas_rack  =cstrack_cap(istn) .eq. "CDAS"
+      kvlbac_rack =cstrack_cap .eq. "VLBAC"
+      kcdas_rack  =cstrack_cap .eq. "CDAS"
       kv5rack=kv5rack .or. kvlbac_rack .or. kcdas_rack
 
 
 
-      kk41rack= cstrack_cap(istn)(1:4) .eq. "K4-1"
-      kk42rack= cstrack_cap(istn)(1:4) .eq. "K4-2"
-      klrack  = cstrack_cap(istn) .eq. "LBA"
+      kk41rack= cstrack_cap(1:4) .eq. "K4-1"
+      kk42rack= cstrack_cap(1:4) .eq. "K4-2"
+      klrack  = cstrack_cap .eq. "LBA"
 
       kmracks =km3rack .or. km4rack .or. km5rack
       kvracks =kv4rack .or. kvrack  .or. KV5rack
 
-      km4fmk4rack =cstrack_cap(istn)(1:3) .eq. "K4-" .and.
-     >             cstrack_cap(istn)(5:7) .eq. "/M4"
-      kk3fmk4rack =cstrack_cap(istn)(1:3) .eq. "K4-" .and.
-     >             cstrack_cap(istn)(5:7) .eq. "/K3"
-      k8bbc =   cstrack_cap(istn) .eq. "VLBA/8" .or.
-     >          cstrack_cap(istn) .eq. "VLBA4/8"
-      kdbbc_rack        = cstrack_cap(istn)(1:4) .eq.  "DBBC"
-      kfila10g_rack     = cstrack_cap(istn)(10:16) .eq. "FILA10G"
+      km4fmk4rack =cstrack_cap(1:3) .eq. "K4-" .and.
+     >             cstrack_cap(5:7) .eq. "/M4"
+      kk3fmk4rack =cstrack_cap(1:3) .eq. "K4-" .and.
+     >             cstrack_cap(5:7) .eq. "/K3"
+      k8bbc =   cstrack_cap .eq. "VLBA/8" .or.
+     >          cstrack_cap .eq. "VLBA4/8"
+      kdbbc_rack        = cstrack_cap(1:4) .eq.  "DBBC"
+      kfila10g_rack     = cstrack_cap(10:16) .eq. "FILA10G"
 
       kvform  = kvrack
       km3form = Km3rack .or. kk3fmk4rack

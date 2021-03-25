@@ -22,9 +22,7 @@
 
 C     BBBUF creates buffers that hold the lines with bbsynth commands
 C     This routine is called only for switched sequences
-
-      include '../skdrincl/skparm.ftni'
-
+   
 C INPUT:
         integer icod    ! frequency code index
 	integer imode   ! group 1 or 2 of the switched frequencies
@@ -32,20 +30,21 @@ C INPUT:
 C                       with appropriate frequencies for the mode
 
 C COMMON
+      include '../skdrincl/skparm.ftni' 
       include '../skdrincl/freqs.ftni'
       include 'drcom.ftni'
 
 C CALLED by: VLBAH
 
 C HISTORY
+! 2020-12-30 JMG Removed variables which were not used. 
 C NRV 910524 created
 C nrv 930407 implicit none
 
 C LOCAL
       integer iline   ! counter for up to 3 lines with 5 freqs each
       integer iz   ! counts up to 5 freqs on a line
-      integer ix,iy,idum
-      integer ichmv
+      integer ix,iy
 
       iline = 0
       iz = 0

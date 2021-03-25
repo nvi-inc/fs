@@ -29,11 +29,11 @@
 ! local
       character*12 lname
 ! History
+! 2021-01-31 JMG Modified for DBBC3_DDC 
 ! 2007May28 JMGipson.  Modified to add Mark5B support.
 ! 2014Dec06 JMG. Added Mark5C support
 ! 2015Jun05 JMG.  A.) Don't output 'mk5=ss_rev?';  B.) Lowercase all output text.
 ! 2016Sep06 JMG. Replace 'mk5=status?' with 'mk5_status'
-
 
       lname="exper_initi"
 
@@ -63,8 +63,15 @@
         endif
         write(lufile,'(a)')   "mk5_status"
       endif
-      if(kdbbc_rack)     write(lufile,'("dbbc=version")')
-      if(kfila10g_rack)  write(lufile,'("fila10g=version")')
+
+      if(cstrack_cap .eq. "DBBC3_DDC") then
+        write(lufile,'(a)') "dbbc3=version"
+      else if(kdbbc_rack) then
+        write(lufile,'(a)') "dbbc=version "
+      else if(kfila10g_rack) then
+        write(lufile,'(a)') "fila10g=version"
+      endif 
+           
 
       write(lufile,'(a)') "enddef"
 

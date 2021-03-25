@@ -41,7 +41,6 @@ C          3) force checks Y or N <<<<<<< removed
 
 ! functions
       integer iTimeDifSec               !difference in seconds between two times
-      real   speed ! functions
       integer trimlen ! functions
       integer julda
 
@@ -125,7 +124,8 @@ C          3) force checks Y or N <<<<<<< removed
       integer istnsk_next,isor_next,icod_next
 
       integer istnsk,isor,icod
-      integer istn_start     !This is what we start with . 
+      integer istn_start        !This is what we start with . 
+      integer icod_prev         !previous code.
 
       integer*2 ldirp,lds
       character*2 cds,cdirp
@@ -133,11 +133,9 @@ C          3) force checks Y or N <<<<<<< removed
       equivalence (cdirp,ldirp)
       character*8 cmodep          !previous mode
     
-      character*8 cspeed          !speed of the recorder in ascii IPS or SLP for S2
-
       integer iobs_now,iobs_this_stat,iobs,iobsp,iobs_this_stat_rec
 
-      integer iblen,icheck,icheckp,isorp,ipasp,kerr
+      integer iblen,isorp,ipasp,kerr
 
 ! Stuff dealing with datatransfer
       logical kin2net,kdisk2file   !data transfer options
@@ -157,8 +155,8 @@ C          3) force checks Y or N <<<<<<< removed
 
       integer nch,nch2,nch3
 
-      integer l,idirp,idurp,iftchk,idirn,ilatestop
-      integer ic,ichk,iset,isppl,mjdpre
+      integer l,idirp,idirn,ilatestop
+      integer ic,mjdpre
 
       real d,epoc,tslew,dum
       integer itemp                  !short lived temporary variable
@@ -171,6 +169,8 @@ C          3) force checks Y or N <<<<<<< removed
 
       integer idt,ituse
       double precision utpre
+
+      character*4 lresponse            !
 C     character*28 cpass,cvpass  
 
 C     LMODEP - mode of previous observation
@@ -200,7 +200,6 @@ C        beginning the current observation
       integer itime_tape_stop(5)            !late end       =iend+ilate
       integer itime_cal(5)         	    !cal		=istart-ical
       integer itime_tmp(5)                 !temporary variable to hold time
-      integer itime_check(5)                !time to do a check.
       integer itime_tape_start(5)           !
       integer itime_tape_start_prev(5) 
       integer itime_data_valid(5)           !when is the scan valid?
@@ -218,9 +217,7 @@ C        beginning the current observation
       integer itime_buf_write_end(5)     !end of time to write buffer
      
       integer itime_pass_end(5)              !Time when we reach the end of this pass
-      real    speed_ft          !Speed in feet.
-      real    rmax_scan_time    !Length of scan in time.
-      integer icod_old          !previous code.
+
 
 ! Following are used in continuous/adaptive recording to keep track of:
 ! A.) Scan starting time.
@@ -237,8 +234,7 @@ C        beginning the current observation
       logical kcont 		! true for CONTINUOUS recording
       logical kadap 		! true for ADAPTIVE recording in VEX file
       logical kcontpass       	! true if a pass is actually continuous
-      logical kcontpass_prev    ! Continuous before this obs?
-      logical knewpass  	! true if this obs on new pass.
+  
       logical kfirst_tape       ! first tape
       logical klast_obs         ! doing last observation
       logical kfirst_obs   
@@ -246,9 +242,8 @@ C        beginning the current observation
 ! Variables associated with Mark6 recording       
       integer idata_mk6_scan_mb       !Data recorded for a scan.
       integer idata_mk6_scan_mb_prev  !for previous scan  
-      real*8  rmk6_buf_time           !buffer time
       integer imk6_buf_time
-  !
+
       character*180 ldum
       character*12 lsession      !filename
       
@@ -265,10 +260,15 @@ C     data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
 C
 C History:
 ! Now put in most recent first. 
-! 2021-01-15 JMG In converting to GB divide by 1000, not 1024.
-! 2020Nov20 JMG. If no observations return with warning. 
-! 2020Jun30 JMG. Got rid of test on kmissing (which indicated missing tape info)
-! 2020May29 JMG. Fixed bug in schedules with early starts. Schedules were not getting written out.
+! 2021-02-08 JMG lsetup_proc. now if changed the change sticks. You have to restart drudg
+! 2021-01-20 JMG if lsetup_proc="YES" always use setup_proc. 
+! 2021-01-20 JMG setup=SETUPBB if cstrack(istn)="BB" 
+! 2020-12-30 JMG Removed variables which were not used.  Removed obsolete check procedure.
+!                Added in new code for setup. 
+! 2020-11-20 JMG If no observations return with warning. 
+! 2020-06-30 JMG Got rid of test on kmissing (which indicated missing tape info)
+! 2020-06-08 JMG. Added new broadband.ftni.  Added ibb_off to buffereing time
+! 2020-05-29 JMG Fixed bug in schedules with early starts. Schedules were not getting written out.
 !                Also got rid of element-by-element copy of one itime_xx to another itime_yy. 
 ! 2019Nov20 JMG. Fixed bug in index.  
 ! 2019Nov20 WEH. changed line from f90 to f77 for backwards  compatibility
@@ -507,8 +507,7 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
 ! 2015Mar31 JMG. More changes to fix issues with phase_reference.
 ! 2015Apr04 JMG. Removed special handling if same source in consecutive scans. 
 ! 2015Jun05 JMG. Replaced squeezewrite by drudg_write. 
-! 2020-06-08 JMG. Added new broadband.ftni.  Added ibb_off to buffereing time
-! 2021-01-19 JMG Now use SETUPBB if rack is broadband.  Previously had to be BB and MARK6 recorder
+
 
       if(nobs .eq. 0) then 
          write(*,*) "Snap: Schedule has no observations. Returning."
@@ -520,8 +519,7 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
       klast_obs=.false. 
       istn_start=istn 
 
-      icod_old=-1
-      iblen = ibuf_len*2
+       iblen = ibuf_len*2
 
       if(cstrack(istn) .eq. "unknown" .or.
      >    cstrec(istn,1) .eq. "unknown") then
@@ -540,7 +538,7 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
       call init_hardware_common(istn)
       MaxTapeLen=MaxTap(istn)
       kcontpass=.true.  !Passes always start out as continous.
-      kcontpass_prev=.true.
+
       kfirst_tape=   .true.
       kdisk2file_prev=.false.
       idirp=1           
@@ -550,15 +548,41 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
       WRITE(LUSCN,'("SNAP output for ", a)') cSTNNA(ISTN)
       ierr=1
 
-      if (cfirstrec(istn)(1:1) .eq. "1") then
-        irec=1
-      else ! second recorder
-        irec=2
-      endif
-C Initialize recorder information.
-      ks2 = ks2rec(irec)
+
+! New option.  lsetup_proc 
+! Note that we preserve the original value.  
+! Opps! changed our mind. See last line at the end of this section.
+      lsetup_proc=lsetup_proc_orig
+      if(lsetup_proc_orig .eq. "IGNORE") lsetup_proc ="NO"
+    
+      if(lsetup_proc .eq. "ASK") then
+         lresponse="?"
+         do while(.not.(lsetup_proc .eq. "YES" 
+     &             .or. lsetup_proc .eq. "NO")) 
+           write(*,'("Use setup_proc (Yes/No): ",$)') 
+           read(*,*) lresponse
+           call capitalize(lresponse) 
+           if(lresponse .eq."YES" .or. lresponse .eq. "Y") then
+              lsetup_proc="YES"
+           else if(lresponse .eq. "NO" .or. lresponse .eq. "N") then 
+              lsetup_proc="NO"
+           else
+              write(*,*) "Invalid response. Try again. " 
+           endif 
+         end do    
+      endif      
+      if(lsetup_proc .eq. "YES") then
+         write(*,*) "Will use setup_proc"
+      else
+         write(*,*) "Will use normal setup" 
+      endif 
+      lsetup_proc_orig=lsetup_proc    !this makes the change permanent. 
+         
+      irec=1
+
+C Initialize recorder information.  
       kk5 = kk5rec(irec)
-      krec= .not.(knorec(irec) .or. kk5rec(irec))
+      krec= .not.(knorec(1) .or. kk5rec(1))
 
 C    1. Prompt for additional parameters, epoch of source positions
 C    and whether maximal checks are wanted.
@@ -590,8 +614,6 @@ C
       iobs_this_stat=0
       iobs_this_stat_rec=0
 
-      icheck=0
-      icheckp=0
       cmodep=" "
       IPASP = -1
       IFTOLD = 0
@@ -611,6 +633,7 @@ C
       end do
 
       icod_next=1   !initialize
+      icod_prev=-1
 
       kadap= (tape_motion_type(istn).eq.'ADAPTIVE')
       kcont= (tape_motion_type(istn).eq.'CONTINUOUS')
@@ -637,12 +660,12 @@ C
           ilen=-1
         endif
       enddo ! get first scan for this station into IBUF
-
+   
 C  Precess the sources to today's date for slewing calculations.
       TJD = JULDA(MON,IDA,itime_scan_beg(1)-1900) + 2440000.0D0
       DO I=1,NCELES
-        call apstar_Rad(tjd,sorp50(1,i),sorp50(2,i),
-     >         sorpda(1,i),sorpda(2,i))
+        call apstar_Rad(tjd,sorp2000(1,i),sorp2000(2,i),
+     >         sorp_now(1,i),sorp_now(2,i))
       enddo
 
       call snapintr(1,itime_scan_beg(1))
@@ -727,22 +750,21 @@ C  Precess the sources to today's date for slewing calculations.
           endif
 111       continue
         endif
-  
-        IF (ISTNSK.NE.0)  THEN ! our station is in this scan
-          if(cdir(istnsk)(1:1) .eq. "R") then
-             idir=-1
-          else if(cdir(istnsk)(1:1) .eq. "F") then
-             idir=1
-          else if(cdir(istnsk)(1:1) .eq. "0") then
+    
+        if(cdir(istnsk)(1:1) .eq. "R") then
+            idir=-1
+        else if(cdir(istnsk)(1:1) .eq. "F") then
+            idir=1
+        else if(cdir(istnsk)(1:1) .eq. "0") then
              idir=0
-          endif
-          if(cdir_next(istnsk)(1:1) .eq. "R") then
-             idirn=-1
-          else if(cdir_next(istnsk)(1:1) .eq. "F") then
-             idirn=1
-          else if(cdir_next(istnsk)(1:1) .eq. "0") then
-             idirn=0
-          endif
+        endif
+        if(cdir_next(istnsk)(1:1) .eq. "R") then
+           idirn=-1
+        else if(cdir_next(istnsk)(1:1) .eq. "F") then
+           idirn=1
+        else if(cdir_next(istnsk)(1:1) .eq. "0") then
+           idirn=0
+        endif
 
 C****************************************************************
 C This is the confusing part where certain timings are set up,
@@ -756,16 +778,7 @@ C  Does this obs start a new tape?
 
 C         Force new tape on the first scan on tape.
           if (iobs_this_stat_rec.eq.0) knewtp=.true.
-
-          kcontpass_prev=kcontpass
-
-          if(knewtp .or. icod .ne. icod_old) then
-            speed_ft=speed(icod,istn)
-             icod_old=icod
-          endif
-
-          kNewPass = (ipasp.ne.ipas(istnsk))       
-    
+         
 ! Data end time=itime_scan_beg+duration.
           call TimeAdd(itime_scan_beg,idur(istnsk),itime_scan_end)
 ! Cal time= itime_scan_beg-ical
@@ -877,16 +890,11 @@ C Use this section only for continuous
             call slewo(isorp,mjdpre,utpre,isor,istn,cwrap_pre,
      >        cwrap_now,tslew,0,dum)
             if (tslew.lt.0) tslew=0.0
-            if (kNewPass) then ! New pass.
-              call TimeAdd(itime_scan_end_prev,ilatestop,itime_pass_end)
-              call TimeSub(itime_scan_beg,itearl(istn),itime_tape_start)
-            else ! Old pass.
-              call TimeAdd(itime_scan_end_prev,ifix(tslew)+ical,
+             call TimeAdd(itime_scan_end_prev,ifix(tslew)+ical,
      >                 itime_scan_beg)
-              call TimeSub(itime_scan_beg,ical,itime_cal)
-              call TimeSub(itime_scan_beg,itearl(istn),itime_early)
-              call copy_time(itime_early,itime_tape_start)  
-            endif ! same pass/new pass
+             call TimeSub(itime_scan_beg,ical,itime_cal)
+             call TimeSub(itime_scan_beg,itearl(istn),itime_early)
+             call copy_time(itime_early,itime_tape_start)  
           endif !  calculate new times
         else ! start& stop OR new direction
           kstop_tape = .true.
@@ -909,15 +917,13 @@ C     3. Output the SNAP commands. Refer to drudg documentation.
 
 C scan_name command. 
         nch=trimlen(scan_name(iskrec(iobs_now)))   
-           
-
+          
         write(ldum,'("scan_name=",3(a,","),i4)')
      >    scan_name(iskrec(iobs_now))(1:nch),lsession, cpocod(istn),
      >    idur(istnsk)-ioff(istnsk)
         
         if(kdebug) write(*,*) ldum(1:50) 
         call drudg_write(lufile,ldum)       !get rid of spaces, and write it out.
-
 
         if(ktarget_time) then
 ! This is test for phase reference.  If doing phase_reference then get there ASAP
@@ -938,12 +944,12 @@ C               SOURCE=name,ra,dec,epoch
         IF (ISOR.LE.NCELES) THEN !celestial source
 ! do some intermediate processing.
           IF (cepoch.EQ.'1950') THEN
-            SORRA = RA50(ISOR)
-            SORDEC = DEC50(ISOR)
+            SORRA =  sorp1950(1,ISOR)
+            SORDEC = sorp1950(2,ISOR)
             EPOC = 1950.0
           ELSE !2000
-            SORRA = SORP50(1,ISOR)
-            SORDEC = SORP50(2,ISOR)
+            SORRA =  sorp2000(1,ISOR)
+            SORDEC = sorp2000(2,ISOR)
             EPOC = 2000.0
           endif
           CALL RADED(SORRA, SORDEC,0.0d0,IRAH,IRAM,RAS,
@@ -1026,51 +1032,9 @@ C               SOURCE=name,ra,dec,epoch
            kdisk2file_prev=.false.
         endif
            
-C
-C Check procedure
-C For continuous tape motion, check after tape stops at end of a pass
-        if (krec) then ! recording
-          ICHK = 0
-C         Add "not krunning" so we don't try a check while it's moving!
-          IF (.not.krunning.and..not.knopass
-     .      .and..NOT.KNEWTP.AND.iobs_this_stat_rec.GT.0) THEN !check procedure
-          IF ((.not.kcont.and.KFLG(2).and.(iobsp.eq.2.or.icheckp.eq.1))
-     .       .or.(kcont.and.kflg(2).and.iobsp.eq.1)) THEN ! see if there's time to do a check
-C        Do check if flag is set, but only if there is enough time.
-C        Or, do check if MAXCHK and if there is enough time.
-C        Enough time = (SOURCE+SPIN+SETUP+TAPE+3S+head) < IPARTM
-            iset=0
-            if (ldirp.ne.ldir(istnsk).or..not.kflg(1)) iset=isettm
-            ISPPL = ISET+ISORTM+ITAPTM+3
-C           Add the procedure times to the previous data stop (time4).
-            if (ilatestop.eq.0) then
-              call TimeAdd(itime_scan_end_prev,isppl,itime_check)
-            else
-              call TimeAdd(itime_tape_stop_prev,isppl,itime_check)
-            endif
-C           Check against start-early for early <> early
-C           check against start-cal   for early=0.
-            if (itearl(istn).ne.0) then
-              idt=iTimeDifSec(iTime_early,iTime_Check)
-            else
-              idt=iTimeDifSec(iTime_cal,iTime_Check)
-            endif
-C CHECK procedure 
-C Needs 55 sec at 80 ips = 4400 in = 366.667 f
-C NOTE: 55 sec should really be IPARTM
-              iftchk = speed_ft*idurp ! feet in previous scan
-              if (idt.ge.IPARTM.and.iftchk.ge.366) then ! enough time 
-                ICHK = 1
-                call snap_check(bitDens(istn,icod),idirp)
-              else ! not enough time, so try later
-                icheck = 1 ! do a check after this obs (or at least try)
-              endif ! enough time OR force
-            ENDIF !do the check
-          END IF !check procedure
-        endif ! recording 
 
 ! Do READY 
-        IF (KNEWTP.and.krec) THEN ! new tape
+        IF (krec) THEN ! new tape
           call snap_ready(ntape,kfirst_tape)
           if (iobs_this_stat.eq.0) then ! do a SETUP first
             if(kin2net) then
@@ -1082,47 +1046,50 @@ C NOTE: 55 sec should really be IPARTM
         END IF ! new tape
    
       
-C SETUP procedure 
-C This is called on the first scan, if the setup is wanted on this
-C scan (flag 1=Y), if tape direction changes, or if a check was done
-C prior to this scan. Do only on a new pass for continuous. 
+! SETUP procedure 
+! Don't call if doing phase reference or we are recording.
+! Do call on
+! 1. First observation.
+! 2. Change in code.
+! 3. If sked flag is set.
+! 4. If lsetup_proc="YES"
 
-      if(.not. (kPhaseRefPrev.or.krunning)) then    !issue SETUP          
-        IF (iobs_this_stat.EQ.0.OR.KFLG(1).OR.LDIRP.NE.LDIR(ISTNSK)
-     >       .OR.ICHK.EQ.1) THEN                
-            if(kin2net) then
-              call snap_in2net_connect(lufile,
+      if(kPhaseRefPrev.or.krunning) then
+        continue    !Don't issue in these 
+      else IF (iobs_this_stat.EQ.0 
+     &   .OR. Icod  .ne. icod_prev .or. kflg(1)) then 
+        if(kin2net) then
+          call snap_in2net_connect(lufile,
      >           ldest,lxfer_options(ixfer_ptr))
-            endif        
-            if(kdisk2file_prev) then             
-              call snap_wait_time(lufile,itime_disk_abort)
-              call snap_disk2file_abort(lufile)
-              kdisk2file_prev=.false.
-            endif  
-            if(cstrack(istn) .eq. "BB") then 
-              csetup_name="setupbb"
-            else
-              call setup_name(ccode(icod),csetup_name)
-            endif 
-            call drudg_write(lufile,csetup_name)                         
-           
-            if(km6disk) then
-              nch=trimlen(scan_name(iskrec(iobs_now)))
-              write(ldum,'("mk6=record=",
-     >         i4.4,"y",i3.3,"d",i2.2,"h", i2.2,"m",i2.2,"s",":",
-     >         i6,":",i6,":",a,":",a,":",a,";")')
-     >         (itime_scan_beg(i),i=1,5),
-     >         idur(istnsk), idata_mk6_scan_mb/(8*1000) ,         !convert bits to bites and to GB. 
-     >         scan_name(iskrec(iobs_now))(1:nch),
-     >         lsession(1:trimlen(lsession)),
-     >         cpocod(istn)                             
-              call drudg_write(lufile,ldum)     
-!              stop  
-            endif            
-       
-         END IF
-      endif
-!        pause 
+        endif        
+        if(kdisk2file_prev) then             
+          call snap_wait_time(lufile,itime_disk_abort)
+          call snap_disk2file_abort(lufile)
+          kdisk2file_prev=.false.
+        endif  
+        if(cstrack(istn) .eq. "BB") then
+           csetup_name="setupbb"
+        else
+           call setup_name(ccode(icod),csetup_name)
+        endif 
+        if(lsetup_proc .eq. "YES") then
+            write(lufile,'(a)') "setup_proc="//csetup_name
+        else
+            write(lufile,'(a)') csetup_name
+        endif                            
+        if(km6disk) then
+           nch=trimlen(scan_name(iskrec(iobs_now)))
+           write(ldum,'("mk6=record=",
+     >       i4.4,"y",i3.3,"d",i2.2,"h", i2.2,"m",i2.2,"s",":",
+     >       i6,":",i6,":",a,":",a,":",a,";")')
+     >       (itime_scan_beg(i),i=1,5),
+     >       idur(istnsk), idata_mk6_scan_mb/(1000*8) ,       
+     >       scan_name(iskrec(iobs_now))(1:nch),
+     >       lsession(1:trimlen(lsession)),
+     >       cpocod(istn)                             
+             call drudg_write(lufile,ldum)     
+          endif            
+       endif
 
 C Early start 
         if(idir.ne.0.and.krec) then ! this is a non-zero recording scan
@@ -1289,7 +1256,6 @@ C Save information about this scan before going on to the next one
         cmodep=cmode(istn,icod)
         IPASP = IPAS(ISTNSK)
         isorp = isor
-        icheckp=icheck
         cwrap_pre = ccable(istnsk)
         iobs_this_stat = iobs_this_stat + 1
 ! Find out when the scan starts for this station. 
@@ -1309,7 +1275,6 @@ C Save information about this scan before going on to the next one
           iobs_this_stat_rec = iobs_this_stat_rec + 1
           LDIRP = LDIR(ISTNSK)
           idirp=idir
-          idurp=idur(istnsk)
         endif ! update direction and footage
 
 C POSTOB        
@@ -1355,6 +1320,7 @@ C POSTOB
             call drudg_write(lufile,ldum)       !get rid of spaces, and write it out.
 ! find speed of recorder
             call find_recorder_speed(icod,speed_recorder,.true.)
+
 ! factor of 5 is too give extra time for scan to complete.
             idt=5+(xfer_end_time(ixfer_ptr)-xfer_beg_time(ixfer_ptr))*
      >                      speed_recorder*(8./110.)
@@ -1371,7 +1337,19 @@ C POSTOB
           utpre=utpre-86400.d0
           mjdpre = mjdpre+1
         endif
-      END IF  ! istnsk.ne.0 means our station is in this scan
+
+! Saver results from previous scan. 
+      icod_prev=icod
+      kdata_xfer_prev=kdisk2file .or. kin2net
+! Now we save the state of this scan.   
+      call copy_time(itime_early,     itime_early_prev)
+      call copy_time(itime_scan_beg,  itime_scan_beg_prev)
+      call copy_time(itime_scan_end,  itime_scan_end_prev)
+      call copy_time(itime_tape_stop, itime_tape_stop_prev)
+      call copy_time(itime_tape_start,itime_tape_start_prev)
+      call copy_time(itime_data_valid,itime_data_valid_prev) 
+      idata_mk6_scan_mb_prev=idata_mk6_scan_mb          
+
 C
 C     Copy ibuf_next into IBUF and unpack it.
       if (ilen.ne.-1) then ! more scans to come
@@ -1384,17 +1362,8 @@ C     Copy ibuf_next into IBUF and unpack it.
      >      MJD,UT,GST,MON,IDA,LMON,LDAY,IERR,KFLG,ioff)
         call ckobs(csname,cstn,nstnsk,cfreq,isor,istnsk,icod)
       endif       
-!      pause  
+   
 
-      kdata_xfer_prev=kdisk2file .or. kin2net
-! Now we save the state of this scan.   
-        call copy_time(itime_early,     itime_early_prev)
-        call copy_time(itime_scan_beg,  itime_scan_beg_prev)
-        call copy_time(itime_scan_end,  itime_scan_end_prev)
-        call copy_time(itime_tape_stop, itime_tape_stop_prev)
-        call copy_time(itime_tape_start,itime_tape_start_prev)
-        call copy_time(itime_data_valid,itime_data_valid_prev) 
-        idata_mk6_scan_mb_prev=idata_mk6_scan_mb          
       END DO ! ilen.gt.0,kerr.eq.0,ierr.eq.0
 
 ! Do any cleanup we need to do

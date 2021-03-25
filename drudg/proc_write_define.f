@@ -21,14 +21,18 @@
       implicit none
 ! write "define  lnamep        00000000000x"
 ! to the (proc) output file, and write lnamep to the screen.
+! 2021Jan12 JMG Modified so that program would not crash if lnamep passed like
+!                call proc_write_define(lufile,luscn, 'foobaz') 
+
 
 ! passed
       integer lufile
       integer luscn             !screen
       character*(*) lnamep      !procedure name.
 ! local
-      character*46 ldum
+      character*35 ldum
       integer ind
+      integer trimlen 
       integer nproc
       save nproc
 
@@ -43,22 +47,20 @@
 
       ldum="define                00000000000x"
 
-      call c2lower(lnamep,lnamep)
-      ind=index(lnamep," ")
-      if(ind .eq. 0) ind=len(lnamep)
+      ind=trimlen(lnamep) 
       write(ldum(9:ind+8),'(a)') lnamep(1:ind)
-!     call c2lower(ldum,ldum)
-      write(lufile,'(a)') ldum
-
+      call lowercase(ldum)
+      write(lufile,'(a)') ldum(1:trimlen(ldum))
+   
 ! This part writes the procedures to the screen.
       if(nproc .eq. 0) then             !indent first proc 5 spaces
-         WRITE(luscn,"(5x,a12,$)") lnamep
+         WRITE(luscn,"('   Defining:   ',a,$)") lnamep(1:ind) 
          nproc =nproc+1
-      elseif(nproc .lt. 4) then
-         WRITE(luscn,"(' ',a12,$)") lnamep !skip a space for next
+      elseif(nproc .lt. 12) then
+         WRITE(luscn,"(' ',a,$)") lnamep(1:ind) !skip a space for next
          nproc =nproc+1
       else
-         WRITE(luscn,"(' ',a12)") lnamep   !close after 5
+         WRITE(luscn,"(' ',a)") lnamep(1:ind)    !close after 5
          nproc=0
       endif
 

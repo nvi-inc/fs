@@ -55,7 +55,6 @@ C LOCAL:
       integer*2 LPROC(4) !  The procedure name for NRAO
          integer nchar,itnum
       real dut,eeq
-      integer ih
       integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
      .          LMON(2),LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn)
 
@@ -127,6 +126,7 @@ C 000815 nrv Remove all but VLBA option.
 ! 2008Aug19 JMGipson. Check to see if tape motion type is "AUTO" for vlba"
 ! 2015Mar30 JMG. got rid of obsolete arg in drchmod
 ! 2020Nov10 JMG. Got rid of somestuff dealing with headstacks. 
+! 2021Jan07  JMG removed unused variables 
 
       kintr = .false.
       if (kbatch) then
@@ -236,10 +236,10 @@ C 4. If station is in observation, process it.  Use block
 C    appropriate to current station.
 C
 	 IF (ISTNSK.NE.0) THEN !Current station in observation
-	   CALL RADED(RA50(ISOR),DEC50(ISOR),HA,
+	   CALL RADED(sorp1950(1,isor),sorp1950(2,isor),HA,
      .         IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,
      .         LHSIGN,IHAH,IHAM,HAS)
-	    CALL RADED(SORP50(1,ISOR),SORP50(2,ISOR),HA2,
+	    CALL RADED(sorp2000(1,ISOR),sorp2000(2,ISOR),HA2,
      .         IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
      .         LHSIGN2,IHAH2,IHAM2,HAS2)
 	    CALL TMADD(IYR,IDAYR,IHR,iMIN,ISC,IDUR(ISTNSK),IYR2,IDAYR2,
@@ -284,7 +284,7 @@ C
 		write(lu_outfile,9503)
 9503            format('** RS CATALOG',57x,'J2000')
 		do i=1,nceles
-		  CALL RADED(SORP50(1,I),SORP50(2,I),HA2,
+		  CALL RADED(sorp2000(1,I),sorp2000(2,I),HA2,
      .            IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
      .            LHSIGN2,IHAH2,IHAM2,HAS2)
 		  write(lu_outfile,9501) csorna(i)(1:4),irah2,
@@ -310,7 +310,7 @@ C
 C          For each observation, write out command line
 	      if (itearl(istn).gt.0) call tmsub(iyr,idayr,ihr,
      .          imin,isc,itearl(istn),iyr,idayr,ihr,imin,isc)
-	      CALL RADED(SORP50(1,ISOR),SORP50(2,ISOR),HA2,
+	      CALL RADED(sorp2000(1,ISOR),sorp2000(2,ISOR),HA2,
      .         IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
      .         LHSIGN2,IHAH2,IHAM2,HAS2)
 	      idir=1

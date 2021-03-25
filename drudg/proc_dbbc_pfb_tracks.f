@@ -32,6 +32,7 @@
 
 ! History
 ! Now most recent at the top.
+! 2020-12-30 JMG. Get lmode_cmd  from subroutine=proc_get_mode_vdif
 !
 ! 2018Sep10 JMGipson. Changed logic to make more transparent.
 !
@@ -48,7 +49,7 @@
       integer num_out     !number written out
       integer nch         !character  location
       integer i           !counter
-
+  
       integer*4 itemp
       integer*4 imask(2)  !Mask can be 64 bits long.
       integer*4 imask_lo, imask_hi
@@ -56,24 +57,11 @@
       equivalence(imask(2),imask_lo)
 
 !      character*80 cbuf
-      character*20 lmode_cmd
-      character*6 lext_vdif
-      character*4 lvsi_align   !holds vsi_align value=0,1,NONE,ASK
+       character*4 lvsi_align   !holds vsi_align value=0,1,NONE,ASK
 
 ! This holds strings of the form a02, b13, etc
       character*3  ltmp_array(32)
       integer      ikey(32)
-
-      lext_vdif="ext"
-      if(km5brec(1)) then
-         lmode_cmd="mk5b_mode"
-      else if(km5Crec(1)) then
-         lmode_cmd="mk5c_mode"
-         if(kfila10g_rack) lext_vdif="vdif"
-      else
-         lmode_cmd="bit_streams"
-      endif
-
 !
 ! Make the bit-mask.
 ! Initialize mask.
@@ -92,7 +80,7 @@
        end do
 
       call proc_track_mask_lines(lu_file, imask_hi,imask_lo,
-     >   kfila10g_rack,samprate(istat,icode), lmode_cmd,lext_vdif)
+     >   kfila10g_rack,samprate(istat,icode))
 
 ! Now we have to write out the vsi1 and vsi2 commands. These look like...
 !>>   form=flex

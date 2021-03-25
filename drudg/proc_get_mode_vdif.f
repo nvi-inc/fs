@@ -17,39 +17,29 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
-      subroutine snap_check(BitDens,idirp)
-! passed
-      implicit none  !2020Jun15 JMGipson automatically inserted.
-      include 'hardware.ftni'
-      double precision BitDens
-      integer idirp
+      subroutine proc_get_mode_vdif(cstrec,kfila10g)
+      implicit none 
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      character*(*) cstrec
+      logical kfila10g
+   
+! History.
+! 2021-02-08  JMG Now vdif for Flexbuff and Mark5C. Previously only if fil10g. 
+! 2021-01-25  JMG now sets lext_vdif and lmode_mcd in drcom.ftni
+! 2020-12-29. JMG First version. Used by proc_dbbc_pfb_tracks and proc_disk_tracks, proc_dbbc3_ddc...
 
-! local
-      character ldir
-      character*3 ltmp
-      integer ntmp
-      character lpost
-
-      if(idirp .eq. 1) then
-         ldir="f"
+      lext_vdif="ext"
+      if(cstrec .eq."Mark5B") then
+         lmode_cmd="mk5b_mode"
+      else if(cstrec .eq. "FlexBuff") then
+         lmode_cmd="fb_mode"
+         lext_vdif="vdif"
+      else if(cstrec .eq. "Mark5C") then
+         lmode_cmd="mk5c_mode"
+         lext_vdif="vdif"
       else
-         ldir="r"
+         lmode_cmd="bit_streams"
       endif
-
-      if(bitdens .lt. 40000.0) then
-        ntmp=3
-        ltmp="135"
-      else
-        ntmp=2
-        ltmp="80"
-      endif
-
-      if(krec_append) then
-        lpost=crec(irec)
-      else
-        lpost=" "
-      endif
-      write(lufile,'("check",a,a1,a1)') ltmp(1:ntmp),ldir,lpost
-
       return
-      end
+      end 

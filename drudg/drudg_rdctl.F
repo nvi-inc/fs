@@ -19,22 +19,28 @@
 *
       SUBROUTINE drudg_rdctl(csked,csnap,cproc,cscratch,
      >   crack_type_def,crec_default,cfirstrec_def, kequip_over)
-      
+      implicit none 
 C
 ! This routine will open the default control file for drudg. 
 ! Based on old routine rdctl that handlled both sked and drudg.
 ! This just handles handles drudg.
 
+! Updates....
+! 2021-01-25 JMG New  option: vdif_single_thread_per_file   
+! 2021-01-14 JMG Increased max_token 
+! 2021-01-11 JMG Modified to account for DBBC3
+! 2020-12-30 JMG New option in skedf.ctl:  SETUP_PROC. [YES|NO|ASK] default is NO
+!
+! 2018-06-17 JMG Father's day. Make sure always a space " " between sections of snap file.
+!                Also fix reported error in label size.  Was reporting error when there was not one. 
+! 2018-09-25 JMG skedf.ctl has different locations depending on wheater PC-FS computer or not. This is set in makefile. 
 ! 2015Jun05. JMGipson. Size of crack_type_def, crec_default set by calling program. Previously hardwired. 
 ! 2015Jul06  JMGipson. Initialized "crack_type_def, crec_default to " ". 
 ! 2015Jul17 JMG. Added cont_cal_polarity.
 ! 2015Jul21 JMG. Made "ASK" valid option ofr cont_cal_polarity 
 ! 2016Jul28 JMG. Now also set cfirstrec_def in 'equipment override'
 ! 2016Sep08 JMG. New keyword 'vsi_align' 
-! 2018Jun17 JMG. Father's day. Make sure always a space " " between sections of snap file.
-!                Also fix reported error in label size.  Was reporting error when there was not one. 
-! 2018Sep25 JMG. skedf.ctl has different locations depending on wheater PC-FS computer or not. This is set in makefile. 
-
+!
 
 C   parameter file
       include '../skdrincl/skparm.ftni'
@@ -43,7 +49,6 @@ C   parameter file
       include 'drcom.ftni' 
       include 'bbc_freq.ftni'
      
-
 ! Passed
       character*128 csked,csnap,cproc,cscratch     !Various directories. 
       character*(*) crack_type_def,crec_default(2),cfirstrec_def
@@ -61,15 +66,13 @@ C  LOCAL VARIABLES
       character*10 lsecname
       character*3 lprompt
       integer itemp
-      character*25 lkeyword     !keyword
+      character*40 lkeyword     !keyword
       character*128 lvalue      !value
-      integer max_dbbc_if_inputs
-      parameter(max_dbbc_if_inputs=4)
-      character*2 lvalid_dbbc_if_inputs(max_dbbc_if_inputs)
+      character*1 lchar 
 
       integer MaxToken
       integer NumToken
-      parameter(MaxToken=6)
+      parameter(MaxToken=20)
       character*128 ltoken(MaxToken)
       equivalence (lkeyword,ltoken(1))
       equivalence (lvalue,ltoken(2))    
@@ -93,7 +96,6 @@ C  LOCAL VARIABLES
      > "/etc/skedf.ctl",  "skedf.ctl",
      > "/usr2/control/skedf.ctl"/
   
-      data lvalid_dbbc_if_inputs/"1","2","3","4"/ 
       data lvalid_polarity/"0","1","2","3","NONE","ASK"/     
       data lvalid_vsi_align/"0","1","NONE","ASK"/     
 
@@ -126,15 +128,18 @@ C  LOCAL VARIABLES
       
 ! Initialization
 ! Stuff for DBBC
-      do i=1,4
+      do i=1,max_ifd 
         ldbbc_if_inputs(i)=" "
         idbbc_if_targets(i)=-1
       end do
       idbbc_bbc_target=-1   
 
+      
       cont_cal_prompt="off" 
       cont_cal_polarity=" "    !default is none!
       lvsi_align_prompt= " "   !default is none!
+      lsetup_proc_orig   ="IGNORE"    !Don't do anything or ask questions. 
+      lvdif_thread_orig  ="IGNORE"    !Don't do anything.  
       ktarget_time=.false.
       klo_config=.false. 
       kignore_mark5b_bad_mask=.false.
@@ -175,10 +180,8 @@ C  2. Process the control file if it exists. Loop throug 3 times.
         kexist = .false.
         inquire(file=cskedf(j),exist=kexist)      
         if(.not.kexist) goto 500                !quick exit. 
-
  
         open(lu,file=cskedf(j),iostat=ierr,status='old')
-
 
         if (ierr.ne.0) then
           write(luscn,9100) cskedf(j)(1:itmplen)
@@ -189,7 +192,6 @@ C  2. Process the control file if it exists. Loop throug 3 times.
 
         write(luscn,'("drudg_rdctl: Reading system control file ",A)')
      >       cskedf(j)(1:itmplen)   
-
     
 ! File exists, and we have opened it.    
         call readline_skdrut(lu,cbuf,keof,ierr,1) !read first $           
@@ -340,7 +342,7 @@ C  $MISC
                    cepoch=lvalue(1:4)
                 else
                   write(luscn,'("RDCTL06 ERROR: Invalid epoch ",a)')
-     >             lvalue(1:trimlen(lvalue))
+     >             ">"//lvalue(1:trimlen(lvalue))//"<"
                endif
 ! Disk2file stuff
               else if (lkeyword .eq. 'DISK2FILE_DIR') then
@@ -413,6 +415,32 @@ C         EQUIPMENT
                 end do
               else if(lkeyword .eq. 'EQUIPMENT_OVERRIDE') then
                 kequip_over=.true.
+              else if(lkeyword .eq. "USE_SETUP_PROC") then
+                call capitalize(lvalue)
+                if(lvalue .eq. "Y" .or. lvalue .eq. "YES") then
+                  lsetup_proc_orig="YES"
+                else if(lvalue .eq. "N" .or. lvalue .eq. "NO") then
+                  lsetup_proc_orig="NO"
+                else if(lvalue .eq. "ASK") then
+                  lsetup_proc_orig="ASK"
+                else
+                  write(luscn, *) "RDCTL Error: Invalid USE_SETUP_PROC " 
+     &                 //lvalue(1:10) 
+                endif 
+              else if(lkeyword .eq. "VDIF_SINGLE_THREAD_PER_FILE") then
+                call capitalize(lvalue)
+                if(lvalue .eq. "Y" .or. lvalue .eq. "YES") then
+                  lvdif_thread_orig="YES"
+                else if(lvalue .eq. "N" .or. lvalue .eq. "NO") then
+                  lvdif_thread_orig="NO"
+                else if(lvalue .eq. "ASK") then
+                  lvdif_thread_orig="ASK"
+                else
+                  write(luscn, *) 
+     &               "RDCTL Error: Invalid VDIF_SINGLE_THREAD_PER_FILE" 
+     &                 //lvalue(1:10) 
+                endif 
+
 C         TPICD
               elseif (lkeyword .eq. 'TPICD') then
                 lprompt=lvalue(1:3)
@@ -473,34 +501,33 @@ C         TPICD
                    lvalue="ASK"           !set to ask if not valid. 
                 endif
                 lvsi_align_prompt=lvalue                                    
-        
+! Stuff for DBBC   or DBBC3     
               elseif(lkeyword .eq. "DEFAULT_DBBC_IF_INPUTS") then
-                if(NumToken .gt. 5) then 
+                if(NumToken-1 .gt. max_ifd) then 
                    write(*,*) "drudg_rdctl: Too many tokens for "//      
      >                        "DEFALUT_DBBC_IF_INPUTS"
-                   write(*,*) "can specify upto 4 inputs"
+                   write(*,*) "can specify upto ",max_ifd 
                 else
 ! Temporarily undo indent. 
-                  do i=2,NumToken
-                    call capitalize(ltoken(i))
-                    itemp=iwhere_in_string_list(
-     >              lvalid_dbbc_if_inputs,max_dbbc_if_inputs,ltoken(i))
+                  do i=1,NumToken-1
+                    lchar=ltoken(i+1)
+                    itemp=index("12345678",lchar)    !See if one of these numbers
                     if(itemp .eq. 0) then
                       write(*,*) "drudg_rdctl: Invalid dbbc_if_input ", 
-     >                   ltoken(i)(1:trimlen(ltoken(i)))
+     >                   ltoken(i+1)(1:trimlen(ltoken(i+1)))
                     else
-                      ldbbc_if_inputs(i-1)=ltoken(i) 
+                      ldbbc_if_inputs(i)=lchar 
                     endif
                   end do                                        
                 endif 
               elseif(lkeyword .eq. "DBBC_IF_TARGETS") then
-                if(NumToken .gt. 5) then 
+                if(NumToken-1 .gt. max_ifd) then 
                    write(*,*) "drudg_rdctl: Too many tokens for"//      
      >                          "DBBC_IF_TARGETS"
                    write(*,*) "can specify upto 4 inputs"                  
                 else
 ! Temporarily undo indent. 
-                  do i=1,4
+                  do i=1,NumToken-1
                     read(ltoken(i+1),*,err=900) idbbc_if_targets(i)
                     if(idbbc_if_targets(i) .gt. 65535 .or. 
      >                 idbbc_if_targets(i) .lt. 0) then
@@ -512,7 +539,7 @@ C         TPICD
                       write(*,*) "Setting to 0."
                      idbbc_if_targets(i)=0
                    endif 
-                  end do                                        
+                  end do                                    
                 endif 
               else if(lkeyword .eq. "DBBC_BBC_TARGET") then 
                 if(NumToken .ne. 2) then
@@ -531,6 +558,7 @@ C         TPICD
                      idbbc_bbc_target=0
                   endif 
                 endif 
+
               else if(lkeyword .eq. "LO_CONFIG") then
                 if(NumToken .ne. 2) then
                   write(*,*) 
@@ -552,7 +580,6 @@ C         TPICD
      >                         ltoken(2) .eq. "YES" .or.
      >                         ltoken(2) .eq."ON"
                 endif     
-
                          
               else if(lkeyword .eq. "TARGET_TIME") then 
                if(NumToken .ne. 2) then
@@ -564,8 +591,6 @@ C         TPICD
      >                         ltoken(2) .eq. "YES" .or.
      >                         ltoken(2) .eq."ON"
                 endif
-
-
               endif
               call readline_skdrut(lu,cbuf,keof,ierr,2)        
 ! End $MISC

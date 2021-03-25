@@ -31,7 +31,10 @@ C
       include '../skdrincl/skobs.ftni'
 
 C
-C   HISTORY:
+! Updates. Most reecent first. 
+! 2021-01-05 JMG Replaced max_frq by max_code. (Max_frq was confusing and led to coding errors.)
+! 2017-10-24 JMG fixed minor bugs in  output (VLBA1:2-->vlba1:4, pcalxfreq1-->pcalcxfre2
+! 2014-02-04 JMG Modified to be in the same order as SCHED output
 C     WHO   WHEN   WHAT
 C     gag   900720 CREATED
 C     gag   901025  got rid of trailing blanks
@@ -66,8 +69,6 @@ C 020103 nrv Change 7010 to 5010 for phase cal freqs.
 ! 2008Aug19 JMG.  Rearranged and cleaned up in the process of debugging.
 ! 2009Sep15 JMG. Had error when computing how many bits.  Fixed.
 ! 2009Sep22 JMG. Got rid of unused variables
-! 2014Feb04 JMG. Modified to be in the same order as SCHED output
-! 2017Oct24 JMG. fixed minor bugs in  output (VLBA1:2-->vlba1:4, pcalxfreq1-->pcalcxfre2
 
 C
 C
@@ -103,7 +104,7 @@ C  LOCAL VARIABLES
       real synthv(max_chan)  !BBC freqs
 
       integer isyn(max_chan) ! synthesizer numbers A=2,B=1,C=4,D=3
-      integer i2bit(max_chan,max_stn,max_frq) ! 1 or 2-bit sampling per channel
+      integer i2bit(max_chan,max_stn,max_code) ! 1 or 2-bit sampling per channel
       character*3 cs   !set character
 
       integer*2 ldum
@@ -484,4 +485,4 @@ C if transfer switch is on.
       endif !VLBA antennas
 
       RETURN
-      END
+      END! 2017Oct24 JMG. fixed minor bugs in  output (VLBA1:2-->vlba1:4, pcalxfreq1-->pcalcxfre2

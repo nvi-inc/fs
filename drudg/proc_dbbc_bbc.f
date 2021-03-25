@@ -23,10 +23,11 @@
 
 ! Note: Also calculate and store in common BBC freqs, lo freqs.
 ! History
-!  2020Feb20 JMGipson. Added implicit none. Added luscn to arg list for invalid_if and invalid_bbc
-!  2012Sep12 JMGipson. First version. Modeled proc_vracks_bbc.
-!  2016Jan19 JMGipson. Modified for new DBBC versions.
-!  2016Nov21 JMGipson. Don't check original rack type anymore.
+!  2020-12-30 JMG Removed obsolete variables. Some cleanup of hardcoded if statements. Use drudg_write
+!  2020-02-20 JMGipson. Added implicit none. Added luscn to arg list for invalid_if and invalid_bbc
+!  2012-09-12 JMGipson. First version. Modeled proc_vracks_bbc.
+!  2016-11-21 JMGipson. Don't check original rack type anymore.
+!  2016-01-19 JMGipson. Modified for new DBBC versions.
 !
 ! Write out VC commands.
       include 'hardware.ftni'
@@ -40,14 +41,13 @@
       integer iwhere_in_string_list
 
 ! local
-      integer nch
       integer max_if_valid
       parameter (max_if_valid=20)
       character*2 cif_valid(max_if_valid)
       integer iwhere
 
       logical kvalid_if
-      logical kdbbc
+
       character*2 cif
       character*1 lq
 
@@ -65,13 +65,8 @@
 
       write(cbbc,'("bbc",i2.2)') ib
 
-! Commented out 2016Nov21
-!      if(cstrack_orig(istn)(1:4) .eq. "DBBC" .or.
-!     >   cstrack_orig(istn) .eq. "NONE") then
-       if(.true.) then
-         kdbbc=.true.
-!        Check to see if the IF is valid. Should be of the form:
-!        A1,A2...A4,  B1,B2...B4, .... D1...D4
+!      Check to see if the IF is valid. Should be of the form:
+!      A1,A2...A4,  B1,B2...B4, .... D1...D4
         cif=cifinp(ic,istn,icode)
         call capitalize(cif)   !capitalize for the check.
         iwhere= iwhere_in_string_list(cif_valid,max_if_valid,cif)
@@ -86,10 +81,6 @@
      >   "proc_dbbc_bbc: Warning! For BBC ",ib, " IF '", cif,
      >       "' has blank as second character!"
         endif
-      else
-       kdbbc=.false.
-       iwhere=0
-      endif
 
 
       if(iwhere .ne. 0) then
@@ -97,7 +88,7 @@
       else
         kvalid_if=.false.
 !        call invalid_if(cbbc,cifinp(ic,istn,icode), cstrack(istn))
-        if(     ib .ge. 1 .and. ib .le. 4) then
+        if(ib .ge. 1 .and. ib .le. 4) then
           cif="a"//ldbbc_if_inputs(1)
         else if(ib .ge. 5 .and. ib .le. 8) then
           cif="b"//ldbbc_if_inputs(2)
@@ -107,13 +98,8 @@
           cif="d"//ldbbc_if_inputs(4)
         endif
         call write_return_if_needed(luscn,kwrite_return)
-        if(kdbbc) then
-           write(luscn,'(a,a,a)') lq,cif,lq
-        else
-          write(luscn,'("For BBC ",i3, " Converted IF ", a, " to ", a)')
-     >    ib,  cifinp(ic,istn,icode), cif
-        endif
-          cifinp(ic,istn,icode)=cif
+        write(luscn,'(a,a,a)') lq,cif,lq
+        cifinp(ic,istn,icode)=cif
       endif
 
       rfmin=10.0
@@ -138,12 +124,11 @@
 
 ! Make a string that looks like:
 ! bbc01=612.99,a,8.000
-      if(cstrack_cap(istn)(1:8) .eq. "DBBC_DDC") then
+      if(cstrack_cap(1:8) .eq. "DBBC_DDC") then
         write(cbuf,'("bbc",i2.2,"=",f7.2,",",a1,",", f6.2)')
      >    ib,fvc(ib),cifinp(ic,istn,icode), vcband(ic,istn,icode)
-        call squeezeleft(cbuf,nch)
-        call lowercase_and_write(lu_outfile,cbuf)
-      endif
+        call drudg_write(lu_outfile,cbuf)       !get rid of spaces, and write it out.  
+      endif 
       return
       end
 

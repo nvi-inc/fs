@@ -43,8 +43,7 @@ C
       integer igtba              ! functions
       integer trimlen
       integer iwhere_in_string_list
-      logical kvalid_rec, kvalid_rack
-
+  
 C  LOCAL:
       integer MaxBufIn
       parameter (MaxBufIn=256)
@@ -109,6 +108,20 @@ C      - these are used in unpacking station info
 C
 C  INITIALIZED
 C
+
+!Updates
+! 2020-12-30 JMG Removed unused variables
+! 2020-11-11 JMG. Catch bug if Station ID has wrong format in horizon mask. 
+! 2020-10-02 JMG. Removed all references to S2
+! 2007Mar30  JMG. Checked to make sure didn't duplicate codes.
+! 2007Apr05  JMG. But OK to have duplicate " " for horizon mask.
+! 2009Mar03  JMG. Fixed bug in OR statement with K5.
+! 2013Mar22  JMG. Fix problem if first antenna limit is negative. (i.e., (-270,270) instead of (90, 630)
+! 2013Sep17  JMG. Fixed incorrect error message for latitude. Said "A line" but was "B line".
+! 2015Jun30  JMG. Changed Rack, recorder length from 8-->12 chars.
+! 2016Jul28  JMG. Changed rack length to 20 chars.
+!                 Initialize cfirtrec(i)="1" even if have problems reading "T " line.
+! 2017Mar13  JMG. If rack or recorder are not recongnized, set them to 'unknown' and continue.
 C  PROGRAMMER: NRV
 C  WHEN   WHO  CHANGES
 C  830423 NRV ADDED AXIS TYPES 2,4 FOR X,Y MOUNTS
@@ -148,17 +161,8 @@ C            (e.g. 7560) using speed.
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C
-! 2007Mar30  JMG. Checked to make sure didn't duplicate codes.
-! 2007Apr05  JMG. But OK to have duplicate " " for horizon mask.
-! 2009Mar03  JMG. Fixed bug in OR statement with K5.
-! 2013Mar22  JMG. Fix problem if first antenna limit is negative. (i.e., (-270,270) instead of (90, 630)
-! 2013Sep17  JMG. Fixed incorrect error message for latitude. Said "A line" but was "B line".
-! 2015Jun30  JMG. Changed Rack, recorder length from 8-->12 chars.
-! 2016Jul28  JMG. Changed rack length to 20 chars.
-!                 Initialize cfirtrec(i)="1" even if have problems reading "T " line.
-! 2017Mar13  JMG. If rack or recorder are not recongnized, set them to 'unknown' and continue.
-! 2020Oct02  JMG. Removed all references to S2
-! 2020Nov11  JMG. Catch bug if Station ID has wrong format in horizon mask. 
+
+
 
       cbufin=" "
 ! AEM 20050314 init vars

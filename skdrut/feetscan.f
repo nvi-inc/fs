@@ -24,6 +24,8 @@ C  FEETSCAN converts the footage and pass number and
 C  puts them into the scan buffer.
 
 C History
+!Updates
+! 2020-12-30 JMG Removed unused variables
 C 970722 nrv New. Removed form newscan and addscan.
 C 001101 nrv Put footage field at nch+1 for S2 (as for non-S2).
 
@@ -39,11 +41,9 @@ C Input and Output
       integer ipas,ifeet,idrive
 
 C Local
-      integer i,nchx
-      logical kfor
-      character*1 cdir
+      integer nchx
       integer*2 ibufx(4)
-      character*1 pnum ! function
+
       integer ib2as,ichmv_ch,ichmv
 
 C  Insert the pass number in the scan, then determine

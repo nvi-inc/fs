@@ -35,6 +35,9 @@ C
       include '../skdrincl/skobs.ftni'
 C
 C  History:
+!Updates
+! 2020-12-30 JMG Removed unused variables
+! 2020-10-02 JMG Removed all references to S2
 C 960517 nrv New.
 C 960521 nrv Revised.
 C 960810 nrv Add tape motion fields
@@ -54,7 +57,7 @@ C 020110 nrv Check S2 tape speed, must be LP or SLP. Make upper case.
 ! 2006Nov16 JMG Fixed initialization of ltlc.
 ! 2016Nov29 JMG. Mapps obsolete DBBC-->DBBC_DDC & DBBC/FILA10G ---> DBBC_DDC/FIL10G
 ! 2016Nov29 JMG. Rack changed to character*20 from character*8
-! 2020Oct02  JMG. Removed all references to S2
+
 C
 C  INPUT:
       character*128 stdef ! station def to get
@@ -84,11 +87,10 @@ C                    section had vex error, <0 is invalid value
 
 C
 C  LOCAL:
-      character*128 cout,cunit,ctemp
+      character*128 cout,cunit
       double precision d
       integer i,nch
 
-C
 C  Initialize in case we have to leave early.
 
       crec=" "
@@ -103,7 +105,6 @@ C  Initialize in case we have to leave early.
       itl=0
       itg=0
       ctapemo=''
-
 
 C  1. The recorder type
 C

@@ -1,8 +1,31 @@
+*
+* Copyright (c) 2021 NVI, Inc.
+*
+* This file is part of VLBI Field System
+* (see http://github.com/nvi-inc/fs).
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
 C  Common Block statement for DRUDG
 ! Newer changes now at top
-! 2020Jun30   Got rid of kmissing (see if pass information is absent)
-! 2019Aug25.  Added imark6_off to support broadband
-! 2019Aug21.  Got rid of iperm which whas not used
+! 2021-01-31  JMG Changed most prompts to char*6 so that "IGNORE" is now an option 
+! 2021-01-25  JMG Removed RA50, DEC50. Moved to skdrincl/source.ftni sorp1950
+! 2021-01-25  JMG Added vdif_thread 
+! 2020-12-30  JMG Added in setup_proc
+! 2020-06-30  JMG Got rid of kmissing (see if pass information is absent)
+! 2019-08-25  JMG Added imark6_off to support broadband
+! 2019-08-21  JMG Got rid of iperm which whas not used
 C
 C  MWH 890518 Changed file names to character
 C             Added Fmp call declarations
@@ -71,32 +94,48 @@ c
      >       klo_config,ktarget_time,kignore_Mark5b_bad_mask,
      >       kcont_cal 
 
+
+! Rearranged so that definitiona and common block statments in the same order. 
+
+
       CHARACTER*128 LSKDFI,SNPNAME,CINNAME,COUTNAME,
      .  lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
      .  cprttyp,cprport,cprtlab,clabtyp,labname,ctextname
 
-      character*4 tpid_prompt, cont_cal_prompt,lvsi_align_prompt
-      character*4 cont_cal_Polarity
-
       character*2 cpaper_size
-      character*2 coption
+      character*2 coption(3)
       character*6 cpid
       character*4 cepoch
-      integer*2 IBUF(ibuf_len)
-      character*(2*ibuf_len) cbuf
+
+      character*6 lsetup_proc_orig                    !value of SETUP_proc in skedf.ctl (if not set then "IGNORE")
+      character*6 lsetup_proc                         !value used.  
+
+      character*6 lvdif_thread_orig                   !Value of lvdif_thread in skedf.ctl. 
+      character*6 lvdif_thread                        !value used in program. 
+      character*6 tpid_prompt,lvsi_align_prompt
+      character*6 cont_cal_prompt,cont_cal_Polarity
+      
+
+
+      character*12 lmode_cmd     !bit_streams, fb_mode, mk5b_mode etc..   
+      character*6  lext_vdif     !used in DBBC, DBBC3
+
+      integer*2 IBUF(500)
+      character*(1000) cbuf
       equivalence (cbuf,ibuf)
-    
+     
+      COMMON/DRCOM_CH/LSKDFI,SNPNAME,CINNAME,COUTNAME,
+     >    lstname,tmpname,pntname,ctmpnam,prcname,cprtlan,cprtpor,
+     >    cprttyp,cprport,cprtlab,clabtyp,labname,ctextname,
+     >    cpaper_size,coption,cpid,cepoch,
+     >    lsetup_proc_orig, lsetup_proc,
+     >    lvdif_thread_orig, lvdif_thread,
+     >    tpid_prompt,lvsi_align_prompt,
+     >    cont_cal_prompt,cont_cal_Polarity,
+     >    lmode_cmd,lext_vdif,cbuf  
 
-      COMMON/DRCOM_CH/cbuf, LSKDFI,SNPNAME,CINNAME,COUTNAME,
-     .    lstname,TMPNAME,pntname,ctmpnam,prcname,cprtlan,cprtpor,
-     .    cprttyp,cprport,cpid,cprtlab,cepoch,clabtyp,labname,
-     >    cpaper_size,coption(3),ctextname,
-     >    tpid_prompt,cont_cal_prompt,cont_cal_polarity,
-     >    lvsi_align_prompt
-
-
-      double precision RA50(max_cel),DEC50(max_cel)
       real rlabsize(6)
+      common /drcom_real/rlabsize
 c
      
       INTEGER ireccv,IRECSK,IRECST,IRECEL,isklen,luusr,
@@ -118,7 +157,6 @@ C
       integer imark6_off
 
       COMMON/DRCOM_int/
-  
      .       ISKLEN,LUUSR,
      .       LU_INFILE, LU_OUTFILE,LUPRT,
      >       ISTN,
@@ -132,9 +170,7 @@ C
      .       ibbcbuf,ibbclen,nbbcbuf,ical_time_staggered,
      >       imark6_off
 
-      common/drcom_real/
-     >       RA50,DEC50,rlabsize
-C
+  
 C  IBUF   - buffer for file reads, writes
 C  ISKLEN - length of schedule file records
 C  LUUSR  - user's terminal
