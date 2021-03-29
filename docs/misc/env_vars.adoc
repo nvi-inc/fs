@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 0.6 - January 2021
+Version 0.7 - March 2021
 
 :sectnums:
 
@@ -180,6 +180,32 @@ value, the _drudg_ output files  will be incorrect and there may be no
 clear indication of that.
 
 This was introduced in _10.0.0-beta3_, December 2020.
+
+=== FESH_GEO_USE_SETUP_PROC
+
+Possible values are `yes` or `no`.
+
+If set, the value is provided as the answer for the _drudg_ prompt for
+the "`use setup_proc`" for geodesy schedules.
+
+IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
+value, the _drudg_ output files  will be incorrect and there may be no
+clear indication of that.
+
+This was introduced in _10.1.0_, 2021.
+
+=== FESH_GEO_VDIF_SINGLE_THREAD_PER_FILE
+
+Possible values are `yes` or `no`.
+
+If set, the value is provided as the answer for the _drudg_ prompt for
+the "`VDIF single thread per file`" for geodesy schedules.
+
+IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
+value, the _drudg_ output files  will be incorrect and there may be no
+clear indication of that.
+
+This was introduced in _10.1.0_, 2021.
 
 === FESH_GEO_VSI_ALIGN
 
