@@ -19,7 +19,7 @@
 //
 
 = DRAFT FS DBBC3 Operations Manual
-Version 0.7 - March 2021
+Version 0.8 - March 2021
 
 :experimental:
 :sectnums:
@@ -39,6 +39,13 @@ with `help=_command_`.
 * `bbc__nnn__` -- `_nnn_` from `001` to `128` -- BBC setup and monitoring
 * `bbc_gain` -- Setup and monitor BBC gains
 * `cont_cal` -- Setup and monitor continuous calibration configuration
++
+
+CAUTION: So far, operation has only been tested with polarity `2`. It is
+expected that other polarities will work. However, until it is tested it won't
+be confirmed. This affects multicast data, the Tsys display, and use of _fivpt_
+and _onoff_.
+
 * `core3h_mode__n__` -- `_n_` from `0` to `8` -- Core3H board setup and monitoring
 * `fb_mode` -- Setting the FlexBuff (_jive5ab_) recording mode -- An alias for `mk5c_mode`
 * `fivept` -- Pointing measurements
@@ -109,7 +116,7 @@ covered below.
 
 ==== Changing thread numbers
 
-The following command changes the thread number on _eth0_ tp `3`
+The following command changes the thread number on _eth0_ to `3`
 (`196608/65536`) and _eth1_ to `4`.
 
 ....
@@ -262,13 +269,22 @@ dbbc3=pps_sync
 NOTE: It may take the time on the boards a few tens of seconds to stabilize
 after the commands.
 
-IMPORTANT: All the Core3H boards in the system need to synced, then a
-`pps_sync` must be issued within 20 seconds of the first `timesync`. This is
-not currently possible since each `timesync` requires about six seconds. A new
-DBBC3 feature is being developed to allow syncing the boards in parallel and
-issue a timely `pps_sync`. Until then, the only safe way to configure a DBBC3
-is with the boot configuration. A _drudg_ setup procedure without the `force`
-parameter, can still be used to verify the configuration.
+[IMPORTANT]
+====
+
+All the Core3H boards in the system need to synced, then a `pps_sync` must be
+issued within 20 seconds of the first `timesync`. This is not currently
+possible since each `timesync` requires about six seconds. A new DBBC3 feature
+is being developed to allow syncing the boards in parallel and issue a timely
+`pps_sync`. Until then, the only safe way to configure a DBBC3 is with the boot
+configuration. However, the above procedure may work, but please verify that
+afterwards all boards have the correct time, VDIF epoch (see *NOTE* below), a
+`pps_delay` is no more than a few tens of nanoseconds.
+
+A _drudg_ setup procedure without the `force` parameter, can still be used to
+verify the configuration.
+
+====
 
 [NOTE]
 ====
@@ -276,9 +292,9 @@ parameter, can still be used to verify the configuration.
 The sync was successful if there no errors reported and all the boards have the
 same time and VDIF epoch.
 
-The best way to check the time for version `v125` and later is with the
+The best way to check the time for version _v125_ and later is with the
 `mcast_time` command. For earlier versions the `dbbc3=time` command can be
-used, but the output can be difficult to interpret because the boards are
+used, but the output can be difficult to interpret because the boards may
 sampled in different seconds.
 
 The VDIF epoch and the time can be checked per board with
@@ -389,18 +405,18 @@ The clock rate should be set to `nominal`, which gives the 128 MHz fixed value.
 Questions:
 
 [start=7]
-. Should we support  DDC_V?
+. Should we support __DDC_V__?
 +
-It may not be necessary since DDC_U is more general.
+It may not be necessary since __DDC_U__ is more general.
 
-. If we are supporting DDC_V, are there any differences besides:
+. If we are supporting __DDC_V__, are there any differences besides:
 +
 
 * Sending only one mask per board instead of four
 * Only having 32 MHz BW, decimation 2
 * Is splitmode always on?
 +
-Sven: For DDC_V, it is always off; DDC_U, always on.
+Sven: For __DDC_V__, it is always off; __DDC_U__, always on.
 
 ====
 
@@ -431,11 +447,23 @@ are only comments in the file or the file is empty, use of a DBBC3 at all will
 be disabled. An example of the contents are:
 
 ....
-* line 1: host(IP address or name), port(4000), time-out(centiseconds)
-*         multicast address, multicast port, multicast interface
-* using an IP address avoids name server and potential network problems
-*
-192.168.1.2 4000 800 224.0.0.19 25000  eno2
+*dbbad.ctl example file
+* one uncommented line with up to six fields:
+*    host(IP address or name)
+*    port(4000)
+*    time-out(centiseconds)
+*    multicast address
+*    multicast port
+*    multicast interface
+* If there are no uncommented lines, DBBC(2)/DBBC3 access is disabled.
+* For DBBC(2), the first three fields are required and no more can be used.
+* For DBBC3, there must be either the first three fields or all six. If the
+*    final three are missing, multicast reception is disabled.
+* Using an IP address instead of a name avoids name server problems.
+* DBBC2 example:
+*  192.168.1.2 4000 500
+* DBBC3 example:
+*  192.168.1.2 4000 800 224.0.0.19 25000 eno2
 ....
 
 === Tsys monitor display
@@ -444,15 +472,34 @@ Support for the Tsys monitor display is built on multicast capture and
 unpacking software developed by Dave Horsley (Hobart).
 
 The Tsys monitor display is organized per IF. The displayed information
-includes: LO, time, delay, Tsys for each IF/Core3H board as well as BBC
-information: frequencies and Tsys values. By default the display will cycle
-through the appropriate IFs (dwelling two seconds on each IF) depending on the
-mode as described in the <<Modes>> sub-section below.
+includes: LO, time, VDIF epoch, time difference between DBBC3 and the FS,
+PPS delay, Tsys for each IF/Core3H board as well as BBC information: frequencies
+and Tsys values. By default the display will cycle through the appropriate IFs
+(dwelling two seconds on each IF) depending on the mode as described in the
+<<Modes>> sub-section below.
+
+NOTE: The time is shown on inverse video if it is not advancing or disagrees
+with the FS or the firmware is _v124_ (no time is available in the multicast
+for that version, so the multicast arrival time is shown). The epoch is `--`
+for now since the VDIF epoch is not available yet in the multicast.  The
+`DDBC3-FS` time difference, in seconds, is shown in inverse video if it is not
+zero (positive if the DBBC3 time is later than the FS). The `DDBC3-FS` time
+difference is `------` for firmware _v124_.
 
 The display is designed to provide what should normally be the most useful
 information without operator intervention. However, the operator can adjust the
 display using the features described in <<Commands>> sub-section below for
 special purposes.
+
+.Tsys monitor display geometry values
+[width="50%",cols="^,^"]
+|=================
+| BBCs/IF | width-by-height
+
+|  8     | `24x13`
+| 12     | `24x17`
+| 16     | `24x21`
+|=================
 
 ==== Modes
 
@@ -519,12 +566,18 @@ The Tsys display accepts several one character commands:
 
 === Checking DBBC3 time
 
-The `mcast_time` command should be placed in the local `midob` procedure to
-monitor the time in the DBBC3 for each scan. It will report an error if any
-Core3H boards' time differs from the FS time or if the multicast data is more
-than 20 seconds old. For future firmware versions, after `125` that report the
-VDIF epoch in the multicast, it will report if there is a VDIF epoch mismatch
-between the boards. Other checks may also be added.
+For DBBC3 firmware versions _v125_ and later, the `mcast_time` command should
+be placed in the local `midob` procedure to monitor the time in the DBBC3 for
+each scan. It will report an error if any Core3H boards' time differs from the
+FS time or if the multicast data is more than 20 seconds old.
+
+For earlier firmware versions, the `dbbc3=time` command can be used. However,
+the output can be difficult to interpret because the boards may sampled in
+different seconds.
+
+For future firmware versions, after _v125_, that report the VDIF epoch in the
+multicast, it will report if there is a VDIF epoch mismatch between the boards.
+Other checks may also be added in the future.
 
 === Setting FS time
 
@@ -534,9 +587,9 @@ NTP servers are available, it is expected that will give the best time in the
 FS.
 
 No suitable NTP servers may be available either because network connectivity is
-poor and/or there are no local functioning NTP servers. In the case the FS
-program _setcl_ can be used with DBBC3 firmware versions `125` and later to set
-and adjust FS time (see _misc/fstime.txt_ for the details).
+poor and/or there are no local functioning NTP servers. In that case the FS
+program _setcl_ can be used with DBBC3 firmware versions _v125_ and later to
+set and adjust FS time (see _misc/fstime.txt_ for the details).
 
 The implementation of _setcl_ for the DBBC3 depends on two values from the
 _dbbc3.ctl_ control file:
@@ -545,10 +598,13 @@ _dbbc3.ctl_ control file:
 +
 
 The amount of time that the multicast arrives after the 1 PPS seems to be
-stable. For the DDC_U v125 firmware, it is about 57 centiseconds. If it is
-different for other versions, the value in _dbbc3.ctl_ can be adjusted. It should
-be easy to measure it for a given firmware when NTP _is_ available using the
-output of the `mcast_time` command.
+stable. This is useful for setting the FS time if NTP is not available. In
+tests so far, for the __DDC_U__ _v125_ firmware, it is about 57 centiseconds;
+__DDC_V__ _v124_, about 30 centiseconds. However, since there is no time
+available in the _v124_ multicast, it is not useful for setting the FS time.
+The value in _dbbc3.ctl_ can be adjusted as appropriate. It should be easy to
+measure it for a given firmware when NTP _is_ available using the output of the
+`mcast_time` command.
 
 * The board number to use for measuring the time.
 +
@@ -570,7 +626,7 @@ day or more, the fractional error in the model rate should be small. The use of
 `adjust` option of _setcl_ in each `midob` should keep the FS close to the
 correct time. It should be good enough to run a schedule. In any event, it
 should better than any other approach without NTP. Since the DBBC3 will be
-running on the correct time, small errros in the FS time should typically not
+running on the correct time, small errors in the FS time should typically not
 be significant.
 
 === Multicast logging
@@ -589,6 +645,10 @@ rate), the following information is logged:
 The counts are given in the order of cal _on_ then _off_
 * `tpi`  -- Only if continuous cal is _not_ in use -- TPI counts for each BBC and IF configured for recording.
 * `tsys` -- Only if continuous cal is in use -- Tsys for each BBC and IF configured for recording.
+
+The _plog_ utility was modified to push reduced logs with DBBC3 multicast data
+squeezed out by default, as it already did for RDBEs. Please see ``**plog
+-h**`` for more information.
 
 [NOTE]
 ====
@@ -613,6 +673,8 @@ finishes, it will restart _tpicd_.
 == Related Features
 
 === Minimizing the use of setup procedures
+
+NOTE: This also applies to any system using a Mark 5C or FlexBuff recorder.
 
 Normally, the FS sets the mode for each scan (unless there is continuous
 recording). If this takes too long or makes the equipment unstable, the _drudg_
@@ -649,14 +711,19 @@ The `use_setup_proc` option in _skedf.ctl_ has three possible settings:
 
 If the option is not used, it defaults to `no`.
 
-NOTE: The `use_setup_proc` option applies to all systems, not just ones using a
-DBBC3.
+The _fesh_ program was expanded to support an environment variable,
+`FESH_GEO_USE_SETUP_PROC`, and a command line option, `-u`, to set the answer
+for an interactive prompt for the whether or not to use `setup_proc` when
+__drudg__ing geodesy schedules. Please see ``**fesh -h**`` for more
+information.
 
 Thanks to Jon Quick (HartRAO) and Harro Verkouter (JIVE) for suggesting this
 option. They also suggested that it may be utilized as part of future features
 for additional checking and resetting of the system.
 
 === Thread procedure
+
+NOTE: This also applies to any system using a Mark 5C or FlexBuff recorder.
 
 When a Mark 5C or FlexBuff recorder is in use, _drudg_ can optionally insert a
 `thread__suffix__` procedure in each setup procedure (where `__suffix__` is a
@@ -691,6 +758,12 @@ jive5ab=datastream=reset
 
 
 * `ask` -- to be prompted once per schedule for what to do
+
+The _fesh_ program was expanded to support an environment variable,
+`FESH_GEO_VDIF_SINGLE_THREAD_PER_FILE`, and a command line option, `-T`, to set
+the answer for an interactive prompt for the whether or not to use a single
+thread per file when __drudg__ing geodesy schedules. Please see ``**fesh -h**``
+for more information.
 
 === jive5ab_cnfg procedure
 
@@ -826,7 +899,7 @@ in `jive5ab_cnfg`?
 
 Harro: Actually - having it as a _drudg_ option wouldn't be too bad! I think
 there is wider interest in this feature. And it would make it more predictable
-and convednient: stations can change as per experiment's request.
+and convenient: stations can change as per experiment's request.
 +
 
 Ed: If we made it an option, it might be controlled by a _skedf.ctl_ option
@@ -866,15 +939,15 @@ _drudg_ supports:
 (_.skd_) schedule files.
 +
 
-NOTE: For a schedule that would nominally record 10 channels on one IF and six
-on another (for example, an _S/X_ mode), the channels for each will need to be
-rounded up the next power of two, to 16 and eight respectively. For example, an
-IF (_X_) with eight USB and two  LSB channels will need to be expanded to eight
-USB and eight LSB; an IF (_S_) with six USB channels, to eight USB. These
-changes can be in the schedule file and flow from the catalog, so it is all
-automatic for the scheduler and the station.
+NOTE: For a schedule that would nominally have a number of channels on an IF
+that is less than a power of two (for example, an _S/X_ mode), the channels for
+such an IF will need to be rounded up the next power of two. For example for
+_S_/_X_, the IF (_X_) with eight USB and two LSB channels will need to be
+expanded to eight USB and eight LSB; the IF (_S_) with six USB channels, to
+eight USB. These settings can be in the schedule file and flow from the
+catalog, so it is all automatic for the scheduler and the station.
 
-* The new <<DBBC3 commands>> that are used in setup procedures.
+* The appropriate new <<DBBC3 commands>> are used in setup procedures.
 
 * The new _skedf.ctl_ options for <<Minimizing the use of setup procedures>>
 and the <<Thread procedure>>.
