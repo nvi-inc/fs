@@ -19,7 +19,7 @@
 //
 
 = DRAFT FS DBBC3 Operations Manual
-Version 0.8 - March 2021
+Version 0.9 - April 2021
 
 :experimental:
 :sectnums:
@@ -478,13 +478,16 @@ and Tsys values. By default the display will cycle through the appropriate IFs
 (dwelling two seconds on each IF) depending on the mode as described in the
 <<Modes>> sub-section below.
 
+The displayed values are from the previous second's multicast. Hence the time
+is one second in the past and the Tsys values are from two seconds in the past.
+
 NOTE: The time is shown on inverse video if it is not advancing or disagrees
-with the FS or the firmware is _v124_ (no time is available in the multicast
-for that version, so the multicast arrival time is shown). The epoch is `--`
-for now since the VDIF epoch is not available yet in the multicast.  The
-`DDBC3-FS` time difference, in seconds, is shown in inverse video if it is not
-zero (positive if the DBBC3 time is later than the FS). The `DDBC3-FS` time
-difference is `------` for firmware _v124_.
+with the FS when it was received or the firmware is _v124_ (no time is
+available in the multicast for that version, so the multicast arrival time is
+shown). The epoch is `--` for now since the VDIF epoch is not available yet in
+the multicast.  The `DDBC3-FS` time difference, in seconds, is shown in inverse
+video if it is not zero (positive if the DBBC3 time is later than the FS). The
+`DDBC3-FS` time difference is `------` for firmware _v124_.
 
 The display is designed to provide what should normally be the most useful
 information without operator intervention. However, the operator can adjust the
