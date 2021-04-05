@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
       detcount=0;
       }*/
     if(gndat2 && strncmp(line+20,"/wx/",4)==0) {
-      printf(" line %s\n",line);
+/*      printf(" line %s\n",line); */
 	if((NULL == (cptr = strtok(line+24," ,\n")) || (1!=sscanf(cptr, "%f", &ctemp)))) {
 	  ctemp=MISSINGVALUE;
 	}
