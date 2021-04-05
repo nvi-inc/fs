@@ -547,12 +547,12 @@ main () {
             logext=${log#*.} # extension, preserving .gz if it exists
             full=$FS_LOG_PATH/$ref$STATION$PLOG_FULL_SUFFIX.$logext
             if [[ $log != $full ]]; then
-                if fuser -v $log |& grep -q " ddout$" ; then
+                if fuser -v $log 2>&1 | grep -q " ddout$" ; then
                     fatal "$log is open in the FS (ddout), aborting"
                 fi
-                # This should be safe, because we checked if file exists earlier. Use "-n" just in case.
+                # This should be safe, because we checked if file exists earlier.
                 warn file contains multicast, renaming $(basename $log) to $(basename $full)
-                $DRY mv -n $log $full
+                $DRY mv $log $full
             fi
             log=$full
         fi
