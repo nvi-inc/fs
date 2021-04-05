@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2021-01-07
+VERSION=2021-04-05
 
 version(){
     echo "[plog $VERSION]"
