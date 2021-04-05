@@ -1,4 +1,5 @@
 /*
+ck
  * Copyright (c) 2020 NVI, Inc.
  *
  * This file is part of VLBI Field System
@@ -23,6 +24,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -348,6 +350,11 @@ Messenger:
 	}
       }
       if(fd >= 0) {
+        if(flock(fd,LOCK_EX|LOCK_NB)) {
+            perror("!! help! ** ddout");
+            fprintf(stderr,
+                    "\007!! help! ** ddout: locking log file %.8s\n",sllog);
+        }
 	memcpy(llog0, shm_addr->LLOG,8);
 	offset= lseek(fd, 0L, SEEK_END);
 	if (offset > 0) {

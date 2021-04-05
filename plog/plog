@@ -344,14 +344,6 @@ joinlst () {
     echo "$*" | sed 's/ /, /g' | sed 's/, \(\S*\)$/ or \1/g'
 }
 
-opening_process_name() {
-    local pid=$(fuser $1 2>/dev/null  | sed -e 's/^[[:space:]]*//' | head -n1)
-    if [[ -z "$pid" ]]; then
-        return
-    fi
-    ps -o comm= -p $pid
-}
-
 # Compress the log to a temp directory
 # Do not compress already compressed files
 compress() {
@@ -555,9 +547,8 @@ main () {
             logext=${log#*.} # extension, preserving .gz if it exists
             full=$FS_LOG_PATH/$ref$STATION$PLOG_FULL_SUFFIX.$logext
             if [[ $log != $full ]]; then
-                pname=$(opening_process_name $log)
-                if [[ -n $pname ]]; then
-                    fatal $log is open by $pname, aborting
+                if fuser -v $log |& grep -q " ddout$" ; then
+                    fatal "$log is open in the FS (ddout), aborting"
                 fi
                 # This should be safe, because we checked if file exists earlier. Use "-n" just in case.
                 warn file contains multicast, renaming $(basename $log) to $(basename $full)
