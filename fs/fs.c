@@ -111,6 +111,7 @@ main(int argc_in,char *argv_in[])
 {
     int i, ampr, wpid, status, size, err, okay, nsems;
     int les=-1, lesm=-1, lesam=-1, lesm2=-1;
+    int ksetsid;
     int klesam;
     FILE *fp;
     char *s1, line[ MAX_LINE], line2[ 5+MAX_LINE], file[MAX_LINE];
@@ -319,7 +320,7 @@ main(int argc_in,char *argv_in[])
       if (line[0] != '*') {
         if( (s1= strrchr( line, '\n')) != NULL) 
            *s1='\0';
-	if(0 != parse(&line2[5],MAX_LINE,line, &ampr,&les,&name))
+	if(0 != parse(&line2[5],MAX_LINE,line, &ampr,&les,&name,&ksetsid))
 	  goto cleanup;
 	if(les==2) {
 	  if(arg_no_x11) {
@@ -331,7 +332,7 @@ main(int argc_in,char *argv_in[])
 	}
         if (!ampr) {
            fprintf( stderr,"running %5.5s\n",name);
-           if( (err=start_prog(argv,'w')) != 0) {
+           if( (err=start_prog(argv,'w',ksetsid)) != 0) {
 	     fprintf(stderr,"%5.5s terminated",name);
 	     statusprt(err);
 	     fprintf(stderr,"\n");
@@ -343,7 +344,7 @@ main(int argc_in,char *argv_in[])
              goto cleanup;
           }
           fprintf( stderr,"getting %s\n",name);
-          pids[ ipids]=start_prog(argv,'n');
+          pids[ ipids]=start_prog(argv,'n',ksetsid);
           if( pids[ ipids] <= 0) {
             fprintf( stderr," error starting process\n");
             goto cleanup;
@@ -380,7 +381,7 @@ main(int argc_in,char *argv_in[])
         if (line[0] != '*') {
           if( (s1= strrchr( line, '\n')) != NULL) 
              *s1='\0';
-	  if(0!= parse(&line2[5],MAX_LINE,line, &ampr,&les,&name))
+	  if(0!= parse(&line2[5],MAX_LINE,line, &ampr,&les,&name,&ksetsid))
 	    goto cleanup;
 	  if(les==2) {
 	    if(arg_no_x11) {
@@ -392,7 +393,7 @@ main(int argc_in,char *argv_in[])
 	  }
           if (!ampr) {
              fprintf( stderr,"running %5.5s\n",name);
-	     if( (err=start_prog(argv,'w')) != 0) {
+	     if( (err=start_prog(argv,'w',ksetsid)) != 0) {
 	       fprintf(stderr,"%5.5s terminated",name);
 	       statusprt(err);
 	       fprintf(stderr,"\n");
@@ -404,7 +405,7 @@ main(int argc_in,char *argv_in[])
                goto cleanup;
             }
             fprintf( stderr,"getting %s\n",name);
-            pids[ ipids]=start_prog(argv,'n');
+            pids[ ipids]=start_prog(argv,'n',ksetsid);
             if( pids[ ipids] <= 0) {
               fprintf( stderr," error starting process\n");
               goto cleanup;
@@ -517,19 +518,20 @@ waitfor:
     
 }
 
-int parse(line2,maxl,line,ampr,les,name)
+int parse(line2,maxl,line,ampr,les,name,ksetsid)
 char *line2,*line,**name;
-int maxl,*ampr,*les;
+int maxl,*ampr,*les,*ksetsid;
 {
     int i;
     char *ptr;
+
+    *ksetsid=0;
 
     if(NULL==(*name=strtok(line," "))) {
       fprintf(stderr," error1\n");
       return -1;
     }
 
-    
     if(NULL==(ptr=strtok(NULL," "))) {
       fprintf(stderr," error 2\n");
       return -1;
@@ -537,6 +539,7 @@ int maxl,*ampr,*les;
       *les=0;
     } else if (strlen(ptr) == 1 && *ptr == 'x') {
       *les=2;
+      *ksetsid=1;
     } else if (strlen(ptr) == 1 && *ptr == 'l') {
       *les=1;
     } else if (strlen(ptr) == 2 && *ptr == 'l' && *(ptr+1) == 'a') {
@@ -563,8 +566,9 @@ int maxl,*ampr,*les;
      
     return 0;
 }
-int start_prog(argv,w)
+int start_prog(argv,w ,ksetsid)
 char **argv,w;
+int ksetsid;
 {
     int chpid,i,wpid,status;
 
@@ -572,6 +576,8 @@ char **argv,w;
       case -1:
         return -1;
       case 0:
+        if(ksetsid)
+            setsid();
         i=execvp(argv[0],argv);
         fprintf(stderr,"exec failed on %s\n",argv[0]);
         _exit(-2);
