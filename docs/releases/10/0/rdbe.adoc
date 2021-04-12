@@ -19,7 +19,7 @@
 //
 
 = FS RDBE Support
-Version 0.5 - February 2021
+Version 0.6 - April 2021
 
 :sectnums:
 :toc:
@@ -338,6 +338,79 @@ turned on again with:
   rdbe=dbe_data_send=on;
 
 ====
+
+=== rdbemsg utility
+
+This utility was developed by Jason Soohoo (Haystack) as
+_vgos-msg-gui.py_. It is an RDBE oriented version of the FS _msg_
+utility for sending operations emails. Originally it ran on a
+different back-end computer. It was ported to the FS computer,
+expanded to provide pointing data, and generalized to support more
+systems.
+
+The `Update Values` button can be used to automatically populate the
+values, based on the configuration of the _/usr2/control/rdbemsg.ctl_
+control file. If the schedule log file is open, the session name, and
+latest SEFD and pointing information will be included. Fields with
+light backgrounds can edited or entered manually. Fields with dark
+backgrounds are populated only by the `Update Values` button.
+
+The `Message Type` drop-down box can used to select `Ready`, ``Start`,
+or `Stop`.  The `Send Msg` button cab be used to mail the message.
+
+==== rdbemsg.ctl
+
+The _rdbemsg_ program uses the _/usr2/control/rdbemsg.ctl_ control
+files. An example is available in
+_/usr2/st.default/control/rdbemsg.ctl_. Lines that start with `*` are
+treated as comments. The supported non-comment lines are:
+
+
+* `R-A:__node__` -- where `__node__` is the IP, node name, or alias of
+RDBE-A
+
+* `R-B:__node__` -- where `__node__` is the IP, node name, or alias of
+RDBE-B
+
+* `R-C:__node__` -- where `__node__` is the IP, node name, or alias of
+RDBE-C
+
+* `R-D:__node__` -- where `__node__` is the IP, node name, or alias of
+RDBE-D
+
+* `station:__xx__` -- where `__xx__` is the two letter station code,
+lowercase.
+
+* `name:__station__` -- where `__station__` is the station name, also
+found in `location.ctl`.
+
+* `to:__emails__` -- where `__emails__` are a list of comma separated
+email destinations for messages.
+
+* `mci:__node__`  where `__node__` is the IP, node name, or alias of
+the MCI node
+
++
+
+This should be commented out, if there is no MCI node.
+
+* `mci-code:__xx__` -- where `__xx__` is the two letter code used by
+the MCI node if different from what is specified by `station`.
+
++
+
+This should be commented out, if there is no MCI node or the MCI node
+uses the `station` code.  This exists to support early MCI nodes that
+did not have the same code as the station.
+
+* `mci-parameter:__n__` -- where `__n__` is the position of the data
+parameter in MCI responses.
+
++
+
+This should be commented out, if there is no MCI node or the MCI
+returns data in the standard position, `2`. This exists to support
+early MCI nodes that returned the data in the `3` position.
 
 === new_ifdbb script
 

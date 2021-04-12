@@ -19,7 +19,7 @@
 //
 
 = DRAFT FS Document Font Conventions
-Version 0.6 - February 2021
+Version 0.7 - March 2021
 
 :sectnums:
 
@@ -52,7 +52,7 @@ The default body font is used for all text, except:
 * _italics_ are used for names (filenames, filename extensions,
 directory paths, libraries, programs, accounts, UNIX commands,
 versions, nodes, domain names, websites, URLs, URIs, email addresses,
-etc., but not people, FS__x__, or FSL__x__), emphasis,
+etc., but not people, places, FS__x__, or FSL__x__), emphasis,
 variable items, and the first use of technical terms.
 
 * `monospace` is used for data (code, program input/output, contents
@@ -145,7 +145,7 @@ IMPORTANT: Will result in a major issue
 
 Results in:
 
-Use single underscores around _words_ to be n italics; double underscores for __char__acters.
+Use single underscores around _words_ to be in italics; double underscores for __char__acters.
 
 === Monospace
 

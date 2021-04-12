@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 1.0 - February 2021
+Version 1.1 - April 2021
 
 :sectnums:
 :experimental:
@@ -335,10 +335,10 @@ operational system.
 ====
 
 If you have aliased `rm` to `rm -i` and `mv` to `mv -i` and `cp` to
-`cp -i`, you will prompted to confirm before anything destructive
-occurs. If so, and if everything is set-up properly below, the only
-cases where you should only be asked to confirm is for deleting the
-symbolic links in the examples for
+`cp -i` (all of which are recommended), you will be prompted to
+confirm before anything destructive occurs. If so, and if everything
+is set-up properly below, the only cases where you should be asked to
+confirm is for deleting the symbolic links in the examples for
 <<Switch permanently to new version>> and
 <<Switch permanently to old operational version>> below.
 
@@ -356,6 +356,22 @@ Make sure there are no existing directories: _control-ops_,
 _proc-ops_, _st-1.0.0-ops_, _control-test_, _proc-test_,
 _st-1.0.0-test_, or use different names and adjust the commands
 below accordingly.
+
+[CAUTION]
+====
+
+If you are currently using  _/usr2/control_ and _/usr2/proc_ as
+symbolic links, you will need to resolve that first or modify the
+commands below to take that into account. You can check if they are
+symbolic links using, for example:
+
+  ls -l /usr2/control
+
+One way to resolve this is to delete the symbolic links and rename the
+directories they pointed to with the names of the corresponding
+symbolic links.
+
+====
 
 . Enter the commands:
 +

@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 1.4 - February 2021
+Version 1.5 - April 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -165,8 +165,8 @@ normal use.
 Hopefully, this change will make the update notes easier to read and
 navigate.  Among other improvements, there are clickable links to
 other sections within a document, as well as to sections in other
-related documents, and a clickable table of contents. The details of
-the changes are:
+related documents, and a clickable table of contents. The major points
+of the change are:
 
 .. Reorganized update notes as _.adoc_ files in the _docs/_
 sub-directory.
@@ -423,7 +423,7 @@ schedule file if the new one specified in the `proc=...` or
 `schedule=...` commands, respectively, does not exist or has incorrect
 permissions (closing
 https://github.com/nvi-inc/fs/issues/45[#45]).  Previously, if the new
-files did not exist, or did not have the correct permissions, the old
+file did not exist, or did not have the correct permissions, the old
 file would still be closed.  Thanks to Jon Quick (HartRAO) for
 pointing out this inconsistency.
 +
@@ -936,11 +936,15 @@ branch.
 . [[addrdbemsg]] Add _rdbemsg_ utility for RDBE VGOS users.
 +
 
-This utility was originally developed by Jason Soohoo (Haystack) as
-_vgos-msg-gui_. It is an RDBE oriented version of the FS _msg_ utility
-for sending operations emails. Originally it ran on a different
-back-end computer. It was ported to the FS computer, expanded to
-provide pointing data, and generalized to support more systems.
+This utility was developed by Jason Soohoo (Haystack) as
+_vgos-msg-gui.py_. It is an RDBE oriented version of the FS _msg_
+utility for sending operations emails. Originally it ran on a
+different back-end computer. It was ported to the FS computer,
+expanded to provide pointing data, and generalized to support more
+systems. For more informaion, please see the
+<<rdbe.adoc#_rdbemsg_utility,rdbemsg utility>> sub-section of the
+<<rdbe.adoc#,FS RDBE support>> document.
+
 
 . [[scnch]] Generalize the _scnch_ window to cover Mark 5 recorders.
 +

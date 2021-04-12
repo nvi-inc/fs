@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 1.2 - February 2021
+Version 1.3 - April 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -54,11 +54,11 @@ complete, approach would be to review the update steps in the new
 release to make sure everything has been covered. _Let the user
 beware._
 
-This document is up to date with the tagged _10.0.0_ release.  Due to
-small increments, such as updating this document, this may not be the
-literal last commit, but the differences should be small unless you
-happen to `pull` between a significant change and this document being
-updated.
+This document is up to date with the features in the `1a94029e`
+commit. Due to small increments, such as updating this document, this
+may not be the literal last commit, but the differences should be
+small unless you happen to `pull` between a significant change and
+this document being updated.
 
 == Upgrading from 10.0.0 to the latest commit
 
@@ -103,7 +103,168 @@ from within the FS _git_ archive directory, usually _/usr2/fs-git_.
 
 === FS changes
 
-There have been no changes at this time.
+. Clean-up of suppressing signals.
+
++
+
+--
+
+.. Remove redundant ignoring of signals in _ddout_ and _oprin_
+(partially closing https://github.com/nvi-inc/fs/issues/100[#100]).
+
+.. Re-enable suppression of signals (partially closing
+https://github.com/nvi-inc/fs/issues/100[#100]).
+
++
+
+As of _10.0.0-beta1_, the previous practice of disabling receipt of
+certain signals, in particular `SIGINT` (for kbd:[Control+C]) was
+removed. It has been reinstated. This assures that no FS programs will
+be aborted if a kbd:[Control+C] is accidentally entered in the session
+where the FS is running. However, this does not prevent a
+kbd:[Control+C] from killing an _xterm_ that is wrapped around a FS
+program, typically only _oprin_, in the FS session from being killed.
+Preventing that is discussed next.
+
+.. Use `setsid()` to shelter __xterm__s from keyboard generated
+kbd:[Control+C].
+
++
+
+To avoid kbd:[Control+C] killing an _xterm_ in the FS session all `x`
+programs in _fspgm.ctl_ and _stpgm.ctl_ (usually just _oprin_) are now
+run under `setsid()`. This disconnects the programs from the session
+that the FS is being run in, thereby preventing a kbd:[Control+C] from
+reaching them, but not otherwise affecting them.
+
+--
++
+
+With these changes, it should no longer be possible to kill the FS
+with a kbd:[Control+C], even when the display server is not being
+used.
+
++
+
+CAUTION: An _xterm_  window can still be terminated using the
+decorations for the window. When the FS is not being running with the
+display server, this will kill the FS abnormally. The decoration
+button that includes the `Delete` and `Destroy` options can be removed
+if desired. In the _~/.fvm2rc_ file include `NoButton 1` in the
+window's `Style` (see the `Style "oprin" ...` line in
+_st.default/oper/.fvwm2rc_ for an example).
+
+. Add command line options to _rdbemsg_.
+
++
+
+Two command line options were added to _rdbemsg_:
+
+* `-f` -- which takes an integer argument to set the font size,
+default is `14`
+
+* `-g` -- which takes a string argument to set the window geometry,
+default is not to set it
+
++
+
+Only the position part of the geometry should be set, e.g., `-0-0`.
+The useful way to control the size is with `-f`.
+
++
+
+. Fix _gndat_.
+
++
+
+--
+
+.. Correct bad Tsys data in _gnplt_ (closing
+https://github.com/nvi-inc/fs/issues/107[#107] and
+https://github.com/nvi-inc/fs/issues/104[#104]).
+
++
+
+This was caused by an incorrectly sized array in _gndat_ that was
+introduced in commit `f84a2bb9` dated June 2003.  This error was
+benign unless more than 20 detectors were used in a single _onoff_
+run.  Before the advent of RDBEs and DBBC3s, this was unlikely, but
+not impossible.
+
++
+
+Due to the layout of the automatic variables, this error should only
+have impacted `Tsys` and `Tsys-Tspill` data in _gnplt_ and only when
+there were more than 20 detectors used. However, also considering the
+layout of the automatic variables, it is unclear why there were not
+catastrophic program failures in such a case. It would be prudent to
+reanalyze any current data sets that used more than 20 detectors with
+the fixed version to see if the results change.
+
++
+
+Thanks to Beppe Maccaferri (Medicina), and subsequently Eskil Varenius
+(Onsala), for reporting this issue.
+
+.. Remove extraneous _gndat_ debug output for the processing of
+weather data.
+
++
+
+The debug output was not visible when _gndat_ was run from _gnplt_.
+
+--
+
+. Fix _plog_ to only refuse to reduce a log with multicast data in it
+if it is the active log in the FS.
+
++
+
+In the process of reducing a log (removing multicast data), the log is
+renamed. This can cause a log recovery to occur if the log is
+currently open in the FS since it appears to be missing. This was
+protected against by _plog_, which would refuse to rename the log if
+it was open to any program. This meant that the log was was being
+viewed with `tail -f` or _less_ it could not be renamed. However,
+_plog_ only needed to refuse if the log was open in the FS (by
+_ddout_). This was fixed so that _plog_ will only refuse to rename the
+log if it is open in the FS.
+
++
+
+NOTE: In such a case, the operator needs to close the log before
+running _plog_ on it. That is good practice in any case.
+
++
+
+NOTE: Other, non-reduction, log processing by _plog_ was not affected
+by this issue since renaming is not needed.
+
++
+
+Thanks to Katie Pazamickis and Jay Redmond (both at GGAO) for
+reporting this.
+
+. Correct error in FORTRAN calls to get FiLa10G time for _setcl_.
+
++
+
+An argument was missing. This was a bug from the VGOS branch, which
+technically do not support using _setcl_ for FiLa10G. The bug
+apparently did not affect versions since the merge since there was a
+relatively low, not quite 1 in 2^32^ chance of it being excited.
+
++
+
+NOTE: _setcl_ only works for the first FiLa10G if there are two. A
+second is only used for VGOS.
+
+. Correct `bbc_gain` command error codes.
+
++
+
+If an error occurred in the monitor form of the command, the error was
+reported as `di` instead of `dg`.
 
 === drudg changes
 

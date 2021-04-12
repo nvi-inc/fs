@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 2.7 - February 2021
+Version 2.8 - March 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -144,20 +144,20 @@ NVI/GSFC).  These contributions include, but are not limited to:
 . Importing the existent archive of FS versions into _git_
 . Merging the main and VGOS branches of FS9
 
+Dave single-handedly imported the entire existent history of FS source
+code into _git_. This includes over 130 FS9 versions (under Linux), 17
+FS8 versions (under VENIX), and two older versions (under HP
+RTE-1000/A) going back to version 5.5 in 1988. Having the source code
+in _git_ greatly simplified the task of merging the main and VGOS
+branches. Dave also did the most critical work on that and provided
+excellent guidance on using _git_. Having the historical code in _git_
+is a great resource for understanding its evolution.
+
 An essential contribution was also made by Tetsuro Kondo (NICT, Japan
 and SHAO, China). Kondo-san pioneered 64-bit support in the FS with
 his 64-bit implementations for the Sejong and Ishioka stations. Dave
 built on his work in developing a version that would support both 32-
 and 64-bit systems.
-
-Dave single-handedly imported the entire existent history of FS source
-code into _git_. This includes over 130 FS9 versions (under Linux), 17
-FS8 versions (under VENIX), and two older versions (under HP
-RTE-1000/A) going back to version 5.5 in 1988.  Having the source code
-in _git_ greatly simplified the task of merging the main and VGOS
-branches. Dave also did the most critical work on that and provided
-excellent guidance on using _git_. Having the historical code in _git_
-is a great resource for understanding its evolution.
 
 As always, we are deeply indebted to Jonathan Quick (HartRAO, South
 Africa) for his many significant contributions that go far beyond what
@@ -910,23 +910,38 @@ customize your _/usr2/control/rdbemsg.ctl_ file.
 to your station's value.
 
 .. You will need to update  the `name` station name to your station's
-value. The station name is also defined in the
+value.
++
+
+NOTE: The station name is also defined in the
 _/usr2/control/location.ctl_ file.
 
 .. You should set the addresses for the RBDE-A (`R-A`) through RDBE-D
-(`R-D`). The example file uses aliases, _rdbea_ through _rdbed_, that
-you can define in _/etc/hosts_.  Likewise, if you have an _mci_ node,
-you should set its alias, _hubpc_, in _/etc/hosts_. (It is usually
-necessary to have _root_ access to modify _/etc/hosts_.)  Alternatively
-of course, you can use any scheme you prefer for defining these
-addresses in _rdbemsg.ctl_.
+(`R-D`).
++
+
+The example file uses aliases, _rdbea_ through _rdbed_, that you can
+define in _/etc/hosts_. Likewise, if you have an _mci_ node, you can
+set its alias, perhaps  _hubpc_, in _/etc/hosts_. Alternatively of
+course, you can use any scheme you prefer for the nodes names used
+in _rdbemsg.ctl_.
++
+
+NOTE: It is usually necessary to have _root_ access to modify
+_/etc/hosts_.
 
 .. The default email address `to` is for the `ivs-ops` mail list. You
-can of course change that to whatever you like. You can also
-temporarily override the address in the _rdbemsg_ utility itself.
+can of course change that to whatever you like.
++
+
+NOTE: You can also temporarily override the address in the _rdbemsg_
+utility itself.
 
 .. If you don't have an MCI node (_hubpc_) for front end monitor
 and control, you should comment out that line.
+
+.. If you do have an MCI node, change the node name from _hubpc_ if it
+is different (possibly an alias from _/etc/hosts_).
 
 .. For stations with a prototype MCI node (GGAO and Westford):
 +
