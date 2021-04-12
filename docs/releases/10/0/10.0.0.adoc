@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 2.8 - March 2021
+Version 2.9 - April 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -1260,6 +1260,23 @@ on the display. For this, you can follow the suggested method from the
 . Test: the FS and _drudg_:
 +
 
+[IMPORTANT]
+====
+
+Before testing, if as part of your testing of station code you ran the
+FS under the _prog_ account, either reboot or use the command:
+
+ fsserver stop
+
+to make sure the server is no longer running as _prog_.
+
+For details on why this is needed, please see the second *IMPORTANT*
+item in
+<<fsserver_changes.adoc#_server_continues_running_after_fs_termination,Server
+continues running after FS termination>> sub-section of the
+<<fsserver_changes.adoc#,FS 10.0.0 fsserver Changes>> document.
+
+====
 Generally speaking, a fairly thorough test is to run a test
 experiment. Start with using _drudg_ to rotate a schedule,
 __drudg__ing it to make _.snp_ and _.prc_ files, making listings, and

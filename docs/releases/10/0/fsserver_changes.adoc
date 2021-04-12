@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 fsserver Changes
-Version 0.3 - February 2021
+Version 0.4 - April 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -95,6 +95,16 @@ up.
 IMPORTANT: After an FS upgrade or changing FS runtime environment
 variable values, it's necessary to either shutdown the server
 (`*fsserver stop*`) or reboot the system before re-starting the FS.
+
+IMPORTANT: If you run the FS under a different account than _oper_
+(perhaps _prog_), _fsserver_ will remain a process of that account
+until it is stopped. Even if the FS is restarted, it will continue to
+run from the other account because _fsserver_ will be its parent. This
+may result in unexpected behavior, such as _oper_ not owning new files
+that are created and _ssh_ commands run from the FS having a default
+identity other than _oper_. To avoid this, it is recommended to either
+reboot or run `*fsserver stop*` after using the FS from an account
+other than _oper_.
 
 === Server accepts SNAP commands
 
