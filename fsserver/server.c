@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -52,6 +52,8 @@
 #include "server.h"
 #include "stream.h"
 #include "window.h"
+
+extern char fsserver_err_file[PATH_MAX];
 
 #define fatal(msg, s)                                                                              \
 	do {                                                                                       \
@@ -1088,6 +1090,10 @@ error:
 }
 
 void server_shutdown(server_t *s) {
+
+	if (unlink(fsserver_err_file))
+		fatal("unlinking fsserver.err file", strerror(errno));
+
 	nng_mtx_lock(s->mtx);
 	s->running = false;
 	if (s->finished_pipe[0] != -1) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -30,6 +30,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <time.h>
+#include <pwd.h>
+#include <linux/limits.h>
 
 #include <jansson.h>
 #include <nng/nng.h>
@@ -43,6 +46,7 @@
 
 static bool opt_daemon = true;
 int error_fd           = -1;
+char fsserver_err_file[PATH_MAX];
 
 #define fatal(msg, s)                                                                              \
 	do {                                                                                       \
@@ -242,8 +246,7 @@ int daemonize() {
 	if (nulldev < 0)
 		fatal("open devnul", strerror(errno));
 
-	if (dup2(nulldev, STDIN_FILENO) < 0 || dup2(nulldev, STDOUT_FILENO) < 0 ||
-	    dup2(nulldev, STDERR_FILENO) < 0)
+	if (dup2(nulldev, STDIN_FILENO) < 0)
 		fatal("closing fds", strerror(errno));
 
 	return fds[1];
@@ -306,8 +309,46 @@ int server_main(int argc, char *argv[]) {
 		}
 	}
 
+	char *linep;
+	time_t ti=time(NULL);
+	struct tm *tm=gmtime(&ti);
+	struct passwd *pw = getpwuid(getuid());
+
+	if(asprintf(&linep,"%s/fsserver.%%Y.%%b.%%d.%%H.%%M.%%S.err",pw->pw_dir)<0)
+		fatal("making fsserver.err file format string","asprintf");
+
+	(void) strftime(fsserver_err_file,sizeof(fsserver_err_file),linep,tm);
+	free(linep);
+
 	if (opt_daemon) {
+		int fd_err = open(fsserver_err_file, O_WRONLY|O_CREAT|O_EXCL,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+		if (fd_err < 0) {
+			fatal("opening fsserver.err file", strerror(errno));
+		}
+
+		if (dup2(fd_err, STDOUT_FILENO) < 0 || dup2(fd_err, STDERR_FILENO) < 0)
+			fatal("connecting to fsserver.err file", strerror(errno));
+
 		error_fd = daemonize();
+
+	} else {
+		if(asprintf(&linep,"/usr/bin/tee %s",fsserver_err_file)<0)
+			fatal("making tee command","asprintf");
+
+		FILE *tee = popen(linep,"w");
+		if(tee==NULL)
+			fatal("opening tee to fsserver.err file", strerror(errno));
+		free(linep);
+
+		if(setvbuf(tee, NULL, _IONBF, BUFSIZ))
+			fatal("setting vbuf for tee to fsserver.err file", strerror(errno));
+
+		int fd_err=fileno(tee);
+		if(fd_err<0)
+			fatal("returning fileno of tee to fsserver.err file", strerror(errno));
+
+		if (dup2(fd_err, STDOUT_FILENO) < 0 || dup2(fd_err, STDERR_FILENO) < 0)
+			fatal("connecting to fsserver.err file", strerror(errno));
 	}
 
 	install_shims();
