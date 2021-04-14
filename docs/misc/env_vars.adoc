@@ -348,6 +348,14 @@ the _.netrc_ file.
 
 This was introduced in 10.0.0-beta2, July 2020.
 
+=== PLOG_COMPRESSED_EXT
+
+Nominal value is `bz2`.
+
+If set to `gz`, it will override the default _bzip2_ compression to _gzip_.
+
+This was introduced about in April 2021.
+
 === S2_PING
 
 If set, S2 devices will be __ping__ed to verify connectivity before
