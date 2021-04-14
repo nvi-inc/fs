@@ -317,7 +317,11 @@ int server_main(int argc, char *argv[]) {
 	if(asprintf(&linep,"%s/fsserver.%%Y.%%b.%%d.%%H.%%M.%%S.err",pw->pw_dir)<0)
 		fatal("making fsserver.err file format string","asprintf");
 
-	(void) strftime(fsserver_err_file,sizeof(fsserver_err_file),linep,tm);
+
+	size_t n=strftime(fsserver_err_file,sizeof(fsserver_err_file),linep,tm);
+	/* the second case is supposedly for very old, <= 4.4.1 libc, and maybe some more until 4.4.4 */
+	if(n == 0 || n>=sizeof(fsserver_err_file))
+		fatal("making fsserver.err file name","strftime");
 	free(linep);
 
 	if (opt_daemon) {

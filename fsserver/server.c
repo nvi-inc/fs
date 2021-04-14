@@ -1091,8 +1091,15 @@ error:
 
 void server_shutdown(server_t *s) {
 
+	/* There is no point to a fatal error if the unlink fails.
+	   The server will exit anyway and if the user already
+	   deleted the file or mv'd it, it is gone. If it is just
+	   mv'd, the error will still appear there, and in the
+	   session if the server is foreground. Exiting here would
+	   also cause a 'fsserver stop' to command to not complete.
+	 */
 	if (unlink(fsserver_err_file))
-		fatal("unlinking fsserver.err file", strerror(errno));
+		perror("unlinking fsserver.err file");
 
 	nng_mtx_lock(s->mtx);
 	s->running = false;
