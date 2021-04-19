@@ -1975,7 +1975,7 @@ class Gui(Frame):
         for i,line in enumerate(data):
             if line[0] != '*':
                 stop_line = i
-        return_data = data[:i+1]
+        return_data = data[:stop_line+1]
         return return_data
     
     def copyRXGFile(self, rxg_filename):
