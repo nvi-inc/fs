@@ -94,5 +94,5 @@ scnch*VT100.Translations:       #override\
 helpsh.title:            fs help
 !helpsh*scrollBar:        true
 helpsh*geometry:         80x24+75+75
-helpsH*VT100.Translations:       #override\
+helpsh*VT100.Translations:       #override\
         ~Ctrl ~Meta <Btn2Up>:   ignore()
