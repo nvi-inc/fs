@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2021-04-05
+VERSION=2021-04-22
 
 version(){
     echo "[plog $VERSION]"
@@ -36,7 +36,7 @@ if [[ -z "${NETRC_DIR:-}" ]]; then
     NETRC_DIR=$HOME
     CURL_NETRC_FILE_OPTION=
 else
-    CURL_NETRC_FILE_OPTION=" --netrc-file $NETRC_DIR/.netrc"
+    CURL_NETRC_FILE_OPTION="--netrc-file $NETRC_DIR/.netrc"
 fi
 
 # Lines to remove from log file to make "reduced" logs
@@ -200,10 +200,15 @@ pftp() {
     if ! which curl > /dev/null; then
         fatal "'curl' not found"
     fi
+
+    if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
+        fatal "$NETRC_DIR/.netrc not found, see usage"
+    fi
+
     URL="$1"; shift
     local F=($@) #Turn into an array so IFS is used in expansion
     local IFS=","
-    $DRY curl -n -T "{${F[*]}}" "ftp://$URL/"
+    eval $DRY curl -n $CURL_NETRC_FILE_OPTION -T "{${F[*]}}" "ftp://$URL/"
 }
 
 pscp() {
