@@ -100,6 +100,7 @@ Options:
  -v       Verbose mode, drudg output printed to stdout
  -V       Print version and exit.
  -P       With -d, use drudg to send the schedule summary to the printer
+ -S       Skip download (including for -x and -f)
  -m mmmyy Specify three character month and two digit year for the vlbeer
           data center (see more below about specifying the month/year)
           uses the hidden .latest sub-directory by default, use -H to suppress
@@ -253,7 +254,8 @@ force=
 verbose=
 txt=
 print=
-while getopts 'a:c:nfdD:hHm:p:Ps:t:vVxy:' opt; do
+download=1
+while getopts 'a:c:nfdD:hHm:p:Ps:St:vVxy:' opt; do
     case $opt in
         n)
             echo "'next' not implemented."
@@ -299,6 +301,9 @@ while getopts 'a:c:nfdD:hHm:p:Ps:t:vVxy:' opt; do
             ;;
         P)
             print=1
+            ;;
+        S)
+            download=
             ;;
         s)
             station=$OPTARG
@@ -422,7 +427,7 @@ if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
         fi
         rm "$SCHED_DIR/$sched.vex"
     fi
-else
+elif [[ -n "$download" ]]; then
     if [[ -e $SCHED_DIR/$sched.skd ]]; then
         if [[ -z "$force" ]]; then
             echo "$SCHED_DIR/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
@@ -442,6 +447,12 @@ else
 fi
 
 if [[ -n "$run_drudg" ]]; then
+    if [[ ! -n "$download" ]]; then
+        if [[ ! -e $SCHED_DIR/$sched.skd ]]; then
+            echo "$SCHED_DIR/$sched.skd doesn't exist" >&2
+            exit 1
+        fi
+    fi
     set +u
     if [[ -z "$station" ]]; then
         >&2 echo "$0: ERROR: Neither STATION environment variable nor -s are set; should be set to two-letter station code if using drudg."
@@ -476,53 +487,55 @@ if [[ -z "${FESH_EMAIL:-}" ]]; then
 else
     user="anonymous:$FESH_EMAIL"
 fi
-pushd "$SCHED_DIR" >/dev/null
 version
-echo Fetching schedule from server...
-#TODO: if not found, maybe check next or previous years?
-if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
-    if [[ "$FESH_CDDIS_METHOD" =~ ^ftp$ ]]; then
-        wget -nv "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-        if [[ -n "$txt" ]]; then
-            wget -nv "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
-        fi
-    elif [[ "$FESH_CDDIS_METHOD" =~ ^https$ ]]; then
-        if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
-            fatal "$NETRC_DIR/.netrc not found, see usage"
-        fi
+if [[ -n "$download" ]]; then
+    pushd "$SCHED_DIR" >/dev/null
+    echo Fetching schedule from server... >&2
+    #TODO: if not found, maybe check next or previous years?
+    if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
+        if [[ "$FESH_CDDIS_METHOD" =~ ^ftp$ ]]; then
+            wget -nv "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            if [[ -n "$txt" ]]; then
+                wget -nv "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+            fi
+        elif [[ "$FESH_CDDIS_METHOD" =~ ^https$ ]]; then
+            if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
+                fatal "$NETRC_DIR/.netrc not found, see usage"
+            fi
 
-        if ! grep -q urs.earthdata.nasa.gov "$NETRC_DIR/.netrc"; then
-            fatal "$NETRC_DIR/.netrc does not contain CDDIS login information, see usage"
-        fi
-        curl  -k  -f -c /dev/null -n \
-            $CURL_NETRC_FILE_OPTION \
-            -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-        if [[ -n "$txt" ]]; then
+            if ! grep -q urs.earthdata.nasa.gov "$NETRC_DIR/.netrc"; then
+                fatal "$NETRC_DIR/.netrc does not contain CDDIS login information, see usage"
+            fi
             curl  -k  -f -c /dev/null -n \
                 $CURL_NETRC_FILE_OPTION \
-                -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+                -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            if [[ -n "$txt" ]]; then
+                curl  -k  -f -c /dev/null -n \
+                    $CURL_NETRC_FILE_OPTION \
+                    -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+            fi
+        else
+            curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            if [[ -n "$txt" ]]; then
+                curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+            fi
         fi
-    else
-        curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+    elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
+        wget -nv "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
         if [[ -n "$txt" ]]; then
-            curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+            wget -nv "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
         fi
+    elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
+        wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+        if [[ -n "$txt" ]]; then
+            wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+        fi
+    elif [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+        wget -nv "ftp://ftp@vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
     fi
-elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
-wget -nv "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-    if [[ -n "$txt" ]]; then
-        wget -nv "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
-    fi
-elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
-wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-    if [[ -n "$txt" ]]; then
-        wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
-    fi
-elif [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-wget -nv "ftp://ftp@vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
+    echo Done >&2
+    popd >/dev/null
 fi
-echo Done
-popd >/dev/null
 
 if [[ -n "$run_drudg" ]]; then
     nine=$'9'
