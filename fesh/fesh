@@ -19,7 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2021-01-07
+VERSION=2021-04-22
 
 version(){
     echo "[fesh $VERSION]"
@@ -99,6 +99,7 @@ Options:
           (see more below about setting the default data center)
  -v       Verbose mode, drudg output printed to stdout
  -V       Print version and exit.
+ -P       With -d, use drudg to send the schedule summary to the printer
  -m mmmyy Specify three character month and two digit year for the vlbeer
           data center (see more below about specifying the month/year)
           uses the hidden .latest sub-directory by default, use -H to suppress
@@ -251,7 +252,8 @@ run_drudg=
 force=
 verbose=
 txt=
-while getopts 'a:c:nfdD:hHm:p:s:t:vVxy:' opt; do
+print=
+while getopts 'a:c:nfdD:hHm:p:Ps:t:vVxy:' opt; do
     case $opt in
         n)
             echo "'next' not implemented."
@@ -294,6 +296,9 @@ while getopts 'a:c:nfdD:hHm:p:s:t:vVxy:' opt; do
             ;;
         x)
             txt=1
+            ;;
+        P)
+            print=1
             ;;
         s)
             station=$OPTARG
@@ -518,20 +523,25 @@ wget -nv "ftp://ftp@vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
 fi
 echo Done
 popd >/dev/null
-nine=$'9'
-
-drudg_out="/dev/null"
-if [[ -n "$verbose" ]]; then
-    drudg_out="/dev/stdout"
-fi
 
 if [[ -n "$run_drudg" ]]; then
-echo -n Drudging schedule... >&2
-cat <<EOF | "$FS_DIR/bin/drudg" "$sched.skd" > "$drudg_out"
+    nine=$'9'
+
+    drudg_out="/dev/null"
+    if [[ -n "$verbose" ]]; then
+        drudg_out="/dev/stdout"
+    fi
+
+    if [[ -n "$print" ]]; then
+        print=$'5'$'\n'
+        echo "Will send summary to printer" >&2
+    fi
+    echo -n Drudging schedule... >&2
+    cat <<EOF | "$FS_DIR/bin/drudg" "$sched.skd" > "$drudg_out"
 $station
 3
 12
-$tpicd_answer$cont_cal_answer$cont_cal_polarity_answer$vsi_align_answer$nine
+$tpicd_answer$cont_cal_answer$cont_cal_polarity_answer$vsi_align_answer$print$nine
 $LIST_DIR/$sched$station.lst
 
 
@@ -540,5 +550,5 @@ $LIST_DIR/$sched$station.lst
 0
 EOF
 
-echo Done. >&2
+    echo Done. >&2
 fi
