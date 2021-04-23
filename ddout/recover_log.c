@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -38,7 +38,9 @@ char lnamef[];
 int fd;
 {
   int fail, fd2, fd_temp;
-  int count, countw, cum, size, before, after, seconds, offset;
+  int before, after, seconds;
+  ssize_t count, countw, cum;
+  off_t size, offset;
   char buf_copy[BUFFSIZE];
 
   fail=FALSE;
@@ -62,6 +64,7 @@ int fd;
 	perror("determining size of old file to copy, ddout");
       offset=lseek(fd, 0L, SEEK_SET);
       if(offset < 0) {
+	perror("rewinding old file to copy, ddout");
 	fprintf(stderr,"\007!! help! ** can't rewind original file, giving up\n");
 	fail=TRUE;
       } else {

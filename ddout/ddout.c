@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -60,7 +60,7 @@ main()
     int irgb, iburl;
     char *ich, *cp1, *cp2, ch, iwhat[5], *ptrs, *prtn1;
     int class;
-    int offset;
+    off_t offset;
     void dxpm();
     int kdebug;
     char *st;
