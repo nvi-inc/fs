@@ -31,7 +31,7 @@
 extern struct fscom *shm_addr;
 
 #define PERMISSIONS 0664
-#define BUFFSIZE 131072
+#define BUFFSIZE 512*4096
 
 int recover_log(lnamef,fd)
 char lnamef[];
@@ -41,7 +41,7 @@ int fd;
   int before, after, seconds;
   ssize_t count, countw, cum;
   off_t size, offset;
-  char buf_copy[BUFFSIZE];
+  static char buf_copy[BUFFSIZE];
 
   fail=FALSE;
   fd2=open(lnamef,O_RDONLY);  /* check to see if the file exists */
