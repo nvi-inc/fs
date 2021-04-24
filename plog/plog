@@ -362,6 +362,10 @@ compress() {
     if [[ ${1##*.} == $PLOG_COMPRESSED_EXT ]]; then
         echo "$1"
         return
+    elif [[ "$PLOG_COMPRESSED_EXT" =~ bz2 ]]; then
+        local compress_program=bzip2
+    else
+        local compress_program=gzip
     fi
 
     local ext=${1#*.}
@@ -370,9 +374,9 @@ compress() {
 
     info Compressing log file...
     if [[ -n "$DRY" ]]; then
-        >&2 echo "$compress --best -c $1 >  $out"
+        >&2 echo "$compress_progam --best -c $1 >  $out"
     else
-        safe_pv "$1" | "$compress" --best > "$out"
+        safe_pv "$1" | "$compress_progam" --best > "$out"
     fi
     echo "$out"
 }
@@ -381,15 +385,20 @@ uncompress() {
     local name=$(basename $1 .$PLOG_COMPRESSED_EXT)
     local out="/tmp/$name"
 
+    if [[ "$PLOG_COMPRESSED_EXT" =~ bz2 ]]; then
+        local uncompress_program=bunzip2
+    else
+        local uncompress_program=gunzip
+    fi
+
     info Uncompressing log file...
     if [[ -n "$DRY" ]]; then
-        >&2 echo "$uncompress -c $1 >  $out"
+        >&2 echo "$uncompress_program -c $1 >  $out"
     else
-        safe_pv "$1" | "$uncompress" > "$out"
+        safe_pv "$1" | "$uncompress_program" > "$out"
     fi
     echo "$out"
 }
-
 # Return a reduced log in /tmp can either be raw or compressed log
 reduce() {
     local ext=${1#*.}
@@ -487,12 +496,8 @@ main () {
      fi
 
      if [[ "$PLOG_COMPRESSED_EXT" =~ bz2 ]]; then
-         compress=bzip2
-         uncompress=bunzip2
          zegrep=bzegrep
      else
-         compress=gzip
-         uncompress=gunzip
          zegrep=zegrep
      fi
 
