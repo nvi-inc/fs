@@ -1517,8 +1517,8 @@ Final station procedure library link does contain '.prc'.
 BO -998
 ANTCN termination mode failed, see above error.
 ""
-BO -999
-WARNING: Log file just opened is already larger than 100 MB.
+BO -999 Place holder
+
 ""
 CD  -1
 Error from DBBCN in TPICD, see above for error.

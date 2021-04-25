@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 0.6 - January 2021
+Version 0.7 - April 2021
 
 :sectnums:
 
@@ -296,6 +296,22 @@ is set to `yes`. It can be added manually to IF set-up procedures
 written by hand.
 
 This was introduced in _10.0.0-beta3_, December 2020.
+
+=== FS_LOG_SIZE_WARNING
+
+Nominal value is 100.
+
+If set, the value will be used as the allowed size of a log file, in
+MB, before a warning is issued when it is opened. In other words,
+opening a log file that is already larger than this will generate a
+warning.
+
+Any non-negative integer up to 2^63^, noninclusive, is allowed. A
+value is `0` will disable the warning entirely. If not set or the
+contents of the environment variable do not decode properly, `100` is
+used.
+
+This was introduced in April 2021.
 
 === FS_WAKEUP_WAV
 
