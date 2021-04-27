@@ -1,0 +1,187 @@
+#!/usr/bin/perl
+# Usage: rxgfix3 file
+
+require "getopts.pl";
+
+exit -1 if (!&Getopts("hkrt"));
+
+if (defined($opt_k) && defined($opt_r)) {
+    print "Can't use both -k and -r\n";
+    print "For help, use: $0 -h\n";
+    exit -1;
+} elsif ($#ARGV < 0 && !defined($opt_h)) {
+    print "For help, use: $0 -h\n";
+    exit -1;
+} elsif (defined($opt_h)) {
+    print "
+Usage: rxgfix3 [-hkrt] [files]
+
+  Fixes .rxg files to remove extraneous comments at the start left by
+  gnplt2. 'files' are the files to be fixed.
+
+  Any gnplt2 style leading date comments that are found before the
+  first non-comment in the file are deleted. An example of a comment
+  that would be deleted is:
+
+* RXG file updated by GnPlt2 on 2021-4-19
+
+  The date in the first such comment is extracted and compared to the
+  date on the date line (the second non-comment line). If they are
+  different, that file will be skipped. Replacing the date line with
+  the extracted date can forced with -r. Keeping the value in the date
+  line can be forced with -k.
+
+  Leading comments that do not match the date comment format will not
+  be removed.
+
+  Before making any changes, the script can be run with the options
+  -rt to see what would be changed. For the date lines that would be
+  changed, there are two options: either re-run the script with just
+  -r if the date in the comment should replace the one in the date
+  line, or use the -k option to keep the value in the date line. You
+  can apply the script to subsets of files with different options as
+  convenient.
+
+  Options:
+    -h    Print this help page.
+    -k    Keep the date in the date line if it doesn't agree with
+          the first leading comment.
+    -r    Replace the date line in file with the date in the first
+          leading comments if they don't agree.
+    -t    Test mode: show each change without updating
+
+  If a file is changed, the original is preserved with a '.bak'
+  extension.
+
+";
+    exit -1;
+
+}
+
+FILE: foreach $name (@ARGV) {
+
+    $bak = $name . ".bak";
+    $out = $name;
+    if (!-e $name) {
+	die "Can't find $name Quitting.\n";
+    }
+
+# rename the original if we can and open the files
+
+    if(!defined($opt_t)) {
+        if (-e $bak) {
+            die "Backup-file $bak already exists, giving up.\n";
+        }
+    }
+
+    if(!defined($opt_t)) {
+        rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
+    }
+
+    if(!defined($opt_t)) {
+        if(!open(BAK,$bak)) {
+            print "Failed to open $bak: $!\n";
+            if(!rename($bak,$out)) {
+                print "Unable to rename $bak to $out: $!\n";
+                die "Please fix whatever the problem is and rename it yourself.\n";
+            } else {
+                die "I renamed $bak to $out for you.\n";
+            }
+        }
+
+        if(!open(OUT,">" . $out)) {
+            print "Failed to open $out: $!\n";
+            if((!close(BAK)) || (!rename($bak,$out))) {
+                print "Unable to rename $bak to $out: $!\n";
+                die "Please fix whatever the problem is and rename it yourself.\n";
+            } else {
+                die "I renamed $bak to $out for you.\n";
+            }
+        }
+    } else {
+	if(!open(BAK,$out)) {
+	    die "Failed to open $out: $!\n";
+	}
+    }
+
+#process
+    $copy=0;
+    $count=0;
+    $found=0;
+    $rename=0;
+    $change=0;
+    while(<BAK>) {
+	$count++ if(/^[^*]/);
+        if($copy) {
+            print OUT if(!defined($opt_t));
+	} elsif($count == 2) {
+            if(/(\d+) +(\d+) +(\d+)/) {
+                if ($found && ($1!=$year || $2!=$month || $3!=$day)) {
+                    if(!defined($opt_k) && !defined($opt_r)) {
+                        print "Skipping $out: comment ($year $month $day) doesn't agree with date: $_";
+                        $rename=1;
+                    } elsif (defined($opt_r)) {
+                        if(defined($opt_t)) {
+                           print "$out: comment date ($year $month $day) would replace date line: $_";
+                        }
+                        $change=1;
+                        $_= "$year $month $day\n";
+                    } # else defined($opt_k), keep current line
+                }
+            } else {
+                print "Skipping $out: date line has the wrong format: $_";
+                $rename=1;
+            }
+            print OUT if(!defined($opt_t));
+            $copy=1;
+	} elsif($count == 1) {
+            print OUT if(!defined($opt_t));
+	} elsif(/^\* RXG file updated by GnPlt2 on (\d+)-(\d+)-(\d+)/) {
+            if(!$found) {
+                $year=$1;
+                $month=$2;
+                $day=$3;
+                $found=1;
+            }
+            if(defined($opt_t)) {
+                print "$out: would delete leading comment:\n$_";
+            }
+            $change=1;
+	} else {
+            print OUT if(!defined($opt_t));
+        }
+        next;
+    }
+
+    if(!defined($opt_t)) {
+        if(!close(OUT)) {
+            $rename=1;
+            print "Warning: Unable to close '$out': $!\n";
+        }
+        if(!close(BAK)) {
+            $rename=1;
+            print "Warning: Unable to close '$bak': $!\n";
+        }
+
+        if($rename || !$change) {
+            if(!rename($bak,$out)) {
+                print "Warning: Unable to rename '$bak' to '$out': $!\n";
+                if($rename) {
+                    print "Warning: Please fix whatever the problem is and rename it yourself,\n";
+                    print "Warning: probably using 'mv $bak $out'\n";
+                } else {
+                    print "Warning: It appears that $out did not need any changes,\n";
+                    print "Warning: but to be safe you should probably \"";
+                    print "Warning: use 'mv $bak $out'\n";
+                }
+            } elsif($rename) {
+                print "Warning: I renamed '$bak' to '$out' for you.\n" if($two == $one);
+
+            }
+        }
+    } else {
+	if(!close(BAK)) {
+	    print "Warning: Unable to close '$out': $!\n";
+	}
+    }
+}
