@@ -1992,11 +1992,8 @@ class Gui(Frame):
             if data[i][0] != '*':
                 data[i] = data[i].rjust(len(data[i])+1, '*')
         
-        #leave record in log
-        todays_date = time.localtime()
-        record = ['* RXG file updated by GnPlt2 on %s-%s-%s\n' % (todays_date[0], todays_date[1], todays_date[2])]
-
         #update date
+        todays_date = time.localtime()
         lineCount = 0
         for i,line in enumerate(nonComments):
             if line[0] != '*':
@@ -2005,7 +2002,7 @@ class Gui(Frame):
                 nonComments[i]='%s %s %s\n' % (todays_date[0], todays_date[1], todays_date[2])
                 break
 
-        final = record + nonComments + data
+        final = nonComments + data
         working_rxg.writelines(final)
         original_rxg.close()
         working_rxg.close()
