@@ -1254,11 +1254,8 @@ global session station send_to cc current_form auto_start put_into_log session F
     
    exec rm "/tmp/text_message.txt.$pid"
 
-   if {$current_form=="ready"} { 
+   if {$current_form=="ready"} {
      if {$auto_start==1} {
-
-      # Run lognm again to check if there is a new logfile name.
-      run_lognm
 
       # If the logname is set then start auto start mode.
       if {$logname_is_set==1} {
