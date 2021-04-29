@@ -374,9 +374,9 @@ compress() {
 
     info Compressing log file...
     if [[ -n "$DRY" ]]; then
-        >&2 echo "$compress_progam --best -c $1 >  $out"
+        >&2 echo "$compress_program --best -c $1 >  $out"
     else
-        safe_pv "$1" | "$compress_progam" --best > "$out"
+        safe_pv "$1" | "$compress_program" --best > "$out"
     fi
     echo "$out"
 }
