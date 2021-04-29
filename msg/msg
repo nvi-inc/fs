@@ -296,6 +296,8 @@ global pointing_id problem_scans_id current_form process_file
      }
 
 
+  # check for log change at start of every form
+  run_lognm
   #*****************************************************#
   # Create a new form. the variable current_form is set #
   # to determine proceeding functions in the program.   #
