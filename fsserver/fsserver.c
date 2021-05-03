@@ -19,7 +19,9 @@
  */
 #include <errno.h>
 #include <fcntl.h>
+#include <linux/limits.h>
 #include <pthread.h>
+#include <pwd.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -29,10 +31,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <unistd.h>
 #include <time.h>
-#include <pwd.h>
-#include <linux/limits.h>
+#include <unistd.h>
 
 #include <jansson.h>
 #include <nng/nng.h>
@@ -310,22 +310,23 @@ int server_main(int argc, char *argv[]) {
 	}
 
 	char *linep;
-	time_t ti=time(NULL);
-	struct tm *tm=gmtime(&ti);
+	time_t ti         = time(NULL);
+	struct tm *tm     = gmtime(&ti);
 	struct passwd *pw = getpwuid(getuid());
 
-	if(asprintf(&linep,"%s/fsserver.%%Y.%%b.%%d.%%H.%%M.%%S.err",pw->pw_dir)<0)
-		fatal("making fsserver.err file format string","asprintf");
+	if (asprintf(&linep, "%s/fsserver.%%Y.%%b.%%d.%%H.%%M.%%S.err", pw->pw_dir) < 0)
+		fatal("making fsserver.err file format string", strerror(errno));
 
-
-	size_t n=strftime(fsserver_err_file,sizeof(fsserver_err_file),linep,tm);
-	/* the second case is supposedly for very old, <= 4.4.1 libc, and maybe some more until 4.4.4 */
-	if(n == 0 || n>=sizeof(fsserver_err_file))
-		fatal("making fsserver.err file name","strftime");
+	size_t n = strftime(fsserver_err_file, sizeof(fsserver_err_file), linep, tm);
+	/* the second case is supposedly for very old, <= 4.4.1 libc, and maybe some more until
+	 * 4.4.4 */
+	if (n == 0 || n >= sizeof(fsserver_err_file))
+		fatal("making fsserver.err file name", "strftime");
 	free(linep);
 
 	if (opt_daemon) {
-		int fd_err = open(fsserver_err_file, O_WRONLY|O_CREAT|O_EXCL,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+		int fd_err = open(fsserver_err_file, O_WRONLY | O_CREAT | O_EXCL,
+		                  S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 		if (fd_err < 0) {
 			fatal("opening fsserver.err file", strerror(errno));
 		}
@@ -336,19 +337,19 @@ int server_main(int argc, char *argv[]) {
 		error_fd = daemonize();
 
 	} else {
-		if(asprintf(&linep,"/usr/bin/tee %s",fsserver_err_file)<0)
-			fatal("making tee command","asprintf");
+		if (asprintf(&linep, "/usr/bin/tee %s", fsserver_err_file) < 0)
+			fatal("making tee command", "asprintf");
 
-		FILE *tee = popen(linep,"w");
-		if(tee==NULL)
+		FILE *tee = popen(linep, "w");
+		if (tee == NULL)
 			fatal("opening tee to fsserver.err file", strerror(errno));
 		free(linep);
 
-		if(setvbuf(tee, NULL, _IONBF, BUFSIZ))
+		if (setvbuf(tee, NULL, _IONBF, BUFSIZ))
 			fatal("setting vbuf for tee to fsserver.err file", strerror(errno));
 
-		int fd_err=fileno(tee);
-		if(fd_err<0)
+		int fd_err = fileno(tee);
+		if (fd_err < 0)
 			fatal("returning fileno of tee to fsserver.err file", strerror(errno));
 
 		if (dup2(fd_err, STDOUT_FILENO) < 0 || dup2(fd_err, STDERR_FILENO) < 0)
