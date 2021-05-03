@@ -53,8 +53,6 @@
 #include "stream.h"
 #include "window.h"
 
-extern char fsserver_err_file[PATH_MAX];
-
 #define fatal(msg, s)                                                                              \
 	do {                                                                                       \
 		fprintf(stderr, "%s:%d (%s) error %s: %s\n", __FILE__, __LINE__, __FUNCTION__,     \
@@ -91,6 +89,8 @@ struct server {
 
 	unsigned next_prompt_id;
 	list_t *prompts;
+
+	char *error_log;
 };
 
 char const *fs_command[] = {"fs", "-i", NULL};
@@ -1090,17 +1090,6 @@ error:
 }
 
 void server_shutdown(server_t *s) {
-
-	/* There is no point to a fatal error if the unlink fails.
-	   The server will exit anyway and if the user already
-	   deleted the file or mv'd it, it is gone. If it is just
-	   mv'd, the error will still appear there, and in the
-	   session if the server is foreground. Exiting here would
-	   also cause a 'fsserver stop' to command to not complete.
-	 */
-	if (unlink(fsserver_err_file))
-		perror("unlinking fsserver.err file");
-
 	nng_mtx_lock(s->mtx);
 	s->running = false;
 	if (s->finished_pipe[0] != -1) {
@@ -1112,6 +1101,20 @@ void server_shutdown(server_t *s) {
 }
 
 void server_destroy(server_t *s) {
+	if (s->error_log) {
+		if (unlink(s->error_log) < 0) {
+			/* There is no point to a fatal error if the unlink fails.
+			   The server will exit anyway and if the user already
+			   deleted the file or mv'd it, it is gone. If it is just
+			   mv'd, the error will still appear there, and in the
+			   session if the server is foreground. Exiting here would
+			   also cause a 'fsserver stop' to command to not complete.
+			*/
+			perror("unlinking fsserver.err file");
+		}
+		free(s->error_log);
+	}
+
 	/* order is very important here! */
 	nng_aio_free(s->aio);
 	nng_close(s->server_cmd_sock);
@@ -1146,4 +1149,8 @@ void server_destroy(server_t *s) {
 	free(s->clients_cmd_url);
 	free(s->server_cmd_url);
 	free(s);
+}
+
+void server_set_log(server_t *s, char *log) {
+	s->error_log = log;
 }
