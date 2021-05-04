@@ -22,9 +22,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../include/clib.h"
-#include "../include/poclb.h"
-
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"

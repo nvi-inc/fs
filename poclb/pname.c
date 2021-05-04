@@ -23,8 +23,6 @@
 */
 #include <string.h>
 
-#include "../include/poclb.h"
-
 static char sname[5]={' ',' ',' ',' ',' '};
 
 void putpname(name)

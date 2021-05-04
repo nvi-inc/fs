@@ -30,8 +30,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "../include/clib.h"
-
 #define  MAX_BUF       256
 
 #define FS_SKD_WAIT (1 << 30)

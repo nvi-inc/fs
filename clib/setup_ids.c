@@ -23,8 +23,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "../include/clib.h"
-
 #include "../include/ipckeys.h"
 #include "../include/params.h"
 #include "../include/fs_types.h"

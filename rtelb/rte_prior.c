@@ -22,8 +22,6 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
-#include "../include/rtelb.h"
-
 int rte_prior(ivalue)
 int ivalue;
 {

@@ -24,9 +24,6 @@
 #include <netinet/in.h>
 #include <sys/select.h>
 
-#include "../include/poclb.h"
-#include "../include/rtelb.h"
-
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"

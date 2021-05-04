@@ -21,8 +21,6 @@
 #include <sys/types.h>
 #include <math.h>
 
-#include "../include/clib.h"
-
 #include "../include/dpi.h"
 #include "../include/params.h"
 #include "../include/fs_types.h"
