@@ -18,9 +18,6 @@ Settable Parameters:
                       or "man" are displayed (attV monitor parameter
                       is the current value).  Default is "agc".
 
-            filter    IF filter, a non-negative integer, 0 means to not
-                      command. Default is zero.
-
             target    level target for AGC, 0-65535. Default is not to
                       command. This normally is not set here, but by
                       the DBBC3 configuration file.
@@ -40,6 +37,12 @@ Monitor-only Parameters:
 Comments:
 Each IF module has two inputs: input '1' does not include down
 conversion, input '2' includes down conversion.
+
+The DBBC3 dbbcifX command has a filter parameter that is not useful.
+However, on command it must be specified or the following parameter,
+target, will be ignored. The FS always sends "1" as the filter value
+if a target is specified. The filter value returned by the DBBC3 is
+not displayed in FS monitor output.
 
 The counts output converts to linear power scale approximately using
 the (C-language) expression:

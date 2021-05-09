@@ -68,11 +68,6 @@ char *ptr;
 	}
         break;
       case 3:
-        ierr=arg_int(ptr,&lcl->filter,0,TRUE);
-	if(ierr == 0 && lcl->filter < 0)
-	  ierr=-200;
-        break;
-      case 4:
 	if(0==strcmp(ptr,"*")) {
 	  if(strlen(ptr)!=1)
 	    ierr=-200;
@@ -116,14 +111,10 @@ struct dbbc3_ifx_cmd *lcl;
           strcpy(output,BAD_VALUE);
         break;
       case 3:
-        if (lcl->filter > 0)
-            sprintf(output,"%d",lcl->filter);
-        break;
-      case 4:
 	if(lcl->target_null!=1)
 	  sprintf(output,"%u",lcl->target);
         break;
-      case 5:
+      case 4:
 	if(lcl->att>=0)
 	  sprintf(output,"%d",lcl->att);
         break;
@@ -175,13 +166,9 @@ struct dbbc3_ifx_cmd *lcl;
     sprintf(buff+strlen(buff),"%d",lcl->att);
   else if (ivalue >=0 && ivalue <NAGC_KEY)
     strcat(buff,agc_key[ivalue]);
-  strcat(buff,",");  
-
-  if(lcl->filter > 0)
-      sprintf(buff+strlen(buff),"%d",lcl->filter);
 
   if(lcl->target_null == 0 && lcl->target <= 65535u) {
-    strcat(buff,",");
+    strcat(buff,",1,");
     sprintf(buff+strlen(buff),"%u",lcl->target);
   }
 
@@ -219,8 +206,6 @@ char *buff;
 
   ptr=strtok(NULL,",");
   if(ptr==NULL)
-    return -1;
-  if(1!=sscanf(ptr,"%d%c",&lclc->filter,&ch))
     return -1;
 
   ptr=strtok(NULL,",");

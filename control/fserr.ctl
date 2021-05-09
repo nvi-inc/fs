@@ -2492,7 +2492,7 @@ No default for IF input.
 DJ -102
 No default for gain.
 ""
-DJ -104
+DJ -103
 No default for AGC target.
 ""
 DJ -201
@@ -2502,9 +2502,6 @@ DJ -202
 Attenuation must be "man", "agc", or 0 to 63.
 ""
 DJ -203
-IF filter must be a non-negative integer.
-""
-DJ -204
 AGC target must 0-65535.
 ""
 DJ -300
