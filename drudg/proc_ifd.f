@@ -28,6 +28,7 @@
       include 'drcom.ftni'
 
 !History
+! 2020-05-08 JMG Got rid of filter output for DBBC3
 ! 2020-12-30 JMG Support for DBBC3
 ! 2016-01-19 JMG Modified to handle DBBC_PFB which can have several DBBs with same number.
 ! 2013-07-11 JMG Added "if_targets"
@@ -62,7 +63,7 @@ C               lo=same as Mk3
 C    for K4-1:  patch=lo1,1-4,5-8,etc.
 C    for LBA:   lo=same as Mk3 ( but allow up to 4 IFs)
 !    for DBBC   ifX=input,agc,filter#,target  where X=A,B,C,D and input=1,2,3,4, target=1-65535
-!    for DBBC3  ifX=input,agc,, target 
+!    for DBBC3  ifX=input,agc,target 
 !
 
 C Later: add a check of patching to determine how the IF3 switches should really be set.
@@ -159,7 +160,11 @@ C         if (VC11 is LOW) switch 2 = 1, else 2
           iv=ifd(j)
           if(ifd(j) .ne. 0) then
             cif=cifinp(iv,istn,icode)
-            if(ibbc_filter(ibd(j)) .ge. 0) then 
+            if(cstrack_cap .eq. "DBBC3_DDC") then
+! Leave out filter for DBBC3_DDC
+              write(cbuf,'("if",a1,"=",a1,",agc")')
+     >          cif(1:1), cif(2:2)
+            else if(ibbc_filter(ibd(j)) .ge. 0) then 
               write(cbuf,'("if",a1,"=",a1,",agc,",i1)')
      >          cif(1:1), cif(2:2), ibbc_filter(ibd(j)) 
             else
