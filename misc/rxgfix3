@@ -3,7 +3,7 @@
 
 require "getopts.pl";
 
-exit -1 if (!&Getopts("chkrt"));
+exit -1 if (!&Getopts("cdhkrt"));
 
 if (defined($opt_k) && defined($opt_r)) {
     print "Can't use both -k and -r\n";
@@ -14,7 +14,7 @@ if (defined($opt_k) && defined($opt_r)) {
     exit -1;
 } elsif (defined($opt_h)) {
     print "
-Usage: rxgfix3 [-chkrt] [files]
+Usage: rxgfix3 [-cdhkrt] [files]
 
   Fixes .rxg files to remove extraneous comments at the start left by
   gnplt2. 'files' are the files to be fixed.
@@ -42,8 +42,14 @@ Usage: rxgfix3 [-chkrt] [files]
   can apply the script to subsets of files with different options as
   convenient.
 
+  If any of the files don't exist or there is have .bak version
+  already, the script will give up before doing any processing. The -d
+  option can be used to delete all matching .bak files before
+  procesing.
+
   Options:
     -c    Cut trailing comments
+    -d    Delete old back-up files at start
     -h    Print this help page.
     -k    Keep the date in the date line if it doesn't agree with
           the first leading comment.
@@ -57,6 +63,48 @@ Usage: rxgfix3 [-chkrt] [files]
 ";
     exit -1;
 
+}
+
+FILE: foreach $name (@ARGV) {
+
+    $bak = $name . ".bak";
+    $out = $name;
+    if (!-e $name) {
+        $bad_n=1;
+	print "Can't find $name\n";
+    }
+
+# check for .bak file
+
+    if (-e $bak) {
+        if(!defined($opt_t)) {
+            if (!defined($opt_d)) {
+                $bad_b=1;
+                print "Backup file $bak already exists.\n";
+            } elsif (!unlink($bak)){
+                $bad_b=1;
+                print "Deleting $bak failed: $!.\n";
+            } else {
+                print "Deleted $bak\n";
+            }
+        } else {
+            if (!defined($opt_d)) {
+                print "Backup file $bak already exists, which would block processing.\n";
+            } else {
+                print "Existing back-up file $bak: would be deleted\n";
+            }
+        }
+    }
+}
+if ($bad_n) {
+    print "  Couldn't find some specified file(s).\n";
+}
+if ($bad_b) {
+    print "  Some back-up file(s) already exist, delete or rename them.\n";
+    print "  You can delete them as part of the processing by adding the -d option.\n";
+}
+if ($bad_n || $bad_b) {
+    die "Giving up.\n";
 }
 
 FILE: foreach $name (@ARGV) {
