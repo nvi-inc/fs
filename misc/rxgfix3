@@ -3,7 +3,7 @@
 
 require "getopts.pl";
 
-exit -1 if (!&Getopts("hkrt"));
+exit -1 if (!&Getopts("chkrt"));
 
 if (defined($opt_k) && defined($opt_r)) {
     print "Can't use both -k and -r\n";
@@ -14,7 +14,7 @@ if (defined($opt_k) && defined($opt_r)) {
     exit -1;
 } elsif (defined($opt_h)) {
     print "
-Usage: rxgfix3 [-hkrt] [files]
+Usage: rxgfix3 [-chkrt] [files]
 
   Fixes .rxg files to remove extraneous comments at the start left by
   gnplt2. 'files' are the files to be fixed.
@@ -43,6 +43,7 @@ Usage: rxgfix3 [-hkrt] [files]
   convenient.
 
   Options:
+    -c    Cut trailing comments
     -h    Print this help page.
     -k    Keep the date in the date line if it doesn't agree with
           the first leading comment.
@@ -107,11 +108,17 @@ FILE: foreach $name (@ARGV) {
 #process
     $copy=0;
     $count=0;
+    $old_count=0;
     $found=0;
     $rename=0;
     $change=0;
     while(<BAK>) {
-	$count++ if(/^[^*]/);
+	if(/^[^*]/) {
+	  $count++;
+          $trailing_comments=0;
+        } else {
+          $trailing_comments=1;
+        }
         if($copy) {
             print OUT if(!defined($opt_t));
 	} elsif($count == 2) {
@@ -150,9 +157,31 @@ FILE: foreach $name (@ARGV) {
 	} else {
             print OUT if(!defined($opt_t));
         }
+        if ($old_count != $count && !defined($opt_t)) {
+            $pos=tell OUT;
+            $old_count=$count;
+        }
         next;
     }
+#
+# handle trailing comments
+#
+    if($trailing_comments) {
+        if(defined($opt_c)) {
+            if(!defined($opt_t)) {
+                if(!$rename) {
+                    truncate OUT, $pos;
+                    $change=1;
+                }
+            } else {
+                print "$out: would delete trailing comments\n";
+            }
 
+        }
+    }
+#
+# clean-up
+#
     if(!defined($opt_t)) {
         if(!close(OUT)) {
             $rename=1;
