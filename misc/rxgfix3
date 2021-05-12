@@ -71,7 +71,7 @@ FILE: foreach $name (@ARGV) {
     $out = $name;
     if (!-e $name) {
         $bad_n=1;
-	print "Can't find $name\n";
+        print "Can't find $name\n";
     }
 
 # check for .bak file
@@ -112,7 +112,7 @@ FILE: foreach $name (@ARGV) {
     $bak = $name . ".bak";
     $out = $name;
     if (!-e $name) {
-	die "Can't find $name Quitting.\n";
+       die "Can't find $name Quitting.\n";
     }
 
 # rename the original if we can and open the files
@@ -148,12 +148,15 @@ FILE: foreach $name (@ARGV) {
             }
         }
     } else {
-	if(!open(BAK,$out)) {
-	    die "Failed to open $out: $!\n";
-	}
+        if(!open(BAK,$out)) {
+            die "Failed to open $out: $!\n";
+        }
     }
 
 #process
+    if(!defined($opt_t)) {
+        print "Processing $name\n";
+    }
     $copy=0;
     $count=0;
     $old_count=0;
@@ -161,15 +164,15 @@ FILE: foreach $name (@ARGV) {
     $rename=0;
     $change=0;
     while(<BAK>) {
-	if(/^[^*]/) {
-	  $count++;
+        if(/^[^*]/) {
+          $count++;
           $trailing_comments=0;
         } else {
           $trailing_comments=1;
         }
         if($copy) {
             print OUT if(!defined($opt_t));
-	} elsif($count == 2) {
+        } elsif($count == 2) {
             if(/(\d+) +(\d+) +(\d+)/) {
                 if ($found && ($1!=$year || $2!=$month || $3!=$day)) {
                     if(!defined($opt_k) && !defined($opt_r)) {
@@ -189,9 +192,9 @@ FILE: foreach $name (@ARGV) {
             }
             print OUT if(!defined($opt_t));
             $copy=1;
-	} elsif($count == 1) {
+        } elsif($count == 1) {
             print OUT if(!defined($opt_t));
-	} elsif(/^\* RXG file updated by GnPlt2 on (\d+)-(\d+)-(\d+)/) {
+        } elsif(/^\* RXG file updated by GnPlt2 on (\d+)-(\d+)-(\d+)/) {
             if(!$found) {
                 $year=$1;
                 $month=$2;
@@ -199,10 +202,10 @@ FILE: foreach $name (@ARGV) {
                 $found=1;
             }
             if(defined($opt_t)) {
-                print "$out: would delete leading comment:\n$_";
+                print "$out: would delete leading comment:$_";
             }
             $change=1;
-	} else {
+        } else {
             print OUT if(!defined($opt_t));
         }
         if ($old_count != $count && !defined($opt_t)) {
@@ -257,8 +260,8 @@ FILE: foreach $name (@ARGV) {
             }
         }
     } else {
-	if(!close(BAK)) {
-	    print "Warning: Unable to close '$out': $!\n";
-	}
+        if(!close(BAK)) {
+            print "Warning: Unable to close '$out': $!\n";
+        }
     }
 }
