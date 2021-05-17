@@ -89,19 +89,22 @@ FILE: foreach $name (@ARGV) {
             }
         } else {
             if (!defined($opt_d)) {
-                print "Backup file $bak already exists, which would block processing.\n";
+                print "Backup file $bak already exists, which blocks processing.\n";
             } else {
-                print "Existing back-up file $bak: would be deleted\n";
+                print "Delete existing back-up file $bak\n";
             }
         }
     }
 }
 if ($bad_n) {
-    print "  Couldn't find some specified file(s).\n";
+    print "  Couldn't find file(s) listed above.\n";
 }
 if ($bad_b) {
-    print "  Some back-up file(s) already exist, delete or rename them.\n";
-    print "  You can delete them as part of the processing by adding the -d option.\n";
+    print
+"  Some back-up file(s), see messages above, already exist or couldn't
+  be deleted. Unless there an error deleting them, you can delete them
+  as part of the processing by adding the -d option.
+";
 }
 if ($bad_n || $bad_b) {
     die "Giving up.\n";
@@ -180,7 +183,7 @@ FILE: foreach $name (@ARGV) {
                         $rename=1;
                     } elsif (defined($opt_r)) {
                         if(defined($opt_t)) {
-                           print "$out: comment date ($year $month $day) would replace date line: $_";
+                           print "$out: use comment date ($year $month $day) to replace date line: $_";
                         }
                         $change=1;
                         $_= "$year $month $day\n";
@@ -202,7 +205,7 @@ FILE: foreach $name (@ARGV) {
                 $found=1;
             }
             if(defined($opt_t)) {
-                print "$out: would delete leading comment:$_";
+                print "$out: delete leading comment: $_";
             }
             $change=1;
         } else {
@@ -217,17 +220,14 @@ FILE: foreach $name (@ARGV) {
 #
 # handle trailing comments
 #
-    if($trailing_comments) {
-        if(defined($opt_c)) {
-            if(!defined($opt_t)) {
-                if(!$rename) {
-                    truncate OUT, $pos;
-                    $change=1;
-                }
-            } else {
-                print "$out: would delete trailing comments\n";
+    if($trailing_comments && defined($opt_c)) {
+        if(!defined($opt_t)) {
+            if(!$rename) {
+                truncate OUT, $pos;
+                $change=1;
             }
-
+        } else {
+            print "$out: delete trailing comments\n";
         }
     }
 #
