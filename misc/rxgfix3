@@ -42,10 +42,17 @@ Usage: rxgfix3 [-cdhkrt] [files]
   can apply the script to subsets of files with different options as
   convenient.
 
+  The -c option will remove all trailing comments. This can be useful
+  to remove a trailing comment history that has gotten out of order.
+  That will make it easier to clean-up the trailing comments later, if
+  that is desired. A backup should be made before using this option.
+  The backup can be used as a basis for cleaning-up the comments or as
+  an archive.
+
   If any of the files don't exist or there is have .bak version
   already, the script will give up before doing any processing. The -d
   option can be used to delete all matching .bak files before
-  procesing.
+  processing.
 
   Options:
     -c    Cut trailing comments
