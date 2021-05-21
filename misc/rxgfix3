@@ -109,8 +109,8 @@ if ($bad_n) {
 if ($bad_b) {
     print
 "  Some back-up file(s), see messages above, already exist or couldn't
-  be deleted. Unless there an error deleting them, you can delete them
-  as part of the processing by adding the -d option.
+  be deleted. Unless there is an error deleting them, you can delete
+  them as part of the processing by adding the -d option.
 ";
 }
 if ($bad_n || $bad_b) {
