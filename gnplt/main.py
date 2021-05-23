@@ -2022,10 +2022,12 @@ class Gui(Frame):
         keys.sort()
         
         for freq in keys:
-            xdata.append(freq)
-            ydata.append(tcal_table.get(freq))
+           if freq > self.plot.minX and freq < self.plot.maxX:
+               xdata.append(freq)
+               ydata.append(tcal_table.get(freq))
         
-        self.plot.drawValues(xdata, ydata, fill = 'green')
+        if len(ydata) > 0:
+            self.plot.drawValues(xdata, ydata, fill = 'green')
     
     def fitTcalFreq(self, mode):
         #mode == average or median
