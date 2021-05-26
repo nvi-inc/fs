@@ -254,6 +254,8 @@ Style "monit*" NeverFocus
 Style "monpcal" NeverFocus
 Style "xconsole" NeverFocus
 Style "monan" NeverFocus
+Style "scnch" NeverFocus
+Style "erchk" NeverFocus
 Style "Field System Prompt*" StaysOnTop
 IgnoreModifiers L2
 
