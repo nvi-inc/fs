@@ -330,7 +330,7 @@ void setup_daemon_log(char *path) {
 void setup_foreground_log(char *path) {
 	char *linep = NULL;
 	if (asprintf(&linep, "/usr/bin/tee %s", path) < 0)
-		fatal("making tee command", "asprintf");
+		fatal("making tee command", strerror(errno));
 
 	FILE *tee = popen(linep, "w");
 	if (tee == NULL)
