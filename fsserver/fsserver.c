@@ -49,7 +49,7 @@ static bool opt_daemon = true;
 // error_fd is set to write end of pipe in the daemon process, which can be
 // used to send an message to the calling process if an error occurs early in
 // the startup of the daemon.
-int error_fd = -1;
+static int error_fd = -1;
 
 #define fatal(msg, s)                                                                              \
 	do {                                                                                       \
