@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2021-04-22
+VERSION=2021-05-30
 
 version(){
     echo "[plog $VERSION]"
@@ -553,7 +553,7 @@ main () {
             full=$FS_LOG_PATH/$ref$STATION$PLOG_FULL_SUFFIX.$logext
             if [[ $log != $full ]]; then
                 if fuser -v $log 2>&1 | grep -q " ddout$" ; then
-                    fatal "$log is open in the FS (ddout), aborting"
+                    fatal "$log is open in the FS (ddout), close it first; aborting"
                 fi
                 # This should be safe, because we checked if file exists earlier.
                 warn file contains multicast, renaming $(basename $log) to $(basename $full)
