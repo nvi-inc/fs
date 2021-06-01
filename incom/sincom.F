@@ -1124,7 +1124,8 @@ c
  820  continue
       call fc_get_flux_file(ierr)
       if(ierr.lt.0) then
-        call logit7ci(0,0,0,1,-404,'bo',ierr)
+        call logit7ci(0,0,0,1,ierr,'fx',0)
+        call logit7ci(0,0,0,1,-404,'bo',0)
         goto 990
       endif
 c      goto 995

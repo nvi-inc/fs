@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -224,7 +224,7 @@ int get_rxgain(file,rxgain)
 
     ierr=find_next_noncomment(fp,buff,sizeof(buff));
 
-    if(ierr==-1)
+    if(ierr==1)
       return -2;
     else if(ierr!=0)
       return ierr-700;
@@ -279,7 +279,7 @@ int get_rxgain(file,rxgain)
     
     ierr=find_next_noncomment(fp,buff,sizeof(buff));
 
-    if(ierr==-1)
+    if(ierr==1)
       return -2;
     else if(ierr!=0)
       return ierr-700;
@@ -306,7 +306,7 @@ int get_rxgain(file,rxgain)
       float el, tk;
       ierr=find_next_noncomment(fp,buff,sizeof(buff));
 
-      if(ierr==-1)
+      if(ierr==1)
 	return -2;
       else if(ierr!=0)
 	return ierr-900;
@@ -335,7 +335,7 @@ int get_rxgain(file,rxgain)
   /* check for trailing junk */
   
   ierr=find_next_noncomment(fp,buff,sizeof(buff));
-  if(ierr==-1) {
+  if(ierr==1) {
     if(0==fclose(fp))
       return 0;
     else

@@ -1485,7 +1485,7 @@ BO -403
 Error ?FFF reading antenna gain file, see preceeding message for file name.
 ""
 BO -404
-Error ?FFF reading flux.ctl file.
+Error reading flux.ctl file, see above errors/messages.
 ""
 BO -405
 Error opening TACD.CTL ?FFF
@@ -3010,6 +3010,120 @@ Program error: less than zero length data object request for device ?W
 ""
 FV -403
 Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+FX   -1
+Failed to open flux.ctl, see above error
+""
+FX   -2
+error with ungetc, see above error
+""
+FX   -3
+error with fgets, see above error
+""
+FX   -4
+line too long in flux.ctl, max is 255 characters
+""
+FX   -5
+too many source records, maximum is 100
+""
+FX   -6
+source name too long, maximum is 10
+""
+FX   -7
+source type missing
+""
+FX   -8
+source type must be c or p
+""
+FX  -10
+minimum frequency missing
+""
+FX  -11
+minimum frequency did not decode
+""
+FX  -12
+maximum frequency missing
+""
+FX  -13
+maximum frequency did not decode
+""
+FX  -14
+first flux coefficient (a) missing
+""
+FX  -15
+first flux coefficient (a) did not decode
+""
+FX  -16
+second flux coefficient (b) missing
+""
+FX  -17
+second flux coefficient (b) did not decode
+""
+FX  -18
+third flux coefficient (c) missing
+""
+FX  -19
+third flux coefficient (c) did not decode
+""
+FX  -20
+size field missing
+""
+FX  -21
+size field did not decode
+""
+FX  -22
+model type missing
+""
+FX  -23
+first Gaussian component percent missing
+""
+FX  -24
+first Gaussian component percent did not decode
+""
+FX  -25
+first Gaussian component first axis missing
+""
+FX  -26
+first Gaussian component first axis did not decode
+""
+FX  -28
+first Gaussian component second axis did not decode
+""
+FX  -30
+second Gaussian component percent did not decode
+""
+FX  -31
+second Gaussian component first axis missing
+""
+FX  -32
+second Gaussian component first axis did not decode
+""
+FX  -34
+second Gaussian component second axis did not decode
+""
+FX  -35
+2pts model separation missing
+""
+FX  -36
+2pts model separation did not decode
+""
+FX  -37
+disk size missing
+""
+FX  -38
+disk size did not decocde
+""
+FX  -39
+model must be gauss, 2pts, or disk
+""
+FX  -40
+extra trailing field
+""
+FX  -41
+error closing flux.ctl, see above error
+""
+FX  -42
+error from fgetc(), see above error
 ""
 HL   -1
 Break Detected in HOLOG
