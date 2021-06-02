@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#include <errno.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
@@ -55,19 +56,22 @@ void get_rxgain_files(ierr)
     if(++icount < MAX_RXGAIN)
       *ierr=get_rxgain(outbuf,&shm_addr->rxgain[icount]);
     else
-      *ierr=-997;
+      *ierr=-22;
     if(*ierr==0) {
         if(strlen(outbuf)-dirlen<-1+sizeof(((struct rxgain_files_ds *) 0)->file)) {
             strcpy(shm_addr->rxgain_files[icount].file,outbuf+dirlen);
             shm_addr->rxgain_files[icount].logged=FALSE;;
         } else
-            *ierr=-996;
+            *ierr=-21;
     }
-
     if(*ierr!=0) {
-      printf(" ierr = %d on %s\n",*ierr,outbuf);
+      if(ierr != -22)
+        printf("failing rxg file: `%s`\n",outbuf);
+      if(*ierr%100>=-3 || *ierr==-12 || *ierr==-11)
+         logit(NULL,errno,"un");
       return;
     }
+
     /* test code
     printf(" file %s\n",outbuf);
     printf(" rxg icount %d name '%s'\n",icount,

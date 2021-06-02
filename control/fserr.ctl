@@ -1482,7 +1482,7 @@ BO -402
 Error antenna check period in TIME.CTL
 ""
 BO -403
-Error ?FFF reading antenna gain file, see preceeding message for file name.
+Error reading .rxg file, see above messages for file name and error.
 ""
 BO -404
 Error reading flux.ctl file, see above errors/messages.
@@ -6325,6 +6325,270 @@ Program error: less than zero length data object request for device ?W
 ""
 RE -403
 Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+RG   -1
+error from fgetc() while looking for extra trailing lines
+""
+RG   -2
+error from ungetc() while looking for extra trailing lines
+""
+RG   -3
+error from fgets() while looking for extra trailing lines
+""
+RG   -4
+.rxg file line too long while looking for extra trailing lines
+""
+RG  -11
+error opening an .rxg file
+""
+RG  -12
+error closing an .rxg file.
+""
+RG  -13
+extra trailing non-comment line found in an .rxg file
+""
+RG  -21
+.rxg file name too long, maximum is 128 characters
+""
+RG  -22
+too many .rxg files, maximum is 20
+""
+RG  -99
+.rxg file ended before line 1 (LO)
+""
+RG -101
+error from fgetc() while looking for line 1 (LO)
+""
+RG -102
+error from ungetc() while looking for line 1 (LO)
+""
+RG -103
+error from fgets() while looking for line 1 (LO)
+""
+RG -104
+.rxg file line too long while looking for line 1 (LO)
+""
+RG -111
+LO (line 1): empty
+""
+RG -112
+LO (line 1): must start with "range" or "fixed"
+""
+RG -113
+LO (line 1): with two LOs: LO2 < LO1 or LO1 < 0
+""
+RG -114
+LO (line 1): with one LO: LO1 < 0
+""
+RG -115
+LO (line 1): no LO values
+""
+RG -199
+.rxg file ended before line 2 (date)
+""
+RG -201
+error from fgetc() while looking for line 2 (date)
+""
+RG -202
+error from ungetc() while looking for line 2 (date)
+""
+RG -203
+error from fgets() while looking for line 2 (date)
+""
+RG -204
+.rxg file line too long while looking for line 2 (date)
+""
+RG -211
+date (line 2): doesn't have three fields
+""
+RG -212
+date (line 2): fields have impossible values
+""
+RG -299
+.rxg file ended before line 3 (FWHM)
+""
+RG -301
+error from fgetc() while looking for line 3 (FWHM)
+""
+RG -302
+error from ungetc() while looking for line 3 (FWHM)
+""
+RG -303
+error from fgets() while looking for line 3 (FWHM)
+""
+RG -304
+.rxg file line too long while looking for line 3 (FWHM)
+""
+RG -311
+FWHM (line 3): empty
+""
+RG -312
+FWHM (line 3): must start with "constant" or "frequency"
+""
+RG -313
+FWHM (line 3): wrong number of fields
+""
+RG -399
+.rxg file ended before line 4 (polarizations)
+""
+RG -401
+error from fgetc() while looking for line 4 (polarizations)
+""
+RG -402
+error from ungetc() while looking for line 4 (polarizations)
+""
+RG -403
+error from fgets() while looking for line 4 (polarizations)
+""
+RG -404
+.rxg file line too long while looking for line 4 (polarizations)
+""
+RG -411
+polarizations (line 4): empty
+""
+RG -412
+polarizations (line 4): polarization 1 must be "lcp" or "rcp"
+""
+RG -413
+polarizations (line 4): polarization 2 must be "lcp" or "rcp"
+""
+RG -499
+.rxg file ended before line 5 (DPFUs)
+""
+RG -501
+error from fgetc() while looking for line 5 (DPFUs)
+""
+RG -502
+error from ungetc() while looking for line 5 (DPFUs)
+""
+RG -503
+error from fgets() while looking for line 5 (DPFUs)
+""
+RG -504
+.rxg file line too long while looking for line 5 (DPFUs)
+""
+RG -511
+DPFU (line 5): first DPFU < 0
+""
+RG -512
+DPFU (line 5): second DPFU < 0
+""
+RG -513
+DPFU (line 5): found one DPFU, but expected two
+""
+RG -514
+DPFU (line 5): found two DPFUs but expected one
+""
+RG -515
+DPFU (line 5): DPFU line empty
+""
+RG -599
+.rxg file ended before line 6 (gain) curve
+""
+RG -601
+error from fgetc() while looking for line 6 (gain curve)
+""
+RG -602
+error from ungetc() while looking for line 6 (gain curve)
+""
+RG -603
+error from fgets() while looking for line 6 (gain curve)
+""
+RG -604
+.rxg file line too long while looking for line 6 (gain curve)
+""
+RG -611
+Gain curve (line 6): first two tokens may be too long or less than 1 or more than 10 coefficients
+""
+RG -612
+Gain curve (line 6): gain curve is not "elev" or "altaz"
+""
+RG -613
+Gain curve (line 6): gain curve type is not "poly"
+""
+RG -699
+.rxg file ended in Tcal table, i.e., no "end_tcal_table"
+""
+RG -701
+error from fgetc() while looking for Tcal table lines
+""
+RG -702
+error from ungetc() while looking for Tcal table lines
+""
+RG -703
+error from fgets() while looking for Tcal table lines
+""
+RG -704
+.rxg file line too long while looking for Tcal table lines
+""
+RG -711
+Tcal line: line did not have at least three fields
+""
+RG -712
+Tcal line: polarization was not "rcp" or "lcp"
+""
+RG -713
+Tcal line: polarization does match defined polarization
+""
+RG -714
+Tcal line: freq < 0
+""
+RG -715
+Tcal line: too many Tcal lines, maximum is 1200
+""
+RG -716
+Tcal line: no Tcal lines present
+""
+RG -799
+.rxg file ended without Trec line
+""
+RG -801
+error from fgetc() while looking for Trec line
+""
+RG -802
+error from ungetc() while looking for Trec line
+""
+RG -803
+error from fgets() while looking for Trec line
+""
+RG -804
+.rxg file line too long while looking for Trec line
+""
+RG -811
+Trec line: first Trec is less than zero
+""
+RG -812
+Trec line: second Trec is less than zero
+""
+RG -813
+Trec line: found one Trec, expected two
+""
+RG -814
+Trec line: found two Trec, expected one
+""
+RG -815
+Trec line: empty Trec line
+""
+RG -899
+.rxg file ended without "end_spillover_table"
+""
+RG -901
+error from fgetc() while looking for spillover table line
+""
+RG -902
+error from ungetc() while looking for spillover table line
+""
+RG -903
+error from fgets() while looking for spillover table line
+""
+RG -904
+.rxg file line too long while looking for spillover table line
+""
+RG -911
+spillover table line: does not have at least two fields
+""
+RG -912
+too many spillover table lines, maximum is 20
 ""
 RL -131
 Operation failed (non-specific error) on device ?W

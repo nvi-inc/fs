@@ -1117,7 +1117,8 @@ c
  810  continue
       call fc_get_rxgain_files(ierr)
       if(ierr.lt.0) then
-        call logit7ci(0,0,0,1,-403,'bo',ierr)
+        call logit7ci(0,0,0,1,ierr,'rg',0)
+        call logit7ci(0,0,0,1,-403,'bo',0)
         goto 990
       endif
 c
