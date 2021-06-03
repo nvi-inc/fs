@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 2.9 - April 2021
+Version 3.0 - May 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -1245,7 +1245,73 @@ need to be logged in as _prog_.
 
 === Miscellaneous FSLx changes
 
-None are required for this update.
+. [[xsession]] <<xsession,Update ~/.xsession>>: If you are running the
+FS on the console and your login shell is _tcsh_ (or if you are using
+AUID accounts, see the *NOTE* immediately below.)
+
++
+
+[NOTE]
+====
+
+If you are using an AUID accounts (with __bash__ as the login shell) in
+FSL10 (see the Adding AUID account sub-section,
+https://nvi-inc.github.io/fsl10/cis-setup.html#_adding_auid_accounts,
+of the CIS hardening for FSL10 document,
+https://nvi-inc.github.io/fsl10/cis-setup.html), you only need to
+update the __~/.profile__ files for the AUID accounts to set the
+needed environment variables.
+
+If you are using __tcsh__ as the login shell for those accounts, you
+will need to make the changes below __and__ add the environment
+variables to the __~/.login__ files for those accounts.
+
+====
+
++
+
+If you are using _tcsh_ as your login shell for  _oper_ or _prog_ (or
+AUID accounts in FSL10), the (optional) changes in this sub-step will
+make sure any FS runtime environment variables are set properly for
+the console window display manager (_fvwm2_). This could be important
+for example, if you want to run __fsclient__ (perhaps for a
+`scan_check` window) from a console hotkey. There are two cases:
+<<fsl9_fsl10,FSL9/FSL10>> and <<fsl8,FSL8>>.
+
+
+* [[fsl9_fsl10]] <<fsl9_fsl10,FSL9/FSL10>>: If you are using one of
+these distributions (or any other that uses the graphical manager
+_gdm3_ for the console), update your _~/.xsession_ files.
+
+.. If _oper_ uses _tcsh_ as its login shell, then as _oper_, make
+these change to _~/.xsession_:
+
+... Change the first line to:
+
+  #!/bin/tcsh
++
+
+...  Change the `source .profile` line to:
+
+  source .login
+
++
+
+.. Likewise, if _prog_ uses _tcsh_ you should make the same changes,
+as _prog_.
+
+* [[fsl8]] <<fsl8,FSL8>>: If you are using this distribution (or any
+other that uses the graphical manager _gdm_ for the console), update
+your _~/.profile_ files.
+
+.. If _oper_ uses _tcsh_ as its login shell, then as _oper_, you will
+need to update the _~/.profile_ file to set any FS runtime environment
+variables you are using in _.login_. The syntax in _.profile_ is
+different from that in _.login_. You can look at an example in
+_/usr2/fs/st.default/oper/.profile_.
+
+.. Likewise, if _prog_ uses _tcsh_ you should make the same changes,
+as _prog_.
 
 === Test the FS
 
