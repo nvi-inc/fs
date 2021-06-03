@@ -19,7 +19,7 @@
 //
 
 = DRAFT FS Document Font Conventions
-Version 0.7 - March 2021
+Version 0.8 - May 2021
 
 :sectnums:
 
@@ -75,8 +75,10 @@ be useful in some cases for replaceable items.
 
 === Links
 
-The anchor text in all links is normal body text for simplicity. The
-text used depends on the reference:
+The anchor text in all links is normal body text for simplicity. Using
+references to section or lists is preferred to using the numbering or
+lettering since those may change. The form used depends on the
+reference:
 
 ** External URLs -- These are references to web pages outside of the
 FS. The anchor text should be the full URL. Shorter anchor text can be
@@ -87,14 +89,18 @@ The anchor text should be the full title of the document.  The
 surrounding text should identify it as a document.
 
 ** Sections (or steps that appear as sections) in other FS documents
--- The anchor text should be the full section/step title. The
-surrounding text should identify it as a section or sub-section (or
-step or sub-step) and include a link to the document.
+-- The anchor text should be the full section title. The surrounding
+text should identify it as a section or sub-section (or step or
+sub-step) and include a link to the document.
 
 ** References to other anchors in other FS documents -- The anchor
-text should show content related text. The surrounding text should
-identify it as something other than a section/step (perhaps _change_
-if appropriate) and include links to its section/step and document.
+display text should show content related text. The surrounding text
+should identify it as something other than a section/step (perhaps
+_change_ if appropriate) and include links to its section/step and
+document. There should be a link reference to the anchor at the point
+where it occurs, typically followed by a colon. This makes the
+location of the anchor visible. The text in the link at anchor and in
+the reference(s) should be the same.
 
 ** References to sections/steps of the current document -- The anchor
 text should be the full section/step title. The surrounding text
@@ -104,7 +110,12 @@ Including whether it is _above_ and _below_ is helpful.
 ** References to other anchors in the current document -- The anchor
 text should show content related text. The surrounding text should
 identify it as something other than a section/step (perhaps _change_
-if appropriate) and include a link to its section/step.
+if appropriate) and include a link to its section/step.  There should
+be a link reference to the anchor at the point where it occurs,
+typically followed by a colon. This makes the location of the anchor
+visible. The text in the link at anchor and in the reference(s) should
+be the same.
+
 
 === Document titles
 
@@ -285,6 +296,48 @@ Suggestion:
 . Step
 . Another step
 ====
+
+=== Anchors and text in the links
+
+An example of using anchors:
+
+....
+[[check_files]]<<check_files,Check files>>:
+
+Some explanatory text probably follows. The anchor above is in double
+square brackets `+++[[<i>anchor</i>]]+++`. The reference, with anchor
+text, is in double angle brackets
+`+++<<<i>anchor</i>,<i>text</i>>>+++`.
+
+Somewhere else in the document, before or after the anchor, include a
+reference to it. In this example, see <<check_files,Check files>>,
+above.
+
+It can also be referred to from a different document with something of
+the form <<font_conventions.adoc#check_files,Check files>> with the
+correct relative path to the document. Including a reference to
+section and the document will be helpful for those working from a
+print out.
+....
+
+Renders as:
+
+[[check_files]]<<check_files,Check files>>:
+
+Some explanatory text probably follows. The anchor above is in double
+square brackets `+++[[<i>anchor</i>]]+++`. The reference, with anchor
+text, is in double angle brackets
+`+++<<<i>anchor</i>,<i>text</i>>>+++`.
+
+Somewhere else in the document, before or after the anchor, include a
+reference to it. In this example, see <<check_files,Check files>>,
+above.
+
+It can also be referred to from a different document with something of
+the form <<font_conventions.adoc#check_files,Check files>> with the
+correct relative path to the document. Including a reference to
+section and the document will be helpful for those working from a
+print out.
 
 == Workarounds
 
