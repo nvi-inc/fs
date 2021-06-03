@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 1.1 - April 2021
+Version 1.2 - April 2021
 
 :sectnums:
 :experimental:
@@ -365,7 +365,7 @@ symbolic links, you will need to resolve that first or modify the
 commands below to take that into account. You can check if they are
 symbolic links using, for example:
 
-  ls -l /usr2/control
+  ls -ld /usr2/control
 
 One way to resolve this is to delete the symbolic links and rename the
 directories they pointed to with the names of the corresponding
