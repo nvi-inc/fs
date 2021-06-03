@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 1.5 - April 2021
+Version 1.6 - May 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -898,6 +898,17 @@ to nominal position after an error in _fivpt_.
 +
 
 This was apparently a benign bug.
+
+.. Fixed Tsys always being 100 for continuous cal in _fivpt_.
++
+
+This bug did not affect the ability of _fivpt_ to find pointing
+offsets. In addition to the Tsys value being wrong, it caused Tsys
+derived values (Tant, fitted peak Tant values, and Tsys related values
+in the `perform` records) to be displayed in terms of a percentage of
+Tsys. This was basically the same effect as having a Tcal value of
+`-100`. Only DBBC racks had continuous cal in FS9. While not entirely
+a cosmetic issue, it was fairly benign.
 
 .. Corrected the order of `_wait_` and `_cal_` response fields in
 `fivept` `help` page,
