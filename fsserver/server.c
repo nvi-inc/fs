@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -89,6 +89,8 @@ struct server {
 
 	unsigned next_prompt_id;
 	list_t *prompts;
+
+	char *error_log;
 };
 
 char const *fs_command[] = {"fs", "-i", NULL};
@@ -851,7 +853,7 @@ int server_cmd(server_t *s, json_t *rep_msg, int argc, const char **const argv) 
 		return server_cmd_window(s, rep_msg, argc, argv);
 	}
 
-	if (strcmp(argv[0], "shutdown") == 0 || strcmp(argv[0], "stop") == 0)  {
+	if (strcmp(argv[0], "shutdown") == 0 || strcmp(argv[0], "stop") == 0) {
 		return server_cmd_shutdown(s, rep_msg, argc, argv);
 	}
 
@@ -1099,6 +1101,20 @@ void server_shutdown(server_t *s) {
 }
 
 void server_destroy(server_t *s) {
+	if (s->error_log) {
+		if (unlink(s->error_log) < 0) {
+			/* There is no point to a fatal error if the unlink fails.
+			   The server will exit anyway and if the user already
+			   deleted the file or mv'd it, it is gone. If it is just
+			   mv'd, the error will still appear there, and in the
+			   session if the server is foreground. Exiting here would
+			   also cause a 'fsserver stop' to command to not complete.
+			*/
+			perror("unlinking fsserver.err file");
+		}
+		free(s->error_log);
+	}
+
 	/* order is very important here! */
 	nng_aio_free(s->aio);
 	nng_close(s->server_cmd_sock);
@@ -1133,4 +1149,8 @@ void server_destroy(server_t *s) {
 	free(s->clients_cmd_url);
 	free(s->server_cmd_url);
 	free(s);
+}
+
+void server_set_log(server_t *s, char *log) {
+	s->error_log = log;
 }

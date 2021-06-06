@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,9 @@
  */
 #include <errno.h>
 #include <fcntl.h>
+#include <linux/limits.h>
 #include <pthread.h>
+#include <pwd.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -29,6 +31,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <jansson.h>
@@ -42,7 +45,11 @@
 #include "server.h"
 
 static bool opt_daemon = true;
-int error_fd           = -1;
+
+// error_fd is set to write end of pipe in the daemon process, which can be
+// used to send an message to the calling process if an error occurs early in
+// the startup of the daemon.
+static int error_fd = -1;
 
 #define fatal(msg, s)                                                                              \
 	do {                                                                                       \
@@ -242,8 +249,7 @@ int daemonize() {
 	if (nulldev < 0)
 		fatal("open devnul", strerror(errno));
 
-	if (dup2(nulldev, STDIN_FILENO) < 0 || dup2(nulldev, STDOUT_FILENO) < 0 ||
-	    dup2(nulldev, STDERR_FILENO) < 0)
+	if (dup2(nulldev, STDIN_FILENO) < 0)
 		fatal("closing fds", strerror(errno));
 
 	return fds[1];
@@ -291,6 +297,57 @@ void install_shims() {
 	}
 }
 
+char *log_path() {
+	char *path = NULL;
+	char time_str[256];
+
+	time_t ti         = time(NULL);
+	struct tm *tm     = gmtime(&ti);
+	struct passwd *pw = getpwuid(getuid());
+
+	size_t n = strftime(time_str, sizeof(time_str), "%Y.%b.%d.%H.%M.%S", tm);
+	/* the second case is supposedly for very old, <= 4.4.1 libc, and maybe some more until
+	 * 4.4.4 */
+	if (n == 0 || n >= sizeof(time_str))
+		fatal("making fsserver.err file name", "strftime");
+
+	if (asprintf(&path, "%s/fsserver.%s.err", pw->pw_dir, time_str) < 0)
+		fatal("making fsserver.err file format string", strerror(errno));
+
+	return path;
+}
+
+void setup_daemon_log(char *path) {
+	int fd_err = open(path, O_WRONLY | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	if (fd_err < 0) {
+		fatal("opening fsserver.err file", strerror(errno));
+	}
+
+	if (dup2(fd_err, STDOUT_FILENO) < 0 || dup2(fd_err, STDERR_FILENO) < 0)
+		fatal("connecting to fsserver.err file", strerror(errno));
+}
+
+void setup_foreground_log(char *path) {
+	char *linep = NULL;
+	if (asprintf(&linep, "/usr/bin/tee %s", path) < 0)
+		fatal("making tee command", strerror(errno));
+
+	FILE *tee = popen(linep, "w");
+	if (tee == NULL)
+		fatal("opening tee to fsserver.err file", strerror(errno));
+	free(linep);
+
+	if (setvbuf(tee, NULL, _IONBF, BUFSIZ))
+		fatal("setting vbuf for tee to fsserver.err file", strerror(errno));
+
+	int fd_err = fileno(tee);
+	if (fd_err < 0)
+		fatal("returning fileno of tee to fsserver.err file", strerror(errno));
+
+	if (dup2(fd_err, STDOUT_FILENO) < 0 || dup2(fd_err, STDERR_FILENO) < 0)
+		fatal("connecting to fsserver.err file", strerror(errno));
+}
+
 /*
  * server_main performs the task of parsing the command line arguments, initializing and configuring
  * a new server instance and monitoring UNIX signals which are passed to the server via callbacks.
@@ -305,9 +362,12 @@ int server_main(int argc, char *argv[]) {
 			return 1;
 		}
 	}
-
+	char *log = log_path();
 	if (opt_daemon) {
-		error_fd = daemonize();
+		setup_daemon_log(log);
+		error_fd = daemonize(); // never returns in foreground process.
+	} else {
+		setup_foreground_log(log);
 	}
 
 	install_shims();
@@ -319,6 +379,8 @@ int server_main(int argc, char *argv[]) {
 	if (rv != 0) {
 		fatal("error creating a new server", nng_strerror(rv));
 	}
+
+	server_set_log(s, log);
 
 	sigset_t emptyset;
 
