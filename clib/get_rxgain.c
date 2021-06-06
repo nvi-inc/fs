@@ -64,6 +64,13 @@ int get_rxgain(file,rxgain)
       return -113;
     break;
   case 2:
+    cptr=strtok(buff," \n\t");
+    cptr=strtok(NULL," \n\t");
+    cptr=strtok(NULL," \n\t");
+    if(cptr!=NULL)
+        return -116;
+    if(rxgain->type=='r')
+      return -117;
     if(rxgain->lo[0]<0)
       return -114;
     break;
@@ -71,6 +78,7 @@ int get_rxgain(file,rxgain)
     return -115;
     break;
   }
+
   
   if((ierr=find_next_noncomment(fp,buff,sizeof(buff)))!=0)
     return ierr-200;
@@ -97,7 +105,7 @@ int get_rxgain(file,rxgain)
 
   /* Line 3: FWHM */
   
-  iread=sscanf(buff,"%10s %f %f",type,&rxgain->fwhm.coeff);
+  iread=sscanf(buff,"%10s %f",type,&rxgain->fwhm.coeff);
 
   if(iread < 1)
     return -311;
@@ -110,6 +118,12 @@ int get_rxgain(file,rxgain)
 
   switch (iread) {
   case 1:
+    cptr=strtok(buff," \n\t");
+    cptr=strtok(NULL," \n\t");
+    if(cptr!=NULL)
+        return -314;
+    if(rxgain->fwhm.model=='c')
+      return -315;
     rxgain->fwhm.coeff=1.0;
     break;
   case 2:
@@ -210,11 +224,17 @@ int get_rxgain(file,rxgain)
 
   rxgain->gain.ncoeff=iread-2;
 
-  if(strstr(buff,"opacity_corrected")!=NULL)
-    rxgain->gain.opacity='y';
-  else
-    rxgain->gain.opacity='n';
+  cptr=strtok(buff," \n\t");
+  for (i=0;i<iread;i++)
+     cptr=strtok(NULL," \n\t");
 
+  if(cptr!=NULL) {
+      if(strstr(cptr,"opacity_corrected")!=NULL)
+          rxgain->gain.opacity='y';
+      else
+          return -614;
+  } else
+      rxgain->gain.opacity='n';
 
   rxgain->tcal_ntable=0;
   rxgain->tcal_npol[0]=0;

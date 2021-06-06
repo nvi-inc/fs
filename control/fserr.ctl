@@ -6383,6 +6383,12 @@ LO (line 1): with one LO: LO1 < 0
 RG -115
 LO (line 1): no LO values
 ""
+RG -116
+LO (line 1): LO2 does not decode as a number
+""
+RG -117
+LO (line 1): no LO2 for type "range"
+""
 RG -199
 .rxg file ended before line 2 (date)
 ""
@@ -6427,6 +6433,12 @@ FWHM (line 3): must start with "constant" or "frequency"
 ""
 RG -313
 FWHM (line 3): wrong number of fields
+""
+RG -314
+FWHM (line 3): value doesn't decode as a number
+""
+RG -315
+FWHM (line 3): value missing for type "constant"
 ""
 RG -399
 .rxg file ended before line 4 (polarizations)
@@ -6505,6 +6517,9 @@ Gain curve (line 6): gain curve is not "elev" or "altaz"
 ""
 RG -613
 Gain curve (line 6): gain curve type is not "poly"
+""
+RG -614
+Gain curve (line 6): gain curve trailing token is not "opacity_corrected", maybe it is misspelled
 ""
 RG -699
 .rxg file ended in Tcal table, i.e., no "end_tcal_table"
