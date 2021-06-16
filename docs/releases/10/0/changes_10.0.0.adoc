@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 1.6 - May 2021
+Version 1.7 - June 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -198,7 +198,7 @@ section to include using symbolic links for switching back-and-forth
 between operational and test installs.
 
 ... Update
-<<../../misc/install_reference.adoc#_cut_and_paste_installation_tips,Cut-and-paste installation tips>>
+<<../../misc/install_reference.adoc#_copy_and_paste_installation_tips,Copy-and-paste installation tips>>
 section for working from HTML or PDF instructions.
 
 ... Add strategy for setting the `geometry` resource for an _xterm_
