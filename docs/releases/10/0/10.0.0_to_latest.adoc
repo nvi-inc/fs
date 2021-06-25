@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 1.6 - June 2021
+Version 1.7 - June 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -327,15 +327,6 @@ Thanks to Katie Pazamickis and Jay Redmond (both at GGAO) for
 reporting this.
 
 +
-
-.. Add use of _bzip2_ compression to _plog_.
-+
-
-_plog_ will now use _bzip2_ as the default program for compressing
-___full.log__ files to send to the data centers. It is possible to use
-__gzip__ instead by setting the environment variable
-`PLOG_COMPRESSED_EXT` to `gz` or using the `-g` command line option.
-Please use `*plog{nbsp}-h*` for more information.
 
 .. Respect `NETRC_DIR` for the `BKG` data center (closing
 https://github.com/nvi-inc/fs/issues/113[#113]).
