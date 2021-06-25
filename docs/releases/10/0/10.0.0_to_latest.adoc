@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 1.4 - May 2021
+Version 1.5 - June 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -315,78 +315,6 @@ from within the FS _git_ archive directory, usually _/usr2/fs-git_.
 
 === FS changes
 
-. Clean-up of suppressing signals.
-
-+
-
---
-
-.. Remove redundant ignoring of signals in _ddout_ and _oprin_
-(partially closing https://github.com/nvi-inc/fs/issues/100[#100]).
-
-.. Re-enable suppression of signals (partially closing
-https://github.com/nvi-inc/fs/issues/100[#100]).
-
-+
-
-As of _10.0.0-beta1_, the previous practice of disabling receipt of
-certain signals, in particular `SIGINT` (for kbd:[Control+C]) had been
-removed. It has been reinstated. When the FS is run without the
-display server, this assures that no FS programs will be aborted if a
-kbd:[Control+C] is accidentally entered in the terminal session where
-the FS is running. However, this does not prevent a kbd:[Control+C]
-from killing an _xterm_ that is wrapped around a FS program (typically
-only _oprin_) in the FS terminal session from being killed.
-Preventing that is discussed next.
-
-.. Use `setsid()` to shelter __xterm__s from keyboard generated
-kbd:[Control+C].
-
-+
-
-To prevent kbd:[Control+C] killing an _xterm_ in the FS terminal
-session all `x` programs in _fspgm.ctl_ and _stpgm.ctl_ (usually just
-_oprin_) are now run under `setsid()` when the display server is not
-being used. This disconnects the programs from the terminal session
-that the FS is being run in, thereby preventing a kbd:[Control+C] from
-reaching them, but not otherwise affecting them.
-
---
-+
-
-With these changes, it should no longer be possible to kill the FS
-with a kbd:[Control+C], even when the display server is not being
-used.
-
-+
-
-CAUTION: An FS _xterm_  window can still be terminated using the
-decorations for the window. When the FS is not being running with the
-display server, this will kill the FS _abnormally_. The decoration
-button that includes the `Delete` and `Destroy` options can be removed
-if desired. In the _~/.fvm2rc_ file include `NoButton 1` in the
-window's `Style` (see the `Style "oprin" ...` line in
-_st.default/oper/.fvwm2rc_ for an example).
-
-. Add command line options to _rdbemsg_.
-
-+
-
-Two command line options were added to _rdbemsg_:
-
-* `-f` -- which takes an integer argument to set the font size,
-default is `14`
-
-* `-g` -- which takes a string argument to set the window geometry,
-default is not to set it
-
-+
-
-Only the position part of the geometry should be set with `-g`, e.g.,
-`-g{nbsp}-0-0`.  The useful way to control the size is with `-f`.
-
-+
-
 . Improve _msg_ to always pick-up a new log file name (closing
 https://github.com/nvi-inc/fs/issues/118[#118]).
 
@@ -407,6 +335,25 @@ selection `Get session name from log` if it is not desired.
 
 Thanks to Jonathan Quick (HartRAO) for reporting the issue, providing
 feedback on the changes,  and testing the fix.
+
+. Add command line options to _rdbemsg_.
+
++
+
+Two command line options were added to _rdbemsg_:
+
+* `-f` -- which takes an integer argument to set the font size,
+default is `14`
+
+* `-g` -- which takes a string argument to set the window geometry,
+default is not to set it
+
++
+
+Only the position part of the geometry should be set with `-g`, e.g.,
+`-g{nbsp}-0-0`.  The useful way to control the size is with `-f`.
+
++
 
 . Add adjustable log size warning message (closing
 https://github.com/nvi-inc/fs/issues/114[#114]).
@@ -432,23 +379,6 @@ restarting it with:
 +
 
 Thanks to Kiah Imai (KPGO) for suggesting this.
-
-. Add explanatory comments to the example _flux.ctl_ control file (closing
-https://github.com/nvi-inc/fs/issues/121[#121]).
-
-+
-
-Although the data used in the file came from other sources, for many
-years the code that read the _flux.ctl_ file was the complete
-documentation for the format.  The example file in
-_/usr2/fs/st.deafault_ now includes the details in an easier to read
-form. You can merged these comments, which are at the end of the
-example file, into your local copy or refer to the example.
-
-+
-
-Thanks to Stuart Weston (Warkworth) for suggesting this and
-contributing some of the information in the comments.
 
 . Increase buffer size for recovering a deleted log.
 
@@ -604,7 +534,60 @@ option `10`).
 
 +
 
-. Instrument _fsserver_ (closing
+. Clean-up suppressing of signals.
+
++
+
+--
+
+.. Remove redundant ignoring of signals in _ddout_ and _oprin_
+(partially closing https://github.com/nvi-inc/fs/issues/100[#100]).
+
+.. Re-enable suppression of signals (partially closing
+https://github.com/nvi-inc/fs/issues/100[#100]).
+
++
+
+As of _10.0.0-beta1_, the previous practice of disabling receipt of
+certain signals, in particular `SIGINT` (for kbd:[Control+C]) had been
+removed. It has been reinstated. When the FS is run without the
+display server, this assures that no FS programs will be aborted if a
+kbd:[Control+C] is accidentally entered in the terminal session where
+the FS is running. However, this does not prevent a kbd:[Control+C]
+from killing an _xterm_ that is wrapped around a FS program (typically
+only _oprin_) in the FS terminal session from being killed.
+Preventing that is discussed next.
+
+.. Use `setsid()` to shelter __xterm__s from keyboard generated
+kbd:[Control+C].
+
++
+
+To prevent kbd:[Control+C] killing an _xterm_ in the FS terminal
+session all `x` programs in _fspgm.ctl_ and _stpgm.ctl_ (usually just
+_oprin_) are now run under `setsid()` when the display server is not
+being used. This disconnects the programs from the terminal session
+that the FS is being run in, thereby preventing a kbd:[Control+C] from
+reaching them, but not otherwise affecting them.
+
+--
++
+
+With these changes, it should no longer be possible to kill the FS
+with a kbd:[Control+C], even when the display server is not being
+used.
+
++
+
+CAUTION: An FS _xterm_  window can still be terminated using the
+decorations for the window. When the FS is not being running with the
+display server, this will kill the FS _abnormally_. The decoration
+button that includes the `Delete` and `Destroy` options can be removed
+if desired. In the _~/.fvm2rc_ file include `NoButton 1` in the
+window's `Style` (see the `Style "oprin" ...` line in
+_st.default/oper/.fvwm2rc_ for an example).
+
+. Record _fsserver_ error messages (closing
 https://github.com/nvi-inc/fs/issues/105[#105]).
 +
 
@@ -632,6 +615,23 @@ terminates normally. If you experience a FS crash, please send this
 file to Ed or post it as part of an issue on _github_. The
 _<time-stamp>_ portion of the name will correspond to the time when
 the FS was last started before the crash.
+
+. Add explanatory comments to the example _flux.ctl_ control file (closing
+https://github.com/nvi-inc/fs/issues/121[#121]).
+
++
+
+Although the data used in the file came from other sources, for many
+years the code that read the _flux.ctl_ file was the complete
+documentation for the format.  The example file in
+_/usr2/fs/st.deafault_ now includes the details in an easier to read
+form. You can merged these comments, which are at the end of the
+example file, into your local copy or refer to the example.
+
++
+
+Thanks to Stuart Weston (Warkworth) for suggesting this and
+contributing some of the information in the comments.
 
 . Improve error messages when reading _flux.ctl_ (closing
 https://github.com/nvi-inc/fs/issues/124[#124]).
@@ -741,6 +741,17 @@ Instructions for implementing this were added to the <<10.0.0.adoc#,FS
 <<10.0.0.adoc#_miscellaneous_fslx_changes,Miscellaneous FSLx changes>>
 step.
 
+. Add use of `NeverFocus` for the `scnch` and `erchk` windows in
+the _.fvwm2rc_ files.
+
++
+
+This was previously added in _10.0.0-beta1_, but removed on _10.0.0_
+because it was thought to prevent scrolling of those windows. However,
+that turned out to not be the case. Using this setting prevents the
+focus from accidentally being given to these windows, which don't
+accept input. This only affects behavior on the console GUI.
+
 . Correct error in FORTRAN calls to get FiLa10G time for _setcl_.
 
 +
@@ -762,16 +773,16 @@ second is only used for VGOS. _fmset_ works for both.
 If an error occurred in the monitor form of the command, the error was
 reported as `di` instead of `dg`.
 
-. Add use of `NeverFocus` for the `scnch` and `erchk` windows in
-the _.fvwm2rc_ files.
+. Change cut-and-paste phrasing in documents to copy-and-paste
 
 +
 
-This was previously added in _10.0.0-beta1_, but removed on _10.0.0_
-because it was thought to prevent scrolling of those windows. However,
-that turned out to not be the case. Using this setting prevents the
-focus from accidentally being given to these windows, which don't
-accept input. This only affects behavior on the console GUI.
+This is technically more accurate. The change primarily affects the
+(now)
+<<../../misc/install_reference.adoc#_copy_and_paste_installation_tips,Copy-and-paste
+installation tips>> in the
+<<../../misc/install_reference.adoc#,Installation Reference>> document
+and references to it.
 
 . [[stop_adding_extra_comments]]<<stop_adding_extra_comments, Stop
 adding extra comments when updating .rxg files>>.
@@ -812,23 +823,23 @@ the active calibration data. That is covered in the
 <<cleanup_comments,Clean-up .rxg file comments>> sub-step in the
 <<Additional steps>> step above. The second part is to clean-up the
 trailing comments. This part is an optional follow-up to the first
-part. It is more involved and can be deferred to a later date. That
-part is described next.
+part. It is more involved and can be deferred to a later date. The
+remainder of this change item describes the second part.
 
 +
 
 [CAUTION]
 ====
 
-Depending on the size of the _.rxg_ files, this step could be very
-laborious. Using this procedure is entirely optional. It is provided
-only in case you are interested in using it. If your trailing comments
-are in the form you want or if you do not want to clean them up, you
-can skip this procedure. If you don't want to clean them up, you can
-either keep them in the backup you made or append all the trailing
-comments from the backups into the corresponding _.rxg_ files. Future
-updates with _gnplt_ will add comments in reverse chronological
-order.
+Depending on the size of the _.rxg_ files, cleaning up the trailing
+comments could be very laborious. Using this procedure is entirely
+optional. It is provided only in case you are interested in using it.
+If your trailing comments are in the form you want or if you do not
+want to clean them up, you can skip this procedure. If you don't want
+to clean them up, you can either keep them in the backup you made or
+append all the trailing comments from the backups into the
+corresponding _.rxg_ files. Future updates with _gnplt_ will add
+comments in reverse chronological order.
 
 If you do append them and they are not in reverse chronological order,
 they will not be consistent with new updates made with _gnplt_, which
@@ -857,9 +868,9 @@ procedure may not work, but it may be possible to adapt it to your
 situation.
 
 If your _.rxg_ files have only been updated by _gnplt_, it may be
-possible to automate this step. If you are interested in a script to
-implement this procedure, please mail Ed. If there is sufficient
-interest, a script can be provided.
+possible to automate this step. If you are would like to have a script
+to implement this procedure, please mail Ed. If there is sufficient
+interest, we will look into developing it.
 
 ====
 
@@ -883,7 +894,8 @@ comments and finding the next matching instance.
 
 +
 
-As _oper_, for each individual _.rxg_ file:
+Using the following procedure to clean-up the trailing comments. As
+_oper_, for each individual _.rxg_ file:
 
 +
 --
@@ -1044,22 +1056,33 @@ After the above procedure, the content is reduced to (for the case of
 
 +
 
-In this case, there is an extra `A`
+[[gnplt1]]<<gnplt1,gnplt1>>: In this case, there is an extra `A`
 section between the final `1` and `0 A` at the end of the file. This
 can be found and removed with these steps:
 
-.. [[gnplt1]] <<gnplt1,gnplt1>>: Locate the end of  the `1` comments,
+.. Locate the end of  the `1` comments,
 which is the _first_ `*end_spillover_table` line after the _last_
 `GnPlt2` date comment.
 
 .. Call the _next_ line _A_.
 
 .. Find the commented out calibration with the latest date line
-(commented out) and _no_ `GnPlt2` date comment) line. This is last
+(commented out) and _no_ `GnPlt2` date comment line. This is last
 update made by _gnplt1_ (`0`).
 
 .. Find the _previous_ `*end_spillover_table` line. It should be the
 last line before the `0` calibration set.
+
++
+
+If your _.rxg_ file was started before opacity corrections were
+supported (version _9.6.7_ in September 2003), the last line before
+the `0` calibration set will be a commented out Tcal table entry
+(with three fields after the leading `\*`, i.e.:
+``*{nbsp}__polarization{nbsp}frequency{nbsp} Tcal__``). You should
+find that line instead.
+
++
 
 .. Call that location _B_.
 
