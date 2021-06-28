@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 1.1 - April 2021
+Version 1.3 - June 2021
 
 :sectnums:
 :experimental:
@@ -162,12 +162,11 @@ between equipment types and default library names is given next.
 If an example for your equipment type is listed, please email
 Ed about it so that it can be added.
 
-== Cut-and-paste installation tips
+== Copy-and-paste installation tips
 
-You can use cut-and-paste (technically copy-and-paste) to reduce the
-amount of typing involved in the installation. This reduces the
-chances of missing required spaces and other easily missed characters
-(like `.`) in the commands.
+You can use copy-and-paste to reduce the amount of typing involved in
+the installation. This reduces the chances of missing required spaces
+and other easily missed characters (like `.`) in the commands.
 
 The basic approach is to view the instructions in a Web browser (or
 PDF viewer) window while working in a shell window that contains a
@@ -183,7 +182,7 @@ Web browsing (or PDF viewing), and _ssh_ to reach the target computer.
 
 In this case you can read the instructions on the other computer,
 performing the installation steps in a shell window where you have
-connected to the FS computer. You can use the normal cut-and-paste
+connected to the FS computer. You can use the normal copy-and-paste
 tools of the other computer to copy input from the document and paste
 them into the session on the FS computer. If this is possible, it is
 often the most convenient.
@@ -365,7 +364,7 @@ symbolic links, you will need to resolve that first or modify the
 commands below to take that into account. You can check if they are
 symbolic links using, for example:
 
-  ls -l /usr2/control
+  ls -ld /usr2/control
 
 One way to resolve this is to delete the symbolic links and rename the
 directories they pointed to with the names of the corresponding

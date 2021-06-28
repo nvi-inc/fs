@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 1.3 - April 2021
+Version 1.9 - June 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -54,7 +54,7 @@ complete, approach would be to review the update steps in the new
 release to make sure everything has been covered. _Let the user
 beware._
 
-This document is up to date with the features in the `1a94029e`
+This document is up to date with the features in the `ed8a148c`
 commit. Due to small increments, such as updating this document, this
 may not be the literal last commit, but the differences should be
 small unless you happen to `pull` between a significant change and
@@ -80,14 +80,74 @@ execute:
 
 No output from the last command indicates a successful _make_.
 
+=== Reboot
+
+This will make sure the FS server is restarted.
+
 === Additional steps
 
-No additional steps are needed at this time.
+. Run the FS to check for _.rxg_ file errors.
+
++
+
+Five additional formatting errors are now reported for _.rxg_ files.
+While it is unlikely, if your _.rxg_ files have any of these errors,
+they will be reported when you try to run the FS. Only one error is
+reported at a time. You will need to correct each error in turn until
+the FS starts successfully.  The new errors reported are described in
+the <<additional_rxg_errors,Additional .rxg file errors>> change in
+the <<FS changes>> sub-section below.
+
+. Adjust _~/.session_ if you are using _tcsh_ as your
+login shell for _oper_ or _prog_ (or AUID accounts).
+
++
+
+This step is optional, but may be helpful if you are using _tcsh_ as
+your login shell for _oper_ and/or _prog_ (or AUID accounts) and use
+the FS with the graphical display on the console.  For this case, you
+may wish to make the changes in the <<10.0.0.adoc#xsession,Updating
+~/.xsession>> sub-step in
+<<10.0.0.adoc#_miscellaneous_fslx_changes,Miscellaneous FSLx changes>>
+step of the <<10.0.0.adoc#,FS 10.0.0 Update Notes>> document.
+
++
+
+This change will make sure the window manager (__fvwm2__) operates
+with the FS runtime environment variables set. This could be important
+for example, if you want to run __fsclient__ (perhaps for a
+`scan_check` window) from a console hotkey.
+
+. Make the `scnch` and `erchk` windows `NeverFocus`.
+
++
+
+This step is optional. You may want to add `NeverFocus` for the
+`scnch`, `erchk`, and `monan` windows in your _~/.fvm2rc_ files so
+they will never accidentally get the focus (they don't accept input).
+They will still be able to be scrolled. If this is desired, add the
+lines:
+
+  Style "erchk" NeverFocus
+  Style "scnch" NeverFocus
+  Style "monan" NeverFocus
++
+
+As _oper_, you can compare your version of the file with the new
+default using:
+
+  cd
+  diff .fvwm2rc /usr2/fs/st.default/oper
+
++
+
+You can make the same change for _prog_, after logging into that
+account.
 
 === Review changes
 
-Please see the <<Changes since 10.0.0>> section below for details of
-the changes since that release.
+Please see the <<Changes since 10.0.0>> section below for the details
+of the changes since that release.
 
 == Changes since 10.0.0
 
@@ -103,56 +163,26 @@ from within the FS _git_ archive directory, usually _/usr2/fs-git_.
 
 === FS changes
 
-. Clean-up of suppressing signals.
+. Improve _msg_ to always pick-up a new log file name (closing
+https://github.com/nvi-inc/fs/issues/118[#118]).
 
 +
 
---
-
-.. Remove redundant ignoring of signals in _ddout_ and _oprin_
-(partially closing https://github.com/nvi-inc/fs/issues/100[#100]).
-
-.. Re-enable suppression of signals (partially closing
-https://github.com/nvi-inc/fs/issues/100[#100]).
-
-+
-
-As of _10.0.0-beta1_, the previous practice of disabling receipt of
-certain signals, in particular `SIGINT` (for kbd:[Control+C]) was
-removed. It has been reinstated. This assures that no FS programs will
-be aborted if a kbd:[Control+C] is accidentally entered in the session
-where the FS is running. However, this does not prevent a
-kbd:[Control+C] from killing an _xterm_ that is wrapped around a FS
-program, typically only _oprin_, in the FS session from being killed.
-Preventing that is discussed next.
-
-.. Use `setsid()` to shelter __xterm__s from keyboard generated
-kbd:[Control+C].
+Previously _msg_ only read the log file (and session) name on start-up
+and when sending messages. It was modified to reread the log file (and
+session) name whenever a new form is displayed. As a result, selecting
+any form or send a sending a message from one will cause the log file
+name to be reread (and session name reset), in other words, this will
+occur for any significant user action. This should provide more
+intuitive behavior, primarily because it is no longer necessary to
+restart _msg_ for each session.  The setting of the session name when
+reading the log file name can be turned off by disabling the `Setup`
+selection `Get session name from log` if it is not desired.
 
 +
 
-To avoid kbd:[Control+C] killing an _xterm_ in the FS session all `x`
-programs in _fspgm.ctl_ and _stpgm.ctl_ (usually just _oprin_) are now
-run under `setsid()`. This disconnects the programs from the session
-that the FS is being run in, thereby preventing a kbd:[Control+C] from
-reaching them, but not otherwise affecting them.
-
---
-+
-
-With these changes, it should no longer be possible to kill the FS
-with a kbd:[Control+C], even when the display server is not being
-used.
-
-+
-
-CAUTION: An _xterm_  window can still be terminated using the
-decorations for the window. When the FS is not being running with the
-display server, this will kill the FS abnormally. The decoration
-button that includes the `Delete` and `Destroy` options can be removed
-if desired. In the _~/.fvm2rc_ file include `NoButton 1` in the
-window's `Style` (see the `Style "oprin" ...` line in
-_st.default/oper/.fvwm2rc_ for an example).
+Thanks to Jonathan Quick (HartRAO) for reporting the issue, providing
+feedback on the changes,  and testing the fix.
 
 . Add command line options to _rdbemsg_.
 
@@ -168,16 +198,63 @@ default is not to set it
 
 +
 
-Only the position part of the geometry should be set, e.g., `-0-0`.
-The useful way to control the size is with `-f`.
+Only the position part of the geometry should be set with `-g`, e.g.,
+`-g{nbsp}-0-0`.  The useful way to control the size is with `-f`.
 
 +
+
+. Add adjustable log size warning message (closing
+https://github.com/nvi-inc/fs/issues/114[#114]).
+
++
+
+When a log is opened (including _station.log_ when starting the FS,
+there was  a warning error if the size exceeded 100 MB. Different
+stations may find different sizes useful. The size for the warning is
+now adjustable by setting the environment variables
+`FS_LOG_SIZE_WARNING` to the desired size in MB. If it is not set, it
+defaults to 100 MB.
+
++
+
+The FS must be restarted in a session with the variable set for it to
+take effect. If the display server is in use, _fsserver_ must be
+stopped (or the system rebooted) _after_ stopping the FS and _before_
+restarting it with:
+
+  fsserver stop
+
++
+
+Thanks to Kiah Imai (KPGO) for suggesting this.
+
+. Increase buffer size for recovering a deleted log.
+
++
+
+If a log file is not locatable as a file (it has been deleted or
+renamed) when a user command would close the log, the FS will attempt
+to recover the file and give it its original name. The buffer used to
+recopy the file was increased to 2 Mib (512 sectors) so it is faster,
+particularly for very large experiment logs with multicast data.
+
++
+
+IMPORTANT: The recovery will not work if in the meantime a file has
+been created with the same name. The FS will think that is the log and
+give up. The log file contents will be lost. Using `log=_name_` or
+`schedule=_name_` will not cause this.
+
++
+
+As part of this change, the handling of the file size and positions
+were restored to using `long` variables. These had been changed to
+`int` variables by the bulk _unlongify_ before _10.0.0-beta1_, but hadn't
+been changed back.
 
 . Fix _gndat_.
 
 +
-
---
 
 .. Correct bad Tsys data in _gnplt_ (closing
 https://github.com/nvi-inc/fs/issues/107[#107] and
@@ -211,12 +288,15 @@ weather data.
 
 +
 
-The debug output was not visible when _gndat_ was run from _gnplt_.
+The debug output was not visible when _gndat_ was run from _gnplt_,
+which is normally the only way it is run.
 
---
++
 
-. Fix _plog_ to only refuse to reduce a log with multicast data in it
-if it is the active log in the FS.
+. Update _plog_.
+
+.. Fix _plog_ to only refuse to reduce a log with multicast data if it
+is the active log in the FS.
 
 +
 
@@ -224,7 +304,7 @@ In the process of reducing a log (removing multicast data), the log is
 renamed. This can cause a log recovery to occur if the log is
 currently open in the FS since it appears to be missing. This was
 protected against by _plog_, which would refuse to rename the log if
-it was open to any program. This meant that the log was was being
+it was open to any program. This meant that if the log was was being
 viewed with `tail -f` or _less_ it could not be renamed. However,
 _plog_ only needed to refuse if the log was open in the FS (by
 _ddout_). This was fixed so that _plog_ will only refuse to rename the
@@ -238,12 +318,278 @@ running _plog_ on it. That is good practice in any case.
 +
 
 NOTE: Other, non-reduction, log processing by _plog_ was not affected
-by this issue since renaming is not needed.
+by this issue since renaming is not needed. It is still good practice
+to close the log before pushing it.
 
 +
 
 Thanks to Katie Pazamickis and Jay Redmond (both at GGAO) for
 reporting this.
+
++
+
+.. Respect `NETRC_DIR` for the `BKG` data center (closing
+https://github.com/nvi-inc/fs/issues/113[#113]).
+
++
+
+This had been overlooked in
+https://github.com/nvi-inc/fs/issues/39[#39], which had added the
+`NETRC_DIR` environment variable.
+
++
+
+Thanks to Kiah Imai (KPGO) for reporting this and testing the fix.
+
++
+
+. Update _fesh_.
+
+.. Add `-P` option to print the summary listing to the printer (closing
+https://github.com/nvi-inc/fs/issues/112[#112]).
+
++
+
+With `-P`, when _drudg_ is run by _fesh_, it will print the summary
+directly to the printer. It is appropriate to make this a _fesh_
+option since it is an integrated feature of _drudg_. To print other
+files, it is recommended to make a wrapper for _fesh_. An example
+wrapper, that prints the summary and the _.prc_ file, is included as
+_/usr2/fs/fesh/feshp_. This can be copied to _~oper/bin_ and
+customized to print other files.
+
++
+
+Thanks to Kiah Imai (KPGO) for suggesting this.
+
+.. Add `-S` option to _fesh_ to skip downloading.
+
++
+
+This allows _fesh_ to trigger the normal _drudg_ processing when the
+schedule is already on the disk. This might be useful for example, if
+the schedule was generated locally by shifting the schedule (_drudg_
+option `10`).
+
++
+
+. Clean-up suppressing of signals.
+
++
+
+--
+
+.. Remove redundant ignoring of signals in _ddout_ and _oprin_
+(partially closing https://github.com/nvi-inc/fs/issues/100[#100]).
+
+.. Re-enable suppression of signals (partially closing
+https://github.com/nvi-inc/fs/issues/100[#100]).
+
++
+
+As of _10.0.0-beta1_, the previous practice of disabling receipt of
+certain signals, in particular `SIGINT` (for kbd:[Control+C]) had been
+removed. It has been reinstated. When the FS is run without the
+display server, this assures that no FS programs will be aborted if a
+kbd:[Control+C] is accidentally entered in the terminal session where
+the FS is running. However, this does not prevent a kbd:[Control+C]
+from killing an _xterm_ that is wrapped around a FS program (typically
+only _oprin_) in the FS terminal session from being killed.
+Preventing that is discussed next.
+
+.. Use `setsid()` to shelter __xterm__s from keyboard generated
+kbd:[Control+C].
+
++
+
+To prevent kbd:[Control+C] killing an _xterm_ in the FS terminal
+session all `x` programs in _fspgm.ctl_ and _stpgm.ctl_ (usually just
+_oprin_) are now run under `setsid()` when the display server is not
+being used. This disconnects the programs from the terminal session
+that the FS is being run in, thereby preventing a kbd:[Control+C] from
+reaching them, but not otherwise affecting them.
+
+--
++
+
+With these changes, it should no longer be possible to kill the FS
+with a kbd:[Control+C], even when the display server is not being
+used.
+
++
+
+CAUTION: An FS _xterm_  window can still be terminated using the
+decorations for the window. When the FS is not being running with the
+display server, this will kill the FS _abnormally_. The decoration
+button that includes the `Delete` and `Destroy` options can be removed
+if desired. In the _~/.fvm2rc_ file include `NoButton 1` in the
+window's `Style` (see the `Style "oprin" ...` line in
+_st.default/oper/.fvwm2rc_ for an example).
+
+. Record _fsserver_ error messages (closing
+https://github.com/nvi-inc/fs/issues/105[#105]).
++
+
+The display server now makes a file with a name of the form
+_~/fsserver.<time-stamp>.err_ each time it is started. It is used to
+collect server error information. The file will be deleted if
+_fsserver_ terminates normally. If you experience a server crash,
+please send this file to Ed or post it as part of an issue on
+_github_. The _<time-stamp>_ portion of the name will correspond to
+the time when the server was last started before the crash. That is
+usually when the FS was first started after the last boot. Any file of
+this type with non-empty contents is worth reporting.
+
++
+
+Thanks to Dave Horsley (AuScope) for suggesting this and contributing
+to the implementation.
+
++
+
+NOTE: The FS also makes a file with a name of the form
+_~/fs.<time-stamp>.err_ each time it is started. It is used to collect
+FS error information. The FS will attempt to delete this file if it
+terminates normally. If you experience a FS crash, please send this
+file to Ed or post it as part of an issue on _github_. The
+_<time-stamp>_ portion of the name will correspond to the time when
+the FS was last started before the crash.
+
+. Add explanatory comments to the example _flux.ctl_ control file (closing
+https://github.com/nvi-inc/fs/issues/121[#121]).
+
++
+
+Although the data used in the file came from other sources, for many
+years the code that read the _flux.ctl_ file was the complete
+documentation for the format.  The example file in
+_/usr2/fs/st.deafault_ now includes the details in an easier to read
+form. You can merged these comments, which are at the end of the
+example file, into your local copy or refer to the example.
+
++
+
+Thanks to Stuart Weston (Warkworth) for suggesting this and
+contributing some of the information in the comments.
+
+. Improve error messages when reading _flux.ctl_ (closing
+https://github.com/nvi-inc/fs/issues/124[#124]).
+
++
+
+The error messages when reading _flux.ctl_ were confusing and
+uninformative. This has been the situation since the file was first
+added in October 2002, for version _9.5.15_ (commit `1b68b90f`).
+Apparently, this was not a significant issue because, apparently,
+modifying the default contents was uncommon. If you have been having
+trouble with this, we apologize.
+
++
+
+The error messages have been more explicit about the cause of any read
+error and the offending line is printed to aid in correcting the
+problem.
+
++
+
+Thanks to Stuart Weston (Warkworth) for reporting this.
+
+. Improve error messages when reading _.rxg_ files.
+
+.. Make error messages more informative (closing
+https://github.com/nvi-inc/fs/issues/83[#83]).
+
++
+
+The error messages when reading _.rxg_ files  were confusing and
+uninformative. This has been the situation since _.rxg_ files were
+first added in October 2002, for version _9.5.15_ (commit `1b68b90f`).
+Apparently, this was not a significant issue because _.rxg_ files were
+usually updated by _gnplt_, which wrote correctly formatted lines. If
+you have been having trouble with this, we apologize.
+
++
+
+The error messages have been more explicit about the cause of any read
+error. Unfortunately, it is not possible to show the offending line
+without more significant changes. However, the messages are fairly
+explicit about where the error occurred.
+
++
+
+The same reading routine is used in _gnplt_ (which uses _gndat_ to
+read the _.rxg_ files) for consistency. Unfortunately, the error
+messages for _gnplt_ will still not be as informative, but restarting
+the FS should provide a more explicit error message that help make it
+clear what the problem is. If it is not possible to use the FS for
+this, another strategy is to use the error number reported in status
+line at the bottom of _gnplt_ to identify the corresponding `RG` error
+in _controlfserr.ctl_.
+
+
++
+
+.. [[additional_rxg_errors]]<<additional_rxg_errors,Additional .rxg
+file errors>>: Five additional errors are now reported (closing
+https://github.com/nvi-inc/fs/issues/134[#134]):
+
++
+--
+
+* The third field on the LO line is missing for type `range`.
+
+* If a third field exists on the LO line, but does not decode as a
+number.
+
+* The second field on the FWHM line is missing for type `constant`.
+
+* If a second field exists on the FWHM line, but does not decode as a
+number.
+
+* A field exists after the gain curve coefficients, but is not
+`opacity_corrected`.
+
+--
++
+
+While it is unlikely, if any of your _.rxg_ files have these errors,
+they will be reported the first time you run the FS after the update.
+You can correct them at that time. The error messages should be pretty
+clear.
+
++
+
+A few other, minor, errors are still not being caught. In particular,
+if a character that cannot be part of a numeric field appears
+_within_, or at the end of, a numeric field, that error will not be
+reported. In that case, the field up to the out-of-place character will
+be used as the value. Hopefully this is an unlikely error. A leading
+character that cannot be part of a numeric field will be reported as
+an error.
+
++
+
+. Add instructions to the example _.xsession_ files for how to
+make them work correctly when _tcsh_ is the login shell.
+
++
+
+Instructions for implementing this were added to the <<10.0.0.adoc#,FS
+10.0.0 Update Notes>> document as the <<10.0.0.adoc#xsession,Updating
+~/.xsession>> sub-step in the
+<<10.0.0.adoc#_miscellaneous_fslx_changes,Miscellaneous FSLx changes>>
+step.
+
+. Add use of `NeverFocus` for the `scnch` and `erchk` windows in
+the _.fvwm2rc_ files.
+
++
+
+This was previously added in _10.0.0-beta1_, but removed on _10.0.0_
+because it was thought to prevent scrolling of those windows. However,
+that turned out to not be the case. Using this setting prevents the
+focus from accidentally being given to these windows, which don't
+accept input. This only affects behavior on the console GUI.
 
 . Correct error in FORTRAN calls to get FiLa10G time for _setcl_.
 
@@ -257,7 +603,7 @@ relatively low, not quite 1 in 2^32^ chance of it being excited.
 +
 
 NOTE: _setcl_ only works for the first FiLa10G if there are two. A
-second is only used for VGOS.
+second is only used for VGOS. _fmset_ works for both.
 
 . Correct `bbc_gain` command error codes.
 
@@ -265,6 +611,30 @@ second is only used for VGOS.
 
 If an error occurred in the monitor form of the command, the error was
 reported as `di` instead of `dg`.
+
+. Add description of using inline anchors.
+
++
+
+These can be used to making linking references to arbitrary text in
+the documents. The description also shows how to make the anchor
+visible in the text. This is described in the
+<<../../../misc/font_conventions.adoc#_linking_to_inline_anchors,Linking
+to inline anchors>> subsection of the
+<<../../../misc/font_conventions.adoc#_source_examples,Source
+examples>> section of the <<../../../misc/font_conventions.adoc#,FS
+Document Font Conventions>> document.
+
+. Change cut-and-paste phrasing in documents to copy-and-paste
+
++
+
+This is technically more accurate. The change primarily affects the
+(now)
+<<../../misc/install_reference.adoc#_copy_and_paste_installation_tips,Copy-and-paste
+installation tips>> in the
+<<../../misc/install_reference.adoc#,Installation Reference>> document
+and references to it.
 
 === drudg changes
 

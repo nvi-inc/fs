@@ -20,7 +20,7 @@
 
 = FS 10.0.0-beta2 Update Notes
 E. Himwich, D. Horsley, J. Gipson, J. Quick
-Version 1.7 - January 2021
+Version 1.8 - June 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -166,7 +166,7 @@ information is available.  It includes eight sub-sections:
 
 . <<../../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
 . <<../../misc/install_reference.adoc#_example_standard_procedure_libraries,Example standard procedure libraries>>
-. <<../../misc/install_reference.adoc#_cut_and_paste_installation_tips,Cut-and-paste installation tips>>
+. <<../../misc/install_reference.adoc#_copy_and_paste_installation_tips,Copy-and-paste installation tips>>
 . <<../../misc/install_reference.adoc#_making_a_back_up_before_installing,Making a back-up before installing>>
 . <<../../misc/install_reference.adoc#_disk_space_requirements,Disk space requirements>>
 . <<../../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
@@ -496,9 +496,9 @@ character 18 to read as:
 
 ==== Copy control files
 
-You will need to execute the following commands to copy new
-files that are needed (cut-and-paste is your friend). There
-are three cases depending on what your old version was:
+You will need to execute the following commands to copy new files that
+are needed (copy-and-paste is your friend). There are three cases
+depending on what your old version was:
 
 . Old versions _9.12.10_ and _9.12.11_:
 
