@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0-beta2 to FS 10.0.0-beta3 Update Notes
-Version 2.1 - February 2021
+Version 2.2 - June 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -520,9 +520,10 @@ available in HTML are for <<beta2.adoc#,10.0.0-beta2>>.  Hopefully,
 this change will make the update notes easier to read and navigate.
 Among other improvements, there are clickable links to other sections
 within documents as well as to sections in other related documents.
-<<../../../misc/font_conventions.adoc#,Font conventions>> similar to the
-traditional printed FS manuals are used. A document describing
-<<../../../misc/env_vars.adoc#,FS environment variable>> use was added.
+<<../../../misc/font_conventions.adoc#,FS Document Font conventions>>
+similar to the traditional printed FS manuals are used. A document
+describing <<../../../misc/env_vars.adoc#,FS environment variable>>
+use was added.
 
 .. Improve structure and correct some errors from original _.txt_ version.
 .. Some typo/wording fixes.

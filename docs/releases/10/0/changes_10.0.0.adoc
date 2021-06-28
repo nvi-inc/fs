@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 1.7 - June 2021
+Version 1.8 - June 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -177,9 +177,9 @@ indexed, at https://nvi-inc.github.io/fs/.
 .. The first update notes available in HTML were for
 <<beta2.adoc#,10.0.0-beta2>>.
 
-..  Add <<../../../misc/font_conventions.adoc#,Font Conventions>>
-document. These conventions are similar to the ones in the traditional
-printed FS manuals.
+..  Add <<../../../misc/font_conventions.adoc#,FS Document Font
+Conventions>> document. These conventions are similar to the ones in
+the traditional printed FS manuals.
 
 .. Add <<../../misc/release_model.adoc#,Release Model>> document  describing
 steps in making a release.
