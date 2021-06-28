@@ -19,7 +19,7 @@
 //
 
 = DRAFT FS Document Font Conventions
-Version 0.8 - May 2021
+Version 0.9 - June 2021
 
 :sectnums:
 
@@ -297,47 +297,52 @@ Suggestion:
 . Another step
 ====
 
-=== Anchors and text in the links
+=== Linking to inline anchors
 
-An example of using anchors:
+Inline anchors provide a way to link to arbitrary text. To assist the
+reader, the location of the inline anchor can made visible by
+including a link to it where it occurs. By convention, this
+"`visibility`" link is usually followed by semicolon. To ease
+identifying the anchor, all links to the inline anchor, including the
+visibility link, should use the same anchor text. An example of using
+an inline anchor:
 
 ....
 [[check_files]]<<check_files,Check files>>:
 
-Some explanatory text probably follows. The anchor above is in double
-square brackets `+++[[<i>anchor</i>]]+++`. The reference, with anchor
-text, is in double angle brackets
+Some explanatory text probably follows. The inline anchor above is in
+double square brackets `+++[[<i>anchor</i>]]+++`. The link with
+anchor text, is in double angle brackets
 `+++<<<i>anchor</i>,<i>text</i>>>+++`.
 
-Somewhere else in the document, before or after the anchor, include a
-reference to it. In this example, see <<check_files,Check files>>,
-above.
+Somewhere else in the document, before or after the inline anchor,
+include a link to it. In this example, see <<check_files,Check
+files>>, above.
 
 It can also be referred to from a different document with something of
 the form <<font_conventions.adoc#check_files,Check files>> with the
-correct relative path to the document. Including a reference to
-section and the document will be helpful for those working from a
-print out.
+correct relative path to the document. Including a link to the section
+and the document will be helpful for those working from a print-out.
 ....
 
 Renders as:
 
 [[check_files]]<<check_files,Check files>>:
 
-Some explanatory text probably follows. The anchor above is in double
-square brackets `+++[[<i>anchor</i>]]+++`. The reference, with anchor
-text, is in double angle brackets
+Some explanatory text probably follows. The inline anchor above is in
+double square brackets `+++[[<i>anchor</i>]]+++`. The reference, with
+anchor text, is in double angle brackets
 `+++<<<i>anchor</i>,<i>text</i>>>+++`.
 
-Somewhere else in the document, before or after the anchor, include a
-reference to it. In this example, see <<check_files,Check files>>,
-above.
+Somewhere else in the document, before or after the inline anchor,
+include a reference to it. In this example, see <<check_files,Check
+files>>, above.
 
 It can also be referred to from a different document with something of
 the form <<font_conventions.adoc#check_files,Check files>> with the
-correct relative path to the document. Including a reference to
+correct relative path to the document. Including a reference to the
 section and the document will be helpful for those working from a
-print out.
+print-out.
 
 == Workarounds
 

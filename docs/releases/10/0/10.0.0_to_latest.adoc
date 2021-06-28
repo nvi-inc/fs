@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 1.7 - June 2021
+Version 1.8 - June 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -611,6 +611,19 @@ second is only used for VGOS. _fmset_ works for both.
 
 If an error occurred in the monitor form of the command, the error was
 reported as `di` instead of `dg`.
+
+. Add description of using inline anchors.
+
++
+
+These can be used to making linking references to arbitrary text in
+the documents. The description also shows how to make the anchor
+visible in the text. This is described in the
+<<../../../misc/font_conventions.adoc#_linking_to_inline_anchors,Linking
+to inline anchors>> subsection of the
+<<../../../misc/font_conventions.adoc#_source_examples,Source
+examples>> section of the <<../../../misc/font_conventions.adoc#,FS
+Document Font Conventions>> document.
 
 . Change cut-and-paste phrasing in documents to copy-and-paste
 
