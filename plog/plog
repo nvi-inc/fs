@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2021-05-30
+VERSION=2021-06-27
 
 version(){
     echo "[plog $VERSION]"
@@ -45,8 +45,6 @@ PLOG_REDUCE_PATTERN="${PLOG_REDUCE_PATTERN:-^[:.0-9]*#rdtc}"
 
 # Added to filename before extension of log files with all data
 PLOG_FULL_SUFFIX="${PLOG_FULL_SUFFIX:-_full}"
-# Check for compressed logs
-PLOG_COMPRESSED_EXT="${PLOG_COMPRESSED_EXT:-gz}"
 
 usage_long() {
     cat <<EOF
@@ -68,6 +66,7 @@ ${underline}Options:${normal}
     ${black}-q${normal}            Quiet mode
     ${black}-z${normal}            Push compressed log (full if contains multicast data)
     ${black}-v${normal}            Print plog version and exit
+    ${black}-g${normal}            Force gzip compression/uncompression
 
 If the log containing RDBE multicast data:
 
@@ -110,6 +109,14 @@ variable.  E.g. add the following to your login script
     export NETRC_DIR="/usr2/control" ${blue}#bash${normal}
 
 See "man 5 netrc" for more details on ".netrc".
+
+plog defaults to using bzip2 compression, if it is available, for full
+log files. Otherwise gzip is used. The use of gzip can be forced with
+the command line option -g or setting the PLOG_COMPRESSED_EXT
+environment variable to gz:
+
+    setenv PLOG_COMPRESSED_EXT gz  ${blue}#tcsh${normal}
+    export PLOG_COMPRESSED_EXT=gz  ${blue}#bash${normal}
 
 Examples of usage:
     ${blue}# push log for latest session, sending reduced if needed${normal}
@@ -355,6 +362,10 @@ compress() {
     if [[ ${1##*.} == $PLOG_COMPRESSED_EXT ]]; then
         echo "$1"
         return
+    elif [[ "$PLOG_COMPRESSED_EXT" =~ bz2 ]]; then
+        local compress_program=bzip2
+    else
+        local compress_program=gzip
     fi
 
     local ext=${1#*.}
@@ -363,9 +374,9 @@ compress() {
 
     info Compressing log file...
     if [[ -n "$DRY" ]]; then
-        >&2 echo "gzip --best -c $1 >  $out"
+        >&2 echo "$compress_program --best -c $1 >  $out"
     else
-        safe_pv "$1" | gzip --best > "$out"
+        safe_pv "$1" | "$compress_program" --best > "$out"
     fi
     echo "$out"
 }
@@ -374,15 +385,20 @@ uncompress() {
     local name=$(basename $1 .$PLOG_COMPRESSED_EXT)
     local out="/tmp/$name"
 
+    if [[ "$PLOG_COMPRESSED_EXT" =~ bz2 ]]; then
+        local uncompress_program=bunzip2
+    else
+        local uncompress_program=gunzip
+    fi
+
     info Uncompressing log file...
     if [[ -n "$DRY" ]]; then
-        >&2 echo "gunzip -c $1 >  $out"
+        >&2 echo "$uncompress_program -c $1 >  $out"
     else
-        safe_pv "$1" | gunzip > "$out"
+        safe_pv "$1" | "$uncompress_program" > "$out"
     fi
     echo "$out"
 }
-
 # Return a reduced log in /tmp can either be raw or compressed log
 reduce() {
     local ext=${1#*.}
@@ -390,9 +406,9 @@ reduce() {
     local out="/tmp/$name.log"
     info Creating reduced log file...
     if [[ -n "$DRY" ]]; then
-        >&2 echo "zegrep -v "$PLOG_REDUCE_PATTERN" $1 > $out"
+        >&2 echo "$egrep_program -v "$PLOG_REDUCE_PATTERN" $1 > $out"
     else
-        safe_pv "$1" | zegrep -v "$PLOG_REDUCE_PATTERN" > "$out"
+        safe_pv "$1" | "$egrep_program" -v "$PLOG_REDUCE_PATTERN" > "$out"
     fi
     echo "$out"
 }
@@ -421,7 +437,7 @@ main () {
     COMPRESS=
     QUIET=
 
-    while getopts hltqpzvc: opt; do
+    while getopts hltqpzvc:g opt; do
         case $opt in
             l)
                 LATEST=1
@@ -452,6 +468,9 @@ main () {
                 version $0
                 exit
                 ;;
+            g)
+                PLOG_COMPRESSED_EXT=gz
+                ;;
             *)
                 usage >&2
                 exit 1
@@ -463,6 +482,24 @@ main () {
     done
     shift $(($OPTIND - 1))
 
+
+# Check compression type
+    if $(command -v  bzip2 >/dev/null) ; then
+        PLOG_COMPRESSED_EXT="${PLOG_COMPRESSED_EXT:-bz2}"
+    else
+        PLOG_COMPRESSED_EXT="${PLOG_COMPRESSED_EXT:-gz}"
+    fi
+
+    if [[ ! "$PLOG_COMPRESSED_EXT" =~ ^(bz2|gz)$ ]]; then
+        echo "PLOG_COMPRESSED_EXT must be bz2 or gz, was $PLOG_COMPRESSED_EXT"
+        exit 1
+     fi
+
+     if [[ "$PLOG_COMPRESSED_EXT" =~ bz2 ]]; then
+         egrep_program=bzegrep
+     else
+         egrep_program=zegrep
+     fi
 
 
     # Default DATA_CENTERS overridden by flag
@@ -547,7 +584,7 @@ main () {
 
         # If log contains multicast data, rename to _full.* since we will upload a reduced file
         FULL=
-        if zegrep -q "$PLOG_REDUCE_PATTERN" $log; then
+        if "$egrep_program" -q "$PLOG_REDUCE_PATTERN" $log; then
             FULL=1
             logext=${log#*.} # extension, preserving .gz if it exists
             full=$FS_LOG_PATH/$ref$STATION$PLOG_FULL_SUFFIX.$logext
