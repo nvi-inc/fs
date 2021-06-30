@@ -2022,10 +2022,12 @@ class Gui(Frame):
         keys.sort()
         
         for freq in keys:
-            xdata.append(freq)
-            ydata.append(tcal_table.get(freq))
+           if freq > self.plot.minX and freq < self.plot.maxX:
+               xdata.append(freq)
+               ydata.append(tcal_table.get(freq))
         
-        self.plot.drawValues(xdata, ydata, fill = 'green')
+        if len(ydata) > 0:
+            self.plot.drawValues(xdata, ydata, fill = 'green')
     
     def fitTcalFreq(self, mode):
         #mode == average or median
@@ -3275,16 +3277,19 @@ class Plot(Canvas, Coordinate):
         coord_list = []
         maxY = max(yvalues)
         minY = min(yvalues)
+        maxX = max(xvalues)
         minX = min(xvalues)
         
         if not maxY >= self.maxY:
             maxY = self.maxY
         if not minY <= self.minY:
             minY = self.minY
+        if not maxX >= self.maxX:
+            maxX = self.maxX
         if not minX <= self.minX:
             minX = self.minX
         
-        self.reDrawAll(minX, self.maxX, minY, maxY)
+        self.reDrawAll(minX, maxX, minY, maxY)
         
         for i in range(len(xvalues)):
             coord_list.append(self.getCanvasXY([xvalues[i], yvalues[i]]))
