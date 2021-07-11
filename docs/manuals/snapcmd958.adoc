@@ -1,3 +1,9 @@
+= SNAP Commands
+W. E. Himwich, N. R. Vandenberg
+FS Operations Manual - Version 9.5 - December 1 2001
+
+
+:sectnums:
 
 == SNAP Command Syntax
 
@@ -5,17 +11,17 @@ This manual contains detailed descriptions of the SNAP commands
 available in the Field System. Each command is described on a separate
 page. Commands are ordered alphabetically.
 
-Please refer to the *SNAP Language* manual (#add link#)for the
+Please refer to the *SNAP Language* (#add link#) manual for the
 specifications of the language itself, including a description of
 control commands and general syntax.
 
 The subsections of this first section contain reference information that
 applies to many commands.
 
-=== 1.1 Command Descriptions
+=== Command Descriptions
 
 In this manual, each command is described on a separate page. For each
-command, the information is provided:
+command, the information provided is:
 
 command - function (equipment)
 
@@ -36,12 +42,11 @@ by both (this will be corrected for `pcal` at a later date).
 
 +
 
-** All of the currently existing rack restrictions are listed below:
+All of the currently existing rack restrictions are listed below:
 
 +
 
-[none]
-*** K4K3 racks +
+K4K3 racks +
 Mark III racks +
 Mark III, Mark IV racks +
 Mark III, Mark IV, VLBA, VLBA4 racks +
@@ -51,28 +56,29 @@ Mark IV, VLBA, VLBA4, K4MK4 racks +
 VLBA racks +
 VLBA, VLBA4 racks +
 all K4 racks +
-all racks 
+all racks
 
 +
 
-These restrictions all correspond to rack types that can be specified in
-equip.ctl, except for the restrictions involving K4 racks: all K4,
-K4K3, K4MK4, VLBA, and in addition: all racks. For the all K4
+These restrictions all correspond to rack types that can be specified
+in _equip.ctl_, except for the restrictions involving K4 racks: all
+K4, K4K3, K4MK4, VLBA, and in addition: all racks. For the all K4
 restriction, all K4 types are included irrespective of K4 VC sub-type
-and including all K4K3 and K4MK4 types irrespective of K4 VC sub-types.
-The K4K3 restriction includes all K4 racks with a K3 formatter,
-irrespective of K4 VC sub-type. The K4MK4 restriction includes all K4
-racks with a Mark IV formatter, irrespective of K4 VC sub-type . The
-VLBA restriction includes both the vlba and vlbag rack types. The
-all restriction indicates that this command works for all racks, i.e.,
-the only rack for which it does not work is none.
-
-** All of the currently existing recorder restrictions are listed below:
+and including all K4K3 and K4MK4 types irrespective of K4 VC
+sub-types.  The K4K3 restriction includes all K4 racks with a K3
+formatter, irrespective of K4 VC sub-type. The K4MK4 restriction
+includes all K4 racks with a Mark IV formatter, irrespective of K4 VC
+sub-type. The VLBA restriction includes both the vlba and vlbag rack
+types. The all restriction indicates that this command works for all
+racks, i.e., the only rack for which it does not work is none.
 
 +
 
-[none]
-*** K4 drives +
+All of the currently existing recorder restrictions are listed below:
+
++
+
+K4 drives +
 Mark III drives +
 Mark III, Mark IV drives +
 Mark IV drives +
@@ -84,19 +90,17 @@ longitudinal drives
 +
 
 These restrictions generally include more than one recorder sub-type
-that can be specified in equip.ctl. The *K4* restriction includes all K4
-drive types with and without the DMS. The *Mark IV* restriction includes
-both the mk4 and mk4b sub-types. The *VLBA* restriction include vlba,
-vlba2, and vlbab sub-types. The *all* restriction indicates that this
-command works for all recorders, i.e., the only recorder type for which
-it does not work is none. The *longitudinal* restriction indicates that
-it includes all of Mark III, Mark IV, VLBA (including VLBA2), and VLBA4
-recorders. All other restrictions: *Mark III*, *VLBA4*, and *S2* all
+that can be specified in _equip.ctl_. The K4 restriction includes all
+K4 drive types with and without the DMS. The Mark IV restriction
+includes both the mk4 and mk4b sub-types. The VLBA restriction include
+vlba, vlba2, and vlbab sub-types. The all restriction indicates that
+this command works for all recorders, i.e., the only recorder type for
+which it does not work is none. The longitudinal restriction indicates
+that it includes all of Mark III, Mark IV, VLBA (including VLBA2), and
+VLBA4 recorders. All other restrictions: Mark III, VLBA4, and S2 all
 apply to just those simple types.
 
-+
-
-Syntax: **command=**__list of parameters__
+Syntax: `command=__list of parameters__`
 
 [none]
 * The command syntax is shown first. The command name and the list of
@@ -105,7 +109,7 @@ the Comments section. Any combination of upper case and lower case
 letters may be used in typing a command. All commands are converted to
 lower case before they are processed.
 
-Response: command/_list of response parameters_
+Response: `command/_list of response parameters_`
 
 [none]
 * The response (if any) to the command is given with the list of
@@ -117,7 +121,7 @@ case letters only.
 Settable parameters:
 
 [none]
-* This part of the page describes each parameter in the “Syntax” line that
+* This part of the page describes each parameter in the "`Syntax`" line that
 can be specified by the operator. The allowable range of values for each
 parameter is given. The default value, if any, is given. A default value
 is obtained by entering a null for a particular parameter. The parameter
@@ -131,7 +135,7 @@ is generated.
 Monitor-only parameters:
 
 [none]
-* Each parameter in the “Response” that does not appear in the “Syntax” is
+* Each parameter in the "`Response`" that does not appear in the "`Syntax`" is
 described in this section. These are parameters that cannot be specified
 by the operator, but are monitored or calculated by the Field System.
 
@@ -150,64 +154,73 @@ the exception that K4 and S2 recorders are only supported as recorder
 number 1, any and all recorders (including none) can be used either as
 recorder 1 or recorder 2. When the FS operates in dual recorder mode,
 all commands that refer to recorders come in two forms. They either have
-a numeral *1* or a numeral *2* appended to the normal single recorder
+a numeral `1` or a numeral `2` appended to the normal single recorder
 version of the command depending on whether they refer to recorder 1 or
 recorder 2. The single recorder version of the commands are the ones
 documented in the SNAP command manual pages. As an example, if recorder
 1 is a VLBA drive and recorder 2 is Mark III drive, the tape command
 that refers to recorder 1 would be the VLBA drive tape command with a
-*1* appended: *tape1*. Likewise for recorder 2, the tape command would
-be the Mark III drive tape command with a *2* appended: *tape2*. For all
+`1` appended: `tape1`. Likewise for recorder 2, the tape command would
+be the Mark III drive tape command with a `2` appended: `tape2`. For all
 tape recorder commands (those that have some drive restriction specified
 in their command -function title line of the SNAP command description
 page) a numeral at the end distinguishes which drive they refer to.
 
 There are also some rack oriented commands that need to know which
-recorder is in use. In addition the monit and chekr programs need to
-know which recorder is in use. The *select* command allows the drive
+recorder is in use. In addition the _monit<n>_ and _chekr_ programs need to
+know which recorder is in use. The `select` command allows the drive
 being used for data recording to be specified. drudg does this
 automatically for schedules that use two drives. Please note that the
 recorder that is not being used for recording can be manipulated by the
 operator using the appropriate commands to complete tasks such as
-prepassing and mounting the next tape. The *mount1* command is not
+prepassing and mounting the next tape. The `mount1` command is not
 available for K4 and or S2 recorders. All other aspects of two recorder
 operation with a K4 or S2 recorder as recorder 1 are implemented.
 
 If only one tape drive is used, the drive type of either recorder 1 or
-recorder 2 in equip.ctl must be none. In this case all of the recorder
-specific commands are used without a numeral suffix and they refer to
-the recorder that is not specified as none. This appears as normal one
-tape drive operation as used in older versions of the FS, except that it
-is possible to select which of two drives will be used by just changing
-the equip.ctl file and restarting the FS. Please note that the *mount*
-command is only available for dual recorder configurations, i.e., the
-version without a numeral appended is never available.
+recorder 2 in _equip.ctl_ must be none. In this case all of the
+recorder specific commands are used without a numeral suffix and they
+refer to the recorder that is not specified as none. This appears as
+normal one tape drive operation as used in older versions of the FS,
+except that it is possible to select which of two drives will be used
+by just changing the _equip.ctl_ file and restarting the FS. Please note
+that the `mount__n__` command is only available for dual recorder
+configurations, i.e., the version without a numeral appended is never
+available.
 
-=== 1.3 MAT Module Functions
+=== MAT Module Functions
 
-The phrase “MAT module functions available” in the comments section
+The phrase "`MAT module functions available`" in the comments section
 means that the following additional types of parameters may be used.
 This is available for those Mark III modules that have MAT
 communications.
 
-__module__**=test/reset** Issues an MAT reset to this module only.
+[frame=none,grid=none]
+[cols="1,4"]
+|===
+a|`__module__=test/reset` | Issues an MAT reset to this module only.
+a|`__module__=alarm`  | Resets the alarm on this module.
+|===
 
-__module__**=alarm** Resets the alarm on this module.
+=== MCB Module Functions
 
-*1.4 MCB Module Functions*
-
-The following syntax is valid for those commands which state that “MCB
-module functions are available” in the Comments section of the command
+The following syntax is valid for those commands which state that "`MCB
+module functions are available`" in the Comments section of the command
 description.
 
-__module__**=addr** Sends the module its base address and length. This
+[frame=none,grid=none]
+[cols="1,4"]
+|===
+a|`__module__=addr` | Sends the module its base address and length. This
 sets the module's MCB address space.
 
-__module__**=test** Checks the module’s address. An error message in
+a|`__module__=test` | Checks the module’s address. An error message in
 response to this command indicates that the module needs to be sent its
 address space.
+a|`__module__=addr` | Sends the module its base address and length. This
+|===
 
-*1.5 Module and Detector Mnemonics*
+=== Module and Detector Mnemonics
 
 The Field System makes use of mnemonics for Mark III, Mark IV, S2, VLBA,
 and VLBA4 equipment in SNAP commands. No mnemonics are defined for K4
@@ -226,152 +239,105 @@ operator who does not have to remember the exact two-character mnemonic.
 Valid mnemonics for modules and detectors are listed in the tables on
 the following pages.
 
-The *u5* and *u6* detector mnemonics are used for station specific
-detectors that implemented via the antcn program. Currently they are not
-completely supported. They may be used in the *fivept* and *onoff*
+The `u5` and `u6` detector mnemonics are used for station specific
+detectors that implemented via the _antcn_ program. Currently they are not
+completely supported. They may be used in the `fivept` and `onoff`
 commands for all rack types (including none). They may also be use in
-the *tpi*, *tpical*, *tpzero*, and **tsys**__X__ commands for +++rack
-types other than+++ Mark III, Mark IV, VLBA, and VLBA4 .
+the `tpi`, `tpical`, `tpzero`, and `tsys__X__` commands for _rack
+types other than_ Mark III, Mark IV, VLBA, and VLBA4.
 
-[width="100%",cols="45%,14%,41%",options="header",]
+[options="header",]
+[cols="<,^,^"]
 |===
-|Field System Module Mnemonics | |
-|Module |Standard mnemonic a|
-Other allowed mnemonics
-
+3+^|Field System Module Mnemonics
+|Module |Standard mnemonic | Other allowed mnemonics
 (* indicates mnemonics available only when only one drive is defined)
 
-|Mark III modules | |
+3+|*Mark III modules*
+|video converters |`v__n__`, `_n_`=`1`-`f` |`vc__n__`, __n__=`1`-`15`, `1`-`f`
+|IF distributor a|`if` a|`ifd`
+|formatter a|`fm` a|`form`
+|tape transport 1 a|`r1` |`rec1`, `tape1`, `rc`\*, `tp`*
+|tape transport 2 a|`r2` |`rec2`, `tape2`, `rc`\*, `tp`*
+|high density heads transport 1 a|`h1` a|`hd`*
+|high density heads transport 2 a|`h2` a|`hd`*
+|S/X receiver a|`rx` |
+|IF3 distributor a|`i3` |`if3`,`ifd3`
 
-|video converters |**v**__n__, __n__=*1-f* |**vc**__n__, __n__=*1-15,
-1-f*
+3+|*S2 modules*
+|tape recorder 1 a|`r1` |`rec1`, `tape1`, `rc`\*, `tp`*
 
-|IF distributor |*if* |*ifd*
+3+|*VLBA modules*
+|baseband converters |`b__n__`, `_n_`=`1-f` |`bc__n__`,
+`bbc__n__`, `_n_`=`1`-`15`, `1`-`f`
+|IF distributor 1, channels A&B a|`ia` |`ifa`, `ifb`, `ib`, `ifab`
+|IF distributor 2, channels C&D a|`ic` |`ifc`, `ifd`, `ic`, `ifcd`
+|formatter a|`fm` a|`form`
+|tape recorder 1 (except heads) a|`r1` |`rec1`, `tape1`, `rc`\*, `tp`*
+|tape recorder 1 (except heads) a|`r2` |`rec2`, `tape2`, `rc`\*, `tp`*
+|high density heads recorder 1 a|`h1` a|`hd`*
+|high density heads recorder 2 a|`h2` a|`hd`*
 
-|formatter |*fm* |*form*
-
-|tape transport 1 |*r1* |*rec1*, *tape1*, *rc**, *tp**
-
-|tape transport 2 |*r2* |*rec2*, *tape2*, *rc**, *tp**
-
-|high density heads transport 1 |*h1* |*hd**
-
-|high density heads transport 2 |*h2* |*hd**
-
-|S/X receiver |*rx* |
-
-|IF3 distributor |*i3* |*if3,ifd3*
-
-|S2 modules | |
-
-|tape recorder 1 |*r1* |*rec1*, *tape1*, *rc**, *tp**
-
-|VLBA modules | |
-
-|baseband converters |**b**__n__, __n__=*1-f* |**bc**__n__,
-**bbc**__n__, __n__=*1-15, 1-f*
-
-|IF distributor 1, channels A&B |*ia* |*ifa*, *ifb*, *ib*, *ifab*
-
-|IF distributor 2, channels C&D |*ic* |*ifc*, *ifd*, *ic*, *ifcd*
-
-|formatter |*fm* |*form*
-
-|tape recorder 1 (except heads) |*r1* |*rec1*, *tape1*, *rc**, *tp**
-
-|tape recorder 1 (except heads) |*r2* |*rec2*, *tape2*, *rc**, *tp**
-
-|high density heads recorder 1 |*h1* |*hd**
-
-|high density heads recorder 2 |*h2* |*hd**
-
-|Groups of modules | |
-
-|all modules which have been set up | |*all*
-
-|odd video or baseband converters | |*odd*
-
-|even video or baseband converters | |*even*
+3+|*Groups of modules*
+|all modules which have been set up | a|`all`
+|odd video or baseband converters | a|`odd`
+|even video or baseband converters | a|`even`
 |===
 
-[width="100%",cols="43%,15%,42%",options="header",]
+[options="header",]
+[cols="<,^,^"]
 |===
-|Field System Detector Mnemonics | |
+3+^|Field System Detector Mnemonics
+
 |Detector |Standard mnemonic |Other allowed mnemonics
 
-|Mark III detectors | |
+3+|*Mark III detectors*
+|formatter selected VCs a|`formvc` |
+|IFs feeding formatter selected VCs a|`formif` |
+|video converters |`v__n__`, `_n_`=`1`-`f` |`vc__n__`,
+`_n_`=`1`-`15`,`1`-`f`
+|IF distributor channel 1 a|`i1` a|`if1`
+|IF distributor channel 2 a|`i2` a|`if2`
+|IF3 distributor a|`i3` a|`if3`
 
-|formatter selected VCs |*formvc* |
-
-|IFs feeding formatter selected VCs |*formif* |
-
-|video converters |**v**__n__, __n__=*1-f* |**vc**__n__,
-__n__=*1-15,1-f*
-
-|IF distributor channel 1 |*i1* |*if1*
-
-|IF distributor channel 2 |*i2* |*if2*
-
-|IF3 distributor |*i3* |*if3*
-
-|S2 detectors | |
-
+3+|*S2 detectors*
 |none | |
 
-|VLBA detectors | |
+3+|*VLBA detectors*
+|formatter selected BBCs a|`formbbc` |
+|IFs feeding formatter selected BBCs a|`formif` |
+|baseband converters, USB |`__n__u`, `_n_`=`1`-`f` |
+`b__n__u`, `bc__n__u`, `bbc__n__u`,
+`_n_`=`1`-`15`,`1`-`f`
+|baseband converters, LSB |`__n__l`, `_n_`=`1`-`f` |
+`b__n__l`, `bc__n__l`, `bbc__n__l`,
+`_n_`=`1`-`15`,`1`-`f`
+|IF distributor 1, channel A a|`ia` a|`ifa`
+|IF distributor 1, channel B a|`ib` a|`ifb`
+|IF distributor 2, channel C a|`ic` a|`ifc`
+|IF distributor 2, channel D a|`id` a|`ifd`
 
-|formatter selected BBCs |*formbbc* |
+3+|*Station Dependent Detectors*
+|Detector 1 (IF "`chain`" 5) |`u5` |
+|Detector 2 (IF "`chain`" 6) |`u6` |
 
-|IFs feeding formatter selected BBCs |*formif* |
-
-|baseband converters, USB |__n__**u**, __n__=*1-f* a|
-**b**__n__*u*, **bc**__n__*u*, **bbc**__n__*u*,
-
-__n__=*1-15,1-f*
-
-|baseband converters, LSB |__n__**l**, __n__=*1-f* a|
-**b**__n__*l*, **bc**__n__*l*, **bbc**__n__*l*,
-
-__n__=*1-15,1-f*
-
-|IF distributor 1, channel A |*ia* |*ifa*
-
-|IF distributor 1, channel B |*ib* |*ifb*
-
-|IF distributor 2, channel C |*ic* |*ifc*
-
-|IF distributor 2, channel D |*id* |*ifd*
-
-|Station Dependent Detectors | |
-
-|Detector 1 (IF “chain” 5) |*u5* |
-
-|Detector 2 (IF “chain” 6) |*u6* |
-
-|Groups of detectors | |
-
-|all non-station dependent detectors | |*all*
-
-|all odd video converters | |*odd*
-
-|all even video converters | |*even*
-
-|all odd baseband converters USB | |*oddu*
-
-|all odd baseband converters LSB | |*oddl*
-
-|all even baseband converters USB | |*evenu*
-
-|all even baseband converters LSB | |*evenl*
+3+|*Groups of detectors*
+|all non-station dependent detectors | a|`all`
+|all odd video converters | a|`odd`
+|all even video converters | a|`even`
+|all odd baseband converters USB | a|`oddu`
+|all odd baseband converters LSB | a|`oddl`
+|all even baseband converters USB | a|`evenu`
+|all even baseband converters LSB | a|`evenl`
 |===
 
 == On-Line Help
 
 The entire documentation for each command is available as on-line help
-in the Field System. The *help* command will display the information for
+in the Field System. The `help` command will display the information for
 a specified command on the screen during Field System operations. The
 information that is listed is identical to that found on the pages of
 this manual.
 
-Refer to the page with the *help* command description.
+Refer to the page with the `help` command description.
 
