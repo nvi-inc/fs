@@ -1,164 +1,42 @@
-____
-image:media/image2.jpg[image,width=694,height=957]VLBI System
-Documentation
+//
+// Copyright (c) 2021 NVI, Inc.
+//
+// This file is part of the FSL10 Linux distribution.
+// (see http://github.com/nvi-inc/fsl10).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
 
-Field System Version 7.2
-____
-
-== SNAP LANGUAGE
-
-____
+= SNAP Language
 N. R. Vandenberg
+FS Version 7.2 - July 1 1989
+:toc:
 
-Interferometrics Inc.
-____
+:sectnums:
+:experimental:
 
-=== Operation Manual
-
-NASA/Goddard Space Flight Center July 1, 1989
-
-____
-Crustal Dynamics Project
-____
-
-image:media/image3.jpg[image,width=816,height=1045]
-
-image:media/image4.jpg[image]image:media/image5.jpg[image]Table of
-Contents
-
-[width="100%",cols="79%,21%",options="header",]
-|===
-a|
-____
-1.0 INTRODUCTION
-____
-
-|1
-|2.0 GENERAL DESCRIPTION OF SNAP |2
-
-a|
-____
-3.0 SNAP DEFINITIONS
-____
-
-|3
-
-a|
-____
-4.0 FUNCTION COMMANDS
-____
-
-|4
-
-a|
-____
-4.1 General Syntax .
-____
-
-|4
-
-a|
-____
-4.2 Syntax Examples
-____
-
-|5
-
-a|
-____
-4.3 MAT Module Functions . . . . . . . . . .
-____
-
-|5
-
-a|
-____
-4.4 Quick vs. Long Functions .
-____
-
-|6
-
-a|
-____
-5.0 CONTROL COMMANDS .
-____
-
-|7
-
-a|
-____
-5.1 Time Flow Control .
-____
-
-|7
-
-a|
-____
-5.2 Timed Waits and Timed Offsets . . . . . . . . . .
-____
-
-|7
-
-a|
-____
-5.3 Time-scheduling
-____
-
-|8
-
-|5.4 Cancellation of Time-Scheduled Commands . . . . . . . . . . .
-image:media/image6.jpg[image,width=110] 9 |
-
-|5.5 Waiting For Completion 9 |
-
-a|
-____
-6.0 COMMENTS 10
-____
-
-|
-
-|7.0 COMMAND STREAMS . . . . 11 |
-
-a|
-____
-8.0 PROCEDURES 12
-____
-
-|
-
-|8.1 Invoking Procedures . 12 |
-
-|8.2 Opening Procedure Libraries . . . . . . . . . . 12 |
-
-|8.3 Priority of Procedures . 13 |
-
-|8.4 Field System Procedure Handling . 13 |
-
-|8.5 Modifying Procedures . 14 |
-
-|9.0 IMMEDIATE EXECUTION OPERATOR COMMANDS . . . . . .
-image:media/image7.jpg[image,width=147] 15 |
-
-|10.0 FORMATS FOR TIME AND ANGLES . . . . . . . 16 |
-|===
-
-SNAP-i
-
-image:media/image8.jpg[image,width=816,height=1046]
-
-____
-1.0 INTRODUCTION
+== Introduction
 
 The Mark Ill Field System uses the SNAP (Standard Notation for Astronomy
-erocedures) language for experiment control. The language was proposed
+Procedures) language for experiment control. The language was proposed
 originally in early 1979; during 1979 the initial implementation of some
 of the features of SNAP was accomplished. Since that time, more of the
 specifications have been implemented in later versions of the Mark Ill
-Field System. As of version 3.1, all of SNAP was implemented except for
-the "wait for completion" feature and logical branching.
+Field System. As of version _3.1_, all of SNAP was implemented except for
+the "`wait for completion`" feature and logical branching.
 
-The scope of intended use for SNAP has been reduced trom its original
+The scope of intended use for SNAP has been reduced from its original
 conception. Since it appears that primarily VLBI experiments will be
 controlled via SNAP, certain changes have been made in the
 specifications. This Manual contains a description of SNAP as it is
@@ -169,15 +47,10 @@ scheduling system and the delogging and correlator system.
 Refer to the companion SNAP Command manual for detailed descriptions of
 the implemented commands. Refer to the Standard Procedures manual for
 lists of procedures that are commonly used.
-____
 
-SNAP-I
+== General Description of SNAP
 
-==== 2.0 GENERAL DESCRIPTION OF SNAP
-
-____
 SNAP has the following general attributes:
-____
 
 * Time-sequencing is an integral part of SNAP. Commands are executed one
 after another. The language provides the ability to suspend execution of
@@ -188,379 +61,364 @@ accountability after the experiment. Display on the operator's console
 of all high-level commands for on-line monitoring is automatic, with
 optional expanded display for detailed monitoring.
 * The syntax and protocol for SNAP are simple for operators to learn and
-use quickly. Only a few basic "rules" of protocol need be learned prior
+use quickly. Only a few basic "`rules`" of protocol need be learned prior
 to using any command.
 * Often-used sequences of commands may be defined as procedures and then
 invoked as a single higher-level command. Procedures may be nested
 within procedures.
 
-==== 3.0 SNAP DEFINITIONS
+== SNAP Definitions
 
-____
-fun.G.ti.QQ- a SNAP word which has an action and/or a parameter value or
-set of parameter values associated with it. Functions are "built in" to
-SNAP and cannot be modified in the field.
-
-command - a contiguous set of non-blank characters requesting an action
-(or actions). Each SNAP command is both delimited and terminated by
-either a space(s) or carriage return. A single command may set, query,
-or log functions and parameters; invoke a procedure; or control the time
-flow of events.
-
-+++procedure+++ - a defined sequence of commands that may be invoked
+[frame=none,grid=none]
+[cols="1,3"]
+|===
+| _function_ | A SNAP word which has an action and/or a parameter
+value or set of parameter values associated with it. Functions are
+"`built-in`" to SNAP and cannot be modified in the field.
+| _command_ | A contiguous set of non-blank characters requesting an
+action (or actions). Each SNAP command is both delimited and
+terminated by either a space(s) or carriage return. A single command
+may set, query, or log functions and parameters; invoke a procedure;
+or control the time flow of events.
+| _procedure_ | A defined sequence of commands that may be invoked
 with the procedure name. Procedures are defined in terms of existing
 commands.
-
-+++control commands+++ - those commands which control the flow of the
+| _control commands_ | Those commands which control the flow of the
 execution of the command list.
-
-+++schedule file+++ - a disk file containing all of the information
+| _schedule file_ | A disk file containing all of the information
 required to control data-taking during an experiment.
-
-+++schedule procedure library+++ - the set of procedures associated with
+| _schedule procedure library_ | The set of procedures associated with
 a single schedule.
-
-+++station procedure library+++ - the set of local station-defined
+| _station procedure library_ | The set of local station-defined
 procedures.
-
-+++vocabulary+++ - the set of all defined words (functions and
+| _vocabulary_ | The set of all defined words (functions and
 procedures) recognized by SNAP. A SNAP word may be up to 12 characters
 long, although abbreviations of 3 to 6 characters will typically be
-used. The character set A through Z (upper case) and O through 9 may be
-used; the first letter of all words is restricted to A through
-
-+++special character+++ - one of a set of reserved characters which have
+used. The character set `a` through `z` (upper case is available, but
+strongly discouraged) and 0 through 9 may be used; the first letter of
+all words is restricted to `a` through `z`
+| _special character_ | one of a set of reserved characters which have
 a special meaning within SNAP and may not be used in procedure or
 function names. All of the characters which are non-numeric and
 non-alphabetic are reserved special characters.
-____
+|===
 
-==== 4.0 FUNCTION COMMANDS
+== Function Commands
 
-____
 A function is a SNAP word that may have a parameter value or values
-associated with it. All functions are "built in ^n^ commands, i.e. they
-cannot be modified by the operator. The value(s) of a function's
-parameters may be queried and logged at any time, simply by invoking the
-function name as a command. In a log entry, the character ^1^'/" IS used
-to indicate a response to a user query for pararneter value(s). In a
-command, the character ^n^ = " is used to assign value(s) to
+associated with it. All functions are "`built-in`" commands, i.e.,
+they cannot be modified by the operator. The value(s) of a function's
+parameters may be queried and logged at any time, simply by invoking
+the function name as a command. In a log entry, the character `/` is
+used to indicate a response to a user query for parameter value(s). In
+a command, the character `=` is used to assign value(s) to
 parameter(s) of a function.
 
-4.1 General Syntax
+=== General Syntax
 
-< function >
+[subs="+quotes"]
+....
+_function_
+....
 
 This command asks for a response giving the current status or value of
 the function. In the case of a Mark Ill module, the status and settings
 on the module are read back and the response is displayed and logged.
 
-< function > / < parml > , < parm2> ...
+[subs="+quotes"]
+....
+_function_/_parml_,_parm2_,...
+....
 
 This is the general form for all responses to function commands. Each
 parameter in the response corresponds to the same parameter in the
 command. The response may have additional parameters which are known as
-"monitor-only" parameters, i.e. parameters which cannot be specified.
+"`monitor-only`" parameters, i.e., parameters which cannot be specified.
 
-< function > = < parml > , < parm2 >
-,image:media/image9.jpg[image,width=13]
+[subs="+quotes"]
+....
+_function_=_parm_,_parm2_
+....
 
 This is the general syntax for all function commands which set
 parameters. In the case of a Mark Ill module, this command will send the
-parameters to the module. These parameters are known as "settable
-parameters", i.e. they may be specified and will be used to set up the
-module. Each parameter may be integer, floating point, ASCII, * or null.
+parameters to the module. These parameters are known as _settable
+parameters_, i.e., they may be specified and will be used to set up the
+module. Each parameter may be integer, floating point, ASCII, `\*` or null.
 A null parameter specifies the default value for the parameter, if any.
-A parameter specified as * means that the parameter's value is to be
+A parameter specified as `*` means that the parameter's value is to be
 left unchanged.
 
 A number of SNAP functions take the names of Mark Ill modules as
 parameters. In these cases, various forms of the module names are
-accepted. For instance, VI, VOI, VCI and VCOI all signify video
-converter number one, and V 10, VCIO and VA all signify video converter
-number ten. The OF distributor may be called either IF or IFD, and a
-single channel can be specified as In, IFn or IFDn, where n is either 1
-or 2. The formatter can be called either FM or FORM, and the tape
-transport either TP or TAPE. NOTE: This flexibility in naming Mark Ill
-modules applies +++only+++ when they are being used as function
-parameters , and +++n.Qi+++ as function names. Function names must be
-entered exactly as listed in the SNAP Command manual.
-____
+accepted. For instance, `v1`, `v01`, `vc1` and `vc01` all signify
+video converter number one, and `v10`, `vc10` and `va` all signify
+video converter number ten. The IF distributor may be called either
+`IF` or `IFD`, and a single channel can be specified as `i__n__`, `if__n__` or
+`IFD__n__`, where _n_ is either `1` or `2`. The formatter can be called
+either `fm` or `form`, and the tape transport either `tp` or `tape`.
 
-===== +++4.2 Syntax Examples+++
+NOTE: This flexibility in naming Mark Ill modules applies _only_ when
+they are being used as function parameters , and _not_ as function
+names.  Function names must be entered exactly as listed in the SNAP
+Command manual.
 
-____
-As examples of the syntax described in the previous section, the
-following commands might be used.
+=== Syntax Examples
 
-The command vcol
+As examples of the syntax described in the previous section
+<<General Syntax>>, the following commands might be used.
+
+The command
+
+ vc01
 
 would read back the current parameter values on video converter 1. The
 response might look like:
 
-image:media/image10.jpg[image,width=301,height=14]
+ vc01/123.5,2.0,u,0,0,rem,lock,365
 
-The command vcol = 123.5
+The command
+
+ vc01=123.5
 
 would set the video converter to 123.5 MHz and use default values for
 all other settable parameters.
 
-The command vcolimage:media/image11.jpg[image,width=46,height=12]
+The command
 
-image:media/image12.jpg[image]image:media/image13.jpg[image]would set
-the video converter to 123.5 MHz, use the default value for the
-bandwidth, and set the TPI to whatever had been specified in the last
-command to this module. The response to both commands would be
-____
+ vc01=123.5,,*
 
-===== VCOI/ACK
+would set the video converter to 123.5 MHz, use the default value for
+the bandwidth, and set the TPI to whatever had been specified in the
+last command to this module. The response to both commands would be
 
-____
+ vc01/ack
+
 Detailed specifications for the settable and monitor-only parameters for
-all commands are in the SNAP Command manual.
-____
+all commands are in the SNAP Command manual (#not yet available#).
 
-====== 4.3 MAT Module Functions
+=== MAT Module Functions
 
-____
 The following syntax is appropriate for those commands which refer to
-Mark Ill modules with an MAT interface. A note in the "comments" section
-for each command described in the SNAP Command manual indicates whether
-these functions are available.
-____
+Mark Ill modules with an MAT interface. A note in the "`comments`"
+section for each command described in the SNAP Command manual (#not
+yet available#) indicates whether these functions are available.
 
-[width="100%",cols="42%,58%",options="header",]
+[frame=none,grid=none]
+[cols="1,4"]
 |===
-|< module >
-image:media/image14.jpg[image,width=9]image:media/image15.jpg[image,width=9]
-image:media/image16.jpg[image]image:media/image17.jpg[image] a|
-____
+a|`_module_=?`|
 Report the parameters last sent to the module. This command merely
 accesses values stored in the computer and has no effect on the module.
-____
 
-|< module > = ALARM a|
-____
+a|`_module_=alarm`|
 Query the alarm status, reset the alarm, and query again. Response to
-each query is ACK or NAK.
-____
+each query is `ack` or `nak`.
 
-|< module > = TEST/RESET |Individual module reset function, identical to
-the system reset command, but for a single
+a|`_module_=test/reset` |Individual module reset function, identical to
+the system reset command, but for a single module.
 |===
 
-____
-module.
 
-The MAT interface responds with ACK to acknowledge communication. The
-response is NAK if the alarm is on. Responses consisting only of "ACKs"
-are not displayed unless the command XDISP=ON was issued, and are not
-logged unless the command XLOG —ON was issued.
-____
+The MAT interface responds with `ack` to acknowledge communication. The
+response is `nak` if the alarm is on. Responses consisting only of ``ack``s
+are not displayed unless the command `xdisp=on` was issued, and are not
+logged unless the command `xlog=on` was issued.
 
-====== 4.4 Quick vs. Long Functions
+=== Quick vs. Long Functions
 
-____
-image:media/image18.jpg[image]image:media/image19.jpg[image]image:media/image20.jpg[image]image:media/image21.jpg[image]image:media/image22.jpg[image]Function
-commands fall into one of two types: "quick-response" functions and
-"long-execution" functions. "Quick" in this instance means on the order
-of seconds; the function VCOI, for example, is a quick-response
-function. These functions +++are completed+++ before the next command in
-the stream is started. The "long-execution" functions, e.g. the SOURCE
-command which instructs the antenna to move to a new source, are those
-which take a long (or unknown) amount of time to complete. These
-functions ace......i.niti.ate.d.......+++Q.....Jx+++
-image:media/image23.jpg[image,width=27,height=12]then the next command
-in the stream is started. Functions which are of the long-execution type
-are so indicated in the "comments" section of the SNAP Command manual.
+Function commands fall into one of two types: "`quick-response`"
+functions and "`long-execution`" functions. "`Quick`" in this instance
+means on the order of seconds; the function `vc01`, for example, is a
+quick-response function. These functions _are completed_ before the
+next command in the stream is started. The "`long-execution`"
+functions, e.g.,  the `source` command, which instructs the antenna to
+move to a new source, are those which take a long (or unknown) amount
+of time to complete.  These functions _are initiated only_ then the
+next command in the stream is started. Functions which are of the
+long-execution type are so indicated in the "`comments`" section of
+the SNAP Command manual (#not yet available#).
 
 NOTE: There are no long-execution commands implemented at the present
-time. The SOURCE command, and any other which might be considered as
+time. The `source` command, and any other which might be considered as
 long-execution commands, is treated as a quick-response command and the
 actual time of its completion is not available in SNAP.
-____
 
-===== 5.0 CONTROL COMMANDS
+== Control Commands
 
-====== 5.1 Time Flow Control
+=== Time Flow Control
 
-____
 The time flow and time-sequencing of commands is controlled by the
 control command:
-____
 
-! < time > (e.g. !123000)
+[subs="+quotes"]
+....
+!_time_        [.underline]#(e.g., !123000)#
+....
 
-____
-The ^N^ !" symbol may be regarded as a general "wait until" symbol.
-Execution of the command stream is suspended until the specified t:me
-occurs. For example, the series of commands
+The `!` symbol may be regarded as a general "`wait until`" symbol.
+Execution of the command stream is suspended until the specified time
+occurs. For example, the series of commands:
 
-! 123000
+ !123000
+ qq=180
+ !130000
+ qq=90
 
-QQ=180
+have the following effect. First, the command stream is blocked until
+1230 UT.  Then, `qq` is to be set to `180` at 1230 UT.  The command
+stream is again blocked until 1300 UT, after which `qq` is set to
+`90`. Commands issued between `!_time_` commands are executed in order
+of occurrence. Each command is completed before moving on to the next
+command, except for long-execution commands (see previous section).
 
-! 130000
-____
+=== Timed Waits and Timed Offsets
 
-QQ=90
-
-____
-image:media/image24.jpg[image]image:media/image25.jpg[image]image:media/image26.jpg[image]image:media/image27.jpg[image]image:media/image28.jpg[image]image:media/image29.jpg[image]image:media/image30.jpg[image]image:media/image31.jpg[image]image:media/image32.jpg[image]have
-the following effect. First, the command stream is blocked until 1230UT.
-Then, QQ is to be set to 180 at 1230UT.
-image:media/image33.jpg[image,width=110,height=14] stream is again
-blocked until 1300UT, after which QQ is set to 90. Commands issued
-between ! < time > commands are executed in order of occurrence. Each
-command is completed before moving on to the next command, except for
-long-execution commands (see previous section).
-____
-
-====== 5.2 Timed Waits and Timed Offsets
-
-____
 A timed wait may be executed by the command:
 
-! + < time to wait >
+[subs="+quotes"]
+....
+!+_time-to-wait_
+....
 
-For example, upon encountering the command I +5M a wait of 5 minutes
+For example, upon encountering the command `!+5m` a wait of five minutes
 will be completed before the next command in the command stream is
 executed.
 
 A timed offset with respect to some reference time is accomplished by
 using the symbol to establish a reference time, and then referring to
-this reference in a time-offset statement of the form !*+ < time
-offset>. For example
-____
+this reference in a time-offset statement of the form
+`!*+_time-offset_`. For example
 
-!12H30M* Wait till 1230UT, then set 1230UT as the current reference
+[frame=none,grid=none]
+[cols="1,5"]
+|===
+a|`!12h30m*`|Wait till 1230 UT, then set 1230 UT as the current reference
+a|`!*+30m`|Wait until 1300  UT
+|===
 
-____
-image:media/image34.jpg[image,width=12,height=11]+30M Wait until 1300UT
-
-The "current time" may be established as the reference time with simply
-! * A reference time remains in effect until it is explicitly updated
-with another ! < time > * or ! * command. Time-offsets provide a
+The "`current time`" may be established as the reference time with simply
+`!\*`. A reference time remains in effect until it is explicitly updated
+with another `!_time_*` or `!*` command. Time-offsets provide a
 convenient way of controlling time-sequencing of actions within a
 user-defined procedure.
-____
 
-======= 5.3 Time-Scheduling
+=== Time-Scheduling
 
-____
 In some applications it is desired that certain actions be initiated at
 a specified time or at intervals regardless of the antenna pointing
 schedule, such as logging weather or certain system parameters. Actions
 of this type which do not interfere with other events in a command
 stream may bé time-scheduled as follows:
 
-< function or procedure > @ < start time > , < period > , < stop time >
+[subs="+quotes"]
+....
+_function-or-procedure_@_start-time_,_period_,_stop-time_
+....
+
 where
 
-< function or procedure > Any SNAP function or procedure.
-
-< start time > UT time at which the command should first be executed. If
-< start time > is not specified, all current time-scheduling for this
-command is cancelled. < start time > may be specified as ! meaning
-"now", or as ! +wait to wait a specified time before starting.
-
-< period > How often to repeat the command. If < period > is not
+[frame=none,grid=none]
+[cols="1,3"]
+|===
+a|`_function-or-procedure_`| Any SNAP function or procedure.
+a|`_start-time_`| UT time at which the command should first be executed. If
+`_start-time_` is not specified, all current time-scheduling for this
+command is cancelled. `_start-time_` may be specified as `!` meaning
+"`now`", or as `!+_wait_` to wait a specified time before starting.
+a|`_period_`| How often to repeat the command. If `_period_` is not
 specified, the command is executed only once.
-
-< stop time > The last time to execute the command. If < stop time > is
+a|`_stop-time_`| The last time to execute the command. If `_stop-time_` is
 not specified, the command will be repeated indefinitely until
-cancelled. < stop time > may also be in the form I +wait to stop after a
+cancelled. `_stop-time_` may also be in the form `!+_wait_` to stop after a
 specified time has passed.
+|===
 
-All of the fields < start time > , < period>, and < stop time > use the
-SNAP time format (section 10.0). It is legal to time-schedule a command
-more than once; each time-scheduling will be handled independently.
+All of the fields `_start-time_`, `_period_`, and `_stop-time_` use
+the SNAP time format, see section <<Formats for Time and Angles>>
+below. It is legal to time-schedule a command more than once; each
+time-scheduling will be handled independently.
 
 As an example of a time scheduled command,
 
-image:media/image35.jpg[image,width=42,height=12]140000
+ wx@!,15m,140000
 
 would schedule weather info to be logged every 15 minutes starting
 immediately and ending at 1400UT. Command execution would then proceed
-immediately to the next command in the command stream after doing the WX
+immediately to the next command in the command stream after doing the `wx`
 command for the first time.
 
-To cancel the above example WX monitor before 14H UT occurs, use the
-command
+To cancel the above example `wx` monitor before 14H UT occurs, use the
+command:
+
+ wx@
 
 Commands which are time-scheduled are inserted into the main line
-command stream at the specified time. Inadvertent nesting of procedures
-is not permitted in this operation, however. Thus, procedures which are
-timescheduled may be subject to delay in execution until the
-currently-executing procedure, if any, is completed. There is no
-provision for asynchronous execu-
+command stream at the specified time. Inadvertent nesting of
+procedures is not permitted in this operation, however. Thus,
+procedures which are time-scheduled may be subject to delay in
+execution until the currently-executing procedure, if any, is
+completed. There is no provision for asynchronous execution of more
+than the two main command streams. It is recommended that use of this
+feature be restricted to repetitive scheduling of non-interfering
+functions or procedures such as weather monitoring.
 
-tion of more than the two main command streams. It is recommended that
-use of this feature be restricted to repetitive scheduling of
-non-interfering functions or procedures such as weather monitoring.
-____
+=== Cancellation of Time-Scheduled Commands
 
-====== 5.4 Cancellation of Time-Scheduled Commands
-
-____
 There are a number of situations in which time-scheduled commands are
-cancelled. One, mentioned above, is when an ex licit command to do so
-(e.g. WX@) is issued. In this case all occurrences of t e specified
+cancelled. One, mentioned above, is when an explicit command to do so
+(e.g., `wx@`) is issued. In this case all occurrences of the specified
 command on the time-schedule list are cancelled.
 
 When an error occurs during execution of a time-scheduled function or
 procedure, the particular entry on the time-schedule list which is
 involved is cancelled from the list.
 
-image:media/image36.jpg[image]image:media/image37.jpg[image]image:media/image38.jpg[image]image:media/image39.jpg[image]image:media/image40.jpg[image]When
-a new schedule is started with the SCHEDULE =xx command, anything on the
-time list related to a previous schedule is cancelled. This includes
-time scheduled procedures from the old schedule procedure library as
-well as procedures, functions and timed-waits initiated by the schedule.
+When a new schedule is started with the `schedule=...` command,
+anything on the time list related to a previous schedule is cancelled.
+This includes time scheduled procedures from the old schedule
+procedure library as well as procedures, functions and timed-waits
+initiated by the schedule.
 
-When the operator command stream is flushed with the FLUSH command, all
-procedures, functions and timed-waits initiated by the operator are
-cancelled from the time-schedule list.
+When the operator command stream is flushed with the `flush` command,
+all procedures, functions and timed-waits initiated by the operator
+are cancelled from the time-schedule list.
 
-When a new station procedure library is established with the PROC =xx
-command, all time-scheduled procedures from the previous station library
-are cancelled.
-____
+When a new station procedure library is established with the
+`proc=...` command, all time-scheduled procedures from the
+previous station library are cancelled.
 
-======= 5.5 Waiting For Completion
+=== Waiting for Completion
 
-____
 The execution of commands in a command stream may be suspended awaiting
 the completion of a long-execution function or a time-scheduled function
 or procedure with the command:
 
-image:media/image41.jpg[image,height=11] < function or procedure name >
+[subs="+quotes"]
+....
+!_function-or-procedure-name_
+....
 
 If the named function or procedure is neither currently executing nor
 currently pre-scheduled, this command will have no effect and the
-command stream execution will proceed to the next command. NOTE: this
-feature is not implemented.
-____
+command stream execution will proceed to the next command.
 
-===== 6.0 COMMENTS
+NOTE: This feature is not implemented.
 
-____
+== Comments
+
 Comments to be logged and displayed are entered with the following
 syntax:
 
-"Stay at the Indian Lodge in beautiful Fort Davis, Texas"
+ "Stay at the Indian Lodge in beautiful Fort Davis, Texas"
 
 All of the characters between quotes are considered to be part of the
 comment. A quote character within the comment terminates the comment.
-The trailing " is not required.
+The trailing `"` is not required.
 
-SNAP-IO
-____
+== Command Streams
 
-===== 7.0 COMMAND STREAMS
-
-____
-A "command stream" is a series of commands which come from a given
+A _command stream_ is a series of commands which come from a given
 source. In the current implementation of SNAP, there are two command
 streams: the schedule's and the operator's. The operator command stream
 holds all commands typed by the operator and commands from within
@@ -570,20 +428,19 @@ procedures invoked by the schedule.
 
 The schedule stream has priority over the operator stream. This means
 that commands from the operator stream will not be executed as long as
-there are schedule commands to be done. Once the schedule has come to a
-wait or image:media/image42.jpg[image,height=9] halt, the operator
-command stream will be treated.
+there are schedule commands to be done. Once the schedule has come to
+a wait or a halt, the operator command stream will be treated.
 
-image:media/image43.jpg[image]The operator initiates the schedule
-command stream by using the SCHEDULE command. The operator can also
-suspend execution of the schedule stream by using the HALT command;
-execution of the schedule stream may be resumed by using the CONT
+The operator initiates the schedule
+command stream by using the `schedule=...`  command. The operator can also
+suspend execution of the schedule stream by using the `halt` command;
+execution of the schedule stream may be resumed by using the `cont`
 command.
 
-The schedule stream is "blocked" whenever a "wait until" command is
+The schedule stream is "`blocked`" whenever a "`wait until`" command is
 issued and execution of the schedule will continue only when this time
 or event occurs. The operator stream is blocked due to execution of
-"wait until" commands which occur in procedures invoked by the operator.
+"`wait until`" commands which occur in procedures invoked by the operator.
 The operator may type in commands while the schedule is executing or
 while the operator stream is blocked. These commands will be stacked up
 as they are typed and executed once the schedule has come to a stopping
@@ -591,255 +448,239 @@ place or the operator stream is unblocked.
 
 The operator can force a function command to be executed immediately
 without waiting for the schedule to come to a waiting place. See section
-9.0 below.
-____
+<<Immediate Execution Operator Commands>> below.
 
-8.0 PROCEDURES
+== Procedures
 
-____
-Procedures are user-defined and consist of a series of any existing SNAP
-commands, including ordinary commands, control commands and calls to
-other procedures. Procedures are grouped into libraries, up to two of
-which are available at any given time for use within the Field System.
-Procedures may be defihed, edited* deleted, copied, and listed by using
-the Field System program PFMED (Erocedure Eile Manager and EQitor) which
-manages procedure libraries. Please refer to the PFMED manual.
-____
+Procedures are user-defined and consist of a series of any existing
+SNAP commands, including ordinary commands, control commands and calls
+to other procedures. Procedures are grouped into libraries, up to two
+of which are available at any given time for use within the Field
+System.  Procedures may be defined, edited, deleted, copied, and
+listed by using the Field System program _pfmed_ (__P__rocedure
+__F__ile __M__anager and __Ed__itor) which manages procedure
+libraries. Please refer to the _pfmed_ manual (#not yet available#).
 
-====== 8.1 Invoking Procedures
-
-____
-image:media/image44.jpg[image]
+=== Invoking Procedures
 
 A procedure is invoked simply by its name. For example,
-____
 
-====== TESTPROC
+[subs="+quotes"]
+....
+testproc
+....
 
-____
-would invoke the procedure named TESTPROC, which consists of SNAP
+would invoke the procedure named `testproc`, which consists of SNAP
 commands to be executed in order. Procedures may be nested to 10 levels.
 
 Procedures may be passed a parameter consisting of up to 12 characters.
 This single parameter will be substituted for all occurrences of the
-character $ in the commands which appear in the procedure. There may be
+character `$` in the commands which appear in the procedure. There may be
 commas embedded in the character string. For example, the procedure
-SKIPF could be passed the parameter 2M IOS by typing:
+`skipf` could be passed the parameter `2m10s` by typing:
 
-image:media/image45.jpg[image] SKIPF=2MIOS and this time-like parameter
-would be substituted for each $ in the procedure.
+[subs="+quotes"]
+....
+skipf=2m10s
+....
+
+and this time-like parameter would be substituted for each `$` in the
+procedure.
 
 Procedures are recorded in the log file the first time they are invoked
-after a log file is started. If a procedure is edited with PFMED, the
+after a log file is started. If a procedure is edited with _pfmed_, the
 new version is automatically logged the next time the procedure is
 invoked.
-____
 
-======= 8.2 Opening Procedure Libraries
+=== Opening Procedure Libraries
 
-____
 In the Field System there are available two libraries of procedures.
 When a new procedure library is opened, the names of all the procedures
 in the library are read into the Field System and these procedures
 become available to the operator.
 
-The procedure library named STATION.PRC is known as the "station
-library", and it normally contains procedures peculiar to the local
-site. When the Field System starts up, the STATION.PRC procedure library
+The procedure library named _station.prc_ is known as the "`station
+library`", and it normally contains procedures peculiar to the local
+site. When the Field System starts up, the _station.prc_ procedure library
 is automatically opened and is kept open as long as the Field System is
 running.
 
-A. second procedure library, the "schedule library", is also available.
+A second procedure library, the "`schedule library`", is also available.
 When a new schedule is opened, the procedure library with the same name
-as the schedule (but with the . PRC extension) becomes the schedule
+as the schedule (but with the _.prc_ extension) becomes the schedule
 library. The schedule library may be opened or changed independently of
-the schedule with the PROC command. When the Field System starts up,
+the schedule with the `proc` command. When the Field System starts up,
 there is no schedule library open.
 
-When the PROC command is issued interactively, the following occurs:
-____
+When the `proc=...` command is issued interactively, the following
+occurs:
 
-* cancel all time-scheduled procedures and events related to the
+. cancel all time-scheduled procedures and events related to the
 schedule procedure library and flush stacks
-image:media/image46.jpg[image] close old library
-image:media/image47.jpg[image] open new library and read in all
-procedure names
 
-____
+. close old library
+
+. open new library and read in all procedure names
+
 If the procedure library named in the command does not exist, you are
 left without a schedule procedure library open to the Field System.
 
-When the SCHEDULE command is issued, the following happens:
-____
+When a `schedule=...` command is issued, the following happens:
 
-* cancel all time-scheduled procedures and timed waits related to the
-previous schedule and flush stacks image:media/image48.jpg[image] close
-previous schedule and schedule procedure library
-image:media/image49.jpg[image] open new schedule and procedure library
-and read in all procedure names
-* find place in the schedule
+. cancel all time-scheduled procedures and timed waits related to the
+previous schedule and flush stacks
 
-____
-image:media/image50.jpg[image]image:media/image51.jpg[image]image:media/image52.jpg[image]image:media/image53.jpg[image]image:media/image54.jpg[image]image:media/image55.jpg[image]Even
-if the new schedule name is the same as the previous one, the above
-steps are done. If the schedule has no procedure library associated with
-it, the old schedule procedure library is closed and no new one is
-opened.
-____
+. close previous schedule and schedule procedure library
 
-======= 8.3 Priority of Procedures
+. open new schedule and procedure library and read in all procedure
+names
 
-____
+. find place in the schedule
+
+Even if the new schedule name is the same as the previous one, the
+above steps are done. If the schedule has no procedure library
+associated with it, the old schedule procedure library is closed and
+no new one is opened.
+
+=== Priority of Procedures
+
 There are at most two libraries of procedures available at any one time:
-the station library STATION.PRC and the schedule library, which may be
+the station library _station.prc_ and the schedule library, which may be
 station or schedule-specific. A procedure from the schedule library has
-precedence over any same-named procedure in the station library, i.e.
+precedence over any same-named procedure in the station library, i.e.,
 the station procedure can never be accessed. Also, a SNAP function has
-precedence over any same-named procedure in either library, i.e. the
+precedence over any same-named procedure in either library, i.e., the
 procedure could never be accessed.
 
 The list of SNAP function names is checked first, so any procedure with
-the same name as a "built-in" command could never be accessed.
-____
+the same name as a "`built-in`" command could never be accessed.
 
-======= 8.4 Field System Procedure Handling
+=== Field System Procedure Handling
 
-____
 When a schedule-invoked procedure is executing and a timed wait is
 encountered within the procedure, the schedule stream is blocked until
 the specified time, allowing the operator stream to be processed. Since
 the operator may invoke a procedure, it is therefore possible to have
-two procedures "executing" at the same time, one from each command
+two procedures "`executing`" at the same time, one from each command
 stream.
 
 Therefore, to avoid confusion, there is an independent control structure
 for each command stream to handle procedures.
-____
 
 The central component of the control structure is a stack which contains
-
-____
 procedure identification and place-marking information for the current
 executing procedure and its calling procedure, If any, and so on up to a
 maximum nesting of 10 levels. While nesting is allowed, recursion,
 either direct or indirect, is not. That is, the same procedure may not
 occur twice on the same stack.
 
-image:media/image56.jpg[image]As long as a procedure is in the midst of
-execution, no other commands from the corresponding command stream will
-be executed, even during timed waits, with the exception of immediate
-execution operator commands (see section 9.0) and time-scheduled events
-which are not procedure calls. Note that a time-scheduled procedure call
-will not be processed until the corresponding procedure stack is empty.
-Thus, it is possible that the time-scheduled procedure may not execute
-when it is expected.
-____
+As long as a procedure is in the midst of execution, no other commands
+from the corresponding command stream will be executed, even during
+timed waits, with the exception of immediate execution operator
+commands (see section <<Immediate Execution Operator Commands>> below)
+and time-scheduled events which are not procedure calls. Note that a
+time-scheduled procedure call will not be processed until the
+corresponding procedure stack is empty.  Thus, it is possible that the
+time-scheduled procedure may not execute when it is expected.
 
-======= 8.5 Modifying Procedures
+=== Modifying Procedures
 
-____
-Procedures may be modified at any time using the program PFMED. The new
+Procedures may be modified at any time using the program _pfmed_. The new
 version of the procedure will not become available until the stack of
 procedures is empty of all references to the library in which the
 modified procedure resides. This restriction is related to the
 implementation of procedures as subcomponents of a single disk file.
 
-Editing procedures must be done using PFMED. Although procedure
+Editing procedures must be done using _pfmed_. Although procedure
 libraries are ASCII files, no other method of editing is supported, and
 any other method is actively discouraged.
-____
 
-==== 9.0 IMMEDIATE EXECUTION OPERATOR COMMANDS
+== Immediate Execution Operator Commands
 
-____
-image:media/image57.jpg[image]image:media/image58.jpg[image]There is an
+There is an
 exception to the priority ordering of the schedule and operator command
-streams: the "immediate execution" operator commands. There is a set of
+streams: the "`immediate execution`" operator commands. There is a set of
 commands which, when invoked by the operator, will be executed
 immediately after the currently-executing command is finished. This
 enables the operator to have some control over the schedule and to halt
 it (if necessary), turn on or off logging or display, interrupt a
-procedure, etc. Commands such as HALT, ECHO, BREAK, and XDISP are
+procedure, etc. Commands such as `halt`, `echo`, `break`, and `xdisp` are
 included in this set of commands.
 
-Time-scheduled functions are also handled immediately. In order to make
-+++any+++ +++function+++ execute immediately, time-schedule it for
-"now". For example, to get the antenna pointing status logged as soon as
-the antenna comes on source, even though the schedule set-up is
-executing, you could use the command ONSOURCE@!. It is not possible to
-schedule procedures for immediate execution since they involve many
-commands.
-____
+Time-scheduled functions are also handled immediately. In order to
+make _any function_ execute immediately, time-schedule it for "`now".
+For example, to get the antenna pointing status logged as soon as the
+antenna comes on source, even though the schedule set-up is executing,
+you could use the command `onsource@!`. It is not possible to schedule
+procedures for immediate execution since they involve many commands.
 
-==== 10.0 FORMATS FOR TIME AND ANGLES
+==  Formats for Time and Angles
 
-____
 Several commands allow times to be specified. Currently, in all time
 formats, the following limits are checked:
-____
 
-[width="100%",cols="31%,45%,24%",options="header",]
 |===
-|<ays |between a|
-____
-1 and 366
-____
+| Unit | Range
 
-|hours |between |O and 23
-a|
-____
-minutes
-____
-
-|between |O and 59
-|seconds a|
-____
-between
-____
-
-|O and 59
+|days | 1 -  366
+|hours |0 - 23
+| minutes |0 - 59
+|seconds |0 - 59
 |===
 
-____
 This means, for example, that a time of 90 seconds must be specified as
-1 M30S.
+`1m30s.`
 
-The default format for < time > is fully numeric:
+The default format for `_time_` is fully numeric:
 
-yydddhhmmss.sss or yymmddhhmmss.sss
+[subs="+quotes"]
+....
+ _yydddhhmmss.sss_  [.underline]#or#  _yymmddhhmmss.sss_
+....
 
 The year, month, and date may be truncated from the left, but hours,
 minutes, and seconds must always be specified, i.e. this format has at
-least six digits and leading zeros must be supplied. Each field of <
-time > may also be specified with a suffix in the alternative format:
-____
+least six digits and leading zeros must be supplied. Each field of 
+`_time_` may also be specified with a suffix in the alternative format:
 
-image:media/image59.jpg[image]image:media/image60.jpg[image]
-yyYdddDhhHmmMssS or yyYmmMddDhhHmmMssS
+[subs="+quotes"]
+....
+__yy__y__ddd__d__hh__h__mm__m__ss__s  [.underline]#or#  __yy__y__mm__m__dd__d__hh__h__mm__m__ss__s
+....
 
-____
 Leading or trailing fields may be omitted, but the fields included must
 be in order of decreasing significance from left to right. Only the
 right-most field may contain a non-integer value.
 
 Examples of correctly specified time fields:
 
-1 21-1 or 120000 (12 hOUß)
+[subs="+quotes"]
+....
+12h  [.underline]#or#  120000  [.underline]#(12 hours)#
+....
 
-4.25M or 4M15S or 000415 (4 min, 15 sec)
+[subs="+quotes"]
+....
+4.25m  [.underline]#or#  4m15s  [.underline]#or#  000415  [.underline]#(4 min, 15 sec)#
+....
 
 Angles are used to specify source positions and offsets. The default
 format is fully numeric:
 
-hhmmss.ss or sddmmss.ss
+[subs="+quotes"]
+....
+_hhmmss.ss_  [.underline]#or#  _sddmmss.ss_
+....
 
 for hours or degrees, respectively. This format always requires that at
 least six digits be specified. Each field of an angle may also be
 specified with a suffix appropriate to the field:
 
-hhHmmMssS or sddDmmMssS
+[subs="+quotes"]
+....
+__hh__h__mm__m__ss__s  [.underline]#or#  __sdd__d__mm__m__ss__s
+....
 
 for hours or degrees, respectively. Any of the fields may be integer or
 real values. The fields must be in order of decreasing significance from
 left to right.
-____
