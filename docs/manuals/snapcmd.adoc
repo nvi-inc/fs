@@ -1,10 +1,14 @@
 = SNAP Commands
 W. E. Himwich, N. R. Vandenberg
-FS Operaton Manual - Version 10.0.1 July 1 2021
+FS Operations Manual - Version 10.0.1 - July 1 2021
+
+:sectnums:
 
 == SNAP Command Descriptions
 
-=== lo - LO frequencies
+:sectnums!:
+
+=== lo - LO Configuration
 
 ==== Syntax
 
@@ -27,7 +31,10 @@ lo/rxg,_chan_,_freq_,_pol_,_file_,_type_,_lo1_,_lo2_,_year_,_month_,_day_,_pol1_
 
 ==== Settable parameters
 
-* `_chan_` --  `**lo**__X__`, where `_X_` is one of: +
+[frame=none,grid=none]
+[cols="1,8"]
+|===
+a| `_chan_` |  `**lo**__X__`, where `_X_` is one of: +
 `*1*`, `*2*`, or `*3*` for Mark III/IV/5 and K-4, +
 `*a*`, `*b*`, `*c*`, or `*d*` for VLBA/4/5 +
 `*1*`, `*2*`, `*3*`, or `*4*` for LBA/4, +
@@ -36,27 +43,31 @@ lo/rxg,_chan_,_freq_,_pol_,_file_,_type_,_lo1_,_lo2_,_year_,_month_,_day_,_pol1_
 `*a*`, `*b*`, `*c*`, `*d*`, `*e*`, `*f*`, `*g*`, or `*h*` for DBBC3 +
 `*1*`-`*8*` for all others.  +
 No default. No previous value available.
-
-* `_freq_` --  LO frequency for this channel, MHz. No default. No previous value available.
-* `_sb_` -- Net sideband for this channel, `*unknown*`, `*usb*` or `*lsb*`.  Default is `*unknown*`.
-* `_pol_` -- Polarization for this channel, `*unknown*`, `*rcp*`, or `*lcp*`.  Default is `*unknown*`.
-* `_pcspace_` --  Spacing of phase-cal rails for this channel, MHz, `*unknown*`, or `*off*`. Default is `*unknown*`.
-* `_pcoff_` -- First phase-cal rail frequency for this IF if not equal to the spacing, MHz. Default `*0.0*`. This offset is specified relative to DC in the IF.
+a| `_freq_` |  LO frequency for this channel, MHz. No default. No previous value available.
+a| `_sb_` | Net sideband for this channel, `*unknown*`, `*usb*` or `*lsb*`.  Default is `*unknown*`.
+a| `_pol_` | Polarization for this channel, `*unknown*`, `*rcp*`, or `*lcp*`.  Default is `*unknown*`.
+a| `_pcspace_` |  Spacing of phase-cal rails for this channel, MHz, `*unknown*`, or `*off*`. Default is `*unknown*`.
+a| `_pcoff_` | First phase-cal rail frequency for this IF if not equal to the spacing, MHz. Default `*0.0*`. This offset is specified relative to DC in the IF.
+|===
 
 ==== Monitor-only parameters
 
-* `rxg` --  literal text, `rxg`, to indicate this line has _.rxg_ file information for the LO _chan_
-* `_file_` --  name of the _.rxg_ file that matched the LO value; `*undefined*` if there was no match, in that case the remaining fields are omitted
-* `_type_` --  LO type from _.rxg_ file: `*fixed*` or `*range*`
-* `_lo1_` -- first LO value from _.rxg_ file, MHz
-* `_lo2_` -- second LO value from _.rxg_ file, if present, MHz
-* `_year_` -- the year from the date in the _.rxg_ file
-* `_month_` -- the month from the date in the _.rxg_ file
-* `_day_`  --  the day from the date in the _.rxg_ file
-* `_pol1_` --   first polarization from the _.rxg_ file
-* `_dpfu1_` -- DPFU of the first polarization in the _.rxg_ file
-* `_pol2_` -- second polarization from the _.rxg_ file, if present
-* `_dpfu2_` -- DPFU of the second polarization in the _.rxg_ file, if present
+[frame=none,grid=none]
+[cols="1,8"]
+|===
+a| `rxg` |  literal text, `rxg`, to indicate this line has _.rxg_ file information for the LO _chan_
+a| `_file_` |  name of the _.rxg_ file that matched the LO value; `*undefined*` if there was no match, in that case the remaining fields are omitted
+a| `_type_` |  LO type from _.rxg_ file: `*fixed*` or `*range*`
+a| `_lo1_` | first LO value from _.rxg_ file, MHz
+a| `_lo2_` | second LO value from _.rxg_ file, if present, MHz
+a| `_year_` | the year from the date in the _.rxg_ file
+a| `_month_` | the month from the date in the _.rxg_ file
+a| `_day_`  |  the day from the date in the _.rxg_ file
+a| `_pol1_` |   first polarization from the _.rxg_ file
+a| `_dpfu1_` | DPFU of the first polarization in the _.rxg_ file
+a| `_pol2_` | second polarization from the _.rxg_ file, if present
+a| `_dpfu2_` | DPFU of the second polarization in the _.rxg_ file, if present
+|===
 
 ==== Comments
 

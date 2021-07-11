@@ -29,9 +29,9 @@ while line:
         equip=m.group(2)
     f=open(name + '.adoc','w+')
     f.write('= ' + name + '(___)'  + '\n')
-    f.write('FS Development Team, Copyright NVI, Inc. 2021\n')
+    f.write('FS Contributors, Copyright NVI, Inc., 2021\n')
     f.write('version\n')
-    f.write(':doctype: manpage' + '\n')
+#    f.write(':doctype: manpage' + '\n')
     f.write(':manmanual: SNAP COMMANDS\n')
     f.write(':mansource: FS Documentation\n')
     f.write(':man-linkstyle: pass:[blue R < >]' + '\n')
@@ -54,7 +54,15 @@ while line:
                 pass
             elif re.match(r'^\[subs="\+quotes"\]',line):
                 pass
+            elif re.match(r'^\[cols=.*\]',line):
+                pass
+            elif re.match(r'^\|===',line):
+                pass
+            elif re.match(r'^\[.*frame.*\]',line):
+                pass
             else:
+                line=re.sub(r'^a\|',r'*',line)
+                line=re.sub(r'\|',r'--',line)
                 line=re.sub(r'`([_*])',r'\1',line)
                 line=re.sub(r'([_*])`',r'\1',line)
                 f.write(line.replace("`","*") + '\n')
