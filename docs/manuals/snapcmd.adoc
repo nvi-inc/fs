@@ -1,67 +1,64 @@
-= lo(a__)
+= SNAP Commands
+W. E. Himwich, N. R. Vandenberg
+FS Operaton Manual - Version 10.0.1 July 1 2021
 
-:doctype: manpage
-:manmanual: LO
-:mansource: LO
-:man-linkstyle: pass:[blue R < >]
+== SNAP Command Descriptions
 
-== NAME
+=== lo - LO frequencies
 
-lo - LO frequencies (all racks)
+==== Syntax
 
-== Synopsis
+[subs="+quotes"]
+....
+lo=_chan_,_freq_,_sb_,_pol_,_pcspace_,_pcoff_
+....
 
+==== Response
 
-lo= _chan_, _freq_, _sb_, _pol_, _pcspace_, _pcoff_
+[subs="+quotes"]
+....
+lo/_chan_,_freq_,_sb_,_pol_,_pcspace_,_pcoff_
+....
 
-== RESPONSE
+[subs="+quotes"]
+....
+lo/rxg,_chan_,_freq_,_pol_,_file_,_type_,_lo1_,_lo2_,_year_,_month_,_day_,_pol1_,_dpfu1_,_pol2_,_dpfu2_
+....
 
-lo/_chan_, _freq_, _sb_, _pol_, _pcspace_, _pcoff_
+==== Settable parameters
 
-lo/rxg, _chan_, _freq_, _pol_, _file_, _type_, _lo1_, _lo2_, _year_, _month_, _day_, _pol1_, _dpfu1_, _pol2_, _dpfu2_
-
-== SETTABLE PARAMETERS
-
-* _chan_ --  lo__X__, where _X_ is one of:
-+
-`1`, `2`, or `3` for Mark III/IV/5 and K-4,
-+
-`a`, `b`, `c`, or `d` for VLBA/4/5
-+
-`1`, `2`, `3`, or `4` for LBA/4,
-+
-`a`, `b`, `c`, `d`, `2a`, `2b`, `2c`, or `2d` for DBBC
-+
-`a0`, `a1`, `b0`, `b1`, `c0`, `c1`, `d0`, or `d1` for RDBE
-+
-`a`, `b`, `c`, `d`, `e`, `f`, `g`, or `h` for DBBC3
-+
-`1`-`8` for all others.
-+
+* `_chan_` --  `**lo**__X__`, where `_X_` is one of: +
+`*1*`, `*2*`, or `*3*` for Mark III/IV/5 and K-4, +
+`*a*`, `*b*`, `*c*`, or `*d*` for VLBA/4/5 +
+`*1*`, `*2*`, `*3*`, or `*4*` for LBA/4, +
+`*a*`, `*b*`, `*c*`, `*d*`, `*2a*`, `*2b*`, `*2c*`, or `*2d*` for DBBC +
+`*a0*`, `*a1*`, `*b0*`, `*b1*`, `*c0*`, `*c1*`, `*d0*`, or `*d1*` for RDBE +
+`*a*`, `*b*`, `*c*`, `*d*`, `*e*`, `*f*`, `*g*`, or `*h*` for DBBC3 +
+`*1*`-`*8*` for all others.  +
 No default. No previous value available.
 
-* _freq_ --  LO frequency for this channel, MHz. No default. No previous value available.
-* _sb_ -- Net sideband for this channel, `unknown`, `usb` or `lsb`.  Default is `unknown`.
-* _pol_ -- Polarization for this channel, `unknown`, `rcp`, or `lcp`.  Default is `unknown`.
-* _pcspace_ --  Spacing of phase-cal rails for this channel, MHz, `unknown`, or `off`. Default is `unknown`.
-* _pcoff_ -- First phase-cal rail frequency for this IF if not equal to the spacing, MHz. Default `0.0`. This offset is specified relative to DC in the IF.
+* `_freq_` --  LO frequency for this channel, MHz. No default. No previous value available.
+* `_sb_` -- Net sideband for this channel, `*unknown*`, `*usb*` or `*lsb*`.  Default is `*unknown*`.
+* `_pol_` -- Polarization for this channel, `*unknown*`, `*rcp*`, or `*lcp*`.  Default is `*unknown*`.
+* `_pcspace_` --  Spacing of phase-cal rails for this channel, MHz, `*unknown*`, or `*off*`. Default is `*unknown*`.
+* `_pcoff_` -- First phase-cal rail frequency for this IF if not equal to the spacing, MHz. Default `*0.0*`. This offset is specified relative to DC in the IF.
 
-== MONITOR-ONLY PARAMETERS
+==== Monitor-only parameters
 
 * `rxg` --  literal text, `rxg`, to indicate this line has _.rxg_ file information for the LO _chan_
-* _file_ --  name of the _.rxg_ file that matched the LO value; `undefined` if there was no match, in that case the remaining fields are omitted
-* _type_ --  LO type from _.rxg_ file: `fixed` or `range`
-* _lo1_ -- first LO value from _.rxg_ file, MHz
-* _lo2_ -- second LO value from _.rxg_ file, if present, MHz
-* _year_ -- the year from the date in the _.rxg_ file
-* _month_ -- the month from the date in the _.rxg_ file
-* _day_  --  the day from the date in the _.rxg_ file
-* _pol1_ --   first polarization from the _.rxg_ file
-* _dpfu1_ -- DPFU of the first polarization in the _.rxg_ file
-* _pol2_ -- second polarization from the _.rxg_ file, if present
-* _dpfu2_ -- DPFU of the second polarization in the _.rxg_ file, if present
+* `_file_` --  name of the _.rxg_ file that matched the LO value; `*undefined*` if there was no match, in that case the remaining fields are omitted
+* `_type_` --  LO type from _.rxg_ file: `*fixed*` or `*range*`
+* `_lo1_` -- first LO value from _.rxg_ file, MHz
+* `_lo2_` -- second LO value from _.rxg_ file, if present, MHz
+* `_year_` -- the year from the date in the _.rxg_ file
+* `_month_` -- the month from the date in the _.rxg_ file
+* `_day_`  --  the day from the date in the _.rxg_ file
+* `_pol1_` --   first polarization from the _.rxg_ file
+* `_dpfu1_` -- DPFU of the first polarization in the _.rxg_ file
+* `_pol2_` -- second polarization from the _.rxg_ file, if present
+* `_dpfu2_` -- DPFU of the second polarization in the _.rxg_ file, if present
 
-== COMMENTS
+==== Comments
 
 This command specifies the characteristics of each IF channel.
 
@@ -74,20 +71,20 @@ upconverter should be included.  In particular, the values for the
 Mark III/IV/5 IF3 channel should include the effect of the internal
 IF3 mixer, if it is being used.
 
-The LO frequencies are used by the pcalr and pcald programs to
-calculate the frequencies of the phase calibrator tones. Pcalr has not
-been tested with spacings other than 1 MHz.
+The LO frequencies are used by the _pcalr_ and _pcald_ programs to
+calculate the frequencies of the phase calibrator tones. _pcalr_ has
+not been tested with spacings other than 1 MHz.
 
-The FIVEPT and ONOFF commands use the values to look-up the source
+The `fivept` and `onoff` commands use the values to look-up the source
 flux, antenna gains and Tcal values for the the selected
-detectors. The CALTEMP command uses it to look up the Tcal values.
+detectors. The `caltemp` command uses it to look up the T~cal~ values.
 
-For the DBBBC, the second four LOs (`2a`, `2b`, `2c`, `2d`) are not used for
-anything but populating the internal LO array.
+For the DBBBC, the second four LOs (`2a`, `2b`, `2c`, `2d`) are not
+used for anything but populating the internal LO array.
 
-An lo= with no parameters clears all LO values.
+An `*lo=*` with no parameters clears all LO values.
 
-The monitor form of `lo` shows all defined LO values.
+The monitor form, `*lo*`, shows all defined LO values.
 
 The `lo/rxg,...` line is displayed for each LO as it is set
 (commanded) and for each LO in monitor responses. This is intended to
@@ -108,4 +105,4 @@ starting as `0`) is passed as the value of fourth element of the run
 parameter array (usually `ip[3]` in C).
 
 In the future, for K4 type 1 rack, the range of LO values should be
-`1`-`4`, for K4 type 2 rack, `1`-`16`.
+`*1*`-`*4*`, for K4 type 2 rack, `*1*`-`*16*`.
