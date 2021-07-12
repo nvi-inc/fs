@@ -1,8 +1,11 @@
-
+import sys
 import fileinput
 import re
 
 filepath='snapcmd.adoc'
+
+if(len(sys.argv)) > 1:
+    filepath=sys.argv[1]
 
 fp=open(filepath)
 line=fp.readline()
