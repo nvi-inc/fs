@@ -1,13 +1,35 @@
+import os
 import sys
 import fileinput
 import re
+from datetime import date
 
+def ext(equip):
+    if equip == '':
+        return '___'
+    elif equip == 'DBBC racks':
+        return 'd__'
+#
+def finish_file(name,extension):
+    os.system('asciidoctor -b manpage '+name+'.adoc')
+    fi=open(name+'.'+extension)
+    fo=open(name+'.man.'+extension,'w+')
+    line=fi.readline()
+    while line:
+        line=re.sub(r'^(\.TH "[^"]+" ")[^"]+(".*)',r'\1FS\2',line)
+        fo.write(line)
+        line=fi.readline()
+    fi.close()
+    fo.close()
+    os.remove(name+'.adoc')
+    os.remove(name+'.'+extension)
+#
 filepath='snapcmd.adoc'
 
 if(len(sys.argv)) > 1:
     filepath=sys.argv[1]
 
-fp=open(filepath)
+fp=open(filepath,'r')
 line=fp.readline()
 while line:
     line = line.rstrip()
@@ -16,6 +38,7 @@ while line:
        continue
     break
 
+extension=''
 line=fp.readline()
 while line:
     line = line.rstrip()
@@ -23,6 +46,9 @@ while line:
     if not m:
         line=fp.readline()
         continue
+    if extension:
+        f.close()
+        finish_file(name,extension)
     name=m.group(1)
     descrip=m.group(2)
     m=re.search('^(.+) *\(([^)]+)\)',descrip)
@@ -31,9 +57,11 @@ while line:
     if m:
         descrip=m.group(1).rstrip()
         equip=m.group(2)
+    extension = ext(equip)
     f=open(name + '.adoc','w+')
-    f.write('= ' + name + '(___)'  + '\n')
-    f.write('FS Contributors, Copyright NVI, Inc., 2021\n')
+    f.write('= ' + name + '('+extension+')'  + '\n')
+    f.write('FS Contributors, Copyright NVI, Inc., '\
+            +str(date.today().year)+'\n')
     f.write('version\n')
 #    f.write(':doctype: manpage' + '\n')
     f.write(':manmanual: SNAP COMMANDS\n')
@@ -90,3 +118,8 @@ while line:
             continue
         else:
             break
+#
+# clean-up at EOF
+if extension:
+    f.close()
+    finish_file(name,extension)
