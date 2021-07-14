@@ -19,14 +19,15 @@ while line:
 line=fp.readline()
 while line:
     line = line.rstrip()
-    m=re.match(r'^=== *(\S+) *- *(.*)$',line)
+    m=re.search(r'^=== *(\S+) *- *(.*)$',line)
     if not m:
         line=fp.readline()
         continue
     name=m.group(1)
     descrip=m.group(2)
-    m=re.match('^(.+) *\(([^)]+)\)',descrip)
+    m=re.search('^(.+) *\(([^)]+)\)',descrip)
     equip=''
+    parameters=0
     if m:
         descrip=m.group(1).rstrip()
         equip=m.group(2)
@@ -49,25 +50,40 @@ while line:
     line=fp.readline()
     while line:
         line = line.rstrip()
-        m=re.match(r'^=== *(\S+) *- *(.*)$',line)
+        m=re.search(r'^=== *(\S+) *- *(.*)$',line)
         if not m:
-            if re.match(r'^====',line):
+            if re.search(r'^==== ',line):
+                if re.search(r'Comments',line):
+                    parameters = 0
+                elif re.search(r'Settable Parameters',line):
+                    parameters = 1
                 f.write(line.replace("==","",1) + '\n')
-            elif re.match(r'^\.\.\.\.',line):
+            elif re.search(r'^\.\.\.\.',line):
                 pass
-            elif re.match(r'^\[subs="\+quotes"\]',line):
+            elif re.search(r'^\|===',line) and parameters:
+#               remove tables in parameters
                 pass
-            elif re.match(r'^\[cols=.*\]',line):
-                pass
-            elif re.match(r'^\|===',line):
-                pass
-            elif re.match(r'^\[.*frame.*\]',line):
-                pass
+
             else:
-                line=re.sub(r'^a\|',r'*',line)
-                line=re.sub(r'\|',r'--',line)
+                if parameters:
+#                   remove tables in parameters
+                    line=re.sub(r'^a\|',r'*',line)
+                    line=re.sub(r'\|',r'--',line)
+
+#               remove curly quotes
+                line=re.sub(r'(["\'])`',r'\1',line)
+                line=re.sub(r'`(["\'])',r'\1',line)
+
+#               fix unconstrained italics at end of monospace token
+#               like ``lo__X__``
+#               there is an extra back tick since the next block will remove it
+                line=re.sub(r'__(.*)__``',r'```_\1_',line)
+
+
+#               remove monospace around bold/underline
                 line=re.sub(r'`([_*])',r'\1',line)
                 line=re.sub(r'([_*])`',r'\1',line)
+#               change monospace to bold
                 f.write(line.replace("`","*") + '\n')
 #                f.write(line + '\n')
             line=fp.readline()

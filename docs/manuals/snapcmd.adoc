@@ -5,8 +5,159 @@ FS Operations Manual - Version 10.0.1 - July 1 2021
 :sectnums:
 
 == SNAP Command Descriptions
-
 :sectnums!:
+
+<<<
+
+=== form - Sampler mode (DBBC racks)
+
+==== Syntax
+
+[subs="+quotes"]
+....
+form=_mode_,_test_
+....
+
+==== Response
+
+[subs="+quotes"]
+....
+form/_mode_,_test_
+....
+
+==== Settable Parameters
+
+[frame=none,grid=none]
+[cols="1,8"]
+|===
+a| `_mode_` | output mode +
+DDC: `astro`, `geo`, `wastro`, `test`, `lba`, `astro2`, `astro3`, or `geo2` +
+PFB: `flex`, `full`, `full_auto`, or `spol`. +
+No default. +
+See the <<formd,Comments>> for special cases and output pin assignments.
+
+a| `_test_` | DDC only Test mode: `0`, `1`, `bin`, `tvg`. +
+No default. +
+Ignored unless `_mode_` is `test`. Not available for readback for version `v100`.
+|===
+
+==== Monitor-only Parameters
+
+None
+
+==== [[formd]]Comments
+Special cases:
+
+* DDC personality:
+
+** Version _v100_ does not support monitor for the `_test_` values.
+
+** Versions before _v104_ do not support `astro2`.
+
+** Versions before _v105_ do not support `astro2` on VSI2.
+
+** Only versions with suffixes _e_ and _f_, version _v105_ or greater, support `astro3`.
+
+** Versions with suffixes _e_ and _f_, version _v105_ or greater, use only VSI1 and
+support only `astro3` and `_test_` modes.
+
+** Only versions _v106_ greater, support `geo2`.
+
+* PFB personality:
+
+** Only the `flex` mode is supported by the FS. The output is
+determined by preceeding `vsi1=...` and `vsi2=...` commands. Although
+the other PFB modes are not suppported by the FS, the `form` command
+will accept the `full`, `full_auto`, and `spol` modes for "`off-label
+use.`"
+
+The following tables give the pin assignments for the DDC modes.
+
+.VSI1 output pin assignments for the DDC modes
+[options="header,footer"]
+[cols=">m,>m,>m,>m,>m,>m,>m,^m,^m,<m,<m,>m"]
+|===
+|VSI1|geo|astro|wastro|astro2|astro3|lba|test=0|test=1|test=bin|test=tvg|geo2
+
+| 1 | 1us|  1us|   1us|   1us|  1us |1us|  0   |  1   | BinC0  |  TVG0  | 1us
+| 2 | 1um|  1um|   1um|   1um|  1um |1um|  0   |  1   | BinC1  |  TVG1  | 1um
+| 3 | 2us|  2us|   2us|   2us|  3us |2us|  0   |  1   | BinC2  |  TVG2  | 2us
+| 4 | 2um|  2um|   2um|   2um|  3um |2um|  0   |  1   | BinC3  |  TVG3  | 2um
+| 5 | 3us|  3us|   3us|   3us|  5us |5us|  0   |  1   | BinC4  |  TVG4  | 3us
+| 6 | 3um|  3um|   3um|   3um|  5um |5um|  0   |  1   | BinC5  |  TVG5  | 3um
+| 7 | 4us|  4us|   4us|   4us|  7us |6us|  0   |  1   | BinC6  |  TVG6  | 4us
+| 8 | 4um|  4um|   4um|   4um|  7um |6um|  0   |  1   | BinC7  |  TVG7  | 4um
+| 9 | 5us|  5us|   5us|   9us|  9us |3us|  0   |  1   | BinC8  |  TVG8  | 5us
+|10 | 5um|  5um|   5um|   9um|  9um |3um|  0   |  1   | BinC9  |  TVG9  | 5um
+|11 | 6us|  6us|   6us|  10us| 11us |4us|  0   |  1   | BinC10 |  TVG10 | 6us
+|12 | 6um|  6um|   6um|  10um| 11um |4um|  0   |  1   | BinC11 |  TVG11 | 6um
+|13 | 7us|  7us|   7us|  11us| 13us |7us|  0   |  1   | BinC12 |  TVG12 | 7us
+|14 | 7um|  7um|   7um|  11um| 13um |7um|  0   |  1   | BinC13 |  TVG13 | 7um
+|15 | 8us|  8us|   8us|  12us| 15us |8us|  0   |  1   | BinC14 |  TVG14 | 8us
+|16 | 8um|  8um|   8um|  12um| 15um |8um|  0   |  1   | BinC15 |  TVG15 | 8um
+|17 | 1ls|  1ls|   1ls|   1ls|  1ls |1ls|  0   |  1   | BinC16 |  TVG16 | 9us
+|18 | 1lm|  1lm|   1lm|   1lm|  1lm |1lm|  0   |  1   | BinC17 |  TVG17 | 9um
+|19 | 8ls|  2ls|   2ls|   2ls|  3ls |2ls|  0   |  1   | BinC18 |  TVG18 |10us
+|20 | 8lm|  2lm|   2lm|   2lm|  3lm |2lm|  0   |  1   | BinC19 |  TVG19 |10um
+|21 | 9us|  3ls|   3ls|   3ls|  5ls |5ls|  0   |  1   | BinC20 |  TVG20 |11us
+|22 | 9um|  3lm|   3lm|   3lm|  5lm |5lm|  0   |  1   | BinC21 |  TVG21 |11um
+|23 |10us|  4ls|   4ls|   4ls|  7ls |6ls|  0   |  1   | BinC22 |  TVG22 |12us
+|24 |10um|  4lm|   4lm|   4lm|  7lm |6lm|  0   |  1   | BinC23 |  TVG23 |12um
+|25 |11us|  5ls|   5ls|   9ls|  9ls |3ls|  0   |  1   | BinC24 |  TVG24 |13us
+|26 |11um|  5lm|   5lm|   9lm|  9lm |3lm|  0   |  1   | BinC25 |  TVG25 |13um
+|27 |12us|  6ls|   6ls|  10ls| 11ls |4ls|  0   |  1   | BinC26 |  TVG26 |14us
+|28 |12um|  6lm|   6lm|  10lm| 11lm |4lm|  0   |  1   | BinC27 |  TVG27 |14um
+|29 |13us|  7ls|   7ls|  11ls| 13ls |7ls|  0   |  1   | BinC28 |  TVG28 |15us
+|30 |13um|  7lm|   7lm|  11lm| 13lm |7lm|  0   |  1   | BinC29 |  TVG29 |15um
+|31 |14us|  8ls|   8ls|  12ls| 15lm |8ls|  0   |  1   | BinC30 |  TVG30 |16us
+|32 |14um|  8lm|   8lm|  12lm| 15ls |8lm|  0   |  1   | BinC31 |  TVG31 |16um
+
+|VSI1|geo|astro|wastro|astro2|astro3|lba|test=0|test=1|test=bin|test=tvg|geo2
+|===
+
+.VSI2 output pin assignments for the DDC modes
+[options="header,footer"]
+[cols=">m,>m,>m,>m,>m,>m,>m,^m,^m,<m,<m,>m"]
+|===
+|VSI1|geo|astro|wastro|astro2|astro3|lba|test=0|test=1|test=bin|test=tvg|geo2
+
+| 1 | 1us|  1us|   9us|   1us|      |1us|  0   |  1   | BinC0  |  TVG0  | 1ls
+| 2 | 1um|  1um|   9um|   1um|      |1um|  0   |  1   | BinC1  |  TVG1  | 1lm
+| 3 | 2us|  2us|  10us|   2us|      |2us|  0   |  1   | BinC2  |  TVG2  | 2ls
+| 4 | 2um|  2um|  10um|   2um|      |2um|  0   |  1   | BinC3  |  TVG3  | 2lm
+| 5 | 3us|  3us|  11us|   3us|      |5us|  0   |  1   | BinC4  |  TVG4  | 3ls
+| 6 | 3um|  3um|  11um|   3um|      |5um|  0   |  1   | BinC5  |  TVG5  | 3lm
+| 7 | 4us|  4us|  12us|   4us|      |6us|  0   |  1   | BinC6  |  TVG6  | 4ls
+| 8 | 4um|  4um|  12um|   4um|      |6um|  0   |  1   | BinC7  |  TVG7  | 4lm
+| 9 | 5us|  5us|  13us|   9us|      |3us|  0   |  1   | BinC8  |  TVG8  | 5ls
+|10 | 5um|  5um|  13um|   9um|      |3um|  0   |  1   | BinC9  |  TVG9  | 5lm
+|11 | 6us|  6us|  14us|  10us|      |4us|  0   |  1   | BinC10 |  TVG10 | 6ls
+|12 | 6um|  6um|  14um|  10um|      |4um|  0   |  1   | BinC11 |  TVG11 | 6lm
+|13 | 7us|  7us|  15us|  11us|      |7us|  0   |  1   | BinC12 |  TVG12 | 7ls
+|14 | 7um|  7um|  15um|  11um|      |7um|  0   |  1   | BinC13 |  TVG13 | 7lm
+|15 | 8us|  8us|  16us|  12us|      |8us|  0   |  1   | BinC14 |  TVG14 | 8ls
+|16 | 8um|  8um|  16um|  12um|      |8um|  0   |  1   | BinC15 |  TVG15 | 8lm
+|17 | 1ls|  1ls|   9ls|   1ls|      |1ls|  0   |  1   | BinC16 |  TVG16 | 9ls
+|18 | 1lm|  1lm|   9lm|   1lm|      |1lm|  0   |  1   | BinC17 |  TVG17 | 9lm
+|19 | 8ls|  2ls|  10ls|   2ls|      |2ls|  0   |  1   | BinC18 |  TVG18 |10ls
+|20 | 8lm|  2lm|  10lm|   2lm|      |2lm|  0   |  1   | BinC19 |  TVG19 |10lm
+|21 | 9us|  3ls|  11ls|   3ls|      |5ls|  0   |  1   | BinC20 |  TVG20 |11ls
+|22 | 9um|  3lm|  11lm|   3lm|      |5lm|  0   |  1   | BinC21 |  TVG21 |11lm
+|23 |10us|  4ls|  12ls|   4ls|      |6ls|  0   |  1   | BinC22 |  TVG22 |12ls
+|24 |10um|  4lm|  12lm|   4lm|      |6lm|  0   |  1   | BinC23 |  TVG23 |12lm
+|25 |11us|  5ls|  13ls|   9ls|      |3ls|  0   |  1   | BinC24 |  TVG24 |13ls
+|26 |11um|  5lm|  13lm|   9lm|      |3lm|  0   |  1   | BinC25 |  TVG25 |13lm
+|27 |12us|  6ls|  14ls|  10ls|      |4ls|  0   |  1   | BinC26 |  TVG26 |14ls
+|28 |12um|  6lm|  14lm|  10lm|      |4lm|  0   |  1   | BinC27 |  TVG27 |14lm
+|29 |13us|  7ls|  15ls|  11ls|      |7ls|  0   |  1   | BinC28 |  TVG28 |15ls
+|30 |13um|  7lm|  15lm|  11lm|      |7lm|  0   |  1   | BinC29 |  TVG29 |15lm
+|31 |14us|  8ls|  16ls|  12ls|      |8ls|  0   |  1   | BinC30 |  TVG30 |16ls
+|32 |14um|  8lm|  16lm|  12lm|      |8lm|  0   |  1   | BinC31 |  TVG31 |16lm
+
+|VSI1|geo|astro|wastro|astro2|astro3|lba|test=0|test=1|test=bin|test=tvg|geo2
+|===
+
+<<<
 
 === lo - LO Configuration
 
@@ -29,35 +180,35 @@ lo/_chan_,_freq_,_sb_,_pol_,_pcspace_,_pcoff_
 lo/rxg,_chan_,_freq_,_pol_,_file_,_type_,_lo1_,_lo2_,_year_,_month_,_day_,_pol1_,_dpfu1_,_pol2_,_dpfu2_
 ....
 
-==== Settable parameters
+==== Settable Parameters
 
 [frame=none,grid=none]
 [cols="1,8"]
 |===
-a| `_chan_` |  `**lo**__X__`, where `_X_` is one of: +
-`*1*`, `*2*`, or `*3*` for Mark III/IV/5 and K-4, +
-`*a*`, `*b*`, `*c*`, or `*d*` for VLBA/4/5 +
-`*1*`, `*2*`, `*3*`, or `*4*` for LBA/4, +
-`*a*`, `*b*`, `*c*`, `*d*`, `*2a*`, `*2b*`, `*2c*`, or `*2d*` for DBBC +
-`*a0*`, `*a1*`, `*b0*`, `*b1*`, `*c0*`, `*c1*`, `*d0*`, or `*d1*` for RDBE +
-`*a*`, `*b*`, `*c*`, `*d*`, `*e*`, `*f*`, `*g*`, or `*h*` for DBBC3 +
-`*1*`-`*8*` for all others.  +
+a| `_chan_` |  ``lo__X__``, where `_X_` is one of: +
+`1`, `2`, or `3` for Mark III/IV/5 and K-4, +
+`a`, `b`, `c`, or `d` for VLBA/4/5 +
+`1`, `2`, `3`, or `4` for LBA/4, +
+`a`, `b`, `c`, `d`, `2a`, `2b`, `2c`, or `2d` for DBBC +
+`a0`, `a1`, `b0`, `b1`, `c0`, `c1`, `d0`, or `d1` for RDBE +
+`a`, `b`, `c`, `d`, `e`, `f`, `g`, or `h` for DBBC3 +
+`1`-`8` for all others.  +
 No default. No previous value available.
 a| `_freq_` |  LO frequency for this channel, MHz. No default. No previous value available.
-a| `_sb_` | Net sideband for this channel, `*unknown*`, `*usb*` or `*lsb*`.  Default is `*unknown*`.
-a| `_pol_` | Polarization for this channel, `*unknown*`, `*rcp*`, or `*lcp*`.  Default is `*unknown*`.
-a| `_pcspace_` |  Spacing of phase-cal rails for this channel, MHz, `*unknown*`, or `*off*`. Default is `*unknown*`.
-a| `_pcoff_` | First phase-cal rail frequency for this IF if not equal to the spacing, MHz. Default `*0.0*`. This offset is specified relative to DC in the IF.
+a| `_sb_` | Net sideband for this channel, `unknown`, `usb` or `lsb`.  Default is `unknown`.
+a| `_pol_` | Polarization for this channel, `unknown`, `rcp`, or `lcp`.  Default is `unknown`.
+a| `_pcspace_` |  Spacing of phase-cal rails for this channel, MHz, `unknown`, or `off`. Default is `unknown`.
+a| `_pcoff_` | First phase-cal rail frequency for this IF if not equal to the spacing, MHz. Default `0.0`. This offset is specified relative to DC in the IF.
 |===
 
-==== Monitor-only parameters
+==== Monitor-only Parameters
 
 [frame=none,grid=none]
 [cols="1,8"]
 |===
 a| `rxg` |  literal text, `rxg`, to indicate this line has _.rxg_ file information for the LO _chan_
-a| `_file_` |  name of the _.rxg_ file that matched the LO value; `*undefined*` if there was no match, in that case the remaining fields are omitted
-a| `_type_` |  LO type from _.rxg_ file: `*fixed*` or `*range*`
+a| `_file_` |  name of the _.rxg_ file that matched the LO value; `undefined` if there was no match, in that case the remaining fields are omitted
+a| `_type_` |  LO type from _.rxg_ file: `fixed` or `range`
 a| `_lo1_` | first LO value from _.rxg_ file, MHz
 a| `_lo2_` | second LO value from _.rxg_ file, if present, MHz
 a| `_year_` | the year from the date in the _.rxg_ file
@@ -116,4 +267,5 @@ starting as `0`) is passed as the value of fourth element of the run
 parameter array (usually `ip[3]` in C).
 
 In the future, for K4 type 1 rack, the range of LO values should be
-`*1*`-`*4*`, for K4 type 2 rack, `*1*`-`*16*`.
+`1`-`4`, for K4 type 2 rack, `1`-`16`.
+

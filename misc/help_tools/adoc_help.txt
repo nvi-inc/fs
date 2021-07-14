@@ -1,0 +1,72 @@
+= Make man pages
+
+. _asciidoctor_ version
+
+.. Works pretty well with _asciidoctor_ 2.0.15 (Mac)
+
+.. Does not work so well with _asciidoctor_ 1.5.4 (Debian Stretch)
+
+. Uses _snapcmd.adoc_ as source
+
+.. Level two section is command name/description/equip
+
+.. Level three sections: Syntax, Response, Settable Parameters, Monitor-only Parameters, Comments
+
+.. Syntax and Response use code blocks, with parameters italic
+
+... Bold is very rare, if ever
+
+... Bold italic is never used
+
+.. Settable Parameters and Monitor-only parameters use tables with two columns, no grid or frame
+
+... Those do not translate well to man pages, so _adoc2help_ converts this these to bullet points
+
+... First cell on a line (parameter) are defined with `a| ` at the start of each line
+
+... Vertical bar separating first and second cells has a space on each side
+
+... Second cell on a line are descriptions
+
+... Second cell lines end with ' +' to force new-lines
+
+..  In general:
+
+...  No unconstrained font settings, e.g., no +++__a__b+++, +++**a**b+++, or +++``a``b+++, except:
+
+.... A monospace with constrained italics can be used if the entire token is enclosed
+in double back ticks and the unconstrained italics are at the end, e.g, +++``lo__X__``+++. It may be possible
+to add more cases.
+
+...  No combination inline fonts except monospace and italics/bold; e.g, +++`_a_`+++ or +++`*a*`+++
+
+... Monospace bold should not be used. It does not translate to man pages as visually different
+from bold. However, if makes the html output better it can be used.
+
+. _adoc2help_
+
+.. Extracts  command description from main document
+
+.. Generates _.adoc_ source for man page _troff_ source generation
+
+... Adds required boiler plate
+
+... Fixes up certain font issue for manpage output
+
+.. Runs _asciidoctor_ on generated _.adoc_ source
+
+.. Changes manual section to `FS` in _troff_ man page source
+
+.. Removes intermediate files
+
+. Man pages
+
+.. Syntax and Response sections are considered code blocks
+
+.. In general italics are replaced with underline.
+
+.. man pages are all monospace, so for _.adoc_ source that is:
+
+... Inline monospace -- is replaced with bold
+
+... Monospace and italics/bold --  is converted to underline/bold
