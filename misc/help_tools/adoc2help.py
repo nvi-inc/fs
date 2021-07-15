@@ -9,6 +9,8 @@ def ext(equip):
         return '___'
     elif equip == 'DBBC racks':
         return 'd__'
+    elif equip == 'VLBA, VLBA4 racks':
+        return 'w__'
 #
 def finish_file(name,extension):
     os.system('asciidoctor -b manpage '+name+'.adoc')
@@ -23,6 +25,10 @@ def finish_file(name,extension):
     fo.close()
     os.remove(name+'.adoc')
     os.remove(name+'.'+extension)
+#
+    if name == 'bbcnn' and extension == 'w__':
+        for i in range(1,16):
+            os.symlink(name+'.man.'+extension,'bbc'+f'{i:02d}'+'.man.'+extension)
 #
 filepath='snapcmd.adoc'
 
@@ -107,13 +113,17 @@ while line:
 #               there is an extra back tick since the next block will remove it
                 line=re.sub(r'__(.*)__``',r'```_\1_',line)
 
-
-#               remove monospace around bold/underline
+#               remove monospace around bold/italics(underline)
                 line=re.sub(r'`([_*])',r'\1',line)
                 line=re.sub(r'([_*])`',r'\1',line)
-#               change monospace to bold
-                f.write(line.replace("`","*") + '\n')
-#                f.write(line + '\n')
+
+#               change bold italics to bold for safety
+                line=re.sub(r'\*_([^_]+)_\*',r'*\1*',line)
+
+#               change plain monospace to bold
+                line=re.sub(r'`',r'*',line)
+
+                f.write(line + '\n')
             line=fp.readline()
             continue
         else:

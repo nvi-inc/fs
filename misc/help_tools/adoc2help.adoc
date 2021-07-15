@@ -22,26 +22,38 @@
 
 ... Those do not translate well to man pages, so _adoc2help_ converts this these to bullet points
 
-... First cell on a line (parameter) are defined with `a| ` at the start of each line
+... First cell in a row (parameter) are defined with `a| ` at the start of each line
 
-... Vertical bar separating first and second cells has a space on each side
+... Vertical bar separating first and second cells has spaces on each
+side
 
-... Second cell on a line are descriptions
+... Second cell in a row are descriptions
 
-... Second cell lines end with ' +' to force new-lines
+... Second cell lines end with ` +` to force new-lines
 
-..  In general:
+..  In general for inline (non-code block) fonts:
 
-...  No unconstrained font settings, e.g., no +++__a__b+++, +++**a**b+++, or +++``a``b+++, except:
+...  The only combined fonts are italics _or_ bold with monospace,
+e.g, +++`_a_`+++ _or_ +++`*a*`+++. These are converted by _adoc2help_ to
+italics(underline)/bold since the _asciidoc_ `manpage` backend does
+not support them (with monospace).
 
-.... A monospace with constrained italics can be used if the entire token is enclosed
-in double back ticks and the unconstrained italics are at the end, e.g, +++``lo__X__``+++. It may be possible
-to add more cases.
+... Bold italics does not work correctly with the _asciidoc_ `manpage`
+backend; _adoc2help_ converts bold italics to bold for safety.
 
-...  No combination inline fonts except monospace and italics/bold; e.g, +++`_a_`+++ or +++`*a*`+++
+... Monospace is converted to bold by _adoc2help_.
 
-... Monospace bold should not be used. It does not translate to man pages as visually different
-from bold. However, if makes the html output better it can be used.
+... Bold monospace should be avoided. It does not translate to _man_
+pages as visually different from bold. However, it can be used if it
+makes the HTML output better.
+
+...  No unconstrained font settings, e.g., no +++__a__b+++,
++++**a**b+++, or +++``a``b+++, except:
+
+.... Monospace with constrained italics can be used if the entire
+token is enclosed in double back ticks and the unconstrained italics
+are at the end, e.g, +++``lo__X__``+++. This is converted to bold _then_
+italics (underline). It may be possible to add more cases.
 
 . _adoc2help_
 
