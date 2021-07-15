@@ -9,6 +9,8 @@ def ext(equip):
         return '___'
     elif equip == 'DBBC racks':
         return 'd__'
+    elif equip == 'VLBA, VLBA4 racks':
+        return 'w__'
 #
 def finish_file(name,extension):
     os.system('asciidoctor -b manpage '+name+'.adoc')
