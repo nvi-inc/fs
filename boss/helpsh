@@ -1,1 +1,7 @@
-xterm -name helpsh -e less $1 &
+#!/bin/bash
+name="$1"
+if [[ ! "$1" =~ \.man\. ]]; then
+    xterm -name helpsh -e less "$name" &
+else
+    xterm -name helpsh -e man "$name" &
+fi
