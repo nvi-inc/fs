@@ -19,7 +19,7 @@
 //
 
 = DRAFT FS Document Font Conventions
-Version 0.9 - June 2021
+Version 1.0 - July 2021
 
 :sectnums:
 
@@ -70,8 +70,12 @@ italics anyway.
 
 === Code blocks
 
-Code (data) blocks are usually all simple monospace, but italics may
-be useful in some cases for replaceable items.
+For code blocks of simple input _or_ output, monospace is used.
+Italics is used for replaceable items.
+
+For code blocks with both input and output, the output is shown as it
+would for a simple output. Literal user input is bold, with
+replaceable user input bold italics.
 
 === Links
 
@@ -194,13 +198,16 @@ Add backticks inside '`quotes`' to make them "`curved.`"
 
 === Code blocks
 
-Code blocks are created by indenting text, or preceding and following it with four periods.
+Code blocks are created by indenting text, or preceding and following
+it with four periods.
 
-=== Italics in code blocks
+=== Italics and bold in code blocks
 
     [subs="+quotes"]
     ....
     login: _account_
+    password: _password_
+    $ *ls* *_dir_*
     ....
 
 Results in:
@@ -208,6 +215,8 @@ Results in:
 [subs="+quotes"]
 ....
 login: _account_
+password: _password_
+$ *ls* *_dir_*
 ....
 
 === Open blocks
