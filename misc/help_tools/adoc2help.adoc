@@ -20,7 +20,7 @@
 
 .. Settable Parameters and Monitor-only parameters use tables with two columns, no grid or frame
 
-... Those do not translate well to man pages, so _adoc2help_ converts this these to bullet points
+... Those do not translate well to man pages, so _adoc2help_ converts these to description lists
 
 ... First cell in a row (parameter) are defined with `a| ` at the start of each line
 

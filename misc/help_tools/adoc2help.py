@@ -101,8 +101,8 @@ while line:
             else:
                 if parameters:
 #                   remove tables in parameters
-                    line=re.sub(r'^a\|',r'*',line)
-                    line=re.sub(r'\|',r'--',line)
+                    line=re.sub(r'^a\|',r'',line)
+                    line=re.sub(r'\|',r'::',line)
 
 #               remove curly quotes
                 line=re.sub(r'(["\'])`',r'\1',line)
