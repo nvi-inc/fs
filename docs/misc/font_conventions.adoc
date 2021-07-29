@@ -19,7 +19,7 @@
 //
 
 = DRAFT FS Document Font Conventions
-Version 1.0 - July 2021
+Version 1.1 - July 2021
 
 :sectnums:
 
@@ -120,6 +120,10 @@ typically followed by a colon. This makes the location of the anchor
 visible. The text in the link at anchor and in the reference(s) should
 be the same.
 
+** An appendix is referred to as an "`appendix`" but is otherwise
+referenced the same as a section. Sections, steps, sub-sections, and
+sub-steps in appendices are referenced the same as ones in the main
+document.
 
 === Document titles
 
@@ -353,10 +357,33 @@ correct relative path to the document. Including a reference to the
 section and the document will be helpful for those working from a
 print-out.
 
+=== Appendices
+
+Add appendices by inserting `:doctype: book` before the title of the
+document. Then before the _each_ appendix insert `[appendix]`. The
+appendix title appears as a document title (conceptually it is a new
+book). Sections start with `===` (conceptually they are sub-sections).
+Sub-sections (`====`) can be added as needed:
+
+....
+:doctype: book
+
+= Document title
+
+[appendix]
+
+= Title of appendix
+
+=== Title of section
+
+==== Title of sub-section
+
+....
+
 == Workarounds
 
 This section covers some ad hoc workarounds for issues with _asciidoctor_.
-
+:
 === Effect of references to sections in other documents on italics
 
 In some cases a reference to a section header in a different document, e.g.,:
