@@ -67,7 +67,7 @@ while line:
         equip=m.group(2)
     extension = ext(equip)
     f=open(name + '.adoc','w+')
-    f.write('= ' + name + '('+extension+')'  + '\n')
+    f.write('= ' + name + '('+extension+')\n')
     f.write('FS Contributors, Copyright NVI, Inc., '\
             +str(date.today().year)+'\n')
     f.write('version\n')
@@ -79,7 +79,7 @@ while line:
     f.write('== Name\n')
     f.write('\n')
     if equip:
-        f.write(name + ' - ' + descrip + ' ' + equip + '\n')
+        f.write(name + ' - ' + descrip + ' (' + equip + ')\n')
     else:
         f.write(name + ' - ' + descrip + '\n')
 #
