@@ -11,6 +11,8 @@ def ext(equip):
         return 'd__'
     elif equip == 'VLBA, VLBA4 racks':
         return 'w__'
+    else:
+        sys.exit("Unknown equipment type '"+equip+"', you probably need to remove *.man.* files");
 #
 def finish_file(name,extension):
     os.system('asciidoctor -b manpage '+name+'.adoc')
