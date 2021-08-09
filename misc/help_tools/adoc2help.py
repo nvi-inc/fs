@@ -83,6 +83,7 @@ while line:
     else:
         f.write(name + ' - ' + descrip + '\n')
 #
+    code_block_ok = 0
     line=fp.readline()
     while line:
         line = line.rstrip()
@@ -91,10 +92,11 @@ while line:
             if re.search(r'^==== ',line):
                 if re.search(r'Comments',line):
                     parameters = 0
+                    code_block_ok = 1
                 elif re.search(r'Settable Parameters',line):
                     parameters = 1
                 f.write(line.replace("==","",1) + '\n')
-            elif re.search(r'^\.\.\.\.',line):
+            elif re.search(r'^\.\.\.\.',line) and not code_block_ok:
                 pass
             elif re.search(r'^\|===',line) and parameters:
 #               remove tables in parameters

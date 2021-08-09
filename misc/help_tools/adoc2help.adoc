@@ -18,6 +18,10 @@
 
 ... Bold italic is never used
 
+... Each example syntax and response line is its own code block,
+because _adoc2help_ converts these code blocks to regular text to
+reduce indenting
+
 .. Settable Parameters and Monitor-only parameters use tables with two columns, no grid or frame
 
 ... Those do not translate well to man pages, so _adoc2help_ converts these to description lists
@@ -30,6 +34,10 @@ side
 ... Second cell in a row are descriptions
 
 ... Second cell lines end with ` +` to force new-lines
+
+... Code blocks should not be used in these sections. If they are,
+they are converted to regular text by _adoc2help_ (that could be
+changed).
 
 ..  In general for inline (non-code block) fonts:
 
@@ -63,7 +71,7 @@ italics (underline). It may be possible to add more cases.
 
 ... Adds required boiler plate
 
-... Fixes up certain font issue for manpage output
+... Fixes up certain font/formatting issues for manpage output
 
 .. Runs _asciidoctor_ on generated _.adoc_ source
 
