@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 3.5 - January 2022
+Version 3.6 - January 2022
 
 :sectnums:
 :stem: latexmath
@@ -55,7 +55,7 @@ complete, approach would be to review the update steps in the new
 release to make sure everything has been covered. _Let the user
 beware._
 
-This document is up to date with the features in the `00399fa8`
+This document is up to date with the features in the `e061cce8`
 commit. Due to small increments, such as updating this document, that
 may not be the literal last commit, but the differences should be
 small unless you happen to `pull` between a significant change and
@@ -287,28 +287,9 @@ you.
 The complete cleanup can be a lengthy process. It is covered in the
 appendix <<Cleaning up .rxg file comments>>. That appendix has two
 sequential steps. The first is relatively easy and is recommended for
-most users. It will provide some benefit even if the second step is
-never used. The first step makes a backup of your current _.rxg_ files
-and removes all potentially extraneous comments. If the first step is
-performed as part of this FS update, or at least before you next
-update of your _.rxg_ files with _gnplt_, it will simplify your _.rxg_
-file comments and will preserve the opportunity to perform the second
-step as written at a later date.
-
-+
-
-The second step is more complicated and can be deferred until later.
-It assumes you have only been updating your _.rxg_ files with _gnplt_;
-in particular, you have not hand editing them. It uses the backed up
-_.rxg_ files to make a minimal set of trailing comments and append
-them to your active _.rxg_ files. If you have been hand editing your
-_.rxg_ files, you may not be able to use the second step exactly as
-written, but you may find it useful as a guide.
-
-+
-
-Please see the appendix <<Cleaning up .rxg file comments>> if you want to
-apply this cleanup.
+most users before they next update their _.rxg_ files with _gnplt_.
+The second step is more complicated and can then be deferred until
+later. Please see the appendix for more details.
 
 === Review changes
 
@@ -392,7 +373,7 @@ suggestions.
 +
 
 The `mk5c_mode` command sends configuration commands, beyond `mode`,
-depending on which recorder is selected in equip.ctl, `mk5c` or
+depending on which recorder is selected in _equip.ctl_, `mk5c` or
 `flexbuff`, the total data rate, and the data type, VDIF or
 5B/Ethernet. The updated default configuration is described in the
 <<../../../dbbc3_ops.adoc#_default_configuration,Default
@@ -970,7 +951,7 @@ command.
 Thanks to Alex Burns (Westford) for suggesting that we have a way to
 eliminate these errors entirely.
 
-. Split `equip` log header line into to parts.
+. Split `equip` log header line into two parts.
 
 +
 
@@ -982,7 +963,7 @@ Version value. Except for the clock rate value, the values in the
 also used for Mark 5B recorders.
 
 
-. <<refrw_bad,refrw_bad()>>:[[refrw_bad]] Rename _poclb_ routine
+. <<refrw_bad,refrw_bad()>>:[[refrw_bad]] Rename _poclb.a_ routine
 `refrw()` to `refrw_bad()`.
 
 +
@@ -1201,7 +1182,7 @@ Although the data used in the file came from other sources, for many
 years the code that read the _flux.ctl_ file was the complete
 documentation for the format. The example file in
 _/usr2/fs/st.default/control/_ now includes the details in an easier
-to read form. You can merged these comments, which are at the end of
+to read form. You can merge these comments, which are at the end of
 the example file, into your local copy or refer to the example.
 
 +
@@ -1267,7 +1248,7 @@ in _/usr2/fs/control/fserr.ctl_.
 +
 
 .. [[additional_rxg_errors]]<<additional_rxg_errors,Additional .rxg
-file errors>>: Five additional errors are now reported (closing
+file errors>>: Report five additional errors in _.rxg_ files (closing
 https://github.com/nvi-inc/fs/issues/134[#134]):
 
 +
@@ -1490,7 +1471,7 @@ comments).
 The second step cleans-up the trailing comments. That step is an
 optional follow-up to the first step. It is more involved and can be
 deferred to a later date. If the _.rxg_ files have only been updated
-by _gnplt_, it should work are written. If other modifications have
+by _gnplt_, it should work as written. If other modifications have
 been made to the _.rxg_ files, for example by hand editing, the second
 step may needed to be modified accordingly.
 
@@ -1834,15 +1815,16 @@ Defaults for up to eight IF inputs can be specified for DBBC3s.
 
 = Cleaning up .rxg file comments
 
-As described in <<stop_adding_extra_comments,Stop adding extra comment
-is when updating .rxg files>> change in the <<FS changes>> sub-section
-above, _gnplt_ has been adding extra comments, in some cases a lot of
-them, to your _.rxg_ files. With this update, that behavior has been
-fixed. However, there may already be many extra comments in your
-_.rxg_ fies. This appendix provides an optional process for cleaning
-up any extra comments. This cleanup is entirely optional. If it is not
-performed, there will be no loss of functionality. There will just be
-some extraneous comments in your _.rxg_ files.
+As described in <<stop_adding_extra_comments,Stop adding extra
+comments when updating .rxg files>> change in the <<FS changes>>
+sub-section above, _gnplt_ has been adding extra comments, in some
+cases a lot of them, to your _.rxg_ files. With this update, that
+behavior has been fixed. However, there may already be many extra
+comments in your _.rxg_ fies. This appendix provides an optional
+process for cleaning up any extra comments. This cleanup is entirely
+optional. If it is not performed, there will be no loss of
+functionality. There will just be some extraneous comments in your
+_.rxg_ files.
 
 NOTE: If you have been curating your _.rxg_ files to fix the issues
 with the comments, you may not want to use this process. You may still
