@@ -101,7 +101,11 @@ while line:
             elif re.search(r'^\|===',line) and parameters:
 #               remove tables in parameters
                 pass
-
+            elif re.search(r'^---',line):
+#               remove one form of horizontal ruler used to denote end of
+#               commands for html version, but not wanted for man pages
+#               other ruler forms (- - -, ***, * * *) are still usable
+                pass
             else:
                 if parameters:
 #                   remove tables in parameters

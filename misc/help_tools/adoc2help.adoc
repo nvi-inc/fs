@@ -12,6 +12,28 @@
 
 .. Level three sections: Syntax, Response, Settable Parameters, Monitor-only Parameters, Comments
 
+.. Place a horizontal ruler and a page break at the end of each command:
+
++
+
+----
+---
+<<<
+----
+
++
+
+The `---` makes a horizontal ruler so that the separation between
+commands in the _.html_ is a little more prominent. It is filter out
+by _adoc2help_ for the _man_ pages, but other horizontal ruler forms
+(`- - -`,`+++***+++`,`* * *`) can still used if needed.
+
++
+
+The `<<<` forces a page break when the _.html_ is printed to _.pdf_.
+
++
+
 .. Syntax and Response use code blocks, with parameters italic
 
 ... Bold is very rare, if ever
@@ -33,7 +55,8 @@ side
 
 ... Second cell in a row are descriptions
 
-... Second cell lines end with ` +` to force new-lines
+... Second cell lines can end with a space followed by `+` to force
+new-lines.
 
 ... Code blocks should not be used in these sections. If they are,
 they are converted to regular text by _adoc2help_ (that could be

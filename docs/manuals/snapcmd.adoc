@@ -1,6 +1,6 @@
 = SNAP Commands
 W. E. Himwich, N. R. Vandenberg
-FS Operations Manual - Version 10.0.1 - July 1 2021
+FS Operations Manual - Version 10.0.1 - August 10 2021
 
 :sectnums:
 
@@ -9,6 +9,7 @@ FS Operations Manual - Version 10.0.1 - July 1 2021
 == SNAP Command Descriptions
 :sectnums!:
 
+___
 <<<
 
 === bbcnn - baseband converter (VLBA, VLBA4 racks)
@@ -118,6 +119,7 @@ controlled by the FS are wired in this way.
 CAUTION: This command does not check whether you have specified a
 valid IF source for the BBC.
 
+---
 <<<
 
 === form - Sampler mode (DBBC racks)
@@ -263,6 +265,7 @@ The following tables give the pin assignments for the DDC modes.
 |VSI1|geo|astro|wastro|astro2|astro3|lba|test=0|test=1|test=bin|test=tvg|geo2
 |===
 
+---
 <<<
 
 === lo - LO Configuration
@@ -373,3 +376,5 @@ parameter array (usually `ip[3]` in C).
 In the future, for K4 type 1 rack, the range of LO values should be
 `1`-`4`, for K4 type 2 rack, `1`-`16`.
 
+---
+<<<
