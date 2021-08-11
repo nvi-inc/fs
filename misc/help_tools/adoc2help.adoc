@@ -12,13 +12,18 @@
 
 .. Level three sections: Syntax, Response, Settable Parameters, Monitor-only Parameters, Comments
 
-.. Place a horizontal ruler and a page break at the end of each command:
+.. Place a horizontal ruler, a page break, and four blank lines, at
+the end of each command (and before the first):
 
 +
 
 ----
 ---
 <<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
 ----
 
 +

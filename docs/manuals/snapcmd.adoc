@@ -11,6 +11,10 @@ FS Operations Manual - Version 10.0.1 - August 10 2021
 
 ___
 <<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
 
 === bbcnn - baseband converter (VLBA, VLBA4 racks)
 
@@ -121,6 +125,10 @@ valid IF source for the BBC.
 
 ---
 <<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
 
 === form - Sampler mode (DBBC racks)
 
@@ -267,6 +275,10 @@ The following tables give the pin assignments for the DDC modes.
 
 ---
 <<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
 
 === lo - LO Configuration
 
@@ -378,3 +390,7 @@ In the future, for K4 type 1 rack, the range of LO values should be
 
 ---
 <<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
