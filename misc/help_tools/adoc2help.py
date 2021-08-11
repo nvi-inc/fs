@@ -14,6 +14,13 @@ def ext(equip):
     else:
         sys.exit("Unknown equipment type '"+equip+"', you probably need to remove *.man.* files");
 #
+def link(file,symlink):
+    try:
+        os.remove(symlink)
+    except FileNotFoundError:
+        pass
+    os.symlink(file,symlink)
+#
 def finish_file(name,extension):
     os.system('asciidoctor -b manpage '+name+'.adoc')
     fi=open(name+'.'+extension)
@@ -30,7 +37,7 @@ def finish_file(name,extension):
 #
     if name == 'bbcnn' and extension == 'w__':
         for i in range(1,16):
-            os.symlink(name+'.man.'+extension,'bbc'+f'{i:02d}'+'.man.'+extension)
+            link(name+'.man.'+extension,'bbc'+f'{i:02d}'+'.man.'+extension)
 #
 filepath='snapcmd.adoc'
 
