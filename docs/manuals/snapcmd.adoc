@@ -2,6 +2,7 @@
 W. E. Himwich, N. R. Vandenberg
 FS Operations Manual - Version 10.0.1 - August 10 2021
 
+:stem: latexmath
 :sectnums:
 
 <<<
@@ -394,3 +395,125 @@ In the future, for K4 type 1 rack, the range of LO values should be
 {nbsp}
 {nbsp}
 {nbsp}
+
+=== tsys - compute and display system temps
+
+==== Syntax
+
+[subs="+quotes"]
+....
+tsys=_list_
+....
+
+==== Response
+
+[subs="+quotes"]
+....
+tsys/_systemps_
+....
+
+==== Settable Parameters
+
+[frame=none,grid=none]
+[cols="1,8"]
+|===
+
+a| _list_ | List of detectors for which stem:[\mathit{tsys}] will
+be computed. Standard detector mnemonics allowed. In addition: for
+VLBA/4/5/DBBC `formif` and `formbbc` are permitted; for Mark III/IV/5,
+`formif` and `formvc` are permitted; station detectors `u5` and `u6`
+are permitted.
+
+|===
+
+==== Monitor-only Parameters
+
+[frame=none,grid=none]
+[cols="1,8"]
+|===
+
+a| _systemps_ | List of detector (using standard mnemonics) & system
+temperature pairs. Temperatures are in degrees Kelvin.
+
+|===
+
+==== Comments
+
+The `_systemp_` results are returned grouped in pairs of
+`__mnemonic__,__value__` for each detector. The output is collected
+into lines by IF channel. Detectors that have no IF assigned are
+displayed first followed by those for IFs `1`-`3` (Mark III/IV) or
+`a`-`d` (VLBA/4/5/DBBC). If the output for an IF would make a long
+output line, the output is split into more than one line. For station
+detectors, the values are displayed on one line.
+
+For Mark III/IV and LBA4 racks the detector mnemonics for the VCs are
+displayed as `_hs_`, where `_h_` is the VC number as hex and `_s_` is
+for the sideband: `d` (dual for upper/lower), `u` (upper), `l`
+(lower), a digit `3`-`7` for other VC detectors or `x` for unknown.
+
+For VLBA/4/5/DBBC, additional mnemonics `formif` and `formbbc` are
+permitted in `_list_`. These select the detectors for the IF channels
+and BBC sidebands currently being recorded by the formatter.  For Mark
+III/IV/5, `formvc` is accepted instead of `formbbc`, as well as
+`formif`.
+
+A time-out or other error on one more devices for a Mark III/IV/5,
+LBA, VLBA/4/5 or DBBC detector will not prevent results from other
+detectors from being displayed. A negative integer will be shown for
+each channel that had an error that prevented an actual measurement
+from being displayed. An overflow value, larger than 999999.9 is
+displayed as dollar signs, `+++$$$$$$$$+++`.
+
+This command calculates and displays system temperatures for the
+different detectors. The formula for Mark III/IV/5, LBA4, DBBC, and
+station detectors is:
+
+[.text-center]
+stem:[\mathit{tsys = ( tpi - tpzero ) \frac{caltemp}{tpdiff}}]
+
+For LBA and DBBC the above formula is used with stem:[\mathit{tpzero = 0}].
+
+For VLBA/4/5 the formula is:
+
+[.text-center]
+stem:[\mathit{tsys = (tpi ( \frac{tpdiffgain}{tpgain})^2 - tpzero ) \frac{caltemp}{tpdiff}}]
+
+where:
+
+* stem:[\mathit{tsys}] -- system temperature, as reported in `tsys` command
+
+* stem:[\mathit{tpi}] -- cal-off reading, from `tpi` command
+
+* stem:[\mathit{tpzero}] -- zero-level reading, from `tpzero` command
+
+* stem:[\mathit{tpical}] -- cal-on reading, from `tpical` command
+
+* stem:[\mathit{caltemp}] -- noise calibration source temperature, from _.rxg_ file
+
+* stem:[\mathit{tpgain}] -- gain for stem:[\mathit{tpi}], from `tpgain` command
+
+* stem:[\mathit{tpdiff}] -- stem:[\mathit{tpical-tpi}], from `tpdiff` command
+
+* stem:[\mathit{tpdiffgain}] -- gain for stem:[\mathit{tpdiff, tpzero}] from `tpdiffgain` command
+
+For VLBA/4/5, there can be two different uses of the `tpi` command.
+If there are, one is normally used with `tpical` to form
+stem:[\mathit{tpdiff}]. The other is normally for the
+stem:[\mathit{tpi}] value. The values measured by `tpi` for the
+two uses may be different. The value for `tpdiff` is used to define
+the conversion factor from counts to degrees (according to `caltemp`)
+only. Subsequent stem:[\mathit{tpi}] values can be used to track
+variations in the system temperature.  The gain must be sampled with
+`tpidiffgain` for the former (and `tpzero`)  and `tpgain` for the
+latter. However, if `tpgain` and/or `tpdiffgain` commands return
+incorrect values when used because of some persistant problem, they
+can be omitted as long as the gain level is the same for all of `tpi`,
+`tpzero`, and `tpdiff`.
+
+For station detectors, if the `_zero_` parameter in the `user_device`
+command is set to `no`, the value of stem:[\mathit{tpzero}], is
+assumed to be zero, i.e., any value measured by `tpzero` is ignored.
+
+Please see the default `preob`, and `midob` procedures for examples of
+how stem:[\mathit{tsys}] is measured.

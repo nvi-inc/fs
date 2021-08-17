@@ -1,4 +1,4 @@
-= Make man pages
+= Making man pages
 
 . _asciidoctor_ version
 
@@ -90,6 +90,31 @@ makes the HTML output better.
 token is enclosed in double back ticks and the unconstrained italics
 are at the end, e.g, +++``lo__X__``+++. This is converted to bold _then_
 italics (underline). It may be possible to add more cases.
+
+.. Equations
+
++
+
++
+
+There is limited supported for equations using `latexmath`. There are
+some further restrictions to make sure the _man_ page versions will be
+acceptable:
+
+... If the `\mathit{...}` command is used (helps with long variable
+names), it must span the entire equation, e.g.,
+`+++stem:[\mathit{...}]+++`. There should be no extra spaces between
+the `[...]` and the `\mathit{...}`. The entire equation must be within
+one line.
+
+... The `\frac{...}{...}` command is translated to a slash `/` for the
+_man_ page. The command must appear entirely on one line. It cannot be
+nested because that won't translate to _man_ pages. It should work to
+use slashes `/` in either or both of the numerator or denominator to
+provide more levels, but this will sacrifice some readability in both
+the _.html_ and _man_ page.
+
+... Experimentation may be required for other LaTeX commands.
 
 . _adoc2help_
 

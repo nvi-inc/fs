@@ -119,6 +119,12 @@ while line:
                     line=re.sub(r'^a\|',r'',line)
                     line=re.sub(r'\|',r'::',line)
 
+#               remove [\mathit{...}] around anything
+                line=re.sub(r'\[\\mathit{(.*?)}\]',r'[\1]',line)
+
+#               replace [\frac{...}{...}] around anything
+                line=re.sub(r' *\\frac{(.*?)}{(.*?)} *',r' \1 / \2 ',line)
+
 #               remove curly quotes
                 line=re.sub(r'(["\'])`',r'\1',line)
                 line=re.sub(r'`(["\'])',r'\1',line)
