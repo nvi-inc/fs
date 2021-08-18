@@ -281,6 +281,183 @@ The following tables give the pin assignments for the DDC modes.
 {nbsp}
 {nbsp}
 
+=== help - display on-line help information
+
+==== Syntax
+
+[subs="+quotes"]
+....
+help=_command_
+....
+
+[subs="+quotes"]
+....
+?=_command_
+....
+
+==== Response
+
+Displays information in a terminal window
+
+==== Settable Parameters
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,8"]
+|===
+a| `_command_` | The name of any SNAP command
+|===
+
+==== Comments:
+
+This command displays available information on the specified SNAP
+command. Either `help` or `?` may be used. Typing `*help*` or `*?*`
+alone gives help on `help`. The help information is essentially the
+listing of the manual page for the SNAP command. If no help is
+available for a command, a message to that effect will be displayed in
+the log output window. You will also receive the message if you
+request help for a command that is not defined for your equipment.
+
+The Field System `help` command opens a new _xterm_ window and uses
+the _less_ pager, or the _man_ command (which also uses _less_) to
+display the requested help information one screen-full at a time. At
+the bottom of the window you will see a prompt in inverse video that
+includes the name of the file being displayed (which you can ignore).
+If you want to continue the listing, press the space bar and the next
+screen-full will be displayed. To exit from the command, type the
+letter `*q*` (not echoed on the screen). The window will persist until
+`*q*` is pressed or it is closed otherwise. It being open will _not_
+block the FS from executing.
+
+When you see `(END)` in inverse video in the prompt at the bottom of
+the screen, you have reached the end of the help information on this
+topic. For help with _less_, type the letter `*h*` to the prompt. All
+the features of _less_ are available, including text searches and
+scrolling back. In some cases statistics about where in the file the
+current screen-full comes from may be displayed in the prompt. In some
+cases, _less_ will display only a colon `:` prompt.
+
+Help files for different equipment configurations are distinguished by
+the three characters in the file extension for the type of hardware.
+The first character is for the type of rack, the second is for the
+type of recorder 1, and the third is type of recorder 2. The table
+farther below, <<families,_Equipment families for help file extension
+characters_>>, gives the extension character correspondence to
+different equipment _families_. Following tables, <<racks,_Rack
+families for equip.ctl entries_>> give the correspondence of rack
+families to rack entires in _equip.ctl_; <<recorders,_Recorder
+families for equip.ctl entries_>>, for recorder families.
+
+Files that include _.man._ between the command name and the equipment
+extension are assumed to be in _troff_ format and are displayed using
+the _man_ command. The output is formatted for the width of the
+window. Unfortunately, the formatting does not adjust when the window
+is re-sized. However, output that may overwrap the width of the
+window, code blocks and tables and particular, can be unwrapped by
+widening the window.
+
+The help information is kept in files in the directory
+_/usr2/fs/help_, one file per command. Local help files are found in
+_/usr2/st/help_, which override those in _/usr2/fs/help_. Within
+either _/usr2/st/help_ or _/usr2/fs/help_, _.man._ files take
+precedence of non-_.man._ files.
+
+.Equipment families for help file extension characters
+[#families]
+[cols="1,4,4"]
+|===
+| Character |Rack families|Recorder families
+
+a| `_` a| All including `none`             a| All including `none`
+a| `+` |                                   a| With two recorders,
+allows a match for the other, see the table
+<<recorder_matching,_Details of recorder matching_>> below
+a| `3` | K4K3                              |
+a| `m` | Mark III                          | Mark III
+a| `n` | LBA4, Mark III/IV                 | Mark III, Mark IV
+a| `e` | LBA4, Mark III/IV, VLBA, VLBA4    |
+a| `f` | LBA4, Mark III/IV, all K4         |
+a| `4` | Mark IV                           | Mark IV
+a| `s` | S2                                | S2
+a| `g` | LBA4, Mark IV, VLBA/4, K4MK4      |
+a| `h` | LBA4, Mark IV, VLBA4, K4MK4       |
+a| `i` | Mark IV, VLBA/4, K4MK4            |
+a| `v` | VLBA                              |
+a| `w` | VLBA, VLBA4                      | VLBA, VLBA4
+a| `k` | all K4                            | K4
+a| `l` | LBA, LBA4                         | longitudinal
+a| `d` | DBBC                             |
+a| `a` a| Any, not includng `none`       a| Any, not including `none`
+a| `j` | DBBC3                             |
+|===
+
+.Rack families for equip.ctl entries
+[#racks]
+[cols="1,4"]
+|===
+| Rack family | Rack _equip.ctl_ entries
+
+| Mark III a| `mk3`
+| VLBA     | `vlba`, `vlbag`
+| Mark IV a| `mk4`
+| VLBA4    | `vlba4`, `vlba5`, `vlbac`, `cdas`
+| K4 | `K41`, `k41u`, `k42`, `k42a`, `k42bu`, `k42c`
+| K4K3  | `K41/k3`, `k41u/k3`, `k42/k3`, `k42a/k3`, `k42bu/k3`
+| K4MK4 | `K41/mk4`, `k41u/mk4`, `k42/mk4`, `k42a/mk4`, `k42bu/mk4`, `k4c/mk4`
+| all K4 | all of the K4, K4K3, and K4MK4 rack families
+| LBA   a| `lba`
+| LBA4  a| `lba4`
+| S2    a| `s2`
+| Mark 5 | `mk5`
+| DBBC  | `dbbc_ddc`, `dbbc_ddc/fila10g`, `dbbc_pfb`, `dbbc_pfb/fila10g`
+| RDBE  a| `rdbe`
+| DBBC3 a| `dbbc3`
+| none  a| `none`
+|===
+
+.Recorder families for equip.ctl entries
+[#recorders]
+[cols="1,4"]
+|===
+| Recorder family | Recorder _equip.ctl_ entries
+
+| Mark III a| `mk3`
+| VLBA     | `vlba`, `vlba2`, `vlbab`
+| Mark IV | `mk4`, `mk4b`
+| VLBA4    | `vlba4`, `vlba42`, `vlbab`
+| K4 | `k41`, `k42`, `k41/dms`, `k42/dms`
+| S2    a| `s2`
+| Mark 5 | `mk5a`, `mk5b`, `mk5a_bs`, `mk5b_bs`, `mk5c`, `mk5c_bs`, `flexbuff`
+| Mark 6 a| `mk6`
+| longitudinal | all of the Mark III, Mark IV, VLBA, and VLBA4 recorder families
+| none | `none`
+|===
+
+.Details of recorder matching (see *NOTE* below for explanation)
+[#recorder_matching]
+[options="header"]
+|===
+| Character for recorder 1 |Character for recorder 2| _equip.ctl_ recorder 1| _equip.ctl_  recorder 2
+a| `+++++++` a| Any a| Not `none` a| Not `none`
+a| Any a| `+++++++` a| Not `none` a| Not `none`
+a| Not `+++++++` a| Not `+++++++` a| `none` a| Any
+a| Not `+++++++` a| Not `+++++++` a| Any a| `none`
+|===
+
+NOTE: Regarding the table <<recorder_matching,_Details of recorder
+matching_>> above: If there are two recorders defined, a `pass:[+]`
+will match if the character for the other recorder matches. If there
+is only one recorder defined, a `pass:[+]` will not match in either
+position.
+
+
+---
+<<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
+
 === lo - LO Configuration
 
 ==== Syntax
@@ -517,3 +694,10 @@ assumed to be zero, i.e., any value measured by `tpzero` is ignored.
 
 Please see the default `preob`, and `midob` procedures for examples of
 how stem:[\mathit{tsys}] is measured.
+
+---
+<<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}

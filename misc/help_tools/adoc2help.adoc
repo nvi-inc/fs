@@ -8,9 +8,13 @@
 
 . Uses _snapcmd.adoc_ as source
 
+.. Reviewing the _.html_ and _man_ page output after making changes is
+recommended to help locate issues.
+
 .. Level two section is command name/description/equip
 
-.. Level three sections: Syntax, Response, Settable Parameters, Monitor-only Parameters, Comments
+.. Level three sections: `Syntax`, `Response`, `Settable Parameters`,
+`Monitor-only Parameters` (which is optional), and `Comments`.
 
 .. Place a horizontal ruler, a page break, and four blank lines, at
 the end of each command (and before the first):
@@ -115,6 +119,15 @@ provide more levels, but this will sacrifice some readability in both
 the _.html_ and _man_ page.
 
 ... Experimentation may be required for other LaTeX commands.
+
+.. Internal cross references can be used. It is recommended that the
+anchor text be italicized so that it will standout in the _man_ pages.
+If the anchor text is the table title, the cross reference in the
+.html will agree with the italics of the table title.
+
+.. Tables translate to _man_ pages pretty well but spanning cells
+don't seem to work. Consider putting a row spanning cell in a *NOTE*
+after the table.
 
 . _adoc2help_
 

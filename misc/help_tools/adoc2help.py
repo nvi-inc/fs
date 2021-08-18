@@ -144,6 +144,9 @@ while line:
 #               change plain monospace to bold
                 line=re.sub(r'`',r'*',line)
 
+#               change a| to | to avoid extra lines
+                line=re.sub(r'a\|',r'|',line)
+
                 f.write(line + '\n')
             line=fp.readline()
             continue
