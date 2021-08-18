@@ -39,8 +39,7 @@ C
         endif
         call hol2char(ibuf,istart,nchar,cstring)
       else
-        cstring='help.___'
-        length=7
+        length=0
       endif
 c
       call fs_get_drive(drive)

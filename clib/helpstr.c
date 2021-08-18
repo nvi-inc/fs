@@ -135,10 +135,12 @@ int rlen;
 	if (*clength > MAX_STRING + 2) {
 		*ierr = -2;
 		return;
-	}
-
-	strncpy(name, cnam, *clength);
-	name[*clength] = '\0';
+	} else if (0 == *clength)
+	    strcpy(name, "help");
+        else {
+	    strncpy(name, cnam, *clength);
+	    name[*clength] = '\0';
+        }
 
 	// prevent directory traversal
 	if (strchr(name, '/')) return;
