@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 2.0 - July 2021
+Version 2.1 - August 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -54,7 +54,7 @@ complete, approach would be to review the update steps in the new
 release to make sure everything has been covered. _Let the user
 beware._
 
-This document is up to date with the features in the `fbf11f58`
+This document is up to date with the features in the `64df6ffa`
 commit. Due to small increments, such as updating this document, that
 may not be the literal last commit, but the differences should be
 small unless you happen to `pull` between a significant change and
@@ -381,6 +381,24 @@ the schedule was generated locally by shifting the schedule (_drudg_
 option `10`).
 
 +
+
+.. Map station code to lower case (closing
+https://github.com/nvi-inc/fs/issues/136[#136]).
+
++
+
+Before the station code was expected to be lower case. If it wasn't,
+this could cause a conflict with _drudg_ which maps it to lower case.
+This could result in a mismatch on the file names for deleting _.snp_
+and _.prc_ files with the `-f` option. _fesh_ now maps the station
+code, from both the `STATION` environment variable and `-s` option, to
+lower case.
+
++
+
++
+
+Thanks to Eskil Varenius (Onsala), for reporting this issue.
 
 . Clean-up suppressing of signals.
 
