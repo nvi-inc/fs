@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 1.3 - June 2021
+Version 1.4 - August 2021
 
 :sectnums:
 :experimental:
@@ -568,12 +568,12 @@ NOTE: Most windows used by the FS are based on _xterm_, which can have
 a `name` property for each case. However, windows opened by _python_
 scripts do not usually have a `name` property. If it is needed, it is
 possible to modify _python_ scripts to accept, and use, a geometry
-parameter.
+parameter. Some FS _python_ based windows can already handle this.
 
 . Adjust the position (and maybe the size) of the window to what you
 want.
 
-. Run the _xwininfo_ program from an shell prompt in an _xterm_.
+. Run the _xwininfo_ program from a shell prompt in an _xterm_.
 
 . Position the cursor on the window and click.
 
@@ -587,11 +587,11 @@ After changing or adding resources in the _~.Xresources_ file, you
 will need to load them to make them active. This can done by logging
 out and back in again or loading them in another way, such as using
 the shell alias _rlxr_ that is available by default for _oper_ and
-_prog_.
+_prog_. The window will need to be reopened to see the effect.
 
-NOTE: Using this method with differently named _.Xresource_ files, it
-possible to have customized window layouts for different displays and/or
-users.
+NOTE: Using this method with differently named _.Xresource_ files and
+reloading aliases, it is possible to have customized window layouts
+for different displays and/or users.
 
 == Opening additional windows
 
