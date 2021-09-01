@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 2.1 - August 2021
+Version 2.2 - September 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -54,7 +54,7 @@ complete, approach would be to review the update steps in the new
 release to make sure everything has been covered. _Let the user
 beware._
 
-This document is up to date with the features in the `64df6ffa`
+This document is up to date with the features in the `d777166f`
 commit. Due to small increments, such as updating this document, that
 may not be the literal last commit, but the differences should be
 small unless you happen to `pull` between a significant change and
@@ -252,9 +252,48 @@ were restored to using `long` variables. These had been changed to
 `int` variables by the bulk _unlongify_ before _10.0.0-beta1_, but hadn't
 been changed back.
 
-. Fix _gndat_.
+. Fix issues in _gnplt_ and _gndat_:
+
+.. Fix plotting of working file Tcal curve on zooomed Tcal versus
+frequency plots in _gnplt_ (closing
+https://github.com/nvi-inc/fs/issues/117[#117]).
 
 +
+
+Previously, if you zoomed in the Tcal versus frequency plot and
+selected display of the working file Tcal curve, it would reset the
+left plot edge to the unzoomed value when drawing the curve.  This was
+caused by an interaction of two issues:
+
++
+
+--
+
+* The program tried to draw the entire Tcal curve, not just the part
+in the zoomed frequency range.
+
+* The function, `drawValues`, that adds Tcal or Trec lines to plots,
+reset any plot limit, except the right edge one, if any data to be
+plotted was beyond that edge. This was apparently to allow showing the
+vertical axis intercept of the Trec fit and to make sure that all
+vertical extents of Trec and Tcal curves were not off the visible plot
+area.
+
+--
+
++
+
+This was fixed by limiting the Tcal curve plotted to just segments
+within the zoomed area. In addition for consistency, the `drawValues`
+function was change to reset any plot limit that is exceeded by the
+data. Since all other uses of `drawValues` already limited the
+horizontal values to be plotted to the zoomed area, there was no
+impact on those other uses.
+
++
+
+Thanks to Eskil Varenius (Onsala), for reporting this issue and
+testing the fix.
 
 .. Correct bad Tsys data in _gnplt_ (closing
 https://github.com/nvi-inc/fs/issues/107[#107] and
