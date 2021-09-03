@@ -9,7 +9,7 @@ FS Operations Manual - Version 9.5 - December 1 2001
 
 This manual contains detailed descriptions of the SNAP commands
 available in the Field System. Each command is described on a separate
-page. Commands are ordered alphabetically.
+"`page.`" Commands are ordered alphabetically.
 
 Please refer to the *SNAP Language* (#add link#) manual for the
 specifications of the language itself, including a description of
@@ -253,19 +253,20 @@ types other than_ Mark III, Mark IV, VLBA, and VLBA4.
 |Module |Standard mnemonic | Other allowed mnemonics
 (* indicates mnemonics available only when only one drive is defined)
 
-3+|*Mark III modules*
+3+|*Mark III/IV modules*
 |video converters |`v__n__`, `_n_`=`1`-`f` |`vc__n__`, __n__=`1`-`15`, `1`-`f`
 |IF distributor a|`if` a|`ifd`
 |formatter a|`fm` a|`form`
-|tape transport 1 a|`r1` |`rec1`, `tape1`, `rc`\*, `tp`*
-|tape transport 2 a|`r2` |`rec2`, `tape2`, `rc`\*, `tp`*
+|tape transport 1 a|`r1` |`rec1`, `t1`, `tape1`, `rc`\*, `tp`*, `tape`*
+|tape transport 2 a|`r2` |`rec2`, `t2`, `tape2`, `rc`\*, `tp`*, `tape`*
+|high density heads a|`hd` a|
 |high density heads transport 1 a|`h1` a|`hd`*
 |high density heads transport 2 a|`h2` a|`hd`*
 |S/X receiver a|`rx` |
 |IF3 distributor a|`i3` |`if3`,`ifd3`
 
 3+|*S2 modules*
-|tape recorder 1 a|`r1` |`rec1`, `tape1`, `rc`\*, `tp`*
+|tape recorder 1 a|`r1` |`rec1`, `t1`, `tape1`, `rc`\*, `tp`*, `tape`*
 
 3+|*VLBA modules*
 |baseband converters |`b__n__`, `_n_`=`1-f` |`bc__n__`,
@@ -273,8 +274,9 @@ types other than_ Mark III, Mark IV, VLBA, and VLBA4.
 |IF distributor 1, channels A&B a|`ia` |`ifa`, `ifb`, `ib`, `ifab`
 |IF distributor 2, channels C&D a|`ic` |`ifc`, `ifd`, `ic`, `ifcd`
 |formatter a|`fm` a|`form`
-|tape recorder 1 (except heads) a|`r1` |`rec1`, `tape1`, `rc`\*, `tp`*
-|tape recorder 1 (except heads) a|`r2` |`rec2`, `tape2`, `rc`\*, `tp`*
+|tape recorder 1 (except heads) a|`r1` |`rec1`, `t1`, `tape1`, `rc`\*, `tp`*, `tape`*
+|tape recorder 2 (except heads) a|`r2` |`rec2`, `t2`, `tape2`, `rc`\*, `tp`*, `tape`*
+|high density heads a|`hd` |
 |high density heads recorder 1 a|`h1` a|`hd`*
 |high density heads recorder 2 a|`h2` a|`hd`*
 
