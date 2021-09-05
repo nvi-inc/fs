@@ -1,4 +1,4 @@
-  tpicd - tpicd daemon control (LBA4, Mark III/IV, VLBA, VLBA4, DBBC, RDBE, DBBC3 racks)
+  tpicd - tpicd daemon control (LBA4, Mark III/IV, VLBA/4/5, DBBC/3, RDBE racks)
 
             Syntax:     tpicd=cont,cycle
                         tpicd
@@ -39,9 +39,9 @@ logged if a schedule is not active or if the schedule is halted; this
 feature is to prevent "run-away" logging if the schedule is closed or
 halted while 'data_valid' is 'on'.
 
-The form "tpicd=tsys" can be used only if continuous cal is
-selected. It will cause the tsys to be calculated from the next set of
-samples (not yet supported for RDBEs).  The number of samples is
+The form "tpicd=tsys" can be used only if continuous cal is selected.
+It will cause the tsys to be calculated from the next set of samples
+(not yet supported for RDBEs or DBBC3s).  The number of samples is
 specified by the cont_cal command.  This does not disturb the behavior
 otherwise.
 
