@@ -96,3 +96,6 @@ helpsh.title:            fs help
 helpsh*geometry:         80x24+75+75
 helpsH*VT100.Translations:       #override\
         ~Ctrl ~Meta <Btn2Up>:   ignore()
+! monit7 (DBBC3 Tsys display, 21 lines)
+monit7*geometry:	24x21-0+120
+monit7.title:		System Temperatures
