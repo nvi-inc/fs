@@ -18,8 +18,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
+:doctype: book
+
 = DRAFT FS DBBC3 Operations Manual
-Version 0.9 - April 2021
+Version 1.0 - September 2021
 
 :experimental:
 :sectnums:
@@ -27,7 +29,11 @@ Version 0.9 - April 2021
 
 == Introduction
 
-This document outlines the model for FS operations with the DBBC3.
+This document outlines the model for FS operations with the DBBC3. It also
+contains an appendix <<Installation for testing>>. The latter provides some
+pointers for installing and will eventually be superseded by the FS updates
+notes for the first release that includes the DBBC3 support described in the
+rest of this document.
 
 == DBBC3 operations
 
@@ -176,8 +182,8 @@ To configure the Core3H boards for the schedule mode:
 
   proc=r4849kk
 
-. Execute the normal setup procedure, perhaps `setup01`, with the `force`
-parameter, e.g.:
+. Execute the normal `setup__mode__` procedure, perhaps `setup01`, with the
+`force` parameter, e.g.:
 
   setup01=force
 
@@ -198,6 +204,9 @@ normally, the rest of the DBBC3 will be configured by the first setup procedure
 encountered in the schedule.
 
 ====
+
+NOTE: The FS hard codes a VDIF frame size of `8000`. If a different size is
+needed, please see the <<Handling other VDIF frame sizes>> appendix.
 
 ===== The details
 
@@ -495,6 +504,7 @@ display using the features described in <<Commands>> sub-section below for
 special purposes.
 
 .Tsys monitor display geometry values
+[#geometry]
 [width="50%",cols="^,^"]
 |=================
 | BBCs/IF | width-by-height
@@ -963,3 +973,283 @@ for DBBC3s:
 ** `dbbc_if_targets`
 ** `dbbc_bbc_target`
 ** `default_dbbc_if_inputs`
+
+[appendix]
+
+== Handling other VDIF frame sizes
+
+The value of `8000` for the VDIF frame size is hard coded in the FS for the
+DBBC3 and _jive5ab_ (and DBBC2/FiL10G as well). Currently, this is the correct
+value, but some day in the future, different values may be needed. If that
+occurs before the FS is updated to accommodate other values, this section gives
+a recipe for handling it for the DBBC3 and _jive5ab_ until there is a FS
+update. It is a little complicated, but should work. Hopefully, the FS will be
+updated before it is necessary.
+
+The basic strategy is to <<Determine the other settings>> needed in the DBBC3
+and _jive5ab_ `vdif_frame` commands, <<Update the SNAP procedures>> to contain
+them, and then <<Command the devices>> with the new values. These are all
+described in the following sub-sections.
+
+After commanding the new VDIF frame size, the FS will complain that the DBBC3
+`vdif_frame` payload is not correct when you check the DBBC3 configuration
+(i.e., using the `setup__mode__` procedure without the `force` parameter), but
+if that is the only complaint, there should not be a problem.
+
+These sub-sections extend the example in the <<Configuring Core3H boards>>
+sub-section above.
+
+=== Determine the other settings
+
+The settings can be calculated from first principles. However, another way to
+determine them is to use the `echo` output from the FS for what would otherwise
+be the correct setup:
+
+   proc=r4849kk
+   echo=on
+   setup01=force
+   echo=off
+
+You will need to identify the `#dbbcn#core3h=_n_,vdif_frame ...` and
+`#mk5cn#VDIF_8000-...` records in the output and use the values recorded in the
+next sub-section.
+
+=== Update the SNAP procedures
+
+These examples use `8200` as an example different frame size.
+
+CAUTION: The examples below do not necessarily contain correct values. They are
+just offered to show the form of the commands.
+
+. You will need to create a new SNAP procedure, perhaps called `vdif_8200`,
+that contains all the other values in the `core3h=_n_,vdif_frame ...` commands
+recorded in the previous section, but with the new frame size, for example:
+
+   dbbc3=core3h=1,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=2,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=3,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=4,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=5,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=6,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=7,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=8,vdif_frame 2 8 8200 ct=off
+
+. You can add a new `VDIF_...` command with the other recorded values, but with
+the new frame size, to the `setup__mode__`  procedure (`setup01` in this
+example) _after_ the call to `jive5ab_cnfg`. For example, add the command:
+
+   jive5ab=VDIF_8200-8192-2-8
+
+NOTE: Not putting this command directly into your `jive5ab_cnfg` procedure
+allows it to be mode specific. If you want to apply this change universally,
+you can put it into your `jive5ab_cnfg` procedure instead, but be wary of other
+modes.
+
+=== Command the devices
+
+Continuing the example, enter:
+
+   proc=r4849kk
+   setup01=force
+   vdif_8200
+
+Afterwards, you will need to sync the time as described in the <<Time sync>>
+sub-section above and start the data transmission as described in the
+<<Starting data transmission>> sub-section above.
+
+NOTE: The reason the setting of the VDIF frame size is done _outside_ of the
+`setup__mode__` procedure is so that when that procedure is used to _check_ the
+DBBC3 configuration, the `dbbc3=core3h=_n_,vdif_frame ...` commands won't cause
+a requirement to re-sync the DBBC3.
+
+[appendix]
+
+== Installation for testing
+
+This section has some terse installation notes for installing the FS branch,
+`ed/dbbc3`, that provides the features described in this document. This is
+provided only to help with testing. This is not for an operational release.
+
+Sub-sections on <<Switching back to 10.0.0>> and <<Switching back to the test
+version>> as also provided in case you need to switch back and forth after
+using the <<Initial installation of the test version>> sub-section.
+
+=== Initial installation of the test version
+
+You must have FS 10.0.0 installed before installing the test version. Please
+see https://nvi-inc.github.io/fs/releases/10/0/10.0.0.html for instructions for
+installing FS 10.0.0.
+
+==== Fetch and make the latest commit on the branch
+
+If you are using _git_, as is recommended, then as _prog_
+execute:
+
+             cd /usr2/fs-git
+             git fetch
+             git checkout ed/dbbc3
+             make clean rmdoto rmexe
+             make >& /dev/null
+             make -s
+
+No output from the last command indicates a successful _make_.
+
+NOTE: It should not be necessary to re__make__ your station software.
+
+==== Reboot
+
+This will make sure the FS server is restarted and shared memory is
+reinitialized.
+
+==== Additional steps
+
+Except as noted, these steps should all be performed as _oper_.
+
+. Install the _dbbc3.ctl_ control file.
+
++
+
+The contents of DBBC3 line in the _equip.ctl_ control file has been moved to
+the new control file, _dbbc3.ctl_, and reorganized. To install the new file,
+execute:
+
+  cd /usr2/control
+  cp /usr2/fs/st.default/control/dbbc3.ctl .
+
++
+
+Edit and customize the contents of your local copy in _/usr2/control_ to agree
+with your DBBC3.
+
++
+
+NOTE: For now, your old DBBC3 line in _equip.ctl_ can be left in place. Its
+presence will be benign and leaving it there will make it easier to return your
+operational FS version when that is needed. The values in the _dbbc3.ctl_
+control file are the ones actually used by this test branch of the FS.
+
++
+
+. Update _equip.ctl_
+
++
+
+Change your rack type to `dbbc3_ddc_u` or `dbbc3_ddc_v` as appropriate.
+
+. Setup the DBBC3 Tsys display window (_monit7_)
+
+.. Update _clpgm.ctl_
+
++
+
+Compare your local copy to the example
+
+          cd /usr2/control
+          diff clpgm.ctl /usr2/fs/st.default/control/ | less
+
++
+
+and consider whether and what changes you should make. Typically, the new line
+for _monit7_ would be added to your local copy.
+
++
+
+TIP: If you are familiar with _vimdiff_, you may find it a more convenient way
+to compare files and update your local copy. Like _vim_, _vimdiff_ may be
+challenging to use until you are familiar with it. Some help is available from
+web searches. Don't use it if you aren't comfortable with it.
+
+.. Update _stpgm.ctl_
+
++
+
+If you are using the display server and you want to have _monit7_ start
+automatically with each client (including at FS start up), add a line for it to
+_stpgm.ctl_. The easiest way to do this is to make a copy of the line for
+_monit2_ and update for _monit7_ (changing ``2``s to ``7``s). If you don't have
+a line for _monit2_ in your _stpgm.ctl_, you can use the one in the example
+file, _/usr2/fs/st.default/control/stpgm.ctl_, as a guide.
+
+.. Update your local rc files:
+
+... Update _~/.Xresources_
+
++
+
+Append the new lines from the default version:
+
+  cd ~
+  tail -n 2 /usr2/fs/st.default/oper/.Xresources >>.Xresources
+
++
+
++
+
+NOTE: The default geometry resource in _/usr2/fs/st.default/oper/.Xresources_
+for _monit7_ handles having up to 16 BBCs per IF.  If you have fewer, you might
+want to adjust the resource in your local file according to the <<geometry,Tsys
+monitor display geometry values>> table above.
+
++
+
+... If you use the default window manager for the console, update _~/.fvwm2rc_:
+
++
+
++
+
+Compare your local file to the default
+
+  cd ~
+  diff .Xresources /usr2/fs/st.default/oper |less
+
++
+
++
+
+The new lines for _monit7_ should be added to your local file.
+
++
+
+... You should  make the corresponding changes for _prog_ while logged
+in as _prog_.
+
+... Log out and back in to put these changes into effect.
+
+=== Switching back to 10.0.0
+
+Once you have the `ed/dbbc3` your can return to using _10.0.0_ by following
+these steps.
+
+. As _prog_, enter:
+
+             cd /usr2/fs-git
+             git checkout -q 10.0.0
+             make clean rmdoto rmexe
+             make >& /dev/null
+             make -s
+
+. Reboot
+
+NOTE: If you added _monit7_ to your _stpgm.ctl_ file, you can comment it out
+(as _oper_), but that is not necessary.  The only consequence of not doing so
+will be a "`flash`" when the display client starts as an _xterm_ and then it
+closes because it can't start _monit7_.
+
+=== Switching back to the test version
+
+If you have switched back to _10.0.0_ and now want to switch back to the test
+version, please follow these steps.
+
+. As _prog_, enter:
+
+             cd /usr2/fs-git
+             git checkout ed/dbbc3
+             make clean rmdoto rmexe
+             make >& /dev/null
+             make -s
+
+. Reboot
+
+. If as part of switching back to _10.0.0_, you had commented out the _monit7_
+line in your _stpgm.ctl_ file, you can uncomment it (as _oper_).
