@@ -21,7 +21,7 @@
 :doctype: book
 
 = DRAFT FS DBBC3 Operations Manual
-Version 1.0 - September 2021
+Version 1.1 - September 2021
 
 :experimental:
 :sectnums:
@@ -675,11 +675,21 @@ command:
 
     tpicd=stop
 
-To restart the error reports, _tpicd_ should be configured and started.
+To restart the error reports, _tpicd_ should be configured and started. Any
+_drudg_ generated `setup` procedure will do this.
 
-When _drudg_ generated setup procedures are executing they will suppress these
-errors because they use this command as they start. As a setup procedure
-finishes, it will restart _tpicd_.
+When _drudg_ generated `setup` procedures are executing they will suppress
+these errors because they use `tpcid=stop` when they start. As a `setup`
+procedure finishes, it will restart _tpicd_.
+
+This method can also be used to suppress multicast errors for equipment
+monitoring in the `midob` procedure. That is, group all the commands that cause
+multicast errors together and place them after a `tpcid=stop` and follow them
+with a `tpcid`. This should not cause a significant, if any, additional loss of
+logged multicast data. The losses may be unacceptable in any event,
+particularly for very short scans. In that case, the commands that cause these
+errors should probably not be included `midob` at all. The `mcast_time` command
+can be used to monitor the DBBC3 time without generating any of these errors.
 
 ====
 
