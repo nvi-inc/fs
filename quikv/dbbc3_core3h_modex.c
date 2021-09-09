@@ -341,6 +341,7 @@ parse:
     m5state_init(&lcl.start.state);
     lcl.start.start=1;
     lcl.start.state.known=1;
+    dbbc3_vdif_frame_params(&lcl);
     memcpy(&shm_addr->dbbc3_core3h_modex[itask-30],&lcl,sizeof(lcl));
 
     out_recs=0;
@@ -385,22 +386,7 @@ parse:
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
-    int width, channels, payload;
-    vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[1+itask-30],
-            &width, &channels, &payload);
-
-    m5state_init(&shm_addr->dbbc3_core3h_modex[itask-30].width.state);
-    shm_addr->dbbc3_core3h_modex[itask-30].width.width=width;
-    shm_addr->dbbc3_core3h_modex[itask-30].width.state.known=1;
-
-    m5state_init(&shm_addr->dbbc3_core3h_modex[itask-30].channels.state);
-    shm_addr->dbbc3_core3h_modex[itask-30].channels.channels=channels;
-    shm_addr->dbbc3_core3h_modex[itask-30].channels.state.known=1;
-
-    m5state_init(&shm_addr->dbbc3_core3h_modex[itask-30].payload.state);
-    shm_addr->dbbc3_core3h_modex[itask-30].payload.payload=payload;
-    shm_addr->dbbc3_core3h_modex[itask-30].payload.state.known=1;
-
+    vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[1+itask-30]);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 

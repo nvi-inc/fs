@@ -271,14 +271,11 @@ void vsi_samplerate_2_dbbc3_core3h(ptr,lclc,board)
             (int) (shm_addr->m5b_crate*1.0e6+0.5),lclc->decimate.decimate);
 
 }
-void vdif_frame_2_dbbc3_core3h(ptr,lclc,board,width,channels_out,payload)
-    char *ptr;
+
+void dbbc3_vdif_frame_params(lclc)
     struct dbbc3_core3h_modex_cmd *lclc;
-    char board[ ];
-    int *width;
-    int *channels_out;
-    int *payload;
 {
+    int payload;
     int bits1=0;
     int bits2=0;
     unsigned bitmask2=lclc->mask2.mask2;
@@ -350,12 +347,27 @@ void vdif_frame_2_dbbc3_core3h(ptr,lclc,board,width,channels_out,payload)
     if(channels2 > channels)
         channels = channels2;
 
-    *width=bits_p_chan;
-    *channels_out=channels;
-    *payload=8000;
+    m5state_init(&lclc->width.state);
+    lclc->width.width=bits_p_chan;
+    lclc->width.state.known=1;
 
+    m5state_init(&lclc->channels.state);
+    lclc->channels.channels=channels;
+    lclc->channels.state.known=1;
+
+    m5state_init(&lclc->payload.state);
+    lclc->payload.payload=8000;
+    lclc->payload.state.known=1;
+
+}
+
+void vdif_frame_2_dbbc3_core3h(ptr,lclc,board)
+    char *ptr;
+    struct dbbc3_core3h_modex_cmd *lclc;
+    char board[ ];
+{
     sprintf(ptr,"core3h=%1.1s,vdif_frame %d %d %d ct=off", board,
-            *width,*channels_out,*payload);
+            lclc->width.width,lclc->channels.channels,lclc->payload.payload);
 
 }
 
