@@ -122,7 +122,7 @@ manually include 'net_port=...'  commands if they are needed.
 
 When the 'fb_mode/'mk5c_mode' command used with the DBBC3, the 'mask'
 field must be null. The bit masks are takened from the core3h board
-setup commands ('core3h_modeX=...') commands, which must proceed this
+setup commands ('core3h_modeX=...') commands, which must precede this
 command.
 
 The 'bit_streams' commands is similar to the 'mk5b_mode' and

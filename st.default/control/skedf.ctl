@@ -320,7 +320,7 @@ $misc
 * DBBC2 example
 * dbbc_if_targets  35000 35000 35000 35000
 * DBBC3 example
-* dbbc_if_targets  35002 12342 35002 35003 5678 6789 7890 8901
+* dbbc_if_targets  32000 32000 32000 32000 32000 32000 32000 32000
 *--------------------------------------------------------------
 * DBBC BBC TPI target levels
 * has no effect for DDC versions before v103
