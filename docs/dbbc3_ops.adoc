@@ -1182,6 +1182,25 @@ control file are the ones actually used by this test branch of the FS.
 
 Change your rack type to `dbbc3_ddc_u` or `dbbc3_ddc_v` as appropriate.
 
+. Add `jive5ab_cnfg` procedure to your `station` procedure library.
+
++
+
+Using _pfmed_, add a `jive5ab_cnfg` procedure to your `station` procedure
+library. It can be empty if no tuning is needed for your recorder.
+
++
+
+NOTE: This procedure is called by setup procedures for Mark 5C and FlexBuff
+recorders and provides a means to tune the setup of _jive5ab_ for your hardware
+independent of the observing mode. This procedure is called after the
+`mk5c_mode`/`fb_mode` commands to allow the default configuration to be
+overridden. The default configuration is described in the
+<<Default configuration>> subsection in main part of this document.
+The commands in this procedure should be mode independent. Mode dependent
+tuning should be handled differently; perhaps by inserting commands directly
+at the top-level of the setup procedure.
+
 . Setup the DBBC3 Tsys display window (_monit7_)
 
 .. Update _clpgm.ctl_
