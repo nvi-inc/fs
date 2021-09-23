@@ -57,7 +57,7 @@ reduce indenting
 
 ... Those do not translate well to man pages, so _adoc2help_ converts these to description lists
 
-... First cell in a row (parameter) are defined with `a| ` at the start of each line
+... First cell in a row (parameter) are defined with `pass:[a| ]`{nbsp} at the start of each line
 
 ... Vertical bar separating first and second cells has spaces on each
 side
@@ -74,7 +74,7 @@ changed).
 ..  In general for inline (non-code block) fonts:
 
 ...  The only combined fonts are italics _or_ bold with monospace,
-e.g, +++`_a_`+++ _or_ +++`*a*`+++. These are converted by _adoc2help_ to
+e.g, `pass:[`_a_`]` _or_ `pass:[`*a*`]`. These are converted by _adoc2help_ to
 italics(underline)/bold since the _asciidoc_ `manpage` backend does
 not support them (with monospace).
 
@@ -87,13 +87,15 @@ backend; _adoc2help_ converts bold italics to bold for safety.
 pages as visually different from bold. However, it can be used if it
 makes the HTML output better.
 
-...  No unconstrained font settings, e.g., no +++__a__b+++,
-+++**a**b+++, or +++``a``b+++, except:
+...  No unconstrained font settings, e.g., no `pass:[__a__b]`,
+`pass:[**a**b]`, or `pass:[``a``b]`, except:
 
 .... Monospace with constrained italics can be used if the entire
 token is enclosed in double back ticks and the unconstrained italics
-are at the end, e.g, +++``lo__X__``+++. This is converted to bold _then_
-italics (underline). It may be possible to add more cases.
+are at the end, e.g, `pass:[``lo__X__``]`. There may be only be one of
+these per line of text (but additional ones can go on separate lines).
+This is converted to bold _then_ italics (underline). It may be
+possible to add more cases.
 
 .. Equations
 
