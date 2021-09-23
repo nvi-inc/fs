@@ -21,7 +21,7 @@
 :doctype: book
 
 = DRAFT FS DBBC3 Operations Manual
-Version 1.3 - September 2021
+Version 1.4 - September 2021
 
 :experimental:
 :sectnums:
@@ -802,7 +802,7 @@ independent, i.e., the same procedure is used for all modes.
 This procedure is a local `station` library procedure to allow tuning of the
 configuration of _jive5ab_ for the specifics of the recorder, including
 overriding the "`default`" configuration given by the `mk5c_mode`/`fb_mode`
-command and a `thread__suffix__` procedure.
+command in a `thread__suffix__` procedure.
 
 ==== Default configuration
 
