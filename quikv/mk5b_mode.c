@@ -43,6 +43,7 @@ int ip[5];                           /* ipc parameters */
       struct mk5b_mode_cmd lcl;
       int increment;
       unsigned long long data_rate;
+      int nWriters;
 
       void skd_run(), skd_par();      /* program scheduling utilities */
 
@@ -142,9 +143,17 @@ parse:
               strcpy(outbuf,"net_protocol = udpsnor : 128000000 : 256000000 : 4 ;\n");
           cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
           out_recs++;
-      }
 
-      if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
+         /* set nwriters */
+
+          nWriters = data_rate / 6000000000ull + 1;
+          nWriters = nWriters < 2 ? 2 : nWriters;
+
+          snprintf(outbuf,sizeof(outbuf),"record = nthread : : %d ;\n", nWriters);
+          cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+          out_recs++;
+
+      } else if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
               (shm_addr->equip.drive_type[shm_addr->select] == MK5C ||
                shm_addr->equip.drive_type[shm_addr->select] == MK5C_BS)) {
 
