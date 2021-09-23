@@ -38,11 +38,11 @@ def finish_file(name,extension):
     os.remove(name+'.'+extension)
 #
     if name == 'bbcnn' and extension == 'w__':
-        for i in range(1,16):
+        for i in range(1,14+1):
             link(name+'.man.'+extension,'bbc'+f'{i:02d}'+'.man.'+extension)
 #
     if name == 'bbcn' and extension == 's__':
-        for i in range(1,4):
+        for i in range(1,4+1):
             link(name+'.man.'+extension,'bbc'+f'{i:01d}'+'.man.'+extension)
 #
 filepath='snapcmd.adoc'

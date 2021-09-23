@@ -355,6 +355,122 @@ ___
 {nbsp}
 {nbsp}
 
+=== agc - gain control mode (S2 racks)
+
+==== Syntax
+
+[subs="+quotes"]
+....
+agc=_gainmode_
+....
+
+==== Response
+
+[subs="+quotes"]
+....
+agc/_gainmode_
+....
+
+==== Settable Parameters
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,8"]
+|===
+a| `_gainmode_` | Global gain control mode for all BBC. Either `on` or
+`off`. No default.  Use `on` to activate automatic gain control on all
+BBC.
+|===
+
+==== Monitor-only Parameters:
+
+None
+
+==== Comments:
+
+This command selects the Automatic Gain Control mode for all BBC on S2
+rack. For control over AGC settings for individual BBC, see the
+``bbc__n__`` command.
+
+Normal setting during an experiment is `on`.
+
+To hold the gain at a given value, switch to `off` gain control. The BBC
+gain value will stay at the value it had when the AGC was changed to
+`off`. Then use `on` to return to AGC control. This method is used for
+radiometry by _onoff_ and _fivpt_. 
+
+
+---
+<<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
+
+=== bbcn - baseband converter (S2 racks)
+
+==== Syntax
+
+[subs="+quotes"]
+....
+bbc__n__=_freq_,_ifsource_,_bwu_,_bwl_,_avper_,_agccontrol_
+....
+
+[subs="+quotes"]
+....
+bbc__n__=_state_
+....
+
+==== Response
+
+[subs="+quotes"]
+....
+bbc__n__:__state__/_freq_,_ifsource_,_bwu_,_bwl_,_avper_,_gainmode_,_gainu_,_gainl_,_lock_,_USBpwr_,_LSBpwr_
+....
+
+==== Settable Parameters
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,6"]
+|===
+a| `_n_` | The BBC index number, `1` to `4`. Not all BBCs are available.
+a| `_state_` | The frequency switching state number. If frequency switching is not running, use `0`.
+a| `_freq_` | L.O. frequency in MHz, between `100.00` and `1000.00`, inclusive. No default.
+a| `_ifsource_` | I.F. input source, one of `1`, `2`, `3`, `4`. No default.
+a| `_bwu_` | Bandwidth for USB in MHz. One of `0.0625`, `0.125`, `0.25`, `0.5`, `1`, `2`, `4`, `8`, `16`.
+a| `_bwl_` | Bandwidth for LSB in MHz. One of `0.0625`, `0.125`, `0.25`, `0.5`, `1`, `2`, `4`, `8`, `16`.
+a| `_avper_` | Averaging period for TPI in seconds (`0.01` to `10` seconds).
+a| `_agccontrol_` | Turn AGC `on`/`off` control for this BBC.
+
+|===
+
+==== Monitor-only Parameters:
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,6"]
+|===
+a| `_gainu_` | Gain value for USB in dB.
+a| `_gainl_` | Gain value for LSB in dB.
+a| `_lock_` | L.O. lock status, `lock` or `unlock`.
+a| `_USBpwr_` | Power in upper sideband in counts. Range `0` to `300000`, nominal operating is `45000`.
+a| `_LSBpwr_` | Power in lower sideband in counts. Range `0` to `300000`, nominal operating is `45000`.
+|===
+
+==== Comments:
+
+This command sets up the baseband converters in the S2 rack. This command is
+analogous to the VLBA ``bbc__nn__``
+and Mark III/IV ``vc__nn__`` commands.
+
+---
+<<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
+
 === bbcnn - baseband converter (VLBA, VLBA4 racks)
 
 ==== Syntax
