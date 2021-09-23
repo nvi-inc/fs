@@ -11,8 +11,10 @@ def ext(equip):
         return 'd__'
     elif equip == 'VLBA, VLBA4 racks':
         return 'w__'
+    elif equip == 'S2 racks':
+        return 's__'
     else:
-        sys.exit("Unknown equipment type '"+equip+"', you probably need to remove *.man.* files");
+        sys.exit("Unknown equipment type '"+equip+"'. To cleanup, you probably need to remove *.man.* files");
 #
 def link(file,symlink):
     try:
@@ -38,6 +40,10 @@ def finish_file(name,extension):
     if name == 'bbcnn' and extension == 'w__':
         for i in range(1,16):
             link(name+'.man.'+extension,'bbc'+f'{i:02d}'+'.man.'+extension)
+#
+    if name == 'bbcn' and extension == 's__':
+        for i in range(1,4):
+            link(name+'.man.'+extension,'bbc'+f'{i:01d}'+'.man.'+extension)
 #
 filepath='snapcmd.adoc'
 
