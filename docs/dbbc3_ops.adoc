@@ -21,7 +21,7 @@
 :doctype: book
 
 = DRAFT FS DBBC3 Operations Manual
-Version 1.2 - September 2021
+Version 1.3 - September 2021
 
 :experimental:
 :sectnums:
@@ -806,40 +806,48 @@ command and a `thread__suffix__` procedure.
 
 ==== Default configuration
 
-The `mk5c_mode`/`fb_mode` command sends the follow commands depending on
-whether the recorder selected in _equip.ctl_ is `mk5c` or `flexbuff`. It does
-_not_ depend on which command is used; `fb_mode` is just an alias for
-`mk5c_mode`. It does depend on the data type, VDIF or 5B/Ethernet. Thus there
-are two options for each recorder type. These are given below.
+The `mk5c_mode`/`fb_mode` command sends the configuration commands, beyond
+`_mode_`,  depending on which recorder is selected in _equip.ctl_, `mk5c` or
+`flexbuff`, and the total data rate. It does _not_ depend on which command is
+used; `fb_mode` is just an alias for `mk5c_mode`. The commands sent also depend
+on the data type, VDIF or 5B/Ethernet. All the cases are listed below.
 
 ===== FlexBuff recorder
 
-For FlexBuff recorders, there is a variable field `_socketbuffer_` in the
-`net_protocol` command sent to the recorder.
+. Setting `mtu`:
 
-. VDIF data
 +
 
-[subs="+quotes"]
-....
-mtu = 9000 ;
-net_protocol = udpsnor : _socketbuffer_ : 256000000 : 4 ;
-....
+The `mtu` command sent to the recorder depends on the data type:
 
-. 5B/Ethernet data
+.. VDIF data
+
+  mtu = 9000 ;
+
+.. 5B/Ethernet data
+
+   mtu = 6000 ;
+
+. Setting `net_protocol`:
+
 +
 
-[subs="+quotes"]
-....
-mtu = 6000 ;
-net_protocol = udpsnor : _socketbuffer_ : 256000000 : 4 ;
-....
+There is a variable field `_socketbuffer_` in the `net_protocol` command sent
+to the recorder. Its value is independent of the data type.
+
++
+
+  net_protocol = udpsnor : _socketbuffer_ : 256000000 : 4 ;
+
++
 
 Where the _socketbuffer_ field depends on the total data rate:
 
 *   32000000 -- data rate < 1 Gbps
 *   64000000 -- 1 Gbps < data rate <= 4 Gbps
 *  128000000 -- data rate > 4 Gbps
+
++
 
 The _socketbuffer_ parameter is an important setting for trying to minimize
 risk of packet loss when starting the recording. For (very) high data rates,
@@ -849,22 +857,49 @@ values appropriate for that. This assumes that the FlexBuff has been tuned
 tuning documentation at
 https://www.jive.eu/~verkout/flexbuff/flexbuf.recording.txt.
 
+. Setting `record = nthread`:
+
++
+
+There is a variable field `_nWriters_` in the `record = nthread` command sent
+to the recorder. Its value is independent of the data type.
+
++
+
+[subs="+quotes"]
+....
+record = nthread : _nWriters_ ;
+....
+
++
+
+where `_nWriters_` is calculated as `max( _data_rate_ / 6 + 1, 2)` and
+`_data_rate_` is the total data rate in Gbps.
+
 ===== Mark 5C recorder
 
-. VDIF data
-+
-....
-net_protocol = : 128k : 2M : 4;
-packet = 36 : 0 : 8032 : 0 : 0 ;
-....
+. Setting `net_protocol`:
 
-. 5B/Ethernet data
 +
 
-....
-net_protocol = : 128k : 2M : 4;
-packet = 36 : 0 : 5008 : 0 : 0 ;
-....
+The `net_protocol` command sent to the recorder is independent of the data
+type:
+
+  net_protocol = : 128k : 2M : 4;
+
+. Setting `packet`:
+
++
+
+The `packet` command sent to the recorder depends on the data type:
+
+.. VDIF data
+
+  packet = 36 : 0 : 8032 : 0 : 0 ;
+
+.. 5B/Ethernet data
+
+  packet = 36 : 0 : 5008 : 0 : 0 ;
 
 ==== Overriding the defaults
 
