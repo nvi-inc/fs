@@ -21,7 +21,7 @@
 :doctype: book
 
 = DRAFT FS DBBC3 Operations Manual
-Version 1.1 - September 2021
+Version 1.2 - September 2021
 
 :experimental:
 :sectnums:
@@ -205,8 +205,9 @@ encountered in the schedule.
 
 ====
 
-NOTE: The FS hard codes a VDIF frame size of `8000`. If a different size is
-needed, please see the <<Handling other VDIF frame sizes>> appendix.
+NOTE: The FS hard codes a VDIF frame payload size of `8000`. If a different
+size is needed, please see the <<Handling other VDIF frame payload sizes>>
+appendix.
 
 ===== The details
 
@@ -986,25 +987,25 @@ for DBBC3s:
 
 [appendix]
 
-== Handling other VDIF frame sizes
+== Handling other VDIF frame payload sizes
 
-The value of `8000` for the VDIF frame size is hard coded in the FS for the
-DBBC3 and _jive5ab_ (and DBBC2/FiL10G as well). Currently, this is the correct
-value, but some day in the future, different values may be needed. If that
-occurs before the FS is updated to accommodate other values, this section gives
-a recipe for handling it for the DBBC3 and _jive5ab_ until there is a FS
-update. It is a little complicated, but should work. Hopefully, the FS will be
-updated before it is necessary.
+The value of `8000` for the VDIF frame payload size is hard coded in the FS for
+the DBBC3 and _jive5ab_ (and DBBC2/FiL10G as well). Currently this is the
+correct value, but some day in the future, different values may be needed. If
+that occurs before the FS is updated to accommodate other values, this section
+gives a recipe for handling it for the DBBC3 and _jive5ab_ in the meantime.  It
+is a little complicated, but should work. Hopefully, the FS will be updated
+before it is necessary.
 
 The basic strategy is to <<Determine the other settings>> needed in the DBBC3
 and _jive5ab_ `vdif_frame` commands, <<Update the SNAP procedures>> to contain
 them, and then <<Command the devices>> with the new values. These are all
 described in the following sub-sections.
 
-After commanding the new VDIF frame size, the FS will complain that the DBBC3
-`vdif_frame` payload is not correct when you check the DBBC3 configuration
-(i.e., using the `setup__mode__` procedure without the `force` parameter), but
-if that is the only complaint, there should not be a problem.
+After commanding a different VDIF payload size, the FS will complain that the
+DBBC3 `vdif_frame` payload is not correct when you check the DBBC3
+configuration (i.e., using the `setup__mode__` procedure without the `force`
+parameter), but if that is the only complaint, there should not be a problem.
 
 These sub-sections extend the example in the <<Configuring Core3H boards>>
 sub-section above.
@@ -1026,14 +1027,14 @@ next sub-section.
 
 === Update the SNAP procedures
 
-These examples use `8200` as an example different frame size.
+These examples use `8200` as an example different payload size.
 
 CAUTION: The examples below do not necessarily contain correct values. They are
 just offered to show the form of the commands.
 
 . You will need to create a new SNAP procedure, perhaps called `vdif_8200`,
 that contains all the other values in the `core3h=_n_,vdif_frame ...` commands
-recorded in the previous section, but with the new frame size, for example:
+recorded in the previous section, but with the new payload size, for example:
 
    dbbc3=core3h=1,vdif_frame 2 8 8200 ct=off
    dbbc3=core3h=2,vdif_frame 2 8 8200 ct=off
@@ -1045,7 +1046,7 @@ recorded in the previous section, but with the new frame size, for example:
    dbbc3=core3h=8,vdif_frame 2 8 8200 ct=off
 
 . You can add a new `VDIF_...` command with the other recorded values, but with
-the new frame size, to the `setup__mode__`  procedure (`setup01` in this
+the new payload size, to the `setup__mode__`  procedure (`setup01` in this
 example) _after_ the call to `jive5ab_cnfg`. For example, add the command:
 
    jive5ab=VDIF_8200-8192-2-8
@@ -1067,7 +1068,7 @@ Afterwards, you will need to sync the time as described in the <<Time sync>>
 sub-section above and start the data transmission as described in the
 <<Starting data transmission>> sub-section above.
 
-NOTE: The reason the setting of the VDIF frame size is done _outside_ of the
+NOTE: The reason the setting of the VDIF payload size is done _outside_ of the
 `setup__mode__` procedure is so that when that procedure is used to _check_ the
 DBBC3 configuration, the `dbbc3=core3h=_n_,vdif_frame ...` commands won't cause
 a requirement to re-sync the DBBC3.
