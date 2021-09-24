@@ -48,6 +48,14 @@ All of the currently existing rack restrictions are listed below:
 
 +
 
+NEW so far +
+DBBC racks +
+VLBA, VLBA4 racks +
+S2 racks +
+
++
+
+OLD +
 K4K3 racks +
 Mark III racks +
 Mark III, Mark IV racks +
@@ -78,8 +86,11 @@ racks, i.e., the only rack for which it does not work is none.
 
 All of the currently existing recorder restrictions are listed below:
 
+NEW so far +
+
 +
 
+OLD +
 K4 drives +
 Mark III drives +
 Mark III, Mark IV drives +
