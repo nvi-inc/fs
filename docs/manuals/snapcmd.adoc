@@ -434,11 +434,11 @@ a| `_gainmode_` | Global gain control mode for all BBC. Either `on` or
 BBC.
 |===
 
-==== Monitor-only Parameters:
+==== Monitor-only Parameters
 
 None
 
-==== Comments:
+==== Comments
 
 This command selects the Automatic Gain Control mode for all BBC on S2
 rack. For control over AGC settings for individual BBC, see the
@@ -497,7 +497,7 @@ a| `_agccontrol_` | Turn AGC `on`/`off` control for this BBC.
 
 |===
 
-==== Monitor-only Parameters:
+==== Monitor-only Parameters
 
 [%noheader]
 [frame=none,grid=none]
@@ -510,7 +510,7 @@ a| `_USBpwr_` | Power in upper sideband in counts. Range `0` to `300000`, nomina
 a| `_LSBpwr_` | Power in lower sideband in counts. Range `0` to `300000`, nominal operating is `45000`.
 |===
 
-==== Comments:
+==== Comments
 
 This command sets up the baseband converters in the S2 rack. This command is
 analogous to the VLBA ``bbc__nn__``
@@ -564,7 +564,7 @@ a| `_gainu_` | Gain value for USB in dB. This is a valid parameter only if `_gai
 a| `_gainl_` | Gain value for LSB in dB. This is a valid parameter only if `_gainmode_` is `man`. May be any value  between `-18.0` dB and `12.0` dB. Not all gains are settable, the lowest available gain greater than `_gainl_` is used. Step size is linear in voltage. Default is the current LSB gain level. The actual gain setting reported as a monitor value may go as low `-99.99` dB.
 |===
 
-==== Monitor-only Parameters:
+==== Monitor-only Parameters
 
 [%noheader]
 [frame=none,grid=none]
@@ -581,7 +581,7 @@ a| `_serno_` | Module serial number, decimal.
 a| `_err_` | Module timing error indication, `1pps` or `no_1pps`.
 |===
 
-==== Comments:
+==== Comments
 
 This command sets up the baseband converters in the VLBA rack.
 It is analogous to the Mark IV ``vc__nn__`` commands.
@@ -814,7 +814,7 @@ Displays information in a terminal window
 a| `_command_` | The name of any SNAP command
 |===
 
-==== Comments:
+==== Comments
 
 This command displays available information on the specified SNAP
 command. Either `help` or `?` may be used. Typing `*help*` or `*?*`
