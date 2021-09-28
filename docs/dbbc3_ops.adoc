@@ -21,7 +21,7 @@
 :doctype: book
 
 = DRAFT FS DBBC3 Operations Manual
-Version 1.4 - September 2021
+Version 1.5 - September 2021
 
 :experimental:
 :sectnums:
@@ -409,6 +409,12 @@ For DBBC3 use, the rack type in _equip.ctl_ should be `dbbc3_ddc_u` or
 `dbbc3_ddc_v` depending on the firmware that is loaded.
 
 The clock rate should be set to `nominal`, which gives the 128 MHz fixed value.
+
+NOTE: The `equip` line in the log header has been broken into two lines,
+`equip1` and `equip2`. The break occurs between the Mark 4 Decoder Transmission
+Terminator Character value and the DBBC(2) DDC Firmware Version value. Except
+for the clock rate value, all the values in the `equip2` are only,
+and are all of the, DBBC(2) related values.
 
 ====
 
