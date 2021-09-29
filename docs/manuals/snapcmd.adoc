@@ -545,6 +545,55 @@ response is either `ack` or an error message sent by the antenna.
 {nbsp}
 {nbsp}
 
+=== azeloff - az-el source position offset
+
+==== Syntax
+
+[subs="+quotes"]
+....
+azeloff=_az_,_el_
+....
+
+==== Response
+
+[subs="+quotes"]
+....
+azeloff/_az_,_el_
+....
+
+==== Settable Parameters
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,8"]
+|===
+a| `_az_` | Offset in azimuth, in numeric angle/degrees format.
+Response is in decimal degrees.
+a| `_el_` | Offset in elevation, in numeric angle/degrees format.
+Response is in decimal degrees.
+
+|===
+
+==== Monitor-only Parameters
+
+None
+
+==== Comments
+
+If supported by the pointing software, the antenna will move to the
+offset position when this command is issued. To return to the
+on-source position, issue this command with zero offsets.
+
+These offsets are independent of, and can be used in addition to,
+`radecoff` and `xyoff`, if the pointing software supports them.
+
+---
+<<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
+
 === bbcn - baseband converter (S2 racks)
 
 ==== Syntax
