@@ -113,7 +113,9 @@ that it includes all of Mark III, Mark IV, VLBA (including VLBA2), and
 VLBA4 recorders. All other restrictions: Mark III, VLBA4, and S2 all
 apply to just those simple types.
 
-Syntax: `command=__list of parameters__`
+Syntax
+
+`command=__list of parameters__`
 
 [none]
 * The command syntax is shown first. The command name and the list of
@@ -122,7 +124,9 @@ the Comments section. Any combination of upper case and lower case
 letters may be used in typing a command. All commands are converted to
 lower case before they are processed.
 
-Response: `command/_list of response parameters_`
+Response
+
+`command/_list of response parameters_`
 
 [none]
 * The response (if any) to the command is given with the list of
@@ -131,7 +135,7 @@ has an identical list of parameters to the command itself, followed by
 any monitor parameters. All responses to commands are displayed in lower
 case letters only.
 
-Settable parameters:
+Settable parameters
 
 [none]
 * This part of the page describes each parameter in the "`Syntax`" line that
@@ -145,14 +149,14 @@ recent issuance of this command. If any parameter value is found to be
 invalid, command interpretation stops at that point and an error message
 is generated.
 
-Monitor-only parameters:
+Monitor-only parameters
 
 [none]
 * Each parameter in the "`Response`" that does not appear in the "`Syntax`" is
 described in this section. These are parameters that cannot be specified
 by the operator, but are monitored or calculated by the Field System.
 
-Comments:
+Comments
 
 [none]
 * The final section of the page provides further descriptions of the way
