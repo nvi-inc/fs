@@ -407,6 +407,47 @@ The letters may be given in any order. Duplicated letters are ignored.
 {nbsp}
 {nbsp}
 
+=== active_rdbes - set/display active RDBEs
+
+==== Syntax
+
+[subs="+quotes"]
+....
+active_rdbes=_list_
+....
+
+==== Response
+
+[subs="+quotes"]
+....
+active_rdbes/_list_
+....
+
+==== Settable Parameters
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,8"]
+|===
+a| `_list_` | list of comma separated RDBE unit designation letters:
+`a`, `b`, `c`, or `d`
+|===
+
+==== Monitor-only Parameters
+
+None
+
+==== Comments
+
+The letters may be given in any order. Duplicated letters are ignored.
+
+---
+<<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
+
 === agc - gain control mode (S2 racks)
 
 ==== Syntax
