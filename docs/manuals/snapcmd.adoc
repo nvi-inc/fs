@@ -500,6 +500,51 @@ radiometry by _onoff_ and _fivpt_.
 {nbsp}
 {nbsp}
 
+=== antenna - direct line to the antenna
+
+==== Syntax
+
+[subs="+quotes"]
+....
+antenna=_message1_,_message2_, ...
+....
+
+==== Response
+
+[subs="+quotes"]
+....
+antenna/_response1_,_response2_, ...
+....
+
+==== Settable Parameters
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,6"]
+|===
+a| `_message<N>_` | messages to be sent to the antenna in the exact
+form required by the pointing software. Each `_message<N>_` between
+commas will be sent separately. The number of messages is not limited
+to nine.
+|===
+
+==== Monitor-only Parameters
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,6"]
+|===
+a| `_response<N>_` | response of the antenna to `_message<N>_`. This
+response is either `ack` or an error message sent by the antenna.
+|===
+
+---
+<<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
+
 === bbcn - baseband converter (S2 racks)
 
 ==== Syntax
