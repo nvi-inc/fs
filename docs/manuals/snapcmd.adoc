@@ -598,7 +598,66 @@ These offsets are independent of, and can be used in addition to,
 {nbsp}
 {nbsp}
 
+=== bank_check - Mark 5 recorder bank check
+
+==== Syntax
+
+[subs="+quotes"]
+....
+bank_check
+....
+
+==== Response
+
+[subs="+quotes"]
+....
+bank_check/_VSN_,_serial1_,...,_serial<N>_
+....
+
+==== Settable Parameters
+
+None
+
+==== Monitor-only Parameters
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,7"]
+|===
+a| `_VSN_` | Volume serial number of bank to be recorded.
+a| `_serial<N>_` | Serial number of the `_<N>_`-th disk in this volume
+|===
+
+==== Comments
+
+This command will check the VSN of the active bank. If it has changed
+or hasn't been logged since the current log file was last opened, it
+will be logged along with the disk serial numbers.
+
+If the active drive type is `mk5a_bs`, `mk5b_bs`, or `mk5c_bs`, this
+command will check the remaining record time on the current bank and
+if the next scan (or continuous recording), as set by the previous
+`scan_name=...` command plus 200 seconds will not fit, it will switch
+banks.
+
+If the bank is switched and the new bank also does not have enough
+room for the next scan (or continuous recording) plus 200 seconds,
+the bank will be switched again to return to the original bank.
+
+If the bank is switched (once or twice) the VSN and disk serial
+numbers in the final bank will be logged unconditionally and the SNAP
+procedure `change_pack` will be invoked to prompt the user to change
+packs.
+
+---
+<<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
+
 === bbcn - baseband converter (S2 racks)
+
 
 ==== Syntax
 
