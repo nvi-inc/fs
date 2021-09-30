@@ -656,6 +656,77 @@ packs.
 {nbsp}
 {nbsp}
 
+=== bank_status - Mark 5 recorder bank status
+
+==== Syntax
+
+[subs="+quotes"]
+....
+bank_status
+....
+
+==== Response
+
+[subs="+quotes"]
+----
+bank_status/_active_,_vsn_,_seconds_,_gb_,_percent_,_ut_
+
+bank_status/_inactive_,_vsn_,_seconds_,_gb_,_percent_,_ut_
+----
+
+==== Settable Parameters
+
+None
+
+==== Monitor-only Parameters
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,8"]
+|===
+a| `_active_` | the active bank, `a` or `b`
+a| `_inactive_` | the inactive bank, `a` or `b`
+a| `_VSN_` | Volume serial number of pack in this bank
+a| `_seconds_` | remaining seconds of record time in the current mode
+a| `_gb_` | remaining gigabytes for pack in this bank
+a| `_percent_` | remaining percentage for pack in this bank
+a| `_ut_` | the time of the last check for this bank
+
+|===
+
+==== Comments
+
+This command will check the available recording time on the current
+bank, switch banks, check the available recording time on the new
+bank, and switch back to the original bank. This command is provided
+as way to manually update the information used in the _monit5_, `Mark
+5 Remaining Capacity`, window for the non-active bank.
+
+This command displays two monitor response records. The first is for
+the active bank, the second is for the other bank.
+
+This command takes a few seconds to execute. It should only be
+executed when the FS is otherwise quiet. It would potentially be most
+useful before starting an experiment to check the status of the disk
+modules current installed and to "`seed`" the _monit5_ display.
+
+Please note the time remaining is the available record time not clock
+time until the bank will be full. The clock time until the bank will
+be full may be significantly different, typically around twice as long
+for geodesy, depending on the recording duty cycle.
+
+This command will return a Mark 5 error if any Mark 5 process that
+conflicts with a bank switch, such as recording, is active (for Mark
+5A, because of a bug in the _Mark5A_ control program, there may be no
+error reported).
+
+---
+<<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
+
 === bbcn - baseband converter (S2 racks)
 
 
