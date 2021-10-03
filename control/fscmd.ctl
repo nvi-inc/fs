@@ -312,6 +312,7 @@ cablelong    qkr 07604 01 FFFFFFFFFFFF
 cablediff    qkr 07701 01 FFFFFFFFFFFF
 mk5          qkr 07800 01 FFFFFFFFFFFF
 jive5ab      qkr 07800 01 FFFFFFFFFFFF
+fb           qkr 07800 01 FFFFFFFFFFFF
 disk_record  qkr 07801 01 FFFFEFFFFFFF
 disk_pos     qkr 07802 01 FFFFEFFFFFFF
 disk_serial  qkr 07803 01 FFFFEFFFFFFF
@@ -330,6 +331,7 @@ mk5c_mode    qkr 07815 01 FFFFEFFFFFFF
 fb_mode      qkr 07815 01 FFFFEFFFFFFF
 dbbc         qkr 07820 01 FFFFFFFFFFFF
 mk5_status   qkr 07821 01 FFFFFFFFFFFF
+fb_status    qkr 07821 01 FFFFFFFFFFFF
 fila10g      qkr 07822 01 FFFFFFFFFFFF
 dbbc2        qkr 07823 01 FFFFFFFFFFFF
 fila10g2     qkr 07824 01 FFFFFFFFFFFF
