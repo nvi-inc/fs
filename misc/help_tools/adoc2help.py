@@ -109,10 +109,10 @@ while line:
         m=re.search(r'^=== *(\S+) *- *(.*)$',line)
         if not m:
             if re.search(r'^==== ',line):
-                if re.search(r'Comments',line):
+                if re.search(r'COMMENTS',line):
                     parameters = 0
                     code_block_ok = 1
-                elif re.search(r'Settable Parameters',line):
+                elif re.search(r'SETTABLE PARAMETERS',line):
                     parameters = 1
                 f.write(line.replace("==","",1) + '\n')
             elif re.search(r'^\.\.\.\.',line) and not code_block_ok:

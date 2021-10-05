@@ -25,22 +25,23 @@ applies to many commands.
 In this manual, each command is described on a separate page. For each
 command, the information provided is:
 
-command - function (equipment)
+*command - function (equipment)*
 
 [none]
-* The command name and a few words that describe its function are given at
-the top of each page. If the command is restricted to certain types of
-equipment, that information is given in parentheses. For example, the
-`bbc__nn__` command is applicable only to VLBA and VLBA4 racks,
-and the title will include the words "`(VLBA, VLBA4 racks)`". Many
-commands don’t have restrictions because they are general FS commands,
-such as `schedule` or `echo`. Commands that interact with the equipment
-may be general as well. This may be because the command is in fact
-implemented for all types of equipment. In fact some commands that have
-no restrictions have very limited functionality beyond some specific
-equipment configurations. Except for one command: `pcal`, all commands
-are restricted by either the rack or the recorder that is used, but not
-by both (this will be corrected for `pcal` at a later date).
+* The command name and a few words that describe its function are
+given at the top of each page. If the command is restricted to certain
+types of equipment, that information is given in parentheses. For
+example, the `bbc__nn__` command is applicable only to VLBA and VLBA4
+racks, and the title will include the words "`(VLBA, VLBA4 racks)`".
+Many commands don’t have restrictions because they are general FS
+commands, such as `schedule` or `echo`. Commands that interact with
+the equipment may be general as well. This may be because the command
+is in fact implemented for all types of equipment. In fact some
+commands that have no restrictions have very limited functionality
+beyond some specific equipment configurations. Except for one command:
+`pcal`, all commands that are restricted sre restricted by either the
+rack or the recorder that is used, but not by both (this will be
+corrected for `pcal` at a later date).
 
 +
 
@@ -52,6 +53,7 @@ NEW so far +
 DBBC racks +
 VLBA, VLBA4 racks +
 S2 racks +
+DBBC3 racks
 
 +
 
@@ -86,6 +88,8 @@ racks, i.e., the only rack for which it does not work is none.
 
 All of the currently existing recorder restrictions are listed below:
 
++
+
 NEW so far +
 
 +
@@ -113,18 +117,20 @@ that it includes all of Mark III, Mark IV, VLBA (including VLBA2), and
 VLBA4 recorders. All other restrictions: Mark III, VLBA4, and S2 all
 apply to just those simple types.
 
-Syntax
+*SYNTAX*
 
 `command=__list of parameters__`
 
 [none]
-* The command syntax is shown first. The command name and the list of
-parameters are shown. The various forms of the command are described in
-the Comments section. Any combination of upper case and lower case
-letters may be used in typing a command. All commands are converted to
-lower case before they are processed.
 
-Response
+* The command syntax is shown first. The command name and the list of
+parameters are shown. The various forms of the command are described
+in the *COMMENTS* section. All commamnds are lower case. Parameters
+are usally lower case as well, but some may not be if they are data
+that is paased outside the FS, such as in the `sy=...` and
+`antenna=...` commands.
+
+*RESPONSE*
 
 `command/_list of response parameters_`
 
@@ -135,7 +141,7 @@ has an identical list of parameters to the command itself, followed by
 any monitor parameters. All responses to commands are displayed in lower
 case letters only.
 
-Settable parameters
+*SETTABLE PARAMETERS*
 
 [none]
 * This part of the page describes each parameter in the "`Syntax`" line that
@@ -149,14 +155,14 @@ recent issuance of this command. If any parameter value is found to be
 invalid, command interpretation stops at that point and an error message
 is generated.
 
-Monitor-only parameters
+*MONITOR-ONLY PARAMETERS*
 
 [none]
 * Each parameter in the "`Response`" that does not appear in the "`Syntax`" is
 described in this section. These are parameters that cannot be specified
 by the operator, but are monitored or calculated by the Field System.
 
-Comments
+*COMMENTS*
 
 [none]
 * The final section of the page provides further descriptions of the way
@@ -207,9 +213,9 @@ available.
 
 === MAT Module Functions
 
-The phrase "`MAT module functions available`" in the comments section
-means that the following additional types of parameters may be used.
-This is available for those Mark III modules that have MAT
+The phrase "`MAT module functions available`" in the *COMMENTS*
+section means that the following additional types of parameters may be
+used.  This is available for those Mark III modules that have MAT
 communications.
 
 [frame=none,grid=none]
@@ -221,9 +227,9 @@ a|`__module__=alarm`  | Resets the alarm on this module.
 
 === MCB Module Functions
 
-The following syntax is valid for those commands which state that "`MCB
-module functions are available`" in the Comments section of the command
-description.
+The following syntax is valid for those commands which state that
+"`MCB module functions are available`" in the *COMMENTS* section of
+the command description.
 
 [frame=none,grid=none]
 [cols="1,4"]
@@ -372,21 +378,21 @@ ___
 
 === active_mk6s - set/display active Mark 6s
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
 active_mk6s=_list_
 ....
 
-==== Response
+==== RESPONSE
 
 [subs="+quotes"]
 ....
 active_mk6s/_list_
 ....
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -396,11 +402,11 @@ a| `_list_` | list of comma separated Mark 6 unit designation letters:
 `a` or `b`
 |===
 
-==== Monitor-only Parameters
+==== MONITOR-ONLY PARAMETERS
 
 None
 
-==== Comments
+==== COMMENTS
 
 The letters may be given in any order. Duplicated letters are ignored.
 
@@ -413,21 +419,21 @@ The letters may be given in any order. Duplicated letters are ignored.
 
 === active_rdbes - set/display active RDBEs
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
 active_rdbes=_list_
 ....
 
-==== Response
+==== RESPONSE
 
 [subs="+quotes"]
 ....
 active_rdbes/_list_
 ....
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -437,11 +443,11 @@ a| `_list_` | list of comma separated RDBE unit designation letters:
 `a`, `b`, `c`, or `d`
 |===
 
-==== Monitor-only Parameters
+==== MONITOR-ONLY PARAMETERS
 
 None
 
-==== Comments
+==== COMMENTS
 
 The letters may be given in any order. Duplicated letters are ignored.
 
@@ -454,21 +460,21 @@ The letters may be given in any order. Duplicated letters are ignored.
 
 === agc - gain control mode (S2 racks)
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
 agc=_gainmode_
 ....
 
-==== Response
+==== RESPONSE
 
 [subs="+quotes"]
 ....
 agc/_gainmode_
 ....
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -479,11 +485,11 @@ a| `_gainmode_` | Global gain control mode for all BBC. Either `on` or
 BBC.
 |===
 
-==== Monitor-only Parameters
+==== MONITOR-ONLY PARAMETERS
 
 None
 
-==== Comments
+==== COMMENTS
 
 This command selects the Automatic Gain Control mode for all BBC on S2
 rack. For control over AGC settings for individual BBC, see the
@@ -506,21 +512,21 @@ radiometry by _onoff_ and _fivpt_.
 
 === antenna - direct line to the antenna
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
 antenna=_message1_,_message2_, ...
 ....
 
-==== Response
+==== RESPONSE
 
 [subs="+quotes"]
 ....
 antenna/_response1_,_response2_, ...
 ....
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -532,7 +538,7 @@ commas will be sent separately. The number of messages is not limited
 to nine.
 |===
 
-==== Monitor-only Parameters
+==== MONITOR-ONLY PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -551,21 +557,21 @@ response is either `ack` or an error message sent by the antenna.
 
 === azeloff - az-el source position offset
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
 azeloff=_az_,_el_
 ....
 
-==== Response
+==== RESPONSE
 
 [subs="+quotes"]
 ....
 azeloff/_az_,_el_
 ....
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -578,11 +584,11 @@ Response is in decimal degrees.
 
 |===
 
-==== Monitor-only Parameters
+==== MONITOR-ONLY PARAMETERS
 
 None
 
-==== Comments
+==== COMMENTS
 
 If supported by the pointing software, the antenna will move to the
 offset position when this command is issued. To return to the
@@ -600,25 +606,25 @@ These offsets are independent of, and can be used in addition to,
 
 === bank_check - Mark 5 recorder bank check
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
 bank_check
 ....
 
-==== Response
+==== RESPONSE
 
 [subs="+quotes"]
 ....
 bank_check/_VSN_,_serial1_,...,_serial<N>_
 ....
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 None
 
-==== Monitor-only Parameters
+==== MONITOR-ONLY PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -628,7 +634,7 @@ a| `_VSN_` | Volume serial number of bank to be recorded.
 a| `_serial<N>_` | Serial number of the `_<N>_`-th disk in this volume
 |===
 
-==== Comments
+==== COMMENTS
 
 This command will check the VSN of the active bank. If it has changed
 or hasn't been logged since the current log file was last opened, it
@@ -658,14 +664,14 @@ packs.
 
 === bank_status - Mark 5 recorder bank status
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
 bank_status
 ....
 
-==== Response
+==== RESPONSE
 
 [subs="+quotes"]
 ----
@@ -674,11 +680,11 @@ bank_status/_active_,_vsn_,_seconds_,_gb_,_percent_,_ut_
 bank_status/_inactive_,_vsn_,_seconds_,_gb_,_percent_,_ut_
 ----
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 None
 
-==== Monitor-only Parameters
+==== MONITOR-ONLY PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -694,7 +700,7 @@ a| `_ut_` | the time of the last check for this bank
 
 |===
 
-==== Comments
+==== COMMENTS
 
 This command will check the available recording time on the current
 bank, switch banks, check the available recording time on the new
@@ -730,7 +736,7 @@ error reported).
 === bbcn - baseband converter (S2 racks)
 
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
@@ -742,14 +748,14 @@ bbc__n__=_freq_,_ifsource_,_bwu_,_bwl_,_avper_,_agccontrol_
 bbc__n__=_state_
 ....
 
-==== Response
+==== RESPONSE
 
 [subs="+quotes"]
 ....
 bbc__n__:__state__/_freq_,_ifsource_,_bwu_,_bwl_,_avper_,_gainmode_,_gainu_,_gainl_,_lock_,_USBpwr_,_LSBpwr_
 ....
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -766,7 +772,7 @@ a| `_agccontrol_` | Turn AGC `on`/`off` control for this BBC.
 
 |===
 
-==== Monitor-only Parameters
+==== MONITOR-ONLY PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -779,7 +785,7 @@ a| `_USBpwr_` | Power in upper sideband in counts. Range `0` to `300000`, nomina
 a| `_LSBpwr_` | Power in lower sideband in counts. Range `0` to `300000`, nominal operating is `45000`.
 |===
 
-==== Comments
+==== COMMENTS
 
 This command sets up the baseband converters in the S2 rack. This command is
 analogous to the VLBA ``bbc__nn__``
@@ -794,21 +800,21 @@ and Mark III/IV ``vc__nn__`` commands.
 
 === bbcnn - baseband converter (VLBA, VLBA4 racks)
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
 bbc__nn__=_freq_,_ifsource_,_bwu_,_bwl_,_avper_,_gainmode_,_gainu_,_gainl_
 ....
 
-==== Response
+==== RESPONSE
 
 [subs="+quotes"]
 ....
 bbc__nn__/_freq_,_ifsource_,_bwu_,_bwl_,_avper_,_gainmode_,_gainu_,_gainl_,_lock_,_USBpwr_,_LSBpwr_,_serno_,_err_
 ....
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -833,7 +839,7 @@ a| `_gainu_` | Gain value for USB in dB. This is a valid parameter only if `_gai
 a| `_gainl_` | Gain value for LSB in dB. This is a valid parameter only if `_gainmode_` is `man`. May be any value  between `-18.0` dB and `12.0` dB. Not all gains are settable, the lowest available gain greater than `_gainl_` is used. Step size is linear in voltage. Default is the current LSB gain level. The actual gain setting reported as a monitor value may go as low `-99.99` dB.
 |===
 
-==== Monitor-only Parameters
+==== MONITOR-ONLY PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -850,7 +856,7 @@ a| `_serno_` | Module serial number, decimal.
 a| `_err_` | Module timing error indication, `1pps` or `no_1pps`.
 |===
 
-==== Comments
+==== COMMENTS
 
 This command sets up the baseband converters in the VLBA rack.
 It is analogous to the Mark IV ``vc__nn__`` commands.
@@ -908,21 +914,21 @@ valid IF source for the BBC.
 
 === bbcnnn - digital baseband converter (DBBC3 racks)
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
 bbc__nnn__=_freq_,_IF_,_bw_,_tpint_
 ....
 
-==== Response
+==== RESPONSE
 
 [subs="+quotes"]
 ....
 bbc__nnn__/_freq_,_IF_,_bw_,_tpint_,_gainctrl_,_gainU_,_gainL_,_tpUcalon_,_tpLcalon_,_tpUcaloff_,_tpLcaloff_
 ....
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -931,16 +937,18 @@ bbc__nnn__/_freq_,_IF_,_bw_,_tpint_,_gainctrl_,_gainU_,_gainL_,_tpUcalon_,_tpLca
 
 a| `_nnn_` | Index number of the BBC, corresponding to its position in
 the rack, `001` to `128`. Not all racks have all BBCs. See the
-Comments for the available BBCs depending on BBCs/IF and IFs in rack.
+<<comments_bbcnnn_j,*COMMENTS*>> for the available BBCs depending on
+BBCs/IF and IFs in rack.
 
 a| `_freq_` | L.O. frequency in MHz, between `0.000001`-`4096`
 inclusive.  This frequency may be specified to 1 Hz precision, i.e., 6
 places after the decimal point.
 
 a| `_IF_` | I.F. input source, one of `a`, `b`, `c`, `d`, `e`, `f`,
-`g`, or `h`. See the Comments for the default values. This parameter
-does not affect equipment set-up, but does affect the center frequency
-Tcal, and FWHM values for Tsys, pointing, and SEFD measurements.
+`g`, or `h`. See the <<comments_bbcnnn_j,*COMMENTS*>> for the default
+values.  This parameter does not affect equipment set-up, but does
+affect the center frequency Tcal, and FWHM values for Tsys, pointing,
+and SEFD measurements.
 
 a| `_bw_` | Sideband bandwidth in MHz. One of `2`, `4`, `8`, `16`,
 `32`, `64`, or `128`. Default `32`. For monitor, a value of `0` maybe
@@ -954,7 +962,7 @@ with the 1 pps.
 
 |===
 
-==== Monitor-only Parameters
+==== MONITOR-ONLY PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -970,27 +978,27 @@ a| `_gainL_` | Gain value for LSB in steps, `0`-`255`.
 
 a| `_tpUcalon_` | Power in upper sideband in counts with the cal on
 for synchronous radiometry or TP for non-synchronous. Range `0` to
-`65535`. See the Comments for information about the nominal operating
-level.
+`65535`. See the <<comments_bbcnnn_j,*COMMENTS*>> for information
+about the nominal operating level.
 
 a| `_tpLcalon_` | Power in lower sideband in counts with the cal on
 for synchronous radiometry or TP for non-synchronous. Range `0` to
-`65535`. See the Comments for information about the nominal operating
-level.
+`65535`. See the <<comments_bbcnnn_j,*COMMENTS*>> for information
+about the nominal operating level.
 
 a| `_tpUcaloff_` | Power in upper sideband in counts with the cal off
 for synchronous radiometry or `0` for non-synchronous. Range `0` to
-`65535`. See the comments for information about the nominal operating
-level.
+`65535`. See the <<comments_bbcnnn_j,*COMMENTS*>> for information
+about the nominal operating level.
 
 a| `_tpLcaloff_` | Power in lower sideband in counts with the cal off
 for synchronous radiometry or `0` for non-synchronous. Range `0` to
-`65535`. See the comments for information about the nominal operating
-level.
+`65535`. See the <<comments_bbcnnn_j,*COMMENTS*>> for information
+about the nominal operating level.
 
 |===
 
-==== Comments
+==== [[comments_bbcnnn_j]] COMMENTS
 
 This command sets up the digital channel converters in the DBBC3 rack.
 This command is analogous to the Mark IV ``VC__nn__`` and VLBA and
@@ -1047,36 +1055,41 @@ of the system. The level is set by the `bbc_gain` command, typically
 
 === form - Sampler mode (DBBC racks)
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
 form=_mode_,_test_
 ....
 
-==== Response
+==== RESPONSE
 
 [subs="+quotes"]
 ....
 form/_mode_,_test_
 ....
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
 [cols="1,8"]
 |===
-a| `_mode_` | Output mode. For DDC: `astro`, `geo`, `wastro`, `test`, `lba`, `astro2`, `astro3`, or `geo2`. For PFB: `flex`, `full`, `full_auto`, or `spol`. No default. See the <<formd,Comments>> for special cases and output pin assignments.
+
+a| `_mode_` | Output mode. For DDC: `astro`, `geo`, `wastro`, `test`,
+`lba`, `astro2`, `astro3`, or `geo2`. For PFB: `flex`, `full`,
+`full_auto`, or `spol`. No default. See the
+<<comments_form_d,*COMMENTS*>> for special cases and output pin
+assignments.
 
 a| `_test_` | DDC only test mode: `0`, `1`, `bin`, `tvg`.  No default. Ignored unless `_mode_` is `test`. Not available for readback for version `v100`.
 |===
 
-==== Monitor-only Parameters
+==== MONITOR-ONLY PARAMETERS
 
 None
 
-==== [[formd]]Comments
+==== [[comments_form_d]]COMMENTS
 Special cases:
 
 * DDC personality:
@@ -1197,7 +1210,7 @@ The following tables give the pin assignments for the DDC modes.
 
 === help - display on-line help information
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
@@ -1209,11 +1222,11 @@ help=_command_
 ?=_command_
 ....
 
-==== Response
+==== RESPONSE
 
 Displays information in a terminal window
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -1222,7 +1235,7 @@ Displays information in a terminal window
 a| `_command_` | The name of any SNAP command
 |===
 
-==== Comments
+==== COMMENTS
 
 This command displays available information on the specified SNAP
 command. Either `help` or `?` may be used. Typing `*help*` or `*?*`
@@ -1374,14 +1387,14 @@ position.
 
 === lo - LO Configuration
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
 lo=_chan_,_freq_,_sb_,_pol_,_pcspace_,_pcoff_
 ....
 
-==== Response
+==== RESPONSE
 
 [subs="+quotes"]
 ....
@@ -1393,7 +1406,7 @@ lo/_chan_,_freq_,_sb_,_pol_,_pcspace_,_pcoff_
 lo/rxg,_chan_,_freq_,_pol_,_file_,_type_,_lo1_,_lo2_,_year_,_month_,_day_,_pol1_,_dpfu1_,_pol2_,_dpfu2_
 ....
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 [%noheader]
 [frame=none,grid=none]
@@ -1412,7 +1425,7 @@ a| `_pcspace_` |  Spacing of phase-cal rails for this channel, MHz, `unknown`, o
 a| `_pcoff_` | First phase-cal rail frequency for this IF if not equal to the spacing, MHz. Default `0.0`. This offset is specified relative to DC in the IF.
 |===
 
-==== Monitor-only Parameters
+==== MONITOR-ONLY PARAMETERS
 
 [frame=none,grid=none]
 [cols="1,8"]
@@ -1431,7 +1444,7 @@ a| `_pol2_` | second polarization from the _.rxg_ file, if present
 a| `_dpfu2_` | DPFU of the second polarization in the _.rxg_ file, if present
 |===
 
-==== Comments
+==== COMMENTS
 
 This command specifies the characteristics of each IF channel.
 
@@ -1489,21 +1502,21 @@ In the future, for K4 type 1 rack, the range of LO values should be
 
 === tsys - compute and display system temps
 
-==== Syntax
+==== SYNTAX
 
 [subs="+quotes"]
 ....
 tsys=_list_
 ....
 
-==== Response
+==== RESPONSE
 
 [subs="+quotes"]
 ....
 tsys/_systemps_
 ....
 
-==== Settable Parameters
+==== SETTABLE PARAMETERS
 
 [frame=none,grid=none]
 [cols="1,8"]
@@ -1517,7 +1530,7 @@ are permitted.
 
 |===
 
-==== Monitor-only Parameters
+==== MONITOR-ONLY PARAMETERS
 
 [frame=none,grid=none]
 [cols="1,8"]
@@ -1528,7 +1541,7 @@ temperature pairs. Temperatures are in degrees Kelvin.
 
 |===
 
-==== Comments
+==== COMMENTS
 
 The `_systemp_` results are returned grouped in pairs of
 `__mnemonic__,__value__` for each detector. The output is collected
