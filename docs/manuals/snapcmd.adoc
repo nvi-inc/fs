@@ -906,6 +906,145 @@ valid IF source for the BBC.
 {nbsp}
 {nbsp}
 
+=== bbcnnn - digital baseband converter (DBBC3 racks)
+
+==== Syntax
+
+[subs="+quotes"]
+....
+bbc__nnn__=_freq_,_IF_,_bw_,_tpint_
+....
+
+==== Response
+
+[subs="+quotes"]
+....
+bbc__nnn__/_freq_,_IF_,_bw_,_tpint_,_gainctrl_,_gainU_,_gainL_,_tpUcalon_,_tpLcalon_,_tpUcaloff_,_tpLcaloff_
+....
+
+==== Settable Parameters
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,7"]
+|===
+
+a| `_nnn_` | Index number of the BBC, corresponding to its position in
+the rack, `001` to `128`. Not all racks have all BBCs. See the
+Comments for the available BBCs depending on BBCs/IF and IFs in rack.
+
+a| `_freq_` | L.O. frequency in MHz, between `0.000001`-`4096`
+inclusive.  This frequency may be specified to 1 Hz precision, i.e., 6
+places after the decimal point.
+
+a| `_IF_` | I.F. input source, one of `a`, `b`, `c`, `d`, `e`, `f`,
+`g`, or `h`. See the Comments for the default values. This parameter
+does not affect equipment set-up, but does affect the center frequency
+Tcal, and FWHM values for Tsys, pointing, and SEFD measurements.
+
+a| `_bw_` | Sideband bandwidth in MHz. One of `2`, `4`, `8`, `16`,
+`32`, `64`, or `128`. Default `32`. For monitor, a value of `0` maybe
+displayed if the BBC has not been configured by the FS and the DBBC3
+boot configuration.
+
+a| `_avper_` | Averaging period in seconds for TPI. Positive integers
+`1`-`60` allowed. Default is `1`. The averaging period is common to
+both upper and lower sidebands. The averaging period is synchronous
+with the 1 pps.
+
+|===
+
+==== Monitor-only Parameters
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,7"]
+|===
+
+a| `_gainctrl_` | Gain control mode, either `agc` or `man`. The gain
+mode is common to both sidebands.
+
+a| `_gainU_` | Gain value for USB in steps, `0`-`255`.
+
+a| `_gainL_` | Gain value for LSB in steps, `0`-`255`.
+
+a| `_tpUcalon_` | Power in upper sideband in counts with the cal on
+for synchronous radiometry or TP for non-synchronous. Range `0` to
+`65535`. See the Comments for information about the nominal operating
+level.
+
+a| `_tpLcalon_` | Power in lower sideband in counts with the cal on
+for synchronous radiometry or TP for non-synchronous. Range `0` to
+`65535`. See the Comments for information about the nominal operating
+level.
+
+a| `_tpUcaloff_` | Power in upper sideband in counts with the cal off
+for synchronous radiometry or `0` for non-synchronous. Range `0` to
+`65535`. See the comments for information about the nominal operating
+level.
+
+a| `_tpLcaloff_` | Power in lower sideband in counts with the cal off
+for synchronous radiometry or `0` for non-synchronous. Range `0` to
+`65535`. See the comments for information about the nominal operating
+level.
+
+|===
+
+==== Comments
+
+This command sets up the digital channel converters in the DBBC3 rack.
+This command is analogous to the Mark IV ``VC__nn__`` and VLBA and
+DBBC ``bbc__nn__`` commands.
+
+Unlike the output of most other commands which have no embedded
+blanks, the output for this command is organized in columns so when
+multiple commands are used in sequence it is easy to read gains and
+power levels.
+
+The `_IF_` selection parameter does not affect the equipment
+configuration. It does affect center frequency, Tcal, and FWHM values
+for Tsys, pointing, and SEFD measurements.
+
+CAUTION: This command does not check whether you have specified a
+valid `_IF_` source for the channel.
+
+`_gainU_` and `_gainL_` can be controlled with the `bbc_gain` command
+
+The nominal operating level for TP counts depends on the configuration
+of the system. The level is set by the `bbc_gain` command, typically
+`16000` in `agc` mode.
+
+.Available BBCs depending on available BBCs/IF and IFs
+[options="header"]
+|===
+>| BBCs/IF ^| IFA ^| IFB ^| IFC ^|IFD ^| IFE ^| IFF ^| IFG  ^| IFH
+>| 8 | `001`-`008` | `009`-`016` | `017`-`024` | `025`-`032` | `033`-`040` | `041`-`048` | `049`-`056` | `057`-`064`
+>| 12 | `001`-`008`, `065`-`068` | `009`-`016`, `073`-`076` | `017`-`024`, `081`-`084` | `025`-`032`, `089`-`092` | `033`-`040`, `097`-`100` | `041`-`048`, `105`-`108` | `049`-`056`, `113`-`116` | `057`-`064`, `121`-`124`
+>| 16 | `001`-`008`, `065`-`072` | `009`-`016`, `073`-`080` | `017`-`024`, `081`-`088` | `025`-`032`, `089`-`096` | `033`-`040`, `097`-`104` | `041`-`048`, `105`-`112` | `049`-`056`, `113`-`120` | `057`-`064`, `121`-`128`
+|===
+
+.Default _IF_ values
+[options="header"]
+[cols="^,^"]
+|===
+| Converters | _IF_
+|`001`-`008`, `065`-`072`|`a`
+|`009`-`016`, `073`-`080`|`b`
+|`017`-`024`, `081`-`088`|`c`
+|`025`-`032`, `089`-`096`|`d`
+|`033`-`040`, `097`-`104`|`e`
+|`041`-`048`, `105`-`112`|`f`
+|`049`-`056`, `113`-`120`|`g`
+|`057`-`064`, `121`-`128`|`h`
+|===
+
+---
+<<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
+
 === form - Sampler mode (DBBC racks)
 
 ==== Syntax

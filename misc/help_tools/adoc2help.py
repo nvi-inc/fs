@@ -13,6 +13,8 @@ def ext(equip):
         return 'w__'
     elif equip == 'S2 racks':
         return 's__'
+    elif equip == 'DBBC3 racks':
+        return 'j__'
     else:
         sys.exit("Unknown equipment type '"+equip+"'. To cleanup, you probably need to remove *.man.* files");
 #
@@ -44,6 +46,10 @@ def finish_file(name,extension):
     if name == 'bbcn' and extension == 's__':
         for i in range(1,4+1):
             link(name+'.man.'+extension,'bbc'+f'{i:01d}'+'.man.'+extension)
+#
+    if name == 'bbcnnn' and extension == 'j__':
+        for i in range(1,128+1):
+            link(name+'.man.'+extension,'bbc'+f'{i:03d}'+'.man.'+extension)
 #
 filepath='snapcmd.adoc'
 
