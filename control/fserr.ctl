@@ -2850,10 +2850,10 @@ DR -612
 Core3h board ?WWW mask2 is not correct.
 ""
 DR -613
-Core3h board ?WWW mask3 is not correct.
+Core3h board ?WWW mask3 is not correct, it should be the same as the requested mask1.
 ""
 DR -614
-Core3h board ?WWW mask4 is not correct.
+Core3h board ?WWW mask4 is not correct, it should be the same as the requested mask2.
 ""
 DR -615
 Core3h board ?WWW sysstat decimate is not correct.
