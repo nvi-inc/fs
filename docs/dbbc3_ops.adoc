@@ -21,7 +21,7 @@
 :doctype: book
 
 = DRAFT FS DBBC3 Operations Manual
-Version 1.5 - September 2021
+Version 1.6 - October 2021
 
 :experimental:
 :sectnums:
@@ -442,12 +442,12 @@ The DBBC3 specific control file parameters are in the _dbbc3.ctl_ control file.
 An example of the contents are:
 
 ....
-* bbcs/if (8, 12, or 16), ifs (1-8)
-  8 8
-* DDC_U firmware version (v125 or later)
- v125
-* DDC_V firmware version (v124 or later)
- v124
+* Two fields: BBCs/IF (8, 12, or 16), IFs (1-8)
+  16 8
+* DDC_U firmware version (v121 or later)
+ v121
+* DDC_V firmware version (v121 or later)
+ v121
 * mcast delay 0-99 centiseconds
   57
 * setcl board
