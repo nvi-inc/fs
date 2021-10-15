@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-import sys
-from io import BytesIO
-import pycurl
 import logging
 import os
-import time
 import re
+import sys
+import time
+from io import BytesIO
 from os import path
+
+import pycurl
+
+logger = logging.getLogger(__name__)
 
 
 def file_progress(download_t, download_d, upload_t, upload_d):
@@ -16,7 +19,7 @@ def file_progress(download_t, download_d, upload_t, upload_d):
         progress = upload_d / upload_t
     else:
         return
-    barLength = 20  # Modify this to change the length of the progress bar
+    barLength = 30  # Modify this to change the length of the progress bar
     status = ""
     if not isinstance(progress, int):
         progress = float(progress)
@@ -25,15 +28,25 @@ def file_progress(download_t, download_d, upload_t, upload_d):
         progress = 0.0
     if progress >= 1.0:
         progress = 1.0
-        status = "Done...\r"
-    block = int(round(barLength * progress))
-    text = "\rPercent: [{}] {:3d}% {}/{} {}".format(
-        "=" * block + " " * (barLength - block),
-        int(progress * 100),
-        download_d,
-        download_t,
-        status,
-    )
+        status = "Done...\n"
+        block = int(round(barLength * progress))
+        text = "\rPercent: [{}] {:3d}% {}/{} {}".format(
+            "=" * block + " " * (barLength - block),
+            int(progress * 100),
+            download_d,
+            download_t,
+            status,
+        )
+        text = "\rDone"
+    else:
+        block = int(round(barLength * progress))
+        text = "\rPercent: [{}] {:3d}% {}/{} {}".format(
+            "=" * block + " " * (barLength - block),
+            int(progress * 100),
+            download_d,
+            download_t,
+            status,
+        )
     sys.stdout.write(text)
     sys.stdout.flush()
 
@@ -41,10 +54,10 @@ def file_progress(download_t, download_d, upload_t, upload_d):
 def set_file_times_anow(local_file, modTime):
     """Change the access time of the file to now. This is used to decide if
     the file needs checking the next time this routine is run. Note the
-    modification time is kept the same as on the server. The modification time is when the
+    modification time is set to modTime. The modification time is when the
     contents were last changed."""
     atime = time.time()
-    logging.debug(
+    logger.debug(
         "set_file_times_anow: setting access and mod time for {} to {} and {}".format(
             local_file, atime, modTime
         )
@@ -54,7 +67,7 @@ def set_file_times_anow(local_file, modTime):
 
 
 class SchedServer(object):
-    """ Tasks common to all interactions with the CDDIS schedule file server"""
+    """Tasks common to all interactions with the CDDIS schedule file server"""
 
     def __init__(self, local_dir):
         self.transfer_done = False
@@ -63,13 +76,21 @@ class SchedServer(object):
         self.url_prefix = ""
         self.local_dir = local_dir
 
-    def curl_setup(self, netrc_file, cookie_file):
-        logging.debug("Setting up curl....")
+    def curl_setup(self, netrc_file, cookie_file, sec_level, quiet):
+        logger.debug("Setting up curl....")
         # cookies and username/password
+
+        # netrc_file is the .netrc file
+        # cookie_file is the .urs_cookies file
         self.curl.setopt(self.curl.NETRC_FILE, netrc_file)
         self.curl.setopt(self.curl.NETRC, True)  # needed?
         self.curl.setopt(self.curl.COOKIEFILE, cookie_file)
         self.curl.setopt(self.curl.COOKIEJAR, cookie_file)
+        if sec_level:
+            logger.debug("Setting seclevel=1")
+            self.curl.setopt(self.curl.SSL_CIPHER_LIST, "DEFAULT:@SECLEVEL=1")
+        else:
+            logger.debug("Not setting seclevel")
         # follow redirects
         self.curl.setopt(self.curl.FOLLOWLOCATION, True)
 
@@ -80,15 +101,16 @@ class SchedServer(object):
         self.curl.setopt(self.curl.WRITEDATA, self.b_obj)
 
         # progress callback
-        self.curl.setopt(self.curl.NOPROGRESS, False)
-        self.curl.setopt(self.curl.XFERINFOFUNCTION, file_progress)
+        if not quiet:
+            self.curl.setopt(self.curl.NOPROGRESS, False)
+            self.curl.setopt(self.curl.XFERINFOFUNCTION, file_progress)
 
-        # give up if can't connect to server in 30 sec
-        self.curl.setopt(self.curl.CONNECTTIMEOUT, 30)
-        # give up if entire operation takes more than 120 sec
-        self.curl.setopt(self.curl.TIMEOUT, 120)
+        # give up if can't connect to server in 10 sec
+        self.curl.setopt(self.curl.CONNECTTIMEOUT, 10)
+        # give up if entire operation takes more than 60 sec
+        self.curl.setopt(self.curl.TIMEOUT, 60)
 
-        logging.debug("Curl is configured.")
+        logger.debug("Curl is configured.")
 
         return True
 
@@ -104,32 +126,34 @@ class SchedServer(object):
         self.curl.setopt(self.curl.NOBODY, True)
         self.curl.setopt(self.curl.HEADER, True)
         # Perform the request
-        logging.info("Requesting file header info...")
+        logger.info("Requesting file header info...")
         self.curl.perform()
-        logging.info("Request for file header info done.")
+        logger.info("Request for file header info done.")
 
         # HTTP response code, e.g. 200.
         status = self.curl.getinfo(self.curl.RESPONSE_CODE)
         success = False
         if status == 200 or (300 < status <= 308):
-            logging.info("Got file status from the server: {}".format(status))
+            logger.info("Got file status from the server: {}".format(status))
             success = True
         else:
-            logging.error(
+            logger.error(
                 "Failed to get file info from server. URL status = {}".format(status)
             )
 
         if success:
             size_download = self.curl.getinfo(self.curl.SIZE_DOWNLOAD)
             file_time = self.curl.getinfo(self.curl.INFO_FILETIME)
-            logging.debug(
+            logger.debug(
                 "dowload size = {}, file time = {}".format(size_download, file_time)
             )
         else:
             file_time = 0
         return success, file_time
 
-    def get_file(self, server_url, filename, local_dir, force, check_delta_hours=1):
+    def get_file(
+        self, server_url, filename, local_dir, force, check_delta_hours=1, quiet=False
+    ):
         """Download a file from the server
 
         Parameters
@@ -172,12 +196,18 @@ class SchedServer(object):
         else:
             # We have a local copy.
             # Get the access and modification times of the local file
-            stinfo = os.stat(local_file)
+            # However, if there's a .new file (an unprocessed sched file)
+            # we want the stats on that
+            check_file = local_file
+            dotnew_file = "{}.new".format(local_file)
+            if path.exists(dotnew_file):
+                check_file = dotnew_file
+            stinfo = os.stat(check_file)
             file_access_time_local = stinfo.st_atime
             file_mod_time_local = stinfo.st_mtime
             # date = datetime.utcnow()
             now = time.time()
-            logging.debug("We have a local copy of {}".format(local_file))
+            logger.debug("We have a local copy of {}".format(local_file))
             if (now - 60 * 60 * check_delta_hours) > file_access_time_local:
                 # It's more than check_delta_hours since the last check. Download
                 # We should tell the server to send the file only if it's newer
@@ -192,39 +222,46 @@ class SchedServer(object):
                     check_delta_hours
                 )
                 download_file = False
-        logging.info(logmsg)
+        logger.info(logmsg)
 
         if download_file:
             url = "{}/{}".format(server_url, filename)
-            (success, file_mod_time_server) = self.get_file_server(url, local_file)
+            (success, file_mod_time_server) = self.get_file_server(
+                url, local_file, quiet
+            )
             # set it's modification and access times
             if not success:
-                logging.warning("Could not get {} from the server".format(filename))
+                logger.warning("Could not get {} from the server".format(filename))
                 # Don't update the access time because we couldn't get to the file
                 return False, False
             else:
                 # either we got a new version or the current local one is the latest
                 # if file_mod_time_server is > file_mod_time_local, then it's a new file
                 if file_mod_time_server > file_mod_time_local:
-                    logging.info("Got a new file from the server")
+                    logger.info("Got a new file from the server")
                     set_file_times_anow(local_file, file_mod_time_server)
                     return True, True
                 else:
-                    logging.info("We already have the latest version of this file")
+                    logger.info(
+                        "We already have the latest version of this file. Server mod "
+                        "time = {}, Local mod time {}".format(
+                            file_mod_time_server, file_mod_time_local
+                        )
+                    )
                     # only change the access time
-                    set_file_times_anow(local_file, file_mod_time_local)
+                    set_file_times_anow(local_file, os.stat(local_file).st_mtime)
                     return True, False
         return True, False
 
     def report_file_stats(self):
         size_download = self.curl.getinfo(self.curl.SIZE_DOWNLOAD)
         file_time = self.curl.getinfo(self.curl.INFO_FILETIME)
-        logging.debug(
+        logger.debug(
             "download size = {}, file time = {}".format(size_download, file_time)
         )
         return (size_download, file_time)
 
-    def get_file_server(self, url, local_file):
+    def get_file_server(self, url, local_file, quiet=False):
         if "ftps://" in url:
             url = re.sub("ftps://", "ftp://", url)
             self.curl.setopt(self.curl.USE_SSL, True)
@@ -238,16 +275,17 @@ class SchedServer(object):
         local_file_temp = "{}_temp".format(local_file)
         with open(local_file_temp, mode="wb") as fd:
             self.curl.setopt(self.curl.WRITEDATA, fd)
-            logging.info("Requesting file from server at {}...".format(url))
+            logger.info("Requesting file from server at {}...".format(url))
             #            self.curl.setopt(self.curl.VERBOSE, True)
             ret = 0
             try:
                 self.curl.perform()
             except pycurl.error as e:
                 ret = e.args[0]
-                logging.debug("Curl perf exception ret = {}".format(ret))
-
-            logging.info("Request for file completed.")
+                logger.debug("Curl perf exception ret = {}".format(ret))
+            if not quiet:
+                print("")
+            logger.info("Request for file completed.")
             fd.close()
             if ret > 0:
                 status = ret
@@ -258,7 +296,7 @@ class SchedServer(object):
             if status == 200 or status == 226:
                 # 200 = Action successfully completed (FTP) 226 = "Closing data connection. Requested file action
                 # successful (for example, file transfer or file abort)." (FTP) Got a file
-                logging.debug(
+                logger.debug(
                     "Got file from the server. Return status: {}".format(status)
                 )
                 # delete old file
@@ -274,20 +312,32 @@ class SchedServer(object):
                 (size_download, file_time) = self.report_file_stats()
                 # file isn't newer but we did get a time
                 success = True
-
             elif status == 304:
                 # got an empty file because it hasn't changed
-                logging.info(
+                logger.info(
                     "The server file hasn't changed. Return status: {}".format(status)
                 )
                 # delete temporary file
                 file_time = 0
                 success = True
+            elif status == 35:
+                logger.warning("Failed to connect to server. The SSL handshake failed.")
+                logger.warning(
+                    "This may be caused by a known problem that affects recent Debian linux distributions"
+                )
+                logger.warning("Try adding CurlSecLevel1 to fesh2.config")
+                file_time = 0
             elif status == 28:
-                logging.warning("Failed to get file from server due to timeout.")
+                logger.warning("Failed to get file from server due to timeout.")
+                file_time = 0
+            elif status == 9:
+                logger.warning(
+                    "Failed to get file from server. Access denied. It's likely the directory does not "
+                    "exist yet."
+                )
                 file_time = 0
             else:
-                logging.warning(
+                logger.warning(
                     "Failed to get file from server. Return status = {}".format(status)
                 )
                 file_time = 0
@@ -299,7 +349,7 @@ class SchedServer(object):
 
 
 class MasterServer(SchedServer):
-    """ Managing access to the Master schedule file. Inherits from SchedServer"""
+    """Managing access to the Master schedule file. Inherits from SchedServer"""
 
     def __init__(self, local_dir):
         super(MasterServer, self).__init__(local_dir)
@@ -308,7 +358,14 @@ class MasterServer(SchedServer):
         self.master_file_intensive_name = ""
 
     def get_master(
-        self, server_url, year, local_dir, force, check_delta_hours=1, intensive=False
+        self,
+        server_url,
+        year,
+        local_dir,
+        force,
+        check_delta_hours=1,
+        intensive=False,
+        quiet=False,
     ):
         """Download the master schedule for the specified year (integer)
 
@@ -334,13 +391,13 @@ class MasterServer(SchedServer):
             self.master_file_name = "master{:02d}-int.txt".format(year - 2000)
         url = "{}/{}".format(server_url, self.url_prefix)
         (success, new) = super(MasterServer, self).get_file(
-            url, self.master_file_name, local_dir, force, check_delta_hours
+            url, self.master_file_name, local_dir, force, check_delta_hours, quiet
         )
         return success, new
 
 
 class SchedFileServer(SchedServer):
-    """ Managing access to schedule files (SKD or VEX). Inherits from SchedServer"""
+    """Managing access to schedule files (SKD or VEX). Inherits from SchedServer"""
 
     def __init__(self, local_dir):
         """
@@ -352,7 +409,15 @@ class SchedFileServer(SchedServer):
         self.sched_file_name = ""
 
     def get_sched(
-        self, server_url, code, sched_type, year, local_dir, force, check_delta_hours=1
+        self,
+        server_url,
+        code,
+        sched_type,
+        year,
+        local_dir,
+        force,
+        quiet=False,
+        check_delta_hours=1,
     ):
         """Download the schedule for the specified session, year (integer)
 
@@ -368,15 +433,15 @@ class SchedFileServer(SchedServer):
         # URL to the directory containing the schedule file
         url = "{}/{}/{}/{}".format(server_url, self.url_prefix, year, code)
         (success, new) = super(SchedFileServer, self).get_file(
-            url, self.sched_file_name, local_dir, force, check_delta_hours
+            url, self.sched_file_name, local_dir, force, check_delta_hours, quiet
         )
         return success, new
 
     def check_exists_sched(self, code, config):
-        """ Given an obs code and directory, look for supported schedule files and return
-            True if the file exists and the type (either vex or skd)"""
-        for ty in config.sched_types:
-            local_file = "{}/{}.{}".format(config.config["FS"]["sched_dir"], code, ty)
+        """Given an obs code and directory, look for supported schedule files and return
+        True if the file exists and the type (either vex or skd)"""
+        for ty in config.SchedTypes:
+            local_file = "{}/{}.{}".format(config.SchedDir, code, ty)
             if path.exists(local_file):
                 return True, ty
         # If we get here then the schedule file wasn't found

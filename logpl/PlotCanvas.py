@@ -631,7 +631,7 @@ class PlotCanvas:
         self.yticks.append(self.offset)
         #create logscale-ticks:
         #set labels:
-        #self.canvas.create_text(5,1, anchor = NW, text = 'Plot: ' + str(PlotManager.active_plots))
+        #self.canvas.create_text(5,1, anchor = NW, text = 'Plot: ' + station_name_2ch(PlotManager.active_plots))
             
     
     def setBorder(self, color = 'black'):

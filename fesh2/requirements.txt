@@ -1,2 +1,9 @@
-pexpect~=4.7.0
-pycurl~=7.43.0.2
+additional-urwid-widgets~=0.4.1
+ConfigArgParse~=1.5.3
+numpy~=1.21.2
+pexpect~=4.8.0
+psutil~=5.8.0
+ptyprocess~=0.7.0
+pycurl~=7.44.1
+python-json-logger~=2.0.2
+urwid~=2.1.2

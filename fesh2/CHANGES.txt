@@ -3,3 +3,8 @@
 2.0rc3, 25 June 2020 -- Third pre-release
 2.0rc4, 25 June 2020 -- Fourth pre-release
 2.0rc5, 29 June 2020 -- Fifth pre-release
+2.0rc6, 29 June 2020 -- Fifth pre-release
+2.1rc1, 16 September 2020 -- Server mode, check status only option
+2.1rc2, 20 November 2020 -- Bug checks, testing
+2.1rc4, 20 November 2020 -- Minor updates
+2.1rc5, 25 November 2020 -- minor bug fixed in doc and __main__
