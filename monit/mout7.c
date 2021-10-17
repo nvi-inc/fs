@@ -99,27 +99,29 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     struct tm *ptr=gmtime(&ifc.time);
 
-    int tm_different =
-            ptr->tm_year != tm_save.tm_year ||
-            ptr->tm_yday != tm_save.tm_yday ||
-            ptr->tm_hour != tm_save.tm_hour ||
-            ptr->tm_min  != tm_save.tm_min  ||
-            ptr->tm_sec  != tm_save.tm_sec;
+    if(NULL != ptr) {
+        int tm_different =
+                ptr->tm_year != tm_save.tm_year ||
+                ptr->tm_yday != tm_save.tm_yday ||
+                ptr->tm_hour != tm_save.tm_hour ||
+                ptr->tm_min  != tm_save.tm_min  ||
+                ptr->tm_sec  != tm_save.tm_sec;
 
-    if(!tm_different || v124)
-        standout();
+        if(!tm_different || v124)
+            standout();
 
-    printw("%4d.%03d.%02d:%02d:%02d",
-            ptr->tm_year+1900,
-            ptr->tm_yday+1,
-            ptr->tm_hour,
-            ptr->tm_min,
-            ptr->tm_sec);
+        printw("%4d.%03d.%02d:%02d:%02d",
+                ptr->tm_year+1900,
+                ptr->tm_yday+1,
+                ptr->tm_hour,
+                ptr->tm_min,
+                ptr->tm_sec);
 
-    if(!tm_different || v124)
-        standend();
+        if(!tm_different || v124)
+            standend();
 
-    memcpy(&tm_save,ptr,sizeof(tm_save));
+        memcpy(&tm_save,ptr,sizeof(tm_save));
+    }
 
     move(3,0);
     printw("Epoch ");
