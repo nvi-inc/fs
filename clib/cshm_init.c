@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <limits.h>
 
 #include "../include/dpi.h"
 #include "../include/params.h"
@@ -509,7 +510,7 @@ void cshm_init()
   }
 
   for (i=0;i<MAX_DBBC3_BBC;i++) {
-    shm_addr->dbbc3_bbcnn[i].freq=0;
+    shm_addr->dbbc3_bbcnn[i].freq=UINT_MAX;
     shm_addr->dbbc3_bbcnn[i].source=-1;
     shm_addr->dbbc3_bbcnn[i].bw=-1;
     shm_addr->dbbc3_bbcnn[i].avper=0;

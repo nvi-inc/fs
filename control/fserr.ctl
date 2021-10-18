@@ -2520,7 +2520,7 @@ DK -101
 No default for frequency
 ""
 DK -201
-Error decoding frequency, must be less than or equal to 4096
+Error decoding frequency, must be 0-4096.000000 MHz, inclusive, with 1 Hz resolution.
 ""
 DK -202
 Error decoding IF source, must be A, B, C, D, E, F, G, or H.

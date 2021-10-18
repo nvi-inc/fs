@@ -65,7 +65,7 @@ char *ptr;
 	  ierr=-200;
 	  break;
 	}
-	if (lcl->freq < 1 || lcl->freq > 4096000000ul)
+	if (lcl->freq > 4096000000ul)
 	  ierr = -200;
         break;
       case 2:

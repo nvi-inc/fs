@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
@@ -97,6 +98,9 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         if(shm_addr->lo.sideband[ifchain]!=1 &&
                 shm_addr->lo.sideband[ifchain]!=2 )
+            continue;
+
+        if(shm_addr->dbbc3_bbcnn[k].freq == UINT_MAX)
             continue;
 
         freq=shm_addr->dbbc3_bbcnn[k].freq*1e-6 - bw_key[ibw]*0.5;

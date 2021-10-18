@@ -26,6 +26,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <time.h>
+#include <limits.h>
 
 #include "../include/dpi.h"
 #include "../include/params.h"
@@ -161,7 +162,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             ibbc=next*8+64+i-8;
         move(5+i,0);
         printw("%03d",ibbc+1);
-        if(bbc[ibbc].freq>0.0) {
+        if(bbc[ibbc].freq!=UINT_MAX) {
             double freq=bbc[ibbc].freq*1e-6;
             if(ifc.lo>=0.0 && krf)
                 if(1==ifc.sideband)

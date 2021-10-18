@@ -8,9 +8,9 @@
 
 Settable Parameters:
 
-            freq      L.O. frequency in MHz, between 0.000001-4096
+            freq      L.O. frequency in MHz, between 0-4096.000000,
                       inclusive.  This frequency may be specified to 1
-                      Hz precison, i.e., 6 places after the decimal
+                      Hz resolution, i.e., 6 places after the decimal
                       point.
 
             IF        I.F. input source, one of A, B, C, D, E, F, G, H.
