@@ -31,7 +31,7 @@ def finish_file(name,extension):
     fo=open(name+'.man.'+extension,'w+')
     line=fi.readline()
     while line:
-        line=re.sub(r'^(\.TH "[^"]+" ")[^"]+(".*)',r'\1FS\2',line)
+#        line=re.sub(r'^(\.TH "[^"]+" ")[^"]+(".*)',r'\1FS\2',line)
         fo.write(line)
         line=fi.readline()
     fi.close()
