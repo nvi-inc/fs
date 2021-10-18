@@ -798,6 +798,128 @@ and Mark III/IV ``vc__nn__`` commands.
 {nbsp}
 {nbsp}
 
+=== bbcnn - digital baseband converter (DBBC racks)
+
+==== SYNTAX
+
+[subs="+quotes"]
+....
+bbc__nn__=_freq_,_IF_,_bw_,_tpint_
+....
+
+==== RESPONSE
+
+[subs="+quotes"]
+....
+bbc__nn__/_freq_,_IF_,_bw_,_tpint_,_gainctrl_,_gainU_,_gainL_,_tpUcalon_,_tpLcalon_,_tpUcaloff_,_tpLcaloff_
+....
+
+==== SETTABLE PARAMETERS
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,7"]
+|===
+
+a| `_nn_` | Index number of the BBC, corresponding to its position in
+the rack, `01` to `16`. Not all racks have all BBCs.
+
+a| `_freq_` | L.O. frequency in MHz, between `0.000001`-`2200`
+inclusive.  Some DBBC versions do not support frequncies `2048` and
+above. No default. This frequency may be specified to 1 Hz precison,
+i.e. 6 places after the decimal point.
+
+a| `_IF_` | I.F. input source, one of `a`, `b`, `c`, `d`. Defaults to
+`a` for converters `01`-`04`, `b` for `05`-`08`, `c` for `09`-`12`,
+and `d` for `13`-`16`.  This parameter does not affect equipment
+set-up, but does affect the center frequency, Tcal, and FWHM values for
+Tsys, pointing, and SEFD measurements.
+
+a| `_bw_` | Sideband bandwidth in MHz. One of `2`, `4`, `8`, `16`,
+`32`, or `64`. Default `8`.
+
+a| `_avper_` | Averaging period in seconds for TPI. Positive integers
+`1`-`60` allowed, Default is `1`. The averaging period is common to
+both upper and lower sideband. The averaging period is synchronous
+with the 1 pps.
+
+|===
+
+==== MONITOR-ONLY PARAMETERS
+
+[%noheader]
+[frame=none,grid=none]
+[cols="1,7"]
+|===
+
+a| `_gainctrl_` | Gain control mode, either `agc` or `man`. The gain
+mode is common to both sidebands.
+
+a| `_gainU_` | Gain value for USB in steps, `0`-`255`.
+
+a| `_gainL_` | Gain value for LSB in steps, `0`-`255`.
+
+a| `_tpUcalon_` | Power in upper sideband in counts with the cal on
+for synchronous radiometry or TP for non-synchronous. Range `0` to
+`65535`. See the <<comments_bbcnn_j,*COMMENTS*>> for information
+about the nominal operating level.
+
+a| `_tpLcalon_` | Power in lower sideband in counts with the cal on
+for synchronous radiometry or TP for non-synchronous. Range `0` to
+`65535`. See the <<comments_bbcnn_j,*COMMENTS*>> for information
+about the nominal operating level.
+
+a| `_tpUcaloff_` | Power in upper sideband in counts with the cal off
+for synchronous radiometry or `0` for non-synchronous. Range `0` to
+`65535`. See the <<comments_bbcnn_j,*COMMENTS*>> for information
+about the nominal operating level.
+
+a| `_tpLcaloff_` | Power in lower sideband in counts with the cal off
+for synchronous radiometry or `0` for non-synchronous. Range `0` to
+`65535`. See the <<comments_bbcnn_j,*COMMENTS*>> for information
+about the nominal operating level.
+
+|===
+
+==== [[comments_bbcnn_j]] COMMENTS
+
+This command sets up the digital channel converters in the DBBC3 rack.
+This command is analogous to the Mark IV ``VC__nn__`` and VLBA and
+DBBC ``bbc__nn__`` commands.
+
+Unlike the output of most other commands which have no embedded
+blanks, the output for this command is organized in columns so when
+multiple comands are used in sequence it is easy to read gains and
+power levels.
+
+The IF inputs are typically hardwired so that channels `01`-`04` get
+IF `A`, `05`-`08` get IF `B`, `09`-`12` get IF `C`, and `13`-`16` get
+IF `D`. For racks with three IFs, `09`-`16` typically get IF `c`.
+
+The `_IF_` selection parameter does not affect the equipment
+configuration. It does affect center frequency, Tcal, and FWHM values
+for Tsys, pointing, and SEFD measurements.
+
+CAUTION: This command does not check whether you have specified a
+valid IF source for the channel.
+
+`_gainU_` and `_gainL_` can be controlled with the `bbc_gain` command
+for DDC versions` 103` and higher.
+
+The nominal operating level for TP counts depends on the configuration
+of the system.  If firmware version `v103` or later is in use, the
+level is set by the `bbc_gain` command, typically `16000` in `agc`
+mode.  For earlier firmware versions, the operating level is arbitrary
+depending on the target levels of the IF modules, but can range from a
+few hundred to a several thousand.
+
+---
+<<<
+{nbsp}
+{nbsp}
+{nbsp}
+{nbsp}
+
 === bbcnn - baseband converter (VLBA, VLBA4 racks)
 
 ==== SYNTAX
@@ -946,8 +1068,8 @@ e.g., `1000.000001` for 1 Hz above 1 GHz.
 
 a| `_IF_` | I.F. input source, one of `a`, `b`, `c`, `d`, `e`, `f`,
 `g`, or `h`. See the <<comments_bbcnnn_j,*COMMENTS*>> for the default
-values.  This parameter does not affect equipment set-up, but does
-affect the center frequency Tcal, and FWHM values for Tsys, pointing,
+values. This parameter does not affect equipment set-up, but does
+affect the center frequency, Tcal, and FWHM values for Tsys, pointing,
 and SEFD measurements.
 
 a| `_bw_` | Sideband bandwidth in MHz. One of `2`, `4`, `8`, `16`,

@@ -51,6 +51,10 @@ def finish_file(name,extension):
         for i in range(1,128+1):
             link(name+'.man.'+extension,'bbc'+f'{i:03d}'+'.man.'+extension)
 #
+    if name == 'bbcnn' and extension == 'd__':
+        for i in range(1,16+1):
+            link(name+'.man.'+extension,'bbc'+f'{i:02d}'+'.man.'+extension)
+#
 filepath='snapcmd.adoc'
 
 if(len(sys.argv)) > 1:
