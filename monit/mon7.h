@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -18,5 +18,4 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #define ROW_HOLD     0
-
-#define COL_HOLD    0
+#define COL_HOLD    20

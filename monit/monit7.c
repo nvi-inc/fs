@@ -224,6 +224,8 @@ main()
 //        }
         mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,all,!undef,record);
         move(ROW_HOLD,COL_HOLD);  /* place cursor at consistent location */
+        standend();
+        printw(" ");
 
         refresh();
 
