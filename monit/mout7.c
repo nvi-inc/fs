@@ -64,15 +64,15 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         buf[0]=0;
         dble2str(buf,ifc.lo,-8,1);
         printw("%8s",buf);
+
+        if(1==ifc.sideband)
+            printw("%4s"," USB");
+        else if(2==ifc.sideband)
+            printw("%4s"," LSB");
+        else
+            printw("%4s"," ");
     } else
         printw("%8s"," ");
-
-    if(1==ifc.sideband)
-        printw("%4s"," USB");
-    else if(2==ifc.sideband)
-        printw("%4s"," LSB");
-    else
-        printw("%4s"," ");
 
     if(rec && !all)
         printw("%4s"," Rec");
@@ -84,11 +84,14 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     move(1,0);
     printw("Delay");
     buf[0]=0;
-    uns2str2(buf,ifc.delay,-8,0);
-    printw("%8s",buf);
+    if(UINT_MAX != ifc.delay) {
+        uns2str2(buf,ifc.delay,-8,0);
+        printw("%8s",buf);
+     } else
+        printw("%8s"," ");
 
     printw(" Tsys ");
-    if(ifc.tsys> -1e12) {
+    if(ifc.lo>=0.0 && ifc.tsys> -1e12) {
         buf[0]=0;
         dble2str(buf,ifc.tsys,-5,1);
         printw("%5s",buf);
@@ -108,7 +111,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 ptr->tm_min  != tm_save.tm_min  ||
                 ptr->tm_sec  != tm_save.tm_sec;
 
-        if(!tm_different || v124)
+        if(!tm_different)
             standout();
 
         printw("%4d.%03d.%02d:%02d:%02d",
@@ -118,7 +121,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 ptr->tm_min,
                 ptr->tm_sec);
 
-        if(!tm_different || v124)
+        if(!tm_different)
             standend();
 
         memcpy(&tm_save,ptr,sizeof(tm_save));
@@ -126,25 +129,29 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     move(3,0);
     printw("Epoch ");
-//    buf[0]=0;
-//    int2str(buf,ifc.vdif_epoch,-2,0);
-//    printw("%2s",buf);
-// place holder until there is an epoch to report
-    printw("--");
+    if(ifc.vdif_epoch >= 0) {
+      buf[0]=0;
+      int2str(buf,ifc.vdif_epoch,-2,0);
+      printw("%2s",buf);
+    } else
+      printw("%2s","--");
+
     printw(" DBBC3-FS ");
-    buf[0]=0;
-    int2str(buf,ifc.time_error,-6,0);
-
-    if(ifc.time_error)
-        standout();
-
-    if (v124)
-        printw("------");
-    else
-        printw("%6s",buf);
-
-    if(ifc.time_error)
-        standend();
+    if(ifc.time_error > -1000000 &&
+       ifc.time_error <  1000000 ) {
+        if(ifc.time_error || v124)
+            standout();
+        if (v124)
+            printw("------");
+        else {
+            buf[0]=0;
+            int2str(buf,ifc.time_error,-6,0);
+            printw("%6s",buf);
+        }
+        if(ifc.time_error || v124)
+            standend();
+    } else
+        printw("%6s"," ");
 
     move(4,0);
     if(ifc.lo>=0.0 && krf)
@@ -176,7 +183,9 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             printw(" %8s"," ");
 
         if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+MAX_DBBC3_BBC]) {
-            if (bbc[ibbc].tsys_usb < -1e18) {
+            if (bbc[ibbc].tsys_usb < -1e20)
+                printw(" %5s"," ");
+            else if (bbc[ibbc].tsys_usb < -1e18) {
                 printw(" ");
                 standout();
                 printw("%5s","Nccal");
@@ -205,7 +214,9 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 printw(" %5s"," ");
 
         if(all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc              ]) {
-            if (bbc[ibbc].tsys_lsb < -1e18) {
+            if (bbc[ibbc].tsys_lsb < -1e20)
+                printw(" %5s"," ");
+            else if (bbc[ibbc].tsys_lsb < -1e18) {
                 printw(" ");
                 standout();
                 printw("%5s","Nccal");
@@ -233,5 +244,4 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         } else
             printw(" %5s"," ");
     }
-
 }

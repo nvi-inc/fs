@@ -50,6 +50,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         shm_addr->dbbc3_ddcv_v<125;
 
     /* special tsys values:
+       -9e20 not set, from clib/cshm_init.c
        -9e18 no continuous cal
        -9e16 BBC not setup
        -9e14 LO not setup

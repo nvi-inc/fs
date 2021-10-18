@@ -71,7 +71,7 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             cycle->ifc[i].time=seconds;
         else
             cycle->ifc[i].time=t->core3h[i].timestamp+epoch;
-        cycle->ifc[i].vdif_epoch=vdif_should;
+        cycle->ifc[i].vdif_epoch=-1;
         cycle->ifc[i].time_error=cycle->ifc[i].time-seconds;
     }
 
