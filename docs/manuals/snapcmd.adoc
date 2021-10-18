@@ -940,9 +940,9 @@ the rack, `001` to `128`. Not all racks have all BBCs. See the
 <<comments_bbcnnn_j,*COMMENTS*>> for the available BBCs depending on
 BBCs/IF and IFs in rack.
 
-a| `_freq_` | L.O. frequency in MHz, between `0.000001`-`4096`
-inclusive.  This frequency may be specified to 1 Hz precision, i.e., 6
-places after the decimal point.
+a| `_freq_` | L.O. frequency in MHz, `0`-`4096`, inclusive. It may be
+specified to 1 Hz precision, i.e., 6 places after the decimal point,
+e.g., `1000.000001` for 1 Hz above 1 GHz.
 
 a| `_IF_` | I.F. input source, one of `a`, `b`, `c`, `d`, `e`, `f`,
 `g`, or `h`. See the <<comments_bbcnnn_j,*COMMENTS*>> for the default
