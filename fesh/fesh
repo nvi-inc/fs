@@ -19,7 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2021-08-23
+VERSION=2021-10-26
 
 version(){
     echo "[fesh $VERSION]"
@@ -335,9 +335,6 @@ fi
 
 sched=$1
 
-#force lower case station code
-station=$(echo "$station" | tr '[:upper:]' '[:lower:]')
-
 if [[ ! "$FESH_DATA_CENTER" =~ ^(cddis|opar|bkg|vlbeer)$ ]]; then
    echo "Unknown data center: $FESH_DATA_CENTER."
    exit 1
@@ -463,6 +460,10 @@ if [[ -n "$run_drudg" ]]; then
         exit 1
     fi
     set -u
+
+#force lower case station code
+    station=$(echo "$station" | tr '[:upper:]' '[:lower:]')
+
     if [[ -e $SNAP_DIR/$sched$station.snp ]]; then
         if [[ -z "$force" ]]; then
             echo "$SNAP_DIR/$sched$station.snp exists, delete or use '-f' to re-drudg" >&2
