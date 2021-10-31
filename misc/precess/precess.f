@@ -30,8 +30,16 @@ C
       real tepoch(MAX_SRC)
       character*16 names(MAX_SRC),tnames(MAX_SRC)
       integer nsourc,i,iepoch,tsourc
-      character*128 c1950, ctest, compare
+      character*128 c1950, ctest, compare, command
+#ifdef SOFA
+      logical ksofa
+      double precision dr1950,dd1950
+#endif
 c
+#ifdef SOFA
+      call get_command_argument(0,command)
+      ksofa=command.eq.'./precess2'
+#endif
       call get_command_argument(1,c1950)
       if(c1950.eq.'') then
         write(6,*) 'no input file'
@@ -58,15 +66,39 @@ c
       else
         do i=1,nsourc
           iepoch=int(cepoch(i)+0.5)
-          call PREFR(cra(i),cdec(i),iepoch,
-     &          ora(i),odec(i))
+          if(iepoch.ne.1950.and.iepoch.ne.2000) then
+            write(6,*) names(i),' epoch ',cepoch(i),' rejected'
+            stop
+#ifdef SOFA
+          else if(ksofa) then
+            if(iepoch.eq.1950) then
+              call iau_FK45Z(cra(i),cdec(i),dble(iepoch),
+     &             ora(i),odec(i))
+            else
+              call iau_FK54Z(cra(i),cdec(i),dble(iepoch),
+     &             ora(i),odec(i),dr1950,dd1950)
+            endif
+#endif
+          else
+            call PREFR(cra(i),cdec(i),iepoch,
+     &            ora(i),odec(i))
+          endif
           if(iepoch.eq.1950) then
             oepoch(i)=2000.
           else if (iepoch.eq.2000) then
             oepoch(i)=1950.
           endif
         enddo
-        write(6,*) 'output'
+
+#ifdef SOFA
+        if(ksofa) then
+          write(6,*) 'output from SOFA'
+        else
+          write(6,*) 'output from PREFR'
+        endif
+#else
+        write(6,*) 'output from PREFR'
+#endif
         call kputc(names,ora,odec,oepoch,nsourc,MAX_SRC,' ')
       endif
 c
