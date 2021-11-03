@@ -20,7 +20,7 @@
 /* refrw
 
    Compute refraction correction given surface weather input.
-   Copied from FORTRAN.
+   Copied from FORTRAN inccrrectly, compare to refrwn.c
 */
 
 #include <math.h>
@@ -43,7 +43,7 @@ static double e = 0.4;
 static double f = 2.64;
 static double g = .57295787e-4;
 
-double refrw(delin,tempc,humi,pres)
+double refrw_bad(delin,tempc,humi,pres)
 double delin;
 float tempc,humi,pres;
 

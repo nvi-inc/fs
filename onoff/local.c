@@ -28,7 +28,7 @@
 
 extern struct fscom *shm_addr;
 
-double refrw();
+double refrwn();
 
 int local(lonpos,latpos,axis,ierr)
      double *lonpos,*latpos;
@@ -42,7 +42,7 @@ int local(lonpos,latpos,axis,ierr)
   cnvrt2(1,shm_addr->radat,shm_addr->decdat,&az,&el,it,0.0,shm_addr->alat,
      shm_addr->wlong);
 
-  el+=DEG2RAD*refrw(el,20.0,50.0,950.0);
+  el+=DEG2RAD*refrwn(el,20.0,50.0,950.0);
 
   cnvrt2(5,az,el,&x,&y,it,0.0,shm_addr->alat,shm_addr->wlong);
 

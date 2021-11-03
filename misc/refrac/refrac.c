@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <math.h>
 
-double refrw(), refrwn();
+double refrw_bad(), refrwn();
 double sbend();
 double lanyi();
 
@@ -56,7 +56,7 @@ int main()
                 el,delta,el2,delta2,el3,diff);
     }
 
-    printf("\nincorrect refrw.c vs correct refrwn.c\n");
+    printf("\nincorrect refrw_bad.c vs correct refrwn.c\n");
     pres=1000.;
     humi=50.;
     temp=20.;
@@ -66,7 +66,7 @@ int main()
     for (i=1; i<=11;i++) {
         el=i*M_PI/180.;
         delta=lanyi(el,temp,humi,pres);
-        delta2=refrw(el,temp,humi,pres);
+        delta2=refrw_bad(el,temp,humi,pres);
         delta3=refrwn(el,temp,humi,pres);
         el*=180./M_PI;
         diff2=delta2-delta;
@@ -94,7 +94,7 @@ int main()
         el=5*M_PI/180.;
         humi=i;
         delta=lanyi(el,temp,humi,pres);
-        delta2=refrw(el,temp,humi,pres);
+        delta2=refrw_bad(el,temp,humi,pres);
         delta3=refrwn(el,temp,humi,pres);
         el*=180./M_PI;
         diff2=delta2-delta;
@@ -122,7 +122,7 @@ int main()
         el=5*M_PI/180.;
         temp=i;
         delta=lanyi(el,temp,humi,pres);
-        delta2=refrw(el,temp,humi,pres);
+        delta2=refrw_bad(el,temp,humi,pres);
         delta3=refrwn(el,temp,humi,pres);
         el*=180./M_PI;
         diff2=delta2-delta;
@@ -150,7 +150,7 @@ int main()
         el=5*M_PI/180.;
         pres=i;
         delta=lanyi(el,temp,humi,pres);
-        delta2=refrw(el,temp,humi,pres);
+        delta2=refrw_bad(el,temp,humi,pres);
         delta3=refrwn(el,temp,humi,pres);
         el*=180./M_PI;
         diff2=delta2-delta;
