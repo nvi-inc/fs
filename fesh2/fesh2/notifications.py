@@ -4,6 +4,9 @@ from email.message import EmailMessage
 from textwrap import fill
 from typing import Union, List
 from smtplib import SMTP, SMTPException, SMTPConnectError, SMTPAuthenticationError
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 import numpy as np
 import socket
 
@@ -51,7 +54,7 @@ class Notifications:
         self.recipients = ",".join(np.atleast_1d(email_recipients))
         return
 
-    def send_email(self, subject: str, message: str) -> bool:
+    def send_email(self, subject: str, message_plaintxet: str, message_html: str = None) -> bool:
         """
         Send an email to self.recipients
 
@@ -59,15 +62,29 @@ class Notifications:
         @param message: Message body
         @return: True if the email was sent successfully, otherwise False
         """
-        text = fill(message)
-        msg = EmailMessage()
-        msg.set_content(text)
+        message_text = fill(message_plaintxet)
+        if message_html:
+            msg = MIMEMultipart('alternative')
+            part1 = MIMEText(message_plaintxet, 'plain')
+            part2 = MIMEText(message_html, 'html')
+
+        else:
+            msg = EmailMessage()
         msg["Subject"] = subject
         msg["From"] = self.email_sender
         msg["To"] = self.recipients
+        if message_html:
+            msg.attach(part1)
+            msg.attach(part2)
+        else:
+            msg.set_content(message_plaintxet)
 
         it_worked = True
         try:
+            logger.info(
+                f"Attempting connection to mail server {self.smtp_server} "
+                f"on port {self.smtp_port}"
+            )
             server = SMTP(self.smtp_server, self.smtp_port)
         except SMTPConnectError as e:
             logger.warning("Could not connect to mail server: {}".format(e))

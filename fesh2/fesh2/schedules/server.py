@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import time
+import shutil
 from io import BytesIO
 from os import path
 
@@ -303,7 +304,7 @@ class SchedServer(object):
                 if path.exists(local_file):
                     os.remove(local_file)
                 # change temporary file name to the correct name
-                os.rename(local_file_temp, local_file)
+                shutil.move(local_file_temp, local_file)
                 # Get the content stored in the BytesIO object (in byte characters)
                 (size_download, file_time) = self.report_file_stats()
                 success = True

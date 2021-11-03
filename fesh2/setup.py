@@ -53,7 +53,6 @@ def _post_install():
     # Do we have permission to write to the template control file directory
     #    if path.exists template_control_file_dir = "/usr2/fs/st.default/control"
     print("\n#############\n")
-    problem_with_permissions = False
     try:
         if path.exists(target_template_config_file):
             remove(target_template_config_file)
@@ -77,7 +76,6 @@ def _post_install():
             )
         )
         input("\a\n Press [return] to continue: ")
-        problem_with_permissions = True
 
     print("\n#############\n")
     copy_cfg_to_control = False
@@ -116,7 +114,7 @@ if not skip_pre_and_post:
 setup(
     name="fesh2",
     python_requires='>3.5.3',
-    version="2.2.0",
+    version="2.2.17",
     url="https://github.com/nvi-inc/fs",
     license="GPL v3",
     author="Jim Lovell",

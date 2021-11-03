@@ -8,8 +8,11 @@ import time
 from datetime import datetime, timedelta
 from os import path
 
-from schedules import server
-from notifications import Notifications
+from fesh2.schedules import server
+from fesh2.notifications import Notifications
+
+# from schedules import server
+# from notifications import Notifications
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +64,9 @@ class ReadSessionLine:
         self.name = d[0].strip()
         self.code = d[1].strip().lower()
 
+        logger.debug(f"Master file line: {d}")
         self.start = datetime.strptime("%d %s %s" % (year, d[2], d[4]), "%Y %b%d %H:%M")
-        self.end = self.start + timedelta(0, int(d[5]) * 60 * 60, 0)
+        self.end = self.start + timedelta(0, int(float(d[5])) * 60 * 60, 0)
 
         sts = d[6].split(" ")
         self.stations = set()
@@ -159,7 +163,7 @@ def check_master(cnf, intensive=False):
     return new_sched
 
 
-def send_warning_new_sched(backup_f, current_f, new_f, config):
+def send_warning_new_sched(backup_f, current_f, new_f, config, ses):
     """A new schedule file has been downloaded but not drudged. A backup of the
     previous version has been made, but it also exists with its original
     name. The new schedule is called new_f and should be drudged if it is to
@@ -181,35 +185,85 @@ def send_warning_new_sched(backup_f, current_f, new_f, config):
     :return:
     :rtype:
     """
-    msg = """A new schedule file has been downloaded but not drudged. A backup of the 
-    previous version has been backed up, but it also exists with its original
-    name. The new schedule is called {} and should be drudged if it is to
-    be used. To drudg the new file by hand:
+    msg = """
+A new schedule file has been downloaded but not drudged. A backup of the 
+previous version has been made, but it also exists with its original
+name. The new schedule is called {} and should be drudged if it is to
+be used. To drudg the new file by hand:
+
         mv {} {}
         drudg {}
-    Or force fesh2 to update the schedules with the following command:
-        fesh2 --update --once --DoDrudg -g <session_name>
-    where <session_name> is the code for the session to be updated (e.g. r4951)
 
-    The backed-up original file is called {}""".format(
-        new_f, new_f, current_f, current_f, backup_f
+Or force fesh2 to update the schedules with the following command:
+
+    fesh2 --update --once --DoDrudg -g {}
+
+where <session_name> is the code for the session to be updated (e.g. r4951)
+
+The backed-up original file is called {}""".format(
+        new_f, new_f, current_f, current_f, ses.code, backup_f
     )
     logger.warning(msg)
-    # TODO: Send this as an email too
-    # Send an email too:
-    notify = Notifications(
-        config.EmailServer,
-        config.EmailSender,
-        config.EmailRecipients,
-        config.EmailPassword,
-    )
-    subject = "[Fesh2] The schedule {} needs processing".format(new_f)
-    notify.send_email(subject, msg)
+    subject = "[Fesh2] The schedule {} needs processing".format(ses.code)
+    msg_html = f"""
+    <html>
+
+        <head>
+            <meta charset="utf-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <title>{subject}</title>
+            <meta name="description" content="An interactive getting started guide for Brackets.">
+            <link rel="stylesheet" href="main.css">
+        </head>
+        <body>
+            <h1>{subject}</h1>
+            <p>
+            A new schedule file has been downloaded but not drudged. A backup of the 
+    previous version has been made, but it also exists with its original
+    name. The new schedule is called <code>{new_f}</code> and should be drudged if it is to
+    be used. To drudg the new file by hand:
+                <br>
+                <blockquote>
+    <code>
+            mv {new_f} {new_f}<br>
+            drudg {current_f}<br>
+    </code>
+            </blockquote>
+
+    Or force fesh2 to update the schedules with the following command:
+                <br>
+                <blockquote>
+    <code>
+        fesh2 --update --once --DoDrudg -g {ses.code};
+    </code>
+            </blockquote>
+    <br>
+                <br>
+    The backed-up original file is called <code>{current_f}</code>
+            <br><br>
+            <hr>
+            This message was automatically generated and sent by fesh2
+            </p>
+
+        </body>
+    </html>"""
+
+    if config.EmailNotifications:
+        # Send an email too:
+        notify = Notifications(
+            config.EmailServer,
+            config.EmailSender,
+            config.EmailRecipients,
+            smtp_port=config.SMTPPort,
+            server_password=config.EmailPassword,
+        )
+        notify.send_email(subject, msg, msg_html)
 
 
 def check_sched(ses, config):
     """
-    For a given session, decides if the schedule file needs checking, interrogates the server(s) and gets the most
+    For a given session, decides if the schedule file needs checking,
+    interrogates the server(s) and gets the most
     recent one if it hasn't been downloaded yet or has been updated.
 
     :param ses: The session to be processed
@@ -308,10 +362,8 @@ def check_sched(ses, config):
                     )
                     if force and got_sched_file_from_server and new_from_server:
                         # We had a forced download and got the file. Now we only need to download
-                        # from another server if it's
-                        # newer there. So set the force flag to False.
+                        # from another server if it's newer there. So set the force flag to False.
                         force = False
-
                     if got_sched_file_from_server:
                         got_sched_file = True
                     if new_from_server:
@@ -348,7 +400,7 @@ def check_sched(ses, config):
                             # Tell the user that there's a new schedule file but don't
                             # Drudg it. Call the new one <sched>.new, the old one <sched>
                             # which should be the same as backup_file_name
-                            input("Press [Return] to continue")
+                            # input("Press [Return] to continue")
 
                             ok_to_drudg = False
                             new_file_name = "{}.new".format(local_file)
@@ -359,7 +411,7 @@ def check_sched(ses, config):
                                 backup_file_name, local_file
                             )  # cp <sched.skd.bak.N> <sched.skd>
                             send_warning_new_sched(
-                                backup_file_name, local_file, new_file_name, config
+                                backup_file_name, local_file, new_file_name, config, ses
                             )
                     else:
                         # Update is forced
@@ -382,15 +434,16 @@ def check_sched(ses, config):
                     # File didn't previously exist and we just downloaded it. Tell the user
                     msg = "A new schedule has been downloaded: {}".format(local_file)
                     subject = "[Fesh2] A new schedule has been downloaded"
-                    # TODO: email message
-                    # Send an email too:
-                    notify = Notifications(
-                        config.EmailServer,
-                        config.EmailSender,
-                        config.EmailRecipients,
-                        config.EmailPassword,
-                    )
-                    notify.send_email(subject, msg)
+                    if config.EmailNotifications:
+                        # Send an email too:
+                        notify = Notifications(
+                            config.EmailServer,
+                            config.EmailSender,
+                            config.EmailRecipients,
+                            smtp_port=config.SMTPPort,
+                            server_password=config.EmailPassword,
+                        )
+                        notify.send_email(subject, msg)
             else:
                 if not timed_out:
                     logger.info(
@@ -419,9 +472,9 @@ def check_sched(ses, config):
             if path.exists(new_file_name):
                 logger.info("Making the new schedule file the default")
                 shutil.move(new_file_name, local_file)  # mv <sched.skd.new> <sched.skd>
-        # the .skd file is the one to process
-        new = True
-        ok_to_drudg = True
+            # the file exists and we can drudg it
+            new = True
+            ok_to_drudg = True
 
     return (got_sched_file, new, sched_type, ok_to_drudg)
 

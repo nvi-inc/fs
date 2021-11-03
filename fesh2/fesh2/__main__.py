@@ -36,25 +36,31 @@ from os import path
 
 from psutil import process_iter, Process
 
-from drudgery import Drudg
-from config import Args, Config
-from util.logging import FeshLog
-from tui import FeshTUI
-from schedules.manager import read_master, check_master, check_sched, ReadSessionLine
-from _version import __version__
-from util.locker import Locker
+from fesh2._version import __version__
+from fesh2.config import Args, Config
+from fesh2.drudgery import Drudg
+from fesh2.schedules.manager import (
+    read_master,
+    check_master,
+    check_sched,
+    ReadSessionLine,
+)
+from fesh2.tui import FeshTUI
+from fesh2.util.locker import Locker
+from fesh2.util.logging import FeshLog
+from fesh2.notifications import Notifications
+
+# from _version import __version__
+# from config import Args, Config
+# from drudgery import Drudg
+# from schedules.manager import read_master, check_master, check_sched, ReadSessionLine
+# from tui import FeshTUI
+# from util.locker import Locker
+# from util.logging import FeshLog
 
 logger = logging.getLogger(__name__)
 
-# TODO: Add SnapDir definition
-
-# TODO: Test with different Python versions. 2.7.3, 3.2.3 on pcfshb back to v 3.5.3 and v 2.7
-# TODO: Test on old versions of Debian: Etch, Wheezy
-# TODO: email alerts:
-#       New schedule that can't be processed
-#       A new schedule has been downloaded and processed (or not)
-
-DEBUG = False
+DEBUG = True
 
 
 def main():
@@ -539,7 +545,7 @@ def drudg_session(
         if not new:
             # Checks came back with no new schedule file or no schedule file at all.
             if not got_sched_file:
-                logger.info("There is no schedule file on the server.")
+                logger.info(f"There is no schedule file for {ses.code} on the server.")
             else:
                 logger.info("The local copy of the schedule file hasn't changed.")
                 # Has the file been drudged?
@@ -561,7 +567,9 @@ def drudg_session(
                 update_stns.append(i)
         if update_stns:
             # Run drudg
-            # print("Run drudg for these stations: {}".format(update_stns))
+            logger.info(
+                "Run drudg for these stations on {}: {} ".format(ses.code, update_stns)
+            )
             for s in update_stns:
                 (success, o1, o2, o3) = drg.godrudg(s, ses.code, config)
                 if success:
@@ -569,11 +577,19 @@ def drudg_session(
                         "Drudg created the following files: {} {} {}".format(o1, o2, o3)
                     )
                 else:
-                    logger.error(
-                        "Drudg failed for station {}. Run drudg manually to search for the "
-                        "problem.".format(s)
-                    )
-
+                    msg = f"Drudg failed for station {s} {ses.code}. Run drudg manually to search for the problem."
+                    logger.error(msg)
+                    if config.EmailNotifications:
+                        # Send an email too:
+                        subject = f"[Fesh2] The schedule {ses.code} needs processing"
+                        notify = Notifications(
+                            config.EmailServer,
+                            config.EmailSender,
+                            config.EmailRecipients,
+                            smtp_port=config.SMTPPort,
+                            server_password=config.EmailPassword,
+                        )
+                        notify.send_email(subject, msg)
 
 def show_summary(config, mstrs, sessions_to_process):
     """
@@ -737,9 +753,9 @@ def show_summary(config, mstrs, sessions_to_process):
                         got_lst[i] = path.exists(
                             "{}/{}{}.lst".format(config.LstDir, ses.code, i)
                         )
-                        tmp_txt = "{}".format(
-                            yn(got_snp[i] and got_prc[i] and got_lst[i])
-                        )
+                        # Just check SNP and PRC file locations. Someone may have moved the LST
+                        # file and it's is not critical
+                        tmp_txt = "{}".format(yn(got_snp[i] and got_prc[i]))
                     else:
                         tmp_txt = "-"
                     prep_txt = "{}{:<7s}".format(prep_txt, tmp_txt)
@@ -748,7 +764,9 @@ def show_summary(config, mstrs, sessions_to_process):
                 got_snp = path.exists("{}/{}{}.snp".format(config.SnapDir, ses.code, i))
                 got_prc = path.exists("{}/{}{}.prc".format(config.ProcDir, ses.code, i))
                 got_lst = path.exists("{}/{}{}.lst".format(config.LstDir, ses.code, i))
-                prep_txt = "{}".format(yn(got_snp and got_prc and got_lst))
+                # Just check SNP and PRC file locations. Someone may have moved the LST
+                # file and it's is not critical
+                prep_txt = "{}".format(yn(got_snp and got_prc))
 
             logger.info("{}{}".format(txt, prep_txt))
             config.tui_data["sessions"][ses] = [

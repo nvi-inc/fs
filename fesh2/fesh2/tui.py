@@ -29,7 +29,7 @@ class FeshTUI:
         """
         self.func = func
         self.func_args = func_args
-        self.station_code_txt = " ".join(config.Stations).capitalize()
+        self.station_code_txt = " ".join(config.Stations).title()
         self.title = "Fesh2 status for {}".format(self.station_code_txt)
         self.sess_lines = {}
         self.config = config
@@ -44,6 +44,7 @@ class FeshTUI:
             ("banner", "black", "white"),
             ("banner_blue", "black", "light blue"),
             ("red", "dark red", "yellow"),
+            ("red_fg", "light red", "default"),
             ("streak", "black", "dark red"),
             ("bg", "black", "dark gray"),
             ("underline", "white, underline", ""),
@@ -101,6 +102,7 @@ class FeshTUI:
         # Sessions
         ## Header
         txt_sessions = urwid.Text(("underline", "Sessions:"), align="left")
+        # TODO: Add a second header line when we have multiple stations
         self.txt_col_headers = [
             "Session",
             "Start (UT)",
@@ -135,7 +137,9 @@ class FeshTUI:
             "[*] Age = time since the schedule file was released.\n"
         )
         self.txt_key = urwid.Text(self.txt_key_default_str, align="left")
-        self.txt_key_reprocess_str = "[**] A new schedule file has been downloaded but not drudged. Press R for help"
+        self.txt_key_reprocess_str = self._highlight_substr(
+            self._get_reprocess_key_text(), "**", "red_fg"
+        )
         self.update_txt_key()
 
         # -----------------------------------------------------------------------------------------
@@ -289,7 +293,7 @@ class FeshTUI:
         self, text_list: list, style: str = "bg", align: str = "center"
     ) -> urwid.AttrMap:
         """
-        Given a list of text trings, returns an urwid AttrMap containing urwid.Columns
+        Given a list of text strings, returns an urwid AttrMap containing urwid.Columns
         ready to be placed in a row
         """
         columns_arr = {}
@@ -299,6 +303,8 @@ class FeshTUI:
                 self.col_widths[n] = len(coltxt)
         # Fill a row with columns for each category
         for n, coltxt in enumerate(text_list):
+            # highlight the ** if it's there
+            coltxt = self._highlight_substr(coltxt, "**", "red_fg")
             columns_arr[n] = (
                 self.col_widths[n],
                 urwid.AttrMap(urwid.Text(coltxt, align=align), style),
@@ -422,9 +428,13 @@ class FeshTUI:
 
     def update_txt_key(self):
         if self.config.tui_data["reprocess_note"]:
-            self.txt_key.set_text(
-                "{}{}".format(self.txt_key_default_str, self.txt_key_reprocess_str)
-            )
+            text = [
+                [self.txt_key_default_str],
+                self.txt_key_reprocess_str,
+            ]
+            text = [item for sublist in text for item in sublist]
+            self.txt_key.set_text(text)
+            # print(f"Text = {text}")
         else:
             self.txt_key.set_text("{}".format(self.txt_key_default_str))
 
@@ -451,11 +461,27 @@ class FeshTUI:
     def _get_processes_text(self):
         return self.config.tui_data["processes_list"]
 
+    def _intersperse(self, lst: list, item: str) -> list:
+        """Intersperse items in a list
+
+        https://stackoverflow.com/questions/5920643/add-an-item-between-each-item-already-in-the-list
+        """
+        result = [item] * (len(lst) * 2 - 1)
+        result[0::2] = lst
+        return result
+
+    def _highlight_substr(self, text: str, substring: str, attribute: str) -> list:
+        """Highlight an given substring of a piece of text
+
+        Returns a list suitable for urwid's Text or set_text"""
+        arr = text.split(substring)
+        return self._intersperse(arr, (attribute, substring))
+
     def _get_reprocess_key_text(self):
-        return """
-[**] A new schedule file has been downloaded but not drudged. 
-Press "R" for instructions.
-"""
+        return (
+            '[**] A new schedule file has been downloaded but not drudged. Press "R" for '
+            "instructions. "
+        )
 
     def _get_reprocess_notes(self):
         return """If you see "**" next to a session then a new schedule file has 

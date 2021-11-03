@@ -67,6 +67,7 @@ class Config:
         self.EmailNotifications = False
         self.EmailRecipients = []
         self.EmailServer = ""
+        self.SMTPPort = 0
         self.EmailSender = ""
         self.EmailPassword = ""
         # Drudg -----------------------------------
@@ -177,6 +178,7 @@ class Config:
         self.EmailSender = self._get_arg_from_extra_args(extra_args, "EmailSender")
         self.EmailServer = self._get_arg_from_extra_args(extra_args, "EmailServer")
         self.EmailPassword = self._get_arg_from_extra_args(extra_args, "EmailPassword")
+        self.SMTPPort = self._get_arg_from_extra_args(extra_args, "EmailPort")
         # Drudg -----------------------------------
         self.DoDrudg = args.DoDrudg
         self.DrudgBinary = args.DrudgBinary
@@ -542,7 +544,7 @@ class Args:
             default=False,
             help="Force an update to the schedule file when there's a new one available to replace the old one. The "
             "default behaviour is to give the new file the name <code>.skd.new and prompt the user to take "
-            "action. The file will also be drudged if the DoDrudg option is True (default = False)",
+            "action. The file will also be drudged if the DoDrudg option is True",
         )
 
         psr.add_argument(

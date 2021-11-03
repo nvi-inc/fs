@@ -5,7 +5,7 @@ import re
 import sys
 import time
 from os import path
-
+import shutil
 import pexpect
 
 logger = logging.getLogger(__name__)
@@ -92,13 +92,18 @@ class Drudg:
 
     def godrudg(self, station, code, conf):
         schedfile = "{}/{}.{}".format(self.sched_dir, code, self.sched_type)
-
+        drudg_exec_txt = "{} {}".format(self.drudg_exec, schedfile)
+        logger.info(f"Running Drudg with \'{drudg_exec_txt}\' in working directory"
+                    f" {self.sched_dir}")
         try:
-            child = pexpect.spawn(
-                "{} {}".format(self.drudg_exec, schedfile), cwd=self.sched_dir
-            )  #
-        except:
+            child = pexpect.spawn(drudg_exec_txt, cwd=self.sched_dir)
+        except pexpect.ExceptionPexpect as e:
+            logger.error(f"Problem starting drudg: {e}")
             return False, None, None, None
+        except BaseException as e:
+            logger.error(f"Unexpected problem starting drudg: {e}")
+            return False, None, None, None
+
         # Run drudge with the working directory set to sched_dir
         # verbose output for pexpect. Comment to turn off:
         child.logfile = sys.stdout.buffer
@@ -148,10 +153,10 @@ class Drudg:
         # Make sure the output files go to the right directories.
         # The LST file should be fine because we specify location during Drudg.
         outfile_snp_target = "{}/{}{}.snp".format(self.snap_dir, code, station)
-        os.rename(outfile_snp, outfile_snp_target)
+        shutil.move(outfile_snp, outfile_snp_target)
         outfile_snp = outfile_snp_target
         outfile_prc_target = "{}/{}{}.prc".format(self.proc_dir, code, station)
-        os.rename(outfile_prc, outfile_prc_target)
+        shutil.move(outfile_prc, outfile_prc_target)
         outfile_prc = outfile_prc_target
         logger.debug(
             "outfiles = {}, {}, {}".format(outfile_snp, outfile_prc, outfile_lst)
