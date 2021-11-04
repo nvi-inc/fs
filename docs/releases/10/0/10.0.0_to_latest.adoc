@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 2.2 - September 2021
+Version 2.3 - November 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -184,7 +184,9 @@ selection `Get session name from log` if it is not desired.
 Thanks to Jonathan Quick (HartRAO) for reporting the issue, providing
 feedback on the changes,  and testing the fix.
 
-. Add command line options to _rdbemsg_.
+. Add features to _rdbemsg_:
+
+.. Add command line options to _rdbemsg_.
 
 +
 
@@ -202,6 +204,35 @@ Only the position part of the geometry should be set with `-g`, e.g.,
 `-g{nbsp}-0-0`.  The useful way to control the size is with `-f`.
 
 +
+
+.. Add `mci-version` parameter to _rdbemsg.ctl_ control file.
+
++
+
+This was added to allow distinguishing the early version of MCI node
+at Westford, which requires different handling. Specifically, the MCI
+logs are in the directory _~oper/node_software/V0_, the file names do
+not contain the station code, the fields in the file are space
+delimited, and the fields are in a different order. The correct form
+for Westford is:
+
+  mci-version:0
+
++
+
+Other stations do not need this parameter and can either not include
+it or comment it out.
+
++
+
+The example control file, _/usr2/fs/st.default/control/rdbemsg.ctl_
+was updated accordingly.
+
++
+
+NOTE: As with other  _rdbemsg.ctl_ parameters, this one should not
+have any white space on its (non-comment) line.
+
 
 . Add adjustable log size warning message (closing
 https://github.com/nvi-inc/fs/issues/114[#114]).

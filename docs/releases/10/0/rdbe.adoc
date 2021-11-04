@@ -19,7 +19,7 @@
 //
 
 = FS RDBE Support
-Version 0.6 - April 2021
+Version 0.7 - November 2021
 
 :sectnums:
 :toc:
@@ -365,6 +365,7 @@ files. An example is available in
 _/usr2/st.default/control/rdbemsg.ctl_. Lines that start with `*` are
 treated as comments. The supported non-comment lines are:
 
+CAUTION: There should be no extra white space on any non-comment line.
 
 * `R-A:__node__` -- where `__node__` is the IP, node name, or alias of
 RDBE-A
@@ -395,7 +396,8 @@ the MCI node
 This should be commented out, if there is no MCI node.
 
 * `mci-code:__xx__` -- where `__xx__` is the two letter code used by
-the MCI node if different from what is specified by `station`.
+the MCI node if different from what is specified by `station`. This is
+needed by GGAO.
 
 +
 
@@ -408,9 +410,26 @@ parameter in MCI responses.
 
 +
 
-This should be commented out, if there is no MCI node or the MCI
-returns data in the standard position, `2`. This exists to support
-early MCI nodes that returned the data in the `3` position.
+This should be commented out if the MCI places data in the standard
+position, `2`. This exists to support early MCI nodes that placed the
+data in the `3` position (GGAO). This is should not be used for MCI
+version `0`, which is handled by `mci-version` parameter described
+<<mci_version,below>>).
+
+* [[mci_version]] `mci-version:__version__`  where `__version__` is
+`0` for stations with the earliest version of the MCI node (Westford).
+This was not available until commit `fb57201c`.
+
++
+
+A value of `0` invokes different handling. Specifically, the MCI logs
+are in the directory _~oper/node_software/V0_, the file names do not
+contain the station code, the fields in the file are space delimited,
+and the fields are in a different order. Other values are ignored.
+
++
+
+Other stations should keep this line commented out.
 
 === new_ifdbb script
 
