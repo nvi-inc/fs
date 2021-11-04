@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 3.1 - June 2021
+Version 3.2 - November 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -992,7 +992,7 @@ schedules, and optionally run _drudg_ for them. There are two possible
 changes:
 
 ... If not already set, specify a directory for _.skd_ files in the
-`$schedules` block of the _/usr2/fs/skedf.ctl_ control file. You can
+`$schedules` block of the _/usr2/control/skedf.ctl_ control file. You can
 use any value you want, but to be backward compatible with the
 previous behavior of _fesh_ it must be _/usr2/sched_.
 
