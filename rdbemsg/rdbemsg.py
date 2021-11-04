@@ -71,6 +71,7 @@ class msg_tk(Tkinter.Tk):
                 self._mci = ""
                 self._mciCode = ""
                 self._mciParameter = ""
+                self._mciVersion = ""
 
                 # read in vgosmsg conf
                 fileHandle = open ( '/usr2/control/rdbemsg.ctl' )
@@ -104,6 +105,8 @@ class msg_tk(Tkinter.Tk):
                                 self._mciCode = self.val[1].rstrip('\r\n')
                         elif (self.val[0] == "mci-parameter"):
                                 self._mciParameter = self.val[1].rstrip('\r\n')
+                        elif (self.val[0] == "mci-version"):
+                                self._mciVersion = self.val[1].rstrip('\r\n')
                         elif (self.val[0] == "comment"):
                                 self._comment = self.val[1].rstrip('\r\n')
                         elif (self.val[0] == "schedule"):
@@ -578,25 +581,36 @@ class msg_tk(Tkinter.Tk):
 
 	def GetCryoVals(self):
                 print "Updating Cryo Values"
-		c = self.stationcode.get()
-		if self._mciCode != "":
-			c = self._mciCode
-		proc20 = subprocess.Popen(["ssh", "oper@" + self._mci, "tail", "-n", "100", "mci_" + c + "_" + self._mcilogtime + ".txt", "|", "egrep", "'AD214|AD215'"], stdout=subprocess.PIPE)
-                text =proc20.stdout.read()
-		for line in text.split('\n'):
-			if "AD214" in line:
-				self._20k=line.split(';')
-			if "AD215" in line:
-				self._70k=line.split(';')
+		if self._mciVersion == "0":
+			proc20 = subprocess.Popen(["ssh", "oper@" + self._mci, "tail", "-n", "100", "node-software/V0/mci" + self._mcilogtime + ".txt", "|", "egrep", "'AD214|AD215'"], stdout=subprocess.PIPE)
+			text =proc20.stdout.read()
+			for line in text.split('\n'):
+				if "AD214" in line:
+					self._20k=line.split()
+				if "AD215" in line:
+					self._70k=line.split()
+			s = 1
+		else:
+			c = self.stationcode.get()
+			if self._mciCode != "":
+				c = self._mciCode
+			proc20 = subprocess.Popen(["ssh", "oper@" + self._mci, "tail", "-n", "100", "mci_" + c + "_" + self._mcilogtime + ".txt", "|", "egrep", "'AD214|AD215'"], stdout=subprocess.PIPE)
+			text =proc20.stdout.read()
+			for line in text.split('\n'):
+				if "AD214" in line:
+					self._20k=line.split(';')
+				if "AD215" in line:
+					self._70k=line.split(';')
+			s = 0
 
 		c  = 2
 		if self._mciParameter != "":
 			c = int(self._mciParameter)
 
-		self.cryo20t.set(self._20k[0])
+		self.cryo20t.set(self._20k[s])
 		self.cryo20v.set(self._20k[c])
 
-		self.cryo70t.set(self._70k[0])
+		self.cryo70t.set(self._70k[s])
                 self.cryo70v.set(self._70k[c])
 
                 #print self._20k
