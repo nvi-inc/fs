@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 2.3 - November 2021
+Version 2.4 - November 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -701,6 +701,16 @@ relatively low, not quite 1 in 2^32^ chance of it being excited.
 
 NOTE: _setcl_ only works for the first FiLa10G if there are two. A
 second is only used for VGOS. _fmset_ works for both.
+
+. Remove extra comma in Tcal table log entires (closing
+ https://github.com/nvi-inc/fs/issues/160[#160]):
+
++
+
+The contents of the _.rxg_ selected by an `lo=...` command are logged
+the first time the file is selected since the log was last opened.
+There was a redundant comma in the Tcal table log entries after the
+_.rxg_ file name.
 
 . Correct `bbc_gain` command error codes.
 
