@@ -189,9 +189,9 @@ void log_rxgfile(lo)
     for (i=0;i<iend;i++) {
         output[start]=0;
         if(shm_addr->rxgain[ir].tcal[i].pol=='l')
-            strcat(output,",lcp");
+            strcat(output,"lcp");
         else if(shm_addr->rxgain[ir].tcal[i].pol=='r')
-            strcat(output,",rcp");
+            strcat(output,"rcp");
 
         snprintf(output+strlen(output),
                 sizeof(output)-strlen(output),
