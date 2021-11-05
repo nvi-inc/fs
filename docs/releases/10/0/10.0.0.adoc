@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 3.2 - November 2021
+Version 3.3 - November 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -852,7 +852,7 @@ options.
 . All old versions:
 +
 The trailing comment on the line for the met. device was
-removed and the preceeding comments were reworded.
+removed and the preceding comments were reworded.
 
 . Old versions _9.12.10_-_9.12.13_:
 +
@@ -864,37 +864,61 @@ the clock rate line itself.
 
 ===== Review stpgm.ctl
 
-. All old versions:
-
-+
-
-WARNING: If you are _not_ planning to use the FS display server, we
+WARNING: If you are planning to _not_ use the FS display server, we
 recommend that you comment out the lines for _erchk_, _monit2_, and
-_scnch_ and not add any other _monit<x>_ programs. If they are used in
-_stpgm.ctl_ without the display server and they are accidentally
-closed, the FS will be killed.  This applies as well if you built the
-FS without the display server as described in the
-<<changes_10.0.0.adoc#noserver,not building the display server>>
+_scnch_ and not add any other _monit<x>_ programs or other uses of
+__xterm__s. If they are used in _stpgm.ctl_ without the display server
+and they are accidentally closed, the FS will be killed.  This applies
+as well if you built the FS without the display server as described in
+the <<changes_10.0.0.adoc#noserver,not building the display server>>
 change (in the
 <<changes_10.0.0.adoc#_fs_changes_that_are_in_common_since_fs9,FS
 changes that are in common since FS9>> sub-section of the
 <<changes_10.0.0.adoc#,Changes from FS9>> document).
 
-.. The line for _erchk_ is now uncommented and differs from the
-previous commented version with the addition of the `-name erchk`
-parameter and the removal of the `-title ...` and `-geom ...` parameters,
-so that the latter two are uniquely supplied by the _.Xresources_
-file.
+. For all versions, if you are planning to use the FS display server:
 
-.. New lines were
-added for _monit2_, and _scnch_ for when the
-display server is in use.
 +
-If you are using the display server you may
-want to add other _monit<x>_ programs. If so, you
-may also want to add resources for them (if
- they aren't already there) in the
-_~/.Xresources_ files for _oper_ and _prog_.
+
+.. The line for _erchk_ is now uncommented as the default and differs
+from the previous commented version with the addition of the `-name
+erchk` parameter and the removal of the `-title ...` and `-geom ...`
+parameters, so that the latter two are uniquely supplied by the
+_.Xresources_ file.
+
++
+
+You should change the second field in the _erchk_ line from `n` to `x`
+as shown in the _/usr2/fs/st.default/control/stpgm.ctl_ example.
+
++
+
+NOTE: An x` should be used as the second field for X window display
+programs. They will be automatically started and stopped with each
+instance of the display client, on its display.
+
+.. New lines were added for _monit2_, and _scnch_ for when the display
+server is in use. You may want to include those if you would like
+them to start automatically when you launch the FS or separate display
+clients.
+
++
+
+If you are using the display server you may want to add other
+_monit<x>_ programs. If so, you may also want to add resources for
+them (if they aren't already there) in the _~/.Xresources_ files for
+_oper_ and _prog_.
+
++
+
+.. If you are using the display server and were starting any
+__xterm__s with `sy=...` from your `initi` procedure, you should
+remove those (see the sub-section
+<<Remove running xterm from your SNAP procedures>> farther below) and
+probably add them to _stpgm.ctl_, usually with `x` for the second
+field. The syntax is slightly different than what is used with
+`sy=...` command. You can use the
+_/usr2/fs/st.default/control/stpgm.ctl_ file as an example.
 
 ==== Update rdbemsg.ctl
 
@@ -1015,18 +1039,26 @@ update any occurrences, even in comments, of `if_config` to
 
 === Update .prc files
 
-This step is for updates to your _.prc_ SNAP procedure libraries.  The
-are three sub-steps.  Only the  change in the first is required:
+This step is for updates to your _.prc_ SNAP procedure libraries.
+Except where a script is provided to make the change (which must be
+used only when the FS not running), all changes should be made with
+_pfmed_.
+
+There are four sub-steps. The first change is required for all users:
 converting from using the old FS _go_ program to _rte_go_.
 
-The change in the second is optional and only relevant if upgrading
-from _9.13.2_: removing `if=cont_cal,,` from the `fivpt` and `onoff`
+The second change is required for all users converting to or already
+using the display server: remove any instances of running __xterm__s
+in your procedures.
+
+The third change is optional and only relevant if upgrading from
+_9.13.2_: removing `if=cont_cal,,` from the `fivpt` and `onoff`
 procedures for `calon` and `caloff` procedures.
 
-The change in the third, switching to using _s_client_ from other
-deprecated TCP communication scripts, is only relevant if you are
-updating from the VGOS branch, versions _9.12.<x>_, and probably only
-if you had a RDBE rack.
+The fourth change, switching to using _s_client_ from other deprecated
+TCP communication scripts, is only relevant if you are updating from
+the VGOS branch, versions _9.12.<x>_, and probably only if you had a
+RDBE rack.
 
 ==== Convert from go to rte_go
 
@@ -1044,6 +1076,30 @@ execute:
 Files that are changed will have a pre-change back-up copy
 with the extension _.bak_. You can use the _.bak_ files to
 recover in case of a problem.
+
+==== Remove running xterm from your SNAP procedures
+
+This step is only needed for stations using the display server. You
+should remove any instances of running __xterm__s from your SNAP
+procedures. Typically this would only occur in the `initi` procedure
+in the `station` library, where it might be used to start monitor
+displays automatically when the FS is launched. In addition to there
+being issues with the functioning of such __xterm__s with the display
+server, a more comprehensive solution is now provided through the
+_stpgm.ctl_ control file (see the <<Review stpgm.ctl>> sub-step
+farther above for more information on setting this up).
+
+To check whether you have an instance of running __xterm__s in your
+procedures, you can use:
+
+  cd /usr2/proc
+  grep xterm *.prc
+
+This will  only identify which libraries have commands that run
+__xterm__s.  You can list those libraries with _less_ to find which
+procedures they are in. You should use _pfmed_ to modify the
+procedures involved. You can delete or comment out the relevant
+commands.
 
 ==== Remove extra if commands
 
