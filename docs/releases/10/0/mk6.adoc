@@ -19,7 +19,7 @@
 //
 
 = FS Mark 6 Support
-Version 0.5 - February 2021
+Version 0.6 - November 2021
 
 :sectnums:
 :toc:
@@ -147,8 +147,12 @@ A value of `100` (one second) is usually suitable for local devices.
 A script _mk6in_ is provided as a diagnostic utility to report the
 data rate being received at the Mark 6 inputs.  The script is
 available in _misc/mk6in_. It should be installed in the Mark 6
-_~oper/bin_ directory and made executable. A CentOS version is
-available in _misc/mk6in.centos_.
+_~oper/bin_ directory, as _oper_, and made executable:
+
+ chmod a+x ~/bin/mk6in
+
+A CentOS version is available in _misc/mk6in.centos_ (you will need to
+name it _mk6in_ when you put it in _~oper/bin_ on the Mark 6).
 
 To use the script as a FS command, add a `mk6in` SNAP procedure to the
 _station_ library, containing:
