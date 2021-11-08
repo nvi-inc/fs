@@ -175,7 +175,7 @@ def start_thread_main(event: threading.Event, config: Config) -> threading.Threa
     event : threading.Event
         When this event is set, a schedule check loop is done or underway
     config : Config
-        The FeshConfig:Config class containing configuration parameterss
+        The FeshConfig:Config class containing configuration parameters
     Returns
     -------
     thread : threading.Thread
@@ -196,25 +196,16 @@ def start_thread_timing_loop(
     config: Config,
 ) -> threading.Thread:
     """
-    This thread manages the main_task wait loop. It waits a specified time (the shortest out of the master and schedule file
-    check wait times) then triggers a check.
+    This thread manages the main_task wait loop.
 
-    :param event_sched_check:
-    :type event_sched_check: threading event
-    :param event_time_loop:
-    :type event_time_loop: threading event
-    :param thread_sched_check: the sched_check thread
-    :type thread_sched_check: a python threading thread
-    :param config: configuration parameters (from the config file)
-    :type config: Config class
-    :return:
-    :rtype: a python threading thread.
+    It waits a specified time (the shortest out of the master and schedule file
+    check wait times) then triggers a check.
 
     Parameters
     ----------
-    event_1
+    event_sched_check
         When this event is set, a schedule check loop is done or underway
-    event_2
+    event_time_loop
         When this event is set, the event loop is exited
     thread_sched_check
         the sched_check thread
@@ -316,19 +307,21 @@ def set_event_loop(
 
 
 def wait_for_event(event: threading.Event, config: Config):
+    """Waits for the event to be triggered, then does a schedule check.
+
+    Parameters
+    ----------
+    event
+        When this event is set, a schedule check loop is done or underway
+    config
+        configuration parameters (from the config file)
     """
-    Waits for the event to be triggerered, then does a schedule check.
-    :param event: When this event is set, a schedule check loop is done or underway
-    :type event: threading event
-    :param config: configuration parameters (from the config file)
-    :type config: Config class
-    """
-    logger.debug("WFE: wait for event")
+    logger.debug("wait_for_event: wait for event")
     event_is_set = event.wait()
-    logger.debug("WFE event set: {}".format(event_is_set))
+    logger.debug("wait_for_eventL event set: {}".format(event_is_set))
     # run the main task
     main_task(config)
-    logger.debug("WFE: clearing event1...")
+    logger.debug("wait_for_event: clearing event1...")
     event.clear()
 
 
@@ -545,7 +538,9 @@ def drudg_session(
         if not new:
             # Checks came back with no new schedule file or no schedule file at all.
             if not got_sched_file:
-                logger.info(f"There is no schedule file for {ses.code} on the server.")
+                logger.info(
+                    "There is no schedule file for {} on the server.".format(ses.code)
+                )
             else:
                 logger.info("The local copy of the schedule file hasn't changed.")
                 # Has the file been drudged?
@@ -577,11 +572,15 @@ def drudg_session(
                         "Drudg created the following files: {} {} {}".format(o1, o2, o3)
                     )
                 else:
-                    msg = f"Drudg failed for station {s} {ses.code}. Run drudg manually to search for the problem."
+                    msg = "Drudg failed for station {} {}. Run drudg manually to search for the problem.".format(
+                        s, ses.code
+                    )
                     logger.error(msg)
                     if config.EmailNotifications:
                         # Send an email too:
-                        subject = f"[Fesh2] The schedule {ses.code} needs processing"
+                        subject = "[Fesh2] The schedule {} needs processing".format(
+                            ses.code
+                        )
                         notify = Notifications(
                             config.EmailServer,
                             config.EmailSender,
@@ -591,17 +590,21 @@ def drudg_session(
                         )
                         notify.send_email(subject, msg)
 
-def show_summary(config, mstrs, sessions_to_process):
-    """
-    Prints a summary of the status of session processing to the screen
-    :param config: configuration parameters (from the config file)
-    :type config: Config class
-    :param mstrs: list of master file names (full path)
-    :type mstrs: array of strings
-    :param sessions_to_process: List of sessions to process
-    :type sessions_to_process: Session class
-    :return: none
-    :rtype: none
+
+def show_summary(
+    config: Config, master_file_names: list, sessions_to_process: ReadSessionLine
+):
+    """Prints a summary of the status of session processing to the screen
+
+    Parameters
+    ----------
+    config
+        configuration parameters (from the config file)
+    master_file_names
+        list of master file names (full path)
+    sessions_to_process
+        List of sessions to process
+
     """
     append_reprocess_note = False
     logger.info("-" * 80)
@@ -659,7 +662,7 @@ def show_summary(config, mstrs, sessions_to_process):
     txt = "Schedule Status for {}:".format(", ".join(sorted(config.Stations)))
     logger.info(Colour.BOLD + Colour.UNDERLINE + txt + Colour.END)
     config.tui_data["status_station_header"] = txt
-    if len(mstrs) > 1:
+    if len(master_file_names) > 1:
         txt = "Master file versions (UTC of latest version downloaded):"
     else:
         txt = "Master file version (UTC of latest version downloaded):"
@@ -667,7 +670,7 @@ def show_summary(config, mstrs, sessions_to_process):
     config.tui_data["master_header"] = txt
 
     config.tui_data["master_lines"] = ""
-    for m in mstrs:
+    for m in master_file_names:
         stinfo = os.stat(m)
         tvers_txt = time.strftime("%Y-%m-%d %H:%M", time.gmtime(stinfo.st_mtime))
         if "int" in m:
@@ -818,12 +821,16 @@ def show_summary(config, mstrs, sessions_to_process):
 
 
 def yn(state: bool) -> str:
-    """
-    Takes a boolean and returns it as 'yes' or 'no'
-    :param state: True or false
-    :type state: boolean
-    :return: 'Yes' if True, otherwise 'no'
-    :rtype: string
+    """Takes a boolean and returns it as 'yes' or 'no'
+
+    Parameters
+    ----------
+    state
+        True or False
+    Returns
+    -------
+        "Yes" or "No"
+
     """
     return "Yes" if state else "No"
 

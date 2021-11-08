@@ -113,8 +113,8 @@ if not skip_pre_and_post:
 
 setup(
     name="fesh2",
-    python_requires='>3.5.3',
-    version="2.2.17",
+    python_requires='>=3.5.3',
+    version="2.3.0",
     url="https://github.com/nvi-inc/fs",
     license="GPL v3",
     author="Jim Lovell",

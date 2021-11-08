@@ -3,10 +3,6 @@ import logging
 import logging.config
 import logging.handlers
 
-# from logging.handlers import RotatingFileHandler
-
-import time
-
 logger = logging.getLogger(__name__)
 
 
@@ -115,7 +111,7 @@ class FeshLog:
         # no messages to the screen if in quiet mode unless its critical or worse
         if quiet:
             # LOGGING_CONFIG["loggers"] = {}
-            LOGGING_CONFIG["handlers"]['verbose_output']['level'] = logging.CRITICAL
+            LOGGING_CONFIG["handlers"]["verbose_output"]["level"] = logging.CRITICAL
         logging.config.dictConfig(LOGGING_CONFIG)
 
         logger.info("Writing to log file {}.".format(log_file_str))

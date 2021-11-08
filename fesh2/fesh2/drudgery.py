@@ -93,15 +93,18 @@ class Drudg:
     def godrudg(self, station, code, conf):
         schedfile = "{}/{}.{}".format(self.sched_dir, code, self.sched_type)
         drudg_exec_txt = "{} {}".format(self.drudg_exec, schedfile)
-        logger.info(f"Running Drudg with \'{drudg_exec_txt}\' in working directory"
-                    f" {self.sched_dir}")
+        logger.info(
+            "Running Drudg with '{}' in working directory {}".format(
+                drudg_exec_txt, self.sched_dir
+            )
+        )
         try:
             child = pexpect.spawn(drudg_exec_txt, cwd=self.sched_dir)
         except pexpect.ExceptionPexpect as e:
-            logger.error(f"Problem starting drudg: {e}")
+            logger.error("Problem starting drudg: {}".format(e))
             return False, None, None, None
         except BaseException as e:
-            logger.error(f"Unexpected problem starting drudg: {e}")
+            logger.error("Unexpected problem starting drudg: {}".format(e))
             return False, None, None, None
 
         # Run drudge with the working directory set to sched_dir

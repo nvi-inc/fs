@@ -64,7 +64,6 @@ class ReadSessionLine:
         self.name = d[0].strip()
         self.code = d[1].strip().lower()
 
-        logger.debug(f"Master file line: {d}")
         self.start = datetime.strptime("%d %s %s" % (year, d[2], d[4]), "%Y %b%d %H:%M")
         self.end = self.start + timedelta(0, int(float(d[5])) * 60 * 60, 0)
 
@@ -205,28 +204,28 @@ The backed-up original file is called {}""".format(
     )
     logger.warning(msg)
     subject = "[Fesh2] The schedule {} needs processing".format(ses.code)
-    msg_html = f"""
+    msg_html = """
     <html>
 
         <head>
             <meta charset="utf-8">
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <title>{subject}</title>
+            <title>{}</title>
             <meta name="description" content="An interactive getting started guide for Brackets.">
             <link rel="stylesheet" href="main.css">
         </head>
         <body>
-            <h1>{subject}</h1>
+            <h1>{}</h1>
             <p>
             A new schedule file has been downloaded but not drudged. A backup of the 
     previous version has been made, but it also exists with its original
-    name. The new schedule is called <code>{new_f}</code> and should be drudged if it is to
+    name. The new schedule is called <code>{}</code> and should be drudged if it is to
     be used. To drudg the new file by hand:
                 <br>
                 <blockquote>
     <code>
-            mv {new_f} {new_f}<br>
-            drudg {current_f}<br>
+            mv {} {}<br>
+            drudg {}<br>
     </code>
             </blockquote>
 
@@ -234,19 +233,21 @@ The backed-up original file is called {}""".format(
                 <br>
                 <blockquote>
     <code>
-        fesh2 --update --once --DoDrudg -g {ses.code};
+        fesh2 --update --once --DoDrudg -g {};
     </code>
             </blockquote>
     <br>
                 <br>
-    The backed-up original file is called <code>{current_f}</code>
+    The backed-up original file is called <code>{}</code>
             <br><br>
             <hr>
             This message was automatically generated and sent by fesh2
             </p>
 
         </body>
-    </html>"""
+    </html>""".format(
+        subject, subject, new_f, new_f, current_f, current_f, ses.code, current_f
+    )
 
     if config.EmailNotifications:
         # Send an email too:

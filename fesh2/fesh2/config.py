@@ -3,12 +3,11 @@ import datetime
 import logging
 import re
 import string
-import sys
 from collections import OrderedDict
 from configparser import ConfigParser, ExtendedInterpolation
 from datetime import datetime
 from os import path
-
+from typing import Union
 import configargparse
 
 logger = logging.getLogger(__name__)
@@ -16,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class Config:
     def __init__(self):
+        """Set up default configuration parameters"""
         # recognised schedule file types
         self.allowed_sched_types = ["vex", "skd"]
 
@@ -113,7 +113,15 @@ class Config:
         # Set up a dictionary for the Text Interface
         self.tui_data = self._setup_tui_info()
 
-    def _setup_tui_info(self):
+    def _setup_tui_info(self) -> dict:
+        """Set up dictionary of parameters used to configure the TUI
+
+        Defaults set here.
+
+        Returns
+        -------
+            dict of default parameters
+        """
         tui_dict = {
             "title": "",
             "station_caption": "",
@@ -128,13 +136,18 @@ class Config:
 
         return tui_dict
 
-    def load(self, arg):
-        # arg is an Args instance
-        # if arg is a tuple of length 2 then configargparse:parse_known_args()
-        # has been called and returned a there may be unprocessed arguments in arg[1].
-        # arg[0] is a Namespace with all processed arguments while arg[1] contains unprocessed
-        # parameters that are in the config files but not
-        # command-line options
+    def load(self, arg: Union[tuple, configargparse.Namespace]):
+        """Puts configuration data from config files, command-line and env vars into variables
+
+        Parameter
+        ----------
+        arg
+            if arg is a tuple of length 2 then configargparse:parse_known_args()
+            has been called and returned and there may be unprocessed arguments in arg[1].
+            arg[0] is a Namespace with all processed arguments while arg[1] contains unprocessed
+            parameters that are in the config files but not command-line options
+
+        """
 
         extra_args = []
         if isinstance(arg.args, tuple):
@@ -215,6 +228,9 @@ class Config:
         self.update = args.update
 
     def check_config(self):
+        """Makes checks of configuration parameters and will raise an exception if there's a problem
+
+        """
         # Check the configuration
 
         # Servers
@@ -230,9 +246,8 @@ class Config:
         for s in self.SchedTypes:
             if s not in self.allowed_sched_types:
                 raise Exception(
-                    "Config file has unrecognised schedule file format '{}' ([Station] section)".format(
-                        s
-                    )
+                    "Config file has unrecognised schedule file format '{}' (["
+                    "Station] section)".format(s)
                 )
 
         # Stations text format
@@ -293,9 +308,9 @@ class Config:
         if self.EmailNotifications:
             # check email addresses and server names make sense
             # from https://www.geeksforgeeks.org/check-if-email-address-valid-or-not-in-python/
-            def email_syntax_ok(email):
+            def email_syntax_ok(email_addr):
                 regex = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$"
-                if re.fullmatch(regex, email):
+                if re.fullmatch(regex, email_addr):
                     return True  # Valid Email
                 else:
                     return False  # invalid Email
@@ -315,10 +330,14 @@ class Config:
                 raise RuntimeError(
                     "Invalid email sender address: {}".format(self.EmailSender)
                 )
-            for email in self.EmailRecipients:
+            if isinstance(self.EmailRecipients, str):
+                iterable = [self.EmailRecipients]
+            else:
+                iterable = self.EmailRecipients
+            for email in iterable:
                 if not email_syntax_ok(email):
                     raise RuntimeError(
-                        "Invalid email recipient address: {}".format(email)
+                        'Invalid email recipient address: "{}" from "{}"'.format(email, self.EmailRecipients)
                     )
 
     def _get_arg_from_extra_args(self, extra_args: list, parameter_name: str):
@@ -421,8 +440,7 @@ class Args:
         # skedf.ctl. NOTE: These are the defaults that are set in the FS if not defined in skedf.ctl
         # We're just making sure they are preserved here.
         # TODO: This is a bit messy because if
-        #  the FS default ever changes its defaults, we have to remember to duplicate the change
-        #  here
+        #  the FS defaults ever change, we have to remember to duplicate the change here
         if not "misc.tpicd" in items:
             items["misc.tpicd"] = "NO 0"
         if not "misc.vsi_align" in items:
@@ -473,7 +491,6 @@ class Args:
             default=default_config_file_skedf,
             help="The location of the skedf.cfg configuration file",
         )
-        # parser_cfg_file_check.add_argument("rest", nargs=configargparse.REMAINDER)
         return parser_cfg_file_check
 
     def add_remaining_args(
@@ -695,7 +712,7 @@ class Args:
             default=items["misc.cont_cal_polarity"],
             env_var="FESH_GEO_CONT_CAL_POLARITY",
             help="Drudg config: If continuous cal is in use, what is the polarity? Options are "
-                 "0-3 or 'none'.",
+            "0-3 or 'none'.",
         )
 
         psr.add_argument(
@@ -703,8 +720,8 @@ class Args:
             default=items["misc.use_setup_proc"],
             env_var="FESH_GEO_USE_SETUP_PROC",
             help="Drudg config: the answer for the drudg prompt for the use setup_proc for "
-                 "geodesy schedules, an option to write a `.snp` file that skips setup on scans "
-                 "when the mode hasn’t changed.",
+            "geodesy schedules, an option to write a `.snp` file that skips setup on scans "
+            "when the mode hasn’t changed.",
         )
 
         psr.add_argument(
@@ -762,7 +779,7 @@ class Args:
             "--year",
             default=now.year,
             type=int,
-            help="The year of the Master Schedule (default is this year)"
+            help="The year of the Master Schedule (default is this year)",
         )
 
         psr.add_argument(
@@ -826,7 +843,6 @@ class CustomConfigParser(object):
         items = OrderedDict()
         for i, line in enumerate(stream):
             line = line.strip()
-            # print(line)
             if not line or line[0] in ["*"]:
                 # a comment or empty line
                 continue
