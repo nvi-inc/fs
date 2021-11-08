@@ -1,3 +1,3 @@
 # __init__.py
+from fesh2._version import __version__
 
-__version__ = "2.0rc5"
