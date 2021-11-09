@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 3.3 - November 2021
+Version 3.4 - November 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -876,7 +876,8 @@ change (in the
 changes that are in common since FS9>> sub-section of the
 <<changes_10.0.0.adoc#,Changes from FS9>> document).
 
-. For all versions, if you are planning to use the FS display server:
+. For all old versions, if you are planning to use the FS display
+server:
 
 +
 
@@ -893,9 +894,9 @@ as shown in the _/usr2/fs/st.default/control/stpgm.ctl_ example.
 
 +
 
-NOTE: An x` should be used as the second field for X window display
-programs. They will be automatically started and stopped with each
-instance of the display client, on its display.
+NOTE: An `x` should be used as the second field for all X window
+display programs. They will be automatically started and stopped with
+each instance of the display client, on its display.
 
 .. New lines were added for _monit2_, and _scnch_ for when the display
 server is in use. You may want to include those if you would like
@@ -912,8 +913,8 @@ _oper_ and _prog_.
 +
 
 .. If you are using the display server and were starting any
-__xterm__s with `sy=...` from your `initi` procedure, you should
-remove those (see the sub-section
+__xterm__s with `sy=...` from your `initi` procedure in your `station`
+library, you should remove those (see the sub-section
 <<Remove running xterm from your SNAP procedures>> farther below) and
 probably add them to _stpgm.ctl_, usually with `x` for the second
 field. The syntax is slightly different than what is used with
