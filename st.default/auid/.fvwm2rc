@@ -524,10 +524,12 @@ AddToMenu "Operator Menu" "Operator Menu" Title
 +              "Monit: LBA C-S-4" Exec exec oper_account xterm -name monit4 -e monit4
 +              "Monit: Mark 5 C-S-5" Exec exec oper_account xterm -name monit5 -e monit5
 +              "Monit: PCal C-S-6" Exec exec oper_account monpcal
+#+              "Monit: PCal C-S-6" Exec exec oper_account xterm -name monit6 -e monit6
 +              "Chekr C-S-C" Exec exec oper_account run -w chekr
 +              "Emacs C-S-E" Exec exec oper_account emacs
 +              "Logex C-S-L" Exec exec oper_account xterm -name logex -e logex
 +              "msg   C-S-M" Exec exec oper_account msg
+#+              "rdbemsg   C-S-M" Exec exec oper_account rdbemsg
 +              "Pfmed C-S-P" Exec exec oper_account xterm -name pfmed -e pfmed
 +              "Setcl C-S-S" Exec exec oper_account run -w setcl
 +              "Fmset C-S-T" Exec exec oper_account xterm -name fmset -e fmset
@@ -625,10 +627,12 @@ Key 3 A CS Exec exec oper_account xterm -name monit3 -e monit3
 Key 4 A CS Exec exec oper_account xterm -name monit4 -e monit4
 Key 5 A CS Exec exec oper_account xterm -name monit5 -e monit5
 Key 6 A CS Exec exec oper_account monpcal
+#Key 6 A CS Exec exec oper_account xterm -name monit6 -e monit6
 Key c A CS Exec exec oper_account run -w chekr
 Key e A CS Exec exec oper_account emacs
 Key l A CS Exec exec oper_account xterm -name logex -e logex
 Key m A CS Exec exec oper_account msg
+#Key m A CS Exec exec oper_account rdbemsg
 Key p A CS Exec exec oper_account xterm -name pfmed -e pfmed
 Key s A CS Exec exec oper_account run -w setcl
 Key t A CS Exec exec oper_account xterm -name fmset -e fmset
