@@ -19,9 +19,10 @@
 //
 
 = FS RDBE Support
-Version 0.7 - November 2021
+Version 0.8 - November 2021
 
 :sectnums:
+:experimental:
 :toc:
 
 == Introduction
@@ -221,7 +222,7 @@ the amplitude is set by the _rdbe.ctl_ control file.  See the
 A monitor display for the RDBEs is provided as the _monit6_ program.
 The display shows information for up to four active RDBEs: A, B, C,
 and D updating at a 1 Hz rate. Some values are displayed in inverse to
-warn of possible problems.  The information displayed is:
+warn of possible problems. The information displayed is:
 
 * DOT time
 * VDIF epoch
@@ -254,7 +255,7 @@ See the <<_rdbe_ctl,rdbe.ctl>> sub-section below for the details.
 ==== monit6.ctl
 
 The _monit6_ program has an eponymously named control file
-_monit6.ctl_.  This control file is used to adjust the configuration
+_monit6.ctl_. This control file is used to adjust the configuration
 of the _monit6_ RDBE display. Unlike other FS control files, it is read
 each time the _monit6_ program is started. The file has five lines.
 The first four control the Tsys and phase-cal display of the four
@@ -269,10 +270,53 @@ The fifth, and final, line specifies the absolute value threshold, in
 nanoseconds, for displaying the `dot2pps` in inverse video. Typically,
 this is set to `100`.
 
-==== monit6 X-resources`
+==== monit6 .Xresources
 
 Resources for the _monit6_ window were added to the example
-_.Xresources_ for _oper_ and _prog_.
+_.Xresources_ for _oper_ and _prog_. You may wish to copy them to your
+_~/.Xresources_ file.
+
+==== Starting monit6 automatically
+
+If you are using the display server, you can have _monit6_ start and
+stop automatically with the display client by adding a line for it to
+_/usr2/control/stpgm.ctl_. You can copy and modify the example line
+for _monit2_ (replace all ``2``s with ``6``s) in
+_/usr2/fs/st.default/control/stpgm.ctl_, placing the result in your
+_/usr2/control/stpgm.ctl_ file.
+
+==== Starting monit6 from the display client
+
+If you are using the display server, you can have _monit6_ start by
+using the command `client=monit6` by adding a line for it to
+_/usr2/control/clpgm.ctl_. You can copy the example line for _monit6_
+in _/usr2/fs/st.default/control/clpgm.ctl_, placing it in your
+_/usr2/control/clpgm.ctl_ file.
+
+==== Running monit6 with a hot key
+
+If you run the FS on the X display console, _monit6_ can be setup to
+be run from a hot key, say kbd:[Control+Shift+6], or a menu selection.
+To set this up, you will need to modify your _~/.fvwm2rc_ file to
+include _monit6_. You might do this by copying and modifying existing
+lines for another _monit<n>_ program (replace all __<n>__s with
+__6__s). You should end up with two lines similar to (for
+kbd:[Control+Shift+6]):
+
+`+              "Monit: RDBE C-S-6" Exec exec xterm -name monit6 -e monit6`
+
+and
+
+`Key 6 A CS Exec exec xterm -name monit6 -e monit6`
+
+These should be added after the corresponding _monit5_ lines (see
+_/usr2/st.default/oper/.fvwm2rc_ for an example). You should use a
+different number than `6` in place of the first `6` on each line, if
+you already have used `6` for a hot key. Alternatively, you can
+comment out or change your existing lines that use `6`.
+
+You will need to logout and back in again or restart _fvwm2_ for any
+changes to take effect.
 
 === Pointing and SEFD measurements
 
@@ -355,8 +399,8 @@ latest SEFD and pointing information will be included. Fields with
 light backgrounds can edited or entered manually. Fields with dark
 backgrounds are populated only by the `Update Values` button.
 
-The `Message Type` drop-down box can used to select `Ready`, ``Start`,
-or `Stop`.  The `Send Msg` button cab be used to mail the message.
+The `Message Type` drop-down box can used to select `Ready`, `Start`,
+or `Stop`. The `Send Msg` button can be used to mail the message.
 
 ==== rdbemsg.ctl
 
@@ -402,7 +446,7 @@ needed by GGAO.
 +
 
 This should be commented out, if there is no MCI node or the MCI node
-uses the `station` code.  This exists to support early MCI nodes that
+uses the `station` code. This exists to support early MCI nodes that
 did not have the same code as the station.
 
 * `mci-parameter:__n__` -- where `__n__` is the position of the data
@@ -430,6 +474,33 @@ and the fields are in a different order. Other values are ignored.
 +
 
 Other stations should keep this line commented out.
+
+==== Running rdbemsg with a hot key
+
+If you run the FS on the X display console, _rdbemsg_ can be setup to
+be run from a hot key, say kbd:[Control+Shift+M], or a menu selection.
+To set this up, you will need to modify your _~/.fvwm2rc_ file to
+include _rdbemsg_. You might do this by modifying existing entries for
+the _msg_ program to use _rdbemsg_ instead. If you don't have existing
+lines for _msg_, you can add two lines, to use kbd:[Control+Shift+M],
+similar to:
+
+`+              "rdbemsg C-S-M" Exec exec rdbemsg`
+
+and
+
+`Key m A CS Exec exec rdbemsg`
+
+These should be added after the corresponding _logex_ lines (see
+_/usr2/st.default/oper/.fvwm2rc_ for an example). You should use a
+different letter than `M` (in the first line above) and the first `m`
+(in the second line above) if you already have used `M`/`m` as a hot
+key. Alternatively, you can comment out or change your existing lines
+that use `M`/`m`. The letters on the two lines should match except
+for the case.
+
+You will need to logout and back in again or restart _fvwm2_ for any
+changes to take effect.
 
 === new_ifdbb script
 
