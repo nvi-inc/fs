@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 3.4 - November 2021
+Version 3.5 - November 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -969,6 +969,7 @@ and control, you should comment out that line.
 is different (possibly an alias from _/etc/hosts_).
 
 .. For stations with a prototype MCI node (GGAO and Westford):
+
 +
 
 If your MCI node uses a different station code (`gg` at GGAO) and/or
@@ -976,6 +977,17 @@ the values are reported in a different position (`3` at  GGAO). You
 can set these values with the `mci-code` and `mci-parameter` lines.
 As needed, uncomment the example lines and update them with
 appropriate values.
+
++
+
++
+
+If you have version `0` of the MCI node (Westford), you will need an
+updated `rdbemsg` program that uses the `mci-version` line. This is
+described in <<rdbe.adoc#_rdbemsg_ctl,rdbemsg.ctl>> sub-section of the
+<<rdbe.adoc#,FS RDBE Support>> document. If you need advice on
+extracting the version of __rdbemsg__ in commit `fb57201c` and
+installing it, please contact Ed.
 
 ==== Update aquir control files
 
