@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 2.5 - November 2021
+Version 2.6 - November 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -54,7 +54,7 @@ complete, approach would be to review the update steps in the new
 release to make sure everything has been covered. _Let the user
 beware._
 
-This document is up to date with the features in the `81174192`
+This document is up to date with the features in the `a754ecea``
 commit. Due to small increments, such as updating this document, that
 may not be the literal last commit, but the differences should be
 small unless you happen to `pull` between a significant change and
@@ -677,8 +677,15 @@ Instructions for implementing this were added to the <<10.0.0.adoc#,FS
 <<10.0.0.adoc#_miscellaneous_fslx_changes,Miscellaneous FSLx changes>>
 step.
 
-. Add use of `NeverFocus` for the `scnch` and `erchk` windows in
-the _.fvwm2rc_ files.
+. Improve default _.fvwm2rc_ files.
+
++
+
+The _.fvwm2rc_ files in the _auid_, _oper_, and _prog_ sub-directories
+of _/usr2/fs/st.default_ were updated. These changes  only affect
+behavior on the console GUI.
+
+.. Add use of `NeverFocus` for the `scnch` and `erchk` windows.
 
 +
 
@@ -686,7 +693,21 @@ This was previously added in _10.0.0-beta1_, but removed on _10.0.0_
 because it was thought to prevent scrolling of those windows. However,
 that turned out to not be the case. Using this setting prevents the
 focus from accidentally being given to these windows, which don't
-accept input. This only affects behavior on the console GUI.
+accept input.
+
+.. Improve consistency of hot key definitions.
+
++
+
++
+
+Previously the handling of _msg_, _rdbemsg_, _monpcal_, and _monit6_
+were not consistent. Now the default configuration is for
+kbd:[Control+Shift+M] to open _msg_ and kbd:[Control+Shift+6] to open
+_monpcal_ and for these programs to be displayed in the `Button 2`
+menu. Immediately below the configuration lines for these programs are
+commented out lines for _rdbemsg_ and _monit6_, which can be used
+instead by sites with RDBEs.
 
 . Correct error in FORTRAN calls to get FiLa10G time for _setcl_.
 
