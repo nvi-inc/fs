@@ -19,10 +19,11 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 2.6 - November 2021
+Version 2.7 - November 2021
 
 //:hide-uri-scheme:
 :sectnums:
+:stem: latexmath
 :sectnumlevels: 4
 :experimental:
 
@@ -54,7 +55,7 @@ complete, approach would be to review the update steps in the new
 release to make sure everything has been covered. _Let the user
 beware._
 
-This document is up to date with the features in the `a754ecea``
+This document is up to date with the features in the `0c8a4426`
 commit. Due to small increments, such as updating this document, that
 may not be the literal last commit, but the differences should be
 small unless you happen to `pull` between a significant change and
@@ -98,8 +99,8 @@ the FS starts successfully.  The new errors reported are described in
 the <<additional_rxg_errors,Additional .rxg file errors>> change in
 the <<FS changes>> sub-section below.
 
-. Adjust _~/.session_ if you are using _tcsh_ as your
-login shell for _oper_ or _prog_ (or AUID accounts).
+. Adjust _~/.session_ if you are using _tcsh_ as your login shell for
+_oper_ or _prog_ (or AUID accounts).
 
 +
 
@@ -285,14 +286,14 @@ been changed back.
 
 . Fix issues in _gnplt_ and _gndat_:
 
-.. Fix plotting of working file Tcal curve on zooomed Tcal versus
+.. Fix plotting of working file T~cal~ curve on zoomed T~cal~ versus
 frequency plots in _gnplt_ (closing
 https://github.com/nvi-inc/fs/issues/117[#117]).
 
 +
 
-Previously, if you zoomed in the Tcal versus frequency plot and
-selected display of the working file Tcal curve, it would reset the
+Previously, if you zoomed in the T~cal~ versus frequency plot and
+selected display of the working file T~cal~ curve, it would reset the
 left plot edge to the unzoomed value when drawing the curve.  This was
 caused by an interaction of two issues:
 
@@ -300,21 +301,21 @@ caused by an interaction of two issues:
 
 --
 
-* The program tried to draw the entire Tcal curve, not just the part
+* The program tried to draw the entire T~cal~ curve, not just the part
 in the zoomed frequency range.
 
-* The function, `drawValues`, that adds Tcal or Trec lines to plots,
-reset any plot limit, except the right edge one, if any data to be
-plotted was beyond that edge. This was apparently to allow showing the
-vertical axis intercept of the Trec fit and to make sure that all
-vertical extents of Trec and Tcal curves were not off the visible plot
-area.
+* The function, `drawValues`, that adds T~cal~ or T~rec~ lines to
+plots, reset any plot limit, except the right edge one, if any data to
+be plotted was beyond that edge. This was apparently to allow showing
+the vertical axis intercept of the T~rec~ fit and to make sure that
+all vertical extents of T~rec~ and T~cal~ curves were not off the
+visible plot area.
 
 --
 
 +
 
-This was fixed by limiting the Tcal curve plotted to just segments
+This was fixed by limiting the T~cal~ curve plotted to just segments
 within the zoomed area. In addition for consistency, the `drawValues`
 function was change to reset any plot limit that is exceeded by the
 data. Since all other uses of `drawValues` already limited the
@@ -326,7 +327,7 @@ impact on those other uses.
 Thanks to Eskil Varenius (Onsala), for reporting this issue and
 testing the fix.
 
-.. Correct bad Tsys data in _gnplt_ (closing
+.. Correct bad T~sys~ data in _gnplt_ (closing
 https://github.com/nvi-inc/fs/issues/107[#107] and
 https://github.com/nvi-inc/fs/issues/104[#104]).
 
@@ -341,9 +342,10 @@ not impossible.
 +
 
 Due to the layout of the automatic variables, this error should only
-have impacted `Tsys` and `Tsys-Tspill` data in _gnplt_ and only when
-there were more than 20 detectors used. However, also considering the
-layout of the automatic variables, it is unclear why there were not
+have impacted stem:[\mathit{T_{sys}}] and
+stem:[\mathit{T_{sys}-T_{spill}}] data in _gnplt_ and only when there
+were more than 20 detectors used. However, also considering the layout
+of the automatic variables, it is unclear why there were not
 catastrophic program failures in such a case. It would be prudent to
 reanalyze any current data sets that used more than 20 detectors with
 the fixed version to see if the results change.
@@ -469,6 +471,49 @@ lower case.
 +
 
 Thanks to Eskil Varenius (Onsala), for reporting this issue.
+
+. Fix continuous calibration T~sys~ calculations for DBBC and DBBC3
+racks (closing https://github.com/nvi-inc/fs/issues/157[#157]).
+
++
+
+For the _tpicd_ method of monitoring T~sys~ for DBBC and DBBC3 racks,
+the value of T~sys~ was being underestimated by about
+stem:[\mathit{\frac{T_{cal}}{2}}]. This was because the CAL~on~ counts
+were being ignored for determining the count level of T~sys~.  This
+has been fixed.
+
++
+
+For the DBBC, this error has been occurring since continuous cal was
+first supported in 2012, FS 9.11.0, commit `f5817f65`. For the DBB3,
+since it was first supported in 2018, FS 9.12.12, commit `19a69540`.
+However, the T~sys~ monitoring for the DBBC3 was largely unused since
+the device communication rate made it difficult to work with.
+
++
+
+NOTE: That the fix for the DBBC3 will be irrelevant once multicast is
+supported.
+
++
+
+This error is fairly small and probably did not have an impact on
+routine local performance monitoring. However, if some specialized
+measurements were being made, they may have been affected. If this
+error had a significant effect on you, please contact Ed.
+
++
+
+NOTE: Downstream amplitude calibration data should not have been
+affected as long as it uses the raw count data, which is how it is
+designed to be used.
+
++
+
+Thanks to Jun Yang (Onsala) for discovering and reporting this. Thank
+to Jun and Eskil Varenius (also at Onsala) for making systems
+available to verify the fixes.
 
 . Clean-up suppressing of signals.
 
@@ -723,14 +768,14 @@ relatively low, not quite 1 in 2^32^ chance of it being excited.
 NOTE: _setcl_ only works for the first FiLa10G if there are two. A
 second is only used for VGOS. _fmset_ works for both.
 
-. Remove extra comma in Tcal table log entires (closing
+. Remove extra comma in T~cal~ table log entires (closing
  https://github.com/nvi-inc/fs/issues/160[#160]):
 
 +
 
 The contents of the _.rxg_ selected by an `lo=...` command are logged
 the first time the file is selected since the log was last opened.
-There was a redundant comma in the Tcal table log entries after the
+There was a redundant comma in the T~cal~ table log entries after the
 _.rxg_ file name.
 
 . Correct `bbc_gain` command error codes.
