@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2021-06-27
+VERSION=2021-11-14
 
 version(){
     echo "[plog $VERSION]"
@@ -407,6 +407,10 @@ reduce() {
     info Creating reduced log file...
     if [[ -n "$DRY" ]]; then
         >&2 echo "$egrep_program -v "$PLOG_REDUCE_PATTERN" $1 > $out"
+    elif [[ "$PLOG_COMPRESSED_EXT" =~ bz2 && ! "$1" =~ \.bz2 ]]; then
+# bunzip2 (via bzegrep) doesn't pass the first 5000 bytes of an uncompressed
+# file (bug!), so use egrep directly as a work around
+        safe_pv "$1" | egrep -v "$PLOG_REDUCE_PATTERN" > "$out"
     else
         safe_pv "$1" | "$egrep_program" -v "$PLOG_REDUCE_PATTERN" > "$out"
     fi
