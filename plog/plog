@@ -409,7 +409,7 @@ reduce() {
         >&2 echo "$egrep_program -v "$PLOG_REDUCE_PATTERN" $1 > $out"
     elif [[ "$PLOG_COMPRESSED_EXT" =~ bz2 && ! "$1" =~ \.bz2 ]]; then
 # bunzip2 (via bzegrep) doesn't pass the first 5000 bytes of an uncompressed
-# file (bug!), so use egrep directly as a work around
+# file from stdin (seems like a bug), so use egrep directly as a work around
         safe_pv "$1" | egrep -v "$PLOG_REDUCE_PATTERN" > "$out"
     else
         safe_pv "$1" | "$egrep_program" -v "$PLOG_REDUCE_PATTERN" > "$out"
