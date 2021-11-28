@@ -4,8 +4,8 @@
 if ($#ARGV < 0) {
     print "Usage: $0 file
 
-Creates a /usr2/control/dbbc3.ctl file and fixes equip.ctl moving the
-dbbc3 data to former from the latter.
+Creates a dbbc3.ctl file and fixes equip.ctl moving the dbbc3 data to
+former from the latter.
 
 file is the equip.ctl control file to be fixed.
 
@@ -15,17 +15,16 @@ This script should be run in /usr2/control.
 
 The old equip.ctl is truncated just after FiLa10G VSI input select
 line. The parameters from the DBBC3 line are placed in the appropriate
-lines of a copy of the default dbbc3.ctl file, placed in
-/usr2/control. (Comments from the default version are preserved.) It
-will use the existing firmware version number for both the ddcu and
-ddcv personalities. Please adjust them as necessary.
+lines of a copy of the default dbbc3.ctl file. (Comments from the
+default version are preserved.) It will use the existing firmware
+version number for both the ddcu and ddcv personalities. Please
+adjust them as necessary.
 
-If you wish to retain the dbbc3 line comments from the old equip.ctl
+If you wish to retain the dbbc3 inline comments from the old equip.ctl
 file, you should not use this script, instead copy the default
-/usr2/fs/st.default/control/dbbc3.ctl file to /usr2/control/dbbc3.ctl
-and adjust the contents as needed. In that case, be sure to delete the
-lines after the FiLa10G VSI input select line in your equip.ctl
-file.\n";
+/usr2/fs/st.default/control/dbbc3.ctl file to dbbc3.ctl and adjust the
+contents as needed. In that case, be sure to delete the lines after
+the FiLa10G VSI input select line in your equip.ctl file.\n";
 
     exit -1;
 }
@@ -48,7 +47,7 @@ if ($name =~ /(.*)\..*$/ ) {
     }
 }
 
-$new="/usr2/control/dbbc3.ctl";
+$new="dbbc3.ctl";
 if (-e $new) {
     die "$new already exists, giving up.\n";
 }
@@ -137,5 +136,7 @@ while(<OLD>) {
         next;
     } elsif ($count == 2 || $count == 3) {
         print NEW " $array[0]\n";
+    } else {
+        print NEW;
     }
 }
