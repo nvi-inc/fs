@@ -343,7 +343,6 @@ parse:
     lcl.start.state.known=1;
     dbbc3_vdif_frame_params(&lcl);
     memcpy(&shm_addr->dbbc3_core3h_modex[itask-30],&lcl,sizeof(lcl));
-
     out_recs=0;
     out_class=0;
 
@@ -364,7 +363,7 @@ parse:
     int ddcu=  DBBC3_DDCU == shm_addr->equip.rack_type;
 
     strcpy(outbuf,"core3h=");
-    strcat(outbuf,board[itask-30]);
+    strcat(outbuf,board[1+itask-30]);
 
     if(ddcu)
         strcat(outbuf,",splitmode on");
