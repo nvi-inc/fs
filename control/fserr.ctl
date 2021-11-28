@@ -2885,6 +2885,9 @@ Core3h board ?WWW should be sending data but it is stopped
 DR -624
 Core3h board ?WWW should be stopped but it is sending data
 ""
+DR -625
+Core3h board ?WWW sysstat input clock rate does not agree with dbbc3.ctl
+""
 DS   -1
 Unable to open dsad.ctl file.
 ""

@@ -235,6 +235,28 @@ c
       endif
       call fs_set_dbbc3_iscboard(dbbc3_iscboard)
 c
+c DBBC3 clock rate
+c
+      call readg(idcb,ierr,ibuf,ilen)
+      if (ierr.lt.0.or.ilen.le.0) then
+        call logit7ci(0,0,0,1,-185,'bo',6)
+        goto 990
+      endif
+      call lower(ibuf,ilen)
+      ifc=1
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        call logit7ci(0,0,0,1,-186,'bo',6)
+        goto 990
+      endif
+
+      dbbc3_clockr = ias2b(ibuf,ic1,ic2-ic1+1)
+      if (dbbc3_clockr.lt.0) then
+        call logit7ci(0,0,0,1,-186,'bo',6)
+        goto 990
+      endif
+      call fs_set_dbbc3_clockr(dbbc3_clockr)
+c
       return
 c
  990  continue

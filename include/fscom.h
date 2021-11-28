@@ -496,6 +496,7 @@ typedef struct fscom {
   int  dbbc3_ddcv_vc;
   int  dbbc3_mcdelay;
   int  dbbc3_iscboard;
+  int  dbbc3_clockr;
 
   struct dbbc3_core3h_modex_cmd dbbc3_core3h_modex[MAX_DBBC3_IF];
 

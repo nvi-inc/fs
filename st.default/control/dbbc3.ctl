@@ -12,3 +12,5 @@
   57
 * setcl board
   1
+* DBBC3 clock rate, >= 0, but DDDC_U/_V only supports 128
+ 128

@@ -2936,3 +2936,15 @@ void fs_get_dbbc3_iscboard__(dbbc3_iscboard)
 	{
           *dbbc3_iscboard = shm_addr->dbbc3_iscboard;
     }
+
+void fs_set_dbbc3_clockr__(dbbc3_clockr)
+	int *dbbc3_clockr;
+	{
+          shm_addr->dbbc3_clockr = *dbbc3_clockr;
+    }
+
+void fs_get_dbbc3_clockr__(dbbc3_clockr)
+	int *dbbc3_clockr;
+	{
+          *dbbc3_clockr = shm_addr->dbbc3_clockr;
+    }

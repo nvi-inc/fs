@@ -267,8 +267,8 @@ void vsi_samplerate_2_dbbc3_core3h(ptr,lclc,board)
     struct dbbc3_core3h_modex_cmd *lclc;
     char board[ ];
 {
-    sprintf(ptr,"core3h=%1.1s,vsi_samplerate %d  %d",board,
-            (int) (shm_addr->m5b_crate*1.0e6+0.5),lclc->decimate.decimate);
+    sprintf(ptr,"core3h=%1.1s,vsi_samplerate %d %d",board,
+            (int) (shm_addr->dbbc3_clockr*1.0e6+0.5),lclc->decimate.decimate);
 
 }
 

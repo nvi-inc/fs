@@ -179,7 +179,7 @@ void dbbc3_core3h_modex_dis(command,itask,ip,force_set)
 
     if(kcom) {
         m5state_init(&lclm.clockrate.state);
-        lclm.clockrate.clockrate=shm_addr->m5b_crate*1.0e6+0.5;
+        lclm.clockrate.clockrate=shm_addr->dbbc3_clockr*1.0e6+0.5;
         lclm.clockrate.state.known=1;
 
         m5state_init(&lclm.splitmode.state);
@@ -279,6 +279,11 @@ send:
                 logitn(NULL,-623,"dr",itask-29);
             else
                 logitn(NULL,-624,"dr",itask-29);
+            ierr=-600-(itask-29);
+        }
+        if(shm_addr->dbbc3_core3h_modex[itask-30].set &&
+                (int) (shm_addr->dbbc3_clockr*1.e6+0.5) != lclm.clockrate.clockrate) {
+            logitn(NULL,-625,"dr",itask-29);
             ierr=-600-(itask-29);
         }
         if(ierr!=0) {

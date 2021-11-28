@@ -536,6 +536,10 @@ c
           nch=mcoma(ib,nch)
           call fs_get_dbbc3_iscboard(dbbc3_iscboard)
           nch = nch + ib2as(dbbc3_iscboard,ib,nch,z'8002')
+c
+          nch=mcoma(ib,nch)
+          call fs_get_dbbc3_clockr(dbbc3_clockr)
+          nch = nch + ib2as(dbbc3_clockr,ib,nch,z'8004')
 
           call logit3(ib,nch-1,lsor)
       endif
