@@ -71,8 +71,10 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             printw("%4s"," LSB");
         else
             printw("%4s"," ");
-    } else
+    } else {
         printw("%8s"," ");
+        printw("%4s"," ");
+    }
 
     if(rec && !all)
         printw("%4s"," Rec");
