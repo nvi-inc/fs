@@ -51,7 +51,7 @@ c     &         2hf ,2hfi,2hle /
 
       call fmpopen(idcb,name,ierr,'r',idum)
       if (ierr.lt.0) then
-        call logit7ci(0,0,0,1,-139,'bo',ierr)
+        call logit7ci(0,0,0,1,-185,'bo',ierr)
         goto 995
       endif
 c
@@ -59,7 +59,7 @@ c bbcs/if anf ifs
 c
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
-        call logit7ci(0,0,0,1,-185,'bo',1)
+        call logit7ci(0,0,0,1,-186,'bo',1)
         goto 990
       endif
       call lower(ibuf,ilen)
@@ -99,7 +99,7 @@ c DBBC3 DDCU firmware version
 c
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
-        call logit7ci(0,0,0,1,-185,'bo',2)
+        call logit7ci(0,0,0,1,-186,'bo',2)
         goto 990
       endif
       call lower(ibuf,ilen)
@@ -147,7 +147,7 @@ c DBBC3 DDCV firmware version
 c
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
-        call logit7ci(0,0,0,1,-185,'bo',3)
+        call logit7ci(0,0,0,1,-186,'bo',3)
         goto 990
       endif
       call lower(ibuf,ilen)
@@ -195,7 +195,7 @@ c DBBC3 mcast delay
 c
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
-        call logit7ci(0,0,0,1,-185,'bo',4)
+        call logit7ci(0,0,0,1,-186,'bo',4)
         goto 990
       endif
       call lower(ibuf,ilen)
@@ -217,7 +217,7 @@ c DBBC3 setcl board
 c
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
-        call logit7ci(0,0,0,1,-185,'bo',5)
+        call logit7ci(0,0,0,1,-186,'bo',5)
         goto 990
       endif
       call lower(ibuf,ilen)
@@ -239,7 +239,7 @@ c DBBC3 clock rate
 c
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
-        call logit7ci(0,0,0,1,-185,'bo',6)
+        call logit7ci(0,0,0,1,-186,'bo',6)
         goto 990
       endif
       call lower(ibuf,ilen)
