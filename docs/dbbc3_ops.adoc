@@ -21,7 +21,7 @@
 :doctype: book
 
 = DRAFT FS DBBC3 Operations Manual
-Version 1.7 - November 2021
+Version 1.8 - November 2021
 
 :experimental:
 :sectnums:
@@ -502,10 +502,11 @@ is one second in the past and the Tsys values are from two seconds in the past.
 NOTE: The time is shown on inverse video if it is not advancing or disagrees
 with the FS when it was received or the firmware is _v124_ (no time is
 available in the multicast for that version, so the multicast arrival time is
-shown). The epoch is `--` for now since the VDIF epoch is not available yet in
-the multicast.  The `DDBC3-FS` time difference, in seconds, is shown in inverse
-video if it is not zero (positive if the DBBC3 time is later than the FS). The
-`DDBC3-FS` time difference is `------` for firmware _v124_.
+shown). The epoch is shown as `--` for now since the VDIF epoch is not
+available yet in the multicast.  The `DDBC3-FS` time difference, in seconds, is
+shown in inverse video if it is not zero (positive if the DBBC3 time is later
+than the FS). The `DDBC3-FS` time difference is shown as `------` in inverse
+video for firmware _v124_.
 
 The display is designed to provide what should normally be the most useful
 information without operator intervention. However, the operator can adjust the
