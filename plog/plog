@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2021-11-14
+VERSION=2021-12-02
 
 version(){
     echo "[plog $VERSION]"
@@ -64,17 +64,27 @@ ${underline}Options:${normal}
                   environment variable. Flag can be given multiple times.
     ${black}-p${normal}            Also push proc file
     ${black}-q${normal}            Quiet mode
-    ${black}-z${normal}            Push compressed log (full if contains multicast data)
+    ${black}-z${normal}            Push a compressed log (only full if log contains multicast
+                  data). Can't be used with '-r'.
+    ${black}-r${normal}            Push only a reduced log if log contains multicast log data
+                  Ignored for a non-multicast log. Can't be used with '-z' in
+                  either case.
     ${black}-v${normal}            Print plog version and exit
     ${black}-g${normal}            Force gzip compression/uncompression
 
 If the log containing RDBE multicast data:
 
-1.  If not already done so, the log file will be renamed to
-    '$FS_LOG_PATH/<log>_full.log'
+1.  If not already done, the log file will be renamed to
+    '$FS_LOG_PATH/<log>_full.log'.
 
-2.  Unless '-z' is supplied, a reduced log file, without multicast data, is
-    created in /tmp and this is transferred to the data center.
+2.  If neither '-r' or '-z' is supplied both a reduced log and a
+    compressed full log will be created on /tmp and uploaded.
+
+3.  If '-r' is supplied, only a reduced log file, without multicast
+    data, created in /tmp and is transferred to the data center.
+
+4.  If '-z' is supplied, only a compressed full log file is created in
+    /tmp and transferred to the data center.
 
 To see progress when compressing and reducing, install the 'pv' package.
 
@@ -125,6 +135,8 @@ Examples of usage:
     plog -p vgp007
     ${blue}# push (full) compressed log for vgp007${normal}
     plog -z vgp007
+    ${blue}# push both reduced and compressed multicast log for vgp007${normal}
+    plog -b vgp007
     ${blue}# push everything in /usr2/log to Haystack${normal}
     plog -c HAYSTACK /usr2/log/*.log
 
@@ -440,8 +452,9 @@ main () {
     PUSH_PROC=
     COMPRESS=
     QUIET=
+    BOTH=1
 
-    while getopts hltqpzvc:g opt; do
+    while getopts hltqpzrvc:g opt; do
         case $opt in
             l)
                 LATEST=1
@@ -463,6 +476,9 @@ main () {
                 ;;
             z)
                 COMPRESS=1
+                ;;
+            r)
+                BOTH=
                 ;;
             h)
                 usage_long
@@ -486,6 +502,10 @@ main () {
     done
     shift $(($OPTIND - 1))
 
+# Conflict check
+    if [[ -n "$COMPRESS" && -z "$BOTH" ]]; then
+        fatal "Can't use '-r' and '-z' together"
+    fi
 
 # Check compression type
     if $(command -v  bzip2 >/dev/null) ; then
@@ -620,10 +640,12 @@ main () {
             continue
         fi
 
-        # The log must now contain multicast data, and we haven't been told to upload
-        # the full compressed file so generate reduced log and add it to the queue
-        # To avoid a name conflict, this renames the file while preserving the extension.
+        # The log must now contain multicast data, so generate reduced log and add it to the queue
         add $(reduce $log)
+        # If not given '-r' also send a compressed log.
+        if [[ -n "$BOTH" ]]; then
+            add $(compress $log)
+        fi
     done
 
     for center in $DATA_CENTERS; do
