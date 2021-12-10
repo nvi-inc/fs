@@ -117,7 +117,6 @@ C Equipment type has been set by schedule file, Option 11, or control file.
         if(ks2rec(i).or.kk41rec(i).or.kk42rec(i)) knopass=.true.
       end do
 
-  
 C Racks
       knorack = cstrack_cap .eq. "NONE"
       km3rack = cstrack_cap .eq. "MARK3A"

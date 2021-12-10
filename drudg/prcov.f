@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -25,6 +25,9 @@ C 970603 nrv New.
 
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
+! 2021-12-03 Split off octal_constants from skparm.ftni 
+      include '../skdrincl/octal_constants.ftni'
+
 
 C Local
       integer jchar,i,ierr,ilen

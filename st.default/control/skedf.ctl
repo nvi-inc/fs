@@ -240,6 +240,10 @@ $misc
 * equipment Mark4  Mark5A  none
 * equipment VLBA   VLBA  VLBA
 *
+* If e-vlbi_override is specified below the the recorder is set to NONE
+* if the string e-vlbi appears in the correlator name.
+*  e-vlbi_override
+*
 * If equipment_override is specified (uncommented below) then the
 * equipment in the control file is used. This then becomes your default
 * equipment regardless of what is in the schedule. This is a useful way of 
@@ -260,6 +264,19 @@ $misc
 * vdif_single_thread_per_File  no
 * vdif_single_thread_per_file  ask
 *
+* --------------------------------------------------------------
+* The following handles gaps in the schedule.
+* The syntax is
+* scan_close  max_gap_time pre_time     BOTH in seconds
+*   max_gap_time is the maximum gap between consecutive scans.
+*   pre_time     is how much before the next scan begins to restart.
+*
+* If the difference between the end of the current scan and the start of the
+* next is >max_gap_time then drudg:
+*  1. closes out the current scan.
+*  2. Will issue a WAIT command for the Time-next-scan-pre_time.
+*
+* scan_close 3600 120
 *
 *--------------------------------------------------------------
 * TPI daemon setup

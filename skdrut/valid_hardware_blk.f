@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 
+! 2021-06-17 JMG. Added in DVP (for DSN)  
 ! 2020-12-29 JMG. Added in DBBC3. A little rearranging. 
 
       subroutine valid_hardware_blk()
@@ -54,8 +55,9 @@
       crack_type(24)=    'DBBC3_DDC' 
       crack_type(25)=    'VLBAC'
       crack_type(26)=    'CDAS'
-      crack_type(27)=    'BB'
-      crack_type(28)=    'unknown'
+      crack_type(27)=    'DVP'
+      crack_type(28)=    'BB'
+      crack_type(29)=    'unknown'
 
 ! Valid recorder types
       crec_type(1)=     'none'

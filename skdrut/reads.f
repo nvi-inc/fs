@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -23,6 +23,8 @@ C
 C  READS reads the schedule file lines.
 C
       include '../skdrincl/skparm.ftni'
+! 2021-12-03 JMGipson.  Added octal_constants.ftni
+      include '../skdrincl/octal_constants.ftni'
 C
 C  INPUT:
       integer iunit,iblen,imode
@@ -44,6 +46,7 @@ C  LOCAL:
       integer jchar ! function
 C HISTORY:
 C  LAST MODIFIED: CREATED 800809
+
 C                 CLEAR BUFFER BEFORE EACH READ!  810705
 C    880315 NRV DE-COMPC'D
 C    880524 PMR changed READF to READL

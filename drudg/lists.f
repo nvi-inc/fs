@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -113,6 +113,10 @@ C     DATA LAXIS /2HHA,2HDC,2HXY,2HEW,2HAZ,2HEL,2HXY,2HNS,2HRI,2HCH,
 C    .2hSE,2hST,2hAL,2hGO/
 C
 C WHO DATE   CHANGES
+
+! 2021-04-02 JMG. Changes STNRAT to slew_rate
+! 2021-01-27 JMG changed some variable names: sorp50-->sorp2000, sorpda--sorp_now, RA50, DEC50-->sorp1950
+! 2021-01-07 JMG removed unused variables 
 C NRV 830818 ADDED SATELLITE CALCULATIONS
 C MWH 840813 Added printer LU lock, added exper name to header
 C NRV 880708 Changed output for different print widths
@@ -148,8 +152,7 @@ C 991209 nrv Add ITUSE to iftold calculation.
 ! 2007Jul20 JMG.  Added character LD
 ! 2013Sep19  JMGipson made sample rate station dependent
 ! 2014Apr23  JMG.  Changed lcbpre, lcbnow to cwrap_pre, cwrap_now. Updated call to slewo.f
-! 2021Jan07  JMG removed unused variables 
-! 2021-01-27 JMG changed some variable names: sorp50-->sorp2000, sorpda--sorp_now, RA50, DEC50-->sorp1950
+
 C
 C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
@@ -235,8 +238,8 @@ C
 C     LAX1 = LAXIS(1,IAXIS(ISTN))
 C     LAX2 = LAXIS(2,IAXIS(ISTN))
       call axtyp(laxis,iaxis(istn),2) ! convert code to name
-      Rt1 = STNRAT(1,ISTN)*60.0*rad2deg
-      Rt2 = STNRAT(2,ISTN)*60.0*rad2deg
+      Rt1 = slew_vel(1,ISTN)*60.0*rad2deg
+      Rt2 = slew_vel(2,ISTN)*60.0*rad2deg
       AL11 = STNLIM(1,1,ISTN)*rad2deg
       AL21 = STNLIM(2,1,ISTN)*rad2deg
       AL12 = STNLIM(1,2,ISTN)*rad2deg

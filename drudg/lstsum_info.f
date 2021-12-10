@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -70,7 +70,7 @@ C     lines are probably there.
         if (ierr.ge.-4) cid1=' '
         if (ierr.ge.-5) cid='  '
       endif
-      ierr=0
+      ierr=0     
 
 C 4.2  Get axis type and station position
       if (kskd) then

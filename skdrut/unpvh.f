@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -23,6 +23,8 @@ C
 C     UNPVH unpacks a record containing horizon mask data.
 C
       include '../skdrincl/skparm.ftni'
+! 2021-12-03 JMGipson.  Added octal_constants.ftni
+      include '../skdrincl/octal_constants.ftni'
 C
 C  INPUT:
       integer*2 IBUF(*)
@@ -53,6 +55,7 @@ C  930225  nrv  implicit none
 C 960201 nrv Check range of az,el
 C 960404 nrv Remove checks for range because this same routine is
 C            used for coordinate masks also.
+! 2021-12-28. Fixed bounds error caught by a compiler
 C
 C
 C     Start the unpacking with the first character of the buffer.
@@ -93,10 +96,12 @@ C     endif
       NHOR = NHOR + 1
       AZH(NHOR) = R
 C  If az entries are not in ascending order, error
-      if (nhor.gt.1.and.azh(nhor).le.azh(nhor-1)) then
+      if (nhor.gt.1) then 
+        if(azh(nhor).le.azh(nhor-1)) then
         ierr=-201-nhor*2
         return
-      endif
+        endif
+      endif 
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2) ! get matching el
       IF (IC1.EQ.0) then ! no matching el
         ierr=-103

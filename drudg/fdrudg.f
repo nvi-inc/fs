@@ -58,6 +58,7 @@ C LOCAL:
       character*128 csnap,cproc,csked,cexpna
       logical kex,kskd,kskdfile,kdrgfile,kknown
       logical kequip_over,knew_sked
+      logical kevlbi_over           !override if e-vlbi is in corname
       integer nch,nci
       character*2  response,scode
       character*12 crec_def(2)      !from skedf.ctl file
@@ -311,12 +312,11 @@ C***********************************************************
 
 
       call drudg_rdctl(csked,csnap,cproc,ctmpnam,
-     >           crack_type_def,crec_def,cfirstrec_def,kequip_over)
-      kdr_type = .not.(crack_type_def.eq.' '.and.
-     >               crec_def(1).eq.' '.and.crec_def(2).eq.' ')
+     >    crack_type_def,crec_def,cfirstrec_def,kequip_over,kevlbi_over)
+ 
       klabel_ps = clabtyp.eq.'POSTSCRIPT' .or. clabtyp .eq. 'DYMO'
 
-C
+!
 C     2. Initialize local variables
 C
       km5A=.false.
@@ -671,30 +671,30 @@ C  if it was not set by the schedule.
 
           crack_tmp_cap=cstrack(istn)
           call capitalize(crack_tmp_cap)
-          if(crack_tmp_cap .eq. "UNKNOWN") cstrack(istn)="none"
-
-          if (kdr_type .and. kequip_over.and.knew_sked) then ! equipment is in control file
-            if(cstrack(istn) .ne. crack_type_def .or.
-     >         cstrec(istn,1) .ne. crec_def(1) .or.
-     >         cstrec(istn,2) .ne. crec_def(2) .or.
-     >         cfirstrec(istn).ne. cfirstrec_def) then
-              Write(luscn,*)
+          if(crack_tmp_cap .eq. "UNKNOWN") cstrack(istn)="none"    
+          
+          if(knew_sked) then
+            if(crack_type_def.ne." " .or. crec_def(1).ne." ".and. 
+     >        kequip_over) then
+              if(cstrack(istn) .ne. crack_type_def .or.
+     >           cstrec(istn,1) .ne. crec_def(1)) then 
+                Write(luscn,*)
      >           "WARNING! Using equipment from skedf.ctl:"
-              write(luscn,  '(5x,"Replacing rack ",a," by ", a)')
-     >          cstrack(istn), crack_type_def
-              do i=1,1
-                write(luscn,'(5x,"Replacing rec",i1,5x, a, " by ",a)')
-     >              i, cstrec(istn,i), crec_def(i)
-              end do
-              cstrack(istn) =crack_type_def
-              cstrec(istn,1)=crec_def(1)
-              cstrec(istn,2)=crec_def(2)
-              cfirstrec(istn)=cfirstrec_def
+                write(luscn,'(5x,"Replacing rack ",a," by ", a)')
+     >            cstrack(istn), crack_type_def
+                write(luscn,'(5x,"Replacing rec  ",a," by ",a)')
+     >            cstrec(istn,1), crec_def(1)            
+                cstrack(istn) =crack_type_def
+                cstrec(istn,1)=crec_def(1)  
+              endif
             endif
-!This keeps us from only doing the override when the schedlue is read in.
+            if(kevlbi_over .and.index(CCORNAME,"E-VLBI") .ne. 0) then
+              cstrec(istn,1) = "none"
+              write(luscn,'(a)') 
+     >          "Setting recorder to NONE because of e-vlbi"
+            endif
+!This keeps us from only doing the override when the schedule is read in.
             knew_sked=.false.
-            if(cstrec(istn,2) .ne. 'none' .and.
-     >        cstrec(istn,1) .ne. 'none') nrecst(istn)=2
           endif ! equipment is in control file
         else !all stations
           do i=1,nstatn

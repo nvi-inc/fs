@@ -17,9 +17,29 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
-!Include file to set the version. Just change this and leave fdrudg.f alone
-! below is set at compiletime
-      iVerMajor_FS = VERSION
-      iVerMinor_FS = SUBLEVEL
-      iVerPatch_FS = PATCHLEVEL
-      cversion = '061006'
+!*************************************************************************************************      
+      real function slew_time(x1,x2,off,vel,acc)   
+      implicit none    
+! Passed      
+      real x1,x2   !starting stopping point
+      real off     !settling time
+      real vel     !velocity          
+      real acc     !acceleration
+! 2021-12-15 JMGipson.   Added forgotten 2.0 before sqrt.
+
+! local
+      real dist 
+      real t_acc   !time to accelerate to terminal velocity
+
+      
+      dist=abs(x1-x2)
+      t_acc=vel/acc
+      
+      if(dist  .le.  acc*t_acc*t_acc) then
+         slew_time=2.0d0*sqrt(dist/acc)
+      else
+         slew_time=dist/vel+t_acc
+      endif
+      slew_time=slew_time+off 
+      return
+      end 

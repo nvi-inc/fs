@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -31,6 +31,7 @@ C so that drudg will compile and load.
 C********************************************************************
 C
 ! Now put in recent changes at the top.
+! 2021-12-03 JMG Moved octal constants to own FTNI
 ! 2021-02-13 JMG Introduced max_fandef=2*max_track
 ! 2021-01-31 JMG Remove stuff related to roll
 ! 2021-01-05 JMG Replaced max_frq by max_code. (Max_frq was confusing and led to coding errors.)
@@ -280,31 +281,6 @@ C
 C
       INTEGER  NULL
       PARAMETER (NULL = 0)
-
-C     Definitions for octal constants.
-
-      integer OBLANK,ODOLLAR,OZERO,OCOMMA,OMINUS,OPLUS,
-     .          ODOT,OLPAREN,OUNDERSCORE,OSTAR,OSLASH,OAND,
-     .          ORPAREN,OBAR,OCOLON
-      parameter (OBLANK = O'40', ODOLLAR = O'44',
-     .OZERO = O'60', OCOMMA = O'54', OMINUS = O'55',
-     .OPLUS = O'53', ODOT = O'56', OLPAREN = O'50',
-     .ORPAREN = O'51',OUNDERSCORE = O'137', OSTAR = O'52',
-     .OSLASH = O'57', OAND = O'46', OBAR = O'140',
-     .OCOLON = 58)
-      integer OCAPA,OCAPB,OCAPC,OCAPD,OCAPE,OCAPF,OCAPX,
-     .OCAPY,OCAPW,OSMALLE,OCAPL,OCAPT,OCAPN,ONINE,OCAPH,
-     .OCAPP,OONE,OCAPZ,OSMALLA,OSMALLZ,OCAPU,OCAPV,OCAPR,
-     .ocapi,ocapo
-      parameter (OCAPA = O'101', OCAPB = O'102',
-     .OCAPC = O'103', OCAPD = O'104', OCAPE = O'105',
-     .OCAPF = O'106', OCAPX = O'130', OCAPY = O'131',
-     .OCAPW = O'127', OCAPL = O'114', OCAPN = O'116',
-     .OSMALLE = O'145', OCAPT = O'124', ONINE = O'71',
-     .OCAPH = O'110', ocapi = o'111', ocapo = o'117', 
-     .OCAPP = O'120', OCAPZ = O'132',
-     .OONE = O'61', OSMALLZ = O'172', OSMALLA = O'141',
-     .OCAPU = O'125', OCAPV = O'126', OCAPR = O'122')
 
 C     Unit 5 = standard input (keyboard)
 C     Unit 6 = standard output (screen)

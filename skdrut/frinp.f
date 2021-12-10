@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -79,6 +79,7 @@ C  LOCAL:
       equivalence (c1,lid)
 
 ! Updates. Now most recent at top.
+! 2021-05-07 JMG. Minor cleanup on error writing. inserted space before station name.
 ! 2021-01-05 JMG removed obsolte itrk_map 
 ! 2021-01-05 JMG Replaced max_frq by max_code. (Max_frq was confusing and led to coding errors.)
 ! 2020-06-22 JMG Fixed bug introduced 2018OCT. 
@@ -299,13 +300,13 @@ C                                    ! this channel on this BBC
      .        write(lu,'(a,a2,a,a2,a,i3,a,a)')
      >        "FRINP04 - Subgroup ", lsg," inconsistent with ",
      >        lsubvc(ic,istn,icode), " for channel ",ic,
-     >        " station",cstnna(istn)
+     >        " station ",cstnna(istn)
 
               if (lc.ne.lcode(icode)) 
      .        write(lu,'(a,a2,a,a2,a,i3,a,a)')
      >        "FRINP05 - Code ",lc," inconsistent with ",
      >         lcode(icode), " for channel ",ic,
-     >        " station",cstnna(istn)
+     >        " station ",cstnna(istn)
               kfound=.true.
               FREQLO(ic,ISTN,ICODE) = F ! LO freq
               cIFINP(ic,istn,ICODE) = cIN ! IF input channel
@@ -326,13 +327,13 @@ C                                    ! this channel on this BBC
      .        write(lu,'(a,a2,a,a2,a,i3,a,a)')
      >        "FRINP04 - Subgroup ", lsg," inconsistent with ",
      >        lsubvc(ic,istn,icode), " for channel ",ic,
-     >        "station",cstnna(istn)
+     >        "station ",cstnna(istn)
 
               if (lc.ne.lcode(icode)) 
      .        write(lu,'(a,a2,a,a2,a,i3,a,a)')
      >        "FRINP05 - Code ",lc," inconsistent with ",
      >         lcode(icode), " for channel ",ic,
-     >        "station",cstnna(istn)
+     >        "station ",cstnna(istn)
 
               FREQLO(ic,ISTN,ICODE) = F ! LO freq
 C             there's no sideband on this line

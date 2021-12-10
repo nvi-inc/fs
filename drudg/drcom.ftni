@@ -19,6 +19,7 @@
 *
 C  Common Block statement for DRUDG
 ! Newer changes now at top
+! 2021-12-20  JMG Added max_gap_time, ipre_time. Removed ITCTM, ICRTY6
 ! 2021-01-31  JMG Changed most prompts to char*6 so that "IGNORE" is now an option 
 ! 2021-01-25  JMG Removed RA50, DEC50. Moved to skdrincl/source.ftni sorp1950
 ! 2021-01-25  JMG Added vdif_thread 
@@ -94,7 +95,6 @@ c
      >       klo_config,ktarget_time,kignore_Mark5b_bad_mask,
      >       kcont_cal 
 
-
 ! Rearranged so that definitiona and common block statments in the same order. 
 
 
@@ -141,8 +141,7 @@ c
       INTEGER ireccv,IRECSK,IRECST,IRECEL,isklen,luusr,
      .  lu_infile,istn,
      .  nlab,nllab,
-     .  icrty6,
-     .  itctim,ilabrow,ilabcol,inewpage,
+     .  ilabrow,ilabcol,inewpage,
      .  nchanr,fileptr,itpid_period
 
       integer lu_outfile,luprt,luscn
@@ -155,6 +154,8 @@ C
 
       integer ical_time_staggered           !override time for the calibration.
       integer imark6_off
+      integer max_gap_time                  !maximium gap between scans
+      integer ipre_time                     !Buffer time before issuing first 'scan=' after resuming 
 
       COMMON/DRCOM_int/
      .       ISKLEN,LUUSR,
@@ -162,13 +163,12 @@ C
      >       ISTN,
      .       NLAB,NLLAB,
      .       ireccv,IRECSK,IRECST,IRECEL,
-     >       itctim,
-     .       ICRTY6,
      .       ilabrow,ilabcol,inewpage,
      .       luscn,itpid_period,
      .       nchanr,fileptr,
      .       ibbcbuf,ibbclen,nbbcbuf,ical_time_staggered,
-     >       imark6_off
+     >       imark6_off, max_gap_time,ipre_time 
+
 
   
 C  IBUF   - buffer for file reads, writes

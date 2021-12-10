@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -74,11 +74,10 @@ C LOCAL
 C
 C  In skobs.ftni
       NOBS = 0
-      ISETTM=0
-      IPARTM=0
+      ISETTM=0  
       ITAPTM=0
       ISORTM=0
-      IHDTM=0
+    
       iyr_start=0
       ida_start=0
       ihr_start=0

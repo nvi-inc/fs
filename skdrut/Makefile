@@ -3,8 +3,7 @@
 #                           skdrutils                                   #
 #                                                                       #
 # Makefile for sked/drudg utilities library. These routines are used by #
-# both sked and drudg. Utilities used by only one program are found in  #
-# separate libraries called skutils and drutils.                        #
+# both sked and drudg.                        #
 #                                                                       #
 # 2005Aug13  JMGipson. Cleaned and alphabetized.
 #########################################################################
@@ -26,11 +25,11 @@ OBJECTS=\
     count_freq_tracks.o \
     ctime2ydhms.o \
     ctime2dmjd.o c2lower.o c2upper.o \
-    delete_file.o dsecdif.o dot8.o durscan.o \
+    delete_file.o dsecdif.o dot8.o \
     errormsg.o extractnexttoken.o fc_gwinsz.o fc_gwinw.o \
-    feetscan.o findscan.o freq_init.o frinit.o  frinp.o \
+    findscan.o freq_init.o frinit.o  frinp.o \
     gdate.o \
-    gdscan.o getiauname.o \
+    getiauname.o \
     hol2lower.o hol2upper.o hms2seconds.o \
     iday_of_year.o idchk.o ifill4.o ifirst_non_blank.o ifirst_non_white.o  \
     igtba.o igtfr.o  \
@@ -49,11 +48,11 @@ OBJECTS=\
     raded.o  readf_asc.o read_nolf.o reads.o \
     readline_skdrut.o \
     sbit.o secnds.o seconds2hms.o sec2minsec.o selev.o searl.o sidtm.o skdrini.o sktime.o \
-    slewo.o soinp.o speed.o  splitntokens.o splitntokens2.o squeezeleft.o stape.o stinp.o sunarc.o \
+    slewo.o slew_time.o soinp.o speed.o  splitntokens.o splitntokens2.o squeezeleft.o stape.o stinp.o sunarc.o \
     sunpo.o sunazel.o \
     ttape.o timesub.o timeadd.o tmadd.o tmsub.o trimlen.o tspin.o \
     unpbar.o unpco.o unpfsk.o unpfcat.o unpfmt.o unplo.o  unprat.o \
-    unpva.o unpvh.o unpvp.o unpvt.o update_string_list.o upper.o \
+    unpvh.o  unpvt.o update_string_list.o upper.o \
     valid_hardware_blk.o \
     vunpfrq.o vunptrk.o vunpant.o vunpdas.o vunpsit.o vunpant.o vglinp.o vunpso.o \
     vunpif.o vunpbbc.o vunptrk.o vsoinp.o vmoinp.o vstinp.o vread.o \

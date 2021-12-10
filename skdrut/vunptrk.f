@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -33,6 +33,8 @@ C
 C
 C  History:
 ! Updates newest most recent
+! 2021-09-29 JMG Check if LBA station. Has "S2_data_source". If source offset track # by 1
+! 2021-05-17 JMG If no track format trudge on and track frame format as "N/A"
 ! 2021-02-12 JMG Changed limit to 2*max_track.  
 ! 2021-01-05 JMG replaced variable 'in' with icnt. 'IN' is fortran 90 keyword. 
 ! 2021-01-05 JMG Changed limit from max_pass to max_track 
@@ -78,8 +80,9 @@ C  LOCAL:
       integer it(4),j,nn,icnt,i,nch
       integer fvex_len,fvex_int,fvex_field,fget_all_lowl,ptr_ch
       integer is
-
+      integer itrk_off             !add this to track# to make sure >0
       
+     
 C
 C  Initialize
       do icnt=1,max_fandef 
@@ -93,15 +96,24 @@ C  Initialize
       ifanfac=0
 
 C  1. The recording format
-C
-      
+C    
+      itrk_off=0 
       ierr = 1
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
-     .ptr_ch('track_frame_format'//char(0)),
-     .ptr_ch('TRACKS'//char(0)),ivexnum)
+     >   ptr_ch('track_frame_format'//char(0)),
+     >   ptr_ch('TRACKS'//char(0)),ivexnum)
       if (iret.ne.0) then
-        write(*,*)"VUNPTRK00 did not find track_frame_format ", iret 
-        return
+        is=fvex_len(stdef)
+        write(lu,'(a)') 
+     >  "VUNPTRK00: Warning no track_frame_format for station "//
+     >  stdef(1:is)//" setting to N/A" 
+        cm="N/A"  
+        iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
+     >   ptr_ch('S2_data_source'//char(0)),
+     >   ptr_ch('TRACKS'//char(0)),ivexnum)
+        if(iret .ne. 0) return
+        write(*,*) "Passed 'S2_data_source' check for LBA"
+        itrk_off=1            
       endif
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       NCH = fvex_len(cout)
@@ -215,10 +227,11 @@ C  2.5 Track list
           iret = fvex_field(i,ptr_ch(cout),len(cout)) ! get track
           if (iret.eq.0) then ! a track
             iret = fvex_int(ptr_ch(cout),j) ! convert to binary
+            j=j+itrk_off
             if (j.le.0.or.j.gt.max_track) then
               ierr = -6
               write(lu,'("VUNPTRK06 - Invalid track number ",i3,
-     .        "must be between 1 and ",i3)') j,max_track
+     .        " must be between 1 and ",i3)') j,max_track
             else
               it(i-4)=j
               if (i.eq.5) itrk(icnt)=j ! save the first one only

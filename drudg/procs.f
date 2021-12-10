@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -30,6 +30,7 @@ C Version 9.0 is supported with this routine.
       include '../skdrincl/data_xfer.ftni'
 
 ! History Now with most recent at top. 
+! 2021-09-28 JMG Fixed problem with truncating DBBC3_DDC. Also got rid of writing out second recorder which is obsolete
 ! 2021-02-08 JMG Introuduced lvdif_thread
 ! 2021-01-05 JMG Replaced max_frq by max_code. (Max_frq was confusing and led to coding errors.)
 ! 2020-12-31 JMG Got rid of 2-recorder stuff for K4 recordders (no more two recorders)
@@ -409,10 +410,9 @@ C
 
       write(luscn,'(a)')
      >      ' NOTE: These procedures are for the following equipment:'
-      write(luscn,'(3x,"Rack:       ",a8)')  cstrack(istn)
-      write(luscn,'(3x,"Recorder 1: ",a8)')  cstrec(istn,1)
-      if(nrecst(istn) .eq. 2)
-     >     write(luscn,'(3x,"Recorder 2: ",a8)')  cstrec(istn,2)
+      write(luscn,'(3x,"Rack:       ",a)')  cstrack(istn)
+      write(luscn,'(3x,"Recorder 1: ",a)')  cstrec(istn,1)
+ 
 
       open(unit=LU_OUTFILE,file=PRCNAME,iostat=IERR)
       IF (IERR.ne.0) THEN

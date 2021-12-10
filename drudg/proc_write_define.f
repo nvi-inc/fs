@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -41,7 +41,7 @@
         return
       endif
       if(lufile .eq. -1) then
-        write(luscn,'()')        !flush the buffer.
+        write(luscn,'()') " "       !flush the buffer.
         return
       endif
 

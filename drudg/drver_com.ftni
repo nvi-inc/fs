@@ -19,7 +19,7 @@
 *
 !  This contains information about the drudg version
        character*32 crel_FS    
-       character*10 cversion
+       character*10 cversion    !Something like 2021-12-04
        integer iVerMajor_FS, iVerMinor_FS, iVerPatch_FS
 
        common /DRVER_CH/crel_FS,cversion

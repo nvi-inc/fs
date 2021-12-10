@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -72,6 +72,7 @@ C  LOCAL
       data ikey_len/20/
 
 !Updates
+! 2021-09-16 JMG Fixed bug. Was changing tape to wrong type when reading in sked files produced by VieSched++
 ! 2020-12-30 JMG Removed unused variables
 ! 2020-10-02 JMG Removed all references to S2
 ! 2020-06-09 JMG Added MARK6, got rid of THICK,THIN,SHORT
@@ -208,15 +209,6 @@ C       Station ID is valid. Check tape type now.
               return
             else if(ikey .ge. 4 .and. ikey .le. 7) then
                ckeywd=list(ikey)
-               if(ikey .eq. 4) then
-                  ckeywd="Mark5A"
-               else if(ikey .eq. 5) then
-                  ckeywd="Mark5B"
-               else if(ikey .eq. 6) then
-                  ckeywd="Mark5C"
-               else if(ikey .eq. 7) then
-                  ckeywd="K5"
-               endif
                if(istn .eq. 0) then
                   do istn=1,nstatn
                      cstrec_old(istn)=cstrec(istn,1)

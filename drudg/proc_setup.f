@@ -49,6 +49,7 @@
       character*1 cband_char  
  
 ! Updates
+! 2021-12-23 JMG replaced some writes with drudg_write 
 ! 2020-12-31 JMG DBBC3 support. Got rid of MK3 stuff 
 ! 2020-10-28 JMG Got rid of S2  stuff
 ! 2018-06-18 JMG Yet another attempt to fix cont_cal. In skedf.ctl, if 'cont_cal off' then emit cont_cal=off
@@ -235,11 +236,13 @@ C  PCALFff
             continue
           else
             cproc_thread="thread"//codtmp
-            write(lu_outfile,'(a)') cproc_thread
-          endif          
-  
-          if(lmode_cmd .ne. "bit_streams") then
-            write(lu_outfile,'(a)') "jive5ab_cnfg"
+!            write(lu_outfile,'(a)') cproc_thread
+             call drudg_write(lu_outfile,cproc_thread)
+          endif      
+          if(cstrec_cap .eq. "FLEXBUFF") then
+             write(lu_outfile,'(a)') 'fb_config'
+          else     
+             write(lu_outfile,'(a)') "mk5c_config"
           endif 
         endif  
       endif
@@ -300,19 +303,22 @@ C  BBCffb, IFPffb  or VCffb
       if(ctemp .ne. " ") then      
         nch=trimlen(ctemp)
         cproc_vc=ctemp(1:nch)//codtmp//cband_char(vcband(1,istn,icode))
-        write(lu_outfile,'(a)') cproc_vc
+        call drudg_write(lu_outfile,cproc_vc)
+!        write(lu_outfile,'(a)') cproc_vc
       endif
 
       if (kbbc .or. kifp .or. kvc.or.
      &   cstrack_cap(1:4) .eq. "DBBC") then
          cproc_ifd="ifd"//codtmp
-         writE(lu_outfile,'(a)') cproc_ifd
+         call drudg_write(lu_outfile,cproc_ifd)
+!         writE(lu_outfile,'(a)') cproc_ifd
        endif ! kbbc kvc kfid
 
        if(cstrack_cap(1:8) .eq. "DBBC_DDC" .or.
      &    cstrack_cap      .eq. "DBBC3_DDC") then 
           if(kcont_cal) then
-             write(lu_outfile,'("cont_cal=on,",a)') cont_cal_polarity
+             write(ldum,'("cont_cal=on,",a)') cont_cal_polarity
+             call drudg_write(lu_outfile,ldum)
           else
              write(lu_outfile,'("cont_cal=off")')
           endif

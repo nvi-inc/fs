@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -39,6 +39,7 @@
       integer trimlen 
 
 ! History:
+! 2021-05-04 JMG Initialize rfvc_max
 ! 2020-01-05 JMG Got rid of some obsolete confusing code dealing with 2-recorders
 ! 2020-12-31 JMG Got rid of KK4VCAB
 ! 2020-12-30 JMG Added in call pt proc_dbbc_bbc
@@ -63,6 +64,7 @@
       integer nlast  
             
       kwrite_return = .true.   
+      rfvc_max =0.d0     
       
       if(cproc_vc .ne. " ") then 
         call proc_write_define(lu_outfile,luscn,cproc_vc)

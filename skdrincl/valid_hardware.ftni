@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -29,6 +29,7 @@
 
 
 ! History in reverse order. 
+! 2020-06-17 JMG  Increased MAX_RACK_TYPE to add DVP
 ! 2020-12-29 JMG  Increased MAX_RACK_TYPE to add DBBC3_DDC
 ! 2019Aug27  JMG. Increased MAX_RACK_TYPE to add 'BB' type 
 ! 2018Oct17  JMG. Increase  MAX_RACK_TYPE, MAX_REC_TYPE to accomadate RDBE, MARK6
@@ -41,7 +42,7 @@
 ! 2010Jan27  JMGipson. Increased number of recorder types to accomodate Mark5C.
 
 
-      PARAMETER (MAX_RACK_TYPE= 28)
+      PARAMETER (MAX_RACK_TYPE= 29)
       PARAMETER (MAX_REC_TYPE = 18)
       PARAMETER (MAX_REC2_TYPE = 7)
 

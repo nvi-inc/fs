@@ -18,7 +18,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE drudg_rdctl(csked,csnap,cproc,cscratch,
-     >   crack_type_def,crec_default,cfirstrec_def, kequip_over)
+     >   crack_type_def,crec_default,cfirstrec_def, 
+     >   kequip_over,kevlbi_over) 
       implicit none 
 C
 ! This routine will open the default control file for drudg. 
@@ -26,6 +27,7 @@ C
 ! This just handles handles drudg.
 
 ! Updates....
+! 2021-12-29 JMG Read in max_gap_time,ipre_time 
 ! 2021-01-25 JMG New  option: vdif_single_thread_per_file   
 ! 2021-01-14 JMG Increased max_token 
 ! 2021-01-11 JMG Modified to account for DBBC3
@@ -52,7 +54,7 @@ C   parameter file
 ! Passed
       character*128 csked,csnap,cproc,cscratch     !Various directories. 
       character*(*) crack_type_def,crec_default(2),cfirstrec_def
-      logical kequip_over    
+      logical kequip_over,kevlbi_over    
           
 ! functions
       integer iwhere_in_string_list
@@ -101,7 +103,7 @@ C  LOCAL VARIABLES
 
 ! this is set in makefile. if it is set to 1, then on FS_PC.
 
-        ifs_PC=FS_PC    
+      ifs_PC=FS_PC    
 
       if(ifs_PC .eq. 1) then
         ifile_beg=3
@@ -157,15 +159,22 @@ C  LOCAL VARIABLES
       ierr = 0
       lu = 11
       kequip_over=.false.         !initialize
+      kevlbi_over=.false. 
       crack_type_def    = " "
       crec_default(1) = " "
       crec_default(2) = " "
    
-
       kautoftp0=.false.
       ldisk2file_dir0 =" "
       lautoftp_string0=" "
       iautoftp_abort_time=300         !default value for aborting....
+
+! This controls closing out scans. 
+!   max_gap_time is the maximum gap between consecutive scans. 
+!   ipre_time     is how much before the next scan begins to restart. 
+      ipre_time=0
+      max_gap_time=-1     !this is a flag indicating don't use. 
+
 
 C  2. Process the control file if it exists. Loop throug 3 times.
 !     The first two times check for the global skedf.ctl
@@ -176,7 +185,7 @@ C  2. Process the control file if it exists. Loop throug 3 times.
         if(.not.kfirst_skip) write(*,*) " "   !close out 'skipping non-sked' line  
          kfirst_skip=.true.     
 
-        itmplen = trimlen(cskedf(j))
+        itmplen = trimlen(cskedf(j))    
         kexist = .false.
         inquire(file=cskedf(j),exist=kexist)      
         if(.not.kexist) goto 500                !quick exit. 
@@ -335,7 +344,7 @@ C  $MISC
 !              write(*,*) "-->",cbuf(1:60) 
               call splitNtokens(cbuf,ltoken,Maxtoken,NumToken)
               lkeyword=ltoken(1) 
-              call capitalize(lkeyword)   
+              call capitalize(lkeyword)               
 
               if(lkeyword .eq. "EPOCH") then
                 if(lvalue .eq. "1950" .or. lvalue .eq. "2000") then
@@ -413,6 +422,9 @@ C         EQUIPMENT
                     crec_default(i)=crec_type(itemp)
                   endif
                 end do
+              else if(lkeyword .eq. "E-VLBI_OVERRIDE") then
+                kevlbi_over=.true.
+    
               else if(lkeyword .eq. 'EQUIPMENT_OVERRIDE') then
                 kequip_over=.true.
               else if(lkeyword .eq. "USE_SETUP_PROC") then
@@ -440,6 +452,14 @@ C         EQUIPMENT
      &               "RDCTL Error: Invalid VDIF_SINGLE_THREAD_PER_FILE" 
      &                 //lvalue(1:10) 
                 endif 
+              else if(lkeyword .eq. "SCAN_CLOSE") then
+                 if(NumToken .ne. 3) then
+                    write(luscn,*) 
+     &        "RDCTL Error: Syntax is SCAN_CLOSE max_gap_time pre_time"
+                 else
+                   read(ltoken(2),*,err=900) max_gap_time
+                   read(ltoken(3),*,err=900) ipre_time
+                 endif                 
 
 C         TPICD
               elseif (lkeyword .eq. 'TPICD') then

@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -29,6 +29,7 @@ C
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
+      include '../skdrincl/broadband.ftni' 
 
 ! functions
       integer trimlen
@@ -44,6 +45,7 @@ C  Local:
      .          lfreq
       integer   IPAS(MAX_STN),IFT(MAX_STN),IDUR(MAX_STN),ioff(max_stn)
       integer ilen,ich,ic1,ic2,idummy,iret,i
+      integer istat 
 
       character*2 ctype  !two letter code.
 
@@ -56,6 +58,7 @@ C  Local:
 
 C
 ! Updates. Most reecent first. 
+! 2021-12-28 JMGipson. Got rid of some unused variables 
 ! 2021-01-05 JMG Replaced max_frq by max_code. (Max_frq was confusing and led to coding errors.)
 ! 2019-08-25 JMG Merged S/X and broadband.
 ! 2018-06-17 JMGipson. Got rid of extra space in output after return from vread.
@@ -311,13 +314,20 @@ C Not needed for VEX because they are read in when station is selected.
 C
       endif ! VEX/sked
 
-      isettm = 20
-      ipartm = 70
+      isettm = 0
       itaptm = 1
       isortm = 5
-      ihdtm = 6
+
       call drprrd(ivexnum)
 ! Added 2019Aug25 JMG
+! Intiailze broadband stuff     
+      do istat=1,nstatn
+         bb_bw(istat) =0.0       !set these all to 0. 
+         idata_mbps(istat)=0
+         isink_mbps(istat)=0
+         ibb_off(istat)=0 
+      end do 
+
       if(.not.kvex) then
         call read_broadband_section
       endif

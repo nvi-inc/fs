@@ -30,6 +30,8 @@ C
       include '../skdrincl/skobs.ftni'
 C
 C History
+! 2021-12-13 JMGipson. Removed references to Recorder 2. 
+!            Also removed stuff that would be written out in piggyback mode. 
 C 970225 nrv New. Copied from snapintr.
 C 990512 nrv Add rack and rec types to call so that they can be
 C            printed in the proc library header.
@@ -61,22 +63,9 @@ C
 
       call write_drudg_version_line(lu_outfile)
 
-
-      write(lu_outfile,'(5a,$)')
+      write(lu_outfile,'(5a)')
      >   '"< ',cstrack(istn),' rack >< ',cstrec(istn,1), ' recorder 1>'
-      if(nrecst(istn) .eq. 2) then
-        write(lu_outfile,'("< ",a," recorder 2>")') cstrec(istn,2)
-      else
-        write(lu_outfile, '(a)')
-      endif
-
-      if(km5A_piggy) then
-        write(lu_outfile,90) "   Mark5A operating in piggyback mode."
-      endif
-      if(km5P_piggy) then
-        write(lu_outfile,90) "   Mark5P operating in piggyback mode."
-      endif
-
+ 
       write(lu_outfile,'(a)') 'enddef'
 
 90    format('"',a,'"')

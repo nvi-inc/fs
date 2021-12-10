@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -21,7 +21,7 @@
      >   iline,npage,num_scans,            !These are modified by this routine
      >   nsline,
      >   itime_start,itime_end,itime_tape_start,itime_tape_stop,
-     >   iDur,counter,cpass,cnewtap,cdir,cscan,cbuf_source)
+     >   iDur,counter,cinfo,cscan,cbuf_source)
 
       implicit none 
       include 'hardware.ftni'
@@ -34,6 +34,11 @@
       include 'lstsum.ftni'
 
 C Writes an output line for LSTSUM.
+! 2021-12-24 JMG. Added another column to G-byte listing so that in 16GB mode would be still be space. 
+! 2021-12-22 JMG. Minor pretty print changes. 
+! 2021-12-13 JMGipson. Got rid of cdir, cpass.  Rename cnewtap by cinfo
+! 2021-01-19 JMG  Changed 1024-->1000 to reflect decimal storage. 
+! 2020-06-08 JMG. Included new broadband.ftni
 C 960917 nrv New. Removed lines from LSTSUM to make this routine.
 C 970131 nrv Remove updating of IFEET and put it back into LSTSUM.
 C 970131 nrv Add KET to call. Change tape start into a string.
@@ -70,9 +75,7 @@ C 021011 nrv Another digit for printing gap time.
 ! 2008Jan07 JMGipson.  Changed so that will ALWAYS print line numbers if recorder type is none.
 !             Previously relied on recorder starting and stopping info, which is absent in the "none" case.
 ! 2014Jan17 JMGipson. Modified call to setup_name.  Removed pass info. 
-! 2020Jun08 JMG. Included new broadband.ftni
-! 2021-01-19 JMG  Changed 1024-->1000 to reflect decimal storage. 
-
+!
 ! Functions
       integer julda
       integer trimlen
@@ -93,11 +96,9 @@ C Input
       integer itime_tape_stop(5)        !tape ending time.
       integer iDur		         !duration in min, seconds
       real    counter                   !tape/disc counter
-
-      character*3 cdir                  !direction
-      character*6 cnewtap
-      character*9 cscan
-      character*2 cpass
+   
+      character*6 cinfo
+      character*9 cscan 
       character*128 cbuf_source         !contains source info.
 C Output
 C These are modified on return: iline, page,num_scans,ntapes
@@ -199,7 +200,7 @@ C  1. Headers.
 9204            format(" Tape motion:     ADAPTIVE (gap=",i3,")",3x,$)
               else
                 write(luprt,9205) tape_motion_type(istn)(1:10)
-9205            format(" Tape motion:     ",a,11x,$)
+9205            format(" Tape motion:     ",a,11x)
               endif
             endif
       
@@ -214,8 +215,8 @@ C  1. Headers.
 9210      format(" Rack:            ",a)
           write(luprt, 9211)    cstrec(istn,1),itearl_local
 9211      format(" Recorder 1:      ",a,14x,"Early start: ",i6,1x,"sec")
-          write(luprt, 9212)    cstrec(istn,2),itlate_local
-9212      format(" Recorder 2:      ",a,14x,"Late  stop:  ",i6,1x,"sec")
+!          write(luprt, 9212)    cstrec(istn,2),itlate_local
+!9212      format(" Recorder 2:      ",a,14x,"Late  stop:  ",i6,1x,"sec")
 
 
 ! Put out procedure names
@@ -236,7 +237,7 @@ C  1. Headers.
               write(luprt,'(a,1x,$)') csetup_name            
               lcodeTmp=lcode(icode)
               call c2lower(ccodetmp,ccodetmp)
-              write(luprt,'(1x,"IFD proc: ifd",a2)') ccodetmp
+              write(luprt,'(5x,"IFD proc: ifd",a2)') ccodetmp
               iline=iline+1
             end do
           end do
@@ -258,19 +259,18 @@ C  1. Headers.
      >    ' Line#  = line number in .snp file where this scan starts'
           write(luprt,'(a)') ' Dur    = time interval of on-source '//
      >       'data (Start Data to  Stop Data) in mmm:ss'
-! last line depends on what we are.
+! last line depends on what we are. 
           if(ks2) then
             write(luprt,'(a)')
      >     ' Group (min) = group number and nearest minute on tape (S2)'
           elseif(kk4) then
             write(luprt,"(' Counts = tape counts at start of scan')")
-          else if(kdisk) then
+          else if(kdisk .or. cstrec_cap .eq."NONE") then 
             write(luprt,"(' Gbyte  = Gigabytes at start of scan')")
           endif
-          writE(luprt,'(a)') ' Info:  XXX'//
-     >     '    or Rec1=start recorder 1, Rec2=start recorder 2'
-          write(luprt,'(a)')
-     >     '              *=parity check, @=no tape motion'
+          writE(luprt,'(a)') ' Info:  Rec = start recording'  
+!          write(luprt,'(a)')
+!     >     '              *=parity check, @=no tape motion'
           write(luprt,'()')
         endif           !end of other information.
 
@@ -307,8 +307,9 @@ C  2. Column heads.
         il=trimlen(cbuf)
         if (kcont) cbuf=cbuf(1:il)//'   Record'
         il=trimlen(cbuf)
-       
-        if(kdisk .or. cstrec(istn,1) .eq. "Mark6") then 
+ 
+        if(kdisk .or. cstrec_cap .eq. "MARK6" 
+     >           .or. cstrec_cap .eq. "NONE") then 
            if(kskd) then
              cbuf=cbuf(1:il)//'      Dur    Gbyte'
            else
@@ -434,14 +435,14 @@ C  Duration
       idurs = idur - idurm*60
       write(luprt,'(2x,i3,":",i2.2,$)') iDurM,iDurS
 
-C  Footage     
-      if(kdisk) then
+C Gbytes       
+      if(kdisk .or. CSTREC_CAP .eq. "NONE") then 
         if(kskd) then
-          write(luprt,'(f8.1,$)') counter/1000  !convert megabytes to Gigabytes
+          write(luprt,'(f9.1,$)') counter/1000  !convert megabytes to Gigabytes
         endif    
       endif
 
-      write(luprt,'(3x,a)') cnewtap
+      write(luprt,'(3x,a)') cinfo
 
       iline=iline+1
       num_scans = num_scans + 1 ! count of observations

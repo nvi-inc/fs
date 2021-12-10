@@ -38,11 +38,11 @@ proc_write_define.o procintr.o procs.o \
 prtmp.o prtxt.o psbar.o read_snap1.o read_snap6.o \
 setprint.o setup_name.o setup_printer.o skdshft.o \
  snap.o \
-snap_bit_density.o snap_data_valid.o snap_disk_check.o \
+snap_bit_density.o snap_check.o snap_data_valid.o snap_disk_check.o \
 snap_disk_end.o snap_disk2file_abort.o snap_enable.o snap_et.o snap_fast.o \
 snap_hol_wrt.o  snap_in2net_connect.o snap_info.o snap_midtp.o \
 snap_monitor.o snap_pass.o snap_pcalf.o snap_prepass.o snap_readtime.o \
-snap_ready.o snap_rec.o snap_recalc_speed.o snap_recp.o snap_rollform.o \
+snap_rec.o snap_recalc_speed.o snap_recp.o snap_rollform.o \
 snap_rw.o snap_st.o \
 snap_start_recording.o snap_systracks.o snap_tpicd.o \
 snap_wait_sec.o snap_wait_time.o snapintr.o \
