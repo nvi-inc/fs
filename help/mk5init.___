@@ -1,12 +1,18 @@
-              mk5init - Reinitialize the Mark 5 connection
+        mk5init - Reinitialize the Mark 5/FlexBuff connection
 
             Syntax:     mk5init
+                        fb_init
 
             Response:   none
 
 
-Comments: This command can be used to reinitialize the connection to a
-Mark 5 recorder. The existing connection, if any exists, is closed.
-The mk5ad.ctl control file is reread and a new connection open. This
-provides a method to change which Mark 5 is being used, as set in the
-mk5ad.ctl control file,  without restarting the FS.
+Comments:
+This command can be used to reinitialize the connection to the Mark 5
+or FlexBuff recorder. The existing connection, if any exists, is
+closed. The 'mk5ad.ctl' control file is reread and a new connection
+open. This provides a method to change which Mark 5 or FlexBuff is
+being used, as set in the 'mk5ad.ctl' control file, without restarting
+the FS.
+
+The 'fb_init' command is a synonym for 'mk5init'. Whichever makes
+the most sense can be used.

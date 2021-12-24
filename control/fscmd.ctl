@@ -317,7 +317,9 @@ disk_pos     qkr 07802 01 FFFFEFFFFFFF
 disk_serial  qkr 07803 01 FFFFEFFFFFFF
 data_check   qkr 07804 01 FFFFEFFFFFFF
 mk5relink    qkr 07805 01 FFFFEFFFFFFF
+fb_relink    qkr 07805 01 FFFFEFFFFFFF
 mk5close     qkr 07806 01 FFFFEFFFFFFF
+fb_close     qkr 07806 01 FFFFEFFFFFFF
 bank_check   qkr 07807 01 FFFFEFFFFFFF
 bank_status  qkr 07808 01 FFFFEFFFFFFF
 disk2file    qkr 07809 01 FFFFEFFFFFFF
@@ -328,6 +330,7 @@ mk5b_mode    qkr 07813 01 FFFFEFFFFFFF
 bit_streams  qkr 07814 01 FFFFFFFFFFFF
 mk5c_mode    qkr 07815 01 FFFFEFFFFFFF
 mk5init      qkr 07816 01 FFFFEFFFFFFF
+fb_init      qkr 07816 01 FFFFEFFFFFFF
 dbbc         qkr 07820 01 FFFFFFFFFFFF
 mk5_status   qkr 07821 01 FFFFFFFFFFFF
 fila10g      qkr 07822 01 FFFFFFFFFFFF
