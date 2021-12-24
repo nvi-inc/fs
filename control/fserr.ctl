@@ -2124,7 +2124,7 @@ DB -101
 dbb?W: error getting class buffer
 ""
 DB -102
-dbb?W: error sending data, connection closed
+dbb?W: error sending data
 ""
 DB -103
 dbb?W: error on select reading data, see above for error, connection closed
@@ -4068,7 +4068,7 @@ M5 -101
 mk5cn: error getting class buffer
 ""
 M5 -102
-mk5cn: error sending data, connection closed
+mk5cn: error sending data
 ""
 M5 -103
 mk5cn: error on select reading data, see above for error, connection closed
@@ -4203,7 +4203,7 @@ M6 -101
 mk6?W: error getting class buffer
 ""
 M6 -102
-mk6?W: error sending data, connection closed
+mk6?W: error sending data
 ""
 M6 -103
 mk6?W: error on select reading data, see above for error, connection closed
@@ -6150,7 +6150,7 @@ RA -101
 rdb?W: error getting class buffer
 ""
 RA -102
-rdb?W: error sending data, connection closed
+rdb?W: error sending data
 ""
 RA -103
 rdb?W: error on select reading data, see above for error, connection closed
