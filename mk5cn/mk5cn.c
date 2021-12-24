@@ -110,8 +110,13 @@ int main(int argc, char * argv[])
 	    ip[0],ip[1],ip[2]);
 #endif
     switch (ip[0]) {
+    case 6:
+	result = doclose(ip);
+        if(0!=result)
+          break;
     case 0:
       /* ** Initialize ** */ 
+      is_init=FALSE;
       fail=TRUE;
       result = doinit();
       ip[4]=fail;

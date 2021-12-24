@@ -281,6 +281,7 @@ loop:
 	  break;
 	case 6:
 	case 28:
+	case 16:
 	  mk5close(&command,itask,ip);
 	  break;
 	case 7:

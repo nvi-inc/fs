@@ -327,6 +327,7 @@ last_check   qkr 07812 01 FFFFEFFFFFFF
 mk5b_mode    qkr 07813 01 FFFFEFFFFFFF
 bit_streams  qkr 07814 01 FFFFFFFFFFFF
 mk5c_mode    qkr 07815 01 FFFFEFFFFFFF
+mk5init      qkr 07816 01 FFFFEFFFFFFF
 dbbc         qkr 07820 01 FFFFFFFFFFFF
 mk5_status   qkr 07821 01 FFFFFFFFFFFF
 fila10g      qkr 07822 01 FFFFFFFFFFFF

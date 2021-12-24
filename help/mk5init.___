@@ -1,0 +1,12 @@
+              mk5init - Reinitialize the Mark 5 connection
+
+            Syntax:     mk5init
+
+            Response:   none
+
+
+Comments: This command can be used to reinitialize the connection to a
+Mark 5 recorder. The existing connection, if any exists, is closed.
+The mk5ad.ctl control file is reread and a new connection open. This
+provides a method to change which Mark 5 is being used, as set in the
+mk5ad.ctl control file,  without restarting the FS.
