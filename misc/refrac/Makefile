@@ -1,9 +1,7 @@
 OBJECTS = refrac.o
 
-LIBS = ../../poclb/poclb.a
+LIBS = ../../poclb/poclb.a -lm
 
-#FFLAGS=-g
-LDLIBS += $(FLIBS)
 refrac: $(OBJECTS) $(LIBS)
 
 include ../../include.mk

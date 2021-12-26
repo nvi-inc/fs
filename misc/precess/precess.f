@@ -30,17 +30,18 @@ C
       real tepoch(MAX_SRC)
       character*16 names(MAX_SRC),tnames(MAX_SRC)
       integer nsourc,i,iepoch,tsourc
-      character*128 c1950, ctest, compare, command
+      character*128 c1950, ctest, compare
 #ifdef SOFA
+      character*128 command
       logical ksofa
       double precision dr1950,dd1950
 #endif
 c
 #ifdef SOFA
-      call get_command_argument(0,command)
+      call getarg(0,command)
       ksofa=command.eq.'./precess2'
 #endif
-      call get_command_argument(1,c1950)
+      call getarg(1,c1950)
       if(c1950.eq.'') then
         write(6,*) 'no input file'
         stop
@@ -56,7 +57,7 @@ c
       write(6,*) 'input from ', c1950
       call kputc(names,cra,cdec,cepoch,nsourc,MAX_SRC,' ')
 c
-      call get_command_argument(3,compare)
+      call getarg(3,compare)
       if(compare(1:7).eq.'compare') then
         do i=1,nsourc
           ora(i)=cra(i)
@@ -102,7 +103,7 @@ c
         call kputc(names,ora,odec,oepoch,nsourc,MAX_SRC,' ')
       endif
 c
-      call get_command_argument(2,ctest)
+      call getarg(2,ctest)
       if(ctest.eq.'') then
         stop
       endif

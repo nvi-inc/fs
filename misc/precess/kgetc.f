@@ -20,7 +20,7 @@
       subroutine kgetc(fname,names,cra,cdec,cepoch,icount,max_src)
       implicit none
       integer max_src, icount
-      character(*) names(max_src), fname
+      character*(*) names(max_src), fname
       double precision cra(max_src), cdec(max_src)
       real cepoch(max_src)
 c

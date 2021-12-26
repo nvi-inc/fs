@@ -20,7 +20,7 @@
       subroutine kputc(names,cra,cdec,cepoch,icount,max_src,ra_plus)
       implicit none
       integer max_src, icount
-      character(*) names(max_src),ra_plus
+      character*(*) names(max_src),ra_plus
       double precision cra(max_src), cdec(max_src)
       real cepoch(max_src)
 c

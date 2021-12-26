@@ -30,11 +30,10 @@ C
       double precision alat,wlong,ht
       real cepoch(MAX_SRC),oepoch(MAX_SRC)
       character*16 names(MAX_SRC)
-      integer nsourc,i,it(6),il
+      integer nsourc,i,it(6)
       character*128 catalog,position,time
-      real ep
 c
-      call get_command_argument(1,catalog)
+      call getarg(1,catalog)
       if(catalog.eq.'') then
         write(6,*) 'no input catalog file'
         stop
@@ -50,7 +49,7 @@ c
       write(6,*) 'input from ', catalog
       call kputc(names,cra,cdec,cepoch,nsourc,MAX_SRC,' ')
 c
-      call get_command_argument(2,time)
+      call getarg(2,time)
       if(time.eq.'') then
          call get_rte_time(it,it(6))
       else
@@ -67,7 +66,7 @@ c        read(time,*) (it(il),il=6,1,-1)
      &   ' Centisecond',i3)") it(6),it(5),it(4),it(3),it(2),it(1)
       call kputc(names,ora,odec,oepoch,nsourc,MAX_SRC,' ')
 c
-      call get_command_argument(3,position)
+      call getarg(3,position)
       if(position.ne.'') then
         read(position,*) wlong,alat,ht
         write(6,*) 'output topocentric'

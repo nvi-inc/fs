@@ -85,20 +85,17 @@ To use SOFA routines, use 'precess2'. The 'sofa' sub-directory must
 exist as created by the commands below. To create 'precess2', as
 'prog' from the 'misc/precess' (this) sub-directory:
 
-  pushd /tmp
-  wget http://www.iausofa.org/2021_0512_F/sofa_f-20210512.tar.gz
-  popd
-  tar xzf /tmp/sofa_f-20210512.tar.gz
-  cd sofa/20210512/f77/src
+    pushd /tmp
+    wget http://www.iausofa.org/2021_0512_F/sofa_f-20210512.tar.gz
+    popd
+    tar xzf /tmp/sofa_f-20210512.tar.gz
+    cd sofa/20210512/f77/src
 
-  Edit 'makefile'
-    Add ' -ff2c' to the end of the 'FX' variable
+  Edit 'makefile' adding ' -ff2c' to the end of the 'FX' variable, then:
 
-  make
+    make
 
-  You do not need 'make test'
+  You do not need 'make test', then:
 
-  cd ../../../..
-  make
-
-NB: This has not been verified or 32-bit of 'fort77'
+    cd ../../../..
+    make

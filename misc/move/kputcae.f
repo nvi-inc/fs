@@ -21,7 +21,7 @@
      &                   oaz,oel)
       implicit none
       integer max_src, icount
-      character(*) names(max_src),ra_plus
+      character*(*) names(max_src),ra_plus
       double precision cra(max_src), cdec(max_src)
       double precision oaz(max_src), oel(max_src)
       real cepoch(max_src)
