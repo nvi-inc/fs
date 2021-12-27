@@ -20,8 +20,8 @@
 /* refrwn
 
    Compute refraction correction given surface weather input.
-   Copied from FORTRAN. is refrw.c with TYPOS
-   TYPOS fixed weh 2006 Nov 15
+   Copied from FORTRAN. is refrw_bad.c with TYPOS fixed
+   TYPOS fixed weh 2006 Nov 15 TNX jhfq
 */
 
 #include <math.h>

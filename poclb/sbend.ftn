@@ -1,0 +1,102 @@
+*
+* Copyright (c) 2021 NVI, Inc.
+*
+* This file is part of VLBI Field System
+* (see http://github.com/nvi-inc/fs).
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
+
+* From (w/corrections): A. L. Berman and S. T. Rockwell, JPL DSN
+* Progress Report 42-25, 1975
+
+      double precision function sbend(elr,tempdc,rhumid,presmb)
+      real presmb,tempdc,rhumid
+      double precision elr
+C
+      double precision a(2),b(2),c(2),e(12),p(2),t(2),z(2),wp1(4),d3
+      double precision fp,ft,fw,u,x,ad1,ad2,bd1,bd2,zd2,r,delta
+      double precision a1,a2,b1,b2,c1,c2,e1,e2,e3,e4,e5,e6,e7,e8,e9
+      double precision e10,e11,e12,p1,p2,t1,t2,z1,z2,w0,w1,w2,w3
+      double precision conv
+C
+      equivalence (a(1),a1),(a(2),a2)
+      equivalence (b(1),b1),(b(2),b2)
+      equivalence (c(1),c1),(c(2),c2)
+      equivalence (e( 1), e1),(e( 2), e2),(e( 3), e3),(e( 4), e4),
+     &            (e( 5), e5),(e( 6), e6),(e( 7), e7),(e( 8), e8),
+     &            (e( 9), e9),(e(10),e10),(e(11),e11),(e(12),e12)
+      equivalence (p(1),p1),(p(2),p2)
+      equivalence (t(1),t1),(t(2),t2)
+      equivalence (wp1(1),w0),(wp1(2),w1),(wp1(3),w2),(wp1(4),w3)
+      equivalence (z(1),z1),(z(2),z2)
+C
+      data a   /     0.40816d0, 112.30d0  /
+      data b   /     0.12820d0, 142.88d0  /
+      data c   /     0.80000d0,  99.344d0 /
+      data e   /    46.625d0  ,  45.375d0 ,     4.1572d0,  1.4468d0  ,
+     &               0.25391d0,   2.2716d0,    -1.3465d0, -4.3877d0  ,
+     &               3.1484d0 ,   4.5201d0,    -1.8982d0,  0.89000d0 /
+      data p   /   760.0d0    ,   0.0d0   /
+      data t   /   273.0d0    ,   0.0d0   /
+      data wp1 / 22000.0d0    ,  17.149d0 ,  4684.1d0,    38.450d0   /
+      data z   /    91.870d0  ,   0.0d0   /
+C
+      data conv/57.295779512d0/
+C
+C STATEMENT FUCNTION
+C
+      delta(ad1,ad2,bd1,bd2,zd2)=(ad2-ad1)*dexp(bd1*(zd2-bd2))
+C
+C CONVERT UNITS
+C
+      r=rhumid/100.d0
+      t2=tempdc+273.0d0
+      p2=(760.0d0/1013.3d0)*presmb
+      z2=90.0d0-elr*conv
+C      WRITE(6,9956) R,T2,P2,Z2                                          DEBUG
+C9956  FORMAT(" R,T2,P2,Z2",4F10.4)                                      DEBUG
+C
+C CALCULATE CORRECTIONS FOR PRES, TEMP, AND WETNESS
+C
+C      WRITE(6,9980) Z1,Z2,C1,C2                                         DEBUG
+C9980  FORMAT(" Z1,Z2,C1,C2",4D15.6)                                     DEBUG
+      d3=1.0d0+delta(z1,z2,c1,c2,z2)
+      fp=(p2/p1)*(1.0d0-delta(p1,p2,a1,a2,z2)/d3)
+      ft=(t1/t2)*(1.0d0-delta(t1,t2,b1,b2,z2)/d3)
+      fw=1.0d0+(w0*r*dexp((w1*t2-w2)/(t2-w3))/(t2*p2))
+C      WRITE(6,9957) D3,FP,FT,FW                                         DEBUG
+C9957  FORMAT(" D3,FP,FT,FW ",4D12.6)                                    DEBUG
+C
+C  CALCULATE OPTICAL REFRACTION
+C
+      u=(z2-e1)/e2
+      x=e11
+      do 10 i=1,8
+        x=e(11-i)+u*x
+10    continue
+C
+C  COMBINE FACTORS AND FINISH OPTICAL FACTOR
+C
+      sbend=ft*fp*fw*(dexp(x/d3)-e12)
+C      WRITE(6,9958) SBEND,X,U                                           DEBUG
+C9958  FORMAT(" SBEND,X,U ",3D20.10)                                     DEBUG
+C
+C BACK TO RADIANS FROM ARC SECONDS
+C
+      sbend=(sbend/3600.0d0)/conv
+C      WRITE(6,9959) SBEND                                               DEBUG
+C9959  FORMAT(" SBEND (RADIANS) ",D20.10)                                DEBUG
+      return
+      end
