@@ -21,7 +21,7 @@
 :doctype: book
 
 = DRAFT FS DBBC3 Operations Manual
-Version 2.0 - December 2021
+Version 2.1 - December 2021
 
 :experimental:
 :sectnums:
@@ -363,8 +363,8 @@ For DBBC3 use, the rack type in _equip.ctl_ should be `dbbc3_ddc_u` or
 NOTE: The `equip` line in the log header has been broken into two lines,
 `equip1` and `equip2`. The break occurs between the Mark 4 Decoder Transmission
 Terminator Character value and the DBBC(2) DDC Firmware Version value. Except
-for the clock rate value, all the values in the `equip2` are only, and are all
-of the, DBBC(2) related values. The clock rate value is also used for Mark 5B
+for the clock rate value, the values in the `equip2` line are all the, and the
+only, DBBC(2) related values. The clock rate value is also used for Mark 5B
 recorders.
 
 ==== dbbc3.ctl
