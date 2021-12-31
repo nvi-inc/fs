@@ -21,7 +21,7 @@
 :doctype: book
 
 = DRAFT FS DBBC3 Operations Manual
-Version 1.9 - December 2021
+Version 2.0 - December 2021
 
 :experimental:
 :sectnums:
@@ -106,20 +106,6 @@ procedure or one procedure can call a separate sub-procedure for each board.
 
 NOTE: A reset and sync is not required for Ethernet configuration changes.
 
-====
-
-Questions:
-
-. Is anything else needed for the Ethernet configuration?
-+
-
-Sven: no
-
-. Are there other things that would be useful to set from the FS? The mode is
-covered below.
-
-====
-
 ==== Changing thread numbers
 
 The following command changes the thread number on _eth0_ to `3`
@@ -128,18 +114,6 @@ The following command changes the thread number on _eth0_ to `3`
 ....
 dbbc3=core3h=1,regupdate vdif_header 3 196608 0x03FF0000
 ....
-
-====
-
-Questions:
-
-[start=3]
-. Does this also change the thread number for _eth1_ to `4`.
-+
-Sven: Yes.
-
-====
-
 
 === Experiment mode configuration
 
@@ -313,29 +287,6 @@ The VDIF epoch and the time can be checked per board with
 
 ====
 
-====
-Questions:
-
-[start=4]
-. Is this sufficient?
-+
-Sven: No, the `pps_sync` was missing (but it requires a new command to implement properly).
-
-. Since there is concern that this may not work correctly, how does one tell if
-it was successful?
-+
-
-Sven: The sync was successful if there no errors reported and all the boards
-have the same time and VDIF epoch.
-
-. Can we then skip `start vdif` before the `timesync`?
-+
-
-Sven: Yes. Actually, the `start vdif` won't work until the board has been
-synced.
-
-====
-
 ==== Starting data transmission
 
 After the boards are synced, data transmission needs to started or stopped for
@@ -415,26 +366,6 @@ Terminator Character value and the DBBC(2) DDC Firmware Version value. Except
 for the clock rate value, all the values in the `equip2` are only, and are all
 of the, DBBC(2) related values. The clock rate value is also used for Mark 5B
 recorders.
-
-====
-
-Questions:
-
-[start=7]
-. Should we support __DDC_V__?
-+
-It may not be necessary since __DDC_U__ is more general.
-
-. If we are supporting __DDC_V__, are there any differences besides:
-+
-
-* Sending only one mask per board instead of four
-* Only having 32 MHz BW, decimation 2
-* Is splitmode always on?
-+
-Sven: For __DDC_V__, it is always off; __DDC_U__, always on.
-
-====
 
 ==== dbbc3.ctl
 
@@ -940,72 +871,6 @@ to only set the _socketbuffer_ size to `64000000`, use:
 ....
 net_protocol = : 64000000
 ....
-
-====
-
-Questions:
-
-[start=9]
-. Is the description correct for the above?
-+
-
-Harro: Yes
-
-. Should we add guidelines for tuning parameters depending on the recorder?
-+
-
-Harro: I've put in a link to the FlexBuff tuning document
-
-. Are there other examples we should give?
-
-. Should `net_protocol` for Mark 5C have a value?
-+
-
-Harro: No, Mark5C recording ignores the `net_protocol` (the current command is
-just to clear out any possible stale settings) - all is configured through
-`packet=...`
-
-. I know we decided to put this single file per thread option in
-`mk5c_config`/`fb_config`, but I can't remember now if we thought it was
-because it would not be changed very often or if I was reluctant to ask for a
-_drudg_ option. I am now thinking we might be able to add it as an option. A
-question is whether it is worthwhile. I don't know how many stations would use
-it. I guess Eskil would, but if so, is it better than commenting/un-commenting
-the relevant line in `mk5c_config`/`fb_config`?
-
-+
-
-Harro: Actually - having it as a _drudg_ option wouldn't be too bad! I think
-there is wider interest in this feature. And it would make it more predictable
-and convenient: stations can change as per experiment's request.
-+
-
-Ed: If we made it an option, it might be controlled by a _skedf.ctl_ option
-`vdif_single_thread_per_file`:
-
-* If the option is not present _drudg_ does nothing.
-
-* If the option is set to `yes`, _drudg_ produces a `thread` procedure with the
-commands above.
-
-* If the option is set to `no`,  _drudg_ produces a `thread` procedure without
-the `_command_=datastream=add:{thread}:*` command.
-
-* If the option is set to `ask`, it will prompt for `yes` or `no` for each
-experiment.
-+
-
-Maybe we could have `skip` option (do nothing) for `ask` as well if it would be
-helpful.
-
-* The `thread` procedure would come after `mk5c_mode`/`fb_mode` and before
-`mk5c_config`/`fb_config`.
-+
-
-Harro: Yup, that would allow stations to still override things the FS and
-_drudg_ have done so far
-
-====
 
 === drudg support
 
