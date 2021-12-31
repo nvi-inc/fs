@@ -20,8 +20,8 @@
 
 :doctype: book
 
-= DRAFT FS DBBC3 Operations Manual
-Version 2.1 - December 2021
+= FS DBBC3 Operations Manual
+Version 2.2 - December 2021
 
 :experimental:
 :sectnums:
