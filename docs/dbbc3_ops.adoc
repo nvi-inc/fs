@@ -21,7 +21,7 @@
 :doctype: book
 
 = DRAFT FS DBBC3 Operations Manual
-Version 1.8 - November 2021
+Version 1.9 - December 2021
 
 :experimental:
 :sectnums:
@@ -53,7 +53,7 @@ be confirmed. This affects multicast data, the Tsys display, and use of _fivpt_
 and _onoff_.
 
 * `core3h_mode__n__` -- `_n_` from `0` to `8` -- Core3H board setup and monitoring
-* `fb_mode` -- Setting the FlexBuff (_jive5ab_) recording mode -- An alias for `mk5c_mode`
+* `fb_mode` -- Setting the FlexBuff recording mode -- An alias for `mk5c_mode`
 * `fivept` -- Pointing measurements
 * `if__x__` -- `_x_` from `a` to `h` -- IF CoMo setup and monitoring
 * `iftp__x__` -- `_x_` from `a` to `h` -- IF CoMo total power monitoring
@@ -146,15 +146,16 @@ Sven: Yes.
 This section covers configuration parameters that are defined per schedule.
 
 Due to certain changes in Core3H setup requiring a time sync afterwards, only
-one mode can be used per schedule. The issue is that there is reluctance to
+one mode can be used per schedule. The issue is that there is a reluctance to
 perform the time sync without operator supervision to verify it and possibly
 re-sync it manually to correct problems.
 
 As a result, during the schedule, only the configuration of the Core3H boards
 are checked. A mechanism is provided to force the setting of the mode
-configuration. This can be used before the experiment starts to place the
-Core3H boards in the correct configuration without having to decode the
-schedule configuration and set the Core3H boards up manually.
+configuration. In principle, this can be used before the experiment starts to
+place the Core3H boards in the correct configuration without having to decode
+the schedule configuration and set the Core3H boards up manually. However, this
+method is not currently recommended.
 
 ==== Configuring Core3H boards
 
@@ -408,13 +409,12 @@ configuration procedure instead. For example:
 For DBBC3 use, the rack type in _equip.ctl_ should be `dbbc3_ddc_u` or
 `dbbc3_ddc_v` depending on the firmware that is loaded.
 
-The clock rate should be set to `nominal`, which gives the 128 MHz fixed value.
-
 NOTE: The `equip` line in the log header has been broken into two lines,
 `equip1` and `equip2`. The break occurs between the Mark 4 Decoder Transmission
 Terminator Character value and the DBBC(2) DDC Firmware Version value. Except
-for the clock rate value, all the values in the `equip2` are only,
-and are all of the, DBBC(2) related values.
+for the clock rate value, all the values in the `equip2` are only, and are all
+of the, DBBC(2) related values. The clock rate value is also used for Mark 5B
+recorders.
 
 ====
 
@@ -500,7 +500,7 @@ The displayed values are from the previous second's multicast. Hence the time
 is one second in the past and the Tsys values are from two seconds in the past.
 
 NOTE: The time is shown on inverse video if it is not advancing or disagrees
-with the FS when it was received or the firmware is _v124_ (no time is
+with the FS time when it was received or the firmware is _v124_ (no time is
 available in the multicast for that version, so the multicast arrival time is
 shown). The epoch is shown as `--` for now since the VDIF epoch is not
 available yet in the multicast.  The `DDBC3-FS` time difference, in seconds, is
@@ -559,8 +559,8 @@ In the `All` mode, if no IFs are defined and no channels are being recorded
 For all non-blank fields, Tsys values for all BBC side-bands will be shown if
 they can be calculated. If they can't be, a hint, in inverse video, for the
 cause of the problem will be displayed in the corresponding field instead.
-There may be more than issue, but only the first encountered is reported. The
-order is:
+There may be more than one issue, but only the first encountered is reported.
+The order is:
 
 . `Nccal` -- continuous cal not enabled
 . `N bbc` -- the BBC is not configured
@@ -663,15 +663,16 @@ rate), the following information is logged:
 
 * `time` -- for each Core3H board in the system
 * `pps2dot` -- (`pps_delay`) in nanoseconds for each Core3H board
-* `tpcont`  -- Only if continuous cal is in use -- TPI counts for each BBC and IF configured for recording.
+* `tpcont`  -- Only if continuous cal _is_ in use -- TPI counts for each BBC and IF configured for recording.
 +
 The counts are given in the order of cal _on_ then _off_
 * `tpi`  -- Only if continuous cal is _not_ in use -- TPI counts for each BBC and IF configured for recording.
-* `tsys` -- Only if continuous cal is in use -- Tsys for each BBC and IF configured for recording.
+* `tsys` -- Only if continuous cal _is_ in use -- Tsys for each BBC and IF configured for recording.
 
 The _plog_ utility was modified to push reduced logs with DBBC3 multicast data
-squeezed out by default, as it already did for RDBEs. Please see ``**plog
--h**`` for more information.
+squeezed out by default, as it already did for RDBEs. A subsequent revision in
+_plog_ will cause the compressed full log to also be push by default. Please
+see ``**plog -h**`` for more information.
 
 [NOTE]
 ====
@@ -696,10 +697,11 @@ This method can also be used to suppress multicast errors for equipment
 monitoring in the `midob` procedure. That is, group all the commands that cause
 multicast errors together and place them after a `tpcid=stop` and follow them
 with a `tpcid`. This should not cause a significant, if any, additional loss of
-logged multicast data. The losses may be unacceptable in any event,
-particularly for very short scans. In that case, the commands that cause these
-errors should probably not be included `midob` at all. The `mcast_time` command
-can be used to monitor the DBBC3 time without generating any of these errors.
+logged multicast data. However in some cases, any loss may be unacceptable,
+particularly for very short scans. In those cases, the commands that cause
+these errors should probably not be included `midob` at all. The `mcast_time`
+command can be used to monitor the DBBC3 time without generating any of these
+errors.
 
 ====
 
@@ -707,12 +709,12 @@ can be used to monitor the DBBC3 time without generating any of these errors.
 
 === Minimizing the use of setup procedures
 
-NOTE: This also applies to any system using a Mark 5C or FlexBuff recorder.
+NOTE: This can be used for any system, not just those with DBBC3s.
 
 Normally, the FS sets the mode for each scan (unless there is continuous
-recording). If this takes too long or makes the equipment unstable, the _drudg_
-option `use_setup_proc yes` in _skedf.ctl_ can be used to minimize the
-execution of the setup procedure.
+recording). If this takes too long (as is the case for the DBBC3) or makes the
+equipment unstable, the _drudg_ option `use_setup_proc yes` in _skedf.ctl_ can
+be used to minimize the execution of the setup procedure.
 
 WARNING: Not executing the setup each scan may not be robust if the equipment
 sometimes loses it configuration. It is up to the individual stations to
@@ -756,7 +758,7 @@ for additional checking and resetting of the system.
 
 === Thread procedure
 
-NOTE: This also applies to any system using a Mark 5C or FlexBuff recorder.
+NOTE: This applies to any system using a Mark 5C or FlexBuff recorder.
 
 When a Mark 5C or FlexBuff recorder is in use, _drudg_ can optionally insert a
 `thread__suffix__` procedure in each setup procedure (where `__suffix__` is a
@@ -768,25 +770,28 @@ feature is controlled by the `vdif_single_thread_per_file` option in
 _skedf.ctl_ control file. The option only needs to be used by stations that
 need to always use a single thread per file or switch between experiments. If
 the option is not present, no ``thread__suffix__`` procedure is inserted.  If
-it is present, the possible setting are:
+it is present, the possible setting are (where `_command_` is `mk5` or `fb`
+depending on the the type of recorder):
 
 * `yes` -- to store a single thread per file, in which case, the
 ``thread__suffix__`` procedure contents are:
 
 +
+[subs="+quotes"]
 ....
-jive5ab=datastream=clear
-jive5ab=datastream=add:{thread}:*
-jive5ab=datastream=reset
+_command_=datastream=clear
+_command_=datastream=add:{thread}:*
+_command_=datastream=reset
 ....
 
 * `no` -- for normal multi-threaded recordings, in which case, the
 ``thread__suffix__`` procedure contents are:
 
 +
+[subs="+quotes"]
 ....
-jive5ab=datastream=clear
-jive5ab=datastream=reset
+_command_=datastream=clear
+_command_=datastream=reset
 ....
 
 
@@ -798,15 +803,16 @@ the answer for an interactive prompt for the whether or not to use a single
 thread per file when __drudg__ing geodesy schedules. Please see ``**fesh -h**``
 for more information.
 
-=== jive5ab_cnfg procedure
+=== mk5c_config/fb_config procedure
 
-NOTE: This also applies to any system using a Mark 5C or FlexBuff recorder.
+NOTE: This applies to any system using a Mark 5C or FlexBuff recorder.
 
 Each mode SNAP procedure produced by _drudg_ for Mark 5C and FlexBuff recorders
-includes a call to the `jive5ab_cnfg` SNAP procedure. This procedure call is
-inserted immediately after the `mk5c_mode`/`fb_mode` command (and after the
-optional <<Thread procedure>> call if present). The procedure is mode
-independent, i.e., the same procedure is used for all modes.
+includes a call to a `mk5c_config`/`fb_config` SNAP procedure, depending on the
+type of recorder. This procedure call is inserted immediately after the
+`mk5c_mode`/`fb_mode` command (and after the optional <<Thread procedure>> call
+if present). The procedure is mode independent, i.e., the same procedure is
+used for all modes.
 
 This procedure is a local `station` library procedure to allow tuning of the
 configuration of _jive5ab_ for the specifics of the recorder, including
@@ -845,8 +851,10 @@ There is a variable field `_socketbuffer_` in the `net_protocol` command sent
 to the recorder. Its value is independent of the data type.
 
 +
-
-  net_protocol = udpsnor : _socketbuffer_ : 256000000 : 4 ;
+[subs="+quotes"]
+....
+net_protocol = udpsnor : _socketbuffer_ : 256000000 : 4 ;
+....
 
 +
 
@@ -860,10 +868,10 @@ Where the _socketbuffer_ field depends on the total data rate:
 
 The _socketbuffer_ parameter is an important setting for trying to minimize
 risk of packet loss when starting the recording. For (very) high data rates,
-the `jive5ab_cnfg` procedure can be used to increase the _socketbuffer_ size to
-values appropriate for that. This assumes that the FlexBuff has been tuned
-(especially the kernel network buffer sizes) along the lines of the FlexBuff
-tuning documentation at
+the `mk5c_config`/`fb_config` procedure can be used to increase the
+_socketbuffer_ size to values appropriate for that. This assumes that the
+FlexBuff has been tuned (especially the kernel network buffer sizes) along the
+lines of the FlexBuff tuning documentation at
 https://www.jive.eu/~verkout/flexbuff/flexbuf.recording.txt.
 
 . Setting `record = nthread`:
@@ -913,14 +921,15 @@ The `packet` command sent to the recorder depends on the data type:
 ==== Overriding the defaults
 
 You can override the commands sent by the `mk5c_mode`/`fb_mode` command or add
-more by putting them in your local `jive5ab_cnfg`. This works because
-`jive5ab_cnfg` is called after `mk5c_mode`/`fb_mode` command (_and_ after the
-call to the optional <<Thread procedure>>) in the setup procedure. An example
-of local customizations is given in the sub-sections below.
+more by putting them in your local `mk5c_config`/`fb_config` procedure. This
+works because `mk5c_config`/`fb_config` is called after `mk5c_mode`/`fb_mode`
+command (_and_ after the call to the optional <<Thread procedure>>) in the
+setup procedure. An example of local customizations is given in the
+sub-sections below.
 
-CAUTION: If you put any commands in `jive5ab_cnfg` that depend on the data
-type, VDIF or 5B/Ethernet, you would need to change them if there is a change
-in the data type. This is not a concern for most stations.
+CAUTION: If you put any commands in `mk5c_config`/`fb_config` that depend on
+the data type, VDIF or 5B/Ethernet, you would need to change them if there is a
+change in the data type. This is not a concern for most stations.
 
 ===== Changing net_protocol
 
@@ -957,12 +966,13 @@ just to clear out any possible stale settings) - all is configured through
 `packet=...`
 
 . I know we decided to put this single file per thread option in
-`jive5ab_cnfg`, but I can't remember now if we thought it was because it would
-not be changed very often or if I was reluctant to ask for a _drudg_ option. I
-am now thinking we might be able to add it as an option. A question is whether
-it is worthwhile. I don't know how many stations would use it. I guess Eskil
-would, but if so, is it better than commenting/un-commenting the relevant line
-in `jive5ab_cnfg`?
+`mk5c_config`/`fb_config`, but I can't remember now if we thought it was
+because it would not be changed very often or if I was reluctant to ask for a
+_drudg_ option. I am now thinking we might be able to add it as an option. A
+question is whether it is worthwhile. I don't know how many stations would use
+it. I guess Eskil would, but if so, is it better than commenting/un-commenting
+the relevant line in `mk5c_config`/`fb_config`?
+
 +
 
 Harro: Actually - having it as a _drudg_ option wouldn't be too bad! I think
@@ -979,7 +989,7 @@ Ed: If we made it an option, it might be controlled by a _skedf.ctl_ option
 commands above.
 
 * If the option is set to `no`,  _drudg_ produces a `thread` procedure without
-the `jive5ab=datastream=add:{thread}:*` command.
+the `_command_=datastream=add:{thread}:*` command.
 
 * If the option is set to `ask`, it will prompt for `yes` or `no` for each
 experiment.
@@ -989,7 +999,7 @@ Maybe we could have `skip` option (do nothing) for `ask` as well if it would be
 helpful.
 
 * The `thread` procedure would come after `mk5c_mode`/`fb_mode` and before
-`jive5ab_cnfg`.
+`mk5c_config`/`fb_config`.
 +
 
 Harro: Yup, that would allow stations to still override things the FS and
@@ -1091,14 +1101,15 @@ recorded in the previous section, but with the new payload size, for example:
 
 . You can add a new `VDIF_...` command with the other recorded values, but with
 the new payload size, to the `setup__mode__`  procedure (`setup01` in this
-example) _after_ the call to `jive5ab_cnfg`. For example, add the command:
+example) _after_ the call to `mk5c_config`/`fb_config`. For example, add the
+command:
 
    jive5ab=VDIF_8200-8192-2-8
 
-NOTE: Not putting this command directly into your `jive5ab_cnfg` procedure
-allows it to be mode specific. If you want to apply this change universally,
-you can put it into your `jive5ab_cnfg` procedure instead, but be wary of other
-modes.
+NOTE: Not putting this command directly into your `mk5c_config`/`fb_config`
+procedure allows it to be mode specific. If you want to apply this change
+universally, you can put it into your `mk5c_config`/`fb_config` procedure
+instead, but be wary of other modes.
 
 === Command the devices
 
@@ -1125,9 +1136,10 @@ This section has some terse installation notes for installing the FS branch,
 `ed/dbbc3`, that provides the features described in this document. This is
 provided only to help with testing. This is not for an operational release.
 
-Sub-sections on <<Switching back to 10.0.0>> and <<Switching back to the test
-version>> as also provided in case you need to switch back and forth after
-using the <<Initial installation of the test version>> sub-section.
+Sub-sections on <<Switching back to 10.0.0>> and
+<<Switching back to the test version>> as also provided in case you need to
+switch back and forth after using the
+<<Initial installation of the test version>> sub-section.
 
 === Initial installation of the test version
 
@@ -1178,12 +1190,20 @@ with your DBBC3.
 
 +
 
-NOTE: For now, your old DBBC3 line in _equip.ctl_ can be left in place. Its
+TIP: For now, your old DBBC3 line in _equip.ctl_ can be left in place. Its
 presence will be benign and leaving it there will make it easier to return your
 operational FS version when that is needed. The values in the _dbbc3.ctl_
 control file are the ones actually used by this test branch of the FS.
 
 +
+
+NOTE: A script for semi-automatically setting up your _ddbc3.ctl_ file is
+included as _/usr2/fs/misc/equipctlfix_. If you use it, you may still need to
+adjust the values in your _dbbc3.ctl_ file afterwards. The use of this script
+is not recommended if you intended to switch back-and-forth between using the
+`ed/dbbc3` branch and _10.0.0_ since it will remove the old DBBC3 line from
+_equip.ctl_.
+
 
 . Update _equip.ctl_
 
@@ -1191,19 +1211,20 @@ control file are the ones actually used by this test branch of the FS.
 
 Change your rack type to `dbbc3_ddc_u` or `dbbc3_ddc_v` as appropriate.
 
-. Add `jive5ab_cnfg` procedure to your `station` procedure library.
+. Use _pfmed_, add a `mk5c_config` and/or a `fb_config` procedure to your
+`station` procedure library, as appropriate.
 
 +
 
-Using _pfmed_, add a `jive5ab_cnfg` procedure to your `station` procedure
-library. It can be empty if no tuning is needed for your recorder.
+Add the versions needed for your recorder(s). You should add both if you use
+both. They can be empty if no tuning is needed for your recorder(s).
 
 +
 
-NOTE: This procedure is called by setup procedures for Mark 5C and FlexBuff
-recorders and provides a means to tune the setup of _jive5ab_ for your hardware
-independent of the observing mode. This procedure is called after the
-`mk5c_mode`/`fb_mode` commands to allow the default configuration to be
+NOTE: These procedures are called by setup procedures for Mark 5C and FlexBuff
+recorders and provide a means to tune the setup of _jive5ab_ for your hardware
+independent of the observing mode. These procedures are called after the
+`mk5c_mode` or `fb_mode` commands to allow the default configuration to be
 overridden. The default configuration is described in the
 <<Default configuration>> subsection in main part of this document.
 The commands in this procedure should be mode independent. Mode dependent
