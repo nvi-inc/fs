@@ -71,11 +71,11 @@ italics anyway.
 === Code blocks
 
 For code blocks of simple input _or_ output, monospace is used.
-Italics is used for replaceable items.
+Italics are used for replaceable items.
 
 For code blocks with both input and output, the output is shown as it
 would for a simple output. Literal user input is bold, with
-replaceable user input bold italics.
+replaceable user input as bold italics.
 
 === Links
 
@@ -383,7 +383,7 @@ Sub-sections (`====`) can be added as needed:
 == Workarounds
 
 This section covers some ad hoc workarounds for issues with _asciidoctor_.
-:
+
 === Effect of references to sections in other documents on italics
 
 In some cases a reference to a section header in a different document, e.g.,:
