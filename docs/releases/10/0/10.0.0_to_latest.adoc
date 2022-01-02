@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 2.9 - December 2021
+Version 3.0 - January 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -1017,18 +1017,64 @@ _.rxg_ file name.
 If an error occurred in the monitor form of the command, the error was
 reported as `di` instead of `dg`.
 
-. Add description of using inline anchors.
+. Improve font conventions.
+
++
+
+These conventions are covered in the
+<<../../../misc/font_conventions.adoc#,FS Document Font Conventions>>
+document. The following descriptions refer to sections in that
+document. The conventions themselves are covered in the
+<<../../../misc/font_conventions.adoc#_conventions,Conventions>>
+subsection. Examples are in the
+<<../../../misc/font_conventions.adoc#_source_examples,Source
+examples>> section.
+
+.. Add description of using inline anchors.
 
 +
 
 These can be used to making linking references to arbitrary text in
-the documents. The description also shows how to make the anchor
-visible in the text. This is described in the
+the documents. This convention is covered as "`other anchors`" in the
+<<../../../misc/font_conventions.adoc#_links,Links>> subsection.
+The document also shows how to make the anchor visible in
+the text. This is described in the example
 <<../../../misc/font_conventions.adoc#_linking_to_inline_anchors,Linking
-to inline anchors>> subsection of the
-<<../../../misc/font_conventions.adoc#_source_examples,Source
-examples>> section of the <<../../../misc/font_conventions.adoc#,FS
-Document Font Conventions>> document.
+to inline anchors>> subsection.
+
+.. Improve description of code blocks.
+
++
+
+Add use of bold for user input and bold italic for replaceable user
+input. This convention is described in the
+<<../../../misc/font_conventions.adoc#_code_blocks,Code blocks>>
+subsection.  The example is covered in the subsection
+<<../../../misc/font_conventions.adoc#_italics_and_bold_in_code_blocks,Italics
+and bold in code blocks>>.
+
+.. Add description for using appendices.
+
++
+
+This convention is covered in the
+<<../../../misc/font_conventions.adoc#_links,Links>> subsection. The
+example is covered in the subsection
+<<../../../misc/font_conventions.adoc#_appendices,Appendices>>.
+
++
+
+. Improved wording for setting geometry values in _~/.Xresources_.
+
++
+
+Using differently named _~/.Xreources_ files that are used by
+different aliases for different displays is described in the final
+*NOTE* of the
+<<../../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting
+geometry values in .Xresources>> in the
+<<../../misc/install_reference.adoc#,Installation Reference>>
+document.
 
 . Change cut-and-paste phrasing in documents to copy-and-paste
 
