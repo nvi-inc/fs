@@ -19,7 +19,8 @@
 *
       subroutine mjd2yrDoy(mjd,iyear,idoy)
 ! History
-! 2019Jun10  JMG. Revised to use non-NR routines
+! 2020-12-30 JMG Removed unsed variable
+! 2019-06-10 JMG. Revised to use non-NR routines
 ! Pass
       implicit none  !2020Jun15 JMGipson automatically inserted.
       integer*4 mjd
@@ -29,7 +30,6 @@
       integer iday_of_year
 ! local
       integer imon,iday
-      integer*4 mjd_temp
       integer*4 jday
 ! convert to mon,day,year
       jday=mjd+2440000

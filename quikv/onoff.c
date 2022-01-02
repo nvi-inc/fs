@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -36,7 +36,8 @@ static float bw[ ]={0.0,0.125,0.250,0.50,1.0,2.0,4.0};
 static float bw4[ ]={0.0,0.125,16.0,0.50,8.0,2.0,4.0};
 static float bw_vlba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0};
 static float bw_lba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0,64.0};
-static float bw_dbbc[ ]={1.0,2.0,4.0,8.0,16.0,32.0};
+static float bw_dbbc[ ]={1.0,2.0,4.0,8.0,16.0,32.0,64.0};
+static float bw_dbbc3[ ]={0.0,2.0,4.0,8.0,16.0,32.0,64.0,128.0};
 static int zone_table[] = {2, 1, 4,3}; /* DBBC filter Nyquist zones */
 
 float flux_val();
@@ -465,7 +466,7 @@ int ip[5];                           /* ipc parameters */
 		float freq, bbcbw;
 		
 		freq=shm_addr->dbbc3_bbcnn[i%MAX_DBBC3_BBC].freq/1.0e6;
-		bbcbw=32.;
+		bbcbw=bw_dbbc3[shm_addr->dbbc3_bbcnn[i%MAX_DBBC3_BBC].bw];
 		if(i<MAX_DBBC3_BBC)
 		  freq-=bbcbw*.5;
 		else

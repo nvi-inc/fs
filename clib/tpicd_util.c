@@ -169,22 +169,7 @@ char *ptr;
 		 shm_addr->equip.drive_type[0]==FLEXBUFF) ) {
 	mk5dbbcd_pfb(lcl->itpis); 
       } else if(shm_addr->equip.rack==DBBC3) {  /* find BBCs */
-	for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
-	  jend=shm_addr->dbbc3_ddc_bbcs_per_if;
-	  if(8<jend) jend=8;
-	  for (j=0;j<jend;j++) {
-	    lcl->itpis[j+i*8]=1;
-	    lcl->itpis[j+i*8+MAX_DBBC3_BBC]=1;
-	  }
-	  if(shm_addr->dbbc3_ddc_bbcs_per_if>8) {
-	    jend=shm_addr->dbbc3_ddc_bbcs_per_if;
-	    if(16<jend) jend=16;
-	    for (j=8;j<jend;j++) {
-	      lcl->itpis[64+j-8+i*8]=1;
-	      lcl->itpis[64+j-8+i*8+MAX_DBBC3_BBC]=1;
-	    }
-	  }   
-	}
+          mk5dbbc3d(lcl->itpis);
       }
 
       if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {

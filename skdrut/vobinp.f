@@ -23,6 +23,11 @@
 C  This routine gets all the observations from the vex file.
 C
 C History
+! Update now in reverse order
+! 2021-01-31 JMG Prettier printing when reading in obs.  
+! 2020-12-30 JMG Removed some obsolete code
+! 2019-11-20 WEH Changed f77 line to f90 for backward compatibility
+! 2019-08-27 JMG Fixed bug in converting date. Need to initialize istart because conversion routine is only setting lower bytes
 C 000606 nrv Re-new. Copied from VOB1INP.
 C 001109 nrv New again. Use new vex parser routines to get
 C            observations scan by scan.
@@ -35,9 +40,6 @@ C            observations scan by scan.
 ! 2014Sep16 JMG. Fixed a bug introduced in 2014Jul08.  Previously would generate a new scan for each 
 !                station in a scan because kfirst_staiton was always getting reinitialized. 
 !                Moved initialization out of station loop. 
-! 2019Aug27 JMG. Fixed bug in converting date. Need to initialize istart because conversion routine is only setting lower bytes
-! 2019Nov20 WEH. Changed f77 line to f90 for backward compatibility
-
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/sourc.ftni'
@@ -75,11 +77,9 @@ C  LOCAL:
       character*128 cmo,cstart,cout,cunit,cscan_id
       character*(max_sorlen) csor
       integer istart(5)
-      integer iii
       double precision d,start_sec
       integer idstart,idend
-      logical ks2
-
+  
       character*128 ldata_transfer_method
       integer ixfer_cnt
       integer istat
@@ -108,7 +108,7 @@ C  LOCAL:
 
 C 1. Get scans one by one.
 
-      write(lu,"('VOBINP - Generating observations ',$)")
+      write(lu,"('VOBINP - Reading observations ')")
       nobs=0
       ierr = 1 ! station
       iret=0
@@ -126,14 +126,17 @@ C 1. Get scans one by one.
         if(iret .ne. 0) then
           if(ierr .gt. 0) ierr=0
           if(ierr .eq. 0) iret=0
-          write(lu, '(i6," scans in this schedule.")') nobs
+          write(lu,'(a)') " " 
+          write(lu, '(a,i6)') "Scans in this schedule = ", nobs
           return
         endif
-      
-        if (mod(nobs,100).eq.0) write(lu,'(i5,$)') nobs
+        if(nobs .gt. 1) then 
+          if (mod(nobs,100).eq.0) write(lu,'(i5,$)') nobs
+          if (mod(nobs,1000) .eq. 0) write(lu,'(a)') " "
+        endif 
 
-        do iii=1,5
-          istart(iii)=0
+        do i=1,5
+          istart(i)=0
         enddo
         iret = fvex_date(ptr_ch(cstart),istart,start_sec)
         ierr=8 ! date/time
@@ -187,7 +190,7 @@ C       Now get each station line that is part of this scan.
           endif
          
 !          write(*,*) "station #: ", " >"//cout(1:4)//"< ",istn 
-!          pause 
+!          pause    
           if (nchan(istn,icod).eq.0) then ! code not defined          
             write(lu,*) "VOBINP03 - Mode ",
      >      cmo(1:fvex_len(cmo))," not defined for station: ", 
@@ -195,7 +198,6 @@ C       Now get each station line that is part of this scan.
             return
           endif ! code not defined
 
-          ks2=cstrec(istn,1)(1:2).eq."S2"
           ierr = 2 ! data start
           iret = fvex_field(2,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
@@ -217,12 +219,9 @@ C       Keep good data offset and duration separate
           iret = fvex_field(4,ptr_ch(cout),len(cout))
           if (iret.ne.0) return
           iret = fvex_units(ptr_ch(cunit),len(cunit))
-          iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)
-          if (ks2) then 
-            ifeet = d ! leave as seconds
-          else 
-            ifeet = d*100.d0/(2.54*12.d0) ! convert mks to feet
-          endif
+          iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),d)       
+          ifeet = d ! leave as seconds
+     
           ierr = 5 ! pass
           iret = fvex_field(5,ptr_ch(cout),len(cout))
           if (iret.ne.0) return

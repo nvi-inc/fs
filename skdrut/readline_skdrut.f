@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -60,7 +60,7 @@ C
 
 100   continue
       read(iunit,'(a1024)',err=500,end=600) ldum
-
+      if(ldum .eq. " ") goto 100
       nend=trimlen(ldum)
       nbeg=ifirst_non_white(ldum)
       if(nbeg .ge. 1024) then

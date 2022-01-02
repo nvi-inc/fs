@@ -312,6 +312,7 @@ cablelong    qkr 07604 01 FFFFFFFFFFFF
 cablediff    qkr 07701 01 FFFFFFFFFFFF
 mk5          qkr 07800 01 FFFFFFFFFFFF
 jive5ab      qkr 07800 01 FFFFFFFFFFFF
+fb           qkr 07800 01 FFFFFFFFFFFF
 disk_record  qkr 07801 01 FFFFEFFFFFFF
 disk_pos     qkr 07802 01 FFFFEFFFFFFF
 disk_serial  qkr 07803 01 FFFFEFFFFFFF
@@ -329,10 +330,12 @@ last_check   qkr 07812 01 FFFFEFFFFFFF
 mk5b_mode    qkr 07813 01 FFFFEFFFFFFF
 bit_streams  qkr 07814 01 FFFFFFFFFFFF
 mk5c_mode    qkr 07815 01 FFFFEFFFFFFF
+fb_mode      qkr 07815 01 FFFFEFFFFFFF
 mk5init      qkr 07816 01 FFFFEFFFFFFF
 fb_init      qkr 07816 01 FFFFEFFFFFFF
 dbbc         qkr 07820 01 FFFFFFFFFFFF
 mk5_status   qkr 07821 01 FFFFFFFFFFFF
+fb_status    qkr 07821 01 FFFFFFFFFFFF
 fila10g      qkr 07822 01 FFFFFFFFFFFF
 dbbc2        qkr 07823 01 FFFFFFFFFFFF
 fila10g2     qkr 07824 01 FFFFFFFFFFFF
@@ -340,6 +343,15 @@ dbbc3        qkr 07825 01 FFFFFFFFFFFF
 fila10g_mode qkr 07826 01 FFFFFFFFFFFF
 dbbcrelink   qkr 07827 01 FFFFFFFFFFFF
 dbbcclose    qkr 07828 01 FFFFFFFFFFFF
+core3h_mode0 qkr 07829 01 4000FFFFFFFF
+core3h_mode1 qkr 07830 01 4000FFFFFFFF
+core3h_mode2 qkr 07831 01 4000FFFFFFFF
+core3h_mode3 qkr 07832 01 4000FFFFFFFF
+core3h_mode4 qkr 07833 01 4000FFFFFFFF
+core3h_mode5 qkr 07834 01 4000FFFFFFFF
+core3h_mode6 qkr 07835 01 4000FFFFFFFF
+core3h_mode7 qkr 07836 01 4000FFFFFFFF
+core3h_mode8 qkr 07837 01 4000FFFFFFFF
 rollform     qkr 07901 01 0254FFFFFFFF
 tpicd        qkr 08001 01 FFFFFFFFFFFF
 onoff        qkr 08101 01 FFFFFFFFFFFF
@@ -537,7 +549,7 @@ bbc106       qkr 09946 01 4000FFFFFFFF
 bbc107       qkr 09947 01 4000FFFFFFFF
 bbc108       qkr 09948 01 4000FFFFFFFF
 bbc109       qkr 09949 01 4000FFFFFFFF
-bbc100       qkr 09950 01 4000FFFFFFFF
+bbc110       qkr 09950 01 4000FFFFFFFF
 bbc111       qkr 09951 01 4000FFFFFFFF
 bbc112       qkr 09952 01 4000FFFFFFFF
 bbc113       qkr 09953 01 4000FFFFFFFF
@@ -601,6 +613,8 @@ pfb1         qkr 13101 01 0800FFFFFFFF
 pfb2         qkr 13102 01 0800FFFFFFFF
 pfb3         qkr 13103 01 0800FFFFFFFF
 pfb4         qkr 13104 01 0800FFFFFFFF
+* mcast_* commands, only dbbc3 for now
+mcast_time   qkr 13201 01 4000FFFFFFFF
 * boss internal
 cont         *xx 00000 02 FFFFFFFFFFFF
 halt         *xx 00000 03 FFFFFFFFFFFF
@@ -623,3 +637,4 @@ date         *xx 00000 19 FFFFFFFFFFFF
 op_stream    *xx 00000 20 FFFFFFFFFFFF
 tnx          *xx 00000 21 FFFFFFFFFFFF
 if           *xx 00000 22 FFFFFFFFFFFF
+setup_proc   *xx 00000 23 FFFFFFFFFFFF

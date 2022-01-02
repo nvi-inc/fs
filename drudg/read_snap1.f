@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -44,6 +44,5 @@ C Output
       ierr=0
       cbuf(1:1)=" "   !get rid of first character.
       read(cbuf,*) cexper,iyear,cstn,cid1,cid2
-      write(*,*) cexper,iyear,cstn,cid1,cid2
       return
       end

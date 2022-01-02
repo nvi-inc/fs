@@ -8,8 +8,8 @@ mk3     type of rack (mk3, vlba, vlbag, mk4, vlba4, mk5, vlba5
 *                     k42, k42a, k42b, k42bu, k42c, k42/k3, k42a/k3,
 *                     k42bu/k3, k42/mk4, k42a/mk4, k42b/mk4, k42bu/mk4
 *                     k42c/mk4, lba, lba4, s2, dbbc_ddc, dbbc_ddc/fila10g,
-*                     dbbc_pfb, dbbc_pfb/fila10g, vlbac, cdas, rdbe, dbbc3,
-*                     or none)
+*                     dbbc_pfb, dbbc_pfb/fila10g, vlbac, cdas, rdbe,
+*                     dbbc3_ddc_u, dbbc3_ddc_v, or none)
 mk3     type of recorder 1 (mk3, vlba, vlba2, vlbab, vlba4, vlba42, mk4,
 *		    mk4b, s2, k41, k41/dms, k42, k42/dms, mk5a, mk5a_bs,
 *                   mk5b, mk5b_bs, mk5c, mk5c_bs, flexbuff, mk6, or none)
@@ -81,5 +81,3 @@ cdp
   nominal   one of: none, nominal, 2, 4, 8, 16, 32, 64, 128
 *FiLa10G input select, one of: vsi1, vsi2, vsi1-2, vsi1-2-3-4, gps, tvg
 vsi1-2
-* DBBC3 firmware version (v121 or greater), bbcs/if (8,12,16), ifs (1-8)
-  v121 16 8

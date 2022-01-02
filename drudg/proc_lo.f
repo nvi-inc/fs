@@ -22,7 +22,8 @@
       include 'hardware.ftni'
       include '../skdrincl/freqs.ftni'
       include 'drcom.ftni'
-!      include 'bbc_freq.ftni'
+
+! 2021-12-22 JMGipson. Used drudg_write for consistency 
 ! make and write out the lo command.
 ! on entry
       integer icode
@@ -62,6 +63,6 @@
       else if(kgeo) then
          nch=ichmv_ch(ibuf,nch,"rcp,1")
       endif ! have pol and pcal
-      call lowercase_and_write(lu_outfile,cbuf)
+      call drudg_write(lu_outfile,cbuf)     
       return
       end

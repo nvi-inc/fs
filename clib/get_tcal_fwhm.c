@@ -34,8 +34,8 @@ static float bw[ ]={0.0,0.125,0.250,0.50,1.0,2.0,4.0};
 static float bw4[ ]={0.0,0.125,16.0,0.50,8.0,2.0,4.0};
 static float bw_vlba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0, 32.0};
 static float bw_lba[ ]={0.0625,0.125,0.25,0.5,1.0,2.0,4.0,8.0,16.0,32.0,64.0};
-static float bw_dbbc[ ]={1.0,2.0,4.0,8.0,16.0,32.0};
-static float bw_dbbc3[ ]={2.0,4.0,8.0,16.0,32.0};
+static float bw_dbbc[ ]={1.0,2.0,4.0,8.0,16.0,32.0,64.0};
+static float bw_dbbc3[ ]={0.0,2.0,4.0,8.0,16.0,32.0,64.0,128.0};
 static char *lwhat[ ]={
   "1l","2l","3l","4l","5l","6l","7l","8l","9l","al","bl","cl","dl","el","fl","gl",
   "1u","2u","3u","4u","5u","6u","7u","8u","9u","au","bu","cu","du","eu","fu","gu",
@@ -478,7 +478,7 @@ int *ierr;
       if(ifchain!=0) {
 	float freq, bbcbw;
 	
-	freq=shm_addr->dbbcnn[det%MAX_DBBC3_BBC].freq/1.e6;
+	freq=shm_addr->dbbc3_bbcnn[det%MAX_DBBC3_BBC].freq/1.e6;
 	bbcbw=bw_dbbc3[shm_addr->dbbc3_bbcnn[det%MAX_DBBC3_BBC].bw];
 	if(det<MAX_DBBC3_BBC)
 	  freq-=bbcbw*.5;

@@ -1,0 +1,1215 @@
+//
+// Copyright (c) 2021 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+:doctype: book
+
+= FS DBBC3 Operations Manual
+Version 2.2 - December 2021
+
+:experimental:
+:sectnums:
+:toc:
+
+== Introduction
+
+This document outlines the model for FS operations with the DBBC3. It also
+contains an appendix <<Installation for testing>>. The latter provides some
+pointers for installing and will eventually be superseded by the FS updates
+notes for the first release that includes the DBBC3 support described in the
+rest of this document.
+
+== DBBC3 operations
+
+=== DBBC3 commands
+
+The following SNAP commands support DBBC3s. You can access help information
+with `help=_command_`.
+
+* `bbc__nnn__` -- `_nnn_` from `001` to `128` -- BBC setup and monitoring
+* `bbc_gain` -- Setup and monitor BBC gains
+* `cont_cal` -- Setup and monitor continuous calibration configuration
++
+
+CAUTION: So far, operation has only been tested with polarity `2`. It is
+expected that other polarities will work. However, until it is tested it won't
+be confirmed. This affects multicast data, the Tsys display, and use of _fivpt_
+and _onoff_.
+
+* `core3h_mode__n__` -- `_n_` from `0` to `8` -- Core3H board setup and monitoring
+* `fb_mode` -- Setting the FlexBuff recording mode -- An alias for `mk5c_mode`
+* `fivept` -- Pointing measurements
+* `if__x__` -- `_x_` from `a` to `h` -- IF CoMo setup and monitoring
+* `iftp__x__` -- `_x_` from `a` to `h` -- IF CoMo total power monitoring
+* `mcast_time` -- display of multicast time
+* `onoff` -- SEFD and antenna calibration measurements
+* `tpicd` -- TPI (multicast) recording control daemon setup
+
+=== FS DBBC3 channel and IF labels
+
+The DBBC3 channel labels are of the form `_nnns_`, where:
+
+* `_nnn_` is the channel number, `000`-`128`
+* `_s_` is the side-band, `l` or `u`
+
+For example, `032u`.
+
+The DBBC3 IF labels are of the form `i__x__`, where:
+
+* `_x_` is the IF, `a`-`h`
+
+For example, `id`.
+
+=== Initial configuration of the DBBC3
+
+When the DBBC3 is booted, it is assumed it is set-up according to
+the "`Setting up the DBBC3 for DDC_U mode`" document.
+
+=== Local configuration changes
+
+This section covers changes that may be needed for experiments but aren't
+conveyed by the schedule file, yet. Some examples are given below.
+
+==== Ethernet configuration
+
+The Ethernet configuration of a Core3H board can be set in the DBBC3 boot
+configuration file. It can be changed on demand with a predefined SNAP
+procedure with contents such as:
+
+....
+dbbc3=core3h=1,tengbcfg eth0 ip=192.168.1.16 gateway=192.168.1.1 nm=27
+dbbc3=core3h=1,tengbcfg eth1 ip=192.168.1.17 gateway=192.168.1.1 nm=27
+dbbc3=core3h=1,tengbarp eth0 2 00:60:dd:44:47:60
+dbbc3=core3h=1,tengbarp eth1 3 00:60:dd:44:47:61
+dbbc3=core3h=1,destination 0 192.168.1.2:46220
+dbbc3=core3h=1,destination 1 192.168.1.3:46221
+....
+
+NOTE: The above example is for one board. Multiple boards can combined in one
+procedure or one procedure can call a separate sub-procedure for each board.
+
+NOTE: A reset and sync is not required for Ethernet configuration changes.
+
+==== Changing thread numbers
+
+The following command changes the thread number on _eth0_ to `3`
+(`196608/65536`) and _eth1_ to `4`.
+
+....
+dbbc3=core3h=1,regupdate vdif_header 3 196608 0x03FF0000
+....
+
+=== Experiment mode configuration
+
+This section covers configuration parameters that are defined per schedule.
+
+Due to certain changes in Core3H setup requiring a time sync afterwards, only
+one mode can be used per schedule. The issue is that there is a reluctance to
+perform the time sync without operator supervision to verify it and possibly
+re-sync it manually to correct problems.
+
+As a result, during the schedule, only the configuration of the Core3H boards
+are checked. A mechanism is provided to force the setting of the mode
+configuration. In principle, this can be used before the experiment starts to
+place the Core3H boards in the correct configuration without having to decode
+the schedule configuration and set the Core3H boards up manually. However, this
+method is not currently recommended.
+
+==== Configuring Core3H boards
+
+[IMPORTANT]
+====
+
+At the current time, due to the issues discussed in the
+<<Time sync>>
+sub-section below, it is not possible to use this method for configuring the
+Core3H boards. They must be configured from the boot configuration file.
+
+The method described in the <<Checking the mode>> sub-section below can, and
+should, still be used to verify that the configuration agrees with the schedule.
+
+Once the new DBBC3 time sync feature becomes available, it should be possible
+to use the configuration method described here, without requiring a FS update.
+
+====
+
+To configure the Core3H boards for the schedule mode:
+
+. _drudg_ the schedule to make the _.prc_ (and _.snp_) file
+. Start the FS
+. Open the experiment procedure library, e.g.:
+
+  proc=r4849kk
+
+. Execute the normal `setup__mode__` procedure, perhaps `setup01`, with the
+`force` parameter, e.g.:
+
+  setup01=force
+
++
+[NOTE]
+====
+
+With or without the `force` the setup procedure configures all other aspects of
+the mode besides the Core3H boards. That should be beneficial. If you only want
+to configure the Core3H configuration, you can use the corresponding Core3H
+configuration procedure instead. For example:
+
+    core3h01=force
+
+CAUTION: This is not recommended since there will be no checks that the rest of
+the DBBC3 configures without errors. However, if the schedule is started
+normally, the rest of the DBBC3 will be configured by the first setup procedure
+encountered in the schedule.
+
+====
+
+NOTE: The FS hard codes a VDIF frame payload size of `8000`. If a different
+size is needed, please see the <<Handling other VDIF frame payload sizes>>
+appendix.
+
+===== The details
+
+For each Core3H that is in use, the following information will be set, in
+this order:
+
+--
+
+* Decimation
+* Splitmode
+* Bitmask
+* `reset`
+* `vdif_frame ...`
+
+--
+
+For example:
+
+....
+core3h=1,vsi_samplerate 128000000 2
+core3h=1,splitmode on
+core3h=1,vsi_bitmask 0xcccccccc
+core3h=1,reset
+core3h=1,vdif_frame 2 8 8000 ct=off
+....
+
+
+[NOTE]
+====
+
+The FS makes some simplifying assumptions when forming the `vdif_frame`
+command. These are believed to agree with limitations in the DBBC3 and what is
+needed for practical operations:
+
+* For the number of bits per channel:
++
+
+If any channel on a board uses two bits, it is assumed that all do.
+
+* For the number of channels:
++
+
+The BBCs for each board are handled as two groups: the first eight and up to an
+additional eight. This splits the BBCs in agreement with the Ethernet ports
+where their channels are destined. The number of channels in the group with
+largest number of channels is rounded up to the next power of two, if it is not
+a power of two already. The resulting, possibly rounded value, is used as the
+number of channels.
+
+====
+
+==== Time sync
+
+After the Core3H boards are configured, the operator needs to sync each Core3H
+and sync the PPS. In principle, this would consist of:
+
+....
+dbbc3=core3h=1,timesync
+dbbc3=core3h=2,timesync
+dbbc3=core3h=3,timesync
+dbbc3=core3h=4,timesync
+dbbc3=core3h=5,timesync
+dbbc3=core3h=6,timesync
+dbbc3=core3h=7,timesync
+dbbc3=core3h=8,timesync
+dbbc3=pps_sync
+....
+
+NOTE: It may take the time on the boards a few tens of seconds to stabilize
+after the commands.
+
+[IMPORTANT]
+====
+
+All the Core3H boards in the system need to synced, then a `pps_sync` must be
+issued within 20 seconds of the first `timesync`. This is not currently
+possible since each `timesync` requires about six seconds. A new DBBC3 feature
+is being developed to allow syncing the boards in parallel and issue a timely
+`pps_sync`. Until then, the only safe way to configure a DBBC3 is with the boot
+configuration. However, the above procedure may work, but please verify that
+afterwards all boards have the correct time, VDIF epoch (see *NOTE* below), a
+`pps_delay` is no more than a few tens of nanoseconds.
+
+A _drudg_ setup procedure without the `force` parameter, can still be used to
+verify the configuration.
+
+====
+
+[NOTE]
+====
+
+The sync was successful if there no errors reported and all the boards have the
+same time and VDIF epoch.
+
+The best way to check the time for version _v125_ and later is with the
+`mcast_time` command. For earlier versions the `dbbc3=time` command can be
+used, but the output can be difficult to interpret because the boards may
+sampled in different seconds.
+
+The VDIF epoch and the time can be checked per board with
+`dbbc3=core3h=__board__,time`, where `_board_` is the board number.
+
+====
+
+==== Starting data transmission
+
+After the boards are synced, data transmission needs to started or stopped for
+each board, as appropriate for the mode. Assuming the setup procedure for the
+mode has been previously been with the `force` parameter as described in the
+<<Configuring Core3H boards>> sub-section above, this can be accomplished with
+the command:
+
+....
+core3h_mode0=end,force
+....
+
+[NOTE]
+====
+
+After the boards have been synced, data transmission can be freely started and
+stopped on individual boards as needed. For example to start transmission on
+board `1`, you can use:
+
+....
+dbbc3=core3h=1,start vdif
+....
+
+To stop transmission, use:
+
+....
+dbbc3=core3h=1,stop
+....
+
+CAUTION: Using these commands may make whether the board is transmitting data
+inconsistent with the FS configuration and may lead to problems.
+
+====
+
+==== Checking the mode
+
+IMPORTANT: It is essential to check the mode as described after it has been
+configured by either the DBBC3 boot configuration or manually as described in
+the <<Configuring Core3H boards>> sub-section above before the experiment, and
+verify that _no_ errors are reported. If there are errors the data may not be
+recorded properly.
+
+After the data transmission has been started, the setup procedure can be
+re-executed without the `force` to parameter to check that the setup is
+correct. Assuming the schedule procedure library has already been opened as
+described in the <<Configuring Core3H boards>> sub-section above, then for
+example use:
+
+  setup01
+
+Any deviations will be reported as errors. This is how the setup is checked
+within a schedule. This also checks that the personality and firmware version
+agree with the FS control files.
+
+[NOTE]
+====
+
+Using the setup procedure to check the mode will also command all the
+non-Core3H setup for the mode, which should be benign. If you really only want
+to check the Core3H configuration, you can use the corresponding Core3H
+configuration procedure instead. For example:
+
+    core3h01
+
+====
+
+=== Control files
+
+==== equip.ctl
+
+For DBBC3 use, the rack type in _equip.ctl_ should be `dbbc3_ddc_u` or
+`dbbc3_ddc_v` depending on the firmware that is loaded.
+
+NOTE: The `equip` line in the log header has been broken into two lines,
+`equip1` and `equip2`. The break occurs between the Mark 4 Decoder Transmission
+Terminator Character value and the DBBC(2) DDC Firmware Version value. Except
+for the clock rate value, the values in the `equip2` line are all the, and the
+only, DBBC(2) related values. The clock rate value is also used for Mark 5B
+recorders.
+
+==== dbbc3.ctl
+
+The DBBC3 specific control file parameters are in the _dbbc3.ctl_ control file.
+An example of the contents are:
+
+....
+* Two fields: BBCs/IF (8, 12, or 16), IFs (1-8)
+  16 8
+* DDC_U firmware version (v121 or later)
+ v121
+* DDC_V firmware version (v121 or later)
+ v121
+* mcast delay 0-99 centiseconds
+  57
+* setcl board
+  1
+* DBBC3 clock rate, >= 0, but DDDC_U/_V only supports 128
+ 128
+....
+
+==== dbbad.ctl
+
+The _dbbad.ctl_ file was expanded for use with DBBC3s. For the DBBC3 it can now
+include the multicast address, port, and the interface being used. If the last
+three parameters are omitted, receiving multi-cast data is disabled. If there
+are only comments in the file or the file is empty, use of a DBBC3 at all will
+be disabled. An example of the contents are:
+
+....
+*dbbad.ctl example file
+* one uncommented line with up to six fields:
+*    host(IP address or name)
+*    port(4000)
+*    time-out(centiseconds)
+*    multicast address
+*    multicast port
+*    multicast interface
+* If there are no uncommented lines, DBBC(2)/DBBC3 access is disabled.
+* For DBBC(2), the first three fields are required and no more can be used.
+* For DBBC3, there must be either the first three fields or all six. If the
+*    final three are missing, multicast reception is disabled.
+* Using an IP address instead of a name avoids name server problems.
+* DBBC2 example:
+*  192.168.1.2 4000 500
+* DBBC3 example:
+*  192.168.1.2 4000 800 224.0.0.19 25000 eno2
+....
+
+=== Tsys monitor display
+
+Support for the Tsys monitor display is built on multicast capture and
+unpacking software developed by Dave Horsley (Hobart).
+
+The Tsys monitor display is organized per IF. The displayed information
+includes: LO, time, VDIF epoch, time difference between DBBC3 and the FS,
+PPS delay, Tsys for each IF/Core3H board as well as BBC information: frequencies
+and Tsys values. By default the display will cycle through the appropriate IFs
+(dwelling two seconds on each IF) depending on the mode as described in the
+<<Modes>> sub-section below.
+
+The displayed values are from the previous second's multicast. Hence the time
+is one second in the past and the Tsys values are from two seconds in the past.
+
+NOTE: The time is shown on inverse video if it is not advancing or disagrees
+with the FS time when it was received or the firmware is _v124_ (no time is
+available in the multicast for that version, so the multicast arrival time is
+shown). The epoch is shown as `--` for now since the VDIF epoch is not
+available yet in the multicast.  The `DDBC3-FS` time difference, in seconds, is
+shown in inverse video if it is not zero (positive if the DBBC3 time is later
+than the FS). The `DDBC3-FS` time difference is shown as `------` in inverse
+video for firmware _v124_.
+
+The display is designed to provide what should normally be the most useful
+information without operator intervention. However, the operator can adjust the
+display using the features described in <<Commands>> sub-section below for
+special purposes.
+
+.Tsys monitor display geometry values
+[#geometry]
+[width="50%",cols="^,^"]
+|=================
+| BBCs/IF | width-by-height
+
+|  8     | `24x13`
+| 12     | `24x17`
+| 16     | `24x21`
+|=================
+
+==== Modes
+
+There are three modes:
+
+* `Rec` shows IFs with channels configured for recording
++
+This is intended for normal station operations.
+
+* `Def` shows IFs with defined LO values
++
+This may be useful for pointing or calibration runs.
+
+* `All` shows all IFs
+
+By default, if any channels are configured for recorded (selected by the bit
+masks in the `Core3H` commands), the display will go into the `Rec` mode. If
+there are no channels being recorded, but there are LOs defined for some IFs,
+it will go into the `Def` mode. If neither the `Rec` nor `Def` mode is
+triggered, it will go into the `All` mode and automatically change to one of
+other modes as appropriate. It is also possible to change to the `All` mode
+from `Rec` or `Dec` with a single character (`*l*`) command. Another `*l*` will
+toggle the display back to the other mode. The current mode is displayed in the
+upper right hand corner.
+
+==== Tsys values
+
+In the `Rec` mode, only Tsys fields for side-bands being recorded are
+populated. Tsys fields for side-bands not being recorded are blank.
+
+In the `All` mode, if no IFs are defined and no channels are being recorded
+(e.g., at FS startup), Tsys fields for all side-bands are blank.
+
+For all non-blank fields, Tsys values for all BBC side-bands will be shown if
+they can be calculated. If they can't be, a hint, in inverse video, for the
+cause of the problem will be displayed in the corresponding field instead.
+There may be more than one issue, but only the first encountered is reported.
+The order is:
+
+. `Nccal` -- continuous cal not enabled
+. `N bbc` -- the BBC is not configured
+. ``N lo `` -- the LO is not defined
+. `Ntcal` -- no Tcal value was found
+
+NOTE: As usual in the FS, an invalid value will be display as dollar signs:
+`$$$$$`. That usually means that a value could be calculated, but there was a
+problem with the result: the result was too large for the field, was negative
+when only positive values are valid, or would have required dividing by zero.
+
+==== Commands
+
+The Tsys display accepts several one character commands:
+
+* `*a*`-`*h*` -- show only that IF
+* `*n*` -- next IF
+* `*p*` -- previous IF
+* `*1*`-`*9*` -- seconds of display time for each IF
+* `*i*` -- toggle display of IF or RF frequency for BBCs
+* `*l*` -- toggle between `All` and `Rec`*/*`Def` modes (unfortunately it couldn't be `*a*`)
+* `*0*` -- reset to all defaults
+* `*?*` or `*/*` -- show help summary
+*  kbd:[esc] or kbd:[control+c] -- exit
+* Any other key -- resume cycling
+
+=== Checking DBBC3 time
+
+For DBBC3 firmware versions _v125_ and later, the `mcast_time` command should
+be placed in the local `midob` procedure to monitor the time in the DBBC3 for
+each scan. It will report an error if any Core3H boards' time differs from the
+FS time or if the multicast data is more than 20 seconds old.
+
+For earlier firmware versions, the `dbbc3=time` command can be used. However,
+the output can be difficult to interpret because the boards may sampled in
+different seconds.
+
+For future firmware versions, after _v125_, that report the VDIF epoch in the
+multicast, it will report if there is a VDIF epoch mismatch between the boards.
+Other checks may also be added in the future.
+
+=== Setting FS time
+
+It is expected that normally the FS computer is running on NTP and the FS time
+model is set to `computer` (see _misc/ntp.txt_ for more information). If good
+NTP servers are available, it is expected that will give the best time in the
+FS.
+
+No suitable NTP servers may be available either because network connectivity is
+poor and/or there are no local functioning NTP servers. In that case the FS
+program _setcl_ can be used with DBBC3 firmware versions _v125_ and later to
+set and adjust FS time (see _misc/fstime.txt_ for the details).
+
+The implementation of _setcl_ for the DBBC3 depends on two values from the
+_dbbc3.ctl_ control file:
+
+* The delay of the multicast
++
+
+The amount of time that the multicast arrives after the 1 PPS seems to be
+stable. This is useful for setting the FS time if NTP is not available. In
+tests so far, for the __DDC_U__ _v125_ firmware, it is about 57 centiseconds;
+__DDC_V__ _v124_, about 30 centiseconds. However, since there is no time
+available in the _v124_ multicast, it is not useful for setting the FS time.
+The value in _dbbc3.ctl_ can be adjusted as appropriate. It should be easy to
+measure it for a given firmware when NTP _is_ available using the output of the
+`mcast_time` command.
+
+* The board number to use for measuring the time.
++
+
+There can be up to eight to choose from. Board `1` will be in all systems and
+should be adequate for the purpose, but which board is used can be changed in
+the control file if need be.
+
+In any event, using _setcl_ to set the FS time this way will only be useful to
+level of stability of the delay of the multicast. Network congestion may also
+cause variations, but hopefully will be minimal in situations where this method
+is needed.
+
+Even if there are significant variations, even a significant fraction of a
+second (which seems unlikely), in the arrival of the multicast, the clock model
+determined should be useful.  Individual offset measurements should be fairly
+accurate. If the clock model is determined over a significant amount of time, a
+day or more, the fractional error in the model rate should be small. The use of
+`adjust` option of _setcl_ in each `midob` should keep the FS close to the
+correct time. It should be good enough to run a schedule. In any event, it
+should better than any other approach without NTP. Since the DBBC3 will be
+running on the correct time, small errors in the FS time should typically not
+be significant.
+
+=== Multicast logging
+
+Support for multicast logging is built on multicast capture and unpacking
+software developed by Dave Horsley (Hobart).
+
+Logging of DBBC3 multi-cast recording is controlled by the `tpicd` command.
+When logging is enabled, for each multicast message received (nominal 1 Hz
+rate), the following information is logged:
+
+* `time` -- for each Core3H board in the system
+* `pps2dot` -- (`pps_delay`) in nanoseconds for each Core3H board
+* `tpcont`  -- Only if continuous cal _is_ in use -- TPI counts for each BBC and IF configured for recording.
++
+The counts are given in the order of cal _on_ then _off_
+* `tpi`  -- Only if continuous cal is _not_ in use -- TPI counts for each BBC and IF configured for recording.
+* `tsys` -- Only if continuous cal _is_ in use -- Tsys for each BBC and IF configured for recording.
+
+The _plog_ utility was modified to push reduced logs with DBBC3 multicast data
+squeezed out by default, as it already did for RDBEs. A subsequent revision in
+_plog_ will cause the compressed full log to also be push by default. Please
+see ``**plog -h**`` for more information.
+
+[NOTE]
+====
+
+Even when not being logged, multicast data is normally being received. A subset
+can be seen in the <<Tsys monitor display>>. When the DBBC3 is busy processing
+commands, it may suppress multicast messages. The FS will complain once every
+20 seconds if it is not receiving multicast. When manually commanding the
+DBBC3, e.g., for troubleshooting, these errors can be suppressed by using the
+command:
+
+    tpicd=stop
+
+To restart the error reports, _tpicd_ should be configured and started. Any
+_drudg_ generated `setup` procedure will do this.
+
+When _drudg_ generated `setup` procedures are executing they will suppress
+these errors because they use `tpcid=stop` when they start. As a `setup`
+procedure finishes, it will restart _tpicd_.
+
+This method can also be used to suppress multicast errors for equipment
+monitoring in the `midob` procedure. That is, group all the commands that cause
+multicast errors together and place them after a `tpcid=stop` and follow them
+with a `tpcid`. This should not cause a significant, if any, additional loss of
+logged multicast data. However in some cases, any loss may be unacceptable,
+particularly for very short scans. In those cases, the commands that cause
+these errors should probably not be included `midob` at all. The `mcast_time`
+command can be used to monitor the DBBC3 time without generating any of these
+errors.
+
+====
+
+== Related Features
+
+=== Minimizing the use of setup procedures
+
+NOTE: This can be used for any system, not just those with DBBC3s.
+
+Normally, the FS sets the mode for each scan (unless there is continuous
+recording). If this takes too long (as is the case for the DBBC3) or makes the
+equipment unstable, the _drudg_ option `use_setup_proc yes` in _skedf.ctl_ can
+be used to minimize the execution of the setup procedure.
+
+WARNING: Not executing the setup each scan may not be robust if the equipment
+sometimes loses it configuration. It is up to the individual stations to
+determine whether minimizing its use is better than always using it.
+
+With this enabled, _drudg_ will replace the calls to setup procedures (e.g.,
+`setup01`) in the _.snp_ file with, e.g.:
+
+ setup_proc=setup01
+
+When the FS encounters this command, it will conditionally execute the setup
+procedure if either of the following is true:
+
+* This is first setup since the schedule was last started.
++
+
+This will make sure the setup is run at the start and any restart of the
+schedule.
+
+* If there was a mode change, i.e., the name of the setup procedure changed.
+
+The `use_setup_proc` option in _skedf.ctl_ has three possible settings:
+
+* `yes` -- use the `setup_proc` command
+
+* `no`  -- do not use the `setup_proc` command
+
+* `ask` -- to prompt for `yes` or `no` for each schedule
+
+If the option is not used, it defaults to `no`.
+
+The _fesh_ program was expanded to support an environment variable,
+`FESH_GEO_USE_SETUP_PROC`, and a command line option, `-u`, to set the answer
+for an interactive prompt for the whether or not to use `setup_proc` when
+__drudg__ing geodesy schedules. Please see ``**fesh -h**`` for more
+information.
+
+Thanks to Jon Quick (HartRAO) and Harro Verkouter (JIVE) for suggesting this
+option. They also suggested that it may be utilized as part of future features
+for additional checking and resetting of the system.
+
+=== Thread procedure
+
+NOTE: This applies to any system using a Mark 5C or FlexBuff recorder.
+
+When a Mark 5C or FlexBuff recorder is in use, _drudg_ can optionally insert a
+`thread__suffix__` procedure in each setup procedure (where `__suffix__` is a
+mode specific suffix). This can be used to control whether the recordings for an
+experiment is multi-threaded or single thread per file.
+
+The contents of the procedure is same for every mode in the schedule. This
+feature is controlled by the `vdif_single_thread_per_file` option in
+_skedf.ctl_ control file. The option only needs to be used by stations that
+need to always use a single thread per file or switch between experiments. If
+the option is not present, no ``thread__suffix__`` procedure is inserted.  If
+it is present, the possible setting are (where `_command_` is `mk5` or `fb`
+depending on the the type of recorder):
+
+* `yes` -- to store a single thread per file, in which case, the
+``thread__suffix__`` procedure contents are:
+
++
+[subs="+quotes"]
+....
+_command_=datastream=clear
+_command_=datastream=add:{thread}:*
+_command_=datastream=reset
+....
+
+* `no` -- for normal multi-threaded recordings, in which case, the
+``thread__suffix__`` procedure contents are:
+
++
+[subs="+quotes"]
+....
+_command_=datastream=clear
+_command_=datastream=reset
+....
+
+
+* `ask` -- to be prompted once per schedule for what to do
+
+The _fesh_ program was expanded to support an environment variable,
+`FESH_GEO_VDIF_SINGLE_THREAD_PER_FILE`, and a command line option, `-T`, to set
+the answer for an interactive prompt for the whether or not to use a single
+thread per file when __drudg__ing geodesy schedules. Please see ``**fesh -h**``
+for more information.
+
+=== mk5c_config/fb_config procedure
+
+NOTE: This applies to any system using a Mark 5C or FlexBuff recorder.
+
+Each mode SNAP procedure produced by _drudg_ for Mark 5C and FlexBuff recorders
+includes a call to a `mk5c_config`/`fb_config` SNAP procedure, depending on the
+type of recorder. This procedure call is inserted immediately after the
+`mk5c_mode`/`fb_mode` command (and after the optional <<Thread procedure>> call
+if present). The procedure is mode independent, i.e., the same procedure is
+used for all modes.
+
+This procedure is a local `station` library procedure to allow tuning of the
+configuration of _jive5ab_ for the specifics of the recorder, including
+overriding the "`default`" configuration given by the `mk5c_mode`/`fb_mode`
+command in a `thread__suffix__` procedure.
+
+==== Default configuration
+
+The `mk5c_mode`/`fb_mode` command sends the configuration commands, beyond
+`_mode_`,  depending on which recorder is selected in _equip.ctl_, `mk5c` or
+`flexbuff`, and the total data rate. It does _not_ depend on which command is
+used; `fb_mode` is just an alias for `mk5c_mode`. The commands sent also depend
+on the data type, VDIF or 5B/Ethernet. All the cases are listed below.
+
+===== FlexBuff recorder
+
+. Setting `mtu`:
+
++
+
+The `mtu` command sent to the recorder depends on the data type:
+
+.. VDIF data
+
+  mtu = 9000 ;
+
+.. 5B/Ethernet data
+
+   mtu = 6000 ;
+
+. Setting `net_protocol`:
+
++
+
+There is a variable field `_socketbuffer_` in the `net_protocol` command sent
+to the recorder. Its value is independent of the data type.
+
++
+[subs="+quotes"]
+....
+net_protocol = udpsnor : _socketbuffer_ : 256000000 : 4 ;
+....
+
++
+
+Where the _socketbuffer_ field depends on the total data rate:
+
+*   32000000 -- data rate < 1 Gbps
+*   64000000 -- 1 Gbps < data rate <= 4 Gbps
+*  128000000 -- data rate > 4 Gbps
+
++
+
+The _socketbuffer_ parameter is an important setting for trying to minimize
+risk of packet loss when starting the recording. For (very) high data rates,
+the `mk5c_config`/`fb_config` procedure can be used to increase the
+_socketbuffer_ size to values appropriate for that. This assumes that the
+FlexBuff has been tuned (especially the kernel network buffer sizes) along the
+lines of the FlexBuff tuning documentation at
+https://www.jive.eu/~verkout/flexbuff/flexbuf.recording.txt.
+
+. Setting `record = nthread`:
+
++
+
+There is a variable field `_nWriters_` in the `record = nthread` command sent
+to the recorder. Its value is independent of the data type.
+
++
+
+[subs="+quotes"]
+....
+record = nthread : _nWriters_ ;
+....
+
++
+
+where `_nWriters_` is calculated as `max( _data_rate_ / 6 + 1, 2)` and
+`_data_rate_` is the total data rate in Gbps.
+
+===== Mark 5C recorder
+
+. Setting `net_protocol`:
+
++
+
+The `net_protocol` command sent to the recorder is independent of the data
+type:
+
+  net_protocol = : 128k : 2M : 4;
+
+. Setting `packet`:
+
++
+
+The `packet` command sent to the recorder depends on the data type:
+
+.. VDIF data
+
+  packet = 36 : 0 : 8032 : 0 : 0 ;
+
+.. 5B/Ethernet data
+
+  packet = 36 : 0 : 5008 : 0 : 0 ;
+
+==== Overriding the defaults
+
+You can override the commands sent by the `mk5c_mode`/`fb_mode` command or add
+more by putting them in your local `mk5c_config`/`fb_config` procedure. This
+works because `mk5c_config`/`fb_config` is called after `mk5c_mode`/`fb_mode`
+command (_and_ after the call to the optional <<Thread procedure>>) in the
+setup procedure. An example of local customizations is given in the
+sub-sections below.
+
+CAUTION: If you put any commands in `mk5c_config`/`fb_config` that depend on
+the data type, VDIF or 5B/Ethernet, you would need to change them if there is a
+change in the data type. This is not a concern for most stations.
+
+===== Changing net_protocol
+
+If you use different values for `net_protocol`, you can leave any field blank
+that your don't need to change from what the FS has already sent. For example
+to only set the _socketbuffer_ size to `64000000`, use:
+
+....
+net_protocol = : 64000000
+....
+
+=== drudg support
+
+_drudg_ supports:
+
+* Up to 128 dual side-band BBCs and eight IFs for VEX (_.vex_) schedule files.
+
+* Up to 16 dual side-band BBCs (`1`-`16`) and two IFs (`a` and `b`) for Mark IV
+(_.skd_) schedule files.
++
+
+NOTE: For a schedule that would nominally have a number of channels on an IF
+that is less than a power of two (for example, an _S/X_ mode), the channels for
+such an IF will need to be rounded up the next power of two. For example for
+_S_/_X_, the IF (_X_) with eight USB and two LSB channels will need to be
+expanded to eight USB and eight LSB; the IF (_S_) with six USB channels, to
+eight USB. These settings can be in the schedule file and flow from the
+catalog, so it is all automatic for the scheduler and the station.
+
+* The appropriate new <<DBBC3 commands>> are used in setup procedures.
+
+* The new _skedf.ctl_ options for <<Minimizing the use of setup procedures>>
+and the <<Thread procedure>>.
+
+* The following previously DBBC2 specific _skedf.ctl_ options can also be used
+for DBBC3s:
+
+** `cont_cal`
+** `cont_cal_polarity`
+** `dbbc_if_targets`
+** `dbbc_bbc_target`
+** `default_dbbc_if_inputs`
+
+[appendix]
+
+== Handling other VDIF frame payload sizes
+
+The value of `8000` for the VDIF frame payload size is hard coded in the FS for
+the DBBC3 and _jive5ab_ (and DBBC2/FiL10G as well). Currently this is the
+correct value, but some day in the future, different values may be needed. If
+that occurs before the FS is updated to accommodate other values, this section
+gives a recipe for handling it for the DBBC3 and _jive5ab_ in the meantime.  It
+is a little complicated, but should work. Hopefully, the FS will be updated
+before it is necessary.
+
+The basic strategy is to <<Determine the other settings>> needed in the DBBC3
+and _jive5ab_ `vdif_frame` commands, <<Update the SNAP procedures>> to contain
+them, and then <<Command the devices>> with the new values. These are all
+described in the following sub-sections.
+
+After commanding a different VDIF payload size, the FS will complain that the
+DBBC3 `vdif_frame` payload is not correct when you check the DBBC3
+configuration (i.e., using the `setup__mode__` procedure without the `force`
+parameter), but if that is the only complaint, there should not be a problem.
+
+These sub-sections extend the example in the <<Configuring Core3H boards>>
+sub-section above.
+
+=== Determine the other settings
+
+The settings can be calculated from first principles. However, another way to
+determine them is to use the `echo` output from the FS for what would otherwise
+be the correct setup:
+
+   proc=r4849kk
+   echo=on
+   setup01=force
+   echo=off
+
+You will need to identify the `#dbbcn#core3h=_n_,vdif_frame ...` and
+`#mk5cn#VDIF_8000-...` records in the output and use the values recorded in the
+next sub-section.
+
+=== Update the SNAP procedures
+
+These examples use `8200` as an example different payload size.
+
+CAUTION: The examples below do not necessarily contain correct values. They are
+just offered to show the form of the commands.
+
+. You will need to create a new SNAP procedure, perhaps called `vdif_8200`,
+that contains all the other values in the `core3h=_n_,vdif_frame ...` commands
+recorded in the previous section, but with the new payload size, for example:
+
+   dbbc3=core3h=1,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=2,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=3,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=4,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=5,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=6,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=7,vdif_frame 2 8 8200 ct=off
+   dbbc3=core3h=8,vdif_frame 2 8 8200 ct=off
+
+. You can add a new `VDIF_...` command with the other recorded values, but with
+the new payload size, to the `setup__mode__`  procedure (`setup01` in this
+example) _after_ the call to `mk5c_config`/`fb_config`. For example, add the
+command:
+
+   jive5ab=VDIF_8200-8192-2-8
+
+NOTE: Not putting this command directly into your `mk5c_config`/`fb_config`
+procedure allows it to be mode specific. If you want to apply this change
+universally, you can put it into your `mk5c_config`/`fb_config` procedure
+instead, but be wary of other modes.
+
+=== Command the devices
+
+Continuing the example, enter:
+
+   proc=r4849kk
+   setup01=force
+   vdif_8200
+
+Afterwards, you will need to sync the time as described in the <<Time sync>>
+sub-section above and start the data transmission as described in the
+<<Starting data transmission>> sub-section above.
+
+NOTE: The reason the setting of the VDIF payload size is done _outside_ of the
+`setup__mode__` procedure is so that when that procedure is used to _check_ the
+DBBC3 configuration, the `dbbc3=core3h=_n_,vdif_frame ...` commands won't cause
+a requirement to re-sync the DBBC3.
+
+[appendix]
+
+== Installation for testing
+
+This section has some terse installation notes for installing the FS branch,
+`ed/dbbc3`, that provides the features described in this document. This is
+provided only to help with testing. This is not for an operational release.
+
+Sub-sections on <<Switching back to 10.0.0>> and
+<<Switching back to the test version>> as also provided in case you need to
+switch back and forth after using the
+<<Initial installation of the test version>> sub-section.
+
+=== Initial installation of the test version
+
+You must have FS 10.0.0 installed before installing the test version. Please
+see https://nvi-inc.github.io/fs/releases/10/0/10.0.0.html for instructions for
+installing FS 10.0.0.
+
+==== Fetch and make the latest commit on the branch
+
+If you are using _git_, as is recommended, then as _prog_
+execute:
+
+             cd /usr2/fs-git
+             git fetch
+             git checkout ed/dbbc3
+             make clean rmdoto rmexe
+             make >& /dev/null
+             make -s
+
+No output from the last command indicates a successful _make_.
+
+NOTE: It should not be necessary to re__make__ your station software.
+
+==== Reboot
+
+This will make sure the FS server is restarted and shared memory is
+reinitialized.
+
+==== Additional steps
+
+Except as noted, these steps should all be performed as _oper_.
+
+. Install the _dbbc3.ctl_ control file.
+
++
+
+The contents of DBBC3 line in the _equip.ctl_ control file has been moved to
+the new control file, _dbbc3.ctl_, and reorganized. To install the new file,
+execute:
+
+  cd /usr2/control
+  cp /usr2/fs/st.default/control/dbbc3.ctl .
+
++
+
+Edit and customize the contents of your local copy in _/usr2/control_ to agree
+with your DBBC3.
+
++
+
+TIP: For now, your old DBBC3 line in _equip.ctl_ can be left in place. Its
+presence will be benign and leaving it there will make it easier to return your
+operational FS version when that is needed. The values in the _dbbc3.ctl_
+control file are the ones actually used by this test branch of the FS.
+
++
+
+NOTE: A script for semi-automatically setting up your _ddbc3.ctl_ file is
+included as _/usr2/fs/misc/equipctlfix_. If you use it, you may still need to
+adjust the values in your _dbbc3.ctl_ file afterwards. The use of this script
+is not recommended if you intended to switch back-and-forth between using the
+`ed/dbbc3` branch and _10.0.0_ since it will remove the old DBBC3 line from
+_equip.ctl_.
+
+
+. Update _equip.ctl_
+
++
+
+Change your rack type to `dbbc3_ddc_u` or `dbbc3_ddc_v` as appropriate.
+
+. Use _pfmed_, add a `mk5c_config` and/or a `fb_config` procedure to your
+`station` procedure library, as appropriate.
+
++
+
+Add the versions needed for your recorder(s). You should add both if you use
+both. They can be empty if no tuning is needed for your recorder(s).
+
++
+
+NOTE: These procedures are called by setup procedures for Mark 5C and FlexBuff
+recorders and provide a means to tune the setup of _jive5ab_ for your hardware
+independent of the observing mode. These procedures are called after the
+`mk5c_mode` or `fb_mode` commands to allow the default configuration to be
+overridden. The default configuration is described in the
+<<Default configuration>> subsection in main part of this document.
+The commands in this procedure should be mode independent. Mode dependent
+tuning should be handled differently; perhaps by inserting commands directly
+at the top-level of the setup procedure.
+
+. Setup the DBBC3 Tsys display window (_monit7_)
+
+.. Update _clpgm.ctl_
+
++
+
+Compare your local copy to the example
+
+          cd /usr2/control
+          diff clpgm.ctl /usr2/fs/st.default/control/ | less
+
++
+
+and consider whether and what changes you should make. Typically, the new line
+for _monit7_ would be added to your local copy.
+
++
+
+TIP: If you are familiar with _vimdiff_, you may find it a more convenient way
+to compare files and update your local copy. Like _vim_, _vimdiff_ may be
+challenging to use until you are familiar with it. Some help is available from
+web searches. Don't use it if you aren't comfortable with it.
+
+.. Update _stpgm.ctl_
+
++
+
+If you are using the display server and you want to have _monit7_ start
+automatically with each client (including at FS start up), add a line for it to
+_stpgm.ctl_. The easiest way to do this is to make a copy of the line for
+_monit2_ and update for _monit7_ (changing ``2``s to ``7``s). If you don't have
+a line for _monit2_ in your _stpgm.ctl_, you can use the one in the example
+file, _/usr2/fs/st.default/control/stpgm.ctl_, as a guide.
+
+.. Update your local rc files:
+
+... Update _~/.Xresources_
+
++
+
+Append the new lines from the default version:
+
+  cd ~
+  tail -n 2 /usr2/fs/st.default/oper/.Xresources >>.Xresources
+
++
+
++
+
+NOTE: The default geometry resource in _/usr2/fs/st.default/oper/.Xresources_
+for _monit7_ handles having up to 16 BBCs per IF.  If you have fewer, you might
+want to adjust the resource in your local file according to the <<geometry,Tsys
+monitor display geometry values>> table above.
+
++
+
+... If you use the default window manager for the console, update _~/.fvwm2rc_:
+
++
+
++
+
+Compare your local file to the default
+
+  cd ~
+  diff .Xresources /usr2/fs/st.default/oper |less
+
++
+
++
+
+The new lines for _monit7_ should be added to your local file.
+
++
+
+... You should  make the corresponding changes for _prog_ while logged
+in as _prog_.
+
+... Log out and back in to put these changes into effect.
+
+=== Switching back to 10.0.0
+
+Once you have the `ed/dbbc3` your can return to using _10.0.0_ by following
+these steps.
+
+. As _prog_, enter:
+
+             cd /usr2/fs-git
+             git checkout -q 10.0.0
+             make clean rmdoto rmexe
+             make >& /dev/null
+             make -s
+
+. Reboot
+
+NOTE: If you added _monit7_ to your _stpgm.ctl_ file, you can comment it out
+(as _oper_), but that is not necessary.  The only consequence of not doing so
+will be a "`flash`" when the display client starts as an _xterm_ and then it
+closes because it can't start _monit7_.
+
+=== Switching back to the test version
+
+If you have switched back to _10.0.0_ and now want to switch back to the test
+version, please follow these steps.
+
+. As _prog_, enter:
+
+             cd /usr2/fs-git
+             git checkout ed/dbbc3
+             make clean rmdoto rmexe
+             make >& /dev/null
+             make -s
+
+. Reboot
+
+. If as part of switching back to _10.0.0_, you had commented out the _monit7_
+line in your _stpgm.ctl_ file, you can uncomment it (as _oper_).

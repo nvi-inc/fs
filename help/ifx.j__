@@ -18,9 +18,9 @@ Settable Parameters:
                       or "man" are displayed (attV monitor parameter
                       is the current value).  Default is "agc".
 
-            target    level target for AGC, 0-65535. No default
-                      This normally is not set here, but by the DBBC3
-                      configuration file.
+            target    level target for AGC, 0-65535. Default is not to
+                      command. This normally is not set here, but by
+                      the DBBC3's configuration file.
 
 Monitor-only Parameters:
 
@@ -30,19 +30,14 @@ Monitor-only Parameters:
 
             counts    Level in the bandpass for one second integration
                       in counts. Range 0 to 65535. The value tracks the
-                      target level in AGC mode. Nominal operating level is
-                      system dependent and can be found in the dbbc
-                      configuration file. See notes for units.
+                      target level in AGC mode.
 
 Comments:
 Each IF module has two inputs: input '1' does not include down
 conversion, input '2' includes down conversion.
 
-The counts output converts to linear power scale approximately using
-the (C-language) expression:
-
-  power=pow(10.0,counts/19000.)
-
-Assuming a 512 MHz wide input bandpass, the nominal operating count
-level is 38000-45000 for the DDC personality, and 40000-45000 for the
-PFB personality.
+The DBBC3 dbbcifX command has a filter parameter that is not useful.
+However, on command it must be specified or the following parameter,
+target, will be ignored. The FS always sends "1" as the filter value
+if a target is specified. The filter value returned by the DBBC3 is
+not displayed in FS monitor output.

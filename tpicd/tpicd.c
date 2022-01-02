@@ -61,6 +61,7 @@ main()
   double dbbc3_tpi[MAX_DBBC3_DET],dbbc3_tpical[MAX_DBBC3_DET];
 
   struct rdtcn_control rdtcn_control[MAX_RDBE];
+  struct dbtcn_control dbtcn_control;
   int iping[MAX_RDBE];
 
 /* connect to the FS */
@@ -116,6 +117,28 @@ main()
 	     sizeof(struct rdtcn_control));
       shm_addr->rdtcn[i].iping=iping[i];
     }
+    goto loop;
+  } else if(DBBC3 == shm_addr->equip.rack) {
+      dbtcn_control.continuous=shm_addr->tpicd.continuous;
+      dbtcn_control.cycle=shm_addr->tpicd.cycle;
+      dbtcn_control.stop_request=shm_addr->tpicd.stop_request;
+      dbtcn_control.to_error_off=shm_addr->tpicd.stop_request;
+      memcpy(&dbtcn_control.data_valid,&data_valid,
+	     sizeof(struct data_valid_cmd));
+      iping[0]=1-shm_addr->dbtcn.iping;
+      if(iping[0]!=0)
+	iping[0]=1;
+      memcpy(&shm_addr->dbtcn.control[iping[0]],&dbtcn_control,
+	     sizeof(struct dbtcn_control));
+      shm_addr->dbtcn.iping=iping[0];
+      /* this will make sure a to_error_off request is respected before
+         the tpicd=stop request command returns; if instead we waited for
+         dbtcn to return, it could take a while time-out period if it is
+         timing out already, in that case the user shouldn't be too annoyed
+         by one more time-out message anyway; it would be faster by an average of
+         0.5 seconds is we waited and wasn't already timing out. */
+      if(shm_addr->tpicd.stop_request)
+          rte_sleep(101);
     goto loop;
   }
 

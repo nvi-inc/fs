@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -31,7 +31,7 @@
 
 static char *if_key[ ]={ "a", "b", "c", "d", "e", "f", "g", "h" };
                                                          /* if input source */
-static char *bw_key[ ]={"2","4","8","16","32"};
+static char *bw_key[ ]={"0","2","4","8","16","32","64","128"};
 static char *agc_key[ ]={"man","agc"};
 
 #define NIF_KEY sizeof(if_key)/sizeof( char *)
@@ -65,32 +65,19 @@ char *ptr;
 	  ierr=-200;
 	  break;
 	}
-	if (lcl->freq < 1 || lcl->freq > 4096000000ul)
+	if (lcl->freq > 4096000000ul)
 	  ierr = -200;
         break;
       case 2:
-	if(itask <= 8)
-	  idefault = 0;
-	else if (itask <= 16)
-	  idefault = 1;
-	else if (itask <= 24)
-	  idefault = 2;
-	else if (itask <= 32)
-	  idefault = 3;
-	else if (itask <= 40)
-	  idefault = 4;
-	else if (itask <= 48)
-	  idefault = 5;
-	else if (itask <= 64)
-	  idefault = 6;
-	else
-	  idefault = 0;
+        idefault=(itask-1)%64/8;
         ierr=arg_key(ptr,if_key,NIF_KEY,&lcl->source,idefault,TRUE);
 	if(ierr==0 && lcl->source >= shm_addr->dbbc3_ddc_ifs)
 	  ierr=-300;
         break;
       case 3:
-	ierr=arg_key_flt(ptr,bw_key,NBW_KEY,&lcl->bw,4,TRUE);
+	ierr=arg_key_flt(ptr,bw_key,NBW_KEY,&lcl->bw,5,TRUE);
+    if(0 == ierr && 0 == lcl->bw)
+        ierr=-200;
         break;
       case 4:
         ierr=arg_int(ptr,&lcl->avper,1,TRUE);

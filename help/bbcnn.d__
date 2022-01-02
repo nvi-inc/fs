@@ -17,8 +17,8 @@ Settable Parameters:
                       D for 13-16. This parameter does not affect
                       equipment set-up, it is for informaton only.
 
-            bw        Sideband bandwidth in MHz. One of 1, 2, 4, 8, 16.
-                      Default 8.
+            bw        Sideband bandwidth in MHz. One of 1, 2, 4, 8, 16,
+                      32, or 64. Default 8.
 
             tpint     Averaging period in seconds for TPI. Positive
                       integers 1-60 allowed, Default is 1. The averaging

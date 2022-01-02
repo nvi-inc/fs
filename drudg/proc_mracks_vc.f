@@ -20,8 +20,8 @@
       subroutine proc_mracks_vc(icode,ic,ib,ichan)
 ! Write out the VC commands.
       implicit none  !2020Jun15 JMGipson automatically inserted.
-
-!  2020Feb20 JMGipson. Added implicit none. Added luscn to arg list for invalid_if and invalid_bbc
+!  2020-12-29 JMGipson. Cahnged dimension of data statements back to 16
+!  2020-02-20 JMGipson. Added implicit none. Added luscn to arg list for invalid_if and invalid_bbc
 !  2012Sep12  JMGipson. First version. Split off of old routine proc_vc.
 !  2014Jun02  JMGipson. Changed starting count in looping over channels from 'ic' to 1
 !  2015Jan29  JMGipson. Handle case of inverted LO.
@@ -49,14 +49,13 @@
       integer icx               !alternate channel#
       logical knormal_lo
 
-      character*1 cvc2k42(max_bbc)
-      character*1 cvchan(max_bbc)
+      character*1 cvc2k42(16)
+      character*1 cvchan(16)
 
       data cvc2k42/'1','2','3','4','5','6','7','8',
-     &             '1','2','3','4','5','6','7','8',
-     &             16*'-'/
+     &             '1','2','3','4','5','6','7','8'/
 
-      data cvchan /8*'A',8*'B',16*'-'/
+      data cvchan /8*'A',8*'B'/
 ! Start of code.
 
       flo(ib) = FREQLO(ic,ISTN,ICODE)
@@ -74,7 +73,12 @@
         write(cbuf,'("vclo=",i2.2,",")') ib
         nch=9
       else if(kk42rack) then !k4-2
-        write(cbuf,'("v",a1,"lo=",a1,",")') cvchan(ib),cvc2k42(ib)
+        if(ib .le. 16) then 
+          write(cbuf,'("v",a1,"lo=",a1,",")') cvchan(ib),cvc2k42(ib)
+        else
+! Should never get here....?
+          cbuf="v-lo=-,"
+        endif 
         nch=8
       endif ! k4-1/2
 

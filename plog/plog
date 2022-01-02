@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2021-12-02
+VERSION=2022-01-02
 
 version(){
     echo "[plog $VERSION]"
@@ -41,7 +41,7 @@ fi
 
 # Lines to remove from log file to make "reduced" logs
 # Use egrep syntax
-PLOG_REDUCE_PATTERN="${PLOG_REDUCE_PATTERN:-^[:.0-9]*#rdtc}"
+PLOG_REDUCE_PATTERN="${PLOG_REDUCE_PATTERN:-^[:.0-9]*#(rdtc|dbtcn)}"
 
 # Added to filename before extension of log files with all data
 PLOG_FULL_SUFFIX="${PLOG_FULL_SUFFIX:-_full}"
@@ -72,7 +72,7 @@ ${underline}Options:${normal}
     ${black}-v${normal}            Print plog version and exit
     ${black}-g${normal}            Force gzip compression/uncompression
 
-If the log containing RDBE multicast data:
+If the log contains RDBE or DBBC3 multicast data:
 
 1.  If not already done, the log file will be renamed to
     '$FS_LOG_PATH/<log>_full.log'.
@@ -136,7 +136,7 @@ Examples of usage:
     ${blue}# push (full) compressed log for vgp007${normal}
     plog -z vgp007
     ${blue}# push both reduced and compressed multicast log for vgp007${normal}
-    plog -b vgp007
+    plog vgp007
     ${blue}# push everything in /usr2/log to Haystack${normal}
     plog -c HAYSTACK /usr2/log/*.log
 

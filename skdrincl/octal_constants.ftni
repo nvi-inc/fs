@@ -1,0 +1,46 @@
+*
+* Copyright (c) 2021 NVI, Inc.
+*
+* This file is part of VLBI Field System
+* (see http://github.com/nvi-inc/fs).
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
+! History
+! 2021-12-03 JMGipson. First version. Removed from skparm.ftni 
+! Some octal constants used by some programs.
+! Removed from skparm.ftni 
+!     Definitions for octal constants.
+
+      integer OBLANK,ODOLLAR,OZERO,OCOMMA,OMINUS,OPLUS,
+     .          ODOT,OLPAREN,OUNDERSCORE,OSTAR,OSLASH,OAND,
+     .          ORPAREN,OCOLON
+      parameter (OBLANK = O'40', ODOLLAR = O'44',
+     .OZERO = O'60', OCOMMA = O'54', OMINUS = O'55',
+     .OPLUS = O'53', ODOT = O'56', OLPAREN = O'50',
+     .ORPAREN = O'51',OUNDERSCORE = O'137', OSTAR = O'52',
+     .OSLASH = O'57', OAND = O'46', OCOLON = 58)
+      integer OCAPA,OCAPB,OCAPC,OCAPD,OCAPE,OCAPF,OCAPX,
+     .OCAPY,OCAPW,OSMALLE,OCAPL,OCAPT,OCAPN,ONINE,OCAPH,
+     .OCAPP,OONE,OCAPZ,OSMALLA,OSMALLZ,OCAPU,OCAPV,
+     .ocapi,ocapo
+      parameter (OCAPA = O'101', OCAPB = O'102',
+     .OCAPC = O'103', OCAPD = O'104', OCAPE = O'105',
+     .OCAPF = O'106', OCAPX = O'130', OCAPY = O'131',
+     .OCAPW = O'127', OCAPL = O'114', OCAPN = O'116',
+     .OSMALLE = O'145', OCAPT = O'124', ONINE = O'71',
+     .OCAPH = O'110', ocapi = o'111', ocapo = o'117', 
+     .OCAPP = O'120', OCAPZ = O'132',
+     .OONE = O'61', OSMALLZ = O'172', OSMALLA = O'141',
+     .OCAPU = O'125', OCAPV = O'126')

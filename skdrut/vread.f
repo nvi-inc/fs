@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -37,6 +37,7 @@ C 020619 nrv Add call to VPRINP to read scheduling parameters
 ! 2010.05.16 JMG. Got rid of trailing char(0) on some output
 ! 2019.08.14 JMG  Set 'iret=0' after reading exper. this prevents
 !             announcing error after return from vread
+! 2021-12-28 JMG. Got rid of ipartm which is never used
 
 C Input
       character*(*) cfile ! VEX file path name
@@ -112,12 +113,10 @@ C  3. Initialize parameters to standard values. These
 C     are parameters not read in from the astro vex file.
 C     Early start, late stop, and time gap were read in.
 
-      isettm = 20
-      ipartm = 70
+      isettm = 0
       itaptm = 1
       isortm = 5
-      ihdtm = 6
-
+   
 C 3. Read the $SCHEDULING_PARAMS section to get parameters.
 C    If there is a def for SKED_PARAMS then mark this as a
 C    sked-produced schedule by setting ksked true.

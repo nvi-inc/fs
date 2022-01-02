@@ -19,6 +19,7 @@
 *
       SUBROUTINE SOINP(cbuf,lu,IERR)
 ! Parse source info contained in cbuf.
+! 2021-01-25 JMG renamed SORP50 to more accurate SORP2000
 ! 2007Jul03 JMG. Rewritten to use ASCII
 ! This can handle both sources and satellites (although we don't use satellites anywhere?)
       implicit none  !2020Jun15 JMGipson automatically inserted.
@@ -86,7 +87,7 @@ C  OUTPUT:
 
         do j=1,7
           ierr=j+2
-          read(ltoken(ierr),*, err=800) SATP50(j,NSATEL)
+          read(ltoken(ierr),*, err=800) satpos(j,NSATEL)
         end do
         ierr=10
         read(ltoken(ierr),*,err=800) isaty(nsatel)
@@ -167,8 +168,8 @@ C  OUTPUT:
             call mpstar_rad(tjd,rarad,decrad)
           END IF  !
         END IF  !"convert to J2000"
-        SORP50(1,NCELES) = RARAD   !J2000 position
-        SORP50(2,NCELES) = DECRAD  !J2000 position
+        SORP2000(1,NCELES) = RARAD   !J2000 position
+        SORP2000(2,NCELES) = DECRAD  !J2000 position
 
         call ckiau(ciauna(nceles),cname,rarad,decrad,lu)
       endif

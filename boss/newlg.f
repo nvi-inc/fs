@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -189,7 +189,7 @@ c
       nch = ichmv(ib,nch,iaxis,1,4) - 1
       call logit3(ib,nch,lsor)
 
-      nch = ichmv_ch(ib,1,'equip,')
+      nch = ichmv_ch(ib,1,'equip1,')
 c
       call fs_get_rack(rack)
       call fs_get_rack_type(rack_type)
@@ -263,8 +263,10 @@ c
         nch=ichmv_ch(ib,nch,'dbbc_pfb')
       else if(rack.eq.DBBC.and.rack_type.eq.DBBC_PFB_FILA10G) then
         nch=ichmv_ch(ib,nch,'dbbc_pfb/fila10g')
-      else if(rack.eq.DBBC3) then
-        nch=ichmv_ch(ib,nch,'dbbc3')
+      else if(rack.eq.DBBC3.and.rack_type.eq.DBBC3_DDCU) then
+        nch=ichmv_ch(ib,nch,'dbbc3_ddc_u')
+      else if(rack.eq.DBBC3.and.rack_type.eq.DBBC3_DDCV) then
+        nch=ichmv_ch(ib,nch,'dbbc3_ddc_v')
       else if(rack.eq.RDBE) then
         nch=ichmv_ch(ib,nch,'rdbe')
       else if(rack.eq.0) then
@@ -459,8 +461,10 @@ c
       else if(mk4dec_fs.eq.ichar('%')) then
          nch=ichmv_ch(ib,nch,'%')
       endif
+      call logit3(ib,nch-1,lsor)
 c
-      nch=mcoma(ib,nch)
+      nch = ichmv_ch(ib,1,'equip2,')
+c
       nch=ichmv_ch(ib,nch,'v')
       call fs_get_dbbcddcvs(dbbcddcvs)
       call fs_get_dbbcddcvc(dbbcddcvc)
@@ -498,23 +502,47 @@ c
       if(ilast.eq.0) ilast=len(fila10gvsi_in)
       call char2hol(fila10gvsi_in,ib,nch,nch+ilast-1)
       nch=nch+ilast-1
-      nch=mcoma(ib,nch)
-c
-      nch=ichmv_ch(ib,nch,'v')
-      call fs_get_dbbc3_ddc_vs(dbbc3_ddc_vs)
-      call fs_get_dbbc3_ddc_vc(dbbc3_ddc_vc)
-      call char2hol(dbbc3_ddc_vs,ib,nch,nch+dbbc3_ddc_vc-1)
-      nch=nch+dbbc3_ddc_vc
-c
-      nch=mcoma(ib,nch)
-      call fs_get_dbbc3_ddc_bbcs_per_if(dbbc3_ddc_bbcs_per_if)
-      nch = nch + ib2as(dbbc3_ddc_bbcs_per_if,ib,nch,z'8002')
-c
-      nch=mcoma(ib,nch)
-      call fs_get_dbbc3_ddc_ifs(dbbc3_ddc_ifs)
-      nch = nch + ib2as(dbbc3_ddc_ifs,ib,nch,z'8002')
 c
       call logit3(ib,nch-1,lsor)
+c
+      if(rack.eq.DBBC3) then
+          nch = ichmv_ch(ib,1,'dbbc3,')
+c
+          call fs_get_dbbc3_ddc_bbcs_per_if(dbbc3_ddc_bbcs_per_if)
+          nch = nch + ib2as(dbbc3_ddc_bbcs_per_if,ib,nch,z'8002')
+c
+          nch=mcoma(ib,nch)
+          call fs_get_dbbc3_ddc_ifs(dbbc3_ddc_ifs)
+          nch = nch + ib2as(dbbc3_ddc_ifs,ib,nch,z'8002')
+c
+          nch=mcoma(ib,nch)
+          nch=ichmv_ch(ib,nch,'v')
+          call fs_get_dbbc3_ddcu_vs(dbbc3_ddcu_vs)
+          call fs_get_dbbc3_ddcu_vc(dbbc3_ddcu_vc)
+          call char2hol(dbbc3_ddcu_vs,ib,nch,nch+dbbc3_ddcu_vc-1)
+          nch=nch+dbbc3_ddcu_vc
+c
+          nch=mcoma(ib,nch)
+          nch=ichmv_ch(ib,nch,'v')
+          call fs_get_dbbc3_ddcv_vs(dbbc3_ddcv_vs)
+          call fs_get_dbbc3_ddcv_vc(dbbc3_ddcv_vc)
+          call char2hol(dbbc3_ddcv_vs,ib,nch,nch+dbbc3_ddcv_vc-1)
+          nch=nch+dbbc3_ddcv_vc
+c
+          nch=mcoma(ib,nch)
+          call fs_get_dbbc3_mcdelay(dbbc3_mcdelay)
+          nch = nch + ib2as(dbbc3_mcdelay,ib,nch,z'8002')
+c
+          nch=mcoma(ib,nch)
+          call fs_get_dbbc3_iscboard(dbbc3_iscboard)
+          nch = nch + ib2as(dbbc3_iscboard,ib,nch,z'8002')
+c
+          nch=mcoma(ib,nch)
+          call fs_get_dbbc3_clockr(dbbc3_clockr)
+          nch = nch + ib2as(dbbc3_clockr,ib,nch,z'8004')
+
+          call logit3(ib,nch-1,lsor)
+      endif
 c
       if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4) then
          call ldrivev('drivev1',lsor,1)
@@ -536,6 +564,29 @@ c
       if(drive(2).eq.VLBA.or.drive(2).eq.VLBA4.or.
      $     drive(2).eq.MK3.or.drive(2).eq.MK4) then
          call lhead('head2',lsor,2)
+      endif
+C
+      if(rack.eq.RDBE) then
+          nch = 1
+          nch = ichmv_ch(ib,nch,'rdbe,')
+          call fs_get_rdbe_rms_t(rdbe_rms_t)
+          nch = nch + ir2as(rdbe_rms_t,ib,nch,5,1)
+          nch=mcoma(ib,nch)
+          call fs_get_rdbe_rms_min(rdbe_rms_min)
+          nch = nch + ir2as(rdbe_rms_min,ib,nch,5,1)
+          nch=mcoma(ib,nch)
+          call fs_get_rdbe_rms_max(rdbe_rms_max)
+          nch = nch + ir2as(rdbe_rms_max,ib,nch,5,1)
+          nch=mcoma(ib,nch)
+          call fs_get_rdbe_pcal_amp(rdbe_pcal_amp)
+          if(rdbe_pcal_amp.eq.'r') then
+             nch = ichmv_ch(ib,nch,'raw')
+          else if(rdbe_pcal_amp.eq.'n') then
+             nch = ichmv_ch(ib,nch,'normalized')
+          else if(rdbe_pcal_amp.eq.'c') then
+             nch = ichmv_ch(ib,nch,'correlator')
+          endif
+          call logit3(ib,nch-1,lsor)
       endif
 c
       nch = 1
@@ -561,27 +612,6 @@ c
       nch = ichmv_ch(ib,nch,'flagr,')
       call fs_get_iapdflg(iapdflg)
       nch = nch + ib2as(iapdflg,ib,nch,z'8005')
-      call logit3(ib,nch-1,lsor)
-C
-      nch = 1
-      nch = ichmv_ch(ib,nch,'rdbe,')
-      call fs_get_rdbe_rms_t(rdbe_rms_t)
-      nch = nch + ir2as(rdbe_rms_t,ib,nch,5,1)
-      nch=mcoma(ib,nch)
-      call fs_get_rdbe_rms_min(rdbe_rms_min)
-      nch = nch + ir2as(rdbe_rms_min,ib,nch,5,1)
-      nch=mcoma(ib,nch)
-      call fs_get_rdbe_rms_max(rdbe_rms_max)
-      nch = nch + ir2as(rdbe_rms_max,ib,nch,5,1)
-      nch=mcoma(ib,nch)
-      call fs_get_rdbe_pcal_amp(rdbe_pcal_amp)
-      if(rdbe_pcal_amp.eq.'r') then
-         nch = ichmv_ch(ib,nch,'raw')
-      else if(rdbe_pcal_amp.eq.'n') then
-         nch = ichmv_ch(ib,nch,'normalized')
-      else if(rdbe_pcal_amp.eq.'c') then
-         nch = ichmv_ch(ib,nch,'correlator')
-      endif
       call logit3(ib,nch-1,lsor)
 c
       nch = 1

@@ -6,7 +6,8 @@ SUBLEVEL = 0
 endif
 
 OBJECTS = incom.o sincom.o equip.o drivem.o drivev.o head.o driveall.o\
-get_rxgain_files.o get_flux.o get_flux_file.o rdbe_equip.o crelease.o
+get_rxgain_files.o get_flux.o get_flux_file.o rdbe_equip.o crelease.o\
+dbbc3_equip.o
 
 crelease.o: CFLAGS += -DRELEASE=$(RELEASE) -DFC1=$(FC1)
 

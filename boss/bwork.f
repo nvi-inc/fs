@@ -87,6 +87,8 @@ C     NCPARM - # chars in procedure parameter string
       integer jchar, itype
       integer disk_record_record
       character cjchar,chsor,char2
+      character*12 setup_proc
+      integer trimlen
       logical krcur,klast,kts,kskblk,kopblk,kbreak,kstak,kon
 C                   KRCUR returns true if a procedure calls itself
 C                   KPAST returns true if a given time is earlier than now
@@ -117,6 +119,7 @@ C**********************************************************************
 C
 C     1. Initialize.
 C
+      setup_proc=' '
       call fc_rte_time(itmlog,itmlog(6))
       iclass = 0
       iclop2 = 0
@@ -678,6 +681,7 @@ C  a valid schedule or all is set to zero.
           kskblk = .false.
           khalt = .false.
           call fs_set_khalt(khalt)
+          setup_proc=' '
 c    
           call fs_get_lprc(ilprc)
           call hol2char(ilprc,1,8,lprc)
@@ -1212,6 +1216,40 @@ c
            call logit7ci(0,0,0,0,-312+iret,'bo',0)
         else if(iret.gt.0) then
            nchar=iret
+           if (.not.kts) call clrcl(iclass)
+           if (kts.and.klast) call cants(itscb,ntscb,5,index,indts)
+           goto 320
+        endif
+      else if (mbranch.eq.23) then
+c
+c setup_proc= command
+c
+        ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
+        nchar = min0(ireg(2),iblen*2)
+        nchar = iflch(ibuf,nchar)
+        ich = 1+iscn_ch(ibuf,1,nchar,'=')
+        nch = trimlen(setup_proc)
+        if(ich.eq.1) then
+            nch = ichmv_ch(ibuf,nchar+1,'/')
+            ich=min(iblen-nch+1,trimlen(setup_proc))
+            call char2hol(setup_proc,ibuf,nch,nch+ich-1)
+c add comma to avoid having nothing after '/' for blank
+c do it always for consistency
+            nch = mcoma(ibuf,nch+ich)
+            call logit4(ibuf,nch-1,lsor2,lprocn)
+            goto 600
+        else if (ich.eq.nchar+1) then
+             setup_proc=' '
+             goto 600
+        else if(nchar-ich+1.gt.12) then
+           call logit7ci(0,0,0,0,-390,'bo',0)
+        else if(ichcm_ch(ibuf,ich,setup_proc(:nch)).eq.0.and.
+     &                 nchar-ich+1.eq.nch) then
+             goto 600
+        else
+           call hol2char(ibuf,ich,nchar,setup_proc)
+           nchar=nchar-ich+1
+           call char2hol(setup_proc,ibuf,1,nchar)
            if (.not.kts) call clrcl(iclass)
            if (kts.and.klast) call cants(itscb,ntscb,5,index,indts)
            goto 320

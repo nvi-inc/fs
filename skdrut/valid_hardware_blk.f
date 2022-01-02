@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -17,6 +17,10 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
+
+! 2021-06-17 JMG. Added in DVP (for DSN)  
+! 2020-12-29 JMG. Added in DBBC3. A little rearranging. 
+
       subroutine valid_hardware_blk()
       implicit none  !2020Jun15 JMGipson automatically inserted.
 !      block data
@@ -42,16 +46,18 @@
       crack_type(15)=    'LBA'
       crack_type(16)=    'Mark5'
       crack_type(17)=    'VLBA5'
-      crack_type(18)=    'DBBC_DDC'
-      crack_type(19)=    'DBBC_DDC/Fila10g'
-      crack_type(20)=    'DBBC_DDC/VSI2'
-      crack_type(21)=    'DBBC_PFB'
-      crack_type(22)=    'DBBC_PFB/Fila10g'
-      crack_type(23)=    'RDBE'
-      crack_type(24)=    'VLBAC'
-      crack_type(25)=    'CDAS'
-      crack_type(26)=    'BB'
-      crack_type(27)=    'unknown'
+      crack_type(18)=    'RDBE'
+      crack_type(19)=    'DBBC_DDC'
+      crack_type(20)=    'DBBC_DDC/Fila10g'
+      crack_type(21)=    'DBBC_DDC/VSI2'
+      crack_type(22)=    'DBBC_PFB'
+      crack_type(23)=    'DBBC_PFB/Fila10g'
+      crack_type(24)=    'DBBC3_DDC' 
+      crack_type(25)=    'VLBAC'
+      crack_type(26)=    'CDAS'
+      crack_type(27)=    'DVP'
+      crack_type(28)=    'BB'
+      crack_type(29)=    'unknown'
 
 ! Valid recorder types
       crec_type(1)=     'none'

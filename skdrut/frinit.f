@@ -22,6 +22,9 @@
 
 C  FRINIT initializes arrays in freqs.ftni before reading from a schedule file.
 
+!Updates
+! 2020-12-30 JMG Removed unused variables
+! 2020-10-02  JMG. Removed all references to S2
 C 960610 nrv New.
 C 960709 nrv Add barrel initialization.
 C 970206 nrv Remove itra2,ihddi2,ihdpo2 and add max_headstack
@@ -34,7 +37,8 @@ C 31Jul2003  JMG Made itras virtual.
 C 26Aug2003  JMG made cbarrel, cinfip character strings.
 ! 2013Sep19  JMGipson made sample rate station dependent
 ! 2018Oct03  JMG. Don't initialize lcode. Done elsewhere.
-! 2020Oct02  JMG. Removed all references to S2
+! 2021-01-31 JMG Removed references to barrel 
+
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -43,7 +47,7 @@ C Input
       integer nst,nco ! number of stations, codes to initialize
 
 C Local
-      integer i,j,k,ih
+      integer i,j,k
 
       do j=1,nco
         do i=1,nst
@@ -52,8 +56,7 @@ C Local
           do k=1,max_band
             trkn(k,i,j)=0.0
             ntrkn(k,i,j)=0
-          enddo
-          cbarrel(i,j)="NONE"
+          enddo   
           enddo
       enddo
       do i=1,nco

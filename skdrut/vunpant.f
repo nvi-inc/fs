@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -18,7 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE vunpant(stdef,ivexnum,iret,ierr,lu,
-     > cNAANT,cAXIS,AXISOF,SLRATE,ANLIM1,ANLIM2,DIAMAN,ISLCON)
+     > cNAANT,cAXIS,AXISOF,SLCON,SLRATE,ANLIM1,ANLIM2,DIAMAN)
       implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     VUNPANT gets the antenna information for station
@@ -33,6 +33,8 @@ C
       include '../skdrincl/constants.ftni'
 C
 C  History:
+! 2021-11-10 This time really changed slew constant from integer to real. Also rename slew_rate--slew_vel
+! 2021-04-02 Changed slew constant from integer to real
 C 960516 nrv New.
 C 970116 nrv Change "ant_motion" to "antenna_motion" for Vex 1.5
 C 970123 nrv Move initialization to front.
@@ -60,10 +62,10 @@ C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
       character*8 cNAANT   ! name of the antenna
       character*4 cAXIS    ! axis type
-      integer islcon(2)    ! slewing constant
+      real     slcon(2)    ! slewing constant   (seconds)
+      real     slrate(2)   ! antenna slew rates for axis 1 and 2, degrees/minute
       double precision AXISOF ! axis offset, meters
-      real SLRATE(2),ANLIM1(2),ANLIM2(2),diaman
-C            - antenna slew rates for axis 1 and 2, degrees/minute
+      real ANLIM1(2),ANLIM2(2),diaman            
 C            - antenna upper,lower limits for axis 1, degrees
 C            - antenna upper,lower limits for axis 2, degrees
 C     DIAMAN - diameter of antenna, in m
@@ -87,8 +89,8 @@ C  Initialize at start in case we have to leave early.
       axisof = 0.d0
       slrate(1)=0.0
       slrate(2)=0.0
-      islcon(1)=0
-      islcon(2)=0
+      slcon(1)=0
+      slcon(2)=0
       anlim1(1)=+999.9*deg2rad
       anlim1(2)=-999.9*deg2rad
       anlim2(1)=+999.9*deg2rad
@@ -201,31 +203,31 @@ C       if (caxis(1:3) .eq. cax) i1=2
           write(lu,
      >     '("VUNPANT05 - Unmatched axis types ",a," and ",a," or ",a)')
      >      cax,cax1,cax2
-        else
-        iret = fvex_field(2,ptr_ch(cout),len(cout)) ! get slewing rate
-        if (iret.ne.0) return
-        iret = fvex_units(ptr_ch(cunit),len(cunit)) ! slewing rate units
-        if (iret.ne.0) return
-        iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r)
-        if (iret.ne.0) then
-          ierr=-4
-          write(lu,
-     >     '("VUNPANT06 - Invalid first axis constant ", i2)') i
-        else
-          SLRATE(i1) = R
-        endif
+        else       
+          iret = fvex_field(2,ptr_ch(cout),len(cout)) ! get slewing rate         
+          if (iret.ne.0) return
+          iret = fvex_units(ptr_ch(cunit),len(cunit)) ! slewing rate units
+          if (iret.ne.0) return
+          iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r)  
+          if (iret.ne.0) then
+            ierr=-4
+            write(lu,
+     >       '("VUNPANT06 - Invalid first axis constant ", i2)') i
+          else
+            SLRATE(i1) = R        
+          endif
         endif
         iret = fvex_field(3,ptr_ch(cout),len(cout)) ! get slewing constant
         if (iret.ne.0) return
         iret = fvex_units(ptr_ch(cunit),len(cunit)) ! slewing constant units
         if (iret.ne.0) return
         iret = fvex_double(ptr_ch(cout),ptr_ch(cunit),r)
-        if (ierr.lt.0) then
+         if (ierr.lt.0) then
           iret=-7
           write(lu,
      >     '("VUNPANT06 - Invalid first axis constant ", i2)') i
         else
-          ISLCON(i1) = R
+          SLCON(i1) = R 
         endif
       enddo ! two slewing rates
 

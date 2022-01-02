@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -90,6 +90,7 @@ C      - these are used in unpacking station info
       integer nstack
 
       integer nch
+      integer i12   !counter 
 
 ! These are used to parse the input line.
       integer MaxToken
@@ -148,6 +149,11 @@ C            (e.g. 7560) using speed.
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C
+! 2021-11-10 JMG. Modified slew algorithm  so that uses slew_off, slew_vel, slew_acc.  
+!                Since sked catalogs only have an offset and a rate term, must infer slew_off and  slew_acc
+! 2021-04-02 JMG Renamed islcon-->slew_off, stnrat-->slew_rate. Made slew_off real. 
+! 2020-11-11 JMG. Catch bug if Station ID has wrong format in horizon mask. 
+! 2020-10-02  JMG. Removed all references to S2
 ! 2007Mar30  JMG. Checked to make sure didn't duplicate codes.
 ! 2007Apr05  JMG. But OK to have duplicate " " for horizon mask.
 ! 2009Mar03  JMG. Fixed bug in OR statement with K5.
@@ -157,8 +163,7 @@ C
 ! 2016Jul28  JMG. Changed rack length to 20 chars.
 !                 Initialize cfirtrec(i)="1" even if have problems reading "T " line.
 ! 2017Mar13  JMG. If rack or recorder are not recongnized, set them to 'unknown' and continue.
-! 2020Oct02  JMG. Removed all references to S2
-! 2020Nov11  JMG. Catch bug if Station ID has wrong format in horizon mask. 
+
 
       cbufin=" "
 ! AEM 20050314 init vars
@@ -269,10 +274,19 @@ C     Put the position ID into a permanent place in LPOCOD
 C
         cSTCOD(I) = c1
         call axtyp(laxis,iaxis(i),1)
-        STNRAT(1,I) = SLRATE(1)*deg2rad/60.0d0
-        STNRAT(2,I) = SLRATE(2)*deg2rad/60.0d0
-        ISTCON(1,I) = SLCON(1)
-        ISTCON(2,I) = SLCON(2)
+        
+        do i12=1,2        
+          slew_vel(i12,I) = SLRATE(i12)*deg2rad/60.0d0
+          slew_off(i12,I) = SLCON(i12)
+!Assume have of the catalog offset is due to settling, the other for time to accelerate.        
+          if(slew_off(i12,i) .gt. 0) then
+            slew_off(i12,i)=slew_off(i12,i)/2.
+            slew_acc(i12,i)=slew_vel(i12,i)/slew_off(i12,i)
+          else
+            slew_acc(i12,i)=60.0*deg2rad      !no offset--->very fast acceleration 60deg/sec^2
+          endif                                   
+        end do         
+           
         STNLIM(1,1,I) = ANLIM1(1)*deg2rad
         STNLIM(2,1,I) = ANLIM1(2)*deg2rad
         STNLIM(1,2,I) = ANLIM2(1)*deg2rad
@@ -411,7 +425,6 @@ C
 C  Got a match. Initialize names.
         cterna(i)=cname
 
-
 C  Store equipment names.
         if (crack .ne. " ") then
           cstrack(i)=crack
@@ -492,17 +505,16 @@ C           error for no matching value, which is ok
         return
       ELSE IF (ctype .eq. "H")  then   ! Horizon type mask.
         J = 8
-        CALL UNPVH(IBUFX(2),ILEN-1,IERR,LID,NHZ,AZH,ELH)
-        kline=.true.
-! Not really an error. 
+        CALL UNPVH(IBUFX(2),ILEN-1,IERR,LID,Nhz,AZH,ELH)
+        kline=.true.  
+! Not really an error.  Just using step functions 
         if (ierr.eq.-103) then
 !           write(lu,'("STINP251 - No matching el for last azimuth,",
-!     >      " wraparound value used.")')
-            elh(nhz)=elh(1)
+!     >      " wraparound value used.")')            
             kline=.false.
-            ierr=0          
-        END IF   !
-
+            elh(nhz)=0.d0   !set to zero. We don't use this anyway. 
+            ierr=0              
+        endif
 ! Real errors 
         IF (IERR.NE.0) THEN
           nch=max(1,trimlen(cbufin0))
@@ -531,17 +543,13 @@ C           error for no matching value, which is ok
         IF (I.eq. 0) THEN  !matching entry not found
           write(lu,'("STINP25 - Pointer not found.  Horizon mask ")')
           goto 910
-        ELSE  ! keep it
-          if (kline) then
-            klineseg(i)=.true.
-          else
-            klineseg(i)=.false.
-          endif
-          NHORZ(I) = NHZ
-          DO J=1,NHORZ(I)
-            AZHORZ(J,I) = AZH(J)*deg2rad
-            ELHORZ(J,I) = ELH(J)*deg2rad
-          END DO
+        ELSE  ! keep it    
+        nhorz(i)=nhz 
+        klineseg(i)=kline    
+        do j=1,nhorz(i)         
+          AZHORZ(J,I) = AZH(J)*deg2rad                     
+          ELHORZ(J,I) = ELH(J)*deg2rad
+        END DO
         END IF
       ELSE
         write(*,*) "Unknown $STATION line!"

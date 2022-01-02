@@ -178,7 +178,7 @@ $misc
 *epoch 1950
 *
 * Station equipment:
-* Station equipment may be specified in drudg or in the equip line below.
+* Station equipment may be specified in drudg or in the equipment line below.
 *  Equipment names are NOT case sensitive.
 *  Allowed rack and recorder names are:
 *  Racks        |  Recorders
@@ -208,6 +208,7 @@ $misc
 *  VLBAC        |
 *  CDAS         |
 *  BB           | Mark6
+*  DBBC3_DDC
 *
 * Relationship between skedf.ctl and equip.ctl file names:
 *
@@ -239,11 +240,44 @@ $misc
 * equipment Mark4  Mark5A  none
 * equipment VLBA   VLBA  VLBA
 *
+* If e-vlbi_override is specified below the the recorder is set to NONE
+* if the string e-vlbi appears in the correlator name.
+*  e-vlbi_override
+*
 * If equipment_override is specified (uncommented below) then the
 * equipment in the control file is used. This then becomes your default
 * equipment regardless of what is in the schedule. This is a useful way of 
 * forcing the recorder to be Mark5A during the transition from tape to disk.
 *  equipment_override 
+*---------------------------------
+*
+*>>>>>>  use_proc_setup
+*
+*  use_setup_proc yes   Always use setup_proc=setupXX  (where setupXX is normaly setup)
+*  use_setup_proc no    Default. Issue setupXX
+*  use_setup_proc ask   Ask when we start to generate snap commands.
+*
+*>>>>>> vdif_single_thread_per_file
+* The threadXX procedure only applies to Mark5C or Flexbuff recorders.
+*
+* vdif_single_thread_per_file  yes
+* vdif_single_thread_per_File  no
+* vdif_single_thread_per_file  ask
+*
+* --------------------------------------------------------------
+* The following handles gaps in the schedule.
+* The syntax is
+* scan_close  max_gap_time pre_time     BOTH in seconds
+*   max_gap_time is the maximum gap between consecutive scans.
+*   pre_time     is how much before the next scan begins to restart.
+*
+* If the difference between the end of the current scan and the start of the
+* next is >max_gap_time then drudg:
+*  1. closes out the current scan.
+*  2. Will issue a WAIT command for the Time-next-scan-pre_time.
+*
+* scan_close 3600 120
+*
 *--------------------------------------------------------------
 * TPI daemon setup
 *   prompt? 
@@ -290,14 +324,20 @@ $misc
 * default DBBC IF inputs when converting from a non-DBBC rack type
 * this selects the inputs that should be assumed for each IF by DRUDG
 * default is nulls if not present
+* DBBC2 example
 * default_dbbc_if_inputs 1 4 2 2
+* DBBC3 example
+* default_dbbc_if_inputs 1 1 2 2 2 2 1 1
 *--------------------------------------------------------------
 * DBBC target values for IF counts in set-up procedure, up to 4
 * values for up to four IFs, in order, this will cause an error
 * in IFx=... command execution if used for DBBC DDC versions
 * before v101 
 * default is nulls if not present
+* DBBC2 example
 * dbbc_if_targets  35000 35000 35000 35000
+* DBBC3 example
+* dbbc_if_targets  32000 32000 32000 32000 32000 32000 32000 32000
 *--------------------------------------------------------------
 * DBBC BBC TPI target levels
 * has no effect for DDC versions before v103

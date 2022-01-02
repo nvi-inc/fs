@@ -236,6 +236,7 @@ C
      &        (rack.eq.DBBC3.and.dbbc3_cont_cal_mode.eq.1))) then
          if(calfp.gt.0) then
             vslope=calfp/(tpical-tpia)
+            tpia=(tpia+tpical)/2
             temps=(tpia-vbase)*vslope
          else
             tpia=(tpia+tpical)/2

@@ -17,26 +17,29 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
-      subroutine proc_disk_tracks(lu_outfile,istn,icode,
-     >         kignore_mark5b_bad_mask)
+      subroutine proc_disk_tracks(icode)
       implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
+      include 'drcom.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/statn.ftni'
+
 
 ! Write out Mark5B mode command.
 ! functions
       integer itras
 ! passed
-      integer lu_outfile,istn,icode
-      logical kignore_mark5b_bad_mask
+      integer icode
 ! function
       integer iwhere_in_string_list
       integer trimlen
 
 ! History.
 ! Now put in changes in reverse order.
-! 2020Feb20 JMG. Change ASTRO-->VLBA if not DBBC or
+! 2020-01-31 JMG  Stop if specified too many tracks for this equipment type. 
+! 2020-01-25 JMG. Get lmode_cmd  now determined externally and placed in drcom.ftni
+! 2020-02-20 JMG. Change ASTRO-->VLBA if not DBBC or
+!
 ! 2019Sep23 JMG. If the recorder is 'none' do not round up number of recorded channels to a power of 2.
 ! 2018Nov13 JMG. Removed check of bandwidth. This will now be caught by FS.
 ! 2018Sep14 JMG. Check wastro before geo2.
@@ -97,9 +100,7 @@
 
       character*10 lbit_mask_mode
 
-      character*80 cbuf
-      character*20 lmode_cmd
-      character*6 lext_vdif
+!      character*80 cbuf
       logical kcomment_only         !only put out comments.
 
       character*1 lul(2)            !ASCII "U","L"
@@ -254,17 +255,7 @@
       kdebug=.true.
       kdebug=.false.
       kastro3_mode=.false.
-
-      lext_vdif="ext"
-      if(km5brec(1)) then
-         lmode_cmd="mk5b_mode"
-      else if(km5Crec(1)) then
-         lmode_cmd="mk5c_mode"
-         if(kfila10g_rack) lext_vdif="vdif"
-      else
-         lmode_cmd="bit_streams"
-      endif
-
+ 
 ! If we don't have a VSI4 formatter or a DBBC write out comments.
       kcomment_only=.false.
       if(.not.(km5rack .or. kv5rack .or. kdbbc_rack .or.
@@ -287,8 +278,8 @@
 !******************************************************************************
 ! Make list containing tracks we use, and keep track of the number.
 !
-      write(*,*)
       if(kdebug) then
+        write(*,*)
         write(*,'(a)') "  sb   sbo   bit  hd  chan pass stn  code  CSB"
       endif
       num_tracks=0
@@ -303,6 +294,12 @@
               if (itras(isb,ibit,ihd,ic,ipass,istn,icode).ne.-99) then         !number of tracks set.
                 ib=ibbcx(ic,istn,icode)   !this is the BBC#
                 num_tracks=num_tracks+1
+                if(num_tracks .gt. 2*max_csb) then
+                  write(*,*)
+     &             "Specified too many tracks for rack ",cstrack_cap
+                  write(*,*) "Check rack type!" 
+                  stop
+                endif 
 
                 write(lsked_csb(num_tracks),'(i2.2,a1,a1)')
      >            ib, lul(isb_out), lsm(ibit)
@@ -510,7 +507,7 @@
       if(kwastro) then
 ! For DBBC_DDC racks & WASTRO all must be in VSI2.
 !      write(*,*) "did not find ", lsked_csb(ierr)
-       if(cstrack_cap(istn).eq."DBBC_DDC" .and. imask_lo.ne.0) then
+       if(cstrack_cap.eq."DBBC_DDC" .and. imask_lo.ne.0) then
           write(*,*) " "
           write(*,*) "ERROR! Rack is DBBC_DDC and some channels in VSI1"
        endif
@@ -569,7 +566,7 @@
 
 ! *****Everything fits on VSI1.
       if(imask(2) .eq. 0) then           !everything fits on VSI1.
-        if(cstrack_cap(istn) .eq. "DBBC_DDC") then
+        if(cstrack_cap .eq. "DBBC_DDC") then
           if(lbit_mask_mode.eq."geo2" .or.
      >       lbit_mask_mode .eq. "astro3") then
              call drudg_write_comment(lu_outfile,
@@ -581,7 +578,7 @@
              call drudg_write_comment(lu_outfile,
      >     "Recorder may be wired to vsi1 or vsi2")
           endif
-        else if(cstrack_cap(istn) .eq. "DBBC_DDC/FILA10G") then
+        else if(cstrack_cap .eq. "DBBC_DDC/FILA10G") then
           call drudg_write_comment(lu_outfile,
      >        "vsi1-2 input should be used in 'equip.ctl'")
           if(lbit_mask_mode.eq."geo2" .or.
@@ -601,21 +598,21 @@
 
       else
 ! Some stuff on VSI2
-        if(cstrack_cap(istn) .eq. "DBBC_DDC") then
+        if(cstrack_cap .eq. "DBBC_DDC") then
           if(imask(1) .ne. 0) then
             write(*,*) "DBBC_DDC can not use both vsi1 and vsi2"
             goto 900
           endif
           call drudg_write_comment(lu_outfile,
      >      "Recorder must be wired to vsi2")
-        else if(cstrack_cap(istn) .eq. "DBBC_DDC/FILA10G") then
+        else if(cstrack_cap .eq. "DBBC_DDC/FILA10G") then
           call drudg_write_comment(lu_outfile,
      >      "Fila10G VSI1-2 must be selected in 'equip.ctl'")
         endif
       endif
 
        call proc_track_mask_lines(lu_outfile, imask_hi,imask_lo,
-     >   kfila10g_rack,samprate(istn,icode), lmode_cmd,lext_vdif)
+     >   kfila10g_rack,samprate(istn,icode))
 
 
       if(kcomment_only) return

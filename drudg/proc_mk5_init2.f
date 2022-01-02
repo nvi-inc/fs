@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -27,6 +27,7 @@
 !  2016May07 WEH  Bank_check if only 2 Gbps or less
 !  2016Sep08 JMG  For Mark5c and >2GBS output jiveab commands
 !  2017Dec20 JMG  Added 'mk5=bank_set?' after bank_check.
+! 2021-12-04 JMGipson removed km5_piggy stuff 
 ! passed
       character*5 lform        !Form descriptor
       integer ifan              !fanout
@@ -51,11 +52,11 @@
         write(ldum,'("mk5=play_rate=data:",i4,";")') idrate
         call drudg_write(lufile,ldum)
 
-        if(km5p_piggy) then
-           itemp=32
-        else
+!        if(km5p_piggy) then
+!           itemp=32
+!        else
            itemp=ntrack_rec_mk5
-        endif
+!        endif
         write(ldum,'("mk5=mode=",a,":",i2,";")')lform,itemp
         call drudg_write(lufile,ldum)
       endif
@@ -66,10 +67,10 @@
       endif
 
       if(km5c .and. .not.kflexbuff) then
-        if(idrate*ntrack_rec_mk5.gt.2048) then
-          write(lufile,'("jive5ab=vsn?")')
-          write(lufile,'("jive5ab=disk_serial?")')
-        endif
+!        if(idrate*ntrack_rec_mk5.gt.2048) then
+          write(lufile,'("mk5=vsn?")')
+          write(lufile,'("mk5=disk_serial?")')
+!        endif
       endif
       end
 

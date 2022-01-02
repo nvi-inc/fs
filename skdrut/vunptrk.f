@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -32,6 +32,15 @@ C
       include '../skdrincl/skparm.ftni'
 C
 C  History:
+! Updates newest most recent
+! 2021-09-29 JMG Check if LBA station. Has "S2_data_source". If source offset track # by 1
+! 2021-05-17 JMG If no track format trudge on and track frame format as "N/A"
+! 2021-02-12 JMG Changed limit to 2*max_track.  
+! 2021-01-05 JMG replaced variable 'in' with icnt. 'IN' is fortran 90 keyword. 
+! 2021-01-05 JMG Changed limit from max_pass to max_track 
+! 2019-09-03 JMG. 1) Added implicit none.  Truncate track-frame format to 8 characters
+! 2016-01-19 JMG.  Doubled dimension of several variables that had max_track to 2*max_track because now sign& magnitude can be on same track 
+
 C 960520 nrv New.
 C 961122 nrv Change fget_mode_lowl to fget_all_lowl
 C 970124 nrv Move initialization to start.
@@ -39,8 +48,8 @@ C 970206 nrv Change max_pass to max_track as size of arrays in fandefs
 C 020327 nrv Get data_modulation.
 C 021111 jfq Don't allow track 0 or headstack 0
 ! 2004Dec8. Changed lm from holerrith to ASCII
-! 2016Jan19 JMG.  Doubled dimension of several variables that had max_track to 2*max_track becuase now sign& magnitude can be on same track 
-! 2019Sep03 JMG. 1) Added implicit none.  Truncate track-frame format to 8 characters
+
+
 !
 C
 C  INPUT:
@@ -55,45 +64,56 @@ C  OUTPUT:
       integer ierr ! error from this routine, >0 indicates the
 C                    statement to which the VEX error refers,
 C                    <0 indicates invalid value for a field
-!      integer*2 lm(4) ! recording format
+!      integer*2 lm(4) ! recording format      
       character*8 cm
-      character*1 cp(max_track*2) ! subpass
-      character*6 cchref(max_track*2) ! channel ID ref
-      character*1 csm(max_track*2) ! sign/mag
-      integer ihdn(max_track*2) ! headstack number
-      integer itrk(max_track*2) ! first track of the fanout assignment
-      integer nfandefs ! number of def statements
-      integer ifanfac ! fanout factor determined from list of tracks
-      character*3 modu ! data modulation, on or off
+      character*1 cp(max_fandef)      ! subpass
+      character*6 cchref(max_fandef)  ! channel ID ref
+      character*1 csm(max_fandef)     ! sign/mag
+      integer ihdn(max_fandef)        ! headstack number
+      integer itrk(max_fandef)        ! first track of the fanout assignment
+      integer nfandefs                ! number of def statements
+      integer ifanfac                 ! fanout factor determined from list of tracks
+      character*3 modu                ! data modulation, on or off
 C
 C  LOCAL:
       character*128 cout
-      integer it(4),j,nn,in,i,nch
+      integer it(4),j,nn,icnt,i,nch
       integer fvex_len,fvex_int,fvex_field,fget_all_lowl,ptr_ch
       integer is
+      integer itrk_off             !add this to track# to make sure >0
+      
+     
 C
 C  Initialize
-C
-      do in=1,max_track
-        cp(in)=' '
-        cchref(in)=''
-        csm(in)=' '
-        itrk(in)=0
-        ihdn(in)=0
+      do icnt=1,max_fandef 
+        cp(icnt)=' '
+        cchref(icnt)=''
+        csm(icnt)=' '
+        itrk(icnt)=0
+        ihdn(icnt)=0
       enddo
       nfandefs=0
       ifanfac=0
 
 C  1. The recording format
-C
-      
+C    
+      itrk_off=0 
       ierr = 1
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
-     .ptr_ch('track_frame_format'//char(0)),
-     .ptr_ch('TRACKS'//char(0)),ivexnum)
+     >   ptr_ch('track_frame_format'//char(0)),
+     >   ptr_ch('TRACKS'//char(0)),ivexnum)
       if (iret.ne.0) then
-        write(*,*)"VUNPTRK00 did not find track_frame_format ", iret 
-        return
+        is=fvex_len(stdef)
+        write(lu,'(a)') 
+     >  "VUNPTRK00: Warning no track_frame_format for station "//
+     >  stdef(1:is)//" setting to N/A" 
+        cm="N/A"  
+        iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
+     >   ptr_ch('S2_data_source'//char(0)),
+     >   ptr_ch('TRACKS'//char(0)),ivexnum)
+        if(iret .ne. 0) return
+        write(*,*) "Passed 'S2_data_source' check for LBA"
+        itrk_off=1            
       endif
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       NCH = fvex_len(cout)
@@ -132,23 +152,29 @@ C
       iret = fget_all_lowl(ptr_ch(stdef),ptr_ch(modef),
      .ptr_ch('fanout_def'//char(0)),
      .ptr_ch('TRACKS'//char(0)),ivexnum)
-      in=0
-      do while (in.lt.max_pass.and.iret.eq.0) ! get all fanout defs
-        in=in+1 ! number of fanout defs
+      icnt=0
+      do while (icnt.le.max_fandef.and.iret.eq.0) ! get all fanout defs
+!      do while (icnt.lt.max_pass.and.iret.eq.0) ! get all fanout defs
+        icnt=icnt+1 ! number of fanout defs        
 C  2.1 Subpass
         ierr = 21
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get subpass
         if (iret.ne.0) return
+        if(icnt .gt. max_fandef) then
+           write(*,*) "Vunptrk:  No more space for fanout_def. Max is ",
+     &       max_fandef      
+           stop
+        endif 
         NCH = fvex_len(cout)
         if (nch.ne.1) then
           if(km5rec) then
-             cp(in)='A'
+             cp(icnt)='A'
           else
             ierr = -2
             write(lu,'("VUNPTRK02 - Subpass must be 1 character.")')
           endif
         else
-          cp(in) = cout(1:1)
+          cp(icnt) = cout(1:1)
         endif
 C
 C  2.2 Chan ref
@@ -161,7 +187,7 @@ C  2.2 Chan ref
           write(lu,'("VUNPTRK03 - Channel ref name too long")')
           ierr=-3
         else
-          cchref(in) = cout(1:nch)
+          cchref(icnt) = cout(1:nch)
         ENDIF   
 
 C  2.3 Sign/magnitude
@@ -174,11 +200,10 @@ C  2.3 Sign/magnitude
           ierr = -4
           write(lu,'("VUNPTRK04 - Invalid sign/magnitude field.")')
         else
-          csm(in) = cout(1:1)
+          csm(icnt) = cout(1:1)
         endif
 
 C  2.4 Headstack number
-
         ierr = 24
         iret = fvex_field(4,ptr_ch(cout),len(cout)) ! get headstack number
         if (iret.ne.0) return
@@ -188,7 +213,7 @@ C  2.4 Headstack number
           write(lu,'("VUNPTRK05 - Invalid headstack number, must be",
      .    "between 1 and ",i3)') max_headstack
         else
-          ihdn(in) = i
+          ihdn(icnt) = i
         endif
 
 C  2.5 Track list
@@ -202,13 +227,14 @@ C  2.5 Track list
           iret = fvex_field(i,ptr_ch(cout),len(cout)) ! get track
           if (iret.eq.0) then ! a track
             iret = fvex_int(ptr_ch(cout),j) ! convert to binary
+            j=j+itrk_off
             if (j.le.0.or.j.gt.max_track) then
               ierr = -6
               write(lu,'("VUNPTRK06 - Invalid track number ",i3,
-     .        "must be between 1 and ",i3)') j,max_track
+     .        " must be between 1 and ",i3)') j,max_track
             else
               it(i-4)=j
-              if (i.eq.5) itrk(in)=j ! save the first one only
+              if (i.eq.5) itrk(icnt)=j ! save the first one only
             endif
           endif ! a track
           i=i+1
@@ -222,7 +248,7 @@ C       Check for consistent fanout
         do j=1,4
           if (it(j).ne.-99) nn=nn+1 ! count the fanned tracks
         enddo
-        if (in.eq.1) then 
+        if (icnt.eq.1) then 
           ifanfac=nn ! save first fanout value
         else ! check subsequent ones
           if (nn.ne.ifanfac) then
@@ -236,7 +262,7 @@ C       Get next fanout def statement
      .  ptr_ch('fanout_def'//char(0)),
      .  ptr_ch('TRACKS'//char(0)),0)
       enddo ! get all fanout defs
-      nfandefs = in
+      nfandefs = icnt
 
       if (ierr.gt.0) ierr=0
       return

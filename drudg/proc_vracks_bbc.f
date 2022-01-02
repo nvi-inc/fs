@@ -23,6 +23,7 @@
 
 ! Note: Also calculate and store in common BBC freqs, lo freqs.
 ! History
+! 2021-12-22 JMGipson. Used drudg_write for consistency 
 !  2020Feb20 JMGipson. Added implicit none. Added luscn to arg list for invalid_if and invalid_bbc
 !  2012Sep12  JMGipson. First version. Split off of old routine proc_vc.
 ! Write out VC commands.
@@ -83,8 +84,7 @@
 ! bbc01=612.99,a,8.000,8.000
       write(cbuf,'("bbc",i2.2,"=",f7.2,",",a1,2(",",f7.3))')
      >        ib,fvc(ib),cifinp(ic,istn,icode)(1:1), bwu,bwl
-      call squeezeleft(cbuf,nch)
-      call lowercase_and_write(lu_outfile,cbuf)
+      call drudg_write(lu_outfile,cbuf)   
       return
       end
 

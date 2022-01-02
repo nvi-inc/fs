@@ -254,7 +254,7 @@ if(nsem!=NULL && nsem[0]!=0)
   nsem_put(nsem);
 
 if(w != 'w')
-  return;
+  return 0;
 
  if(to !=0) {
    if(signal(SIGALRM,nullfcn) == SIG_ERR){
@@ -759,7 +759,6 @@ static void nullfcn(sig)
 int sig;
 {
     int i;
-    void skd_run();
 
     if(signal(sig,SIG_IGN) == SIG_ERR ) {
       perror("nullfcn: error ignoring signal");

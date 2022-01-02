@@ -61,8 +61,11 @@ c
      $ dbbc_como_cores(4),dbbc_cores, ichdbbcfm, user_device_zero(6),
      $  mk6_units(MAX_MK6), mk6_active(MAX_MK6),
      $  rdbe_units(MAX_RDBE), rdbe_active(MAX_RDBE),
-     $  dbbc3_ddc_v, dbbc3_ddc_vc, dbbc3_ddc_bbcs_per_if, dbbc3_ddc_ifs,
-     $  dbbc3_cont_cal_mode
+     $  dbbc3_ddcu_v, dbbc3_ddcu_vc, dbbc3_ddc_bbcs_per_if,
+     $  dbbc3_ddc_ifs,
+     $  dbbc3_cont_cal_mode,
+     $  dbbc3_ddcv_v, dbbc3_ddcv_vc,
+     $  dbbc3_mcdelay, dbbc3_iscboard, dbbc3_clockr
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3,2), lgen(2,2),
@@ -110,8 +113,11 @@ c
      $ dbbc_como_cores,dbbc_cores, ichdbbcfm, user_device_zero,
      $ mk6_units, mk6_active,
      $ rdbe_units, rdbe_active,
-     $ dbbc3_ddc_v, dbbc3_ddc_vc, dbbc3_ddc_bbcs_per_if, dbbc3_ddc_ifs,
+     $ dbbc3_ddcu_v, dbbc3_ddcu_vc, dbbc3_ddc_bbcs_per_if,
+     $ dbbc3_ddc_ifs,
      $ dbbc3_cont_cal_mode,
+     $ dbbc3_ddcv_v, dbbc3_ddcv_vc,
+     $ dbbc3_mcdelay, dbbc3_iscboard, dbbc3_clockr,
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 
@@ -125,14 +131,16 @@ c
       character*16 fila10gvsi_in
       character*17 scan_name,scan_name_old
       character*1 rdbe_pcal_amp
-      character*16 dbbc3_ddc_vs
+      character*16 dbbc3_ddcu_vs
       character*32 sVerRelease_FS
       character*32 fortran
+      character*16 dbbc3_ddcv_vs
 c
       common/fscom_dum2/ LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP,
      $                   dbbcddcvs, dbbcpfbvs, fila10gvsi_in, dbbcddcvl,
      $			 dbbcpfbvl,scan_name,scan_name_old,
      $                   rdbe_pcal_amp,
-     $                   dbbc3_ddc_vs,
-     $                   sVerRelease_FS,fortran
+     $                   dbbc3_ddcu_vs,
+     $                   sVerRelease_FS,fortran,
+     $                   dbbc3_ddcv_vs
 

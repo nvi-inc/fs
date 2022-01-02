@@ -19,7 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2021-10-26
+VERSION=2022-01-02
 
 version(){
     echo "[fesh $VERSION]"
@@ -68,6 +68,12 @@ fi
 if [[ ! -z "${FESH_GEO_VSI_ALIGN:-}" ]]; then
     vsi_align=$FESH_GEO_VSI_ALIGN
 fi
+if [[ ! -z "${FESH_GEO_USE_SETUP_PROC:-}" ]]; then
+    use_setup_proc=$FESH_GEO_USE_SETUP_PROC
+fi
+if [[ ! -z "${FESH_GEO_VDIF_SINGLE_THREAD_PER_FILE:-}" ]]; then
+    vdif_single_thread_per_file=$FESH_GEO_VDIF_SINGLE_THREAD_PER_FILE
+fi
 if [[ -z "${NETRC_DIR:-}" ]]; then
     NETRC_DIR=$HOME
     CURL_NETRC_FILE_OPTION=
@@ -115,13 +121,15 @@ Options:
  -c val   Override drudg CONT_CAL answer to val
  -p val   Override drudg CONT_CAL_POLARITY answer to val
  -t val   Override drudg TPICD answer to val
+ -T val   Override drudg VDIF_SINGLE_THREAD_PER_FILE answer to val
+ -u val   Override drudg SETUP_PROC answer to val
  -h       Print this message
 
 NOTE: If you specify a schedule that doesn't exist, you will get a
 file or a directory error from the server.
 
-For the '-d' option, the STATION environment variable or the -s option
-must set the two-letter station code, e.g., for STATION:
+For the '-d' option, the STATION environment variable or the -s option must be
+set with the two-letter station code. For example, for STATION:
 
     setenv STATION gs #in ~/.login for tcsh or
     export STATION=gs #in ~/.profile for bash
@@ -215,14 +223,16 @@ However, this method will no longer work when CDDIS stops support
 of non-ssl ftp, which is expected at the end of October 2020.
 
 With the '-d' option, if the 'skedf.ctl' control file specifies
-prompting for any of: tpicd, vsi_align, cont_cal, or
-cont_cal_polarity, a fixed answer can be provided by setting the
-environment variables: FESH_GEO_TPICD, FESH_GEO_VSI_ALIGN,
-FESH_GEO_CONT_CAL, and FESH_CONT_CAL_POLARITY, respectively. These
-settings can be overridden when running the script with the options:
-'-t', '-a', '-c', and '-p', respectively. Using '' as the value for an
-option will unset the corresponding value supplied as an environment
-variable.  Please be sure to read the follow four NOTES:
+prompting for any of: tpicd, vsi_align, cont_cal, cont_cal_polarity,
+using setup_proc, or single VDIF thread per file, a fixed answer can
+be provided by setting the environment variables: FESH_GEO_TPICD,
+FESH_GEO_VSI_ALIGN, FESH_GEO_CONT_CAL, FESH_GEO_CONT_CAL_POLARITY,
+FESH_GEO_USE_SETUP_PROC, and FESH_GEO_VDIF_SINGLE_THREAD_PER_FILE
+respectively. These settings can be overridden when running the script
+with the options: '-t', '-a', '-c', '-p', '-u', and '-T' respectively.
+Using '' as the value for an option will unset the corresponding value
+supplied as an environment variable. Please be sure to read the
+follow four NOTEs:
 
   NOTE: If used incorrectly, this feature can fail in complicated ways
   with no obvious indication. Use at your own risk. Simple use with
@@ -247,6 +257,8 @@ variable.  Please be sure to read the follow four NOTES:
    -setting the cont_cal answer to anything but on or off
    -setting the cont_cal_polarity to answer anything but 0, 1, 2, 3, or none
    -setting the vsi_align answer to anything but 0, 1, or none
+   -setting the use_setup_proc answer to anything but yes or no
+   -setting the vdif_single_thread_per_file answer to anything but yes or no
 EOF
 }
 
@@ -256,7 +268,7 @@ verbose=
 txt=
 print=
 download=1
-while getopts 'a:c:nfdD:hHm:p:Ps:St:vVxy:' opt; do
+while getopts 'a:c:nfdD:hHm:p:Ps:St:T:u:vVxy:' opt; do
     case $opt in
         n)
             echo "'next' not implemented."
@@ -321,6 +333,12 @@ while getopts 'a:c:nfdD:hHm:p:Ps:St:vVxy:' opt; do
         a)
             if [ ! -z ${OPTARG} ]; then vsi_align=$OPTARG; fi
             ;;
+        u)
+            if [ ! -z ${OPTARG} ]; then use_setup_proc=$OPTARG; fi
+            ;;
+        T)
+            if [ ! -z ${OPTARG} ]; then vdif_single_thread_per_file=$OPTARG; fi
+            ;;
         *)
             echo "Try the '-h' option for help" >&2
             exit 1
@@ -375,6 +393,10 @@ cont_cal_polarity_answer=
 if [ ! -z ${cont_cal_polarity+x} ]; then cont_cal_polarity_answer=$cont_cal_polarity$'\n'; fi
 vsi_align_answer=
 if [ ! -z ${vsi_align+x} ]; then vsi_align_answer=$vsi_align$'\n'; fi
+use_setup_proc_answer=
+if [ ! -z ${use_setup_proc+x} ]; then use_setup_proc_answer=$use_setup_proc$'\n'; fi
+vdif_single_thread_per_file_answer=
+if [ ! -z ${vdif_single_thread_per_file+x} ]; then vdif_single_thread_per_file_answer=$vdif_single_thread_per_file$'\n'; fi
 
 #prevent simple errors in answers
 if [[ ! "$tpicd_answer" =~ ^([0-9]+$'\n'|)$ ]]; then
@@ -391,6 +413,14 @@ if [[ ! "$cont_cal_polarity_answer" =~ ^([0-3]+$'\n'|none$'\n'|)$ ]]; then
 fi
 if [[ ! "$vsi_align_answer" =~ ^([0-1]+$'\n'|none$'\n'|)$ ]]; then
    echo -n "VSI_ALIGN must be 0, 1, none, or not set, was $vsi_align_answer"
+   exit 1
+fi
+if [[ ! "$use_setup_proc_answer" =~ ^(yes$'\n'|no$'\n'|)$ ]]; then
+   echo -n "USE_SETUP_PROC must be yes, no, or not set, was $use_setup_proc_answer"
+   exit 1
+fi
+if [[ ! "$vdif_single_thread_per_file_answer" =~ ^(yes$'\n'|no$'\n'|)$ ]]; then
+   echo -n "VDIF_SINGLE_THREAD_PER_FILE must be yes, no, or not set, was $vdif_single_thread_per_file_answer"
    exit 1
 fi
 if [ ! -z "$vsi_align_answer"  ]
@@ -544,6 +574,7 @@ fi
 
 if [[ -n "$run_drudg" ]]; then
     nine=$'9'
+    twelve=$'12'
 
     drudg_out="/dev/null"
     if [[ -n "$verbose" ]]; then
@@ -558,8 +589,8 @@ if [[ -n "$run_drudg" ]]; then
     cat <<EOF | "$FS_DIR/bin/drudg" "$sched.skd" > "$drudg_out"
 $station
 3
-12
-$tpicd_answer$cont_cal_answer$cont_cal_polarity_answer$vsi_align_answer$print$nine
+$use_setup_proc_answer$twelve
+$tpicd_answer$vdif_single_thread_per_file_answer$cont_cal_answer$cont_cal_polarity_answer$vsi_align_answer$print$nine
 $LIST_DIR/$sched$station.lst
 
 

@@ -1,9 +1,30 @@
+*
+* Copyright (c) 2021 NVI, Inc.
+*
+* This file is part of VLBI Field System
+* (see http://github.com/nvi-inc/fs).
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
 ! Common array that holds different track assignments.
+! 2021-01-05 JMG Replaced max_frq by max_code. (Max_frq was confusing and led to coding errors.)
+!
       implicit none 
       include '../skdrincl/skparm.ftni'
         
       integer max_track_map
-      parameter (max_track_map=(max_stn*max_frq)/4)
+      parameter (max_track_map=(max_stn*max_code)/4)
 ! The rest are variables. 
       logical kdebug_itras
       integer num_track_map               !number of distinct track mappigns.   
@@ -15,7 +36,7 @@
       integer*4 itrack_map_vec(2,max_headstack,max_track,max_track_map)
       common /itras_cmn/itrack_map,itrack_map_vec
 
-      integer istn_code_key(max_stn,max_frq)    !Pointer into track maps.
+      integer istn_code_key(max_stn,max_code)    !Pointer into track maps.
       common /itras_cmn/istn_code_key
 
 ! How many passes,tracks, headstacks and bits (1 or 2) for this new track layout

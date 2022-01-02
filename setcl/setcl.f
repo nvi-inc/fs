@@ -296,6 +296,15 @@ C             two return buffers with imode = -53
            goto 998
         endif
         goto 200
+      else if (DBBC3.eq.rack) then
+        idum=fc_get_dbbc3time(centisec,it,iold)
+        centisec(2)=centisec(1)
+        unixsec(2)=unixsec(1)
+        unixhs(2)=unixhs(1)
+        if(iold.gt.20) then
+           call logit7ci(idum,idum,idum,-1,-26,'sc',0)
+        endif
+        goto 200
       else
          call logit7ci(idum,idum,idum,-1,-11,'sc',0)
          goto 1

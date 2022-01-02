@@ -39,11 +39,14 @@ C  LOCAL:
 C     IYR - start time of obs.
       character*4 laxistype(7)
       integer i
+      real t_acc
 
       data laxistype/"HADC","XYEW","AZEL","XYNS","RICH","SEST","ALGO"/
 C
 C
 C     WHO DATE   CHANGES
+! 2021-12-13 JMGipson. Removed references to Recorder 2. 
+!            Also removed stuff that would be written out in piggyback mode. 
 C     gag 901016 Created, copied out of snap file.
 C     gag 901025 Added ! in front of the *.
 C     nrv 930212 implicit none
@@ -68,6 +71,7 @@ C
 ! 2018Jul20 Moved writing of drudg version to subrotine.
 ! 2020Jun30 Don't output tape pases, lenghth. Instead print out terid, terna, recorder.
 
+
       IF (IFUNC.EQ.1) THEN
         cprfx='"'
       ELSE IF (IFUNC.EQ.2) THEN
@@ -84,8 +88,13 @@ C     write antenna line
      > cstcod(istn),cstnna(istn),laxistype(iaxis(istn))
       write(lu_outfile,"(f7.4,1x,$)") axisof(istn)
       do i=1,2
-        write(lu_outfile,"(1x,f5.1,1x,i4,2(1x,f6.1),$)")
-     >    STNRAT(i,ISTN)*60.d0*rad2deg,istcon(1,istn),
+        t_acc=0.d0 
+        if(slew_off(i,istn) .ne. 0 .and. slew_acc(i,istn) .ne. 0) then 
+           t_acc=slew_vel(i,istn)/slew_acc(i,istn)
+        endif 
+
+        write(lu_outfile,"(1x,f5.1,1x,f5.1,2(1x,f6.1),$)")
+     >    slew_vel(i,ISTN)*60.d0*rad2deg,slew_off(1,istn)+t_acc,
      >    STNLIM(1,i,ISTN)*rad2deg,STNLIM(2,i,ISTN)*rad2deg
       end do
       write(lu_outfile,"(F5.1,2(1x,a))")
@@ -116,15 +125,12 @@ C  Write drudg version
 
 C       Write equipment line
       IF (IFUNC.EQ.1) THEN ! only for non-VLBA
-        write(lu_outfile,
-     >  '(a, "Rack=",a8, "  Recorder 1=",a8, "  Recorder 2=",a8)')
-     >     cprfx,cstrack(istn),cstrec(istn,1),cstrec(istn,2)
+!        write(lu_outfile,
+!     >  '(a, "Rack=",a8, "  Recorder 1=",a8, "  Recorder 2=",a8)')
+!     >     cprfx,cstrack(istn),cstrec(istn,1),cstrec(istn,2)
+        write(lu_outfile, '(a, "Rack=",a, "  Recorder=",a )')
+     >     cprfx,cstrack(istn),cstrec(istn,1)
       endif
-      if(KM5A_Piggy)  write(lu_outfile,'(a,a)')
-     >      cprfx,"Mark5A operating in piggyback mode "
-
-      if(KM5P_Piggy)  write(lu_outfile,'(a)')
-     >      cprfx,"Mark5P operating in piggyback mode "
 
 
       RETURN

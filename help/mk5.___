@@ -1,25 +1,34 @@
                  mk5 - Low-level Mark 5 interface
 
             Syntax:     mk5=command,...
+                    jive5ab=command,...
+                         fb=command,...
 
             Response:   mk5/response,...
+                    jive5ab/response,...
+                         fb/response,...
 
 
 Settable parameters:
-            command     low-level Mark 5 command or query
+            command     low-level Mark 5 or jive5ab' command or query
 
 Monitor-only parameters:
-              response      response from the Mark 5.
+            response    response from the Mark 5 or 'jive5ab'
 
 
-Comments: Multiple commands can be sent with one mk5 command by
-separating them with commas. The responses for each command are
-displayed in separate output records. Output records, including the
-operator display time-tag are formatted to fit within the 99 columns
-of standard operator display window (Login Shell) Responses that are
-too long for this are split into multiple lines, preferentially at
-colons, commas, and spaces in that order. If all other options fail
-an arbitrary break is made.
+Comments:
 
-Please refer to the Mark 5 command set document for details
-on available commands and their responses.
+Multiple commands can be sent with one 'mk5' command by separating
+them with commas. The responses for each command are displayed in
+separate output records. Output records, including the operator
+display time-tag are formatted to fit within the 99 columns of
+standard operator display window (Login Shell) Responses that are too
+long for this are split into multiple lines, preferentially at colons,
+commas, and spaces in that order. If all other options fail an
+arbitrary break is made.
+
+'jive5ab' and 'fb' (FlexBuff) are synonyms for 'mk5' that may be used
+to make the command and/or output clearer.
+
+Please refer to the Mark 5 command set document and 'jive5ab' document
+for details on available commands and their responses.

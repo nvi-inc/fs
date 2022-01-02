@@ -899,6 +899,9 @@ For Mark 5B recorder minimum implied sample rate is 2 MHz. Check Mark 5B clock r
 5T -214
 For Mark 5B recorder implied decimation must be integer 1, 2, 4, 8, or 16. Check Mark 5B clock rate in equip.ctl.
 ""
+5T -222
+Mask must be null for DBBC3.
+""
 5T -223
 Decimation not supported for VDIF.
 ""
@@ -1259,8 +1262,14 @@ Error decoding span field in TIME.CTL
 BO -183
 Error decoding model field in TIME.CTL
 ""
-BO -189
+BO -184
 Error reading TIME.CTL, UNIX ?FFF
+""
+BO -185
+Error opening DBBC3.CTL ?FFF
+""
+BO -186
+Error decoding DBBC3.CTL line ?WWW
 ""
 BO -190
 Error initializing mcbcn, internal error ?WWW
@@ -1471,6 +1480,9 @@ No default for IF command condition.
 ""
 BO -315
 Unknown condition in IF command.
+""
+BO -390
+setup procedure name must be 12 characters or less.
 ""
 BO -400
 Error opening flagr.ctl, UNIX ?FFF
@@ -2067,10 +2079,16 @@ DB   -1
 dbbc.: error opening dbb?W.ctl
 ""
 DB   -2
-dbbc.: error pushing back on dbb?W.ctl
+dbbc.: line too long in dbb?W.ctl
 ""
 DB   -3
-dbbc.: first non-comment line in dbb?W.ctl did not contain three tokens
+dbbc.: first non-comment line in dbb?W.ctl must contain at least three tokens
+""
+DB   -4
+dbbc.: first non-comment line in dbb?W.ctl must contain three, six, or more tokens
+""
+DB   -5
+dbbc.: error reading dbb?W.ctl
 ""
 DB  -11
 dbb?W: error opening socket
@@ -2502,13 +2520,13 @@ DK -101
 No default for frequency
 ""
 DK -201
-Error decoding frequency, must be less than or equal to 4096
+Error decoding frequency, must be 0-4096.000000 MHz, inclusive, with 1 Hz resolution.
 ""
 DK -202
 Error decoding IF source, must be A, B, C, D, E, F, G, or H.
 ""
 DK -203
-Error decoding bandwidth, must be one of: 2, 4, 8, 16, or 32.
+Error decoding bandwidth, must be one of: 2, 4, 8, 16, 32, 64, or 128.
 ""
 DK -204
 Averaging period must be a positive integer 60 or less.
@@ -2524,6 +2542,45 @@ Error decoding dbbcNN/ response, could be a DBBC version mis-match, see error DC
 ""
 DK -451
 Class buffer error from command response.
+""
+DN   21
+DBBC3 multicast: error from select() cleared.
+""
+DN   20
+DBBC3 multicast: receiving multicast messages again.
+""
+DN   -1
+DBBC3 multicast: error unpacking, packet too small.
+""
+DN  -20
+DBBC3 multicast: no message received, multicast may not be running
+""
+DN  -21
+DBBC3 multicast: error from select(), UNIX?FFF
+""
+DN  -22
+DBBC3 multicast: error from recvfrom(), UNIX?FFF
+""
+DN  -11
+DBBC3 multicast: opening datagram socket, UNIX?FFF
+""
+DN  -12
+DBBC3 multicast: setting SO_REUSEADDR, UNIX?FFF
+""
+DN  -13
+DBBC3 multicast: binding datagram socket (wrong port?), UNIX?FFF
+""
+DN  -14
+DBBC3 multicast: adding multicast group (wrong address?), UNIX?FFF
+""
+DN  -16
+DBBC3 multicast: interface name too long to get address, maximum is?WWW
+""
+DN  -17
+DBBC3 multicast: opening socket to get interface address, UNIX?FF
+""
+DN  -18
+DBBC3 multicast: retrieving interface address from socket (wrong interface?), UNIX?FFF
 ""
 DP -301
 No command form of pfbX command.
@@ -2632,6 +2689,204 @@ Invalid state number (0 to 64).
 ""
 DQ -70
 Invalid device for ping (da ro r1).
+""
+DR -201
+First parameter is either null or 'mask2', an integer, usually as a hex value, e.g., 0xf.
+""
+DR -202
+mask1 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
+""
+DR -203
+decimate parameter, must be 1-255
+""
+DR -204
+Sample rate must be a number greater than 0.124
+""
+DR -205
+The 'force' parameter must be 'force', '$', or null.
+""
+DR -206
+The 'okay' parameter must be 'disk_record_ok' or null.
+""
+DR -213
+For DBBC3 DDC_V decimate must be 2
+""
+DR -214
+Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255.
+""
+DR -224
+Can't specify sample rate and decimate parameters simultaneously
+""
+DR -234
+For DBBC3 DDC_V sample rate must imply a decimate of 2
+""
+DR -301
+Can't change mode while recording, use disk_record=off first or (dangerous) use 'disk_record_ok' as 'okay' parameter.
+""
+DR -302
+mask2 cannot be used unless DDBC3 is DDC_U.
+""
+DR -303
+Can't specify mask2 for more BBCs per IF set in dbbc3.ctl.
+""
+DR -304
+The 'force' parameter must be 'force', '$', or null.
+""
+DR -305
+core3h_mode0 'state' parameter must be either 'begin' or 'end'.
+""
+DR -306
+Core3h board number exceeds IFs in dbbc3.ctl.
+""
+DR -307
+The 'okay' parameter must be 'disk_record_ok' or null.
+""
+DR -308
+The 'state' parameter must be 'begin' or 'end'.
+""
+DR -400
+error retrieving acknowledgement of command
+""
+DR -401
+error retrieving class
+""
+DR -451
+Class buffer error from command response.
+""
+DR -452
+DBBC version does not agree with dbbc3.ctl; see message above for DBBC3's version.
+""
+DR -453
+DBBC3 firmware should be DDC_U, but is DDC_V; see message above for DBBC3's version.
+""
+DR -454
+DBBC3 firmware should be DDC_V, but is DDC_U; see message above for DBBC3's version.
+""
+DR -455
+Uknown personality from DBBC3; see message above for DBBC3's personality.
+""
+DR -456
+Unknown rack type in logmsg_dbbc3().
+""
+DR -501
+error decoding sysstat bitmask response
+""
+DR -502
+error decoding sysstat samplerate response
+""
+DR -503
+error decoding sysstat output response
+""
+DR -504
+error decoding splitmode response
+""
+DR -505
+error decoding sysstat Selected input response
+""
+DR -506
+error decoding vdif_frame width response
+""
+DR -507
+error decoding vdif_frame channels per frame response
+""
+DR -508
+error decoding vdif_frame payload size response
+""
+DR -521
+could not find systat bitmask response
+""
+DR -522
+could not find systat amplerate response
+""
+DR -523
+could not find sysstat output response
+""
+DR -524
+could not find splitmode response
+""
+DR -525
+could not find sysstat Selected input response
+""
+DR -526
+error decoding vdif_frame channel width response
+""
+DR -527
+could not find vdif_frame channels per frame response
+""
+DR -528
+could not find vdif_frame payload size response
+""
+DR -600
+DBBC3 firmware/version is wrong AND/OR one or more board's data transmission state is not correct.
+""
+DR -601
+DBBC3 Core3h board 1 configuration is not correct.
+""
+DR -602
+DBBC3 Core3h board 2 configuration is not correct.
+""
+DR -603
+DBBC3 Core3h board 3 configuration is not correct.
+""
+DR -604
+DBBC3 Core3h board 4 configuration is not correct.
+""
+DR -605
+DBBC3 Core3h board 5 configuration is not correct.
+""
+DR -606
+DBBC3 Core3h board 6 configuration is not correct.
+""
+DR -607
+DBBC3 Core3h board 7 configuration is not correct.
+""
+DR -608
+DBBC3 Core3h board 8 configuration is not correct.
+""
+DR -611
+Core3h board ?WWW mask1 is not correct.
+""
+DR -612
+Core3h board ?WWW mask2 is not correct.
+""
+DR -613
+Core3h board ?WWW mask3 is not correct, it should be the same as the requested mask1.
+""
+DR -614
+Core3h board ?WWW mask4 is not correct, it should be the same as the requested mask2.
+""
+DR -615
+Core3h board ?WWW sysstat decimate is not correct.
+""
+DR -616
+Core3h board ?WWW vdif_frame width is not correct.
+""
+DR -617
+Core3h board ?WWW vdif_frame channels is not correct.
+""
+DR -618
+Core3h board ?WWW vdif_frame payload is not correct.
+""
+DR -619
+Core3h board ?WWW splitmode should be on and it is not
+""
+DR -620
+Core3h board ?WWW splitmode should be off and it is not
+""
+DR -621
+Core3h board ?WWW vsi input should be vs1-vsi2-vsi3-vsi4 and it is not
+""
+DR -622
+Core3h board ?WWW vsi input should be vs1 and it is not
+""
+DR -623
+Core3h board ?WWW should be sending data but it is stopped
+""
+DR -624
+Core3h board ?WWW should be stopped but it is sending data
+""
+DR -625
+Core3h board ?WWW sysstat input clock rate does not agree with dbbc3.ctl
 ""
 DS   -1
 Unable to open dsad.ctl file.
@@ -2860,6 +3115,18 @@ Class buffer error from command response.
 ""
 DV -501
 Only DBBC PFB rack types supported in vsiX commands.
+""
+DW -301
+mcast_time command does not accept arguments.
+""
+DW -302
+Multi-cast time data is stale, more than 20 seconds old.
+""
+DW -303
+Core3H board ?WWW has a non-zero time offset.
+""
+DW -304
+One or more Core3H boards have a non-zero time offset and/or the multicast data is stale, please see messages above.
 ""
 ER -902
 Unable to find ":" in S2 error decode response.
@@ -4679,9 +4946,6 @@ Unknown IF filter.
 Q1 -309
 Unknown IF filter or unsupported IF filter for PFB BBC.
 ""
-Q1 -310
-formbbc and formif not currently supported for DBBC3.
-""
 Q2 -201
 Satellite name longer than 24 characters.
 ""
@@ -5634,7 +5898,7 @@ Q* -201
 Chan is lo1-3:MK3/4/5+K4, loa-d:VLBA/4/5, lo1-4:LBA/4, loa-d,2a-2d:DBBC, loa0-d0,a1-d1:RDBE, loa-h:DBBC3, lo1-8:others
 ""
 Q* -202
-LO frequency must be a positive real number
+LO frequency must be a non-negative real number
 ""
 Q* -203
 LO sideband must be one of unknown, usb, or lsb.
@@ -7011,7 +7275,7 @@ SC  -10
 setcl: failed too many times, couldn't check formatter time
 ""
 SC  -11
-setcl: cannot set fs time without Mk3/4 VLBA/4, S2, K4*/MK4, DBBC/FiLa10G rack or S2, K4, M5B recorder
+setcl: cannot set fs time without Mk3/4 VLBA/4, S2, K4*/MK4, DBBC/FiLa10G, DBBC3 rack or S2, K4, M5B recorder
 ""
 SC  -12
 setcl: FS to computer time difference 0.5 seconds or greater
@@ -7054,6 +7318,9 @@ setcl: Mark 5B syncerr_gt_3, CONSIDER using fmset 's' option to fix.
 ""
 SC  -25
 setcl: rte_check got error from times(), see above for error
+""
+SC  -26
+setcl: DBB3 time is older than 20 seconds
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W

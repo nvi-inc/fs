@@ -24,6 +24,12 @@ C     This routine gets all the mode information from the vex file.
 C     Call once to get all values in freqs.ftni filled in, then call
 C     SETBA to figure out which frequency bands are there.
 C
+!Updates
+! 2021-01-31 JMG Removed call to vunproll since don't use barrel roll anymore
+! 2021-01-05 JMG Replaced max_frq by max_code. (Max_frq was confusing and led to coding errors.)
+! 2020-12-30 JMG Removed unused variables
+! 2020-10-03 JMG Removed references to headstacks, passes, tapes
+! 2019-09-03 JMG Implicit none
 C History
 C 960518 nrv New.
 C 960522 nrv Revised.
@@ -69,8 +75,7 @@ C 021111 jfq Extend S2 mode to support LBA rack
 ! 2018Oct09  Preserve mode and band if VEX created from sked previously.  Previously was setting to numerical value, first mode=
 !            Also keep better track of number of  freq-channels. If everything except for side-band is the same, assume same fre
 !            which means use same BBC.
-! 2019Sep03  Implicit none
-! 2020Oct03  Removed references to headstacks, passes, tapes
+
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -96,24 +101,16 @@ C  LOCAL:
 
       integer ix,ib,ic,i,ia,icode,istn
       integer il,im,in, iret,ierr1,iul,ism,ip,ipc,itone
-      integer iinc,ireinit
       integer ifanfac
-
-
-      integer irtrk(18,max_roll_def)
-      integer ih
-
+    
       double precision bitden_das
-      integer nsubpass,npcaldefs,nrdefs,nrsteps
-      integer nchdefs,nbbcdefs,nifdefs,nfandefs,nhd,nhdpos
+      integer npcaldefs
+      integer nchdefs,nbbcdefs,nifdefs,nfandefs,nhdpos
 
       character*8 cpre
-      character*16 cs2m
       character*16 cm
-      character*8 cs2d
 
-      double precision bitden
-      character*4 cmodu, croll ! ON or OFF
+      character*4 cmodu ! ON or OFF
 
 ! IF related parameters.
       character*6 cifdref(max_ifd)
@@ -136,11 +133,15 @@ C  LOCAL:
       double precision frf(max_chan),flo(max_chan),vbw(max_chan)
       double precision fpcal(max_chan),fpcal_base(max_chan)
 
-! Things that depend on number of tracks.
-      character*6 ctrchanref(2*max_track)
-      character*1 cp(2*max_track),csm(2*max_track)
-      integer ihdn(2*max_track)
-      integer itrk(2*max_track),ivc(2*max_bbc)
+! Things that depend on number of fandefs
+      character*1 cp(max_fandef)           ! subpass
+      character*6 ctrchanref(max_fandef)   ! channel ID ref
+      character*1 csm(max_fandef)          ! sign/mag
+      integer ihdn(max_fandef)             ! headstack number
+      integer itrk(max_fandef)             ! first track of the fanout assignment
+
+
+      integer ivc(2*max_bbc)
 
 !things that depend pass.   
       double precision srate
@@ -183,9 +184,9 @@ C  LOCAL:
       iret = fget_mode_def(ptr_ch(cout),len(cout),ivexnum) ! get first one
       do while (iret.eq.0.and.fvex_len(cout).gt.0)
         il=fvex_len(cout)
-        IF  (ncodes.eq.MAX_FRQ) THEN  !
+        IF  (ncodes.eq.max_code) THEN  !
           write(lu,'("VMOINP01 - Too many modes.  Max is ",
-     .    i3,".  Ignored: ",a)') MAX_FRQ,cout(1:il)
+     .    i3,".  Ignored: ",a)') max_code,cout(1:il)
         else
           ncodes=ncodes+1
           modedefnames(ncodes)=cout
@@ -233,7 +234,7 @@ C    Assign a code to the mode and the same to the name
 !        write(ccode(icode)(1:2),'(i2.2)') icode
 !        cnafrq(icode)=ccode(icode)
 ! End old way of assigning codes.
-        do istn=1,nstatn ! for one station at a time
+        do istn=1,nstatn ! for one station at a time  
 
 ! Initialize this array.
           call new_track_map()
@@ -245,9 +246,6 @@ C    Assign a code to the mode and the same to the name
 
 ! Find what kind of recorder.
           kDiskRec=.true.
-
-C         Initialize roll to blank
-          cbarrel(istn,icode)=" "
 
 C         Get $FREQ statements. If there are no chan_defs for this
 C         station, then skip the other sections.
@@ -323,26 +321,6 @@ C         Get $HEAD_POS and $PASS_ORDER statements.
 ! Now set to default since no disk recording...
           nhdpos=1
 
-          if (ierr.ne.0) then
-            write(lu,'("VMOINP07 - Error getting $HEAD_POS and",
-     .        "$PASS_ORDER information for mode",a, " station ",a,
-     .         /, " iret=",i5," ierr=",i5)')
-     .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),iret,ierr
-            call errormsg(iret,ierr,'HEAD_POS',lu)
-            ierr1=5
-          endif
-
-C         Get $ROLL statements.
-          call vunproll(modedefnames(icode),stndefnames(istn),ivexnum,
-     .      iret,ierr,lu,croll,irtrk,iinc,ireinit,nrdefs,nrsteps)
-          if (ierr.ne.0) then
-            write(lu,'("VMOINP08 - Error getting $ROLL information",
-     .      " for mode ",a," station ",a,/" iret=",i5," ierr=",i5)')
-     .      modedefnames(icode)(1:il),stndefnames(istn)(1:im),iret,ierr
-            call errormsg(iret,ierr,'ROLL',lu)
-            ierr1=6
-          endif
-
 C         Get $PHASE_CAL_DETECT statements.
           call vunppcal(modedefnames(icode),stndefnames(istn),ivexnum,
      >        iret,ierr,lu,cpcalref,ipct,ntones,npcaldefs,
@@ -353,13 +331,10 @@ C    point there were no reading or content errors for this station/mode
 C    combination. Some consistency checks are done here.
 C
 
-
-
 ! prior to 2018Oct03, did not use ifc.
 ! 'ifc' keeps track of number of independnent channels.
 !  if have same channel configuration except for sidebands,  corresponds to same ifc.
 !  Because of this  final ifc can less than nchdefs.
-
 
           ifc=1   !initialize
 C    Save the chan_def info and its links.
@@ -428,9 +403,10 @@ C           Phase cal refs
             endif
 C           Track assignments
 
-            ip=1 !pass is always 1
+            ip=1 !pass is always 1            
             do ix=1,nfandefs ! check each fandef
-              if (ctrchanref(ix).eq.cchanidref(i)) then ! matched link
+!               write(*,*) ctrchanref(ix), cchanidref(i) 
+              if (ctrchanref(ix).eq.cchanidref(i)) then ! matched link           
                 ism=1 ! sign
                 if (csm(ix).eq.'m') ism=2 ! magnitude
                 iul=1 ! usb
@@ -447,12 +423,13 @@ C           Track assignments
                   endif
                 endif
                 call add_track(itrk(ix),iul,ism,ihdn(ix),ifc,ip)
-                kadd_track_map=.true.
+                kadd_track_map=.true.     
               endif ! matched link
-            enddo ! check each fandef
+            enddo ! check each fandef 
+!            stop
           enddo ! each chan_def line
           nchan(istn,icode)=ifc
-
+!          stop 
 C
 C    3.2 Save the non-channel specific info for this mode.
 C         Recording format, "Mark3", "Mark4", "VLBA".
