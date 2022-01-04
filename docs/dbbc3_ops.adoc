@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS DBBC3 Operations Manual
-Version 2.2 - December 2021
+Version 2.4 - January 2022
 
 :experimental:
 :sectnums:
@@ -29,11 +29,10 @@ Version 2.2 - December 2021
 
 == Introduction
 
-This document outlines the model for FS operations with the DBBC3. It also
-contains an appendix <<Installation for testing>>. The latter provides some
-pointers for installing and will eventually be superseded by the FS updates
-notes for the first release that includes the DBBC3 support described in the
-rest of this document.
+This document outlines the features and model for FS operations with
+the DBBC3. It also contains an appendix
+<<Configuring the FS for a DBBC3>> that includes steps for adjusting
+the FS for use with a DBBC3.
 
 == DBBC3 operations
 
@@ -47,10 +46,10 @@ with `help=_command_`.
 * `cont_cal` -- Setup and monitor continuous calibration configuration
 +
 
-CAUTION: So far, operation has only been tested with polarity `2`. It is
-expected that other polarities will work. However, until it is tested it won't
-be confirmed. This affects multicast data, the Tsys display, and use of _fivpt_
-and _onoff_.
+CAUTION: So far, operation has only been tested with polarity `2`. It
+is expected that other polarities will work. However, until it is
+tested it won't be confirmed. This affects multicast data, the T~sys~
+display, and use of _fivpt_ and _onoff_.
 
 * `core3h_mode__n__` -- `_n_` from `0` to `8` -- Core3H board setup and monitoring
 * `fb_mode` -- Setting the FlexBuff recording mode -- An alias for `mk5c_mode`
@@ -360,13 +359,6 @@ configuration procedure instead. For example:
 For DBBC3 use, the rack type in _equip.ctl_ should be `dbbc3_ddc_u` or
 `dbbc3_ddc_v` depending on the firmware that is loaded.
 
-NOTE: The `equip` line in the log header has been broken into two lines,
-`equip1` and `equip2`. The break occurs between the Mark 4 Decoder Transmission
-Terminator Character value and the DBBC(2) DDC Firmware Version value. Except
-for the clock rate value, the values in the `equip2` line are all the, and the
-only, DBBC(2) related values. The clock rate value is also used for Mark 5B
-recorders.
-
 ==== dbbc3.ctl
 
 The DBBC3 specific control file parameters are in the _dbbc3.ctl_ control file.
@@ -417,32 +409,35 @@ be disabled. An example of the contents are:
 
 === Tsys monitor display
 
-Support for the Tsys monitor display is built on multicast capture and
-unpacking software developed by Dave Horsley (Hobart).
+Support for the T~sys~ monitor display is built on multicast capture
+and unpacking software developed by Dave Horsley (Hobart).
 
-The Tsys monitor display is organized per IF. The displayed information
-includes: LO, time, VDIF epoch, time difference between DBBC3 and the FS,
-PPS delay, Tsys for each IF/Core3H board as well as BBC information: frequencies
-and Tsys values. By default the display will cycle through the appropriate IFs
-(dwelling two seconds on each IF) depending on the mode as described in the
-<<Modes>> sub-section below.
+The T~sys~ monitor display is organized per IF. The displayed
+information includes: LO, time, VDIF epoch, time difference between
+DBBC3 and the FS, PPS delay, T~sys~ for each IF/Core3H board as well
+as BBC information: frequencies and T~sys~ values. By default the
+display will cycle through the appropriate IFs (dwelling two seconds
+on each IF) depending on the mode as described in the <<Modes>>
+sub-section below.
 
-The displayed values are from the previous second's multicast. Hence the time
-is one second in the past and the Tsys values are from two seconds in the past.
+The displayed values are from the previous second's multicast. Hence
+the time is one second in the past and the T~sys~ values are from two
+seconds in the past.
 
-NOTE: The time is shown on inverse video if it is not advancing or disagrees
-with the FS time when it was received or the firmware is _v124_ (no time is
-available in the multicast for that version, so the multicast arrival time is
-shown). The epoch is shown as `--` for now since the VDIF epoch is not
-available yet in the multicast.  The `DDBC3-FS` time difference, in seconds, is
-shown in inverse video if it is not zero (positive if the DBBC3 time is later
-than the FS). The `DDBC3-FS` time difference is shown as `------` in inverse
-video for firmware _v124_.
+NOTE: The time is shown on inverse video if it is not advancing or
+disagrees with the FS time when it was received or the firmware is
+_v124_ (no time is available in the multicast for that version, so the
+multicast arrival time is shown). The epoch is shown as `--` for now
+since the VDIF epoch is not available yet in the multicast.  The
+`DDBC3-FS` time difference, in seconds, is shown in inverse video if
+it is not zero (positive if the DBBC3 time is later than the FS). The
+`DDBC3-FS` time difference is shown as `------` in inverse video for
+firmware _v124_.
 
-The display is designed to provide what should normally be the most useful
-information without operator intervention. However, the operator can adjust the
-display using the features described in <<Commands>> sub-section below for
-special purposes.
+The display is designed to provide what should normally be the most
+useful information without operator intervention. However, the
+operator can adjust the display using the features described in
+<<Commands>> sub-section below for special purposes.
 
 .Tsys monitor display geometry values
 [#geometry]
@@ -481,17 +476,19 @@ upper right hand corner.
 
 ==== Tsys values
 
-In the `Rec` mode, only Tsys fields for side-bands being recorded are
-populated. Tsys fields for side-bands not being recorded are blank.
+In the `Rec` mode, only T~sys~ fields for side-bands being recorded
+are populated. T~sys~ fields for side-bands not being recorded are
+blank.
 
-In the `All` mode, if no IFs are defined and no channels are being recorded
-(e.g., at FS startup), Tsys fields for all side-bands are blank.
+In the `All` mode, if no IFs are defined and no channels are being
+recorded (e.g., at FS startup), T~sys~ fields for all side-bands are
+blank.
 
-For all non-blank fields, Tsys values for all BBC side-bands will be shown if
-they can be calculated. If they can't be, a hint, in inverse video, for the
-cause of the problem will be displayed in the corresponding field instead.
-There may be more than one issue, but only the first encountered is reported.
-The order is:
+For all non-blank fields, T~sys~ values for all BBC side-bands will be
+shown if they can be calculated. If they can't be, a hint, in inverse
+video, for the cause of the problem will be displayed in the
+corresponding field instead.  There may be more than one issue, but
+only the first encountered is reported.  The order is:
 
 . `Nccal` -- continuous cal not enabled
 . `N bbc` -- the BBC is not configured
@@ -505,7 +502,7 @@ when only positive values are valid, or would have required dividing by zero.
 
 ==== Commands
 
-The Tsys display accepts several one character commands:
+The T~sys~ display accepts several one character commands:
 
 * `*a*`-`*h*` -- show only that IF
 * `*n*` -- next IF
@@ -588,9 +585,10 @@ be significant.
 Support for multicast logging is built on multicast capture and unpacking
 software developed by Dave Horsley (Hobart).
 
-Logging of DBBC3 multi-cast recording is controlled by the `tpicd` command.
-When logging is enabled, for each multicast message received (nominal 1 Hz
-rate), the following information is logged:
+Logging of DBBC3 multi-cast recording is controlled by the `tpicd`
+command.  When logging is enabled, for each multicast message received
+(nominal 1 Hz rate), the following information, shown with their log
+entry labels, is logged:
 
 * `time` -- for each Core3H board in the system
 * `pps2dot` -- (`pps_delay`) in nanoseconds for each Core3H board
@@ -598,7 +596,7 @@ rate), the following information is logged:
 +
 The counts are given in the order of cal _on_ then _off_
 * `tpi`  -- Only if continuous cal is _not_ in use -- TPI counts for each BBC and IF configured for recording.
-* `tsys` -- Only if continuous cal _is_ in use -- Tsys for each BBC and IF configured for recording.
+* `tsys` -- Only if continuous cal _is_ in use -- T~sys~ for each BBC and IF configured for recording.
 
 The _plog_ utility was modified to push reduced logs with DBBC3 multicast data
 squeezed out by default, as it already did for RDBEs. A subsequent revision in
@@ -995,110 +993,44 @@ a requirement to re-sync the DBBC3.
 
 [appendix]
 
-== Installation for testing
+== Configuring the FS for a DBBC3
 
-This section has some terse installation notes for installing the FS branch,
-`ed/dbbc3`, that provides the features described in this document. This is
-provided only to help with testing. This is not for an operational release.
+This appendix provides the steps needed to configure the FS to support
+a DBBC3. You must have version FS _10.1.0_, or later, installed.
 
-Sub-sections on <<Switching back to 10.0.0>> and
-<<Switching back to the test version>> as also provided in case you need to
-switch back and forth after using the
-<<Initial installation of the test version>> sub-section.
-
-=== Initial installation of the test version
-
-You must have FS 10.0.0 installed before installing the test version. Please
-see https://nvi-inc.github.io/fs/releases/10/0/10.0.0.html for instructions for
-installing FS 10.0.0.
-
-==== Fetch and make the latest commit on the branch
-
-If you are using _git_, as is recommended, then as _prog_
-execute:
-
-             cd /usr2/fs-git
-             git fetch
-             git checkout ed/dbbc3
-             make clean rmdoto rmexe
-             make >& /dev/null
-             make -s
-
-No output from the last command indicates a successful _make_.
-
-NOTE: It should not be necessary to re__make__ your station software.
-
-==== Reboot
-
-This will make sure the FS server is restarted and shared memory is
-reinitialized.
-
-==== Additional steps
-
-Except as noted, these steps should all be performed as _oper_.
-
-. Install the _dbbc3.ctl_ control file.
+. Update _equip.ctl_.
 
 +
 
-The contents of DBBC3 line in the _equip.ctl_ control file has been moved to
-the new control file, _dbbc3.ctl_, and reorganized. To install the new file,
-execute:
+If you have a DBBC3, change your rack type to `dbbc3_ddc_u` or
+`dbbc3_ddc_v`, as appropriate.
 
-  cd /usr2/control
-  cp /usr2/fs/st.default/control/dbbc3.ctl .
+. Update _dbbc3.ctl_.
 
 +
 
-Edit and customize the contents of your local copy in _/usr2/control_ to agree
-with your DBBC3.
+Update the _dbbc3.ctl_ control file for the details of
+your DBBC3. The comments in the _/usr2/control/dbbc3.ctl_ file may be
+helpful for determining what values to use. You can also refer to the
+<<_dbbc3_ctl,dbbc3.ctl>> subsection above.
+
+. Update _dbbad.ctl_.
 
 +
 
-TIP: For now, your old DBBC3 line in _equip.ctl_ can be left in place. Its
-presence will be benign and leaving it there will make it easier to return your
-operational FS version when that is needed. The values in the _dbbc3.ctl_
-control file are the ones actually used by this test branch of the FS.
+.. Update the IP address and port in your _dbbad.ctl_ control file to
+point to the DBBC3 device.
 
-+
-
-NOTE: A script for semi-automatically setting up your _ddbc3.ctl_ file is
-included as _/usr2/fs/misc/equipctlfix_. If you use it, you may still need to
-adjust the values in your _dbbc3.ctl_ file afterwards. The use of this script
-is not recommended if you intended to switch back-and-forth between using the
-`ed/dbbc3` branch and _10.0.0_ since it will remove the old DBBC3 line from
-_equip.ctl_.
+.. Increase the number of fields on the non-comment line to six, using
+the correct information for the multicast data. Please see the
+<<_dbbad_ctl,dbbad.ctl>> subsection above for an example. The example
+multicast address and port may be correct. The multicast interface
+used is usually your primary interface, typically _eno1_ or _eth0_.
 
 
-. Update _equip.ctl_
+. Setup the DBBC3 T~sys~ display window (_monit7_)
 
-+
-
-Change your rack type to `dbbc3_ddc_u` or `dbbc3_ddc_v` as appropriate.
-
-. Use _pfmed_, add a `mk5c_config` and/or a `fb_config` procedure to your
-`station` procedure library, as appropriate.
-
-+
-
-Add the versions needed for your recorder(s). You should add both if you use
-both. They can be empty if no tuning is needed for your recorder(s).
-
-+
-
-NOTE: These procedures are called by setup procedures for Mark 5C and FlexBuff
-recorders and provide a means to tune the setup of _jive5ab_ for your hardware
-independent of the observing mode. These procedures are called after the
-`mk5c_mode` or `fb_mode` commands to allow the default configuration to be
-overridden. The default configuration is described in the
-<<Default configuration>> subsection in main part of this document.
-The commands in this procedure should be mode independent. Mode dependent
-tuning should be handled differently; perhaps by inserting commands directly
-at the top-level of the setup procedure.
-
-. Setup the DBBC3 Tsys display window (_monit7_)
-
-.. Update _clpgm.ctl_
+.. Update _clpgm.ctl_.
 
 +
 
@@ -1119,29 +1051,34 @@ to compare files and update your local copy. Like _vim_, _vimdiff_ may be
 challenging to use until you are familiar with it. Some help is available from
 web searches. Don't use it if you aren't comfortable with it.
 
-.. Update _stpgm.ctl_
+.. Update _stpgm.ctl_.
 
 +
 
-If you are using the display server and you want to have _monit7_ start
-automatically with each client (including at FS start up), add a line for it to
-_stpgm.ctl_. The easiest way to do this is to make a copy of the line for
-_monit2_ and update for _monit7_ (changing ``2``s to ``7``s). If you don't have
-a line for _monit2_ in your _stpgm.ctl_, you can use the one in the example
-file, _/usr2/fs/st.default/control/stpgm.ctl_, as a guide.
+If you are using the display server and you want to have T~sys~
+display (_monit7_) start automatically with each client (including at
+FS start up), add a line for it to _stpgm.ctl_. The easiest way to do
+this is to make a copy of the line for _monit2_ and update for
+_monit7_ (changing ``2``s to ``7``s). If you don't have a line for
+_monit2_ in your _stpgm.ctl_, you can use the one in the example file,
+_/usr2/fs/st.default/control/stpgm.ctl_, as a guide.
 
-.. Update your local rc files:
+.. Update your local _rc_ files:
 
-... Update _~/.Xresources_
+... Update _~/.Xresources_.
 
 +
 
-Append the new lines from the default version:
+Compare your local file to the default:
 
   cd ~
-  tail -n 2 /usr2/fs/st.default/oper/.Xresources >>.Xresources
+  diff .Xresources /usr2/fs/st.default/oper | less
 
 +
+
++
+
+The new lines for _monit7_ should be added to your local file.
 
 +
 
@@ -1152,16 +1089,20 @@ monitor display geometry values>> table above.
 
 +
 
-... If you use the default window manager for the console, update _~/.fvwm2rc_:
+TIP: If you vary the number of BBCs per IF in your configuration, you
+can setup the geometry for the most you use and can resize the window
+to a smaller size after it is opened, if you want.
 
 +
 
+... If you use the default window manager for the console, update _~/.fvwm2rc_.
+
 +
 
-Compare your local file to the default
+Compare your local file to the default:
 
   cd ~
-  diff .Xresources /usr2/fs/st.default/oper |less
+  diff .fvwm2rc /usr2/fs/st.default/oper | less
 
 +
 
@@ -1171,45 +1112,9 @@ The new lines for _monit7_ should be added to your local file.
 
 +
 
+... Log out and back in to put these changes into effect.
+
 ... You should  make the corresponding changes for _prog_ while logged
 in as _prog_.
 
-... Log out and back in to put these changes into effect.
-
-=== Switching back to 10.0.0
-
-Once you have the `ed/dbbc3` your can return to using _10.0.0_ by following
-these steps.
-
-. As _prog_, enter:
-
-             cd /usr2/fs-git
-             git checkout -q 10.0.0
-             make clean rmdoto rmexe
-             make >& /dev/null
-             make -s
-
-. Reboot
-
-NOTE: If you added _monit7_ to your _stpgm.ctl_ file, you can comment it out
-(as _oper_), but that is not necessary.  The only consequence of not doing so
-will be a "`flash`" when the display client starts as an _xterm_ and then it
-closes because it can't start _monit7_.
-
-=== Switching back to the test version
-
-If you have switched back to _10.0.0_ and now want to switch back to the test
-version, please follow these steps.
-
-. As _prog_, enter:
-
-             cd /usr2/fs-git
-             git checkout ed/dbbc3
-             make clean rmdoto rmexe
-             make >& /dev/null
-             make -s
-
-. Reboot
-
-. If as part of switching back to _10.0.0_, you had commented out the _monit7_
-line in your _stpgm.ctl_ file, you can uncomment it (as _oper_).
+.. Restart the FS if it was already running.

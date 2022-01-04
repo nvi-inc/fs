@@ -19,9 +19,8 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 3.0 - January 2022
+Version 3.1 - January 2022
 
-//:hide-uri-scheme:
 :sectnums:
 :stem: latexmath
 :sectnumlevels: 4
@@ -112,6 +111,27 @@ This will make sure the FS server is restarted.
 
 === Additional steps
 
+Except if noted otherwise, these steps should all be performed as
+_oper_.
+
+. Create the _dbbc3.ctl_ control file.
+
++
+
+The contents of DBBC3 line in the _equip.ctl_ control file has been
+moved to the new control file, _dbbc3.ctl_, and reorganized. To create
+the new file and remove the obsolete contents of _equip.ctl_, execute:
+
+  cd /usr2/control
+  /usr2/fs/misc/equipctlfix equip.ctl
+
++
+
+NOTE: This will create the file, preserving the values from the DBBC3
+line in your old _equip.ctl_ file. That should allowing running the FS
+if you don't have a DBBC3. If you have a DBBC3, you should customize
+the contents in the <<dbbc3config,FS DBBC3 Configuration>> step below.
+
 . Run the FS to check for _.rxg_ file errors.
 
 +
@@ -124,8 +144,73 @@ the FS starts successfully.  The new errors reported are described in
 the <<additional_rxg_errors,Additional .rxg file errors>> change in
 the <<FS changes>> sub-section below.
 
-. Adjust _~/.session_ if you are using _tcsh_ as your login shell for
-_oper_ or _prog_ (or AUID accounts).
+. Use _pfmed_ to add `mk5c_config` and `fb_config` procedures to your
+`station` procedure library.
+
++
+
+This procedures are used to tune the configuration of _jive5ab_ for
+your hardware. They can be empty if don't have a Mark 5C or Flexbuff
+recorder or no tuning is needed for your recorder(s). We recommend
+adding the procedures even if you don't have a Mark 5C or FlexBuff in
+case you get them in the future. This will prevent an otherwise
+unexpected error about the procedure(s) being missing at that time.
+
++
+
+NOTE: These procedures are called by _drudg_ generated setup
+procedures for systems with Mark 5C and FlexBuff recorders. They
+provide a means to tune the setup of _jive5ab_ for your hardware
+independent of the observing mode. These procedures are called after
+the `mk5c_mode` or `fb_mode` commands to allow the default
+configuration to be overridden. The default configuration is described
+in the <<../../../dbbc3_ops.adoc#_default_configuration,Default
+configuration>> subsection of the <<../../../dbbc3_ops.adoc#,FS DBBC3
+Operations>> document and in the `help` pages for `mk5c_mode` and
+`fb_mode`. The commands in these procedures should be mode
+independent.  Mode dependent tuning should be handled differently;
+perhaps by inserting commands directly at the top-level of the setup
+procedure.
+
+. If you have a FlexBuff recorder, use _pfmed_ to add a `checkfb` procedure to your
+`station` procedure library.
+
++
+
+_drudg_ uses this procedure in place of `checkmk5` when the selected
+recorder is FlexBuff.
+
++
+
+You can do make this change in one of two ways, using _pfmed_ commands:
+
+.. If you don't also have a Mark 5 recorder, you can rename your existing
+procedure:
+
+  pf,station
+  rn,checkmk5,checkfb
+
+.. If you also have a Mark 5 recorder, you can make a copy of your
+existing procedure:
+
+  pf,station
+  st,checkmk5,checkfb
+
++
+
+Optionally you can modify the new procedure, created by either method,
+to make it more appropriate for a FlexBuff recorder.
+
+
+. <<dbbc3config,FS DBBC3 Configuration>>[[dbbc3config]]: If you have a
+DBBC3, you should make the configuration changes described in the
+<<../../../dbbc3_ops.adoc#_configuring_the_fs_for_a_dbbc3,Configuring
+the FS for a DBBC3>> appendix of the <<../../../dbbc3_ops.adoc#,FS
+DBBC3 Operations>> document. If you expect to get a DBBC3, these
+changes can be deferred until then.
+
+. If you are using _tcsh_ as your login shell for _oper_ or _prog_ (or
+AUID accounts) and have not already done so, adjust _~/.session_ .
 
 +
 
@@ -135,13 +220,14 @@ the FS with the graphical display on the console.  For this case, you
 may wish to make the changes in the <<10.0.0.adoc#xsession,Updating
 ~/.xsession>> sub-step in
 <<10.0.0.adoc#_miscellaneous_fslx_changes,Miscellaneous FSLx changes>>
-step of the <<10.0.0.adoc#,FS 10.0.0 Update Notes>> document.
+step of the <<10.0.0.adoc#,FS 10.0.0 Update Notes>> document. If you
+have already made these changes, this step can be skipped.
 
 +
 
 This change will make sure the window manager (__fvwm2__) operates
 with the FS runtime environment variables set. This could be important
-for example, if you want to run __fsclient__ (perhaps for a
+for example, if you want to run __fsclient__ window (perhaps a
 `scan_check` window) from a console hotkey.
 
 . Make the `scnch` and `erchk` windows `NeverFocus`.
@@ -188,6 +274,85 @@ A complete history of changes can be found using the `git log` command
 from within the FS _git_ archive directory, usually _/usr2/fs-git_.
 
 === FS changes
+
+. Add more complete support for DBBC3 DDC personality.
+
++
+
+Previously, the FS only provided limited functionality for DBBC3
+racks, as described in the <<dbbc3.adoc#,FS DBBC3 support>> document
+for release _10.0.0_. More complete support is provided now. The
+updated support is described in the <<../../../dbbc3_ops.adoc#,FS DBBC3
+Operations Manual>> document and includes:
+
++
+--
+
+* A separate _dbbc3.ctl_ control file
+
+* Core3H board setting and monitoring with `core3h_mode__n__` commands
+
+* T~sys~ display window (_monit7_)
+
+* Multicast logging, which is controlled with the `tpicd` command.
+
+* `mcast_time` command for checking DBBC3 time from the multicast data
+
+* _drudg_ support for schedules (closing
+https://github.com/nvi-inc/fs/issues/33[#33])
+
+* Integrated support for recording DBBC3 data with a FlexBuff recorder
+
+* FS time setting from a DBBC3 with _setcl_ if NTP is not available
+
+--
++
+
+CAUTION: The current FS support is structured around the features of
+the DBBC3 DDC firmware, `DDC_U` _v125_ and `DDC_V` _v124_, available
+at the time of this release. Firmware updates and experience with the
+current approach may lead to different FS support and operations in
+the future.
+
++
+
+Thanks to: the EVN, for funding this development work; Eskil Varenius
+(Onsala) for making a system available for development as well as
+testing the FS; Sven Dornbusch (MPIfR, Bonn) for elaborating on the
+details of DBBC3 functionality; and Uwe Bach (Effelsberg), H.
+Verkouter (JIVE), and Jon Quick (HartRAO) for providing helpful
+suggestions.
+
+. Expand setup of Mark 5C and Flexbuff recorders
+
++
+
+The `mk5c_mode` command sends configuration commands, beyond `mode`,
+depending on which recorder is selected in equip.ctl, `mk5c` or
+`flexbuff`, the total data rate, and the data type, VDIF or
+5B/Ethernet. The updated default configuration is described in the
+<<../../../dbbc3_ops.adoc#_default_configuration,Default
+configuration>> subsection of the <<../../../dbbc3_ops.adoc#,FS DBBC3
+Operations Manual>> document.
+
++
+
+All the settings can be overridden by the `mk5c_config` (or
+`fb_config`, depending on the recorder type selected when running
+_drudg_) local procedure. See the
+<<../../../dbbc3_ops.adoc#_overriding_the_defaults,Overriding the
+defaults>> subsection of the <<../../../dbbc3_ops.adoc#,FS DBBC3
+Operations Manual>> document.
+
++
+
+NOTE: Another change, <<fbsyns,FlexBuff synonyms>> in this document,
+makes `mk5c_mode` available with the synonym `fb_mode`.
+
++
+
+Thanks H. Verkouter (JIVE) for extensive discussions about what the
+correct settings should be.
 
 . Improve _msg_ to always pick-up a new log file name (closing
 https://github.com/nvi-inc/fs/issues/118[#118]).
@@ -519,36 +684,52 @@ lower case.
 
 Thanks to Eskil Varenius (Onsala), for reporting this issue.
 
+.. Add new environment variables.
+
++
+
++
+
+Support for new environment variables `FESH_GEO_USE_SETUP_PROC` and
+`FESH_GEO_VDIF_SINGLE_THREAD_PER_FILE` were added. These variables can
+be used to supply fixed answers to the new optional _drudg_ prompts as
+described in <<drudg changes>> below. For more details about the use
+of the new variables, please see the `*fesh{nbsp}-h*` output.
+
+
 . Fix continuous calibration T~sys~ calculations for DBBC and DBBC3
 racks (closing https://github.com/nvi-inc/fs/issues/157[#157]).
 
 +
 
-For the _tpicd_ method of monitoring T~sys~ for DBBC and DBBC3 racks,
-the value of T~sys~ was being underestimated by about
+For the direct sample of count data by _tpicd_ for monitoring T~sys~
+for DBBC and DBBC3 racks with continuous calibration, the value of
+T~sys~ was being underestimated by about
 stem:[\mathit{\frac{T_{cal}}{2}}]. This was because the CAL~on~ counts
-were being ignored for determining the count level of T~sys~.  This
-has been fixed.
+were being ignored for determining the count level of T~sys~. This has
+been fixed.
 
 +
 
 For the DBBC, this error has been occurring since continuous cal was
-first supported in 2012, FS 9.11.0, commit `f5817f65`. For the DBB3,
-since it was first supported in 2018, FS 9.12.12, commit `19a69540`.
-However, the T~sys~ monitoring for the DBBC3 was largely unused since
-the device communication rate made it difficult to work with.
+first supported in 2012, FS _9.11.0_, commit `f5817f65`. For the
+DBBC3, it has been present since the rack was first supported in 2018,
+FS _9.12.12_, commit `19a69540`. However, the T~sys~ monitoring for
+the DBBC3 was largely unused before then current release because the
+device communication rate made it difficult to work with.
 
 +
 
-NOTE: The fix for the DBBC3 will be irrelevant once multicast is
-supported.
+NOTE: The fix for the DBBC3 is now irrelevant. As of this release,
+T~sys~ for the DBBC3 is calculated, correctly, from the multicast
+data.
 
 +
 
 This error is fairly small and probably did not have an impact on
 routine local performance monitoring. However, if some specialized
 measurements were being made, they may have been affected. If this
-error had a significant effect on you, please contact Ed.
+error had a significant effect for you, please contact Ed.
 
 +
 
@@ -562,8 +743,82 @@ Thanks to Jun Yang (Onsala) for discovering and reporting this. Thank
 to Jun and Eskil Varenius (also at Onsala) for making systems
 available to verify the fixes.
 
-. Add `mk5init` command reinitialize the Mark 5 or Flexbuff connection without restarting the FS
-(closing https://github.com/nvi-inc/fs/issues/164[#164]).
+. Fix continuous calibration T~sys~ calculations in `fivept` (closing
+https://github.com/nvi-inc/fs/issues/131[#131]).
+
++
+
+For continuous calibration systems, T~sys~ was being underestimated
+in `fivept` by about stem:[\mathit{\frac{T_{cal}}{2}}]. This was
+because the CAL~on~ counts were being ignored for determining the
+count level of T~sys~. This has been fixed.
+
++
+
+This made the point-by-point T~ant~ values larger by the same amount.
+This should not have biased the fitted peak source T~ant~ since the
+fitting process removes a background level. Nor should it affected the
+pointing offsets. Perhaps it actually had some benefit since it made
+it less likely that the point-by-point T~ant~ would be negative, which
+is always a little unpleasant. It does affect the T~sys~ derived
+values of the `#fivpt#perform` output, but those values are mostly a
+curiosity and typically not used for any significant work.
+
++
+
+For the DBBC, this error has been occurring since continuous cal was
+first supported in 2012, FS _9.11.0_, commit `f5817f65`. For the RDBE,
+this error has been occurring since continuous cal was first supported
+in  2016, FS _9.12.5_, commit `217940c1`. For the DBBC3, it has been
+present since the rack was first supported in 2018, FS _9.12.12_,
+commit `19a69540`.
+
++
+
+Thanks to Eskil Varenius (Onsala) for making a system available to
+verify the fix.
+
+. Add `setup_proc` command.
+
++
+
+This command is used to identify the setup procedures in the _.snp_ files, e.g.:
+
+  setup_proc=setup01
+
++
+
+The setup procedure (in this example `setup01`) will be executed if it
+is the first `setup_proc=...` command since the schedule was started
+or if a different procedure was used in the previous instance of the
+command in a schedule.  This can be useful to avoid executing setup
+procedures more than necessary, especially if they take very long to
+execute, as is the case the DBBC3, or if they may  disturb the
+equipment.
+
++
+
+Use of this command in _drudg_ generated _.snp_ files is controlled
+with the `use_setup_proc` option in _skedf.ctl_. The default is to not
+use it, which is the same as the previous behaviour.
+
++
+
+WARNING: The previous behavior of re-executing a setup procedure for
+each recording can provide some "`self-healing`" of the equipment
+setup if there errors occurred during the previous setup or if the
+equipment malfunctioned. The use of this command will eliminate this
+added robustness. Each site will need to evaluate whether to use the
+option in _drudg_ for this command based on their equipment's
+performance. It is typically necessary for DBBC3 systems.
+
++
+
+See `*help=setup_proc*` for more information.
+
+. Add `mk5init` command to reinitialize the Mark 5 or Flexbuff
+connection without restarting the FS (closing
+https://github.com/nvi-inc/fs/issues/164[#164]).
 
 +
 
@@ -574,8 +829,8 @@ for changing which recorder is used without restarting the FS.
 
 +
 
-NOTE: Another change, <<fbsyns,FlexBuff synonyms>>, makes `mk5init`
-available with the synonym `fb_init`.
+NOTE: Another change, <<fbsyns,FlexBuff synonyms>>, in this document,
+makes `mk5init` available with the synonym `fb_init`.
 
 +
 
@@ -601,28 +856,49 @@ Mark 5 versions)  were added:
 +
 --
 
-* `fb_relink` -- `mk5relink` -- relink to recorder
+* `fb` -- `mk5` (`jive5ab` is also a synonym) -- low-level recorder
+communication
 
-* `fb_close` -- `mk5close` -- close connectin to recorder
+* `fb_close` -- `mk5close` -- close connection to recorder
 
 * `fb_init` -- `mk5init` -- initialize connection after rereading
 _mk5ad.ctl_ control file
+
+* `fb_mode` -- `mk5c_mode` -- set recording mode
+
++
+
+This command tailors it behaviour depending on what type of recorder
+is specified in _equip.ctl_  control file, not by the name of the
+command.
+
+* `fb_relink` -- `mk5relink` -- relink to recorder after closing
+connection
+
++
+
+This command is used after `fb_close`/`mk5close` to reestablish the
+connection.
+
+* `fb_status` -- `mk5_status` -- report recorder errors
 
 --
 +
 
 There is no differences in the function of the commands when the
-FlexBuff synonyms are used. The synonyms may be used to make the
-meaning of procedure files clearer.
+FlexBuff synonyms are used. They may be used to make the meaning of
+procedure files and log entries clearer.
+
+. Split `equip` log header line into to parts.
 
 +
 
-Additional synonyms that will be added before the next release are:
-
-* `fb_status` -- `mk5_status` -- report recorder errors
-
-* `fb` -- `mk5` (`jive5ab` is also a synonym) -- low-level recorder
-communication
+The `equip` line in the log header has been broken into two lines,
+`equip1` and `equip2`. The break occurs between the Mark 4 Decoder
+Transmission Terminator Character value and the DBBC DDC Firmware
+Version value. Except for the clock rate value, the values in the
+`equip2` line are only DBBC related values. The clock rate value is
+also used for Mark 5B recorders.
 
 
 . <<refrw_bad,refrw_bad()>>:[[refrw_bad]] Rename _poclb_ routine
@@ -1087,6 +1363,255 @@ installation tips>> in the
 <<../../misc/install_reference.adoc#,Installation Reference>> document
 and references to it.
 
+. Add other fixes:
+
+.. Remove `e` rack type in help files.
+
++
+
++
+
+Help for the `pcald` and `tpicd` commands is now for every rack.
+
+.. Add the missing `formbbc` and `formif` detector groups in `onoff`
+for DBBC3 racks.
+
+.. Corrected `error number for trouble opening _time.ctl_.
+
+.. Add missing `32` and `64` MHz BWs in help for DBBC `bbc__nn__`
+commands.
+
+.. Add missing `64` MHz BW for `fivept` and `onoff` with DBBC BBCs.
+
+.. Add `0` MHz BW for display of DBBC3 BBCs that are not configured.
+
+.. When sending a target level for the DBBC3 IFs, always send `1` for
+the filter selection, and ignore the filter selection on read back.
+
++
+
++
+
+Currently, this parameter is used in the syntax for the device, but is
+meaningless.
+
+.. Add useful default IF sources for DBBC3 `bbc__nnn__` commands.
+
+.. Allow `0` for DBBC3 BBC frequencies.
+
+.. Generalize DBBC3 `dbbcgain` command read back to handle DBBC3s.
+
+.. Make numerous wording fixes.
+
+.. Correct a few compile warnings, but certainly not a significant number.
+
+.. Add missing `help` page for `jive5ab` command.
+
+.. Reorganize and cleanup the `help` file for `onoff`.
+
+.. Fix error that prevent DBBC3 `ack` responses from passed to logging
+system.
+
+.. Add missing `bbc110` command for DBBC3.
+
 === drudg changes
 
-There have been no changes at this time.
+_drudg_ opening message date is 2021-12-28`.
+
+. Add support for DBBC3 DDC racks.
+
++
+
+_drudg_ can handle VEX schedules, _.vex_, with up to 128 dual
+side-band BBCs and eight IFs, It can handle Mark III schedules, _.skd,
+with up to 16 dual sideband BBCs (`1`-`16`) and two IFs (`a` and `b`).
+
++
+[NOTE]
+====
+
+At this time it is only considered safe to set the configuration of
+then Core3H boards with the DBBC3 boot configuration file. As a result
+the _drudg_ generated setup procedures only _check_ the configuration
+of the Core3H boards. Once it is possible to set the Core3H boards
+remotely. The setup procedure can be run with `force` as its argument
+set the configuration manually. For example:
+
+  setup01=force
+
+====
+
++
+
+[TIP]
+====
+
+A full check (or setup) of the Core3H boards will take longer than
+schedules allow for setup procedures to execute. As a result, it is
+strongly recommended that the new `use_setup_proc` _drudg_ option in
+_skedf.ctl_ (see <<use_setup_proc,use_setup_proc>> below) be enabled
+for use with DBBC3s. This will cause the mode to be checked only at
+the start of the schedule. If the schedule is started at least a few
+minutes ahead of time, there should be no delays in schedule
+execution due to the setup procedure.
+
+====
+
+. Replace use of all `mk5...` commands with `fb_...` commands in
+generated procedures when the selected recorder is FlexBuff. The
+following substitutions are made:
+ 
+* `fb` for `mk5`
+
+* `fb_mode` for `mk5c_mode`
+
+* `fb_status` for `mk5_status`
+
++
+
+NOTE: As a general rule, _drudg_ will use the `fb` versions of `mk5`
+commands and procedures when the selected recorder is FlexBuff. The
+procedures are discussed in individual items below.
+
+
+. Replace use of the `checkmk5` procedure with `checkfb` in _.snp_
+files when the selected recorder is FlexBuff.
+
+. Add, optionally, `thread...` procedures to setup procedures
+for Mark 5C and FlexBuff recorders.
+
++
+
+This procedure controls whether VDIF data is recorded multithreaded or
+single thread per file. Its use is described in
+<<../../../dbbc3_ops.adoc#_thread_procedure,Thread procedure>>
+subsection of the <<../../../dbbc3_ops.adoc#,FS DBBC3 Operations
+Manual>> document.
+
++
+
+NOTE: Although it is expected that only one thread selection will be
+used for an entire experiment, a separate `thread...` procedure is
+created for each mode. This allows them to be customized by mode if
+that should prove useful.
+
+
+. Add `mk5c_config` or `fb_config` procedure calls to setup
+procedures for Mark 5C and Flexbuff recorders, respectively.
+
++
+
+These procedures can be used to override the default configuration of
+Mark 5C and FlexBuff recorders. They are called after the `mk5c_mode`
+or `fb_mode` commands (and after the `thread...` procedure if
+present). They are local procedures intended to provide tuning for the
+recorder configuration.
+
++
+
+For more information see the
+<<../../../dbbc3_ops.adoc#_mk5c_configfb_config_procedure,mk5c_config/fb_config
+procedure>> subsection of the <<../../../dbbc3_ops.adoc#,FS DBBC3
+Operations Manual>> document.
+
+. Enhancements to summary listings, from option `5`:
+
+.. The `GB` positions and totals
+are now also listed when the recorder is none (closing
+https://github.com/nvi-inc/fs/issues/166[#166]).
+
+.. The `GB` fields were expanded to allow for larger data volumes.
+
+.. The `Info` column and the captions in the header describing it were
+cleaned-up.
+
+. Changes to _skedf.ctl_ options
+
++
+
+Please see the _/usr2/fs/st,default/control/skedf.ctl_ for details
+about the use of these options.
+
+.. New `e-vlbi_override` option
+
++
+
+If enabled, _drudg_ will automatically convert the recorder to `none`
+if the `target_correlator` parameter in a VEX schedule includes the
+string `e-vlbi` (case insensitive). This can still be overridden with
+_drudg_ option `11`.
+
+.. New `scan_close` option
+
++
+
+If enabled, _drudg_ will detect gaps in the schedule at least as long
+as a user settable `max_gap_time`, say an hour, and wait to start the
+next scan a user settable `pre_time` time before it is scheduled. The
+`pre_time` should probably be short, but at least as long as the worst
+case slewing time of the antenna. The concept is that the scan at the
+start of gap is _closed_, i.e., `check...` procedure is run before
+slewing to the next source. Then there is a wait until the `pre_time`
+before the next scan will begin for the `scan_name=...` and
+`source=...` to be commanded.
+
++
+
+This can be useful for intensive schedules. The antenna won't slew
+needlessly to a new source or setup for new scan at the start of the
+gap. The schedule can be broken into while it is waiting for the next
+scan to start, the intensive schedule run, and then the original
+schedule rejoined for the next scan.
+
+.. <<use_setup_proc,use_setup_proc>>[[use_setup_proc]]: New `use_setup_proc` option
+
++
+
++
+
+If enabled, _drudg_ prefixes each setup procedure with `setup_proc=`
+to invoke that command. For more information see
+the
+<<../../../dbbc3_ops.adoc#_minimizing_the_use_of_setup_procedures,Minimizing
+the use of setup procedures>> subsection of the
+<<../../../dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> document.
+
+.. New `vdif_single_thread_per_file` option
+
++
+
+This option allows control of whether the VDIF files created by Mark
+5C and FlexBuff recorders are multi-threaded or single threaded.
+
++
+
+For more information see the
+<<../../../dbbc3_ops.adoc#_thread_procedure,Thread procedure>>
+subsection of the <<../../../dbbc3_ops.adoc#,FS DBBC3
+Operations Manual>> document.
+
+.. Expanded `default_dbbc_if_inputs` option
+
++
+
+Defaults for up to eight IF inputs can be specified for DBBC3s.
+
+.. Expanded `default_dbbc_if_targets` option
+
++
+
++
+
+Defaults for up to eight IF inputs can be specified for DBBC3s.
+
+. Add other enhancements:
+
+.. Support slewing model acceleration in _.skd_ files.
+
+.. Use ISO  format for opening message date
+
+.. Remove trailing spaces in _.prc_ files
+
+.. Remove some obsolete variables
+
+.. Various clean-ups
