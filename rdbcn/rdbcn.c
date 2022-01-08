@@ -223,7 +223,8 @@ int doinit()
 	  shm_addr->rdbe_active[i]=1;
 	}
     }
-    {
+    char *disable=getenv("FS_RDBE_MC_DISABLE");
+    if (!disable || strcmp(disable,"1")) {
       char rdtcn[6];
       int ip[5];
       sprintf(rdtcn,"rdtc%1.1s",me+4);
