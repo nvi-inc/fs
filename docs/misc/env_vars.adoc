@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2021 NVI, Inc.
+// Copyright (c) 2020-2022 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 0.8 - January 2022
+Version 0.9 - January 2022
 
 :sectnums:
 
@@ -338,6 +338,16 @@ contents of the environment variable do not decode properly, `100` is
 used.
 
 This was introduced in April 2021.
+
+=== FS_RDBE_MC_DISABLE
+
+Nominal value is `1`.
+
+If set to `1`, this will suppress attempting to receive RDBE multicast
+data. This is useful for systems with R2DBEs to eliminate the (not
+useful in this case) multicast errors from the log and the display.
+
+This was introduced in January 2022.
 
 === FS_WAKEUP_WAV
 
