@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS DBBC3 Operations Manual
-Version 2.4 - January 2022
+Version 2.5 - January 2022
 
 :experimental:
 :sectnums:
@@ -876,17 +876,17 @@ _drudg_ supports:
 
 * Up to 128 dual side-band BBCs and eight IFs for VEX (_.vex_) schedule files.
 
-* Up to 16 dual side-band BBCs (`1`-`16`) and two IFs (`a` and `b`) for Mark IV
-(_.skd_) schedule files.
-+
+* Up to 16 dual side-band BBCs (`001`-`016`) and two IFs (`a` and `b`)
+for Mark IV (_.skd_) schedule files.  +
 
-NOTE: For a schedule that would nominally have a number of channels on an IF
-that is less than a power of two (for example, an _S/X_ mode), the channels for
-such an IF will need to be rounded up the next power of two. For example for
-_S_/_X_, the IF (_X_) with eight USB and two LSB channels will need to be
-expanded to eight USB and eight LSB; the IF (_S_) with six USB channels, to
-eight USB. These settings can be in the schedule file and flow from the
-catalog, so it is all automatic for the scheduler and the station.
+NOTE: For a schedule that would nominally have a number of channels on
+an IF that is less than a power of two (for example, an _S/X_ mode),
+the channels for such an IF will need to be rounded up the next power
+of two. For example for _S_/_X_, the IF (_X_) with eight USB and two
+LSB channels will need to be expanded to eight USB and eight LSB; the
+IF (_S_) with six USB channels, to eight USB. These settings can can
+flow from the catalog, so it is all automatic for the scheduler and
+the station.
 
 * The appropriate new <<DBBC3 commands>> are used in setup procedures.
 

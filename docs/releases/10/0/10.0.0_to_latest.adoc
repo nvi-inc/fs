@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 3.2 - January 2022
+Version 3.3 - January 2022
 
 :sectnums:
 :stem: latexmath
@@ -279,11 +279,11 @@ from within the FS _git_ archive directory, usually _/usr2/fs-git_.
 
 +
 
-Previously, the FS only provided limited functionality for DBBC3
-racks, as described in the <<dbbc3.adoc#,FS DBBC3 support>> document
-for release _10.0.0_. More complete support is provided now. The
-updated support is described in the <<../../../dbbc3_ops.adoc#,FS DBBC3
-Operations Manual>> document and includes:
+Before this release, the FS only provided limited functionality for
+DBBC3 racks, as described in the <<dbbc3.adoc#,FS DBBC3 support>>
+document for release, _10.0.0_. More complete support is provided now.
+The updated support is described in the <<../../../dbbc3_ops.adoc#,FS
+DBBC3 Operations Manual>> document and includes:
 
 +
 --
@@ -306,6 +306,16 @@ https://github.com/nvi-inc/fs/issues/33[#33])
 * FS time setting from a DBBC3 with _setcl_ if NTP is not available
 
 --
++
+
+WARNING: Although we have made a strong effort to verify that the FS
+and _drudg_ will correctly for DBBC3s, it has not been possible to
+schedule a fringe test yet to validate the functionality. Until we
+have some field experience with DBBC3, we will not know if everything
+works well together and/or whether we should make some adjustments for
+better operations. If there are issues, we expect there will updates
+to address them.
+
 +
 
 CAUTION: The current FS support is structured around the features of
@@ -476,41 +486,41 @@ been changed back.
 
 . Fix issues in _gnplt_ and _gndat_:
 
-.. Fix plotting of working file T~cal~ curve on zoomed T~cal~ versus
-frequency plots in _gnplt_ (closing
+.. Fix plotting of working file T~cal~(K) curve on zoomed T~cal~(K)
+versus frequency plots in _gnplt_ (closing
 https://github.com/nvi-inc/fs/issues/117[#117]).
 
 +
 
-Previously, if you zoomed in the T~cal~ versus frequency plot and
-selected display of the working file T~cal~ curve, it would reset the
-left plot edge to the unzoomed value when drawing the curve.  This was
-caused by an interaction of two issues:
+Previously, if you zoomed in the T~cal~(K) versus frequency plot and
+selected display of the working file T~cal~(K) curve, it would reset
+the left plot edge to the un-zoomed value when drawing the curve.
+This was caused by an interaction of two issues:
 
 +
 
 --
 
-* The program tried to draw the entire T~cal~ curve, not just the part
-in the zoomed frequency range.
+* The program tried to draw the entire T~cal~(K) curve, not just the
+part in the zoomed frequency range.
 
-* The function, `drawValues`, that adds T~cal~ or T~rec~ lines to
+* The function, `drawValues`, that adds T~cal~(K) or T~rec~ lines to
 plots, reset any plot limit, except the right edge one, if any data to
 be plotted was beyond that edge. This was apparently to allow showing
 the vertical axis intercept of the T~rec~ fit and to make sure that
-all vertical extents of T~rec~ and T~cal~ curves were not off the
+all vertical extents of T~rec~ and T~cal~(K) curves were not off the
 visible plot area.
 
 --
 
 +
 
-This was fixed by limiting the T~cal~ curve plotted to just segments
-within the zoomed area. In addition for consistency, the `drawValues`
-function was change to reset any plot limit that is exceeded by the
-data. Since all other uses of `drawValues` already limited the
-horizontal values to be plotted to the zoomed area, there was no
-impact on those other uses.
+This was fixed by limiting the T~cal~(K) curve plotted to just
+segments within the zoomed area. In addition for consistency, the
+`drawValues` function was change to reset any plot limit that is
+exceeded by the data. Since all other uses of `drawValues` already
+limited the horizontal values to be plotted to the zoomed area, there
+was no impact on those other uses.
 
 +
 
@@ -525,7 +535,7 @@ https://github.com/nvi-inc/fs/issues/104[#104]).
 
 This was caused by an incorrectly sized array in _gndat_ that was
 introduced in commit `f84a2bb9` dated June 2003.  This error was
-benign unless more than 20 detectors were used in a single _onoff_
+benign unless more than 20 detectors were used in a single `onoff`
 run.  Before the advent of RDBEs and DBBC3s, this was unlikely, but
 not impossible.
 
@@ -715,7 +725,7 @@ For the DBBC, this error has been occurring since continuous cal was
 first supported in 2012, FS _9.11.0_, commit `f5817f65`. For the
 DBBC3, it has been present since the rack was first supported in 2018,
 FS _9.12.12_, commit `19a69540`. However, the T~sys~ monitoring for
-the DBBC3 was largely unused before then current release because the
+the DBBC3 was largely unused before the current release because the
 device communication rate made it difficult to work with.
 
 +
@@ -791,9 +801,9 @@ This command is used to identify the setup procedures in the _.snp_ files, e.g.:
 The setup procedure (in this example `setup01`) will be executed if it
 is the first `setup_proc=...` command since the schedule was started
 or if a different procedure was used in the previous instance of the
-command in a schedule.  This can be useful to avoid executing setup
+command in a schedule. This can be useful to avoid executing setup
 procedures more than necessary, especially if they take very long to
-execute, as is the case the DBBC3, or if they may  disturb the
+execute, as is the case the DBBC3, or if they may disturb the
 equipment.
 
 +
@@ -846,12 +856,14 @@ may be removed in the future.
 
 Thanks to Jun Yang (Onsala) for suggesting this.
 
-. <<fbsyns,FlexBuff synonyms>>:[[fbsyns]] Add FlexBuff synonyms for certain Mark 5 commands.
+. <<fbsyns,FlexBuff synonyms>>:[[fbsyns]] Add FlexBuff synonyms for
+all Mark 5 commands except `mk5b_mode`, which is not used with a
+FlexBuff recorder.
 
 +
 
-The following synonyms for FlexBuff recorders (and their correspond
-Mark 5 versions)  were added:
+The following synonyms for FlexBuff recorders (listed with their
+corresponding Mark 5 versions) were added:
 
 +
 --
@@ -1291,15 +1303,15 @@ relatively low, not quite 1 in 2^32^ chance of it being excited.
 NOTE: _setcl_ only works for the first FiLa10G if there are two. A
 second is only used for VGOS. _fmset_ works for both.
 
-. Remove extra comma in T~cal~ table log entires (closing
+. Remove extra comma in T~cal~(K) table log entires (closing
  https://github.com/nvi-inc/fs/issues/160[#160]):
 
 +
 
 The contents of the _.rxg_ selected by an `lo=...` command are logged
 the first time the file is selected since the log was last opened.
-There was a redundant comma in the T~cal~ table log entries after the
-_.rxg_ file name.
+There was a redundant comma in the T~cal~(K) table log entries after
+the _.rxg_ file name.
 
 . Correct `bbc_gain` command error codes.
 
@@ -1378,56 +1390,127 @@ installation tips>> in the
 <<../../misc/install_reference.adoc#,Installation Reference>> document
 and references to it.
 
-. Add other fixes:
+. Add other miscellaneous fixes:
 
-.. Remove `e` rack type in help files.
+.. Generalize the `bbcgain` command read back to handle DBBC3s.
 
-+
+.. Allow `0` for DBBC3 BBC frequencies.
 
-+
+.. Add the missing `bbc110` command for DBBC3.
 
-Help for the `pcald` and `tpicd` commands is now for every rack.
+.. Add useful default IF sources for DBBC3 `bbc__nnn__` commands, when
+`_nnn_` is `064` or larger.
+
+.. Fix error that prevent DBBC3 command `ack` responses from being
+passed to the logging system.
+
+.. Add `0` MHz BW for display of DBBC3 BBCs that are not configured.
 
 .. Add the missing `formbbc` and `formif` detector groups in `onoff`
 for DBBC3 racks.
 
-.. Corrected `error number for trouble opening _time.ctl_.
++
 
-.. Add missing `32` and `64` MHz BWs in help for DBBC `bbc__nn__`
-commands.
+Before the current release there was no way to know which BBCs or IFs
+were being recorded to implement these groups. Now that the
+`core3h_mode__n__` commands are implemented, it is possible.
 
 .. Add missing `64` MHz BW for `fivept` and `onoff` with DBBC BBCs.
 
-.. Add `0` MHz BW for display of DBBC3 BBCs that are not configured.
+.. Fix a bug that caused DBBC3 BBC frequencies to be ignored when
+calculating T~cal~(K) and frequency dependent FWHM.
+
++
+
+For T~cal~(K), this generated incorrect values, which impacted T~sys~
+values by a proportional amount. The incorrect values were for a
+frequency in the band or nearby, so typically not entirely
+unreasonable.
+
++
+
+Since T~sys~ calculated by the FS is only a station diagnostic, this
+had limited impact. Before the current release with DBBC3's, T~sys~ could
+effectively only be calculated in `fivept` and `onoff` and to spot
+check T~sys~ outside of schedule execution. Pointing offsets (from
+`fivept`) and SEFDs/T~cal~(J)s (from `onoff`) were not affected. The
+T~cal~(K) values were probably adequate for verifying consistency of
+station performance with T~sys~ spot checks, if they were used at all.
+
++
+
+For frequency dependent FWHM, this should have been an insignificant
+error in most cases.
+
+.. Change `onoff` and `holog` to use `refrwn()` in place of
+(incorrect) `refrw()`.
+
++
+
+This should not be a significant effect above 5° elevation. Refraction
+is only applied to estimate an approximate value of the antenna
+elevation; great accuracy is not required. In any event, fixed values
+are used for the meteorological parameters, which limits the accuracy.
+For `fivept`, the FORTRAN `refr()` function is used, which also has
+fixed meteorological parameters.
+
+.. Update the value of π in the FS copy of _prefr.f_ to agree with the
+current value in _drudg_.
+
++
+
+In FS _9.7.0_, July 2004, commit `acde80ba2` the value if π used by
+_skdrut/prefr.f_ was updated with a value with more digits. The
+current change catches _fslb/pref.f_ up with the previous change.
+
++
+
+This increased digits changes the value of π by somewhat less than 3
+parts in 10^-11^, which should be insignificant. This marginally
+improves the consistency of FS precession rotations between B1950 and
+J2000 with those in _drudg_.
+
+.. Corrected `error number for reporting trouble opening _time.ctl_.
+
+.. Don't read the _rdbe.ctl_ control file, or log its contents, unless
+the rack type is RDBE.
 
 .. When sending a target level for the DBBC3 IFs, always send `1` for
 the filter selection, and ignore the filter selection on read back.
 
 +
 
-+
-
 Currently, this parameter is used in the syntax for the device, but is
 meaningless.
 
-.. Add useful default IF sources for DBBC3 `bbc__nnn__` commands.
+.. Fix `tpicd` to only use direct sampling DBBC3 of side-bands that are
+recorded instead of all of them.
 
-.. Allow `0` for DBBC3 BBC frequencies.
++
 
-.. Generalize DBBC3 `dbbcgain` command read back to handle DBBC3s.
+Before the current release, there was no way to know what channels
+were being recorded. Additionally, direct sampling was too slow to be
+useful. Only recorded channels would be sampled now, but direct
+sampling is no longer supported in favor of multicast.
+
+.. Reorganize and cleanup the `help` file for `onoff`.
+
+.. Add missing `32` and `64` MHz BWs in `help` for DBBC `bbc__nn__`
+commands.
+
+.. Add missing `help` page for `jive5ab` command.
+
+.. Remove `e` rack type in `help` files.
+
++
+
++
+
+`help` for the `pcald` and `tpicd` commands now works for all systems.
 
 .. Make numerous wording fixes.
 
 .. Correct a few compile warnings, but certainly not a significant number.
-
-.. Add missing `help` page for `jive5ab` command.
-
-.. Reorganize and cleanup the `help` file for `onoff`.
-
-.. Fix error that prevent DBBC3 `ack` responses from passed to logging
-system.
-
-.. Add missing `bbc110` command for DBBC3.
 
 === drudg changes
 
@@ -1437,9 +1520,11 @@ _drudg_ opening message date is 2021-12-28`.
 
 +
 
-_drudg_ can handle VEX schedules, _.vex_, with up to 128 dual
-side-band BBCs and eight IFs, It can handle Mark III schedules, _.skd,
-with up to 16 dual sideband BBCs (`1`-`16`) and two IFs (`a` and `b`).
+_drudg_ will handle VEX schedules, _.vex_, with up to 256 channels
+(128 BBCs) and eight IFs. It will handle Mark IV schedules, _.skd_,
+with up to 32 channels (16 BBCs, `001`-`016`) and up to two IFs (`a`
+and `b`). In all cases, the number of channels per IF must be a power
+of two.
 
 +
 [NOTE]
