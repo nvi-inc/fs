@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 3.6 - January 2022
+Version 3.7 - January 2022
 
 :sectnums:
 :stem: latexmath
@@ -33,7 +33,7 @@ Version 3.6 - January 2022
 == Introduction
 
 The document covers updating from FS _10.0.0_ to the _latest commit_
-on its branch. The latest commit is experimental. We make ever effort
+on its branch. The latest commit is experimental. We make every effort
 to keep the latest commit usable, but any commit that is not tagged
 for release is not intended for operations. The intended use of this
 document is to collect update information, as it becomes available,
@@ -55,7 +55,7 @@ complete, approach would be to review the update steps in the new
 release to make sure everything has been covered. _Let the user
 beware._
 
-This document is up to date with the features in the `e061cce8`
+This document is up to date with the features in the `5d7de7b6`
 commit. Due to small increments, such as updating this document, that
 may not be the literal last commit, but the differences should be
 small unless you happen to `pull` between a significant change and
@@ -344,8 +344,8 @@ https://github.com/nvi-inc/fs/issues/33[#33])
 +
 
 WARNING: Although we have made a strong effort to verify that the FS
-and _drudg_ will correctly for DBBC3s, it has not been possible to
-schedule a fringe test yet to validate the functionality. Until we
+and _drudg_ will work correctly for DBBC3s, it has not been possible
+to schedule a fringe test yet to validate the functionality. Until we
 have some field experience with DBBC3, we will not know if everything
 works well together and/or whether we should make some adjustments for
 better operations. If there are issues, we expect there will updates
@@ -951,17 +951,19 @@ command.
 Thanks to Alex Burns (Westford) for suggesting that we have a way to
 eliminate these errors entirely.
 
-. Split `equip` log header line into two parts.
+. Split `equip` log header line into three parts.
 
 +
 
-The `equip` line in the log header has been broken into two lines,
-`equip1` and `equip2`. The break occurs between the Mark 4 Decoder
-Transmission Terminator Character value and the DBBC DDC Firmware
-Version value. Except for the clock rate value, the values in the
-`equip2` line are only DBBC related values. The clock rate value is
-also used for Mark 5B recorders.
-
+The `equip` line in the log header has been broken into three lines,
+`equip`, `equip2`, and `equip3`. The `equip` line now contains just
+the rack, recorders, and decoder information. The remaining
+information from the _equip.ctl_ control file is listed, in order, on
+the `equip2` and `equip3` lines. Those lines break between the Mark 4
+Decoder Transmission Terminator Character value and the DBBC DDC
+Firmware Version value. Except for the clock rate value, the values in
+the `equip3` line are only DBBC related values. The clock rate value
+is also used for Mark 5B recorders.
 
 . <<refrw_bad,refrw_bad()>>:[[refrw_bad]] Rename _poclb.a_ routine
 `refrw()` to `refrw_bad()`.
@@ -1549,6 +1551,19 @@ are used for the meteorological parameters, which limits the accuracy.
 For `fivept`, the FORTRAN `refr()` function is used, which also has
 fixed meteorological parameters.
 
+.. Prevent decimation from being specified for 5B/Ethernet in the
+`mk5c_mode` (and `fb_mode`) command.
+
++
+
+Previously, it was possible to set the 5B/Ethernet sample rate via the
+_decimation_ parameter  in the `mk5c_mode` (and `fb_mode`) command.
+This was a vestige of the `mk5b_mode` command. The Ethernet recorders
+(Mark 5C and FlexBuff, controlled by _jive5ab_) do not support
+decimation. The _sample_ parameter of the `mk5c_mode` (and `fb_mode`)
+command provides full functionally for setting the sample rate for
+5B/Ethernet and VDIF recording and is the method used by _drudg_.
+
 .. Update the value of π in the FS copy of _prefr.f_ to agree with the
 current value in _drudg_.
 
@@ -1556,7 +1571,7 @@ current value in _drudg_.
 
 In FS _9.7.0_, July 2004, commit `acde80ba2` the value if π used by
 _skdrut/prefr.f_ was updated with a value with more digits. The
-current change catches _fslb/pref.f_ up with the previous change.
+current change catches _fslb/pref.f_ up with that previous change.
 
 +
 
