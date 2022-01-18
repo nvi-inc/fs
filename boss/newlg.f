@@ -189,7 +189,7 @@ c
       nch = ichmv(ib,nch,iaxis,1,4) - 1
       call logit3(ib,nch,lsor)
 
-      nch = ichmv_ch(ib,1,'equip1,')
+      nch = ichmv_ch(ib,1,'equip,')
 c
       call fs_get_rack(rack)
       call fs_get_rack_type(rack_type)
@@ -365,8 +365,11 @@ c
       else
          nch=ichmv_ch(ib,nch,"none")
       endif
+      call logit3(ib,nch-1,lsor)
 c
-      nch=mcoma(ib,nch)
+      nch = ichmv_ch(ib,1,'equip2,')
+c
+c
       call fs_get_freqif3(freqif3)
       nch=nch+ib2as(freqif3/100,ib,nch,z'8000'+10)
 c
@@ -463,7 +466,7 @@ c
       endif
       call logit3(ib,nch-1,lsor)
 c
-      nch = ichmv_ch(ib,1,'equip2,')
+      nch = ichmv_ch(ib,1,'equip3,')
 c
       nch=ichmv_ch(ib,nch,'v')
       call fs_get_dbbcddcvs(dbbcddcvs)
