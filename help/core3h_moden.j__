@@ -1,10 +1,10 @@
-core3h_modex - set core3h mode (DBBC3 rack)
+core3h_moden - set core3h mode (DBBC3 rack)
 
 Syntax:   core3h_mode0=state,force,okay
-          core3h_modeX=mask2,mask1,decimation,sample,force,okay
+          core3h_modeN=mask2,mask1,decimation,sample,force,okay
 
-Response: core3h_modeX/mask2,mask1,decimation,sample,clock,split,input
-          core3h_modeX/stopped
+Response: core3h_modeN/mask2,mask1,decimation,sample,clock,split,input
+          core3h_modeN/stopped
 
 Settable parameters:
 
@@ -13,7 +13,7 @@ state:      begin or end. No default, see 'Comments' section for more
 
 force:      force setup: literal 'force', '$', nor null. See comments.
 
-X           1 to 8, but is limited to the number of IFs boards
+N           1 to 8, but is limited to the number of IFs boards
             specified in dbbc3.ctl
 
 mask2:      VSI2 input bit-stream mask, usually hex, 32-bit wide
@@ -74,7 +74,7 @@ These commands, in their command form, i.e., with '=', update the FS's
 model of Core3H boards' state, with or without 'force'. Once a 'begin'
 has been executed, the FS's model is not well defined until the
 matching 'end' has been executed. No commands other than other
-'core3h_modeX' command should be executed between them. If there are
+'core3h_modeN' command should be executed between them. If there are
 other commands, the results may not be well defined, particularly for
 'mk5c_mode'/'fb_mode' and 'tpicd'.
 
@@ -123,7 +123,7 @@ is:
 - the final command of such a set-up/check, so an error should be more
   visible
 
-The 'core3h_modeX=...,force' command, 'x' not equal to '0', also
+The 'core3h_modeN=...,force' command, 'N' not equal to '0', also
 checks in DBBC3 firmware version in case it is used by itself.
 
 The effective sample rate can be specified in the SNAP command either
