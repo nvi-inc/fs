@@ -143,7 +143,7 @@ int itask;
       m5state_init(&lcl->decimate.state);
       if(14==itask)
 	break;
-      if(3!=lcl->source.source){ /* VSI or 5B/Ethernet */
+      if(3>lcl->source.source){ /* VSI */
 	ierr=arg_int(ptr,&lcl->decimate.decimate ,1,FALSE);
 	if(ierr == 0 && lcl->decimate.decimate!=1 &&
 	   lcl->decimate.decimate!=2 &&
@@ -165,7 +165,7 @@ int itask;
 	if(ierr==-100)
 	  ierr=0;   /* default okay if sample is provided (next) */
       } else if(strlen(ptr)!=0)
-	ierr=-220;   /* VDIF cannot specify decimation */
+	ierr=-220;   /* Ethernet cannot specify decimation */
       break;
     case 4:
       m5state_init(&lcl->samplerate.state);

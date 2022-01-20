@@ -903,7 +903,7 @@ For Mark 5B recorder implied decimation must be integer 1, 2, 4, 8, or 16. Check
 Mask must be null for DBBC3.
 ""
 5T -223
-Decimation not supported for VDIF.
+Decimation is not supported for Mark 5C and FlexBuff recorders.
 ""
 5T -224
 For Ethernet recorders, total date rate must be an integer multiple of 1 Mbps.

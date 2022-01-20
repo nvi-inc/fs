@@ -32,13 +32,11 @@ mask:       For FiLa10g: bit-stream mask, hex, non-zero 64-bit wide
 decimation: decimation factor
             For mk5b_mode: 1, 2, 4, 8, or 16.  No default unless
             sample (next parameter) is specified.
-            For mk5c_mode/fb_mode: only available for source 'mark5b'.
-            There is no monitor value for Ethernet recorders.
+            Not available for mk5c_mode/fb_mode.
             Ignored for bit_streams.
 
-            For mk5b_mode, and mk5c_mode/fb_mode with 5b/Ethernet, the
-            minimum implied sample rate (relative to the VSI-H/Mark5B
-            clock rate in equip.ctl) is 2 Mbps.
+            For mk5b_mode, the minimum implied sample rate (relative
+            to the VSI-H/Mark5B clock rate in equip.ctl) is 2 Ms/s.
 
 sample:     sample rate: in MHz.  For mk5b_mode: the possible range of
             values includes 2, 4, 8, 16, 32, and 64, but the range is
