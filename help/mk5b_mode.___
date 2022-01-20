@@ -22,12 +22,12 @@ source:     data source or format
             Mark5B-over-Ethernet, which is not fully supported by the
             FS.
 
-mask:       For FiLa10g: bit-stream mask, hex, non-zero 64-bit wide
+mask:       bit-stream mask, hex, non-zero 64-bit wide
             maximum, default 0xffffffff (least 32 bits on).
-            For DBBC3: null.
+            For mk5b_mode, only the upper or lower 32 bits may be
+            non-zero, see comments.
+            For DBBC3 the mask must be null, see comments.
             There is no monitor value for Ethernet recorders.
-            See comments for notes about the mask for 'mk5b_mode' and
-            for DBBC3s.
 
 decimation: decimation factor
             For mk5b_mode: 1, 2, 4, 8, or 16.  No default unless
@@ -38,7 +38,7 @@ decimation: decimation factor
             For mk5b_mode, the minimum implied sample rate (relative
             to the VSI-H/Mark5B clock rate in equip.ctl) is 2 Ms/s.
 
-sample:     sample rate: in MHz.  For mk5b_mode: the possible range of
+sample:     sample rate: in Ms/s.  For mk5b_mode: the possible range of
             values includes 2, 4, 8, 16, 32, and 64, but the range is
             more limited due to the available decimation factors; see
             comments; default sample rate is the VSI-H/Mark5B clock
@@ -79,13 +79,13 @@ The 'fb_mode' command is an alias for the 'mk5c_mode' command.
 Intended for better indentification with FlexBuff recorders, but is
 otherwise exactly the same.
 
-For the 'mk5b_mode=...' command, the minimum sample rate is 2 MHz.  As
+For the 'mk5b_mode=...' command, the minimum sample rate is 2 Ms/s.  As
 a result the decimation factor may not yield an effective sample rate
-less than 2 MHz when divided into the VSI-H/Mark5B clock rate (from
+less than 2 Ms/s when divided into the VSI-H/Mark5B clock rate (from
 'equip.ctl').  When specifying the decimation implicitly via a sample
 rate, the range of available sample rates is similarly limited by the
 range of decimation factors available.  As a result, the sample rate
-must be one of the powers of 2 MHz starting with the greater of 2 MHz
+must be one of the powers of 2 Ms/s starting with the greater of 2 Ms/s
 and VSI-H/Mark5B clock rate divided by 16 up to the VSI-H/Mark5B clock
 rate itself.
 
@@ -97,17 +97,17 @@ sample rates are described in next paragraph.  Note that for
 total bit rates of a little above 2 Gbps are not supported.  There may
 not be an error message in such a case, but it won't work.
 
-The sample rate parameter is in units of MHz.  More resolution, down
-to 1 Hz, can obtained for Ethernet recorders by appending a decimal
-point and trailing digits. e.g. a sample rate of 15625 Hz (the lowest
+The sample rate parameter is in units of Ms/s.  More resolution, down
+to 1 s/s, can obtained for Ethernet recorders by appending a decimal
+point and trailing digits. e.g. a sample rate of 15625 s/s (the lowest
 possible with a 64-bit mask) can be specified as '0.015625'.  In
 principle, the maximum value of the sample rate is the maximum value
 that will fit in an unsigned 64-bit integer, or 18446744073709551615
-Hz.  However, the possible values are further limited by the fact that
-the total date rate must fit in a unsigned 64-bit value and be a
+s/s.  However, the possible values are further limited by the fact
+that the total date rate must fit in a unsigned 64-bit value and be a
 multiple of 1 Mbps (for 'mk5c_mode=...'/'fb_mode=...') , i.e.,
 18446744073709 Mbps is the maximum.  Therefore the maximum effective
-sample rate is 18446744073709 MHz (using only one track).  No limit
+sample rate is 18446744073709 Ms/s (using only one track).  No limit
 checking is performed, so values that exceed these limits may produce
 erroneous results with no warning.  However, any unallowed values
 below these limits will return an error.
@@ -155,7 +155,7 @@ mask may be non-zero.  The lower 32 bits select DBBC2 VSI1 bitstreams
 and the upper 32 bits select VSI2 bitstreams.  For these cases, the
 Mark 5B recorder can be connected to either VSI1 or VSI2.  However,
 there is no detection if an incompatable connection is being used.
-Possible ncompatable connections include: (1) connected to VSI2 when
+Possible incompatable connections include: (1) connected to VSI2 when
 the VSI1 bitsreams for 'wastro' or 'geo2' are to be recorded, (2)
 connected to VSI2 when 'astro3' is to be recorded, (3) connection to
 VSI2 when 'astro2' will be used with a DBBC2 firmware version earlier
@@ -201,7 +201,7 @@ from the recorder and will not be effective.  The override is not
 available for 'mk5c_mode=...'.  Changing the mode while recording will
 probably cause problems with the recording and is not recommended.
 
-Notes on the default recorder configuration:
+Notes on the default Ethernet recorder configuration:
 
 The 'mk5c_mode'/'fb_mode' command sends the configuration commands,
 depending on which recorder is selected in 'equip.ctl', 'mk5c' or
@@ -286,8 +286,9 @@ Notes on Mark5B-over-Ethernet (5B/Ethernet):
 
   Only VDIF recording is recommended for use with the Ethernet
   recorders.  5B/Ethernet is not fully supported by the FS.  However,
-  there is a path to recording it if it is needed in an unusual
-  situation.  Please follow these steps:
+  there is a POSSIBLE path to recording it if it is needed in an
+  unusual situation.  This has not been tested.  If you try to use it,
+  please report your experience.  Follow these steps:
 
      1. 'drudg' the experiment observing schedule normally.
 
@@ -301,7 +302,7 @@ Notes on Mark5B-over-Ethernet (5B/Ethernet):
            immediately after the 'fila10g_mode=...' command.
 
            For a DBBC3, insert the command:
-           'dbbc3=core3h=X,start vdif' immediately after each
+           'dbbc3=core3h=X,start mark5b' immediately after each
            corresponding 'core3h_modeX=...' command.
    
      3. Run the experiment with these changes.
@@ -323,8 +324,7 @@ Notes on Mark5B-over-Ethernet (5B/Ethernet):
      sequence numbers.  **The resulting executable should not be used
      for VDIF recording**.  Please see the installation instructions
      in the 'jive5ab' source distribution for more information or
-     contact Harro Verkouter (verkouter@jive.eu) for additional
-     assistance.
+     contact Marjolein.
 
      Please note that for Mark 5C recorders, the 'FILA=1' option will
      not improve the situation.

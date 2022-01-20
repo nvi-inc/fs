@@ -879,7 +879,7 @@ mask parameter must specify a non-zero integer, maximum 64 bits, usually as a he
 decimate parameter must be one of 1, 2, 4, 8, or 16
 ""
 5T -204
-Mark 5B recorder sample rate must be integer 2, 4, 8, 16, 32, or 64 (MHz).
+Mark 5B recorder sample rate must be integer 2, 4, 8, 16, 32, or 64 (Ms/s).
 ""
 5T -205
 fpdp parameter, if specified, must be 1 or 2.
@@ -912,7 +912,7 @@ For Ethernet recorders, total date rate must be an integer multiple of 1 Mbps.
 Can't specify sample rate and decimate parameters simultaneously
 ""
 5T -244
-Sample rate must be a positive integer Hz.
+Sample rate must be a positive integer s/s.
 ""
 5T -301
 Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the sixth parameter.
@@ -930,7 +930,7 @@ Use "mk5b_mode" for Mark 5B recorders only.
 Use "mk5c_mode" for Mark 5C and Flexbuff recorders only.
 ""
 5T -501
-error decoding mode? source/magic  parameter
+error decoding mode? source/magic parameter
 ""
 5T -502
 error decoding mode? mask or format parameter
