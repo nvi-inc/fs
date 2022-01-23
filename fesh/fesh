@@ -113,8 +113,9 @@ Options:
  -H       suppress use of the hidden .latest sub-directory for vlbeer
  -y yyyy  Specify different (four-digit) year than the current one
           for geo data centers (see more below about specifying the year)
- -f       Force downloading of schedule from server and, if given
-          with '-d', re-run drudg
+ -f       Force downloading of schedule (and .txt witb -x) files from server
+          (if -S is not used) and force re-drudging when -d is used, otherwise
+          existing files will not be replaced
  -x       download corresponding .txt file as well (geo only)
  -s xx    Override STATION environment variable
  -a val   Override drudg VSI_ALIGN answer to val
