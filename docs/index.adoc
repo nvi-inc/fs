@@ -19,9 +19,7 @@
 //
 
 = Index of fs/
-Version 0.6 - January 2022
-
-<<dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>
+Version 0.7 - January 2022
 
 == Direct Links
 

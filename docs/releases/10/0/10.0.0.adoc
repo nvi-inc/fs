@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2021 NVI, Inc.
+// Copyright (c) 2020-2022 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 3.5 - November 2021
+Version 3.6 - January 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -193,8 +193,6 @@ This section provides links to some other useful documents.
 * <<beta3.adoc#,FS 10.0.0-beta3 Update Notes>>
 
 * <<beta3_to_10.0.0.adoc#,FS 10.0.0-beta3 to FS 10.0.0 Update Notes>>
-
-* <<10.0.0_to_latest.adoc#,FS 10.0.0 to Latest Commit Update Notes>>
 
 === Miscellaneous documents
 

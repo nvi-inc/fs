@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020 NVI, Inc.
+# Copyright (c) 2020, 2022 NVI, Inc.
 #
 # This file is part of FSL10 Linux distribution.
 # (see http://github.com/nvi-inc/fsl10).
@@ -17,18 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-
-DOC_DIR = 0
+DOC_DIR = 0 1
 
 .PHONY: all $(DOC_DIR)
 
 all: index.html $(DOC_DIR)
 
-index.html: index.adoc
-
 $(DOC_DIR):
 	$(MAKE) -C $@
-
 
 %.html: %.adoc
 	asciidoctor $^

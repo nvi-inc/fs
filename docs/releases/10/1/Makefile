@@ -18,10 +18,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-all: index.html beta2.html beta1_to_beta2.html beta2_to_beta3.html\
-    beta3.html beta3_to_10.0.0.html rdbe.html mk6.html dbbc3.html\
-    changes_10.0.0.html fesh_changes.html fsserver_changes.html\
-    10.0.0.html
+all: index.html dbbc3_ops.html\
+    10.1.0.html 10.1.0_to_latest.html
 
 %.html: %.adoc
 	asciidoctor -a toc $^

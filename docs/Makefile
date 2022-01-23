@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020 NVI, Inc.
+# Copyright (c) 2020, 2022 NVI, Inc.
 #
 # This file is part of FSL10 Linux distribution.
 # (see http://github.com/nvi-inc/fsl10).
@@ -22,15 +22,11 @@ DOC_DIR = releases misc
 
 .PHONY: all $(DOC_DIR)
 
-all: index.html dbbc3_ops.html $(DOC_DIR)
-
-index.html: index.adoc
-dbbc3_ops.html: dbbc3_ops.adoc
+all: index.html $(DOC_DIR)
 
 $(DOC_DIR):
 	$(MAKE) -C $@
 
-
 %.html: %.adoc
-	asciidoctor -a toc $^
+	asciidoctor $^
 

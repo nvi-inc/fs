@@ -20,67 +20,116 @@
 
 :doctype: book
 
-= FS 10.0.0 to Latest Commit Update Notes
-Version 3.8 - January 2022
+= FS 10.1.0 Update Notes
+E. Himwich, D. Horsley, J. Quick, J. Gipson
+Version 3.7 - January 2022
 
+//:hide-uri-scheme:
 :sectnums:
 :stem: latexmath
 :sectnumlevels: 4
 :experimental:
 
 :toc:
+:toclevels: 4
 
 == Introduction
 
-The document covers updating from FS _10.0.0_ to the _latest commit_
-on its branch. The latest commit is experimental. We make every effort
-to keep the latest commit usable, but any commit that is not tagged
-for release is not intended for operations. The intended use of this
-document is to collect update information, as it becomes available,
-before the next release.
+This update is intended for all stations using FS _10.0.0_. This
+document covers the steps needed to update from FS _10.0.0_ to
+_10.1.0_. The changes in the FS and _drudg_ for _10.0.0_ are covered
+in the <<Changes since 10.0.0>> section below.
 
-IMPORTANT: Commits that are not tagged for release may have
-significant issues including: not building, crashing, and
-incompatibilities with operational observation schedule files. Such
-commits are intended for testing only. _Let the user beware._
+FS _10.1.0_ has been tested for several configurations but not all
+possible ones. You should test it carefully before using it for
+operations. Please email Ed if you encounter problems so that we can
+resolve them.
 
-CAUTION: It is expected that those using the latest commit are experts
-and will manage the differences for updating to the next official
-release themselves. No specific documentation will be provided. What
-commit was last updated to will determine what needs to be done. It
-might work to verify that all the steps in the latest version of this
-document, appropriately renamed as an update from the old release to
-the new release, were completed. An alternate, but not necessarily
-complete, approach would be to review the update steps in the new
-release to make sure everything has been covered. _Let the user
-beware._
+Installing the new version as an update is much simpler than upgrade
+to _10.0.0_, see the <<Upgrading from 10.0.0>> section below.
 
-This document is up to date with the features in the `5d7de7b6`
-commit. Due to small increments, such as updating this document, that
-may not be the literal last commit, but the differences should be
-small unless you happen to `pull` between a significant change and
-this document being updated.
+The most significant changes in _10.0.0_ are:
 
-== Upgrading from 10.0.0 to the latest commit
+* FS and _drudg_ support for DBBC3 racks.
+
+* Use of command and procedure with names containing `fb` instead of
+`mk5`. For FS commands the new names are synonynms for the old names.
+
+* Use of `mk5c_config` nd `fb_config` procedures for local tuning of
+Mark 5C and FlexBuff recorders.
+
+* Instrumentation record _fsserver_ errors.
+
+* Change the default FS git branch to `main`
+
+NOTE: This has not been implemented in the `alpha` pre-releases.
+
+* Numerous small enhancements and fixes.
+
+For the complete list of changes, see the <<Changes since 10.0.0>>
+sections below.
+
+== Upgrading from 10.0.0
 
 You must have already upgraded to _10.0.0_ according to the
-<<10.0.0.adoc#,FS 10.0.0 Update Notes>> document before installing
+<<../0/10.0.0.adoc#,FS 10.0.0 Update Notes>> document before installing
 this update.
 
-=== Fetch and make the latest commit and make station code
+=== Fetch and make FS 10.1.0 and make station code
 
-. Update the FS
+CAUTION: With this release, we have changed the default _git_ branch
+for the FS. This will be transparent for all users unless they have
+made local changes to their FS _git_ repo. If you have made such
+changes and need to preserve them, please contact Ed for methods to
+handle this.
+
+. Login as _root_.
+
+. Download the FS
 
 +
 
-If you are using _git_, as is recommended, then as _prog_ execute:
+* If you are are on an FSL9 or FSL10 system:
+
+       cd /usr2
+       mv fs-git fs-git.old-10.0.0
+       git clone https://github.com/nvi-inc/fs.git fs-git
+       cd fs-git
+       git checkout -q 10.1.0
+       make install
+
++
+
+Answer `*y*` to confirm installation.
+
+* If you are using FSL8 or other old Linux distribution, or otherwise
+need to use _ssh_ instead:
+
+       cd /usr2
+       mv fs-git fs-git.old-10.0.0
+       git clone git@github.com:nvi-inc/fs fs-git
+       cd fs-git
+       git checkout -q 10.1.0
+       make install
+
++
+
++
+
+Answer `*y*` to confirm installation.
+
+. Login as _prog_.
+
++
+
+IMPORTANT: The FS must be compiled as _prog_.
+
+. Compile the FS
 
 
-             cd /usr2/fs-git
-             git checkout master
-             git pull
-             make clean rmdoto rmexe all >& /dev/null
-             make -s
+  cd /usr2/fs
+  make rmdoto rmexe all >& /dev/null
+  make -s
 
 +
 
@@ -98,18 +147,20 @@ with:
 
 +
 
-IMPORTANT: If your station code uses `refrw()` you will need to update
-to use `refrw_bad()` or `refrwn()`. The use of `refrw_bad()` should be
-sufficient in the short-term, but you should change to `refrwn()` in
-the long term. Please see the <<refrw_bad,refrw_bad()>> FS change
-below from more details.
+IMPORTANT: If your station code uses `refrw()`, the _make_ will fail.
+You will need to update to use `refrw_bad()` or `refrwn()`. The use of
+`refrw_bad()` should be sufficient in the short-term, but you should
+change to `refrwn()` in the long term. Please see the
+<<refrw_bad,refrw_bad()>> FS change below from more details.
 
 
 === Reboot
 
-This will make sure the FS server is restarted.
+IMPORTANT: Reboot the computer. This is necessary to allocate FS, and
+possibly station, shared memory for the new version. It will also make
+sure you are using the latest version of the display server.
 
-=== Additional steps
+=== Local customizations
 
 Except if noted otherwise, these steps should all be performed as
 _oper_.
@@ -176,13 +227,12 @@ or you aren't aware of what tuning is needed. These procedures are
 called after the `mk5c_mode` or `fb_mode` commands, depending on the
 type of recorder, to allow the default configuration to be overridden.
 The default configuration is described in the
-<<../../../dbbc3_ops.adoc#_default_configuration,Default
-configuration>> subsection of the <<../../../dbbc3_ops.adoc#,FS DBBC3
-Operations>> document and in the `help` pages for `mk5c_mode` and
-`fb_mode`. The commands in these procedures should be mode
-independent.  Mode dependent tuning should be handled differently;
-perhaps by inserting commands directly at the top-level of the setup
-procedure.
+<<dbbc3_ops.adoc#_default_configuration,Default configuration>>
+subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations>> document and
+in the `help` pages for `mk5c_mode` and `fb_mode`. The commands in
+these procedures should be mode independent.  Mode dependent tuning
+should be handled differently; perhaps by inserting commands directly
+at the top-level of the setup procedure.
 
 . If you have a FlexBuff recorder, use _pfmed_ to add a `checkfb`
 procedure to your `station` procedure library.
@@ -210,8 +260,8 @@ existing procedure:
 
 . <<dbbc3config,FS DBBC3 Configuration>>[[dbbc3config]]: If you have a
 DBBC3, you should make the configuration changes described in the
-<<../../../dbbc3_ops.adoc#_configuring_the_fs_for_a_dbbc3,Configuring
-the FS for a DBBC3>> appendix of the <<../../../dbbc3_ops.adoc#,FS
+<<dbbc3_ops.adoc#_configuring_the_fs_for_a_dbbc3,Configuring
+the FS for a DBBC3>> appendix of the <<dbbc3_ops.adoc#,FS
 DBBC3 Operations>> document. If you expect to get a DBBC3, these
 changes can be deferred until then.
 
@@ -327,10 +377,10 @@ from within the FS _git_ archive directory, usually _/usr2/fs-git_.
 +
 
 Before this release, the FS only provided limited functionality for
-DBBC3 racks, as described in the <<dbbc3.adoc#,FS DBBC3 support>>
+DBBC3 racks, as described in the <<../0/dbbc3.adoc#,FS DBBC3 support>>
 document for release, _10.0.0_. More complete support is provided now.
-The updated support is described in the <<../../../dbbc3_ops.adoc#,FS
-DBBC3 Operations Manual>> document and includes:
+The updated support is described in the <<dbbc3_ops.adoc#,FS DBBC3
+Operations Manual>> document and includes:
 
 +
 --
@@ -388,18 +438,18 @@ The `mk5c_mode` command sends configuration commands, beyond `mode`,
 depending on which recorder is selected in _equip.ctl_, `mk5c` or
 `flexbuff`, the total data rate, and the data type, VDIF or
 5B/Ethernet. The updated default configuration is described in the
-<<../../../dbbc3_ops.adoc#_default_configuration,Default
-configuration>> subsection of the <<../../../dbbc3_ops.adoc#,FS DBBC3
-Operations Manual>> document.
+<<dbbc3_ops.adoc#_default_configuration,Default configuration>>
+subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>
+document.
 
 +
 
 All the settings can be overridden by the `mk5c_config` (or
 `fb_config`, depending on the recorder type selected when running
 _drudg_) local procedure. See the
-<<../../../dbbc3_ops.adoc#_overriding_the_defaults,Overriding the
-defaults>> subsection of the <<../../../dbbc3_ops.adoc#,FS DBBC3
-Operations Manual>> document.
+<<dbbc3_ops.adoc#_overriding_the_defaults,Overriding the defaults>>
+subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>
+document.
 
 +
 
@@ -1706,8 +1756,8 @@ for Mark 5C and FlexBuff recorders.
 
 This procedure controls whether VDIF data is recorded multithreaded or
 single thread per file. Its use is described in
-<<../../../dbbc3_ops.adoc#_thread_procedure,Thread procedure>>
-subsection of the <<../../../dbbc3_ops.adoc#,FS DBBC3 Operations
+<<dbbc3_ops.adoc#_thread_procedure,Thread procedure>>
+subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations
 Manual>> document.
 
 +
@@ -1732,9 +1782,9 @@ recorder configuration.
 +
 
 For more information see the
-<<../../../dbbc3_ops.adoc#_mk5c_configfb_config_procedure,mk5c_config/fb_config
-procedure>> subsection of the <<../../../dbbc3_ops.adoc#,FS DBBC3
-Operations Manual>> document.
+<<dbbc3_ops.adoc#_mk5c_configfb_config_procedure,mk5c_config/fb_config
+procedure>> subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations
+Manual>> document.
 
 . Enhancements to summary listings, from option `5`:
 
@@ -1792,11 +1842,10 @@ schedule rejoined for the next scan.
 +
 
 If enabled, _drudg_ prefixes each setup procedure with `setup_proc=`
-to invoke that command. For more information see
-the
-<<../../../dbbc3_ops.adoc#_minimizing_the_use_of_setup_procedures,Minimizing
-the use of setup procedures>> subsection of the
-<<../../../dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> document.
+to invoke that command. For more information see the
+<<dbbc3_ops.adoc#_minimizing_the_use_of_setup_procedures,Minimizing
+the use of setup procedures>> subsection of the <<dbbc3_ops.adoc#,FS
+DBBC3 Operations Manual>> document.
 
 .. New `vdif_single_thread_per_file` option
 
@@ -1807,10 +1856,9 @@ This option allows control of whether the VDIF files created by Mark
 
 +
 
-For more information see the
-<<../../../dbbc3_ops.adoc#_thread_procedure,Thread procedure>>
-subsection of the <<../../../dbbc3_ops.adoc#,FS DBBC3
-Operations Manual>> document.
+For more information see the <<dbbc3_ops.adoc#_thread_procedure,Thread
+procedure>> subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations
+Manual>> document.
 
 .. Expanded `default_dbbc_if_inputs` option
 
