@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.0.0 to Latest Commit Update Notes
-Version 3.7 - January 2022
+Version 3.8 - January 2022
 
 :sectnums:
 :stem: latexmath
@@ -77,10 +77,9 @@ If you are using _git_, as is recommended, then as _prog_ execute:
 
 
              cd /usr2/fs-git
-             git fetch
              git checkout master
-             make clean rmdoto rmexe
-             make >& /dev/null
+             git pull
+             make clean rmdoto rmexe all >& /dev/null
              make -s
 
 +
@@ -145,27 +144,39 @@ the FS starts successfully. The new errors reported are described in
 the <<additional_rxg_errors,Additional .rxg file errors>> change in
 the <<FS changes>> sub-section below.
 
-. Use _pfmed_ to add `mk5c_config` and `fb_config` procedures to your
-`station` procedure library.
+. If you have a Mark 5C and/or FlexBuff recorder, use _pfmed_ to add
+`mk5c_config` and/or `fb_config` procedures to your `station`
+procedure library.
 
 +
 
-This procedures are used to tune the configuration of _jive5ab_ for
-your hardware. They can be empty if don't have a Mark 5C or Flexbuff
-recorder or no tuning is needed for your recorder(s). We recommend
-adding the procedures even if you don't have a Mark 5C or FlexBuff in
-case you get them in the future. This will prevent an otherwise
-unexpected error about the procedure(s) being missing at that time.
+[TIP]
+====
 
+Alternatively, if the FS is not running, you can add empty procedures
+to your `station` procedure library with the following commands. For
+`mk5c_config`:
+
+  cd /usr2/proc
+  cat /usr2/fs/st.default/proc/mk5c_config.prc >>station.prc
+
+For `fb_config`:
+
+  cd /usr2/proc
+  cat /usr2/fs/st.default/proc/fb_config.prc >>station.prc
+
+====
 +
 
-NOTE: These procedures are called by _drudg_ generated setup
-procedures for systems with Mark 5C and FlexBuff recorders. They
-provide a means to tune the setup of _jive5ab_ for your hardware
-independent of the observing mode. These procedures are called after
-the `mk5c_mode` or `fb_mode` commands to allow the default
-configuration to be overridden. The default configuration is described
-in the <<../../../dbbc3_ops.adoc#_default_configuration,Default
+These procedures are called by _drudg_ generated setup procedures for
+systems with Mark 5C and FlexBuff recorders. They provide a means to
+tune the setup of _jive5ab_ for your hardware independent of the
+observing mode. They can be empty if your recorders don't need tuning
+or you aren't aware of what tuning is needed. These procedures are
+called after the `mk5c_mode` or `fb_mode` commands, depending on the
+type of recorder, to allow the default configuration to be overridden.
+The default configuration is described in the
+<<../../../dbbc3_ops.adoc#_default_configuration,Default
 configuration>> subsection of the <<../../../dbbc3_ops.adoc#,FS DBBC3
 Operations>> document and in the `help` pages for `mk5c_mode` and
 `fb_mode`. The commands in these procedures should be mode
@@ -173,8 +184,8 @@ independent.  Mode dependent tuning should be handled differently;
 perhaps by inserting commands directly at the top-level of the setup
 procedure.
 
-. If you have a FlexBuff recorder, use _pfmed_ to add a `checkfb` procedure to your
-`station` procedure library.
+. If you have a FlexBuff recorder, use _pfmed_ to add a `checkfb`
+procedure to your `station` procedure library.
 
 +
 
@@ -196,12 +207,6 @@ existing procedure:
 
   pf,station
   st,checkmk5,checkfb
-
-+
-
-Optionally you can modify the new procedure, created by either method,
-to make it more appropriate for a FlexBuff recorder.
-
 
 . <<dbbc3config,FS DBBC3 Configuration>>[[dbbc3config]]: If you have a
 DBBC3, you should make the configuration changes described in the
@@ -244,6 +249,7 @@ lines:
   Style "erchk" NeverFocus
   Style "scnch" NeverFocus
   Style "monan" NeverFocus
+
 +
 
 As _oper_, you can compare your version of the file with the new
@@ -257,6 +263,12 @@ default using:
 You can make the same change for _prog_, after logging into that
 account.
 
++
+
+NOTE: If you login with AUID accounts and then promote to
+_oper_/_prog_, you will need to make these changes in the AUID
+accounts to have the intended effect.
+
 . Cleanup _.rxg_ file comments:
 
 +
@@ -265,6 +277,15 @@ This step is optional, but may help you if want the leading and
 trailing comments in your _.rxg_ files to be easy to interpret. If it
 is not performed, there will no loss of functionality with the _.rxg_
 files. They will just have some extraneous comments.
+
++
+
+The complete cleanup can be a lengthy process. It is covered in the
+appendix <<Cleaning up .rxg file comments>>. That appendix has two
+sequential steps. The first is relatively easy and is recommended for
+most users before they next update their _.rxg_ files with _gnplt_.
+The second step is more complicated and can then be deferred until
+later. Please see the appendix for more details.
 
 +
 
@@ -281,15 +302,6 @@ updated your _.rxg_ files, this step may have little or no benefit for
 you.
 
 ====
-
-+
-
-The complete cleanup can be a lengthy process. It is covered in the
-appendix <<Cleaning up .rxg file comments>>. That appendix has two
-sequential steps. The first is relatively easy and is recommended for
-most users before they next update their _.rxg_ files with _gnplt_.
-The second step is more complicated and can then be deferred until
-later. Please see the appendix for more details.
 
 === Review changes
 
@@ -362,10 +374,10 @@ the future.
 +
 
 Thanks to: the EVN, for funding this development work; Eskil Varenius
-(Onsala) for making a system available for development as well as
-testing the FS; Sven Dornbusch (MPIfR, Bonn) for elaborating on the
-details of DBBC3 functionality; and Uwe Bach (Effelsberg), H.
-Verkouter (JIVE), and Jon Quick (HartRAO) for providing helpful
+(Onsala), for making a system available for development as well as
+testing the FS; Sven Dornbusch (MPIfR, Bonn), for elaborating on the
+details of DBBC3 functionality; Uwe Bach (Effelsberg), Marjolein
+Verkouter (JIVE), and Jon Quick (HartRAO), for providing helpful
 suggestions.
 
 . Expand setup of Mark 5C and Flexbuff recorders
@@ -396,8 +408,8 @@ makes `mk5c_mode` available with the synonym `fb_mode`.
 
 +
 
-Thanks H. Verkouter (JIVE) for extensive discussions about what the
-correct settings should be.
+Thanks to Marjolein Verkouter (JIVE) for extensive discussions about
+what the correct settings should be.
 
 . Improve _msg_ to always pick-up a new log file name (closing
 https://github.com/nvi-inc/fs/issues/118[#118]).

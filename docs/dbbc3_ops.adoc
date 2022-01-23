@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021 NVI, Inc.
+// Copyright (c) 2021, 2022 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS DBBC3 Operations Manual
-Version 2.5 - January 2022
+Version 2.6 - January 2022
 
 :experimental:
 :sectnums:
@@ -681,9 +681,10 @@ for an interactive prompt for the whether or not to use `setup_proc` when
 __drudg__ing geodesy schedules. Please see ``**fesh -h**`` for more
 information.
 
-Thanks to Jon Quick (HartRAO) and Harro Verkouter (JIVE) for suggesting this
-option. They also suggested that it may be utilized as part of future features
-for additional checking and resetting of the system.
+Thanks to Jon Quick (HartRAO) and Marjolein Verkouter (JIVE) for
+suggesting this option. They also suggested that it may be utilized as
+part of future features for additional checking and resetting of the
+system.
 
 === Thread procedure
 
