@@ -178,10 +178,10 @@ the new file and remove the obsolete contents of _equip.ctl_, execute:
 
 +
 
-NOTE: This will create the file, preserving the values from the DBBC3
-line in your old _equip.ctl_ file. That should allowing running the FS
-if you don't have a DBBC3. If you have a DBBC3, you should customize
-the contents in the <<dbbc3config,FS DBBC3 Configuration>> step below.
+This will create the file, preserving the values from the DBBC3 line
+in your old _equip.ctl_ file. That should allowing running the FS if
+you don't have a DBBC3. If you have a DBBC3, you should customize the
+contents in the <<dbbc3config,FS DBBC3 Configuration>> step below.
 
 . Run the FS to check for _.rxg_ file errors.
 
