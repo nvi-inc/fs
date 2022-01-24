@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2021 NVI, Inc.
+// Copyright (c) 2020-2022 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 1.8 - June 2021
+Version 1.9 - January 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -746,7 +746,7 @@ more details).
 The details of DBBC3 features are described in the
 <<dbbc3.adoc#_fs_dbbc3_support_features,FS DBBC3 support features>>
 section of the
-<<dbbc3.adoc#,FS DBBC3 support>> document.
+<<dbbc3.adoc#,FS 10.0 DBBC3 support>> document.
 
 . [[mk6]] Partial support for Mark 6 recorders
 +

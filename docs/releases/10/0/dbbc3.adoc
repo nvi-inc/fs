@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020, 2022 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -18,8 +18,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-= FS DBBC3 Support
-Version 0.2 - February 2021
+= FS 10.0 DBBC3 Support
+Version 0.3 - January 2022
 
 :sectnums:
 :toc:

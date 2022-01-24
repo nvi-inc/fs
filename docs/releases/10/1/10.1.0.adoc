@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 3.7 - January 2022
+Version 3.8 - January 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -228,9 +228,9 @@ called after the `mk5c_mode` or `fb_mode` commands, depending on the
 type of recorder, to allow the default configuration to be overridden.
 The default configuration is described in the
 <<dbbc3_ops.adoc#_default_configuration,Default configuration>>
-subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations>> document and
-in the `help` pages for `mk5c_mode` and `fb_mode`. The commands in
-these procedures should be mode independent.  Mode dependent tuning
+subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>
+and in the `help` pages for `mk5c_mode` and `fb_mode`. The commands in
+these procedures should be mode independent. Mode dependent tuning
 should be handled differently; perhaps by inserting commands directly
 at the top-level of the setup procedure.
 
@@ -260,10 +260,10 @@ existing procedure:
 
 . <<dbbc3config,FS DBBC3 Configuration>>[[dbbc3config]]: If you have a
 DBBC3, you should make the configuration changes described in the
-<<dbbc3_ops.adoc#_configuring_the_fs_for_a_dbbc3,Configuring
-the FS for a DBBC3>> appendix of the <<dbbc3_ops.adoc#,FS
-DBBC3 Operations>> document. If you expect to get a DBBC3, these
-changes can be deferred until then.
+<<dbbc3_ops.adoc#_configuring_the_fs_for_a_dbbc3,Configuring the FS
+for a DBBC3>> appendix of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3
+Operations Manual>>. If you expect to get a DBBC3, these changes can
+be deferred until then.
 
 . If you are using _tcsh_ as your login shell for _oper_ or _prog_ (or
 AUID accounts) and have not already done so, adjust _~/.session_ .
@@ -377,10 +377,10 @@ from within the FS _git_ archive directory, usually _/usr2/fs-git_.
 +
 
 Before this release, the FS only provided limited functionality for
-DBBC3 racks, as described in the <<../0/dbbc3.adoc#,FS DBBC3 support>>
-document for release, _10.0.0_. More complete support is provided now.
-The updated support is described in the <<dbbc3_ops.adoc#,FS DBBC3
-Operations Manual>> document and includes:
+DBBC3 racks, as described in the <<../0/dbbc3.adoc#,FS 10.0 DBBC3
+support>> document for release, _10.0.0_. More complete support is
+provided now.  The updated support is described in the
+<<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> and includes:
 
 +
 --
@@ -439,8 +439,7 @@ depending on which recorder is selected in _equip.ctl_, `mk5c` or
 `flexbuff`, the total data rate, and the data type, VDIF or
 5B/Ethernet. The updated default configuration is described in the
 <<dbbc3_ops.adoc#_default_configuration,Default configuration>>
-subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>
-document.
+subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
 
 +
 
@@ -448,8 +447,7 @@ All the settings can be overridden by the `mk5c_config` (or
 `fb_config`, depending on the recorder type selected when running
 _drudg_) local procedure. See the
 <<dbbc3_ops.adoc#_overriding_the_defaults,Overriding the defaults>>
-subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>
-document.
+subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
 
 +
 
@@ -1756,9 +1754,8 @@ for Mark 5C and FlexBuff recorders.
 
 This procedure controls whether VDIF data is recorded multithreaded or
 single thread per file. Its use is described in
-<<dbbc3_ops.adoc#_thread_procedure,Thread procedure>>
-subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations
-Manual>> document.
+<<dbbc3_ops.adoc#_thread_procedure,Thread procedure>> subsection of
+the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
 
 +
 
@@ -1783,8 +1780,8 @@ recorder configuration.
 
 For more information see the
 <<dbbc3_ops.adoc#_mk5c_configfb_config_procedure,mk5c_config/fb_config
-procedure>> subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations
-Manual>> document.
+procedure>> subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3
+Operations Manual>>.
 
 . Enhancements to summary listings, from option `5`:
 
@@ -1845,7 +1842,7 @@ If enabled, _drudg_ prefixes each setup procedure with `setup_proc=`
 to invoke that command. For more information see the
 <<dbbc3_ops.adoc#_minimizing_the_use_of_setup_procedures,Minimizing
 the use of setup procedures>> subsection of the <<dbbc3_ops.adoc#,FS
-DBBC3 Operations Manual>> document.
+10.1 DBBC3 Operations Manual>>.
 
 .. New `vdif_single_thread_per_file` option
 
@@ -1857,8 +1854,8 @@ This option allows control of whether the VDIF files created by Mark
 +
 
 For more information see the <<dbbc3_ops.adoc#_thread_procedure,Thread
-procedure>> subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations
-Manual>> document.
+procedure>> subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3
+Operations Manual>>.
 
 .. Expanded `default_dbbc_if_inputs` option
 
