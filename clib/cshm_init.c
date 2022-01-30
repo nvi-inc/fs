@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -533,7 +533,6 @@ void cshm_init()
       shm_addr->dbtcn.control[j].continuous=0;
       shm_addr->dbtcn.control[j].cycle=0;
       shm_addr->dbtcn.control[j].stop_request=1;
-      shm_addr->dbtcn.control[j].to_error_off=0;
       shm_addr->dbtcn.control[j].data_valid.user_dv=0;
   }
   shm_addr->dbtcn.iping=0;
@@ -564,6 +563,8 @@ void cshm_init()
           shm_addr->dbbc3_tsys_data.data[i].bbc[j].tsys_usb=-9e20;
       }
   }
+  shm_addr->dbbc3_command_count=0;
+  shm_addr->dbbc3_command_active=0;
 
   return;
 }

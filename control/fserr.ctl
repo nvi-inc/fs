@@ -2550,22 +2550,13 @@ DK -451
 Class buffer error from command response.
 ""
 DN   21
-DBBC3 multicast: error from select() cleared.
+DBBC3 multicast: error from select() cleared
 ""
 DN   20
-DBBC3 multicast: receiving multicast messages again.
+DBBC3 multicast: receiving messages again
 ""
 DN   -1
 DBBC3 multicast: error unpacking, packet too small.
-""
-DN  -20
-DBBC3 multicast: no message received, multicast may not be running
-""
-DN  -21
-DBBC3 multicast: error from select(), UNIX?FFF
-""
-DN  -22
-DBBC3 multicast: error from recvfrom(), UNIX?FFF
 ""
 DN  -11
 DBBC3 multicast: opening datagram socket, UNIX?FFF
@@ -2587,6 +2578,18 @@ DBBC3 multicast: opening socket to get interface address, UNIX?FF
 ""
 DN  -18
 DBBC3 multicast: retrieving interface address from socket (wrong interface?), UNIX?FFF
+""
+DN  -20
+DBBC3 multicast: time-out, DBBC3 may not be running
+""
+DN  -21
+DBBC3 multicast: error from select(), UNIX?FFF
+""
+DN  -22
+DBBC3 multicast: error from recvfrom(), UNIX?FFF
+""
+DN  -23
+DBBC3 multicast: time-out while data_valid is on, some multicast not recorded, probably due to a DBBC3 command
 ""
 DP -301
 No command form of pfbX command.

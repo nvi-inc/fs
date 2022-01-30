@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -736,6 +736,12 @@ int ip[5];
               rte_ticks (centisec);
           }
 
+          if(dbbc3) {
+              /* increment when starting and ending command */
+              shm_addr->dbbc3_command_count++;
+              shm_addr->dbbc3_command_active=1;
+          }
+
           if (send(sock, inbuf, nchars, flags) < nchars) { /* Send to socket, OK? */
 #ifdef DEBUG
               (void) fprintf(stderr, /* Nope */
@@ -886,6 +892,11 @@ read:
 
   } /* End of for loop  */
 
+  if(dbbc3) {
+      /* increment when starting and ending command */
+      shm_addr->dbbc3_command_count++;
+      shm_addr->dbbc3_command_active=0;
+  }
   ip[0]=out_class;
   ip[1]=out_recs;
   ip[2]=0;

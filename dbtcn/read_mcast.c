@@ -29,6 +29,7 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
+extern struct fscom *shm_addr;
 #include "packet.h"
 #include "packet_unpack.h"
 
@@ -38,8 +39,8 @@
 #define TIME_OUT        125
 #define ERROR_PERIOD   2000
 
-ssize_t read_mcast(int sock, char buf[], size_t buf_size, int to_report,
-        int it[6], int centisec[6])
+ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
+        int centisec[6],int data_valid)
 {
     ssize_t n;
     struct sockaddr_in from;
@@ -52,6 +53,16 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int to_report,
     static int mcast_to    = 0;
     static int old_error = 0;
 
+    static unsigned was_count_next = 0;
+    unsigned was_count;
+
+/* use the command count before the PREVIOUS select() to decide
+ * if there has been DBBC3 activity that could interfere
+ */
+
+    was_count=was_count_next;
+    was_count_next=shm_addr->dbbc3_command_count;
+
     /* Read when data available */
     FD_ZERO(&readfds);
     FD_SET(sock, &readfds);
@@ -60,10 +71,17 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int to_report,
 
     return_select = select(sock + 1, &readfds, NULL, NULL, &to);
     if(return_select == 0) {
-        if(to_report) {
+        int dbbc3_cmd=shm_addr->dbbc3_command_active ||
+            shm_addr->dbbc3_command_count != was_count;
+        if(!dbbc3_cmd) {
             mcast_to=mcast_to%(ERROR_PERIOD/TIME_OUT) + 1;
             if(1==mcast_to) {
               logit(NULL,-20,"dn");
+            }
+        } else if(data_valid) {
+            mcast_to=mcast_to%(ERROR_PERIOD/TIME_OUT) + 1;
+            if(1==mcast_to) {
+              logit(NULL,-23,"dn");
             }
         }
       return -1;

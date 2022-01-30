@@ -87,9 +87,8 @@ int main(int argc, char *argv[])
                 &shm_addr->dbtcn.control[shm_addr->dbtcn.iping],
                 sizeof(dbtcn_control));
 
-        to_report=1!=dbtcn_control.to_error_off;
-
-        n = read_mcast(sock,buf,sizeof(buf),to_report,itmc,centisec);
+        n = read_mcast(sock,buf,sizeof(buf),itmc,centisec,
+                dbtcn_control.data_valid.user_dv);
 
         if(n<0)
             continue;
