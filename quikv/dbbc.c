@@ -40,10 +40,12 @@ int ip[5];                           /* ipc parameters */
       char *arg_next();
       int out_recs, out_class;
       char outbuf[BUFSIZE];
+      static char *board[]={"1","2","3","4","5","6","7","8"};
 
       void skd_run(), skd_par();      /* program scheduling utilities */
 
-      if(DBBC==shm_addr->equip.rack && 25==itask) {
+      if(DBBC==shm_addr->equip.rack &&
+         (25==itask || 30 == itask)) {
           ierr=-303;
           goto error;
       } else if(DBBC3==shm_addr->equip.rack &&
@@ -66,9 +68,16 @@ parse:
       ptr=arg_next(command,&ilast);
       outbuf[0]=0;
 
+      if (30 == itask) {
+	  strcat(outbuf,"core3h=");
+          strcat(outbuf,ptr);
+	  strcat(outbuf,",");
+          ptr=arg_next(command,&ilast);
+      }
+
       while( ptr != NULL) {
-	if(22 == itask || 24 == itask)
-	  strcat(outbuf,"fila10g=");
+        if(22 == itask || 24 == itask)
+          strcat(outbuf,"fila10g=");
 	strcat(outbuf,ptr);
 	strcat(outbuf,",");
 	ptr=arg_next(command,&ilast);
@@ -81,13 +90,13 @@ parse:
 dbbcn:
       if(22==itask || 24 == itask )
 	ip[0]=7;
-      else if(25==itask)
+      else if(25==itask || 30 == itask)
         ip[0]=8;
       else
 	ip[0]=1;
       ip[1]=out_class;
       ip[2]=out_recs;
-      if(20 == itask || 22 == itask || 25==itask)
+      if(20 == itask || 22 == itask || 25==itask || 30==itask)
 	skd_run("dbbcn",'w',ip);
       else
 	skd_run("dbbc2",'w',ip);

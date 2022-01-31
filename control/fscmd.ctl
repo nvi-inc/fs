@@ -344,6 +344,7 @@ fila10g_mode qkr 07826 01 FFFFFFFFFFFF
 dbbcrelink   qkr 07827 01 FFFFFFFFFFFF
 dbbcclose    qkr 07828 01 FFFFFFFFFFFF
 core3h_mode  qkr 07829 01 4000FFFFFFFF
+core3h       qkr 07830 01 FFFFFFFFFFFF
 rollform     qkr 07901 01 0254FFFFFFFF
 tpicd        qkr 08001 01 FFFFFFFFFFFF
 onoff        qkr 08101 01 FFFFFFFFFFFF

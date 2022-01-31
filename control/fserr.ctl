@@ -1029,13 +1029,13 @@ AQ  -40
 MOON is not available
 ""
 BD -301
-must specify at least 1 argument for dbbc/fila10g/dbbc3/dbbc2/fila10g2 command
+must specify at least 1 argument for dbbc/fila10g/dbbc3/core3h/dbbc2/fila10g2 commands
 ""
 BD -302
 dbbc and fila10g commands not available for DBBC3 rack
 ""
 BD -303
-dbbc3 command not available for DBBC2 racks
+dbbc3 and core3h commands not available for DBBC2 racks
 ""
 BD -401
 error retrieving class
