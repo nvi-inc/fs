@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -167,7 +167,11 @@ dbbcddcv=shm_addr->dbbcddcv;
  else if(shm_addr->rdbe_units[3])
    iRDBE=4;
 
- if (rack == RDBE) {
+ if (rack == DBBC3) {
+    fprintf(stderr,"fmset does not support DBBC3 racks - fmset aborting\n");
+  rte_sleep(SLEEP_TIME);
+  exit(0);
+ } else if (rack == RDBE) {
    if(nRDBE==0) {
      fprintf(stderr,
 	     "no RDBEs available, correct rdbc?.ctl, and restart FS - fmset aborting\n");
