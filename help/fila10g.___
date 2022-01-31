@@ -12,7 +12,7 @@ Settable parameters:
                         No checking is done.
 
 Monitor-only parameters:
-            data_to     response of FiLa10G system, if any.
+            data_from   response of FiLa10G system, if any.
 
 Comments:
 
@@ -35,9 +35,13 @@ DBBC2 in a system, which is defined in the dbbad.ctl control file.
 This is the DBBC2 used for normal DBBC2 operations.
 
 The second command, fila10g2, is for use in systems with a FiL0a10g
-attached to the second DBBC2 in a system with two DBBC2s. The second
-DBBC2 is defined in the dbba2.ctl control file. The (limited) FS
-support for a second DBBC2 (and FiLa10G) is provided to enable two
-DBBC2 VGOS operations.
+attached to the "second" DBBC2 in a system. The second DBBC2 is
+defined in the dbba2.ctl control file. The (limited) FS support for a
+second DBBC2 (and FiLa10G) is provided to enable two DBBC2 VGOS
+operations.
+
+The fila10g command cannot be used if the rack type in equip.ctl
+specifies a DBBC3. Other rack types do not limit the use of this
+command.
 
 See the FiLA10G documentation for a list of FiLa10G commands.
