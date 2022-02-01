@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -84,6 +84,17 @@ main()
     int krf=1;
     int all=0;
     for(;;) {
+        rte_time(it,&iyear);
+        isleep=100-it[0];
+        isleep=isleep>100?100:isleep;
+        isleep=isleep<1?100:isleep;
+        rte_sleep((unsigned) isleep);
+
+        if (nsem_test("fs   ") != 1) {
+            printf("Field System terminated\n");
+            die();
+            exit(0);
+        }
         while(ERR!=(ch=getch())) {  /* handle inputs */
             char *num=strchr(numbers,ch);
             if(NULL != num) {
@@ -228,18 +239,6 @@ main()
         printw(" ");
 
         refresh();
-
-        rte_time(it,&iyear);
-        isleep=100-it[0];
-        isleep=isleep>100?100:isleep;
-        isleep=isleep<1?100:isleep;
-        rte_sleep((unsigned) isleep);
-
-        if (nsem_test("fs   ") != 1) {
-            printf("Field System terminated\n");
-            die();
-            exit(0);
-        }
     }
 
 }  /* end main of monit6 */
