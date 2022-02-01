@@ -7326,7 +7326,7 @@ SC  -25
 setcl: rte_check got error from times(), see above for error
 ""
 SC  -26
-setcl: DBB3 time is older than 20 seconds
+setcl: DBB3 time was older than 20 seconds for four tries
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W

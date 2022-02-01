@@ -551,6 +551,7 @@ void cshm_init()
 
   shm_addr->dbbc3_tsys_data.iping=0;
   for(i=0;i<2;i++) {
+      shm_addr->dbbc3_tsys_data.data[i].last=0;
       for(j=0;j<MAX_DBBC3_IF;j++) {
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].lo=-1.0;
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].delay=UINT_MAX;
