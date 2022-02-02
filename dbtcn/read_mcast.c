@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -23,12 +23,12 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <sys/select.h>
+#include <sys/types.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
-#include "ssize_t.h"
 #include "packet.h"
 #include "packet_unpack.h"
 
