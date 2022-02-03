@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -177,22 +177,20 @@ void dbbc3_core3h_modex(command,itask,ip)
     struct dbbc3_core3h_modex_cmd lcl;
     int increment;
     int force_set = 0;
+    int iboard;
 
     static char *board[]={" ","1","2","3","4","5","6","7","8"};
 
     void skd_run(), skd_par();      /* program scheduling utilities */
 
-    if (29==itask) {
+    if (command->equal != '=') {
+        ierr=-306;
+        goto error;
+    } else if(command->argv[0]!=NULL &&
+              (0==strcmp("begin",command->argv[0]) ||
+              0==strcmp("end"  ,command->argv[0]))) {
         int force = 0;
         int okay = 0;
-
-        if(NULL==command->argv[0] ||
-            NULL!=command->argv[0] &&
-            0!=strcmp("begin",command->argv[0]) &&
-            0!=strcmp("end"  ,command->argv[0])) {
-            ierr=-308;
-            goto error;
-        }
         if(NULL != command->argv[1]) {
             force=0==strcmp("force",command->argv[1]);
             if(!force && 0!=strcmp("$",command->argv[1]) &&
@@ -283,30 +281,32 @@ void dbbc3_core3h_modex(command,itask,ip)
             goto error;
         }
     }
-    if(itask-29>shm_addr->dbbc3_ddc_ifs) {
-        ierr=-306;
+
+    ierr=arg_int(command->argv[0],&iboard,1,FALSE);
+    if(ierr==-200 || ierr==-100){
+      ierr=-201;
+      goto error;
+    } else if(iboard<1 || iboard > shm_addr->dbbc3_ddc_ifs) {
+        ierr=-201;
         goto error;
-    }
-    if (command->equal != '=') {
+    } else if (command->argv[1]!=NULL && *command->argv[1]=='?'
+            && command->argv[2] == NULL) {
+            dbbc3_core3h_modex_dis(command,iboard,ip,0);
+            return;
+    } else if (command->argv[1]==NULL) {
         out_recs=0;
         out_class=0;
-        add_check_queries(&out_recs, &out_class, board[1+itask-30],1);
+        add_check_queries(&out_recs, &out_class, board[iboard],1);
         goto dbbcn;
-
-    } else if (command->argv[0]==NULL)
-        goto parse;  /* simple equals */
-    else if (*command->argv[0]=='?') {
-            dbbc3_core3h_modex_dis(command,itask,ip);
-            return;
     }
 
     /* if we get this far it is a set-up command so parse it */
 
 parse:
-    ilast=0;                                      /* last argv examined */
-    memcpy(&lcl,&shm_addr->dbbc3_core3h_modex[itask-30],sizeof(lcl));
+    ilast=1;                                      /* last argv examined */
+    memcpy(&lcl,&shm_addr->dbbc3_core3h_modex[iboard-1],sizeof(lcl));
 
-    count=1;
+    count=2;
     while( count>= 0) {
         ptr=arg_next(command,&ilast);
         ierr=dbbc3_core3h_modex_dec(&lcl,&count, ptr);
@@ -342,12 +342,12 @@ parse:
     lcl.start.start=1;
     lcl.start.state.known=1;
     dbbc3_vdif_frame_params(&lcl);
-    memcpy(&shm_addr->dbbc3_core3h_modex[itask-30],&lcl,sizeof(lcl));
+    memcpy(&shm_addr->dbbc3_core3h_modex[iboard-1],&lcl,sizeof(lcl));
     out_recs=0;
     out_class=0;
 
     if(!lcl.force.force) {
-        add_check_queries(&out_recs, &out_class, board[1+itask-30],1);
+        add_check_queries(&out_recs, &out_class, board[iboard],1);
         goto dbbcn;
     }
 
@@ -356,14 +356,14 @@ parse:
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
-    vsi_samplerate_2_dbbc3_core3h(outbuf,&lcl,board[1+itask-30]);
+    vsi_samplerate_2_dbbc3_core3h(outbuf,&lcl,board[iboard]);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
     int ddcu=  DBBC3_DDCU == shm_addr->equip.rack_type;
 
     strcpy(outbuf,"core3h=");
-    strcat(outbuf,board[1+itask-30]);
+    strcat(outbuf,board[iboard]);
 
     if(ddcu)
         strcat(outbuf,",splitmode on");
@@ -375,17 +375,17 @@ parse:
     int masks=1;
     if(DBBC3_DDCU==shm_addr->equip.rack_type)
         masks=4;
-    vsi_bitmask_2_dbbc3_core3h(outbuf,&lcl,board[1+itask-30],masks);
+    vsi_bitmask_2_dbbc3_core3h(outbuf,&lcl,board[iboard],masks);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
     strcpy(outbuf,"core3h=");
-    strcat(outbuf,board[1+itask-30]);
+    strcat(outbuf,board[iboard]);
     strcat(outbuf,",reset");
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
-    vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[1+itask-30]);
+    vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[iboard]);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
@@ -404,7 +404,7 @@ dbbcn:
         }
         return;
     }
-    dbbc3_core3h_modex_dis(command,itask,ip,force_set);
+    dbbc3_core3h_modex_dis(command,iboard,ip,force_set);
     return;
 
 error:

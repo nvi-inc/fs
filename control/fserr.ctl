@@ -2697,33 +2697,36 @@ DQ -70
 Invalid device for ping (da ro r1).
 ""
 DR -201
-First parameter is either null or 'mask2', an integer, usually as a hex value, e.g., 0xf.
+First parameter is either 'begin', 'end', or the Core3H board number: '1' to the number of IFs set in 'dbbc3.ctl'.
 ""
 DR -202
-mask1 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
+mask2 parameter is either null, an integer, usually as a hex value, e.g., 0xf.
 ""
 DR -203
-decimate parameter, must be 1-255
+mask1 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
 ""
 DR -204
-Sample rate must be a number greater than 0.124
+decimate parameter, must be 1-255
 ""
 DR -205
-The 'force' parameter must be 'force', '$', or null.
+Sample rate must be a number greater than 0.124
 ""
 DR -206
+The 'force' parameter must be 'force', '$', or null.
+""
+DR -207
 The 'okay' parameter must be 'disk_record_ok' or null.
 ""
-DR -213
+DR -214
 For DBBC3 DDC_V decimate must be 2
 ""
-DR -214
+DR -215
 Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255.
 ""
-DR -224
+DR -225
 Can't specify sample rate and decimate parameters simultaneously
 ""
-DR -234
+DR -235
 For DBBC3 DDC_V sample rate must imply a decimate of 2
 ""
 DR -301
@@ -2739,16 +2742,13 @@ DR -304
 The 'force' parameter must be 'force', '$', or null.
 ""
 DR -305
-core3h_mode0 'state' parameter must be either 'begin' or 'end'.
+Internal error, impossible state clause.
 ""
 DR -306
-Core3h board number exceeds IFs in dbbc3.ctl.
+Command requires parameters after an '='.
 ""
 DR -307
 The 'okay' parameter must be 'disk_record_ok' or null.
-""
-DR -308
-The 'state' parameter must be 'begin' or 'end'.
 ""
 DR -400
 error retrieving acknowledgement of command

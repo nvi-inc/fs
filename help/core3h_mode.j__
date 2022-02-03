@@ -1,10 +1,11 @@
-core3h_moden - set core3h mode (DBBC3 rack)
+core3h_mode - set core3h boards mode (DBBC3 rack)
 
-Syntax:   core3h_mode0=state,force,okay
-          core3h_modeN=mask2,mask1,decimation,sample,force,okay
+Syntax:   core3h_mode=state,force,okay
+          core3h_mode=n,mask2,mask1,decimation,sample,force,okay
+          core3h_mode=n
 
-Response: core3h_modeN/mask2,mask1,decimation,sample,clock,split,input
-          core3h_modeN/stopped
+Response: core3h_mode/n,mask2,mask1,decimation,sample,clock,split,input
+          core3h_mode/n,stopped
 
 Settable parameters:
 
@@ -13,7 +14,7 @@ state:      begin or end. No default, see 'Comments' section for more
 
 force:      force setup: literal 'force', '$', nor null. See comments.
 
-N           1 to 8, but is limited to the number of IFs boards
+n           1 to 8, but is limited to the number of IFs boards
             specified in dbbc3.ctl
 
 mask2:      VSI2 input bit-stream mask, usually hex, 32-bit wide
@@ -58,10 +59,10 @@ which can take 20 seconds.
 The state values of 'begin' and 'end' mark the beginning and end of
 Core3H configuration for a mode. For example:
 
-   core3h_mode0=begin,force
-   core3h_mode1=...,force
+   core3h_mode=begin,force
+   core3h_mode=1,...,force
    ...
-   core3h_mode0=end,force
+   core3h_mode=end,force
 
 Up to the total number of Core3h boards in the rack (the maximum is
 set in dbbc3.ctl) can be set-up between the 'begin' and 'end'. Any
@@ -70,12 +71,18 @@ by the 'end,force' (which will also start the output of boards that
 are set-up). This is to make sure only the set-up boards will send
 data.
 
-These commands, in their command form, i.e., with '=', update the FS's
-model of Core3H boards' state, with or without 'force'. Once a 'begin'
-has been executed, the FS's model is not well defined until the
-matching 'end' has been executed. No commands other than other
-'core3h_modeN' command should be executed between them. If there are
-other commands, the results may not be well defined, particularly for
+The monitor form of these commands are with only board number after
+the equal sign '=' and no other parameters. e.g., 'core3h_mode=1'.
+However, if a '?' is include after theboard number, e.g.,
+'core3h_mode=1,?', the FS settins for the device are displayed.
+
+These commands, in their command form, i.e., with parameters other
+than a lone '?' after the board number, update the FS's model of Core3H
+boards' state, with or without 'force'. Once a 'begin' has been
+executed, the FS's model is not well defined until the matching 'end'
+has been executed. No commands other than other 'core3h_modeN' command
+should be executed between them. If there are other commands, the
+results may not be well defined, particularly for
 'mk5c_mode'/'fb_mode' and 'tpicd'.
 
 By default, the command forms of these commands only check the state
@@ -105,14 +112,14 @@ the operator must sync them. Once that is completed, the operator will
 need to start/stop the data transmission for the mode, by executing
 the command:
 
-    core3h_mode0=end,force
+    core3h_mode=end,force
 
 Using the setup procedure with 'force' will also execute this command,
 but it will fail for the first board to be started because the Core3H
 boards have not been synced. This error can serve as reminder to the
 operator to sync the boards and execute the above 'end,force' again.
 
-The 'core3_mode0=end' command, with or without 'force', checks the
+The 'core3_mode=end' command, with or without 'force', checks the
 DBBC3 firmwware version for agreement with the FS control files. This
 is intended to be the primary DBBC3 version check since this command
 is:
@@ -123,8 +130,8 @@ is:
 - the final command of such a set-up/check, so an error should be more
   visible
 
-The 'core3h_modeN=...,force' command, 'N' not equal to '0', also
-checks in DBBC3 firmware version in case it is used by itself.
+The 'core3h_mode=n,...,force' command, also checks in DBBC3 firmware
+version in case it is used by itself.
 
 The effective sample rate can be specified in the SNAP command either
 explicitly with the 'sample' parameter or implicitly with the

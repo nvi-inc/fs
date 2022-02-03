@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -57,7 +57,7 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
     if(ptr == NULL) ptr="";
 
     switch (*count) {
-        case 1:
+        case 2:
             ierr=arg_uns(ptr,&lcl->mask2.mask2 ,0x0,TRUE);
             m5state_init(&lcl->mask2.state);
             if(ierr==0) {
@@ -66,7 +66,7 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
                 lcl->mask2.state.error=1;
             }
             break;
-        case 2:
+        case 3:
             ierr=arg_uns(ptr,&lcl->mask1.mask1 ,0xffffffff,TRUE);
             m5state_init(&lcl->mask1.state);
             if(ierr==0) {
@@ -75,7 +75,7 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
                 lcl->mask1.state.error=1;
             }
             break;
-        case 3:
+        case 4:
             lcl->decimate.decimate=0;
             ierr=arg_int(ptr,&lcl->decimate.decimate ,1,FALSE);
             m5state_init(&lcl->decimate.state);
@@ -95,7 +95,7 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
             if(ierr==-100)
                 ierr=0;
             break;
-        case 4:
+        case 5:
             if(DBBC3_DDCU == shm_addr->equip.rack_type)
                 crate=256;
             else
@@ -137,7 +137,7 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
                 lcl->decimate.state.error=1;
             }
             break;
-        case 5:
+        case 6:
             ierr=arg_key(ptr,force_key,NFORCE_KEY,&lcl->force.force,0,TRUE);
             m5state_init(&lcl->force.state);
             if(ierr==0) {
@@ -146,7 +146,7 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
                 lcl->force.state.error=1;
             }
             break;
-        case 6:
+        case 7:
             ierr=arg_key(ptr,disk_key,NDISK_KEY,&lcl->disk.disk,-1,TRUE);
             m5state_init(&lcl->disk.state);
             if(ierr==0) {
@@ -164,11 +164,11 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
     return ierr;
 }
 
-void dbbc3_core3h_modex_enc(output,count,lclc,board)
+void dbbc3_core3h_modex_enc(output,count,lclc,iboard)
     char *output;
     int *count;
     struct dbbc3_core3h_modex_cmd *lclc;
-    int board;
+    int iboard;
 {
 
     int ivalue;
@@ -178,27 +178,30 @@ void dbbc3_core3h_modex_enc(output,count,lclc,board)
 
     switch (*count) {
         case 1:
+            snprintf(output,2,"%d",iboard);
+            break;
+        case 2:
             if(lclc->mask2.state.known && lclc->mask2.mask2) {
                 strcpy(output,"0x");
                 m5sprintf(output+2,"%x",&lclc->mask2.mask2,&lclc->mask2.state);
             }
             break;
-        case 2:
+        case 3:
             strcpy(output,"0x");
             m5sprintf(output+2,"%x",&lclc->mask1.mask1,&lclc->mask1.state);
             break;
-        case 3:
+        case 4:
             m5sprintf(output,"%d",&lclc->decimate.decimate,&lclc->decimate.state);
             break;
-        case 4:  /* commanded value only */
+        case 5:  /* commanded value only */
             if(DBBC3_DDCU == shm_addr->equip.rack_type)
                 crate=256;
             else
                 crate=128;
-            if(shm_addr->dbbc3_core3h_modex[board].decimate.state.known &&
-                    shm_addr->dbbc3_core3h_modex[board].decimate.decimate!=0) {
+            if(shm_addr->dbbc3_core3h_modex[iboard-1].decimate.state.known &&
+                    shm_addr->dbbc3_core3h_modex[iboard-1].decimate.decimate!=0) {
                 sprintf(output,"(%.3f)", (float) crate/
-                        shm_addr->dbbc3_core3h_modex[board].decimate.decimate+0.0001 );
+                        shm_addr->dbbc3_core3h_modex[iboard-1].decimate.decimate+0.0001 );
                 m5state_encode(output,&lclc->decimate.state);
             }
             break;
