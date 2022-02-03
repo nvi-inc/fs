@@ -2802,7 +2802,7 @@ DR -521
 could not find systat bitmask response
 ""
 DR -522
-could not find systat amplerate response
+could not find systat samplerate response
 ""
 DR -523
 could not find sysstat output response
@@ -2823,7 +2823,7 @@ DR -528
 could not find vdif_frame payload size response
 ""
 DR -600
-DBBC3 firmware/version is wrong AND/OR one or more board's data transmission state is not correct.
+DBBC3 firmware/version is wrong AND/OR the data transmission state for one or boards is not correct.
 ""
 DR -601
 DBBC3 Core3h board 1 configuration is not correct.
