@@ -2700,7 +2700,7 @@ DR -201
 First parameter is either 'begin', 'end', or the Core3H board number: '1' to the number of IFs set in 'dbbc3.ctl'.
 ""
 DR -202
-mask2 parameter is either null, an integer, usually as a hex value, e.g., 0xf.
+mask2 parameter is either null, or an integer, usually as a hex value, e.g., 0xf.
 ""
 DR -203
 mask1 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
@@ -2736,7 +2736,7 @@ DR -302
 mask2 cannot be used unless DDBC3 is DDC_U.
 ""
 DR -303
-Can't specify mask2 for more BBCs per IF set in dbbc3.ctl.
+Can't specify mask2 for more BBCs per IF than set in dbbc3.ctl.
 ""
 DR -304
 The 'force' parameter must be 'force', '$', or null.
@@ -2799,10 +2799,10 @@ DR -508
 error decoding vdif_frame payload size response
 ""
 DR -521
-could not find systat bitmask response
+could not find sysstat bitmask response
 ""
 DR -522
-could not find systat samplerate response
+could not find sysstat samplerate response
 ""
 DR -523
 could not find sysstat output response
@@ -2823,7 +2823,7 @@ DR -528
 could not find vdif_frame payload size response
 ""
 DR -600
-DBBC3 firmware/version is wrong AND/OR the data transmission state for one or boards is not correct.
+DBBC3 firmware/version is wrong AND/OR the data transmission state for one or more boards is not correct.
 ""
 DR -601
 DBBC3 Core3h board 1 configuration is not correct.
@@ -2880,10 +2880,10 @@ DR -620
 Core3h board ?WWW splitmode should be off and it is not
 ""
 DR -621
-Core3h board ?WWW vsi input should be vs1-vsi2-vsi3-vsi4 and it is not
+Core3h board ?WWW vsi input should be vsi1-vsi2-vsi3-vsi4 and it is not
 ""
 DR -622
-Core3h board ?WWW vsi input should be vs1 and it is not
+Core3h board ?WWW vsi input should be vsi1 and it is not
 ""
 DR -623
 Core3h board ?WWW should be sending data but it is stopped
@@ -3384,7 +3384,7 @@ FX  -37
 disk size missing
 ""
 FX  -38
-disk size did not decocde
+disk size did not decode
 ""
 FX  -39
 model must be gauss, 2pts, or disk
@@ -7326,7 +7326,7 @@ SC  -25
 setcl: rte_check got error from times(), see above for error
 ""
 SC  -26
-setcl: DBB3 time was older than 20 seconds for four tries
+setcl: DBBC3 time was older than 20 seconds for four tries
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W
