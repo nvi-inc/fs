@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021 NVI, Inc.
+* Copyright (c) 2020-2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -28,6 +28,7 @@ C
       include '../skdrincl/constants.ftni'
 C
 C History:
+! 2022-02-04 JMG Increased size of recorder to 12chars
 ! 2021-11-20 JMG Previously assumed that mask (az,el) came in pairs.  Now can have step functions
 ! 2021-04-02 JMG Renamed islcon-->slew_off, stnrat-->slew_rate. Made slew_off real. 
 ! 2021-10-02 JMG Removed all references to S2. 
@@ -60,7 +61,8 @@ C OUTPUT:
 C LOCAL:      
       integer ierr1
       real slcon(2),SLRATE(2),ANLIM1(2),ANLIM2(2)
-      character*8 cocc,crec
+      character*8 cocc
+      character*12 crec 
       character*20 crack
       character*8 cant,cter,csit
       character*4 caxis
@@ -133,6 +135,7 @@ C     2. Now call routines to retrieve all the station information.
         CALL vunpdas(stndefnames(i),ivexnum,iret,IERR,lu,
      .    cIDT,cter,nstack,maxt,nr,lb,sefd,par,npar,
      .    crec,crack,ctapemo,ite,itl,itg,ctlc)
+
    
         if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,'(a,a,/,"iret=",i5," ierr=",i5)')
@@ -218,8 +221,8 @@ C
      >         crec(:nch)// "setting to none!"
             crec='none'
         endif   
-        cstrec(i,1)=crec
-        
+        cstrec(i,1)=crec 
+      
         if(nr .eq. 1) then
           cstrec(i,2)='none'
         else

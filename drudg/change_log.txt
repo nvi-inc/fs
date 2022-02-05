@@ -1,4 +1,6 @@
 This file contains a summary of changes made and why.
+2022-02-05 ../skdrut/vunpdas.f: increased crec from 8 chars to 12. Capitalize on input.  (Sleeping bug.)
+2022-02-05 ../skdrut/kvalid_rec.f.  Fixed bug. Got rid of temp variable.  ../skdrut/kvalid_rac.f Got rid of temp variable
 2021-02-03 Changed to core3h_mode from core3h_modeN, by WEH: proc_core3h.f
 2021-12-28 Fixed too 'bounds errors'.  skdrut/unpvh.f skdrut/readline_skdrut.f.  ../skdrlnfch/pchar-linux.f  Never caused problems bug caught in runtime
 2021-12-28 drudg/proc_exper_init.f. No fb=ss_rev? for flexbuff.  Output mk5_status only for MK5A, MK5B, MK5C or MK6 disks

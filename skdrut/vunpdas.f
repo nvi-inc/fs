@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -36,6 +36,7 @@ C
 C
 C  History:
 !Updates
+! 2022-02-05 JGipson increased recorder size:  8-->12. Capitalized it. 
 ! 2020-12-30 JMG Removed unused variables
 ! 2020-10-02 JMG Removed all references to S2
 C 960517 nrv New.
@@ -75,7 +76,7 @@ C                    section had vex error, <0 is invalid value
       integer*2 lb(*)    ! bands
       real sefd(*),par(max_sefdpar,*)
       integer npar(*)    ! sefds
-      character*8 crec   ! recorder
+      character*12 crec   ! recorder
       character*20 crack ! rack
       character*128 ctapemo ! tape motion type
       integer ite,itl,itg ! early, late, gap
@@ -116,7 +117,8 @@ C
         iret = fvex_field(1,ptr_ch(cout),len(cout)) ! get recorder name
         if (iret.ne.0) return
         NCH = fvex_len(cout)
-        IF  (NCH.GT.8.or.NCH.le.0) THEN  !
+        call capitalize(crec)
+        IF  (NCH.GT.12.or.NCH.le.0) THEN  !
           write(lu,'("VUNPDAS01 - Recorder type name too long: ",a)')
      .    cout(1:nch)
           ierr=-1
@@ -318,6 +320,6 @@ C  8. Tape motion, early start, late stop, gap time.
       endif
 
       iret=0
-      if (ierr.gt.0) ierr=0
+      if (ierr.gt.0) ierr=0   
       return
       end
