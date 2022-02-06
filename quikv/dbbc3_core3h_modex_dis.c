@@ -227,91 +227,92 @@ send:
       logit(output,0,NULL);
 
     if(!kcom) {
+      if (!shm_addr->dbbc3_core3h_modex[iboard-1].set ||
+          !shm_addr->dbbc3_core3h_modex[iboard-1].start.state.known) {
+        logitn(NULL,-626,"dr",iboard);
+        ierr=-600-iboard;
+    } else {
         ierr=0;
-        if(shm_addr->dbbc3_core3h_modex[iboard-1].set &&
-                shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1 != lclc.mask1.mask1) {
+        if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1 != lclc.mask1.mask1) {
             logitn(NULL,-611,"dr",iboard);
             ierr=-600-iboard;
         }
+
         if(DBBC3_DDCU==shm_addr->equip.rack_type) {
-            if(shm_addr->dbbc3_core3h_modex[iboard-1].set &&
-                    shm_addr->dbbc3_core3h_modex[iboard-1].mask2.mask2 != lclc.mask2.mask2) {
+            if(shm_addr->dbbc3_core3h_modex[iboard-1].mask2.mask2 != lclc.mask2.mask2) {
                 logitn(NULL,-612,"dr",iboard);
                 ierr=-600-iboard;
             }
-            if(shm_addr->dbbc3_core3h_modex[iboard-1].set &&
-                    shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1 != lclm.mask3.mask3) {
+            if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1 != lclm.mask3.mask3) {
                 logitn(NULL,-613,"dr",iboard);
                 ierr=-600-iboard;
             }
-            if(shm_addr->dbbc3_core3h_modex[iboard-1].set &&
-                    shm_addr->dbbc3_core3h_modex[iboard-1].mask2.mask2 != lclm.mask4.mask4) {
+            if(shm_addr->dbbc3_core3h_modex[iboard-1].mask2.mask2 != lclm.mask4.mask4) {
                 logitn(NULL,-614,"dr",iboard);
                 ierr=-600-iboard;
             }
         }
-        if(shm_addr->dbbc3_core3h_modex[iboard-1].set &&
-                shm_addr->dbbc3_core3h_modex[iboard-1].decimate.decimate != lclc.decimate.decimate) {
+
+        if(shm_addr->dbbc3_core3h_modex[iboard-1].decimate.decimate != lclc.decimate.decimate) {
             logitn(NULL,-615,"dr",iboard);
             ierr=-600-iboard;
         }
-        if(shm_addr->dbbc3_core3h_modex[iboard-1].set &&
-                shm_addr->dbbc3_core3h_modex[iboard-1].width.width != lclc.width.width) {
+
+        if(shm_addr->dbbc3_core3h_modex[iboard-1].width.width != lclc.width.width) {
             logitn(NULL,-616,"dr",iboard);
             ierr=-600-iboard;
         }
-        if(shm_addr->dbbc3_core3h_modex[iboard-1].set &&
-                shm_addr->dbbc3_core3h_modex[iboard-1].channels.channels != lclc.channels.channels) {
+
+        if(shm_addr->dbbc3_core3h_modex[iboard-1].channels.channels != lclc.channels.channels) {
             logitn(NULL,-617,"dr",iboard);
             ierr=-600-iboard;
         }
-        if(shm_addr->dbbc3_core3h_modex[iboard-1].set &&
-                shm_addr->dbbc3_core3h_modex[iboard-1].payload.payload != lclc.payload.payload) {
+
+        if( shm_addr->dbbc3_core3h_modex[iboard-1].payload.payload != lclc.payload.payload) {
             logitn(NULL,-618,"dr",iboard);
             ierr=-600-iboard;
         }
 
-        if(shm_addr->dbbc3_core3h_modex[iboard-1].set)
-            if(DBBC3_DDCU==shm_addr->equip.rack_type && 1!=lclm.splitmode.splitmode) {
-                logitn(NULL,-619,"dr",iboard);
-                ierr=-600-iboard;
-            } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 0!=lclm.splitmode.splitmode) {
-                logitn(NULL,-620,"dr",iboard);
-                ierr=-600-iboard;
-            }
+        if(DBBC3_DDCU==shm_addr->equip.rack_type && 1!=lclm.splitmode.splitmode) {
+            logitn(NULL,-619,"dr",iboard);
+            ierr=-600-iboard;
+        } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 0!=lclm.splitmode.splitmode) {
+            logitn(NULL,-620,"dr",iboard);
+            ierr=-600-iboard;
+        }
 
-        if(shm_addr->dbbc3_core3h_modex[iboard-1].set)
-            if(DBBC3_DDCU==shm_addr->equip.rack_type && 4!=lclm.vsi_input.vsi_input) {
-                logitn(NULL,-621,"dr",iboard);
-                ierr=-600-iboard;
-            } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 1!=lclm.vsi_input.vsi_input) {
-                logitn(NULL,-622,"dr",iboard);
-                ierr=-600-iboard;
-            }
+        if(DBBC3_DDCU==shm_addr->equip.rack_type && 4!=lclm.vsi_input.vsi_input) {
+            logitn(NULL,-621,"dr",iboard);
+            ierr=-600-iboard;
+        } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 1!=lclm.vsi_input.vsi_input) {
+            logitn(NULL,-622,"dr",iboard);
+            ierr=-600-iboard;
+        }
 
-        if(shm_addr->dbbc3_core3h_modex[iboard-1].start.state.known &&
-                shm_addr->dbbc3_core3h_modex[iboard-1].start.start != lclc.start.start) {
+        if(shm_addr->dbbc3_core3h_modex[iboard-1].start.start != lclc.start.start) {
             if(lclc.start.start == 0)
                 logitn(NULL,-623,"dr",iboard);
             else
                 logitn(NULL,-624,"dr",iboard);
             ierr=-600-iboard;
         }
-        if(shm_addr->dbbc3_core3h_modex[iboard-1].set &&
-                (int) (shm_addr->dbbc3_clockr*1.e6+0.5) != lclm.clockrate.clockrate) {
+
+        if((int) (shm_addr->dbbc3_clockr*1.e6+0.5) != lclm.clockrate.clockrate) {
             logitn(NULL,-625,"dr",iboard);
             ierr=-600-iboard;
         }
-        if(4==options && (ierr!=0||overall_error)) {
-            ierr=-600;
-        }
-        if(ierr!=0) {
-            if (1==options||2==options) {
-              ierr=0;
-              overall_error=1;
-            }
-            goto error2;
-        }
+      }
+
+      if(4==options && (ierr!=0||overall_error)) {
+          ierr=-600;
+      }
+      if(ierr!=0) {
+          if (1==options||2==options) {
+            ierr=0;
+            overall_error=1;
+          }
+          goto error2;
+      }
     }
     ip[0]=out_class;
     ip[1]=out_recs;

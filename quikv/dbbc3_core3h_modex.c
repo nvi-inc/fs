@@ -143,8 +143,9 @@ static void check_board(iboard,board,ip,ierr_out,name)
        goto error2;
     }
 
-    if(shm_addr->dbbc3_core3h_modex[iboard].start.state.known &&
-            shm_addr->dbbc3_core3h_modex[iboard].start.start != lclc.start.start) {
+    if(!shm_addr->dbbc3_core3h_modex[iboard].start.state.known) {
+        logitn(NULL,-595,"dr",iboard+1);
+    } else if(shm_addr->dbbc3_core3h_modex[iboard].start.start != lclc.start.start) {
         if(lclc.start.start == 0)
             logitn(NULL,-623,"dr",iboard+1);
         else

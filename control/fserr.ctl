@@ -2819,74 +2819,77 @@ could not find vdif_frame channels per frame response
 DR -528
 could not find vdif_frame payload size response
 ""
+DR -595
+Core3H board ?WWW data transmission state is not defined in the FS yet
+""
 DR -596
-DBBC3 firmware/version is wrong AND the data transmission state for one or more Core3H boards is not correct.
+DBBC3 firmware/version is wrong AND the data transmission state for one or more Core3H boards is not correct/defined
 ""
 DR -597
-The data transmission state for one or more Core3H boards is not correct.
+The data transmission state for one or more Core3H boards is not correct
 ""
 DR -598
-DBBC3 firmware/version is wrong AND The configuration of one or more Core3H boards is not correct.
+DBBC3 firmware/version is wrong AND the configuration of one or more Core3H boards is not correct/defined
 ""
 DR -599
 DBBC3 firmware/version is wrong
 ""
 DR -600
-The configuration of one or more Core3H boards is not correct.
+The configuration of one or more Core3H boards is not correct, or not defined in the FS yet
 ""
 DR -601
-DBBC3 Core3h board 1 configuration is not correct.
+DBBC3 Core3H board 1 configuration is not correct, or not defined in the FS yet
 ""
 DR -602
-DBBC3 Core3h board 2 configuration is not correct.
+DBBC3 Core3H board 2 configuration is not correct, or not defined in the FS yet
 ""
 DR -603
-DBBC3 Core3h board 3 configuration is not correct.
+DBBC3 Core3H board 3 configuration is not correct, or not defined in the FS yet
 ""
 DR -604
-DBBC3 Core3h board 4 configuration is not correct.
+DBBC3 Core3H board 4 configuration is not correct, or not defined in the FS yet
 ""
 DR -605
-DBBC3 Core3h board 5 configuration is not correct.
+DBBC3 Core3H board 5 configuration is not correct, or not defined in the FS yet
 ""
 DR -606
-DBBC3 Core3h board 6 configuration is not correct.
+DBBC3 Core3H board 6 configuration is not correct, or not defined in the FS yet
 ""
 DR -607
-DBBC3 Core3h board 7 configuration is not correct.
+DBBC3 Core3H board 7 configuration is not correct, or not defined in the FS yet
 ""
 DR -608
-DBBC3 Core3h board 8 configuration is not correct.
+DBBC3 Core3H board 8 configuration is not correct, or not defined in the FS yet
 ""
 DR -611
-Core3h board ?WWW mask1 is not correct.
+Core3H board ?WWW mask1 is not correct
 ""
 DR -612
-Core3h board ?WWW mask2 is not correct.
+Core3H board ?WWW mask2 is not correct
 ""
 DR -613
-Core3h board ?WWW mask3 is not correct, it should be the same as the requested mask1.
+Core3H board ?WWW mask3 is not correct, it should be the same as the requested mask1
 ""
 DR -614
-Core3h board ?WWW mask4 is not correct, it should be the same as the requested mask2.
+Core3H board ?WWW mask4 is not correct, it should be the same as the requested mask2
 ""
 DR -615
-Core3h board ?WWW sysstat decimate is not correct.
+Core3H board ?WWW sysstat decimate is not correct
 ""
 DR -616
-Core3h board ?WWW vdif_frame width is not correct.
+Core3H board ?WWW vdif_frame width is not correct
 ""
 DR -617
-Core3h board ?WWW vdif_frame channels is not correct.
+Core3H board ?WWW vdif_frame channels is not correct
 ""
 DR -618
-Core3h board ?WWW vdif_frame payload is not correct.
+Core3H board ?WWW vdif_frame payload is not correct
 ""
 DR -619
-Core3h board ?WWW splitmode should be on and it is not
+Core3H board ?WWW splitmode should be on and it is not
 ""
 DR -620
-Core3h board ?WWW splitmode should be off and it is not
+Core3H board ?WWW splitmode should be off and it is not
 ""
 DR -621
 Core3h board ?WWW vsi input should be vsi1-vsi2-vsi3-vsi4 and it is not
@@ -2895,13 +2898,16 @@ DR -622
 Core3h board ?WWW vsi input should be vsi1 and it is not
 ""
 DR -623
-Core3h board ?WWW should be sending data but it is stopped
+Core3H board ?WWW should be sending data but it is stopped
 ""
 DR -624
-Core3h board ?WWW should be stopped but it is sending data
+Core3H board ?WWW should be stopped but it is sending data
 ""
 DR -625
-Core3h board ?WWW sysstat input clock rate does not agree with dbbc3.ctl
+Core3H board ?WWW sysstat input clock rate does not agree with dbbc3.ctl
+""
+DR -626
+Core3H board ?WWW configuration is not defined in the FS yet
 ""
 DS   -1
 Unable to open dsad.ctl file.

@@ -1,4 +1,4 @@
-core3h_mode - core3h board mode (DBBC3 rack)
+core3h_mode - Core3H board mode (DBBC3 rack)
 
 Syntax:   core3h_mode=state,force,okay
           core3h_mode=n,mask2,mask1,decimation,sample,force,okay
@@ -10,17 +10,21 @@ Response: core3h_mode/n,mask2,mask1,decimation,sample,clock,split,input
 
 Settable parameters:
 
-state:      begin or end. No default, see 'Comments' section for more
-            details.
+state:      'begin' or 'end. No default, see 'Comments' section for
+            more details.
 
 force:      force setup: literal 'force', '$', nor null. See comments.
 
+okay        override to allow command while recording, literal text:
+            'disk_record_ok'
+
 n           1 to 8, but is limited to the number of IFs boards
-            specified in dbbc3.ctl
+            specified in 'dbbc3.ctl'
 
 mask2:      VSI2 input bit-stream mask, usually hex, 32-bit wide
-            maximum, for example: 0xf, default 0, null on display if
-            zero. See the 'Comments' section for more details.
+            maximum, for example: 0xf, default 0. Null on display if
+	    zero. Must be null for DDC_V. See the 'Comments' section
+            for more details.
 
 mask1:      VSI1 input bit-stream mask, usually hex, non-zero 32-bit
             wide maximum, for example: 0xf, default 0xffffffff
@@ -33,13 +37,10 @@ sample:     sample rate in Ms/s: must be greater than 0.499. The value
             must yield a valid decimation factor. For DDC_V, only 64
             Ms/s is accepted. Unless a decimation factor was
             specified, the default for DDC_U is 256 Ms/s (decimation
-            1); for DDC_V, 64 Ms/s (decimation 2). For response, since
+            1); for DDC_V, 64 Ms/s (decimation 2). In response, since
             the sample rate is not reported by the device, the
             reported 'decimation' implied sample rate is shown in
             parenthesizes for reference.
-
-okay        override to allow command while recording, literal text:
-            'disk_record_ok'
 
 Monitor only parameter:
 
@@ -53,9 +54,26 @@ input       VSI input: 'tvg','vsi1','vsi2','vsi1-2','vsi1-2-3-4','gps'
 
 Comments:
 
-Beware that some of these commands can take several seconds to
-execute. This particularly true for 'core3h_mode=end' (no 'force'),
-which can take 20 seconds.
+Be aware that some of these commands can take several seconds to
+execute. This is particularly true for 'core3h_mode=end' (no 'force')
+and 'core3h_mode', which can take 20 and 30 seconds, respectively.
+
+These commands in their command form, with or without 'force', update
+the FS's model of Core3H board configurations.
+
+The monitor form of these commands are with only the board number
+after the equal sign '=' and no other parameters. e.g.,
+'core3h_mode=1'. However, if a '?' is included after the board number,
+e.g., 'core3h_mode=1,?', the FS's model for that board's configuration
+is reported. All the boards can be reported with a single
+'core3h_mode' command (no parameters); the model for all boards can be
+reported with 'core3h_mode=?'.
+
+The monitor form of these commands, 'core3h_mode' and 'core3h_mode=n',
+and the non-'force' command forms (except 'begin') report all
+deviations of the board configurations from the FS's model as errors.
+If there were any deviations, a summary error is returned to 'boss',
+which reports it.
 
 The state values of 'begin' and 'end' mark the beginning and end of
 Core3H configuration for a mode. For example:
@@ -65,40 +83,28 @@ Core3H configuration for a mode. For example:
    ...
    core3h_mode=end,force
 
-Up to the total number of Core3h boards in the rack (the maximum is
-set in dbbc3.ctl) can be set-up between the 'begin' and 'end'. Any
+Up to the total number of Core3H boards in the rack (the maximum is
+set in 'dbbc3.ctl') can be set-up between the 'begin' and 'end'. Any
 boards that are not set-up will have their output disabled (stopped)
 by the 'end,force' (which will also start the output of boards that
 are set-up). This is to make sure only the set-up boards will send
 data.
 
-The monitor form of these commands are with only board number after
-the equal sign '=' and no other parameters. e.g., 'core3h_mode=1'.
-However, if a '?' is included after the board number, e.g.,
-'core3h_mode=1,?', the FS settings for that board are displayed.
-
-All the boards can be monitored with a single 'core3h_mode' command (no
-parameters), but beware, it can take up to 30 seconds to execute even if
-there are no time-outs. For 'core3h_mode=?' the FS settings of all the
-boards are displayed.
-
-These commands, in their command form, i.e., with no parameters other
-than a lone '?' after the board number, update the FS's model of Core3H
-boards' state, with or without 'force'. Once a 'begin' has been
-executed, the FS's model is not well defined until the matching 'end'
-has been executed. No commands other than other 'core3h_modeN' command
-should be executed between them. If there are other commands, the
-results may not be well defined, particularly for
+Once a 'begin' has been executed, the FS's model is not well defined
+until the matching 'end' has been executed. No commands other than
+'core3h_mode=n,...' command should be executed between them. If there
+are other commands, the results may be incorrect, particularly for
 'mk5c_mode'/'fb_mode' and 'tpicd'.
 
-By default, the command forms of these commands only check the state
-of the Core3H board. This occurs if the 'force' parameter is '$' or
-null. If it is literal 'force', the board will be configured. Using
-'$' as a synonym for null is to support allowing the operator to use
-'force' as the argument for a setup procedure from 'drudg' to force
-setup, while making only checking the default for schedules. The
-'drudg' generated setup procedures will be called from schedules with
-no argument, for example:
+The non-'force' command forms of the 'core3h_mode=1,...' commands do
+not setup the boards, but update and show the FS model for the boards.
+This occurs if the 'force' parameter is '$' or null. If it is literal
+'force', the boards will be setup with no output. Using '$' as a
+synonym for null is to support allowing the operator to use 'force' as
+the argument for a setup procedure from 'drudg' to force setup, while
+making only checking the default for schedules. The 'drudg' generated
+setup procedures will be called from schedules with no argument, for
+example:
 
     setup01
 
@@ -115,8 +121,8 @@ place of the 'force' parameter to preserve the checking functionality.
 
 This approach is used because after the Core3H boards are configured,
 the operator must sync them. Once that is completed, the operator will
-need to start/stop the data transmission for the mode, by executing
-the command:
+need to start the data transmission for the boards used by the mode,
+by executing the command:
 
     core3h_mode=end,force
 
@@ -146,18 +152,16 @@ specified. The device does not respond with the commanded effective
 sample rate. In the query response for this command, the implied
 sample rate is shown in parentheses for informational purposes only.
 
-For a DBBC3 DDC_V personality only a decimation of '2' or sample rate
-of '64' are allowed.
-
 To use a non-zero 'mask2', the DBBC3 personality must be DDC_U.
 Additionally, there can't be bits turned on for BBCs in 'mask2' that
 exceed the number available as set by the number of BBCs per IF in
 'dbbc3.ctl'.
 
-The meaning of the bits in the mask are given in the following table.
-Mask1 represents the first eight BBCs for a Core3h board; mask2, the
-second eight. In the table, the first eight BBCs for a board are
-generically numbered 1-8; the second eight, 9-16.
+The meaning of the bits in the mask are given in the following table
+starting with the least significant bit. Mask1 represents the first
+eight BBCs for a Core3H board; Mask2, the second eight. In the table,
+the first eight BBCs for a board are generically numbered 1-8; the
+second eight, 9-16.
 
  Bit   Mask2  Mask1
   1     9US    1US
