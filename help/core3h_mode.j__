@@ -1,8 +1,9 @@
-core3h_mode - set core3h boards mode (DBBC3 rack)
+core3h_mode - core3h board mode (DBBC3 rack)
 
 Syntax:   core3h_mode=state,force,okay
           core3h_mode=n,mask2,mask1,decimation,sample,force,okay
           core3h_mode=n
+          core3h_mode
 
 Response: core3h_mode/n,mask2,mask1,decimation,sample,clock,split,input
           core3h_mode/n,stopped
@@ -73,10 +74,15 @@ data.
 
 The monitor form of these commands are with only board number after
 the equal sign '=' and no other parameters. e.g., 'core3h_mode=1'.
-However, if a '?' is include after theboard number, e.g.,
-'core3h_mode=1,?', the FS settins for the device are displayed.
+However, if a '?' is included after the board number, e.g.,
+'core3h_mode=1,?', the FS settings for that board are displayed.
 
-These commands, in their command form, i.e., with parameters other
+All the boards can be monitored with a single 'core3h_mode' command (no
+parameters), but beware, it can take up to 30 seconds to execute even if
+there are no time-outs. For 'core3h_mode=?' the FS settings of all the
+boards are displayed.
+
+These commands, in their command form, i.e., with no parameters other
 than a lone '?' after the board number, update the FS's model of Core3H
 boards' state, with or without 'force'. Once a 'begin' has been
 executed, the FS's model is not well defined until the matching 'end'
@@ -120,7 +126,7 @@ boards have not been synced. This error can serve as reminder to the
 operator to sync the boards and execute the above 'end,force' again.
 
 The 'core3_mode=end' command, with or without 'force', checks the
-DBBC3 firmwware version for agreement with the FS control files. This
+DBBC3 firmware version for agreement with the FS control files. This
 is intended to be the primary DBBC3 version check since this command
 is:
 
@@ -130,8 +136,8 @@ is:
 - the final command of such a set-up/check, so an error should be more
   visible
 
-The 'core3h_mode=n,...,force' command, also checks in DBBC3 firmware
-version in case it is used by itself.
+The 'core3h_mode=n,...,force' commands and 'core3h_mode' command (the
+latter without parameters) also check the DBBC3 firmware version.
 
 The effective sample rate can be specified in the SNAP command either
 explicitly with the 'sample' parameter or implicitly with the

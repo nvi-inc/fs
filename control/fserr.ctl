@@ -2744,9 +2744,6 @@ The 'force' parameter must be 'force', '$', or null.
 DR -305
 Internal error, impossible state clause.
 ""
-DR -306
-Command requires parameters after an '='.
-""
 DR -307
 The 'okay' parameter must be 'disk_record_ok' or null.
 ""
@@ -2821,6 +2818,9 @@ could not find vdif_frame channels per frame response
 ""
 DR -528
 could not find vdif_frame payload size response
+""
+DR -599
+The configuration of one or more Core3H boards is not correct.
 ""
 DR -600
 DBBC3 firmware/version is wrong AND/OR the data transmission state for one or more boards is not correct.

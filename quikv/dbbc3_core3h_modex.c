@@ -184,8 +184,61 @@ void dbbc3_core3h_modex(command,itask,ip)
     void skd_run(), skd_par();      /* program scheduling utilities */
 
     if (command->equal != '=') {
-        ierr=-306;
-        goto error;
+        int options;
+
+        check_board(-1,board[0],ip,&ierr,command->name);
+        if(ip[2]<0)
+            return;
+
+        for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+           out_class=0;
+           out_recs=0;
+           add_check_queries(&out_recs, &out_class, board[i+1],1);
+           ip[0]=9;
+           ip[1]=out_class;
+           ip[2]=out_recs;
+           skd_run("dbbcn",'w',ip);
+           skd_par(ip);
+
+           if(ip[2]<0) {
+               if(ip[0]!=0) {
+                   cls_clr(ip[0]);
+                   ip[0]=ip[1]=0;
+               }
+               return;
+           }
+           if(i==0)
+             options=1;
+           else if(i==shm_addr->dbbc3_ddc_ifs-1)
+             options=4;
+           else
+             options=2;
+
+           dbbc3_core3h_modex_dis(command,i+1,ip,0,options);
+        }
+        if(ierr==-600 || ip[2] == -599)
+          ip[2]=-600;
+          if(ierr!=0)
+            memcpy(ip+3,"dr",2);
+        return;
+    } else if(command->argv[0] != NULL &&
+        *command->argv[0] == '?' && command->argv[1] == NULL) {
+        int options;
+
+        for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+           out_class=0;
+           out_recs=0;
+           if(i==0)
+             options=1;
+           else if(i==shm_addr->dbbc3_ddc_ifs-1)
+             options=4;
+           else
+             options=2;
+
+           dbbc3_core3h_modex_dis(command,i+1,ip,0,options);
+         }
+         return;
+
     } else if(command->argv[0]!=NULL &&
               (0==strcmp("begin",command->argv[0]) ||
               0==strcmp("end"  ,command->argv[0]))) {
@@ -291,7 +344,7 @@ void dbbc3_core3h_modex(command,itask,ip)
         goto error;
     } else if (command->argv[1]!=NULL && *command->argv[1]=='?'
             && command->argv[2] == NULL) {
-            dbbc3_core3h_modex_dis(command,iboard,ip,0);
+            dbbc3_core3h_modex_dis(command,iboard,ip,0,0);
             return;
     } else if (command->argv[1]==NULL) {
         out_recs=0;
@@ -404,7 +457,7 @@ dbbcn:
         }
         return;
     }
-    dbbc3_core3h_modex_dis(command,iboard,ip,force_set);
+    dbbc3_core3h_modex_dis(command,iboard,ip,force_set,0);
     return;
 
 error:

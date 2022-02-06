@@ -31,11 +31,12 @@
 #define MAX_OUT 256
 #define BUFSIZE 2048
 
-void dbbc3_core3h_modex_dis(command,iboard,ip,force_set)
+void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
     struct cmd_ds *command;
     int iboard;
     int ip[5];
     int force_set;
+    int options;
 {
     int ierr, count, i;
     char output[MAX_OUT];
@@ -44,16 +45,25 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set)
     int msgflg=0;  /* argument for cls_rcv - unused */
     int save=0;    /* argument for cls_rcv - unused */
     int nchars;
-    int out_class=0;
-    int out_recs=0;
+    static int out_class=0;
+    static int out_recs=0;
+    static int overall_error=0;
     char inbuf[BUFSIZE];
     int kcom;
     int iclass, nrecs;
     struct dbbc3_core3h_modex_cmd lclc;
     struct dbbc3_core3h_modex_mon lclm;
 
+    if(0==options||1==options) {
+        out_class=0;
+        out_recs=0;
+        overall_error=0;
+    }
     kcom= command->argv[1] != NULL &&
         *command->argv[1] == '?' && command->argv[2] == NULL;
+
+    kcom= kcom || command->argv[0] != NULL &&
+        *command->argv[0] == '?' && command->argv[1] == NULL;
 
     if((!kcom) && command->equal == '=' && force_set) {
         ierr=logmsg_dbbc3(output,command,ip);
@@ -210,8 +220,12 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set)
 send:
     for (i=0;i<5;i++)
         ip[i]=0;
-    cls_snd(&ip[0],output,strlen(output),0,0);
-    ip[1]=1;
+    if(0==options||4==options) {
+      cls_snd(&out_class,output,strlen(output),0,0);
+      out_recs++;
+    } else
+      logit(output,0,NULL);
+
     if(!kcom) {
         ierr=0;
         if(shm_addr->dbbc3_core3h_modex[iboard-1].set &&
@@ -288,18 +302,27 @@ send:
             logitn(NULL,-625,"dr",iboard);
             ierr=-600-iboard;
         }
+        if(4==options && (ierr!=0||overall_error)) {
+            ierr=-599;
+        }
         if(ierr!=0) {
+            if (1==options||2==options) {
+              ierr=0;
+              overall_error=1;
+            }
             goto error2;
         }
     }
+    ip[0]=out_class;
+    ip[1]=out_recs;
     return;
 
 error:
     if(i!=nrecs-1)
         cls_clr(iclass);
-    ip[0]=0;
-    ip[1]=0;
 error2:
+    ip[0]=out_class;
+    ip[1]=out_recs;
     ip[2]=ierr;
     ip[4]=0;
     memcpy(ip+3,"dr",2);
