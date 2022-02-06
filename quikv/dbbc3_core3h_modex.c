@@ -123,7 +123,7 @@ static void check_board(iboard,board,ip,ierr_out,name)
                 if(ierr!=0) {
                     logit(outbuf,0,NULL);
                     logit(NULL,-450+ierr,"dr");
-                    *ierr_out=-600;
+                    *ierr_out=-599;
                 }
             }
         } else if(!output && NULL != strstr(inbuf," Output      ")) {
@@ -136,7 +136,7 @@ static void check_board(iboard,board,ip,ierr_out,name)
     }
     if(0==strcmp(board," ")) {
         if(0!=ierr)
-            *ierr_out=-600;
+            *ierr_out=-599;
         return;
     } else if (!output) {
        ierr = -523;
@@ -149,7 +149,7 @@ static void check_board(iboard,board,ip,ierr_out,name)
             logitn(NULL,-623,"dr",iboard+1);
         else
             logitn(NULL,-624,"dr",iboard+1);
-        *ierr_out=-600;
+        *ierr_out=-597;
     }
     return;
 
@@ -216,10 +216,11 @@ void dbbc3_core3h_modex(command,itask,ip)
 
            dbbc3_core3h_modex_dis(command,i+1,ip,0,options);
         }
-        if(ierr==-600 || ip[2] == -599)
-          ip[2]=-600;
-          if(ierr!=0)
-            memcpy(ip+3,"dr",2);
+        if(ierr==-599 && ip[2]==-600)
+          ip[2]=-598;
+        else if(ip[2]==0)
+          ip[2]=ierr;
+        memcpy(ip+3,"dr",2);
         return;
     } else if(command->argv[0] != NULL &&
         *command->argv[0] == '?' && command->argv[1] == NULL) {
@@ -287,17 +288,30 @@ void dbbc3_core3h_modex(command,itask,ip)
                 }
             }
             if(!force) {
-                int ierr_overall = 0;
+                int ierr_version = 0;
+                int ierr_output = 0;
                 for (i=-1;i<shm_addr->dbbc3_ddc_ifs;i++) {
                     check_board(i,board[i+1],ip,&ierr,command->name);
                     if(ip[2]<0)
                         return;
-                    if(ierr!=0)
-                        ierr_overall=-600;
+                    if(ierr!=0) {
+                        if(-1==i)
+                            ierr_version=ierr;
+                        else
+                            ierr_output=ierr;
+                    }
                 }
-                if(0!=ierr_overall) {
+                if(ierr_version==-599 & ierr_output==-597) {
+                    ierr=-596;
                     ip[4]=0;
-                    ierr=ierr_overall;
+                    goto error;
+                } else if(ierr_version==-599) {
+                    ierr=ierr_version;
+                    ip[4]=0;
+                    goto error;
+                } else if(ierr_output==-597) {
+                    ierr=ierr_output;
+                    ip[4]=0;
                     goto error;
                 }
                 ip[0]=ip[1]=0;

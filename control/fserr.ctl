@@ -2819,11 +2819,20 @@ could not find vdif_frame channels per frame response
 DR -528
 could not find vdif_frame payload size response
 ""
+DR -596
+DBBC3 firmware/version is wrong AND the data transmission state for one or more Core3H boards is not correct.
+""
+DR -597
+The data transmission state for one or more Core3H boards is not correct.
+""
+DR -598
+DBBC3 firmware/version is wrong AND The configuration of one or more Core3H boards is not correct.
+""
 DR -599
-The configuration of one or more Core3H boards is not correct.
+DBBC3 firmware/version is wrong
 ""
 DR -600
-DBBC3 firmware/version is wrong AND/OR the data transmission state for one or more boards is not correct.
+The configuration of one or more Core3H boards is not correct.
 ""
 DR -601
 DBBC3 Core3h board 1 configuration is not correct.

@@ -303,7 +303,7 @@ send:
             ierr=-600-iboard;
         }
         if(4==options && (ierr!=0||overall_error)) {
-            ierr=-599;
+            ierr=-600;
         }
         if(ierr!=0) {
             if (1==options||2==options) {
