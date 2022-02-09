@@ -1,4 +1,5 @@
 This file contains a summary of changes made and why.
+2022-02-08 proc_setup.f, proc_exper_initi.f. Fixed a couple of revision bugs. fdrudg.f. If EVLBI, remove 'fila10g' from rack type
 2022-02-05 ../skdrut/vunpdas.f: increased crec from 8 chars to 12. Capitalize on input.  (Sleeping bug.)
 2022-02-05 ../skdrut/kvalid_rec.f.  Fixed bug. Got rid of temp variable.  ../skdrut/kvalid_rac.f Got rid of temp variable
 2021-02-03 Changed to core3h_mode from core3h_modeN, by WEH: proc_core3h.f

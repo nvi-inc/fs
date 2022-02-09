@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -80,6 +80,7 @@ C LOCAL:
       character*39 clabprint !used to hold print line
       logical krec2_found
       character*20 cstat_tmp
+      integer ind            !index. location of substring in another.
 
 C
 C  DATE   WHO CHANGES
@@ -690,8 +691,13 @@ C  if it was not set by the schedule.
             endif
             if(kevlbi_over .and.index(CCORNAME,"E-VLBI") .ne. 0) then
               cstrec(istn,1) = "none"
-              write(luscn,'(a)') 
-     >          "Setting recorder to NONE because of e-vlbi"
+              write(luscn,'(a)') "Because of e-vlbi "
+              write(luscn,'(a)') "   Setting recorder to NONE " 
+              ind=index(cstrack(istn),"/Fila10g")
+              if(ind .ne. 0) then
+                cstrack(istn)(ind:)=" "
+                write(*,'(a)') "   Changing rack to "//cstrack(istn)
+              endif 
             endif
 !This keeps us from only doing the override when the schedule is read in.
             knew_sked=.false.
