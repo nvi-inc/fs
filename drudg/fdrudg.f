@@ -84,7 +84,7 @@ C LOCAL:
 
 C
 C  DATE   WHO CHANGES
-!
+! 2022-02-09 JMGipson. Fixed bug in logic of using equip_override.  Added parens
 ! 2019Aug21 JMG.  Got rid of iperm
 !
 C  830427 NRV ADDED TYPE-6 CARTRIDGE TO IRP CALLS
@@ -675,7 +675,7 @@ C  if it was not set by the schedule.
           if(crack_tmp_cap .eq. "UNKNOWN") cstrack(istn)="none"    
           
           if(knew_sked) then
-            if(crack_type_def.ne." " .or. crec_def(1).ne." ".and. 
+            if((crack_type_def.ne." " .or. crec_def(1).ne." ") .and. 
      >        kequip_over) then
               if(cstrack(istn) .ne. crack_type_def .or.
      >           cstrec(istn,1) .ne. crec_def(1)) then 
