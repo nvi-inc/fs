@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -497,8 +497,14 @@ Ack:    ich = strtok(NULL, ",");
 	if(iwl != 0){ /* non-empty "()" */
 	  dxpm(ibur, "?W", &ptrs, &irgb); 
 	  if(ptrs != NULL) { /* replace ?W... in ibur with non-empty "()" */
+            int istart=0;
+            /* strip leading spaces that don't fit */
+            while(irgb<iwl && iwhat[istart]==' ') {
+                istart++;
+                iwl--;
+            }
 	    iwm= irgb < iwl? irgb: iwl;
-	    memcpy(ptrs,iwhat,iwm);
+	    memcpy(ptrs,iwhat+istart,iwm);
 	  } else {
 	    dxpm(ibur, "?F", &ptrs, &irgb); 
 	    if(ptrs != NULL) { /* replace ?F... in ibur with non-empty "()" */
