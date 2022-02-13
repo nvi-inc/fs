@@ -1,4 +1,8 @@
 This file contains a summary of changes made and why.
+2022-02-10 fdrudg.f. Handling of equip_override.  If ON will use stuff from skedf.ctl. 
+           If OFF will use schedule file. If no information in schedule, then will use skedf.ctl.
+2022-02-10 stinp.f, vstinp.f. AND newroutine store_rack_and_recorder.f. make making of reading rack and recorder consistent
+           between VEX and SKD schedules
 2022-02-09 fdrudg.f:  Fixed error in logic of using equip_override. Missing paren in logic evaluation
 2022-02-08 proc_setup.f, proc_exper_initi.f. Fixed a couple of revision bugs. fdrudg.f. If EVLBI, remove 'fila10g' from rack type
 2022-02-05 ../skdrut/vunpdas.f: increased crec from 8 chars to 12. Capitalize on input.  (Sleeping bug.)

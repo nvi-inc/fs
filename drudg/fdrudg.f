@@ -385,7 +385,6 @@ C       Opening message
             write(luscn,'(a)') "-"//Crel_FS(1:trimlen(Crel_FS))
           endif
 
-
           nch = trimlen(cfile)
           if (nch.eq.0.or.ifunc.eq.8.or.ierr.ne.0) then ! prompt for file name
             if (kbatch) goto 990
@@ -675,12 +674,12 @@ C  if it was not set by the schedule.
           if(crack_tmp_cap .eq. "UNKNOWN") cstrack(istn)="none"    
           
           if(knew_sked) then
-            if((crack_type_def.ne." " .or. crec_def(1).ne." ") .and. 
-     >        kequip_over) then
+! 1. kequip_over =.true.  Replace whatever is in the sked file by waht is in skedf.ctl
+            if(kequip_over) then
               if(cstrack(istn) .ne. crack_type_def .or.
      >           cstrec(istn,1) .ne. crec_def(1)) then 
                 Write(luscn,*)
-     >           "WARNING! Using equipment from skedf.ctl:"
+     >     "WARNING! Equipment_over_ride: Using skedf.ctl:"
                 write(luscn,'(5x,"Replacing rack ",a," by ", a)')
      >            cstrack(istn), crack_type_def
                 write(luscn,'(5x,"Replacing rec  ",a," by ",a)')
@@ -688,7 +687,23 @@ C  if it was not set by the schedule.
                 cstrack(istn) =crack_type_def
                 cstrec(istn,1)=crec_def(1)  
               endif
+            else
+! 2. kequip_over=.false. Only replace if there is nothing in the schedule.
+              if(cstrack(istn).eq. " " .or. cstrec(istn,1).eq. " ")then
+                Write(luscn,*)
+     >     "WARNING! Equipment missing or not recognized in schedule.",
+     >     "  Using skedf.ctl."
+              endif
+              if(cstrack(istn) .eq. " ") then
+                  cstrack(istn) =crack_type_def
+                  write(luscn,*) "Setting rack to ",crack_type_def
+              endif
+              if(cstrec(istn,1) .eq. " ") then
+                  cstrec(istn,1)=crec_def(1)
+                  write(luscn,*) "Setting recorder to ",crec_def(1)
+              endif
             endif
+
             if(kevlbi_over .and.index(CCORNAME,"E-VLBI") .ne. 0) then
               cstrec(istn,1) = "none"
               write(luscn,'(a)') "Because of e-vlbi "

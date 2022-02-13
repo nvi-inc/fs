@@ -48,7 +48,8 @@ OBJECTS=\
     raded.o  readf_asc.o read_nolf.o reads.o \
     readline_skdrut.o \
     sbit.o secnds.o seconds2hms.o sec2minsec.o selev.o searl.o sidtm.o skdrini.o sktime.o \
-    slewo.o slew_time.o soinp.o speed.o  splitntokens.o splitntokens2.o squeezeleft.o stape.o stinp.o sunarc.o \
+    slewo.o slew_time.o soinp.o speed.o  splitntokens.o splitntokens2.o squeezeleft.o \
+    stape.o stinp.o store_rack_and_recorder.o sunarc.o \
     sunpo.o sunazel.o \
     ttape.o timesub.o timeadd.o tmadd.o tmsub.o trimlen.o tspin.o \
     unpbar.o unpco.o unpfsk.o unpfcat.o unpfmt.o unplo.o  unprat.o \

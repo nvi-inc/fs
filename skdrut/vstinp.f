@@ -28,6 +28,7 @@ C
       include '../skdrincl/constants.ftni'
 C
 C History:
+! 2022-02-10 JMG. Use subroutine to stuff crec, crack into appropriate slots. 
 ! 2022-02-04 JMG Increased size of recorder to 12chars
 ! 2021-11-20 JMG Previously assumed that mask (az,el) came in pairs.  Now can have step functions
 ! 2021-04-02 JMG Renamed islcon-->slew_off, stnrat-->slew_rate. Made slew_off real. 
@@ -54,10 +55,7 @@ C OUTPUT:
 
 ! functions
       integer ptr_ch,fget_station_def,fvex_len
-      integer trimlen
-      logical kvalid_rack
-      logical kvalid_rec  
-
+    
 C LOCAL:      
       integer ierr1
       real slcon(2),SLRATE(2),ANLIM1(2),ANLIM2(2)
@@ -203,32 +201,11 @@ C
            cterna(i)=cter
         endif
 
-        nch = trimlen(stndefnames(i)) 
+! Put rack and recorder in appropriate slots.  
+! Doing it this way ensures SKD and VEX files are treated the same. 
 
-
-        if(.not.kvalid_rack(crack)) then        
-            write(lu,'(a)') "VSTINP: for station "// 
-     >        stndefnames(i)(1:il)//" unrecognized rack type: "//
-     >        crack// "setting to none!"
-            crack='none'
-        endif 
-        cstrack(i)=crack         
-
-        if(.not.kvalid_rec(crec)) then        
-            nch=max(1,trimlen(crec))
-            write(lu,'(a)') "VSTINP: for station "// 
-     >         stndefnames(i)(1:il)//" unrecognized recorder type: "//
-     >         crec(:nch)// "setting to none!"
-            crec='none'
-        endif   
-        cstrec(i,1)=crec 
-      
-        if(nr .eq. 1) then
-          cstrec(i,2)='none'
-        else
-          nr=1
-          cstrec(i,2)=crec
-        endif
+        call store_rack_and_recorder(lu,stndefnames(i),
+     >    crack,crec, cstrack(i),cstrec(i,1))
 
         cfirstrec(i)='1'
         nheadstack(i)=nstack ! number of headstacks
