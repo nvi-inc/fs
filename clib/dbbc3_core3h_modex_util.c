@@ -193,15 +193,14 @@ void dbbc3_core3h_modex_enc(output,count,lclc,iboard)
         case 4:
             m5sprintf(output,"%d",&lclc->decimate.decimate,&lclc->decimate.state);
             break;
-        case 5:  /* commanded value only */
+        case 5:  /* implied value only */
             if(DBBC3_DDCU == shm_addr->equip.rack_type)
                 crate=256;
             else
                 crate=128;
-            if(shm_addr->dbbc3_core3h_modex[iboard-1].decimate.state.known &&
-                    shm_addr->dbbc3_core3h_modex[iboard-1].decimate.decimate!=0) {
+            if(lclc->decimate.state.known && lclc->decimate.decimate!=0) {
                 sprintf(output,"(%.3f)", (float) crate/
-                        shm_addr->dbbc3_core3h_modex[iboard-1].decimate.decimate+0.0001 );
+                        lclc->decimate.decimate+0.0001 );
                 m5state_encode(output,&lclc->decimate.state);
             }
             break;

@@ -48,6 +48,10 @@ sample:     sample rate: in Ms/s.  For mk5b_mode: the possible range of
             track mask must yield a multiple of 1 Mbps for the total
             rate; see comments; no default.  Ignored for bit_streams.
 
+	    On monitor for mk5b_mode, the implied sample rate is shown
+	    in parentheses for reference. For mk5c_mode/fb_mode, the
+            commanded rate is shown in double parentheses.
+
 fpdp:       fpdp mode: 1 or 2. Default: no command sent to recorder.
             Ignored for mk5c_mode/fb_mode and bit_streams.
 
@@ -66,9 +70,10 @@ The effective sample rate can be specified in the SNAP command either
 explicitly with the 'sample' parameter or implicitly with the
 'decimation' parameter.  Only one of 'decimation' and 'sample' may be
 specified.  For VDIF, 'decimation' cannot be specified.  The recorders
-do not respond with the effective sample rate.  In the query response
-for these commands, the commanded sample rate, if it was explicitly
-commanded, is shown in parentheses for informational purposes only.
+do not respond with the effective sample rate. In the query response
+for mk5b_mode, the implied sample rate is shown in parentheses for
+reference; for mk5c_mode/fb_mode, the commanded rate is shown in
+double parentheses.
 
 The 'mk5c_mode' command is similar to the 'mk5b_mode' command,
 but is used with Mark 5C/FlexBuff recorders only and with slightly

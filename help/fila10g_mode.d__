@@ -22,10 +22,8 @@ sample:     sample rate in MHz: must be greater than 0.124.  The value
             equip.ctl) must yield a valid decimation factor.  Default
             sample rate is the VSI-H/Mark5B clock rate unless a
             decimation factor was specified or the VSI-H/Mark5B
-            clock rate is 'none'.  On monitor, no output if the
-            decimation factor was most recently specified; otherwise
-            the commanded sample rate is shown in parenthesizes for
-            reference.
+            clock rate is 'none'.  On monitor, the implied sample rate
+            is shown in parenthesizes for reference.
 
 okay        overide to allow command while recording, literal ascii:
             disk_record_ok
@@ -36,11 +34,10 @@ clock       input clock rate in Hz
 Comments:
 The effective sample rate can be specified in the SNAP command either
 explicitly with the 'sample' parameter or implicitly with the
-'decimation' parameter.  Only one of 'sample' and 'decimation' may
-be specified.  The device does not respond with the commanded
-effective sample rate.  In the query response for this command, the
-commanded sample rate, if it was explicitly commanded, is shown in
-parentheses for informational purposes only.
+'decimation' parameter. Only one of 'sample' and 'decimation' may be
+specified. The device does not respond with the commanded effective
+sample rate. In the query response for this command, the implied
+sample rate is shown in parentheses for informational purposes only.
 
 To use a non-zero 'mask2', the FiLa10G 'input select' in 'equip.ctl'
 must be 'vsi1-2'. Use of 'vsi1-2' is strongly encouraged and will work
