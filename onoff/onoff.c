@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -59,6 +59,7 @@ main()
   char lsorna2[sizeof(shm_addr->lsorna)+1];
   int cont0, cont[MAX_ONOFF_DET], rack_det, station_det;
   int ifchain;
+  int count;
 
 /* connect to the FS */
 
@@ -90,30 +91,41 @@ main()
   kagc=FALSE;
   koff=FALSE;
   memcpy(&onoff,&shm_addr->onoff,sizeof(onoff));
-
   ierr=0;
 
+  count=0;
+  for(j=0;j<MAX_ONOFF_DET;j++)
+    if(onoff.itpis[j]!=0)
+      count++;
+  snprintf(buff,sizeof(buff)," Starting run with %d detectors selected",count);
+  logit(buff,0,NULL);
+
   if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
+    logit(" Locking gains",0,NULL);
     kagc=TRUE;
     if(agc(onoff.itpis,0,&ierr))
       goto error_recover;
   } else if(shm_addr->equip.rack==DBBC &&
 	      (shm_addr->equip.rack_type == DBBC_DDC ||
 	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
+    logit(" Locking gains",0,NULL);
     kagc=TRUE;
     if(agc_dbbc(onoff.itpis,0,&ierr))
       goto error_recover;
   } else if(shm_addr->equip.rack==DBBC &&
 	      (shm_addr->equip.rack_type == DBBC_PFB ||
 	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+    logit(" Locking gains",0,NULL);
     kagc=TRUE;
     if(agc_dbbc_pfb(onoff.itpis,0,&ierr))
       goto error_recover;
   } else if(shm_addr->equip.rack==DBBC) {
+    logit(" Locking gains",0,NULL);
     kagc=TRUE;
     if(agc_dbbc(onoff.itpis,0,&ierr))
       goto error_recover;
   } else if(shm_addr->equip.rack==DBBC3) {
+    logit(" Locking gains",0,NULL);
     kagc=TRUE;
     if(agc_dbbc3(onoff.itpis,0,&ierr))
       goto error_recover;
@@ -175,7 +187,7 @@ main()
 
   sprintf(buff2,
  "    De      Center  TCal    Flux    DPFU     Gain    Product   LO    T   FWHM");
-  logit(buff2,0,NULL);
+  logit_nd(buff2,0,NULL);
 
   for(i=0;i<MAX_ONOFF_DET;i++) {
     if(onoff.itpis[i]!=0) {
@@ -215,12 +227,13 @@ main()
        sprintf(buff+strlen(buff)," %8.2f %c %.5f",
 	       0.0,'x',0.0);
 
-      logit(buff,0,NULL);
+      logit_nd(buff,0,NULL);
     }
   }
 
   /* wait for onsource */
 
+  logit(" Waiting to be onsource",0,NULL);
   nwt=shm_addr->onoff.wait;
   if(1 != nsem_test("aquir"))
     nwt=nwt*4;               /* aquir not runnig */
@@ -294,12 +307,20 @@ main()
   for(i=0;i<shm_addr->onoff.rep;i++) {
 
     if(i!=0) {
+      snprintf(buff,sizeof(buff)," Going   on  source for repetition %d of %d",
+               i+1,shm_addr->onoff.rep);
+      logit(buff,0,NULL);
       if(gooff(azoff,eloff,"azel",shm_addr->onoff.wait,&ierr))
 	goto error_recover;
       else
 	koff=FALSE;
+    } else  {
+      snprintf(buff,sizeof(buff)," Already on  source for repetition %d of %d",
+               i+1,shm_addr->onoff.rep);
+      logit(buff,0,NULL);
     }
 
+    logit(" Collecting data",0,NULL);
     if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
       goto error_recover;
     wcounts("ONSO",0.0,0.0,&onoff,&sample);
@@ -328,10 +349,12 @@ main()
     isgn=-isgn;
 
     koff=TRUE;
+    logit(" Going   off source",0,NULL);
     if(gooff(azoff+isgn*astep,eloff+isgn*estep,"azel",
 	     shm_addr->onoff.wait,&ierr))
       goto error_recover;
 
+    logit(" Collecting data",0,NULL);
     if(use_cal) {
       if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
 	goto error_recover;
@@ -368,11 +391,13 @@ main()
   }
 
   /*last point onsource */
+  logit(" Going   on  source for final data point",0,NULL);
   if(gooff(azoff,eloff,"azel",shm_addr->onoff.wait,&ierr))
     goto error_recover;
   else
     koff=FALSE;
 
+  logit(" Collecting data",0,NULL);
   if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
     goto error_recover;
   wcounts("ONSO",0.0,0.0,&onoff,&sample);
@@ -406,10 +431,10 @@ main()
 #if 0
   sprintf(buff," i %d onscal.avg %f ons.avg %f ofscal.avg %f ofs.avg %f zero.avg %f",
 	   i,  onscal.avg[i],ons.avg[i],ofscal.avg[i],ofs.avg[i],zero.avg[i]);
-      logit(buff,0,NULL);
+      logit_nd(buff,0,NULL);
   sprintf(buff," i %d onscal.sig %f ons.sig %f ofscal.sig %f ofs.sig %f zero.sig %f",
 	  i,  onscal.sig[i],ons.sig[i],ofscal.sig[i],ofs.sig[i],zero.sig[i]);
-      logit(buff,0,NULL);
+      logit_nd(buff,0,NULL);
 #endif
       if(onoff.devices[i].tcal>0.0 && (use_cal || cont[i])) {
       	gcmp[i]=(onscal.avg[i]-ons.avg[i])
@@ -490,7 +515,8 @@ main()
  error_recover:
  
   ip1[2]=0;
-  if(koff)
+  if(koff) {
+    logit(" Going   on  source to conclude after an error",0,NULL);
     if(gooff(azoff,eloff,"azel",shm_addr->onoff.wait,&ierr1)) {
       ip1[0]=0;
       ip1[1]=0;
@@ -498,10 +524,12 @@ main()
       ip1[4]=0;
       memcpy(ip1+3,"nf",2);
     }
+  }
 
   ip2[2]=0;
   if(kagc)
     if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
+      logit(" Unlocking gains",0,NULL);
       if(agc(onoff.itpis,1,&ierr2)) {
 	ip2[0]=0;
 	ip2[1]=0;
@@ -512,6 +540,7 @@ main()
     } else if(shm_addr->equip.rack==DBBC &&
 	      (shm_addr->equip.rack_type == DBBC_DDC ||
 	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
+      logit(" Unlocking gains",0,NULL);
       if(agc_dbbc(onoff.itpis,1,&ierr2)) {
 	ip2[0]=0;
 	ip2[1]=0;
@@ -522,6 +551,7 @@ main()
     } else if(shm_addr->equip.rack==DBBC &&
 	      (shm_addr->equip.rack_type == DBBC_PFB ||
 	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+      logit(" Unlocking gains",0,NULL);
       if(agc_dbbc_pfb(onoff.itpis,1,&ierr2)) {
 	ip2[0]=0;
 	ip2[1]=0;
@@ -530,6 +560,7 @@ main()
 	memcpy(ip2+3,"nf",2);
       }
     } else if(shm_addr->equip.rack==DBBC3) {
+      logit(" Unlocking gains",0,NULL);
       if(agc_dbbc3(onoff.itpis,1,&ierr2)) {
 	ip2[0]=0;
 	ip2[1]=0;
@@ -562,7 +593,7 @@ main()
 	strcat(buff," ");
 	*/
 	jr2as(calr_sig[i],buff,-5,2,sizeof(buff));
-	logit(buff,0,NULL);
+	logit_nd(buff,0,NULL);
       }
 
     sprintf(buff2,
