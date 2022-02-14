@@ -36,11 +36,15 @@ static char *force_key[ ]=         { "$", "force" };
 static char *disk_key[ ]=         { "disk_record_ok" };
 static char *split_key[ ]=         { "off", "on" };
 static char *input_key[ ]=         { "tvg","vsi1","vsi2","vsi1-2","vsi1-2-3-4","gps" };
+static char *format_key[ ]=         { "stop","vdif","mk5b","raw" };
+static char *sync_key[ ]=         { "nosync","sync" };
 
 #define NFORCE_KEY sizeof(force_key)/sizeof( char *)
 #define NDISK_KEY sizeof(disk_key)/sizeof( char *)
 #define NSPLIT_KEY sizeof(split_key)/sizeof( char *)
 #define NINPUT_KEY sizeof(input_key)/sizeof( char *)
+#define NFORMAT_KEY sizeof(format_key)/sizeof( char *)
+#define NSYNC_KEY sizeof(sync_key)/sizeof( char *)
 
 char *m5trim();
 
@@ -211,9 +215,10 @@ void dbbc3_core3h_modex_enc(output,count,lclc,iboard)
     if(*count>0) *count++;
     return;
 }
-void dbbc3_core3h_modex_mon(output,count,lclm)
+void dbbc3_core3h_modex_mon(output,count,lclc,lclm)
     char *output;
     int *count;
+    struct dbbc3_core3h_modex_cmd *lclc;
     struct dbbc3_core3h_modex_mon *lclm;
 {
 
@@ -237,6 +242,38 @@ void dbbc3_core3h_modex_mon(output,count,lclm)
             ivalue = lclm->vsi_input.vsi_input;
             if (ivalue >=0 && ivalue <NINPUT_KEY)
                 strcat(output,input_key[ivalue]);
+            else
+                strcat(output,BAD_VALUE);
+            break;
+        case 4:
+            m5sprintf(output,"%d",&lclc->channels.channels,
+                    &lclc->channels.state);
+            break;
+        case 5:
+            m5sprintf(output,"%d",&lclc->width.width,
+                    &lclc->width.state);
+            break;
+        case 6:
+            m5sprintf(output,"%d",&lclc->payload.payload,
+                    &lclc->payload.state);
+            break;
+        case 7:
+            ivalue = lclm->format.format;
+            if(0==lclc->start.start)
+              ivalue = 0;
+            if (ivalue >=0 && ivalue <NFORMAT_KEY)
+                strcat(output,format_key[ivalue]);
+            else
+                strcat(output,BAD_VALUE);
+            break;
+        case 8:
+            if(!lclm->sync.state.known) {
+                *count=-1;
+                break;
+            }
+            ivalue = lclm->sync.sync;
+            if (ivalue >=0 && ivalue <NSYNC_KEY)
+                strcat(output,sync_key[ivalue]);
             else
                 strcat(output,BAD_VALUE);
             break;
@@ -485,7 +522,7 @@ int dbbc3_core3h_2_output(ptr,lclc,lclm) /* return values:
     char *ptr;           /* input buffer to be parsed */
 
     struct dbbc3_core3h_modex_cmd *lclc;  /* result structure with parameters */
-    struct dbbc3_core3h_modex_cmd *lclm;  /* result structure with parameters */
+    struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
 {
     char string[]= "Output              :";
     char string1[]= "stopped";
@@ -500,12 +537,75 @@ int dbbc3_core3h_2_output(ptr,lclc,lclm) /* return values:
 
     if(strstr(ptr+strlen(string),string1))
         lclc->start.start=0;
-    else if (ptr+strlen(string),string2)
+    else if (strstr(ptr+strlen(string),string2))
         lclc->start.start=1;
-    else
+     else
         return -1;
 
     lclc->start.state.known=1;
+    return 0;
+}
+int dbbc3_core3h_2_format(ptr,lclc,lclm) /* return values:
+                                     *  0 == no error
+                                     *  0 != error
+                                     */
+    char *ptr;           /* input buffer to be parsed */
+
+    struct dbbc3_core3h_modex_cmd *lclc;  /* result structure with parameters */
+    struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
+{
+    char string[]= "Output 0 format     :";
+    char string1[]= "vdif";
+    char string2[]= "mk5b";
+    char string3[]= "raw";
+
+    m5state_init(&lclm->format.state);
+
+    ptr=strstr(ptr,string);
+    if(ptr == NULL) {
+        return -1;
+    }
+
+    if(strstr(ptr+strlen(string),string1))
+        lclm->format.format=1;
+    else if (strstr(ptr+strlen(string),string2))
+        lclm->format.format=2;
+    else if (strstr(ptr+strlen(string),string3))
+        lclm->format.format=3;
+    else
+        return -1;
+
+    lclm->format.state.known=1;
+    return 0;
+}
+int dbbc3_core3h_2_sync(ptr,lclc,lclm) /* return values:
+                                     *  0 == no error
+                                     *  0 != error
+                                     */
+    char *ptr;           /* input buffer to be parsed */
+
+    struct dbbc3_core3h_modex_cmd *lclc;  /* result structure with parameters */
+    struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
+{
+    char string[]= "VDIF timesync       :";
+    char string0[]= "no";
+    char string1[]= "yes";
+
+    m5state_init(&lclm->sync.state);
+
+    ptr=strstr(ptr,string);
+    if(ptr == NULL) {
+        return -1;
+    }
+
+    if(strstr(ptr+strlen(string),string0))
+        lclm->sync.sync=0;
+    else if (strstr(ptr+strlen(string),string1))
+        lclm->sync.sync=1;
+    else
+        return -1;
+
+    lclm->sync.state.known=1;
     return 0;
 }
 int dbbc3_core3h_2_splitmode(ptr,lclc,lclm) /* return values:

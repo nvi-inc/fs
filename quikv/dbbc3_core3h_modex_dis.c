@@ -83,6 +83,8 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
         int width = 0;
         int channels = 0;
         int payload = 0;
+        int format = 0;
+        int sync = 0;
 
         iclass=ip[0];
         nrecs=ip[1];
@@ -141,6 +143,18 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
                     goto error;
                 }
                 payload = TRUE;
+            } else if(!format && NULL != strstr(inbuf," Output 0 format")) {
+                if(1 == lclc.start.start && 0!=dbbc3_core3h_2_format(inbuf,&lclc,&lclm)) {
+                    ierr=-509;
+                    goto error;
+                }
+                format = TRUE;
+            } else if(!sync && NULL != strstr(inbuf," VDIF timesync ")) {
+                if(0!=dbbc3_core3h_2_sync(inbuf,&lclc,&lclm)) {
+                    ierr=-510;
+                    goto error;
+                }
+                sync = TRUE;
             }
         }
         if (!mask) {
@@ -167,6 +181,12 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
         } else if (!payload) {
             ierr = -528;
             goto error;
+        } else if (!format) {
+            ierr = -529;
+            goto error;
+        } else if (!sync) {
+            ierr = -530;
+            goto error;
         }
     }
     /* format output buffer */
@@ -174,12 +194,6 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
     strcpy(output,command->name);
     strcat(output,"/");
 
-    if(0 == lclc.start.start) {
-        snprintf(output+strlen(output),2,"%d",iboard);
-        strcat(output,",");
-        strcat(output,"stopped");
-        goto send;
-    }
     count=0;
     while( count>= 0) {
         if (count > 0) strcat(output,",");
@@ -187,7 +201,7 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
         dbbc3_core3h_modex_enc(output,&count,&lclc,iboard);
     }
 
-    /* this a rare command that has a monitor '?' value from shared memory */
+    /* this is a rare command that has monitor '?' values */
 
     if(kcom) {
         m5state_init(&lclm.clockrate.state);
@@ -207,12 +221,18 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
         else
             lclm.vsi_input.vsi_input=1;
         lclm.vsi_input.state.known=1;
+
+        m5state_init(&lclm.format.state);
+        lclm.format.format=1;
+        lclm.format.state.known=1;
+
+        m5state_init(&lclm.sync.state);
     }
     count=0;
     while( count>= 0) {
         if (count > 0) strcat(output,",");
         count++;
-        dbbc3_core3h_modex_mon(output,&count,&lclm);
+        dbbc3_core3h_modex_mon(output,&count,&lclc,&lclm);
     }
 
     if(strlen(output)>0) output[strlen(output)-1]='\0';
@@ -299,6 +319,14 @@ send:
 
         if((int) (shm_addr->dbbc3_clockr*1.e6+0.5) != lclm.clockrate.clockrate) {
             logitn(NULL,-625,"dr",iboard);
+            ierr=-600-iboard;
+        }
+        if(1 == lclc.start.start && 1 != lclm.format.format) {
+            logitn(NULL,-627,"dr",iboard);
+            ierr=-600-iboard;
+        }
+        if(1 != lclm.sync.sync) {
+            logitn(NULL,-628,"dr",iboard);
             ierr=-600-iboard;
         }
       }

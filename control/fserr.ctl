@@ -2798,6 +2798,12 @@ error decoding vdif_frame channels per frame response
 DR -508
 error decoding vdif_frame payload size response
 ""
+DR -509
+error decoding sysstat Output 0 format response
+""
+DR -510
+error decoding sysstat VDIF timesync response
+""
 DR -521
 could not find sysstat bitmask response
 ""
@@ -2821,6 +2827,12 @@ could not find vdif_frame channels per frame response
 ""
 DR -528
 could not find vdif_frame payload size response
+""
+DR -529
+could not find sysstat Output 0 format response
+""
+DR -530
+could not find sysstat VDIF timesync response
 ""
 DR -595
 Core3H board?W data transmission state is not defined in the FS yet
@@ -2911,6 +2923,12 @@ Core3H board?W sysstat input clock rate does not agree with dbbc3.ctl
 ""
 DR -626
 Core3H board?W configuration is not defined in the FS yet
+"
+DR -627
+Core3H board?W Output 0 format is not VDIF
+"
+DR -628
+Core3H board?W is not synced
 ""
 DS   -1
 Unable to open dsad.ctl file.
