@@ -100,6 +100,18 @@ main()
   snprintf(buff,sizeof(buff)," Starting run with %d detectors selected",count);
   logit(buff,0,NULL);
 
+  /* wait for onsource */
+
+  logit(" Waiting to be onsource",0,NULL);
+  nwt=shm_addr->onoff.wait;
+  if(1 != nsem_test("aquir"))
+    nwt=nwt*4;               /* aquir not runnig */
+  if(onsor(nwt,&ierr))
+    goto error_recover;
+
+  rte_time(it,it+5);
+  rut=it[3]*3600.0+it[2]*60.0+it[1]+((double)it[0])/100.;
+
   if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
     logit(" Locking gains",0,NULL);
     kagc=TRUE;
@@ -230,18 +242,6 @@ main()
       logit_nd(buff,0,NULL);
     }
   }
-
-  /* wait for onsource */
-
-  logit(" Waiting to be onsource",0,NULL);
-  nwt=shm_addr->onoff.wait;
-  if(1 != nsem_test("aquir"))
-    nwt=nwt*4;               /* aquir not runnig */
-  if(onsor(nwt,&ierr)) 
-    goto error_recover;
-
-  rte_time(it,it+5);
-  rut=it[3]*3600.0+it[2]*60.0+it[1]+((double)it[0])/100.;
 
   if(onoff.proc[0]!=0) {
     for(i=0;i<6;i++) 
