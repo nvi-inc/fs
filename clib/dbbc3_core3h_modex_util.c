@@ -168,10 +168,11 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
     return ierr;
 }
 
-void dbbc3_core3h_modex_enc(output,count,lclc,iboard)
+void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
     char *output;
     int *count;
     struct dbbc3_core3h_modex_cmd *lclc;
+    struct dbbc3_core3h_modex_mon *lclm;
     int iboard;
 {
 
@@ -189,10 +190,27 @@ void dbbc3_core3h_modex_enc(output,count,lclc,iboard)
                 strcpy(output,"0x");
                 m5sprintf(output+2,"%x",&lclc->mask2.mask2,&lclc->mask2.state);
             }
+            if(DBBC3_DDCU == shm_addr->equip.rack_type &&
+              lclm->mask4.state.known && lclc->mask2.state.known &&
+              lclm->mask4.mask4 != lclc->mask2.mask2) {
+                output=output+strlen(output);
+                strcpy(output,"[0x");
+                m5sprintf(output+3,"%x",&lclm->mask4.mask4,&lclm->mask4.state);
+                output=output+strlen(output);
+                strcpy(output,"]");
+            }
             break;
         case 3:
             strcpy(output,"0x");
             m5sprintf(output+2,"%x",&lclc->mask1.mask1,&lclc->mask1.state);
+            if(DBBC3_DDCU == shm_addr->equip.rack_type &&
+              lclm->mask3.state.known && lclm->mask3.mask3 != lclc->mask1.mask1) {
+                output=output+strlen(output);
+                strcpy(output,"[0x");
+                m5sprintf(output+3,"%x",&lclm->mask3.mask3,&lclm->mask3.state);
+                output=output+strlen(output);
+                strcpy(output,"]");
+            }
             break;
         case 4:
             m5sprintf(output,"%d",&lclc->decimate.decimate,&lclc->decimate.state);

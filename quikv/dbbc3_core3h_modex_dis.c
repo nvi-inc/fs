@@ -194,16 +194,12 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
     strcpy(output,command->name);
     strcat(output,"/");
 
-    count=0;
-    while( count>= 0) {
-        if (count > 0) strcat(output,",");
-        count++;
-        dbbc3_core3h_modex_enc(output,&count,&lclc,iboard);
-    }
-
     /* this is a rare command that has monitor '?' values */
 
     if(kcom) {
+        m5state_init(&lclm.mask4.state);
+        m5state_init(&lclm.mask3.state);
+
         m5state_init(&lclm.clockrate.state);
         lclm.clockrate.clockrate=shm_addr->dbbc3_clockr*1.0e6+0.5;
         lclm.clockrate.state.known=1;
@@ -228,6 +224,13 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
 
         m5state_init(&lclm.sync.state);
     }
+    count=0;
+    while( count>= 0) {
+        if (count > 0) strcat(output,",");
+        count++;
+        dbbc3_core3h_modex_enc(output,&count,&lclc,&lclm,iboard);
+    }
+
     count=0;
     while( count>= 0) {
         if (count > 0) strcat(output,",");

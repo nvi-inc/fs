@@ -22,11 +22,12 @@ n           1 to 8, but is limited to the number of IFs boards
 
 mask2:      VSI2 input bit-stream mask, usually hex, 32-bit wide
             maximum, for example: 0xf, default 0. Null on display if
-	    zero. Must be null for DDC_V. See the 'Comments' section
-            for more details.
+            zero. Must be null for DDC_V. See the 'Comments' section
+            for more details on DDC_U usage.
 
 mask1:      VSI1 input bit-stream mask, usually hex, non-zero 32-bit
-            wide maximum, for example: 0xf, default 0xffffffff
+            wide maximum, for example: 0xf, default 0xffffffff. See
+            the 'Comments' section for more details on DDC_U usage.
 
 decimation: decimation factor: 1-255. No default unless 'sample' (next
             parameter) is specified. For DDC_V, only '2' is permitted.
@@ -160,10 +161,16 @@ specified. The device does not respond with the commanded effective
 sample rate. In the query response for this command, the implied
 sample rate is shown in parentheses for informational purposes only.
 
-To use a non-zero 'mask2', the DBBC3 personality must be DDC_U.
+To use a non-zero 'mask2', the personality must be DDC_U.
 Additionally, there can't be bits turned on for BBCs in 'mask2' that
 exceed the number available as set by the number of BBCs per IF in
 'dbbc3.ctl'.
+
+For the DDC_U personality, the display values for 'mask2' or 'mask1'
+will be followed by the values of mask4 or mask3, respectively, in
+square brackets if the value of mask4 does not agree with 'mask2', or
+mask3 does not agree with 'mask1'. In these cases, the bit masks are
+not configured correctly.
 
 The meaning of the bits in the mask are given in the following table
 starting with the least significant bit. Mask1 represents the first
