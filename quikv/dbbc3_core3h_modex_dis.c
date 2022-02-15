@@ -74,6 +74,8 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
         return;
     } else if(kcom) {
         memcpy(&lclc,&shm_addr->dbbc3_core3h_modex[iboard-1],sizeof(lclc));
+        m5state_init(&lclm.mask3.state);
+        m5state_init(&lclm.mask4.state);
     } else {
         int mask = 0;
         int rate = 0;
@@ -194,36 +196,6 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
     strcpy(output,command->name);
     strcat(output,"/");
 
-    /* this is a rare command that has monitor '?' values */
-
-    if(kcom) {
-        m5state_init(&lclm.mask4.state);
-        m5state_init(&lclm.mask3.state);
-
-        m5state_init(&lclm.clockrate.state);
-        lclm.clockrate.clockrate=shm_addr->dbbc3_clockr*1.0e6+0.5;
-        lclm.clockrate.state.known=1;
-
-        m5state_init(&lclm.splitmode.state);
-        if(DBBC3_DDCU==shm_addr->equip.rack_type)
-            lclm.splitmode.splitmode=1;
-        else
-            lclm.splitmode.splitmode=0;
-        lclm.splitmode.state.known=1;
-
-        m5state_init(&lclm.vsi_input.state);
-        if(DBBC3_DDCU==shm_addr->equip.rack_type)
-            lclm.vsi_input.vsi_input=4;
-        else
-            lclm.vsi_input.vsi_input=1;
-        lclm.vsi_input.state.known=1;
-
-        m5state_init(&lclm.format.state);
-        lclm.format.format=1;
-        lclm.format.state.known=1;
-
-        m5state_init(&lclm.sync.state);
-    }
     count=0;
     while( count>= 0) {
         if (count > 0) strcat(output,",");
@@ -231,11 +203,13 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
         dbbc3_core3h_modex_enc(output,&count,&lclc,&lclm,iboard);
     }
 
-    count=0;
-    while( count>= 0) {
-        if (count > 0) strcat(output,",");
-        count++;
-        dbbc3_core3h_modex_mon(output,&count,&lclc,&lclm);
+    if(!kcom) {
+        count=0;
+        while( count>= 0) {
+            if (count > 0) strcat(output,",");
+            count++;
+            dbbc3_core3h_modex_mon(output,&count,&lclc,&lclm);
+        }
     }
 
     if(strlen(output)>0) output[strlen(output)-1]='\0';
