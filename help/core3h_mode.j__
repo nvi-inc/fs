@@ -54,12 +54,13 @@ channels    VDIF channels: 1-16
 
 width       VDIF channel width: 1 or 2 bits
 
-payload     VDIF frame size, typically 8000 bytes
+payload     VDIF payload size, typically 8000 bytes, but other multiples
+            of eight are possible
 
-format      data transmission format: 'stop', 'vdif', 'mk5b', or 'raw'
-            'stop' means no data is being sent
+format      data transmission format: 'stopped', 'vdif', 'mk5b', or
+            'raw'. 'stopped' means no data is being sent
 
-sync        whether the board is synced: 'sync' or 'nosync'
+sync        whether the board is synced: 'synced' or 'unsynced'
 
 Comments:
 

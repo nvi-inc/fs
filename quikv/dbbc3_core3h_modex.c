@@ -45,27 +45,25 @@ static void add_check_queries( out_recs, out_class, board, all)
         return;
     }
 
+    strcpy(str,"core3h=");
+    strcat(str,board);
+    strcat(str,",status_fs");
+    cls_snd(out_class, str, strlen(str) , 0, 0);
+    ++*out_recs;
+
     if(all) {
         strcpy(str,"core3h=");
         strcat(str,board);
-        strcat(str,",splitmode");
+        strcat(str,",mode_fs");
         cls_snd(out_class, str, strlen(str) , 0, 0);
         ++*out_recs;
 
         strcpy(str,"core3h=");
         strcat(str,board);
-        strcat(str,",vdif_frame");
+        strcat(str,",splitmode");
         cls_snd(out_class, str, strlen(str) , 0, 0);
         ++*out_recs;
     }
-    /* sysstat, which is slow, must be used because otherwise
-       inputselect and output, vdif/stop, are not available.
-     */
-    strcpy(str,"core3h=");
-    strcat(str,board);
-    strcat(str,",sysstat");
-    cls_snd(out_class, str, strlen(str) , 0, 0);
-    ++*out_recs;
 }
 static void check_board(iboard,board,ip,ierr_out,name)
     int iboard;
@@ -115,6 +113,7 @@ static void check_board(iboard,board,ip,ierr_out,name)
             ierr = -401;
             goto error;
         }
+
         if(0==strcmp(board," ")) {
             if(strncmp(inbuf,"version/",8)==0) {
                 strcpy(outbuf,name);
@@ -126,21 +125,24 @@ static void check_board(iboard,board,ip,ierr_out,name)
                     *ierr_out=-599;
                 }
             }
-        } else if(!output && NULL != strstr(inbuf," Output      ")) {
-            if(0!=dbbc3_core3h_2_output(inbuf,&lclc,&lclm)) {
-                ierr=-503;
-                goto error;
+        } else {
+            switch (i) {
+                case 0: case 1:
+                    break;
+                case 2:
+                    if(0!=dbbc3_core3h_status_fs(inbuf,&lclc,&lclm)) {
+                        ierr=-502;
+                        goto error;
+                    }
+                 default:
+                    break;
             }
-            output = TRUE;
         }
     }
     if(0==strcmp(board," ")) {
         if(0!=ierr)
             *ierr_out=-599;
         return;
-    } else if (!output) {
-       ierr = -523;
-       goto error2;
     }
 
     if(!shm_addr->dbbc3_core3h_modex[iboard].start.state.known) {
@@ -150,6 +152,10 @@ static void check_board(iboard,board,ip,ierr_out,name)
             logitn(NULL,-623,"dr",iboard+1);
         else
             logitn(NULL,-624,"dr",iboard+1);
+        *ierr_out=-597;
+    }
+    if(1!=lclm.sync.sync ) {
+        logitn(NULL,-628,"dr",iboard+1);
         *ierr_out=-597;
     }
     return;

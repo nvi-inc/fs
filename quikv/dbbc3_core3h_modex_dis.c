@@ -77,16 +77,7 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
         m5state_init(&lclm.mask3.state);
         m5state_init(&lclm.mask4.state);
     } else {
-        int mask = 0;
-        int rate = 0;
-        int output = 0;
         int split = 0;
-        int input = 0;
-        int width = 0;
-        int channels = 0;
-        int payload = 0;
-        int format = 0;
-        int sync = 0;
 
         iclass=ip[0];
         nrecs=ip[1];
@@ -97,97 +88,34 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
                 ierr = -401;
                 goto error;
             }
-            if(!mask && NULL != strstr(inbuf,"VSI input bitmask")) {
-                if(0!=dbbc3_core3h_2_vsi_bitmask(inbuf,&lclc,&lclm)) {
-                    ierr=-501;
-                    goto error;
-                }
-                mask=TRUE;
-            } else if(!rate && NULL != strstr(inbuf,"Input sample rate")) {
-                if(0!=dbbc3_core3h_2_vsi_samplerate(inbuf,&lclc,&lclm)) {
-                    ierr=-502;
-                    goto error;
-                }
-                rate = TRUE;
-            } else if(!output && NULL != strstr(inbuf," Output      ")) {
-                if(0!=dbbc3_core3h_2_output(inbuf,&lclc,&lclm)) {
-                    ierr=-503;
-                    goto error;
-                }
-                output = TRUE;
-            } else if(!split && NULL != strstr(inbuf,"Split mode")) {
-                if(0!=dbbc3_core3h_2_splitmode(inbuf,&lclc,&lclm)) {
-                    ierr=-504;
-                    goto error;
-                }
-                split = TRUE;
-            } else if(!input && NULL != strstr(inbuf,"Selected input")) {
-                if(0!=dbbc3_core3h_2_vsi_input(inbuf,&lclc,&lclm)) {
-                    ierr=-505;
-                    goto error;
-                }
-                input = TRUE;
-            } else if(!width && NULL != strstr(inbuf,"channel width (in bits)")) {
-                if(0!=dbbc3_core3h_2_width(inbuf,&lclc,&lclm)) {
-                    ierr=-506;
-                    goto error;
-                }
-                width = TRUE;
-            } else if(!channels && NULL != strstr(inbuf,"number of channels per frame")) {
-                if(0!=dbbc3_core3h_2_channels(inbuf,&lclc,&lclm)) {
-                    ierr=-507;
-                    goto error;
-                }
-                channels = TRUE;
-            } else if(!payload && NULL != strstr(inbuf,"payload size (in bytes)")) {
-                if(0!=dbbc3_core3h_2_payload(inbuf,&lclc,&lclm)) {
-                    ierr=-508;
-                    goto error;
-                }
-                payload = TRUE;
-            } else if(!format && NULL != strstr(inbuf," Output 0 format")) {
-                if(1 == lclc.start.start && 0!=dbbc3_core3h_2_format(inbuf,&lclc,&lclm)) {
-                    ierr=-509;
-                    goto error;
-                }
-                format = TRUE;
-            } else if(!sync && NULL != strstr(inbuf," VDIF timesync ")) {
-                if(0!=dbbc3_core3h_2_sync(inbuf,&lclc,&lclm)) {
-                    ierr=-510;
-                    goto error;
-                }
-                sync = TRUE;
+	    switch (i) {
+                case 0: case 1: case4: case 5:
+                    break;
+                case 2:
+                    if(0!=dbbc3_core3h_status_fs(inbuf,&lclc,&lclm)) {
+                        ierr=-501;
+                        goto error;
+                    }
+                    break;
+                case 6:
+                    if(0!=dbbc3_core3h_mode_fs(inbuf,&lclc,&lclm)) {
+                        ierr=-502;
+                        goto error;
+                    }
+                    break;
+                default:
+                    if(!split && NULL != strstr(inbuf,"Split mode")) {
+                        if(0!=dbbc3_core3h_2_splitmode(inbuf,&lclc,&lclm)) {
+                            ierr=-503;
+                            goto error;
+                        }
+                        split = TRUE;
+                    }
+                    break;
             }
         }
-        if (!mask) {
-            ierr = -521;
-            goto error;
-        } else if (!rate) {
-            ierr = -522;
-            goto error;
-        } else if (!output) {
+        if (!split) {
             ierr = -523;
-            goto error;
-        } else if (!split) {
-            ierr = -524;
-            goto error;
-        } else if (!input) {
-            ierr = -525;
-            goto error;
-        } else if (!width) {
-            ierr = -526;
-            goto error;
-        } else if (!channels) {
-            ierr = -527;
-            goto error;
-        } else if (!payload) {
-            ierr = -528;
-            goto error;
-        } else if (!format) {
-            ierr = -529;
-            goto error;
-        } else if (!sync) {
-            ierr = -530;
             goto error;
         }
     }

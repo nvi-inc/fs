@@ -2775,67 +2775,16 @@ DR -456
 Unknown rack type in logmsg_dbbc3().
 ""
 DR -501
-error decoding sysstat bitmask response
+error decoding mode_fs response
 ""
 DR -502
-error decoding sysstat samplerate response
+error decoding status_fs response
 ""
 DR -503
-error decoding sysstat output response
-""
-DR -504
 error decoding splitmode response
 ""
-DR -505
-error decoding sysstat Selected input response
-""
-DR -506
-error decoding vdif_frame width response
-""
-DR -507
-error decoding vdif_frame channels per frame response
-""
-DR -508
-error decoding vdif_frame payload size response
-""
-DR -509
-error decoding sysstat Output 0 format response
-""
-DR -510
-error decoding sysstat VDIF timesync response
-""
-DR -521
-could not find sysstat bitmask response
-""
-DR -522
-could not find sysstat samplerate response
-""
 DR -523
-could not find sysstat output response
-""
-DR -524
 could not find splitmode response
-""
-DR -525
-could not find sysstat Selected input response
-""
-DR -526
-error decoding vdif_frame channel width response
-""
-DR -527
-could not find vdif_frame channels per frame response
-""
-DR -528
-could not find vdif_frame payload size response
-""
-DR -529
-could not find sysstat Output 0 format response
-""
-DR -530
-could not find sysstat VDIF timesync response
-""
-DR -595
-Core3H board?W data transmission state is not defined in the FS yet
 ""
 DR -596
 DBBC3 firmware/version is wrong AND the data transmission state for one or more Core3H boards is not correct/defined
@@ -2889,7 +2838,7 @@ DR -614
 Core3H board?W mask4 is not correct, it should be the same as the requested mask2
 ""
 DR -615
-Core3H board?W sysstat decimate is not correct
+Core3H board?W decimation is not correct
 ""
 DR -616
 Core3H board?W vdif_frame width is not correct
@@ -2898,7 +2847,7 @@ DR -617
 Core3H board?W vdif_frame channels is not correct
 ""
 DR -618
-Core3H board?W vdif_frame payload is not correct
+Core3H board?W vdif_frame payload size is not correct
 ""
 DR -619
 Core3H board?W splitmode should be on and it is not
@@ -2919,13 +2868,13 @@ DR -624
 Core3H board?W should be stopped but it is sending data
 "
 DR -625
-Core3H board?W sysstat input clock rate does not agree with dbbc3.ctl
+Core3H board?W input clock rate does not agree with dbbc3.ctl
 ""
 DR -626
 Core3H board?W configuration is not defined in the FS yet
 "
 DR -627
-Core3H board?W Output 0 format is not VDIF
+Core3H board?W data format is not VDIF
 "
 DR -628
 Core3H board?W is not synced

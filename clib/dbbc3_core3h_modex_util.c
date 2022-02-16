@@ -36,8 +36,8 @@ static char *force_key[ ]=         { "$", "force" };
 static char *disk_key[ ]=         { "disk_record_ok" };
 static char *split_key[ ]=         { "off", "on" };
 static char *input_key[ ]=         { "tvg","vsi1","vsi2","vsi1-2","vsi1-2-3-4","gps" };
-static char *format_key[ ]=         { "stop","vdif","mk5b","raw" };
-static char *sync_key[ ]=         { "nosync","sync" };
+static char *format_key[ ]=         { "stopped","vdif","mk5b","raw" };
+static char *sync_key[ ]=         { "unsynced","synced" };
 
 #define NFORCE_KEY sizeof(force_key)/sizeof( char *)
 #define NDISK_KEY sizeof(disk_key)/sizeof( char *)
@@ -428,204 +428,6 @@ void vdif_frame_2_dbbc3_core3h(ptr,lclc,board)
 
 }
 
-int dbbc3_core3h_2_vsi_bitmask(ptr,lclc,lclm) /* return values:
-                                     *  0 == no error
-                                     *  0 != error
-                                     */
-    char *ptr;           /* input buffer to be parsed */
-
-    struct dbbc3_core3h_modex_cmd *lclc;  /* result structure with parameters */
-    struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
-{
-    char string[]= "VSI input bitmask   :";
-
-    m5state_init(&lclm->mask4.state);
-    m5state_init(&lclm->mask3.state);
-    m5state_init(&lclc->mask2.state);
-    m5state_init(&lclc->mask1.state);
-    lclm->mask4.mask4=0;
-    lclm->mask3.mask3=0;
-    lclc->mask2.mask2=0;
-    lclc->mask1.mask1=0;
-
-    ptr=strstr(ptr,string);
-    if(ptr == NULL) {
-        return -1;
-    }
-
-    ptr=strtok(ptr+strlen(string)," \n\r");
-    if(ptr == NULL) {
-        return -1;
-    }
-    if(m5sscanf(ptr,"%x",&lclc->mask1.mask1,&lclc->mask1.state)) {
-        return -1;
-    }
-
-    ptr=strtok(NULL," \n\r");
-    if(ptr!=NULL && strncmp(ptr,"0x",2)==0) {
-        memcpy(&lclc->mask2,&lclc->mask1,sizeof(lclc->mask2));
-        if(m5sscanf(ptr,"%x",&lclc->mask1.mask1,&lclc->mask1.state)) {
-            return -1;
-        }
-        ptr=strtok(NULL," \n\r");
-        if(ptr!=NULL && strncmp(ptr,"0x",2)==0) {
-            memcpy(&lclm->mask3,&lclc->mask2,sizeof(lclm->mask3));
-            memcpy(&lclc->mask2,&lclc->mask1,sizeof(lclc->mask2));
-            if(m5sscanf(ptr,"%x",&lclc->mask1.mask1,&lclc->mask1.state)) {
-                return -1;
-            }
-            ptr=strtok(NULL," \n\r");
-            if(ptr!=NULL && strncmp(ptr,"0x",2)==0) {
-                memcpy(&lclm->mask4,&lclm->mask3,sizeof(lclm->mask4));
-                memcpy(&lclm->mask3,&lclc->mask2,sizeof(lclm->mask3));
-                memcpy(&lclc->mask2,&lclc->mask1,sizeof(lclc->mask2));
-                if(m5sscanf(ptr,"%x",&lclc->mask1.mask1,&lclc->mask1.state)) {
-                    return -1;
-                }
-            }
-        }
-
-    }
-    return 0;
-}
-int dbbc3_core3h_2_vsi_samplerate(ptr,lclc,lclm) /* return values:
-                                             *  0 == no error
-                                             *  0 != error
-                                             */
-    char *ptr;           /* input buffer to be parsed */
-
-    struct dbbc3_core3h_modex_cmd *lclc;  /* result structure with parameters */
-    struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
-{
-    char string[]= "Input sample rate   :";
-    char string2[]= "Hz";
-    char string3[]= "/";
-
-    m5state_init(&lclc->decimate.state);
-    m5state_init(&lclm->clockrate.state);
-
-    ptr=strstr(ptr,string);
-    if(ptr == NULL) {
-        return -1;
-    }
-
-    if(m5sscanf(ptr+strlen(string),"%d",
-                &lclm->clockrate.clockrate,&lclm->clockrate.state)) {
-        return -1;
-    }
-
-    ptr=strstr(ptr+strlen(string),string2);
-    if(ptr == NULL) {
-        return -1;
-    }
-
-    ptr=strstr(ptr+strlen(string2),string3);
-    if(ptr == NULL) {
-        lclc->decimate.decimate=1;
-        lclc->decimate.state.known=1;
-        return 0;
-    }
-
-    if(m5sscanf(ptr+strlen(string2),"%d",
-                &lclc->decimate.decimate,&lclc->decimate.state)) {
-        return -1;
-    }
-
-    return 0;
-}
-int dbbc3_core3h_2_output(ptr,lclc,lclm) /* return values:
-                                     *  0 == no error
-                                     *  0 != error
-                                     */
-    char *ptr;           /* input buffer to be parsed */
-
-    struct dbbc3_core3h_modex_cmd *lclc;  /* result structure with parameters */
-    struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
-{
-    char string[]= "Output              :";
-    char string1[]= "stopped";
-    char string2[]= "started";
-
-    m5state_init(&lclc->start.state);
-
-    ptr=strstr(ptr,string);
-    if(ptr == NULL) {
-        return -1;
-    }
-
-    if(strstr(ptr+strlen(string),string1))
-        lclc->start.start=0;
-    else if (strstr(ptr+strlen(string),string2))
-        lclc->start.start=1;
-     else
-        return -1;
-
-    lclc->start.state.known=1;
-    return 0;
-}
-int dbbc3_core3h_2_format(ptr,lclc,lclm) /* return values:
-                                     *  0 == no error
-                                     *  0 != error
-                                     */
-    char *ptr;           /* input buffer to be parsed */
-
-    struct dbbc3_core3h_modex_cmd *lclc;  /* result structure with parameters */
-    struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
-{
-    char string[]= "Output 0 format     :";
-    char string1[]= "vdif";
-    char string2[]= "mk5b";
-    char string3[]= "raw";
-
-    m5state_init(&lclm->format.state);
-
-    ptr=strstr(ptr,string);
-    if(ptr == NULL) {
-        return -1;
-    }
-
-    if(strstr(ptr+strlen(string),string1))
-        lclm->format.format=1;
-    else if (strstr(ptr+strlen(string),string2))
-        lclm->format.format=2;
-    else if (strstr(ptr+strlen(string),string3))
-        lclm->format.format=3;
-    else
-        return -1;
-
-    lclm->format.state.known=1;
-    return 0;
-}
-int dbbc3_core3h_2_sync(ptr,lclc,lclm) /* return values:
-                                     *  0 == no error
-                                     *  0 != error
-                                     */
-    char *ptr;           /* input buffer to be parsed */
-
-    struct dbbc3_core3h_modex_cmd *lclc;  /* result structure with parameters */
-    struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
-{
-    char string[]= "VDIF timesync       :";
-    char string0[]= "no";
-    char string1[]= "yes";
-
-    m5state_init(&lclm->sync.state);
-
-    ptr=strstr(ptr,string);
-    if(ptr == NULL) {
-        return -1;
-    }
-
-    if(strstr(ptr+strlen(string),string0))
-        lclm->sync.sync=0;
-    else if (strstr(ptr+strlen(string),string1))
-        lclm->sync.sync=1;
-    else
-        return -1;
-
-    lclm->sync.state.known=1;
-    return 0;
-}
 int dbbc3_core3h_2_splitmode(ptr,lclc,lclm) /* return values:
                                      *  0 == no error
                                      *  0 != error
@@ -659,7 +461,7 @@ int dbbc3_core3h_2_splitmode(ptr,lclc,lclm) /* return values:
 
     return -1;
 }
-int dbbc3_core3h_2_vsi_input(ptr,lclc,lclm) /* return values:
+int dbbc3_core3h_status_fs(ptr,lclc,lclm) /* return values:
                                      *  0 == no error
                                      *  0 != error
                                      */
@@ -669,30 +471,50 @@ int dbbc3_core3h_2_vsi_input(ptr,lclc,lclm) /* return values:
     struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
 {
     int i;
-    char string[]=  "Selected input      :";
 
-    m5state_init(&lclm->vsi_input.state);
+    m5state_init(&lclm->sync.state);
+    m5state_init(&lclm->format.state);
+    m5state_init(&lclc->start.state);
 
-    ptr=strstr(ptr,string);
+    ptr++;  /* skip leading \r */
+
+    ptr=strtok(ptr,",\n");
     if(ptr == NULL) {
         return -1;
     }
+    for(i=0;i<NSYNC_KEY;i++)
+       if(0==strcmp(ptr,sync_key[i])) {
+          lclm->sync.sync=i;
+          lclm->sync.state.known=1;
+          break;
+       }
 
-    ptr=strtok(ptr+strlen(string)," \n\r");
+    ptr=strtok(NULL,",\n");
     if(ptr == NULL) {
         return -1;
     }
+    for(i=0;i<NFORMAT_KEY;i++)
+       if(0==strcmp(ptr,format_key[i])) {
+          lclm->format.format=i;
+          lclm->format.state.known=1;
+          break;
+       }
 
-    for(i=0;i<NINPUT_KEY;i++)
-        if(0==strcmp(ptr,input_key[i])) {
-            lclm->vsi_input.vsi_input=i;
-            lclm->vsi_input.state.known=1;
-            return 0;
-        }
+    ptr=strtok(NULL,",\n");
+    if(ptr == NULL) {
+        return -1;
+    }
+    if(0==strcmp(ptr,"stopped")) {
+       lclc->start.start=0;
+       lclc->start.state.known=0;
+    } else if(0==strcmp(ptr,"started")) {
+       lclc->start.start=1;
+       lclc->start.state.known=0;
+    }
 
-    return -1;
+    return 0;
 }
-int dbbc3_core3h_2_width(ptr,lclc,lclm) /* return values:
+int dbbc3_core3h_mode_fs(ptr,lclc,lclm) /* return values:
                                      *  0 == no error
                                      *  0 != error
                                      */
@@ -701,84 +523,119 @@ int dbbc3_core3h_2_width(ptr,lclc,lclm) /* return values:
     struct dbbc3_core3h_modex_cmd *lclc;  /* result structure with parameters */
     struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
 {
+    char *ptr2;
+    int i;
+    int f1,f2,f3,f4;
 
-    char string[]=  "channel width (in bits)        :";
-
+    m5state_init(&lclm->vsi_input.state);
+    m5state_init(&lclm->clockrate.state);
+    m5state_init(&lclc->decimate.state);
+    m5state_init(&lclc->mask1.state);
+    m5state_init(&lclc->mask2.state);
+    m5state_init(&lclm->mask3.state);
+    m5state_init(&lclm->mask4.state);
     m5state_init(&lclc->width.state);
+    m5state_init(&lclc->channels.state);
+    m5state_init(&lclc->payload.state);
 
-    ptr=strstr(ptr,string);
+    ptr++;  /* skip leading \r */
+
+    ptr=strtok(ptr,",\n");
+    if(ptr == NULL) {
+        return -1;
+    }
+    for(i=0;i<NINPUT_KEY;i++)
+       if(0==strcmp(ptr,input_key[i])) {
+          lclm->vsi_input.vsi_input=i;
+          lclm->vsi_input.state.known=1;
+          break;
+       }
+
+    ptr=strtok(NULL,",\n");
+    if(ptr == NULL) {
+        return -1;
+    }
+    if(m5sscanf(ptr,"%d",
+                &lclm->clockrate.clockrate,&lclm->clockrate.state)) {
+        return -1;
+    }
+
+    ptr2=strstr(ptr,"/");
+
+    if(NULL==ptr2) {
+        lclc->decimate.decimate=1;
+        lclc->decimate.state.known=1;
+    } else {
+        if(m5sscanf(ptr2+1,"%d",
+            &lclc->decimate.decimate,&lclc->decimate.state)) {
+            return -1;
+        }
+    }
+
+    ptr=strtok(NULL,",\n");
     if(ptr == NULL) {
         return -1;
     }
 
-    ptr=strtok(ptr+strlen(string)," \n\r");
+    lclc->mask1.mask1=0;
+    lclc->mask1.state.known=1;
+    lclc->mask2.mask2=0;
+    lclc->mask2.state.known=1;
+    lclm->mask3.mask3=0;
+    lclm->mask3.state.known=1;
+    lclm->mask4.mask4=0;
+    lclm->mask4.state.known=1;
+    int count=sscanf(ptr,"%x %x %x %x",&f1,&f2,&f3,&f4);
+    if(0<count) {
+        lclc->mask1.mask1=f1;
+    }
+    if(1<count) {
+        memcpy(&lclc->mask2,&lclc->mask1,sizeof(lclc->mask2));
+        lclc->mask1.mask1=f2;
+    }
+    if(2<count) {
+        memcpy(&lclm->mask3,&lclc->mask2,sizeof(lclm->mask3));
+        memcpy(&lclc->mask2,&lclc->mask1,sizeof(lclc->mask2));
+        lclc->mask1.mask1=f3;
+    }
+    if(3<count) {
+        memcpy(&lclm->mask4,&lclm->mask3,sizeof(lclm->mask4));
+        memcpy(&lclm->mask3,&lclc->mask2,sizeof(lclm->mask3));
+        memcpy(&lclc->mask2,&lclc->mask1,sizeof(lclc->mask2));
+        lclc->mask1.mask1=f4;
+    }
+
+    ptr=strtok(NULL,",\n");  /* skip format, already have that */
     if(ptr == NULL) {
         return -1;
     }
 
+    ptr=strtok(NULL,",\n");
+    if(ptr == NULL) {
+        return -1;
+    }
     if(m5sscanf(ptr,"%d",&lclc->width.width,&lclc->width.state)) {
         return -1;
     }
 
-    return 0;
-}
-int dbbc3_core3h_2_channels(ptr,lclc,lclm) /* return values:
-                                     *  0 == no error
-                                     *  0 != error
-                                     */
-    char *ptr;           /* input buffer to be parsed */
+    ptr=strtok(NULL,",\n");
 
-    struct dbbc3_core3h_modex_cmd *lclc;  /* result structure with parameters */
-    struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
-{
-
-    char string[]=  "number of channels per frame   :";
-
-    m5state_init(&lclc->channels.state);
-
-    ptr=strstr(ptr,string);
     if(ptr == NULL) {
         return -1;
     }
-
-    ptr=strtok(ptr+strlen(string)," \n\r");
-    if(ptr == NULL) {
-        return -1;
-    }
-
     if(m5sscanf(ptr,"%d",&lclc->channels.channels,&lclc->channels.state)) {
         return -1;
     }
 
-    return 0;
-}
-int dbbc3_core3h_2_payload(ptr,lclc,lclm) /* return values:
-                                     *  0 == no error
-                                     *  0 != error
-                                     */
-    char *ptr;           /* input buffer to be parsed */
+    ptr=strtok(NULL,",\n");
 
-    struct dbbc3_core3h_modex_cmd *lclc;  /* result structure with parameters */
-    struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
-{
-
-    char string[]=  "payload size (in bytes)        :";
-
-    m5state_init(&lclc->payload.state);
-
-    ptr=strstr(ptr,string);
     if(ptr == NULL) {
         return -1;
     }
-
-    ptr=strtok(ptr+strlen(string)," \n\r");
-    if(ptr == NULL) {
-        return -1;
-    }
-
     if(m5sscanf(ptr,"%d",&lclc->payload.payload,&lclc->payload.state)) {
         return -1;
     }
+    lclc->payload.payload*=8; /* this field is 1/8 of payload */
 
     return 0;
 }
