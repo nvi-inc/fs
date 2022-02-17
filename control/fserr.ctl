@@ -2832,10 +2832,10 @@ DR -612
 Core3H board?W mask2 is not correct
 ""
 DR -613
-Core3H board?W mask3 is not correct, it should be the same as the requested mask1
+Core3H board?W mask3 is inconsistent with the requested mask1
 ""
 DR -614
-Core3H board?W mask4 is not correct, it should be the same as the requested mask2
+Core3H board?W mask4 is inconsistent with the requested mask2
 ""
 DR -615
 Core3H board?W decimation is not correct
