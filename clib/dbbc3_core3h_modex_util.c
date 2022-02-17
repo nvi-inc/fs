@@ -201,8 +201,10 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
             }
             break;
         case 3:
-            strcpy(output,"0x");
-            m5sprintf(output+2,"%x",&lclc->mask1.mask1,&lclc->mask1.state);
+            if(lclc->mask1.state.known) {
+                strcpy(output,"0x");
+                m5sprintf(output+2,"%x",&lclc->mask1.mask1,&lclc->mask1.state);
+            }
             if(DBBC3_DDCU == shm_addr->equip.rack_type &&
               lclm->mask3.state.known && lclm->mask3.mask3 != lclc->mask1.mask1) {
                 output=output+strlen(output);
