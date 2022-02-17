@@ -2787,43 +2787,43 @@ DR -523
 could not find splitmode response
 ""
 DR -596
-DBBC3 firmware/version is wrong AND the data transmission state for one or more Core3H boards is not correct/defined
+Core3H board?W data sending state is not defined in the FS yet
 ""
 DR -597
-The data transmission state for one or more Core3H boards is not correct
+DBBC3 firmware/version is wrong AND/OR one or more Core3H boards does not have the correct data sending state
 ""
 DR -598
-DBBC3 firmware/version is wrong AND the configuration of one or more Core3H boards is not correct/defined
+One or more Core3H boards does not have the correct data sending state
 ""
 DR -599
 DBBC3 firmware/version is wrong
 ""
 DR -600
-The configuration of one or more Core3H boards is not correct, or not defined in the FS yet
+The configuration of one or more Core3H boards is not correct
 ""
 DR -601
-DBBC3 Core3H board 1 configuration is not correct, or not defined in the FS yet
+DBBC3 Core3H board 1 configuration is not correct
 ""
 DR -602
-DBBC3 Core3H board 2 configuration is not correct, or not defined in the FS yet
+DBBC3 Core3H board 2 configuration is not correct
 ""
 DR -603
-DBBC3 Core3H board 3 configuration is not correct, or not defined in the FS yet
+DBBC3 Core3H board 3 configuration is not correct
 ""
 DR -604
-DBBC3 Core3H board 4 configuration is not correct, or not defined in the FS yet
+DBBC3 Core3H board 4 configuration is not correct
 ""
 DR -605
-DBBC3 Core3H board 5 configuration is not correct, or not defined in the FS yet
+DBBC3 Core3H board 5 configuration is not correct
 ""
 DR -606
-DBBC3 Core3H board 6 configuration is not correct, or not defined in the FS yet
+DBBC3 Core3H board 6 configuration is not correct
 ""
 DR -607
-DBBC3 Core3H board 7 configuration is not correct, or not defined in the FS yet
+DBBC3 Core3H board 7 configuration is not correct
 ""
 DR -608
-DBBC3 Core3H board 8 configuration is not correct, or not defined in the FS yet
+DBBC3 Core3H board 8 configuration is not correct
 ""
 DR -611
 Core3H board?W mask1 is not correct
@@ -2869,14 +2869,11 @@ Core3H board?W should be stopped but it is sending data
 "
 DR -625
 Core3H board?W input clock rate does not agree with dbbc3.ctl
-""
-DR -626
-Core3H board?W configuration is not defined in the FS yet
 "
-DR -627
+DR -626
 Core3H board?W data format is not VDIF
 "
-DR -628
+DR -627
 Core3H board?W is not synced
 ""
 DS   -1

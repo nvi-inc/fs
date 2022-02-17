@@ -31,12 +31,13 @@
 #define MAX_OUT 256
 #define BUFSIZE 2048
 
-void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options)
+void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options,kmon)
     struct cmd_ds *command;
     int iboard;
     int ip[5];
     int force_set;
     int options;
+    int kmon;
 {
     int ierr, count, i;
     char output[MAX_OUT];
@@ -151,12 +152,7 @@ send:
     } else
       logit(output,0,NULL);
 
-    if(!kcom) {
-      if (!shm_addr->dbbc3_core3h_modex[iboard-1].set ||
-          !shm_addr->dbbc3_core3h_modex[iboard-1].start.state.known) {
-        logitn(NULL,-626,"dr",iboard);
-        ierr=-600-iboard;
-    } else {
+    if(!kcom && !kmon) {
         ierr=0;
         if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1 != lclc.mask1.mask1) {
             logitn(NULL,-611,"dr",iboard);
@@ -227,26 +223,26 @@ send:
             ierr=-600-iboard;
         }
         if(1 == lclc.start.start && 1 != lclm.format.format) {
-            logitn(NULL,-627,"dr",iboard);
+            logitn(NULL,-626,"dr",iboard);
             ierr=-600-iboard;
         }
         if(1 != lclm.sync.sync) {
-            logitn(NULL,-628,"dr",iboard);
+            logitn(NULL,-627,"dr",iboard);
             ierr=-600-iboard;
         }
-      }
 
-      if(4==options && (ierr!=0||overall_error)) {
-          ierr=-600;
-      }
-      if(ierr!=0) {
-          if (1==options||2==options) {
-            ierr=0;
-            overall_error=1;
-          }
-          goto error2;
-      }
+        if(4==options && (ierr!=0||overall_error)) {
+            ierr=-600;
+        }
+        if(ierr!=0) {
+            if (1==options||2==options) {
+              ierr=0;
+              overall_error=1;
+            }
+            goto error2;
+        }
     }
+
     ip[0]=out_class;
     ip[1]=out_recs;
     return;
