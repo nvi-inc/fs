@@ -316,8 +316,11 @@ int fila10g_2_vsi_samplerate(ptr,lclc,lclm) /* return values:
     return -1;
   }
   ptr=strstr(ptr+sizeof(string),string2);
-  if(ptr == NULL)
+  if(ptr == NULL) {  /* missing value means '1' */
+    lclc->decimate.decimate=1;
+    lclc->decimate.state.known=1;
     return 0;
+  }
 
   if(m5sscanf(ptr+sizeof(string2),"%d",
 	      &lclc->decimate.decimate,&lclc->decimate.state)) {
