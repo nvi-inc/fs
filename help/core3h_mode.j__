@@ -171,7 +171,9 @@ For the DDC_U personality, the display values for 'mask2' or 'mask1'
 will be followed by the values of mask4 or mask3, respectively, in
 square brackets if the value of mask4 does not agree with 'mask2', or
 mask3 does not agree with 'mask1'. In these cases, the bit masks are
-not configured correctly.
+not configured correctly. It is a requirement for DDC_U operation that
+the mask4 and mask3 agree with 'mask2' and 'mask1', respectively.
+
 
 The meaning of the bits in the mask are given in the following table
 starting with the least significant bit. Mask1 represents the first
