@@ -80,6 +80,12 @@ the current values for the display only parameters and schedule the
 external program "onoff". See the onoff manual in Volume 2 (currently
 out-of-date).
 
+While running, the "onoff" program will display a set of narrative
+messages describing what actions are being performed.  At the end of
+measurements, the "VAL" results are displayed.  To make the displayed
+information easier to follow, the raw measurements, the "APR" values,
+and the "SIG" results are logged, but not displayed.
+
 The current command antenna position including offsets is assumed to
 be 'onsource.'
  

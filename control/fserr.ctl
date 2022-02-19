@@ -4530,16 +4530,19 @@ MN   -1 Place Holder
 
 ""
 NF   -1
-Break Detected in ONOFF
+Break detected in ONOFF: stopped
+""
+NF   -2
+Break detected in ONOFF: stopping
 ""
 NF   -3
 ONOFF already running
 ""
 NF   -4
-Error occurred while trying to return to source at end. Check offsets.
+Not able to return to initial target after an error: check antenna and offsets
 ""
 NF   -5
-Error occurred while trying to return to AGC. Check BBC gain settings.
+Error occurred while trying to return to AGC: check gain settings
 ""
 NF   -6
 Error occurred while trying to restore IF att. Check IF att settings.
@@ -4578,13 +4581,22 @@ NF  -19
 Error retrieving DBBC IF responses.
 ""
 NF  -20
-Did not reach source in allotted time
+Did not reach onsource for a target in the allotted time: ended
 ""
 NF  -21
 Error decoding DBBC IF response.
 ""
+NF  -22
+Did not reach onsource for a target in the allotted time: giving up
+""
+NF  -23
+Did not reach onsource trying to return to initial target after an error
+""
 NF  -30
-ANTCN failed too many times
+ANTCN failed too many times trying to go to a target to make measurements
+""
+NF  -31
+ANTCN failed too many times trying to return to initial target after an error
 ""
 NF  -40
 Diagnostic: Unknown axis system found in LOCAL
