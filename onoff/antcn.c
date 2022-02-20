@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -26,17 +26,21 @@ int antcn(ip1,ierr)
   int ip[5] = {0,0,0,0,0};
   int i;
 
-  ip[0]=ip1;
 
   for(i=0;i<2;i++) {
     if(brk_chk("onoff")!=0) {
       *ierr=-1;
       return -1;
     }
+
+    ip[0]=ip1;
     skd_run("antcn",'w',ip);
+    skd_par(ip);
+
+    if(ip[2]!=0)
+      logita(NULL,ip[2],ip+3,ip+4);
     if(ip[2]>=0)
       return 0;
-    logita(NULL,ip[2],ip+3,ip+4);
   }
 
   *ierr=-30;
