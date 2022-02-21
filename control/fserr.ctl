@@ -2721,7 +2721,7 @@ DR -207
 The 'okay' parameter must be 'disk_record_ok' or null.
 ""
 DR -214
-For DBBC3 DDC_V decimate must be 2
+For DBBC3 DDC_V decimate must be 1 or 2
 ""
 DR -215
 Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255.
@@ -2730,7 +2730,7 @@ DR -225
 Can't specify sample rate and decimate parameters simultaneously
 ""
 DR -235
-For DBBC3 DDC_V sample rate must imply a decimate of 2
+For DBBC3 DDC_V sample rate must imply a decimate of 1 or 2
 ""
 DR -301
 Can't change mode while recording, use disk_record=off first or (dangerous) use 'disk_record_ok' as 'okay' parameter.

@@ -88,7 +88,8 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
                         lcl->decimate.decimate>255)
                     ierr=-200;
                 else if(DBBC3_DDCV == shm_addr->equip.rack_type &&
-                        2!= lcl->decimate.decimate)
+                        2!= lcl->decimate.decimate &&
+                        1!= lcl->decimate.decimate)
                     ierr=-210;
             }
             if(ierr==0) {
@@ -135,7 +136,8 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
                             lcl->samplerate.decimate >255)
                         ierr=-210;
                     else if(DBBC3_DDCV == shm_addr->equip.rack_type &&
-                            2!= lcl->samplerate.decimate)
+                            2!= lcl->samplerate.decimate &&
+                            1!= lcl->samplerate.decimate)
                         ierr=-230;
                 }
             }

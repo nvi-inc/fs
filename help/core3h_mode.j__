@@ -30,12 +30,13 @@ mask1:      VSI1 input bit-stream mask, usually hex, non-zero 32-bit
             the 'Comments' section for more details on DDC_U usage.
 
 decimation: decimation factor: 1-255. No default unless 'sample' (next
-            parameter) is specified. For DDC_V, only '2' is permitted.
+            parameter) is specified. For DDC_V, only '1' and '2' are
+            permitted.
 
 sample:     sample rate in Ms/s: must be greater than 0.499. The value
             divided into the maximum data rate (256 Ms/s) for DDC_U
-            must yield a valid decimation factor. For DDC_V, only 64
-            Ms/s is accepted. Unless a decimation factor was
+            must yield a valid decimation factor. For DDC_V, only 128
+            and 64 Ms/s are accepted. Unless a decimation factor was
             specified, the default for DDC_U is 256 Ms/s (decimation
             1); for DDC_V, 64 Ms/s (decimation 2). In response, since
             the sample rate is not reported by the device, the
