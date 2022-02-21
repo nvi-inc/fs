@@ -46,6 +46,11 @@ struct dbbc3_core3h_modex_cmd {
     struct m5state state;
   } decimate;
   struct {
+    float samplerate;
+    int decimate;
+    struct m5state state;
+  } samplerate;
+  struct {
     int force;
     struct m5state state;
   } force;

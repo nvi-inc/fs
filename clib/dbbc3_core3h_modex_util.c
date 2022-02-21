@@ -104,7 +104,10 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
                 crate=256;
             else
                 crate=128;
+            sample=lcl->samplerate.samplerate;
+            m5state_init(&lcl->samplerate.state);
             ierr=arg_float(ptr,&sample,0.0,FALSE);
+            lcl->samplerate.samplerate=sample;
             if(lcl->decimate.state.known != 0) {
                 if(ierr != -100)
                     ierr=-220;
@@ -123,22 +126,23 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
                 if(sample <= 0.499) {
                     ierr=-200;
                 } else {
-                    lcl->decimate.decimate=(crate/sample)+0.5;
-                    if( fabs(lcl->decimate.decimate*sample-crate)/ crate
+                    lcl->samplerate.samplerate=sample;
+                    lcl->samplerate.decimate=(crate/sample)+0.5;
+                    if( fabs(lcl->samplerate.decimate*sample-crate)/ crate
                             > 0.001)
                         ierr=-210;
-                    else if( lcl->decimate.decimate <1 ||
-                            lcl->decimate.decimate >255)
+                    else if( lcl->samplerate.decimate <1 ||
+                            lcl->samplerate.decimate >255)
                         ierr=-210;
                     else if(DBBC3_DDCV == shm_addr->equip.rack_type &&
-                            2!= lcl->decimate.decimate)
+                            2!= lcl->samplerate.decimate)
                         ierr=-230;
                 }
             }
             if(ierr==0) {
-                lcl->decimate.state.known=1;
+                lcl->samplerate.state.known=1;
             } else {
-                lcl->decimate.state.error=1;
+                lcl->samplerate.state.error=1;
             }
             break;
         case 6:
@@ -217,14 +221,21 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
         case 4:
             m5sprintf(output,"%d",&lclc->decimate.decimate,&lclc->decimate.state);
             break;
-        case 5:  /* implied value only */
+        case 5:
             if(DBBC3_DDCU == shm_addr->equip.rack_type)
                 crate=256;
             else
                 crate=128;
-            if(lclc->decimate.state.known && lclc->decimate.decimate!=0) {
-                sprintf(output,"(%.3f)", (float) crate/
-                        lclc->decimate.decimate+0.0001 );
+            if(lclc->samplerate.state.known) {
+                sprintf(output,"%.3f", lclc->samplerate.samplerate+0.0001 );
+                while(output[strlen(output)-1]=='0')
+                  output[strlen(output)-1]=0;
+                m5state_encode(output,&lclc->samplerate.state);
+            } else if(lclc->decimate.state.known && lclc->decimate.decimate!=0) {
+                sprintf(output,"(%.3f", (float) crate/ lclc->decimate.decimate+0.0001 );
+                while(output[strlen(output)-1]=='0')
+                  output[strlen(output)-1]=0;
+                strcat(output,")");
                 m5state_encode(output,&lclc->decimate.state);
             }
             break;
@@ -326,8 +337,15 @@ void vsi_samplerate_2_dbbc3_core3h(ptr,lclc,board)
     struct dbbc3_core3h_modex_cmd *lclc;
     char board[ ];
 {
+    int decimate;
+
+    if(lclc->decimate.state.known)
+      decimate=lclc->decimate.decimate;
+    else
+      decimate=lclc->samplerate.decimate;
+
     sprintf(ptr,"core3h=%1.1s,vsi_samplerate %d %d",board,
-            (int) (shm_addr->dbbc3_clockr*1.0e6+0.5),lclc->decimate.decimate);
+            (int) (shm_addr->dbbc3_clockr*1.0e6+0.5),decimate);
 
 }
 
@@ -532,6 +550,7 @@ int dbbc3_core3h_mode_fs(ptr,lclc,lclm) /* return values:
     m5state_init(&lclm->vsi_input.state);
     m5state_init(&lclm->clockrate.state);
     m5state_init(&lclc->decimate.state);
+    m5state_init(&lclc->samplerate.state);
     m5state_init(&lclc->mask1.state);
     m5state_init(&lclc->mask2.state);
     m5state_init(&lclm->mask3.state);

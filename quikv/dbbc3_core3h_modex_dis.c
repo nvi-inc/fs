@@ -174,7 +174,10 @@ send:
             }
         }
 
-        if(shm_addr->dbbc3_core3h_modex[iboard-1].decimate.decimate != lclc.decimate.decimate) {
+        if(shm_addr->dbbc3_core3h_modex[iboard-1].decimate.state.known &&
+           shm_addr->dbbc3_core3h_modex[iboard-1].decimate.decimate != lclc.decimate.decimate ||
+           shm_addr->dbbc3_core3h_modex[iboard-1].samplerate.state.known &&
+           shm_addr->dbbc3_core3h_modex[iboard-1].samplerate.decimate != lclc.decimate.decimate) {
             logitn(NULL,-615,"dr",iboard);
             ierr=-600-iboard;
         }
