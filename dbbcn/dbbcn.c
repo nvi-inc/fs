@@ -173,9 +173,9 @@ int main(int argc, char * argv[])
     }
     ip[2] = result;
     memcpy(ip+3,"db",2);
-    if(result<-3||-1<result) 
+    if(result<-3||0<result)
       memcpy(ip+4,who,2);
-    else
+    else if (0!=result)
       memcpy(ip+4,what,2);
 #ifdef DEBUG
     fprintf(stderr,"leaving dbbcn ip[0]=%d ip[1]=%d ip[2]=%d\n",
