@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdio.h>
+#include <stdlib.h>
 
 int antcn(ip1,ierr)
      int ip1;
@@ -25,7 +26,13 @@ int antcn(ip1,ierr)
 {
   int ip[5] = {0,0,0,0,0};
   int i;
+  static suppress;
+  static kfirst=1;
 
+  if(kfirst) {
+    suppress=NULL!=getenv("FS_ONOFF_SUPPRESS_ANTCN_ERRORS");
+    kfirst=0;
+  }
 
   for(i=0;i<2;i++) {
     if(brk_chk("onoff")!=0) {
@@ -36,6 +43,9 @@ int antcn(ip1,ierr)
     ip[0]=ip1;
     skd_run("antcn",'w',ip);
     skd_par(ip);
+
+    if(suppress)
+      return 0;
 
     if(ip[2]!=0)
       logita(NULL,ip[2],ip+3,ip+4);

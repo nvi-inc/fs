@@ -217,6 +217,13 @@ results and to calibrate the noise diode. However, SEFD measurements
 should only be about 41% noisier than when the same integration is
 used with non-continuous calibration is used.
 
+If an antcn error occurs, a second try will be made before giving up.
+If your antcn program returns spurious errors, that should be fixed.
+As a work-around, an environment variable,
+"FS_ONOFF_SUPPRESS_ANTCN_ERRORS" (nominal value '1'), can be set to
+cause all antcn errors to be ignored. However, this is not recommended
+as a long-term solution.
+
  Continuous vs non-continuous cal switching considerations
 
 If for 'fivept' and 'onoff' only continuous cal is used, you can set
