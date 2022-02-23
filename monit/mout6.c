@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -46,7 +46,8 @@ mout6()
   int tone, chan;
   int iping[4];
   int it[6];
-  int seconds,dot2pps;
+  time_t seconds;
+  int dot2pps;
   struct tm *tm;
   int inv_vdif[4],vdif_should,inv_pps;
 
