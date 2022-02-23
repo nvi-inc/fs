@@ -119,7 +119,7 @@ int ierr;
 int nRDBE;
 int clear_area=0;
 int vdif_epoch, vdif_should;
-
+int kfirst = 1;
 
  putpname("fmset");
 skd_set_return_name("fmset");
@@ -328,9 +328,10 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
  mvwaddstr( maindisp, hint_row+3, column, buffer);
  irow=4;
  if(source==RDBE) {
-   if(vdif_epoch < vdif_should) {
+   if(vdif_epoch < vdif_should && !kfirst) {
      sprintf(buffer,"    '>'     to increment %s VDIF epoch." ,form);
-   }
+   } else
+     sprintf(buffer,"                                             ");
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
    sprintf(buffer,"    '<'     to decrement %s VDIF epoch." ,form);
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
@@ -497,6 +498,10 @@ do 	{
 		  form,vdif_should);
 	  mvwaddstr( maindisp, 8, column, buffer );
 	  
+          if(kfirst) {
+            kfirst=0;
+            goto build;
+          }
 	} else if(source==MK5) {
 	  char *pps_status,*freq_status,*source_status;
 	  if((rack == VLBA4 && rack_type == VLBA45) ||
@@ -663,18 +668,22 @@ do 	{
 	case 'a':
 	  if(source== RDBE && shm_addr->rdbe_units[0])
 	    iRDBE=1;
+            kfirst=1;
 	  goto build;
 	case 'b':
 	  if(source== RDBE && shm_addr->rdbe_units[1])
 	    iRDBE=2;
+            kfirst=1;
 	  goto build;
 	case 'c':
 	  if(source== RDBE && shm_addr->rdbe_units[2])
 	    iRDBE=3;
+            kfirst=1;
 	  goto build;
 	case 'd':
 	  if(source== RDBE && shm_addr->rdbe_units[3])
 	    iRDBE=4;
+            kfirst=1;
 	  goto build;
 	case SYNCH_KEY:
 	  for (i=hint_row;i<hint_row+irow;i++)
