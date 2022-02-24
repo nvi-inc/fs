@@ -966,7 +966,7 @@ error retrieving class for time query in get_fila10gtime
 error decoding time in get_fila10gtime
 ""
 AN   -1
-Illegal mode
+Illegal or unimplemented mode
 ""
 AN   -2
 Time-out while waiting for a response
