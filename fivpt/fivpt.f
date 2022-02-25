@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -61,7 +61,7 @@ C
       ierr=0
       kon=.false.
       if(0.ne.rn_take('fivpt',1)) then
-        call logit7ic(idum,idum,idum,-1,-2,lwho,'er')
+        call logit6(idum,idum,idum,-1,-2,lwho)
         goto 1
       endif
       call read_fscom
@@ -498,7 +498,7 @@ C
       call offot(lonpos,latpos,lonosv,latosv,ilon,ilat,lbuf,isbuf)
       call xoffot(lonpos,latpos,lonosv,latosv,ilon,ilat,
      &     elnpar(2),eltpar(2),lbuf,isbuf)
-      if (ierr.ne.0) call logit7ic(idum,idum,idum,-1,ierr,lwho,'er')
+      if (ierr.ne.0) call logit6(idum,idum,idum,-1,ierr,lwho)
       goto 90000
 C
 C   ERROR
@@ -527,16 +527,16 @@ C
 C
 80015 continue
       if (ierr.gt.0) goto 89990
-      call logit7ic(idum,idum,idum,-1,ierr,lwho,'er')
-      if (jerr.ne.0) call logit7ic(idum,idum,idum,-1,-100,lwho,'er')
+      call logit6(idum,idum,idum,-1,ierr,lwho)
+      if (jerr.ne.0) call logit6(idum,idum,idum,-1,-100,lwho)
       goto 90000
 C
 C BREAK DETECTED
 C
 89990 continue
       ierr=-1
-      call logit7ic(idum,idum,idum,-1,ierr,lwho,'br')
-      if (jerr.ne.0) call logit7ic(idum,idum,idum,-1,-100,lwho,'er')
+      call logit6(idum,idum,idum,-1,ierr,lwho)
+      if (jerr.ne.0) call logit6(idum,idum,idum,-1,-100,lwho)
       goto 90000
 C
 C CLEAN UP AND EXIT
@@ -547,7 +547,7 @@ C
             call fc_mcbcn_r(ip)
             if(ip(3).lt.0) then
                call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
-               call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
+               call logit6(idum,idum,idum,-1,-112,lwho)
             endif
          else if(DBBC.eq.rack.and.
      &           (DBBC_DDC.eq.rack_type.or.
@@ -555,7 +555,7 @@ C
             call fc_dbbcn_r(ip)
             if(ip(3).lt.0) then
                call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
-               call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
+               call logit6(idum,idum,idum,-1,-112,lwho)
             endif
          else if(DBBC.eq.rack.and.
      &           (DBBC_PFB.eq.rack_type.or.
@@ -563,13 +563,13 @@ C
             call fc_dbbcn_pfb_r(ip)
             if(ip(3).lt.0) then
                call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
-               call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
+               call logit6(idum,idum,idum,-1,-112,lwho)
             endif
          else if(DBBC3.eq.rack) then
             call fc_dbbc3n_r(ip)
             if(ip(3).lt.0) then
                call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
-               call logit7ic(idum,idum,idum,-1,-112,lwho,'er')
+               call logit6(idum,idum,idum,-1,-112,lwho)
             endif
          endif
       endif

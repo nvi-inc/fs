@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -31,11 +31,11 @@ C        IERR = 0 IF NO ERROR
 C 
       include '../include/fscom.i'
 C 
-      integer*2 lwho,lwhat
+      integer*2 lwho
       integer*4 ip(5)
       logical kbreak
 C 
-      data lwho/2Hfp/,lwhat/2Hrb/,ntry/2/ 
+      data lwho/2Hfp/,ntry/2/
 C 
       ierr=0
       iter=ntry
@@ -49,7 +49,7 @@ CC
 C      CHECK FOR TIME OUT
 C
       if (ip(3).ne.-104) goto 15
-      call logit7(idum,idum,idum,-1,-70,lwho,lwhat)
+      call logit6(idum,idum,idum,-1,-70,lwho)
       goto 12
 C
 C  other errors

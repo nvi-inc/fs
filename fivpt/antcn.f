@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -42,7 +42,7 @@ C
       call run_prog('antcn','wait',ip1,0,0,0,0)
       call rmpar(ip)
       if (ip(3).ge.0) return 
-      call logit7ic(idum,idum,idum,-1,ip(3),ip(4),'fp')
+      call logit6(idum,idum,idum,-1,ip(3),ip(4))
       itry=itry-1 
       if (itry.gt.0) goto 15
       goto 80020 
