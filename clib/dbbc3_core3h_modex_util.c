@@ -26,6 +26,7 @@
 #include <limits.h>
 #include <math.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
@@ -661,4 +662,43 @@ int dbbc3_core3h_mode_fs(ptr,lclc,lclm) /* return values:
     lclc->payload.payload*=8; /* this field is 1/8 of payload */
 
     return 0;
+}
+void dbbc3_core3h_modex_log_buf(char *outbuf, char *inbuf, size_t size_out,
+     char* who)
+{
+  int in=0;
+  int out=0;
+  int len=strlen(inbuf);
+  int j;
+
+  if(size_out>=11) {
+    strcpy(outbuf,"response: ");
+    out+=10;
+  } else {
+    logite("no room to show response",-500,who);
+    return;
+  }
+
+  for(j=0;j<len;j++) {
+    if('\r'==inbuf[j]) {
+       if(out>=size_out-2) {
+         break;
+       }
+       strcpy(outbuf+out,"\\r");
+       out+=2;
+    } else if(!isprint(inbuf[j])) {
+       if(out>=size_out-4) {
+         break;
+       }
+       snprintf(outbuf+out,5,"\\x%02x",inbuf[j]);
+       out+=4;
+    } else {
+      if(out>=size_out-1) {
+        break;
+      }
+      outbuf[out++]=inbuf[j];
+    }
+  }
+  outbuf[out]=0;
+  logite(outbuf,-500,who);
 }

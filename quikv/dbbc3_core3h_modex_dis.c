@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
@@ -50,6 +49,7 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options,kmon)
     static int out_recs=0;
     static int overall_error=0;
     char inbuf[BUFSIZE];
+    char inbuf2[BUFSIZE];
     int kcom;
     int iclass, nrecs;
     struct dbbc3_core3h_modex_cmd lclc;
@@ -89,18 +89,21 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options,kmon)
                 ierr = -401;
                 goto error;
             }
-	    switch (i) {
+            strcpy(inbuf2,inbuf);
+            switch (i) {
                 case 0: case 1: case4: case 5:
                     break;
                 case 2:
                     if(0!=dbbc3_core3h_status_fs(inbuf,&lclc,&lclm)) {
                         ierr=-501;
+                        dbbc3_core3h_modex_log_buf(inbuf,inbuf2,sizeof(inbuf),"dr");
                         goto error;
                     }
                     break;
                 case 6:
                     if(0!=dbbc3_core3h_mode_fs(inbuf,&lclc,&lclm)) {
                         ierr=-502;
+                        dbbc3_core3h_modex_log_buf(inbuf,inbuf2,sizeof(inbuf),"dr");
                         goto error;
                     }
                     break;
@@ -108,6 +111,7 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options,kmon)
                     if(!split && NULL != strstr(inbuf,"Split mode")) {
                         if(0!=dbbc3_core3h_2_splitmode(inbuf,&lclc,&lclm)) {
                             ierr=-503;
+                            dbbc3_core3h_modex_log_buf(inbuf,inbuf2,sizeof(inbuf),"dr");
                             goto error;
                         }
                         split = TRUE;

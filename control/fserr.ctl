@@ -2774,14 +2774,17 @@ Uknown personality from DBBC3; see message above for DBBC3's personality.
 DR -456
 Unknown rack type in logmsg_dbbc3().
 ""
+DR -500 Place holder for bad response buffer
+
+""
 DR -501
-error decoding mode_fs response
+error decoding mode_fs response, see DR -500 error for contents
 ""
 DR -502
-error decoding status_fs response
+error decoding status_fs response, see DR -500 error for contents
 ""
 DR -503
-error decoding splitmode response
+error decoding splitmode response, see DR -500 error for contents
 ""
 DR -523
 could not find splitmode response

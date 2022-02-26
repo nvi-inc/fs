@@ -82,6 +82,7 @@ static void check_board(iboard,board,ip,ierr_out,name)
     int save=0;    /* argument for cls_rcv - unused */
     int iclass, nrecs;
     char inbuf[BUFSIZE];
+    char inbuf2[BUFSIZE];
     char outbuf[BUFSIZE];
     struct dbbc3_core3h_modex_cmd lclc;
     struct dbbc3_core3h_modex_mon lclm;
@@ -126,14 +127,17 @@ static void check_board(iboard,board,ip,ierr_out,name)
                 }
             }
         } else {
+            strcpy(inbuf2,inbuf);
             switch (i) {
                 case 0: case 1:
                     break;
                 case 2:
                     if(0!=dbbc3_core3h_status_fs(inbuf,&lclc,&lclm)) {
                         ierr=-502;
+                        dbbc3_core3h_modex_log_buf(inbuf,inbuf2,sizeof(inbuf),"dr");
                         goto error;
                     }
+                    break;
                  default:
                     break;
             }
