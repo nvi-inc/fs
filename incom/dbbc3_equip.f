@@ -30,7 +30,7 @@ c
       character*4 decoder,pcalc
       character*18 dbbcv
       double precision das2b
-      character*7 m5bcrate
+      character*7 bbcs
       logical kmove
       integer*2 line1(16),line2(2),line3(13)
 c
@@ -55,7 +55,7 @@ c     &         2hf ,2hfi,2hle /
         goto 995
       endif
 c
-c bbcs/if anf ifs
+c bbcs/if and ifs
 c
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
@@ -71,12 +71,27 @@ c
         goto 990
       endif
 c
-      dbbc3_ddc_bbcs_per_if = ias2b(ibuf,ic1,ic2-ic1+1)
-      if (dbbc3_ddc_bbcs_per_if.ne.8.and.
-     &     dbbc3_ddc_bbcs_per_if.ne.12.and.
-     &     dbbc3_ddc_bbcs_per_if.ne.16) then
-         call logit7ci(0,0,0,1,-186,'bo',1)
-         goto 990
+      call hol2char(ibuf,ic1,ic2,bbcs)
+      call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
+      if(bbcs.eq.'nominal') then
+        if(rack.eq.DBBC3.and.
+     &     rack_type.eq.DBBC3_DDCU) then
+            dbbc3_ddc_bbcs_per_if=16
+        else if(rack.eq.DBBC3.and.
+     &     rack_type.eq.DBBC3_DDCV) then
+            dbbc3_ddc_bbcs_per_if=8
+        else
+            dbbc3_ddc_bbcs_per_if=0
+        endif
+      else
+        dbbc3_ddc_bbcs_per_if = ias2b(ibuf,ic1,ic2-ic1+1)
+        if (dbbc3_ddc_bbcs_per_if.ne.8.and.
+     &       dbbc3_ddc_bbcs_per_if.ne.12.and.
+     &       dbbc3_ddc_bbcs_per_if.ne.16) then
+           call logit7ci(0,0,0,1,-186,'bo',1)
+           goto 990
+        endif
       endif
 c
       call gtfld(ibuf,ifc,ilen,ic1,ic2)
