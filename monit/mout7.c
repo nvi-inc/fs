@@ -141,7 +141,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     printw(" DBBC3-FS ");
     if(ifc.time_error > -1000000 &&
        ifc.time_error <  1000000 ) {
-        if(ifc.time_error || v124)
+        if(ifc.time_error)
             standout();
         if (v124)
             printw("------");
@@ -150,7 +150,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             int2str(buf,ifc.time_error,-6,0);
             printw("%6s",buf);
         }
-        if(ifc.time_error || v124)
+        if(ifc.time_error)
             standend();
     } else
         printw("%6s"," ");
