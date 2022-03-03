@@ -144,19 +144,18 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
       printw("%2s","--");
 
     printw(" DBBC3-FS ");
-    if(ifc.time_error > -1000000 &&
-       ifc.time_error <  1000000 ) {
-        if(ifc.time_error)
-            standout();
+    if(ifc.time> 0) {
         if (v124)
             printw("------");
         else {
             buf[0]=0;
             int2str(buf,ifc.time_error,-6,0);
+            if(ifc.time_error)
+                standout();
             printw("%6s",buf);
+            if(ifc.time_error)
+                standend();
         }
-        if(ifc.time_error)
-            standend();
     } else
         printw("%6s"," ");
 
