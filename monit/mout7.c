@@ -136,12 +136,15 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     move(3,0);
     printw("Epoch ");
-    if(ifc.vdif_epoch >= 0) {
-      buf[0]=0;
-      int2str(buf,ifc.vdif_epoch,-2,0);
-      printw("%2s",buf);
+    if(ifc.time > 0) {
+      if(ifc.vdif_epoch >= 0) {
+        buf[0]=0;
+        int2str(buf,ifc.vdif_epoch,-2,0);
+        printw("%2s",buf);
+      } else
+        printw("%2s","--");
     } else
-      printw("%2s","--");
+      printw("%2s"," ");
 
     printw(" DBBC3-FS ");
     if(ifc.time> 0) {
