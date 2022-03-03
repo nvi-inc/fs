@@ -30,8 +30,8 @@ mask:       bit-stream mask, hex, non-zero 64-bit wide
             There is no monitor value for Ethernet recorders.
 
 decimation: decimation factor
-            For mk5b_mode: 1, 2, 4, 8, or 16.  No default unless
-            sample (next parameter) is specified.
+            For mk5b_mode: 1, 2, 4, 8, or 16.  The default is inferred
+            from sample (next parameter).
             Not available for mk5c_mode/fb_mode.
             Ignored for bit_streams.
 
@@ -55,7 +55,7 @@ sample:     sample rate: in Ms/s.  For mk5b_mode: the possible range of
 fpdp:       fpdp mode: 1 or 2. Default: no command sent to recorder.
             Ignored for mk5c_mode/fb_mode and bit_streams.
 
-okay        overide to allow command while recording, literal ascii:
+okay        override to allow command while recording, literal ASCII:
             disk_record_ok
             Ignored for mk5c_mode/fb_mode and bit_streams.
 
@@ -81,7 +81,7 @@ different parameters. The recorder must be controlled by the 'jive5ab'
 control program for this command to work.
 
 The 'fb_mode' command is an alias for the 'mk5c_mode' command.
-Intended for better indentification with FlexBuff recorders, but is
+Intended for better identification with FlexBuff recorders, but is
 otherwise exactly the same.
 
 For the 'mk5b_mode=...' command, the minimum sample rate is 2 Ms/s.  As
@@ -123,13 +123,12 @@ command.  For Mark 5C, it also sends 'packet=...' command.  For
 FlexBuff, it also sends an 'mtu=...' command.  The operator can
 manually include 'net_port=...'  commands if they are needed.
 
-When the 'fb_mode/'mk5c_mode' command used with the DBBC3, the 'mask'
-field must be null. The bit masks are takened from the core3h board
-setup commands ('core3h_modeX=...') commands, which must precede this
-command.
+When the 'fb_mode/'mk5c_mode' command is used with a DBBC3, the 'mask'
+field must be null. The bit masks are taken from the Core3H board
+setup commands ('core3h_mode=n,...'), which must precede this command.
 
-The 'bit_streams' commands is similar to the 'mk5b_mode' and
-'mk5c_mode/fb_mode' commands but does not communicate with the
+The 'bit_streams' command is similar to the 'mk5b_mode' and
+'mk5c_mode/fb_mode' command but does not communicate with the
 recorder.  All parameters except the bit mask are ignored.  The main
 purpose of 'bit_streams' is to provide a way to set the bit stream
 mask for correct sampling of Tsys when no recorder is being used
@@ -159,8 +158,8 @@ For the 'mk5b_mode' command, only the upper or lower 32 bits of the
 mask may be non-zero.  The lower 32 bits select DBBC2 VSI1 bitstreams
 and the upper 32 bits select VSI2 bitstreams.  For these cases, the
 Mark 5B recorder can be connected to either VSI1 or VSI2.  However,
-there is no detection if an incompatable connection is being used.
-Possible incompatable connections include: (1) connected to VSI2 when
+there is no detection if an incompatible connection is being used.
+Possible incompatible connections include: (1) connected to VSI2 when
 the VSI1 bitsreams for 'wastro' or 'geo2' are to be recorded, (2)
 connected to VSI2 when 'astro3' is to be recorded, (3) connection to
 VSI2 when 'astro2' will be used with a DBBC2 firmware version earlier
@@ -307,8 +306,8 @@ Notes on Mark5B-over-Ethernet (5B/Ethernet):
            immediately after the 'fila10g_mode=...' command.
 
            For a DBBC3, insert the command:
-           'dbbc3=core3h=X,start mark5b' immediately after each
-           corresponding 'core3h_modeX=...' command.
+           'core3h=X,start mark5b' for each board sending data immediately
+           after the 'core3h_mode=end,force' command.
    
      3. Run the experiment with these changes.
 

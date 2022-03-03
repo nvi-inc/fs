@@ -12,8 +12,8 @@ mask2:      VSI2 input bit-stream mask, usually hex, 32-bit wide maximum,
 mask1:      VSI1 input bit-stream mask, usually hex, non-zero 32-bit wide
             maximum, for example: 0xf, default 0xffffffff
 
-decimation: decimation factor: 1, 2, 4, 8, or 16. No default unless
-            sample (next parameter) is specified.
+decimation: decimation factor: 1, 2, 4, 8, or 16.  The default is inferred
+            from sample (next parameter).
 
 sample:     sample rate in MHz: must be greater than 0.124.  The value
             divided into the VSI-H/Mark5B clock rate (specified in
@@ -23,7 +23,7 @@ sample:     sample rate in MHz: must be greater than 0.124.  The value
             clock rate is 'none'.  On monitor, the implied sample rate
             is shown in parenthesizes for reference.
 
-okay        overide to allow command while recording, literal ascii:
+okay        override to allow command while recording, literal ASCII:
             disk_record_ok
 
 Monitor only parameter:
@@ -61,8 +61,7 @@ wired to FiLa10G input VSI2 and that input is selected in 'equip.ctl'.
 The lay-out of the bit-streams described in the 'help' page for the
 DBBC2 'form' command ('form.d__') and the discussion of useful
 cross-wirings in the 'help' page for the 'mk5b_mode' command
-('mk5b_mode.___') maybe helpful in such ad hoc situations.  You can
-also reach out for advice to Ed (Ed.Himwich@nasa.gov).
+('mk5b_mode.___') maybe helpful in such ad hoc situations.
 
 For single VSI modes, mismatches in using 'vsi2' (or 'vsi1') input for
 modes 'wastro'/'geo2'/'astro2'(<v105)/'astro3' when VSI1 (or VSI2) is
