@@ -9,15 +9,15 @@ Response: core3h_mode/n,mask2,mask1,decimation,sample,clock,split,input,channels
 
 Settable parameters:
 
-state:      'begin' or 'end. No default, see 'Comments' section for
-            more details.
+state:      'begin' or 'end'. No default, see 'Comments' section for
+            the details.
 
-force:      force setup: literal 'force', '$', nor null. See comments.
+force:      force setup: literal 'force', '$', or null. See comments.
 
 okay        override to allow command while recording, literal text:
             'disk_record_ok'
 
-n           1 to 8, but is limited to the number of IFs boards
+n           1 to 8, but is limited to the number of IF boards
             specified in 'dbbc3.ctl'
 
 mask2:      VSI2 input bit-stream mask, usually hex, 32-bit wide
@@ -29,19 +29,19 @@ mask1:      VSI1 input bit-stream mask, usually hex, non-zero 32-bit
             wide maximum, for example: 0xf, default 0xffffffff. See
             the 'Comments' section for more details on DDC_U usage.
 
-decimation: decimation factor: 1-255. No default unless 'sample' (next
-            parameter) is specified. For DDC_V, only '1' and '2' are
+decimation: decimation factor: 1-255. Default is inferred from 'sample'
+            (next parameter). For DDC_V, only '1' and '2' are
             permitted.
 
-sample:     sample rate in Ms/s: must be greater than 0.499. The value
-            divided into the maximum data rate (256 Ms/s) for DDC_U
-            must yield a valid decimation factor. For DDC_V, only 128
-            and 64 Ms/s are accepted. Unless a decimation factor was
-            specified, the default for DDC_U is 256 Ms/s (decimation
-            1); for DDC_V, 64 Ms/s (decimation 2). In response, since
-            the sample rate is not reported by the device, the
-            reported 'decimation' implied sample rate is shown in
-            parenthesizes for reference.
+sample:     sample rate in Ms/s: must be greater than 0.499. For
+            DDC_U, the value divided into the maximum DDC_U sample
+            rate, 256 Ms/s, must yield a valid integer decimation
+            factor. For DDC_V, only 128 and 64 Ms/s are accepted.
+            Unless a decimation factor was specified, the default for
+            DDC_U is 256 Ms/s (decimation 1); for DDC_V, 64 Ms/s
+            (decimation 2). In response, since the sample rate is not
+            reported by the device, the reported 'decimation' implied
+            sample rate is shown in parenthesizes for reference.
 
 Monitor only parameter:
 
@@ -51,12 +51,12 @@ split       split mode: 'on' or 'off'
 
 input       VSI input: 'tvg','vsi1','vsi2','vsi1-2','vsi1-2-3-4','gps'
 
-channels    VDIF channels: 1-16
+channels    VDIF channels: only the powers of two, range 1-16
 
 width       VDIF channel width: 1 or 2 bits
 
 payload     VDIF payload size, typically 8000 bytes, but other multiples
-            of eight are possible
+            of eight are possible, range 8-8192
 
 format      data transmission format: 'stopped', 'vdif', 'mk5b', or
             'raw'. 'stopped' means no data is being sent
@@ -65,26 +65,23 @@ sync        whether the board is synced: 'synced' or 'unsynced'
 
 Comments:
 
-Be aware that some of these commands can take several seconds to
-execute. This is particularly true for 'core3h_mode=end' (no 'force')
-and 'core3h_mode', which can take 20 and 30 seconds, respectively.
-
-These commands in their command form, with or without 'force', update
-the FS's model of Core3H board configurations.
+These commands in their command form for individual boads,
+'core3h_mode=n,...', with or without 'force', update the FS's model of
+Core3H board configurations.
 
 The monitor form of these commands are with only the board number
 after the equal sign '=' and no other parameters. e.g.,
 'core3h_mode=1'. However, if a '?' is included after the board number,
 e.g., 'core3h_mode=1,?', the FS's model for that board's configuration
-is reported. All the boards can be reported with a single
+is reported. All the boards can be monitored with a single
 'core3h_mode' command (no parameters); the model for all boards can be
 reported with 'core3h_mode=?'.
 
-The monitor form of these commands, 'core3h_mode' and 'core3h_mode=n',
-and the non-'force' command forms (except 'begin') report all
-deviations of the board configurations from the FS's model as errors.
-If there were any deviations, a summary error is returned to 'boss',
-which reports it.
+The non-'force' command form of these commands (except 'begin') report
+the deviations of the board configurations from the FS's model as
+errors. For 'end', only deviations of the status of data transmission
+are reported. If there were any deviations, a summary error is
+reported last.
 
 The state values of 'begin' and 'end' mark the beginning and end of
 Core3H configuration for a mode. For example:
@@ -108,14 +105,14 @@ are other commands, the results may be incorrect, particularly for
 'mk5c_mode'/'fb_mode' and 'tpicd'.
 
 The non-'force' command forms of the 'core3h_mode=1,...' commands do
-not setup the boards, but update and show the FS model for the boards.
-This occurs if the 'force' parameter is '$' or null. If it is literal
-'force', the boards will be setup with no output. Using '$' as a
-synonym for null is to support allowing the operator to use 'force' as
-the argument for a setup procedure from 'drudg' to force setup, while
-making only checking the default for schedules. The 'drudg' generated
-setup procedures will be called from schedules with no argument, for
-example:
+not setup the boards, but update the FS model of the settings and show
+the actual state of the  boards. This occurs if the 'force' parameter
+is '$' or null. If it is literal 'force', the boards will be setup
+with no output of the state. Using '$' as a synonym for null is to
+support allowing the operator to use 'force' as the argument for a
+setup procedure from 'drudg' to force setup, while making only
+checking the default for schedules. The 'drudg' generated setup
+procedures are called from schedules with no argument, for example:
 
     setup01
 
@@ -150,11 +147,11 @@ is:
 - part of both a complete set-up and check of a mode, both of which
   should executed by the operator as part of normal operations
 
-- the final command of such a set-up/check, so an error should be more
-  visible
+- the final command of such a set-up/check, which should make the error
+  more visible
 
-The 'core3h_mode=n,...,force' commands and 'core3h_mode' command (the
-latter without parameters) also check the DBBC3 firmware version.
+The 'core3h_mode=n,...,force' commands also check the DBBC3 firmware
+version.
 
 The effective sample rate can be specified in the SNAP command either
 explicitly with the 'sample' parameter or implicitly with the
@@ -174,7 +171,6 @@ square brackets if the value of mask4 does not agree with 'mask2', or
 mask3 does not agree with 'mask1'. In these cases, the bit masks are
 not configured correctly. It is a requirement for DDC_U operation that
 the mask4 and mask3 agree with 'mask2' and 'mask1', respectively.
-
 
 The meaning of the bits in the mask are given in the following table
 starting with the least significant bit. Mask1 represents the first
