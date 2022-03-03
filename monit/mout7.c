@@ -49,7 +49,8 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     struct dbbc3_tsys_bbc bbc[MAX_DBBC3_BBC];
     char buf[128];
     int i;
-    static time_t disp_time;
+    static time_t disp_time = 0;
+    struct tm *ptr;
 
     int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
         shm_addr->dbbc3_ddcu_v<125 ||
@@ -105,10 +106,14 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     move(2,0);
     printw("Time   ");
 
-    disp_time=ifc.time+1;
-    struct tm *ptr=gmtime(&disp_time);
+/* legitimate times start at the first VDIF epoch */
 
-    if(NULL != ptr) {
+    if(ifc.time > 0) {
+      disp_time=ifc.time+1;
+      ptr=gmtime(&disp_time);
+    }
+
+    if(ifc.time > 0 && NULL != ptr) {
         int tm_different = disp_time!=save_disp_time;
 
         if(!tm_different && !kfirst)

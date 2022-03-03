@@ -557,6 +557,7 @@ void cshm_init()
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].delay=UINT_MAX;
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].time_error=-1000000;
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].vdif_epoch= -1;
+          shm_addr->dbbc3_tsys_data.data[i].ifc[j].time = 0;
       }
       for(j=0;j<MAX_DBBC3_BBC;j++) {
           shm_addr->dbbc3_tsys_data.data[i].bbc[j].freq=UINT_MAX;
