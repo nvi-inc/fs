@@ -165,9 +165,6 @@ define  calon         00000000000
 "turn cal on
 enddef
 define  sched_initi   00000000000x
-jive5ab=version?
-" check ntp
-check_ntp
 enddef
 define  sched_end     00000000000x
 "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -181,7 +178,7 @@ define  sched_end     00000000000x
 enddef
 define  initi         22033234428x
 "welcome to the field system
-"sy=run setcl &
+sy=run setcl &
 check_ntp
 enddef
 define  midob         00000000000
@@ -216,18 +213,21 @@ sy=popen 'ntpq -np 2>&1|grep -v "^[- x]" 2>&1' -n ntpq &
 enddef
 define  fb_config     22033234617x
 enddef
-define  proc_library  00000000000x
-" ONSA13SW default VGOS obs library
-" Manually constructed outside DRUDG
-"< DBBC3_DDC            rack >< FlexBuff recorder 1>
-enddef
 define  exper_initi   00000000000
-proc_library
+"- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+" comment on timing:
+"- - - - - - - - - -
+" we report 'maser-fmout' for each Core3H board of the DBBC3
+" with the command 'pps_delay'
+" we also report 'gps-maser' with the command 'clock'
+" thus, 'gps-maser' + 'maser-fmout' = 'gps-fmout'
+"- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+jive5ab=version?
+check_ntp
 sched_initi
-mk5=dts_id?
-mk5=os_rev?
-mk5_status
-setupbb
+fb=dts_id?
+fb=os_rev?
+fb_status
 enddef
 define  setupvg       22033234528x
 pcalon
