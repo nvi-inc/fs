@@ -1,4 +1,5 @@
 define  exper_initi   00000000000
+check_ntp
 sched_initi
 enddef
 define  sched_initi   00000000000
@@ -93,6 +94,7 @@ define  initi         00000000000
 "welcome to the pc field system
 vlba4init
 sy=run setcl &
+check_ntp
 enddef
 define  midob         00000000000
 onsource
@@ -266,3 +268,7 @@ disk_serial
 mk5=bank_set?
 mk5=vsn?
 enddef   
+define  check_ntp     22033234428x
+sy=popen 'uptime 2>&1' -n uptime &
+sy=popen 'ntpq -np 2>&1|grep -v "^[- x#]" 2>&1' -n ntpq &
+enddef

@@ -1,6 +1,7 @@
 define  fb_config     00000000000
 enddef
 define  exper_initi   00000000000
+check_ntp
 sched_initi
 enddef
 define  sched_initi   00000000000
@@ -29,6 +30,7 @@ enddef
 define  initi         00000000000
 "welcome to the pc field system
 sy=run setcl &
+check_ntp
 enddef
 define  midob         00000000000
 onsource
@@ -218,4 +220,8 @@ bbc_gain=15,30,30
 bbc_gain=16,30,30
 !+1s
 bbc_gain=all,agc,$
+enddef
+define  check_ntp     22033234428x
+sy=popen 'uptime 2>&1' -n uptime &
+sy=popen 'ntpq -np 2>&1|grep -v "^[- x#]" 2>&1' -n ntpq &
 enddef
