@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 3.9 - March 2022
+Version 4.0 - March 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -56,11 +56,11 @@ in _10.1.0_ are:
 containing `fb` instead of `mk5`. For FS commands the new names are
 synonyms for the old names.
 
-* Use of `mk5c_config` nd `fb_config` procedures for local tuning of
-Mark 5C and FlexBuff recorders.
-
 * Improved _onoff_ output for the operator to make it clearer what the
 program is doing.
+
+* Use of `mk5c_config` nd `fb_config` procedures for local tuning of
+Mark 5C and FlexBuff recorders.
 
 * A new _drudg_ option `e-vlbi_override` in _skedf.ctl_ to
 automatically change the recorder to `none` and remove `/fila10g` if
@@ -242,6 +242,20 @@ Except as indicated, the actions in the next step should be performed
 as _oper_.
 
 === Local customizations
+
+. Check your use of the `equipment_override` option in _skedf.ctl_.
+
++
+
+If you did not have the `equipment_override` option selected in
+_skedf.ctl_, you probably should. This will also require you to
+specify the `equipment` option with the correct values if you aren't
+already. This is the safest way to specify your equipment in
+_skedf.ctl_. However, other combinations are possible depending on
+your needs. Due to bugs in _drudg_ these options were not operating
+correctly in version _10.0.0_. For more information, please the
+<<fix_equipment,Fix drudg equipment options>> change in the
+<<drudg changes>> section below.
 
 . If present, remove use of _setsid_ from _stpgm.ctl_.
 
@@ -488,6 +502,11 @@ execute part of the schedule, and perform any normal post-experiment
 plotting and clean-up that you do. The idea here is to verify that
 everything works as you expect for normal operations.
 
+Previously, the _onoff_ program did not detect errors reported by
+_antcn_; now it does. It seems unlikely that that this will cause a
+problem, but if it does, please see <<onoff_antcn,onoff now detects
+antcn errors>> for a workaround.
+
 === Consider when to update your back-ups
 
 It would be prudent to wait until you have successfully run an
@@ -582,6 +601,87 @@ testing; John Gipson (GSFC) for _drudg_ support; Eskil Varenius
 testing; Sven Dornbusch (MPIfR, Bonn), for elaborating on the details
 of DBBC3 functionality; Uwe Bach (Effelsberg) and Marjolein Verkouter
 (JIVE) for providing helpful suggestions.
+
+====
+
+. Improve _onoff_
+
++
+[%collapsible]
+====
+
+.. Improve _onoff_ operator output.
+
++
+
+The operator output of _onoff_ was completely restructured. The raw
+data is still recorded in the log, but now the operator will see only
+summary messages that describe what the program is doing and the final
+results (the `VAL` lines). Each major action that the program
+undertakes is reported, as well as any steps needed to recover if an
+error should occur. This should make the output both more compact and
+useful. The full output can still be seen in the Log Display window by
+using `*xdisp=on*` (use `*xdisp=off*` afterwards to turn off the more
+verbose display).
+
++
+
+TIP: If _antcn_ logs messages about commanding offsets (mode `2`), the
+flow of the _onoff_ operator output may be affected. The general
+posture of _antcn_ is intended to be "`no news is good news.`" In
+particular, this is why _onoff_ (and _aquir_ and _fivpt_) check
+onsource status with mode `5` which is not suppose to generate log
+output for why the antenna is off source. You can of course arrange
+your _antcn_'s output anyway you prefer.
+
+.. Change to lock gains after initially reaching starting position.
+
++
+
+Previously, for systems that require locking the gains, they were set
+before confirming that the antenna had reached the starting position.
+Now _onoff_ waits until it has been reached. This will have no impact
+when _onoff_ is started already at the starting position, including
+when run by _aquir_.
+
++
+
+If _onoff_ is started _before_ the antenna has reached the starting
+position, the effects will be:
+
+* _onoff_ will take slightly longer to run because the gains won't be
+locked in parallel with the slew.
+
+* The gains will be locked at the starting position. This could
+improve the gain levels used for the measurements, particularly for
+large elevation slews. The is the reason that this change was made.
+
+.. <<onoff_antcn,onoff now detects antcn errors>>[[onoff_antcn]]:
+
++
+
+Previously, these errors were ignored due to a bug. Now _antcn_ errors
+are detected. If one occurs now, _onoff_ will try to run _antcn_ a
+second time to make _onoff_ more robust if a transitory antenna
+communication problems occurs.
+
++
+
+It seems unlikely that these changes will cause a problem, but if they
+do, a short term workaround is provided. If the environment variable
+`FS_ONOFF_SUPPRESS_ANTCN_ERRORS` is set to `1`, the previous behavior
+will be restored. In the longer term, the behavior of __antcn__ should be
+corrected.
+
++
+
+TIP: If you are using the display server, you must stop _fsserver_ or
+reboot to enable a change in environment variable settings. Please see
+the beginning of
+<<../../../misc/env_vars.adoc#_runtime_variables,Runtime variables>>
+section in the <<../../../misc/env_vars.adoc#,FS Environment
+Variables>> document, for more information on setting environment
+variables.
 
 ====
 
@@ -686,6 +786,28 @@ was updated accordingly.
 
 NOTE: As with other  _rdbemsg.ctl_ parameters, this one should not
 have any white space on its (non-comment) line.
+
+====
+
+. Show incorrect times DOT time in inverse video for the RDBE monitor
+display (_monit6_) window.
+
++
+[%collapsible]
+====
+
++
+
+Although in principle there is nothing wrong with recording data from
+RDBEs that have slightly different times (unlike having different VDIF
+epochs, which makes recording impossible with Mark 6 recorders), the
+recovery is too costly to use in most cases. As a result, to bring the
+operator's attention to the conflict, _monit6_ was modified to show
+DOT values that are not the current time in inverse video. This change
+could have been limited to using inverse video to just show times that
+don't agree with the majority since only a disagreement causes a
+problem. However, there did not seem to be a use case for recording
+with the time intentionally set wrong.
 
 ====
 
@@ -1645,7 +1767,7 @@ examples>> section.
 
 +
 
-These can be used to making linking references to arbitrary text in
+These can be used to make linking references to arbitrary text in
 the documents. This convention is covered as "`other anchors`" in the
 <<../../../misc/font_conventions.adoc#_links,Links>> subsection.
 The document also shows how to make the anchor visible in
@@ -1675,15 +1797,15 @@ example is covered in the subsection
 
 +
 
-.. Improved wording for setting geometry values in _~/.Xresources_.
+.. Improve wording for setting geometry values in _~/.Xresources_.
 
 +
 
-Using differently named _~/.Xreources_ files that are used by
+Using differently named _~/.Xresources_ files that are used by
 different aliases for different displays is described in the final
 *NOTE* of the
 <<../../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting
-geometry values in .Xresources>> in the
+geometry values in .Xresources>> section of the
 <<../../misc/install_reference.adoc#,Installation Reference>>
 document.
 
@@ -1713,16 +1835,39 @@ read.
 
 There are some downsides, primarily:
 
-* There is extra white space when the toggle is closed.
+* There is extra white space when a toggle is closed.
 
 * If you return "`back`" to the document after following a link to a
-_different_ document from within opened text, the previously opened
-text will be closed because the web page has been reloaded.
+_different_ document, previously opened toggles will be closed because
+the web page has been reloaded. This makes it a little more difficult
+to return to where you were reading in the original document if it was
+within opened text.
 
 +
 
 If there is a consensus that this is overall an improvement, its use
 will continue for future updates.
+
+.. Add explanation of setting environment variables.
+
++
+
+Section
+<<../../../misc/env_vars.adoc#_setting_environment_variables,Setting environment variables>>
+was added to the
+<<../../../misc/env_vars.adoc#,FS environment variables>>
+document.
+
++
+
+The preamble of the
+<<../../../misc/env_vars.adoc#_runtime_variables,Runtime variables>>
+section in the same document was expanded to include the additional
+steps needed to update environment variables when using the display
+server.
+
+
+.. Make numerous wording fixes.
 
 ====
 
@@ -1771,6 +1916,45 @@ details of the cleanup process.
 
 Thanks to Jonathan Quick (HartRAO) for reporting these issues,
 making suggestions for the fixes, and testing them.
+
+====
+
+. Update example `station` procedure libraries
+
++
+[%collapsible]
+====
+
+The example libraries can be found in _/usr2/fs/st.default/proc_.
+
+.. Add standard procedures for (rack/recorder): DBBC/Mark 5C,
+DBBC/Flexbuff, DBBC3/FlexBuff.
+
++
+
+.New example station.prc libraries
+|=============================================================
+|Equipment - Rack/Drive1/Drive2 |Prefix letters |Example `station` Library
+
+|dbbc/mk5c           |d5c        |_d5cstation.prc_
+|dbbc/flexbuff       |dfb        |_dfbstation.prc_
+|dbbc3/flexbuff      |d3fb       |_d3fbstation.prc_
+|=============================================================
+
+.. Add `check_ntp` procedure.
+
++
+
+An example `check_ntp` procedure is provided in _check_ntp.prc_. It is
+slightly improved from the original version. It has also been
+incorporated into the example `station` libraries for the current most
+commonly used rack/recorder combinations: DBBC/Mark5B, DBBC/FlexBuff,
+DBBC/March 5C, DBBC3/Flexbuf, and VLBA5/Mark 5B. Please see the table
+in the
+<<../../misc/install_reference.adoc#_example_standard_procedure_libraries,
+Example standard procedure libraries>> section of the
+<<../../misc/install_reference.adoc#,Installation Reference>> document
+to identify which files are for which combinations.
 
 ====
 
@@ -1839,6 +2023,41 @@ are used for the meteorological parameters, which limits the accuracy.
 For `fivept`, the FORTRAN `refr()` function is used, which also has
 fixed meteorological parameters.
 
+.. Fix the RDBE monitor display (_monit6_) to use the `time_t` type
+when calculating the nominal VDIF epoch.
+
++
+
+The `mout6()` function was using an `int` to hold the time instead of
+a `time_t`, resulting in incorrect values for the nominal VDIF epoch
+on 64-bit systems. This had very limited impact. The nominal VDIF
+epoch was only used to apply inverse video to epochs that weren't
+nominal, if _all_ RDBEs had different epochs, a rather unlikely case.
+If it occurred, all the VDIF epochs would have been shown in inverse
+video as "`wrong,`" which would have been "`incorrect`" for at most
+one epoch. This has been fixed.
+
++
+
+The error was introduced by the bulk _unlongify_ for conversion to the
+32/64-bit compatibility for version _10.0.0_. It only would have
+impacted 64-bit systems.
+
+.. Correct RDBE VDIF epoch increment command hint line in _fmset_.
+
++
+
+The VDIF epoch increment command (`>`) hint line, which only appears
+if the RDBE's VDIF is before the current epoch, was displayed twice.
+Additionally, if it became no longer useful, it was not removed. In
+the version _9.12.13_, the hint lines dynamically adjusted depending
+on whether an increment was possible. This behavior was not correctly
+preserved in the merge of versions _9.13.2_ (old "`main`") branch and
+_9.12.13_ (old "`vgos`" branch). The fixed version uses statically
+placed hints lines for simplicity, only showing the  VDIF epoch
+increment line when it could be useful.
+
+
 .. Prevent decimation from being specified for 5B/Ethernet in the
 `mk5c_mode` (and `fb_mode`) command.
 
@@ -1849,8 +2068,69 @@ _decimation_ parameter  in the `mk5c_mode` (and `fb_mode`) command.
 This was a vestige of the `mk5b_mode` command. The Ethernet recorders
 (Mark 5C and FlexBuff, controlled by _jive5ab_) do not support
 decimation. The _sample_ parameter of the `mk5c_mode` (and `fb_mode`)
-command provides full functionally for setting the sample rate for
+command provides full functionally for specifying the sample rate for
 5B/Ethernet and VDIF recording and is the method used by _drudg_.
+
+.. Improve sample rate reporting for query responses of commands
+`fila10g_mode`, `mk5b_mode`, and `mk5c_mode`/`fb_mode`.
+
++
+
+None of the devices these commands query report the sample rate. For
+`fila10g_mode` and `mk5b_mode`, the sample rate _implied_ by the
+device decimation response is shown in parentheses. Previously, they
+reported the _commanded_ rate in parentheses.
+
++
+
+NOTE: The _core3h_mode_ command follows the same improved convention.
+
+
++
+
+For `mk5c_mode`/`fb_mode`, the devices also don't report the
+decimation, so the _commanded_ sample rate is shown in _double_
+parentheses. The device does report the track bit rate, which can be
+used for comparison, but this is reported in bits per second instead
+of Ms/s.
+
+.. Eliminate extraneous `(_xx_)` strings in error messages.
+
++
+
+Some error messages were displayed/logged with extraneous `(_xx_)`
+strings after the error number. This came about because a change was
+made (in commit `9e9906d9` for version _9.12.2_ released in March of
+2016), to report the so-called `LWHAT` two character Hollerith values
+(or up to four character representation of numbers) for an error even
+if there was no `?W` (or `?WWW) string in the message to be replaced
+with the value.  The principle being that it was more important to
+report the information to help solve a problem than to adhere to
+incorrect formatting of the error message.
+
++
+
+This did not seem to cause much of a problem. However, some programs,
+in particular _aquir_, _fivpt_, _onoff_, were incorrectly setting the
+`LWHAT` value.  Other programs, in particular _mk5cn_, _dbbcn_, and
+_rdbcn_, were carelessly setting the `LWHAT` value when there was no
+error. The latter problem caused extraneous strings in error messages
+from unrelated commands. We believe all cases of this have been fixed.
+If you see any now, please report them.
+
+.. Allow less white space for numeric `LWHAT` values in error
+messages.
+
++
+
+Previously, if an error message had a runtime determined numeric
+value, there had to be a four character `?WWWW` placeholder in the
+error message for it to replace to avoid overwriting. This was changed
+to allow shorter placeholders, down to `?W`, to be used. A `?W` can be
+used to show a one digit number with one space in front of it. To do
+this, the `?W` must be directly appended to the previous word in the
+message, for example `word?W`, which may be a little hard to read in
+the _fserr.ctl_ or _sterr.ctl_ file.
 
 .. Update the value of π in the FS copy of _prefr.f_ to agree with the
 current value in _drudg_.
@@ -1893,20 +2173,32 @@ sampling is no longer supported in favor of multicast.
 
 .. Reorganize and cleanup the `help` file for `onoff`.
 
+.. Improve the description of the decimation parameter in the `help`
+files for `fila10g_mode` and  `mk5b_mode`/`mk5c_mode`/`fb_mode`.
+
 .. Add missing `32` and `64` MHz BWs in `help` for DBBC `bbc__nn__`
 commands.
 
 .. Add missing `help` page for `jive5ab` command.
 
+.. Fix `mk5_status` command to get its command name for logging from
+the parsed command line instead of being hard-coded.
+
++
+
+This is the normal structure of SNAP commands, which `mk5_status` did
+not have. It enables only updating _control/fscmd.ctl_ to either
+change the name or create a synonym. Fixing this was necessary in
+order to make the `fb_status` synonym work correctly.
+
 .. Remove `e` rack type in `help` files.
+
 
 +
 
 +
 
 `help` for the `pcald` and `tpicd` commands now works for all systems.
-
-.. Make numerous wording fixes.
 
 .. Correct a few compile warnings, but certainly not a significant number.
 
@@ -2118,6 +2410,47 @@ For more information see the <<dbbc3_ops.adoc#_thread_procedure,Thread
 procedure>> subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3
 Operations Manual>>.
 
+.. <<fix_equipment,Fix drudg equipment options>>[[fix_equipment]]: Fix
+`equipment` and `equipment_override` options in _skedf.ctl_.
+
++
+
+These bugs apparently first appeared in version _10.0.0_.
+
+... Fix a bug that prevented applying `equipment` if equipment was not
+specified in the schedule and `equipment_override` was not selected.
+
+... Fix a bug that caused `equipment` to be applied if there was
+equipment in the schedule even if `equipment_override` was not
+selected.
+
++
+--
+
+If you used _equipment_override_, these bugs did not affect you. Since
+no one reported these bugs, presumably at least one of the following
+was always true:
+
+* The `equipment_override` option was selected.
+
+* The schedule had correct equipment.
+
+* The `equipment` option was selected and had correct values.
+
+* The equipment was adjusted with option `11`.
+
+The features of these options now agree with the original design,
+which was:
+
+* User by itself, the values specified by `equipment` will only be
+applied if there is no equipment in the schedule.
+
+* If `equipment_override` is also selected, the values specified by
+`equipment` will be forced.
+
+--
++
+
 .. Expand `default_dbbc_if_inputs` option
 
 +
@@ -2140,7 +2473,9 @@ Values for up to eight IF inputs can be specified for DBBC3s.
 [%collapsible]
 ====
 
-.. Support slewing model acceleration in _.skd_ files.
+.. Make the recorder type in _.vex_ schedules case insensitive (bug fix)
+
+.. Support slewing model acceleration in _.skd_ files
 
 .. Use ISO  format for opening message date
 
@@ -2148,7 +2483,9 @@ Values for up to eight IF inputs can be specified for DBBC3s.
 
 .. Remove some obsolete variables
 
-.. Make various clean-ups
+.. Remove obsolete ``Makefile``s from the _vex/_ subdirectory
+
+.. Make various other clean-ups
 
 ====
 
@@ -2545,5 +2882,5 @@ you should find that line instead.
 . Delete from _A_ to _B_, inclusive.
 
 . If you executed this as part of the <<Cleanup procedure>> step
-above, you can continue with the sub-step labeled <<save_file,Save
-file>> in that step.
+above, you can continue with the sub-step labeled
+<<save_file,Save file>> in that step.

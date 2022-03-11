@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 1.0 - March 2022
+Version 1.1 - March 2022
 
 :sectnums:
 
@@ -322,14 +322,13 @@ Nominal value is `1`.
 
 If this variable is defined, _flagr_ will suppress reporting of errors
 from _antcn_. It was introduced when a bug in _flagr_ was corrected so
-that it would report these errors. It was intended to temporarily
-restore the previous behavior until the station implementation of
-_antcn_ could be fixed.
+that it would report these errors. In case that creates problems,
+setting the variable can be used to temporarily restore the previous
+behavior until the station implementation of _antcn_ can be fixed.
 
 This was introduced in _9.11.6_, August 2014.
 
 === FS_GNPLT_SIZE
-
 
 Nominal value is `8`.
 
@@ -377,6 +376,18 @@ contents of the environment variable do not decode properly, `100` is
 used.
 
 This was introduced in April 2021.
+
+=== FS_ONOFF_SUPPRESS_ANTCN_ERRORS
+
+Nominal value is `1`.
+
+If this variable is defined, _onoff_ will suppress reporting of errors
+from _antcn_. It was introduced when a bug in _onoff_ was corrected so
+that it would report these errors. In case that creates problems,
+setting the variable can be used to temporarily restore the previous
+behavior until the station implementation of _antcn_ can be fixed.
+
+This was introduced in March 2022.
 
 === FS_RDBE_MC_DISABLE
 

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2021 NVI, Inc.
+// Copyright (c) 2020-2022 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 1.4 - August 2021
+Version 1.5 - March 2022
 
 :sectnums:
 :experimental:
@@ -134,29 +134,33 @@ between equipment types and default library names is given next.
 
 .Example station.prc libraries
 |=============================================================
-|Equipment - Rack/Drive1/Drive2 |Prefix letters |Station Library
-|k42/k42             |k42        |k42station.prc
-|k42k3/vlba          |k42k3v     |k42k3vstation.prc
-|k42mk4/vlba         |k42mk4v    |k42mk4vstation.prc
-|k42mk4/vlbab/vlbab  |k42mk4vb   |k42mk4vstation2.prc
-|k42/k5              |k42k5      |k42k5station.prc
-|lba/s2              |ls2        |ls2station.prc
-|lba4/s2             |l4s2       |l4s2station.prc
-|mk3/mk3a            |3          |3station.prc
-|mk4/mk4             |4          |4station.prc
-|mk4/mk5a            |45         |45station.prc
-|mk4/vlba4           |4v4        |4v4station.prc
-|mk5/mk5b            |5          |5station.prc
-|none/s2             |s2         |s2station.prc
-|vlba/s2             |vs2        |vs2station.prc
-|vlba/vlba           |v          |vstation.prc
-|vlba/vlba2          |v2         |v2station.prc
-|vlba/vlba/vlba      |v          |vstation2.prc
-|vlba4/vlba4         |v4         |v4station.prc
-|vlba4/mk5a          |v45        |v45station.prc
-|vlba4/vlba42        |v42        |v42station.prc
-|vlba5/mk5b          |v5         |v5station.prc
-|dbbc/mk5b           |d          |dstation.prc
+|Equipment - Rack/Drive1/Drive2 |Prefix letters |Example `station` library
+
+|k42/k42             |k42        |_k42station.prc_
+|k42k3/vlba          |k42k3v     |_k42k3vstation.prc_
+|k42mk4/vlba         |k42mk4v    |_k42mk4vstation.prc_
+|k42mk4/vlbab/vlbab  |k42mk4vb   |_k42mk4vstation2.prc_
+|k42/k5              |k42k5      |_k42k5station.prc_
+|lba/s2              |ls2        |_ls2station.prc_
+|lba4/s2             |l4s2       |_l4s2station.prc_
+|mk3/mk3a            |3          |_3station.prc_
+|mk4/mk4             |4          |_4station.prc_
+|mk4/mk5a            |45         |_45station.prc_
+|mk4/vlba4           |4v4        |_4v4station.prc_
+|mk5/mk5b            |5          |_5station.prc_
+|none/s2             |s2         |_s2station.prc_
+|vlba/s2             |vs2        |_vs2station.prc_
+|vlba/vlba           |v          |_vstation.prc_
+|vlba/vlba2          |v2         |_v2station.prc_
+|vlba/vlba/vlba      |v          |_vstation2.prc_
+|vlba4/vlba4         |v4         |_v4station.prc_
+|vlba4/mk5a          |v45        |_v45station.prc_
+|vlba4/vlba42        |v42        |_v42station.prc_
+|vlba5/mk5b          |v5         |_v5station.prc_
+|dbbc/mk5b           |d          |_dstation.prc_
+|dbbc/mk5c           |d5c        |_d5cstation.prc_
+|dbbc/flexbuff       |dfb        |_dfbstation.prc_
+|dbbc3/flexbuff      |d3fb       |_d3fbstation.prc_
 |=============================================================
 
 If an example for your equipment type is listed, please email
