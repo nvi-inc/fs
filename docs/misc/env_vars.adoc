@@ -19,23 +19,54 @@
 //
 
 = FS Environment Variables
-Version 0.9 - January 2022
+Version 1.0 - March 2022
 
 :sectnums:
 
 == Introduction
 
 This document describes user settable Linux environment variables used
-by the FS.  There are two categories: _make_ time and runtime.
+by the FS and how to set them. There are two categories of variables:
+_make_ time and runtime.
 
 // Some environment variables used internally are also listed.
+
+== Setting environment variables
+
+=== With bash
+
+If you are using _bash_, you can set environment variables with the
+_export_ command. For example, to set the value of a hypothetical
+environment variable `VAR` to `1`, use:
+
+  export VAR=1
+
+If _bash_ is your login shell, you can have the variable set
+automatically for your sessions when you login by adding the command
+to your _~/.proflle_ file. This is recommended for the variables from
+this document that you may decide to use.
+
+=== With tcsh
+
+If you are using _tcsh_, you can set environment variables with the
+`setenv` command. For example, to  set the value of a hypothetical
+environment variable `VAR` to `1`, use:
+
+  setenv VAR 1
+
+If _tcsh_ is your login shell, you can have the variable set
+automatically for your sessions when you login by adding the command
+to your _~/.login_ file. This is recommended for the variables from
+this document that you may decide to use.
+
 
 == Make time variables
 
 These variables, if used, are usually set for the _prog_ account since
 it is used to build the FS. For _prog_ users with _bash_ as their
 login shell, they are usually set in _~/.profile_ using the _export_
-command; with _tcsh_, in _~/.login_, using _setenv_.
+command; with _tcsh_, in _~/.login_, using _setenv_. See the
+<<Setting environment variables>> section above for more information.
 
 === FS_DISPLAY_SERVER_NO_MAKE
 
@@ -93,8 +124,16 @@ This was introduced in _9.7.0_, July, 2004.
 These variables, if used, are usually set for the _oper_ and _prog_
 accounts since they are used to run the FS. For users with _bash_ as
 their login shell, they are usually set in _~/.profile_ using the
-_export_ command; with _tcsh_, in _~/.login_, using _setenv_.
+_export_ command; with _tcsh_, in _~/.login_, using _setenv_. See the
+<<Setting environment variables>> section above for more information.
 
+If you are using the display server, it is necessary to reboot, or
+stop _fsserver_ with:
+
+  fsserver stop
+
+before setting, or changing the setting of, an environment variable.
+The FS must then be restarted.
 
 === DATA_CENTERS
 
