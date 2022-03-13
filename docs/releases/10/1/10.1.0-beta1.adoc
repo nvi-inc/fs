@@ -20,9 +20,9 @@
 
 :doctype: book
 
-= FS 10.1.0 Update Notes
+= FS 10.1.0 Beta1 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 4.1 - March 2022
+Version 4.2 - March 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -36,10 +36,11 @@ Version 4.1 - March 2022
 == Introduction
 
 This document covers the steps needed to update from FS _10.0.0_ to
-_10.1.0_ and the changes in new version. This update is intended for
-all stations using FS _10.0.0_. Installing the new version as an
-update is much simpler than the update to _10.0.0_, see the
-<<Upgrading from 10.0.0>> section below.
+_10.1.0-beta1_ and the changes in the new version. This update is not
+an operational release. It is intended for _testing_ by all stations
+using FS _10.0.0_. Installing the new version as an update is much
+simpler than the update to _10.0.0_, see the <<Upgrading from 10.0.0>>
+section below.
 
 FS _10.1.0_ has been tested for several configurations but not all
 possible ones. You should test it carefully before using it for
@@ -95,7 +96,7 @@ directories to switch back and forth between in your operational
 _10.0.0_ configuration and a test install of _10.0.1_. This is covered
 in detail in the
 <<../../misc/install_reference.adoc#_using_symbolic_links,Using
-symbolic links>> subsection of above referenced section.
+symbolic links>> subsection of the above referenced section.
 
 === Login as root
 
@@ -129,7 +130,7 @@ proceed with:
   mv fs-git fs-git.old-10.0.0
   git clone https://github.com/nvi-inc/fs.git fs-git
   cd fs-git
-  git checkout -q 10.1.0
+  git checkout -q 10.1.0-beta1
   make install
 
 +
@@ -143,7 +144,7 @@ need to use _ssh_ instead:
   mv fs-git fs-git.old-10.0.0
   git clone git@github.com:nvi-inc/fs fs-git
   cd fs-git
-  git checkout -q 10.1.0
+  git checkout -q 10.1.0-beta1
   make install
 
 +
@@ -175,7 +176,7 @@ your default branch to `main` with:
   git branch -u origin/main main
   git remote set-head origin -a
   git branch -rd origin/master
-  git checkout -q 10.1.0
+  git checkout -q 10.1.0-beta1
 
 . Login as _root_:
 
