@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -19,48 +19,53 @@
  */
 /* antcn.c
  *
- * This is the stub version of antcn (ANTenna CoNtrol program).
- * This version sends a log message whenever it is called.
- *
+ * This is the stub version of antcn (ANTenna CoNtrol program). This
+ * version sends a log message whenever it is called. This is only for
+ * a demonstration without an antenna, real antcn programs, in /usr2/st,
+ * should follow "no news is good news". For more details see the
+ * comments below and the example:
+ * /usr2/fs/st.default/st-0.0.0/antcn/antcn.c
  */
 
 /* Input */
-/* IP(1) = mode
-       0 = initialize LU
-       1 = pointing (from SOURCE command)
-       2 = offset (from RADECOFF, AZELOFF, or XYOFF commands)
-       3 = on/off source status (from ONSOURCE command)
-       4 = direct communications (from ANTENNA command)
-       5 = on/off source status for pointing programs
-       6 = reserved for future focus control
-       7 = log tracking data (from TRACK command)
-       8 = Station detectors, see /usr2/fs/misc/stndet.txt
-       9 = Satellite traking, see /usr2/fs/misc/satellites.txt
-      10 = termination mode, must return promptly
- 11 - 99 = reserved for future use
-100 - 32767 = for site specific use
+/* ip[0] = mode
+             0 = initialize LU
+             1 = pointing (from SOURCE command)
+             2 = offset (from RADECOFF, AZELOFF, or XYOFF commands)
+             3 = on/off source status (from ONSOURCE command)
+             4 = direct communications (from ANTENNA command)
+             5 = on/off source status for pointing programs
+             6 = reserved for future focus control
+             7 = log tracking data (from TRACK command)
+             8 = Station detectors, see /usr2/fs/misc/stndet.txt
+             9 = Satellite tracking, see /usr2/fs/misc/satellites.txt
+            10 = termination mode, must return promptly
+       11 - 99 = reserved for future use
+   100 - 32767 = for site specific use
 
-   IP(2) = class number (mode 4 only)
-   IP(3) = number of records in class (mode 4 only)
-   IP(4) - not used
-   IP(5) - not used
+  all modes aren't required; 0, 1, 2, 3, and 5 are a useful minimum
+
+   ip[1] = class number (mode 4 only)
+   ip[2] = number of records in class (mode 4 only)
+   ip[3] - not used
+   ip[4] - not used
 */
 
 /* Output */
-/*  IP(1) = class with returned message
-      (2) = number of records in class
-      (3) = error number
+/*  ip[0] = class with returned message
+      [1] = number of records in class
+      [1] = error number
             0 - ok
-           -1 - illegal mode
+           -1 - illegal or unimplemented mode
            -2 - timeout
            -3 - wrong number of characters in response
            -4 - interface not set to remote
            -5 - error return from antenna
            -6 - error in pointing model initialization
             others as defined locally
-      (4) = 2HAN for above errors, found in FSERR.CTL
-          = 2HST for site defined errors, found in STERR.CTL
-      (5) = not used
+      [3] = "an" for above errors, found in fserr.ctl
+          = "st" for site defined errors, found in sterr.ctl
+      [4] = not used
 */
 
 /* Defined variables */
@@ -129,28 +134,44 @@ Continue:
 
     case 0:             /* initialize */
       ierr = 0;
-      strcpy(buf,"Initializing antenna interface");
+      /* real antcn programs should follow "no news is good news",
+       * see the comments above in the header
+       */
+      strcpy(buf,"stub antcn: Initializing antenna interface");
       logit(buf,0,NULL);
       fs->ionsor = 0;
       break;
 
     case 1:             /* source= command */
       ierr = 0;
-      strcpy(buf,"Commanding to a new source");
+      /* real antcn programs should follow "no news is good news",
+       * see the comments above in the header
+       */
+      strcpy(buf,"stub antcn: Commanding to a new source");
       logit(buf,0,NULL);
       fs->ionsor = 0;
       break;
 
     case 2:             /* offsets         */
       ierr = 0;
-      strcpy(buf,"Commanding new offsets");
+      /* real antcn programs should follow "no news is good news",
+       * see the comments above in the header
+       */
+      strcpy(buf,"stub antcn: Commanding new offsets");
       logit(buf,0,NULL);
       fs->ionsor = 0;
       break;
 
     case 3:        /* onsource command with error message */
       ierr = 0;
-      strcpy(buf,"Checking onsource status, extended error logging");
+      /* real antcn programs should follow "no news is good news",
+       * see the comments above in the header
+       *
+       * If the antenna is off source, direct logging with logit() of
+       * information about why may be useful. Being off source is not
+       * an error in itself.
+       */
+      strcpy(buf,"stub antcn: Checking onsource status, extended error logging");
       logit(buf,0,NULL);
       fs->ionsor = 1;
       break;
@@ -159,7 +180,10 @@ Continue:
       if (class == 0)
         goto End;
       for (i=0; i<nrec; i++) {
-        strcpy(buf2,"Received message for antenna: ");
+      /* real antcn programs should follow "no news is good news",
+       * see the comments above in the header
+       */
+        strcpy(buf2,"stub antcn: Received message for antenna: ");
         nchar = cls_rcv(class,buf,sizeof(buf),&r1,&r2,dum,dum);
         buf[nchar] = 0;  /* make into a string */
         strcat(buf2,buf);
@@ -175,47 +199,79 @@ Continue:
 
     case 5:    /* onsource command with no error logging */
       ierr = 0;
-      strcpy(buf,"Checking onsource status, no error logging");
+      /* real antcn programs should follow "no news is good news",
+       * see the comments above in the header
+       *
+       * This particular mode, 5, should not report errors about
+       * why the antenna is off source, which modes 3 and 7 can do.
+       * It can however report more information about other errors
+       * like antenna communication, if the return error code is
+       * not sufficient. Being off source is not an error by itself.
+       */
+      strcpy(buf,"stub antcn: Checking onsource status, no error logging");
       logit(buf,0,NULL);
       fs->ionsor = 1;
       break;
 
     case 6:            /* reserved */
       ierr = -1;
-      strcpy(buf,"TBD focus control");
+      /* real antcn programs should follow "no news is good news",
+       * see the comments above in the header
+       */
+      strcpy(buf,"stub antcn: TBD focus control");
       logit(buf,0,NULL);
       goto End;
       break;
 
     case 7:    /* onsource command with additional info  */
       ierr = 0;
-      strcpy(buf,"Checking onsource status, log tracking data");
+      strcpy(buf,"stub antcn: Checking onsource status, log tracking data");
+      /* real antcn programs should follow "no news is good news",
+       * see the comments above in the header
+       *
+       * If the antenna is off source, direct logging with logit() of
+       * information about why may be useful. Being off source is not
+       * an error in itself.
+       */
       logit(buf,0,NULL);
       fs->ionsor = 1;
       break;
 
   case 8:
       ierr = 0;
-      strcpy(buf,"Station dependent detectors access");
+      strcpy(buf,"stub antcn: Station dependent detectors access");
+      /* real antcn programs should follow "no news is good news",
+       * see the comments above in the header
+       *
+       * see /usr2/fs/misc/stndet.txt
+       */
       logit(buf,0,NULL);
       break;
 
   case 9:
       ierr = 0;
-      strcpy(buf,"Satellite tracking mode");
+      strcpy(buf,"stub antcn: Satellite tracking mode");
+      /* real antcn programs should follow "no news is good news",
+       * see the comments above in the header
+       *
+       * see /usr2/fs/misc/satellites.txt
+       */
       logit(buf,0,NULL);
       break;
 
   case 10: /*normally triggered on FS termination if environment variable
 	     FS_ANTCN_TERMINATION has been defined */
       ierr = 0;
-      strcpy(buf,"Termination mode");
+      /* real antcn programs should follow "no news is good news",
+       * see the comments above in the header
+       */
+      strcpy(buf,"stub antcn: Termination mode");
       logit(buf,0,NULL);
       break;
 
-  default:
+  default: /* should not get here */
       ierr = -1;
-      strcpy(buf,"Impossible to reach");
+      strcpy(buf,"stub antcn: should not get here");
       logit(buf,0,NULL);
       break;
   }  /* end of switch */

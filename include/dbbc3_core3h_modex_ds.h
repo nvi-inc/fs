@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -46,6 +46,11 @@ struct dbbc3_core3h_modex_cmd {
     struct m5state state;
   } decimate;
   struct {
+    float samplerate;
+    int decimate;
+    struct m5state state;
+  } samplerate;
+  struct {
     int force;
     struct m5state state;
   } force;
@@ -80,4 +85,12 @@ struct dbbc3_core3h_modex_mon {
     unsigned int mask3;
     struct m5state state;
   } mask3;
+  struct {
+    int format;
+    struct m5state state;
+  } format;
+  struct {
+    int sync;
+    struct m5state state;
+  } sync;
 };

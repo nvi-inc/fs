@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -31,25 +31,26 @@
 ! History
 !  2006Nov30 JMGIpson. First version.
 !  2013Sep25 JMGipson. First version modeled on check_rec_type
+!  2022-02-04 JMGipson. Got rid of temporary variable. 
 
 ! functions
       integer iwhere_in_string_list
 ! local
-      integer iwhere
-      character*8 crectmp
+      integer iwhere    
 
       kvalid_rec=.true. 
-      iwhere=iwhere_in_string_list(crec_type, max_rec_type,crec)
-      if(iwhere .eq. 0) return           !valid rec type.
+      iwhere=iwhere_in_string_list(crec_type, max_rec_type,crec)   
+      if(iwhere .ne. 0) return           !valid rec type.
+  
 
 ! Didn't find. Capitalize and try again.
-      crectmp=crec
-      call capitalize(crectmp)
-      iwhere= iwhere_in_string_list(crec_type_cap,max_rec_type,crectmp)
+      call capitalize(crec)
+      iwhere= iwhere_in_string_list(crec_type_cap,max_rec_type,crec) 
       if(iwhere .ne. 0) then
-        crec=crec_type(iwhere)       
+        crec=crec_type(iwhere)   
       else
         kvalid_rec=.false.
       endif
+      
       return
       end

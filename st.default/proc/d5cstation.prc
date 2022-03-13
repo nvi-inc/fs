@@ -1,3 +1,5 @@
+define  mk5c_config   00000000000
+enddef
 define  exper_initi   00000000000
 check_ntp
 sched_initi
@@ -40,10 +42,7 @@ bread
 " strongly recommended
 "add your station command to measure the gps to fm output clock offset
 "gps-fmout=c2
-mk5b_mode
-!+1s
-mk5=dot?
-sy=run setcl adapt &
+mk5c_mode
 enddef
 define  midtp         00000000000
 "rxmon
@@ -113,7 +112,7 @@ bbcsx8
 cont_cal=off
 "cont_cal=on
 form=geo
-mk5b_mode=ext,0x55555555,2
+mk5c_mode=vdif,0x55555555,2
 ifdsx
 bbc_gain=all,agc
 enddef

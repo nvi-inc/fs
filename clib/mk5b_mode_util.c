@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -319,15 +319,20 @@ int itask;
 	while(output[strlen(output)-1]=='0')
 	  output[strlen(output)-1]=0;
 	m5state_encode(output,&lclc->samplerate.state);
+      } else if(lclc->decimate.state.known && lclc->decimate.decimate!=0) {
+	sprintf(output,"(%.3f)",
+		((float) shm_addr->m5b_crate)/
+			 lclc->decimate.decimate+0.0001 );
+	m5state_encode(output,&lclc->decimate.state);
       } else if(shm_addr->mk5b_mode.samplerate.state.known) {
-	sprintf(output,"(%llu.",
+	sprintf(output,"((%llu.",
 		shm_addr->mk5b_mode.samplerate.samplerate/1000000);
 	if(shm_addr->mk5b_mode.samplerate.samplerate%1000000)
 	  sprintf(output+strlen(output),"%06llu",
 		  shm_addr->mk5b_mode.samplerate.samplerate%1000000);
 	while(output[strlen(output)-1]=='0')
 	  output[strlen(output)-1]=0;
-	strcat(output,")");
+	strcat(output,"))");
 	m5state_encode(output,&shm_addr->mk5b_mode.samplerate.state);
       }
       break;

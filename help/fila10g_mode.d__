@@ -12,22 +12,18 @@ mask2:      VSI2 input bit-stream mask, usually hex, 32-bit wide maximum,
 mask1:      VSI1 input bit-stream mask, usually hex, non-zero 32-bit wide
             maximum, for example: 0xf, default 0xffffffff
 
-decimation: decimation factor: 1, 2, 4, 8, or 16. No default unless
-            sample (next parameter) is specified. On monitor,
-            displayed if available; depending on the FiLa10G version,
-            it may also not be displayed if '1'.
+decimation: decimation factor: 1, 2, 4, 8, or 16.  The default is inferred
+            from sample (next parameter).
 
 sample:     sample rate in MHz: must be greater than 0.124.  The value
             divided into the VSI-H/Mark5B clock rate (specified in
             equip.ctl) must yield a valid decimation factor.  Default
             sample rate is the VSI-H/Mark5B clock rate unless a
             decimation factor was specified or the VSI-H/Mark5B
-            clock rate is 'none'.  On monitor, no output if the
-            decimation factor was most recently specified; otherwise
-            the commanded sample rate is shown in parenthesizes for
-            reference.
+            clock rate is 'none'.  On monitor, the implied sample rate
+            is shown in parenthesizes for reference.
 
-okay        overide to allow command while recording, literal ascii:
+okay        override to allow command while recording, literal ASCII:
             disk_record_ok
 
 Monitor only parameter:
@@ -36,11 +32,10 @@ clock       input clock rate in Hz
 Comments:
 The effective sample rate can be specified in the SNAP command either
 explicitly with the 'sample' parameter or implicitly with the
-'decimation' parameter.  Only one of 'sample' and 'decimation' may
-be specified.  The device does not respond with the commanded
-effective sample rate.  In the query response for this command, the
-commanded sample rate, if it was explicitly commanded, is shown in
-parentheses for informational purposes only.
+'decimation' parameter. Only one of 'sample' and 'decimation' may be
+specified. The device does not respond with the commanded effective
+sample rate. In the query response for this command, the implied
+sample rate is shown in parentheses for informational purposes only.
 
 To use a non-zero 'mask2', the FiLa10G 'input select' in 'equip.ctl'
 must be 'vsi1-2'. Use of 'vsi1-2' is strongly encouraged and will work
@@ -66,8 +61,7 @@ wired to FiLa10G input VSI2 and that input is selected in 'equip.ctl'.
 The lay-out of the bit-streams described in the 'help' page for the
 DBBC2 'form' command ('form.d__') and the discussion of useful
 cross-wirings in the 'help' page for the 'mk5b_mode' command
-('mk5b_mode.___') maybe helpful in such ad hoc situations.  You can
-also reach out for advice to Ed (Ed.Himwich@nasa.gov).
+('mk5b_mode.___') maybe helpful in such ad hoc situations.
 
 For single VSI modes, mismatches in using 'vsi2' (or 'vsi1') input for
 modes 'wastro'/'geo2'/'astro2'(<v105)/'astro3' when VSI1 (or VSI2) is

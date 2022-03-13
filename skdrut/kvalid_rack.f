@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -34,21 +34,20 @@
 !  2013Sep25 JMGipson. Modeled on check_rack_type. But bug fixed and made funciton. 
 !  2016Nov29 JMGipson. Changed cracktmp from character*8 to character*20 
 !  2016Nov29 JMGipson. Also fixed bug in second try at recognizing. 
+!  2022-02-04 JMGipson. Got rid of temporary variable. 
 
 ! functions
       integer iwhere_in_string_list
 ! local
-      integer i
-      character*20 cracktmp
+      integer i    
 
       kvalid_rack=.true.
       i=iwhere_in_string_list(crack_type, max_rack_type,crack)
       if(i .ne. 0) return           !valid rack type.
 
 ! Didn't find. Capitalize and try again.
-      cracktmp=crack
-      call capitalize(cracktmp)
-      i=iwhere_in_string_list(crack_type_cap,max_rack_type,cracktmp)
+      call capitalize(crack) 
+      i=iwhere_in_string_list(crack_type_cap,max_rack_type,crack) 
  
       if(i .ne. 0) then
          crack=crack_type(i)         

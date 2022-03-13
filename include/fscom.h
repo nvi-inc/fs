@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -485,7 +485,6 @@ typedef struct fscom {
       int continuous;
       int cycle;
       int stop_request;
-      int to_error_off;
       struct data_valid_cmd data_valid;
     } control[2];
     int iping;
@@ -522,4 +521,6 @@ typedef struct fscom {
           } bbc[MAX_DBBC3_BBC];
       } data[2];
   } dbbc3_tsys_data;
+  unsigned dbbc3_command_count;
+  int dbbc3_command_active;
 } Fscom;

@@ -2,8 +2,8 @@
 * Please refer to the Control Files Manual in Volume 1 of the
 * Field System Documentation
 *
-* Two fields: BBCs/IF (8, 12, or 16), IFs (1-8)
-  16 8
+* Two fields: BBCs/IF (8, 12, 16 or nominal (U:16,V:8)), IFs (1-8)
+  nominal 8
 * DDC_U firmware version (v121 or later)
   v121
 * DDC_V firmware version (v121 or later)

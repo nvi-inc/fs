@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021 NVI, Inc.
+* Copyright (c) 2020-2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -43,8 +43,7 @@ C
       integer igtba              ! functions
       integer trimlen
       integer iwhere_in_string_list
-      logical kvalid_rec, kvalid_rack
-
+     
 C  LOCAL:
       integer MaxBufIn
       parameter (MaxBufIn=256)
@@ -163,6 +162,7 @@ C
 ! 2016Jul28  JMG. Changed rack length to 20 chars.
 !                 Initialize cfirtrec(i)="1" even if have problems reading "T " line.
 ! 2017Mar13  JMG. If rack or recorder are not recongnized, set them to 'unknown' and continue.
+! 2022-02-10 JMG. Use subroutine to stuff crec, crack into appropriate slots. 
 
 
       cbufin=" "
@@ -425,13 +425,11 @@ C
 C  Got a match. Initialize names.
         cterna(i)=cname
 
-C  Store equipment names.
-        if (crack .ne. " ") then
-          cstrack(i)=crack
-        endif
-        if (crec1 .ne. " ") then
-           cstrec(i,1)=crec1
-        endif
+! Put rack and recorder in appropriate slots.  
+! Doing it this way ensures SKD and VEX files are treated the same. 
+
+        call store_rack_and_recorder(lu,cstnna(i),
+     >    crack,crec1, cstrack(i),cstrec(i,1))
 
 C       If second recorder is specified and the first recorder was S2
 C       then save the second recorder field as the S2 mode.

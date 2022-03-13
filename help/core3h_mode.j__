@@ -1,0 +1,227 @@
+core3h_mode - Core3H board mode (DBBC3 rack)
+
+Syntax:   core3h_mode=state,force,okay
+          core3h_mode=n,mask2,mask1,decimation,sample,force,okay
+          core3h_mode=n
+          core3h_mode
+
+Response: core3h_mode/n,mask2,mask1,decimation,sample,clock,split,input,channels,width,payload,format,sync
+
+Settable parameters:
+
+state:      'begin' or 'end'. No default, see 'Comments' section for
+            the details.
+
+force:      force setup: literal 'force', '$', or null. See comments.
+
+okay        override to allow command while recording, literal text:
+            'disk_record_ok'
+
+n           1 to 8, but is limited to the number of IF boards
+            specified in 'dbbc3.ctl'
+
+mask2:      VSI2 input bit-stream mask, usually hex, 32-bit wide
+            maximum, for example: 0xf, default 0. Null on display if
+            zero. Must be null for DDC_V. See the 'Comments' section
+            for more details on DDC_U usage.
+
+mask1:      VSI1 input bit-stream mask, usually hex, non-zero 32-bit
+            wide maximum, for example: 0xf, default 0xffffffff. See
+            the 'Comments' section for more details on DDC_U usage.
+
+decimation: decimation factor: 1-255. Default is inferred from 'sample'
+            (next parameter). For DDC_V, only '1' and '2' are
+            permitted.
+
+sample:     sample rate in Ms/s: must be greater than 0.499. For
+            DDC_U, the value divided into the maximum DDC_U sample
+            rate, 256 Ms/s, must yield a valid integer decimation
+            factor. For DDC_V, only 128 and 64 Ms/s are accepted.
+            Unless a decimation factor was specified, the default for
+            DDC_U is 256 Ms/s (decimation 1); for DDC_V, 64 Ms/s
+            (decimation 2). In response, since the sample rate is not
+            reported by the device, the reported 'decimation' implied
+            sample rate is shown in parenthesizes for reference.
+
+Monitor only parameter:
+
+clock       input clock rate in Hz
+
+split       split mode: 'on' or 'off'
+
+input       VSI input: 'tvg','vsi1','vsi2','vsi1-2','vsi1-2-3-4','gps'
+
+channels    VDIF channels: only the powers of two, range 1-16
+
+width       VDIF channel width: 1 or 2 bits
+
+payload     VDIF payload size, typically 8000 bytes, but other multiples
+            of eight are possible, range 8-8192
+
+format      data transmission format: 'stopped', 'vdif', 'mk5b', or
+            'raw'. 'stopped' means no data is being sent
+
+sync        whether the board is synced: 'synced' or 'unsynced'
+
+Comments:
+
+These commands in their command form for individual boads,
+'core3h_mode=n,...', with or without 'force', update the FS's model of
+Core3H board configurations.
+
+The monitor form of these commands are with only the board number
+after the equal sign '=' and no other parameters. e.g.,
+'core3h_mode=1'. However, if a '?' is included after the board number,
+e.g., 'core3h_mode=1,?', the FS's model for that board's configuration
+is reported. All the boards can be monitored with a single
+'core3h_mode' command (no parameters); the model for all boards can be
+reported with 'core3h_mode=?'.
+
+The non-'force' command form of these commands (except 'begin') report
+the deviations of the board configurations from the FS's model as
+errors. For 'end', only deviations of the status of data transmission
+are reported. If there were any deviations, a summary error is
+reported last.
+
+The state values of 'begin' and 'end' mark the beginning and end of
+Core3H configuration for a mode. For example:
+
+   core3h_mode=begin,force
+   core3h_mode=1,...,force
+   ...
+   core3h_mode=end,force
+
+Up to the total number of Core3H boards in the rack (the maximum is
+set in 'dbbc3.ctl') can be set-up between the 'begin' and 'end'. Any
+boards that are not set-up will have their output disabled (stopped)
+by the 'end,force' (which will also start the output of boards that
+are set-up). This is to make sure only the set-up boards will send
+data.
+
+Once a 'begin' has been executed, the FS's model is not well defined
+until the matching 'end' has been executed. No commands other than
+'core3h_mode=n,...' command should be executed between them. If there
+are other commands, the results may be incorrect, particularly for
+'mk5c_mode'/'fb_mode' and 'tpicd'.
+
+The non-'force' command forms of the 'core3h_mode=1,...' commands do
+not setup the boards, but update the FS model of the settings and show
+the actual state of the  boards. This occurs if the 'force' parameter
+is '$' or null. If it is literal 'force', the boards will be setup
+with no output of the state. Using '$' as a synonym for null is to
+support allowing the operator to use 'force' as the argument for a
+setup procedure from 'drudg' to force setup, while making only
+checking the default for schedules. The 'drudg' generated setup
+procedures are called from schedules with no argument, for example:
+
+    setup01
+
+To setup the Core3H boards, the operator can use the same procedure
+with 'force' as its argument:
+
+    setup01=force
+
+The 'force' will be passed to Core3H setup sub-procedure, which will
+pass it to the Core3H setup commands. Due to the structure of SNAP, if
+no argument is given, a '$' will appear as the value of the 'force'
+parameter in Core3H set-up commands. Hence the commands accept '$' in
+place of the 'force' parameter to preserve the checking functionality.
+
+This approach is used because after the Core3H boards are configured,
+the operator must sync them. Once that is completed, the operator will
+need to start the data transmission for the boards used by the mode,
+by executing the command:
+
+    core3h_mode=end,force
+
+Using the setup procedure with 'force' will also execute this command,
+but it will fail for the first board to be started because the Core3H
+boards have not been synced. This error can serve as reminder to the
+operator to sync the boards and execute the above 'end,force' again.
+
+The 'core3_mode=end' command, with or without 'force', checks the
+DBBC3 firmware version for agreement with the FS control files. This
+is intended to be the primary DBBC3 version check since this command
+is:
+
+- part of both a complete set-up and check of a mode, both of which
+  should executed by the operator as part of normal operations
+
+- the final command of such a set-up/check, which should make the error
+  more visible
+
+The 'core3h_mode=n,...,force' commands also check the DBBC3 firmware
+version.
+
+The effective sample rate can be specified in the SNAP command either
+explicitly with the 'sample' parameter or implicitly with the
+'decimation' parameter. Only one of 'sample' and 'decimation' may be
+specified. The device does not respond with the commanded effective
+sample rate. In the query response for this command, the implied
+sample rate is shown in parentheses for informational purposes only.
+
+To use a non-zero 'mask2', the personality must be DDC_U.
+Additionally, there can't be bits turned on for BBCs in 'mask2' that
+exceed the number available as set by the number of BBCs per IF in
+'dbbc3.ctl'.
+
+For the DDC_U personality, the display values for 'mask2' or 'mask1'
+will be followed by the values of mask4 or mask3, respectively, in
+square brackets if the value of mask4 does not agree with 'mask2', or
+mask3 does not agree with 'mask1'. In these cases, the bit masks are
+not configured correctly. It is a requirement for DDC_U operation that
+the mask4 and mask3 agree with 'mask2' and 'mask1', respectively.
+
+The meaning of the bits in the mask are given in the following table
+starting with the least significant bit. Mask1 represents the first
+eight BBCs for a Core3H board; Mask2, the second eight. In the table,
+the first eight BBCs for a board are generically numbered 1-8; the
+second eight, 9-16.
+
+ Bit   Mask2  Mask1
+  1     9US    1US
+  2     9UM    1UM
+  3     9LS    1LS
+  4     9LM    1LM
+  5    10US    2US
+  6    10UM    2UM
+  7    10LS    2LS
+  8    10LM    2LM
+  9    11US    3US
+ 10    11UM    3UM
+ 11    11LS    3LS
+ 12    11LM    3LM
+ 13    12US    4US
+ 14    12UM    4UM
+ 15    12LS    4LS
+ 16    12LM    4LM
+ 17    13US    5US 
+ 18    13UM    5UM 
+ 19    13LS    5LS 
+ 20    13LM    5LM 
+ 21    14US    6US
+ 22    14UM    6UM
+ 23    14LS    6LS
+ 24    14LM    6LM
+ 25    15US    7US
+ 26    15UM    7UM
+ 27    15LS    7LS
+ 28    15LM    7LM
+ 29    16US    8US
+ 30    16UM    8UM
+ 31    16LS    8LS
+ 32    16LM    8LM
+
+The number of BBCs available per board may be 8, 12, or 16 depending
+on the hardware configuration. The BBCs for each mask for each board
+are:
+
+Board  Mask2  Mask1
+  1   65- 72   1- 8
+  2   73- 80   9-16
+  3   81- 88  17-24
+  4   89- 96  25-32
+  5   97-104  33-40
+  6  105-112  41-48
+  7  113-120  49-56
+  8  121-128  57-64

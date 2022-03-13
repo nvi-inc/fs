@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -323,10 +323,11 @@ C  BBCffb, IFPffb  or VCffb
              write(lu_outfile,'("cont_cal=off")')
           endif
 
+          ldum="bbc_gain=all,agc"
           if(idbbc_bbc_target .gt. 0) then
-             write(ldum,'(a,i5)') "bbc_gain=all,agc,",idbbc_bbc_target          
-             call drudg_write(lu_outfile,ldum)
-          endif 
+             write(ldum(20:30),'(",",i5)') idbbc_bbc_target
+          endif
+          call drudg_write(lu_outfile,ldum)
        endif
 
 C  !*

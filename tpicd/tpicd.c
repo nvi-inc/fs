@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -122,7 +122,6 @@ main()
       dbtcn_control.continuous=shm_addr->tpicd.continuous;
       dbtcn_control.cycle=shm_addr->tpicd.cycle;
       dbtcn_control.stop_request=shm_addr->tpicd.stop_request;
-      dbtcn_control.to_error_off=shm_addr->tpicd.stop_request;
       memcpy(&dbtcn_control.data_valid,&data_valid,
 	     sizeof(struct data_valid_cmd));
       iping[0]=1-shm_addr->dbtcn.iping;
@@ -131,14 +130,6 @@ main()
       memcpy(&shm_addr->dbtcn.control[iping[0]],&dbtcn_control,
 	     sizeof(struct dbtcn_control));
       shm_addr->dbtcn.iping=iping[0];
-      /* this will make sure a to_error_off request is respected before
-         the tpicd=stop request command returns; if instead we waited for
-         dbtcn to return, it could take a while time-out period if it is
-         timing out already, in that case the user shouldn't be too annoyed
-         by one more time-out message anyway; it would be faster by an average of
-         0.5 seconds is we waited and wasn't already timing out. */
-      if(shm_addr->tpicd.stop_request)
-          rte_sleep(101);
     goto loop;
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -21,7 +21,6 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include "ssize_t.h"
 #include "packet.h"
 const size_t len_gcomo_t               = 8;
 const size_t len_downconverter_t       = 8;

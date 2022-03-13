@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -38,14 +38,14 @@ C
       include '../include/fscom.i'
 C 
 c     character*1 cjchar
-      integer*2 lwho,lwhat,ibuf(80),indata(1)
+      integer*2 lwho,ibuf(80),indata(1)
       integer nrecs,ichmv,get_buf
       integer*4 iclass,ip(5)
       dimension ireg(2) 
       equivalence (reg,ireg)
       logical kbreak
 C 
-      data idum/0/,lwho/2Hfp/,lwhat/2Hma/,ntry/2/ 
+      data idum/0/,lwho/2Hfp/,ntry/2/
   
 C 
       iter=ntry
@@ -82,14 +82,14 @@ C
 C      CHECK FOR TIME OUT
 C
       if (ip(3).ne.-4) goto 14
-      call logit7(idum,idum,idum,-1,-70,lwho,lwhat)
+      call logit6(idum,idum,idum,-1,-70,lwho)
       goto 12
 C
 C       CHECK FOR CHARACTER COUNT ERROR
 C
 14    continue
       if(ip(3).ne.-5) goto 15
-      call logit7(idum,idum,idum,-1,-71,lwho,lwhat)
+      call logit6(idum,idum,idum,-1,-71,lwho)
       goto 12
 C
 C  other errors

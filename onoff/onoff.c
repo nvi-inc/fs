@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -59,6 +59,8 @@ main()
   char lsorna2[sizeof(shm_addr->lsorna)+1];
   int cont0, cont[MAX_ONOFF_DET], rack_det, station_det;
   int ifchain;
+  int count;
+  char *dir[2];
 
 /* connect to the FS */
 
@@ -90,49 +92,14 @@ main()
   kagc=FALSE;
   koff=FALSE;
   memcpy(&onoff,&shm_addr->onoff,sizeof(onoff));
-
   ierr=0;
 
-  if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
-    kagc=TRUE;
-    if(agc(onoff.itpis,0,&ierr))
-      goto error_recover;
-  } else if(shm_addr->equip.rack==DBBC &&
-	      (shm_addr->equip.rack_type == DBBC_DDC ||
-	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
-    kagc=TRUE;
-    if(agc_dbbc(onoff.itpis,0,&ierr))
-      goto error_recover;
-  } else if(shm_addr->equip.rack==DBBC &&
-	      (shm_addr->equip.rack_type == DBBC_PFB ||
-	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
-    kagc=TRUE;
-    if(agc_dbbc_pfb(onoff.itpis,0,&ierr))
-      goto error_recover;
-  } else if(shm_addr->equip.rack==DBBC) {
-    kagc=TRUE;
-    if(agc_dbbc(onoff.itpis,0,&ierr))
-      goto error_recover;
-  } else if(shm_addr->equip.rack==DBBC3) {
-    kagc=TRUE;
-    if(agc_dbbc3(onoff.itpis,0,&ierr))
-      goto error_recover;
-  }
-
-  if(local(&az,&el,"azel",&ierr))
-    goto error_recover;
-
-  el*=RAD2DEG;
-  az*=RAD2DEG;
-
-  memcpy(lsorna,shm_addr->lsorna,sizeof(lsorna)-1);
-
-  lsorna[sizeof(lsorna)-1]=0;
-  for(j=0;j<sizeof(lsorna)-1;j++)
-    if(lsorna[j]==' ') {
-      lsorna[j]=0;
-      break;
-    }
+  count=0;
+  for(j=0;j<MAX_ONOFF_DET;j++)
+    if(onoff.itpis[j]!=0)
+      count++;
+  snprintf(buff,sizeof(buff)," Starting run with %d detectors selected",count);
+  logit(buff,0,NULL);
 
   use_cal=FALSE;
   station_det=FALSE;
@@ -173,9 +140,87 @@ main()
       cont0=FALSE;
   }
 
+  if(cont0) {
+    snprintf(buff,sizeof(buff)," Using continuous cal, all integrations include both cal on and off data");
+    logit(buff,0,NULL);
+  }
+  snprintf(buff,sizeof(buff)," Maximum allotted time to reach an on or off source position is %d seconds",
+           shm_addr->onoff.wait);
+  logit(buff,0,NULL);
+
+  if(fabs(xoff*RAD2DEG)>0.0000095 ||
+     fabs(yoff*RAD2DEG)>0.0000095 ||
+     fabs(azoff*RAD2DEG)>0.0000095 ||
+     fabs(eloff*RAD2DEG)>0.0000095 ||
+     fabs(haoff*RAD2DEG)>0.0000095 ||
+     fabs(decoff*RAD2DEG)>0.0000095)
+    logit(" There are some non-zero pointing offsets: possibly peaked-up",0,NULL);
+   else
+    logit(" There are only zero pointing offsets: probably not peaked-up",0,NULL);
+
+  /* wait for onsource */
+
+  nwt=shm_addr->onoff.wait;
+  if(1 != nsem_test("aquir"))
+    nwt=nwt*4;               /* aquir not runnig */
+  snprintf(buff,sizeof(buff)," Waiting up to %d seconds to reach initial target",nwt);
+  logit(buff,0,NULL);
+
+  if(onsor(nwt,&ierr))
+    goto error_recover;
+
+  rte_time(it,it+5);
+  rut=it[3]*3600.0+it[2]*60.0+it[1]+((double)it[0])/100.;
+
+  if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
+    logit(" Locking gains",0,NULL);
+    kagc=TRUE;
+    if(agc(onoff.itpis,0,&ierr))
+      goto error_recover;
+  } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_DDC ||
+	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
+    logit(" Locking gains",0,NULL);
+    kagc=TRUE;
+    if(agc_dbbc(onoff.itpis,0,&ierr))
+      goto error_recover;
+  } else if(shm_addr->equip.rack==DBBC &&
+	      (shm_addr->equip.rack_type == DBBC_PFB ||
+	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+    logit(" Locking gains",0,NULL);
+    kagc=TRUE;
+    if(agc_dbbc_pfb(onoff.itpis,0,&ierr))
+      goto error_recover;
+  } else if(shm_addr->equip.rack==DBBC) {
+    logit(" Locking gains",0,NULL);
+    kagc=TRUE;
+    if(agc_dbbc(onoff.itpis,0,&ierr))
+      goto error_recover;
+  } else if(shm_addr->equip.rack==DBBC3) {
+    logit(" Locking gains",0,NULL);
+    kagc=TRUE;
+    if(agc_dbbc3(onoff.itpis,0,&ierr))
+      goto error_recover;
+  }
+
+  if(local(&az,&el,"azel",&ierr))
+    goto error_recover;
+
+  el*=RAD2DEG;
+  az*=RAD2DEG;
+
+  memcpy(lsorna,shm_addr->lsorna,sizeof(lsorna)-1);
+
+  lsorna[sizeof(lsorna)-1]=0;
+  for(j=0;j<sizeof(lsorna)-1;j++)
+    if(lsorna[j]==' ') {
+      lsorna[j]=0;
+      break;
+    }
+
   sprintf(buff2,
  "    De      Center  TCal    Flux    DPFU     Gain    Product   LO    T   FWHM");
-  logit(buff2,0,NULL);
+  logit_nd(buff2,0,NULL);
 
   for(i=0;i<MAX_ONOFF_DET;i++) {
     if(onoff.itpis[i]!=0) {
@@ -215,20 +260,9 @@ main()
        sprintf(buff+strlen(buff)," %8.2f %c %.5f",
 	       0.0,'x',0.0);
 
-      logit(buff,0,NULL);
+      logit_nd(buff,0,NULL);
     }
   }
-
-  /* wait for onsource */
-
-  nwt=shm_addr->onoff.wait;
-  if(1 != nsem_test("aquir"))
-    nwt=nwt*4;               /* aquir not runnig */
-  if(onsor(nwt,&ierr)) 
-    goto error_recover;
-
-  rte_time(it,it+5);
-  rut=it[3]*3600.0+it[2]*60.0+it[1]+((double)it[0])/100.;
 
   if(onoff.proc[0]!=0) {
     for(i=0;i<6;i++) 
@@ -267,7 +301,7 @@ main()
   jr2as((float) haoff*RAD2DEG,buff,-9,5,sizeof(buff));
   strcat(buff," ");
   jr2as((float) decoff*RAD2DEG,buff,-9,5,sizeof(buff));
-  logit(buff,0,NULL);
+  logit_nd(buff,0,NULL);
 
   beam=sqrt(shm_addr->onoff.fwhm*shm_addr->onoff.fwhm+
 	    shm_addr->onoff.ssize*shm_addr->onoff.ssize);
@@ -275,9 +309,13 @@ main()
   if(el>shm_addr->onoff.cutoff) {
     astep=0.0;
     estep=shm_addr->onoff.step*beam;
+    dir[0]="up";
+    dir[1]="down";
   } else {
     estep=0.0;
     astep=shm_addr->onoff.step*beam/cos(el*DEG2RAD);
+    dir[0]="cw";
+    dir[1]="ccw";
   }
 
   ini_accum(&onoff.itpis,&ons);
@@ -294,12 +332,25 @@ main()
   for(i=0;i<shm_addr->onoff.rep;i++) {
 
     if(i!=0) {
+      snprintf(buff,sizeof(buff)," Going   on  source for repetition %d of %d",
+               i+1,shm_addr->onoff.rep);
+      logit(buff,0,NULL);
       if(gooff(azoff,eloff,"azel",shm_addr->onoff.wait,&ierr))
 	goto error_recover;
       else
 	koff=FALSE;
+    } else  {
+      snprintf(buff,sizeof(buff)," Already on  source for repetition %d of %d",
+               i+1,shm_addr->onoff.rep);
+      logit(buff,0,NULL);
     }
 
+    if(cont0)
+      snprintf(buff,sizeof(buff)," Integrating for %d seconds", onoff.intp);
+    else
+      snprintf(buff,sizeof(buff)," Integrating for %d seconds: cal off",
+               onoff.intp);
+    logit(buff,0,NULL);
     if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
       goto error_recover;
     wcounts("ONSO",0.0,0.0,&onoff,&sample);
@@ -319,6 +370,8 @@ main()
 
     if(use_cal) {
       scmds("calonnf");
+      snprintf(buff,sizeof(buff)," Integrating for %d seconds: cal on", onoff.intp);
+      logit(buff,0,NULL);
       if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
 	goto error_recover;
       wcounts("ONSC",0.0,0.0,&onoff,&sample);
@@ -328,11 +381,15 @@ main()
     isgn=-isgn;
 
     koff=TRUE;
+    snprintf(buff,sizeof(buff)," Going   off source: %s",dir[i%2]);
+    logit(buff,0,NULL);
     if(gooff(azoff+isgn*astep,eloff+isgn*estep,"azel",
 	     shm_addr->onoff.wait,&ierr))
       goto error_recover;
 
     if(use_cal) {
+      snprintf(buff,sizeof(buff)," Integrating for %d seconds: cal on", onoff.intp);
+      logit(buff,0,NULL);
       if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
 	goto error_recover;
       wcounts("OFFC",isgn*astep,isgn*estep,&onoff,&sample);
@@ -340,6 +397,13 @@ main()
 
       scmds("caloffnf");
     }
+
+    if(cont0)
+      snprintf(buff,sizeof(buff)," Integrating for %d seconds", onoff.intp);
+    else
+      snprintf(buff,sizeof(buff)," Integrating for %d seconds: cal off",
+               onoff.intp);
+    logit(buff,0,NULL);
     if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
       goto error_recover;
     if(cont0) {
@@ -368,11 +432,18 @@ main()
   }
 
   /*last point onsource */
+  logit(" Going   on  source for final data point",0,NULL);
   if(gooff(azoff,eloff,"azel",shm_addr->onoff.wait,&ierr))
     goto error_recover;
   else
     koff=FALSE;
 
+  if(cont0)
+    snprintf(buff,sizeof(buff)," Integrating for %d seconds", onoff.intp);
+  else
+    snprintf(buff,sizeof(buff)," Integrating for %d seconds: cal off",
+             onoff.intp);
+  logit(buff,0,NULL);
   if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
     goto error_recover;
   wcounts("ONSO",0.0,0.0,&onoff,&sample);
@@ -384,6 +455,9 @@ main()
   
   if(use_cal) {
     scmds("calonnf");
+    snprintf(buff,sizeof(buff)," Integrating for %d seconds: cal on",
+             onoff.intp);
+    logit(buff,0,NULL);
     if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
       goto error_recover;
     wcounts("ONSC",0.0,0.0,&onoff,&sample);
@@ -406,10 +480,10 @@ main()
 #if 0
   sprintf(buff," i %d onscal.avg %f ons.avg %f ofscal.avg %f ofs.avg %f zero.avg %f",
 	   i,  onscal.avg[i],ons.avg[i],ofscal.avg[i],ofs.avg[i],zero.avg[i]);
-      logit(buff,0,NULL);
+      logit_nd(buff,0,NULL);
   sprintf(buff," i %d onscal.sig %f ons.sig %f ofscal.sig %f ofs.sig %f zero.sig %f",
 	  i,  onscal.sig[i],ons.sig[i],ofscal.sig[i],ofs.sig[i],zero.sig[i]);
-      logit(buff,0,NULL);
+      logit_nd(buff,0,NULL);
 #endif
       if(onoff.devices[i].tcal>0.0 && (use_cal || cont[i])) {
       	gcmp[i]=(onscal.avg[i]-ons.avg[i])
@@ -489,8 +563,14 @@ main()
 
  error_recover:
  
+  if(-20==ierr)
+    logit(NULL,-22,"nf");
+  else if (-1==ierr)
+    logit(NULL,-2,"nf");
+
   ip1[2]=0;
-  if(koff)
+  if(koff) {
+    logit(" Returning to initial target after an error",0,NULL);
     if(gooff(azoff,eloff,"azel",shm_addr->onoff.wait,&ierr1)) {
       ip1[0]=0;
       ip1[1]=0;
@@ -498,10 +578,12 @@ main()
       ip1[4]=0;
       memcpy(ip1+3,"nf",2);
     }
+  }
 
   ip2[2]=0;
   if(kagc)
     if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
+      logit(" Unlocking gains",0,NULL);
       if(agc(onoff.itpis,1,&ierr2)) {
 	ip2[0]=0;
 	ip2[1]=0;
@@ -512,6 +594,7 @@ main()
     } else if(shm_addr->equip.rack==DBBC &&
 	      (shm_addr->equip.rack_type == DBBC_DDC ||
 	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
+      logit(" Unlocking gains",0,NULL);
       if(agc_dbbc(onoff.itpis,1,&ierr2)) {
 	ip2[0]=0;
 	ip2[1]=0;
@@ -522,6 +605,7 @@ main()
     } else if(shm_addr->equip.rack==DBBC &&
 	      (shm_addr->equip.rack_type == DBBC_PFB ||
 	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+      logit(" Unlocking gains",0,NULL);
       if(agc_dbbc_pfb(onoff.itpis,1,&ierr2)) {
 	ip2[0]=0;
 	ip2[1]=0;
@@ -530,6 +614,7 @@ main()
 	memcpy(ip2+3,"nf",2);
       }
     } else if(shm_addr->equip.rack==DBBC3) {
+      logit(" Unlocking gains",0,NULL);
       if(agc_dbbc3(onoff.itpis,1,&ierr2)) {
 	ip2[0]=0;
 	ip2[1]=0;
@@ -562,7 +647,7 @@ main()
 	strcat(buff," ");
 	*/
 	jr2as(calr_sig[i],buff,-5,2,sizeof(buff));
-	logit(buff,0,NULL);
+	logit_nd(buff,0,NULL);
       }
 
     sprintf(buff2,
@@ -601,6 +686,11 @@ main()
   }
 
   if(ip1[2]!=0) {
+    ip1[4]=0;
+    if(ip1[2]==-20)
+      ip1[2]=-23;
+    else if(ip1[2]==-30)
+      ip1[2]=-31;
     logita(NULL,ip1[2],ip1+3,ip1+4);
     ip1[0]=0;
     ip1[1]=0;
@@ -622,6 +712,8 @@ main()
     ip[0]=0;
     ip[1]=0;
     ip[2]=ierr;
+    if(ierr==-1||ierr==-6||ierr==-16 || ierr==-20 || ierr==-30)
+      ip[4]=0;
     memcpy(ip+3,"nf",2);
     logita(NULL,ip[2],ip+3,ip+4);
   }

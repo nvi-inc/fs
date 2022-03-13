@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021 NVI, Inc.
+* Copyright (c) 2020-2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -29,6 +29,7 @@
 ! local
       character*12 lname
 ! History
+! 2022-02-08 JMG. For fila10g utput "fila10g=version"
 ! 2021-09-28 JMG. Treat mk5c or flexbuff differently
 ! 2021-01-31 JMG Modified for DBBC3_DDC 
 ! 2007May28 JMGipson.  Modified to add Mark5B support.
@@ -70,7 +71,8 @@
         write(lufile,'(a)') "dbbc3=version"
       else if(kdbbc_rack) then
         write(lufile,'(a)') "dbbc=version "
-      else if(kfila10g_rack) then
+      endif
+      if(kfila10g_rack) then
         write(lufile,'(a)') "fila10g=version"
       endif 
            

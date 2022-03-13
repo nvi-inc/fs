@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021 NVI, Inc.
+* Copyright (c) 2020-2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -302,7 +302,13 @@ C             two return buffers with imode = -53
         unixsec(2)=unixsec(1)
         unixhs(2)=unixhs(1)
         if(iold.gt.20) then
+           nerr=nerr+1
+           if(nerr.le.3) then
+              call susp(2,1)
+              goto 50
+           endif
            call logit7ci(idum,idum,idum,-1,-26,'sc',0)
+           goto 998
         endif
         goto 200
       else

@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021 NVI, Inc.
+* Copyright (c) 2020-2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 *
 !Include file to set the version. Just change this and leave fdrudg.f alone. (you need to delete fdrudg.o prior to make though.) 
 ! below is set at compiletime
-      cversion = '2021-12-28'
+      cversion = '2022-02-10'
 !
 ! See change_log.txt for a summary of the changes.
 !  

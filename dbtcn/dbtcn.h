@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -20,8 +20,8 @@
 
 int open_mcast(char mcast_addr[], int mcast_port, char mcast_if[], int *error_no);
 int get_if_addr(char *name, char **address, int *error_no);
-ssize_t read_mcast(int sock, char buf[], size_t buf_size, int to_report,
-        int it[6], int centisec[6]);
+ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
+        int centisec[6], int data_valid);
 void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         int cont_cal, int swap_cal);
 void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,

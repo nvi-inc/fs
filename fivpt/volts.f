@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -50,7 +50,7 @@ C             != 0 if continups cal
 C
       double precision timt,dtpi,dri,tpita,sigt,timta,didim1
       double precision dtpi2,tpita2,sigt2
-      integer*2 icmnd(4,18),indata(10),iques,lwho,lwhat
+      integer*2 icmnd(4,18),indata(10),iques,lwho
       integer it(5),iti(5)
       integer*4 ip(5)
 c     character*1 cjchar
@@ -80,7 +80,7 @@ C
      +            2hi1, 2h#9,2h3!,2h__,
      +            2hi2, 2h#9,2h3!,2h__,
      +            2hi3, 2h#9,2h5%,2h__/
-      data iques/2H??/,ndev/18/,lwho/2Hfp/,lwhat/2Hvo/,ntry/1/
+      data iques/2H??/,ndev/18/,lwho/2Hfp/,ntry/1/
       data nin/10/
 C
 C  0. INITIALIZE
@@ -250,14 +250,14 @@ C
         else
            if (dtpi.lt.65534.5d0.or.RDBE.eq.rack) goto 16 
         endif
-        call logit7(idum,idum,idum,-1,-80,lwho,lwhat) 
+        call logit6(idum,idum,idum,-1,-80,lwho)
         itry=itry-1
         if (itry.le.0) goto 80010
         goto 12 
 c
  16     continue
         if (icont.eq.0.or.dtpi2.lt.65534.5d0.or.RDBE.eq.rack) goto 161 
-        call logit7(idum,idum,idum,-1,-80,lwho,lwhat) 
+        call logit6(idum,idum,idum,-1,-80,lwho)
         itry=itry-1
         if (itry.le.0) goto 80010
         goto 12 

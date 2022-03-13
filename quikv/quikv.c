@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -310,6 +310,7 @@ loop:
 	case 23:
 	case 24:
 	case 25:
+        case 30:
 	  dbbc(&command,itask,ip);
 	  break;
     case 21:
@@ -319,14 +320,6 @@ loop:
 	  fila10g_mode(&command, itask, ip);
 	  break;
 	case 29:
-	case 30:
-	case 31:
-	case 32:
-	case 33:
-	case 34:
-	case 35:
-	case 36:
-	case 37:
 	  dbbc3_core3h_modex(&command, itask, ip);
 	  break;
 	default:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -39,7 +39,8 @@
 extern struct fscom *fs;
 
 static char unit_letters[ ] = {"ABCDEFGH"};
-static struct tm tm_save;
+static time_t save_disp_time;
+static int kfirst = 1;
 
 void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         int def, int rec)
@@ -48,6 +49,8 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     struct dbbc3_tsys_bbc bbc[MAX_DBBC3_BBC];
     char buf[128];
     int i;
+    static time_t disp_time = 0;
+    struct tm *ptr;
 
     int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
         shm_addr->dbbc3_ddcu_v<125 ||
@@ -103,17 +106,17 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     move(2,0);
     printw("Time   ");
 
-    struct tm *ptr=gmtime(&ifc.time);
+/* legitimate times start at the first VDIF epoch */
 
-    if(NULL != ptr) {
-        int tm_different =
-                ptr->tm_year != tm_save.tm_year ||
-                ptr->tm_yday != tm_save.tm_yday ||
-                ptr->tm_hour != tm_save.tm_hour ||
-                ptr->tm_min  != tm_save.tm_min  ||
-                ptr->tm_sec  != tm_save.tm_sec;
+    if(ifc.time > 0) {
+      disp_time=ifc.time+1;
+      ptr=gmtime(&disp_time);
+    }
 
-        if(!tm_different)
+    if(ifc.time > 0 && NULL != ptr) {
+        int tm_different = disp_time!=save_disp_time;
+
+        if(!tm_different && !kfirst)
             standout();
 
         printw("%4d.%03d.%02d:%02d:%02d",
@@ -123,35 +126,39 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 ptr->tm_min,
                 ptr->tm_sec);
 
-        if(!tm_different)
+        if(!tm_different && !kfirst)
             standend();
 
-        memcpy(&tm_save,ptr,sizeof(tm_save));
-    }
+        save_disp_time=disp_time;
+        kfirst = 0;
+    } else
+       printw("%17s"," ");
 
     move(3,0);
     printw("Epoch ");
-    if(ifc.vdif_epoch >= 0) {
-      buf[0]=0;
-      int2str(buf,ifc.vdif_epoch,-2,0);
-      printw("%2s",buf);
+    if(ifc.time > 0) {
+      if(ifc.vdif_epoch >= 0) {
+        buf[0]=0;
+        int2str(buf,ifc.vdif_epoch,-2,0);
+        printw("%2s",buf);
+      } else
+        printw("%2s","--");
     } else
-      printw("%2s","--");
+      printw("%2s"," ");
 
     printw(" DBBC3-FS ");
-    if(ifc.time_error > -1000000 &&
-       ifc.time_error <  1000000 ) {
-        if(ifc.time_error || v124)
-            standout();
+    if(ifc.time> 0) {
         if (v124)
             printw("------");
         else {
             buf[0]=0;
             int2str(buf,ifc.time_error,-6,0);
+            if(ifc.time_error)
+                standout();
             printw("%6s",buf);
+            if(ifc.time_error)
+                standend();
         }
-        if(ifc.time_error || v124)
-            standend();
     } else
         printw("%6s"," ");
 

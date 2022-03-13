@@ -1,3 +1,5 @@
+define  fb_config     00000000000
+enddef
 define  exper_initi   00000000000
 check_ntp
 sched_initi
@@ -40,10 +42,7 @@ bread
 " strongly recommended
 "add your station command to measure the gps to fm output clock offset
 "gps-fmout=c2
-mk5b_mode
-!+1s
-mk5=dot?
-sy=run setcl adapt &
+fb_mode
 enddef
 define  midtp         00000000000
 "rxmon
@@ -86,34 +85,13 @@ onsource
 if=cont_cal,,!*+4s
 if=cont_cal,,caltsys_man
 enddef
-define  ready_disk    00000000000
-mk5close
-xdisp=on
-"mount the mark5 disks for this experiment now
-"recording will begin at current position
-"enter 'mk5relink' when ready or
-"if you can't get the mk5 going then
-"enter 'cont' to continue without the mk5
-xdisp=off
-halt
-disk_serial
-disk_pos
-bank_check
-"uncomment the following for Mark 5B
-mk5=DTS_id?
-mk5=OS_rev?
-mk5=SS_rev?
-mk5_status
-"uncomment the following if your station uses in2net transfers
-"mk5=net_protocol=tcp:4194304:2097152;
-enddef
 define  setupa        00000000000
 pcalon
 bbcsx8
 cont_cal=off
 "cont_cal=on
 form=geo
-mk5b_mode=ext,0x55555555,2
+fb_mode=vdif,0x55555555,2
 ifdsx
 bbc_gain=all,agc
 enddef
@@ -201,29 +179,12 @@ xdisp=on
 wakeup 
 xdisp=off
 enddef   
-define  checkmk5      00000000000 
+define  checkfb       00000000000 
 scan_check
-mk5=get_stats?
-mk5=get_stats?
-mk5=get_stats?
-mk5=get_stats?
-mk5=get_stats?
-mk5=get_stats?
-mk5=get_stats?
-mk5=get_stats?
-mk5_status
+fb_status
 enddef
 define  greplog       00000000000x
 sy=xterm -name greplog -e sh -c 'grep -i $ /usr2/log/`lognm`.log|less' &
-enddef   
-define  mk5panic      000000000000
-"mk5panic - dls - 5 december 2003
-disk_record=off
-mk5=bank_set=inc;
-!+3s
-disk_serial
-mk5=bank_set?
-mk5=vsn?
 enddef   
 define  bbc_level     13179000745x
 bbc_gain=1,30,30

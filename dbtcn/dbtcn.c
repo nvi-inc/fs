@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -20,12 +20,12 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
-#include "ssize_t.h"
 #include "packet.h"
 #include "packet_unpack.h"
 #include "dbtcn.h"
@@ -87,9 +87,8 @@ int main(int argc, char *argv[])
                 &shm_addr->dbtcn.control[shm_addr->dbtcn.iping],
                 sizeof(dbtcn_control));
 
-        to_report=1!=dbtcn_control.to_error_off;
-
-        n = read_mcast(sock,buf,sizeof(buf),to_report,itmc,centisec);
+        n = read_mcast(sock,buf,sizeof(buf),itmc,centisec,
+                dbtcn_control.data_valid.user_dv);
 
         if(n<0)
             continue;

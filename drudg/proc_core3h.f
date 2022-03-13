@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2021 NVI, Inc.
+* Copyright (c) 2021-2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -180,7 +180,7 @@
 ! Now output command the procedure
       call proc_write_define(lu_outfile, luscn,cproc_core8h)
 
-      write(lu_outfile,'(a)') "core3h_mode0=begin,$"
+      write(lu_outfile,'(a)') "core3h_mode=begin,$"
 
       dtemp=samprate(istn,icode)
       call double_2_string(dtemp,'(f11.4)', lsamprate,nch,ierr) 
@@ -189,11 +189,11 @@
           if(imask(ibrd,2) .eq. 0) then 
 ! Output null for imask(ibrd,2) in this case. 
              write(cbuf,
-     &       '("core3h_mode",i1,"=,",1("0x",z8.8,","),",",a,",$")') 
+     &       '("core3h_mode=",i1,",,",1("0x",z8.8,","),",",a,",$")')
      &       ibrd, imask(ibrd,1),  lsamprate(1:nch)
           else
              write(cbuf,
-     &       '("core3h_mode",i1,"=",2("0x",z8.8,","),",",a,",$")') 
+     &       '("core3h_mode=",i1,",",2("0x",z8.8,","),",",a,",$")')
      &       ibrd,imask(ibrd,2),imask(ibrd,1),lsamprate(1:nch) 
           endif 
 !         write(*,*) idec, samprate(istn,icode) 
@@ -202,7 +202,7 @@
          call drudg_write(lu_outfile,cbuf) 
         endif
       end do
-      write(lu_outfile,'(a)') "core3h_mode0=end,$"
+      write(lu_outfile,'(a)') "core3h_mode=end,$"
       write(lu_outfile,"(a)") 'enddef'
 
       return

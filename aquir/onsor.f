@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -53,7 +53,7 @@ C
 C  DIDN'T REACH ONSOURCE
 C
       ierr=-20
-      call logit7cc(idum,idum,idum,-1,ierr,'aq','er')
+      call logit6(idum,idum,idum,-1,ierr,'aq')
 C
       return
       end

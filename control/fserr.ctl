@@ -966,7 +966,7 @@ error retrieving class for time query in get_fila10gtime
 error decoding time in get_fila10gtime
 ""
 AN   -1
-Illegal mode
+Illegal or unimplemented mode
 ""
 AN   -2
 Time-out while waiting for a response
@@ -1029,7 +1029,13 @@ AQ  -40
 MOON is not available
 ""
 BD -301
-must specify at least 1 argument for dbbc command
+must specify at least 1 argument for dbbc/fila10g/dbbc3/core3h/dbbc2/fila10g2 commands
+""
+BD -302
+dbbc and fila10g commands not available for DBBC3 rack
+""
+BD -303
+dbbc3 and core3h commands not available for DBBC2 racks
 ""
 BD -401
 error retrieving class
@@ -2544,22 +2550,13 @@ DK -451
 Class buffer error from command response.
 ""
 DN   21
-DBBC3 multicast: error from select() cleared.
+DBBC3 multicast: error from select() cleared
 ""
 DN   20
-DBBC3 multicast: receiving multicast messages again.
+DBBC3 multicast: receiving messages again
 ""
 DN   -1
 DBBC3 multicast: error unpacking, packet too small.
-""
-DN  -20
-DBBC3 multicast: no message received, multicast may not be running
-""
-DN  -21
-DBBC3 multicast: error from select(), UNIX?FFF
-""
-DN  -22
-DBBC3 multicast: error from recvfrom(), UNIX?FFF
 ""
 DN  -11
 DBBC3 multicast: opening datagram socket, UNIX?FFF
@@ -2581,6 +2578,18 @@ DBBC3 multicast: opening socket to get interface address, UNIX?FF
 ""
 DN  -18
 DBBC3 multicast: retrieving interface address from socket (wrong interface?), UNIX?FFF
+""
+DN  -20
+DBBC3 multicast: time-out, DBBC3 may not be running
+""
+DN  -21
+DBBC3 multicast: error from select(), UNIX?FFF
+""
+DN  -22
+DBBC3 multicast: error from recvfrom(), UNIX?FFF
+""
+DN  -23
+DBBC3 multicast: time-out while data_valid is on, some multicast not recorded, probably due to a DBBC3 command
 ""
 DP -301
 No command form of pfbX command.
@@ -2691,34 +2700,37 @@ DQ -70
 Invalid device for ping (da ro r1).
 ""
 DR -201
-First parameter is either null or 'mask2', an integer, usually as a hex value, e.g., 0xf.
+First parameter is either 'begin', 'end', or the Core3H board number: '1' to the number of IFs set in 'dbbc3.ctl'.
 ""
 DR -202
-mask1 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
+mask2 parameter is either null, or an integer, usually as a hex value, e.g., 0xf.
 ""
 DR -203
-decimate parameter, must be 1-255
+mask1 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
 ""
 DR -204
-Sample rate must be a number greater than 0.124
+decimate parameter, must be 1-255
 ""
 DR -205
-The 'force' parameter must be 'force', '$', or null.
+Sample rate must be a number greater than 0.124
 ""
 DR -206
+The 'force' parameter must be 'force', '$', or null.
+""
+DR -207
 The 'okay' parameter must be 'disk_record_ok' or null.
 ""
-DR -213
-For DBBC3 DDC_V decimate must be 2
-""
 DR -214
+For DBBC3 DDC_V decimate must be 1 or 2
+""
+DR -215
 Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255.
 ""
-DR -224
+DR -225
 Can't specify sample rate and decimate parameters simultaneously
 ""
-DR -234
-For DBBC3 DDC_V sample rate must imply a decimate of 2
+DR -235
+For DBBC3 DDC_V sample rate must imply a decimate of 1 or 2
 ""
 DR -301
 Can't change mode while recording, use disk_record=off first or (dangerous) use 'disk_record_ok' as 'okay' parameter.
@@ -2727,22 +2739,16 @@ DR -302
 mask2 cannot be used unless DDBC3 is DDC_U.
 ""
 DR -303
-Can't specify mask2 for more BBCs per IF set in dbbc3.ctl.
+Can't specify mask2 for more BBCs per IF than set in dbbc3.ctl.
 ""
 DR -304
 The 'force' parameter must be 'force', '$', or null.
 ""
 DR -305
-core3h_mode0 'state' parameter must be either 'begin' or 'end'.
-""
-DR -306
-Core3h board number exceeds IFs in dbbc3.ctl.
+Internal error, impossible state clause.
 ""
 DR -307
 The 'okay' parameter must be 'disk_record_ok' or null.
-""
-DR -308
-The 'state' parameter must be 'begin' or 'end'.
 ""
 DR -400
 error retrieving acknowledgement of command
@@ -2768,125 +2774,110 @@ Uknown personality from DBBC3; see message above for DBBC3's personality.
 DR -456
 Unknown rack type in logmsg_dbbc3().
 ""
+DR -500 Place holder for bad response buffer
+
+""
 DR -501
-error decoding sysstat bitmask response
+error decoding mode_fs response, see DR -500 error for contents
 ""
 DR -502
-error decoding sysstat samplerate response
+error decoding status_fs response, see DR -500 error for contents
 ""
 DR -503
-error decoding sysstat output response
-""
-DR -504
-error decoding splitmode response
-""
-DR -505
-error decoding sysstat Selected input response
-""
-DR -506
-error decoding vdif_frame width response
-""
-DR -507
-error decoding vdif_frame channels per frame response
-""
-DR -508
-error decoding vdif_frame payload size response
-""
-DR -521
-could not find systat bitmask response
-""
-DR -522
-could not find systat amplerate response
+error decoding splitmode response, see DR -500 error for contents
 ""
 DR -523
-could not find sysstat output response
-""
-DR -524
 could not find splitmode response
 ""
-DR -525
-could not find sysstat Selected input response
+DR -596
+Core3H board?W data sending state is not defined in the FS yet
 ""
-DR -526
-error decoding vdif_frame channel width response
+DR -597
+DBBC3 firmware/version is wrong AND/OR one or more Core3H boards does not have the correct data sending state
 ""
-DR -527
-could not find vdif_frame channels per frame response
+DR -598
+One or more Core3H boards does not have the correct data sending state
 ""
-DR -528
-could not find vdif_frame payload size response
+DR -599
+DBBC3 firmware/version is wrong
 ""
 DR -600
-DBBC3 firmware/version is wrong AND/OR one or more board's data transmission state is not correct.
+The configuration of one or more Core3H boards is not correct
 ""
 DR -601
-DBBC3 Core3h board 1 configuration is not correct.
+DBBC3 Core3H board 1 configuration is not correct
 ""
 DR -602
-DBBC3 Core3h board 2 configuration is not correct.
+DBBC3 Core3H board 2 configuration is not correct
 ""
 DR -603
-DBBC3 Core3h board 3 configuration is not correct.
+DBBC3 Core3H board 3 configuration is not correct
 ""
 DR -604
-DBBC3 Core3h board 4 configuration is not correct.
+DBBC3 Core3H board 4 configuration is not correct
 ""
 DR -605
-DBBC3 Core3h board 5 configuration is not correct.
+DBBC3 Core3H board 5 configuration is not correct
 ""
 DR -606
-DBBC3 Core3h board 6 configuration is not correct.
+DBBC3 Core3H board 6 configuration is not correct
 ""
 DR -607
-DBBC3 Core3h board 7 configuration is not correct.
+DBBC3 Core3H board 7 configuration is not correct
 ""
 DR -608
-DBBC3 Core3h board 8 configuration is not correct.
+DBBC3 Core3H board 8 configuration is not correct
 ""
 DR -611
-Core3h board ?WWW mask1 is not correct.
+Core3H board?W mask1 is not correct
 ""
 DR -612
-Core3h board ?WWW mask2 is not correct.
+Core3H board?W mask2 is not correct
 ""
 DR -613
-Core3h board ?WWW mask3 is not correct, it should be the same as the requested mask1.
+Core3H board?W mask3 is inconsistent with the requested mask1
 ""
 DR -614
-Core3h board ?WWW mask4 is not correct, it should be the same as the requested mask2.
+Core3H board?W mask4 is inconsistent with the requested mask2
 ""
 DR -615
-Core3h board ?WWW sysstat decimate is not correct.
+Core3H board?W decimation is not correct
 ""
 DR -616
-Core3h board ?WWW vdif_frame width is not correct.
+Core3H board?W vdif_frame width is not correct
 ""
 DR -617
-Core3h board ?WWW vdif_frame channels is not correct.
+Core3H board?W vdif_frame channels is not correct
 ""
 DR -618
-Core3h board ?WWW vdif_frame payload is not correct.
+Core3H board?W vdif_frame payload size is not correct
 ""
 DR -619
-Core3h board ?WWW splitmode should be on and it is not
+Core3H board?W splitmode should be on and it is not
 ""
 DR -620
-Core3h board ?WWW splitmode should be off and it is not
+Core3H board?W splitmode should be off and it is not
 ""
 DR -621
-Core3h board ?WWW vsi input should be vs1-vsi2-vsi3-vsi4 and it is not
+Core3H board?W vsi input should be vs1-vsi2-vsi3-vsi4 and it is not
 ""
 DR -622
-Core3h board ?WWW vsi input should be vs1 and it is not
+Core3H board?W vsi input should be vs1 and it is not
 ""
 DR -623
-Core3h board ?WWW should be sending data but it is stopped
+Core3H board?W should be sending data but it is stopped
 ""
 DR -624
-Core3h board ?WWW should be stopped but it is sending data
-""
+Core3H board?W should be stopped but it is sending data
+"
 DR -625
-Core3h board ?WWW sysstat input clock rate does not agree with dbbc3.ctl
+Core3H board?W input clock rate does not agree with dbbc3.ctl
+"
+DR -626
+Core3H board?W data format is not VDIF
+"
+DR -627
+Core3H board?W is not synced
 ""
 DS   -1
 Unable to open dsad.ctl file.
@@ -3378,7 +3369,7 @@ FX  -37
 disk size missing
 ""
 FX  -38
-disk size did not decocde
+disk size did not decode
 ""
 FX  -39
 model must be gauss, 2pts, or disk
@@ -4542,16 +4533,19 @@ MN   -1 Place Holder
 
 ""
 NF   -1
-Break Detected in ONOFF
+Break detected in ONOFF: stopped
+""
+NF   -2
+Break detected in ONOFF: stopping
 ""
 NF   -3
 ONOFF already running
 ""
 NF   -4
-Error occurred while trying to return to source at end. Check offsets.
+Not able to return to initial target after an error: check antenna and offsets
 ""
 NF   -5
-Error occurred while trying to return to AGC. Check BBC gain settings.
+Error occurred while trying to return to AGC: check gain settings
 ""
 NF   -6
 Error occurred while trying to restore IF att. Check IF att settings.
@@ -4590,13 +4584,22 @@ NF  -19
 Error retrieving DBBC IF responses.
 ""
 NF  -20
-Did not reach source in allotted time
+Did not reach onsource for a target in the allotted time: ended
 ""
 NF  -21
 Error decoding DBBC IF response.
 ""
+NF  -22
+Did not reach onsource for a target in the allotted time: giving up
+""
+NF  -23
+Did not reach onsource trying to return to initial target after an error
+""
 NF  -30
-ANTCN failed too many times
+ANTCN failed too many times trying to go to a target to make measurements
+""
+NF  -31
+ANTCN failed too many times trying to return to initial target after an error
 ""
 NF  -40
 Diagnostic: Unknown axis system found in LOCAL
@@ -7320,7 +7323,7 @@ SC  -25
 setcl: rte_check got error from times(), see above for error
 ""
 SC  -26
-setcl: DBB3 time is older than 20 seconds
+setcl: DBBC3 time was older than 20 seconds for four tries
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W

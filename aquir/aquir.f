@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -41,7 +41,7 @@ c
  1    continue
       call wait_prog('aquir',ip)
       if(0.ne.rn_take('aquir',1)) then
-        call logit7ic(idum,idum,idum,-2,ierr,lwho,'er')
+        call logit6(idum,idum,idum,-2,ierr,lwho)
         goto 1
       endif
 
@@ -123,12 +123,12 @@ C
 10010 continue
       if(ierr.eq.-2) goto 11000     !fs is gone
       if (ierr.gt.-2) goto 10015
-      call logit7ic(idum,idum,idum,-1,ierr,lwho,'er')
+      call logit6(idum,idum,idum,-1,ierr,lwho)
       goto 11000
 C
 10015 continue
       call scmd(lter,iwter,mprc,jerr)
-      call logit7ic(idum,idum,idum,-1,ierr,lwho,'br')
+      call logit6(idum,idum,idum,-1,ierr,lwho)
       goto 11000
 C
 10020 continue
