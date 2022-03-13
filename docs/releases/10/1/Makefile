@@ -19,7 +19,7 @@
 #
 
 all: index.html dbbc3_ops.html\
-    10.1.0.html 10.1.0_to_latest.html
+    10.1.0-beta1.html 10.1.0_to_latest.html
 
 %.html: %.adoc
 	asciidoctor -a toc $^
