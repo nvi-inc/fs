@@ -43,7 +43,7 @@ int *iold;
       int secs=shm_addr->dbbc3_tsys_data.data[iping].ifc[shm_addr->dbbc3_iscboard-1].time;
 
       memcpy(centisec,shm_addr->dbbc3_tsys_data.data[iping].centisec,
-              6*sizeof(centisec));
+              6*sizeof(centisec[0]));
       secs2rte(&secs,fm_tim);
 	  fm_tim[0]=shm_addr->dbbc3_mcdelay;
 }
