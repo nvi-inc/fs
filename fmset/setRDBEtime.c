@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -41,6 +41,7 @@ extern int outclass;        /* output class number */
 extern int ip[5];           /* parameters for fs communications */
 extern int rtn1, rtn2, msgflg, save; /* unused cls_get args */
 extern int iRDBE;
+extern int RDBE_set_ticks;
 
 void setRDBEtime(formtime,delta,vdif_epoch)
 time_t formtime;
@@ -48,6 +49,8 @@ int delta;
 {
 int count;
  char *name;
+
+        RDBE_data_send( 0);
 
 	if(delta == 0) {
 	  unsigned char *cp;
@@ -117,5 +120,5 @@ if( ip[2] < 0 )
 
 cls_clr(outclass); /* clear class numbers just in case */
 cls_clr(inclass);
-
+rte_ticks(&RDBE_set_ticks);
 }

@@ -67,6 +67,7 @@ struct fila10g_cfg *fila10g_cfg_use = NULL;
 struct fila10g_cfg *ask_fila10g_cfg();
 int iRDBE;
 int iDBBC;
+int RDBE_set_ticks;
 
 WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
 
@@ -593,6 +594,7 @@ do 	{
 	    if(vdif_epoch < vdif_should) {
 	      vdif_epoch++;
 	      setfmtime(formtime,0,vdif_epoch);
+	      changedfm=1;
 	    }
 	  }
 	  goto build;
@@ -602,6 +604,7 @@ do 	{
 	    if(0 < vdif_epoch) {
 	      vdif_epoch--;
 	      setfmtime(formtime,0,vdif_epoch);
+	      changedfm=1;
 	    }
 	  }
 	  goto build;
@@ -610,6 +613,7 @@ do 	{
 	  if(source=RDBE) {
 	    vdif_epoch=vdif_should;
 	    setfmtime(formtime,0,vdif_epoch);
+	    changedfm=1;
 	  }
 	  goto build;
 	  break;
@@ -717,6 +721,16 @@ do 	{
 	}
 } while ( running );
 
+if(rack == RDBE && changedfm) {
+   int ticks;
+   rte_ticks(&ticks);
+   if (ticks < RDBE_set_ticks+110)
+       rte_sleep(110-(ticks-RDBE_set_ticks));
+   for (i=0;i<MAX_RDBE;i++) {
+      iRDBE=i+1;
+      RDBE_data_send(1);
+      }
+}
 endwin ();
  if(changedfm && rack !=RDBE) {
    logit("Formatter time reset.",0,NULL);

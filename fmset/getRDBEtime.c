@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -35,6 +35,7 @@ extern int ip[5];           /* parameters for fs communications */
 extern int synch;
 extern int rack, rack_type;
 extern int iRDBE;
+extern int RDBE_set_ticks;
 extern WINDOW   * maindisp;  /* main display WINDOW data structure pointer */
 
 void rte2secs();
@@ -73,6 +74,8 @@ int *vdif_epoch;
           mvwaddstr( maindisp, 6, 10+11,
                      "                                           ");
           mvwaddstr( maindisp, 6, 10+11+43 , "               ");
+
+          RDBE_data_send(0);
 
 	  out_recs=0;
 	  out_class=0;
@@ -203,6 +206,7 @@ int *vdif_epoch;
 	  if(ip[1]!=0)
 	    cls_clr(ip[0]);
 
+          rte_ticks(&RDBE_set_ticks);
 	}
 
 
