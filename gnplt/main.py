@@ -1765,7 +1765,7 @@ class Gui(Frame):
         cpoly = spoly[:]
         cpoly.reverse()
         #build statistics
-        #stat = 'Polynomial: %s\nComputed DPFU: %s\nRMS/DPFU: %s' % (str(cpoly), dpfu, dpfu_div_rms)
+        #stat = 'Polynomial: %s\nComputed DPFU: %s\nRMS/DPFU: %s' % (station_name_2ch(cpoly), dpfu, dpfu_div_rms)
         stat = 'Coefficients:\t'
         for k,coeff in enumerate(cpoly):
             stat += 'x^%s : %.3g\n\t\t' % (k,coeff)
