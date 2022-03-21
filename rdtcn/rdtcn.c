@@ -700,8 +700,9 @@ while (1) {
 /* pcal */
 
   if(pcaloff > 0.1) {
+    int step=lround(pcal_spacing/1e6);
     buf[0]=0;
-    for (i=0;i<512; i+=5 ) {
+    for (i=0;i<512; i+=step ) {
       if(pcaloff+i*1e6>512e6)
 	break;
       if(strlen(buf) > 100 || i == 16 && buf[0]!=0 ) {
