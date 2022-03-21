@@ -219,8 +219,9 @@ void dbbc3_core3h_modex(command,itask,ip)
              options=2;
 
            dbbc3_core3h_modex_dis(command,i+1,ip,0,options,1);
+           if(ip[2]!=0)
+             return;
         }
-        memcpy(ip+3,"dr",2);
         return;
     } else if(command->argv[0] != NULL &&
         *command->argv[0] == '?' && command->argv[1] == NULL) {
