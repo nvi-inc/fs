@@ -239,6 +239,7 @@ fb_config
 dbbcvg
 ifdvg
 cont_cal=on,2
+bbc_gain=all,agc
 tpicd=no,100
 tpicd
 enddef
