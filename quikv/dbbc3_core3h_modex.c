@@ -198,6 +198,7 @@ void dbbc3_core3h_modex(command,itask,ip)
     int force_set = 0;
     int iboard;
     int kmon;
+    int mismatch;
 
     static char *board[]={" ","1","2","3","4","5","6","7","8"};
 
@@ -416,6 +417,26 @@ parse:
         }
     }
 
+    /* must be called no matter the rack type */
+    mismatch=dbbc3_vdif_frame_params(&lcl);
+    if(mismatch) {
+        ierr=mismatch;
+        goto error;
+    }
+
+    if(DBBC3_DDCU==shm_addr->equip.rack_type) {
+        if(!(lcl.mask1.state.known && lcl.mask1.mask1) &&
+                !(lcl.mask2.state.known && lcl.mask2.mask2)) {
+            ierr=-311;
+            goto error;
+        }
+    } else if(DBBC3_DDCV==shm_addr->equip.rack_type) {
+        if(!(lcl.mask1.state.known && lcl.mask1.mask1)) {
+            ierr=-312;
+            goto error;
+        }
+    }
+
     lcl.set=1; /* needs to be set between the two memcpy()s,
                   discarded for errors in any event
                   also for start
@@ -423,7 +444,6 @@ parse:
     m5state_init(&lcl.start.state);
     lcl.start.start=1;
     lcl.start.state.known=1;
-    dbbc3_vdif_frame_params(&lcl);
     memcpy(&shm_addr->dbbc3_core3h_modex[iboard-1],&lcl,sizeof(lcl));
     out_recs=0;
     out_class=0;

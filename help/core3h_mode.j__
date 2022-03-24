@@ -40,7 +40,7 @@ sample:     sample rate in Ms/s: must be greater than 0.499. For
             Unless a decimation factor was specified, the default for
             DDC_U is 256 Ms/s (decimation 1); for DDC_V, 64 Ms/s
             (decimation 2). In response, since the sample rate is not
-            reported by the device, the reported 'decimation' implied
+            reported by the board, the reported 'decimation' implied
             sample rate is shown in parenthesizes for reference.
 
 Monitor only parameter:
@@ -160,7 +160,7 @@ version.
 The decimation can be specified in the SNAP command either explicitly
 with the 'decimation' parameter or implicitly with the 'sample'
 parameter. Only one of 'decimation' and 'sample' may be specified. The
-device does not respond with the effective sample rate. In the query
+board does not respond with the effective sample rate. In the query
 response for this command, the implied sample rate is shown in
 parentheses for information purposes only.
 
@@ -169,13 +169,40 @@ Additionally, there can't be bits turned on for BBCs in 'mask2' that
 exceed the number available as set by the number of BBCs per IF in
 'dbbc3.ctl'.
 
-For the DDC_U personality, the display values for 'mask2' or 'mask1'
-will be followed by the values of mask4 or mask3, respectively, in
-square brackets, '[...]', if the value of mask4 does not agree with
-'mask2', or mask3 does not agree with 'mask1'. In these cases, the bit
-masks are not configured correctly. It is a requirement for DDC_U
-operation that the mask4 and mask3 agree with 'mask2' and 'mask1',
-respectively.
+There are five requirements for correct mask values:
+
+  1. For a non-zero mask, the number of channels must be a power of
+     two.
+
+  2. All selected channels must have the same width (bits/channel):
+     one-bit or two-bits.
+
+  3. If both masks are non-zero, they must have the same number of
+     channels.
+
+  4. For DDC_V, 'mask1' must be non-zero and 'mask2' cannot be
+     non-zero.
+
+  5. For DDC_U, at least one of 'mask1' and 'mask2' must be non-zero.
+
+For DDC_U, if only one of the masks is non-zero, the FS will command
+the board as though the other mask had the same value. (You will see
+the additional mask displayed in the monitor response for the board.)
+This is done to satisfy the Core3H board requirement that both masks
+must have the same number of channels and width (bits/channel). As a
+consequence of this, if you want to record data from only the first or
+second Core3H board output (that is to say only 'mask1' or 'mask2' is
+commanded as non-zero in the 'core3h_mode' command), you will need to
+disable the other output with the Core3H board command 'destination 0
+none' (or 'destination 1 none', as appropriate). (The monitor value
+for a mask with the destination set to 'none' will be display in curly
+braces, '{...}', see below.) The FS sending the non-zero mask in place
+of the zero one has no impact on what channels are used by the FS
+internally, e.g., for Tsys monitoring. That is controlled entirely by
+what masks were specified in the 'core3h_mode' command.
+
+For DDC_V, the board's 'destination 1' needs to be set to 'none' to be
+consistent.
 
 The display values for the masks are enclosed in curly braces,
 '{...}', if they are non-zero and corresponding output destination
@@ -184,6 +211,14 @@ This indicates that there is no output for that mask even though it is
 non-zero. The destination is not set by this command, it must be set
 by other means, usually the boot configuration or low-level
 'core3h=...' SNAP commands.
+
+For the DDC_U personality, the display values for 'mask2' or 'mask1'
+will be followed by the values of mask4 or mask3, respectively, in
+square brackets, '[...]', if the value of mask4 does not agree with
+'mask2', or mask3 does not agree with 'mask1'. In these cases, the
+masks are not configured correctly. It is a requirement for DDC_U
+operation that the mask4 and mask3 agree with 'mask2' and 'mask1',
+respectively.
 
 The meaning of the bits in the mask are given in the following table
 starting with the least significant bit. Mask1 represents the first

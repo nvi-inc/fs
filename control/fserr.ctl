@@ -2700,13 +2700,13 @@ DQ -70
 Invalid device for ping (da ro r1).
 ""
 DR -201
-First parameter is either 'begin', 'end', or the Core3H board number: '1' to the number of IFs set in 'dbbc3.ctl'.
+First parameter must be 'begin', 'end', or the Core3H board number: '1' to the number of IFs set in 'dbbc3.ctl'.
 ""
 DR -202
-mask2 parameter is either null, or an integer, usually as a hex value, e.g., 0xf.
+mask2 parameter must either be null or an integer, usually as a hex value, e.g., 0xf
 ""
 DR -203
-mask1 parameter, must specify a non-zero integer, usually as a hex value, e.g., 0xf
+mask1 parameter must either be null or an integer, usually as a hex value, e.g., 0xf
 ""
 DR -204
 decimate parameter, must be 1-255
@@ -2733,22 +2733,37 @@ DR -235
 For DBBC3 DDC_V sample rate must imply a decimate of 1 or 2
 ""
 DR -301
-Can't change mode while recording, use disk_record=off first or (dangerous) use 'disk_record_ok' as 'okay' parameter.
+Can't change mode while recording, use disk_record=off first or (dangerous) use 'disk_record_ok' as 'okay' parameter
 ""
 DR -302
-mask2 cannot be used unless DDBC3 is DDC_U.
+'mask2' cannot have selected channels unless DDBC3 is DDC_U
 ""
 DR -303
-Can't specify mask2 for more BBCs per IF than set in dbbc3.ctl.
+Can't specify 'mask2' for more BBCs per IF than set in dbbc3.ctl
 ""
 DR -304
-The 'force' parameter must be 'force', '$', or null.
+The 'force' parameter must be 'force', '$', or null
 ""
 DR -305
 Internal error, impossible state clause.
 ""
 DR -307
 The 'okay' parameter must be 'disk_record_ok' or null.
+""
+DR -308
+All selected channels must have the same width: 1-bit or 2-bits
+""
+DR -309
+If 'mask1' AND 'mask2' are non-zero, they must have the same number of channels
+""
+DR -310
+The number of selected channels in each mask must be a power of two (or zero)
+""
+DR -311
+For DDC_U, at least one of 'mask1' and 'mask2' must be non-zero
+""
+DR -312
+For DDC_V, 'mask1' must be non-zero
 ""
 DR -400
 error retrieving acknowledgement of command
@@ -2847,10 +2862,10 @@ DR -612
 Core3H board?W mask2 is not correct
 ""
 DR -613
-Core3H board?W mask3 is inconsistent with the requested mask1
+Core3H board?W mask3 is not correct
 ""
 DR -614
-Core3H board?W mask4 is inconsistent with the requested mask2
+Core3H board?W mask4 is not correct
 ""
 DR -615
 Core3H board?W decimation is not correct

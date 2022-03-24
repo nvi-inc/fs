@@ -346,11 +346,25 @@ void vsi_bitmask_2_dbbc3_core3h(ptr,lclc,board,masks)
     int masks;
 {
     if(4<=masks)
-        sprintf(ptr,"core3h=%1.1s,vsi_bitmask 0x%x 0x%x 0x%x 0x%x",board,
-                lclc->mask2.mask2,
-                lclc->mask1.mask1,
-                lclc->mask2.mask2,
-                lclc->mask1.mask1);
+        if(lclc->mask1.state.known && lclc->mask1.mask1 &&
+                lclc->mask2.state.known && lclc->mask2.mask2)
+            sprintf(ptr,"core3h=%1.1s,vsi_bitmask 0x%x 0x%x 0x%x 0x%x",board,
+                    lclc->mask2.mask2,
+                    lclc->mask1.mask1,
+                    lclc->mask2.mask2,
+                    lclc->mask1.mask1);
+        else if(lclc->mask1.state.known && lclc->mask1.mask1)
+            sprintf(ptr,"core3h=%1.1s,vsi_bitmask 0x%x 0x%x 0x%x 0x%x",board,
+                    lclc->mask1.mask1,
+                    lclc->mask1.mask1,
+                    lclc->mask1.mask1,
+                    lclc->mask1.mask1);
+        else
+            sprintf(ptr,"core3h=%1.1s,vsi_bitmask 0x%x 0x%x 0x%x 0x%x",board,
+                    lclc->mask2.mask2,
+                    lclc->mask2.mask2,
+                    lclc->mask2.mask2,
+                    lclc->mask2.mask2);
     else
         sprintf(ptr,"core3h=%1.1s,vsi_bitmask 0x%x",board,lclc->mask1.mask1);
 
@@ -372,83 +386,54 @@ void vsi_samplerate_2_dbbc3_core3h(ptr,lclc,board)
 
 }
 
-void dbbc3_vdif_frame_params(lclc)
+int dbbc3_vdif_frame_params(lclc)
     struct dbbc3_core3h_modex_cmd *lclc;
 {
     int payload;
-    int bits1=0;
-    int bits2=0;
     unsigned bitmask2=lclc->mask2.mask2;
     unsigned bitmask1=lclc->mask1.mask1;
-    int bits_p_chan = 0 ;
+    int bpc = 0 ;
     int channels = 0;
-    int bits_p_chan1 = 0 ;
-    int bits_p_chan2 = 0 ;
     int channels1 = 0;
     int channels2 = 0;
     int i;
+    int bits1[ ] ={0 , 0, 0, 0};
+    int bits2[ ] ={0 , 0, 0, 0};
 
-    for(i=0;i<32;i++) {
-        if(bitmask2 & 0x1U<<i)
-            bits2++;
-        if(bitmask1 & 0x1U<<i)
-            bits1++;
+    for(i=0;i<16;i++) {
+        bits1[bitmask1 >> i*2 & 0x3U]++;
+        bits2[bitmask2 >> i*2 & 0x3U]++;
     }
 
-    if(0xaaaaaaaU & bitmask1 && 0x5555555U & bitmask1 )
-        bits_p_chan1 = 2 ;
-    else if(bitmask1)
-        bits_p_chan1 = 1 ;
+    if((bits1[1] || bits1[2] || bits2[1] || bits2[2]) &&
+       (bits1[3] || bits2[3]))
+       return -308;
+    else if(bits1[3]||bits2[3])
+        bpc = 2;
+    else
+        bpc = 1;
 
-    if(0xaaaaaaaU & bitmask2 && 0x5555555U & bitmask2 )
-        bits_p_chan2 = 2 ;
-    else if(bitmask1)
-        bits_p_chan2 = 1 ;
+    channels1=bits1[1]+bits1[2]+bits1[3];
+    channels2=bits2[1]+bits2[2]+bits2[3];
 
-    if(bits_p_chan1 > 0)
-        channels1 = bits1/bits_p_chan1;
+    if(bitmask1 && bitmask2 &&
+       channels1 != channels2)
+       return -309;
+    else if(channels1)
+       channels=channels1;
+    else
+       channels=channels2;
 
-    if(bits_p_chan2 > 0)
-        channels2 = bits2/bits_p_chan2;
-
-    bits_p_chan = bits_p_chan1;
-    if(bits_p_chan2 > bits_p_chan)
-        bits_p_chan = bits_p_chan2;
-
-    switch (channels1) {
-        case 3:
-            channels1=4;
-            break;
-        case 5: case 6: case 7:
-            channels1=8;
-            break;
-        case 9: case 10: case 11: case 12: case 13: case 14: case 15:
-            channels1=16;
+    switch (channels) { /* trap zero in caller */
+        case 0: case 1: case 2: case 4: case 8: case 16:
             break;
         default:
+            return -310;
             break;
     }
-
-    switch (channels2) {
-        case 3:
-            channels2=4;
-            break;
-        case 5: case 6: case 7:
-            channels2=8;
-            break;
-        case 9: case 10: case 11: case 12: case 13: case 14: case 15:
-            channels2=16;
-            break;
-        default:
-            break;
-    }
-
-    channels = channels1;
-    if(channels2 > channels)
-        channels = channels2;
 
     m5state_init(&lclc->width.state);
-    lclc->width.width=bits_p_chan;
+    lclc->width.width=bpc;
     lclc->width.state.known=1;
 
     m5state_init(&lclc->channels.state);
@@ -459,6 +444,7 @@ void dbbc3_vdif_frame_params(lclc)
     lclc->payload.payload=8000;
     lclc->payload.state.known=1;
 
+    return 0;
 }
 
 void vdif_frame_2_dbbc3_core3h(ptr,lclc,board)
