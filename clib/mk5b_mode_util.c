@@ -509,7 +509,7 @@ unsigned long long *data_rate;
         *data_rate = lclc->samplerate.datarate;
     } else {
 
-        if((0xaaaaaaaaaaaaaaaaULL & bitmask) && (0x555555555555555ULL & bitmask))
+        if((0xaaaaaaaaaaaaaaaaULL & bitmask) && (0x5555555555555555ULL & bitmask))
             bits_p_chan = 2 ;
         else if(bitmask)
             bits_p_chan = 1 ;
