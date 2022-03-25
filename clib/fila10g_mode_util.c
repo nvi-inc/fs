@@ -245,8 +245,8 @@ struct fila10g_mode_cmd *lclc;
       bits++;
   }
 
-  if((0xaaaaaaaU & bitmask2 || 0xaaaaaaaU & bitmask1 ) &&
-     (0x5555555U & bitmask2 || 0x5555555U & bitmask1 ))
+  if((0xaaaaaaaaU & bitmask2 || 0xaaaaaaaaU & bitmask1 ) &&
+     (0x55555555U & bitmask2 || 0x55555555U & bitmask1 ))
     bits_p_chan = 2 ;
   else if(bitmask1 || bitmask2)
     bits_p_chan = 1 ;  
