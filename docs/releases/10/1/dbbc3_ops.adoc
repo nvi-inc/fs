@@ -21,10 +21,11 @@
 
 = FS 10.1 DBBC3 Operations Manual
 E. Himwich, J. Quick
-Version 2.9 - March 2022
+Version 3.0 - March 2022
 
 :experimental:
 :sectnums:
+:sectnumlevels: 5
 :toc:
 
 == Introduction
@@ -33,6 +34,11 @@ This document outlines the features and model for FS operations with
 the DBBC3. It also contains an appendix
 <<Configuring the FS for use with a DBBC3>> that gives the steps for
 customizing the FS for use with a DBBC3.
+
+Support for several items that utilize the multicast data, including
+the T~sys~ monitor display and multicast data logging, is built on a
+well designed tool for generating multicast and unpacking software
+developed, and used, by Dave Horsley (Hobart).
 
 == DBBC3 operations
 
@@ -49,14 +55,17 @@ on the details of the commands with `help=_command_`.
 
 +
 
-CAUTION: The syntax of this command is different than the DBBC2 version.
+CAUTION: The syntax of this command is different than the DBBC2
+version. Most significantly, the `_samples_` parameter has been moved
+to the end in the DBBC3 version. The meanings of the `_frequency_` and
+`_option_` parameters are changed somewhat.
 
 +
 
 WARNING: So far, operation has only been tested with polarity `2`. It
-is expected that other polarities will work. However, until they have
-been tested it won't be confirmed. This affects multicast data, the
-T~sys~ display, and use of _fivpt_ and _onoff_.
+is expected that other polarities will work but has nor yet been
+confirmed. This affects multicast data, the T~sys~ display, and use of
+_fivpt_ and _onoff_.
 
 * `core3h` -- Low-level communication with Core3H boards
 
@@ -74,6 +83,11 @@ features if you only use it as described in the
 * `fb_mode` -- Setting the FlexBuff recording mode -- An alias for `mk5c_mode`
 
 * `fivept` -- Pointing measurements
+
+* `if` -- This command was expanded to have ``_condition_``s for
+whether each possible DBBC3 BBC and IF is active. Usage examples can
+be found in the `iread` and `bread` procedures in the default
+_/usr2/fs/st.default/d3fbstation.prc_ procedure library.
 
 * `if__x__` -- `_x_` from `a` to `h` -- IF CoMo setup and monitoring
 
@@ -145,7 +159,7 @@ The following command changes the thread number on _eth0_ to `3`
 (`196608/65536`) and _eth1_ to `4`.
 
 ....
-dbbc3=core3h=1,regupdate vdif_header 3 196608 0x03FF0000
+core3h=1,regupdate vdif_header 3 196608 0x03FF0000
 ....
 
 === Setting the experiment mode configuration
@@ -319,6 +333,19 @@ for example use:
 
   setup01
 
+[NOTE]
+====
+
+If you only want to check the Core3H configuration, you can use the
+corresponding Core3H configuration procedure instead. For example:
+
+    core3h01
+
+This is not recommended for checking the mode, since it only checks
+the Core3H boards.
+
+====
+
 Verify that no errors are reported. If there are errors, the data may
 not be recorded properly. This is how the setup is checked within a
 schedule. This also checks that the personality and firmware version
@@ -330,17 +357,6 @@ which only lists errors, it should be easier to identify them. If you
 don't already have that window setup (it is more generally useful
 anyway), directions are include in the
 <<Configuring the FS for use with a DBBC3>> appendix below.
-
-[NOTE]
-====
-
-If you only want to check the Core3H configuration, you can use the
-corresponding Core3H configuration procedure instead. For example:
-
-    core3h01
-
-====
-
 
 === Control files
 
@@ -397,10 +413,17 @@ use of a DBBC3 will be disabled. An example of the contents is:
 *  192.168.1.2 4000 800 224.0.0.19 25000 eno2
 ....
 
-=== Tsys monitor display
+==== skedf.ctl
 
-Support for the T~sys~ monitor display is built on multicast capture
-and unpacking software developed by Dave Horsley (Hobart).
+The _skedf.ctl_ file now includes new options and expansion of some
+options for DBBC3 support. The are listed in the <<drudg support>>
+section. More discussion of the two new DBBC3 related options can be
+found in the <<Minimizing the use of setup procedures>> and the
+<<Thread procedure>> subsections below. The details of the syntax for
+all the options is available in the
+_/usr2/fs/st.defaul/control/skedf.ctl_ example file.
+
+=== Tsys monitor display
 
 The T~sys~ monitor display is organized per IF and updates at a 1 Hz
 rate. The displayed information includes: LO, time, VDIF epoch, time
@@ -600,9 +623,6 @@ in the registration of the FS time should be small.
 
 === Multicast logging
 
-Support for multicast logging is built on multicast capture and unpacking
-software developed by Dave Horsley (Hobart).
-
 Logging of DBBC3 multi-cast recording is controlled by the `tpicd`
 command.  When logging is enabled, for each multicast message received
 (nominal 1 Hz rate), the following information, shown with their log
@@ -700,7 +720,8 @@ system.
 
 === Thread procedure
 
-NOTE: This applies to any system using a Mark 5C or FlexBuff recorder.
+NOTE: This applies to any system using a Mark 5C or FlexBuff recorder,
+not just one with a DBBC3.
 
 When a Mark 5C or FlexBuff recorder is in use, _drudg_ can optionally
 insert a `thread__suffix__` procedure in each setup procedure (where
@@ -755,7 +776,8 @@ geodesy schedules. Please see ``**fesh -h**`` for more information.
 
 === mk5c_config/fb_config procedure
 
-NOTE: This applies to any system using a Mark 5C or FlexBuff recorder.
+NOTE: This applies to any system using a Mark 5C or FlexBuff recorder,
+not just one with a DBBC3..
 
 Each mode SNAP setup procedure produced by _drudg_ for Mark 5C and
 FlexBuff recorders includes a call to a `mk5c_config`/`fb_config` SNAP
@@ -921,8 +943,9 @@ the station.
 * The appropriate new <<DBBC3 related commands>> are used in setup
 procedures.
 
-* The new _skedf.ctl_ options for <<Minimizing the use of setup procedures>>
-and the <<Thread procedure>>.
+* New _skedf.ctl_ options for
+<<Minimizing the use of setup procedures>> and the
+<<Thread procedure>>.
 
 * The following previously DBBC2 specific _skedf.ctl_ options that can
 also now be used for DBBC3s:
