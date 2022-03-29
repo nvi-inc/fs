@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021 NVI, Inc.
+* Copyright (c) 2020-2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -962,7 +962,7 @@ C               SOURCE=name,ra,dec,epoch
         endif !celestial/satellite
 
         if(iobs_this_stat .eq. 0) then
-          if(km6disk) then
+          if(km6disk.or..not.krec) then
             continue
           else if(kk5rec(1)) then 
             write(lufile,'(a)') 'ready_k5'

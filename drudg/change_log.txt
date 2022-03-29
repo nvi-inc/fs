@@ -1,4 +1,5 @@
 This file contains a summary of changes made and why.
+2022-03-29 Don't include ready procedure for recorder=none, by WEH: snap.f
 2022-02-10 fdrudg.f. Handling of equip_override.  If ON will use stuff from skedf.ctl. 
            If OFF will use schedule file. If no information in schedule, then will use skedf.ctl.
 2022-02-10 stinp.f, vstinp.f. AND newroutine store_rack_and_recorder.f. make making of reading rack and recorder consistent
