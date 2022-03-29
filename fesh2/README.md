@@ -60,11 +60,22 @@ should do the trick. You may also need these:
 
 ### Fesh2 installation
 Installation should be carried out under the
-`prog` account. Fesh2 is distributed as part of the Field System and can be found in 
-   '/usr2/fs/fesh2'. Run the following:
+`prog` account. You may wish to install fesh2 within a python virtual 
+environment, but regardless, the installation commands are the same:
+
+Fesh2 is distributed as part of the Field System and can be found in 
+   '/usr2/fs/fesh2'. There are two installation options. 
+#### Installing from the distributed code:
+Run the following:
    ```
    cd /usr2/fs/fesh2
    python3 setup.py install
+   ```
+#### Installing with pip:
+Run the following:
+   ```
+   cd /usr2/fs/fesh2
+   pip3 install --upgrade  dist/fesh2-2.3.0.tar.gz
    ```
 
 You will then need to edit the **fesh2** configuration file for your station
