@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Beta1 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 4.3 - March 2022
+Version 4.4 - April 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -294,6 +294,16 @@ server, you should remove it. It is no longer needed and if it is used
 on an `x` line in the file, it will prevent the FS from starting
 successfully. It is also not needed when the display server is in use.
 
+. Make sure all lines with _xterm_ in _stpgm.ctl_ use `x` as the
+second field.
+
++
+
+For use without the display server, this will prevent the _xterm_ from
+being aborted by a kbd:[Control+C] and causing the FS to abort.  When
+used with the display server, this will make it part of the clients,
+which is normally what is needed.
+
 . Create the _dbbc3.ctl_ control file.
 
 +
@@ -555,16 +565,20 @@ of the changes since that release.
 There are separate sub-sections with summaries of changes in the FS
 and _drudg_.
 
-Each change item is listed as a summary line with clickable _toggle_:
+Each change is listed as a numbered title, then usually a few summary
+sentences, followed by a _toggle_:
 
 [%collapsible]
 ====
 Details are shown here.
 ====
 
-that can be clicked on to toggle showing (or not showing) the details.
+that can be clicked to toggle showing (or not showing) the details.
 In this way, you can view the summary as a list and only reveal the
-details of items that interest you.
+details of items that interest you. The summary sentences are omitted
+if they would not add any new information, usually because it is
+already covered in the numbered title item and/or the details are very
+brief.
 
 Clickable links such as
 https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
@@ -579,14 +593,16 @@ from within the FS _git_ repo directory, usually _/usr2/fs-git_.
 
 +
 
-[%collapsible]
-====
-
 Before this release, the FS only provided limited functionality for
 DBBC3 racks, as described in the <<../0/dbbc3.adoc#,FS 10.0 DBBC3
 support>> document for that release, _10.0.0_. More complete support is
 provided now. The updated support is described in the
 <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> and includes:
+
++
+
+[%collapsible]
+====
 
 * A separate _dbbc3.ctl_ control file
 
@@ -632,6 +648,13 @@ of DBBC3 functionality; Uwe Bach (Effelsberg) and Marjolein Verkouter
 ====
 
 . Improve _onoff_
+
++
+
+_onoff_ output for the operator was improved so that it is easier to
+see what _onoff_ is doing. The order of locking the gains relative to
+arriving on source was corrected. Errors reported by _antcn_ are no
+longer ignored.
 
 +
 [%collapsible]
@@ -716,6 +739,11 @@ variables.
 adding extra comments when updating .rxg files>>
 
 +
+
+Longstanding bugs in _gnplt_ that caused it to add extra comments when
+updating _.rxg_ files were corrected.
+
++
 [%collapsible]
 ====
 
@@ -764,6 +792,11 @@ making suggestions for the fixes, and testing them.
 https://github.com/nvi-inc/fs/issues/114[#114])
 
 +
+
+An environment variable was added to adjust the threshold for a log
+file size warning.
+
++
 [%collapsible]
 ====
 
@@ -787,8 +820,26 @@ Thanks to Kiah Imai (KPGO) for suggesting this.
 . Improve _plog_
 
 +
+
+_plog_ now also supports _bzip2_ compression, which is used  by
+default for logs with multicast data. It no longer refuses to compress
+multicast logs if they are only open to programs other than the FS.
+Both multicast and reduced logs are now uploaded by default. The
+`NETRC_DIR` environment is now supported for the `BKG` data center.
+
++
 [%collapsible]
 ====
+
+.. Add use of _bzip2_ compression to _plog_.
+
++
+
+_plog_ will now use _bzip2_ as the default program for compressing
+___full.log__ files to send to the data centers. It is possible to use
+__gzip__ instead by setting the environment variable
+`PLOG_COMPRESSED_EXT` to `gz` or using the `-g` command line option.
+Please use `*plog{nbsp}-h*` for more information.
 
 .. Fix _plog_ to only refuse to reduce a log with multicast data if it
 is the active log in the FS.
@@ -819,18 +870,6 @@ to close the log before pushing it.
 
 Thanks to Katie Pazamickis and Jay Redmond (both at GGAO) for
 reporting this.
-
-+
-
-.. Add use of _bzip2_ compression to _plog_.
-
-+
-
-_plog_ will now use _bzip2_ as the default program for compressing
-___full.log__ files to send to the data centers. It is possible to use
-__gzip__ instead by setting the environment variable
-`PLOG_COMPRESSED_EXT` to `gz` or using the `-g` command line option.
-Please use `*plog{nbsp}-h*` for more information.
 
 .. Upload both reduced and compress logs when multicast is present as
 the default.
@@ -871,6 +910,13 @@ Thanks to Kiah Imai (KPGO) for reporting this and testing the fix.
 ====
 
 . Improve _fesh_
+
++
+
+Options were added to print the summary to the printer from _drudg_
+and to skip downloading the schedule. Station codes are now case
+insensitive. New environment variables and options were added to
+handle the new _drudg_ prompts that can be selected in _skedf.ctl_.
 
 +
 [%collapsible]
@@ -940,6 +986,11 @@ of the new variables, please see the `*fesh{nbsp}-h*` output.
 https://github.com/nvi-inc/fs/issues/118[#118])
 
 +
+
+_msg_ now detects changes in the log file name, simplifying its use
+when a session is started while it is running.
+
++
 [%collapsible]
 ====
 
@@ -962,10 +1013,16 @@ feedback on the changes, and testing the fix.
 . Add `setup_proc` command
 
 +
+
+The `setup_proc` command can be used to minimize the number of times
+that setup procedures are executed during schedules.
+
++
 [%collapsible]
 ====
 
-This command is used to identify the setup procedures in the _.snp_ files, e.g.:
+This command is used to identify the setup procedures in the _.snp_
+files, e.g.:
 
   setup_proc=setup01
 
@@ -981,7 +1038,7 @@ Use of this command in _drudg_ generated _.snp_ files is controlled
 with the `use_setup_proc` option in _skedf.ctl_. The default is to not
 use it, which is the same as the previous behaviour.
 
-WARNING: The previous behavior of re-executing a setup procedure for
+CAUTION: The previous behavior of re-executing a setup procedure for
 each recording can provide some "`self-healing`" of the equipment
 setup if there errors occurred during the previous setup or if the
 equipment malfunctioned. The use of this command will eliminate this
@@ -993,9 +1050,13 @@ See `*help=setup_proc*` for more information.
 
 ====
 
-. Add `mk5init` command to reinitialize the Mark 5 or Flexbuff
-connection without restarting the FS (closing
-https://github.com/nvi-inc/fs/issues/164[#164])
+. Add `mk5init` command
+
++
+
+The `mk5init` command, in principle, allows changing which Mark 5 or
+FlexBuff recorder is being used, without restarting the FS (closing
+https://github.com/nvi-inc/fs/issues/164[#164]).
 
 +
 [%collapsible]
@@ -1020,6 +1081,11 @@ Thanks to Jun Yang (Onsala) for suggesting this.
 ====
 
 . Expand setup of Mark 5C and Flexbuff recorders
+
++
+
+Additional setup is provided for Mark 5C and FlexBuff recorders, as
+well as a way to provide local tuning of the setup.
 
 +
 [%collapsible]
@@ -1047,8 +1113,14 @@ what the correct settings should be.
 ====
 
 . <<fbsyns,FlexBuff synonyms>>:[[fbsyns]] Add FlexBuff synonyms for
-all Mark 5 commands except `mk5b_mode`, which is not used with a
-FlexBuff recorder
+all Mark 5 commands except `mk5b_mode`
+
++
+
+These synonyms are intended to allow matching command names to the
+type of recorder. There is no change in functionality. The only Mark 5
+command that does not have a FlexBuff synonym is `mk5b_mode`, which is
+not used with  FlexBuff recorders.
 
 +
 [%collapsible]
@@ -1092,6 +1164,10 @@ procedure files and log entries clearer.
 . Split `equip` log header line into three parts
 
 +
+
+The `equip` log header had grown too long. It has been split up.
+
++
 [%collapsible]
 ====
 
@@ -1108,6 +1184,11 @@ is also used for Mark 5B recorders.
 ====
 
 . Add features to _rdbemsg_
+
++
+
+Options were added to control the font size and window placement. A
+new control file keyword was added to support older MCI nodes.
 
 +
 [%collapsible]
@@ -1161,8 +1242,13 @@ have any white space on its (non-comment) line.
 
 ====
 
-. Show incorrect times DOT time in inverse video for the RDBE monitor
+. Show incorrect DOT times in inverse video for the RDBE monitor
 display (_monit6_) window.
+
++
+
+Inverse video was added to help identify when the RDBEs are not all
+using the same time.
 
 +
 [%collapsible]
@@ -1185,6 +1271,10 @@ with the time intentionally set wrong.
 (closing https://github.com/nvi-inc/fs/issues/167[#167])
 
 +
+
+This allows suppressing of multicast error messages for R2DBEs.
+
++
 [%collapsible]
 ====
 
@@ -1199,8 +1289,13 @@ eliminate these errors entirely.
 
 ====
 
-. Fix issues with zooming, large numbers of detectors, and debug
-output in _gnplt_ and _gndat_
+. Fix additional issues in _gnplt_ and _gndat_
+
+
++
+
+In _gnplt_, fix issues with zooming, large numbers of detectors. In
+gndat, remove debug output.
 
 +
 [%collapsible]
@@ -1289,6 +1384,10 @@ which is normally the only way it is run.
 racks (closing https://github.com/nvi-inc/fs/issues/157[#157])
 
 +
+
+The T~sys~ values being reported were slightly too small.
+
++
 [%collapsible]
 ====
 
@@ -1329,6 +1428,10 @@ available to verify the fixes.
 https://github.com/nvi-inc/fs/issues/131[#131])
 
 +
+
+The T~sys~ value being reported was slightly too small.
+
++
 [%collapsible]
 ====
 
@@ -1360,6 +1463,13 @@ verify the fix.
 ====
 
 . Improve refraction calculations
+
++
+
+The incorrect `refrw()` routine was renamed to help prevent its use.
+New refraction algorithms  were added. A small improvement was made in
+_onoff_'s refraction calculation. References for the `refrwn()` (in C;
+in FORTRAN `refr()`) routine were located.
 
 +
 [%collapsible]
@@ -1413,6 +1523,10 @@ Observed and Computed Values of Deep Space Network Data Types for
 Navigation,`" Section 9.3.2.2.1 (pp. 295-297), John Wiley, 2003
 (https://descanso.jpl.nasa.gov/monograph/series2/Descanso2_S09.pdf).
 
++
+
+The Lanyi algorithm is expected to be the best of ones in _poclb.a_.
+
 .. Change `onoff` and `holog` to use `refrwn()` in place of
 (incorrect) `refrw()`.
 
@@ -1425,14 +1539,15 @@ are used for the meteorological parameters, which limits the accuracy.
 For `fivept`, the FORTRAN `refr()` function is used, which also has
 fixed meteorological parameters.
 
-.. Locate references for `refrwn()`
+.. Locate references for `refrwn()` and `refr()`
 
 +
 
-The older `refrwn()` is apparently from W. R. Iliff and J.  M. Holt,
-"`Use of Surface Refractivity in the Empirical Prediction of Total
-Atmosphere Refractions,`" J. Research NBS 67D (Radio Prop.), No.  1,
-pp. 31-35, January-February, 1963
+The older `refrwn()` \(C) and `refr()` (FORTRAN) routines are
+apparently derived from W.  R. Iliff and J.  M. Holt, "`Use of Surface
+Refractivity in the Empirical Prediction of Total Atmosphere
+Refractions,`" J.  Research NBS 67D (Radio Prop.), No.  1, pp. 31-35,
+January-February, 1963
 (https://www.semanticscholar.org/paper/Use-of-surface-refractivity-in-the-empirical-of-Iliff-Holt/1ddcd0e4e672dd890198539361c5237c033001f7)
 and C. A. Clark, "`Haystack Pointing System: Radar Coordinate
 Correction,`" MIT LL Technical Note 1966-56, 24 October 1966
@@ -1448,15 +1563,19 @@ references.
 . Increase buffer size for recovering a deleted log
 
 +
+
+This speeds-up recovery of a deleted log that the FS is still using.
+
++
 [%collapsible]
 ====
 
 If there is no file with the name of the current log (it has been
 deleted or renamed) when a user command would close it, the FS will
 attempt to recover the file and give it its original name. The buffer
-used to recopy the file was increased to 2 Mib (512 sectors) so it is
-faster, particularly for very large experiment logs with multicast
-data.
+used to recopy the file was increased to 2 Mib (i.e., 512 sectors) so
+it is faster, particularly for very large experiment logs with
+multicast data.
 
 IMPORTANT: The recovery will not work if in the meantime a file has
 been created with the same name. The FS will think that is the log and
@@ -1474,12 +1593,16 @@ _unlongify_ before _10.0.0-beta1_, but hadn't been changed back.
 . Add test utilities: _precess_, _move_, and _refrac_
 
 +
+
+These utilities are available in sub-directories in _misc/_ with the
+names of the programs. They are intended for testing of, and
+experimentation with, precession and refraction routines. The
+_move_ program can be used to find the azimuth and elevation of a
+source for a particular time and station location.
+
++
 [%collapsible]
 ====
-
-This utilities are available in sub-directories in _misc/_ with the
-names of the programs. They are intended for testing and
-experimentation.
 
 .. The _precess_ program can be used to precess mean coordinates
 between epochs B1950 and J2000. Two options approaches are available:
@@ -1528,6 +1651,14 @@ modified to test other situations.
 display server is not in use and other cleanup of signal handling
 
 +
+
+These changes restore the previous non-display server handling of
+kbd:[Control+C] before version _10.0.0_, but also make an improvement
+to prevent __xterm__s started by the FS, such as for _oprin_, from
+being aborted by a kbd:[Control+C] and causing the FS to abort. This
+has no impact on display server use.
+
++
 [%collapsible]
 ====
 
@@ -1570,8 +1701,9 @@ the FS from starting successfully when the display server is not in
 use and is not needed when the server is in use.
 
 With these changes, it should no longer be possible to kill the FS
-with a kbd:[Control+C], even when the display server is not being
-used.
+with a kbd:[Control+C], even when the display server is not being used
+as long as you use `x` in any lines in your _stpgm.ctl_ that use
+_xterm_.
 
 WARNING: An FS _xterm_ window can still be terminated abnormally using
 the decorations for the window. When the FS is not being running with
@@ -1589,6 +1721,11 @@ terminated _abnormally_ by using the _kill_ command to send a `SIGINT`
 
 . Record _fsserver_ error messages (closing
 https://github.com/nvi-inc/fs/issues/105[#105])
+
++
+
+A log file is used to record any _fsserver_ errors that may be
+reported. The log file is deleted if the server exits normally.
 
 +
 [%collapsible]
@@ -1621,6 +1758,10 @@ the FS was last started before the crash.
 https://github.com/nvi-inc/fs/issues/121[#121])
 
 +
+
+The comments explain the format of the source records in the file.
+
++
 [%collapsible]
 ====
 
@@ -1638,6 +1779,10 @@ contributing some of the information in the comments.
 
 . Improve error messages when reading _flux.ctl_ (closing
 https://github.com/nvi-inc/fs/issues/124[#124])
+
++
+
+The new messages identify the errors more clearly.
 
 +
 [%collapsible]
@@ -1659,6 +1804,10 @@ Thanks to Stuart Weston (Warkworth) for reporting this.
 ====
 
 . Improve error messages when reading _.rxg_ files
+
++
+
+The new messages identify the errors more clearly.
 
 +
 [%collapsible]
@@ -1749,6 +1898,14 @@ the _.rxg_ file name.
 ====
 
 . Improve web documents
+
++
+
+The font conventions were improved. The wording was improved for how
+to determine X-window geometry values and for using copy-and-paste to
+simplify installation steps. The organization of the change items in
+the update documents, starting with this one, was improved. More
+explanation of setting runtime environment variables was provided.
 
 +
 [%collapsible]
@@ -1878,6 +2035,13 @@ server.
 . Update example `station` procedure libraries
 
 +
+
+Missing example procedure library libraries for DBBC2/Mark 5C,
+DBBC2/FlexBuff were added. A new exmple was added for DBBC3/Flexbuff.
+A stand-alone example `check_ntp` procedure was added and included in
+the example libraries for the most common systems.
+
++
 [%collapsible]
 ====
 
@@ -1915,6 +2079,11 @@ to identify which files are for which combinations.
 ====
 
 . Add other miscellaneous fixes
+
++
+
+Several small issues, most unlikely to affect typical use of the FS,
+were fixed.
 
 +
 [%collapsible]
@@ -1955,12 +2124,13 @@ unreasonable.
 +
 
 Since T~sys~ calculated by the FS is only a station diagnostic, this
-had limited impact. Before the current release with DBBC3's, T~sys~ could
-effectively only be calculated in `fivept` and `onoff` and to spot
-check T~sys~ outside of schedule execution. Pointing offsets (from
-`fivept`) and SEFDs/T~cal~(J)s (from `onoff`) were not affected. The
-T~cal~(K) values were probably adequate for verifying consistency of
-station performance with T~sys~ spot checks, if they were used at all.
+had limited impact. Before the current release, T~sys~ for DBBC3's,
+could effectively only be calculated in `fivept` and `onoff` and to
+spot check T~sys~ outside of schedule execution. Pointing offsets
+(from `fivept`) and SEFDs/T~cal~(J)s (from `onoff`) were not affected.
+The T~cal~(K) values were probably adequate for verifying consistency
+of station performance with T~sys~ spot checks, if they were used at
+all.
 
 +
 
@@ -2230,14 +2400,16 @@ _drudg_ opening message date is 2022-02-10.
 . Add support for DBBC3 DDC racks
 
 +
-[%collapsible]
-====
 
 _drudg_ will handle VEX schedules, _.vex_, with up to 256 channels
 (128 BBCs) and eight IFs. It will handle Mark IV schedules, _.skd_,
 with up to 32 channels (16 BBCs, `001`-`016`) and up to two IFs (`a`
-and `b`). In all cases, the number of channels per IF must be a power
-of two.
+and `b`). In all cases, the number of channels per Core3H board output
+must be a power of two.
+
++
+[%collapsible]
+====
 
 [NOTE]
 =====
@@ -2273,6 +2445,11 @@ execution due to the setup procedure.
 generated procedures when the selected recorder is FlexBuff
 
 +
+
+This change was made to agree with the complimentary change in the FS,
+as described in the <<fbsyns,FlexBuff synonyms>> FS change above.
+
++
 [%collapsible]
 ====
 
@@ -2304,7 +2481,6 @@ typically the contents of these procedures are  different.
 
 . Add `mk5c_config` or `fb_config` procedure calls to setup
 procedures for Mark 5C and Flexbuff recorders, respectively
-
 
 +
 [%collapsible]
@@ -2359,6 +2535,12 @@ cleaned-up.
 ====
 
 . Changes to _skedf.ctl_ options
+
++
+
+Three new options were added. The `equipment` and `equipment_override`
+options were fixed. DBBC2 IF related options were generalized to allow
+eight IFs for use with DBBC3s.
 
 +
 [%collapsible]
@@ -2487,6 +2669,11 @@ Values for up to eight IF inputs can be specified for DBBC3s.
 ====
 
 . Add other miscellaneous enhancements:
+
++
+
+Several small changes, most unlikely to affect typical use of _drudg_,
+were made.
 
 +
 [%collapsible]
