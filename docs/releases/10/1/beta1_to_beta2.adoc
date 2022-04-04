@@ -1,0 +1,256 @@
+//
+// Copyright (c) 2020-2022 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+:doctype: book
+
+= FS 10.1.0-beta1 to FS 10.1.0-beta2 Update Notes
+E. Himwich, J. Quick, J. Gipson, D. Horsley
+Version 4.5 - April 2022
+
+//:hide-uri-scheme:
+:sectnums:
+:stem: latexmath
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+:toclevels: 4
+
+== Introduction
+
+This document covers the steps needed to update from FS _10.0.0-beta1_
+to _10.1.0-beta2_ and the changes since _10.1.0-beta1_. This update is
+not an operational release. It is intended for _testing_ by all
+stations using FS _10.1.0-beta1_. Installing this version as an update
+is much simpler than the update to _10.1.0-beta1_, see the
+<<Upgrading from 10.1.0-beta1>> section below.
+
+The changes in the FS and _drudg_ for _10.1.0-beta2_ are covered in the
+<<Changes since 10.1.0-beta1>> section below.
+
+== Upgrading from 10.1.0-beta1
+
+You must have already installed _10.1.0-beta1_ according to the
+<<10.1.0-beta1.adoc#,FS 10.1.0-beta1 Update Notes>> document before
+installing this update.
+
+=== Login as root
+
+The next step requires having root privileges.
+
+=== Fix file permissions
+
+Having the wrong ownership and/or permissions on the operational files
+(procedure libraries, control files, schedules, and logs) can cause
+errors during FS operations. For a full discussion, please refer to
+the
+<<../../misc/install_reference.adoc#_set_operations_file_permissions,Set
+operations file permissions>> section of the
+<<../../misc/install_reference.adoc#,Installation Reference>>
+document.  For stations with the standard configuration (all the
+operational files are owned by user __oper__ in group __rtx__, with
+permissions `ug+rw,o+r,o-w`), the following command will enforce this
+(note that the __execute__/__search__ bits are not changed):
+
+       /usr2/fs/misc/fix_perm
+
+Answer `*y*` to the prompt if you wish to proceed. It is recommended for most stations.
+
+=== Login as prog
+
+=== Fetch FS 10.1.0-beta2
+
+There are two options given below:
+
+* If you are using an FSL9 or FSL10 system:
+
+  cd /usr2/fs-git
+  git fetch
+  git checkout -q 10.1.0-beta2
+
+* If you are unable to use _git_:
+
+. Please follow the steps, through the step that includes the option
+to set the link, in the
+<<../../misc/release_model.adoc#_installing_from_an_archive,Installing
+from an archive>> sub-section in the
+<<../../misc/release_model.adoc#,Release Model>> document. Use
+__10.1.0-beta2__ as the value for __tag__. Be sure to set the link for
+__/usr2/fs__.
+
+=== Login as prog
+
+IMPORTANT: The FS must be compiled as _prog_.
+
+If you are already logged in as _prog_, no change is needed. This step
+is included to make sure you switch to _prog_ in case you installed
+from an archive in the previous step.
+
+=== Compile the FS
+
+  cd /usr2/fs
+  make rmdoto rmexe all >& /dev/null
+  make -s
+
+No output from the last command indicates a successful _make_.
+
+=== Login as oper
+
+Except as indicated, the actions in the next step should be performed
+as _oper_.
+
+=== Local customizations
+
+. Make sure all lines with _xterm_ in _stpgm.ctl_ use `x` as the
+second field.
+
++
+
+For use without the display server, this will prevent the _xterm_ from
+being aborted by a kbd:[Control+C] and causing the FS to abort.  When
+used with the display server, this will make it part of the clients,
+which is normally what is needed.
+
+=== Review changes
+
+Please see the <<Changes since 10.1.0-beta1>> section below for the
+details of the changes since that release.
+
+== Changes since 10.1.0-beta1
+
+There are separate sub-sections with summaries of changes in the FS
+and _drudg_.
+
+Each change is listed as a numbered title, then usually a few summary
+sentences, followed by a _toggle_:
+
+[%collapsible]
+====
+Details are shown here.
+====
+
+that can be clicked to toggle showing (or not showing) the details.
+In this way, you can view the summary as a list and only reveal the
+details of items that interest you. The summary sentences and/or the
+details toggle may be omitted if they would not add any new
+information, usually because it is already covered in the numbered
+title item and/or the details are very brief.
+
+Clickable links such as
+https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
+reported at https://github.com/nvi-inc/fs/issues.
+
+A detailed list of changes can be found using the `git log` command
+from within the FS _git_ repo directory, usually _/usr2/fs-git_.
+
+=== FS changes
+
+. Turn data sending off before modifying an RDBE's time in _fmset_.
+
++
+
+The _fmset_ program will now make sure that transmission of data is
+turned off before updating the time. It will be re-enabled when
+_fmset_ exits.
+
++
+
+IMPORTANT: All RDBE's being recorded must have the same VDIF epoch.
+_fmset_ is the safest way to change the VDIF epoch of an RDBE.
+
++
+[%collapsible]
+====
+
+Previously for RDBEs, the operator needed to turn data transmission
+off manually (`rdbe=data_send=off`) before using the sync (`s`)
+command in _fmset_. Then after leaving _fmset_, re-enable data
+transmission (`rdbe=data_send=on`). Using the `s` command was a rare
+event. As a result, handling this in a more automated way had not yet
+been implemented. Automating this became more important because we
+have received new information that data transmission must be off
+before making any change to an RDBE's time, including the VDIF epoch.
+
+To streamline this process, _fmset_ has been modified to turn off data
+transmission automatically for any RDBE that had data transmission on
+before its time is changed. When _fmset_ is exited, it will re-enable
+data transmission for all RDBEs for which it had turned off the
+transmission.
+
+[IMPORTANT]
+=====
+
+The VDIF epochs of all the RDBEs being recorded must agree to
+successfully record with a Mark 6 recorder. They can get out of sync
+of a subset of the RDBEs is rebooted. In order to simplify dealing
+with an RDBE needing to be rebooted during an experiment, it is
+recommended that the VDIF epochs be reset as soon as convenient (the
+first gap in observing) after an epoch change, which occurs at the
+start of January 1 and July 1 UT.
+
+A possible method for resetting the epoch is to reboot. However,
+rebooting creates a risk of a bad FPGA load, which in some cases,
+cannot be detected until the data reaches the correlator. Using
+_fmset_ to update the epoch is safer since it does not involve an FPGA
+reload.
+
+If an RDBE has to be rebooted (sometimes it is unavoidable) after the
+epoch change and _before_ there was a chance to update the epoch for
+all the RDBE, the rebooted RDBE's VDIF epoch will not agree with the
+other RDBEs. The disagreeing epoch will be shown in inverse video in
+the RDBE monitor display (_monit6_). _fmset_ can be used to decrement
+the epoch of the rebooted RDBE so that it agrees with others.  It is
+not an error to have the RDBEs using a previous epoch, they just must
+all use the same one.
+
+=====
+
+====
+
+. Fix `filag_mode`, `mk5c_mode`, and `fb_mode` so that the upper four
+mask bits are considered when determining if data is one-bit or
+two-bit.
+
++
+
+This was probably benign since it was unlikely that two channels
+represented by the top four mask bits were the only ones with two-bit
+sampling. This would only have affected systems with a FiLa10G.
+
+. Corrections for errors/oversights introduced in _10.1.0-beta1_:
+
+.. Fixed `core3h_mode` (no parameters) to report errors for any board
+and stop instead of continuing on to the next.
+
+.. Correct a bug in _setcl_ that could have affected its use with
+DBBC3, but apparently had never caused an issue.
+
+.. Minor clean-up of white-space in example _dbbc3.ctl_ file.
+
+.. Add missing `bbc_gain=all,agc` in example _d3fbstation.prc_ file.
+
+=== drudg changes
+
+_drudg_ opening message date is `2022-03-29`.
+
+. Corrections for errors/oversights introduced in _10.1.0-beta1_:
+
+.. Remove `ready` procedure from _.snp_ when recorder `none` is
+selected.
