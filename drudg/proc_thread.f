@@ -38,7 +38,7 @@
         endif
         write(lu_outfile,'(a)') "mk5=datastream=reset"
       endif
-      write(lu_outfile,'(a)') "endef"
+      write(lu_outfile,'(a)') "enddef"
       end 
    
 
