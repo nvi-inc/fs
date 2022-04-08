@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -37,11 +37,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "../include/params.h" /* FS parameters            */
 #include "../include/fs_types.h" /* FS header files        */
 #include "../include/fscom.h"  /* FS shared mem. structure */
 #include "../include/shm_addr.h" /* FS shared mem. pointer */
+
+#include "erchk.h"
 
 #define MAX_LEN 256+1
 
@@ -53,7 +56,7 @@ void setup_ids();
 void skd_wait();
 void get_err();
 void display_it();
-
+int read_ctl();
 
 // I always forget which end of the pipe is which
 #define READ_END 0
@@ -125,12 +128,77 @@ int read_skd() {
   }
 }
 
-main()
+int main()
 {
   int i,irow,icol,fd;
-  char chk_message[MAX_LEN];
+  char control_file[80];
+  char working[MAX_LEN];
   size_t n;
   char *buffer = NULL;
+  struct errlist *start;
+  struct errlist *item;
+  int iret=0;
+  char *ptr, *code, *num, *prefix, *attrib;
+  int match;
+
+  strcpy(control_file,FS_ROOT);
+  strcat(control_file,"/control/erchk.ctl");
+
+  FILE *fp = fopen(control_file, "r");
+  if(fp == NULL) {
+      fprintf(stderr,"Unable to open '%s': %s\n",control_file,strerror(errno));
+      if(errno==ENOENT) {
+          fprintf(stderr,"  You can install the default example file with:\n");
+          fprintf(stderr,"    cp /usr2/fs/st.default/control/erchk.ctl /usr2/control\n");
+      }
+      fprintf(stderr,"  Press <return> (or close this window) to exit and try again.\n");
+      getchar();
+      exit(-1);
+  }
+
+  iret=read_ctl(fp,&start);
+  if(EOF==fclose(fp)) {
+    perror("Closing file");
+    fprintf(stderr,"  Internal program error at line %d of control file, send error to developer.\n",iret);
+    fprintf(stderr,"  Was trying to close '%s'\n",control_file);
+    fprintf(stderr,"  Press <return> (or close this window) to exit.\n");
+    getchar();
+    exit(-1);
+  }
+
+  //  int count=0;
+  //  item=start;
+  //  while(NULL != item) {
+  //    count++;
+  //    printf(" count %d",count);
+  //    if(item->code!=NULL)
+  //      printf(" code '%s'",item->code);
+  //    if(item->num!=NULL)
+  //      printf(" num  '%s'",item->num);
+  //    if(item->attrib!=NULL)
+  //      printf(" attrib  '%s'",item->attrib);
+  //    if(item->prefix!=NULL)
+  //      printf(" prefix  '%s'",item->prefix);
+  //    printf("\n");
+  //    item=item->next;
+  //  }
+
+  if(iret<0) {
+    fprintf(stderr,"  Correct the errors reported above and try again.\n");
+    fprintf(stderr,"  Was trying to parse '%s'\n",control_file);
+    fprintf(stderr,"  See '/usr2/fs/st.default/control/erchk.ctl' for the format.\n");
+    fprintf(stderr,"  You can run 'erchk' by itself in a window to debug these errors.\n");
+    fprintf(stderr,"  When you get no errors, use Control-C to quit.\n");
+    fprintf(stderr,"  For now, press <return> (or close this window) to exit and try again.\n");
+    getchar();
+    exit(-1);
+  } else if (iret>0) {
+    fprintf(stderr,"  Internal program error at line %d of control file, send error to developer.\n",iret);
+    fprintf(stderr,"  Was trying to read '%s'\n",control_file);
+    fprintf(stderr,"  Press <return> (or close this window) to exit.\n");
+    getchar();
+    exit(-1);
+  }
 
   if(getenv("FS_DISPLAY_SERVER") != NULL)
     fd = read_ssub();
@@ -144,30 +212,37 @@ main()
   i=0;
   irow=0;
   icol=0;
-  while (getline(&buffer, &n, pipe) >= 0 &&  n > 0) { /* retrieve error from the pipe */
-    if (!strstr(buffer, "ERROR")) continue;
 
-    if(strcmp(chk_message,buffer)) {
-      strcpy(chk_message,buffer);
-      if(strstr(buffer," bo ") ||
-          strstr(buffer," ch ") ||
-          strstr(buffer," ma ")) {
-        printf("**** ");
-        display_it(irow,icol,"M",buffer);
-      } else if(strstr(buffer," m5 ") ||
-          strstr(buffer," 5m ") ||
-          strstr(buffer," mc ") ||
-          strstr(buffer," an ")){
-        printf("*** ");
-        display_it(irow,icol,"R",buffer);
-      } else if(strstr(buffer," fm ")) {
-        printf("** ");
-        display_it(irow,icol,"Y",buffer);
-      } else if(strstr(buffer," sp ")) {
-      } else {
-        printf("* ");
-        display_it(irow,icol,"B",buffer);
+  while (getline(&buffer, &n, pipe) >= 0 &&  n > 0) { /* retrieve error from the pipe */
+    if (!strstr(buffer, "?ERROR "))
+      continue;
+
+    strcpy(working,buffer);
+    ptr=strtok(working," ");
+    code=strtok(NULL," ");
+    num=strtok(NULL," (");
+    if(NULL==code||NULL==num)
+      continue;
+    //      printf(" ptr '%s' code '%s' num '%s'\n",ptr,code,num);
+    item=start;
+    match=0;
+    while(NULL != item && !match) {
+      //        printf(" code '%s' num '%s'\n",item->code,item->num);
+      if(!strcmp("any",item->code)) {
+        prefix=item->prefix;
+        attrib=item->attrib;
+        match=1;
+      } else if(!strcmp(code,item->code) &&
+          (!strcmp("any",item->num)||!strcmp(num,item->num))) {
+        prefix=item->prefix;
+        attrib=item->attrib;
+        match=1;
       }
+      item=item->next;
+    }
+    if(match && NULL!=attrib) {
+      printf("%s ",prefix);
+      display_it(irow,icol,attrib,buffer);
     }
   }
   if (buffer)
