@@ -2712,7 +2712,7 @@ DR -204
 decimate parameter must either be null or an integer 1-255.
 ""
 DR -205
-Sample rate must either be null or a number greater than 0.499.
+Sample rate must either be null or a positive number.
 ""
 DR -206
 The 'force' parameter must be 'force', '$', or null.
@@ -2724,7 +2724,7 @@ DR -214
 For DBBC3 DDC_V decimate must be 1 or 2.
 ""
 DR -215
-Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255.
+Clock rate (MHz: 256 for DDC_U or 128 for DDC_V) divided by sample rate must be an integer 1-255.
 ""
 DR -225
 Can't specify sample rate and decimate parameters simultaneously.

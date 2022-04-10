@@ -109,6 +109,8 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
             sample=lcl->samplerate.samplerate;
             m5state_init(&lcl->samplerate.state);
             ierr=arg_float(ptr,&sample,0.0,FALSE);
+            if(sample<=0.0)
+               ierr=-200;
             lcl->samplerate.samplerate=sample;
             if(lcl->decimate.state.known != 0) {
                 if(ierr != -100)
@@ -125,22 +127,18 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
                 ierr=0;
             }
             if(ierr == 0 ) {
-                if(sample <= 0.499) {
-                    ierr=-200;
-                } else {
-                    lcl->samplerate.samplerate=sample;
-                    lcl->samplerate.decimate=(crate/sample)+0.5;
-                    if( fabs(lcl->samplerate.decimate*sample-crate)/ crate
-                            > 0.001)
-                        ierr=-210;
-                    else if( lcl->samplerate.decimate <1 ||
-                            lcl->samplerate.decimate >255)
-                        ierr=-210;
-                    else if(DBBC3_DDCV == shm_addr->equip.rack_type &&
-                            2!= lcl->samplerate.decimate &&
-                            1!= lcl->samplerate.decimate)
-                        ierr=-230;
-                }
+                lcl->samplerate.samplerate=sample;
+                lcl->samplerate.decimate=(crate/sample)+0.5;
+                if( fabs(lcl->samplerate.decimate*sample-crate)/ crate
+                        > 0.001)
+                    ierr=-210;
+                else if( lcl->samplerate.decimate <1 ||
+                        lcl->samplerate.decimate >255)
+                    ierr=-210;
+                else if(DBBC3_DDCV == shm_addr->equip.rack_type &&
+                        2!= lcl->samplerate.decimate &&
+                        1!= lcl->samplerate.decimate)
+                    ierr=-230;
             }
             if(ierr==0) {
                 lcl->samplerate.state.known=1;
