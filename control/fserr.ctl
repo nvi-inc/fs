@@ -2673,7 +2673,7 @@ DQ -34
 Invalid bbc number (1 to 4).
 ""
 DQ -35
-Invalid LO frequency (100.0 to 1000.0Mhz).
+Invalid LO frequency (100.0 to 1000.0MHz).
 ""
 DQ -36
 Invalid If source (i1, i2, i3, i4, i?d, i?a)
@@ -2703,16 +2703,16 @@ DR -201
 First parameter must be 'begin', 'end', or the Core3H board number: '1' to the number of IFs set in 'dbbc3.ctl'.
 ""
 DR -202
-mask2 parameter must either be null or an integer, usually as a hex value, e.g., 0xf
+mask2 parameter must either be null or an integer, usually as a hex value, e.g. 0xf.
 ""
 DR -203
-mask1 parameter must either be null or an integer, usually as a hex value, e.g., 0xf
+mask1 parameter must either be null or an integer, usually as a hex value, e.g. 0xf.
 ""
 DR -204
-decimate parameter, must be 1-255
+decimate parameter must either be null or an integer 1-255.
 ""
 DR -205
-Sample rate must be a number greater than 0.124
+Sample rate must either be null or a number greater than 0.499.
 ""
 DR -206
 The 'force' parameter must be 'force', '$', or null.
@@ -2721,28 +2721,28 @@ DR -207
 The 'okay' parameter must be 'disk_record_ok' or null.
 ""
 DR -214
-For DBBC3 DDC_V decimate must be 1 or 2
+For DBBC3 DDC_V decimate must be 1 or 2.
 ""
 DR -215
 Clock rate (from equip.ctl) divided by sample rate must be an integer 1-255.
 ""
 DR -225
-Can't specify sample rate and decimate parameters simultaneously
+Can't specify sample rate and decimate parameters simultaneously.
 ""
 DR -235
-For DBBC3 DDC_V sample rate must imply a decimate of 1 or 2
+For DBBC3 DDC_V sample rate must imply a decimate of 1 or 2.
 ""
 DR -301
-Can't change mode while recording, use disk_record=off first or (dangerous) use 'disk_record_ok' as 'okay' parameter
+Can't change mode while recording, use disk_record=off first or (dangerous) use 'disk_record_ok' as 'okay' parameter.
 ""
 DR -302
-'mask2' cannot have selected channels unless DDBC3 is DDC_U
+'mask2' cannot have selected channels unless DDBC3 is DDC_U.
 ""
 DR -303
-Can't specify 'mask2' for more BBCs per IF than set in dbbc3.ctl
+Can't specify 'mask2' for more BBCs per IF than set in dbbc3.ctl.
 ""
 DR -304
-The 'force' parameter must be 'force', '$', or null
+The 'force' parameter must be 'force', '$', or null.
 ""
 DR -305
 Internal error, impossible state clause.
@@ -2751,31 +2751,31 @@ DR -307
 The 'okay' parameter must be 'disk_record_ok' or null.
 ""
 DR -308
-All selected channels must have the same width: 1-bit or 2-bits
+All selected channels must have the same width: 1-bit or 2-bits.
 ""
 DR -309
-If 'mask1' AND 'mask2' are non-zero, they must have the same number of channels
+If 'mask1' AND 'mask2' are non-zero, they must have the same number of channels.
 ""
 DR -310
-The number of selected channels in each mask must be a power of two (or zero)
+The number of selected channels in each mask must be a power of two (or zero).
 ""
 DR -311
-For DDC_U, at least one of 'mask1' and 'mask2' must be non-zero
+For DBBC3 DDC_U, at least one of 'mask1' and 'mask2' must be non-zero.
 ""
 DR -312
-For DDC_V, 'mask1' must be non-zero
+For DBBC3 DDC_V, 'mask1' must be non-zero.
 ""
 DR -400
-error retrieving acknowledgement of command
+error retrieving acknowledgement of command.
 ""
 DR -401
-error retrieving class
+error retrieving class.
 ""
 DR -451
 Class buffer error from command response.
 ""
 DR -452
-DBBC version does not agree with dbbc3.ctl; see message above for DBBC3's version.
+DBBC3 version does not agree with dbbc3.ctl; see message above for DBBC3's version.
 ""
 DR -453
 DBBC3 firmware should be DDC_U, but is DDC_V; see message above for DBBC3's version.
@@ -2784,7 +2784,7 @@ DR -454
 DBBC3 firmware should be DDC_V, but is DDC_U; see message above for DBBC3's version.
 ""
 DR -455
-Uknown personality from DBBC3; see message above for DBBC3's personality.
+Unknown personality from DBBC3; see message above for DBBC3's personality.
 ""
 DR -456
 Unknown rack type in logmsg_dbbc3().
@@ -2793,130 +2793,130 @@ DR -500 Place holder for bad response buffer
 
 ""
 DR -501
-error decoding mode_fs response, see DR -500 error for contents
+error decoding mode_fs response, see DR -500 error for contents.
 ""
 DR -502
-error decoding status_fs response, see DR -500 error for contents
+error decoding status_fs response, see DR -500 error for contents.
 ""
 DR -503
-error decoding splitmode response, see DR -500 error for contents
+error decoding splitmode response, see DR -500 error for contents.
 ""
 DR -504
-error decoding destination 0 response, see DR -500 error for contents
+error decoding destination 0 response, see DR -500 error for contents.
 ""
 DR -505
-error decoding destination 1 response, see DR -500 error for contents
+error decoding destination 1 response, see DR -500 error for contents.
 ""
 DR -523
-could not find splitmode response
+could not find splitmode response.
 ""
 DR -524
-could not find destination 0 response
+could not find destination 0 response.
 ""
 DR -525
-could not find destination 1 response
+could not find destination 1 response.
 ""
 DR -596
-Core3H board?W data sending state is not defined in the FS yet
+Core3H board?W data sending state is not defined in the FS yet.
 ""
 DR -597
-DBBC3 firmware/version is wrong AND/OR one or more Core3H boards does not have the correct data sending state
+DBBC3 firmware/version is wrong AND one or more Core3H boards does not have the correct data sending state.
 ""
 DR -598
-One or more Core3H boards does not have the correct data sending state
+One or more Core3H boards does not have the correct data sending state.
 ""
 DR -599
-DBBC3 firmware/version is wrong
+DBBC3 firmware/version is wrong.
 ""
 DR -600
-The configuration of one or more Core3H boards is not correct
+The configuration of one or more Core3H boards is not correct.
 ""
 DR -601
-DBBC3 Core3H board 1 configuration is not correct
+Core3H board 1 configuration is not correct.
 ""
 DR -602
-DBBC3 Core3H board 2 configuration is not correct
+Core3H board 2 configuration is not correct.
 ""
 DR -603
-DBBC3 Core3H board 3 configuration is not correct
+Core3H board 3 configuration is not correct.
 ""
 DR -604
-DBBC3 Core3H board 4 configuration is not correct
+Core3H board 4 configuration is not correct.
 ""
 DR -605
-DBBC3 Core3H board 5 configuration is not correct
+Core3H board 5 configuration is not correct.
 ""
 DR -606
-DBBC3 Core3H board 6 configuration is not correct
+Core3H board 6 configuration is not correct.
 ""
 DR -607
-DBBC3 Core3H board 7 configuration is not correct
+Core3H board 7 configuration is not correct.
 ""
 DR -608
-DBBC3 Core3H board 8 configuration is not correct
+Core3H board 8 configuration is not correct.
 ""
 DR -611
-Core3H board?W mask1 is not correct
+Core3H board?W mask1 is not correct.
 ""
 DR -612
-Core3H board?W mask2 is not correct
+Core3H board?W mask2 is not correct.
 ""
 DR -613
-Core3H board?W mask3 is not correct
+Core3H board?W mask3 is not correct.
 ""
 DR -614
-Core3H board?W mask4 is not correct
+Core3H board?W mask4 is not correct.
 ""
 DR -615
-Core3H board?W decimation is not correct
+Core3H board?W decimation is not correct.
 ""
 DR -616
-Core3H board?W vdif_frame width is not correct
+Core3H board?W vdif_frame channel width is not correct.
 ""
 DR -617
-Core3H board?W vdif_frame channels is not correct
+Core3H board?W vdif_frame number of channels is not correct.
 ""
 DR -618
-Core3H board?W vdif_frame payload size is not correct
+Core3H board?W vdif_frame payload size is not correct.
 ""
 DR -619
-Core3H board?W splitmode should be on and it is not
+Core3H board?W splitmode should be on and it is not.
 ""
 DR -620
-Core3H board?W splitmode should be off and it is not
+Core3H board?W splitmode should be off and it is not.
 ""
 DR -621
-Core3H board?W vsi input should be vs1-vsi2-vsi3-vsi4 and it is not
+Core3H board?W vsi input should be vsi1-2-3-4 and it is not.
 ""
 DR -622
-Core3H board?W vsi input should be vs1 and it is not
+Core3H board?W vsi input should be vsi1 and it is not.
 ""
 DR -623
-Core3H board?W should be sending data but it is stopped
+Core3H board?W should be sending data but it is stopped.
 ""
 DR -624
-Core3H board?W should be stopped but it is sending data
+Core3H board?W should be stopped but it is sending data.
 "
 DR -625
-Core3H board?W input clock rate does not agree with dbbc3.ctl
+Core3H board?W input clock rate does not agree with dbbc3.ctl.
 "
 DR -626
-Core3H board?W data format is not VDIF
+Core3H board?W data format is not VDIF.
 "
 DR -627
-Core3H board?W is not synced
+Core3H board?W is not synced.
 "
 DR -628
-core3h_mode mask1 for board?W is non-zero, but destination 0 is 'none'
+core3h_mode mask1 for board?W is non-zero, but destination 0 is 'none'.
 "
 DR -629
-core3h_mode mask1 for board?W is zero, but destination 0 is not 'none'
+core3h_mode mask1 for board?W is zero, but destination 0 is not 'none'.
 "
 DR -630
-core3h_mode mask2 for board?W is non-zero, but destination 1 is 'none'
+core3h_mode mask2 for board?W is non-zero, but destination 1 is 'none'.
 "
 DR -631
-core3h_mode mask2 for board?W is zero, but destination 1 is not 'none'
+core3h_mode mask2 for board?W is zero, but destination 1 is not 'none'.
 ""
 DS   -1
 Unable to open dsad.ctl file.
