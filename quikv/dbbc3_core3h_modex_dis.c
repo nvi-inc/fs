@@ -69,6 +69,8 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options,kmon)
     if((!kcom) && command->equal == '=' && force_set) {
         ierr=logmsg_dbbc3(output,command,ip);
         if(ierr!=0) {
+            out_class=ip[0];
+            out_recs=ip[1];
             ierr+=-450;
             goto error2;
         }
