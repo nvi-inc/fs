@@ -224,12 +224,9 @@ void dbbc3_core3h_modex(command,itask,ip)
                }
                return;
            }
-           if(i==0)
-             options=1;
-           else if(i==shm_addr->dbbc3_ddc_ifs-1)
-             options=4;
-           else
-             options=2;
+           options=1;
+           if(i==shm_addr->dbbc3_ddc_ifs-1)
+             options=0;
 
            dbbc3_core3h_modex_dis(command,i+1,ip,0,options,1);
            if(ip[2]!=0)
@@ -243,12 +240,10 @@ void dbbc3_core3h_modex(command,itask,ip)
         for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
            out_class=0;
            out_recs=0;
-           if(i==0)
-             options=1;
-           else if(i==shm_addr->dbbc3_ddc_ifs-1)
-             options=4;
-           else
-             options=2;
+
+           options=1;
+           if(i==shm_addr->dbbc3_ddc_ifs-1)
+             options=0;
 
            dbbc3_core3h_modex_dis(command,i+1,ip,0,options,1);
          }
@@ -491,7 +486,6 @@ parse:
     vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[iboard]);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
-
 
 dbbcn:
     ip[0]=9;

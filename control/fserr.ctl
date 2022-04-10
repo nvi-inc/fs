@@ -2829,31 +2829,7 @@ DR -599
 DBBC3 firmware/version is wrong.
 ""
 DR -600
-The configuration of one or more Core3H boards is not correct.
-""
-DR -601
-Core3H board 1 configuration is not correct.
-""
-DR -602
-Core3H board 2 configuration is not correct.
-""
-DR -603
-Core3H board 3 configuration is not correct.
-""
-DR -604
-Core3H board 4 configuration is not correct.
-""
-DR -605
-Core3H board 5 configuration is not correct.
-""
-DR -606
-Core3H board 6 configuration is not correct.
-""
-DR -607
-Core3H board 7 configuration is not correct.
-""
-DR -608
-Core3H board 8 configuration is not correct.
+Core3H board?W configuration is not correct.
 ""
 DR -611
 Core3H board?W mask1 is not correct.
