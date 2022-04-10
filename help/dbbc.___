@@ -41,5 +41,7 @@ entires. The last line is logged as a normal response.
 
 The dbbc command cannot be used if the rack type in equip.ctl
 specifies a DBBC3. The dbbc3 command cannot be used if the rack type
-in equip.ctl specifies a DBBC2. Other rack types do not limit the use
-of these commands.
+in equip.ctl specifies a DBBC. Other rack types do not limit the use
+of these two commands, but whether they make sense depends on what
+device is specified in dbbad.ctl. The dbbc2 command can always be used
+regardless of the rack type in equip.ctl.
