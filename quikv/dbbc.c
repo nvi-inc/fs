@@ -52,6 +52,11 @@ int ip[5];                           /* ipc parameters */
           (20==itask || 22==itask)) {
           ierr=-302;
           goto error;
+      } else if (30==itask &&
+          (command->equal != '=' ||
+          command->argv[0]==NULL || command->argv[1]==NULL)) {
+          ierr=-304;
+          goto error;
       } else if (command->equal != '=' ||
           command->argv[0]==NULL )
          {
@@ -69,10 +74,16 @@ parse:
       outbuf[0]=0;
 
       if (30 == itask) {
+	  int iboard;
 	  strcat(outbuf,"core3h=");
-          strcat(outbuf,ptr);
+	  ierr=arg_int(ptr,&iboard,1,FALSE);
+	  if(ierr||iboard < 1||iboard > shm_addr->dbbc3_ddc_ifs) {
+	      ierr=-305;
+	      goto error;
+	  }
+	  strcat(outbuf,ptr);
 	  strcat(outbuf,",");
-          ptr=arg_next(command,&ilast);
+	  ptr=arg_next(command,&ilast);
       }
 
       while( ptr != NULL) {
