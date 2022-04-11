@@ -2597,6 +2597,33 @@ DBBC3 multicast: error from recvfrom(), UNIX?FFF
 DN  -23
 DBBC3 multicast: time-out while data_valid is on, some multicast not recorded, probably due to a DBBC3 command
 ""
+DN  -30 Place holder for version string
+
+""
+DN  -31
+DBBC3 multicast: DBBC3 personality not found, see DN -30 error above
+""
+DN  -32
+DBBC3 multicast: DBBC3 version not found, see DN -30 error above
+""
+DN  -33
+DBBC3 multicast: DBBC3 version doesn't agree with DBBC_U version in dbbc3.ctl, see DN -30 error above
+""
+DN  -34
+DBBC3 multicast: DBBC3 personality should be DBBC_U (equip.ctl), but it is DBBC_V, see DN -30 error above
+""
+DN  -35
+DBBC3 multicast: DBBC3 has an unknown personality, see DN -30 error above
+""
+DN  -36
+DBBC3 multicast: DBBC3 version doesn't agree with DBBC_V version in dbbc3.ctl, see DN -30 error above
+""
+DN  -37
+DBBC3 multicast: DBBC3 personality should be DBBC_V (equip.ctl), but it is DBBC_U, see DN -30 error above
+""
+DN  -38
+DBBC3 multicast: equip.ctl had an unrecognized DBBC3 rack type
+""
 DP -301
 No command form of pfbX command.
 ""

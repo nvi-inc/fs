@@ -98,6 +98,8 @@ int main(int argc, char *argv[])
             continue;
         }
 
+        version_check(&packet);
+
         calc_ts(&packet,&cycle, cont_cal, swap_cal);
 
         update_shm(&packet,&cycle, itmc, centisec);

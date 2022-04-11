@@ -28,3 +28,4 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         int it[6], int centisec[6]);
 void log_mcast(dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         int cont_cal, int swap_cal);
+void version_check( dbbc3_ddc_multicast_t *t);
