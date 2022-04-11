@@ -21,7 +21,7 @@
 
 = FS 10.1 DBBC3 Operations Manual
 E. Himwich, J. Quick
-Version 3.1 - April 2022
+Version 3.2 - April 2022
 
 :experimental:
 :sectnums:
@@ -31,14 +31,19 @@ Version 3.1 - April 2022
 == Introduction
 
 This document outlines the features and model for FS operations with
-the DBBC3. It also contains an appendix
+the DBBC3. It contains a section
 <<Configuring the FS for use with a DBBC3>> that gives the steps for
 customizing the FS for use with a DBBC3.
+
+There are appendices, <<Minimizing the use of setup procedures>>,
+<<Thread procedure>>, and <<Recorder tuning>> that describe features
+that are not limited to use with the DBBC3, but are expected to mostly
+be u with DBBC3,
 
 Support for several items that utilize the multicast data, including
 the T~sys~ monitor display and multicast data logging, is built on a
 well designed tool for generating multicast and unpacking software
-developed, and used, by Dave Horsley (Hobart).
+developed, and utilized for the DBBC3, by Dave Horsley (Hobart).
 
 == DBBC3 support features
 
@@ -119,7 +124,7 @@ for DBBC3s is important because the setup procedures for DBBC3 racks
 are very time consuming and their execution needs to be limited. This
 command is added by _drudg_ to _.snp_ files if selected by the
 `setup_proc` option in _skedf.ctl control file. Please see the
-<<Minimizing the use of setup procedures>> appendix for more details. 
+<<Minimizing the use of setup procedures>> appendix for more details.
 
 * `tpicd` -- TPI (multicast) recording control daemon setup
 
@@ -376,14 +381,83 @@ the Core3H boards.
 Verify that no errors are reported. If there are errors, the data may
 not be recorded properly. This is how the setup is checked within a
 schedule. This also checks that the personality and firmware version
-agree with the FS control files. 
+agree with the FS control files.
 
 TIP: There can be a lot of log output from a setup procedure, which
 can make it hard to identify errors. If you use the `erchk` window,
 which only lists errors, it should be easier to identify them. If you
 don't already have that window setup (it is more generally useful
 anyway), directions are include in the
-<<Configuring the FS for use with a DBBC3>> appendix below.
+<<Configuring the FS for use with a DBBC3>> section below.
+
+=== Firmware version checking
+
+The FS checks that the DBBC3 firmware being used agrees with the what
+is in the FS control files, _equip.ctl_ and _dbbc3.ctl_. The
+personality, __DDC_U__ or __DDC_V__, is checked first. If the
+personality agrees, the version for that personality is then
+checked. In addition to the error report, the string received from
+DBBC3 is displayed for reference.
+
+If one of these errors is detected, you should either load the correct
+firmware/version into the DBBC3 and/or correct the FS control files.
+What is appropriate depends on what you are trying to do. Ignoring or
+masking the displaying the errors off is not recommended.
+
+The checks are made in two different situations:
+
+* Multicast data
+
++
+
+The version information is checked for each multicast reception. If
+there is no multicast being received, these errors will not be
+reported this way. The error information is only reported once every
+twenty seconds.
+
++
+
+If for some reason you wish to ignore this very persistent error
+information, you can use the `tnx` to suppress it from being
+displayed. It will still be logged, As an example, if you are getting
+the errors `dn  -30` and `dn  37` you can stop them from being
+displayed with:
+
+  tnx=dn,-30
+  tnx=dn,-37
+
++
+
+CAUTION: Suppressing the display of the error information will _not_
+prevent loss of data and/or other erroneous error messages if the
+firmware/version in the FS control files doesn't agree with what is
+loaded in the DBBC3.
+
+* Use of the `core3h_mode` command
+
++
+
+The `core3h_mode` command checks the version in the two cases:
+
+** For `core3h_mode=end` commands, with or without the `force`
+parameter being used.
+
++
+
+This command is the last command executed by _drudg_ generated Core3H
+setup procedures. A firmware/version error will be nearly, in some
+cases actually, the last error shown. That should help make it easier
+to spot.
+
+** A `core3h=__n__,...,force` command.
+
++
+
++
+
+An error is reported for these commands in case one of them is used by
+itself. This also maintains the historical precedent of checking the
+version whenever the formatter is configured.
 
 === Control files
 
@@ -616,7 +690,7 @@ easy to measure it for a given system when NTP _is_ available using
 the output of the `mcast_time` command. The system will need to synced
 to NTP and the `computer` model is selected in _time.ctl_. In this
 case, the last value on the `mcast_time/0` line is the delay in
-centiseconds; it may vary at the single centisecond level. 
+centiseconds; it may vary at the single centisecond level.
 
 * The board number to use for measuring the time.
 
@@ -735,13 +809,11 @@ also now be used for DBBC3s:
 The full syntax for these options can be found in the example
 _/usr2/fs/st.default/control/skedf.ctl_ file.
 
-[appendix]
-
 == Configuring the FS for use with a DBBC3
 
-This appendix provides the steps needed to configure the FS to support
-a DBBC3. You must have version FS _10.1.0_, or later, installed. All
-steps, except as noted, are to be executed as _oper_.
+This sub-section  provides the steps needed to configure the FS to
+support a DBBC3. You must have version FS _10.1.0_, or later,
+installed. All steps, except as noted, are to be executed as _oper_.
 
 . Update _equip.ctl_.
 
@@ -793,6 +865,12 @@ This probably depends on what correlators you are sending your data to
 and how they want the threads organized. The option and how to use it
 are described in the <<Thread procedure>> appendix.
 
++
+
+If you do use the single thread per file option, you should remove the
+`scan_check` command from your `checkmk5` and/or `checkfb` procedure
+as described in the <<Thread procedure>> appendix.
+
 .. Consider adding or updating other DBBC3 related options.
 
 +
@@ -822,7 +900,7 @@ This may help if you need to make more changes later.
 `fb_config` procedures, depending on what recorders you will be using,
 to your `station` procedure library using _pfmed_.
 
-+ 
++
 
 Initially, these procedures can be empty, but you can add commands as
 appropriate. This is described in more details in the
@@ -1059,7 +1137,7 @@ in _skedf.ctl_ control file. The option only needs to be used by
 stations that need to a single thread per file. If the option is not
 present, no ``thread__suffix__`` procedure is inserted.  If it is
 present, the possible setting are (where `_command_` is `mk5` or `fb`
-depending on the the type of recorder):
+depending on the type of recorder):
 
 * `yes` -- to store a single thread per file, in which case, the
 ``thread__suffix__`` procedure contents are:
