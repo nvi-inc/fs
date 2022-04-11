@@ -69,7 +69,7 @@ int dbbc3_version_check(char *inbuf, char *output)
 		if(strncmp(inbuf+8 ,"DDC_V,",6)==0) {
 			if(strncmp(test_buf,shm_addr->dbbc3_ddcv_vs,shm_addr->dbbc3_ddcv_vc)!=0 ||
 					strlen(test_buf)!=shm_addr->dbbc3_ddcv_vc) 
-				ierr = -2;
+				ierr = -7;
 		} else if(strncmp(inbuf+8 ,"DDC_U,",6)==0)
 			ierr = -4;
 		 else 

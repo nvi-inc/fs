@@ -2808,19 +2808,22 @@ DR -451
 Class buffer error from command response.
 ""
 DR -452
-DBBC3 version does not agree with dbbc3.ctl; see message above for DBBC3's version.
+DBBC3 version does not agree with DDC_U version in dbbc3.ctl; see message above for DBBC3's version.
 ""
 DR -453
-DBBC3 firmware should be DDC_U, but is DDC_V; see message above for DBBC3's version.
+DBBC3 firmware should be DDC_U (equip.ctl), but is DDC_V; see message above for DBBC3's version.
 ""
 DR -454
-DBBC3 firmware should be DDC_V, but is DDC_U; see message above for DBBC3's version.
+DBBC3 firmware should be DDC_V (equip.ctl), but is DDC_U; see message above for DBBC3's version.
 ""
 DR -455
 Unknown personality from DBBC3; see message above for DBBC3's personality.
 ""
 DR -456
 Unknown rack type in logmsg_dbbc3().
+""
+DR -457
+DBBC3 version does not agree with DDC_V version in dbbc3.ctl; see message above for DBBC3's version.
 ""
 DR -500 Place holder for bad response buffer
 
