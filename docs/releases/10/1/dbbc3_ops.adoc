@@ -21,11 +21,11 @@
 
 = FS 10.1 DBBC3 Operations Manual
 E. Himwich, J. Quick
-Version 3.0 - March 2022
+Version 3.1 - April 2022
 
 :experimental:
 :sectnums:
-:sectnumlevels: 5
+:sectnumlevels: 4
 :toc:
 
 == Introduction
@@ -40,7 +40,7 @@ the T~sys~ monitor display and multicast data logging, is built on a
 well designed tool for generating multicast and unpacking software
 developed, and used, by Dave Horsley (Hobart).
 
-== DBBC3 operations
+== DBBC3 support features
 
 === DBBC3 related commands
 
@@ -63,7 +63,7 @@ to the end in the DBBC3 version. The meanings of the `_frequency_` and
 +
 
 WARNING: So far, operation has only been tested with polarity `2`. It
-is expected that other polarities will work but has nor yet been
+is expected that other polarities will work but that has not yet been
 confirmed. This affects multicast data, the T~sys~ display, and use of
 _fivpt_ and _onoff_.
 
@@ -78,6 +78,16 @@ described in its help page. You don't need to be familiar will all the
 features if you only use it as described in the
 <<Setting the experiment mode configuration>> section below.
 
++
+
+CAUTION: For the DDC personality, the Core3H board uses up to two
+Ethernet outputs per board. The first output is used for the first
+eight BBCs; the second, for up to an additional eight. For each output
+that is active, the number of channels must be a power of two, from 1
+to 16 and all channels must user either only one-bit sampling or only
+two-bit sampling. If both outputs are in use for a board, they must
+use the same number of channels and bits per channel.
+
 * `dbbc3` -- Low-level DBBC3 communication
 
 * `fb_mode` -- Setting the FlexBuff recording mode -- An alias for `mk5c_mode`
@@ -85,9 +95,12 @@ features if you only use it as described in the
 * `fivept` -- Pointing measurements
 
 * `if` -- This command was expanded to have ``_condition_``s for
-whether each possible DBBC3 BBC and IF is active. Usage examples can
-be found in the `iread` and `bread` procedures in the default
-_/usr2/fs/st.default/d3fbstation.prc_ procedure library.
+whether each possible DBBC3 BBC and IF is active.
+
++
+
+Usage examples can be found in the `iread` and `bread` procedures in
+the default _/usr2/fs/st.default/d3fbstation.prc_ procedure library.
 
 * `if__x__` -- `_x_` from `a` to `h` -- IF CoMo setup and monitoring
 
@@ -96,6 +109,17 @@ _/usr2/fs/st.default/d3fbstation.prc_ procedure library.
 * `mcast_time` -- display of multicast time information
 
 * `onoff` -- SEFD and antenna calibration measurements
+
+* `setup_proc` -- Conditional execution of setup procedure
+
++
+
+This command does not have a specific DDBC3 aspect to it, but its use
+for DBBC3s is important because the setup procedures for DBBC3 racks
+are very time consuming and their execution needs to be limited. This
+command is added by _drudg_ to _.snp_ files if selected by the
+`setup_proc` option in _skedf.ctl control file. Please see the
+<<Minimizing the use of setup procedures>> appendix for more details. 
 
 * `tpicd` -- TPI (multicast) recording control daemon setup
 
@@ -114,18 +138,21 @@ The DBBC3 IF labels are of the form `i__x__`, where:
 
 For example, `id` is IF D.
 
-=== Initial configuration of the DBBC3
+=== Configuring the DBBC3
 
-When the DBBC3 is booted, it is assumed it is set-up according to
-either the "`Setting up the DBBC3 for DDC_U mode v125`" or "`Setting up
-the DBBC3 for DDC_V mode v124`" document, as appropriate.
+==== Initial configuration of the DBBC3
 
-=== Local configuration changes
+This documents assumes that when the DBBC3 is booted, it is set-up
+according to either the "`Setting up the DBBC3 for DDC_U mode v125`"
+or "`Setting up the DBBC3 for DDC_V mode v124`" document, as
+appropriate.
+
+==== Local configuration changes
 
 This section covers changes that may be needed for experiments but aren't
 conveyed by the schedule file, yet. Some examples are given below.
 
-==== Ethernet configuration
+===== Ethernet configuration
 
 The Ethernet configuration of a Core3H board can be set in the DBBC3 boot
 configuration file. It can be changed on demand with a predefined SNAP
@@ -153,7 +180,7 @@ sub-procedure for each board.
 TIP: A reset and sync is not required for Ethernet configuration
 changes.
 
-==== Changing thread numbers
+===== Changing thread numbers
 
 The following command changes the thread number on _eth0_ to `3`
 (`196608/65536`) and _eth1_ to `4`.
@@ -162,7 +189,7 @@ The following command changes the thread number on _eth0_ to `3`
 core3h=1,regupdate vdif_header 3 196608 0x03FF0000
 ....
 
-=== Setting the experiment mode configuration
+==== Setting the experiment mode configuration
 
 Currently, the recommended method for configuring the mode for the
 Core3H boards is from the DBBC3 boot configuration. This is because
@@ -189,7 +216,7 @@ determine the correct Core3H board boot configuration for an arbitrary
 mode from a schedule. It is not entirely automatic, but will provide
 the needed information in a fairly straightforward format.
 
-==== Setting the boot configuration for the mode
+===== Setting the boot configuration for the mode
 
 This section assumes your boot configuration sets up the DBBC3 except
 for the details of the observing mode. To configure the Core3H boards
@@ -419,7 +446,7 @@ The _skedf.ctl_ file now includes new options and expansion of some
 options for DBBC3 support. The are listed in the <<drudg support>>
 section. More discussion of the two new DBBC3 related options can be
 found in the <<Minimizing the use of setup procedures>> and the
-<<Thread procedure>> subsections below. The details of the syntax for
+<<Thread procedure>> appendices below. The details of the syntax for
 all the options is available in the
 _/usr2/fs/st.defaul/control/skedf.ctl_ example file.
 
@@ -666,262 +693,6 @@ multicast data squeezed out by default, as it already did for RDBEs. A
 subsequent revision in _plog_ causes the compressed full log to also
 be push by default. Please see ``**plog -h**`` for more information.
 
-== Related Features
-
-=== Minimizing the use of setup procedures
-
-NOTE: This can be used for any system, not just those with DBBC3s.
-
-Normally, the FS sets the mode for each scan (unless there is continuous
-recording). If this takes too long (as is the case for the DBBC3) or makes the
-equipment unstable, the _drudg_ option `use_setup_proc yes` in _skedf.ctl_ can
-be used to minimize the execution of the setup procedure.
-
-WARNING: Not executing the setup each scan may not be robust if the equipment
-sometimes loses it configuration. It is up to the individual stations to
-determine whether minimizing its use is better than always using it.
-
-With this is enabled, _drudg_ will replace the calls to setup
-procedures (e.g., `setup01`) in the _.snp_ file with, e.g.:
-
- setup_proc=setup01
-
-When the FS encounters this command, it will conditionally execute the setup
-procedure if either of the following is true:
-
-* This is the first setup since the schedule was last started.
-+
-
-This will make sure the setup is run at the start and any restart of the
-schedule.
-
-* If there was a mode change, i.e., the name of the setup procedure changed.
-
-The `use_setup_proc` option in _skedf.ctl_ has three possible settings:
-
-* `yes` -- use the `setup_proc` command
-
-* `no`  -- do not use the `setup_proc` command
-
-* `ask` -- to prompt for `yes` or `no` for each schedule
-
-If the option is not used, it defaults to `no`.
-
-NOTE: The _fesh_ program was expanded to support an environment
-variable, `FESH_GEO_USE_SETUP_PROC`, and a command line option, `-u`,
-to set the answer for an interactive prompt for the whether or not to
-use `setup_proc` when __drudg__ing geodesy schedules. Please see
-``**fesh -h**`` for more information.
-
-Thanks to Jon Quick (HartRAO) and Marjolein Verkouter (JIVE) for
-suggesting this option. They also suggested that it may be utilized as
-part of future features for additional checking and resetting of the
-system.
-
-=== Thread procedure
-
-NOTE: This applies to any system using a Mark 5C or FlexBuff recorder,
-not just one with a DBBC3.
-
-When a Mark 5C or FlexBuff recorder is in use, _drudg_ can optionally
-insert a `thread__suffix__` procedure in each setup procedure (where
-`__suffix__` is a mode specific suffix, e.g., `01`). This can be used
-to control whether the recordings for an experiment is multi-threaded
-or single thread per file.
-
-The contents of the procedure is same for every mode in the schedule.
-This feature is controlled by the `vdif_single_thread_per_file` option
-in _skedf.ctl_ control file. The option only needs to be used by
-stations that need to a single thread per file. If the option is not
-present, no ``thread__suffix__`` procedure is inserted.  If it is
-present, the possible setting are (where `_command_` is `mk5` or `fb`
-depending on the the type of recorder):
-
-* `yes` -- to store a single thread per file, in which case, the
-``thread__suffix__`` procedure contents are:
-
-+
-[subs="+quotes"]
-....
-_command_=datastream=clear
-_command_=datastream=add:{thread}:*
-_command_=datastream=reset
-....
-
-* `no` -- for normal multi-threaded recordings, in which case, the
-``thread__suffix__`` procedure contents are:
-
-+
-[subs="+quotes"]
-....
-_command_=datastream=clear
-_command_=datastream=reset
-....
-
-
-* `ask` -- to be prompted once per schedule for what to do
-
-If you use the `yes` option, the `scan_check` command will not work
-properly, you should comment it out or remove it from your `checkfb`
-and/or `check5c` procedure. Alternately, if you use `yes` only
-sometimes, you may want to edit the procedure depending on your
-choice. We are looking into a mechanism to automate this. We are also
-looking into how to support `scan_check` for `yes`.
-
-NOTE: The _fesh_ program was expanded to support an environment
-variable, `FESH_GEO_VDIF_SINGLE_THREAD_PER_FILE`, and a command line
-option, `-T`, to set the answer for an interactive prompt for the
-whether or not to use a single thread per file when __drudg__ing
-geodesy schedules. Please see ``**fesh -h**`` for more information.
-
-=== mk5c_config/fb_config procedure
-
-NOTE: This applies to any system using a Mark 5C or FlexBuff recorder,
-not just one with a DBBC3..
-
-Each mode SNAP setup procedure produced by _drudg_ for Mark 5C and
-FlexBuff recorders includes a call to a `mk5c_config`/`fb_config` SNAP
-procedure, depending on the type of recorder. This procedure call is
-inserted immediately after the `mk5c_mode`/`fb_mode` command (and
-after the optional <<Thread procedure>> call, if present). The
-procedure is mode independent, i.e., the same procedure is used for
-all modes.
-
-This procedure is a local `station` library procedure to allow tuning
-of the configuration of _jive5ab_ for the specifics of the recorder,
-including overriding the "`default`" configuration, described next
-below, given by the `mk5c_mode`/`fb_mode` command in the setup
-procedure..
-
-TIP: You can see the full details of the FS setup of the recorder by
-the `mk5c_mode`/`fb_mode` command by using `*echo=on*` before command
-and `*echo=off*` afterwards.
-
-==== Default configuration
-
-The `mk5c_mode`/`fb_mode` command sends configuration information,
-beyond what is set with `mode`,  depending on which recorder is
-selected in _equip.ctl_, `mk5c` or `flexbuff`, and the total data
-rate. It does _not_ depend on which command is used; `fb_mode` is just
-an alias for `mk5c_mode`. The commands sent also depend on the data
-type, VDIF or 5B/Ethernet. All the cases are listed below.
-
-===== FlexBuff recorder
-
-. Setting `mtu`:
-
-+
-
-The `mtu` command sent to the recorder depends on the data type:
-
-.. VDIF data
-
-  mtu = 9000 ;
-
-.. 5B/Ethernet data
-
-   mtu = 6000 ;
-
-. Setting `net_protocol`:
-
-+
-
-There is a variable field `_socketbuffer_` in the `net_protocol` command sent
-to the recorder. Its value is independent of the data type.
-
-+
-[subs="+quotes"]
-....
-net_protocol = udpsnor : _socketbuffer_ : 256000000 : 4 ;
-....
-
-+
-
-Where the _socketbuffer_ field depends on the total data rate:
-
-*   32000000 -- data rate < 1 Gbps
-*   64000000 -- 1 Gbps < data rate <= 4 Gbps
-*  128000000 -- data rate > 4 Gbps
-
-+
-
-The _socketbuffer_ parameter is an important setting for trying to minimize
-risk of packet loss when starting the recording. For (very) high data rates,
-the `mk5c_config`/`fb_config` procedure can be used to increase the
-_socketbuffer_ size to values appropriate for that. This assumes that the
-FlexBuff has been tuned (especially the kernel network buffer sizes) along the
-lines of the FlexBuff tuning documentation at
-https://www.jive.eu/~verkout/flexbuff/flexbuf.recording.txt.
-
-. Setting `record = nthread`:
-
-+
-
-There is a variable field `_nWriters_` in the `record = nthread` command sent
-to the recorder. Its value is independent of the data type.
-
-+
-
-[subs="+quotes"]
-....
-record = nthread : _nWriters_ ;
-....
-
-+
-
-where `_nWriters_` is calculated as `max( _data_rate_ / 6 + 1, 2)` and
-`_data_rate_` is the total data rate in Gbps.
-
-===== Mark 5C recorder
-
-. Setting `net_protocol`:
-
-+
-
-The `net_protocol` command sent to the recorder is independent of the data
-type:
-
-  net_protocol = : 128k : 2M : 4;
-
-. Setting `packet`:
-
-+
-
-The `packet` command sent to the recorder depends on the data type:
-
-.. VDIF data
-
-  packet = 36 : 0 : 8032 : 0 : 0 ;
-
-.. 5B/Ethernet data
-
-  packet = 36 : 0 : 5008 : 0 : 0 ;
-
-==== Overriding the defaults
-
-You can override the commands sent by the `mk5c_mode`/`fb_mode`
-command or add more by putting them in your local
-`mk5c_config`/`fb_config` procedure. This works because
-`mk5c_config`/`fb_config` is called after `mk5c_mode`/`fb_mode`
-command (_and_ after the call to the optional <<Thread procedure>>, so
-it can overridden by the same mechanism) in the setup procedure. An
-example of local customization is shown in the
-<<Changing net_protocol>> subsection below.
-
-CAUTION: If you put any commands in `mk5c_config`/`fb_config` that depend on
-the data type, VDIF or 5B/Ethernet, you would need to change them if there is a
-change in the data type. This is not a concern for most stations.
-
-===== Changing net_protocol
-
-If you use different values for `net_protocol`, you can leave any field blank
-that your don't need to change from what the FS has already sent. For example
-to only set the _socketbuffer_ size to `64000000`, use:
-
-....
-net_protocol = : 64000000
-....
-
 === drudg support
 
 _drudg_ supports:
@@ -943,9 +714,14 @@ the station.
 * The appropriate new <<DBBC3 related commands>> are used in setup
 procedures.
 
-* New _skedf.ctl_ options for
-<<Minimizing the use of setup procedures>> and the
-<<Thread procedure>>.
+* New _skedf.ctl_ options `setup_proc` and `vdif_single_thread_per
+file` as described in the <<Minimizing the use of setup procedures>>
+and the <<Thread procedure>> appendices.
+
+* _drudg_ inserts a `mk5c_config` or `fb_config` procedure call into
+the setup procedures when the selected recorders Mark 5C or FlexBuff,
+respectively. Please see the <<Recorder tuning>> appendix for the
+details.
 
 * The following previously DBBC2 specific _skedf.ctl_ options that can
 also now be used for DBBC3s:
@@ -955,6 +731,9 @@ also now be used for DBBC3s:
 ** `dbbc_if_targets`
 ** `dbbc_bbc_target`
 ** `default_dbbc_if_inputs`
+
+The full syntax for these options can be found in the example
+_/usr2/fs/st.default/control/skedf.ctl_ file.
 
 [appendix]
 
@@ -987,8 +766,9 @@ helpful for determining what values to use. You can also refer to the
 .. Update the IP address and port in your _dbbad.ctl_ control file to
 point to the DBBC3 device.
 
-.. Increase the number of fields on the non-comment line to six, using
-the correct information for the multicast data. Please see the
+.. Insert the correct address and port for your DBBC2 in the (only)
+non-comment line. Add additional fields to increase the number to six,
+using the correct information for the multicast data. Please see the
 <<_dbbad_ctl,dbbad.ctl>> subsection above, or
 _/usr2/fs/st.default/control/dbbad.ctl_, for an example. The example's
 multicast address and port may be correct. The multicast interface
@@ -1002,7 +782,7 @@ used is usually your primary interface, typically _eno1_ or _eth0_.
 
 This is recommended because the setup for a DBBC3 may be long enough
 to interfere with timely schedule execution. This feature is described
-in the <<Minimizing the use of setup procedures>> subsection above.
+in the <<Minimizing the use of setup procedures>> appendix.
 
 .. Consider whether to add the `vdif_single_thread_per_file` option
 and how to set it.
@@ -1011,7 +791,7 @@ and how to set it.
 
 This probably depends on what correlators you are sending your data to
 and how they want the threads organized. The option and how to use it
-are described in the <<Thread procedure>> subsection above.
+are described in the <<Thread procedure>> appendix.
 
 .. Consider adding or updating other DBBC3 related options.
 
@@ -1037,6 +817,17 @@ This may help if you need to make more changes later.
 
 . Add the `mcast_time` command to the `midob` procedure in your
 `station` procedure library using _pfmed_.
+
+. If you have not already done so, add `mk5c_config` and/or
+`fb_config` procedures, depending on what recorders you will be using,
+to your `station` procedure library using _pfmed_.
+
++ 
+
+Initially, these procedures can be empty, but you can add commands as
+appropriate. This is described in more details in the
+<<Recorder tuning>> appendix.
+
 
 . Setup the DBBC3 T~sys~ display window (_monit7_)
 
@@ -1196,6 +987,271 @@ it, should be added to your local file.
 in as _prog_.
 
 . Start the FS, or restart it if it was already running.
+
+[appendix]
+
+== Minimizing the use of setup procedures
+
+NOTE: This can be used for any system, not just those with DBBC3s.
+
+Normally, the FS sets the mode for each scan (unless there is continuous
+recording). If this takes too long (as is the case for the DBBC3) or makes the
+equipment unstable, the _drudg_ option `use_setup_proc yes` in _skedf.ctl_ can
+be used to minimize the execution of the setup procedure.
+
+WARNING: Not executing the setup each scan may not be robust if the equipment
+sometimes loses it configuration. It is up to the individual stations to
+determine whether minimizing its use is better than always using it.
+
+With this is enabled, _drudg_ will replace the calls to setup
+procedures (e.g., `setup01`) in the _.snp_ file with, e.g.:
+
+ setup_proc=setup01
+
+When the FS encounters this command, it will conditionally execute the setup
+procedure if either of the following is true:
+
+* This is the first setup since the schedule was last started.
++
+
+This will make sure the setup is run at the start and any restart of the
+schedule.
+
+* If there was a mode change, i.e., the name of the setup procedure changed.
+
+The `use_setup_proc` option in _skedf.ctl_ has three possible settings:
+
+* `yes` -- use the `setup_proc` command
+
+* `no`  -- do not use the `setup_proc` command
+
+* `ask` -- to prompt for `yes` or `no` for each schedule
+
+If the option is not used, it defaults to `no`.
+
+NOTE: The _fesh_ program was expanded to support an environment
+variable, `FESH_GEO_USE_SETUP_PROC`, and a command line option, `-u`,
+to set the answer for an interactive prompt for the whether or not to
+use `setup_proc` when __drudg__ing geodesy schedules. Please see
+``**fesh -h**`` for more information.
+
+Thanks to Jon Quick (HartRAO) and Marjolein Verkouter (JIVE) for
+suggesting this option. They also suggested that it may be utilized as
+part of future features for additional checking and resetting of the
+system.
+
+[appendix]
+
+== Thread procedure
+
+NOTE: This can be used for any system with a Mark 5C or FlexBuff
+recorder, not just one with a DBBC3.
+
+When a Mark 5C or FlexBuff recorder is in use, _drudg_ can optionally
+insert a `thread__suffix__` procedure in each setup procedure (where
+`__suffix__` is a mode specific suffix, e.g., `01`). This can be used
+to control whether the recordings for an experiment is multi-threaded
+or single thread per file.
+
+The contents of the procedure is same for every mode in the schedule.
+This feature is controlled by the `vdif_single_thread_per_file` option
+in _skedf.ctl_ control file. The option only needs to be used by
+stations that need to a single thread per file. If the option is not
+present, no ``thread__suffix__`` procedure is inserted.  If it is
+present, the possible setting are (where `_command_` is `mk5` or `fb`
+depending on the the type of recorder):
+
+* `yes` -- to store a single thread per file, in which case, the
+``thread__suffix__`` procedure contents are:
+
++
+[subs="+quotes"]
+....
+_command_=datastream=clear
+_command_=datastream=add:{thread}:*
+_command_=datastream=reset
+....
+
+* `no` -- for normal multi-threaded recordings, in which case, the
+``thread__suffix__`` procedure contents are:
+
++
+[subs="+quotes"]
+....
+_command_=datastream=clear
+_command_=datastream=reset
+....
+
+
+* `ask` -- to be prompted once per schedule for what to do
+
+If you use the `yes` option, the `scan_check` command will not work
+properly, you should comment it out or remove it from your `checkfb`
+and/or `check5c` procedure. Alternately, if you use `yes` only
+sometimes, you may want to edit the procedure depending on your
+choice. We are looking into a mechanism to automate this. We are also
+looking into how to support `scan_check` for `yes`.
+
+NOTE: The _fesh_ program was expanded to support an environment
+variable, `FESH_GEO_VDIF_SINGLE_THREAD_PER_FILE`, and a command line
+option, `-T`, to set the answer for an interactive prompt for the
+whether or not to use a single thread per file when __drudg__ing
+geodesy schedules. Please see ``**fesh -h**`` for more information.
+
+[appendix]
+
+== Recorder tuning
+
+This appendix describes changes that can be made to optimize the
+configuration of the Mark 5C and FlexBuff recorders.
+
+NOTE: This can be used for any system with a Mark 5C or FlexBuff
+recorder, not just one with a DBBC3..
+
+=== mk5c_config/fb_config procedure
+
+Each mode SNAP setup procedure produced by _drudg_ for Mark 5C and
+FlexBuff recorders includes a call to a `mk5c_config`/`fb_config` SNAP
+procedure, depending on the type of recorder. This procedure call is
+inserted immediately after the `mk5c_mode`/`fb_mode` command (and
+after the optional <<Thread procedure>> call, if present). The
+procedure is mode independent, i.e., the same procedure is used for
+all modes.
+
+This procedure is a local `station` library procedure to allow tuning
+of the configuration of _jive5ab_ for the specifics of the recorder,
+including overriding the "`default`" configuration, described next
+below, given by the `mk5c_mode`/`fb_mode` command in the setup
+procedure..
+
+=== Default configuration
+
+The `mk5c_mode`/`fb_mode` command sends configuration information,
+beyond what is set with `mode`,  depending on which recorder is
+selected in _equip.ctl_, `mk5c` or `flexbuff`, and the total data
+rate. It does _not_ depend on which command is used; `fb_mode` is just
+an alias for `mk5c_mode`. The commands sent also depend on the data
+type, VDIF or 5B/Ethernet. All the cases are listed below.
+
+TIP: You can see the full details of the FS setup of the recorder by
+the `mk5c_mode`/`fb_mode` command by using `*echo=on*` before the
+command and `*echo=off*` afterwards.
+
+==== FlexBuff recorder
+
+. Setting `mtu`:
+
++
+
+The `mtu` command sent to the recorder depends on the data type:
+
+.. VDIF data
+
+  mtu = 9000 ;
+
+.. 5B/Ethernet data
+
+   mtu = 6000 ;
+
+. Setting `net_protocol`:
+
++
+
+There is a variable field `_socketbuffer_` in the `net_protocol` command sent
+to the recorder. Its value is independent of the data type.
+
++
+[subs="+quotes"]
+....
+net_protocol = udpsnor : _socketbuffer_ : 256000000 : 4 ;
+....
+
++
+
+Where the _socketbuffer_ field depends on the total data rate:
+
+*   32000000 -- data rate < 1 Gbps
+*   64000000 -- 1 Gbps < data rate <= 4 Gbps
+*  128000000 -- data rate > 4 Gbps
+
++
+
+The _socketbuffer_ parameter is an important setting for trying to minimize
+risk of packet loss when starting the recording. For (very) high data rates,
+the `mk5c_config`/`fb_config` procedure can be used to increase the
+_socketbuffer_ size to values appropriate for that. This assumes that the
+FlexBuff has been tuned (especially the kernel network buffer sizes) along the
+lines of the FlexBuff tuning documentation at
+https://www.jive.eu/~verkout/flexbuff/flexbuf.recording.txt.
+
+. Setting `record = nthread`:
+
++
+
+There is a variable field `_nWriters_` in the `record = nthread` command sent
+to the recorder. Its value is independent of the data type.
+
++
+
+[subs="+quotes"]
+....
+record = nthread : _nWriters_ ;
+....
+
++
+
+where `_nWriters_` is calculated as `max( _data_rate_ / 6 + 1, 2)` and
+`_data_rate_` is the total data rate in Gbps.
+
+==== Mark 5C recorder
+
+. Setting `net_protocol`:
+
++
+
+The `net_protocol` command sent to the recorder is independent of the data
+type:
+
+  net_protocol = : 128k : 2M : 4;
+
+. Setting `packet`:
+
++
+
+The `packet` command sent to the recorder depends on the data type:
+
+.. VDIF data
+
+  packet = 36 : 0 : 8032 : 0 : 0 ;
+
+.. 5B/Ethernet data
+
+  packet = 36 : 0 : 5008 : 0 : 0 ;
+
+=== Overriding the defaults
+
+You can override the commands sent by the `mk5c_mode`/`fb_mode`
+command or add more by putting them in your local
+`mk5c_config`/`fb_config` procedure. This works because
+`mk5c_config`/`fb_config` is called after `mk5c_mode`/`fb_mode`
+command (_and_ after the call to the optional <<Thread procedure>>, so
+it can overridden by the same mechanism) in the setup procedure. An
+example of local customization is shown in the
+<<Changing net_protocol>> subsection below.
+
+CAUTION: If you put any commands in `mk5c_config`/`fb_config` that depend on
+the data type, VDIF or 5B/Ethernet, you would need to change them if there is a
+change in the data type. This is not a concern for most stations.
+
+==== Changing net_protocol
+
+If you use different values for `net_protocol`, you can leave any field blank
+that your don't need to change from what the FS has already sent. For example
+to only set the _socketbuffer_ size to `64000000`, use:
+
+....
+net_protocol = : 64000000
+....
 
 [appendix]
 
@@ -1397,7 +1453,8 @@ inconsistent with the FS configuration and may lead to problems.
 === Check the mode
 
 After the Core3H boards have been configured, you should check the
-mode as described in the <<Checking the mode>> subsection above.
+mode as described in the <<Checking the mode>> subsection above in the
+main document.
 
 [appendix]
 
@@ -1503,3 +1560,4 @@ without `force` to check the DBBC3 configuration, the
 re-sync the boards.
 
 ====
+
