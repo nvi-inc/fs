@@ -287,9 +287,12 @@ void dbbc3_core3h_modex(command,itask,ip)
                     m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
                     shm_addr->dbbc3_core3h_modex[i].start.start=0;
                     shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
-                    /* invalidate old masks so no Tsys logging */
+                    /* invalidate old masks so no Tsys logging or threads */
                     shm_addr->dbbc3_core3h_modex[i].mask2.state.known=0;
                     shm_addr->dbbc3_core3h_modex[i].mask1.state.known=0;
+                    /* other stuff to invalidate so not displayed with '?' */
+                    shm_addr->dbbc3_core3h_modex[i].decimate.state.known=0;
+                    shm_addr->dbbc3_core3h_modex[i].samplerate.state.known=0;
                 } else {
                     m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
                     shm_addr->dbbc3_core3h_modex[i].start.start=1;
