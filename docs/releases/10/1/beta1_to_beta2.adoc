@@ -22,7 +22,7 @@
 
 = FS 10.1.0-beta1 to FS 10.1.0-beta2 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 4.5 - April 2022
+Version 4.6 - April 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -117,6 +117,11 @@ Except as indicated, the actions in the next step should be performed
 as _oper_.
 
 === Local customizations
+
+. Install the new (default) _erchk_ control file.
+
+  cd /usr2/control
+  cp /usr2/fs/st.default/control/erchk.ctl .
 
 . Make sure all lines with _xterm_ in _stpgm.ctl_ use `x` as the
 second field.
@@ -234,6 +239,84 @@ This was probably benign since it was unlikely that two channels
 represented by the top four mask bits were the only ones with two-bit
 sampling. This would only have affected systems with a FiLa10G.
 
+. Log phase-cal tones, for RDBEs, that have spacings of arbitrary
+multiples of 1 MHz.
+
++
+
+Previously, tones were logged for a 5 MHz spacing regardless of the
+actual spacing.
+
++
+[%collapsible]
+====
+
+In practice, the only other phase-cal spacing in use was 10 MHz. In
+that case, the RDBEs and the FS were still being setup for 5 MHz
+spacing. Because of where the first tones happened to fall, this
+resulted in the even numbered multiples of 5 MHz being logged even
+though they did not have any power.
+
+If the RDBEs and the FS had been setup for 10 MHz spacing, the tones
+logged with no power would have been the odd multiples of 5 MHz.  Now
+only the tones expected to have power, multiples of 10 MHz, will be
+logged, assuming a correct 10 MHz spacing setup is used.
+
+For troubleshooting purposes, it may be useful to look at the tones
+for all one MHz multiples. This can be accomplished by setting the
+RDBEs and FS up for one MHz phase-cal spacing. In this case, the
+multiples of one MHz with power should correspond to the actual
+positions of the tones. For example, if the first tone actually occurs
+at 1.4 MHz in the band and the RDBE and FS are setup up for one MHz
+spacing, the 0^th^ one MHz tone, corresponding to 0.4 MHz, should not
+have power. In this case, the first multiple of one MHz with power
+should be the 1^st^. The phase-cal offset in the `lo` command is
+ignored.
+
+====
+
+. Add control file for _erchk_ (closing
+ https://github.com/nvi-inc/fs/issues/774[#174]).
+
++
+
+The _erchk_ program now uses a control file, _erchk.ctl_, which can be
+customized locally to change how errors are displayed.
+
++
+[%collapsible]
+====
+
+To give stations more control of how errors are displayed, the _erchk_
+program has been expanded to read a control file,
+_/usr2/control/erchk.ctl_. The stations can customize it as they see
+fit. A default/example file _/usr2/fs/st.default/control/erchk.ctl_
+has been provided. It recreates the behavior of _erchk_ before this
+update with the exception that `sp` errors are no longer suppressed
+(as was requested in https://github.com/nvi-inc/fs/issues/174[#174]).
+A comment is included explaining how to restore suppression of `sp`
+errors, if that is desired. The complete syntax of the file is
+explained in the comments.
+
+The syntax of he control file is fairly simple, but it is important to
+be careful when modifying it. Some changes can prevent errors from
+being displayed and therefore make them harder to notice since they
+only be in the log display. The default/example file is configured to
+cause all errors to be displayed.
+
+NOTE: As before, the `tnx` command removes display of the selected
+errors from the _erhck_ window (as well as log display window).
+
+If _/usr2/control/erchk.ctl_ cannot be found or has syntax errors,
+messages with an explanation of how to fix the problem or find more
+information are provided. The messages are organized so they will be
+visible if _erchk_ is run either manually or in a window by the FS or
+a window manager. If there is an error, or just to check to see if
+there is one, the _erchk_ program can be run manually without the FS.
+This can be tried repeatedly until all issues are resolved.
+
+====
+
 . Corrections for errors/oversights introduced in _10.1.0-beta1_:
 
 .. Fixed `core3h_mode` (no parameters) to report errors for any board
@@ -248,9 +331,12 @@ DBBC3, but apparently had never caused an issue.
 
 === drudg changes
 
-_drudg_ opening message date is `2022-03-29`.
+_drudg_ opening message date is `2022-04-08`.
 
 . Corrections for errors/oversights introduced in _10.1.0-beta1_:
 
 .. Remove `ready` procedure from _.snp_ when recorder `none` is
 selected.
+
+.. Correct `endef` to `enddef` when generating `thread...` procedures
+ (closing https://github.com/nvi-inc/fs/issues/177[#177]).
