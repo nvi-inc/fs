@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 NVI, Inc.
+ * Copyright (c) 2021, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -28,7 +28,7 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-get_dbbc3time(centisec,fm_tim,iold)
+int get_dbbc3time(centisec,fm_tim,iold)
 int centisec[6];
 int fm_tim[6];
 int *iold;
@@ -36,14 +36,26 @@ int *iold;
     int it[6],seconds;
     rte_time(it,it+5);
     rte2secs(it,&seconds);
-    time_t now = seconds;
 
-      int iping=shm_addr->dbbc3_tsys_data.iping;
-      *iold=seconds-shm_addr->dbbc3_tsys_data.data[iping].last;
-      int secs=shm_addr->dbbc3_tsys_data.data[iping].ifc[shm_addr->dbbc3_iscboard-1].time;
+    if(DBBC3_DDCU == shm_addr->equip.rack_type &&
+       shm_addr->dbbc3_ddcu_v<125 ||
+       DBBC3_DDCV == shm_addr->equip.rack_type &&
+       shm_addr->dbbc3_ddcv_v<125)
+      return -1;
 
-      memcpy(centisec,shm_addr->dbbc3_tsys_data.data[iping].centisec,
-              6*sizeof(centisec[0]));
-      secs2rte(&secs,fm_tim);
-	  fm_tim[0]=shm_addr->dbbc3_mcdelay;
+    int iping=shm_addr->dbbc3_tsys_data.iping;
+    /* trap 1 for v124 in case that is loaded despite control files,
+       multiple tries will get a better value if not v124 */
+    if (1>=shm_addr->dbbc3_tsys_data.data[iping].ifc[shm_addr->dbbc3_iscboard-1].raw_timestamp)
+       return -2;
+
+    *iold=seconds-shm_addr->dbbc3_tsys_data.data[iping].last;
+    int secs=shm_addr->dbbc3_tsys_data.data[iping].ifc[shm_addr->dbbc3_iscboard-1].time;
+
+    memcpy(centisec,shm_addr->dbbc3_tsys_data.data[iping].centisec,
+       6*sizeof(centisec[0]));
+    secs2rte(&secs,fm_tim);
+    fm_tim[0]=shm_addr->dbbc3_mcdelay;
+
+    return 0;
 }

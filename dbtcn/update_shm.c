@@ -67,6 +67,7 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         cycle->ifc[i].lo=shm_addr->lo.lo[i];
         cycle->ifc[i].sideband=shm_addr->lo.sideband[i];
         cycle->ifc[i].delay=t->core3h[i].pps_delay;
+        cycle->ifc[i].raw_timestamp=t->core3h[i].timestamp;
         if(v124)
             cycle->ifc[i].time=seconds;
         else

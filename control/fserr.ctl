@@ -7301,6 +7301,15 @@ rdt?W: Error from select(), see above message for details.
 RZ   -2
 rdt?W: multicast may not be running, no message received
 ""
+SC   29
+setcl: DBBC3 multicast time now okay.
+""
+SC   28
+setcl: WARNING: DBBC3 multicast time was older than 20 seconds or not received yet.
+""
+SC   27
+setcl: WARNING: Core3H board?W (selected in dbbc3.ctl) is not synced (or VDIF epoch seconds is 0 or 1).
+""
 SC   -1
 setcl: incorrect number of class buffers.
 ""
@@ -7377,7 +7386,10 @@ SC  -25
 setcl: rte_check got error from times(), see above for error
 ""
 SC  -26
-setcl: DBBC3 time was older than 20 seconds for four tries
+setcl: DBBC3 firmware version must be 125 or later to get time from multicast.
+""
+SC  -29
+setcl: Core3H multicast time still bad after four tries.
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W
