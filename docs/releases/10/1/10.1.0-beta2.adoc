@@ -20,9 +20,9 @@
 
 :doctype: book
 
-= FS 10.1.0 Beta1 Update Notes
+= FS 10.1.0 Beta2 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 4.5 - April 2022
+Version 4.6 - April 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -260,11 +260,21 @@ with:
        cd /usr2/st
        make rmdoto rmexe all
 
-IMPORTANT: If your station code uses `refrw()`, the _make_ will fail.
-You will need to update to use `refrw_bad()` or `refrwn()`. The use of
+[IMPORTANT]
+====
+
+If your station code uses `refrw()`, the _make_ will fail. You will
+need to update to use `refrw_bad()` or `refrwn()`. The use of
 `refrw_bad()` should be sufficient in the short-term, but you should
-change to `refrwn()` when convenient. Please see the
-<<refrw_bad,refrw_bad()>> FS change below from more details.
+change to `refrwn()` when convenient.
+
+For more information, please see the <<refrw_bad,refrw_bad()>> FS
+change item (if that link doesn't work in your browser: click on
+<<refraction,Improve refraction calculations>>, open the *Details*
+toggle below that location by clicking on it, go `Back` in the
+browser, and finally click on the original link).
+
+====
 
 === Reboot
 
@@ -289,9 +299,15 @@ specify the `equipment` option with the correct values if you aren't
 already. This is the safest way to specify your equipment in
 _skedf.ctl_. However, other combinations are possible depending on
 your needs. Due to bugs in _drudg_ these options were not operating
-correctly in version _10.0.0_. For more information, please the
-<<fix_equipment,Fix drudg equipment options>> change in the
-<<drudg changes>> section below.
+correctly in version _10.0.0_.
+
++
+
+For more information, please see the <<fix_equipment,Fix drudg
+equipment options>> _drudg_ change item (if that link doesn't work in
+your browser: click on <<skedf,Changes to skedf.ctl options>>, open
+the *Details* toggle below that location by clicking on it, go `Back`
+in the browser, and finally click on the original link).
 
 . If present, remove use of _setsid_ from _stpgm.ctl_.
 
@@ -346,9 +362,16 @@ Five additional formatting errors are now reported for _.rxg_ files.
 While it is unlikely, if your _.rxg_ files have any of these errors,
 they will be reported when you try to run the FS. Only one error is
 reported at a time. You will need to correct each error in turn until
-the FS starts successfully. The new errors reported are described in
-the <<additional_rxg_errors,Additional .rxg file errors>> change in
-the <<FS changes>> sub-section below.
+the FS starts successfully.
+
++
+
+The new errors reported are described in the
+<<additional_rxg_errors,Additional .rxg file errors>> FS change item
+(if that link doesn't work in your browser: click on
+<<rxgfiles,Improve error messages when reading .rxg files>>, open the
+*Details* toggle below that location by clicking on it, go `Back` in
+the browser, and finally click on the original link).
 
 . If you have a Mark 5C and/or FlexBuff recorder, use _pfmed_ to add
 `mk5c_config` and/or `fb_config` procedures to your `station`
@@ -381,9 +404,13 @@ observing mode. They can be empty if your recorders don't need tuning
 or you aren't aware of what tuning is needed. These procedures are
 called after the `mk5c_mode` or `fb_mode` commands, depending on the
 type of recorder, to allow the default configuration to be overridden.
+
++
+
 The default configuration is described in the
 <<dbbc3_ops.adoc#_default_configuration,Default configuration>>
-subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>
+subsection of the <<dbbc3_ops.adoc#_recorder_tuning,Recoder tuning>>
+appendix of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>
 and in the `help` pages for `mk5c_mode` and `fb_mode`. The commands in
 these procedures should be mode independent. Mode dependent tuning
 should be handled differently; perhaps by inserting commands directly
@@ -425,9 +452,9 @@ present.
 . <<dbbc3config,FS DBBC3 Configuration>>[[dbbc3config]]: If you have a
 DBBC3, you should make the configuration changes described in the
 <<dbbc3_ops.adoc#_configuring_the_fs_for_use_with_a_dbbc3,Configuring
-the FS for use with a DBBC3>> appendix of the <<dbbc3_ops.adoc#,FS
-10.1 DBBC3 Operations Manual>>. If you expect to get a DBBC3, these
-changes can be deferred until then.
+the FS for use with a DBBC3>> section of the <<dbbc3_ops.adoc#,FS 10.1
+DBBC3 Operations Manual>>. If you expect to get a DBBC3, these changes
+can be deferred until then.
 
 . If you are using _tcsh_ as your login shell for _oper_ or _prog_ (or
 AUID accounts) and have not already done so, adjust _~/.xsession_ .
@@ -555,8 +582,11 @@ everything works as you expect for normal operations.
 
 Previously, the _onoff_ program did not detect errors reported by
 _antcn_; now it does. It seems unlikely that that this will cause a
-problem, but if it does, please see <<onoff_antcn,onoff now detects
-antcn errors>> for a workaround.
+problem, but if it does, please see the <<onoff_antcn,onoff now
+detects antcn errors>> FS change item (if that link doesn't work in
+your browser: click on <<onoff,Improve onoff>>, open the *Details*
+toggle below that location by clicking on it, go `Back` in the
+browser, and finally click on the original link)..
 
 === Consider when to update your back-ups
 
@@ -579,6 +609,14 @@ of the changes since that release.
 There are separate sub-sections with summaries of changes in the FS
 and _drudg_.
 
+Clickable links such as
+https://github.com/nvi-inc/fs/issues/36[#36] connect to specific
+issues
+reported at https://github.com/nvi-inc/fs/issues.
+
+A detailed list of changes can be found using the `git log` command
+from within the FS _git_ repo directory, usually _/usr2/fs-git_.
+
 Each change is listed as a numbered title, then usually a few summary
 sentences, followed by a _toggle_:
 
@@ -587,19 +625,12 @@ sentences, followed by a _toggle_:
 Details are shown here.
 ====
 
-that can be clicked to toggle showing (or not showing) the details.
+that can be clicked on to toggle showing (or not showing) the details.
 In this way, you can view the summary as a list and only reveal the
 details of items that interest you. The summary sentences and/or the
 details toggle may be omitted if they would not add any new
 information, usually because it is already covered in the numbered
 title item and/or the details are very brief.
-
-Clickable links such as
-https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
-reported at https://github.com/nvi-inc/fs/issues.
-
-A detailed list of changes can be found using the `git log` command
-from within the FS _git_ repo directory, usually _/usr2/fs-git_.
 
 === FS changes
 
@@ -661,7 +692,7 @@ of DBBC3 functionality; Uwe Bach (Effelsberg) and Marjolein Verkouter
 
 ====
 
-. Improve _onoff_
+. <<onoff,Improve onoff>>[[onoff]]:
 
 +
 
@@ -1091,7 +1122,13 @@ equipment.
 
 Use of this command in _drudg_ generated _.snp_ files is controlled
 with the `use_setup_proc` option in _skedf.ctl_. The default is to not
-use it, which is the same as the previous behaviour.
+use it, which is the same as the previous behaviour. For more
+information on the _skedf.ctl_ option, see the
+<<use_setup_proc,use_setup_proc>> _drudg_ change item (if that link
+doesn't work in your browser: click on <<skedf,Changes to skedf.ctl
+options>>, open the *Details* toggle below that location by clicking
+on it, go `Back` in the browser, and finally click on the original
+link).
 
 CAUTION: The previous behavior of re-executing a setup procedure for
 each recording can provide some "`self-healing`" of the equipment
@@ -1151,13 +1188,13 @@ depending on which recorder is selected in _equip.ctl_, `mk5c` or
 `flexbuff`, the total data rate, and the data type, VDIF or
 5B/Ethernet. The updated default configuration is described in the
 <<dbbc3_ops.adoc#_default_configuration,Default configuration>>
-subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
+subsection of the <<dbbc3_ops.adoc#_recorder_tuning,Recoder tuning>>
+appendix of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
 
-All the settings can be overridden by the `mk5c_config` (or
-`fb_config`, depending on the recorder type selected when running
-_drudg_) local procedure. See the
-<<dbbc3_ops.adoc#_overriding_the_defaults,Overriding the defaults>>
-subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
+All the settings can be overridden by the `mk5c_config` or `fb_config`
+local procedures, depending on the recorder type selected when running
+_drudg_). See the <<dbbc3_ops.adoc#_overriding_the_defaults,Overriding
+the defaults>> subsection of the same appendix.
 
 NOTE: Another change, <<fbsyns,FlexBuff synonyms>> in this document,
 makes `mk5c_mode` available with the synonym `fb_mode`.
@@ -1448,7 +1485,7 @@ eliminate these errors entirely.
 +
 
 In _gnplt_, fix issues with zooming, large numbers of detectors. In
-gndat, remove debug output.
+_gndat_, remove debug output.
 
 +
 [%collapsible]
@@ -1615,7 +1652,7 @@ verify the fix.
 
 ====
 
-. Improve refraction calculations
+. <<refraction,Improve refraction calculations>>[[refraction]]:
 
 +
 
@@ -1652,8 +1689,7 @@ determined, when it is convenient.
 Thanks to Jon Quick (HartRAO) for pointing out this error and
 supplying the corrected `refrwn()` in 2006.
 
-.. Add new refraction calculations to _poclb.a_ (includes references
-for them and `refrwn()`)
+.. Add new refraction calculations to _poclb.a_
 
 +
 
@@ -1692,7 +1728,7 @@ are used for the meteorological parameters, which limits the accuracy.
 For `fivept`, the FORTRAN `refr()` function is used, which also has
 fixed meteorological parameters.
 
-.. Locate references for `refrwn()` and `refr()`
+.. Provide references for `refrwn()` and `refr()`
 
 +
 
@@ -1956,7 +1992,7 @@ Thanks to Stuart Weston (Warkworth) for reporting this.
 
 ====
 
-. Improve error messages when reading _.rxg_ files
+. <<rxgfiles,Improve error messages when reading .rxg files>>[[rxgfiles]]:
 
 +
 
@@ -2139,11 +2175,11 @@ and references to it.
 +
 
 In the update notes for FS _10.1.0_ (this document) the list of FS and
-_drudg_ changes now show a summary line and a _toggle_ to open a more
-detailed description. This should make the list of changes easier to
-review while allowing a reader to view more details for items they
-find interesting. We hope this will make the update notes easier to
-read.
+_drudg_ changes now typically show a numbered title, a summary
+paragraph, and a *Details* _toggle_ to show (or hide) a more detailed
+description. This should make the list of changes easier to review
+while allowing a reader to view more details for items they find
+interesting. We hope this will make the update notes easier to read.
 
 +
 
@@ -2156,6 +2192,16 @@ _different_ document, previously opened toggles will be closed because
 the web page has been reloaded. This makes it a little more difficult
 to return to where you were reading in the original document if it was
 within opened text.
+
+* Links that point into a closed *Details* toggle do not work in all
+browsers. To help with that, when these links appear in the text of
+this document, additional instructions with a second link are
+provided. If the original link into the *Details* doesn't work, an
+alternate approach is to follow the second link, click on the
+*Details* toggle below that location to open it, go *Back* in the
+browser, and then click on the original link. At least some
+Chromium-based browsers appear to able to follow links into into
+closed *Details* toggles.
 
 +
 
@@ -2231,7 +2277,7 @@ to identify which files are for which combinations.
 
 ====
 
-. Add other miscellaneous fixes
+. Add other miscellaneous bug fixes
 
 +
 
@@ -2583,11 +2629,12 @@ second eight, the second Ethernet output.
 =====
 
 At this time it is only considered safe to set the configuration of
-then Core3H boards with the DBBC3 boot configuration file. As a result
-the _drudg_ generated setup procedures only _check_ the configuration
-of the Core3H boards. Once it is possible to set the Core3H boards
-remotely. The setup procedure can be run with `force` as its argument
-set the configuration manually. For example:
+the Core3H boards with the DBBC3 boot configuration file. As a result
+the _drudg_ generated setup procedures as called from schedules only
+_check_ the configuration of the Core3H boards. Once it is possible to
+set the Core3H boards over the communication interface, the setup
+procedure can be run with `force` as its argument to set the
+configuration from the FS manually. For example:
 
   setup01=force
 
@@ -2599,11 +2646,16 @@ set the configuration manually. For example:
 A full check (or setup) of the Core3H boards will take longer than
 schedules allow for setup procedures to execute. As a result, it is
 strongly recommended that the new `use_setup_proc` _drudg_ option in
-_skedf.ctl_ (see <<use_setup_proc,use_setup_proc>> below) be enabled
-for use with DBBC3s. This will cause the mode to be checked only at
-the start of the schedule. If the schedule is started at least a few
-minutes ahead of time, there should be no delays in schedule
-execution due to the setup procedure.
+_skedf.ctl_ be enabled for use with DBBC3s. This will cause the mode
+to be checked only at the start of the schedule. If the schedule is
+started at least a few minutes ahead of time, there should be no
+delays in schedule execution due to the setup procedure.
+
+For more information, please see the <<use_setup_proc,use_setup_proc>>
+_drudg_ change item (if that link doesn't work in your browser: click
+on <<skedf,Changes to skedf.ctl options>>, open the *Details* toggle
+below that location by clicking on it, go `Back` in the browser, and
+finally click on the original link).
 
 =====
 
@@ -2662,8 +2714,9 @@ recorder configuration.
 
 For more information see the
 <<dbbc3_ops.adoc#_mk5c_configfb_config_procedure,mk5c_config/fb_config
-procedure>> subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3
-Operations Manual>>.
+procedure>> subsection of the
+<<dbbc3_ops.adoc#_recorder_tuning,Recoder tuning>> appendix of the
+<<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
 
 ====
 
@@ -2702,7 +2755,7 @@ cleaned-up.
 
 ====
 
-. Changes to _skedf.ctl_ options
+. <<skedf,Changes to skedf.ctl options>>[[skedf]]:
 
 +
 
@@ -2756,7 +2809,8 @@ gap. The schedule can be broken into while it is waiting for the next
 scan to start, the intensive schedule run, and then the original
 schedule rejoined for the next scan.
 
-.. <<use_setup_proc,use_setup_proc>>[[use_setup_proc]]: Add `use_setup_proc` option
+.. <<use_setup_proc,use_setup_proc>>[[use_setup_proc]]: Add
+`use_setup_proc` option
 
 +
 
