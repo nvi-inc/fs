@@ -144,8 +144,14 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options,kmon)
             ierr = -524;
             goto error;
         } else if (!dest1) {
-            ierr = -525;
-            goto error;
+            if(DBBC3_DDCV!=shm_addr->equip.rack_type) {
+              ierr = -525;
+              goto error;
+            } else {
+              m5state_init(&lclm.none1.state);
+              lclm.none1.none1=1;
+              lclm.none1.state.known=1;
+            }
         }
     }
     /* format output buffer */

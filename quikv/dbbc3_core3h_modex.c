@@ -70,11 +70,13 @@ static void add_check_queries( out_recs, out_class, board, all)
         cls_snd(out_class, str, strlen(str) , 0, 0);
         ++*out_recs;
 
-        strcpy(str,"core3h=");
-        strcat(str,board);
-        strcat(str,",destination 1");
-        cls_snd(out_class, str, strlen(str) , 0, 0);
-        ++*out_recs;
+        if(DBBC3_DDCV!=shm_addr->equip.rack_type) {
+            strcpy(str,"core3h=");
+            strcat(str,board);
+            strcat(str,",destination 1");
+            cls_snd(out_class, str, strlen(str) , 0, 0);
+            ++*out_recs;
+        }
     }
 }
 static void check_board(iboard,board,ip,ierr_out,name)

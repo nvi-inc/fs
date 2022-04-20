@@ -210,7 +210,9 @@ The display values for the masks are enclosed in curly braces,
 This indicates that there is no output for that mask even though it is
 non-zero. The destination is not set by this command, it must be set
 by other means, usually the boot configuration or low-level
-'core3h=...' SNAP commands.
+'core3h=...' SNAP commands. For DDC_V, curly braces are always used
+for 'mask2'/'mask4' (if non-zero) since that output is inherently
+disabled.
 
 For the DDC_U personality, the display values for 'mask2' or 'mask1'
 will be followed by the values of mask4 or mask3, respectively, in
