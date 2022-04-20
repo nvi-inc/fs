@@ -193,7 +193,12 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
             snprintf(output,2,"%d",iboard);
             break;
         case 2:
+            if((lclc->mask2.state.known && lclc->mask2.mask2 ||
+                lclm->mask4.state.known && lclm->mask4.mask4) &&
+                lclm->none1.state.known && lclm->none1.none1)
+                    strcpy(output,"{");
             if(lclc->mask2.state.known && lclc->mask2.mask2) {
+                output=output+strlen(output);
                 strcpy(output,"0x");
                 m5sprintf(output+2,"%x",&lclc->mask2.mask2,&lclc->mask2.state);
             }
@@ -206,9 +211,20 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
                 output=output+strlen(output);
                 strcpy(output,"]");
             }
+            if((lclc->mask2.state.known && lclc->mask2.mask2 ||
+                lclm->mask4.state.known && lclm->mask4.mask4) &&
+                lclm->none1.state.known && lclm->none1.none1) {
+                    output=output+strlen(output);
+                    strcpy(output,"}");
+            }
             break;
         case 3:
+            if((lclc->mask1.state.known && lclc->mask1.mask1 ||
+                lclm->mask3.state.known && lclm->mask3.mask3) &&
+                lclm->none0.state.known && lclm->none0.none0)
+                    strcpy(output,"{");
             if(lclc->mask1.state.known) {
+                output=output+strlen(output);
                 strcpy(output,"0x");
                 m5sprintf(output+2,"%x",&lclc->mask1.mask1,&lclc->mask1.state);
             }
@@ -219,6 +235,12 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
                 m5sprintf(output+3,"%x",&lclm->mask3.mask3,&lclm->mask3.state);
                 output=output+strlen(output);
                 strcpy(output,"]");
+            }
+            if((lclc->mask1.state.known && lclc->mask1.mask1 ||
+                lclm->mask3.state.known && lclm->mask3.mask3) &&
+                lclm->none0.state.known && lclm->none0.none0) {
+                    output=output+strlen(output);
+                    strcpy(output,"}");
             }
             break;
         case 4:
@@ -301,15 +323,13 @@ void dbbc3_core3h_modex_mon(output,count,lclc,lclm)
                 strcat(output,BAD_VALUE);
             break;
         case 8:
-            if(!lclm->sync.state.known) {
-                *count=-1;
-                break;
+            if(lclm->sync.state.known) {
+                ivalue = lclm->sync.sync;
+                if (ivalue >=0 && ivalue <NSYNC_KEY)
+                    strcat(output,sync_key[ivalue]);
+                else
+                    strcat(output,BAD_VALUE);
             }
-            ivalue = lclm->sync.sync;
-            if (ivalue >=0 && ivalue <NSYNC_KEY)
-                strcat(output,sync_key[ivalue]);
-            else
-                strcat(output,BAD_VALUE);
             break;
         default:
             *count=-1;
@@ -483,6 +503,64 @@ int dbbc3_core3h_2_splitmode(ptr,lclc,lclm) /* return values:
         }
 
     return -1;
+}
+
+int dbbc3_core3h_2_destination0(ptr,lclc,lclm) /* return values:
+                                     *  0 == no error
+                                     *  0 != error
+                                     */
+    char *ptr;           /* input buffer to be parsed */
+
+    struct dbbc3_core3h_modex_cmd *lclc;  /* result structure with parameters */
+    struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
+{
+    int i;
+    char string[]=  "Output 0 destination:";
+
+    m5state_init(&lclm->none0.state);
+
+    ptr=strstr(ptr,string);
+    if(ptr == NULL) {
+        return -1;
+    }
+
+    ptr=strtok(ptr+strlen(string)," \n\r");
+    if(ptr == NULL) {
+        return -1;
+    }
+
+    lclm->none0.none0= 0==strcmp(ptr,"none");
+    lclm->none0.state.known=1;
+    return 0;
+}
+
+int dbbc3_core3h_2_destination1(ptr,lclc,lclm) /* return values:
+                                     *  0 == no error
+                                     *  0 != error
+                                     */
+    char *ptr;           /* input buffer to be parsed */
+
+    struct dbbc3_core3h_modex_cmd *lclc;  /* result structure with parameters */
+    struct dbbc3_core3h_modex_mon *lclm;  /* result structure with parameters */
+{
+    int i;
+    char string[]=  "Output 1 destination:";
+
+    m5state_init(&lclm->none1.state);
+
+    ptr=strstr(ptr,string);
+    if(ptr == NULL) {
+        return -1;
+    }
+
+    ptr=strtok(ptr+strlen(string)," \n\r");
+    if(ptr == NULL) {
+        return -1;
+    }
+
+    lclm->none1.none1= 0==strcmp(ptr,"none");
+    lclm->none1.state.known=1;
+    return 0;
 }
 int dbbc3_core3h_status_fs(ptr,lclc,lclm) /* return values:
                                      *  0 == no error

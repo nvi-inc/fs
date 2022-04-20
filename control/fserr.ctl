@@ -2786,8 +2786,20 @@ error decoding status_fs response, see DR -500 error for contents
 DR -503
 error decoding splitmode response, see DR -500 error for contents
 ""
+DR -504
+error decoding destination 0 response, see DR -500 error for contents
+""
+DR -505
+error decoding destination 1 response, see DR -500 error for contents
+""
 DR -523
 could not find splitmode response
+""
+DR -524
+could not find destination 0 response
+""
+DR -525
+could not find destination 1 response
 ""
 DR -596
 Core3H board?W data sending state is not defined in the FS yet
@@ -2878,6 +2890,18 @@ Core3H board?W data format is not VDIF
 "
 DR -627
 Core3H board?W is not synced
+"
+DR -628
+core3h_mode mask1 for board?W is non-zero, but destination 0 is 'none'
+"
+DR -629
+core3h_mode mask1 for board?W is zero, but destination 0 is not 'none'
+"
+DR -630
+core3h_mode mask2 for board?W is non-zero, but destination 1 is 'none'
+"
+DR -631
+core3h_mode mask2 for board?W is zero, but destination 1 is not 'none'
 ""
 DS   -1
 Unable to open dsad.ctl file.

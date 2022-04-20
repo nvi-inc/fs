@@ -93,4 +93,12 @@ struct dbbc3_core3h_modex_mon {
     int sync;
     struct m5state state;
   } sync;
+  struct {
+    int none0;
+    struct m5state state;
+  } none0;
+  struct {
+    int none1;
+    struct m5state state;
+  } none1;
 };
