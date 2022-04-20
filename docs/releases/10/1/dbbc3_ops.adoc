@@ -26,7 +26,7 @@
 :toc:
 :experimental:
 E. Himwich, J. Quick
-Version 3.4 - April 2022
+Version 3.5 - April 2022
 
 == Introduction
 
@@ -86,13 +86,64 @@ features if you only use it as described in the
 
 +
 
-CAUTION: For the DDC personality, the Core3H board uses up to two
+CAUTION: For the DDC_U personality, the Core3H board uses up to two
 Ethernet outputs per board. The first output is used for the first
 eight BBCs; the second, for up to an additional eight. For each output
 that is active, the number of channels must be a power of two, from 1
 to 16, and all channels must use either only one-bit sampling or only
 two-bit sampling. If both outputs are in use for a board, they must
 use the same number of channels and bits per channel.
+
++
+
+An unusual feature of this command is that instead of having just the
+two typical _monitor_ and _command_ forms, it has monitor, _checking_,
+and _force_ forms. The latter is most similar to the typical command
+form, but rarely used.
+
++
+
++
+
+.Click here for more details on the command forms
+[%collapsible]
+====
+
+** Monitor form
+
++
+
+The monitor form is similar to the monitor form for other commands,
+which usually have no parameters and shows the actual hardware
+configuration. That will work for `core3h_mode`, which will query all
+the boards. In addition, you can query a single board by specifying
+its number as the first parameter.
+
+** Checking form
+
++
+
+The checking mode is an unusual feature of this command. Like a
+traditional command form, it is used with parameters to define the
+board configuration, but doesn't command the board with them. Instead,
+it compares them to the board's configuration to see if they agree.
+Any deviations are reported as errors. The actual configuration is
+reported in the same format as the monitor form. This form is used to
+check the configuration.
+
+** Force form
+
++
+
+The force form is similar to the checking mode, but a literal `force`
+is specified as the sixth parameter. In this case the board is
+actually configured. However, this is not recommended for operational
+use, except as part of determining the correct setup from a schedule,
+as described in the <<Setting the boot configuration for the mode>>
+subsection  below. The force form is most similar to the traditional
+command form.
+
+====
 
 * `dbbc3` -- Low-level DBBC3 communication
 
@@ -166,9 +217,9 @@ procedure with contents such as:
 
 IMPORTANT: If you place non-private IP address or FQDNs in your SNAP
 procedures, they will be visible to anyone who can access your log
-files. Even if this does not violate your local IT policies, it should
-probably be avoided. If possible, use only private addresses and/or
-locally defined aliases.
+files, e.g., on a log server. Even if this does not violate your local
+IT policies, it should probably be avoided. If possible, use only
+private addresses.
 
 ....
 core3h=1,tengbcfg eth0 ip=192.168.1.16 gateway=192.168.1.1 nm=27
@@ -231,6 +282,17 @@ for the schedule mode:
 
 . _drudg_ the schedule to make the _.prc_ (and _.snp_) file. For this
 example, the schedule is `r5012` for station `Kk`.
+
+. Make sure the DBBC3 has the firmware personality and version that
+you will use for the observation loaded and that _equip.ctl_ and
+_dbbc3.ctl_ agree with what is in the DBBC3.
+
++
+
+IMPORTANT: Although some modes can be observed with either the DDC_U
+or DDC_V personalities, the setup is different. The setup for DDC_U
+will not work for DDC_V, and vice-versa. This procedure will give you
+a personality, and possibly version, specific setup.
 
 . Start the FS
 
@@ -340,6 +402,12 @@ set the `destination` for output `0` to `none`. For all masks that
 have a non-zero mask, make sure the corresponding outputs (`0` for
 `mask1`, `1` for `mask2`) have an `__IP__:__port__` set for the
 `destination`.
+
++
+
+TIP: For DDC_V, you do not have to set `destination 1 none`. It is
+disabled by the firmware regardless of how it is set and the FS
+ignores it.
 
 ... Use `start vdif` after the `timesync` command, removing any `stop`
 command that may be present.
@@ -737,11 +805,13 @@ the control file if need be.
 
 NOTE: _setcl_ will only be able to get a useful time from the selected
 board if it is synced. _setcl_ detects a lack of sync when the Core3H
-board's time in the multicast is `00:00:00` on the first day of the
-current VDIF epoch (so twice a year for about one second each, it is
-possible for _setcl_ to incorrectly think the board is not synced). A
-lack of sync should also be shown as `unsynced` in the `core3h_mode`
-command monitor output.
+board's time in the multicast is `00:00:00` or `00:00:01` on the first
+day of the current VDIF epoch. As a result, twice a year for about two
+seconds each, _setcl_ can incorrectly think the board is not synced.
+Each run of _setcl_ tries to get the time for up to four attempts, so
+even if the first two tries incorrectly show the board as unsynced, a
+subsequent attempt should be okay. A lack of sync will also be shown
+as `unsynced` in the `core3h_mode` command monitor output.
 
 In any event, using _setcl_ to set the FS time this way will only be useful to
 level of stability of the delay of the multicast. Network congestion may also
@@ -1503,10 +1573,67 @@ can serve as a reminder that more steps are needed. Continue to the
 <<Sync time>> and then the <<Start data transmission>> subsections
 below for the steps to complete the setup.
 
-==== The details
+. Set the Core3H output ``destination``s
+
++
+
+The FS does not set the ``destination``s for the Core3H boards. When
+checking the configuration, it does verify that outputs that are not
+expected to be recorded have their `destination` set to `none` and
+outputs that are to be recorded do not. You will have to verify that
+that the outputs that are being recorded have the correct
+``destination`` addresses set.
+
++
+
+TIP: For DDC_V, you do not have to set `destination 1 none`. It is
+disabled by the firmware regardless of how it is set and the FS
+ignores it.
+
++
+
+You can check that the ``destination``s are set to `none` in the
+correct places with, e.g.:
+
+  core3h01
+
++
+
+NOTE: This will also check the other aspects of the Core3H board
+setup. Any non-`destination` related errors should also be resolved at
+this time.
+
++
+
+If any `destination` related errors are reported, you must correct
+them. You can use commands similar to those in the example in the
+<<Ethernet configuration>> subsection above, as needed. It is not
+necessary to reboot the DBBC3 to fix this.
+
++
+
+You can display the ``destination``s that are set for the `_n_`^th^
+board with:
+
++
+
+[subs="+quotes"]
+....
+  core3h=_n_,destination 0
+  core3h=_n_,destination 1
+....
+
++
+
+IMPORTANT: Depending on your site's IT rules, you may need to be
+careful to avoid recording public IP addresses in your experiment
+logs.
+
+==== The configuration details
 
 For each Core3H that is in use, the following information/commands
-will be sent, in this known-to-work order:
+will be sent when using `force`, in this known-to-work order:
+
 
 --
 
