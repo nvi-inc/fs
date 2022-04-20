@@ -64,6 +64,24 @@ int ip[5];                           /* ipc parameters */
 	goto error;
       }
 
+      if(shm_addr->equip.rack == DBBC3) {
+        int decimate0=0;
+        int decimate;
+        for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
+          if(shm_addr->dbbc3_core3h_modex[i].set) {
+            if(shm_addr->dbbc3_core3h_modex[i].decimate.state.known)
+              decimate=shm_addr->dbbc3_core3h_modex[i].decimate.decimate;
+            else
+              decimate=shm_addr->dbbc3_core3h_modex[i].samplerate.decimate;
+
+            if(decimate0 && decimate0!=decimate) {
+              ierr=-302;
+              goto error;
+            }
+            decimate0=decimate;
+         }
+      }
+
       if (command->equal != '=') {
 	if(13 == itask || 15 == itask ) {
 	  char *str;

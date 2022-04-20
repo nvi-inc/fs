@@ -151,7 +151,7 @@ The recorder bit mask, only, determines the Tsys data reporting.  When
 a FiLa10G is in use, 'drudg' always uses equivalent bit masks for
 'fila10g_mode=...' and 'mk5c_mode=...'/'fb_mode=...' commands, but the
 FiLa10G mask has no effect on the Tsys data reported. When a DBBC3 is
-use, the recorder bit mask is determined from the Core3h setup
+use, the recorder bit mask is determined from the Core3H board setup
 commands.
 
 For the 'mk5b_mode' command, only the upper or lower 32 bits of the
@@ -204,6 +204,29 @@ while recording is active, the command will cause an error response
 from the recorder and will not be effective.  The override is not
 available for 'mk5c_mode=...'.  Changing the mode while recording will
 probably cause problems with the recording and is not recommended.
+
+For DBBC3 racks there are two special cases, neither is expected to
+occur in normal operations:
+
+     (i) If the Core3H board setups use mixed one- and two-bit
+         sampling, the setup of recorder uses '1' for the number of
+         channels and bits per channel. This is a convenience so that
+         the recorder will accept the setup. The total data rate will
+         still be correct, which allows the recorder to return
+         accurate estimates of the remaining space.
+
+    (ii) Use of different decimations (or equivalently, sample rates)
+         for different Core3H boards in not currently supported and
+         will be trapped with an error. You can construct a magic mode
+         string that the recorder will accept if you use '1' for the
+         total data rate, number of channels, and bits per channels.
+         However, the recorder will not be able to return accurate
+         estimates of the remaining space. If you use the correct
+         total data rate, you can get accurate reports of the
+         remaining space. You can send your magic mode string to the
+         recorder along with setup described below in "Notes on the
+         default Ethernet recorder configuration" for a complete
+         recorder setup.
 
 Notes on the default Ethernet recorder configuration:
 

@@ -917,6 +917,9 @@ Sample rate must be a positive integer s/s.
 5T -301
 Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the sixth parameter.
 ""
+5T -302
+Mixed decimations for DBBC3 racks are not supported at this time for mk5c_mode/fb_mode.
+""
 5T -400
 error retrieving acknowledgement of command
 ""
