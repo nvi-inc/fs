@@ -202,7 +202,9 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
             }
             if(DBBC3_DDCU == shm_addr->equip.rack_type &&
               lclm->mask4.state.known && lclc->mask2.state.known &&
-              lclm->mask4.mask4 != lclc->mask2.mask2) {
+              lclm->mask4.mask4 != lclc->mask2.mask2 ||
+              DBBC3_DDCV == shm_addr->equip.rack_type &&
+              lclm->mask4.state.known && lclm->mask4.mask4) {
                 output=output+strlen(output);
                 strcpy(output,"[0x");
                 m5sprintf(output+3,"%x",&lclm->mask4.mask4,&lclm->mask4.state);
@@ -227,7 +229,10 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
                 m5sprintf(output+2,"%x",&lclc->mask1.mask1,&lclc->mask1.state);
             }
             if(DBBC3_DDCU == shm_addr->equip.rack_type &&
-              lclm->mask3.state.known && lclm->mask3.mask3 != lclc->mask1.mask1) {
+              lclm->mask3.state.known && lclc->mask1.state.known &&
+              lclm->mask3.mask3 != lclc->mask1.mask1 ||
+              DBBC3_DDCV == shm_addr->equip.rack_type &&
+              lclm->mask3.state.known && lclm->mask3.mask3) {
                 output=output+strlen(output);
                 strcpy(output,"[0x");
                 m5sprintf(output+3,"%x",&lclm->mask3.mask3,&lclm->mask3.state);

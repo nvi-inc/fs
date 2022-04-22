@@ -22,12 +22,12 @@ n           1 to 8, but is limited to the number of IF boards
 
 mask2:      VSI2 input bit-stream mask, usually hex, 32-bit maximum
             width, for example: 0xf, default 0. Must be null for
-            DDC_V. Null on display if zero or DDC_V. See the
-            'Comments' section for more details on display values.
+            DDC_V. See the 'Comments' section for the details of
+            the display values.
 
 mask1:      VSI1 input bit-stream mask, usually hex, 32-bit maximum
             width, for example: 0xf, default 0xffffffff. See the
-            'Comments' section for more details on display values.
+            'Comments' section for the details of the display values.
 
 decimation: decimation factor: 1-255. Default is inferred from
             'sample' (next parameter). For DDC_V, only '1' and '2' are
@@ -214,13 +214,15 @@ by other means, usually the boot configuration or low-level
 for 'mask2'/'mask4' (if non-zero) since that output is inherently
 disabled.
 
-For the DDC_U personality, the display values for 'mask2' or 'mask1'
-will be followed by the values of mask4 or mask3, respectively, in
-square brackets, '[...]', if the value of mask4 does not agree with
-'mask2', or mask3 does not agree with 'mask1'. In these cases, the
-masks are not configured correctly. It is a requirement for DDC_U
-operation that the mask4 and mask3 agree with 'mask2' and 'mask1',
-respectively.
+The display values for 'mask2' or 'mask1' will be followed by the
+values of 'mask4' or 'mask3', respectively, in square brackets,
+'[...]', if they do not have the expected values. For DDC_U, the value
+of 'mask4' should agree with 'mask2' and 'mask3' should agree with
+'mask1'. For the DDC_V personality, 'mask4' and 'mask3' (and additionally
+'mask2') should be zero. If the masks do not have the expected values
+they are not configured correctly. It is a requirement for DDC_U
+operation that the 'mask4' and 'mask3' agree with 'mask2' and 'mask1',
+respectively. For DDC_V, only 'mask1' should be non-zero.
 
 The meaning of the bits in the mask are given in the following table
 starting with the least significant bit. Mask1 represents the first

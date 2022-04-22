@@ -2933,6 +2933,15 @@ core3h_mode mask2 for board?W is non-zero, but destination 1 is 'none'.
 DR -631
 core3h_mode mask2 for board?W is zero, but destination 1 is not 'none'.
 ""
+DR -632
+core3h_mode mask2 for board?W should be zero, but is not.
+""
+DR -633
+core3h_mode mask3 for board?W should be zero, but is not.
+""
+DR -634
+core3h_mode mask4 for board?W should be zero, but is not.
+""
 DS   -1
 Unable to open dsad.ctl file.
 ""
