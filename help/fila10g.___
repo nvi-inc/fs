@@ -42,6 +42,8 @@ operations.
 
 The fila10g command cannot be used if the rack type in equip.ctl
 specifies a DBBC3. Other rack types do not limit the use of this
-command.
+command, but whether it makes sense depends on what device is
+specified in dbbad.ctl. The fila10g2 command can always be used
+regardless of the rack type in equip.ctl.
 
 See the FiLA10G documentation for a list of FiLa10G commands.

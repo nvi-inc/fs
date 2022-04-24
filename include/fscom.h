@@ -509,6 +509,7 @@ typedef struct fscom {
               double lo;
               int sideband;
               unsigned int delay;
+              unsigned raw_timestamp;
               time_t time;
               int time_error;
               int vdif_epoch;

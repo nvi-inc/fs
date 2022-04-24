@@ -99,21 +99,15 @@ int itask;
               for (j=0;j<shm_addr->dbbc3_ddc_ifs;j++) {
                   int bits1=0;
                   int bits2=0;
-                  int bits=0;
                   if(shm_addr->dbbc3_core3h_modex[j].mask2.state.known)
-                      for(i=0;i<32;i++) {
+                      for(i=0;i<32;i++)
                           if(shm_addr->dbbc3_core3h_modex[j].mask2.mask2 & 0x1U<<i)
                               bits2++;
-                      }
                   if(shm_addr->dbbc3_core3h_modex[j].mask1.state.known)
-                      for(i=0;i<32;i++) {
+                      for(i=0;i<32;i++)
                           if(shm_addr->dbbc3_core3h_modex[j].mask1.mask1 & 0x1U<<i)
                               bits1++;
-                      }
-                  bits=bits1;
-                  if ( bits2 > bits )
-                      bits=bits2;
-                  lcl->mask.bits+=bits;
+                  lcl->mask.bits+=(bits1+bits2);
               }
               break;
           }
@@ -424,88 +418,25 @@ unsigned long long *data_rate;
 
     *data_rate = 0;
     if(shm_addr->equip.rack==DBBC3) {
+        int bits[ ] ={0 , 0, 0, 0};
+
         for (j=0;j<shm_addr->dbbc3_ddc_ifs;j++) {
-            int channels1 = 0;
-            int channels2 = 0;
-
-            if(shm_addr->dbbc3_core3h_modex[j].mask2.state.known) {
-                int bits2=0;
-                int bits_p_chan2 = 0 ;
-
-                for(i=0;i<32;i++) {
-                    if(shm_addr->dbbc3_core3h_modex[j].mask2.mask2 & 0x1U<<i)
-                        bits2++;
-                }
-                if(0xaaaaaaaU & shm_addr->dbbc3_core3h_modex[j].mask2.mask2 &&
-                        0x5555555U & shm_addr->dbbc3_core3h_modex[j].mask2.mask2 )
-                    bits_p_chan2 = 2 ;
-                else if(shm_addr->dbbc3_core3h_modex[j].mask2.mask2)
-                    bits_p_chan2 = 1 ;
-
-                if (bits_p_chan2 > bits_p_chan) /* we want the max */
-                    bits_p_chan = bits_p_chan2;
-
-                if(bits_p_chan2 > 0)
-                    channels2 = bits2/bits_p_chan2;
-
-                switch (channels2) { /* round up to a power of two */
-                    case 3:
-                        channels2=4;
-                        break;
-                    case 5: case 6: case 7:
-                        channels2=8;
-                        break;
-                    case 9: case 10: case 11: case 12: case 13: case 14: case 15:
-                        channels2=16;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            if(shm_addr->dbbc3_core3h_modex[j].mask1.state.known) {
-                int bits1=0;
-                int bits_p_chan1 = 0 ;
-
-                for(i=0;i<32;i++) {
-                    if(shm_addr->dbbc3_core3h_modex[j].mask1.mask1 & 0x1U<<i)
-                        bits1++;
-                }
-                if(0xaaaaaaaU & shm_addr->dbbc3_core3h_modex[j].mask1.mask1 &&
-                        0x5555555U & shm_addr->dbbc3_core3h_modex[j].mask1.mask1 )
-                    bits_p_chan1 = 2 ;
-                else if(shm_addr->dbbc3_core3h_modex[j].mask1.mask1)
-                    bits_p_chan1 = 1 ;
-
-                if (bits_p_chan1 > bits_p_chan) /* we want the max */
-                    bits_p_chan = bits_p_chan1;
-
-                if(bits_p_chan1 > 0)
-                    channels1 = bits1/bits_p_chan1;
-
-                switch (channels1) { /* round up to a power of two */
-                    case 3:
-                        channels1=4;
-                        break;
-                    case 5: case 6: case 7:
-                        channels1=8;
-                        break;
-                    case 9: case 10: case 11: case 12: case 13: case 14: case 15:
-                        channels1=16;
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            if(channels2 >= channels1 && channels1!=0)
-                channels += 2*channels2;
-            else if(channels1 >= channels2 && channels2!=0)
-                channels += 2*channels1;
-            else if(channels2==0)
-                channels += channels1;
-            else if(channels1==0)
-                channels += channels2;
+            if(shm_addr->dbbc3_core3h_modex[j].mask2.state.known)
+                for(i=0;i<16;i++)
+                    bits[shm_addr->dbbc3_core3h_modex[j].mask2.mask2 >> i*2 & 0x3U]++;
+            if(shm_addr->dbbc3_core3h_modex[j].mask1.state.known)
+                for(i=0;i<16;i++)
+                    bits[shm_addr->dbbc3_core3h_modex[j].mask1.mask1 >> i*2 & 0x3U]++;
         }
+        channels=bits[1]+bits[2]+bits[3];
+        if((bits[1] || bits[2]) && bits[3]) {
+           bits_p_chan=1;     /* mixed width, special case */
+           channels=1;
+         } else if(bits[3])
+           bits_p_chan=2;
+         else
+           bits_p_chan=1;
+
         *data_rate = lclc->samplerate.datarate;
     } else {
 

@@ -63,6 +63,20 @@ static void add_check_queries( out_recs, out_class, board, all)
         strcat(str,",splitmode");
         cls_snd(out_class, str, strlen(str) , 0, 0);
         ++*out_recs;
+
+        strcpy(str,"core3h=");
+        strcat(str,board);
+        strcat(str,",destination 0");
+        cls_snd(out_class, str, strlen(str) , 0, 0);
+        ++*out_recs;
+
+        if(DBBC3_DDCV!=shm_addr->equip.rack_type) {
+            strcpy(str,"core3h=");
+            strcat(str,board);
+            strcat(str,",destination 1");
+            cls_snd(out_class, str, strlen(str) , 0, 0);
+            ++*out_recs;
+        }
     }
 }
 static void check_board(iboard,board,ip,ierr_out,name)
@@ -186,6 +200,7 @@ void dbbc3_core3h_modex(command,itask,ip)
     int force_set = 0;
     int iboard;
     int kmon;
+    int mismatch;
 
     static char *board[]={" ","1","2","3","4","5","6","7","8"};
 
@@ -211,12 +226,9 @@ void dbbc3_core3h_modex(command,itask,ip)
                }
                return;
            }
-           if(i==0)
-             options=1;
-           else if(i==shm_addr->dbbc3_ddc_ifs-1)
-             options=4;
-           else
-             options=2;
+           options=1;
+           if(i==shm_addr->dbbc3_ddc_ifs-1)
+             options=0;
 
            dbbc3_core3h_modex_dis(command,i+1,ip,0,options,1);
            if(ip[2]!=0)
@@ -230,12 +242,10 @@ void dbbc3_core3h_modex(command,itask,ip)
         for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
            out_class=0;
            out_recs=0;
-           if(i==0)
-             options=1;
-           else if(i==shm_addr->dbbc3_ddc_ifs-1)
-             options=4;
-           else
-             options=2;
+
+           options=1;
+           if(i==shm_addr->dbbc3_ddc_ifs-1)
+             options=0;
 
            dbbc3_core3h_modex_dis(command,i+1,ip,0,options,1);
          }
@@ -279,9 +289,12 @@ void dbbc3_core3h_modex(command,itask,ip)
                     m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
                     shm_addr->dbbc3_core3h_modex[i].start.start=0;
                     shm_addr->dbbc3_core3h_modex[i].start.state.known=1;
-                    /* invalidate old masks so no Tsys logging */
+                    /* invalidate old masks so no Tsys logging or threads */
                     shm_addr->dbbc3_core3h_modex[i].mask2.state.known=0;
                     shm_addr->dbbc3_core3h_modex[i].mask1.state.known=0;
+                    /* other stuff to invalidate so not displayed with '?' */
+                    shm_addr->dbbc3_core3h_modex[i].decimate.state.known=0;
+                    shm_addr->dbbc3_core3h_modex[i].samplerate.state.known=0;
                 } else {
                     m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
                     shm_addr->dbbc3_core3h_modex[i].start.start=1;
@@ -404,6 +417,26 @@ parse:
         }
     }
 
+    /* must be called no matter the rack type */
+    mismatch=dbbc3_vdif_frame_params(&lcl);
+    if(mismatch) {
+        ierr=mismatch;
+        goto error;
+    }
+
+    if(DBBC3_DDCU==shm_addr->equip.rack_type) {
+        if(!(lcl.mask1.state.known && lcl.mask1.mask1) &&
+                !(lcl.mask2.state.known && lcl.mask2.mask2)) {
+            ierr=-311;
+            goto error;
+        }
+    } else if(DBBC3_DDCV==shm_addr->equip.rack_type) {
+        if(!(lcl.mask1.state.known && lcl.mask1.mask1)) {
+            ierr=-312;
+            goto error;
+        }
+    }
+
     lcl.set=1; /* needs to be set between the two memcpy()s,
                   discarded for errors in any event
                   also for start
@@ -411,7 +444,6 @@ parse:
     m5state_init(&lcl.start.state);
     lcl.start.start=1;
     lcl.start.state.known=1;
-    dbbc3_vdif_frame_params(&lcl);
     memcpy(&shm_addr->dbbc3_core3h_modex[iboard-1],&lcl,sizeof(lcl));
     out_recs=0;
     out_class=0;
@@ -459,7 +491,6 @@ parse:
     vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[iboard]);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
-
 
 dbbcn:
     ip[0]=9;

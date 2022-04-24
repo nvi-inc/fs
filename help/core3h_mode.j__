@@ -20,17 +20,17 @@ okay        override to allow command while recording, literal text:
 n           1 to 8, but is limited to the number of IF boards
             specified in 'dbbc3.ctl'
 
-mask2:      VSI2 input bit-stream mask, usually hex, 32-bit wide
-            maximum, for example: 0xf, default 0. Null on display if
-            zero. Must be null for DDC_V. See the 'Comments' section
-            for more details on DDC_U usage.
+mask2:      VSI2 input bit-stream mask, usually hex, 32-bit maximum
+            width, for example: 0xf, default 0. Must be null for
+            DDC_V. See the 'Comments' section for the details of
+            the display values.
 
-mask1:      VSI1 input bit-stream mask, usually hex, non-zero 32-bit
-            wide maximum, for example: 0xf, default 0xffffffff. See
-            the 'Comments' section for more details on DDC_U usage.
+mask1:      VSI1 input bit-stream mask, usually hex, 32-bit maximum
+            width, for example: 0xf, default 0xffffffff. See the
+            'Comments' section for the details of the display values.
 
-decimation: decimation factor: 1-255. Default is inferred from 'sample'
-            (next parameter). For DDC_V, only '1' and '2' are
+decimation: decimation factor: 1-255. Default is inferred from
+            'sample' (next parameter). For DDC_V, only '1' and '2' are
             permitted.
 
 sample:     sample rate in Ms/s: must be greater than 0.499. For
@@ -40,7 +40,7 @@ sample:     sample rate in Ms/s: must be greater than 0.499. For
             Unless a decimation factor was specified, the default for
             DDC_U is 256 Ms/s (decimation 1); for DDC_V, 64 Ms/s
             (decimation 2). In response, since the sample rate is not
-            reported by the device, the reported 'decimation' implied
+            reported by the board, the reported 'decimation' implied
             sample rate is shown in parenthesizes for reference.
 
 Monitor only parameter:
@@ -65,17 +65,17 @@ sync        whether the board is synced: 'synced' or 'unsynced'
 
 Comments:
 
-These commands in their command form for individual boads,
+These commands in their command form for individual boards,
 'core3h_mode=n,...', with or without 'force', update the FS's model of
 Core3H board configurations.
 
-The monitor form of these commands are with only the board number
-after the equal sign '=' and no other parameters. e.g.,
-'core3h_mode=1'. However, if a '?' is included after the board number,
-e.g., 'core3h_mode=1,?', the FS's model for that board's configuration
-is reported. All the boards can be monitored with a single
-'core3h_mode' command (no parameters); the model for all boards can be
-reported with 'core3h_mode=?'.
+The monitor form of these commands use only the board number after the
+equal sign '=' and no other parameters. e.g., 'core3h_mode=1'.
+However, if a '?' is included after the board number, e.g.,
+'core3h_mode=1,?', the FS's model for that board's configuration is
+reported. All the boards can be monitored with a single 'core3h_mode'
+command (no parameters); the model for all boards can be reported with
+'core3h_mode=?'.
 
 The non-'force' command form of these commands (except 'begin') report
 the deviations of the board configurations from the FS's model as
@@ -121,56 +121,108 @@ with 'force' as its argument:
 
     setup01=force
 
-The 'force' will be passed to Core3H setup sub-procedure, which will
-pass it to the Core3H setup commands. Due to the structure of SNAP, if
-no argument is given, a '$' will appear as the value of the 'force'
-parameter in Core3H set-up commands. Hence the commands accept '$' in
-place of the 'force' parameter to preserve the checking functionality.
+The 'force' will be passed to Core3H setup sub-procedure, 'core3h01'
+in this case, which will pass it to the Core3H setup commands. Due to
+the structure of SNAP, if no argument is given, a '$' will appear as
+the value of the 'force' parameter in Core3H set-up commands. Hence
+the commands accept '$' in place of the 'force' parameter to preserve
+the checking functionality.
 
-This approach is used because after the Core3H boards are configured,
-the operator must sync them. Once that is completed, the operator will
-need to start the data transmission for the boards used by the mode,
-by executing the command:
+This approach is used because after the Core3H boards are configured
+with 'force', the operator must sync them. Once that is completed, the
+operator will need to start the data transmission for the boards used
+by the mode (and make sure those not used are disabled), by executing
+the command:
 
     core3h_mode=end,force
 
-Using the setup procedure with 'force' will also execute this command,
-but it will fail for the first board to be started because the Core3H
-boards have not been synced. This error can serve as reminder to the
-operator to sync the boards and execute the above 'end,force' again.
+Using of a setup procedure with 'force' will also execute this
+command, but it will fail for the first board to be started because
+the Core3H boards have not been synced. This error can serve as
+reminder to the operator to sync the boards and execute the above
+command with 'end,force'.
 
 The 'core3_mode=end' command, with or without 'force', checks the
 DBBC3 firmware version for agreement with the FS control files. This
 is intended to be the primary DBBC3 version check since this command
 is:
 
-- part of both a complete set-up and check of a mode, both of which
-  should executed by the operator as part of normal operations
+- part of both a complete set-up and check of a mode; at least the
+  latter should be executed by the operator as part of normal
+  operations
 
-- the final command of such a set-up/check, which should make the error
-  more visible
+- the final command of such a set-up/check, which should make the
+  error more visible
 
 The 'core3h_mode=n,...,force' commands also check the DBBC3 firmware
 version.
 
-The effective sample rate can be specified in the SNAP command either
-explicitly with the 'sample' parameter or implicitly with the
-'decimation' parameter. Only one of 'sample' and 'decimation' may be
-specified. The device does not respond with the commanded effective
-sample rate. In the query response for this command, the implied
-sample rate is shown in parentheses for informational purposes only.
+The decimation can be specified in the SNAP command either explicitly
+with the 'decimation' parameter or implicitly with the 'sample'
+parameter. Only one of 'decimation' and 'sample' may be specified. The
+board does not respond with the effective sample rate. In the query
+response for this command, the implied sample rate is shown in
+parentheses for information purposes only.
 
 To use a non-zero 'mask2', the personality must be DDC_U.
 Additionally, there can't be bits turned on for BBCs in 'mask2' that
 exceed the number available as set by the number of BBCs per IF in
 'dbbc3.ctl'.
 
-For the DDC_U personality, the display values for 'mask2' or 'mask1'
-will be followed by the values of mask4 or mask3, respectively, in
-square brackets if the value of mask4 does not agree with 'mask2', or
-mask3 does not agree with 'mask1'. In these cases, the bit masks are
-not configured correctly. It is a requirement for DDC_U operation that
-the mask4 and mask3 agree with 'mask2' and 'mask1', respectively.
+There are five requirements for correct mask values:
+
+  1. For a non-zero mask, the number of channels must be a power of
+     two.
+
+  2. All selected channels must have the same width (bits/channel):
+     one-bit or two-bits.
+
+  3. If both masks are non-zero, they must have the same number of
+     channels.
+
+  4. For DDC_V, 'mask1' must be non-zero and 'mask2' cannot be
+     non-zero.
+
+  5. For DDC_U, at least one of 'mask1' and 'mask2' must be non-zero.
+
+For DDC_U, if only one of the masks is non-zero, the FS will command
+the board as though the other mask had the same value. (You will see
+the additional mask displayed in the monitor response for the board.)
+This is done to satisfy the Core3H board requirement that both masks
+must have the same number of channels and width (bits/channel). As a
+consequence of this, if you want to record data from only the first or
+second Core3H board output (that is to say only 'mask1' or 'mask2' is
+commanded as non-zero in the 'core3h_mode' command), you will need to
+disable the other output with the Core3H board command 'destination 0
+none' (or 'destination 1 none', as appropriate). (The monitor value
+for a mask with the destination set to 'none' will be display in curly
+braces, '{...}', see below.) The FS sending the non-zero mask in place
+of the zero one has no impact on what channels are used by the FS
+internally, e.g., for Tsys monitoring. That is controlled entirely by
+what masks were specified in the 'core3h_mode' command.
+
+For DDC_V, the board's 'destination 1' needs to be set to 'none' to be
+consistent.
+
+The display values for the masks are enclosed in curly braces,
+'{...}', if they are non-zero and corresponding output destination
+('0' for 'mask1'/'mask3', '1' for 'mask2'/'mask4') is set to 'none'.
+This indicates that there is no output for that mask even though it is
+non-zero. The destination is not set by this command, it must be set
+by other means, usually the boot configuration or low-level
+'core3h=...' SNAP commands. For DDC_V, curly braces are always used
+for 'mask2'/'mask4' (if non-zero) since that output is inherently
+disabled.
+
+The display values for 'mask2' or 'mask1' will be followed by the
+values of 'mask4' or 'mask3', respectively, in square brackets,
+'[...]', if they do not have the expected values. For DDC_U, the value
+of 'mask4' should agree with 'mask2' and 'mask3' should agree with
+'mask1'. For the DDC_V personality, 'mask4' and 'mask3' (and additionally
+'mask2') should be zero. If the masks do not have the expected values
+they are not configured correctly. It is a requirement for DDC_U
+operation that the 'mask4' and 'mask3' agree with 'mask2' and 'mask1',
+respectively. For DDC_V, only 'mask1' should be non-zero.
 
 The meaning of the bits in the mask are given in the following table
 starting with the least significant bit. Mask1 represents the first
