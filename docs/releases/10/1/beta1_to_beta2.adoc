@@ -22,7 +22,7 @@
 
 = FS 10.1.0-beta1 to FS 10.1.0-beta2 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 4.7 - April 2022
+Version 4.8 - April 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -493,6 +493,31 @@ not an error to have the RDBEs using a previous epoch, they just must
 all use the same one.
 
 =====
+
+====
+
+. Show incorrect DOT times in inverse video for the RDBE monitor
+display (_monit6_) window.
+
++
+
+Inverse video was added to help identify when the RDBEs are not all
+using the same time.
+
++
+[%collapsible]
+====
+
+Although in principle there is nothing wrong with recording data from
+RDBEs that have slightly different times (unlike having different VDIF
+epochs, which makes recording impossible with Mark 6 recorders), the
+recovery of the recorded data is too costly to use in most cases. As a
+result, to bring the operator's attention to the conflict, _monit6_
+was modified to show DOT values that are not the current time in
+inverse video. This change could have been limited to using inverse
+video to just show times that don't agree with the majority since only
+a disagreement causes a problem. However, there did not seem to be a
+use case for recording with the time intentionally set wrong.
 
 ====
 
