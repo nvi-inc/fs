@@ -26,7 +26,7 @@
 :toc:
 :experimental:
 E. Himwich, J. Quick
-Version 3.5 - April 2022
+Version 3.6 - April 2022
 
 == Introduction
 
@@ -576,6 +576,8 @@ An example of the contents is:
 * DBBC3 clock rate, >= 0, but DDDC_U/_V only supports 128
   128
 ....
+
+NOTE: The use of `nominal` for BBCS/IF is recommended.
 
 ==== dbbad.ctl
 

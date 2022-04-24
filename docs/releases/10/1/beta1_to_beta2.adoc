@@ -22,7 +22,7 @@
 
 = FS 10.1.0-beta1 to FS 10.1.0-beta2 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 4.6 - April 2022
+Version 4.7 - April 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -38,18 +38,23 @@ Version 4.6 - April 2022
 This document covers the steps needed to update from FS _10.0.0-beta1_
 to _10.1.0-beta2_ and the changes since _10.1.0-beta1_. This update is
 not an operational release. It is intended for _testing_ by all
-stations using FS _10.1.0-beta1_. Installing this version as an update
-is much simpler than the update to _10.1.0-beta1_, see the
-<<Upgrading from 10.1.0-beta1>> section below.
+stations using FS _10.1.0-beta1_. If you do not already have FS
+_10.1.0-beta1_ installed, please see the <<10.1.0-beta2.adoc#,FS
+10.1.0-beta2 Update Notes>> document instead.
 
-The changes in the FS and _drudg_ for _10.1.0-beta2_ are covered in the
+If you already have FS _10.1.0-beta1_ installed, the update from that is
+much simpler than the update to _10.1.0-beta1_, see the
+<<Upgrading from 10.1.0-beta1>> section below. The changes in the FS
+and _drudg_ for _10.1.0-beta2_ are covered in the
 <<Changes since 10.1.0-beta1>> section below.
 
 == Upgrading from 10.1.0-beta1
 
 You must have already installed _10.1.0-beta1_ according to the
 <<10.1.0-beta1.adoc#,FS 10.1.0-beta1 Update Notes>> document before
-installing this update.
+following the directions in the current document. If you have not
+already installed _10.1.0-beta1_, please see the
+<<10.1.0-beta2.adoc#,FS 10.1.0-beta2 Update Notes>> document instead.
 
 === Login as root
 
@@ -75,6 +80,9 @@ Answer `*y*` to the prompt if you wish to proceed. It is recommended for most st
 
 === Login as prog
 
+This is necessary for updating the FS source, unless you are unable to
+use _git_ as described in the next step.
+
 === Fetch FS 10.1.0-beta2
 
 There are two options given below:
@@ -85,12 +93,17 @@ There are two options given below:
   git fetch
   git checkout -q 10.1.0-beta2
 
-* If you are unable to use _git_:
++
+
+NOTE: The _github_ server was recently updated and the certificates
+available in FSL8 no longer work.
+
+* If you are unable to use _git_ (FSL8 and other older systems):
 
 . Please follow the steps, through the step that includes the option
 to set the link, in the
 <<../../misc/release_model.adoc#_installing_from_an_archive,Installing
-from an archive>> sub-section in the
+from an archive>> subsection in the
 <<../../misc/release_model.adoc#,Release Model>> document. Use
 __10.1.0-beta2__ as the value for __tag__. Be sure to set the link for
 __/usr2/fs__.
@@ -118,10 +131,17 @@ as _oper_.
 
 === Local customizations
 
-. Install the new (default) _erchk_ control file.
+. Install the default (new) _erchk_ control file.
 
   cd /usr2/control
   cp /usr2/fs/st.default/control/erchk.ctl .
+
++
+
+The default file will recreate the previous _erchk_ behavior except
+that now `sp` errors will also be shown. More information on
+customizing the file can be found in <<erchk,erchk control file>> FS
+change item below.
 
 . Make sure all lines with _xterm_ in _stpgm.ctl_ use `x` as the
 second field.
@@ -140,8 +160,15 @@ details of the changes since that release.
 
 == Changes since 10.1.0-beta1
 
-There are separate sub-sections with summaries of changes in the FS
-and _drudg_.
+There are separate subsections with summaries of changes in the FS and
+_drudg_.
+
+Clickable links such as, https://github.com/nvi-inc/fs/issues/36[#36],
+connect to specific issues reported at
+https://github.com/nvi-inc/fs/issues.
+
+A detailed list of changes can be found using the `git log` command
+from within the FS _git_ repo directory, usually _/usr2/fs-git_.
 
 Each change is listed as a numbered title, then usually a few summary
 sentences, followed by a _toggle_:
@@ -150,7 +177,6 @@ sentences, followed by a _toggle_:
 ====
 Details are shown here.
 ====
-
 that can be clicked to toggle showing (or not showing) the details.
 In this way, you can view the summary as a list and only reveal the
 details of items that interest you. The summary sentences and/or the
@@ -158,14 +184,255 @@ details toggle may be omitted if they would not add any new
 information, usually because it is already covered in the numbered
 title item and/or the details are very brief.
 
-Clickable links such as
-https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
-reported at https://github.com/nvi-inc/fs/issues.
-
-A detailed list of changes can be found using the `git log` command
-from within the FS _git_ repo directory, usually _/usr2/fs-git_.
-
 === FS changes
+
+. Improve DBBC3 support:
+
++
+
+Several improvements were made in DBBC3 support, including: mask
+configuration for DDC_U, firmware version checking,
+`fb_mode`/`mk5c_mode` recorder mode setting, mask display by the
+_core3h_mode_ command, the _setcl_ program, clarifying how to
+configure an experiment mode, and other improvements in the DBBC3
+Operations manual.
+
++
+[%collapsible]
+====
+
+.. Fix setting Core3H board masks for DDC_U.
+
++
+
+We received new information about setting the masks, which we have
+implemented.
+
++
+[%collapsible]
+=====
+
+The following background information may provide some useful context
+for understanding the new method:
+
+* The FS `core3h_mode` command accepts two masks per board, `mask2`
+and `mask1`.
+
+* The output for the first eight BBCs for a board is selected by
+`mask1` and goes to the first Ethernet output port, _eth0_; the second
+eight BBCs, by `mask2` and goes to the second port, _eth1_.
+
+* The Core3H board itself has two additional masks: `mask4` and
+`mask3`; the values of which must match those of `mask2` and `mask1`,
+respectively. The FS manages those masks for the user. They generally
+aren't visible, except when they don't have correct values.
+
+* The four Core3H board masks each must have the same number of
+channels and bits per channel, even if the corresponding `core3h_mode`
+mask has zero channels. As a result, both output ports will produce
+data, even if output from only one is desired.
+
+There are three requirements that the `core3h_mode` masks for a given
+board must meet:
+
+... The number of channels selected for a mask must be zero or a power
+of two, up to 16.
+
+... All selected channels for a mask must have the same width
+(bits/channel): one- or two-bit.
+
+... If both masks are non-zero, they must be have the same number of
+channels and widths.
+
+The `core3h_mode` command will reject any mask combination for a board
+that doesn't meet these requirements. Each board can have a different
+number of channels and width as long as each each individual board
+meets the requirements by itself.
+
+If output is not desired for a port, i.e., its `core3h_mode` mask is
+zero, it must be disabled by setting its `destination` to `none`.  The
+FS does not set the Ethernet port destinations. That must be done by
+the boot configuration file or by the operator sending commands to the
+DBBC3.
+
+As an aid to the operator, when the `core3h_mode` command is used to
+check the board setup, it will check the `destination` set for the two
+ports. A error will be reported if the `destination` for a non-zero
+`core3h_mode` mask is set to `none` or if for a zero mask it is not
+set to `none`. Consequently to avoid an error, if a mask is set to
+zero, the `destination` for its port must be set to `none`.
+
+
+NOTE: For DDC_V, there is only one mask, `mask1`. Only the first two
+mask requirements above, the number of channels is a power of two and
+uniform width, apply. In this case, the `core3h_mode` command will
+only check that the first Ethernet port's `destination` is not set to
+`none`. The second port is irrelevant for DDC_V.
+
+=====
+
+.. Check the firmware version from the multicast, comparing it to the
+FS control files.
+
++
+
+Previously it was only checked for specific forms of the `core3h_mode`
+command (that still occurs). Firmware version error reports for the
+multicast will occur every 20 seconds and should be very hard to
+overlook, assuming multicast reception is enabled in the _dbbad.ctl_
+control file.
+
++
+
+NOTE: The firmware version error messages for the `core3h_mode`
+command were reworded to use parallel construction to those from the
+multicast.
+
+.. Improve the magic string calculated in the `fb_mode` command (and
+its alias `mk5c_mode`) to agree with the new DBBC3 mask rules.
+
++
+
+Additionally, two special cases (not expected to occur in normal
+operations) are handled:
+
+... Different sample widths on different Core3H boards.
+
++
+
+In this case, the number of channels and width are both set to `1` to
+allow the string to be accepted by _jive5ab_. The total data rate is
+correct allowing accurate calculations of the remaining space.
+
+... Different sample rates for different Core3H boards.
+
++
+
++
+
+Such a configuration is trapped an as error. If one ever needs to be
+used, a method for implementing it is described in the `help` page for
+`fb_mode` command.
+
++
+
+Thanks to Marjolein Verkouter (JIVE) for suggesting how to handle
+these cases.`
+
+.. Improve the display of masks for _core3_mode_ command.
+
+... Display all non-zero Core3H board masks for DDC_V.
+
++
+
++
+
+All Core3H board masks except `mask1` should be zero; non-zero values
+that occur are displayed. Additionally, when the configuration is
+checked, any masks that should be zero but are not will generate
+errors.
+
+... Display `core3h_mode` masks in curl braces, `{...}`, if its
+associated Ethernet port `destination` is `none`.
+
++
+
+This indicates there will be no output for that mask.
+
++
+
++
+
+NOTE: For DDC_V, `mask2` (if it is incorrectly non-zero) is always
+displayed in curly braces regardless of its `destination` setting
+because that port in inherently disabled for DDC_V.
+
+.. Improve _setcl_
+
++
+
+_setcl_ will now reject being used with _v124_ (there is no time in
+the multicast) or if the board it is configured to use is not
+`synced`.
+
+.. Clarify that the boot configuration is the only recommended way to
+configure the DBBC3 at this time.
+
++
+
+The <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> document was
+reorganized to emphasis that the boot configuration is the only
+recommended way to configure the DBBC3. The updated manual includes a
+procedure for determining and setting the boot configuration from a
+schedule using copy-and-paste.
+
++
+
+NOTE: The method of using the FS to configure the DBBC3 directly has
+been moved to an appendix,
+<<dbbc3_ops.adoc#_alternate_core3h_board_configuration_method,Alternate
+Core3H board configuration method>>, of that document, where it is
+described as an "`engineering test mode`". It use is not recommended
+at this time.
+
+.. Make other improvements to the  <<dbbc3_ops.adoc#,FS 10.1 DBBC3
+Operations Manual>> document
+
++
+
+The document was improved in several other ways, including: adding a
+section on firmware version checking, non-DBBC3 specification sections
+were moved to appendices, the appendix on configuring the FS was
+improved and made a section of the main document, a workaround for
+`scan_check` not working (removing it) when writing a single VDIF
+thread per file was included, the description of handling _.skd_
+schedules was improved, a third level was added to the table of
+contents, and miscellaneous changes to bring it up to date for
+_10.1.0-beta2_ were added.
+
++
+[%collapsible]
+=====
+
+... A section was added on how the FS handles checking the firmware
+version and reporting when the version loaded is different than
+expected.
+
+... Non-DBBC3 specific sections were moved to appendices.
+
++
+
+They were retained in this document because although they are not
+specific to DBBC3s, it is expected that they will not get much use
+with other systems.
+
+... The appendix on configuring the FS for use with a DBBC3 was
+changed to a section in the main part of the document.
+
++
+
++
+
+It was also made more complete, most significantly to add more
+information about customizing the `station` procedure library and how
+to make sure the T~sys~ monitor display window can get the focus to
+allow entry of commands.
+
+... The fact that `scan_check` currently does not work when writing a
+single VDIF thread per file and how to workaround it (remove it) was
+noted.
+
+... The description of the handling of _.skd_ schedules by _drudg_ for
+the DBBC3 was improved.
+
+... A third level was added to the table of contents to provide
+clickable links for access to another level of subsections.
+
+... It was updated for changes since _10.1.0-beta1_.
+
+=====
+
+====
 
 . Turn data sending off before modifying an RDBE's time in _fmset_.
 
@@ -203,12 +470,12 @@ transmission.
 =====
 
 The VDIF epochs of all the RDBEs being recorded must agree to
-successfully record with a Mark 6 recorder. They can get out of sync
-of a subset of the RDBEs is rebooted. In order to simplify dealing
-with an RDBE needing to be rebooted during an experiment, it is
-recommended that the VDIF epochs be reset as soon as convenient (the
-first gap in observing) after an epoch change, which occurs at the
-start of January 1 and July 1 UT.
+successfully record with a Mark 6 recorder. One of the ways they can
+get out of sync is if a subset of the RDBEs is rebooted. In order to
+simplify dealing with an RDBE needing to be rebooted during an
+experiment, it is recommended that the VDIF epochs be reset as soon as
+convenient (the first gap in observing) after an epoch change, which
+occurs at the start of January 1 and July 1 UT.
 
 A possible method for resetting the epoch is to reboot. However,
 rebooting creates a risk of a bad FPGA load, which in some cases,
@@ -228,16 +495,6 @@ all use the same one.
 =====
 
 ====
-
-. Fix `filag_mode`, `mk5c_mode`, and `fb_mode` so that the upper four
-mask bits are considered when determining if data is one-bit or
-two-bit.
-
-+
-
-This was probably benign since it was unlikely that two channels
-represented by the top four mask bits were the only ones with two-bit
-sampling. This would only have affected systems with a FiLa10G.
 
 . Log phase-cal tones, for RDBEs, that have spacings of arbitrary
 multiples of 1 MHz.
@@ -275,8 +532,8 @@ ignored.
 
 ====
 
-. Add control file for _erchk_ (closing
- https://github.com/nvi-inc/fs/issues/774[#174]).
+. <<erchk,erchk control file>>[[erchk]]: Add control file for _erchk_
+ (closing https://github.com/nvi-inc/fs/issues/174[#174]).
 
 +
 
@@ -301,11 +558,11 @@ explained in the comments.
 The syntax of he control file is fairly simple, but it is important to
 be careful when modifying it. Some changes can prevent errors from
 being displayed and therefore make them harder to notice since they
-only be in the log display. The default/example file is configured to
-cause all errors to be displayed.
+will only be shown in the log display. The default/example file is
+configured to cause all errors to be displayed.
 
 NOTE: As before, the `tnx` command removes display of the selected
-errors from the _erhck_ window (as well as log display window).
+errors from the _erchk_ window (as well as log display window).
 
 If _/usr2/control/erchk.ctl_ cannot be found or has syntax errors,
 messages with an explanation of how to fix the problem or find more
@@ -315,28 +572,99 @@ a window manager. If there is an error, or just to check to see if
 there is one, the _erchk_ program can be run manually without the FS.
 This can be tried repeatedly until all issues are resolved.
 
+Thanks to Eskil Varenius (Onsala) for pointing out that `sp` errors
+were not being shown.
+
 ====
 
-. Corrections for errors/oversights introduced in _10.1.0-beta1_:
+. Fix `filag_mode`, `mk5c_mode`, and `fb_mode` so that the upper four
+mask bits are considered when determining if data is one-bit or
+two-bit.
 
-.. Fixed `core3h_mode` (no parameters) to report errors for any board
-and stop instead of continuing on to the next.
++
 
-.. Correct a bug in _setcl_ that could have affected its use with
-DBBC3, but apparently had never caused an issue.
+This was probably benign since it was unlikely that the channels
+represented by the top four mask bits were the only ones with two-bit
+sampling. This would only have affected systems with a FiLa10G.
 
-.. Minor clean-up of white-space in example _dbbc3.ctl_ file.
+. Improve description in the help files for when the `dbbc`, `dbbc3`,
+`fila10g`, `dbbc2`, and `fila10g2` commands are active.
+
+. Correct errors/oversights introduced in _10.1.0-beta1_:
+
++
+[%collapsible]
+====
+
+.. Correct _/usr2/fs/st.default/equipctlfix_ script to append _.bak_
+instead of replacing the extension in the backup filename.
+
+.. Fix a class number eating bug that occurred if there were was a
+firmware version error detected while setting a Core3H board with
+`force`.
+
++
+
+The class with the message to report the firmware version returned by
+the DBBBC3 was being lost.
+
+.. Fix the `core3h_mode` command, with no parameters, to report errors
+(they were silently ignored before) for a board and stop instead of
+continuing on to the next.
+
+.. Limit the `core3h` command to available boards.
+
+.. Fix `core3h_mode` command,  with `?` as a parameter, to not report
+implied sample-rate when decimation/sample-rate aren't set.
+
+.. Correct a bug in _setcl_ that caused to it overwrite 120 bytes of
+memory for DBBC3 support.
+
++
+
+Apparently this never caused an issue.
 
 .. Add missing `bbc_gain=all,agc` in example _d3fbstation.prc_ file.
+
+.. Limit `core3h_mode` sample rates by available decimations.
+
++
+
+Previously, there was a low, but artificial, numeric sample rate
+limit.
+
+.. Cleanup minor white-space issues in example _dbbc3.ctl_ file
+ (closing https://github.com/nvi-inc/fs/issues/173[#173]).
+
++
+
+Thanks to Eskil Varenius (Onsala) for reporting these.
+
+.. Make code improvements to remove the remaining vestiges of checking
+Core3H board state for monitor commands.
+
++
+
++
+
+This had no impact on users.
+
+====
 
 === drudg changes
 
 _drudg_ opening message date is `2022-04-08`.
 
-. Corrections for errors/oversights introduced in _10.1.0-beta1_:
+. Correct errors/oversights introduced in _10.1.0-beta1_:
 
 .. Remove `ready` procedure from _.snp_ when recorder `none` is
 selected.
 
 .. Correct `endef` to `enddef` when generating `thread...` procedures
  (closing https://github.com/nvi-inc/fs/issues/177[#177]).
+
++
+
++
+
+Thanks to Beppe Maccaferri (Medicina) for reporting this issue.

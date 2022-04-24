@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Beta2 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 4.6 - April 2022
+Version 4.7 - April 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -79,6 +79,27 @@ geodesy intensive schedules.
 NOTE: #This has _not_ been implemented in the _alpha_ and _beta_
 pre-releases.#
 
+As always, we are deeply indebted to Jonathan Quick (HartRAO, South
+Africa) for his many significant contributions that go far beyond what
+is explicitly mentioned here. For this particular release, his
+contributions include feature suggestions and testing for DBBC3
+support, as well as for many non-DBBC3 specific features, and for
+documentation enhancements. Many of the improvements that were made
+are due to his thoughtfulness and diligence.
+
+We thank Eskil Varenius (Onsala, Sweden) for bug reports and feedback,
+particularly on DBBC3 related issues.
+
+We thank Chris Coughlin, Kiah Imai (and the rest of the team at KPGO,
+Hawaii), Katie Pazamickas and Jay Redmond (both at GGAO, Maryland) for
+testing beta releases.
+
+We thank Beppe Maccaferri (Medicina, Italy) for being a diligent beta
+tester and reporting bugs.
+
+We thank Javi Gonzalez (Yebes, Spain) for testing RDBE phase-cal tone
+logging improvements.
+
 == Upgrading from 10.0.0
 
 If you have already installed _10.1.0-beta1_, please refer to the
@@ -120,8 +141,9 @@ apply to _alpha_ and _beta_ releases.#
 
 The default branch of the FS has changed to `main`. To simplify the
 installation, we recommend that you re-clone the repository. If you
-need to preserve your old repository as your working copy, please use
-the directions in the <<note,NOTE>> below in this step.
+use _git_ (either one of the first two methods below) and need to
+preserve your old repository as your working copy, please use the
+directions in this <<note,NOTE>> below in this step.
 
 ====
 
@@ -132,7 +154,8 @@ You can of course use any name you like for the copy. You should use a
 different name for the copy than _fs-git.old-10.0.0_ if that directory
 already exists.
 
-* If you are using an FSL9 or FSL10 system:
+* If you are using an FSL9, FSL10, or another system that can support
+`https` connections with _github.com_:
 
   cd /usr2
   mv fs-git fs-git.old-10.0.0
@@ -145,8 +168,8 @@ already exists.
 
 Answer `*y*` to confirm installation.
 
-* If you are using FSL8 or other old Linux distribution, or otherwise
-need to use _ssh_ instead:
+* If you are able to use _ssh_ instead (this no longer includes
+FSL8):
 
   cd /usr2
   mv fs-git fs-git.old-10.0.0
@@ -159,7 +182,7 @@ need to use _ssh_ instead:
 
 Answer `*y*` to confirm installation.
 
-* If you are unable to use _git_:
+* If you are using FSL8, or otherwise unable to use _git_:
 
 +
 
@@ -169,7 +192,7 @@ since it is preserved anyway.
 . Please follow the steps, through the step that includes the option
 to set the link, in the
 <<../../misc/release_model.adoc#_installing_from_an_archive,Installing
-from an archive>> sub-section in the
+from an archive>> subsection in the
 <<../../misc/release_model.adoc#,Release Model>> document. Use
 __10.1.0-beta2__ as the value for __tag__. Be sure to set the link for
 __/usr2/fs__.
@@ -179,16 +202,21 @@ __/usr2/fs__.
 
 [NOTE]
 ====
-[[note]]
+<<note,NOTE>>[[note]]:
 
 IMPORTANT: #This *NOTE* does not apply to _alpha_ AND _beta_
 releases.#
 
-If you need to preserve your old repository for operations, instead of
-following the directions above, you can download the update and change
-your default branch to `main` with:
+If you are able to use _git_ and need to preserve your old repository
+for operations, instead of following the directions above, you can
+download the update and change your default branch to `main` with:
 
-. As _root_, make a copy of your current _/usr2/fs-git_ directory;
+.Click here for the details
+[%collapsible]
+=====
+
+. As _root_, make a backup copy of your current _/usr2/fs-git_
+directory;
 
   cd /usr2
   cp -a fs-git fs-git.old-10.0.0
@@ -210,15 +238,11 @@ your default branch to `main` with:
 
 . Login as _root_
 
-. Execute the installation script:
-
-  cd /usr2/fs-git
-  make install
-
 +
 
-Answer `*y*` to confirm installation.
+This is to prepare for the next step below.
 
+=====
 ====
 
 === Fix file permissions
@@ -230,10 +254,11 @@ the
 <<../../misc/install_reference.adoc#_set_operations_file_permissions,Set
 operations file permissions>> section of the
 <<../../misc/install_reference.adoc#,Installation Reference>>
-document.  For stations with the standard configuration (all the
+document. For stations with the standard configuration (all the
 operational files are owned by user __oper__ in group __rtx__, with
-permissions `ug+rw,o+r,o-w`), the following command will enforce this
-(note that the __execute__/__search__ bits are not changed):
+permissions `ug+rw,o+r,o-w`), the following command, executed as
+__root__, will enforce this (note that the __execute__/__search__ bits
+are not changed):
 
        /usr2/fs/misc/fix_perm
 
@@ -241,7 +266,7 @@ Answer `*y*` to the prompt if you wish to proceed. It is recommended for most st
 
 === Login as prog
 
-IMPORTANT: The FS must be compiled as _prog_.
+IMPORTANT: The FS and your station code must be compiled as _prog_.
 
 === Compile the FS
 
@@ -317,7 +342,7 @@ If you have been using _setsid_ in your _stpgm.ctl_, possibly to
 insulate __xterm__s from kbd:[Control+C] when not using the display
 server, you should remove it. It is no longer needed and if it is used
 on an `x` line in the file, it will prevent the FS from starting
-successfully. It is also not needed when the display server is in use.
+successfully. It is also not needed if the display server is in use.
 
 . Make sure all lines with _xterm_ in _stpgm.ctl_ use `x` as the
 second field.
@@ -334,7 +359,7 @@ which is normally what is needed.
 +
 
 The contents of DBBC3 line in the _equip.ctl_ control file has been
-moved to the new control file, _dbbc3.ctl_, and reorganized. To create
+moved to a new control file, _dbbc3.ctl_, and reorganized. To create
 the new file and remove the obsolete contents of _equip.ctl_, execute:
 
   cd /usr2/control
@@ -349,10 +374,17 @@ should allowing running the FS if you don't have a DBBC3. If you have
 a DBBC3, you should customize the contents in the <<dbbc3config,FS
 DBBC3 Configuration>> step below.
 
-. Install the new (default) _erchk_ control file.
+. Install the new (default) _erchk_ control file:
 
   cd /usr2/control
   cp /usr2/fs/st.default/control/erchk.ctl .
+
++
+
+The default file will recreate the previous _erchk_ behavior except
+that now `sp` errors will also be shown. More information on
+customizing the file can be found in <<erchk,erchk control file>> FS
+change item below.
 
 . Run the FS to check for _.rxg_ file errors.
 
@@ -384,7 +416,9 @@ procedure library.
 
 Alternatively, if the FS is _not_ running, you can add empty initial
 versions to your `station` procedure library with the following
-commands. For `mk5c_config`:
+commands.
+
+For `mk5c_config`:
 
   cd /usr2/proc
   cat /usr2/fs/st.default/proc/mk5c_config.prc >>station.prc
@@ -401,14 +435,14 @@ These procedures are called by _drudg_ generated setup procedures for
 systems with Mark 5C and FlexBuff recorders. They provide a means to
 tune the setup of _jive5ab_ for your hardware independent of the
 observing mode. They can be empty if your recorders don't need tuning
-or you aren't aware of what tuning is needed. These procedures are
-called after the `mk5c_mode` or `fb_mode` commands, depending on the
-type of recorder, to allow the default configuration to be overridden.
+or you aren't aware of what tuning is needed.
 
 +
 
-The default configuration is described in the
-<<dbbc3_ops.adoc#_default_configuration,Default configuration>>
+NOTE: These procedures are called after the `mk5c_mode` or `fb_mode`
+commands, depending on the type of recorder, to allow the default
+configuration to be overridden. The default configuration is described
+in the <<dbbc3_ops.adoc#_default_configuration,Default configuration>>
 subsection of the <<dbbc3_ops.adoc#_recorder_tuning,Recoder tuning>>
 appendix of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>
 and in the `help` pages for `mk5c_mode` and `fb_mode`. The commands in
@@ -447,7 +481,7 @@ Additionally, for either case, in the new file:
 * You should remove any `mk5=get_stats?` commands, if they are
 present.
 
-* You may also like to rename the call to `mk5_status` to `fb_status`.
+* It is recommended to rename the `mk5_status` call to `fb_status`.
 
 . <<dbbc3config,FS DBBC3 Configuration>>[[dbbc3config]]: If you have a
 DBBC3, you should make the configuration changes described in the
@@ -504,7 +538,7 @@ later. Please see the appendix for more details.
 This step exists due to bugs in _gnplt_, fixed as of this update, that
 have caused extra comments to added to _.rxg_ files. This is described
 in the <<stop_adding_extra_comments,Stop adding extra comments when
-updating .rxg files>> change in the <<FS changes>> sub-section below.
+updating .rxg files>> change in the <<FS changes>> subsection below.
 
 If you have been correcting the extra comments added by _gnplt_ as you
 updated your _.rxg_ files, this step may have little or no benefit for
@@ -567,7 +601,7 @@ to make sure the server is no longer running as _prog_.
 For details on why this is needed, please see the second *IMPORTANT*
 item in
 <<../0/fsserver_changes.adoc#_server_continues_running_after_fs_termination,Server
-continues running after FS termination>> sub-section of the
+continues running after FS termination>> subsection of the
 <<../0/fsserver_changes.adoc#,FS 10.0.0 fsserver Changes>> document.
 
 ====
@@ -590,6 +624,9 @@ browser, and finally click on the original link)..
 
 === Consider when to update your back-ups
 
+CAUTION: This step may not be appropriate if you are beta testing
+since the beta test versions are not intended for operations.
+
 It would be prudent to wait until you have successfully run an
 experiment or two and preferably received word that the experiment(s)
 produced good data. The chances of needing to use your back-up from
@@ -606,7 +643,7 @@ of the changes since that release.
 
 == Changes since 10.0.0
 
-There are separate sub-sections with summaries of changes in the FS
+There are separate subsections with summaries of changes in the FS
 and _drudg_.
 
 Clickable links such as
@@ -758,7 +795,7 @@ large elevation slews. The is the reason that this change was made.
 Previously, these errors were ignored due to a bug. Now _antcn_ errors
 are detected. If one occurs now, _onoff_ will try to run _antcn_ a
 second time to make _onoff_ more robust if a transitory antenna
-communication problems occurs.
+communication problem occurs.
 
 +
 
@@ -833,8 +870,8 @@ making suggestions for the fixes, and testing them.
 
 ====
 
-. Add control file for _erchk_ (closing
- https://github.com/nvi-inc/fs/issues/174[#174]).
+. <<erchk,erchk control file>>[[erchk]]: Add control file for _erchk_
+ (closing https://github.com/nvi-inc/fs/issues/174[#174]).
 
 +
 
@@ -859,11 +896,11 @@ explained in the comments.
 The syntax of he control file is fairly simple, but it is important to
 be careful when modifying it. Some changes can prevent errors from
 being displayed and therefore make them harder to notice since they
-only be in the log display. The default/example file is configured to
-cause all errors to be displayed.
+will only be shown in the log display. The default/example file is
+configured to cause all errors to be displayed.
 
 NOTE: As before, the `tnx` command removes display of the selected
-errors from the _erhck_ window (as well as log display window).
+errors from the _erchk_ window (as well as log display window).
 
 If _/usr2/control/erchk.ctl_ cannot be found or has syntax errors,
 messages with an explanation of how to fix the problem or find more
@@ -872,6 +909,9 @@ visible if _erchk_ is run either manually or in a window by the FS or
 a window manager. If there is an error, or just to check to see if
 there is one, the _erchk_ program can be run manually without the FS.
 This can be tried repeatedly until all issues are resolved.
+
+Thanks to Eskil Varenius (Onsala) for reporting that `sp` errors were
+not being shown.
 
 ====
 . Add adjustable log size warning message (closing
@@ -1311,12 +1351,12 @@ transmission.
 =====
 
 The VDIF epochs of all the RDBEs being recorded must agree to
-successfully record with a Mark 6 recorder. They can get out of sync
-of a subset of the RDBEs is rebooted. In order to simplify dealing
-with an RDBE needing to be rebooted during an experiment, it is
-recommended that the VDIF epochs be reset as soon as convenient (the
-first gap in observing) after an epoch change, which occurs at the
-start of January 1 and July 1 UT.
+successfully record with a Mark 6 recorder. One of the ways they can
+get out of sync is if a subset of the RDBEs is rebooted. In order to
+simplify dealing with an RDBE needing to be rebooted during an
+experiment, it is recommended that the VDIF epochs be reset as soon as
+convenient (the first gap in observing) after an epoch change, which
+occurs at the start of January 1 and July 1 UT.
 
 A possible method for resetting the epoch is to reboot. However,
 rebooting creates a risk of a bad FPGA load, which in some cases,
@@ -2236,7 +2276,7 @@ server.
 +
 
 Missing example procedure library libraries for DBBC2/Mark 5C,
-DBBC2/FlexBuff were added. A new exmple was added for DBBC3/Flexbuff.
+DBBC2/FlexBuff were added. A new example was added for DBBC3/Flexbuff.
 A stand-alone example `check_ntp` procedure was added and included in
 the example libraries for the most common systems.
 
@@ -2850,9 +2890,9 @@ selected.
 +
 --
 
-If you used _equipment_override_, these bugs did not affect you. Since
-no one reported these bugs, presumably at least one of the following
-was always true:
+If you used `equipment_override`, these bugs did not affect you. Since
+no one reported these bugs, hopefully at least one of the following
+was true (which would have prevented a problem) for each schedule:
 
 * The `equipment_override` option was selected.
 
@@ -2865,7 +2905,7 @@ was always true:
 The features of these options now agree with the original design,
 which was:
 
-* User by itself, the values specified by `equipment` will only be
+* Used by itself, the values specified by `equipment` will only be
 applied if there is no equipment in the schedule.
 
 * If `equipment_override` is also selected, the values specified by
@@ -2923,7 +2963,7 @@ were made.
 
 As described in <<stop_adding_extra_comments,Stop adding extra
 comments when updating .rxg files>> change in the <<FS changes>>
-sub-section above, _gnplt_ has been adding extra comments, in some
+subsection above, _gnplt_ has been adding extra comments, in some
 cases a lot of them, to your _.rxg_ files. With this update, that
 behavior has been fixed. However, there may already be many extra
 comments in your _.rxg_ fies. This appendix provides an optional
@@ -3071,8 +3111,8 @@ the next step, <<Cleanup trailing comments>>, below.
 === Cleanup trailing comments
 
 The procedure for cleaning-up the trailing comments is covered in the
-<<Cleanup procedure>> sub-section below. After that there is an
-<<Explanation of procedure>> sub-section that may make what is being
+<<Cleanup procedure>> subsection below. After that there is an
+<<Explanation of procedure>> subsection that may make what is being
 done clearer and includes a small additional procedure for files that
 have been updated previously by _gnplt1_. When applying these
 procedures, there are a few points worth considering:
@@ -3216,7 +3256,7 @@ doesn't have a second `GnPlt2` date comment at the start.
 
 . [[finish]] <<Finish,Finish>>: If your _.rxg_ file was updated with
 _gnplt1_ in the past, please consider using the <<gnplt1,gnplt1>>
-additional procedure in the <<Explanation of procedure>> sub-section
+additional procedure in the <<Explanation of procedure>> subsection
 below. Then continue with the next step here, <<save_file,Save file>>.
 
 . [[save_file]]<<save_file,Save file>>: Save the file.
