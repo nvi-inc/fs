@@ -1,4 +1,5 @@
 This file contains a summary of changes made and why.
+2022-04-26 Update copyright year, by WEH: proc_thread.f
 2022-04-08 Fix endef for thread prcoedure, by WEH: proc_thread.f
 2022-03-29 Don't include ready procedure for recorder=none, by WEH: snap.f
 2022-02-10 fdrudg.f. Handling of equip_override.  If ON will use stuff from skedf.ctl. 
