@@ -243,7 +243,7 @@ bbc_gain=all,agc
 tpicd=no,100
 tpicd
 enddef
-define  dbbcvg        22033234617x9x
+define  dbbcvg        00000000000 
 bbc001=3480.4,a,32.0
 bbc002=3448.4,a,32.0
 bbc003=3384.4,a,32.0
@@ -309,7 +309,7 @@ bbc062=1303.6,h,32.0
 bbc063=1335.6,h,32.0
 bbc064=1367.6,h,32.0
 enddef
-define  ifdvg       2122033234619x
+define  ifdvg         00000000000 
 ifa=1,agc,32000
 ifb=1,agc,32000
 ifc=2,agc,32000
