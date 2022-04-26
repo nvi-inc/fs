@@ -44,6 +44,7 @@ int ip[5];                           /* ipc parameters */
       int increment;
       unsigned long long data_rate;
       int nWriters;
+      int channels_dbbc3;
 
       void skd_run(), skd_par();      /* program scheduling utilities */
 
@@ -134,7 +135,11 @@ parse:
       out_recs=0;
       out_class=0;
 
-      mk5b_mode_2_m5(outbuf,&lcl,itask,&data_rate);
+      mk5b_mode_2_m5(outbuf,&lcl,itask,&data_rate,&channels_dbbc3);
+      if(shm_addr->equip.rack == DBBC3 && !channels_dbbc3) {
+        ierr=-303;
+        goto error;
+      }
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
       out_recs++;
 

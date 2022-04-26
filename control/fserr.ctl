@@ -920,6 +920,9 @@ Don't change mode while recording, use disk_record=off first or (dangerous) use 
 5T -302
 Mixed decimations for DBBC3 racks are not supported at this time for mk5c_mode/fb_mode.
 ""
+5T -303
+Can't configure the recorder if no DBBC3 channels are selected.
+""
 5T -400
 error retrieving acknowledgement of command
 ""

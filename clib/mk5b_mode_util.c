@@ -379,11 +379,12 @@ struct mk5b_mode_mon *lclm;
    return;
 }
 
-mk5b_mode_2_m5(ptr,lclc,itask,data_rate)
+mk5b_mode_2_m5(ptr,lclc,itask,data_rate,channels_dbbc3)
 char *ptr;
 struct mk5b_mode_cmd *lclc;
 int itask;
 unsigned long long *data_rate;
+int *channels_dbbc3;
 {
   if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
        (shm_addr->equip.drive_type[shm_addr->select] == MK5B ||
@@ -438,6 +439,7 @@ unsigned long long *data_rate;
            bits_p_chan=1;
 
         *data_rate = lclc->samplerate.datarate;
+        *channels_dbbc3=channels;
     } else {
 
         if((0xaaaaaaaaaaaaaaaaULL & bitmask) && (0x5555555555555555ULL & bitmask))
