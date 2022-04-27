@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2020-2021 NVI, Inc.
+# Copyright (c) 2020-2022 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2022-01-02
+VERSION=2022-04-26
 
 version(){
     echo "[fesh $VERSION]"
@@ -354,6 +354,7 @@ fi
 
 sched=$1
 
+FESH_DATA_CENTER=$(echo "$FESH_DATA_CENTER" | tr '[:upper:]' '[:lower:]')
 if [[ ! "$FESH_DATA_CENTER" =~ ^(cddis|opar|bkg|vlbeer)$ ]]; then
    echo "Unknown data center: $FESH_DATA_CENTER."
    exit 1
