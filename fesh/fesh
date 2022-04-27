@@ -19,7 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2022-04-26
+VERSION=2022-04-27
 
 version(){
     echo "[fesh $VERSION]"
@@ -55,6 +55,7 @@ fi
 FESH_DATA_CENTER=${FESH_DATA_CENTER:-'cddis'}
 
 FESH_CDDIS_METHOD=${FESH_CDDIS_METHOD:-'ftp-ssl'}
+FESH_BKG_METHOD=${FESH_BKG_METHOD:-'ftp-ssl'}
 
 if [[ ! -z "${FESH_GEO_TPICD:-}" ]]; then
     tpicd=$FESH_GEO_TPICD
@@ -202,6 +203,8 @@ which by default is in "~".  For example:
         login mycddisuser
         password secret
 
+See "man 5 netrc" for more details on ".netrc".
+
 If your curl supports the "--netrc-file" option (see "man curl") , you
 can change the directory used for ".netrc" by setting the NETRC_DIR
 environment variable.  This matches plog. E.g., add the following to
@@ -209,8 +212,6 @@ your login script
 
     setenv NETRC_DIR "/usr2/control" #in ~/.login for tcsh or
     export NETRC_DIR="/usr2/control" #in ~/.profile for bash
-
-See "man 5 netrc" for more details on ".netrc".
 
 If you have FSL8 or another old distribution that does not support
 curl ftp-ssl or https with CDDIS, but worked with the previous
@@ -222,6 +223,17 @@ previous behaviour with:
 
 However, this method will no longer work when CDDIS stops support
 of non-ssl ftp, which is expected at the end of October 2020.
+
+The default transfer method from BKG is ftp-ssl.  If you have FSL8 or
+another old distribution that does not support curl ftp-ssl
+with BKG, but worked with the previous versions of fesh that used wget
+for non-ssl ftp, you can restore the previous behaviour with:
+
+    setenv FESH_BKG_METHOD ftp #in ~/.login for tcsh or
+    export FESH_BKG_METHOD=ftp #in ~/.profile for bash
+
+However, this method will no longer work when BKG stops support
+of non-ssl ftp, which is expected at the end of May 2022.
 
 With the '-d' option, if the 'skedf.ctl' control file specifies
 prompting for any of: tpicd, vsi_align, cont_cal, cont_cal_polarity,
@@ -383,6 +395,11 @@ fi
 
 if [[ ! "$FESH_CDDIS_METHOD" =~ ^(ftp|ftp-ssl|https)$ ]]; then
    echo "Unknown cddis method: $FESH_CDDIS_METHOD."
+   exit 1
+fi
+
+if [[ ! "$FESH_BKG_METHOD" =~ ^(ftp|ftp-ssl)$ ]]; then
+   echo "Unknown bkg method: $FESH_BKG_METHOD."
    exit 1
 fi
 
@@ -553,6 +570,7 @@ if [[ -n "$download" ]]; then
             fi
         else
             curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+
             if [[ -n "$txt" ]]; then
                 curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
             fi
@@ -563,9 +581,16 @@ if [[ -n "$download" ]]; then
             wget -nv "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
         fi
     elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
-        wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-        if [[ -n "$txt" ]]; then
-            wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+        if [[ "$FESH_BKG_METHOD" =~ ^ftp$ ]]; then
+            wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            if [[ -n "$txt" ]]; then
+                wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+            fi
+        else
+            curl --ssl-reqd -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            if [[ -n "$txt" ]]; then
+                curl --ssl-reqd -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+            fi
         fi
     elif [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
         wget -nv "ftp://ftp@vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
