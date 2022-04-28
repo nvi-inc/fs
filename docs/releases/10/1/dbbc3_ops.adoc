@@ -26,7 +26,7 @@
 :toc:
 :experimental:
 E. Himwich, J. Quick
-Version 3.6 - April 2022
+Version 3.7 - April 2022
 
 == Introduction
 
@@ -881,12 +881,13 @@ be pushed by default. Please see ``**plog -h**`` for more information.
 
 The DBBC3 related _drudg_ changes include:
 
-* Support for Up to eight IFs (`a`-`h`) with up to 16 dual side-band
+* Support for up to eight IFs (`a`-`h`) with up to 16 dual side-band
 BBCs each (overall `001`-`128`) for VEX (_.vex_) schedule files.
 
-* Support  to two IFs (`a` and `b`) with up to eight 8 dual side-band
-BBCs (`001`-`008`) on IF `a` and up to eight 8 dual side-band BBCs
-(`009`-`016`) on IF `b` for Mark IV (_.skd_) schedule files.
+* Support for up to two IFs (`a` and `b`) with up to eight dual
+side-band BBCs (`001`-`008`) on IF `a` and up to eight eight dual
+side-band BBCs (`009`-`016`) on IF `b` for Mark IV (_.skd_) schedule
+files.
 
 +
 
@@ -895,7 +896,7 @@ channels for an IF that is not a power of two, the channels for that
 IF will need to be increased to the next power of two. For example,
 for  _S_/_X_: _X_-band using 10 channels, will need to be expanded to
 use 16; _S_-band using six channels will need to be expanded to eight.
-The expanded set of channels being recorded can flow from the catalog,
+The expanded set of channels to be recorded can flow from the catalog,
 so their use is automatic for the scheduler and the station. This is
 just an example that will allow recording of all the normal data.
 Other adjustments may be needed for efficient correlation.
@@ -903,9 +904,10 @@ Other adjustments may be needed for efficient correlation.
 * The appropriate <<DBBC3 related commands>> are used in setup
 procedures.
 
-* New _skedf.ctl_ options `setup_proc` and `vdif_single_thread_per
-file` as described in the <<Minimizing the use of setup procedures>>
-and the <<Thread procedure>> appendices.
+* New _skedf.ctl_ options `setup_proc` and
+`vdif_single_thread_per_file` as described in the
+<<Minimizing the use of setup procedures>> and the
+<<Thread procedure>> appendices.
 
 * _drudg_ inserts a `mk5c_config` or `fb_config` procedure call into
 the setup procedures when the selected recorders are Mark 5C or
@@ -1863,9 +1865,9 @@ Afterwards, you need to re-sync the time as described in the
 <<Sync time>> subsection above and start the data transmission as
 described in the <<Start data transmission>> subsection above.
 
-CAUTION: The order of the last two commands above is critical to avoid
-having the overall setup procedure overwrite the new payload value for
-the Core3H boards.
+IMPORTANT: The order of the last two commands above is critical to
+avoid having the overall setup procedure overwrite the new payload
+value for the Core3H boards.
 
 NOTE: The reason for setting the new Core3H payload size _outside_ of
 the overall setup procedure is so that when using that procedure
