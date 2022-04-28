@@ -1,7 +1,7 @@
 #!/bin/bash
 #NB "strict" mode is used if run as a script
 #
-# Copyright (c) 2020-2021 NVI, Inc.
+# Copyright (c) 2020-2022 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -111,6 +111,14 @@ For example, for CDDIS:
         login mycddisuser
         password secret
 
+and for BKG:
+
+    machine ivs.bkg.bund.de
+        login mybkguser
+        password secret
+
+See "man 5 netrc" for more details on ".netrc".
+
 If your curl supports the "--netrc-file" option (see "man curl") , you can
 change the directory for ".netrc" by setting the NETRC_DIR environment
 variable.  E.g. add the following to your login script
@@ -118,7 +126,16 @@ variable.  E.g. add the following to your login script
     setenv NETRC_DIR "/usr2/control" ${blue}#tcsh${normal}
     export NETRC_DIR="/usr2/control" ${blue}#bash${normal}
 
-See "man 5 netrc" for more details on ".netrc".
+The default transfer method from BKG is ftp-ssl.  If you have FSL8 or
+another old distribution that does not support curl ftp-ssl with BKG,
+but worked with the previous versions of plog that used non-ssl ftp
+for BKG, you can restore the previous behaviour with:
+
+    setenv PLOG_BKG_METHOD ftp ${blue}#tcsh${normal}
+    export PLOG_BKG_METHOD=ftp ${blue}#bash${normal}
+
+However, this method will no longer work when BKG stops support
+of non-ssl ftp, which is expected at the end of May 2022.
 
 plog defaults to using bzip2 compression, if it is available, for full
 log files. Otherwise gzip is used. The use of gzip can be forced with
@@ -227,7 +244,7 @@ pftp() {
     URL="$1"; shift
     local F=($@) #Turn into an array so IFS is used in expansion
     local IFS=","
-    eval $DRY curl -n $CURL_NETRC_FILE_OPTION -T "{${F[*]}}" "ftp://$URL/"
+    eval $DRY curl $SSL_REQUIRED -n $CURL_NETRC_FILE_OPTION -T "{${F[*]}}" "ftp://$URL/"
 }
 
 pscp() {
@@ -362,6 +379,18 @@ CTRS=$(compgen -A variable | grep PLOG_CTR_ | cut -c $(echo "PLOG_CTR_" | wc -c)
 # Default Data center
 DATA_CENTERS=${DATA_CENTERS:-"CDDIS"}
 
+PLOG_BKG_METHOD=${PLOG_BKG_METHOD:-'ftp-ssl'}
+
+if [[ ! "$PLOG_BKG_METHOD" =~ ^(ftp|ftp-ssl)$ ]]; then
+   echo "Unknown bkg method: $PLOG_BKG_METHOD."
+   exit 1
+fi
+
+if [[ "$PLOG_BKG_METHOD" =~ ^ftp-ssl$ ]]; then
+    SSL_REQUIRED=--ssl-reqd
+else
+    SSL_REQUIRED=
+fi
 
 joinlst () {
     local IFS=" "
