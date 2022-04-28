@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Beta2 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 4.8 - April 2022
+Version 4.9 - April 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -2942,6 +2942,9 @@ were made.
 ====
 
 .. Make the recorder type in _.vex_ schedules case insensitive (bug fix)
+
+.. Add missing final scan `checkmk6` call in _.snp_ files for VGOS
+_.skd_ schedules using a Mark 6 recorder (bug fix)
 
 .. Support slewing model acceleration in _.skd_ files
 
