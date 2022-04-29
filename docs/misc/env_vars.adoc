@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 1.3 - April 2022
+Version 1.4 - April 2022
 
 :sectnums:
 
@@ -153,6 +153,16 @@ _emacs_, _ex_, _nano_, _pico_, _vi_, and  _vim_.
 Used by _pfmed_ as the editor run by the `ed` command.
 
 This was introduced in _8.9.0_, circa 1995.
+
+=== FESH_BKG_METHOD
+
+Possible values are `ftp-ssl` or `ftp`. If nothing is specifed it
+defaults to `ftp-ssl`.
+
+If set, this changes the default access method for _bkg_ in _fesh_
+to the specified value.
+
+This was introduced in April 2022.
 
 === FESH_CDDIS_METHOD
 
@@ -434,6 +444,16 @@ Used in _fesh_ and _plog_ to set a different directory then  _~_ for
 the _.netrc_ file.
 
 This was introduced in 10.0.0-beta2, July 2020.
+
+=== PLOG_BKG_METHOD
+
+Possible values are `ftp-ssl` or `ftp`. If nothing is specifed it
+defaults to `ftp-ssl`.
+
+If set, this changes the default access method for _bkg_ in _plog_
+to the specified value.
+
+This was introduced in April 2022.
 
 === PLOG_COMPRESSED_EXT
 
