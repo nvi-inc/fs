@@ -1,0 +1,295 @@
+//
+// Copyright (c) 2020-2022 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+:doctype: book
+
+= FS 10.1.0-beta2 to FS 10.1.0-beta3 Update Notes
+E. Himwich, J. Quick, J. Gipson, D. Horsley
+Version 4.9 - April 2022
+
+//:hide-uri-scheme:
+:sectnums:
+:stem: latexmath
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+:toclevels: 4
+
+== Introduction
+
+This document covers the steps needed to update from FS _10.0.0-beta2_
+to _10.1.0-beta3_ and the changes since _10.1.0-beta2_. This update is
+not an operational release. It is intended for _testing_ by all
+stations using FS _10.1.0-beta2_. If you do not already have FS
+_10.1.0-beta2_ installed, please see the <<beta1_to_beta2.adoc#,FS
+10.1.0-beta1 to 10.1.0-beta2 Update Notes>> document instead.
+
+If you already have FS _10.1.0-beta2_ installed, the update from that is
+much simpler than the update to _10.1.0-beta2_, see the
+<<Upgrading from 10.1.0-beta2>> section below. The changes in the FS
+and _drudg_ for _10.1.0-beta3_ are covered in the
+<<Changes since 10.1.0-beta2>> section below.
+
+== Upgrading from 10.1.0-beta2
+
+You must have already installed _10.1.0-beta2_ according to the
+<<beta1_to_beta2.adoc#,FS 10.1.0-beta1 to 10.1.0-beta2 Update Notes>>
+document before following the directions in the current document.
+
+=== Login as prog
+
+This is necessary for updating the FS source, unless you must install
+from an archive, as described in the next step.
+
+=== Fetch FS 10.1.0-beta2
+
+There are two options given below:
+
+* If you are using an FSL9 or FSL10 system:
+
+  cd /usr2/fs-git
+  git fetch
+  git checkout -q 10.1.0-beta3
+
++
+
+NOTE: The _github_ server was recently updated and the certificates
+available in FSL8 no longer work.
+
+* If you are unable to use _git_ (you are using FSL8 or other older
+system):
+
+. Please follow the steps, through the step that includes the option
+to set the link, in the
+<<../../misc/release_model.adoc#_installing_from_an_archive,Installing
+from an archive>> subsection in the
+<<../../misc/release_model.adoc#,Release Model>> document. Use
+__10.1.0-beta3__ as the value for __tag__. Be sure to set the link for
+__/usr2/fs__.
+
+=== Login as prog
+
+IMPORTANT: The FS must be compiled as _prog_.
+
+If you are already logged in as _prog_, no change is needed. This step
+is included to make sure you switch to _prog_ in case you installed
+from an archive in the previous step.
+
+=== Compile the FS
+
+  cd /usr2/fs
+  make rmdoto rmexe all >& /dev/null
+  make -s
+
+No output from the last command indicates a successful _make_.
+
+=== Login as oper
+
+Except as indicated, the actions in the next step should be performed
+as _oper_.
+
+=== Local customizations
+
+There are no new local customizations at this time.
+
+=== Review changes
+
+Please see the <<Changes since 10.1.0-beta2>> section below for the
+details of the changes since that release.
+
+== Changes since 10.1.0-beta2
+
+There are separate subsections with summaries of changes in the FS and
+_drudg_.
+
+Clickable links such as, https://github.com/nvi-inc/fs/issues/36[#36],
+connect to specific issues reported at
+https://github.com/nvi-inc/fs/issues.
+
+A detailed list of changes can be found using the `git log` command
+from within the FS _git_ repo directory, usually _/usr2/fs-git_.
+
+Each change is listed as a numbered title, then usually a few summary
+sentences, followed by a _toggle_:
+
+[%collapsible]
+====
+Details are shown here.
+====
+that can be clicked to toggle showing (or not showing) the details.
+In this way, you can view the summary as a list and only reveal the
+details of items that interest you. The summary sentences and/or the
+details toggle may be omitted if they would not add any new
+information, usually because it is already covered in the numbered
+title item and/or the details are very brief.
+
+=== FS changes
+
+. Improve _plog_
+
++
+
+The new default method for pushing to the BKG data center is
+`ftp-ssl`. The data center and station code are now case insensitive.
+
++
+[%collapsible]
+====
+
+.. Add support for `ftp-ssl` with the BKG data center in _plog_.
+
++
+
+The default for pushing files (logs) to the BKG data center is now
+`ftp-ssl`. Unfortunately, accessing BKG with `ftp-ssl` cannot be
+supported on FSL8. The old behavior using `ftp` can be enabled by
+setting the environment variable `PLOG_BKG_METHOD` to `ftp`. However,
+BKG is expecting to discontinue support for non-SSL `ftp` at the end
+of May 2022.
+
++
+
+NOTE: After June 2022, BKG upload access will require use of an
+individual account. You can get information to apply for an account by
+going to https://ivs.bkg.bund.de/ and following the
+`Access{nbsp}Information` link.
+
+.. Make data center case insensitive.
+
++
+
+This change was made to improve ease-of-use when specifying the data
+center with the `-c` option. For consistency, the value specified by
+the `DATA_CENTERS` environment variable is now also case insensitive.
+
+.. Make two character station code case insensitive.
+
++
+
+This change was made to make _plog_ and _fesh_'s use of the `STATION`
+environment variable consistent.
+
+====
+
+. Improve _fesh_
+
++
+
+The new default method for accessing the BKG data center is `ftp-ssl`.
+The data center is now case insensitive (as was the station code).
+
++
+[%collapsible]
+====
+
+.. Add support for `ftp-ssl` for the BKG data center
+
++
+
+The default for pulling schedule (and _.txt_ note) files from the BKG
+data center is now `ftp-ssl` (using `anonymous` access).
+Unfortunately, accessing BKG with `ftp-ssl` cannot be supported on
+FSL8. The old behavior using `ftp` can be enabled by setting the
+environment variable `FESH_BKG_METHOD` to `ftp`. However, BKG is
+expecting to discontinue support for non-SSL `ftp` at the end of May
+2022.
+
+.. Make data centers case insensitive
+
++
+
+This change was made to improve ease-of-use when specifying the data
+center with the `-D` option. For consistency, the value specified by
+the `FESH_DATA_CENTER` environment variable is now also case
+insensitive.
+
+====
+
+. Improve `mk5c_mode`/`fb_mode` for use with DBBC3s
+
++
+
+These commands will now trap no DBBC3 channels being selected and give
+what should be a clearer explanatory message than just having the
+recorder rejecting a zero channel `mode`.
+
++
+
+Thanks to Christian Plötz (Wettzell) for pointing out the need for this.
+
+. Improve `help` page for the `core3h_mode` command
+
++
+
+A significant part of the `Comments` section was rewritten to more
+clearly explain the different _Forms_ of this command, particularly
+the _Checking Form_, which is unique to this command. The _Command_
+and _Monitor_ forms, which are typically the ones used in commands for
+other devices are also described more fully.
+
++
+
+Several other changes were made to bring the feature description up to
+date and improve wording.
+
+. Correct the `d3fbstation.prc` example procedure library
+
++
+
+Two `define` lines were malformed. This was a benign error.
+
+. Improve web documents
+
++
+
+A few minor changes were made.
+
++
+[%collapsible]
+====
+
+.. Note _drudg_ bug fix to add missing final scan `checkmk6` call to
+_.snp_ files.
+
++
+
++
+
+This fix in _drudg_ has been present since _10.1.0-beta1_.
+
+.. Include that incorrect RDBE DOT time are in inverse video for the
+RDBE monitor window (_monit6_) in the <<beta1_to_beta2.adoc#,FS
+10.1.0-beta1 to 10.1.0-beta2 Update Notes>> document. It was already
+in the <<10.1.0-beta2.adoc#,FS 10.1.0-beta2 Update Notes>>
+
+.. Fix the alphabetic order of the environment variables beginning
+with `FESH+++_+++` in the <<../../../misc/env_vars.adoc#,FS
+Environment Variables>> document.
+
+.. Make miscellaneous wording improvements
+
+====
+
+=== drudg changes
+
+There have been no _drudg_ changes since _10.1.0-beta2_.
+
+The _drudg_ opening message date remains `2022-04-08`.
