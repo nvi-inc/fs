@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 1.1 - March 2022
+Version 1.2 - April 2022
 
 :sectnums:
 
@@ -154,12 +154,12 @@ Used by _pfmed_ as the editor run by the `ed` command.
 
 This was introduced in _8.9.0_, circa 1995.
 
-=== FESH_EMAIL
+=== FESH_CDDIS_METHOD
 
-Nominal value is an email address.
+Possible values are `ftp-ssl` or `https`.
 
-If set, this is used as the password in _fesh_ for the anonymous
-FTP-SSL method for _cddis_.
+If set, this changes the default access method for _cddis_ in _fesh_
+to the specified value.
 
 This was introduced in _10.0.0-beta3_, December 2020.
 
@@ -172,25 +172,12 @@ specified value.
 
 This was introduced in _10.0.0-beta3_, December 2020.
 
-=== FESH_CDDIS_METHOD
+=== FESH_EMAIL
 
-Possible values are `ftp-ssl` or `https`.
+Nominal value is an email address.
 
-If set, this changes the default access method for _cddis_ in _fesh_
-to the specified value.
-
-This was introduced in _10.0.0-beta3_, December 2020.
-
-=== FESH_GEO_TPICD
-
-Possible values are non-negative integers.
-
-If set, the value is provided as the answer for the _drudg_ prompt for
-the _tpicd_ interval for geodesy schedules.
-
-IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
-value, the _drudg_ output files  will be incorrect and there may be no
-clear indication of that.
+If set, this is used as the password in _fesh_ for the anonymous
+FTP-SSL method for _cddis_.
 
 This was introduced in _10.0.0-beta3_, December 2020.
 
@@ -213,6 +200,19 @@ Possible values are `0`, `1`, `2`, `3`, or `none`.
 
 If set, the value is provided as the answer for the _drudg_ prompt for
 the continuous cal polarity for geodesy schedules.
+
+IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
+value, the _drudg_ output files  will be incorrect and there may be no
+clear indication of that.
+
+This was introduced in _10.0.0-beta3_, December 2020.
+
+=== FESH_GEO_TPICD
+
+Possible values are non-negative integers.
+
+If set, the value is provided as the answer for the _drudg_ prompt for
+the _tpicd_ interval for geodesy schedules.
 
 IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
 value, the _drudg_ output files  will be incorrect and there may be no
