@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 1.2 - April 2022
+Version 1.3 - April 2022
 
 :sectnums:
 
@@ -156,7 +156,8 @@ This was introduced in _8.9.0_, circa 1995.
 
 === FESH_CDDIS_METHOD
 
-Possible values are `ftp-ssl` or `https`.
+Possible values are `ftp-ssl` or `https`. If nothing is specifed it
+defaults to `ftp-ssl`.
 
 If set, this changes the default access method for _cddis_ in _fesh_
 to the specified value.
