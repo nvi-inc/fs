@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2022-01-02
+VERSION=2022-04-29
 
 version(){
     echo "[plog $VERSION]"
@@ -62,6 +62,7 @@ ${underline}Options:${normal}
     ${black}-h${normal}            Print this message
     ${black}-c CENTER${normal}     Push files to data CENTER. Overrides the DATA_CENTERS
                   environment variable. Flag can be given multiple times.
+                  Upper and lower case values are accepted.
     ${black}-p${normal}            Also push proc file
     ${black}-q${normal}            Quiet mode
     ${black}-z${normal}            Push a compressed log (only full if log contains multicast
@@ -95,9 +96,10 @@ two-letter station code in. E.g. add the following ~/.login (tcsh) or
     setenv STATION gs ${blue}#tcsh${normal}
     export STATION=gs ${blue}#bash${normal}
 
-Data centers are specified in the DATA_CENTERS environment variable which can
-contain CDDIS, OPAR, BKG, HAYSTACK (VGOS only). Multiple centers are separated
-with a space. E.g. add the following to your login script
+Data centers are specified in the DATA_CENTERS environment variable
+which can contain CDDIS, OPAR, BKG, and HAYSTACK (VGOS only). Multiple
+centers are separated with a space. Upper and lower case values are
+accepted. E.g. add the following to your login script
 
     setenv DATA_CENTERS "CDDIS HAYSTACK" ${blue}#tcsh${normal}
     export DATA_CENTERS="CDDIS HAYSTACK" ${blue}#bash${normal}
@@ -109,12 +111,6 @@ For example, for CDDIS:
 
     machine urs.earthdata.nasa.gov
         login mycddisuser
-        password secret
-
-and for BKG:
-
-    machine ivs.bkg.bund.de
-        login mybkguser
         password secret
 
 See "man 5 netrc" for more details on ".netrc".
@@ -378,6 +374,7 @@ CTRS=$(compgen -A variable | grep PLOG_CTR_ | cut -c $(echo "PLOG_CTR_" | wc -c)
 
 # Default Data center
 DATA_CENTERS=${DATA_CENTERS:-"CDDIS"}
+DATA_CENTERS=$(echo "$DATA_CENTERS" | tr '[:lower:]' '[:upper:]')
 
 PLOG_BKG_METHOD=${PLOG_BKG_METHOD:-'ftp-ssl'}
 
@@ -492,10 +489,11 @@ main () {
                 DRY=echo
                 ;;
             c)
-                if [[ ! $CTRS =~ $OPTARG ]]; then
-                    fatal "Unknown data center '$OPTARG'"
+                NEW_CENTER=$(echo "$OPTARG" | tr '[:lower:]' '[:upper:]')
+                if [[ ! $CTRS =~ $NEW_CENTER ]]; then
+                    fatal "Unknown data center '$NEW_CENTER'"
                 fi
-                CENTERS_OVER="$CENTERS_OVER $OPTARG"
+                CENTERS_OVER="$CENTERS_OVER $NEW_CENTER"
                 ;;
             p)
                 PUSH_PROC=1
