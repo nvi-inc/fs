@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2022-04-29
+VERSION=2022-04-30
 
 version(){
     echo "[plog $VERSION]"
@@ -89,9 +89,10 @@ If the log contains RDBE or DBBC3 multicast data:
 
 To see progress when compressing and reducing, install the 'pv' package.
 
-plog requires the STATION environment variable be set to the lower case
-two-letter station code in. E.g. add the following ~/.login (tcsh) or
-~/.profile (bash):
+plog requires the STATION environment variable be set to the
+two-letter station code. Upper and lower case values are accepted, but
+they are mapped to lower case. E.g. add the following ~/.login (tcsh)
+or ~/.profile (bash):
 
     setenv STATION gs ${blue}#tcsh${normal}
     export STATION=gs ${blue}#bash${normal}
@@ -601,9 +602,10 @@ main () {
         # we need the name of the station if we're going to lookup by observation name
         set +u
         if [[ -z "$STATION" ]]; then
-            fatal "STATION environment variable not set. Set to lower case two-letter station id."
+            fatal "STATION environment variable not set. Set to two-letter station id."
         fi
         set -u
+        STATION=$(echo "$STATION" | tr '[:upper:]' '[:lower:]')
 
         # Should we add the proc file?
         if [[ -n "$PUSH_PROC" ]]; then
