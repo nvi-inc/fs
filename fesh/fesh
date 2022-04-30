@@ -19,7 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2022-04-27
+VERSION=2022-04-30
 
 version(){
     echo "[fesh $VERSION]"
@@ -102,8 +102,9 @@ Options:
  -n       Fetch next schedule in master file (not supported yet)
  -d       drudg schedule with default settings, not supported for vlbeer
           (needs STATION environment variable or -s set with two letter id)
- -D dc    Use alternate data center; dc=bkg, cddis, opar, or vlbeer
-          (see more below about setting the default data center)
+ -D dc    Use alternate data center; dc=bkg, cddis, opar, or vlbeer. Upper
+          and lower case are accepted. (see more below about setting the
+          default data center)
  -v       Verbose mode, drudg output printed to stdout
  -V       Print version and exit.
  -P       With -d, use drudg to send the schedule summary to the printer
@@ -130,14 +131,15 @@ Options:
 NOTE: If you specify a schedule that doesn't exist, you will get a
 file or a directory error from the server.
 
-For the '-d' option, the STATION environment variable or the -s option must be
-set with the two-letter station code. For example, for STATION:
+For the '-d' option, the STATION environment variable, or the -s
+option, must be set with the two-letter station code. For example, for
+STATION:
 
     setenv STATION gs #in ~/.login for tcsh or
     export STATION=gs #in ~/.profile for bash
 
-If both are set, -s overrides STATION. In any case, the value is
-mapped to lower case for agreement with drudg.
+If both are set, -s overrides STATION. In any event, the value is
+mapped to lower case, if it isn't already, for agreement with drudg.
 
 Please see the end of this message about handling optional 'skedf.ctl'
 specified prompting for 'drudg'.
@@ -146,8 +148,8 @@ The '-d' option is not supported for data center 'vlbeer'.
 
 The default data center is CDDIS but can be changed by setting the
 FESH_DATA_CENTER environment variable. Accepted values are bkg, cddis,
-opar (the three 'geo' centers) or vlbeer. For example, to make the default
-bkg, use:
+opar (the three 'geo' centers) or vlbeer. The value is mapped to lower
+case, if it isn't already. For example, to make the default bkg, use:
 
     setenv FESH_DATA_CENTER bkg #in ~/.login for tcsh or
     export FESH_DATA_CENTER=bkg #in ~/.profile for bash
