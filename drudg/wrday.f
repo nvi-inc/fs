@@ -21,6 +21,7 @@
 C  Write a line in the SNAP summary with the new date.
 C History
 C 990305 nrv New. Copied from wrdate.
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 !     2006Sep28 Rewrriten to remove hollerith
 
 C Input:
@@ -33,6 +34,7 @@ C Local:
       integer*2 lmon(2),lday(2)
       character*3 cmon
       equivalence (lmon,cmon)
+      integer ida ,imon
 
       imon = 0
       ida = idayr

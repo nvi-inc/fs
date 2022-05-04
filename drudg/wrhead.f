@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 	SUBROUTINE wrhead(lu,ierr,cs,isig,idoub,ldoub,ido,imode,icod)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C   wrhead writes the header lines period, bbfilter, level,
 C   baseband, ifchan, and sideband for a VLBA schedule pointing
@@ -30,6 +31,10 @@ C   COMMON BLOCKS USED
       include 'drcom.ftni'
 C
 C   HISTORY:
+
+! Updates. Most reecent first. 
+! 2021-01-05 JMG Replaced max_frq by max_code. (Max_frq was confusing and led to coding errors.)
+! 2008-08-99 JMG  A little cleanup and modernization.
 C     WHO   WHEN   WHAT
 C     gag   900802 CREATED
 C     gag   901025 got rid of trailing blanks
@@ -39,15 +44,14 @@ C     nrv   930708 Added imode in calling list, rewrote to simplify and
 C                  use built-in features of ib2as. Add inner loop to get
 C                  all channels for Mode A written out.
 C 960703 nrv Use ix index when writing sideband.
-! 2008Aug19 JMG.  A little cleanup and modernization.
 C
 C  INPUT:
       integer lu,iblen,icod
       character*(*) cs   ! what line to write
       integer isig    ! value to write out for each channel
       integer ido     ! mode passed from calling routine
-      integer idoub(max_chan,max_stn,max_frq)  ! two dimension array
-      integer*2 ldoub(max_chan,max_stn,max_frq)  ! two dimension array
+      integer idoub(max_chan,max_stn,max_code)  ! two dimension array
+      integer*2 ldoub(max_chan,max_stn,max_code)  ! two dimension array
       integer imode   ! 1=write out one entry per BBC
 C                           2=need double the entries
 C
@@ -82,26 +86,26 @@ C  loop on the number of channels read from schedule file
           endif
 
           ichan=invcx(ix,istn,icod) ! ichan=total#channel index
-! End change 
+! End change
           do im=1,imode
             nch = ichmv_ch(ibuf,nch,'(')
             iy=iy+1
 !            if (imode.eq.1) then !only one entry, use ix
 ! Changed 2014May21
-!              iy=ix-1         
+!              iy=ix-1
 !            else !two entries, use iy
-!              iy = (ix-1)*2 + im      
+!              iy = (ix-1)*2 + im
 !            endif
             nch = nch + ib2as(iy,ibuf,nch,ileft)
 
             nch = ichmv_ch(ibuf,nch,',')
 
 	  if ((ido.eq.1).or.(ido.eq.2)) then ! single value
-            nch = nch + ib2as(isig,ibuf,nch,ileft) 
+            nch = nch + ib2as(isig,ibuf,nch,ileft)
           endif
 
 	  if (ido.eq.2) then ! append M
-            nch = ichmv_ch(ibuf,nch,'M') 
+            nch = ichmv_ch(ibuf,nch,'M')
 	  else if (ido.eq.3) then ! use integer array
             nch = nch + ib2as(idoub(ichan,istn,icod),ibuf,nch,ileft)
 	  else if (ido.eq.4) then ! use character array
@@ -128,8 +132,8 @@ C             For the lsb, take the other one
 C  write out buffer if reached 8 channels written into it
           if(mod(iout,4).eq.0) then
 !	  if (mod(iout,8).eq.0) then
-            write(lu,'(a)') cbuf(1:nch)    
-            return 
+            write(lu,'(a)') cbuf(1:nch)
+            return
 	  else
             nch = ichmv_ch(ibuf,nch,',')
 	  end if
@@ -138,7 +142,7 @@ C  write out buffer if reached 8 channels written into it
 
 C  write out buffer if there is something to write
 	if (nchan(istn,icod).ne.8) then
-          write(lu,'(a)') cbuf(1:nch-2)     !skip terminal ","          
+          write(lu,'(a)') cbuf(1:nch-2)     !skip terminal ","
 	end if
 C
 	RETURN

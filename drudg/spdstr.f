@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine spdstr(spd,cspd_out,nspd)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C SPDSTR returns a Hollerith "lspd" with the appropriate speed for
 C the value of "spd". "nspd" is the number of characters in lspd.
@@ -59,7 +60,7 @@ C        20    33.33   33.375
 C        40    66.66   67.5
 C        80   133.33  135
 C       160   266.66  270
-C       320    
+C       320
       data maxspd/23/
       data sp/0.0, 2.5, 4.21875,4.44,
      .             5.0, 8.4375, 8.88,

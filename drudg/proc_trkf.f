@@ -19,12 +19,13 @@
 *
       subroutine proc_trkf(icode,lwhich8,ierr)
 ! Write TRKF and RECP procedures
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
       include '../skdrincl/freqs.ftni'
       include 'drcom.ftni'
 
 ! passed
-      integer icode     
+      integer icode
       character*1 lwhich8               !flag for (F)irst 8 BBCs or (L)ast
 
 ! returned
@@ -32,17 +33,17 @@
 
 !functions
       integer itras     !returns track#, or -1 if not set.
-      integer iaddtr    !write another track to cbuf    
+      integer iaddtr    !write another track to cbuf
 
 
 ! History
 ! 2007Jul11 Split off from procs.f
 ! 2009Sep08 Fixed bug in filling up extra tracks if used 2nd headstack
-! 2014Dec10 JMG. Modified test to switch tracks to only work when in non-VEX mode. 
+! 2014Dec10 JMG. Modified test to switch tracks to only work when in non-VEX mode.
 
 ! local
       character*12 cnamep               !function name
-      character*4 cpmode                !mode name    
+      character*4 cpmode                !mode name
 
       integer im5chn_dup                !number of duplicated channels.
       integer num_chans_obs         	!number of channels observer
@@ -90,7 +91,7 @@
       character*1 cvpass(28)
       character*28 cvpassTmp
       equivalence (cvpass,cvpassTmp)
-  
+
 
       integer ipass                     ! pass counter
 
@@ -98,7 +99,7 @@
 
       ir = 1
       if (kuse(2).and..not.kuse(1)) ir = 2
-      
+
       ipass=1
       call trkall(ipass,istn,icode,
      >    cmode(istn,icode), itrk,cpmode,ifan(istn,icode))
@@ -117,13 +118,13 @@
            endif
           im5chn_dup=num_tracks_rec_mk5/ifan_fact-num_chans_obs       !This is the number of channels to duplicate
       endif
-      
+
       cnamep="trkf"//ccode(icode)
-       
+
       call proc_write_define(lu_outfile,luscn,cnamep)
 
       cbuf="trackform="
-      nch=11       
+      nch=11
       write(lu_outfile,'(a)') cbuf(1:nch)
 
 ! This is used below for handling Mark5A and Mark5P
@@ -139,13 +140,13 @@
          do ihead =1,max_headstack  !2hd hedzz
            do isb=1,2 ! sidebands
              do ibit=1,2 ! bits
-               if(nch .eq. 0) then    !initialize front of line.                
+               if(nch .eq. 0) then    !initialize front of line.
                  cbuf="trackform="
-                 nch=11                
+                 nch=11
                  ib=0
                endif
-               it=itras(isb,ibit,ihead,ic,ipass,istn,icode) 
-          
+               it=itras(isb,ibit,ihead,ic,ipass,istn,icode)
+
                kinclude=.false.
                if (it.ne.-99) then ! assigned
 C             Use BBC number, not channel number
@@ -161,10 +162,10 @@ C             Use BBC number, not channel number
                if(kinclude) then
                  isb_out=isb
                  if(abs(freqrf(ic,istn,icode)).lt.
-     >                freqlo(ic,istn,icode)) then 
+     >                freqlo(ic,istn,icode)) then
                     isb_out=3-isb    !swap the sidebands
                  endif ! reverse sidebands
-                 if(.true.) then    
+                 if(.true.) then
                     if(km5APigWire(ir)) then
                       if(km4form) then
                         ihdtmp=2    !put out on 2nd headstack.
@@ -210,7 +211,7 @@ C             Use BBC number, not channel number
                    itvec(Numtracks)=it
                    ibvec(Numtracks)=ib
                    isbvec(Numtracks)=isb_out
-                   ibitvec(NumTracks)=ibit 
+                   ibitvec(NumTracks)=ibit
                  endif
                  ib=1
                endif  !include
@@ -359,7 +360,7 @@ C             Use BBC number, not channel number
           endif
 ! ***** End of special Mark5 Stuff.
        write(lu_outfile,"(a)") 'enddef'
-    
+
 
       return
       end

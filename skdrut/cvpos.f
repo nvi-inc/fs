@@ -19,6 +19,7 @@
 *
       SUBROUTINE CVPOS(NSOR,ISTN,MJD,UT,AZ,EL,HA,DC,X30,Y30,X85,Y85,
      .                 KUP)
+      implicit none
 C
 C   CVPOS converts source ra and dec into az,el,ha,x, and y; or satellite
 C         elememts into the same plus dec.
@@ -32,7 +33,7 @@ C        NSOR   - Source index number into DB arrays
 C        ISTN   - Station index number into DB arrays
 C        MJD    - Modified Julian date (from JULDA)
       real*8 UT ! UT for which positions requested
-     
+
 C  OUTPUT VARIABLES:
       real*4 az,el,ha,dc,x30,y30,x85,y85
 C        AZ,EL,HA,DC,X30,Y30,X85,Y85 - az,el,ha,dc,and x,y at input date and time
@@ -41,6 +42,10 @@ C
 C   COMMON BLOCKS USED
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/statn.ftni'
+! Function
+      integer iwhere_in_range4
+
+
 C
 C     LOCAL VARIABLES:
       real*4 slat,clat,sha,cha,saz,sel,cel,azx,
@@ -84,16 +89,17 @@ C     WEH  830523  Add satellites, add DC to arguments.
 C     NRV  880315  DE-COMPC'D
 C     GAG  881221  ADDED HORIZON AND COORDINATE MASK CHECK WRITTEN BY NRV
 C     NRV  900125  Added type 6 = SEST with 30 degree sun avoidance
-C     NRV  900208  Reversed XYEW and XYNS for schedule dates after 
+C     NRV  900208  Reversed XYEW and XYNS for schedule dates after
 C                  April 1, 1990 (this corrects the erroneous designations)
 C     NRV  900309  Added call to SUNAZEL for SEST limit check
 C     931012 nrv Remove statement functions for acos, asin//REPLACED
 C                Remove DMOD and check HA for 2PI
 C     940804 nrv Changed limit on horizon check to i<nhorz because the
 C                value is checked between (i) and (i+1).
-C 960223 nrv Change to using (az,el) points actually on the horizon 
+C 960223 nrv Change to using (az,el) points actually on the horizon
 C            and interpolating between the line segments. Keep the
 C            coordinate mask unchanges.
+! 2021-01-25 JMG renamed SATP50-->satpos, SORPDA-->sorp_now
 C
 C
 C     1. Define the statement function ACOS.
@@ -106,17 +112,17 @@ C     2. Now calculate hour angle and dec, and sin/cos.
 C
       IF  (NSOR.LE.NCELES) THEN  !
         CALL SIDTM(MJD,ST0,FRAC)
-        HAD = ST0+UT*FRAC - STNPOS(1,ISTN) - SORPDA(1,NSOR)
-        DEC=SORPDA(2,NSOR)
+        HAD = ST0+UT*FRAC - STNPOS(1,ISTN) - sorp_now(1,NSOR)
+        DEC=sorp_now(2,NSOR)
       ELSE  !
         NORB=NSOR-NCELES
-        OINC=SATP50(1,NORB)
-        OECC=SATP50(2,NORB)
-        OPER=SATP50(3,NORB)
-        ONOD=SATP50(4,NORB)
-        OANM=SATP50(5,NORB)
-        OAXS=SATP50(6,NORB)
-        OMOT=SATP50(7,NORB)
+        OINC=satpos(1,NORB)
+        OECC=satpos(2,NORB)
+        OPER=satpos(3,NORB)
+        ONOD=satpos(4,NORB)
+        OANM=satpos(5,NORB)
+        OAXS=satpos(6,NORB)
+        OMOT=satpos(7,NORB)
         IOEY=ISATY(NORB)
         OEDY=SATDY(NORB)
 C
@@ -198,12 +204,14 @@ C         (1 = ha/dec, 5 = Richmond)
      .       (DC.GT.STNLIM(1,2,ISTN)).AND.
      .       (DC.LT.STNLIM(2,2,ISTN)))
         IF (NCORD(ISTN).GT.0) THEN
-          I=1
-          DO WHILE(I.LE.NCORD(ISTN).AND.
-     .      (DC.LT.CO1MASK(I,ISTN).OR.DC.GE.CO1MASK(I+1,ISTN)))
-            I=I+1
-          ENDDO
-          KUP=KUP.AND.ABS(HA).LE.CO2MASK(I,ISTN) 
+          i=iwhere_in_range4(co1mask(1,istn),ncord(istn),DC)
+          if(i .eq. 0) then   
+            write(*,*) "Problem in Co1mask ",
+     >        (Co1mask(i,istn),i=1,ncord(istn))
+            write(*,*) " or DC ", DC
+            stop
+          endif 
+          KUP=KUP.AND.ABS(HA).LE.CO2MASK(I,ISTN)
         ENDIF
 C         For x,y mounts with fixed axis oriented EW, check x and y
 C      (2=XYEW)
@@ -213,11 +221,13 @@ C      (2=XYEW)
      .       (Y30.GT.STNLIM(1,2,ISTN)).AND.
      .       (Y30.LT.STNLIM(2,2,ISTN)))
         IF (NCORD(ISTN).GT.0) THEN
-          I=1
-          DO WHILE(I.LE.NCORD(ISTN).AND.
-     .      (X30.LT.CO1MASK(I,ISTN).OR.X30.GE.CO1MASK(I+1,ISTN)))
-            I=I+1
-          ENDDO
+          I=iwhere_in_range4(CO1mask(1,istn),ncord(istn),X30)
+          if(i .eq. 0) then   
+             write(*,*) "Problem in Co1mask ",
+     >         (Co1mask(i,istn),i=1,ncord(istn))       
+            write(*,*) " or X30 ", X30
+            stop
+          endif 
           KUP=KUP.AND.Y30.GE.CO2MASK(I,ISTN)
         ENDIF
 C         For az/el mounts, check elevation only (azimuth cable
@@ -228,12 +238,14 @@ C       (3 = AZEL)  (check 6=SEST and 7=ALGO here too)
         KUP=((EL.GT.STNLIM(1,2,ISTN)).AND.
      .       (EL.LT.STNLIM(2,2,ISTN)))
         IF (NCORD(ISTN).GT.0) THEN
-          I=1
-          DO WHILE(I.LE.NCORD(ISTN).AND.
-     .      (AZ.LT.CO1MASK(I,ISTN).OR.AZ.GE.CO1MASK(I+1,ISTN)))
-            I=I+1
-          ENDDO
-          KUP=KUP.AND.EL.GE.CO2MASK(I,ISTN)
+          I=iwhere_in_range4(CO1mask(1,istn),ncord(istn),az)
+          if(i .eq. 0) then
+            write(*,*) "Problem in Co1mask ",
+     >        (Co1mask(i,istn),i=1,ncord(istn))
+            write(*,*) " or AZ ", AZ
+            stop
+          endif 
+           KUP=KUP.AND.EL.GE.CO2MASK(I,ISTN)
         ENDIF
 C         For x,y mounts with fixed axis oriented NS, check x and y
 C       (4 = XYNS)
@@ -243,11 +255,13 @@ C       (4 = XYNS)
      .       (Y85.GT.STNLIM(1,2,ISTN)).AND.
      .       (Y85.LT.STNLIM(2,2,ISTN)))
         IF (NCORD(ISTN).GT.0) THEN
-          I=1
-          DO WHILE(I.LE.NCORD(ISTN).AND.
-     .      (X85.LT.CO1MASK(I,ISTN).OR.X85.GE.CO1MASK(I+1,ISTN)))
-            I=I+1
-          ENDDO
+          I=iwhere_in_range4(CO1mask(1,istn),ncord(istn),X85)
+          if(i .eq. 0) then  
+            write(*,*) "Problem in Co1mask ",
+     >        (Co1mask(i,istn),i=1,ncord(istn)) 
+            write(*,*) " or X30 ", X85
+            stop
+          endif 
           KUP=KUP.AND.Y85.GE.CO2MASK(I,ISTN)
         ENDIF
       ENDIF
@@ -267,11 +281,15 @@ C     Check for station elevation limit, set within SKED
       KUP=KUP.AND.EL.GT.STNELV(ISTN)
 C     Now check horizon mask for stations that have one.
       IF (NHORZ(ISTN).GT.0) THEN
-        I=1
-        DO WHILE(I.LT.NHORZ(ISTN).AND.
-     .    (AZ.LT.AZHORZ(I,ISTN).OR.AZ.GE.AZHORZ(I+1,ISTN)))
-          I=I+1 ! find AZ between i and i+1
-        ENDDO
+        eli=100.d0
+          I=iwhere_in_range4(azhorz(1,istn),nhorz(istn),az)
+          if(i .eq. 0) then
+            write(*,*) "Problem in azhorz ", 
+     >         (azhorz(i,istn),i=1,ncord(istn))
+            write(*,*) " or AZ ", AZ
+            stop
+          endif 
+
         if (.not.klineseg(istn)) then ! use step functions
           eli=elhorz(i,istn)
         else ! interpolate horizon mask line segment end points
@@ -280,7 +298,7 @@ C     Now check horizon mask for stations that have one.
           else
             eli=((elhorz(i+1,istn)-elhorz(i,istn))/
      .      (azhorz(i+1,istn)-azhorz(i,istn)))
-     .      *(az-azhorz(i,istn)) + elhorz(i,istn) 
+     .      *(az-azhorz(i,istn)) + elhorz(i,istn)
           endif ! inf slope
         endif
         KUP=KUP.AND.EL.GE.eli

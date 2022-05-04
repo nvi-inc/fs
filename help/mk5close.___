@@ -1,12 +1,16 @@
-              mk5close - Close the Mark 5 connection
+           mk5close - Close the Mark 5/FlexBuff connection
 
             Syntax:     mk5close
+                        fb_close
 
             Response:   none
 
 
 Comments:
-This command can be used to close the connection to a Mark 5
-recorder. It is recommended that this be done prior to
+This command can be used to close the connection to the Mark 5 or
+FlexBuff recorder. It is recommended that this be done prior to
 shutting down the Mark 5 control program for a disk swap. The
-connection can be re-opened with the mk5relink command.
+connection can be re-opened with the 'mk5relink' command.
+
+The 'fb_close' command is a synonym for 'mk5close'. Whichever makes
+the most sense can be used.

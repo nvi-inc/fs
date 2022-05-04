@@ -31,11 +31,11 @@ c  kbit is designed to complement sbit which sets or resets
 c  bits identified in the same way. 
 c
 c     include '../include/params.i'
+!2020-12-30 JMG Removed unsed variable
 C NRV 951015 set variable INT_BITS instead
       integer INT_BITS
 c 
       integer ib,iw
-      logical bjtest
 
 c 
       INT_BITS=32

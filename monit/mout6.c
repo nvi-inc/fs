@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -26,6 +26,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <time.h>
+#include <stdio.h>
 
 #include "../include/dpi.h"
 #include "../include/params.h"
@@ -46,9 +47,12 @@ mout6()
   int tone, chan;
   int iping[4];
   int it[6];
-  int seconds,dot2pps;
+  time_t seconds;
+  int dot2pps;
   struct tm *tm;
   int inv_vdif[4],vdif_should,inv_pps;
+  int inv_dot[4];
+  char dot_should[14];
 
   for (i=0;i<MAX_RDBE;i++) {
     inv_vdif[i]=0;
@@ -72,10 +76,25 @@ mout6()
   rte_time(it,it+5);
   rte2secs(it,&seconds);
   tm = gmtime(&seconds);
+
   vdif_should=-1;
+  memset(dot_should,0,sizeof(dot_should));
   if(tm->tm_year>99) {
     vdif_should=(tm->tm_year-100)%32;
     vdif_should=vdif_should*2+tm->tm_mon/6;
+    snprintf(dot_should,sizeof(dot_should),"%04d%03d%02d%02d%02d",
+            tm->tm_year+1900,
+            tm->tm_yday+1,
+            tm->tm_hour,
+            tm->tm_min,
+            tm->tm_sec);
+  }
+
+  for(i=0;i<MAX_RDBE;i++) {
+    inv_dot[i]=0;
+    if(0!=fs->rdbe_active[i] && (iping[i]==0 || iping[i]==1) &&
+      memcmp(local[i].epoch,dot_should,13))
+        inv_dot[i]=1;
   }
 
   if(vdif_should>=0) {
@@ -123,6 +142,9 @@ mout6()
     if(iping[i]<0 || iping[i] >1)
       continue;
     
+    if(inv_dot[i])
+      standout();
+
     move(ROW_A+i,COL_DOT);
     printw("%.4s.%.3s.%.2s:%.2s:%.2s",
 	   local[i].epoch,
@@ -130,6 +152,8 @@ mout6()
 	   local[i].epoch+7,
 	   local[i].epoch+9,
 	   local[i].epoch+11);
+    if(inv_dot[i])
+      standend();
 
     if(local[i].epoch_vdif<100)
     if(inv_vdif[i])

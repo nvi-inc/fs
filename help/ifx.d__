@@ -38,18 +38,19 @@ Settable Parameters:
                       comments. No default.
                       Usually 1 is  512-1024 MHz,
                               2 is   10- 512 MHz,
-                              3 is 1536-2028 MHz,
+                              3 is 1536-2048 MHz,
                               4 is 1024-1536 MHz,
                               5 is 1200-1800 MHz (L Band),
                               6 is    0-1024 MHz,
                               7 is spare,
                               8 is spare.
                               
-            target    level target for AGC, 0-65535. No default
-                      This normally is not set here, but by the DBBC
-                      configuration file. There is no command/monitor
-                      read back of this value for DBBC version v100.
-		      At least some DBBC versions do not accept "0".
+            target    level target for AGC, 0-65535. Default is to not
+                      command. This normally is not set here, but by
+                      the DBBC configuration file. There is no
+                      command/monitor read back of this value for DBBC
+                      version v100.  At least some DBBC versions do
+                      not accept "0".
 
 Monitor-only Parameters:
 
@@ -79,7 +80,10 @@ Only DBBC DDC personality versions v102 and later support filters 5-8
 The counts output converts to linear power scale approximately using
 the (C-language) expression:
 
-  power=pow(10.0,counts/19000.)
+  power=65535*pow(10.0,(counts-65535)/factor)
+
+Where 'factor' is the DBBC IF conversion factor for this IF from the
+'equip.ctl' control file.
 
 Assuming a 512 MHz wide input bandpass, the nominal operating count
 level is 38000-45000 for the DDC personality, and 40000-45000 for the

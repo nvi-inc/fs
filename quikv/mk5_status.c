@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -59,6 +59,9 @@ extern void logit(char* msg, int ierr, char* who);
  *  [16/01/15 10:42:46] Jonathan Quick: The -9<n>x appear to be marking
  *  errors in parsing the <n>th underlying command (to the Mark5) so -90x
  *  for the 'status?' and then -91x for the 'error?' say
+ *
+ *  [12/02/2022       ] Ed Himwich: Get command name for log entries from
+ *  parsing of the command so that the command is agnostic about its name.
  */
 #define EPARM       (-301) /* "command does not accept parameters" */
 
@@ -97,8 +100,8 @@ int mk5_status(command, itask, ip)
             return ierr;
 
         /* Format + send reply to this query */
-        nch = snprintf(buf, sizeof(buf)-1, "mk5_status/status,0x%08X%s", statusword, 
-				((statusword&0x0002)?",error(s) pending":""));
+        nch = snprintf(buf, sizeof(buf)-1, "%s/status,0x%08X%s", command->name,
+                      statusword, ((statusword&0x0002)?",error(s) pending":""));
         cls_snd(&out_class, buf, nch, 0, 0);
         nmsg++;
 
@@ -112,7 +115,7 @@ int mk5_status(command, itask, ip)
         }
 
         /* Retrieve the error - let the code write it after the prefix */
-        nch = sprintf(buf, "mk5_status/error,");
+        nch = sprintf(buf, "%s/error,",command->name);
         if( (ierr=mk5_status_get_error(ip, buf+nch, sizeof(buf)-nch-1))<0 )
             return ierr;
 

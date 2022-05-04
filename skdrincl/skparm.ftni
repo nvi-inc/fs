@@ -1,3 +1,22 @@
+*
+* Copyright (c) 2020-2021 NVI, Inc.
+*
+* This file is part of VLBI Field System
+* (see http://github.com/nvi-inc/fs).
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
 C********************************************************************
 C
 C     SKPARM.FTNI HOLDS PARAMETERS FOR THE SKED FAMILY OF PROGRAMS.
@@ -7,14 +26,22 @@ C
 C********************************************************************
 C NOTE: If you have FS Linux 1 you may have to change parameters
 C           max_stn from 30 to 20
-C           max_frq from 20 to 17 
+C           max_code from 20 to 17 
 C so that drudg will compile and load.
 C********************************************************************
 C
 ! Now put in recent changes at the top.
-! 2019Aug25 JMG  Max_trk
-! 2019Aug23 JMG  MAX_OBS changed to 40000
-! 2017Oct24 JMG MAX_SOR-->5000, MAX_CEL-->4990
+! 2021-12-03 JMG Moved octal constants to own FTNI
+! 2021-02-13 JMG Introduced max_fandef=2*max_track
+! 2021-01-31 JMG Remove stuff related to roll
+! 2021-01-05 JMG Replaced max_frq by max_code. (Max_frq was confusing and led to coding errors.)
+! 2021-01-05 JKMG Max_trk appears to be duplicate of max_track.  Removed.
+! 2021-01-05 JMG Some rearrangement to group common items together 
+! 2020-12-29 JMG  max_code-->128. Max_IFD-->8  to support DBBC3
+!                 Made A) max_chan=max_track=2*max_bbc 
+! 2019-08-25 JMG  Max_trk introduced. Removed above. 
+! 2019-08-23 JMG  MAX_OBS changed to 40000
+! 2017-10-24 JMG  MAX_SOR-->5000, MAX_CEL-->4990
 !
 C 890623 by NRV to add windows parameters
 C 891113 NRV Add max base/flux parameter
@@ -47,7 +74,7 @@ C 960516 nrv Add MAX_FLD, set to 20
 C 960522 nrv Add lots of max's, change max_pass to index*subpasses
 C 960628 nrv Allow more modes in catalog.
 C 970114 nrv Add MAX_SORLEN, length of source names.
-C 970204 nrv Change max_subpass to 36, max_frq to 20
+C 970204 nrv Change max_subpass to 36, max_code to 20
 C 970206 nrv Chage max_headstack to 1
 C 971030 nrv Increase max_flux to 120 to allow 20 clean components.
 C 971208 nrv Add max_tone for phase cal tones
@@ -81,9 +108,8 @@ C
 C     The maximum number of stations which can be selected for
 C     an experiment at one time.  Used in SKED and DRUDG.
 C
-      integer max_stn,max_baseline,max_hor,max_cor,max_headstack,
-     .max_track,max_pass,max_ifd,max_bbc,max_index,max_chan,
-     .max_subpass,max_tone,max_roll_def
+      integer max_stn,max_baseline,max_hor,max_cor
+ 
 
       PARAMETER (MAX_STN = 40)
 C
@@ -98,64 +124,33 @@ C
       PARAMETER (MAX_HOR = 60)
       PARAMETER (MAX_COR = 30)
 C
-C     The maximum number of sources, celetial AND satellite
-C     which can be selected for an experiment at one time. 
-C     This must be the largest parameter of the maximum 
-C     parameters used with the stations, frequencies and sources.
-C     Used in SKED and DRUDG.
-C *** NOTE: If this value is changed, then at least one of MAX_CEL
-C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
-C
-      integer max_sor,max_cel,max_sat,max_frq
-      PARAMETER (MAX_SOR = 5000)
 
-C     The maximum number of CHARACTERS in a source name. Should be
-C     an even integer. Maximum size now is 26, to be cmpatible with
-C     the multiple-use arrays in skcom. Increase the LNASEx arrays if
-C     you need longer source names.
+! The maximum number of CHARACTERS in a source name. Should be 
+! an even integer. Maximum size now is 26, to be cmpatible with
+! the multiple-use arrays in skcom. Increase the LNASEx arrays if
+! you need longer source names.
       integer max_sorlen
       PARAMETER (MAX_SORLEN = 16)
-C
-C     The maximum number of celestial (RA,DEC) sources which can
-C     be selected for an experiment at one time. Used in SKED,SOCAT,DRUDG.
-C *** NOTE: If this value is changed at least one of MAX_SOR
-C *** and MAX_SAT must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
-C
+
+! The maximum number of celestial (RA,DEC) sources which can
+! be selected for an experiment at one time. Used in SKED,SOCAT,DRUDG.
+      integer max_cel
       PARAMETER (MAX_CEL = 4990)
-C
-C     The maximum number of satellite (orbital element) sources which
-C     can be selected for an experiment at one time. Used in SKED
-C     and DRUDG.
-C *** NOTE: If this value is changed, then at least one of MAX_SOR
-C *** and MAX_CEL must be changed, so that MAX_SOR = MAX_CEL + MAX_SAT.
-C
-      PARAMETER (MAX_SAT = MAX_SOR-MAX_CEL)
-C
-C     The maximum number of frequency codes which can be selected
-C     for use in an experiment at one time.  Used in SKED and DRUDG.
-C
-      PARAMETER (MAX_FRQ = 50)
+!
+! The maximum number of satellite (orbital element) sources which
+! can be selected for an experiment at one time. Used in SKED and DRUDG.
 
-!     Maximum number of tracks.  Mark4 goes from 2:33 usable tracks.
-      integer max_trk
-      parameter (max_trk=128)
+      integer max_sat 
+      PARAMETER (MAX_SAT = 10)
 
-C
-C     The maximum number of phase cal tones that can be detected
-C     for each channe.
+!  The maximum number of sources, celetial AND satellite which can be selected 
+!  for an experiment at one time. This must be the largest parameter of the maximum 
+!   parameters used with the stations, frequencies and sources. Used in SKED and DRUDG.
 
-      PARAMETER (MAX_TONE = 17)
+      integer max_sor
+      Parameter (max_sor=max_cel+max_sat)
 
-C     The maximum number of frequency bands within a schedule.
-C       **NOTE** This is restricted to be no more than 2!
-C       There are places in SKED that may appear to handle more
-C       than two bands, but this feature is really tailored to
-C       only S/X observations. ***
-C     Several frequency codes may be selected, as long as they
-C     are composed of a maximum of two bands, e.g. S and X.
-C
-      integer max_band,max_flux,max_vlba,max_sefdpar
-      PARAMETER (MAX_BAND = 2)
+      integer max_flux
 C
 C     The maximum size of flux arrays. For source models, this number
 C     is the maximum number of model components times 6, because
@@ -168,58 +163,75 @@ C     source.
 C
 C     PARAMETER (MAX_FLUX = 18)
       PARAMETER (MAX_FLUX = 120)
-C 
-C     Maximum number of VLBA entries. 
 
-      parameter (max_vlba = MAX_STN*MAX_FRQ)
-C
-C     Maximum number of rise/set times in arrays.
-
-C     Maximum number of parameters for the calculation of
-C     elevation-dependent SEFDs.
-
+!     Maximum number of parameters for the calculation of elevation-dependent SEFDs.
+      integer max_sefdpar 
       parameter (MAX_SEFDPAR = 5)
-C
-C     Maximum number of headstacks. Limited to 2 within sked/drudg
-C     for now. Change to 1 to save space.
 
+C     The maximum number of frequency bands within a schedule.
+C       **NOTE** This is restricted to be no more than 2!
+C       There are places in SKED that may appear to handle more
+C       than two bands, but this feature is really tailored to
+C       only S/X observations. ***
+C     Several frequency codes may be selected, as long as they
+C     are composed of a maximum of two bands, e.g. S and X.
+C
+      integer max_band
+      parameter (max_band=2)
+
+
+!----Stuff dealing with recording....
+
+! The maximum number of frequency codes which can be selected for use 
+!  in an experiment at one time.  
+      integer max_code 
+      PARAMETER (max_code = 50)
+
+!  The maximum number of phase cal tones that can be detected for each channel.
+      integer max_tone 
+      PARAMETER (MAX_TONE = 17)
+
+!     Maximum number of IFs in a system.
+      integer max_ifd 
+      parameter (max_ifd = 8)
+       
+      integer max_dbbc3_ifd, max_dbbc_ifd
+      parameter (max_dbbc3_ifd=8)
+      parameter (max_dbbc_ifd=4) 
+
+!     Maximum number of BBCs in a system.
+      integer max_bbc 
+      parameter (max_bbc = 128) 
+
+!  Maximum number of video channels. Formerly  was 16 because u/l are handled as sub-parts of channels. 
+!  But there are explicit chandef's for each u/l channel in VEX file, 
+!  so this is now 2* number of frequencies 
+
+      integer max_track,max_chan,max_fandef
+      PARAMETER (MAX_CHAN = 2*max_bbc)
+      parameter (max_track=max_chan)   
+      parameter (max_fandef=2*max_track)
+!-------------------------------------------------------------
+! Some obsolete stuff that should be removed.
+!     Maximum number of headstacks. Limited to 2 within sked/drudg
+!     for now. Change to 1 to save space.
+
+      integer max_headstack 
       parameter (max_headstack = 2)
 
-C     Maximum number of tracks on a headstack.
-
-      parameter (max_track = 36)
-
-C     Maximum number of roll_def statements
-
-      parameter (max_roll_def = max_track * max_headstack)
+      integer max_subpass
 
 C     Maximum number of index positions for the headstacks.
-
+      integer max_index 
       parameter (max_index = 14)
 
 C     Maximum number of subpasses per index position. Set to
 C     4 for now, to save array space. Increase to 8.
-
-      parameter (max_subpass = 36)
+      parameter (max_subpass = 4)
 C
 C     Maximum number of passes that are possible.
-
+      integer max_pass
       parameter (max_pass = max_index*max_subpass)
-
-C     Maximum number of IFs in a system.
-
-      parameter (max_ifd = 4)
-
-C     Maximum number of BBCs in a system.
-
-      parameter (max_bbc = 32)
-
-C     Maximum number of video channels.
-C     Formerly this was 16 because u/l are handled as sub-parts of
-C     channels. But there are explicit chandef's for each u/l channel
-C     in VEX file, so this probably has to be 32 now.
-C
-      PARAMETER (MAX_CHAN = 32)
 
 
 C     Lengths for thick and thin tape.
@@ -229,11 +241,8 @@ C     Lengths for thick and thin tape.
       parameter (THICK_LENGTH = 8700)
       parameter (SHORT_LENGTH = 2700)
 
-C     Speeds for S2.
-      real*4 speed_lp, speed_slp
-      parameter (SPEED_LP = 6.3) ! in/sec
-      parameter (SPEED_SLP = 4.2) ! in/sec
-
+      double precision small
+      parameter (small=1.d-12)         !small diagonal element of normal
 
       integer max_par_esti,max_par_opti,max_dim_esti
       integer max_sor_esti,max_trial
@@ -273,31 +282,6 @@ C
       INTEGER  NULL
       PARAMETER (NULL = 0)
 
-C     Definitions for octal constants.
-
-      integer OBLANK,ODOLLAR,OZERO,OCOMMA,OMINUS,OPLUS,
-     .          ODOT,OLPAREN,OUNDERSCORE,OSTAR,OSLASH,OAND,
-     .          ORPAREN,OBAR,OCOLON
-      parameter (OBLANK = O'40', ODOLLAR = O'44',
-     .OZERO = O'60', OCOMMA = O'54', OMINUS = O'55',
-     .OPLUS = O'53', ODOT = O'56', OLPAREN = O'50',
-     .ORPAREN = O'51',OUNDERSCORE = O'137', OSTAR = O'52',
-     .OSLASH = O'57', OAND = O'46', OBAR = O'140',
-     .OCOLON = 58)
-      integer OCAPA,OCAPB,OCAPC,OCAPD,OCAPE,OCAPF,OCAPX,
-     .OCAPY,OCAPW,OSMALLE,OCAPL,OCAPT,OCAPN,ONINE,OCAPH,
-     .OCAPP,OONE,OCAPZ,OSMALLA,OSMALLZ,OCAPU,OCAPV,OCAPR,
-     .ocapi,ocapo
-      parameter (OCAPA = O'101', OCAPB = O'102',
-     .OCAPC = O'103', OCAPD = O'104', OCAPE = O'105',
-     .OCAPF = O'106', OCAPX = O'130', OCAPY = O'131',
-     .OCAPW = O'127', OCAPL = O'114', OCAPN = O'116',
-     .OSMALLE = O'145', OCAPT = O'124', ONINE = O'71',
-     .OCAPH = O'110', ocapi = o'111', ocapo = o'117', 
-     .OCAPP = O'120', OCAPZ = O'132',
-     .OONE = O'61', OSMALLZ = O'172', OSMALLA = O'141',
-     .OCAPU = O'125', OCAPV = O'126', OCAPR = O'122')
-
 C     Unit 5 = standard input (keyboard)
 C     Unit 6 = standard output (screen)
 
@@ -315,6 +299,7 @@ C
       integer ibuf_len,ibufq_len,max_obs
       PARAMETER (IBUF_LEN = 499)   ! length in words
       PARAMETER (IBUFQ_LEN = 500)   ! length in words
+
 C
 C     The maximum number of scans allowed in a schedule
 C

@@ -19,6 +19,7 @@
 *
       subroutine proc_pcalf(icode,lwhich8)
 ! Issue pcalf
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
       include 'hardware.ftni'
       include '../skdrincl/statn.ftni'

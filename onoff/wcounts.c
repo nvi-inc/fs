@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -63,7 +63,7 @@ void wcounts(label,azoff,eloff,onoff,accum)
        ((onoff->intp==1 &&strlen(buff)>70)
 		       ||(onoff->intp!=1 &&strlen(buff)>61))
     ){
-      logit(buff,0,NULL);
+      logit_nd(buff,0,NULL);
       buff[0]=0;
     }
     
@@ -112,7 +112,7 @@ void wcounts(label,azoff,eloff,onoff,accum)
     }
   }
   if(strlen(buff)!=0)
-    logit(buff,0,NULL);
+    logit_nd(buff,0,NULL);
 
 }
 

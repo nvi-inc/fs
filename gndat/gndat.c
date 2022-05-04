@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
   double gcurve_ass_array[MAXDETECTORS], dpfu_gcurve_ass_array[MAXDETECTORS], LO_array[MAXDETECTORS];
   double trec_array[MAXDETECTORS], tatm_array[MAXDETECTORS], tspill_array[MAXDETECTORS], tau_array[MAXDETECTORS];
   double LO1array[MAXRX], LO2array[MAXRX], tau0_array[MAXDETECTORS], airmass_array[MAXDETECTORS];
-  double tcal_log_array[MAXRX];
+  double tcal_log_array[MAXDETECTORS];
   double a,b,c,elev,am;
   int detcount, valcount, i, j, k, right, firstapr, firstval; 
   int rxcount, error, icount, LOcount, works, somethingelse;
@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
       detcount=0;
       }*/
     if(gndat2 && strncmp(line+20,"/wx/",4)==0) {
-      printf(" line %s\n",line);
+/*      printf(" line %s\n",line); */
 	if((NULL == (cptr = strtok(line+24," ,\n")) || (1!=sscanf(cptr, "%f", &ctemp)))) {
 	  ctemp=MISSINGVALUE;
 	}

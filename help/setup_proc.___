@@ -1,0 +1,68 @@
+       setup_proc - conditional execution of "setup" procedure
+
+            Syntax:     setup_proc=proc
+
+            Response:   setup_proc/proc
+
+
+Settable parameters:
+
+          proc          setup procedure to be conditionally executed,
+                        null to clear memory of any previous 'proc'
+
+Comments:
+
+This command provides conditional execution of a SNAP "setup"
+procedure.  If the "setup" procedure was not used in the immediately
+preceding instance of this command, it is executed; if it was, it is
+not executed. For example, the sequence:
+
+
+      setup_proc=
+      setup_proc=setupsx
+      (other commands)
+      setup_proc=setup01
+
+will execute both the 'setupsx' and the 'setup01' commands. The
+sequence:
+
+      setup_proc=
+      setup_proc=setupsx
+      (other commands)
+      setup_proc=eetupsx
+
+will execute the 'setupsx' procedure only for the first
+'setup_proc=...' command.
+
+When a successful 'schedule=...' command changes which schedule is in
+use, the memory of which 'proc' was last used is cleared. If all the
+setup procedures in a '.snp' file are called via the 'setup_proc'
+command, the effect will be that:
+
+  - The first setup procedure before the first scan will be executed.
+
+  - The first setup procedure for a different mode (which will use a
+    different setup procedure) will be executed.
+
+  - Any setup procedure for the continuation of the previous mode will
+    not be executed.
+
+The use of this feature in a schedule by 'drudg' is controlled by the
+'conditional_setup' parameter in 'skedf.ctl'.
+
+This feature can be useful if the "setup" procedures take too long to
+execute and/or if the equipment will not tolerate being setup
+repetitively.  However, its use involves some risk since if the
+execution of the setup procedure fails for some reason, there will be
+no subsequent execution of the procedure (until the next mode change
+or schedule restart) to possibly fix the problem.  Each station must
+decide based on their equipment whether or not to enable this feature
+in 'drudg'.
+
+This command will work both in and out of schedules and can used for
+any procedures or commands (in place of procedures). However, such
+alternate uses may have limited value.
+
+In the future, this feature may used to enable reporting whether the
+most recent setup procedure failed and/or reconfiguring the equipment
+automatically.

@@ -18,10 +18,11 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE SETPRINT(ierr,iopt)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C  Set up printer with proper escape sequences or
 C  open up output print file. This routine only opens the
-C  file but puts nothing in it if the user specified scripts 
+C  file but puts nothing in it if the user specified scripts
 C  to be used for printing output.
 
 C NRV 910306 Added IOPT to call for landscape orientation of list
@@ -43,7 +44,7 @@ C  iopt  3 = landscape, 8.5 point (small)
         character*128 cout
 
        if (cprport.eq.'PRINT') then ! temp file name
-        cout = tmpname 
+        cout = tmpname
        else ! specified file name
         cout = cprport
        endif

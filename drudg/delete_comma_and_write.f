@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine delete_comma_and_write(lu_out,ibuf,nch)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 !
       integer lu_out
       integer ibuf(*)

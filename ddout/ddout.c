@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -36,6 +36,8 @@
 #define MAX_BUF 1024
 /* not Y10K compliant */
 #define FIRST_CHAR 21
+#define DEFAULT_WARN_SIZE 100
+#define WARN_SIZE_BUF 120
 
 extern struct fscom *shm_addr;
 
@@ -60,7 +62,7 @@ main()
     int irgb, iburl;
     char *ich, *cp1, *cp2, ch, iwhat[5], *ptrs, *prtn1;
     int class;
-    int offset;
+    off_t offset;
     void dxpm();
     int kdebug;
     char *st;
@@ -86,6 +88,8 @@ main()
     int skd_run_to();
     int serverfd;
     char* serverfdst;
+    long warn_size;
+    char warn_size_msg[WARN_SIZE_BUF];
 
     serverfd = -1;
     serverfdst = getenv("FS_SERVER_LOG_FD");
@@ -98,10 +102,22 @@ main()
 /* SECTION 1 */
     
     setup_ids();
-    sig_ignore();
     skd_set_return_name("ddout");
     lnamef[0]=0;
     umask(0);
+    char *warn=getenv("FS_LOG_SIZE_WARNING");
+    if(warn){
+      if(1!=sscanf(warn,"%ld",&warn_size))
+         warn_size=DEFAULT_WARN_SIZE;
+      else if (warn_size < 0)
+         warn_size=DEFAULT_WARN_SIZE;
+    } else
+         warn_size=DEFAULT_WARN_SIZE;
+
+    if(warn_size > 0)
+       snprintf(warn_size_msg,WARN_SIZE_BUF,
+       "WARNING: Log file just opened is already larger than %ld MB.",
+       warn_size);
 
 /* SECTION 2 */
 
@@ -279,6 +295,7 @@ Messenger:
 
     if(memcmp(cp2,"nl",2)==0 || rtn2 == -1){
       knl=TRUE;
+      clear_rxgain_files_log();
       if (fd >=0) {
 	fd=recover_log(lnamef,fd);  /* recover log if necessary */
 	if(close(fd) < 0) {
@@ -360,8 +377,10 @@ Messenger:
 	  read(fd,&ch,1);
 	  if(ch != '\n')
 	    write(fd, "\n", 1);
-	  if(offset > 1000L*1000L*100L)
-	    logit(NULL,-999,"bo");
+          if(warn_size > 0) {
+              if(offset > warn_size*1000L*1000L)
+                  logite(warn_size_msg,-999,"bo");
+          }
 	} else if(offset < 0) {
 	  shm_addr->abend.other_error=1;
 	  perror("finding end of log file, ddout");
@@ -405,7 +424,8 @@ Ack:    ich = strtok(NULL, ",");
 
     kpcald = strncmp(buf+FIRST_CHAR-1,"#pcald#",7)==0 ||
       strncmp(buf+FIRST_CHAR-1,"#tpicd#",7)==0 || /*phasecal or tsys record */
-      strncmp(buf+FIRST_CHAR-1,"#rdtc",5)==0;
+      strncmp(buf+FIRST_CHAR-1,"#rdtc",5)==0 ||
+      strncmp(buf+FIRST_CHAR-1,"#dbtcn#",7)==0;
 
     knd= memcmp("nd",prtn1,2)==0;  /* no display */
     if(kxd || !(kp || kack || kdebug || knd || kpcald) || kpcald && kpd ){
@@ -477,8 +497,14 @@ Ack:    ich = strtok(NULL, ",");
 	if(iwl != 0){ /* non-empty "()" */
 	  dxpm(ibur, "?W", &ptrs, &irgb); 
 	  if(ptrs != NULL) { /* replace ?W... in ibur with non-empty "()" */
+            int istart=0;
+            /* strip leading spaces that don't fit */
+            while(irgb<iwl && iwhat[istart]==' ') {
+                istart++;
+                iwl--;
+            }
 	    iwm= irgb < iwl? irgb: iwl;
-	    memcpy(ptrs,iwhat,iwm);
+	    memcpy(ptrs,iwhat+istart,iwm);
 	  } else {
 	    dxpm(ibur, "?F", &ptrs, &irgb); 
 	    if(ptrs != NULL) { /* replace ?F... in ibur with non-empty "()" */

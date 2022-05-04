@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -22,11 +22,18 @@ C
 C     This routine gets all the station information
 C     and stores it in common.
 C
+      implicit none
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/statn.ftni'
       include '../skdrincl/constants.ftni'
 C
 C History:
+! 2022-02-10 JMG. Use subroutine to stuff crec, crack into appropriate slots. 
+! 2022-02-04 JMG Increased size of recorder to 12chars
+! 2021-11-20 JMG Previously assumed that mask (az,el) came in pairs.  Now can have step functions
+! 2021-04-02 JMG Renamed islcon-->slew_off, stnrat-->slew_rate. Made slew_off real. 
+! 2021-10-02 JMG Removed all references to S2. 
+
 C 960517 nrv New.
 C 960810 nrv Add tape motion to VUNPDAS call. Store LSTREC.
 C 960817 nrv Add tape speed and number of tapes to VUNPDAS.
@@ -37,6 +44,7 @@ C 001114 nrv For two recorders save second type same as first.
 C 010615 nrv Initialize lstrec2 to blanks.
 ! 2006Nov30 JMGipson. Modified to check recorder type.
 ! 2016Nov29 JMG. Rack changed to character*20 from character*8 
+! 2019Sep03 JMG. Correct length for station name.  Added implicit none 
 C
 C INPUT:
       integer ivexnum ! vex file number 
@@ -47,27 +55,22 @@ C OUTPUT:
 
 ! functions
       integer ptr_ch,fget_station_def,fvex_len
-      integer trimlen
-      logical kvalid_rack
-      logical kvalid_rec  
-
-C LOCAL:
-      logical kline
+    
+C LOCAL:      
       integer ierr1
-      real SLRATE(2),ANLIM1(2),ANLIM2(2)
-      character*4 cs2sp
-      character*8 cocc,crec
+      real slcon(2),SLRATE(2),ANLIM1(2),ANLIM2(2)
+      character*8 cocc
+      character*12 crec 
       character*20 crack
       character*8 cant,cter,csit
       character*4 caxis
 
-      integer islcon(2),ns2tp
-      real AZH(MAX_HOR),ELH(MAX_HOR)
+      realr slcon(2)   
       real DIAM
       real sefd(max_band),par(max_sefdpar,max_band)
       integer*2 lb(max_band)
       double precision POSXYZ(3),AOFF
-      INTEGER J,nr,maxt,npar(max_band),nhz,i
+      INTEGER nr,maxt,npar(max_band),nel,i
       character*2 ctlc
       character*2 cid
       character*4 cidt
@@ -78,6 +81,7 @@ C LOCAL:
       integer iret ! return from vex routines
       character*128 cout,ctapemo
       integer nch 
+      integer i12 
 
 C
 C     1. First get all the def names 
@@ -103,7 +107,7 @@ C     2. Now call routines to retrieve all the station information.
 
         il=fvex_len(stndefnames(i))
         CALL vunpant(stndefnames(i),ivexnum,iret,ierr,lu,
-     .    cant,cAXIS,AOFF,SLRATE,ANLIM1,ANLIM2,DIAM,ISLCON)      
+     .    cant,cAXIS,AOFF,SLCON,SLRATE,ANLIM1,ANLIM2,DIAM)      
         if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,
      >    '(a, a,/,"iret=",i5," ierr=",i5)')
@@ -113,7 +117,10 @@ C     2. Now call routines to retrieve all the station information.
           ierr1=1
         endif
         CALL vunpsit(stndefnames(i),ivexnum,iret,IERR,lu,
-     .    CID,csit,POSXYZ,POSLAT,POSLON,cOCC,nhz,azh,elh)
+     >    CID,csit,POSXYZ,POSLAT,POSLON,cOCC,nhorz(i),nel,
+     >    azhorz(1,i),elhorz(1,i))     
+ 
+        klineseg(i) = nhorz(i) .eq. nel 
          
         if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,'(a,a,/,"iret=",i5," ierr=",i5)')
@@ -125,7 +132,8 @@ C     2. Now call routines to retrieve all the station information.
 
         CALL vunpdas(stndefnames(i),ivexnum,iret,IERR,lu,
      .    cIDT,cter,nstack,maxt,nr,lb,sefd,par,npar,
-     .    crec,crack,ctapemo,ite,itl,itg,cs2sp,ns2tp,ctlc)
+     .    crec,crack,ctapemo,ite,itl,itg,ctlc)
+
    
         if (iret.ne.0.or.ierr.ne.0) then 
           write(lu,'(a,a,/,"iret=",i5," ierr=",i5)')
@@ -142,10 +150,19 @@ C       2.1 Antenna information
         cSTCOD(I) = cID
         cPOCOD(I) = cid
         call axtyp(caxis,iaxis(i),1)
-        STNRAT(1,I) = SLRATE(1)
-        STNRAT(2,I) = SLRATE(2)
-        ISTCON(1,I) = ISLCON(1)
-        ISTCON(2,I) = ISLCON(2)
+
+        do i12=1,2            
+          slew_vel(i12,I) = SLRATE(i12)
+          slew_off(i12,I) = SLCON(i12)
+!Assume have of the catalog offset is due to settling, the other for time to accelerate.        
+          if(slew_off(i12,i) .gt. 0) then
+            slew_off(i12,i)=slew_off(i12,i)/2.
+            slew_acc(i12,i)=slew_vel(i12,i)/slew_off(i12,i)
+          else
+            slew_acc(i12,i)=60.0*deg2rad      !no offset--->very fast acceleration 60deg/sec^2
+          endif                                   
+        end do         
+        
         STNLIM(1,1,I) = ANLIM1(1)
         STNLIM(2,1,I) = ANLIM1(2)
         STNLIM(1,2,I) = ANLIM2(1)
@@ -153,7 +170,6 @@ C       2.1 Antenna information
         AXISOF(I)=AOFF
         DIAMAN(I)=DIAM
         cterid(i)=cidt
-        NHORZ(I) = 0
 C       For VEX 1.3, antenna name is not there, so use site name
 
        if(cant .eq. ' ') then
@@ -164,7 +180,6 @@ C       For VEX 1.3, antenna name is not there, so use site name
        if(cantna(i) .eq. "TIGOCONC") then
           cantna(i) ="TIGO"
        endif 
-
 
 C
 C       2.2 Here we handle the position information.
@@ -186,39 +201,16 @@ C
            cterna(i)=cter
         endif
 
-        nch = trimlen(stndefnames(i)) 
+! Put rack and recorder in appropriate slots.  
+! Doing it this way ensures SKD and VEX files are treated the same. 
 
-
-        if(.not.kvalid_rack(crack)) then        
-            write(lu,'(a)') "VSTINP: for station "// 
-     >        stndefnames(i)(1:nch)//" unrecognized rack type: "//
-     >        crack// "setting to none!"
-            crack='none'
-        endif 
-        cstrack(i)=crack         
-
-        if(.not.kvalid_rec(crec)) then        
-            write(lu,'(a)') "VSTINP: for station "// 
-     >         stndefnames(i)(1:nch)//" unrecognized recorder type: "//
-     >         crec(1:nch)// "setting to none!"
-            crec='none'
-        endif   
-        cstrec(i,1)=crec
-        
-        if(nr .eq. 1) then
-          cstrec(i,2)='none'
-        else
-          nr=1
-          cstrec(i,2)=crec
-        endif
+        call store_rack_and_recorder(lu,stndefnames(i),
+     >    crack,crec, cstrack(i),cstrec(i,1))
 
         cfirstrec(i)='1'
         nheadstack(i)=nstack ! number of headstacks
         maxtap(i) = maxt     ! tape length
         nrecst(i) = nr       ! number of recorders
-        ns2tapes(i) = ns2tp  ! number of S2 tapes
-!        idummy = ichmv(ls2speed(1,i),1,ls2sp,1,4) ! rack type
-        cs2speed(i)=cs2sp(1:4)
         tape_motion_type(i)=ctapemo   ! tape motion
         itearl(i)=ite                 ! early start time
         itlate(i)=itl                 ! late stop time
@@ -239,14 +231,9 @@ C       enddo
 C
 C      2.5 Here we handle the horizon mask
 C
-        kline=.true.
-         NHORZ(I) = NHZ
-          if (nhorz(i).gt.0) then
-            DO J=1,NHORZ(I)
-              AZHORZ(J,I) = AZH(J)
-              ELHORZ(J,I) = ELH(J)
-            END DO
-          endif
+! No longer need to do anything.        
+       
+   
 C
 C      2.6 Here we handle the coordinate mask
 C

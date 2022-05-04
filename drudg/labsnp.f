@@ -19,6 +19,7 @@
 *
       SUBROUTINE LABSNP(nlabpr,iyear,inew)
 C  Write tape labels from reading the SNAP file
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C NRV 901206 New routine
 C nrv 930412 implicit none
@@ -124,7 +125,7 @@ C 2. Loop over SNAP records
         endif !non=comment line
       enddo !read loop
 901   if (clabtyp.ne.'POSTSCRIPT'.and. clabtyp .ne. 'DYM0') then
-        if (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'.or.cprttyp.eq.'FILE') 
+        if (clabtyp.eq.'LASER+BARCODE_CARTRIDGE'.or.cprttyp.eq.'FILE')
      .  call blabl(luprt,nout,cexper,cstnna,cstcod,
      .  iy1,id1,ih1,im1,iy2,id2,ih2,im2,ilabrow,cprttyp,clabtyp,cprport)
       else

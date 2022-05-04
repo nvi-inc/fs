@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -17,10 +17,11 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
-      SUBROUTINE SREAD(IERR,ivexnum)   
-C Reads schedule file. 
-C Calls VREAD for VEX files. 
+      SUBROUTINE SREAD(IERR,ivexnum)
+C Reads schedule file.
+C Calls VREAD for VEX files.
 C Calls READS to read lines and sked subroutines to parse SKED format.
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'
@@ -28,6 +29,7 @@ C
       include '../skdrincl/sourc.ftni'
       include '../skdrincl/freqs.ftni'
       include '../skdrincl/skobs.ftni'
+      include '../skdrincl/broadband.ftni' 
 
 ! functions
       integer trimlen
@@ -43,6 +45,7 @@ C  Local:
      .          lfreq
       integer   IPAS(MAX_STN),IFT(MAX_STN),IDUR(MAX_STN),ioff(max_stn)
       integer ilen,ich,ic1,ic2,idummy,iret,i
+      integer istat 
 
       character*2 ctype  !two letter code.
 
@@ -54,9 +57,12 @@ C  Local:
       character*80 cfirstline
 
 C
-C  History
-! 2019Aug25.  Merged S/X and broadband. 
-
+! Updates. Most reecent first. 
+! 2021-12-28 JMGipson. Got rid of some unused variables 
+! 2021-01-05 JMG Replaced max_frq by max_code. (Max_frq was confusing and led to coding errors.)
+! 2019-08-25 JMG Merged S/X and broadband.
+! 2018-06-17 JMGipson. Got rid of extra space in output after return from vread.
+! 2006-07-24 JMGipson. Got rid of ilocf, reio. (Remnants of old operating system no longer used.)
 C  900413 NRV Added re-reading of $CODES section
 C  910306 NRV Added reading new parameters: HEAD, EARLY
 C  930407 nrv implicit none
@@ -95,8 +101,7 @@ C 021014 nrv Set kpostpass=.true. for astro (.not.geo) schedules.
 C 021021 nrv Don't set default tape motion parameters for VEX files
 C            because they have already been read in.
 C
-! 2006Jul24 JMGipson. Got rid of ilocf, reio. (Remnants of old operating system no longer used.)
-! 2018Jun17 JMGipson. Got rid of extra space in output after return from vread. 
+
 
       close(unit=LU_INFILE)
       open(unit=LU_INFILE,file=LSKDFI,status='old',iostat=IERR)
@@ -115,7 +120,7 @@ C
       kcod = .false.
       kvlb = .false.
       khed = .false.
-      call frinit(max_stn,max_frq)
+      call frinit(max_stn,max_code)
 C
       read(lu_infile,'(a)') cfirstline
 C*********************************************************
@@ -142,7 +147,7 @@ C       read stations, codes, sources
 C       Write out experiment information now.
         write(luscn,'("Experiment name: ",a)') cexper
         i=trimlen(cexperdes)
-        if (i.gt.0) write(luscn,'("Experiment description: ",a)') 
+        if (i.gt.0) write(luscn,'("Experiment description: ",a)')
      .  cexperdes(1:i)
         i=trimlen(cpiname)
         if (i.gt.0) write(luscn,'("PI name: ",a)') cpiname(1:i)
@@ -218,8 +223,6 @@ C         Get the first line of this section
               CALL STINP(IBUF,ILEN,LUSCN,IERR)
             else IF(ctype .eq. "FR" .and. ksta) then
               CALL FRINP(IBUF,ILEN,LUSCN,IERR)
-            else IF(ctype .eq. "HD" .and. kcod) then
-              CALL HDINP(IBUF,ILEN,LUSCN,IERR)
             END IF
 C           Do not return on error.  Information messages from
 C           xxINP routines provide sufficient warnings.
@@ -268,7 +271,7 @@ C  needed, because it was checked before.
       if (.not.kcod) then
         write(luscn,'(" Re-reading ... ",$)')
         ncodes=0
-        if (ksta) call frinit(nstatn,max_frq)
+        if (ksta) call frinit(nstatn,max_code)
         rewind(LU_INFILE)
         CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
         DO WHILE (ILEN.GT.0) !read schedule file
@@ -281,27 +284,11 @@ C  needed, because it was checked before.
               CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
             enddo !read $CODES section
           endif
-        CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
+! Need to have this because if we had EOF previously next read will cause problem.  
+          if(ilen .gt. 0) then 
+            CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
+          endif 
         enddo !read schedule file
-      endif
-C Re-read $HEAD section if needed.
-      if (.not.khed) then
-        write(luscn,'(" Re-reading ... ",$)')
-        rewind(LU_INFILE)
-        CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-        DO WHILE (ILEN.GT.0) 
-          IF (cBUF(1:5) .eq. "$HEAD") THEN
-            write(luscn,*) cbuf(1:ilen)
-
-            CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-            DO WHILE (cbuf(1:1) .ne. "$" .and. ilen .ne. -1)
-              ILEN=(ILEN+1)/2
-              CALL HDINP(IBUF,ILEN,LUSCN,IERR)
-              CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,2)
-            enddo 
-          endif
-        CALL READS(LU_INFILE,IERR,IBUF,ISKLEN,ILEN,1)
-        enddo 
       endif
 C       Look for the string "Cover Letter" in .drg file
         ireccv=0
@@ -314,6 +301,7 @@ C       Look for the string "Cover Letter" in .drg file
           enddo !read schedule file
           write(luscn,'()')
         endif ! .drg file
+        ierr=0 
 C
 C Order the observations, in case they were not so in the $SKED section.
 C Not needed for VEX because they are read in when station is selected.
@@ -326,16 +314,23 @@ C Not needed for VEX because they are read in when station is selected.
 C
       endif ! VEX/sked
 
-      isettm = 20
-      ipartm = 70
+      isettm = 0
       itaptm = 1
       isortm = 5
-      ihdtm = 6
+
       call drprrd(ivexnum)
 ! Added 2019Aug25 JMG
+! Intiailze broadband stuff     
+      do istat=1,nstatn
+         bb_bw(istat) =0.0       !set these all to 0. 
+         idata_mbps(istat)=0
+         isink_mbps(istat)=0
+         ibb_off(istat)=0 
+      end do 
+
       if(.not.kvex) then
         call read_broadband_section
-      endif 
+      endif
       if (.not.kgeo) kpostpass=.true.
 C      if (.not.kgeo) kpostpass=.false.
 C

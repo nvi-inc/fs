@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -19,6 +19,7 @@
 *
       SUBROUTINE wrdur(ksw,istart,idur,iqual,ih,im,is,
      .  iz2,iz3,lu,isetup)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C  WRDUR writes the dur lines for the VLBA
 C  pointing schedules.
@@ -50,7 +51,8 @@ C  INITIALIZED:
       DATA cdur/'dur=00s qual=    stop=00h00m00s '/
 C
 C
-      call ifill(ibuf,1,ibuf_len,oblank)
+!      call ifill(ibuf,1,ibuf_len,oblank)
+      cbuf=" " 
 
       if (idur.eq.0) then ! don't use dur= command
         nch=ichmv_ch(ibuf,1,'qual=')

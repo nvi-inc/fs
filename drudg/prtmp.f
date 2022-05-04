@@ -21,6 +21,7 @@
 C  PRTMP prints the temp file
 c  NRV 910703
 C  nrv 950925 Change to simply call "printer". Landscape or
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C             portrait is handled by each listing type.
 C  nrv 951015 Revert to using cprtpor and cprtlan , and if blank
 C             then "printer" will handle them.
@@ -40,7 +41,7 @@ C 970207 nrv Add iopt to call and use it instead of iwidth.
       if (klab) then ! labels
         ierr = printer(labname,'l',cprtlab)
       else ! normal prinout
-        call drchmod(tmpname,ierr) 
+        call drchmod(tmpname,ierr)
         if (iopt.eq.0) then
           ierr = printer(tmpname,'t',cprtpor)
         else if (iopt.eq.1) then
@@ -62,6 +63,6 @@ C 970207 nrv Add iopt to call and use it instead of iwidth.
            close(luprt,status='delete')
          endif
       end if
-   
+
       RETURN
       END

@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 	SUBROUTINE getqual(cql,ix,icod,squal)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C  getqual gets either qual 1 or qual 2 bbsynth depending
 C  on cql.

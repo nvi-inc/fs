@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -21,6 +21,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
+#include <errno.h>
 
 #include "../include/dpi.h"
 #include "../include/params.h"
@@ -30,7 +31,7 @@ static int get_float(fvalue,error1,error2,ierr)
      float *fvalue;
      int error1,error2, *ierr;
 {
-  char *cptr;
+  char *cptr,ch;
 
   cptr=strtok(NULL," \n\t");
   if(cptr==NULL) {
@@ -38,7 +39,7 @@ static int get_float(fvalue,error1,error2,ierr)
     return -1;
   }
   
-  if(1!=sscanf(cptr,"%f",fvalue)) {
+  if(1!=sscanf(cptr,"%f%c",fvalue,&ch)) {
     *ierr=error2;
     return -1;
   }
@@ -168,19 +169,38 @@ int get_flux(file,flux)
   int ierr, i, icount;
   char *cptr;
   char buff[256];
+  char buff2[256];
+  int line;
   struct flux_ds *flux_p;
 
-  if( (fp= fopen(file,"r"))==NULL )
+  if( (fp= fopen(file,"r"))==NULL ) {
+    logit(NULL,errno,"un");
     return -1;
+  }
 
   icount=0;
+  buff2[0]=0;
+  line=0;
   while(TRUE){
     
+    line++;
     ierr=find_next_noncomment(fp,buff,sizeof(buff));
-    if(ierr<-1)
-      return ierr-100;
-    else if(ierr==-1)
-      return 0;
+    if(ierr<=-4) {
+      strcpy(buff2,buff);
+      goto error;
+    } else if (ierr<=-2) {
+      logit(NULL,errno,"un");
+      goto error2;
+    } else if (ierr==-1) {
+      logit(NULL,errno,"un");
+      ierr=-42;
+      goto error2;
+    } else if(ierr==1)
+      goto end;
+
+    strcpy(buff2,buff);
+    if(strlen(buff2)>0)
+      buff2[strlen(buff2)-1]=0;
 
     for (i=0;i<strlen(buff);i++)
       if(isupper(buff[i]))
@@ -192,86 +212,110 @@ int get_flux(file,flux)
     if(cptr==NULL)
       continue;
 
-    if(++icount >MAX_FLUX)
-      return -5;
+    if(++icount >MAX_FLUX) {
+      ierr=-5;
+      goto error;
+    }
 
     /* source name */
 
-    if(strlen(cptr)>sizeof(flux->name)-1)
-      return -6;
-    else
+    if(strlen(cptr)>sizeof(flux->name)-1) {
+      ierr=-6;
+      goto error;
+    } else
       strcpy((flux+icount-1)->name,cptr);
 
     /* type */
 
     cptr=strtok(NULL," \n\t");
-    if(cptr==NULL)
-      return -7;
+    if(cptr==NULL) {
+      ierr=-7;
+      goto error;
+    }
 
-    if(strlen(cptr)!=1)
-      return -8;
-
-    if(strchr("cp",*cptr)==NULL)
-      return -9;
+    if(strlen(cptr)!=1||strchr("cp",*cptr)==NULL) {
+      ierr=-8;
+      goto error;
+    }
 
     (flux+icount-1)->type=*cptr;
 
     /* freq min */
 
     if(get_float(&(flux+icount-1)->fmin,-10,-11,&ierr))
-      return ierr;
+      goto error;
 
     /* freq max */
 
     if(get_float(&(flux+icount-1)->fmax,-12,-13,&ierr))
-      return ierr;
+      goto error;
 
     /* flux coeff 0: 10**log */
 
     if(get_float(&(flux+icount-1)->fcoeff[0],-14,-15,&ierr))
-      return ierr;
+      goto error;
 
     /* flux coeff 0: 10**log(f) */
     
     if(get_float(&(flux+icount-1)->fcoeff[1],-16,-17,&ierr))
-      return ierr;
+      goto error;
 
     /* flux coeff 0: 10**2log(f) */
 
     if(get_float(&(flux+icount-1)->fcoeff[2],-18,-19,&ierr))
-      return ierr;
+      goto error;
 
     /* size */
 
     if(get_float(&(flux+icount-1)->size,-20,-21,&ierr))
-      return ierr;
+      goto error;
 
     (flux+icount-1)->size*=(DEG2RAD/3600.);
     /* model */
     
     cptr=strtok(NULL," \n\t");
-    if(cptr==NULL)
-      return -22;
+    if(cptr==NULL) {
+      ierr=-22;
+      goto error;
+    }
 
     if(strcmp(cptr,"gauss")==0) {
       (flux+icount-1)->model='g';
       if(get_gauss(&(flux+icount-1)->mcoeff,-23,&ierr))
-	return ierr;
+        goto error;
     } else if(strcmp(cptr,"2pts")==0) {
       (flux+icount-1)->model='2';
       if(get_2pts(&(flux+icount-1)->mcoeff,-35,&ierr))
-	return ierr;
+        goto error;
     } else if(strcmp(cptr,"disk")==0) {
       (flux+icount-1)->model='d';
       if(get_disk(&(flux+icount-1)->mcoeff,-37,&ierr))
-	return ierr;
+        goto error;
+    } else {
+      ierr=-39;
+      goto error;
     }
 
     cptr=strtok(NULL," \n\t");
-    if(cptr!=NULL)
-      return -39;
+    if(cptr!=NULL) {
+      ierr=-40;
+      goto error;
+    }
 
   }
 
+end:
+  if(fclose(fp)==EOF) {
+      logit(NULL,errno,"un");
+      return -41;
+  }
   return 0;
+
+error:
+   printf("trying to read (non-blank) non-comment line %d, flux.ctl line that failed:\n'%s'\n",line,buff2);
+   return ierr;
+
+error2:
+   printf("trying to read (non-blank) non-comment line %d, last flux.ctl line correctly read:\n'%s'\n",line,buff2);
+   return ierr;
 }

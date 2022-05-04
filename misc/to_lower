@@ -1,0 +1,19 @@
+#!/bin/bash
+# convert file contents to lower case
+set -Ce
+if [ $# -eq 0 ]; then
+    echo ""
+    echo "Usage: $0 <files>"
+    echo ""
+    echo "Convert file(s) contents to lower case:"
+    echo "  Makes back-up copy with added .bak extension"
+    echo "  Will not overwrite existing .bak files"
+    echo "  Gives up after any error"
+    exit 1
+fi
+for f in $@; do
+    echo "Converting $f file..."
+    mv -n "$f" "$f".bak
+    tr '[:upper:]' '[:lower:]' < "$f".bak > "$f"
+done
+echo "Done."

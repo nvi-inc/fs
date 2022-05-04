@@ -18,10 +18,11 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine snap_pcalf(lmode)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
       character*(*) lmode
       character*20 ldum
-! 2015Jun05 JMG. Repalced squeezewrite by drudg_write. 
+! 2015Jun05 JMG. Repalced squeezewrite by drudg_write.
       write(ldum,'("pcalf",a)') lmode
       call drudg_write(luFile,ldum)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -87,6 +87,10 @@ char *file;
     if (fgets(buffer,MAXSTR,tdcb)==NULL) {
       printf("fserr: ERROR reading control file, message, line %d file %s\n",
 	     next_line,file);
+      exit(-1);
+    } else if(strlen(buffer)>0 && '\n' != buffer[strlen(buffer)-1]) {
+      printf("fserr: ERROR reading control file, line too long (MAX %d characters) or no ending newline on last line, line %d file %s\n",
+	     MAXSTR-2,next_line,file);
       exit(-1);
     }
 

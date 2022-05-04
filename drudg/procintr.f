@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE PROCINTR
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C This routine writes out the header information for proc files.
 C into lu_outfile.
@@ -29,6 +30,8 @@ C
       include '../skdrincl/skobs.ftni'
 C
 C History
+! 2021-12-13 JMGipson. Removed references to Recorder 2. 
+!            Also removed stuff that would be written out in piggyback mode. 
 C 970225 nrv New. Copied from snapintr.
 C 990512 nrv Add rack and rec types to call so that they can be
 C            printed in the proc library header.
@@ -40,7 +43,7 @@ C 991210 nrv Write equipment name from common.
 C 991214 nrv Remove calling parameters, not nneeded.
 ! 2005Aug08 JMGipson.  Simplified.
 ! 2006Nov30 Use cstrec(istn,irec) instead of 2 different arrays
-! 2018Jul20 Moved writing of drudg version to subrotine. 
+! 2018Jul20 Moved writing of drudg version to subrotine.
 
 C Input
 !    None.
@@ -59,23 +62,10 @@ C
      > cprfx,cexper,cstnna(istn),cpocod(istn)
 
       call write_drudg_version_line(lu_outfile)
-   
 
-      write(lu_outfile,'(5a,$)')
+      write(lu_outfile,'(5a)')
      >   '"< ',cstrack(istn),' rack >< ',cstrec(istn,1), ' recorder 1>'
-      if(nrecst(istn) .eq. 2) then
-        write(lu_outfile,'("< ",a," recorder 2>")') cstrec(istn,2)
-      else
-        write(lu_outfile, '(a)')
-      endif
-
-      if(km5A_piggy) then
-        write(lu_outfile,90) "   Mark5A operating in piggyback mode."
-      endif
-      if(km5P_piggy) then
-        write(lu_outfile,90) "   Mark5P operating in piggyback mode."
-      endif
-
+ 
       write(lu_outfile,'(a)') 'enddef'
 
 90    format('"',a,'"')

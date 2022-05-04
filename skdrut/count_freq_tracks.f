@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE count_freq_tracks(cbnd,nbnd,luscn)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C   COMMON BLOCKS USED
       include '../skdrincl/skparm.ftni'
@@ -32,12 +33,14 @@ C   COMMON BLOCKS USED
 !  2006Oct06  Assume cbarrel=" " is valid.
 !  2008Jun10  Wasn't counting tracks if recorder was S2?
 ! 2013Sep19  JMGipson made sample rate station dependent
-! 2016Dec05 JMGipson. Error in setting the sample rate. Used first stations VC BW. Now uses stations BW. 
+! 2016Dec05 JMGipson. Error in setting the sample rate. Used first stations VC BW. Now uses stations BW.
+! 2021-01-31 JMG Don't check barrel roll 
+! 2021-03-05 Issue warning here if mode not defined for a station. Prevously done in itras. 
 
 ! functions
       integer itras
+      integer itras_map
       integer iwhere_in_string_list
-      integer trimlen
 
 ! passed
       character*2 cbnd(2)
@@ -47,9 +50,7 @@ C
 C  LOCAL VARIABLES
       integer ierr,ip,ic,i,iv,is,isub,iul
       integer ih
-      integer nch
       character*3 cs
-      integer itrk_tot
 C
 C  1. Count number of frequencies and the number of tracks being
 C     recorded at each station on each frequency.
@@ -60,7 +61,14 @@ C
       cbnd(1)=" "
       cbnd(2)=" "
       do ic=1,ncodes
-        do is=1,nstatn
+         do is=1,nstatn
+! Quick check to see if the mode is defined for this station. 
+          if(itras_map(is,ic) .eq. 0) then
+            write(*,*) "Track map not defined for station ",cstnna(is),
+     >        " and mode ", cnafrq(ic)
+             goto 100
+          endif 
+
           nfreq(1,is,ic)=0
           nfreq(2,is,ic)=0
           do i=1,nchan(is,ic)
@@ -99,10 +107,10 @@ C                        Two-thirds of the data on a switched track are used
                       endif
                     endif
 !C                 Add another 0.978 for magnitude bit
-! This is wrong! Contribution of magnitude bit is ~ 0.2411 sign 
-! Quick derivation:  
+! This is wrong! Contribution of magnitude bit is ~ 0.2411 sign
+! Quick derivation:
 ! 1-bit efficiency is 0.571429
-! 2-bit efficiency is 0.63662 
+! 2-bit efficiency is 0.63662
 ! (2-bit)/(1-bit) = 0.63622/0.571529=sqrt(1.241184)
 
                     if (itras(iul,2,ih,iv,ip,is,ic).ne.-99) then
@@ -116,26 +124,10 @@ C                        Two-thirds of the data on a switched track are used
             endif
           enddo
 ! Issue warning.
-          itrk_tot=(ntrkn(1,is,ic)+ntrkn(2,is,ic))*ifan(is,ic)
-          if(itrk_tot .ne. 0) then
-            if(cbarrel(is,ic) .ne. "NONE" .and.
-     >          cbarrel(is,ic) .ne. "off" .and.
-     >          cbarrel(is,ic) .ne. " ") then
-              if(itrk_tot .ne. 8 .and. itrk_tot .ne. 16 .and.
-     >           itrk_tot .ne. 32 .and. itrk_tot .ne. 64) then
-                nch=trimlen(cbarrel(is,ic))
-                write(*,'(4(a))')
-     >           "Count_freq_tracks  warning:  Barrel roll ",
-     >            cbarrel(is,ic)(1:nch),
-     >            " is not allowed for ", cstnna(is)
-                write(*,'(a,a,i2)') " # of tracks must be one of ",
-     >            "(8,16,32,64). Actual number is: ", itrk_tot
-              endif
-            endif
-          endif
-        enddo
+!          itrk_tot=(ntrkn(1,is,ic)+ntrkn(2,is,ic))*ifan(is,ic)
+100   continue  
+         enddo
       enddo
-
 C  1.5 Calculate sample rate if not specified.
 
 C
@@ -143,7 +135,7 @@ C
         do ic=1,ncodes
           if (samprate(is,ic).eq.0) samprate(is,ic)=2.0*vcband(is,1,ic)
         enddo
-      end do 
+      end do
 
       RETURN
       END

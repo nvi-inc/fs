@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine fakesum
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     FAKESUM makes a fake LVEX output from the schedule.
 C
@@ -74,7 +75,7 @@ C
 
       ic=trimlen(lskdfi)
       WRITE(LUSCN,100) cSTNNA(ISTN),LSKDFI(1:ic) ! new
-100   FORMAT(' FAKEsum output for ',A,' from schedule ',A) 
+100   FORMAT(' FAKEsum output for ',A,' from schedule ',A)
 
       ituse=1
 
@@ -108,7 +109,7 @@ C THEN BEGIN Current station in observation
           if (cdir(istnsk)(1:1) .eq. "R") idir=-1
           IFTOLD = IFT(ISTNSK)+IFIX(IDIR*(ituse*ITEARL(istn)+
      .      IDUR(ISTNSK)) *speed(icod,istn))
-          IHEAD=ihdpos(1,IPAS(ISTNSK),istn,icod)
+          IHEAD=1
 C       Create scan ID from start time and source
 C       ddd-hhmm_source
 C       Use scan IDs already generated.

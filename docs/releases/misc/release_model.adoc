@@ -1,0 +1,392 @@
+//
+// Copyright (c) 2020-2021 NVI, Inc.
+//
+// This file is part of the FSL10 Linux distribution.
+// (see http://github.com/nvi-inc/fsl10).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= Strawman Release Model
+Version 1.1 - February 2021
+
+:sectnums:
+
+This document briefly describes the version tags, release model,
+update notice, version checkout, and branches used with the FS _git_
+repo. It also outlines the steps in initial and update installs of the
+FS, including from an archive, and sending changes to the maintainers.
+
+== Version tags
+
+An example version _tag_ is:
+
+   10.1.0-beta1
+
+The general form of FS version tags is:
+
+[subs="+quotes"]
+....
+__MAJOR__.__MINOR__.__PATCH__-__STRING__
+....
+
+Where:
+
+* `_MAJOR_`, a number, indicates a major release, e.g., `10`.  Note
+   that `_MAJOR_` does not start with a `v`.
+
+*  `_MINOR_`, a number, indicates a minor release, e.g., `1`.
+
+*  `_PATCH_`, a number, indicate the patch number, e.g., `0`.
+   Non-zero patch numbers are only used for fixes to
+   `__MAJOR__.__MINOR__` releases (before version _10.0.0_, non-zero
+   ``_PATCH_``s were used in regular releases).
+
+*  `_STRING_`, a string, which is optional and when non-blank provides
+   additional information, e.g., `beta1`. If `_STRING_` is empty, the
+   dash `-` is omitted.
+
+If the version tag has changed since the last time the FS was _made_,
+the version tag is inserted in the FS (and _drudg_) code
+and compiled in.  If
+the version that is made does not correspond to a tagged commit, additional
+information is automatically appended to identify the specific commit, e.g.:
+
+  10.0.0-beta1-58-g229f696e
+
+The general form of what is appended is:
+
+[subs="+quotes"]
+....
+-_n_-g__SHA__-dirty
+....
+
+where:
+
+*  `_n_` is the number of commits that have been been made since the last
+   commit tagged with a version string, e.g., `58`.
+
+*  `_SHA_` is the (unique) SHA prefix of this commit, e.g., `229f696e`.
+
+*  `-dirty` is appended if the working directory contains changes that
+   have not been committed. When -dirty appears, the ability to identify
+   what version was run is lost. This should be avoided.
+
+This format is only present for versions _10.0.0-alpha2_ and later.
+
+== Release model
+
+When an FS release is made, a particular commit is tagged with the version. A
+lightweight tag is sufficient, but an annotated tag can be used.  Official
+releases never have a non-blank `_STRING_`.  However, alpha and beta releases will
+have appropriate `_STRING_` values, e.g. _alpha1_, _beta2_, etc.  Other values may
+be used as needed.
+
+There is a basic distinction between `__MAJOR__.__MINOR__.0`,
+i.e., with zero `_PATCH_`, a _feature release_, and non-zero
+`_PATCH_`, a _patch release_.  Generally feature releases include
+significant feature changes, but also occur when a patch is not just a
+"`quick`" install for the users. A patch that requires significant
+changes, including, but not limited to reboots due to changes in
+shared memory size, should be promoted to being a feature release. The
+goal is that patch releases should be safe for operational stations to
+install without needing a significant amount of time, testing, or
+otherwise being a risk to operations.
+
+== Update notices
+
+For each release, there should be an _update notice_ in a file of the form
+
+[subs="+quotes"]
+....
+__/usr2/fs/docs/releases/<MAJOR>/<MINOR>/<tag>.adoc__
+....
+
+documenting the changes in the version and installation instructions.
+There may also be documents using the `_STRING_` and other files
+associated with the release, including patches, in the same
+sub-directory, e.g., _beta1.adoc_, _beta2.adoc_,
+_beta1_to_beta2.adoc_, _<STRING>_to_latest.adoc_, and _10.0.1.adoc_.
+All these files should be visible on the _gh-pages_.
+
+For feature releases, the notice should have a complete description of
+the changes and installation instructions from the previous feature
+release.
+
+For patch releases, the description and instructions should be
+complete for an update from the corresponding feature release and
+include those instructions (by reference).
+
+A _<tag>_to_latest.adoc_ file covers changes on that branch since the
+most recent feature or maintenance release. It starts as basically
+empty for a new release. It accumulates the changes that occur until
+the next release. It helps provide content for the next release update
+notes. At a new release it is converted to a new _<tag>.adoc_ file for
+the new _<tag>_.
+
+NOTE: Those using the latest commit are understood to be experts and
+are expected to manage differences in the update steps when updating to
+the next release themselves. Advice may be helpful of course, but
+documentation is not provided.
+
+== Branches
+
+The main branch in the repo is _master_. This is the branch that is
+checked out after a clone operation from _github_.  The _master_
+branch represents the main line of development and should include most
+of the feature releases.
+
+In order to patch an existing feature release, a _maintenance branch_
+is normally used.  For example, to create a maintenance branch _10.2_
+for feature release _10.2.0_:
+
+   git checkout -b 10.2 10.2.0
+
+The changes created on any maintenance release should be _rebased_
+onto _master_ as soon as they are stable. Maintenance branches should
+be retained long term both for possible future extension and to
+preserve the history.
+
+To develop a new feature, a _feature branch_ can be created at any
+point. Likewise, for _bug fix_ branches.  Once they are considered to
+be stabilized enough they are merged into the appropriate branch,
+_master_ or a maintenance branch, and then deleted.
+
+Patch releases are normally made on maintenance branches.  However, if
+a patch is needed and there have been no changes on _master_ since the
+corresponding feature release, the patch can be released on the
+_master_ (probably having been developed on a bug fix branch first).
+Otherwise, a maintenance branch should be made.
+
+Despite feature releases normally being on the _master_ branch, a
+feature release may occur on a different branch for a patch that has
+been promoted to a feature release.  In this case, a maintenance
+branch for a new feature release is created at the tip of the existing
+maintenance branch, if it exists. For example, to make a _10.3_
+maintenance branch off the _10.2_ maintenance branch:
+
+   git checkout -b 10.3 10.2
+
+and the new feature release is placed on the new branch.  Likewise, a
+maintenance branch can created from a patch release on _master_:
+
+   git checkout -b 10.2 10.2.1
+
+== Version checkout
+
+It is always possible to get a specific release version by checking
+out the `_tag_` for its version string:
+
+[subs="+quotes"]
+....
+git checkout _tag_
+....
+
+Commits that do not have a version tag are not considered releases.  Users can
+check them out, but they may have bugs and/or incompatibilities with local
+files and station software of the previous tagged version.
+
+The last commit on a branch, the _tip_, is checked out with:
+
+[subs="+quotes"]
+....
+git checkout _branch_
+....
+
+It is not necessary that unreleased commits on _master_ or a maintenance branch
+be in a state that is releasable. However, it is helpful to developers, and to
+a lessor extent for users, for the branch tips be in a usable state. This is
+largely achieved by not _merging_ or _rebasing_ feature branches into the branch
+that aren't in a fairly complete state.  However, it is acceptable to make new
+commits significantly changing the impact of previous commits, if they still
+result in a usable tip.
+
+== Making a release
+
+Before a release is made, the update notes should be prepared. For
+feature releases, the instructions should include all steps to upgrade
+from the previous feature release. If there were significant changes
+in patch releases for that version, they can be included by reference
+to the last patch release instructions at the time of the new feature
+release. A description of the changes should be included as well.
+
+For patch releases, the installation instructions can be abbreviated
+to cover just what is necessary to upgrade from the corresponding
+feature release plus instructions for all previous patches for that
+feature release.  Covering all the previous patch releases, should not
+be hard, since previous patch notes can be included explicitly or by
+reference.  A description of what has been fixed should included.
+
+To make a release:
+
+. Finalize release, including update notes, committing all changes.
++
+Final commit message: ``**Finalize** _tag_``
+
+. ``**git push**``
+. ``**git tag** __tag__``
+. ``**git push --tags**``
+. Change to the _docs/_ sub-directory
+. Generate and push the _.html_ files to the _gh-pages_ branch on _github_.
++
+Directions are in _making_gh-pages.txt_.
+
+. On the github page for the repo, select `release`
+. Select `Draft a new release`
+. Enter version string as an existing tag and select branch
+. Enter a release message as the `Description`
+. Leave `Title` blank
++  
+Do not include `*pre-release*` or the version `_tag_` in `Title` since they
+are automatically prepended to the announcement email.
+. If not for production, select `This is a pre-release`
+. Select `Publish Release`
+
+== Installation 
+
+To find the most recent release for installation, go to:
+
+https://github.com/nvi-inc/fs/releases
+
+Typically, you should use the most recent patch release for the most
+recent feature release. If there have not been any patch releases for
+that feature release, use that feature release itself, i.e., with the
+version string ending in zero. Versions with a trailing _-string_ are
+not intended for production.  Use the tag of the release you have
+chosen for `_tag_` in the instructions below.
+
+=== First time FS installation
+
+As _root_, execute: 
+
+.   ``**cd /usr2**``
+.   ``**git clone \https://github.com/nvi-inc/fs fs-git**``
+.   ``**cd fs-git**``
+.   ``**git checkout -q** _tag_``
++
+
+Use the version `_tag_` of the release you are installing.
+.   ``**make install**``
++
+Answer `*y*` to confirm installation
+.   Log-out as _root_ and log-in as _prog_
+.   ``**make >&/dev/null**``
+.   ``**make -s**``
++
+If there is no output from the above command, then the _make_ was successful.
+.   Reboot
+
+You can then login as _oper_ and run the FS, but you will need to
+customize the control files in _/usr2/control_ before you can do
+anything useful. Additionally, you may need to add station software,
+particularly _antcn_ if you want to control an antenna
+
+=== Installing FS updates
+
+As _prog_:
+
+.   ``**cd /usr2/fs-git**``
+.   ``**git fetch**``
+.   ``**git checkout -q** _tag_``
+
++
+
+Use the version `_tag_` of the release you are installing.
+.   ``**make >&/dev/null**``
+.   ``**make -s**``
++
+If there is no output from the above command, then the _make_ was successful.
+.   Reboot
++
+A patch update may not require a reboot, please check the instructions.
+
+Additionally, you will need to follow the update instructions. There
+is usually a link to them in the release announcement, which can be
+found at https://nvi-inc.github.io/fs/releases/.
+
+=== Installing from an archive
+
+The main method of distributing the FS is with the _git_ repo from
+_github_. This makes updates, particularly patches,  much easier
+to install. However, if it is not possible to use _git_, you can get a
+_.tar.gz_ archive from the release page.
+
+To install from the archive (use the `_tag_` of the release you are installing):
+
+.   Log in as _root_
+.   ``**cd /tmp**``
+.   ``**wget \https://github.com/nvi-inc/fs/archive/**__tag__**.tar.gz**``
++
+
+TIP: If you don't have _wget_ or if there another problem with it,
+such as its TLS version is too old (this is the case for FSL8), you can
+retrieve the archive on a different local machine and move it to
+_/tmp_ on the FS machine.
+
+
+.   ``**cd /usr2**``
+.   ``**tar xzf /tmp/**__tag__**.tar.gz**``
+.   ``**cd /usr2/fs-**__tag__``
+
+. At this point you have two options:
+
+..  Set _/usr2/fs_ link, file ownerships, and file permissions
++
+
+If this is a first time installation of the FS or it is an update that
+you want to use immediately, then execute:
+
+   make install
++
+Answer `*y*` to confirm installation
+
+.. Set only the ownerships and permissions
++
+
+If you only want to build this version and not make it operational
+yet, then execute:
+
+  chown -R prog.rtx .
+  chmod -R a+r,u+w,go-w .
+
+.   Log out as _root_ and log in as _prog_
+.   ``**cd /usr2/fs-**__tag__``
+.   ``**make >&/dev/null**``
+.   ``**make -s**``
++
+
+If there is no output from this command, then the _make_ was
+successful.
+
+. If you set the _/usr2/fs_ link by using `make install` above, then
+reboot.
+
+If this is a first time installation, you can then login as _oper_ and
+run the FS, but you will need to customize the control files in
+_/usr2/control_ before you can do anything useful.  Additionally, you
+may need to add station software, particularly _antcn_ if you want to
+control an antenna.
+
+If this an update, you will need to follow the update instructions.
+There is usually a link to them in the release announcement, which can
+be found at https://nvi-inc.github.io/fs/releases/.
+
+== Managing testing of FS updates
+
+#TODO: develop and write#
+
+== Users sending code changes to developer
+
+#TODO: patches? fork/pull-request?. It would be good to preserve commit SHAs
+for tracing versions using stations, if possible.#

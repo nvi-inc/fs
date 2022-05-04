@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine make_unit_vector(phi,theta,vec)
+      implicit none
 ! Make a unit vector
 ! input
       double precision phi, theta       !spherical  cooordiantes=long,lat

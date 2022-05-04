@@ -41,7 +41,7 @@ void nng_perror(const char *msg, int rv) {
 	fprintf(stderr, "ssub (%s:%d %s) error %s: %s\n", __FILE__, __LINE__, __FUNCTION__, msg,   \
 	        nng_strerror(rv))
 
-long long sync_msgs(int seq, char *addr, nng_duration timeout) {
+int64_t sync_msgs(uint64_t seq, char *addr, nng_duration timeout) {
 	//  unsigned long long last_seq = 0;
 	nng_socket sock;
 
@@ -327,7 +327,7 @@ int main(int argc, char **argv) {
 		if (m.seq > seq) {
 			// We've missed a message, perform out-of-band sync
 			synced      = false;
-			long long s = sync_msgs(seq, repaddr, -1);
+			int64_t s = sync_msgs(seq, repaddr, -1);
 			if (s < 0) {
 				continue;
 			}

@@ -120,7 +120,17 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
 	*ierr=-16;
 	return -1;
       }
+    } else if(shm_addr->equip.rack==DBBC3) {
+      tpi_dbbc3(ip,itpis);
+      if(ip[2]<0) {
+        if(ip[1]!=0)
+          cls_clr(ip[0]);
+        logita(NULL,ip[2],ip+3,ip+4);
+        *ierr=-16;
+        return -1;
+      }
     }
+
     if(station) {
       if(kst1)
 	memcpy(shm_addr->user_dev1_name,"u5",2);

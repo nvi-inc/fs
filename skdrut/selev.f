@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -18,11 +18,14 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE SELEV(LINSTQ,luscn,ludsp)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     SELEV reads/writes station elevation limits
 C
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/constants.ftni'
+! 2021-12-03 JMGipson.  Added octal_constants.ftni
+      include '../skdrincl/octal_constants.ftni'
 C
 C  INPUT:
       integer*2 LINSTQ(*)
@@ -53,7 +56,7 @@ C   930225 nrv implicit none
 C   950405 nrv Use 2-letter station codes for listings.
 c   950411 nrv Call IGTST2 for input of 2-letter codes
 C 951017 nrv Fixed gtfld call to remove linstq
-C 960415 nrv Do not return on initial error, find all. 
+C 960415 nrv Do not return on initial error, find all.
 C
 C
 C     1. Check for some input.  If none, write out current.
@@ -78,7 +81,8 @@ C     2. Something is specified.  Get each station/elevation combination.
 C
       DO WHILE (IC1.NE.0) !more decoding
         NCH = IC2-IC1+1
-        CALL IFILL(LKEYWD,1,20,oblank)
+!        CALL IFILL(LKEYWD,1,20,oblank)
+        ckeywd=" "
         IDUMMY = ICHMV(LKEYWD,1,LINSTQ(2),IC1,MIN0(NCH,20))
         IF  (JCHAR(LINSTQ(2),IC1).EQ.OUNDERSCORE) THEN  !all stations
           CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)

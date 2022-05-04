@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -33,9 +33,11 @@ int get_rxgain(file,rxgain)
   int ierr, iread, i;
   char type[11], pol0[4], pol1[4], gform[6], gtype[5], tcpol[4];
   char buff[256];
+  float fdum;
+  char *cptr;
 
   if( (fp= fopen(file,"r"))==NULL )
-    return -1;
+    return -11;
 
   if((ierr=find_next_noncomment(fp,buff,sizeof(buff)))!=0)
     return ierr-100;
@@ -62,6 +64,13 @@ int get_rxgain(file,rxgain)
       return -113;
     break;
   case 2:
+    cptr=strtok(buff," \n\t");
+    cptr=strtok(NULL," \n\t");
+    cptr=strtok(NULL," \n\t");
+    if(cptr!=NULL)
+        return -116;
+    if(rxgain->type=='r')
+      return -117;
     if(rxgain->lo[0]<0)
       return -114;
     break;
@@ -69,6 +78,7 @@ int get_rxgain(file,rxgain)
     return -115;
     break;
   }
+
   
   if((ierr=find_next_noncomment(fp,buff,sizeof(buff)))!=0)
     return ierr-200;
@@ -95,7 +105,7 @@ int get_rxgain(file,rxgain)
 
   /* Line 3: FWHM */
   
-  iread=sscanf(buff,"%10s %f %f",type,&rxgain->fwhm.coeff);
+  iread=sscanf(buff,"%10s %f",type,&rxgain->fwhm.coeff);
 
   if(iread < 1)
     return -311;
@@ -108,6 +118,12 @@ int get_rxgain(file,rxgain)
 
   switch (iread) {
   case 1:
+    cptr=strtok(buff," \n\t");
+    cptr=strtok(NULL," \n\t");
+    if(cptr!=NULL)
+        return -314;
+    if(rxgain->fwhm.model=='c')
+      return -315;
     rxgain->fwhm.coeff=1.0;
     break;
   case 2:
@@ -177,7 +193,7 @@ int get_rxgain(file,rxgain)
 
   /* Line 6: gain curve */
 
-  iread=sscanf(buff,"%5s %4s %f %f %f %f %f %f %f %f %f %f",
+  iread=sscanf(buff,"%5s %4s %f %f %f %f %f %f %f %f %f %f %f",
 	       gform,gtype,
 	       &rxgain->gain.coeff[0],
 	       &rxgain->gain.coeff[1],
@@ -188,7 +204,8 @@ int get_rxgain(file,rxgain)
 	       &rxgain->gain.coeff[6],
 	       &rxgain->gain.coeff[7],
 	       &rxgain->gain.coeff[8],
-	       &rxgain->gain.coeff[9]);
+	       &rxgain->gain.coeff[9],
+               &fdum);
 
   if(iread<3 || iread >12)
     return -611;
@@ -207,11 +224,17 @@ int get_rxgain(file,rxgain)
 
   rxgain->gain.ncoeff=iread-2;
 
-  if(strstr(buff,"opacity_corrected")!=NULL)
-    rxgain->gain.opacity='y';
-  else
-    rxgain->gain.opacity='n';
+  cptr=strtok(buff," \n\t");
+  for (i=0;i<iread;i++)
+     cptr=strtok(NULL," \n\t");
 
+  if(cptr!=NULL) {
+      if(strstr(cptr,"opacity_corrected")!=NULL)
+          rxgain->gain.opacity='y';
+      else
+          return -614;
+  } else
+      rxgain->gain.opacity='n';
 
   rxgain->tcal_ntable=0;
   rxgain->tcal_npol[0]=0;
@@ -224,8 +247,8 @@ int get_rxgain(file,rxgain)
 
     ierr=find_next_noncomment(fp,buff,sizeof(buff));
 
-    if(ierr==-1)
-      return -2;
+    if(ierr==1)
+      return -699;
     else if(ierr!=0)
       return ierr-700;
 
@@ -279,10 +302,10 @@ int get_rxgain(file,rxgain)
     
     ierr=find_next_noncomment(fp,buff,sizeof(buff));
 
-    if(ierr==-1)
-      return -2;
+    if(ierr==1)
+      return -799;
     else if(ierr!=0)
-      return ierr-700;
+      return ierr-800;
 
     lower(buff);
 
@@ -290,24 +313,24 @@ int get_rxgain(file,rxgain)
 
     if(iread>=1) {
       if(rxgain->trec[0] <0.0 )
-	return -801;
+	return -811;
       if(iread>=2) {
-	if(rxgain->dpfu[1] <0.0 )
-	  return -802;
+	if(rxgain->trec[1] <0.0 )
+	  return -812;
       }
       if(iread==1 && rxgain->pol[1] !=0)
-	return -803;
+	return -813;
       else if(iread==2 && rxgain->pol[1] == 0)
-	return -804;
+	return -814;
     } else
-      return -805;
+      return -815;
     
     while(1) {
       float el, tk;
       ierr=find_next_noncomment(fp,buff,sizeof(buff));
 
-      if(ierr==-1)
-	return -2;
+      if(ierr==1)
+	return -899;
       else if(ierr!=0)
 	return ierr-900;
 
@@ -335,14 +358,14 @@ int get_rxgain(file,rxgain)
   /* check for trailing junk */
   
   ierr=find_next_noncomment(fp,buff,sizeof(buff));
-  if(ierr==-1) {
+  if(ierr==1) {
     if(0==fclose(fp))
       return 0;
     else
-      return -999;
+      return -12;
   } else if(ierr!=0)
-    return ierr-998;
+    return ierr;
   else
-    return -998;
+    return -13;
 
 }

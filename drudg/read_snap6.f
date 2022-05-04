@@ -18,12 +18,13 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine read_snap6(cbuf,crack,creca,crecb,ierr)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
-C Read the sixth comment line of a SNAP file. 
+C Read the sixth comment line of a SNAP file.
 C Example:
-C " Rack=VLBAG     Recorder A=VLBA      Recorder B=none     
+C " Rack=VLBAG     Recorder A=VLBA      Recorder B=none
 
-C 991103 nrv Created to scan for equipment. 
+C 991103 nrv Created to scan for equipment.
 
 C Called by: LSTSUM
 
@@ -49,7 +50,7 @@ C Find up to three '=' and take the name following.
       ierr=-1
       ich = index(cbuf,'=')
       if (ich.eq.0) return
-      ic1 = ich + index(cbuf(ich:),' ') 
+      ic1 = ich + index(cbuf(ich:),' ')
       if (ic1.eq.0) return
       crack = cbuf(ich+1:ic1)
       ich = ic1 + index(cbuf(ic1:),'=') - 1

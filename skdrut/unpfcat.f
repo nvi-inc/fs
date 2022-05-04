@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -19,10 +19,13 @@
 *
       SUBROUTINE unpfcat(IBUF,ILEN,IERR,
      .LFR,LC,lsub,lrx)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     UNPFR unpacks the lines in the FREQ.CAT catalog
 C
       include '../skdrincl/skparm.ftni'
+! 2021-12-03 JMGipson.  Added octal_constants.ftni
+      include '../skdrincl/octal_constants.ftni'
 
 C  History:
 C  900117 NRV Created, modeled after UNPFR of old FRCAT program
@@ -58,7 +61,7 @@ C     Name - 8 characters
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       NCH = IC2-IC1+1
-      IF  (NCH.GT.8) THEN 
+      IF  (NCH.GT.8) THEN
         IERR = -101
         RETURN
       END IF
@@ -72,7 +75,7 @@ C
       IF  (NCH.GT.2) THEN
         IERR = -102
         RETURN
-      END IF 
+      END IF
       call char2hol ('  ',LC,1,2)
       IDUMY = ICHMV(LC,1,IBUF,IC1,NCH)
 C
@@ -80,7 +83,7 @@ C     sub group name, 8 characters
 C
       CALL GTFLD(IBUF,ICH,ILEN*2,IC1,IC2)
       NCH = IC2-IC1+1
-      IF  (NCH.GT.8) THEN 
+      IF  (NCH.GT.8) THEN
         IERR = -103
         RETURN
       END IF

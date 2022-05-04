@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       Subroutine getstr(instring,ix,outstring)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C     Scans "instring" and returns the next blank-delimited field
 C     as "outstring".  Similar to LNFCH's GTFLD.
 C   Input:
@@ -29,6 +30,7 @@ C   Output:
 C     ix  ! index of next character after the end of outstring
 c                   (used for subsequent scans)
 C
+      integer i,i1
       outstring=''
       i=ix
       do while (index(instring(i:),' ').ne.1)

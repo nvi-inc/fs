@@ -19,6 +19,7 @@
 *
       logical function kCheckGrpOr(itrk,istart,iend,ihead)
 ! passed
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       integer itrk(36,2)
       integer istart,iend
       integer ihead

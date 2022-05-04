@@ -19,6 +19,7 @@
 *
       SUBROUTINE vunpso(sodef,ivexnum,iret,ierr,lu,
      >   cname1,cname2,rarad,decrad,iep)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     VUNPSO gets the source information for source sodef.
 C     **NOTE** Satellites as sources not supported yet.
@@ -75,7 +76,7 @@ C
       if (iret.eq.0) then
         iret = fvex_field(1,ptr_ch(cout),len(cout))
         NCH = fvex_len(cout)
-        IF  (NCH.GT.max_sorlen.or.NCH.le.0) THEN 
+        IF  (NCH.GT.max_sorlen.or.NCH.le.0) THEN
           write(lu,'("VUNPSO01 - IAU name too long, using first ",i3,
      .    " characters")') max_sorlen
           ierr=-1
@@ -151,7 +152,7 @@ C
         iep=2000
       else if (cout(1:nch).eq.'B1950') then
         iep=1950
-      else 
+      else
         Ierr = -5
         write(lu,'("VUNPSO05 - Invalid epoch, only J2000 or B1950")')
       endif

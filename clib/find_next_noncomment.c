@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -38,10 +38,12 @@ int find_next_noncomment(fp,buff,sbuff)
       check=fgetc(fp);
     }
   }
+  if(ferror(fp))
+    return -1;
 
   if (check == EOF)
-    /* ended in comment */
-    return -1;
+    /* ended */
+    return 1;
   else if(ungetc(check, fp)==EOF)
     return -2;
 

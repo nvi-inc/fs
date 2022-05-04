@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine trkall(ipass,istn,icode,cmode,itrk,cm,ifan)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C  TRKALL returns the complete list of tracks to be
 C  recorded, given the mode and list of tracks assigned
@@ -28,15 +29,15 @@ C  Also outputs a 3-character mode for the procedure names,
 C        in the form "Vxy" where x and y are the fan factors,
 C        If fan factor is unity, the mode is simply "V".
 C        For Mark III modes, the name is the one-letter mode.
-C  Restrictions: 
+C  Restrictions:
 C  1. Fan in/out may be 1:2, 2:1, 4:1 or 1:4 only.
 C  3. VLBA modes must begin with "V".
-C  4. Track assignments in "itras" are converted to VLBA 
+C  4. Track assignments in "itras" are converted to VLBA
 C     track numbers when they are returned in "itrk".
-C                 
+C
 C History
 C 951214 nrv New.
-C 960124 nrv Bad fan-out logic replaced. 
+C 960124 nrv Bad fan-out logic replaced.
 C 960201 nrv Worse fan-out logic replaced.
 C 960531 nrv Fanout factor is input, already determined.
 C 961018 nrv Fan out the 'M' modes just like the 'V' ones.
@@ -45,7 +46,7 @@ C 970401 nrv Remove itrax -- not used
 ! 25Jul2003 JMG changed itras to a function
 ! 2005Nov29 JMGipson. Itras changed to give Mark4 Track number. Required minor change here.
 ! Got rid of residual holleriths.
-! 2006Nov01 JMGipson.  Recognize and don't complain on fan out 1:1  
+! 2006Nov01 JMGipson.  Recognize and don't complain on fan out 1:1
 ! 2014Jan17. Got rid of 'nm' which was length of cm
 
 C
@@ -67,7 +68,7 @@ C  OUTPUT:
       integer itrk(max_track,max_headstack) ! tracks to be recorded/enabled
 C           VLBA track # assignments
 !      integer*2 lm(2) ! 3-character mode for procedure names
-      character*4 cm  
+      character*4 cm
 C     integer itrax(2,2,max_headstack,max_chan) ! a fanned-out version of itras
 C
 C  LOCAL:
@@ -98,7 +99,7 @@ C             itrax(isb,ibit,ihd,ichan)=itras(isb,ibit,ihd,ichan)
         enddo
       enddo
 
-C 2. Now check for fan-out and add the appropriate tracks. 
+C 2. Now check for fan-out and add the appropriate tracks.
 
 C     If this is a VLBA mode or Mk4 mode, check for fan-out
       if(cm(1:1) .eq. "V" .or. cm(1:1) .eq. "M") then
@@ -136,8 +137,8 @@ C                       itrax(isb,ibit,ihd,ichan+6)=it+6
 
 C 3. Fan-in mode. Not implemented.
       iy=index(cmode,":1")
-! 1:1 is valid mode--no fanout or fanint  
-      if (iy.ne.0. .and. cmode(iy-1:iy-1) .ne. "1") then ! fan-in  
+! 1:1 is valid mode--no fanout or fanint
+      if (iy.ne.0. .and. cmode(iy-1:iy-1) .ne. "1") then ! fan-in
         write(*,*) "TRKALL: Fan in mode not implemented!"
         write(*,*) "Mode: ", cmode
 !        read(cmode(1:iy-1),*) n

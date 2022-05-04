@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -19,10 +19,13 @@
 *
       SUBROUTINE unpfmt(IBUF,ILEN,IERR,
      .LCODE,lst,ns,lfmt)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     UNPFMT  unpacks the recording format line
 C
       include '../skdrincl/skparm.ftni'
+! 2021-12-03 JMGipson.  Added octal_constants.ftni
+      include '../skdrincl/octal_constants.ftni'
 
 C  History:
 C 970115 nrv New. Copied from UNPBAR.
@@ -70,7 +73,7 @@ C
         nx=nx+1
         if (ic1.gt.0) then ! station name
           NCH = IC2-IC1+1
-          IF  (NCH.GT.8) THEN 
+          IF  (NCH.GT.8) THEN
             IERR = -101-nx
             RETURN
           END IF
@@ -85,7 +88,7 @@ C
         nx=nx+1
         if (ic1.gt.0) then ! format
           NCH = IC2-IC1+1
-          IF  (NCH.GT.3) THEN 
+          IF  (NCH.GT.3) THEN
             IERR = -101-nx
             RETURN
           END IF

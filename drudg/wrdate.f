@@ -23,6 +23,7 @@ C  NRV 910705
 C 980910 nrv Write out the full 4-digit year.
 ! 2006Sep28 rewritten to use ascii.
 ! 2014Feb05 JMG Made iyr, idayr integer*2
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C Input:
       integer lu

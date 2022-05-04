@@ -18,9 +18,10 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       real FUNCTION SPEED(ICODE,is)
+      implicit none
 
 C   SPEED returns the actual tape speed in feet per second
-C   Restrictions: 
+C   Restrictions:
 C    - Channel bandwidth for BBC 1 is used.
 C    - VLBA/MkIII mode factor is 9.072/9.0
 C
@@ -36,7 +37,7 @@ C            because LMODE is used for a mode name in the non-VEX file.
 C            In the non-VEX file, LMFMT will be modified by user input
 C            to DRUDG to be either "M" or "V".
 C 990524 nrv Use tape_dens instead of bitdens. tape_dens is set by scheduler.
-C 990524     NOTE: Use density for only code 1. Normally can't change 
+C 990524     NOTE: Use density for only code 1. Normally can't change
 C 990524     recording density during an experiment anyway.
 C 990621 nrv Use bitdens because this is read from the schedule file.
 C            If user changes it then bitdens gets changed.
@@ -52,6 +53,7 @@ C 030109 jmg Back to m/s on K4
 ! 2006Nov29 JMG.  Changed to use cstrec(istn,irec)
 ! 2009Oct01 JMG.  Made special speed for disk recording
 ! 2013Sep19  JMGipson made sample rate station dependent
+! 2020Oct02  JMG. Removed all references to S2
 
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
@@ -75,28 +77,18 @@ C
       endif
 
 C Determine type of equipment.
-      if (cstrec(is,1)(1:2) .eq. "S2") then
-        if (cs2speed(is)(1:2) .eq. "LP") then
-          sp = speed_lp ! ips
-        else if (cs2speed(is)(1:3) .eq. "SLP") then
-          sp = speed_slp ! ips
-        else ! unknown
-          speed=-1.0
-          return
-        endif
-        sp=sp/12.0 ! convert to fps
-      else if (cstrec(is,1)(1:2) .eq. "K4") then
+      if (cstrec(is,1)(1:2) .eq. "K4") then
         totrate=samprate(is,icode)*(ntrkn(1,is,icode)+ntrkn(2,is,icode))
         if (totrate.gt.129.0) then
           sp = 423.8 ! mm/sec for 256 Mbps
         else if (totrate.lt.65.0) then
           sp = 105.9 ! mm/sec for 64 Mbps
-        else 
+        else
           sp = 211.9 ! mm/sec for 128 Mbps
         endif
         sp=sp/1000.0 ! convert to m/s
 ! is disk based?
-       else if(cstrec(is,1)(1:2) .eq. "K5" .or. 
+       else if(cstrec(is,1)(1:2) .eq. "K5" .or.
      &         cstrec(is,1)(1:5) .eq. "Mark5") then
           sp=1.d-6
 

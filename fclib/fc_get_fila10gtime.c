@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-int fc_get_fila10gtime__(centisec,fm_tim,ip,to)
+int fc_get_fila10gtime__(centisec,fm_tim,ip,to,iDBBC)
 int centisec[6];
 int fm_tim[6];
 int ip[5];
 int *to;
+int *iDBBC;
 {
 
-  return get_fila10gtime(centisec,fm_tim,ip,*to);
+  return get_fila10gtime(centisec,fm_tim,ip,*to,*iDBBC);
 
 }

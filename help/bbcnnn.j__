@@ -8,9 +8,9 @@
 
 Settable Parameters:
 
-            freq      L.O. frequency in MHz, between 0.000001-4096
+            freq      L.O. frequency in MHz, between 0-4096.000000,
                       inclusive.  This frequency may be specified to 1
-                      Hz precison, i.e., 6 places after the decimal
+                      Hz resolution, i.e., 6 places after the decimal
                       point.
 
             IF        I.F. input source, one of A, B, C, D, E, F, G, H.
@@ -27,8 +27,10 @@ Settable Parameters:
                       This parameter does not affect equipment set-up,
                       it is for informaton only.
 
-            bw        Sideband bandwidth in MHz. One of 2, 4, 8, 16, 32
-                      Default 32.
+            bw        Sideband bandwidth in MHz. One of 2, 4, 8, 16,
+                      32, 64, or 128.  Default 32. For monitor, a
+                      value of 0 maybe displayed if the BBC has not
+                      been configured.
 
             tpint     Averaging period in seconds for TPI. Positive
                       integers 1-60 allowed, Default is 1. The averaging

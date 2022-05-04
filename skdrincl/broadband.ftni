@@ -1,0 +1,31 @@
+*
+* Copyright (c) 2020 NVI, Inc.
+*
+* This file is part of VLBI Field System
+* (see http://github.com/nvi-inc/fs).
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
+! Common block to contain info about broadband stuff
+! Must occur in file after 'skparm.ftni'
+
+! 2020Jun08. Removed from statn.ftni 
+
+      integer  iData_mbps(max_stn)   !maximum rate data is acquired. 
+      integer  iSink_mbps(max_stn)   !maximum rate data is absorbed. May be > because of  buffering.   
+      integer ibb_off(max_stn)       !Additional time-offset for Broadband stations to write to disk.
+      real  BB_BW(max_stn)           !Effective Broadband BW per band in Hz (assuming 1-bit sampling)
+
+      common /broaband_int/   idata_mbps,isink_mbps,ibb_off
+      common /broadband_real/ BB_BW

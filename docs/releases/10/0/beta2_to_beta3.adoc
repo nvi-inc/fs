@@ -1,0 +1,645 @@
+//
+// Copyright (c) 2020-2021 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= FS 10.0.0-beta2 to FS 10.0.0-beta3 Update Notes
+Version 2.2 - June 2021
+
+//:hide-uri-scheme:
+:sectnums:
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+:toclevels: 4
+
+== Introduction
+
+The document covers updating from the _beta2_ pre-release to the
+_beta3_ pre-release.
+
+For instructions for other upgrade paths, see the
+<<10.0.0.adoc#_other_update_documents,Other update documents>>
+sub-section of the
+<<10.0.0.adoc#,FS 10.0.0 Update Notes>> document.
+
+== Upgrading from 10.0.0-beta2 to 10.0.0-beta3
+
+You must have already upgraded to _10.0.0-beta2_ according to the
+<<beta2.adoc#,FS 10.0.0-beta2 Update Notes>> document or the 
+<<beta1_to_beta2.adoc#,FS 10.0.0-beta1 to FS 10.0.0-beta2 Update Notes>>
+before
+installing this update.
+
+=== Fetch and make 10.0.0-beta3
+
+NOTE: If you are using FSL7 or other old distribution that may not be
+compatible with the latest update of the server, you may still be able
+to use the FS without the server by removing it from the _make_
+process. Please follow the steps in <<noserver, not building the
+display server>> below.
+
+If you are using _git_, as is recommended, then as _prog_
+execute:
+
+             cd /usr2/fs-git
+             git fetch
+             git checkout -q 10.0.0-beta3
+             make clean rmdoto rmexe
+             make >& /dev/null
+             make -s
+
+No output from the last command indicates a successful _make_.
+
+=== Additional steps
+
+. If you use RDBEs in your back-end and want to use the _rdbemsg_
+utility to send operations messages, please customize your
+_/usr2/control/rdbemsg.ctl_ control file by adding the `name` line to
+the file if you haven't already.  Full instructions are provided in
+the, revised, <<beta2.adoc#_update_rdbemsg_ctl,Update rdbemsg.ctl>>
+sub-step in the <<beta2.adoc#,beta2 update notes>> document.
+
+
+. If you use the _fesh_ script there is one required change (listed
+first below) and a few optional changes that depend on your situation:
+
+.. If not already set, specify a directory for _.skd_ files in the
+`$schedules` block of the _/usr2/fs/skedf.ctl_ control file. You can
+use any value you want, but to be backward compatible with the
+previous behavior of _fesh_ it must be _/usr2/sched_.
+
+.. Likewise, directories should be specified in the `$snap` and `$proc`
+blocks of _/usr2/contol/skedf.ctl_. You can use any
+values you want, but typically they should be set to _/usr2/sched_ and
+_/usr2/proc_, respectively, to agree with the FS.
+
+.. The _fesh_ script uses _cddis_ as the default data center. You can
+specify a different data center by setting the `FESH_DATA_CENTER`
+environment variable. Available data centers for geodesy are _bkg_,
+_cddis_, and _opar_; for astronomy, _vlbeer_.
++
+
+TIP: For FSL8 and other old Linux distributions, access to _cddis_ may
+not be possible, due to out-of-date certificates. If you are in that
+situation, _bkg_ or _opar_ may be suitable alternatives.
+
+.. The _fesh_ script uses FTP-SSL as the default access method for the
+_cddis_ data center. For this case, you an avoid having to answer a
+prompt for your email address each time you run _fesh_  by setting your
+email address in the `FESH_EMAIL` environment variable.
++
+
+TIP: The FTP-SSL method may not work from behind some firewalls.  If
+it doesn't work for you, either use a different data center (see
+above) or use HTTPS for _cddis_ (see below).
+
+.. You can change the access method for _cddis_ to HTTPS, by setting
+the `FESH_CDDIS_METHOD` environment variable to `https`.
++
+
+NOTE: Using HTTPS requires an _EarthData_ login and setting it in
+your _.netrc_ file.  If you don’t have an _EarthData_ login, you
+should be able to get one by selecting `REGISTER` at:
+https://urs.earthdata.nasa.gov/.
+
++
+
+Please see `*fesh -h*` for more information on using these features.
+A more complete description of the changes is in <<fesh,fesh changes>>
+below.
+
+. If you have a local (station) `lo` command, you will need to update
+it (or replace it, see the next paragraph) to get full support for
+rack types that were not in your previous FS9 version and implement
+the new capability described in <<logrxg,logging _.rxg_ files>>
+below.
++
+
+To reduce the maintenance burden of updating your local `lo` (and, if
+you have it, an `lo_config`) command in the future, you should
+consider switching to use the newly provided `lo` command
+<<lohooks,hooks>> described below. This approach may not be suitable
+for all stations, but if it will work for your station, it should
+reduce, and in most cases eliminate, the need to update your local
+software when the FS `lo` command changes in the future.
+
+. Update _/usr2/control/skedf.ctl_. Due to an <<skedf.ctl,error>> in
+the example _/usr2/fs/st.defaut/control/skedf.ctl_ file, most stations
+probably incorrectly show the `lo_config` keyword as `if_config` in
+their local version. Please check your local copy and update any
+occurrences, even in comments,  of `if_config` to `lo_config`.
+
+=== Review other changes
+
+Please see the sub-section <<Changes since 10.0.0-beta2>> below
+for details of the changes since that release.
+
+== Changes since 10.0.0-beta2
+
+[[details]] There are separate sub-sections with summaries of changes in the FS
+and _drudg_. Following those are sub-sections giving the details of the
+changes. Each summary item has a clickable <<details,More details>>
+link that leads to the detailed description of that item.
+
+Clickable links such as
+https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
+reported at https://github.com/nvi-inc/fs/issues.
+
+A complete history of changes can be found using the `git log`
+command.
+
+The file _/usr2/fs/misc/changes.txt_ contains the old history of
+changes in FS9. The file _/usr2/fs/misc/VENIX_changes.txt_ contains
+the old history of changes in FS8. However these two files have been
+merged into the history given by `git log`.
+
+The history of _drudg_ is also described in more detail in
+_/usr2/fs/drudg/change_log.txt_.
+
+=== Summary of FS changes
+
+. Add _new_ifdbb_ script for (RDBE) VGOS stations. <<new_ifdbb,More details>>.
+
+. Update and expand _fesh_ (includes closing
+https://github.com/nvi-inc/fs/issues/36[#36],
+https://github.com/nvi-inc/fs/issues/37[#37],
+https://github.com/nvi-inc/fs/issues/65[#65], and partially closing
+https://github.com/nvi-inc/fs/issues/38[#38]).
+<<fesh,More details>>.
+
+. Remove hard coding of the station name in _rdbemsg_ (closing
+https://github.com/nvi-inc/fs/issues/62[#62]).
+<<stationrdbemsg,More details>>.
+
+. Improve _fsserver_ (includes closing
+https://github.com/nvi-inc/fs/issues/69[#69],
+https://github.com/nvi-inc/fs/issues/78[#78], and re-closing
+https://github.com/nvi-inc/fs/issues/76[#76]).  <<fsserver,More
+details>>.
+
+. Improve _gnplt_ (closing https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
+<<gnplt,More details>>.
+
+. Improve `help` command (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
+<<helpfiles,More details>>.
+
+. Add option to not build the display server into the FS (partially closing
+https://github.com/nvi-inc/fs/issues/76[#76]). <<noserver,More
+details>>.
+
+. Add GPL to files. <<gpl,More details>>.
+
+. Improve update notes (includes closing
+https://github.com/nvi-inc/fs/issues/71[#71]). <<updatenotes,More details>>.
+
+. Add _.rxg_ file logging to `lo` command. <<logrxg,More details>>.
+
+. Add hooks for local LO control to `lo` and `lo_config` commands.
+<<lohooks,More details>>.
+
+. Fix example _/usr2/fs/st.default/control.skedf.ctl_ (closing
+https://github.com/nvi-inc/fs/issues/81[#81]).
+<<skedf.ctl,More details>>.
+
+. Fix ignoring _antcn_ errors in the `satellite` and `satoff` commands. (closing
+https://github.com/nvi-inc/fs/issues/82[#82]).
+<<saterrors,More details>>.
+
+=== Summary of drudg changes
+
+_drudg_ opening message date is `2020Sep14`.
+
+. Fix crash if `$HEAD` is the last block in a `.skd` file. <<head,More details>>.
+. Fix crash if error in mask (closing
+https://github.com/nvi-inc/fs/issues/74[#74]).
+<<mask,More details>>.
+. Clean-up source.
+<<drudgsource,More details>>.
+
+=== Details of FS changes
+
+. [[new_ifdbb]] Add _new_ifdbb_ script for (RDBE) VGOS stations. This script is
+intended as a tool to allow stations, and schedule writers, a way
+to update schedules for changes in the _ifdbb_ procedure used by
+VGOS stations, particularly those with RDBE back-ends. For RDBE
+stations, the attenuation used in the signal chain, which is set
+by the schedule, depends on the observing mode being used and the
+conditions at the station. The provides a way to incorporate
+needed changes into schedules. If the script is run without other
+command line arguments, it will output "`help`" information.
+
+. [[fesh]] Update and expand _fesh_ (includes closing
+https://github.com/nvi-inc/fs/issues/36[#36],
+https://github.com/nvi-inc/fs/issues/37[#37],
+https://github.com/nvi-inc/fs/issues/65[#65], and partially closing
+https://github.com/nvi-inc/fs/issues/38[#38]).
+
+.. _fesh_ now supports encrypted access to _cddis_ using FTP-SSL and
+HTTPS (closing https://github.com/nvi-inc/fs/issues/36[#36]). This
+allows use of _cddis_ after non-SSL FTP access was disabled there at
+the end of October 2020. FTP-SSL is the default method.
+
++
+
+For FTP-SSL, it is recommended that the
+`FESH_EMAIL` environment variable be set to avoid having to provide
+an email address as the _anonymous_ FTP-SSL password for each
+invocation.
+
++
+
+TIP: The FTP-SSL method may not work from behind some firewalls.
+If it doesn't work for you, you can either use HTTPS for _cddis_  or
+use a different data center (see below).
+
++
+
+CAUTION: The use of FTP-SSL by _cddis_ may be deprecated in the future.
+
++
+
+Using HTTPS can be activated for _cddis_ by setting the
+`FESH_CDDIS_METHOD` environment variable to `https`.
+
++
+
+NOTE: Using HTTPS for _cddis_ requires an _EarthData_ login and
+setting it in your _.netrc_ file.  If you don’t have an _EarthData_
+login, you should be able to get one by selecting `REGISTER` at:
+https://urs.earthdata.nasa.gov/.
+
++
+
+TIP: For FSL8 and other old Linux distributions, access to _cddis_ may
+not be possible, due to out-of-date certificates. If you are in that
+situation, _bkg_ or _opar_ may be suitable alternatives.
+
+.. _fesh_ now supports _bkg_, _cddis_, _opar_, and _vlbeer_ data
+centers (closing https://github.com/nvi-inc/fs/issues/37[#37]). The
+data center can be selected with the `FESH_DATA_CENTER` environment
+variable or the `-D` command line option. The default data center is
+_cddis_. For _vlbeer_ only _.vex_ files are supported; for the others
+only, _.skd_.  Running _drudg_ automatically is not supported for
+_vlbeer_.
+
+.. _fesh_ now respects the _/usr2/control/skedf.ctl_ control file
+(closing https://github.com/nvi-inc/fs/issues/65[#65]). Previously
+_fesh_ assumed that the directory for _.skd_ files was _/usr2/sched/_
+regardless of what was in the `$schedules` block of
+_/usr2/control/skedf.ctl_. This only worked if the directory specified
+was _/usr2/sched_ or was the working directory (i.e., not specified or
+`.`). This prevented use with different directories, such as
+_/usr2/exper_, for _.skd_ files.  Thanks to Jon Quick (HartRAO) for
+reporting this.
+
+.. _fesh_ now provides support for _drudg_ optional prompts for
+geodesy schedules (partially closing
+https://github.com/nvi-inc/fs/issues/38[#38]). It is assumed that for
+geodesy the answers to these questions for a station do not vary. This
+feature is intended to allow stations that observe both astronomy and
+geodesy schedules to use _fesh_ for geodesy schedules.  The
+environment variables `FESH_GEO_TPICD`, `FESH_GEO_CONT_CAL`,
+`FESH_GEO_CONT_CAL_POLARITY`, and `FESH_GEO_VSI_ALIGN` or the command
+line options `-tcpa` can be used to supply answers to the
+corresponding _drudg_ prompts.
+
++
+
+IMPORTANT: _Let the user beware._ This feature must be used with
+extreme care.  The answers that are specified must correspond exactly
+to the questions that _drudg_ will ask. If they don't correspond
+correctly, _drudg_ may produce subtly incorrect output with no obvious
+indication of a problem. The _fesh_ script does what consistency
+checking it can, e.g., if `FESH_CONT_CAL` is specified as `off`, no
+answer can be supplied for `FESH_CONT_CAL_POLARITY` since that
+question will not be asked. It is important to verify that correct
+output is being produced.
+
++
+
+IMPORTANT: The feature will not work for schedules that have more than
+mode. It is extremely rare for geodesy schedules to have more than one
+mode, but it is possible.
+
+.. Use of an environment variable, `LIST_DIR`, was added to specify the
+directory for _drudg_ listings. If not set, the `.skd` file directory
+is used.
+
+.. Use of an environment variable, `NETRC_DIR`, was added to specify a
+directory other than the user's home directory (__~__) for the `.netrc`
+file used with HTTPS access for _cddis_.  The same variable is used by
+the _plog_ script for the same purpose.
+
++
+
+Normally, the _.netrc_  file would be in the user's home directory.
+However, some systems have security policies that forbid that. This
+variable provides a way to have the _.netrc_ file in a different
+directory.
+
++
+
+.. The user name for the unencrypted FTP access to _bkg_, _opar_, and
+_vlbeer_, is explicitly set to _ftp_ to avoid potential conflicts with
+other accounts specified in _~/.netrc_ (this is not redirected by
+`NETRC_DIR`).
+
+.. Several new command line options were added:
+
+... `-y` to override the year directory accessed for a geodesy data
+center (the default is the current year).
++
+
+This is particularly useful for getting schedules for the next year.
+
+... `-t` to trigger also downloading the _.txt_ file associated with a
+geodesy schedule.`
+
+... `-m` to override the month directory accessed for _vlbeer_ (the
+default is the current month).
++
+
+This is particularly useful for getting schedules for a future month.
+
+... `-H` to disable the default use of the _.latest_ sub-directory of
+the month directory for _vlbeer_.
+
+... `-D` to override the data center if the `FESH_DATA_CENTER`
+environment variable is set, or change the data center from the
+default if it is not set.
+
+... `-s` to override the station code if the `STATION` environment
+variable is set, or set it if it is not set.
+
++
+
+Please see `*fesh -h*` for more information on using these features.
+
+. [[stationrdbemsg]] Remove hard coding of the station name in _rdbemsg_ (closing
+https://github.com/nvi-inc/fs/issues/62[#62]). The station name is now
+set in _rdbemsg.ctlr_ control file. Thanks to Chevo Terraza (MGO) for
+reporting this.
+
+. [[fsserver]] Improve _fsserver_ (includes closing
+https://github.com/nvi-inc/fs/issues/69[#69],
+https://github.com/nvi-inc/fs/issues/78[#78], and re-closing
+https://github.com/nvi-inc/fs/issues/76[#76]).
+
+.. _spub_/_ssub_ occasionally froze (closing
+https://github.com/nvi-inc/fs/issues/69[#69]). This may
+have been caused be the byte order being wrong in buffered stream `cb`
+We believe that this issue is fixed. The situation is still being
+monitored.  Please report any instance of this problem that occurs. It
+happens very rarely so it is challenging to get enough usage to verify
+that it is not happening.  If it does happen, restarting the client
+has been a successful strategy for recovery.
+
+.. Fixed `clean` function in _Makefile_.
+.. Fixed _sspub_ to support more than 2^32^ messages.
+.. Modified the build so that it will work for FSL8 (closing
+https://github.com/nvi-inc/fs/issues/78[#78], and re-closing
+https://github.com/nvi-inc/fs/issues/76[#76]). Thanks to Jon Quick
+(HartRAO) for special effort on this including adding documentation
+to assist with future upgrades of _nng_.
+ 
+. [[gnplt]] Improve _gnplt_ (closing https://github.com/nvi-inc/fs/issues/72[#72] and https://github.com/nvi-inc/fs/issues/73[#73]).
+
+.. _gnplt_ now updates the date in updated _.rxg_ files (closing
+https://github.com/nvi-inc/fs/issues/72[#72]).  The original
+developer, Tomas Gille (NVI), did very good work developing this
+second version of _gnplt_, but ran out of time in his internship and
+was unable to include this minor but important feature. Thanks to
+Beppe Maccaferri (Medicina) for reporting this.
+
+.. _gnplt_ now works on FSL8 (Lenny) again (closing
+https://github.com/nvi-inc/fs/issues/73[#73]).  Some
+improvements in _beta1_ made it fail for FSL8.
+
+. [[helpfiles]] Improve `help` command (includes closing https://github.com/nvi-inc/fs/issues/75[#75]).
+
+.. The `help` file for the `ddbc` command was expanded to also
+describe the `dbbc2` and `dbbc3` commands and now includes a
+description of the output for multi-line responses for all of these
+commands (closing https://github.com/nvi-inc/fs/issues/75[#75]). The
+`help` command now works for the `dbbc2` and `dbbc3` commands.
+
+.. The `help` file for the `fila10g` command was expanded to also
+support the `fila10g2` command. The `help` command now works for the
+`fila10g2` command.
+
+.. Restore `help` command for DBBC3 commands. The selection of DBBC3
+specific commands was lost in the merge of the VGOS and main branches.
+It is now restored.
+
+. [[noserver]] Add option to not build the display server into the FS
+(partially closing https://github.com/nvi-inc/fs/issues/76[#76]).  The
+latest version of the server may not _make_ successfully on some
+older Linux distributions such as FSL7. To help users in that
+situation, an option was added to disable inclusion of the server by
+setting the `FS_DISPLAY_SERVER_NO_MAKE` environment variable before
+__make__-ing the FS. Follow the steps below to remove the server.
+
+.. As _prog_:
+
++
+
+* If you use _tcsh_, add the following to _~/.login_:
+
+  setenv FS_DISPLAY_SERVER_NO_MAKE 1
+
++
+
+* If you use _bash_, add the following to _~/.profile_:
+
+  export FS_DISPLAY_SERVER_NO_MAKE=1
+
++
+
+.. Logout of and then back into the _prog_ account.
+
+.. _make_ the FS.
+
+.. It is also necessary to make sure that users running the FS do
+not have the `FS_DISPLAY_SERVER` environment variable set.
+
+... As  _oper_:
+
+.... Delete or comment out any lines in the _~/.login_
+file (if using _tcsh_) or _~/.profile_ (if using _bash_) setting
+the variable.
+
+.... Logout and back in before attempting to run the FS.
+
+... Repeat the above steps as _prog_.
+
+. [[gpl]] Add GPL to files. The GPL was missing from the _include/*.i_
+files.
+
+. [[updatenotes]] Improve update notes (includes closing
+https://github.com/nvi-inc/fs/issues/71[#71]).
+
+.. Modify steps for updating to a specific commit after _beta2_ to
+use the latest commit instead. As well as being
+simpler, this is part of a new approach to try to keep the update
+notes current with the latest commit. It is important
+to be aware that the latest commit is not a version
+intended for operations. We make every effort to make sure it is
+bug free, but problems may occur. Since it represents the
+"`bleeding edge`" of development, features may not be as stable nor
+use as reliable as released (tagged) versions.
+
+.. Add the inclusion of the new _rdbemsg_ utility as a change. It was
+not mentioned for _beta1_ or _beta2_.
+
+.. Add missing _rdbemsg.ctl_ customization.
+
+.. Reorganized as _.adoc_ files in the _docs/_ sub-directory (closing
+https://github.com/nvi-inc/fs/issues/71[#71]).
++
+
+All of the _.adoc_ files are viewable as HTML, and are hierarchically
+indexed, at https://nvi-inc.github.io/fs/. The first update notes
+available in HTML are for <<beta2.adoc#,10.0.0-beta2>>.  Hopefully,
+this change will make the update notes easier to read and navigate.
+Among other improvements, there are clickable links to other sections
+within documents as well as to sections in other related documents.
+<<../../../misc/font_conventions.adoc#,FS Document Font conventions>>
+similar to the traditional printed FS manuals are used. A document
+describing <<../../../misc/env_vars.adoc#,FS environment variable>>
+use was added.
+
+.. Improve structure and correct some errors from original _.txt_ version.
+.. Some typo/wording fixes.
+
+. [[logrxg]] Add _.rxg_ file logging to `lo` command.
+
+.. Summary information logging.
++
+
+When an LO is configured (or monitored) with the `lo` command, a
+summary of information from the matching _.rxg_ file is displayed and
+logged.  Details of the format are available with `help=lo`.  This is
+intended to give the operator feedback that the correct version of the
+_.rxg_ file is in use. Thanks to Alastair Gunn (Jodrell Bank) for
+suggesting this.
+
+.. Full logging of _.rxg_ file non-comment lines.
++
+
+When an LO is configured with the `lo` command, the contents of the
+corresponding _.rxg_ file are logged, but not displayed. This only
+occurs if this is the first time this _.rxg_ file matched an LO being
+configured since the most recent opening of the current log. Each
+logged line starts with `:rxg_file,` followed by the name of the
+_.rxg_ file, and then the values from a single non-comment line in the
+file. The lines are logged in the order from the _.rxg_ file. This is
+intended to provide historical information about the values being used
+in FS calculations.
+
+. [[lohooks]] Add hooks for local LO control to `lo` and `lo_config`
+commands.
+
+.. Hook in `lo` command.
++
+
+While the FS has an option for any built-in command to have a local
+version, having such a local overriding command can create a
+maintenance burden if the FS command is updated.  Some commands very
+rarely change, but others change fairly often. The more often they
+change, the more maintenance burden there is.  Unfortunately the `lo`
+command changes fairly often.
++
+
+To address this issue, a hook has been added to the FS version of the
+`lo` command to run _antcn_ in a particular local mode to configure an
+LO when it is commanded.  This is triggered with the environment
+variable `FS_LO_ANTCN_MODE`.  The details of the interface are
+available in the `Comments` section show with `help=lo`. This may not
+be a suitable solution in all situations.  If you have (or need) a
+local `lo` command you can continue to use it (or implement one), but
+it will need to be updated to get new capabilities such as new racks
+and <<logrxg,logging .rxg files>> when they come along.
++
+
+NOTE: This change does not currently provide a way to display LO
+configuration information read back from the device.
+
+.. Hook in `lo_config` command.
++
+
+The _drudg_ program provides a means to include the calling of a
+`lo_config` command at the end of each IF setup procedure it
+generates. This is intended to provide stations that implement
+commanding the LO configuration to device(s) with a way to do it in
+one step for a mode as to opposed individually with
+`lo=...` commands. It can also be used to implement command of the
+LO setup for a mode instead of with the `lo` command to reduce (but not
+eliminate) the maintenance burden that is  needed if a local `lo`
+command is used.  See the example
+_/usr2/fs/st.default/control/skedf.ctl_ file for how to trigger
+``drudg``'s use of this command (also see the related
+<<skedf.ctl,skedf.ctl fix>> in this sub-section.
++
+
+Until now the `lo_config` command has been a station only command,
+i.e., it had to implemented as a local command. With this update, there
+is now a built-in command that can used for this functionality, if it
+is suitable. If it is not suitable, the local command can still be
+used or implemented.
++
+
+By default the built-in `lo_config` command is a no-op. However,
+it has a hook that can used to run _antcn_ in a particular local mode
+to implement configuring the LOs.  This is triggered with the
+environment variable `FS_LO_CONFIG_ ANTCN_MODE`. The details of the
+interface are available in the `Comments` section shown with
+`help=lo_config`.
+
+. [[skedf.ctl]] Fix example _/usr2/fs/st.default/control.skedf.ctl_
+(closing https://github.com/nvi-inc/fs/issues/81[#81]). The example
+_sked.ctl_ file incorrectly identified the `lo_config` keyword as
+`if_config`. This has been fixed. It is recommended that you check
+and, if needed update your local copy in
+_/usr2/control/skedf.ctl_ appropriately, including the comments.
+
+. [[saterrors]] Fix ignoring _antcn_ errors in the `satellite` and
+`satoff` commands. (closing
+https://github.com/nvi-inc/fs/issues/82[#82]). This bug caused errors
+from _antcn_ to be ignored for _only_ these commands. It has been
+fixed.
+
+=== Details of drudg changes
+
+. [[head]] Fix crash if `$HEAD` is the last block in a `.skd` file. Fixed bug in _reads.f_.
+
+. [[mask]] Fix crash if error in mask (closing
+https://github.com/nvi-inc/fs/issues/74[#74]). A particular error in
+the mask format intermittently excited an uninitialized variable bug.
+Thanks to Beppe Maccaferri (Medicina) for reporting this. He
+discovered it while testing with _r1971.skd_ (which was not an
+experiment that included Medicina).
+
+. [[drudgsource]] Clean-up source.
+
+.. Remove references to passes, headstacks, and S2.
+
+.. Add the GPL to files it was missing from.
+
+.. Unify source between __sked__ and the FS.

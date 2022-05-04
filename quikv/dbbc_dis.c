@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -52,6 +52,10 @@ int ip[5];
 
       strcpy(output,command->name);
       strcat(output,"/");
+      if(30==itask) {
+         strcat(output,command->argv[0]);
+         strcat(output,",");
+      }
       start=output+strlen(output);
 
       

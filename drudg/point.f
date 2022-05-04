@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE POINT(cr1,cr2,cr3,cr4)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C Write a file or a tape with pointing controls
 C
@@ -52,10 +53,8 @@ C LOCAL:
      .iras,isra,idecs
       integer*2 ldsign,lhsign,ldsign2,lhsign2,ldsn
       integer*2 LPROC(4) !  The procedure name for NRAO
-      integer*2 ldirr !REV,FOR
-      integer nchar,itnum
+         integer nchar,itnum
       real dut,eeq
-      integer ih
       integer*2 LSNAME(max_sorlen/2),LSTN(MAX_STN),LCABLE(MAX_STN),
      .          LMON(2),LDAY(2),LPRE(3),LMID(3),LPST(3),ldir(max_stn)
 
@@ -83,7 +82,6 @@ Cinteger*4 ifbrk
 
 C Initialized:
 C record word lengths
-      data ldirr/2hR /
       data lu_outfil2/42/
 
 C LAST MODIFIED:
@@ -127,6 +125,8 @@ C 000815 nrv Remove all but VLBA option.
 ! 2006Sep26 JMGipson. Changed call for vlbat of lsname to ASCII csname.
 ! 2008Aug19 JMGipson. Check to see if tape motion type is "AUTO" for vlba"
 ! 2015Mar30 JMG. got rid of obsolete arg in drchmod
+! 2020Nov10 JMG. Got rid of somestuff dealing with headstacks. 
+! 2021Jan07  JMG removed unused variables 
 
       kintr = .false.
       if (kbatch) then
@@ -136,32 +136,22 @@ C 000815 nrv Remove all but VLBA option.
 9991      format(' Invalid pointing output selection.')
           return
         endif
-      else  
+      else
         i=iwhere_in_string_list(lvlba_stat,10, cantna(istn))
         if(i .eq. 0) return        !station not in vlba list.
-        istin=6  
+        istin=6
         if(tape_allocation(istn) .ne. "AUTO") then
            write(*,*) "WARNING! Skipping ",cantna(istn),
      >      " because allocation is not AUTO!"
-           return 
-        endif        
+           return
+        endif
       endif
 C
 C 2. First get output file or LU for pointing commands.
 C If problems, quit.
 
       icodp=0
-      if (istin.eq.5.or.istin.eq.6) then
-        ih=0
-        do i=1,max_pass
-          if (ihdpos(1,i,istn,1).ne.0) ih=ih+1
-        enddo
-        if (ih.eq.0) then
-          write(luscn,9211) cantna(istn)
-9211      format(/'POINT03 - No head position information for ',a/)
-          return
-        endif
-      end if
+
 
       WRITE(LUSCN,9900) cSTNNA(ISTN), LSKDFI(1:trimlen(lskdfi))
 9900  FORMAT(' POINTING FILE FOR ',A,' FROM SCHEDULE ',A,/
@@ -246,10 +236,10 @@ C 4. If station is in observation, process it.  Use block
 C    appropriate to current station.
 C
 	 IF (ISTNSK.NE.0) THEN !Current station in observation
-	   CALL RADED(RA50(ISOR),DEC50(ISOR),HA,
+	   CALL RADED(sorp1950(1,isor),sorp1950(2,isor),HA,
      .         IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,
      .         LHSIGN,IHAH,IHAM,HAS)
-	    CALL RADED(SORP50(1,ISOR),SORP50(2,ISOR),HA2,
+	    CALL RADED(sorp2000(1,ISOR),sorp2000(2,ISOR),HA2,
      .         IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
      .         LHSIGN2,IHAH2,IHAM2,HAS2)
 	    CALL TMADD(IYR,IDAYR,IHR,iMIN,ISC,IDUR(ISTNSK),IYR2,IDAYR2,
@@ -294,7 +284,7 @@ C
 		write(lu_outfile,9503)
 9503            format('** RS CATALOG',57x,'J2000')
 		do i=1,nceles
-		  CALL RADED(SORP50(1,I),SORP50(2,I),HA2,
+		  CALL RADED(sorp2000(1,I),sorp2000(2,I),HA2,
      .            IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
      .            LHSIGN2,IHAH2,IHAM2,HAS2)
 		  write(lu_outfile,9501) csorna(i)(1:4),irah2,
@@ -320,11 +310,11 @@ C
 C          For each observation, write out command line
 	      if (itearl(istn).gt.0) call tmsub(iyr,idayr,ihr,
      .          imin,isc,itearl(istn),iyr,idayr,ihr,imin,isc)
-	      CALL RADED(SORP50(1,ISOR),SORP50(2,ISOR),HA2,
+	      CALL RADED(sorp2000(1,ISOR),sorp2000(2,ISOR),HA2,
      .         IRAH2,IRAM2,RAS2,LDSIGN2,IDECD2,IDECM2,DECS2,
      .         LHSIGN2,IHAH2,IHAM2,HAS2)
 	      idir=1
-	      if (ldir(istnsk).eq.ldirr) idir=-1
+	     
 	      KNEWTP = KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,
      .        IDIRP,IFTOLD)
 	      itype = 1
@@ -395,7 +385,7 @@ C
      .       idayrp,ihrp,minp,iscp,iobss,irecp,
      .       idayr_save,ihr_save,min_save,isc_save)
             iobss=iobss+1 ! increment this station's obs
-            icodp=icod              
+            icodp=icod
 C
 	    END IF !if istin
 C
@@ -414,10 +404,10 @@ C  When finished with vlba point file, write the quit statement
 C  at the end.
       if (istin.eq.5.or.istin.eq.6) then !vlba observe file
 	 CALL TMADD(IYR2,IDAYR2,IHR2,MIN2,5, ISC2,IYR,IDAYR,
-     .         IHR,iMIN,ISC)      
+     .         IHR,iMIN,ISC)
         write(lu_outfile,'(a)') "disk=off"
         write(lu_outfile,
-     >    '("stop=",i2.2,"h",i2.2,"m",i2.2,"s ","!NEXT!")') 
+     >    '("stop=",i2.2,"h",i2.2,"m",i2.2,"s ","!NEXT!")')
      >    ihr,imin,isc
          write(lu_outfile,"('!QUIT!')")
       end if
@@ -430,9 +420,9 @@ C at the end.  **NOTE: this outputs for first freq. code ONLY.
 C
 	IF (IERR.NE.0) WRITE(LUSCN,9901) IERR
 9901  FORMAT(/' POINT05 - ERROR ',I3,' READING FILE'/)
-990   CLOSE(LU_OUTFILE)   
+990   CLOSE(LU_OUTFILE)
       call drchmod(pntname,ierr)
-     
+
 
 900   continue
       RETURN

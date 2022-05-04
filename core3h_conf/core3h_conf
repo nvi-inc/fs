@@ -1,0 +1,15 @@
+#!/bin/bash
+if [[ $# -eq 0 ]]; then
+    echo "$(basename $0): Extract Core3H board configuration from log file"
+    echo "Usage: $(basename $0) log_file"
+    exit 1
+elif [[ $# -ne 1 ]]; then
+    echo "Only one argument can be given" >&2
+    echo "For help, try: $(basename $0)" >&2
+    exit 1
+elif [[ ! -f "$1" ]]; then
+    echo "$1 doesn't exist" >&2
+    echo "For help, try: $(basename $0)" >&2
+    exit 1
+fi
+grep 'dbbcn#.core' "$1" |grep -v start|grep -o '[1-8],[^\]*'

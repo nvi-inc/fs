@@ -22,21 +22,39 @@
 ! passed
       implicit none
       real vcband    !video bandwidth
-! 2012Sep13.  Added BWs of 128, 65, 32
-      real bandw(11)
-      character*1 cband(11)
-      integer i
-! Return a character
-      DATA BANDW/128.0,64.0,32.0,16.0,8.0,4.0,2.0,1.0,0.5,0.25,0.125/
-      data cband/'G','F','E','D','8','4', '2','1','H','Q', 'E'/
-
-      do i=1,8
-       if(abs(bandw(i)-vcband) .le. 0.01) then
-         cband_char=cband(i)
+! Update
+! 2020-12-31 JMG  Rewritten to make it easier to understand and expand 
+! 2020-01-11 JMG  Made all the charaters lower case 
+      character*12 cband
+      integer i    !counter
+      real       bw_test 
+!
+      data cband/"abc1248defgh"/
+! Return a character     
+! Start at BW=0.125MHz and double.
+! .125 MHz=a
+! .250 MHz=b
+! .500 MHz=c
+! 1.0  MHz=1
+! 2.0  MHz=2
+! 4.0  MHz=4
+! 8.0  MHz=8
+!16.0  MHz=d
+!32    MHz=e
+! 64       f
+!128       g
+!256       h
+! etc
+      bw_test=0.125      !BW in MHz
+      do  i=1,12
+        if(abs(bw_test-vcband) .le. 0.01) then
+         cband_char=cband(i:i)
          return
-       endif
+        endif
+        bw_test=2*bw_test 
       end do
       write(*,*) "ERROR: cband_char: Invalid band!"
+      write(*,'("Last BW tested was: ",f8.2)')  bw_test/2 
       cband_char="?"
       return
       end

@@ -19,8 +19,10 @@
 *
       SUBROUTINE SOINP(cbuf,lu,IERR)
 ! Parse source info contained in cbuf.
+! 2021-01-25 JMG renamed SORP50 to more accurate SORP2000
 ! 2007Jul03 JMG. Rewritten to use ASCII
 ! This can handle both sources and satellites (although we don't use satellites anywhere?)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 ! Typical source line looks like:
 !  0008-264 $        00 11  1.24676914  -26 12 33.3762017 2000.0 0.0
@@ -85,7 +87,7 @@ C  OUTPUT:
 
         do j=1,7
           ierr=j+2
-          read(ltoken(ierr),*, err=800) SATP50(j,NSATEL)
+          read(ltoken(ierr),*, err=800) satpos(j,NSATEL)
         end do
         ierr=10
         read(ltoken(ierr),*,err=800) isaty(nsatel)
@@ -154,9 +156,9 @@ C  OUTPUT:
 ! Read in the epoch.
         ierr=9
         read(ltoken(9),*,end=900) epoch
-        
+
         IF  (EPOCH.NE.2000.0) THEN  !"convert to J2000"
-          IEP = EPOCH+.01 
+          IEP = EPOCH+.01
           IF  (IEP.EQ.1950) THEN ! reference frame rotation
             call prefr(rarad,decrad,1950,r,d)
             RARAD = R
@@ -166,14 +168,14 @@ C  OUTPUT:
             call mpstar_rad(tjd,rarad,decrad)
           END IF  !
         END IF  !"convert to J2000"
-        SORP50(1,NCELES) = RARAD   !J2000 position
-        SORP50(2,NCELES) = DECRAD  !J2000 position
+        SORP2000(1,NCELES) = RARAD   !J2000 position
+        SORP2000(2,NCELES) = DECRAD  !J2000 position
 
         call ckiau(ciauna(nceles),cname,rarad,decrad,lu)
       endif
       nsourc=nsourc+1
 
-      
+
       ierr=0
       RETURN
 

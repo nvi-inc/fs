@@ -7,6 +7,10 @@ ifdef NO_FTOK_FS
 CPPFLAGS :=  -DNO_FTOK_FS
 endif
 
+ifdef FS_DISPLAY_SERVER_NO_MAKE
+CPPFLAGS +=  -DFS_DISPLAY_SERVER_NO_MAKE
+endif
+
 LDLIBS = -lutil
 OBJECTS = fs.o statusprt.o 
 LIBS = ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a

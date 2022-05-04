@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine snap_info(cr2,maxchk,dopre)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C SNAP_INFO sets the parity check and prepass flags.
 
@@ -100,6 +101,6 @@ C Local
           enddo
         endif ! prepass
       endif ! batch/interactive
-      
+
       return
       end

@@ -69,3 +69,5 @@ else
     y=mask(2:2:len);
 end
 plot(x,y);
+xlabel('Azimuth');
+ylabel('Elevation');

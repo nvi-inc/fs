@@ -1,8 +1,30 @@
+*
+* Copyright (c) 2020-2021 NVI, Inc.
+*
+* This file is part of VLBI Field System
+* (see http://github.com/nvi-inc/fs).
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
 !     STATION INFORMATION COMMON BLOCK
+! 2021-11-10 JMG Now  have three parameters for slew 
 ! 2007Aug10  JMGipson. Obsolete variables removed and reorganized.
 ! 2015Mar19  JMG. Added idata_mbps,isink_mbps; moved bb_bw here. 
 ! 2015Apr20  JMG Changed size or rack,recorder: char*8--->char*12
 ! 2016Jan05  JMG Changed size of rack to char*20
+! 2020Jun08  JMG Moved broadband stuff to 'broadband.ftni' 
+! 2020Oct02  JMG. Removed all references to S2 
 
 C
 C two_letter_code is a unique identifier for each DAS.
@@ -12,10 +34,10 @@ C  STNLIM - limit stops: (1,1) lower limit, axis 1
 C           (degrees)    (2,1) upper limit, axis 1
 C                        (1,2) lower limit, axis 2
 C                        (2,2) upper limit, axis 2
-C  STNRAT - slew rates: (1) axis 1, (2) axis 2 (degrees per minute)
+C  slew_rate - slew rates: (1) axis 1, (2) axis 2 (degrees per minute)
+!  slew_off - slew constant in seconds 
 C  IAXIS  - axis type: 1=hadec, 2=xy, 3=azel
 C  STNELV - station elevation limit, assigned in SKED
-C  ISTCON - slew overhead time, seconds
 C  NHORZ - number of az, el pairs in horizon mask
 C  AZHORZ, ELHORZ - as, el of horizon mask
 C  NCORD - number of pairs in coordinate mask
@@ -41,8 +63,10 @@ C             false if it's step functions
 
 ! real
       real diaman(max_stn)                      !Diameter.
-      real stnlim(2,2,max_stn)                  !Antenna limits (min,max)
-      real stnrat(2,max_stn)                    !Slew rates
+      real stnlim(2,2,max_stn)                  !Antenna limits (min,max)     
+      real slew_off(2,max_stn)                  !slew off. This is really the settling time.
+      real slew_vel(2,max_stn)                  !Slew rates
+      real slew_acc(2,max_Stn)                  !slew acceleration   
       real AZHORZ(MAX_HOR,MAX_STN)              !AZ mask
       real ELHORZ(MAX_HOR,MAX_STN)              !El Mask
       real CO1MASK(MAX_COR,MAX_STN)             !co-ordinate mask1
@@ -52,15 +76,12 @@ C             false if it's step functions
       real  SEFDST(MAX_BAND,MAX_STN)             !SEFD
       real  sefdpar(max_sefdpar,max_band,max_stn)  !function to determine el dependent SEFD
       real  sefdstel(max_band,max_stn)           !elevation dependent SEFD
-      integer  iData_mbps(max_stn)               !maximum rate data is acquired. 
-      integer  iSink_mbps(max_stn)               !maximum rate data is absorbed. May be more than data_mbps becuase of buffering.   
-      real  BB_BW(max_stn)                       !Effective Broadband BW per band in Hz (assuming 1-bit sampling)
 
 
 ! Integer/logical
-      integer nstatn,iaxis,maxpas,istcon,nhorz,ncord,maxtap,nsefdpar
+      integer nstatn,iaxis,maxpas,nhorz,ncord,maxtap,nsefdpar
       integer nrecst,nheadstack,ibitden_save
-      integer itearl,itlate,itgap,ns2tapes,tape_length
+      integer itearl,itlate,itgap,tape_length
       logical klineseg
 
       COMMON/STATN_dbl/
@@ -70,15 +91,14 @@ C             false if it's step functions
 
       common/statn_real/
      >       diaman,
-     >       STNLIM,STNRAT,
+     >       STNLIM,slew_off,slew_vel,slew_acc,
      >       AZHORZ,ELHORZ, CO1MASK,CO2MASK,STNELV,
-     >       SEFDST,    sefdpar,     sefdstel, BB_BW
+     >       SEFDST,    sefdpar,     sefdstel
 
       common/statn_int/
      .       NSTATN,
      .       IAXIS(MAX_STN),
      .       MAXPAS(MAX_STN),
-     .       ISTCON(2,MAX_STN),
      .       NHORZ(MAX_STN),
      .       NCORD(MAX_STN),maxtap(max_stn),
      .       tape_length(max_stn),
@@ -86,33 +106,31 @@ C             false if it's step functions
      .       nrecst(max_stn),nheadstack(max_stn),
      .       ibitden_save(max_stn),
      .       itearl(max_stn),itlate(max_stn),itgap(max_stn),
-     .       ns2tapes(max_stn),
-     .       klineseg(max_stn),idata_mbps,isink_mbps
+     .       klineseg(max_stn)
 
 ! Start of character data.
       character*8 cstnna(max_stn)            	!Position name.
       character*8 cantna(max_stn)               !Antenna name (may have multiple antennas)
       character*8 coccup(max_stn)               !Occupation code
       character*8 cterna(max_stn)               !Terminal name
-      character*20 cstrack(max_stn)              !rack type
+      character*20 cstrack(max_stn)             !rack type
       character*8 cstrec(max_stn,2)             !recorders, upto 2
       character*4 cterid(max_stn)               !Terminal ID
       character*2 cfirstrec(max_stn)            !First recorder: "1" or "2"
       character*2 cbsefd(max_band,max_stn)      !Code for station dependent SEFD
-      character*4 cs2speed(max_stn)             !Speed for S2 recordes
       character*2 cpocod(max_stn)               !Position code for station.
       character*2 chccod(max_Stn)               !Horizon maske code
       character*1 cstcod(max_stn)               !Single letter code. Only used internally.
-      character*20 cstrack_orig(max_stn)         !This keeps track of original configuration.
+      character*20 cstrack_orig(max_stn)        !This keeps track of original configuration.
       character*8 cstrec_orig(max_stn,2)
-      character*20 cstrack_cap(max_stn)
+!      character*20 cstrack_cap(max_stn)
 
 
       common /statn_ch/cstnna,cantna,coccup,cterna,cstrec,cstrack
-      common /statn_ch/cterid,cfirstrec,cbsefd,cs2speed
+      common /statn_ch/cterid,cfirstrec,cbsefd
       common /statn_ch/cpocod,chccod,cstcod
       common /statn_ch/cstrack_orig, cstrec_orig
-      common /statn_ch/cstrack_cap
+!      common /statn_ch/cstrack_cap
 
       character*128 stndefnames
       character*128 tape_motion_type

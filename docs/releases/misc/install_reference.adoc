@@ -1,0 +1,831 @@
+//
+// Copyright (c) 2020-2022 NVI, Inc.
+//
+// This file is part of the FSL10 Linux distribution.
+// (see http://github.com/nvi-inc/fsl10).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= Installation Reference
+Version 1.5 - March 2022
+
+:sectnums:
+:experimental:
+
+This document collects several topics that are useful for installation
+in general, but are usually not needed for routine updates.
+
+== Upgrading from FS versions before the previous stable
+
+This section only covers upgrading from "`main`" branch versions,
+i.e., versions _9.12.<x>_ are excluded.
+
+For reference, the list of the most recent _critical updates_, since
+version _9.3.13_, is given below.  These are updates that must be
+applied sequentially.  Please start with the next update with a later
+version number than what you have and apply it and the following
+listed versions before upgrading to the new version.  You can find the
+latest versions of installation notes for these FS versions in the
+_/usr2/fs/misc_ sub-directory.  The list of critical updates is:
+
+  9.4.0
+  9.5.3
+  9.5.12
+  9.6.9
+  9.7.7
+  9.9.2
+  9.10.4
+  9.11.6
+  9.11.8
+  9.11.19
+  9.13.2
+
+Strictly speaking you do not need to actually use the source archives
+(_.tgz_ files) of the previous versions.  You can just follow the steps
+in the upgrade notices for your local files for the corresponding FS
+versions.  However, it can be very helpful to actually install each
+version to help make sure that all of the upgrade steps have been
+completed and that the FS will run _and_ to test it as described.
+This can be particularly helpful when the upgrade requires some
+modifications to your local programs.  So it probably best to actually
+install _and_ test each version along the way.  This is especially
+true if you have to upgrade through more than one previous version.
+Otherwise if a step was overlooked, it might be hard to identify for
+which version the error was made.
+
+If you have a version older than _9.3.13_, please email Ed for more
+information.
+
+[NOTE]
+====
+
+There are three suggested methods for getting archives of old versions
+if you need them:
+
+. You can find archives for old versions at:
+http://www.metsahovi.fi/fs/dist/old/
+
+. The _.tgz_ archives can  be extracted from a local FS _git_ repo. In
+the following, use the tag of the release you want to extract, e.g.,
+_9.11.19_, in place of `_tag_` in:
+
++
+
+[subs="+quotes"]
+....
+cd /usr2/fs-git
+make TAG=_tag_ tag_archive
+....
++
+
+This will place the _fs-<tag>.tgz_ archive in _/tmp_. In these
+archives, the files will have the prefix `usr2/fs-_tag_/`.
+
+. You can get a _.tar.gz_ archive from _github_ with:
+
++
+
+[subs="+quotes"]
+....
+wget https://github.com/nvi-inc/fs/archive/_tag_.tar.gz
+....
++
+
+This will place the _fs-<tag>.tar.gz_ archive in the current
+directory. In these archives, the files will have the prefix
+`fs-_tag_/`.
+
+The latter two methods will work for the versions listed above as far
+back as _9.5.3_. It could be extended to older versions if needed.
+
+====
+
+== Example standard procedure libraries
+
+For reference purposes, information about the example station
+libraries for different equipment configurations is given here.  The
+files are found in _/usr2/fs/st.default/proc_.  They can be referred to
+and compared to what you have in _/usr2/proc/station.prc_.
+
+_Only_ for new installations (or complete re-installs), you can copy
+the default version for your equipment to _/usr2/proc_ renaming it to
+_station.prc_ in the process, e.g.:
+
+  cd /usr2/proc
+  cp -i /usr2/fs/st.default/proc/3station.prc station.prc
+  chmod a+rw station.prc
+
+The `-i` option will prompt before overwriting an existing
+_station.prc_ to give you a chance to recover if you did not realize
+you already had a _station.prc_ file.  The table of correspondence
+between equipment types and default library names is given next.
+
+.Example station.prc libraries
+|=============================================================
+|Equipment - Rack/Drive1/Drive2 |Prefix letters |Example `station` library
+
+|k42/k42             |k42        |_k42station.prc_
+|k42k3/vlba          |k42k3v     |_k42k3vstation.prc_
+|k42mk4/vlba         |k42mk4v    |_k42mk4vstation.prc_
+|k42mk4/vlbab/vlbab  |k42mk4vb   |_k42mk4vstation2.prc_
+|k42/k5              |k42k5      |_k42k5station.prc_
+|lba/s2              |ls2        |_ls2station.prc_
+|lba4/s2             |l4s2       |_l4s2station.prc_
+|mk3/mk3a            |3          |_3station.prc_
+|mk4/mk4             |4          |_4station.prc_
+|mk4/mk5a            |45         |_45station.prc_
+|mk4/vlba4           |4v4        |_4v4station.prc_
+|mk5/mk5b            |5          |_5station.prc_
+|none/s2             |s2         |_s2station.prc_
+|vlba/s2             |vs2        |_vs2station.prc_
+|vlba/vlba           |v          |_vstation.prc_
+|vlba/vlba2          |v2         |_v2station.prc_
+|vlba/vlba/vlba      |v          |_vstation2.prc_
+|vlba4/vlba4         |v4         |_v4station.prc_
+|vlba4/mk5a          |v45        |_v45station.prc_
+|vlba4/vlba42        |v42        |_v42station.prc_
+|vlba5/mk5b          |v5         |_v5station.prc_
+|dbbc/mk5b           |d          |_dstation.prc_
+|dbbc/mk5c           |d5c        |_d5cstation.prc_
+|dbbc/flexbuff       |dfb        |_dfbstation.prc_
+|dbbc3/flexbuff      |d3fb       |_d3fbstation.prc_
+|=============================================================
+
+If an example for your equipment type is listed, please email
+Ed about it so that it can be added.
+
+== Copy-and-paste installation tips
+
+You can use copy-and-paste to reduce the amount of typing involved in
+the installation. This reduces the chances of missing required spaces
+and other easily missed characters (like `.`) in the commands.
+
+The basic approach is to view the instructions in a Web browser (or
+PDF viewer) window while working in a shell window that contains a
+session on the FS computer. This allows you to read the instructions
+and copy commands from them, pasting them into the shell window as
+needed.
+
+There are least two ways to arrange this:
+
+. Work from a different computer with a comfortable display, tools for
+Web browsing (or PDF viewing), and _ssh_ to reach the target computer.
++
+
+In this case you can read the instructions on the other computer,
+performing the installation steps in a shell window where you have
+connected to the FS computer. You can use the normal copy-and-paste
+tools of the other computer to copy input from the document and paste
+them into the session on the FS computer. If this is possible, it is
+often the most convenient.
+
+. Work on the X display of the FS.
++
+
+In this case you can use a Web browser (or PDF viewer) on the FS
+computer to read the document and a terminal to enter commends. This
+is very similar to the previous option, but may not have as much
+screen real estate to work with. You can switch between windows using
+the kbd:[Alt+Tab] short-cut.
++
+
+TIP: You may prefer to work in an _xterm_ other than the `login shell`
+since that _xterm_ normally requires using kbd:[Shift+Insert] to
+paste.
+
+NOTE: For previous updates a possible technique was to use console
+text terminals on the FS computer. You can use (kbd:[Control+Alt+Fn])
+to switch between a terminal to view the text instructions (with
+_less_) and a terminal for entering commands. This was always a
+cumbersome option. Now with the installation document in HTML format,
+it may no longer feasible unless you have a way to make a usable text
+version of the document. If you do, please let Ed know so that can be
+included here for others to use.
+
+You can use _ssh_ or _su_ to switch users as needed on in the window
+where you are entering commands. For example, you can change to being
+_prog_ by executing:
+
+ ssh -X prog@localhost
+
+or
+
+ su - prog
+
+Please don't forget to log back out when you need to change users
+again or you may develop a series of _nested_ logins.  Any steps that
+require rebooting will of course completely log out all of your
+terminals; you will need to re-login again from scratch to continue.
+
+At the end of the update, it is recommended that you login as _oper_
+for testing with whatever configuration you usually use for
+operations.
+
+== Making a back-up before installing
+
+This section has two sub-sections:
+
+. <<Back-ups>> covering how to make back-ups on varions FSL__x__
+distributions.
+
+. <<Using symbolic links>> for using symbolic links to switch between
+operational and test set-ups.
+
+=== Back-ups
+
+Before you begin the upgrade make sure you have a current back-up of
+your system in case something goes wrong. If you are using one of the
+FSL__x__ distributions, there are options for each below.
+
+If you have SCSI disks, Section 5.7 of the FS9 _Computer Reference_
+manual has a discussion of drive ID numbers if you are unsure about
+these.
+
+If you are using a RAID, except for FSL10 (which uses a different
+scheme), you would normally choose to install the update on your
+primary disk after having made and verified your back-up.  Once the
+installation is complete, has been tested, and used for a little
+while, you can copy over your back-up with the upgraded primary.  If
+the upgrade fails, you should restore the back-up to the primary for
+operations.  You can then try to upgrade again when it is convenient.
+In a desperate situation, you can use the back-up for operations.  You
+may choose to install the FS on your back-up disk for testing and then
+later copy the back-up onto the primary once you are satisfied with
+the new version.  In any event, please be sure to make a fresh back-up
+(and put it safely away) before attempting an update installation.
+
+====  FSL10 (stretch)
+
+If the system is configured as a RAID, please see the procedure at:
+
+https://nvi-inc.github.io/fsl10/raid.html#_recoverable_testing
+
+====  FSL9 (wheezy)
+
+If the system is configured as a RAID, please see
+_/usr2/fs/misc/FSL9_RAID.pdf_ section "`APPLYING AN UPDATE`" for directions
+for applying an update.
+
+====  FSL8 (lenny), FSL7, (etch), and FSL6 (sarge)
+
+If the system is configured as a RAID, please see http://www.metsahovi.fi/fs/docs/pre_FSL9_RAID.pdf
+section "`APPLYING AN UPDATE`" for directions for
+applying an update.
+
+That _.pdf_ file can also be extracted from a local FS _git_ repo with:
+
+  cd /usr2/fs-git
+  git show 9.11.0:misc/RAID.pdf >/tmp/pre_FSL9_RAID.pdf
+
+====  FSL5 (woody)
+
+We recommend you use the _tar_ based back-up that is part of the
+rotating disk back-up scheme.  A draft document that describes this
+method is available in http://www.metsahovi.fi/fs/docs/backups2.pdf.
+
+====  FSL4 (potato) and earlier
+
+If you have an even older FS Linux distribution, please use the
+disk-to-disk back scheme described in Section 5.8 of the FS9 _Computer
+Reference_ manual.
+
+If you are running one of these FSL__x__ distributions and do not have
+documentation on how to make a back-up, please email Ed for advice.
+
+=== Using symbolic links
+
+_After_ you have made a backup (to allow recovery in case something
+bad should happen), you can use symbolic links to your directories to
+change between your operational and test directories.  This may allow
+you to more easily switch between operational and testing
+configurations.
+
+In the following examples, it is assumed that _/usr2/fs-9.13.2_ is
+your operational FS version and the FS you want to test is in
+_/usr2/fs-git_ and that _/usr2/st-1.0.0_ is the directory with your
+station software; you should substitute the correct directories if
+they are different. All commands must be entered as _root_. Extra
+white space has been added only to improve legibility.
+
+[NOTE]
+====
+
+You can also use this scheme to switch back and forth between
+different FS _git_ repos, but you will have to give the new git repo a
+different name than the old repo, which may be in _/usr2/fs-git_.  One
+possible scheme is to clone a new repo for each new version and
+include the version tag in the name of the _git_ repo. For example,
+_10.0.0_ could go in _/usr2/fs-git-10.0.0_.
+
+This approach goes against the spirit of _git_,  with which it is
+possible to `checkout` and re__make__ the executables for any version
+included in the repo. However, it may be more reassuring to know that
+you have preserved the current, known to work, executables of your
+operational system.
+
+====
+
+If you have aliased `rm` to `rm -i` and `mv` to `mv -i` and `cp` to
+`cp -i` (all of which are recommended), you will be prompted to
+confirm before anything destructive occurs. If so, and if everything
+is set-up properly below, the only cases where you should be asked to
+confirm is for deleting the symbolic links in the examples for
+<<Switch permanently to new version>> and
+<<Switch permanently to old operational version>> below.
+
+==== To set-up initially for testing:
+
+Your operational station software is assumed to be in _/usr2/st-1.0.0_. Make appropriate adjustments if they are different.
+
+. Make sure the FS is not running.
+
+. Enter the command:
+
+  cd /usr2
++
+Make sure there are no existing directories: _control-ops_,
+_proc-ops_, _st-1.0.0-ops_, _control-test_, _proc-test_,
+_st-1.0.0-test_, or use different names and adjust the commands
+below accordingly.
+
+[CAUTION]
+====
+
+If you are currently using  _/usr2/control_ and _/usr2/proc_ as
+symbolic links, you will need to resolve that first or modify the
+commands below to take that into account. You can check if they are
+symbolic links using, for example:
+
+  ls -ld /usr2/control
+
+One way to resolve this is to delete the symbolic links and rename the
+directories they pointed to with the names of the corresponding
+symbolic links.
+
+====
+
+. Enter the commands:
++
+....
+mv control   control-ops
+mv proc      proc-ops
+mv st-1.0.0  st-1.0.0-ops
+
+cp -a control-ops   control-test
+cp -a proc-ops      proc-test
+cp -a st-1.0.0-ops  st-1.0.0-test
+
+ln -sfn control-test  control
+ln -sfn proc-test     proc
+ln -sfn st-1.0.0-test st
+....
+
+. Then follow the installation instructions. You will be
+modifying the _-test_ versions.
+
+==== Switch temporarily to operational version
+
+Your operational FS version is assumed here to be in _/usr2/fs-9.13.2_
+and your operational station software is assumed to be in
+_/usr2/st-1.0.0_.  Make appropriate adjustments if they are different.
+
+. Make sure the FS is not running.
+
+. Enter the commands:
++
+....
+cd /usr2
+ln -sfn control-ops   control
+ln -sfn proc-ops      proc
+ln -sfn st-1.0.0-ops  st
+ln -sfn fs-9.13.2     fs
+....
+
+. Reboot.
+
+The above commands (even rebooting if you like) can be put in
+a script if you need to do this multiple times.
+
+==== Switch temporarily to test version
+
+Your test FS version is assumed here to be in _/usr2/fs-git_
+and your test station software is assumed to be in
+_/usr2/st-1.0.0-test_.  Make appropriate adjustments if they are different.
+
+. Make sure the FS is not running.
+
+. Enter the commands:
++
+....
+cd /usr2
+ln -sfn control-test   control
+ln -sfn proc-test      proc
+ln -sfn st-1.0.0-test  st
+ln -sfn fs-git         fs
+....
+
+. Reboot.
+
+The above commands (even rebooting if you like) can be put in
+a script if you need to do this multiple times.
+
+==== Switch permanently to new version
+
+When you are satisfied with the testing of the new system
+you can switch permanently.
+
+Your test FS version is assumed here to be in _/usr2/fs-git_
+and your test station software is assumed to be in
+_/usr2/st-1.0.0-test_.  Make appropriate adjustments if they are different.
+
+. Make sure the FS is not running.
+
+. Enter the commands:
++
+....
+cd /usr2
+
+rm  control
+rm  proc
+
+mv control-test   control
+mv proc-test      proc
+mv st-1.0.0-test  st-1.0.0
+
+ln -sfn st-1.0.0  st
+ln -sfn fs-git    fs
+....
+
+. Reboot.
+
+Your old operational directories (named _*-ops_) remain available for
+future reference.
+
+==== Switch permanently to old operational version
+
+Follow these steps if you need to switch back permanently, perhaps
+because the installation failed.
+
+Your operational FS version is assumed here to be in _/usr2/fs-9.13.2_
+and your operational station software is assumed to be in
+_/usr2/st-1.0.0_.  Make appropriate adjustments if they are different.
+
+. Make sure the FS is not running.
+
+. Enter the commands:
++
+....
+cd /usr2
+
+rm control
+rm proc
+
+mv control-ops   control
+mv proc-ops      proc
+mv st-1.0.0-ops  st-1.0.0
+
+ln -sfn st-1.0.0  st
+ln -sfn fs-9.13.2 fs
+....
+
+. Reboot.
+
+Your old test directories (named _*-test_) remain available for future
+reference.
+
+== Disk space requirements
+
+Please be sure that you have at least 50 MB of free space (use the
+`*df -h /usr2*` UNIX command to check free space on your _/usr2_
+partition) before starting the upgrade. This would probably only be
+an issue for stations with 200 GB, or smaller, disks.
+
+If you are tight on space, you may want to compress old log files and
+delete old versions of the FS (except your most recent one of course).
+Since you should have backed-up your system that should be safe. You
+can be safer, if you only delete the _*.[oas]_ and executable files of
+your old versions (except your most recent one of course).  You might
+want to keep the source of the previous versions around for reference
+if you have room.  You can eliminate the non-source files by _cd_-ing
+to each of the old FS directories in turn as _prog_ and executing:
+
+  make rmdoto rmexe
+
+as a shell command.  If you have any questions about how to do this,
+please email Ed.
+
+== Set operations file permissions
+
+It is recommended that your local files for operations (_control_, _proc_,
+_log_, _sched_, _tle_files_ directories and their contents) have the default
+ownership (`oper.rtx`) and permissions (for regular files `rw-rw-r-`,
+for directories `rwxrwxr-x`).  To force this (however, this will not
+change the "`execute/search`" permissions), please execute the script (as
+_root_):
+
+  /usr2/fs/misc/fix_perm
+
+Answer `*y*` to the prompt if you wish to proceed.  It is a good idea to
+do this, unless you have purposely changed the ownership and
+permissions to some other values.  If you don't want to restore the
+defaults, answer `*n*` (this is the last chance to abort the execution
+of the script). If you don't have a _/usr2/tle_files_ directory,
+you will get a message that there is no such directory.
+
+== Fix .prc file define lines
+
+Sometimes due to errors (possibly caused during manual editing,
+instead of using _pfmed_), the `define` statements in _.prc_ files can
+be damaged.  This can lead to other problems including causing the
+contents of procedures being logged every time they are executed
+rather than just the first time they are used in a given log file.
+You can use the utility, _/usr2/fs/misc/fix_define_, to fix this. You
+can run it when the FS is _not active_ (as _oper_):
+
+  cd /usr2/proc
+  /usr2/fs/misc/fix_define -t *.prc
+
+in _test_ mode to see if there any `define` statements that need to be
+fixed.  If there are, they will be displayed.  If you choose to fix
+them, you can re-run the second command above without the `-t` flag to
+apply the fix.  An original of each _.prc_ file that is changed is
+retained with an added _.bak_ extension.
+
+== Setting geometry values in .Xresources
+
+A strategy for setting the `geometry` resource for an _xterm_ window
+(and others with a `name` property) is:
+
+NOTE: Most windows used by the FS are based on _xterm_, which can have
+a `name` property for each case. However, windows opened by _python_
+scripts do not usually have a `name` property. If it is needed, it is
+possible to modify _python_ scripts to accept, and use, a geometry
+parameter. Some FS _python_ based windows can already handle this.
+
+. Adjust the position (and maybe the size) of the window to what you
+want.
+
+. Run the _xwininfo_ program from a shell prompt in an _xterm_.
+
+. Position the cursor on the window and click.
+
+. Copy the string output for the `-geometry` parameter, e.g,
+`80x24+0+0`.
+
+. Paste the string as the value for `geometry` resource for that
+window in the _~/.Xresources_ file.
+
+After changing or adding resources in the _~.Xresources_ file, you
+will need to load them to make them active. This can done by logging
+out and back in again or loading them in another way, such as using
+the shell alias _rlxr_ that is available by default for _oper_ and
+_prog_. The window will need to be reopened to see the effect.
+
+NOTE: Using this method with differently named _.Xresource_ files and
+reloading aliases, it is possible to have customized window layouts
+for different displays and/or users.
+
+== Opening additional windows
+
+This section describes how to set-up your system to open additional
+useful windows on your display. This could be for additional status
+displays or utilities.
+
+CAUTION: All these techniques create the potential for opening
+multiple instances of a window. This might be confusing if it is not
+what you intended. In particular, windows with fixed placement may
+have multiple instances overlaying each other and not all be visible.
+
+NOTE: Some programs, such as _fmset_, could cause problems if multiple
+instances are running. The FS protects against that in those cases.
+
+CAUTION: FS display programs, such _monit2_, and other _monit<x>_
+programs end automatically if the FS is terminated. If you start
+programs that don't end automatically with the <<Window manager>> or
+<<Not using display server client>> methods below, they will continue
+running after the FS is terminated.
+
+Some windows, in particular _xterm_ windows, have a `name` property
+that allows them to be associated with resources in the
+_~/.Xresources_ file. This allows you to define other properties of
+the window, such as placement, size, title, font, and colors. See the
+<<Setting .Xresources>> sub-section below for details on this.
+
+=== Configuring additional windows
+
+Three possible approaches are suggested. The first includes a method
+that uses keyboard _shortcuts_ to open a window with a minimal number
+of key strokes, but can only be used on the local X-display console.
+The others can be used on any display.
+
+==== Window manager
+
+This approach only works for local X-display console for an FSL__x__
+system that is running the _fvwm2_ window manager (the default). There
+may be equivalent options for other window managers. This approach has
+two methods, which can used individually, but it is beneficial to use
+both. These methods require adding lines to the user's _~/.Xresources_
+file. You can see examples in the _st.default/oper/.fvwm2rc_ file.
+
+. Keyboard shortcuts
++
+
+This method can be particularly convenient since it only involves
+holding down two modifier keys, kbd:[Control+Shift], and pressing one
+other key, a quick shortcut. Using the existing example line for
+_monit2_ as an example, you can add a line similar to:
+
++
+
+....
+Key 2 A CS Exec exec xterm -name monit2 -e monit2
+....
++
+
+In this example, the shortcut is kbd:[Control+Shift+2 ]. You should
+replace the `2` with another number or lower case letter not already
+in use to make a unique key combination. You could replace the `xterm
+...` portion of the line with program you want to run, whether it
+opens a window or not.
++
+
+In the above example for _monit2_, the `-name monit2` option  sets the
+_xterm_'s name to `monit2` string. You can replace `monit2` token with
+the appropriate name.
++
+
+The `-e monit2` option tells the _xterm_ to run the _monit2_ program
+in the _xterm_. You can run any program you want in the _xterm_ or
+just get your default shell by leaving off the entire `-e ...`.
+
+. Menu selections
++
+
+As a complement to a keyboard shortcut, you can add a menu selection
+to the middle mouse button menu for the same program. This menu can
+show the shortcut key sequence for the window, making it a convenient
+reminder.
++
+
+Continuing the example for _monit2_, the following line is included in
+the example file for the `AddToMenu "Operator Menu" "Operator Menu"
+Title` definition:
++
+
+....
++              "Monit: status C-S-2" Exec exec xterm -name monit2 -e monit2
+....
++
+
+You can add a similar line, replacing `Monit: status` with a similar
+short text description of the function being performed.  The `2` in
+the `C-S-2` would be replaced with the unique character in the
+shortcut. The `exec ...` would be replaced with the corresponding text
+from your shortcut line.
+
+In order to try your changes you must restart _fvwm2_: left click on
+the background, select the `Restart` item, and then confirm that you
+do want to restart _fvwm2_. You could also log out and back in again.
+
+==== Using display server client
+
+If you using the display server, there are two methods for opening
+more windows. You can define windows to be opened automatically when
+an instance of the client is started and you can define windows to be
+opened with the `client=...` command. If you use the former for a
+window, also setting up the latter will give you an easy way to
+re-open a start-up client window if it is accidentally closed, without
+having to exit the client and restart it.
+
+These methods can be used on any display, not just the local X-display
+console.
+
+. Client start-up windows
++
+
+Windows to be opened automatically when a client starts can be listed
+in the _/usr2/control/stpgm.ctl_ file. For example for _monit2_, you
+can add:
++
+
+....
+moni2 x xterm -name monit2 -e monit2 &
+....
++
+
+The first field is a five character name of your choosing for the
+program within the FS. It must not conflict with a name of another
+program within the FS. The second field must be `x` to indicate that
+this is a client window. The remainder of the line, up to but not
+including the final `&`, is the command to run. The last field must be
+`&` to cause the program/window to be run as a background process.
+This program/window will be started for each client instance and will
+be automatically terminated when that client ends.
++
+
+IMPORTANT: This method should not be used if you aren't using the
+display server. While it will cause the window to be opened when the
+FS is started, if the window is closed by accident, it will cause the
+FS to abort.
+
+. Windows opened with the `client=...` command.
++
+
+This method defines the window in the _/usr2/control/clpgm.ctl_
+control file.  This can be used to open a window with the `client=...`
+command.
++
+
+You can find an example for a `monit2` window in
+_st.default/control/clpgm.ctl_:
++
+
+....
+monit2 a xterm -name monit2 -e monit2
+....
++
+
+It is similar to what is used in _/usr2/control/stpgm.ctl_ file,
+except:
+
+.. The first field is not restricted to five characters.
+
+.. The second field is set to one of:
++
+--
+* `a` -- for _attached_, to have the window closed when the client exits
+* `d` -- for _detached_, to have it continue after the client exits
+--
++
+
+Usually `a` is the best choice unless there is a reason to use `d`.
+
+.. There is no final `&`.
+
++
+--
+
+After adding a new window to _/usr2/control/clpgm.ctl_ and starting or
+restarting _fsclient_, you can open the window with:
+
+[subs="+quotes"]
+....
+client=_name_
+....
+
+where _name_ is the first field on the line in _clpgm.ctl_.
+--
+
+==== Not using display server client
+
+If you are _not_ running the display server, you can define SNAP
+procedures to open windows. This approach can be used on any display.
+Closing such windows will not cause the FS to abort.
+
+Continuing the example of _monit2_, you could define a `monit2`
+procedure in your  _station_ procedure library that contains:
+
+....
+sy=xterm -name monit2 -e monit2 &
+....
+
+CAUTION: The trailing `&` is necessary to prevent the FS from waiting
+for the window to close.
+
+Then entering `monit2` as operator input would open an instance of a
+_monit2_ window.
+
+You could also add commands like these to your `initi` procedure in
+your `station` procedure library to have them open automatically when
+the FS is start.
+
+=== Setting .Xresources
+
+The window's name can be used to access resources defined the
+_~/.Xresources_ file. This allows you to set properties of the window,
+such as placement, size, title, and colors.  Not all windows can have
+their properties defined in this way. In particular, _xterm_ windows
+can, but _python_ based windows cannot.
+
+You can look at the example lines for _monit2_, and others, in
+_st.default/oper/.Xresources_ for examples for how to define
+resources for a named window. Please also see the
+<<Setting geometry values in .Xresources>>
+section above for a strategy to set `geometry` resources.
+
+After adding resources in the _~/.Xresources_ file, you will need to
+load them to make them active. This can done by logging out and back
+in again or loading them in another way, such as using the shell alias
+_rlxr_ that is available by default for _oper_ and _prog_.

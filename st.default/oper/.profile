@@ -17,7 +17,7 @@ if [ -n "$BASH_VERSION" ]; then
     fi
 fi
 
-#set initial PATH explcitly (or some one can make it insert the sbin's)
+#set initial PATH explicitly (or some one can make it insert the sbin's)
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games"
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] ; then
@@ -29,4 +29,4 @@ PATH="/usr2/st/bin:/usr2/fs/bin:$PATH"
 export EDITOR=vim
 export LESS=-XR
 #export FS_CHECK_NTP=1
-#export FS_DISPLAY_SERVER=on
+export FS_DISPLAY_SERVER=on

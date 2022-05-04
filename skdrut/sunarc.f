@@ -18,7 +18,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 C@SUNARC
-      REAL*4 FUNCTION SUNARC(NSOR,mjd,ut) !Sun distance 
+      REAL*4 FUNCTION SUNARC(NSOR,mjd,ut) !Sun distance
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C   SUNARC calculates the distance of a source from the sun and
 C             returns the arc distance in degrees.
@@ -59,11 +60,11 @@ C
 C     Compute distance of the source from the sun.
 C
       IF  (NSOR.LE.NCELES) THEN  !"calculate distance from sun"
-        CRA = DCOS(SORPDA(1,NSOR)-RASUN)
+        CRA = DCOS(sorp_now(1,NSOR)-RASUN)
         CD1 = DCOS(DBLE(DECSUN))
         SD1 = DSIN(DBLE(DECSUN))
-        CD2 = DCOS(SORPDA(2,NSOR))
-        SD2 = DSIN(SORPDA(2,NSOR))
+        CD2 = DCOS(sorp_now(2,NSOR))
+        SD2 = DSIN(sorp_now(2,NSOR))
         ARG = CD1*CD2*CRA + SD1*SD2
         ARC = ATAN2(SQRT(1-ARG*ARG),ARG)
         ARCD = ARC*180./PI

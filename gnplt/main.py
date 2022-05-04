@@ -708,9 +708,9 @@ class Gui(Frame):
         cpoly = poly[:]
         cpoly.reverse()
         
-        stat = 'Coefficients:\t'
+        stat = 'Coefficients*DPFU:\t'
         for k,coeff in enumerate(cpoly):
-            stat += 'x^%s : %.3g\n\t\t' % (len(cpoly)-k-1,coeff)
+            stat += 'x^%s : %.3g\n\t\t' % (k,coeff)
         stat += '\nDPFU:\t%.3g\n\n' % DPFU
         
         self.statistics.set(stat)
@@ -1484,7 +1484,7 @@ class Gui(Frame):
         """displays tkMessageBox.showinfo with version number
         """
         title = 'About'
-        message = 'GnPlt2 version 2.06'
+        message = 'GnPlt2 version 2.07'
         tkMessageBox.showinfo(title, message)
     
     def shortcuts(self):
@@ -1768,7 +1768,7 @@ class Gui(Frame):
         #stat = 'Polynomial: %s\nComputed DPFU: %s\nRMS/DPFU: %s' % (station_name_2ch(cpoly), dpfu, dpfu_div_rms)
         stat = 'Coefficients:\t'
         for k,coeff in enumerate(cpoly):
-            stat += 'x^%s : %.3g\n\t\t' % (len(cpoly)-k-1,coeff)
+            stat += 'x^%s : %.3g\n\t\t' % (k,coeff)
         stat += '\nComputed DPFU:\t%.3g\n\n' % dpfu
         stat += '\nRMS/DPFU:\t%.3g' % dpfu_div_rms
         self.statistics.set(stat)
@@ -1785,8 +1785,8 @@ class Gui(Frame):
         poly = map(lambda x: x*DPFU, poly)
         self.plot.drawFittedLine(poly, tags = ('fitted_dpfu_line',))
         stat = 'Coefficients:\t'
-        for coeff in cpoly:
-            stat += '%.3g\n\t\t' % coeff
+        for k,coeff in enumerate(cpoly):
+            stat += 'x^%s : %.3g\n\t\t' % (k,coeff)
         stat += '\nComputed DPFU:\t%.3g\n\n' % DPFU
         
         self.statistics.set(stat)
@@ -1975,7 +1975,7 @@ class Gui(Frame):
         for i,line in enumerate(data):
             if line[0] != '*':
                 stop_line = i
-        return_data = data[:i+1]
+        return_data = data[:stop_line+1]
         return return_data
     
     def copyRXGFile(self, rxg_filename):
@@ -1992,10 +1992,17 @@ class Gui(Frame):
             if data[i][0] != '*':
                 data[i] = data[i].rjust(len(data[i])+1, '*')
         
-        #leave record in log
+        #update date
         todays_date = time.localtime()
-        record = ['* RXG file updated by GnPlt2 on %s-%s-%s\n' % (todays_date[0], todays_date[1], todays_date[2])]
-        final = record + nonComments + data
+        lineCount = 0
+        for i,line in enumerate(nonComments):
+            if line[0] != '*':
+                lineCount += 1
+            if lineCount == 2 and line[0] != '*':
+                nonComments[i]='%s %s %s\n' % (todays_date[0], todays_date[1], todays_date[2])
+                break
+
+        final = nonComments + data
         working_rxg.writelines(final)
         original_rxg.close()
         working_rxg.close()
@@ -2012,10 +2019,12 @@ class Gui(Frame):
         keys.sort()
         
         for freq in keys:
-            xdata.append(freq)
-            ydata.append(tcal_table.get(freq))
+           if freq > self.plot.minX and freq < self.plot.maxX:
+               xdata.append(freq)
+               ydata.append(tcal_table.get(freq))
         
-        self.plot.drawValues(xdata, ydata, fill = 'green')
+        if len(ydata) > 0:
+            self.plot.drawValues(xdata, ydata, fill = 'green')
     
     def fitTcalFreq(self, mode):
         #mode == average or median
@@ -3265,16 +3274,19 @@ class Plot(Canvas, Coordinate):
         coord_list = []
         maxY = max(yvalues)
         minY = min(yvalues)
+        maxX = max(xvalues)
         minX = min(xvalues)
         
         if not maxY >= self.maxY:
             maxY = self.maxY
         if not minY <= self.minY:
             minY = self.minY
+        if not maxX >= self.maxX:
+            maxX = self.maxX
         if not minX <= self.minX:
             minX = self.minX
         
-        self.reDrawAll(minX, self.maxX, minY, maxY)
+        self.reDrawAll(minX, maxX, minY, maxY)
         
         for i in range(len(xvalues)):
             coord_list.append(self.getCanvasXY([xvalues[i], yvalues[i]]))
@@ -3741,7 +3753,7 @@ class Plot(Canvas, Coordinate):
         Returns the number with appropriate number of digits"""
         try:
             number_of_digits = int(max(0,math.ceil(1-math.log10(abs(maxi-mini)))))
-        except (ZeroDivisionError, ValueError):
+        except (ZeroDivisionError, ValueError, OverflowError):
             number_of_digits = 2 
 
         expr = '%.' + str(number_of_digits) +'f'

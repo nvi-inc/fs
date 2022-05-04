@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <time.h>
+
 /* shared memory (fscom C data structure) layout */
 
 typedef struct fscom {
@@ -271,7 +274,7 @@ typedef struct fscom {
         int iapdflg;
         int k4rec_mode_stat; /* should be moved after k4rec_mode next chance */
         struct onoff_cmd onoff;
-        struct rxgain_ds rxgain[20];
+        struct rxgain_ds rxgain[MAX_RXGAIN];
   int iswif3_fs[4];
   int ipcalif3;
   struct flux_ds flux[MAX_FLUX];
@@ -450,9 +453,9 @@ typedef struct fscom {
 
   int rdbe_sync[MAX_RDBE];
 
-  int  dbbc3_ddc_v;
-  char dbbc3_ddc_vs[16];
-  int  dbbc3_ddc_vc;
+  int  dbbc3_ddcu_v;
+  char dbbc3_ddcu_vs[16];
+  int  dbbc3_ddcu_vc;
   int  dbbc3_ddc_bbcs_per_if;
   int  dbbc3_ddc_ifs;
 
@@ -466,4 +469,59 @@ typedef struct fscom {
 
   char fortran[33];
 
+  struct rxgain_files_ds rxgain_files[MAX_RXGAIN];
+
+  struct dbbab {
+      char host[129];
+      int port;
+      int time_out;
+      char mcast_addr[129];
+      int mcast_port;
+      char mcast_if[16];
+  } dbbad;
+
+  struct dbtcn {
+    struct dbtcn_control {
+      int continuous;
+      int cycle;
+      int stop_request;
+      struct data_valid_cmd data_valid;
+    } control[2];
+    int iping;
+  } dbtcn;
+
+  int  dbbc3_ddcv_v;
+  char dbbc3_ddcv_vs[16];
+  int  dbbc3_ddcv_vc;
+  int  dbbc3_mcdelay;
+  int  dbbc3_iscboard;
+  int  dbbc3_clockr;
+
+  struct dbbc3_core3h_modex_cmd dbbc3_core3h_modex[MAX_DBBC3_IF];
+
+  struct dbbc3_tsys_data {
+      int iping;
+      struct dbbc3_tsys_cycle {
+          time_t last;
+          int centisec[6];
+          int hsecs;
+          struct dbbc3_tsys_ifc {
+              double lo;
+              int sideband;
+              unsigned int delay;
+              unsigned raw_timestamp;
+              time_t time;
+              int time_error;
+              int vdif_epoch;
+              float tsys;
+          } ifc[MAX_DBBC3_IF];
+          struct dbbc3_tsys_bbc {
+              float tsys_lsb;
+              float tsys_usb;
+              unsigned freq;
+          } bbc[MAX_DBBC3_BBC];
+      } data[2];
+  } dbbc3_tsys_data;
+  unsigned dbbc3_command_count;
+  int dbbc3_command_active;
 } Fscom;

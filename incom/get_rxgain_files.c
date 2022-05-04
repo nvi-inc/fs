@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#include <errno.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
@@ -28,16 +29,20 @@
 
 int get_rxgain();
 
-get_rxgain_files(ierr)
+void get_rxgain_files(ierr)
      int *ierr;
 {
   char outbuf[513];
   int freq, icount, i;
+  int dirlen;
   FILE *idum;
 
   strcpy(outbuf,"ls ");
+  dirlen=strlen(outbuf);
   strcat(outbuf,FS_ROOT);
-  strcat(outbuf,"/control/rxg_files/*.rxg");
+  strcat(outbuf,"/control/rxg_files/");
+  dirlen=strlen(outbuf)-dirlen;
+  strcat(outbuf,"*.rxg");
 
   strcat(outbuf," > /tmp/LS.NUM 2> /dev/null");
 
@@ -46,34 +51,45 @@ get_rxgain_files(ierr)
   idum=fopen("/tmp/LS.NUM","r");
   unlink("/tmp/LS.NUM");
 
-  icount=0;
+  icount=-1;
   while(-1!=fscanf(idum,"%s",outbuf)){
-    /*    printf(" file %s\n",outbuf); */
-    if(icount++ < MAX_RXGAIN)
+    if(++icount < MAX_RXGAIN)
       *ierr=get_rxgain(outbuf,&shm_addr->rxgain[icount]);
     else
-      *ierr=-999;
-
+      *ierr=-22;
+    if(*ierr==0) {
+        if(strlen(outbuf)-dirlen<-1+sizeof(((struct rxgain_files_ds *) 0)->file)) {
+            strcpy(shm_addr->rxgain_files[icount].file,outbuf+dirlen);
+            shm_addr->rxgain_files[icount].logged=FALSE;;
+        } else
+            *ierr=-21;
+    }
     if(*ierr!=0) {
-      printf(" ierr = %d on %s\n",*ierr,outbuf);
+      if(ierr != -22)
+        printf("failing rxg file: `%s`\n",outbuf);
+      if(*ierr%100>=-3 || *ierr==-12 || *ierr==-11)
+         logit(NULL,errno,"un");
       return;
     }
+
     /* test code
     printf(" file %s\n",outbuf);
-    printf(" gain curve: count %d\n", shm_addr->rxgain[icount].gain.ncoeff);
+    printf(" rxg icount %d name '%s'\n",icount,
+            shm_addr->rxgain_files[icount].file);
+    printf(" gain curve: ncoeff  %d\n", shm_addr->rxgain[icount].gain.ncoeff);
     printf(" gain curve: opacity corrected %c\n",
 	   shm_addr->rxgain[icount].gain.opacity);
     for (i=0;i<shm_addr->rxgain[icount].gain.ncoeff;i++)
       printf(" %f ",shm_addr->rxgain[icount].gain.coeff[i]);
     printf(" \n");
-    printf(" tcal table: count %d\n", shm_addr->rxgain[icount].tcal_ntable);
+    printf(" tcal table: ntable %d\n", shm_addr->rxgain[icount].tcal_ntable);
     for (i=0;i<shm_addr->rxgain[icount].tcal_ntable;i++)
       printf(" %c %f %f\n ",
 	     shm_addr->rxgain[icount].tcal[i].pol,
 	     shm_addr->rxgain[icount].tcal[i].freq,
 	     shm_addr->rxgain[icount].tcal[i].tcal);
     printf(" trec %f\n",shm_addr->rxgain[icount].trec);
-    printf(" spill table: count %d\n", shm_addr->rxgain[icount].spill_ntable);
+    printf(" spill table: ntable %d\n", shm_addr->rxgain[icount].spill_ntable);
     for (i=0;i<shm_addr->rxgain[icount].spill_ntable;i++)
       printf("%f %f\n ",
 	     shm_addr->rxgain[icount].spill[i].el,
@@ -88,12 +104,3 @@ get_rxgain_files(ierr)
   return;
 
 }
-
-
-
-
-
-
-
-
-

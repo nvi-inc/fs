@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -236,6 +236,7 @@ C
      &        (rack.eq.DBBC3.and.dbbc3_cont_cal_mode.eq.1))) then
          if(calfp.gt.0) then
             vslope=calfp/(tpical-tpia)
+            tpia=(tpia+tpical)/2
             temps=(tpia-vbase)*vslope
          else
             tpia=(tpia+tpical)/2
@@ -271,7 +272,7 @@ c       digital detector - assume tpzero=0
       endif
       jtry=jtry-1
       if (jerr.gt.0.and.jtry.gt.0) goto 8001
-      if (jerr.ne.0) call logit7ic(idum,idum,idum,-1,-110,lwho,'er')
+      if (jerr.ne.0) call logit6(idum,idum,idum,-1,-110,lwho)
 
       return
       end 

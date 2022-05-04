@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -29,8 +29,10 @@ int if_cmd(ibuf,nchar)
      char *ibuf,*nchar;
 {
   char *ptr, *ptr_cond, *ptr_true, *ptr_false, ifchar;
-  int ddc,pfb,itpis_test[MAX_DBBC_PFB_DET], i, ibbc, ifc, ic;
+  int ddc,pfb,itpis_test[MAX_GLOBAL_DET], i, ibbc, ifc, ic;
+  int dbbc3;
   char ifs[ ]={"abcd"};
+  char ifs3[ ]={"abcdefgh"};
 
   ptr=memchr(ibuf,'=',*nchar);
   if(NULL==ptr)
@@ -106,7 +108,9 @@ int if_cmd(ibuf,nchar)
     (shm_addr->equip.rack_type == DBBC_PFB ||
      shm_addr->equip.rack_type == DBBC_PFB_FILA10G);
 
-  for(i=0;i<MAX_DBBC_PFB_DET;i++)
+  dbbc3=shm_addr->equip.rack==DBBC3;
+
+  for(i=0;i<MAX_GLOBAL_DET;i++)
     itpis_test[i]=0;
 
   if(shm_addr->equip.drive[0]==MK5 &&
@@ -114,11 +118,14 @@ int if_cmd(ibuf,nchar)
       shm_addr->equip.drive_type[0]==MK5B_BS ||
       shm_addr->equip.drive_type[0]==MK5C ||
       shm_addr->equip.drive_type[0]==MK5C_BS ||
-      shm_addr->equip.drive_type[0]==FLEXBUFF) )
+      shm_addr->equip.drive_type[0]==FLEXBUFF) ||
+      dbbc3 && shm_addr->equip.drive_type[0]==MK6)
     if(ddc) {
       mk5dbbcd(itpis_test); 
     } else if(pfb)
       mk5dbbcd_pfb(itpis_test);
+    else if(dbbc3)
+      mk5dbbc3d(itpis_test);
   
   if(0!=*ptr)
     *ptr=0;      /* terminate false-command */
@@ -145,7 +152,8 @@ int if_cmd(ibuf,nchar)
       strcpy(ibuf,ptr_false);
 
   else if(!strcmp("cont_cal",ptr_cond))
-    if((ddc||pfb) && 1==shm_addr->dbbc_cont_cal.mode)
+    if((ddc||pfb) && 1==shm_addr->dbbc_cont_cal.mode
+            || dbbc3 && 1==shm_addr->dbbc3_cont_cal.mode)
       strcpy(ibuf,ptr_true);
     else
       strcpy(ibuf,ptr_false);      
@@ -160,9 +168,20 @@ int if_cmd(ibuf,nchar)
 	strcpy(ibuf,ptr_false);
     else
 	strcpy(ibuf,ptr_false);
+  else if(1==sscanf(ptr_cond,"bbc%3d",&ibbc) && strlen(ptr_cond)==6 &&
+	  ibbc >= 1 &&  ibbc <= MAX_DBBC3_BBC &&
+	  strchr("01",ptr_cond[3]) && strchr("0123456789",ptr_cond[4]) &&
+	  strchr("0123456789",ptr_cond[5]))
+    if(dbbc3)
+      if(itpis_test[-1+ibbc] || itpis_test[-1+ibbc+MAX_DBBC3_BBC])
+	strcpy(ibuf,ptr_true);
+      else
+	strcpy(ibuf,ptr_false);
+    else
+	strcpy(ibuf,ptr_false);
 
   else if(1==sscanf(ptr_cond,"if%1c",&ifchar) && strlen(ptr_cond)==3 &&
-	  NULL!=strchr(ifs,ifchar)) {
+	  NULL!=strchr(ifs,ifchar) && (ddc || pfb)) {
     ifc=strchr(ifs,ifchar)-ifs;
     if(ddc) {
       for(i=0;i<MAX_DBBC_BBC;i++)
@@ -196,6 +215,21 @@ int if_cmd(ibuf,nchar)
 	strcpy(ibuf,ptr_true);
       else
 	strcpy(ibuf,ptr_false);	
+    } else
+      strcpy(ibuf,ptr_false);
+
+  } else if(1==sscanf(ptr_cond,"if%1c",&ifchar) && strlen(ptr_cond)==3 &&
+	  NULL!=strchr(ifs3,ifchar) && dbbc3) {
+    ifc=strchr(ifs3,ifchar)-ifs3;
+    if(dbbc3) {
+      for(i=0;i<MAX_DBBC3_BBC;i++)
+	if((itpis_test[i] || itpis_test[i+MAX_DBBC3_BBC]) &&
+	   shm_addr->dbbc3_bbcnn[i].source==ifc){
+	  strcpy(ibuf,ptr_true);
+	  break;
+	}
+      if(i>=MAX_DBBC3_BBC)
+	strcpy(ibuf,ptr_false);
     } else
       strcpy(ibuf,ptr_false);
 

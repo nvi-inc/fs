@@ -107,7 +107,7 @@ platform/posix/posix_tcpdial.c\
 platform/posix/posix_tcplisten.c\
 platform/posix/posix_thread.c\
 platform/posix/posix_udp.c\
-platform/posix/posix_pollq_epoll.c\
+platform/posix/posix_pollq_poll.c\
 platform/posix/posix_rand_urandom.c\
 transport/ws/websocket.c\
 supplemental/base64/base64.c\
@@ -120,7 +120,7 @@ supplemental/http/http_server.c\
 
 SOURCES := $(addprefix $(NNG_DIR)/src/, $(SOURCES))
 
-HEADERS =  nng/compat/nanomsg/ipc.h nng/compat/nanomsg/inproc.h nng/compat/nanomsg/pubsub.h nng/compat/nanomsg/survey.h nng/compat/nanomsg/pipeline.h nng/compat/nanomsg/ws.h nng/compat/nanomsg/nn.h nng/compat/nanomsg/reqrep.h nng/compat/nanomsg/tcp.h nng/compat/nanomsg/bus.h nng/compat/nanomsg/pair.h nng/nng.h nng/protocol/reqrep0/rep.h nng/protocol/reqrep0/req.h nng/protocol/pair1/pair.h nng/protocol/survey0/respond.h nng/protocol/survey0/survey.h nng/protocol/pipeline0/push.h nng/protocol/pipeline0/pull.h nng/protocol/pubsub0/pub.h nng/protocol/pubsub0/sub.h nng/protocol/pair0/pair.h nng/protocol/bus0/bus.h nng/transport/tls/tls.h nng/transport/inproc/inproc.h nng/transport/ws/websocket.h nng/transport/zerotier/zerotier.h nng/transport/ipc/ipc.h nng/transport/tcp/tcp.h nng/supplemental/tls/engine.h nng/supplemental/tls/tls.h nng/supplemental/util/options.h nng/supplemental/util/platform.h nng/supplemental/http/http.h 
+HEADERS =  nng/transport/inproc/inproc.h nng/transport/tls/tls.h nng/transport/ws/websocket.h nng/transport/tcp/tcp.h nng/transport/ipc/ipc.h nng/transport/zerotier/zerotier.h nng/compat/nanomsg/bus.h nng/compat/nanomsg/inproc.h nng/compat/nanomsg/ws.h nng/compat/nanomsg/pubsub.h nng/compat/nanomsg/pipeline.h nng/compat/nanomsg/ipc.h nng/compat/nanomsg/pair.h nng/compat/nanomsg/survey.h nng/compat/nanomsg/tcp.h nng/compat/nanomsg/nn.h nng/compat/nanomsg/reqrep.h nng/nng.h nng/supplemental/tls/tls.h nng/supplemental/tls/engine.h nng/supplemental/util/options.h nng/supplemental/util/platform.h nng/supplemental/http/http.h nng/protocol/pair0/pair.h nng/protocol/bus0/bus.h nng/protocol/pair1/pair.h nng/protocol/reqrep0/req.h nng/protocol/reqrep0/rep.h nng/protocol/pipeline0/pull.h nng/protocol/pipeline0/push.h nng/protocol/pubsub0/sub.h nng/protocol/pubsub0/pub.h nng/protocol/survey0/survey.h nng/protocol/survey0/respond.h 
 
 HEADERS_SRC = $(addprefix $(NNG_DIR)/include/, $(HEADERS))
 
@@ -130,7 +130,7 @@ $(SOURCES): $(NNG_ARCHIVE)
 
 
 CFLAGS += -g -Wall -Wextra -fno-omit-frame-pointer     -std=gnu99
-CPPFLAGS = -DNNG_ENABLE_STATS -DNNG_HAVE_BACKTRACE=1 -DNNG_HAVE_BUS0 -DNNG_HAVE_CLOCK_GETTIME=1 -DNNG_HAVE_EPOLL=1 -DNNG_HAVE_EPOLL_CREATE1=1 -DNNG_HAVE_EVENTFD=1 -DNNG_HAVE_FLOCK=1 -DNNG_HAVE_LIBNSL=1 -DNNG_HAVE_LOCKF=1 -DNNG_HAVE_MSG_CONTROL=1 -DNNG_HAVE_PAIR0 -DNNG_HAVE_PAIR1 -DNNG_HAVE_PTHREAD_ATFORK_PTHREAD=1 -DNNG_HAVE_PUB0 -DNNG_HAVE_PULL0 -DNNG_HAVE_PUSH0 -DNNG_HAVE_REP0 -DNNG_HAVE_REQ0 -DNNG_HAVE_RESPONDENT0 -DNNG_HAVE_SEMAPHORE_PTHREAD=1 -DNNG_HAVE_SOPEERCRED=1 -DNNG_HAVE_STRCASECMP=1 -DNNG_HAVE_STRNCASECMP=1 -DNNG_HAVE_STRNLEN=1 -DNNG_HAVE_SUB0 -DNNG_HAVE_SURVEYOR0 -DNNG_HAVE_UNIX_SOCKETS=1 -DNNG_HIDDEN_VISIBILITY -DNNG_LITTLE_ENDIAN -DNNG_MAX_TASKQ_THREADS=16 -DNNG_PLATFORM_LINUX -DNNG_PLATFORM_POSIX -DNNG_PRIVATE -DNNG_STATIC_LIB -DNNG_SUPP_HTTP -DNNG_TRANSPORT_INPROC -DNNG_TRANSPORT_IPC -DNNG_TRANSPORT_TCP -DNNG_TRANSPORT_TLS -DNNG_TRANSPORT_WS -DNNG_USE_EVENTFD -D_GNU_SOURCE -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT -D_THREAD_SAFE -I/usr2/fs/third_party/src/nng-1.3.0/include -isystem /usr2/fs/third_party/src/nng-1.3.0/src 
+CPPFLAGS = -DNNG_ENABLE_STATS -DNNG_HAVE_BACKTRACE=1 -DNNG_HAVE_BUS0 -DNNG_HAVE_CLOCK_GETTIME=1 -DNNG_HAVE_EPOLL=1 -DNNG_HAVE_FLOCK=1 -DNNG_HAVE_LIBNSL=1 -DNNG_HAVE_LOCKF=1 -DNNG_HAVE_MSG_CONTROL=1 -DNNG_HAVE_PAIR0 -DNNG_HAVE_PAIR1 -DNNG_HAVE_PTHREAD_ATFORK_PTHREAD=1 -DNNG_HAVE_PUB0 -DNNG_HAVE_PULL0 -DNNG_HAVE_PUSH0 -DNNG_HAVE_REP0 -DNNG_HAVE_REQ0 -DNNG_HAVE_RESPONDENT0 -DNNG_HAVE_SEMAPHORE_PTHREAD=1 -DNNG_HAVE_SOPEERCRED=1 -DNNG_HAVE_STRCASECMP=1 -DNNG_HAVE_STRNCASECMP=1 -DNNG_HAVE_SUB0 -DNNG_HAVE_SURVEYOR0 -DNNG_HAVE_UNIX_SOCKETS=1 -DNNG_HIDDEN_VISIBILITY -DNNG_LITTLE_ENDIAN -DNNG_MAX_TASKQ_THREADS=16 -DNNG_PLATFORM_LINUX -DNNG_PLATFORM_POSIX -DNNG_PRIVATE -DNNG_STATIC_LIB -DNNG_SUPP_HTTP -DNNG_TRANSPORT_INPROC -DNNG_TRANSPORT_IPC -DNNG_TRANSPORT_TCP -DNNG_TRANSPORT_TLS -DNNG_TRANSPORT_WS -DNNG_USE_EVENTFD -D_GNU_SOURCE -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT -D_THREAD_SAFE -isystem $(NNG_DIR)/src -I$(NNG_DIR)/include 
 
 OBJECTS :=  $(SOURCES:.c=.o)
 $(NNG_LIBRARY): $(OBJECTS)

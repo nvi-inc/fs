@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -121,6 +121,6 @@ error:
       ip[1]=0;
  error2:
       ip[2]=ierr;
-      memcpy(ip+3,"di",2);
+      memcpy(ip+3,"dg",2);
       return;
 }

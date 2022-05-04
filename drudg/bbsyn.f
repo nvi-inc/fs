@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 	SUBROUTINE bbsyn(iy,ix,fr)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C  bbsyn appends the appropriate bbysnth to the buffer
 C  for writing the bbsyn frequencies

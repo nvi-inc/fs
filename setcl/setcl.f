@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -58,6 +58,7 @@ C
       logical rn_test,kfm
       integer idum,fc_rte_prior,rn_take,fc_ntp_synch,ntp_synch
       character*13 crate
+      integer fc_get_dbbc3time
 c
       include '../include/time_arrays.i'
 C
@@ -284,7 +285,7 @@ C             two return buffers with imode = -53
      &       (DBBC_DDC_FILA10G.eq.rack_type.or.
      &       DBBC_PFB_FILA10G.eq.rack_type)) then
         idum=rn_take('fsctl',0)
-        idum=fc_get_fila10gtime(centisec,it,ip,0)
+        idum=fc_get_fila10gtime(centisec,it,ip,0,1)
         call rn_put('fsctl')
         centisec(2)=centisec(1)
         unixsec(2)=unixsec(1)
@@ -295,6 +296,37 @@ C             two return buffers with imode = -53
            if(nerr.le.3) goto 50
            goto 998
         endif
+        goto 200
+      else if (DBBC3.eq.rack) then
+        idum=fc_get_dbbc3time(centisec,it,iold)
+        if(idum.eq.-1) then
+           call logit7ci(idum,idum,idum,-1,-26,'sc',0)
+           goto 1
+        else if(idum.eq.-2) then
+           call fs_get_dbbc3_iscboard(dbbc3_iscboard)
+           call logit7ci(idum,idum,idum,1, 27,'sc',dbbc3_iscboard)
+           nerr=nerr+1
+           if(nerr.le.3) then
+              call susp(2,1)
+              goto 50
+           endif
+           call logit7ci(idum,idum,idum,-1,-29,'sc',0)
+           goto 998
+        endif
+        centisec(2)=centisec(1)
+        unixsec(2)=unixsec(1)
+        unixhs(2)=unixhs(1)
+        if(iold.gt.20) then
+           call logit7ci(idum,idum,idum,-1, 28,'sc',0)
+           nerr=nerr+1
+           if(nerr.le.3) then
+              call susp(2,1)
+              goto 50
+           endif
+           call logit7ci(idum,idum,idum,-1,-29,'sc',0)
+           goto 998
+        endif
+        if(nerr.ne.0) call logit7ci(idum,idum,idum,-1, 29,'sc',0)
         goto 200
       else
          call logit7ci(idum,idum,idum,-1,-11,'sc',0)
@@ -469,16 +501,20 @@ c
       call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
      &     rateti_fs,spanti_fs,modelti_fs,icomputer)
 c
-      if (kfm.and.cjchar(modelti_fs,1).ne.'c') then
-         call fc_rte_check(iErr)
-         if(iErr.eq.-5) then
-            call logit7ci(idum,idum,idum,-1,-25,'sc',0)
-         else if(iErr.ne.0) then
-            call logit7ci(idum,idum,idum,-1,-5+iErr,'sc',0)
-         endif
+c we must always check for the 248 day problem until
+c the clock logic is re-written, both for 'computer' and 64-bit
+c
+      call fc_rte_check(iErr)
+      if(iErr.eq.-5) then
+         call logit7ci(idum,idum,idum,-1,-25,'sc',0)
+      else if(iErr.ne.0) then
+         call logit7ci(idum,idum,idum,-1,-5+iErr,'sc',0)
+      endif
+c and computer compared to the formatter?
+      if(kfm) then
          if(abs(dble(secsoffti_fs)-dble(secs_fm)).gt.86400*248) then
-            call logit7ci(idum,idum,idum,-1,-4,'sc',0)
-            goto 999
+           call logit7ci(idum,idum,idum,-1,-4,'sc',0)
+           goto 999
          endif
       endif
 c

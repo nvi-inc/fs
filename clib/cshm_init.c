@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <limits.h>
 
 #include "../include/dpi.h"
 #include "../include/params.h"
@@ -509,7 +510,7 @@ void cshm_init()
   }
 
   for (i=0;i<MAX_DBBC3_BBC;i++) {
-    shm_addr->dbbc3_bbcnn[i].freq=0;
+    shm_addr->dbbc3_bbcnn[i].freq=UINT_MAX;
     shm_addr->dbbc3_bbcnn[i].source=-1;
     shm_addr->dbbc3_bbcnn[i].bw=-1;
     shm_addr->dbbc3_bbcnn[i].avper=0;
@@ -521,6 +522,51 @@ void cshm_init()
   shm_addr->dbbc3_cont_cal.option=-1;
   shm_addr->dbbc3_cont_cal.samples=10;
 
+  shm_addr->dbbad.host[0]=0;
+  shm_addr->dbbad.port=0;
+  shm_addr->dbbad.time_out=0;
+  shm_addr->dbbad.mcast_addr[0]=0;
+  shm_addr->dbbad.mcast_port=0;
+  shm_addr->dbbad.mcast_if[0]=0;
+
+  for (j=0;j<2;j++) {
+      shm_addr->dbtcn.control[j].continuous=0;
+      shm_addr->dbtcn.control[j].cycle=0;
+      shm_addr->dbtcn.control[j].stop_request=1;
+      shm_addr->dbtcn.control[j].data_valid.user_dv=0;
+  }
+  shm_addr->dbtcn.iping=0;
+
+  for(i=0;i<MAX_DBBC3_IF;i++) {
+      shm_addr->dbbc3_core3h_modex[i].set=0;
+      m5state_init(&shm_addr->dbbc3_core3h_modex[i].mask2.state);
+      m5state_init(&shm_addr->dbbc3_core3h_modex[i].mask1.state);
+      m5state_init(&shm_addr->dbbc3_core3h_modex[i].decimate.state);
+      m5state_init(&shm_addr->dbbc3_core3h_modex[i].samplerate.state);
+      m5state_init(&shm_addr->dbbc3_core3h_modex[i].width.state);
+      m5state_init(&shm_addr->dbbc3_core3h_modex[i].channels.state);
+      m5state_init(&shm_addr->dbbc3_core3h_modex[i].payload.state);
+      m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
+  }
+
+  shm_addr->dbbc3_tsys_data.iping=0;
+  for(i=0;i<2;i++) {
+      shm_addr->dbbc3_tsys_data.data[i].last=0;
+      for(j=0;j<MAX_DBBC3_IF;j++) {
+          shm_addr->dbbc3_tsys_data.data[i].ifc[j].lo=-1.0;
+          shm_addr->dbbc3_tsys_data.data[i].ifc[j].delay=UINT_MAX;
+          shm_addr->dbbc3_tsys_data.data[i].ifc[j].time_error=-1000000;
+          shm_addr->dbbc3_tsys_data.data[i].ifc[j].vdif_epoch= -1;
+          shm_addr->dbbc3_tsys_data.data[i].ifc[j].time = 0;
+      }
+      for(j=0;j<MAX_DBBC3_BBC;j++) {
+          shm_addr->dbbc3_tsys_data.data[i].bbc[j].freq=UINT_MAX;
+          shm_addr->dbbc3_tsys_data.data[i].bbc[j].tsys_lsb=-9e20;
+          shm_addr->dbbc3_tsys_data.data[i].bbc[j].tsys_usb=-9e20;
+      }
+  }
+  shm_addr->dbbc3_command_count=0;
+  shm_addr->dbbc3_command_active=0;
 
   return;
 }

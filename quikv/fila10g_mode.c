@@ -75,7 +75,7 @@ parse:
 
 
       ilast=0;                                      /* last argv examined */
-      memcpy(&lcl,&shm_addr->mk5b_mode,sizeof(lcl));
+      memcpy(&lcl,&shm_addr->fila10g_mode,sizeof(lcl));
 
       count=1;
       while( count>= 0) {

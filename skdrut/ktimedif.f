@@ -19,6 +19,7 @@
 *
       logical function ktimedif(itime1,itime2)
 ! Return true if the times are different.
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       integer itime1(5),itime2(5)          !iyear,iday,ihour,imin,isec
 
       ktimedif= (itime1(1) .ne. itime2(1)) .or.

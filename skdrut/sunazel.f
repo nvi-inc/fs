@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE sunazel(ISTN,MJD,UT,AZ,EL)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C   SUNEL converts the sun's ra and dec into az, el
 C

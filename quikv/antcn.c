@@ -45,6 +45,7 @@ int antcn(int ip[5])
   ip[2]=0;
   skd_run("antcn",'w',ip);
 
+  skd_par(ip);
   if(ip[2] >= 0 && (ip0 == 1 || ip0 == 9)) {
     ip[0]=1;
     ip[2]=0;

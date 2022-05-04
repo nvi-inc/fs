@@ -21,6 +21,8 @@
 C  Write form feed on printer
 C  Different versions needed for UX and PC.
 C  nrv 910705
+      implicit none  !2020Jun15 JMGipson automatically inserted.
+      integer luprt
 
 C For PC:
 C      write(luprt,'("1")')

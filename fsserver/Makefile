@@ -1,6 +1,6 @@
 TARGETS = ../bin/fsserver ../bin/fsclient ../bin/spub ../bin/ssub $(SHIMS) 
 SHIMS = ../bin/shims/xterm ../bin/shims/fs.prompt
-OBJECTs = fsserver.o server.o window.o list.o prompt.o fsclient.o window.o list.o prompt.o ./shims/fs.prompt.o 
+OBJECTS = fsserver.o server.o window.o list.o prompt.o fsclient.o window.o list.o prompt.o ./shims/fs.prompt.o
 
 .PHONY: all
 .PHONY: shims
@@ -14,7 +14,7 @@ CPPFLAGS += -pthread -D_GNU_SOURCE
 
 ../bin/spub: spub.o stream.o msg.o list.o
 ../bin/ssub: ssub.o msg.o
-../bin/fsserver: fsserver.o window.o server.o list.o prompt.o stream.o msg.o 
+../bin/fsserver: fsserver.o window.o server.o list.o prompt.o stream.o msg.o jsonutils.o inject_snap.o $(LIBS)
 ../bin/fsclient: fsclient.o window.o stream.o msg.o list.o prompt.o $(LIBS)
 
 ../bin/shims/fs.prompt: shims/fs.prompt.o $(LIBS)

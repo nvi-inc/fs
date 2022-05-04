@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -169,9 +169,9 @@ int main(int argc, char * argv[])
     }
     ip[2] = result;
     memcpy(ip+3,"ra",2);
-    if(result<-3||-1<result) 
+    if(result<-3||0<result)
       memcpy(ip+4,who,2);
-    else
+    else if (0!=result)
       memcpy(ip+4,what,2);
 #ifdef DEBUG
     fprintf(stderr,"leaving %s ip[0]=%d ip[1]=%d ip[2]=%d\n",
@@ -223,7 +223,8 @@ int doinit()
 	  shm_addr->rdbe_active[i]=1;
 	}
     }
-    {
+    char *disable=getenv("FS_RDBE_MC_DISABLE");
+    if (!disable || strcmp(disable,"1")) {
       char rdtcn[6];
       int ip[5];
       sprintf(rdtcn,"rdtc%1.1s",me+4);

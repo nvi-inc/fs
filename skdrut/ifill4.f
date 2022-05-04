@@ -19,6 +19,7 @@
 *
       subroutine ifill4(iarray,Ilen,ivalue)
 !passed
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       integer ilen
       integer iarray(ilen)
       integer ivalue

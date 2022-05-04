@@ -457,7 +457,7 @@ int disp;    /* non-zero means display tsys data as regular user data */
 		tpiz < -1 )
 	  shm_addr->systmp[ i]=1e9;
 	else {
-	  shm_addr->systmp[ i]=(tpi-tpiz)*
+	  shm_addr->systmp[ i]=(0.5*(tpi+tpic)-tpiz)*
 	    shm_addr->caltemps[ i]/(tpic-tpi);
 	}
 	if(disp &&

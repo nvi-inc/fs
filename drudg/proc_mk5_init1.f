@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine proc_mk5_init1(ntrack_obs,ntrack_rec_mk5,luscn,ierr)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
 ! passed
       integer ntrack_obs       !number of tracks we normally record on
@@ -27,16 +28,16 @@
       integer ierr             !some error
 ! history
 ! 2007Dec11 JMGipson.  Fixed  bug in format statement
-! 2014Jan30 JMGipson.  Removed some piggyback stuff. 
+! 2014Jan30 JMGipson.  Removed some piggyback stuff.
 ! 2014Dec06 JMGipson. Support Mark5C
-! 2018Sep05 JMGipson. Got rid of trailing '"' on comments. 
+! 2018Sep05 JMGipson. Got rid of trailing '"' on comments.
 
-      ierr=0  
+      ierr=0
 
 ! Put some instructions out for MK5 recorders.
       if(km5B.or. km5c) then
-        continue  
-      else if(km5A .or. knorec(1)) then 
+        continue
+      else if(km5A .or. knorec(1)) then
 ! setup for number of tracks observed and recorded.
         if(ntrack_obs .lt. 4) then
            write(luscn,'(/,a)')
@@ -52,9 +53,9 @@
 ! put commands in setup.
         if(km4form) then
           if(knorec(1))
-     >    write(lufile, 90) "If you have a Mark5A recorder" 
-          write(lufile,90) "Connect the Set 1 Mark5A recorder input to"          
-          write(lufile,90) "the headstack 1 output of the formatter"          
+     >    write(lufile, 90) "If you have a Mark5A recorder"
+          write(lufile,90) "Connect the Set 1 Mark5A recorder input to"
+          write(lufile,90) "the headstack 1 output of the formatter"
           if(ntrack_rec_mk5 .gt. 32) then
              write(lufile,90)
      >          "Connect the Set 2 Mark 5A recorder input to"
@@ -62,8 +63,8 @@
      >          "the headstack 2 output of the formatter"
           endif
         else if(kvrack) then
-           write(lufile,90)"Connect the Set 1 Mark5A recorder input to"          
-           write(lufile,90)"the first recorder output of the formatter"           
+           write(lufile,90)"Connect the Set 1 Mark5A recorder input to"
+           write(lufile,90)"the first recorder output of the formatter"
         endif
       endif
       return

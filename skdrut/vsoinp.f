@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE VSOINP(ivexnum,lu,ierr)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     This routine gets all the source information
 C     and stores it in common.
@@ -29,6 +30,7 @@ C
       include '../skdrincl/sourc.ftni'
 C
 C History:
+! 2021-01-25 JMG renamed SORP50 to more accurate SORP2000
 C 960527 nrv New.
 C 970114 nrv Change 8 to max_sorlen
 C 971003 nrv Suppress messages from the IAU name checker
@@ -40,7 +42,7 @@ C 2003Dec09 JMGipson replace holleriths by characcters.
 
 C
 C INPUT:
-      integer ivexnum ! vex file number 
+      integer ivexnum ! vex file number
       integer lu ! unit for writing error messages
 C
 C OUTPUT:
@@ -60,7 +62,7 @@ C LOCAL:
       character*128 csrc_names(max_sor)
       double precision RARAD,DECRAD,r,d
 C
-C     1. First get all the def names 
+C     1. First get all the def names
 C
       ierr1=0
       nsourc=0
@@ -75,7 +77,7 @@ C
           csrc_names(nsourc)=cout
           cout=" "
           iret = fget_source_def(ptr_ch(cout),len(cout),0) ! get next one
-        END IF 
+        END IF
       enddo
 
 C     2. Now call routines to retrieve all the source information.
@@ -85,7 +87,7 @@ C     2. Now call routines to retrieve all the source information.
       do isor=1,nsourc ! get each source information
         CALL vunpso(csrc_names(isor),ivexnum,iret,ierr,lu,
      .  ciau,ccom,RARAD,DECRAD,iep)
-        if (ierr.ne.0) then 
+        if (ierr.ne.0) then
           il=fvex_len(csrc_names(isor))
           write(lu,'("VSOINP01: Error getting $SOURCE information for ",
      >     a,"iret=",i5," ierr=",i5)')
@@ -138,8 +140,8 @@ C
             call mpstar_rad(tjd,rarad,decrad)
           END IF  !
         END IF  !"convert to J2000"
-        SORP50(1,NCELES) = RARAD   !J2000 position
-        SORP50(2,NCELES) = DECRAD  !J2000 position
+        SORP2000(1,NCELES) = RARAD   !J2000 position
+        SORP2000(2,NCELES) = DECRAD  !J2000 position
         endif ! continue
 C
       enddo ! get each source information

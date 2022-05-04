@@ -1,0 +1,343 @@
+//
+// Copyright (c) 2020-2021 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= FS 10.0.0-beta3 to FS 10.0.0 Update Notes
+Version 2.2 - February 2021
+
+//:hide-uri-scheme:
+:sectnums:
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+:toclevels: 4
+
+== Introduction
+
+The document covers updating from the _beta3_ pre-release to the
+FS _10.0.0_.
+
+For instructions for other upgrade paths, see the
+<<10.0.0.adoc#_other_update_documents,Other update documents>>
+sub-section of the
+<<10.0.0.adoc#,FS 10.0.0 Update Notes>> document.
+
+== Upgrading from 10.0.0-beta3 to 10.0.0
+
+You must have already upgraded to _10.0.0-beta3_ according to the
+<<beta3.adoc#,FS 10.0.0-beta3 Update Notes>> document or the
+<<beta2_to_beta3.adoc#,FS 10.0.0-beta2 to FS 10.0.0-beta3 Update Notes>>
+before
+installing this update.
+
+=== Fetch and make 10.0.0
+
+If you are using _git_, as is recommended, then as _prog_
+execute:
+
+             cd /usr2/fs-git
+             git fetch
+             git checkout -q 10.0.0
+             make clean rmdoto rmexe
+             make >& /dev/null
+             make -s
+
+No output from the last command indicates a successful _make_.
+
+=== Additional steps
+
+. If you have a station `lo_config` command, you should make sure it
+has been updated as described in the
+<<10.0.0.adoc#_update_local_lolo_config_commands,Update local lo/lo config commands>>
+sub-step of the
+<<10.0.0.adoc#_update_station_programs,Update station programs>>
+step in the <<10.0.0.adoc#,FS 10.0.0 Update Notes>> document. Although
+updating the `lo` command was mentioned for the update to
+__10.0.0-beta3__, updating the `lo_config` command was omitted from
+some versions of the instructions.
+
+. If you use _metserver_ as a local program and you updated to FS10
+from a VGOS branch, you may want to update to the new version. It
+includes several improvements, see the <<metserver,metserver>> change
+(in the <<FS changes>> sub-section below) for more details. See
+_st.default/st-0.0.0/metserver/INSTALL_ for the installation
+instructions. 
+
+. If you original updated to FS10 from a VGOS branch version, and
+haven't already, you should remove use of the deprecated _be_client_
+and _mcicn_ scripts with the more general _s_client_ script.
++
+
+You can find instances of the deprecated scripts commands, using,
+e.g., for _be_client_:
+
+   cd /usr2/proc
+   grep be_client *.prc
+
++
+
+You can use `less` to identify the SNAP procedures in each file that
+uses the script. Use _pfmed_ to make the changes.
++
+
+Information about using _s_client_ can be found using `*help=sy*`.
+
+. If you initially installed a beta version from scratch (and in
+particular on FSL10) and are using _bash_ as your shell, you can
+change your configuration to prevent the _cd_ command from changing
+the `login shell` window title, if you would like. Doing so will keep
+the title of this dedicated-use window consistent with the
+documentation.
++
+
+To make this change, add the line:
+
+  login_sh*allowTitleOps: false
++
+
+to the `login shell` stanzas of your _~oper/.Xresources_ and
+_~prog/.Xresources_ files. See _st.default/~oper/.Xresources_ for an
+example. You will need to log-out and log back in again to make the
+change fully active.
+
+. If they are not already, convert the contents of your _aquir_
+control files to lowercase. This is usually necessary since the FS is
+now case sensitive. However, you _could_ arrange your control files
+and procedure libraries to use uppercase if you want. That would be an
+unusual situation. For the typical situation, you can convert as
+_oper_, for example, with:
++
+
+CAUTION: These commands will change all the uppercase in the file(s)
+to lowercase, including in comments. The change for the comments
+should be benign. While it might not be what is desired for some of
+the comments, it will enforce lowercase for lines that are currently
+commented out, but may be uncommented in the future. You can always
+use an alternative method of conversion to retain uppercase in
+comments only in places where you want it.
+
+   cd /usr2/control
+   /usr2/fs/misc/to_lower ctlpo.ctl
++
+
+You can repeat this for other _aquir_ control files you may have. The
+_to_lower_ script can process multiple files given on the command
+line. It will make a back-up of original files with an added _.bak_
+extension. It will not overwrite any existing _.bak_ file. It stops if
+any error is encountered.
++
+
+CAUTION: Each _aquir_ control file has its own horizon mask that is
+separate from the one in _location.ctl_.
+
+=== Review changes
+
+Please see the <<Changes since 10.0.0-beta3>> section below
+for details of the changes since that pre-release.
+
+== Changes since 10.0.0-beta3
+
+There are separate sub-sections with summaries of changes in the FS
+and _drudg_.
+
+Clickable links such as
+https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
+reported at https://github.com/nvi-inc/fs/issues.
+
+A complete history of changes can be found using the `git log` command
+from within the FS _git_ archive directory, usually _/usr2/fs-git_.
+
+=== FS changes
+
+. Improvements to _msg_:
+
+.. Add checking in _msg_ for the FS being active just before writing to
+the log (closes https://github.com/nvi-inc/fs/issues/86[#86]).
++
+
+This allows `msg` to send its output to the log if it is started
+before the FS. Previously, it had to be started after the FS. Thanks
+to Jon Quick (HartRAO) for suggesting this.
+
+.. Add feature to _msg_ to allow switching from "`manual start`" to
+"`auto-start`" (closes
+https://github.com/nvi-inc/fs/issues/87[#87]).
++
+
+By design, _msg_ only allowed "`auto-start`" to be entered from the
+`Ready` form. If the connection to the FS computer is lost (killing
+_msg_) while waiting for "`auto-start`" to complete, it was difficult
+to re-enter without sending a new `Ready` message. To help with this
+an `Auto-start` button was added to "`manual start`".  When _msg_ is
+restarted, the user can go to the `Start` form and use the
+`Auto-start` button to re-enter "`auto-start`". The log must already
+be open to the experiment log when _msg_ restarted for this to work.
+Thanks to Jon Quick (HartRAO) for suggesting this.
+
+. Add the `.rxg` file LO values to the `lo/rxg` output lines.
++
+
+This change is intended to make it clearer which `.rxg` file is use,
+particularly if there are files with both `fixed` and `range` LO
+specifications that could match (`fixed` has priority).
+
+. Change default _.Xresource_ files to prevent overwriting of `login
+shell` window title by _bash_.
++
+
+This maintains consistent window naming for agreement with existing
+documentation. This only affects _bash_ users.
+
+. Improve DBBC2 `if__x__` command help files.
+
+.. The fact that the IF target level is not command as the default was added.
+
+.. The range for IF filter 3 was corrected to 1536-2048.
+
+.. The description of the scaling of the IF power measurements was
+brought up to date.
+
+. Add missing help file for `active_mk6s`.
+
+. Make improvements to update instructions:
+
+.. [[makeinc]] Add `make clean rmdoto rmexe` command after `git
+checkout` in incremental update notes.
++
+
+For incremental updates it is necessary to clean the old compiled
+code. This is due to _drudg_ not participating in the new _Makefile_
+scheme, but it is generally cleaner too. Thanks to Carlo Migoni
+(Sardinia) for reporting this.
+
+.. Add update instructions to covert the contents of _aquir_ control
+files to lower case.
++
+
+This is necessary and was omitted in all the _beta_ update
+instructions. The distributed example _aquir_ control files were
+converted to lowercase. Thanks to Jon Quick (HartRAO) for reporting
+this.
+
+.. Add suggestions for how to set-up for opening additional windows
+interactively in the
+<<../../misc/install_reference.adoc#_opening_additional_windows,Opening additional windows>>
+section of the
+<<../../misc/install_reference.adoc#,Installation reference>> document.
+
+.. Add switching to _s_client_ to the update notes for former VGOS
+branch users.
+
+.. [[metserver]] Add update instructions for switching to the new
+_metserver_.  It has several new features for former users of the old
+VGOS branch versions:
+
+... A new command line argument to disable errors messages for specific
+sensors if they are broken.
+
+... Support for `FS_SERIAL_CLOCAL` _make_ time environment variable for
+FSL9 and later.
+
+... Improved reporting of errors when opening serial devices.
+
+... Reduction in the threshold for old data being declared _stale_ to
+10 seconds, which is more than sufficient.
+
+. Fix an issue with _git_ on FSL8 causing the repo to appear "`dirty`"
+after _root_ does a `make install`.
+
+. Switch back to using internal version information for `fesh` and
+`plog`.
++
+
+Using the FS version could make it look like the programs have changed
+when they hadn't. Using the FS version was a change in _beta2_.
+
+. Improve start-up error message from _fserr_ if an error message line
+is too long in _fsser.ctl_ or _sterr.ctl_.
++
+
+Previously, it reported the error as being in the following `""` line.
+
+. Add `mci-code` and `mci-parameter` options to _rdbemsg.ctl_.
++
+
+These options allow overriding of the station code in the MCI log and
+which positional parameter to extract from the data lines,
+respectively. If these lines are not specified, the values default to
+the station code and `2`, respectively. These are needed for the
+prototype MCI nodes at GGAO and Westford. GGAO requires `gg` for the
+code and `3` for the parameter position.
+
+. Update default control files:
+
+** _equip.ctl_ -- Change default second recorded to `none`.
+** _stpgm.ctl_ -- Change five character name of _monit2_ to `moni2`.
+** _rdbemsg.ctl_ -- Add example `mci-code` and `mci-parameter` lines.
+
+. Add `save` to all _fslb/novas.f_ routines.
++
+
+This is defensive in case local variable are changed to being
+automatic. The NOVAS routines seem to require static variables.
+
+. Add missing GPL to _wish_ scripts.
+
+=== drudg changes
+
+. Fix the GB shown in _drudg_ listings (closes
+https://github.com/nvi-inc/fs/issues/88[#88]).
++
+
+The values had been incorrectly scaled by 1000/1024 since _beta1_.
+This was fixed. This issue was introduced in the merge of the VGOS
+branch, which also had this issue. This did not have much consequence
+for Mark 6 users, but it could lead to selecting the wrong size module
+for Mark 5 usage.  Thanks to Jon Quick (HartRAO) for reporting this.
++
+
+The size of the GB being recorded in `mk6=record=...` commands had the
+same issue dating back to the VGOS branch as well. This was also
+fixed. This error had no impact since the value is only used by the
+recorder to determine whether the disk module has enough room for the
+recording and the Mark 6 modules were not being used near their
+capacity limit.
+
+. Correct the name of the setup procedure used for `BB` racks to
+always be `setupbb` regardless of the recorder selected (closes
+https://github.com/nvi-inc/fs/issues/57[#57]).
++
+
+This makes schedules more useful with other recorders, particularly
+`none` (which is used for single dish tests).
+
+. Allow the `$PARAMS` block to occur after other blocks in _.skd_
+files.
++
+
+Previously it has to be the first block.
+
+. Restore summary listings for staggered start (closes
+https://github.com/nvi-inc/fs/issues/94[#94]).
++
+
+This bug was apparently introduced in _beta1_. It was apparently
+broken in the merge of _9.13.2_ (where it worked) and the VGOS branch.
+Thanks to Jon Quick (HartRAO) for reporting this.

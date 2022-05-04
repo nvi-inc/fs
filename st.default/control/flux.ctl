@@ -1,15 +1,15 @@
 * flux.ctl - source flux control file
 *
-* source records:
-*
 * originally from John Conway based on (Casa, Cygnusa, TauA) from Baars et al
 * 1977, AA, 61, 99 and (others) Ott et al 1994, AA 284, 331, see sflux.f
 * subroutine, WEH 020813
 *
 * min freq on L band sources decreased to 500 per John Conway, WEH 0209xx
 *
-*               freq MHz  ---- flux 10** ----   "     FS
-* source  type  min  max  log   log(f) 2log(f) size  model
+* source record format documented at the end
+*
+*               freq MHz  ---- flux model ---- size
+* source  type  min  max    a      b       c     "   FS structure model
    3c48     c   500 23780 2.465 -0.004 -0.1251   1.5 gauss 100    1s
    3c123    c   500 23780 2.525  0.246 -0.1638  23   gauss 100   23s 5s
    3c147    c   500 23780 2.806 -0.140 -0.1031   1   gauss 100    1s
@@ -62,3 +62,56 @@
    3c84     p  2020  2520 1.60205 0      0        1  gauss 100 1s  
    3c84     p  8080  9080 1.69987 0      0        1  gauss 100 1s  
 *
+* source record format
+*
+*   maximum of 100 records
+*
+*   source name:
+*
+*     up to 10 characters, must agree with name used in source=...
+*
+*   source type:
+*
+*     c - flux calibrator (pointing also)
+*     p - pointing only
+*
+*   freq MHz:
+*
+*     minimum and maximum applicable frequencies in MHz
+*
+*   flux model:
+*
+*     log10nu     = log10(frequency in MHz)
+*
+*     log10(flux) = a + b * log10nu + c * log10nu * log10nu
+*
+*   size: seconds of arc
+*
+*     used to approximately increase step size used is fivpt/onoff
+*
+*   FS (approximate) structure models: gauss, 2pts, disk
+*
+*     gauss percent1 axis11 axis12 percent2 axis21 axis22
+*
+*     up to two concentric, possibly elliptical gaussian components
+*
+*       component 1: percent1 axis11 axis12
+*       component 2: percent2 axis21 axis22
+*
+*       if component 2 is omitted, then axis12 can be omitted for circular
+*
+*       if axis22 is omitted, component 2 is circular
+*
+*       percent1 and percent2: floats that should sum to 100
+*
+*     2pts seperation
+*
+*       two point like sources with the given separation
+*
+*     disk diameter
+*
+*       uniform disk with the given diameter
+*
+*     axisXX, separation, and diameter: float angles with suffix: d, m, or s
+*
+*        d=degrees, m=arc minutes, s=arc seconds

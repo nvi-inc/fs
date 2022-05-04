@@ -110,3 +110,4 @@
 #include "dbbc_vsix_ds.h"
 #include "dbbc_pfbx_ds.h"
 #include "dbbcvsi_clk_ds.h"
+#include "dbbc3_core3h_modex_ds.h"

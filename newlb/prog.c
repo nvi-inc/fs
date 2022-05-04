@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -2720,44 +2720,44 @@ void fs_get_rdbe_pcal_amp__(rdbe_pcal_amp)
 	  memcpy(rdbe_pcal_amp,shm_addr->rdbe_equip.pcal_amp,N);
 	}
 
-void fs_set_dbbc3_ddc_v__(dbbc3_ddc_v)
-	int *dbbc3_ddc_v;
+void fs_set_dbbc3_ddcu_v__(dbbc3_ddcu_v)
+	int *dbbc3_ddcu_v;
 	{
-          shm_addr->dbbc3_ddc_v = *dbbc3_ddc_v;
+          shm_addr->dbbc3_ddcu_v = *dbbc3_ddcu_v;
         }
 
-void fs_get_dbbc3_ddc_v__(dbbc3_ddc_v)
-	int *dbbc3_ddc_v;
+void fs_get_dbbc3_ddcu_v__(dbbc3_ddcu_v)
+	int *dbbc3_ddcu_v;
 	{
-          *dbbc3_ddc_v = shm_addr->dbbc3_ddc_v;
+          *dbbc3_ddcu_v = shm_addr->dbbc3_ddcu_v;
 	}
 
-void fs_set_dbbc3_ddc_vs__(dbbc3_ddc_vs)
-	char *dbbc3_ddc_vs;
+void fs_set_dbbc3_ddcu_vs__(dbbc3_ddcu_vs)
+	char *dbbc3_ddcu_vs;
 	{
           size_t N;
 	  N = DBBC3_DDC_VS_N;
-	  memcpy(shm_addr->dbbc3_ddc_vs,dbbc3_ddc_vs,N);
+	  memcpy(shm_addr->dbbc3_ddcu_vs,dbbc3_ddcu_vs,N);
 	}
 
-void fs_get_dbbc3_ddc_vs__(dbbc3_ddc_vs)
-	char *dbbc3_ddc_vs;
+void fs_get_dbbc3_ddcu_vs__(dbbc3_ddcu_vs)
+	char *dbbc3_ddcu_vs;
 	{
           size_t N;
 	  N = DBBC3_DDC_VS_N;
-	  memcpy(dbbc3_ddc_vs,shm_addr->dbbc3_ddc_vs,N);
+	  memcpy(dbbc3_ddcu_vs,shm_addr->dbbc3_ddcu_vs,N);
 	}
 
-void fs_set_dbbc3_ddc_vc__(dbbc3_ddc_vc)
-	int *dbbc3_ddc_vc;
+void fs_set_dbbc3_ddcu_vc__(dbbc3_ddcu_vc)
+	int *dbbc3_ddcu_vc;
 	{
-          shm_addr->dbbc3_ddc_vc = *dbbc3_ddc_vc;
+          shm_addr->dbbc3_ddcu_vc = *dbbc3_ddcu_vc;
         }
 
-void fs_get_dbbc3_ddc_vc__(dbbc3_ddc_vc)
-	int *dbbc3_ddc_vc;
+void fs_get_dbbc3_ddcu_vc__(dbbc3_ddcu_vc)
+	int *dbbc3_ddcu_vc;
 	{
-          *dbbc3_ddc_vc = shm_addr->dbbc3_ddc_vc;
+          *dbbc3_ddcu_vc = shm_addr->dbbc3_ddcu_vc;
 	}
 
 void fs_set_dbbc3_ddc_bbcs_per_if__(dbbc3_ddc_bbcs_per_if)
@@ -2873,3 +2873,78 @@ void fs_get_fortran__(fortran)
 	  N = FORTRAN;
 	  memcpy(fortran,shm_addr->fortran,N);
 	}
+void fs_set_dbbc3_ddcv_v__(dbbc3_ddcv_v)
+	int *dbbc3_ddcv_v;
+	{
+          shm_addr->dbbc3_ddcv_v = *dbbc3_ddcv_v;
+        }
+
+void fs_get_dbbc3_ddcv_v__(dbbc3_ddcv_v)
+	int *dbbc3_ddcv_v;
+	{
+          *dbbc3_ddcv_v = shm_addr->dbbc3_ddcv_v;
+	}
+
+void fs_set_dbbc3_ddcv_vs__(dbbc3_ddcv_vs)
+	char *dbbc3_ddcv_vs;
+	{
+          size_t N;
+	  N = DBBC3_DDC_VS_N;
+	  memcpy(shm_addr->dbbc3_ddcv_vs,dbbc3_ddcv_vs,N);
+	}
+
+void fs_get_dbbc3_ddcv_vs__(dbbc3_ddcv_vs)
+	char *dbbc3_ddcv_vs;
+	{
+          size_t N;
+	  N = DBBC3_DDC_VS_N;
+	  memcpy(dbbc3_ddcv_vs,shm_addr->dbbc3_ddcv_vs,N);
+	}
+
+void fs_set_dbbc3_ddcv_vc__(dbbc3_ddcv_vc)
+	int *dbbc3_ddcv_vc;
+	{
+          shm_addr->dbbc3_ddcv_vc = *dbbc3_ddcv_vc;
+        }
+
+void fs_get_dbbc3_ddcv_vc__(dbbc3_ddcv_vc)
+	int *dbbc3_ddcv_vc;
+	{
+          *dbbc3_ddcv_vc = shm_addr->dbbc3_ddcv_vc;
+	}
+
+void fs_set_dbbc3_mcdelay__(dbbc3_mcdelay)
+	int *dbbc3_mcdelay;
+	{
+          shm_addr->dbbc3_mcdelay = *dbbc3_mcdelay;
+    }
+
+void fs_get_dbbc3_mcdelay__(dbbc3_mcdelay)
+	int *dbbc3_mcdelay;
+	{
+          *dbbc3_mcdelay = shm_addr->dbbc3_mcdelay;
+    }
+
+void fs_set_dbbc3_iscboard__(dbbc3_iscboard)
+	int *dbbc3_iscboard;
+	{
+          shm_addr->dbbc3_iscboard = *dbbc3_iscboard;
+    }
+
+void fs_get_dbbc3_iscboard__(dbbc3_iscboard)
+	int *dbbc3_iscboard;
+	{
+          *dbbc3_iscboard = shm_addr->dbbc3_iscboard;
+    }
+
+void fs_set_dbbc3_clockr__(dbbc3_clockr)
+	int *dbbc3_clockr;
+	{
+          shm_addr->dbbc3_clockr = *dbbc3_clockr;
+    }
+
+void fs_get_dbbc3_clockr__(dbbc3_clockr)
+	int *dbbc3_clockr;
+	{
+          *dbbc3_clockr = shm_addr->dbbc3_clockr;
+    }

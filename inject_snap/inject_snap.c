@@ -101,20 +101,24 @@ main(int argc, char **argv)
 	printf("%s\n",buf);
     }
     if(ip[2]!=0) {
-      int class, ipf[5], rtn1f,rtn2f;
+//      int class, ipf[5], rtn1f,rtn2f;
       char ibur[MAX_BUF];
-      int iburl;
-      if(ip[4]==0)
-	sprintf(buf,"ERROR %2.2s %4d \n",ip+3,ip[2]);
-      else
-	sprintf(buf,"ERROR %2.2s %4d (%2.2s)\n",ip+3,ip[2],ip+4);
-      class=0;
-      cls_snd(&class, buf, 80, 0, 0);
-      ipf[0]=class;
-      skd_run("fserr", 'w', ipf); 
-      skd_par(ipf);
-      iburl=cls_rcv(ipf[0], ibur, 118, &rtn1f, &rtn2f, 0,0);
-      ibur[iburl]='\0';
+//      int iburl;
+//      if(ip[4]==0)
+//	sprintf(buf,"ERROR %2.2s %4d \n",ip+3,ip[2]);
+//      else
+//	sprintf(buf,"ERROR %2.2s %4d (%2.2s)\n",ip+3,ip[2],ip+4);
+//      class=0;
+//      cls_snd(&class, buf, 80, 0, 0);
+//      ipf[0]=class;
+//      skd_run("fserr", 'w', ipf); 
+//      skd_par(ipf);
+//      iburl=cls_rcv(ipf[0], ibur, 118, &rtn1f, &rtn2f, 0,0);
+//      ibur[iburl]='\0';
+
+/* temporary fix until fserr interface is generalized or replaced */
+
+      strcpy(ibur,"(Please check log/display for error message expansion)");
 
       if(ip[4]==0)
 	printf("ERROR %2.2s %4d %s\n",ip+3,ip[2],ibur);

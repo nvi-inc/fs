@@ -20,8 +20,8 @@
       SUBROUTINE ATAPE(LINSTQ,luscn,ludsp)
       implicit none
 C
-C     ATAPE reads/writes station tape allocation type. This routine 
-C     reads the TAPE_ALLOCATION lines in the schedule file and handles 
+C     ATAPE reads/writes station tape allocation type. This routine
+C     reads the TAPE_ALLOCATION lines in the schedule file and handles
 C     the ALLOCATION command.
 C
       include '../skdrincl/skparm.ftni'
@@ -78,7 +78,7 @@ C
           il=trimlen(tape_allocation(i))
           WRITE(LUDSP,'(1X,A2,2X,A8,2x,a)') cpoCOD(I),cSTNNA(I),
      >        tape_allocation(i)(1:il)
-        END DO  
+        END DO
         return
       END IF  !no input
 C
@@ -114,7 +114,7 @@ C       Station ID is valid. Check tape type now.
      >      list
             return
           END IF  !invalid type
-        endif 
+        endif
 
 C   3. Now set parameters in common.
 

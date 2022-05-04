@@ -19,6 +19,7 @@
 *
 !     Last change:  JG   27 May 2005    3:05 pm
       function dot8(a,b,num)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       DOUBLE precision a(*),b(*)
       INTEGER num,i
       DOUBLE PRECISION dot8

@@ -19,6 +19,7 @@
 *
       subroutine proc_sked_proc(ierr)
 ! Write out procedures from sked file if there are any.
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
       include 'drcom.ftni'
       include '../skdrincl/statn.ftni'

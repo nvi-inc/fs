@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine seconds2hms(rsecond,ihr,imin,isec)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       double precision rsecond
       integer ihr,imin,isec
       ihr =rsecond/3600.d0

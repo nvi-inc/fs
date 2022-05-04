@@ -1,4 +1,4 @@
-
+#
 ../bin/plog: plog
-	sed s/UNKNOWN-VERSION/"$(FS_VERSION)"/ $^ > $@
-	chmod +x $@
+	rm -f ../bin/plog
+	ln -s ../plog/plog ../bin/plog

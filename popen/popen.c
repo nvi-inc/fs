@@ -49,8 +49,8 @@ int status;
 char buffer[BUFF_SIZE];
 char out[BUFF_SIZE];
 
- char *name, *command, *send;
- int c, index, no_display, error,to;
+ char *name, *command;
+ int c, index, no_display, to;
  struct itimerval value;
 
  setup_ids();
@@ -59,20 +59,16 @@ char out[BUFF_SIZE];
  name = argv[0];
  command = NULL;
  no_display=0;
- error=NULL==getenv("FS_POPEN_NO_STDERR");
  to=0;
 
  opterr = 0;
- while ((c = getopt (argc, argv, "lc:en:t:")) != -1) {
+ while ((c = getopt (argc, argv, "lc:n:t:")) != -1) {
    switch (c) {
    case 't':
      to = atoi(optarg);
      break;
    case 'n':
      name = optarg;
-     break;
-   case 'e':
-     error = 0;
      break;
    case 'l':
      no_display = 1;
@@ -117,13 +113,6 @@ char out[BUFF_SIZE];
    snprintf(out,OUT_SIZE,"%s:%s",name,"No command given");
    err_out(out);
  }
- if(error) {
-     send=malloc(strlen(command)+6);
-     strcpy(send,command);
-     strcat(send," 2>&1");
-     command=send;
- }
-
  fp = popen(command, "r");
  if (fp == NULL)  {
    snprintf(out,OUT_SIZE,"%s:%s",name,"popen() failed");

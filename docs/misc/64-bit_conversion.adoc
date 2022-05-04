@@ -1,0 +1,482 @@
+//
+// Copyright (c) 2020-2021 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= Converting to a 64-bit System
+Version 1.1 - February 2021
+
+//:hide-uri-scheme:
+:sectnums:
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+:toclevels: 4
+
+== Introduction
+
+This document covers converting to a 64-bit system from an existing
+32-bit FS10 system. It is also used as part of the upgrade path to go
+directly to 64-bit system while upgrading the FS.
+
+The approach here assumes you will be installing a 64-bit system on a new
+computer. Doing so will allow you to convert to 64-bit without
+disturbing your operational 32-bit system.
+
+== Convert to using a 64-bit system
+
+IMPORTANT: All operations,except where noted, are performed on the
+new, 64-bit, system.
+
+Please follow the steps below.
+
+=== Install a 64-bit system
+
+Install a 64-bit system on a different (hopefully new) computer. We
+recommend FSL10, which is based on Debian _Stretch_ and tuned for FS
+use. The FSL10 installation guide can be found at
+https://nvi-inc.github.io/fsl10/. That process installs a base FS.
+
+NOTE: As indicated in that document, you should checkout the latest release of FS10, which may be a pre-release.
+
+You can install a different distribution. However, we can't
+provide as much support in that case. The FSL10 distribution is
+tuned to provide a complete platform for running the FS. For other
+distributions you may have to make adjusts for several things that
+an FSL10 installation provides, including:
+
+- which packages are installed
+- required user accounts and groups
+
+=== Login as root
+
+Login as _root_.
+
+=== Rename default directories
+
+NOTE: This step assumes you have installed a base FS, either along
+with FSL10 or using your own methods. If the latter and the normal
+default FS directories were not created, you can skip this step.
+
+. Rename the existing default station specific FS related directories
+on the 64-bit computer to get them out of the way:
+
+      cd /usr2
+      mv control   control.DEFAULT
+      mv sched     sched.DEFAULT
+      mv proc      proc.DEFAULT
+
+. If you use the _/usr2/tle_files_ directory on your old computer,
+you should rename the one on the 64-bit computer:
+
+      cd /usr2
+      mv tle_files tle_files.DEFAULT
+
+. If your station software is in _/usr2/st-0.0.0_ on your old computer,
+you should rename the one on the 64-bit computer:
+
+      cd /usr2
+      mv st-0.0.0  st-0.0.0.DEFAULT
+
+. The _log_ directory were not included above, since it should
+essentially be empty on the new computer, but could also be
+renamed if you prefer:
+
+      cd /usr2
+      mv log       log.DEFAULT
+
+=== Transfer files
+
+Your station specific FS related files can be transferred from the old
+computer using any convenient method.  If both systems are on the
+network this can be particularly easy. The following example sub-steps
+use this approach. You should replace the _old_ host name in the
+examples (and in file names) with your old system's host name. These
+commands must be executed as _root_, and except where noted, from the
+64-bit system.
+
+NOTE: You may need to provide the appropriate password for each _scp_
+command. If so, you can simplify the process by copying your 64-bit
+computer's _root_ SSH keys to the old machine _oper_ and _prog_
+accounts with _ssh-copy-id_ first.
+
+CAUTION: It is assumed that the new installation is on new hardware
+with disks more than large enough to accommodate all the data being
+transferred. However, if you installed the new Linux on old hardware
+with small disks, there may be a space issue.
+
+WARNING: The instructions below assume that the existing system you
+are using has a standard FS configuration in terms of symbolic links
+and directories. If your system is different, you will need to adjust
+what you do accordingly, but you may still find the outline of steps
+useful.
+
+. Transfer operations directories:
+
+.. Transfer _control_, _sched_, and _proc_:
++
+
+[subs="+quotes"]
+....
+cd /usr2
+scp -pqr oper@_old_:/usr2/control .
+scp -pqr oper@_old_:/usr2/sched .
+scp -pqr oper@_old_:/usr2/proc .
+....
++
+
+NOTE: Your _sched_ and _proc_ directories could be
+large and take a significant amount of time to transfer.
+
+.. Transfer _log_:
++
+It can be useful to have your old log files on the new
+computer, but that transfer could take a long time:
++
+
+[subs="+quotes"]
+....
+cd /usr2
+scp -pqr oper@_old_:/usr2/log .
+....
+
+.. Transfer _tle_files_:
++
+If you use the _/usr2/tle_files_ directory on your old
+computer, you can also transfer it:
++
+
+[subs="+quotes"]
+....
+cd /usr2
+scp -pqr oper@_old_:/usr2/tle_files .
+....
+
+. Fix the permissions on the operations directories/files you
+transferred. You can fix their permissions and ownerships
+to the standard with:
+
+    /usr2/fs/misc/fix_perm
++
+Answer `*y*` to confirm.
++
+
+NOTE: If you don't have a _/usr2/tle_files_ directory, you will get a
+message that there is no such directory. That is benign unless you
+expect such a directory to be there.
+
+. Make back-up copies of the operational directories. This
+sub-step is optional but may be useful so that there are
+unmodified copies of the directories from the old machine
+to use for reference:
++
+
+[subs="+quotes"]
+....
+cd /usr2
+cp -a proc      proc-_old_
+cp -a control   control-_old_
+cp -a sched     sched-_old_
+....
++
+
+and possibly:
++
+
+[subs="+quotes"]
+....
+cd /usr2
+cp -a log       log-_old_
+cp -a tle_files tle_files-_old_
+....
+
+. Transfer your station software directory (and make a
+reference copy). This is usually the target directory
+pointed to by the _/usr2/st_ symbolic link. On your old
+computer, you can find its name with:
+
+  ls -l /usr2/st
++
+
+In the rest of this sub-step, the target _st-version_ will be used.
+You should replace __version__ with your version number. For example,
+_1.0.0_, to make a target _st-1.0.0_. If your target is _st-0.0.0_ you
+should rename the default on the new computer first as described in
+the <<Rename default directories>> step above.
+
+.. On the new computer, copy the target from the old computer to the
+new computer, e.g.:
++
+
+[subs="+quotes"]
+....
+cd /usr2
+scp -pqr oper@__old__:/usr2/st-_version_ .
+....
+
+.. On the new computer, set the _/usr2/st_ symbolic link to point to
+the target directory:
++
+
+[subs="+quotes"]
+....
+cd /usr2
+ln -fsn st-_version_ st
+....
+
+.. On the new computer, you can set its permissions and ownership for
+_prog_ with:
++
+
+[subs="+quotes"]
+....
+cd /usr2
+chown -R prog.rtx st-_version_
+chmod -R a+r,u+w,go-w st-_version_
+....
+
+.. On the new computer, you can make a reference copy with (_old_ is
+the name of your old computer):
++
+
+[subs="+quotes"]
+....
+cd /usr2
+cp -a st-_version_ st-_version-old_
+....
+
+. Copy your _oper_ and _prog_ directories to the new computer. This
+sub-step is optional. The FSL10 installation made default home
+directories for these users on _/usr2_.  If you did not have
+customized content for the users on the old computer, you could just
+use the versions on the new computer. Still it may be useful to have a
+copy of your old directories on the new system for reference,
+especially if you realize later that there were additional programs
+and files you want to use on the new system. In the commands below
+_old_ is the name of your old computer.
+
+.. You can accomplish the transfers as _root_ using:
++
+
+[subs="+quotes"]
+....
+cd /usr2
+scp -pqr oper@_old_:~ oper-_old_
+scp -pqr prog@_old_:~ prog-_old_
+....
+
+.. You probably want to set their permission and ownership so the
+appropriate users are allow to access them:
++
+
+[subs="+quotes"]
+....
+chown -R oper.rtx /usr2/oper-_old_
+chmod -R a+r,u+w,go-w /usr2/oper-_old_
+
+chown -R prog.rtx /usr2/prog-_old_
+chmod -R a+r,u+w,go-w /usr2/prog-_old_
+....
+
++
+You can customize the home directories on the new computer
+to include any features you want from the old system.
+
+. At this point you are principle done transferring files.
+However, it is also possible that you may need or want
+other files or changes such as:
+
+.. Copy other files or programs from the old system
++
+This might include directories and log files that exist as copies from even older computers.
+
+.. Install additional Debian packages
+.. Copy/merge additional configuration files, such as:
+
+    /etc/hosts
+    /etc/hosts.allow
+    /etc/hosts.deny
+    /etc/ntp.conf
+
++
+You can use a similar process to the one above to transfer
+and/or make reference copies of more files and directories.
+
+=== Login as prog
+
+Login as _prog_.
+
+=== Update station programs
+
+This step is for modifying your station programs in _/usr2/st_.  There
+are two possible issues, conversion of FORTRAN code and conversion of
+C code.
+
+==== Conversion of FORTRAN code
+
+If you don't have any FORTRAN station code or you have already
+converted it to _f95_, skip this sub-step.
+
+Use of _f95_ is necessary
+on 64-bit systems. If you have station programs
+in FORTRAN, please email Ed so he is aware.
+
+You will need to adapt your __Makefile__s
+to use the same compiler options as the FS, which can be
+found in _/usr2/fs/include.mk_.
+As a first cut, it may work to add the following two lines
+to your __Makefile__s for FORTRAN programs:
+
+    FFLAGS  += -ff2c -I../../fs/include -fno-range-check -finit-local-zero -fno-automatic -fbackslash
+    FLIBS   += -lgfortran -lm
+
+==== Conversion of C code
+
+If you don't have any C station code, you can skip this sub-step.
+
+If you have C station code, it should work as written unless
+you have declared integers that interface to the FS as `long`.
+For a start at fixing those, please see
+https://github.com/dehorsley/unlongify.
+The following steps describe how to install and use the _unlongify_ tool.
+
+===== Install go language
+
+If you haven't already, you will need to first install the _go_
+language. If you are using FSL10, you can install the _go_ language in
+one of two ways listed below:
+
+. <<Option A - Installing golang package>>
+. <<Option B - Installing latest go language>>
+
+We recommend the first way for those that are only using _go_ for the
+_unlongify_ tool. After installing the _go_ language, continue the
+<<Conversion of C code>> instructions starting at
+<<Configure prog account for go language>> sub-step below.
+
+====== Option A - Installing golang package
+
+You can use the Debian package management system to install _go_.
+This will give you an older version of _go_ that is perfectly adequate
+for the task at hand and is supported by the normal security update
+mechanism. To install it this way, as _root_ use:
+
+  apt-get install golang
+
+====== Option B - Installing latest go language
+
+You can install the latest version of _go_, but this is outside the
+normal security update mechanism. In this case, you will need to
+manage your own updates, which may not be suitable for an operational
+environment.  If you use this method it is recommended that you
+sign-up for _go_ language announcements so that you will be informed
+when a security update is available.  You can sign-up at
+https://groups.google.com/forum/#!forum/golang-announce.
+
+Another alternative is to delete the latest _go_ (`*rm -rf
+/usr/local/go*`) after you have made _unlongify_. You can
+always re-install it if you need it again.
+
+Both the initial install and updates are handled by the
+_fsadapt_ script, as _root_:
+
+  cd /root/fsl10
+  ./fsadapt
+
+In the first window select _only_ the option (i.e., only that line has a `*`):
+
+  goinst    Install (or 'Update') Go programming language
+
+Then press kbd:[Enter] while `OK` is highlighted. On the next screen, press kbd:[Tab]
+to highlight `Cancel` and then press kbd:[Enter].
+
+===== Configure prog account for go language
+
+Once you have the _go_ language installed, you need to define
+the `GOPATH` environment variable and include it in _prog_'s
+path.  The default _~prog/.profile_ file includes two commands
+(commented out by default) to accomplish these things:
+
+ #export GOPATH=~/go
+ #PATH="$GOPATH/bin:/usr/local/bin/go:$PATH"
+
+You will need to uncomment these two lines and then logout
+and log back in again as _prog_ or, in a current login session
+for _prog_, re-execute the file:
+
+....
+. ~/.profile
+....
+
+===== Install unlongify
+
+Then you should be able to execute the installation step given
+at the URL above (as _prog_):
+
+  cd
+  go get github.com/dehorsley/unlongify
+
+===== Use unlongify
+
+Please read the _README.md_ file, which is displayed at the
+URL above. Alternatively, it can be viewed at
+_~/prog/go/src/github.com/dehorsley/unlongify/README.md_ where
+it was installed by the above command. Please pay particular
+attention to the `Note` about system calls.
+
+TIP: The _unlongify_ program attempts to process all _*.h_ and _*.c_
+files in the path specified as its argument. If it encounters a file
+with a syntax error, an error message will be printed and processing
+will stop. Presumably, this would not happen for files that are in
+active use, e.g., are referred to in __Makefile__s. However, there may
+be code with issues in files that are not currently used. If an error
+occurs, the messages should help you identify files with issues, which
+can moved (re)moved or corrected as appropriate. Thanks to Carlo
+Migoni (Sardinia) for reporting this and spurring the addition of file
+names to the error messages.
+
+=== Make local software
+
+IMPORTANT: If you are installing a 64-bit system as part of upgrading
+the FS, you should return to the FS update instructions at this point.
+
+If _/usr2/st/Makefile_ is set-up in the standard way, you can do this with:
+
+       cd /usr2/st
+       make rmdoto rmexe all
+
+NOTE: At this point, you are only trying to verify the code will _make_
+successfully.  You may still need to debug it in the <<Test the FS>> step
+below.
+
+Once your code __make__s successfully, you can continue, but you may
+need to debug it in the <<Test the FS>> step below.
+
+=== Reboot
+
+IMPORTANT: Reboot the computer.  This is important for initializing shared
+memory for the new version.
+
+=== Login as oper
+
+The remaining steps assume you are logged in as _oper_.
+
+=== Test the FS
+
+NOTE: You may need to debug your station code as part of this.

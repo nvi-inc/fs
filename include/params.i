@@ -1,3 +1,22 @@
+*
+* Copyright (c) 2020 NVI, Inc.
+*
+* This file is part of VLBI Field System
+* (see http://github.com/nvi-inc/fs).
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
 c params.i
 c compile time parameters
 c
@@ -51,6 +70,8 @@ c
       integer RDBE          ! RDBE comparison bit variable
       integer MK6           ! MK6 comparison bit variable
       integer DBBC3         ! DBBC3 comparison bit variable
+      integer DBBC3_DDCU    ! DBBC3_DDCU comparison bit variable
+      integer DBBC3_DDCV    ! DBBC3_DDCV comparison bit variable
       character*5 FS_ROOT
       integer MAX_BBC
       integer MAX_VLBA_BBC
@@ -142,6 +163,8 @@ C rack/drive _types
       parameter ( MK5C     = z'1'  )
       parameter ( MK5C_BS  = z'2'  )
       parameter ( FLEXBUFF = z'4'  )
+      parameter ( DBBC3_DDCU = z'1'  )
+      parameter ( DBBC3_DDCV = z'2'  )
 C
       parameter ( MAX_MK6 = 2 )
       parameter ( MAX_RDBE = 4 )

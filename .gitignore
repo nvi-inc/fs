@@ -17,6 +17,9 @@
 *.gch
 *.pch
 
+# Python compiled bytecode
+*.pyc
+
 # Libraries
 *.lib
 *.a

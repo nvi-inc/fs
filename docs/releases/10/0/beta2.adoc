@@ -1,0 +1,1498 @@
+//
+// Copyright (c) 2020-2021 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= FS 10.0.0-beta2 Update Notes
+E. Himwich, D. Horsley, J. Gipson, J. Quick
+Version 1.8 - June 2021
+
+//:hide-uri-scheme:
+:sectnums:
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+:toclevels: 4
+
+== Introduction
+
+CAUTION: The _beta2_ pre-release of the  FS does not _make_ on older
+Linux distributions such as FSL8. The _beta1_ pre-release does _make_
+on FSL8. This is fixed for FSL8 in _beta3_, which also has a
+workaround for even older distributions.
+
+This update is intended as a test version for all stations using the
+FS. This includes both stations using the main (non-VGOS) branch
+(latest version _9.13.2_) and the VGOS branch (latest versions
+_9.12.10_-_9.12.13_). Installing the new version as update for these
+cases is fairly simple but has several steps, see the
+<<Upgrading from an FS9 version>>
+section below.
+
+The most significant changes in _10.0.0_ are:
+
+. One unified version for all FS users.
+
++
+
+Both non-VGOS and VGOS operations are supported by the new version.
+Previous installations of the main (non-VGOS) branch will need to have
+some new local control files added.
+
++
+
+The most significant change for users is that previous main branch users will
+find that in the new FS input is case sensitive, as it was already
+in the VGOS branch.
+
+. Support for use on both 32- and 64-bit systems.
+
++
+
+The new version should run on 32-bit systems that currently support
+the FS (we expect to support as far back as FSL8, but currently FSL9
+is the limit), as well as on 64-bit systems. The update notice
+includes instructions for transitioning to a 64-bit system, which may
+require some relatively simple changes to station software. See the
+<<../../../misc/64-bit_conversion.adoc#,64-bit conversion>> document for more details.
+
++
+
+A new FS Linux distribution, FSL10 (based on Debian _Stretch_), is now
+available for 64-bit (and 32-bit) use. We recommend using this
+distribution if you would like to move to using a 64-bit OS or need a
+32-bit OS that is still under support (the base Debian distribution,
+_Wheezy_, used for FSL9, and those for older FSL__x__ versions, is no longer under
+support). This also may be an alternative for users with distributions
+(such as FSL7) that are too old to support the current FS.  Installation
+instructions for FSL10 can be found at
+<https://nvi-inc.github.io/fsl10>.
+
++
+
+. Version control with _git_.
+
++
+
+The FS source is now managed using _git_ and _github_ is used for
+distribution. The source code is now under the GPL3 license.
+
++
+
+The details of the model used for FS releases under _git_ are
+described in the <<../../misc/release_model.adoc#,Release Model>> document.
+
++
+
+This change increases the importance of not modifying the
+_/usr2/fs_ directory tree since such changes will make it more
+difficult to simply `pull` updates to install bug fixes and new
+features.
+
+. The FS display server is now recommended for normal use.
+
++
+
+This change is new as of the _beta2_ release.
+
+Please also see the section <<Changes from FS9>> below for details of
+the changes compared to the latest FS9 versions.
+
+Essential contributions were made by Dave Horsley (UTAS, Australia and
+NVI/GSFC) and Tetsuro Kondo (NICT, Japan and SHAO, China). Kondo-san
+pioneered 64-bit support in the FS with his 64-bit implementations for
+the Sejong and Ishioka stations. Dave built on his work in developing
+a version that would support 32- and 64-bit systems.
+
+Dave also single-handedly imported the entire existent history of FS
+source code into _git_. This includes over 130 FS9 versions (under
+Linux), 17 FS8 versions (under VENIX), and two older versions (under HP
+RTE-1000/A) going back to version 5.5 in 1988.  Having the source code
+in _git_ greatly simplified the task of merging the main and VGOS
+branches. Dave also did the most critical work on that and provided
+excellent guidance on using _git_. Having the historical code in _git_
+is a great resource for understanding the evolution of the code.
+
+As always, we are deeply indebted to Jonathan Quick (HartRAO, South
+Africa) for his many significant contributions that go far beyond what
+is explicitly mentioned below. In this particular case, his
+contributions include testing and insights for adapting the code for
+64-bit use, patiently solving various problems, developing FSL10,
+making many helpful suggestions for changes, testing, and providing feedback.
+
+We also think Beppe Maccaferri (Medicina) for being a diligent beta
+tester, reporting bugs, helping test several fixes, and making helpful
+suggestions for changes.
+
+We would also like thank Eskil Varenius (Onsala) bug reports and
+feedback, particularly on DBBC3 related issues.
+
+== Other useful documents
+
+This section provides links to some other useful documents.
+
+=== Other related upgrade documents
+
+Upgrading from <<beta2_to_beta3.adoc#,beta2 to beta3>>.
+
+Upgrading from <<beta1_to_beta2.adoc#,beta1 to beta2>>.
+
+Upgrading from FS9 to _10.0.0-beta1_ (text document):
+https://raw.githubusercontent.com/nvi-inc/fs/259e203330fff145dba5ea6b2f48c8bcd23b4333/misc/fs10.0.0up.txt.
+
+=== Miscellaneous
+
+<<../../misc/known_bugs.adoc#,Known bugs>> document with the known bugs list from FS9.
+
+<<../../misc/install_reference.adoc#,Installation reference>> document with other useful install
+information is available.  It includes eight sub-sections:
+
+
+. <<../../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
+. <<../../misc/install_reference.adoc#_example_standard_procedure_libraries,Example standard procedure libraries>>
+. <<../../misc/install_reference.adoc#_copy_and_paste_installation_tips,Copy-and-paste installation tips>>
+. <<../../misc/install_reference.adoc#_making_a_back_up_before_installing,Making a back-up before installing>>
+. <<../../misc/install_reference.adoc#_disk_space_requirements,Disk space requirements>>
+. <<../../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
+. <<../../misc/install_reference.adoc#_fix_prc_file_define_lines,Fix .prc file define lines>>
+. <<../../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting geometry values in .Xresources>>
+
+If you haven't upgraded or installed the FS before, you may want to
+review the appendix.  It is _strongly_ recommended that you back-up your
+operational system before upgrading.
+
+== Upgrading from an FS9 version
+
+CAUTION: The _beta2_ pre-release of the  FS does not _make_ on older
+Linux distributions such as FSL8. The _beta1_ pre-release does _make_
+on FSL8. This is fixed for FSL8 in _beta3_, which also has a
+workaround for even older distributions.
+
+This section covers upgrading from FS9, which was always 32-bit only,
+to _10.0.0-beta2_. It is assumed you are upgrading on a 32-bit system.
+There are two possible paths for upgrading:
+
+. Upgrading from a main branch version. The main branch versions
+are numbered _9.13.x_ and _9.11.x_ or older.  Specifically, versions
+_9.12.x_ are not part of the main branch.  If you are upgrading
+from a main branch version, it is assumed that upgrade is from
+_9.13.2_, the previous stable release.  If you have a main branch
+version older than version _9.13.2_ you should upgrade to _9.13.2_
+first, please refer to the
+<<../../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading from FS versions before the previous stable>>
+section in the
+<<../../misc/install_reference.adoc#,Installation reference>> document
+for more information.
+
+. Upgrading from a VGOS branch version.  The VGOS branch versions
+are numbered _9.12.x_.  The instructions provided in this section
+are for installing as an upgrade to versions
+_9.12.10_-_9.12.13_, the latest VGOS branch releases. As far as we
+know, no other VGOS versions are in use.  If you have a different
+version, please email Ed for more information.
+
+The upgrade instructions for the update from the old main branch and
+the old VGOS branch differ only in the step
+<<Update control files>>.
+
+[TIP]
+====
+
+It is also possible to upgrade to a new installation on a 64-bit
+system. Doing so will allow you to upgrade to _10.0.0_ and 64-bit
+without disturbing your operational 32-bit system. However, the upgrade may
+be more involved because it may require additional changes and
+testing for your station software.  The instructions for combining the
+FS and 64-bit upgrade are:
+
+. Follow the steps in the
+<<../../../misc/64-bit_conversion.adoc#,64-bit Conversion>> document 
+down to the 
+<<../../../misc/64-bit_conversion.adoc#_make_local_software,Make local software>>
+step. Instead of following that step, return to the next item in this *TIP*.
++
+
+This step will result in a base FS10 installation on a 64-bit system
+with your local software, control files, and procedure files from your
+FS9 32-bit system. That is an inconsistent configuration, which will
+not work properly. The local software will have been updated for
+64-bit, but not tested. Your local software and other local files need
+to be updated for _10.0.0_, which is covered in the next step.
+
+. To update your local software and other local files for _10.0.0_,
+follow the instructions in this document, beginning with the
+<<beta2.adoc#_case_sensitive_strings_in_antenna_commands,Case sensitive strings in antenna= commands>>
+sub-step and continue with remaining steps.
++
+When you get to the <<Test the FS>> sub-step, you may need to debug your station software.
+
+====
+
+To upgrade from FS9 to FS10 on a 32-bit system, please follow the steps below.
+
+=== Back-up your operational system
+
+Having a back-up to return to
+will allow you to continue operations in case something goes
+wrong with the installation.  For more details, please see the
+<<../../misc/install_reference.adoc#_making_a_back_up_before_installing,Making a back-up before installing>>
+section in the
+<<../../misc/install_reference.adoc#,Installation reference>> document.
+
+NOTE: If you are using FSL10 with a RAID, that sub-section points you to the
+improved backup and test procedure that is available with
+that distribution.
+
+NOTE: That section also includes a description of how to
+preserve your operational files and switch back and forth
+between an operational and a test set-up by changing
+symbolic links.
+
+=== Login as root
+
+Login as _root_.
+
+=== Download the FS
+
+Place a copy of the FS _git_ repository in the _/usr2_ directory on
+your computer. For example, you might do the following:
+
+       cd /usr2
+       git clone https://github.com/nvi-inc/fs.git fs-git
+
+or alternatively, if you are using FSL8 or other old Linux
+distribution, or otherwise need to use _ssh_ instead:
+
+       cd /usr2
+       git clone git@github.com:nvi-inc/fs fs-git
+
+TIP: Using _ssh_ requires you to have a _gitub_ account and for you
+to add an _ssh_ public key from your machine's _root_ account to your _github_ account. For more information, go to
+https://github.com/join and
+https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/adding-a-new-ssh-key-to-your-github-account.
+
+=== Checkout the release
+
+Checkout the _beta2_ release from the local repository:
+
+       cd fs-git
+       git checkout -q 10.0.0-beta2
+
+=== Set the /usr2/fs link
+
+Set the link for the new FS version:
+
+       cd /usr2/fs-git
+       make install
+
+Answer `*y*` to confirm installation.
+
+CAUTION: This step will change your _/usr2/fs_ symbolic link to point to
+           _/usr2/fs-git_. To switch back to your old version, you
+           will need to change the link manually.
+
+The `make install` command may create and possibly rename some
+existing directories if the FS was never installed on this system
+before. However, since you should only be following this path if
+you are upgrading an FS9 installation, there
+should not be any problem.
+
+=== Fix file permissions
+
+Having the wrong ownership and/or permissions on the operational
+files (procedure libraries, control files, schedules, and logs)
+can cause errors during FS operations.  For a full discussion,
+please refer to the
+<<../../misc/install_reference.adoc#_set_operations_file_permissions,Set operations file permissions>>
+section of the
+<<../../misc/install_reference.adoc#,Installation reference>> document.
+For stations where all the operational files are
+expected to owned by user __oper__ in group __rtx__, with permissions
+`ug+rw,o+r,o-w`, the following command will enforce this (note
+that the __execute__/__search__ bits are not changed):
+
+       /usr2/fs/misc/fix_perm
+
+Answer `*y*` to the prompt if you wish to proceed. It is recommended for most stations.
+
+=== Login as prog
+
+IMPORTANT: Logout as _root_, and login as _prog_.
+
+=== Set FORTRAN compiler
+
+Starting with version _10.0.0_, the standard
+FORTRAN compiler for use with the FS is _f95_ (_gfortran_).
+We recommend that you use it. On the 32-bit systems you can
+still use _fort77_, but you should only use it if you either
+don't have _f95_ or if you have FORTRAN station code that
+is too difficult to convert to _f95_, see sub-step <<Conversion of FORTRAN code>> for more
+details.
+
+To select _f95_ as your compiler, you will need to set the
+`FC` variable to this value. If your shell is _tcsh_ you can
+use:
+
+          setenv FC f95
+
+If your shell is _bash_, you can use:
+
+          export FC=f95
+
+WARNING: For beta testing on a 32-bit system, you may not want to
+make this change permanent since it is incompatible with
+pre-_10.0.0_ versions.
+
+To make this change permanent, you should add the appropriate
+command to the appropriate _rc_ file depending on your login
+shell: _~prog/.login_ for _tcsh_ or probably _~prog/.profile_
+for _bash_.
+
+=== Make the FS
+
+CAUTION: The _beta2_ pre-release of the  FS does not _make_ on older
+Linux distributions such as FSL8. The _beta1_ pre-release does _make_
+on FSL8. This is fixed for FSL8 in _beta3_, which also has a
+workaround for even older distributions.
+
+          cd /usr2/fs
+          make >& /dev/null
+
+and then
+
+          make -s
+
+to confirm that everything compiled correctly (no news is good
+news).
+
+=== Update station programs
+
+This step is for modifying your station programs in _/usr2/st_.  There
+are two possible issues:
+
+==== Conversion of FORTRAN code
+
+If you don't have any FORTRAN station code, you can skip this sub-step.
+If you do have some, please email Ed so he is
+aware.
+
+Basically you have two options (also see step <<Set FORTRAN compiler>>):
+
+. Change to using _f95_ for both the FS and your station
+FORTRAN programs.   It is recommended that
+you follow this approach for 32-bit systems and it is
+necessary when moving to a 64-bit system.
++
+
+You will need to adapt your __Makefile__s
+to use the same compiler options as the FS, which can be
+found in _/usr2/fs/include.mk_.
+As a first cut, it may work to add the following two lines
+to your __Makefile__s for FORTRAN programs:
+
+    FFLAGS  += -ff2c -I../../fs/include -fno-range-check -finit-local-zero -fno-automatic -fbackslash
+    FLIBS   += -lgfortran -lm
+
+. Continue to use _fort77_ for both the
+FS and your station programs. You should follow this approach _only_ if
+you are on a 32-bit system and it is too difficult to convert to
+_f95_.
+
+==== Case sensitive strings in antenna= commands
+
+In FS9 versions, the strings used in `antenna=...` commands were always
+converted to uppercase before being sent to _antcn_.  An part of the FS
+input being case sensitive that no longer happens.  If your
+antenna, or your side of the antenna interface, requires that the
+strings passed by the `antenna=...` command are uppercase, you have
+two options:
+
+. Convert your code. For simple backward compatibility,
+change you _antcn_ program to always convert the
+`antenna=...` strings to upper case. Alternatively, make
+your code case insensitive.
+
+. Convert the strings in your `antenna=...` commands
+wherever they occur: SNAP procedures, SNAP schedules,
+external programs, or scripts, to upper case. Field system
+input is now case sensitive.
+
+The former choice is probably the easier, but in some
+cases the second  may be better. If you have questions about which to
+use and how to do it, please email Ed.
+
+=== Make local software
+
+If _/usr2/st/Makefile_ is set-up in the standard way, you can do this with:
+
+       cd /usr2/st
+       make rmdoto rmexe all
+
+NOTE: At this point, you are only trying to verify the code will _make_
+successfully.  You may still need to debug it in the step <<Test the FS>>
+below.
+
+=== Reboot
+
+IMPORTANT: Reboot the computer.  This is necessary to allocate FS, and possibly station, shared
+memory for the new version.
+
+=== Login as oper
+
+The remaining steps assume you are logged in as _oper_.
+
+=== Update control files
+
+This step is for updates to the local control files. There are five
+sub-steps:
+
+. <<Update stcmd.ctl>>
+. <<Copy control files>>
+. <<Update equip.ctl>>
+. <<Review control files>>
+. <<Update rdbemsg.ctl>>
+
+Differences for updating from different previous versions are
+noted.  Please read all cases in each sub-step carefully to make
+sure you find all the cases for your old version; sometimes an old
+version is included in more than one case in a sub-step.
+
+==== Update stcmd.ctl
+
+. Old version 9.13.2:
+
++
+
+The non-comments lines need another digit added to the
+subroutine number. This sub-step is only need for updates from
+_9.13.2_. You can fix your file with the commands:
+
+  cd /usr2/control
+  /usr2/fs/misc/cmdctlfix6 stcmd.ctl
+
++
+
+You may also want to expand the (typically) second comment
+line to correspond to the new format by adding a `U` after
+character 18 to read as:
+
+    *COMMAND     SEG SUBPA BO
+
+==== Copy control files
+
+You will need to execute the following commands to copy new files that
+are needed (copy-and-paste is your friend). There are three cases
+depending on what your old version was:
+
+. Old versions _9.12.10_ and _9.12.11_:
+
+               cd /usr2/control
+               cp /usr2/fs/st.default/control/clpgm.ctl .
+               cp /usr2/fs/st.default/control/rdbemsg.ctl .
+
+. Old versions _9.12.12_ and _9.12.13_:
+
+               cd /usr2/control
+               cp /usr2/fs/st.default/control/rdbemsg.ctl .
+
+. Old version _9.13.2_:
+
+               cd /usr2/control
+               cp /usr2/fs/st.default/control/dbba2.ctl .
+               cp /usr2/fs/st.default/control/mk6c?.ctl .
+               cp /usr2/fs/st.default/control/monit6.ctl .
+               cp /usr2/fs/st.default/control/rdbc?.ctl .
+               cp /usr2/fs/st.default/control/rdbe.ctl .
+               cp /usr2/fs/st.default/control/rdbemsg.ctl .
+
+==== Update equip.ctl
+
+It is necessary to add lines for the
+FiLa10G input select and the DBBC3 configuration.  There
+are three cases, please check which applies for you.  In any
+event, you should compare your _equip.ctl_ to the example as
+described when you get to sub-step <<Review control files>> below, to make sure there are
+no duplicated lines or other problems caused by the commands
+in this current sub-step, i.e., <<Update equip.ctl>>.
+
+. If your old version was _9.12.10_ or _9.12.11_, you will need
+to add the final four lines of the example _equip.ctl_
+file to yours:
+
+  cd /usr2/control
+  tail -n 4 /usr2/fs/st.default/control/equip.ctl >>equip.ctl
+
+. If your old version was _9.12.12_ or _9.12.13_, you will need
+to insert two lines before the final two lines.  This is
+covered in sub-step <<Review control files>> below.
+
+. If your old version was _9.13.2_, you will need to add the
+final two lines of the example _equip.ctl_ file to yours:
+
+  cd /usr2/control
+  tail -n 2 /usr2/fs/st.default/control/equip.ctl >>equip.ctl
+
+==== Review control files
+
+You should compare your versions of the following files:
+
+* _clpgm.ctl_
+* _equip.ctl_
+* _stpgm.ctl_
+
+to the examples, e.g., using:
+
+          cd /usr2/control
+          diff clpgm.ctl /usr2/fs/st.default/control/ | less
+
+and consider whether and what changes you should make to your
+copies.
+
+The following sub-sections give the details of the changes in these files. You will
+need to make the corresponding changes to your copies of the
+files.
+
+===== Review clpgm.ctl
+
+You may be able to just replace your copy with the new one.
+
+. Old versions _9.12.10_ and _9.12.11_:
++
+This file was not present so the new default version (copied by
+commands in sub-step <<Copy control files>> above) should not
+require modification.
+
+. Old versions _9.12.12_, _9.12.13_, and _9.13.2_:
+
+.. The `-title ...`  parameter for each
+window was removed so that it is uniquely
+supplied by the _.Xresources_ file.
+
+.. The value of the `-name`
+parameter for _erchk_ was changed from `ERRORS`
+to `erchk`.
+
+.. The useful display window _scnch_ was added.
+
+.. The _xterm_
+program was added.
+
+.. For RDBE systems, the useful RDBE display windows: _monit6_,
+and _monX_ (_X_=[_a_-_d_]) were added. The _monan_ program was added
+to the default since it is used at several sites. If these are not
+relevant for your site, you may prefer to not add them.
+
+===== Review equip.ctl
+
+CAUTION: This sub-step has the most complicated changes.
+Please read all clauses to make sure you see
+all that apply to your old version.
+
+There are two sub-sections. The first
+sub-section covers changes to non-comment lines; the
+second, comments. The former are required. The
+later are in some sense optional, especially
+when they refer to equipment you don't (or
+never will) have. However, changing them now
+may help avoid confusion at a later date.
+
+======  Non-comment lines
+
+.  Old versions _9.12.10_-_9.12.13_:
+
+.. The line for DBBC PFB version was changed to have a
+minimum version number of `v15_1`. The line is
+shown here with the typical preceding comment:
+
+    *DBBC PFB version
+    v15_1    v15_1 or later
+
+.. The line that defines the DBBC2 CoMo configuration was changed. Please
+see item (12) in the installation instructions in _/usr2/fs/misc/fs91119up.txt_ for
+full details on handling this. However, the following commands will
+probably make the needed change if you don't have a DBBC2 or if your
+DBBC2 configuration is four CoMos with one Core per CoMo:
+
+  cd /usr2/control
+  /usr2/fs/misc/dbbc_equip '1 1 1 1' equip.ctl
++
+If the script prints a warning about the number
+of IF power conversions being incorrect, the
+issue must be resolved before continuing,
+either by adjusting the number of power
+conversions, adjusting the CoMo configuration,
+or both.
+
+. Old versions _9.12.10_ and _9.12.11_:
++
+A FiLa10G input select line was added, but
+sub-step <<Update equip.ctl>> above should have handled that.
+
+. Old versions _9.12.12_ and _9.12.13_:
++
+A "`stanza`" (actually one comment and one FiLa10G
+input select line) was inserted before the
+final "`stanza`" (typically one comment and one
+DBBC3 configuration line). An example of the
+lines inserted can be found near the end of the
+default example _/usr2/fs/st.default/control/equip.ctl_ file. They are
+listed here as well (one comment and one
+FiLa10G input select line):
+
+    *FiLa10G input select, one of: vsi1, vsi2, vsi1-2, vsi1-2-3-4, gps, tvg
+    vsi1-2
+
+. Old versions _9.12.10_, _9.12.11_, and _9.13.2_:
++
+A new line for the DBBC3 configuration was added at the end, but sub-step
+<<Update equip.ctl>>  above should have handled that.
+
+====== Comment lines
+
+. All old versions:
++
+Compared to all old versions, comment lines
+were added or modified for new equipment type
+options.
++
+. Old versions _9.12.10_-_9.12.13_:
++
+The trailing comment on the line for the met. device was
+reworded.
+
+. Old versions _9.12.10_-_9.12.13_:
++
+The comment lines describing the available clock
+rates was completely rewritten and greatly
+expanded, and an additional clock rate (`128`)
+was appended to the end of the comment on
+the clock rate line itself.
+
+===== Review stpgm.ctl
+
+. All old versions:
+
++
+
+WARNING: If you are _not_ planning to use the FS display
+server, we recommend you comment out the lines
+for _erchk_, _monit2_, and _scnch_ and not add any other _monitX_ programs. If they are
+used in _stpgm.ctl_ without the display server and they are
+accidentally closed, the FS will be killed.
+
+.. The line for _erchk_ is now uncommented and differs from the
+previous commented version with the addition of the `-name erchk`
+parameter and the removal of the `-title ...` and `-geom ...` parameters,
+so that the latter two are uniquely supplied by the _.Xresources_
+file.
+
+.. New lines were
+added for _monit2_, and _scnch_ for when the
+display server is in use.
++
+If you are using the display server you may
+want to add other _monitX_ programs. If so, you
+may also want to add resources for them (if
+ they aren't already there) in the
+_~/.Xresources_ files for _oper_ and _prog_.
+
+==== Update rdbemsg.ctl
+
+. Versions 9.12.10-9.12.13:
+
++
+
+If you have RDBEs for your back-end and will use the _rdbemsg_
+utility to send operations messages, you will need to
+customize your _/usr2/control/rdbemsg.ctl_ file.
+
+.. You will need to update the `station` two letter code (lower
+case) and the `name` station name to your station's values. The
+station name is usually defined in the
+_/usr2/control/location.ctl_ file.
+
+.. If you don't have a _HubPC_ (_mci_) node for front end monitor
+and control, you should comment out that line.
+
+.. You should set the addresses for the RBDE-A (`R-A`) through RDBE-D
+(`R-D`). The example file uses aliases, _rdbea_ through _rdbed_, that
+you can define in _/etc/hosts_.  Likewise, if you have an _mci_ node,
+you should set its alias, _hubpc_, in _/etc/hosts_. (It is usually
+necessary to have _root_ access to modify _/etc/hosts_.)  Alternatively
+of course, you can use any scheme you prefer for defining these
+addresses in _rdbemsg.ctl_.
+
+.. The default email address `to` is for the `ivs-vgos-ops` mail
+list. You can of course change that to whatever you like. You
+can also temporarily override the address in the _rdbemsg_
+utility itself.
+
+=== Update .prc files
+
+This step is for updates to your SNAP _.prc_ procedure libraries.
+The are two sub-steps. 
+Only the  change in the first is required: converting from using the
+old FS _go_
+program to _rte_go_. The change in the second is
+optional and only relevant if upgrading from _9.13.2_: removing
+`if=cont_cal,,` from the `fivpt` and `onoff` procedures for
+`calon` and `caloff` procedures.
+
+==== Convert from go to rte_go
+
+Convert use of the old FS _go_ program to use _rte_go_. This
+is required because the compiler for the _go_ language
+conflicts with the old program name _go_. This change is necessary even if
+you do not have the _go_ language compiler installed.
+
+To make this change for all your _.prc_ procedure libraries,
+execute:
+
+           cd /usr2/proc
+           /usr2/fs/misc/go_fix *.prc
+
+Files that are changed will have a pre-change back-up copy
+with the extension _.bak_. You can use the _.bak_ file to
+recover in case of a problem.
+
+==== Remove extra if commands
+
+This sub-step is optional and only relevant if you are upgrading
+from _9.13.2_. You can remove the `if=cont_cal,,` as a prefix from before the
+`calon` and `caloff` commands in you `calonnf`, `calonfp`,
+`caloffnf`, and `calofffp` procedures, probably located in your
+_point_ procedure library. This is just a clean-up and not
+making this change will have no impact.
+
+=== Miscellaneous FS related changes
+
+There are two changes: set the `FS_DISPLAY_SERVER` environment variable
+for _oper_ and _prog_ (this is only needed if you were not running the
+FS display server before) and update the _~/.Xresources_ file for the
+_oper_ and _prog_ accounts.
+
+==== Set FS_DISPLAY_SERVER
+
+Set the `FS_DISPLAY_SERVER` environment variable for _oper_ and
+_prog_.  This will make using the display server the default for
+your system.  We strongly recommend this, but if it is not suitable
+for you for some reason you can skip this.  If you are
+already using the display server, you can also skip this sub-step.
+
+WARNING: If you don't use the
+display server, you will probably need to update the _stpgm.ctl_ file for that
+case as described in sub-step <<Review stpgm.ctl>> above.
+
+If _oper_ uses the _bash_ shell then in the _~oper/.profile_
+file, you can uncomment or insert
+
+          export FS_DISPLAY_SERVER=on
+
+If _oper_ uses the _tcsh_ shell then in the _~oper/.login_
+file, you can uncomment or insert
+
+          setenv  FS_DISPLAY_SERVER on
+
+You should logout and login again after making this change.
+
+You should  make the corresponding change for _prog_ while logged
+in as _prog_.
+
+==== Update .Xresources
+
+The main change was to add values for the _erchk_,
+_scnch_, and _helpsh_  windows.  There were some minor changes
+for other windows, but what to use for the changed values may
+depend on the resolution of your display.  The example values
+worked well for an FSL10 installation on a system with a
+non-GPU CPU.
+
+[TIP]
+====
+
+A strategy for setting the `geometry` resource for a window is:
+
+. Adjust the position (and maybe the size) of the window to what you
+want.
+
+. Run the _xwininfo_ program
+
+. Position the cursor on the window and click.
+
+. Copy the string output for the `-geometry` parameter, e.g,
+`80x24+0+0`.
+
+. Paste the string as the value for `geometry` resource for that
+window in the _~/.Xresources_ file.
+
+You will need to logout and login again (or reload
+the X resources a different way) for the change to become
+effective.
+====
+
+
+As _oper_, you can find the differences between your file and
+the example file with:
+
+  cd
+  diff .Xresources /usr2/fs/st.default/oper
+
+Please make any changes to your file that you find
+appropriate, but at a minimum you should probably add the
+lines for _monit6_, _erchk_, _scnch_, and _helpsh_ if not already
+present. You will need to logout and login again (or reload
+the X-resources a different way) for the changes to become
+effective.
+
+All the new lines are at the end of the file, if need to add
+lines for _monit6_, _erchk_, _scnch_, and _helpsh_, you can
+use:
+
+  cd
+  tail -n 24 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
+
+To add lines for just _erchk_, _scnch_, and _helpsh_, you can
+use:
+
+  cd
+  tail -n 20 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
+
+To add lines for just _helpsh_, you can
+use:
+
+  cd
+  tail -n 6 /usr2/fs/st.default/st.default/oper/.Xresources >>.Xresources
+
+You can update _prog_'s _.Xresources_ file similarly, but you
+will need to be logged in as _prog_.
+
+=== Miscellaneous FSLx changes
+
+None are required for this update.
+
+===  Test the FS
+
+Generally speaking, a fairly thorough test is to run a test
+experiment.  Start with using _drudg_ to rotate a schedule,
+__drudg__ing it to make _.snp_ and _.prc_ files, making listings,
+and any other pre-experiment preparation and tests you normally
+do, then execute part of schedule, and perform any normal
+post-experiment plotting and clean-up that you do.  The idea here
+is to verify that everything works as you expect for normal
+operations.
+
+=== Consider when to update your back-ups
+
+WARNING: This step may not be appropriate if you are beta testing
+since the beta test versions are not intended for
+operations.
+
+It would be prudent to wait until you have successfully run an
+experiment or two and preferably received word that the
+experiment(s) produced good data.  The chances of needing to use
+your back-up should be small.  If something does happen, you can
+copy the back-up to the (now assumed bad) updated disk.  You can
+then either use the restored disk or apply the FS update again.
+The FSL10 test procedure has more options for recovery.  Managing
+this is a lot easier and safer if you have a third disk.
+
+== Changes from FS9
+
+[[details]] There are separate sub-sections with summaries of changes
+in the FS and _drudg_. Following those are sub-sections giving the
+details of the changes.  Each summary item has a clickable
+<<details,More details>> link that leads to the detailed description
+of that item.
+
+Each sub-section is divided into three parts:
+
+. Changes that are in common since FS9
++
+These parts cover changes compared
+to both FS9 branches. These are changes that have been introduced in version _10.0.0_.
+
+. Changes relative to the main branch
++
+These parts cover changes that are only relative to the main
+branch, specifically version _9.13.2_. These are primarily features that were in the VGOS branch but
+not in the main branch.
+
+. Changes relative to the VGOS branch
++
+These sparts cover changes that are only relative to the VGOS
+branch, specifically version _9.12.13_.  These are primarily features that were in the main branch but
+not in the VGOS branch.
+
+
+Clickable links such as
+https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
+reported at https://github.com/nvi-inc/fs/issues.
+
+A complete history of changes can be found using the `git log`
+command.
+
+The file _/usr2/fs/misc/changes.txt_ contains the old history of
+changes in FS9. The file _/usr2/fs/misc/VENIX_changes.txt_ contains
+the old history of changes in FS8. However these two files have been
+merged into the history given by `git log`.
+
+The history of _drudg_ is also described in more detail in
+_/usr2/fs/drudg/change_log.txt_.
+
+=== Summary of FS changes
+
+This sub-section is divided into three parts. Please see
+<<Changes from FS9>> above for an explanation of the parts.
+
+==== Changes that are in common since FS9
+
+.  One unified version for all FS users. <<unified,More details>>.
+.  Support for use on both 32- and 64-bit systems. <<bit3264,More details>>.
+.  Version control with _git_. <<usegit,More details>>.
+. The FS uses a new _Makefile_ scheme. <<makefile,More details>>.
+
+. Improve _fesh_ (includes closing https://github.com/nvi-inc/fs/issues/34[#34]). <<fesh,More details>>.
+. Update example _equip.ctl_ (includes closing https://github.com/nvi-inc/fs/issues/35[#35]). <<equip.ctl,More details>>.
+. Fix some error messages (includes closing https://github.com/nvi-inc/fs/issues/43[#43] & https://github.com/nvi-inc/fs/issues/22[#22]). <<fixmess,More details>>.
+. Improve _plog_. <<plog,More details>>.
+. Restore `if` command. <<if,More details>>.
+. Update GPL in files. <<gpl,More details>>.
+. Remove usage of `system()` call to find _help_ file_(closes https://github.com/nvi-inc/fs/issues/40[#40] & https://github.com/nvi-inc/fs/issues/3[#3]). <<help,More details>>.
+. No longer set _/usr2/fs_ and _/usr2/st_ to be owned by _prog_. <<symlinks,More details>>.
+. Add checking for a procedure or schedule file before attempting to open it (closes https://github.com/nvi-inc/fs/issues/45[#45]). <<prc,More details>>.
+. Add more log header lines. <<header_lines,More details>>.
+. Fix year wrap error message in procedure logging (closes https://github.com/nvi-inc/fs/issues/23[#23]). <<year,More details>>.
+. Fix remaining case of a closed procedure library causing a crash if
+there was an attempt to execute a procedure from the library was fixed. <<prc2,More details>>.
+. Move X resources for _helpsh_ to _~/.Xresources_. <<helpsh,More details>>.
+. Move unsetting of `TMOUT` environment variable for _oper_ to
+    _~/.bashrc_ in the default files. <<tmout,More details>>.
+. Improve error logging for _dbbcn_. <<dbbcn,More details>>.
+. Improve `help` page for _tpicd_. <<tpicd,More details>>.
+. Add `popen` time-out feature. <<popen,More details>>.
+. The FS display server is now recommended for normal use. <<server,More details>>.
+. Make _fsclient_ honor the `-n` flag properly (closes https://github.com/nvi-inc/fs/issues/48[#48]). <<clientn,More details>>.
+. Make _fsclient_ ignore prompt in no-X11 mode (closes https://github.com/nvi-inc/fs/issues/49[#49]). <<clientnx,More details>>. 
+. Add _fsserver_ improvements and log support (includes closing https://github.com/nvi-inc/fs/issues/29[#29] & https://github.com/nvi-inc/fs/issues/25[#25]). <<fsserver,More details>>.
+. Eliminate `cls_chk` error from `inject_snap -w ...` command when
+    an error occurs (partly closes https://github.com/nvi-inc/fs/issues/50[#50]). <<cls_chk,More details>>.
+. Fix labels in _gnplt_ windows that display the gain curve
+    coefficients (closes https://github.com/nvi-inc/fs/issues/51[#51]). <<gnplt,More details>>.
+. Improve holog/MASK. <<holog,More details>>.
+. Fix _onoff_ for the DBBC3 rack (closes https://github.com/nvi-inc/fs/issues/52[#52]). <<onoff,More details>>.
+. Add support for DBBC3 to `if=cont_cal,...` (closes https://github.com/nvi-inc/fs/issues/54[#54]). <<cont_cal,More details>>.
+. Update `help` pages for _onoff_ and _fivpt_. <<onoff_fivpt,More details>>.
+. Always check for day 248 problem in _setcl_ (closes https://github.com/nvi-inc/fs/issues/56[#56]). <<day248,More details>>.
+. Change the flags for the _monX_ programs in _clpgm.ctl_ from `a`
+    to `d`. <<monx,More details>>.
+. Generalize the _scnch_ window to cover Mark 5 recorders (closes
+    https://github.com/nvi-inc/fs/issues/61[#61]). <<scnch,More details>>.
+. Update _misc/release_model.txt_. <<release_model,More details>>.
+. Improve update notes. <<notes,More details>>.
+
+==== Changes relative to the main branch
+
+#TODO: Complete this sub-section.#
+
+. Input is now case sensitive. <<case,More details>>.
+. `tpicd=no` requires a running (not halted) schedule to log data. <<tpicdno,More details>>.
+
+==== Changes relative to the VGOS branch
+
+#TODO: Complete this sub-section.#
+
+=== Summary of drudg changes
+
+This sub-section is divided into three parts. Please see
+<<Changes from FS9>> above for an explanation of the parts.
+
+==== Changes that are in common since FS9
+
+_drudg_ opening message date is `2020Jun30`.
+
+. Source code now works on 32- and 64-bit platforms. <<bit3264_drudg,More details>>.
+. Source version control is maintained with _git_. <<git_drudg,More details>>.
+
+. Fix uninitialized variables. <<uninit,More details>>.
+. Fix missing `preob` when `EARLY` start non-zero. <<preob,More details>>.
+. Add support for additional wait at the end of recording for broadband. <<wait,More details>>.
+. Update comment on line three of _.snp_ files. <<comment,More details>>.
+
+==== Changes relative to the main branch
+
+#TODO: Complete this sub-section.#
+
+==== Changes relative to the VGOS branch
+
+#TODO: Complete this sub-section.#
+
+=== Details of FS changes
+
+This sub-section is divided into three parts. Please see
+<<Changes from FS9>> above for an explanation of the parts.
+
+==== Changes that are in common since FS9
+
+. [[unified]] One unified version for all FS users.
+
++
+
+Both non-VGOS and VGOS operations are supported by the new version.
+Previous installations of the main (non-VGOS) branch will need to have
+some new local control files added.
+
++
+
+The most significant change for users is that previous main branch users will
+find that in the new FS input is case sensitive, as it was already
+in the VGOS branch.
+
+
+. [[bit3264]] Support for use on both 32- and 64-bit systems.
+
++
+
+The new version should run on 32-bit systems that currently support
+the FS (we expect to support as far back as FSL8, but currently FSL9
+is the limit), as well as on 64-bit systems. The
+<<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit system>> document
+contains instructions for transitioning to a 64-bit system.
+
++
+
+The key change to the source code to make this compatibility possible
+is avoiding use of ``long int``s, except where they are required for
+system calls, particularly in fixed length data structures. A tool,
+_unlongify_ was developed by Dave Horsley to help convert the FS code.
+It is available to help convert station code. It use is described in the
+<<../../../misc/64-bit_conversion.adoc#_conversion_of_c_code,Conversion of C code>>
+sub-step of the
+<<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit system>> document.
+
++
+
+. [[usegit]] Version control with _git_.
+
++
+
+The FS source is now managed using _git_ and _github_ is used for
+distribution. The source code is now under the GPL3 license.
+
++
+
+The details of the model used for FS releases under _git_ are
+described in the <<../../misc/release_model.adoc#,Release Model>> document.
+
++
+
+This change increases the importance of not modifying the
+_/usr2/fs_ directory tree since such changes will make it more
+difficult to simply `pull` updates to install bug fixes and new
+features.
+
+. [[makefile]] The FS uses a new _Makefile_ scheme. This is
+accomplished by including the _/usr2/fs/include.mk_ file in every
+Makefile except for _drudg_ and its libraries. The scheme is "`opt-in`"
+so it is not necessary for every program or station programs to
+participate. Within the FS source tree, only _drudg_ and its libraries
+don't use it.  An explanation of the new scheme is provided in
+_/usr2/fs/misc/fs10_makefile.md_.
+
+. [[fesh]] Improve _fesh_ (includes closing https://github.com/nvi-inc/fs/issues/34[#34]).
+
+.. A typo in the error message for when
+the schedule is already downloaded was fixed (closes https://github.com/nvi-inc/fs/issues/34[#34]). Thanks to
+Morgan Goodrich (KPGO) for reporting this.
+
+.. The internal version number was replaced with the FS version.
+
+. [[equip.ctl]] Update example _equip.ctl_ (includes closing https://github.com/nvi-inc/fs/issues/35[#35]).
+
+.. The example DBBC3
+firmware version is now more sensible (closes https://github.com/nvi-inc/fs/issues/35[#35]). Thanks to Eskil Varenius (Onsala)
+for reporting this.
+
+.. The minimum DBBC3 firmware version required was added in a comment.
+
+. [[fixmess]] Fix some error messages (includes closing https://github.com/nvi-inc/fs/issues/43[#43] & https://github.com/nvi-inc/fs/issues/22[#22]).
+
+.. Fixed errors in
+_control/fserr.ctl_.  Errors in some double double-quotes (`""`)
+lines and some incorrectly reused error codes were fixed (closes
+https://github.com/nvi-inc/fs/issues/43[#43]).  Thanks to Alexander Neidhardt (Wettzell) for reporting
+these.
+
+.. The errors for a `tnx` command not being found when
+attempting to manipulate its display setting were clarified
+(closes https://github.com/nvi-inc/fs/issues/22[#22]).  Thanks to Jon Quick (HartRAO) for reporting this.
+
+.. Error messages that should refer to the (not yet implemented)
+`active_rdbes` and `active_mk6s` commands were corrected to no
+longer incorrectly refer to the `rdbe_active` and `mk5_active`
+commands, respectively.
+
+.. Obsolete errors for the, no longer used, _sw.ctl_ control file
+were removed.
+
+. [[plog]] Improve _plog_.
+
+.. Use of an environment variable `NETRC_DIR` was
+added to support not having the _.netrc_ file in the user's home
+directory was added. Please see `*plog -h*` for details on how to
+use this.
+
+.. The internal version number was replaced with the FS version.
+
+. [[if]] Restore `if` command. It had accidentally been overlooked in
+_beta1_. Thanks to Beppe Maccaferri (Medicina) for reporting
+this.
+
+. [[gpl]] Update GPL in files. The GPL header was added to the
+_holog/MASK/*.m_ and _misc/mk6in*_ scripts and removed from
+_fserver/tests/convey.*_.
+
+. [[help]] Remove usage of `system()` call to find `help` files (closes https://github.com/nvi-inc/fs/issues/40[#40] &
+https://github.com/nvi-inc/fs/issues/3[#3]). The `help` command no longer uses the `system()` to find the
+correct `help` file to display.
+
+. [[symlinks]] No longer set _/usr2/fs_ and _/usr2/st_ to be owned by _prog_. This
+was an error in the _misc/fsinstall_ script.
+
+. [[prc]] Add checking for a procedure or schedule file before attempting to
+open it (closes https://github.com/nvi-inc/fs/issues/45[#45]). This change is to avoid accidentally closing
+an active procedure or schedule file if the new one specified in
+the `proc=...` or `schedule=...` commands, respectively, does not
+exist (or has incorrect permissions).  Previously, if the files
+did not exist (or did not have the correct permission), the old
+file would be closed. Thanks to Jon Quick (HartRAO) for pointing
+out this inconsistency.
++
+The old behavior was partly a consequence of how the original file
+handling worked on HP-RTE systems, but is not sensible for how the
+SNAP commands should work.  Note that this is a non-backward
+compatible change in how the SNAP commands behave.
+Previously supplying a non-existent procedure or schedule file
+name would cause the closure of the corresponding file. Now to
+close an open procedure or schedule without opening a new one, a
+null parameter must be supplied, i.e., `proc=` or `schedule=`.  As
+before, the latter will not close an open schedule procedure
+library.
+
+. [[header_lines]]  Add more log header lines. Log header lines were added for
+`uname()` system information and the compile time value of the
+`FC` environment variable.
+
+. [[year]] Fix year wrap error message in procedure logging (closes https://github.com/nvi-inc/fs/issues/23[#23]).
+This fixed a benign and spurious error message if a log was kept
+open past the end of the year and any procedures that had last
+been logged in the previous year were executed again.  Thanks to
+Eskil Varenius (Onsala) and Alexander Neidhardt (Wettzell) for
+reporting this.
+
+. [[prc2]] Fix remaining case of a closed procedure library causing a crash if
+there was an attempt to execute a procedure from the library was
+fixed. This case could happen if the schedule that was opened was
+named _station_, which would lead to the closure of an already
+open schedule procedure library (there cannot be _station_
+schedule procedure library since _station_ can only be opened
+once).
+
+. [[helpsh]] Move X resources for _helpsh_ to _~/.Xresources_. This allows the
+geometry and other parameter of the FS `help` display _xterm_ to be
+controlled locally.
+
+. [[tmout]] Move unsetting of `TMOUT` environment variable for _oper_ to
+_~/.bashrc_ in the default files. This allows all interactive
+shells to disable the time-out. Additionally, some settings were
+rearranged in _~/.bashrc_ to make them only apply to interactive
+shells (this was also done for _prog_ and AUID accounts). This
+change is only relevant for stations using FSL10.
+
+. [[dbbcn]] Improve error logging for _dbbcn_. The name of the program is now
+correctly displayed.
+
+. [[tpicd]] Improve `help` page for _tpicd_. Made it clearer that when in the
+`no` mode, `data_valid=on` will only start logging of _tpicd_ data
+when a schedule is running and not-blocked.  This behavior was
+inherited from the VGOS branch where accidentally leaving _tpicd_
+logging RDBE multi-cast data after closing a schedule or halting
+it creates a lot of extra log entries. This is probable beneficial
+for all back-ends.
+
+. [[popen]] Add _popen_ time-out feature. There is a now a `-t ...` time-out
+option. If the command being run has a time-out feature, it is
+generally better to use the command's feature. See `help=sy` for
+more details.
+
+. [[server]] The FS display server is now recommended for
+normal use. This was changed as of the _beta2_ release.
+
+. [[clientn]] Make _fsclient_ honor the `-n` flag properly (closes https://github.com/nvi-inc/fs/issues/48[#48]). This
+eliminates opening "`double`" windows if _fsclient_ is run with `-n`
+under an already running _fsclient_.
+
+. [[clientnx]] Make _fsclient_ ignore prompt in no-X11 mode (closes https://github.com/nvi-inc/fs/issues/49[#49]). If FS
+client is in no-X11 mode, it created a _fs.prompt_ when instructed
+by the server. This change removes that behaviour, though it may
+cause an issue if no other clients exist to dismiss the prompt,
+see issue https://github.com/nvi-inc/fs/issues/49[#49]. If this is a problem for anyone's use case we will
+need a new feature here.
+
+. [[fsserver]] Add _fsserver_ improvements and log support (includes closing https://github.com/nvi-inc/fs/issues/29[#29] & https://github.com/nvi-inc/fs/issues/25[#25]).
+These changes introduce new functionality to _fsserver_, as well as
+simplifies some use cases.
+
+.. The first major change is that the server now only needs to use
+one socket when using _websockets_ -- address which start with
+`ws://` (closes https://github.com/nvi-inc/fs/issues/29[#29]). The new default base URL for all _fsserver_
+streams and control channels is now:
+
+    ws://127.0.0.1:7083
++
+(70 83 are decimal ASCII encoding of `F` and `S`.)
++
+This can be changed by editing `FS_SERVER_URL_BASE` in
+_include/params.h_; however, we will likely introduce command-line
+flag and/or environment variable to set this in the future.
++
+This is should be safe to expose on the network (rather than just
+the loop-back), but users may wish to use an HTTP(S) as a proxy to
+provide some authentication/authorisation.
++
+This was enabled by factoring out functionality _spub_ into a
+reusable "`buffered stream`" library, which has been incorporated
+into _fsserver_. All the behaviour of streams are now managed
+within the _fsserver_ process rather than an external _spub_
+instance.
+
+.. The second major change of this patch is the addition of the FS
+log to the streams available from the server (closes https://github.com/nvi-inc/fs/issues/25[#25]).
+(Previously only the "`display`" was available, which has a reduced
+time-stamp format and filters some output.)
++
+This is available at
+
+    FS_SERVER_URL_BASE/log
++
+that is, by default
+
+    ws://127.0.0.1:7083/log
+
+.. A third change is that the server now continues running after the
+FS is terminated. This allows clients to detect the FS termination
+and prevents a socket conflict if the FS is terminated and
+restarted in quick succession. The only user visible impact will
+be a slight delay if the FS is restarted quickly after termination
+while the old session is finishing up. This also means, after an
+FS upgrade, it's important to either shutdown the server
+(`*fsserver stop*`) or restart the system.
+
+.. Fourth, the server can now accept snap commands to be sent to FS,
+e.g.:
+
+   fsserver fs snap "terminate"
++
+This allows clients to interact with the FS directly through
+fsserver rather than needing access to _inject_snap_.
++
+No filtering or authorisation is implemented on this command
+channel, so it effectively allows complete command execution
+privileges in the FS context to anyone with access to the socket.
+Note this is also true for _inject_snap_ on a standard system. If
+a station wishes to limit local access they can use
+iptables/nftables, or use the server in UNIX socket mode and use
+file system permissions. Stations that would like to enable remote
+access should implement their own authentication/authorisation
+that suits their needs, e.g. SSH port forwarding or HTTP proxying.
+
+.. Finally, this patch also upgrades the included messaging library
+_nng_ to version _1.3.0_, which brings with it some performance
+improvements and bug fixes, the most obvious to FS users caused
+some _ssub_ instances in "`wait`" mode to use a high amount of CPU
+time.
+
+. [[cls_chk]] Eliminate `cls_chk` error from `inject_snap -w ...` command when
+an error occurs (partly closes https://github.com/nvi-inc/fs/issues/50[#50]). This was caused by
+_inject_snap_ not implementing the new linkage that was added for
+_fserr_. This is covered in issue https://github.com/nvi-inc/fs/issues/50[#50]. To correctly retrieve the
+error message would have required making a new interface to
+_fserr_ or subsuming it into library routine that both _ddout_
+and _inject_snap_ could use. It was not possible to do either in the
+available time. Instead _inject_snap_ was modified to output the error
+without the message, but pointing out that the message can be
+found in the log and display. Thanks to Dave Horsley (Hobart) for
+reporting this.
+
+. [[gnplt]] Fix labels in _gnplt_ windows that display the gain curve
+coefficients (closes https://github.com/nvi-inc/fs/issues/51[#51]). Previously the labels, when displayed
+were in reverse order. In one window, there were no coefficient
+labels at all. Thanks to Beppe Maccaferri (Medicina) for reporting
+this and testing the solution.
+
+. [[holog]] Improve _holog/MASK_. The elevation spacing was corrected for the
+example in step (3), using _holog.m_. Axis titles were added to
+_plot_mask.m_.
+
+. [[onoff]] Fix _onoff_ for the DBBC3 rack (closes https://github.com/nvi-inc/fs/issues/52[#52]). A code block from
+_9.12.13_ in _onoff/get_samples.c_ had been omitted, preventing
+sampling of the TPI values and causing _onoff_ to crash. Thanks to
+Eskil Varenius (Onsala) for reporting that this caused a crash.
+
+. [[cont_cal]] Add support for DBBC3 to `if=cont_cal,...` (closes https://github.com/nvi-inc/fs/issues/54[#54]).  Thanks
+to Eskil Varenius (Onsala) for reporting that this was missing.
+
+. [[onoff_fivpt]] Update `help` pages for _onoff_ and _fivpt_. Added a section on
+switching between continuous and non-continuous cal.  Removed
+`if=cont_cal,,` in `calon`/`off`-`nf`/`fp` procedures.  Add
+recovery method for misconfigured cal.
+
+. [[day248]] Always check for day 248 problem in _setcl_ (closes https://github.com/nvi-inc/fs/issues/56[#56]).
+Previously _setcl_ only checked for the day 248 problem (due to
+use of 32-bit arithmetic in the time handling code), if the time
+model was _not_ `computer`. In principle, when the model is
+`computer` there is no need to check for this issue.  However,
+since the time is still managed with the same 32-bit arithmetic as
+for the non-`computer` models, it is still necessary to check.
+Not doing so was an oversight. The result was that there were no
+warnings of an impending 248 day time problem if the model was
+`computer`.  This is now fixed. Thanks to Richard Blaauw (WSRT),
+and subsequently Jon Quick (HartRAO) for reporting this.
+
+. [[monx]] Change the flags for the _monX_ programs in _clpgm.ctl_ from `a`
+to `d`.  Since they do not depend on the FS, they can continue
+running after the client is closed.
+
+. [[scnch]] Generalize the _scnch_ window to cover Mark 5 recorders (closes
+https://github.com/nvi-inc/fs/issues/61[#61]).  The _scnch_ window was initially developed for Mark 6
+recorders. The form has now been generalized to cover Mark 5
+recorders as wekk
+
+. [[release_model]] Update _misc/release_model.txt_. The release steps were
+clarified.
+
+. [[notes]] Improve update notes.
+
+.. The `-q` option was added to
+the `pull` to suppress the detached HEAD warning.
+
+.. A sentence was added to the description of the change to using
+_git_ that it now even more important to not change the contents
+of the _/usr2/fs_ source tree.  Changing the source tree will make
+it harder to install bug fixes and updates.
+
+.. The paths to the example control files now include the needed
+intermediate directory _fs/_.
+
+.. The sub-steps for updating the control files were corrected
+to properly
+depend or not depend on the old version being _9.12.12_.
+
+.. A sub-step was added to make using the FS display server the default.
+
+.. A sub-step was added for updating the _~/.Xresources_ file for _oper_
+and _prog_.
+
+.. A sub-step to update where the `TMOUT` environment variable is unset
+for stations using FSL10 was added.
+
+.. A recommendation was added to sign-up for the _go_ language
+announcements to be informed of security updates if you are
+installing the latest version of _go_ lnaguage.
+
+==== Changes relative to the main branch
+
+#TODO: Complete this sub-section.#
+
+. [[case]] Input is now case sensitive. As was the case for the VGOS branch,
+operator, schedule, and procedure is now case sensitive. This change
+should present no difficulties if all normal input is in lower case.
+All SNAP commands and most parameters are lower case.
++
+
+The change was made because in some cases it necessary to send upper
+or mixed case input to devices and other computers from SNAP commands.
+For MAT and GPIB communication, all communications sent to the devices
+is still mapped to upper case.
++
+
+The biggest consequence of this change is perhaps that strings sent in
+`antenna=...` commands to the antenna are not by default be mapped to
+upper case. If this an issue for a particular antenna, it may require
+changes to your _antcn_ program. This is covered in the
+<<Case sensitive strings in antenna= commands>> sub-step of the
+<<Update station programs>> step above.
+
+. [[tpicdno]] `tpicd=no` requires a running (not halted) schedule to log data.
+This changes was introduced from VGOS branch, where it critical to
+avoid logging very large amounts of data for RDBE systems if the
+schedule ends or is halted while _tpicd_ is recording data. It is
+probably beneficial for all back-ends, so has been made a general
+feature.
+
+==== Changes relative to the VGOS branch
+
+#TODO: Complete this sub-section.#
+
+=== Details of drudg changes
+
+This sub-section is divided into three parts. Please see
+<<Changes from FS9>> above for an explanation of the parts.
+
+==== Changes that are in common since FS9
+
+. [[bit3264_drudg]] Source code now works on 32- and 64-bit platforms.
+The use of FORTRAN requires eight-byte integers to support some calls
+in the VEX library. As a result the _drudg_ program has its own
+version of the _lnfch_ library, _skdrlnfch_, which uses eight byte
+integers, as does the _skdrutil_, as well as _drudg_ itself. The rest
+of the FS uses four byte integers by default.
+
+. [[git_drudg]] Source version control is maintained with _git_. The
+_drudg_ program is external to the FS. For each _drudg_ update the
+source in imported into the FS _git_ repo for distribution with the
+FS. This does not provide the same level of tracking as having _drudg_
+itself in _git_ but it is still useful.
+
+. [[uninit]] Fix uninitialized variables. Several previously uninitialized variables are
+    now initialized. As part of this `implicit none` was added to all FORTRAN
+    routines that did not have it before, except for _xat.f_.
+
+. [[preob]] Fix missing `preob` when `EARLY` start non-zero. This was broken
+    in the implementation of staggered start for FS _9.13.0_ and has been
+    restored.
+
+. [[wait]] Add support for additional wait at the end of recording for
+    broadband. This allows schedules to include a fixed amount of
+    additional wait for buffering per station. This seems to be needed
+    for Mark 6 recorders in configurations that otherwise would
+    require no buffer time for disks that are slower than nominal.
+
+. [[comment]] Update comment on line three of _.snp_ files. Previously at the
+    end of line, the number of passes and the tape length were
+    listed. Since there is no tape support, these fields were replaced
+    with the recorder type.
+
+==== Changes relative to the main branch
+
+#TODO: Complete this sub-section.#
+
+==== Changes relative to the VGOS branch
+
+#TODO: Complete this sub-section.#
+

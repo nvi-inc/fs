@@ -879,7 +879,7 @@ mask parameter must specify a non-zero integer, maximum 64 bits, usually as a he
 decimate parameter must be one of 1, 2, 4, 8, or 16
 ""
 5T -204
-Mark 5B recorder sample rate must be integer 2, 4, 8, 16, 32, or 64 (MHz).
+Mark 5B recorder sample rate must be integer 2, 4, 8, 16, 32, or 64 (Ms/s).
 ""
 5T -205
 fpdp parameter, if specified, must be 1 or 2.
@@ -899,8 +899,11 @@ For Mark 5B recorder minimum implied sample rate is 2 MHz. Check Mark 5B clock r
 5T -214
 For Mark 5B recorder implied decimation must be integer 1, 2, 4, 8, or 16. Check Mark 5B clock rate in equip.ctl.
 ""
+5T -222
+Mask must be null for DBBC3.
+""
 5T -223
-Decimation not supported for VDIF.
+Decimation is not supported for Mark 5C and FlexBuff recorders.
 ""
 5T -224
 For Ethernet recorders, total date rate must be an integer multiple of 1 Mbps.
@@ -909,10 +912,16 @@ For Ethernet recorders, total date rate must be an integer multiple of 1 Mbps.
 Can't specify sample rate and decimate parameters simultaneously
 ""
 5T -244
-Sample rate must be a positive integer Hz.
+Sample rate must be a positive integer s/s.
 ""
 5T -301
 Don't change mode while recording, use disk_record=off first or (dangerous) use disk_record_ok as the sixth parameter.
+""
+5T -302
+Mixed decimations for DBBC3 racks are not supported at this time for mk5c_mode/fb_mode.
+""
+5T -303
+Can't configure the recorder if no DBBC3 channels are selected.
 ""
 5T -400
 error retrieving acknowledgement of command
@@ -927,7 +936,7 @@ Use "mk5b_mode" for Mark 5B recorders only.
 Use "mk5c_mode" for Mark 5C and Flexbuff recorders only.
 ""
 5T -501
-error decoding mode? source/magic  parameter
+error decoding mode? source/magic parameter
 ""
 5T -502
 error decoding mode? mask or format parameter
@@ -963,7 +972,7 @@ error retrieving class for time query in get_fila10gtime
 error decoding time in get_fila10gtime
 ""
 AN   -1
-Illegal mode
+Illegal or unimplemented mode
 ""
 AN   -2
 Time-out while waiting for a response
@@ -1026,7 +1035,19 @@ AQ  -40
 MOON is not available
 ""
 BD -301
-must specify at least 1 argument for dbbc command
+Must specify at least 1 argument for dbbc/fila10g/dbbc3/dbbc2/fila10g2 commands
+""
+BD -302
+dbbc and fila10g commands are not available for DBBC3 racks
+""
+BD -303
+dbbc3 and core3h commands are not available for DBBC racks
+""
+BD -304
+Must specify at least 2 arguments for core3h command
+""
+BD -305
+First core3h argument must be an integer 1 through the number of IFs in dbbc3.ctl.
 ""
 BD -401
 error retrieving class
@@ -1259,32 +1280,38 @@ Error decoding span field in TIME.CTL
 BO -183
 Error decoding model field in TIME.CTL
 ""
-BO -189
+BO -184
 Error reading TIME.CTL, UNIX ?FFF
 ""
+BO -185
+Error opening DBBC3.CTL ?FFF
+""
+BO -186
+Error decoding DBBC3.CTL line ?WWW
+""
 BO -190
-Error initiliazing mcbcn, internal error ?WWW
+Error initializing mcbcn, internal error ?WWW
 ""
 BO -191
-Error initiliazing rclcn, internal error ?WWW
+Error initializing rclcn, internal error ?WWW
 ""
 BO -192
-Error initiliazing mk5cn, internal error ?WWW
+Error initializing mk5cn, internal error ?WWW
 ""
 BO -193
-Error initiliazing dscon, internal error ?WWW
+Error initializing dscon, internal error ?WWW
 ""
 BO -194
-Error initiliazing dbbcn, internal error ?WWW
+Error initializing dbbcn, internal error ?WWW
 ""
 BO -195
-Error initiliazing dbbc2, internal error ?WWW
+Error initializing dbbc2, internal error ?WWW
 ""
 BO -196
-Error initiliazing mk6ca, internal error ?WWW
+Error initializing mk6ca, internal error ?WWW
 ""
 BO -197
-Error initiliazing mk6cb, internal error ?WWW
+Error initializing mk6cb, internal error ?WWW
 ""
 BO -198
 More than ?WWW Mark6s requires mods to binit.f (plus fspgm.ctl, fserr.ctl, and mk6cn.c).
@@ -1472,6 +1499,9 @@ No default for IF command condition.
 BO -315
 Unknown condition in IF command.
 ""
+BO -390
+setup procedure name must be 12 characters or less.
+""
 BO -400
 Error opening flagr.ctl, UNIX ?FFF
 ""
@@ -1482,10 +1512,10 @@ BO -402
 Error antenna check period in TIME.CTL
 ""
 BO -403
-Error ?FFF reading antenna gain file, see preceeding message for file name.
+Error reading .rxg file, see above messages for file name and error.
 ""
 BO -404
-Error ?FFF reading flux.ctl file.
+Error reading flux.ctl file, see above errors/messages.
 ""
 BO -405
 Error opening TACD.CTL ?FFF
@@ -1517,8 +1547,8 @@ Final station procedure library link does contain '.prc'.
 BO -998
 ANTCN termination mode failed, see above error.
 ""
-BO -999
-WARNING: Log file just opened is already larger than 100 MB.
+BO -999 Place holder
+
 ""
 CD  -1
 Error from DBBCN in TPICD, see above for error.
@@ -2067,10 +2097,16 @@ DB   -1
 dbbc.: error opening dbb?W.ctl
 ""
 DB   -2
-dbbc.: error pushing back on dbb?W.ctl
+dbbc.: line too long in dbb?W.ctl
 ""
 DB   -3
-dbbc.: first non-comment line in dbb?W.ctl did not contain three tokens
+dbbc.: first non-comment line in dbb?W.ctl must contain at least three tokens
+""
+DB   -4
+dbbc.: first non-comment line in dbb?W.ctl must contain three, six, or more tokens
+""
+DB   -5
+dbbc.: error reading dbb?W.ctl
 ""
 DB  -11
 dbb?W: error opening socket
@@ -2124,7 +2160,7 @@ DB -101
 dbb?W: error getting class buffer
 ""
 DB -102
-dbb?W: error sending data, connection closed
+dbb?W: error sending data
 ""
 DB -103
 dbb?W: error on select reading data, see above for error, connection closed
@@ -2502,13 +2538,13 @@ DK -101
 No default for frequency
 ""
 DK -201
-Error decoding frequency, must be less than or equal to 4096
+Error decoding frequency, must be 0-4096.000000 MHz, inclusive, with 1 Hz resolution.
 ""
 DK -202
 Error decoding IF source, must be A, B, C, D, E, F, G, or H.
 ""
 DK -203
-Error decoding bandwidth, must be one of: 2, 4, 8, 16, or 32.
+Error decoding bandwidth, must be one of: 2, 4, 8, 16, 32, 64, or 128.
 ""
 DK -204
 Averaging period must be a positive integer 60 or less.
@@ -2524,6 +2560,75 @@ Error decoding dbbcNN/ response, could be a DBBC version mis-match, see error DC
 ""
 DK -451
 Class buffer error from command response.
+""
+DN   21
+DBBC3 multicast: error from select() cleared
+""
+DN   20
+DBBC3 multicast: receiving messages again
+""
+DN   -1
+DBBC3 multicast: error unpacking, packet too small.
+""
+DN  -11
+DBBC3 multicast: opening datagram socket, UNIX?FFF
+""
+DN  -12
+DBBC3 multicast: setting SO_REUSEADDR, UNIX?FFF
+""
+DN  -13
+DBBC3 multicast: binding datagram socket (wrong port?), UNIX?FFF
+""
+DN  -14
+DBBC3 multicast: adding multicast group (wrong address?), UNIX?FFF
+""
+DN  -16
+DBBC3 multicast: interface name too long to get address, maximum is?WWW
+""
+DN  -17
+DBBC3 multicast: opening socket to get interface address, UNIX?FF
+""
+DN  -18
+DBBC3 multicast: retrieving interface address from socket (wrong interface?), UNIX?FFF
+""
+DN  -20
+DBBC3 multicast: time-out, DBBC3 may not be running
+""
+DN  -21
+DBBC3 multicast: error from select(), UNIX?FFF
+""
+DN  -22
+DBBC3 multicast: error from recvfrom(), UNIX?FFF
+""
+DN  -23
+DBBC3 multicast: time-out while data_valid is on, some multicast not recorded, probably due to a DBBC3 command
+""
+DN  -30 Place holder for version string
+
+""
+DN  -31
+DBBC3 multicast: DBBC3 personality not found, see DN -30 error above
+""
+DN  -32
+DBBC3 multicast: DBBC3 version not found, see DN -30 error above
+""
+DN  -33
+DBBC3 multicast: DBBC3 version doesn't agree with DBBC_U version in dbbc3.ctl, see DN -30 error above
+""
+DN  -34
+DBBC3 multicast: DBBC3 personality should be DBBC_U (equip.ctl), but it is DBBC_V, see DN -30 error above
+""
+DN  -35
+DBBC3 multicast: DBBC3 has an unknown personality, see DN -30 error above
+""
+DN  -36
+DBBC3 multicast: DBBC3 version doesn't agree with DBBC_V version in dbbc3.ctl, see DN -30 error above
+""
+DN  -37
+DBBC3 multicast: DBBC3 personality should be DBBC_V (equip.ctl), but it is DBBC_U, see DN -30 error above
+""
+DN  -38
+DBBC3 multicast: equip.ctl had an unrecognized DBBC3 rack type
 ""
 DP -301
 No command form of pfbX command.
@@ -2607,7 +2712,7 @@ DQ -34
 Invalid bbc number (1 to 4).
 ""
 DQ -35
-Invalid LO frequency (100.0 to 1000.0Mhz).
+Invalid LO frequency (100.0 to 1000.0MHz).
 ""
 DQ -36
 Invalid If source (i1, i2, i3, i4, i?d, i?a)
@@ -2632,6 +2737,213 @@ Invalid state number (0 to 64).
 ""
 DQ -70
 Invalid device for ping (da ro r1).
+""
+DR -201
+First parameter must be 'begin', 'end', or the Core3H board number: '1' to the number of IFs set in 'dbbc3.ctl'.
+""
+DR -202
+mask2 parameter must either be null or an integer, usually as a hex value, e.g. 0xf.
+""
+DR -203
+mask1 parameter must either be null or an integer, usually as a hex value, e.g. 0xf.
+""
+DR -204
+decimate parameter must either be null or an integer 1-255.
+""
+DR -205
+Sample rate must either be null or a positive number.
+""
+DR -206
+The 'force' parameter must be 'force', '$', or null.
+""
+DR -207
+The 'okay' parameter must be 'disk_record_ok' or null.
+""
+DR -214
+For DBBC3 DDC_V decimate must be 1 or 2.
+""
+DR -215
+Clock rate (MHz: 256 for DDC_U or 128 for DDC_V) divided by sample rate must be an integer 1-255.
+""
+DR -225
+Can't specify sample rate and decimate parameters simultaneously.
+""
+DR -235
+For DBBC3 DDC_V sample rate must imply a decimate of 1 or 2.
+""
+DR -301
+Can't change mode while recording, use disk_record=off first or (dangerous) use 'disk_record_ok' as 'okay' parameter.
+""
+DR -302
+'mask2' cannot have selected channels unless DDBC3 is DDC_U.
+""
+DR -303
+Can't specify 'mask2' for more BBCs per IF than set in dbbc3.ctl.
+""
+DR -304
+The 'force' parameter must be 'force', '$', or null.
+""
+DR -305
+Internal error, impossible state clause.
+""
+DR -307
+The 'okay' parameter must be 'disk_record_ok' or null.
+""
+DR -308
+All selected channels must have the same width: 1-bit or 2-bits.
+""
+DR -309
+If 'mask1' AND 'mask2' are non-zero, they must have the same number of channels.
+""
+DR -310
+The number of selected channels in each mask must be a power of two (or zero).
+""
+DR -311
+For DBBC3 DDC_U, at least one of 'mask1' and 'mask2' must be non-zero.
+""
+DR -312
+For DBBC3 DDC_V, 'mask1' must be non-zero.
+""
+DR -400
+error retrieving acknowledgement of command.
+""
+DR -401
+error retrieving class.
+""
+DR -451
+Class buffer error from command response.
+""
+DR -452
+DBBC3 version does not agree with DDC_U version in dbbc3.ctl; see message above for DBBC3's version.
+""
+DR -453
+DBBC3 firmware should be DDC_U (equip.ctl), but is DDC_V; see message above for DBBC3's version.
+""
+DR -454
+DBBC3 firmware should be DDC_V (equip.ctl), but is DDC_U; see message above for DBBC3's version.
+""
+DR -455
+Unknown personality from DBBC3; see message above for DBBC3's personality.
+""
+DR -456
+Unknown rack type in logmsg_dbbc3().
+""
+DR -457
+DBBC3 version does not agree with DDC_V version in dbbc3.ctl; see message above for DBBC3's version.
+""
+DR -500 Place holder for bad response buffer
+
+""
+DR -501
+error decoding mode_fs response, see DR -500 error for contents.
+""
+DR -502
+error decoding status_fs response, see DR -500 error for contents.
+""
+DR -503
+error decoding splitmode response, see DR -500 error for contents.
+""
+DR -504
+error decoding destination 0 response, see DR -500 error for contents.
+""
+DR -505
+error decoding destination 1 response, see DR -500 error for contents.
+""
+DR -523
+could not find splitmode response.
+""
+DR -524
+could not find destination 0 response.
+""
+DR -525
+could not find destination 1 response.
+""
+DR -596
+Core3H board?W data sending state is not defined in the FS yet.
+""
+DR -597
+DBBC3 firmware/version is wrong AND one or more Core3H boards does not have the correct data sending state.
+""
+DR -598
+One or more Core3H boards does not have the correct data sending state.
+""
+DR -599
+DBBC3 firmware/version is wrong.
+""
+DR -600
+Core3H board?W configuration is not correct.
+""
+DR -611
+Core3H board?W mask1 is not correct.
+""
+DR -612
+Core3H board?W mask2 is not correct.
+""
+DR -613
+Core3H board?W mask3 is not correct.
+""
+DR -614
+Core3H board?W mask4 is not correct.
+""
+DR -615
+Core3H board?W decimation is not correct.
+""
+DR -616
+Core3H board?W vdif_frame channel width is not correct.
+""
+DR -617
+Core3H board?W vdif_frame number of channels is not correct.
+""
+DR -618
+Core3H board?W vdif_frame payload size is not correct.
+""
+DR -619
+Core3H board?W splitmode should be on and it is not.
+""
+DR -620
+Core3H board?W splitmode should be off and it is not.
+""
+DR -621
+Core3H board?W vsi input should be vsi1-2-3-4 and it is not.
+""
+DR -622
+Core3H board?W vsi input should be vsi1 and it is not.
+""
+DR -623
+Core3H board?W should be sending data but it is stopped.
+""
+DR -624
+Core3H board?W should be stopped but it is sending data.
+"
+DR -625
+Core3H board?W input clock rate does not agree with dbbc3.ctl.
+"
+DR -626
+Core3H board?W data format is not VDIF.
+"
+DR -627
+Core3H board?W is not synced.
+"
+DR -628
+core3h_mode mask1 for board?W is non-zero, but destination 0 is 'none'.
+"
+DR -629
+core3h_mode mask1 for board?W is zero, but destination 0 is not 'none'.
+"
+DR -630
+core3h_mode mask2 for board?W is non-zero, but destination 1 is 'none'.
+"
+DR -631
+core3h_mode mask2 for board?W is zero, but destination 1 is not 'none'.
+""
+DR -632
+core3h_mode mask2 for board?W should be zero, but is not.
+""
+DR -633
+core3h_mode mask3 for board?W should be zero, but is not.
+""
+DR -634
+core3h_mode mask4 for board?W should be zero, but is not.
 ""
 DS   -1
 Unable to open dsad.ctl file.
@@ -2861,6 +3173,18 @@ Class buffer error from command response.
 DV -501
 Only DBBC PFB rack types supported in vsiX commands.
 ""
+DW -301
+mcast_time command does not accept arguments.
+""
+DW -302
+Multi-cast time data is stale, more than 20 seconds old.
+""
+DW -303
+Core3H board ?WWW has a non-zero time offset.
+""
+DW -304
+One or more Core3H boards have a non-zero time offset and/or the multicast data is stale, please see messages above.
+""
 ER -902
 Unable to find ":" in S2 error decode response.
 ""
@@ -3010,6 +3334,120 @@ Program error: less than zero length data object request for device ?W
 ""
 FV -403
 Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+FX   -1
+Failed to open flux.ctl, see above error
+""
+FX   -2
+error with ungetc, see above error
+""
+FX   -3
+error with fgets, see above error
+""
+FX   -4
+line too long in flux.ctl, max is 255 characters
+""
+FX   -5
+too many source records, maximum is 100
+""
+FX   -6
+source name too long, maximum is 10
+""
+FX   -7
+source type missing
+""
+FX   -8
+source type must be c or p
+""
+FX  -10
+minimum frequency missing
+""
+FX  -11
+minimum frequency did not decode
+""
+FX  -12
+maximum frequency missing
+""
+FX  -13
+maximum frequency did not decode
+""
+FX  -14
+first flux coefficient (a) missing
+""
+FX  -15
+first flux coefficient (a) did not decode
+""
+FX  -16
+second flux coefficient (b) missing
+""
+FX  -17
+second flux coefficient (b) did not decode
+""
+FX  -18
+third flux coefficient (c) missing
+""
+FX  -19
+third flux coefficient (c) did not decode
+""
+FX  -20
+size field missing
+""
+FX  -21
+size field did not decode
+""
+FX  -22
+model type missing
+""
+FX  -23
+first Gaussian component percent missing
+""
+FX  -24
+first Gaussian component percent did not decode
+""
+FX  -25
+first Gaussian component first axis missing
+""
+FX  -26
+first Gaussian component first axis did not decode
+""
+FX  -28
+first Gaussian component second axis did not decode
+""
+FX  -30
+second Gaussian component percent did not decode
+""
+FX  -31
+second Gaussian component first axis missing
+""
+FX  -32
+second Gaussian component first axis did not decode
+""
+FX  -34
+second Gaussian component second axis did not decode
+""
+FX  -35
+2pts model separation missing
+""
+FX  -36
+2pts model separation did not decode
+""
+FX  -37
+disk size missing
+""
+FX  -38
+disk size did not decode
+""
+FX  -39
+model must be gauss, 2pts, or disk
+""
+FX  -40
+extra trailing field
+""
+FX  -41
+error closing flux.ctl, see above error
+""
+FX  -42
+error from fgetc(), see above error
 ""
 HL   -1
 Break Detected in HOLOG
@@ -3954,7 +4392,7 @@ M5 -101
 mk5cn: error getting class buffer
 ""
 M5 -102
-mk5cn: error sending data, connection closed
+mk5cn: error sending data
 ""
 M5 -103
 mk5cn: error on select reading data, see above for error, connection closed
@@ -4089,7 +4527,7 @@ M6 -101
 mk6?W: error getting class buffer
 ""
 M6 -102
-mk6?W: error sending data, connection closed
+mk6?W: error sending data
 ""
 M6 -103
 mk6?W: error on select reading data, see above for error, connection closed
@@ -4161,16 +4599,19 @@ MN   -1 Place Holder
 
 ""
 NF   -1
-Break Detected in ONOFF
+Break detected in ONOFF: stopped
+""
+NF   -2
+Break detected in ONOFF: stopping
 ""
 NF   -3
 ONOFF already running
 ""
 NF   -4
-Error occurred while trying to return to source at end. Check offsets.
+Not able to return to initial target after an error: check antenna and offsets
 ""
 NF   -5
-Error occurred while trying to return to AGC. Check BBC gain settings.
+Error occurred while trying to return to AGC: check gain settings
 ""
 NF   -6
 Error occurred while trying to restore IF att. Check IF att settings.
@@ -4209,13 +4650,22 @@ NF  -19
 Error retrieving DBBC IF responses.
 ""
 NF  -20
-Did not reach source in allotted time
+Did not reach onsource for a target in the allotted time: ended
 ""
 NF  -21
 Error decoding DBBC IF response.
 ""
+NF  -22
+Did not reach onsource for a target in the allotted time: giving up
+""
+NF  -23
+Did not reach onsource trying to return to initial target after an error
+""
 NF  -30
-ANTCN failed too many times
+ANTCN failed too many times trying to go to a target to make measurements
+""
+NF  -31
+ANTCN failed too many times trying to return to initial target after an error
 ""
 NF  -40
 Diagnostic: Unknown axis system found in LOCAL
@@ -4564,9 +5014,6 @@ Unknown IF filter.
 ""
 Q1 -309
 Unknown IF filter or unsupported IF filter for PFB BBC.
-""
-Q1 -310
-formbbc and formif not currently supported for DBBC3.
 ""
 Q2 -201
 Satellite name longer than 24 characters.
@@ -5520,7 +5967,7 @@ Q* -201
 Chan is lo1-3:MK3/4/5+K4, loa-d:VLBA/4/5, lo1-4:LBA/4, loa-d,2a-2d:DBBC, loa0-d0,a1-d1:RDBE, loa-h:DBBC3, lo1-8:others
 ""
 Q* -202
-LO frequency must be a positive real number
+LO frequency must be a non-negative real number
 ""
 Q* -203
 LO sideband must be one of unknown, usb, or lsb.
@@ -5554,6 +6001,12 @@ Previous value not permitted for LO pcal offset.
 ""
 Q* -401
 LO channel position exceeds number of conditioning modules
+""
+Q* -501
+FS_LO_ANTCN_MODE must be 100 or greater.
+""
+Q* -502
+FS_LO_CONFIG_ANTCN_MODE must be 100 or greater.
 ""
 Q- -101
 No default for User Device channel
@@ -6030,7 +6483,7 @@ RA -101
 rdb?W: error getting class buffer
 ""
 RA -102
-rdb?W: error sending data, connection closed
+rdb?W: error sending data
 ""
 RA -103
 rdb?W: error on select reading data, see above for error, connection closed
@@ -6205,6 +6658,285 @@ Program error: less than zero length data object request for device ?W
 ""
 RE -403
 Program error: impossible type code for rclcn_res_position_read for device ?W
+""
+RG   -1
+error from fgetc() while looking for extra trailing lines
+""
+RG   -2
+error from ungetc() while looking for extra trailing lines
+""
+RG   -3
+error from fgets() while looking for extra trailing lines
+""
+RG   -4
+.rxg file line too long while looking for extra trailing lines
+""
+RG  -11
+error opening an .rxg file
+""
+RG  -12
+error closing an .rxg file.
+""
+RG  -13
+extra trailing non-comment line found in an .rxg file
+""
+RG  -21
+.rxg file name too long, maximum is 128 characters
+""
+RG  -22
+too many .rxg files, maximum is 20
+""
+RG  -99
+.rxg file ended before line 1 (LO)
+""
+RG -101
+error from fgetc() while looking for line 1 (LO)
+""
+RG -102
+error from ungetc() while looking for line 1 (LO)
+""
+RG -103
+error from fgets() while looking for line 1 (LO)
+""
+RG -104
+.rxg file line too long while looking for line 1 (LO)
+""
+RG -111
+LO (line 1): empty
+""
+RG -112
+LO (line 1): must start with "range" or "fixed"
+""
+RG -113
+LO (line 1): with two LOs: LO2 < LO1 or LO1 < 0
+""
+RG -114
+LO (line 1): with one LO: LO1 < 0
+""
+RG -115
+LO (line 1): no LO values
+""
+RG -116
+LO (line 1): LO2 does not decode as a number
+""
+RG -117
+LO (line 1): no LO2 for type "range"
+""
+RG -199
+.rxg file ended before line 2 (date)
+""
+RG -201
+error from fgetc() while looking for line 2 (date)
+""
+RG -202
+error from ungetc() while looking for line 2 (date)
+""
+RG -203
+error from fgets() while looking for line 2 (date)
+""
+RG -204
+.rxg file line too long while looking for line 2 (date)
+""
+RG -211
+date (line 2): doesn't have three fields
+""
+RG -212
+date (line 2): fields have impossible values
+""
+RG -299
+.rxg file ended before line 3 (FWHM)
+""
+RG -301
+error from fgetc() while looking for line 3 (FWHM)
+""
+RG -302
+error from ungetc() while looking for line 3 (FWHM)
+""
+RG -303
+error from fgets() while looking for line 3 (FWHM)
+""
+RG -304
+.rxg file line too long while looking for line 3 (FWHM)
+""
+RG -311
+FWHM (line 3): empty
+""
+RG -312
+FWHM (line 3): must start with "constant" or "frequency"
+""
+RG -313
+FWHM (line 3): wrong number of fields
+""
+RG -314
+FWHM (line 3): value doesn't decode as a number
+""
+RG -315
+FWHM (line 3): value missing for type "constant"
+""
+RG -399
+.rxg file ended before line 4 (polarizations)
+""
+RG -401
+error from fgetc() while looking for line 4 (polarizations)
+""
+RG -402
+error from ungetc() while looking for line 4 (polarizations)
+""
+RG -403
+error from fgets() while looking for line 4 (polarizations)
+""
+RG -404
+.rxg file line too long while looking for line 4 (polarizations)
+""
+RG -411
+polarizations (line 4): empty
+""
+RG -412
+polarizations (line 4): polarization 1 must be "lcp" or "rcp"
+""
+RG -413
+polarizations (line 4): polarization 2 must be "lcp" or "rcp"
+""
+RG -499
+.rxg file ended before line 5 (DPFUs)
+""
+RG -501
+error from fgetc() while looking for line 5 (DPFUs)
+""
+RG -502
+error from ungetc() while looking for line 5 (DPFUs)
+""
+RG -503
+error from fgets() while looking for line 5 (DPFUs)
+""
+RG -504
+.rxg file line too long while looking for line 5 (DPFUs)
+""
+RG -511
+DPFU (line 5): first DPFU < 0
+""
+RG -512
+DPFU (line 5): second DPFU < 0
+""
+RG -513
+DPFU (line 5): found one DPFU, but expected two
+""
+RG -514
+DPFU (line 5): found two DPFUs but expected one
+""
+RG -515
+DPFU (line 5): DPFU line empty
+""
+RG -599
+.rxg file ended before line 6 (gain) curve
+""
+RG -601
+error from fgetc() while looking for line 6 (gain curve)
+""
+RG -602
+error from ungetc() while looking for line 6 (gain curve)
+""
+RG -603
+error from fgets() while looking for line 6 (gain curve)
+""
+RG -604
+.rxg file line too long while looking for line 6 (gain curve)
+""
+RG -611
+Gain curve (line 6): first two tokens may be too long or less than 1 or more than 10 coefficients
+""
+RG -612
+Gain curve (line 6): gain curve is not "elev" or "altaz"
+""
+RG -613
+Gain curve (line 6): gain curve type is not "poly"
+""
+RG -614
+Gain curve (line 6): gain curve trailing token is not "opacity_corrected", maybe it is misspelled
+""
+RG -699
+.rxg file ended in Tcal table, i.e., no "end_tcal_table"
+""
+RG -701
+error from fgetc() while looking for Tcal table lines
+""
+RG -702
+error from ungetc() while looking for Tcal table lines
+""
+RG -703
+error from fgets() while looking for Tcal table lines
+""
+RG -704
+.rxg file line too long while looking for Tcal table lines
+""
+RG -711
+Tcal line: line did not have at least three fields
+""
+RG -712
+Tcal line: polarization was not "rcp" or "lcp"
+""
+RG -713
+Tcal line: polarization does match defined polarization
+""
+RG -714
+Tcal line: freq < 0
+""
+RG -715
+Tcal line: too many Tcal lines, maximum is 1200
+""
+RG -716
+Tcal line: no Tcal lines present
+""
+RG -799
+.rxg file ended without Trec line
+""
+RG -801
+error from fgetc() while looking for Trec line
+""
+RG -802
+error from ungetc() while looking for Trec line
+""
+RG -803
+error from fgets() while looking for Trec line
+""
+RG -804
+.rxg file line too long while looking for Trec line
+""
+RG -811
+Trec line: first Trec is less than zero
+""
+RG -812
+Trec line: second Trec is less than zero
+""
+RG -813
+Trec line: found one Trec, expected two
+""
+RG -814
+Trec line: found two Trec, expected one
+""
+RG -815
+Trec line: empty Trec line
+""
+RG -899
+.rxg file ended without "end_spillover_table"
+""
+RG -901
+error from fgetc() while looking for spillover table line
+""
+RG -902
+error from ungetc() while looking for spillover table line
+""
+RG -903
+error from fgets() while looking for spillover table line
+""
+RG -904
+.rxg file line too long while looking for spillover table line
+""
+RG -911
+spillover table line: does not have at least two fields
+""
+RG -912
+too many spillover table lines, maximum is 20
 ""
 RL -131
 Operation failed (non-specific error) on device ?W
@@ -6581,6 +7313,15 @@ rdt?W: Error from select(), see above message for details.
 RZ   -2
 rdt?W: multicast may not be running, no message received
 ""
+SC   29
+setcl: DBBC3 multicast time now okay.
+""
+SC   28
+setcl: WARNING: DBBC3 multicast time was older than 20 seconds or not received yet.
+""
+SC   27
+setcl: WARNING: Core3H board?W (selected in dbbc3.ctl) is not synced (or VDIF epoch seconds is 0 or 1).
+""
 SC   -1
 setcl: incorrect number of class buffers.
 ""
@@ -6612,7 +7353,7 @@ SC  -10
 setcl: failed too many times, couldn't check formatter time
 ""
 SC  -11
-setcl: cannot set fs time without Mk3/4 VLBA/4, S2, K4*/MK4, DBBC/FiLa10G rack or S2, K4, M5B recorder
+setcl: cannot set fs time without Mk3/4 VLBA/4, S2, K4*/MK4, DBBC/FiLa10G, DBBC3 rack or S2, K4, M5B recorder
 ""
 SC  -12
 setcl: FS to computer time difference 0.5 seconds or greater
@@ -6655,6 +7396,12 @@ setcl: Mark 5B syncerr_gt_3, CONSIDER using fmset 's' option to fix.
 ""
 SC  -25
 setcl: rte_check got error from times(), see above for error
+""
+SC  -26
+setcl: DBBC3 firmware version must be 125 or later to get time from multicast.
+""
+SC  -29
+setcl: Core3H multicast time still bad after four tries.
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W

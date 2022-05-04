@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -67,6 +67,7 @@ struct fila10g_cfg *fila10g_cfg_use = NULL;
 struct fila10g_cfg *ask_fila10g_cfg();
 int iRDBE;
 int iDBBC;
+int RDBE_set_ticks;
 
 WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
 
@@ -119,7 +120,7 @@ int ierr;
 int nRDBE;
 int clear_area=0;
 int vdif_epoch, vdif_should;
-
+int kfirst = 1;
 
  putpname("fmset");
 skd_set_return_name("fmset");
@@ -167,7 +168,11 @@ dbbcddcv=shm_addr->dbbcddcv;
  else if(shm_addr->rdbe_units[3])
    iRDBE=4;
 
- if (rack == RDBE) {
+ if (rack == DBBC3) {
+    fprintf(stderr,"fmset does not support DBBC3 racks - fmset aborting\n");
+  rte_sleep(SLEEP_TIME);
+  exit(0);
+ } else if (rack == RDBE) {
    if(nRDBE==0) {
      fprintf(stderr,
 	     "no RDBEs available, correct rdbc?.ctl, and restart FS - fmset aborting\n");
@@ -324,9 +329,10 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
  mvwaddstr( maindisp, hint_row+3, column, buffer);
  irow=4;
  if(source==RDBE) {
-   if(vdif_epoch < vdif_should) {
+   if(vdif_epoch < vdif_should && !kfirst) {
      sprintf(buffer,"    '>'     to increment %s VDIF epoch." ,form);
-   }
+   } else
+     sprintf(buffer,"                                             ");
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
    sprintf(buffer,"    '<'     to decrement %s VDIF epoch." ,form);
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
@@ -493,6 +499,10 @@ do 	{
 		  form,vdif_should);
 	  mvwaddstr( maindisp, 8, column, buffer );
 	  
+          if(kfirst) {
+            kfirst=0;
+            goto build;
+          }
 	} else if(source==MK5) {
 	  char *pps_status,*freq_status,*source_status;
 	  if((rack == VLBA4 && rack_type == VLBA45) ||
@@ -584,6 +594,7 @@ do 	{
 	    if(vdif_epoch < vdif_should) {
 	      vdif_epoch++;
 	      setfmtime(formtime,0,vdif_epoch);
+	      changedfm=1;
 	    }
 	  }
 	  goto build;
@@ -593,6 +604,7 @@ do 	{
 	    if(0 < vdif_epoch) {
 	      vdif_epoch--;
 	      setfmtime(formtime,0,vdif_epoch);
+	      changedfm=1;
 	    }
 	  }
 	  goto build;
@@ -601,6 +613,7 @@ do 	{
 	  if(source=RDBE) {
 	    vdif_epoch=vdif_should;
 	    setfmtime(formtime,0,vdif_epoch);
+	    changedfm=1;
 	  }
 	  goto build;
 	  break;
@@ -659,18 +672,22 @@ do 	{
 	case 'a':
 	  if(source== RDBE && shm_addr->rdbe_units[0])
 	    iRDBE=1;
+            kfirst=1;
 	  goto build;
 	case 'b':
 	  if(source== RDBE && shm_addr->rdbe_units[1])
 	    iRDBE=2;
+            kfirst=1;
 	  goto build;
 	case 'c':
 	  if(source== RDBE && shm_addr->rdbe_units[2])
 	    iRDBE=3;
+            kfirst=1;
 	  goto build;
 	case 'd':
 	  if(source== RDBE && shm_addr->rdbe_units[3])
 	    iRDBE=4;
+            kfirst=1;
 	  goto build;
 	case SYNCH_KEY:
 	  for (i=hint_row;i<hint_row+irow;i++)
@@ -704,6 +721,16 @@ do 	{
 	}
 } while ( running );
 
+if(rack == RDBE && changedfm) {
+   int ticks;
+   rte_ticks(&ticks);
+   if (ticks < RDBE_set_ticks+110)
+       rte_sleep(110-(ticks-RDBE_set_ticks));
+   for (i=0;i<MAX_RDBE;i++) {
+      iRDBE=i+1;
+      RDBE_data_send(1);
+      }
+}
 endwin ();
  if(changedfm && rack !=RDBE) {
    logit("Formatter time reset.",0,NULL);

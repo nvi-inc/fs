@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine timin(cbuf,cti,ctiformat,cctiformat,iyear)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include '../skdrincl/skparm.ftni'
 C Decode time commands read from the SNAP file.
 C 980916 nrv Extracted from lstsum
@@ -30,7 +31,7 @@ C Input
       integer iyear ! from SNAP file, modified on output if
 C                     the time field contains the year
 C Output
-      character*(*) cti ! time field 
+      character*(*) cti ! time field
       character*(*) ctiformat ! its appropriate format statement
       character*(*) cctiformat ! format for reading characters
 C Local

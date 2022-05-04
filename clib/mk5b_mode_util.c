@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -47,7 +47,7 @@ int *count;
 char *ptr;
 int itask;
 {
-    int ierr, i, arg_key();
+    int ierr, i, j, arg_key();
     int isample;
     int decimate;
     char *sptr,*dptr;
@@ -89,32 +89,55 @@ int itask;
       } 
       break;
     case 2:
+      if(15==itask & shm_addr->equip.rack==DBBC3) {
+          if (0!=strlen(ptr)) {
+              ierr=-220;
+          } else {
+              m5state_init(&lcl->mask.state);
+              lcl->mask.state.known=0;
+              lcl->mask.bits=0;
+              for (j=0;j<shm_addr->dbbc3_ddc_ifs;j++) {
+                  int bits1=0;
+                  int bits2=0;
+                  if(shm_addr->dbbc3_core3h_modex[j].mask2.state.known)
+                      for(i=0;i<32;i++)
+                          if(shm_addr->dbbc3_core3h_modex[j].mask2.mask2 & 0x1U<<i)
+                              bits2++;
+                  if(shm_addr->dbbc3_core3h_modex[j].mask1.state.known)
+                      for(i=0;i<32;i++)
+                          if(shm_addr->dbbc3_core3h_modex[j].mask1.mask1 & 0x1U<<i)
+                              bits1++;
+                  lcl->mask.bits+=(bits1+bits2);
+              }
+              break;
+          }
+      }
       ierr=arg_long_long_uns(ptr,&lcl->mask.mask , 0xffffffffULL,TRUE);
       if(0==lcl->mask.mask) {
-	ierr=-200;
+          ierr=-200;
       } else if((shm_addr->equip.drive[shm_addr->select] == MK5 &&
-		 (shm_addr->equip.drive_type[shm_addr->select] == MK5B ||
-		  shm_addr->equip.drive_type[shm_addr->select] == MK5B_BS)) &&
-		lcl->mask.mask & 0xffffffffULL &&
-		lcl->mask.mask & 0xffffffff00000000ULL)
-	ierr=-210;
+                  (shm_addr->equip.drive_type[shm_addr->select] == MK5B ||
+                   shm_addr->equip.drive_type[shm_addr->select] == MK5B_BS)) &&
+              lcl->mask.mask & 0xffffffffULL &&
+              lcl->mask.mask & 0xffffffff00000000ULL)
+          ierr=-210;
       m5state_init(&lcl->mask.state);
       if(ierr==0) {
-	lcl->mask.bits=0;
-	for(i=0;i<64;i++) 
-	  if(lcl->mask.mask & 0x1ULL<<i)
-	    lcl->mask.bits++;
-	
-	lcl->mask.state.known=1;
+          lcl->mask.bits=0;
+          for(i=0;i<64;i++)
+              if(lcl->mask.mask & 0x1ULL<<i)
+                  lcl->mask.bits++;
+
+          lcl->mask.state.known=1;
       } else {
-	lcl->mask.state.error=1;
+          lcl->mask.state.error=1;
       } 
       break;
     case 3:
       m5state_init(&lcl->decimate.state);
       if(14==itask)
 	break;
-      if(3!=lcl->source.source){ /* VSI or 5B/Ethernet */
+      if(3>lcl->source.source){ /* VSI */
 	ierr=arg_int(ptr,&lcl->decimate.decimate ,1,FALSE);
 	if(ierr == 0 && lcl->decimate.decimate!=1 &&
 	   lcl->decimate.decimate!=2 &&
@@ -136,7 +159,7 @@ int itask;
 	if(ierr==-100)
 	  ierr=0;   /* default okay if sample is provided (next) */
       } else if(strlen(ptr)!=0)
-	ierr=-220;   /* VDIF cannot specify decimation */
+	ierr=-220;   /* Ethernet cannot specify decimation */
       break;
     case 4:
       m5state_init(&lcl->samplerate.state);
@@ -290,15 +313,20 @@ int itask;
 	while(output[strlen(output)-1]=='0')
 	  output[strlen(output)-1]=0;
 	m5state_encode(output,&lclc->samplerate.state);
+      } else if(lclc->decimate.state.known && lclc->decimate.decimate!=0) {
+	sprintf(output,"(%.3f)",
+		((float) shm_addr->m5b_crate)/
+			 lclc->decimate.decimate+0.0001 );
+	m5state_encode(output,&lclc->decimate.state);
       } else if(shm_addr->mk5b_mode.samplerate.state.known) {
-	sprintf(output,"(%llu.",
+	sprintf(output,"((%llu.",
 		shm_addr->mk5b_mode.samplerate.samplerate/1000000);
 	if(shm_addr->mk5b_mode.samplerate.samplerate%1000000)
 	  sprintf(output+strlen(output),"%06llu",
 		  shm_addr->mk5b_mode.samplerate.samplerate%1000000);
 	while(output[strlen(output)-1]=='0')
 	  output[strlen(output)-1]=0;
-	strcat(output,")");
+	strcat(output,"))");
 	m5state_encode(output,&shm_addr->mk5b_mode.samplerate.state);
       }
       break;
@@ -351,10 +379,12 @@ struct mk5b_mode_mon *lclm;
    return;
 }
 
-mk5b_mode_2_m5(ptr,lclc,itask)
+mk5b_mode_2_m5(ptr,lclc,itask,data_rate,channels_dbbc3)
 char *ptr;
 struct mk5b_mode_cmd *lclc;
 int itask;
+unsigned long long *data_rate;
+int *channels_dbbc3;
 {
   if(shm_addr->equip.drive[shm_addr->select] == MK5 &&
        (shm_addr->equip.drive_type[shm_addr->select] == MK5B ||
@@ -384,30 +414,55 @@ int itask;
   } else { /* Mark 5C/FlexBuff */
     unsigned long long bitmask=lclc->mask.mask;
     int bits_p_chan = 0 ;
-    unsigned long long data_rate = 0;
     int channels = 0;
-    int i;
-        
-    if((0xaaaaaaaaaaaaaaaaULL & bitmask) && (0x555555555555555ULL & bitmask))
-      bits_p_chan = 2 ;
-    else if(bitmask)
-      bits_p_chan = 1 ;  
-    
-    if(bits_p_chan > 0)
-      channels = lclc->mask.bits/bits_p_chan;
-    
-    if(lclc->decimate.state.known)
-      data_rate = lclc->decimate.datarate;
-    else 
-      data_rate = lclc->samplerate.datarate;
-    
+    int i, j;
+
+    *data_rate = 0;
+    if(shm_addr->equip.rack==DBBC3) {
+        int bits[ ] ={0 , 0, 0, 0};
+
+        for (j=0;j<shm_addr->dbbc3_ddc_ifs;j++) {
+            if(shm_addr->dbbc3_core3h_modex[j].mask2.state.known)
+                for(i=0;i<16;i++)
+                    bits[shm_addr->dbbc3_core3h_modex[j].mask2.mask2 >> i*2 & 0x3U]++;
+            if(shm_addr->dbbc3_core3h_modex[j].mask1.state.known)
+                for(i=0;i<16;i++)
+                    bits[shm_addr->dbbc3_core3h_modex[j].mask1.mask1 >> i*2 & 0x3U]++;
+        }
+        channels=bits[1]+bits[2]+bits[3];
+        if((bits[1] || bits[2]) && bits[3]) {
+           bits_p_chan=1;     /* mixed width, special case */
+           channels=1;
+         } else if(bits[3])
+           bits_p_chan=2;
+         else
+           bits_p_chan=1;
+
+        *data_rate = lclc->samplerate.datarate;
+        *channels_dbbc3=channels;
+    } else {
+
+        if((0xaaaaaaaaaaaaaaaaULL & bitmask) && (0x5555555555555555ULL & bitmask))
+            bits_p_chan = 2 ;
+        else if(bitmask)
+            bits_p_chan = 1 ;
+
+        if(bits_p_chan > 0)
+            channels = lclc->mask.bits/bits_p_chan;
+
+        if(lclc->decimate.state.known)
+            *data_rate = lclc->decimate.datarate;
+        else
+            *data_rate = lclc->samplerate.datarate;
+
+    }
     if(4==lclc->source.source)
       strcpy(lclc->source.magic,"mark5b-");
     else
       strcpy(lclc->source.magic,"VDIF_8000-");
     snprintf(lclc->source.magic+strlen(lclc->source.magic),
 	     sizeof(lclc->source.magic)-strlen(lclc->source.magic)-1,
-	     "%llu-%d-%d",data_rate/1000000,channels,bits_p_chan);
+	     "%llu-%d-%d",*data_rate/1000000,channels,bits_p_chan);
     strncpy(shm_addr->mk5b_mode.source.magic,lclc->source.magic,
 	    sizeof(shm_addr->mk5b_mode.source.magic));
     sprintf(ptr,"mode = %s ; \n",lclc->source.magic);

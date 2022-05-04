@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -31,11 +31,11 @@ C        IERR = 0 IF NO ERROR
 C 
       include '../include/fscom.i'
 C 
-      integer*2 lwho,lwhat
+      integer*2 lwho
       integer*4 ip(5)
       logical kbreak
 C 
-      data lwho/2Hfp/,lwhat/2Hdb/,ntry/2/ 
+      data lwho/2Hfp/,ntry/2/
 C 
       iter=ntry
 12    continue

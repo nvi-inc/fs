@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2022 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE STINP(IBUFX,ILEN,LU,IERR)
+      implicit none
 C
 C     This routine reads and decodes a station entry
 C
@@ -40,10 +41,9 @@ C
 C
 ! functions
       integer igtba              ! functions
-      integer trimlen  
+      integer trimlen
       integer iwhere_in_string_list
-      logical kvalid_rec, kvalid_rack 
-
+     
 C  LOCAL:
       integer MaxBufIn
       parameter (MaxBufIn=256)
@@ -87,10 +87,9 @@ C      - these are used in unpacking station info
       double precision chklat,chklon,rht
       integer ibitden
       integer nstack
-      character*4 cs2sp
 
-      real s2sp
       integer nch
+      integer i12   !counter 
 
 ! These are used to parse the input line.
       integer MaxToken
@@ -149,19 +148,25 @@ C            (e.g. 7560) using speed.
 C
 C     1. Find out what type of entry this is.  Decode as appropriate.
 C
+! 2021-11-10 JMG. Modified slew algorithm  so that uses slew_off, slew_vel, slew_acc.  
+!                Since sked catalogs only have an offset and a rate term, must infer slew_off and  slew_acc
+! 2021-04-02 JMG Renamed islcon-->slew_off, stnrat-->slew_rate. Made slew_off real. 
+! 2020-11-11 JMG. Catch bug if Station ID has wrong format in horizon mask. 
+! 2020-10-02  JMG. Removed all references to S2
 ! 2007Mar30  JMG. Checked to make sure didn't duplicate codes.
 ! 2007Apr05  JMG. But OK to have duplicate " " for horizon mask.
 ! 2009Mar03  JMG. Fixed bug in OR statement with K5.
-! 2013Mar22  JMG. Fix problem if first antenna limit is negative. (i.e., (-270,270) instead of (90, 630) 
-! 2013Sep17  JMG. Fixed incorrect error message for latitude. Said "A line" but was "B line". 
+! 2013Mar22  JMG. Fix problem if first antenna limit is negative. (i.e., (-270,270) instead of (90, 630)
+! 2013Sep17  JMG. Fixed incorrect error message for latitude. Said "A line" but was "B line".
 ! 2015Jun30  JMG. Changed Rack, recorder length from 8-->12 chars.
-! 2016Jul28  JMG. Changed rack length to 20 chars.  
-!                 Initialize cfirtrec(i)="1" even if have problems reading "T " line. 
+! 2016Jul28  JMG. Changed rack length to 20 chars.
+!                 Initialize cfirtrec(i)="1" even if have problems reading "T " line.
 ! 2017Mar13  JMG. If rack or recorder are not recongnized, set them to 'unknown' and continue.
-! 
+! 2022-02-10 JMG. Use subroutine to stuff crec, crack into appropriate slots. 
+
+
       cbufin=" "
 ! AEM 20050314 init vars
-      cs2sp = " "
       caxis = " "
       cname = " "
       crack = " "
@@ -171,7 +176,7 @@ C
       cidt = " "
       cidpos = " "
       cidhor = " "
-      
+
       do i=1,min(ilen,MaxBufIn)
         ibufin(i)=ibufx(i)
       end do
@@ -181,7 +186,7 @@ C
       endif
       cbufin0=cbufin    !cbufin is modified below. Want to keep a copy
 
-      ctype=cbufin(1:1) 
+      ctype=cbufin(1:1)
 
       cbufin(1:1)=" "            !this just gets rid of the type: A,P,T,C,H
 
@@ -194,12 +199,12 @@ C
 !      call capitalize(cbufin)
       call splitNtokens(cbufin,ltoken,Maxtoken,NumToken)
       nch=trimlen(cbufin)
-
+   
 ! Antenna line
 ! ID  Name    Caxis axix_off rate1 con1 low1   high1  rate2 con2  low2  high2 diam  Cidpos cidt cidhor
 !  1   2       3      4       5    6     7     8       9    10   11    12     13     14     15 16
 !  B  BR-VLBA  AZEL 2.00000  90.0  0    270.0  810.0  30.0  0    2.3   88.0  25.0    Br     BR BV
-      if(ctype .eq. "A") then 
+      if(ctype .eq. "A") then
         if(NumToken .lt. 14) goto 950
         cid = ltoken(1)
         cname=ltoken(2)
@@ -230,7 +235,7 @@ C
           endif
         end do
 ! This takes care of the case where someone gives a negative cable wrap.
-        if(caxis .eq. "AZEL") then 
+        if(caxis .eq. "AZEL") then
         if(anlim1(1) .lt. 0) then
            anlim1(1)=anlim1(1)+360
            anlim1(2)=anlim1(2)+360
@@ -239,8 +244,8 @@ C
            anlim2(1)=anlim2(1)+360
            anlim2(2)=anlim2(2)+360
         endif
-        endif 
-  
+        endif
+
         cidpos=ltoken(14)
         if(NumToken .ge. 15) then
           cidt=ltoken(15)
@@ -249,7 +254,7 @@ C
           cidhor=ltoken(16)
           if(cidhor .eq. "--".or.cidhor.eq."-") cidhor=" "
         endif
-
+        
         i=iwhere_in_string_list(cstcod(i),nstatn,c1)
         if(i .eq. 0) then        !new entry.
           if(nstatn .lt. Max_stn) then
@@ -269,10 +274,19 @@ C     Put the position ID into a permanent place in LPOCOD
 C
         cSTCOD(I) = c1
         call axtyp(laxis,iaxis(i),1)
-        STNRAT(1,I) = SLRATE(1)*deg2rad/60.0d0
-        STNRAT(2,I) = SLRATE(2)*deg2rad/60.0d0
-        ISTCON(1,I) = SLCON(1)
-        ISTCON(2,I) = SLCON(2)
+        
+        do i12=1,2        
+          slew_vel(i12,I) = SLRATE(i12)*deg2rad/60.0d0
+          slew_off(i12,I) = SLCON(i12)
+!Assume have of the catalog offset is due to settling, the other for time to accelerate.        
+          if(slew_off(i12,i) .gt. 0) then
+            slew_off(i12,i)=slew_off(i12,i)/2.
+            slew_acc(i12,i)=slew_vel(i12,i)/slew_off(i12,i)
+          else
+            slew_acc(i12,i)=60.0*deg2rad      !no offset--->very fast acceleration 60deg/sec^2
+          endif                                   
+        end do         
+           
         STNLIM(1,1,I) = ANLIM1(1)*deg2rad
         STNLIM(2,1,I) = ANLIM1(2)*deg2rad
         STNLIM(1,2,I) = ANLIM2(1)*deg2rad
@@ -311,7 +325,7 @@ C
         NHORZ(I) = 0
         cantna(i)=cname
         return
-      else if(ctype .eq. "P") then 
+      else if(ctype .eq. "P") then
         if(numtoken .lt. 8) goto 950
 ! Do the position line.
 ! cidpos cname   posxyz(1)        posxyz(2)     posxyz(3)      Locc      poslon  poslat    Who
@@ -381,9 +395,9 @@ C
 
         j=8
         CALL UNPVT(IBUFX(2),ILEN-1,IERR,cIDT,cNAME,ibitden,
-     >   nstack,maxt,nr,cs2sp,cb,sefd,j,par,npar,crack,crec1,crec2) 
+     >   nstack,maxt,nr,cb,sefd,j,par,npar,crack,crec1,crec2)
 !
-! Try to get the station by looking at the terminal ID at station name. 
+! Try to get the station by looking at the terminal ID at station name.
 !
         i=0
         if (cidt .ne. " " .and. cidt .ne. "--") then
@@ -397,16 +411,12 @@ C
           goto 910
         END IF  !matching entry not found
 
-! Initialize to default values. Must do here before error exit. 
-        cfirstrec(i)="1 " 
+! Initialize to default values. Must do here before error exit.
+        cfirstrec(i)="1 "
 
-        cstrack(i)="UNKNOWN"
-        cstrec(i,1)="UNKNOWN"
-        cstrec(i,2)="NONE"
-        cs2speed(i)=" "
 ! This ierr is from unpvt and indicates a problem in parsing the line.
-!        if(ierr .ne. 0) goto 910   
-! 2017Mar13. Continue on. 
+!        if(ierr .ne. 0) goto 910
+! 2017Mar13. Continue on.
 
 ! Assume the terminal id line is correct.
         if(cidt .ne. " " .and. cidt .ne. "--") then
@@ -415,49 +425,28 @@ C
 C  Got a match. Initialize names.
         cterna(i)=cname
 
+! Put rack and recorder in appropriate slots.  
+! Doing it this way ensures SKD and VEX files are treated the same. 
 
-C  Store equipment names.
-        if (crack .ne. " ") then   
-          cstrack(i)=crack
-        endif       
-        if (crec1 .ne. " ") then      
-           cstrec(i,1)=crec1               
-        endif   
-            
+        call store_rack_and_recorder(lu,cstnna(i),
+     >    crack,crec1, cstrack(i),cstrec(i,1))
+
 C       If second recorder is specified and the first recorder was S2
-C       then save the second recorder field as the S2 mode.  
+C       then save the second recorder field as the S2 mode.
         if (crec2 .eq. " ") then
          if(nr .eq. 2) nr=1
-        else
-          if(crec1 .eq. 'S2')then
-             cs2mode(i,1)=crec2
-          else
-            if(.not.kvalid_rec(crec2)) crec2='none'           
-            cstrec(i,2)=crec2
-          endif
-        endif     
+        endif
 
-C    Now set the S2 and K4 switches depending on the recorder type.
         nrecst(i) = nr
-        if (cstrec(i,1)(1:2) .eq. "S2") then ! set S2 variables
-          cs2speed(i)=cs2sp
-          if(cs2sp.eq.   "LP") then
-            s2sp=SPEED_LP
-          else if(cs2sp .eq. "SLP") then
-            s2sp=SPEED_SLP
-          endif
-          nheadstack(i)=1
-          ibitden_save(i)=1
-          maxtap(i)=maxt*5.0*s2sp ! convert from minutes to feet
-        else if (cstrec(i,1)(1:2) .eq. "K4")  then ! set K4 variables
+        if (cstrec(i,1)(1:2) .eq. "K4")  then ! set K4 variables
           nheadstack(i)=1
           maxtap(i) = maxt ! conversion??
           ibitden_save(i)=1
-        else if(cstrec(i,1) .eq. "Mark5A" .or.         
-     >          cstrec(i,1) .eq.  "K5") then          
+        else if(cstrec(i,1) .eq. "Mark5A" .or.
+     >          cstrec(i,1) .eq.  "K5") then
           maxtap(i)=10000         !set to 10 thousand feet.
-          bitdens(i,1)=1.000d11   !very high means we don't need to worry about it. 
-          nheadstack(i)=nstack 
+          bitdens(i,1)=1.000d11   !very high means we don't need to worry about it.
+          nheadstack(i)=nstack
         else ! set Mk34 variables
           maxtap(i) = maxt
           ibitden_save(i)=ibitden
@@ -487,7 +476,7 @@ C    Now set the S2 and K4 switches depending on the recorder type.
         enddo
         return
 
-      else if(ctype .eq. "C") then    !Coordinate type mask 
+      else if(ctype .eq. "C") then    !Coordinate type mask
         J = 8
         CALL UNPVH(IBUFX(2),ILEN-1,IERR,LID,NCO,CO1,CO2)
         IF (IERR.NE.0) THEN
@@ -512,34 +501,36 @@ C           error for no matching value, which is ok
           END DO
         END IF
         return
-      ELSE IF (ctype .eq. "H")  then   ! Horizon type mask. 
+      ELSE IF (ctype .eq. "H")  then   ! Horizon type mask.
         J = 8
-        CALL UNPVH(IBUFX(2),ILEN-1,IERR,LID,NHZ,AZH,ELH)
-        kline=.true.
-        IF (IERR.NE.0) THEN
-          if (ierr.lt.-200) then
-            write(lu,*) "STINP252 - Horizon mask azimuths are out "//
-     >      "of order. Error in field ", -(ierr+200)
-            nch=trimlen(cbufin0)
-            write(lu,'(a)') cbufin0(1:nch)        
-            RETURN
-          endif
-          if (ierr.eq.-99)then
-            write(lu,'(a,i5)')
-     >       "STINP250 - Too many horizon mask az/el pairs. Max is ",
-     >        max_hor
-            write(lu,'(a)') cbufin0(1:80)
-            RETURN
-          endif
-          if (ierr.eq.-103) then
-C           write(lu,'("STINP251 - No matching el for last azimuth,",
-C    .      " wraparound value used.")')
-C           write(lu,'(80a2)') (ibufx(i),i=2,ilen)
-            elh(nhz)=elh(1)
+        CALL UNPVH(IBUFX(2),ILEN-1,IERR,LID,Nhz,AZH,ELH)
+        kline=.true.  
+! Not really an error.  Just using step functions 
+        if (ierr.eq.-103) then
+!           write(lu,'("STINP251 - No matching el for last azimuth,",
+!     >      " wraparound value used.")')            
             kline=.false.
-          endif  
-        END IF   !
+            elh(nhz)=0.d0   !set to zero. We don't use this anyway. 
+            ierr=0              
+        endif
+! Real errors 
+        IF (IERR.NE.0) THEN
+          nch=max(1,trimlen(cbufin0))
+          write(*,*) "Error parsing horizon mask: "//cbufin(:nch)
+          if(ierr .eq. -101) then
+            write(*,*) "Incorrect form for station ID (2nd arg)" 
+          else if (ierr.lt.-200) then
+            write(lu,*) "STINP252 - Horizon mask azimuths are out "//
+     >      "of order. Error in field ", -(ierr+200)                                
+          else if (ierr.eq.-99)then
+            write(lu,'(a,i5)')
+     >     "STINP250 - Too many horizon mask az/el pairs. Max is ",
+     >        max_hor          
+          endif
+          return
+        ENDIF
         i=iwhere_in_String_list(chccod,nstatn,cid)
+  
         if (i.eq.0 ) then !check position codes too
           write(lu,*) "STINP251 - Horizon mask pointer not found. "//
      >      "Checking position code."
@@ -550,22 +541,18 @@ C           write(lu,'(80a2)') (ibufx(i),i=2,ilen)
         IF (I.eq. 0) THEN  !matching entry not found
           write(lu,'("STINP25 - Pointer not found.  Horizon mask ")')
           goto 910
-        ELSE  ! keep it
-          if (kline) then
-            klineseg(i)=.true.
-          else
-            klineseg(i)=.false.
-          endif
-          NHORZ(I) = NHZ
-          DO J=1,NHORZ(I)
-            AZHORZ(J,I) = AZH(J)*deg2rad
-            ELHORZ(J,I) = ELH(J)*deg2rad
-          END DO
+        ELSE  ! keep it    
+        nhorz(i)=nhz 
+        klineseg(i)=kline    
+        do j=1,nhorz(i)         
+          AZHORZ(J,I) = AZH(J)*deg2rad                     
+          ELHORZ(J,I) = ELH(J)*deg2rad
+        END DO
         END IF
       ELSE
-        write(*,*) "Unknown $STATION line!"       
+        write(*,*) "Unknown $STATION line!"
       END IF
-      return 
+      return
 
 C! come here on bad line.
 900   continue
@@ -585,9 +572,9 @@ C! come here on bad line.
       return
 
 960   continue
-      write(lu, *) 
-     >     "STINP - duplicate codes in station 'A' lines."// 
-     >     " Please fix before proceeding!" 
+      write(lu, *)
+     >     "STINP - duplicate codes in station 'A' lines."//
+     >     " Please fix before proceeding!"
       ierr=100
       stop
       END

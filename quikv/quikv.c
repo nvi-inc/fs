@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -175,6 +175,9 @@ loop:
 	case 2:
 	  user_device(&command,itask,ip);
 	  break;
+	case 3:
+	  lo_config(&command,itask,ip);
+	  break;
 	default:
 	  ierr=-4;
 	  break;
@@ -278,6 +281,7 @@ loop:
 	  break;
 	case 6:
 	case 28:
+	case 16:
 	  mk5close(&command,itask,ip);
 	  break;
 	case 7:
@@ -306,6 +310,7 @@ loop:
 	case 23:
 	case 24:
 	case 25:
+        case 30:
 	  dbbc(&command,itask,ip);
 	  break;
     case 21:
@@ -313,6 +318,9 @@ loop:
       break;
 	case 26:
 	  fila10g_mode(&command, itask, ip);
+	  break;
+	case 29:
+	  dbbc3_core3h_modex(&command, itask, ip);
 	  break;
 	default:
 	  ierr=-4;
@@ -467,6 +475,14 @@ loop:
       case 131:
 	dbbc_pfbx(&command,itask,ip);
 	break;
+      case 132:
+	switch (itask) {
+	case  1: dbbc3_mcast_time(&command,itask,ip); break;
+        default:
+	  ierr=-4;
+	  goto error;
+        }
+    break;
 /* end modified mb */
       default:
 	ierr=-4;

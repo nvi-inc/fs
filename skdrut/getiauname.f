@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine GetIauName(ltest,rarad2k,decrad2k)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 ! get the iau name.
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/constants.ftni'

@@ -1,0 +1,278 @@
+#!/usr/bin/perl
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+sub time {
+#
+# calculate time of the log entry
+# everything is measured relative to $reftime, first time in log
+# it will make a mess of $reftime is not reasonable
+#
+    local ($date) = @_;
+#2005.123.12:23:56.21
+#01234567890123456789
+#or
+#9823717225512
+#0123456789012
+    if(substr($date,4,1) eq '.') {
+	$year=substr($date,0,4);
+	$day=substr($date,5,3);
+	$hour=substr($date,9,2);
+	$minute=substr($date,12,2);
+	$second=substr($date,15,5);
+    } else {
+	$year=substr($date,0,2)+1900;
+	$day=substr($date,2,3);
+	$hour=substr($date,5,2);
+	$minute=substr($date,7,2);
+	$second=substr($date,9,4)/100;
+    }
+    if(!defined($refdate)) {
+#	$refdate=substr($date,0,17);
+	$refdate=sprintf "%04d.%03d.%02d:%02d:%05.2f",
+	    $year,$day,$hour,$minute,$second;
+	$refyear=$year;
+	$refday=$day;
+	$refhour=$hour;
+	$refminute=$minute;
+	$refsecond=$second;
+#		print "$refyear $refday $refhour $refminute $refsecond\n";
+	$tmax=0;
+	$tmin=3e7;
+    }
+    $days_in_year=365;
+    $days_in_year=366 if $refyear%4==0;
+    $time=(((($year-$refyear)*$days_in_year
+	     +$day-$refday)*24.0
+	    +$hour-$refhour)*60.0
+	   +$minute-$refminute)*60.0
+	   +$second-$refsecond;
+#	    print "$day $hour $minute $second $time\n";
+    $tmax=$time if $time>$tmax;
+    $tmin=$time if $time<$tmin;
+    return $time;
+}
+#
+# main program
+#
+
+# 1.0 Initialize
+
+require "getopts.pl";
+
+&Getopts("hmrisvu");
+
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
+    print STDERR "Try: 'tpcheck -h'\n";
+    exit 0;
+}
+
+if(defined($opt_v)) {
+    print "[tpcheck 0.1]\n";
+    pgqinf("VERSION",$val,$len);
+    exit 0;
+}
+
+if (defined($opt_h)) {
+    print "
+Usage:
+    tpcheck [options] logs
+Synopsis: Compare DBBC3 multicast and BBC tp counts
+options:
+    -h    help
+    -m    print missing channels, suppresses match output
+    -r    relative time
+    -s    print summary, suppresses match output
+    -u    unique matches
+    -v    version
+
+Run this script on a log with BBCnnn output lines (BBC) and tpicd
+(TPC) once per second logged multicast data. It works best with each
+BBC being read only once and only the tpicd data from right before the
+first BBC is read through the data just after the last BBC is read.
+The log can be copied and the copy edited to achieve this. The BBCs
+should be read by a SNAP procedure to make that as quick as possible.
+
+With no options the script will list each match, some sidebands may
+match more than once depending on how much variation is in the
+multicast data. The -u can be used to show only unique matches.
+
+The -m option will show which sidebands were missing or did not match.
+
+The -s option will print a numerical summary that includes the maximum
+BBC number found in both the BBC or TPC output found and the
+corresponding maximum possible sidebands. This is the upper bound for
+the further output of missing BBC, missing TPC, and unmatched
+sidebands.
+
+In principle the check is good if:
+- the output with -u is sorted and diff-ed to itself and there no
+  differences (this shows matches of BBCs were to adjacent TPCs).
+- the -s option shows the full set of BBCs and TPCs and no missing
+  matches
+
+It is generally not useful to supply more than one log at a time. The
+script will skip any log it cannot open.
+
+";
+
+    exit 0;
+}
+
+# 2.0 extract data
+
+foreach $file (@ARGV) {
+    open(FILE,$file) || do {
+        print STDERR "can't open $file: $!\n";
+        next;
+    };
+    $some=1;
+#   print "file $file \n";
+    $x=0;
+    $y=0;
+    while (<FILE>) {
+        chomp;
+
+#       print "$_\n";
+        if(/bbc(...)\/.+,[ ]*([^,]+),[ ]*([^,]+),[ ]*([^,]+),[ ]*([^,]+)/) {
+#            print " bbc $1 $2 $3 $4 $5\n";
+            if(!defined($opt_r)) {
+                $bbct{$1}{'u'}=substr($_,9,11);
+                $bbct{$1}{'l'}=substr($_,9,11);
+            } else {
+                $bbct{$1}{'u'}=&time($_);
+                $bbct{$1}{'l'}=&time($_);
+            }
+            $bbcon{$1}{'u'}=$2;
+            $bbcon{$1}{'l'}=$3;
+            $bbcoff{$1}{'u'}=$4;
+            $bbcoff{$1}{'l'}=$5;
+            if($bbcon{$1}{'l'} eq $tpon{$1}{'l'} and $bbcoff{$1}{'l'} eq $tpoff{$1}{'l'} ) {
+                if(!defined($opt_m) and !defined($opt_s) and (!defined($opt_u) or !defined($match{$1}{'l'}))) {
+                    if(!defined($opt_r)) {
+                        print " $1 l BBC for $bbct{$1}{'l'} matched TPC for $tpt{$1}{'l'}\n";
+                    } else {
+                        print " $1 l BBC    for ";
+                        printf "%5.2f",$bbct{$1}{'l'};
+                        print " matched TPC for ";
+                        printf "%5.2f\n",$tpt{$1}{'l'};
+                    }
+                }
+                $match{$1}{'l'}=1;
+            }
+            if($bbcon{$1}{'u'} eq $tpon{$1}{'u'} and $bbcoff{$1}{'u'} eq $tpoff{$1}{'u'} ) {
+                if(!defined($opt_m) and !defined($opt_s) and (!defined($opt_u) or !defined($match{$1}{'u'}))) {
+                    if(!defined($opt_r)) {
+                        print " $1 u BBC for $bbct{$1}{'u'} matched TPC for $tpt{$1}{'u'}\n";
+                    } else {
+                        print " $1 u BBC for ";
+                        printf "%5.2f",$bbct{$1}{'u'};
+                        print " matched TPC for ";
+                        printf "%5.2f\n",$tpt{$1}{'u'};
+                    }
+                }
+                $match{$1}{'u'}=1;
+#            } else {
+#                print " bbc $1 u for $bbct{$1}{'u'} didn't match tpcont for $tpt{$1}{'u'}";
+#                print "  $bbcon{$1}{'u'} $tpon{$1}{'u'}  $bbcoff{$1}{'u'} $tpoff{$1}{'u'}\n";
+            }
+        } elsif (/tpcont\/(.+)/) {
+            $x = $1;
+            if(!defined($opt_r)) {
+                $tptime=substr($_,9,11);
+            } else {
+                $tptime=&time($_);
+            }
+            while ($x =~ /[ ]*(...)([ul]),[ ]*([^,]+),[ ]*([^,]+)/g) {
+#                print " tpcont $1 $2 $3 $4\n";
+                $tpt{$1}{$2}=$tptime;
+                $tpon{$1}{$2}=$3;
+                $tpoff{$1}{$2}=$4;
+                if($bbcon{$1}{$2} eq $tpon{$1}{$2} and $bbcoff{$1}{$2} eq $tpoff{$1}{$2} ) {
+                if(!defined($opt_m) and !defined($opt_s) and (!defined($opt_u) or !defined($match{$1}{$2}))) {
+                        if(!defined($opt_r)) {
+                            print " $1 $2 TPC for $tpt{$1}{$2} matched BBC for $bbct{$1}{$2}\n";
+                        } else {
+                            print " $1 $2 BBC for ";
+                            printf "%5.2f",$bbct{$1}{$2};
+                            print " matched TPC for ";
+                            printf "%5.2f\n",$tpt{$1}{$2};
+                        }
+                    }
+                    $match{$1}{$2}=1;
+                }
+            }
+        }
+    }
+}
+#
+# summary and missing data
+#
+if(defined($opt_m) or defined($opt_s)) {
+    @list = reverse sort keys %bbct;
+    $max = $list[0];
+    @list = reverse sort keys %tpt;
+    if ($max < $list[0]) {
+        $max = $list[0];
+    }
+    if(defined($opt_s)) {
+        $maxs=2*$max;
+        printf " %s %3d\n", "last BBC found            ",$max;
+        printf " %s %3d\n", "maximum possible sidebands",$maxs;
+    }
+
+    $bcount=0;
+    $tcount=0;
+    $mcount=0;
+    for ($i=1;$i<=$max;$i++) {
+        $key = sprintf "%03d",$i;
+        for $ele ('l','u') {
+            if(!defined($bbct{$key}{$ele})) {
+                $bcount++;
+                if(defined($opt_m)) {
+                    print "$key $ele BBC missing\n";
+                }
+            }
+            if(!defined($tpt{$key}{$ele})) {
+                $tcount++;
+                if(defined($opt_m)) {
+                    print "$key $ele TPC missing\n";
+                }
+            }
+            if(!defined($match{$key}{$ele})) {
+                $mcount++;
+                if(defined($opt_m)) {
+                    print "$key $ele not matched\n";
+                }
+            }
+        }
+    }
+    if(defined($opt_s)) {
+        printf " %s %3d\n", "BBC sidebands not found   ",$bcount;
+        printf " %s %3d\n", "TPC sidebands not found   ",$tcount;
+        printf " %s %3d\n", "sidebands     not matched ",$mcount;
+    }
+}
+#debug print out
+#
+#for $key (sort keys %bbct) {
+#    for $ele (sort keys %{ $bbct{$key}}) {
+#        print "$key $ele $bbct{$key}{$ele} $bbcon{$key}{$ele} $bbcoff{$key}{$ele}\n";
+#    }
+#}
+#for $key (sort keys %tpt) {
+#    for $ele (sort keys %{ $tpt{$key}}) {
+#        print "$key $ele $tpt{$key}{$ele} $tpon{$key}{$ele} $tpoff{$key}{$ele}\n";
+#    }
+#}
+exit 0;

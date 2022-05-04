@@ -4,16 +4,19 @@
 
 # Not group or world writeable by default for AUID
 umask 022
-# use physical directories
-set -o physical
-set -o noclobber
-set -o ignoreeof
 
-# If not running interactively, don't do anything
+# If not running interactively, don't do anything more
 case $- in
     *i*) ;;
       *) return;;
 esac
+
+# use physical directories
+set -o physical
+
+# safety measures
+set -o noclobber
+set -o ignoreeof
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options

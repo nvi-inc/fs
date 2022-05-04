@@ -1,0 +1,204 @@
+#!/usr/bin/perl
+#
+# Copyright (c) 2020-2021 NVI, Inc.
+#
+# This file is part of VLBI Field System
+# (see http://github.com/nvi-inc/fs).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+
+if ($#ARGV < 0) {
+    print
+"Usage: $0 new station files
+
+Insert content of file 'new' for the 'ifdbb' procedure of 'station' in 'files'.
+
+ - Version 1.03
+ - The 'files' should be '.skd' schedules for broadband observations that
+   contain a section for 'station' in the '\$PROCS' block.
+ - File 'new' must start with a 'define  ifdbb ' line and end with an 'enddef'
+   line
+ - A line that is known to be correct in all details is always used in place
+   of the first line in 'new'.
+ - A progress report is printed during processing. It may be useful for
+   troubleshooting, e.g., 'station' (which is case sensitive) being misspelled.
+ - DOS/Windows line endings in 'new' and the input 'files' will be converted to
+   UNIX line endings while being copied to the output 'files'.
+ - The original input 'files' are renamed with a '.bak' extension as a backup.
+   The are used to automatically recover from some errors and can be used
+   manually recover from any others.
+ - Even if the content is the same, what is in 'new' will replace an old
+   'ifdbb' procedure. If no errors were reported in the processing, you can
+   check for this by using 'diff' to compare the output version to the '.bak'
+   version, no change will be visible.
+";
+    exit -1;
+}
+
+$new = shift or die "Try $0 for help\n";
+open(NEW,$new) || die "Can't open $new\n";
+
+$station = shift or die "Try $0 for help\n";
+
+FILE: foreach $name (@ARGV) {
+    print "Processing $name\n";
+    seek NEW, 0, SEEK_SET or die "Cannot rewind $new: $!";
+    $bak = $name . ".bak";
+    $out = $name;
+    if (!-e $name) {
+        die "Can't find $name Quitting.\n";
+    }
+
+# rename the original if we can and open the files
+
+    if (-e $bak) {
+        die "Backup-file $bak already exists, giving up.\n";
+    }
+
+    rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
+
+    if(!open(BAK,$bak)) {
+        print "Failed to open $bak: $!\n";
+        if(!rename($bak,$out)) {
+            print "Unable to rename $bak to $out: $!\n";
+            die "Please fix whatever the problem is and rename it yourself.\n";
+        } else {
+            die "I renamed $bak to $out for you.\n";
+        }
+    }
+
+    if(!open(OUT,">" . $out)) {
+        print "Failed to open $out: $!\n";
+        if((!close(BAK)) || (!rename($bak,$out))) {
+            print "Unable to rename $bak to $out: $!\n";
+            die "Please fix whatever the problem is and rename it yourself.\n";
+        } else {
+          die "I renamed $bak to $out for you.\n";
+        }
+    }
+
+#process
+
+    $line=0;
+    $change=0;
+    $procs_found=0;
+    $station_found=0;
+    $ifdbb_found=0;
+    $enddef_found=0;
+
+    while(<BAK>) {
+        s/\r//;
+        $line++;
+        if (!$procs_found) {
+            if(/^\$PROCS$/) {
+                print "Found \$PROCS\n";
+                $procs_found=1;
+            }
+            print OUT;
+            next;
+        }
+        if(!$station_found) {
+            if(/^BEGIN +(\w+) *$/) {
+                print "Found $1\n";
+                if ($1 eq $station) {
+                    $station_found = 1;
+                }
+            }
+            print OUT;
+            next;
+        }
+        if(!$ifdbb_found) {
+            if(/^END /) {
+                last;
+            } elsif(/^define  ifdbb /) {
+                print "Found old ifdbb\n";
+                $ifdbb_found = 1;
+                $new_lines=0;
+                $enddef_line=0;
+                $newdef_found=0;
+                while(<NEW>) {
+                    s/\r//;
+                    $new_lines++;
+                    if(/^define  ifdbb / && $new_lines == 1) {
+                        $_ = "define  ifdbb         00000000000x\n";
+                        $newdef_found=1;
+                    } elsif(/^enddef$/) {
+                        $enddef_line=$new_lines;
+                    }
+                    print OUT;
+                }
+                if(!$newdef_found || $enddef_line != $new_lines) {
+                    last;
+                }
+                print "New ifdbb inserted\n";
+                $change=1;
+                while(<BAK>) {
+                    s/\r//;
+                    if (/^enddef/) {
+                        $enddef_found=1;
+                        last;
+                    } else {
+                        next;
+                    }
+                }
+                next;
+            } else {
+                print OUT;
+                next;
+            }
+        }
+        print OUT;
+    }
+    $rename=1;
+    if(!$procs_found) {
+        print "Warning: $PROCS not found in $name.\n";
+    } elsif(!$station_found) {
+        print "Warning: $station procedures not found in $name.\n";
+    } elsif(!$ifdbb_found) {
+        print "Warning: ifdbb procedure for $station not found in $name.\n";
+    } elsif(!$newdef_found || $enddef_line != $new_lines) {
+        print "Warning: contents of $new malformed.\n";
+    } elsif(!$enddef_found) {
+        print "Warning: No enddef for original ifdbb procedure was found.\n";
+    } else {
+        $rename=0;
+    }
+    if(!close(OUT)) {
+        $rename=1;
+    print "Warning: Unable to close to $out: $!\n";
+    }
+    if(!close(BAK)) {
+        $rename=1;
+    print "Warning: Unable to close to $bak: $!\n";
+    }
+
+    if($rename || $change == 0) {
+        if(!rename($bak,$out)) {
+            print "Warning: Unable to rename '$bak' to '$out': $!\n";
+            if($rename) {
+                print "Warning: Please fix whatever the problem is and rename it yourself,\n";
+                print "Warning: probably using 'mv $bak $out'\n";
+            } else {
+                print "Warning: It appears that $out did not need any changes,\n";
+                print "Warning: but to be safe you should probably \"";
+                print "Warning: use 'mv $bak $out'\n";
+            }
+        } elsif($rename) {
+            print "Warning: I renamed '$bak' to '$out' for you.\n";
+
+        }
+    }
+}

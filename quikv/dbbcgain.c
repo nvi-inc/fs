@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -47,9 +47,10 @@ int ip[5];                           /* ipc parameters */
       void dbbcgain_dis();
       void skd_run(), skd_par();      /* program scheduling utilities */
 
-      if((DBBC_DDC != shm_addr->equip.rack_type &&
+      if(((DBBC_DDC != shm_addr->equip.rack_type &&
 	  DBBC_DDC_FILA10G != shm_addr->equip.rack_type)||
-	 DBBC != shm_addr->equip.rack) {
+	 DBBC != shm_addr->equip.rack) &&
+	 DBBC3 != shm_addr->equip.rack) {
 	ierr=-501;
 	goto error;
       }

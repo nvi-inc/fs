@@ -1,7 +1,7 @@
 #
 CFLAGS= -g
 LIBS = ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a
-OBJECTS = erchk.o get_err.o
+OBJECTS = erchk.o get_err.o read_ctl.o
 
 ../bin/erchk: $(OBJECTS) $(LIBS)
 	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@

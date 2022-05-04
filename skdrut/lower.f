@@ -20,6 +20,7 @@
 C@LOWER
 
       character function lower(c)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C        if c is a character, return its lowercase value.  otherwise
 C     return it unchanged.

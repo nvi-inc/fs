@@ -16,7 +16,7 @@ setcl n  setcl &
 aquir n  aquir &
 antcn n  antcn &
 rclcn n  rclcn &
-oprin x xterm -name oprin -j -e oprin -fs_internal &
+oprin x xterm -tm "intr ^_" -name oprin -j -e oprin -fs_internal &
 pcald n pcald &
 mk5cn n mk5cn &
 mk6ca n mk6cn ca &
@@ -35,3 +35,4 @@ dscon n dscon &
 holog n holog &
 dbbcn n dbbcn cn &
 dbbc2 n dbbcn c2 &
+dbtcn n dbtcn &

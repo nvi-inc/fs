@@ -1,0 +1,2867 @@
+//
+// Copyright (c) 2020-2022 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+:doctype: book
+
+= FS 10.1.0 Beta1 Update Notes
+E. Himwich, J. Quick, J. Gipson, D. Horsley
+Version 4.3 - April 2022
+
+//:hide-uri-scheme:
+:sectnums:
+:stem: latexmath
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+:toclevels: 4
+
+== Introduction
+
+This document covers the steps needed to update from FS _10.0.0_ to
+_10.1.0-beta1_ and the changes in the new version. This update is not
+an operational release. It is intended for _testing_ by all stations
+using FS _10.0.0_. Installing the new version as an update is much
+simpler than the update to _10.0.0_, see the <<Upgrading from 10.0.0>>
+section below.
+
+FS _10.1.0_ has been tested for several configurations but not all
+possible ones. You should test it carefully before using it for
+operations. Please email Ed if you encounter problems so that we can
+resolve them.
+
+The changes in the FS and _drudg_ for _10.1.0_ are covered in the
+<<Changes since 10.0.0>> section below. The most significant changes
+in _10.1.0_ are:
+
+* FS and _drudg_ support for DBBC3 racks.
+
+* Improved _onoff_ output for the operator to make it clearer what the
+program is doing.
+
+* _gnplt_ no longer duplicates trailing comments in _.rxg_ files.
+
+* A new _drudg_ option `e-vlbi_override` in _skedf.ctl_ to
+automatically change the recorder to `none` and remove `/fila10g` if
+present in the rack name, if the `target_correlator` VEX parameter
+includes `e-vlbi` (case insensitive).
+
+* A new _drudg_ option `close_scan` in _skedf.ctl_ to make it easier
+to breakaway from one schedule to run another schedule for a short
+time and then return to the original schedule. This is useful for
+geodesy intensive schedules.
+
+* Change the default FS _git_ branch to `main`
+
++
+
+NOTE: #This has _not_ been implemented in the _alpha_ and _beta_
+pre-releases.#
+
+== Upgrading from 10.0.0
+
+You must have already upgraded to _10.0.0_ according to the
+<<../0/10.0.0.adoc#,FS 10.0.0 Update Notes>> document before installing
+this update.
+
+=== Backup your operational system
+
+Having a back-up to return to will allow you to continue operations in
+case something goes wrong with the installation. If you don't have
+your own scheme, and for more details, please see the
+<<../../misc/install_reference.adoc#_making_a_back_up_before_installing,Making
+a back-up before installing>> section in the
+<<../../misc/install_reference.adoc#,Installation Reference>>
+document.
+
+You can also using symbolic links with copies of your old operational
+directories to switch back and forth between in your operational
+_10.0.0_ configuration and a test install of _10.0.1_. This is covered
+in detail in the
+<<../../misc/install_reference.adoc#_using_symbolic_links,Using
+symbolic links>> subsection of the above referenced section.
+
+=== Login as root
+
+The next step requires _root_ permissions.
+
+=== Fetch FS 10.1.0
+
+The directions in this step make a backup copy of your _/usr2/fs-git_
+directory. This is optional, but may help you recover if there is an
+error. You can of course use any name you like for the backup. You
+should use a different name for the backup directory than
+_fs-git.old-10.0.0_ if that directory already exists.
+
+[IMPORTANT]
+====
+
+#The paragraph immediately below in this *IMPORTANT* block does not
+apply to _alpha_ and _beta_ releases.#
+
+The default branch of the FS has changed to `main`. To simplify the
+installation, we recommend that you re-clone the repository. If you
+need to preserve your old repository as your working copy, please use
+the directions in the <<note,NOTE>> below in this step. Otherwise
+proceed with:
+
+====
+
+* If you are using an FSL9 or FSL10 system:
+
+  cd /usr2
+  mv fs-git fs-git.old-10.0.0
+  git clone https://github.com/nvi-inc/fs.git fs-git
+  cd fs-git
+  git checkout -q 10.1.0-beta1
+  make install
+
++
+
+Answer `*y*` to confirm installation.
+
+* If you are using FSL8 or other old Linux distribution, or otherwise
+need to use _ssh_ instead:
+
+  cd /usr2
+  mv fs-git fs-git.old-10.0.0
+  git clone git@github.com:nvi-inc/fs fs-git
+  cd fs-git
+  git checkout -q 10.1.0-beta1
+  make install
+
++
+
+Answer `*y*` to confirm installation.
+
+[NOTE]
+====
+[[note]]
+
+IMPORTANT: #This *NOTE* does not apply to _alpha_ AND _beta_ releases.#
+
+If you need to preserve your old repository for operations, instead of
+following the directions above, you can download the update and change
+your default branch to `main` with:
+
+. As _root_:
+
+  cd /usr2
+  cp -a fs-git fs-git.old-10.0.0
+
+. Login as _prog_
+
+. Execute:
+
+  cd /usr2/fs-git
+  git branch -m master main
+  git fetch origin
+  git branch -u origin/main main
+  git remote set-head origin -a
+  git branch -rd origin/master
+  git checkout -q 10.1.0-beta1
+
+. Login as _root_:
+
+  cd /usr2/fs-git
+  make install
+
++
+
+Answer `*y*` to confirm installation.
+
+====
+
+=== Login as prog
+
+IMPORTANT: The FS must be compiled as _prog_.
+
+=== Compile the FS
+
+
+  cd /usr2/fs
+  make rmdoto rmexe all >& /dev/null
+  make -s
+
+No output from the last command indicates a successful _make_.
+
+=== Reload your station code
+
+If _/usr2/st/Makefile_ is set-up in the standard way, you can do this
+with:
+
+       cd /usr2/st
+       make rmdoto rmexe all
+
+IMPORTANT: If your station code uses `refrw()`, the _make_ will fail.
+You will need to update to use `refrw_bad()` or `refrwn()`. The use of
+`refrw_bad()` should be sufficient in the short-term, but you should
+change to `refrwn()` when convenient. Please see the
+<<refrw_bad,refrw_bad()>> FS change below from more details.
+
+=== Reboot
+
+IMPORTANT: Reboot the computer. This is necessary to allocate FS, and
+possibly station, shared memory for the new version. It will also make
+sure you are using the latest version of the display server.
+
+=== Login as oper
+
+Except as indicated, the actions in the next step should be performed
+as _oper_.
+
+=== Local customizations
+
+. Check your use of the `equipment_override` option in _skedf.ctl_.
+
++
+
+If you did not have the `equipment_override` option selected in
+_skedf.ctl_, you probably should. This will also require you to
+specify the `equipment` option with the correct values if you aren't
+already. This is the safest way to specify your equipment in
+_skedf.ctl_. However, other combinations are possible depending on
+your needs. Due to bugs in _drudg_ these options were not operating
+correctly in version _10.0.0_. For more information, please the
+<<fix_equipment,Fix drudg equipment options>> change in the
+<<drudg changes>> section below.
+
+. If present, remove use of _setsid_ from _stpgm.ctl_.
+
++
+
+If you have been using _setsid_ in your _stpgm.ctl_, possibly to
+insulate __xterm__s from kbd:[Control+C], you should remove it. If it
+is used on an `x` line in the file, it will prevent the FS from
+starting successfully when the display server is not in use and is not
+needed when the server is in use.
+
+. Create the _dbbc3.ctl_ control file.
+
++
+
+The contents of DBBC3 line in the _equip.ctl_ control file has been
+moved to the new control file, _dbbc3.ctl_, and reorganized. To create
+the new file and remove the obsolete contents of _equip.ctl_, execute:
+
+  cd /usr2/control
+  /usr2/fs/misc/equipctlfix equip.ctl
+
++
+
+This will create the file, preserving the values from the DBBC3 line
+in your old _equip.ctl_ file. Your original file will be preserved as
+_equip.ctl.bak_, which must not already exist. Creating this file
+should allowing running the FS if you don't have a DBBC3. If you have
+a DBBC3, you should customize the contents in the <<dbbc3config,FS
+DBBC3 Configuration>> step below.
+
+. Run the FS to check for _.rxg_ file errors.
+
++
+
+Five additional formatting errors are now reported for _.rxg_ files.
+While it is unlikely, if your _.rxg_ files have any of these errors,
+they will be reported when you try to run the FS. Only one error is
+reported at a time. You will need to correct each error in turn until
+the FS starts successfully. The new errors reported are described in
+the <<additional_rxg_errors,Additional .rxg file errors>> change in
+the <<FS changes>> sub-section below.
+
+. If you have a Mark 5C and/or FlexBuff recorder, use _pfmed_ to add
+`mk5c_config` and/or `fb_config` procedures to your `station`
+procedure library.
+
++
+
+[TIP]
+====
+
+Alternatively, if the FS is _not_ running, you can add empty initial
+versions to your `station` procedure library with the following
+commands. For `mk5c_config`:
+
+  cd /usr2/proc
+  cat /usr2/fs/st.default/proc/mk5c_config.prc >>station.prc
+
+For `fb_config`:
+
+  cd /usr2/proc
+  cat /usr2/fs/st.default/proc/fb_config.prc >>station.prc
+
+====
++
+
+These procedures are called by _drudg_ generated setup procedures for
+systems with Mark 5C and FlexBuff recorders. They provide a means to
+tune the setup of _jive5ab_ for your hardware independent of the
+observing mode. They can be empty if your recorders don't need tuning
+or you aren't aware of what tuning is needed. These procedures are
+called after the `mk5c_mode` or `fb_mode` commands, depending on the
+type of recorder, to allow the default configuration to be overridden.
+The default configuration is described in the
+<<dbbc3_ops.adoc#_default_configuration,Default configuration>>
+subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>
+and in the `help` pages for `mk5c_mode` and `fb_mode`. The commands in
+these procedures should be mode independent. Mode dependent tuning
+should be handled differently; perhaps by inserting commands directly
+at the top-level of the setup procedure.
+
+. If you have a FlexBuff recorder, use _pfmed_ to add a `checkfb`
+procedure to your `station` procedure library.
+
++
+
+_drudg_ uses this procedure in place of `checkmk5` when the selected
+recorder is FlexBuff.
+
++
+
+You can do make this change in one of two ways, using _pfmed_ commands:
+
+* If you don't also have a Mark 5 recorder, you can rename your existing
+procedure:
+
+  pf,station
+  rn,checkmk5,checkfb
+
+* If you also have a Mark 5 recorder, you can make a copy of your
+existing procedure:
+
+  pf,station
+  st,checkmk5,checkfb
+
++
+
+Additionally, for either case, in the new file:
+
+* You should remove any `mk5=get_stats?` commands, if they are
+present.
+
+* You may also like to rename the call to `mk5_status` to `fb_status`.
+
+. <<dbbc3config,FS DBBC3 Configuration>>[[dbbc3config]]: If you have a
+DBBC3, you should make the configuration changes described in the
+<<dbbc3_ops.adoc#_configuring_the_fs_for_use_with_a_dbbc3,Configuring
+the FS for use with a DBBC3>> appendix of the <<dbbc3_ops.adoc#,FS
+10.1 DBBC3 Operations Manual>>. If you expect to get a DBBC3, these
+changes can be deferred until then.
+
+. If you are using _tcsh_ as your login shell for _oper_ or _prog_ (or
+AUID accounts) and have not already done so, adjust _~/.xsession_ .
+
++
+
+This step is optional, but may be helpful if you are using _tcsh_ as
+your login shell for _oper_ and/or _prog_ (or AUID accounts) and use
+the FS with the graphical display on the console. For this case, you
+may wish to make the changes in the
+<<../0/10.0.0.adoc#xsession,Updating ~/.xsession>> sub-step in
+<<../0/10.0.0.adoc#_miscellaneous_fslx_changes,Miscellaneous FSLx
+changes>> step of the <<../0/10.0.0.adoc#,FS 10.0.0 Update Notes>>
+document. If you have already made these changes, this step can be
+skipped.
+
++
+
+This change will make sure the window manager (__fvwm2__) operates
+with the FS runtime environment variables set. This could be important
+for example, if you want to run __fsclient__ (perhaps for a
+`scan_check` window) from a console hotkey.
+
+. Cleanup _.rxg_ file comments:
+
++
+
+This step is optional, but may help you if want the leading and
+trailing comments in your _.rxg_ files to be easy to interpret. If it
+is not performed, there will no loss of functionality with the _.rxg_
+files. They will just have some extraneous comments.
+
++
+
+The complete cleanup can be a lengthy process. It is covered in the
+appendix <<Cleaning up .rxg file comments>>. That appendix has two
+sequential steps. The first is relatively easy and is recommended for
+most users before they next update their _.rxg_ files with _gnplt_.
+The second step is more complicated and can then be deferred until
+later. Please see the appendix for more details.
+
++
+
+[NOTE]
+====
+
+This step exists due to bugs in _gnplt_, fixed as of this update, that
+have caused extra comments to added to _.rxg_ files. This is described
+in the <<stop_adding_extra_comments,Stop adding extra comments when
+updating .rxg files>> change in the <<FS changes>> sub-section below.
+
+If you have been correcting the extra comments added by _gnplt_ as you
+updated your _.rxg_ files, this step may have little or no benefit for
+you.
+
+====
+
+. Make the `scnch` and `erchk` windows `NeverFocus`.
+
++
+
+This step is optional, but will eliminate these windows getting the
+input focus, which can be a nuisance. Add `NeverFocus` for the
+`scnch`, `erchk`, and `monan` windows in your _~/.fvm2rc_ files so
+they will never accidentally get the focus (they don't accept input).
+They will still be able to be scrolled. If this is desired, add the
+lines:
+
+  Style "erchk" NeverFocus
+  Style "scnch" NeverFocus
+  Style "monan" NeverFocus
+
++
+
+As _oper_, you can compare your version of the file with the new
+default using:
+
+  cd
+  diff .fvwm2rc /usr2/fs/st.default/oper
+
++
+
+You can make the same change for _prog_, after logging into that
+account.
+
++
+
+NOTE: If you login with AUID accounts and then promote to
+_oper_/_prog_, you will need to make these changes in the AUID
+accounts to have the intended effect.
+
+=== Login as oper
+
+Make sure you are logged in as _oper_ for the next step. This step in
+included to make sure you have switched back to _oper_ after the
+previous step.
+
+=== Test the FS
+
+[IMPORTANT]
+====
+
+Before testing, if as part of your testing of station code you ran the
+FS under the _prog_ account, either reboot or use the command:
+
+ fsserver stop
+
+to make sure the server is no longer running as _prog_.
+
+For details on why this is needed, please see the second *IMPORTANT*
+item in
+<<../0/fsserver_changes.adoc#_server_continues_running_after_fs_termination,Server
+continues running after FS termination>> sub-section of the
+<<../0/fsserver_changes.adoc#,FS 10.0.0 fsserver Changes>> document.
+
+====
+
+Generally speaking, a fairly thorough test is to run a test
+experiment. Start with using _drudg_ to rotate a schedule,
+__drudg__ing it to make _.snp_ and _.prc_ files and listings. Peform
+any other pre-experiment preparation and tests you normally do, then
+execute part of the schedule, and perform any normal post-experiment
+plotting and clean-up that you do. The idea here is to verify that
+everything works as you expect for normal operations.
+
+Previously, the _onoff_ program did not detect errors reported by
+_antcn_; now it does. It seems unlikely that that this will cause a
+problem, but if it does, please see <<onoff_antcn,onoff now detects
+antcn errors>> for a workaround.
+
+=== Consider when to update your back-ups
+
+It would be prudent to wait until you have successfully run an
+experiment or two and preferably received word that the experiment(s)
+produced good data. The chances of needing to use your back-up from
+before updating should be small. If something does happen, you can
+copy the back-up to the (now assumed bad) updated disk. You can then
+either use the restored disk or apply the FS update again. The FSL10
+test procedure has more options for recovery. Managing this is a lot
+easier and safer if you have a third disk.
+
+=== Review changes
+
+Please see the <<Changes since 10.0.0>> section below for the details
+of the changes since that release.
+
+== Changes since 10.0.0
+
+There are separate sub-sections with summaries of changes in the FS
+and _drudg_.
+
+Each change item is listed as a summary line with clickable _toggle_:
+
+[%collapsible]
+====
+Details are shown here.
+====
+
+that can be clicked on to toggle showing (or not showing) the details.
+In this way, you can view the summary as a list and only reveal the
+details of items that interest you.
+
+Clickable links such as
+https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
+reported at https://github.com/nvi-inc/fs/issues.
+
+A detailed list of changes can be found using the `git log` command
+from within the FS _git_ repo directory, usually _/usr2/fs-git_.
+
+=== FS changes
+
+. Add more complete support for DBBC3 DDC personality
+
++
+
+[%collapsible]
+====
+
+Before this release, the FS only provided limited functionality for
+DBBC3 racks, as described in the <<../0/dbbc3.adoc#,FS 10.0 DBBC3
+support>> document for that release, _10.0.0_. More complete support is
+provided now. The updated support is described in the
+<<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> and includes:
+
+* A separate _dbbc3.ctl_ control file
+
+* Core3H board setting and monitoring with the `core3h_mode` command
+
+* T~sys~ display window (_monit7_)
+
+* Multicast logging, which is controlled with the `tpicd` command.
+
+* `mcast_time` command for checking DBBC3 time from the multicast data
+
+* _drudg_ support for schedules (closing
+https://github.com/nvi-inc/fs/issues/33[#33])
+
+* Integrated support for recording DBBC3 data with a Mark 5C or
+FlexBuff recorder
+
+* FS time setting from a DBBC3 with _setcl_ if NTP is not available
+
+WARNING: Although we have made a strong effort to verify that the FS
+and _drudg_ will work correctly for DBBC3s, it has not been possible
+to schedule a fringe test yet to validate the functionality. Until we
+have some field experience with DBBC3, we will not know if everything
+works well together and/or whether we should make some adjustments for
+better operations. If there are issues, we expect there will be updates
+to address them.
+
+CAUTION: The current FS support is structured around the features of
+the DBBC3 DDC firmware, `DDC_U` _v125_ and `DDC_V` _v124_, available
+at the time of this release. Firmware updates and experience with the
+current approach may lead to different FS support and operations in
+the future.
+
+Thanks to: the EVN, for funding this development work; Jon Quick
+(HartRAO) for testing, feature recommendations, helpful suggestions,
+extensive discussions, and making a system available for remote
+testing; John Gipson (GSFC) for _drudg_ support; Eskil Varenius
+(Onsala), for testing as well as making a system available for remote
+testing; Sven Dornbusch (MPIfR, Bonn), for elaborating on the details
+of DBBC3 functionality; Uwe Bach (Effelsberg) and Marjolein Verkouter
+(JIVE) for providing helpful suggestions.
+
+====
+
+. Improve _onoff_
+
++
+[%collapsible]
+====
+
+.. Improve _onoff_ operator output.
+
++
+
+The operator output of _onoff_ was completely restructured. The raw
+data is still recorded in the log, but now the operator will see only
+summary messages that describe what the program is doing and the final
+results (the `VAL` lines). Each major action that the program
+undertakes is reported, as well as any steps needed to recover if an
+error should occur. This should make the output both more compact and
+useful. The full output can still be seen in the Log Display window by
+using `*xdisp=on*` (use `*xdisp=off*` afterwards to turn off the more
+verbose display).
+
++
+
+TIP: If _antcn_ logs messages about commanding offsets (mode `2`), the
+flow of the _onoff_ operator output may be affected. The general
+posture of _antcn_ is intended to be "`no news is good news.`" In
+particular, this is why _onoff_ (and _aquir_ and _fivpt_) check
+onsource status with mode `5` which is not suppose to generate log
+output for why the antenna is off source. You can of course arrange
+your _antcn_'s output anyway you prefer.
+
+.. Change to lock gains after initially reaching starting position.
+
++
+
+Previously, for systems that require locking the gains, they were set
+before confirming that the antenna had reached the starting position.
+Now _onoff_ waits until it has been reached. This will have no impact
+when _onoff_ is started already at the starting position, including
+when run by _aquir_.
+
++
+
+If _onoff_ is started _before_ the antenna has reached the starting
+position, the effects will be:
+
+* _onoff_ will take slightly longer to run because the gains won't be
+locked in parallel with the slew.
+
+* The gains will be locked at the starting position. This could
+improve the gain levels used for the measurements, particularly for
+large elevation slews. The is the reason that this change was made.
+
+.. <<onoff_antcn,onoff now detects antcn errors>>[[onoff_antcn]]:
+
++
+
+Previously, these errors were ignored due to a bug. Now _antcn_ errors
+are detected. If one occurs now, _onoff_ will try to run _antcn_ a
+second time to make _onoff_ more robust if a transitory antenna
+communication problems occurs.
+
++
+
+It seems unlikely that these changes will cause a problem, but if they
+do, a short term workaround is provided. If the environment variable
+`FS_ONOFF_SUPPRESS_ANTCN_ERRORS` is set to `1`, the previous behavior
+will be restored. In the longer term, the behavior of __antcn__ should be
+corrected.
+
++
+
+TIP: If you are using the display server, you must stop _fsserver_ or
+reboot to enable a change in environment variable settings. Please see
+the beginning of
+<<../../../misc/env_vars.adoc#_runtime_variables,Runtime variables>>
+section in the <<../../../misc/env_vars.adoc#,FS Environment
+Variables>> document, for more information on setting environment
+variables.
+
+====
+
+. [[stop_adding_extra_comments]]<<stop_adding_extra_comments, Stop
+adding extra comments when updating .rxg files>>
+
++
+[%collapsible]
+====
+
+The trailing comments in _.rxg_ files are intended to hold the old
+calibration data, in reverse chronological order, as an historical
+record. There was a longstanding bug in the current _gnplt_ (so-called
+_gnplt2_) that caused it to include additional, out-of-order,
+commented out, copies of old calibration data when updating _.rxg_
+files. This has been fixed (closing
+https://github.com/nvi-inc/fs/issues/111[#111]).
+
+Another "`feature`" in _gnplt_ (_gnplt2_) caused extra comments to be
+inserted at the beginning of ._rxg_ files. _gnplt_ was not updating
+the date line. The program was compensating for this by adding a new
+first line comment with the date each time it updated the file. Since
+the date line is now being updated
+(https://github.com/nvi-inc/fs/issues/72[#72]), the date comment line
+is no longer added.
+
+While these bugs have been fixed, it could be a lot of work to cleanup
+the comments if they have not been cleaned up right along as the
+_.rxg_ files have been updated with _gnplt_. Cleaning-up the comments
+is entirely optional. A process for the cleanup is provided in the
+appendix <<Cleaning up .rxg file comments>>. It is broken into two
+steps. The first, which is relative easy, includes making a backup of
+the files as they are now, and then reducing them to the minimum
+needed to preserve the active calibration data (with its interspersed
+comments).
+
+The second step cleans-up the trailing comments. That step is an
+optional follow-up to the first step. It is more involved and can be
+deferred to a later date. If the _.rxg_ files have only been updated
+by _gnplt_, it should work as written. If other modifications have
+been made to the _.rxg_ files, for example by hand editing, the second
+step may needed to be modified accordingly.
+
+Please see the appendix <<Cleaning up .rxg file comments>> for the
+details of the cleanup process.
+
+Thanks to Jonathan Quick (HartRAO) for reporting these issues,
+making suggestions for the fixes, and testing them.
+
+====
+
+. Add adjustable log size warning message (closing
+https://github.com/nvi-inc/fs/issues/114[#114])
+
++
+[%collapsible]
+====
+
+When a log is opened (including _station.log_ when starting the FS),
+there is an error reported if the size exceeds a threshold, previously
+hard-coded as 100 MB. The size for the error is now adjustable by
+setting the environment variable `FS_LOG_SIZE_WARNING` to the desired
+size in MB. If it is not set, it defaults to 100 MB.
+
+The FS must be restarted in a session with the variable set for it to
+take effect. If the display server is in use, _fsserver_ must be
+stopped (or the system rebooted) _after_ stopping the FS and _before_
+restarting it with:
+
+  fsserver stop
+
+Thanks to Kiah Imai (KPGO) for suggesting this.
+
+====
+
+. Improve _plog_
+
++
+[%collapsible]
+====
+
+.. Fix _plog_ to only refuse to reduce a log with multicast data if it
+is the active log in the FS.
+
++
+
+In the process of reducing a log (removing multicast data), the log is
+renamed. This can cause a log recovery to occur if the log is
+currently open in the FS since it appears to be missing. This was
+protected against by _plog_, which would refuse to rename the log if
+it was open to any program. This meant that if the log was, for
+example, being viewed with `tail -f` or _less_ it could not be
+renamed. This was fixed so that _plog_ will only refuse to rename the
+log if it is open in the FS (to _ddout_)..
+
++
+
+NOTE: In such a case, the operator needs to close the log before
+running _plog_ on it. That is good practice in any case.
+
++
+
+NOTE: Other, non-reduction, log processing by _plog_ was not affected
+by this issue since renaming is not needed. It is still good practice
+to close the log before pushing it.
+
++
+
+Thanks to Katie Pazamickis and Jay Redmond (both at GGAO) for
+reporting this.
+
++
+
+.. Add use of _bzip2_ compression to _plog_.
+
++
+
+_plog_ will now use _bzip2_ as the default program for compressing
+___full.log__ files to send to the data centers. It is possible to use
+__gzip__ instead by setting the environment variable
+`PLOG_COMPRESSED_EXT` to `gz` or using the `-g` command line option.
+Please use `*plog{nbsp}-h*` for more information.
+
+.. Upload both reduced and compress logs when multicast is present as
+the default.
+
++
+
+Before, when a log contained multicast data, the default was to only
+upload a reduced log (with multicast removed). Now both the reduced
+and compressed full log are uploaded by default.
+
++
+
+A new option, `-r`, was added for uploading just a reduced log. As
+before, the `-z` option will upload just a compressed full, It is not
+expected that either of these options will get much use. The `-r` and
+`-z` options cannot be used together.
+
++
+
+Thanks to Chevo Terrazas (MGO) for suggesting uploading both files in
+one step.
+
+.. Respect `NETRC_DIR` for the `BKG` data center (closing
+https://github.com/nvi-inc/fs/issues/113[#113]).
+
++
+
+This had been overlooked in
+https://github.com/nvi-inc/fs/issues/39[#39], which had added the
+`NETRC_DIR` environment variable.
+
++
+
+Thanks to Kiah Imai (KPGO) for reporting this and testing the fix.
+
++
+
+====
+
+. Improve _fesh_
+
++
+[%collapsible]
+====
+
+.. Add `-P` option to print the summary listing to the printer (closing
+https://github.com/nvi-inc/fs/issues/112[#112]).
+
++
+
+With `-P`, when _drudg_ is run by _fesh_, it will print the summary
+directly to the printer. It is appropriate to make this a _fesh_
+option since it is an integrated feature of _drudg_. To print other
+files, it is recommended to make a wrapper for _fesh_. An example
+wrapper, which prints the summary and the _.prc_ file, is included as
+_/usr2/fs/fesh/feshp_. This can be copied to _~oper/bin_ and
+customized to print other files.
+
++
+
+Thanks to Kiah Imai (KPGO) for suggesting this.
+
+.. Add `-S` option to _fesh_ to skip downloading.
+
++
+
+This allows _fesh_ to trigger the normal _drudg_ processing when the
+schedule is already on the disk. This might be useful for example, if
+the schedule was generated locally by shifting the schedule (_drudg_
+option `10`).
+
++
+
+.. Map station code to lower case (closing
+https://github.com/nvi-inc/fs/issues/136[#136]).
+
++
+
+Before the station code was expected to be lower case. If it wasn't,
+this could cause a conflict with _drudg_, which maps it to lower case.
+This could result in a mismatch on the file names for deleting _.snp_
+and _.prc_ files with the `-f` option. _fesh_ now maps the station
+code, from both the `STATION` environment variable and `-s` option, to
+lower case.
+
++
+
++
+
+Thanks to Eskil Varenius (Onsala), for reporting this issue.
+
+.. Add new environment variables.
+
++
+
++
+
+Support for new environment variables `FESH_GEO_USE_SETUP_PROC` and
+`FESH_GEO_VDIF_SINGLE_THREAD_PER_FILE` were added. These variables can
+be used to supply fixed answers to the new optional _drudg_ prompts as
+described in <<drudg changes>> below. For more details about the use
+of the new variables, please see the `*fesh{nbsp}-h*` output.
+
+====
+
+. Improve _msg_ to always pick-up a new log file name (closing
+https://github.com/nvi-inc/fs/issues/118[#118])
+
++
+[%collapsible]
+====
+
+Previously _msg_ only read the log file (and session) name on start-up
+and when sending messages. It was modified to reread the log file (and
+session) name whenever a new form is displayed. As a result, selecting
+any form or send a sending a message from one will cause the log file
+name to be reread (and session name reset), in other words, this will
+occur for any significant user action. This should provide more
+intuitive behavior, primarily because it is no longer necessary to
+restart _msg_ for each session. The setting of the session name when
+reading the log file name can be turned off by disabling the `Setup`
+selection `Get session name from log` if it is not desired.
+
+Thanks to Jonathan Quick (HartRAO) for reporting the issue, providing
+feedback on the changes, and testing the fix.
+
+====
+
+. Add `setup_proc` command
+
++
+[%collapsible]
+====
+
+This command is used to identify the setup procedures in the _.snp_ files, e.g.:
+
+  setup_proc=setup01
+
+The setup procedure (in this example, `setup01`) will be executed if
+it is the first `setup_proc=...` command since the schedule was
+started or if a different procedure was used in the previous instance
+of the command in a schedule. This can be useful to avoid executing
+setup procedures more than necessary, especially if they take very
+long to execute, as is the case the DBBC3, or if they may disturb the
+equipment.
+
+Use of this command in _drudg_ generated _.snp_ files is controlled
+with the `use_setup_proc` option in _skedf.ctl_. The default is to not
+use it, which is the same as the previous behaviour.
+
+WARNING: The previous behavior of re-executing a setup procedure for
+each recording can provide some "`self-healing`" of the equipment
+setup if there errors occurred during the previous setup or if the
+equipment malfunctioned. The use of this command will eliminate this
+added robustness. Each site will need to evaluate whether to use the
+option in _drudg_ for this command based on their equipment's
+performance. It is typically necessary for DBBC3 systems.
+
+See `*help=setup_proc*` for more information.
+
+====
+
+. Add `mk5init` command to reinitialize the Mark 5 or Flexbuff
+connection without restarting the FS (closing
+https://github.com/nvi-inc/fs/issues/164[#164])
+
++
+[%collapsible]
+====
+
+The `mk5init` command will close the current connection to the Mark 5
+or FlexBuff recorder, reread the _mk5ad.ctl_ control file, and
+establish a new connection based on the contents. This may be useful
+for changing which recorder is used without restarting the FS.
+
+NOTE: Another change, <<fbsyns,FlexBuff synonyms>>, in this document,
+makes `mk5init` available with the synonym `fb_init`.
+
+WARNING: This feature is considered experimental. It appears to work
+well, but more extensive field testing may reveal issues.
+
+CAUTION: The function of this command may be revised or the command
+may be removed in the future.
+
+Thanks to Jun Yang (Onsala) for suggesting this.
+
+====
+
+. Expand setup of Mark 5C and Flexbuff recorders
+
++
+[%collapsible]
+====
+
+The `mk5c_mode` command sends configuration commands, beyond `mode`,
+depending on which recorder is selected in _equip.ctl_, `mk5c` or
+`flexbuff`, the total data rate, and the data type, VDIF or
+5B/Ethernet. The updated default configuration is described in the
+<<dbbc3_ops.adoc#_default_configuration,Default configuration>>
+subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
+
+All the settings can be overridden by the `mk5c_config` (or
+`fb_config`, depending on the recorder type selected when running
+_drudg_) local procedure. See the
+<<dbbc3_ops.adoc#_overriding_the_defaults,Overriding the defaults>>
+subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
+
+NOTE: Another change, <<fbsyns,FlexBuff synonyms>> in this document,
+makes `mk5c_mode` available with the synonym `fb_mode`.
+
+Thanks to Marjolein Verkouter (JIVE) for extensive discussions about
+what the correct settings should be.
+
+====
+
+. <<fbsyns,FlexBuff synonyms>>:[[fbsyns]] Add FlexBuff synonyms for
+all Mark 5 commands except `mk5b_mode`, which is not used with a
+FlexBuff recorder
+
++
+[%collapsible]
+====
+
+The following synonyms for FlexBuff recorders (listed with their
+corresponding Mark 5 versions) were added:
+
+* `fb` -- `mk5` (`jive5ab` is also a synonym) -- low-level recorder
+communication
+
+* `fb_close` -- `mk5close` -- close connection to recorder
+
+* `fb_init` -- `mk5init` -- initialize connection after rereading
+_mk5ad.ctl_ control file
+
+* `fb_mode` -- `mk5c_mode` -- set recording mode
+
++
+
+This command tailors it behaviour depending on what type of recorder
+is specified in _equip.ctl_  control file, not by the name of the
+command.
+
+* `fb_relink` -- `mk5relink` -- relink to recorder after closing
+connection
+
++
+
+This command is used after `fb_close`/`mk5close` to reestablish the
+connection.
+
+* `fb_status` -- `mk5_status` -- report recorder errors
+
+There is no differences in the function of the commands when the
+FlexBuff synonyms are used. They may be used to make the meaning of
+procedure files and log entries clearer.
+
+====
+
+. Split `equip` log header line into three parts
+
++
+[%collapsible]
+====
+
+The `equip` line in the log header has been broken into three lines,
+`equip`, `equip2`, and `equip3`. The `equip` line now contains just
+the rack, recorders, and decoder information. The remaining
+information from the _equip.ctl_ control file is listed, in order, on
+the `equip2` and `equip3` lines. Those lines break between the Mark 4
+Decoder Transmission Terminator Character value and the DBBC DDC
+Firmware Version value. Except for the clock rate value, the values in
+the `equip3` line are only DBBC related values. The clock rate value
+is also used for Mark 5B recorders.
+
+====
+
+. Add features to _rdbemsg_
+
++
+[%collapsible]
+====
+.. Add command line options to _rdbemsg_.
+
++
+
+Two command line options were added to _rdbemsg_:
+
+* `-f` -- which takes an integer argument to set the font size,
+default is `14`
+
+* `-g` -- which takes a string argument to set the window geometry,
+default is not to set it
+
++
+
+Only the position part of the geometry should be set with `-g`, e.g.,
+`-g{nbsp}-0-0`. The useful way to control the size is with `-f`.
+
++
+
+.. Add `mci-version` parameter to _rdbemsg.ctl_ control file.
+
++
+
+This was added to allow distinguishing the early version of MCI node
+at Westford, which requires different handling. Specifically, the MCI
+logs are in the directory _~oper/node_software/V0_, the file names do
+not contain the station code, the fields in the file are space
+delimited, and the fields are in a different order. The correct form
+for Westford is:
+
+  mci-version:0
+
++
+
+Other stations do not need this parameter and can either not include
+it or comment it out.
+
++
+
+The example control file, _/usr2/fs/st.default/control/rdbemsg.ctl_
+was updated accordingly.
+
++
+
+NOTE: As with other  _rdbemsg.ctl_ parameters, this one should not
+have any white space on its (non-comment) line.
+
+====
+
+. Show incorrect times DOT time in inverse video for the RDBE monitor
+display (_monit6_) window.
+
++
+[%collapsible]
+====
+
+Although in principle there is nothing wrong with recording data from
+RDBEs that have slightly different times (unlike having different VDIF
+epochs, which makes recording impossible with Mark 6 recorders), the
+recovery is too costly to use in most cases. As a result, to bring the
+operator's attention to the conflict, _monit6_ was modified to show
+DOT values that are not the current time in inverse video. This change
+could have been limited to using inverse video to just show times that
+don't agree with the majority since only a disagreement causes a
+problem. However, there did not seem to be a use case for recording
+with the time intentionally set wrong.
+
+====
+
+. Add use of `FS_RDBE_MCAST_DISABLE` environment variable
+(closing https://github.com/nvi-inc/fs/issues/167[#167])
+
++
+[%collapsible]
+====
+
+If set to `1`, this will suppress attempting to receive RDBE multicast
+data. This is useful for systems with R2DBEs to eliminate the (not
+useful in this case) multicast errors from the log and the display.
+They could already be eliminated from just the display with the `tnx`
+command.
+
+Thanks to Alex Burns (Westford) for suggesting that we have a way to
+eliminate these errors entirely.
+
+====
+
+. Fix issues with zooming, large numbers of detectors, and debug
+output in _gnplt_ and _gndat_
+
++
+[%collapsible]
+====
+
+.. Fix plotting of working file T~cal~(K) curve on zoomed T~cal~(K)
+versus frequency plots in _gnplt_ (closing
+https://github.com/nvi-inc/fs/issues/117[#117]).
+
++
+
+Previously, if you zoomed in the T~cal~(K) versus frequency plot and
+selected display of the working file T~cal~(K) curve, it would reset
+the left plot edge to the un-zoomed value when drawing the curve.
+This was caused by an interaction of two issues:
+
++
+--
+
+* The program tried to draw the entire T~cal~(K) curve, not just the
+part in the zoomed frequency range.
+
+* The function, `drawValues`, that adds T~cal~(K) or T~rec~ lines to
+plots, reset any plot limit, except the right edge one, if any data to
+be plotted was beyond that edge. This was apparently to allow showing
+the vertical axis intercept of the T~rec~ fit and to make sure that
+all vertical extents of T~rec~ and T~cal~(K) curves were not off the
+visible plot area.
+
+--
++
+
+This was fixed by limiting the T~cal~(K) curve plotted to just
+segments within the zoomed area. In addition for consistency, the
+`drawValues` function was change to reset any plot limit that is
+exceeded by the data. Since all other uses of `drawValues` already
+limited the horizontal values to be plotted to the zoomed area, there
+was no impact on those other uses.
+
++
+
+Thanks to Eskil Varenius (Onsala), for reporting this issue and
+testing the fix.
+
+.. Correct bad T~sys~ data in _gnplt_ (closing
+https://github.com/nvi-inc/fs/issues/107[#107] and
+https://github.com/nvi-inc/fs/issues/104[#104]).
+
++
+
+This was caused by an incorrectly sized array in _gndat_ that was
+introduced in commit `f84a2bb9` dated June 2003. This error was benign
+unless more than 20 detectors were used in a single `onoff` run.
+Before the advent of RDBEs and DBBC3s, this was unlikely, but not
+impossible.
+
++
+
+Due to the layout of the automatic variables, this error should only
+have impacted stem:[\mathit{T_{sys}}] and
+stem:[\mathit{T_{sys}-T_{spill}}] data in _gnplt_ and only when there
+were more than 20 detectors used. However, also considering the layout
+of the automatic variables, it is unclear why there were not
+catastrophic program failures in such a case. It would be prudent to
+reanalyze any current data sets that used more than 20 detectors with
+the fixed version to see if the results change.
+
++
+
+Thanks to Beppe Maccaferri (Medicina), and subsequently Eskil Varenius
+(Onsala), for reporting this issue.
+
+.. Remove extraneous _gndat_ debug output for the processing of
+weather data.
+
++
+
+The debug output was not visible when _gndat_ was run from _gnplt_,
+which is normally the only way it is run.
+
++
+
+====
+
+. Fix continuous calibration T~sys~ calculations for DBBC and DBBC3
+racks (closing https://github.com/nvi-inc/fs/issues/157[#157])
+
++
+[%collapsible]
+====
+
+For the direct sample of count data by _tpicd_ for monitoring T~sys~
+for DBBC and DBBC3 racks with continuous calibration, the value of
+T~sys~ was being underestimated by about
+stem:[\mathit{\frac{T_{cal}}{2}}]. This was because the CAL~on~ counts
+were being ignored for determining the count level of T~sys~. This has
+been fixed.
+
+For the DBBC, this error has been occurring since continuous cal was
+first supported in 2012, FS _9.11.0_, commit `f5817f65`. For the
+DBBC3, it has been present since the rack was first supported in 2018,
+FS _9.12.12_, commit `19a69540`. However, the T~sys~ monitoring for
+the DBBC3 was largely unused before the current release because the
+device communication rate made it difficult to work with.
+
+NOTE: The fix for the DBBC3 is now irrelevant. As of this release,
+T~sys~ for the DBBC3 is calculated, correctly, from the multicast
+data.
+
+This error is fairly small and probably did not have an impact on
+routine local performance monitoring. However, if some specialized
+measurements were being made, they may have been affected. If this
+error had a significant effect for you, please contact Ed.
+
+NOTE: Downstream amplitude calibration data should not have been
+affected as long as it uses the raw count data, which is how it was
+designed to be used.
+
+Thanks to Jun Yang (Onsala) for discovering and reporting this. Thank
+to Jun and Eskil Varenius (also at Onsala) for making systems
+available to verify the fixes.
+
+====
+
+. Fix continuous calibration T~sys~ calculations in `fivept` (closing
+https://github.com/nvi-inc/fs/issues/131[#131])
+
++
+[%collapsible]
+====
+
+For continuous calibration systems, T~sys~ was being underestimated
+in `fivept` by about stem:[\mathit{\frac{T_{cal}}{2}}]. This was
+because the CAL~on~ counts were being ignored for determining the
+count level of T~sys~. This has been fixed.
+
+This made the point-by-point T~ant~ values larger by the same amount.
+This should not have biased the fitted peak source T~ant~ since the
+fitting process removes a background level. Nor should it have
+affected the pointing offsets. Perhaps it actually had some benefit
+since it made it less likely that the point-by-point T~ant~ would be
+negative, which is always a little unpleasant. It does affect the
+T~sys~ derived values of the `#fivpt#perform` output, but those values
+are mostly a curiosity and typically not used for any significant
+work.
+
+For the DBBC, this error has been occurring since continuous cal was
+first supported in 2012, FS _9.11.0_, commit `f5817f65`. For the RDBE,
+this error has been occurring since continuous cal was first supported
+in  2016, FS _9.12.5_, commit `217940c1`. For the DBBC3, it has been
+present since the rack was first supported in 2018, FS _9.12.12_,
+commit `19a69540`.
+
+Thanks to Eskil Varenius (Onsala) for making a system available to
+verify the fix.
+
+====
+
+. Improve refraction calculations
+
++
+[%collapsible]
+====
+
+.. <<refrw_bad,refrw_bad()>>:[[refrw_bad]] Rename _poclb.a_ routine
+`refrw()` to `refrw_bad()`
+
++
+
+This change is intended to make it apparent that the calculation used
+in old `refrw()` routine is incorrect and encourage use of the correct
+`refrwn()` routine. The error in the old `refrw()` routine has been
+known about since 2006. The error is generally small above 5&deg;
+elevation.
+
++
+
+The old routine can still be used by changing calls to the new name.
+This may be preferable in the short term if the effect of this error
+is built into current point models. To get consistent results, station
+code can be converted to use `refrwn()` and a new model can be
+determined, when it is convenient.
+
++
+
+Thanks to Jon Quick (HartRAO) for pointing out this error and
+supplying the corrected `refrwn()` in 2006.
+
+.. Add new refraction calculations to _poclb.a_ (includes references
+for them and `refrwn()`)
+
++
+
+Two additional refraction calculations are now available in the C
+language _poclb.a_ library:
+
+* `sbend()` -- from A. L. Berman and S. T. Rockwell, "`A New Radio
+Frequency Angular Tropospheric Refraction Model,`" JPL DSN Progress
+Report 42-25, pp. 142-153, November and December 1974
+(https://ipnpr.jpl.nasa.gov/progress_report/42-25/25V.PDF) and A. L.
+Berman, "`Modification of the DSN Radio Frequency Angular Tropospheric
+Refraction Model,`" JPL DSN Progress Report 42-38, pp. 184-186,
+January and February 1977
+(https://tmo.jpl.nasa.gov/progress_report2/42-38/38V.PDF).
+
+* `lanyi()` -- from G. Lanyi, "`Atmospheric Refraction Corrections to
+Antenna Pointing at 1 Millidegree Level,`" JPL IOM 335.3-89-026, 24
+March 1989, with corrections, and T. D. Moyer, "`Formulation for
+Observed and Computed Values of Deep Space Network Data Types for
+Navigation,`" Section 9.3.2.2.1 (pp. 295-297), John Wiley, 2003
+(https://descanso.jpl.nasa.gov/monograph/series2/Descanso2_S09.pdf).
+
+.. Change `onoff` and `holog` to use `refrwn()` in place of
+(incorrect) `refrw()`.
+
++
+
+This should not be a significant effect above 5° elevation. Refraction
+is only applied to estimate an approximate value of the antenna
+elevation; great accuracy is not required. In any event, fixed values
+are used for the meteorological parameters, which limits the accuracy.
+For `fivept`, the FORTRAN `refr()` function is used, which also has
+fixed meteorological parameters.
+
+.. Locate references for `refrwn()`
+
++
+
+The older `refrwn()` is apparently from W. R. Iliff and J.  M. Holt,
+"`Use of Surface Refractivity in the Empirical Prediction of Total
+Atmosphere Refractions,`" J. Research NBS 67D (Radio Prop.), No.  1,
+pp. 31-35, January-February, 1963
+(https://www.semanticscholar.org/paper/Use-of-surface-refractivity-in-the-empirical-of-Iliff-Holt/1ddcd0e4e672dd890198539361c5237c033001f7)
+and C. A. Clark, "`Haystack Pointing System: Radar Coordinate
+Correction,`" MIT LL Technical Note 1966-56, 24 October 1966
+(https://www.semanticscholar.org/paper/HAYSTACK-POINTING-SYSTEM%3A-RADAR-COORDINATE-Clark/bf564e4ebc49a4ae8d69333b267a97cc320109a0).
+
++
+
+Thanks to Ludwig Schwardt (SKA, South Africa) for tracking down these
+references.
+
+====
+
+. Increase buffer size for recovering a deleted log
+
++
+[%collapsible]
+====
+
+If there is no file with the name of the current log (it has been
+deleted or renamed) when a user command would close it, the FS will
+attempt to recover the file and give it its original name. The buffer
+used to recopy the file was increased to 2 Mib (512 sectors) so it is
+faster, particularly for very large experiment logs with multicast
+data.
+
+IMPORTANT: The recovery will not work if in the meantime a file has
+been created with the same name. The FS will think that is the log and
+give up. In that case, The log file contents will be lost. Using
+`log=_name_` or `schedule=_name_` will not cause this.
+
+As part of this change, the variables for handling file sizes and
+positions in the recovery function, _ddout/recover_log.c_,  were
+changed to be `off_t` or `ssize_t`, as appropriate. They were `int`
+variables, having been changed from `long` variables by the bulk
+_unlongify_ before _10.0.0-beta1_, but hadn't been changed back.
+
+====
+
+. Add test utilities: _precess_, _move_, and _refrac_
+
++
+[%collapsible]
+====
+
+This utilities are available in sub-directories in _misc/_ with the
+names of the programs. They are intended for testing and
+experimentation.
+
+.. The _precess_ program can be used to precess mean coordinates
+between epochs B1950 and J2000. Two options approaches are available:
+
++
+--
+
+** The method used by the FS in _fslb/prefr.f_. This is the same
+method used by _drudg_ (which has its own copy of _prefr.f_).
+
+** The method provided by the SOFA library.
+
+--
++
+
+See the _README.txt_ file in the directory for more information.
+
++
+
+.. The _move_ program can be used to calculate apparent coordinates of
+date and apparent topocentric coordinates of date.
+
+
++
+
+This uses the same method as the FS `source=...` command.
+
++
+
+See the _README.txt_ file in the directory for more information,
+
+.. The _refrac_ program can be used to compare different refraction
+algorithms at different elevations and under different meteorological
+conditions.
+
++
+
++
+
+This is program has a set of comparisons hard-coded, but could be
+modified to test other situations.
+
+====
+
+. Prevent kbd:[Control+C] from causing the FS to abort when the
+display server is not in use and other cleanup of signal handling
+
++
+[%collapsible]
+====
+
+.. Remove redundant ignoring of signals in _ddout_ and _oprin_
+(partially closing https://github.com/nvi-inc/fs/issues/100[#100]).
+
+.. Re-enable suppression of signals (partially closing
+https://github.com/nvi-inc/fs/issues/100[#100]).
+
++
+
+As of _10.0.0-beta1_, the previous practice of disabling receipt of
+certain signals, in particular `SIGINT` (for kbd:[Control+C]) had been
+removed. It has been reinstated. When the FS is run without the
+display server, this assures that no FS programs will be aborted if a
+kbd:[Control+C] is accidentally entered in the terminal session where
+the FS is running. However, this does not prevent a kbd:[Control+C]
+from killing an _xterm_ that is wrapped around a FS program (typically
+only _oprin_) in the FS terminal session from being killed.
+Preventing that is discussed next.
+
+.. Use `setsid()` to shelter __xterm__s from keyboard generated
+kbd:[Control+C].
+
++
+
+To prevent kbd:[Control+C] killing an _xterm_ in the FS terminal
+session all `x` programs in _fspgm.ctl_ (just _oprin_) and _stpgm.ctl_
+are now run under `setsid()` when the display server is not being
+used. This disconnects the programs from the terminal session that the
+FS is being run in, thereby preventing a kbd:[Control+C] from reaching
+them, but not otherwise affecting them.
+
++
+
+IMPORTANT: If you have been using _setsid_ in your _stpgm.ctl_,
+possibly to insulate __xterm__s from kbd:[Control+C], you should
+remove it. If it is used on an `x` line in the file, it will prevent
+the FS from starting successfully when the display server is not in
+use and is not needed when the server is in use.
+
+With these changes, it should no longer be possible to kill the FS
+with a kbd:[Control+C], even when the display server is not being
+used.
+
+WARNING: An FS _xterm_ window can still be terminated abnormally using
+the decorations for the window. When the FS is not being running with
+the display server, this will kill the FS _abnormally_. The decoration
+button that includes the `Delete` and `Destroy` options can be removed
+if desired. In the _~/.fvm2rc_ file include `NoButton 1` in the
+window's `Style` (see the `Style "oprin" ...` line in
+_st.default/oper/.fvwm2rc_ for an example).
+
+WARNING: The FS, run without the display server, can still be
+terminated _abnormally_ by using the _kill_ command to send a `SIGINT`
+(`2`) or `SIGKILL` (`9`) signal to an _xterm_ run by the FS.
+
+====
+
+. Record _fsserver_ error messages (closing
+https://github.com/nvi-inc/fs/issues/105[#105])
+
++
+[%collapsible]
+====
+
+The display server now makes a file with a name of the form
+_~/fsserver.<time-stamp>.err_ each time it is started. It is used to
+collect server error information. The file will be deleted if
+_fsserver_ terminates normally. If you experience a server crash,
+please send this file to Ed or post it as part of an issue on
+_github_. The _<time-stamp>_ portion of the name will correspond to
+the time when the server was last started before the crash. That is
+usually when the FS was first started after the last boot. Any file of
+this type with non-empty contents is worth reporting.
+
+Thanks to Dave Horsley (Hobart) for suggesting this and contributing
+to the implementation.
+
+NOTE: The FS also makes a file with a name of the form
+_~/fs.<time-stamp>.err_ each time it is started. It is used to collect
+FS error information. The FS will attempt to delete this file if it
+terminates normally. If you experience a FS crash, please send this
+file to Ed or post it as part of an issue on _github_. The
+_<time-stamp>_ portion of the name will correspond to the time when
+the FS was last started before the crash.
+
+====
+
+. Add explanatory comments to the example _flux.ctl_ control file (closing
+https://github.com/nvi-inc/fs/issues/121[#121])
+
++
+[%collapsible]
+====
+
+Although the data used in the file came from other sources, for many
+years the code that read the _flux.ctl_ file was the complete
+documentation for the format. The example file in
+_/usr2/fs/st.default/control/_ now includes the details in an easier
+to read form. You can merge these comments, which are at the end of
+the example file, into your local copy or refer to the example.
+
+Thanks to Stuart Weston (Warkworth) for suggesting this and
+contributing some of the information in the comments.
+
+====
+
+. Improve error messages when reading _flux.ctl_ (closing
+https://github.com/nvi-inc/fs/issues/124[#124])
+
++
+[%collapsible]
+====
+
+The error messages when reading _flux.ctl_ were confusing and
+uninformative. This has been the situation since the file was first
+added in October 2002, for version _9.5.15_ (commit `1b68b90f`).
+Apparently, this was not a significant issue because, apparently,
+modifying the default contents was uncommon. If you have been having
+trouble with this, we apologize.
+
+The error messages have been more explicit about the cause of any read
+error and the offending line is printed to aid in correcting the
+problem.
+
+Thanks to Stuart Weston (Warkworth) for reporting this.
+
+====
+
+. Improve error messages when reading _.rxg_ files
+
++
+[%collapsible]
+====
+
+.. Make error messages more informative (closing
+https://github.com/nvi-inc/fs/issues/83[#83]).
+
++
+
+The error messages when reading _.rxg_ files were confusing and
+uninformative. This has been the situation since _.rxg_ files were
+first added in October 2002, for version _9.5.15_ (commit `1b68b90f`).
+Apparently, this was not a significant issue because _.rxg_ files were
+usually updated by _gnplt_, which wrote correctly formatted lines. If
+you have been having trouble with this, we apologize.
+
++
+
+The error messages have been more explicit about the cause of any read
+error. Unfortunately, it is not possible to show the offending line
+without more significant changes. However, the messages are fairly
+explicit about where the error occurred.
+
++
+
+The same reading routine is used in _gnplt_ (which uses _gndat_ to
+read the _.rxg_ files) for consistency. Unfortunately, the error
+messages for _gnplt_ will still not be as informative, but restarting
+the FS should provide a more explicit error message that help make it
+clear what the problem is. If it is not possible to use the FS for
+this, another strategy is to use the error number reported in status
+line at the bottom of _gnplt_ to identify the corresponding `RG` error
+in _/usr2/fs/control/fserr.ctl_.
+
+.. [[additional_rxg_errors]]<<additional_rxg_errors,Additional .rxg
+file errors>>: Report five additional errors in _.rxg_ files (closing
+https://github.com/nvi-inc/fs/issues/134[#134]):
+
++
+--
+
+* The third field on the LO line is missing for type `range`.
+
+* If a third field exists on the LO line, but does not decode as a
+number.
+
+* The second field on the FWHM line is missing for type `constant`.
+
+* If a second field exists on the FWHM line, but does not decode as a
+number.
+
+* A field exists after the gain curve coefficients, but is not
+`opacity_corrected`.
+
+--
++
+
+While it is unlikely, if any of your _.rxg_ files have these errors,
+they will be reported the first time you run the FS after the update.
+You can correct them at that time. The error messages should identify
+the problem clearly enough.
+
++
+
+A few other, minor, errors are still not being caught. In particular,
+if a character that cannot be part of a numeric field appears
+_within_, or at the end of, a numeric field, that error will not be
+reported. In that case, the field up to the out-of-place character will
+be used as the value. Hopefully this is an unlikely error. A leading
+character that cannot be part of a numeric field will be reported as
+an error.
+
+====
+
+. Remove extra comma in T~cal~(K) table log entires (closing
+ https://github.com/nvi-inc/fs/issues/160[#160])
+
++
+[%collapsible]
+====
+
+The contents of the _.rxg_ selected by an `lo=...` command are logged
+the first time the file is selected since the log was last opened.
+There was a redundant comma in the T~cal~(K) table log entries after
+the _.rxg_ file name.
+
+====
+
+. Improve web documents
+
++
+[%collapsible]
+====
+
+.. Improve font conventions.
+
++
+
+These conventions are covered in the
+<<../../../misc/font_conventions.adoc#,FS Document Font Conventions>>
+document. The following descriptions refer to sections in that
+document. The conventions themselves are covered in the
+<<../../../misc/font_conventions.adoc#_conventions,Conventions>>
+subsection. Examples are in the
+<<../../../misc/font_conventions.adoc#_source_examples,Source
+examples>> section.
+
+... Add description of using inline anchors.
+
++
+
+These can be used to make linking references to arbitrary text in
+the documents. This convention is covered as "`other anchors`" in the
+<<../../../misc/font_conventions.adoc#_links,Links>> subsection.
+The document also shows how to make the anchor visible in
+the text. This is described in the example
+<<../../../misc/font_conventions.adoc#_linking_to_inline_anchors,Linking
+to inline anchors>> subsection.
+
+... Improve description of code blocks.
+
++
+
+Add use of bold for user input and bold italic for replaceable user
+input. This convention is described in the
+<<../../../misc/font_conventions.adoc#_code_blocks,Code blocks>>
+subsection.  The example is covered in the subsection
+<<../../../misc/font_conventions.adoc#_italics_and_bold_in_code_blocks,Italics
+and bold in code blocks>>.
+
+... Add description for using appendices.
+
++
+
+This convention is covered in the
+<<../../../misc/font_conventions.adoc#_links,Links>> subsection. The
+example is covered in the subsection
+<<../../../misc/font_conventions.adoc#_appendices,Appendices>>.
+
++
+
+.. Improve wording for setting geometry values in _~/.Xresources_.
+
++
+
+Using differently named _~/.Xresources_ files that are used by
+different aliases for different displays is described in the final
+*NOTE* of the
+<<../../misc/install_reference.adoc#_setting_geometry_values_in_xresources,Setting
+geometry values in .Xresources>> section of the
+<<../../misc/install_reference.adoc#,Installation Reference>>
+document.
+
+.. Change cut-and-paste phrasing in documents to copy-and-paste
+
++
+
+This is technically more accurate. The change primarily affects the
+(now)
+<<../../misc/install_reference.adoc#_copy_and_paste_installation_tips,Copy-and-paste
+installation tips>> in the
+<<../../misc/install_reference.adoc#,Installation Reference>> document
+and references to it.
+
+.. Improve presentation of FS and _drudg_ change lists in the update notes
+
++
+
+In the update notes for FS _10.1.0_ (this document) the list of FS and
+_drudg_ changes now show a summary line and a _toggle_ to open a more
+detailed description. This should make the list of changes easier to
+review while allowing a reader to view more details for items they
+find interesting. We hope this will make the update notes easier to
+read.
+
++
+
+There are some downsides, primarily:
+
+* There is extra white space when a toggle is closed.
+
+* If you return "`back`" to the document after following a link to a
+_different_ document, previously opened toggles will be closed because
+the web page has been reloaded. This makes it a little more difficult
+to return to where you were reading in the original document if it was
+within opened text.
+
++
+
+If there is a consensus that this is overall an improvement, its use
+will continue for future updates.
+
+.. Add explanation of setting environment variables.
+
++
+
+Section
+<<../../../misc/env_vars.adoc#_setting_environment_variables,Setting environment variables>>
+was added to the
+<<../../../misc/env_vars.adoc#,FS environment variables>>
+document.
+
++
+
+The preamble of the
+<<../../../misc/env_vars.adoc#_runtime_variables,Runtime variables>>
+section in the same document was expanded to include the additional
+steps needed to update environment variables when using the display
+server.
+
+
+.. Make numerous wording fixes.
+
+====
+
+. Update example `station` procedure libraries
+
++
+[%collapsible]
+====
+
+The example libraries can be found in _/usr2/fs/st.default/proc_.
+
+.. Add standard procedures for (rack/recorder): DBBC/Mark 5C,
+DBBC/Flexbuff, DBBC3/FlexBuff.
+
++
+
+.New example station.prc libraries
+|=============================================================
+|Equipment - Rack/Drive1/Drive2 |Prefix letters |Example `station` Library
+
+|dbbc/mk5c           |d5c        |_d5cstation.prc_
+|dbbc/flexbuff       |dfb        |_dfbstation.prc_
+|dbbc3/flexbuff      |d3fb       |_d3fbstation.prc_
+|=============================================================
+
+.. Add `check_ntp` procedure.
+
++
+
+An example `check_ntp` procedure is provided in _check_ntp.prc_. It is
+slightly improved from the original version. It has also been
+incorporated into the example `station` libraries for the current most
+commonly used rack/recorder combinations: DBBC/Mark5B, DBBC/FlexBuff,
+DBBC/March 5C, DBBC3/Flexbuf, and VLBA5/Mark 5B. Please see the table
+in the
+<<../../misc/install_reference.adoc#_example_standard_procedure_libraries,
+Example standard procedure libraries>> section of the
+<<../../misc/install_reference.adoc#,Installation Reference>> document
+to identify which files are for which combinations.
+
+====
+
+. Add other miscellaneous fixes
+
++
+[%collapsible]
+====
+
+.. Generalize the `bbcgain` command read back to handle DBBC3s.
+
+.. Allow `0` for DBBC3 BBC frequencies.
+
+.. Add the missing `bbc110` command for DBBC3.
+
+.. Add useful default IF sources for DBBC3 `bbc__nnn__` commands, when
+`_nnn_` is `064` or larger.
+
+.. Add `0` MHz BW for display of DBBC3 BBCs that are not configured.
+
+.. Add the missing `formbbc` and `formif` detector groups in `onoff`
+for DBBC3 racks.
+
++
+
+Before the current release there was no way to know which BBCs or IFs
+were being recorded to implement these groups. Now that the
+`core3h_mode` command is implemented, it is possible.
+
+.. Add missing `64` MHz BW for `fivept` and `onoff` with DBBC BBCs.
+
+.. Fix a bug that caused DBBC3 BBC frequencies to be ignored when
+calculating T~cal~(K) and frequency dependent FWHM.
+
++
+
+For T~cal~(K), this generated incorrect values, which impacted T~sys~
+values by a proportional amount. The incorrect values were for a
+frequency in the band or nearby, so typically not entirely
+unreasonable.
+
++
+
+Since T~sys~ calculated by the FS is only a station diagnostic, this
+had limited impact. Before the current release with DBBC3's, T~sys~ could
+effectively only be calculated in `fivept` and `onoff` and to spot
+check T~sys~ outside of schedule execution. Pointing offsets (from
+`fivept`) and SEFDs/T~cal~(J)s (from `onoff`) were not affected. The
+T~cal~(K) values were probably adequate for verifying consistency of
+station performance with T~sys~ spot checks, if they were used at all.
+
++
+
+For frequency dependent FWHM, this should have been an insignificant
+error in most cases.
+
+.. Fix the RDBE monitor display (_monit6_) to use the `time_t` type
+when calculating the nominal VDIF epoch.
+
++
+
+The `mout6()` function was using an `int` to hold the time instead of
+a `time_t`, resulting in incorrect values for the nominal VDIF epoch
+on 64-bit systems. This had very limited impact. The nominal VDIF
+epoch was only used to apply inverse video to epochs that weren't
+nominal, if _all_ RDBEs had different epochs, a rather unlikely case.
+If it occurred, all the VDIF epochs would have been shown in inverse
+video as "`wrong,`" which would have been "`incorrect`" for at most
+one epoch. This has been fixed.
+
++
+
+The error was introduced by the bulk _unlongify_ for conversion to the
+32/64-bit compatibility for version _10.0.0_. It only would have
+impacted 64-bit systems.
+
+.. Correct RDBE VDIF epoch increment command hint line in _fmset_.
+
++
+
+The VDIF epoch increment command (`>`) hint line, which only appears
+if the RDBE's VDIF is before the current epoch, was displayed twice.
+Additionally, if it became no longer useful, it was not removed. In
+the version _9.12.13_, the hint lines dynamically adjusted depending
+on whether an increment was possible. This behavior was not correctly
+preserved in the merge of versions _9.13.2_ (old "`main`") branch and
+_9.12.13_ (old "`vgos`" branch). The fixed version uses statically
+placed hints lines for simplicity, only showing the  VDIF epoch
+increment line when it could be useful.
+
+
+.. Prevent decimation from being specified for 5B/Ethernet in the
+`mk5c_mode` (and `fb_mode`) command.
+
++
+
+Previously, it was possible to set the 5B/Ethernet sample rate via the
+_decimation_ parameter  in the `mk5c_mode` (and `fb_mode`) command.
+This was a vestige of the `mk5b_mode` command. The Ethernet recorders
+(Mark 5C and FlexBuff, controlled by _jive5ab_) do not support
+decimation. The _sample_ parameter of the `mk5c_mode` (and `fb_mode`)
+command provides full functionally for specifying the sample rate for
+5B/Ethernet and VDIF recording and is the method used by _drudg_.
+
+.. Improve sample rate reporting for query responses of commands
+`fila10g_mode`, `mk5b_mode`, and `mk5c_mode`/`fb_mode`.
+
++
+
+None of the devices these commands query report the sample rate. For
+`fila10g_mode` and `mk5b_mode`, the sample rate _implied_ by the
+device decimation response is shown in parentheses. Previously, they
+reported the _commanded_ rate in parentheses.
+
++
+
+NOTE: The _core3h_mode_ command follows the same improved convention.
+
+
++
+
+For `mk5c_mode`/`fb_mode`, the devices also don't report the
+decimation, so the _commanded_ sample rate is shown in _double_
+parentheses. The device does report the track bit rate, which can be
+used for comparison, but this is reported in bits per second instead
+of Ms/s.
+
+.. Update the value of π in the FS copy of _prefr.f_ to agree with the
+current value in _drudg_.
+
++
+
+In FS _9.7.0_, July 2004, commit `acde80ba2` the value if π used by
+_skdrut/prefr.f_ was updated with a value with more digits. The
+current change catches _fslb/pref.f_ up with that previous change.
+
++
+
+This increased digits changes the value of π by somewhat less than 3
+parts in 10^-11^, which should be insignificant. This marginally
+improves the consistency of FS precession rotations between B1950 and
+J2000 with those in _drudg_.
+
+.. Eliminate extraneous `(_xx_)` strings in error messages.
+
++
+
+Some error messages were displayed/logged with extraneous `(_xx_)`
+strings after the error number. This came about because a change was
+made (in commit `9e9906d9` for version _9.12.2_ released in March of
+2016), to report the so-called `LWHAT` two character Hollerith values
+(or up to four character representation of numbers) for an error even
+if there was no `?W` (or `?WWW) string in the message to be replaced
+with the value.  The principle being that it was more important to
+report the information to help solve a problem than to adhere to
+incorrect formatting of the error message.
+
++
+
+This did not seem to cause much of a problem. However, some programs,
+in particular _aquir_, _fivpt_, _onoff_, were incorrectly setting the
+`LWHAT` value.  Other programs, in particular _mk5cn_, _dbbcn_, and
+_rdbcn_, were carelessly setting the `LWHAT` value when there was no
+error. The latter problem caused extraneous strings in error messages
+from unrelated commands. We believe all cases of this have been fixed.
+If you see any now, please report them.
+
+.. Allow less white space for numeric `LWHAT` values in error
+messages.
+
++
+
+Previously, if an error message had a runtime determined numeric
+value, there had to be a four character `?WWWW` placeholder in the
+error message for it to replace to avoid overwriting. This was changed
+to allow shorter placeholders, down to `?W`, to be used. A `?W` can be
+used to show a one digit number with one space in front of it. To do
+this, the `?W` must be directly appended to the previous word in the
+message, for example `word?W`, which may be a little hard to read in
+the _fserr.ctl_ or _sterr.ctl_ file.
+
+.. Corrected `error number for reporting trouble opening _time.ctl_.
+
+.. Correct erroneous Ethernet transaction error messages
+
++
+
+Previously, the message for reporting errors when sending data to the
+Ethernet devices (Mark 5s, DBBCs, RDBEs, Mark 6s), incorrectly stated
+that the connection was closed. The connection is not closed. Perhaps
+it should be, but the incorrect statements have been removed until the
+functionality is changed.  The affected errors are:
+`DB`/`M5`/`M6`/`RA` `-102`.
+
+.. Correct `bbc_gain` command error codes
+
++
+
+If an error occurred in the monitor form of the command, the error was
+reported as `di` instead of `dg`.
+
+.. Add instructions to the example _.xsession_ files for how to
+make them work correctly when _tcsh_ is the login shell
+
++
+
+Instructions for implementing this were added to the
+<<../0/10.0.0.adoc#,FS 10.0.0 Update Notes>> document as the
+<<../0/10.0.0.adoc#xsession,Updating ~/.xsession>> sub-step in the
+<<../0/10.0.0.adoc#_miscellaneous_fslx_changes,Miscellaneous FSLx
+changes>> step.
+
+.. Improve default _.fvwm2rc_ files
+
++
+
+The _.fvwm2rc_ files in the _auid_, _oper_, and _prog_ sub-directories
+of _/usr2/fs/st.default_ were updated. These changes  only affect
+behavior on the console GUI.
+
+... Add use of `NeverFocus` for the `scnch` and `erchk` windows.
+
++
+
+This was previously added in _10.0.0-beta1_, but removed on _10.0.0_
+because it was thought to prevent scrolling of those windows. However,
+that turned out to not be the case. Using this setting prevents the
+focus from accidentally being given to these windows, which don't
+accept input.
+
+... Improve consistency of hot key definitions.
+
++
+
++
+
+Previously the handling of _msg_, _rdbemsg_, _monpcal_, and _monit6_
+were not consistent. Now the default configuration is for
+kbd:[Control+Shift+M] to open _msg_ and kbd:[Control+Shift+6] to open
+_monpcal_ and for these programs to be displayed in the `Button 2`
+menu. Immediately below the configuration lines for these programs are
+commented out lines for _rdbemsg_ and _monit6_, which can be used
+instead by sites with RDBEs.
+
+.. Don't read the _rdbe.ctl_ control file, or log its contents, unless
+the rack type is RDBE.
+
+.. Correct error in FORTRAN calls to get FiLa10G time for _setcl_
+
++
+
+An argument was missing. This was a bug from the VGOS branch, which
+technically do not support using _setcl_ for FiLa10G. The bug
+apparently did not affect versions since the merge since there was a
+relatively low, not quite 1 in 2^32^ chance of it being excited.
+
++
+
+NOTE: _setcl_ only works for the first FiLa10G if there are two. A
+second is only used for VGOS. _fmset_ works for both.
+
+.. When sending a target level for the DBBC3 IFs, always send `1` for
+the filter selection, and ignore the filter selection on read back.
+
++
+
+Currently, this parameter is used in the syntax for the device, but is
+meaningless.
+
+.. Fix `tpicd` to only use direct sampling DBBC3 of side-bands that are
+recorded instead of all of them.
+
++
+
+Before the current release, there was no way to know what channels
+were being recorded. Additionally, direct sampling was too slow to be
+useful. Only recorded channels would be sampled now, but direct
+sampling is no longer supported in favor of multicast.
+
+.. Reorganize and cleanup the `help` file for `onoff`.
+
+.. Improve the description of the decimation parameter in the `help`
+files for `fila10g_mode` and  `mk5b_mode`/`mk5c_mode`/`fb_mode`.
+
+.. Add missing `32` and `64` MHz BWs in `help` for DBBC `bbc__nn__`
+commands.
+
+.. Add missing `help` page for `jive5ab` command.
+
+.. Fix `mk5_status` command to get its command name for logging from
+the parsed command line instead of being hard-coded.
+
++
+
+This is the normal structure of SNAP commands, which `mk5_status` did
+not have. It enables only updating _control/fscmd.ctl_ to either
+change the name or create a synonym. Fixing this was necessary in
+order to make the `fb_status` synonym work correctly.
+
+.. Remove `e` rack type in `help` files.
+
+
++
+
++
+
+`help` for the `pcald` and `tpicd` commands now works for all systems.
+
+.. Correct a few compile warnings, but certainly not a significant number.
+
+====
+
+=== drudg changes
+
+_drudg_ opening message date is 2022-02-10.
+
+. Add support for DBBC3 DDC racks
+
++
+[%collapsible]
+====
+
+_drudg_ will handle VEX schedules, _.vex_, with up to 256 channels
+(128 BBCs) and eight IFs. It will handle Mark IV schedules, _.skd_,
+with up to 32 channels (16 BBCs, `001`-`016`) and up to two IFs (`a`
+and `b`). In all cases, the number of channels per IF must be a power
+of two.
+
+[NOTE]
+=====
+
+At this time it is only considered safe to set the configuration of
+then Core3H boards with the DBBC3 boot configuration file. As a result
+the _drudg_ generated setup procedures only _check_ the configuration
+of the Core3H boards. Once it is possible to set the Core3H boards
+remotely. The setup procedure can be run with `force` as its argument
+set the configuration manually. For example:
+
+  setup01=force
+
+=====
+
+[TIP]
+=====
+
+A full check (or setup) of the Core3H boards will take longer than
+schedules allow for setup procedures to execute. As a result, it is
+strongly recommended that the new `use_setup_proc` _drudg_ option in
+_skedf.ctl_ (see <<use_setup_proc,use_setup_proc>> below) be enabled
+for use with DBBC3s. This will cause the mode to be checked only at
+the start of the schedule. If the schedule is started at least a few
+minutes ahead of time, there should be no delays in schedule
+execution due to the setup procedure.
+
+=====
+
+====
+
+. Replace use of all `mk5...` commands with `fb_...` commands in
+generated procedures when the selected recorder is FlexBuff
+
++
+[%collapsible]
+====
+
+The following substitutions are made:
+ 
+* `fb` for `mk5`
+
+* `fb_mode` for `mk5c_mode`
+
+* `fb_status` for `mk5_status`
+
+NOTE: As a general rule, _drudg_ will use the `fb` versions of `mk5`
+commands and procedures when the selected recorder is FlexBuff. The
+procedures are discussed in next two items below.
+
+====
+
+. Replace use of the `checkmk5` procedure with `checkfb` in _.snp_
+files when the selected recorder is FlexBuff
+
++
+[%collapsible]
+====
+
+This change was made for naming consistency, but also because the
+typically the contents of these procedures are  different.
+
+====
+
+. Add `mk5c_config` or `fb_config` procedure calls to setup
+procedures for Mark 5C and Flexbuff recorders, respectively
+
+
++
+[%collapsible]
+====
+
+These procedures can be used to override the default configuration of
+Mark 5C and FlexBuff recorders. They are called after the `mk5c_mode`
+or `fb_mode` commands (and after the `thread...` procedure if
+present). They are local procedures intended to provide tuning for the
+recorder configuration.
+
+For more information see the
+<<dbbc3_ops.adoc#_mk5c_configfb_config_procedure,mk5c_config/fb_config
+procedure>> subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3
+Operations Manual>>.
+
+====
+
+. Add, optionally, `thread...` procedures to setup procedures
+for Mark 5C and FlexBuff recorders
+
++
+[%collapsible]
+====
+
+This procedure controls whether VDIF data is recorded multithreaded or
+single thread per file. Its use is described in
+<<dbbc3_ops.adoc#_thread_procedure,Thread procedure>> subsection of
+the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
+
+NOTE: Although it is expected that only one thread selection will be
+used for an entire experiment, a separate `thread...` procedure is
+created for each mode. This allows them to be customized by mode if
+that should prove useful.
+
+====
+
+. Enhancements to summary listings, option `5`
+
++
+[%collapsible]
+====
+
+.. The `GB` positions and totals are now also listed when the recorder
+is `none` (closing https://github.com/nvi-inc/fs/issues/166[#166]).
+
+.. The `GB` fields were expanded to allow for larger data volumes.
+
+.. The `Info` column and the captions in the header describing it were
+cleaned-up.
+
+====
+
+. Changes to _skedf.ctl_ options
+
++
+[%collapsible]
+====
+
+Please see the _/usr2/fs/st.default/control/skedf.ctl_ for details
+about the use of these options.
+
+.. Add `e-vlbi_override` option
+
++
+
+If enabled and if the `target_correlator` parameter in a VEX schedule
+includes the string `e-vlbi` (case insensitive), _drudg_ will:
+
+* automatically convert the recorder to `none`
+
+* for racks type that include a FiLal0G, the `/fila10g` will be
+removed.
+
++
+
+The equipment selection can subsequently be changed with _drudg_
+option `11`.
+
+.. Add `scan_close` option
+
++
+
+If enabled, _drudg_ will detect gaps in the schedule at least as long
+as a user settable `max_gap_time`, say an hour, and wait to start the
+next scan a user settable `pre_time` time before it is scheduled. The
+`pre_time` should probably be short, but at least as long as the worst
+case slewing time of the antenna. The concept is that the scan at the
+start of gap is _closed_, i.e., `check...` procedure is run before
+slewing to the next source. Then there is a wait until the `pre_time`
+before the next scan will begin for the `scan_name=...` and
+`source=...` to be commanded.
+
++
+
+This can be useful for intensive schedules. The antenna won't slew
+needlessly to a new source or setup for new scan at the start of the
+gap. The schedule can be broken into while it is waiting for the next
+scan to start, the intensive schedule run, and then the original
+schedule rejoined for the next scan.
+
+.. <<use_setup_proc,use_setup_proc>>[[use_setup_proc]]: Add `use_setup_proc` option
+
++
+
+If enabled, _drudg_ prefixes each setup procedure with `setup_proc=`
+to invoke that command. For more information see the
+<<dbbc3_ops.adoc#_minimizing_the_use_of_setup_procedures,Minimizing
+the use of setup procedures>> subsection of the <<dbbc3_ops.adoc#,FS
+10.1 DBBC3 Operations Manual>>.
+
+.. Add `vdif_single_thread_per_file` option
+
++
+
+This option allows control of whether the VDIF files created by Mark
+5C and FlexBuff recorders are multi-threaded or single threaded.
+
++
+
+For more information see the <<dbbc3_ops.adoc#_thread_procedure,Thread
+procedure>> subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3
+Operations Manual>>.
+
+.. <<fix_equipment,Fix drudg equipment options>>[[fix_equipment]]: Fix
+`equipment` and `equipment_override` options in _skedf.ctl_.
+
++
+
+These bugs apparently first appeared in version _10.0.0_.
+
+... Fix a bug that prevented applying `equipment` if equipment was not
+specified in the schedule and `equipment_override` was not selected.
+
+... Fix a bug that caused `equipment` to be applied if there was
+equipment in the schedule even if `equipment_override` was not
+selected.
+
++
+--
+
+If you used _equipment_override_, these bugs did not affect you. Since
+no one reported these bugs, presumably at least one of the following
+was always true:
+
+* The `equipment_override` option was selected.
+
+* The schedule had correct equipment.
+
+* The `equipment` option was selected and had correct values.
+
+* The equipment was adjusted with option `11`.
+
+The features of these options now agree with the original design,
+which was:
+
+* User by itself, the values specified by `equipment` will only be
+applied if there is no equipment in the schedule.
+
+* If `equipment_override` is also selected, the values specified by
+`equipment` will be forced.
+
+--
++
+
+.. Expand `default_dbbc_if_inputs` option
+
++
+
+Defaults for up to eight IF inputs can be specified for DBBC3s.
+
+.. Expand `dbbc_if_targets` option
+
++
+
+Values for up to eight IF inputs can be specified for DBBC3s.
+
+.. Expand `dbbc_bbc_target` option to also support DBBC3s.
+
+====
+
+. Add other miscellaneous enhancements:
+
++
+[%collapsible]
+====
+
+.. Make the recorder type in _.vex_ schedules case insensitive (bug fix)
+
+.. Add missing final scan `checkmk6` call in _.snp_ files for VGOS
+_.skd_ schedules using a Mark 6 recorder (bug fix)
+
+.. Support slewing model acceleration in _.skd_ files
+
+.. Use ISO  format for opening message date
+
+.. Remove trailing spaces in _.prc_ files
+
+.. Remove some obsolete variables
+
+.. Remove obsolete ``Makefile``s from the _vex/_ subdirectory
+
+.. Make various other clean-ups
+
+====
+
+[appendix]
+
+= Cleaning up .rxg file comments
+
+As described in <<stop_adding_extra_comments,Stop adding extra
+comments when updating .rxg files>> change in the <<FS changes>>
+sub-section above, _gnplt_ has been adding extra comments, in some
+cases a lot of them, to your _.rxg_ files. With this update, that
+behavior has been fixed. However, there may already be many extra
+comments in your _.rxg_ fies. This appendix provides an optional
+process for cleaning up any extra comments. This cleanup is entirely
+optional. If it is not performed, there will be no loss of
+functionality. There will just be some extraneous comments in your
+_.rxg_ files.
+
+NOTE: If you have been curating your _.rxg_ files to fix the issues
+with the comments, you may not want to use this process. You may still
+wish to review it to see if any of it might be helpful.
+
+The cleanup process is broken into two sequential steps below:
+
+. <<Remove extra comments>> -- which makes a backup of your current
+_.rxg_ files and the removes all the extra comments.
+
+. <<Cleanup trailing comments>> -- which uses the backup of your
+_.rxg_ files to produce a set of trailing comments with all redundant
+comments removed.
+
+The first is relatively easy to apply. It may have some benefit even
+if you don't bother with the second step, ever. The second can be
+deferred until later, if you do want to apply it.
+
+=== Remove extra comments
+
+The sub-steps here are designed to be as simple as possible when
+applying the FS update this appendix is part of, but preserve the
+opportunity for a full cleanup, whether it is done now or at a later
+date. As _oper_:
+
+. [[backup]] <<backup,Make a backup of your current .rxg files>>:
+
++
+
+This will give you a backup to recover from in case something goes
+wrong and will simplify cleaning up the trailing comments if you defer
+that to a later date. Enter these commands as _oper_, using current
+values for `_year_`, `_month_`, and `_day_`:
+
++
+
+[subs="+quotes"]
+....
+cd /usr2/control/rxg_files
+mkdir BACKUP._year_._month_._day_
+cp -a *.rxg BACKUP._year_._month_._day_
+....
+
++
+
+. Reduce the _.rxg_ files to just the active calibration.
+
++
+
+This will remove leading comments added by _gnplt_ and all trailing
+comments. This will not disturb the active calibration or its
+interspersed comments.
+
++
+
+CAUTION: The trailing comments may be a complicated hash unless you
+have been curating them. If you have, you probably do not want to use
+the `-c` option with the _rxgfix3_ script below, if you use the script
+at all. If you have not been curating them, it may be a laborious
+process to straighten them out. Removing them now will help make that
+process a little easier.
+
+.. [[check]] <<check,Check what changes would be made>>:
+
++
+
+This sub-step uses the _rxgfix3_ script. Its default behavior is to
+remove "`extra`" leading comments that _gnplt_ may have added. It has
+several options that may also be useful. This sub-step uses the
+recommended options along with the `-t` option, which runs the script
+in "`test`" mode to just show what changes would be made. The
+recommended options are explained below. To see what changes would be
+made, as _oper_ enter:
+
+
+   cd /usr2/control/rxg_files
+   /usr2/fs/misc/rxgfix3 -cdrt *.rxg
+
++
+
+TIP: If the output is too large to work with, you can simplify it by
+running _rxgfix3_ on any subset of files, even a single file, at a
+time.
+
++
+
+The meanings of the recommended options used with _rxgfix3_ script
+above are:
+
++
+
+TIP: Help text and a complete listing of available options can be
+viewed with `*/usr2/fs/misc/rxgfix3{nbsp}-h*`.
+
++
+
+* `-c` -- Delete trailing comments. This will make it easier to update
+your trailing comments to the correct form. You should drop this
+option if you want to keep your trailing comments the way they are.
+
+* `-d` -- Delete existing _.bak_ files before processing. If old
+_.bak_ files are left over from using _rxgfix<n>_ scripts in the past,
+this will delete them. If you prefer to keep them, you can rename them
+before running _rxgfix3_ without `-t`.
+
+* `-r` -- Use the date in the first `GnPlt2` leading comment to
+replace the date on the date line in the active calibration. This will
+not be needed if you have updated all your _.rxg_ files with _gnplt_
+since FS version _10.0.0-beta3_, but is benign in that case. If you
+have manually changed the date line in your _.rxg_ file(s) you may
+prefer to use the `-k` option to keep the current date line. (Omitting
+both `-r` and `-k` will cause _rxgfix3_ to not process a file if the
+date comment and the date line don't agree.)
+
++
+
+If some of these changes are unacceptable, you can change the actions
+by dropping some options or making changes, such as using `-k` in
+place of `-r`. You can always process the files in subsets with
+different options if that is needed.
+
+.. Apply the changes:
+
++
+
++
+
+If the changes shown in <<check,Check what changes would be made>>
+sub-step above are acceptable or you have figured out how you want to
+modify them, you can re-run _rxgfix3_ with the options you decided on,
+but without the `-t`, in order to apply them.
+
+Once the "`extra`" comments have been removed you can decide how and
+when to deal with reinstalling the trailing comments. This may be
+quite involved and can be deferred until convenient. It is covered in
+the next step, <<Cleanup trailing comments>>, below.
+
+=== Cleanup trailing comments
+
+The procedure for cleaning-up the trailing comments is covered in the
+<<Cleanup procedure>> sub-section below. After that there is an
+<<Explanation of procedure>> sub-section that may make what is being
+done clearer and includes a small additional procedure for files that
+have been updated previously by _gnplt1_. When applying these
+procedures, there are a few points worth considering:
+
+. Depending on the size of your _.rxg_ files, cleaning up the trailing
+comments could be very laborious. Using this procedure is entirely
+optional. It is provided only in case you are interested in using it.
+If your trailing comments are in the form you want or if you do not
+want to clean them up, you can skip this procedure. If you don't want
+to clean them up, you can either keep them in the backup you made (in
+sub-step <<backup,Make a backup of your current .rxg files>> above) or
+append all the trailing comments from the backups into the
+corresponding _.rxg_ files (the latter case would be equivalent to not
+using the `-c` option in the <<check,Check what changes would be
+made>> sub-step and following sub-step above). Future updates with
+_gnplt_ will add comments in reverse chronological order.
+
++
+
+If you do append them and they are not in reverse chronological order,
+they will not be consistent with new updates made with _gnplt_, which
+will add new comments in reverse chronological order. As a result,
+straightening out the trailing comments at a later date will be more
+complicated. It is probably best to avoid this unless you are not
+worried about the older trailing comments. Keeping the trailing
+comment cleanup simpler is the reason that it is recommended to delete
+the trailing comments (with _rxgfix3_ option `-c`) in the
+<<Remove extra comments>> step above. The procedure here assumes that
+no new comments have been inserted in the backup copy in reverse
+chronological order.
+
+. This approach for cleaning up the trailing comments will work
+correctly if your _.rxg_ files have _only_ been updated with _gnplt_
+and not modified otherwise. If they have been modified otherwise, the
+following procedure may not work, but it may be possible to adapt it
+to your situation.
+
++
+
+If your _.rxg_ files have only been updated by _gnplt_, it may be
+possible to automate this step. If you would like to have a script to
+implement this procedure, please mail Ed. If there is sufficient
+interest, we will look into developing it.
+
+. The procedure makes use of the added `GnPlt2` date comment lines in
+the file. Although the date encoded will typically be different, the
+lines will be of the form:
+
++
+
+....
+* RXG file updated by GnPlt2 on 2021-4-19
+....
+
++
+
+The procedure identifies particular instances of these comments and
+then locates the next matching instance.
+
+==== Cleanup procedure
+
+This procedure should be applied _after_ the <<Remove extra comments>>
+step above. Using the following procedure to cleanup the trailing
+comments. As _oper_, for each individual _.rxg_ file:
+
+. Make a temporary copy, to work on, of the backup of the file you
+created in the <<Remove extra comments>> step above. Working with the
+temporary copy will allow for easy recovery in case there is problem,
+including an error in this procedure. To make a working copy for
+_<name>.rxg_, where `_year_`, `_month_`, and `_day_` are the values
+you used in the <<backup, Make a backup of your current .rxg files>>
+sub-step above, enter:
+
++
+
+[subs="+quotes"]
+....
+cp /usr2/control/rxg_files/BACKUP._year_._month_._day_/_<name>_.rxg /tmp
+....
+
++
+
+IMPORTANT: For the remainder of these steps, work on the copy you just
+made.
+
+. Find the uncommented calibration data set at the top of the file.
+
+. The first two lines in the file should be `GnPlt2` date comments.
+Note the date in the second date comment. Ignore any date comments
+that follow the second one.
+
++
+
+If there are no `GnPlt2` date comments, delete from the start of the
+file to (and including) the `end_spillover_table` line at the end of
+the active calibration, then go to the <<save_file,Save file>> step
+below.
+
++
+
+If only the first line is a `GnPlt2` date comment, delete from the
+start of the file to (and including) the `end_spillover_table` line at
+the end of the active calibration, then go to the <<finish,Finish>>
+step below.
+
+. Search for the _next_ occurrence of a date comment with the date
+you noted above.
+
+. Call the line before that location _B_. It should be
+`end_spillover_table`.
+
+. Delete from the beginning of the file to _B_, inclusive.
+
+. [[loop]] <<loop,Loop>>:
+
+.. If the line after `GnPlt2` date comment that you found is another
+`GnPlt2` date comment, note the date in that comment.
+
++
+
+Otherwise go to the step labeled <<finish,Finish>> below.
+
++
+
+.. Find the last line of the commented out calibration set at this
+point. It should be `*end_spillover_table`.
+
+.. Call the next line location _A_.
+
+.. Search for the next occurrence of the date you noted above in
+<<loop,Loop>>.
+
+.. Call the previous line location _B_. It should be
+`*end_spillover_table`.
+
+.. Delete from _A_ to _B_, inclusive.
+
+.. Repeat the above steps above starting with the step labeled
+<<loop,Loop>> above until you reach a commented out calibration that
+doesn't have a second `GnPlt2` date comment at the start.
+
+. [[finish]] <<Finish,Finish>>: If your _.rxg_ file was updated with
+_gnplt1_ in the past, please consider using the <<gnplt1,gnplt1>>
+additional procedure in the <<Explanation of procedure>> sub-section
+below. Then continue with the next step here, <<save_file,Save file>>.
+
+. [[save_file]]<<save_file,Save file>>: Save the file.
+
+. Append the saved file to what is now in the _.rxg_ file its
+contents originally came from.
+
++
+
+NOTE: Any trailing comments that were added by _gnplt_ after applying
+the <<Remove extra comments>> step above, will be in the correct
+order. As a result, appending after those will maintain the correct
+order.
+
+==== Explanation of procedure
+
+To understand how this process works, consider two cases: (1) only the
+_gnplt2_ has been used to update the file, and (2) the file was
+previously updated by _gnplt1_. In the former case, the growth of the
+file follows the pattern (where the integers indicate the sequential
+versions of the calibration, the leftmost is the active one, all the
+others are commented out):
+
+....
+0
+1 0
+2 0 1 0
+3 0 1 0 2 0 1 0
+4 0 1 0 2 0 1 0 3 0 1 0 2 0 1 0
+...
+....
+
+For each new version, _gnplt2_ inserted a new data comment at the
+start. The previous date comments were preserved after it. After the
+above procedure, the content is reduced to (for the case of `4` being
+the active calibration):
+
+....
+4 3 2 1 0
+....
+
+The other case is if the file was updated with _gnplt1_ before
+switching to _gnplt2_. In this case the progression is (where `A`
+represents _all_ the trailing comments before the first _gnplt2_
+update):
+
+....
+0 A
+1 A 0 A
+2 A 0 A 1 A 0 A
+3 A 0 A 1 A 0 A 2 A 0 A 1 A 0 A
+4 A 0 A 1 A 0 A 2 A 0 A 1 A 0 A 3 A 0 A 1 A 0 A 2 A 0 A 1 A 0 A
+...
+....
+
+After the above procedure, the content is reduced to (for the case of
+`4` being the active calibration):
+
+....
+4 3 2 1 A 0 A
+....
+
+[[gnplt1]]<<gnplt1,gnplt1>>: In this case, there is an extra `A`
+section between the final `1` and `0 A` at the end of the file. This
+can be found and removed with these steps:
+
+. Locate the end of the `1` comments,
+which is the _first_ `*end_spillover_table` line after the _last_
+`GnPlt2` date comment.
+
+. Call the _next_ line _A_.
+
+. Find the _next_ commented out calibration with the _latest_ date
+line (commented out) and _no_ `GnPlt2` date comment line. This is last
+update made by _gnplt1_ (`0`).
+
+. Find the _previous_ `*end_spillover_table` line. It should be the
+last line before the `0` calibration set.
+
++
+
+If your _.rxg_ file was started before opacity corrections were
+supported (version _9.6.7_ in September 2003), the last line before
+the `0` calibration set will be a commented out Tcal table entry (with
+three fields after the leading `\*`, i.e.,
+``*{nbsp}__polarization{nbsp}frequency{nbsp}Tcal__``). In this case,
+you should find that line instead.
+
+. Call that location _B_.
+
+. Delete from _A_ to _B_, inclusive.
+
+. If you executed this as part of the <<Cleanup procedure>> step
+above, you can continue with the sub-step labeled
+<<save_file,Save file>> in that step.

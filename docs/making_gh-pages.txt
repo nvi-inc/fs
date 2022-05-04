@@ -1,0 +1,41 @@
+//
+// Copyright (c) 2020 NVI, Inc.
+//
+// This file is part of the FSL10 Linux distribution.
+// (see http://github.com/nvi-inc/fsl10).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+Requires asciidoctor
+
+Source in docs/
+
+To update:
+
+  git add $(find . -name \*.adoc)
+  rm -f $(find . -name \*.html)
+  git commit
+  git push
+  git branch -f gh-pages <branch>
+     <branch> is whatever is to be used, usually master
+  git checkout gh-pages
+  make
+  git add -f $(find . -name \*.html)
+  git commit -m Update
+  git push --force
+
+View at:
+
+https://nvi-inc.github.io/fs/

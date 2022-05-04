@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -20,6 +20,12 @@
       SUBROUTINE LSTSUM(kskd,IERR)
 
 C Create SUMMARY of SNAP file
+! Now in reverse order and different date format.
+! 2021-12-13 JMG. Replaced cnewtap_XXX by cinfo.  
+! 2021-02-27 JMG Fixed problem with staggered start. Removed unused variable 'spin_speed'
+! 2021-02-07 JMG Superbowl Sunday. Replaced 1024 by 1000 to convert ot Gb.  Removed obsolete arg num_tapes 
+! 2020-06-17 JMG. Initialize itime_start_p and itime_stop_p and itime_start, itime_stop 
+
 C
 C NRV 901121 New routine, modeled on CLIST.BAS
 C            NOTE: this gets pass numbers right only for 'SX' experiments
@@ -123,7 +129,7 @@ C 021014 nrv Read new FAST commands from the .snp file with fractional seconds.
 !            calculating line position.
 ! 2007Jul28 JMGipson. Replace kdisk by km5disk which is hardware.ftni.
 ! 2015Feb30 JMG. Simplified code. Got rid of a lot of stuff for Tape recorders. Added support for Mark6.
-!
+
 
       implicit none 
       include 'hardware.ftni'
@@ -146,9 +152,8 @@ C Output:
 C Local:
       integer itlate_local,itearl_local
       INTEGER IC
-      integer nline,num_tapes,npage,maxwidth,maxline,iline
-      integer inewp
-      integer ieq
+      integer nline,npage,maxwidth,maxline,iline
+      integer inewp  
       real dif
 
       logical kvalidtime                !valid time read?
@@ -165,9 +170,7 @@ C Local:
       integer idur                      !duration of scan
       character*12 cscan
       character*128 ctmp_source         !buffer contianing source command
-      character*3 cdir                  !direction
-      character*2 cpass                 !Current pass
-      character*6 cnewtap               !Newtape
+      character*6 cinfo                 !information
       real        data_mByte		 !storage in mega-bytes for current disk              
 
 ! this is for previous scan.    
@@ -180,29 +183,22 @@ C Local:
       integer idur_p                    !duration of scan
       character*12 cscan_p
       character*128 ctmp_source_p       !buffer contianing source command
-      character*3 cdir_p                !direction
-      character*2 cpass_p               !Current pass
-      character*6 cnewtap_p             !Newtape
-      character*6 cnewtap_store
+      character*6 cinfo_p               !
+      character*6 cinfo_store   
 
-      character*2 cpass_old
-
-      real   spin_speed                 !Speed of tape in feet/sec.
 ! flags
 ! Note: most of these flags get reset when we write out a line.
       logical kdata_start               !Started taking data
       logical kdata_stop                !stoped taking data.
       logical ksource                   !found source command
-      logical kmidtp                    !Found midtp command.
-    
-
-      real speed_snap 			! speed from SNAP file
+      logical kmidtp                    !Found midtp command.    
+      logical kmk6_record_found        !indicate we have found mk6=record
+  
       double precision speed_recorder   ! speed of recorder in this mode.
 
       LOGICAL   kexist                  !does a file exist 
       character*128 ctmp,ctmp_in
 
-    
       integer itemp
       integer i
 
@@ -211,8 +207,7 @@ C Local:
       character*2 ccode_tmp
    
       character*2 csize                 !what is paper orientation, font size
-                                         !values are ls,ll,ps,pl
-
+                                        !values are ls,ll,ps,pl
 
 C 1.0  Check existence of SNAP file.
       IC = TRIMLEN(CINNAME)
@@ -259,18 +254,17 @@ C 3. Initialize local variables
       kdata_stop=.false.
       krunning=.false.
      
+! initialize some times. 
       do i=1,5
         itime_tape_stop(i)=0
         itime_tape_start(i)=0
-      end do
-     
-      cpass_old="NO"
-      cpass= " "
-
-      idir   = 1
-      speed_snap=0
+        itime_stop_p(i)=0
+        itime_start_p(i)=0
+        itime_stop(i)=0
+        itime_start(i)=0
+      end do               
+    
       iline  = maxline
-      num_tapes = 0
       num_scans = 0
       npage  = 0
       idur   =-1
@@ -278,26 +272,24 @@ C 3. Initialize local variables
       itlate_local=0
 
       inewp = 0
-      cnewtap = '    '
+      cinfo = '    '
       cscan   = '     '
+      kmk6_record_found=.false.
 
 C 4. Set other variables by reading the .snp file or getting
 C    information from common.
-! This initializes a common block.
+! This initializes a common block.    
       call lstsum_info(kskd)
-
+   
       icode=1
       icode_old=1
-      call find_recorder_speed(icode,speed_recorder,kskd)
-  
-      data_mbyte=0.d0 
-      
+      call find_recorder_speed(icode,speed_recorder,kskd) 
 ! Initialize count counter.
+      data_mbyte=0.d0      
    
-C 5. Main loop to read .snp file and print summary of observations.
-
-441   rewind(lu_infile)
+      rewind(lu_infile)
       nline=0
+C 5. Main loop to read .snp file and print summary of observations.
       do while (.true.) ! read loop
         read(lu_infile,'(a)',err=991,end=990,iostat=IERR) ctmp_in
         if (index(ctmp_in,'scan_name=').eq.0) then
@@ -309,7 +301,7 @@ C 5. Main loop to read .snp file and print summary of observations.
         if (ctmp(1:1).eq.'"') then !non-comment line
           continue
         else if(ctmp(1:10) .eq."scan_name=") then
-          cnewtap_store=" "
+          cinfo_store=" "
           cscan_p=cscan                 	!save old
           nsline_p=nsline               	!save old
           read(ctmp(11:),'(a)') cscan
@@ -341,64 +333,53 @@ C           Here is where we determine early start without the schedule
           end do
 
           ctmp_source_p	=ctmp_source
-          cnewtap_p	=cnewtap             !save old
-          cdir_p        =cdir
-          cpass_p       =cpass
-    
-
+          cinfo_p	=cinfo             !save old
+ 
           idur=-1                               !recalculate for next scan.
-          cnewtap= " "
+          cinfo= " "
 C       Now get the source info for the new scan
           ctmp_source=ctmp
           ksource=.true.
-        else if (ctmp(1:5) .eq.'READY') then
-          cnewtap = 'XXX '
-          if (index(ctmp,'READY1').ne.0) then ! rec 1
-            cnewtap = 'Rec1'
-          elseif (index(ctmp,'READY2').ne.0) then ! rec 2
-            cnewtap = 'Rec2'
-          endif
+        else if (ctmp(1:5) .eq.'READY' .or. 
+     > ctmp(1:10) .eq.'MK6=RECORD' .and. .not. kmk6_record_found) then
+          cinfo = 'Rec '   
           data_mbyte=0.d0         
-        else if (index(ctmp,'MIDTP').ne.0) then
-          inewp = 1
-          idur=-1 ! reset duration so it gets calculated again
-          kmidtp=.true.
+          kmk6_record_found=.true.
         else if (index(ctmp,'MIDOB').ne.0) then ! data start time
-! Print the PREVIOUS SCAN. Need to do this because sometimes get
+! Print the PREVIOUS SCAN. Need to do this because sometimes
 ! UNLOD command after a scan, but before the data starts. This allows to
 ! output tape unload correctly. 
           if (kdata_stop) then          
             call lstsumo(kskd,itearl_local,itlate_local,maxline,
-     >        iline,npage,num_scans,num_tapes,             !These are modified by this routine
+     >        iline,npage,num_scans,          !These are modified by this routine
      >        nsline_p,
      >        itime_start_p,itime_stop_p,
      >        itime_tape_start_p,itime_tape_stop,
-     >        iDur_p,data_mbyte ,cpass_p,cnewtap_p,cdir_p,
-     >        cscan_p,ctmp_source_p)
+     >        iDur_p,data_mbyte ,cinfo_p,cscan_p,ctmp_source_p)
           endif
           kdata_stop=.false.
   
           dif = itimedifsec(itime_stop_p, itime_start_p)            
-          data_mbyte=data_mbyte+dif*speed_recorder
-      
+          data_mbyte=data_mbyte+dif*speed_recorder      
 
 ! Wait till time. command.
         else if (index(ctmp,'!').ne.0) then ! time
           call snap_readTime(ctmp,itime_temp,kvalidtime)
           if(kvalidtime) then
-            if(krunning) then   !if recorder is going, update count.      
+! Commented out 2021-02-27 JMG
+!            if(krunning) then   !if recorder is going, update count.      
               do i=1,5
                itime_now(i)=itime_temp(i)       !update running time.
               end do
-            endif 
+!            endif 
           endif
 ! Data start command.
         else if(ctmp(1:10) .eq. "DISK_START" .or.
      >          ctmp(1:10) .eq. "DISC_START" .or.
      >          ctmp(1:14) .eq. "DISK_RECORD=ON") then
-
+!          cinfo="Rec"
           idur=-1 ! make sure we calculate duration from this point
-          if(kdisk) idir=1  ! disks always go forward.
+          
           do i=1,5
             itime_tape_start(i)=itime_now(i)
           end do
@@ -413,7 +394,8 @@ C       Now get the source info for the new scan
            do i=1,5
              itime_start(i)=itime_now(i)
            end do
-           if(itime_tape_start(1) .eq. 0 .or. km6disk) then 
+           if(itime_tape_start(1) .eq. 0 .or. km6disk .or.
+     >       cstrec_cap .eq. "NONE") then 
              do i=1,5
                itime_tape_start(i)=itime_start(i)
              end do
@@ -424,6 +406,7 @@ C       Now get the source info for the new scan
      >           ctmp(1:10) .eq. 'DISK_END' .or.
      >           ctmp(1:10) .eq. 'DISC_END' .or.
      >           ctmp(1:15) .eq. 'DISK_RECORD=OFF') then
+
           krunning = .false. 
           kdata_stop=.true.
           do i=1,5
@@ -447,8 +430,6 @@ C           Update running time
           if (idur.eq.-1) then ! no stop yet
             idur = itimedifsec(itime_stop,itime_start)
           endif ! no stop yet
-        else if (ctmp(1:5) .eq. 'CHECK') then
-          cnewtap = ' *  '
         else if (ctmp(1:5) .eq. "SETUP" .and. kskd) then  !We get code info from Setup. Can only do if have sked file.
           do itemp=1,NCodes
              call c2upper(ccode(itemp),ccode_Tmp)
@@ -456,24 +437,12 @@ C           Update running time
                  icode=itemp
                  if(icode .ne. icode_old) then
                    call find_recorder_speed(icode,speed_recorder,kskd)
-                   write(cnewtap,"('Mode',i2)") icode
+                   write(cinfo,"('Mode',i2)") icode
                    icode_old=icode
-                   cnewtap_store=cnewtap
+                   cinfo_store=cinfo
                  endif
              endif
-           end do
-        else if (index(ctmp,'=').ne.0) then !might be setup proc
-          if (index(ctmp,'DATA_VALID').eq.0.and.
-     .        index(ctmp,'ST1=').eq.0.and.index(ctmp,'ST2=').eq.0) then ! setup
-            ieq = index(ctmp,'=')
-            cpass_old=cpass ! previous pass
-            cpass = '  '
-            cpass = ctmp(ieq+1:ieq+2)
-            if (cpass(2:2).eq.' ') then ! shift right
-              cpass(2:2)=cpass(1:1)
-              cpass(1:1)=' '
-            endif ! shift right
-          endif ! setup
+           end do      
         endif ! might be setup proc
 
       enddo !read loop
@@ -481,28 +450,23 @@ C           Update running time
 990   continue
       ierr=0
 
-!      counter_print=counter_data_valid_on         
+!      counter_print=counter_data_valid_on          
  
-  
-
-      if(cnewtap_store .ne. " ") cnewtap=cnewtap_store
+      if(cinfo_store .ne. " ") cinfo=cinfo_store
       call lstsumo(kskd,itearl_local,itlate_local,maxline,
-     >        iline,npage,num_scans,num_tapes,             !These are modified by this routine
+     >        iline,npage,num_scans,                  !These are modified by this routine
      >        nsline,
      >        itime_start,itime_stop,
      >        itime_tape_start,itime_tape_stop,
-     >        iDur,data_mbyte,cpass,cnewtap,cdir,
-     >        cscan,ctmp_source)
+     >        iDur,data_mbyte,cinfo,   cscan,ctmp_source)
 
       write(luprt, "()") ! skip line
-      if(kdisk) then
+      if(kdisk .or. cstrec_cap .eq. "NONE") then 
          data_mbyte=data_mbyte+idur*speed_recorder
-         write(luprt,   '("   Total",f8.1, " Gbytes")') data_mbyte/1024
-
-      else
-        write(luprt, '("   Total number of tapes: ",i3)')num_tapes
+         write(luprt,'("   Total  Gbytes: ",f8.1)') 
+     >     data_mbyte/1000   
       endif
-      write(luprt,   '("   Total number of scans: ",i5)')num_scans
+      write(luprt,   '("   Total # scans:    ",i5)')num_scans
 
       call luff(luprt)
       close(luprt)

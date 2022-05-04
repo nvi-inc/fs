@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -114,7 +114,7 @@ struct dbbc3_ifx_cmd *lcl;
 	if(lcl->target_null!=1)
 	  sprintf(output,"%u",lcl->target);
         break;
-      case 5:
+      case 4:
 	if(lcl->att>=0)
 	  sprintf(output,"%d",lcl->att);
         break;
@@ -166,10 +166,9 @@ struct dbbc3_ifx_cmd *lcl;
     sprintf(buff+strlen(buff),"%d",lcl->att);
   else if (ivalue >=0 && ivalue <NAGC_KEY)
     strcat(buff,agc_key[ivalue]);
-  strcat(buff,",");  
 
   if(lcl->target_null == 0 && lcl->target <= 65535u) {
-    strcat(buff,",");  
+    strcat(buff,",1,");
     sprintf(buff+strlen(buff),"%u",lcl->target);
   }
 
@@ -207,8 +206,6 @@ char *buff;
 
   ptr=strtok(NULL,",");
   if(ptr==NULL)
-    return -1;
-  if(1!=sscanf(ptr,"%d%c",&idum,&ch))
     return -1;
 
   ptr=strtok(NULL,",");

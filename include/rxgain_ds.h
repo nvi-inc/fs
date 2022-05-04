@@ -59,3 +59,8 @@ struct rxgain_ds {
     float tk;         /* spill contribution temperature (degrees K) */
   } spill[MAX_SPILL]; /* sorted by increasing elevation */
 };
+
+struct rxgain_files_ds {
+    char file[129];
+    int logged;
+};

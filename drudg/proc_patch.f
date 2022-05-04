@@ -18,20 +18,21 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine proc_patch(icode,ifd)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 ! Write out patch commands for Mk3/4 and for kk4
       include 'hardware.ftni'
       include '../skdrincl/freqs.ftni'
       include 'drcom.ftni'
-      include 'bbc_freq.ftni' 
+      include 'bbc_freq.ftni'
 
       integer icode     ! Code
-      integer ifd(*)            !<>0, this IF used.     
+      integer ifd(*)            !<>0, this IF used.
 
 ! History:
 ! V1.00 2007Jul06.  First version. Separated from procs.f
 ! V1.01 2007Jul19.  Put in test for KSX
-! 2015Jun05 JMG. Repalced squeezewrite by drudg_write. 
+! 2015Jun05 JMG. Repalced squeezewrite by drudg_write.
 
 ! K41 and K42 rules fairly simple.
 

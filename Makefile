@@ -4,9 +4,16 @@ FS_DIRECTORY := $(shell echo $(pwd) | rev | cut -d/ -f1 | rev )
 #look for git first
 FS_COMMIT := $(shell git describe --always --tags 2>/dev/null)
 ifneq ($(FS_COMMIT),)
+#for old git, 1.5.6.5 in FSL8 anyway, --dirty isn't supported by
+# git describe, so we do a git diff HEAD instead (for all versions)
+# further, in 1.5.6.5, git diff HEAD --quiet thinks there is a change
+# after root does a make install, redirecting output has the opposite
+# problem, no changes are detected, but doing a git status first
+# seems to clean it up and seems benign for other versions
+FS_VERSION := $(shell git status 2>&1 >/dev/null)
 FS_VERSION := $(FS_COMMIT)$(shell git diff HEAD --quiet || echo "-dirty")
-#alternatvely an archive version
 else
+#alternatively, an archive version
 # there should be no other dashes except in the basename:
 #  fs-VERSION.SUBLEVEL.PATCHLEVEL-RELEASE
 #  -RELEASE is optional
@@ -38,7 +45,11 @@ print-%  : ; @echo $* = $($*)
 #  portopen(), including ibcon.
 #
 LIB_DIR = clib flib bosslb fclib fmpsee fslb lnfch newlb polb port rtelb vis \
-poclb skdrlnfch skdrut vex rclco/rcl s2das third_party
+poclb skdrlnfch skdrut vex rclco/rcl s2das
+
+ifndef FS_DISPLAY_SERVER_NO_MAKE
+LIB_DIR += third_party
+endif
 
 EXE_DIR = rwand chekr fserr ddout fs fsalloc incom matcn oprin pcalr onoff \
 fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \
@@ -46,7 +57,11 @@ quikv mcbcn brk moon logex headp fmset ibcon quikr rte_go drudg rclcn pdplt logp
 lognm pcald msg fsvue fs.prompt inject_snap erchk mk5cn tpicd flagr \
 gnfit gndat gnplt dscon systests autoftp monpcal logpl1 holog gnplt1 predict \
 dbbcn rdbcn rdtcn mk6cn popen udceth0 rack mcicn be_client s_client lgerr fesh\
-plog fsserver rdbemsg
+plog rdbemsg new_ifdbb dbtcn core3h_conf
+
+ifndef FS_DISPLAY_SERVER_NO_MAKE
+EXE_DIR += fsserver
+endif
 
 export LDFLAGS += -L$(shell pwd)/third_party/lib
 export CPPFLAGS += -I$(shell pwd)/third_party/include
@@ -91,7 +106,8 @@ dist:
 	cd /; find usr2/fs-$(FS_VERSION)/bin -mindepth 1 \
 	                                            -name '*' -print >> /tmp/fsdist-exclude
 	cd /; find usr2/fs-$(FS_VERSION)/third_party/src/* \
-			! -iname '*.tar.gz' \
+			! -iname '*.tar.gz'   \
+			! -iname '*.template' \
 			! -iname '*.make'                     -print >> /tmp/fsdist-exclude 
 	echo usr2/fs-$(FS_VERSION)/third_party/lib                   >> /tmp/fsdist-exclude
 	echo usr2/fs-$(FS_VERSION)/third_party/include               >> /tmp/fsdist-exclude
@@ -106,7 +122,11 @@ clean:
 	rm -f `find . -name '.*~' -print`
 	rm -f `find . -name '*.pyc' -print`
 	rm -rf third_party/include third_party/lib third_party/bin
-	find third_party/src/* ! -iname '*.tar.gz' ! -iname '*.make' -delete
+	find third_party/src/* \
+		! -iname '*.tar.gz' \
+		! -iname '*.make' \
+		! -iname '*.template' \
+		-delete
 #
 rmexe:
 	rm -fr bin/*
@@ -116,7 +136,11 @@ rmdoto:
 	rm -rf oprin/readline-2.0
 	rm -f `find . -name '*.pyc' -print`
 	rm -rf third_party/include third_party/lib third_party/bin
-	find third_party/src/* ! -iname '*.tar.gz' ! -iname '*.make' -delete
+	find third_party/src/* \
+		! -iname '*.tar.gz' \
+		! -iname '*.make' \
+		! -iname '*.template' \
+		-delete
 #
 libs:
 	for dir in $(LIB_DIR); do\

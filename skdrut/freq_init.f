@@ -20,13 +20,17 @@
       subroutine freq_init
 ! intilize the frequency part
 C   COMMON BLOCKS USED
+      implicit none  !2020Jun15 JMGipson automatically inserted.
+
+! 2021-01-05 JMG Replaced max_code by max_code. (max_code was confusing and led to coding errors.)
+
       include '../skdrincl/skparm.ftni'
       include '../skdrincl/freqs.ftni'
 ! local
       integer ic,is,iv,i,ix
 
       NCODES = 0
-      do ic=1,max_frq
+      do ic=1,max_code
         cmode_cat(ic)=" "
         do is=1,max_stn
           do iv=1,max_chan

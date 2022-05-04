@@ -18,17 +18,18 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       subroutine snap_monitor(kin2net)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include 'hardware.ftni'
-!  2014Jan31. Removed  tape based stuff. 
+!  2014Jan31. Removed  tape based stuff.
 
       logical kin2net
 
       if(Km5Disk) then
         if(kin2net) then
           write(luFile,'("in2net")')
-        else if(.not.kflexbuff) then 
+        else if(.not.kflexbuff) then
           write(luFile,'("disk_pos")')
-        endif     
+        endif
       endif
 
       return

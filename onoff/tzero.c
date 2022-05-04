@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -189,6 +189,9 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
       for(i=0;i<MAX_GLOBAL_DET;i++)
 	itpis[i]=0;
 
+    snprintf(buf2,sizeof(buf2)," Integrating for %d seconds: zero level",
+             onoff->intp);
+    logit(buf2,0,NULL);
     get_samples(cont,ip,itpis,onoff->intp,rut,accum,&acdum,&ierr2);
 
   }

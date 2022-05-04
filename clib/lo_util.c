@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -52,15 +52,17 @@ static char *lo3_key[ ]={"loa","lob","loc","lod","loe","lof","log","loh"};
 #define STAR_KEY sizeof(star_key)/sizeof( char *)
 #define LO3_KEY sizeof(lo3_key)/sizeof( char *)
 
-int lo_dec(lcl,count,ptr)
+int lo_dec(lcl,count,ptr,lo_arg)
 struct lo_cmd *lcl;
 int *count;
 char *ptr;
+int *lo_arg;
 {
     int ierr, arg_key(), arg_int();
     int len, dum, i;
-    static int lo;
+    int lo;
 
+    lo=*lo_arg;
     ierr=0;
     if(ptr == NULL) ptr="";
 
@@ -115,6 +117,7 @@ char *ptr;
 	    ierr=-200;
 	  lo-=1;
 	}
+	*lo_arg=lo;
       }
       break;
     case 2:
@@ -285,4 +288,130 @@ struct lo_cmd *lcl;
   if(*count>0)
     *count++;
   return;
+}
+void lo_rxg_enc(output,lo,lcl)
+    char *output;
+    int lo;
+    struct lo_cmd *lcl;
+{
+    int ir, idec, pos, ivalue;
+
+    output=output+strlen(output);
+
+    strcpy(output,"rxg,");
+
+    if(shm_addr->equip.rack==MK4 || shm_addr->equip.rack==MK3 ||
+            shm_addr->equip.rack==K4 || shm_addr->equip.rack==K4MK4 ||
+            shm_addr->equip.rack==K4K3)
+        strcat(output,lom_key[lo]);
+    else if(shm_addr->equip.rack==VLBA4 || shm_addr->equip.rack==VLBA)
+        strcat(output,lov_key[lo]);
+    else if(shm_addr->equip.rack==LBA || shm_addr->equip.rack==LBA4)
+        strcat(output,lol_key[lo]);
+    else if(shm_addr->equip.rack==DBBC)
+        strcat(output,lod_key[lo]);
+    else if(shm_addr->equip.rack==RDBE)
+        sprintf(output+strlen(output),"lo%c%d",
+                lets[lo/MAX_RDBE_IF],lo%MAX_RDBE_IF);
+    else if(shm_addr->equip.rack==DBBC3)
+        strcat(output,lo3_key[lo]);
+    else
+        sprintf(output+strlen(output),"lo%d",lo+1);
+    strcat(output,",");
+
+    idec=16;
+    if(lcl->lo[lo] >= 1.0)
+        idec-=log10(lcl->lo[lo]);
+    dble2str(output,lcl->lo[lo],35,idec);
+    pos=strlen(output)-1;
+    while(output[pos]=='0') {
+        output[pos]='\0';
+        pos=strlen(output)-1;
+    }
+    pos=strlen(output)-1;
+    if(output[pos]=='.')
+        output[pos]='\0';
+    strcat(output,",");
+
+    ivalue = lcl->pol[lo];
+    if (ivalue >=0 && ivalue <POL_KEY)
+        strcat(output,pol_key[ivalue]);
+    strcat(output,",");
+
+    ir=get_gain_rxg(lo+1,lcl);
+    if(ir<0)
+        strcat(output,"undefined");
+    else {
+        strcat(output,shm_addr->rxgain_files[ir].file);
+        strcat(output,",");
+
+        if(shm_addr->rxgain[ir].type=='f')
+            strcat(output,"fixed");
+        else if(shm_addr->rxgain[ir].type=='r')
+            strcat(output,"range");
+        strcat(output,",");
+
+        idec=6;
+        if(shm_addr->rxgain[ir].lo[0] >= 1.0) {
+            idec-=log10(shm_addr->rxgain[ir].lo[0]);
+            if(idec < 0)
+                idec=0;
+        }
+        dble2str(output,shm_addr->rxgain[ir].lo[0],35,idec);
+        pos=strlen(output)-1;
+        while(output[pos]=='0') {
+            output[pos]='\0';
+            pos=strlen(output)-1;
+        }
+        pos=strlen(output)-1;
+        if(output[pos]=='.')
+            output[pos]='\0';
+        strcat(output,",");
+
+        if(shm_addr->rxgain[ir].lo[1]>=0) {
+            idec=6;
+            if(shm_addr->rxgain[ir].lo[1] >= 1.0) {
+                idec-=log10(shm_addr->rxgain[ir].lo[1]);
+                if(idec < 0)
+                    idec=0;
+            }
+            dble2str(output,shm_addr->rxgain[ir].lo[1],35,idec);
+            pos=strlen(output)-1;
+            while(output[pos]=='0') {
+                output[pos]='\0';
+                pos=strlen(output)-1;
+            }
+            pos=strlen(output)-1;
+            if(output[pos]=='.')
+                output[pos]='\0';
+        }
+        strcat(output,",");
+
+        sprintf(output+strlen(output),"%d,%d,%d",
+                shm_addr->rxgain[ir].year,
+                shm_addr->rxgain[ir].month,
+                shm_addr->rxgain[ir].day);
+        strcat(output,",");
+
+        if(shm_addr->rxgain[ir].pol[0]=='l')
+            strcat(output,"lcp");
+        else if(shm_addr->rxgain[ir].pol[0]=='r')
+            strcat(output,"rcp");
+        strcat(output,",");
+        sprintf(output+strlen(output),"%.5e",
+                shm_addr->rxgain[ir].dpfu[0]);
+
+        if(0!=shm_addr->rxgain[ir].pol[1] &&
+                NULL!=strchr("lr",shm_addr->rxgain[ir].pol[1])) {
+            strcat(output,",");
+            if(shm_addr->rxgain[ir].pol[1]=='l')
+                strcat(output,"lcp");
+            else if(shm_addr->rxgain[ir].pol[1]=='r')
+                strcat(output,"rcp");
+            strcat(output,",");
+            sprintf(output+strlen(output),"%.5e",
+                    shm_addr->rxgain[ir].dpfu[1]);
+        }
+    }
+    return;
 }

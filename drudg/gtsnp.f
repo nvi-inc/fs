@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 	SUBROUTINE GTSNP(ICH,NCHAR,IC1,IC2,kcomment)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
       include '../skdrincl/skparm.ftni'
       include 'drcom.ftni'

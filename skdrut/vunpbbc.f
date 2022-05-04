@@ -19,8 +19,9 @@
 *
       SUBROUTINE vunpbbc(modef,stdef,ivexnum,iret,ierr,lu,
      .cbbref,ivc,cifref,nbbcdefs)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
-C     VUNPBBC gets the BBC assignment statements 
+C     VUNPBBC gets the BBC assignment statements
 C     for station STDEF and mode MODEF and converts it.
 C     All statements are gotten and checked before returning.
 C     Any invalid values are not loaded into the returned

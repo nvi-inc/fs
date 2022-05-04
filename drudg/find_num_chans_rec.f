@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -19,8 +19,13 @@
 *
       subroutine find_num_chans_rec(ipass,istn,icode,
      > ifan,nchan_obs,nchan_rec_mk5)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       include '../skdrincl/skparm.ftni'
 
+! History
+! 2021-12-24 JMGipson. Changed way roundup was done. 
+
+! Function
       integer itras
 
 C  INPUT:
@@ -29,9 +34,8 @@ C  INPUT:
 ! returned.
       integer nchan_obs,nchan_rec_mk5
 ! local
-      integer isb,ibit,ihd,ichan,it
-      integer i
-      
+      integer isb,ibit,ihd,ichan,it   
+ 
       nchan_obs=0
       do isb=1,2
         do ibit=1,2
@@ -40,18 +44,16 @@ C  INPUT:
               it = itras(isb,ibit,ihd,ichan,ipass,istn,icode)
               if (it.ne.-99) then
                  nchan_obs=nchan_obs+1
-              endif
+              endif 
             enddo
           enddo
         enddo
       enddo
 ! At this point have the number of tracks observed
       nchan_rec_mk5=8                 !can only record in units of 8,16, 32,64
-      do i=1,4
-         if(nchan_obs*ifan .le.nchan_rec_mk5) goto 5
+      do while(nchan_rec_mk5 .lt. nchan_obs*ifan)   
          nchan_rec_mk5=nchan_rec_mk5*2
       end do
-5     continue
 
       end
 

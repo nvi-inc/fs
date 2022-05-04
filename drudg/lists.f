@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020-2021 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE LISTS()    !LIST ONE STATION'S SCHEDULE
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C This routine lists on the printer a schedule
 C
@@ -51,7 +52,6 @@ C LOCAL:
       character*1 cs
       integer ipasp,iftold,idirp,idir,ituse
       integer i,j,id
-      integer ld
       real wlon,alat,al11,al12,al21,al22,rt1,rt2
       real az,el,x30,y30,x85,y85,dc,ha1
       real speed
@@ -64,12 +64,12 @@ C LOCAL:
       real tslew,dum
       integer iyr,idayr,ihr,imin,isc,mjd,mon,ida,ical,icod
       integer mjdpre,ispre,iyr2,idayr2,ihr2,imin2,isc2
-      integer*2 lfreq,lcbpre,lcbnew
+      integer*2 lfreq
       character*2 cwrap_pre
       character*2 cwrap_new
       double precision UT,GST,utpre ! previous value required for slewing
       integer nstnsk,istnsk,isor,nsat
-      character*7 cwrap ! cable wrap string returned from CBINF 
+      character*7 cwrap ! cable wrap string returned from CBINF
 C NSTNSK - number of stations in current observation
 C ISTNSK - which station corrresponds to ISTN
       integer nlobs,nlines,ntapes,ierr,ilen,npage
@@ -89,7 +89,6 @@ C     integer*2 LAXIS(2,7),
       integer iobs
       LOGICAL KUP ! true if source is up at station
       logical kwrap
-      integer*2 HHR
       character*2 csize
       integer iheader_Space
 
@@ -98,7 +97,7 @@ C     integer*2 LAXIS(2,7),
       double precision conv_s2 ! speed scaling for feet-->minutes
       integer ifeet
       double precision ffeet0_k4 ! initial counts
-      DATA HHR/2HR /
+   
 C
 C SUBROUTINES CALLED:
 C  FMP routines to read schedule file
@@ -114,6 +113,10 @@ C     DATA LAXIS /2HHA,2HDC,2HXY,2HEW,2HAZ,2HEL,2HXY,2HNS,2HRI,2HCH,
 C    .2hSE,2hST,2hAL,2hGO/
 C
 C WHO DATE   CHANGES
+
+! 2021-04-02 JMG. Changes STNRAT to slew_rate
+! 2021-01-27 JMG changed some variable names: sorp50-->sorp2000, sorpda--sorp_now, RA50, DEC50-->sorp1950
+! 2021-01-07 JMG removed unused variables 
 C NRV 830818 ADDED SATELLITE CALCULATIONS
 C MWH 840813 Added printer LU lock, added exper name to header
 C NRV 880708 Changed output for different print widths
@@ -142,13 +145,14 @@ C 970307 nrv Use pointer array ISKREC to insure time order of obs.
 C 971003 nrv Add a check for S2 and determine tape changes for it separately.
 C 980916 nrv Change date header on source page to yyyy.ddd
 C 981202 nrv Add warning message about negative slewing times.
-C 990527 nrv Add option for S2 and K4 non-VEX outputs. 
+C 990527 nrv Add option for S2 and K4 non-VEX outputs.
 C 991118 nrv Removed LAXIS variable and use AXTYP subroutine.
 C 991209 nrv Add ITUSE to iftold calculation.
 ! 2007   jmg Removed obsolete call to m3inf.  Not used.
 ! 2007Jul20 JMG.  Added character LD
 ! 2013Sep19  JMGipson made sample rate station dependent
 ! 2014Apr23  JMG.  Changed lcbpre, lcbnow to cwrap_pre, cwrap_now. Updated call to slewo.f
+
 C
 C 1. First initialize counters.  Read the first observation,
 C unpack the record, and set the PREvious variables to the
@@ -223,8 +227,8 @@ C
       MJDPRE = MJD
       UTPRE = UT
       ISPRE = ISOR
-     
-      cwrap_pre=" " 
+
+      cwrap_pre=" "
 C
       IC = TRIMLEN(LSKDFI)
       WRITE(LUSCN,100) cSTNNA(ISTN),LSKDFI(1:ic) ! new
@@ -234,8 +238,8 @@ C
 C     LAX1 = LAXIS(1,IAXIS(ISTN))
 C     LAX2 = LAXIS(2,IAXIS(ISTN))
       call axtyp(laxis,iaxis(istn),2) ! convert code to name
-      Rt1 = STNRAT(1,ISTN)*60.0*rad2deg
-      Rt2 = STNRAT(2,ISTN)*60.0*rad2deg
+      Rt1 = slew_vel(1,ISTN)*60.0*rad2deg
+      Rt2 = slew_vel(2,ISTN)*60.0*rad2deg
       AL11 = STNLIM(1,1,ISTN)*rad2deg
       AL21 = STNLIM(2,1,ISTN)*rad2deg
       AL12 = STNLIM(1,2,ISTN)*rad2deg
@@ -293,13 +297,13 @@ C
 C
       TJD = JULDA(MON,IDA,IYR-1900) + 2440000.0D0
       DO I=1,NCELES
-        call apstar_Rad(tjd,sorp50(1,i),sorp50(2,i),
-     >         sorpda(1,i),sorpda(2,i))
-        CALL RADED(RA50(I),DEC50(I),0.d0,IRH3,IRM3,RAS3,LDS3,
+        call apstar_Rad(tjd,sorp2000(1,i),sorp2000(2,i),
+     >         sorp_now(1,i),sorp_now(2,i))
+        CALL RADED(sorp1950(1,I),sorp1950(2,I),0.d0,IRH3,IRM3,RAS3,LDS3,
      .        IDD3,IDM3,DCS3,lhsign ,ID,ID,D)
-        CALL RADED(SORP50(1,I),SORP50(2,I),0.d0,IRH1,IRM1,RAS1,LDS1,
+        CALL RADED(sorp2000(1,I),sorp2000(2,I),0.d0,IRH1,IRM1,RAS1,LDS1,
      .        IDD1,IDM1,DCS1,lhsign,ID,ID,D)
-        CALL RADED(SORPDA(1,I),SORPDA(2,I),0.d0,IRH2,IRM2,RAS2,LDS2,
+        CALL RADED(sorp_now(1,I),sorp_now(2,I),0.d0,IRH2,IRM2,RAS2,LDS2,
      .        IDD2,IDM2,DCS2,lhsign,ID,ID,D)
 C
         IF (cs.EQ.'S') then
@@ -323,7 +327,7 @@ C
       DO 150 NSAT=1,NSATEL
 C  if (ifbrk().lt.0) goto 900
         I=NCELES+NSAT
-        WRITE(luprt,9150) I,csorna(i)(1:8),(SATP50(J,NSAT),J=1,7),
+        WRITE(luprt,9150) I,csorna(i)(1:8),(SATPos(J,NSAT),J=1,7),
      .       ISATY(NSAT),SATDY(NSAT)
 9150    FORMAT(I4,1X,A,1X,F7.2,F7.5,3F7.2,F11.1,F8.3,I5,F7.2)
 150   CONTINUE
@@ -346,13 +350,13 @@ C
       if (kwrap) then ! print cable wrap
         IF (cs.EQ.'S') THEN
           WRITE(LUPRT,1137)
-        ELSE 
+        ELSE
           WRITE(luprt,1080)
         ENDIF
       else ! no cable wrap output
         IF (cs.EQ.'S') THEN
           WRITE(LUPRT,9137)
-        ELSE 
+        ELSE
           WRITE(luprt,9080)
         ENDIF
       endif
@@ -420,13 +424,9 @@ C THEN BEGIN new page
 C ENDT new page
           ENDIF
           IDIR=+1
-          IF (LDIR(ISTNSK).EQ.HHR)IDIR=-1
-          if (ks2) then
-C           knewtp = ift(istnsk).eq.0.and.ipas(istnsk).eq.0
-C           replaced with:
-            knewtp = IPAS(istnsk).LT.IPASP.OR.
-     .      (IPAS(istnsk).EQ.IPASP.AND.(IFT(istnsk).LT.(IFTOLD-300)))
-          else if (idir.ne.0) then
+      
+   
+          if (idir.ne.0) then
             KNEWTP = KNEWT(IFT(ISTNSK),IPAS(ISTNSK),IPASP,IDIR,
      .      IDIRP,IFTOLD)
           else
@@ -455,7 +455,7 @@ C CONVERT BACK TO DOUBLE
           AZ = AZ*rad2deg
           EL = EL*rad2deg
           IF (ISOR.LE.NCELES) THEN
-            CALL RADED(RA50(ISOR),DEC50(ISOR),HA,
+            CALL RADED(sorp1950(1,ISOR),sorp1950(2,ISOR),HA,
      .           IRAH,IRAM,RAS,LDSIGN,IDECD,IDECM,DECS,
      .           LHSIGN,IHAH,IHAM,HAS)
           ELSE
@@ -464,13 +464,13 @@ C CONVERT BACK TO DOUBLE
      .           LHSIGN,IHAH,IHAM,HAS)
           ENDIF
 C
-          if (tslew.lt.0.0) then 
+          if (tslew.lt.0.0) then
             WRITE(luprt,9331)
 9331        FORMAT('  THE FOLLOWING SOURCE REQUIRES NEGATIVE ',
      .             'SLEWING TIME.  INFORM THE SCHEDULER!'/)
                   NLINES = NLINES + 2
           endif
-          IF (KUP) THEN !source is up 
+          IF (KUP) THEN !source is up
             cwrap_new=ccable(istnsk)
             CALL SLEWo(ISPRE,MJDPRE,UTPRE,ISOR,ISTN,
      >            cwrap_pre,cwrap_new,TSLEW,0,dum)
@@ -574,7 +574,7 @@ C     5. Now write out the observation line.
             else
               write(luprt,8516) IPAS(ISTNSK),LDIR(ISTNSK),IFT(ISTNSK)
 8516          format(I3,A1,' ',I5,' ',' ________________'/)
-            endif 
+            endif
           endif ! wid 137/80
           endif ! cable/no cable
 C

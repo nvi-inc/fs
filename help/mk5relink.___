@@ -1,17 +1,21 @@
-          mk5relink - re-establish the Mark 5 connection
+       mk5relink - re-establish the Mark 5/FlexBuff connection
 
             Syntax:     mk5relink
+                        fb_relink
 
             Response:   none
 
 
 Comments:
-This command can be used to open a new connection to the Mark 5
-recorder. If the connection is already open, it will be closed and new
-one established. Opening a new connection is needed after the Mark 5's
-control program has been restarted or its power has been cycled. This
-may happen for example for a disk swap.
+This command can be used to open a new connection to the Mark 5 or
+FlexBuff recorder. If the connection is already open, it will be
+closed and new one established. Opening a new connection is needed
+after the Mark 5 or FlexBuff's control program has been restarted or
+its power has been cycled. This may happen for example for a disk
+swap.
 
-If a schedule is running, but halted, this command will
-release the halt if a connection is successfully re-
-established.
+If a schedule is running, but halted, this command will release the
+halt if a connection is successfully reestablished.
+
+The 'fb_relink' command is a synonym for 'mk5relink'. Whichever makes
+the most sense can be used.

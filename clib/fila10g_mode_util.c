@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2022 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -167,12 +167,11 @@ struct fila10g_mode_cmd *lclc;
     case 3:
       m5sprintf(output,"%d",&lclc->decimate.decimate,&lclc->decimate.state);
       break;
-    case 4:  /* commanded value only */
-      if(shm_addr->fila10g_mode.decimate.state.known &&
-	 shm_addr->fila10g_mode.decimate.decimate!=0) {
+    case 4:  /* implied value only */
+      if(lclc->decimate.state.known && lclc->decimate.decimate!=0) {
 	sprintf(output,"(%.3f)",
 		((float) shm_addr->m5b_crate)/
-			 shm_addr->fila10g_mode.decimate.decimate+0.0001 );
+			 lclc->decimate.decimate+0.0001 );
 	m5state_encode(output,&lclc->decimate.state);
       }
       break;
@@ -246,8 +245,8 @@ struct fila10g_mode_cmd *lclc;
       bits++;
   }
 
-  if((0xaaaaaaaU & bitmask2 || 0xaaaaaaaU & bitmask1 ) &&
-     (0x5555555U & bitmask2 || 0x5555555U & bitmask1 ))
+  if((0xaaaaaaaaU & bitmask2 || 0xaaaaaaaaU & bitmask1 ) &&
+     (0x55555555U & bitmask2 || 0x55555555U & bitmask1 ))
     bits_p_chan = 2 ;
   else if(bitmask1 || bitmask2)
     bits_p_chan = 1 ;  
@@ -317,8 +316,11 @@ int fila10g_2_vsi_samplerate(ptr,lclc,lclm) /* return values:
     return -1;
   }
   ptr=strstr(ptr+sizeof(string),string2);
-  if(ptr == NULL)
+  if(ptr == NULL) {  /* missing value means '1' */
+    lclc->decimate.decimate=1;
+    lclc->decimate.state.known=1;
     return 0;
+  }
 
   if(m5sscanf(ptr+sizeof(string2),"%d",
 	      &lclc->decimate.decimate,&lclc->decimate.state)) {

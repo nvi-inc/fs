@@ -19,6 +19,7 @@
 *
       subroutine xyz2latlon(XYZ,rlat,rlon)
 ! convert from xyz to lat long
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 !
       include '../skdrincl/constants.ftni'
 

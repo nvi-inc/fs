@@ -23,39 +23,31 @@ C@READF_ASC
 C
 C  ASCII only version of READF
       implicit none
+C 880523  -written by P. Ryan
+C 960212 nrv Extend buffer
 C 000907 nrv Call IFILL with IBL instead of 80
+! 2020Sep14 JMGipson. Cleanup, get rid of some obsolete stuff. 
+
 
 C  Input:
-       integer iunit
-C        -iunit : logical unit for reading
-       integer kerr
-C        -kerr  : variable to return error on input (nonzero if error)
-       integer ibl
-C        -ibl : buffer length
-       logical*4 ex,opn
+       integer iunit    !logical unit for reading
+       integer kerr     !variable to return error on input (nonzero if error)
+       integer ibl      ! buffer length
 C
 C  Output:
-       integer il
-C        -il    : number of characters read in
-       integer*2 ibuf(*)
-C        -ibuf  : integer buffer for reading
-C
+       integer il      ! number of characters read in
+       integer*2 ibuf(*) !buffer that stuff is stored in. 
+
+
 C  Local:
-       character*1024 ch,nam
-C        -ch    : character buffer for initial input
-       integer     trimlen
-C        -trimlen : find number of character read in
-       integer*4 k
+       character*1024 ch   ! character buffer for initial input
+       integer    trimlen  ! find number of character read in
+       integer*4 k         !ioerr 
        integer oblank
        data oblank /O'40'/
-C        -k : variable for iostat error-checking
-C
-C  880523  -written by P. Ryan
-C 960212 nrv Extend buffer
-C
-       inquire(iunit,exist=ex,opened=opn,name=nam)
-       read(iunit,10,end=20,iostat=k) ch
-10     format (A1024)
+
+!       inquire(iunit,exist=ex,opened=opn,name=nam)
+       read(iunit,'(a1024)',end=20,iostat=k) ch
        kerr = k
        il   = trimlen(ch)
        if(il .gt. 0 .and. ch(il:il) .eq. char(13)) then

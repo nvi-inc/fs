@@ -19,6 +19,7 @@
 *
       subroutine write_error_and_pause(lu_out,lstring)
 ! do as the name suggests.
+      implicit none  !2020Jun15 JMGipson automatically inserted.
       integer lu_out
       character*(*) lstring
 

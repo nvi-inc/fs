@@ -19,6 +19,7 @@
 *
 C BCODE
 	subroutine bcode(lu,jbuf,lbuf,clabtyp)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C  BCODE writes out the ASCII label and the bar code
 C  label to the Epson printer.

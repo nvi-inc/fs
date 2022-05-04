@@ -18,6 +18,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
       SUBROUTINE STAPE(LINSTQ,luscn,ludsp)
+      implicit none  !2020Jun15 JMGipson automatically inserted.
 C
 C     STAPE reads/writes station tape motion.
 c     This routine reads the TAPE_MOTION lines in the schedule
@@ -59,7 +60,7 @@ C
 C MODIFICATIONS:
 C 970317 NRV New. Copied from SEARL.
 C 970328 nrv Parse/list GAP time for ADAPTIVE type.
-C 970729 nrv Handle the old format (for ADAPTIVE only) without the 
+C 970729 nrv Handle the old format (for ADAPTIVE only) without the
 C            station list and with the GAP key word.
 C 980629 nrv Add tape length to listing.
 C 980629 nrv Allow DYNAMIC type.
@@ -74,7 +75,7 @@ C
       CALL GTFLD(LINSTQ(2),ICH,i2long(LINSTQ(1)),IC1,IC2)
       IF  (IC1.EQ.0) THEN  !no input
         IF  (NSTATN.LE.0) THEN  !no stations selected
-          write(luscn,'("STAPE00 - Select stations first.")') 
+          write(luscn,'("STAPE00 - Select stations first.")')
           RETURN
         END IF  !no stations selected
         WRITE(LUDSP,"(' ID  STATION  TAPE_MOTION (gap) ')")
@@ -87,7 +88,7 @@ C
           else
             write(ludsp,'()')
           endif
-        END DO  
+        END DO
         RETURN
       END IF  !no input
 C

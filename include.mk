@@ -6,6 +6,8 @@ ifeq ($(FC),f77)
 FC = f95
 endif
 
+FC1 := $(FC)
+
 CFLAGS += -Werror=int-to-pointer-cast
 
 ifeq ($(FC),fort77)

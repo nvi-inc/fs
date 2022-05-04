@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020-2021 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -44,16 +44,19 @@
 #include <jansson.h>
 
 #include "../include/params.h"
+
+#include "inject_snap.h"
+#include "jsonutils.h"
 #include "list.h"
 #include "prompt.h"
 #include "server.h"
 #include "stream.h"
 #include "window.h"
 
-#define fatal(msg, s)                                                                             \
+#define fatal(msg, s)                                                                              \
 	do {                                                                                       \
 		fprintf(stderr, "%s:%d (%s) error %s: %s\n", __FILE__, __LINE__, __FUNCTION__,     \
-		        msg, s);                                                    \
+		        msg, s);                                                                   \
 		exit(1);                                                                           \
 	} while (0)
 
@@ -86,23 +89,11 @@ struct server {
 
 	unsigned next_prompt_id;
 	list_t *prompts;
+
+	char *error_log;
 };
 
 char const *fs_command[] = {"fs", "-i", NULL};
-
-int json_object_sprintf(json_t *obj, const char *key, char *const format, ...) {
-	va_list args;
-	char *buf;
-	va_start(args, format);
-	int sz = vasprintf(&buf, format, args);
-	if (sz < 0)
-		return NNG_ENOMEM;
-	va_end(args);
-	json_t *jstr = json_string(buf);
-	json_object_set_new(obj, key, jstr);
-	free(buf);
-	return 0;
-}
 
 #ifdef FS_SERVER_SOCKET_PATH
 static int mkdir_p(char *const path) {
@@ -672,6 +663,26 @@ int server_cmd_fs_status(server_t *s, json_t *rep_msg, int argc, const char *con
 	return 0;
 }
 
+int server_cmd_fs_snap(server_t *s, json_t *rep_msg, int argc, const char *const argv[]) {
+	if (argc < 2) {
+		json_object_sprintf(rep_msg, "message",
+		                    "Invalid Parameters: fs snap requires an argument");
+		json_object_set_new(rep_msg, "code", json_integer(JSONRPC_STATUS_INVALID_PARAMS));
+		return 1;
+	}
+
+	nng_mtx_lock(s->mtx);
+	if (s->fs == NULL || s->fs->pid == 0) {
+		nng_mtx_unlock(s->mtx);
+		json_object_sprintf(rep_msg, "message", "Invalid Request: fs not running");
+		json_object_set_new(rep_msg, "code", json_integer(JSONRPC_STATUS_INVALID_REQUEST));
+		return 1;
+	}
+	int ret = inject_snap(rep_msg, argv[1]);
+	nng_mtx_unlock(s->mtx);
+	return ret;
+}
+
 int server_cmd_fs(server_t *s, json_t *rep_msg, int argc, const char *const argv[]) {
 	if (argc <= 1) {
 		/* TODO: usage */
@@ -684,6 +695,10 @@ int server_cmd_fs(server_t *s, json_t *rep_msg, int argc, const char *const argv
 	}
 	if (strcmp(argv[1], "status") == 0) {
 		return server_cmd_fs_status(s, rep_msg, argc - 1, argv + 1);
+	}
+
+	if (strcmp(argv[1], "snap") == 0) {
+		return server_cmd_fs_snap(s, rep_msg, argc - 1, argv + 1);
 	}
 
 	json_object_sprintf(rep_msg, "message", "unknown command \"%s\"", argv[1]);
@@ -700,9 +715,8 @@ int server_cmd_prompt(server_t *s, json_t *rep_msg, int argc, const char *const 
 
 	if (argc < 2) {
 		json_object_set_new(rep_msg, "message",
-			    json_string("prompt requires open or close"));
-		json_object_set_new(rep_msg, "code",
-			    json_integer(JSONRPC_STATUS_METHOD_NOT_FOUND));
+		                    json_string("prompt requires open or close"));
+		json_object_set_new(rep_msg, "code", json_integer(JSONRPC_STATUS_METHOD_NOT_FOUND));
 		return 1;
 	}
 
@@ -839,7 +853,7 @@ int server_cmd(server_t *s, json_t *rep_msg, int argc, const char **const argv) 
 		return server_cmd_window(s, rep_msg, argc, argv);
 	}
 
-	if (strcmp(argv[0], "shutdown") == 0) {
+	if (strcmp(argv[0], "shutdown") == 0 || strcmp(argv[0], "stop") == 0) {
 		return server_cmd_shutdown(s, rep_msg, argc, argv);
 	}
 
@@ -879,7 +893,7 @@ void server_cmd_cb(void *arg) {
 
 	json_t *reply = json_object();
 	json_object_set_new(reply, "jsonrpc", json_string("2.0"));
-	json_object_set_new(request, "id", json_null());
+	json_object_set_new(reply, "id", json_null());
 
 	json_error_t err;
 	request = json_loadb(nng_msg_body(msg), nng_msg_len(msg), 0, &err);
@@ -909,6 +923,7 @@ void server_cmd_cb(void *arg) {
 		json_object_set_new(error, "code", json_integer(JSONRPC_STATUS_INVALID_REQUEST));
 		goto error;
 	}
+	json_object_set(reply, "id", id);
 
 	method = json_object_get(request, "method");
 	if (!json_is_string(method)) {
@@ -944,7 +959,7 @@ void server_cmd_cb(void *arg) {
 	cmd_rv      = server_cmd(s, ret, json_array_size(params) + 1, args);
 	free(args);
 
-	if (cmd_rv > 0) {
+	if (cmd_rv != 0) {
 		json_object_set_new(reply, "error", ret);
 	} else {
 		json_object_set_new(reply, "result", ret);
@@ -1086,6 +1101,20 @@ void server_shutdown(server_t *s) {
 }
 
 void server_destroy(server_t *s) {
+	if (s->error_log) {
+		if (unlink(s->error_log) < 0) {
+			/* There is no point to a fatal error if the unlink fails.
+			   The server will exit anyway and if the user already
+			   deleted the file or mv'd it, it is gone. If it is just
+			   mv'd, the error will still appear there, and in the
+			   session if the server is foreground. Exiting here would
+			   also cause a 'fsserver stop' to command to not complete.
+			*/
+			perror("unlinking fsserver.err file");
+		}
+		free(s->error_log);
+	}
+
 	/* order is very important here! */
 	nng_aio_free(s->aio);
 	nng_close(s->server_cmd_sock);
@@ -1120,4 +1149,8 @@ void server_destroy(server_t *s) {
 	free(s->clients_cmd_url);
 	free(s->server_cmd_url);
 	free(s);
+}
+
+void server_set_log(server_t *s, char *log) {
+	s->error_log = log;
 }

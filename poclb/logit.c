@@ -25,6 +25,7 @@
 
 #include <string.h>
 #include <stdio.h>
+
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/shm_addr.h"      /* shared memory pointer */
@@ -33,9 +34,18 @@
 void cls_snd();
 void pname();
 void rte_time();
-static logit0();
+static void logit0( char *msg, int ierr, char *who, char *type, char lsor);
 
-logits(msg,ierr,who,lsor)
+logit_nds(msg,ierr,who,lsor)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+char lsor;           /* char identifying source usually ':' or '/' */
+
+{
+  logit0(msg,ierr,who,"nd",lsor);
+}
+void logits(msg,ierr,who,lsor)
 char *msg;           /* a message to be logged, NULL if none */
 int ierr;            /* error number, 0 if no error          */
 char *who;           /* 2-char string identifying the error  */
@@ -44,7 +54,7 @@ char lsor;           /* char identifying source usually ':' or '/' */
 {
   logit0(msg,ierr,who,NULL,lsor);
 }
-logit(msg,ierr,who)
+void logit(msg,ierr,who)
 char *msg;           /* a message to be logged, NULL if none */
 int ierr;            /* error number, 0 if no error          */
 char *who;           /* 2-char string identifying the error  */
@@ -52,7 +62,7 @@ char *who;           /* 2-char string identifying the error  */
 {
   logit0(msg,ierr,who,NULL,'/');
 }
-logit_nd(msg,ierr,who)
+void logit_nd(msg,ierr,who)
 char *msg;           /* a message to be logged, NULL if none */
 int ierr;            /* error number, 0 if no error          */
 char *who;           /* 2-char string identifying the error  */
@@ -60,7 +70,7 @@ char *who;           /* 2-char string identifying the error  */
 {
   logit0(msg,ierr,who,"nd",'/');
 }
-static logit0(msg,ierr,who,type,lsor)
+static void logit0(msg,ierr,who,type,lsor)
 char *msg;           /* a message to be logged, NULL if none */
 int ierr;            /* error number, 0 if no error          */
 char *who;           /* 2-char string identifying the error  */
@@ -107,10 +117,11 @@ char lsor;           /* char identifying source usually ':' or '/' */
       memcpy(buf+l,name,5);
       buf[l+5]='\0';
       strcat(buf,"#");
-    } else
+    } else {
       ssor[0]=lsor;
       ssor[1]=0;
       strcat(buf,ssor);
+    }
     if(msg!=NULL) {
       int n;
       int bufl=strlen(buf);

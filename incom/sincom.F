@@ -1,3 +1,22 @@
+*
+* Copyright (c) 2020-2021 NVI, Inc.
+*
+* This file is part of VLBI Field System
+* (see http://github.com/nvi-inc/fs).
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
       subroutine sincom(ip)
 C
       include '../include/fscom.i'
@@ -578,6 +597,12 @@ C
       call equip(idcb,FS_ROOT//'/control/equip.ctl',ip)
       if(ip(3).ne.0) return
 c
+      call fs_get_rack(rack)
+      if(rack.eq.DBBC3) then
+          call dbbc3_equip(idcb,FS_ROOT//'/control/dbbc3.ctl',ip)
+          if(ip(3).ne.0) return
+      endif
+c
       call fs_get_drive(drive)
       if(drive(1).eq.VLBA.or.drive(1).eq.VLBA4) then
          call drivev(idcb,FS_ROOT//'/control/drivev1.ctl',ip,-219,1)
@@ -597,8 +622,11 @@ c
 C
 C RDBE.ctl
 C
-      call rdbe_equip(idcb,FS_ROOT//'/control/rdbe.ctl',ip,-231)
-      if(ip(3).ne.0) return
+      call fs_get_rack(rack)
+      if(rack.eq.RDBE) then
+        call rdbe_equip(idcb,FS_ROOT//'/control/rdbe.ctl',ip,-231)
+        if(ip(3).ne.0) return
+      endif
 C
 320   continue
 C
@@ -1048,7 +1076,7 @@ C
       ilen=0
       call readg(idcb,ierr,ibuf,ilen)
       if (ierr.lt.0.or.ilen.le.0) then
-        call logit7ci(0,0,0,1,-189,'bo',ierr)
+        call logit7ci(0,0,0,1,-184,'bo',ierr)
         goto 990
       endif
       ifc=1
@@ -1117,14 +1145,16 @@ c
  810  continue
       call fc_get_rxgain_files(ierr)
       if(ierr.lt.0) then
-        call logit7ci(0,0,0,1,-403,'bo',ierr)
+        call logit7ci(0,0,0,1,ierr,'rg',0)
+        call logit7ci(0,0,0,1,-403,'bo',0)
         goto 990
       endif
 c
  820  continue
       call fc_get_flux_file(ierr)
       if(ierr.lt.0) then
-        call logit7ci(0,0,0,1,-404,'bo',ierr)
+        call logit7ci(0,0,0,1,ierr,'fx',0)
+        call logit7ci(0,0,0,1,-404,'bo',0)
         goto 990
       endif
 c      goto 995
