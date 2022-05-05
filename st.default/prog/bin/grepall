@@ -1,1 +1,0 @@
-find . -name "$2" -print |xargs grep -i "$1"|more

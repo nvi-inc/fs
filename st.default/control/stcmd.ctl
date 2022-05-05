@@ -1,2 +1,0 @@
-*********STATION SPECIFIC COMMANDS**************
-*COMMAND     SEG SUBPA BO

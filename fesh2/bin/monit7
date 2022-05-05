@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-xterm -xrm 'xterm*allowWindowOps: true' -name monit7_fesh2 -e monit_fesh2.sh &
-
