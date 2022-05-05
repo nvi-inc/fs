@@ -3,7 +3,7 @@ from __future__ import print_function
 
 import sys
 from os import path, remove
-from shutil import copy2
+from shutil import copy
 
 from setuptools import setup, find_packages
 
@@ -21,6 +21,7 @@ def _pre_install():
     """Pre-installation tasks:"""
     # If we don't have a FS directory structure, quit
 
+    print("-"*80)
     print("Checking for a Field System installation...")
     say_goodbye = False
     for p in [
@@ -36,6 +37,9 @@ def _pre_install():
     if say_goodbye:
         print("Can't find an installed Field System distribution. Quitting")
         sys.exit()
+    else:
+        print("Field System directories found.")
+    print("-"*80)
 
 
 def _post_install():
@@ -45,14 +49,15 @@ def _post_install():
     template_control_file_dir = "/usr2/fs/st.default/control"
     station_config_dir = "/usr2/control"
     template_config_file = path.join(this_directory, "fesh2", config_file_name)
+    # <blah>/fesh2/fesh2.config
     target_template_config_file = path.join(
         template_control_file_dir,
         config_file_name,
-    )
-    target_station_config_file = path.join(station_config_dir, config_file_name)
+    ) # /usr2/fs/st.default/control/fesh2.config
+    target_station_config_file = path.join(station_config_dir, config_file_name) # /usr2/control/fesh2.config
     # Do we have permission to write to the template control file directory
     #    if path.exists template_control_file_dir = "/usr2/fs/st.default/control"
-    print("\n#############\n")
+    print("-"*80)
     try:
         if path.exists(target_template_config_file):
             remove(target_template_config_file)
@@ -62,28 +67,29 @@ def _post_install():
                 template_control_file_dir,
             )
         )
-        copy2(
+        copy(
             template_config_file,
             target_template_config_file,
         )
     except:
+        print("- WARNING " * 8)
         print(
-            "WARNING: Could not put the template config file into the Field System template\n "
+            "Could not put the template config file into the Field System template\n "
             "control file directory (i.e. tried copying {} to\n {}. Permission issue? Try doing "
             "this by hand.".format(
                 template_config_file,
                 target_template_config_file,
             )
         )
-        input("\a\n Press [return] to continue: ")
+        print("- WARNING " * 8)
+    print("-"*80)
 
-    print("\n#############\n")
     copy_cfg_to_control = False
     if not path.exists(target_station_config_file):
         print(
             "Placing a copy of the template configration file {} in {}.".format(
                 config_file_name,
-                template_control_file_dir,
+                station_config_dir,
             )
         )
         print("It will need editing for your site.")
@@ -101,11 +107,24 @@ def _post_install():
             )
         )
     if copy_cfg_to_control:
-        copy2(
-            template_config_file,
-            target_station_config_file,
-        )
-    print("\n#############\n\n")
+        try:
+            copy(
+                template_config_file,
+                target_station_config_file,
+            )
+        except:
+                print("- WARNING " * 8)
+                print(
+                "Could not copy the template config file into the Field System\n "
+                "control file directory (i.e. tried copying {} to {}.\nPermission issue?) Try "
+                "doing this by hand.".format(
+                    template_config_file,
+                    target_station_config_file,
+                ))
+                print("- WARNING " * 8)
+
+    print("-"*80)
+    print("\n\n")
 
 
 if not skip_pre_and_post:
@@ -121,7 +140,7 @@ setup(
     author_email="jejlovell@gmail.com",
     description="Geodetic VLBI schedule management and processing",
     long_description=long_description,
-    long_description_content_type="text/markdown",
+#    long_description_content_type="text/markdown",
     packages=find_packages(),
     include_package_data=True,
     entry_points={
