@@ -1,0 +1,21 @@
+               diag - diagnostic (S2 racks)
+
+
+            Syntax   : diag=test
+  
+            Response : diag/acknowledgement 
+
+Settable Parameters: 
+
+test : Test to be performed. Only self1 is valid. 
+  
+Monitor-only Parameters: none
+
+Comments: 
+
+Initiate internal diagnostic self-test 1 (use STATUS to check completion). Note 
+that many other RCL commands which affect system switch settings are not allowed 
+during the self-test. 
+  
+  
+  

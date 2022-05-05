@@ -1,0 +1,48 @@
+               fs - frequency switching (S2 racks)
+
+            Syntax: fs=init,numstates,period
+            Syntax: fs=start[,seqname]
+            Syntax: fs=stop
+            Syntax: fs=halt
+            Syntax: fs=save,seqname
+            Syntax: fs=load,seqname
+            Syntax: fs=state,nbr,[bbc1,freq1,ifsrc1,bbc2,freq2,ifsrc2,...]
+            Syntax: fs=list
+            Syntax: fs
+
+            Response: fs/frequency switching not running
+            Response: fs/seqname,status,curstate,numstate,period
+            Response: fs/state,bbc1,freq1,ifsrc1,......
+
+Options:
+            init  : Initializes new frequency switching sequence
+            start : Starts running an existing frequency switching sequence.
+                    If seqname is not specified, start running the current sequence.
+            stop  : Stops running frequency switching sequence and exist FS mode.
+            halt  : Temporarily halts running frequency switching sequence. Use start
+                    to re-start it.
+            save  : Saves current frequency switching sequence.
+            load  : Loads an existing frequency switching sequence, but does not run it.
+            state : Halts at specified state or sets bbc for specific state.
+            list  : List the fewquency switching sequence.
+
+Settable Parameters: 
+
+  numstates : Number of states in the sequence (maximum 64).
+  period    : Frequency switching in seconds. See s2das manual for valid periods.
+  seqname   : Name of the frequency switching sequence (max 8 characters)
+  nbr       : State number (1 to numstates).
+  bbcn      : bbc id for parameters n.
+  freqn     : Frequency setting for bbcn.
+  ifsrcn    : IF source setting. (ias where a is if index 1-4 and s the ifswitch setting d or a)
+  
+Monitor-only Parameters:
+ 
+  status : Status of the frequency switching sequence. (run, halt)
+ 
+
+
+  
+  
+  
+  

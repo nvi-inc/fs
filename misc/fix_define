@@ -1,0 +1,164 @@
+#!/usr/bin/perl
+# Usage: fix_define files
+
+require "getopts.pl";
+
+&Getopts("fhot");
+
+if ($#ARGV < 0 || defined($opt_h)) {
+    print "\n  Usage: fix_define [-fhot] files\n\n";
+    print "    This command fixes the 'define' lines in .prc procedure files to have the\n";
+    print "    correct format to work properly in the FS. Without the '-f' flag it will\n";
+    print "    only make minimal changes to achieve this goal. Without the '-o' flag it\n";
+    print "    will not execute if the FS is running. It does not correct or detect other\n";
+    print "    possible .prc file structural defects.\n\n";
+    print "    Flags:\n";
+    print "      -f    forces all the date/time fields to zero and puts a space at the end,\n";
+    print "            which is as PFMED would create it.\n";
+    print "      -h    flag (or no arguments) prints this help message.\n";
+    print "      -o    overrides the interlock preventing execution if the FS is active.\n";
+    print "            This option must be used with extreme care. It must not be used on\n";
+    print "            .prc files that are open in the FS, for example:\n";
+    print "             /usr2/proc/station.prc\n";
+    print "      -t    test mode: will list each line in each file that would change,\n";
+    print "            but no changes will be made.\n";
+    print "\n";
+    print "    The original files are preserved with a '.bak' extension, unless no change\n";
+    print "      was made in which case the original is retained as is.\n\n";
+    if(`lognm`) {
+	die "  FYI: The FS is currently active.\n\n";
+    } else {
+	die "  FYI: As far as I can tell, the FS is currently NOT active.\n\n";
+    }
+    exit -1;
+}
+
+    if(`lognm` && !defined($opt_o)) {
+	die " Cannot be used when the FS is active without '-o' flag,\n please check '$0 -h' and be careful.\n";
+    }
+
+FILE: foreach $name (@ARGV) {
+
+    $bak = $name . ".bak";
+    $out = $name;
+    if (!-e $name) {
+	die "Can't find $name Quitting.\n";
+    }
+
+# rename the original if we can and open the files
+    
+    if(!defined($opt_t)) {
+	if (-e $bak) {
+	    die "Backup-file $bak already exists, giving up.\n";
+	}
+    }
+
+    if(`lognm` && !defined($opt_o)) {
+	die " $0 is already running and the FS became active, giving up.\n";
+    }
+    if(!defined($opt_t)) {
+	rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
+    }
+ 
+    if(!defined($opt_t)) {
+	if(!open(BAK,$bak)) {
+	    print "Failed to open $bak: $!\n";
+	    if(!rename($bak,$out)) {
+		print "Unable to rename $bak to $out: $!\n";
+		die "Please fix whatever the problem is and rename it yourself.\n";
+	    } else {
+		die "I renamed $bak to $out for you.\n";
+	    }
+	}
+	
+	if(!open(OUT,">" . $out)) {
+	    print "Failed to open $out: $!\n";
+	    if((!close(BAK)) || (!rename($bak,$out))) { 
+		print "Unable to rename $bak to $out: $!\n";
+		die "Please fix whatever the problem is and rename it yourself.\n";
+	    } else {
+		die "I renamed $bak to $out for you.\n";
+	    }
+	}
+    } else {
+	if(!open(BAK,$out)) {
+	    die "Failed to open $out: $!\n";
+	}
+    }
+
+
+#process
+
+    $line=0;
+    $change=0;
+    $rename=0;
+    while(<BAK>) {
+	$line++;
+	if(!defined($opt_f) && /^define  [^ ]{1,12}[ ]{0,11}  \d{11}.{0,1}$/) {
+# if boss has opened it, it will have an 'x' at the end if there was anything
+# after the date/time field
+	    if(!defined($opt_t)) {
+		print OUT;
+	    }
+	} elsif(/^define [ ]{0,1}([^ ]{1,12})/) {		
+	    $change=1;
+# canonical form is with space at the end
+	    if(!defined($opt_t)) {
+		chomp($name=$1);
+		printf OUT "define  %-12s  00000000000 \n", $name;
+	    } else {
+		print "In file '$out', I would change line $line:";
+		print;
+	    }
+	} elsif(/^define/) {
+	    print "File '$out' has a 'define' problem I can't fix at line $line:";
+	    print;
+	    $rename=1;
+	    if(!defined($opt_t)) {
+		print OUT;
+	    }
+	} else {
+	    if(!defined($opt_t)) {
+		print OUT;
+	    }
+	}
+    }
+
+    if(!defined($opt_t)) {
+	if(!close(OUT)) {
+	    $rename=1;
+	    print "Warning: Unable to close to $out: $!\n";
+	}
+	if(!close(BAK)) {
+	    $rename=1;
+	    print "Warning: Unable to close to $bak: $!\n";
+	}
+
+	if($rename || $change == 0) {
+	    if(`lognm` && !defined($opt_o)) {
+		print " $0 is already running and the FS became active.\n";
+		print " I can't risk renaming '$bak' to '$out' for you.\n";
+		die " Please stop the FS and use 'mv $bak $out', giving up.\n";
+	    }
+	    if(!rename($bak,$out)) { 
+		print "Warning: Unable to rename '$bak' to '$out': $!\n";
+		if($rename) {
+		    print "Warning: Please fix whatever the problem is and rename it yourself,\n";
+		    print "Warning: probably using 'mv $bak $out'\n";
+		} else {
+		    print "Warning: It appears that $out did not need any changes,\n";
+		    print "Warning: but to be safe you should probably \"";
+		    print "Warning: use 'mv $bak $out'\n";
+		}
+	    } elsif($rename) {
+		print "Warning: I renamed '$bak' to '$out' for you.\n";
+		
+	    }
+	}
+    } else {
+	if(!close(BAK)) {
+	    $rename=1;
+	    print "Warning: Unable to close to $out: $!\n";
+	}
+    }
+}

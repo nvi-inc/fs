@@ -1,0 +1,6 @@
+RDBE      DOT           DOT2GPS   Raw          TSys               PCal
+                                            IF1    IF2   Tone   Amp   Phase 
+ A  2015.107.24:15:19 1000000.0 IF1 32.0  100.0  100.0  0a030  100.0 -182.0
+ B
+ C
+ D

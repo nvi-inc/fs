@@ -1,0 +1,1 @@
+/bin/ps -e | /usr/bin/egrep "oprin" | /usr/bin/cut -c1-6

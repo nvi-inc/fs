@@ -1,0 +1,126 @@
+File: /usr2/fs/misc/tworecs.txt  Version: 0.3  Date: 050601
+
+		       Two Tape Drive Operation
+
+			      Ed Himwich
+
+
+FS 9.5 and later versions include support for sequential use of two
+drives. For this purpose each tape drive has a number "1" or "2". This
+is true even for systems with a single tape drive. Any two
+longitudinal reorders (Mark III, Mark IV, VLBA, VLBA2, VLBA4) may be
+used together. At this time S2, K4, and Mark5 recorders may only be
+used as tape drive 1, but (in the unlikely event that that anyone
+would want to do it) a longitudinal recorder could be used as drive 2
+with a S2, K4, or Mark5 recorder as drive 1. However, this mode should
+be tested before being used in an experiment.
+
+For a station with two recorders there are three possible
+configurations in equip.ctl: (1) drive 1 is some specific drive type
+and drive 2 is "none", (2) drive 1 is "none" and drive 2 is some
+specific drive type, and (3) both drive 1 and drive 2 are specified as
+some specific (not necessarily the same) drive types.
+
+In case (3), the commands associated with the tape drives (including
+head stack positioning commands) have either a "1" or "2" appended to
+them to distinguish which drive they refer to. Likewise if DRUDG is
+told that there are two tape drives it will appended the drive number
+to the names of procedures that have drive specific commands; this
+includes set-up and parity check procedures. However in cases (1) and
+(2), the field system accepts only the traditional drive related
+commands but applies them to the appropriate drive. This is true
+regardless of whether the single recorder in use is drive 1 or drive
+2. DRUDG will produce traditional procedures if it is told that there
+is one recorder regardless of whether it is recorder 1 or recorder 2.
+
+The four goals of this design are that: (1) single recorder operation
+should not change in any significant way, (2) a station with two
+recorders can use both for sequential recording during a schedule, (3)
+the syntax allows for the possibility of future (but not yet
+supported) simultaneous recorder use, and (4) a station with two
+recorders, but that is using only one, can decide after DRUDG-ing
+which of the two recorders to use, by changing equip.ctl. The latter
+feature is intended to provide flexibility if there are problems with
+one of the recorders.
+
+One of the results of this design is that a second recorder can be
+used to record a short schedule, such as an Intensive, that interrupts
+a longer session without having to waste time dismounting and mounting
+tapes (twice). The tape for the shorter session can be kept on the
+second drive. When it is time to switch the longer schedule can be
+stopped, the FS stopped, the equip.ctl control file changed to specify
+use of the second drive, the FS restarted and the shorter schedule
+started. A similar method can be used to switch back to the longer
+schedule. Both the longer and short schedule in this case should be
+handled in DRUDG as though there were only one recorder. The changing
+of the control file can be automated with a script to reduce the
+chances of an error and make the change more quickly.
+
+When using DRUDG to generate the .SNP and .PRC files for a schedule,
+the recorder configuration is determined from the skedf.ctl control
+file if it is defined there. In any event, option (11) can be used to
+override the default in the control file or the schedule. DRUDG and
+the FS must agree on whether one or two recorders are in use. If not,
+DRUDG will generate commands that the FS will not be able to
+execute. Option (11) provides an "unused" choice for drive 1 and drive
+2. The "unused" choice differs from "none" in that for "unused" DRUDG
+will assume that the FS has two recorders defined, i.e. recorder
+commands have "1" or "2" appended, but will only generate commands for
+the drive that is not "unused". This may be useful if you don't want
+to change your equip.ctl control when switching between drives. In
+that case you must make the decision about which drive to use when you
+run DRUDG. DRUDG provides a choice in option (11) to specify which
+drive to start on when two drives are available and automatically
+makes the choice for you if you forget.
+
+A new command to support dual drive operation, "select", is
+provided. This command is used to specify which drive is currently
+being used for recording. You don't need to enter this command. The
+appropriate command is placed in the set-up procedure automatically by
+DRUDG. This command affects which drive chekr checks, controls the
+"mount" inter-lock described below, and which recorder monitor output
+is used if a VLBA rack is in use. Currently there is no hardware
+mechanism for selecting the recorder monitor for Mark III, Mark IV, or
+VLBA4 racks.
+
+One of the things that sequential dual recorder use makes possible is
+unattended tape changes. In fact the changes aren't unattended, but
+one of the drives can be changed while the other is in use. An
+operator then need not necessarily be present at the time when the
+tape drive in use would change. To support this there is a new
+"mountX" (X=1 or 2) command. This command provides a mechanism for
+recording the tape label and loading the tape (if the recorder
+supports automated loading). If the label is accepted it will execute
+the experiment library version of the "mounterX" procedure that DRUDG
+will have generated with appropriate contents for the specified type
+of tape drive. Currently this procedure is empty except for VLBA and
+VLBA4 drives. For non-VLBA/VLBA4 drives, the operator will need to
+establish vacuum before entering the label as usual. When it becomes
+time to use this tape, the "newtapeX" command in the "readyX"
+procedure will detect that a new label has already been entered and
+continue execution without waiting for an operator to input the
+"labelX=..."  command. However, if the "mountX=..." command has not
+been issued, it is assumed that a new tape is not mounted and the
+schedule waits for the "labelX=..."  command. So the tape doesn't have
+to be changed beforehand. Please note that as a safety feature, the
+"mountX" command will not work for the tape currently specified by the
+"select" command.
+
+If you have a second recorder, a natural question to ask is: "since
+only one drive is used at a time, can I use the other one to pre-pass
+tapes?" It is possible, if you do not have a Mark IV/VLBA4 recorder or
+if you have a Mark IV/VLBA4 recorder and only the first headstack is
+being recorded with, but somewhat dangerous. There are two possible
+approaches: (1) specify only one drive in the equip.ctl file and write
+special SNAP procedures to control the other drive using low-level MAT
+or MCB commands, or (2) always have two drives defined in the
+equip.ctl file and use commands that control the drive not being
+recorded with by the schedule. Option (2) seems less prone to
+error. However, both approaches require a high degree of vigilance to
+avoid accidently issuing a command that inappropriately addresses the
+drive being used by the schedule. Making this mistake once would
+probably be enough to convince you to never try prepassing with the
+second drive during a schedule again. In any event, it not possible to
+use the "prepass" procedure or any of its relatives since these
+procedures start schedules to do a prepass. Doing so would interrupt
+the execution of the observation schedule.

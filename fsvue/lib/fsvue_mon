@@ -1,0 +1,136 @@
+#!/usr/bin/wish -f
+#
+  wm positionfrom . user
+  wm sizefrom . ""
+  wm maxsize . 1152 900
+  wm iconposition . 1200 500
+  wm iconname . {fsvue}
+#position window full screen from top left corner.
+#  wm geometry . $vieX\x$vieY+0+0
+#position window from top left corner.
+  wm geometry . +0+0
+  wm title . {FS VLBI User Environment Remote Client}
+
+set WINFONT -b&h-lucidatypewriter-bold-r-normal-sans-14-140-75-75-m-90-iso8859-1
+frame .op \
+    -bg {black} \
+    -relief {groove} 
+
+pack .op -side top -fill both -expand 0
+global fsrun
+set fsrun 0
+## Entry windows for IP.
+#
+entry .op.ip -width 40 -relief sunken -textvariable command
+#bind .op.ip <Return> Start
+focus .op.ip
+###
+## STOP Button with this button will exit and loose connection.
+# 
+set energizer [button .op.run -text "<< Connect >>" \
+    -relief raised -background blue -foreground white -activebackground red -command Start]
+button .op.stop -text "Exit" -font 9x15bold -background red -foreground white\
+    -activebackground red -command { if {$fsrun==1} {error "Still Connected\nDisconnect then exit" } else { exit }}
+#label .op.result -text "Remote FSVUE Monitor" -background blue \
+    -foreground white -font 9x15bold
+label .op.ip_label -text "IP address:" -background black \
+    -foreground white -font 9x15bold
+pack .op.ip_label -side left
+pack .op.ip .op.run -side left -fill x
+#pack .op.result .op.stop -side right -fill x
+pack .op.stop -side right -fill x
+
+text .t -height 20 -width 90 -background blue -yscrollc {.sb set} -font $WINFONT -bg linen
+scrollbar .sb -bg linen -command {.t yview}
+pack .sb -side right -fill y
+pack .t  -fill both -expand 1
+#
+##
+###
+# Global parameter.
+###
+global sid
+
+proc client_handle {} {
+    global backend buffer sid request
+
+    if {[gets $sid request] <= 0} {
+	catch {close $sid}
+	set backend ""
+	.t insert end "Lost connection to server\n"
+	update idletasks
+    } else {
+	if {[string match $buffer $request]} {
+	    update idletasks
+	    client_send 0
+	} else {
+	    set buffer $request
+	    set line [lindex $request 0]
+	    if {[regexp "ERROR" $line] == 1} {
+		if {[regexp " ma " $line] == 1 || 
+		    [regexp " ch " $line] == 1 ||
+		    [regexp " bo " $line] == 1} {
+		    .t tag configure "red_rev" -background Red -foreground linen
+		    .t insert end $line\n red_rev
+		} elseif {[regexp " mc " $line] == 1 || 
+			  [regexp " ib " $line] == 1 ||
+			  [regexp " an " $line] == 1 ||
+			  [regexp " ds " $line] == 1} {
+		    .t tag configure "red_und" -background Red -foreground white
+		    .t insert end $line\n red_und
+		} elseif {[regexp " ta " $line] == 1 ||
+			  [regexp " wx " $line] == 1 ||
+			  [regexp " sc " $line] == 1 } {
+		    .t tag configure "red" -background linen -foreground Red
+		    .t insert end $line\n red
+		} elseif {[regexp " if " $line] == 1 || 
+			  [regexp " sp " $line] == 1 } {
+		    .t tag configure "blue" -background linen -foreground Blue
+		    .t insert end $line\n blue
+		} else {
+		    .t insert end $line\n ta
+		}
+		.t see end
+	    } else {
+		if {[regexp ">" $line] == 1 } {
+		    .t tag configure "red" -background linen -foreground Red
+		    .t insert end $line\n red
+		} else {
+		    .t insert end $line\n
+		}
+		.t see end
+	    }
+		update idletasks
+		client_send 0
+	}
+    }
+}
+proc client_send {args} {
+    global backend .t request energizer
+
+    if {$backend != ""} {
+	puts $backend $args
+    }
+}
+proc Stop {} {
+    global sid energizer fsrun
+    catch close $sid
+    set fsrun 0
+    $energizer config -text "<< Connect >>" -state normal -command Start
+}
+proc Start {} {
+    global .op.ip backend request buffer sid fsrun energizer
+
+    $energizer config -text "<< Disconnect >>" -state normal -command Stop
+
+    set fsrun 1
+    set request ""
+#    set sid [socket localhost 8433]
+    set host [.op.ip get]
+    set sid [socket $host 8433]
+    fileevent $sid readable "client_handle"
+    fconfigure $sid -blocking 0 -buffering line
+    set backend $sid
+    set buffer ""
+    client_send 0
+}

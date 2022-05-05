@@ -1,0 +1,15 @@
+* tacdlog.ctl - tacd client log control file
+*
+* NO commas allowed as delimiters - just spaces.
+*
+tacggao.gsfc.nasa.gov	IP or hostname
+32325               	PORT number
+average		log time or average.
+GG		station two-letter code
+600             logging period for all data (seconds)
+/usr2/log       directory for tacd logging data.
+GGAO7108        station Name
+76.8265       	longitude
+39.0219       	latitude
+14.99         	station Elevation
+*

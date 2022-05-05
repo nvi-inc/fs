@@ -1,0 +1,34 @@
+File: /usr2/fs/misc/lo_config.txt       Version: 0.1  Date: 130925
+
+			  lo_config command
+
+The "lo_config" command is intended only for stations that use a local
+"lo=..." command to set their LOs under schedule control and need to
+avoid sending individual commands for each LO used for a given
+mode. In this case they can use the "lo_config" command to set all LOs
+at one time.  The "lo_config" command is a local station implemented
+command only.
+
+Use of the "lo_config" command by DRUDG in experiment procedure files
+is enabled with the "LO_CONFIG" keyword in the
+"/usr2/control/skedf.ctl" control file.  Please see
+"/usr2/fs/st.default/control/skedf.ctl" for an example.
+
+If "lo_config" is enabled in "skedf.ctl", DRUDG will append an
+"lo_config" command at the end of every IF set-up procedure it
+generates.  The intent is to give a signal when the entire LO
+configuration for a mode has been defined so that just one transaction
+can used to set the local LO control system, instead of one
+transaction for each "LO=..." command.
+
+Please note that if "lo_config" is used, any local IF set-up
+procedures should be updated to use it.  In addition if any manual
+"lo=..." commands are given, it will be necessary to manually issue an
+"lo_config" command to cause an effect.
+
+It is recommended that a "/usr2/st/help/lo_config.___" file be created
+with help information for use with the help command.
+
+Due to the fact that using "lo_config" makes manually configuring the
+LOs a two step process, is recommended that it only be implemented if
+it is necessary.

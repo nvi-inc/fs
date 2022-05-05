@@ -1,0 +1,48 @@
+#!/bin/bash 
+# 2008-12-16 pb send file xxxxx.log to vlbeer 
+# Renames logfile with station code and ftp's it. 
+# Renames ftp version back to local 
+# Doesn't need '.log' extension. 
+# Procedure call sy =exec lgput `lognm`.log cm
+#
+echo "Send VLBI Logfile v1.0.."
+
+ if [ $# -lt 2 ];
+   then
+    echo "Syntax: $(basename $0) <filename> <stn>"
+    exit 1
+ fi
+ 
+ if [ "$2" != jb ] && [ "$2" != cm ] && [ "$2" != kn ] && [ "$2" != da ] \
+     && [ "$2" != de ] && [ "$2" != ta ]
+     then
+      echo "Unknown Station"
+      exit 4
+     fi
+     
+cd /usr2/log            
+FILE=`echo $1 |cut -f1 -d '.'`
+if [ ! -f "$FILE".log ]
+ then 
+  echo "$FILE.log file not found"
+  exit 2
+fi
+     
+OUTF=$FILE$2
+mv $FILE.log $OUTF.log
+
+MONTH=$(date +"%b")
+YEAR=$(date +"%y")
+VDIR=`echo vlbi_arch/$MONTH$YEAR/ | tr A-Z a-z` 
+echo "Dir: $VDIR "
+#  
+echo "Sending VLBI Logfile (v1.0)..$FILE $OUTF" 
+ncftpput -u evn -p <PASSWDHERE> vlbeer.ira.inaf.it $VDIR $OUTF.log 2>&1
+echo "sendlog result code $?"
+result="sendlog result code $?, $OUTF"
+inject_snap "\"$result\""
+mv $OUTF.log $FILE.log
+cd
+
+### EOF ###
+ 

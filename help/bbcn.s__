@@ -1,0 +1,39 @@
+               bbcn - baseband converter (S2 racks)
+
+            Syntax: bbcn=freq,ifsource,bwu,bwl,avper,agccontrol 
+            Syntax: bbcn=state (to monitor a state during frequency switching) 
+            Syntax: bbcn 
+  
+            Response: bbcn:state/freq,ifsource,bwu,bwl,avper,gainmode,gainu,gainl,lock,USBpwr,LSBpwr 
+
+            n     : the BBC index number, 1 to 4. Not all BBCs are available. 
+            state : the frequency switching state number. If frequency switching is not 
+                    running, use 0. 
+
+Settable Parameters: 
+
+  freq       : L.O. frequency in MHz, between 100.00 and 1000.00, inclusive. No default. 
+  ifsource   : I.F. input source, one of 1, 2, 3, 4. No default. 
+  bwu        : Bandwidth for USB in MHz. One of 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16. 
+  bwl        : Bandwidth for LSB in MHz. One of 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16. 
+  avper      : Averaging period for TPI in seconds (0.01 to 10 seconds). 
+  agccontrol : Turn AGC on/off control for this BBC. 
+  
+Monitor-only Parameters:
+ 
+  gainu  : Gain value for USB in dB. 
+  gainl  : Gain value for LSB in dB.
+  lock   : L.O. lock status, lock or unlock. 
+  USBpwr : Power in upper sideband in counts. Range 0 to 300000,
+           nominal operating is 45000. 
+  LSBpwr : Power in lower sideband in counts. Range 0 to 300000, 
+           nominal operating is 45000.
+ 
+Comments: 
+
+This command sets up the baseband converters in the S2 rack. This command is 
+analagous MkIV bbcnn and to the Mark III vcnn commands. 
+  
+  
+  
+  

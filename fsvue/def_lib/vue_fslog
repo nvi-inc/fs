@@ -1,0 +1,495 @@
+#!/usr/bin/wish
+# vue_fslog source
+# Basic font for button, menus and labels
+# Product of Raymond Gonzalez for NVI,Inc./GSFC (2000)
+# to be incorporated into the VLBI Field System.
+  # Window manager configurations
+
+# fsvue directories
+  set ICONDIR /usr2/fs/fsvue/images
+  set LIBDIR /usr2/fs/fsvue/lib
+# Use this size of fonts for the information icon, or help.
+
+  global tkVersion
+  wm positionfrom . user
+  wm sizefrom . ""
+  wm maxsize . 1152 900  
+  wm iconbitmap . @$ICONDIR/vlb.icon
+  wm iconposition . 1200 0
+  wm iconname . {fsvue}
+#  wm geometry . +5+25
+  wm title . {Log Files}
+  set w .
+  $w config -cursor {top_left_arrow black white}
+
+set cmd(quit) quit
+set cmd(exit) quit
+set cmd(xterm) "xterm -bg black -fg white -sb -sl 1000"
+
+set global_startmode 0
+set argno 1
+set newfile_filename ""
+set current_filename ""               ;# The selected log file
+set current_DefaultDir /usr2/log      ;# Default directory for FS log files
+
+
+# Decide on font size.
+  if {$argc<=1} {
+      set newfile_filename [lindex $argv 0]
+      set ibfont [open "|/bin/sh -c \"cat $LIBDIR/my_font; :\""]
+      set bfont [gets $ibfont]
+      catch {close $ibfont}
+  } else {
+      set bfont [lindex $argv 0]
+      set newfile_filename [lindex $argv 1]
+  }  
+
+# Top frame is a menubar
+# there is more magic that you can do with this
+# build widget .m
+frame .m \
+	-bg {navy} \
+	-borderwidth {2} \
+	-relief {groove} 
+
+frame .m2 \
+	-bg {linen} \
+	-borderwidth {1} \
+	-relief {raised} 
+
+button .m.fs -text "Errors Only" -relief {raise}  \
+	-background navy -fg white \
+	-command {.t delete 1.0 end
+DSPlogerr }
+
+button .m.log -text "Full Log" -relief {raise}  -background navy -fg white -command {.t delete 1.0 end
+DSPlog }
+
+button .m.logl -text "log directory" -relief {raise}  -background navy -fg white -command { fileselection_dialog }
+
+button .m.help -bitmap @$ICONDIR/info.icon -relief {raise}  -background navy -fg white -command {Help logs}
+
+button .m.ef -text "Format_help" -relief {raise}  -background navy -fg white -command {Help format}
+
+button .m.q -text "Exit" -relief {raise}  -background red -fg white -command exit 
+
+pack append . .m2 {left frame n expand fill}
+
+entry .m.ent -relief {sunken} -bg linen -fg black
+pack .m.help .m.fs .m.log .m.ent .m.logl .m.ef -side left -fill both
+pack .m.q -side right -fill both
+
+# Main command entry area is under that
+bind .m.ent <Return> {DSPlogmon}
+pack .m -side top -fill x -expand 0
+# Put the focus into the box
+focus .m.ent
+
+proc forAllMatches { w pattern script} {
+    scan [$w index end] %d numLines
+    for {set i 1} {$i < $numLines} {incr i} {
+	$w mark set last $i.0
+	while { [regexp -indices $pattern \
+		[$w get last "last lineend"] indices]} {
+	    $w mark set first \
+			"last + [lindex $indices 0] chars"
+		$w mark set last "last + 1 chars \
+			+ [lindex $indices 1] chars"
+		uplevel $script
+	    }
+	}
+    }
+
+# setup display area( text and scrollbar) to monitor Field System.
+# This will be pipeing information from the station.log file.
+# 
+text .t -yscrollc {.sb set}  -bg linen
+scrollbar .sb -bg linen -command {.t yview}
+text .t2 -height 1  -bg white -fg Red
+
+.t tag configure errtag -foreground black -background red
+
+pack .sb -side right -fill y
+pack .t .t2 -side top -fill both -expand 1
+
+#text: read the log file from fsvue into the text widget
+proc loadcalling file {
+    global newfile_filename
+    .t delete end 1.0
+    set f [open $file r]
+    while { ![eof $f] } {
+#        .t insert end [read $f 10240]
+        .t insert end [read $f 10000000]
+        .t see end; 
+        .t yview end
+    }
+
+    # Mark error messages.
+    forAllMatches .t "ERROR" {
+        .t tag add big first last
+    }
+    .t tag configure big -background Red -foreground white -borderwidth 2 \
+            -font -Adobe-Helvetica-Medium-R-Normal--*-190-* \
+            -relief sunken
+    close $f
+    .t2 delete 1.0 end
+    .t2 insert end "You are now viewing $newfile_filename"
+}
+
+loadcalling $newfile_filename
+
+# Update display area with line of text
+proc line {text} {
+    .t insert end $text\n; 
+    .t see end; 
+    .t yview end
+    update idletask
+}
+
+# Setup fd monitoring 
+proc execAndLog {cmd} {
+    line "\nStart of <$cmd>."
+    set inpipe [open "|/bin/sh -c \"$cmd &1; :\""]
+    fileevent $inpipe readable [list logOutput $inpipe $cmd]
+}
+
+# Close fd monitoring 
+proc execAndLogClose {} {
+  close $inpipe 
+}
+
+# Monitor fd (inpipe) and feed into display area
+proc logOutput {inpipe cmd} {
+   .t delete end 1.0
+    if {[eof $inpipe]} {
+	close $inpipe
+	line "end of <$cmd>."
+    } else {
+	line [gets $inpipe]
+    }
+# Mark error messages.
+    forAllMatches .t "ERROR" {
+	.t tag add big first last
+    }
+    .t tag configure big -background Red -foreground white -borderwidth 2 \
+	    -font -Adobe-Helvetica-Medium-R-Normal--*-190-* \
+	    -relief sunken
+}
+
+#text: read a FS log file into a text widget
+proc loadFile file {
+    global newfile_filename
+    .t delete end 1.0
+    set f [open $file r]
+    while { ![eof $f] } {
+#	.t insert end [read $f 10240]
+	.t insert end [read $f 10000000]
+	.t see end; 
+	.t yview end
+    }
+
+    # Mark error messages.
+    forAllMatches .t "ERROR" {
+	.t tag add big first last
+    }
+    .t tag configure big -background Red -foreground white -borderwidth 2 \
+	    -font -Adobe-Helvetica-Medium-R-Normal--*-190-* \
+	    -relief sunken
+    close $f
+    .t2 delete 1.0 end
+    .t2 insert end "You are now viewing $newfile_filename"
+}
+
+# Display only errors at only errors.
+proc Onlyerror file {
+    .t delete end 1.0
+    set f [open $file r]
+    set pat "ERROR"
+    while { [gets $f line] >= 0} {
+	if [regexp $pat $line] {
+	    .t insert end $line\n
+	    .t see end; 
+	    .t yview end
+	}
+    }
+    # Mark error messages.
+    forAllMatches .t "ERROR" {
+	.t tag add big first last
+    }
+    .t tag configure big -background Red -foreground white -borderwidth 2 \
+	    -font -Adobe-Helvetica-Medium-R-Normal--*-190-* \
+	    -relief sunken
+    close $f
+}
+
+# Display string with 3 lines before and after.
+proc lookForString cmd {
+    global newfile_filename
+    .t delete 1.0 end
+    set f [open $newfile_filename r]
+    while { [gets $f line] >= 0} {
+	if [regexp $cmd $line] {
+	    .t insert end $line\n
+	    .t see end; 
+	    .t yview end
+	}
+    }
+    # Mark error messages.
+    forAllMatches .t "ERROR" {
+	.t tag add big first last
+    }
+    .t tag configure big -background Red -foreground white -borderwidth 2 \
+	    -font -Adobe-Helvetica-Medium-R-Normal--*-190-* \
+	    -relief sunken
+    close $f
+}
+
+#
+# Which monitor log file do you want the Field System to Display.
+proc DSPlogmon {} {
+    global newfile_filename
+    set cmd [.m.ent get]
+    lookForString $cmd
+#    execAndLog "grep -i -n3 $cmd $newfile_filename"
+}
+
+# Which monitor log file do you want the Field System to Display.
+proc DSPlog {} {
+    global newfile_filename
+    loadFile $newfile_filename
+}
+# Which error log file do you want the Field System to Display.
+proc DSPlogerr {} {
+    global newfile_filename
+    Onlyerror $newfile_filename
+}
+
+
+#
+#       Help procedure
+#
+proc Help {sel} {
+        global cmd
+# long lines to allow msg to format things
+
+       set h(logs) {Logs can be examined by clicking on the 
+
+        [log directory] 
+
+then clicking or typing the name of the log file, this will bring up the desired log file. 
+
+The user can next use the 
+
+        [Errors Only]
+              or 
+          [Full log] 
+
+to examine the log. 
+
+        YOU CAN ALSO SEARCH 
+
+You can search for a string in the log file by typing the string into the input window. This will find every occurence of the string in the file. 
+}
+set h(format) {
+        GENERAL FORMAT OF ERROR LOG ENTRY
+
+        time type data
+
+time: The 'time' the log entry was written. dddhhmmss
+
+type: The 'type' of entry one of:
+      Commands
+      : command statement from a schedule file.
+      ; command statement from the Operator.
+      @ at time-scheduled command.
+      $ a command from within a procedure.
+      & contents of a procedure.
+
+      Errors
+      ? error message
+
+      Responses
+      / response to a command, e.g. readback of data from a module.
+
+      External
+      # log entry from a particular program.
+
+data: The error or entry field.
+      Commands
+      command[[[parm1],parm2],...]
+      command: Any valid SNAP command or procedure.
+        parmN:   Parameter N for a command or procedure.
+
+      Errors
+      ERROR aa nnnn(mmm)
+        aa: a 2 char. mnemonic for the source of the error.
+      nnnn: a number identifying the particular error.
+       mmm: optional additional information, numeric or char.
+
+      Responses
+      command/parm1[[parm2],...]
+      command: Any Valid SNAP command.
+        parmN: A settable or monitor only parameter for a command.
+
+      External
+      program_name\#program data
+      program_name five char. program name.
+
+      Comments
+      "any text 
+
+}
+
+        if { $sel == "commands" } {
+                set h(commands) {Key    Alias
+	}
+                foreach name [lsort [array names cmd]] {
+                        set h(commands) \
+                                [format "%s\n%-7s\t%s" $h(commands) $name $cmd($name)]
+                }
+        }
+        tk_dialog .help "Information" $h($sel) {} -1 OK
+}
+#
+# This is a standard bit of code, modified to use my font
+# dialog.tcl --
+#
+# This file defines the procedure tk_dialog, which creates a dialog
+# box containing a bitmap, a message, and one or more buttons.
+#
+# $Header: /user6/ouster/wish/library/RCS/dialog.tcl,v 1.4 93/08/16 16:59:52 ouster Exp $ SPRITE (Berkeley)
+#
+# Copyright (c) 1992-1993 The Regents of the University of California.
+# All.vpeople.rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above cop.vpeople.right notice and the following two paragraphs appear in
+# all copies of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+# DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+# OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+# CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+# ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+#
+
+#
+# tk_dialog:
+#
+# This procedure displays a dialog box, waits for a button in the dialog
+# to be invoked, then returns the index of the selected button.
+#
+# Arguments:
+# w -           Window to use for dialog top-level.
+# title -       Title to display in dialog's decorative frame.
+# text -        Message to display in dialog.
+# bitmap -      Bitmap to display in dialog (empty string means none).
+# default -     Index of button that is to display the default ring
+#               (-1 means none).
+# args -        One or more strings to display in buttons across the
+#               bottom of the dialog box.
+
+proc tk_dialog {w title text bitmap default args} {
+    global tk_priv bfont
+
+    set ICONDIR /usr2/fs/fsvue/images
+    # 1. Create the top-level window and divide it into top
+    # and bottom parts.
+
+    catch {destroy $w}
+    toplevel $w -class Dialog
+    wm title $w $title
+    wm iconbitmap $w @$ICONDIR/vlb.icon
+    wm iconname $w {VLBIIE}
+
+    frame $w.top -relief raised -bd 1 -bg blue
+    pack $w.top -side top -fill both
+    frame $w.bot -relief raised -bd 1 -bg blue
+    pack $w.bot -side bottom -fill both
+
+    # 2. Fill the top part with bitmap and message.
+
+    message $w.msg -width 8i -text $text 
+    pack $w.msg -in $w.top -side right -expand 1 -fill both -padx 5m -pady 5m
+    if {$bitmap != ""} {
+        label $w.bitmap -bitmap $bitmap
+        pack $w.bitmap -in $w.top -side left -padx 5m -pady 5m
+    }
+
+    # 3. Create a row of buttons at the bottom of the dialog.
+
+    set i 0
+    foreach but $args {
+        button $w.button$i -text $but -command "set tk_priv(button) $i"
+        if {$i == $default} {
+            frame $w.default -relief sunken -bd 1 -bg blue
+            raise $w.button$i $w.default
+            pack $w.default -in $w.bot -side left -expand 1 -padx 3m -pady 2m
+            pack $w.button$i -in $w.default -padx 2m -pady 2m \
+                    -ipadx 2m -ipady 1m
+            bind $w <Return> "$w.button$i flash; set tk_priv(button) $i"
+        } else {
+            pack $w.button$i -in $w.bot -side left -expand 1 \
+                    -padx 3m -pady 3m -ipadx 2m -ipady 1m 
+        }
+        incr i
+    }
+
+    # 4. Withdraw the window, then update all the geometry information
+    # so we know how big it wants to be, then center the window in the
+    # display and de-iconify it.
+
+    wm withdraw $w
+    update idletasks
+    set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 \
+            - [winfo vrootx [winfo parent $w]]]
+    set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 \
+            - [winfo vrooty [winfo parent $w]]]
+    wm geom $w +$x+$y
+    wm deiconify $w
+
+    # 5. Set a grab and claim the focus too.
+
+#    set oldFocus [focus]
+#    grab $w
+#    focus $w
+
+    # 6. Wait for the user to respond, then restore the focus and
+    # return the index of the selected button.
+
+    tkwait variable tk_priv(button)
+    destroy $w
+#    focus $oldFocus
+    return $tk_priv(button)
+}
+
+# ==========================================================================
+#
+#                         FILESELECTION SECTION
+#
+# ==========================================================================
+proc fileselection_dialog {} {
+ 
+ global global_startmode current_DefaultDir newfile_filename current_filename 
+
+ set types {
+  {{Log Files} {*.log} }
+  {{All Files} {*} }
+ }
+
+ set newfile_filename $current_filename
+ set newfile_filename [tk_getOpenFile  -title "Open new log file" -filetypes $types -initialdir $current_DefaultDir]
+
+ if {$newfile_filename != ""} {
+     .t delete 1.0 end
+     loadFile $newfile_filename
+ }
+
+}

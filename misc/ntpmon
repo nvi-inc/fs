@@ -1,0 +1,9 @@
+#!/bin/tcsh
+while(1)
+ echo "NTP Monitor on `hostname -f`"
+ date -u +'%Y-%m-%d %H:%M:%S.%3N Z'
+ ntpq -np -c as -c rv
+ date -u +'%Y-%m-%d %H:%M:%S.%3N Z'
+ echo ''
+ sleep 0.5
+end

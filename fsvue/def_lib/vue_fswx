@@ -1,0 +1,79 @@
+#!/usr/bin/wish
+# vue_fswx source for the Tk toolkit
+# Basic font for button, menus and labels
+# Product of RDG for NVI,Inc./GSFC (2000)
+# to be incorporated into the VLBI Field System.
+  # Window manager configurations
+
+  set ICONDIR /usr2/fs/fsvue/images
+  set LIBDIR /usr2/fs/fsvue/lib
+
+  global tkVersion
+
+  wm positionfrom . user
+  wm sizefrom . ""
+  wm maxsize . 1152 900  
+  wm iconbitmap . @$ICONDIR/vlb.icon
+  wm iconposition . 1200 0
+  wm iconname . {fsvue}
+#  wm geometry . +5+25
+  wm title . { Weather }
+
+
+# Decide on font size.
+  if {$argc<=0} {
+      set ibfont [open "|/bin/sh -c \"cat $LIBDIR/my_font; :\""]
+      set bfont [gets $ibfont]
+      catch {close $ibfont}
+  } else {
+      set bfont [lindex $argv 0]
+  }  
+
+# Top frame is a menubar
+# there is more magic that you can do with this
+# build widget .m
+frame .m \
+	-bg {blue} \
+	-borderwidth {5} \
+	-relief {groove} 
+
+proc flash { w option value1 value2 interval count} {
+    for {set i 0} {$i < $count} {incr i} {
+	$w config $option $value1
+	update idletasks
+	after $interval
+	$w config $option $value2
+	update idletasks
+	after $interval
+    }
+}
+
+#flash . -bg black black 10 5	
+
+button .m.q -text "Exit" -relief {raise}  -background red -fg white -command exit 
+
+pack .m .m.q -side top -fill x -expand 0
+
+label .label4 -text "UT Time"  -bg blue -fg white
+label .result4 -width 16 -relief sunken  -textvariable result4
+label .label1 -text "Temperature"  -bg blue -fg white
+label .result1 -width 8 -relief sunken  -textvariable result1
+label .label2 -text "Pressure"  -bg blue -fg white
+label .result2 -width 8 -relief sunken  -textvariable result2
+label .label3 -text "Humidity"  -bg blue -fg white
+label .result3 -width 8 -relief sunken  -textvariable result3
+
+while {1} {
+
+set result4 [exec vueinfo time]
+set result1 [exec vueinfo wxt]
+set result2 [exec vueinfo wxp]
+set result3 [exec vueinfo wxh]
+
+pack .label4 .result4 -fill x 
+pack .label1 .result1 -fill x 
+pack .label2 .result2 -fill x 
+pack .label3 .result3 -fill x 
+
+update
+}

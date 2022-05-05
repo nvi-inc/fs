@@ -1,0 +1,109 @@
+              ifpnn - IF processor (LBA, LBA4 racks)
+
+
+            Syntax:     ifpnn=freq,bandwidth,mode,flipU,flipL,bitcode,mstats
+                    ifpnn=alarm
+
+            Response:   ifpnn/freq,bandwidth,mode,flipU,flipL,bitcode,mstats,sync,proc,tp
+                    ifpnn/ACK,NAK
+
+  
+Settable parameters:
+            freq        Effective frequency in MHz, value is usually 32.0
+            MHz (or higher aliases at 96 or 160 MHz) though a
+            limited amount of tuning is available depending on
+            bandwidth and filter mode, see below.  No default.
+          bandwidth Effective filter bandwidth in MHz, default 2.
+          Choices for single centreband are: 0.0625, 0.125,
+          0.25, 0.5, 1, 2, 4, 8, 16, 32 or 64 MHz (64 MHz
+          available only in 1-bit sampling). Choices for
+          double sideband are: 0.0625, 0.125, 0.25, 0.5, 1, 2,
+          4, 8 or 16 MHz.
+          mode      filter mode, usually DSB, SCB or ACB, default DSB.
+          The following are available:
+                        DSB - double sideband response about frequency,
+              tunability given in comments below.
+                        SCB - single response centred on frequency (i.e.,
+              equivalent to upper sideband at frequency -
+              bandwidth/2), tunability given in comments
+              below.
+                        ACB - alternative single response centred
+              onfrequency, slightly wider than SCB but at the
+              expense of additional ripple, tunability the
+              same as for SCB given in coments below.
+                        DS2 - double sideband response about frequency
+              produced only in band splitter available only
+              for bandwidths 1, 2, 4, 8 and 16 MHz. Not
+              tuneable.
+                        DS4 - separated double sideband response about
+              frequency, produced only in band splitter only
+              for bandwidth 8 MHz. Response is equivalent to
+              lower sideband at 24 MHz and upper sideband at
+              40 MHz.  Not tuneable.
+                        DS6 - separated double sideband response about
+              frequency, produced only in band splitter,
+              available only for bandwidth 8 MHz Response is
+              equivalent to lower sideband 16MHz and upper
+              sideband at 48MHz. Not tuneable.
+                        SC1 - single response centred on frequencyproduced
+              only in band splitter, available only for
+              bandwidths 1, 2, 4, 8, 16, 32, and 64 MHz.  Not
+              tuneable.
+                        AC1 - alternative single response centred 
+              frequency, produced only in band splitter,
+              available only for 1, 2, 4, 8, 16, 32, and 64
+              MHz.  Not tuneable.
+          flipU     Upper sideband/Centre band spectrum inverter, either
+          NAT for response upright in IF or FLIP for inverted.
+          Default is NAT.
+            flipL       Lower sideband/Centre band spectrum inverter,  NAT
+            for response inverted in IF or FLIP for upright
+            Default is NAT.
+          bitcode   Either AT for Australian style true sign and
+          magnitude encoding or VLBA for Mark IV/VLBA
+          compatible encoding. Default is AT.
+            mstats      Either 4LVL for use with VLBI recording and other
+            true 4-level correlators or 3LVL for use with a
+            3-level correlator. Default is 4LVL. See also the
+            cornn command for more details on the correlator
+            output port.
+
+Monitor-only parameters:
+            sync        5MHz, 1PPS reference signal status, sync or err.
+          proc      digital filters status, proc for processing or ntrdy
+          for not ready.
+          tp        total power reading, decimal (currently not
+          available).
+
+Comments: The limited frequency tuning range requires that the
+LBA DAS be used with a (at least coarsely) tuneable first LO
+and independant IFs if multiple VCs are to be emulated.
+ 
+Note that you must use one of the Band Splitter only modes
+e.g., SC1 if you want to independently manipulate the Fine
+Tuner using ftnn.
+ 
+The tuneability for modes DSB and SCB and ACB depending on
+bandwidth is as follows (see additional comment below):
+
+                                              bandwidth (MHz)   Range for  DSB (MHz)    Range for SCB and
+                                            ACB (MHz)
+                                                  32.0 & 64.0       Not available.          Not tunable.
+                                                16.0              Not tuneable.         Not tunable.
+                                                  8.0               24, 32, and 40          12, 20-44, and 52
+                                              4.0               +/- 12.00           +/- 14.00
+                                            2.0             +/- 14.00           +/- 15.00
+                                              1.0               +/- 7.000           +/- 7.500
+                                            0.5             +/- 3.500           +/- 3.750
+                                              0.25              +/- 1.750           +/- 1.875
+                                            0.125           +/- 0.875           +/- 0.9375
+                                                0.0625            +/- 0.9375            +/- 0.96875
+
+In addition for bandwidth < 16 MHz in mode DSB or bandwidth < 32
+MHz in mode SCB, filters may be mis-tuned up to bandwidth/16
+from the nominal frequencies quoted above.
+
+The form ifpnn=alarm is used to reset the 1PPS/5MHz status
+latches.
+
+See also: cornn, ftnn, monnn.

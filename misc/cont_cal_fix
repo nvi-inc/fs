@@ -1,0 +1,122 @@
+#!/usr/bin/perl
+# Usage: cont_cal_fix file(s)
+
+if ($#ARGV < 0) {
+    print "\n  Usage: cont_cal_fix files\n\n";
+    print "    Fixes procedues files any cont_cal=... commands that contain non-null\n";
+    print "    (non-default) values for the number of samples from prior to FS 9.11.8.\n\n";
+    print "    'files' are the files to be fixed\n\n";
+    exit -1;
+}
+
+
+$float_pattern='([+-]?)(?=\d|\.\d)\d*(\.\d*)?';
+
+FILE: foreach $name (@ARGV) {
+
+    $bak = $name . ".bak";
+    $out = $name;
+    if (!-e $name) {
+	die "Can't find $name Quitting.\n";
+    }
+
+# rename the original if we can and open the files
+
+    if (-e $bak) {
+	die "Backup-file $bak already exists, giving up.\n";
+    }
+
+    rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
+ 
+    if(!open(BAK,$bak)) {
+	print "Failed to open $bak: $!\n";
+	if(!rename($bak,$out)) {
+	    print "Unable to rename $bak to $out: $!\n";
+	    die "Please fix whatever the problem is and rename it yourself.\n";
+	} else {
+	    die "I renamed $bak to $out for you.\n";
+	}
+    }
+    
+    if(!open(OUT,">" . $out)) {
+	print "Failed to open $out: $!\n";
+	if((!close(BAK)) || (!rename($bak,$out))) { 
+	    print "Unable to rename $bak to $out: $!\n";
+	    die "Please fix whatever the problem is and rename it yourself.\n";
+	} else {
+	    die "I renamed $bak to $out for you.\n";
+	}
+    }
+
+
+#process
+
+    $bslash=0;
+    $line=0;
+    $change=0;
+    while(<BAK>) {
+	$line++;
+#calrx is now obsolete
+# we only fix cont_cal= commands, even commented out
+	if(!/^[\" ]*cont_cal=/i) {
+	    print OUT;
+	    next;
+#this one was already fixed, skip
+	} elsif(/^[^=]+[^,]*,[^,]*,[^,]+.*$/) {
+	    print OUT;
+	    next;
+#this one doesn't need fixing, skip
+	} elsif(!/^[^=]+[^,]*,.*$/) {
+	    print OUT;
+	    next;
+#also this one doesn't need fixing, skip
+	} elsif(!/^[^=]+[^,]*,[^, ]+.*$/) {
+	    print OUT;
+	    next;
+	}
+	if(/\\/) {
+	    print "cont_cal=... at  line $line in $out contained a backslash escape sequence, please edit by hand\n";
+	    $bslash=1;
+	    last;
+	}
+	$change=1;
+	chomp;
+#what is left an okay old command that just needs an extra comma.
+	if(/^([^=]+[^,]*,)([^,]*).*$/) {
+	    print OUT "$1,$2\n";
+	} else {
+	    print "cont_cal=... at  line $line in $out did not match known pattern, please edit by hand\n";
+	    $bslash=1;
+	    last;
+	} 
+    }
+    $rename=0;
+    if(!close(OUT)) {
+	$rename=1;
+	print "Warning: Unable to close to $out: $!\n";
+    }
+    if(!close(BAK)) {
+	$rename=1;
+	print "Warning: Unable to close to $bak: $!\n";
+    }
+
+    if($bslash) {
+	$rename=1;
+    }
+    if($rename || $change == 0) {
+	if(!rename($bak,$out)) { 
+	    print "Warning: Unable to rename '$bak' to '$out': $!\n";
+	    if($rename) {
+		print "Warning: Please fix whatever the problem is and rename it yourself,\n";
+		print "Warning: probably using 'mv $bak $out'\n";
+	    } else {
+		print "Warning: It appears that $out did not need any changes,\n";
+		print "Warning: but to be safe you should probably \"";
+		print "Warning: use 'mv $bak $out'\n";
+	    }
+	} elsif($rename) {
+	    print "Warning: I renamed '$bak' to '$out' for you.\n";
+
+	}
+    }
+}

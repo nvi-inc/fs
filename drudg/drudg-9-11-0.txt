@@ -1,0 +1,105 @@
+DRUDG Release Notes
+2013-Jan-23
+
+On startup the DRUDG version date should say 2013Jan23.
+
+The major changes in this version of DRUDG are list below. For most 
+fixes I list the files that were changed to make the change. Files
+are listed with respect to the drudg source directory.
+
+1.  Support for DBBC.  This version of DRUDG provides support for the
+    DBBC in DDC mode.  The DBBC is now a valid rack type.  This
+    involved changes to many DRUDG routines and some new routines.
+    Affected files: procs.f
+    New files: check_dbbc_freqs.f, check_dbbc_setup.f, proc_dbbc_bbc.f, 
+    proc_lba_ifp.f, proc_lo.f, proc_mracks_vc.f, proc_vc.f,
+    proc_vc_cmd.f, proc_vracks_bbc.f, 
+
+2.  AutoFTP_ABORT_TIME skedf.ctl parameter added to $MISC section.
+    The user can now specify a maximum time for disk2file operations
+    to be aborted (in case they did not terminate on time).  Normally,
+    the abort would be issued just before the next scan.  However, if
+    the next scan would be a long time in the future, there may be a
+    long delay before the abort.  With the new parameter, a maximum
+    time can be set after which the abort will be guaranteed to be
+    issued.  If the user does not specify an abort time DRUDG will use
+    300 seconds.
+    Affected files: drudg_rdctl.f, snap.f, ../skdrincl/data_xfer.ftni
+
+3.  Better support for phase referencing.  When observing
+    phase-reference scans, there should not be a setup procedure,
+    PREOB, or POSTOB between the scans.  DRUDG has no way of
+    explicitly knowing a session is phase-reference.  However, in
+    phase referencing experiments the scheduler switches back and
+    forth between two near-by sources without turning off recording.
+    Hence DRUDG assumes that the scans are phase-referencing if 1) the
+    recorder is running and 2) it is a VEX schedule.  Previously DRUDG
+    would omit the setup procedure and PREOB procedure between the
+    scans.  It now also omits the POSTOB procedure.  
+    Affected files: snap.f.
+
+4.  More scans allowed.  The limit on the number of scans in a
+    schedule was increased to 20,000. 
+    Affected files: skdrincl/skparm.ftni
+
+5.  Fixed 24:00:00 bug.  There was a bug in SKED which would
+    occasionally produce scans with a time-tag of 24:00:00 which is
+    not a valid DRUDG time-tag.  SKED was modified so that this should
+    not happen, and DRUDG was modified to handle this case correctly. 
+    Affected files: unpsk.f     
+
+6.  Handling of smaller powers of two.  For Mark5A recorders the
+    minimum number of tracks recorded is 8.  For Mark5B this is not
+    the case, and DRUDG was modified to handle recording for smaller
+    powers of including 1, 2, 4. 
+    Affected files: proc_mk5b_tracks.f
+
+7.  Separating of skedf.ctl reading routines for DRUDG and SKED.
+    Previously DRUDG and SKED used the same routines to read the
+    configuration file skedf.ctl.  This meant that if extra variables
+    were put into skedf.ctl that either program needed, both programs
+    needed to be modified even if they both did not require the data.
+    This situation has been modified so that DRUDG and SKED now have
+    their own routines. Both DRUDG and SKED will ignore items in
+    skedf.ctl that they do not understand. 
+    Affected files: fdrudg.f
+    New file:  drudg_rdctl.f
+
+8.  Global read and write permission on all files DRUDG creates.
+    DRUDG now set's the permissions so all users can read and write
+    the files that it produces.
+    Affected files: drchmod.f 
+
+9.  Label first character bug.  In some releases of DRUDG, DRUDG 'ate'
+    the first character of the session name when it was producing
+    labels. This required users to write in the tape label command by
+    hand. This has been fixed.
+    Affected files: lablog.f   
+
+10. VEX is now a default file type. The user no longer has to specify
+    the '.vex' extension explicitly.  If no file extension is given
+    DRUDG will try first to open a '.skd' file.  If it does not find
+    one it will then try to open a '.vex' file.
+    Affected files: fdrudg.f
+
+11. TPICD bug. Drudg now writes out the TPICD for all rack types.
+    Affected files: snap.f 
+
+12. Bug in Equipment override in 'command line mode'.  DRUDG has an
+    undocumented 'command line mode' where you can give it a schedule, 
+    filename, and command number and DRUDG will execute the appropriate
+    command and stop. For example:   
+       drudg r1453.skd tc 12
+    Will produe the PRC files for TC and exit.
+    In previous releases DRUDG would ignore the equipment_override 
+    option in command line mode. It now has the same behavior in
+    interactive and command line mode.  
+    Affected files: fdrudg.f    
+
+13. More forgiving behavior for unknown recorder types.  Previously 
+    DRUDG would quit with an error if it doesn't recognize the 
+    recorder type. It now sets the recorder type to 'unknown' and
+    continues on. 
+    Affected files: fdrudg.f, equip_type.f, ../skdrut/ttape.f, 
+    ../skdrut/check_rec_type.f, ../skdrut/unpvt.f 
+

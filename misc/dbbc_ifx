@@ -1,0 +1,163 @@
+#!/usr/bin/perl
+# Usage: dbbc_ifx [-f] inputA inputB inputC inputD files
+
+require "getopts.pl";
+
+&Getopts("f");
+
+
+if ($#ARGV < 0) {
+    print "\n  Usage: dbbc_ifx [-f] inputA inputB inputC inputD files\n\n";
+    print "    Fixes procedure files with DBBC ifX=... commands that don't have IF inputs.\n";
+    print "      for X= 'a', 'b', 'c', or 'd' (case insensitive)\n\n";
+    print "    The IF input is the first parameter in an ifX=... commmand.\n";
+    print "    The inputX parameters must be one of '0', '1', '2', '3', or '4'\n";
+    print "      where '0' means don't change inputX,\n";
+    print "      otherwise the value is the input to use,\n";
+    print "      e.g. if inputA is 3, then you get ifa=3,...\n\n";
+    print "    No change is made to 'ifX=...' commands that already have a non-null\n";
+    print "      first parameter, unless the -f option is selected.\n";
+    print "    The original files are preserved with a '.bak' extension,\n";
+    print "      unless no change was made in which case the original is retained.\n\n";
+    exit -1;
+}
+if ($#ARGV < 4) {
+    die "Must have at least 5 arguments, enter 'dbbc_ifx' for help\n";
+} 
+
+$a=shift(@ARGV);
+$b=shift(@ARGV);
+$c=shift(@ARGV);
+$d=shift(@ARGV);
+
+if (index('01234', $a) == -1 || length($a) != 1) {
+    die "inputA is not with 0, 1, 2, 3, or 4\n";
+} 
+if (index('01234', $b) == -1 || length($b) != 1) {
+    die "inputB is not with 0, 1, 2, 3, or 4\n";
+} 
+if (index('01234', $c) == -1 || length($c) != 1) {
+    die "inputC is not with 0, 1, 2, 3, or 4\n";
+} 
+if (index('01234', $d) == -1 || length($d) != 1) {
+    die "inputD is not with 0, 1, 2, 3, or 4\n";
+} 
+
+FILE: foreach $name (@ARGV) {
+
+    $bak = $name . ".bak";
+    $out = $name;
+    if (!-e $name) {
+	die "Can't find $name Quitting.\n";
+    }
+
+# rename the original if we can and open the files
+
+    if (-e $bak) {
+	die "Backup-file $bak already exists, giving up.\n";
+    }
+
+    rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
+ 
+    if(!open(BAK,$bak)) {
+	print "Failed to open $bak: $!\n";
+	if(!rename($bak,$out)) {
+	    print "Unable to rename $bak to $out: $!\n";
+	    die "Please fix whatever the problem is and rename it yourself.\n";
+	} else {
+	    die "I renamed $bak to $out for you.\n";
+	}
+    }
+    
+    if(!open(OUT,">" . $out)) {
+	print "Failed to open $out: $!\n";
+	if((!close(BAK)) || (!rename($bak,$out))) { 
+	    print "Unable to rename $bak to $out: $!\n";
+	    die "Please fix whatever the problem is and rename it yourself.\n";
+	} else {
+	    die "I renamed $bak to $out for you.\n";
+	}
+    }
+
+
+#process
+
+    $line=0;
+    $change=0;
+    while(<BAK>) {
+	$line++;
+	if(!defined($opt_f)) {
+	    if(!/^[ ]*if([a-d])=[ ]*(,.*)$/i) {
+		print OUT;
+		next;
+	    } 
+	    $if=lc($1);
+	    $end=$2;
+	} else {
+	    if(!/^[ ]*if([a-d])=[^,]*(,.*)$/i) {
+		print OUT;
+		next;
+	    }
+	    $if=lc($1);
+	    $end=$2;
+	}
+	if($if eq 'a' && $a eq '0') {
+	    print OUT;
+	    next;
+	} elsif($if eq 'b' && $b eq '0') {
+	    print OUT;
+	    next;
+	} elsif($if eq 'c' && $c eq '0') {
+	    print OUT;
+	    next;
+	} elsif($if eq 'd' && $d eq '0') {
+	    print OUT;
+	    next;
+	}
+
+	if($if eq 'a') {
+	    $change=1;
+	    $in=$a;
+	} elsif($if eq 'b') {
+	    $change=1;
+	    $in=$b;
+	} elsif($if eq 'c') {
+	    $change=1;
+	    $in=$c;
+	} elsif($if eq 'd') {
+	    $change=1;
+	    $in=$d;
+	} else {
+	    print OUT;
+	    next;
+	}
+	print OUT "if$if=$in$end\n";
+    }
+
+    $rename=0;
+    if(!close(OUT)) {
+	$rename=1;
+	print "Warning: Unable to close to $out: $!\n";
+    }
+    if(!close(BAK)) {
+	$rename=1;
+	print "Warning: Unable to close to $bak: $!\n";
+    }
+
+    if($rename || $change == 0) {
+	if(!rename($bak,$out)) { 
+	    print "Warning: Unable to rename '$bak' to '$out': $!\n";
+	    if($rename) {
+		print "Warning: Please fix whatever the problem is and rename it yourself,\n";
+		print "Warning: probably using 'mv $bak $out'\n";
+	    } else {
+		print "Warning: It appears that $out did not need any changes,\n";
+		print "Warning: but to be safe you should probably \"";
+		print "Warning: use 'mv $bak $out'\n";
+	    }
+	} elsif($rename) {
+	    print "Warning: I renamed '$bak' to '$out' for you.\n";
+
+	}
+    }
+}

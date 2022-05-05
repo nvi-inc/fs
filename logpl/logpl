@@ -1,0 +1,130 @@
+#!/usr/bin/python
+#
+# Copyright (c) 2020 NVI, Inc.
+#
+# This file is part of VLBI Field System
+# (see http://github.com/nvi-inc/fs).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+import sys
+import os
+#######################
+#Handling the arguments:
+#######################
+
+start_ok = 1
+batch_mode = 0
+force = 0
+verbose = 0
+output_mode = None
+output_name = None
+log = None
+cfile = None
+ctrlfile = None
+geometry = None
+
+args = sys.argv[1:]
+
+while args:
+    if args[0]=='-cmd':
+        batch_mode=1
+        args = args[1:]
+    elif args[0]=='-f':
+        force = 1
+        args = args[1:]
+    elif args[0]=='-verbose':
+        verbose = 1
+        args = args[1:]
+    elif args[0]=='-log':
+        log = args[1]
+        args = args[2:]
+    elif args[0] == '-output':
+        try:
+            #tmp = args[1].split(',')
+            output_mode = args[1].strip()
+            output_name = args[2].strip()
+            assert (output_name and (output_mode.lower() == 'printer' or output_mode.lower() == 'file'))
+        except (IndexError, AssertionError):
+            print 'Incorrect use of output. Type help for help.'
+            start_ok = 0
+        args = args[3:]
+    elif args[0]=='-geometry':
+        geometry = args[1]
+        args = args[2:]
+    elif args[0]=='-cfile':
+        cfile = args[1]
+        args = args[2:]
+    elif args[0]=='-control':
+        ctrlfile = args[1]
+        args = args[2:]
+    elif args[0]=='-help':
+        helptext = """
+Argument   Parameter    Description
+--------   ---------    -----------
+-cfile     commandfile  Logpl starts in batchmode and 
+                        automatically reads commands 
+                        from commandfile
+-cmd       void         Starts logpl in batchmode
+-control   controlfile  Logpl uses specified controlfile
+-f         void         Skips version check of Python/Tkinter and runs
+                        logpl regardless of version. 
+-geometry  geometry     Set geometry for logpl. Format is of
+                        standard X11 format (WIDTHxHEIGHT+XPOS+YPOS). 
+                        Default is +1+1. 
+                        The user may also change height/width. 
+-help      void         Displays this help
+-log       logfile      Logpl automatically opens logfile
+-output    mode name    Specify default output. Mode should be
+                        printer for print or file to print to a file. 
+                        The name is printer name in print mode, or file name
+                        in file mode. Note that output requires 2 arguments.  
+-verbose   void         Displays status messages in batch mode.
+                        Default is off. Error messages are
+                        still displayed
+
+If no argument is used, logpl starts up in normal GUI mode. 
+"""
+        print helptext
+        start_ok=0
+        break
+    else:
+        print 'Argument',args[0],'not recognized, use -help for help'
+        start_ok=0
+        break
+#check version number:
+try:
+    from Tkinter import *
+except ImportError:
+    print 'TkInter not installed correctly.'
+    start_ok = 0
+version = sys.version_info
+if not (version[0]==2 and version[1]>3 or version[0]>2 or force): 
+    #try to import tkinter. If it's not installed, print that
+    start_ok = 0
+    print 'Incorrect Python version. Logpl requires Python 2.4 or higher. This version is %s.%s.%s' % (version[0], version[1], version[2])
+    print 'To force run, use argument -f'
+    print 'To run old logpl, use logpl1'
+
+if start_ok:
+    from MainGUI import MainGUI
+    try:
+        start = MainGUI(cmd=batch_mode, log=log,cfile=cfile,ctrlfile=ctrlfile, geometry=geometry, verbose = verbose, output_mode = output_mode, output_name = output_name)
+    except (KeyboardInterrupt): #ctrl-c
+        sys.exit(1) #or pass
+    except TclError, e:
+        print 'The LogPlotter GUI crashed!'
+        print 'Error message:\n', e
+        sys.exit(1) #or pass

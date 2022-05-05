@@ -1,0 +1,5 @@
+LIBS =  ../port/port.a
+OBJECTS = ./metwind.o ./nmea_wind.o
+#
+../metwind: ./metwind.o $(OBJECTS)
+	gcc -o ../metwind $(OBJECTS) $(LIBS)

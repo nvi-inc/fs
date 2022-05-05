@@ -1,0 +1,80 @@
+*
+* Copyright (c) 2020 NVI, Inc.
+*
+* This file is part of VLBI Field System
+* (see http://github.com/nvi-inc/fs).
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
+	SUBROUTINE getqual(cql,ix,icod,squal)
+C
+C  getqual gets either qual 1 or qual 2 bbsynth depending
+C  on cql.
+C
+C   COMMON BLOCKS USED
+      include '../skdrincl/skparm.ftni'
+      include 'drcom.ftni'
+      include '../skdrincl/sourc.ftni'
+      include '../skdrincl/statn.ftni'
+      include '../skdrincl/freqs.ftni'
+C
+C   HISTORY:
+C  WHO   WHEN   WHAT
+C  gag   900806 CREATED
+C  gag   910513 Added parameter to nchanv to handle multiple vlba stations.
+C 951213 nrv Changes for new Mark IV/VLBA setup
+C 960516 nrv Use IBBCX instead of INVCX
+C
+C Called by: VLBAH
+C
+C  INPUT:
+	character cql   ! what qual (set) number we want
+	integer ix    ! the video converter
+        integer icod ! freq code
+C
+C  OUTPUT:
+	real squal(max_chan)
+C
+C
+C   SUBROUTINES
+C     CALLED BY: vlbah
+C     CALLED:
+C
+C
+C  LOCAL VARIABLES
+	integer iy    ! counter
+	character*3 cs  ! the set number
+        logical kgot
+C
+C  INITIALIZED
+C
+C
+C  This loop will compare the set number and BBC number
+C  to get the correct bbsynth for the appropriate qual for the
+C  video converter ix.
+
+	iy = 1
+        kgot=.false.
+	do while (iy.le.nchan(istn,icod).and..not.kgot)
+	  cs = cset(iy,istn,icod)
+	  if ((iy.ne.ix).and.((cs(1:1).eq.cql).or.(cs.eq.'1,2')).and.
+     .      (ibbcx(ix,istn,icod).eq.ibbcx(iy,istn,icod))) then
+		  squal(ix)=abs(freqrf(iy,istn,icod)-freqlo(iy,istn,icod))
+            kgot=.true.
+	  end if
+	  iy = iy + 1
+	end do
+C
+	RETURN
+	END

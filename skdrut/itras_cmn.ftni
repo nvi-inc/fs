@@ -1,0 +1,39 @@
+! Common array that holds different track assignments.
+      implicit none 
+      include '../skdrincl/skparm.ftni'
+        
+      integer max_track_map
+      parameter (max_track_map=(max_stn*max_frq)/4)
+! The rest are variables. 
+      logical kdebug_itras
+      integer num_track_map               !number of distinct track mappigns.   
+      integer itrack_map_key              !where is itrack_map in the list of track_maps?  0 until set. 
+      common /itras_cmn/num_track_map,itrack_map_key,kdebug_itras
+
+! The factor of two below is for ibit=(sign, magnitude bit).
+      integer*4 itrack_map(2,max_headstack,max_track)
+      integer*4 itrack_map_vec(2,max_headstack,max_track,max_track_map)
+      common /itras_cmn/itrack_map,itrack_map_vec
+
+      integer istn_code_key(max_stn,max_frq)    !Pointer into track maps.
+      common /itras_cmn/istn_code_key
+
+! How many passes,tracks, headstacks and bits (1 or 2) for this new track layout
+      integer num_tracks_new, max_tracks_new
+      integer num_bits_new
+      integer num_pass_new,num_head_new  
+      common/itras_cmn/num_tracks_new,max_tracks_new
+      common/itras_cmn/num_bits_new
+      common/itras_cmn/num_pass_new,num_head_new  
+
+      integer num_tracks(max_track_map),max_tracks(max_track_map)
+      integer num_bits(max_track_map)
+      integer num_pass(max_track_map), num_head(max_track_map)
+     
+      common /itras_cmn/num_tracks,max_tracks
+      common /itras_cmn/num_bits,num_pass,num_head
+ 
+      logical khead(max_headstack,max_stn)
+      common /itras_cmn/khead
+  
+

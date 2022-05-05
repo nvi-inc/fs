@@ -1,0 +1,234 @@
+#!/usr/bin/wish
+# Font selection interface
+# Font chapter
+
+# The menus are big, so position the window
+# near the upper-left corner of the display
+wm geometry . +30+30
+
+global pattern
+
+# Create a frame and buttons along the top
+frame .buttons
+pack .buttons -side top -fill x
+button .buttons.quit -text "Save for fsvue" -command {puts $pattern; exit}
+button .buttons.reset -text Reset -command Reset
+pack .buttons.quit .buttons.reset  -side right
+
+# An entry widget is used for status messages
+entry .buttons.e -textvar status -relief flat
+pack .buttons.e -side top -fill x
+proc Status { string } {
+	global status
+	set status $string
+	update idletasks
+}
+# So we can see status messages
+tkwait visibility .buttons.e
+
+# Set up a set of menus.  There is one for each
+# component of a font name, except that the two resolutions
+# are combined and the avgWidth is supressed.
+frame .menubar
+set font(comps) {foundry family weight slant swidth \
+	adstyle pixels points res res2 \
+	space avgWidth registry encoding}
+foreach x $font(comps) {
+	# font lists all possible component values
+	# current keeps the current component values
+	set font(cur,$x) *
+	set font($x) {}
+	# Trim out the second resolution and the average width
+	if {$x == "res2" || $x == "avgWidth"} {
+	    continue
+	}
+	# The border and highlight thickness are set to 0 so the 
+	# button texts run together into one long string.
+	menubutton .menubar.$x -menu .menubar.$x.m -text -$x \
+		-padx 0 -bd 0 -font fixed \
+		-highlightthickness 0
+	menu .menubar.$x.m
+	pack .menubar.$x -side left
+	# Create the initial wild card entry for the component
+	.menubar.$x.m add radio -label * \
+		-variable font(cur,$x) \
+		-value * \
+		-command [list DoFont]
+}
+# Use traces to patch up the supressed font(comps)
+trace variable font(cur,res2) r TraceRes2
+proc TraceRes2 { args } {
+	global font
+	set font(cur,res2) $font(cur,res)
+}
+trace variable font(cur,avgWidth) r TraceWidth
+proc TraceWidth { args } {
+	global font
+	set font(cur,avgWidth) *
+}
+# Mostly, but not always, the points are 10x the pixels
+trace variable font(cur,pixels) w TracePixels
+proc TracePixels { args } {
+	global font
+	catch {
+	    # Might not be a number
+	    set font(cur,points) [expr 10*$font(cur,pixels)]
+	}
+}
+
+# Create a listbox to hold all the font names
+frame .body
+set font(list) [listbox .body.list \
+	-setgrid true -selectmode browse \
+	-yscrollcommand {.body.scroll set}]
+scrollbar .body.scroll -command {.body.list yview}
+pack .body.scroll -side right -fill y
+pack .body.list -side left -fill both -expand true
+
+# Clicking on an item displays the font
+bind $font(list) <ButtonRelease-1> [list SelectFont $font(list) %y]
+
+# Use the xlsfonts program to generate a
+# list of all fonts known to the server.
+Status "Listing fonts..."
+if [catch {open "|xlsfonts *"} in] {
+	puts stderr "xlsfonts failed $in"
+	exit 1
+}
+set font(num) 0
+set numAliases 0
+set font(N) 0
+while {[gets $in line] >= 0} {
+	$font(list) insert end $line
+	# fonts(all,$i) is the master list of existing fonts
+	# This is used to avoid potenially expensive
+	# searches for fonts on the server, and to
+	# highlight the matching font in the listbox
+	# when a pattern is specified.
+	set font(all,$font(N)) $line
+	incr font(N)
+    
+	set parts [split $line -]
+	if {[llength $parts] < 14} {
+		# Aliases do not have the full information
+		lappend aliases $line
+		incr numAliases
+	} else {
+		incr font(num)
+		# Chop up the font name and record the
+		# unique font(comps) in the font array.
+		# The leading - in font names means that
+		# parts has a leading null element and we
+		# start at element 1 (not zero).
+		set i 1
+		foreach x $font(comps) {
+			set value [lindex $parts $i]
+			incr i
+			if {[lsearch $font($x) $value] < 0} {
+				# Missing this entry, so add it
+				lappend font($x) $value
+			}
+		}
+	}
+}
+# Fill out the menus
+foreach x $font(comps) {
+	if {$x == "res2" || $x == "avgWidth"} {
+	    continue
+	}
+	foreach value [lsort $font($x)] {
+		if {[string length $value] == 0} {
+			set label (nil)
+		} else {
+			set label $value
+		}
+		.menubar.$x.m  add radio -label $label \
+			-variable font(cur,$x) \
+			-value $value \
+			-command DoFont
+	}
+}
+Status "Found $font(num) fonts and $numAliases aliases"
+
+# This label displays the current font
+label .font -textvar font(current) -bd 5 -font fixed
+
+# A message displays a string in the font.
+set font(msg) [message .font(msg) -aspect 1000 -borderwidth 10]
+set font(sampler) "
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqurstuvwxyz
+0123456789
+!@#$%^&*()_+-=[]{};:'\"`~,.<>/?\\|
+"
+set font(errormsg) "
+
+(No matching font)
+
+"
+# Now pack the main display
+pack .menubar -side top -fill x
+pack .body -side top -fill both -expand true
+pack .font $font(msg) -side top
+
+
+proc DoFont {  } {
+	global font pattern bfont
+	set font(current) {}
+	foreach x $font(comps) {
+	    append font(current) -$font(cur,$x)
+	}
+	SetFont
+	#puts $bfont
+}
+proc SelectFont { list y } {
+	# Extract a font name from the listbox
+	global font
+	set ix [$font(list) nearest $y]
+	set font(current) [$font(list) get $ix]
+	set parts [split $font(current) -]
+	if {[llength $parts] < 14} {
+		foreach x $font(comps) {
+			set font(cur,$x) {}
+		}
+	} else {
+		set i 1
+		foreach x $font(comps) {
+			set value [lindex $parts $i]
+			incr i
+			set font(cur,$x) $value
+		}
+	}
+	SetFont
+}
+proc SetFont {} {
+    global font bfont pattern
+    # Generate a regular expresson from the font pattern
+    regsub -all -- {\(nil\)} $font(current) {} font(current)
+    regsub -all -- {\*} $font(current) {[^-]*} pattern
+    for {set n 0} {$n < $font(N)} {incr n} {
+	if [regexp -- $pattern $font(all,$n)] {
+	    $font(msg) config -font $font(current) \
+		    -text $font(sampler)
+	    catch {$font(list) select clear \
+		    [$font(list) curselection]}
+	    $font(list) select set $n
+	    $font(list) see $n
+	    return
+	}
+	# return the font to fsvue
+#	puts $pattern
+    }
+    $font(msg) config -text $font(errormsg)
+}
+
+proc Reset {} {
+	global font
+	foreach x $font(comps) {
+		set font(cur,$x) *
+	}
+	DoFont
+	Status "$font(num) fonts"
+}
+
+Reset

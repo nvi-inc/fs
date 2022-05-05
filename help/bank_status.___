@@ -1,0 +1,41 @@
+           bank_status - Mark 5A recording bank status
+
+            Syntax:     bank_status
+
+            Response:   bank_status/active,vsn,seconds,gb,percent,ut
+                        bank_status/inactive,vsn,seconds,gb,percent,ut
+
+Monitor-only parameters:
+          active        the active bank, a or b
+          inactive      the inactive bank, a or b
+          vsn           the VSN of the pack in this bank
+          seconds       remaining seconds of record time in the
+                        current mode for pack in this bank
+          gb            remaining gigabytes for pack in this bank
+          precent       remaining percentage for pack in this bank
+          ut            the time of the last check for this bank
+
+Comments:
+This command will check the recording time on the current bank, switch
+banks, check the recording time on the new bank, and switch back to
+the original bank. This command is provided as way to manually update
+the information used in the monit5, "remaining disk capacity display",
+for the non-active bank.
+
+This command displays two monitor response records. The first is for
+the active bank, the second is for the other bank.
+
+This command takes a few seconds to execute. It should only be
+executed when the FS is otherwise quiet. It would potentially be most
+useful before starting an experiment to check the status of the disk
+modules current installed and to "seed" the monit5 display.
+
+Please note the time remaining is the available record time not clock
+time until the bank will be full. The clock time until the bank will
+be full may be significantly different, typically around twice as long
+for geodesy, depending on the recording duty cycle.
+
+This command will return a Mark 5 error if any Mark 5 process that
+conflicts with a bank switch, such as recording, is active (because of
+a bug in the Mark5A, there may be no error for this case).
+

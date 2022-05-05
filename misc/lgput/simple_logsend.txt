@@ -1,0 +1,20 @@
+==================================================
+Simple one-destination 'lgput' 2014-02-26 PB 
+==================================================
+
+1. Put thre 'lgput' script in /usr2/st/bin; chmod a+x.
+
+2. With 'pfmed' make a procedure called 'sendlog' in
+station.prc (modify the 'jb' for your station):
+ 
+  "send the logfile to vlbeer 090126
+ sy =exec lgput `lognm`.log jb &
+
+3. With 'pfmed' put the following in sched_end in station.prc:
+
+sendlog
+!+15s
+
+ - That's all that is needed. 
+
+ ---------------------------------------------------

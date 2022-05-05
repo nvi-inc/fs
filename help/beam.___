@@ -1,0 +1,29 @@
+               beam - set beamsize for flux command
+
+            Syntax:     beam5=angle
+          beam6=angle
+
+            Response:   beam5/angle
+          beam6/angle
+
+
+Settable parameters:
+          angle     full-width half maximum beam size, displayed in
+          decimal degrees of arc.
+
+Monitor-only parameters: none
+
+Comments:
+The beam5/6 commands are used to specify beamsizes for station
+specific detectors u5 and u6. They do not correspond to a
+standard IF channel, but instead to whatever IF is being
+supplied to the corresponding station detector.
+
+The commands flux5/6 use the sizes specified as beam5/6,
+respectively, to calculate the apparent flux.
+
+There is no default for the beam size.
+
+Issuing a beam5/6=... command will change the calculated
+values of the flux5/6 command to invalid quantities. Reissue a
+correct flux5/6=... command to recalculate fluxes.

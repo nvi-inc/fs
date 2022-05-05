@@ -1,0 +1,43 @@
+#!/bin/bash
+set -e
+#
+if ! [ $(id -u) = 0 ]; then
+   echo "This script must be run as root."
+   exit 1
+fi
+#
+echo "********************************************************************"
+echo "*  This is the INSTALLATION script for a AUID account              *"
+echo "********************************************************************"
+echo "CAUTION: This script will automatically modify some of your directories."
+echo "On /usr2, an existing user home directory will renamed to user.FSCOPY"
+badans=true
+while [ "$badans" = "true" ]
+do
+  echo -n "Enter exisiting user to update (return to exit): " 
+  read ans
+  case "$ans" in
+    prog) echo "Can't update prog "
+           ;;
+    oper) echo "Can't update oper "
+           ;;
+    *)    if  [ x$ans = x ]; then
+	    exit
+          elif  [ -e /usr2/$ans.FSCOPY -o -L /usr2/$ans.FSCOPY ]; then
+	    echo "/usr2/$ans.FSCOPY exisits, user apparently already updated"
+	  elif ! [ -e /usr2/$ans -o -L /usr2/$ans ]; then
+	    echo "User $ans does not have a directory on /usr2"
+	  else
+           badans=false
+          fi
+  esac
+done
+#
+cd /usr2
+mv $ans $ans.FSCOPY
+#
+cd /usr2/fs/st.default/auid
+find . -print|cpio -pmdu /usr2/$ans
+chown -R $ans.$ans /usr2/$ans
+#
+echo "Done."

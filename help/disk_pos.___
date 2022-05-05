@@ -1,0 +1,26 @@
+             disk_pos - Mark 5 byte position pointers
+
+            Syntax:     disk_pos
+
+            Response:
+            MK5A:       disk_pos/write_pointer, read_pointer
+
+            MK5B:       disk_pos/write_pointer, start-scan, stop-scan
+
+
+Monitor-only parameters:
+                write_pointer   Current write pointer byte position
+                read_pointer    Current read pointer byte position
+                start-scan      Current start-scan pointer byte position
+                stop-scan       Current stop-scan pointer byte position
+
+Comments:
+For Mark 5A, this command reports the current write and read pointers;
+for Mark 5B, the current write, start-scan, and stop-scan
+pointers. The start-scan and stop-scan pointers define the data range
+for certain data check and transfer operatons. The start-scan pointer
+is roughly analogous to a read pointer.
+
+See the Mark 5A amd Mark 5B command sets for more details. For Mark
+5A, this command returns the result of the "position?" query, for Mark
+5B, the "pointers?" query.

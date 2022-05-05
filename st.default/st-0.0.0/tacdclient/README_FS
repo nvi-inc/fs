@@ -1,0 +1,43 @@
+tacd - TAC Field System SNAP client command.
+
+ HOST name or IP address,PORT number are in the /usr2/control/tacd.ctl file.
+
+ Function that uses this information:
+ /usr2/fs/quikv/tacd.c	/* This client retrives TAC information. Displays and
+                           logs using the function tacd_dis.c. tacd is also
+                           responsible for placing information on to Shared
+                           Memory /usr2/fs/include/tacd_shm.h */ 
+
+ There are a few things that can be done with the tacd function.
+
+ When you start the Field System and type:
+ >tacd         /* displays TAC average */
+
+ You can change this by typing:
+
+ >tacd=time    /* displays TAC time. */
+ >tacd=average /* displays TAC average time. */
+ >tacd=status  /* displays TAC status. */
+ >tacd=version /* displays TAC version. This will only display once, then 
+                  to back to the default. */
+ Once you've done this it will continue to display what you requested, by
+ simply typing tacd without any parameters, except the tacd=version.
+
+example:
+20:03:28;tacd=status
+20:03:28/tacd/status,tacggao.gsfc.nasa.gov,32325,C:\gps\tac\12gg063A.csv,OPENED
+20:03:30;tacd
+20:03:30/tacd/status,tacggao.gsfc.nasa.gov,32325,C:\gps\tac\12gg063A.csv,OPENED
+
+It will continue, until you change it.
+
+average example:
+>tacd=average	
+ will log:
+18:23:38;tacd=average
+18:23:38/tacd/average,NEW,36647.765625,300,0.016172,11.063171,11.093600,11.028600
+
+ If the time is old - it will be labeled OLD:
+>tacd
+18:24:44;tacd=average
+18:24:44/tacd/average,OLD,36647.765625,300,0.016172,11.063171,11.093600,11.028600

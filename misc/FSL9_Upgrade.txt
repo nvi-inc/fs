@@ -1,0 +1,379 @@
+File: /usr2/fs/misc/FSL9_Upgrade.txt  Version: 2.2  Date: 140805
+
+		 Upgrading to FSL9 from a prior FSLx System
+
+		    Ed Himwich and Jonathan Quick
+
+INTRODUCTION
+
+This document describes how to upgrade to FSL9 from a relatively
+recent prior Field System Linux (FSLx, x=6, 7, 8) distribution.  It
+also describes how to install FSL9 on a new computer (either as a
+replacement or a completely new system).  For either case, the
+FSL9_End_user.txt document should be used to complete and customize
+the installation after the steps in this document.
+
+If you are running an older revision than FSL6 on your computer, the
+computer is probably approaching, or more than, 10 years old.  It may
+be possible to upgrade such a computer, but even if it is possible,
+the reliability of such a computer is highly questionable.  We
+encourage replacement such a computer rather than upgrading it.
+
+For most standard computers being upgraded or new computers being
+installed these instructions should be sufficient.  The more a system
+being upgraded differs from a standard system, the more likely that
+some important step will be missing.  However it is likely that the
+more a system being upgraded differs from the standard, the more
+knowledgeable, and therefore able to handle discrepancies, the local
+Field System "friend" would be.  The instructions try to anticipate
+some places where additional steps and information may be needed for
+non-standard systems.  It is likely that non-standard systems will be
+that way because additional packages and software have been added, not
+because something has been removed.  Please note that in order to make
+these instructions as foolproof as possible, they are written in a
+general way that may not be the most efficient.  Other more expedient
+methods may be possible.  If you have problems or questions, please
+contact Ed (Ed.Himwich@nasa.gov).
+
+Computers with less than 6 GB (each) hard disks, 256 MB RAM, or ISA
+peripheral cards are not supported by FSL9.  Stations with computers
+that are not supported by FSL9 should consider upgrading their
+computers and/or installing an inexpensive firewall/router to protect
+their older (now obsolete systems) from network attacks.
+
+For reference, this history of FSL distributions is:
+
+  FS Linux 1                       Slackware     Linux 1.2.x    1994
+  FS Linux 2     "bo"              Debian 1.3.1  Linux 2.0.29   1997
+  FS Linux 3     "hamm"            Debian 2.0    Linux 2.0.34   1998
+                 "slink"           Debian 2.1    Linux 2.0.36   1999
+  FS Linux 4     "potato"          Debian 2.2    Linux 2.2.18   2000
+  FS Linux 5     "woody"           Debian 3.0    Linux 2.2.20   2002
+                                                 Linux 2.4.18
+  FS Linux 6     "sarge"           Debian 3.1    Linux 2.4.27   2005
+  FS Linux 7     "etch"            Debian 4.0    Linux 2.6.18   2007
+  FS Linux 8     "lenny"           Debian 5.0    Linux 2.6.26   2009
+  FS Linux 9     "wheezy"          Debian 7.6    Linux 3.2.0    2014
+
+The remainder of this document is broken into four sections.  The
+PREPARATION section describes information that you should collect that
+will make the rest of the process easier.  This includes both system
+parameters and *.tgz archives of critical files.  The INSTALLATION
+section describes the actual installation of FSL9, the fsadapt sysadm
+utility, and FS to create a base standard system.  The CUSTOMIZATION
+section points you to additional documentation for completing the
+process of installing the system so that it includes your local files
+and configuration.  The POST INSTALLATION section describes the final
+clean-up after the installation and testing are finished.
+
+PREPARATION
+
+The section covers steps that will help prepare you for the installation..
+
+1. Obtain Debian 7.6 (or later) DVDs/CDs
+
+   Information on how to obtain the Debian DVDs/CDs can be found at 
+
+     http://www.debian.org/distrib/
+
+   You can use DVDs or CDs.  Using the netinst CD is recommended if
+   you have a good Internet connection.  If not, using DVDs instead of
+   the CDs has the advantage that fewer disc are required.  However
+   they are much larger to transfer as files if downloaded for local
+   burning.  What media you chose effects how you will set-up
+   /etc/apt/sources.list in Step 4 of the Second Stage installation in
+   fsl9_DVD.txt.  A rough guide to the media to use is:
+
+   A. Fast Internet connection: Get and use netinst CD and make sure
+      CD references are commented out of sources.list.
+
+   B. Slow Internet connection: Get and use first 3 DVDs and put web
+      references at bottom of sources.list.
+
+   C. For fewer lengthy DVD downloads use just DVD-1 in (B) above, but
+      then you don't have local copy in case of Internet connection
+      loss.
+
+   E. No Internet connection: 3 DVDs, but you will be missing the PGPLOT
+      package for plotlog.
+
+   F. No internet and only a CD player (no DVD player): use CDs instead of
+      DVDs in (E) above
+
+2. Collect System Information
+
+   In order to upgrade or install, you will need to know the following
+   information.  For computers being upgraded or replaced, a
+   suggestion for how to obtain the information is provided.  For new
+   computers for new stations, the basic information in only sections
+   (2A) and (2B) is required, but you will need to determine the
+   information by other means including possibly consulting local
+   experts.
+
+   A. Collect network parameters if you have a network connection
+
+      If you are replacing a computer, some of these parameters will
+      be different for your new computer, so be sure to get the values
+      for the new computer.  If you are installing on a new computer,
+      you may want to get advice from a local expert.
+
+      Hostname ___________________________
+        more /etc/hostname <CR> or uname -n <CR>
+
+      Domain   ___________________________
+        hostname --domain <CR> or
+        more /etc/resolv.conf <CR>, look for "search" line
+
+      Network interface device  ________________________
+        more /etc/network/interfaces <CR> and look at appropriate line
+
+      IP address __________________________ 
+        see above
+
+      Netmask   ___________________________
+        see above
+
+      Broadcast address: ______________________
+        see above
+
+      Network Gateway ______________________________
+        see above
+
+      DNS servers   _______________________________
+       more /etc/resolv.conf <CR>, look for "nameserver" lines
+
+      nearest (in a network sense) Debian mirror server _____________________
+        for example, see: http://www.debian.org/mirror/list
+
+      alternate older methods to find some of the information:
+        route -n < CR > and look for "Iface" field in the line starting 0.0.0.0
+ 
+        ifconfig eth0 < CR > (where "eth0" is network interface device
+        from above) and look for "inet addr" field
+
+        see above "ifconfig" output and look for "Mask" field
+        see above "ifconfig" output and look for "Bcast" field
+        route -n < CR > and look for the "Gateway" field in the line
+        starting with 0.0.0.0
+
+   B. Other required hardware information:
+
+      Serial Card Information ( mark appropriate box for latter use.)
+        [ ] 4-port VSCom (ByteRunner) 400H
+        [ ] 8-port VSCom (ByteRunner) 800H
+        [ ] other ____________________________________
+        [ ] none
+        examine card 
+
+      GPIB device
+        [ ] PCI-GPIB card
+        [ ] GPIB-RS232
+        [ ] NI-USB
+        [ ] other _____________________________________
+        [ ] none
+        examine card/device (PCI-GPIB card and NI-USB use NI or LLP
+          GPIB driver)
+
+   C. Additional information that may be helpful to know, if
+      applicable.  This section is only useful if you are upgrading or
+      replacing a computer.
+
+      Serial ports used by card on old system __________
+        For FSL7 and later (logged-in as root):
+          grep ttyS /var/log/dmesg
+        or for FSL6 or earlier
+          setserial -g /dev/ttyS*
+          and examine the output, usually 0-3 are on the motherboard, not
+          on the serial card, which are typically start at 4 or 16
+
+      Old system Linux version __________
+        uname -r <CR>
+          or
+        cat /proc/version <CR>      
+
+      Old system Debian version (if Debian) _________
+        cat /etc/debian_version <CR>
+
+      Information in local files, but this will be saved in Step 3 by
+        making the "etc.tgz" archives.  This includes:
+
+        NTP servers, usually in /etc/ntp.conf or /etc/init.d/xntp3
+  
+        SSH keys, usually in *key *_key.pub files in /etc/ssh
+
+        Printers, usually in /etc/printcap or in /etc/cups/*,
+
+        /etc/hosts file listed "hosts"
+
+        /etc/hosts.deny and /etc/hosts.allow configuration
+
+        Customizations of the oper and prog home directories.
+
+        Customizations of FS control and procedure files, and locally
+        used SNAP schedules.
+
+        Local station software (/usr2/st).
+
+      Additional Debian packages loaded beyond standard FSLx packages
+        Obtain from local experts
+
+      Additional directory structures not normally found on FS
+      computers.
+        Obtain from local experts and/or may be visible on /usr2 with
+        names other than: control, log, sched, oper, proc, prog, fs*,
+        and st*
+
+3. Collect files to be transferred to the new system
+
+   This step is intended only for stations that are upgrading or
+   replacing an existing computer.
+
+   The instructions for this process can be found in the
+   FSL9_End_User.txt customization document, Step 1.  That procedure
+   will create a few *.tgz files that can be used to ease the
+   customization process.  Stations that are installing a replacement
+   computer (that doesn't re-use the existing PC system hardware), can
+   wait to do this step as part of the End User customization.  For
+   new computers for new stations there would typically be no files to
+   collect.
+
+   Please note that if you are upgrading a computer with a single
+   disk, i.e. no back-up disk, it is particularly important that you
+   verify the integrity and contents of the the *.tgz files before
+   overwriting the disk (the only working version) in the installation
+   process.
+
+INSTALLATION
+
+This section outlines the detailed steps for the installation.  Spaces
+are included to check-off each step as it is completed.
+
+1. Before beginning the installation procedure, you will need to
+   determine how many and which disks to upgrade initially (i.e.,
+   according to this INSTALLATION section).
+   
+   ___ If you have disks of different sizes, you should be sure to
+       include the smallest disk as one of the disks that you upgrade
+       initially.  This will assure that the RAID size will be correct
+       for all the disks.  If your smallest disk is your current
+       operational disk, you should perform a disk rotation (see
+       RAID.pdf in /usr2/fs/misc) to make sure that one of your larger
+       disks is up to date and use it as the "shelf" disk as described
+       next.
+
+   ___ If you have more than one disk, you should remove the current
+       active operational disk (not your smallest disk, see above) and
+       save it "on the shelf" in case you need to return to your old
+       system or need to retrieve a file that was forgotten.
+
+   ___ There are three cases:
+
+       (A) Three or more disks available.  Insert two of your disks,
+           including your smallest, but not including your current
+           operational, disk.  If you have more than three disks, you
+           can make a back-up of the old operational disk on one of
+           the additional disks for safety, but this is not necessary.
+
+       (B) Two disks available.  Insert your smallest, but not your
+           current operational, disk.  In this case you should install
+           FSL9 on only the one disk, instead of the normal two.  You
+           will need to modify the DVD installation instructions to
+           use one disk instead of two.  These changes are described
+           in Step 2 below.
+
+       (C) One disk available.  You will be unable to retain your
+           current operational disk "on the shelf" as a backup in case
+           of problems.  It is better to obtain more disks before
+           continuing, but if you are unable to do this you can
+           upgrade the single disk.  You should be careful to verify
+           the saved *.tgz files are not corrupt and contain all the
+           files you need.  It would be prudent to make other more
+           complete back-ups if that is reasonably easy to do.
+
+2. Install FSL9/fsadapt/FS from Debian 7.6 (or later) CDs (or DVDs)
+   using the instructions found at:
+
+   ____  ftp://ftp.hartrao.ac.za/pub/fs9x/fsl9_DVD.txt
+
+   The information you collected in the preceding section should be
+   useful in this process.  Do not turn off installation of the
+   Desktop Environment when that is offered unless you have a very
+   small disk.  Be sure to include the SSH server unless you know you
+   don't want it.  It is also recommended that you NOT delete the
+   desktop user if you installed the Desktop Environment..
+
+   Your choice of Debian installation media will affect how you set-up
+   /etc/apt/sources.list in Step 4 of the Second Stage installation.
+   Please see item #1 in the PREPARATION section of this document for
+   more details.
+
+   If you are using only one disk for the upgrade (cases (B) and (C)
+   in Step 1 above), you will need to modify the installation
+   instructions slightly.  The four needed differences, listed by
+   installation stage (1 or 2) and steps (n) in a format of
+   "stage#step", are:
+
+     1#10 Omit setting up the second disk.
+
+     1#12 Omit this step (configuring the second disk partitions).
+
+     1#13 Set-up the MD devices as indicated, but you will select only
+          the one disk device (/dev/hdaX, X=2,3,4 or /dev/sdbX,
+          X=1,5,6) for each MD device.  This works in spite of the
+          on-screen instructions insisting that you must select two
+          disk devices for each MD device.
+
+     2#11 Be sure to use this step (installing GRUB on the second
+          disk).  It will however fail on the second disk (since there
+          isn't one), but is necessary to set-up grub correctly.
+
+   These differences, except the last, are also noted in the "DVD"
+   installation instructions.
+
+3. Place appropriate refresh_secondary in /usr/local/sbin, as "root",
+   using "sd156" or "sd234" for "XXXXX" as appropriate for your system
+   in the "cp" command:
+
+   ____ cd /usr/local/sbin
+   ____ cp -a /usr2/fs/misc/refresh_secondary.XXXXX refresh_secondary
+   ____ chown root.root refresh_secondary
+   ____ chmod a+r,u+wx,go-wx refresh_secondary
+
+4. Place mdstat in /usr/local/bin, as "root":
+
+   ____ cd /usr/local/bin
+   ____ cp -a /usr2/fs/misc/mdstat.7 mdstat
+   ____ chown root.root mdstat
+   ____ chmod a+rx,u+w,go-w mdstat
+
+5. Edit /etc/aliases so root, prog, and desktop e-mail goes to oper, as "root":
+
+   ____ change "root: desktop" to "root: oper"
+   ____ add "prog: oper" at the end
+   ____ add "desktop: oper" at the end
+
+
+CUSTOMIZATION
+
+After the standard system has been installed according to the
+directions in the preceding section, the system will need to be
+customized for your station.  The steps for this are covered in the
+document FSL9_End_User.txt.  That document is intended primarily for
+installers of a new computer that has been checked out at GSFC and
+then shipped to the end user.  However, the steps are so similar that
+they are also useful for customization when installing according to
+this document.  A few additional comments for upgraded and replacement
+computers have been added enclosed in that document within square
+brackets "[]" and indented.  The information and *.tgz archives
+(particularly, the archive files) created in the PREPARATION section
+of this document should prove useful in completing the customization.
+
+POST INSTALLATION
+
+After the customization is complete, you should test all the major
+features of the FS and other operational software you have.  When you
+are satisfied that everything is working and you no longer need your
+old operational system on your third disk (if you have one), you
+should update that disk so that it so that is also running FSL9.
+Follow the directions for initializing a new disk in the REPLACEMENT
+DISKS section of FSL9_RAID.pdf in /usr2/fs/misc/ directory.

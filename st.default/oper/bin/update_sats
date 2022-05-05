@@ -1,0 +1,14 @@
+#!/bin/sh
+#cd /usr2/tle_files
+# uncomment (or add) wget command for element sets you want
+#wget -qr www.celestrak.com/NORAD/elements/amateur.txt -O amateur.txt
+#wget -qr www.celestrak.com/NORAD/elements/visual.txt  -O visual.txt
+#wget -qr www.celestrak.com/NORAD/elements/weather.txt -O weather.txt
+#wget -qr www.celestrak.com/NORAD/elements/gps-ops.txt -O gps.txt
+#wget -qr www.celestrak.com/NORAD/elements/geo.txt     -O geo.txt
+# uncomment chmod and modified as needed, all *.txt files should be a+rw
+#chmod a+rw amateur.txt visual.txt weather.txt gps.txt geo.txt
+# The following lines are examples of commands to update *.tle files.
+#predict -t station.tle  -u amateur.txt visual.txt weather.txt gps.txt geo.txt
+#predict -t station1.tle -u amateur.txt visual.txt weather.txt gps.txt geo.txt
+#predict -t station2.tle -u amateur.txt visual.txt weather.txt gps.txt geo.txt

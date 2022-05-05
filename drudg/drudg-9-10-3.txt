@@ -1,0 +1,12 @@
+Drudg release notes 9.10.2
+Date of release is 2008-Feb-01
+
+1. Some versions of linux don't initialize Fortran "Block Data"
+commands correctly.  This caused an error when processing the
+"equipment" line of skedf.ctl.  Fixed by expliciting initializing
+all of the recorder and rack types.
+
+2. Drudg would emit an incorrect "checkmk5" after scans which
+were not recorded. Fixed so that drudg checks to see if data
+was recorded.
+

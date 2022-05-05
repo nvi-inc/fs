@@ -1,0 +1,45 @@
+           decode4 - Mark IV decoder low-level control
+
+            Syntax:     decode4=command
+
+            Response:   decode/response
+
+
+Settable parameters:
+          command   any legal command for Mark IV decoder. The
+          terminating "$" character is  appended before
+          sending the command.
+
+Monitor-only parameters:
+            data        response to command.
+
+Comments: 
+This command is a simple feed-through to the Mark IV decoder.
+No checking is done on the command, no action is taken for any
+response. This form of the command is temporary while it is
+determined what standard parameters are desired.
+
+The command is sent to the MAT bus just as if the operator had
+used the mat command. No modifications are made before the
+command is sent on the bus.
+
+This command is for the new  Mark IV decoder which may be
+installed in any of the Mark III, Mark IV, or VLBA4 rack
+types, but this command will work decoder if it is installed
+with other rack types as well.
+
+The terminator used for sending transmissions to the decoder is is
+value specified in the equip.ctl control file on the 18th non-comment
+line.  Choices are: 'return' (0x0d), '$' (0x24), or '%' (0x25).  These
+are the three forms accepted by the decoder.  Use of '$' sign form is
+known to cause MATs on the bus to misbehave.  It is suspected that '%'
+will have the same problem.  The best choice is probably 'return', but
+it has not been tested extensively.
+
+Documentation for the Mark 4 Decoder commands can be found in Mark IV Memo #279.  Mark IV Memos can be found at
+ftp://web.haystack.mit.edu/pub/mark4/memos/memoindex.html
+
+[This Memo Index does not yet have a link to the latest version,
+ftp://web.haystack.mit.edu/pub/mark4/memos/279.1.pdf
+which applies to the new Decoder firmware,
+which has not yet been widely distributed.]

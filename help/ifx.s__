@@ -1,0 +1,28 @@
+               ifx - ifx module parameters (S2 racks)
+
+            Syntax: ifx=atten1,atten2,atten3,atten4,input1,input2,input3,input4,avper 
+            Syntax: ifx=state,n (to monitor state 'n' during frequency switching) 
+            Syntax: ifx
+  
+            Response: ifx:state/atten1,atten2,atten3,atten4,input1,input2,input3,input4,aveper,TP1,TP2,TP3,TP4 
+
+            n : the frequency switching state number. If frequency switching is not 
+                running, use 0. 
+
+Settable Parameters: 
+
+  atteny : Attenuator setting for IF channel y. 0 to 30 step of 2. Use auto for self-adjustment.
+  inputy : Input source for IF channel  (dir, alt, none). 
+  avper  : Averaging period for TPI in seconds (0.01 to 10 seconds). 
+  
+Monitor-only Parameters:
+ 
+  TPIy : Total power in IF channel y in counts. Range 0 to 300000.
+ 
+Comments: 
+
+The auto parameter is use to set the TPI count near 50000.
+  
+  
+  
+  

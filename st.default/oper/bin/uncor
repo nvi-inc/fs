@@ -1,0 +1,129 @@
+#!/usr/bin/perl
+# Usage: uncor xxx
+#
+# where is xxx is the suffix of the xtrxxx and errxx files in /usr2/log
+#
+# uncor reads the xtrxxx and errxxx file and prints a new xtrac output file
+#       to its standard output that is suitable for running through error
+#       with a "zero" pointing model. Any editing (1/0) in the original xtrxxx
+#       file is preserved, any commented out points in the $data of the
+#       original xtrxxx file are not copied, and the $stats section of new
+#       xtrac output file includes all the points in $data section regardless
+#       of the editing. The errxxx file must be the output of an error run on
+#       the xtrxxx file.
+#
+sub abs {
+    local($value)=@_;
+    if ($value < 0) {
+	$value = - $value;
+    }
+    return $value;
+}
+
+if ($#ARGV <0) {
+    print "Usage: uncor xxx\n";
+    print "where xxx is the suffix of the xtrxxx and errxx files in /usr2/log\n";
+    exit -1;
+}
+
+$xtrac="/usr2/log/xtr" . $ARGV[0];
+$error="/usr2/log/err" . $ARGV[0];
+
+open(XTRAC,$xtrac) ||die "Can't open xtrac file";
+open(ERROR,$error) ||die "Can't open error file";
+
+while ($rec=<XTRAC>) {
+    $rec =~ s/\s$//g;
+    print $rec,"\n";
+    if ($rec eq "\$data") {
+	goto XT;
+    }
+}
+XT:
+if ($rec ne "\$data") {
+	die "No \$data section in xtrac file";
+}
+
+while ($rec=<ERROR>) {
+    $rec =~ s/\s$//g;
+    if ($rec eq "\$uncorrected") {
+	goto ER;
+    }
+}
+ER:
+if ($rec ne "\$uncorrected") {
+	die "No \$data section in error file";
+}
+
+$pi=atan2(1,1)*4;
+$deg2rad=$pi/180.0;
+
+while ($recX=<XTRAC>) {
+     next if substr($recX,0,1) eq "\*";
+     $recX =~ s/\s$//;
+
+     if (!($recE=<ERROR>)) {
+	 die "Premature EOF on error file";
+     }
+
+     $recE =~ s/\s$//;
+     if ($recX eq "\$stats") {
+	 if ( $recE eq "\$uncorrected_stats" ) {
+	     goto EN;
+	 }
+	 die "Error file longer than Xtrac file";
+     } elsif ($recE eq "\$uncorrected_stats") {
+	 die "Xtrac file longer that Error file";
+     }
+
+     ($editX,$lonX,$latX,$olonX,$olatX,$slonX,$slatX,$restX)=split(' ',$recX,8);
+     ($editE,$lonE,$latE,$olonE,$olatE,$restE)=	split(' ',$recE,6);
+
+     if (&abs($lonX-$lonE)>0.000025 || &abs($latX-$latE) > 0.000025) {
+	 printf STDERR "%s%s", $recX, $recE;
+	die "record mismatch";
+    }
+
+     printf("  %d %9.5f %9.5f %8.5f %8.5f %8.5f %8.5f %s",
+	    $editX,$lonX,$latX,$olonE,$olatE,$slonX,$slatX,$restX);
+
+     next if $editE != 1;
+     $wlon=1. /($slonX**2);
+     $x+= $olonE*$wlon;
+     $xs+= ($olonE**2)*$wlon;
+     $xdenom+=$wlon;
+
+     $wlat=1. /($slatX**2);
+     $y+= $olatE*$wlat;
+     $ys+= ($olatE**2)*$wlat;
+     $ydenom+=$wlat;
+
+     $coslat=cos($latX*$deg2rad);
+     $sdist=($olonE*$coslat)**2+$olatE**2;
+
+     $wdist=1. /((($coslat**2)/$wlon)+(1./$wlat));
+     $ds+= $sdist*$wdist;
+     $ddenom+=$wdist;
+
+     $count+=1;
+}
+
+die "Premature EOF on xtrac file";
+
+EN:
+
+print $recX,"\n";
+
+if ($count >= 1) {
+    $xavg=$x/$xdenom;
+    $yavg=$y/$ydenom;
+    if ($count > 1) {
+	$fact = $count/($count-1);
+	$xrms=sqrt($fact*($xs/$xdenom-($xavg**2)));
+	$yrms=sqrt($fact*($ys/$ydenom-($yavg**2)));
+	$drms=sqrt($fact*($ds/$ddenom));
+    }
+}
+
+printf "     %8.4f %8.4f %7.4f %7.4f %6.4f %3d %3d\n",
+    $xavg,$xrms,$yavg,$yrms,$drms,$count,$count;

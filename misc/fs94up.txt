@@ -1,0 +1,880 @@
+File: /usr2/fs-9.4.0/misc/fs94up.txt
+
+WEH 990821
+ 
+I. Introduction
+
+The SNAP documentation changes for the new version will be available on
+the FS servers, atri.gsfc.nasa.gov or kurp-ftp.hut.fi, shortly. The help
+files included with the new FS version are up to date.
+
+II. Changes Since Version 9.3.26
+
+			 A. Changes in the FS
+
+1. New "lo" command.  The LO command has been changed so that it uses
+a similar style to the "patch" command.  The sideband, polarization,
+and phase-cal spacing can now also be specified.  One of the points of
+making this change was to have the "LO" command implemented in C so
+that it would be easier to use as a starting point for making station
+specific versions in "stqkr".  The "upconv" command has been deleted.
+
+2. Mode independent "parity" checks.  The "parity" command and the
+parity check procedures have been changed to allow them to be used in
+any mode.  The key changes that implement this feature are that there
+are now four parity check procedures and the set-up "parity" command
+in each uses the default for which tracks to check.  The default uses
+the currently enabled tracks.  For systems with only "odd" or "even"
+reproduce, only those tracks are checked by default.  Two of the new
+check procedures are for 80 ips playback and two are for 135 ips
+playback.  For each speed one procedure is used for forward playback
+and the other for reverse.  The names of the procedures are:
+"checkf80", "checkr80", "checkf135", and "checkr135".  These are
+station procedures, i.e., they are meant to be placed in the station
+procedure library and customized as necessary.  The typical
+customization will be to adjust the timing so that the tape returns to
+the same footage (within a foot or so) that it started at.  DRUDG now
+emits calls to these procedures in the schedules.  These procedures
+use the "sfastf" and "sfastr" procedures.
+
+3. Y2K compliance.  The FS has been overhauled to support dates after
+December 31, 1999.  There are several aspects to this change.  The
+most significant is that the log time-tag format has changed to
+include a four digit year and punctuation.  The log display in the
+"login shell" window has been modified to include only the hour,
+minute, and second of the time-tags.  Timed-waits in schedules have
+been modified to accept the same time format as used in the log
+time-tags (the old style time format is accepted as well).  Numerous
+other places where times are entered and display have been modified to
+agree with the this new convention.  The log analysis and plotting
+programs "logex", "logpl", and "pdplt" (actually "xtrac" which is
+called by "pdplt") have been modified to accommodate the new format,
+the old format, and any sensible mixing of formats to the extent
+possible including transitions from one year to another.  The "fmset"
+program has been modified to accept dates in the year 2000 and beyond.
+The FS and DRUDG can now handle schedules and timed waits that span
+the end of the year.  The "decade" field in the "location.ctl" control
+file is now just a place holder; the "setcl" program now determines
+the decade for Mark III systems by comparing the FS time and the
+formatter.  A small problem which will not be fixed is that if one
+experiment log is open for more than one century continuously,
+unmodified procedures will be logged one extra time.  The next serious
+date compliance issue will be in 2038 when all UNIX variants that use
+a four byte integer representation of the number of seconds since 1969
+will have a problem.
+
+4. VLBA4 support.  The new version supports VLBA4 racks and recorders.
+These systems are upgraded VLBA systems that include Mark IV
+formatters in the racks and a second write stack in the recorders.  As
+usual we have tried to maintain as much interoperability between
+different racks and recorders.  The points where limitations are
+likely to occur are in the "parity" command and in which combinations
+DRUDG supports.  If you detect any problems in this regard or your
+hardware doesn't seem to be supported, please let Ed and Nancy know.
+
+5. Station specific detectors for "onoff" and "fivpt".  These are
+implemented through mode 8 in "antcn".  Two detectors are supported,
+but more can be implemented by clever use of station SNAP commands.
+The documentation for this feature is not complete, but a draft
+version can be foound in /usr2/fs/misc/stndet.txt.  Please contact Ed
+if you need more information on this feature.  The station specific
+detectors can also be used to measure Tsys for stations that do not
+have Mark III/IV or VLBA/VLBA4 racks.  New commands implemented to
+support these features include: beamX, fluxX, caltempX, TsysX, where X
+is 5 or 6.
+
+6. Station dependent "pcald" daemon.  A new program, "pcald", to
+extract phase-cal information during experiments has been added.  This
+program is station dependent.  There is no version to support standard
+systems yet, but all the overhead to support the implementation for
+specific hardware has been provided.  We hope to distribute a version
+for standard hardware fairly soon.  The program is controlled by the
+new "pcald" and "pcalform" commands.  For VEX schedules, DRUDG
+generates the appropriate commands for VEX schedules only.
+
+7. New VLBA and VLBA4 recorder parameters in "equip.ctl".  New
+parameters have been added for write currents for vacuum switching and
+the second head in a VLBA4 system.
+
+8. Set-up procedure after "ready".  DRUDG now inserts the set-up
+procedure at tape changes after "ready".  This was done primarily to
+work around some issues when S2 recorders are being used, but has some
+advantages for non-S2 systems as well.
+
+9. "save_file" command.  This command can be used to either save a
+string to a file OR retrieve the first line of a file it and introduce
+it into the operator stream.  The syntax is "save_file=file,string" or
+save_file=file" respectively for saving or retrieving.  The parameter
+"file" is the name of the file in "/usr2/control" where the string
+will saved to or retrieved from; it may be up to 64 characters in
+length.  The parameter "string" is the string to be written to the
+file; it may be up to 512 characters in length.  When writing the
+string, the file will be unceremoniously overwritten unless there is a
+permission conflict.  This command is intended to allow the name of a
+SNAP procedure to be saved in a file and then executed later by
+another procedure.  Thanks to Gino Tuccari for suggesting this for
+re-initializing which front-end is in use when the FS is restarted.
+
+10. DQA support with VLBA4 rack.  It is now possible to use the DQA
+module in the VLBA formatter for parity checks and phase-cal
+extraction when the Mark IV formatter is used for recording data.  In
+order to do this, the monitor side of the recorder output must be
+routed properly to the VLBA formatter.  The VLBA formatter must be
+set-up using the "vform" command to set the tape clock.  The "vform"
+command is identical the VLBA form command, but the "v" was added to
+avoid a conflict with the Mark IV "form" command.  Likewise there is
+"vdqa" command.  Both the "vform" and "vdqa" commands are available
+only with the VLBA4 rack.  For use with "parity" command the second
+non-comment line of the "sw.ctl" file must indicate "dqa" as the
+decoder type.  The VLBA formatter must be set to the correct tape
+clock rate for the DQA module in this configuration.  For single speed
+parity check procedures you should put a "vform=c,4" at the start of
+the procedures.  You should issue the same command before trying to
+use the "vdqa" command.
+
+11. "sw.ctl" file change.  It was incorrectly reported in the 9.3.207
+update notice that the second line of the "sw.ctl" file should be the
+type of CPU board in a VLBA or VLBA4 recorder (usually "vmve117").
+This was in fact superfluous.  However in 9.4.0 the second line
+needs to be the type of decoder in use.  Choices are: "mk3" (standard
+Mark III decoder), "mk4" (yet to be released Mark IV decoder), or
+"dqa" (subset of the VLBA formatter).  You must put the appropriate
+string as the second line of "sw.ctl" for the "parity" command to
+work.
+
+12. Mark IV Decoder support.  In this initial implementation, the Mark
+IV decoder is supported by the "parity" command and the new "decode4"
+command.  The "decode4" command provides low-level communications
+access to the Mark IV Decoder much like the "form4" command does for
+the Mark IV Formatter.  The "decode4" command is like the "mat"
+command always available independent of the hardware specified in
+"equip.ctl".  In addition the "form4" is now also available for any
+rack type instead of only for Mark IV.
+
+13. The "parity" command now reports average errors per track.  The
+practice of reporting the lowest of three measurements of 0.25 seconds
+each, has been replaced with reporting the actual errors measured in 1
+Mbyte of data.  If you have been seeing "all zeros" for your parity
+checks you will now probably start to see some non-zero values. Parity
+errors seem to happen in pairs.
+
+It takes two second at 4 Mbit/sec to sample 1 Mbyte of data. This is
+longer than the previous time spent per track.  Consequently the
+parity check procedure time has increased.  The scheduling programs
+all support this longer time so new schedules you receive should work
+fine.  The maximum time allocated for these checks is 100s.  Please
+note that "parity" needs to know the data rate.  It infers this from
+the "repro" command, so it is necessary to set-up reproduce before
+using "parity".
+
+14. VLBA4 support fixes.  Dave Graham found several small problems in
+a preliminary implementation of VLBA4 support.  These were in
+"monit2", the "check" command, the VLBA "form" command (when used with
+a VLBA4 drive), "chekr", and the "parity" command.  These have all
+been fixed or in the case of the "parity" command included in the
+reworking.
+
+15. Default write voltage is now 10.0.  The standard control file has
+be modified to take this into account.
+
+16. The "ibcon" program now accepts responses up to 32 (was 30)
+characters in ASCII mode.
+
+17. Other "parity" command changes.  The length of the parity command
+output lines was made shorter to cause fewer line wraps on the log
+display.  It is no longer necessary to define the vacuum state for
+Mark IV drives with vacuum switching before using "parity".  This was
+caused by the "parity" command incorrectly commanding the bit rate
+(which is the strobe that also controls the vacuum).  The commanding
+of the bit rate has been removed and so has the check for the vacuum
+state.  However, the bit rate must be defined using "repro" before
+"parity" can be used.
+
+18. External filter support for Mark III/IV VCs.  If a schedule file
+calls for external filters, DRUDG will generate VC commands with a
+nominal filter BW of 0.0 but append the desired external filter BW in
+parenthesis in this field.  This will allow the operator to determine
+what external filters are requested by the schedule.  The FS will
+accept this form of the command and will use it display the most
+recently requested external filters.  There is no way for the FS to
+actually know what filters are installed.
+
+19. The PASS, STACK, and LVDT commands will now report the final
+position of the head even if some problem occurs (such as failure to
+converge).  When these commands are used to position both heads, they
+will attempt to position head 1 even if there is a problem with head
+2.  Errors for position head 2 will be reported even if there is a
+problem with head 1 as well.
+
+20. The Mark IV "form" command now checks for synch errors.  It checks
+the synch error status every time the formatter is configured, but
+before this information is reset by the reconfiguration.  This provides
+an indication of whether there was a synch error since the last
+formatter set-up.  Synch errors are also checked and reported when the
+formatter is monitored.
+
+21. The Mark IV "form" command now checks to verify that the rack ID
+has at least two zero bits in it.  This is checked every time the
+formatter is commanded or monitored.
+
+22. There is a new command "PCALPORTS" to select which VCs have their
+signals routed to the Mark IV Formatter Phase-cal Ports.
+
+23. The debug output for the Mark IV Formatter communications problems
+have been improved.  Also they no longer appear in the Log Display
+output.  They only go the logfile itself.  This should make it clearer
+when a un-recovered error occurs.
+
+24. Fivpt has been modified to accept a negative noise diode
+temperature to indicate that there is no diode to fire.  In this case
+a Tsys measurement is made as usually except that the cal is not
+fired.  The system temperature is assumed to be the absolute value of
+the negative diode temperature.  Thus if -100 is used as the diode
+temperature, the power measurements will be made as a percentage of
+the system temperature.
+
+25. For Mark III and IV recorders, the 5 ips speed has been made
+available in the "st" command.  The 7.5 IPS button is selected with a
+rate generator value of 427.
+
+26. An interlock has been added to prevent two copies of "fmset" from
+running simultaneously.  Presumably this could only happen by accident.
+
+27. The narrow track head calibration schedules have been revised.  The
+most significant change made was to change the place where the tape is
+flipped.  The schedule is now started with the tape initially
+flipped.  This saves the time required for a high-speed round-trip in
+each direction on each repeated calibration once the tape has been
+prepassed.  The first use of a tape for a head calibration after some
+idle period for that tape should, as always, be preceded with a
+pre-pass.  The second change was to modify all of the commands that run
+the tape off the reel on purpose to use 80 ips speed.  This will help
+reduce damage to thin tapes.  The last change is that the "reverse"
+calibration is used for positioning the heads when the recorder will
+read or write or reverse.  This should make the schedule more robust
+when either of the headstacks has a significant forward-reverse offset
+and this information has been included in the starting head.ctl
+control file.
+
+28. The default pointing procedure files, "point.prc", and
+"vpoint.prc", and the default "aquir" control file, "ctlpo.ctl", now
+use J2000 coordinates for the pointing sources.
+
+29. The interaction of the tape drive enables and tape motion commands
+for Mark III/IV and VLBA records has been made more consistent.  The
+approach taken has two goals: (1) that each command should directly
+control the corresponding hardware, (2) the only command that can turn
+on the general record enable is the "st" command.
+
+To implement this for VLBA recorders, it was necessary to change from
+"virtual" group enables (controlled by the general enable as well) to
+a "virtual" general record enable.  This corresponds more closely to
+the hardware.  Now the VLBA "enable" command will turn on and off the
+group enables independently of the general enable's state.  For
+systems with Mark IV formatters, the enabling of the formatter output
+is part of the general enable and controlled by the "st" command.  The
+most visible effects of this change are that: (1) for VLBA drives,
+bypass reproduce will now work without issuing "st" command with the
+record enable state set to "on", (2) for Mark IV and VLBA drives,
+bypass will not work (because the heads are disabled) immediately
+after an "et", and (3) for a Mark IV or VLBA recorder is moving, but
+the heads are disabled, it is now possible to enable them with an
+"enable=..." command, but without issuing a new "st" command to turn
+on the general enable.
+
+I am not entirely happy with all aspects of this approach and would be
+interested to hear some feedback.  The problem with not disabling the
+general enable on "et" for Mark III and IV drives is that since the
+tape can be moved with the front panel buttons, there is the
+possibility of accidently writing on the tape.  For consistency in this
+case it seems that the VLBA virtual record enable (via the group
+enables) must be disabled as well.  The behavior of the VLBA "enable"
+command is now more consistent with the Mark III and IV "enable"
+commands in that it actually controls the hardware, but inconsistent in
+the sense that the heads are now active even though no "st" command
+has been issued to turn on the general enable.  If we gave up having it
+control the hardware, then we could make it more consistent with the
+Mark IV drive, where "st=for,0,on" is needed to reproduce in bypass
+while the tape is stopped.  This might easier for operators who use
+more than one system.
+
+30. For VLBA and VLBA4 recorders there is a "wvolt" command that can
+be used to monitor and set the write voltage(s) for the heads on the
+fly.  This is for testing purposes only and will be overridden by the
+next "rec=load".
+
+31. The "data_valid" command has been extended to non-S2 recorder
+systems.  This command will start and stop phase-cal extraction that is
+enabled by the "pcald" command.  Otherwise, it is no-op except when
+used with an S2 recorder.  However, for non-S2 recorder systems it is
+also used to mark in the log the times of expected good data.  This use
+of '"data start' and '"data stop' that cluttered listings of log
+comments is eliminated with this version.
+
+32. The support for the Digiboard serial card has been revised for the
+new kernel.  There may be still some bugs in this.  If you use a
+Digiboard please let Ed know if you have any problems.
+
+33. The S2 recorder "rec=eject" command was modified to eject the
+tapes by using the S2 console command "transport eject all". This
+removes the need to change the "rec_mode" to eject the tapes, which
+was causing problems.
+
+34. The 10 kHz phase-cal amplitude and phase calculations for the VLBA
+DQA command have been modified. The amplitude is now calculated
+including the effect of the asin(x*PI/2) quantization correction. This
+will increase the reported phase-cal amplitude by about 50% for most
+cases. The sign of the phase has been flipped. The amplitude and phase
+calculations should now agree with the PCALR program.
+
+35. A new command "cablelong" has been included.  This command is
+identical to "cable".  The purpose for this command is to record the
+"long" cable measurement for the cable counter sign check with a
+different command than the normal cable measurements.  This will make
+plots of "cable" auto-scale reasonably.  Please use this command for
+the "long" cable measurements.
+
+36. The VLBA recorder "repro" command has been improved and now agrees
+more closely with the Mark IV repro command.  In particular there were
+two major changes.  The VLBA recorder "repro" command now accepts tape
+speeds in addition to equalizer names for equalizer selection.
+Hopefully this will be more natural to use.  The second change is that
+instead of accepting alternate bit rates as substitutes for the
+equalizer setting, there is now a separate "bit rate" parameter.  Like
+the one in Mark IV "repro" command, it defaults to the rate implied by
+the equalizer set-up.  For VLBA recorder "bit rate" parameter there
+are several alternate bit rates that can be used in bypass.
+
+                         B. Changes in DRUDG
+
+1. Equipment type, FS version, and drudg version date appear as
+separate comments at the top of the .prc and .snp files.
+
+2. An option to print the experiment Notes file (.txt extension and
+same root as the .skd file name) was added.  For .drg files the menu
+has an option to print the PI cover letter.
+
+3. Support for the $PROC section in the .skd and .drg file was added
+(or fixed). Any special SNAP procedures for this experiment may be
+entered into the schedule file by the scheduler and these procedures
+will be copied into the experiment .prc file.
+
+4. Equipment types (rack and recorder) may appear in the .skd file at
+the end of the "T" lines in the $STATION section.  (But see
+description of Option 11 below).
+
+5. Only the simple menu appears (i.e. no options for different types
+of listings or procedure files) if the equipment type is known.
+
+6. Support for S2 recorders from a non-VEX file was added.
+
+7. A new Option 11 was added to "Show/set equipment type".  This
+option displays the station equipment type as known to drudg and
+allows the user to modify it.  For .skd and .drg files the default
+equipment type is "unknown".  The rack type and recorder type may each
+be selected from a list.  Caution should be used with this option to
+ensure that the user doesn't select a type of equipment for which it
+will be impossible to execute the schedule as written.
+
+8. Changes in Procedures:
+- Add ST=FOR,0,ON for setup procedures for Mark IV drives
+- Options 18 and 19 were added for other hybrid systems.
+- PCALFORM=, LO=, PATCH= commands added to setup procedures.
+- New format for LO command.
+- S2 UNLOADER procedure was modified to add et and remove rec_mode.
+- Added sideband and polarization for each LO in the IFD procedures.
+- Changed to 80 ips in UNLOADER for Mk3/4/VLBA.
+
+9. Changes in SNAP output:
+- Change CHECK2C1/2 to CHECKF/R with 80 or 135 speed.
+- Add DATA_VALID commands.
+- Reverse READY and SETUP procedure calls, but a SETUP is issued
+before the fist READY.
+- Confirm that the user really wants PREPASS if it appears in the
+schedule.
+- New time format on all commands.
+
+10. New options were added to support hybrid equipment for making
+procedures.  More combinations of Mark IV, VLBA, and VLBA4 equipment
+were added.  If your equipment does not appear in Options 12-21 on the
+full menu, you can use new Option 11 to select your rack and recorder
+types.
+
+11. The option to print the PI Cover Letter or the Experiment Notes
+file was changed from 21 to 51 to accommodate the extra numbers needed
+for equipment types for procedures.
+
+			    C. KNOWN BUGS
+
+1. There are communication problems with the Mark IV formatter.  It
+apparently misses some characters that are sent to it and time-outs on
+occasion.  It appears that this is related to the 1 PPS interrupt
+service routine in the formatter.  In spite of this problem, we have
+managed to make formatter communications fairly robust.  It is
+important that the (extra) time-out parameter for the formatter in the
+"matad.ctl" file be set to 200 centiseconds.  The FS will try all the
+communications up to three times if an unrecognized command response
+(formatter error "7") or time-out occurs.  Debug information about
+communication errors are logged in the log file, but are not displayed
+in the log display window.
+
+A further problem which may or may not be related is that very rarely
+(although one case was repeatable and therefore was coded around) the
+formatter A/D assignments (sent with the "/ASS" command) do not appear
+to take.
+
+The formatter is not using the correct line protocol for the MAT bus.
+It is using one rather than two stops bits at 9600 BAUD.  The main
+manifestation of this is that occasionally the formatter reports
+communication errors in the "error word".  Whether or not this
+contributes to the other communication problems is unclear.
+
+Another problem related to using the Mark IV formatter on the MAT bus
+has been noticed both on the development system at Haystack and at
+Effelsberg.  After switching to version 9.3.1, both systems had
+occasional headstack controller MAT hangs.  It is unclear how the FS
+could cause this to happen.  It may be a problem generic to the head
+controller.  This problem has happened very rarely: three or four
+times at Haystack over one particular week and we don't know how many
+times it occurred at Effelsberg.  Recovery is possible by just
+reseting the head controller MAT.  If this happens to you please let
+Ed know.
+
+Another problem is that occasionally the formatter "stutters" the
+first character of its response.  In the case the first character is
+repeated and the second characters are omitted.  This is fairly benign,
+but may appear to cause intermittent problems.
+
+Another formatter problem is that it occasionally responds incorrectly
+with a NAK.  However this version of the Field System is able to handle
+this case completely.
+
+2. For stations that have VLBA, Mark IV back-ends and/or an S2
+recorder, the "fmset" program should not be run for extended periods
+of time.  The "fmset" program should be used only to set or briefly
+verify that the formatter time is correct.  Do not leave "fmset"
+running after completing either of these tasks, especially during an
+experiment.
+
+The "fmset" program dominates the Field System when it is running and
+this is likely to interfere with the running of an experiment or other
+activities.  The only way to detect the time from the VLBA formatter
+with greater precision than one second it to wait for the seconds
+response from the formatter to change.  This requires the FS to
+communicate with the formatter almost continuously.  A similar problem
+exists for the S2 recorder.  This problem is less severe for the Mark
+IV formatter, but extended use of "fmset" in this case should be
+avoided as well.  In a future revision, this will be made more robust
+so that there will probably be less danger if "fmset" is left running.
+However, even in the future "fmset" should only be left running for as
+short a time as possible.  A reminder about this is included in the
+"fmset" menu.
+
+3. TPI=ALL (and for TPICAL, and TPZERO, and TSYSx) doesn't work.  This
+isn't a bug, actually it is feature (apologies in advance).  The name
+"ALL" was incorrectly thought to conflict with the 2 character code
+for BBC lower-sideband "al", so it was accidently eliminated.  It will
+be restored in a future revision but is of doubtful utility for VLBA
+racks.  For Mark III, you can achieve the same effect by entering:
+
+TPI=odd,even,if1,if2,if3
+
+Use the same parameters for the other similar commands.  You should
+omit "if3", if you don't have that module.  For VLBA racks a similar
+command can be used but is of doubtful utility:
+
+TPI=oddl,evenl,oddu,evenu,ifa,ifb,ifc,ifd
+
+This will select all 28 video power detectors (14 BBCs with two
+side-bands each) and all the IF distributors.  A more useful version
+might be:
+
+TPI=oddu,evenu,ifa,ifb,ifc,ifd
+
+4. The Mark IV rack version of the "form" command and the Mark IV
+recorder versions of the "repro" and "parity" commands do not support
+the "odd" and "even" parameters for the read and write head types and
+reproduce electronics in the "head.ctl" control file.  This means that
+automatic substitution of odd or even head in passes that use only
+even or odd heads respectively does not occur.  The only correct
+settings for the read and write head parameters and reproduce
+electronics is "all".  This will be fixed in a future revision.
+Please let Ed know if you are missing some tracks and need to work
+around this limitation.
+
+5. For any mode recorded with VLBA style tapeform, the only correct
+setting of the read and write head types on the "head.ctl" is "all".
+This will be fixed in a future revision.  Please let Ed know if you
+are missing some tracks and need to work around this limitation.
+
+6. CHEKR does not check the status of the Mark IV formatter.
+Implementation of this has been deferred until the formatter
+communication problems have been resolved.
+
+7. DRUDG generates IF3 commands for Mark III/IV racks for experiments
+run from .DRG and non-VEX .SKD files regardless of whether they are
+needed or not.  This occurs because it is impossible to know whether
+IF3 is needed or not.
+
+8. When a tape drive has been commanded to move the tape and then
+stops because it hit the low tape sensor (or when S2 recorders hit the
+BOT or EOT), "CHEKR" will complain periodically that the tape drive is
+not in the correct state.  In principle the FS should be smarter about
+this.  However, if the tape is managed correctly by the schedule this
+error message should never occur.  If it does, then it it an
+indication that there is either a problem with: (1) the schedule, (2)
+the check procedures, (3) the recorder, or (4) the tape is too short.
+If any of these cases apply they should be corrected.  It is more
+likely that this error message will occur when the tape is being
+controlled manually.  In this case, issuing an "ET" command will
+convince the FS that the tape drive should be stopped and the error
+message will cease.
+
+9. The "comm=" command in "logex" extracts only the first command
+commanded and displayed.  This problem was noted by Giuseppe
+Maccaferri.
+
+10. The error and status response number reporting scheme for S2
+recorders is clumsy.  FS errors that have mnemonic "rl" are mostly
+error responses from the recorder or the RCL interface library that is
+used to communicate with the recorder.  If the numeric part of an "rl"
+error is greater than -130, then it is the error code returned by the
+recorder.  If the numeric part is less than -130, but greater than
+-300, then add 130 to the value, the absolute value of the result is
+the error response code from the RCL library.  For values less than or
+equal to -300, a FS error has been detected.  Status response codes
+are all reported with mnemonic "rz" and the numeric value is the
+negative of the status response code.  In all cases an appropriate
+error or status message is displayed.  These messages are retained in
+the log.
+
+11. The format of the "ibad.ctl" must not contain any leading or
+embedded spaces.  If either the option "no_untalk/unlisten_after" is
+misspelled or an incorrect device name is supplied, the driver will
+cause a segmentation violation when it is initialized and the FS will
+terminate.  Unfortunately there is no way to prevent this problem in a
+general way; it reflects a limitation in the driver.
+
+12. The ONOFF and FIVPT programs have been known to "hang"
+mysteriously.  This seems to be caused by some problem with the "go"
+mechanism that is used to restart the program when it pauses to allow
+a SNAP procedure, such as CALON or CALOFF to execute.  The "go" that is
+used to restart the program fails for some reason.  This has been
+exceedingly difficult to debug because it is intermittent and fairly
+rare.  There is however a good work around for it.  The CALON and CALOFF
+procedures are called by procedures CALONFP and CALOFFFP for FIVPT and
+CALONNF and CALOFFNF for ONOFF.  FIVPT or ONOFF may hang during (or
+actually just after) the execution of one these procedures that FIVPT
+and ONOFF will typically hang.  If this happens, you will have to
+terminate the FS to recover.  You can prevent it from happening again
+(for this procedure) by adding the lines:
+
+!+1s
+sy=go fivpt &
+
+to the end of CALONFP or CALOFFFP.  For CALONNF and CALOFFNF, please
+add:
+
+!+1s
+sy=go onoff &
+
+If you see other situations where FIVPT or ONOFF hang, please let Ed
+know.
+
+13. Errors in control files, "*.ctl", are not consistently detected by
+the FS at start-up.  Some, but not all, simple typographic errors will
+be detected.  The resulting problems may be subtle and difficult to
+detect and correct.  This problem exists for historical reasons. It
+will be corrected in the next release.  In the meantime, please be
+very careful about editing these files.  Please note that values which
+are not relevant for your equipment CANNOT be commented out.  Every
+parameter must be present to preserve the order of the files.
+
+III. Installation
+
+If you are installing FS9 for the first time with this version, please
+follow the installation instructions in Section 4.5 of the FS9
+"Computer Reference" manual or the "nfsload.txt" memo.  In this case
+you should also get a copy of the current FS9 "Control Files and Field
+System Initialization" manual.
+
+The remainder of this section explains how to install this version as
+an upgrade from 9.3.x, where "x" is in the range 13-27.  If you are
+upgrading from an different version please contact Ed for additional
+instructions.
+
+(0) Before you begin the upgrade make sure you have a current back-up
+of your system in case something goes wrong.  Please refer to the
+directions for making disk-to-disk back-ups in Section 5.8 of the FS9
+"Computer Reference" manual.  If you are running one of the Debian
+distribution kernels and do not have documentation on how to make a
+back-up, please contact Ed.  Section 5.7 of the FS9 "Computer
+Reference" manual has a discussion of drive ID numbers if you are
+unsure about these.  You may choose to install the FS on your back-up
+disk for testing and then later copy the back-up onto the primary once
+you are satisfied with the new version.  In any event, please be sure
+to make a fresh back-up before continuing with the installation.
+
+(1) Please be sure that you have at least 20 MB of free space (use the
+"df" UNIX command to check free space) on your "/usr2" partition
+before starting the upgrade.  This would probably only be a problem
+for stations with 200 MB disks.  If you are tight on space, you may
+want to delete old log files and old versions of the FS (except your
+most recent one of course).  Since you should have backed-up your
+system, you even can delete the "*.[oas]" and executable files of your
+most recent version.  You might want to keep the source of the previous
+version around for reference if you have room.  You can eliminate the
+unnecessary files by "cd"-ing to the old FS directory as "prog" and
+doing a "make rmdoto rmexe".)  If you have any questions about how to
+do this, please contact Ed.
+
+(2) Log-in as prog.
+
+(3) Place a copy of the fs-9.4.0 archive in your "/tmp" directory.
+The archive can be retrieved by ftp from
+"ftp://atri.gsfc.nasa.gov/fs/dist/fs-9.4.0.tar.gz" or the same file on
+"kurp-ftp.hut.fi. "kurp-ftp" mirrors "atri" and any changes made on
+atri should be available on "kurp-ftp" within 24 hours. You will have
+to login to either server using your account and password. For example
+you might do the following:
+
+    cd /tmp
+    ncftp -u atri.gsfc.nasa.gov
+    (enter your account name for the server at prompt)
+    (enter your password for the server at prompt)
+    cd /fs/dist
+    get fs-9.4.0.tar.gz
+    quit
+
+Please note "ncftp" will automatically get this file in binary mode.
+If you use "ftp" you may have to enable binary mode manually.
+
+If you need to transfer the archive using DOS floppies, please see the
+section below titled TRANSFERRING THE UPDATE ARCHIVE BY DOS FLOPPY for
+instructions.
+
+(4) Log-out as prog and log-in as root.
+
+(5) Extract the source from the archive:
+
+    cd /
+    tar -xzpf /tmp/fs-9.4.0.tar.gz
+
+(6) Install the system:
+
+    cd /usr2/fs-9.4.0
+    make install
+    (answer the question "y" if it is okay to proceed)
+
+(8) Log-out as root, and log-in prog.
+
+(9) Make the FS:
+
+    cd /usr2/fs
+    make
+
+If your station software includes the "sterp" program you will may
+need to revise your parsing of the error messages to accomodate the
+new time-tag format.  If you generate any log file style time tags in
+your station software, you may need to revise these as well.
+
+(10) Remake your local software.  You will need to recompile and
+reload all your programs.  If you are using the standard station
+software "Makefile", the following steps should do the trick:
+
+    cd /usr2/st
+    make rmdoto rmexe all
+
+(11) Log-out as prog and log-in as oper
+
+(12) Modify your control files, procedures, and schedules for the new
+version.  See the section below for complete details on how to make
+these changes.
+
+(13) Reboot the computer
+
+(14) Test the FS.  Generally speaking a fairly thorough test is to run
+a test experiment, starting with DRUDG-ing a schedule, executing part
+of it (preferably at least a tape change and a parity check in each
+direction), and any post-experiment plotting, and clean-up that you
+do.  The idea here is to verify that everything works as you expect for
+normal operations.  It also is a good idea to (at least) briefly try
+any calibration procedures that you use the FS for, such as pointing
+and narrow track head calibration.
+
+MODIFYING PROCEDURES, CONTROL FILES, AND SCHEDULES FOR THE NEW VERSION
+
+1. Edit sw.ctl and append a second non-comment line with one field
+(without quotes) that specifies you decoder type, one of: "mk3",
+"mk4", or "dqa" (VLBA).
+
+2. Update your equip.ctl file.  Several new parameters have been added
+at the end.  Please compare your equip.ctl file to the one in
+/usr2/fs/st.default/control/ and add any missing parameters.  Please do
+this even if the parameters are not relevant for your set-up.  Please
+note that the default voltage for write current is now 10.0.  Please
+use this value for any new write voltages entries you add.
+
+3. Update your stcmd.ctl file for the new format.  The commands:
+
+   cd /usr2/control
+   /usr2/fs-9.4.0/misc/cmdctlfix2 stcmd.ctl
+
+should do it automatically.  You will need to rename or delete your
+old "stcmd.bak" if it already exists.  If all your station command are
+hardware independent, i.e., use "FF" for the equipment bits field (now
+"1F1F" for the new version), as they probably should be, this should
+work with no problems. If you haven't updated your "stcmd.ctl" file
+since the S2 equipment support was added, your equipment bits field
+may be still be "77". You can correct this before running "cmdctlfix2"
+by first running "cmdctlfix" and renaming or deleting "stcmd.bak".
+Please note that if your "stcmd.ctl" has been paritially or
+incorrectly updated in the past, "cmdctlfix" and cmdctlfix2" will do
+the best the can and print a warning. In any case, you should probably
+check the contents of the file to make sure they are correct.
+
+4. Edit all your SNAP procedures files (usually just station.prc, old
+experiment procedure files should be deleted to reduce clutter),
+changing your "lo=" commands to the new formats.  The following
+examples are for typical geodetic LO systems:
+ 
+  (VLBA/VLBA4):
+    lo=loa,7600.1
+    lo=lob,1540.1
+    lo=loc,8080.0
+  (Mark III/IV):
+    lo=lo1,8080.
+    lo=lo2,2020.
+    lo=lo3,8580.1
+
+Use appropriate appropriate channels and frequencies for your
+equipment.  Please note the total effective first LO should be used.
+The "upconv" command has been deleted.  You should consider deleting
+old "experiment" procedure libraries you have laying around to reduce
+clutter.  To make sure you have changed all "lo=..." command, you can
+search for all instances of "lo=..." commands, using grep, e.g.:
+
+   cd /usr2/proc
+   grep -i lo= *.prc |less
+
+Please use PFMED to edit the procedures.
+    
+5. Please remove any "upconv" commands in your procedures.  The
+"upconv" command has been deleted.
+
+6. Remove any check2c1/2 and check2a procedures from your station.prc
+library.  Please add to your station.prc library the checkr80,
+checkf80, checkr135, and checkf135 procedure from the default
+procedure library appropriate to your equipment in
+/usr2/fs-9.4.0/st.default/proc.  The new check procedures for each
+"*station.prc" library are available by themselves in the "*check.prc"
+libraries to ease installing them.  The naming conventions for these
+files are:
+
+Equipment      Prefix letters  Station Library      Check library
+Rack/drive
+
+Mk3/Mk3A                       station.prc          check.prc
+VLBA/VLBA          v           vstation.prc         vcheck.prc
+Mk3/VLBA           3v          3vstation.prc        3vcheck.prc
+Mk4/Mk4            4           4station.prc         vcheck.prc
+VLBA/VLBA2         v2          v2station.prc        v2check.prc
+VLBA4/VLBA4        v4          v4station.prc        v4check.prc
+Mk3/Mk3B           3b          3bstation.prc        3bcheck.prc
+
+You will need to test the timing of the new check procedures for your
+system.  Please note that the default timings will not be close unless
+you have 330 as the "Maximum Tape Speed" parameter in your "equip.ctl"
+file.  Please use this speed.  If your recorder will not run reliably
+at 330 ips please contact Ed.  Please check also that your recorder is
+not running at 270 IPS when "sff" and "srw" are used.  The sound of
+the recorder is quite different and a "st" command to monitor the tape
+speed should show 330 and not 270 ips as the speed.
+
+Start with the "checkf135" procedure.  Record some data in the forward
+direction at 135 ips using the most tracks you can.  If you have a Mark
+III drive this would be mode A.  If you have a Mark IV or VLBA drive
+you should make a 32 track recording.  Check the tape footage.  Without
+changing the set-up, try the "checkf135" procedure.  You should get a
+good parity check and the tape should return to the starting footage
+within a foot or so.  If the tape does return to the right footage you
+will need to adjust the timing.  If it did not go far enough, you
+should increase the timed wait after the "parity" command.  One second
+of additional delay at 135 ips is 11.25 feet.  If the tape went beyond
+the starting footage you need to increase the rewind time.  At the
+super rewind speed of 330 ips, one second is 27.5 feet.  The delays can
+be adjusted in units as small as 0.01 seconds, although in practice it
+usually isn't useful to use more than 0.05 seconds of precision.  The
+timing should be adjusted as recommended to compensate for over- or
+undershooting the correct footage.  The default delays are designed to
+allow enough time for the worst case check, but please not that the
+total time should not exceed 100 seconds.  If you are having trouble
+with the timing, you can use "xdisp=on" and watch the execution more
+closely.  It is essential for consistent performance that each action
+complete before the timed wait that follows it.  In particular: the
+wait after the fastr must not end before the tape drive has come to a
+stop, the wait after the st=for,135,off must not end before the tape
+drive is up to speed, and the wait after "parity" command must not end
+before the parity command has completed.  There should be a reasonable
+margin in each case, although the wait may go on sometime after the
+"parity" command because it is engineered for the worst case.
+
+This procedure needs to be repeated for reverse recording at 135 ips
+for "checkr135".  The timings will probably be similar to the forward
+check procedure.
+
+If your station uses thin tape you need to repeat the procedure again
+for 80 ips recording both forward and reverse for "checkf80" and
+"checkr80".  One second of motion at 80 ips is 6.67 feet.
+
+If you have any trouble with this or are unable to get good parity
+checks, please contact Ed (even if you already knew you had an
+existing read-back problem).
+
+7. Update your narrow track head calibration schedule.  The new default
+versions are located in /usr2/fs-9.4.0/st.default/sched (see step 6
+in this section for an explanation of the prefix characters in the
+hdcal schedule file names).  You can copy the version appropriate for
+your hardware to /usr2/sched.  Before doing this you should compare
+your existing "*hdcal.snp" file to the corresponding version in your
+old FS source tree to see if you have made any customizations.  For
+example:
+
+diff hdcal.snp /usr2/fs-9.3.17/st.default/proc/ |less
+
+If there are customizations in your version, you will probably need to
+make the same customizations in the new version.  If you do find that
+customizations are necessary, please let Ed know so that the standard
+schedule can be modified to take this into account.
+
+8. If you chose to, you may want to update your pointing procedure
+library "point.prc" or "vpoint.prc" to use the J2000 coordinates in
+the new default libraries in /usr2/fs-9.4.0/st.default/proc.  You
+might also choose to update the "aquir" control file, "ctlpo.ctl" to
+use the J2000 coordinates in the default version in
+/usr2/fs-9.4.0/st.default/control.  Both of these changes will
+require you to restore any customizations you have made for your
+station.
+
+9. Be sure to return to the next step (13) of the installation
+instructions.
+
+TRANSFERRING THE UPDATE ARCHIVE BY DOS FLOPPY
+
+In order to assist sites that need to transfer the FS archive by DOS
+floppy, "split" files of the fs-9.4.0.tar.gz archive have been placed
+in the /fs/dist directory on atri.gsfc.nasa.gov.  These files are
+small enough to each fit on 1.44 MB 3.5" floppy.  The files are:
+
+fs940tg.aa
+fs940tg.ab
+
+If you need to use DOS floppies to get files to the FS computer,
+please copy these files to some directory such as /tmp on the FS
+computer and then execute the command:
+
+cat fs940tg.* >fs-9.4.0.tar.gz
+
+This will create an exact image of the original fs-9.4.0.tar.gz
+archive on your computer.  Please be sure to use binary transfer when
+getting the files from atri or kurp-ftp.

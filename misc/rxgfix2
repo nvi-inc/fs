@@ -1,0 +1,145 @@
+#!/usr/bin/perl
+# Usage: rxgfix2 file
+
+if ($#ARGV < 0) {
+    print "\n  Usage: rxgfix2 files\n\n";
+    print "    Fixes rxg files to have two Trec value if needed.\n\n";
+    print "    'files' are the files to be fixed\n\n";
+    print "    The original files are renamed with a '.bak' extension\n";
+    print "    Files with only one polarizaion or with two and that already\n";
+    print "    have two Trec values, i.e., already correct, are silently restored.\n\n";
+    exit -1;
+}
+
+
+$float_pattern='([+-]?)(?=\d|\.\d)\d*(\.\d*)?';
+
+FILE: foreach $name (@ARGV) {
+
+    $bak = $name . ".bak";
+    $out = $name;
+    if (!-e $name) {
+	die "Can't find $name Quitting.\n";
+    }
+
+# rename the original if we can and open the files
+
+    if (-e $bak) {
+	die "Backup-file $bak already exists, giving up.\n";
+    }
+
+    rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
+ 
+    if(!open(BAK,$bak)) {
+	print "Failed to open $bak: $!\n";
+	if(!rename($bak,$out)) {
+	    print "Unable to rename $bak to $out: $!\n";
+	    die "Please fix whatever the problem is and rename it yourself.\n";
+	} else {
+	    die "I renamed $bak to $out for you.\n";
+	}
+    }
+    
+    if(!open(OUT,">" . $out)) {
+	print "Failed to open $out: $!\n";
+	if((!close(BAK)) || (!rename($bak,$out))) { 
+	    print "Unable to rename $bak to $out: $!\n";
+	    die "Please fix whatever the problem is and rename it yourself.\n";
+	} else {
+	    die "I renamed $bak to $out for you.\n";
+	}
+    }
+
+
+#process
+
+    $one=0;
+    $two=0;
+    $found=0;
+    $trailing=0;
+    $count=0;
+    $pol=0;
+    while(<BAK>) {
+	if($trailing) {
+	    print OUT;
+	    next;
+	}
+	$count++ if(/^[^*]/);
+	if($pol==0 && $count == 4) {
+	    $pol=1;
+	    if(!/^\s*\S+\s+\S+\s*$/) { 
+		print OUT;
+		$one=1;
+		next;
+	    } else {
+		print OUT;
+		next;
+	    }
+	} elsif(/^[ ]*end_tcal_table/) {
+	    $found=1;
+	    print OUT;
+	    next;
+	} elsif(not $found) {
+	    print OUT;
+	    next;
+	} else {
+	    if(/^\*/ || /^ *$/) {
+		print OUT;
+		next;
+	    } else {
+		if(not /^[ ]*$float_pattern[ ]+$float_pattern[ ]*$/) {
+		    if(/^[ ]*$float_pattern[ ]*$/) {
+			chomp;
+			print OUT "$_ $_\n";	    
+			$good=1;
+		    } else {
+			print OUT;
+		    }
+		} else {
+		    $two=1;
+		    print OUT;
+		}
+		$trailing=1;
+		next;
+	    }
+	}
+    }
+    $rename=0;
+    if(!close(OUT)) {
+	$rename=1;
+	print "Warning: Unable to close to $out: $!\n";
+    }
+    if(!close(BAK)) {
+	$rename=1;
+	print "Warning: Unable to close to $bak: $!\n";
+    }
+
+    if($two && $one) {
+	$rename=1;
+	print "Warning: File '$out' had one pol and two Trec, which is wrong, please fix.\n";
+    } elsif ($two) {
+	$rename=1;
+#	print "Warning: File '$out' already contained two Trec values\n";
+    } elsif ($one) {
+	$rename=1;
+#	print "Warning: File '$out' only has one pol., so it needs only one Trec value\n";
+    } elsif ((not $good)||(not $trailing)) {
+	$rename=1;
+	if(not $good) {
+	    print "Warning: Trec line invalid\n";
+	} else {
+	    print "Warning: 'end_tcal_table' not found.\n";
+	}
+	print "Warning: There is probably something wrong, like '$out' wasn't an rxg file\n";
+    }
+    if($rename) {
+	if(!rename($bak,$out)) { 
+	    print "Warning: Unable to rename '$bak' to '$out': $!\n";
+	    print "Warning: Please fix whatever the problem is and rename it yourself,\n";
+	    print "Warning: probably using 'mv $bak $out'\n";
+	} else {
+	    print "Warning: I renamed '$bak' to '$out' for you.\n" if($two == $one);
+
+	}
+    }
+}

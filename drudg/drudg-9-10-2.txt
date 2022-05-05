@@ -1,0 +1,14 @@
+Drudg release notes 9.10.2
+Date of release is 2007-Dec-27.
+
+1. Fixed a problem where the rack type specified in skedf.ctl had
+to be in upper case.  Is now case insensitive.
+
+2. PROC.  Removed all the "mk5=" commands from "exper_initi". These
+now need to be put in the ready_disk procedure.
+
+3. SNAP. Moved "ready_disk" before the first "setup" command.
+
+4. Labels.  Fixed a problem where the left hand side of labels
+were being cut off.
+

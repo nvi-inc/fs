@@ -1,0 +1,22 @@
+#!/usr/bin/wish -f
+# logpl_err source
+# Basic font for button, menus and labels for logpl errors
+# Product NVI,Inc./GSFC (2003)
+# to be incorporated into the VLBI Field System.
+
+# Window manager configurations for directories
+  set ICONDIR /usr2/fs/fsvue/images
+
+  wm iconposition . 1200 0
+  wm geometry . +500+500
+  wm iconbitmap . @$ICONDIR/vlb.icon
+  wm title . {fsvue}
+  set w .
+
+  if {$argv==1} {
+      message .msg -width 250 -text \
+	      {I can't do defaults yet but I will give you the next best thing.}
+      pack .msg
+  } else {
+
+  }

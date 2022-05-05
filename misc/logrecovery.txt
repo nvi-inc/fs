@@ -1,0 +1,49 @@
+This file contains a note describing a method to recover a log file
+that has been accidently deleted. The chances of this method
+succeeding are inversely proportional to how many changes have been
+made to the disk since the file was deleted. Please note that the
+format of the log entry time stamp has changed since the original note
+was written. With the current time stamps, you would enter the shown
+commands as:
+
+    # cd /
+    # grep ^1997.078 /dev/sda3 > cb302a.log
+    # grep ^1997.079 /dev/sda3 > cb302b.log
+
+Please note also if you have IDE disks, the device name would be /dev/hda3.
+
+Thanks to Pablo for figuring this out and writing it up.
+
+From: Pablo de Vicente <vicente@cay.oan.es>
+Subject: file recovery
+To: pcfs@vega.gsfc.nasa.gov
+Date: Fri, 21 Mar 97 13:35:21 MET
+Mailer: Elm [revision: 70.85]
+Status: RO
+
+ To whom it may concern,
+
+ After the last CORE observation, the person who was observing removed by 
+ error the log file we had just produced. Fortunately
+ no other operation was done at the PC till we discovered that the file was
+ not there. We have been lucky and could recover the whole file. Just in
+ case other people may be interested, this is how we managed to recover it.
+
+ 1) As root I unmounted the /usr2 partition, to avoid writing on it.
+ 2) As root we made a search on that partition looking for the character
+    string with the date of the two days during which the obsevation 
+    was done,
+
+    # cd /
+    # grep 97078 /dev/sda3 > cb302a.log
+    # grep 97079 /dev/sda3 > cb302b.log
+
+ 3) We joined both files, and revised the whole content of it to remove all
+    junk that we may have come into it. All lines seem to be ordered in time.
+
+ This operation was possible because,
+  - the lost file was ascii
+  - all lines of the file are time tagged by the FS.
+
+ Pablo de Vicente.
+

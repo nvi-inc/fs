@@ -1,0 +1,17 @@
+
+#!/bin/bash
+set -e
+if ! [ $(id -u) = 0 ]; then
+   echo "This script must be run as root."
+   exit 1
+fi
+# install mdstat
+cd /usr/local/bin
+cp -a /usr2/fs/misc/mdstat.7 mdstat
+chown root:root mdstat
+chmod a+rx mdstat
+# install refresh_secondary
+cd /usr/local/sbin
+cp -a /usr2/fs/misc/refresh_secondary.sdb_efi refresh_secondary
+chown root:root refresh_secondary
+chmod a+r,u+x refresh_secondary

@@ -1,0 +1,68 @@
+               disk_record - Start/stop Mark 5 recording
+
+            Syntax:     disk_record=record,label
+
+            Response:   disk_record/record,label,scan
+
+
+Settable Parameters:
+          record    One of: on or off. No default. Additional monitor only
+                    values: halted, throttled, overflow, and waiting
+          label     String of up to 63 characters, default comes
+                    from scan_name command
+
+Monitor-only parameters:
+          scan      sequential scan number
+
+
+Comments: The default for the label come from the scan_name command.
+It consists of session, station, and name parameters from the
+scan_name command concatentaed together in that order, seperated by
+underscores, i.e.: session_station_name.
+
+The record monitor parameter values of halted, throttled, overflow,
+and waiting all indicate errors.
+
+If recording is aborted because of some problem before the
+"disk_record=off" command is executed by the Mark 5A, then all data
+recorded since the previous "disk_record=on" may be lost.  If you are
+using the "2004y351d" (16December2004) version, or a later version, of
+the Mark5A program, then as described below, in most of these cases,
+it is possible to update the record pointer (but not the directory) on
+the disk pack to reflect the data that had been recorded.  This
+procedure will prevent the data from being overwritten by new
+recordings and allow the data from the aborted recording to be
+correlated.  This command seems to work well in at least two cases:
+(1) the Mark5A program is ended prematurely by crash or some other
+problem or (2) the power is lost to the Mark5A unit.  It does not seem
+work as well in the case where the key switch is turned off during
+recording (care should be exercised of course to avoid turning the key
+switch on the selected disk pack).  Regardless of the cause of the
+aborted recording, the best recovery procedure is to execute the
+following FS commands (after re-starting the Mark5A program):
+
+  mk5=bank_set=<bank with aborted recording>;
+  mk5=recover=0
+
+If you do not know which bank has the aborted recording, it is
+probably the one that is neither empty nor full.  You can use the
+monit5 'disk space remaining' display and the 'bank_status' command to
+see which bank is neither empty (100% remaining) nor full (0.x%
+remaining).  If recording aborted during the first scan, then that
+bank would show 100% remaining.
+
+It is probably not worthwhile to recover short recordings particularly
+if doing so would prevent other scans from being recorded. However,
+for longer recordings, particularly if several scans have been
+recorded "continuously" and a problem prevented a proper
+"disk_record=off", recovery may be helpful. Since at this time
+directory information is not recovered properly, this won't be helpful
+for scans transferred off-line after an experiment with software that
+depends on the directory information. In that case, the transfer will
+not work, but this will at least preserve the data on disk.
+
+The Mark5A "recover" command is available with the "2004y351d"
+(16December2004) or later versions of the Mark5A program. It is
+documented in the "Mark 5A command set" document
+<http://web.haystack.mit.edu/mark5/command5a.pdf>.
+
