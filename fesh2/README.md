@@ -75,8 +75,13 @@ Run the following:
 Run the following:
    ```
    cd /usr2/fs/fesh2
-   pip3 install --upgrade  dist/fesh2-2.3.0.tar.gz
+   pip3 install -v --upgrade  dist/fesh2-2.3.0.tar.gz
    ```
+
+Watch out for WARNING messages. In some Field System setups it may not be 
+possible for the prog account to write to the /usr2/control directior, in 
+which case the default configuration file needs copying there manually. A 
+warning message is issued if this is the case. 
 
 You will then need to edit the **fesh2** configuration file for your station
 (s). More information on configuration is provided below.
