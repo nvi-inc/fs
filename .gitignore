@@ -17,9 +17,6 @@
 *.gch
 *.pch
 
-# Python compiled bytecode
-*.pyc
-
 # Libraries
 *.lib
 *.a
@@ -73,3 +70,5 @@ third_party/lib/
 
 .fs_version
 .DS_Store
+
+*.idea
