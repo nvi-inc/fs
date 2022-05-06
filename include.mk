@@ -13,7 +13,7 @@ CFLAGS += -Werror=int-to-pointer-cast
 ifeq ($(FC),fort77)
 FLIBS   += -lf2c -lm
 else
-FFLAGS  += -ff2c -I$(ROOT)/include -fno-range-check -finit-local-zero -fno-automatic -fbackslash
+FFLAGS  += -ff2c -I$(ROOT)/include -fno-range-check -finit-local-zero -fno-automatic -fbackslash -fallow-argument-mismatch
 FLIBS   += -lgfortran -lm
 endif
 
