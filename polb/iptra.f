@@ -21,6 +21,7 @@
 C
       double precision ra,ra1,ra2,ra3,rain
       include '../include/dpi.i'
+      include '../include/boz.i'
 C
 C RA
 C
@@ -35,11 +36,11 @@ C
       if (its.lt.0) its=0
       if (its.gt.9) its=9
 C
-      iptra=icnext+ib2as(ih,lbuf,icnext,o'40000'+o'400'*2+2)
-      iptra=iptra+ib2as(im,lbuf,iptra,o'40000'+o'400'*2+2)
-      iptra=iptra+ib2as(is,lbuf,iptra,o'40000'+o'400'*2+2)
+      iptra=icnext+ib2as(ih,lbuf,icnext,ocp40000+ocp400*2+2)
+      iptra=iptra+ib2as(im,lbuf,iptra,ocp40000+ocp400*2+2)
+      iptra=iptra+ib2as(is,lbuf,iptra,ocp40000+ocp400*2+2)
       iptra=ichmv_ch(lbuf,iptra,'.')
-      iptra=iptra+ib2as(its,lbuf,iptra,o'40000'+o'400'*1+1)
+      iptra=iptra+ib2as(its,lbuf,iptra,ocp40000+ocp400*1+1)
 
       return
       end

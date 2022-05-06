@@ -69,7 +69,8 @@ C     NONE
 C 
 C 4.  CONSTANTS USED
 C 
-C     NONE
+      include '../include/boz.i'
+C
 C 5.  INITIALIZED VARIABLES 
 C 
 C     NONE
@@ -84,14 +85,14 @@ C
 C 
 C  GET AND CONVERT FOR LEFT(OR HIGH) BYTE CASE 
 C 
-      ibin=(iand(iar(i/2),o'377')-o'60')
+      ibin=(iand(iar(i/2),ocp377)-ocp60)
 C 
       goto 900 
 C 
 C  GET AND CONVERT FOR RIGHT(OR LOW) BYTE CASE 
 C
 500   continue
-      ibin=(iar((i+1)/2)/o'400')-o'60'
+      ibin=(iar((i+1)/2)/ocp400)-ocp60
 C 
 C  EXIT ITS ALL OVER THIS ROUND
 C 

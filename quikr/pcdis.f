@@ -44,6 +44,9 @@ C     CALLING SUBROUTINES: PCALC
 C     CALLED SUBROUTINES: character utilities 
 C 
 C 3.  LOCAL VARIABLES 
+C
+      include '../include/boz.i'
+C
       integer*2 ibuf2(60)
 C               - input class buffer, output display buffer 
 C        ILEN   - length of buffers, chars
@@ -79,10 +82,10 @@ C     2.  Fill the buffer with the required common variables
 C 
       ierr = 0
 C 
-      nch = nch+ib2as(ncycpc,ibuf2,nch,o'100000'+8) 
+      nch = nch+ib2as(ncycpc,ibuf2,nch,ocp100000+8) 
       nch = mcoma(ibuf2,nch)
 C 
-      nch = nch+ib2as(ipaupc,ibuf2,nch,o'100000'+8) 
+      nch = nch+ib2as(ipaupc,ibuf2,nch,ocp100000+8) 
       nch = mcoma(ibuf2,nch)
 C 
       call char2hol('fs',lrep,1,2)
@@ -92,15 +95,15 @@ C
       nch = ichmv(ibuf2,nch,lrep,1,2)
       nch = mcoma(ibuf2,nch)
 C
-      nch = nch+ib2as(nblkpc,ibuf2,nch,o'100000'+8)
+      nch = nch+ib2as(nblkpc,ibuf2,nch,ocp100000+8)
       nch = mcoma(ibuf2,nch)
 C
-      nch = nch+ib2as(ibugpc,ibuf2,nch,o'100000'+8)
+      nch = nch+ib2as(ibugpc,ibuf2,nch,ocp100000+8)
 C
       do i=1,28
         if (itrkpc(i).gt.0) then
           nch = mcoma(ibuf2,nch)
-          nch = nch+ib2as(i,ibuf2,nch,o'100000'+8)
+          nch = nch+ib2as(i,ibuf2,nch,ocp100000+8)
         endif
       enddo
 C

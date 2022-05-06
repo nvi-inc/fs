@@ -19,6 +19,8 @@
 *
       program sigma
 C
+      include '../include/boz.i'
+C
       logical kinit,kgpnt,kopn,kif,koutp,kgsta,kuse
       logical kgdat,kpdat,kusen
 C
@@ -64,7 +66,7 @@ C          edit:     point(s) removed,     point(s) added
 C
       call fmperror_standalone_set(1)
 C
-      ic=ib2as(mpts,ldum,1,o'100000'+6)
+      ic=ib2as(mpts,ldum,1,ocp100000+6)
 C
       if (kinit(lu,iibuf,iobuf,iapp,imbuf,lst)) goto 10010
 C

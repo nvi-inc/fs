@@ -36,6 +36,8 @@ C                   s  = switch setting
 C                   a  = mixer, and high bits of atten.
 C                   b  = remaining atten. bits
 C 
+      include '../include/boz.i'
+C
 C  Fill unused fields with zeros 
 C
       call ifill_ch(ibuf,1,4,'0') 
@@ -48,11 +50,11 @@ C
 c
 C  Put upper two bits (of six) into char 7 plus mixer control
 c
-      call ichmv(ibuf,7,ihx2a((2-imix)*4+and(iat,o'60')/o'20'),2,1)
+      call ichmv(ibuf,7,ihx2a((2-imix)*4+and(iat,ocp60)/ocp20),2,1)
 c
 C  Put lower four bits into next character.
 c
-      call ichmv(ibuf,8,ihx2a(and(iat,o'17')),2,1)
+      call ichmv(ibuf,8,ihx2a(and(iat,ocp17)),2,1)
 C 
       return
       end 

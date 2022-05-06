@@ -23,7 +23,8 @@ C
 C WRITE SOURCE LOG ENTRY
 C 
       include '../include/fscom.i'
-C 
+      include '../include/boz.i'
+C
 C  WE READ THE FOLLOWING FROM FSCOM:
 C 
 C    LSORNA,  DEC50, RA50, EP1950,
@@ -66,15 +67,15 @@ C
       is=int(rut2+0.5)
 C 
 c not Y10K compliant
-      icnext=icnext+ib2as(iyr,lbuf,icnext,o'40000'+o'400'*4+4) 
+      icnext=icnext+ib2as(iyr,lbuf,icnext,ocp40000+ocp400*4+4) 
       icnext=ichmv_ch(lbuf,icnext,'.') 
-      icnext=icnext+ib2as(idoy,lbuf,icnext,o'40000'+o'400'*3+3) 
+      icnext=icnext+ib2as(idoy,lbuf,icnext,ocp40000+ocp400*3+3) 
       icnext=ichmv_ch(lbuf,icnext,'.') 
-      icnext=icnext+ib2as(ih,lbuf,icnext,o'40000'+o'400'*2+2) 
+      icnext=icnext+ib2as(ih,lbuf,icnext,ocp40000+ocp400*2+2) 
       icnext=ichmv_ch(lbuf,icnext,':') 
-      icnext=icnext+ib2as(im,lbuf,icnext,o'40000'+o'400'*2+2) 
+      icnext=icnext+ib2as(im,lbuf,icnext,ocp40000+ocp400*2+2) 
       icnext=ichmv_ch(lbuf,icnext,':') 
-      icnext=icnext+ib2as(is,lbuf,icnext,o'40000'+o'400'*2+2) 
+      icnext=icnext+ib2as(is,lbuf,icnext,ocp40000+ocp400*2+2) 
       icnext=ichmv_ch(lbuf,icnext,' ')
 C 
 C EVEN OFF THE LAST WORD AND SEND IT

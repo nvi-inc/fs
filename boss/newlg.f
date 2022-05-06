@@ -24,6 +24,7 @@ C           and sends this to DDOUT for starting a new log.
 C
       include '../include/fscom.i'
       include '../include/dpi.i'
+      include '../include/boz.i'
 C
 C  INPUT:
 C
@@ -55,13 +56,13 @@ C
       nch = ichmv_ch(ibuf,nch,'Mark IV Field System ')
       nch = ichmv_ch(ibuf,nch,'Version ')
       idum=sVerMajor_FS
-      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = nch + ib2as(idum,ibuf,nch,ocp100000+5)
       nch = ichmv_ch(ibuf,nch,'.')
       idum=sVerMinor_FS
-      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = nch + ib2as(idum,ibuf,nch,ocp100000+5)
       nch = ichmv_ch(ibuf,nch,'.')
       idum=sVerPatch_FS
-      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = nch + ib2as(idum,ibuf,nch,ocp100000+5)
       nch = nch-1
       call char2hol('nl',nl,1,2)
       call ifill_ch(lprocdumm,1,12,' ')
@@ -80,13 +81,13 @@ C
       nch=ichmv_ch(ibuf,nch,'release')
       nch=mcoma(ibuf,nch)
       idum=sVerMajor_FS
-      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = nch + ib2as(idum,ibuf,nch,ocp100000+5)
       nch = ichmv_ch(ibuf,nch,'.')
       idum=sVerMinor_FS
-      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = nch + ib2as(idum,ibuf,nch,ocp100000+5)
       nch = ichmv_ch(ibuf,nch,'.')
       idum=sVerPatch_FS
-      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = nch + ib2as(idum,ibuf,nch,ocp100000+5)
       call fs_get_sVerrelease_fs(sVerRelease_FS)
       idum=iflch(sVerRelease_FS,32)
       if(idum.ne.0) then
@@ -371,10 +372,10 @@ c
 c
 c
       call fs_get_freqif3(freqif3)
-      nch=nch+ib2as(freqif3/100,ib,nch,z'8000'+10)
+      nch=nch+ib2as(freqif3/100,ib,nch,zcp8000+10)
 c
       nch=ichmv_ch(ib,nch,'.')
-      nch=nch+ib2as(mod(freqif3,100),ib,nch,z'C100'+2)
+      nch=nch+ib2as(mod(freqif3,100),ib,nch,zcpC100+2)
 c
       nch=mcoma(ib,nch)
       nch=ichmv(ib,nch,ihx2a(iswavif3_fs),2,1)
@@ -390,15 +391,15 @@ c
       nch=mcoma(ib,nch)
       call fs_get_hwid(hwid)
       ihwid=hwid
-      nch=nch+ib2as(ihwid,ib,nch,z'8005')
+      nch=nch+ib2as(ihwid,ib,nch,zcp8005)
 c
       nch=mcoma(ib,nch)
       call fs_get_i70kch(i70kch)
-      nch = nch + ib2as(i70kch,ib,nch,z'8005')
+      nch = nch + ib2as(i70kch,ib,nch,zcp8005)
 c
       nch=mcoma(ib,nch)
       call fs_get_i20kch(i20kch)
-      nch = nch + ib2as(i20kch,ib,nch,z'8005')
+      nch = nch + ib2as(i20kch,ib,nch,zcp8005)
 c
       nch=mcoma(ib,nch)
       if(pcalcntrl.eq.3) then
@@ -409,11 +410,11 @@ c
 
       nch=mcoma(ib,nch)
       call fs_get_imk4fmv(imk4fmv)
-      nch = nch + ib2as(imk4fmv,ib,nch,z'8005')
+      nch = nch + ib2as(imk4fmv,ib,nch,zcp8005)
 
       nch=mcoma(ib,nch)
       call fs_get_ndas(ndas)
-      nch = nch + ib2as(ndas,ib,nch,z'8002')
+      nch = nch + ib2as(ndas,ib,nch,zcp8002)
 
       nch=mcoma(ib,nch)
       call fs_get_idasfilt(idasfilt)
@@ -437,7 +438,7 @@ c
          nch=ichmv_ch(ib,nch,'cdp')
       else
          call fs_get_wx_host(wx_host)
-         nch = nch + ib2as(wx_met,ib,nch,z'8005')
+         nch = nch + ib2as(wx_met,ib,nch,zcp8005)
          nch=ichmv_ch(ib,nch,':')
          do i=1,65
             if(jchar(wx_host,i).eq.0) then
@@ -453,7 +454,7 @@ c
       if(mk4sync_dflt.eq.-1) then
          nch=ichmv_ch(ib,nch,'off')
       else
-         nch = nch + ib2as(mk4sync_dflt,ib,nch,z'8002')
+         nch = nch + ib2as(mk4sync_dflt,ib,nch,zcp8002)
       endif
 
       nch=mcoma(ib,nch)
@@ -486,18 +487,18 @@ c
       call fs_get_dbbc_cores(dbbc_cores)
       do i=1,dbbc_cond_mods
          nch=mcoma(ib,nch)
-         nch = nch + ib2as(dbbc_como_cores(i),ib,nch,z'8002')
+         nch = nch + ib2as(dbbc_como_cores(i),ib,nch,zcp8002)
       enddo
 
       call fs_get_dbbc_if_factors(dbbc_if_factors)
       do i=1,dbbc_cond_mods
          nch=mcoma(ib,nch)
-         nch = nch + ib2as(dbbc_if_factors(i),ib,nch,z'8005')
+         nch = nch + ib2as(dbbc_if_factors(i),ib,nch,zcp8005)
       enddo
 c
       nch=mcoma(ib,nch)
       call fs_get_m5b_crate(m5b_crate)
-      nch = nch + ib2as(m5b_crate,ib,nch,z'8003')
+      nch = nch + ib2as(m5b_crate,ib,nch,zcp8003)
 c
       nch=mcoma(ib,nch)
       call fs_get_fila10gvsi_in(fila10gvsi_in)
@@ -512,11 +513,11 @@ c
           nch = ichmv_ch(ib,1,'dbbc3,')
 c
           call fs_get_dbbc3_ddc_bbcs_per_if(dbbc3_ddc_bbcs_per_if)
-          nch = nch + ib2as(dbbc3_ddc_bbcs_per_if,ib,nch,z'8002')
+          nch = nch + ib2as(dbbc3_ddc_bbcs_per_if,ib,nch,zcp8002)
 c
           nch=mcoma(ib,nch)
           call fs_get_dbbc3_ddc_ifs(dbbc3_ddc_ifs)
-          nch = nch + ib2as(dbbc3_ddc_ifs,ib,nch,z'8002')
+          nch = nch + ib2as(dbbc3_ddc_ifs,ib,nch,zcp8002)
 c
           nch=mcoma(ib,nch)
           nch=ichmv_ch(ib,nch,'v')
@@ -534,15 +535,15 @@ c
 c
           nch=mcoma(ib,nch)
           call fs_get_dbbc3_mcdelay(dbbc3_mcdelay)
-          nch = nch + ib2as(dbbc3_mcdelay,ib,nch,z'8002')
+          nch = nch + ib2as(dbbc3_mcdelay,ib,nch,zcp8002)
 c
           nch=mcoma(ib,nch)
           call fs_get_dbbc3_iscboard(dbbc3_iscboard)
-          nch = nch + ib2as(dbbc3_iscboard,ib,nch,z'8002')
+          nch = nch + ib2as(dbbc3_iscboard,ib,nch,zcp8002)
 c
           nch=mcoma(ib,nch)
           call fs_get_dbbc3_clockr(dbbc3_clockr)
-          nch = nch + ib2as(dbbc3_clockr,ib,nch,z'8004')
+          nch = nch + ib2as(dbbc3_clockr,ib,nch,zcp8004)
 
           call logit3(ib,nch-1,lsor)
       endif
@@ -614,7 +615,7 @@ c
       nch = 1
       nch = ichmv_ch(ib,nch,'flagr,')
       call fs_get_iapdflg(iapdflg)
-      nch = nch + ib2as(iapdflg,ib,nch,z'8005')
+      nch = nch + ib2as(iapdflg,ib,nch,zcp8005)
       call logit3(ib,nch-1,lsor)
 c
       nch = 1

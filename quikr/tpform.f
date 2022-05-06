@@ -45,6 +45,8 @@ C
 C     CALLED SUBROUTINES: GTPRM
 C
 C   LOCAL VARIABLES
+C
+      include '../include/boz.i'
 C        NCHAR  - number of characters in buffer
 C        ICH    - character counter
       integer*2 ibuf(40)            !  class buffer
@@ -90,9 +92,9 @@ C             the contents of the ITAPOF array.
           if (itapof(i,indxtp).ge.minoff .and.
      $          itapof(i,indxtp).le.maxoff) then
             nchar = ichmv_ch(ibuf,nchar,'  ')
-            nchar = nchar + ib2as(i,ibuf,nchar,o'100003')
+            nchar = nchar + ib2as(i,ibuf,nchar,ocp100003)
             nchar = ichmv_ch(ibuf,nchar,'->')
-            nchar = nchar + ib2as(itapof(i,indxtp),ibuf,nchar,o'100005')
+            nchar = nchar + ib2as(itapof(i,indxtp),ibuf,nchar,ocp100005)
             if (nchar.gt.58) then
               call put_buf(iclass,ibuf,1-nchar,'fs','  ')
               nchar = 1

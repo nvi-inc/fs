@@ -49,6 +49,8 @@ C     LXPLT - Plotting routine
 C 
 C LOCAL VARIABLES:
 C 
+      include '../include/boz.i'
+C
 C     LXDAY,LXHR,LXMIN,LXSEC - Day, Hours, Minutes, & Seconds 
 C     TIME - Contains log time
       integer it(6)
@@ -70,15 +72,15 @@ C
       it(1)=(xx-secs*100.0d0)+.5
       nch=nch+ib2as(it(6),line,nch,4)
       nch=ichmv_ch(line,nch,'.')
-      nch=nch+ib2as(it(5),line,nch,o'40000'+o'400'*2+3) 
+      nch=nch+ib2as(it(5),line,nch,ocp40000+ocp400*2+3) 
       nch=ichmv_ch(line,nch,'.')
-      nch=nch+ib2as(it(4),line,nch,o'40000'+o'400'+2) 
+      nch=nch+ib2as(it(4),line,nch,ocp40000+ocp400+2) 
       nch=ichmv_ch(line,nch,':')
-      nch=nch+ib2as(it(3),line,nch,o'40000'+o'400'+2)
+      nch=nch+ib2as(it(3),line,nch,ocp40000+ocp400+2)
       nch=ichmv_ch(line,nch,':')
-      nch=nch+ib2as(it(2),line,nch,o'40000'+o'400'+2)
+      nch=nch+ib2as(it(2),line,nch,ocp40000+ocp400+2)
       nch=ichmv_ch(line,nch,'.')
-      nch=nch+ib2as(it(1),line,nch,o'40000'+o'400'+2)
+      nch=nch+ib2as(it(1),line,nch,ocp40000+ocp400+2)
 
 C
       return

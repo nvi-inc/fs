@@ -21,6 +21,7 @@
 C
       double precision dec,dec1,dec2,decin
       include '../include/dpi.i'
+      include '../include/boz.i'
 C
 C DECLINATION
 C
@@ -35,9 +36,9 @@ C
 C
       iptdc=ichmv_ch(lbuf,icnext,'+')
       if (decin.lt.0.0) iptdc=ichmv_ch(lbuf,icnext,'-')
-      iptdc=iptdc+ib2as(ih,lbuf,iptdc,o'40000'+o'400'*2+2)
-      iptdc=iptdc+ib2as(im,lbuf,iptdc,o'40000'+o'400'*2+2)
-      iptdc=iptdc+ib2as(is,lbuf,iptdc,o'40000'+o'400'*2+2)
+      iptdc=iptdc+ib2as(ih,lbuf,iptdc,ocp40000+ocp400*2+2)
+      iptdc=iptdc+ib2as(im,lbuf,iptdc,ocp40000+ocp400*2+2)
+      iptdc=iptdc+ib2as(is,lbuf,iptdc,ocp40000+ocp400*2+2)
 
       return
       end

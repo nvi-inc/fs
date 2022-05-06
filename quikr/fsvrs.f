@@ -45,6 +45,8 @@ C        NCH    - character counter
 C
 C 5.  INITIALIZED VARIABLES
 C
+      include '../include/boz.i'
+C
 C 6.  PROGRAMMER: MWH
 C     LAST MODIFIED: CREATED  890531
 C
@@ -54,13 +56,13 @@ C
       nch = ichmv_ch(ibuf,1,'fsversion/')
 C                   Put / to indicate a response
       idum=sVerMajor_FS
-      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = nch + ib2as(idum,ibuf,nch,ocp100000+5)
       nch = ichmv_ch(ibuf,nch,'.')
       idum=sVerMinor_FS
-      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = nch + ib2as(idum,ibuf,nch,ocp100000+5)
       nch = ichmv_ch(ibuf,nch,'.')
       idum=sVerPatch_FS
-      nch = nch + ib2as(idum,ibuf,nch,o'100000'+5)
+      nch = nch + ib2as(idum,ibuf,nch,ocp100000+5)
       call fs_get_sVerrelease_fs(sVerRelease_FS)
       idum=iflch(sVerRelease_FS,32)
       if(idum.ne.0) then

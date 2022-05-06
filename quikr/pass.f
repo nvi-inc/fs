@@ -34,6 +34,7 @@ C        IP(3) - error return
 C        IP(4) - who we are
 C
       include '../include/fscom.i'
+      include '../include/boz.i'
 C
       real*4 pnow(2),poff(2),microns(2)
       logical kpas(2),kauto
@@ -355,7 +356,7 @@ C
      $        .or.VLBA4.eq.drive(indxtp).or.MK3.eq.drive(indxtp).or.
      &        (MK4.eq.drive(indxtp).and.drive_type(indxtp).ne.MK4B)
      &        ) then
-          nch = nch+ib2as(ipashd(i,indxtp),ibuf,nch,o'100000'+3)
+          nch = nch+ib2as(ipashd(i,indxtp),ibuf,nch,ocp100000+3)
         endif
         nch = mcoma(ibuf,nch)
       enddo

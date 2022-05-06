@@ -37,6 +37,7 @@ C                logit4 call for the TI, time list, command print out.
 C     920922 gag Consolidated quikr routines back into one program.
 C
       include '../include/fscom.i'
+      include '../include/boz.i'
 C
       integer*4 ip(5),ipinsnp(5)        !  array for rmpar parameters
       dimension iparm(2)                      ! parameters from gtprm
@@ -319,7 +320,7 @@ C*****NOTE***** IBUF IS EXPANDED IF THE PROCEDURE HAS ANY
 C       PARAMETERS.  MAX 100 CHARS.  JIND AND NCHAR ARE MODIFIED.
 C
       if (iclass.ne.0) then
-         iclass = iclass+o'60000'
+         iclass = iclass+ocp60000
       endif
       call logit4(ibuf,nchar,lsor,lprocn)
       if (ierr.ne.0) then
@@ -571,7 +572,7 @@ C  User requested schedule name, format response and log it.
             nch=nch+trimlen(lskd2)
             nch = mcoma(ibuf,nch)
             if (ierr.lt.0) icurln=0
-            nch = nch+ib2as(icurln,ibuf,nch,o'100000'+5)
+            nch = nch+ib2as(icurln,ibuf,nch,ocp100000+5)
             call logit4(ibuf,nch-1,lsor2,lprocn)
             if(iwait.ne.0) then
                call put_buf(ipinsnp(1),ibuf,-(nch-1),'  ','  ')
@@ -964,11 +965,11 @@ C     5.11 FLUSH command to clear out the operator stream completely.
 C     Reinitialize everything.
 C
       else if (mbranch.eq.11) then
-        ireg(2) = get_buf(iclop2+o'120000',ibuf,-iblen*2,idum,idum)
+        ireg(2) = get_buf(iclop2+ocp120000,ibuf,-iblen*2,idum,idum)
         do while (ireg(2).ge.0)
           nchar = iflch(ibuf,min0(ireg(2),iblen*2))
           call put_cons(ibuf,nchar)
-          ireg(2) = get_buf(iclop2+o'120000',ibuf,-iblen*2,idum,idum)
+          ireg(2) = get_buf(iclop2+ocp120000,ibuf,-iblen*2,idum,idum)
         enddo
         istkop(2) = 2
         lstkop(2) = 2
@@ -1003,17 +1004,17 @@ C                     Next the source of the command
             idummy = ib2as(itscb(11,i),ibuf,4,4)
 C                     The index in the function or proc lists
             idummy = ichmv_ch(ibuf,8,'@')
-       idummy = ib2as(itscb(1,i)/1024+1970,ibuf,9,o'40000'+o'400'*4+4)
+       idummy = ib2as(itscb(1,i)/1024+1970,ibuf,9,ocp40000+ocp400*4+4)
        idummy = ichmv_ch(ibuf,13,'.')
-       idummy = ib2as(mod(itscb(1,i),1024),ibuf,14,o'40000'+o'400'*3+3)
+       idummy = ib2as(mod(itscb(1,i),1024),ibuf,14,ocp40000+ocp400*3+3)
        idummy = ichmv_ch(ibuf,17,'.')
-       idummy = ib2as(itscb(2,i)/60,ibuf,18,o'40000'+o'400'*2+2)
+       idummy = ib2as(itscb(2,i)/60,ibuf,18,ocp40000+ocp400*2+2)
        idummy = ichmv_ch(ibuf,20,':')
-       idummy = ib2as(mod(itscb(2,i),60),ibuf,21,o'40000'+o'400'*2+2)
+       idummy = ib2as(mod(itscb(2,i),60),ibuf,21,ocp40000+ocp400*2+2)
        idummy = ichmv_ch(ibuf,23,':')
-       idummy = ib2as(itscb(3,i)/100,ibuf,24,o'40000'+o'400'*2+2)
+       idummy = ib2as(itscb(3,i)/100,ibuf,24,ocp40000+ocp400*2+2)
        idummy = ichmv_ch(ibuf,26,'.')
-       idummy = ib2as(mod(itscb(3,i),100),ibuf,27,o'40000'+o'400'*2+2)
+       idummy = ib2as(mod(itscb(3,i),100),ibuf,27,ocp40000+ocp400*2+2)
        idummy = ichmv_ch(ibuf,29,'   ')
 C                     The time next scheduled
             icl = itscb(12,i)

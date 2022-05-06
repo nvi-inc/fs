@@ -57,6 +57,7 @@ C  OUTPUT:
 C
 C     IERR - error return.  -1 for stack error, <0 for FMP error.
 C
+      include '../include/boz.i'
 C
 C  LOCAL:
 C
@@ -190,11 +191,11 @@ C
       if (index.gt.0) ilen = fmpreadstr(idcbp1,ierr,ibc)
       if (index.lt.0) ilen = fmpreadstr(idcbp2,ierr,ibc)
       call fc_rte_time(itime,itime(6))
-      idummy = ib2as(mod(itime(6),100),ib,23,o'40000'+o'400'*2+2)
-      idummy = ib2as(itime(5),ib,25,o'40000'+o'400'*3+3)
-      idummy = ib2as(itime(4),ib,28,o'40000'+o'400'*2+2)
-      idummy = ib2as(itime(3),ib,30,o'40000'+o'400'*2+2)
-      idummy = ib2as(itime(2),ib,32,o'40000'+o'400'*2+2)
+      idummy = ib2as(mod(itime(6),100),ib,23,ocp40000+ocp400*2+2)
+      idummy = ib2as(itime(5),ib,25,ocp40000+ocp400*3+3)
+      idummy = ib2as(itime(4),ib,28,ocp40000+ocp400*2+2)
+      idummy = ib2as(itime(3),ib,30,ocp40000+ocp400*2+2)
+      idummy = ib2as(itime(2),ib,32,ocp40000+ocp400*2+2)
       ibc(34:34) = 'x'
 C                   Pad with character to fill in last byte
       if (index.gt.0) id = fmpsetpos(idcbp1,ierr,irec,-irec)

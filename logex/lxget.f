@@ -58,6 +58,8 @@ C     LNFCH Utilities
 C
 C LOCAL VARIABLES:
 C
+      include '../include/boz.i'
+C
 C     NCHBUF - Number of characters in IBUF past time field.
 C     NREC - number of records in IBUF.
 C
@@ -322,12 +324,12 @@ C
 C
 C  Determine whether a TYPE command was specified.
 C
-800   if (ntype.eq.0.or.ntype.eq.o'40') goto 1000
+800   if (ntype.eq.0.or.ntype.eq.ocp40) goto 1000
 C
 C  JCHAR returns LCH as zero/character. To left justify multiply
-C  o'400' (256 decimal) and add a blank (o'40').
+C  ocp400 (256 decimal) and add a blank (ocp40).
 C
-cxx      lch = jchar(ibuf2,10)*o'400'+' '
+cxx      lch = jchar(ibuf2,10)*ocp400+' '
       lch = jchar(ibuf2,ildch)
       do i=1,ntype
         if (lch.eq.ltype(i)) goto 1000

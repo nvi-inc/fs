@@ -38,6 +38,9 @@ C
 C     CALLED SUBROUTINES: FVDIS, utilities
 C 
 C   LOCAL VARIABLES 
+C
+      include '../include/boz.i'
+C
 C        NCHAR  - number of characters in buffer
 C        ICH    - character counter 
       integer*2 ibuf(40)
@@ -84,7 +87,7 @@ C                   If no parameters, schedule FIVPT
       if(nchar.eq.ieq) goto 210 
       if (cjchar(ibuf,ieq+1).ne.'?') goto 210
       ip(1) = 0 
-      ip(4) = o'77' 
+      ip(4) = ocp77 
       call fpdis(ip,ibuf,ilen,nchar)
       return
 C
@@ -418,7 +421,7 @@ c
                ierr=-219
                goto 990
             endif
-            nch=ib2as(ibbc,ldevfp,1,z'4303')
+            nch=ib2as(ibbc,ldevfp,1,zcp4303)
             if(id.eq.11) then
                call char2hol('u',ldevfp,4,4)
             else

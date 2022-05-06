@@ -52,6 +52,9 @@ C     ID - data buffer ID word
 C
 C
 C     LOCAL:
+C
+      include '../include/boz.i'
+C
       character cjchar
 C
 C     ILENB - expected length of response from data buffer
@@ -84,8 +87,8 @@ C                   Suppress CRLF on transmission
       nloop = nloop+1
 C                   Send the command to data buffer or terminal
 C
-C*************FOR THE REAL DATA BUFFER USE o'100'+LU******************
-C*************FOR TERMINAL TESTING     USE  o'400'+LU******************
+C*************FOR THE REAL DATA BUFFER USE ocp100+LU******************
+C*************FOR TERMINAL TESTING     USE  ocp400+LU******************
       if (kdbtst) then
         itn=ilenb*1.5*1100./ibdb+5.0001
         if(ilenb.eq.4) itn=itn+10
@@ -102,7 +105,7 @@ C                   Issue binary read, buffer mode
       if (ibugpc.gt.2) write(luop,9509) (idata(248+k),k=1,10)
 9509  format(1x,"last 10 words idata = "10(o7,2x)) 
 c     if (ireg(2).eq.515.and.l.eq.2h20) ireg(2)=516 
-      if (ireg(2).eq.515.and.jchar(idata,516).eq.z'20') ireg(2)=516 
+      if (ireg(2).eq.515.and.jchar(idata,516).eq.zcp20) ireg(2)=516 
       if (ierr.eq.0.and.ilog.ne.-1) goto 100
       if (ierr.ne.0) write(luop,9120) ierr
       if (ilog.eq.-1) write(luop,9220)
@@ -131,7 +134,7 @@ C
       ichek = jchar(idata,ilog) 
       jchek = 0 
       do i=1,ilog-1 
-        jchek = and(jchek+jchar(idata,i),o'377') 
+        jchek = and(jchek+jchar(idata,i),ocp377) 
       enddo
       if (ichek.ne.jchek) ierr=-2 
 C 

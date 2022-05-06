@@ -38,6 +38,9 @@ C  COMMON BLOCK USED
       include '../include/fscom.i'
 C
 C  LOCAL VARIABLES
+C
+      include '../include/boz.i'
+C
       integer*2 ibuf(10)
       dimension ireg(2)
       integer get_buf
@@ -177,7 +180,7 @@ C
 C  6.  Set up response.
 C
 600   nch = ichmv_ch(ibuf,1,'feet/')
-      nch = nch + ib2as(icurft,ibuf,nch,o'100005')-1
+      nch = nch + ib2as(icurft,ibuf,nch,ocp100005)-1
       iclass = 0
       call put_buf(iclass,ibuf,-nch,'fs','  ')
 C

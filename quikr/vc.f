@@ -74,6 +74,7 @@ C
 C 
 C 4.  CONSTANTS USED
 C 
+      include '../include/boz.i'
 C 
 C 5.  INITIALIZED VARIABLES 
 C 
@@ -110,7 +111,7 @@ C                   If no parameters, go read VC
       call fs_get_itpivc(itpivc)
       call fs_get_ibwvc(ibwvc)
       if (cjchar(ibuf,ieq+1).eq.'?') then
-        ip(4) = o'77'
+        ip(4) = ocp77
 C       IP(5) = ICLCM
         call vcdis(ip,ivcn,iclcm)
         return
@@ -139,9 +140,9 @@ C                   Pick up frequency, real number
         goto 990
       else
         ifr = ifix(freq)
-        idumm1 = ib2as(ifr,lfr,1,o'41400'+3)
+        idumm1 = ib2as(ifr,lfr,1,ocp41400+3)
         idumm1 = ichmv_ch(lfr,4,'.')
-        idumm1 = ib2as(ifix((freq-ifr+.001)*100.0),lfr,5,o'41000'+2)
+        idumm1 = ib2as(ifix((freq-ifr+.001)*100.0),lfr,5,ocp41000+2)
       endif
 C 
       ic1=ich

@@ -22,6 +22,8 @@
       integer*2 inbuf(1)
       integer iebuf(1),inchar,outchar,maxout
 C
+      include '../include/boz.i'
+C
       character*3 exp(0:31)
       character*6 cobuf
       integer inext,i,idum,ilen,iobuf(3),trimlen
@@ -35,7 +37,7 @@ C
       inext=1
       do i=1,inchar 
       ich = jchar(inbuf,i)
-        ich=and(jchar(inbuf,i),o'000177')
+        ich=and(jchar(inbuf,i),ocp000177)
         if(ich.gt.31.and.ich.ne.127) then
           idum=ichmv(iobuf,1,inbuf,i,1)
           ilen=1

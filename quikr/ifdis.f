@@ -61,6 +61,8 @@ C
 C 4.  CONSTANTS USED:
       parameter (ilen=60)                   ! length of buffers, characters
 C 
+      include '../include/boz.i'
+C
 C     PROGRAMMER: NRV
 C     LAST MODIFIED: 800215 
 C 
@@ -120,11 +122,11 @@ C
         endif
 C 
         ierr = 0
-        nch = nch + ib2as(ia1,ibuf2,nch,o'100000'+2)   ! 1st attenuator setting
+        nch = nch + ib2as(ia1,ibuf2,nch,ocp100000+2)   ! 1st attenuator setting
         call fs_get_iat1if(iat1if)
         if (ia1.ne.iat1if) ierr = -301
         nch = mcoma(ibuf2,nch)
-        nch = nch + ib2as(ia2,ibuf2,nch,o'100000'+2)   ! 2nd attenuator setting
+        nch = nch + ib2as(ia2,ibuf2,nch,ocp100000+2)   ! 2nd attenuator setting
         call fs_get_iat2if(iat2if)
         if (ia2.ne.iat2if) ierr = -302
         nch = mcoma(ibuf2,nch)

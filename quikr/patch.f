@@ -37,6 +37,9 @@ C
 C     CALLED SUBROUTINES: GTPRM
 C 
 C   LOCAL VARIABLES 
+C
+      include '../include/boz.i'
+C
 C        NCHAR  - number of characters in buffer
 C        ICH    - character counter 
       dimension ifp(16) 
@@ -86,7 +89,7 @@ C
       endif
       if (cjchar(ibuf,ieq+1).eq.'?') then
         ip(1) = 0
-        ip(4) = o'77'
+        ip(4) = ocp77
         call padis(ip,iclcm)
         return
       endif

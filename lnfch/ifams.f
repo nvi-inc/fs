@@ -67,17 +67,19 @@ C       mmb             IF(LSGN=0&IH=0&JCHAR(IFORM,3)=0)
 C       mmbss.sc        IF(LSGN=0&IH=0) 
 C       ss.sc           IF(LSGN=0&IH=0&IM=0)
 C 
+      include '../include/boz.i'
+C
       dimension iout(1) 
       ifams=istrt 
       if (jchar(lsgn,1).ne.0) ifams=ichmv(iout,ifams,lsgn,1,1)
       if (ih.eq.0.and.ifams.eq.istrt) goto 1000
-      ifams=ib2as(ih,iout,ifams,o'41002')+ifams 
+      ifams=ib2as(ih,iout,ifams,ocp41002)+ifams 
       ifams=ichmv(iout,ifams,iform,1,1) 
 1000  continue
       if ((im.eq.0.and.ifams.eq.istrt)
      .               .or.ichcm(iform,2,0,1,2).eq.0)
      .         goto 2000 
-      ifams=ib2as(im,iout,ifams,o'41002')+ifams 
+      ifams=ib2as(im,iout,ifams,ocp41002)+ifams 
       ifams=ichmv(iout,ifams,iform,2,1) 
 2000  continue
       if (jchar(iform,3).eq.0.or.sec.eq.0.) goto 3000

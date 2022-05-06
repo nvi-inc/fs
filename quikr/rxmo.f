@@ -67,6 +67,8 @@ C
 C 
 C  4.  CONSTANTS USED
       parameter (ilen=40)
+C
+      include '../include/boz.i'
 C 
 C 
 C 6.  PROGRAMMER: NRV 
@@ -94,7 +96,7 @@ C
       if (ieq.eq.0) goto 500
 C                   If no parameters, go read RX
       if (cjchar(ibuf,ieq+1).ne.'?') goto 140
-      ip(4) = o'77' 
+      ip(4) = ocp77 
       call rxdmo(ip,iclcm)
       return
 C 

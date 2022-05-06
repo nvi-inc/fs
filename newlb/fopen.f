@@ -27,6 +27,8 @@ C  IDCB: Control Block of File
 C OUTPUT:
 C  IERR: Error value, returns negative if an error is detected
 
+      include '../include/boz.i'
+C
       integer IDCB
       character*(*) filename
       integer IERR
@@ -45,7 +47,7 @@ C  IERR: Error value, returns negative if an error is detected
         return
       END IF
       IF(.not.kexist) then
-         permissions = o'0664'
+         permissions = ocp0664
          ilen=trimlen(filename)
          call fc_chmod(filename,permissions,ilen,ierr)
       endif

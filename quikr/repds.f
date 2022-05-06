@@ -63,6 +63,8 @@ C               - registers from EXEC
 C 
 C    INITIALIZED VARIABLES
 C 
+      include '../include/boz.i'
+C
       data ilen/40/
       data lby/2hra,2hw ,2hby,2hp /
       data bws/0.0,0.0625,0.125,0.25,0.5,1.0,2.0,4.0/
@@ -140,13 +142,13 @@ C                   Bypass or not
       if (iby.ne.ibypas(indxtp)) ierr = -301
       nch = mcoma(ibuf2,nch)
 C
-      ncx = ib2as(ita,ibuf2,nch,o'100000'+2)
+      ncx = ib2as(ita,ibuf2,nch,ocp100000+2)
 C                   Encode the A track
       call fs_get_itraka(itraka,indxtp)
       if (ita.ne.itraka(indxtp).and..not.kcom) ierr = -302
       nch = mcoma(ibuf2,nch+ncx)
 C
-      ncx = ib2as(itb,ibuf2,nch,o'100000'+2)
+      ncx = ib2as(itb,ibuf2,nch,ocp100000+2)
 C                   Encode the B track
       call fs_get_itrakb(itrakb,indxtp)
       if (itb.ne.itrakb(indxtp).and..not.kcom) ierr = -303

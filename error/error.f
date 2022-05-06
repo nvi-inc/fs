@@ -21,6 +21,7 @@
 C
       include '../include/params.i'
       include '../include/dpi.i'
+      include '../include/boz.i'
 C
       logical kinit,kgpnt,kopn,koutp,kpst,kplin,kpdat,kpout_ch,kpfit
       logical kif,kgetm,kptri,kpant,kgant,kbit,kpcon,kfixed,kpdat2
@@ -82,7 +83,7 @@ C
       call fc_setup_ids
       call fmperror_standalone_set(1)
 c
-      ic=ib2as(mpts,ldum,1,o'100000'+6)
+      ic=ib2as(mpts,ldum,1,ocp100000+6)
       call fc_rte_time(it,it(6))
 C
       if (kinit(lu,iibuf,iobuf,iapp,imbuf,lst)) goto 10010

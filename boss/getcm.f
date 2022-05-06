@@ -57,6 +57,8 @@ C     Parameters string
 C     NCPARM - number of chars in LPPARM
 C     IERR  - error return, non-zero FMP error
 C
+      include '../include/boz.i'
+C
 C  LOCAL VARIABLES:
 C
       integer*4 irec,ioff,icurln,ilstln
@@ -77,7 +79,7 @@ C     If so, then that's our highest priority.
 C
 200   continue
       iwait = 0
-      ireg(2) = get_buf(iclopr+o'120000',ibuf,-iblen*2,idum,iwait)
+      ireg(2) = get_buf(iclopr+ocp120000,ibuf,-iblen*2,idum,iwait)
       nchar=min0(ireg(2),iblen*2)
 c delete trsiling cr if there
       if(nchar.gt.0) then
@@ -96,7 +98,7 @@ c delete trsiling cr if there
       if (nchar.eq.0) goto 300
 C                   When there's nothing there, that's the
 C                   end of the class records
-      if (jchar(ibuf,1).gt.o'42'.or.jchar(ibuf,1).lt.o'41') then
+      if (jchar(ibuf,1).gt.ocp42.or.jchar(ibuf,1).lt.ocp41) then
 C                   Don't bother with comments (") or wait commands (!)
         ich = iscn_ch(ibuf,1,nchar,'=')
         if (ich.eq.0) then
@@ -178,7 +180,7 @@ C
      .nproc1,ibuf,iblen,istkop,istksk)
       ncparm = 0
       if (iclop2.gt.0) then
-        ireg(2) = get_buf(iclop2+o'120000',ibuf,-iblen*2,idum,iwait)
+        ireg(2) = get_buf(iclop2+ocp120000,ibuf,-iblen*2,idum,iwait)
         nchar = iflch(ibuf,min0(ireg(2),iblen*2))
         if (ireg(1).lt.0) nchar = 0
       end if

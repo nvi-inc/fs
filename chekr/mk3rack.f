@@ -21,6 +21,7 @@
      .                   nfmerr)
 C
       include '../include/fscom.i'
+      include '../include/boz.i'
 C 
 C  INPUT: 
       integer*2 lmodna(1), lwho
@@ -75,7 +76,7 @@ C
           enddo
 C
           ibuf1(1) = 8
-          ibuf1(3) = o'47'   ! an apostrophe '
+          ibuf1(3) = ocp47   ! an apostrophe '
           call put_buf(iclass,ibuf1,-5,'fs','  ')
 C Finally, get alarm status
          ierr=rn_take('fsctl',0)

@@ -62,6 +62,8 @@ C               - registers from EXEC
 C 
 C    INITIALIZED VARIABLES
 C 
+      include '../include/boz.i'
+C
       data ilen/40/
       data lby/2hre,2had,2hby,2hp /
       data ibws1/0,1,2,3/       !!! EQUALIZERS !!!
@@ -140,13 +142,13 @@ C                   Bypass or not
       if (iby.ne.ibypas(indxtp)) ierr = -301
       nch = mcoma(ibuf2,nch)
 C
-      ncx = ib2as(ita,ibuf2,nch,o'100000'+3)
+      ncx = ib2as(ita,ibuf2,nch,ocp100000+3)
 C                   Encode the A track
       call fs_get_itraka(itraka,indxtp)
       if (ita.ne.itraka(indxtp).and..not.kcom) ierr = -302
       nch = mcoma(ibuf2,nch+ncx)
 C
-      ncx = ib2as(itb,ibuf2,nch,o'100000'+3)
+      ncx = ib2as(itb,ibuf2,nch,ocp100000+3)
 C                   Encode the B track
       call fs_get_itrakb(itrakb,indxtp)
       if (itb.ne.itrakb(indxtp).and..not.kcom) ierr = -303
@@ -162,7 +164,7 @@ C                   The equalizer selection
       if (ieq.ne.ieq4tap(indxtp)) ierr = -305
       nch = mcoma(ibuf2,nch)
       if(ibr.ge.1.and.ibr.le.5) then
-        ncx = ib2as(ibws3(ibr),ibuf2,nch,o'100000'+2)
+        ncx = ib2as(ibws3(ibr),ibuf2,nch,ocp100000+2)
       else
         nch = ichmv_ch(ibuf2,nch,'bad_value') 
       endif

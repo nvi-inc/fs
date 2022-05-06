@@ -20,6 +20,7 @@
       program rwand
 C
       include '../include/fscom.i'
+      include '../include/boz.i'
 C
 C  Programmed by Lloyd Rawley, March 1988.   Last update <890623.2034>
 C
@@ -201,7 +202,7 @@ C
         else if (ichcm(bufr,istart(i),bufr,istart(i-1),nchar).ne.0) then
           if (ncmess+nchar.le.messmax) then
 C Add bar code (preceded by a comma) to the message string
-            ncmess = ichmv(mess,ncmess,o'54',1,1)
+            ncmess = ichmv(mess,ncmess,ocp54,1,1)
             ncmess = ichmv(mess,ncmess,bufr,istart(i),nchar)
           else
             call logit2(mess,ncmess-1)        ! log previous message

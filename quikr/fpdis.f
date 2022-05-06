@@ -33,6 +33,7 @@ C
 C 2.2.   COMMON BLOCKS USED 
       include '../include/fscom.i'
       include '../include/dpi.i'
+      include '../include/boz.i'
 C 
 C     CALLING SUBROUTINES: FVPNT
 C     CALLED SUBROUTINES: character utilities 
@@ -58,18 +59,18 @@ C
 200   ierr = 0
       nch = ichmv(ibuf,nch,laxfp,1,4) 
       nch = mcoma(ibuf,nch) 
-      nch = nch + ib2as(nrepfp,ibuf,nch,o'100002')
+      nch = nch + ib2as(nrepfp,ibuf,nch,ocp100002)
       nch = mcoma(ibuf,nch) 
-      nch = nch + ib2as(nptsfp,ibuf,nch,o'100002')
+      nch = nch + ib2as(nptsfp,ibuf,nch,ocp100002)
       nch = mcoma(ibuf,nch) 
       nch = nch + ir2as(stepfp,ibuf,nch,6,2)
       nch = mcoma(ibuf,nch) 
-      nch = nch + ib2as(intpfp,ibuf,nch,o'100002')
+      nch = nch + ib2as(intpfp,ibuf,nch,ocp100002)
       nch = mcoma(ibuf,nch) 
       iend=iflch(ldevfp,4)
       nch = ichmv(ibuf,nch,ldevfp,1,iend)
       nch = mcoma(ibuf,nch) 
-      nch = nch + ib2as(iwtfp,ibuf,nch,o'100004')
+      nch = nch + ib2as(iwtfp,ibuf,nch,ocp100004)
       nch = mcoma(ibuf,nch) 
       nch = nch + ir2as(calfp,ibuf,nch,6,1) 
       nch = mcoma(ibuf,nch) 
@@ -79,7 +80,7 @@ C
       nch = mcoma(ibuf,nch) 
       nch = nch + ir2as(sngl(ssizfp*RAD2DEG),ibuf,nch,6,4)
       nch = mcoma(ibuf,nch)
-      nch = nch + ib2as(ichfp_fs,ibuf,nch,o'100002')
+      nch = nch + ib2as(ichfp_fs,ibuf,nch,ocp100002)
 C 
 C     5. Now send the buffer to SAM and schedule PPT. 
 C 

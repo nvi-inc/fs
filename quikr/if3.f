@@ -50,6 +50,8 @@ C
 C  LOCAL CONSTANT
       parameter (ilen=40)
 C
+      include '../include/boz.i'
+C
 C  PROGRAMMER: NRV
 C     LAST MODIFIED: 810207
 C
@@ -72,7 +74,7 @@ C
       if (ieq.eq.0) goto 500                ! if no parameters, read device
       if (cjchar(ibuf,ieq+1).eq.'?') then
         ip(1) = 0
-        ip(4) = o'77'
+        ip(4) = ocp77
         call if3dis(ip,iclcm,kfirst)
         return
       endif

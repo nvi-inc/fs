@@ -44,6 +44,8 @@ C     LNFCH Utilities
 C
 C LOCAL VARIABLES:
 C
+      include '../include/boz.i'
+C
       character*79 outbuf
       integer answer, trimlen, ichcm_ch
       integer idcb1(2), idcb2(2)
@@ -126,7 +128,7 @@ C
 C **************************************************************
 C
 C
-      nc = ib2as(ihgt,ihas,1,o'100004')
+      nc = ib2as(ihgt,ihas,1,ocp100004)
       call fmpopen(idcb1,FILENAME1,ierr,'w+',5)
       if (ierr.lt.0) goto 1100
       call fmpopen(idcb2,FILENAME2,ierr,'w+',5)

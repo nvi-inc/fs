@@ -44,14 +44,16 @@ C           b = bandwidth choice AND EQ=BW bit
 C          tb = track B 
 C          ta = track A 
 C 
+      include '../include/boz.i'
+C
       nch = ichmv_ch(ibuf,1,'!')
 C                   The strobe character
       nch = ichmv_ch(ibuf,nch,'0')
       nch = nch + ib2as(iby*2,ibuf,nch,1) 
       nch = nch + ib2as(ieq,ibuf,nch,1) 
       nch = nch + ib2as(ibw,ibuf,nch,1) 
-      nch = nch + ib2as(itb,ibuf,nch,2+o'40000'+o'400'*2) 
-      nch = nch + ib2as(ita,ibuf,nch,2+o'40000'+o'400'*2) 
+      nch = nch + ib2as(itb,ibuf,nch,2+ocp40000+ocp400*2) 
+      nch = nch + ib2as(ita,ibuf,nch,2+ocp40000+ocp400*2) 
 C 
       return
       end 

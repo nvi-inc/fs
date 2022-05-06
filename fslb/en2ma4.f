@@ -29,6 +29,8 @@ C      - true for head stacks enabled index 1 = stack 0
 C                                     index 2 = stack 1
 C     IENA - record-enable bit
 C 
+      include '../include/boz.i'
+C
 C  LOCAL: 
 C
       integer ia,ib
@@ -43,8 +45,8 @@ C                   Fill buffer with zeros to start
       call ichmv(ibuf,2,ihx2a(ia),2,1)
       ia = 0
       ib = 0
-      if (kena(1)) call ichmv(ibuf,9,ihx2a(z'01'),2,1)
-      if (kena(2)) call ichmv(ibuf,7,ihx2a(z'01'),2,1)
+      if (kena(1)) call ichmv(ibuf,9,ihx2a(zcp01),2,1)
+      if (kena(2)) call ichmv(ibuf,7,ihx2a(zcp01),2,1)
 C
       return
       end 

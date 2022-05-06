@@ -42,6 +42,8 @@ C     CALLED SUBROUTINES: CHARACTER ROUTINES
 C 
 C   LOCAL VARIABLES 
 C 
+      include '../include/boz.i'
+C
 C        NCHAR  - number of characters in buffer
 C        NCH    - character counter 
       integer*2 ibuf(50),ibuf2(50) 
@@ -81,7 +83,7 @@ C                   If no parameters, get mad!
       call pchar(idum,2,9)
       nenq = iscnc(ibuf,ifc,nchar,9)
 C                   Scan for a tab character
-      if (nenq.ne.0) idumm1 = ichmv(ibuf,nenq,o'5',2,1)
+      if (nenq.ne.0) idumm1 = ichmv(ibuf,nenq,ocp5,2,1)
 C                   If we found one, substitute the enq character
       if(itask.eq.2) then
          ibuf2(1) = 9

@@ -63,6 +63,8 @@ C
 C 4.  CONSTANTS USED:
       parameter (ilen=60)                   ! length of buffers, characters
 C 
+      include '../include/boz.i'
+C
 C     PROGRAMMER: NRV
 C     LAST MODIFIED: 800215 
 C 
@@ -129,7 +131,7 @@ C
          endif
 C     
          ierr = 0
-         nch = nch + ib2as(iat,ibuf2,nch,o'100000'+2) ! attenuator setting
+         nch = nch + ib2as(iat,ibuf2,nch,ocp100000+2) ! attenuator setting
          nch = mcoma(ibuf2,nch)
          nch = iif3ed(-1,imix,ibuf2,nch,ilen) ! encode mixer state
          do i=1,4
@@ -154,10 +156,10 @@ c
          nch = mcoma(ibuf2,nch)
 c
          inf=freq/100
-         nch=nch+ib2as(inf,ibuf2,nch,z'8000'+4)
+         nch=nch+ib2as(inf,ibuf2,nch,zcp8000+4)
          nch=ichmv_ch(ibuf2,nch,'.')
          inf=freq-inf*100
-         nch=nch+ib2as(inf,ibuf2,nch,z'8000'+2)
+         nch=nch+ib2as(inf,ibuf2,nch,zcp8000+2)
          nch = mcoma(ibuf2,nch)
 c
          if (.not.kcom) then

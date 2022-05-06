@@ -61,6 +61,8 @@ C
 C 
 C 4.  CONSTANTS USED
       parameter (ilen=40)                    !  length of ibuf, characters
+C
+      include '../include/boz.i'
 C 
 C 5.  INITIALIZED VARIABLES 
 C 
@@ -107,7 +109,7 @@ C
 C 
       else if (ieq.ne.nchar.and.cjchar(ibuf,ieq+1).eq.'?') then
         ip(1) = 0
-        ip(4) = o'77'
+        ip(4) = ocp77
         call fmdis(ip,iclcm)
         return
 C 
@@ -241,7 +243,7 @@ C     6.6 MAT MODE, PARAMETER 6
 C
 C260   CALL GTPRM(IBUF,ICH,NCHAR,1,PARM,ierr)
 C     IMMODE = 0
-C     IF (JCHAR(PARM,1).NE.o'54') IMMODE = IPARM(1)
+C     IF (JCHAR(PARM,1).NE.ocp54) IMMODE = IPARM(1)
 C     IF (IMMODE.GE.0.AND.IMMODE.LE.5) GOTO 300
 C     IERR = -206
 C     GOTO 990
