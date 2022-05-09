@@ -26,21 +26,45 @@
       integer OBLANK,ODOLLAR,OZERO,OCOMMA,OMINUS,OPLUS,
      .          ODOT,OLPAREN,OUNDERSCORE,OSTAR,OSLASH,OAND,
      .          ORPAREN,OCOLON
-      parameter (OBLANK = O'40', ODOLLAR = O'44',
-     .OZERO = O'60', OCOMMA = O'54', OMINUS = O'55',
-     .OPLUS = O'53', ODOT = O'56', OLPAREN = O'50',
-     .ORPAREN = O'51',OUNDERSCORE = O'137', OSTAR = O'52',
-     .OSLASH = O'57', OAND = O'46', OCOLON = 58)
+      parameter (OBLANK = int(O'40'))
+      parameter (ODOLLAR = int(O'44'))
+      parameter (OZERO = int(O'60'))
+      parameter (OCOMMA = int(O'54'))
+      parameter (OMINUS = int(O'55'))
+      parameter (OPLUS = int(O'53'))
+      parameter (ODOT = int(O'56'))
+      parameter (OLPAREN = int(O'50'))
+      parameter (ORPAREN = int(O'51'))
+      parameter (OUNDERSCORE = int(O'137'))
+      parameter (OSTAR = int(O'52'))
+      parameter (OSLASH = int(O'57'))
+      parameter (OAND = int(O'46'))
+      parameter (OCOLON = 58)
       integer OCAPA,OCAPB,OCAPC,OCAPD,OCAPE,OCAPF,OCAPX,
      .OCAPY,OCAPW,OSMALLE,OCAPL,OCAPT,OCAPN,ONINE,OCAPH,
      .OCAPP,OONE,OCAPZ,OSMALLA,OSMALLZ,OCAPU,OCAPV,
      .ocapi,ocapo
-      parameter (OCAPA = O'101', OCAPB = O'102',
-     .OCAPC = O'103', OCAPD = O'104', OCAPE = O'105',
-     .OCAPF = O'106', OCAPX = O'130', OCAPY = O'131',
-     .OCAPW = O'127', OCAPL = O'114', OCAPN = O'116',
-     .OSMALLE = O'145', OCAPT = O'124', ONINE = O'71',
-     .OCAPH = O'110', ocapi = o'111', ocapo = o'117', 
-     .OCAPP = O'120', OCAPZ = O'132',
-     .OONE = O'61', OSMALLZ = O'172', OSMALLA = O'141',
-     .OCAPU = O'125', OCAPV = O'126')
+      parameter (OCAPA = int(O'101'))
+      parameter (OCAPB = int(O'102'))
+      parameter (OCAPC = int(O'103'))
+      parameter (OCAPD = int(O'104'))
+      parameter (OCAPE = int(O'105'))
+      parameter (OCAPF = int(O'106'))
+      parameter (OCAPX = int(O'130'))
+      parameter (OCAPY = int(O'131'))
+      parameter (OCAPW = int(O'127'))
+      parameter (OCAPL = int(O'114'))
+      parameter (OCAPN = int(O'116'))
+      parameter (OSMALLE = int(O'145'))
+      parameter (OCAPT = int(O'124'))
+      parameter (ONINE = int(O'71'))
+      parameter (OCAPH = int(O'110'))
+      parameter (ocapi = int(o'111'))
+      parameter (ocapo = int(o'117'))
+      parameter (OCAPP = int(O'120'))
+      parameter (OCAPZ = int(O'132'))
+      parameter (OONE = int(O'61'))
+      parameter (OSMALLZ = int(O'172'))
+      parameter (OSMALLA = int(O'141'))
+      parameter (OCAPU = int(O'125'))
+      parameter (OCAPV = int(O'126'))
