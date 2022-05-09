@@ -88,7 +88,7 @@ CFLAGS= -c -DF2C
 else
 FFLAGS=-fno-range-check -fno-underscoring -g -D READ_LINE
 ifeq ($(shell uname -m),x86_64)
-FFLAGS+=-fdefault-integer-8 -finteger-4-integer-8
+FFLAGS+=-fdefault-integer-8 -finteger-4-integer-8 -fallow-argument-mismatch
 endif
 endif
 endif
