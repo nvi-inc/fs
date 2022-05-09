@@ -79,7 +79,10 @@ LDFLAGS += -lf2c
 else
 FFLAGS=-fno-range-check -fno-underscoring -g -D READ_LINE
 ifeq ($(shell uname -m),x86_64)
-FFLAGS+=-fdefault-integer-8 -finteger-4-integer-8 -fallow-argument-mismatch
+FFLAGS+=-fdefault-integer-8 -finteger-4-integer-8
+endif
+ifneq ($(FS_F95_NO_ALLOW_ARGUMENT_MISMATCH),1)
+FFLAGS += -fallow-argument-mismatch
 endif
 endif
 else
