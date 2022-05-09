@@ -70,7 +70,7 @@ C  LOCAL VARIABLES
       integer ichan,ileft,iout
       integer ichcm_ch,ichmv,ib2as,ichmv_ch ! function
 C
-        ileft = o'100002'
+        ileft = int(o'100002')
 	iblen = ibuf_len*2
         iout=0
 
