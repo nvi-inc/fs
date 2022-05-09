@@ -29,6 +29,8 @@ C  Input parameters:
       integer icompare, ichcm, ia2hx 
       integer*2 icheck, isum
       integer*2 lbyte, mbyte
+      integer*2 szcpFF
+      parameter (szcpFF=zcpFF)
 C
 C  Output value:  TRUE if check works, FALSE if it fails
 C
@@ -58,11 +60,11 @@ C
       isum = 0
       nwords = (nchar-4)/2
       do i=1,nwords
-        lbyte = and(bufr(i),zcpFF)
+        lbyte = and(bufr(i),szcpFF)
         if (lbyte.eq.zcp0D) lbyte=0
         mbyte = rshift(bufr(i),8)
         if (mbyte.eq.zcp0D) mbyte=0
-        isum = and(lbyte+mbyte+isum,zcpFF)
+        isum = and(lbyte+mbyte+isum,szcpFF)
       end do
 
       cksum = (isum.eq.icheck)

@@ -67,8 +67,8 @@ c  DOD MIL-STD-1753 order
 c  
       integer igetb,i
       integer*2 nmask,notmsk,ipat,jdata,k1,k2,iishftc,iishft
-      integer*2 m1,m2,m32768
-      data m1/o'177777'/,m2/o'177776'/,m32768/o'100000'/
+      integer*2 m1,m2,m32768,i1
+      data m1/o'177777'/,m2/o'177776'/,m32768/o'100000'/,i1/1/
 C
 C     CREATE MASK OF N ONES.
 50     continue
@@ -80,18 +80,18 @@ C     CREATE COMPLEMENT OF EXCLUSIVE-OR MASK
 C 
 C     DETERMINE FEEDBACK PATTERN
       ipat=0
-      if (and(mask,1) .eq. 0) go to 70 
+      if (and(mask,i1) .eq. 0) go to 70
 C 
 C     LEAST SIG BIT OF MASK IS SET
       jdata=igetb(idata,idbit)
       idbit=idbit+1 
-      if (xor(and(istate,1),jdata) .eq. 1) ipat=nmask 
+      if (xor(and(istate,i1),jdata) .eq. 1) ipat=nmask
 C     MODIFY LAST BIT OF IPAT TO CORRESPOND TO JDATA
       ipat=or(and(ipat,m2),jdata)
       go to 80
 C 
 C     LEAST SIG BIT OF MASK IS ZERO 
-70    if (and(istate,1) .eq. 1) ipat=nmask 
+70    if (and(istate,i1) .eq. 1) ipat=nmask
 C 
 C     XOR THE APPROPRIATE BITS
 80    continue
