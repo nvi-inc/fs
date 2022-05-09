@@ -93,6 +93,13 @@ bin:
 $(LIB_DIR) $(EXE_DIR):
 	$(MAKE) -C $@
 
+# fesh2 installation. This is not installed by default as dependancies (e.g. curl) should be checked
+fesh2:
+	cd fesh2
+	python setup.py install --home=/usr2/fs/python
+	cd ..
+
+
 .PHONY: dist clean rmexe rmdoto install tag_archive archive
 dist:
 	rm -rf /tmp/fs-$(FS_VERSION).tgz /tmp/fsdist-exclude
