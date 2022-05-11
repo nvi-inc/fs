@@ -330,8 +330,8 @@ int server_finished_fd(server_t *s) {
 		s->finished_pipe[1] = -1;
 		return -1;
 	}
-	fcntl(s->finished_pipe[0], F_SETFD, FD_CLOEXEC);
-	int r = s->finished_pipe[1];
+	fcntl(s->finished_pipe[1], F_SETFD, FD_CLOEXEC);
+	int r = s->finished_pipe[0];
 	nng_mtx_unlock(s->mtx);
 	return r;
 }
@@ -1093,7 +1093,7 @@ void server_shutdown(server_t *s) {
 	nng_mtx_lock(s->mtx);
 	s->running = false;
 	if (s->finished_pipe[0] != -1) {
-		close(s->finished_pipe[0]);
+		close(s->finished_pipe[1]);
 		s->finished_pipe[0] = -1;
 		s->finished_pipe[1] = -1;
 	}
