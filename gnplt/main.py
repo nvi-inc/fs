@@ -3652,7 +3652,7 @@ class Plot(Canvas, Coordinate):
         start = self.xoffset+self.x_margin
         end = _width-self.x_margin-self.xoffset
         diff = (end - start)/4
-        for i in range(start, end+1, diff):
+        for i in range(start, end+1, int(diff)):
             self.create_line(i, _height-self.y_margin+4, i, _height-3-self.y_margin, tags = tags)
             if self.grid:
                 self.create_line(i, _height-3-self.y_margin, i, self.y_margin, fill = '#b9b9b9', dash = (4,4), tags = tags)
@@ -3664,7 +3664,7 @@ class Plot(Canvas, Coordinate):
         start = _height-self.yoffset-self.y_margin
         end = self.y_margin+self.yoffset
         diff = (end-start)/4
-        for i in range(start, end-2, diff):
+        for i in range(start, end-2, int(diff)):
             if self.logScale:
                 maxlog = math.log10(_height-self.offset)
                 i = math.log10(i)/maxlog*(_height-self.yoffset)

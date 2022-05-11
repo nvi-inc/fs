@@ -597,7 +597,7 @@ class PlotCanvas:
         #x-axis
         self.xticks = []
         _length = _width-2*self.offset-self.info_box
-        for i in range(self.offset+self.info_box, _width-self.offset, _length/4):
+        for i in range(self.offset+self.info_box, _width-self.offset, int(_length/4)):
             #if too close
             if (_width-self.offset-i)<30:
                 break
@@ -613,7 +613,7 @@ class PlotCanvas:
         #y-axis
         self.yticks = []
         _length = max(100,_height/4)
-        for i in range(_height-self.offset,self.offset, -_length):
+        for i in range(_height-self.offset,self.offset, int(-_length)):
             #if too close:
             if (i-self.offset)<30:
                 break
