@@ -27,7 +27,7 @@ class GndatReader(threading.Thread):
         self.progress = 0
         self.database = {}
         threading.Thread.__init__(self)
-        
+
     def run(self):
         filename = self.filename
         file = open(filename, 'r')
@@ -36,21 +36,21 @@ class GndatReader(threading.Thread):
         #sections:
         _antenna = 0
         _dpfu = 0
-        _gain = 0 
+        _gain = 0
         _label = 0
         _data = 0
         _readlo = 0
         numTools = NumericTools()
-        
+
         self.database.clear()
         labels = []
         self.no_plot_list = []
-        
+
         data = file.readlines()
         tot_length = len(data)
         percentage = step = max(tot_length/100,1)
         self.rxg_list = {}
-        
+
         for i,line in enumerate(data):
             if i == percentage:
                 percentage += step
@@ -60,35 +60,35 @@ class GndatReader(threading.Thread):
                 if line[:-1] == '$ANTENNA':
                     _antenna = 1
                     _dpfu = 0
-                    _gain = 0 
+                    _gain = 0
                     _label = 0
                     _data = 0
                     _readlo = 0
                 elif line[:-1] == '$DPFU':
                     _antenna = 0
                     _dpfu = 1
-                    _gain = 0 
+                    _gain = 0
                     _label = 0
                     _data = 0
                     _readlo = 0
                 elif line[:-1] == '$GAIN':
                     _antenna = 0
                     _dpfu = 0
-                    _gain = 1 
+                    _gain = 1
                     _label = 0
                     _data = 0
                     _readlo = 0
                 elif line[:-1] == '$LABELS':
                     _antenna = 0
                     _dpfu = 0
-                    _gain = 0 
+                    _gain = 0
                     _label = 1
                     _data = 0
                     _readlo = 0
                 elif line[:-1] == '$DATA':
                     _antenna = 0
                     _dpfu = 0
-                    _gain = 0 
+                    _gain = 0
                     _label = 0
                     _data = 1
                     _readlo = 0
@@ -97,12 +97,12 @@ class GndatReader(threading.Thread):
                 elif line[0] == '$':
                     _antenna = 0
                     _dpfu = 0
-                    _gain = 0 
+                    _gain = 0
                     _label = 0
                     _data = 0
-                    _readlo = 0  
+                    _readlo = 0
                 else: #header data
-                    if _label == 1: 
+                    if _label == 1:
                         labels.append(line[:-1])
                     elif _readlo == 1:
                         _list = line.split(' ')
@@ -151,8 +151,8 @@ class GndatReader(threading.Thread):
                                 self.database[key].append(d)
                             except KeyError:
                                 self.database[key] = [d]
-            
+
         file.close()
-    
+
     def getData(self):
         return [self.database, self.no_plot_list, self.rxg_list, self.number_of_bad_values]

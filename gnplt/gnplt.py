@@ -31,9 +31,10 @@ try:
 except ImportError as e:
     print('Error: GnPlt could not find all required packages. \nTkinter, numpy and Python 2.4 or newer is required.\nError message: %s' %e)
     sys.exit(1)
-    
+
 def usage():
     print("Usage: "+sys.argv[0]+" [-log logfile | -help]")
+
 args = sys.argv[1:]
 kw = {}
 while args:
@@ -62,5 +63,4 @@ try:
 except TclError as e:
     print('The LogPlotter GUI crashed! \nError message:\n', e)
 except (KeyboardInterrupt): #ctrl-c
-        pass
-
+    pass
