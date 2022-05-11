@@ -19,9 +19,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import Tkinter
-import ttk
-import tkFont
+import tkinter
+import tkinter.ttk
+import tkinter.font
 import array
 import socket
 import os
@@ -33,13 +33,13 @@ import datetime
 import time
 import getopt
 
-class msg_tk(Tkinter.Tk):
+class msg_tk(tkinter.Tk):
 	def __init__(self,parent):
-		Tkinter.Tk.__init__(self,parent)
+		tkinter.Tk.__init__(self,parent)
 		parms = {'-f': 14, '-g':''}
 		try:
 		    opts, pargs = getopt.getopt(sys.argv[1:], "f:g:")
-		except getopt.GetoptError, msg:
+		except getopt.GetoptError as msg:
 		    sys.exit(msg)
 
 		for o,v in opts:
@@ -52,7 +52,7 @@ class msg_tk(Tkinter.Tk):
 			self.geometry(geometry)
 
 		self.parent = parent
-		self.customFont = tkFont.Font(family="Helvetica", size=fontsize)
+		self.customFont = tkinter.font.Font(family="Helvetica", size=fontsize)
 		self.initialize()
 
                 self._max_read_bytes = 10000000 # 10M
@@ -112,7 +112,7 @@ class msg_tk(Tkinter.Tk):
                         elif (self.val[0] == "schedule"):
                                 self._schedule = self.val[1].rstrip('\r\n')
                         else:
-                                print "unknown value";
+                                print("unknown value");
                         #print self.val
 
 		self._ts = time.time()
@@ -124,340 +124,340 @@ class msg_tk(Tkinter.Tk):
 	
 		# Welcome 2 lines
 
-		r0 = Tkinter.Label(self,fg="white", bg="blue",text=u"---------- RDBE msg ----------",font=self.customFont,width=15)
+		r0 = tkinter.Label(self,fg="white", bg="blue",text="---------- RDBE msg ----------",font=self.customFont,width=15)
                 r0.grid(column=0,row=0,columnspan=7,sticky='EW')
 
-		r1 = Tkinter.Label(self,fg="white", bg="blue",text=u" ", font=self.customFont,width=15)
+		r1 = tkinter.Label(self,fg="white", bg="blue",text=" ", font=self.customFont,width=15)
                 r1.grid(column=0,row=1,columnspan=7,sticky='EW')
 
 		# Session Name
-		r2_0 = Tkinter.Label(self,fg="white",bg="blue",text=u"Session Name:",font=self.customFont,width=15)
+		r2_0 = tkinter.Label(self,fg="white",bg="blue",text="Session Name:",font=self.customFont,width=15)
 		r2_0.grid(column=0,row=2,sticky='EW')
 
-		self.sessionname = Tkinter.StringVar()
-		self.sessionnameVariable = Tkinter.Entry(self,textvariable=self.sessionname,font=self.customFont,width=15)
+		self.sessionname = tkinter.StringVar()
+		self.sessionnameVariable = tkinter.Entry(self,textvariable=self.sessionname,font=self.customFont,width=15)
                 self.sessionnameVariable.grid(column=1,row=2,sticky='EW')
 
 		# Station Code
-		r2_2 = Tkinter.Label(self,fg="white",bg="blue",text=u"Station Code:",font=self.customFont,width=15)
+		r2_2 = tkinter.Label(self,fg="white",bg="blue",text="Station Code:",font=self.customFont,width=15)
                 r2_2.grid(column=2,row=2,sticky='EW')
 
-		self.stationcode = Tkinter.StringVar()
-                self.stationcodeVariable = Tkinter.Entry(self,textvariable=self.stationcode,font=self.customFont,width=15)
+		self.stationcode = tkinter.StringVar()
+                self.stationcodeVariable = tkinter.Entry(self,textvariable=self.stationcode,font=self.customFont,width=15)
                 self.stationcodeVariable.grid(column=3,row=2,sticky='EW')
 
 		#Message Type
-		r2_4 = Tkinter.Label(self,fg="white", bg="blue",text=u"Message Type",font=self.customFont,width=15)
+		r2_4 = tkinter.Label(self,fg="white", bg="blue",text="Message Type",font=self.customFont,width=15)
                 r2_4.grid(column=4,row=2,sticky='EW')
 
                 msg_types = ('Ready', 'Start', 'Stop')
-                self.typeVariable = Tkinter.StringVar()
-                self.typeBox = ttk.Combobox(self, textvariable=self.typeVariable, values=msg_types, state='readonly',font=self.customFont,width=15)
+                self.typeVariable = tkinter.StringVar()
+                self.typeBox = tkinter.ttk.Combobox(self, textvariable=self.typeVariable, values=msg_types, state='readonly',font=self.customFont,width=15)
                 self.typeBox.grid(column=5,row=2,sticky='EW')
 
-		r3 = Tkinter.Label(self,fg="white", bg="blue",text=u" ", font=self.customFont,width=15)
+		r3 = tkinter.Label(self,fg="white", bg="blue",text=" ", font=self.customFont,width=15)
                 r3.grid(column=0,row=3,columnspan=7,sticky='EW')
 
 
 		# RDBE and SEFD
 
-		r4_0 = Tkinter.Label(self,fg="white", bg="blue",text=u"- RDBE -",font=self.customFont,width=15)
+		r4_0 = tkinter.Label(self,fg="white", bg="blue",text="- RDBE -",font=self.customFont,width=15)
                 r4_0.grid(column=0,row=4,sticky='EW')
 	
-		r4_3 = Tkinter.Label(self,fg="white", bg="blue",text=u"- SEFD -",font=self.customFont,width=15)
+		r4_3 = tkinter.Label(self,fg="white", bg="blue",text="- SEFD -",font=self.customFont,width=15)
                 r4_3.grid(column=3,row=4,sticky='EW')
 
-		r5_0 = Tkinter.Label(self,fg="white", bg="blue",text=u" ",font=self.customFont,width=15)
+		r5_0 = tkinter.Label(self,fg="white", bg="blue",text=" ",font=self.customFont,width=15)
                 r5_0.grid(column=0,row=5,sticky='EW')
 
-		r5_1 = Tkinter.Label(self,fg="white", bg="blue",text=u"PPS Offset",font=self.customFont,width=15)
+		r5_1 = tkinter.Label(self,fg="white", bg="blue",text="PPS Offset",font=self.customFont,width=15)
 		r5_1.grid(column=1,row=5,sticky='EW')
 
-		r5_2 = Tkinter.Label(self,fg="white", bg="blue",text=u"GPS Offset",font=self.customFont,width=15)
+		r5_2 = tkinter.Label(self,fg="white", bg="blue",text="GPS Offset",font=self.customFont,width=15)
                 r5_2.grid(column=2,row=5,sticky='EW')
 
-		r5_4 = Tkinter.Label(self,fg="white", bg="blue",text=u"IF0",font=self.customFont,width=15)
+		r5_4 = tkinter.Label(self,fg="white", bg="blue",text="IF0",font=self.customFont,width=15)
                 r5_4.grid(column=4,row=5,sticky='EW')
                 
-                r5_5 = Tkinter.Label(self,fg="white", bg="blue",text=u"IF1",font=self.customFont,width=15)
+                r5_5 = tkinter.Label(self,fg="white", bg="blue",text="IF1",font=self.customFont,width=15)
                 r5_5.grid(column=5,row=5,sticky='EW')
 
-		r5_6 = Tkinter.Label(self,fg="white", bg="blue",text=u"SRC",font=self.customFont,width=15)
+		r5_6 = tkinter.Label(self,fg="white", bg="blue",text="SRC",font=self.customFont,width=15)
                 r5_6.grid(column=6,row=5,sticky='EW')
 
-		r6_0 = Tkinter.Label(self,fg="white", bg="blue",text=u"BandA",font=self.customFont,width=15)
+		r6_0 = tkinter.Label(self,fg="white", bg="blue",text="BandA",font=self.customFont,width=15)
                 r6_0.grid(column=0,row=6,sticky='EW')
 
-		self.ppsA = Tkinter.StringVar()
-		ppsAlabel = Tkinter.Label(self,textvariable=self.ppsA,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.ppsA = tkinter.StringVar()
+		ppsAlabel = tkinter.Label(self,textvariable=self.ppsA,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
 		ppsAlabel.grid(column=1,row=6,sticky='EW')
 
-		self.gpsA = Tkinter.StringVar()
-                gpsAlabel = Tkinter.Label(self,textvariable=self.gpsA,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.gpsA = tkinter.StringVar()
+                gpsAlabel = tkinter.Label(self,textvariable=self.gpsA,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 gpsAlabel.grid(column=2,row=6,sticky='EW')
 
-		r6_3 = Tkinter.Label(self,fg="white", bg="blue",text=u"BandA",font=self.customFont,width=15)
+		r6_3 = tkinter.Label(self,fg="white", bg="blue",text="BandA",font=self.customFont,width=15)
                 r6_3.grid(column=3,row=6,sticky='EW')
 
-		self.sefdA0 = Tkinter.StringVar()
-                self.sefdA0Variable = Tkinter.Label(self,textvariable=self.sefdA0,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.sefdA0 = tkinter.StringVar()
+                self.sefdA0Variable = tkinter.Label(self,textvariable=self.sefdA0,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 self.sefdA0Variable.grid(column=4,row=6,sticky='EW')
 
-		self.sefdA1 = Tkinter.StringVar()
-                self.sefdA1Variable = Tkinter.Label(self,textvariable=self.sefdA1,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.sefdA1 = tkinter.StringVar()
+                self.sefdA1Variable = tkinter.Label(self,textvariable=self.sefdA1,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 self.sefdA1Variable.grid(column=5,row=6,sticky='EW')
 
-		self.sefdSRC = Tkinter.StringVar()
-		self.sefdSRCVariable = Tkinter.Label(self,textvariable=self.sefdSRC,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.sefdSRC = tkinter.StringVar()
+		self.sefdSRCVariable = tkinter.Label(self,textvariable=self.sefdSRC,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 self.sefdSRCVariable.grid(column=6,row=6,sticky='EW')
 
-		r7 = Tkinter.Label(self,fg="white", bg="blue",text=u"BandB",font=self.customFont,width=15)
+		r7 = tkinter.Label(self,fg="white", bg="blue",text="BandB",font=self.customFont,width=15)
                 r7.grid(column=0,row=7,sticky='EW')
 
-		self.ppsB = Tkinter.StringVar()
-                ppsBlabel = Tkinter.Label(self,textvariable=self.ppsB,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.ppsB = tkinter.StringVar()
+                ppsBlabel = tkinter.Label(self,textvariable=self.ppsB,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 ppsBlabel.grid(column=1,row=7,sticky='EW')
 
-                self.gpsB = Tkinter.StringVar()
-                gpsBlabel = Tkinter.Label(self,textvariable=self.gpsB,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.gpsB = tkinter.StringVar()
+                gpsBlabel = tkinter.Label(self,textvariable=self.gpsB,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 gpsBlabel.grid(column=2,row=7,sticky='EW')
 
-		r7_3 = Tkinter.Label(self,fg="white", bg="blue",text=u"BandB",font=self.customFont,width=15)
+		r7_3 = tkinter.Label(self,fg="white", bg="blue",text="BandB",font=self.customFont,width=15)
                 r7_3.grid(column=3,row=7,sticky='EW')
 
-		self.sefdB0 = Tkinter.StringVar()
-                self.sefdB0Variable = Tkinter.Label(self,textvariable=self.sefdB0,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.sefdB0 = tkinter.StringVar()
+                self.sefdB0Variable = tkinter.Label(self,textvariable=self.sefdB0,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 self.sefdB0Variable.grid(column=4,row=7,sticky='EW')
 
-		self.sefdB1 = Tkinter.StringVar()
-                self.sefdB1Variable = Tkinter.Label(self,textvariable=self.sefdB1,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.sefdB1 = tkinter.StringVar()
+                self.sefdB1Variable = tkinter.Label(self,textvariable=self.sefdB1,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 self.sefdB1Variable.grid(column=5,row=7,sticky='EW')
 
-		r7_6 = Tkinter.Label(self,fg="white", bg="blue",text=u"Time",font=self.customFont,width=15)
+		r7_6 = tkinter.Label(self,fg="white", bg="blue",text="Time",font=self.customFont,width=15)
                 r7_6.grid(column=6,row=7,sticky='EW')
 
-		r8 = Tkinter.Label(self,fg="white", bg="blue",text=u"BandC",font=self.customFont,width=15)
+		r8 = tkinter.Label(self,fg="white", bg="blue",text="BandC",font=self.customFont,width=15)
                 r8.grid(column=0,row=8,sticky='EW')
 
-		self.ppsC = Tkinter.StringVar()
-                ppsClabel = Tkinter.Label(self,textvariable=self.ppsC,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.ppsC = tkinter.StringVar()
+                ppsClabel = tkinter.Label(self,textvariable=self.ppsC,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 ppsClabel.grid(column=1,row=8,sticky='EW')
 
-                self.gpsC = Tkinter.StringVar()
-                gpsClabel = Tkinter.Label(self,textvariable=self.gpsC,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.gpsC = tkinter.StringVar()
+                gpsClabel = tkinter.Label(self,textvariable=self.gpsC,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 gpsClabel.grid(column=2,row=8,sticky='EW')
 
-		r8_3 = Tkinter.Label(self,fg="white", bg="blue",text=u"BandC",font=self.customFont,width=15)
+		r8_3 = tkinter.Label(self,fg="white", bg="blue",text="BandC",font=self.customFont,width=15)
                 r8_3.grid(column=3,row=8,sticky='EW')
 
-		self.sefdC0 = Tkinter.StringVar()
-                self.sefdC0Variable = Tkinter.Label(self,textvariable=self.sefdC0,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.sefdC0 = tkinter.StringVar()
+                self.sefdC0Variable = tkinter.Label(self,textvariable=self.sefdC0,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 self.sefdC0Variable.grid(column=4,row=8,sticky='EW')
 
-		self.sefdC1 = Tkinter.StringVar()
-                self.sefdC1Variable = Tkinter.Label(self,textvariable=self.sefdC1,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.sefdC1 = tkinter.StringVar()
+                self.sefdC1Variable = tkinter.Label(self,textvariable=self.sefdC1,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 self.sefdC1Variable.grid(column=5,row=8,sticky='EW')
 	
-		self.sefdTIME = Tkinter.StringVar()
-		self.sefdTIMEVariable = Tkinter.Label(self,textvariable=self.sefdTIME,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.sefdTIME = tkinter.StringVar()
+		self.sefdTIMEVariable = tkinter.Label(self,textvariable=self.sefdTIME,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 self.sefdTIMEVariable.grid(column=6,row=8,sticky='EW')
 
-		r9 = Tkinter.Label(self,fg="white", bg="blue",text=u"BandD",font=self.customFont,width=15)
+		r9 = tkinter.Label(self,fg="white", bg="blue",text="BandD",font=self.customFont,width=15)
                 r9.grid(column=0,row=9,sticky='EW')
 
-		self.ppsD = Tkinter.StringVar()
-                ppsDlabel = Tkinter.Label(self,textvariable=self.ppsD,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.ppsD = tkinter.StringVar()
+                ppsDlabel = tkinter.Label(self,textvariable=self.ppsD,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 ppsDlabel.grid(column=1,row=9,sticky='EW')
 
-                self.gpsD = Tkinter.StringVar()
-                gpsDlabel = Tkinter.Label(self,textvariable=self.gpsD,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.gpsD = tkinter.StringVar()
+                gpsDlabel = tkinter.Label(self,textvariable=self.gpsD,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 gpsDlabel.grid(column=2,row=9,sticky='EW')
 
-		r9_3 = Tkinter.Label(self,fg="white", bg="blue",text=u"BandD",font=self.customFont,width=15)
+		r9_3 = tkinter.Label(self,fg="white", bg="blue",text="BandD",font=self.customFont,width=15)
                 r9_3.grid(column=3,row=9,sticky='EW')
 
-		self.sefdD0 = Tkinter.StringVar()
-                self.sefdD0Variable = Tkinter.Label(self,textvariable=self.sefdD0,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.sefdD0 = tkinter.StringVar()
+                self.sefdD0Variable = tkinter.Label(self,textvariable=self.sefdD0,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 self.sefdD0Variable.grid(column=4,row=9,sticky='EW')
 
-		self.sefdD1 = Tkinter.StringVar()
-                self.sefdD1Variable = Tkinter.Label(self,textvariable=self.sefdD1,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.sefdD1 = tkinter.StringVar()
+                self.sefdD1Variable = tkinter.Label(self,textvariable=self.sefdD1,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 self.sefdD1Variable.grid(column=5,row=9,sticky='EW')
 
-		r10_0 = Tkinter.Label(self,fg="white", bg="blue",text=u" ",font=self.customFont,width=15)
+		r10_0 = tkinter.Label(self,fg="white", bg="blue",text=" ",font=self.customFont,width=15)
                 r10_0.grid(column=0,row=10,sticky='EW')
 
-		r10_3 = Tkinter.Label(self,fg="white", bg="blue",text=u"Az",font=self.customFont,width=15)
+		r10_3 = tkinter.Label(self,fg="white", bg="blue",text="Az",font=self.customFont,width=15)
                 r10_3.grid(column=3,row=10,sticky='EW')
 
-		self.sefdAz = Tkinter.StringVar()
-                self.sefdAzVariable = Tkinter.Label(self,textvariable=self.sefdAz,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.sefdAz = tkinter.StringVar()
+                self.sefdAzVariable = tkinter.Label(self,textvariable=self.sefdAz,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 self.sefdAzVariable.grid(column=4,row=10,sticky='EW')
 
-		r10_5 = Tkinter.Label(self,fg="white", bg="blue",text=u"El",font=self.customFont,width=15)
+		r10_5 = tkinter.Label(self,fg="white", bg="blue",text="El",font=self.customFont,width=15)
                 r10_5.grid(column=5,row=10,sticky='EW')
 
-		self.sefdEl = Tkinter.StringVar()
-                self.sefdElVariable = Tkinter.Label(self,textvariable=self.sefdEl,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+		self.sefdEl = tkinter.StringVar()
+                self.sefdElVariable = tkinter.Label(self,textvariable=self.sefdEl,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 self.sefdElVariable.grid(column=6,row=10,sticky='EW')
 
-		r11 = Tkinter.Label(self,fg="white", bg="blue",text=u" ",font=self.customFont,width=15)
+		r11 = tkinter.Label(self,fg="white", bg="blue",text=" ",font=self.customFont,width=15)
                 r11.grid(column=0,row=11,columnspan=7,sticky='EW')	
 
 		# Maser offset and MCI
 
-		r12 = Tkinter.Label(self,fg="white", bg="blue",text=u"- Maser -",font=self.customFont,width=15)
+		r12 = tkinter.Label(self,fg="white", bg="blue",text="- Maser -",font=self.customFont,width=15)
                 r12.grid(column=0,row=12,sticky='EW')
 
-		r12_3 = Tkinter.Label(self,fg="white", bg="blue",text=u"- MCI -",font=self.customFont,width=15)
+		r12_3 = tkinter.Label(self,fg="white", bg="blue",text="- MCI -",font=self.customFont,width=15)
                	r12_3.grid(column=3,row=12,sticky='EW')
 
-		r13_0 = Tkinter.Label(self,fg="white", bg="blue",text=u" ",font=self.customFont,width=15)
+		r13_0 = tkinter.Label(self,fg="white", bg="blue",text=" ",font=self.customFont,width=15)
                 r13_0.grid(column=0,row=13,sticky='EW')
 
-		r13 = Tkinter.Label(self,fg="white", bg="blue",text=u"Reading",font=self.customFont,width=15)
+		r13 = tkinter.Label(self,fg="white", bg="blue",text="Reading",font=self.customFont,width=15)
                 r13.grid(column=1,row=13,sticky='EW')
                 
-                r13_4 = Tkinter.Label(self,fg="white", bg="blue",text=u"Sensor",font=self.customFont,width=15)
+                r13_4 = tkinter.Label(self,fg="white", bg="blue",text="Sensor",font=self.customFont,width=15)
                 r13_4.grid(column=4,row=13,sticky='EW')
                 
-                r13_5 = Tkinter.Label(self,fg="white", bg="blue",text=u"Reading",font=self.customFont,width=15)
+                r13_5 = tkinter.Label(self,fg="white", bg="blue",text="Reading",font=self.customFont,width=15)
                 r13_5.grid(column=5,row=13,sticky='EW')
 
-		r14_0 = Tkinter.Label(self,fg="white", bg="blue",text=u"Maser Offset",font=self.customFont,width=15)
+		r14_0 = tkinter.Label(self,fg="white", bg="blue",text="Maser Offset",font=self.customFont,width=15)
                 r14_0.grid(column=0,row=14,sticky='EW')
 
-		self.maser = Tkinter.StringVar()	
-		self.maserVariable = Tkinter.Entry(self,textvariable=self.maser,font=self.customFont,width=15)
+		self.maser = tkinter.StringVar()	
+		self.maserVariable = tkinter.Entry(self,textvariable=self.maser,font=self.customFont,width=15)
                 self.maserVariable.grid(column=1,row=14,columnspan=1,sticky='EW')
 
-		r14_3 = Tkinter.Label(self,fg="white", bg="blue",text=u"20K",font=self.customFont,width=15)
+		r14_3 = tkinter.Label(self,fg="white", bg="blue",text="20K",font=self.customFont,width=15)
                 r14_3.grid(column=3,row=14,sticky='EW')
 
-                self.cryo20t = Tkinter.StringVar()
-                cryo20tlabel = Tkinter.Label(self,textvariable=self.cryo20t,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.cryo20t = tkinter.StringVar()
+                cryo20tlabel = tkinter.Label(self,textvariable=self.cryo20t,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 cryo20tlabel.grid(column=4,row=14,sticky='EW')
 
-                self.cryo20v = Tkinter.StringVar()
-                cryo20vlabel = Tkinter.Label(self,textvariable=self.cryo20v,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.cryo20v = tkinter.StringVar()
+                cryo20vlabel = tkinter.Label(self,textvariable=self.cryo20v,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 cryo20vlabel.grid(column=5,row=14,sticky='EW')
 
-		r15_0 = Tkinter.Label(self,fg="white", bg="blue",text=u" ",font=self.customFont,width=15)
+		r15_0 = tkinter.Label(self,fg="white", bg="blue",text=" ",font=self.customFont,width=15)
                 r15_0.grid(column=0,row=15,sticky='EW')
 
-		r15_3 = Tkinter.Label(self,fg="white", bg="blue",text=u"70K",font=self.customFont,width=15)
+		r15_3 = tkinter.Label(self,fg="white", bg="blue",text="70K",font=self.customFont,width=15)
                 r15_3.grid(column=3,row=15,sticky='EW')
                 
-                self.cryo70t = Tkinter.StringVar()
-                cryo70tlabel = Tkinter.Label(self,textvariable=self.cryo70t,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.cryo70t = tkinter.StringVar()
+                cryo70tlabel = tkinter.Label(self,textvariable=self.cryo70t,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 cryo70tlabel.grid(column=4,row=15,sticky='EW')
                 
-                self.cryo70v = Tkinter.StringVar()
-                cryo70vlabel = Tkinter.Label(self,textvariable=self.cryo70v,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.cryo70v = tkinter.StringVar()
+                cryo70vlabel = tkinter.Label(self,textvariable=self.cryo70v,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 cryo70vlabel.grid(column=5,row=15,sticky='EW')
 	
                 row = 21 
-		rpnt_0 = Tkinter.Label(self,fg="white", bg="blue",text=u" ",font=self.customFont,width=15)
+		rpnt_0 = tkinter.Label(self,fg="white", bg="blue",text=" ",font=self.customFont,width=15)
                 rpnt_0.grid(column=0,row=row,columnspan=7,sticky='EW')	
 
                 row = row + 1
-		rpnt_1_0 = Tkinter.Label(self,fg="white", bg="blue",text=u"- Pointing - ",font=self.customFont,width=15)
+		rpnt_1_0 = tkinter.Label(self,fg="white", bg="blue",text="- Pointing - ",font=self.customFont,width=15)
                 rpnt_1_0.grid(column=0,row=row,sticky='EW')
 
-		rpnt_1_2 = Tkinter.Label(self,fg="white", bg="blue",text=u"Source",font=self.customFont,width=15)
+		rpnt_1_2 = tkinter.Label(self,fg="white", bg="blue",text="Source",font=self.customFont,width=15)
                 rpnt_1_2.grid(column=2,row=row,sticky='EW')
 
-                self.pSRC    = Tkinter.StringVar()
-                pSRClabel = Tkinter.Label(self,textvariable=self.pSRC,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.pSRC    = tkinter.StringVar()
+                pSRClabel = tkinter.Label(self,textvariable=self.pSRC,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 pSRClabel.grid(column=3,row=row,sticky='EW')
 
-		rpnt_1_4 = Tkinter.Label(self,fg="white", bg="blue",text=u"Time",font=self.customFont,width=15)
+		rpnt_1_4 = tkinter.Label(self,fg="white", bg="blue",text="Time",font=self.customFont,width=15)
                 rpnt_1_4.grid(column=4,row=row,sticky='EW')
 
-                self.pTIM    = Tkinter.StringVar()
-                pTIMlabel = Tkinter.Label(self,textvariable=self.pTIM,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.pTIM    = tkinter.StringVar()
+                pTIMlabel = tkinter.Label(self,textvariable=self.pTIM,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 pTIMlabel.grid(column=5,row=row,sticky='EW')
 
 		row = row + 1
-		rpnt_2_0 = Tkinter.Label(self,fg="white", bg="blue",text=u"Lon",font=self.customFont,width=15)
+		rpnt_2_0 = tkinter.Label(self,fg="white", bg="blue",text="Lon",font=self.customFont,width=15)
                 rpnt_2_0.grid(column=0,row=row,sticky='EW')
 
-		rpnt_2_1 = Tkinter.Label(self,fg="white", bg="blue",text=u"Lat",font=self.customFont,width=15)
+		rpnt_2_1 = tkinter.Label(self,fg="white", bg="blue",text="Lat",font=self.customFont,width=15)
                 rpnt_2_1.grid(column=1,row=row,sticky='EW')
 
-		rpnt_2_2 = Tkinter.Label(self,fg="white", bg="blue",text=u"X-Lat offset",font=self.customFont,width=15)
+		rpnt_2_2 = tkinter.Label(self,fg="white", bg="blue",text="X-Lat offset",font=self.customFont,width=15)
                 rpnt_2_2.grid(column=2,row=row,sticky='EW')
 
-		rpnt_2_3 = Tkinter.Label(self,fg="white", bg="blue",text=u"Lat offset",font=self.customFont,width=15)
+		rpnt_2_3 = tkinter.Label(self,fg="white", bg="blue",text="Lat offset",font=self.customFont,width=15)
                 rpnt_2_3.grid(column=3,row=row,sticky='EW')
 
-		rpnt_2_4 = Tkinter.Label(self,fg="white", bg="blue",text=u"X-Lat QC",font=self.customFont,width=15)
+		rpnt_2_4 = tkinter.Label(self,fg="white", bg="blue",text="X-Lat QC",font=self.customFont,width=15)
                 rpnt_2_4.grid(column=4,row=row,sticky='EW')
 
-		rpnt_2_5 = Tkinter.Label(self,fg="white", bg="blue",text=u"Lat QC",font=self.customFont,width=15)
+		rpnt_2_5 = tkinter.Label(self,fg="white", bg="blue",text="Lat QC",font=self.customFont,width=15)
                 rpnt_2_5.grid(column=5,row=row,sticky='EW')
 
-		rpnt_2_6 = Tkinter.Label(self,fg="white", bg="blue",text=u"Detector",font=self.customFont,width=15)
+		rpnt_2_6 = tkinter.Label(self,fg="white", bg="blue",text="Detector",font=self.customFont,width=15)
                 rpnt_2_6.grid(column=6,row=row,sticky='EW')
 
 		row = row + 1
-                self.lon     = Tkinter.StringVar()
-                lonlabel = Tkinter.Label(self,textvariable=self.lon,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.lon     = tkinter.StringVar()
+                lonlabel = tkinter.Label(self,textvariable=self.lon,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 lonlabel.grid(column=0,row=row,sticky='EW')
                 
-                self.lat     = Tkinter.StringVar()
-                latlabel = Tkinter.Label(self,textvariable=self.lat,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.lat     = tkinter.StringVar()
+                latlabel = tkinter.Label(self,textvariable=self.lat,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 latlabel.grid(column=1,row=row,sticky='EW')
                 
-                self.xlatoff = Tkinter.StringVar()
-                xlatofflabel = Tkinter.Label(self,textvariable=self.xlatoff,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.xlatoff = tkinter.StringVar()
+                xlatofflabel = tkinter.Label(self,textvariable=self.xlatoff,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 xlatofflabel.grid(column=2,row=row,sticky='EW')
                 
-                self.latoff = Tkinter.StringVar()
-                latofflabel = Tkinter.Label(self,textvariable=self.latoff,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.latoff = tkinter.StringVar()
+                latofflabel = tkinter.Label(self,textvariable=self.latoff,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 latofflabel.grid(column=3,row=row,sticky='EW')
                 
-                self.xlatqc = Tkinter.StringVar()
-                xlatqclabel = Tkinter.Label(self,textvariable=self.xlatqc,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.xlatqc = tkinter.StringVar()
+                xlatqclabel = tkinter.Label(self,textvariable=self.xlatqc,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 xlatqclabel.grid(column=4,row=row,sticky='EW')
                 
-                self.latqc = Tkinter.StringVar()
-                latqclabel = Tkinter.Label(self,textvariable=self.latqc,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.latqc = tkinter.StringVar()
+                latqclabel = tkinter.Label(self,textvariable=self.latqc,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 latqclabel.grid(column=5,row=row,sticky='EW')
                 
-                self.detec = Tkinter.StringVar()
-                deteclabel = Tkinter.Label(self,textvariable=self.detec,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+                self.detec = tkinter.StringVar()
+                deteclabel = tkinter.Label(self,textvariable=self.detec,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
                 deteclabel.grid(column=6,row=row,sticky='EW')
                 
 		row = row + 3
-		r21 = Tkinter.Label(self,fg="white", bg="blue",text=u" ", font=self.customFont,width=15)
+		r21 = tkinter.Label(self,fg="white", bg="blue",text=" ", font=self.customFont,width=15)
                 r21.grid(column=0,row=row,columnspan=7,sticky='EW')
 
 		row = row + 1
-		r22 = Tkinter.Label(self,fg="white", bg="blue",text=u"To",font=self.customFont,width=15)
+		r22 = tkinter.Label(self,fg="white", bg="blue",text="To",font=self.customFont,width=15)
                 r22.grid(column=0,row=row,sticky='EW')
 
-		self.addressTo = Tkinter.StringVar()
-		self.toVariable = Tkinter.Entry(self,textvariable=self.addressTo,font=self.customFont,width=15)
+		self.addressTo = tkinter.StringVar()
+		self.toVariable = tkinter.Entry(self,textvariable=self.addressTo,font=self.customFont,width=15)
                 self.toVariable.grid(column=1,row=row,columnspan=2,sticky='EW')
 	
 		row = row + 3
-		r25 = Tkinter.Label(self,fg="white", bg="blue",text=u"Comments",font=self.customFont,width=15)
+		r25 = tkinter.Label(self,fg="white", bg="blue",text="Comments",font=self.customFont,width=15)
                 r25.grid(column=0,row=row,sticky='EW')
 	
 		#self.comment = Tkinter.StringVar()
-		self.commentBox = Tkinter.Text(self,height=3,font=self.customFont,width=15)
+		self.commentBox = tkinter.Text(self,height=3,font=self.customFont,width=15)
 		self.commentBox.grid(column=1,row=row,columnspan=3,sticky='WE')
 		
-		commentScroll = Tkinter.Scrollbar(self, command=self.commentBox.yview)
+		commentScroll = tkinter.Scrollbar(self, command=self.commentBox.yview)
 		commentScroll.grid(column=4,row=row,sticky='WNS')
 		self.commentBox['yscrollcommand'] = commentScroll.set
 
 		row = row + 1
-		update_button = Tkinter.Button(self,text=u"Update Values", command=self.OnButtonUpdate,font=self.customFont,width=15)
+		update_button = tkinter.Button(self,text="Update Values", command=self.OnButtonUpdate,font=self.customFont,width=15)
 		update_button.grid(column=5,row=row)
 
-		send_button = Tkinter.Button(self,text=u"Send Msg", command=self.OnButtonSend,font=self.customFont,width=15)
+		send_button = tkinter.Button(self,text="Send Msg", command=self.OnButtonSend,font=self.customFont,width=15)
 		send_button.grid(column=6,row=row)
 	
 		#Window settings
@@ -470,7 +470,7 @@ class msg_tk(Tkinter.Tk):
 		#self.entry.selection_range(0, Tkinter.END)
 
 	def OnButtonUpdate(self):
-		print "Updating Values!"
+		print("Updating Values!")
 		c = self.stationcode.get()
 		if c == "":
 			c = self._station
@@ -495,38 +495,38 @@ class msg_tk(Tkinter.Tk):
 		try:
 			self.GetRDBEVals()
 		except:
-			print "Could not get RDBE data!"
+			print("Could not get RDBE data!")
 
 		if self._mci != "":
 			try:
 				self.GetCryoVals()
-			except Exception,e: 
-				print str(e)
-				print "Could not get MCI data!"
+			except Exception as e: 
+				print(str(e))
+				print("Could not get MCI data!")
 		else:
-			print "No MCI node defined!"
+			print("No MCI node defined!")
 
 		try:
 			self.GetSEFDVals()
 		except:
-			print "Could not get SEFD values!"
+			print("Could not get SEFD values!")
 
 		try:
 			self.GetPntVals()
 		except:
-			print "Could not get Pointing values!"
+			print("Could not get Pointing values!")
 
 		self.addressTo.set(self._to)
 
 	def OnButtonSend(self):
-		print "Sending Message!"
+		print("Sending Message!")
 		#print self.typeBox.get()
 		self.sendMessage()
 
 	def GetRDBEVals(self):
 		host = "127.0.0.1"
                 port = 5000
-                print "Updating offset values: "+ self._bandA[0]
+                print("Updating offset values: "+ self._bandA[0])
                 host = self._bandA[0]
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.connect ((host,port))
@@ -540,7 +540,7 @@ class msg_tk(Tkinter.Tk):
 		self.ppsA.set(self._bandA[1])
 		self.gpsA.set(self._bandA[2])
 
-		print "Updating offset values: "+ self._bandB[0]
+		print("Updating offset values: "+ self._bandB[0])
                 host = self._bandB[0]
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.connect ((host,port))
@@ -553,7 +553,7 @@ class msg_tk(Tkinter.Tk):
 		self.ppsB.set(self._bandB[1])
                 self.gpsB.set(self._bandB[2])
 
-                print "Updating offset values: "+ self._bandC[0]
+                print("Updating offset values: "+ self._bandC[0])
                 host = self._bandC[0]
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.connect ((host,port))
@@ -566,7 +566,7 @@ class msg_tk(Tkinter.Tk):
 		self.ppsC.set(self._bandC[1])
                 self.gpsC.set(self._bandC[2])
 
-                print "Updating offset values: "+ self._bandD[0]
+                print("Updating offset values: "+ self._bandD[0])
                 host = self._bandD[0]
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.connect ((host,port))
@@ -580,7 +580,7 @@ class msg_tk(Tkinter.Tk):
                 self.gpsD.set(self._bandD[2])
 
 	def GetCryoVals(self):
-                print "Updating Cryo Values"
+                print("Updating Cryo Values")
 		if self._mciVersion == "0":
 			proc20 = subprocess.Popen(["ssh", "oper@" + self._mci, "tail", "-n", "100", "node-software/V0/mci" + self._mcilogtime + ".txt", "|", "egrep", "'AD214|AD215'"], stdout=subprocess.PIPE)
 			text =proc20.stdout.read()
@@ -617,7 +617,7 @@ class msg_tk(Tkinter.Tk):
                 #print self._70k
 	
 	def GetSEFDVals(self):
-                print "Updating SEFD Values"
+                print("Updating SEFD Values")
 		s = self.sessionname.get()
 		c = self.stationcode.get()
 		procSEFD = subprocess.Popen(["/bin/sh", "-c", "grep 'onoff#VAL' /usr2/log/" + s + c + ".log  | tail  -n 8"], stdout=subprocess.PIPE)
@@ -657,7 +657,7 @@ class msg_tk(Tkinter.Tk):
 		#print self._SEFD[1]
 
 	def GetPntVals(self):
-                print "Updating Pointing Values"
+                print("Updating Pointing Values")
 		s = self.sessionname.get()
 		c = self.stationcode.get()
 		procPnt = subprocess.Popen(["/bin/sh", "-c", "grep 'fivpt#xoffset' /usr2/log/" + s + c + ".log  | tail  -n 1"], stdout=subprocess.PIPE)
@@ -683,7 +683,7 @@ class msg_tk(Tkinter.Tk):
 		TO = self.addressTo.get()
 		SUBJECT = self.sessionname.get() + " " + self._name + " " + self.typeVariable.get() + " message"
 		TEXT = 	" Comment:\n" +\
-			" " + self.commentBox.get('1.0',Tkinter.END) + "\n" +\
+			" " + self.commentBox.get('1.0',tkinter.END) + "\n" +\
 			" Maser Offset: " + self.maser.get() + "\n\n" + \
 			"============RDBE-OFFSETS===========\n" + \
                 	" PPS Offset\n" + \
@@ -721,7 +721,7 @@ class msg_tk(Tkinter.Tk):
 
 		process = subprocess.Popen(["mail", "-s", SUBJECT, TO], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 		process.stdin.write(TEXT)
-		print process.communicate()[0]
+		print(process.communicate()[0])
 		process.stdin.close()
 
 
