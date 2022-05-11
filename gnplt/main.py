@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from Tkinter import *
+from tkinter import *
 from NumericTools import NumericTools
 from Coordinate import Coordinate
 #from Simulation import Simulation #Hans
@@ -25,7 +25,7 @@ from AutoBreakMenu import AutoBreakMenu
 from PrintCanvas import PrintCanvas
 from GndatReader import GndatReader
 from GnPltError import *
-import string, os, tkFileDialog, tkFont, math, tkMessageBox, time, random
+import string, os, tkinter.filedialog, tkinter.font, math, tkinter.messagebox, time, random
 
 class Gui(Frame):
     #class variables
@@ -50,7 +50,7 @@ class Gui(Frame):
         Frame.__init__(self, parent)
         self.master.title('Gain Plot 2')
 	font_size = os.getenv('FS_GNPLT_FONTSIZE', '8')
-        fontb = tkFont.Font(font = ("Helvetica %s bold" % font_size))
+        fontb = tkinter.font.Font(font = ("Helvetica %s bold" % font_size))
         self.master.option_add("*Font", fontb)
         self.master.minsize(width = 300, height = 300)
         
@@ -171,7 +171,7 @@ class Gui(Frame):
 ##        #devtools.add_command(label = 'bbb', command = lambda: self.computeOpacityFactor())
         
 ##################argument section: cycle through arguments in args
-        if args.has_key('log'):
+        if 'log' in args:
             self.open(0, args.get('log'))
         
     
@@ -317,7 +317,7 @@ class Gui(Frame):
         opac_cor_menu = Menu(self.yaxismenu, tearoff = 0)
         opac_cor_menu.add_command(label = 'Set Tatm', command = lambda: self.setTatm())
         
-        for rxg in self.rxg_file_information.keys():
+        for rxg in list(self.rxg_file_information.keys()):
             info = self.rxg_file_information.get(rxg)
             lo_range = info[7]
             lo_low = lo_range[0]
@@ -349,7 +349,7 @@ class Gui(Frame):
             else:
                 self.yaxismenu.add_radiobutton(label = name, variable = self.selectedY, command = lambda: self.prepPlot())
         
-        if 'Airmass' and 'Tsys-Tspill' in self.database.keys():
+        if 'Airmass' and 'Tsys-Tspill' in list(self.database.keys()):
             calculated.add_radiobutton(label = 'Zenith Opacity', variable = self.selectedY, command = lambda: self.computeZenithOpacity())
             
         self.yaxismenu.add_separator()
@@ -438,7 +438,7 @@ class Gui(Frame):
         rightpolmenu.add_command(label = 'No left or right', command = lambda: self.selectAllFrequencies('both', 0))
         rightpolmenu.add_separator()
         
-        for info in self.rxg_file_information.values():
+        for info in list(self.rxg_file_information.values()):
             lo_range = info[7]
             if lo_range[-1] == 'fixed':
                 label = '%s,%s' % (lo_range[0], lo_range[1])
@@ -545,7 +545,7 @@ class Gui(Frame):
                             if type == 'c' or type == 'p':
                                 calib_and_point_menu.add_command(label = freq_detector, command = lambda fdp = freq, source = source, shortcut = shortcut: self.plotShortcut(fdp, source, shortcut))
                 else:
-                    for info in self.rxg_file_information.values():
+                    for info in list(self.rxg_file_information.values()):
                         lo_range = info[7]
                         if lo_range[-1] == 'fixed':
                             label = '%s,%s' % (lo_range[0], lo_range[1])
@@ -588,7 +588,7 @@ class Gui(Frame):
                                 freqmenu.add_command(label = freq_detector, command = lambda fdp = freq, source = source, shortcut = shortcut: self.plotShortcut(fdp, source, shortcut))
                                 
                     else: #add LO-range
-                        for info in self.rxg_file_information.values():
+                        for info in list(self.rxg_file_information.values()):
                             lo_range = info[7]
                             if lo_range[-1] == 'fixed':
                                 label = '%s,%s' % (lo_range[0], lo_range[1])
@@ -702,7 +702,7 @@ class Gui(Frame):
         poly = GAIN_ELEV_POLY[0]
         mode = GAIN_ELEV_POLY[1] == 'ALTAZ'
         #scale with DPFU
-        poly = map(lambda x: x*DPFU, poly)
+        poly = [x*DPFU for x in poly]
         self.plot.drawFittedLine(poly, fill = 'green', complement_angle = mode, tags = ('gain_elev_poly',))
         
         cpoly = poly[:]
@@ -799,7 +799,7 @@ class Gui(Frame):
         """setlectAllSources selects all check buttons with the source 'source'.  
         """
         for source in source_list:
-            for time in self.sources_chosen[source].keys():
+            for time in list(self.sources_chosen[source].keys()):
                 self.sources_chosen[source][time].set(set)
             
         self.prepPlot()
@@ -811,7 +811,7 @@ class Gui(Frame):
         if pol == 'both':
             self.selectAllFrequencies('l', set)
             self.selectAllFrequencies('r', set)
-        for fdp in self.frequencies_chosen.keys():
+        for fdp in list(self.frequencies_chosen.keys()):
             if fdp.split()[-1] == pol:
                 self.frequencies_chosen[fdp].set(set)
         
@@ -1031,7 +1031,7 @@ class Gui(Frame):
         """
         if not logfile:
             types = (('Log Files','*.log'), ('All Files','*'))
-            logfile = tkFileDialog.askopenfilename(initialdir = Gui.fs_dir, filetypes = types)
+            logfile = tkinter.filedialog.askopenfilename(initialdir = Gui.fs_dir, filetypes = types)
         if logfile:
             #clear database
             self.database.clear()
@@ -1108,7 +1108,7 @@ class Gui(Frame):
                     self.readRXG()
                     #print database
                     #build menus:
-                    plot_list = self.database.keys()
+                    plot_list = list(self.database.keys())
                     #items in no_plot_list are not to be plotted
                     
                     
@@ -1141,7 +1141,7 @@ class Gui(Frame):
                     self.plot.database = self.database.copy()
                     
                     #set total number of points
-                    for key in self.database.keys():
+                    for key in list(self.database.keys()):
                         Gui.total_points.set(len(self.database.get(key)))
                         break
                     
@@ -1181,10 +1181,10 @@ class Gui(Frame):
                 	if kw.get('quit'):
                 		pass
                 	else:
-                		tkMessageBox.showinfo('Unwanted action', 'The working file was updated using simulated data. The RXG file can therefore not be updated.')
+                		tkinter.messagebox.showinfo('Unwanted action', 'The working file was updated using simulated data. The RXG file can therefore not be updated.')
                 else:
                 	#ask the user to replace
-                	answer = tkMessageBox.askyesno('Save?', 'Save updates made to %s?' % orig_rxg)
+                	answer = tkinter.messagebox.askyesno('Save?', 'Save updates made to %s?' % orig_rxg)
    	             	if answer:
   	                	os.remove(orig_rxg)
       	           		os.rename(working_rxg, orig_rxg)
@@ -1312,14 +1312,14 @@ class Gui(Frame):
         fs_dir_entr = Entry(file_parsing_frame, textvariable = fs_dir, width = 30)
         fs_dir_entr.grid(row = 0, column = 1, padx = 5, pady = 2)
         fs_dir.set(Gui.fs_dir)
-        Button(file_parsing_frame, text = '...', command = lambda: fs_dir.set(tkFileDialog.askdirectory(initialdir = Gui.fs_dir))).grid(row = 0, column = 2, padx = 5)
+        Button(file_parsing_frame, text = '...', command = lambda: fs_dir.set(tkinter.filedialog.askdirectory(initialdir = Gui.fs_dir))).grid(row = 0, column = 2, padx = 5)
         
         Label(file_parsing_frame, text = 'Default directory for .rxg files:').grid(row = 1, column = 0, padx = 5, pady = 2)
         rxg_dir = StringVar()
         rxg_dir_entr = Entry(file_parsing_frame, textvariable = rxg_dir, width = 30)
         rxg_dir_entr.grid(row = 1, column = 1, padx = 5, pady = 2)
         rxg_dir.set(Gui.rxg_dir)
-        Button(file_parsing_frame, text = '...', command = lambda: rxg_dir.set(tkFileDialog.askdirectory(initialdir = Gui.rxg_dir))).grid(row = 1, column = 2, padx = 5)
+        Button(file_parsing_frame, text = '...', command = lambda: rxg_dir.set(tkinter.filedialog.askdirectory(initialdir = Gui.rxg_dir))).grid(row = 1, column = 2, padx = 5)
         
         Label(file_parsing_frame, text = 'Output file for gndat:').grid(row = 2, column = 0, padx = 5, pady = 2)
         gndat_output = Entry(file_parsing_frame, width = 30)
@@ -1421,7 +1421,7 @@ class Gui(Frame):
         if kw.get('destination')==1: #print to file
             filename = kw.get('filename')
             format = 'EPS'
-            if kw.has_key('file_format'):
+            if 'file_format' in kw:
                 format = kw.get('file_format')
             else: #from batch_mode
                 formats = ['EPS', 'PDF', 'BMP', 'JPG', 'TIFF', 'GIF', 'PNG', 'PS']
@@ -1485,7 +1485,7 @@ class Gui(Frame):
         """
         title = 'About'
         message = 'GnPlt2 version 2.07'
-        tkMessageBox.showinfo(title, message)
+        tkinter.messagebox.showinfo(title, message)
     
     def shortcuts(self):
         """displays toplevel window with explanation of all of gnplt2's keyboard and mouse shortcuts 
@@ -1541,7 +1541,7 @@ class Gui(Frame):
         #eventually find all rxg files in rxg file directory. 
         self.rxg_file_information = {}
         global GAIN_ELEV_POLY, DPFU_L, DPFU_R
-        for filename in RXG_LIST.keys():
+        for filename in list(RXG_LIST.keys()):
             global TCAL_TABLE_L, TCAL_TABLE_R
             TCAL_TABLE_L = TCAL_TABLE_R = TREC_L = TREC_R = DPFU_L = DPFU_R = polynomial = LO_RANGE = opacity_corrected_poly = 0
             path = Gui.rxg_dir
@@ -1649,7 +1649,7 @@ class Gui(Frame):
         global TCAL_TABLE_L, TCAL_TABLE_R, TREC_L, TREC_R, DPFU_L, DPFU_R, GAIN_ELEV_POLY, LO_RANGE, OPACITY_CORRECTED_POLY
         current_LOs = self.plot.getList('LO', datalist)
         #match with LOs, find which file it is, the extract the information....
-        RXGs = RXG_LIST.keys()
+        RXGs = list(RXG_LIST.keys())
         for lo in current_LOs:
             for rxg in RXGs:
                 value = RXG_LIST.get(rxg)
@@ -1782,7 +1782,7 @@ class Gui(Frame):
         cpoly = poly[:]
         cpoly.reverse()
         #scale with DPFU
-        poly = map(lambda x: x*DPFU, poly)
+        poly = [x*DPFU for x in poly]
         self.plot.drawFittedLine(poly, tags = ('fitted_dpfu_line',))
         stat = 'Coefficients:\t'
         for k,coeff in enumerate(cpoly):
@@ -1884,7 +1884,7 @@ class Gui(Frame):
                     data = self.removeDoubleSpace(data)
                     if mode == 'gain_elev':
                         ##############update dpfu:
-                        if self.working_data.has_key('dpfu') and dpfu_order:
+                        if 'dpfu' in self.working_data and dpfu_order:
                             dpfu = self.working_data.get('dpfu')
                             ldata = data.split()
                             for j,pol_in_rxg in enumerate(dpfu_order):
@@ -1897,7 +1897,7 @@ class Gui(Frame):
                             dpfu_order = data.split()
                             dpfu_line_set = 1
                         ################update gain polynomial
-                        if self.working_data.has_key('gain_poly') and (data[:9] == 'ELEV POLY' or data[:10] == 'ALTAZ POLY'):
+                        if 'gain_poly' in self.working_data and (data[:9] == 'ELEV POLY' or data[:10] == 'ALTAZ POLY'):
                             gain_poly = self.working_data.get('gain_poly')[0]
                             mode = self.working_data.get('gain_poly')[1] #ELEV or ALTAZ
                             opac_cor = self.working_data.get('gain_poly')[2]
@@ -1911,7 +1911,7 @@ class Gui(Frame):
                                 str_out += ' opacity_corrected'
                             working_rxg_data_updated[i] = str_out + '\n'
                         #################update TCal table:
-                        if self.working_data.has_key('tcal_factor') and (data[:3] == pol_id):
+                        if 'tcal_factor' in self.working_data and (data[:3] == pol_id):
                             #check length, otherwise, might be 'lcp rcp'
                             ldata = data.split()
                             if len(ldata) == 3:
@@ -1921,7 +1921,7 @@ class Gui(Frame):
                                 working_rxg_data_updated[i] = '%s %s %s\n' %(ldata[0], ldata[1], new_tcal)
     
                     elif mode == 'tsys-tspill_airmass':
-                        if self.working_data.has_key('trec') and trec_line_found:
+                        if 'trec' in self.working_data and trec_line_found:
                             ldata = data.split()
                             trec = self.working_data.get('trec')
                             if pol == 'l':
@@ -1933,11 +1933,11 @@ class Gui(Frame):
                         elif (working_rxg_data[i].strip() == 'end_tcal_table'):
                             trec_line_found = 1
                                 
-                except (IndexError, ), e:
+                except (IndexError, ) as e:
                     pass
             
         if mode == 'tcal_freq':
-            if self.working_data.has_key('tcal_freq_table'):
+            if 'tcal_freq_table' in self.working_data:
                 m = len(working_rxg_data_updated)
                 first_id = m
                 for i in range(m):
@@ -2015,7 +2015,7 @@ class Gui(Frame):
         
         xdata = []
         ydata = []
-        keys = tcal_table.keys() 
+        keys = list(tcal_table.keys()) 
         keys.sort()
         
         for freq in keys:
@@ -2045,7 +2045,7 @@ class Gui(Frame):
         
         xdata = []
         ydata = []
-        keys = tcal_table_unprocessed.keys()
+        keys = list(tcal_table_unprocessed.keys())
         keys.sort()
         
         for freq in keys:
@@ -2248,7 +2248,7 @@ class Gui(Frame):
             self.database['TCal(K)'] = self.pre_opacity_corrected_tcal[:]
             self.database['TCal Ratio'] = self.pre_opacity_corrected_tcal_ratio[:]
 
-            for rxg in Gui.opacity_correction.keys():
+            for rxg in list(Gui.opacity_correction.keys()):
                 data = Gui.opacity_correction.get(rxg).get()
                 info = self.rxg_file_information.get(rxg)
                 trec_l = info[2]
@@ -2460,7 +2460,7 @@ class Gui(Frame):
     def chooseFreq(self, window = None):
     	""" Window for choosing frequencies"""
     	if not self.polVar.get():
-    		tkMessageBox.showinfo('Message', 'Please select a polarization.')
+    		tkinter.messagebox.showinfo('Message', 'Please select a polarization.')
     		self.simWin.lift()
     	else:
 	    	try:
@@ -2528,18 +2528,18 @@ class Gui(Frame):
     def unselectAll(self):
     	""" Unselects all frequencies"""
     	self.simSelectedFreq =[]
-   	for freq in self.freqVariables.keys():
+   	for freq in list(self.freqVariables.keys()):
    		self.freqVariables[freq].set(0)
    		
     def closeFreq(self):
     	""" Saves the choice of frequencies"""
     	self.simSelectedFreq = []
     	try: 
-    		for freq in self.freqVariables.keys():
+    		for freq in list(self.freqVariables.keys()):
     			if not self.selectAll.get():
     				if self.freqVariables.get(freq).get():
     					self.simSelectedFreq.append(freq)
-    				if len(self.freqVariables.keys()) == len(self.simSelectedFreq):
+    				if len(list(self.freqVariables.keys())) == len(self.simSelectedFreq):
     					self.selectAll.set(1)
     			else:
     				self.simSelectedFreq.append(freq)
@@ -2566,7 +2566,7 @@ class Gui(Frame):
     def endSimulation(self):
     	""" Quit """
     	if self.simulation.get():
-    		if tkMessageBox.askyesno("Notification", "This will exit the simulation, delete all simulated data and reread the log file. Are you sure you want to continue?"):
+    		if tkinter.messagebox.askyesno("Notification", "This will exit the simulation, delete all simulated data and reread the log file. Are you sure you want to continue?"):
     			self.focus_set()
    	     		self.simWin.destroy()
         		try: self.simTable.destroy()
@@ -2654,7 +2654,7 @@ class Gui(Frame):
 			else:
 				self.d.insert(0, 0)
 		if i >= 4:	
-			tkMessageBox.showinfo('Message', 'The max degree of polynomial is 3')
+			tkinter.messagebox.showinfo('Message', 'The max degree of polynomial is 3')
 			self.SIM_degree.delete(0, END)
 			self.SIM_degree.insert(0, 3)
 			self.buildEntries()
@@ -2767,14 +2767,14 @@ class Gui(Frame):
     	self.sim_data_indices =[]
     	try:
     		if self.simSelectedFreq == []:
-    			tkMessageBox.showinfo('Message', 'Please select at least one frequency.')
+    			tkinter.messagebox.showinfo('Message', 'Please select at least one frequency.')
     			self.simWin.focus_set()
     			self.simWin.lift()
     		temp = 0
    	 	for source in self.sourceSelected:
     			temp += source.get()
     		if not temp:	
-    			tkMessageBox.showinfo('Message', 'Please select at least one source.')
+    			tkinter.messagebox.showinfo('Message', 'Please select at least one source.')
     			self.simWin.focus_set()
     			self.simWin.lift()
     		pol = self.polVar.get()
@@ -2802,7 +2802,7 @@ class Gui(Frame):
         	listDetectors = {}
         	for det in self.database['Detector']:
         		listDetectors[det] = 0
-        	listDetectors = listDetectors.keys()		     
+        	listDetectors = list(listDetectors.keys())		     
         	# Set the self.frequencies_chosen
         	for freq in self.simSelectedFreq:
         		for det in listDetectors:
@@ -2820,7 +2820,7 @@ class Gui(Frame):
        	 					self.frequencies_chosen[fdp].set(1)                
         			except: pass
        	except:
-    		tkMessageBox.showinfo('Message', 'Please select at least one frequency.')
+    		tkinter.messagebox.showinfo('Message', 'Please select at least one frequency.')
     		self.do_not_plot.set(1)
     		self.simWin.focus_set()
     		self.simWin.lift()
@@ -2870,7 +2870,7 @@ class Gui(Frame):
  	dict = {}
  	for i in list:
  		dict[i] = 0 
- 	return dict.keys()
+ 	return list(dict.keys())
  	 
     def editTCalTable(self, freq_tcal_l = None, freq_tcal_r = None, workingfile = None):
     	""" Creates a window for editing the values of TCal(K)"""
@@ -2910,16 +2910,16 @@ class Gui(Frame):
 		freq_tcal_r.update(self.tcal_in_use[1])
 				
 	if (freq_tcal_l or freq_tcal_r) and not workingfile:
-		freqR = freq_tcal_r.keys()[:]
+		freqR = list(freq_tcal_r.keys())[:]
 		freqR.sort()	
-		freqL = freq_tcal_l.keys()[:]
+		freqL = list(freq_tcal_l.keys())[:]
 		freqL.sort()
 		tcal_table_l = freq_tcal_l
 		tcal_table_r = freq_tcal_r
 	else:
-		freqR = TCAL_TABLE_R.keys()[:]
+		freqR = list(TCAL_TABLE_R.keys())[:]
 		freqR.sort()	
-		freqL = TCAL_TABLE_L.keys()[:]
+		freqL = list(TCAL_TABLE_L.keys())[:]
 		freqL.sort()
 		tcal_table_l = TCAL_TABLE_L.copy()
 		tcal_table_r = TCAL_TABLE_R.copy()
@@ -2946,7 +2946,7 @@ class Gui(Frame):
     		
     def saveTcalTable(self, freqL, freqR, tcal_table_l, tcal_table_r):
     	""" Save tcal table"""
-    	tcalFile = tkFileDialog.asksaveasfile(initialdir = Gui.rxg_dir)
+    	tcalFile = tkinter.filedialog.asksaveasfile(initialdir = Gui.rxg_dir)
     	if tcalFile:
     		path = tcalFile.name
     		names = path.split('/')    		
@@ -2967,7 +2967,7 @@ class Gui(Frame):
     	""" Load tcal table"""
     	freqtcalL = {}
     	freqtcalR = {}
-    	tcalFile = tkFileDialog.askopenfilename(initialdir = Gui.rxg_dir)
+    	tcalFile = tkinter.filedialog.askopenfilename(initialdir = Gui.rxg_dir)
 	if tcalFile:
 		tcal_file = open(tcalFile, 'r')
 		for line in tcal_file.readlines():
@@ -3162,7 +3162,7 @@ class Plot(Canvas, Coordinate):
                     self.minY = min(_ylist)
                     self.maxX = max(_xlist)
                     self.maxY = max(_ylist)
-            except (ValueError, ), e: #empty plot!
+            except (ValueError, ) as e: #empty plot!
                 self.minX = self.maxX = self.minY = self.maxY = 0
         
         
@@ -3251,7 +3251,7 @@ class Plot(Canvas, Coordinate):
         will remain the same every time. 
         """
         k = int(k)
-        if self.colors.has_key(k):
+        if k in self.colors:
             return_color = self.colors.get(k)
         else:
             random.seed(1234567890)	
@@ -3291,7 +3291,7 @@ class Plot(Canvas, Coordinate):
         for i in range(len(xvalues)):
             coord_list.append(self.getCanvasXY([xvalues[i], yvalues[i]]))
         
-        if kw.has_key('fill'):
+        if 'fill' in kw:
             fill = kw.get('fill')
             dash = None
         else:
@@ -3299,7 +3299,7 @@ class Plot(Canvas, Coordinate):
             dash = (12, 8)
         tags = ('line',)
         
-        if kw.has_key('tags'):
+        if 'tags' in kw:
             tags += kw.get('tags')
         
         self.create_line(coord_list, dash = dash, width = 2, fill = fill, tags = tags)
@@ -3313,7 +3313,7 @@ class Plot(Canvas, Coordinate):
         coord_list = []
         y_list = []
         x_list = []
-        if kw.has_key('complement_angle'):
+        if 'complement_angle' in kw:
             complement_angle = kw.get('complement_angle')
         else:
             complement_angle = 0
@@ -3342,10 +3342,10 @@ class Plot(Canvas, Coordinate):
 
         tags = ('line',)
         
-        if kw.has_key('tags'):
+        if 'tags' in kw:
             tags+=kw.get('tags')
         
-        if kw.has_key('fill'):
+        if 'fill' in kw:
             fill = kw.get('fill')
             dash = None
         else:
@@ -3803,7 +3803,7 @@ class Plot(Canvas, Coordinate):
                 self.delete('line')
                 [self.minX, self.maxX, self.minY, self.maxY] = [self.getCartesianX(x1), self.getCartesianX(x2), self.getCartesianY(y1), self.getCartesianY(y2)]
                 self.plot(zoom_list, self.xname, self.yname, False)
-            except (ValueError,TclError ), e:
+            except (ValueError,TclError ) as e:
                 pass
     
     def deleteSelection(self, event):

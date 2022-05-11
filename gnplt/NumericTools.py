@@ -196,8 +196,8 @@ class NumericTools:
 def main():
     num = NumericTools()
     t = num.date2num('2008.176.11:50:45.23')
-    print t
-    print num.num2date(t)
+    print(t)
+    print(num.num2date(t))
     
     
 

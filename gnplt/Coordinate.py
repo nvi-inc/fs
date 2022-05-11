@@ -33,7 +33,7 @@ class Coordinate:
         self.y_margin = int(ymargin)
 
     def getCanvasXY(self, cartesianXY, **kw):
-        if kw.has_key('force_scale'):
+        if 'force_scale' in kw:
             force = kw.get('force_scale')
         else:
             force = 0

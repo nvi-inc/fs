@@ -27,9 +27,9 @@ gnplt.py also handles major error that causes the program to crash...
 import sys
 try:
     from main import Gui
-    from Tkinter import *
-except ImportError,e:
-    print 'Error: GnPlt could not find all required packages. \nTkinter, numpy and Python 2.4 or newer is required.\nError message: %s' %e
+    from tkinter import *
+except ImportError as e:
+    print('Error: GnPlt could not find all required packages. \nTkinter, numpy and Python 2.4 or newer is required.\nError message: %s' %e)
     sys.exit(1)
     
 def usage():
@@ -45,11 +45,11 @@ while args:
             usage()
             sys.exit(0)
         else:
-            print 'Argument %s is not recognized.' % args[0]
+            print('Argument %s is not recognized.' % args[0])
             usage()
             sys.exit(1)
     except IndexError:
-        print 'Incorrect use of arguments. Use argument -help for instructions'
+        print('Incorrect use of arguments. Use argument -help for instructions')
         break
 
 #cycle through arguments.....
@@ -59,8 +59,8 @@ root = Tk()
 try:
     Gui(root, **kw)
     root.mainloop()
-except TclError, e:
-    print 'The LogPlotter GUI crashed! \nError message:\n', e
+except TclError as e:
+    print('The LogPlotter GUI crashed! \nError message:\n', e)
 except (KeyboardInterrupt): #ctrl-c
         pass
 

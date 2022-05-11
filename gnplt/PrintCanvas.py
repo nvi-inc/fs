@@ -18,7 +18,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 #based on logpl's canvasconstructor with some smaller adjustments. 
-import Tkinter as tk #name incompatibility with Image and ImageDraw.... 
+import tkinter as tk #name incompatibility with Image and ImageDraw.... 
 import os
 
 class PrintCanvas(tk.Toplevel):
@@ -150,7 +150,7 @@ class PrintCanvas(tk.Toplevel):
         fit with an always left aligned anchor coordinate for PIL
         """
         if self.main_canvas.type(item) != 'text':
-            raise ValueError, 'Object must be text'
+            raise ValueError('Object must be text')
         coords = old_coords
         anchor = self.main_canvas.itemcget(item, 'anchor')
         bbox = self.main_canvas.bbox(item)
