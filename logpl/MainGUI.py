@@ -20,10 +20,10 @@
 #LogPlotter/MainGUI.py
 import os, sys
 try: #check for Tkinter
-    from Tkinter import *
-    import tkMessageBox, tkFont, math, operator, threading, readline, tkFileDialog, string
+    from tkinter import *
+    import tkinter.messagebox, tkinter.font, math, operator, threading, readline, tkinter.filedialog, string
 except ImportError:
-    print 'Tkinter not correctly installed. Exiting...'
+    print('Tkinter not correctly installed. Exiting...')
     sys.exit()
 
 try: #check for logpl 
@@ -36,7 +36,7 @@ try: #check for logpl
     from HelpFrame import HelpFrame
     from ColorSelector import ColorSelector
 except ImportError:
-    print 'Logpl not correctly installed. Exiting...'
+    print('Logpl not correctly installed. Exiting...')
     sys.exit()
     
     
@@ -71,10 +71,10 @@ class MainGUI:
         screenwidth = self.root.winfo_screenwidth()
         #normal font:
         global font
-        font = tkFont.Font(font = ("Helvetica 8 normal"))
+        font = tkinter.font.Font(font = ("Helvetica 8 normal"))
         #bold font:
         global fontb
-        fontb = tkFont.Font(font = ("Helvetica 8 bold"))
+        fontb = tkinter.font.Font(font = ("Helvetica 8 bold"))
         self.root.option_add("*Font", fontb)
             
         #set display proportion after paper size. 
@@ -199,7 +199,7 @@ class MainGUI:
         
         helpmenu = Menu(menubar, tearoff = 0)
         helpmenu.add_command(label = 'Help Contents', command = lambda: HelpFrame(None, font.cget('size')), underline = 0)
-        helpmenu.add_command(label = 'About LogPlotter', command = lambda: tkMessageBox.showinfo('About LogPlotter', self.about()), underline = 0)
+        helpmenu.add_command(label = 'About LogPlotter', command = lambda: tkinter.messagebox.showinfo('About LogPlotter', self.about()), underline = 0)
         menubar.add_cascade(label = 'Help', menu = helpmenu, underline = 0)
         self.root.config(menu=menubar)
         
@@ -391,19 +391,19 @@ a new value.
         while True:
             if cfile_cmd:
                 entry = cfile_cmd
-                print 'command:', entry
+                print('command:', entry)
             else:
                 #readline.parse_and_bind("tab: complete")
                 try:
-                    entry = raw_input('logpl>')
+                    entry = input('logpl>')
                 except (EOFError, KeyboardInterrupt):
-                    print 'exiting\n'
+                    print('exiting\n')
                     break
             if entry == 'exit':
                 sys.exit()
             elif entry == 'help':
-                print 'Available commands: '
-                print helptext
+                print('Available commands: ')
+                print(helptext)
             elif entry == 'settings':
                 self.editSettings()
             else:
@@ -419,7 +419,7 @@ a new value.
                                     self.check_absTime.set(value)
                                     self.absoluteTime()
                                 else:
-                                    print 'Current setting for absolute time is', self.check_absTime.get()
+                                    print('Current setting for absolute time is', self.check_absTime.get())
                             ###
                             elif cmd == 'average':
                                 self.average()
@@ -429,9 +429,9 @@ a new value.
                                     try:
                                         self.cfileRead(value)
                                     except IOError:
-                                        print 'Error: File %s could not be found.' % value
+                                        print('Error: File %s could not be found.' % value)
                                 else:
-                                    print 'No filename specified'
+                                    print('No filename specified')
                             ###
                             elif cmd == 'channel=':
                                 if value and value.isdigit:
@@ -440,14 +440,14 @@ a new value.
                                     if (len(self.canvas_man)+1)>value and value>=0:
                                         self.selectLastest(int(value))
                                     else:
-                                        print 'No such channel.'
+                                        print('No such channel.')
                                 else:
-                                    print 'Selected plot is ', str(MainGUI.active_plot +1)
-                                    print 'There are ', len(self.canvas_man), ' channels.'
+                                    print('Selected plot is ', str(MainGUI.active_plot +1))
+                                    print('There are ', len(self.canvas_man), ' channels.')
                                     if len(self.canvas_man)>0:
                                         for i in range(len(self.canvas_man)):
                                             try:
-                                                print '%02d: %s' %(i+1, self.canvas_man[i][0].superImposeList.keys())
+                                                print('%02d: %s' %(i+1, list(self.canvas_man[i][0].superImposeList.keys())))
                                             except (AttributeError, IndexError):
                                                 pass
                             ###
@@ -456,13 +456,13 @@ a new value.
                                     IOSettings.default_control_file=value
                                     self.readSettings()
                                 else:
-                                    print 'Current control file: ' + IOSettings.default_control_file
+                                    print('Current control file: ' + IOSettings.default_control_file)
                             ###
                             elif cmd == 'defdir=':
                                 if value:
                                     IOSettings.default_directory = value
                                 else:
-                                    print 'Current default directory is ', IOSettings.default_directory
+                                    print('Current default directory is ', IOSettings.default_directory)
                             ###
                             elif cmd == 'fontdec':
                                 self.fontSize('decrease')
@@ -479,20 +479,20 @@ a new value.
                                         try:
                                             value = int(value)
                                         except ValueError:
-                                            print 'Invalid argument!'
+                                            print('Invalid argument!')
                                             value = 0
                                         if not self.canvas_man[MainGUI.active_plot][0].invert == value:
                                             self.invertScale()
                                     else:
-                                        print 'Invert scale is set to', self.canvas_man[MainGUI.active_plot][0].invert
-                                except (IndexError, TypeError), e:
-                                    print 'Selected plot,', MainGUI.active_plot, ',does not exist'
+                                        print('Invert scale is set to', self.canvas_man[MainGUI.active_plot][0].invert)
+                                except (IndexError, TypeError) as e:
+                                    print('Selected plot,', MainGUI.active_plot, ',does not exist')
                             ###        
                             elif cmd == 'line=':
                                 if value == '0' or value == '1':
                                     self.check_connect.set(int(value))
                                 else:
-                                    print 'Current status: ' + str(self.check_connect.get())
+                                    print('Current status: ' + str(self.check_connect.get()))
                             ###
                             elif cmd == 'list=':
                                 if value:
@@ -504,25 +504,25 @@ a new value.
                                     try:
                                         if self.filename:
                                             line = self._readComments(description) 
-                                            print line
+                                            print(line)
                                             if filename:
                                                 output = open(filename, 'w')
                                                 output.write(line)
                                                 output.close
-                                                print '%s succesfully written' %(filename)
+                                                print('%s succesfully written' %(filename))
                                         else:
-                                            print "Error: Log not opened!"
-                                    except (AttributeError, TypeError, KeyError, IOError), e:
-                                        print 'Error reading. Log opened?'
+                                            print("Error: Log not opened!")
+                                    except (AttributeError, TypeError, KeyError, IOError) as e:
+                                        print('Error reading. Log opened?')
                             ###        
                             elif cmd == 'log=':
                                 if not value == '':
                                     try:
                                         self.openFile(value)
                                     except IOError:
-                                        print 'Error: Could not open log!'
+                                        print('Error: Could not open log!')
                                 else:
-                                    print 'Current log file: ' + str(self.filename)
+                                    print('Current log file: ' + str(self.filename))
                             ###
                             elif cmd == 'lscale=':
                                 try:
@@ -530,14 +530,14 @@ a new value.
                                         try:
                                             value = int(value)
                                         except ValueError:
-                                            print 'Invalid argument!'
+                                            print('Invalid argument!')
                                             value = 0
                                         if not self.canvas_man[MainGUI.active_plot][0].logScale == value:
                                             self.logScale()
                                     else:
-                                        print 'Logscale is set to', self.canvas_man[MainGUI.active_plot][0].logScale 
+                                        print('Logscale is set to', self.canvas_man[MainGUI.active_plot][0].logScale) 
                                 except (IndexError, TypeError):
-                                    print 'Selected plot,', MainGUI.active_plot, ',does not exist'
+                                    print('Selected plot,', MainGUI.active_plot, ',does not exist')
                             
                             ###
                             elif cmd == 'output=':
@@ -554,12 +554,12 @@ a new value.
                                 else:
                                     #printing to default
                                     if (MainGUI.output_mode == 0 or MainGUI.output_mode == 1) and MainGUI.output_name:
-                                        print 'printing to', MainGUI.output_name
+                                        print('printing to', MainGUI.output_name)
                                         self.startPrint(destination = MainGUI.output_mode, printer = MainGUI.output_name, filename = MainGUI.output_name, set_ratio = True, width = 8.5, height = 11)
                                         self.removeAll()
                                     else:
-                                        print 'Error: No default output set!'
-                                        print 'Usage: "output= printer/file, printername/filename"'
+                                        print('Error: No default output set!')
+                                        print('Usage: "output= printer/file, printername/filename"')
                             ###
                             elif cmd == 'plot=':
                                 try:
@@ -570,27 +570,27 @@ a new value.
                                             self.check_data.get(value).set(0)
                                         self.handleCheck(value)
                                     else:
-                                        print 'No such plot is available. Type plots to see available plots'
+                                        print('No such plot is available. Type plots to see available plots')
                                 except AttributeError:
-                                    print 'Log is not read! Use log= to specify log'
+                                    print('Log is not read! Use log= to specify log')
                             ###
                             elif cmd == 'plotall':
                                 self.plotAll()
                             ###
                             elif cmd == 'plots':
-                                print 'Available plots :'
+                                print('Available plots :')
                                 try:
-                                    for key in self.settings_dict.keys():
+                                    for key in list(self.settings_dict.keys()):
                                         if self.logreader.checkDataPresence(key):
-                                            print key
+                                            print(key)
                                 except AttributeError:
-                                    print 'No plots. Log opened?'
+                                    print('No plots. Log opened?')
                             ###
                             elif cmd == 'plotxy=':
                                 try:
                                     [key1, key2] = value.split(',')
                                 except (ValueError):
-                                    print 'incorrect input'
+                                    print('incorrect input')
                                 else:
                                     key1 = key1.strip()
                                     key2 = key2.strip()
@@ -598,9 +598,9 @@ a new value.
                                         if self.logreader.checkDataPresence(key1) and self.logreader.checkDataPresence(key2):
                                             self.handleCheck(key1, key2)
                                         else:
-                                            print 'No such plot is available. Type plots to see available plots' 
+                                            print('No such plot is available. Type plots to see available plots') 
                                     except AttributeError:
-                                        print 'No plots. Log opened?'
+                                        print('No plots. Log opened?')
                             ###
                             elif cmd == 'removeall':
                                 self.removeAll()
@@ -609,13 +609,13 @@ a new value.
                                 try:
                                     self.resetPlot()
                                 except (ValueError, IndexError):
-                                    print 'Selected plot does not exist! Selected plot is: ', MainGUI.active_plot
+                                    print('Selected plot does not exist! Selected plot is: ', MainGUI.active_plot)
                             ###
                             elif cmd == 'scale=':
                                 try:
                                     [minY, maxY] = value.split(',')
                                 except ValueError:
-                                    print 'Incorrect input'
+                                    print('Incorrect input')
                                 else:
                                     self.setY(minY,maxY)
                             ###
@@ -635,14 +635,14 @@ a new value.
                                 if value == '0' or value == '1':
                                     self.check_superimpose.set(int(value))
                                 else:
-                                    print 'Current status: ' + str(self.check_connect.get())
+                                    print('Current status: ' + str(self.check_connect.get()))
                             ###
                             elif cmd == 'timescale=':
                                 if not self.plotman.getYYplot():
                                     try:
                                         _l1 = value.split(',')
                                     except ValueError:
-                                        print 'Incorrect input'
+                                        print('Incorrect input')
                                     else:
                                         for k in range(2):
                                             _l1[k] = _l1[k].strip()
@@ -659,19 +659,19 @@ a new value.
                                         [minX, maxX]=_l1
                                         self.setX(minX, maxX)
                                 else:
-                                    print 'The plot is not a timeplot. Use xscale=. '
+                                    print('The plot is not a timeplot. Use xscale=. ')
                             ###
                             elif cmd == 'xscale=':
                                 if self.plotman.getYYplot():
                                     [minX, maxX] = value.split(',')
                                     self.setX(minX, maxX)
                                 else:
-                                    print 'The plot is not an XY plot. Use timescale='
-                    except (ValueError, ), e: #catches all invalid inputs not specifically handled...
-                        print 'Error: Invalid input! Type help for instructions'
+                                    print('The plot is not an XY plot. Use timescale=')
+                    except (ValueError, ) as e: #catches all invalid inputs not specifically handled...
+                        print('Error: Invalid input! Type help for instructions')
                                 
                 if match == 0:
-                    print 'Command not recognized. Type help for list of commands.'
+                    print('Command not recognized. Type help for list of commands.')
                 
             if cfile_cmd:
                 break        
@@ -689,7 +689,7 @@ a new value.
         self.subplotmenus = {}
         old_text = self.status_text.get()
         self.status_text.set('Building plot menus...')
-        description_list = self.settings_dict.keys()[:]
+        description_list = list(self.settings_dict.keys())[:]
         #check if several keys has the same command. In that case, make cascade menu:
         cascade_list = []
         while description_list:
@@ -714,9 +714,9 @@ a new value.
             #cascade_list contains those commands that should be cascaded!
             
         #print cascade_list
-        description_list = self.settings_dict.keys()[:]
+        description_list = list(self.settings_dict.keys())[:]
         #clear old cascade menus
-        max_index = len(self.settings_dict.keys())
+        max_index = len(list(self.settings_dict.keys()))
         try:
             self.subplotmenus.clear()
             extra_menus = 3
@@ -730,7 +730,7 @@ a new value.
             for key in cascade_list[i]: #build cascade_menu
             #if not built:
                 group = self.settings_dict.get(key)[4]
-                if not self.subplotmenus.has_key(group):
+                if group not in self.subplotmenus:
                     self.subplotmenus[group] = Menu(self.plotmenu, tearoff=0)
                 
                 self.check_data[key] = IntVar()
@@ -823,7 +823,7 @@ a new value.
                         max_time = time/60.0
                     elif self.timePairingFormat.get()=='seconds':
                         max_time = time/3600.0
-            except (AttributeError, ), e: #created from batchmode. no self.timePairing etc..
+            except (AttributeError, ) as e: #created from batchmode. no self.timePairing etc..
                 pass
             l1 = self.logreader.getListYY(key1,key2, timePair, max_time)
             self.plotman.setYYplot(True)
@@ -903,9 +903,9 @@ a new value.
             #update plot details
             _pn = self.plotNames.children['menu']
             _pn.delete(0, END)
-            for name in self.canvas_man[MainGUI.active_plot][0].superImposeList.keys():
+            for name in list(self.canvas_man[MainGUI.active_plot][0].superImposeList.keys()):
                 _pn.add_command(label = name, command = lambda name = name: self.setMaxMinXY(name))
-            if self.selected_Plot.get() in self.canvas_man[MainGUI.active_plot][0].superImposeList.keys():
+            if self.selected_Plot.get() in list(self.canvas_man[MainGUI.active_plot][0].superImposeList.keys()):
                 self.setMaxMinXY(self.selected_Plot.get())
             else:
                 self.setMaxMinXY(name)
@@ -983,7 +983,7 @@ a new value.
             else:
                 minX = float(minX)
                 maxX = float(maxX)
-            for key in self.canvas_man[MainGUI.active_plot][0].superImposeList.keys():
+            for key in list(self.canvas_man[MainGUI.active_plot][0].superImposeList.keys()):
                 self.canvas_man[MainGUI.active_plot][0].datalist = self.canvas_man[MainGUI.active_plot][0].superImposeList.get(key)
                 self.canvas_man[MainGUI.active_plot][0].datalist[0][1] = minX
                 self.canvas_man[MainGUI.active_plot][0].datalist[0][2] = maxX
@@ -1045,7 +1045,7 @@ a new value.
                     y+=step
             
             self.labelsCanvas.create_text(x-4,y, text = 'Plot ' + str(i+1) + ': ', anchor = E, tags = 'plot_label', font = font)
-            descriptions = self.canvas_man[i][0].superImposeList.keys()
+            descriptions = list(self.canvas_man[i][0].superImposeList.keys())
             for key in descriptions:
                 color = self.canvas_man[i][0].canvas.itemcget(key, 'outline')
                 width = self.canvas_man[i][0].canvas.itemcget(key, 'width')
@@ -1067,7 +1067,7 @@ a new value.
                         self.labelsCanvas.create_rectangle(label_coord, outline = color, width = width, fill = color, tags = 'plot_label')
                     if type == 'polygon':
                         self.labelsCanvas.create_polygon(label_coord, outline = color, width = width, fill = color, tags = 'plot_label')
-                except (ZeroDivisionError, ), e:
+                except (ZeroDivisionError, ) as e:
                     pass #don't draw, plot not in view... (i.e after zooming). Not considered an error
                 if self.plotman.getYYplot():
                     [key1, key2] = key.split(' vs. ')
@@ -1187,7 +1187,7 @@ a new value.
         if PlotManager.active_plots>1:
             #remove all existing plots, set superimposeNext and replot
             _plot_list = []
-            for key in self.check_data.keys():
+            for key in list(self.check_data.keys()):
                 if self.check_data.get(key).get():
                     _plot_list.append(key)
             self.removeAll()
@@ -1201,7 +1201,7 @@ a new value.
         """splitAll splits all superimposed plots to nonsuperimposed plots"""
         plots = []
         for i in range(len(self.canvas_man)):
-            plots.extend(self.canvas_man[i][0].superImposeList.keys())
+            plots.extend(list(self.canvas_man[i][0].superImposeList.keys()))
         #before remove, check if XY-plot
         _xyplot = self.plotman.getYYplot()
         #clear all plots
@@ -1223,7 +1223,7 @@ a new value.
         if len(self.canvas_man)>0:
             #delete plot, draw it again
             try:
-                keys = self.canvas_man[MainGUI.active_plot][0].superImposeList.keys()
+                keys = list(self.canvas_man[MainGUI.active_plot][0].superImposeList.keys())
                 self.canvas_man[MainGUI.active_plot][0].superImposeList.clear()
                 self.check_superimpose.set(0)
                 for key in keys:
@@ -1248,7 +1248,7 @@ a new value.
                                     max_time = time/60.0
                                 elif self.timePairingFormat.get()=='seconds':
                                     max_time = time/3600.0
-                        except (AttributeError, ), e: #created from batchmode. no self.timePairing etc..
+                        except (AttributeError, ) as e: #created from batchmode. no self.timePairing etc..
                             pass
                         _l = self.logreader.getListYY(key1,key2, timePair, max_time)
                     self.canvas_man[MainGUI.active_plot][0].superImposeList[key] = _l
@@ -1301,9 +1301,9 @@ its border red"""
                 #trick to change options in OptionMenu widget
                 _pn = self.plotNames.children['menu']
                 _pn.delete(0, END)
-                for name in self.canvas_man[_click][0].superImposeList.keys():
+                for name in list(self.canvas_man[_click][0].superImposeList.keys()):
                     _pn.add_command(label = name, command = lambda name = name: self.setMaxMinXY(name))
-                if self.selected_Plot.get() in self.canvas_man[_click][0].superImposeList.keys():
+                if self.selected_Plot.get() in list(self.canvas_man[_click][0].superImposeList.keys()):
                     self.setMaxMinXY(self.selected_Plot.get())
                 else:
                     self.setMaxMinXY(name)
@@ -1348,7 +1348,7 @@ its border red"""
             delpts = self.canvas_man[MainGUI.active_plot][0].superImposeList.get(plotname).count(None)
             try:
                 delpts += len(self.canvas_man[MainGUI.active_plot][0].backup_data.get(plotname))-1-pts
-            except (AttributeError, ), e: #no backup_data = no zoom
+            except (AttributeError, ) as e: #no backup_data = no zoom
                 pass
             self.entry_Pts.set(str(pts))
             self.entry_delPts.set(str(delpts))
@@ -1371,12 +1371,12 @@ its border red"""
             if (self.canvas_man[MainGUI.active_plot][0].zoomCount>0):
                 _data = self.canvas_man[MainGUI.active_plot][0].backup_data
                 self.canvas_man[MainGUI.active_plot][0].canvas.delete(ALL)
-                if len(_data.keys())>1:
+                if len(list(_data.keys()))>1:
                     si=1
                     self.canvas_man[MainGUI.active_plot][0].color = -1
                 else:
                     si = 0
-                for key in _data.keys():
+                for key in list(_data.keys()):
                     self.canvas_man[MainGUI.active_plot][0].plotData(_data.get(key), superimpose = si)
             #rebuild x-scale
             self.canvas_man[0][0].xaxis.delete(ALL)
@@ -1390,14 +1390,14 @@ its border red"""
         for i in range(len(self.canvas_man)):
             if self.canvas_man[i][1] == check:
                 #if this plotmanager has superimposed plot, remove only the superimposed:
-                if len(self.canvas_man[i][0].superImposeList.keys())>1:
+                if len(list(self.canvas_man[i][0].superImposeList.keys()))>1:
                     #remove this datalist, replot with others
                     self.canvas_man[i][0].superImposeList.pop(check)
                     #delete ALL points, 
                     self.canvas_man[i][0].canvas.delete(ALL)
                     #reset colors
                     self.canvas_man[i][0].color=-1
-                    for key in self.canvas_man[i][0].superImposeList.keys():
+                    for key in list(self.canvas_man[i][0].superImposeList.keys()):
                         _list = self.canvas_man[i][0].superImposeList.get(key)
                         self.canvas_man[i][0].plotData(_list, superimpose = 1)
                     #change name:
@@ -1413,12 +1413,12 @@ its border red"""
                             self.canvas_man[i][0].redraw()
                     break
             else: #check if perhaps the canvas_man has this plot superimposed
-                if self.canvas_man[i][0].superImposeList.has_key(check):
+                if check in self.canvas_man[i][0].superImposeList:
                     #pop this list, redraw the plot...
                     self.canvas_man[i][0].superImposeList.pop(check)
                     self.canvas_man[i][0].canvas.delete(ALL)
                     self.canvas_man[i][0].color=-1
-                    for key in self.canvas_man[i][0].superImposeList.keys():
+                    for key in list(self.canvas_man[i][0].superImposeList.keys()):
                         _list = self.canvas_man[i][0].superImposeList.get(key)
                         self.canvas_man[i][0].plotData(_list, superimpose = 1)
         #update plot labels...
@@ -1437,12 +1437,12 @@ its border red"""
         #make sure superimpose is not on
         self.check_superimpose.set(0)
         #all available plots are in self.settings_dict.keys()
-        for key in self.settings_dict.keys():
+        for key in list(self.settings_dict.keys()):
             try:
                 if self.logreader.checkDataPresence(key): #plot exists
                     self.check_data.get(key).set(1)
                     self.handleCheck(key)
-            except (AttributeError), e:
+            except (AttributeError) as e:
                 #logreader is not created, do nothing
                 self.status_text.set('No log exists!')
 
@@ -1459,7 +1459,7 @@ its border red"""
             self.plotman.setYYplot(False)
             self.plotman.setAxisCreated(False)
         elif not onlyXYremove: #remove normal plots
-            for keys in self.check_data.keys():
+            for keys in list(self.check_data.keys()):
                 if self.check_data[keys].get():
                     self.removePlot(keys)
                     self.check_data[keys].set(0)
@@ -1477,7 +1477,7 @@ its border red"""
             try:
                 label = self.plotmenu.entrycget(i, 'label')
                 #following checks that no cascade menus are disabled
-                if (self.settings_dict.has_key(label) or self.settings_dict.has_key(label + '$')):
+                if (label in self.settings_dict or label + '$' in self.settings_dict):
                     self.plotmenu.entryconfig(i, state = DISABLED)
                 i += 1
                 #if self.plotmenu.entrycget(index, option)
@@ -1507,7 +1507,7 @@ its border red"""
         self.closeFile()
         self.status_text.set('Opening file')
         if not _filename:
-            _filename = tkFileDialog.askopenfilename(initialdir = IOSettings.default_directory, filetypes=[
+            _filename = tkinter.filedialog.askopenfilename(initialdir = IOSettings.default_directory, filetypes=[
                     ('Log files','*.log'),
                     ("Any file", "*"),
                     ])
@@ -1545,14 +1545,14 @@ its border red"""
                     rem = 100/5-char
                     bar = '[%s%s]' % ('#'*(char), ' '*(rem))
                     middle = 10
-                    print '%s%s%%%s' % (bar[:middle],progress,bar[middle:]), '\r',
+                    print('%s%s%%%s' % (bar[:middle],progress,bar[middle:]), '\r', end=' ')
             self.plottingFrame.delete(c)
             self.plottingFrame.delete(c1)
             
             #self.progressBar.config(bg = old_bg)
             self.status_text.set('Logfile ' + _filename.strip() + ' read succesfully')
             #set plotlist status enabled if data exist.
-            length = len(self.settings_dict.keys())
+            length = len(list(self.settings_dict.keys()))
             i=0
             while True: #enable plots only if data is available
                 try:
@@ -1595,7 +1595,7 @@ its border red"""
             self.settings_dict = self.settings.readSF(IOSettings.default_control_file)
         except (IOError, IndexError):
             if not MainGUI.batch_mode:
-                answer = tkMessageBox.askyesno('Error','Control file not found or file corrupt! Quit?\nPress Yes to Quit, No to open edit settings window')
+                answer = tkinter.messagebox.askyesno('Error','Control file not found or file corrupt! Quit?\nPress Yes to Quit, No to open edit settings window')
                 if answer:
                     sys.exit()
                 else:
@@ -1604,13 +1604,13 @@ its border red"""
                     self.editSettings()
             else:
                 self.settings_dict = {}
-                print 'Error: Control file ', IOSettings.default_control_file, ' not found or file corrupt. Please specify a proper control file!'
+                print('Error: Control file ', IOSettings.default_control_file, ' not found or file corrupt. Please specify a proper control file!')
         else:
             #reload menus
             self.buildPlotMenu()
             if self.filename:
                 if not MainGUI.batch_mode:
-                    answer = tkMessageBox.askyesno('LogPlotter 2', 'Plot menus rebuilt. Log needs to be reloaded. \nReload %s?' %(self.filename))
+                    answer = tkinter.messagebox.askyesno('LogPlotter 2', 'Plot menus rebuilt. Log needs to be reloaded. \nReload %s?' %(self.filename))
                     if answer:
                         self.openFile(self.filename)
                     else:
@@ -1631,7 +1631,7 @@ its border red"""
             self.buildPlotMenu()
             if self.filename:
                 if not MainGUI.batch_mode:
-                    answer = tkMessageBox.askyesno('LogPlotter 2', 'Plot menus rebuilt. Log needs to be reloaded. \nReload %s?' %(self.filename))
+                    answer = tkinter.messagebox.askyesno('LogPlotter 2', 'Plot menus rebuilt. Log needs to be reloaded. \nReload %s?' %(self.filename))
                     if answer:
                         self.openFile(self.filename)
                     else:
@@ -1745,7 +1745,7 @@ its border red"""
         if kw.get('destination')==1: #print to file
             filename = kw.get('filename')
             format = 'EPS'
-            if kw.has_key('file_format'):
+            if 'file_format' in kw:
                 format = kw.get('file_format')
             else: #from batch_mode
                 formats = ['EPS', 'PDF', 'BMP', 'JPG', 'TIFF', 'GIF', 'PNG', 'PS']
@@ -1839,7 +1839,7 @@ its border red"""
         self.entry_PairingTime.grid(row=1, column=1)
         self.entry_PairingTime.insert(0, 60)
         ######add plotnames
-        for key in self.check_data.keys():
+        for key in list(self.check_data.keys()):
             try:
                 if self.logreader.checkDataPresence(key):
                     self.xlistbox.insert(END, key)
@@ -1915,7 +1915,7 @@ its border red"""
             
             menubar = Menu(top)
             filemenu = Menu(menubar, tearoff = 0)
-            filemenu.add_command(label = 'Save to file', command = (lambda: tkFileDialog.asksaveasfile().writelines(textbox.get(1.0, END))), underline = 0)
+            filemenu.add_command(label = 'Save to file', command = (lambda: tkinter.filedialog.asksaveasfile().writelines(textbox.get(1.0, END))), underline = 0)
             filemenu.add_separator()
             filemenu.add_command(label = 'Print', command = lambda: self.printText(textbox.get(1.0, END)), underline = 0)
             filemenu.add_separator()
@@ -1958,7 +1958,7 @@ its border red"""
             
             menubar = Menu(top)
             filemenu = Menu(menubar, tearoff = 0)
-            filemenu.add_command(label = 'Save to file', command = (lambda : tkFileDialog.asksaveasfile().writelines(txt.get(1.0, END))), underline = 0)
+            filemenu.add_command(label = 'Save to file', command = (lambda : tkinter.filedialog.asksaveasfile().writelines(txt.get(1.0, END))), underline = 0)
             filemenu.add_separator()
             filemenu.add_command(label = 'Print', command = lambda: self.printText(txt.get(1.0, END)), underline = 0)
             filemenu.add_separator()
@@ -1970,7 +1970,7 @@ its border red"""
             top.config(menu = menubar)
             top.minsize(width = 510, height = 100)
             
-            for a in self.settings_dict.keys():
+            for a in list(self.settings_dict.keys()):
                 if a[0] != '$' and self.logreader.checkDataPresence(a):
                     plotmenu.add_command(label = a, command = (lambda text = self._getList(a): txt.insert(END, text)))
             plotmenu.add_separator()
@@ -2156,7 +2156,7 @@ its border red"""
                         if to_canvas != from_canvas:
                             #superimpose all plots in from_canvas on to_canvas
                             #plots on from_canvas:
-                            plots = self.canvas_man[from_canvas][0].superImposeList.keys()
+                            plots = list(self.canvas_man[from_canvas][0].superImposeList.keys())
                             #delete from_canvas
                             if not self.plotman.getYYplot():
                                 for key in plots:
@@ -2213,9 +2213,9 @@ its border red"""
         when in batch mode.
         """
         if MainGUI.verbose:
-            print error_text
+            print(error_text)
         elif error_text.lower().count('error'):
-            print error_text
+            print(error_text)
 
 class LogReader(threading.Thread):
     """
@@ -2313,9 +2313,9 @@ class LogReader(threading.Thread):
         if timePair:
             [_list1, _list2] = self.fixXYlist(_list1,_list2, max_time)
         #extract y-coordinates
-        ylist1 = map(operator.itemgetter(0), _list1)
+        ylist1 = list(map(operator.itemgetter(0), _list1))
         #extract y-coordinates
-        ylist2 = map(operator.itemgetter(0), _list2)
+        ylist2 = list(map(operator.itemgetter(0), _list2))
         #max, min:
         maxY1 = max(ylist1)
         minY1 = min(ylist1)
@@ -2380,8 +2380,8 @@ class LogReader(threading.Thread):
         description = key
         datalist = self.database.get(key)[:]
         #find max and min
-        data = map(operator.itemgetter(0), datalist)
-        timestamp = map(operator.itemgetter(2), datalist)
+        data = list(map(operator.itemgetter(0), datalist))
+        timestamp = list(map(operator.itemgetter(2), datalist))
         datalist.insert(0, [description, min(timestamp),max(timestamp), min(data), max(data)])
         return datalist
 
@@ -2395,7 +2395,7 @@ class LineReader:
         self.firstday = 0
         #copy settings:
         self.settings_dict = settings_dict
-        self.identification_table = self.settings_dict.keys()
+        self.identification_table = list(self.settings_dict.keys())
         temp_table1 = []
         temp_table2 = []
         self.channel_identifier={}

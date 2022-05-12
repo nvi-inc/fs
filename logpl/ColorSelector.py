@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from Tkinter import *
+from tkinter import *
 import random
 
 class ColorSelector(Toplevel):
@@ -62,8 +62,8 @@ class ColorSelector(Toplevel):
         Button(parent, text = 'Add new setup', command = (lambda : self.setupList.insert(END, 'setup %s' % (self._addSetup())))).grid(row = 1, column =0, columnspan = 2)
         
         #set init values:
-        self.setups.keys().sort()
-        for labels in self.setups.keys():
+        list(self.setups.keys()).sort()
+        for labels in list(self.setups.keys()):
             self.setupList.insert(END, 'setup %s' % (labels))
         
         return parent
@@ -90,7 +90,7 @@ class ColorSelector(Toplevel):
         self._selectShape(event)
     
     def _addSetup(self):
-        number = len(self.setups.keys())
+        number = len(list(self.setups.keys()))
         r = random.randrange(0,256)
         g = random.randrange(0,256)
         b = random.randrange(0,256)

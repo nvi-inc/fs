@@ -20,7 +20,7 @@
 #LogPlotter/CanvasConstructor.py
 #Class that receieves canvases and adds them to a larger Canvas
 #make it support all Canvas methods
-import Tkinter as tk #name incompatibility with Image and ImageDraw.... 
+import tkinter as tk #name incompatibility with Image and ImageDraw.... 
 import os
 
 class CanvasConstructor(tk.Toplevel):
@@ -152,7 +152,7 @@ class CanvasConstructor(tk.Toplevel):
         fit with an always left aligned anchor coordinate for PIL
         """
         if self.main_canvas.type(item) != 'text':
-            raise ValueError, 'Object must be text'
+            raise ValueError('Object must be text')
         coords = old_coords
         anchor = self.main_canvas.itemcget(item, 'anchor')
         bbox = self.main_canvas.bbox(item)

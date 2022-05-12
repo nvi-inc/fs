@@ -27,9 +27,9 @@
 ##########################
 from Coordinate import Coordinate
 from PlotManager import PlotManager
-from Tkinter import *
+from tkinter import *
 import math
-import operator, random, tkFont
+import operator, random, tkinter.font
 
 class PlotCanvas:
 
@@ -43,7 +43,7 @@ class PlotCanvas:
     
     def __init__(self, canvas):
         if not PlotCanvas.font:    
-            PlotCanvas.font = tkFont.Font(font = ("Helvetica 8 normal"))
+            PlotCanvas.font = tkinter.font.Font(font = ("Helvetica 8 normal"))
         self.xyPlot = False
         self.canvas = canvas
         #setting font
@@ -76,7 +76,7 @@ class PlotCanvas:
         
     def plotData(self, datalist, **kw):
         #go through settings:
-        for key in kw.keys():
+        for key in list(kw.keys()):
             if key == 'superimpose' and kw.get(key)==1:
                 self.color +=1
             if key == 'connectPoints':
@@ -90,7 +90,7 @@ class PlotCanvas:
         description = datalist[0][0]
         if description:
             self.superImposeList[description]=datalist[:]
-        if not self.deleted_list_si.has_key(description): #first access
+        if description not in self.deleted_list_si: #first access
             self.deleted_list_si[description] = [None]*len(self.datalist)
         self.deleted_list=self.deleted_list_si.get(description)
         minX = float(datalist[0][1])
@@ -121,7 +121,7 @@ class PlotCanvas:
         self.coord = Coordinate([plotX, plotY],[deltaX, deltaY],[minX, minY], self.offset, self.info_box)
         self.dotlist = []
         #check for color spec.
-        if not self.color<len(self.colorlist.keys()): #color does not exist
+        if not self.color<len(list(self.colorlist.keys())): #color does not exist
             r = random.randrange(0,256)
             g = random.randrange(0,256)
             b = random.randrange(0,256)
@@ -384,13 +384,13 @@ class PlotCanvas:
             #delete old plot
             self.canvas.delete(ALL)
             #make new plot
-            if len(data_dict.keys())>1:
+            if len(list(data_dict.keys()))>1:
                 si = 1
                 #reset colors:
                 self.color=-1
             else:
                 si = 0
-            for key in data_dict.keys():
+            for key in list(data_dict.keys()):
                 #recompute max/min
                 data_dict.get(key).insert(0, [None]*5)
                 #insert description
@@ -422,12 +422,12 @@ class PlotCanvas:
         self.datalist[0][2] = PlotCanvas.xaxismax
         #redraw
         self.canvas.delete(ALL)
-        if len(self.superImposeList.keys())>1:
+        if len(list(self.superImposeList.keys()))>1:
             si = 1
             self.color = -1
         else:
             si = 0 
-        for key in self.superImposeList.keys():
+        for key in list(self.superImposeList.keys()):
             self.plotData(self.superImposeList.get(key), superimpose = si)
         
 
@@ -439,7 +439,7 @@ class PlotCanvas:
                 _list.append(datalist[i])
 
         #don't resize xdata if not do_x, only ydata        
-        ydata = map(operator.itemgetter(0), _list)
+        ydata = list(map(operator.itemgetter(0), _list))
         try:
             datalist[0][3] = min(ydata)
             datalist[0][4] = max(ydata)
@@ -447,7 +447,7 @@ class PlotCanvas:
             datalist[0][3] = datalist[0][4] = 0
 
         if do_x:
-            xdata = map(operator.itemgetter(2), _list)
+            xdata = list(map(operator.itemgetter(2), _list))
             datalist[0][1] = min(xdata)
             datalist[0][2] = max(xdata)
             
@@ -490,11 +490,11 @@ class PlotCanvas:
                 year = int(self.datalist[1][1][:4])
                 try:
                     if self.backup_data:
-                        for key in self.backup_data.keys():
+                        for key in list(self.backup_data.keys()):
                             firstday = int(self.backup_data.get(key)[1][1][5:8])
                             year = int(self.backup_data.get(key)[1][1][:4])
                             break
-                except (AttributeError, ), e: #no backup data (no zoom)
+                except (AttributeError, ) as e: #no backup data (no zoom)
                     pass
                 xtext = self.reverseTimeStamp(timeStamp, firstday, year)
             xaxis.create_text(xpos, 10, text = xtext, anchor = E, font = PlotCanvas.font)
@@ -580,12 +580,12 @@ class PlotCanvas:
         
         self.canvas.configure(height = height, width = width)
         
-        if len(self.superImposeList.keys())>1:
+        if len(list(self.superImposeList.keys()))>1:
             si = 1
             self.color=-1
         else:
             si = 0
-        for key in self.superImposeList.keys():
+        for key in list(self.superImposeList.keys()):
             self.plotData(self.superImposeList.get(key), superimpose = si)
 
         
@@ -648,7 +648,7 @@ class PlotCanvas:
         self.canvas.destroy()
 
     def identifyCanvas(self,event_addr):
-        if event_addr == self.canvas.event_info.im_self:
+        if event_addr == self.canvas.event_info.__self__:
             return True
         else:
             return False
@@ -663,7 +663,7 @@ class PlotCanvas:
         self.canvas.postscript(file = filename, colormode = 'color')
 
     def engNumber(self, number_list): #receives a list of numbers and returns it with proper number of digits, print with powers 10 exponents multiples of 3
-        number_list = map(float, number_list)
+        number_list = list(map(float, number_list))
         min_number = min(number_list)
         max_number = max(number_list)
         abs_number = max(abs(min_number),abs(max_number))

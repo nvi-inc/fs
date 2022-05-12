@@ -58,7 +58,7 @@ while args:
             output_name = args[2].strip()
             assert (output_name and (output_mode.lower() == 'printer' or output_mode.lower() == 'file'))
         except (IndexError, AssertionError):
-            print 'Incorrect use of output. Type help for help.'
+            print('Incorrect use of output. Type help for help.')
             start_ok = 0
         args = args[3:]
     elif args[0]=='-geometry':
@@ -97,26 +97,26 @@ Argument   Parameter    Description
 
 If no argument is used, logpl starts up in normal GUI mode. 
 """
-        print helptext
+        print(helptext)
         start_ok=0
         break
     else:
-        print 'Argument',args[0],'not recognized, use -help for help'
+        print('Argument',args[0],'not recognized, use -help for help')
         start_ok=0
         break
 #check version number:
 try:
-    from Tkinter import *
+    from tkinter import *
 except ImportError:
-    print 'TkInter not installed correctly.'
+    print('TkInter not installed correctly.')
     start_ok = 0
 version = sys.version_info
 if not (version[0]==2 and version[1]>3 or version[0]>2 or force): 
     #try to import tkinter. If it's not installed, print that
     start_ok = 0
-    print 'Incorrect Python version. Logpl requires Python 2.4 or higher. This version is %s.%s.%s' % (version[0], version[1], version[2])
-    print 'To force run, use argument -f'
-    print 'To run old logpl, use logpl1'
+    print('Incorrect Python version. Logpl requires Python 2.4 or higher. This version is %s.%s.%s' % (version[0], version[1], version[2]))
+    print('To force run, use argument -f')
+    print('To run old logpl, use logpl1')
 
 if start_ok:
     from MainGUI import MainGUI
@@ -124,7 +124,7 @@ if start_ok:
         start = MainGUI(cmd=batch_mode, log=log,cfile=cfile,ctrlfile=ctrlfile, geometry=geometry, verbose = verbose, output_mode = output_mode, output_name = output_name)
     except (KeyboardInterrupt): #ctrl-c
         sys.exit(1) #or pass
-    except TclError, e:
-        print 'The LogPlotter GUI crashed!'
-        print 'Error message:\n', e
+    except TclError as e:
+        print('The LogPlotter GUI crashed!')
+        print('Error message:\n', e)
         sys.exit(1) #or pass

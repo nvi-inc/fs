@@ -71,7 +71,7 @@ class Settings:
 * \n"""
         _file.write(header)
         linelist = []
-        for description in self.settings_dict.keys():
+        for description in list(self.settings_dict.keys()):
             _list = self.settings_dict.get(description)
             #check for blank signs. If so, add quotes.
             for i in range(len(_list)):
@@ -187,13 +187,13 @@ class Settings:
                             #primary information (must exist), error raised if nonexistant:
                             description = param_list[2]
                             if description.count('!')>0:
-                                print 'Illegal character ! used in description. \n Exiting...'
+                                print('Illegal character ! used in description. \n Exiting...')
                                 sys.exit()
                             parameter = param_list[1]
                             try:
                                 int(parameter)
                             except:
-                                print 'Parameter in control file is not integer! \n Exiting...'
+                                print('Parameter in control file is not integer! \n Exiting...')
                                 sys.exit()
                             try:
                                 group_name = param_list[5]
@@ -211,7 +211,7 @@ class Settings:
                                 string = ''
                             self.settings_dict[description] = [command, split_sign, parameter, string, group_name, row]                       
             control_file.close()
-        except IOError, e:
+        except IOError as e:
             raise IOError #just send back...
         else:
             return self.settings_dict

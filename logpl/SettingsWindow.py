@@ -17,10 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from Tkinter import *
+from tkinter import *
 from Settings import Settings
 from IOSettings import IOSettings
-import tkFileDialog, tkMessageBox
+import tkinter.filedialog, tkinter.messagebox
 import os
 
 class SettingsWindow(Toplevel):
@@ -127,12 +127,12 @@ class SettingsWindow(Toplevel):
                     else:
                         omitted_rows.append(i+1)
                 except TypeError:
-                    print 'Error: Value not list'
+                    print('Error: Value not list')
             if omitted_rows:
-                tkMessageBox.showwarning('Error', 'Incorrect settings! Description, command and \noffset fields may NOT be empty.\n row %r has been omitted. ' % (omitted_rows))
+                tkinter.messagebox.showwarning('Error', 'Incorrect settings! Description, command and \noffset fields may NOT be empty.\n row %r has been omitted. ' % (omitted_rows))
         newhash = self.createHash()
         if not newhash == self.hash:
-            answer = tkMessageBox.askyesno('Save?', 'The settings has been updated. Do you wish to save \nthe updates to the control file (%s)?' % (self.filename))
+            answer = tkinter.messagebox.askyesno('Save?', 'The settings has been updated. Do you wish to save \nthe updates to the control file (%s)?' % (self.filename))
             if answer:
                 self.saveFile()
         self.destroy()
@@ -140,7 +140,7 @@ class SettingsWindow(Toplevel):
     def setLabels(self, settings_dict):
         _row = 0
         keylist = []
-        for key in settings_dict.keys():
+        for key in list(settings_dict.keys()):
             row = settings_dict.get(key)[5]
             keylist.append([row, key])
         keylist.sort()
@@ -171,7 +171,7 @@ class SettingsWindow(Toplevel):
 
     def openFile(self, init_file = None):
         if not init_file:
-            _filename = tkFileDialog.askopenfilename(initialdir = '.')
+            _filename = tkinter.filedialog.askopenfilename(initialdir = '.')
             IOSettings.default_control_file = _filename
         else:
             _filename = init_file
@@ -287,9 +287,9 @@ class SettingsWindow(Toplevel):
             try:
                 self.settings.setSettings(self.entry_description[i].get(),[self.entry_key[i].get(), char, self.entry_offset[i].get(), self.entry_string[i].get(), self.entry_group[i].get(), i+1])
             except TypeError:
-                print 'Error: Value not list'
+                print('Error: Value not list')
         if saveAs==1 or not self.filename:
-            _filename = tkFileDialog.asksaveasfilename()
+            _filename = tkinter.filedialog.asksaveasfilename()
         else:
             _filename = self.filename
         #write the new settings:

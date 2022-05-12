@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from Tkinter import *
+from tkinter import *
 from idlelib.TreeWidget import TreeItem, TreeNode
 
 class HelpFrame(Toplevel):
@@ -60,7 +60,7 @@ class HelpFrame(Toplevel):
         return TOC
     
     def textOut(self, text):
-        print text
+        print(text)
     
     def createRightSide(self):
         rightSide = Frame(self)

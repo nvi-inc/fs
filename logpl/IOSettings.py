@@ -18,7 +18,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 #LogPlotter/IOSettings
-from Tkinter import *
+from tkinter import *
 import os
 
 class IOSettings(Toplevel):
