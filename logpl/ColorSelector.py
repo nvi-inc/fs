@@ -29,21 +29,21 @@ class ColorSelector(Toplevel):
         topFrame = Frame(self)
         topFrame.pack(anchor = NW)
         self.resizable(width = 0, height = 0)
-        
+
         self.setupsBox(LabelFrame(topFrame, text = 'Setups', padx = 3)).pack(side = LEFT, anchor = NW, fill = BOTH, padx = 2)
         self.colorBox(LabelFrame(topFrame, text = 'Color', padx = 3)).pack(side = LEFT, anchor = NW, fill = BOTH, padx = 2)
         self.shapesBox(LabelFrame(topFrame, text = 'Shape')).pack(side = LEFT, anchor = NW, fill = BOTH, padx = 2)
-        
+
         bottomframe = Frame(self, relief = GROOVE, bd = 2)
         bottomframe.pack(anchor = E, fill = X)
         Button(bottomframe, text = 'Cancel', command = lambda: self.destroy()).pack(side = RIGHT)
         Button(bottomframe, text = 'Apply to all plots', command = (lambda: self.apply('all'))).pack(side = RIGHT)
         Button(bottomframe, text = 'Apply to selected plot', command = (lambda: self.apply())).pack(side = RIGHT)
-        
+
         self.setupList.selection_set(0, 0)
         event = C()
         self._selectSetup(event, self.setupList.curselection())
-        
+
     def apply(self, all = None):
         self.applyToAll = self.applytoSelected = 0
         if all:
@@ -60,35 +60,35 @@ class ColorSelector(Toplevel):
         self.setupList.bind('<<ListboxSelect>>', (lambda event : self._selectSetup(event, self.setupList.curselection())))
         yscrollbar.config(command = self.setupList.yview)
         Button(parent, text = 'Add new setup', command = (lambda : self.setupList.insert(END, 'setup %s' % (self._addSetup())))).grid(row = 1, column =0, columnspan = 2)
-        
+
         #set init values:
         list(self.setups.keys()).sort()
         for labels in list(self.setups.keys()):
             self.setupList.insert(END, 'setup %s' % (labels))
-        
+
         return parent
-    
+
     def _selectSetup(self, event, curselection):
         curselection = int(curselection[0])
         #set color
         color = self.setups.get(curselection)[0]
         shape = self.setups.get(curselection)[1]
-        
+
         rgb = []
         for i in range(1,7,2):
             rgb.append(int(color[i:i+2], 16))
-        
+
         ymax = 10
         redbox.coords('indicator', rgb[0],0, rgb[0], ymax)
         greenbox.coords('indicator', rgb[1],0, rgb[1], ymax)
         bluebox.coords('indicator', rgb[2],0, rgb[2], ymax)
-        
+
         self.colorbox.config(bg = color)
         event.x = 90
         event.y = 30+25*shape
         #select shape
         self._selectShape(event)
-    
+
     def _addSetup(self):
         number = len(list(self.setups.keys()))
         r = random.randrange(0,256)
@@ -98,7 +98,7 @@ class ColorSelector(Toplevel):
         shape = random.randrange(0,6)
         self.setups[number] = [color, shape]
         return number
-    
+
     def colorBox(self, parent):
         ymax = 10
         Label(parent, text = 'Red:').pack(anchor = W)
@@ -111,18 +111,18 @@ class ColorSelector(Toplevel):
         Label(parent, text = 'Blue:').pack(anchor = W)
         bluebox = Canvas(parent, width = 256, height = ymax, highlightthickness = 0)
         bluebox.pack(pady = 5)
-        
-        
+
+
         redstart = 150
         greenstart = 100
         bluestart = 250
         self.hexcode = StringVar()
-        
+
         Label(parent, textvariable = self.hexcode).pack(anchor = W)
         self.colorbox = Canvas(parent, width = 50, height = 50, bg = '#%02x%02x%02x' % (redstart,greenstart,bluestart), highlightthickness = 0)
         self.hexcode.set('Color code: %s' % self.colorbox.cget('bg').upper())
         self.colorbox.pack()
-    
+
         for red in range(0,256):
             color = '#%02x%02x%02x' %(red, 0, 0)
             redbox.create_line(red,0, red, ymax, fill = color)
@@ -132,14 +132,14 @@ class ColorSelector(Toplevel):
         for blue in range(0,256):
             color = '#%02x%02x%02x' %(0, 0, blue)
             bluebox.create_line(blue,0, blue, ymax, fill = color)
-            
+
         red_indicator = redbox.create_line(redstart,0,redstart,ymax, fill = 'white', width = 2, tags = ('indicator'))
         redbox.bind('<B1-Motion>', (lambda event: redbox.coords(red_indicator, self._setColor(event.x)[0], 0, self._setColor(event.x)[0], ymax)))
         green_indicator = greenbox.create_line(greenstart,0,greenstart,ymax, fill = 'white', width = 2, tags = ('indicator'))
-        greenbox.bind('<B1-Motion>', (lambda event: greenbox.coords(green_indicator, self._setColor(None, event.x)[1], 0, self._setColor(None, event.x)[1], ymax)))            
+        greenbox.bind('<B1-Motion>', (lambda event: greenbox.coords(green_indicator, self._setColor(None, event.x)[1], 0, self._setColor(None, event.x)[1], ymax)))
         blue_indicator = bluebox.create_line(bluestart,0,bluestart,ymax, fill = 'white', width = 2, tags = ('indicator'))
         bluebox.bind('<B1-Motion>', (lambda event: bluebox.coords(blue_indicator, self._setColor(None, None, event.x)[2], 0, self._setColor(None, None, event.x)[2], ymax)))
-    
+
         return parent
 
     def _setColor(self, red = None, green = None, blue = None):
@@ -200,9 +200,9 @@ class ColorSelector(Toplevel):
         #circle
         self.shapes_window.create_text(5, y1+3, text = 'Circle:', anchor = W, font = font)
         self.shapes_window.create_oval(x1,y1,x2,y2, width = 1, outline = color, fill = fill, tags = ('shape'))
-        
+
         return parent
-    
+
     def _selectShape(self, event):
         item = self.shapes_window.find_closest(event.x, event.y)
         try:
@@ -218,7 +218,7 @@ class ColorSelector(Toplevel):
                 #save the shape
                 try:
                     currentsetup = int(self.setupList.curselection()[0])
-                    shape = int((event.y-30)/25.0) 
+                    shape = int((event.y-30)/25.0)
                     self.setups[currentsetup][1] = shape
                 except IndexError:
                     pass
@@ -226,8 +226,8 @@ class ColorSelector(Toplevel):
             pass
 
 class C(object):
-    pass        
-        
+    pass
+
 if __name__ == '__main__':
     root = Tk()
     setups = {}

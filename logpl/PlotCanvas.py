@@ -19,7 +19,7 @@
 #
 #LogPlotter/PlotCanvas.py
 ##########################
-#Used in LogPlotter. 
+#Used in LogPlotter.
 #Accepts canvas from mainGUI
 #Function plotData receives a list
 #of points, sends them to Coordinates.py
@@ -36,13 +36,13 @@ class PlotCanvas:
 ###################Class variables used for zooming:
     xaxismin = 0
     xaxismax = 0
-    
+
     font = None
-    
-###################init: defines some variables and also binds left mouse button to delete data points    
-    
+
+###################init: defines some variables and also binds left mouse button to delete data points
+
     def __init__(self, canvas):
-        if not PlotCanvas.font:    
+        if not PlotCanvas.font:
             PlotCanvas.font = tkinter.font.Font(font = ("Helvetica 8 normal"))
         self.xyPlot = False
         self.canvas = canvas
@@ -73,7 +73,7 @@ class PlotCanvas:
         self.deleted_list_si = {}
         self.colorlist = {0: ['#000000', 5], 1: ['#ff0000', 0], 2: ['#00ff00', 1], 3: ['#0000ff', 2], 4: ['#00ffff', 3], 5: ['#a0aff0', 4]}
 
-        
+
     def plotData(self, datalist, **kw):
         #go through settings:
         for key in list(kw.keys()):
@@ -81,9 +81,9 @@ class PlotCanvas:
                 self.color +=1
             if key == 'connectPoints':
                 self.connectPoints=kw.get(key)
-            
+
         #self.colorlist = ['black', 'red', 'magenta', 'blue', 'darkred', 'DarkMagenta', 'green4', 'Gold4', 'green', 'navy', 'blue']
-        
+
         #save datalist as instance variable
         self.datalist = datalist[:]
         #save datalist to be able to handle superimposed plots:
@@ -110,7 +110,7 @@ class PlotCanvas:
         if self.invert: #flip max and min...
             _a = minY
             minY = maxY
-            maxY = _a       
+            maxY = _a
         #set width of area with graph description
         self.info_box = 150
         plotX = int(self.canvas.cget('width')) - self.info_box
@@ -128,81 +128,81 @@ class PlotCanvas:
             color = '#%02x%02x%02x' % (r,g,b)
             shape = random.randrange(0,6)
             self.colorlist[self.color] = [color, shape]
-        
+
         index = self.color
         color = self.colorlist.get(index)[0]
         average_list = []
         for i in range(1,len(self.datalist)):
-                if self.datalist[i]: #if not deleted, otherwise, i is in deleted_list
-                    xcoord = self.datalist[i][2]
-                    ycoord = self.datalist[i][0]
-                    if self.logScale:
-                        try:
-                            ycoord = math.log10(ycoord)
-                        except (ValueError, OverflowError): #Value not in plot! Set it to -1
-                            ycoord = -1
-                    if i<(len(self.datalist)-1):
-                        j=1
-                        try:
-                            while not self.datalist[i+j]:
-                                j +=1
-                        except IndexError:
-                            pass
-                        else:
-                            xnextcoord = self.datalist[i+j][2]
-                            ynextcoord = self.datalist[i+j][0]
-                            if self.logScale:
-                                try:
-                                    ynextcoord = math.log10(ynextcoord)
-                                except (ValueError, OverflowError): #Value not in plot! Set it to -1
-                                    ynextcoord = -1
+            if self.datalist[i]: #if not deleted, otherwise, i is in deleted_list
+                xcoord = self.datalist[i][2]
+                ycoord = self.datalist[i][0]
+                if self.logScale:
                     try:
-                        x=self.coord.getCanvasXY([xcoord,ycoord])[0]
-                        y=self.coord.getCanvasXY([xcoord,ycoord])[1]
-                        try:
-                            xnext=self.coord.getCanvasXY([xnextcoord,ynextcoord])[0]
-                            ynext=self.coord.getCanvasXY([xnextcoord,ynextcoord])[1]
-                        except UnboundLocalError: #if no nextcoord, for instance, after a zoom
-                            xnext=x
-                            ynext=y
-                        x1=x-2
-                        x2=x+2
-                        y1=y-2
-                        y2=y+2
-                    except TypeError:
-                        pass#Coordinate sent None back because object out of bounds, or ZeroDivision error
-                    else:
-                        self.plotDot(x1, y1, x2, y2, color, ('datadot', i, description), index)
-                        if self.connectPoints:
-                            self.canvas.create_line(x,y,xnext,ynext)
-                        if self.average: 
-                            average_list.append(y)
-                else: #plot deleted_dot
-                    xcoord = self.deleted_list[i][2]
-                    ycoord = self.deleted_list[i][0]
+                        ycoord = math.log10(ycoord)
+                    except (ValueError, OverflowError): #Value not in plot! Set it to -1
+                        ycoord = -1
+                if i<(len(self.datalist)-1):
+                    j=1
                     try:
-                        x=self.coord.getCanvasXY([xcoord,ycoord])[0]
-                        y=self.coord.getCanvasXY([xcoord,ycoord])[1]
-                    except (TypeError, UnboundLocalError):
-                        pass#out of bounds
+                        while not self.datalist[i+j]:
+                            j +=1
+                    except IndexError:
+                        pass
                     else:
-                        x1=x-2
-                        x2=x+2
-                        if y<0:
-                            y1 = 0
-                            y2 = 4
-                        elif y>int(self.canvas.cget('height')):
-                            y1 = int(self.canvas.cget('height'))
-                            y2 = int(self.canvas.cget('height'))-4
-                        else:
-                            y1 = y-2
-                            y2= y+2
-                        self.plotDot(x1, y1, x2, y2, 'white', ('deleted_dot', i, description), index)
-        
+                        xnextcoord = self.datalist[i+j][2]
+                        ynextcoord = self.datalist[i+j][0]
+                        if self.logScale:
+                            try:
+                                ynextcoord = math.log10(ynextcoord)
+                            except (ValueError, OverflowError): #Value not in plot! Set it to -1
+                                ynextcoord = -1
+                try:
+                    x=self.coord.getCanvasXY([xcoord,ycoord])[0]
+                    y=self.coord.getCanvasXY([xcoord,ycoord])[1]
+                    try:
+                        xnext=self.coord.getCanvasXY([xnextcoord,ynextcoord])[0]
+                        ynext=self.coord.getCanvasXY([xnextcoord,ynextcoord])[1]
+                    except UnboundLocalError: #if no nextcoord, for instance, after a zoom
+                        xnext=x
+                        ynext=y
+                    x1=x-2
+                    x2=x+2
+                    y1=y-2
+                    y2=y+2
+                except TypeError:
+                    pass#Coordinate sent None back because object out of bounds, or ZeroDivision error
+                else:
+                    self.plotDot(x1, y1, x2, y2, color, ('datadot', i, description), index)
+                    if self.connectPoints:
+                        self.canvas.create_line(x,y,xnext,ynext)
+                    if self.average:
+                        average_list.append(y)
+            else: #plot deleted_dot
+                xcoord = self.deleted_list[i][2]
+                ycoord = self.deleted_list[i][0]
+                try:
+                    x=self.coord.getCanvasXY([xcoord,ycoord])[0]
+                    y=self.coord.getCanvasXY([xcoord,ycoord])[1]
+                except (TypeError, UnboundLocalError):
+                    pass#out of bounds
+                else:
+                    x1=x-2
+                    x2=x+2
+                    if y<0:
+                        y1 = 0
+                        y2 = 4
+                    elif y>int(self.canvas.cget('height')):
+                        y1 = int(self.canvas.cget('height'))
+                        y2 = int(self.canvas.cget('height'))-4
+                    else:
+                        y1 = y-2
+                        y2= y+2
+                    self.plotDot(x1, y1, x2, y2, 'white', ('deleted_dot', i, description), index)
+
         if average_list:
             self.ymean = sum(average_list)/len(average_list)
             self.canvas.create_line(self.info_box+1, self.ymean, self.canvas.cget('width'), self.ymean, fill = color, width = 3, dash = (4,4))
-        #create layout of plot    
+        #create layout of plot
         self.setLayout()
         ypos_list = []
         #create text at ticks:
@@ -218,18 +218,18 @@ class PlotCanvas:
         i=0
         _height = int(self.canvas.cget('height'))
         for ypos in self.yticks:
-                ypos = ypos + self.color*15
-                xpos = self.info_box-8-self.color*15
-                if xpos<30:
-                    xpos = self.info_box-8
-                #number of digits:
-                _text = str(ypos_list[i])
-                i+=1
-                #text = _text.split('.')
-                #if len(text)>1: #if decimal number
-                if not ypos> (_height - self.offset):
-                    self.canvas.create_text(xpos,ypos, anchor = E, text = _text, fill = color, font = PlotCanvas.font)
-    
+            ypos = ypos + self.color*15
+            xpos = self.info_box-8-self.color*15
+            if xpos<30:
+                xpos = self.info_box-8
+            #number of digits:
+            _text = str(ypos_list[i])
+            i+=1
+            #text = _text.split('.')
+            #if len(text)>1: #if decimal number
+            if not ypos> (_height - self.offset):
+                self.canvas.create_text(xpos,ypos, anchor = E, text = _text, fill = color, font = PlotCanvas.font)
+
     def plotDot(self, x1,y1,x2,y2, fill, tags,index):
         color = self.colorlist.get(index)[0]
         shape = self.colorlist.get(index)[1]
@@ -245,7 +245,7 @@ class PlotCanvas:
             self.canvas.create_polygon(x1,y1,x1,y2,x2,y1+2, tags = tags, width = 1, outline = color, fill = fill)
         else:
             self.canvas.create_oval(x1,y1,x2,y2, tags = tags, width = 1, outline = color, fill = fill)
-    
+
     def onDotClick(self, event = None, item = None):
         #find closest dot. Move to corner. Pop from datalist, redraw!
         #find closest tag. item_index (the TAG!!!!!) corresponds to 1 in datalist!
@@ -273,7 +273,7 @@ class PlotCanvas:
             #delete item from datalist
             self.superImposeList.get(key)[item_index]=None
             #recompute datalists max and min
-            tlist = self.superImposeList.get(key)[:] 
+            tlist = self.superImposeList.get(key)[:]
             tlist = self.maxmin(tlist)
             self.superImposeList[key]=tlist[:]
         elif (item in del_list):
@@ -291,7 +291,7 @@ class PlotCanvas:
             #delete item from deleted_list
             self.deleted_list_si.get(key)[item_index]=None
             #recompute datalists max and min
-            tlist = self.superImposeList.get(key)[:] 
+            tlist = self.superImposeList.get(key)[:]
             tlist = self.maxmin(tlist)
             self.superImposeList[key]=tlist[:]
 
@@ -323,7 +323,7 @@ class PlotCanvas:
             self.backup_data = {}
             self.backup_data.clear()
             self.backup_data = self.superImposeList.copy()
-        
+
         if minX and maxX:
             minX = float(minX)
             maxX = float(maxX)
@@ -352,9 +352,9 @@ class PlotCanvas:
                 endY = event.y
             except AttributeError:
                 startX = startY = endX = endY = 0
-                  
+
             self.canvas.delete('Zoom_Rectangle')
-        
+
         if not PlotManager.active_plots == 1:
             startX = self.info_box
             endX = int(self.canvas.cget('width'))
@@ -395,7 +395,7 @@ class PlotCanvas:
                 data_dict.get(key).insert(0, [None]*5)
                 #insert description
                 data_dict[key][0][0]=key
-                tmplist = data_dict.get(key)[:] 
+                tmplist = data_dict.get(key)[:]
                 tmplist = self.maxmin(data_dict.get(key), 1)
                 if PlotManager.active_plots>1:
                     #max and min x:
@@ -407,14 +407,14 @@ class PlotCanvas:
             if PlotManager.active_plots==1:
                 self.xaxis.delete(ALL)
                 self.createXaxis(self.xaxis, self.xyPlot, self.absTime)
-                
+
     def onDelete(self, event):
         #points to delete:
         delete_list = self.canvas.find_enclosed(self.startZoomRectX,self.startZoomRectY,event.x,event.y)
         self.canvas.delete('Zoom_Rectangle')
         for item in delete_list:
             self.onDotClick(None, item)
-    
+
     #zooms data to current xaxis
     def zoomToAxis(self):
         #set max/min X to axisminX, axisminY
@@ -426,10 +426,10 @@ class PlotCanvas:
             si = 1
             self.color = -1
         else:
-            si = 0 
+            si = 0
         for key in list(self.superImposeList.keys()):
             self.plotData(self.superImposeList.get(key), superimpose = si)
-        
+
 
     def maxmin(self,datalist, do_x = 0):
         #first, build list without None
@@ -438,7 +438,7 @@ class PlotCanvas:
             if datalist[i]:
                 _list.append(datalist[i])
 
-        #don't resize xdata if not do_x, only ydata        
+        #don't resize xdata if not do_x, only ydata
         ydata = list(map(operator.itemgetter(0), _list))
         try:
             datalist[0][3] = min(ydata)
@@ -450,9 +450,9 @@ class PlotCanvas:
             xdata = list(map(operator.itemgetter(2), _list))
             datalist[0][1] = min(xdata)
             datalist[0][2] = max(xdata)
-            
+
         return datalist
-    
+
     def createXaxis(self, xaxis, YY_plot = False, absTime = 0):
         #set width
         width = self.canvas.master.winfo_width()
@@ -499,7 +499,7 @@ class PlotCanvas:
                 xtext = self.reverseTimeStamp(timeStamp, firstday, year)
             xaxis.create_text(xpos, 10, text = xtext, anchor = E, font = PlotCanvas.font)
         self.xaxis = xaxis
-        
+
     def reverseTimeStamp(self, xpos, firstday, year = None):
         #xpos in hours
         _days = xpos / 24.0 + firstday
@@ -519,14 +519,14 @@ class PlotCanvas:
             year = year+1*years
             timeStamp = '%s.' % (year) + timeStamp
         return timeStamp
-    
+
     def convertTime(self, timeStamp, precision = None):
         #timeStamp comes floating number of hours
         #check deltaX to decide appropriate unit
         minX = float(self.datalist[0][1])
         maxX = float(self.datalist[0][2])
         deltaX = maxX - minX
-        if precision: #shows minutes and hours eventhough only hours on scale. 
+        if precision: #shows minutes and hours eventhough only hours on scale.
             deltaX = min(10,deltaX)
         timeStamp -= minX
         timeStamp = max(timeStamp, 0)
@@ -537,10 +537,10 @@ class PlotCanvas:
         #if deltaX<1 min, display seconds with 1 decimal
         hours = int(timeStamp)
         _time = str(timeStamp).split('.')
-        
+
         minutes_full = (float(timeStamp)-hours)*60
         minutes = int(minutes_full)
-        
+
         seconds_full = (minutes_full-minutes)*60
         seconds = int(seconds_full)
 
@@ -559,27 +559,27 @@ class PlotCanvas:
     def redraw(self, width = None, height = None):
         #note that variable plots is not used....
         #diff = 59-31 = 28
-         
+
         #delete all objects in canvas:
         self.canvas.delete(ALL)
-        
+
         plots = PlotManager.active_plots
         xaxis_height = 25
-        
+
         total_height = float(self.canvas.master.winfo_height()-xaxis_height)
         setheight = total_height/PlotManager.active_plots
-        #the last plot takes the amount of space that is left. 
-        #most of the time it will have the same height as the other plots, but 
+        #the last plot takes the amount of space that is left.
+        #most of the time it will have the same height as the other plots, but
         #it might differ by a few pixels. This is to avoid an ugly loop
-        
+
         if not height:
             height = int(total_height - setheight*(PlotManager.active_plots-1))
-        
+
         if not width:
             width = self.canvas.master.winfo_width()
-        
+
         self.canvas.configure(height = height, width = width)
-        
+
         if len(list(self.superImposeList.keys()))>1:
             si = 1
             self.color=-1
@@ -588,7 +588,7 @@ class PlotCanvas:
         for key in list(self.superImposeList.keys()):
             self.plotData(self.superImposeList.get(key), superimpose = si)
 
-        
+
     def setLayout(self):
         _height = int(self.canvas.cget('height'))
         _width = int(self.canvas.cget('width'))
@@ -608,7 +608,7 @@ class PlotCanvas:
         #set at last position:
         self.canvas.create_line(_width-self.offset, _height-1,_width-self.offset, _height-7)
         if self.grid:
-                self.canvas.create_line(_width-self.offset, _height-7, _width-self.offset, 0, fill = '#b9b9b9', dash = (4,4))
+            self.canvas.create_line(_width-self.offset, _height-7, _width-self.offset, 0, fill = '#b9b9b9', dash = (4,4))
         self.xticks.append(_width-self.offset)
         #y-axis
         self.yticks = []
@@ -627,13 +627,13 @@ class PlotCanvas:
         #at last pos
         self.canvas.create_line(1+self.info_box, self.offset, 7+self.info_box, self.offset)
         if self.grid:
-                self.canvas.create_line(7+self.info_box, self.offset, _width, self.offset, fill = '#b9b9b9', dash = (4,4))
+            self.canvas.create_line(7+self.info_box, self.offset, _width, self.offset, fill = '#b9b9b9', dash = (4,4))
         self.yticks.append(self.offset)
         #create logscale-ticks:
         #set labels:
         #self.canvas.create_text(5,1, anchor = NW, text = 'Plot: ' + str(PlotManager.active_plots))
-            
-    
+
+
     def setBorder(self, color = 'black'):
         _height = int(self.canvas.cget('height'))
         _width = int(self.canvas.cget('width'))
@@ -696,7 +696,7 @@ class PlotCanvas:
                 numbers = "%g" % number
             return_list.append(numbers)
         return return_list
-      
+
 
     def getAverage(self):
         try:
@@ -707,18 +707,3 @@ class PlotCanvas:
         except AttributeError:
             _mean = 'invalid'
         return _mean
-        
-
-
-
-        
-                
-    
-
-
-
-
-
-
-        
-        

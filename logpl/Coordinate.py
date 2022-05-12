@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-#Python program that receives cartesian XY coordinates and returns graphic point coordinates. Y-axis is #flipped. 
+#Python program that receives cartesian XY coordinates and returns graphic point coordinates. Y-axis is #flipped.
 #if cartesian coord is outside of plot, return None
 
 class Coordinate:
@@ -25,7 +25,7 @@ class Coordinate:
     #constructor with arguments: plotDim = list of canvas dimensions
     #                 deltaXY = list of max(x)-min(x) and max(y)-min(y)
     #                 minXY = lits of min(x) and min(y)
-    
+
     def __init__(self, plotDim, deltaXY, minXY, offset, info_box):
         #note that 20 is subtracted, and later on 10 is added in order to get
         #10 pixels of empty space at every border
@@ -55,12 +55,12 @@ class Coordinate:
         except ZeroDivisionError:
             self.deltaY = cartesianXY[1]/100.0
             canvasY = int(float(self.pixelsY-(cartesianXY[1]-self.minY)/self.deltaY*self.pixelsY)+self.offset)
-       
+
         if (canvasX<(self.info_box+self.offset) or canvasX>(self.info_box+self.pixelsX+self.offset)):# or canvasY<0 or canvasY>self.pixelsY):
             return None
         else:
             return (canvasX, canvasY)
-    
+
     def getCanvasY(self, cartY):
         cartY = float(cartY)
         cavansY=0
@@ -72,13 +72,10 @@ class Coordinate:
         return canvasY
 
     def getCartesianXY(self, CanvasXY):
-                CanvasXY[0] = CanvasXY[0]-self.info_box
-                CanvasXY[0]-=self.offset
-                CanvasXY[1]-=self.offset
-                #receives CanvasXY, returns CartesiaXY
-                cartesianY=self.deltaY*(1-CanvasXY[1]/self.pixelsY)+self.minY
-                cartesianX=(CanvasXY[0])*self.deltaX/self.pixelsX+self.minX
-                return [cartesianX, cartesianY]
-                
-
-        
+        CanvasXY[0] = CanvasXY[0]-self.info_box
+        CanvasXY[0]-=self.offset
+        CanvasXY[1]-=self.offset
+        #receives CanvasXY, returns CartesiaXY
+        cartesianY=self.deltaY*(1-CanvasXY[1]/self.pixelsY)+self.minY
+        cartesianX=(CanvasXY[0])*self.deltaX/self.pixelsX+self.minX
+        return [cartesianX, cartesianY]

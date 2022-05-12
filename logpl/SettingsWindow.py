@@ -48,25 +48,25 @@ class SettingsWindow(Toplevel):
         #frames:
         topframe = Canvas(self, height = 20, bd = 0)
         topframe.pack(anchor = NW, fill = X)
-        
+
         labelframe = Frame(self, padx = 5, relief = GROOVE, bd = 2, highlightthickness = 0)
         labelframe.pack(expand = 1, fill = BOTH, anchor = NW)
         labelframe.rowconfigure(0, weight = 1)
-        
+
         yscrollbar = Scrollbar(labelframe, orient = VERTICAL)
         self.sframe = Canvas(labelframe, yscrollcommand = yscrollbar.set, scrollregion = (0,0,0,15), bd = 0, highlightthickness = 0)
         self.sframe.pack(side = LEFT, fill = BOTH, expand = 1)
         #self.sframe.rowconfigure(1, weight = 1)
         yscrollbar.config(command = self.sframe.yview)
         yscrollbar.pack(side = LEFT, fill = Y)
-        
-        
+
+
         hframe = Frame(self, relief = RIDGE)
         hframe.pack(expand = 0, fill = BOTH, anchor = NW)
         bframe = Frame(self, relief = RIDGE)
         bframe.pack(expand = 0, fill = BOTH, anchor = NW)
-        
-        
+
+
         self.minsize(width = 680, height = 440)
         self.resizable(width = 0, height = 1)
 
@@ -81,12 +81,12 @@ class SettingsWindow(Toplevel):
         topframe.create_window(395,y, window = Label(topframe, text = 'String', anchor = anchorl), anchor = anchorw, width = 65)
         topframe.create_window(470,y, window = Label(topframe, text = 'Group Name', anchor = anchorl), anchor = anchorw, width = 65)
         topframe.create_window(622,y, window = Label(topframe, text = 'Select', anchor = anchorl), anchor = anchorw, width = 65)
-        
+
         #Buttons:
         Button(bframe, text = 'Add Single Command', command = lambda:self.addLine()).grid(row = 0, column = 0)
         Button(bframe, text = 'Add Command Pair', command = lambda:self.addPair()).grid(row = 0, column = 1)
         Button(bframe, text = 'Remove Selected Command', command = lambda:self.removeLine()).grid(row = 0, column = 2)
-        
+
         #help labels
         Label(hframe, text = 'Descriptions must be unique').pack()
         Label(hframe, text = 'Fields may contain blank spaces and double quotes (no need to add extra quotes)').pack()
@@ -103,7 +103,7 @@ class SettingsWindow(Toplevel):
         self.entry_group = []
         self.radiobuttons = []
         self.select_row = IntVar()
-        
+
         #get default settings-file and open it
         init_file = IOSettings.default_control_file
         try:
@@ -136,7 +136,7 @@ class SettingsWindow(Toplevel):
             if answer:
                 self.saveFile()
         self.destroy()
-    
+
     def setLabels(self, settings_dict):
         _row = 0
         keylist = []
@@ -150,14 +150,14 @@ class SettingsWindow(Toplevel):
             anchor = W
             self.addLine()
             self.entry_key[-1].insert(0, settings_dict.get(key)[0])
-            
+
             if settings_dict.get(key)[1] == ' ': #if space:
                 self.entry_char[-1].set('(space)')
             else:
                 self.entry_char[-1].set(settings_dict.get(key)[1])
-            
+
             self.entry_offset[-1].insert(0, settings_dict.get(key)[2])
-            
+
             if key[0]=='$': #1st in command pair:
                 self.entry_description[-1].bind('<FocusOut>', (lambda event, _row = _row: self.onFocusOut(event, _row)))
                 self.entry_group[-1].config(state = DISABLED)
@@ -165,7 +165,7 @@ class SettingsWindow(Toplevel):
             if key[-1]=='$': #2nd in command pair
                 self.entry_description[-1].config(state = DISABLED)
 
-            
+
             self.entry_string[-1].insert(0, settings_dict.get(key)[3])
             self.entry_group[-1].insert(0, settings_dict.get(key)[4])
 
@@ -183,33 +183,33 @@ class SettingsWindow(Toplevel):
             self.hash = self.createHash()
             #set default controlfile
             IOSettings.default_control_file= _filename
-    
+
     def createHash(self):
         text = ''
         for i in range(len(self.entry_key)):
-            text += self.entry_key[i].get()+self.entry_char[i].get() + self.entry_description[i].get() + self.entry_offset[i].get() + self.entry_string[i].get() + self.entry_group[i].get() 
-        
+            text += self.entry_key[i].get()+self.entry_char[i].get() + self.entry_description[i].get() + self.entry_offset[i].get() + self.entry_string[i].get() + self.entry_group[i].get()
+
         hash = text.__hash__()
         return hash
-    
+
     def addLine(self):
         ymax = self.sframe.cget('scrollregion').split(' ')[3]
         ymax = int(ymax) + 25
         self.sframe.configure(scrollregion = (0,0,0,ymax))
-        
+
         _row = len(self.entry_key)+1
         y = _row*25-15
         anchor = W
         self.entry_key.append(Entry(self.sframe, width = 15))
         cw = self.sframe.create_window(1,y, window = self.entry_key[-1], anchor = anchor, width = 65)
-        
+
         x = self.sframe.bbox(cw)[2] + 10
         self.entry_char.append(StringVar())
         self.entry_char[-1].set(',')
         self.entry_char_menu.append(OptionMenu(self.sframe, self.entry_char[-1], ',','(space)'))
         cw = self.sframe.create_window(x,y, window = self.entry_char_menu[-1], anchor = anchor, width = 75)
         self.entry_char_menu[-1].children['menu'].add_command(label = 'other...', command = lambda obj = self.entry_char[-1] : obj.set(self.getCustom()))
-        
+
         x = self.sframe.bbox(cw)[2] + 10
         self.entry_description.append(Entry(self.sframe, width = 25))
         cw = self.sframe.create_window(x,y, window = self.entry_description[-1], anchor = anchor)
@@ -217,7 +217,7 @@ class SettingsWindow(Toplevel):
         x = self.sframe.bbox(cw)[2] + 10
         self.entry_offset.append(Entry(self.sframe, width = 5))
         cw = self.sframe.create_window(x,y, window = self.entry_offset[-1], anchor = anchor)
-        
+
         x = self.sframe.bbox(cw)[2] + 10
         self.entry_string.append(Entry(self.sframe, width = 10))
         cw = self.sframe.create_window(x,y, window = self.entry_string[-1], anchor = anchor)
@@ -225,11 +225,11 @@ class SettingsWindow(Toplevel):
         x = self.sframe.bbox(cw)[2] + 10
         self.entry_group.append(Entry(self.sframe, width = 25))
         cw = self.sframe.create_window(x,y, window = self.entry_group[-1], anchor = anchor)
-        
+
         x = self.sframe.bbox(cw)[2] + 10
         self.radiobuttons.append(Radiobutton(self.sframe, variable = self.select_row, value = _row))
         cw = self.sframe.create_window(x,y, window = self.radiobuttons[-1], anchor = anchor)
-        
+
     def newFile(self):
         #clear all old entries
         self.sframe.delete(ALL)
@@ -242,7 +242,7 @@ class SettingsWindow(Toplevel):
         self.entry_group = []
         self.entry_string = []
         self.radiobuttons = []
-    
+
     def getCustom(self):
         top = Toplevel()
         top.title('')
@@ -258,7 +258,7 @@ class SettingsWindow(Toplevel):
         except IndexError:
             sign = ','
         return sign
-    
+
     def addPair(self):
         #add a regular line, then add customline, also, binds ordinary description line
         self.addLine()
@@ -268,13 +268,13 @@ class SettingsWindow(Toplevel):
         self.entry_description[_row].config(state = DISABLED)
         self.entry_group[_row-1].config(state = DISABLED)
         self.entry_description[_row-1].bind('<FocusOut>', (lambda event, _row = _row: self.onFocusOut(event, _row)))
-    
+
     def onFocusOut(self, event=None, row = -1):
         self.entry_description[row].config(state = NORMAL)
         self.entry_description[row].delete(0,END)
         self.entry_description[row].insert(0,self.entry_description[row-1].get()[1:]+'$')
         self.entry_description[row].config(state = DISABLED)
-    
+
     def saveFile(self, saveAs = 0):
         #save by using Settings()
         #description is description+string, label = group name [4]
@@ -296,7 +296,7 @@ class SettingsWindow(Toplevel):
         if _filename:
             self.filename = _filename
             self.settings.writeSF(_filename)
-        
+
         self.hash = self.createHash()
 
     def removeLine(self):

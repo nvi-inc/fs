@@ -25,12 +25,12 @@ class IOSettings(Toplevel):
     default_directory = '/usr2/log/'
     #default_control_file = '/p3/home/ptg/logpl.ctl' #if lacerta (my development computer...)
     default_control_file = '/usr2/control/logpl.ctl' #if mv-3 or other fs computer
-    
+
     def __init__(self, parent = None):
         self.iosettings = {}
         self.iosettings['default_control_file'] = IOSettings.default_control_file
         self.iosettings['default_directory'] = IOSettings.default_directory
-    
+
     def gui(self, parent = None):
         Toplevel.__init__(self, parent)
         mainframe = LabelFrame(self, text = 'I/O Settings')
@@ -59,7 +59,7 @@ class IOSettings(Toplevel):
             def_ctrl_file.insert(0, '')
         ###OK
         Button(buttonframe, text = 'OK', command = lambda: self.ok(def_dir.get(),def_ctrl_file.get())).pack(side = RIGHT)
-    
+
     def ok(self, def_dir, def_ctrl_file, def_tmp_ps):
         IOSettings.default_directory = def_dir
         IOSettings.default_control_file = def_ctrl_file
