@@ -98,6 +98,7 @@ fesh2:
 	cd fesh2
 	python setup.py install --home=/usr2/fs/python
 	cd ..
+	test ! -f /usr2/fs/bin/fesh2 && ln -s /usr2/fs/python/bin/fesh2 /usr2/fs/bin/fesh2
 
 
 .PHONY: dist clean rmexe rmdoto install tag_archive archive

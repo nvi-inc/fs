@@ -37,12 +37,18 @@ tested under version 3.7.3
 
 ***Note that **fesh2** is not compatible with Python version 2.***
 
+Note that if you're 
+using an old version of Debian (Jessie or earlier) then you will need to 
+install python 3.5 or higher by hand. This could be done inside a virtual 
+environment by a user or on the system as root.
+
 ## Installation
 
 **Fesh2** is distributed as part of the
 [Field System](https://github.com/nvi-inc/fs) however, it is not installed 
 as part of 
-the standard procedure and must be done as a separate step. 
+the standard procedure and must be done as a separate step as there are some 
+dependancies that must be checked first. 
 
 ### PycURL dependency
 
@@ -60,29 +66,20 @@ should do the trick. You may also need these:
 
 ### Fesh2 installation
 
+Please make sure the above dependencies are satisfied before proceeding.
+
 Assumes that python libraries and executables will be kept in /usr2/fs/python
-Makefile will install fesh2 unless the FS_FESH2_NO_MAKE environment variable is set.
 
-IF so, PYTHONPATH needs setting up as follows 
-    export PYTHONPATH=$PYTHONPATH:/usr2/fs/python
-And /usr2/fs/python/bin needs added to the PATH.
-    export PATH=$PATH:/usr2/fs/python/bin
-Running Make will execute this:
-    python setup.py install --home=/usr2/fs/python
+IF so: 
+* PYTHONPATH needs setting up as follows
+    `export PYTHONPATH=$PYTHONPATH:/usr2/fs/python`
+* and /usr2/fs/python/bin needs adding to the PATH.
+     `export PATH=$PATH:/usr2/fs/python/bin`
+  or get `make` to create a symlink from `/usr2/fs/bin`?
+* Running `make fesh2` will execute this:
+      python setup.py install --home=/usr2/fs/python
+* but the installation location could be elsewhere.
 
-We are cleared to use pip. (Whew!) So I think we can proceed under that approach and prog could install it. I will try to look it later this week. In the meantime, there are some questions/comments below.
-
-It seems like symlinking from bin/ should work, but maybe I am missing something.
-
-Unless fesh2 will work all the way back to Lenny, we will need building it to be optional (and maybe there other systems where it wouldn't work). This could be accomplished with an environment variable that would have to be set for the top-level Makefile. We can add the environment variable at the last minute and just work from a Makefile in fesh2/ for now. Maybe some one has a better idea.
-
-Of course, it would be helpful if it worked as far back as Lenny. If that is possible and not unreasonable amount of work, that would be good. If it is possible but too much work, it would have to be deferred (maybe until we no longer support Lenny :).
-
-If it is installed as part of the FS, I wonder how fesh2 as a service will interact with re-making the FS. The .o and executables may be deleted and remade from time-to-time. Will that cause a problem? If that gets too awkward., it may be better to have it as a separate application.
-
-There are other details that will need to be ironed out.
-
-BTW, BKG is changing to ftp-ssl as the only access method. We should start with ftp-ssl as the default for them. They already have it working. They plan to go to individual user accounts soon. So it would good if fesh2 supports that too. There is some talk that they will go to https eventually. If that can be allowed for as well, it would probably be a good idea.
 
 
 Installation should be carried out under the
