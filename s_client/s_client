@@ -27,7 +27,7 @@ import getopt
 import string
 import select
 from subprocess import call
-    
+
 parms = {'-h': '127.0.0.1', '-p':5000, '-t':1,'-c': "dbe_atten?;",
          '-n': os.path.basename(__file__)}
 try:
@@ -49,7 +49,7 @@ name= str(parms['-n'])
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.settimeout(timeout)
 try:
-     s.connect ((host,port))
+    s.connect ((host,port))
 except socket.timeout:
     call(["lgerr","lg","-1",
          name+': '+host+': '+"Connection time-out"])
@@ -65,13 +65,13 @@ except socket.error as e:
 # ADD \n TO END IF NOT THERE
 mycmd = string.strip(mycmd)
 mycmd = mycmd + '\n'
-        
+
 # SEND COMMAND
 #print mycmd
 rv = s.send(mycmd)
 if rv <= 0 :
     print("Fail to send ", rv)
-            
+
 # WAIT FOR RESPONSE
 ready=select.select([s], [], [],timeout)
 if ready[0]:
@@ -84,4 +84,3 @@ else:
 #    print "Read time-out"
 
 s.close()
-
