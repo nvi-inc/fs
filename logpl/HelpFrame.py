@@ -18,7 +18,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from tkinter import *
-from idlelib.TreeWidget import TreeItem, TreeNode
+from idlelib.tree import TreeItem, TreeNode
 
 class HelpFrame(Toplevel):
 
