@@ -20,7 +20,7 @@
 #
 """application that starts a thread that receives the output from 'tail -f'. """
 
-from Tkinter import *
+from tkinter import *
 import sys
 import time
 import threading
@@ -125,8 +125,8 @@ class Tools:
 		Button(win, text='OK', command = win.destroy).pack()
 
 	def qmessage(self, label, text):
-		import tkMessageBox
-		x = tkMessageBox.askokcancel(label,text)
+		import tkinter.messagebox
+		x = tkinter.messagebox.askokcancel(label,text)
 		# x=1 : ok, x=0 : Cancel
 		return x
 
@@ -145,8 +145,8 @@ class Tools:
 		sys.exit()
 
 	def openLog(self):
-		import tkFileDialog
-		MainGui.filename = tkFileDialog.askopenfilename()
+		import tkinter.filedialog
+		MainGui.filename = tkinter.filedialog.askopenfilename()
 
 
 	def findFile(self):
