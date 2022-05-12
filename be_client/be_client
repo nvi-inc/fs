@@ -38,7 +38,7 @@ def save_history(historyPath=historyPath):
 
 if os.path.exists(historyPath):
     readline.read_history_file(historyPath)
-    
+
 parms = {'-h': '127.0.0.1', '-p':5000, '-c': "dbe_alc=0:0:off:1:0:off;"}
 try:
     opts, pargs = getopt.getopt(sys.argv[1:], "h:p:c:")
@@ -67,8 +67,8 @@ while 1:
 
     if arg in ('', ';'):
         continue
-    
-    #IF NOT QUIT 
+
+    #IF NOT QUIT
     if arg != "quit":
 
         # ADD ; TO END IF NOT THERE
@@ -77,12 +77,12 @@ while 1:
             arg = arg + ';\n'
         else:
             arg = arg + '\n'
-        
+
         # SEND COMMAND
         rv = s.send(arg)
         if rv <= 0 :
             print("Fail to send ", rv)
-            
+
         # WAIT FOR RESPONSE
         ret = s.recv(8192)
         print(ret)
@@ -93,4 +93,3 @@ while 1:
 
 s.close()
 atexit.register(save_history)
-
