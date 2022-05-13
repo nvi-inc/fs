@@ -1,0 +1,372 @@
+#!/usr/bin/python
+#
+# Copyright (c) 2014 Stephen R. McWhirter
+#
+# This file is part of VLBI Field System
+# (see http://github.com/nvi-inc/fs).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+import socket 
+import time 
+import getopt
+import string
+import sys
+import readline
+import struct
+import Tkinter as Tk
+import tkFont
+import matplotlib
+import os
+matplotlib.use('TkAgg')
+from matplotlib.figure import Figure
+import numpy as np
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from ctypes import *
+import subprocess
+import shelve
+
+cmds= '''arp= 192.168.10.100 : aa.bb.cc.dd.ee.22
+atten= 0 : 4.5
+atten= 1 : 4.5
+bstate? 0
+bstate? 1
+chsel= 0 : 1 : 3 : 5 : 7 : 9 : 11 : 13 : 15
+chsel= 1 : 1 : 3 : 5 : 7 : 9 : 11 : 13 : 15
+chsel_en= 2 : chsel_enable : psn_enable
+data_connect= 192.168.10.10 : 50000 : 0x5766 : 10
+data_send= on : 2014-111-22-33-44 :  : 10
+diode= 80 : 200 
+dot= 2014-111-22-33-44
+dot_inc= 10
+fpga_rd= w : 0x80009a : 2
+fpga_wr= w : 0x80009a : 0xdeed
+gps_offset?
+help?
+hw_version?
+ifconfig= up : 9000 : 4 : 192.168.5.21 : 1
+init=
+mac= 68.61.79.73.74.6b
+ntpdate= 192.168.67.105
+option= time_long
+option= space_on
+pcal= 0
+pcal_ifx= 0
+personality= PFBG : PFBG_3_0.bin
+pps_mon= disable
+pps_mon= enable : 224.0.2.29 : 20020
+pps_offset?
+quantize= 
+raw? 0 : 50
+raw_ifx= 0
+reboot=
+runfile= /home/roach/init.txt
+status?
+sw_version?
+tsys? 0
+tsys? 1
+'''
+
+class TSYS(BigEndianStructure):
+    _fields_ = [('read_time', c_char * 20),
+    ('pkt_size', c_uint16),
+    ('epoch_ref', c_uint16),
+    ('epoch_sec', c_uint32),
+    ('interval', c_uint32),
+    ('tsys_header', c_char * 20),
+    ('tsys_on', c_uint32 * 64),
+    ('tsys_off', c_uint32 * 64),
+    ('pcal_header', c_char * 20),
+    ('pcal_ifx', c_uint16),
+    ('pcal_sin', c_int32 * 1024),
+    ('pcal_cos', c_int32 * 1024),
+    ('stat_str', c_char * 3000),
+    ('raw_header', c_char * 24),
+    ('raw_ifx', c_uint16),
+    ('mu', c_double),
+    ('sigma', c_double),
+    ('pps_offset', c_double),
+    ('gps_offset', c_double),
+    ('raw_size', c_uint16),
+    ('raw_samples', c_uint8 * 4096)]
+
+ANY = "0.0.0.0"
+parms = {'-h':"224.0.2.29", '-p':"20020", '-H':"192.168.61.56", '-P':"5000"}
+try:
+    opts, pargs = getopt.getopt(sys.argv[1:], "h:p:H:P", ["multicast host", "multicast port", "rdbe host", "rdbe port"])
+except getopt.GetoptError, msg:
+    sys.exit(msg)
+for o,v in opts:
+    parms[o] = v
+MCAST_ADDR = str(parms['-h'])
+MCAST_PORT = int(parms['-p'])
+RDBE_ADDR = str(parms['-H'])
+RDBE_PORT = int(parms['-P'])
+print "MCAST Host:", MCAST_ADDR, "MCAST Port:", MCAST_PORT
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+sock.bind((MCAST_ADDR,MCAST_PORT))
+sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 255)
+mreg = struct.pack("=4sl",socket.inet_aton(MCAST_ADDR), socket.INADDR_ANY)
+status = sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreg)
+def handle_input(sock, state):
+    if state == Tk.READABLE:
+        data, addr = sock.recvfrom(60000,socket.MSG_WAITALL)
+        tsys=TSYS();
+        memmove(addressof(tsys), buffer(data)[:], min(sizeof(tsys), len(data)))
+        flogdat.write(data)
+        rtm=tsys.read_time
+        prtm=time.strptime(rtm, "%Y%j%H%M%S")
+        frtm=time.strftime("%a %b %d",prtm)
+        output = "%s : %d : %d : %s : %s" % (addr[0], tsys.epoch_ref, tsys.epoch_sec, frtm, rtm[0:4]+ '-' + rtm[4:7] + '-' + rtm[7:9] + '-' + rtm[9:11] + '-' + rtm[11:13] )
+        dot.config(text=output)
+        mustr= "raw interface %d mu %.2f sigma %.2f" % (tsys.raw_ifx, tsys.mu, tsys.sigma) 
+        fi, la =text1.yview()
+        text1.delete(1.0, 'end') 
+        text1.insert('end', tsys.stat_str)
+        text1.yview_moveto(fi)
+        if (plots.winfo_exists() and plot_en.get()):
+            label1.config(text=mustr)
+            a1.cla()
+            x=np.ctypeslib.as_array(tsys.raw_samples)
+            x=x[0:tsys.raw_size]
+            x=x.astype(np.float32)
+            x-=128
+            a1.plot(x)
+            a1.set_ylim([-128,128])
+            canvasraw.show()
+
+            pfft.cla()
+            Pxx = np.fft.fft(x,1024)[0:511]
+            P = 10 * np.log10(Pxx+1e-16)
+            pfft.plot( P)
+            pfft.set_ylim([0,60])
+            canvasfft.show()
+
+            phist.cla()
+            h=np.zeros(256)
+            for a in x:
+                h[int(round(a+128))]+=1
+#                h[a+128]+=1
+            phist.plot(np.arange(-128, 128), h)
+            canvashist.show()
+
+            pcaltmp = np.array(np.zeros(1024), dtype=complex)
+            for i in range(1024):
+                pcaltmp[i] = tsys.pcal_cos[i]-1j*tsys.pcal_sin[i] 
+            try:
+                efg=float(ef.get())
+            except:
+                efg=0
+            for n in range(4):
+                for i in range(n, 1024, 4):
+                    pcaltmp[i] = pcaltmp[i]*np.exp(-1j*2*np.pi*efg*n/1024e6)
+
+            a2.cla()
+            a2.plot(pcaltmp.real,'r')
+            a2.plot(pcaltmp.imag,'b')
+            canvaspcal.show()
+
+            a3.cla()
+            pcaltmpfft=np.fft.fft(pcaltmp)
+            a3.plot(20*np.log10(np.abs(pcaltmpfft+1e-16)),'b')
+            canvaspcalfft.show()
+
+            tones= np.arange(30, 480, 5)
+            xf=tones*1e6
+            ph=np.unwrap(np.angle(pcaltmpfft[tones]))
+            z1 = np.polyfit(2*np.pi*xf, ph, 1)
+            dlystr="pcal interface %d delay %.6e" % (tsys.pcal_ifx, -1*z1[0])
+            label2.config(text=dlystr)
+
+            a4.cla()
+            phresid=ph-z1[1]-z1[0]*2*np.pi*xf
+            a4.plot(xf, phresid,'b')
+            canvaspcalphase.show()
+
+
+            ptsys0.cla()
+            ptsys1.cla()
+            tmpon=[]
+            tmpoff=[]
+            for ch in range(32):
+                tmpon.append(tsys.tsys_on[ch])
+                tmpoff.append(tsys.tsys_off[ch])
+            ptsys0.plot(tmpon[0:16],'r-x')
+            ptsys0.plot(tmpoff[0:16],'b-+')
+            ptsys1.plot(tmpon[16:32],'r-x')
+            ptsys1.plot(tmpoff[16:32],'b-+')
+            ptsys0.set_ylim([0,200000])
+            ptsys1.set_ylim([0,200000])
+            canvastsys.show()
+            #tsys for arthur
+            aon=tsys.tsys_on[7]
+            aoff=tsys.tsys_off[7]
+            tsysstr="tsys ch7 on %.6e off %.6e off/(on-off) %.6e" % (aon, aoff, float(aoff)/(aon-aoff))
+            label3.config(text=tsysstr)
+
+def send_cmd(cmd):
+    data = ''
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((RDBE_ADDR, RDBE_PORT))
+    sent = sock.send(cmd + ';\n')
+    chunk = sock.recv(10000)
+    #print len(chunk)
+    while len(chunk) == 1448:        
+        data += chunk
+        chunk = sock.recv(10000)
+    data += chunk
+    return data
+
+def on_click(event):
+    if event.type == '2':
+        index = event.widget.index('insert')
+    else:
+        index = event.widget.index("@%s,%s" % (event.x, event.y))
+    line, char = index.split(".")
+    event.widget.tag_remove('sel', "1.0", 'end')
+    event.widget.tag_add('sel', line+".0", line+".end")
+    cmd=event.widget.get(line+".0", line+".end").strip()
+    send2.yview('end')
+    tmp= '\n' + cmd + '\n'
+    send2.insert('end', tmp)
+    flogcmd.write(tmp)
+    tmp=  send_cmd(cmd)
+    send2.insert('end', tmp)
+    flogcmd.write(tmp)
+
+    rc = shelve.open('rdbe30_monrc_' + RDBE_ADDR, writeback=True)
+    rc['geom_root'] = root.geometry()
+    if (plots.winfo_exists()):
+        rc['geom_plots'] = plots.geometry()
+    rc['geom_cmdlist'] = cmdlist.geometry()
+    rc['geom_cmdlog'] = cmdlog.geometry()
+    rc['cmds'] = send1.get(2.0, 'end')
+    rc.close()   
+
+root = Tk.Tk()
+plot_en=Tk.IntVar()
+plot_en.set(0)
+root.tk_setPalette(background='white')
+default_font = tkFont.Font(family="Helvetica", size=7)
+text_font = tkFont.Font(family="Helvetica", size=7)
+fixed_font = tkFont.Font(family="Helvetica", size=7)
+matplotlib.rc('figure',figsize=(4,.8),dpi=96)
+matplotlib.rcParams['figure.subplot.bottom']=0.2
+matplotlib.rcParams['figure.subplot.top']=0.8
+matplotlib.rc('font',size=5)
+
+root.createfilehandler(sock,Tk.READABLE, handle_input)
+root.title('RDBE 3.0 Monitor svn 2994 ' + RDBE_ADDR)
+dot=Tk.Label(root)
+dot.pack(anchor='w')
+text1=Tk.Text(root,wrap='none',undo=True)
+text1.pack(expand=1,fill='both')
+
+cmdlist = Tk.Toplevel()
+cmdlist.title('RDBE 3.0 Command List ' + RDBE_ADDR)
+send1=Tk.Text(cmdlist,wrap='none',undo=True)
+send1.pack(expand=1,fill='both')
+send1.bind("<3>", on_click)
+send1.bind("<F1>", on_click)
+send1.insert('end','dbe_pps_mon=enable:'+MCAST_ADDR+':'+str(MCAST_PORT)+'\n'+cmds)
+cmdlog = Tk.Toplevel()
+cmdlog.title('RDBE 3.0 Command log ' + RDBE_ADDR)
+send2=Tk.Text(cmdlog,wrap='word',undo=True)
+send2.pack(expand=1,fill='both')
+send2.bind("<3>", on_click)
+send2.bind("<F1>", on_click)
+
+plots = Tk.Toplevel()
+plots.title('RDBE 3.0 Plots ' + RDBE_ADDR)
+label1=Tk.Label(plots, justify='left')
+label1.pack(anchor='w')  
+label2=Tk.Label(plots, justify='left')
+label2.pack(anchor='w')  
+label3=Tk.Label(plots, justify='left')
+label3.pack(anchor='w')  
+c = Tk.Checkbutton(plots, text="Plotting", variable=plot_en)
+c.pack(anchor='w')
+
+ef = Tk.Entry(plots)
+ef.pack(anchor='w')
+ef.delete(0, 'end')
+ef.insert(0, "1.4e6")
+
+f1 = Figure()
+a1 = f1.add_subplot(111)
+ffft = Figure()
+pfft = ffft.add_subplot(111)
+fhist = Figure()
+phist = fhist.add_subplot(111)
+f2 = Figure()
+a2 = f2.add_subplot(111)
+f3 = Figure()
+a3 = f3.add_subplot(111)
+f4 = Figure()
+a4 = f4.add_subplot(111)
+ftsys = Figure()
+ptsys0 = ftsys.add_subplot(121)
+ptsys1 = ftsys.add_subplot(122)
+
+canvasraw = FigureCanvasTkAgg(f1, master=plots)
+canvasraw.get_tk_widget().pack(fill='both', expand=1)
+canvasfft = FigureCanvasTkAgg(ffft, master=plots)
+canvasfft.get_tk_widget().pack(fill='both', expand=1)
+canvashist = FigureCanvasTkAgg(fhist, master=plots)
+canvashist.get_tk_widget().pack(fill='both', expand=1)
+canvaspcal = FigureCanvasTkAgg(f2, master=plots)
+canvaspcal.get_tk_widget().pack(fill='both', expand=1)
+canvaspcalfft = FigureCanvasTkAgg(f3, master=plots)
+canvaspcalfft.get_tk_widget().pack(fill='both', expand=1)
+canvaspcalphase = FigureCanvasTkAgg(f4, master=plots)
+canvaspcalphase.get_tk_widget().pack(fill='both', expand=1)
+canvastsys = FigureCanvasTkAgg(ftsys, master=plots)
+canvastsys.get_tk_widget().pack(fill='both', expand=1)
+
+
+toolbar7 = NavigationToolbar2TkAgg(canvastsys, plots)
+toolbar6 = NavigationToolbar2TkAgg(canvaspcalphase, plots)
+toolbar5 = NavigationToolbar2TkAgg(canvaspcalfft, plots)
+toolbar4 = NavigationToolbar2TkAgg(canvaspcal, plots)
+toolbar3 = NavigationToolbar2TkAgg(canvashist, plots)
+toolbar2 = NavigationToolbar2TkAgg(canvasfft, plots)
+toolbar1 = NavigationToolbar2TkAgg(canvasraw, plots)
+
+#send_cmd("dbe_pps_mon=disable")
+#send_cmd("dbe_pps_mon=enable:"+MCAST_ADDR+":"+str(MCAST_PORT))
+flogdat=open('rdbe30_mon_dat_' + RDBE_ADDR + '.log','ab',0)
+flogcmd=open('rdbe30_mon_cmd_' + RDBE_ADDR + '.log','a',0)
+
+try:
+    img = Tk.PhotoImage(file='rdbe30.gif')
+    root.tk.call('wm', 'iconphoto', root._w, img)
+except Tk.TclError:
+    pass
+
+rc = shelve.open('rdbe30_monrc_' + RDBE_ADDR, writeback=True)
+try:
+    root.geometry(rc['geom_root'])
+    plots.geometry(rc['geom_plots'])
+    cmdlist.geometry(rc['geom_cmdlist'])
+    cmdlog.geometry(rc['geom_cmdlog'])
+    send1.delete(1.0, 'end') 
+    send1.insert('end','dbe_pps_mon=enable:'+MCAST_ADDR+':'+str(MCAST_PORT)+'\n'+rc['cmds'])
+    rc.close()
+except:
+    pass
+
+root.mainloop()
+root.deletefilehandler(sock)
