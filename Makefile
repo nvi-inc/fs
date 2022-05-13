@@ -53,11 +53,17 @@ endif
 
 EXE_DIR = rwand chekr fserr ddout fs fsalloc incom matcn oprin pcalr onoff \
 fivpt pfmed error resid sigma xtrac boss antcn monit run labck setcl aquir \
-quikv mcbcn brk moon logex headp fmset ibcon quikr rte_go drudg rclcn pdplt logpl \
+quikv mcbcn brk moon logex headp fmset ibcon quikr rte_go drudg rclcn pdplt \
 lognm pcald msg fsvue fs.prompt inject_snap erchk mk5cn tpicd flagr \
-gnfit gndat gnplt dscon systests autoftp monpcal logpl1 holog gnplt1 predict \
-dbbcn rdbcn rdtcn mk6cn popen udceth0 rack mcicn be_client s_client lgerr fesh\
-plog rdbemsg new_ifdbb streamlog dbtcn core3h_conf
+gnfit gndat dscon systests autoftp logpl1 holog gnplt1 predict \
+dbbcn rdbcn rdtcn mk6cn popen udceth0 rack mcicn lgerr fesh\
+plog new_ifdbb streamlog dbtcn core3h_conf
+
+ifeq ($(FS_PYTHON_VERSION),2)
+EXE_DIR += logpl-python2 gnplt-python2 monpcal-python2 be_client-python2 s_client-python2 rdbemsg-python2
+else
+EXE_DIR += logpl gnplt monpcal be_client s_client rdbemsg
+endif
 
 ifndef FS_DISPLAY_SERVER_NO_MAKE
 EXE_DIR += fsserver
