@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 # Copyright (c) 2014 Stephen R. McWhirter
 # Copyright (c) 2022 NVI, Inc.
