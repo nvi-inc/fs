@@ -46,13 +46,13 @@ time.sleep(sleeptime);
 connection.send("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb ")
 time.sleep(sleeptime);
 if not doTimeout:
-	connection.send("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\n")
-	time.sleep(sleeptime)
-	connection.send("dddddddddddddddd\n")
-	rcvstr = connection.recv(4096)
-	time.sleep(sleeptime)
-	connection.send("eeeeeeeeeeeeeee\n")
+    connection.send("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\n")
+    time.sleep(sleeptime)
+    connection.send("dddddddddddddddd\n")
+    rcvstr = connection.recv(4096)
+    time.sleep(sleeptime)
+    connection.send("eeeeeeeeeeeeeee\n")
 else:
-	connection.send(" should time out, no newline!")
-	time.sleep(10)
+    connection.send(" should time out, no newline!")
+    time.sleep(10)
 s.close()
