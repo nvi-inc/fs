@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #
 # Copyright (c) 2014 Stephen R. McWhirter
+# Copyright (c) 2022 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -26,8 +27,8 @@ import string
 import sys
 import readline
 import struct
-import Tkinter as Tk
-import tkFont
+import tkinter as Tk
+import tkinter.font
 import matplotlib
 import os
 matplotlib.use('TkAgg')
@@ -106,7 +107,7 @@ ANY = "0.0.0.0"
 parms = {'-h':"224.0.2.29", '-p':"20020", '-H':"192.168.61.56", '-P':"5000"}
 try:
     opts, pargs = getopt.getopt(sys.argv[1:], "h:p:H:P", ["multicast host", "multicast port", "rdbe host", "rdbe port"])
-except getopt.GetoptError, msg:
+except getopt.GetoptError as msg:
     sys.exit(msg)
 for o,v in opts:
     parms[o] = v
@@ -114,7 +115,7 @@ MCAST_ADDR = str(parms['-h'])
 MCAST_PORT = int(parms['-p'])
 RDBE_ADDR = str(parms['-H'])
 RDBE_PORT = int(parms['-P'])
-print "MCAST Host:", MCAST_ADDR, "MCAST Port:", MCAST_PORT
+print("MCAST Host:", MCAST_ADDR, "MCAST Port:", MCAST_PORT)
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 sock.bind((MCAST_ADDR,MCAST_PORT))
@@ -260,9 +261,9 @@ root = Tk.Tk()
 plot_en=Tk.IntVar()
 plot_en.set(0)
 root.tk_setPalette(background='white')
-default_font = tkFont.Font(family="Helvetica", size=7)
-text_font = tkFont.Font(family="Helvetica", size=7)
-fixed_font = tkFont.Font(family="Helvetica", size=7)
+default_font = tkinter.font.Font(family="Helvetica", size=7)
+text_font = tkinter.font.Font(family="Helvetica", size=7)
+fixed_font = tkinter.font.Font(family="Helvetica", size=7)
 matplotlib.rc('figure',figsize=(4,.8),dpi=96)
 matplotlib.rcParams['figure.subplot.bottom']=0.2
 matplotlib.rcParams['figure.subplot.top']=0.8
