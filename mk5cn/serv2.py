@@ -36,7 +36,7 @@ s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.bind(('', myPort))
 s.listen(5)
 
-print "listening to the clients on port " + str(myPort)
+print("listening to the clients on port " + str(myPort))
 connection, address = s.accept()
 
 sfile = s.makefile()
