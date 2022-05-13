@@ -34,7 +34,7 @@ import os
 matplotlib.use('TkAgg')
 from matplotlib.figure import Figure
 import numpy as np
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from ctypes import *
 import subprocess
 import shelve
@@ -338,13 +338,13 @@ canvastsys = FigureCanvasTkAgg(ftsys, master=plots)
 canvastsys.get_tk_widget().pack(fill='both', expand=1)
 
 
-toolbar7 = NavigationToolbar2TkAgg(canvastsys, plots)
-toolbar6 = NavigationToolbar2TkAgg(canvaspcalphase, plots)
-toolbar5 = NavigationToolbar2TkAgg(canvaspcalfft, plots)
-toolbar4 = NavigationToolbar2TkAgg(canvaspcal, plots)
-toolbar3 = NavigationToolbar2TkAgg(canvashist, plots)
-toolbar2 = NavigationToolbar2TkAgg(canvasfft, plots)
-toolbar1 = NavigationToolbar2TkAgg(canvasraw, plots)
+toolbar7 = NavigationToolbar2Tk(canvastsys, plots)
+toolbar6 = NavigationToolbar2Tk(canvaspcalphase, plots)
+toolbar5 = NavigationToolbar2Tk(canvaspcalfft, plots)
+toolbar4 = NavigationToolbar2Tk(canvaspcal, plots)
+toolbar3 = NavigationToolbar2Tk(canvashist, plots)
+toolbar2 = NavigationToolbar2Tk(canvasfft, plots)
+toolbar1 = NavigationToolbar2Tk(canvasraw, plots)
 
 #send_cmd("dbe_pps_mon=disable")
 #send_cmd("dbe_pps_mon=enable:"+MCAST_ADDR+":"+str(MCAST_PORT))
