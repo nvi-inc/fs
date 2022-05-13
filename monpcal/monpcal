@@ -25,7 +25,7 @@ import sys
 import time
 import threading
 import os
-import popen2
+import subprocess
 
 
 class MainGui:
@@ -172,16 +172,15 @@ class FileReader(threading.Thread):
         lr = LineReader()
         #try to open file, on fail, display error
         try:
-            child = popen2.Popen3('tail -f '+ MainGui.filename)
-            output = child.fromchild
-            MainGui.pid = child.pid
-        #in case of an error:
-        except NameError:
+            child = subprocess.Popen(['tail', '-f', MainGui.filename],stdout=subprocess.PIPE,stderr=None,text=True,close_fds=True)
+        except:
             tools.stop()
             tools.message("Failed to run tail!")
-        else: #if no error
-        # child.poll() returns the exit status of child... -1 for running
-            while child.poll() == -1:
+        else:
+            output=child.stdout
+            MainGui.pid = child.pid
+        # child.poll() returns the exit status of child... None for running
+            while child.poll() == None :
                 position = -1
                 line = output.readline()
                 l1 = lr.getData(line)
@@ -198,12 +197,12 @@ class LogFinder(threading.Thread):
     def run(self):
         while 1:
             try:
-                _child = popen2.Popen3('lognm')
-            except NameError:
+                 _child = subprocess.Popen('lognm',stdout=subprocess.PIPE,stderr=None,text=True,close_fds=True)
+            except:
                 tools.message('Could not run lognm')
                 break
             else:
-                logfile = _child.fromchild
+                logfile = _child.stdout
                 _filename = logfile.read().rstrip()
                 logfile.close()
                 filename = "%s%s%s" % ('/usr2/log/',_filename,'.log')
