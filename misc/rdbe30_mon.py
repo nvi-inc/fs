@@ -20,8 +20,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import socket 
-import time 
+import socket
+import time
 import getopt
 import string
 import sys
@@ -49,7 +49,7 @@ chsel= 1 : 1 : 3 : 5 : 7 : 9 : 11 : 13 : 15
 chsel_en= 2 : chsel_enable : psn_enable
 data_connect= 192.168.10.10 : 50000 : 0x5766 : 10
 data_send= on : 2014-111-22-33-44 :  : 10
-diode= 80 : 200 
+diode= 80 : 200
 dot= 2014-111-22-33-44
 dot_inc= 10
 fpga_rd= w : 0x80009a : 2
@@ -69,7 +69,7 @@ personality= PFBG : PFBG_3_0.bin
 pps_mon= disable
 pps_mon= enable : 224.0.2.29 : 20020
 pps_offset?
-quantize= 
+quantize=
 raw? 0 : 50
 raw_ifx= 0
 reboot=
@@ -133,9 +133,9 @@ def handle_input(sock, state):
         frtm=time.strftime("%a %b %d",prtm)
         output = "%s : %d : %d : %s : %s" % (addr[0], tsys.epoch_ref, tsys.epoch_sec, frtm, rtm[0:4]+ '-' + rtm[4:7] + '-' + rtm[7:9] + '-' + rtm[9:11] + '-' + rtm[11:13] )
         dot.config(text=output)
-        mustr= "raw interface %d mu %.2f sigma %.2f" % (tsys.raw_ifx, tsys.mu, tsys.sigma) 
+        mustr= "raw interface %d mu %.2f sigma %.2f" % (tsys.raw_ifx, tsys.mu, tsys.sigma)
         fi, la =text1.yview()
-        text1.delete(1.0, 'end') 
+        text1.delete(1.0, 'end')
         text1.insert('end', tsys.stat_str)
         text1.yview_moveto(fi)
         if (plots.winfo_exists() and plot_en.get()):
@@ -166,7 +166,7 @@ def handle_input(sock, state):
 
             pcaltmp = np.array(np.zeros(1024), dtype=complex)
             for i in range(1024):
-                pcaltmp[i] = tsys.pcal_cos[i]-1j*tsys.pcal_sin[i] 
+                pcaltmp[i] = tsys.pcal_cos[i]-1j*tsys.pcal_sin[i]
             try:
                 efg=float(ef.get())
             except:
@@ -225,7 +225,7 @@ def send_cmd(cmd):
     sent = sock.send(cmd + ';\n')
     chunk = sock.recv(10000)
     #print len(chunk)
-    while len(chunk) == 1448:        
+    while len(chunk) == 1448:
         data += chunk
         chunk = sock.recv(10000)
     data += chunk
@@ -255,7 +255,7 @@ def on_click(event):
     rc['geom_cmdlist'] = cmdlist.geometry()
     rc['geom_cmdlog'] = cmdlog.geometry()
     rc['cmds'] = send1.get(2.0, 'end')
-    rc.close()   
+    rc.close()
 
 root = Tk.Tk()
 plot_en=Tk.IntVar()
@@ -293,11 +293,11 @@ send2.bind("<F1>", on_click)
 plots = Tk.Toplevel()
 plots.title('RDBE 3.0 Plots ' + RDBE_ADDR)
 label1=Tk.Label(plots, justify='left')
-label1.pack(anchor='w')  
+label1.pack(anchor='w')
 label2=Tk.Label(plots, justify='left')
-label2.pack(anchor='w')  
+label2.pack(anchor='w')
 label3=Tk.Label(plots, justify='left')
-label3.pack(anchor='w')  
+label3.pack(anchor='w')
 c = Tk.Checkbutton(plots, text="Plotting", variable=plot_en)
 c.pack(anchor='w')
 
@@ -363,7 +363,7 @@ try:
     plots.geometry(rc['geom_plots'])
     cmdlist.geometry(rc['geom_cmdlist'])
     cmdlog.geometry(rc['geom_cmdlog'])
-    send1.delete(1.0, 'end') 
+    send1.delete(1.0, 'end')
     send1.insert('end','dbe_pps_mon=enable:'+MCAST_ADDR+':'+str(MCAST_PORT)+'\n'+rc['cmds'])
     rc.close()
 except:
