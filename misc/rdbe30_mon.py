@@ -349,7 +349,7 @@ toolbar1 = NavigationToolbar2Tk(canvasraw, plots)
 #send_cmd("dbe_pps_mon=disable")
 #send_cmd("dbe_pps_mon=enable:"+MCAST_ADDR+":"+str(MCAST_PORT))
 flogdat=open('rdbe30_mon_dat_' + RDBE_ADDR + '.log','ab',0)
-flogcmd=open('rdbe30_mon_cmd_' + RDBE_ADDR + '.log','a',0)
+flogcmd=open('rdbe30_mon_cmd_' + RDBE_ADDR + '.log','a')
 
 try:
     img = Tk.PhotoImage(file='rdbe30.gif')
