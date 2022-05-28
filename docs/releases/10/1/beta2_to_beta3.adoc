@@ -22,7 +22,7 @@
 
 = FS 10.1.0-beta2 to FS 10.1.0-beta3 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 4.9 - April 2022
+Version 5.0 - May 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -148,7 +148,8 @@ title item and/or the details are very brief.
 +
 
 The new default method for pushing to the BKG data center is
-`ftp-ssl`. The data center and station code are now case insensitive.
+`ftp-ssl`. The upload URL for OPAR was updated. The data center and
+station code are now case insensitive.
 
 +
 [%collapsible]
@@ -171,6 +172,21 @@ NOTE: After June 2022, BKG upload access will require use of an
 individual account. You can get information to apply for an account by
 going to https://ivs.bkg.bund.de/ and following the
 `Access{nbsp}Information` link.
+
+.. Update URL for upload to OPAR.
+
++
+
+OPAR now uses a different URL, _++https://ivsopar.obspm.fr/upload/++_,
+for uploading. The old one,
+_++https://ivsopar.obspm.fr/upload/scripts/upload.php++_, will
+continue to work for some time.
+
++
+
+Thanks to Sébastien Lambert (OPAR) for sending the new URL and
+Christophe Barache (OPAR) for keeping the old one open for backward
+compatibility for at least some period.
 
 .. Make data center case insensitive.
 
@@ -288,8 +304,26 @@ Environment Variables>> document.
 
 ====
 
+. Add missing default control file, _msg.ctl_ for the _msg_ program.
+
 === drudg changes
 
-There have been no _drudg_ changes since _10.1.0-beta2_.
+The _drudg_ opening message date is `2022-05-28`.
 
-The _drudg_ opening message date remains `2022-04-08`.
+. Fix wait time bug for `disk2ile=abort,...`
+
++
+
+Since _10.1.0-beta1_, _drudg_ has not calculated the correct wait time
+before the `disk2file=abort,...` command was issued. This was caused
+by an uninitialized variable; the behavior was different for different
+systems. On 32-bit systems, this bug seemed to typically cause the
+wait time to be incorrectly formatted. As a result, it was reject by
+the FS, causing the wait to not occur, possibly aborting the
+`disk2file` operation before it was finished. For 64-bit systems, this
+bug seemed to typically cause the wait time to be too long, possibly
+causing the subsequent scan to start late by a few minutes.
+
++
+
+Thanks to Jon Quick (HartRAO) for reporting this bug.
