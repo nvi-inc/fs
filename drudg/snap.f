@@ -243,6 +243,8 @@ C     data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
 C
 C History:
 ! Now put in most recent first. 
+! 2022-05-28 JMG. Memorial day weekend. I should be playing not working. 
+!                 Fixed bug in 'disk2file'. Was not  setting iscan_gap_prev at end of loop.
 ! 2021-12-18 JMG. Got rid of some unused calculations.
 !                 new: iscan_gap: time between end of current scan and start of next. 
 !                 new: kcheck_done, kcheck_done_prev. Have we issued kcheck_done_prev 
@@ -737,7 +739,7 @@ C  2.5  Calculate all the times and flags we will need.
           if(klast_obs) then
             iscan_gap=0
           else
-            iscan_gap=iTimeDifSec(iTime_scan_beg_next,iTime_scan_end)     
+            iscan_gap=iTimeDifSec(iTime_scan_beg_next,iTime_scan_end)       
           endif 
 !          write(lufile,'("SCAN GAP", i7)') iscan_gap
 
@@ -751,8 +753,8 @@ C  2.5  Calculate all the times and flags we will need.
  ! Calculate time to abort autoftp for previous scan. Only need to do if a previous scan.   
             idt=idt-(isettm+ical+5)     !isettm is time for setup. 
                                         ! 5 is for execution of disk2file         
-            idt=min(idt,iautoftp_abort_time)        
-            call TimeAdd(itime_scan_end_prev,idt,itime_disk_abort)
+            idt=min(idt,iautoftp_abort_time)      
+            call TimeAdd(itime_scan_end_prev,idt,itime_disk_abort)   
           endif        
 
 ! This indicates start of phase reference.     
@@ -1270,7 +1272,7 @@ C POSTOB
 
        kcheck_done_prev=kcheck_done 
        kPhaseRef_Prev=KPhaseRef
-
+       iscan_gap_prev=iscan_gap
        icod_prev=icod
        kdata_xfer_prev=kdisk2file .or. kin2net 
        call copy_time(itime_scan_end, itime_scan_end_prev)
