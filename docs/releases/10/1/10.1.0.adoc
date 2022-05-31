@@ -20,9 +20,9 @@
 
 :doctype: book
 
-= FS 10.1.0 Beta3 Update Notes
+= FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 5.1 - May 2022
+Version 5.2 - May 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -35,26 +35,29 @@ Version 5.1 - May 2022
 
 == Introduction
 
-If you have already installed _10.1.0-beta2_, please refer to the
-<<beta2_to_beta3.adoc#,FS 10.1.0-beta2 to FS 10.1.0-beta3 Update
-Notes>> document instead.
-
-If you have only installed _10.1.0-beta1_, please refer to the
-<<beta1_to_beta2.adoc#,FS 10.1.0-beta1 to FS 10.1.0-beta2 Update
-Notes>> document, then the <<beta2_to_beta3.adoc#,FS 10.1.0-beta2 to
-FS 10.1.0-beta3 Update Notes>> document.
-
 This document covers the steps needed to update from FS _10.0.0_ to
-_10.1.0-beta3_ and the changes in the new version. This update is not
-an operational release. It is intended for _testing_ by all stations
-using FS _10.0.0_. Installing the new version as an update is much
-simpler than the update to _10.0.0_, see the <<Upgrading from 10.0.0>>
-section below.
+_10.1.0_ and the changes in the new version. Installing the new
+version as an update is much simpler than the update to _10.0.0_, see
+the <<Upgrading from 10.0.0>> section below.
 
 FS _10.1.0_ has been tested for several configurations but not all
 possible ones. You should test it carefully before using it for
 operations. Please email Ed if you encounter problems so that we can
 resolve them.
+
+[NOTE]
+====
+
+If you have already installed _10.1.0-beta2_, please refer to the
+<<beta2_to_10.1.0.adoc#,FS 10.1.0-beta2 to FS 10.1.0 Update Notes>>
+document instead.
+
+If you have only installed _10.1.0-beta1_, please refer to the
+<<beta1_to_beta2.adoc#,FS 10.1.0-beta1 to FS 10.1.0-beta2 Update
+Notes>> document, then the <<beta2_to_10.1.0adoc#,FS 10.1.0-beta2 to
+FS 10.1.0 Update Notes>> document.
+
+====
 
 The changes in the FS and _drudg_ for _10.1.0_ are covered in the
 <<Changes since 10.0.0>> section below. The most significant changes
@@ -79,11 +82,6 @@ geodesy intensive schedules.
 
 * Change the default FS _git_ branch to `main`
 
-+
-
-NOTE: #This has _not_ been implemented in the _alpha_ and _beta_
-pre-releases.#
-
 As always, we are deeply indebted to Jonathan Quick (HartRAO, South
 Africa) for his many significant contributions that go far beyond what
 is explicitly mentioned here. For this particular release, his
@@ -97,9 +95,9 @@ particularly on DBBC3 related issues.
 
 We thank Chris Coughlin, Kiah Imai (and the rest of the team at KPGO,
 Hawaii), Katie Pazamickas and Jay Redmond (both at GGAO, Maryland) for
-testing beta releases.
+testing Beta releases.
 
-We thank Beppe Maccaferri (Medicina, Italy) for being a diligent beta
+We thank Beppe Maccaferri (Medicina, Italy) for being a diligent Beta
 tester and reporting bugs.
 
 We thank Javi Gonzalez (Yebes, Spain) for testing RDBE phase-cal tone
@@ -107,18 +105,23 @@ logging improvements.
 
 == Upgrading from 10.0.0
 
+You must have already upgraded to _10.0.0_ according to the
+<<../0/10.0.0.adoc#,FS 10.0.0 Update Notes>> document before
+installing this update.
+
+[NOTE]
+====
+
 If you have already installed _10.1.0-beta2_, please refer to the
-<<beta2_to_beta3.adoc#,FS 10.1.0-beta2 to FS 10.1.0-beta3 Update
+<<beta2_to_10.1.0adoc#,FS 10.1.0-beta2 to FS 10.1.0 Update
 Notes>> document instead.
 
 If you have only installed _10.1.0-beta1_, please refer to the
 <<beta1_to_beta2.adoc#,FS 10.1.0-beta1 to FS 10.1.0-beta2 Update
-Notes>> document, then the <<beta2_to_beta3.adoc#,FS 10.1.0-beta2 to
-FS 10.1.0-beta3 Update Notes>> document.
+Notes>> document, then the <<beta2_to_10.1.0adoc#,FS 10.1.0-beta2 to
+FS 10.1.0 Update Notes>> document.
 
-Otherwise, you must have already upgraded to _10.0.0_ according to the
-<<../0/10.0.0.adoc#,FS 10.0.0 Update Notes>> document before installing
-this update.
+====
 
 === Backup your operational system
 
@@ -130,9 +133,9 @@ a back-up before installing>> section in the
 <<../../misc/install_reference.adoc#,Installation Reference>>
 document.
 
-You can also using symbolic links with copies of your old operational
+You can also use symbolic links with copies of your old operational
 directories to switch back and forth between in your operational
-_10.0.0_ configuration and a test install of _10.0.1_. This is covered
+_10.0.0_ configuration and a test install of _10.1.0_. This is covered
 in detail in the
 <<../../misc/install_reference.adoc#_using_symbolic_links,Using
 symbolic links>> subsection of the above referenced section.
@@ -146,80 +149,13 @@ The next step requires _root_ permissions.
 [IMPORTANT]
 ====
 
-#The paragraph immediately below in this *IMPORTANT* block does not
-apply to _alpha_ and _beta_ releases.#
-
 The default branch of the FS has changed to `main`. To simplify the
-installation, we recommend that you re-clone the repository. If you
-use _git_ (either one of the first two methods below) and need to
+installation, the directions after this *IMPORTANT* block re-clone the
+repository. If you use _git_ (either one of the first two methods
+after this block; the third method does not use _git_) and need to
 preserve your old repository as your working copy, please use the
-directions in this <<note,NOTE>> below in this step.
-
-====
-
-There are three options given below. The directions in the first two
-include preserving a copy of your current _/usr2/fs-git_ directory.
-This is not required, but may help you recover if there is an error.
-You can of course use any name you like for the copy. You should use a
-different name for the copy than _fs-git.old-10.0.0_ if that directory
-already exists.
-
-* If you are using an FSL9, FSL10, or another system that can support
-`https` connections with _github.com_:
-
-  cd /usr2
-  mv fs-git fs-git.old-10.0.0
-  git clone https://github.com/nvi-inc/fs.git fs-git
-  cd fs-git
-  git checkout -q 10.1.0-beta3
-  make install
-
-+
-
-Answer `*y*` to confirm installation.
-
-* If you are able to use _ssh_ instead (this no longer includes
-FSL8):
-
-  cd /usr2
-  mv fs-git fs-git.old-10.0.0
-  git clone git@github.com:nvi-inc/fs fs-git
-  cd fs-git
-  git checkout -q 10.1.0-beta3
-  make install
-
-+
-
-Answer `*y*` to confirm installation.
-
-* If you are using FSL8, or otherwise unable to use _git_:
-
-+
-
-NOTE: This option does not include making a copy of your old directory
-since it is preserved anyway.
-
-. Please follow the steps, through the step that includes the option
-to set the link, in the
-<<../../misc/release_model.adoc#_installing_from_an_archive,Installing
-from an archive>> subsection in the
-<<../../misc/release_model.adoc#,Release Model>> document. Use
-__10.1.0-beta3__ as the value for __tag__. Be sure to set the link for
-__/usr2/fs__.
-
-. Return to the current document, continuing with the next step,
-<<Fix file permissions>> below.
-
-[NOTE]
-====
-<<note,NOTE>>[[note]]:
-
-IMPORTANT: #This *NOTE* does not apply to _alpha_ AND _beta_
-releases.#
-
-If you are able to use _git_ and need to preserve your old repository
-for operations, instead of following the directions above, you can
-download the update and change your default branch to `main` with:
+directions within this *IMPORTANT* block instead to download the
+update and change your default branch to `main`:
 
 .Click here for the details
 [%collapsible]
@@ -242,18 +178,72 @@ directory;
   git remote set-head origin -a
   git branch -rd origin/master
 
-. Checkout the  new version:
+. Checkout the new version:
 
-  git checkout -q 10.1.0-beta3
+  git checkout -q 10.1.0
 
 . Login as _root_
 
 +
 
-This is to prepare for the next step below.
+This is to prepare for the next step below, <<Fix file permissions>>,
+which you should follow next.
 
 =====
 ====
+
+There are three options given below. The directions in the first two
+include preserving a copy of your current _/usr2/fs-git_ directory.
+This is not required, but may help you recover if there is an error.
+You can of course use any name you like for the copy. You should use a
+different name for the copy than _fs-git.old-10.0.0_ if that already
+exists.
+
+* If you are using an FSL9, FSL10, or another system that can support
+`https` connections with _github.com_:
+
+  cd /usr2
+  mv fs-git fs-git.old-10.0.0
+  git clone https://github.com/nvi-inc/fs fs-git
+  cd fs-git
+  git checkout -q 10.1.0
+  make install
+
++
+
+Answer `*y*` to confirm installation.
+
+* If you are able to use _ssh_ instead (this no longer includes
+FSL8):
+
+  cd /usr2
+  mv fs-git fs-git.old-10.0.0
+  git clone git@github.com:nvi-inc/fs fs-git
+  cd fs-git
+  git checkout -q 10.1.0
+  make install
+
++
+
+Answer `*y*` to confirm installation.
+
+* If you are using FSL8, or otherwise unable to use _git_:
+
++
+
+NOTE: This option does not include making a copy of your old directory
+since it is preserved anyway.
+
+. Please follow the steps, through the step that includes the option
+to set the link, in the
+<<../../misc/release_model.adoc#_installing_from_an_archive,Installing
+from an archive>> subsection in the
+<<../../misc/release_model.adoc#,Release Model>> document. Use
+__10.1.0__ as the value for __tag__. Be sure to set the link for
+__/usr2/fs__.
+
+. Return to the current document, continuing with the next step,
+<<Fix file permissions>> below.
 
 === Fix file permissions
 
@@ -300,14 +290,15 @@ with:
 
 If your station code uses `refrw()`, the _make_ will fail. You will
 need to update to use `refrw_bad()` or `refrwn()`. The use of
-`refrw_bad()` should be sufficient in the short-term, but you should
-change to `refrwn()` when convenient.
+`refrw_bad()`, which uses the same algorithm as the old `refrw()`,
+should be sufficient in the short-term, but you should change to
+`refrwn()` when convenient.
 
 For more information, please see the <<refrw_bad,refrw_bad()>> FS
-change item (if that link doesn't work in your browser: click on
-<<refraction,Improve refraction calculations>>, open the *Details*
-toggle below that location by clicking on it, go `Back` in the
-browser, and finally click on the original link).
+change item (if that link doesn't work in your browser, click on this
+link instead: <<refraction,Improve refraction calculations>>, open the
+*Details* toggle below that location by clicking on it, go `Back` in
+the browser, and finally click on the original link).
 
 ====
 
@@ -340,9 +331,10 @@ correctly in version _10.0.0_.
 
 For more information, please see the <<fix_equipment,Fix drudg
 equipment options>> _drudg_ change item (if that link doesn't work in
-your browser: click on <<skedf,Changes to skedf.ctl options>>, open
-the *Details* toggle below that location by clicking on it, go `Back`
-in the browser, and finally click on the original link).
+your browser, click on this link instead:
+<<skedf,Changes to skedf.ctl options>>, open the *Details* toggle
+below that location by clicking on it, go `Back` in the browser, and
+finally click on the original link).
 
 . If present, remove use of _setsid_ from _stpgm.ctl_.
 
@@ -410,10 +402,10 @@ the FS starts successfully.
 
 The new errors reported are described in the
 <<additional_rxg_errors,Additional .rxg file errors>> FS change item
-(if that link doesn't work in your browser: click on
-<<rxgfiles,Improve error messages when reading .rxg files>>, open the
-*Details* toggle below that location by clicking on it, go `Back` in
-the browser, and finally click on the original link).
+(if that link doesn't work in your browser, click on this link
+instead: <<rxgfiles,Improve error messages when reading .rxg files>>,
+open the *Details* toggle below that location by clicking on it, go
+`Back` in the browser, and finally click on the original link).
 
 . If you have a Mark 5C and/or FlexBuff recorder, use _pfmed_ to add
 `mk5c_config` and/or `fb_config` procedures to your `station`
@@ -628,14 +620,11 @@ Previously, the _onoff_ program did not detect errors reported by
 _antcn_; now it does. It seems unlikely that that this will cause a
 problem, but if it does, please see the <<onoff_antcn,onoff now
 detects antcn errors>> FS change item (if that link doesn't work in
-your browser: click on <<onoff,Improve onoff>>, open the *Details*
-toggle below that location by clicking on it, go `Back` in the
-browser, and finally click on the original link)..
+your browser, click on this link instead <<onoff,Improve onoff>>, open
+the *Details* toggle below that location by clicking on it, go `Back`
+in the browser, and finally click on the original link)..
 
 === Consider when to update your back-ups
-
-CAUTION: This step may not be appropriate if you are beta testing
-since the beta test versions are not intended for operations.
 
 It would be prudent to wait until you have successfully run an
 experiment or two and preferably received word that the experiment(s)
@@ -810,7 +799,7 @@ communication problem occurs.
 +
 
 It seems unlikely that these changes will cause a problem, but if they
-do, a short term workaround is provided. If the environment variable
+do, a short-term workaround is provided. If the environment variable
 `FS_ONOFF_SUPPRESS_ANTCN_ERRORS` is set to `1`, the previous behavior
 will be restored. In the longer term, the behavior of __antcn__ should be
 corrected.
@@ -1055,9 +1044,9 @@ and compressed full log are uploaded by default.
 +
 
 A new option, `-r`, was added for uploading just a reduced log. As
-before, the `-z` option will upload just a compressed full, It is not
-expected that either of these options will get much use. The `-r` and
-`-z` options cannot be used together.
+before, the `-z` option will upload just a compressed full log. It is
+not expected that either of these options will get much use. The `-r`
+and `-z` options cannot be used together.
 
 +
 
@@ -1203,13 +1192,13 @@ when a session is started while it is running.
 Previously _msg_ only read the log file (and session) name on start-up
 and when sending messages. It was modified to reread the log file (and
 session) name whenever a new form is displayed. As a result, selecting
-any form or send a sending a message from one will cause the log file
-name to be reread (and session name reset), in other words, this will
-occur for any significant user action. This should provide more
-intuitive behavior, primarily because it is no longer necessary to
-restart _msg_ for each session. The setting of the session name when
-reading the log file name can be turned off by disabling the `Setup`
-selection `Get session name from log` if it is not desired.
+any form or sending a message from one will cause the log file name to
+be reread (and session name reset), in other words, this will occur
+for any significant user action. This should provide more intuitive
+behavior, primarily because it is no longer necessary to restart _msg_
+for each session. The setting of the session name when reading the log
+file name can be turned off by disabling the `Setup` selection `Get
+session name from log` if it is not desired.
 
 Thanks to Jonathan Quick (HartRAO) for reporting the issue, providing
 feedback on the changes, and testing the fix.
@@ -1245,10 +1234,10 @@ with the `use_setup_proc` option in _skedf.ctl_. The default is to not
 use it, which is the same as the previous behaviour. For more
 information on the _skedf.ctl_ option, see the
 <<use_setup_proc,use_setup_proc>> _drudg_ change item (if that link
-doesn't work in your browser: click on <<skedf,Changes to skedf.ctl
-options>>, open the *Details* toggle below that location by clicking
-on it, go `Back` in the browser, and finally click on the original
-link).
+doesn't work in your browser, click on this link instead:
+<<skedf,Changes to skedf.ctl options>>, open the *Details* toggle
+below that location by clicking on it, go `Back` in the browser, and
+finally click on the original link).
 
 CAUTION: The previous behavior of re-executing a setup procedure for
 each recording can provide some "`self-healing`" of the equipment
@@ -1353,7 +1342,7 @@ _mk5ad.ctl_ control file
 
 +
 
-This command tailors it behaviour depending on what type of recorder
+This command tailors its behaviour depending on what type of recorder
 is specified in _equip.ctl_  control file, not by the name of the
 command.
 
@@ -1377,7 +1366,7 @@ procedure files and log entries clearer.
 
 +
 
-The `equip` log header had grown too long. It has been split up.
+The `equip` log header line had grown too long. It has been split up.
 
 +
 [%collapsible]
@@ -1446,12 +1435,12 @@ reload.
 
 If an RDBE has to be rebooted (sometimes it is unavoidable) after the
 epoch change and _before_ there was a chance to update the epoch for
-all the RDBE, the rebooted RDBE's VDIF epoch will not agree with the
+all the RDBEs, the rebooted RDBE's VDIF epoch will not agree with the
 other RDBEs. The disagreeing epoch will be shown in inverse video in
 the RDBE monitor display (_monit6_). _fmset_ can be used to decrement
-the epoch of the rebooted RDBE so that it agrees with others.  It is
-not an error to have the RDBEs using a previous epoch, they just must
-all use the same one.
+the epoch of the rebooted RDBE so that it agrees with the others. It
+is not an error to have the RDBEs using a previous epoch, they just
+must all use the same one.
 
 =====
 
@@ -1472,13 +1461,14 @@ using the same time.
 Although in principle there is nothing wrong with recording data from
 RDBEs that have slightly different times (unlike having different VDIF
 epochs, which makes recording impossible with Mark 6 recorders), the
-recovery of the recorded data is too costly to use in most cases. As a
-result, to bring the operator's attention to the conflict, _monit6_
-was modified to show DOT values that are not the current time in
-inverse video. This change could have been limited to using inverse
-video to just show times that don't agree with the majority since only
-a disagreement causes a problem. However, there did not seem to be a
-use case for recording with the time intentionally set wrong.
+process to recover the recorded data is too costly to use in most
+cases. As a result, to bring the operator's attention to the conflict
+(so that it can be fixed), _monit6_ was modified to show DOT values
+that are not the current time in inverse video. This change could have
+been limited to using inverse video to just show times that don't
+agree with the majority since only a disagreement causes a problem.
+However, there did not seem to be a use case for recording with the
+time intentionally set wrong.
 
 ====
 
@@ -1531,7 +1521,7 @@ it or comment it out.
 
 +
 
-The example control file, _/usr2/fs/st.default/control/rdbemsg.ctl_
+The example control file, _/usr2/fs/st.default/control/rdbemsg.ctl_,
 was updated accordingly.
 
 +
@@ -1799,7 +1789,7 @@ elevation.
 +
 
 The old routine can still be used by changing calls to the new name.
-This may be preferable in the short term if the effect of this error
+This may be preferable in the short-term if the effect of this error
 is built into current point models. To get consistent results, station
 code can be converted to use `refrwn()` and a new model can be
 determined, when it is convenient.
@@ -1834,7 +1824,8 @@ Navigation,`" Section 9.3.2.2.1 (pp. 295-297), John Wiley, 2003
 
 +
 
-The Lanyi algorithm is expected to be the best of ones in _poclb.a_.
+The Lanyi algorithm is expected to be the best of the ones in
+_poclb.a_.
 
 .. Change `onoff` and `holog` to use `refrwn()` in place of
 (incorrect) `refrw()`.
@@ -2104,8 +2095,8 @@ Apparently, this was not a significant issue because, apparently,
 modifying the default contents was uncommon. If you have been having
 trouble with this, we apologize.
 
-The error messages have been more explicit about the cause of any read
-error and the offending line is printed to aid in correcting the
+The error messages have been made more explicit about the cause of any
+read error and the offending line is printed to aid in correcting the
 problem.
 
 Thanks to Stuart Weston (Warkworth) for reporting this.
@@ -2565,7 +2556,7 @@ made (in commit `9e9906d9` for version _9.12.2_ released in March of
 if there was no `?W` (or `?WWW) string in the message to be replaced
 with the value.  The principle being that it was more important to
 report the information to help solve a problem than to adhere to
-incorrect formatting of the error message.
+the possibly incorrect formatting of the error message.
 
 +
 
@@ -2589,7 +2580,7 @@ to allow shorter placeholders, down to `?W`, to be used. A `?W` can be
 used to show a one digit number with one space in front of it. To do
 this, the `?W` must be directly appended to the previous word in the
 message, for example `word?W`, which may be a little hard to read in
-the _fserr.ctl_ or _sterr.ctl_ file.
+the _fserr.ctl_, or _sterr.ctl_, file.
 
 .. Corrected `error number for reporting trouble opening _time.ctl_.
 
@@ -2774,10 +2765,10 @@ started at least a few minutes ahead of time, there should be no
 delays in schedule execution due to the setup procedure.
 
 For more information, please see the <<use_setup_proc,use_setup_proc>>
-_drudg_ change item (if that link doesn't work in your browser: click
-on <<skedf,Changes to skedf.ctl options>>, open the *Details* toggle
-below that location by clicking on it, go `Back` in the browser, and
-finally click on the original link).
+_drudg_ change item (if that link doesn't work in your browser, click
+on this link instead: <<skedf,Changes to skedf.ctl options>>, open the
+*Details* toggle below that location by clicking on it, go `Back` in
+the browser, and finally click on the original link).
 
 =====
 
@@ -2830,7 +2821,7 @@ procedures for Mark 5C and Flexbuff recorders, respectively
 
 These procedures can be used to override the default configuration of
 Mark 5C and FlexBuff recorders. They are called after the `mk5c_mode`
-or `fb_mode` commands (and after the `thread...` procedure if
+or `fb_mode` commands (and after the `thread...` procedure, if
 present). They are local procedures intended to provide tuning for the
 recorder configuration.
 
@@ -3148,7 +3139,7 @@ above are:
 +
 
 TIP: Help text and a complete listing of available options can be
-viewed with `*/usr2/fs/misc/rxgfix3{nbsp}-h*`.
+viewed with `*/usr2/fs/misc/rxgfix3{nbsp}&#8209;h*`.
 
 +
 
@@ -3313,8 +3304,8 @@ you noted above.
 
 . [[loop]] <<loop,Loop>>:
 
-.. If the line after `GnPlt2` date comment that you found is another
-`GnPlt2` date comment, note the date in that comment.
+.. If the line after the `GnPlt2` date comment that you found is
+another `GnPlt2` date comment, note the date in that comment.
 
 +
 
