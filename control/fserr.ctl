@@ -7332,7 +7332,7 @@ SC   -3
 setcl: setting system time not supported
 ""
 SC   -4
-setcl: formatter to cpu boot time difference greater than 248 days
+setcl: formatter time and FS PC boot time differ by more than 248 days, check formatter time and FS PC uptime
 ""
 SC   -5
 setcl: formatter time garbled
