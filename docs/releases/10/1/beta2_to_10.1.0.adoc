@@ -22,7 +22,7 @@
 
 = FS 10.1.0-beta2 to FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 5.1 - May 2022
+Version 5.2 - June 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -47,31 +47,31 @@ the <<Changes since 10.1.0-beta2>> section below.
 
 You must have already installed _10.1.0-beta2_ according to the
 <<beta1_to_beta2.adoc#,FS 10.1.0-beta1 to 10.1.0-beta2 Update Notes>>
-document before following the directions in the current document.
+document before upgrading. If you have installed _10.1.0-beta2_,
+follow the directions below.
 
 === Login as root
+
 
 The next step requires _root_ permissions.
 
 === Fetch FS 10.1.0
 
-. Please follow the directions in the <<10.1.0.adoc#_fetch_fs_10_1_0,
+IMPORTANT: With the release of _10.1.0_, the default branch for the FS
+repo has changed to `main`. Please be sure to follow the directions
+pointed to below for fetching the new version.
+
+Please follow the directions in the <<10.1.0.adoc#_fetch_fs_10_1_0,
 Fetch FS 10.1.0>> step in the <<10.1.0.adoc#,FS 10.1.0 Update Notes>>
 document, except that you may want to use a more appropriate new name
 (maybe `fs-git.old-10.1.0-beta2`) for renaming your old __git__ repo
 directory.
 
-. Proceed directly to the <<10.1.0.adoc#_fix_file_permissions, Fix
-file permissions>> step in the same document and then return to the
-<<Login as prog>> step below in this document.
-
 === Fix file permissions
 
-. If you haven't already, please follow the directions in the
+Please follow the directions in the
 <<10.1.0.adoc#_fix_file_permissions, Fix file permissions>> step in
 the <<10.1.0.adoc#,FS 10,1,0 Update Notes>> document.
-
-. Proceed to the <<Login as prog>> step below.
 
 === Login as prog
 
@@ -98,7 +98,18 @@ as _oper_.
 
 === Local customizations
 
-There are no new local customizations at this time.
+. If you have been using local copies of _fesh_ and/or _plog_ and/or
+_rdbemsg_, you should remove them from use.
+
++
+
+A simple way to do this, while preserving the local copy, is to rename
+it to something else, e.g., for _fesh_, you might name it _fesh.old_,
+if that doesn't conflict with an existing name. If you have aliases
+setup (probably in _~oper/.bash_aliases_ or _~oper/.cshrc_, but
+possibly elsewhere) to make the local copy the default, you should
+deactivate them so you will get the new standard _fesh_ and _plog_ by
+default.
 
 === Review changes
 
@@ -297,6 +308,17 @@ Environment Variables>> document.
 ====
 
 . Add missing default control file, _msg.ctl_ for the _msg_ program.
+
+.. Elaborate in `SC   -4` error message to provide more explicit
+advice.
+
++
+
+This error is reported by _setcl_ when the formatter and FS PC boot
+time differ by more than 248 days. This may occur because the PC has
+been running a long time since it was booted, but it also could be
+because the formatter time has not been set or is wrong. The error
+message now explicitly suggests checking both.
 
 === drudg changes
 

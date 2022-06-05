@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 5.2 - May 2022
+Version 5.3 - June2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -37,27 +37,13 @@ Version 5.2 - May 2022
 
 This document covers the steps needed to update from FS _10.0.0_ to
 _10.1.0_ and the changes in the new version. Installing the new
-version as an update is much simpler than the update to _10.0.0_, see
-the <<Upgrading from 10.0.0>> section below.
+version (see the <<Upgrading from 10.0.0>> section below) is much
+simpler than the update to _10.0.0_.
 
 FS _10.1.0_ has been tested for several configurations but not all
 possible ones. You should test it carefully before using it for
 operations. Please email Ed if you encounter problems so that we can
 resolve them.
-
-[NOTE]
-====
-
-If you have already installed _10.1.0-beta2_, please refer to the
-<<beta2_to_10.1.0.adoc#,FS 10.1.0-beta2 to FS 10.1.0 Update Notes>>
-document instead.
-
-If you have only installed _10.1.0-beta1_, please refer to the
-<<beta1_to_beta2.adoc#,FS 10.1.0-beta1 to FS 10.1.0-beta2 Update
-Notes>> document, then the <<beta2_to_10.1.0adoc#,FS 10.1.0-beta2 to
-FS 10.1.0 Update Notes>> document.
-
-====
 
 The changes in the FS and _drudg_ for _10.1.0_ are covered in the
 <<Changes since 10.0.0>> section below. The most significant changes
@@ -77,48 +63,49 @@ includes `e-vlbi` (case insensitive).
 
 * A new _drudg_ option `close_scan` in _skedf.ctl_ to make it easier
 to breakaway from one schedule to run another schedule for a short
-time and then return to the original schedule. This is useful for
+time and then return to the original schedule. This can be useful for
 geodesy intensive schedules.
 
 * Change the default FS _git_ branch to `main`
 
-As always, we are deeply indebted to Jonathan Quick (HartRAO, South
-Africa) for his many significant contributions that go far beyond what
-is explicitly mentioned here. For this particular release, his
-contributions include feature suggestions and testing for DBBC3
-support, as well as for many non-DBBC3 specific features, and for
-documentation enhancements. Many of the improvements that were made
-are due to his thoughtfulness and diligence.
+As always, we are deeply indebted to Jonathan Quick (HartRAO) for his
+many significant contributions that go far beyond what is explicitly
+mentioned here. For this particular release, his contributions include
+feature suggestions and testing for DBBC3 support, as well as for many
+non-DBBC3 specific features, and for documentation enhancements. Many
+of the improvements that were made are due to his thoughtfulness and
+diligence.
 
-We thank Eskil Varenius (Onsala, Sweden) for bug reports and feedback,
+We thank Eskil Varenius (Onsala) for bug reports and feedback,
 particularly on DBBC3 related issues.
 
-We thank Chris Coughlin, Kiah Imai (and the rest of the team at KPGO,
-Hawaii), Katie Pazamickas and Jay Redmond (both at GGAO, Maryland) for
-testing Beta releases.
+We thank Chris Coughlin, Kiah Imai (and the rest of the team at KPGO),
+Katie Pazamickas and Jay Redmond (both at GGAO) for testing Beta
+releases.
 
-We thank Beppe Maccaferri (Medicina, Italy) for being a diligent Beta
-tester and reporting bugs.
+We thank Beppe Maccaferri (Medicina) for being a diligent Beta tester
+and reporting bugs.
 
-We thank Javi Gonzalez (Yebes, Spain) for testing RDBE phase-cal tone
-logging improvements.
+We thank Javi Gonzalez (Yebes) for testing the RDBE phase-cal tone
+logging improvement.
 
 == Upgrading from 10.0.0
 
 You must have already upgraded to _10.0.0_ according to the
 <<../0/10.0.0.adoc#,FS 10.0.0 Update Notes>> document before
-installing this update.
+installing this update. If you have already installed _10.0.0_, please
+follow the directions below.
 
 [NOTE]
 ====
 
-If you have already installed _10.1.0-beta2_, please refer to the
-<<beta2_to_10.1.0adoc#,FS 10.1.0-beta2 to FS 10.1.0 Update
-Notes>> document instead.
+If you have _10.1.0-beta2_ installed, please refer to the
+<<beta2_to_10.1.0.adoc#,FS 10.1.0-beta2 to FS 10.1.0 Update Notes>>
+document instead.
 
-If you have only installed _10.1.0-beta1_, please refer to the
+If you have _10.1.0-beta1_  installed, please refer to the
 <<beta1_to_beta2.adoc#,FS 10.1.0-beta1 to FS 10.1.0-beta2 Update
-Notes>> document, then the <<beta2_to_10.1.0adoc#,FS 10.1.0-beta2 to
+Notes>> document, then the <<beta2_to_10.1.0.adoc#,FS 10.1.0-beta2 to
 FS 10.1.0 Update Notes>> document.
 
 ====
@@ -138,11 +125,12 @@ directories to switch back and forth between in your operational
 _10.0.0_ configuration and a test install of _10.1.0_. This is covered
 in detail in the
 <<../../misc/install_reference.adoc#_using_symbolic_links,Using
-symbolic links>> subsection of the above referenced section.
+symbolic links>> subsection of the section and document referenced
+above.
 
 === Login as root
 
-The next step requires _root_ permissions.
+IMPORTANT: The next step requires _root_ permissions.
 
 === Fetch FS 10.1.0
 
@@ -151,11 +139,12 @@ The next step requires _root_ permissions.
 
 The default branch of the FS has changed to `main`. To simplify the
 installation, the directions after this *IMPORTANT* block re-clone the
-repository. If you use _git_ (either one of the first two methods
-after this block; the third method does not use _git_) and need to
-preserve your old repository as your working copy, please use the
-directions within this *IMPORTANT* block instead to download the
-update and change your default branch to `main`:
+repository. If you need to preserve your old repository as your
+working copy and you use _git_ to install (either one of the first two
+methods after this block; the third method does not use _git_), please
+use the directions in the *Click here for the details* toggle within
+this *IMPORTANT* block to download the update and change your default
+branch to `main`:
 
 .Click here for the details
 [%collapsible]
@@ -187,7 +176,7 @@ directory;
 +
 
 This is to prepare for the next step below, <<Fix file permissions>>,
-which you should follow next.
+which you should go to next.
 
 =====
 ====
@@ -235,14 +224,14 @@ NOTE: This option does not include making a copy of your old directory
 since it is preserved anyway.
 
 . Please follow the steps, through the step that includes the option
-to set the link, in the
+to set the _/usr2/fs_ link, in the
 <<../../misc/release_model.adoc#_installing_from_an_archive,Installing
 from an archive>> subsection in the
 <<../../misc/release_model.adoc#,Release Model>> document. Use
 __10.1.0__ as the value for __tag__. Be sure to set the link for
-__/usr2/fs__.
+__/usr2/fs__ by running *`make install`*.
 
-. Return to the current document, continuing with the next step,
+. Return to this document, continuing with the next step,
 <<Fix file permissions>> below.
 
 === Fix file permissions
@@ -310,8 +299,8 @@ sure you are using the latest version of the display server.
 
 === Login as oper
 
-Except as indicated, the actions in the next step should be performed
-as _oper_.
+IMPORTANT: Except as indicated, the actions in the next step should be
+performed as _oper_.
 
 === Local customizations
 
@@ -320,12 +309,12 @@ as _oper_.
 +
 
 If you did not have the `equipment_override` option selected in
-_skedf.ctl_, you probably should. This will also require you to
-specify the `equipment` option with the correct values if you aren't
-already. This is the safest way to specify your equipment in
-_skedf.ctl_. However, other combinations are possible depending on
-your needs. Due to bugs in _drudg_ these options were not operating
-correctly in version _10.0.0_.
+_skedf.ctl_, you probably should. You will also need to specify the
+`equipment` option with the correct values if you haven't already.
+This is the safest way to specify your equipment in _skedf.ctl_.
+However, other combinations are possible depending on your needs. Due
+to bugs in _drudg_ these options were not operating correctly in
+version _10.0.0_.
 
 +
 
@@ -343,7 +332,7 @@ finally click on the original link).
 If you have been using _setsid_ in your _stpgm.ctl_, possibly to
 insulate __xterm__s from kbd:[Control+C] when not using the display
 server, you should remove it. It is no longer needed and if it is used
-on an `x` line in the file, it will prevent the FS from starting
+on an `x` line in the file now, it will prevent the FS from starting
 successfully. It is also not needed if the display server is in use.
 
 . Make sure all lines with _xterm_ in _stpgm.ctl_ use `x` as the
@@ -352,7 +341,7 @@ second field.
 +
 
 For use without the display server, this will prevent the _xterm_ from
-being aborted by a kbd:[Control+C] and causing the FS to abort.  When
+being aborted by a kbd:[Control+C] and causing the FS to abort. When
 used with the display server, this will make it part of the clients,
 which is normally what is needed.
 
@@ -371,7 +360,7 @@ the new file and remove the obsolete contents of _equip.ctl_, execute:
 
 This will create the file, preserving the values from the DBBC3 line
 in your old _equip.ctl_ file. Your original file will be preserved as
-_equip.ctl.bak_, which must not already exist. Creating this file
+_equip.ctl.bak_, which must not exist already. Creating this file
 should allowing running the FS if you don't have a DBBC3. If you have
 a DBBC3, you should customize the contents in the <<dbbc3config,FS
 DBBC3 Configuration>> step below.
@@ -437,7 +426,7 @@ These procedures are called by _drudg_ generated setup procedures for
 systems with Mark 5C and FlexBuff recorders. They provide a means to
 tune the setup of _jive5ab_ for your hardware independent of the
 observing mode. They can be empty if your recorders don't need tuning
-or you aren't aware of what tuning is needed.
+or you don't know what tuning to use.
 
 +
 
@@ -457,8 +446,8 @@ procedure to your `station` procedure library.
 
 +
 
-_drudg_ uses this procedure in place of `checkmk5` when the selected
-recorder is FlexBuff.
+_drudg_ now uses this procedure in place of `checkmk5` when the
+selected recorder is FlexBuff.
 
 +
 
@@ -492,27 +481,18 @@ the FS for use with a DBBC3>> section of the <<dbbc3_ops.adoc#,FS 10.1
 DBBC3 Operations Manual>>. If you expect to get a DBBC3, these changes
 can be deferred until then.
 
-. If you are using _tcsh_ as your login shell for _oper_ or _prog_ (or
-AUID accounts) and have not already done so, adjust _~/.xsession_ .
+. If you have been using local copies of _fesh_ and/or _plog_ and/or
+_rdbemsg_, you should remove them from use.
 
 +
 
-This step is optional, but may be helpful if you are using _tcsh_ as
-your login shell for _oper_ and/or _prog_ (or AUID accounts) and use
-the FS with the graphical display on the console. For this case, you
-may wish to make the changes in the
-<<../0/10.0.0.adoc#xsession,Updating ~/.xsession>> sub-step in
-<<../0/10.0.0.adoc#_miscellaneous_fslx_changes,Miscellaneous FSLx
-changes>> step of the <<../0/10.0.0.adoc#,FS 10.0.0 Update Notes>>
-document. If you have already made these changes, this step can be
-skipped.
-
-+
-
-This change will make sure the window manager (__fvwm2__) operates
-with the FS runtime environment variables set. This could be important
-for example, if you want to run __fsclient__ (perhaps for a
-`scan_check` window) from a console hotkey.
+A simple way to do this, while preserving the local copy, is to rename
+it to something else, e.g., for _fesh_, you might name it _fesh.old_,
+if that doesn't conflict with an existing name. If you have aliases
+setup (probably in _~oper/.bash_aliases_ or _~oper/.cshrc_, but
+possibly elsewhere) to make the local copy the default, you should
+deactivate them so you will get the new standard _fesh_ and _plog_ by
+default.
 
 . Cleanup _.rxg_ file comments:
 
@@ -548,7 +528,30 @@ you.
 
 ====
 
-. Make the `scnch` and `erchk` windows `NeverFocus`.
+. If you are using _tcsh_ as your login shell for _oper_ or _prog_ (or
+AUID accounts) and have not already done so, adjust _~/.xsession_ .
+
++
+
+This step is optional, but may be helpful if you are using _tcsh_ as
+your login shell for _oper_ and/or _prog_ (or AUID accounts) and use
+the FS with the graphical display on the console. For this case, you
+may wish to make the changes in the
+<<../0/10.0.0.adoc#xsession,Updating ~/.xsession>> sub-step in the
+<<../0/10.0.0.adoc#_miscellaneous_fslx_changes,Miscellaneous FSLx
+changes>> step of the <<../0/10.0.0.adoc#,FS 10.0.0 Update Notes>>
+document. If you have already made these changes, this step can be
+skipped.
+
++
+
+This change will make sure the window manager (__fvwm2__) operates
+with the FS runtime environment variables set. This could be
+important, for example, if you want to run __fsclient__ (perhaps for a
+`scan_check` window) from a console hotkey.
+
+. Make the `scnch` and `erchk` windows `NeverFocus` when using the FS
+on the console.
 
 +
 
@@ -556,8 +559,8 @@ This step is optional, but will eliminate these windows getting the
 input focus, which can be a nuisance. Add `NeverFocus` for the
 `scnch`, `erchk`, and `monan` windows in your _~/.fvm2rc_ files so
 they will never accidentally get the focus (they don't accept input).
-They will still be able to be scrolled. If this is desired, add the
-lines:
+The `scnch` and `erchk` windows will still be able to be scrolled. If
+this changed is desired, add the lines:
 
   Style "erchk" NeverFocus
   Style "scnch" NeverFocus
@@ -584,9 +587,9 @@ accounts to have the intended effect.
 
 === Login as oper
 
-Make sure you are logged in as _oper_ for the next step. This step in
-included to make sure you have switched back to _oper_ after the
-previous step.
+IMPORTANT: Make sure you are logged in as _oper_ for the next step.
+This step in included to make sure you have switched back to _oper_
+after the previous step.
 
 === Test the FS
 
@@ -594,14 +597,15 @@ previous step.
 ====
 
 Before testing, if as part of your testing of station code you ran the
-FS under the _prog_ account, either reboot or use the command:
+FS under the _prog_ account, either reboot or after terminating the
+FS, use the command:
 
  fsserver stop
 
-to make sure the server is no longer running as _prog_.
+to make sure the server is no longer being run by _prog_.
 
 For details on why this is needed, please see the second *IMPORTANT*
-item in
+item in the
 <<../0/fsserver_changes.adoc#_server_continues_running_after_fs_termination,Server
 continues running after FS termination>> subsection of the
 <<../0/fsserver_changes.adoc#,FS 10.0.0 fsserver Changes>> document.
@@ -619,10 +623,10 @@ everything works as you expect for normal operations.
 Previously, the _onoff_ program did not detect errors reported by
 _antcn_; now it does. It seems unlikely that that this will cause a
 problem, but if it does, please see the <<onoff_antcn,onoff now
-detects antcn errors>> FS change item (if that link doesn't work in
-your browser, click on this link instead <<onoff,Improve onoff>>, open
-the *Details* toggle below that location by clicking on it, go `Back`
-in the browser, and finally click on the original link)..
+detects antcn errors>> FS change item below (if that link doesn't work
+in your browser, click on this link instead: <<onoff,Improve onoff>>,
+open the *Details* toggle below that location by clicking on it, go
+`Back` in the browser, and finally click on the original link).
 
 === Consider when to update your back-ups
 
@@ -631,9 +635,11 @@ experiment or two and preferably received word that the experiment(s)
 produced good data. The chances of needing to use your back-up from
 before updating should be small. If something does happen, you can
 copy the back-up to the (now assumed bad) updated disk. You can then
-either use the restored disk or apply the FS update again. The FSL10
-test procedure has more options for recovery. Managing this is a lot
-easier and safer if you have a third disk.
+either use the restored disk or apply the FS update again. If you are
+using FSL10, its recoverable testing procedure
+(https://nvi-inc.github.io/fsl10/raid.html#_recoverable_testing) has
+more options for recovery. Managing this is a lot easier and safer if
+you have a third disk.
 
 === Review changes
 
@@ -722,9 +728,9 @@ Thanks to: the EVN, for funding this development work; Jon Quick
 extensive discussions, and making a system available for remote
 testing; John Gipson (GSFC) for _drudg_ support; Eskil Varenius
 (Onsala), for testing as well as making a system available for remote
-testing; Sven Dornbusch (MPIfR, Bonn), for elaborating on the details
-of DBBC3 functionality; Uwe Bach (Effelsberg) and Marjolein Verkouter
-(JIVE) for providing helpful suggestions.
+testing; Sven Dornbusch (MPIfR), for elaborating on the details of
+DBBC3 functionality; Uwe Bach (Effelsberg) and Marjolein Verkouter
+(JIVE) for extensive discussions and providing helpful suggestions.
 
 ====
 
@@ -772,7 +778,7 @@ your _antcn_'s output anyway you prefer.
 Previously, for systems that require locking the gains, they were set
 before confirming that the antenna had reached the starting position.
 Now _onoff_ waits until it has been reached. This will have no impact
-when _onoff_ is started already at the starting position, including
+when _onoff_ is launched already at the starting position, including
 when run by _aquir_.
 
 +
@@ -791,24 +797,24 @@ large elevation slews. The is the reason that this change was made.
 
 +
 
-Previously, these errors were ignored due to a bug. Now _antcn_ errors
-are detected. If one occurs now, _onoff_ will try to run _antcn_ a
-second time to make _onoff_ more robust if a transitory antenna
-communication problem occurs.
+Previously, these errors were ignored due to a bug. Now _onoff_ will
+detect _antcn_ errors. If one occurs, _onoff_ will repeat the request
+to _antcn_, one time, to try to make itself more robust if a
+transitory antenna communication problem occurs.
 
 +
 
 It seems unlikely that these changes will cause a problem, but if they
 do, a short-term workaround is provided. If the environment variable
 `FS_ONOFF_SUPPRESS_ANTCN_ERRORS` is set to `1`, the previous behavior
-will be restored. In the longer term, the behavior of __antcn__ should be
-corrected.
+will be restored. In the longer term, it may be possible to change your __antcn__
+to avoid this issue.
 
 +
 
 TIP: If you are using the display server, you must stop _fsserver_ or
 reboot to enable a change in environment variable settings. Please see
-the beginning of
+the beginning of the
 <<../../../misc/env_vars.adoc#_runtime_variables,Runtime variables>>
 section in the <<../../../misc/env_vars.adoc#,FS Environment
 Variables>> document, for more information on setting environment
@@ -888,9 +894,9 @@ fit. A default/example file _/usr2/fs/st.default/control/erchk.ctl_
 has been provided. It recreates the behavior of _erchk_ before this
 update with the exception that `sp` errors are no longer suppressed
 (as was requested in https://github.com/nvi-inc/fs/issues/174[#174]).
-A comment is included explaining how to restore suppression of `sp`
-errors, if that is desired. The complete syntax of the file is
-explained in the comments.
+The complete syntax of the file is described in the comments included
+in the file. A comment is included explaining how to restore
+suppression of `sp` errors, if that is desired.
 
 The syntax of he control file is fairly simple, but it is important to
 be careful when modifying it. Some changes can prevent errors from
@@ -932,9 +938,9 @@ setting the environment variable `FS_LOG_SIZE_WARNING` to the desired
 size in MB. If it is not set, it defaults to 100 MB.
 
 The FS must be restarted in a session with the variable set for it to
-take effect. If the display server is in use, _fsserver_ must be
-stopped (or the system rebooted) _after_ stopping the FS and _before_
-restarting it with:
+take effect. If the display server is in use, the system must be
+rebooted, or _fsserver_ must be stopped, _after_ stopping the FS, and
+_before_ restarting it with:
 
   fsserver stop
 
@@ -965,17 +971,17 @@ are now case insensitive.
 
 The default for pushing files (logs) to the BKG data center is now
 `ftp-ssl`. Unfortunately, accessing BKG with `ftp-ssl` cannot be
-supported on FSL8. The old behavior using `ftp` can be enabled by
-setting the environment variable `PLOG_BKG_METHOD` to `ftp`. However,
-BKG is expecting to discontinue support for non-SSL `ftp` at the end
-of May 2022.
+supported on FSL8. The old behavior using non-SSL `ftp` can be
+restored by setting the environment variable `PLOG_BKG_METHOD` to
+`ftp`. However, BKG is expecting to discontinue support for non-SSL
+`ftp` after June 9, 2022.
 
 +
 
 NOTE: After June 2022, BKG upload access will require use of an
 individual account. You can get information to apply for an account by
-going to https://ivs.bkg.bund.de/ and following the
-`Access{nbsp}Information` link.
+going to https://ivs.bkg.bund.de/ and following the `Access` link
+under `Data Center` on the left.
 
 .. Update URL for upload to OPAR.
 
@@ -1019,7 +1025,7 @@ log if it is open in the FS (to _ddout_)..
 +
 
 NOTE: In such a case, the operator needs to close the log before
-running _plog_ on it. That is good practice in any case.
+running _plog_ on it. That is good practice anyway.
 
 +
 
@@ -1050,15 +1056,15 @@ and `-z` options cannot be used together.
 
 +
 
-Thanks to Chevo Terrazas (MGO) for suggesting uploading both files in
-one step.
+Thanks to Chevo Terrazas (MGO) for suggesting uploading both file by
+default.
 
 .. Respect `NETRC_DIR` for the `BKG` data center (closing
 https://github.com/nvi-inc/fs/issues/113[#113]).
 
 +
 
-This had been overlooked in
+This case had been overlooked in closing
 https://github.com/nvi-inc/fs/issues/39[#39], which had added the
 `NETRC_DIR` environment variable.
 
@@ -1089,12 +1095,12 @@ _plog_ and _fesh_ (the latter now also case insensitive), consistent.
 
 +
 
-The new default method for accessing the BKG data center is `ftp-ssl`.
+The new default download method for the BKG data center is `ftp-ssl`.
 Options were added to print the summary to the printer from _drudg_
 and to skip downloading the schedule. New environment variables and
 options were added to handle the new _drudg_ prompts that can be
-selected in _skedf.ctl_. The data center and station code are now
-case insensitive.
+selected in _skedf.ctl_. The data center and station code are now case
+insensitive.
 
 +
 [%collapsible]
@@ -1107,10 +1113,9 @@ case insensitive.
 The default for pulling schedule (and _.txt_ note) files from the BKG
 data center is now `ftp-ssl` (using `anonymous` access).
 Unfortunately, accessing BKG with `ftp-ssl` cannot be supported on
-FSL8. The old behavior using `ftp` can be enabled by setting the
-environment variable `FESH_BKG_METHOD` to `ftp`. However, BKG is
-expecting to discontinue support for non-SSL `ftp` at the end of May
-2022.
+FSL8. The old behavior using non-SSL `ftp` can be restored by setting
+the environment variable `FESH_BKG_METHOD` to `ftp`. However, BKG is
+expecting to discontinue support for non-SSL `ftp` after June 9, 2022.
 
 .. Add `-P` option to print the summary listing to the printer (closing
 https://github.com/nvi-inc/fs/issues/112[#112]).
@@ -1121,9 +1126,10 @@ With `-P`, when _drudg_ is run by _fesh_, it will print the summary
 directly to the printer. It is appropriate to make this a _fesh_
 option since it is an integrated feature of _drudg_. To print other
 files, it is recommended to make a wrapper for _fesh_. An example
-wrapper, which prints the summary and the _.prc_ file, is included as
-_/usr2/fs/fesh/feshp_. This can be copied to _~oper/bin_ and
-customized to print other files.
+wrapper, which includes the normal processing, prints the summary, and
+prints the _.prc_ file, is included as _/usr2/fs/fesh/feshp_. This can
+be copied to _~oper/bin_ and possibly customized to print different
+files.
 
 +
 
@@ -1251,13 +1257,13 @@ See `*help=setup_proc*` for more information.
 
 ====
 
-. Add `mk5init` command
+. Add `mk5init` command (closing
+https://github.com/nvi-inc/fs/issues/164[#164])
 
 +
 
 The `mk5init` command, in principle, allows changing which Mark 5 or
-FlexBuff recorder is being used, without restarting the FS (closing
-https://github.com/nvi-inc/fs/issues/164[#164]).
+FlexBuff recorder is being used, without restarting the FS.
 
 +
 [%collapsible]
@@ -1421,11 +1427,12 @@ transmission.
 
 The VDIF epochs of all the RDBEs being recorded must agree to
 successfully record with a Mark 6 recorder. One of the ways they can
-get out of sync is if a subset of the RDBEs is rebooted. In order to
-simplify dealing with an RDBE needing to be rebooted during an
-experiment, it is recommended that the VDIF epochs be reset as soon as
-convenient (the first gap in observing) after an epoch change, which
-occurs at the start of January 1 and July 1 UT.
+get out of sync is if a subset of the RDBEs is rebooted after a recent
+epoch change. In order to simplify dealing with an RDBE needing to be
+rebooted during an experiment, it is recommended that the VDIF epochs
+be reset as soon as convenient (the first gap in observing) after an
+epoch change. Epoch changes occur at the start of January 1 and July 1
+UT.
 
 A possible method for resetting the epoch is to reboot. However,
 rebooting creates a risk of a bad FPGA load, which in some cases,
@@ -1469,6 +1476,8 @@ been limited to using inverse video to just show times that don't
 agree with the majority since only a disagreement causes a problem.
 However, there did not seem to be a use case for recording with the
 time intentionally set wrong.
+
+Thanks to  Javi Gonzalez (Yebes) for requesting this.
 
 ====
 
@@ -1550,7 +1559,7 @@ resulted in the even numbered multiples of 5 MHz being logged even
 though they did not have any power.
 
 If the RDBEs and the FS had been setup for 10 MHz spacing, the tones
-logged with no power would have been the odd multiples of 5 MHz.  Now
+logged with no power would have been the odd multiples of 5 MHz. Now
 only the tones expected to have power, multiples of 10 MHz, will be
 logged, assuming a correct 10 MHz spacing setup is used.
 
@@ -1564,6 +1573,8 @@ spacing, the 0^th^ one MHz tone, corresponding to 0.4 MHz, should not
 have power. In this case, the first multiple of one MHz with power
 should be the 1^st^. The phase-cal offset in the `lo` command is
 ignored.
+
+Thanks to  Javi Gonzalez (Yebes) for testing this improvement.
 
 ====
 
@@ -1718,7 +1729,7 @@ NOTE: Downstream amplitude calibration data should not have been
 affected as long as it uses the raw count data, which is how it was
 designed to be used.
 
-Thanks to Jun Yang (Onsala) for discovering and reporting this. Thank
+Thanks to Jun Yang (Onsala) for discovering and reporting this. Thanks
 to Jun and Eskil Varenius (also at Onsala) for making systems
 available to verify the fixes.
 
@@ -1788,11 +1799,11 @@ elevation.
 
 +
 
-The old routine can still be used by changing calls to the new name.
-This may be preferable in the short-term if the effect of this error
-is built into current point models. To get consistent results, station
-code can be converted to use `refrwn()` and a new model can be
-determined, when it is convenient.
+The old routine can still be used by changing calls to use its new
+name. This may be preferable in the short-term if the effect of this
+error is built into current point models. To get consistent results,
+station code can be converted to use `refrwn()` and a new model
+determined, when it is convenient to do both.
 
 +
 
@@ -1844,9 +1855,9 @@ fixed meteorological parameters.
 +
 
 The older `refrwn()` \(C) and `refr()` (FORTRAN) routines are
-apparently derived from W.  R. Iliff and J.  M. Holt, "`Use of Surface
+apparently derived from W. R. Iliff and J. M. Holt, "`Use of Surface
 Refractivity in the Empirical Prediction of Total Atmosphere
-Refractions,`" J.  Research NBS 67D (Radio Prop.), No.  1, pp. 31-35,
+Refractions,`" J. Research NBS 67D (Radio Prop.), No. 1, pp. 31-35,
 January-February, 1963
 (https://www.semanticscholar.org/paper/Use-of-surface-refractivity-in-the-empirical-of-Iliff-Holt/1ddcd0e4e672dd890198539361c5237c033001f7)
 and C. A. Clark, "`Haystack Pointing System: Radar Coordinate
@@ -1873,13 +1884,13 @@ This speeds-up recovery of a deleted log that the FS is still using.
 If there is no file with the name of the current log (it has been
 deleted or renamed) when a user command would close it, the FS will
 attempt to recover the file and give it its original name. The buffer
-used to recopy the file was increased to 2 Mib (i.e., 512 sectors) so
+used to recopy the file was increased to 2 MiB (formerly 128 KiB) so
 it is faster, particularly for very large experiment logs with
 multicast data.
 
 IMPORTANT: The recovery will not work if in the meantime a file has
 been created with the same name. The FS will think that is the log and
-give up. In that case, The log file contents will be lost. Using
+give up. In that case, the log file contents will be lost. Using
 `log=_name_` or `schedule=_name_` will not cause this.
 
 As part of this change, the variables for handling file sizes and
@@ -1913,7 +1924,7 @@ between epochs B1950 and J2000. Two options approaches are available:
 ** The method used by the FS in _fslb/prefr.f_. This is the same
 method used by _drudg_ (which has its own copy of _prefr.f_).
 
-** The method provided by the SOFA library.
+** The method provided by the SOFA library (https://www.iausofa.org/).
 
 --
 +
@@ -1942,8 +1953,8 @@ conditions.
 
 +
 
-This is program has a set of comparisons hard-coded, but could be
-modified to test other situations.
+This program has a set of comparisons hard-coded, but could be
+modified to test other combinations.
 
 ====
 
@@ -1971,8 +1982,8 @@ https://github.com/nvi-inc/fs/issues/100[#100]).
 +
 
 As of _10.0.0-beta1_, the previous practice of disabling receipt of
-certain signals, in particular `SIGINT` (for kbd:[Control+C]) had been
-removed. It has been reinstated. When the FS is run without the
+certain signals, in particular `SIGINT` (for kbd:[Control+C]), had
+been removed. It has been reinstated. When the FS is run without the
 display server, this assures that no FS programs will be aborted if a
 kbd:[Control+C] is accidentally entered in the terminal session where
 the FS is running. However, this does not prevent a kbd:[Control+C]
@@ -2005,7 +2016,7 @@ with a kbd:[Control+C], even when the display server is not being used
 as long as you use `x` in any lines in your _stpgm.ctl_ that use
 _xterm_.
 
-WARNING: An FS _xterm_ window can still be terminated abnormally using
+WARNING: An FS _xterm_ window can still be aborted abnormally using
 the decorations for the window. When the FS is not being running with
 the display server, this will kill the FS _abnormally_. The decoration
 button that includes the `Delete` and `Destroy` options can be removed
@@ -2013,9 +2024,11 @@ if desired. In the _~/.fvm2rc_ file include `NoButton 1` in the
 window's `Style` (see the `Style "oprin" ...` line in
 _st.default/oper/.fvwm2rc_ for an example).
 
-WARNING: The FS, run without the display server, can still be
-terminated _abnormally_ by using the _kill_ command to send a `SIGINT`
-(`2`) or `SIGKILL` (`9`) signal to an _xterm_ run by the FS.
+WARNING: The FS, run without the display server, can still be aborted
+_abnormally_ by using the _kill_ command to send a `SIGINT` (`2`) or
+`SIGKILL` (`9`) signal to an _xterm_ run by the FS. A `SIGKILL` sent
+to any core FS program, regardless of whether the display server is
+being used, will cause the FS to abort _abnormally_.
 
 ====
 
@@ -2067,10 +2080,10 @@ The comments explain the format of the source records in the file.
 
 Although the data used in the file came from other sources, for many
 years the code that read the _flux.ctl_ file was the complete
-documentation for the format. The example file in
-_/usr2/fs/st.default/control/_ now includes the details in an easier
-to read form. You can merge these comments, which are at the end of
-the example file, into your local copy or refer to the example.
+documentation for the format. The example file,
+_/usr2/fs/st.default/control/flux.ctl_, now includes the details in an
+easier to read form. You can merge these comments, which are at the
+end of the example file, into your local copy or refer to the example.
 
 Thanks to Stuart Weston (Warkworth) for suggesting this and
 contributing some of the information in the comments.
@@ -2107,7 +2120,8 @@ Thanks to Stuart Weston (Warkworth) for reporting this.
 
 +
 
-The new messages identify the errors more clearly.
+The new messages identify the errors more clearly. Some errors that
+were previously ignored are now caught.
 
 +
 [%collapsible]
@@ -2176,10 +2190,10 @@ the problem clearly enough.
 A few other, minor, errors are still not being caught. In particular,
 if a character that cannot be part of a numeric field appears
 _within_, or at the end of, a numeric field, that error will not be
-reported. In that case, the field up to the out-of-place character will
-be used as the value. Hopefully this is an unlikely error. A leading
-character that cannot be part of a numeric field will be reported as
-an error.
+reported. In that case, the field up to the out-of-place character
+will be used as the value. Hopefully this is an unlikely error. A
+leading character in a numeric field that is inconsistent with the
+field being a numeric value _will_ be reported as an error.
 
 ====
 
@@ -2190,10 +2204,10 @@ an error.
 [%collapsible]
 ====
 
-The contents of the _.rxg_ selected by an `lo=...` command are logged
-the first time the file is selected since the log was last opened.
-There was a redundant comma in the T~cal~(K) table log entries after
-the _.rxg_ file name.
+The contents of the _.rxg_ file selected by an `lo=...` command are
+logged the first time the file is referred to since the log was last
+opened. There was a redundant comma in the T~cal~(K) table log entries
+after the _.rxg_ file name. It was removed.
 
 ====
 
@@ -2228,11 +2242,12 @@ examples>> section.
 
 +
 
-These can be used to make linking references to arbitrary text in
-the documents. This convention is covered as "`other anchors`" in the
-<<../../../misc/font_conventions.adoc#_links,Links>> subsection.
-The document also shows how to make the anchor visible in
-the text. This is described in the example
+These can be used to make linking references to arbitrary text in the
+documents. This convention is covered as "`other anchors`" in the
+<<../../../misc/font_conventions.adoc#_links,Links>> subsection. The
+document also shows how to make the anchor visible in the text, so the
+reader cans see where they were directed. This is described in the
+example
 <<../../../misc/font_conventions.adoc#_linking_to_inline_anchors,Linking
 to inline anchors>> subsection.
 
@@ -2243,7 +2258,7 @@ to inline anchors>> subsection.
 Add use of bold for user input and bold italic for replaceable user
 input. This convention is described in the
 <<../../../misc/font_conventions.adoc#_code_blocks,Code blocks>>
-subsection.  The example is covered in the subsection
+subsection. The example is covered in the subsection
 <<../../../misc/font_conventions.adoc#_italics_and_bold_in_code_blocks,Italics
 and bold in code blocks>>.
 
@@ -2388,12 +2403,12 @@ to identify which files are for which combinations.
 
 ====
 
-. Add other miscellaneous bug fixes
+. Add other miscellaneous bug fixes and enhancements
 
 +
 
-Several small issues, most unlikely to affect typical use of the FS,
-were fixed.
+Several small items, most unlikely to affect typical use of the FS,
+were fixed or improved.
 
 +
 [%collapsible]
@@ -2456,7 +2471,7 @@ The `mout6()` function was using an `int` to hold the time instead of
 a `time_t`, resulting in incorrect values for the nominal VDIF epoch
 on 64-bit systems. This had very limited impact. The nominal VDIF
 epoch was only used to apply inverse video to epochs that weren't
-nominal, if _all_ RDBEs had different epochs, a rather unlikely case.
+nominal when _all_ RDBEs had different epochs, a rather unlikely case.
 If it occurred, all the VDIF epochs would have been shown in inverse
 video as "`wrong,`" which would have been "`incorrect`" for at most
 one epoch. This has been fixed.
@@ -2477,10 +2492,9 @@ Additionally, if it became no longer useful, it was not removed. In
 the version _9.12.13_, the hint lines dynamically adjusted depending
 on whether an increment was possible. This behavior was not correctly
 preserved in the merge of versions _9.13.2_ (old "`main`") branch and
-_9.12.13_ (old "`vgos`" branch). The fixed version uses statically
+_9.12.13_ (old "`vgos`" branch). The new version uses statically
 placed hints lines for simplicity, only showing the  VDIF epoch
 increment line when it could be useful.
-
 
 .. Prevent decimation from being specified for 5B/Ethernet in the
 `mk5c_mode` (and `fb_mode`) command.
@@ -2508,7 +2522,6 @@ reported the _commanded_ rate in parentheses.
 +
 
 NOTE: The _core3h_mode_ command follows the same improved convention.
-
 
 +
 
@@ -2554,15 +2567,15 @@ made (in commit `9e9906d9` for version _9.12.2_ released in March of
 2016), to report the so-called `LWHAT` two character Hollerith values
 (or up to four character representation of numbers) for an error even
 if there was no `?W` (or `?WWW) string in the message to be replaced
-with the value.  The principle being that it was more important to
-report the information to help solve a problem than to adhere to
-the possibly incorrect formatting of the error message.
+with the value. The principle being that it was more important to
+report the information to help solve a problem than to adhere to the
+possibly incorrect formatting of the error message.
 
 +
 
 This did not seem to cause much of a problem. However, some programs,
 in particular _aquir_, _fivpt_, _onoff_, were incorrectly setting the
-`LWHAT` value.  Other programs, in particular _mk5cn_, _dbbcn_, and
+`LWHAT` value. Other programs, in particular _mk5cn_, _dbbcn_, and
 _rdbcn_, were carelessly setting the `LWHAT` value when there was no
 error. The latter problem caused extraneous strings in error messages
 from unrelated commands. We believe all cases of this have been fixed.
@@ -2592,8 +2605,19 @@ Previously, the message for reporting errors when sending data to the
 Ethernet devices (Mark 5s, DBBCs, RDBEs, Mark 6s), incorrectly stated
 that the connection was closed. The connection is not closed. Perhaps
 it should be, but the incorrect statements have been removed until the
-functionality is changed.  The affected errors are:
-`DB`/`M5`/`M6`/`RA` `-102`.
+functionality is changed. The affected errors are: `DB`/`M5`/`M6`/`RA`
+`-102`.
+
+.. Elaborate in `SC   -4` error message to provide more explicit
+advice.
+
++
+
+This error is reported by _setcl_ when the formatter and FS PC boot
+time differ by more than 248 days. This may occur because the PC has
+been running a long time since it was booted, but it also could be
+because the formatter time has not been set or is wrong. The error
+message now explicitly suggests checking both.
 
 .. Correct `bbc_gain` command error codes
 
@@ -2841,9 +2865,9 @@ for Mark 5C and FlexBuff recorders
 ====
 
 This procedure controls whether VDIF data is recorded multithreaded or
-single thread per file. Its use is described in
-<<dbbc3_ops.adoc#_thread_procedure,Thread procedure>> subsection of
-the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
+single thread per file. Its use is described in the
+<<dbbc3_ops.adoc#_thread_procedure,Thread procedure>> appendix of the
+<<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
 
 NOTE: Although it is expected that only one thread selection will be
 used for an entire experiment, a separate `thread...` procedure is
@@ -2897,7 +2921,7 @@ removed.
 
 +
 
-The equipment selection can subsequently be changed with _drudg_
+The equipment selection can still be changed subsequently with _drudg_
 option `11`.
 
 .. Add `scan_close` option
@@ -2927,10 +2951,10 @@ schedule rejoined for the next scan.
 
 +
 
-If enabled, _drudg_ prefixes each setup procedure with `setup_proc=`
-to invoke that command. For more information see the
+If enabled, _drudg_ prefixes each setup procedure call with
+`setup_proc=`. For more information see the
 <<dbbc3_ops.adoc#_minimizing_the_use_of_setup_procedures,Minimizing
-the use of setup procedures>> subsection of the <<dbbc3_ops.adoc#,FS
+the use of setup procedures>> appendix of the <<dbbc3_ops.adoc#,FS
 10.1 DBBC3 Operations Manual>>.
 
 .. Add `vdif_single_thread_per_file` option
@@ -2943,8 +2967,8 @@ This option allows control of whether the VDIF files created by Mark
 +
 
 For more information see the <<dbbc3_ops.adoc#_thread_procedure,Thread
-procedure>> subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3
-Operations Manual>>.
+procedure>> appendix of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations
+Manual>>.
 
 .. <<fix_equipment,Fix drudg equipment options>>[[fix_equipment]]: Fix
 `equipment` and `equipment_override` options in _skedf.ctl_.
@@ -2953,8 +2977,9 @@ Operations Manual>>.
 
 These bugs apparently first appeared in version _10.0.0_.
 
-... Fix a bug that prevented applying `equipment` if equipment was not
-specified in the schedule and `equipment_override` was not selected.
+... Fix a bug that prevented applying `equipment` if the equipment was
+not specified in the schedule and `equipment_override` was not
+selected.
 
 ... Fix a bug that caused `equipment` to be applied if there was
 equipment in the schedule even if `equipment_override` was not
@@ -2965,7 +2990,8 @@ selected.
 
 If you used `equipment_override`, these bugs did not affect you. Since
 no one reported these bugs, hopefully at least one of the following
-was true (which would have prevented a problem) for each schedule:
+was true (any one of which would have prevented a possible problem)
+for each schedule:
 
 * The `equipment_override` option was selected.
 
@@ -3061,9 +3087,10 @@ _.rxg_ files and the removes all the extra comments.
 _.rxg_ files to produce a set of trailing comments with all redundant
 comments removed.
 
-The first is relatively easy to apply. It may have some benefit even
-if you don't bother with the second step, ever. The second can be
-deferred until later, if you do want to apply it.
+The first is relatively easy to apply. It can be used anytime before
+the next time you update any of your _.rxg_ files. It may have some
+benefit even if you don't bother with the second step, ever. The
+second can be deferred until later, if you do want to apply it.
 
 === Remove extra comments
 
@@ -3230,7 +3257,7 @@ to your situation.
 
 If your _.rxg_ files have only been updated by _gnplt_, it may be
 possible to automate this step. If you would like to have a script to
-implement this procedure, please mail Ed. If there is sufficient
+implement this procedure, please email Ed. If there is sufficient
 interest, we will look into developing it.
 
 . The procedure makes use of the added `GnPlt2` date comment lines in
@@ -3285,7 +3312,8 @@ that follow the second one.
 If there are no `GnPlt2` date comments, delete from the start of the
 file to (and including) the `end_spillover_table` line at the end of
 the active calibration, then go to the <<save_file,Save file>> step
-below.
+below. If there are no comments after that `end_spillover_table`, no
+cleanup is necessary and you are done with this file.
 
 +
 
@@ -3365,7 +3393,7 @@ others are commented out):
 ...
 ....
 
-For each new version, _gnplt2_ inserted a new data comment at the
+For each new version, _gnplt2_ inserted a new date comment at the
 start. The previous date comments were preserved after it. After the
 above procedure, the content is reduced to (for the case of `4` being
 the active calibration):
