@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 1.4 - April 2022
+Version 1.5 - June 2022
 
 :sectnums:
 
@@ -127,13 +127,13 @@ their login shell, they are usually set in _~/.profile_ using the
 _export_ command; with _tcsh_, in _~/.login_, using _setenv_. See the
 <<Setting environment variables>> section above for more information.
 
-If you are using the display server, it is necessary to reboot, or
-stop _fsserver_ with:
+If you are using the display server, to set or change the value of an
+environment variable, it is necessary to reboot, or after terminating
+the FS, to stop _fsserver_ with:
 
   fsserver stop
 
-before setting, or changing the setting of, an environment variable.
-The FS must then be restarted.
+Then the environment value can be set and the FS FS restarted.
 
 === DATA_CENTERS
 
