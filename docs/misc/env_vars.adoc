@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 1.1 - March 2022
+Version 1.5 - June 2022
 
 :sectnums:
 
@@ -127,13 +127,13 @@ their login shell, they are usually set in _~/.profile_ using the
 _export_ command; with _tcsh_, in _~/.login_, using _setenv_. See the
 <<Setting environment variables>> section above for more information.
 
-If you are using the display server, it is necessary to reboot, or
-stop _fsserver_ with:
+If you are using the display server, to set or change the value of an
+environment variable, it is necessary to reboot, or after terminating
+the FS, to stop _fsserver_ with:
 
   fsserver stop
 
-before setting, or changing the setting of, an environment variable.
-The FS must then be restarted.
+Then the environment value can be set and the FS FS restarted.
 
 === DATA_CENTERS
 
@@ -154,12 +154,23 @@ Used by _pfmed_ as the editor run by the `ed` command.
 
 This was introduced in _8.9.0_, circa 1995.
 
-=== FESH_EMAIL
+=== FESH_BKG_METHOD
 
-Nominal value is an email address.
+Possible values are `ftp-ssl` or `ftp`. If nothing is specifed it
+defaults to `ftp-ssl`.
 
-If set, this is used as the password in _fesh_ for the anonymous
-FTP-SSL method for _cddis_.
+If set, this changes the default access method for _bkg_ in _fesh_
+to the specified value.
+
+This was introduced in April 2022.
+
+=== FESH_CDDIS_METHOD
+
+Possible values are `ftp-ssl` or `https`. If nothing is specifed it
+defaults to `ftp-ssl`.
+
+If set, this changes the default access method for _cddis_ in _fesh_
+to the specified value.
 
 This was introduced in _10.0.0-beta3_, December 2020.
 
@@ -172,25 +183,12 @@ specified value.
 
 This was introduced in _10.0.0-beta3_, December 2020.
 
-=== FESH_CDDIS_METHOD
+=== FESH_EMAIL
 
-Possible values are `ftp-ssl` or `https`.
+Nominal value is an email address.
 
-If set, this changes the default access method for _cddis_ in _fesh_
-to the specified value.
-
-This was introduced in _10.0.0-beta3_, December 2020.
-
-=== FESH_GEO_TPICD
-
-Possible values are non-negative integers.
-
-If set, the value is provided as the answer for the _drudg_ prompt for
-the _tpicd_ interval for geodesy schedules.
-
-IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
-value, the _drudg_ output files  will be incorrect and there may be no
-clear indication of that.
+If set, this is used as the password in _fesh_ for the anonymous
+FTP-SSL method for _cddis_.
 
 This was introduced in _10.0.0-beta3_, December 2020.
 
@@ -213,6 +211,19 @@ Possible values are `0`, `1`, `2`, `3`, or `none`.
 
 If set, the value is provided as the answer for the _drudg_ prompt for
 the continuous cal polarity for geodesy schedules.
+
+IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
+value, the _drudg_ output files  will be incorrect and there may be no
+clear indication of that.
+
+This was introduced in _10.0.0-beta3_, December 2020.
+
+=== FESH_GEO_TPICD
+
+Possible values are non-negative integers.
+
+If set, the value is provided as the answer for the _drudg_ prompt for
+the _tpicd_ interval for geodesy schedules.
 
 IMPORTANT: Note that if it is set and _drudg_ does not prompt for this
 value, the _drudg_ output files  will be incorrect and there may be no
@@ -433,6 +444,16 @@ Used in _fesh_ and _plog_ to set a different directory then  _~_ for
 the _.netrc_ file.
 
 This was introduced in 10.0.0-beta2, July 2020.
+
+=== PLOG_BKG_METHOD
+
+Possible values are `ftp-ssl` or `ftp`. If nothing is specifed it
+defaults to `ftp-ssl`.
+
+If set, this changes the default access method for _bkg_ in _plog_
+to the specified value.
+
+This was introduced in April 2022.
 
 === PLOG_COMPRESSED_EXT
 

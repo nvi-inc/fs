@@ -1,0 +1,343 @@
+//
+// Copyright (c) 2020-2022 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+:doctype: book
+
+= FS 10.1.0-beta2 to FS 10.1.0 Update Notes
+E. Himwich, J. Quick, J. Gipson, D. Horsley
+Version 5.2 - June 2022
+
+//:hide-uri-scheme:
+:sectnums:
+:stem: latexmath
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+:toclevels: 4
+
+== Introduction
+
+This document covers the steps needed to update from FS _10.1.0-beta2_
+to _10.1.0_ and the changes since _10.1.0-beta2_.
+
+The update from FS _10.1.0-beta2_ is much simpler than the update to
+_10.1.0-beta2_, see the <<Upgrading from 10.1.0-beta2>> section below.
+The changes in the FS and _drudg_ since _10.1.0-beta2_ are covered in
+the <<Changes since 10.1.0-beta2>> section below.
+
+== Upgrading from 10.1.0-beta2
+
+You must have already installed _10.1.0-beta2_ according to the
+<<beta1_to_beta2.adoc#,FS 10.1.0-beta1 to 10.1.0-beta2 Update Notes>>
+document before upgrading. If you have installed _10.1.0-beta2_,
+follow the directions below.
+
+=== Login as root
+
+
+The next step requires _root_ permissions.
+
+=== Fetch FS 10.1.0
+
+IMPORTANT: With the release of _10.1.0_, the default branch for the FS
+repo has changed to `main`. Please be sure to follow the directions
+pointed to below for fetching the new version.
+
+Please follow the directions in the <<10.1.0.adoc#_fetch_fs_10_1_0,
+Fetch FS 10.1.0>> step in the <<10.1.0.adoc#,FS 10.1.0 Update Notes>>
+document, except that you may want to use a more appropriate new name
+(maybe `fs-git.old-10.1.0-beta2`) for renaming your old __git__ repo
+directory.
+
+=== Fix file permissions
+
+Please follow the directions in the
+<<10.1.0.adoc#_fix_file_permissions, Fix file permissions>> step in
+the <<10.1.0.adoc#,FS 10,1,0 Update Notes>> document.
+
+=== Login as prog
+
+IMPORTANT: The FS must be compiled as _prog_.
+
+=== Compile the FS
+
+  cd /usr2/fs
+  make rmdoto rmexe all >& /dev/null
+  make -s
+
+No output from the last command indicates a successful _make_.
+
+=== Reboot
+
+IMPORTANT: Reboot the computer. This is necessary to allocate FS, and
+possibly station, shared memory for the new version. It will also make
+sure you are using the latest version of the display server.
+
+=== Login as oper
+
+Except as indicated, any actions in the next step should be performed
+as _oper_.
+
+=== Local customizations
+
+. If you have been using local copies of _fesh_ and/or _plog_ and/or
+_rdbemsg_, you should remove them from use.
+
++
+
+A simple way to do this, while preserving the local copy, is to rename
+it to something else, e.g., for _fesh_, you might name it _fesh.old_,
+if that doesn't conflict with an existing name. If you have aliases
+setup (probably in _~oper/.bash_aliases_ or _~oper/.cshrc_, but
+possibly elsewhere) to make the local copy the default, you should
+deactivate them so you will get the new standard _fesh_ and _plog_ by
+default.
+
+=== Review changes
+
+Please see the <<Changes since 10.1.0-beta2>> section below for the
+details of the changes since that release.
+
+== Changes since 10.1.0-beta2
+
+There are separate subsections with summaries of changes in the FS and
+_drudg_.
+
+Clickable links such as, https://github.com/nvi-inc/fs/issues/36[#36],
+connect to specific issues reported at
+https://github.com/nvi-inc/fs/issues.
+
+A detailed list of changes can be found using the `git log` command
+from within the FS _git_ repo directory, usually _/usr2/fs-git_.
+
+Each change is listed as a numbered title, then usually a few summary
+sentences, followed by a _toggle_:
+
+[%collapsible]
+====
+Details are shown here.
+====
+that can be clicked to toggle showing (or not showing) the details.
+In this way, you can view the summary as a list and only reveal the
+details of items that interest you. The summary sentences and/or the
+details toggle may be omitted if they would not add any new
+information, usually because it is already covered in the numbered
+title item and/or the details are very brief.
+
+=== FS changes
+
+. Improve _plog_
+
++
+
+The new default method for pushing to the BKG data center is
+`ftp-ssl`. The upload URL for OPAR was updated. The data center and
+station code are now case insensitive.
+
++
+[%collapsible]
+====
+
+.. Add support for `ftp-ssl` with the BKG data center in _plog_.
+
++
+
+The default for pushing files (logs) to the BKG data center is now
+`ftp-ssl`. Unfortunately, accessing BKG with `ftp-ssl` cannot be
+supported on FSL8. The old behavior using `ftp` can be enabled by
+setting the environment variable `PLOG_BKG_METHOD` to `ftp`. However,
+BKG is expecting to discontinue support for non-SSL `ftp` at the end
+of May 2022.
+
++
+
+NOTE: After June 2022, BKG upload access will require use of an
+individual account. You can get information to apply for an account by
+going to https://ivs.bkg.bund.de/ and following the
+`Access{nbsp}Information` link.
+
+.. Update URL for upload to OPAR.
+
++
+
+OPAR now uses a different URL, _++https://ivsopar.obspm.fr/upload/++_,
+for uploading. The old one,
+_++https://ivsopar.obspm.fr/upload/scripts/upload.php++_, will
+continue to work for some time.
+
++
+
+Thanks to Sébastien Lambert (OPAR) for sending the new URL and
+Christophe Barache (OPAR) for keeping the old one open for backward
+compatibility for at least some period.
+
+.. Make data center case insensitive.
+
++
+
+This change was made to improve ease-of-use when specifying the data
+center with the `-c` option. For consistency, the value specified by
+the `DATA_CENTERS` environment variable is now also case insensitive.
+
+.. Make two character station code case insensitive.
+
++
+
+This change was made to make _plog_ and _fesh_'s use of the `STATION`
+environment variable consistent.
+
+====
+
+. Improve _fesh_
+
++
+
+The new default method for accessing the BKG data center is `ftp-ssl`.
+The data center is now case insensitive (as was the station code
+already).
+
++
+[%collapsible]
+====
+
+.. Add support for `ftp-ssl` for the BKG data center
+
++
+
+The default for pulling schedule (and _.txt_ note) files from the BKG
+data center is now `ftp-ssl` (using `anonymous` access).
+Unfortunately, accessing BKG with `ftp-ssl` cannot be supported on
+FSL8. The old behavior using `ftp` can be enabled by setting the
+environment variable `FESH_BKG_METHOD` to `ftp`. However, BKG is
+expecting to discontinue support for non-SSL `ftp` at the end of May
+2022.
+
+.. Make data centers case insensitive
+
++
+
+This change was made to improve ease-of-use when specifying the data
+center with the `-D` option. For consistency, the value specified by
+the `FESH_DATA_CENTER` environment variable is now also case
+insensitive.
+
+====
+
+. Improve `mk5c_mode`/`fb_mode` for use with DBBC3s
+
++
+
+These commands will now trap no DBBC3 channels being selected and give
+what should be a clearer explanatory message than just having the
+recorder rejecting a zero channel `mode`.
+
++
+
+Thanks to Christian Plötz (Wettzell) for pointing out the usefulness
+of this.
+
+. Improve `help` page for the `core3h_mode` command
+
++
+
+A significant part of the `Comments` section was rewritten to more
+clearly explain the different _Forms_ of this command, particularly
+the _Checking Form_, which is unique to this command. The _Command_
+and _Monitor_ forms, which are typically the ones used in commands for
+other devices are also described more fully.
+
++
+
+Several other changes were made to bring the feature description up to
+date and improve wording.
+
+. Correct the `d3fbstation.prc` example procedure library
+
++
+
+Two `define` lines were malformed. This was a benign error.
+
+. Improve web documents
+
++
+
+A few minor changes were made.
+
++
+[%collapsible]
+====
+
+.. Note _drudg_ bug fix to add missing final scan `checkmk6` call to
+_.snp_ files.
+
++
+
++
+
+This fix in _drudg_ has been present since _10.1.0-beta1_.
+
+.. Include that incorrect RDBE DOT time are in inverse video for the
+RDBE monitor window (_monit6_) in the <<beta1_to_beta2.adoc#,FS
+10.1.0-beta1 to 10.1.0-beta2 Update Notes>> document. It was already
+in the <<10.1.0-beta2.adoc#,FS 10.1.0-beta2 Update Notes>>
+
+.. Fix the alphabetic order of the environment variables beginning
+with `FESH+++_+++` in the <<../../../misc/env_vars.adoc#,FS
+Environment Variables>> document.
+
+.. Make miscellaneous wording improvements
+
+====
+
+. Add missing default control file, _msg.ctl_ for the _msg_ program.
+
+.. Elaborate in `SC   -4` error message to provide more explicit
+advice.
+
++
+
+This error is reported by _setcl_ when the formatter and FS PC boot
+time differ by more than 248 days. This may occur because the PC has
+been running a long time since it was booted, but it also could be
+because the formatter time has not been set or is wrong. The error
+message now explicitly suggests checking both.
+
+=== drudg changes
+
+The _drudg_ opening message date is `2022-05-28`.
+
+. Fix wait time bug for `disk2ile=abort,...`
+
++
+
+Since _10.1.0-beta1_, _drudg_ has not calculated the correct wait time
+before the `disk2file=abort,...` command was issued. This was caused
+by an uninitialized variable; the behavior was different for different
+systems. On 32-bit systems, this bug seemed to typically cause the
+wait time to be incorrectly formatted. As a result, it was reject by
+the FS, causing the wait to not occur, possibly aborting the
+`disk2file` operation before it was finished. For 64-bit systems, this
+bug seemed to typically cause the wait time to be too long, possibly
+causing the subsequent scan to start late by a few minutes.
+
++
+
+Thanks to Jon Quick (HartRAO) for reporting this bug.

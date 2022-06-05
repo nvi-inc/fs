@@ -19,9 +19,9 @@
 //
 
 = Index of fs/releases/10/0/
-Version 1.1 - January 2022
+Version 1.2 - June 2022
 
-<<10.0.0.adoc#,FS 10.0.0 Update Notes>> (latest release)
+<<10.0.0.adoc#,FS 10.0.0 Update Notes>> (old)
 
 <<beta3_to_10.0.0.adoc#,FS 10.0.0-beta3 to FS-10.0.0 Update Notes>>
 
