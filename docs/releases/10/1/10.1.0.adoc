@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 5.  - June 2022
+Version 5.4 - June 2022
 
 //:hide-uri-scheme:
 :sectnums:
