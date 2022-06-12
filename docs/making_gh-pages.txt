@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020, 2022 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -29,7 +29,7 @@ To update:
   git commit
   git push
   git branch -f gh-pages <branch>
-     <branch> is whatever is to be used, usually master
+     <branch> is whatever is to be used, usually main
   git checkout gh-pages
   make
   git add -f $(find . -name \*.html)
