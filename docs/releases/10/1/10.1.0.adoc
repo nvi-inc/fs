@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 5.4 - June 2022
+Version 5.5 - June 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -160,10 +160,26 @@ directory;
 
 . Change your default branch to _main_:
 
++
+
+There are two different methods for this sub-step depending on which
+FSL__x__/_git_ version you are using:
+
+.. If you are using FSL10 (_git_ version _2.11.0_):
+
   cd /usr2/fs-git
   git branch -m master main
   git fetch origin
   git branch -u origin/main main
+  git remote set-head origin -a
+  git branch -rd origin/master
+
+.. If you are using FSL9 (_git_ version _1.7.10.4_):
+
+  cd /usr2/fs-git
+  git branch -m master main
+  git fetch origin
+  sed -i 's%refs/heads/master%refs/heads/main%' .git/config
   git remote set-head origin -a
   git branch -rd origin/master
 
