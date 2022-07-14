@@ -39,5 +39,6 @@ mv $ans $ans.FSCOPY
 cd /usr2/fs/st.default/auid
 find . -print|cpio -pmdu /usr2/$ans
 chown -R $ans.$ans /usr2/$ans
+chmod 0750 /usr2/$ans
 #
 echo "Done."
