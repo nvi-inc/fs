@@ -2431,6 +2431,8 @@ class LineReader:
                     try:
                         if search_string[offset]==match_string:
                                 self.channel_identifier[key]=1
+                        else:
+                                self.channel_identifier[key]=0
                     except IndexError:
                         pass
                 else:
