@@ -406,7 +406,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[plotlog 1.7.2]\n";
+    print "[plotlog 1.7.3]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit 0;
@@ -498,7 +498,13 @@ if (defined($opt_h)) {
     print "    if '-f ?', you will be prompted for standard pgplot devices,\n";
     print "               be sure to quote '?', like \\?\n";
     print "    'vps' (portrait PostScript) is a useful choice for 'device' for file output\n";
-    print "    '.ps' works well as the file extension for device 'vps'\n";
+    print "    '.ps' works well as the file extension for device 'vps'\n\n";
+
+    print "You can use different colors by setting the environment variables\n";
+    print "PGPLOT_FOREGROUND and PGPLOT_BACKGROUND appropriately before running the\n";
+    print "program. Colors that are available depend on the device, but in addition to\n";
+    print "'black' and 'white', may include 'red', 'green', 'blue', 'cyan', 'magenta',\n";
+    print "'yellow', 'grey', 'slategrey', 'gold', and maybe others.\n";
     exit 0;
 }
 
