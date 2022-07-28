@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright (c) 2020 NVI, Inc.
+# Copyright (c) 2020, 2022 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -406,7 +406,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[plotlog 1.7]\n";
+    print "[plotlog 1.7.1]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit 0;
@@ -493,7 +493,7 @@ if (defined($opt_h)) {
     print " -v        print program and PGPLOT version information and stop\n";
     print " -h        print this help information and stop\n";
     print " -f file/device  send graphs to 'file' using PGPLOT 'device'\n";
-    print "    if -f omitted and DISPLAY is defined, an xterm will be used\n";
+    print "    if -f omitted and DISPLAY is defined, '/xw' will be used\n";
     print "    if -f omitted and DISPLAY is not defined, 'plotlog.ps/vps' will be used\n";
     print "    if '-f ?', you will be prompted for standard pgplot devices,\n";
     print "               be sure to quote '?', like \\?\n";
@@ -502,7 +502,7 @@ if (defined($opt_h)) {
 }
 
 if(defined($ENV{'DISPLAY'}) && !defined($opt_f)) {
-    $dev="/xterm";
+    $dev="/xw";
 } elsif(!defined($opt_f)) {
     $dev="plotlog.ps/vps";
 } else {
