@@ -406,7 +406,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[plotlog 1.7.3]\n";
+    print "[plotlog 1.7.4]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit 0;
@@ -483,8 +483,8 @@ if (defined($opt_h)) {
     print " -r        plot cable data in raw units\n";
     print " -s string match commands with 'string' instead of 'tsys',\n";
     print "           option -t still applies for editing\n";
-    print " -2 n      n is 1 or 2, useful for selecting which values to plot for -s tpicd#tpcont\n";
-    print "           1 is for tpi values, 2 is for tpical values\n";
+    print " -2 n      n is 1 or 2, useful for selecting which values to plot for\n";
+    print "           -s tpicd#tpcont; 1 for first value, 2 for second\n";
     print " -t value  edit out tsys points less than or equal to zero or greater than or\n";
     print "           equal to 'value'\n";
     print " -z value  edit out pcal data with amplitudes less than 'value'\n";
