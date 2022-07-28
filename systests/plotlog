@@ -406,7 +406,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[plotlog 1.7.4]\n";
+    print "[plotlog 1.8]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit 0;
@@ -451,7 +451,11 @@ if (defined($opt_h)) {
     print "Cable delay is plotted as one-way cable delay change unless the 'r' switch is\n";
     print "used.\n\n";
 
+    print "fmout-gps and gps-fmput data are plotted as fmout-gps, flipping the sign of\n";
+    print "any gps-fmout data.\n\n";
+
     print "Option explanations:\n";
+
     print " phase-difference plot options (suppresses all other output, except -p):\n";
     print "  -1 all converters are on one IF\n";
     print "  -a odd converters are on one IF, even are on another (astronomy)\n";
@@ -754,7 +758,7 @@ foreach $file (@ARGV) {
 	} elsif(/\/((gps-fmout)|(fmout-gps))\//i) {
             (undef,$cmd,@fields)=split('[/,\cM]');
             if($fields[0] =~ /($float_pattern)/) {
-		if($cmd eq "gps-fmout") {
+		if($cmd eq "fmout-gps") {
 		    $gpsv[$gpsn]=$1;
 		} else {
 		    $gpsv[$gpsn]=-$1;
@@ -864,13 +868,13 @@ if(@gpst) {
 #    print "$avg $count\n";
     if($avg > 500000) {
 	$offset=1e6;
-	$label="(gps-fmout)-1e6 (us)";
+	$label="(fmout-gps)-1e6 (us)";
     } elsif($avg <-500000) {
 	$offset=-1e6;
-	$label="(gps-fmout)+1e6 (us)";
+	$label="(fmout-gps)+1e6 (us)";
     } else {
 	$offset=0;
-	$label="gps-fmout (us)";
+	$label="fmout-gps (us)";
     }
 #    print "$offset $label\n";
     if($offset) {
