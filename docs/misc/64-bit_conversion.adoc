@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2021 NVI, Inc.
+// Copyright (c) 2020-2022 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit System
-Version 1.1 - February 2021
+Version 1.2 - August 2021
 
 //:hide-uri-scheme:
 :sectnums:
@@ -111,10 +111,22 @@ examples (and in file names) with your old system's host name. These
 commands must be executed as _root_, and except where noted, from the
 64-bit system.
 
-NOTE: You may need to provide the appropriate password for each _scp_
-command. If so, you can simplify the process by copying your 64-bit
-computer's _root_ SSH keys to the old machine _oper_ and _prog_
-accounts with _ssh-copy-id_ first.
+[NOTE]
+====
+
+You may need to provide the appropriate password for each _scp_
+command below. If so, you can simplify the process by copying your
+64-bit computer's _root_ public SSH keys to the old machine _oper_ and
+_prog_ accounts with _ssh-copy-id_ first. If _root_ doesn't have an ID
+yet, you will get an error like:
+
+ /usr/bin/ssh-copy-id: ERROR: No identities found
+
+In that case, you can generate a key with _ssh-keygen_
+(leaving the passphrase empty is recommended) and try _ssh-copy-id_
+again.
+
+====
 
 CAUTION: It is assumed that the new installation is on new hardware
 with disks more than large enough to accommodate all the data being
