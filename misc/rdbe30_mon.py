@@ -126,9 +126,9 @@ def handle_input(sock, state):
     if state == Tk.READABLE:
         data, addr = sock.recvfrom(60000,socket.MSG_WAITALL)
         tsys=TSYS();
-        memmove(addressof(tsys), buffer(data)[:], min(sizeof(tsys), len(data)))
+        memmove(addressof(tsys), data, min(sizeof(tsys), len(data)))
         flogdat.write(data)
-        rtm=tsys.read_time
+        rtm=tsys.read_time.decode()
         prtm=time.strptime(rtm, "%Y%j%H%M%S")
         frtm=time.strftime("%a %b %d",prtm)
         output = "%s : %d : %d : %s : %s" % (addr[0], tsys.epoch_ref, tsys.epoch_sec, frtm, rtm[0:4]+ '-' + rtm[4:7] + '-' + rtm[7:9] + '-' + rtm[9:11] + '-' + rtm[11:13] )
@@ -147,14 +147,14 @@ def handle_input(sock, state):
             x-=128
             a1.plot(x)
             a1.set_ylim([-128,128])
-            canvasraw.show()
+            canvasraw.draw()
 
             pfft.cla()
             Pxx = np.fft.fft(x,1024)[0:511]
             P = 10 * np.log10(Pxx+1e-16)
-            pfft.plot( P)
+            pfft.plot( np.real(P))
             pfft.set_ylim([0,60])
-            canvasfft.show()
+            canvasfft.draw()
 
             phist.cla()
             h=np.zeros(256)
@@ -162,7 +162,7 @@ def handle_input(sock, state):
                 h[int(round(a+128))]+=1
 #                h[a+128]+=1
             phist.plot(np.arange(-128, 128), h)
-            canvashist.show()
+            canvashist.draw()
 
             pcaltmp = np.array(np.zeros(1024), dtype=complex)
             for i in range(1024):
@@ -178,12 +178,12 @@ def handle_input(sock, state):
             a2.cla()
             a2.plot(pcaltmp.real,'r')
             a2.plot(pcaltmp.imag,'b')
-            canvaspcal.show()
+            canvaspcal.draw()
 
             a3.cla()
             pcaltmpfft=np.fft.fft(pcaltmp)
             a3.plot(20*np.log10(np.abs(pcaltmpfft+1e-16)),'b')
-            canvaspcalfft.show()
+            canvaspcalfft.draw()
 
             tones= np.arange(30, 480, 5)
             xf=tones*1e6
@@ -195,7 +195,7 @@ def handle_input(sock, state):
             a4.cla()
             phresid=ph-z1[1]-z1[0]*2*np.pi*xf
             a4.plot(xf, phresid,'b')
-            canvaspcalphase.show()
+            canvaspcalphase.draw()
 
 
             ptsys0.cla()
@@ -211,7 +211,7 @@ def handle_input(sock, state):
             ptsys1.plot(tmpoff[16:32],'b-+')
             ptsys0.set_ylim([0,200000])
             ptsys1.set_ylim([0,200000])
-            canvastsys.show()
+            canvastsys.draw()
             #tsys for arthur
             aon=tsys.tsys_on[7]
             aoff=tsys.tsys_off[7]
@@ -222,12 +222,12 @@ def send_cmd(cmd):
     data = ''
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((RDBE_ADDR, RDBE_PORT))
-    sent = sock.send(cmd + ';\n')
-    chunk = sock.recv(10000)
+    sent = sock.send((cmd + ';\n').encode())
+    chunk = sock.recv(10000).decode()
     #print len(chunk)
     while len(chunk) == 1448:
         data += chunk
-        chunk = sock.recv(10000)
+        chunk = sock.recv(10000).decode()
     data += chunk
     return data
 
