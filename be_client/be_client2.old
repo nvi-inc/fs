@@ -75,12 +75,12 @@ while 1:
         arg = arg + '\n'
 
         # SEND COMMAND
-        rv = s.send(arg)
+        rv = s.send(arg).encode()
         if rv <= 0 :
             print("Fail to send ", rv)
 
         # WAIT FOR RESPONSE
-        ret = s.recv(8192)
+        ret = s.recv(8192).decode()
         print(ret)
         arg = "quit"
     # ELSE TERMINATE SESSION

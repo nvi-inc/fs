@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (c) 2021 NVI, Inc.
+# Copyright (c) 2021, 2022 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -46,14 +46,14 @@ connection, address = s.accept()
 
 while True:
     try:
-        rcvstr = connection.recv(4096)
+        rcvstr = connection.recv(4096).decode()
     except:
         print("recv failed, listening to the clients on port " + str(myPort))
         connection, address = s.accept()
         continue
     print(rcvstr, end=' ')
     try:
-        connection.send(rcvstr.strip() + " = 0 : " + str(myPort) + " ;\n")
+        connection.send((rcvstr.strip() + " = 0 : " + str(myPort) + " ;\n").encode())
     except:
         print("send failed, listening to the clients on port " + str(myPort))
         connection, address = s.accept()

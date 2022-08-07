@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (c) 2020-2021 NVI, Inc.
+# Copyright (c) 2020-2022 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -530,11 +530,11 @@ class msg_tk(tkinter.Tk):
         host = self._bandA[0]
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect ((host,port))
-        rv = s.send("pps_offset?;\n")
-        ra = s.recv(8192).rstrip(';\r\n').split(':')
+        rv = s.send("pps_offset?;\n".encode())
+        ra = s.recv(8192).decode().rstrip(';\r\n').split(':')
         self._junk,self._bandA[1] = ra
-        rv = s.send("gps_offset?;\n")
-        self._junk,self._bandA[2] = s.recv(8192).rstrip(';\r\n').split(':')
+        rv = s.send("gps_offset?;\n".encode())
+        self._junk,self._bandA[2] = s.recv(8192).decode().rstrip(';\r\n').split(':')
         s.close()
 
         self.ppsA.set(self._bandA[1])
@@ -544,10 +544,10 @@ class msg_tk(tkinter.Tk):
         host = self._bandB[0]
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect ((host,port))
-        rv = s.send("pps_offset?;\n")
-        self._junk,self._bandB[1] = s.recv(8192).rstrip(';\r\n').split(':')
-        rv = s.send("gps_offset?;\n")
-        self._junk,self._bandB[2] = s.recv(8192).rstrip(';\r\n').split(':')
+        rv = s.send("pps_offset?;\n".encode())
+        self._junk,self._bandB[1] = s.recv(8192).decode().rstrip(';\r\n').split(':')
+        rv = s.send("gps_offset?;\n".encode())
+        self._junk,self._bandB[2] = s.recv(8192).decode().rstrip(';\r\n').split(':')
         s.close()
 
         self.ppsB.set(self._bandB[1])
@@ -557,10 +557,10 @@ class msg_tk(tkinter.Tk):
         host = self._bandC[0]
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect ((host,port))
-        rv = s.send("pps_offset?;\n")
-        self._junk,self._bandC[1] = s.recv(8192).rstrip(';\r\n').split(':')
-        rv = s.send("gps_offset?;\n")
-        self._junk,self._bandC[2] = s.recv(8192).rstrip(';\r\n').split(':')
+        rv = s.send("pps_offset?;\n".encode())
+        self._junk,self._bandC[1] = s.recv(8192).decode().rstrip(';\r\n').split(':')
+        rv = s.send("gps_offset?;\n".encode())
+        self._junk,self._bandC[2] = s.recv(8192).decode().rstrip(';\r\n').split(':')
         s.close()
 
         self.ppsC.set(self._bandC[1])
@@ -570,10 +570,10 @@ class msg_tk(tkinter.Tk):
         host = self._bandD[0]
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect ((host,port))
-        rv = s.send("pps_offset?;\n")
-        self._junk,self._bandD[1] = s.recv(8192).rstrip(';\r\n').split(':')
-        rv = s.send("gps_offset?;\n")
-        self._junk,self._bandD[2] = s.recv(8192).rstrip(';\r\n').split(':')
+        rv = s.send("pps_offset?;\n".encode())
+        self._junk,self._bandD[1] = s.recv(8192).decode().rstrip(';\r\n').split(':')
+        rv = s.send("gps_offset?;\n".encode())
+        self._junk,self._bandD[2] = s.recv(8192).decode().rstrip(';\r\n').split(':')
         s.close()
 
         self.ppsD.set(self._bandD[1])

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (c) 2020 NVI, Inc.
+# Copyright (c) 2020, 2022 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -35,9 +35,9 @@ if len(sys.argv) == 2:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect(server_address)
         time.sleep(2)
-        sock.sendall(msg)
+        sock.sendall(msg.encode())
         time.sleep(2)
-        data = sock.recv(4096)
+        data = sock.recv(4096).decode()
         print(data)
         sock.close()
 
@@ -74,9 +74,9 @@ elif len(sys.argv) == 5:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect(server_address)
         time.sleep(2)
-        sock.sendall(msg)
+        sock.sendall(msg.encode())
         time.sleep(2)
-        data = sock.recv(4096)
+        data = sock.recv(4096).decode()
         print(data)
         sock.close()
 
