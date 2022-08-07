@@ -482,7 +482,7 @@ class msg_tk(tkinter.Tk):
 
         s = self.sessionname.get()
         if s == "":
-            proclognm = subprocess.Popen(["lognm"], stdout=subprocess.PIPE)
+            proclognm = subprocess.Popen(["lognm"], stdout=subprocess.PIPE,text=True)
             s1 = proclognm.stdout.read().rstrip('\n')
             if s1[-2:] == c:
                 s = s1[:-2]
@@ -582,7 +582,7 @@ class msg_tk(tkinter.Tk):
     def GetCryoVals(self):
         print("Updating Cryo Values")
         if self._mciVersion == "0":
-            proc20 = subprocess.Popen(["ssh", "oper@" + self._mci, "tail", "-n", "100", "node-software/V0/mci" + self._mcilogtime + ".txt", "|", "egrep", "'AD214|AD215'"], stdout=subprocess.PIPE)
+            proc20 = subprocess.Popen(["ssh", "oper@" + self._mci, "tail", "-n", "100", "node-software/V0/mci" + self._mcilogtime + ".txt", "|", "egrep", "'AD214|AD215'"], stdout=subprocess.PIPE,text=True)
             text =proc20.stdout.read()
             for line in text.split('\n'):
                 if "AD214" in line:
@@ -594,7 +594,7 @@ class msg_tk(tkinter.Tk):
             c = self.stationcode.get()
             if self._mciCode != "":
                 c = self._mciCode
-            proc20 = subprocess.Popen(["ssh", "oper@" + self._mci, "tail", "-n", "100", "mci_" + c + "_" + self._mcilogtime + ".txt", "|", "egrep", "'AD214|AD215'"], stdout=subprocess.PIPE)
+            proc20 = subprocess.Popen(["ssh", "oper@" + self._mci, "tail", "-n", "100", "mci_" + c + "_" + self._mcilogtime + ".txt", "|", "egrep", "'AD214|AD215'"], stdout=subprocess.PIPE, text=True)
             text =proc20.stdout.read()
             for line in text.split('\n'):
                 if "AD214" in line:
@@ -620,7 +620,7 @@ class msg_tk(tkinter.Tk):
         print("Updating SEFD Values")
         s = self.sessionname.get()
         c = self.stationcode.get()
-        procSEFD = subprocess.Popen(["/bin/sh", "-c", "grep 'onoff#VAL' /usr2/log/" + s + c + ".log  | tail  -n 8"], stdout=subprocess.PIPE)
+        procSEFD = subprocess.Popen(["/bin/sh", "-c", "grep 'onoff#VAL' /usr2/log/" + s + c + ".log  | tail  -n 8"], stdout=subprocess.PIPE,text=True)
 
         self._SEFD = procSEFD.stdout.read().split('\n')
 
@@ -660,7 +660,7 @@ class msg_tk(tkinter.Tk):
         print("Updating Pointing Values")
         s = self.sessionname.get()
         c = self.stationcode.get()
-        procPnt = subprocess.Popen(["/bin/sh", "-c", "grep 'fivpt#xoffset' /usr2/log/" + s + c + ".log  | tail  -n 1"], stdout=subprocess.PIPE)
+        procPnt = subprocess.Popen(["/bin/sh", "-c", "grep 'fivpt#xoffset' /usr2/log/" + s + c + ".log  | tail  -n 1"], stdout=subprocess.PIPE,text=True)
 
         vals = procPnt.stdout.read().split('\n')[0]
 
@@ -719,7 +719,7 @@ class msg_tk(tkinter.Tk):
                 " QCs: X-Lat: " + self.xlatqc.get() + " | Lat: " + self.latqc.get()
 
 
-        process = subprocess.Popen(["mail", "-s", SUBJECT, TO], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        process = subprocess.Popen(["mail", "-s", SUBJECT, TO], stdin=subprocess.PIPE, stdout=subprocess.PIPE,text=True)
         process.stdin.write(TEXT)
         print(process.communicate()[0])
         process.stdin.close()
