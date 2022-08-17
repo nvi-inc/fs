@@ -26,6 +26,7 @@ from PrintCanvas import PrintCanvas
 from GndatReader import GndatReader
 from GnPltError import *
 import string, os, tkinter.filedialog, tkinter.font, math, tkinter.messagebox, time, random
+import subprocess
 
 class Gui(Frame):
     #class variables
@@ -1047,7 +1048,9 @@ class Gui(Frame):
             Output stream is the temporary filename if no error, or the error message if there is one.
             In the future, std_err might be used. In that case, use os.popen3 instead.
             """
-            [std_in, std_out] = os.popen2(cmdline)
+            p=subprocess.Popen(cmdline,shell=True,stdin=subprocess.PIPE,stdout=subprocess.PIPE,close_fds=True)
+            [std_in, std_out] = [p.stdin, p.stdout]
+
             std_out_copy = std_out.read()
             std_in.close()
             std_out.close()
