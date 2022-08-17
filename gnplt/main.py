@@ -1079,7 +1079,7 @@ class Gui(Frame):
                 tot_x = x1-x0
 
                 #gndat_reader.run()
-                while gndat_reader.isAlive():
+                while gndat_reader.is_alive():
                     progress = gndat_reader.progress
                     new_x = x0 + progress * tot_x/100
                     self.plot.coords(bar, x0, y0, new_x, y1)

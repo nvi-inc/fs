@@ -1532,7 +1532,7 @@ its border red"""
             color = '#2F9EFF'
             c1 = self.plottingFrame.create_rectangle(1,y1-1,MainGUI.plot_width, y2+1)
             c = self.plottingFrame.create_rectangle(2,y1,2,y2, outline = color, fill = color)
-            while self.logreader.isAlive():
+            while self.logreader.is_alive():
                 progress = self.logreader.progress
                 if not MainGUI.batch_mode:
                     self.plottingFrame.coords(c, 2, y1, (MainGUI.plot_width)/100*progress, y2)
