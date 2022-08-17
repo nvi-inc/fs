@@ -27,6 +27,7 @@ from GndatReader import GndatReader
 from GnPltError import *
 import string, os, tkinter.filedialog, tkinter.font, math, tkinter.messagebox, time, random
 import subprocess
+import functools
 
 class Gui(Frame):
     #class variables
@@ -3205,7 +3206,7 @@ class Plot(Canvas, Coordinate):
             self.data_indices = data_indices
 
             #if the log shouldn't be time ordered, this sort makes that happen...
-            self.data_indices.sort(self.sortTime)
+            self.data_indices.sort(key=functools.cmp_to_key(self.sortTime))
 
             self.xname = xname
             self.yname = yname
