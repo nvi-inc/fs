@@ -126,7 +126,7 @@ class NumericTools:
                 A[i][1] = dfdk2[i]
 
             #solve system
-            lstsq_output = linalg.lstsq(A,dBeta)
+            lstsq_output = linalg.lstsq(A,dBeta,rcond=-1)
             [dk1, dk2]= lstsq_output[0]
 
             k1 += dk1
