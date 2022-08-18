@@ -32,6 +32,8 @@ except ImportError,e:
     print 'Error: GnPlt could not find all required packages. \nTkinter, numpy and Python 2.4 or newer is required.\nError message: %s' %e
     sys.exit(1)
     
+def usage():
+    print("Usage: "+sys.argv[0]+" [-log logfile | -help]")
 args = sys.argv[1:]
 kw = {}
 while args:
@@ -39,9 +41,13 @@ while args:
         if args[0] == '-log':
             kw['log'] = args[1]
             args = args[2:]
+        elif args[0] == '-help':
+            usage()
+            sys.exit(0)
         else:
-            print 'Argument %s is not recognized. Use argument -help for instructions' % args[0]
-            break
+            print 'Argument %s is not recognized.' % args[0]
+            usage()
+            sys.exit(1)
     except IndexError:
         print 'Incorrect use of arguments. Use argument -help for instructions'
         break
