@@ -413,102 +413,103 @@ if(defined($opt_v)) {
 }
 
 if (defined($opt_h)) {
-    print "Usage:\n";
-    print "   plotlog [options] logs\n";
-    print "Synopsis: extracts and plots data from log files\n";
-    print "Exit code is 0 for no error, -1 for no logs found, -2 for nothing to plot.\n\n";
+    print "Usage: plotlog [options] logs
 
-    print "This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or\n";
-    print "fmout-gps/), setcl#time/, and the first encountered USB tone per channel for\n";
-    print "Mark IV decoder pcal data in log files and generates time plots of the data.\n";
-    print "The time axis of all the plots is the same. The data is plotted so that it fits\n";
-    print "entirely inside the boxes. Points that appear along the top line of a plot did\n";
-    print "not decode (\$\$\$ for example) or were edited out by command line options.\n\n";
+Synopsis: extracts and plots data from log files
+Exit code is 0 for no error, -1 for no logs found, -2 for nothing to plot.
 
-    print "The '1anw' switches can be used to select different IF arrangements for\n";
-    print "calculating phase differences between pcal tones. Any combination of the '1anw'\n";
-    print "switches can be used. No difference is plotted more than once.\n\n";
+This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or
+fmout-gps/), setcl#time/, and the first encountered USB tone per channel for
+Mark IV decoder pcal data in log files and generates time plots of the data.
+The time axis of all the plots is the same. The data is plotted so that it fits
+entirely inside the boxes. Points that appear along the top line of a plot did
+not decode (\$\$\$ for example) or were edited out by command line options.
 
-    print "The 'j' switch can be used to normalize pcal amplitudes by Tsys (per channel)\n";
-    print "for time plots and amplitude versus phase plots. The minimum non-zero Tsys\n";
-    print "(per channel) is used as the reference value for normalization. If this causes\n";
-    print "problems, an explict global reference value can be specified with the 'k'\n";
-    print "option. The 't' option may also be useful for removing bad Tsys values. By\n";
-    print "default dual side-band Tsys is used for normalization if it is available, if\n";
-    print "not then single side-band Tsys data is used. This is usually what is wanted\n";
-    print "but if not, the 'b' option can be used to force use of single side-band Tsys\n";
-    print "for channels that it is available for.\n\n";
+The '1anw' switches can be used to select different IF arrangements for
+calculating phase differences between pcal tones. Any combination of the '1anw'
+switches can be used. No difference is plotted more than once.
 
-    print "For the 'j1anw' switches a simple model is used to match different data from\n";
-    print "the log. Points from different data types that are the nearest together in time\n";
-    print "are matched. No epoch from one data type is matched to more than one epoch of\n";
-    print "another type in this way. If the resulting matched epochs are within 60 seconds\n";
-    print "of each other, the match is accepted. The tolerance of match can be adjusted\n";
-    print "using the 'u' option.\n\n";
+The 'j' switch can be used to normalize pcal amplitudes by Tsys (per channel)
+for time plots and amplitude versus phase plots. The minimum non-zero Tsys
+(per channel) is used as the reference value for normalization. If this causes
+problems, an explict global reference value can be specified with the 'k'
+option. The 't' option may also be useful for removing bad Tsys values. By
+default dual side-band Tsys is used for normalization if it is available, if
+not then single side-band Tsys data is used. This is usually what is wanted
+but if not, the 'b' option can be used to force use of single side-band Tsys
+for channels that it is available for.
 
-    print "The 'p' switch adds amplitude versus phase plots for each phase-cal tone after\n";
-    print "all other plots. This option suppresses all other output except options -1anw.\n\n";
-    print "Cable delay is plotted as one-way cable delay change unless the 'r' switch is\n";
-    print "used.\n\n";
+For the 'j1anw' switches a simple model is used to match different data from
+the log. Points from different data types that are the nearest together in time
+are matched. No epoch from one data type is matched to more than one epoch of
+another type in this way. If the resulting matched epochs are within 60 seconds
+of each other, the match is accepted. The tolerance of match can be adjusted
+using the 'u' option.
 
-    print "fmout-gps and gps-fmput data are plotted as fmout-gps, flipping the sign of\n";
-    print "any gps-fmout data.\n\n";
+The 'p' switch adds amplitude versus phase plots for each phase-cal tone after
+all other plots. This option suppresses all other output except options -1anw.
 
-    print "Option explanations:\n";
+Cable delay is plotted as one-way cable delay change unless the 'r' switch is
+used.
 
-    print " phase-difference plot options (suppresses all other output, except -p):\n";
-    print "  -1 all converters are on one IF\n";
-    print "  -a odd converters are on one IF, even are on another (astronomy)\n";
-    print "  -n converters 1-8 on one band, 9-16 on a second (narrow band geodesy),\n";
-    print "     also useful for wide band geodesy\n";
-    print "  -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third\n";
-    print "     (wide band geodesy)\n\n";
+fmout-gps and gps-fmput data are plotted as fmout-gps, flipping the sign of
+any gps-fmout data.
 
-    print " -b        force single-side-band Tsys normalization of pcal amp data\n";
-    print " -c value  cable cal edit, if greater than zero, delete points that much or\n";
-    print "           more above lowest value, if less than zero, delete points that much\n";
-    print "           or more below largest value; uses plot Y axis units, be careful of\n";
-    print "           the -r option\n";
-    print " -e regexp include only plots with labels that DO NOT match 'regexp', where\n";
-    print "           'regexp' is any Perl regular expression pattern, you will need to\n";
-    print "           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'\n";
-    print "           or spaces, this option can be combined with the 'g' option as well.\n";
-    print "           The match is case insensitive.\n";
-    print " -g regexp include only plots with labels that DO match 'regexp', where\n";
-    print "           'regexp' is any Perl regular expression pattern, you will need to\n";
-    print "           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'\n";
-    print "           or spaces, this option can be combined with the 'e' option as well.\n";
-    print "           The match is case insensitive.\n";
-    print " -j        normalize phase-cal amp by Tsys per channel\n";
-    print " -k value  changes 'j' normalization from minimum non-zero Tsys per channel to\n";
-    print "           'value' for all channels\n";
-    print " -p        plot amplitude versus phase for phase cal tones,\n";
-    print "           suppresses all other output except -1anw\n";
-    print " -r        plot cable data in raw units\n";
-    print " -s string match commands with 'string' instead of 'tsys',\n";
-    print "           option -t still applies for editing\n";
-    print " -2 n      n is 1 or 2, useful for selecting which values to plot for\n";
-    print "           -s tpicd#tpcont; 1 for first value, 2 for second\n";
-    print " -t value  edit out tsys points less than or equal to zero or greater than or\n";
-    print "           equal to 'value'\n";
-    print " -z value  edit out pcal data with amplitudes less than 'value'\n";
-    print " -u value  maximum distance in time (seconds) allowed for matching data for\n";
-    print "           '1anwp' option plots is changed to 'value' instead of 60 seconds\n";
-    print " -v        print program and PGPLOT version information and stop\n";
-    print " -h        print this help information and stop\n";
-    print " -f file/device  send graphs to 'file' using PGPLOT 'device'\n";
-    print "    if -f omitted and DISPLAY is defined, '/xw' will be used\n";
-    print "    if -f omitted and DISPLAY is not defined, 'plotlog.ps/vps' will be used\n";
-    print "    if '-f ?', you will be prompted for standard pgplot devices,\n";
-    print "               be sure to quote '?', like \\?\n";
-    print "    'vps' (portrait PostScript) is a useful choice for 'device' for file output\n";
-    print "    '.ps' works well as the file extension for device 'vps'\n\n";
+Option explanations:
+ phase-difference plot options (suppresses all other output, except -p):
+  -1 all converters are on one IF
+  -a odd converters are on one IF, even are on another (astronomy)
+  -n converters 1-8 on one band, 9-16 on a second (narrow band geodesy),
+     also useful for wide band geodesy
+  -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third
+     (wide band geodesy)
 
-    print "You can use different colors by setting the environment variables\n";
-    print "PGPLOT_FOREGROUND and PGPLOT_BACKGROUND appropriately before running the\n";
-    print "program. Colors that are available depend on the device, but in addition to\n";
-    print "'black' and 'white', may include 'red', 'green', 'blue', 'cyan', 'magenta',\n";
-    print "'yellow', 'grey', 'slategrey', 'gold', and maybe others.\n";
+ -b        force single-side-band Tsys normalization of pcal amp data
+ -c value  cable cal edit, if greater than zero, delete points that much or
+           more above lowest value, if less than zero, delete points that much
+           or more below largest value; uses plot Y axis units, be careful of
+           the -r option
+ -e regexp include only plots with labels that DO NOT match 'regexp', where
+           'regexp' is any Perl regular expression pattern, you will need to
+           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'
+           or spaces, this option can be combined with the 'g' option as well.
+           The match is case insensitive.
+ -g regexp include only plots with labels that DO match 'regexp', where
+           'regexp' is any Perl regular expression pattern, you will need to
+           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'
+           or spaces, this option can be combined with the 'e' option as well.
+           The match is case insensitive.
+ -j        normalize phase-cal amp by Tsys per channel
+ -k value  changes 'j' normalization from minimum non-zero Tsys per channel to
+           'value' for all channels
+ -p        plot amplitude versus phase for phase cal tones,
+           suppresses all other output except -1anw
+ -r        plot cable data in raw units
+ -s string match commands with 'string' instead of 'tsys',
+           option -t still applies for editing
+ -2 n      n is 1 or 2, useful for selecting which values to plot for
+           -s tpicd#tpcont; 1 for first value, 2 for second
+ -t value  edit out tsys points less than or equal to zero or greater than or
+           equal to 'value'
+ -z value  edit out pcal data with amplitudes less than 'value'
+ -u value  maximum distance in time (seconds) allowed for matching data for
+           '1anwp' option plots is changed to 'value' instead of 60 seconds
+ -v        print program and PGPLOT version information and stop
+ -h        print this help information and stop
+ -f file/device  send graphs to 'file' using PGPLOT 'device'
+    if -f omitted and DISPLAY is defined, '/xw' will be used
+    if -f omitted and DISPLAY is not defined, 'plotlog.ps/vps' will be used
+    if '-f ?', you will be prompted for standard pgplot devices,
+               be sure to quote '?', like \\?
+    'vps' (portrait PostScript) is a useful choice for 'device' for file output
+    '.ps' works well as the file extension for device 'vps'
+
+You can use different colors by setting the environment variables
+PGPLOT_FOREGROUND and PGPLOT_BACKGROUND appropriately before running the
+program. Colors that are available depend on the device, but in addition to
+'black' and 'white', may include 'red', 'green', 'blue', 'cyan', 'magenta',
+'yellow', 'grey', 'slategrey', 'gold', and maybe others.
+";
     exit 0;
 }
 
