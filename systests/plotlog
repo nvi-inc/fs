@@ -30,7 +30,7 @@ sub nrml {
 #
 # normalize the pcal in $i-th channel by the tsys value that matches if any
 #
-    my($i,$chan)= @_;
+    my($k,$i,$chan)= @_;
     my($pv,$pt,$tv,$tt);
     my($ttref,$tvref,$ptref,$pvref);
     my($j,$min,$nfirst);
@@ -38,9 +38,9 @@ sub nrml {
     $#pt=-1;
     $#tv=-1;
     $#tt=-1;
-    for($j=0;$j<$pcaln[1][$i];$j++) {
-	$pv[$j]=$pcala[1][$i][$j];
-	$pt[$j]=$pcalt[1][$i][$j];
+    for($j=0;$j<$pcaln[$k][$i];$j++) {
+	$pv[$j]=$pcala[$k][$i][$j];
+	$pt[$j]=$pcalt[$k][$i][$j];
     }
     for($j=0;$j<$tsysn{$chan};$j++) {
 	$tv[$j]=$tsysv{$chan}[$j];
@@ -141,20 +141,20 @@ sub phs {
 #
 # plot phase differences
 #
-    my ($i,$j)=@_;
+    my ($i,$j,$m,$n)=@_;
     my ($tim1,$phs1,$tim2,$phs2);
     my ($tref1,$pref1,$tref2,$pref2,$k,$label);
     $#tim1=-1;
     $#phs1=-1;
     $#tim2=-1;
     $#phs2=-1;
-    for($k=0; $k<$pcaln[1][$i];$k++) {
-	$tim1[$k]=$pcalt[1][$i][$k];
-	$phs1[$k]=$pcalp[1][$i][$k];
+    for($k=0; $k<$pcaln[$m][$i];$k++) {
+	$tim1[$k]=$pcalt[$m][$i][$k];
+	$phs1[$k]=$pcalp[$m][$i][$k];
     }
-    for($k=0; $k<$pcaln[1][$j];$k++) {
-	$tim2[$k]=$pcalt[1][$j][$k];
-	$phs2[$k]=$pcalp[1][$j][$k];
+    for($k=0; $k<$pcaln[$n][$j];$k++) {
+	$tim2[$k]=$pcalt[$n][$j][$k];
+	$phs2[$k]=$pcalp[$n][$j][$k];
     }
     ($tref1,$pref1,$tref2,$pref2)=&match(\@tim1,\@phs1,\@tim2,\@phs2);
 
@@ -171,7 +171,7 @@ sub phs {
 	    }
 	}
     }
-    &vu($tref1,$pref1,"Phase diff $pcall[1][$j]-$pcall[1][$i]");
+    &vu($tref1,$pref1,"Phase diff $pcall[$n][$j]-$pcall[$m][$i]");
 }
 
 sub vup {
@@ -419,11 +419,12 @@ Synopsis: extracts and plots data from log files
 Exit code is 0 for no error, -1 for no logs found, -2 for nothing to plot.
 
 This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or
-fmout-gps/), setcl#time/, and the first encountered USB tone per channel for
-Mark IV decoder pcal data in log files and generates time plots of the data.
-The time axis of all the plots is the same. The data is plotted so that it fits
-entirely inside the boxes. Points that appear along the top line of a plot did
-not decode (\$\$\$ for example) or were edited out by command line options.
+fmout-gps/), setcl#time/, and the first encountered tone per channel (LSB and
+USB separately) for Mark IV decoder pcal data in log files and generates time
+plots of the data. The time axis of all the plots is the same. The data is
+plotted so that it fits entirely inside the boxes. Points that appear along the
+top line of a plot did not decode (\$\$\$ for example) or were edited out by
+command line options.
 
 The '1anw' switches can be used to select different IF arrangements for
 calculating phase differences between pcal tones. Any combination of the '1anw'
@@ -432,7 +433,7 @@ switches can be used. No difference is plotted more than once.
 The 'j' switch can be used to normalize pcal amplitudes by Tsys (per channel)
 for time plots and amplitude versus phase plots. The minimum non-zero Tsys
 (per channel) is used as the reference value for normalization. If this causes
-problems, an explict global reference value can be specified with the 'k'
+problems, an explicit global reference value can be specified with the 'k'
 option. The 't' option may also be useful for removing bad Tsys values. By
 default dual side-band Tsys is used for normalization if it is available, if
 not then single side-band Tsys data is used. This is usually what is wanted
@@ -463,8 +464,11 @@ Option explanations:
      also useful for wide band geodesy
   -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third
      (wide band geodesy)
+  Phase differences between LSB/USB channels for the same BBC/VC are not
+  displayed.
 
- -b        force single-side-band Tsys normalization of pcal amp data
+ -b        force same side-band Tsys normalization (reject dual and opposite
+           side-band Tsys even if that is all that is available)
  -c value  cable cal edit, if greater than zero, delete points that much or
            more above lowest value, if less than zero, delete points that much
            or more below largest value; uses plot Y axis units, be careful of
@@ -891,32 +895,43 @@ if(@setcl) {
      &vu(\@setclt, \@setcl,"setcl offset (0.01 s)");
 }
 for($i=1;$i<17;$i++) {
-    if(defined($pcaln[1][$i])) {
-	$#amp=-1;
-	$#tim=-1;
-	$#phs=-1;
-	for($j=0;$j<$pcaln[1][$i];$j++) {
-	    $amp[$j]=$pcala[1][$i][$j];
-	    $tim[$j]=$pcalt[1][$i][$j];
-		$phs[$j]=$pcalp[1][$i][$j];
-	}
+    for($k=0;$k<2;$k++) {
+	if(defined($pcaln[$k][$i])) {
+	    $#amp=-1;
+	    $#tim=-1;
+	    $#phs=-1;
+	    for($j=0;$j<$pcaln[$k][$i];$j++) {
+		$amp[$j]=$pcala[$k][$i][$j];
+		$tim[$j]=$pcalt[$k][$i][$j];
+		$phs[$j]=$pcalp[$k][$i][$j];
+	    }
 #
-# fix up to use dual sideband tsys for normalization, BUT specific sideband data
-# if dual doesn't exist
+# fix up to use dual sideband tsys (MK IV) or opposite sideband (VLBA) for
+# normalization if specific sideband data doesn't exist,
+# -b forces same sideband, reject point if not there
 #
-	$chan=$pcall[1][$i];
-	if(!defined($opt_b)) {
-	    substr($chan,-1)="d";
-	    $chan=$pcall[1][$i] if !defined($tsysn{$chan});
-	}
+		$chan=$pcall[$k][$i];
+		if(!defined($opt_b)) {
+		    substr($chan,-1)="d";
+		    $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+                    if(!defined($tsysn{$chan}) && substr($hcan,-1) eq 'u') {
+		        substr($chan,-1)="l";
+		        $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+                    }
+                    if(!defined($tsysn{$chan}) && substr($chan,-1) eq 'l') {
+		        substr($chan,-1)="u";
+		        $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+                    }
+		}
 
-	if(!defined($opt_j)) {		    
-	    &vu(\@tim,\@amp,"$pcalf[1][$i] Hz Amp $pcall[1][$i]");
-	} elsif(defined($tsysn{$chan})) {
-	    ($ptref,$pvref)= &nrml($i, $chan);
-	    &vu($ptref,$pvref,"$pcalf[1][$i] Hz Amp(Ts) $pcall[1][$i]");
+		if(!defined($opt_j)) {
+		    &vu(\@tim,\@amp,"$pcalf[$k][$i] Hz Amp $pcall[$k][$i]");
+		} elsif(defined($tsysn{$chan})) {
+		    ($ptref,$pvref)= &nrml($k, $i, $chan);
+		    &vu($ptref,$pvref,"$pcalf[$k][$i] Hz Amp(Ts) $pcall[$k][$i]");
+		}
+	&vu(\@tim,\@phs,"$pcalf[$k][$i] Hz Phase $pcall[$k][$i]");
 	}
-	&vu(\@tim,\@phs,"$pcalf[1][$i] Hz Phase $pcall[1][$i]");
     }
 }
 
@@ -981,13 +996,20 @@ foreach $chan (sort keys %rxcount) {
 goto END_EXTRAS;
 
 EXTRAS:
+# $done is not redundant, it prevents re-plotting of differences when
+# when multiple options are specified
 if(defined($opt_1)) {
     for($i=1;$i<15;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+1;$j<15;$j++) {
-		if(defined($pcaln[1][$j])) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i;$j<15;$j++) {
+		    for($n=0;$n<2;$n++) {
+			next if $j == $i && $n == $m;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
+			    $done[$i][$j][$m][$n]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
@@ -995,21 +1017,31 @@ if(defined($opt_1)) {
 }
 if(defined($opt_a)) {
     for($i=1;$i<15;$i+=2) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+2;$j<15;$j+=2) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i;$j<15;$j+=2) {
+		    for($n=0;$n<2;$n++) {
+			next if $j == $i && $n == $m;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
+			    $done[$i][$j][$m][$n]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
     }
     for($i=2;$i<15;$i+=2) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+2;$j<15;$j+=2) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i;$j<15;$j+=2) {
+		    for($n=0;$n<2;$n++) {
+			next if $j == $i && $n == $m;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
+			    $done[$i][$j][$m][$n]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
@@ -1017,21 +1049,31 @@ if(defined($opt_a)) {
 }
 if(defined($opt_n)) {
     for($i=1;$i<9;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+1;$j<9;$j++) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i;$j<9;$j++) {
+		    for($n=0;$n<2;$n++) {
+			next if $j == $i && $n == $m;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
+			    $done[$i][$j][$m][$n]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
     }
     for($i=9;$i<15;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+1;$j<15;$j++) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i;$j<15;$j++) {
+		    for($n=0;$n<2;$n++) {
+			next if $j == $i && $n == $m;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
+			    $done[$i][$j][$m][$n]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
@@ -1039,31 +1081,46 @@ if(defined($opt_n)) {
 }
 if(defined($opt_w)) {
     for($i=1;$i<5;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+1;$j<5;$j++) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i;$j<5;$j++) {
+		    for($n=0;$n<2;$n++) {
+			next if $j == $i && $n == $m;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
+			    $done[$i][$j][$m][$n]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
     }
     for($i=5;$i<9;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+1;$j<9;$j++) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i;$j<9;$j++) {
+		    for($n=0;$n<2;$n++) {
+			next if $j == $i && $n == $m;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
+			    $done[$i][$j][$m][$n]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
     }
     for($i=9;$i<15;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+1;$j<15;$j++) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i;$j<15;$j++) {
+		    for($n=0;$n<2;$n++) {
+			next if $j == $i && $n == $m;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
+			    $done[$i][$j][$m][$n]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
@@ -1090,45 +1147,55 @@ if(!$first) {
 if(defined($opt_p)) {
     $first = 1;
     for($i=1;$i<17;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    $#amp=-1;
-	    $#tim=-1;
-	    $#phs=-1;
-	    for($j=0;$j<$pcaln[1][$i];$j++) {
-		$amp[$j]=$pcala[1][$i][$j];
-		$tim[$j]=$pcalt[1][$i][$j];
-		$phs[$j]=$pcalp[1][$i][$j];
-	    }
-#
-# fix up to use dual sideband tsys for normalization if specific sideband data
-# doesn't exist
-#
-	    $chan=$pcall[1][$i];
-	    if(!defined($opt_b)) {
-		substr($chan,-1)="d";
-		$chan=$pcall[1][$i] if !defined($tsysn{$chan});
-	    }
-
-	    if(!defined($opt_j)) {		    
-		if($first == 1 && $panel !=0) {
-		    pgask(-1);
-		    pgpanl(1,8);
-		    pgpage();
-		    $panel=0;
+        for($k=0;$k<2;$k++) {
+	    if(defined($pcaln[$k][$i])) {
+		$#amp=-1;
+		$#tim=-1;
+		$#phs=-1;
+		for($j=0;$j<$pcaln[$k][$i];$j++) {
+		    $amp[$j]=$pcala[$k][$i][$j];
+		    $tim[$j]=$pcalt[$k][$i][$j];
+		    $phs[$j]=$pcalp[$k][$i][$j];
 		}
-		$label=sprintf("$pcalf[1][$i] Hz Amp $pcall[1][$i]");
-		&vup(\@phs,\@amp,$label);
-	    } elsif (defined($tsysn{$chan})) {
-		($ptref,$pvref)= &nrml($i, $chan);
-		$#tima=-1;
-		$#vala=-1;
-		for($j=0;$j<=$#$ptref;$j++) {
-		    $tima[$j]=$$ptref[$j];
-		    $vala[$j]=$$pvref[$j];
+#
+# fix up to use dual sideband tsys (MK IV) or opposite sideband (VLBA) for
+# normalization if specific sideband data doesn't exist,
+# -b forces same sideband, reject point if not there
+#
+		$chan=$pcall[$k][$i];
+		if(!defined($opt_b)) {
+		    substr($chan,-1)="d";
+		    $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+			if(!defined($tsysn{$chan}) && substr($chan,-1) eq 'u') {
+			    substr($chan,-1)="l";
+			    $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+			}
+			if(!defined($tsysn{$chan}) && substr($chan,-1) eq 'l') {
+			    substr($chan,-1)="u";
+			    $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+			}
 		}
-		($ptref,$pvref,$atref,$avref)=&match(\@tim,\@phs,\@tima,\@vala);
-		$label=sprintf("$pcalf[1][$i] Hz Amp(Ts) $pcall[1][$i]");
-		&vup($pvref,$avref,$label);
+		if(!defined($opt_j)) {
+		    if($first == 1 && $panel !=0) {
+			pgask(-1);
+			pgpanl(1,8);
+			pgpage();
+			$panel=0;
+		    }
+		    $label=sprintf("$pcalf[$k][$i] Hz Amp $pcall[$k][$i]");
+		    &vup(\@phs,\@amp,$label);
+		} elsif (defined($tsysn{$chan})) {
+		    ($ptref,$pvref)= &nrml($k, $i, $chan);
+		    $#tima=-1;
+		    $#vala=-1;
+		    for($j=0;$j<=$#$ptref;$j++) {
+			$tima[$j]=$$ptref[$j];
+			$vala[$j]=$$pvref[$j];
+		    }
+		    ($ptref,$pvref,$atref,$avref)=&match(\@tim,\@phs,\@tima,\@vala);
+		    $label=sprintf("$pcalf[$k][$i] Hz Amp(Ts) $pcall[$k][$i]");
+		    &vup($pvref,$avref,$label);
+		}
 	    }
 	}
     }
