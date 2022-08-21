@@ -242,7 +242,7 @@ sub vuy {
 	    pgtbox("BCTNZYH",0.0,0,"BCNVT",0.0,0); 
 	    pglabel("Time","","");
 	} elsif($type == 2) {
-	    pgbox("BCTN",0.0,0,"BCNVT",0.0,0); 
+	    pgbox("BCTN",45.0,0,"BCNVT",0.0,0);
 	    pglabel("Phase","","");
 	}
 	pgask(-1);
