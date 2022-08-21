@@ -395,7 +395,7 @@ sub time {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("12:abc:e:g:jk:rnps:t:u:wz:f:hv");
+&Getopts("12:abc:e:g:jk:rnps:t:u:wyz:f:hv");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -500,6 +500,7 @@ Option explanations:
            -s tpicd#tpcont; 1 for first value, 2 for second
  -t value  edit out tsys points less than or equal to zero or greater than or
            equal to 'value'
+ -y        edit out pcal phases with outside [-180,+180] degrees
  -z value  edit out pcal data with amplitudes less than 'value'
  -u value  maximum distance in time (seconds) allowed for matching data for
            '1anwp' option plots is changed to 'value' instead of 60 seconds
@@ -607,6 +608,9 @@ foreach $file (@ARGV) {
 		$amp='$$$';
 		$phase='$$$';
 	    }
+	    if(defined($opt_y) && ($phase < -180 || 180 < $phase)) {
+		$phase='$$$';
+	    }
 	    $pcalt[$band][$chan][$pcaln[$band][$chan]]=&time($_);
 	    $pcala[$band][$chan][$pcaln[$band][$chan]]=$amp;
 	    $pcalp[$band][$chan][$pcaln[$band][$chan]]=$phase;
@@ -646,6 +650,9 @@ foreach $file (@ARGV) {
 	    }
 	    if(defined($opt_z) && $amp < $opt_z) {
 		$amp='$$$';
+		$phase='$$$';
+	    }
+	    if(defined($opt_y) && ($phase < -180 || 180 < $phase)) {
 		$phase='$$$';
 	    }
 	    $pcalt[$band][$chan][$pcaln[$band][$chan]]=&time($_);
