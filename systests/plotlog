@@ -386,6 +386,12 @@ sub time {
     $tmin=$time if $time<$tmin;
     return $time;
 }
+sub by_rdbe_chan {
+#by band, then by IF, then by channel
+    substr($a,2,1) cmp substr($b,2,1) or
+    substr($a,3,1) cmp substr($b,3,1) or
+    substr($a,0,2) cmp substr($b,0,2);
+}
 #
 # main program
 #
@@ -395,7 +401,7 @@ sub time {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("12:abc:e:g:jk:rnps:t:u:wyz:f:hv");
+&Getopts("12:abc:e:g:jk:m:M:rnps:t:u:wyz:f:hv");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -425,6 +431,9 @@ plots of the data. The time axis of all the plots is the same. The data is
 plotted so that it fits entirely inside the boxes. Points that appear along the
 top edge of a plot did not decode (\$\$\$ for example) or were edited out by
 command line options.
+
+For RDBEs, unless the '-m' and/or '-m' options are specified, only Tsys from
+the first (non-'00') detector encountered for each IF is plotted.
 
 The '1anw' switches can be used to select different IF arrangements for
 plotting phase differences between pcal tones for back-ends with baseband/video
@@ -493,6 +502,18 @@ Option explanations:
  -j        normalize phase-cal amp by Tsys per channel
  -k value  changes 'j' normalization from minimum non-zero Tsys per channel to
            'value' for all channels
+ -m regexp for RDBEs only, include only Tsys detectors that DO match 'regexp',
+           where 'regex' is any Perl regular expression pattern. You will need
+           to quote 'regexp' if it contains special characters. You can use
+           this to get different slices of detectors, e.g., '01' for the '01'
+           detectors on all bands or 'a1' for all detectors from band A IF 1.
+           You can also use '|' (or) to include multiple strings, e.g.,
+           '1a0005|1a0010'. This option can be combined with the '-m' option as
+           well. The match is case insensitive. This option offers slightly
+           different functionality than '-g', operating only on Tsys detectors.
+           It is a little faster too.
+ -M regexp for RDBEs only, include only Tsys detectors that do NOT match
+           'regexp', see '-m'
  -p        plot amplitude versus phase for phase cal tones,
            suppresses all other output except -1anw
  -r        plot cable data in raw units
@@ -562,7 +583,10 @@ foreach $file (@ARGV) {
 	    $location=$1;
 	    (undef)=&time($_);
 	}
-
+	if(!$equip && /;equip,/i) {
+            $equip=1;
+            $rdbe=/rdbe/;
+        }
 	if(/wx\/[ ]*([^,]*),[ ]*([^,]*),[ ]*([^, \cM]*)/i) {
 	    $temp[$wxcount]=$1;
 	    $pres[$wxcount]=$2;
@@ -664,8 +688,28 @@ foreach $file (@ARGV) {
 	    $pcaln[$band][$chan]++;
 	} elsif (/[#\/]$string\/(.*)/i) {
 	    @fields=split('[,\cM]',$1);
+	    s{^\s+|\s+$}{}g foreach @fields;
 	    while($detect=shift(@fields)) {
 		$tsys=shift(@fields);
+		if($rdbe) {
+		    if(defined($opt_m)) {
+			next if $detect !~/$opt_m/i;
+		    }
+		    if(defined($opt_M)) {
+			next if $detect =~/$opt_M/i;
+		    }
+		    if(!defined($opt_m) && !defined($opt_M)) {
+                        next if '00' eq substr($detect,0,2);
+			$if_detect=substr($detect,2,2);
+			if(!$rdbe_if_tsys{$if_detect}){
+			    $rdbe_if_tsys{$if_detect}{$detect}=1;
+			} elsif(!$rdbe_if_tsys{$if_detect}{$detect}) {
+			    next;
+			}
+		    }
+		} elsif(defined($opt_m) || defined($opt_M)) {
+		    die "Options -m and -M are only for RDBE racks\n";
+		}
 		if(defined($opt_2)) {
 		    if($opt_2 == 1) {
 			$detect="$detect (1)";
@@ -949,17 +993,31 @@ for($i=1;$i<17;$i++) {
     }
 }
 
-foreach $detect (sort keys %tsysn) {
+if($rdbe) {
+    foreach $detect (sort by_rdbe_chan keys %tsysn) {
 #    print "Detect $detect $tsysn{$detect}\n";
-    $#amp=-1;
-    $#tim=-1;
-    for($j=0;$j<$tsysn{$detect};$j++) {
-	$amp[$j]=$tsysv{$detect}[$j];
-	$tim[$j]=$tsyst{$detect}[$j];
+	$#amp=-1;
+	$#tim=-1;
+	for($j=0;$j<$tsysn{$detect};$j++) {
+	    $amp[$j]=$tsysv{$detect}[$j];
+	    $tim[$j]=$tsyst{$detect}[$j];
+	}
+	$label=sprintf("$string %s",$detect);
+	&vu(\@tim,\@amp,$label);
     }
-    $label=sprintf("$string %s",$detect);
-    &vu(\@tim,\@amp,$label);
-}	
+} else {
+    foreach $detect (sort keys %tsysn) {
+#    print "Detect $detect $tsysn{$detect}\n";
+	$#amp=-1;
+	$#tim=-1;
+	for($j=0;$j<$tsysn{$detect};$j++) {
+	    $amp[$j]=$tsysv{$detect}[$j];
+	    $tim[$j]=$tsyst{$detect}[$j];
+	}
+	$label=sprintf("$string %s",$detect);
+	&vu(\@tim,\@amp,$label);
+    }
+}
 foreach $detect (sort keys %tsysn1) {
 #    print "Detect $detect $tsysn1{$detect}\n";
     $#amp=-1;
