@@ -576,7 +576,7 @@ foreach $file (@ARGV) {
     $y=0;
     while (<FILE>) {
 	chomp;
-	if(/;location,([^,]*)/i) {
+	if(!$location && /;location,([^,]*)/i) {
 	    $location=$1;
 	    (undef)=&time($_);
 	}
