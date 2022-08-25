@@ -443,7 +443,7 @@ sub by_rdbe_tone {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("12:abc:d:D:e:g:G:jk:m:M:rnps:t:u:wyz:f:hvV");
+&Getopts("12:abc:d:D:e:g:G:jk:l:m:M:rnps:t:u:wyz:f:hvV");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -559,6 +559,8 @@ Option explanations:
            RDBEs yet).
  -k value  changes 'j' normalization from minimum non-zero Tsys per channel to
            'value' for all channels (not supported for RDBEs, see '-j')
+ -l string specify location, useful for snippets of logs that don't include the
+           'location' line. This is used in plot titles.
  -m regexp for RDBEs only, include only Tsys detectors that DO match 'regexp',
            where 'regex' is any Perl regular expression pattern. You will need
            to quote 'regexp' if it contains special characters. You can use
@@ -616,6 +618,10 @@ $string = $opt_s if defined($opt_s);
 
 $time_dist=60;
 $time_dist = $opt_u if defined($opt_u);
+
+if(defined($opt_l)) {
+    $location=$opt_l;
+}
 
 if(defined($opt_e)) {
     $rdbe=$opt_e=~/rdbe/i;
