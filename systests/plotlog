@@ -199,8 +199,8 @@ sub vuy {
     if(defined($opt_g)) {
 	return if $label !~/$opt_g/i;
     }
-    if(defined($opt_e)) {
-	return if $label =~/$opt_e/i;
+    if(defined($opt_G)) {
+	return if $label =~/$opt_G/i;
     }
     $ymax=0;
     $ymin=0;
@@ -401,7 +401,7 @@ sub by_rdbe_chan {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("12:abc:e:g:jk:m:M:rnps:t:u:wyz:f:hv");
+&Getopts("12:abc:g:G:jk:m:M:rnps:t:u:wyz:f:hv");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -489,16 +489,13 @@ Option explanations:
            more above lowest value, if less than zero, delete points that much
            or more below largest value; uses plot Y axis units, be careful of
            the -r option
- -e regexp include only plots with labels that DO NOT match 'regexp', where
-           'regexp' is any Perl regular expression pattern, you will need to
-           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'
-           or spaces, this option can be combined with the 'g' option as well.
-           The match is case insensitive.
  -g regexp include only plots with labels that DO match 'regexp', where
-           'regexp' is any Perl regular expression pattern, you will need to
+           'regexp' is any Perl regular expression pattern. You will need to
            quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'
-           or spaces, this option can be combined with the 'e' option as well.
-           The match is case insensitive.
+           This option can be combined with the '-G' option as well. The match
+           is case insensitive.
+ -G regexp include only plots with labels that DO NOT match 'regexp', where
+           'regexp', see '-g'
  -j        normalize phase-cal amp by Tsys per channel
  -k value  changes 'j' normalization from minimum non-zero Tsys per channel to
            'value' for all channels
