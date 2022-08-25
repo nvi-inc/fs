@@ -137,6 +137,42 @@ sub match {
     return (\@ot1,\@ov1,\@ot2,\@ov2);
 }
 
+sub phsr {
+#
+# plot phase differences for RDBEs
+#
+    my ($tone1,$tone2)=@_;
+    my ($tim1,$phs1,$tim2,$phs2);
+    my ($tref1,$pref1,$tref2,$pref2,$k,$label);
+    $#tim1=-1;
+    $#phs1=-1;
+    $#tim2=-1;
+    $#phs2=-1;
+    for($k=0; $k<$rpcaln{$tone1};$k++) {
+	$tim1[$k]=$rpcalt{$tone1}[$k];
+	$phs1[$k]=$rpcalp{$tone1}[$k];
+    }
+    for($k=0; $k<$rpcaln{$tone2};$k++) {
+	$tim2[$k]=$rpcalt{$tone2}[$k];
+	$phs2[$k]=$rpcalp{$tone2}[$k];
+    }
+    ($tref1,$pref1,$tref2,$pref2)=&match(\@tim1,\@phs1,\@tim2,\@phs2);
+
+    for($k=0; $k<=$#$tref1;$k++) {
+	if($$pref1[$k]!~/^$float_pattern$/ ||
+	   $$pref2[$k]!~/^$float_pattern$/) {
+	    $$pref1[$k]='$$$';
+	} else {
+	    $$pref1[$k]=$$pref2[$k]-$$pref1[$k];
+	    if($$pref1[$k] > 180) {
+		$$pref1[$k]-=360;
+	    } elsif($$pref1[$k] < -180) {
+		$$pref1[$k]+=360;
+	    }
+	}
+    }
+    &vu($tref1,$pref1,"Phase $tone2-$tone1");
+}
 sub phs {
 #
 # plot phase differences
@@ -392,6 +428,12 @@ sub by_rdbe_chan {
     substr($a,3,1) cmp substr($b,3,1) or
     substr($a,0,2) cmp substr($b,0,2);
 }
+sub by_rdbe_tone {
+#by band, then by IF, then by tone
+    substr($a,1,1) cmp substr($b,1,1) or
+    substr($a,0,1) cmp substr($b,0,1) or
+    substr($a,2) cmp substr($b,2);
+}
 #
 # main program
 #
@@ -401,17 +443,17 @@ sub by_rdbe_chan {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("12:abc:g:G:jk:m:M:rnps:t:u:wyz:f:hv");
+&Getopts("12:abc:d:D:g:G:jk:m:M:rnps:t:u:wyz:f:hvV");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
 
-if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_V)) {
     print STDERR "Try: 'plotlog -h'\n";
     exit 0;
 }
 
-if(defined($opt_v)) {
+if(defined($opt_V)) {
     print "[plotlog 1.8]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
@@ -425,15 +467,17 @@ Synopsis: extracts and plots data from log files
 Exit code is 0 for no error, -1 for no logs found, -2 for nothing to plot.
 
 This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or
-fmout-gps/), setcl#time/, and the first encountered tone per channel (LSB and
-USB separately) for Mark IV decoder pcal data in log files and generates time
-plots of the data. The time axis of all the plots is the same. The data is
-plotted so that it fits entirely inside the boxes. Points that appear along the
-top edge of a plot did not decode (\$\$\$ for example) or were edited out by
-command line options.
+fmout-gps/), setcl#time/, RDBE pcal, and the first encountered tone per channel
+(LSB and USB separately) for Mark IV decoder pcal data in log files and
+generates time plots of the data. The time axis of all the plots is the same.
+The data is plotted so that it fits entirely inside the boxes. Points that
+appear along the top edge of a plot did not decode (\$\$\$ for example) or were
+edited out by command line options.
 
-For RDBEs, unless the '-m' and/or '-m' options are specified, only Tsys from
-the first (non-'00') detector encountered for each IF is plotted.
+For RDBEs: unless the '-m' and/or '-m' options are specified, only Tsys from
+the first (non-'00') detector encountered for each IF is plotted; unless the
+'-d' and/or '-D' options are specified, only the first pcal tone encountered
+for each IF is plotted.
 
 The '1anw' switches can be used to select different IF arrangements for
 plotting phase differences between pcal tones for back-ends with baseband/video
@@ -476,6 +520,7 @@ Option explanations:
   -a odd converters are on one IF, even are on another (astronomy)
   -n converters 1-8 on one band, 9-16 on a second (narrow band geodesy),
      also useful for wide band geodesy
+  -v differences within RDBE (VGOS) IFs
   -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third
      (wide band geodesy)
   Phase differences between LSB/USB channels for the same BBC/VC are not
@@ -489,6 +534,17 @@ Option explanations:
            more above lowest value, if less than zero, delete points that much
            or more below largest value; uses plot Y axis units, be careful of
            the -r option
+ -d regexp for RDBEs only, include only pcal tones that DO match 'regexp',
+           where 'regex' is any Perl regular expression pattern. You will need
+           to quote 'regexp' if it contains special characters. You can use
+           this to get different slices of tones, e.g., '0005' for the 5-th
+           tone for all bands or '1a' for all tones in band A, IF 1. You can
+           also use '|' (or) to include multiple strings, e.g. '1a0005|1a0010'.
+           This option can be combined with '-D' option as well. The match is
+           case insensitive. This offers slightly different functionality than
+           '-g', operating only on pcal tones. It is a little faster too.
+ -D regexp for RDBEs only, include only pcal tones that do NOT match 'regexp',
+           see '-d'
  -g regexp include only plots with labels that DO match 'regexp', where
            'regexp' is any Perl regular expression pattern. You will need to
            quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'
@@ -496,9 +552,10 @@ Option explanations:
            is case insensitive.
  -G regexp include only plots with labels that DO NOT match 'regexp', where
            'regexp', see '-g'
- -j        normalize phase-cal amp by Tsys per channel
+ -j        normalize phase-cal amp by Tsys per channel (not supported for
+           RDBEs yet).
  -k value  changes 'j' normalization from minimum non-zero Tsys per channel to
-           'value' for all channels
+           'value' for all channels (not supported for RDBEs, see '-j')
  -m regexp for RDBEs only, include only Tsys detectors that DO match 'regexp',
            where 'regex' is any Perl regular expression pattern. You will need
            to quote 'regexp' if it contains special characters. You can use
@@ -524,7 +581,7 @@ Option explanations:
  -z value  edit out pcal data with amplitudes less than 'value'
  -u value  maximum distance in time (seconds) allowed for matching data for
            '1anwp' option plots is changed to 'value' instead of 60 seconds
- -v        print program and PGPLOT version information and stop
+ -V        print program and PGPLOT version information and stop
  -h        print this help information and stop
  -f file/device  send graphs to 'file' using PGPLOT 'device'
     if -f omitted and DISPLAY is defined, '/xw' will be used
@@ -683,6 +740,41 @@ foreach $file (@ARGV) {
 	    $pcalp[$band][$chan][$pcaln[$band][$chan]]=$phase;
 	    $pcall[$band][$chan]="$chan$sb";
 	    $pcaln[$band][$chan]++;
+	} elsif (/[#\/]pcal\/(.*)/i) {
+	    @fields=split('[,\cM]',$1);
+#	    print "$_\n";
+	    s{^\s+|\s+$}{}g foreach @fields;
+#	    print "@fields \n\n";
+	    while($tone=shift(@fields)) {
+		$amp=shift(@fields);
+		$phase=shift(@fields);
+		if($rdbe) {
+		    if(defined($opt_d)) {
+			next if $tone !~/$opt_d/i;
+		    }
+		    if(defined($opt_D)) {
+			next if $tone =~/$opt_D/i;
+		    }
+		    if(!defined($opt_d) && !defined($opt_D)) {
+			$if_tone=substr($tone,0,2);
+			if(!$rdbe_if_pcal{$if_tone}){
+			    $rdbe_if_pcal{$if_tone}{$tone}=1;
+			} elsif(!$rdbe_if_pcal{$if_tone}{$tone}) {
+			    next;
+			}
+		    }
+		} elsif(defined($opt_d) || defined($opt_D)) {
+		    die "Options -d and -D are only for RDBE racks\n";
+		}
+		if(defined($opt_y) && ($phase < -180 || 180 < $phase)) {
+		    $phase='$$$';
+		}
+		$rpcalt{$tone}[$rpcaln{$tone}]=&time($_);
+		$rpcala{$tone}[$rpcaln{$tone}]=$amp;
+		$rpcalp{$tone}[$rpcaln{$tone}]=$phase;
+		$rpcaln{$tone}++;
+#		print "$tone $rpcala{$tone} $rpcalp{$tone} $rpcaln{$tone}\n";
+	    }
 	} elsif (/[#\/]$string\/(.*)/i) {
 	    @fields=split('[,\cM]',$1);
 	    s{^\s+|\s+$}{}g foreach @fields;
@@ -844,7 +936,7 @@ $panel=0;
 $first=1;
 
 goto EXTRAS
-    if defined($opt_1)||defined($opt_a)||defined($opt_n)||defined($opt_w)||defined($opt_p);
+    if defined($opt_1)||defined($opt_a)||defined($opt_n)||defined($opt_w)||defined($opt_v)||defined($opt_p);
 
 if(@wxtime) {
     &vu(\@wxtime, \@temp,"Temperature");
@@ -949,6 +1041,22 @@ if(@gpst) {
 if(@setcl) {
      &vu(\@setclt, \@setcl,"setcl offset (0.01 s)");
 }
+foreach $tone (sort by_rdbe_tone keys %rpcaln) {
+    $#amp=-1;
+    $#tim=-1;
+    $#phs=-1;
+    for($j=0;$j<$rpcaln{$tone};$j++) {
+	$amp[$j]=$rpcala{$tone}[$j];
+	$tim[$j]=$rpcalt{$tone}[$j];
+	$phs[$j]=$rpcalp{$tone}[$j];
+    }
+    if(!defined($opt_j)) {
+	&vu(\@tim,\@amp,"$tone Amp");
+	&vu(\@tim,\@phs,"$tone Phase");
+    } else {
+	die "Option -j is not supported for RDBE racks\n";
+    }
+}
 for($i=1;$i<17;$i++) {
     for($k=0;$k<2;$k++) {
 	if(defined($pcaln[$k][$i])) {
@@ -965,27 +1073,27 @@ for($i=1;$i<17;$i++) {
 # normalization if specific sideband data doesn't exist,
 # -b forces same sideband, reject point if not there
 #
-		$chan=$pcall[$k][$i];
-		if(!defined($opt_b)) {
-		    substr($chan,-1)="d";
+	    $chan=$pcall[$k][$i];
+	    if(!defined($opt_b)) {
+		substr($chan,-1)="d";
+		$chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+		if(!defined($tsysn{$chan}) && substr($hcan,-1) eq 'u') {
+		    substr($chan,-1)="l";
 		    $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
-                    if(!defined($tsysn{$chan}) && substr($hcan,-1) eq 'u') {
-		        substr($chan,-1)="l";
-		        $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
-                    }
-                    if(!defined($tsysn{$chan}) && substr($chan,-1) eq 'l') {
-		        substr($chan,-1)="u";
-		        $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
-                    }
 		}
+		if(!defined($tsysn{$chan}) && substr($chan,-1) eq 'l') {
+		    substr($chan,-1)="u";
+		    $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+		}
+	    }
 
-		if(!defined($opt_j)) {
-		    &vu(\@tim,\@amp,"$pcalf[$k][$i] Hz Amp $pcall[$k][$i]");
-		} elsif(defined($tsysn{$chan})) {
-		    ($ptref,$pvref)= &nrml($k, $i, $chan);
-		    &vu($ptref,$pvref,"$pcalf[$k][$i] Hz Amp(Ts) $pcall[$k][$i]");
-		}
-	&vu(\@tim,\@phs,"$pcalf[$k][$i] Hz Phase $pcall[$k][$i]");
+	    if(!defined($opt_j)) {
+		&vu(\@tim,\@amp,"$pcalf[$k][$i] Hz Amp $pcall[$k][$i]");
+	    } elsif(defined($tsysn{$chan})) {
+		($ptref,$pvref)= &nrml($k, $i, $chan);
+		&vu($ptref,$pvref,"$pcalf[$k][$i] Hz Amp(Ts) $pcall[$k][$i]");
+	    }
+	    &vu(\@tim,\@phs,"$pcalf[$k][$i] Hz Phase $pcall[$k][$i]");
 	}
     }
 }
@@ -1065,6 +1173,19 @@ foreach $chan (sort keys %rxcount) {
 goto END_EXTRAS;
 
 EXTRAS:
+
+if(defined($opt_v)) {
+    @tones=sort by_rdbe_tone keys %rpcaln;
+    for ($i=0;$i<=$#tones;$i++) {
+	$if_band=substr($tones[$i],0,2);
+	for ($j=$i+1;$j<=$#tones;$j++) {
+	    if(substr($tones[$j],0,2) ne $if_band) {
+		last;
+	    }
+	    &phsr($tones[$i],$tones[$j]);
+	}
+    }
+}
 # $done is not redundant, it prevents re-plotting of differences when
 # when multiple options are specified
 if(defined($opt_1)) {
@@ -1268,7 +1389,25 @@ if(defined($opt_p)) {
 	    }
 	}
     }
-
+    foreach $tone (sort by_rdbe_tone keys %rpcaln) {
+	$#amp=-1;
+	$#phs=-1;
+	for($j=0;$j<$rpcaln{$tone};$j++) {
+	    $amp[$j]=$rpcala{$tone}[$j];
+	    $phs[$j]=$rpcalp{$tone}[$j];
+	}
+	if($first == 1 && $panel !=0) {
+	    pgask(-1);
+	    pgpanl(1,8);
+	    pgpage();
+	    $panel=0;
+	}
+	if(!defined($opt_j)) {
+	    &vup(\@phs,\@amp,"$tone Amp");
+	} else {
+	    die "Option -j is not supported for RDBE racks\n";
+	}
+    }
     if(!$first) {
 	pgtbox("BCTN",45.0,0,"",0.0,0); 
 	pglabel("Phase","","");
