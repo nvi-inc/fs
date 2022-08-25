@@ -443,7 +443,7 @@ sub by_rdbe_tone {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("12:abc:d:D:g:G:jk:m:M:rnps:t:u:wyz:f:hvV");
+&Getopts("12:abc:d:D:e:g:G:jk:m:M:rnps:t:u:wyz:f:hvV");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -545,6 +545,9 @@ Option explanations:
            '-g', operating only on pcal tones. It is a little faster too.
  -D regexp for RDBEs only, include only pcal tones that do NOT match 'regexp',
            see '-d'
+ -e string specify rack, useful for snippets of logs for RDBEs that don't have
+           an 'equip' line near the start; the only useful value is 'rdbe',
+           which is case insensitive.
  -g regexp include only plots with labels that DO match 'regexp', where
            'regexp' is any Perl regular expression pattern. You will need to
            quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'
@@ -614,11 +617,17 @@ $string = $opt_s if defined($opt_s);
 $time_dist=60;
 $time_dist = $opt_u if defined($opt_u);
 
+if(defined($opt_e)) {
+    $rdbe=$opt_e=~/rdbe/i;
+    $equip=1;
+}
+
 # 2.0 extract data
 
 $some=0;
 $first=1;
 $wxcount=0;
+
 foreach $file (@ARGV) {
     if(!defined($save_file)) {
 	$save_file=$file;
@@ -638,9 +647,9 @@ foreach $file (@ARGV) {
 	    (undef)=&time($_);
 	}
 	if(!$equip && /;equip,/i) {
-            $equip=1;
-            $rdbe=/rdbe/;
-        }
+	    $equip=1;
+	    $rdbe=/rdbe/;
+	}
 	if(/wx\/[ ]*([^,]*),[ ]*([^,]*),[ ]*([^, \cM]*)/i) {
 	    $temp[$wxcount]=$1;
 	    $pres[$wxcount]=$2;
