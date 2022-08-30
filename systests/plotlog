@@ -428,6 +428,33 @@ sub by_rdbe_chan {
     substr($a,3,1) cmp substr($b,3,1) or
     substr($a,0,2) cmp substr($b,0,2);
 }
+sub by_dbbc3_chan {
+my($if_a,$if_b);
+#by IF, then by side-band, then by channel (whole IFs after channels)
+    if(substr($a,0,1) eq 'i' && substr($b,0,1) eq 'i') {
+      return $a cmp $b;
+    } elsif(substr($a,0,1) eq 'i') {
+	$if_b=(substr($b,0,3)-1)/8 % 8;
+	$if_a=index('abcdefgh',substr($a,1,1),);
+	if ($if_a eq $if_b) {
+	    return +1;
+	}
+	return $if_a <=> $if_b;
+    } elsif(substr($b,0,1) eq 'i') {
+	$if_a=(substr($a,0,3)-1)/8 % 8;
+	$if_b=index('abcdefgh',substr($b,1,1),);
+	if ($if_a eq $if_b) {
+	    return -1;
+	}
+	return $if_a <=> $if_b;
+    } else {
+	$if_a=(substr($a,0,3)-1)/8 % 8;
+	$if_b=(substr($b,0,3)-1)/8 % 8;
+	return ($if_a <=> $if_b or
+	    substr($a,3,1) cmp substr($b,3,1) or
+	    $a cmp $b);
+    }
+}
 sub by_rdbe_tone {
 #by band, then by IF, then by tone
     substr($a,1,1) cmp substr($b,1,1) or
@@ -474,10 +501,11 @@ The data is plotted so that it fits entirely inside the boxes. Points that
 appear along the top edge of a plot did not decode (\$\$\$ for example) or were
 edited out by command line options.
 
-For RDBEs: unless the '-m' and/or '-m' options are specified, only Tsys from
-the first (non-'00') detector encountered for each IF is plotted; unless the
-'-d' and/or '-D' options are specified, only the first pcal tone encountered
-for each IF is plotted.
+For RDBEs and DBBC3s, unless the '-m' and/or '-m' options are specified, only
+Tsys from the first (non-'00') detector encountered for each IF is plotted.
+
+For RBDEs, unless the '-d' and/or '-D' options are specified, only the first
+pcal tone encountered for each IF is plotted.
 
 The '1anw' switches can be used to select different IF arrangements for
 plotting phase differences between pcal tones for back-ends with baseband/video
@@ -545,9 +573,9 @@ Option explanations:
            '-g', operating only on pcal tones. It is a little faster too.
  -D regexp for RDBEs only, include only pcal tones that do NOT match 'regexp',
            see '-d'
- -e string specify rack, useful for snippets of logs for RDBEs that don't have
-           an 'equip' line near the start; the only useful value is 'rdbe',
-           which is case insensitive.
+ -e string specify rack, useful for snippets of logs for DBBC3s and RDBEs that
+           don't have an 'equip' line near the start; the only useful values
+           are 'dbbc3' and 'rdbe', which are case insensitive.
  -g regexp include only plots with labels that DO match 'regexp', where
            'regexp' is any Perl regular expression pattern. You will need to
            quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'
@@ -561,18 +589,18 @@ Option explanations:
            'value' for all channels (not supported for RDBEs, see '-j')
  -l string specify location, useful for snippets of logs that don't include the
            'location' line. This is used in plot titles.
- -m regexp for RDBEs only, include only Tsys detectors that DO match 'regexp',
-           where 'regex' is any Perl regular expression pattern. You will need
-           to quote 'regexp' if it contains special characters. You can use
-           this to get different slices of detectors, e.g., '01' for the '01'
-           detectors on all bands or 'a1' for all detectors from band A IF 1.
-           You can also use '|' (or) to include multiple strings, e.g.,
-           '1a0005|1a0010'. This option can be combined with the '-m' option as
-           well. The match is case insensitive. This option offers slightly
-           different functionality than '-g', operating only on Tsys detectors.
-           It is a little faster too.
- -M regexp for RDBEs only, include only Tsys detectors that do NOT match
-           'regexp', see '-m'
+ -m regexp for RDBEs and DBBC3s only, include only Tsys detectors that DO
+           match 'regexp', where 'regex' is any Perl regular expression
+           pattern. You will need to quote 'regexp' if it contains special
+           characters. You can use this to get different slices of detectors,
+           e.g., '01' for the '01' detectors on all bands or 'a1' for all
+           detectors from band A IF 1.  You can also use '|' (or) to include
+           multiple strings, e.g., '1a0005|1a0010'. This option can be combined
+           with the '-m' option as well. The match is case insensitive. This
+           option offers slightly different functionality than '-g', operating
+           only on Tsys detectors.  It is a little faster too.
+ -M regexp for RDBEs and DBBC3s only, include only Tsys detectors that do NOT
+           match 'regexp', see '-m'
  -p        plot amplitude versus phase for phase cal tones,
            suppresses all other output except -1anw
  -r        plot cable data in raw units
@@ -625,6 +653,7 @@ if(defined($opt_l)) {
 
 if(defined($opt_e)) {
     $rdbe=$opt_e=~/rdbe/i;
+    $dbbc3=$opt_e=~/dbbc3/i;
     $equip=1;
 }
 
@@ -655,6 +684,7 @@ foreach $file (@ARGV) {
 	if(!$equip && /;equip,/i) {
 	    $equip=1;
 	    $rdbe=/rdbe/;
+	    $dbbc3=/dbbc3/;
 	}
 	if(/wx\/[ ]*([^,]*),[ ]*([^,]*),[ ]*([^, \cM]*)/i) {
 	    $temp[$wxcount]=$1;
@@ -811,8 +841,27 @@ foreach $file (@ARGV) {
 			    next;
 			}
 		    }
+		} elsif($dbbc3) {
+		    if(defined($opt_m)) {
+			next if $detect !~/$opt_m/i;
+		    }
+		    if(defined($opt_M)) {
+			next if $detect =~/$opt_M/i;
+		    }
+		    if(!defined($opt_m) && !defined($opt_M)) {
+			if(substr($detect,0,1) ne 'i') {
+			    $if_detect=(substr($detect,0,3)-1)/8 % 8;
+			} else {
+			    $if_detect=index('abcdefgh',substr($detect,1,1),);
+			}
+			if(!$dbbc3_if_tsys{$if_detect}){
+			    $dbbc3_if_tsys{$if_detect}{$detect}=1;
+			} elsif(!$dbbc3_if_tsys{$if_detect}{$detect}) {
+			    next;
+			}
+		    }
 		} elsif(defined($opt_m) || defined($opt_M)) {
-		    die "Options -m and -M are only for RDBE racks\n";
+		    die "Options -m and -M are only for RDBE and DBBC3 racks\n";
 		}
 		if(defined($opt_2)) {
 		    if($opt_2 == 1) {
@@ -1115,6 +1164,18 @@ for($i=1;$i<17;$i++) {
 
 if($rdbe) {
     foreach $detect (sort by_rdbe_chan keys %tsysn) {
+#    print "Detect $detect $tsysn{$detect}\n";
+	$#amp=-1;
+	$#tim=-1;
+	for($j=0;$j<$tsysn{$detect};$j++) {
+	    $amp[$j]=$tsysv{$detect}[$j];
+	    $tim[$j]=$tsyst{$detect}[$j];
+	}
+	$label=sprintf("$string %s",$detect);
+	&vu(\@tim,\@amp,$label);
+    }
+} elsif($dbbc3) {
+    foreach $detect (sort by_dbbc3_chan keys %tsysn) {
 #    print "Detect $detect $tsysn{$detect}\n";
 	$#amp=-1;
 	$#tim=-1;
