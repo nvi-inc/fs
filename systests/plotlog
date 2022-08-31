@@ -486,7 +486,7 @@ sub by_clocks {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("12:abc:d:D:e:g:G:jk:l:m:M:rnps:t:u:wyz:f:hvV");
+&Getopts("12:abc:Cd:D:e:g:G:jk:l:m:M:rnps:t:u:wyz:f:hvV");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -515,7 +515,7 @@ setcl#time/, RDBE pcal, and the first encountered tone per channel
 generates time plots of the data. The time axis of all the plots is the same.
 The data is plotted so that it fits entirely inside the boxes. Points that
 appear along the top edge of a plot did not decode (\$\$\$ for example) or were
-edited out by command line options.
+edited out automatically or by command line options.
 
 For RDBEs and DBBC3s, unless the '-m' and/or '-m' options are specified, only
 Tsys from the first (non-'00') detector encountered for each IF is plotted.
@@ -526,6 +526,9 @@ pcal tone encountered for each IF is plotted.
 Clock data includes values from any suitable commands containing 'maser',
 'fmout', and/or 'gps' in their names, as well as RDBE GPS and PPS offsets, and
 DBBC3 dot2pps data from multicast.
+
+Cable and clock data with absolute values greater 10 are automatically deleted
+unless the '-C' option is used.
 
 The '1anw' switches can be used to select different IF arrangements for
 plotting phase differences between pcal tones for back-ends with baseband/video
@@ -579,6 +582,8 @@ Option explanations:
            more above lowest value, if less than zero, delete points that much
            or more below largest value; uses plot Y axis units, be careful of
            the -r option
+ -C        don't automatically delete cable and clock data with raw values that
+           have absolute values greater than 10
  -d regexp for RDBEs only, include only pcal tones that DO match 'regexp',
            where 'regex' is any Perl regular expression pattern. You will need
            to quote 'regexp' if it contains special characters. You can use
@@ -710,7 +715,9 @@ foreach $file (@ARGV) {
 	    $wxtime[$wxcount]=&time($_);
 	    $wxcount++;
 	} elsif(/cable\/[ ]*([^, \cM]*)/i) {
-	    $cable[$cablen]=$1;
+	    $value=$1;
+	    next unless $value=~/^$float_pattern$/ ;
+	    $cable[$cablen]=$value;
 	    $cablet[$cablen]=&time($_);
 	    $cablen++;
 	} elsif(/pcalports[=\/]([^,]*),([0-9]+)/i||/vsi4[=\/][^,]*,([^,]*),([0-9]+)/i) {
@@ -1070,10 +1077,13 @@ if(@wxtime) {
 if(@cablet) {
     if(!defined($opt_r)) {
         for($i=0;$i<=$#cable;$i++) {
-	    next unless $cable[$i]=~/^$float_pattern$/ ;
-            $cablefirst=$cable[$i] if(!defined($cablefirst));
-            $cable[$i]=($cable[$i]-$cablefirst)/4e5;
-            $cable[$i]/=1e-12;
+	    if(defined($opt_C) || abs($cable[$i])<1e1) {
+		$cablefirst=$cable[$i] if(!defined($cablefirst));
+		$cable[$i]=($cable[$i]-$cablefirst)/4e5;
+		$cable[$i]/=1e-12;
+	    } else {
+		$cable[$i]= '$$$';
+	    }
 	}
 	if(defined($opt_c)) {
 	    for($i=0;$i<=$#cable;$i++) {
@@ -1099,8 +1109,11 @@ if(@cablet) {
 	&vu(\@cablet, \@cable,"Cable Delay (ps)");
     } else {
         for($i=0;$i<=$#cable;$i++) {
-	    next unless $cable[$i]=~/^$float_pattern$/ ;
-            $cable[$i]*=1e3;
+	    if(defined($opt_C) || abs($cable[$i])<1e1) {
+		$cable[$i]*=1e3;
+	    } else {
+		$cable[$i]= '$$$';
+	    }
 	}
 	if(defined($opt_c)) {
 	    for($i=0;$i<=$#cable;$i++) {
