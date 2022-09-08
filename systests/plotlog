@@ -427,8 +427,12 @@ top line of a plot did not decode (\$\$\$ for example) or were edited out by
 command line options.
 
 The '1anw' switches can be used to select different IF arrangements for
-calculating phase differences between pcal tones. Any combination of the '1anw'
-switches can be used. No difference is plotted more than once.
+plotting phase differences between pcal tones for back-ends with baseband/video
+converters. Any combination of the '1anw' switches can be used. No difference
+is plotted more than once. The differences between the two side-bands of one
+converter are plotted separately after the differences between converters.
+
+The '-v' switch can be used to plot phase differences within IFs for RDBEs.
 
 The 'j' switch can be used to normalize pcal amplitudes by Tsys (per channel)
 for time plots and amplitude versus phase plots. The minimum non-zero Tsys
@@ -1002,9 +1006,8 @@ if(defined($opt_1)) {
     for($i=1;$i<15;$i++) {
 	for($m=0;$m<2;$m++) {
 	    if(defined($pcaln[$m][$i])) {
-		for ($j=$i;$j<15;$j++) {
+		for ($j=$i+1;$j<15;$j++) {
 		    for($n=0;$n<2;$n++) {
-			next if $j == $i && $n == $m;
 			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
 			    $done[$i][$j][$m][$n]=1;
 			    &phs($i,$j,$m,$n);
@@ -1019,9 +1022,8 @@ if(defined($opt_a)) {
     for($i=1;$i<15;$i+=2) {
 	for($m=0;$m<2;$m++) {
 	    if(defined($pcaln[$m][$i])) {
-		for ($j=$i;$j<15;$j+=2) {
+		for ($j=$i+2;$j<15;$j+=2) {
 		    for($n=0;$n<2;$n++) {
-			next if $j == $i && $n == $m;
 			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
 			    $done[$i][$j][$m][$n]=1;
 			    &phs($i,$j,$m,$n);
@@ -1034,9 +1036,8 @@ if(defined($opt_a)) {
     for($i=2;$i<15;$i+=2) {
 	for($m=0;$m<2;$m++) {
 	    if(defined($pcaln[$m][$i])) {
-		for ($j=$i;$j<15;$j+=2) {
+		for ($j=$i+2;$j<15;$j+=2) {
 		    for($n=0;$n<2;$n++) {
-			next if $j == $i && $n == $m;
 			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
 			    $done[$i][$j][$m][$n]=1;
 			    &phs($i,$j,$m,$n);
@@ -1051,9 +1052,8 @@ if(defined($opt_n)) {
     for($i=1;$i<9;$i++) {
 	for($m=0;$m<2;$m++) {
 	    if(defined($pcaln[$m][$i])) {
-		for ($j=$i;$j<9;$j++) {
+		for ($j=$i+1;$j<9;$j++) {
 		    for($n=0;$n<2;$n++) {
-			next if $j == $i && $n == $m;
 			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
 			    $done[$i][$j][$m][$n]=1;
 			    &phs($i,$j,$m,$n);
@@ -1066,9 +1066,8 @@ if(defined($opt_n)) {
     for($i=9;$i<15;$i++) {
 	for($m=0;$m<2;$m++) {
 	    if(defined($pcaln[$m][$i])) {
-		for ($j=$i;$j<15;$j++) {
+		for ($j=$i+1;$j<15;$j++) {
 		    for($n=0;$n<2;$n++) {
-			next if $j == $i && $n == $m;
 			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
 			    $done[$i][$j][$m][$n]=1;
 			    &phs($i,$j,$m,$n);
@@ -1083,9 +1082,8 @@ if(defined($opt_w)) {
     for($i=1;$i<5;$i++) {
 	for($m=0;$m<2;$m++) {
 	    if(defined($pcaln[$m][$i])) {
-		for ($j=$i;$j<5;$j++) {
+		for ($j=$i+1;$j<5;$j++) {
 		    for($n=0;$n<2;$n++) {
-			next if $j == $i && $n == $m;
 			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
 			    $done[$i][$j][$m][$n]=1;
 			    &phs($i,$j,$m,$n);
@@ -1098,9 +1096,8 @@ if(defined($opt_w)) {
     for($i=5;$i<9;$i++) {
 	for($m=0;$m<2;$m++) {
 	    if(defined($pcaln[$m][$i])) {
-		for ($j=$i;$j<9;$j++) {
+		for ($j=$i+1;$j<9;$j++) {
 		    for($n=0;$n<2;$n++) {
-			next if $j == $i && $n == $m;
 			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
 			    $done[$i][$j][$m][$n]=1;
 			    &phs($i,$j,$m,$n);
@@ -1113,9 +1110,8 @@ if(defined($opt_w)) {
     for($i=9;$i<15;$i++) {
 	for($m=0;$m<2;$m++) {
 	    if(defined($pcaln[$m][$i])) {
-		for ($j=$i;$j<15;$j++) {
+		for ($j=$i+1;$j<15;$j++) {
 		    for($n=0;$n<2;$n++) {
-			next if $j == $i && $n == $m;
 			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
 			    $done[$i][$j][$m][$n]=1;
 			    &phs($i,$j,$m,$n);
@@ -1123,6 +1119,14 @@ if(defined($opt_w)) {
 		    }
 		}
 	    }
+	}
+    }
+}
+if(defined($opt_1) || defined($opt_a) || defined($opt_n) || defined($opt_w)) {
+    for($i=1;$i<15;$i++) {
+	if(defined($pcaln[1][$i]) && defined($pcaln[0][$i])) {
+	    $done[$i][$i][1][0]=1;
+	    &phs($i,$i,0,1);
 	}
     }
 }
