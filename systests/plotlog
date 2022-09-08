@@ -429,8 +429,9 @@ command line options.
 The '1anw' switches can be used to select different IF arrangements for
 plotting phase differences between pcal tones for back-ends with baseband/video
 converters. Any combination of the '1anw' switches can be used. No difference
-is plotted more than once. The differences between the two side-bands of one
-converter are plotted separately after the differences between converters.
+is plotted more than once. Only one difference between each pair of converters
+is plotted. The differences between the two side-bands of one converter are
+plotted separately after the differences between converters.
 
 The '-v' switch can be used to plot phase differences within IFs for RDBEs.
 
@@ -1008,8 +1009,8 @@ if(defined($opt_1)) {
 	    if(defined($pcaln[$m][$i])) {
 		for ($j=$i+1;$j<15;$j++) {
 		    for($n=0;$n<2;$n++) {
-			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
-			    $done[$i][$j][$m][$n]=1;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
 			    &phs($i,$j,$m,$n);
 			}
 		    }
@@ -1024,8 +1025,8 @@ if(defined($opt_a)) {
 	    if(defined($pcaln[$m][$i])) {
 		for ($j=$i+2;$j<15;$j+=2) {
 		    for($n=0;$n<2;$n++) {
-			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
-			    $done[$i][$j][$m][$n]=1;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
 			    &phs($i,$j,$m,$n);
 			}
 		    }
@@ -1038,8 +1039,8 @@ if(defined($opt_a)) {
 	    if(defined($pcaln[$m][$i])) {
 		for ($j=$i+2;$j<15;$j+=2) {
 		    for($n=0;$n<2;$n++) {
-			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
-			    $done[$i][$j][$m][$n]=1;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
 			    &phs($i,$j,$m,$n);
 			}
 		    }
@@ -1054,8 +1055,8 @@ if(defined($opt_n)) {
 	    if(defined($pcaln[$m][$i])) {
 		for ($j=$i+1;$j<9;$j++) {
 		    for($n=0;$n<2;$n++) {
-			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
-			    $done[$i][$j][$m][$n]=1;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
 			    &phs($i,$j,$m,$n);
 			}
 		    }
@@ -1068,8 +1069,8 @@ if(defined($opt_n)) {
 	    if(defined($pcaln[$m][$i])) {
 		for ($j=$i+1;$j<15;$j++) {
 		    for($n=0;$n<2;$n++) {
-			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
-			    $done[$i][$j][$m][$n]=1;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
 			    &phs($i,$j,$m,$n);
 			}
 		    }
@@ -1084,8 +1085,8 @@ if(defined($opt_w)) {
 	    if(defined($pcaln[$m][$i])) {
 		for ($j=$i+1;$j<5;$j++) {
 		    for($n=0;$n<2;$n++) {
-			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
-			    $done[$i][$j][$m][$n]=1;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
 			    &phs($i,$j,$m,$n);
 			}
 		    }
@@ -1098,8 +1099,8 @@ if(defined($opt_w)) {
 	    if(defined($pcaln[$m][$i])) {
 		for ($j=$i+1;$j<9;$j++) {
 		    for($n=0;$n<2;$n++) {
-			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
-			    $done[$i][$j][$m][$n]=1;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
 			    &phs($i,$j,$m,$n);
 			}
 		    }
@@ -1112,8 +1113,8 @@ if(defined($opt_w)) {
 	    if(defined($pcaln[$m][$i])) {
 		for ($j=$i+1;$j<15;$j++) {
 		    for($n=0;$n<2;$n++) {
-			if(defined($pcaln[$n][$j]) && !$done[$i][$j][$m][$n]) {
-			    $done[$i][$j][$m][$n]=1;
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
 			    &phs($i,$j,$m,$n);
 			}
 		    }
@@ -1125,7 +1126,7 @@ if(defined($opt_w)) {
 if(defined($opt_1) || defined($opt_a) || defined($opt_n) || defined($opt_w)) {
     for($i=1;$i<15;$i++) {
 	if(defined($pcaln[1][$i]) && defined($pcaln[0][$i])) {
-	    $done[$i][$i][1][0]=1;
+	    $done[$i][$i]=1;
 	    &phs($i,$i,0,1);
 	}
     }
