@@ -378,7 +378,7 @@ sub time {
 # everything is measured relative to $reftime, first time in log
 # it will make a mess of $reftime is not reasonable
 #
-    local ($date) = @_;
+    my ($date) = @_;
 #2005.123.12:23:56.21
 #01234567890123456789
 #or
