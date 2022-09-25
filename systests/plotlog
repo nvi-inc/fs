@@ -708,10 +708,14 @@ foreach $file (@ARGV) {
 	    $rdbe=/rdbe/;
 	    $dbbc3=/dbbc3/;
 	}
-	if(/wx\/[ ]*([^,]*),[ ]*([^,]*),[ ]*([^, \cM]*)/i) {
-	    $temp[$wxcount]=$1;
-	    $pres[$wxcount]=$2;
-	    $humid[$wxcount]=$3;
+	if(/wx\/(.*)/i) {
+	    @fields=split('[,\cM]',$1);
+	    s{^\s+|\s+$}{}g foreach @fields;
+	    $temp[$wxcount]=shift(@fields);
+	    $pres[$wxcount]=shift(@fields);
+	    $humid[$wxcount]=shift(@fields);
+	    $windsp[$wxcount]=shift(@fields) if 3 <= tr/,//;
+	    $winddir[$wxcount]=shift(@fields) if 4 <= tr/,//;
 	    $wxtime[$wxcount]=&time($_);
 	    $wxcount++;
 	} elsif(/cable\/[ ]*([^, \cM]*)/i) {
@@ -1069,9 +1073,11 @@ goto EXTRAS
     if defined($opt_1)||defined($opt_a)||defined($opt_n)||defined($opt_w)||defined($opt_v)||defined($opt_p);
 
 if(@wxtime) {
-    &vu(\@wxtime, \@temp,"Temperature");
-    &vu(\@wxtime, \@pres,"Pressure");
-    &vu(\@wxtime, \@humid,"Humidity");
+    &vu(\@wxtime, \@temp,"Temperature (C)");
+    &vu(\@wxtime, \@pres,"Pressure (millibars)");
+    &vu(\@wxtime, \@humid,"Humidity (%)");
+    &vu(\@wxtime, \@windsp,"Wind Speed (m/s)") if @windsp;
+    &vu(\@wxtime, \@winddir,"Wind Dir (deg Az)") if @winddir;
 }
 
 if(@cablet) {
