@@ -698,7 +698,7 @@ foreach $file (@ARGV) {
     $x=0;
     $y=0;
     while (<FILE>) {
-	chomp;
+	s/\r?\n\z//s;
 	if(!$location && /;location,([^,]*)/i) {
 	    $location=$1;
 	    (undef)=&time($_);
@@ -709,7 +709,7 @@ foreach $file (@ARGV) {
 	    $dbbc3=/dbbc3/;
 	}
 	if(/wx\/(.*)/i) {
-	    @fields=split('[,\cM]',$1);
+	    @fields=split(',',$1);
 	    s{^\s+|\s+$}{}g foreach @fields;
 	    $temp[$wxcount]=shift(@fields);
 	    $pres[$wxcount]=shift(@fields);
@@ -718,7 +718,7 @@ foreach $file (@ARGV) {
 	    $winddir[$wxcount]=shift(@fields) if 4 <= tr/,//;
 	    $wxtime[$wxcount]=&time($_);
 	    $wxcount++;
-	} elsif(/cable\/[ ]*([^, \cM]*)/i) {
+	} elsif(/cable\/[ ]*([^, ]*)/i) {
 	    $value=$1;
 	    next unless $value=~/^$float_pattern$/ ;
 	    $cable[$cablen]=$value;
@@ -746,7 +746,7 @@ foreach $file (@ARGV) {
 	    } else {
 		die "unknown pcal port $port\n";
 	    }
-	    (undef,undef,@fields)=split('[ \cM]');
+	    (undef,undef,@fields)=split(' ');
 	    next if($#fields!=3);
 	    $freq=shift(@fields);
 	    $rate=shift(@fields);
@@ -772,7 +772,7 @@ foreach $file (@ARGV) {
 	    }
 	    $pcaln[$band][$chan]++;
 	} elsif (/pcaldisp2\/k5ts/i) {
-	    (undef,undef,@fields)=split('[ /\cM]+');
+	    (undef,undef,@fields)=split('[ /]+');
 	    $rec=substr($fields[0],-1);
             $ch=substr($fields[1],-1);
 	    $chan = 4*($rec-1)+$ch;
@@ -814,7 +814,7 @@ foreach $file (@ARGV) {
 	    $pcall[$band][$chan]="$chan$sb";
 	    $pcaln[$band][$chan]++;
 	} elsif (/[#\/]pcal\/(.*)/i) {
-	    @fields=split('[,\cM]',$1);
+	    @fields=split(',',$1);
 #	    print "$_\n";
 	    s{^\s+|\s+$}{}g foreach @fields;
 #	    print "@fields \n\n";
@@ -849,7 +849,7 @@ foreach $file (@ARGV) {
 #		print "$tone $rpcala{$tone} $rpcalp{$tone} $rpcaln{$tone}\n";
 	    }
 	} elsif (/[#\/]$string\/(.*)/i) {
-	    @fields=split('[,\cM]',$1);
+	    @fields=split(',',$1);
 	    s{^\s+|\s+$}{}g foreach @fields;
 	    while($detect=shift(@fields)) {
 		$tsys=shift(@fields);
@@ -913,7 +913,7 @@ foreach $file (@ARGV) {
 		$tsysn{$detect}++;	 
 	    }
 	} elsif (/\/tsys1=/i) {
-	    (undef,undef,@fields)=split('[/=,\cM]');
+	    (undef,undef,@fields)=split('[/=,]');
 	    $det=0;
 	    while($device=shift(@fields)) {
 		$det++;
@@ -921,7 +921,7 @@ foreach $file (@ARGV) {
 		$tsys1{$det}=sprintf "%3s", $device;
 	    }
 	} elsif (/\/tsys1\//i) {
-	    (undef,undef,@fields)=split('[/,\cM]');
+	    (undef,undef,@fields)=split('[/,]');
 	    $det=0;
 	    while($tsys=shift(@fields)) {
 		$det++;
@@ -937,7 +937,7 @@ foreach $file (@ARGV) {
 		$tsysn1{$detect}++;	 
 	    }
 	} elsif (/\/tsys2=/i) {
-	    (undef,undef,@fields)=split('[/=,\cM]');
+	    (undef,undef,@fields)=split('[/=,]');
 	    $det=0;
 	    while($device=shift(@fields)) {
 		$det++;
@@ -945,7 +945,7 @@ foreach $file (@ARGV) {
 		$tsys2{$det}=sprintf "%3s", $device;
 	    }
 	} elsif (/\/tsys2\//i) {
-	    (undef,undef,@fields)=split('[/,\cM]');
+	    (undef,undef,@fields)=split('[/,]');
 	    $det=0;
 	    while($tsys=shift(@fields)) {
 		$det++;
@@ -961,7 +961,7 @@ foreach $file (@ARGV) {
 		$tsysn2{$detect}++;	 
 	    }
 	} elsif (/\/tsys3=/i) {
-	    (undef,undef,@fields)=split('[/=,\cM]');
+	    (undef,undef,@fields)=split('[/=,]');
 	    $det=0;
 	    while($device=shift(@fields)) {
 		$det++;
@@ -969,7 +969,7 @@ foreach $file (@ARGV) {
 		$tsys3{$det}=sprintf "%3s", $device;
 	    }
 	} elsif (/\/tsys3\//i) {
-	    (undef,undef,@fields)=split('[/,\cM]');
+	    (undef,undef,@fields)=split('[/,]');
 	    $det=0;
 	    while($tsys=shift(@fields)) {
 		$det++;
@@ -985,7 +985,7 @@ foreach $file (@ARGV) {
 		$tsysn3{$detect}++;	 
 	    }
 	} elsif (/\/(sx|rx|sk)\//i) {
-            (undef,$cmd,@fields)=split('[/,\cM]');
+            (undef,$cmd,@fields)=split('[/,]');
             ($value,$units)=split(' ',$fields[$#fields]);
 	    next unless $value=~/^$float_pattern$/ ;
 	    ($rx{$fields[0]}[$rxcount{$fields[0]}],undef)=$value;
@@ -995,13 +995,13 @@ foreach $file (@ARGV) {
 	    $rxunits{$fields[0]}=$units;
 	    $rxcmd=$cmd;
 	} elsif(/#setcl#time\//i) {
-		(undef,@fields)=split('[/,\cM]');
+		(undef,@fields)=split('[/,]');
 		$setcl[$setcln]=$fields[9];
 		$setclt[$setcln]=&time($_);
 		$setcln++;
 	} elsif(/(rdtc.#dot2[gp]ps)/) {
 	    $cmd=$1;
-	    (undef,@fields)=split('[/,\cM]');
+	    (undef,@fields)=split('[/,]');
 	    if($fields[0] =~ /($float_pattern)/) {
 		$clockv{$cmd}[$clockn{$cmd}]=$fields[0];
 		$clockt{$cmd}[$clockn{$cmd}]=&time($_);
@@ -1009,7 +1009,7 @@ foreach $file (@ARGV) {
 	    }
 	} elsif(/\/(rdbe.\/!dbe_[gp]ps)/) {
 	    $cmd=$1;
-	    (undef,undef,undef,@fields)=split('[:\cM;]');
+	    (undef,undef,undef,@fields)=split('[:;]');
 	    if($fields[0] =~ /($float_pattern)/) {
 		$clockv{$cmd}[$clockn{$cmd}]=$fields[0];
 		$clockt{$cmd}[$clockn{$cmd}]=&time($_);
@@ -1017,7 +1017,7 @@ foreach $file (@ARGV) {
 	    }
 	} elsif(/dbtcn#(pps2dot)/) {
 	    $cmdp=$1;
-	    (undef,@fields)=split('[/,\cM]');
+	    (undef,@fields)=split('[/,]');
 	    s{^\s+|\s+$}{}g foreach @fields;
 	    while($if_chan=shift(@fields)) {
 		$cmd=$cmdp . '/' . $if_chan;
@@ -1040,7 +1040,7 @@ foreach $file (@ARGV) {
 	    }
 	} elsif(/\/(.*(fmout|maser|gps).*)\//i) {
 	    $cmd=$1;
-	    (undef,undef,@fields)=split('[/,\cM]');
+	    (undef,undef,@fields)=split('[/,]');
 	    if($fields[0] =~ /($float_pattern)/) {
 		$clockv{$cmd}[$clockn{$cmd}]=$fields[0];
 		$clockt{$cmd}[$clockn{$cmd}]=&time($_);
@@ -1048,7 +1048,7 @@ foreach $file (@ARGV) {
 	    }
 	} elsif(/#.....#(.*(fmout|maser|gps).*)\//i) {
 	    $cmd=$1;
-	    (undef,@fields)=split('[/,\cM]');
+	    (undef,@fields)=split('[/,]');
 	    if($fields[0] =~ /($float_pattern)/) {
 		$clockv{$cmd}[$clockn{$cmd}]=$fields[0];
 		$clockt{$cmd}[$clockn{$cmd}]=&time($_);
