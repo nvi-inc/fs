@@ -66,6 +66,7 @@ C                         Ref times for operator and schedule streams
       equivalence (lnamef,cnamef),(tmpchr,tmpstr)
       character*28 pathname
       integer idcbp1(2),idcbp2(2),fc_system,fc_skd_end_insnp,fc_if_cmd
+      integer fc_find_process
       save idcbp1,idcbp2
 C                         DCB's for procedures from lists 1 and 2
       dimension istksk(42),istkop(42)        !  stacks for nested procedures
@@ -838,7 +839,7 @@ C
         nchar = min0(ireg(2),iblen*2)
         ich = 1+iscn_ch(ibuf,1,nchar,'=')
         if (ich.ne.1) then
-           if(ichcm_ch(ibuf,ich,'disk_record_ok').ne.0) then
+           if(ichcm_ch(ibuf,ich,'force').ne.0) then
               call logit7ci(0,0,0,0,-172,'bo',0)
               if(iwait.ne.0) then
                  ipinsnp(3)=-172
@@ -851,8 +852,30 @@ C
            call fs_get_disk_record_record(disk_record_record)
            if(disk_record_record.eq.1) then
               call logit7ci(0,0,0,0,-173,'bo',0)
+           endif
+           ipida=fc_find_process('autoftp'//char(0),ierr)
+           if(ipida.ge.0) then
+              call logit7ci(0,0,0,0,-174,'bo',0)
+           else if(ipida.gt.-7) then
+              if(ipida.gt.-5) then
+                 call logit7ci(0,0,0,0,ierr,'un',0)
+              endif
+              call logit7ci(0,0,0,1,-177,'bo',ipida)
+           endif
+           ipidf=fc_find_process('fs.prompt'//char(0),ierr)
+           if(ipidf.ge.0) then
+              call logit7ci(0,0,0,0,-175,'bo',0)
+           else if(ipidf.gt.-7) then
+              if(ipidf.gt.-5) then
+                 call logit7ci(0,0,0,0,ierr,'un',0)
+              endif
+              call logit7ci(0,0,0,1,-178,'bo',ipidf)
+           endif
+           if(disk_record_record.eq.1.or.
+     &        ipida.ne.-7.or.ipidf.ne.-7) then
+              call logit7ci(0,0,0,0,-176,'bo',0)
               if(iwait.ne.0) then
-                 ipinsnp(3)=-173
+                 ipinsnp(3)=-176
                  call char2hol('bo',ipinsnp(4),1,2)
                  ipinsnp(5)=0
               endif

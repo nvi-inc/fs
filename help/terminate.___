@@ -1,22 +1,31 @@
               terminate - end field system operation
 
             Syntax:     terminate
-                        terminate=okay
+                        terminate=force
 
             Response:   none
 
 
 Settabel Parameters:
-       okay            literal ascii: disk_record_ok
+       force           literal text: force
 
 Comments: 
 This is the graceful way to end operation of the Field System.
-Schedule execution is ended, log and schedule files are
-closed, all programs are removed from the system by oprin.
+Schedule execution is ended, log and schedule files are closed, all
+online FS programs are removed from the system.
 
-The terminate command will not succeed if recording has been commanded
-with the disk_record=on command.  Either recording must be stopped
-using disk_record=off first or if you wish to continue recording
-despite terminating the FS, you can use
-"terminate=disk_record_ok".  Terminating the FS while the disk is
-recording is not recommended.
+The 'terminate' command will not succeed if: (i) recording has been
+commanded with the 'disk_record=on', (ii) an instance of 'autoftp' is
+active, (iii) an instance of 'fs.prompt' is active, or (iv) 'pfmed' is
+active.
+
+If it is appropriate to do so, the first three conditions can be
+corrected by: (i) stopping recording with 'disk_record=off', (ii)
+waiting for all instances of 'autoftp' to finish, or (iii) closing all
+instances of 'fs.prompt'. Alternately, 'terminate=force' can override
+the first three conditions and force termination immediately, but this
+may cause other problems related to the conditions that were
+preventing termination.
+
+There is no way to override 'pfmed' being active stopping termination.
+To correct that condition, exit that utility.
