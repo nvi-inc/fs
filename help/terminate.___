@@ -6,7 +6,7 @@
             Response:   none
 
 
-Settabel Parameters:
+Settable Parameters:
        force           literal text: force
 
 Comments: 
@@ -14,18 +14,28 @@ This is the graceful way to end operation of the Field System.
 Schedule execution is ended, log and schedule files are closed, all
 online FS programs are removed from the system.
 
-The 'terminate' command will not succeed if: (i) recording has been
-commanded with the 'disk_record=on', (ii) an instance of 'autoftp' is
-active, (iii) an instance of 'fs.prompt' is active, or (iv) 'pfmed' is
-active.
+There are four conditions that can stop 'terminate' from succeeding.
+The first two are:
 
-If it is appropriate to do so, the first three conditions can be
-corrected by: (i) stopping recording with 'disk_record=off', (ii)
-waiting for all instances of 'autoftp' to finish, or (iii) closing all
-instances of 'fs.prompt'. Alternately, 'terminate=force' can override
-the first three conditions and force termination immediately, but this
+ (i) 'pfmed' being active
+(ii) recording having been commanded with 'disk_record=on'
+
+If the display server is in use, termination will also be blocked if:
+
+(iii) any instances of 'autoftp' are active
+ (iv) any instances of 'fs.prompt' are active
+
+If it is appropriate, the four conditions can be corrected by:
+
+  (i) exiting 'pfmed'
+ (ii) using 'disk_record=off' to stop recording
+(iii) waiting for all instances of 'autoftp' to finish
+ (iv) closing all instances of 'fs.prompt'
+
+Alternately, if it is necessary to terminate immediately, the last
+three conditions can be overridden with 'terminate=force', but this
 may cause other problems related to the conditions that were
-preventing termination.
+preventing termination. The user should be careful.
 
-There is no way to override 'pfmed' being active stopping termination.
-To correct that condition, exit that utility.
+There is no way to override the condition for 'pfmed' being active;
+the program must be exited.

@@ -91,6 +91,7 @@ C     NCPARM - # chars in procedure parameter string
       character*12 setup_proc
       integer trimlen
       logical krcur,klast,kts,kskblk,kopblk,kbreak,kstak,kon
+      character*256 display_server_envar
 C                   KRCUR returns true if a procedure calls itself
 C                   KPAST returns true if a given time is earlier than now
 C                   KLAST true if this is last time scheduling of command
@@ -853,23 +854,29 @@ C
            if(disk_record_record.eq.1) then
               call logit7ci(0,0,0,0,-173,'bo',0)
            endif
-           ipida=fc_find_process('autoftp'//char(0),ierr)
-           if(ipida.ge.0) then
-              call logit7ci(0,0,0,0,-174,'bo',0)
-           else if(ipida.gt.-7) then
-              if(ipida.gt.-5) then
-                 call logit7ci(0,0,0,0,ierr,'un',0)
+           call getenv('FS_DISPLAY_SERVER', display_server_envar)
+           if (display_server_envar == "on") then
+              ipida=fc_find_process('autoftp'//char(0),ierr)
+              if(ipida.ge.0) then
+                 call logit7ci(0,0,0,0,-174,'bo',0)
+              else if(ipida.gt.-7) then
+                 if(ipida.gt.-5) then
+                    call logit7ci(0,0,0,0,ierr,'un',0)
+                 endif
+                 call logit7ci(0,0,0,1,-177,'bo',ipida)
               endif
-              call logit7ci(0,0,0,1,-177,'bo',ipida)
-           endif
-           ipidf=fc_find_process('fs.prompt'//char(0),ierr)
-           if(ipidf.ge.0) then
-              call logit7ci(0,0,0,0,-175,'bo',0)
-           else if(ipidf.gt.-7) then
-              if(ipidf.gt.-5) then
-                 call logit7ci(0,0,0,0,ierr,'un',0)
-              endif
-              call logit7ci(0,0,0,1,-178,'bo',ipidf)
+              ipidf=fc_find_process('fs.prompt'//char(0),ierr)
+              if(ipidf.ge.0) then
+                 call logit7ci(0,0,0,0,-175,'bo',0)
+              else if(ipidf.gt.-7) then
+                 if(ipidf.gt.-5) then
+                    call logit7ci(0,0,0,0,ierr,'un',0)
+                 endif
+                 call logit7ci(0,0,0,1,-178,'bo',ipidf)
+               endif
+           else
+              ipida=-7
+              ipidf=-7
            endif
            if(disk_record_record.eq.1.or.
      &        ipida.ne.-7.or.ipidf.ne.-7) then
