@@ -378,7 +378,7 @@ sub time {
 # everything is measured relative to $reftime, first time in log
 # it will make a mess of $reftime is not reasonable
 #
-    my ($date) = @_;
+    my ($date, $other) = @_;
 #2005.123.12:23:56.21
 #01234567890123456789
 #or
@@ -418,8 +418,10 @@ sub time {
 	   +$minute-$refminute)*60.0
 	   +$second-$refsecond;
 #	    print "$day $hour $minute $second $time\n";
-    $tmax=$time if $time>$tmax;
-    $tmin=$time if $time<$tmin;
+    if(!defined($other)) {
+        $tmax=$time if $time>$tmax;
+        $tmin=$time if $time<$tmin;
+    }
     return $time;
 }
 sub by_rdbe_chan {
@@ -510,12 +512,12 @@ Synopsis: extracts and plots data from log files
 Exit code is 0 for no error, -1 for no logs found, -2 for nothing to plot.
 
 This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), clock (see below),
-setcl#time/, RDBE pcal, and the first encountered tone per channel
-(LSB and USB separately) for Mark IV decoder pcal data in the log files and
-generates time plots of the data. The time axis of all the plots is the same.
-The data is plotted so that it fits entirely inside the boxes. Points that
-appear along the top edge of a plot did not decode (\$\$\$ for example) or were
-edited out automatically or by command line options.
+setcl#time/, RDBE pcal, recorder statistics, and the first encountered tone per
+channel (LSB and USB separately) for Mark IV decoder pcal data in the log files
+and generates time plots of the data. The time axis of all the plots is the
+same.  The data is plotted so that it fits entirely inside the boxes. Points
+that appear along the top edge of a plot did not decode (\$\$\$ for example) or
+were edited out automatically or by command line options.
 
 For RDBEs and DBBC3s, unless the '-m' and/or '-m' options are specified, only
 Tsys from the first (non-'00') detector encountered for each IF is plotted.
@@ -530,6 +532,11 @@ DBBC3 dot2pps data from multicast.
 Cable and clock data with absolute values greater 10 are automatically deleted
 unless the '-C' option is used.
 
+The recorder statistics plotted are the delay in starting, shortness of the
+recording, and missing bytes, as determined from the scan_check results. If the
+scan_check is missing or has bad values, the point is shown at the top edge of
+the plot.
+
 The '1anw' switches can be used to select different IF arrangements for
 plotting phase differences between pcal tones for back-ends with baseband/video
 converters. Any combination of the '1anw' switches can be used. No difference
@@ -540,14 +547,14 @@ plotted separately after the differences between converters.
 The '-v' switch can be used to plot phase differences within IFs for RDBEs.
 
 The 'j' switch can be used to normalize pcal amplitudes by Tsys (per channel)
-for time plots and amplitude versus phase plots. The minimum non-zero Tsys
-(per channel) is used as the reference value for normalization. If this causes
+for time plots and amplitude versus phase plots. The minimum non-zero Tsys (per
+channel) is used as the reference value for normalization. If this causes
 problems, an explicit global reference value can be specified with the 'k'
 option. The 't' option may also be useful for removing bad Tsys values. By
 default dual side-band Tsys is used for normalization if it is available, if
-not then single side-band Tsys data is used. This is usually what is wanted
-but if not, the 'b' option can be used to force use of single side-band Tsys
-for channels that it is available for.
+not then single side-band Tsys data is used. This is usually what is wanted but
+if not, the 'b' option can be used to force use of single side-band Tsys for
+channels that it is available for.
 
 For the 'j1anw' switches a simple model is used to match different data from
 the log. Points from different data types that are the nearest together in time
@@ -684,6 +691,7 @@ if(defined($opt_e)) {
 $some=0;
 $first=1;
 $wxcount=0;
+$recordn=0;
 
 foreach $file (@ARGV) {
     if(!defined($save_file)) {
@@ -1054,6 +1062,47 @@ foreach $file (@ARGV) {
 		$clockt{$cmd}[$clockn{$cmd}]=&time($_);
 		$clockn{$cmd}++;
 	    }
+        } elsif(/:scan_name=([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)/) {
+	    $new_dur=$5;
+        } elsif(/:!(\d{4}\.\d{3}\.\d\d:\d\d:\d\d)/) {
+	    $new_time=&time("$1.00",1);
+	} elsif(/:disk_record=on/) {
+	    $nom_start=$new_time;
+	    $nom_dur=$new_dur;
+	    $recordt[$recordn]=$nom_start;
+	    $recordn++;
+        } elsif(defined($nom_start) && /scan_check\/.*,(\d+)y(\d+)d(\d+)h(\d+)m([\d.]+)s,([\d.]+)s,[^,]*,(\d+)/) {
+	    $act_start=&time(sprintf("%0.4d.%0.3d.%0.2d:%0.2d:%05.2f",
+			  $1,$2,$3,$4,$5),1);
+	    $act_dur=$6;
+	    $missing=$7;
+	    $delay = $act_start-$nom_start;
+	    $short=$nom_dur-$act_dur;
+	    next if $act_start < $nom_start;
+	    $recordd[$recordn-1]=$delay;
+	    $records[$recordn-1]=$short;
+	    $recordm[$recordn-1]=$missing;
+        } elsif(/:mk6[ab]?=record=(\d+)y(\d+)d(\d+)h(\d+)m(\d+)s:(\d+)/) {
+	    $nom_start=&time(sprintf("%0.4d.%0.3d.%0.2d:%0.2d:%05.2f",
+			  $1,$2,$3,$4,$5),1);
+	    $nom_dur=$6;
+	    $recordt[$recordn]=$nom_start;
+	    $recordn++;
+        } elsif(defined($nom_start) && /!scan_check\?.*:(\d+)y(\d+)d(\d+)h(\d+)m(\d+)s:([-\d.]+):[^:]*:[^:]*:(\d+)/) {
+	    $act_start=&time(sprintf("%0.4d.%0.3d.%0.2d:%0.2d:%05.2f",
+			  $1,$2,$3,$4,$5),1);
+	    $act_dur=$6;
+	    $missing=$7;
+	    $delay = $act_start-$nom_start;
+            if($act_dur >= 0) {
+	        $short=$nom_dur-$act_dur;
+            } else {
+	        $short='$$$';
+            }
+	    next if $act_start < $nom_start;
+	    $recordd[$recordn-1]=$delay;
+	    $records[$recordn-1]=$short;
+	    $recordm[$recordn-1]=$missing;
 	}
     }
 }
@@ -1144,6 +1193,11 @@ if(@cablet) {
 	}
         &vu(\@cablet, \@cable,"Cable Counter (ms)");
     }
+}
+if(@recordt) {
+    &vu(\@recordt, \@recordd,"Record delay (sec)");
+    &vu(\@recordt, \@records,"Recording short (sec)");
+    &vu(\@recordt, \@recordm,"Missing bytes");
 }
 foreach $clock (sort by_clocks keys %clockn) {
     $#val=-1;
