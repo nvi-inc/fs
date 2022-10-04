@@ -82,6 +82,8 @@ pid_t find_process(const char* name,int *err)
                 return (pid_t) ipid;
             } else
                 fclose(fp);
+        } else if (ENOENT==errno) {
+          continue; /* in case the file disappeared after the directory read */
         } else {
             closedir(dir);
             *err=errno;
