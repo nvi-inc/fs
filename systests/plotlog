@@ -488,7 +488,7 @@ sub by_clocks {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwyz:CD:G:M:V");
+&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwyz:BCD:G:M:V");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -527,7 +527,9 @@ pcal tone encountered for each IF is plotted.
 
 Clock data includes values from any suitable commands containing 'maser',
 'fmout', and/or 'gps' in their names, as well as RDBE GPS and PPS offsets, and
-DBBC3 dot2pps data from multicast.
+DBBC3 'pps2dot' data. For RDBEs (and DBBC3s), if both multicast and monitor
+(DBBC3: 'mcast_time') values are present, only the multicast values will be
+plotted unless the '-B' option is specified in which case both will be plotted.
 
 Cable and clock data with absolute values greater 10 are automatically deleted
 unless the '-C' option is used.
@@ -1200,6 +1202,10 @@ if(@recordt) {
     &vu(\@recordt, \@recordm,"Missing bytes");
 }
 foreach $clock (sort by_clocks keys %clockn) {
+    next if !defined($opt_B) && $clock =~ /rdbe(.)\/!dbe_(.)ps/ &&
+        defined($clockn{"rdtc$1#dot2$2ps"}) ;
+    next if !defined($opt_B) && $clock =~ /mcast_time\/(\w+)/ &&
+        defined($clockn{"pps2dot/$1"}) ;
     $#val=-1;
     $#tim=-1;
     $avg=0;
