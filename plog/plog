@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2022-05-25
+VERSION=2022-10-05
 
 version(){
     echo "[plog $VERSION]"
@@ -241,7 +241,9 @@ pftp() {
     URL="$1"; shift
     local F=($@) #Turn into an array so IFS is used in expansion
     local IFS=","
-    eval $DRY curl $SSL_REQUIRED -n $CURL_NETRC_FILE_OPTION -T "{${F[*]}}" "ftp://$URL/"
+    local G="{${F[*]}}"
+    local IFS=" " #Then don't take commas out when expanding
+    eval $DRY curl $SSL_REQUIRED -n $CURL_NETRC_FILE_OPTION -T '$G' "ftp://$URL/"
 }
 
 pscp() {
