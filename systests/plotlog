@@ -511,13 +511,13 @@ if (defined($opt_h)) {
 Synopsis: extracts and plots data from log files
 Exit code is 0 for no error, -1 for no logs found, -2 for nothing to plot.
 
-This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), clock (see below),
-setcl#time/, RDBE pcal, recorder statistics, and the first encountered tone per
-channel (LSB and USB separately) for Mark IV decoder pcal data in the log files
-and generates time plots of the data. The time axis of all the plots is the
-same.  The data is plotted so that it fits entirely inside the boxes. Points
-that appear along the top edge of a plot did not decode (\$\$\$ for example) or
-were edited out automatically or by command line options.
+This script finds wx/, cable/, cdms/, tsys/ rx/ (or sk/ or sx/), clock (see
+below), setcl#time/, RDBE pcal, recorder statistics, and the first encountered
+tone per channel (LSB and USB separately) for Mark IV decoder pcal data in the
+log files and generates time plots of the data. The time axis of all the plots
+is the same. The data is plotted so that it fits entirely inside the boxes.
+Points that appear along the top edge of a plot did not decode (\$\$\$ for
+example) or were edited out automatically or by command line options.
 
 For RDBEs and DBBC3s, unless the '-m' and/or '-m' options are specified, only
 Tsys from the first (non-'00') detector encountered for each IF is plotted.
@@ -734,6 +734,12 @@ foreach $file (@ARGV) {
 	    $cable[$cablen]=$value;
 	    $cablet[$cablen]=&time($_);
 	    $cablen++;
+	} elsif(/cdms\/[ ]*([^, ]*)/i) {
+	    $value=$1;
+	    next unless $value=~/^$float_pattern$/ ;
+	    $cdms[$cdmsn]=$value;
+	    $cdmst[$cdmsn]=&time($_);
+	    $cdmsn++;
 	} elsif(/pcalports[=\/]([^,]*),([0-9]+)/i||/vsi4[=\/][^,]*,([^,]*),([0-9]+)/i) {
 	    $x=$1;
 	    $y=$2;
@@ -1195,6 +1201,9 @@ if(@cablet) {
 	}
         &vu(\@cablet, \@cable,"Cable Counter (ms)");
     }
+}
+if(@cdmst) {
+    &vu(\@cdmst, \@cdms,"CDMS delay (ps)");
 }
 if(@recordt) {
     &vu(\@recordt, \@recordd,"Record delay (sec)");
