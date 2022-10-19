@@ -511,25 +511,46 @@ if (defined($opt_h)) {
 Synopsis: extracts and plots data from log files
 Exit code is 0 for no error, -1 for no logs found, -2 for nothing to plot.
 
-This script finds wx/, cable/, cdms/, tsys/ rx/ (or sk/ or sx/), clock (see
-below), setcl#time/, RDBE pcal, recorder statistics, and the first encountered
-tone per channel (LSB and USB separately) for Mark IV decoder pcal data in the
-log files and generates time plots of the data. The time axis of all the plots
-is the same. The data is plotted so that it fits entirely inside the boxes.
-Points that appear along the top edge of a plot did not decode (\$\$\$ for
-example) or were edited out automatically or by command line options.
-
-For RDBEs and DBBC3s, unless the '-m' and/or '-m' options are specified, only
-Tsys from the first (non-'00') detector encountered for each IF is plotted.
-
-For RBDEs, unless the '-d' and/or '-D' options are specified, only the first
-pcal tone encountered for each IF is plotted.
+This script makes plots of data found in log files. It plots wx/, cable/,
+cdms/, tsys/ rx/ (and sk/ and sx/), clock (see below), setcl#time/, RDBE
+phase-cal, recorder statistics, and the first encountered tone per channel (LSB
+and USB separately) for Mark IV decoder phase-cal data. The time axis of all
+the plots is the same. The data is plotted so that it fits entirely inside the
+boxes. Points that appear along the top edge of a plot did not decode (\$\$\$
+for example) or were edited out automatically or by command line options.
+However, not all values that don't decode or are missing appear on the top
+edge.
 
 Clock data includes values from any suitable commands containing 'maser',
 'fmout', and/or 'gps' in their names, as well as RDBE GPS and PPS offsets, and
 DBBC3 'pps2dot' data. For RDBEs (and DBBC3s), if both multicast and monitor
 (DBBC3: 'mcast_time') values are present, only the multicast values will be
 plotted unless the '-B' option is specified in which case both will be plotted.
+
+For RBDEs, unless the '-d' and/or '-D' options are specified, only the first
+phase-cal tone encountered for each IF is plotted. Any Perl regular expressions
+may be used for the arguments. You can use these options to get different
+slices of tones, e.g., '-d 0005' for the 5-th tone for all bands or '-d 1a' for
+all tones in band A, IF 1. You can also use '|' (or) to match multiple strings,
+e.g. '-d \"1a0005|1a0010\"'. The '-D' option is applied after '-d'.
+
+For RDBEs and DBBC3s, unless the '-m' and/or '-M' options are specified, only
+Tsys from the first (non-'00') detector encountered for each IF is plotted. Any
+Perl regular expressions may be used for the arguments. You can use these
+options to get different slices of detectors, e.g., '-m 01' for the '01'
+detectors on all bands or '-m a1' for all detectors from band A IF 1. You can
+also use '|' (or) to match multiple strings, e.g., '-m \"1a0005|1a0010\"'. The
+'-M' option is applied after '-m'.
+
+The '-g' and/or '-G' options can be specified to select only certain plots
+based on their titles. Any Perl regular expressions may be used for the
+arguments. You can also use '|' (or) to match multiple strings, e.g.,
+'-g \"Temp|Hum\"'. The '-G' option is applied after '-g'.
+
+The '-d'/'-D' and/or '-m/'-M' options can be combined with '-g'/'-G'. For
+example, '-d 0210 -g 0210' will produce only plots of the 210 phase cal tone
+for each band. Whereas, '-d 0210' will produce the 210 phase-cal tone plots and
+all non-phase-cal plots.
 
 Cable and clock data with absolute values greater 10 are automatically deleted
 unless the '-C' option is used.
@@ -539,40 +560,42 @@ recording, and missing bytes, as determined from the scan_check results. If the
 scan_check is missing or has bad values, the point is shown at the top edge of
 the plot.
 
-The '1anw' switches can be used to select different IF arrangements for
-plotting phase differences between pcal tones for back-ends with baseband/video
-converters. Any combination of the '1anw' switches can be used. No difference
-is plotted more than once. Only one difference between each pair of converters
-is plotted. The differences between the two side-bands of one converter are
-plotted separately after the differences between converters.
+The '-1anw' options can be used to select different IF arrangements for
+plotting phase differences between phase-cal tones for back-ends with
+baseband/video converters. Any combination of the '-1anw' options can be used.
+No difference is plotted more than once. Only one difference between each pair
+of converters is plotted. The differences between the two side-bands of one
+converter are plotted separately after the differences between converters.
 
-The '-v' switch can be used to plot phase differences within IFs for RDBEs.
+The '-v' option can be used to plot phase differences within IFs for RDBEs.
 
-The 'j' switch can be used to normalize pcal amplitudes by Tsys (per channel)
-for time plots and amplitude versus phase plots. The minimum non-zero Tsys (per
-channel) is used as the reference value for normalization. If this causes
-problems, an explicit global reference value can be specified with the 'k'
-option. The 't' option may also be useful for removing bad Tsys values. By
-default dual side-band Tsys is used for normalization if it is available, if
-not then single side-band Tsys data is used. This is usually what is wanted but
-if not, the 'b' option can be used to force use of single side-band Tsys for
-channels that it is available for.
+The '-j' option (not yet supported for RDBEs) can be used to normalize
+phase-cal amplitudes by Tsys (per channel) for time plots and amplitude versus
+phase plots. The minimum non-zero Tsys (per channel) is used as the reference
+value for normalization. If this causes problems, an explicit global reference
+value can be specified with the '-k' option. The '-t' option may also be useful
+for removing bad Tsys values. By default, dual side-band Tsys is used for
+normalization of Mark IV VC data if it is available, if not then single
+side-band Tsys data is used. This is usually what is wanted but if not, the
+'-b' option can be used to force use of single side-band Tsys for channels for
+which that it is available.
 
-For the 'j1anw' switches a simple model is used to match different data from
+For the '-j1anvw' options, a simple model is used to match different data from
 the log. Points from different data types that are the nearest together in time
 are matched. No epoch from one data type is matched to more than one epoch of
 another type in this way. If the resulting matched epochs are within 60 seconds
-of each other, the match is accepted. The tolerance of match can be adjusted
-using the 'u' option.
+of each other, the match is accepted. The time tolerance of the match can be
+adjusted using the '-u' option.
 
-The 'p' switch adds amplitude versus phase plots for each phase-cal tone after
-all other plots. This option suppresses all other output except options -1anw.
+The '-p' option adds amplitude versus phase plots for each phase-cal tone after
+all other plots. This option suppresses all other output except options
+'-1anvw'.
 
-Cable delay is plotted as one-way cable delay change unless the 'r' switch is
-used.
+Cable delay is plotted as one-way cable delay change unless the '-r' (raw)
+option is used.
 
 Option explanations:
- phase-difference plot options (suppresses all other output, except -p):
+ phase-difference plot options (suppresses all other output, except '-p'):
   -1 all converters are on one IF
   -a odd converters are on one IF, even are on another (astronomy)
   -n converters 1-8 on one band, 9-16 on a second (narrow band geodesy),
@@ -593,27 +616,20 @@ Option explanations:
            the -r option
  -C        don't automatically delete cable and clock data with raw values that
            have absolute values greater than 10
- -d regexp for RDBEs only, include only pcal tones that DO match 'regexp',
+ -d regexp for RDBEs only, include only phase-cal tones that DO match 'regexp',
            where 'regex' is any Perl regular expression pattern. You will need
-           to quote 'regexp' if it contains special characters. You can use
-           this to get different slices of tones, e.g., '0005' for the 5-th
-           tone for all bands or '1a' for all tones in band A, IF 1. You can
-           also use '|' (or) to include multiple strings, e.g. '1a0005|1a0010'.
-           This option can be combined with '-D' option as well. The match is
-           case insensitive. This offers slightly different functionality than
-           '-g', operating only on pcal tones. It is a little faster too.
- -D regexp for RDBEs only, include only pcal tones that do NOT match 'regexp',
-           see '-d'
+           to quote 'regexp' if it contains special characters. The match is
+           case insensitive. This option can be combined with the '-D' option.
+ -D regexp for RDBEs only, include only phase-cal tones that do NOT match
+           'regexp', see '-d'
  -e string specify rack, useful for snippets of logs for DBBC3s and RDBEs that
            don't have an 'equip' line near the start; the only useful values
            are 'dbbc3' and 'rdbe', which are case insensitive.
- -g regexp include only plots with labels that DO match 'regexp', where
+ -g regexp include only plots with titles that DO match 'regexp', where
            'regexp' is any Perl regular expression pattern. You will need to
-           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'
-           This option can be combined with the '-G' option as well. The match
-           is case insensitive.
- -G regexp include only plots with labels that DO NOT match 'regexp', where
-           'regexp', see '-g'
+           quote 'regexp' if it contains special characters. This option can be
+           combined with the '-G' option. The match is case insensitive.
+ -G regexp include only plots with titles that DO NOT match 'regexp', see '-g'
  -j        normalize phase-cal amp by Tsys per channel (not supported for
            RDBEs yet).
  -k value  changes 'j' normalization from minimum non-zero Tsys per channel to
@@ -623,28 +639,24 @@ Option explanations:
  -m regexp for RDBEs and DBBC3s only, include only Tsys detectors that DO
            match 'regexp', where 'regex' is any Perl regular expression
            pattern. You will need to quote 'regexp' if it contains special
-           characters. You can use this to get different slices of detectors,
-           e.g., '01' for the '01' detectors on all bands or 'a1' for all
-           detectors from band A IF 1.  You can also use '|' (or) to include
-           multiple strings, e.g., '1a0005|1a0010'. This option can be combined
-           with the '-m' option as well. The match is case insensitive. This
-           option offers slightly different functionality than '-g', operating
-           only on Tsys detectors.  It is a little faster too.
+           characters. This option can be combined with the '-M' option. The
+           match is case insensitive.
  -M regexp for RDBEs and DBBC3s only, include only Tsys detectors that do NOT
            match 'regexp', see '-m'
  -p        plot amplitude versus phase for phase cal tones,
            suppresses all other output except -1anw
  -r        plot cable data in raw units
- -s string match commands with 'string' instead of 'tsys',
-           option -t still applies for editing
- -2 n      n is 1 or 2, useful for selecting which values to plot for
-           -s tpicd#tpcont; 1 for first value, 2 for second
+ -s string match commands with 'string' instead of 'tsys', option '-t' still
+           applies for editing
+ -2 n      n is '1' or '2', useful for selecting which values to plot for
+           '-s \"tpicd#tpcont\"'; '1' for the first value (usually cal-on), '2'
+           (usually cal-off for the second
  -t value  edit out tsys points less than or equal to zero or greater than or
            equal to 'value'
- -y        edit out pcal phases with outside [-180,+180] degrees
- -z value  edit out pcal data with amplitudes less than 'value'
+ -y        edit out phase-cal with phases outside [-180,+180] degrees
+ -z value  edit out phase-cal data with amplitudes less than 'value'
  -u value  maximum distance in time (seconds) allowed for matching data for
-           '1anwp' option plots is changed to 'value' instead of 60 seconds
+           'j1anvw' option plots is changed to 'value' instead of 60 seconds
  -V        print program and PGPLOT version information and stop
  -h        print this help information and stop
  -f file/device  send graphs to 'file' using PGPLOT 'device'
