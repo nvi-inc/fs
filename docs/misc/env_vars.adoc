@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 1.5 - June 2022
+Version 1.6 - October 2022
 
 :sectnums:
 
@@ -43,8 +43,8 @@ environment variable `VAR` to `1`, use:
 
 If _bash_ is your login shell, you can have the variable set
 automatically for your sessions when you login by adding the command
-to your _~/.proflle_ file. This is recommended for the variables from
-this document that you may decide to use.
+to your _~/.proflle_ file. For a change in that file to come into
+effect, it is necessary to logout and log back in again.
 
 === With tcsh
 
@@ -56,9 +56,8 @@ environment variable `VAR` to `1`, use:
 
 If _tcsh_ is your login shell, you can have the variable set
 automatically for your sessions when you login by adding the command
-to your _~/.login_ file. This is recommended for the variables from
-this document that you may decide to use.
-
+to your _~/.login_ file. For a change in that file to come into
+effect, it is necessary to logout and log back in again.
 
 == Make time variables
 
@@ -127,13 +126,25 @@ their login shell, they are usually set in _~/.profile_ using the
 _export_ command; with _tcsh_, in _~/.login_, using _setenv_. See the
 <<Setting environment variables>> section above for more information.
 
-If you are using the display server, to set or change the value of an
-environment variable, it is necessary to reboot, or after terminating
-the FS, to stop _fsserver_ with:
+After changing the value of any runtime environment variable that
+starts with `FS_` (or the `HOME`, `S2_PING`, `STATION`, `TERM`
+variables), it is necessary to restart the FS for the new value to
+become effective.
+
+[NOTE]
+====
+
+If you are using the display server and you are using an FS version up
+to and including _10.1.0_ (or more precisely, a commit up to and
+including `3abb6b04ee12ccbaef55bc58ef13c356d8398c6f`), to set or
+change the value of an environment variable, it is necessary, after
+terminating the FS, to either reboot, or to stop _fsserver_, with:
 
   fsserver stop
 
-Then the environment value can be set and the FS FS restarted.
+Then set the environment variable and restart the FS.
+
+====
 
 === DATA_CENTERS
 
