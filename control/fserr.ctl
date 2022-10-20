@@ -1263,10 +1263,25 @@ BO -171
 Resource locked. Cannot terminate. Is PFMED running?
 ""
 BO -172
-Parameter for terminate must be disk_record_ok.
+Parameter for terminate must be 'force'.
 ""
 BO -173
-Don't terminate while recording, either use disk_record=off first or (dangerous) terminate=disk_record_ok.
+Can't terminate while recording, use disk_record=off first.
+""
+BO -174
+Can't terminate while autoftp is active, wait for all instances to finish first
+""
+BO -175
+Can't terminate while fs.prompt is active, close all instances first.
+""
+BO -176
+One or more conditions above is preventing termination, if you must terminate (dangerous) use terminate=force.
+""
+BO -177
+Can't terminate due to internal error?WW checking autoftp status, report this and the above 'un' error.
+""
+BO -178
+Can't terminate due to internal error?WW checking fs.prompt status, report this and the above 'un' error.
 ""
 BO -180
 Error opening TIME.CTL, UNIX ?FFF

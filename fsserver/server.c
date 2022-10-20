@@ -994,6 +994,7 @@ void server_sigchld_cb(server_t *s, pid_t pid, int status) {
 		s->fs->status = status;
 		s->fs->pid    = 0;
 		nng_mtx_unlock(s->mtx);
+		server_shutdown(s);
 		return;
 	}
 	window_t *w = list_pop(&s->windows, window_by_pid, &pid);

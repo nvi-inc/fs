@@ -1,22 +1,43 @@
               terminate - end field system operation
 
             Syntax:     terminate
-                        terminate=okay
+                        terminate=force
 
             Response:   none
 
 
-Settabel Parameters:
-       okay            literal ascii: disk_record_ok
+Settable Parameters:
+       force           literal text: force
 
 Comments: 
 This is the graceful way to end operation of the Field System.
-Schedule execution is ended, log and schedule files are
-closed, all programs are removed from the system by oprin.
+Schedule execution is ended, log and schedule files are closed, all
+online FS programs are removed from the system.
 
-The terminate command will not succeed if recording has been commanded
-with the disk_record=on command.  Either recording must be stopped
-using disk_record=off first or if you wish to continue recording
-despite terminating the FS, you can use
-"terminate=disk_record_ok".  Terminating the FS while the disk is
-recording is not recommended.
+There are four conditions that can stop 'terminate' from succeeding.
+The first two are:
+
+ (i) 'pfmed' being active
+(ii) recording having been commanded with 'disk_record=on'
+
+If the display server is in use, termination will also be blocked if:
+
+(iii) any instances of 'autoftp' are active
+ (iv) any instances of 'fs.prompt' are active
+
+If it is appropriate, the four conditions can be corrected by:
+
+  (i) exiting 'pfmed'
+ (ii) using 'disk_record=off' to stop recording
+(iii) waiting for all instances of 'autoftp' to finish
+ (iv) closing all instances of 'fs.prompt'
+
+Alternately, if it is necessary to terminate immediately, the last
+three conditions can be overridden with 'terminate=force', but this
+may cause other problems related to the conditions that were
+preventing termination. The user should be careful.
+
+There is no way to override the condition for 'pfmed' being active;
+the program must be exited. This condition is checked before the
+others since there is no point using 'force' if 'pfmed' is going to
+block termination anyway.
