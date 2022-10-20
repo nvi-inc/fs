@@ -837,6 +837,15 @@ C
       else if (mbranch.eq.10) then
          ierr=0
         ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
+        if (rn_test('pfmed')) then
+          call logit7ci(0,0,0,0,-171,'bo',0)
+          if(iwait.ne.0) then
+             ipinsnp(3)=-171
+             call char2hol('bo',ipinsnp(4),1,2)
+             ipinsnp(5)=0
+          endif
+          goto 600
+        endif
         nchar = min0(ireg(2),iblen*2)
         ich = 1+iscn_ch(ibuf,1,nchar,'=')
         if (ich.ne.1) then
@@ -888,15 +897,6 @@ C
               endif
               goto 600
            endif
-        endif
-        if (rn_test('pfmed')) then
-          call logit7ci(0,0,0,0,-171,'bo',0)
-          if(iwait.ne.0) then
-             ipinsnp(3)=-171
-             call char2hol('bo',ipinsnp(4),1,2)
-             ipinsnp(5)=0
-          endif
-          goto 600
         endif
         do i=1,20
           icheck(i)=0

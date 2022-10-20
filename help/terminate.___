@@ -38,4 +38,6 @@ may cause other problems related to the conditions that were
 preventing termination. The user should be careful.
 
 There is no way to override the condition for 'pfmed' being active;
-the program must be exited.
+the program must be exited. This condition is checked before the
+others since there is no point using 'force' if 'pfmed' is going to
+block termination anyway.
