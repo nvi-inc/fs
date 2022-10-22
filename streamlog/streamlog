@@ -2,21 +2,60 @@
 # Print the Field System log to stdout
 set -euo pipefail
 
-if [[ -n ${FS_DISPLAY_SERVER:-} ]]; then
-    if ! fsserver status &> /dev/null; then echo fsserver not running; exit 1 ; fi
-    if ! fsserver fs status &> /dev/null; then echo fs not running; exit 1; fi
-    FS_SERVER_URL_BASE=$(awk '/FS_SERVER_URL_BASE/ {gsub(/"/, "", $3); print $3}' /usr2/fs/include/params.h)
-    exec ssub -w "$FS_SERVER_URL_BASE/log"
+usage() {
+   echo -e "\n  Usage: $(basename $0) [-h]|[-s][-w]"
+   echo -e "\n  stream FS log output\n"
+   echo "  where:"
+   echo -e "\t-h\tThis help output"
+   echo -e "\t-s\tEnable scroll-back, mostly for display server use"
+   echo -e "\t-w\tWait for FS start and restart after termination"
+   echo -e "\n  Don't use '-h' or '-w' in 'stpgm.ctl'.\n"
+}
+SCROLL=
+WAIT=
+while getopts "hws" arg; do
+    case $arg in
+        s)
+            SCROLL=-s
+            ;;
+        w)
+            WAIT=-w
+            ;;
+        h)
+            usage >&2
+            exit 0
+            ;;
+        *)
+            usage >&2
+            exit 1
+            ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+if [[ $# -ne 0 ]] ; then
+    usage >&2
+    exit 1
 fi
 
+if [[ -n ${FS_DISPLAY_SERVER:-} ]]; then
+    if [[ -z "$WAIT" ]]; then
+        if ! fsserver fs status &> /dev/null; then echo fs not running >&2; exit 1; fi
+    fi
+    FS_SERVER_URL_BASE=$(awk '/FS_SERVER_URL_BASE/ {gsub(/"/, "", $3); print $3}' /usr2/fs/include/params.h)
+    STRING="$WAIT $SCROLL $FS_SERVER_URL_BASE/log"
+    exec ssub $STRING
+fi
 
-#Kill child tail on exit
-trap 'kill $(jobs -p)' EXIT
 
 LOG=
 PID=
 
-while true; do
+if ! NEW=$(lognm) && [[ -z "$WAIT" ]]; then
+    echo fs not running >&2
+    exit 1
+fi
+while NEW=$(lognm) || [[ -n "$WAIT" ]]; do
     # FS isn't running or hasn't created new log yet
     if ! NEW=$(lognm) || [[ ! -e  "/usr2/log/${NEW}.log" ]]; then
         sleep 1
@@ -31,10 +70,18 @@ while true; do
             kill "$PID"
         fi
 
-        # Only print the whole file it was created recently.
-        # This avoids, e.g., printing the whole stations log when switching to it.
-        if [ "$(stat --printf="%s" "/usr2/log/${NEW}.log")" -lt 4000 ]; then
-            tail -n+1 -f "/usr2/log/${NEW}.log" &
+        #Kill child tail on exit
+        trap 'kill $(jobs -p)' EXIT
+
+        # If scroll-back is requested, print some of the log from before we
+        # started. 20 lines should be enough to get the header lines, but some
+        # extra (old) lines may appear before them and some header (and
+        # following no-header) lines may be lost if there are a lot of lines
+        # coming out quickly. This is racy, but maybe about the best we can do.
+        # The other clause is racy too, but won't print any "extra" lines; we
+        # just may lose some lines added to the new log at the transition.
+        if [ -n "$SCROLL" ]; then
+            tail -n 20 -f "/usr2/log/${NEW}.log" &
         else
             tail -n 0 -f "/usr2/log/${NEW}.log" &
         fi
