@@ -514,12 +514,14 @@ Exit code is 0 for no error, -1 for no logs found, -2 for nothing to plot.
 This script makes plots of data found in log files. It plots wx/, cable/,
 cdms/, tsys/ rx/ (and sk/ and sx/), clock (see below), setcl#time/, RDBE
 phase-cal, recorder statistics, and the first encountered tone per channel (LSB
-and USB separately) for Mark IV decoder phase-cal data. The time axis of all
-the plots is the same. The data is plotted so that it fits entirely inside the
-boxes. Points that appear along the top edge of a plot did not decode (\$\$\$
-for example) or were edited out automatically or by command line options.
-However, not all values that don't decode or are missing appear on the top
-edge.
+and USB separately) for Mark IV decoder phase-cal data. The time axes of all
+the plots for a given log are the same. Valid data is plotted so that it fits
+entirely inside the plotting area. Points that appear along the top edge of a
+plot did not decode (\$\$\$ for example) or were edited out automatically or by
+command line options. Cases where the form of the entry was too garbled to be
+identified or the sampling failed (possibly because the command timed-out) do
+not appear at all. The latter two problems may be noticeable if the plot for a
+data type is missing entirely or is sparser than expected.
 
 Clock data includes values from any suitable commands containing 'maser',
 'fmout', and/or 'gps' in their names, as well as RDBE GPS and PPS offsets, and
@@ -742,13 +744,11 @@ foreach $file (@ARGV) {
 	    $wxcount++;
 	} elsif(/cable\/[ ]*([^, ]*)/i) {
 	    $value=$1;
-	    next unless $value=~/^$float_pattern$/ ;
 	    $cable[$cablen]=$value;
 	    $cablet[$cablen]=&time($_);
 	    $cablen++;
 	} elsif(/cdms\/[ ]*([^, ]*)/i) {
 	    $value=$1;
-	    next unless $value=~/^$float_pattern$/ ;
 	    $cdms[$cdmsn]=$value;
 	    $cdmst[$cdmsn]=&time($_);
 	    $cdmsn++;
@@ -1015,7 +1015,6 @@ foreach $file (@ARGV) {
 	} elsif (/\/(sx|rx|sk)\//i) {
             (undef,$cmd,@fields)=split('[/,]');
             ($value,$units)=split(' ',$fields[$#fields]);
-	    next unless $value=~/^$float_pattern$/ ;
 	    ($rx{$fields[0]}[$rxcount{$fields[0]}],undef)=$value;
 	    $rxtime{$fields[0]}[$rxcount{$fields[0]}]=&time($_);
 #            print "$fields[0] $rx{$fields[0]}[$rxcount{$fields[0]}]\n";
@@ -1030,19 +1029,15 @@ foreach $file (@ARGV) {
 	} elsif(/(rdtc.#dot2[gp]ps)/) {
 	    $cmd=$1;
 	    (undef,@fields)=split('[/,]');
-	    if($fields[0] =~ /($float_pattern)/) {
-		$clockv{$cmd}[$clockn{$cmd}]=$fields[0];
-		$clockt{$cmd}[$clockn{$cmd}]=&time($_);
-		$clockn{$cmd}++;
-	    }
+	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
+	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
+	    $clockn{$cmd}++;
 	} elsif(/\/(rdbe.\/!dbe_[gp]ps)/) {
 	    $cmd=$1;
 	    (undef,undef,undef,@fields)=split('[:;]');
-	    if($fields[0] =~ /($float_pattern)/) {
-		$clockv{$cmd}[$clockn{$cmd}]=$fields[0];
-		$clockt{$cmd}[$clockn{$cmd}]=&time($_);
-		$clockn{$cmd}++;
-	    }
+	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
+	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
+	    $clockn{$cmd}++;
 	} elsif(/dbtcn#(pps2dot)/) {
 	    $cmdp=$1;
 	    (undef,@fields)=split('[/,]');
@@ -1050,38 +1045,30 @@ foreach $file (@ARGV) {
 	    while($if_chan=shift(@fields)) {
 		$cmd=$cmdp . '/' . $if_chan;
 		$delay=shift(@fields);
-		if($delay =~ /($float_pattern)/) {
-		    $clockv{$cmd}[$clockn{$cmd}]=$delay;
-		    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
-		    $clockn{$cmd}++;
-		}
+		$clockv{$cmd}[$clockn{$cmd}]=$delay;
+		$clockt{$cmd}[$clockn{$cmd}]=&time($_);
+		$clockn{$cmd}++;
 	    }
 	} elsif(/\/mcast_time\//) {
 	    (undef,$cmd,@fields)=split('[/,]');
 	    s{^\s+|\s+$}{}g foreach @fields;
             next if $fields[0] eq '0';
 	    $cmd=$cmd . '/' . $fields[0];
-	    if($fields[3] =~ /($float_pattern)/) {
-		    $clockv{$cmd}[$clockn{$cmd}]=$fields[3];
-		    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
-		    $clockn{$cmd}++;
-	    }
+	    $clockv{$cmd}[$clockn{$cmd}]=$fields[3];
+	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
+	    $clockn{$cmd}++;
 	} elsif(/\/(.*(fmout|maser|gps).*)\//i) {
 	    $cmd=$1;
 	    (undef,undef,@fields)=split('[/,]');
-	    if($fields[0] =~ /($float_pattern)/) {
-		$clockv{$cmd}[$clockn{$cmd}]=$fields[0];
-		$clockt{$cmd}[$clockn{$cmd}]=&time($_);
-		$clockn{$cmd}++;
-	    }
+	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
+	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
+	    $clockn{$cmd}++;
 	} elsif(/#.....#(.*(fmout|maser|gps).*)\//i) {
 	    $cmd=$1;
 	    (undef,@fields)=split('[/,]');
-	    if($fields[0] =~ /($float_pattern)/) {
-		$clockv{$cmd}[$clockn{$cmd}]=$fields[0];
-		$clockt{$cmd}[$clockn{$cmd}]=&time($_);
-		$clockn{$cmd}++;
-	    }
+	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
+	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
+	    $clockn{$cmd}++;
         } elsif(/:scan_name=([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)/) {
 	    $new_dur=$5;
         } elsif(/:!(\d{4}\.\d{3}\.\d\d:\d\d:\d\d)/) {
@@ -1152,6 +1139,7 @@ if(@wxtime) {
 if(@cablet) {
     if(!defined($opt_r)) {
         for($i=0;$i<=$#cable;$i++) {
+	    next unless $cable[$i]=~/^$float_pattern$/ ;
 	    if(defined($opt_C) || abs($cable[$i])<1e1) {
 		$cablefirst=$cable[$i] if(!defined($cablefirst));
 		$cable[$i]=($cable[$i]-$cablefirst)/4e5;
@@ -1184,6 +1172,7 @@ if(@cablet) {
 	&vu(\@cablet, \@cable,"Cable Delay (ps)");
     } else {
         for($i=0;$i<=$#cable;$i++) {
+	    next unless $cable[$i]=~/^$float_pattern$/ ;
 	    if(defined($opt_C) || abs($cable[$i])<1e1) {
 		$cable[$i]*=1e3;
 	    } else {
@@ -1259,6 +1248,7 @@ foreach $clock (sort by_clocks keys %clockn) {
     if($offset) {
 #	print "apply offset $offset\n";
 	for($i=0;$j<$count;$i++) {
+	    next unless $val[$j]=~/^$float_pattern$/ ;
 	    $val[$j]-=$offset;
 	}
     }
