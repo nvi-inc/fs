@@ -1,0 +1,120 @@
+#!/bin/bash
+#
+# Copyright (c) 2022 NVI, Inc.
+#
+# This file is part of VLBI Field System
+# (see http://github.com/nvi-inc/fs).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# Print the Field System log to stdout
+set -euo pipefail
+
+usage() {
+   echo -e "\n  Usage: $(basename $0) [-h]|[-d][-s][-w]"
+   echo -e "\n  stream FS log output\n"
+   echo "  where:"
+   echo -e "\t-d\tUse display stream instead of log, requires display server use"
+   echo -e "\t-h\tThis help output"
+   echo -e "\t-s\tEnable scroll-back, mostly for display server use"
+   echo -e "\t-w\tWait for FS start and restart after termination"
+   echo -e "\n  Don't use '-h' or '-w' in 'stpgm.ctl'.\n"
+}
+SCROLL=
+WAIT=
+STREAM=log
+while getopts "dhws" arg; do
+    case $arg in
+        s)
+            SCROLL=-s
+            ;;
+        w)
+            WAIT=-w
+            ;;
+        h)
+            usage >&2
+            exit 0
+            ;;
+        d)
+            if [[ ! -n ${FS_DISPLAY_SERVER:-} ]]; then
+                echo "'-d' only supported with display sever enabled" >&2
+                exit 1
+            fi
+            STREAM=windows/fs
+            ;;
+        *)
+            usage >&2
+            exit 1
+            ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+if [[ $# -ne 0 ]] ; then
+    usage >&2
+    exit 1
+fi
+
+if [[ -n ${FS_DISPLAY_SERVER:-} ]]; then
+    if [[ -z "$WAIT" ]]; then
+        if ! fsserver fs status &> /dev/null; then echo fs not running >&2; exit 1; fi
+    fi
+    FS_SERVER_URL_BASE=$(awk '/FS_SERVER_URL_BASE/ {gsub(/"/, "", $3); print $3}' /usr2/fs/include/params.h)
+    STRING="$WAIT $SCROLL $FS_SERVER_URL_BASE/$STREAM"
+    exec ssub $STRING
+fi
+
+
+LOG=
+PID=
+
+if ! NEW=$(lognm) && [[ -z "$WAIT" ]]; then
+    echo fs not running >&2
+    exit 1
+fi
+while NEW=$(lognm) || [[ -n "$WAIT" ]]; do
+    # FS isn't running or hasn't created new log yet
+    if ! NEW=$(lognm) || [[ ! -e  "/usr2/log/${NEW}.log" ]]; then
+        sleep 1
+        continue
+    fi
+
+    if [[ "$NEW" != "$LOG" ]]; then
+
+        # Kill old tail process, disowning it so shell doesn't announce it.
+        if [[ -n "$PID" ]]; then
+            disown "$PID"
+            kill "$PID"
+        fi
+
+        #Kill child tail on exit
+        trap 'kill $(jobs -p)' EXIT
+
+        # If scroll-back is requested, print some of the log from before we
+        # started. 20 lines should be enough to get the header lines, but some
+        # extra (old) lines may appear before them and some header (and
+        # following no-header) lines may be lost if there are a lot of lines
+        # coming out quickly. This is racy, but maybe about the best we can do.
+        # The other clause is racy too, but won't print any "extra" lines; we
+        # just may lose some lines added to the new log at the transition.
+        if [ -n "$SCROLL" ]; then
+            tail -n 20 -f "/usr2/log/${NEW}.log" &
+        else
+            tail -n 0 -f "/usr2/log/${NEW}.log" &
+        fi
+        PID=$!
+        LOG=$NEW
+    fi
+    sleep 1
+done
