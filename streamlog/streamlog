@@ -3,9 +3,10 @@
 set -euo pipefail
 
 usage() {
-   echo -e "\n  Usage: $(basename $0) [-h]|[-s][-w]"
+   echo -e "\n  Usage: $(basename $0) [-h]|[-d][-s][-w]"
    echo -e "\n  stream FS log output\n"
    echo "  where:"
+   echo -e "\t-d\tUse display stream instead of log, requires display server use"
    echo -e "\t-h\tThis help output"
    echo -e "\t-s\tEnable scroll-back, mostly for display server use"
    echo -e "\t-w\tWait for FS start and restart after termination"
@@ -13,7 +14,8 @@ usage() {
 }
 SCROLL=
 WAIT=
-while getopts "hws" arg; do
+STREAM=log
+while getopts "dhws" arg; do
     case $arg in
         s)
             SCROLL=-s
@@ -24,6 +26,13 @@ while getopts "hws" arg; do
         h)
             usage >&2
             exit 0
+            ;;
+        d)
+            if [[ ! -n ${FS_DISPLAY_SERVER:-} ]]; then
+                echo "'-d' only supported with display sever enabled" >&2
+                exit 1
+            fi
+            STREAM=windows/fs
             ;;
         *)
             usage >&2
@@ -43,7 +52,7 @@ if [[ -n ${FS_DISPLAY_SERVER:-} ]]; then
         if ! fsserver fs status &> /dev/null; then echo fs not running >&2; exit 1; fi
     fi
     FS_SERVER_URL_BASE=$(awk '/FS_SERVER_URL_BASE/ {gsub(/"/, "", $3); print $3}' /usr2/fs/include/params.h)
-    STRING="$WAIT $SCROLL $FS_SERVER_URL_BASE/log"
+    STRING="$WAIT $SCROLL $FS_SERVER_URL_BASE/$STREAM"
     exec ssub $STRING
 fi
 
