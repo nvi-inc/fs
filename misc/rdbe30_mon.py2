@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #
 # Copyright (c) 2014 Stephen R. McWhirter
+# Copyright (c) 2022 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -103,9 +104,9 @@ class TSYS(BigEndianStructure):
     ('raw_samples', c_uint8 * 4096)]
 
 ANY = "0.0.0.0"
-parms = {'-h':"224.0.2.29", '-p':"20020", '-H':"192.168.61.56", '-P':"5000"}
+parms = {'-h':"224.0.2.29", '-p':"20020", '-H':"192.168.61.56", '-P':"5000", '--log':"", '--command':"", '--monitor':"", '--plot':""}
 try:
-    opts, pargs = getopt.getopt(sys.argv[1:], "h:p:H:P", ["multicast host", "multicast port", "rdbe host", "rdbe port"])
+    opts, pargs = getopt.getopt(sys.argv[1:], "h:p:H:P", ["multicast host", "multicast port", "rdbe host", "rdbe port", "log=", "command=", "monitor=", "plot="] )
 except getopt.GetoptError, msg:
     sys.exit(msg)
 for o,v in opts:
@@ -114,6 +115,10 @@ MCAST_ADDR = str(parms['-h'])
 MCAST_PORT = int(parms['-p'])
 RDBE_ADDR = str(parms['-H'])
 RDBE_PORT = int(parms['-P'])
+LOG_GEO = str(parms['--log'])
+CMD_GEO = str(parms['--command'])
+MON_GEO = str(parms['--monitor'])
+PLT_GEO = str(parms['--plot'])
 print "MCAST Host:", MCAST_ADDR, "MCAST Port:", MCAST_PORT
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
@@ -358,10 +363,22 @@ except Tk.TclError:
 
 rc = shelve.open('rdbe30_monrc_' + RDBE_ADDR, writeback=True)
 try:
-    root.geometry(rc['geom_root'])
-    plots.geometry(rc['geom_plots'])
-    cmdlist.geometry(rc['geom_cmdlist'])
-    cmdlog.geometry(rc['geom_cmdlog'])
+    if MON_GEO:
+        root.geometry(MON_GEO)
+    else:
+        root.geometry(rc['geom_root'])
+    if PLT_GEO:
+        plots.geometry(PLT_GEO)
+    else:
+        plots.geometry(rc['geom_plots'])
+    if CMD_GEO:
+        cmdlist.geometry(CMD_GEO)
+    else:
+        cmdlist.geometry(rc['geom_cmdlist'])
+    if LOG_GEO:
+        cmdlog.geometry(LOG_GEO)
+    else:
+        cmdlog.geometry(rc['geom_cmdlog'])
     send1.delete(1.0, 'end') 
     send1.insert('end','dbe_pps_mon=enable:'+MCAST_ADDR+':'+str(MCAST_PORT)+'\n'+rc['cmds'])
     rc.close()
