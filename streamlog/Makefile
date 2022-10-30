@@ -1,2 +1,4 @@
+#
 ../bin/streamlog: streamlog
-	cp $^ $@
+	rm -f ../bin/streamlog
+	ln -s ../streamlog/streamlog ../bin/streamlog
