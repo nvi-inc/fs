@@ -30,7 +30,7 @@ sub nrml {
 #
 # normalize the pcal in $i-th channel by the tsys value that matches if any
 #
-    my($i,$chan)= @_;
+    my($k,$i,$chan)= @_;
     my($pv,$pt,$tv,$tt);
     my($ttref,$tvref,$ptref,$pvref);
     my($j,$min,$nfirst);
@@ -38,9 +38,9 @@ sub nrml {
     $#pt=-1;
     $#tv=-1;
     $#tt=-1;
-    for($j=0;$j<$pcaln[1][$i];$j++) {
-	$pv[$j]=$pcala[1][$i][$j];
-	$pt[$j]=$pcalt[1][$i][$j];
+    for($j=0;$j<$pcaln[$k][$i];$j++) {
+	$pv[$j]=$pcala[$k][$i][$j];
+	$pt[$j]=$pcalt[$k][$i][$j];
     }
     for($j=0;$j<$tsysn{$chan};$j++) {
 	$tv[$j]=$tsysv{$chan}[$j];
@@ -137,24 +137,60 @@ sub match {
     return (\@ot1,\@ov1,\@ot2,\@ov2);
 }
 
-sub phs {
+sub phsr {
 #
-# plot phase differences
+# plot phase differences for RDBEs
 #
-    my ($i,$j)=@_;
+    my ($tone1,$tone2)=@_;
     my ($tim1,$phs1,$tim2,$phs2);
     my ($tref1,$pref1,$tref2,$pref2,$k,$label);
     $#tim1=-1;
     $#phs1=-1;
     $#tim2=-1;
     $#phs2=-1;
-    for($k=0; $k<$pcaln[1][$i];$k++) {
-	$tim1[$k]=$pcalt[1][$i][$k];
-	$phs1[$k]=$pcalp[1][$i][$k];
+    for($k=0; $k<$rpcaln{$tone1};$k++) {
+	$tim1[$k]=$rpcalt{$tone1}[$k];
+	$phs1[$k]=$rpcalp{$tone1}[$k];
     }
-    for($k=0; $k<$pcaln[1][$j];$k++) {
-	$tim2[$k]=$pcalt[1][$j][$k];
-	$phs2[$k]=$pcalp[1][$j][$k];
+    for($k=0; $k<$rpcaln{$tone2};$k++) {
+	$tim2[$k]=$rpcalt{$tone2}[$k];
+	$phs2[$k]=$rpcalp{$tone2}[$k];
+    }
+    ($tref1,$pref1,$tref2,$pref2)=&match(\@tim1,\@phs1,\@tim2,\@phs2);
+
+    for($k=0; $k<=$#$tref1;$k++) {
+	if($$pref1[$k]!~/^$float_pattern$/ ||
+	   $$pref2[$k]!~/^$float_pattern$/) {
+	    $$pref1[$k]='$$$';
+	} else {
+	    $$pref1[$k]=$$pref2[$k]-$$pref1[$k];
+	    if($$pref1[$k] > 180) {
+		$$pref1[$k]-=360;
+	    } elsif($$pref1[$k] < -180) {
+		$$pref1[$k]+=360;
+	    }
+	}
+    }
+    &vu($tref1,$pref1,"Phase $tone2-$tone1");
+}
+sub phs {
+#
+# plot phase differences
+#
+    my ($i,$j,$m,$n)=@_;
+    my ($tim1,$phs1,$tim2,$phs2);
+    my ($tref1,$pref1,$tref2,$pref2,$k,$label);
+    $#tim1=-1;
+    $#phs1=-1;
+    $#tim2=-1;
+    $#phs2=-1;
+    for($k=0; $k<$pcaln[$m][$i];$k++) {
+	$tim1[$k]=$pcalt[$m][$i][$k];
+	$phs1[$k]=$pcalp[$m][$i][$k];
+    }
+    for($k=0; $k<$pcaln[$n][$j];$k++) {
+	$tim2[$k]=$pcalt[$n][$j][$k];
+	$phs2[$k]=$pcalp[$n][$j][$k];
     }
     ($tref1,$pref1,$tref2,$pref2)=&match(\@tim1,\@phs1,\@tim2,\@phs2);
 
@@ -171,7 +207,7 @@ sub phs {
 	    }
 	}
     }
-    &vu($tref1,$pref1,"Phase diff $pcall[1][$j]-$pcall[1][$i]");
+    &vu($tref1,$pref1,"Phase diff $pcall[$n][$j]-$pcall[$m][$i]");
 }
 
 sub vup {
@@ -199,8 +235,8 @@ sub vuy {
     if(defined($opt_g)) {
 	return if $label !~/$opt_g/i;
     }
-    if(defined($opt_e)) {
-	return if $label =~/$opt_e/i;
+    if(defined($opt_G)) {
+	return if $label =~/$opt_G/i;
     }
     $ymax=0;
     $ymin=0;
@@ -242,7 +278,7 @@ sub vuy {
 	    pgtbox("BCTNZYH",0.0,0,"BCNVT",0.0,0); 
 	    pglabel("Time","","");
 	} elsif($type == 2) {
-	    pgbox("BCTN",0.0,0,"BCNVT",0.0,0); 
+	    pgbox("BCTN",45.0,0,"BCNVT",0.0,0);
 	    pglabel("Phase","","");
 	}
 	pgask(-1);
@@ -342,7 +378,7 @@ sub time {
 # everything is measured relative to $reftime, first time in log
 # it will make a mess of $reftime is not reasonable
 #
-    local ($date) = @_;
+    my ($date, $other) = @_;
 #2005.123.12:23:56.21
 #01234567890123456789
 #or
@@ -382,9 +418,66 @@ sub time {
 	   +$minute-$refminute)*60.0
 	   +$second-$refsecond;
 #	    print "$day $hour $minute $second $time\n";
-    $tmax=$time if $time>$tmax;
-    $tmin=$time if $time<$tmin;
+    if(!defined($other)) {
+        $tmax=$time if $time>$tmax;
+        $tmin=$time if $time<$tmin;
+    }
     return $time;
+}
+sub by_rdbe_chan {
+#by band, then by IF, then by channel
+    substr($a,2,1) cmp substr($b,2,1) or
+    substr($a,3,1) cmp substr($b,3,1) or
+    substr($a,0,2) cmp substr($b,0,2);
+}
+sub by_dbbc3_chan {
+my($if_a,$if_b);
+#by IF, then by side-band, then by channel (whole IFs after channels)
+    if(substr($a,0,1) eq 'i' && substr($b,0,1) eq 'i') {
+      return $a cmp $b;
+    } elsif(substr($a,0,1) eq 'i') {
+	$if_b=(substr($b,0,3)-1)/8 % 8;
+	$if_a=index('abcdefgh',substr($a,1,1),);
+	if ($if_a eq $if_b) {
+	    return +1;
+	}
+	return $if_a <=> $if_b;
+    } elsif(substr($b,0,1) eq 'i') {
+	$if_a=(substr($a,0,3)-1)/8 % 8;
+	$if_b=index('abcdefgh',substr($b,1,1),);
+	if ($if_a eq $if_b) {
+	    return -1;
+	}
+	return $if_a <=> $if_b;
+    } else {
+	$if_a=(substr($a,0,3)-1)/8 % 8;
+	$if_b=(substr($b,0,3)-1)/8 % 8;
+	return ($if_a <=> $if_b or
+	    substr($a,3,1) cmp substr($b,3,1) or
+	    $a cmp $b);
+    }
+}
+sub by_rdbe_tone {
+#by band, then by IF, then by tone
+    substr($a,1,1) cmp substr($b,1,1) or
+    substr($a,0,1) cmp substr($b,0,1) or
+    substr($a,2) cmp substr($b,2);
+}
+sub by_clocks {
+#For RDBEs by type, then by band then by (reverse) origin
+#For DBBC3 by IF, then (reverse) origin
+# all others alphabetize
+    if(substr($a,0,2) eq 'rd' and substr($b,0,2) eq 'rd') {
+       return (substr($a,-3) cmp substr($b,-3) or
+           substr($a,4,1) cmp substr($b,4,1) or
+           $b cmp $a);
+    } elsif(substr($a,0,11) eq 'mcast_time/' and substr($b,0,8) eq 'pps2dot/') {
+       return (substr($a,-1) cmp substr($b,-1) or 1);
+    } elsif(substr($b,0,11) eq 'mcast_time/' and substr($a,0,8) eq 'pps2dot/') {
+       return (substr($a,-1) cmp substr($b,-1) or -1);
+    } else {
+       return( $a cmp $b);
+    }
 }
 #
 # main program
@@ -395,120 +488,193 @@ sub time {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("12:abc:e:g:jk:rnps:t:u:wz:f:hv");
+&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwyz:BCD:G:M:V");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
 
-if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_V)) {
     print STDERR "Try: 'plotlog -h'\n";
     exit 0;
 }
 
-if(defined($opt_v)) {
-    print "[plotlog 1.8]\n";
+if(defined($opt_V)) {
+    print "[plotlog 2.0]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit 0;
 }
 
 if (defined($opt_h)) {
-    print "Usage:\n";
-    print "   plotlog [options] logs\n";
-    print "Synopsis: extracts and plots data from log files\n";
-    print "Exit code is 0 for no error, -1 for no logs found, -2 for nothing to plot.\n\n";
+    print "Usage: plotlog [options] logs
 
-    print "This script finds wx/, cable/, tsys/ rx/ (or sk/ or sx/), gps-fmout/ (or\n";
-    print "fmout-gps/), setcl#time/, and the first encountered USB tone per channel for\n";
-    print "Mark IV decoder pcal data in log files and generates time plots of the data.\n";
-    print "The time axis of all the plots is the same. The data is plotted so that it fits\n";
-    print "entirely inside the boxes. Points that appear along the top line of a plot did\n";
-    print "not decode (\$\$\$ for example) or were edited out by command line options.\n\n";
+Synopsis: extracts and plots data from log files
+Exit code is 0 for no error, -1 for no logs found, -2 for nothing to plot.
 
-    print "The '1anw' switches can be used to select different IF arrangements for\n";
-    print "calculating phase differences between pcal tones. Any combination of the '1anw'\n";
-    print "switches can be used. No difference is plotted more than once.\n\n";
+This script makes plots of data found in log files. It plots wx/, cable/,
+cdms/, tsys/ rx/ (and sk/ and sx/), clock (see below), setcl#time/, RDBE
+phase-cal, recorder statistics, and the first encountered tone per channel (LSB
+and USB separately) for Mark IV decoder phase-cal data. The time axes of all
+the plots for a given log are the same. Valid data is plotted so that it fits
+entirely inside the plotting area. Points that appear along the top edge of a
+plot did not decode (\$\$\$ for example) or were edited out automatically or by
+command line options. Cases where the form of the entry was too garbled to be
+identified or the sampling failed (possibly because the command timed-out) do
+not appear at all. The latter two problems may be noticeable if the plot for a
+data type is missing entirely or is sparser than expected.
 
-    print "The 'j' switch can be used to normalize pcal amplitudes by Tsys (per channel)\n";
-    print "for time plots and amplitude versus phase plots. The minimum non-zero Tsys\n";
-    print "(per channel) is used as the reference value for normalization. If this causes\n";
-    print "problems, an explict global reference value can be specified with the 'k'\n";
-    print "option. The 't' option may also be useful for removing bad Tsys values. By\n";
-    print "default dual side-band Tsys is used for normalization if it is available, if\n";
-    print "not then single side-band Tsys data is used. This is usually what is wanted\n";
-    print "but if not, the 'b' option can be used to force use of single side-band Tsys\n";
-    print "for channels that it is available for.\n\n";
+Clock data includes values from any suitable commands containing 'maser',
+'fmout', and/or 'gps' in their names, as well as RDBE GPS and PPS offsets, and
+DBBC3 'pps2dot' data. For RDBEs (and DBBC3s), if both multicast and monitor
+(DBBC3: 'mcast_time') values are present, only the multicast values will be
+plotted unless the '-B' option is specified in which case both will be plotted.
 
-    print "For the 'j1anw' switches a simple model is used to match different data from\n";
-    print "the log. Points from different data types that are the nearest together in time\n";
-    print "are matched. No epoch from one data type is matched to more than one epoch of\n";
-    print "another type in this way. If the resulting matched epochs are within 60 seconds\n";
-    print "of each other, the match is accepted. The tolerance of match can be adjusted\n";
-    print "using the 'u' option.\n\n";
+For RBDEs, unless the '-d' and/or '-D' options are specified, only the first
+phase-cal tone encountered for each IF is plotted. Any Perl regular expressions
+may be used for the arguments. You can use these options to get different
+slices of tones, e.g., '-d 0005' for the 5-th tone for all bands or '-d 1a' for
+all tones in band A, IF 1. You can also use '|' (or) to match multiple strings,
+e.g. '-d \"1a0005|1a0010\"'. The '-D' option is applied after '-d'.
 
-    print "The 'p' switch adds amplitude versus phase plots for each phase-cal tone after\n";
-    print "all other plots. This option suppresses all other output except options -1anw.\n\n";
-    print "Cable delay is plotted as one-way cable delay change unless the 'r' switch is\n";
-    print "used.\n\n";
+For RDBEs and DBBC3s, unless the '-m' and/or '-M' options are specified, only
+Tsys from the first (non-'00') detector encountered for each IF is plotted. Any
+Perl regular expressions may be used for the arguments. You can use these
+options to get different slices of detectors, e.g., '-m 01' for the '01'
+detectors on all bands or '-m a1' for all detectors from band A IF 1. You can
+also use '|' (or) to match multiple strings, e.g., '-m \"1a0005|1a0010\"'. The
+'-M' option is applied after '-m'.
 
-    print "fmout-gps and gps-fmput data are plotted as fmout-gps, flipping the sign of\n";
-    print "any gps-fmout data.\n\n";
+The '-g' and/or '-G' options can be specified to select only certain plots
+based on their titles. Any Perl regular expressions may be used for the
+arguments. You can also use '|' (or) to match multiple strings, e.g.,
+'-g \"Temp|Hum\"'. The '-G' option is applied after '-g'.
 
-    print "Option explanations:\n";
+The '-d'/'-D' and/or '-m/'-M' options can be combined with '-g'/'-G'. For
+example, '-d 0210 -g 0210' will produce only plots of the 210 phase cal tone
+for each band. Whereas, '-d 0210' will produce the 210 phase-cal tone plots and
+all non-phase-cal plots.
 
-    print " phase-difference plot options (suppresses all other output, except -p):\n";
-    print "  -1 all converters are on one IF\n";
-    print "  -a odd converters are on one IF, even are on another (astronomy)\n";
-    print "  -n converters 1-8 on one band, 9-16 on a second (narrow band geodesy),\n";
-    print "     also useful for wide band geodesy\n";
-    print "  -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third\n";
-    print "     (wide band geodesy)\n\n";
+Cable and clock data with absolute values greater 10 are automatically deleted
+unless the '-C' option is used.
 
-    print " -b        force single-side-band Tsys normalization of pcal amp data\n";
-    print " -c value  cable cal edit, if greater than zero, delete points that much or\n";
-    print "           more above lowest value, if less than zero, delete points that much\n";
-    print "           or more below largest value; uses plot Y axis units, be careful of\n";
-    print "           the -r option\n";
-    print " -e regexp include only plots with labels that DO NOT match 'regexp', where\n";
-    print "           'regexp' is any Perl regular expression pattern, you will need to\n";
-    print "           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'\n";
-    print "           or spaces, this option can be combined with the 'g' option as well.\n";
-    print "           The match is case insensitive.\n";
-    print " -g regexp include only plots with labels that DO match 'regexp', where\n";
-    print "           'regexp' is any Perl regular expression pattern, you will need to\n";
-    print "           quote 'regexp' if it contains special characters, e.g., 'Temp|Hum'\n";
-    print "           or spaces, this option can be combined with the 'e' option as well.\n";
-    print "           The match is case insensitive.\n";
-    print " -j        normalize phase-cal amp by Tsys per channel\n";
-    print " -k value  changes 'j' normalization from minimum non-zero Tsys per channel to\n";
-    print "           'value' for all channels\n";
-    print " -p        plot amplitude versus phase for phase cal tones,\n";
-    print "           suppresses all other output except -1anw\n";
-    print " -r        plot cable data in raw units\n";
-    print " -s string match commands with 'string' instead of 'tsys',\n";
-    print "           option -t still applies for editing\n";
-    print " -2 n      n is 1 or 2, useful for selecting which values to plot for\n";
-    print "           -s tpicd#tpcont; 1 for first value, 2 for second\n";
-    print " -t value  edit out tsys points less than or equal to zero or greater than or\n";
-    print "           equal to 'value'\n";
-    print " -z value  edit out pcal data with amplitudes less than 'value'\n";
-    print " -u value  maximum distance in time (seconds) allowed for matching data for\n";
-    print "           '1anwp' option plots is changed to 'value' instead of 60 seconds\n";
-    print " -v        print program and PGPLOT version information and stop\n";
-    print " -h        print this help information and stop\n";
-    print " -f file/device  send graphs to 'file' using PGPLOT 'device'\n";
-    print "    if -f omitted and DISPLAY is defined, '/xw' will be used\n";
-    print "    if -f omitted and DISPLAY is not defined, 'plotlog.ps/vps' will be used\n";
-    print "    if '-f ?', you will be prompted for standard pgplot devices,\n";
-    print "               be sure to quote '?', like \\?\n";
-    print "    'vps' (portrait PostScript) is a useful choice for 'device' for file output\n";
-    print "    '.ps' works well as the file extension for device 'vps'\n\n";
+The recorder statistics plotted are the delay in starting, shortness of the
+recording, and missing bytes, as determined from the scan_check results. If the
+scan_check is missing or has bad values, the point is shown at the top edge of
+the plot.
 
-    print "You can use different colors by setting the environment variables\n";
-    print "PGPLOT_FOREGROUND and PGPLOT_BACKGROUND appropriately before running the\n";
-    print "program. Colors that are available depend on the device, but in addition to\n";
-    print "'black' and 'white', may include 'red', 'green', 'blue', 'cyan', 'magenta',\n";
-    print "'yellow', 'grey', 'slategrey', 'gold', and maybe others.\n";
+The '-1anw' options can be used to select different IF arrangements for
+plotting phase differences between phase-cal tones for back-ends with
+baseband/video converters. Any combination of the '-1anw' options can be used.
+No difference is plotted more than once. Only one difference between each pair
+of converters is plotted. The differences between the two side-bands of one
+converter are plotted separately after the differences between converters.
+
+The '-v' option can be used to plot phase differences within IFs for RDBEs.
+
+The '-j' option (not yet supported for RDBEs) can be used to normalize
+phase-cal amplitudes by Tsys (per channel) for time plots and amplitude versus
+phase plots. The minimum non-zero Tsys (per channel) is used as the reference
+value for normalization. If this causes problems, an explicit global reference
+value can be specified with the '-k' option. The '-t' option may also be useful
+for removing bad Tsys values. By default, dual side-band Tsys is used for
+normalization of Mark IV VC data if it is available, if not then single
+side-band Tsys data is used. This is usually what is wanted but if not, the
+'-b' option can be used to force use of single side-band Tsys for channels for
+which that it is available.
+
+For the '-j1anvw' options, a simple model is used to match different data from
+the log. Points from different data types that are the nearest together in time
+are matched. No epoch from one data type is matched to more than one epoch of
+another type in this way. If the resulting matched epochs are within 60 seconds
+of each other, the match is accepted. The time tolerance of the match can be
+adjusted using the '-u' option.
+
+The '-p' option adds amplitude versus phase plots for each phase-cal tone after
+all other plots. This option suppresses all other output except options
+'-1anvw'.
+
+Cable delay is plotted as one-way cable delay change unless the '-r' (raw)
+option is used.
+
+Option explanations:
+ phase-difference plot options (suppresses all other output, except '-p'):
+  -1 all converters are on one IF
+  -a odd converters are on one IF, even are on another (astronomy)
+  -n converters 1-8 on one band, 9-16 on a second (narrow band geodesy),
+     also useful for wide band geodesy
+  -v differences within RDBE (VGOS) IFs
+  -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third
+     (wide band geodesy)
+  Phase differences between LSB/USB channels for the same BBC/VC are not
+  displayed. Points that appear along the right edge of the plot had phase
+  values that did not decode (\$\$\$ for example) or were edited out by command
+  line options.
+
+ -b        force same side-band Tsys normalization (reject dual and opposite
+           side-band Tsys even if that is all that is available)
+ -c value  cable cal edit, if greater than zero, delete points that much or
+           more above lowest value, if less than zero, delete points that much
+           or more below largest value; uses plot Y axis units, be careful of
+           the -r option
+ -C        don't automatically delete cable and clock data with raw values that
+           have absolute values greater than 10
+ -d regexp for RDBEs only, include only phase-cal tones that DO match 'regexp',
+           where 'regex' is any Perl regular expression pattern. You will need
+           to quote 'regexp' if it contains special characters. The match is
+           case insensitive. This option can be combined with the '-D' option.
+ -D regexp for RDBEs only, include only phase-cal tones that do NOT match
+           'regexp', see '-d'
+ -e string specify rack, useful for snippets of logs for DBBC3s and RDBEs that
+           don't have an 'equip' line near the start; the only useful values
+           are 'dbbc3' and 'rdbe', which are case insensitive.
+ -g regexp include only plots with titles that DO match 'regexp', where
+           'regexp' is any Perl regular expression pattern. You will need to
+           quote 'regexp' if it contains special characters. This option can be
+           combined with the '-G' option. The match is case insensitive.
+ -G regexp include only plots with titles that DO NOT match 'regexp', see '-g'
+ -j        normalize phase-cal amp by Tsys per channel (not supported for
+           RDBEs yet).
+ -k value  changes 'j' normalization from minimum non-zero Tsys per channel to
+           'value' for all channels (not supported for RDBEs, see '-j')
+ -l string specify location, useful for snippets of logs that don't include the
+           'location' line. This is used in plot titles.
+ -m regexp for RDBEs and DBBC3s only, include only Tsys detectors that DO
+           match 'regexp', where 'regex' is any Perl regular expression
+           pattern. You will need to quote 'regexp' if it contains special
+           characters. This option can be combined with the '-M' option. The
+           match is case insensitive.
+ -M regexp for RDBEs and DBBC3s only, include only Tsys detectors that do NOT
+           match 'regexp', see '-m'
+ -p        plot amplitude versus phase for phase cal tones,
+           suppresses all other output except -1anw
+ -r        plot cable data in raw units
+ -s string match commands with 'string' instead of 'tsys', option '-t' still
+           applies for editing
+ -2 n      n is '1' or '2', useful for selecting which values to plot for
+           '-s \"tpicd#tpcont\"'; '1' for the first value (usually cal-on), '2'
+           (usually cal-off for the second
+ -t value  edit out tsys points less than or equal to zero or greater than or
+           equal to 'value'
+ -y        edit out phase-cal with phases outside [-180,+180] degrees
+ -z value  edit out phase-cal data with amplitudes less than 'value'
+ -u value  maximum distance in time (seconds) allowed for matching data for
+           'j1anvw' option plots is changed to 'value' instead of 60 seconds
+ -V        print program and PGPLOT version information and stop
+ -h        print this help information and stop
+ -f file/device  send graphs to 'file' using PGPLOT 'device'
+    if -f omitted and DISPLAY is defined, '/xw' will be used
+    if -f omitted and DISPLAY is not defined, 'plotlog.ps/vps' will be used
+    if '-f ?', you will be prompted for standard pgplot devices,
+               be sure to quote '?', like \\?
+    'vps' (portrait PostScript) is a useful choice for 'device' for file output
+    '.ps' works well as the file extension for device 'vps'
+
+You can use different colors by setting the environment variables
+PGPLOT_FOREGROUND and PGPLOT_BACKGROUND appropriately before running the
+program. Colors that are available depend on the device, but in addition to
+'black' and 'white', may include 'red', 'green', 'blue', 'cyan', 'magenta',
+'yellow', 'grey', 'slategrey', 'gold', and maybe others.
+";
     exit 0;
 }
 
@@ -526,11 +692,23 @@ $string = $opt_s if defined($opt_s);
 $time_dist=60;
 $time_dist = $opt_u if defined($opt_u);
 
+if(defined($opt_l)) {
+    $location=$opt_l;
+}
+
+if(defined($opt_e)) {
+    $rdbe=$opt_e=~/rdbe/i;
+    $dbbc3=$opt_e=~/dbbc3/i;
+    $equip=1;
+}
+
 # 2.0 extract data
 
 $some=0;
 $first=1;
 $wxcount=0;
+$recordn=0;
+
 foreach $file (@ARGV) {
     if(!defined($save_file)) {
 	$save_file=$file;
@@ -544,22 +722,36 @@ foreach $file (@ARGV) {
     $x=0;
     $y=0;
     while (<FILE>) {
-	chomp;
-	if(/;location,([^,]*)/i) {
+	s/\r?\n\z//s;
+	if(!$location && /;location,([^,]*)/i) {
 	    $location=$1;
 	    (undef)=&time($_);
 	}
-
-	if(/wx\/[ ]*([^,]*),[ ]*([^,]*),[ ]*([^, \cM]*)/i) {
-	    $temp[$wxcount]=$1;
-	    $pres[$wxcount]=$2;
-	    $humid[$wxcount]=$3;
+	if(!$equip && /;equip,/i) {
+	    $equip=1;
+	    $rdbe=/rdbe/;
+	    $dbbc3=/dbbc3/;
+	}
+	if(/wx\/(.*)/i) {
+	    @fields=split(',',$1);
+	    s{^\s+|\s+$}{}g foreach @fields;
+	    $temp[$wxcount]=shift(@fields);
+	    $pres[$wxcount]=shift(@fields);
+	    $humid[$wxcount]=shift(@fields);
+	    $windsp[$wxcount]=shift(@fields) if 3 <= tr/,//;
+	    $winddir[$wxcount]=shift(@fields) if 4 <= tr/,//;
 	    $wxtime[$wxcount]=&time($_);
 	    $wxcount++;
-	} elsif(/cable\/[ ]*([^, \cM]*)/i) {
-	    $cable[$cablen]=$1;
+	} elsif(/cable\/[ ]*([^, ]*)/i) {
+	    $value=$1;
+	    $cable[$cablen]=$value;
 	    $cablet[$cablen]=&time($_);
 	    $cablen++;
+	} elsif(/cdms\/[ ]*([^, ]*)/i) {
+	    $value=$1;
+	    $cdms[$cdmsn]=$value;
+	    $cdmst[$cdmsn]=&time($_);
+	    $cdmsn++;
 	} elsif(/pcalports[=\/]([^,]*),([0-9]+)/i||/vsi4[=\/][^,]*,([^,]*),([0-9]+)/i) {
 	    $x=$1;
 	    $y=$2;
@@ -582,7 +774,7 @@ foreach $file (@ARGV) {
 	    } else {
 		die "unknown pcal port $port\n";
 	    }
-	    (undef,undef,@fields)=split('[ \cM]');
+	    (undef,undef,@fields)=split(' ');
 	    next if($#fields!=3);
 	    $freq=shift(@fields);
 	    $rate=shift(@fields);
@@ -597,6 +789,9 @@ foreach $file (@ARGV) {
 		$amp='$$$';
 		$phase='$$$';
 	    }
+	    if(defined($opt_y) && ($phase < -180 || 180 < $phase)) {
+		$phase='$$$';
+	    }
 	    $pcalt[$band][$chan][$pcaln[$band][$chan]]=&time($_);
 	    $pcala[$band][$chan][$pcaln[$band][$chan]]=$amp;
 	    $pcalp[$band][$chan][$pcaln[$band][$chan]]=$phase;
@@ -605,7 +800,7 @@ foreach $file (@ARGV) {
 	    }
 	    $pcaln[$band][$chan]++;
 	} elsif (/pcaldisp2\/k5ts/i) {
-	    (undef,undef,@fields)=split('[ /\cM]+');
+	    (undef,undef,@fields)=split('[ /]+');
 	    $rec=substr($fields[0],-1);
             $ch=substr($fields[1],-1);
 	    $chan = 4*($rec-1)+$ch;
@@ -638,15 +833,92 @@ foreach $file (@ARGV) {
 		$amp='$$$';
 		$phase='$$$';
 	    }
+	    if(defined($opt_y) && ($phase < -180 || 180 < $phase)) {
+		$phase='$$$';
+	    }
 	    $pcalt[$band][$chan][$pcaln[$band][$chan]]=&time($_);
 	    $pcala[$band][$chan][$pcaln[$band][$chan]]=$amp;
 	    $pcalp[$band][$chan][$pcaln[$band][$chan]]=$phase;
 	    $pcall[$band][$chan]="$chan$sb";
 	    $pcaln[$band][$chan]++;
+	} elsif (/[#\/]pcal\/(.*)/i) {
+	    @fields=split(',',$1);
+#	    print "$_\n";
+	    s{^\s+|\s+$}{}g foreach @fields;
+#	    print "@fields \n\n";
+	    while($tone=shift(@fields)) {
+		$amp=shift(@fields);
+		$phase=shift(@fields);
+		if($rdbe) {
+		    if(defined($opt_d)) {
+			next if $tone !~/$opt_d/i;
+		    }
+		    if(defined($opt_D)) {
+			next if $tone =~/$opt_D/i;
+		    }
+		    if(!defined($opt_d) && !defined($opt_D)) {
+			$if_tone=substr($tone,0,2);
+			if(!$rdbe_if_pcal{$if_tone}){
+			    $rdbe_if_pcal{$if_tone}{$tone}=1;
+			} elsif(!$rdbe_if_pcal{$if_tone}{$tone}) {
+			    next;
+			}
+		    }
+		} elsif(defined($opt_d) || defined($opt_D)) {
+		    die "Options -d and -D are only for RDBE racks\n";
+		}
+		if(defined($opt_y) && ($phase < -180 || 180 < $phase)) {
+		    $phase='$$$';
+		}
+		$rpcalt{$tone}[$rpcaln{$tone}]=&time($_);
+		$rpcala{$tone}[$rpcaln{$tone}]=$amp;
+		$rpcalp{$tone}[$rpcaln{$tone}]=$phase;
+		$rpcaln{$tone}++;
+#		print "$tone $rpcala{$tone} $rpcalp{$tone} $rpcaln{$tone}\n";
+	    }
 	} elsif (/[#\/]$string\/(.*)/i) {
-	    @fields=split('[,\cM]',$1);
+	    @fields=split(',',$1);
+	    s{^\s+|\s+$}{}g foreach @fields;
 	    while($detect=shift(@fields)) {
 		$tsys=shift(@fields);
+		if($rdbe) {
+		    if(defined($opt_m)) {
+			next if $detect !~/$opt_m/i;
+		    }
+		    if(defined($opt_M)) {
+			next if $detect =~/$opt_M/i;
+		    }
+		    if(!defined($opt_m) && !defined($opt_M)) {
+                        next if '00' eq substr($detect,0,2);
+			$if_detect=substr($detect,2,2);
+			if(!$rdbe_if_tsys{$if_detect}){
+			    $rdbe_if_tsys{$if_detect}{$detect}=1;
+			} elsif(!$rdbe_if_tsys{$if_detect}{$detect}) {
+			    next;
+			}
+		    }
+		} elsif($dbbc3) {
+		    if(defined($opt_m)) {
+			next if $detect !~/$opt_m/i;
+		    }
+		    if(defined($opt_M)) {
+			next if $detect =~/$opt_M/i;
+		    }
+		    if(!defined($opt_m) && !defined($opt_M)) {
+			if(substr($detect,0,1) ne 'i') {
+			    $if_detect=(substr($detect,0,3)-1)/8 % 8;
+			} else {
+			    $if_detect=index('abcdefgh',substr($detect,1,1),);
+			}
+			if(!$dbbc3_if_tsys{$if_detect}){
+			    $dbbc3_if_tsys{$if_detect}{$detect}=1;
+			} elsif(!$dbbc3_if_tsys{$if_detect}{$detect}) {
+			    next;
+			}
+		    }
+		} elsif(defined($opt_m) || defined($opt_M)) {
+		    die "Options -m and -M are only for RDBE and DBBC3 racks\n";
+		}
 		if(defined($opt_2)) {
 		    if($opt_2 == 1) {
 			$detect="$detect (1)";
@@ -669,7 +941,7 @@ foreach $file (@ARGV) {
 		$tsysn{$detect}++;	 
 	    }
 	} elsif (/\/tsys1=/i) {
-	    (undef,undef,@fields)=split('[/=,\cM]');
+	    (undef,undef,@fields)=split('[/=,]');
 	    $det=0;
 	    while($device=shift(@fields)) {
 		$det++;
@@ -677,7 +949,7 @@ foreach $file (@ARGV) {
 		$tsys1{$det}=sprintf "%3s", $device;
 	    }
 	} elsif (/\/tsys1\//i) {
-	    (undef,undef,@fields)=split('[/,\cM]');
+	    (undef,undef,@fields)=split('[/,]');
 	    $det=0;
 	    while($tsys=shift(@fields)) {
 		$det++;
@@ -693,7 +965,7 @@ foreach $file (@ARGV) {
 		$tsysn1{$detect}++;	 
 	    }
 	} elsif (/\/tsys2=/i) {
-	    (undef,undef,@fields)=split('[/=,\cM]');
+	    (undef,undef,@fields)=split('[/=,]');
 	    $det=0;
 	    while($device=shift(@fields)) {
 		$det++;
@@ -701,7 +973,7 @@ foreach $file (@ARGV) {
 		$tsys2{$det}=sprintf "%3s", $device;
 	    }
 	} elsif (/\/tsys2\//i) {
-	    (undef,undef,@fields)=split('[/,\cM]');
+	    (undef,undef,@fields)=split('[/,]');
 	    $det=0;
 	    while($tsys=shift(@fields)) {
 		$det++;
@@ -717,7 +989,7 @@ foreach $file (@ARGV) {
 		$tsysn2{$detect}++;	 
 	    }
 	} elsif (/\/tsys3=/i) {
-	    (undef,undef,@fields)=split('[/=,\cM]');
+	    (undef,undef,@fields)=split('[/=,]');
 	    $det=0;
 	    while($device=shift(@fields)) {
 		$det++;
@@ -725,7 +997,7 @@ foreach $file (@ARGV) {
 		$tsys3{$det}=sprintf "%3s", $device;
 	    }
 	} elsif (/\/tsys3\//i) {
-	    (undef,undef,@fields)=split('[/,\cM]');
+	    (undef,undef,@fields)=split('[/,]');
 	    $det=0;
 	    while($tsys=shift(@fields)) {
 		$det++;
@@ -741,9 +1013,8 @@ foreach $file (@ARGV) {
 		$tsysn3{$detect}++;	 
 	    }
 	} elsif (/\/(sx|rx|sk)\//i) {
-            (undef,$cmd,@fields)=split('[/,\cM]');
+            (undef,$cmd,@fields)=split('[/,]');
             ($value,$units)=split(' ',$fields[$#fields]);
-	    next unless $value=~/^$float_pattern$/ ;
 	    ($rx{$fields[0]}[$rxcount{$fields[0]}],undef)=$value;
 	    $rxtime{$fields[0]}[$rxcount{$fields[0]}]=&time($_);
 #            print "$fields[0] $rx{$fields[0]}[$rxcount{$fields[0]}]\n";
@@ -751,23 +1022,94 @@ foreach $file (@ARGV) {
 	    $rxunits{$fields[0]}=$units;
 	    $rxcmd=$cmd;
 	} elsif(/#setcl#time\//i) {
-		(undef,@fields)=split('[/,\cM]');
+		(undef,@fields)=split('[/,]');
 		$setcl[$setcln]=$fields[9];
 		$setclt[$setcln]=&time($_);
 		$setcln++;
-	} elsif(/\/((gps-fmout)|(fmout-gps))\//i) {
-            (undef,$cmd,@fields)=split('[/,\cM]');
-            if($fields[0] =~ /($float_pattern)/) {
-		if($cmd eq "fmout-gps") {
-		    $gpsv[$gpsn]=$1;
-		} else {
-		    $gpsv[$gpsn]=-$1;
-		}
-	    } else {
-		$gpsv[$gpsn]=$fields[0];
+	} elsif(/(rdtc.#dot2[gp]ps)/) {
+	    $cmd=$1;
+	    (undef,@fields)=split('[/,]');
+	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
+	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
+	    $clockn{$cmd}++;
+	} elsif(/\/(rdbe.\/!dbe_[gp]ps)/) {
+	    $cmd=$1;
+	    (undef,undef,undef,@fields)=split('[:;]');
+	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
+	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
+	    $clockn{$cmd}++;
+	} elsif(/dbtcn#(pps2dot)/) {
+	    $cmdp=$1;
+	    (undef,@fields)=split('[/,]');
+	    s{^\s+|\s+$}{}g foreach @fields;
+	    while($if_chan=shift(@fields)) {
+		$cmd=$cmdp . '/' . $if_chan;
+		$delay=shift(@fields);
+		$clockv{$cmd}[$clockn{$cmd}]=$delay;
+		$clockt{$cmd}[$clockn{$cmd}]=&time($_);
+		$clockn{$cmd}++;
 	    }
-            $gpst[$gpsn]=&time($_);
-	    $gpsn++;
+	} elsif(/\/mcast_time\//) {
+	    (undef,$cmd,@fields)=split('[/,]');
+	    s{^\s+|\s+$}{}g foreach @fields;
+            next if $fields[0] eq '0';
+	    $cmd=$cmd . '/' . $fields[0];
+	    $clockv{$cmd}[$clockn{$cmd}]=$fields[3];
+	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
+	    $clockn{$cmd}++;
+	} elsif(/\/(.*(fmout|maser|gps).*)\//i) {
+	    $cmd=$1;
+	    (undef,undef,@fields)=split('[/,]');
+	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
+	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
+	    $clockn{$cmd}++;
+	} elsif(/#.....#(.*(fmout|maser|gps).*)\//i) {
+	    $cmd=$1;
+	    (undef,@fields)=split('[/,]');
+	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
+	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
+	    $clockn{$cmd}++;
+        } elsif(/:scan_name=([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)/) {
+	    $new_dur=$5;
+        } elsif(/:!(\d{4}\.\d{3}\.\d\d:\d\d:\d\d)/) {
+	    $new_time=&time("$1.00",1);
+	} elsif(/:disk_record=on/) {
+	    $nom_start=$new_time;
+	    $nom_dur=$new_dur;
+	    $recordt[$recordn]=$nom_start;
+	    $recordn++;
+        } elsif(defined($nom_start) && /scan_check\/.*,(\d+)y(\d+)d(\d+)h(\d+)m([\d.]+)s,([\d.]+)s,[^,]*,(\d+)/) {
+	    $act_start=&time(sprintf("%0.4d.%0.3d.%0.2d:%0.2d:%05.2f",
+			  $1,$2,$3,$4,$5),1);
+	    $act_dur=$6;
+	    $missing=$7;
+	    $delay = $act_start-$nom_start;
+	    $short=$nom_dur-$act_dur;
+	    next if $act_start < $nom_start;
+	    $recordd[$recordn-1]=$delay;
+	    $records[$recordn-1]=$short;
+	    $recordm[$recordn-1]=$missing;
+        } elsif(/:mk6[ab]?=record=(\d+)y(\d+)d(\d+)h(\d+)m(\d+)s:(\d+)/) {
+	    $nom_start=&time(sprintf("%0.4d.%0.3d.%0.2d:%0.2d:%05.2f",
+			  $1,$2,$3,$4,$5),1);
+	    $nom_dur=$6;
+	    $recordt[$recordn]=$nom_start;
+	    $recordn++;
+        } elsif(defined($nom_start) && /!scan_check\?.*:(\d+)y(\d+)d(\d+)h(\d+)m(\d+)s:([-\d.]+):[^:]*:[^:]*:(\d+)/) {
+	    $act_start=&time(sprintf("%0.4d.%0.3d.%0.2d:%0.2d:%05.2f",
+			  $1,$2,$3,$4,$5),1);
+	    $act_dur=$6;
+	    $missing=$7;
+	    $delay = $act_start-$nom_start;
+            if($act_dur >= 0) {
+	        $short=$nom_dur-$act_dur;
+            } else {
+	        $short='$$$';
+            }
+	    next if $act_start < $nom_start;
+	    $recordd[$recordn-1]=$delay;
+	    $records[$recordn-1]=$short;
+	    $recordm[$recordn-1]=$missing;
 	}
     }
 }
@@ -784,21 +1126,27 @@ $panel=0;
 $first=1;
 
 goto EXTRAS
-    if defined($opt_1)||defined($opt_a)||defined($opt_n)||defined($opt_w)||defined($opt_p);
+    if defined($opt_1)||defined($opt_a)||defined($opt_n)||defined($opt_w)||defined($opt_v)||defined($opt_p);
 
 if(@wxtime) {
-    &vu(\@wxtime, \@temp,"Temperature");
-    &vu(\@wxtime, \@pres,"Pressure");
-    &vu(\@wxtime, \@humid,"Humidity");
+    &vu(\@wxtime, \@temp,"Temperature (C)");
+    &vu(\@wxtime, \@pres,"Pressure (millibars)");
+    &vu(\@wxtime, \@humid,"Humidity (%)");
+    &vu(\@wxtime, \@windsp,"Wind Speed (m/s)") if @windsp;
+    &vu(\@wxtime, \@winddir,"Wind Dir (deg Az)") if @winddir;
 }
 
 if(@cablet) {
     if(!defined($opt_r)) {
         for($i=0;$i<=$#cable;$i++) {
 	    next unless $cable[$i]=~/^$float_pattern$/ ;
-            $cablefirst=$cable[$i] if(!defined($cablefirst));
-            $cable[$i]=($cable[$i]-$cablefirst)/4e5;
-            $cable[$i]/=1e-12;
+	    if(defined($opt_C) || abs($cable[$i])<1e1) {
+		$cablefirst=$cable[$i] if(!defined($cablefirst));
+		$cable[$i]=($cable[$i]-$cablefirst)/4e5;
+		$cable[$i]/=1e-12;
+	    } else {
+		$cable[$i]= '$$$';
+	    }
 	}
 	if(defined($opt_c)) {
 	    for($i=0;$i<=$#cable;$i++) {
@@ -825,7 +1173,11 @@ if(@cablet) {
     } else {
         for($i=0;$i<=$#cable;$i++) {
 	    next unless $cable[$i]=~/^$float_pattern$/ ;
-            $cable[$i]*=1e3;
+	    if(defined($opt_C) || abs($cable[$i])<1e1) {
+		$cable[$i]*=1e3;
+	    } else {
+		$cable[$i]= '$$$';
+	    }
 	}
 	if(defined($opt_c)) {
 	    for($i=0;$i<=$#cable;$i++) {
@@ -851,14 +1203,30 @@ if(@cablet) {
         &vu(\@cablet, \@cable,"Cable Counter (ms)");
     }
 }
-if(@gpst) {
+if(@cdmst) {
+    &vu(\@cdmst, \@cdms,"CDMS delay (ps)");
+}
+if(@recordt) {
+    &vu(\@recordt, \@recordd,"Record delay (sec)");
+    &vu(\@recordt, \@records,"Recording short (sec)");
+    &vu(\@recordt, \@recordm,"Missing bytes");
+}
+foreach $clock (sort by_clocks keys %clockn) {
+    next if !defined($opt_B) && $clock =~ /rdbe(.)\/!dbe_(.)ps/ &&
+        defined($clockn{"rdtc$1#dot2$2ps"}) ;
+    next if !defined($opt_B) && $clock =~ /mcast_time\/(\w+)/ &&
+        defined($clockn{"pps2dot/$1"}) ;
+    $#val=-1;
+    $#tim=-1;
     $avg=0;
     $count=0;
-    for($i=0;$i<$gpsn;$i++) {
-	next unless $gpsv[$i]=~/^$float_pattern$/ ;
-	$gpsv[$i]*=1e6;  #microseconds
-	$avg+=$gpsv[$i];
-	$count++;
+    for($j=0;$j<$clockn{$clock};$j++) {
+	next unless $clockv{$clock}[$j]=~/^$float_pattern$/ ;
+	next unless defined($opt_C) || abs($clockv{$clock}[$j])<1e1 ;
+	    $val[$j]=$clockv{$clock}[$j]*=1e6;
+	    $tim[$j]=$clockt{$clock}[$j];
+	    $avg+=$val[$j];
+	    $count++;
     }
 #
 # it seems PGPLOT can't handle lots of significant digits
@@ -868,68 +1236,121 @@ if(@gpst) {
 #    print "$avg $count\n";
     if($avg > 500000) {
 	$offset=1e6;
-	$label="(fmout-gps)-1e6 (us)";
+	$label="($clock)-1e6 (us)";
     } elsif($avg <-500000) {
 	$offset=-1e6;
-	$label="(fmout-gps)+1e6 (us)";
+	$label="($clock)+1e6 (us)";
     } else {
 	$offset=0;
-	$label="fmout-gps (us)";
+	$label="$clock (us)";
     }
 #    print "$offset $label\n";
     if($offset) {
 #	print "apply offset $offset\n";
-	for($i=0;$i<$gpsn;$i++) {
-	    next unless $gpsv[$i]=~/^$float_pattern$/ ;
-	    $gpsv[$i]-=$offset;
+	for($i=0;$j<$count;$i++) {
+	    next unless $val[$j]=~/^$float_pattern$/ ;
+	    $val[$j]-=$offset;
 	}
     }
-    &vu(\@gpst, \@gpsv,$label);
+    &vu(\@tim,\@val,$label);
 }
 if(@setcl) {
      &vu(\@setclt, \@setcl,"setcl offset (0.01 s)");
 }
+foreach $tone (sort by_rdbe_tone keys %rpcaln) {
+    $#amp=-1;
+    $#tim=-1;
+    $#phs=-1;
+    for($j=0;$j<$rpcaln{$tone};$j++) {
+	$amp[$j]=$rpcala{$tone}[$j];
+	$tim[$j]=$rpcalt{$tone}[$j];
+	$phs[$j]=$rpcalp{$tone}[$j];
+    }
+    if(!defined($opt_j)) {
+	&vu(\@tim,\@amp,"$tone Amp");
+	&vu(\@tim,\@phs,"$tone Phase");
+    } else {
+	die "Option -j is not supported for RDBE racks\n";
+    }
+}
 for($i=1;$i<17;$i++) {
-    if(defined($pcaln[1][$i])) {
-	$#amp=-1;
-	$#tim=-1;
-	$#phs=-1;
-	for($j=0;$j<$pcaln[1][$i];$j++) {
-	    $amp[$j]=$pcala[1][$i][$j];
-	    $tim[$j]=$pcalt[1][$i][$j];
-		$phs[$j]=$pcalp[1][$i][$j];
-	}
+    for($k=0;$k<2;$k++) {
+	if(defined($pcaln[$k][$i])) {
+	    $#amp=-1;
+	    $#tim=-1;
+	    $#phs=-1;
+	    for($j=0;$j<$pcaln[$k][$i];$j++) {
+		$amp[$j]=$pcala[$k][$i][$j];
+		$tim[$j]=$pcalt[$k][$i][$j];
+		$phs[$j]=$pcalp[$k][$i][$j];
+	    }
 #
-# fix up to use dual sideband tsys for normalization, BUT specific sideband data
-# if dual doesn't exist
+# fix up to use dual sideband tsys (MK IV) or opposite sideband (VLBA) for
+# normalization if specific sideband data doesn't exist,
+# -b forces same sideband, reject point if not there
 #
-	$chan=$pcall[1][$i];
-	if(!defined($opt_b)) {
-	    substr($chan,-1)="d";
-	    $chan=$pcall[1][$i] if !defined($tsysn{$chan});
-	}
+	    $chan=$pcall[$k][$i];
+	    if(!defined($opt_b)) {
+		substr($chan,-1)="d";
+		$chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+		if(!defined($tsysn{$chan}) && substr($hcan,-1) eq 'u') {
+		    substr($chan,-1)="l";
+		    $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+		}
+		if(!defined($tsysn{$chan}) && substr($chan,-1) eq 'l') {
+		    substr($chan,-1)="u";
+		    $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+		}
+	    }
 
-	if(!defined($opt_j)) {		    
-	    &vu(\@tim,\@amp,"$pcalf[1][$i] Hz Amp $pcall[1][$i]");
-	} elsif(defined($tsysn{$chan})) {
-	    ($ptref,$pvref)= &nrml($i, $chan);
-	    &vu($ptref,$pvref,"$pcalf[1][$i] Hz Amp(Ts) $pcall[1][$i]");
+	    if(!defined($opt_j)) {
+		&vu(\@tim,\@amp,"$pcalf[$k][$i] Hz Amp $pcall[$k][$i]");
+	    } elsif(defined($tsysn{$chan})) {
+		($ptref,$pvref)= &nrml($k, $i, $chan);
+		&vu($ptref,$pvref,"$pcalf[$k][$i] Hz Amp(Ts) $pcall[$k][$i]");
+	    }
+	    &vu(\@tim,\@phs,"$pcalf[$k][$i] Hz Phase $pcall[$k][$i]");
 	}
-	&vu(\@tim,\@phs,"$pcalf[1][$i] Hz Phase $pcall[1][$i]");
     }
 }
 
-foreach $detect (sort keys %tsysn) {
+if($rdbe) {
+    foreach $detect (sort by_rdbe_chan keys %tsysn) {
 #    print "Detect $detect $tsysn{$detect}\n";
-    $#amp=-1;
-    $#tim=-1;
-    for($j=0;$j<$tsysn{$detect};$j++) {
-	$amp[$j]=$tsysv{$detect}[$j];
-	$tim[$j]=$tsyst{$detect}[$j];
+	$#amp=-1;
+	$#tim=-1;
+	for($j=0;$j<$tsysn{$detect};$j++) {
+	    $amp[$j]=$tsysv{$detect}[$j];
+	    $tim[$j]=$tsyst{$detect}[$j];
+	}
+	$label=sprintf("$string %s",$detect);
+	&vu(\@tim,\@amp,$label);
     }
-    $label=sprintf("$string %s",$detect);
-    &vu(\@tim,\@amp,$label);
-}	
+} elsif($dbbc3) {
+    foreach $detect (sort by_dbbc3_chan keys %tsysn) {
+#    print "Detect $detect $tsysn{$detect}\n";
+	$#amp=-1;
+	$#tim=-1;
+	for($j=0;$j<$tsysn{$detect};$j++) {
+	    $amp[$j]=$tsysv{$detect}[$j];
+	    $tim[$j]=$tsyst{$detect}[$j];
+	}
+	$label=sprintf("$string %s",$detect);
+	&vu(\@tim,\@amp,$label);
+    }
+} else {
+    foreach $detect (sort keys %tsysn) {
+#    print "Detect $detect $tsysn{$detect}\n";
+	$#amp=-1;
+	$#tim=-1;
+	for($j=0;$j<$tsysn{$detect};$j++) {
+	    $amp[$j]=$tsysv{$detect}[$j];
+	    $tim[$j]=$tsyst{$detect}[$j];
+	}
+	$label=sprintf("$string %s",$detect);
+	&vu(\@tim,\@amp,$label);
+    }
+}
 foreach $detect (sort keys %tsysn1) {
 #    print "Detect $detect $tsysn1{$detect}\n";
     $#amp=-1;
@@ -980,13 +1401,32 @@ foreach $chan (sort keys %rxcount) {
 goto END_EXTRAS;
 
 EXTRAS:
+
+if(defined($opt_v)) {
+    @tones=sort by_rdbe_tone keys %rpcaln;
+    for ($i=0;$i<=$#tones;$i++) {
+	$if_band=substr($tones[$i],0,2);
+	for ($j=$i+1;$j<=$#tones;$j++) {
+	    if(substr($tones[$j],0,2) ne $if_band) {
+		last;
+	    }
+	    &phsr($tones[$i],$tones[$j]);
+	}
+    }
+}
+# $done is not redundant, it prevents re-plotting of differences when
+# when multiple options are specified
 if(defined($opt_1)) {
     for($i=1;$i<15;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+1;$j<15;$j++) {
-		if(defined($pcaln[1][$j])) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i+1;$j<15;$j++) {
+		    for($n=0;$n<2;$n++) {
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
@@ -994,21 +1434,29 @@ if(defined($opt_1)) {
 }
 if(defined($opt_a)) {
     for($i=1;$i<15;$i+=2) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+2;$j<15;$j+=2) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i+2;$j<15;$j+=2) {
+		    for($n=0;$n<2;$n++) {
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
     }
     for($i=2;$i<15;$i+=2) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+2;$j<15;$j+=2) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i+2;$j<15;$j+=2) {
+		    for($n=0;$n<2;$n++) {
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
@@ -1016,21 +1464,29 @@ if(defined($opt_a)) {
 }
 if(defined($opt_n)) {
     for($i=1;$i<9;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+1;$j<9;$j++) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i+1;$j<9;$j++) {
+		    for($n=0;$n<2;$n++) {
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
     }
     for($i=9;$i<15;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+1;$j<15;$j++) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i+1;$j<15;$j++) {
+		    for($n=0;$n<2;$n++) {
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
@@ -1038,33 +1494,53 @@ if(defined($opt_n)) {
 }
 if(defined($opt_w)) {
     for($i=1;$i<5;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+1;$j<5;$j++) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i+1;$j<5;$j++) {
+		    for($n=0;$n<2;$n++) {
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
     }
     for($i=5;$i<9;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+1;$j<9;$j++) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i+1;$j<9;$j++) {
+		    for($n=0;$n<2;$n++) {
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
 	}
     }
     for($i=9;$i<15;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    for ($j=$i+1;$j<15;$j++) {
-		if(defined($pcaln[1][$j]) && !$done[$i][$j]) {
-		    $done[$i][$j]=1;
-		    &phs($i,$j);
+	for($m=0;$m<2;$m++) {
+	    if(defined($pcaln[$m][$i])) {
+		for ($j=$i+1;$j<15;$j++) {
+		    for($n=0;$n<2;$n++) {
+			if(defined($pcaln[$n][$j]) && !$done[$i][$j]) {
+			    $done[$i][$j]=1;
+			    &phs($i,$j,$m,$n);
+			}
+		    }
 		}
 	    }
+	}
+    }
+}
+if(defined($opt_1) || defined($opt_a) || defined($opt_n) || defined($opt_w)) {
+    for($i=1;$i<15;$i++) {
+	if(defined($pcaln[1][$i]) && defined($pcaln[0][$i])) {
+	    $done[$i][$i]=1;
+	    &phs($i,$i,0,1);
 	}
     }
 }
@@ -1089,49 +1565,77 @@ if(!$first) {
 if(defined($opt_p)) {
     $first = 1;
     for($i=1;$i<17;$i++) {
-	if(defined($pcaln[1][$i])) {
-	    $#amp=-1;
-	    $#tim=-1;
-	    $#phs=-1;
-	    for($j=0;$j<$pcaln[1][$i];$j++) {
-		$amp[$j]=$pcala[1][$i][$j];
-		$tim[$j]=$pcalt[1][$i][$j];
-		$phs[$j]=$pcalp[1][$i][$j];
-	    }
-#
-# fix up to use dual sideband tsys for normalization if specific sideband data
-# doesn't exist
-#
-	    $chan=$pcall[1][$i];
-	    if(!defined($opt_b)) {
-		substr($chan,-1)="d";
-		$chan=$pcall[1][$i] if !defined($tsysn{$chan});
-	    }
-
-	    if(!defined($opt_j)) {		    
-		if($first == 1 && $panel !=0) {
-		    pgask(-1);
-		    pgpanl(1,8);
-		    pgpage();
-		    $panel=0;
+        for($k=0;$k<2;$k++) {
+	    if(defined($pcaln[$k][$i])) {
+		$#amp=-1;
+		$#tim=-1;
+		$#phs=-1;
+		for($j=0;$j<$pcaln[$k][$i];$j++) {
+		    $amp[$j]=$pcala[$k][$i][$j];
+		    $tim[$j]=$pcalt[$k][$i][$j];
+		    $phs[$j]=$pcalp[$k][$i][$j];
 		}
-		$label=sprintf("$pcalf[1][$i] Hz Amp $pcall[1][$i]");
-		&vup(\@phs,\@amp,$label);
-	    } elsif (defined($tsysn{$chan})) {
-		($ptref,$pvref)= &nrml($i, $chan);
-		$#tima=-1;
-		$#vala=-1;
-		for($j=0;$j<=$#$ptref;$j++) {
-		    $tima[$j]=$$ptref[$j];
-		    $vala[$j]=$$pvref[$j];
+#
+# fix up to use dual sideband tsys (MK IV) or opposite sideband (VLBA) for
+# normalization if specific sideband data doesn't exist,
+# -b forces same sideband, reject point if not there
+#
+		$chan=$pcall[$k][$i];
+		if(!defined($opt_b)) {
+		    substr($chan,-1)="d";
+		    $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+			if(!defined($tsysn{$chan}) && substr($chan,-1) eq 'u') {
+			    substr($chan,-1)="l";
+			    $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+			}
+			if(!defined($tsysn{$chan}) && substr($chan,-1) eq 'l') {
+			    substr($chan,-1)="u";
+			    $chan=$pcall[$k][$i] if !defined($tsysn{$chan});
+			}
 		}
-		($ptref,$pvref,$atref,$avref)=&match(\@tim,\@phs,\@tima,\@vala);
-		$label=sprintf("$pcalf[1][$i] Hz Amp(Ts) $pcall[1][$i]");
-		&vup($pvref,$avref,$label);
+		if(!defined($opt_j)) {
+		    if($first == 1 && $panel !=0) {
+			pgask(-1);
+			pgpanl(1,8);
+			pgpage();
+			$panel=0;
+		    }
+		    $label=sprintf("$pcalf[$k][$i] Hz Amp $pcall[$k][$i]");
+		    &vup(\@phs,\@amp,$label);
+		} elsif (defined($tsysn{$chan})) {
+		    ($ptref,$pvref)= &nrml($k, $i, $chan);
+		    $#tima=-1;
+		    $#vala=-1;
+		    for($j=0;$j<=$#$ptref;$j++) {
+			$tima[$j]=$$ptref[$j];
+			$vala[$j]=$$pvref[$j];
+		    }
+		    ($ptref,$pvref,$atref,$avref)=&match(\@tim,\@phs,\@tima,\@vala);
+		    $label=sprintf("$pcalf[$k][$i] Hz Amp(Ts) $pcall[$k][$i]");
+		    &vup($pvref,$avref,$label);
+		}
 	    }
 	}
     }
-
+    foreach $tone (sort by_rdbe_tone keys %rpcaln) {
+	$#amp=-1;
+	$#phs=-1;
+	for($j=0;$j<$rpcaln{$tone};$j++) {
+	    $amp[$j]=$rpcala{$tone}[$j];
+	    $phs[$j]=$rpcalp{$tone}[$j];
+	}
+	if($first == 1 && $panel !=0) {
+	    pgask(-1);
+	    pgpanl(1,8);
+	    pgpage();
+	    $panel=0;
+	}
+	if(!defined($opt_j)) {
+	    &vup(\@phs,\@amp,"$tone Amp");
+	} else {
+	    die "Option -j is not supported for RDBE racks\n";
+	}
+    }
     if(!$first) {
 	pgtbox("BCTN",45.0,0,"",0.0,0); 
 	pglabel("Phase","","");
