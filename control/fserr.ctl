@@ -1449,6 +1449,9 @@ BO -261
 Schedule file name too long, 8 characters maximum.
 ""
 BO -262
+Log file name too long, ?W characters maximum.
+""
+BO -263
 Cannot change schedules while recording, use disk_record=off to stop.
 ""
 BO -295

@@ -1285,6 +1285,18 @@ void fs_get_llog__(LLOG)
 	  memcpy(LLOG,shm_addr->LLOG,N);
 	}
 
+void fs_set_llog2__(LLOG2)
+	int *LLOG2;
+	{
+	  memcpy(shm_addr->LLOG2,LLOG2,MAX_SKD);
+	}
+
+void fs_get_llog2__(LLOG2)
+	int *LLOG2;
+	{
+	  memcpy(LLOG2,shm_addr->LLOG2,MAX_SKD);
+	}
+
 void fs_set_lfeet_fs__(LFEET_FS,i)
 	char *LFEET_FS;
 	int *i;

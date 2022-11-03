@@ -527,8 +527,9 @@ C
         endif
         if (ich.eq.1) then
           nch = ichmv_ch(ibuf,nchar+1,'/')
-          call fs_get_llog(illog)
-          nch = nch + ichmv(ibuf,nch,illog,1,8)
+          call fs_get_llog2(illog2)
+          nch = nch + ichmv(ibuf,nch,illog2,1,MAX_SKD)
+          nch=1+iflch(ibuf,nch-1)
           call logit4(ibuf,nch-1,lsor2,lprocn)
           if(iwait.ne.0) then
              call put_buf(ipinsnp(1),ibuf,-(nch-1),'  ','  ')
@@ -538,9 +539,15 @@ C
 C                   User requested log name, format response and log it.
           ic2 = iscn_ch(ibuf,ich,nchar,',')
           if (ic2.eq.0) ic2 = nchar+1
-          llog=' '
-          llog(1:ic2-ich) = ibc(ich:ic2-1)
-          call char2hol(llog,illog,1,8)
+          if(ic2-ich.gt.MAX_SKD) then
+             call logit7ci(0,0,0,1,-262,'bo',MAX_SKD)
+             goto 600
+          endif
+          llog2=' '
+          llog2(1:ic2-ich) = ibc(ich:ic2-1)
+          call char2hol(llog2,illog2,1,MAX_SKD)
+          call fs_set_llog2(illog2)
+          call char2hol(llog2,illog,1,8)
           call fs_set_llog(illog)
           call newlg(ibuf,lsor)
 C                   Start the new log file
@@ -571,7 +578,7 @@ C  User requested schedule name, format response and log it.
          endif
          call fs_get_disk_record_record(disk_record_record)
          if(disk_record_record.eq.1) then
-             call logit7ci(0,0,0,0,-262,'bo',0)
+             call logit7ci(0,0,0,0,-263,'bo',0)
              goto 600
           endif
         irnprc = rn_take('pfmed',1)
@@ -741,11 +748,13 @@ c
           endif
           call fs_get_lskd(ilskd)
           call hol2char(ilskd,1,8,lskd)
-          call fs_get_llog(illog)
-          call hol2char(illog,1,8,llog)
-          if (llog.ne.lskd) then
-            llog(1:8) = lskd(1:8)
-            call char2hol(llog,illog,1,8)
+          call fs_get_llog2(illog2)
+          call hol2char(illog2,1,MAX_SKD,llog2)
+          if (llog2.ne.lskd) then
+            llog2 = lskd
+            call char2hol(llog2,illog2,1,MAX_SKD)
+            call fs_set_llog2(illog2)
+            call char2hol(llog2,illog,1,8)
             call fs_set_llog(illog)
             call newlg(ibuf,lsor)
             call fc_rte_time(itmlog,itmlog(6))

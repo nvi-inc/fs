@@ -202,3 +202,6 @@ C
       parameter (MAX_PROC_PARAM_CHARS=512)
       parameter (MAX_PROC_PARAM_WORDS=MAX_PROC_PARAM_CHARS/INT2_CHARS)
       parameter (MAX_PROC_PARAM_COUNT=4*MAX_PROC_PARAM_WORDS)
+
+      integer MAX_SKD
+      parameter (MAX_SKD=18)

@@ -211,3 +211,5 @@
 #define MAX_RDBE_IF   2
 
 #define MAX_LO     (MAX_RDBE*MAX_RDBE_IF)
+
+#define MAX_SKD  18

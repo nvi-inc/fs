@@ -59,7 +59,10 @@ C
 C
 C     1.18 Start first log file
 C
-      call char2hol('station ',illog,1,8)
+      llog2='station'
+      call char2hol(llog2,illog2,1,MAX_SKD)
+      call fs_set_llog2(illog2)
+      call char2hol(llog2,illog,1,8)
       call fs_set_llog(illog)
       call char2hol('::',ldum,1,2)
       call newlg(ibuf,ldum)

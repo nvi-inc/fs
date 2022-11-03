@@ -485,8 +485,10 @@ C
       ifamst(2) = 1
       ifamst(3) = 1
 C
-      llog='        '
-      call char2hol(llog,illog,1,8)
+      llog2=' '
+      call char2hol(llog2,illog2,1,MAX_SKD)
+      call fs_set_llog2(illog2)
+      call char2hol(llog2,illog,1,8)
       call fs_set_llog(illog) 
   
       call char2hol(' ',lfeet_fs(1,1),1,6)
