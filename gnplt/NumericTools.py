@@ -77,9 +77,7 @@ class NumericTools:
         return DPFU
 
     def getMedian(self, list):
-        list.sort()
-        middle = len(list)/2
-        return list[middle]
+        return median(list)
 
     def getMean(self, list):
         return float(sum(list))/len(list)
