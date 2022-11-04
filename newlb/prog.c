@@ -1386,6 +1386,18 @@ void fs_get_lprc__(LPRC)
 	  memcpy(LPRC,shm_addr->LPRC,N);
 	}
 
+void fs_set_lprc2__(LPRC2)
+	int *LPRC2;
+	{
+	  memcpy(shm_addr->LPRC2,LPRC2,MAX_SKD);
+	}
+
+void fs_get_lprc2__(LPRC2)
+	int *LPRC2;
+	{
+	  memcpy(LPRC2,shm_addr->LPRC2,MAX_SKD);
+	}
+
 void fs_set_lstp__(LSTP)
 	int *LSTP;
 	{

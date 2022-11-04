@@ -692,12 +692,14 @@ C  a valid schedule or all is set to zero.
           call fs_set_khalt(khalt)
           setup_proc=' '
 c    
-          call fs_get_lprc(ilprc)
-          call hol2char(ilprc,1,8,lprc)
-          if(lprc.ne.'none'.and.lprc.ne.' ') then
+          call fs_get_lprc2(ilprc2)
+          call hol2char(ilprc2,1,MAX_SKD,lprc2)
+          if(lprc2.ne.'none'.and.lprc2.ne.' ') then
               call fmpclose(idcbp1,ierr)
-              lprc='none'
-              call char2hol(lprc,ilprc,1,8)
+              lprc2='none'
+              call char2hol(lprc2,ilprc2,1,MAX_SKD)
+              call fs_set_lprc2(ilprc2)
+              call char2hol(lprc2,ilprc,1,8)
               call fs_set_lprc(ilprc)
               nproc1 = 0
           endif
@@ -735,15 +737,19 @@ c
                  ipinsnp(5)=ierr
                  endif
             endif
-            lprc='none'
-            call char2hol(lprc,ilprc,1,8)
+            lprc2='none'
+            call char2hol(lprc2,ilprc2,1,MAX_SKD)
+            call fs_set_lprc2(ilprc2)
+            call char2hol(lprc2,ilprc,1,8)
             call fs_set_lprc(ilprc)
             nproc1 = 0
           else
             call fs_get_lskd(ilskd)
             call hol2char(ilskd,1,8,lskd)
-            lprc(1:8) = lskd(1:8)
-            call char2hol(lprc,ilprc,1,8)
+            lprc2 = lskd
+            call char2hol(lprc2,ilprc2,1,MAX_SKD)
+            call fs_set_lprc2(ilprc2)
+            call char2hol(lprc2,ilprc,1,8)
             call fs_set_lprc(ilprc)
           endif
           call fs_get_lskd(ilskd)
@@ -1032,8 +1038,10 @@ C
           irnprc = rn_take('pfmed',1)
           if (irnprc.eq.0) then
             call fmpclose(idcbp1,ierr)
-            lprc='none'
-            call char2hol(lprc,ilprc,1,8)
+            lprc2='none'
+            call char2hol(lprc2,ilprc2,1,MAX_SKD)
+            call fs_set_lprc2(ilprc2)
+            call char2hol(lprc2,ilprc,1,8)
             call fs_set_lprc(ilprc)
             nproc1 = 0
             call rn_put('pfmed')
@@ -1049,10 +1057,10 @@ C
         endif
         if (ich.eq.1) then         !  request for procedure file name
           nch = ichmv_ch(ibuf,nchar+1,'/')
-          call fs_get_lprc(ilprc)
-          call hol2char(ilprc,1,8,lprc)
-          ibc(nch:nch+7) = lprc(1:8)
-          nch = nch+8
+          call fs_get_lprc2(ilprc2)
+          call hol2char(ilprc2,1,MAX_SKD,lprc2)
+          ibc(nch:) = lprc2(:trimlen(lprc2))
+          nch = nch+trimlen(lprc2)
           call logit4(ibuf,nch-1,lsor2,lprocn)
           if(iwait.ne.0) then
              call put_buf(ipinsnp(1),ibuf,-(nch-1),'  ','  ')
@@ -1061,8 +1069,8 @@ C
         else
           ic2 = iscn_ch(ibuf,ich,nchar,',')
           if (ic2.eq.0) ic2 = nchar+1
-          if(ic2-1-ich+1.gt.8) then
-             call logit7ci(0,0,0,0,-260,'bo',0)
+          if(ic2-1-ich+1.gt.MAX_SKD) then
+             call logit7ci(0,0,0,1,-260,'bo',MAX_SKD)
              goto 600
           endif
           call fs_get_lstp(ilstp)
@@ -1088,25 +1096,31 @@ C check for write access/existence
             endif
             irnprc = rn_take('pfmed',1)
             if (irnprc.eq.0) then
-              call fs_get_lprc(ilprc)
-              call hol2char(ilprc,1,8,lprc)
-              if (lprc.ne.ibc(ich:ic2-1)) call cants(itscb,ntscb,2,0,0)
+              call fs_get_lprc2(ilprc2)
+              call hol2char(ilprc2,1,MAX_SKD,lprc2)
+              if (lprc2.ne.ibc(ich:ic2-1)) call cants(itscb,ntscb,2,0,0)
 C                   Cancel procs from the old library
 C                   not doing it when the new proc is the same is questionable
               call fmpclose(idcbp1,ierr)
-              lprc='none'
-              call char2hol(lprc,ilprc,1,8)
+              lprc2='none'
+              call char2hol(lprc2,ilprc2,1,MAX_SKD)
+              call fs_set_lprc2(ilprc2)
+              call char2hol(lprc2,ilprc,1,8)
               call fs_set_lprc(ilprc)
               nproc1 = 0
-              lprc = ibc(ich:ic2-1)
-              call char2hol(lprc,ilprc,1,8)
+              lprc2 = ibc(ich:ic2-1)
+              call char2hol(lprc2,ilprc2,1,MAX_SKD)
+              call fs_set_lprc2(ilprc2)
+              call char2hol(lprc2,ilprc,1,8)
               call fs_set_lprc(ilprc)
-              call opnpf(lprc,idcbp1,ibuf,iblen,lproc1,maxpr1,nproc1,
+              call opnpf(lprc2,idcbp1,ibuf,iblen,lproc1,maxpr1,nproc1,
      &                   ierr,'n')
               if (ierr.ne.0) then
                 call logit7ci(0,0,0,1,-133,'bo',ierr)
-                lprc = 'none'
-                call char2hol(lprc,ilprc,1,8)
+                lprc2 = 'none'
+                call char2hol(lprc2,ilprc2,1,MAX_SKD)
+                call fs_set_lprc2(ilprc2)
+                call char2hol(lprc2,ilprc,1,8)
                 call fs_set_lprc(ilprc)
                 nproc1 = 0
               endif

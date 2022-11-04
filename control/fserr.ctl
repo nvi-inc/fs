@@ -1443,7 +1443,7 @@ BO -259
 Internal error: time for secst invalid
 ""
 BO -260
-Procedure library name too long, 8 characters maximum.
+Procedure library name too long, ?W characters maximum.
 ""
 BO -261
 Schedule file name too long, 8 characters maximum.
