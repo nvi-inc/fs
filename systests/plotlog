@@ -504,7 +504,7 @@ sub by_clocks {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwyz:BCD:G:M:V");
+&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwyz:BCD:G:M:SV");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -676,6 +676,7 @@ Option explanations:
  -z value  edit out phase-cal data with amplitudes less than 'value'
  -u value  maximum distance in time (seconds) allowed for matching data for
            'j1anvw' option plots is changed to 'value' instead of 60 seconds
+ -S        require a leading slash for wx/, cable/, and cdms/ entries
  -V        print program and PGPLOT version information and stop
  -h        print this help information and stop
  -f file/device  send graphs to 'file' using PGPLOT 'device'
@@ -738,6 +739,7 @@ foreach $file (@ARGV) {
 #   print "file $file \n";
     $x=0;
     $y=0;
+    $slash="\/" if $opt_S;
     while (<FILE>) {
 	s/\r?\n\z//s;
 	if(!$location && /;location,([^,]*)/i) {
@@ -749,7 +751,7 @@ foreach $file (@ARGV) {
 	    $rdbe=/rdbe/;
 	    $dbbc3=/dbbc3/;
 	}
-	if(/wx\/(.*)/i) {
+	if(/${slash}wx\/(.*)/i) {
 	    @fields=split(',',$1);
 	    s{^\s+|\s+$}{}g foreach @fields;
 	    $temp[$wxcount]=shift(@fields);
@@ -759,12 +761,12 @@ foreach $file (@ARGV) {
 	    $winddir[$wxcount]=shift(@fields) if 4 <= tr/,//;
 	    $wxtime[$wxcount]=&time($_);
 	    $wxcount++;
-	} elsif(/cable\/[ ]*([^, ]*)/i) {
+	} elsif(/${slash}cable\/[ ]*([^, ]*)/i) {
 	    $value=$1;
 	    $cable[$cablen]=$value;
 	    $cablet[$cablen]=&time($_);
 	    $cablen++;
-	} elsif(/cdms\/[ ]*([^, ]*)/i) {
+	} elsif(/${slash}cdms\/[ ]*([^, ]*)/i) {
 	    $value=$1;
 	    $cdms[$cdmsn]=$value;
 	    $cdmst[$cdmsn]=&time($_);
