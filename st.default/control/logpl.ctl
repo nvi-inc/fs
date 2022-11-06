@@ -30,7 +30,7 @@
 * 
 rx/                 9              rx-9-20k              (20K)                   ,                Rx
 wx/                 1              Temperature           ""                      ,                Weather
-cable/              1              Cable-length          ""                      ,                ""
+cable/              1              Cable                 ""                      ,                ""
 tsys/               -1             tsys-i1               i1                      ,                Tsys
 tsys/               -1             tsys-i2               i2                      ,                Tsys
 rx/                 9              rx-9-lo               (LO)                    ,                Rx
