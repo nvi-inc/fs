@@ -53,7 +53,7 @@ main()
   char last_lsorna[10];
   int last_satellite;
   char last_satellite_name[17];
-  char lskd[8];
+  char lskd[MAX_SKD];
   int suppress_antcn_errors;
 
 /* connect to the FS */
@@ -79,7 +79,7 @@ main()
   acquired=FALSE;
   new=FALSE;
 
-  memcpy(lskd,shm_addr->LSKD,8);
+  memcpy(lskd,shm_addr->LSKD2,MAX_SKD);
 
 #ifdef TESTX
   printf(" iapdflg %d\n",shm_addr->iapdflg);
@@ -106,11 +106,11 @@ main()
     if(dad_pid()!=0 && ip[0]!=0) {
 #ifdef TESTX
       printf(" new\n");
-      printf("new %d acquired %d LSKD %8.8s lskd %8.8s\n",
-	     new,acquired,shm_addr->LSKD,lskd);
+      printf("new %d acquired %d LSKD2 '%s' lskd '%s'\n",
+	     new,acquired,shm_addr->LSKD2,lskd);
 #endif
-      if(new && !acquired && memcmp(shm_addr->LSKD,"none    ",8)!=0 &&
-	 memcmp(shm_addr->LSKD,lskd,8)==0)
+      if(new && !acquired && memcmp(shm_addr->LSKD2,"none ",5)!=0 &&
+	 memcmp(shm_addr->LSKD2,lskd,MAX_SKD)==0)
 	logit(NULL,-1,"fl");
       
       logit("flagr/antenna,new-source",0,NULL);
@@ -123,7 +123,7 @@ main()
       strncpy(last_satellite_name,
 	      shm_addr->satellite.name,
 	      sizeof(last_satellite_name));
-      memcpy(lskd,shm_addr->LSKD,8);
+      memcpy(lskd,shm_addr->LSKD2,MAX_SKD);
 
     }
     skd_run("antcn",'w',ipa);

@@ -64,7 +64,6 @@ C                         Ref times for operator and schedule streams
       character*20 cnamef,tmpstr   !  file name, general use
       dimension lnamef(10),tmpchr(10) !  file name, general use
       equivalence (lnamef,cnamef),(tmpchr,tmpstr)
-      character*28 pathname
       integer idcbp1(2),idcbp2(2),fc_system,fc_skd_end_insnp,fc_if_cmd
       integer fc_find_process
       save idcbp1,idcbp2
@@ -241,8 +240,10 @@ C
         if (ichcm_ch(lsor,1,'::').eq.0) then
           call logit4_ch('*end of schedule',lsor,lprocn)
           kskblk = .true.
-          lskd = 'none'
-          call char2hol(lskd,ilskd,1,8)
+          lskd2 = 'none'
+          call char2hol(lskd2,ilskd2,1,MAX_SKD)
+          call fs_set_lskd2(ilskd2)
+          call char2hol(lskd2,ilskd,1,8)
           call fs_set_lskd(ilskd)
           call fmpclose(idcbsk,ierr)
         endif
@@ -562,10 +563,10 @@ C
 C  User requested schedule name, format response and log it.
          if (ich.eq.1) then
             nch = ichmv_ch(ibuf,nchar+1,'/')
-            call fs_get_lskd(ilskd)
-            call hol2char(ilskd,1,8,lskd)
-            ibc(nch:nch+7) = lskd(1:8)
-            nch=nch+8
+            call fs_get_lskd2(ilskd2)
+            call hol2char(ilskd2,1,MAX_SKD,lskd2)
+            ibc(nch:) = lskd2
+            nch=nch+trimlen(lskd2)
             nch = mcoma(ibuf,nch)
             if (ierr.lt.0) icurln=0
             nch = nch+ib2as(icurln,ibuf,nch,o'100000'+5)
@@ -589,8 +590,8 @@ C  User requested schedule name, format response and log it.
           ich = 1+iscn_ch(ibuf,1,nchar,'=')
           ic4 = iscn_ch(ibuf,ich,nchar,',')
           if (ic4.eq.0) ic4 = nchar + 1
-          if(ic4-1-ich+1.gt.8) then
-             call logit7ci(0,0,0,0,-261,'bo',0)
+          if(ic4-1-ich+1.gt.MAX_SKD) then
+             call logit7ci(0,0,0,1,-261,'bo',MAX_SKD)
              call rn_put('pfmed')
              goto 600
           endif
@@ -630,8 +631,10 @@ C  if the scehdule file name is blank don't try to open it.
           if(cnamef.eq.' ') then
              call fmpclose(idcbsk,ierr)
              kskblk = .true.
-             lskd = 'none'
-             call char2hol(lskd,ilskd,1,8)
+             lskd2 = 'none'
+             call char2hol(lskd2,ilskd2,1,MAX_SKD)
+             call fs_set_lskd2(ilskd2)
+             call char2hol(lskd2,ilskd,1,8)
              call fs_set_lskd(ilskd)
              call rn_put('pfmed')
              goto 600
@@ -657,11 +660,14 @@ C  a valid schedule or all is set to zero.
             ibc1=FS_ROOT//'/sched/'
             il1=12
           endif     
-          lskd = cnamef(ic2+1:ic3-1)
-          call char2hol(lskd,ilskd,1,8)
+          lskd2 = cnamef(ic2+1:ic3-1)
+          call char2hol(lskd2,ilskd2,1,MAX_SKD)
+          call fs_set_lskd2(ilskd2)
+          call char2hol(lskd2,ilskd,1,8)
           call fs_set_lskd(ilskd)
-          pathname = ibc1(1:il1) // lskd(1:ic3-ic2-1) // ibc2(1:il2)
-          call fmpopen(idcbsk,pathname,ierr,'r',id)
+          call fmpopen(idcbsk,
+     &     ibc1(1:il1) // lskd2(1:ic3-ic2-1) // ibc2(1:il2),
+     &     ierr,'r',id)
           if (ierr.lt.0) then
              call logit7ci(0,0,0,1,-105,'bo',ierr)
              if(iwait.ne.0) then
@@ -670,8 +676,10 @@ C  a valid schedule or all is set to zero.
                 ipinsnp(5)=0
              endif
              kskblk = .true.
-             lskd = 'none'
-             call char2hol(lskd,ilskd,1,8)
+             lskd2 = 'none'
+             call char2hol(lskd2,ilskd2,1,MAX_SKD)
+             call fs_set_lskd2(ilskd2)
+             call char2hol(lskd2,ilskd,1,8)
              call fs_set_lskd(ilskd)
              call rn_put('pfmed')
              goto 600
@@ -681,8 +689,10 @@ C  a valid schedule or all is set to zero.
           call newsk(ibuf,ich,nchar,idcbsk,iblen,ierr,icurln,ilstln)
           if (ierr.ne.0) then
              kskblk = .true.
-             lskd = 'none'
-             call char2hol(lskd,ilskd,1,8)
+             lskd2 = 'none'
+             call char2hol(lskd2,ilskd2,1,MAX_SKD)
+             call fs_set_lskd2(ilskd2)
+             call char2hol(lskd2,ilskd,1,8)
              call fs_set_lskd(ilskd)
             call rn_put('pfmed')
             goto 600
@@ -704,9 +714,9 @@ c
               nproc1 = 0
           endif
 c
-          call fs_get_lskd(ilskd)
-          call hol2char(ilskd,1,8,lskd)
-          if (lskd.eq.'station') then
+          call fs_get_lskd2(ilskd2)
+          call hol2char(ilskd2,1,MAX_SKD,lskd2)
+          if (lskd2.eq.'station') then
               call logit7ci(0,0,0,1,-158,'bo',ierr)
               if(iwait.ne.0) then
                  ipinsnp(3)=-158
@@ -717,9 +727,9 @@ c
               goto 600
           end if
 c
-          call fs_get_lskd(ilskd)
-          call hol2char(ilskd,1,8,lskd)
-          call opnpf(lskd,idcbp1,ibuf,iblen,lproc1,maxpr1,nproc1,ierr,
+          call fs_get_lskd2(ilskd2)
+          call hol2char(ilskd2,1,MAX_SKD,lskd2)
+          call opnpf(lskd2,idcbp1,ibuf,iblen,lproc1,maxpr1,nproc1,ierr,
      &               'n')
           if (ierr.lt.0) then
             if(ierr.ne.-6) then
@@ -744,20 +754,20 @@ c
             call fs_set_lprc(ilprc)
             nproc1 = 0
           else
-            call fs_get_lskd(ilskd)
-            call hol2char(ilskd,1,8,lskd)
-            lprc2 = lskd
+            call fs_get_lskd2(ilskd2)
+            call hol2char(ilskd2,1,MAX_SKD,lskd2)
+            lprc2 = lskd2
             call char2hol(lprc2,ilprc2,1,MAX_SKD)
             call fs_set_lprc2(ilprc2)
             call char2hol(lprc2,ilprc,1,8)
             call fs_set_lprc(ilprc)
           endif
-          call fs_get_lskd(ilskd)
-          call hol2char(ilskd,1,8,lskd)
+          call fs_get_lskd2(ilskd2)
+          call hol2char(ilskd2,1,MAX_SKD,lskd2)
           call fs_get_llog2(illog2)
           call hol2char(illog2,1,MAX_SKD,llog2)
-          if (llog2.ne.lskd) then
-            llog2 = lskd
+          if (llog2.ne.lskd2) then
+            llog2 = lskd2
             call char2hol(llog2,illog2,1,MAX_SKD)
             call fs_set_llog2(illog2)
             call char2hol(llog2,illog,1,8)
@@ -1138,9 +1148,9 @@ C
       else if (mbranch.eq.16) then
         ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
         nchar=min0(ireg(2),iblen*2)
-        call fs_get_lskd(ilskd)
-        call hol2char(ilskd,1,8,lskd)
-        if (lskd(1:4).eq.'none') then
+        call fs_get_lskd2(ilskd2)
+        call hol2char(ilskd2,1,MAX_SKD,lskd2)
+        if (lskd2.eq.'none') then
           call putcon_ch('no schedule currently active')
           if(iwait.ne.0) then
           idum=ichmv_ch(ibuf,1,'no schedule currently active')-1
@@ -1154,9 +1164,9 @@ C
 C     5.17  STATUS Command.
 C
       else if (mbranch.eq.17) then
-        call fs_get_lskd(ilskd)
-        call hol2char(ilskd,1,8,lskd)
-        if (lskd(1:4).eq.'none') then
+        call fs_get_lskd2(ilskd2)
+        call hol2char(ilskd2,1,MAX_SKD,lskd2)
+        if (lskd2.eq.'none') then
           call putcon_ch('no schedule currently active')
           if(iwait.ne.0) then
           idum=ichmv_ch(ibuf,1,'no schedule currently active')-1
@@ -1165,10 +1175,10 @@ C
           endif
         else
           call fs_get_khalt(khalt)
-          call fs_get_lskd(ilskd)
-          call hol2char(ilskd,1,8,lskd)
+          call fs_get_lskd2(ilskd2)
+          call hol2char(ilskd2,1,MAX_SKD,lskd2)
           call stat(ibuf,khalt,kopblk,kskblk,icurln,idcbsk,
-     .         itscb,ntscb,lskd,iwait,ipinsnp)
+     .         itscb,ntscb,lskd2,iwait,ipinsnp)
         endif
 C
 C     5.18  HELP command

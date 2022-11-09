@@ -1446,7 +1446,7 @@ BO -260
 Procedure library name too long, ?W characters maximum.
 ""
 BO -261
-Schedule file name too long, 8 characters maximum.
+Schedule file name too long, ?W characters maximum.
 ""
 BO -262
 Log file name too long, ?W characters maximum.

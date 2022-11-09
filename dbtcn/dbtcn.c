@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
         if (1==dbtcn_control.stop_request ||
                 (dbtcn_control.continuous == 0 &&
                  (dbtcn_control.data_valid.user_dv ==0 || shm_addr->KHALT !=0 ||
-                  0==strncmp(shm_addr->LSKD,"none    ",8)))) {
+                  0==strncmp(shm_addr->LSKD2,"none ",5)))) {
             last=0;
             continue;
         }

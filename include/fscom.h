@@ -526,4 +526,5 @@ typedef struct fscom {
   int dbbc3_command_active;
   char LLOG2[MAX_SKD];
   char LPRC2[MAX_SKD];
+  char LSKD2[MAX_SKD];
 } Fscom;

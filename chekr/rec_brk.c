@@ -123,7 +123,7 @@ int indx, stat;
   if ((shm_addr->check.vkmove[indx] && kmove_time) ||
       (shm_addr->check.vkload[indx] && kload_time) ) {
       if(shm_addr->IRDYTP[indx] == 1 && shm_addr->KHALT==0 &&
-          memcmp(shm_addr->LSKD,"none    ",8)!=0)
+          memcmp(shm_addr->LSKD2,"none ",5)!=0)
            icherr[5]=1;
   }
 

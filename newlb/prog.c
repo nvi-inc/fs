@@ -1442,6 +1442,18 @@ void fs_get_lskd__(LSKD)
           memcpy(LSKD,shm_addr->LSKD,N);
 	}
 
+void fs_set_lskd2__(LSKD2)
+	int *LSKD2;
+	{
+          memcpy(shm_addr->LSKD2,LSKD2,MAX_SKD);
+        }
+
+void fs_get_lskd2__(LSKD2)
+	int *LSKD2;
+	{
+          memcpy(LSKD2,shm_addr->LSKD2,MAX_SKD);
+	}
+
 void fs_set_rack__(rack)
 	int *rack;
 	{

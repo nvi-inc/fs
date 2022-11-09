@@ -62,8 +62,10 @@ C
       call fs_set_lprc2(ilprc2)
       call char2hol(lprc2,ilprc,1,8)
       call fs_set_lprc(ilprc)
-      lskd = 'none'
-      call char2hol(lskd,ilskd,1,8)
+      lskd2 = 'none'
+      call char2hol(lskd2,ilskd2,1,MAX_SKD)
+      call fs_set_lskd2(ilskd2)
+      call char2hol(lskd2,ilskd,1,8)
       call fs_set_lskd(ilskd)
       lnewpr = ' '
       call char2hol(lnewpr,ilnewpr,1,8)
