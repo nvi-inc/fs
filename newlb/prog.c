@@ -1414,6 +1414,18 @@ void fs_get_lstp__(LSTP)
 	  memcpy(LSTP,shm_addr->LSTP,N);
 	}
 
+void fs_set_lstp2__(LSTP2)
+	int *LSTP2;
+	{
+	  memcpy(shm_addr->LSTP2,LSTP2,MAX_SKD);
+	}
+
+void fs_get_lstp2__(LSTP2)
+	int *LSTP2;
+	{
+	  memcpy(LSTP2,shm_addr->LSTP2,MAX_SKD);
+	}
+
 void fs_set_hwid__(hwid)
 	int *hwid;
 	{

@@ -136,10 +136,12 @@ C
       istref(2) = iotref(2)
       istref(3) = iotref(3)
       call char2hol('/',lsor2,1,1)
-      lstp = 'station'
-      call char2hol(lstp,ilstp,1,8)
+      lstp2 = 'station'
+      call char2hol(lstp2,ilstp2,1,MAX_SKD)
+      call fs_set_lstp2(ilstp2)
+      call char2hol(lstp2,ilstp,1,8)
       call fs_set_lstp(ilstp)
-      call opnpf(lstp,idcbp2,ibuf,iblen,lproc2,maxpr2,nproc2,ierr,'n')
+      call opnpf(lstp2,idcbp2,ibuf,iblen,lproc2,maxpr2,nproc2,ierr,'n')
       if (ierr.lt.0) call logit7ci(0,0,0,1,-133,'bo',ierr)
       iwait=0
       ipinsnp(1)=0
@@ -1083,11 +1085,11 @@ C
              call logit7ci(0,0,0,1,-260,'bo',MAX_SKD)
              goto 600
           endif
-          call fs_get_lstp(ilstp)
-          call hol2char(ilstp,1,8,lstp)
+          call fs_get_lstp2(ilstp2)
+          call hol2char(ilstp2,1,MAX_SKD,lstp2)
           if (kstak(istkop,istksk,1)) then
             call logit7ci(0,0,0,0,-212,'bo',0)
-          else if (ibc(ich:ic2-1).eq.lstp) then
+          else if (ibc(ich:ic2-1).eq.lstp2) then
 C  the station procedure library is opened on startup and remains open
 C  therefore, station as a procedure command parameter is an error.
             call logit7ci(0,0,0,0,-136,'bo',0)
