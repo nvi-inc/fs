@@ -504,7 +504,7 @@ sub by_clocks {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwyz:BCD:G:M:SV");
+&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwyz:BCD:G:M:SVW");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -678,6 +678,7 @@ Option explanations:
            'j1anvw' option plots is changed to 'value' instead of 60 seconds
  -S        require a leading slash for wx/, cable/, and cdms/ entries
  -V        print program and PGPLOT version information and stop
+ -W        plot all '/rx/' fields of the form 'number[...]'
  -h        print this help information and stop
  -f file/device  send graphs to 'file' using PGPLOT 'device'
     if -f omitted and DISPLAY is defined, '/xw' will be used
@@ -1031,13 +1032,32 @@ foreach $file (@ARGV) {
 #		print "tsys $tsysv3{$detect}[$tsysn3{$detect}]\n" if($det == 1);
 		$tsysn3{$detect}++;	 
 	    }
+	} elsif (/\/rx\/.*$float_pattern\[[^]]+\]/i) {
+# Wettzell
+	    (undef,$cmd,@fields)=split('[/,]');
+	    $device=$fields[0];
+	    $wettzell="dBm|degC";
+	    $wettzell="[^]]*" if $opt_W;
+	    while($param=shift(@fields)) {
+		if($param =~ /(.*)\[($wettzell)\]/) {
+		    next if !$opt_W && $2 eq "dBm" && $device =~ /^lo/;
+		    $subdevice="$device \($2\)";
+		    $rx{$subdevice}[$rxcount{$subdevice}]=$1;
+		    $rxtime{$subdevice}[$rxcount{$subdevice}]=&time($_);
+		    $rxcount{$subdevice}++;
+		    $rxunits{$subdevice}="";
+		    $rxcmd=$cmd;
+		 }
+	    }
 	} elsif (/\/(sx|rx|sk)\//i) {
-            (undef,$cmd,@fields)=split('[/,]');
-            ($value,$units)=split(' ',$fields[$#fields]);
+# Everyone else
+	    (undef,$cmd,@fields)=split('[/,]');
+	    ($value,$units)=split(' ',$fields[$#fields]);
+	    next if ! $units; # so we don't get bad entries for Wettzell
 	    ($rx{$fields[0]}[$rxcount{$fields[0]}],undef)=$value;
 	    $rxtime{$fields[0]}[$rxcount{$fields[0]}]=&time($_);
-#            print "$fields[0] $rx{$fields[0]}[$rxcount{$fields[0]}]\n";
-            $rxcount{$fields[0]}++;
+#	    print "$fields[0] $rx{$fields[0]}[$rxcount{$fields[0]}]\n";
+	    $rxcount{$fields[0]}++;
 	    $rxunits{$fields[0]}=$units;
 	    $rxcmd=$cmd;
 	} elsif(/#setcl#time\//i) {
