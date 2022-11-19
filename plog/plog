@@ -116,6 +116,15 @@ For example, for CDDIS:
 
 See "man 5 netrc" for more details on ".netrc".
 
+If you have more than one login for BKG in your ".netrc" file, you can
+select which one to use by setting the PLOG_BKG_LOGIN environment
+variable to that login, for example:
+
+    setenv PLOG_BKG_LOGIN mybkguser ${blue}#tcsh${normal}
+    export PLOG_BKG_LOGIN=mybkguser ${blue}#bash${normal}
+
+If the variable is not set, the first BKG login is used.
+
 If your curl supports the "--netrc-file" option (see "man curl") , you can
 change the directory for ".netrc" by setting the NETRC_DIR environment
 variable.  E.g. add the following to your login script
@@ -243,7 +252,7 @@ pftp() {
     local IFS=","
     local G="{${F[*]}}"
     local IFS=" " #Then don't take commas out when expanding
-    eval $DRY curl $SSL_REQUIRED -n $CURL_NETRC_FILE_OPTION -T '$G' "ftp://$URL/"
+    eval $DRY curl $SSL_REQUIRED $PLOG_BKG_LOGIN -n $CURL_NETRC_FILE_OPTION -T '$G' "ftp://$URL/"
 }
 
 pscp() {
@@ -390,6 +399,12 @@ if [[ "$PLOG_BKG_METHOD" =~ ^ftp-ssl$ ]]; then
     SSL_REQUIRED=--ssl-reqd
 else
     SSL_REQUIRED=
+fi
+
+if [[ -z "${PLOG_BKG_LOGIN:-}" ]]; then
+    PLOG_BKG_LOGIN=
+else
+    PLOG_BKG_LOGIN="-u $PLOG_BKG_LOGIN:"
 fi
 
 joinlst () {
