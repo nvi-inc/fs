@@ -433,10 +433,8 @@ int iyear;
   } else
       printw("   ");
 
-  move(ROW1+2,COL1+26);
-  printw("%.8s",shm_addr->LSKD);
-  move(ROW1+2,COL1+39);
-  printw("%.8s",shm_addr->LLOG);
+  move(ROW1+2,COL1+29);
+  printw("%.*s",MAX_SKD,shm_addr->LSKD2);
   move(ROW1+2,COL1+53);
   preflt(outf,shm_addr->preswx,-6,1);
   printw("%s",outfloat);
@@ -682,7 +680,10 @@ int iyear;
   preflt(outf,outhaa,-6,2);
   printw("%s",outfloat);
 */
+  move(ROW1+4,COL1+56);
+  printw("%.*s",MAX_SKD,shm_addr->LLOG2);
 
+/* old tape recorder head pass number
   if(kMdrive[selectm] || kVdrive[selectm]) {
     move(ROW1+4,COL1+74);
     preint(outf,shm_addr->ipashd[selectm][0],-3,0);
@@ -696,7 +697,7 @@ int iyear;
     move(ROW1+4,COL1+78);
     printw("%s","   ");
   }
-
+*/
 /* ROW 6 */
 
   *checkln=0;
