@@ -373,14 +373,22 @@ sub vuy {
 	       $ymin-0.05*($ymax-$ymin),$ymax+0.05*($ymax-$ymin));
 	pgtbox("BCTZYH",0.0,0,"BCNVT",0.0,0);
 	pgpoint($good+1, \@xg,\@plg,17) if $good > -1;
-	pgpoint($bad+1 , \@xb,\@plb,21) if $bad > -1;
+	if(!$giza == !($opt_Z & 2)) {
+		pgpoint($bad+1, \@xb,\@plb,21) if $bad > -1;
+        } else {
+		pgpoint($bad+1, \@xb,\@plb,23) if $bad > -1;
+        }
 #    pgline($#$y+1, $x, $ply);
     } else {
 	pgswin($xmin-0.01*($xmax-$xmin),$xmax+0.01*($xmax-$xmin),
 	       $ymin-0.05*($ymax-$ymin),$ymax+0.05*($ymax-$ymin));
 	pgbox("BCT",45.0,0,"BCNVT",0.0,0);
 	pgpoint($good+1, \@xg,\@plg,17) if $good > -1;
-	pgpoint($bad+1 , \@xb,\@plb,21) if $bad > -1;
+	if(!$giza == !($opt_Z & 2)) {
+		pgpoint($bad+1, \@xb,\@plb,21) if $bad > -1;
+        } else {
+		pgpoint($bad+1, \@xb,\@plb,23) if $bad > -1;
+        }
     }
     pgvport(0.075,.95,0,1);
     pglabel("",$label,"");
@@ -504,7 +512,10 @@ sub by_clocks {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwyz:BCD:G:M:SVW");
+pgqinf("VERSION",$val,$len);
+$giza = $val =~ /giza/;
+
+&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwyz:BCD:G:M:SVWZ:");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -613,6 +624,18 @@ all other plots. This option suppresses all other output except options
 Cable delay is plotted as one-way cable delay change unless the '-r' (raw)
 option is used.
 
+The plotting support is different if 'giza' has been substituted for 'pgplot'
+(FSL11 may have 'giza-1.2.0'). You can see if 'giza' is being used by checking
+if the 'PGPLOT' library version shown by 'plotlog -V' includes the string
+'giza'. If the script detects that 'giza' is in use, it makes two adjustments:
+(i) the line width is set to '0' and (ii) the bad points are plotted with
+larger open circles. If these adjustments cause problems or are no longer
+needed because 'giza' has been brought into better agreement with 'pgplot',
+they can be disabled, individually, with the '-Z hex' option (see below). If
+'giza' is not detected, the '-Z hex' option can be used to force the
+adjustments. Additionally, the 'giza' library does not respect the
+'PGPLOT_BACKGROUND' and 'PGPLOT_FOREGROUND' environment variables.
+
 Option explanations:
  phase-difference plot options (suppresses all other output, except '-p'):
   -1 all converters are on one IF
@@ -679,6 +702,12 @@ Option explanations:
  -S        require a leading slash for wx/, cable/, and cdms/ entries
  -V        print program and PGPLOT version information and stop
  -W        plot all '/rx/' fields of the form 'number[...]'
+ -Z hex    toggle 'giza' adjustments, selected bitwise, LSB is bit 0; if
+           'giza' is detected, this disables them; if 'giza' is not detected,
+           it enables them:
+             bit 0: set line width to 0
+             bit 1: increase bad point open circle size
+           thus with 'giza' detected, '-Z 2' removes the latter
  -h        print this help information and stop
  -f file/device  send graphs to 'file' using PGPLOT 'device'
     if -f omitted and DISPLAY is defined, '/xw' will be used
@@ -689,7 +718,7 @@ Option explanations:
     '.ps' works well as the file extension for device 'vps'
 
 You can use different colors by setting the environment variables
-PGPLOT_FOREGROUND and PGPLOT_BACKGROUND appropriately before running the
+'PGPLOT_BACKGROUND' and 'PGPLOT_FOREGROUND' appropriately before running the
 program. Colors that are available depend on the device, but in addition to
 'black' and 'white', may include 'red', 'green', 'blue', 'cyan', 'magenta',
 'yellow', 'grey', 'slategrey', 'gold', and maybe others.
@@ -1155,6 +1184,7 @@ foreach $file (@ARGV) {
 exit -1 if(!$some);
 
 pgbegin(0,$dev,1,8);
+pgslw(0) if !$giza != !($opt_Z & 1);
 pgsch(3);
 pgask(-1);
 pgpanl(1,8);
