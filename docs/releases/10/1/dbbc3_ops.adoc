@@ -26,7 +26,7 @@
 :toc:
 :experimental:
 E. Himwich, J. Quick
-Version 3.9 - June 2022
+Version 4.0 - November 2022
 
 == Introduction
 
@@ -1293,7 +1293,7 @@ equipment unstable, the _drudg_ option `use_setup_proc yes` in _skedf.ctl_ can
 be used to minimize the execution of the setup procedure.
 
 CAUTION: Not executing the setup each scan may not be robust if the
-equipment sometimes loses it configuration. It is up to the individual
+equipment sometimes loses its configuration. It is up to the individual
 stations to determine whether minimizing its use is better than always
 using it.
 
@@ -1308,12 +1308,19 @@ procedure if either of the following is true:
 * This is the first setup since the schedule was last started.
 +
 
-This will make sure the setup is run at the start and any restart of the
-schedule.
+This will make sure the setup is run at the start and any restart of
+the schedule. There should be sufficient time for the setup procedure
+in these cases as long as the schedule is started as little as even
+just a few minutes before the first scan.
 
 * If there was a mode change, i.e., the name of the setup procedure changed.
 
-The `use_setup_proc` option in _skedf.ctl_ has three possible settings:
++
+
+NOTE: Mode changes within schedules is not supported yet for DBBC3s.
+
+The `use_setup_proc` option in _skedf.ctl_ has three possible
+settings:
 
 * `yes` -- use the `setup_proc` command
 
