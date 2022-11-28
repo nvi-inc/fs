@@ -13,7 +13,7 @@ Settable parameters:
 Comments:
 
 This command provides conditional execution of a SNAP "setup"
-procedure.  If the "setup" procedure was not used in the immediately
+procedure.  If the setup procedure was not used in the immediately
 preceding instance of this command, it is executed; if it was, it is
 not executed. For example, the sequence:
 
@@ -29,7 +29,7 @@ sequence:
       setup_proc=
       setup_proc=setupsx
       (other commands)
-      setup_proc=eetupsx
+      setup_proc=setupsx
 
 will execute the 'setupsx' procedure only for the first
 'setup_proc=...' command.
@@ -47,10 +47,10 @@ command, the effect will be that:
   - Any setup procedure for the continuation of the previous mode will
     not be executed.
 
-The use of this feature in a schedule by 'drudg' is controlled by the
-'conditional_setup' parameter in 'skedf.ctl'.
+The use of this feature in a '.snp' schedule by 'drudg' is controlled
+by the 'use_setup_proc' option in 'skedf.ctl'.
 
-This feature can be useful if the "setup" procedures take too long to
+This feature can be useful if the setup procedure takes too long to
 execute and/or if the equipment will not tolerate being setup
 repetitively.  However, its use involves some risk since if the
 execution of the setup procedure fails for some reason, there will be
