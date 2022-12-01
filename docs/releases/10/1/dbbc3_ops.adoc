@@ -26,7 +26,7 @@
 :toc:
 :experimental:
 E. Himwich, J. Quick
-Version 4.0 - November 2022
+Version 4.1 - December 2022
 
 == Introduction
 
@@ -1358,11 +1358,11 @@ be different for some modes, the corresponding `thread__suffix__`
 procedures can be edited.
 
 This feature is controlled by the `vdif_single_thread_per_file` option
-in _skedf.ctl_ control file. The option only needs to be used by
+in the _skedf.ctl_ control file. The option only needs to be used by
 stations that need to record a single thread per file, at least some
-of the time; the default for _jive5ab_ after be restarted is
+of the time; the default for _jive5ab_ after being restarted is
 multi-threaded. If the option is not present, no ``thread__suffix__``
-procedure is inserted. If it is present, the possible setting are
+procedure is inserted. If it is present, the possible settings are
 (where `_command_` is `mk5` or `fb` depending on the type of
 recorder):
 
