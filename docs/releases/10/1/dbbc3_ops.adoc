@@ -26,7 +26,7 @@
 :toc:
 :experimental:
 E. Himwich, J. Quick
-Version 4.1 - December 2022
+Version 4.2 - December 2022
 
 == Introduction
 
@@ -1698,10 +1698,12 @@ different size is needed, please see the
 
 === Sync time
 
-After the Core3H boards are configured, the operator needs to sync
-each Core3H and sync the PPS. In principle, this would consist of:
+After the Core3H boards are configured, the operator needs to sync the
+PPS and sync each Core3H. In principle, this would consist of:
 
 ....
+dbbc3=pps_sync
+!+1s
 core3h=1,timesync
 core3h=2,timesync
 core3h=3,timesync
@@ -1710,12 +1712,11 @@ core3h=5,timesync
 core3h=6,timesync
 core3h=7,timesync
 core3h=8,timesync
-!+1s
-dbbc3=pps_sync
 ....
 
 If you have fewer than eight boards, only include the `timesync`
-commands for boards you have.
+commands for boards you have. It may be necessary to increase the
+delay after the `pps_sync` command to achieve reliable results.
 
 It may take the boards a few tens of seconds to stabilize after the
 commands. During that the period, the times reported for the boards
@@ -1752,14 +1753,11 @@ The `pps_delay` values can be viewed with the `mcast_time` command.
 
 ====
 
-NOTE: All the Core3H boards in the system need to be synced, even if
-not sending data. After that a `pps_sync` should be issued within 20
-seconds of the first `timesync`. This is not currently even possible
-if more than three boards are installed since each `timesync` requires
-about six seconds. In any event, for now, the only safe way to
-configure a DBBC3 is with the boot configuration. A new DBBC3 feature
-is being developed to allow syncing the boards in parallel and issuing
-a timely `pps_sync`.
+NOTE: All the Core3H boards in the system need to be synced, even
+those not sending data. For now, the only safe way to configure a
+DBBC3 is with the boot configuration. A new DBBC3 feature is being
+developed to allow syncing the PPS and then syncing, in parallel, the
+Core3H boards without needing to reboot.
 
 === Start data transmission
 

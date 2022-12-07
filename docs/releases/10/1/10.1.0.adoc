@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 5.5 - June 2022
+Version 5.6 - December 2022
 
 //:hide-uri-scheme:
 :sectnums:
@@ -75,6 +75,9 @@ feature suggestions and testing for DBBC3 support, as well as for many
 non-DBBC3 specific features, and for documentation enhancements. Many
 of the improvements that were made are due to his thoughtfulness and
 diligence.
+
+We thank Dave Horsley (Hobart) for developing the unpacking software
+for the DBBC3 multicast data.
 
 We thank Eskil Varenius (Onsala) for bug reports and feedback,
 particularly on DBBC3 related issues.
