@@ -798,6 +798,7 @@ foreach $file (@ARGV) {
 	    $cablen++;
 	} elsif(/${slash}cdms\/[ ]*([^, ]*)/i) {
 	    $value=$1;
+	    $value= '$$$' if $value > '999998.5';
 	    $cdms[$cdmsn]=$value;
 	    $cdmst[$cdmsn]=&time($_);
 	    $cdmsn++;
