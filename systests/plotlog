@@ -637,6 +637,12 @@ adjustments. Additionally, the 'giza' library does not respect the
 'PGPLOT_BACKGROUND' and 'PGPLOT_FOREGROUND' environment variables.
 
 Option explanations:
+
+ Generally, the philosophy is that if no options are specified the script
+ should do something that is likely to be useful. Options can be added to tune
+ the behavior for different situations. Scripts or aliases can be used if any
+ options are needed routinely.
+
  phase-difference plot options (suppresses all other output, except '-p'):
   -1 all converters are on one IF
   -a odd converters are on one IF, even are on another (astronomy)
