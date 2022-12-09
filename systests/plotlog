@@ -515,7 +515,7 @@ require "getopts.pl";
 pgqinf("VERSION",$val,$len);
 $giza = $val =~ /giza/;
 
-&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwyz:BCD:G:M:SVWZ:");
+&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwz:BCD:G:M:SVWYZ:");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -695,13 +695,13 @@ Option explanations:
            (usually cal-off for the second
  -t value  edit out tsys points less than or equal to zero or greater than or
            equal to 'value'
- -y        edit out phase-cal with phases outside [-180,+180] degrees
  -z value  edit out phase-cal data with amplitudes less than 'value'
  -u value  maximum distance in time (seconds) allowed for matching data for
            'j1anvw' option plots is changed to 'value' instead of 60 seconds
  -S        require a leading slash for wx/, cable/, and cdms/ entries
  -V        print program and PGPLOT version information and stop
  -W        plot all '/rx/' fields of the form 'number[...]'
+ -Y        don't edit out phase-cal with phases outside [-180,+180] degrees
  -Z hex    toggle 'giza' adjustments, selected bitwise, LSB is bit 0; if
            'giza' is detected, this disables them; if 'giza' is not detected,
            it enables them:
@@ -839,7 +839,7 @@ foreach $file (@ARGV) {
 		$amp='$$$';
 		$phase='$$$';
 	    }
-	    if(defined($opt_y) && ($phase < -180 || 180 < $phase)) {
+	    if(!defined($opt_Y) && ($phase < -180 || 180 < $phase)) {
 		$phase='$$$';
 	    }
 	    $pcalt[$band][$chan][$pcaln[$band][$chan]]=&time($_);
@@ -883,7 +883,7 @@ foreach $file (@ARGV) {
 		$amp='$$$';
 		$phase='$$$';
 	    }
-	    if(defined($opt_y) && ($phase < -180 || 180 < $phase)) {
+	    if(!defined($opt_Y) && ($phase < -180 || 180 < $phase)) {
 		$phase='$$$';
 	    }
 	    $pcalt[$band][$chan][$pcaln[$band][$chan]]=&time($_);
@@ -917,7 +917,7 @@ foreach $file (@ARGV) {
 		} elsif(defined($opt_d) || defined($opt_D)) {
 		    die "Options -d and -D are only for RDBE racks\n";
 		}
-		if(defined($opt_y) && ($phase < -180 || 180 < $phase)) {
+		if(!defined($opt_Y) && ($phase < -180 || 180 < $phase)) {
 		    $phase='$$$';
 		}
 		$rpcalt{$tone}[$rpcaln{$tone}]=&time($_);
