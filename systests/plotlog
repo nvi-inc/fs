@@ -621,8 +621,8 @@ The '-p' option adds amplitude versus phase plots for each phase-cal tone after
 all other plots. This option suppresses all other output except options
 '-1anvw'.
 
-Cable delay is plotted as one-way cable delay change unless the '-r' (raw)
-option is used.
+'cable/' and 'cdms/' data are plotted as one-way cable delay change unless the
+'-r' (raw) option is used.
 
 The plotting support is different if 'giza' has been substituted for 'pgplot'
 (FSL11 may have 'giza-1.2.0'). You can see if 'giza' is being used by checking
@@ -693,7 +693,7 @@ Option explanations:
            match 'regexp', see '-m'
  -p        plot amplitude versus phase for phase cal tones,
            suppresses all other output except -1anw
- -r        plot cable data in raw units
+ -r        plot 'cable/' and 'cdms/'  data in raw units
  -s string match commands with 'string' instead of 'tsys', option '-t' still
            applies for editing
  -2 n      n is '1' or '2', useful for selecting which values to plot for
@@ -1280,7 +1280,16 @@ if(@cablet) {
     }
 }
 if(@cdmst) {
-    &vu(\@cdmst, \@cdms,"CDMS delay (ps)");
+    if(!defined($opt_r)) {
+        for($i=0;$i<=$#cdms;$i++) {
+	    next unless $cdms[$i]=~/^$float_pattern$/ ;
+	    $cdmsfirst=$cdms[$i] if(!defined($cdmsfirst));
+	    $cdms[$i]=0.5*($cdms[$i]-$cdmsfirst);
+	}
+	&vu(\@cdmst, \@cdms,"CDMS delay (ps)");
+    } else {
+	&vu(\@cdmst, \@cdms,"CDMS raw (ps)");
+    }
 }
 if(@recordt) {
     &vu(\@recordt, \@recordd,"Record delay (sec)");
