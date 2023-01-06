@@ -84,21 +84,15 @@ C        JT, JS, JO - track, sector, offset of procedure file entry
 C        JX     - extent of procedure file
 C
       integer ierr
-      character*29 dlstr
-      character*12 dlfilenm
       character*512 ibc
       character*80 dirstr
-      character*12 twochr
       character*64 pathname,pathname2,link
       integer trimlen
-      integer i2byte(6)
       integer iret
       character*8 sl1,sl2,sl4
       character*40 cmessage
       logical kex,kest,kerr
       character*3 me
-      equivalence (twochr,i2byte)
-      equivalence (dlfilenm,dlstr(18:29))
 C 4.  CONSTANTS USED
 C
       data me/'ffm'/
