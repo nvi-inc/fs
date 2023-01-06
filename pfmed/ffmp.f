@@ -74,7 +74,10 @@ C                         ICHCM, IFILL, MIN0, PFBLK, PFCOP, TRIMLEN
   
 C 3.  LOCAL VARIABLES
 C
-      character*12 lfr,lpf
+      character*8 lpf
+c                 - procedure file name without extension
+      character*4 lfr
+c                 -file extension with leading dot
       character lrn
       logical ldupl
 c     logical lge,lle

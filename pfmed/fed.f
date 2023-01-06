@@ -85,8 +85,10 @@ C
 c               - flag for editor
       logical knew
 C               - flag for newly created procedure
-      character*12 lnam1,lnam2,cid
+      character*12 lnam1,lnam2
 C               - procedure name
+      character*4 cid
+C               - file extension with leading dot
 C        NN     - line number or count from command
 C        ICHI   - character count of typed line
 C        LCOM   - single character edit command

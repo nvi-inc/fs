@@ -44,7 +44,7 @@ C                  3 - about to replace file, 4 - error after 1 or 2)
       character*(*) lp
 C                - target procedure file
       character*(*) lfr
-C                - correct extent name for reading
+C                - correct extension with leading dot for reading
       character*64 fname,link
 C
 C 2.2.   COMMON BLOCKS USED:

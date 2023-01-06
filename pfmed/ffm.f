@@ -72,10 +72,10 @@ C                         IDTYP, IFILL, MIN0, PFBLK, PFCOP
 C
 C 3.  LOCAL VARIABLES
 C
-      character*12 lnam1,lnam2
-C               - file names
-      character*12 lfr
-C               - corrected procedure file name for reading
+      character*8 lnam1,lnam2
+C               - procedure file names without extension
+      character*4 lfr
+C               - procedure file extension with leading '.'
 C        IR     - record count
 C        IERR   - error flag
 C        LEN    - record length
@@ -93,7 +93,7 @@ C
       integer trimlen
       integer i2byte(6)
       integer iret
-      character*12 sl1,sl2,sl4
+      character*8 sl1,sl2,sl4
       character*40 cmessage
       logical kex,kest,kerr
       character*3 me
@@ -230,9 +230,10 @@ c  Are there any filenames left?
 c space over past that name
 C Add ">" for active, "s" for schedule 2nd copy.
 C  "a" for active F.S. proc file
-              if(ibc(ix:ix+11).eq.sl2(1:12)) ibc(ix-1:ix-1) = 'S'
-              if(ibc(ix:ix+11).eq.sl4(1:12)) ibc(ix-1:ix-1) = 'A'
-              if(ibc(ix:ix+11).eq.sl1(1:12)) then
+              ix2=ix+len(lproc)-1
+              if(ibc(ix:ix2).eq.sl2) ibc(ix-1:ix-1) = 'S'
+              if(ibc(ix:ix2).eq.sl4) ibc(ix-1:ix-1) = 'A'
+              if(ibc(ix:ix2).eq.sl1) then
                 if ((sl4.eq.sl1).or.(sl1.eq.sl2)) then
                   ibc(ix-2:ix-2) = '>'
                 else

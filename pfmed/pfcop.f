@@ -64,8 +64,8 @@ C     CALLED SUBROUTINES: FMP routines, IB2AS, EXEC, PFBLK
 C
 C 3.  LOCAL VARIABLES:
 C
-      character*12 lfr
-C                - correct file name for reading
+      character*4 lfr
+C                - correct extension with leading dot for reading
       character*64 pathname,link
       integer trimlen
       logical kex,kerr
