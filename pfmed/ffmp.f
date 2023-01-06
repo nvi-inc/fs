@@ -45,9 +45,9 @@ C     IB changed to a character rather than holerith string
       character*(*) ib
 C               - line and record buffer
 C        ICHI   - number of characters from keyboard
-      character*12 lproc
+      character*(*) lproc
 C               - procedure file currently active in PFMED
-      character*34 ldef
+      character*(*) ldef
 C               - DEFINE line at top of each procedure
 C
 C 2.2.   COMMON BLOCKS USED:
@@ -191,7 +191,7 @@ C       Write last line.
         if(ib(1:2).eq.'ds') then
          call sortp(ibsrt,nprc)
          write (luo,'("Pfmed: Displayed ",i3," procedures in ", 
-     &        "file ",a12)') nprc,lproc 
+     &        "file ",a)') nprc,lproc(:trimlen(lproc))
         endif
 
         nprc = npx

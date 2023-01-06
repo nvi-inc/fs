@@ -25,8 +25,8 @@ C  FOR PFMED AND OPRIN, FILE EXISTENCE, AND "STATION" PROCEDURE
 C  FILE. IT RETURNS A -1 IN IERR AFTER A TRUE ERROR REPORT.
 C
 C  INPUT PARAMETERS
-      character*12 lnam1,lproc,lstp,lprc
-      character*28 pathname
+      character*(*) lnam1,lproc,lstp,lprc
+      character*(*) pathname
 C  OUTPUT PARAMETERS
       integer ierr
 C

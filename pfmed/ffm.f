@@ -42,7 +42,7 @@ C        LUI,LUO - input, output LU's
       character*(*) ib
 C               - line and record buffer
 C        ICHI   - number of characters from keyboard
-      character*12 lproc,lnewsk,lnewpr,lstp,lprc
+      character*(*) lproc,lnewsk,lnewpr,lstp,lprc
 C               - procedure file currently active in PFMED
 C               - 2nd copy of schedule procedure file
 C               - 2nd copy of station procedure file
@@ -134,9 +134,9 @@ C     Move first name to buffer with initialized prefix.
           if ((nch1.gt.4).and.(ib(ic1+nch1-3:ic1+nch1).eq.'.prc')) then
             nch1 = nch1-4
           end if
-          if (nch1.gt.8) then
-            write(lui,9100)
-9100        format(" file names must be 8 characters or less")
+          if (nch1.gt.len(lproc)) then
+            write(lui,9100) len(lproc)
+9100        format(" file names must be",i3," characters or less")
             return
           end if
          end if
@@ -384,8 +384,8 @@ C   by mistake
         end if
         call fopen(idcb2,pathname2,ierr)
         do 710 ir=1,32767
-          call f_readstring(idcb1,ierr,ibc,len)
-          if(ierr.lt.0.or.len.lt.0) goto 720
+          call f_readstring(idcb1,ierr,ibc,llen)
+          if(ierr.lt.0.or.llen.lt.0) goto 720
           nch = trimlen(ibc)
           if (nch.gt.0) call f_writestring(idcb2,ierr,ibc(:nch),id)
           if(ierr.lt.0) goto 800

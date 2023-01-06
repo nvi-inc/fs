@@ -48,9 +48,9 @@ C        LUI, LUO  - input, output LU's
 C               - line and record buffer
 C        ICHX   - number of characters from terminal
       character*103 editor
-      character*12 lproc
+      character*(*) lproc
 C               - active procedure file
-      character*34 ldef
+      character*(*) ldef
 C               - DEFINE line (name begins in col. 9)
 C
 C     OUTPUT VARIABLES: none
@@ -338,7 +338,8 @@ C
           lm8(1:8) = 'replaced'
         end if
         nch = trimlen(lnam1)
-        if (nch.gt.0) write(lui,9800) lnam1(1:nch),lm8,lproc(1:12)
+        if (nch.gt.0) write(lui,9800) lnam1(1:nch),lm8,
+     &     lproc(1:trimlen(lproc))
 9800    format(' procedure ',a,' ',a8,' in ',a)
 C  Replace procedure file
         call pfblk(3,lproc,cid)
