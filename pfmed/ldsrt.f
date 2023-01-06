@@ -27,7 +27,8 @@ C     DL - list procedures in active procedure file.
 
        implicit none
 
-       character*12 ibsrt(1)
+       include '../include/params.i'
+       character*(*) ibsrt(MAX_PROC2)
        character*80 ibcd
        character*74 ibc2
 

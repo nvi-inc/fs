@@ -28,7 +28,7 @@ C
         implicit none
         include '../include/params.i'
 c
-        character*(*) isrt(1)
+        character*(*) isrt(MAX_PROC2)
         integer i,j,nx,lu,nxmax
         data nxmax/MAX_PROC2/
         data lu/6/

@@ -88,7 +88,7 @@ C               - file names
       logical kerr
       logical kactive
 
-      character*12 ibsrt(1)  ! 010816 pb 
+      character*(*) ibsrt(MAX_PROC2)  ! 010816 pb
       integer nprc,scanp,npx 
 C
 C 4.  CONSTANTS USED

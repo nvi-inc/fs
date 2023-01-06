@@ -29,8 +29,10 @@ C nx - number of elements in the array.
 C
        implicit none
        
-       integer i,j,nx,nc,ichcm
-       character*12 temp,isrt(1)
+       include '../include/params.i'
+       integer i,j,nx
+       character*(*) isrt(MAX_PROC2)
+       character*12 temp
 
 cc       write (6,'("SORTQ isrt(1): ",12a)') isrt(1)
 
@@ -38,8 +40,7 @@ cc       write (6,'("SORTQ isrt(1): ",12a)') isrt(1)
 
          do j = 1,nx-i-1
            
-           nc = ichcm(isrt(j+1),1,isrt(j),1,12)
-           if (nc.gt.0) then
+           if (isrt(j).gt.isrt(j+1)) then
              temp = isrt(j) 
              isrt(j) = isrt(j+1)
              isrt(j+1) = temp 
