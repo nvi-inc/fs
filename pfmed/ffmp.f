@@ -207,7 +207,7 @@ C     LI - list procedure.
 C     Check for name.
         if(lnam1.eq.' ') then
           write(lui,1104)
-1104      format(1x,"no filename given")
+1104      format(1x,"no procedure name given")
           goto 900
         end if
 C     Search file for DEFINE  procedurenam.
@@ -243,7 +243,7 @@ C     PU - purge procedure from active procedure file.
       if (ib(1:2).eq.'pu') then
         if (lnam1.eq.' ') then
           write(lui,1106)
-1106      format(1x,"no filename given")
+1106      format(1x,"no procedure name given")
           goto 900
         end if
 C     Create scratch file 2.
@@ -315,12 +315,12 @@ C     RN - rename procedure.
       if(ib(1:2).eq.'rn') then
         if (lnam1.eq.' ') then
           write(lui,1109)
-1109      format(1x,"no filename given")
+1109      format(1x,"no source procedure name given")
           goto 900
         end if
         if (lnam2.eq.' ') then
           write(lui,1110)
-1110      format(1x,"no destination filename given")
+1110      format(1x,"no destination procedure name given")
           goto 900
         end if
 C     Check for illegal name.
@@ -422,7 +422,7 @@ C     Get full name for reading.
 C     Read until procedure found.
         nch = trimlen(lpf)
         if (nch.le.0) then
-           write(6,*) 'ffmp: illegal filename length'
+           write(6,*) 'ffmp: illegal procedure library name length'
            goto 900
         else
            call follow_link(lpf(:nch),link,ierr)

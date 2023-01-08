@@ -122,7 +122,7 @@ C     Move first name to buffer with initialized prefix.
         nch1 = ic2-ic1-1
         if (nch1.le.0) then
           write(lui,1101)
-1101      format(" no filename given")
+1101      format(" no procedure filename given")
           return
         else 
           if ((nch1.gt.4).and.(ib(ic1+nch1-3:ic1+nch1).eq.'.prc')) then
