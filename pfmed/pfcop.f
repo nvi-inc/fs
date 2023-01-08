@@ -130,7 +130,7 @@ C     Open procedure file.
              return
           endif
           call fopen(idcb3,pathname,ierr)
-          if(kerr(ierr,'pfcop','opening',' ',0,1)) then
+          if(kerr(ierr,'pfcop','opening',pathname,0,1)) then
              iret=-1
              return
           endif
