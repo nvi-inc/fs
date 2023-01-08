@@ -78,7 +78,6 @@ C 4.  CONSTANTS USED
 C
       character*7 ccol
       character*34 ldef
-      character*54 lmdisp
       character*102 cib 
       character*102 cibin
       character*12 ibsrt(MAX_PROC2) ! 010812 
@@ -172,22 +171,21 @@ C FOLLOWING VARIABLES WERE LOCKED & MAY BE GRABBED ONCE AND SET LATER AT END
 C
 C  Print messages about current procedure files
 C
-      lmdisp = 'current active schedule procedure file: ' // lprc(1:8)
-      write(lui,2102) lmdisp
+      nch=trimlen(lprc)
+      write(lui,2102)
+     & 'current active schedule procedure file: ' // lprc(1:nch)
 2102  format(a)
       if (kboss_pf) then
-        lmdisp = 'current active station procedure file:  '// lstp(1:8)
-        write(lui,2103) lmdisp
-2103    format(a)
+        nch=trimlen(lstp)
+        write(lui,2102)
+     &  'current active station procedure file:  '// lstp(1:nch)
       else
-        lmdisp = 'current active station procedure file:  none'
-        write(lui,2104) lmdisp
-2104    format(a)
+        write(lui,2102)
+     &  'current active station procedure file:  none'
       endif
-      lmdisp = 'procedure file currently open in pfmed: '//
-     .    lproc(1:8)
-      write(lui,2105) lmdisp
-2105  format(a)
+      nch=trimlen(lproc)
+      write(lui,2102)
+     & 'procedure file currently open in pfmed: '// lproc(1:nch)
 C     Copy current procedure file to scratch file 3.
       knewpf = .false.
       call pfcop(lproc,lui,id)
