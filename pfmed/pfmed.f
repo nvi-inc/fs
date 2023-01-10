@@ -202,6 +202,7 @@ cc      cib1 = ' '
 
       call ldsrt(ibsrt,nprc,idcb3,ierr)
       call readpl(cibin,ccol,ibsrt,nprc)
+      kboss_pf=kboss()
 cc      write(6,'("CIBIN: ",a20," NP: ",i3)') cibin,nprc
 c
       ichi = 0
