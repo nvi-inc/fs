@@ -27,9 +27,9 @@ C        The syntax and usage are similar to the corresponding EDIT commands.
 C        P and O allow only character for character replacement or a single
 C        use of controlS, controlC, or controlT.
 C
-C        Procedure files lacking DEFINE as the first record are amended.
+C        Procedure library lacking DEFINE as the first record are amended.
 C
-C 1.2.   RESTRICTIONS - Only procedure files are accessible.  These have
+C 1.2.   RESTRICTIONS - Only procedure libraries are accessible.  These have
 C        the prefix "[PRC" which is transparent to the user.  Procedures are
 C        available only on disc ICRPRC.  Two scratch files tmppf1 and 
 C        tmppf2 must exist on ICRPRC before editing can take place.  
@@ -49,7 +49,7 @@ C               - line and record buffer
 C        ICHX   - number of characters from terminal
       character*103 editor
       character*(*) lproc
-C               - active procedure file
+C               - procedure library active in pfmed
       character*(*) ldef
 C               - DEFINE line (name begins in col. 9)
 C
@@ -86,7 +86,7 @@ c               - flag for editor
       logical knew
 C               - flag for newly created procedure
       character*12 lnam1,lnam2
-C               - procedure name
+C               - procedure names
       character*4 cid
 C               - file extension with leading dot
 C        NN     - line number or count from command
@@ -120,11 +120,11 @@ C weh  150325  remove char2low
 C
 C     PROGRAM STRUCTURE
 C
-C     Exit if no procedure file active.
+C     Exit if no procedure library active.
 C
       if (lproc(1:1).eq.' ') then
         write(lui,1101)
-1101    format("no procedure file active")
+1101    format("no procedure library active in pfmed")
         goto 900
       endif
 C     Initialize and parse names.
@@ -234,7 +234,7 @@ c
          else if(iperm.eq.0) then
             write(6,*) 'Changes discarded because you ',
      &           'don''t have sufficent permission to update'
-            write(6,*) 'library ',lpsave(:max(1,trimlen(lpsave))),'.'
+            write(6,*) 'file ',pathsave(:max(1,trimlen(pathsave))),'.'
             goto 390
          endif
 
@@ -343,7 +343,7 @@ C
         if (nch.gt.0) write(lui,9800) lnam1(1:nch),lm8,
      &     lproc(1:trimlen(lproc))
 9800    format(' procedure ',a,' ',a8,' in ',a)
-C  Replace procedure file
+C  Replace procedure library
         call pfblk(3,lproc,cid)
 C  Copy to scratch 3
         call pfcop(lproc,lui,id)

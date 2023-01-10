@@ -26,7 +26,7 @@ C        When PFMED is ready to read or alter a file, PFMED is called to
 C        lock the status of the procedure files.  If there is a second copy,
 C        PFBLK returns the correct file name for reading.
 C
-C 1.2.   RESTRICTIONS - Only procedure files are accessible.  These have
+C 1.2.   RESTRICTIONS - Only procedure libraries are accessible.  These have
 C        the prefix "[PRC" which is transparent to the user.  Procedures are
 C        available only on disc ICRPRC.  The resource number must be
 C        allocated by OPRIN.
@@ -42,7 +42,7 @@ C
 C        KBLK    - control flag (1 - about to read, 2 - finished reading,
 C                  3 - about to replace file, 4 - error after 1 or 2)
       character*(*) lp
-C                - target procedure file
+C                - target procedure library (without extension)
       character*(*) lfr
 C                - correct extension with leading dot for reading
       character*64 fname,link
@@ -53,10 +53,10 @@ C
 C
       include '../include/fscom.i'
 C
-C        LPRC    - current schedule procedure file
-C        LNEWSK  - flag for 2nd copy of schedule procedure file
+C        LPRC    - current schedule procedure library
+C        LNEWSK  - flag for 2nd copy of schedule procedure library
 C                  (<>0 if copy exists)
-C        LNEWPR  - flag for 2nd copy of station procedure file
+C        LNEWPR  - flag for 2nd copy of station procedure library
 C
 C 2.4.   EXTERNAL INPUT/OUTPUT
 C
@@ -97,10 +97,10 @@ C     After reading - release lock and schedule BOSS if second copy used.
       if (kboss_pf) knewpf = .true.
       return
 C
-C     Replacing procedure file.
+C     Replacing procedure library.
 300   continue
 C     Set name.
-C     If file to be replaced is not current to BOSS, purge old and rename.
+C     If library to be replaced is not current to BOSS, purge old and rename.
       call fs_get_lnewpr(ilnewpr)
       call hol2char(ilnewpr,1,8,lnewpr)
       call fs_get_lnewsk(ilnewsk)
@@ -139,7 +139,7 @@ C     If file to be replaced is not current to BOSS, purge old and rename.
           if(kerr(ierr1,me,'renaming',lsf2,0,0)) continue
           if(kerr(ierr2,me,'renaming',fname,0,0)) return
         end if
-C     If file is second copy, purge old, rename, and schedule BOSS.
+C     If library is second copy, purge old, rename, and schedule BOSS.
       else if(lp.eq.lnewsk.or.lp.eq.lnewpr) then
         lfr(1:4)='.prx'
         call fclose(idcb1,ierr)
@@ -169,7 +169,7 @@ C     If file is second copy, purge old, rename, and schedule BOSS.
           if(kerr(ierr2,me,'renaming',fname,0,0)) return
         end if
         if (kboss_pf) knewpf = .true.
-C     If file is current to BOSS, rename to second copy, set flag, and
+C     If library is current to BOSS, rename to second copy, set flag, and
 C     schedule BOSS.
       else
         lfr(1:4)='.prx'

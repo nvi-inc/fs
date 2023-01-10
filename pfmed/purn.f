@@ -50,20 +50,21 @@ C
         end if
       else
         write(lui,9100)
-9100    format(" cannot perform operation on open pfmed library")
+9100    format(" cannot perform operation on active pfmed library")
         ierr = -1
         return
       end if
       if (lnam1.eq.lstp) then
         write(lui,9200)
-9200    format(" cannot perform operation on current station library")
+9200    format(" cannot perform operation on current FS station"
+     .         " procedure library")
         ierr = -1
         return
       endif
       if (lnam1.eq.lprc) then
         write(lui,9300)
-9300    format(" cannot perform operation on current field system"
-     .         " proc library")
+9300    format(" cannot perform operation on current FS schedule"
+     .         " procedure library")
         ierr = -1
         return
       endif

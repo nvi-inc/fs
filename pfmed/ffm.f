@@ -24,9 +24,9 @@ C
 C 1.1.   FFM is a simplified FMGR for use with the Mark III field system.
 C        There are two sets of commands available.  Commands with the
 C        prefix PF (PF, PFCR, PFDL, PFPU, PFRN, PFST) apply to procedure
-C        files as disk file units.
+C        libraries as disk file units.
 C
-C 1.2.   RESTRICTIONS - Only procedure files are accessible.  These have
+C 1.2.   RESTRICTIONS - Only procedure libraries are accessible.  These have
 C        the prefix "[PRC" which is transparent to the user.  Procedures are
 C        available only on disc ICRPRC.
 C
@@ -43,11 +43,11 @@ C        LUI,LUO - input, output LU's
 C               - line and record buffer
 C        ICHI   - number of characters from keyboard
       character*(*) lproc,lnewsk,lnewpr,lstp,lprc
-C               - procedure file currently active in PFMED
-C               - 2nd copy of schedule procedure file
-C               - 2nd copy of station procedure file
-C               - station procedure library
-C               - Field System procedure library
+C               - procedure library active in PFMED
+C               - 2nd copy of schedule procedure library
+C               - 2nd copy of station procedure library
+C               - Field System station procedure library
+C               - Field System schedule procedure library
 C
 C 2.2.   COMMON BLOCKS USED:
 C
@@ -73,9 +73,9 @@ C
 C 3.  LOCAL VARIABLES
 C
       character*8 lnam1,lnam2
-C               - procedure file names without extension
+C               - procedure library names without extensions
       character*4 lfr
-C               - procedure file extension with leading '.'
+C               - procedure library extension with leading '.'
 C        IR     - record count
 C        IERR   - error flag
 C        LEN    - record length
@@ -122,7 +122,7 @@ C     Move first name to buffer with initialized prefix.
         nch1 = ic2-ic1-1
         if (nch1.le.0) then
           write(lui,1101)
-1101      format(" no procedure filename given")
+1101      format(" no procedure library given")
           return
         else 
           if ((nch1.gt.4).and.(ib(ic1+nch1-3:ic1+nch1).eq.'.prc')) then
@@ -130,7 +130,7 @@ C     Move first name to buffer with initialized prefix.
           end if
           if (nch1.gt.len(lproc)) then
             write(lui,9100) len(lproc)
-9100        format(" file names must be",i3," characters or less")
+9100        format(" library names must be",i3," characters or less")
             return
           end if
          end if
@@ -158,12 +158,12 @@ C     Move second name if present.
          else if(iperm.eq.0) then
             write(6,*) 'This command is not permitted because you ',
      &           'don''t have sufficent permission for'
-            write(6,*) 'library ',lnam1(:nch1)
+            write(6,*) 'file ',pathname(:max(1,trimlen(pathname)))
             goto 920
          endif
       endif
   
-C     PFCR - create new procedure file.
+C     PFCR - create new procedure library.
   
       if(ib(3:4).eq.'cr') then
         if (lnam1.eq.' ') then
@@ -187,7 +187,7 @@ C  check to see if target exists already
         endif
       endif
  
-C     PFDL - list directory of procedure files
+C     PFDL - list directory of procedure libraries
   
       if(ib(3:4).eq.'dl') then
 c  Have the OS issue directory command and send the results to file, FFMTMP
@@ -221,19 +221,23 @@ c  Top of "]PRC" filename get loop.
 c  Are there any filenames left?
             if(dirstr(ipos+1:ipos+4).eq.'prc') then
             ibc(ix:ix+ipos-1) = dirstr(1:ipos-1)
-c space over past that name
-C Add ">" for active, "s" for schedule 2nd copy.
-C  "a" for active F.S. proc file
+C Add ">" for active in pfmed, "S" for station procedure library in FS
+C  "A" for schedule procedure library in FS
               ix2=ix+len(lproc)-1
-              if(ibc(ix:ix2).eq.sl2) ibc(ix-1:ix-1) = 'S'
-              if(ibc(ix:ix2).eq.sl4) ibc(ix-1:ix-1) = 'A'
-              if(ibc(ix:ix2).eq.sl1) then
-                if ((sl4.eq.sl1).or.(sl1.eq.sl2)) then
-                  ibc(ix-2:ix-2) = '>'
-                else
-                  ibc(ix-1:ix-1) = '>'
+              if(kboss_pf) then
+                if(ibc(ix:ix2).eq.sl2) ibc(ix-1:ix-1) = 'S'
+                if(ibc(ix:ix2).eq.sl4) ibc(ix-1:ix-1) = 'A'
+                if(ibc(ix:ix2).eq.sl1) then
+                  if ((sl1.eq.sl2.or.sl1.eq.sl4)) then
+                    ibc(ix-2:ix-2) = '>'
+                  else
+                    ibc(ix-1:ix-1) = '>'
+                  endif
                 endif
+              else if(ibc(ix:ix2).eq.sl1) then
+                ibc(ix-1:ix-1) = '>'
               endif
+c space over past that name
               ix=ix+14
               if (ix.gt.60) then
                 nch = trimlen(ibc)
@@ -252,10 +256,12 @@ C  "a" for active F.S. proc file
           if (nch.gt.0) write(luo,7701) ibc(:nch)
 7701      format(a)
         end if
+        write(6,"(a)")
+     .    "Key: '>' active in pfmed, 'A' schedule, 'S' station"
         return
       endif
   
-C     PF - change procedure file active in PFMED.
+C     PF - change procedure library active in PFMED.
   
       if(ib(3:3).eq.',') then
         if(lnam1.ne.' ') then
@@ -269,7 +275,7 @@ C     PF - change procedure file active in PFMED.
         end if
       end if
   
-C     PFPU - purge procedure file.
+C     PFPU - purge procedure library.
   
       if(ib(3:4).eq.'pu') then
         if (lnam1.eq.' ') then
@@ -293,7 +299,7 @@ C     PFPU - purge procedure file.
         return
       end if
  
-C     PFRN - rename procedure file.
+C     PFRN - rename procedure library.
   
       if(ib(3:4).eq.'rn') then
         if ((lnam1.eq.' ').or.(lnam2.eq.' ')) then
@@ -304,13 +310,14 @@ C     PFRN - rename procedure file.
   
         if (lnam1.eq.lstp) then
           write(lui,9200)
-9200      format(" cannot perform operation on current station library")
+9200      format(" cannot perform operation on current FS station "
+     .           "procedure library")
           return
         endif
         if (lnam1.eq.lprc) then
           write(lui,9300)
-9300      format(" cannot perform operation on current active "
-     .           "field system proc library")
+9300      format(" cannot perform operation on current FS schedule "
+     .           "procedure library")
           return
         endif
  
@@ -348,7 +355,7 @@ C     PFRN - rename procedure file.
         goto 920
       end if
   
-C     PFST - transfer from existing file to file created by this command.
+C     PFST - transfer from existing library to library created by this command.
   
       if(ib(3:4).eq.'st') then
         kest = .false.

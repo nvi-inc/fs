@@ -25,10 +25,10 @@ C
 C 1.1.   FFMP is a simplified FMGR for use with the Mark III field system.
 C        There are two sets of commands available.  Commands without the
 C        PF prefix (DL, LI, PU, RN, ST) apply to individual procedures
-C        within a procedure file.  The command LL is also handled here.
-C        The default prodedure file is the one currently used by BOSS.
+C        within a procedure library.  The command LL is also handled here.
+C        The default prodedure library is the one currently used by BOSS.
 C
-C 1.2.   RESTRICTIONS - Only procedure files are accessible.  These have
+C 1.2.   RESTRICTIONS - Only procedure libraries are accessible.  These have
 C        the prefix "[PRC" which is transparent to the user.  Procedures are
 C        available only on disc ICRPRC.
 C
@@ -46,7 +46,7 @@ C     IB changed to a character rather than holerith string
 C               - line and record buffer
 C        ICHI   - number of characters from keyboard
       character*(*) lproc
-C               - procedure file currently active in PFMED
+C               - procedure library active in PFMED
       character*(*) ldef
 C               - DEFINE line at top of each procedure
 C
@@ -75,7 +75,7 @@ C                         ICHCM, IFILL, MIN0, PFBLK, PFCOP, TRIMLEN
 C 3.  LOCAL VARIABLES
 C
       character*8 lpf
-c                 - procedure file name without extension
+c                 - procedure library name without extension
       character*4 lfr
 c                 -file extension with leading dot
       character lrn
@@ -107,11 +107,11 @@ C# LAST COMPC'ED  870115:05:41 #
 C
 C     PROGRAM STRUCTURE
 C
-C     Exit if no procedure file active.
+C     Exit if no procedure library active.
   
       if(lproc.eq.' ') then
         write(lui,1101)
-1101    format(1x,"no procedure file active")
+1101    format(1x,"no procedure library active in pfmed")
         return
       end if
  
@@ -147,7 +147,7 @@ C     Move second name if present.
         end if
       end if
   
-C     DL - list procedures in active procedure file.
+C     DL - list procedures in active procedure library.
   
       if((ib(1:2).eq.'dl').or.(ib(1:2).eq.'ds')) then
         ix=1
@@ -194,7 +194,7 @@ C       Write last line.
         if(ib(1:2).eq.'ds') then
          call sortp(ibsrt,nprc)
          write (luo,'("Pfmed: Displayed ",i3," procedures in ", 
-     &        "file ",a)') nprc,lproc(:trimlen(lproc))
+     &        "library ",a)') nprc,lproc(:trimlen(lproc))
         endif
 
         nprc = npx
@@ -210,7 +210,7 @@ C     Check for name.
 1104      format(1x,"no procedure name given")
           goto 900
         end if
-C     Search file for DEFINE  procedurenam.
+C     Search file for DEFINE  procedure name.
         call f_rewind(idcb3,ierr)
         if (ierr.ne.0) goto 990
         len = 0
@@ -238,7 +238,7 @@ C     Rewind scratch file.
         go to 900
       end if
   
-C     PU - purge procedure from active procedure file.
+C     PU - purge procedure from active procedure library.
   
       if (ib(1:2).eq.'pu') then
         if (lnam1.eq.' ') then
@@ -287,7 +287,7 @@ C     Check if procedure found.
 C     Close old scratch copy.
         call fclose(idcb3,ierr)
         if(kerr(ierr,'ffmp','closing',' ',0,0)) return
-C     Replace procedure file.
+C     Replace procedure library.
         call pfblk(3,lproc,lfr)
 C     Copy new version.
         call pfcop(lproc,lui,id)
@@ -383,7 +383,7 @@ C     Close old scratch copy.
         if (.not.ldupl) then
           call fclose(idcb3,ierr)
           if(kerr(ierr,'ffmp','closing',' ',0,0)) return
-C     Replace procedure file.
+C     Replace procedure library.
           call pfblk(3,lproc,lfr)
 C     Copy new version.
           call pfcop(lproc,lui,id)
@@ -394,7 +394,7 @@ C     Reload name buffer
         end if
       end if
   
-C     ST - copy procedure to active procedure file.
+C     ST - copy procedure to active procedure library.
   
       if(ib(1:2).eq.'st') then
         if (lnam1.eq.' ') then
@@ -402,7 +402,7 @@ C     ST - copy procedure to active procedure file.
 1116      format(1x,"syntax error")
           return
         end if
-C     Parse first name for procedure file.
+C     Parse first name for procedure library.
         ix = 1
         do while ((lnam1(ix:ix+1).ne.'::').and.(ix.le.nch1))
           ix = ix + 1
@@ -441,7 +441,7 @@ C
         kactive=lpf(:nch).eq.lproc(:trimlen(lproc))
         if(kactive) then
 C                
-C close the active file in case if it is the one being copied from because
+C close the active library in case if it is the one being copied from because
 C gfortran doesn't allow a file to be opened on more than one unit
 C 
             call fclose(idcb3,ierr)
@@ -449,7 +449,7 @@ C
         endif
         call fopen(idcb1,pathname,ierr)
         if(ierr.lt.0) then
-          write(lui,1117) lpf(:nch)
+          write(lui,1117) pathname(:trimlen(pathname))
 1117      format(1x,"file ",a," not found")
           go to 900
         end if
@@ -494,7 +494,7 @@ C     Write ENDDEF.
         if(kerr(ierr,'ffmp','closing',' ',0,0)) return
 C     Release lock.
         call pfblk(2,lpf,lfr)
-C     Copy active file.
+C     Copy active library.
         if(kactive) then
 C has to be reopened if it was closed above
             call fopen(idcb3,pathname,ierr)
@@ -522,7 +522,7 @@ C     Check for duplicate procedure.
         end do
 635     call fclose(idcb3,ierr)
         if(kerr(ierr,'ffmp','closing',' ',0,0)) return
-C     Replace file.
+C     Replace library.
         call pfblk(3,lproc,lfr)
 C     Copy new version.
         call pfcop(lproc,lui,id)

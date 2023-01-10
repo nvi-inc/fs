@@ -38,8 +38,8 @@ C
       include '../include/fscom.i'
 C
 C        LPRC   - current schedule procedure library
-C        LNEWSK - next version of procedure file
-C        LNEWPR - next version of station procedure file
+C        LNEWSK - next version of procedure library
+C        LNEWPR - next version of station procedure library
 C
       include 'pfmed.i'
 C
@@ -65,7 +65,7 @@ C
 C 3.  LOCAL VARIABLES
 C
 C        ICHI   - number of characters from keyboard
-C        LPROC  - active procedure file for PFMED
+C        LPROC  - active procedure library for PFMED
       dimension ib(51)
 C               - line and record buffer
       character*8 lproc
@@ -154,8 +154,8 @@ C
         end if
       endif
 C
-C     Set active procedure file for PFMED to schedule procedure file or
-C     station procedure file.
+C     Set active procedure library for PFMED to schedule procedure library or
+C     station procedure library.
 C
 C FOLLOWING VARIABLES WERE LOCKED & MAY BE GRABBED ONCE AND SET LATER AT END
       call fs_get_lprc(ilprc)
@@ -169,24 +169,24 @@ C FOLLOWING VARIABLES WERE LOCKED & MAY BE GRABBED ONCE AND SET LATER AT END
       lproc = lprc
       if(lproc.eq.'none') lproc=lstp
 C
-C  Print messages about current procedure files
+C  Print messages about current procedure libraries
 C
       nch=trimlen(lprc)
       write(lui,2102)
-     & 'current active schedule procedure file: ' // lprc(1:nch)
+     & 'current FS schedule procedure library:     '// lprc(1:nch)
 2102  format(a)
       if (kboss_pf) then
         nch=trimlen(lstp)
         write(lui,2102)
-     &  'current active station procedure file:  '// lstp(1:nch)
+     &  'current FS station  procedure library:     '// lstp(1:nch)
       else
         write(lui,2102)
-     &  'current active station procedure file:  none'
+     &  'current FS station  procedure library:     none'
       endif
       nch=trimlen(lproc)
       write(lui,2102)
-     & 'procedure file currently open in pfmed: '// lproc(1:nch)
-C     Copy current procedure file to scratch file 3.
+     & 'current procedure library active in pfmed: '// lproc(1:nch)
+C     Copy open procedure file to scratch file 3.
       knewpf = .false.
       call pfcop(lproc,lui,id)
 c
@@ -244,7 +244,7 @@ c
            else if(iperm.eq.0) then
               write(6,*) 'This command is not permitted because you ',
      &             'don''t have sufficent permission for'
-              write(6,*) 'library ',lproc(:nch),'.'
+              write(6,*) 'file ',fname(:max(1,trimlen(fname))),'.'
               if (cib.eq.'ed'.or.cib(1:3).eq.'ed,'.or.
      &             cib.eq.'vi'.or.cib(1:3).eq.'vi,'.or.
      &             cib.eq.'emacs'.or.cib(1:6).eq.'emacs,'.or.

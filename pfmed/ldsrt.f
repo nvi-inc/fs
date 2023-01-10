@@ -23,7 +23,7 @@ c@ldsrt.f
 C
 C 010819 PB V1.0 - Load the pfmed sort buffer. 
 C
-C     DL - list procedures in active procedure file.
+C     DL - list procedures in active procedure library.
 
        implicit none
 

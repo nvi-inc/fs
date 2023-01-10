@@ -21,10 +21,9 @@
 C
 C 1.  PFCOP PROGRAM SPECIFICATION
 C
-C 1.1.   PFCOP copies a procedure file into scratch file 3.  If any error
-C        occurs, the active procedure file is set empty.
+C 1.1.   PFCOP copies a procedure library into scratch file 3.
 C
-C 1.2.   RESTRICTIONS - Only procedure files are accessible.  These have
+C 1.2.   RESTRICTIONS - Only procedure libraries are accessible.  These have
 C        the prefix "[PRC" which is transparent to the user.  Procedures are
 C        available only on disc ICRPRC.
 C
@@ -37,7 +36,7 @@ C
 C     INPUT VARIABLES:
 C
       character*(*) lp
-C                - target procedure file
+C                - target procedure library
 C        LUI     - terminal LU
 C
 C 2.2.   COMMON BLOCKS USED:
@@ -72,12 +71,6 @@ C                - correct extension with leading dot for reading
 C
 C 4.  CONSTANTS USED
 C
-c     dimension lm6(12)
-C
-c     data lm6    /2hno,2h p,2hro,2hce,2hdu,2hre,2h f,2hil,2he ,2hac,
-c    /             2hti,2hve/
-C          - NO PROCEDURE FILE ACTIVE
-C
 C 5.  INITIALIZED VARIABLES: none
 C
 C 6.  PROGRAMMER: C. Ma
@@ -86,10 +79,12 @@ C# LAST COMPC'ED  870115:05:40
 C
 C     PROGRAM STRUCTURE
 C
-C     Check if procedure file exists to be copied.
+C     Check if procedure library exists to be copied.
       if(lp.eq.'none') then
-C     No procedure file - message and return.
-c        call exec(2,lui,lm6,-24)
+C     No procedure library - message and return.
+         write(6,*) 'pfcop: no procedure library active'
+         iret = -1
+         return
       else
         iret = 0
         call pfblk(1,lp,lfr)
@@ -114,7 +109,7 @@ c        call exec(2,lui,lm6,-24)
               pathname = FS_ROOT//'/proc/'//lp(:nch)//lfr(1:4)
            endif
         endif
-C     Open procedure file.
+C     Open procedure library.
         inquire(file=pathname,exist=kex)
         if (.not.kex) then
           nch = trimlen(pathname)
