@@ -107,9 +107,9 @@ C     If library to be replaced is not current to BOSS, purge old and rename.
       call hol2char(ilnewsk,1,8,lnewsk)
       call fs_get_lprc2(ilprc2)
       call hol2char(ilprc2,1,MAX_SKD,lprc2)
-      call fs_get_lstp(ilstp)
-      call hol2char(ilstp,1,8,lstp)
-      if((lp.ne.lstp.and.lp.ne.lprc2).or.(.not.kboss_pf)) then
+      call fs_get_lstp2(ilstp2)
+      call hol2char(ilstp2,1,MAX_SKD,lstp2)
+      if((lp.ne.lstp2.and.lp.ne.lprc2).or.(.not.kboss_pf)) then
         lfr(1:4)='.prc'
         call fclose(idcb1,ierr)
         if(kerr(ierr,me,'closing',' ',0,0)) return
@@ -204,9 +204,9 @@ c       if(kerr(ierr,me,'purging',fname,0,0)) return
         if(lprc2.eq.lp) lnewsk=lp
         call char2hol(lnewsk,ilnewsk,1,8)
         call fs_set_lnewsk(ilnewsk)
-        call fs_get_lstp(ilstp)
-        call hol2char(ilstp,1,8,lstp)
-        if(lp.eq.lstp) lnewpr=lp
+        call fs_get_lstp2(ilstp2)
+        call hol2char(ilstp2,1,MAX_SKD,lstp2)
+        if(lp.eq.lstp2) lnewpr=lp
         call char2hol(lnewpr,ilnewpr,1,8)
         call fs_set_lnewpr(ilnewpr)
         if (kboss_pf) knewpf = .true.

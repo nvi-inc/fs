@@ -126,8 +126,10 @@ C     Set input and output LU's.
 C
 C     Check to see if another instance of PFMED is already active.
 C
-      lstp = 'station'
-      call char2hol(lstp,ilstp,1,8)
+      lstp2 = 'station'
+      call char2hol(lstp2,ilstp2,1,MAX_SKD)
+      call fs_set_lstp2(ilstp2)
+      call char2hol(lstp2,ilstp,1,8)
       call fs_set_lstp(ilstp)
       if (.not.kboss_pf) then
         irnprc = rn_take('pfmed',1)
@@ -161,14 +163,14 @@ C
 C FOLLOWING VARIABLES WERE LOCKED & MAY BE GRABBED ONCE AND SET LATER AT END
       call fs_get_lprc2(ilprc2)
       call hol2char(ilprc2,1,MAX_SKD,lprc2)
-      call fs_get_lstp(ilstp)
-      call hol2char(ilstp,1,8,lstp)
+      call fs_get_lstp2(ilstp2)
+      call hol2char(ilstp2,1,MAX_SKD,lstp2)
       call fs_get_lnewsk(ilnewsk)
       call hol2char(ilnewsk,1,8,lnewsk)
       call fs_get_lnewpr(ilnewpr)
       call hol2char(ilnewpr,1,8,lnewpr)
       lproc = lprc2
-      if(lproc.eq.'none') lproc=lstp
+      if(lproc.eq.'none') lproc=lstp2
 C
 C  Print messages about current procedure libraries
 C
@@ -177,9 +179,9 @@ C
      & 'current FS schedule procedure library:     '// lprc2(1:nch)
 2102  format(a)
       if (kboss_pf) then
-        nch=trimlen(lstp)
+        nch=trimlen(lstp2)
         write(lui,2102)
-     &  'current FS station  procedure library:     '// lstp(1:nch)
+     &  'current FS station  procedure library:     '// lstp2(1:nch)
       else
         write(lui,2102)
      &  'current FS station  procedure library:     none'
@@ -278,7 +280,7 @@ C     Check mode.
           call fed(lui,luo,cib,ichi,lproc,ldef)
           call ldsrt(ibsrt,nprc,idcb3,ierr)      ! Reload names 
         else if (cib(1:2).eq.'pf') then
-          call ffm(lui,luo,cib,ichi,lproc,lprc2,lstp,lnewsk,lnewpr)
+          call ffm(lui,luo,cib,ichi,lproc,lprc2,lstp2,lnewsk,lnewpr)
         else
           call ffmp(lui,luo,cib,ichi,lproc,ldef,ibsrt,nprc)
         endif
@@ -302,7 +304,9 @@ C      ABOUT TO UNLOCK: RESETTING VARS
       call fs_set_lprc2(ilprc2)
       call char2hol(lprc2,ilprc,1,8)
       call fs_set_lprc(ilprc)
-      call char2hol(lstp,ilstp,1,8)
+      call char2hol(lstp2,ilstp2,1,MAX_SKD)
+      call fs_set_lstp2(ilstp2)
+      call char2hol(lstp2,ilstp,1,8)
       call fs_set_lstp(ilstp)
       call char2hol(lnewsk,ilnewsk,1,8)
       call fs_set_lnewsk(ilnewsk)
