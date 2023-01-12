@@ -37,9 +37,9 @@ C 2.2.   COMMON BLOCKS USED:
 C
       include '../include/fscom.i'
 C
-C        LPRC2  - current schedule procedure library
-C        LNEWSK - next version of procedure library
-C        LNEWPR - next version of station procedure library
+C        LPRC2   - current schedule procedure library
+C        LNEWSK  - next version of procedure library
+C        LNEWPR2 - next version of station procedure library
 C
       include 'pfmed.i'
 C
@@ -167,8 +167,8 @@ C FOLLOWING VARIABLES WERE LOCKED & MAY BE GRABBED ONCE AND SET LATER AT END
       call hol2char(ilstp2,1,MAX_SKD,lstp2)
       call fs_get_lnewsk(ilnewsk)
       call hol2char(ilnewsk,1,8,lnewsk)
-      call fs_get_lnewpr(ilnewpr)
-      call hol2char(ilnewpr,1,8,lnewpr)
+      call fs_get_lnewpr2(ilnewpr2)
+      call hol2char(ilnewpr2,1,MAX_SKD,lnewpr2)
       lproc = lprc2
       if(lproc.eq.'none') lproc=lstp2
 C
@@ -280,7 +280,7 @@ C     Check mode.
           call fed(lui,luo,cib,ichi,lproc,ldef)
           call ldsrt(ibsrt,nprc,idcb3,ierr)      ! Reload names 
         else if (cib(1:2).eq.'pf') then
-          call ffm(lui,luo,cib,ichi,lproc,lprc2,lstp2,lnewsk,lnewpr)
+          call ffm(lui,luo,cib,ichi,lproc,lprc2,lstp2,lnewsk,lnewpr2)
         else
           call ffmp(lui,luo,cib,ichi,lproc,ldef,ibsrt,nprc)
         endif
@@ -294,9 +294,9 @@ C     Exit.
         call fs_get_lnewsk(ilnewsk)
         call hol2char(ilnewsk,1,8,lnewsk)
         if (lnewsk.ne.' ') call reprc(lnewsk)
-        call fs_get_lnewpr(ilnewpr)
-        call hol2char(ilnewpr,1,8,lnewpr)
-        if (lnewpr.ne.' ') call reprc(lnewpr)
+        call fs_get_lnewpr2(ilnewpr2)
+        call hol2char(ilnewpr2,1,MAX_SKD,lnewpr2)
+        if (lnewpr2.ne.' ') call reprc(lnewpr2)
       endif
 
 C      ABOUT TO UNLOCK: RESETTING VARS
@@ -310,7 +310,9 @@ C      ABOUT TO UNLOCK: RESETTING VARS
       call fs_set_lstp(ilstp)
       call char2hol(lnewsk,ilnewsk,1,8)
       call fs_set_lnewsk(ilnewsk)
-      call char2hol(lnewpr,ilnewpr,1,8)
+      call char2hol(lnewpr2,ilnewpr2,1,MAX_SKD)
+      call fs_set_lnewpr2(ilnewpr2)
+      call char2hol(lnewpr2,ilnewpr,1,8)
       call fs_set_lnewpr(ilnewpr)
       call rn_put('pfmed')
       inquire(file=lsf2,exist=kex)

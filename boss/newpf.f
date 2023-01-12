@@ -127,33 +127,33 @@ C
 C     3. Get a new version of the station proc file.
 C
  300    continue
-        call fs_get_lnewpr(ilnewpr)
-        if (ilnewpr(1).eq.0) then
-          lnewpr=' '
+        call fs_get_lnewpr2(ilnewpr2)
+        if (ilnewpr2(1).eq.0) then
+          lnewpr2=' '
         else
-          call hol2char(ilnewpr,1,8,lnewpr)
+          call hol2char(ilnewpr2,1,MAX_SKD,lnewpr2)
         endif
-        if (lnewpr.ne.' '.and..not.kstak(istkop,istksk,2)) then
+        if (lnewpr2.ne.' '.and..not.kstak(istkop,istksk,2)) then
           call fmpclose(idcbp2,ierr)
-          call fs_get_lstp(ilstp)
-          call hol2char(ilstp,1,8,lstp)
-          nch = trimlen(lstp)
-          call follow_link(lstp(:nch),link,ierr)
+          call fs_get_lstp2(ilstp2)
+          call hol2char(ilstp2,1,MAX_SKD,lstp2)
+          nch = trimlen(lstp2)
+          call follow_link(lstp2(:nch),link,ierr)
           if(ierr.lt.0) then
              call logit7ci(0,0,0,1,-505+ierr,'bo',ierr)
              goto 400
           endif
           if(link.eq.' ') then
-             pathname = FS_ROOT//'/proc/' // lstp(:nch) // '.prc'
+             pathname = FS_ROOT//'/proc/' // lstp2(:nch) // '.prc'
           else
              pathname = FS_ROOT//'/proc/' // link(:trimlen(link))
           endif
           call ftn_purge(pathname,ierr)
-          call fs_get_lstp(ilstp)
-          call hol2char(ilstp,1,8,lstp)
-          nch = trimlen(lstp)
+          call fs_get_lstp2(ilstp2)
+          call hol2char(ilstp2,1,MAX_SKD,lstp2)
+          nch = trimlen(lstp2)
           if(link.eq.' ') then
-             pathname2= FS_ROOT//'/proc/' // lstp(:nch) // '.prx'
+             pathname2= FS_ROOT//'/proc/' // lstp2(:nch) // '.prx'
           else
              iprc=index(link,".prc")
              link(iprc+3:iprc+3)='x'
@@ -167,12 +167,14 @@ C
             call logit7ci(0,0,0,1,-127,'bo',ierr2)
             ierr2 = 0
           else
-            call fs_get_lstp(ilstp)
-            call hol2char(ilstp,1,8,lstp)
-            call opnpf(lstp,idcbp2,ibuf,iblen,lproc2,maxpr2,nproc2,ierr,
-     &               'o')
-            lnewpr = ' '
-            call char2hol(lnewpr,ilnewpr,1,12)
+            call fs_get_lstp2(ilstp2)
+            call hol2char(ilstp2,1,MAX_SKD,lstp2)
+            call opnpf(lstp2,idcbp2,ibuf,iblen,lproc2,maxpr2,nproc2,
+     $                 ierr,'o')
+            lnewpr2 = ' '
+            call char2hol(lnewpr2,ilnewpr2,1,MAX_SKD)
+            call fs_set_lnewpr2(ilnewpr2)
+            call char2hol(lnewpr2,ilnewpr,1,8)
             call fs_set_lnewpr(ilnewpr)
           endif
         endif

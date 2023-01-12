@@ -67,8 +67,10 @@ C
       call fs_set_lskd2(ilskd2)
       call char2hol(lskd2,ilskd,1,8)
       call fs_set_lskd(ilskd)
-      lnewpr = ' '
-      call char2hol(lnewpr,ilnewpr,1,8)
+      lnewpr2 = ' '
+      call char2hol(lnewpr2,ilnewpr2,1,MAX_SKD)
+      call fs_set_lnewpr2(ilnewpr2)
+      call char2hol(lnewpr2,ilnewpr,1,8)
       call fs_set_lnewpr(ilnewpr)
       lnewsk = ' '
       call char2hol(lnewsk,ilnewsk,1,8)

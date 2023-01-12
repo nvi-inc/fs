@@ -56,7 +56,7 @@ C
 C        LPRC2   - current schedule procedure library
 C        LNEWSK  - flag for 2nd copy of schedule procedure library
 C                  (<>0 if copy exists)
-C        LNEWPR  - flag for 2nd copy of station procedure library
+C        LNEWPR2 - flag for 2nd copy of station procedure library
 C
 C 2.4.   EXTERNAL INPUT/OUTPUT
 C
@@ -78,11 +78,11 @@ C
 C     Before reading a procedure file.
 100   continue
 C     If file to be read is not second copy, release lock.
-      call fs_get_lnewpr(ilnewpr)
-      call hol2char(ilnewpr,1,8,lnewpr)
+      call fs_get_lnewpr2(ilnewpr2)
+      call hol2char(ilnewpr2,1,MAX_SKD,lnewpr2)
       call fs_get_lnewsk(ilnewsk)
       call hol2char(ilnewsk,1,8,lnewsk)
-      if ((lp.ne.lnewsk.and.lp.ne.lnewpr).or.(.not.kboss_pf)) then
+      if ((lp.ne.lnewsk.and.lp.ne.lnewpr2).or.(.not.kboss_pf)) then
 C     Set file name for reading.
         lfr(1:4)='.prc'
       else
@@ -101,8 +101,8 @@ C     Replacing procedure library.
 300   continue
 C     Set name.
 C     If library to be replaced is not current to BOSS, purge old and rename.
-      call fs_get_lnewpr(ilnewpr)
-      call hol2char(ilnewpr,1,8,lnewpr)
+      call fs_get_lnewpr2(ilnewpr2)
+      call hol2char(ilnewpr2,1,MAX_SKD,lnewpr2)
       call fs_get_lnewsk(ilnewsk)
       call hol2char(ilnewsk,1,8,lnewsk)
       call fs_get_lprc2(ilprc2)
@@ -140,7 +140,7 @@ C     If library to be replaced is not current to BOSS, purge old and rename.
           if(kerr(ierr2,me,'renaming',fname,0,0)) return
         end if
 C     If library is second copy, purge old, rename, and schedule BOSS.
-      else if(lp.eq.lnewsk.or.lp.eq.lnewpr) then
+      else if(lp.eq.lnewsk.or.lp.eq.lnewpr2) then
         lfr(1:4)='.prx'
         call fclose(idcb1,ierr)
         if(kerr(ierr,me,'closing',' ',0,0)) return
@@ -206,8 +206,10 @@ c       if(kerr(ierr,me,'purging',fname,0,0)) return
         call fs_set_lnewsk(ilnewsk)
         call fs_get_lstp2(ilstp2)
         call hol2char(ilstp2,1,MAX_SKD,lstp2)
-        if(lp.eq.lstp2) lnewpr=lp
-        call char2hol(lnewpr,ilnewpr,1,8)
+        if(lp.eq.lstp2) lnewpr2=lp
+        call char2hol(lnewpr2,ilnewpr2,1,MAX_SKD)
+        call fs_set_lnewpr2(ilnewpr2)
+        call char2hol(lnewpr2,ilnewpr,1,8)
         call fs_set_lnewpr(ilnewpr)
         if (kboss_pf) knewpf = .true.
       endif

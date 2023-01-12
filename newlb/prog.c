@@ -1354,6 +1354,18 @@ void fs_get_lnewpr__(LNEWPR)
 	  memcpy(LNEWPR,shm_addr->LNEWPR,N);
 	}
 
+void fs_set_lnewpr2__(LNEWPR2)
+	int *LNEWPR2;
+	{
+	  memcpy(shm_addr->LNEWPR2,LNEWPR2,MAX_SKD);
+	}
+
+void fs_get_lnewpr2__(LNEWPR2)
+	int *LNEWPR2;
+	{
+	  memcpy(LNEWPR2,shm_addr->LNEWPR2,MAX_SKD);
+	}
+
 void fs_set_lnewsk__(LNEWSK)
 	int *LNEWSK;
 	{
