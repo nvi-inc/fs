@@ -38,7 +38,7 @@ C
       include '../include/fscom.i'
 C
 C        LPRC2   - current schedule procedure library
-C        LNEWSK  - next version of procedure library
+C        LNEWSK2 - next version of procedure library
 C        LNEWPR2 - next version of station procedure library
 C
       include 'pfmed.i'
@@ -165,8 +165,8 @@ C FOLLOWING VARIABLES WERE LOCKED & MAY BE GRABBED ONCE AND SET LATER AT END
       call hol2char(ilprc2,1,MAX_SKD,lprc2)
       call fs_get_lstp2(ilstp2)
       call hol2char(ilstp2,1,MAX_SKD,lstp2)
-      call fs_get_lnewsk(ilnewsk)
-      call hol2char(ilnewsk,1,8,lnewsk)
+      call fs_get_lnewsk2(ilnewsk2)
+      call hol2char(ilnewsk2,1,MAX_SKD,lnewsk2)
       call fs_get_lnewpr2(ilnewpr2)
       call hol2char(ilnewpr2,1,MAX_SKD,lnewpr2)
       lproc = lprc2
@@ -280,7 +280,7 @@ C     Check mode.
           call fed(lui,luo,cib,ichi,lproc,ldef)
           call ldsrt(ibsrt,nprc,idcb3,ierr)      ! Reload names 
         else if (cib(1:2).eq.'pf') then
-          call ffm(lui,luo,cib,ichi,lproc,lprc2,lstp2,lnewsk,lnewpr2)
+          call ffm(lui,luo,cib,ichi,lproc,lprc2,lstp2,lnewsk2,lnewpr2)
         else
           call ffmp(lui,luo,cib,ichi,lproc,ldef,ibsrt,nprc)
         endif
@@ -291,9 +291,9 @@ C     Exit.
       call fclose(idcb3,ierr)
       if(kerr(ierr,'pfmed','closing',' ',0,0)) continue
       if (((kboss_pf).and.(.not.kboss())).and.(knewpf)) then !boss was 'offed'
-        call fs_get_lnewsk(ilnewsk)
-        call hol2char(ilnewsk,1,8,lnewsk)
-        if (lnewsk.ne.' ') call reprc(lnewsk)
+        call fs_get_lnewsk2(ilnewsk2)
+        call hol2char(ilnewsk2,1,MAX_SKD,lnewsk2)
+        if (lnewsk2.ne.' ') call reprc(lnewsk2)
         call fs_get_lnewpr2(ilnewpr2)
         call hol2char(ilnewpr2,1,MAX_SKD,lnewpr2)
         if (lnewpr2.ne.' ') call reprc(lnewpr2)
@@ -308,7 +308,9 @@ C      ABOUT TO UNLOCK: RESETTING VARS
       call fs_set_lstp2(ilstp2)
       call char2hol(lstp2,ilstp,1,8)
       call fs_set_lstp(ilstp)
-      call char2hol(lnewsk,ilnewsk,1,8)
+      call char2hol(lnewsk2,ilnewsk2,1,MAX_SKD)
+      call fs_set_lnewsk2(ilnewsk2)
+      call char2hol(lnewsk2,ilnewsk,1,8)
       call fs_set_lnewsk(ilnewsk)
       call char2hol(lnewpr2,ilnewpr2,1,MAX_SKD)
       call fs_set_lnewpr2(ilnewpr2)

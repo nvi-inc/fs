@@ -72,34 +72,34 @@ C     If not, then close the file, purge it, and rename the pending
 C     edited file to the proper name.  Then call OPNPF to get the
 C     directory.
 C
-        call fs_get_lnewsk(ilnewsk)
-        if (ilnewsk(1).eq.0) then
-          lnewsk=' '
+        call fs_get_lnewsk2(ilnewsk2)
+        if (ilnewsk2(1).eq.0) then
+          lnewsk2=' '
         else
-          call hol2char(ilnewsk,1,8,lnewsk)
+          call hol2char(ilnewsk2,1,MAX_SKD,lnewsk2)
         end if
-        if ((lnewsk.ne.' ').and.(.not.kstak(istkop,istksk,1))) then
+        if ((lnewsk2.ne.' ').and.(.not.kstak(istkop,istksk,1))) then
           call fmpclose(idcbp1,ierr)
-          call fs_get_lprc(ilprc)
-          call hol2char(ilprc,1,8,lprc)
-          nch = trimlen(lprc)
-          call follow_link(lprc(:nch),link,ierr)
+          call fs_get_lprc2(ilprc2)
+          call hol2char(ilprc2,1,MAX_SKD,lprc2)
+          nch = trimlen(lprc2)
+          call follow_link(lprc2(:nch),link,ierr)
           if(ierr.lt.0) then
              call logit7ci(0,0,0,1,-500+ierr,'bo',ierr)
              goto 300
           endif
           if(link.eq.' ') then
-             pathname = FS_ROOT//'/proc/' // lprc(:nch) // '.prc'
+             pathname = FS_ROOT//'/proc/' // lprc2(:nch) // '.prc'
           else
              pathname = FS_ROOT//'/proc/' // link(:trimlen(link))
           endif
           call ftn_purge(pathname,ierr)
 C                     Purge the old version of the file
-          call fs_get_lprc(ilprc)
-          call hol2char(ilprc,1,8,lprc)
-          nch = trimlen(lprc)
+          call fs_get_lprc2(ilprc2)
+          call hol2char(ilprc2,1,MAX_SKD,lprc2)
+          nch = trimlen(lprc2)
           if(link.eq.' ') then
-             pathname2= FS_ROOT//'/proc/' // lprc(:nch) // '.prx'
+             pathname2= FS_ROOT//'/proc/' // lprc2(:nch) // '.prx'
           else
              iprc=index(link,".prc")
              link(iprc+3:iprc+3)='x'
@@ -114,12 +114,14 @@ C                     Rename the edited version to the proper name
             call logit7ci(0,0,0,1,-127,'bo',ierr2)
             ierr2 = 0
           else
-            call fs_get_lprc(ilprc)
-            call hol2char(ilprc,1,8,lprc)
-            call opnpf(lprc,idcbp1,ibuf,iblen,lproc1,maxpr1,nproc1,ierr,
-     &               'o')
-            lnewsk = ' '
-            call char2hol(lnewsk,ilnewsk,1,12)
+            call fs_get_lprc2(ilprc2)
+            call hol2char(ilprc2,1,MAX_SKD,lprc2)
+            call opnpf(lprc2,idcbp1,ibuf,iblen,lproc1,maxpr1,nproc1,
+     &               ierr,'o')
+            lnewsk2 = ' '
+            call char2hol(lnewsk2,ilnewsk2,1,MAX_SKD)
+            call fs_set_lnewsk2(ilnewsk2)
+            call char2hol(lnewsk2,ilnewsk,1,8)
             call fs_set_lnewsk(ilnewsk)
           endif
         endif

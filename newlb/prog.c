@@ -1382,6 +1382,18 @@ void fs_get_lnewsk__(LNEWSK)
 	  memcpy(LNEWSK,shm_addr->LNEWSK,N);
 	}
 
+void fs_set_lnewsk2__(LNEWSK2)
+	int *LNEWSK2;
+	{
+          memcpy(shm_addr->LNEWSK2, LNEWSK2, MAX_SKD);
+	}
+
+void fs_get_lnewsk2__(LNEWSK2)
+	int *LNEWSK2;
+	{
+	  memcpy(LNEWSK2,shm_addr->LNEWSK2,MAX_SKD);
+	}
+
 void fs_set_lprc__(LPRC)
 	int *LPRC;
 	{

@@ -54,7 +54,7 @@ C
       include 'pfmed.i'
 C
 C        LPRC2   - current schedule procedure library
-C        LNEWSK  - flag for 2nd copy of schedule procedure library
+C        LNEWSK2 - flag for 2nd copy of schedule procedure library
 C                  (<>0 if copy exists)
 C        LNEWPR2 - flag for 2nd copy of station procedure library
 C
@@ -80,9 +80,9 @@ C     Before reading a procedure file.
 C     If file to be read is not second copy, release lock.
       call fs_get_lnewpr2(ilnewpr2)
       call hol2char(ilnewpr2,1,MAX_SKD,lnewpr2)
-      call fs_get_lnewsk(ilnewsk)
-      call hol2char(ilnewsk,1,8,lnewsk)
-      if ((lp.ne.lnewsk.and.lp.ne.lnewpr2).or.(.not.kboss_pf)) then
+      call fs_get_lnewsk2(ilnewsk2)
+      call hol2char(ilnewsk2,1,MAX_SKD,lnewsk2)
+      if ((lp.ne.lnewsk2.and.lp.ne.lnewpr2).or.(.not.kboss_pf)) then
 C     Set file name for reading.
         lfr(1:4)='.prc'
       else
@@ -103,8 +103,8 @@ C     Set name.
 C     If library to be replaced is not current to BOSS, purge old and rename.
       call fs_get_lnewpr2(ilnewpr2)
       call hol2char(ilnewpr2,1,MAX_SKD,lnewpr2)
-      call fs_get_lnewsk(ilnewsk)
-      call hol2char(ilnewsk,1,8,lnewsk)
+      call fs_get_lnewsk2(ilnewsk2)
+      call hol2char(ilnewsk2,1,MAX_SKD,lnewsk2)
       call fs_get_lprc2(ilprc2)
       call hol2char(ilprc2,1,MAX_SKD,lprc2)
       call fs_get_lstp2(ilstp2)
@@ -140,7 +140,7 @@ C     If library to be replaced is not current to BOSS, purge old and rename.
           if(kerr(ierr2,me,'renaming',fname,0,0)) return
         end if
 C     If library is second copy, purge old, rename, and schedule BOSS.
-      else if(lp.eq.lnewsk.or.lp.eq.lnewpr2) then
+      else if(lp.eq.lnewsk2.or.lp.eq.lnewpr2) then
         lfr(1:4)='.prx'
         call fclose(idcb1,ierr)
         if(kerr(ierr,me,'closing',' ',0,0)) return
@@ -201,8 +201,10 @@ c       if(kerr(ierr,me,'purging',fname,0,0)) return
         end if
         call fs_get_lprc2(ilprc2)
         call hol2char(ilprc2,1,MAX_SKD,lprc2)
-        if(lprc2.eq.lp) lnewsk=lp
-        call char2hol(lnewsk,ilnewsk,1,8)
+        if(lprc2.eq.lp) lnewsk2=lp
+        call char2hol(lnewsk2,ilnewsk2,1,MAX_SKD)
+        call fs_set_lnewsk2(ilnewsk2)
+        call char2hol(lnewsk2,ilnewsk,1,8)
         call fs_set_lnewsk(ilnewsk)
         call fs_get_lstp2(ilstp2)
         call hol2char(ilstp2,1,MAX_SKD,lstp2)
