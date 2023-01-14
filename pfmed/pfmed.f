@@ -37,7 +37,7 @@ C 2.2.   COMMON BLOCKS USED:
 C
       include '../include/fscom.i'
 C
-C        LPRC   - current schedule procedure library
+C        LPRC2  - current schedule procedure library
 C        LNEWSK - next version of procedure library
 C        LNEWPR - next version of station procedure library
 C
@@ -140,8 +140,10 @@ C
 1103      format(a)
           goto 990
         end if
-        lprc='none'
-        call char2hol(lprc,ilprc,1,8)
+        lprc2='none'
+        call char2hol(lprc2,ilprc2,1,MAX_SKD)
+        call fs_set_lprc2(ilprc2)
+        call char2hol(lprc2,ilprc,1,8)
         call fs_set_lprc(ilprc)
       else
         irnprc = rn_take('pfmed',1)
@@ -157,22 +159,22 @@ C     Set active procedure library for PFMED to schedule procedure library or
 C     station procedure library.
 C
 C FOLLOWING VARIABLES WERE LOCKED & MAY BE GRABBED ONCE AND SET LATER AT END
-      call fs_get_lprc(ilprc)
-      call hol2char(ilprc,1,8,lprc)
+      call fs_get_lprc2(ilprc2)
+      call hol2char(ilprc2,1,MAX_SKD,lprc2)
       call fs_get_lstp(ilstp)
       call hol2char(ilstp,1,8,lstp)
       call fs_get_lnewsk(ilnewsk)
       call hol2char(ilnewsk,1,8,lnewsk)
       call fs_get_lnewpr(ilnewpr)
       call hol2char(ilnewpr,1,8,lnewpr)
-      lproc = lprc
+      lproc = lprc2
       if(lproc.eq.'none') lproc=lstp
 C
 C  Print messages about current procedure libraries
 C
-      nch=trimlen(lprc)
+      nch=trimlen(lprc2)
       write(lui,2102)
-     & 'current FS schedule procedure library:     '// lprc(1:nch)
+     & 'current FS schedule procedure library:     '// lprc2(1:nch)
 2102  format(a)
       if (kboss_pf) then
         nch=trimlen(lstp)
@@ -276,7 +278,7 @@ C     Check mode.
           call fed(lui,luo,cib,ichi,lproc,ldef)
           call ldsrt(ibsrt,nprc,idcb3,ierr)      ! Reload names 
         else if (cib(1:2).eq.'pf') then
-          call ffm(lui,luo,cib,ichi,lproc,lprc,lstp,lnewsk,lnewpr)
+          call ffm(lui,luo,cib,ichi,lproc,lprc2,lstp,lnewsk,lnewpr)
         else
           call ffmp(lui,luo,cib,ichi,lproc,ldef,ibsrt,nprc)
         endif
@@ -296,7 +298,9 @@ C     Exit.
       endif
 
 C      ABOUT TO UNLOCK: RESETTING VARS
-      call char2hol(lprc,ilprc,1,8)
+      call char2hol(lprc2,ilprc2,1,MAX_SKD)
+      call fs_set_lprc2(ilprc2)
+      call char2hol(lprc2,ilprc,1,8)
       call fs_set_lprc(ilprc)
       call char2hol(lstp,ilstp,1,8)
       call fs_set_lstp(ilstp)

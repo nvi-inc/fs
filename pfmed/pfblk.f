@@ -53,7 +53,7 @@ C
       include '../include/fscom.i'
       include 'pfmed.i'
 C
-C        LPRC    - current schedule procedure library
+C        LPRC2   - current schedule procedure library
 C        LNEWSK  - flag for 2nd copy of schedule procedure library
 C                  (<>0 if copy exists)
 C        LNEWPR  - flag for 2nd copy of station procedure library
@@ -105,11 +105,11 @@ C     If library to be replaced is not current to BOSS, purge old and rename.
       call hol2char(ilnewpr,1,8,lnewpr)
       call fs_get_lnewsk(ilnewsk)
       call hol2char(ilnewsk,1,8,lnewsk)
-      call fs_get_lprc(ilprc)
-      call hol2char(ilprc,1,8,lprc)
+      call fs_get_lprc2(ilprc2)
+      call hol2char(ilprc2,1,MAX_SKD,lprc2)
       call fs_get_lstp(ilstp)
       call hol2char(ilstp,1,8,lstp)
-      if((lp.ne.lstp.and.lp.ne.lprc).or.(.not.kboss_pf)) then
+      if((lp.ne.lstp.and.lp.ne.lprc2).or.(.not.kboss_pf)) then
         lfr(1:4)='.prc'
         call fclose(idcb1,ierr)
         if(kerr(ierr,me,'closing',' ',0,0)) return
@@ -199,9 +199,9 @@ c       if(kerr(ierr,me,'purging',fname,0,0)) return
           if(kerr(ierr1,me,'renaming',lsf2,0,0)) continue
           if(kerr(ierr2,me,'renaming',fname,0,0)) return
         end if
-        call fs_get_lprc(ilprc)
-        call hol2char(ilprc,1,8,lprc)
-        if(lprc.eq.lp) lnewsk=lp
+        call fs_get_lprc2(ilprc2)
+        call hol2char(ilprc2,1,MAX_SKD,lprc2)
+        if(lprc2.eq.lp) lnewsk=lp
         call char2hol(lnewsk,ilnewsk,1,8)
         call fs_set_lnewsk(ilnewsk)
         call fs_get_lstp(ilstp)
