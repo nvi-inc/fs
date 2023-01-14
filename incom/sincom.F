@@ -238,8 +238,10 @@ C                   Initialize previous segment name for LINKP
       ilowtp(1) = 1
       ilowtp(2) = 1
       ibyp=1
-      lexper = ' '
-      call char2hol(lexper,ilexper,1,8)
+      lexper2 = ' '
+      call char2hol(lexper2,ilexper2,1,MAX_SKD)
+      call fs_set_lexper2(ilexper2)
+      call char2hol(lexper2,ilexper,1,8)
       call fs_set_lexper(ilexper)
       call char2hol('00000000',ltrken(1),1,8)
       call char2hol('00000000',ltpnum(1,1),1,8)

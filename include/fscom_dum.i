@@ -75,7 +75,7 @@ c
      . idevds(32), hostpc_fs(40), wx_host(33), ILLOG2((MAX_SKD+1)/2),
      . ILPRC2((MAX_SKD+1)/2),ILSKD2((MAX_SKD+1)/2),
      . ILSTP2((MAX_SKD+1)/2),ILNEWPR2((MAX_SKD+1)/2),
-     . ILNEWSK2((MAX_SKD+1)/2)
+     . ILNEWSK2((MAX_SKD+1)/2),ILEXPER2((MAX_SKD+1)/2)
 
       common/fscom_dum/
      . ra50, dec50, radat, decdat, alat, wlong,
@@ -140,6 +140,7 @@ c
       character*32 fortran
       character*16 dbbc3_ddcv_vs
       character*(MAX_SKD) LLOG2,LPRC2,LSKD2,LSTP2,LNEWPR2,LNEWSK2
+      character*(MAX_SKD) LEXPER2
 c
       common/fscom_dum2/ LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP,
      $                   dbbcddcvs, dbbcpfbvs, fila10gvsi_in, dbbcddcvl,
@@ -148,5 +149,5 @@ c
      $                   dbbc3_ddcu_vs,
      $                   sVerRelease_FS,fortran,
      $                   dbbc3_ddcv_vs,LLOG2,LPRC2,LSKD2,LSTP2,LNEWPR2,
-     $                   LNEWSK2
+     $                   LNEWSK2,LEXPER2
 

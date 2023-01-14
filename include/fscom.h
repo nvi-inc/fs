@@ -530,4 +530,5 @@ typedef struct fscom {
   char LSTP2[MAX_SKD];
   char LNEWPR2[MAX_SKD];
   char LNEWSK2[MAX_SKD];
+  char LEXPER2[MAX_SKD];
 } Fscom;

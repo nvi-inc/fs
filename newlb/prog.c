@@ -800,6 +800,18 @@ void fs_get_lexper__(LEXPER)
 	  memcpy(LEXPER,shm_addr->LEXPER,N);
 	}
 
+void fs_set_lexper2__(LEXPER2)
+	int *LEXPER2;
+	{
+	  memcpy(shm_addr->LEXPER2,LEXPER2,MAX_SKD);
+	}
+
+void fs_get_lexper2__(LEXPER2)
+	int *LEXPER2;
+	{
+	  memcpy(LEXPER2,shm_addr->LEXPER2,MAX_SKD);
+	}
+
 void fs_set_inext__(INEXT)
 	short *INEXT;
         
