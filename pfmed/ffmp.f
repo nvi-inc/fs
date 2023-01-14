@@ -74,7 +74,7 @@ C                         ICHCM, IFILL, MIN0, PFBLK, PFCOP, TRIMLEN
   
 C 3.  LOCAL VARIABLES
 C
-      character*8 lpf
+      character*(MAX_SKD) lpf
 c                 - procedure library name without extension
       character*4 lfr
 c                 -file extension with leading dot

@@ -51,6 +51,7 @@ C               - Field System schedule procedure library
 C
 C 2.2.   COMMON BLOCKS USED:
 C
+      include '../include/params.i'
       include 'pfmed.i'
 C
 C 2.3.   DATA BASE ACCESSES: none
@@ -72,7 +73,7 @@ C                         IDTYP, IFILL, MIN0, PFBLK, PFCOP
 C
 C 3.  LOCAL VARIABLES
 C
-      character*8 lnam1,lnam2
+      character*(MAX_SKD) lnam1,lnam2
 C               - procedure library names without extensions
       character*4 lfr
 C               - procedure library extension with leading '.'
@@ -89,7 +90,7 @@ C
       character*64 pathname,pathname2,link
       integer trimlen
       integer iret
-      character*8 sl1,sl2,sl4
+      character*(MAX_SKD) sl1,sl2,sl4
       character*40 cmessage
       logical kex,kest,kerr
       character*3 me
@@ -239,8 +240,8 @@ C  "A" for schedule procedure library in FS
                 ibc(ix-1:ix-1) = '>'
               endif
 c space over past that name
-              ix=ix+14
-              if (ix.gt.60) then
+              ix=ix+MAX_SKD+4
+              if (ix.gt.80-MAX_SKD) then
                 nch = trimlen(ibc)
                 if (nch.gt.0) write(luo,7701) ibc(:nch)
                 ix = 3

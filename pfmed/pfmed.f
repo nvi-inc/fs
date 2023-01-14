@@ -68,7 +68,7 @@ C        ICHI   - number of characters from keyboard
 C        LPROC  - active procedure library for PFMED
       dimension ib(51)
 C               - line and record buffer
-      character*8 lproc
+      character*(MAX_SKD) lproc
       character cret
       integer fnblnk,ipos
       integer trimlen, rn_take

@@ -49,9 +49,9 @@ C                - correct extension with leading dot for reading
 C
 C 2.2.   COMMON BLOCKS USED:
 C
-      include 'pfmed.i'
 C
       include '../include/fscom.i'
+      include 'pfmed.i'
 C
 C        LPRC    - current schedule procedure library
 C        LNEWSK  - flag for 2nd copy of schedule procedure library
