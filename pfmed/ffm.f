@@ -367,11 +367,17 @@ C     PFST - transfer from existing library to library created by this command.
 C     Open file.
         call pfblk(1,lnam1,lfr)
         pathname ='/usr2/proc/' // lnam1(1:nch1) // lfr(1:4)
+        inquire (FILE=pathname,EXIST=kest)
+        if(.not.kest) then
+          inch=trimlen(pathname)
+          write(lui,1112) pathname(:inch)
+1112      format(" error, file ",a," doesn't exist")
+          goto 920
+        end if
         call fopen(idcb1,pathname,ierr)
         if(ierr.lt.0) then
-          write(lui,1112) pathname
-1112      format(" error opening file ",a)
-          kest = .true.
+          write(lui,1114) pathname
+          goto 920
         end if
 C     Create new file.
         pathname2 = '/usr2/proc/' // lnam2(1:nch2) // '.prc'
@@ -385,6 +391,11 @@ C   by mistake
           goto 900
         end if
         call fopen(idcb2,pathname2,ierr)
+        if(ierr.lt.0) then
+          write(lui,1114) pathname2
+1114      format(" error opening file ",a)
+          goto 920
+        end if
         do 710 ir=1,32767
           call f_readstring(idcb1,ierr,ibc,llen)
           if(ierr.lt.0.or.llen.lt.0) goto 720
