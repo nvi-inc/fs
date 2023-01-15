@@ -39,13 +39,13 @@ c
         do while (ichar(ibcd(in:in)).ne.32)
          in = in+1
         enddo
-        ibsrt(ix)=ibcd(is:is+12-1)
-        ix = ix+1
         if (ix.gt.MAX_PROC2) then
-          write(6,'("pfmed: Exceeded maximum number of procedures")') 
+          write(6,'("Exceeded maximum number of procedures")')
           scanp = MAX_PROC2 
           return
         endif
+        ibsrt(ix)=ibcd(is:is+12-1)
+        ix = ix+1
         is = in 
         do while (ichar(ibcd(is:is)).eq.32)
          is = is+1

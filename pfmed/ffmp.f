@@ -193,7 +193,7 @@ C       Write last line.
 
         if(ib(1:2).eq.'ds') then
          call sortp(ibsrt,nprc)
-         write (luo,'("Pfmed: Displayed ",i3," procedures in ", 
+         write (luo,'("Displayed",i5," procedures in ",
      &        "library ",a)') nprc,lproc(:trimlen(lproc))
         endif
 

@@ -36,9 +36,11 @@ C
 
 cc       write (6,'("SORTQ isrt(1): ",12a)') isrt(1)
 
-       do i = 1,nx
+       nx = nx -1   ! 010831 correct this
 
-         do j = 1,nx-i-1
+       do i = 1,nx-1
+
+         do j = 1,nx-i
            
            if (isrt(j).gt.isrt(j+1)) then
              temp = isrt(j) 
@@ -49,8 +51,6 @@ cc       write (6,'("SORTQ isrt(1): ",12a)') isrt(1)
          enddo
 
        enddo 
-
-       nx = nx -1   ! 010831 correct this 
 
        return 
        end

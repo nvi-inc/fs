@@ -33,8 +33,8 @@ c
         data nxmax/MAX_PROC2/
         data lu/6/
         
-        if (nx.gt.nxmax) then 
-          nx = nxmax
+        if (nx-1.gt.nxmax) then
+          nx = nxmax+1
           write (lu,'("Insufficient space to dislay full sort.")')
           return
         endif
