@@ -93,6 +93,7 @@ C
       character*40 cmessage
       logical kex,kest,kerr
       character*3 me
+      logical kactive
 C 4.  CONSTANTS USED
 C
       data me/'ffm'/
@@ -374,6 +375,15 @@ C     Open file.
 1112      format(" error, file ",a," doesn't exist")
           goto 920
         end if
+        kactive=lnam1.eq.lproc
+        if(kactive) then
+C
+C close the active library if it is the one being copied from because
+C gfortran doesn't allow a file to be opened on more than one unit
+C
+            call fclose(idcb3,ierr)
+            if(kerr(ierr,'ffmp','closing',pathname,0,0)) return
+        endif
         call fopen(idcb1,pathname,ierr)
         if(ierr.lt.0) then
           write(lui,1114) pathname
@@ -408,6 +418,11 @@ C   by mistake
         if(kerr(ierr,me,'closing',' ',0,0)) return
         call fclose(idcb1,ierr)
         if(kerr(ierr,me,'closing',' ',0,0)) return
+        if(kactive) then
+C has to be reopened if it was closed above
+            call fopen(idcb3,pathname,ierr)
+            if(kerr(ierr,'ffmp','opening',pathname,0,0)) return
+        endif
         goto 920
       end if
   

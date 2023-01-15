@@ -441,7 +441,7 @@ C
         kactive=lpf(:nch).eq.lproc(:trimlen(lproc))
         if(kactive) then
 C                
-C close the active library in case if it is the one being copied from because
+C close the active library if it is the one being copied from because
 C gfortran doesn't allow a file to be opened on more than one unit
 C 
             call fclose(idcb3,ierr)
@@ -494,12 +494,12 @@ C     Write ENDDEF.
         if(kerr(ierr,'ffmp','closing',' ',0,0)) return
 C     Release lock.
         call pfblk(2,lpf,lfr)
-C     Copy active library.
         if(kactive) then
 C has to be reopened if it was closed above
             call fopen(idcb3,pathname,ierr)
             if(kerr(ierr,'ffmp','opening',pathname,0,0)) return
         endif
+C     Copy active library.
         call f_rewind(idcb3,ierr)
         if(kerr(ierr,'ffmp','rewinding',' ',0,0)) return
         len = 0
