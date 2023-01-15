@@ -124,8 +124,7 @@ C     Set input and output LU's.
       if(luo.eq.0) luo=lui
       kboss_pf=kboss()
 C
-C     If the Field System is not running, check to see if BOSS is
-C     present.
+C     Check to see if another instance of PFMED is already active.
 C
       lstp = 'station'
       call char2hol(lstp,ilstp,1,8)
@@ -134,7 +133,7 @@ C
         irnprc = rn_take('pfmed',1)
         if (irnprc.eq.1) then
           write(lui,1101) 
-1101      format("pfmed is already locked")
+1101      format("It looks like pfmed is already running somewhere.")
           write(lui,1102) 
 1102      format("hit return to continue",$)
           read(5,1103) cret
