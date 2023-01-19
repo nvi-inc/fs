@@ -171,6 +171,21 @@ sub phsr {
 	    }
 	}
     }
+# eliminate a big gap that includes zero
+    $smallp=+200;
+    $smalln=-200;
+    for($k=0; $k<=$#$tref1;$k++) {
+	next if $$pref1[$k]!~/^$float_pattern$/;
+        $smallp = $$pref1[$k] if $$pref1[$k] > 0 && $$pref1[$k]<$smallp;
+        $smalln = $$pref1[$k] if $$pref1[$k] < 0 && $$pref1[$k]>$smalln;
+    }
+    if($smallp <199 && $smalln >-199 && $smallp - $smalln > 180) {
+        for($k=0; $k<=$#$tref1;$k++) {
+	    next if $$pref1[$k]!~/^$float_pattern$/;
+            $$pref1[$k]+=360 if $$pref1[$k]<0;
+        }
+    }
+
     &vu($tref1,$pref1,"Phase $tone2-$tone1");
 }
 sub phs {
@@ -206,6 +221,20 @@ sub phs {
 		$$pref1[$k]+=360;
 	    }
 	}
+    }
+# eliminate a big gap that includes zero
+    $smallp=+200;
+    $smalln=-200;
+    for($k=0; $k<=$#$tref1;$k++) {
+	next if $$pref1[$k]!~/^$float_pattern$/;
+        $smallp = $$pref1[$k] if $$pref1[$k] > 0 && $$pref1[$k]<$smallp;
+        $smalln = $$pref1[$k] if $$pref1[$k] < 0 && $$pref1[$k]>$smalln;
+    }
+    if($smallp <199 && $smalln >-199 && $smallp - $smalln > 180) {
+        for($k=0; $k<=$#$tref1;$k++) {
+	    next if $$pref1[$k]!~/^$float_pattern$/;
+            $$pref1[$k]+=360 if $$pref1[$k]<0;
+        }
     }
     &vu($tref1,$pref1,"Phase diff $pcall[$n][$j]-$pcall[$m][$i]");
 }
