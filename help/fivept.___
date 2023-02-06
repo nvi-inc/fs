@@ -116,14 +116,14 @@ flux,ctl file for the source being observed.well.
 If the noise diode temperature is less than zero, it is assumed that
 there is no noise diode to use. All power measurements will be made
 assuming the absolute value of the diode temperature is the system
-temperature. Thus if the noise diode temperature is -100, the power
-measurements will come out as a percentage of the system
-temperature. The SEFD should still be useful measurement.
+temperature. Thus if the noise diode temperature is -100, the (net)
+antenna temperature measurements will come out as a percentage of the
+system temperature. The SEFD should still be a useful measurement.
 
-For continuous calibration with a DBBC rack with an IF detector
-selected, there is no noise diode available. In this case the diode
-temperature is assumed to be -100 and the effects of the preceding
-paragraph apply.
+For continuous calibration for an IF detector in a DBBC rack, there
+are no separate cal-on and cal-off data. In this case, the total power
+detector is used with an (internally) assumed the diode temperature of
+-100. As a result, the effects of the preceding paragraph apply.
 
 For continuous calibration with a DBBC, the Tsys measurements samples
 are the larger of the specified integration time and the samples

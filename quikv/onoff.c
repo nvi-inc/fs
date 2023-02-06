@@ -586,6 +586,10 @@ int ip[5];                           /* ipc parameters */
 	    lcl.fwhm=lcl.devices[i].fwhm>lcl.fwhm
 	      ?lcl.devices[i].fwhm : lcl.fwhm;
 	    
+	    if(shm_addr->equip.rack==DBBC && shm_addr->dbbc_cont_cal.mode == 1 &&
+              lcl.devices[i].lwhat[0] == 'i' && lcl.devices[i].tcal >=0)
+		 lcl.devices[i].tcal=-100;
+
 	    lcl.devices[i].flux=flux_val(lsorna,&shm_addr->flux,
 					 lcl.devices[i].center,
 					 epoch,

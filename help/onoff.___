@@ -119,17 +119,20 @@ omitted since they are not usually useful. They can be added by
 specifying them as additional devices.
  
 If a noise diode temperature is less than zero, it is assumed that
-there is no noise diode to use for that detector. All measurements for
-that detector will be made assuming the absolute value of the diode
-temperature is the system temperature. Thus if the noise diode
-temperature is -100 (a useful choice), the power measurements will
-come out as a percentage of the system temperature. Other quantities
-dependent on the noise diode will be displayed as 0.0.
+there is no noise diode to use for that detector. The only useful
+result value will be the SEFD. The Tsys value will be the noise diode
+temperature. Other quantities that depend on the noise diode will be
+displayed as 0.0.
 
-If either noise diode temperature is greater than zero, then two
-procedures must be available: calonnf and caloffnf, which are used to
-turn the noise diode on and off respectively. The recommended form for
-these procedures is:
+For continuous calibration with an IF detector in a DBBC rack, there
+are no separate cal-on and cal-off data. In this case, the total power
+detector is used with an (internally) assumed the diode temperature of
+-100. As a result, the effects of the preceding paragraph apply.
+
+For non-continuous cal, if any noise diode temperature is greater than
+zero, then two procedures must be available: calonnf and caloffnf,
+which are used to turn the noise diode on and off respectively. The
+recommended form for these procedures is:
 
 CALONNF:  calon
           !+1s

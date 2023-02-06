@@ -477,6 +477,11 @@ C  Now check the cal and freq values.
       fxfp_fs = fx
       ssizfp= ssize
       ichfp_fs = ichain
+      call fs_get_dbbc_cont_cal_mode(dbbc_cont_cal_mode)
+C there is no cont_cal for DBBC IFs
+      if(DBBC.eq.rack.and.dbbc_cont_cal_mode.eq.1.and.
+     &     calfp.ge.0.and.ichcm_ch(ldevfp,1,'i').eq.0)
+     &     calfp=-100
 c
       if(rack.eq.MK3.or.rack.eq.MK4) then
         if(cjchar(ldevfp,1).ne.'v') goto 504

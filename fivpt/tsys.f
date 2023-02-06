@@ -232,7 +232,8 @@ C
          vslope=calfp/(tpical-tpia)
          temps=(tpia-vbase)*vslope
       else if(rack.eq.RDBE .or.
-     &        ((rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.1).or.
+     &        ((rack.eq.DBBC.and.dbbc_cont_cal_mode.eq.1.and.
+     &           ichcm_ch(ldevfp,1,'i').ne.0).or.
      &        (rack.eq.DBBC3.and.dbbc3_cont_cal_mode.eq.1))) then
          if(calfp.gt.0) then
             vslope=calfp/(tpical-tpia)
