@@ -37,9 +37,9 @@ C 2.2.   COMMON BLOCKS USED:
 C
       include '../include/fscom.i'
 C
-C        LPRC   - current schedule procedure library
-C        LNEWSK - next version of procedure library
-C        LNEWPR - next version of station procedure library
+C        LPRC2   - current schedule procedure library
+C        LNEWSK2 - next version of procedure library
+C        LNEWPR2 - next version of station procedure library
 C
       include 'pfmed.i'
 C
@@ -68,7 +68,7 @@ C        ICHI   - number of characters from keyboard
 C        LPROC  - active procedure library for PFMED
       dimension ib(51)
 C               - line and record buffer
-      character*8 lproc
+      character*(MAX_SKD) lproc
       character cret
       integer fnblnk,ipos
       integer trimlen, rn_take
@@ -126,8 +126,10 @@ C     Set input and output LU's.
 C
 C     Check to see if another instance of PFMED is already active.
 C
-      lstp = 'station'
-      call char2hol(lstp,ilstp,1,8)
+      lstp2 = 'station'
+      call char2hol(lstp2,ilstp2,1,MAX_SKD)
+      call fs_set_lstp2(ilstp2)
+      call char2hol(lstp2,ilstp,1,8)
       call fs_set_lstp(ilstp)
       if (.not.kboss_pf) then
         irnprc = rn_take('pfmed',1)
@@ -140,8 +142,10 @@ C
 1103      format(a)
           goto 990
         end if
-        lprc='none'
-        call char2hol(lprc,ilprc,1,8)
+        lprc2='none'
+        call char2hol(lprc2,ilprc2,1,MAX_SKD)
+        call fs_set_lprc2(ilprc2)
+        call char2hol(lprc2,ilprc,1,8)
         call fs_set_lprc(ilprc)
       else
         irnprc = rn_take('pfmed',1)
@@ -157,27 +161,27 @@ C     Set active procedure library for PFMED to schedule procedure library or
 C     station procedure library.
 C
 C FOLLOWING VARIABLES WERE LOCKED & MAY BE GRABBED ONCE AND SET LATER AT END
-      call fs_get_lprc(ilprc)
-      call hol2char(ilprc,1,8,lprc)
-      call fs_get_lstp(ilstp)
-      call hol2char(ilstp,1,8,lstp)
-      call fs_get_lnewsk(ilnewsk)
-      call hol2char(ilnewsk,1,8,lnewsk)
-      call fs_get_lnewpr(ilnewpr)
-      call hol2char(ilnewpr,1,8,lnewpr)
-      lproc = lprc
-      if(lproc.eq.'none') lproc=lstp
+      call fs_get_lprc2(ilprc2)
+      call hol2char(ilprc2,1,MAX_SKD,lprc2)
+      call fs_get_lstp2(ilstp2)
+      call hol2char(ilstp2,1,MAX_SKD,lstp2)
+      call fs_get_lnewsk2(ilnewsk2)
+      call hol2char(ilnewsk2,1,MAX_SKD,lnewsk2)
+      call fs_get_lnewpr2(ilnewpr2)
+      call hol2char(ilnewpr2,1,MAX_SKD,lnewpr2)
+      lproc = lprc2
+      if(lproc.eq.'none') lproc=lstp2
 C
 C  Print messages about current procedure libraries
 C
-      nch=trimlen(lprc)
+      nch=trimlen(lprc2)
       write(lui,2102)
-     & 'current FS schedule procedure library:     '// lprc(1:nch)
+     & 'current FS schedule procedure library:     '// lprc2(1:nch)
 2102  format(a)
       if (kboss_pf) then
-        nch=trimlen(lstp)
+        nch=trimlen(lstp2)
         write(lui,2102)
-     &  'current FS station  procedure library:     '// lstp(1:nch)
+     &  'current FS station  procedure library:     '// lstp2(1:nch)
       else
         write(lui,2102)
      &  'current FS station  procedure library:     none'
@@ -276,7 +280,7 @@ C     Check mode.
           call fed(lui,luo,cib,ichi,lproc,ldef)
           call ldsrt(ibsrt,nprc,idcb3,ierr)      ! Reload names 
         else if (cib(1:2).eq.'pf') then
-          call ffm(lui,luo,cib,ichi,lproc,lprc,lstp,lnewsk,lnewpr)
+          call ffm(lui,luo,cib,ichi,lproc,lprc2,lstp2,lnewsk2,lnewpr2)
         else
           call ffmp(lui,luo,cib,ichi,lproc,ldef,ibsrt,nprc)
         endif
@@ -287,22 +291,30 @@ C     Exit.
       call fclose(idcb3,ierr)
       if(kerr(ierr,'pfmed','closing',' ',0,0)) continue
       if (((kboss_pf).and.(.not.kboss())).and.(knewpf)) then !boss was 'offed'
-        call fs_get_lnewsk(ilnewsk)
-        call hol2char(ilnewsk,1,8,lnewsk)
-        if (lnewsk.ne.' ') call reprc(lnewsk)
-        call fs_get_lnewpr(ilnewpr)
-        call hol2char(ilnewpr,1,8,lnewpr)
-        if (lnewpr.ne.' ') call reprc(lnewpr)
+        call fs_get_lnewsk2(ilnewsk2)
+        call hol2char(ilnewsk2,1,MAX_SKD,lnewsk2)
+        if (lnewsk2.ne.' ') call reprc(lnewsk2)
+        call fs_get_lnewpr2(ilnewpr2)
+        call hol2char(ilnewpr2,1,MAX_SKD,lnewpr2)
+        if (lnewpr2.ne.' ') call reprc(lnewpr2)
       endif
 
 C      ABOUT TO UNLOCK: RESETTING VARS
-      call char2hol(lprc,ilprc,1,8)
+      call char2hol(lprc2,ilprc2,1,MAX_SKD)
+      call fs_set_lprc2(ilprc2)
+      call char2hol(lprc2,ilprc,1,8)
       call fs_set_lprc(ilprc)
-      call char2hol(lstp,ilstp,1,8)
+      call char2hol(lstp2,ilstp2,1,MAX_SKD)
+      call fs_set_lstp2(ilstp2)
+      call char2hol(lstp2,ilstp,1,8)
       call fs_set_lstp(ilstp)
-      call char2hol(lnewsk,ilnewsk,1,8)
+      call char2hol(lnewsk2,ilnewsk2,1,MAX_SKD)
+      call fs_set_lnewsk2(ilnewsk2)
+      call char2hol(lnewsk2,ilnewsk,1,8)
       call fs_set_lnewsk(ilnewsk)
-      call char2hol(lnewpr,ilnewpr,1,8)
+      call char2hol(lnewpr2,ilnewpr2,1,MAX_SKD)
+      call fs_set_lnewpr2(ilnewpr2)
+      call char2hol(lnewpr2,ilnewpr,1,8)
       call fs_set_lnewpr(ilnewpr)
       call rn_put('pfmed')
       inquire(file=lsf2,exist=kex)

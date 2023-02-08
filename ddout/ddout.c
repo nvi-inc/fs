@@ -38,6 +38,7 @@
 #define FIRST_CHAR 21
 #define DEFAULT_WARN_SIZE 100
 #define WARN_SIZE_BUF 120
+#define LOG_DIR FS_ROOT "/log/"
 
 extern struct fscom *shm_addr;
 
@@ -50,14 +51,14 @@ main()
     char *llogndx;
     int irga;
     int ip[5];
-    char lnamef[65];
+    char lnamef[MAX_SKD+sizeof(LOG_DIR ".log")+1];
     char ibur[150];
     char buf[MAX_BUF+2];
     char buf2[MAX_BUF+2];
     char *iwhs, *iwhe;
     char bul[MAX_BUF+2];
-    char llog0[9];
-    char sllog[9], sllog0[9];
+    char llog0[MAX_SKD];
+    char sllog[MAX_SKD+1], sllog0[MAX_SKD+1];
     int rtn1, rtn2, status, bufl, bull, rtn1f, rtn2f;
     int irgb, iburl;
     char *ich, *cp1, *cp2, ch, iwhat[5], *ptrs, *prtn1;
@@ -308,15 +309,15 @@ Messenger:
       if(rtn2 == -1)
 	goto Bye;
 
-      strcpy(lnamef,"/usr2/log/");
-      llogndx = memccpy(sllog, shm_addr->LLOG, ' ', 8);
+      strcpy(lnamef,LOG_DIR);
+      llogndx = memccpy(sllog, shm_addr->LLOG2, ' ', MAX_SKD);
       if(llogndx!=NULLPTR) {
 	if(llogndx!=sllog)
 	  *(llogndx-1)=0;
 	else
 	  llogndx[0]=0;
       } else
-	sllog[8]=0;
+	sllog[MAX_SKD]=0;
 
       strcat(lnamef, sllog);
       strcat(lnamef, ".log");
@@ -325,47 +326,48 @@ Messenger:
       if (fd < 0) {  /* if open/create failed, try recovering */
 	shm_addr->abend.other_error=1;
 	fprintf(stderr,
-		"\007!! help! ** error opening/creating log file %.8s\n",
+		"\007!! help! ** error opening/creating log file %s\n",
 		sllog);
 	play_wav(1);
 	perror("!! help! ** ddout");
 	  
 	/* try previous log file now */
-	llogndx = memccpy(sllog0,llog0, ' ', 8);
+	llogndx = memccpy(sllog0,llog0, ' ', MAX_SKD);
 	if(llogndx!=NULLPTR) {
 	  if(llogndx!=sllog0)
 	    *(llogndx-1)=0;
 	  else
 	    llogndx[0]=0;
 	} else
-	  sllog0[8]=0;
+	  sllog0[MAX_SKD]=0;
 	if (strcmp(sllog, sllog0)!=0 && llog0[0]!=0) {
 	  strcpy(sllog, sllog0);
-	  strcpy(lnamef, "/usr2/log/");
+	  strcpy(lnamef, LOG_DIR);
 	  strcat(lnamef, sllog);
 	  strcat(lnamef, ".log");
 	  fprintf(stderr,
-		  "\007!! help! ** now trying to re-open log file %.8s\n",
+		  "\007!! help! ** now trying to re-open log file %s\n",
 		  sllog);
 	  play_wav(1);
 	  fd = open(lnamef, O_RDWR|O_CREAT,PERMISSIONS);
 	  rte_rawt(&last_sync);
 	  if(fd >=0) {
+	    memcpy(shm_addr->LLOG2,llog0,MAX_SKD);
 	    memcpy(shm_addr->LLOG,llog0,8);
 	    fprintf(stderr,
-		    "\007!! help! ** succesfully re-opened log file %.8s\n",
+		    "\007!! help! ** succesfully re-opened log file %s\n",
 		    sllog);
 	    play_wav(1);
 	  } else {
 	    fprintf(stderr,
-		    "\007!! help! ** error re-opening log file %.8s\n",sllog);
+		    "\007!! help! ** error re-opening log file %s\n",sllog);
 	    play_wav(1);
 	    perror("!! help! ** ddout");
 	  }
 	}
       }
       if(fd >= 0) {
-	memcpy(llog0, shm_addr->LLOG,8);
+	memcpy(llog0, shm_addr->LLOG2,MAX_SKD);
 	offset= lseek(fd, 0L, SEEK_END);
 	if (offset > 0) {
 	  offset=lseek(fd, -1L, SEEK_END);
@@ -692,7 +694,7 @@ Trouble:
     if(knl) {
       shm_addr->abend.other_error=1;
       fprintf(stderr,
-	      "\007!! help! ** log file '%.8s' not open, can't write to disk\n",
+	      "\007!! help! ** log file '%s' not open, can't write to disk\n",
 	     sllog);
       play_wav(1);
     }

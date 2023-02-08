@@ -606,7 +606,7 @@ while (1) {
   if(1==rdtcn_control.stop_request ||
      (rdtcn_control.continuous == 0 &&
       (rdtcn_control.data_valid.user_dv ==0 || shm_addr->KHALT !=0 ||
-       0==strncmp(shm_addr->LSKD,"none    ",8)))) {
+       0==strncmp(shm_addr->LSKD2,"none ",5)))) {
     loop_count=-1;
     continue;
   }

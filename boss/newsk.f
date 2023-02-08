@@ -65,10 +65,12 @@ C  If 1st line is a comment, get experiment name here
       call gtfld(ib,nch,ibl*2,icf,ic2)
       if(icf.eq.0) goto 99
       nc = min0(8,ic2-icf+1)
-      lexper=' '
-      call ifill_ch(ilexper,1,8,' ')
-      idummy = ichmv(ilexper,1,ib,icf,nc)
-      call hol2char(ilexper,1,8,lexper)
+      lexper2=' '
+      call ifill_ch(ilexper2,1,MAX_SKD,' ')
+      idummy = ichmv(ilexper2,1,ib,icf,nc)
+      call hol2char(ilexper2,1,MAX_SKD,lexper2)
+      call fs_set_lexper2(ilexper2)
+      call char2hol(lexper2,ilexper,1,8)
       call fs_set_lexper(ilexper)
 C
 C count all the leading comments in the schdeule

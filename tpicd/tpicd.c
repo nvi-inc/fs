@@ -176,7 +176,7 @@ main()
 #endif
   if(tpicd.continuous==0 && tpicd.tsys_request==0 &&
      ((data_valid[0].user_dv ==0 && data_valid[1].user_dv ==0)||
-      shm_addr->KHALT !=0 || 0==strncmp(shm_addr->LSKD,"none    ",8)))
+      shm_addr->KHALT !=0 || 0==strncmp(shm_addr->LSKD2,"none ",5)))
     goto loop;
 
   if(tpicd.cycle<=0)

@@ -57,17 +57,25 @@ C
       inext(2)=0
       inext(3)=0
       call fs_set_inext(inext)
-      lprc = 'none'
-      call char2hol(lprc,ilprc,1,8)
+      lprc2 = 'none'
+      call char2hol(lprc2,ilprc2,1,MAX_SKD)
+      call fs_set_lprc2(ilprc2)
+      call char2hol(lprc2,ilprc,1,8)
       call fs_set_lprc(ilprc)
-      lskd = 'none'
-      call char2hol(lskd,ilskd,1,8)
+      lskd2 = 'none'
+      call char2hol(lskd2,ilskd2,1,MAX_SKD)
+      call fs_set_lskd2(ilskd2)
+      call char2hol(lskd2,ilskd,1,8)
       call fs_set_lskd(ilskd)
-      lnewpr = ' '
-      call char2hol(lnewpr,ilnewpr,1,8)
+      lnewpr2 = ' '
+      call char2hol(lnewpr2,ilnewpr2,1,MAX_SKD)
+      call fs_set_lnewpr2(ilnewpr2)
+      call char2hol(lnewpr2,ilnewpr,1,8)
       call fs_set_lnewpr(ilnewpr)
-      lnewsk = ' '
-      call char2hol(lnewsk,ilnewsk,1,8)
+      lnewsk2 = ' '
+      call char2hol(lnewsk2,ilnewsk2,1,MAX_SKD)
+      call fs_set_lnewsk2(ilnewsk2)
+      call char2hol(lnewsk2,ilnewsk,1,8)
       call fs_set_lnewsk(ilnewsk)
       do i=1,31
         tpzero(i)=0
@@ -230,8 +238,10 @@ C                   Initialize previous segment name for LINKP
       ilowtp(1) = 1
       ilowtp(2) = 1
       ibyp=1
-      lexper = ' '
-      call char2hol(lexper,ilexper,1,8)
+      lexper2 = ' '
+      call char2hol(lexper2,ilexper2,1,MAX_SKD)
+      call fs_set_lexper2(ilexper2)
+      call char2hol(lexper2,ilexper,1,8)
       call fs_set_lexper(ilexper)
       call char2hol('00000000',ltrken(1),1,8)
       call char2hol('00000000',ltpnum(1,1),1,8)
@@ -485,8 +495,10 @@ C
       ifamst(2) = 1
       ifamst(3) = 1
 C
-      llog='        '
-      call char2hol(llog,illog,1,8)
+      llog2=' '
+      call char2hol(llog2,illog2,1,MAX_SKD)
+      call fs_set_llog2(illog2)
+      call char2hol(llog2,illog,1,8)
       call fs_set_llog(illog) 
   
       call char2hol(' ',lfeet_fs(1,1),1,6)

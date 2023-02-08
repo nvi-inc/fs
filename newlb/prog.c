@@ -800,6 +800,18 @@ void fs_get_lexper__(LEXPER)
 	  memcpy(LEXPER,shm_addr->LEXPER,N);
 	}
 
+void fs_set_lexper2__(LEXPER2)
+	int *LEXPER2;
+	{
+	  memcpy(shm_addr->LEXPER2,LEXPER2,MAX_SKD);
+	}
+
+void fs_get_lexper2__(LEXPER2)
+	int *LEXPER2;
+	{
+	  memcpy(LEXPER2,shm_addr->LEXPER2,MAX_SKD);
+	}
+
 void fs_set_inext__(INEXT)
 	short *INEXT;
         
@@ -1285,6 +1297,18 @@ void fs_get_llog__(LLOG)
 	  memcpy(LLOG,shm_addr->LLOG,N);
 	}
 
+void fs_set_llog2__(LLOG2)
+	int *LLOG2;
+	{
+	  memcpy(shm_addr->LLOG2,LLOG2,MAX_SKD);
+	}
+
+void fs_get_llog2__(LLOG2)
+	int *LLOG2;
+	{
+	  memcpy(LLOG2,shm_addr->LLOG2,MAX_SKD);
+	}
+
 void fs_set_lfeet_fs__(LFEET_FS,i)
 	char *LFEET_FS;
 	int *i;
@@ -1342,6 +1366,18 @@ void fs_get_lnewpr__(LNEWPR)
 	  memcpy(LNEWPR,shm_addr->LNEWPR,N);
 	}
 
+void fs_set_lnewpr2__(LNEWPR2)
+	int *LNEWPR2;
+	{
+	  memcpy(shm_addr->LNEWPR2,LNEWPR2,MAX_SKD);
+	}
+
+void fs_get_lnewpr2__(LNEWPR2)
+	int *LNEWPR2;
+	{
+	  memcpy(LNEWPR2,shm_addr->LNEWPR2,MAX_SKD);
+	}
+
 void fs_set_lnewsk__(LNEWSK)
 	int *LNEWSK;
 	{
@@ -1356,6 +1392,18 @@ void fs_get_lnewsk__(LNEWSK)
           size_t N;
 	  N = LNEWSK_N;
 	  memcpy(LNEWSK,shm_addr->LNEWSK,N);
+	}
+
+void fs_set_lnewsk2__(LNEWSK2)
+	int *LNEWSK2;
+	{
+          memcpy(shm_addr->LNEWSK2, LNEWSK2, MAX_SKD);
+	}
+
+void fs_get_lnewsk2__(LNEWSK2)
+	int *LNEWSK2;
+	{
+	  memcpy(LNEWSK2,shm_addr->LNEWSK2,MAX_SKD);
 	}
 
 void fs_set_lprc__(LPRC)
@@ -1374,6 +1422,18 @@ void fs_get_lprc__(LPRC)
 	  memcpy(LPRC,shm_addr->LPRC,N);
 	}
 
+void fs_set_lprc2__(LPRC2)
+	int *LPRC2;
+	{
+	  memcpy(shm_addr->LPRC2,LPRC2,MAX_SKD);
+	}
+
+void fs_get_lprc2__(LPRC2)
+	int *LPRC2;
+	{
+	  memcpy(LPRC2,shm_addr->LPRC2,MAX_SKD);
+	}
+
 void fs_set_lstp__(LSTP)
 	int *LSTP;
 	{
@@ -1388,6 +1448,18 @@ void fs_get_lstp__(LSTP)
           size_t N;
 	  N = LSTP_N;
 	  memcpy(LSTP,shm_addr->LSTP,N);
+	}
+
+void fs_set_lstp2__(LSTP2)
+	int *LSTP2;
+	{
+	  memcpy(shm_addr->LSTP2,LSTP2,MAX_SKD);
+	}
+
+void fs_get_lstp2__(LSTP2)
+	int *LSTP2;
+	{
+	  memcpy(LSTP2,shm_addr->LSTP2,MAX_SKD);
 	}
 
 void fs_set_hwid__(hwid)
@@ -1416,6 +1488,18 @@ void fs_get_lskd__(LSKD)
           size_t N;
           N = LSKD_N;
           memcpy(LSKD,shm_addr->LSKD,N);
+	}
+
+void fs_set_lskd2__(LSKD2)
+	int *LSKD2;
+	{
+          memcpy(shm_addr->LSKD2,LSKD2,MAX_SKD);
+        }
+
+void fs_get_lskd2__(LSKD2)
+	int *LSKD2;
+	{
+          memcpy(LSKD2,shm_addr->LSKD2,MAX_SKD);
 	}
 
 void fs_set_rack__(rack)

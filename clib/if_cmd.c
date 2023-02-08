@@ -262,12 +262,12 @@ int if_cmd(ibuf,nchar)
     if(NULL!=ptr)
       ptr2=strtok(NULL,":");
     if(NULL==ptr || NULL==ptr2)
-      if(!strncmp(shm_addr->LSKD,"none    ",8))
+      if(!strncmp(shm_addr->LSKD2,"none ",5))
 	strcpy(ibuf,ptr_false);
       else
 	strcpy(ibuf,ptr_true);
     else
-      if(!strncmp(shm_addr->LSKD,ptr2,strlen(ptr2)))
+      if(!strncmp(shm_addr->LSKD2,ptr2,strlen(ptr2)))
 	strcpy(ibuf,ptr_true);
       else
 	strcpy(ibuf,ptr_false);

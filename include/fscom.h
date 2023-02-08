@@ -524,4 +524,11 @@ typedef struct fscom {
   } dbbc3_tsys_data;
   unsigned dbbc3_command_count;
   int dbbc3_command_active;
+  char LLOG2[MAX_SKD];
+  char LPRC2[MAX_SKD];
+  char LSKD2[MAX_SKD];
+  char LSTP2[MAX_SKD];
+  char LNEWPR2[MAX_SKD];
+  char LNEWSK2[MAX_SKD];
+  char LEXPER2[MAX_SKD];
 } Fscom;

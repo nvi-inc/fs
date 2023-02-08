@@ -62,7 +62,7 @@ int ip[5];                           /* ipc parameters */
 	goto error;
       }
 
-      if(0!=memcmp(shm_addr->LSKD,"none ",5) &&
+      if(0!=memcmp(shm_addr->LSKD2,"none ",5) &&
 	 !shm_addr->scan_name.name_old[0] && !iOverRide) {
 	ierr=302;
 	goto error;

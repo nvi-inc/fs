@@ -72,7 +72,10 @@ c
      . lnaant(4), lsorna(5), lfreqv(3,15), idevant(32), idevgpib(32),
      . idevlog(5,32), idevmcb(32), hwid, modelti_fs, stcnm(1,4),
      . cwrap(4), user_dev1_name(2), user_dev2_name(2),
-     . idevds(32), hostpc_fs(40), wx_host(33)
+     . idevds(32), hostpc_fs(40), wx_host(33), ILLOG2((MAX_SKD+1)/2),
+     . ILPRC2((MAX_SKD+1)/2),ILSKD2((MAX_SKD+1)/2),
+     . ILSTP2((MAX_SKD+1)/2),ILNEWPR2((MAX_SKD+1)/2),
+     . ILNEWSK2((MAX_SKD+1)/2),ILEXPER2((MAX_SKD+1)/2)
 
       common/fscom_dum/
      . ra50, dec50, radat, decdat, alat, wlong,
@@ -123,7 +126,8 @@ c
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 
      . lfreqv, idevant, idevgpib, idevlog, idevmcb, hwid, 
      . modelti_fs, stcnm, cwrap, user_dev1_name, user_dev2_name,
-     . idevds, hostpc_fs, wx_host
+     . idevds, hostpc_fs, wx_host, ILLOG2, ILPRC2, ILSKD2, ILSTP2,
+     . ILNEWPR2, ILNEWSK2
 c
       CHARACTER*8 LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP
       character*16 dbbcddcvs, dbbcpfbvs
@@ -135,6 +139,8 @@ c
       character*32 sVerRelease_FS
       character*32 fortran
       character*16 dbbc3_ddcv_vs
+      character*(MAX_SKD) LLOG2,LPRC2,LSKD2,LSTP2,LNEWPR2,LNEWSK2
+      character*(MAX_SKD) LEXPER2
 c
       common/fscom_dum2/ LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP,
      $                   dbbcddcvs, dbbcpfbvs, fila10gvsi_in, dbbcddcvl,
@@ -142,5 +148,6 @@ c
      $                   rdbe_pcal_amp,
      $                   dbbc3_ddcu_vs,
      $                   sVerRelease_FS,fortran,
-     $                   dbbc3_ddcv_vs
+     $                   dbbc3_ddcv_vs,LLOG2,LPRC2,LSKD2,LSTP2,LNEWPR2,
+     $                   LNEWSK2,LEXPER2
 

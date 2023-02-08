@@ -55,7 +55,6 @@ C     LNAMEF - full file name
       integer*4 irec,ioff
       integer fmpposition,fmpreadstr,fmpsetpos,fmpwritestr
       integer trimlen
-      character*28 lnamef
       character*80 ibc
       integer*2 ib(40)
       equivalence (ib,ibc)
@@ -65,8 +64,9 @@ C     1. First try to open the file.
 C     The file is opened non-exclusively and in update mode.
 C
       nch = trimlen(lprc)
-      lnamef = FS_ROOT//'/proc/' // lprc(1:nch) // '.prc'
-      call fmpopen(idcb,lnamef,ierr,'r+',id)
+      call fmpopen(idcb,
+     & FS_ROOT//'/proc/' // lprc(1:nch) // '.prc',
+     & ierr,'r+',id)
       if (ierr.lt.0) return
 C
 C     2. The file is opened.  Read through all lines.

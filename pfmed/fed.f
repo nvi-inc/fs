@@ -57,6 +57,7 @@ C     OUTPUT VARIABLES: none
 C
 C 2.2.   COMMON BLOCKS USED
 C
+      include '../include/params.i'
       include 'pfmed.i'
 C
 C 2.3.   DATA BASE ACCESSES: none

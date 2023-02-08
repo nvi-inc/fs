@@ -30,7 +30,7 @@ C         - time-blocked status of operator stream
 C         - time-blocked status of schedule stream
 C         - HALT status of current schedule
 C     ICURLN - line # of current line of schedule
-      character*8 lskd
+      character*(*) lskd
 C          - 2-character name of current schedule
       dimension idcbsk(1),itscb(13,1)
 C         - DCB of current schedule file
@@ -45,6 +45,7 @@ C  LOCAL VARIABLES:
 C
       integer*4 irec,ioff,ir2,icurln
       integer fmpposition,fmpreadstr,fmpsetpos,fmpsetline
+      integer trimlen
       integer ichcm_ch
       integer*2 ibuf(1),ib(50)
       integer it(6)
@@ -61,9 +62,9 @@ C           of tape already identified
 C
 C  CONSTANTS:
       integer*2 lm1(40)
-      character*32 lm2
+      character*64 lm2
 C
-      data lm2 /'active schedule is:             '/
+      data lm2 /'active schedule is: '/
 C          - messages for display on terminal
 C
 C   DATE   WHO  CHANGES
@@ -78,9 +79,9 @@ C
       ksttp = .false.
 C
 C    Print display heading.
-      lm2(21:32) = lskd(1:8)
-      call char2hol(lm2,lm1,1,32)
-      call put_cons(lm1,32)
+      lm2(21:) = lskd
+      call char2hol(lm2,lm1,1,trimlen(lm2))
+      call put_cons(lm1,trimlen(lm2))
       if(iwait.ne.0) then
          call put_buf(ipinsnp(1),lm1,-32,'  ','  ')
          ipinsnp(2)=ipinsnp(2)+1
