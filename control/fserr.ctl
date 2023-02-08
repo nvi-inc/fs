@@ -1125,7 +1125,7 @@ BO -124
 No (scan_name=...) observation starting at a future time found in schedule.
 ""
 BO -125
-Reading procedure file, error, UNIX ?FFF
+Reading procedure library, error, UNIX ?FFF
 ""
 BO -126
 Too many procedures.  Maximum is ?WWW
@@ -1140,7 +1140,7 @@ BO -129
 Error in new proc routine, stack is flushed, UNIX ?FFF
 ""
 BO -130
-Reading edited proc file, UNIX ?FFF
+Reading edited procedure library, UNIX ?FFF
 ""
 BO -131
 Reading new procedure library, UNIX ?FFF
@@ -1158,7 +1158,7 @@ BO -135
 Maximum number of characters in procedure parameter is ?WWW.
 ""
 BO -136
-Can't have schedule and station library the same.
+Can't have schedule and station procedure library the same.
 ""
 BO -137
 Schedule year disagrees with current (computer) year.
@@ -1224,10 +1224,10 @@ BO -157
 Can't change procedure library while PFMED is running.
 ""
 BO -158
-Can't open STATION as procedure library.
+Can't open STATION as schedule procedure library.
 ""
 BO -159
-Can't change schedule library because resource is locked.
+Can't change schedule procedure library because PFMED is running.
 ""
 BO -160
 Error opening RXDIODE.CTL, UNIX ?FFF
@@ -1368,10 +1368,10 @@ BO -210
 Procedure library is too big, trailing procedures ignored.
 ""
 BO -211
-Can't open a new schedule when a procedure from the schedule library is executing
+Can't open a new schedule when a procedure from the schedule procedure library is executing
 ""
 BO -212
-Can't change schedule procedure library when a procedure from the schedule procedure library is executing
+Can't change schedule procedure library when a procedure from the old library is executing
 ""
 BO -219
 Error opening drivev1.ctl ?FFF
@@ -1443,7 +1443,7 @@ BO -259
 Internal error: time for secst invalid
 ""
 BO -260
-Procedure file name too long, 8 characters maximum.
+Procedure library name too long, 8 characters maximum.
 ""
 BO -261
 Schedule file name too long, 8 characters maximum.
@@ -1542,7 +1542,7 @@ BO -407
 Error decoding TACD.CTL line ?WWW
 ""
 BO -501
-Error following schedule procedure library file name link.
+Error following schedule procedure library link.
 ""
 BO -502
 Schedule procedure library link was empty.
@@ -1551,7 +1551,7 @@ BO -503
 Final schedule procedure library link does contain '.prc'.
 ""
 BO -506
-Error following station procedure library file name link.
+Error following station procedure library link.
 ""
 BO -507
 Station procedure library link was empty.

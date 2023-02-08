@@ -24,9 +24,9 @@ C
 C 1.1.   FFM is a simplified FMGR for use with the Mark III field system.
 C        There are two sets of commands available.  Commands with the
 C        prefix PF (PF, PFCR, PFDL, PFPU, PFRN, PFST) apply to procedure
-C        files as disk file units.
+C        libraries as disk file units.
 C
-C 1.2.   RESTRICTIONS - Only procedure files are accessible.  These have
+C 1.2.   RESTRICTIONS - Only procedure libraries are accessible.  These have
 C        the prefix "[PRC" which is transparent to the user.  Procedures are
 C        available only on disc ICRPRC.
 C
@@ -42,12 +42,12 @@ C        LUI,LUO - input, output LU's
       character*(*) ib
 C               - line and record buffer
 C        ICHI   - number of characters from keyboard
-      character*12 lproc,lnewsk,lnewpr,lstp,lprc
-C               - procedure file currently active in PFMED
-C               - 2nd copy of schedule procedure file
-C               - 2nd copy of station procedure file
-C               - station procedure library
-C               - Field System procedure library
+      character*(*) lproc,lnewsk,lnewpr,lstp,lprc
+C               - procedure library active in PFMED
+C               - 2nd copy of schedule procedure library
+C               - 2nd copy of station procedure library
+C               - Field System station procedure library
+C               - Field System schedule procedure library
 C
 C 2.2.   COMMON BLOCKS USED:
 C
@@ -72,10 +72,10 @@ C                         IDTYP, IFILL, MIN0, PFBLK, PFCOP
 C
 C 3.  LOCAL VARIABLES
 C
-      character*12 lnam1,lnam2
-C               - file names
-      character*12 lfr
-C               - corrected procedure file name for reading
+      character*8 lnam1,lnam2
+C               - procedure library names without extensions
+      character*4 lfr
+C               - procedure library extension with leading '.'
 C        IR     - record count
 C        IERR   - error flag
 C        LEN    - record length
@@ -84,21 +84,16 @@ C        JT, JS, JO - track, sector, offset of procedure file entry
 C        JX     - extent of procedure file
 C
       integer ierr
-      character*29 dlstr
-      character*12 dlfilenm
       character*512 ibc
       character*80 dirstr
-      character*12 twochr
       character*64 pathname,pathname2,link
       integer trimlen
-      integer i2byte(6)
       integer iret
-      character*12 sl1,sl2,sl4
+      character*8 sl1,sl2,sl4
       character*40 cmessage
       logical kex,kest,kerr
       character*3 me
-      equivalence (twochr,i2byte)
-      equivalence (dlfilenm,dlstr(18:29))
+      logical kactive
 C 4.  CONSTANTS USED
 C
       data me/'ffm'/
@@ -128,15 +123,15 @@ C     Move first name to buffer with initialized prefix.
         nch1 = ic2-ic1-1
         if (nch1.le.0) then
           write(lui,1101)
-1101      format(" no filename given")
+1101      format(" no procedure library given")
           return
         else 
           if ((nch1.gt.4).and.(ib(ic1+nch1-3:ic1+nch1).eq.'.prc')) then
             nch1 = nch1-4
           end if
-          if (nch1.gt.8) then
-            write(lui,9100)
-9100        format(" file names must be 8 characters or less")
+          if (nch1.gt.len(lproc)) then
+            write(lui,9100) len(lproc)
+9100        format(" library names must be",i3," characters or less")
             return
           end if
          end if
@@ -164,12 +159,12 @@ C     Move second name if present.
          else if(iperm.eq.0) then
             write(6,*) 'This command is not permitted because you ',
      &           'don''t have sufficent permission for'
-            write(6,*) 'library ',lnam1(:nch1)
+            write(6,*) 'file ',pathname(:max(1,trimlen(pathname)))
             goto 920
          endif
       endif
   
-C     PFCR - create new procedure file.
+C     PFCR - create new procedure library.
   
       if(ib(3:4).eq.'cr') then
         if (lnam1.eq.' ') then
@@ -193,7 +188,7 @@ C  check to see if target exists already
         endif
       endif
  
-C     PFDL - list directory of procedure files
+C     PFDL - list directory of procedure libraries
   
       if(ib(3:4).eq.'dl') then
 c  Have the OS issue directory command and send the results to file, FFMTMP
@@ -227,18 +222,23 @@ c  Top of "]PRC" filename get loop.
 c  Are there any filenames left?
             if(dirstr(ipos+1:ipos+4).eq.'prc') then
             ibc(ix:ix+ipos-1) = dirstr(1:ipos-1)
-c space over past that name
-C Add ">" for active, "s" for schedule 2nd copy.
-C  "a" for active F.S. proc file
-              if(ibc(ix:ix+11).eq.sl2(1:12)) ibc(ix-1:ix-1) = 'S'
-              if(ibc(ix:ix+11).eq.sl4(1:12)) ibc(ix-1:ix-1) = 'A'
-              if(ibc(ix:ix+11).eq.sl1(1:12)) then
-                if ((sl4.eq.sl1).or.(sl1.eq.sl2)) then
-                  ibc(ix-2:ix-2) = '>'
-                else
-                  ibc(ix-1:ix-1) = '>'
+C Add ">" for active in pfmed, "S" for station procedure library in FS
+C  "A" for schedule procedure library in FS
+              ix2=ix+len(lproc)-1
+              if(kboss_pf) then
+                if(ibc(ix:ix2).eq.sl2) ibc(ix-1:ix-1) = 'S'
+                if(ibc(ix:ix2).eq.sl4) ibc(ix-1:ix-1) = 'A'
+                if(ibc(ix:ix2).eq.sl1) then
+                  if ((sl1.eq.sl2.or.sl1.eq.sl4)) then
+                    ibc(ix-2:ix-2) = '>'
+                  else
+                    ibc(ix-1:ix-1) = '>'
+                  endif
                 endif
+              else if(ibc(ix:ix2).eq.sl1) then
+                ibc(ix-1:ix-1) = '>'
               endif
+c space over past that name
               ix=ix+14
               if (ix.gt.60) then
                 nch = trimlen(ibc)
@@ -257,10 +257,12 @@ C  "a" for active F.S. proc file
           if (nch.gt.0) write(luo,7701) ibc(:nch)
 7701      format(a)
         end if
+        write(6,"(a)")
+     .    "Key: '>' active in pfmed, 'A' schedule, 'S' station"
         return
       endif
   
-C     PF - change procedure file active in PFMED.
+C     PF - change procedure library active in PFMED.
   
       if(ib(3:3).eq.',') then
         if(lnam1.ne.' ') then
@@ -274,7 +276,7 @@ C     PF - change procedure file active in PFMED.
         end if
       end if
   
-C     PFPU - purge procedure file.
+C     PFPU - purge procedure library.
   
       if(ib(3:4).eq.'pu') then
         if (lnam1.eq.' ') then
@@ -298,7 +300,7 @@ C     PFPU - purge procedure file.
         return
       end if
  
-C     PFRN - rename procedure file.
+C     PFRN - rename procedure library.
   
       if(ib(3:4).eq.'rn') then
         if ((lnam1.eq.' ').or.(lnam2.eq.' ')) then
@@ -309,13 +311,14 @@ C     PFRN - rename procedure file.
   
         if (lnam1.eq.lstp) then
           write(lui,9200)
-9200      format(" cannot perform operation on current station library")
+9200      format(" cannot perform operation on current FS station "
+     .           "procedure library")
           return
         endif
         if (lnam1.eq.lprc) then
           write(lui,9300)
-9300      format(" cannot perform operation on current active "
-     .           "field system proc library")
+9300      format(" cannot perform operation on current FS schedule "
+     .           "procedure library")
           return
         endif
  
@@ -353,7 +356,7 @@ C     PFRN - rename procedure file.
         goto 920
       end if
   
-C     PFST - transfer from existing file to file created by this command.
+C     PFST - transfer from existing library to library created by this command.
   
       if(ib(3:4).eq.'st') then
         kest = .false.
@@ -365,11 +368,26 @@ C     PFST - transfer from existing file to file created by this command.
 C     Open file.
         call pfblk(1,lnam1,lfr)
         pathname ='/usr2/proc/' // lnam1(1:nch1) // lfr(1:4)
+        inquire (FILE=pathname,EXIST=kest)
+        if(.not.kest) then
+          inch=trimlen(pathname)
+          write(lui,1112) pathname(:inch)
+1112      format(" error, file ",a," doesn't exist")
+          goto 920
+        end if
+        kactive=lnam1.eq.lproc
+        if(kactive) then
+C
+C close the active library if it is the one being copied from because
+C gfortran doesn't allow a file to be opened on more than one unit
+C
+            call fclose(idcb3,ierr)
+            if(kerr(ierr,'ffmp','closing',pathname,0,0)) return
+        endif
         call fopen(idcb1,pathname,ierr)
         if(ierr.lt.0) then
-          write(lui,1112) pathname
-1112      format(" error opening file ",a)
-          kest = .true.
+          write(lui,1114) pathname
+          goto 920
         end if
 C     Create new file.
         pathname2 = '/usr2/proc/' // lnam2(1:nch2) // '.prc'
@@ -383,9 +401,14 @@ C   by mistake
           goto 900
         end if
         call fopen(idcb2,pathname2,ierr)
+        if(ierr.lt.0) then
+          write(lui,1114) pathname2
+1114      format(" error opening file ",a)
+          goto 920
+        end if
         do 710 ir=1,32767
-          call f_readstring(idcb1,ierr,ibc,len)
-          if(ierr.lt.0.or.len.lt.0) goto 720
+          call f_readstring(idcb1,ierr,ibc,llen)
+          if(ierr.lt.0.or.llen.lt.0) goto 720
           nch = trimlen(ibc)
           if (nch.gt.0) call f_writestring(idcb2,ierr,ibc(:nch),id)
           if(ierr.lt.0) goto 800
@@ -395,6 +418,11 @@ C   by mistake
         if(kerr(ierr,me,'closing',' ',0,0)) return
         call fclose(idcb1,ierr)
         if(kerr(ierr,me,'closing',' ',0,0)) return
+        if(kactive) then
+C has to be reopened if it was closed above
+            call fopen(idcb3,pathname,ierr)
+            if(kerr(ierr,'ffmp','opening',pathname,0,0)) return
+        endif
         goto 920
       end if
   

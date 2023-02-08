@@ -72,7 +72,7 @@ COMMAND commands[] = {
 
   { "pf",com_thru,   "pf,lib              Set active procedure library"},
   { "pfcr",com_thru, "pfcr,lib            Create procedure library"},
-  { "pfdl",com_thru, "pfdl                Display procedure libraries "}, 
+  { "pfdl",com_thru, "pfdl                Display procedure libraries"},
   { "pfpu",com_thru, "pfpu,lib            Delete procedure library"},
   { "pfrn",com_thru, "pfrn,old,new        Rename procedure library"},
   { "pfst",com_thru, "pfst,old,new        Create procedure library"},

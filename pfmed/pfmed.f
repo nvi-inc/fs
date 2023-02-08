@@ -38,8 +38,8 @@ C
       include '../include/fscom.i'
 C
 C        LPRC   - current schedule procedure library
-C        LNEWSK - next version of procedure file
-C        LNEWPR - next version of station procedure file
+C        LNEWSK - next version of procedure library
+C        LNEWPR - next version of station procedure library
 C
       include 'pfmed.i'
 C
@@ -65,10 +65,10 @@ C
 C 3.  LOCAL VARIABLES
 C
 C        ICHI   - number of characters from keyboard
-C        LPROC  - active procedure file for PFMED
+C        LPROC  - active procedure library for PFMED
       dimension ib(51)
 C               - line and record buffer
-      character*12 lproc
+      character*8 lproc
       character cret
       integer fnblnk,ipos
       integer trimlen, rn_take
@@ -78,7 +78,6 @@ C 4.  CONSTANTS USED
 C
       character*7 ccol
       character*34 ldef
-      character*54 lmdisp
       character*102 cib 
       character*102 cibin
       character*12 ibsrt(MAX_PROC2) ! 010812 
@@ -125,8 +124,7 @@ C     Set input and output LU's.
       if(luo.eq.0) luo=lui
       kboss_pf=kboss()
 C
-C     If the Field System is not running, check to see if BOSS is
-C     present.
+C     Check to see if another instance of PFMED is already active.
 C
       lstp = 'station'
       call char2hol(lstp,ilstp,1,8)
@@ -135,7 +133,7 @@ C
         irnprc = rn_take('pfmed',1)
         if (irnprc.eq.1) then
           write(lui,1101) 
-1101      format("pfmed is already locked")
+1101      format("It looks like pfmed is already running somewhere.")
           write(lui,1102) 
 1102      format("hit return to continue",$)
           read(5,1103) cret
@@ -155,8 +153,8 @@ C
         end if
       endif
 C
-C     Set active procedure file for PFMED to schedule procedure file or
-C     station procedure file.
+C     Set active procedure library for PFMED to schedule procedure library or
+C     station procedure library.
 C
 C FOLLOWING VARIABLES WERE LOCKED & MAY BE GRABBED ONCE AND SET LATER AT END
       call fs_get_lprc(ilprc)
@@ -170,25 +168,24 @@ C FOLLOWING VARIABLES WERE LOCKED & MAY BE GRABBED ONCE AND SET LATER AT END
       lproc = lprc
       if(lproc.eq.'none') lproc=lstp
 C
-C  Print messages about current procedure files
+C  Print messages about current procedure libraries
 C
-      lmdisp = 'current active schedule procedure file: ' // lprc(1:8)
-      write(lui,2102) lmdisp
+      nch=trimlen(lprc)
+      write(lui,2102)
+     & 'current FS schedule procedure library:     '// lprc(1:nch)
 2102  format(a)
       if (kboss_pf) then
-        lmdisp = 'current active station procedure file:  '// lstp(1:8)
-        write(lui,2103) lmdisp
-2103    format(a)
+        nch=trimlen(lstp)
+        write(lui,2102)
+     &  'current FS station  procedure library:     '// lstp(1:nch)
       else
-        lmdisp = 'current active station procedure file:  none'
-        write(lui,2104) lmdisp
-2104    format(a)
+        write(lui,2102)
+     &  'current FS station  procedure library:     none'
       endif
-      lmdisp = 'procedure file currently open in pfmed: '//
-     .    lproc(1:8)
-      write(lui,2105) lmdisp
-2105  format(a)
-C     Copy current procedure file to scratch file 3.
+      nch=trimlen(lproc)
+      write(lui,2102)
+     & 'current procedure library active in pfmed: '// lproc(1:nch)
+C     Copy open procedure file to scratch file 3.
       knewpf = .false.
       call pfcop(lproc,lui,id)
 c
@@ -204,6 +201,7 @@ cc      cib1 = ' '
 
       call ldsrt(ibsrt,nprc,idcb3,ierr)
       call readpl(cibin,ccol,ibsrt,nprc)
+      kboss_pf=kboss()
 cc      write(6,'("CIBIN: ",a20," NP: ",i3)') cibin,nprc
 c
       ichi = 0
@@ -245,7 +243,7 @@ c
            else if(iperm.eq.0) then
               write(6,*) 'This command is not permitted because you ',
      &             'don''t have sufficent permission for'
-              write(6,*) 'library ',lproc(:nch),'.'
+              write(6,*) 'file ',fname(:max(1,trimlen(fname))),'.'
               if (cib.eq.'ed'.or.cib(1:3).eq.'ed,'.or.
      &             cib.eq.'vi'.or.cib(1:3).eq.'vi,'.or.
      &             cib.eq.'emacs'.or.cib(1:6).eq.'emacs,'.or.

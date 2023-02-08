@@ -28,13 +28,13 @@ C
         implicit none
         include '../include/params.i'
 c
-        character*(*) isrt(1)
+        character*(*) isrt(MAX_PROC2)
         integer i,j,nx,lu,nxmax
         data nxmax/MAX_PROC2/
         data lu/6/
         
-        if (nx.gt.nxmax) then 
-          nx = nxmax
+        if (nx-1.gt.nxmax) then
+          nx = nxmax+1
           write (lu,'("Insufficient space to dislay full sort.")')
           return
         endif
