@@ -60,7 +60,7 @@ try:
     Gui(root, **kw)
     root.mainloop()
 except TclError, e:
-    print 'The LogPlotter GUI crashed! \nError message:\n', e
+    print 'The gnplt GUI crashed! \nError message:\n', e
 except (KeyboardInterrupt): #ctrl-c
         pass
 
