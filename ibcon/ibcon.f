@@ -133,6 +133,10 @@ C                        =0 disabled
 C 
 C 4.  CONSTANTS USED
 C 
+      integer*2 si4,si8
+      parameter (si4=4)
+      parameter (si8=8)
+C
 C 5.  INITIALIZED VARIABLES 
 C 
       data kini/.false./,kfirst/.true./,kgpib/.true./
@@ -320,7 +324,7 @@ C  CHECK DEVICE NAME (FIRST WORD)
            idev = i
            nadev = modtbl(1,i)
            imdev = modtbl(2,i)
-           if(and(modtbl(2,i),8).ne.0) then
+           if(and(modtbl(2,i),si8).ne.0) then
               no_write_ren=1
            endif
            goto 221
@@ -512,7 +516,7 @@ C     IREG number of characters in the buffer
          inxt=1
          do i=1,ndev
             if(idev.le.0.or.idev.eq.i) then
-               if(and(modtbl(2,i),4).ne.0) then
+               if(and(modtbl(2,i),si4).ne.0) then
                   call fs_get_kecho(kecho)
                   ireg=rspdev(idevid(i),ibuf,ierr,ipcode,300,kecho)
                   if (ierr .eq. -4) then

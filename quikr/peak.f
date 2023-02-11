@@ -22,6 +22,7 @@ C
 C  Peak up on tape drive read resposne
 C
       include '../include/fscom.i'
+      include '../include/boz.i'
 C
       integer ip(5),ireg(2),iparm(2)
       integer*2 ibuf(50)
@@ -55,7 +56,7 @@ C
       if(ieq.eq.0) then
         goto 500
       else if(cjchar(ibuf,ieq+1).eq.'?') then
-        ip(4)=o'77'
+        ip(4)=ocp77
         goto 600
       endif
       ich=ieq+1
@@ -193,10 +194,10 @@ C
       if(ieq.eq.0) nch=nchar+1
       nch=ichmv_ch(ibuf,nch,'/')
 C
-      nch=nch+ib2as(nsamppk_fs(indxtp),ibuf,nch,o'100003')
+      nch=nch+ib2as(nsamppk_fs(indxtp),ibuf,nch,ocp100003)
       nch=mcoma(ibuf,nch)
 C
-      nch=nch+ib2as(iterpk_fs(indxtp),ibuf,nch,o'100003')
+      nch=nch+ib2as(iterpk_fs(indxtp),ibuf,nch,ocp100003)
       nch=mcoma(ibuf,nch)
 C
       if(ihdpk_fs(indxtp).eq.1) then

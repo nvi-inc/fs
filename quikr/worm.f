@@ -22,6 +22,7 @@ C
 C  Estimate velocities
 C
       include '../include/fscom.i'
+      include '../include/boz.i'
 C
       integer ip(5),ireg(2),iparm(2)
       integer*2 ibuf(50)
@@ -61,7 +62,7 @@ C
       if(ieq.eq.0) then
         goto 500
       else if(cjchar(ibuf,ieq+1).eq.'?') then
-        ip(4)=o'77'
+        ip(4)=ocp77
         goto 600
       endif
       ich=ieq+1

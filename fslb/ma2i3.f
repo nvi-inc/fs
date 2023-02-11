@@ -62,12 +62,14 @@ C                   0 = a fixed zero
 C                   a = mixer sw. state (2 bits), upper 2 bits of atten.
 C                   t = lower 4 bits of atten.
 C
+      include '../include/boz.i'
+C
       integer*4 fc_bbc2freq,bits
 C
 C  Atten: upper 2 bits from char 9, lower 4 from char 10
 C
       iat = 16*and(ia2hx(ibuf2,9),3) + ia2hx(ibuf2,10)
-      imix = and(ia2hx(ibuf2,9),o'14')/4
+      imix = and(ia2hx(ibuf2,9),ocp14)/4
       iswh = ia2hx(ibuf1,10)
       is1  = 2-and(iswh,1)
       is2  = 2-(and(iswh,2)/2)
@@ -78,8 +80,8 @@ C
 c
 c lo freq
 c
-      bits=o'200000'*ia2hx(ibuf1,3)+o'10000'*ia2hx(ibuf1,4)
-     &     + o'400'*ia2hx(ibuf1,5)+o'20'*ia2hx(ibuf1,6)+ia2hx(ibuf1,7)
+      bits=ocp200000*ia2hx(ibuf1,3)+ocp10000*ia2hx(ibuf1,4)
+     &     + ocp400*ia2hx(ibuf1,5)+ocp20*ia2hx(ibuf1,6)+ia2hx(ibuf1,7)
       freq=fc_bbc2freq(bits)
 c
       irem = 1-and(ia2hx(ibuf2,7),1)
@@ -87,8 +89,8 @@ c
       lck = 1-(and(ia2hx(ibuf2,7),8)/8)
 C
 C  Pick up four bits from each character for TP
-      tpi = o'10000'*ia2hx(ibuf2,3) + o'400'*ia2hx(ibuf2,4)
-     .     + o'20'*ia2hx(ibuf2,5) + ia2hx(ibuf2,6)
+      tpi = ocp10000*ia2hx(ibuf2,3) + ocp400*ia2hx(ibuf2,4)
+     .     + ocp20*ia2hx(ibuf2,5) + ia2hx(ibuf2,6)
 C
       return
       end

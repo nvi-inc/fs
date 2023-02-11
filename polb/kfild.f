@@ -22,6 +22,8 @@
       logical kfmp
       character*(*) ipbuf
 C
+      include '../include/boz.i'
+C
       integer*2 lfel(11),lrec(9),lin(3)
 C
       data lfel   /  20,2Her,2Hro,2Hr ,2Hin,2H f,2Hie,2Hld,2H x,2Hxx,
@@ -35,12 +37,12 @@ C           in_
       if (iferr.ge.0) return
 C
       ifc=16
-      ifc=ifc+ib2as(ifield,lfel(2),ifc,o'100000'+4)
+      ifc=ifc+ib2as(ifield,lfel(2),ifc,ocp100000+4)
       ifc=ichmv_ch(lfel(2),ifc,'_')
       call po_put_i(lfel(2),ifc)
 C
       ifc=12
-      ifc=ifc+ib2as(irec,lrec(2),ifc,o'100000'+4)
+      ifc=ifc+ib2as(irec,lrec(2),ifc,ocp100000+4)
       ifc=ichmv_ch(lrec(2),ifc,'_')
       call po_put_i(lrec(2),ifc)
       kfild=kfmp(lut,0,lin(2),lin(1),ipbuf,0,1)

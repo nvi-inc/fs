@@ -25,6 +25,7 @@ c
       integer*2 ib(50)
 c
       include '../include/fscom.i'
+      include '../include/boz.i'
 c
       nch=1
       nch=ichmv_ch(ib,nch,name)
@@ -38,7 +39,7 @@ c
       nch=ichmv_ch(ib,nch,'2')
 c
       nch=mcoma(ib,nch)
-      nch = nch + ib2as(iacttp(indxtp),ib,nch,z'8003')
+      nch = nch + ib2as(iacttp(indxtp),ib,nch,zcp8003)
       call logit3(ib,nch-1,lsor)
 c
       return

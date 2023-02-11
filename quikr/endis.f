@@ -36,6 +36,7 @@ C        IP(4) - who we are
 C 
 C 2.2.   COMMON BLOCKS USED 
       include '../include/fscom.i'
+      include '../include/boz.i'
 C 
 C     CALLED SUBROUTINES: character utilities 
 C 
@@ -168,7 +169,7 @@ C
       do 410 i=1,28
         if (itrk(i).ne.itrken(i,indxtp).and..not.kcom) ierr = -300-i
         if (itrk(i).eq.0) goto 410
-        ncx = ib2as(i,ibuf2,nch,o'100000'+2)
+        ncx = ib2as(i,ibuf2,nch,ocp100000+2)
         nch = ichmv_ch(ibuf2,nch+ncx,',')
 410   continue
       nch = nch-1

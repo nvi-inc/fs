@@ -32,7 +32,8 @@ C       1 = A
 C       2 = B
 C
       include '../include/fscom.i'
-
+      include '../include/boz.i'
+C
       logical kbit,kone,kother,kbreak,kdoaux
       integer*4 ip(1)
       integer*2 ibuf(128), lwhat
@@ -81,7 +82,7 @@ C
       ieq=iscn_ch(ibuf,1,nchar,'=')
       if (ieq.eq.0) goto 500
       if (cjchar(ibuf,ieq+1).eq.'?') then
-        ip(4)=o'77'
+        ip(4)=ocp77
         goto 700
       end if
 C
@@ -525,7 +526,7 @@ C
                   nc=ib2as(iv,lwhat,1,2) !report actual, not requested
                   call logit7ci(0,0,0,0,-312,'qg',lwhat)
                endif
-               nch=nch+ib2as(iserr(i),ibuf,nch,o'100003')
+               nch=nch+ib2as(iserr(i),ibuf,nch,ocp100003)
                nch=mcoma(ibuf,nch)
                if (nch.ge.84) then
                   nch=nch-2
@@ -552,9 +553,9 @@ C
 700   iclass=0
       nch=nchar-1
       nch=ichmv_ch(ibuf,nch,'/')
-      nch=nch+ib2as(int(pethr(indxtp)),ibuf,nch,o'100005')
+      nch=nch+ib2as(int(pethr(indxtp)),ibuf,nch,ocp100005)
       nch=mcoma(ibuf,nch)
-      nch=nch+ib2as(isethr(indxtp),ibuf,nch,o'100003')
+      nch=nch+ib2as(isethr(indxtp),ibuf,nch,ocp100003)
       nch=mcoma(ibuf,nch)
       if (idecpa_fs(indxtp).eq.0) then
         nch= ichmv_ch(ibuf,nch,'ab')
@@ -575,7 +576,7 @@ C
          if (kbit(itrkpa(1,indxtp),i)) then
             iv=i
             if(drive(indxtp).ne.MK3) iv=iv-1
-            nch=nch+ib2as(iv,ibuf,nch,o'100002')
+            nch=nch+ib2as(iv,ibuf,nch,ocp100002)
             nch=mcoma(ibuf,nch)
             ntrk=ntrk+1
          end if

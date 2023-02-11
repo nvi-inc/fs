@@ -19,6 +19,8 @@
 *
       program resid
 C
+      include '../include/boz.i'
+C
       logical kinit,kgpnt,kopn,kif,koutp,kgant,kuse
       logical kxy,kazel,khadc
 C
@@ -49,7 +51,7 @@ C          no input points
 C
       call fmperror_standalone_set(1)
 
-      ic=ib2as(mpts,ldum,1,o'100000'+6)
+      ic=ib2as(mpts,ldum,1,ocp100000+6)
 C
       if (kinit(lu,iibuf,iobuf,iapp,lstrng,is,ics,lst)) goto 10010
 C

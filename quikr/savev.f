@@ -23,6 +23,8 @@ C  Peak up on tape drive read response
 C
       include '../include/fscom.i'
 C
+      include '../include/boz.i'
+C
       integer vrevw,v15rev,v15for,v15scale,v13,v15flip,vw0,vw8
       parameter(
      &          vrevw    = 1,
@@ -64,7 +66,7 @@ C
       if(ieq.eq.0) then
         goto 500
       else if(cjchar(ibuf,ieq+1).eq.'?') then
-        ip(4)=o'77'
+        ip(4)=ocp77
         goto 500
       endif
 C

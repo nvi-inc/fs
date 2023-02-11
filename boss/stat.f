@@ -41,6 +41,8 @@ C     NTSCB - maximum # of items on time list
 C
 C  CALLING SUBROUTINES: BWORK
 C
+      include '../include/boz.i'
+C
 C  LOCAL VARIABLES:
 C
       integer*4 irec,ioff,ir2,icurln
@@ -104,17 +106,17 @@ C    Print display heading.
 C
 C    Get and display current time.
       call fc_rte_time(it,idum)
-      nch = 1 + ib2as(idum ,lm1,1,o'42004')
+      nch = 1 + ib2as(idum ,lm1,1,ocp42004)
       nch = ichmv_ch(lm1,nch,'.')
-      nch = nch + ib2as(it(5),lm1,nch,o'41403')
+      nch = nch + ib2as(it(5),lm1,nch,ocp41403)
       nch = ichmv_ch(lm1,nch,'.')
-      nch = nch + ib2as(it(4),lm1,nch,o'41002')
+      nch = nch + ib2as(it(4),lm1,nch,ocp41002)
       nch = ichmv_ch(lm1,nch,':')
-      nch = nch + ib2as(it(3),lm1,nch,o'41002')
+      nch = nch + ib2as(it(3),lm1,nch,ocp41002)
       nch = ichmv_ch(lm1,nch,':')
-      nch = nch + ib2as(it(2),lm1,nch,o'41002')
+      nch = nch + ib2as(it(2),lm1,nch,ocp41002)
       nch = ichmv_ch(lm1,nch,'.')
-      nch = nch + ib2as(it(1),lm1,nch,o'41002')
+      nch = nch + ib2as(it(1),lm1,nch,ocp41002)
       nch = ichmv_ch(lm1,nch,'  ')
       nch0= nch
       nch = ichmv_ch(lm1,nch,'now')
@@ -156,17 +158,17 @@ C
       if(index('0123456789',cjchar(ib,2)).eq.0) goto 200
       nc = iflch(ib,ilen)
       call gttim(ib,2,nc,0,it1,it2,it3,ierr)
-      nch = 1   + ib2as(it1/1024+1970,lm1,1,o'42004')
+      nch = 1   + ib2as(it1/1024+1970,lm1,1,ocp42004)
       nch = ichmv_ch(lm1,nch,'.')
-      nch = nch + ib2as(mod(it1,1024),lm1,nch,o'41403')
+      nch = nch + ib2as(mod(it1,1024),lm1,nch,ocp41403)
       nch = ichmv_ch(lm1,nch,'.')
-      nch = nch + ib2as(it2/60,lm1,nch,o'41002')
+      nch = nch + ib2as(it2/60,lm1,nch,ocp41002)
       nch = ichmv_ch(lm1,nch,':')
-      nch = nch + ib2as(mod(it2,60),lm1,nch,o'41002')
+      nch = nch + ib2as(mod(it2,60),lm1,nch,ocp41002)
       nch = ichmv_ch(lm1,nch,':')
-      nch = nch + ib2as(it3/100,lm1,nch,o'41002')
+      nch = nch + ib2as(it3/100,lm1,nch,ocp41002)
       nch = ichmv_ch(lm1,nch,'.')
-      nch = nch + ib2as(mod(it3,100),lm1,nch,o'41002')
+      nch = nch + ib2as(mod(it3,100),lm1,nch,ocp41002)
       nch = ichmv_ch(lm1,nch,'  ')
 220   if (ichcm_ch(ib,1,'data_valid=off').ne.0.or.kendo) goto 230
 C  End of observation
@@ -258,17 +260,17 @@ C
       it(3) = mod(itscb(2,ind),60)
       it(2) = itscb(3,ind)/100
       it(1) = mod(itscb(3,ind),100)
-      ich = ich + ib2as(it(6),ibuf,ich,o'42004')
+      ich = ich + ib2as(it(6),ibuf,ich,ocp42004)
       ich = ichmv_ch(ibuf,ich,'.')
-      ich = ich + ib2as(it(5),ibuf,ich,o'41403')
+      ich = ich + ib2as(it(5),ibuf,ich,ocp41403)
       ich = ichmv_ch(ibuf,ich,'.')
-      ich = ich + ib2as(it(4),ibuf,ich,o'41002')
+      ich = ich + ib2as(it(4),ibuf,ich,ocp41002)
       ich = ichmv_ch(ibuf,ich,':')
-      ich = ich + ib2as(it(3),ibuf,ich,o'41002')
+      ich = ich + ib2as(it(3),ibuf,ich,ocp41002)
       ich = ichmv_ch(ibuf,ich,':')
-      ich = ich + ib2as(it(2),ibuf,ich,o'41002')
+      ich = ich + ib2as(it(2),ibuf,ich,ocp41002)
       ich = ichmv_ch(ibuf,ich,'.')
-      ich = ich + ib2as(it(1),ibuf,ich,o'41002')
+      ich = ich + ib2as(it(1),ibuf,ich,ocp41002)
       ich = ich - 1
 340   call put_cons(ibuf,ich)
       if(iwait.ne.0) then
@@ -298,17 +300,17 @@ C
       it(3) = mod(itscb(2,ind),60)
       it(2) = itscb(3,ind)/100
       it(1) = mod(itscb(3,ind),100)
-      ich = ich + ib2as(it(6),ib,ich,o'42004')
+      ich = ich + ib2as(it(6),ib,ich,ocp42004)
       ich = ichmv_ch(ib,ich,'.')
-      ich = ich + ib2as(it(5),ib,ich,o'41403')
+      ich = ich + ib2as(it(5),ib,ich,ocp41403)
       ich = ichmv_ch(ib,ich,'.')
-      ich = ich + ib2as(it(4),ib,ich,o'41002')
+      ich = ich + ib2as(it(4),ib,ich,ocp41002)
       ich = ichmv_ch(ib,ich,':')
-      ich = ich + ib2as(it(3),ib,ich,o'41002')
+      ich = ich + ib2as(it(3),ib,ich,ocp41002)
       ich = ichmv_ch(ib,ich,':')
-      ich = ich + ib2as(it(2),ib,ich,o'41002')
+      ich = ich + ib2as(it(2),ib,ich,ocp41002)
       ich = ichmv_ch(ib,ich,'.')
-      ich = ich + ib2as(it(1),ib,ich,o'41002')
+      ich = ich + ib2as(it(1),ib,ich,ocp41002)
       ich = ich - 1
 370   call put_cons(ib,ich)
       if(iwait.ne.0) then
@@ -334,7 +336,7 @@ C
       endif
       ich=ichmv_ch(ibuf,1,' #')
       icur = icurln
-      nc = ib2as(icur,ibuf,ich,o'100006')
+      nc = ib2as(icur,ibuf,ich,ocp100006)
       ich = ichmv(ibuf,9,ib,1,ilen)-1
       call put_cons(ibuf,ich)
       if(iwait.ne.0) then

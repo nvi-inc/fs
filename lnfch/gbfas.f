@@ -48,7 +48,7 @@ C
 C        IRGA   - the integer found starting at ISTRT and as given
 C                 by the ISTAT part of IRGB 
 C 
-C        IRGB   =  ISTAT*o'400'+ICNT
+C        IRGB   =  ISTAT*ocp400+ICNT
 C 
 C             ICNT  -   the count of the charcters used in the return 
 C                       of the rest of the information from this call 
@@ -83,6 +83,8 @@ C
 C             4.  a check should be made of IRGB upon return since
 C                 the format  bbbbsbbbc is accepted also. 
 C 
+      include '../include/boz.i'
+C
       integer ic,jchar
 C 
         equivalence (reg,irga,ireg(1)),(irgb,ireg(2)) 
@@ -124,7 +126,7 @@ C               IC IS A NUMBER
 C 
 C               CONVERT IC TO AN INTEGER IN BINARY
 C 
-      ic=ic-o'60' 
+      ic=ic-ocp60 
 C 
 C               NOTE A DIGIT HAS BEEN FOUND 
 C 
@@ -173,7 +175,7 @@ C
 C 
 C               IF THE CURRENT CHARACTER A BLANK
 C 
-        if (ic.ne.o'40') goto 30000
+        if (ic.ne.ocp40) goto 30000
 C 
 C               CHECK FOR TOO MANY BLANKS SO FAR
 C 
@@ -199,9 +201,9 @@ C
 C 
 C               CHECK FOR A SIGN NOW
 C 
-        if (ic.eq.o'53') isign=1
+        if (ic.eq.ocp53) isign=1
 C 
-        if (ic.eq.o'55') isign=-1 
+        if (ic.eq.ocp55) isign=-1 
 C 
 C               IF SIGN NOT FOUND THE LAST CASE IS EXHAUSTED
 C 
@@ -239,7 +241,7 @@ C
 C 
 C               OVERFLOW
 C 
-        irgb=o'400'+i-istrt 
+        irgb=ocp400+i-istrt 
 C 
         goto 99000 
 C 
@@ -247,7 +249,7 @@ C
 C 
 C               ONLY BLANKS BEFORE NON-NUMERIC OR END 
 C 
-        irgb=o'1000'+i-istrt
+        irgb=ocp1000+i-istrt
 C 
         goto 99000 
 C 
@@ -255,7 +257,7 @@ C
 C 
 C               ONLY BLANKS AND SIGN BEFORE NON-NUMERIC OR END
 C 
-        irgb=o'1400'+i-istrt
+        irgb=ocp1400+i-istrt
 C 
 C               RETURN SIGN VALUE IN IRGA 
 C 
@@ -267,7 +269,7 @@ C
 C 
 C               255 BLANKS (WILL THIS EVER OCCUR ?) 
 C 
-        irgb=o'2000'+i-istrt+1
+        irgb=ocp2000+i-istrt+1
 C 
         goto 99000 
 C 
@@ -275,7 +277,7 @@ C
 C 
 C               ISTRT AFTER IEND
 C 
-        irgb=o'2400'
+        irgb=ocp2400
 C 
 99000   continue
 C 

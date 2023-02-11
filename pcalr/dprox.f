@@ -45,10 +45,15 @@ C
 C     ARW 790724  MODIFIED NRV 800222 
 C     MODIFIED MAH DEC '81
 C 
+      include '../include/boz.i'
+C
       logical ksplit
       integer itabl(256)
       integer*2 ibuf(1),idata(1),istate,mask,isync(10),idum,jstate
       integer*2 ltime(8)
+      integer*2 socp177400,socp7777
+      parameter (socp177400=ocp177400)
+      parameter (socp7777=ocp7777)
 C 
       nbytes=0
       ipar=0
@@ -105,11 +110,11 @@ C     DECODE TIME
       do i=1,8
         ltime(i)=ih22a(jchar(isync,i+12)) 
       enddo
-      ltime(7)=and(ltime(7),o'177400') 
+      ltime(7)=and(ltime(7),socp177400)
       ltime(8)=0
       call char2hol(' ',ltime,14,16)
       n=12
-      mask=o'7003'
+      mask=ocp7003
       istate=0
       idbit=1 
       nbits=148 
@@ -121,10 +126,10 @@ C     REVERSE ORDER OF BITS IN ISYNC TO compare to ISTATE
       enddo
 C     COMPARE WITH CRC CHARACTER IN ISYNC 
       icrcc=1 
-      if (and(istate,o'7777').ne.and(jstate,o'7777')) icrcc=-1 
+      if (and(istate,socp7777).ne.and(jstate,socp7777)) icrcc=-1
       if(idebug.gt.0) write(luop,9130) ischar,icrcc
 9130  format(/"ischar,icrcc=",2i6)
-      call ifill(ibuf,1,nbytes,o'377')
+      call ifill(ibuf,1,nbytes,ocp377)
       call ifill(ibuf,ischar,20,0)
 180   continue
 C 

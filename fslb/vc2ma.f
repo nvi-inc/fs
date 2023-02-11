@@ -42,8 +42,10 @@ C                   fffff = frequency, in 10s of kHz, i.e.
 C                           an implied decimal point between the
 C                           third and fourth characters for MHz.
 C 
+      include '../include/boz.i'
+C
       iatn = 2*iatu/10 + iatl/10
-      call ib2as(itp*100+iatn*10+ibw,ibuf,1,o'41400'+3) 
+      call ib2as(itp*100+iatn*10+ibw,ibuf,1,ocp41400+3) 
 C                   Set the pre-fill bit and fill leading zeros 
       call ichmv(ibuf,4,lfreq,1,3)
       call ichmv(ibuf,7,lfreq,5,2)

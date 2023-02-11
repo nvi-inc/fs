@@ -59,6 +59,8 @@ C          8-13 = Channel B head select
 C          6-7  = Channel A stack select
 C          0-5  = Channel A head select
 C 
+      include '../include/boz.i'
+C
       integer*2 itemp
 C
       irem = and(ia2hx(ibuf,3),8)/8
@@ -67,9 +69,9 @@ C
       ieq = ia2hx(ibuf,5)
 
       call ichmv(itemp,1,ibuf,7,1)
-      ihunds = JISHFT(and(ia2hx(itemp,1),z'0c'),-2)
+      ihunds = JISHFT(and(ia2hx(itemp,1),zcp0c),-2)
 C
-      itens = and(ia2hx(itemp,1),z'03')
+      itens = and(ia2hx(itemp,1),zcp03)
 C
       call ichmv(itemp,1,ibuf,8,1)
       iones = ia2hx(itemp,1)
@@ -77,9 +79,9 @@ C
       itb=(ihunds*100)+(itens*16)+iones
 C      
       call ichmv(itemp,1,ibuf,9,1)
-      ihunds = JISHFT(and(ia2hx(itemp,1),z'0c'),-2)
+      ihunds = JISHFT(and(ia2hx(itemp,1),zcp0c),-2)
 C
-      itens = and(ia2hx(itemp,1),z'03')
+      itens = and(ia2hx(itemp,1),zcp03)
 C
       call ichmv(itemp,1,ibuf,10,1)
       iones = ia2hx(itemp,1)

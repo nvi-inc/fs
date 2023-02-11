@@ -61,6 +61,8 @@ C               - registers from EXEC
 C 
 C 4.  CONSTANTS USED
 C 
+      include '../include/boz.i'
+C
 C 5.  INITIALIZED VARIABLES 
 C 
       data ilen/60/ 
@@ -94,7 +96,7 @@ C
       call fs_get_rack(rack)
 c
       do  j = 1,3
-          nch = nch+ib2as(j,ibuf2,nch,o'100000'+1)
+          nch = nch+ib2as(j,ibuf2,nch,ocp100000+1)
           ic1 = nch 
           jc = 0
 C 
@@ -103,7 +105,7 @@ C
              do  i = 1,14
                 if (iabs(ifp2vc(i)).eq.j) then
                    nch = mcoma(ibuf2,nch)
-                   nch = nch+ib2as(i,ibuf2,nch,o'100000'+2)
+                   nch = nch+ib2as(i,ibuf2,nch,ocp100000+2)
                    call char2hol('h ',l,1,2)
                    if (ifp2vc(i).lt.0) call char2hol('l ',l,1,2)
                    nch = ichmv(ibuf2,nch,l,1,1)
@@ -137,7 +139,7 @@ C
                       else
                          nch=ichmv_ch(ibuf2,nch,',b')
                       endif
-                      nch = nch+ib2as(mod(i,8),ibuf2,nch,o'100000'+1)
+                      nch = nch+ib2as(mod(i,8),ibuf2,nch,ocp100000+1)
                       jc = jc+1 
                    endif
                 enddo

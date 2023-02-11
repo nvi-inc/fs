@@ -339,7 +339,7 @@ C       Create buffers with switched frequencies
         end if
 
 C  Now write out the unswitched frequencies in the header
-        ileft = o'100002'
+        ileft = int(o'100002')
         iz = 0 ! channel counter
 
 ! Changed 2014May21

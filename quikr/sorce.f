@@ -23,6 +23,7 @@ C     Set and display the source name
 C
       include '../include/fscom.i'
       include '../include/dpi.i'
+      include '../include/boz.i'
 C
       integer*4 ip(5)
       integer it(6),iparm(2),get_buf,ichcm_ch,itb(6)
@@ -335,13 +336,13 @@ C                   Adjust next char to be first blank in source name.
       else
         call radec(ra50,dec50,0.0,irah,iram,ras,
      .     lds,idcd,idcm,dcs,lhs,i,i,d) 
-        nch=nch+ib2as(irah,ibuf,nch,o'40000'+o'400'*2+2)
-        nch=nch+ib2as(iram,ibuf,nch,o'40000'+o'400'*2+2)
+        nch=nch+ib2as(irah,ibuf,nch,ocp40000+ocp400*2+2)
+        nch=nch+ib2as(iram,ibuf,nch,ocp40000+ocp400*2+2)
         nch = nch + ir2as(ras,ibuf,nch,-6,-3)
         nch = mcoma(ibuf,nch)
         if (dec50.lt.0.0) nch=ichmv_ch(ibuf,nch,'-')
-        nch=nch+ib2as(idcd,ibuf,nch,o'40000'+o'400'*2+2)
-        nch=nch+ib2as(idcm,ibuf,nch,o'40000'+o'400'*2+2)
+        nch=nch+ib2as(idcd,ibuf,nch,ocp40000+ocp400*2+2)
+        nch=nch+ib2as(idcm,ibuf,nch,ocp40000+ocp400*2+2)
         nch = nch + ir2as(dcs,ibuf,nch,-5,-2)
         nch = mcoma(ibuf,nch)
         call fs_get_ep1950(ep1950)
@@ -362,13 +363,13 @@ C                   Adjust next char to be first blank in source name.
       else 
          call radec(radat,decdat,0.0,irah,iram,ras,
      .        lds,idcd,idcm,dcs,lhs,i,i,d) 
-         nch=nch+ib2as(irah,ibuf,nch,o'40000'+o'400'*2+2)
-         nch=nch+ib2as(iram,ibuf,nch,o'40000'+o'400'*2+2)
+         nch=nch+ib2as(irah,ibuf,nch,ocp40000+ocp400*2+2)
+         nch=nch+ib2as(iram,ibuf,nch,ocp40000+ocp400*2+2)
          nch = nch + ir2as(ras,ibuf,nch,-6,-3)
          nch = mcoma(ibuf,nch)
          if (decdat.lt.0.0) nch=ichmv_ch(ibuf,nch,'-')
-         nch=nch+ib2as(idcd,ibuf,nch,o'40000'+o'400'*2+2)
-         nch=nch+ib2as(idcm,ibuf,nch,o'40000'+o'400'*2+2)
+         nch=nch+ib2as(idcd,ibuf,nch,ocp40000+ocp400*2+2)
+         nch=nch+ib2as(idcm,ibuf,nch,ocp40000+ocp400*2+2)
          nch = nch + ir2as(dcs,ibuf,nch,-5,-2)
          nch = mcoma(ibuf,nch)
          nch = nch + ir2as(epoch,ibuf,nch,9,4)

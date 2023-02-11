@@ -31,4 +31,3 @@ class RXGError(GnPltError):
 
 class NonConvergenceError(GnPltError):
     pass
-

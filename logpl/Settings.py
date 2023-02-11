@@ -26,7 +26,7 @@
 #Also, possibility to write default config file
 #and later on, possibility to read old logpl
 #config files
-#will make separate config for usbxy since they are so different. 
+#will make separate config for usbxy since they are so different.
 #style: [description]=[command, splitsign, parameter, string, group name]
 #############################################
 
@@ -40,30 +40,30 @@ class Settings:
     def writeSF(self, filename):
         _file = open(filename, 'w')
         header = '* ' + filename + """ - Control file for logpl2
-* This file may be edited in any text editor or in logpl's internal editor. 
+* This file may be edited in any text editor or in logpl's internal editor.
 *
-* 1. Command, the pattern logpl will grep the log file for. 
+* 1. Command, the pattern logpl will grep the log file for.
 * 2. Parameter, the number of separated data field for the command,
 *               a negative value means to take the value just after the
 *               field with "String"
-* 3. Description, the menu label logpl will use for the command. The description 
-*                 must be unique for every data. For pair commands, the first 
-*                 description must begin with a $-sign, and the second must end 
-*                 with a $-sign. 
+* 3. Description, the menu label logpl will use for the command. The description
+*                 must be unique for every data. For pair commands, the first
+*                 description must begin with a $-sign, and the second must end
+*                 with a $-sign.
 * 4. String, a level-2 grep. This parameter is optional and may be left out,
 *            for negative "Parameter" values, it is the string before the
 *            data field
-* 5. Dividing Character, the character that separates the parameters. 
-*                        If left out, it defaults to a comma. 
+* 5. Dividing Character, the character that separates the parameters.
+*                        If left out, it defaults to a comma.
 * 6. Group Name, Specify a group name to put the data in a cascaded menu
-*                in the plot menu. If several data share a group name, 
-*                they appear in the same cascade menu. 
+*                in the plot menu. If several data share a group name,
+*                they appear in the same cascade menu.
 *
 * This file is space-separated, and fields may only contain spaces
 * if they are inside double quotes. To have a double quote in a field, type 4 double quotes.
-* Note that single quotes are parsed as normal ASCII.  
+* Note that single quotes are parsed as normal ASCII.
 * Only field 1,2 and 3 are required by logpl. An empty field may simply be left out
-* but if there are fields to the right of it, specify it empty by using two double quotes (""). 
+* but if there are fields to the right of it, specify it empty by using two double quotes ("").
 * Also note, the interpretation of this control file is CASE SENSITIVE!
 *
 * 1:Command\t2:Parameter\t3:Description\t\t4:String\t5:Dividing Character\t6:Group Name
@@ -71,7 +71,7 @@ class Settings:
 * \n"""
         _file.write(header)
         linelist = []
-        for description in self.settings_dict.keys():
+        for description in list(self.settings_dict.keys()):
             _list = self.settings_dict.get(description)
             #check for blank signs. If so, add quotes.
             for i in range(len(_list)):
@@ -93,10 +93,10 @@ class Settings:
         for i in range(len(linelist)):
             _file.write(linelist[i][1])
         _file.close()
-    
+
     def fixLine(self, entry):
         if type(entry)==int:
-            return entry 
+            return entry
         if entry.count('"')>0:
             entry = entry.replace('"', '""""')
         if entry == '' or not entry:
@@ -104,19 +104,19 @@ class Settings:
         if entry.count(' ')>0:
             entry = '"' + entry + '"'
         return entry
-            
+
     def setSettings(self, key, value):
         #check value is list:
         if type(value)==type([]):
             self.settings_dict[key]=value
         else:
             raise TypeError
-        
-        
+
+
     def clearSettings(self):
         self.settings_dict.clear()
-    
-    
+
+
     def readSF(self, _filename='logpl.ctl'):
         try:
             control_file = open(_filename, 'r')
@@ -173,7 +173,7 @@ class Settings:
                                     if i>(len(line_list)-1):
                                         break
                                     a = line_list[i]
-                                    
+
                                 param_list.append(s)
                         except IndexError:
                             pass
@@ -187,13 +187,13 @@ class Settings:
                             #primary information (must exist), error raised if nonexistant:
                             description = param_list[2]
                             if description.count('!')>0:
-                                print 'Illegal character ! used in description. \n Exiting...'
+                                print('Illegal character ! used in description. \n Exiting...')
                                 sys.exit()
                             parameter = param_list[1]
                             try:
                                 int(parameter)
                             except:
-                                print 'Parameter in control file is not integer! \n Exiting...'
+                                print('Parameter in control file is not integer! \n Exiting...')
                                 sys.exit()
                             try:
                                 group_name = param_list[5]
@@ -209,9 +209,9 @@ class Settings:
                                 string = param_list[3]
                             except IndexError:
                                 string = ''
-                            self.settings_dict[description] = [command, split_sign, parameter, string, group_name, row]                       
+                            self.settings_dict[description] = [command, split_sign, parameter, string, group_name, row]
             control_file.close()
-        except IOError, e:
+        except IOError as e:
             raise IOError #just send back...
         else:
             return self.settings_dict

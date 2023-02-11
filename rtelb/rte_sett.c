@@ -58,8 +58,20 @@ char *sMode;
     iComputer= shm_addr->time.icomputer[iIndex];
 
     if (!strcmp(sMode,"cpu")) {
+        struct timespec tp;
         rte_sleep(25);
-        ierr=stime(&oFmClock);
+        tp.tv_sec=oFmClock;
+        tp.tv_nsec=0;
+        ierr=0;
+// unused, trapped by caller since it would require root permission
+//
+// untested, for Bullseye and later:
+//        ierr=clock_settime(CLOCK_REALTIME,&tp);
+// was before Bullseye:
+//        ierr=stime(&oFmClock);
+//
+//        if(ierr)
+//          perror("setting system time");
         shm_addr->time.secs_off = rte_secs();
     } else {
        time_t oCpuClock;

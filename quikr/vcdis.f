@@ -27,7 +27,7 @@ C     INPUT VARIABLES:
 C        IP(1)  - class number of buffer from MATCN 
 C        IP(2)  - # records in class
 C        IP(3)  - error return from MATCN 
-C        IP(4)  - who, or o'77' (?) 
+C        IP(4)  - who, or ocp77 (?) 
 C        IP(5)  - class with command
 C 
 C     OUTPUT VARIABLES: 
@@ -63,6 +63,9 @@ C               - registers from EXEC
       equivalence (reg,ireg(1)) 
 C 
 C 5.  INITIALIZED VARIABLES 
+C
+      include '../include/boz.i'
+C
       data ilen/40/,ilen2/60/ 
 C 
 C 6.  PROGRAMMER: NRV 
@@ -154,10 +157,10 @@ C                   Total power selection, ASCII letters
       if (itp.ne.itpivc(ivcn)) ierr = -303
       nch = mcoma(ibuf2,nch)
 C 
-      ncx = ib2as(iatu,ibuf2,nch,o'100000'+2) 
+      ncx = ib2as(iatu,ibuf2,nch,ocp100000+2) 
       if (iatu.ne.iatuvc(ivcn)) ierr = -304 
       nch = mcoma(ibuf2,nch+ncx)
-      ncx = ib2as(iatl,ibuf2,nch,o'100000'+2) 
+      ncx = ib2as(iatl,ibuf2,nch,ocp100000+2) 
       if (iatl.ne.iatlvc(ivcn)) ierr = -305 
 C 
       nch = nch + ncx 

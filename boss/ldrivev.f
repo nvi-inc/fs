@@ -25,6 +25,7 @@ c
       integer*2 ib(50)
 c
       include '../include/fscom.i'
+      include '../include/boz.i'
 c
       nch=1
       nch=ichmv_ch(ib,nch,name)
@@ -47,7 +48,7 @@ c
 c
       nch=mcoma(ib,nch)
       call fs_get_ihdmndel(ihdmndel,indxtp)
-      nch = nch + ib2as(ihdmndel(indxtp),ib,nch,o'100000'+6)
+      nch = nch + ib2as(ihdmndel(indxtp),ib,nch,ocp100000+6)
 c
       nch=mcoma(ib,nch)
       call fs_get_motorv(motorv,indxtp)
@@ -71,7 +72,7 @@ c
 c
       nch=mcoma(ib,nch)
       call fs_get_itpthick(itpthick,indxtp)
-      nch=nch+ib2as(itpthick(indxtp),ib,nch,z'8000'+10)
+      nch=nch+ib2as(itpthick(indxtp),ib,nch,zcp8000+10)
 c
       nch=mcoma(ib,nch)
       call fs_get_wrvolt(wrvolt,indxtp)
@@ -79,7 +80,7 @@ c
 c
       nch=mcoma(ib,nch)
       call fs_get_capstan(capstan,indxtp)
-      nch=nch+ib2as(capstan(indxtp),ib,nch,z'8000'+10)
+      nch=nch+ib2as(capstan(indxtp),ib,nch,zcp8000+10)
 c
       call logit3(ib,nch-1,lsor)
       nch=1
@@ -92,7 +93,7 @@ c
 c
       nch=mcoma(ib,nch)
       call fs_get_itpthick2(itpthick2,indxtp)
-      nch=nch+ib2as(itpthick2(indxtp),ib,nch,z'8000'+10)
+      nch=nch+ib2as(itpthick2(indxtp),ib,nch,zcp8000+10)
 c
       nch=mcoma(ib,nch)
       call fs_get_wrvolt2(wrvolt2,indxtp)

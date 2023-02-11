@@ -34,6 +34,7 @@ C        IP(4) - who we are
 C
 C 2.2.   COMMON BLOCKS USED
       include '../include/fscom.i'
+      include '../include/boz.i'
 C
 C 2.5.   SUBROUTINE INTERFACE:
 C     CALLING SUBROUTINES:
@@ -96,7 +97,7 @@ C
 C                   If no parameters, go read device
       if (cjchar(ibuf,ieq+1).ne.'?') goto 140
       ip(1) = 0 
-      ip(4) = o'77' 
+      ip(4) = ocp77 
       call dedis(ip,iclcm)
       return
 C 

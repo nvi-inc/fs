@@ -21,6 +21,7 @@
      .                    icherr,ichecks,indxtp)
 C
       include '../include/fscom.i'
+      include '../include/boz.i'
 C
 C  INPUT PARAMETERS
 C
@@ -55,7 +56,7 @@ C  is mode -1 to matcn. Replace with -5 which is the + strobe.
         enddo
 C
         ibuf1(1) = 8
-        ibuf1(3) = o'47'   ! an apostrophe '
+        ibuf1(3) = ocp47   ! an apostrophe '
         call put_buf(iclass,ibuf1,-5,'fs','  ')
 C Finally, get alarm status
         ierr=rn_take('fsctl',0)

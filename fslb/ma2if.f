@@ -56,6 +56,7 @@ C                   j = IF1 input, 0=NOR, 8=ALT
 C                   a1= atten. 1 (2 bits first char., other 4 in second)
 C                   a2= atten. 2 (2 bits first char., other 4 in second)
 C
+      include '../include/boz.i'
 C
       iat1 = 16*and(ia2hx(ibuf1,9),3) + ia2hx(ibuf1,10)
 C  Atten: upper 2 bits from char 9, lower 4 from char 10
@@ -64,13 +65,13 @@ C  Atten: upper 2 bits from char 9, lower 4 from char 10
       inp2 = ia2hx(ibuf1,5)/8
       irem = ia2hx(ibuf1,3)/8
 C
-c     tp1 = o'10000'*float(ia2hx(ibuf2,7)) + o'400'*ia2hx(ibuf2,8)
-c    .     + o'20'*ia2hx(ibuf2,9) + ia2hx(ibuf2,10)
-      tp1 = o'10000'*ia2hx(ibuf2,7) + o'400'*ia2hx(ibuf2,8)
-     .     + o'20'*ia2hx(ibuf2,9) + ia2hx(ibuf2,10)
+c     tp1 = ocp10000*float(ia2hx(ibuf2,7)) + ocp400*ia2hx(ibuf2,8)
+c    .     + ocp20*ia2hx(ibuf2,9) + ia2hx(ibuf2,10)
+      tp1 = ocp10000*ia2hx(ibuf2,7) + ocp400*ia2hx(ibuf2,8)
+     .     + ocp20*ia2hx(ibuf2,9) + ia2hx(ibuf2,10)
 C  Pick up four bits from each character for TP
-      tp2 = o'10000'*ia2hx(ibuf2,3) + o'400'*ia2hx(ibuf2,4)
-     .     + o'20'*ia2hx(ibuf2,5) + ia2hx(ibuf2,6)
+      tp2 = ocp10000*ia2hx(ibuf2,3) + ocp400*ia2hx(ibuf2,4)
+     .     + ocp20*ia2hx(ibuf2,5) + ia2hx(ibuf2,6)
 C  Pick up four bits from each character for TP
 C
       return

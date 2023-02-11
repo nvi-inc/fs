@@ -63,6 +63,8 @@ C 4.  CONSTANTS USED
 C 
 C 5.  INITIALIZED VARIABLES 
 C 
+      include '../include/boz.i'
+C
       data ilen/80/ 
 C 
 C 6.  PROGRAMMER: NRV 
@@ -213,7 +215,7 @@ C
         if (lprm.eq.0) goto 285
         if (cjchar(lprm,1).ne.'v') goto 250
 C                              V
-        ii=jchar(lprm,2)-o'60'
+        ii=jchar(lprm,2)-ocp60
         if (ii.gt.9) ii=ii-39
         if (ii.lt.1 .or. ii.gt.14) goto 285
         itpis(ii) = 1

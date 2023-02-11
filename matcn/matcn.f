@@ -106,6 +106,8 @@ C     CALLED SUBROUTINES: IAT, DATAT
 C 
 C   LOCAL VARIABLES 
 C 
+      include '../include/boz.i'
+C
 C               - RMPAR 
 C        IMODE  - mode for transmission/reception , stored in common MATCM
 C                                                   for communication with iat
@@ -257,7 +259,7 @@ C
       call ifill_ch(ibuf,1,180,' ')
       k5b=.false.
       do 900 iclrec = 1,nclrec
-        ireg(2) = get_buf(or(o'020000',iclass),ibuf,-ilen,idum,idum)
+        ireg(2) = get_buf(or(ocp020000,iclass),ibuf,-ilen,idum,idum)
 c
 c to avoid race condition with late clrcl
 c
@@ -403,7 +405,7 @@ C
 C     6. TEST/RESET mode messages.  Buffer already contains #xx.
 C
 600     continue
-        call pchar(ibuf,4,o'33')
+        call pchar(ibuf,4,ocp33)
         nch = 4
         call fs_get_kecho(kecho)
         call iat(ibuf,nch,lumat,kecho,ibuf2(2),nch2,ierr,itn)

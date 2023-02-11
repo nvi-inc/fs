@@ -22,7 +22,7 @@
 
 class PlotManager:
     active_plots = 0
-    
+
     def __init__(self):
         self._yyplot = False
         self.axis = False

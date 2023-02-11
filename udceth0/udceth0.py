@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
-# Copyright (c) 2020 NVI, Inc.
+# Copyright (c) 2020, 2022 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -25,77 +25,77 @@ import time
 
 if len(sys.argv) == 2:
 
-	ip = sys.argv[1]
-        port = 9050
-	server_address = (ip,port)
+    ip = sys.argv[1]
+    port = 9050
+    server_address = (ip,port)
 
-        msg = "updown 0000.0 0 0 0 0\n"
+    msg = "updown 0000.0 0 0 0 0\n"
 
-	try:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.connect(server_address)
-		time.sleep(2)
-                sock.sendall(msg)
- 		time.sleep(2)
-                data = sock.recv(4096)
-                print data
-                sock.close()
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect(server_address)
+        time.sleep(2)
+        sock.sendall(msg.encode())
+        time.sleep(2)
+        data = sock.recv(4096).decode()
+        print(data)
+        sock.close()
 
-        except KeyboardInterrupt:
-                print ''
-                print 'Client Terminated by User - closing open sockets'
+    except KeyboardInterrupt:
+        print('')
+        print('Client Terminated by User - closing open sockets')
 
 
-        except IndexError:
-                print 'Server address not specified'
+    except IndexError:
+        print('Server address not specified')
 
-        except socket.error:
-                print 'Server not reachable'
+    except socket.error:
+        print('Server not reachable')
 
-        finally:
-                try:
-                        sock.close()
-                        #print >>sys.stderr, 'socket closed'
-                except NameError:
-			print 'socket not open'
+    finally:
+        try:
+            sock.close()
+            #print >>sys.stderr, 'socket closed'
+        except NameError:
+            print('socket not open')
 elif len(sys.argv) == 5:
 
-	ip = sys.argv[1]
-	port = 9050
-	freq = sys.argv[2]
-	f = '%.1f' % (float(freq))
-	ga = sys.argv[3]
-	gb = sys.argv[4]
-	server_address = (ip,port)
+    ip = sys.argv[1]
+    port = 9050
+    freq = sys.argv[2]
+    f = '%.1f' % (float(freq))
+    ga = sys.argv[3]
+    gb = sys.argv[4]
+    server_address = (ip,port)
 
-	msg = "updown " + f + " " + ga + " " + gb + " 0 0\n"
+    msg = "updown " + f + " " + ga + " " + gb + " 0 0\n"
 
-	try:
-		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock.connect(server_address)
-		time.sleep(2)
-		sock.sendall(msg)
-		time.sleep(2)
-		data = sock.recv(4096)
-		print data
-		sock.close()
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect(server_address)
+        time.sleep(2)
+        sock.sendall(msg.encode())
+        time.sleep(2)
+        data = sock.recv(4096).decode()
+        print(data)
+        sock.close()
 
-	except KeyboardInterrupt:
-		print ''
-		print 'Client Terminated by User - closing open sockets'	
-	
+    except KeyboardInterrupt:
+        print('')
+        print('Client Terminated by User - closing open sockets')
 
-	except IndexError:
-		print 'Server address not specified'
 
-	except socket.error:
-		print 'Server not reachable'
+    except IndexError:
+        print('Server address not specified')
 
-	finally:
-		try:
-			sock.close()
-			#print >>sys.stderr, 'socket closed'
-		except NameError:
-			print 'socket not open'
+    except socket.error:
+        print('Server not reachable')
+
+    finally:
+        try:
+            sock.close()
+            #print >>sys.stderr, 'socket closed'
+        except NameError:
+            print('socket not open')
 else:
-	print "\n usage: udceth0.py <ip address> <freq> <ga> <gb>\n"
+    print("\n usage: udceth0.py <ip address> <freq> <ga> <gb>\n")

@@ -52,6 +52,8 @@ C
 C  LOCAL CONSTANT
       parameter (ilen=40)
 C
+      include '../include/boz.i'
+C
 C  PROGRAMMER: NRV
 C     LAST MODIFIED: 810207
 C
@@ -77,7 +79,7 @@ C
       call fs_get_inp2if(inp2if)
       if (cjchar(ibuf,ieq+1).eq.'?') then
         ip(1) = 0
-        ip(4) = o'77'
+        ip(4) = ocp77
         call ifdis(ip,iclcm,kfirst)
         return
       endif

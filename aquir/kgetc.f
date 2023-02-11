@@ -30,6 +30,8 @@ C
       integer iwpre(msorc),iwfiv(msorc),iwonof(msorc),iwpeak(msorc)
       integer iwpos(msorc)
 C
+      include '../include/boz.i'
+C
       logical kfild,kreof,kopn,kread,kif
       integer idcb(2)
 C
@@ -47,7 +49,7 @@ C
       call char2hol(l2mnyc,l2mny,1,36)
       l2mnys=trimlen(l2mnyc)
       kgetc=.true.
-      ic=ib2as(msorc,idum,1,o'100000'+8)
+      ic=ib2as(msorc,idum,1,ocp100000+8)
 C
 C   OPEN THE DATA FILE
 C

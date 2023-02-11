@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
-# Copyright (c) 2020 NVI, Inc.
+# Copyright (c) 2020, 2022 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -36,23 +36,23 @@ s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.bind(('', myPort))
 s.listen(5)
 
-print "listening to the clients on port " + str(myPort)
+print("listening to the clients on port " + str(myPort))
 connection, address = s.accept()
 
 sfile = s.makefile()
-rcvstr = connection.recv(4096)
-connection.send("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ; ")
+rcvstr = connection.recv(4096).decode()
+connection.send("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ; ".encode())
 time.sleep(sleeptime);
-connection.send("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb ")
+connection.send("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb ".encode())
 time.sleep(sleeptime);
 if not doTimeout:
-	connection.send("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\n")
-	time.sleep(sleeptime)
-	connection.send("dddddddddddddddd\n")
-	rcvstr = connection.recv(4096)
-	time.sleep(sleeptime)
-	connection.send("eeeeeeeeeeeeeee\n")
+    connection.send("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\n".encode())
+    time.sleep(sleeptime)
+    connection.send("dddddddddddddddd\n".encode())
+    rcvstr = connection.recv(4096).decode()
+    time.sleep(sleeptime)
+    connection.send("eeeeeeeeeeeeeee\n".encode())
 else:
-	connection.send(" should time out, no newline!")
-	time.sleep(10)
+    connection.send(" should time out, no newline!".encode())
+    time.sleep(10)
 s.close()

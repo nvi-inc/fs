@@ -24,6 +24,8 @@ C  CHK parses the list of module mnemonics to be checked.
 C 
 C  COMMON:
       include '../include/fscom.i'
+      include '../include/boz.i'
+C
 C 
 C     INPUT VARIABLES:
       dimension ip(1) 
@@ -322,8 +324,8 @@ C
 C  2.6 One of the video converters.
 C 
         else if (cjchar(lprm,1).eq.'v'.and.kMrack) then
-          ii=jchar(lprm,2)-z'30'
-          if (ii.gt.9) ii=ii-7-z'20'
+          ii=jchar(lprm,2)-zcp30
+          if (ii.gt.9) ii=ii-7-zcp20
           if (ii.le.0 .or. ii.gt.15) then
             ip(3) = -201
             return
@@ -333,8 +335,8 @@ C
 C  2.7 One of the baseband converters.
 C
         else if (cjchar(lprm,1).eq.'b'.and.kVrack) then
-          ii=jchar(lprm,2)-z'30'
-          if (ii.gt.9) ii=ii-7-z'20'
+          ii=jchar(lprm,2)-zcp30
+          if (ii.gt.9) ii=ii-7-zcp20
           if (ii.le.0 .or. ii.gt.14) then
             ip(3) = -201
             return
@@ -344,8 +346,8 @@ C
 C  2.7a One of the IF processors.
 C
         else if (cjchar(lprm,1).eq.'p'.and.kLrack) then
-          ii=jchar(lprm,2)-z'30'
-          if (ii.gt.9) ii=ii-7-z'20'
+          ii=jchar(lprm,2)-zcp30
+          if (ii.gt.9) ii=ii-7-zcp20
           if (ii.le.0 .or. ii.gt.2*ndas) then
             ip(3) = -201
             return
@@ -487,7 +489,7 @@ C
           if (icheck(i).ge.1) then
             if (i.le.15) then
               nch = ichmv_ch(ibuf,nch,'v')
-              nch = nch + ib2as(i,ibuf,nch,o'100000'+2)
+              nch = nch + ib2as(i,ibuf,nch,ocp100000+2)
             else
               if (i.eq.16) nch = ichmv_ch(ibuf,nch,'if')
               if (i.eq.17) nch = ichmv_ch(ibuf,nch,'fm')
@@ -501,7 +503,7 @@ C
           if (ichvlba(i).ge.1) then
             if (i.le.14) then
               nch = ichmv_ch(ibuf,nch,'b')
-              nch = nch + ib2as(i,ibuf,nch,o'100000'+2)
+              nch = nch + ib2as(i,ibuf,nch,ocp100000+2)
             else
               if (i.eq.15) nch = ichmv_ch(ibuf,nch,'ia')
               if (i.eq.16) nch = ichmv_ch(ibuf,nch,'ic')
@@ -515,7 +517,7 @@ C
           call fs_get_ichlba(ichlba(i),i)
           if (ichlba(i).ge.1) then
             nch = ichmv_ch(ibuf,nch,'p')
-            nch = nch + ib2as(i,ibuf,nch,o'100000'+2)
+            nch = nch + ib2as(i,ibuf,nch,ocp100000+2)
             nch = mcoma(ibuf,nch)
           endif
         enddo

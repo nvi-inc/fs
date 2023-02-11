@@ -42,12 +42,14 @@ C           0000-3999 are positive positions
 C           4000-7999 are negative positions as 4000+abs(position)
 C         FF is hex FF
 C
+      include '../include/boz.i'
+C
       integer iof,idumm1,ib2as,ichmv,ichmv_ch
       integer*2 ixx
 C
       iof=min(abs(iposn),3999)    !limit offset to 3999
       if(iposn.lt.0) iof=iof+4000
-      idumm1 = ib2as(iof,ibuf,5,o'40000'+o'400'*4+4)
+      idumm1 = ib2as(iof,ibuf,5,ocp40000+ocp400*4+4)
       if(ipas.eq.0) then
         call char2hol('fd',ixx,1,2)
       else if(mod(ipas,2).eq.0) then

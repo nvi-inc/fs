@@ -27,6 +27,7 @@ C
       integer get_buf
 C
       include '../include/fscom.i'
+      include '../include/boz.i'
 C
       integer*2 ibuf(20), lgenx(2)
       character cjchar
@@ -61,7 +62,7 @@ C
       call fs_get_idirtp(idirtp,indxtp)
       call fs_get_ienatp(ienatp,indxtp)
       if (ieq.eq.nchar.or.cjchar(ibuf,ieq+1).ne.'?') goto 210
-      ip(4) = o'77' 
+      ip(4) = ocp77 
       call stdis(ip,iclcm,indxtp)
       return
 C 

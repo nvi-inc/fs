@@ -51,6 +51,8 @@ C  CALLED SUBROUTINES: character utilities
 C 
 C LOCAL VARIABLES 
 C 
+      include '../include/boz.i'
+C
 C  ILEN   - max length available in ITRAN buffer, characters. 
 C          ***NOTE*** THIS MUST CORRESPOND TO THE LENGTH
 C                     OF IBUF2 IN MATCN, LESS 1 WORD. 
@@ -179,9 +181,9 @@ C removing output drain maybe a
 C solution for an intermittent kernel 2.6 problem with SuperMicro C7SIM-Q?
 c     ierr=portoutdrain(lumat)
 C
-C  For actual communications, use o'2000' in the read request.
-C  For terminal tests, use o'400' instead.
-C    o'2000' = 0 0 0 0 1 0 0 0 0    followed by six bits of LU #
+C  For actual communications, use ocp2000 in the read request.
+C  For terminal tests, use ocp400 instead.
+C    ocp2000 = 0 0 0 0 1 0 0 0 0    followed by six bits of LU #
 C            !       !   !   ! ASCII read
 C            !       !   ! no echo
 C            !       ! transmit special characters
@@ -241,7 +243,7 @@ C
 C
 C  8. Now check for errors.  If time-out or wrong number of characters,
 C     try communications all over again.
-C     If we got a o'6' (ack) or o'25' (nak) substitute readable ACK or NAK.
+C     If we got a ocp6 (ack) or ocp25 (nak) substitute readable ACK or NAK.
 C
       if(ireg(1).eq.-1) then !bad buffer length on read
          ierr=-10
@@ -328,10 +330,10 @@ c                                ! wrong # of characters in response
            nrc=nrc-1
          endif
          nrc=nrc-1
-      else if (jchar(irecv,1).eq.o'6') then ! ack response
+      else if (jchar(irecv,1).eq.ocp6) then ! ack response
          ierr = +1
          nrc = ichmv_ch(irecv,1,'ack') - 1
-      else if (jchar(irecv,1).eq.o'25') then ! nak response
+      else if (jchar(irecv,1).eq.ocp25) then ! nak response
          if (ir.eq.5.and.itry.lt.maxtry) goto 200
          ierr = +2
          nrc = ichmv_ch(irecv,1,'nak') - 1

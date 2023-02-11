@@ -51,6 +51,8 @@ C      LNFCH Utilities
 C 
 C LOCAL VARIABLES:
 C
+      include '../include/boz.i'
+C
       integer ichcm_ch
       character cjchar
 C 
@@ -157,7 +159,7 @@ C not Y10K compliant
       endif
       if (cjchar(ibuf2,ifrst).ne.'"') goto 300
       call ifill_ch(jbuf,1,100,' ')
-      call ifill(jbuf,1,1,o'42')
+      call ifill(jbuf,1,1,ocp42)
       call ichmv(jbuf,2,lstid,1,1)
       call ichmv(jbuf,4,ibuf2,1,ilen)
       ncom=ilen+3

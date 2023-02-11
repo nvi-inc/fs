@@ -24,7 +24,9 @@ C
       integer*2 ibuf(1)
       character*(*) iobuf
       double precision parr,qarr,phi
+C
       include '../include/dpi.i'
+      include '../include/boz.i'
 C
       logical kpout,kpout_ch
 C
@@ -39,17 +41,17 @@ C
 C
       inext=1
       inext=ichmv_ch(ibuf,1,'  ')
-      inext=inext+ib2as(imdl,ibuf,inext,o'40000'+o'400'*5+5)
+      inext=inext+ib2as(imdl,ibuf,inext,ocp40000+ocp400*5+5)
       inext=ichmv_ch(ibuf,inext,'  ')
-      inext=inext+ib2as(it(6),ibuf,inext,o'40000'+o'400'*4+4)
+      inext=inext+ib2as(it(6),ibuf,inext,ocp40000+ocp400*4+4)
       inext=ichmv_ch(ibuf,inext,'  ')
-      inext=inext+ib2as(it(5),ibuf,inext,o'40000'+o'400'*3+3)
+      inext=inext+ib2as(it(5),ibuf,inext,ocp40000+ocp400*3+3)
       inext=ichmv_ch(ibuf,inext,'  ')
-      inext=inext+ib2as(it(4),ibuf,inext,o'40000'+o'400'*2+2)
+      inext=inext+ib2as(it(4),ibuf,inext,ocp40000+ocp400*2+2)
       inext=ichmv_ch(ibuf,inext,'  ')
-      inext=inext+ib2as(it(3),ibuf,inext,o'40000'+o'400'*2+2)
+      inext=inext+ib2as(it(3),ibuf,inext,ocp40000+ocp400*2+2)
       inext=ichmv_ch(ibuf,inext,'  ')
-      inext=inext+ib2as(it(2),ibuf,inext,o'40000'+o'400'*2+2)
+      inext=inext+ib2as(it(2),ibuf,inext,ocp40000+ocp400*2+2)
       inext=ichmv_ch(ibuf,inext,' ')
 C
       kplin=kpout(lut,idcb,ibuf,inext,iobuf,lst)

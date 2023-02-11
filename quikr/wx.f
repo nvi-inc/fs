@@ -54,6 +54,9 @@ C        ICH    - character counter
       equivalence (reg,ireg(1)),(parm,iparm(1)) 
 C 
 C 5. INITIALIZED VARIABLES
+C
+      include '../include/boz.i'
+C
 c     data ilen/40/
       data ilen2/80/          !  lengths of class buffers
       data il/10/,lchar/2h+ ,2h% ,2h! ,2h? /
@@ -194,7 +197,7 @@ C
             nch = mcoma(ibuf2,nch)
             nch = nch + ir2as(speedwx,ibuf2,nch,7,1) 
             nch = mcoma(ibuf2,nch)
-            nch = nch + ib2as(directionwx,ibuf2,nch,o'100000'+3) 
+            nch = nch + ib2as(directionwx,ibuf2,nch,ocp100000+3) 
          endif
       endif
 C 

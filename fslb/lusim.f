@@ -44,6 +44,8 @@ C
 C  CALLING SUBROUTINES: SUB1, SUB2, ... (not required for utilities) 
 C  CALLED SUBROUTINES: SUB1, SUB2, ... (includes segments scheduled) 
 C 
+      include '../include/boz.i'
+C
 C 3.  LOCAL VARIABLES 
 C 
 C       LUDEF   - FLAG INDICATING VALUE OF LU DEFINED BE USER IF PRESENT
@@ -90,7 +92,7 @@ C
 C
 C  GET THE CURRENT LU FROM IDSEG - THIS IS RTE-IV
 C
-      ludef=-iget(iget(o'1717')+32)
+      ludef=-iget(iget(ocp1717)+32)
 C 
 C  NOW EXIT
 C 

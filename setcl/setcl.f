@@ -43,6 +43,8 @@ C      - IP(1) = lu for error messages
 C
 C  LOCAL:
 C
+      include '../include/boz.i'
+C
       integer*2 ibuf(120),ibuft(10),ibuf2(10),ibuf4(40)
       integer ilen,trimlen,fc_get_vtime,fc_get_s2time,fc_get_5btime
       integer it(6),get_buf, ireg(2), fc_rte_sett,iyrctl_fs
@@ -527,21 +529,21 @@ c
       endif
 c
       inxtc=ichmv_ch(ibuf,1,'time/')
-      inxtc=inxtc+ib2as(centiavg,ibuf,inxtc,o'100000'+12)
+      inxtc=inxtc+ib2as(centiavg,ibuf,inxtc,ocp100000+12)
       inxtc = mcoma(ibuf,inxtc)
-      inxtc=inxtc+ib2as(centidiff,ibuf,inxtc,o'100000'+12)
+      inxtc=inxtc+ib2as(centidiff,ibuf,inxtc,ocp100000+12)
       inxtc = mcoma(ibuf,inxtc)
-      inxtc=inxtc+ib2as(it(6),ibuf,inxtc,o'40000'+o'400'*4+4)
+      inxtc=inxtc+ib2as(it(6),ibuf,inxtc,ocp40000+ocp400*4+4)
       inxtc = mcoma(ibuf,inxtc)
-      inxtc=inxtc+ib2as(it(5),ibuf,inxtc,o'40000'+o'400'*3+3)
+      inxtc=inxtc+ib2as(it(5),ibuf,inxtc,ocp40000+ocp400*3+3)
       inxtc = mcoma(ibuf,inxtc)
-      inxtc=inxtc+ib2as(it(4),ibuf,inxtc,o'40000'+o'400'*2+2)
+      inxtc=inxtc+ib2as(it(4),ibuf,inxtc,ocp40000+ocp400*2+2)
       inxtc = mcoma(ibuf,inxtc)
-      inxtc=inxtc+ib2as(it(3),ibuf,inxtc,o'40000'+o'400'*2+2)
+      inxtc=inxtc+ib2as(it(3),ibuf,inxtc,ocp40000+ocp400*2+2)
       inxtc = mcoma(ibuf,inxtc)
-      inxtc=inxtc+ib2as(it(2),ibuf,inxtc,o'40000'+o'400'*2+2)
+      inxtc=inxtc+ib2as(it(2),ibuf,inxtc,ocp40000+ocp400*2+2)
       inxtc=ichmv_ch(ibuf,inxtc,'.')
-      inxtc=inxtc+ib2as(it(1),ibuf,inxtc,o'40000'+o'400'*2+2)
+      inxtc=inxtc+ib2as(it(1),ibuf,inxtc,ocp40000+ocp400*2+2)
       inxtc = mcoma(ibuf,inxtc)
       if ((.not.kfm).or.epochti_fs.eq.0.or.icomputer.ne.0
      &     .or.cjchar(modelti_fs,1).eq.'c') then
@@ -560,7 +562,7 @@ c    &     (rateti_fs+(float(diff)/(centiavg-epochti_fs)))*86400.
       endif
       inxtc = mcoma(ibuf,inxtc)
       if(kfm) then
-         inxtc=inxtc+ib2as(diff,ibuf,inxtc,o'100000'+12)
+         inxtc=inxtc+ib2as(diff,ibuf,inxtc,ocp100000+12)
       else
          inxtc=ichmv_ch(ibuf,inxtc,'$$$$$$$$$$$$')
       endif
@@ -569,15 +571,15 @@ c
       ntp_synch=fc_ntp_synch(ierrors)
       if(ntp_synch.lt.0) ierrors=0
       inxtc=ichmv_ch(ibuf,1,'model/old,')
-      inxtc=inxtc+ib2as(secsoffti_fs,ibuf,inxtc,o'100000'+12)
+      inxtc=inxtc+ib2as(secsoffti_fs,ibuf,inxtc,ocp100000+12)
       inxtc = mcoma(ibuf,inxtc)
-      inxtc=inxtc+ib2as(offsetti_fs,ibuf,inxtc,o'100000'+12)
+      inxtc=inxtc+ib2as(offsetti_fs,ibuf,inxtc,ocp100000+12)
       inxtc = mcoma(ibuf,inxtc)
       if(epochti_fs.eq.0.or.cjchar(modelti_fs,1).eq.'c'
      &     .or.icomputer.ne.0) then
-         inxtc=inxtc+ib2as(0,ibuf,inxtc,o'100000'+12)
+         inxtc=inxtc+ib2as(0,ibuf,inxtc,ocp100000+12)
       else
-         inxtc=inxtc+ib2as(epochti_fs,ibuf,inxtc,o'100000'+12)
+         inxtc=inxtc+ib2as(epochti_fs,ibuf,inxtc,ocp100000+12)
       endif
       inxtc = mcoma(ibuf,inxtc)
       inxtc=inxtc+ir2as(rateti_fs*86400.,ibuf,inxtc,8,3)
@@ -594,7 +596,7 @@ c
       else
          inxtc = ichmv_ch(ibuf,inxtc,'none,')
       endif
-      inxtc=inxtc+ib2as(ibaseold,ibuf,inxtc,o'100000'+12)
+      inxtc=inxtc+ib2as(ibaseold,ibuf,inxtc,ocp100000+12)
       inxtc = mcoma(ibuf,inxtc)
       if(ntp_synch.eq.1) then
          inxtc = ichmv_ch(ibuf,inxtc,'sync,')
@@ -603,10 +605,10 @@ c
       else
          inxtc = ichmv_ch(ibuf,inxtc,'unknown,')
       endif
-      inxtc=inxtc+ib2as(difffs2unix,ibuf,inxtc,o'100000'+12)
+      inxtc=inxtc+ib2as(difffs2unix,ibuf,inxtc,ocp100000+12)
       inxtc = mcoma(ibuf,inxtc)
       if(kfm) then
-         inxtc=inxtc+ib2as(diffunix,ibuf,inxtc,o'100000'+12)
+         inxtc=inxtc+ib2as(diffunix,ibuf,inxtc,ocp100000+12)
       else
          inxtc=ichmv_ch(ibuf,inxtc,'$$$$$$$$$$$$')
       endif
@@ -661,15 +663,15 @@ c
      &          rateti_fs,spanti_fs,modelti_fs,icomputer)
         endif
         inxtc=ichmv_ch(ibuf,1,'model/new,')
-        inxtc=inxtc+ib2as(secsoffti_fs,ibuf,inxtc,o'100000'+12)
+        inxtc=inxtc+ib2as(secsoffti_fs,ibuf,inxtc,ocp100000+12)
         inxtc = mcoma(ibuf,inxtc)
-        inxtc=inxtc+ib2as(offsetti_fs,ibuf,inxtc,o'100000'+12)
+        inxtc=inxtc+ib2as(offsetti_fs,ibuf,inxtc,ocp100000+12)
         inxtc = mcoma(ibuf,inxtc)
         if(epochti_fs.eq.0.or.cjchar(modelti_fs,1).eq.'c'
      &       .or.icomputer.ne.0) then
-           inxtc=inxtc+ib2as(0,ibuf,inxtc,o'100000'+12)
+           inxtc=inxtc+ib2as(0,ibuf,inxtc,ocp100000+12)
         else
-           inxtc=inxtc+ib2as(epochti_fs,ibuf,inxtc,o'100000'+12)
+           inxtc=inxtc+ib2as(epochti_fs,ibuf,inxtc,ocp100000+12)
         endif
         inxtc = mcoma(ibuf,inxtc)
         inxtc=inxtc+ir2as(rateti_fs*86400.,ibuf,inxtc,8,3)
@@ -687,7 +689,7 @@ c
            inxtc = ichmv_ch(ibuf,inxtc,'none')
         endif
         inxtc = mcoma(ibuf,inxtc)
-        inxtc=inxtc+ib2as(ibase,ibuf,inxtc,o'100000'+12)
+        inxtc=inxtc+ib2as(ibase,ibuf,inxtc,ocp100000+12)
         call logit2(ibuf,inxtc-1)
 c
       else if(kfm.and.abs(diff-ibase).gt.50) then
@@ -722,7 +724,7 @@ C
            endif
            call fs_get_m5b_crate(m5b_crate)
            if(m5b_crate.ne.0) then 
-              idum=1+ib2as(m5b_crate,ibuf,1,o'100000'+12)
+              idum=1+ib2as(m5b_crate,ibuf,1,ocp100000+12)
               call char2hol(char(0),ibuf,idum,idum)
               call hol2char(ibuf,1,idum,crate)
               if(crate(1:idum).ne.m5freq(1:idum)) then

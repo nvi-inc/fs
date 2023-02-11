@@ -60,6 +60,8 @@ C
 C 
 C 4.  CONSTANTS USED
 C 
+      include '../include/boz.i'
+C
 C 5.  INITIALIZED VARIABLES 
 C 
       data ilen/80/ 
@@ -153,7 +155,7 @@ C
         if (ichcm_ch(lprm,1,'p').ne.0) goto 285
         if (((cjchar(lprm,2).ge.'1').and.(cjchar(lprm,2).le.'9')).or.
      .      ((cjchar(lprm,2).ge.'a').and.(cjchar(lprm,2).le.'f'))) then
-          ii=jchar(lprm,2) - o'60'  !! turns hollerith into integer
+          ii=jchar(lprm,2) - ocp60  !! turns hollerith into integer
           if (ii.gt.9) ii=ii-39  !! if a thru f subtract to get correct
 C                              !! integer
           if (ii.lt.1 .or. ii.gt.2*ndas) goto 285

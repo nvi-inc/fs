@@ -81,6 +81,8 @@ C      LXWRT - Writes out LOGEX data.
 C
 C LOCAL VARIABLES:
 C
+      include '../include/boz.i'
+C
       logical kmatch
 C        - A flag that indicates whether we have a matching schedule &
 C          log observation.
@@ -169,7 +171,7 @@ C
       ic = iscn_ch(logna,1,ilc,'.')-1
       if (ic.lt.0) ic = ilc
       lch=jchar(logna,ic)
-      lstid=lch*o'400'+o'40'
+      lstid=lch*ocp400+ocp40
       if (ikey.eq.9) goto 200
       call redsk(ibufsk,iskbw)
       if (icode.eq.-1) goto 600
@@ -241,16 +243,16 @@ C
 430   continue 
       call ifill_ch(jbuf,1,100,' ')
       if (ikey.eq.12) then
-        call ib2as(idayr,jbuf,1,o'40000'+o'400'*2+3)
+        call ib2as(idayr,jbuf,1,ocp40000+ocp400*2+3)
         call ifill_ch(jbuf,4,1,'-')
-        call ib2as(ihr,jbuf,5,o'40000'+o'400'+2)
-        call ib2as(min,jbuf,7,o'40000'+o'400'+2)
+        call ib2as(ihr,jbuf,5,ocp40000+ocp400+2)
+        call ib2as(min,jbuf,7,ocp40000+ocp400+2)
       else
         if (itcntl.ne.-1) then
-          call ib2as(ilrday,jbuf,1,o'40000'+o'400'*2+3)
+          call ib2as(ilrday,jbuf,1,ocp40000+ocp400*2+3)
           call ifill_ch(jbuf,4,1,'-')
-          call ib2as(ilrhrs,jbuf,5,o'40000'+o'400'+2)
-          call ib2as(ilrmin,jbuf,7,o'40000'+o'400'+2)
+          call ib2as(ilrhrs,jbuf,5,ocp40000+ocp400+2)
+          call ib2as(ilrmin,jbuf,7,ocp40000+ocp400+2)
         else
           call ifill_ch(jbuf,4,1,'-')
         endif
@@ -259,30 +261,30 @@ C
         call ichmv(jbuf,10,lsourn,1,16)
         call ichmv(jbuf,27,ltapen,1,8)
         ilsft = lsft
-        call ib2as(ilsft,jbuf,36,o'40000'+o'400'*5+5)
+        call ib2as(ilsft,jbuf,36,ocp40000+ocp400*5+5)
         if (isld.eq.0) then
           call ifill_ch(jbuf,47,1,'.')
         else          
-          call ib2as(isly,jbuf,42,o'40000'+o'400'*4+4)
+          call ib2as(isly,jbuf,42,ocp40000+ocp400*4+4)
           call ifill_ch(jbuf,46,1,'.')
-          call ib2as(isld,jbuf,47,o'40000'+o'400'*2+3)
+          call ib2as(isld,jbuf,47,ocp40000+ocp400*2+3)
           call ifill_ch(jbuf,50,1,'.')
-          call ib2as(islhr,jbuf,51,o'40000'+o'400'+2)
+          call ib2as(islhr,jbuf,51,ocp40000+ocp400+2)
           call ifill_ch(jbuf,53,1,':')
-          call ib2as(islmin,jbuf,54,o'40000'+o'400'+2)
+          call ib2as(islmin,jbuf,54,ocp40000+ocp400+2)
           call ifill_ch(jbuf,56,1,':')
-          call ib2as(islsec,jbuf,57,o'40000'+o'400'+2)
+          call ib2as(islsec,jbuf,57,ocp40000+ocp400+2)
         endif
         if (ield.eq.0) then
           call ifill_ch(jbuf,63,1,'-')
         else
-          call ib2as(ielhr,jbuf,60,o'40000'+o'400'+2)
+          call ib2as(ielhr,jbuf,60,ocp40000+ocp400+2)
           call ifill_ch(jbuf,62,1,':')
-          call ib2as(ielmin,jbuf,63,o'40000'+o'400'+2)
+          call ib2as(ielmin,jbuf,63,ocp40000+ocp400+2)
           call ifill_ch(jbuf,65,1,':')
-          call ib2as(ielsec,jbuf,66,o'40000'+o'400'+2)
+          call ib2as(ielsec,jbuf,66,ocp40000+ocp400+2)
           ileft=left
-          call ib2as(ileft,jbuf,69,o'40000'+o'400'*5+5)
+          call ib2as(ileft,jbuf,69,ocp40000+ocp400*5+5)
         endif
         call ichmv(jbuf,75,lstat,1,6)
       else

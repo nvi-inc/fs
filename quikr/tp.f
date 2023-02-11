@@ -63,6 +63,8 @@ C
 C 
 C   INITIALIZED VARIABLES 
 C 
+      include '../include/boz.i'
+C
       data ilen/40/ 
 C 
 C  PROGRAMMER: NRV
@@ -92,7 +94,7 @@ c
 C                   If no parameters, go read device
       if (cjchar(ibuf,ieq+1).eq.'?') then
         ip(1) = 0
-        ip(4) = o'77'
+        ip(4) = ocp77
         call tpdis(ip,iclcm,indxtp)
         return
       endif

@@ -57,6 +57,9 @@ C        ICH    - character counter
       equivalence (reg,ireg(1)),(parm,iparm(1)) 
 C 
 C 5.  INITIALIZED VARIABLES 
+C
+      include '../include/boz.i'
+C
       data ilen/40/                        !  length of ibuf, characters
 C 
 C 
@@ -87,7 +90,7 @@ c
       endif
       if (cjchar(ibuf,ieq+1).eq.'?') then
         nch = ichmv_ch(ibuf,ieq,'/')
-        nch = nch + ib2as(iftgo,ibuf,nch,o'40000'+o'400'*5+5)
+        nch = nch + ib2as(iftgo,ibuf,nch,ocp40000+ocp400*5+5)
         iclass = 0
         nch = nch - 1
         call put_buf(iclass,ibuf,-nch,'fs','  ')
@@ -181,17 +184,17 @@ C                     Add on the time difference to the present
          inext1=ichmv_ch(ibuf,inext1,'@!')
          inext2=ichmv_ch(ibuf(4),1,'et2@')
       endif
-      inext2 = inext2 + ib2as(it(6),ibuf(4),inext2,o'40000'+o'400'*4+4)
+      inext2 = inext2 + ib2as(it(6),ibuf(4),inext2,ocp40000+ocp400*4+4)
       inext2 = ichmv_ch(ibuf(4),inext2,'.')
-      inext2 = inext2 + ib2as(it(5),ibuf(4),inext2,o'40000'+o'400'*3+3) 
+      inext2 = inext2 + ib2as(it(5),ibuf(4),inext2,ocp40000+ocp400*3+3) 
       inext2 = ichmv_ch(ibuf(4),inext2,'.')
-      inext2 = inext2 + ib2as(it(4),ibuf(4),inext2,o'40000'+o'400'*2+2)
+      inext2 = inext2 + ib2as(it(4),ibuf(4),inext2,ocp40000+ocp400*2+2)
       inext2 = ichmv_ch(ibuf(4),inext2,':')
-      inext2 = inext2 + ib2as(it(3),ibuf(4),inext2,o'40000'+o'400'*2+2) 
+      inext2 = inext2 + ib2as(it(3),ibuf(4),inext2,ocp40000+ocp400*2+2) 
       inext2 = ichmv_ch(ibuf(4),inext2,':')
-      inext2 = inext2 + ib2as(it(2),ibuf(4),inext2,o'40000'+o'400'*2+2) 
+      inext2 = inext2 + ib2as(it(2),ibuf(4),inext2,ocp40000+ocp400*2+2) 
       inext2 = ichmv_ch(ibuf(4),inext2,'.')
-      inext2 = inext2 + ib2as(it(1),ibuf(4),inext2,o'40000'+o'400'*2+2)
+      inext2 = inext2 + ib2as(it(1),ibuf(4),inext2,ocp40000+ocp400*2+2)
       call copin(ibuf,inext1-1)
       call copin(ibuf(4),inext2-1)
 C                     Send the commands to BOSS 

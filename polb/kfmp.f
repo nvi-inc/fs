@@ -24,6 +24,8 @@
       character*(*) ipbuf
       integer*2 lerr(8)
 C
+      include '../include/boz.i'
+C
       data lerr   /  14,2Her,2Hro,2Hr ,2H  ,2H  ,2H  ,2H  /
 C          error
       kfmp=.false.
@@ -35,7 +37,7 @@ C          error
 C
       kfmp=.true.
       ifc=7
-      ifc=ifc+ib2as(ierr,lerr(2),ifc,o'100000'+6)
+      ifc=ifc+ib2as(ierr,lerr(2),ifc,ocp100000+6)
       ifc=ichmv_ch(lerr(2),ifc,' _')
       call po_put_i(lerr(2),ifc)
 C

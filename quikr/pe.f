@@ -38,6 +38,9 @@ C
 C     CALLED SUBROUTINES: GTPRM
 C 
 C    LOCAL VARIABLES
+C
+      include '../include/boz.i'
+C
 C        NCHAR  - number of characters in buffer
 C        ICH    - character counter 
       integer*2 ibuf(20)
@@ -82,7 +85,7 @@ C
       if (ieq.eq.0) goto 500
 C                   If no parameters, go read decoder 
       if (cjchar(ibuf,ieq+1).ne.'?') goto 200
-      ip(4) = o'77' 
+      ip(4) = ocp77 
       call pedis(ip,iclcm,perr,isyner,indxtp)
       return
 C 

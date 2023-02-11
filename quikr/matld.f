@@ -69,6 +69,7 @@ C               - registers from EXEC calls
 C 
 C 4.  CONSTANTS USED
 C 
+      include '../include/boz.i'
 C 
 C 5.  INITIALIZED VARIABLES 
 C 
@@ -163,7 +164,7 @@ C
 300   ibuf(1) = 5 
       call char2hol('#  :',ibuf(2),1,4)
       idumm1 = ichmv(ibuf,4,ladr,1,2) 
-      idumm1 = ib2as(nhxbyt,ibuf,7,o'40000'+o'400'*2+2) 
+      idumm1 = ib2as(nhxbyt,ibuf,7,ocp40000+ocp400*2+2) 
       ibuf(5) = lloc(1) 
       ibuf(6) = lloc(2) 
       call char2hol('00',ibuf(7),1,2)

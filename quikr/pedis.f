@@ -60,6 +60,8 @@ C        IA     - hex char from MAT
 C 
 C INITIALIZED VARIABLES 
 C 
+      include '../include/boz.i'
+C
       data ilen/60/ 
       data lchan/2hab/
       data lmode/2hre,2hc ,2hpl,2hay/ 
@@ -87,11 +89,11 @@ C
 C     2. Now the buffer contains: PERR/ and we want to add
 C     the data. 
 C 
-      nch = nch + ib2as(itrper(indxtp),ibuf2,nch,o'100000'+2) 
+      nch = nch + ib2as(itrper(indxtp),ibuf2,nch,ocp100000+2) 
       nch = mcoma(ibuf2,nch)
       nch = ichmv(ibuf2,nch,lchan,ichper(indxtp)+1,1) 
       nch = mcoma(ibuf2,nch)
-      nch = nch + ib2as(insper(indxtp),ibuf2,nch,o'100000'+3) 
+      nch = nch + ib2as(insper(indxtp),ibuf2,nch,ocp100000+3) 
       nch = mcoma(ibuf2,nch)
       nch = nch + ir2as(tperer(indxtp),ibuf2,nch,5,1) 
       nch = mcoma(ibuf2,nch)
@@ -114,7 +116,7 @@ C                   between successive readings
 C 
       nch = nch + ir2as(sum,ibuf2,nch,6,1)
       nch = mcoma(ibuf2,nch)
-      nch = nch + ib2as(isyner,ibuf2,nch,o'100000'+5) 
+      nch = nch + ib2as(isyner,ibuf2,nch,ocp100000+5) 
 C 
 C 
 C     5. Now send the buffer to SAM.

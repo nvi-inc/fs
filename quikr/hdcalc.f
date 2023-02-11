@@ -22,6 +22,7 @@ C
 C  Calculate the calibration parameters
 C
       include '../include/fscom.i'
+      include '../include/boz.i'
 C
       integer ip(5),ireg(2),iparm(2)
       integer*2 ibuf(50)
@@ -62,7 +63,7 @@ C
         kbdread_fs(indxtp)=.false.
         goto 990
       else if(cjchar(ibuf,ieq+1).eq.'?') then
-        ip(4)=o'77'
+        ip(4)=ocp77
         goto 500
       endif
       ich=ieq+1

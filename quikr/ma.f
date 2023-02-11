@@ -60,6 +60,8 @@ C
 C 
 C    INITIALIZED VARIABLES
 C 
+      include '../include/boz.i'
+C
       data ilen/100/
 C 
 C   PROGRAMMER: NRV 
@@ -113,7 +115,7 @@ C                   If there's nothing left, quit
       call pchar(idum,2,9)
       nenq = iscnc(ibuf,ifc,icom-1,9)
 C                   Scan for a tab character
-      if (nenq.ne.0) idumm1 = ichmv(ibuf,nenq,o'5',2,1)
+      if (nenq.ne.0) idumm1 = ichmv(ibuf,nenq,ocp5,2,1)
 C                   If we found one, substitute the enq character
       idumm1 = ichmv(ibuf2(2),1,ibuf,ifc,icom-1)
 C                   Move characters to output buffer starting at first

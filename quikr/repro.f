@@ -69,6 +69,9 @@ C
       equivalence (reg,ireg(1)),(parm,iparm(1))
 C
 C     INITIALIZED
+C
+      include '../include/boz.i'
+C
       data ilen/40/
       data bws /0.0625 ,0.125 , 0.25 , 0.5 , 1.0,  2.0,  4.0/
       data tsp3/4.21875,8.4375,16.875,33.75,67.5,135.0,270.0/
@@ -96,7 +99,7 @@ C
 C                   If no parameters, go read device
       if (ieq.eq.nchar.or.cjchar(ibuf,ieq+1).ne.'?') goto 140
       ip(1) = 0
-      ip(4) = o'77'
+      ip(4) = ocp77
       call repds(ip,iclcm,indxtp)
       return
 C

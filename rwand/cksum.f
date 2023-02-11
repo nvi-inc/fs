@@ -20,6 +20,8 @@
       logical function cksum(bufr,nchar)
 C  Check the sum of characters received from the TimeWand. 
 C                                                Lloyd Rawley   March 1988
+      include '../include/boz.i'
+C
 C  Input parameters:
       integer*2 bufr(1)           !  buffer received from the wand
       integer nchar             !  number of characters in buffer
@@ -27,6 +29,8 @@ C  Input parameters:
       integer icompare, ichcm, ia2hx 
       integer*2 icheck, isum
       integer*2 lbyte, mbyte
+      integer*2 szcpFF
+      parameter (szcpFF=zcpFF)
 C
 C  Output value:  TRUE if check works, FALSE if it fails
 C
@@ -40,7 +44,7 @@ C                       HP bit manipulation routines
 C
 C 1. Check that last five bytes are in the form expected.
 C
-      lcrcr = z'0D0D'     !  (two carriage returns.)
+      lcrcr = zcp0D0D     !  (two carriage returns.)
       icompare = ichcm(lcrcr,1,bufr,nchar-4,2)
       i16 = ia2hx(bufr,nchar-2)             !  convert ascii hex to binary;
       i1  = ia2hx(bufr,nchar-1)             !  -1 returned if out of range. 
@@ -49,18 +53,18 @@ C
         return                              !  string was probably truncated.
       endif
 C
-      icheck = and((16*i16)+i1,z'FF')
+      icheck = and((16*i16)+i1,zcpFF)
 C
 C 2. Add up all previous bytes and compare to value obtained above.
 C
       isum = 0
       nwords = (nchar-4)/2
       do i=1,nwords
-        lbyte = and(bufr(i),z'FF')
-        if (lbyte.eq.z'0D') lbyte=0
+        lbyte = and(bufr(i),szcpFF)
+        if (lbyte.eq.zcp0D) lbyte=0
         mbyte = rshift(bufr(i),8)
-        if (mbyte.eq.z'0D') mbyte=0
-        isum = and(lbyte+mbyte+isum,z'FF')
+        if (mbyte.eq.zcp0D) mbyte=0
+        isum = and(lbyte+mbyte+isum,szcpFF)
       end do
 
       cksum = (isum.eq.icheck)

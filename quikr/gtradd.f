@@ -21,6 +21,7 @@
 C  get ra,dec formats c#870115:04:30# 
 C 
       include '../include/dpi.i'
+      include '../include/boz.i'
 C
 C 1.1.   GTRADD decodes the SNAP ra, dec formats 
 C 
@@ -92,7 +93,7 @@ C                   If declination, change first suffix to "D"
 C
       lfc = jchar(ias,ifc)
       isign = +1
-      if (lfc.ne.o'53'.and.lfc.ne.o'55') goto 190
+      if (lfc.ne.ocp53.and.lfc.ne.ocp55) goto 190
 C                   If there is no sign, no work needs to be done
       if (imode.ne.1) goto 180
       ierr = -3
@@ -100,10 +101,10 @@ C                   The RA cannot be negative unless it is an offset!
       goto 999
 180   ifc = ifc + 1 
 C                   Skip over the sign
-      if (lfc.eq.o'55') isign = -1
+      if (lfc.eq.ocp55) isign = -1
 C                   Remember the sign for signing the value at the end
 190   lec = jchar(ias,iec)
-      if ((lec.lt.o'60'.or.lec.gt.o'71').and.lec.ne.o'56') goto 500 
+      if ((lec.lt.ocp60.or.lec.gt.ocp71).and.lec.ne.ocp56) goto 500 
 C                   If last char is non-numeric AND not a "." 
 C                   we must have some suffixes
 C 

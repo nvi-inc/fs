@@ -25,6 +25,7 @@ c
       integer*2 ib(50)
 c
       include '../include/fscom.i'
+      include '../include/boz.i'
 c
       nch=1
       nch=ichmv_ch(ib,nch,name)
@@ -70,7 +71,7 @@ c
       nch=nch+ir2as(lvbosc_fs(indxtp),ib,nch,6,4)
 c
       nch=mcoma(ib,nch)
-      nch=nch+ib2as(ilvtl_fs(indxtp),ib,nch,o'100000'+5)
+      nch=nch+ib2as(ilvtl_fs(indxtp),ib,nch,ocp100000+5)
       call logit3(ib,nch-1,lsor)
 C
       call fs_get_drive(drive)

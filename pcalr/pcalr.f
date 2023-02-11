@@ -52,6 +52,7 @@ C     BPSET - sets tracks and IBYPPC as requested
 C 
 C 
       include '../include/fscom.i'
+      include '../include/boz.i'
 C 
 C  LOCAL VARIABLES: 
 C 
@@ -392,7 +393,7 @@ C
 500   continue
 C  Set SA to look at 500 Hz around 10 KHz
 cxx      call exec(2,lusa,24Hprs,im2,px1,mn1,mp50,av2,-24)
-      call ib2as(lvsens,levset,3,o'100002')
+      call ib2as(lvsens,levset,3,ocp100002)
 cxx      call exec(2,lusa,levset,-3-(lvsens/10))
 C Measure phase cal amp and phase with spectrum analyzer
 cxx      call exec(2,lusa,6Haa1,re,-6)

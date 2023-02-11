@@ -17,8 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-#based on logpl's canvasconstructor with some smaller adjustments. 
-import Tkinter as tk #name incompatibility with Image and ImageDraw.... 
+#based on logpl's canvasconstructor with some smaller adjustments.
+import tkinter as tk #name incompatibility with Image and ImageDraw....
 import os
 
 class PrintCanvas(tk.Toplevel):
@@ -30,8 +30,8 @@ class PrintCanvas(tk.Toplevel):
         self.plots = settings.get('plots')
         self.main_canvas.pack()
         self.built_height = 0
-            
-            
+
+
 
     def addCanvas(self, canvas, xadd=0):
         step = 0
@@ -44,7 +44,7 @@ class PrintCanvas(tk.Toplevel):
         #cycle through items
         for item in canvas.find_all():
             coords = canvas.coords(item)
-            
+
             for i in range(len(coords)):
                 if i%2 == 0: #if x-coord
                     coords[i] += xadd
@@ -56,7 +56,7 @@ class PrintCanvas(tk.Toplevel):
                 outline_color = canvas.itemcget(item, 'outline')
             fill_color = canvas.itemcget(item, 'fill')
             width = canvas.itemcget(item, 'width')
-            
+
             if canvas.type(item) == 'oval':
                 self.main_canvas.create_oval(coords, outline = outline_color, fill= fill_color)
             elif canvas.type(item) == 'line':
@@ -76,9 +76,9 @@ class PrintCanvas(tk.Toplevel):
                     coords[0] = 1
                     anchor = 'w'
                 self.main_canvas.create_text(coords, text = text, anchor = anchor, fill = fill_color)
-        
-               
- 
+
+
+
     def printCanvas(self, _filename = None, file_format = None, printcmd = None, printer = None):
         #output = self.main_canvas.postscript(colormode = 'color', pageheight = '11i' , pagewidth = '8.5i', pageanchor = N, width = self.main_width+margin, height = self.main_height, pagex = self.main_width, pagey = self.main_height, x=100, y=0)
         if _filename and file_format != 'EPS':
@@ -90,7 +90,7 @@ class PrintCanvas(tk.Toplevel):
         else:
             ymargin = 50
             xmargin = ymargin*8.5/11.0
-            output = self.main_canvas.postscript(colormode = 'color', pageheight = '11i' , pagewidth = '8.5i', width = int(self.main_width)+xmargin, height = int(self.main_height)+ymargin, y=-ymargin/2) 
+            output = self.main_canvas.postscript(colormode = 'color', pageheight = '11i' , pagewidth = '8.5i', width = int(self.main_width)+xmargin, height = int(self.main_height)+ymargin, y=-ymargin/2)
             if _filename:
                 _file = open(_filename, 'w')
                 _file.write(output)
@@ -103,11 +103,11 @@ class PrintCanvas(tk.Toplevel):
                 printerspool.write(output)
                 printerspool.close()
         return 0
-    
+
     def makeImage(self, filename, format):
         """make image (pdf/jpeg/bmp/gif/png/tiff) of self.main_canvas, using Image & ImageDraw
         """
-        import Image, ImageDraw, ImageFont #will raise ImportError if PIL not installed. 
+        import Image, ImageDraw, ImageFont #will raise ImportError if PIL not installed.
         ymargin = 50
         xmargin = int(ymargin*8.5/11.0)
         img = Image.new('RGB', (self.main_width+ymargin, self.main_height+xmargin), 'white')
@@ -123,7 +123,7 @@ class PrintCanvas(tk.Toplevel):
                     coords[i]+= ymargin/2
                 else: #y-coordinate
                     coords[i]+= xmargin/2
-                    
+
             fill_color = self.main_canvas.itemcget(item, 'fill')
             if type!='text' or type!='line': #text or line has no fill option...
                 outline_color = self.main_canvas.itemcget(item, 'fill')
@@ -144,13 +144,13 @@ class PrintCanvas(tk.Toplevel):
             elif type == 'line':
                 output_image.line(coords, fill_color)
         img.save(filename, format)
-        
+
     def _anchorToCoordinate(self, item, old_coords):
         """This changes the coordinate of a Tk text object with an anchor to
         fit with an always left aligned anchor coordinate for PIL
         """
         if self.main_canvas.type(item) != 'text':
-            raise ValueError, 'Object must be text'
+            raise ValueError('Object must be text')
         coords = old_coords
         anchor = self.main_canvas.itemcget(item, 'anchor')
         bbox = self.main_canvas.bbox(item)

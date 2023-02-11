@@ -22,6 +22,8 @@
       integer idcb(2)
       character*(*) ipbuf
 C
+      include '../include/boz.i'
+C
       logical kexist
       integer IERR
       integer permissions
@@ -42,7 +44,7 @@ C
 C
 2000  continue
       if(.not.kexist) then
-        permissions = o'0664'
+        permissions = ocp0664
         ilen=trimlen(ipbuf)
         call fc_chmod(ipbuf,permissions,ilen,ierr)
       endif

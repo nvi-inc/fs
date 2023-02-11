@@ -45,6 +45,8 @@ C         IPHCK - check for phase cal in given track
 C 
 C   LOCAL VARIABLES 
 C 
+      include '../include/boz.i'
+C
 C        NCHAR  - number of characters in buffer
 C        ICH    - character counter 
 C        ITN    - number of tracks typed in 
@@ -97,7 +99,7 @@ C
 C                   If no parameters, schedule PCALR
       if (cjchar(ibuf,ieq+1).ne.'?') goto 210
       ip(1) = 0 
-      ip(4) = o'77' 
+      ip(4) = ocp77 
       call pcdis(ip,iclcm)
       return
 C 

@@ -56,6 +56,9 @@ C     IBIND - selected baud rate, DVB00 index
       equivalence (reg,ireg(1)),(parm,iparm(1)) 
 C 
 C 5.  INITIALIZED VARIABLES 
+C
+      include '../include/boz.i'
+C
       data ilen/40/ 
       data nrates/7/
       data irate/110,300,600,1200,2400,4800,9600/ 
@@ -126,7 +129,7 @@ C     5. Return current baud rate setting.
 C 
 500   nch = ichmv_ch(ibuf,ieq,'/')
       call fs_get_ibmat(ibmat)
-      nch = nch + ib2as(ibmat,ibuf,nch,o'100000'+4) -1
+      nch = nch + ib2as(ibmat,ibuf,nch,ocp100000+4) -1
       iclass = 0
       call put_buf(iclass,ibuf,-nch,'fs','  ')
       ip(1) = iclass
