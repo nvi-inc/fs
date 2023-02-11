@@ -171,6 +171,21 @@ sub phsr {
 	    }
 	}
     }
+# eliminate a big gap that includes zero
+    $smallp=+200;
+    $smalln=-200;
+    for($k=0; $k<=$#$tref1;$k++) {
+	next if $$pref1[$k]!~/^$float_pattern$/;
+        $smallp = $$pref1[$k] if $$pref1[$k] > 0 && $$pref1[$k]<$smallp;
+        $smalln = $$pref1[$k] if $$pref1[$k] < 0 && $$pref1[$k]>$smalln;
+    }
+    if($smallp <199 && $smalln >-199 && $smallp - $smalln > 180) {
+        for($k=0; $k<=$#$tref1;$k++) {
+	    next if $$pref1[$k]!~/^$float_pattern$/;
+            $$pref1[$k]+=360 if $$pref1[$k]<0;
+        }
+    }
+
     &vu($tref1,$pref1,"Phase $tone2-$tone1");
 }
 sub phs {
@@ -206,6 +221,20 @@ sub phs {
 		$$pref1[$k]+=360;
 	    }
 	}
+    }
+# eliminate a big gap that includes zero
+    $smallp=+200;
+    $smalln=-200;
+    for($k=0; $k<=$#$tref1;$k++) {
+	next if $$pref1[$k]!~/^$float_pattern$/;
+        $smallp = $$pref1[$k] if $$pref1[$k] > 0 && $$pref1[$k]<$smallp;
+        $smalln = $$pref1[$k] if $$pref1[$k] < 0 && $$pref1[$k]>$smalln;
+    }
+    if($smallp <199 && $smalln >-199 && $smallp - $smalln > 180) {
+        for($k=0; $k<=$#$tref1;$k++) {
+	    next if $$pref1[$k]!~/^$float_pattern$/;
+            $$pref1[$k]+=360 if $$pref1[$k]<0;
+        }
     }
     &vu($tref1,$pref1,"Phase diff $pcall[$n][$j]-$pcall[$m][$i]");
 }
@@ -275,7 +304,7 @@ sub vuy {
     if(!$first && $panel==0) {
 #	print "labeling X axis\n";
 	if($type == 1) {
-	    pgtbox("BCTNZYH",0.0,0,"BCNVT",0.0,0); 
+	    pgtbox("BCTNZYH",0.0,0,"BCNVT",0.0,0);
 	    pglabel("Time","","");
 	} elsif($type == 2) {
 	    pgbox("BCTN",45.0,0,"BCNVT",0.0,0);
@@ -313,14 +342,18 @@ sub vuy {
 #
 # put edited out values at the top
 #
+    $good=-1;
+    $bad=-1;
     for($i=0;$i<=$#$y;$i++) {
 #	print "$$y[$i] ";
 	if($$y[$i] =~/^$float_pattern$/) {
 #	    print" matched ";
-	    $ply[$i]=$$y[$i];
+	    $plg[++$good]=$$y[$i];
+	    $xg[$good]=$$x[$i];
 	} else {
 #	    print" not matched ";
-	    $ply[$i]=$ymax+0.05*($ymax-$ymin);
+	    $plb[++$bad]=$ymax+0.0375*($ymax-$ymin);
+	    $xb[$bad]=$$x[$i];
 	}
 #	print " ply $ply[$i]\n";
     }
@@ -341,14 +374,24 @@ sub vuy {
 #
 # put bad values on right edge
 #
+	$good=-1;
+	$bad=-1;
 	for($i=0;$i<=$#$x;$i++) {
 #	print "$$x[$i] ";
-	    if($$x[$i] =~/^$float_pattern$/) {
-#	    print" matched ";
-		$plx[$i]=$$x[$i];
+	    if($$y[$i] =~/^$float_pattern$/ && $$x[$i] =~/^$float_pattern$/) {
+#	    	print" matched ";
+		$plg[++$good]=$$y[$i];
+		$xg[$good]=$$x[$i];
 	    } else {
-#	    print" not matched ";
-		$plx[$i]=$xmax+0.01*($xmax-$xmin);
+#		print" not matched ";
+		$plb[++$bad]=$$y[$i];
+		$xb[$bad]=$$x[$i];
+		if($$y[$i] !~/^$float_pattern$/) {
+		     $plb[$bad]=$ymax+0.0375*($ymax-$ymin);
+		}
+		if($$x[$i] !~/^$float_pattern$/) {
+		    $xb[$bad]=$xmax+0.0075*($xmax-$xmin);
+		}
 	    }
 #	print " plx $plx[$i]\n";
 	}
@@ -358,13 +401,23 @@ sub vuy {
 	pgswin($tmin-0.01*($tmax-$tmin),$tmax+0.01*($tmax-$tmin),
 	       $ymin-0.05*($ymax-$ymin),$ymax+0.05*($ymax-$ymin));
 	pgtbox("BCTZYH",0.0,0,"BCNVT",0.0,0);
-	pgpoint($#$y+1, $x,\@ply,17);
+	pgpoint($good+1, \@xg,\@plg,17) if $good > -1;
+	if(!$giza == !($opt_Z & 2)) {
+		pgpoint($bad+1, \@xb,\@plb,21) if $bad > -1;
+        } else {
+		pgpoint($bad+1, \@xb,\@plb,23) if $bad > -1;
+        }
 #    pgline($#$y+1, $x, $ply);
     } else {
 	pgswin($xmin-0.01*($xmax-$xmin),$xmax+0.01*($xmax-$xmin),
 	       $ymin-0.05*($ymax-$ymin),$ymax+0.05*($ymax-$ymin));
 	pgbox("BCT",45.0,0,"BCNVT",0.0,0);
-	pgpoint($#$y+1, \@plx,\@ply,17);
+	pgpoint($good+1, \@xg,\@plg,17) if $good > -1;
+	if(!$giza == !($opt_Z & 2)) {
+		pgpoint($bad+1, \@xb,\@plb,21) if $bad > -1;
+        } else {
+		pgpoint($bad+1, \@xb,\@plb,23) if $bad > -1;
+        }
     }
     pgvport(0.075,.95,0,1);
     pglabel("",$label,"");
@@ -488,7 +541,10 @@ sub by_clocks {
 use PGPLOT;
 require "getopts.pl";
 
-&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwyz:BCD:G:M:V");
+pgqinf("VERSION",$val,$len);
+$giza = $val =~ /giza/;
+
+&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwz:BCD:G:M:SVWYZ:");
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -499,7 +555,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_V)) {
 }
 
 if(defined($opt_V)) {
-    print "[plotlog 2.0]\n";
+    print "[plotlog 2.1]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit 0;
@@ -517,11 +573,12 @@ phase-cal, recorder statistics, and the first encountered tone per channel (LSB
 and USB separately) for Mark IV decoder phase-cal data. The time axes of all
 the plots for a given log are the same. Valid data is plotted so that it fits
 entirely inside the plotting area. Points that appear along the top edge of a
-plot did not decode (\$\$\$ for example) or were edited out automatically or by
-command line options. Cases where the form of the entry was too garbled to be
-identified or the sampling failed (possibly because the command timed-out) do
-not appear at all. The latter two problems may be noticeable if the plot for a
-data type is missing entirely or is sparser than expected.
+plot as open circles did not decode (\$\$\$ for example) or were edited out
+automatically or by command line options. Cases where the form of the entry was
+too garbled to be identified or the sampling failed (possibly because the
+command timed-out) do not appear at all. The latter two problems may be
+noticeable if the plot for a data type is missing entirely or is sparser than
+expected.
 
 Clock data includes values from any suitable commands containing 'maser',
 'fmout', and/or 'gps' in their names, as well as RDBE GPS and PPS offsets, and
@@ -593,10 +650,28 @@ The '-p' option adds amplitude versus phase plots for each phase-cal tone after
 all other plots. This option suppresses all other output except options
 '-1anvw'.
 
-Cable delay is plotted as one-way cable delay change unless the '-r' (raw)
-option is used.
+'cable/' and 'cdms/' data are plotted as one-way cable delay change unless the
+'-r' (raw) option is used.
+
+The plotting support is different if 'giza' has been substituted for 'pgplot'
+(FSL11 may have 'giza-1.2.0'). You can see if 'giza' is being used by checking
+if the 'PGPLOT' library version shown by 'plotlog -V' includes the string
+'giza'. If the script detects that 'giza' is in use, it makes two adjustments:
+(i) the line width is set to '0' and (ii) the bad points are plotted with
+larger open circles. If these adjustments cause problems or are no longer
+needed because 'giza' has been brought into better agreement with 'pgplot',
+they can be disabled, individually, with the '-Z hex' option (see below). If
+'giza' is not detected, the '-Z hex' option can be used to force the
+adjustments. Additionally, the 'giza' library does not respect the
+'PGPLOT_BACKGROUND' and 'PGPLOT_FOREGROUND' environment variables.
 
 Option explanations:
+
+ Generally, the philosophy is that if no options are specified the script
+ should do something that is likely to be useful. Options can be added to tune
+ the behavior for different situations. Scripts or aliases can be used if any
+ options are needed routinely.
+
  phase-difference plot options (suppresses all other output, except '-p'):
   -1 all converters are on one IF
   -a odd converters are on one IF, even are on another (astronomy)
@@ -606,9 +681,9 @@ Option explanations:
   -w converters 1-4 on one band, 5-8 on a second, 9-16 on a third
      (wide band geodesy)
   Phase differences between LSB/USB channels for the same BBC/VC are not
-  displayed. Points that appear along the right edge of the plot had phase
-  values that did not decode (\$\$\$ for example) or were edited out by command
-  line options.
+  displayed. Points that appear along the right edge of the plot as open
+  circles had phase values that did not decode (\$\$\$ for example) or were
+  edited out by command line options.
 
  -b        force same side-band Tsys normalization (reject dual and opposite
            side-band Tsys even if that is all that is available)
@@ -647,7 +722,7 @@ Option explanations:
            match 'regexp', see '-m'
  -p        plot amplitude versus phase for phase cal tones,
            suppresses all other output except -1anw
- -r        plot cable data in raw units
+ -r        plot 'cable/' and 'cdms/'  data in raw units
  -s string match commands with 'string' instead of 'tsys', option '-t' still
            applies for editing
  -2 n      n is '1' or '2', useful for selecting which values to plot for
@@ -655,11 +730,19 @@ Option explanations:
            (usually cal-off for the second
  -t value  edit out tsys points less than or equal to zero or greater than or
            equal to 'value'
- -y        edit out phase-cal with phases outside [-180,+180] degrees
  -z value  edit out phase-cal data with amplitudes less than 'value'
  -u value  maximum distance in time (seconds) allowed for matching data for
            'j1anvw' option plots is changed to 'value' instead of 60 seconds
+ -S        require a leading slash for wx/, cable/, and cdms/ entries
  -V        print program and PGPLOT version information and stop
+ -W        plot all '/rx/' fields of the form 'number[...]'
+ -Y        don't edit out phase-cal with phases outside [-180,+180] degrees
+ -Z hex    toggle 'giza' adjustments, selected bitwise, LSB is bit 0; if
+           'giza' is detected, this disables them; if 'giza' is not detected,
+           it enables them:
+             bit 0: set line width to 0
+             bit 1: increase bad point open circle size
+           thus with 'giza' detected, '-Z 2' removes the latter
  -h        print this help information and stop
  -f file/device  send graphs to 'file' using PGPLOT 'device'
     if -f omitted and DISPLAY is defined, '/xw' will be used
@@ -670,7 +753,7 @@ Option explanations:
     '.ps' works well as the file extension for device 'vps'
 
 You can use different colors by setting the environment variables
-PGPLOT_FOREGROUND and PGPLOT_BACKGROUND appropriately before running the
+'PGPLOT_BACKGROUND' and 'PGPLOT_FOREGROUND' appropriately before running the
 program. Colors that are available depend on the device, but in addition to
 'black' and 'white', may include 'red', 'green', 'blue', 'cyan', 'magenta',
 'yellow', 'grey', 'slategrey', 'gold', and maybe others.
@@ -721,6 +804,7 @@ foreach $file (@ARGV) {
 #   print "file $file \n";
     $x=0;
     $y=0;
+    $slash="\/" if $opt_S;
     while (<FILE>) {
 	s/\r?\n\z//s;
 	if(!$location && /;location,([^,]*)/i) {
@@ -732,7 +816,7 @@ foreach $file (@ARGV) {
 	    $rdbe=/rdbe/;
 	    $dbbc3=/dbbc3/;
 	}
-	if(/wx\/(.*)/i) {
+	if(/${slash}wx\/(.*)/i) {
 	    @fields=split(',',$1);
 	    s{^\s+|\s+$}{}g foreach @fields;
 	    $temp[$wxcount]=shift(@fields);
@@ -742,13 +826,14 @@ foreach $file (@ARGV) {
 	    $winddir[$wxcount]=shift(@fields) if 4 <= tr/,//;
 	    $wxtime[$wxcount]=&time($_);
 	    $wxcount++;
-	} elsif(/cable\/[ ]*([^, ]*)/i) {
+	} elsif(/${slash}cable\/[ ]*([^, ]*)/i) {
 	    $value=$1;
 	    $cable[$cablen]=$value;
 	    $cablet[$cablen]=&time($_);
 	    $cablen++;
-	} elsif(/cdms\/[ ]*([^, ]*)/i) {
+	} elsif(/${slash}cdms\/[ ]*([^, ]*)/i) {
 	    $value=$1;
+	    $value= '$$$' if $value > '999998.5';
 	    $cdms[$cdmsn]=$value;
 	    $cdmst[$cdmsn]=&time($_);
 	    $cdmsn++;
@@ -789,7 +874,7 @@ foreach $file (@ARGV) {
 		$amp='$$$';
 		$phase='$$$';
 	    }
-	    if(defined($opt_y) && ($phase < -180 || 180 < $phase)) {
+	    if(!defined($opt_Y) && ($phase < -180 || 180 < $phase)) {
 		$phase='$$$';
 	    }
 	    $pcalt[$band][$chan][$pcaln[$band][$chan]]=&time($_);
@@ -833,7 +918,7 @@ foreach $file (@ARGV) {
 		$amp='$$$';
 		$phase='$$$';
 	    }
-	    if(defined($opt_y) && ($phase < -180 || 180 < $phase)) {
+	    if(!defined($opt_Y) && ($phase < -180 || 180 < $phase)) {
 		$phase='$$$';
 	    }
 	    $pcalt[$band][$chan][$pcaln[$band][$chan]]=&time($_);
@@ -867,7 +952,7 @@ foreach $file (@ARGV) {
 		} elsif(defined($opt_d) || defined($opt_D)) {
 		    die "Options -d and -D are only for RDBE racks\n";
 		}
-		if(defined($opt_y) && ($phase < -180 || 180 < $phase)) {
+		if(!defined($opt_Y) && ($phase < -180 || 180 < $phase)) {
 		    $phase='$$$';
 		}
 		$rpcalt{$tone}[$rpcaln{$tone}]=&time($_);
@@ -1012,13 +1097,32 @@ foreach $file (@ARGV) {
 #		print "tsys $tsysv3{$detect}[$tsysn3{$detect}]\n" if($det == 1);
 		$tsysn3{$detect}++;	 
 	    }
+	} elsif (/\/rx\/.*$float_pattern\[[^]]+\]/i) {
+# Wettzell
+	    (undef,$cmd,@fields)=split('[/,]');
+	    $device=$fields[0];
+	    $wettzell="dBm|degC";
+	    $wettzell="[^]]*" if $opt_W;
+	    while($param=shift(@fields)) {
+		if($param =~ /(.*)\[($wettzell)\]/) {
+		    next if !$opt_W && $2 eq "dBm" && $device =~ /^lo/;
+		    $subdevice="$device \($2\)";
+		    $rx{$subdevice}[$rxcount{$subdevice}]=$1;
+		    $rxtime{$subdevice}[$rxcount{$subdevice}]=&time($_);
+		    $rxcount{$subdevice}++;
+		    $rxunits{$subdevice}="";
+		    $rxcmd=$cmd;
+		 }
+	    }
 	} elsif (/\/(sx|rx|sk)\//i) {
-            (undef,$cmd,@fields)=split('[/,]');
-            ($value,$units)=split(' ',$fields[$#fields]);
+# Everyone else
+	    (undef,$cmd,@fields)=split('[/,]');
+	    ($value,$units)=split(' ',$fields[$#fields]);
+	    next if ! $units; # so we don't get bad entries for Wettzell
 	    ($rx{$fields[0]}[$rxcount{$fields[0]}],undef)=$value;
 	    $rxtime{$fields[0]}[$rxcount{$fields[0]}]=&time($_);
-#            print "$fields[0] $rx{$fields[0]}[$rxcount{$fields[0]}]\n";
-            $rxcount{$fields[0]}++;
+#	    print "$fields[0] $rx{$fields[0]}[$rxcount{$fields[0]}]\n";
+	    $rxcount{$fields[0]}++;
 	    $rxunits{$fields[0]}=$units;
 	    $rxcmd=$cmd;
 	} elsif(/#setcl#time\//i) {
@@ -1116,6 +1220,7 @@ foreach $file (@ARGV) {
 exit -1 if(!$some);
 
 pgbegin(0,$dev,1,8);
+pgslw(0) if !$giza != !($opt_Z & 1);
 pgsch(3);
 pgask(-1);
 pgpanl(1,8);
@@ -1204,7 +1309,16 @@ if(@cablet) {
     }
 }
 if(@cdmst) {
-    &vu(\@cdmst, \@cdms,"CDMS delay (ps)");
+    if(!defined($opt_r)) {
+        for($i=0;$i<=$#cdms;$i++) {
+	    next unless $cdms[$i]=~/^$float_pattern$/ ;
+	    $cdmsfirst=$cdms[$i] if(!defined($cdmsfirst));
+	    $cdms[$i]=0.5*($cdms[$i]-$cdmsfirst);
+	}
+	&vu(\@cdmst, \@cdms,"CDMS delay (ps)");
+    } else {
+	&vu(\@cdmst, \@cdms,"CDMS raw (ps)");
+    }
 }
 if(@recordt) {
     &vu(\@recordt, \@recordd,"Record delay (sec)");
@@ -1550,7 +1664,7 @@ END_EXTRAS:
     $exit_code=0;
 
 if(!$first) {
-    pgtbox("BCTNZYH",0.0,0,"",0.0,0); 
+    pgtbox("BCTNZYH",0.0,0,"",0.0,0);
     pglabel("Time","","");
     $something=1;
 } elsif($page==1 && !defined($opt_p)){
@@ -1637,7 +1751,7 @@ if(defined($opt_p)) {
 	}
     }
     if(!$first) {
-	pgtbox("BCTN",45.0,0,"",0.0,0); 
+	pgtbox("BCTN",45.0,0,"",0.0,0);
 	pglabel("Phase","","");
     } elsif($page==1 && !$something) {
 	pgpanl(1,1);
