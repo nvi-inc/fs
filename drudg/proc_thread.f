@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2021, 2022 NVI, Inc.
+* Copyright (c) 2021-2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -23,18 +23,21 @@
       include 'hardware.ftni' 
 ! generate new thread procedure
       character*(*) cproc_thread
+! History
+! 2023-02-10 JMGipson.  typographic change:  fb=datastream=add:{thread}-->fb=datastream=add:ds{thread}
+!
      
       call proc_write_define(lu_outfile, luscn,cproc_thread)
       if(kflexbuff) then 
         write(lu_outfile,'(a)') "fb=datastream=clear"
         if(lvdif_thread .eq. "YES") then
-          write(lu_outfile,'(a)') "fb=datastream=add:{thread}:*"
+          write(lu_outfile,'(a)') "fb=datastream=add:ds{thread}:*"
         endif
         write(lu_outfile,'(a)') "fb=datastream=reset"
       else
         write(lu_outfile,'(a)') "mk5=datastream=clear"
         if(lvdif_thread .eq. "YES") then
-          write(lu_outfile,'(a)') "mk5=datastream=add:{thread}:*"
+          write(lu_outfile,'(a)') "mk5=datastream=add:ds{thread}:*"
         endif
         write(lu_outfile,'(a)') "mk5=datastream=reset"
       endif

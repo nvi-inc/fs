@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2022-2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -17,7 +17,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
-      subroutine errormsg(iret,ierr,cgroup,luscn)
+      subroutine errormsg(iret,ierr,cgroup_in,luscn)
       implicit none  !2020Jun15 JMGipson automatically inserted.
 
 C ERRORMSG prints informatiave error messages about VEX
@@ -38,16 +38,23 @@ C 970122 nrv New.
 C 970718 nrv Correct some of the error numbers to be consistent
 C            with the VUNPxxx routines.
 C 020111 nrv Add more ROLL messages.
+! 2022-05-06 To avoid problems when bounds checking is turned on, removed hardcoding of lenght of cgroup_in
+!            Then cgroup=cgroup_in   and checking done on cgroup.
+!
 
 C Input:
       integer iret ! return from the parser
       integer ierr ! indicates type of error
-      character*12 cgroup ! group name for ierr
+      character*(*) cgroup_in ! group name for ierr
       integer luscn ! unit to print the message on
 
 C Local
       character*128 cmsg
       integer trimlen
+      character*12 cgroup
+
+      cgroup=" "
+      cgroup=cgroup_in
 
 C 1. If iret is non-zero, print the appropriate message.
 

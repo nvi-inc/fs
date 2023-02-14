@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2022 NVI, Inc.
+* Copyright (c) 2020, 2022-2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -248,6 +248,7 @@ C 021002 nrv Write comments about geo/astro VEX/standard schedule.
 ! 2016Jul28 JMG.      Now also set cfirstrec_def in 'equipment override'
 ! 2018Jun17 JMG.      Removed debugging statement whichr wrote out first recorder
 ! 2021-01-27 JMG      Renamed: SORP50-->sorp2000  RA50, DEC50-->SORP1950
+! 2023-02-10 JMG.     Increased limit of scheudle name from 6 to 16 chars.
 ! Get the version
       include 'fdrudg_date.ftni'
       call get_version(iverMajor_FS,iverMinor_FS,iverPatch_FS,crel_FS)
@@ -461,11 +462,11 @@ C       Opening message
           enddo
           cexpna=lskdfi(ixp:) ! exp name is root of file name
           IX = INDEX(cexpna,'.')-1
-          if (ix.gt.6) then ! too many letters
+          if (ix.gt.16) then ! too many letters
             write(luscn,'(a)')
      >      " ERROR: Schedule name is too long. Please rename the file "
             write(luscn,'(a)')
-     >         "to have 6 characters or less before the file extension."
+     >      "to have 16 characters or less before the file extension."
             goto 990
           endif
           kskd = .true.
