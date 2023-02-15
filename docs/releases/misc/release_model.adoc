@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2021 NVI, Inc.
+// Copyright (c) 2020-2021, 2023 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -19,7 +19,7 @@
 //
 
 = Strawman Release Model
-Version 1.1 - February 2021
+Version 1.2 - February 2023
 
 :sectnums:
 
@@ -336,7 +336,27 @@ _/tmp_ on the FS machine.
 
 
 .   ``**cd /usr2**``
+
 .   ``**tar xzf /tmp/**__tag__**.tar.gz**``
+
++
+
+TIP: The directory name created when the archive is un-__tar__-ed will
+include the _tag_ of the release, e.g., _/usr2/fs-10.0.0_. There is
+some advantage to not modifying the name of the directory or its
+contents. The _tag_ from the directory will be recorded in the FS
+`release` log entry and displayed by the `fsversion` command. If you
+want to change the contents of the directory, it is recommended that
+you make a copy with a new name, e.g., _/usr2/fs-10.0.0-mychange_, and
+modify the new directory. The portion after a second dash, "`-`", (in
+this example, _mychange_) can be an arbitrary string (without spaces
+and forward slashes, "`__/__`") up to 32 characters. Using appropriate
+names will help track what, possibly changed, version you are using
+and make it easier to return to previous versions. The _/usr2/fs_ link
+will need to be changed to point to the different version you want to
+switch to and the machine rebooted (assuming you have already run
+_make_ in the directory).
+
 .   ``**cd /usr2/fs-**__tag__``
 
 . At this point you have two options:
