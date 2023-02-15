@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 1.6 - October 2022
+Version 1.7 - February 2023
 
 :sectnums:
 
@@ -76,6 +76,41 @@ FS. This may be useful to allow building the FS usable on systems that
 can't support the display server.
 
 This was introduced in _10.0.0-beta3_, December 2020.
+
+=== FS_F95_NO_ALLOW_ARGUMENT_MISMATCH
+
+Nominal value is `1`.
+
+If set to `1`, this variable suppresses use of the _f95_ compiler
+option `-fallow_argument_mismatch`. Using this compiler option is
+required for _f95_ version _10.2.1_ (FSL11) and later. It should not
+be used with _f95_ version _6.3.0_ (FSL10) and earlier; it will
+prevent compilation. It is not known whether it should be used for
+versions between _6.3.0_ and _10.2.1_.
+
+For FSL10, and other older FSL__x__, the environment variable should
+be used to suppress use of the option. Some other non-FSL__x__
+distributions may need it set as well.
+
+For FS installations that use the _fort77_ complier, it is recommended
+that the variable be set to `1`. That way the configuration will be
+forward compatible with a possible change to _f95_.
+
+This was introduced in _10.2.0-alpha1_, February, 2023.
+
+=== FS_PYTHON_VERSION
+
+Nominal value is `2`.
+
+If set to `2`, this variable will cause the _python2_ version of the
+_python_ scripts to be linked instead of the _python3_ versions.
+Using this option is required for FSL10 and earlier. Some other
+non-FSL__x__ distributions may need it set as well. The value of `2`
+should not be used for FSL11 and later. In fact, the variable doesn't
+need to be set at all for FSL11 and later. In the future, additional
+values with new functionality may be added.
+
+This was introduced in _10.2.0-alpha1_, February, 2023.
 
 === FS_SERIAL_CLOCAL
 
