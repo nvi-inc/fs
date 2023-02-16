@@ -1052,6 +1052,9 @@ First core3h argument must be an integer 1 through the number of IFs in dbbc3.ct
 BD -401
 error retrieving class
 ""
+BO  250
+Internal warning: opnpf.f lprcl too small, needs length of?WW, okay this time
+""
 BO -101
 Error getting next command, UNIX ?FFF
 ""
@@ -1414,6 +1417,9 @@ Error opening rdbe.ctl ?FFF
 ""
 BO -232
 Error decoding rdbe.ctl line ?WWW
+""
+BO -250
+Internal error: opnpf.f passed procedure library name too long, can only support?WW characters
 ""
 BO -251
 Internal error: time for secsnow invalid

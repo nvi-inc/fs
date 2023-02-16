@@ -56,6 +56,7 @@ C     LNAMEF - full file name
       integer fmpposition,fmpreadstr,fmpsetpos,fmpwritestr
       integer trimlen
       character*80 ibc
+      character*(MAX_SKD) lprcl
       integer*2 ib(40)
       equivalence (ib,ibc)
 C
@@ -64,8 +65,15 @@ C     1. First try to open the file.
 C     The file is opened non-exclusively and in update mode.
 C
       nch = trimlen(lprc)
+      if(nch.gt.len(lprcl)) then
+          call logit7ci(0,0,0,1,-250,'bo',len(lprcl))
+          return
+      elseif(len(lprc).gt.len(lprcl)) then
+          call logit7ci(0,0,0,1,250,'bo',len(lprc))
+      endif
+      lprcl=lprc
       call fmpopen(idcb,
-     & FS_ROOT//'/proc/' // lprc(1:nch) // '.prc',
+     & FS_ROOT//'/proc/' // lprcl(1:nch) // '.prc',
      & ierr,'r+',id)
       if (ierr.lt.0) return
 C
