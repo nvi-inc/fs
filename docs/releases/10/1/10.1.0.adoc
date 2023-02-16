@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2022 NVI, Inc.
+// Copyright (c) 2020-2023 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 5.6 - December 2022
+Version 5.7 - February 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -2315,7 +2315,9 @@ installation tips>> in the
 <<../../misc/install_reference.adoc#,Installation Reference>> document
 and references to it.
 
-.. Improve presentation of FS and _drudg_ change lists in the update notes
+.. <<improve_presentation,Improve
+presentation>>[[improve_presentation]]: Improve presentation of FS and
+_drudg_ change lists in the update notes
 
 +
 
@@ -2338,15 +2340,31 @@ the web page has been reloaded. This makes it a little more difficult
 to return to where you were reading in the original document if it was
 within opened text.
 
-* Links that point into a closed *Details* toggle do not work in all
-browsers. To help with that, when these links appear in the text of
-this document, additional instructions with a second link are
-provided. If the original link into the *Details* doesn't work, an
-alternate approach is to follow the second link, click on the
-*Details* toggle below that location to open it, go *Back* in the
-browser, and then click on the original link. At least some
-Chromium-based browsers appear to able to follow links into into
++
+
+TIP: An alternative to avoid this is to right click the link, then
+open it in a new tab, and then click on that tab. To return to the
+original document, you can close the new tab or click on the original
+document's tab, whatever you prefer.
+
+* Links that point into a closed *Details* toggle in the same document
+do not work in all browsers. To help with that, when these links
+appear in the text of this document, additional instructions with a
+second link are provided. If the original link into the *Details*
+doesn't work, an alternate approach is to follow the second link,
+click on the *Details* toggle below that location to open it, go
+*Back* in the browser, and then click on the original link. At least
+some Chromium-based browsers appear to able to follow links into into
 closed *Details* toggles.
+
+* Links that point into a *Details* toggle in a different document do
+not work in all browsers. To help with that, if the relevant text is
+small it is reproduced within an embedded sidebar block (grey
+background). Otherwise, a second link to the title of the item with
+toggle in the different document is provided along with instructions
+to follow the link (probably opening it in a new tab would be best),
+open the toggle, and then search for the anchor text of the original
+link.
 
 +
 
