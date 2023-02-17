@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2022 NVI, Inc.
+// Copyright (c) 2020-2023 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.1.0 to Latest Commit Update Notes
-Version 4.1 - October 2022
+Version 4.6 - February 2023
 
 :sectnums:
 :stem: latexmath
@@ -49,14 +49,11 @@ and will manage the differences for updating to the next official
 release themselves. No specific documentation will be provided. What
 commit was last updated to will determine what needs to be done. It
 might work to verify that all the steps in the latest version of this
-document, appropriately renamed as an update from the old release to
-the new release, were completed. An alternate, but not necessarily
-complete, approach would be to review the update steps in the new
-release to make sure everything has been covered. _Let the user
-beware._
+document, appropriately adjusted and renamed as the update from the old
+release to the new release, were completed. However, this may not be
+complete. _Let the user beware._
 
-
-This document is up to date with the `5bc44f23` commit. Due to small
+This document is up to date with the `11029477` commit. Due to small
 increments, such as updating this document, that may not be the
 literal last commit, but the differences should be small unless you
 happen to `pull` between a significant change and this document being
@@ -68,20 +65,56 @@ You must have already upgraded to _10.1.0_ according to the
 <<10.1.0.adoc#,FS 10.1.0 Update Notes>> document before installing
 this update.
 
-=== Fetch and make the latest commit and make station code
+=== Fetch and make the latest commit and station code
 
-. Update the FS
+. Pull the latest commit into the working directory
 
 +
 
 If you are using _git_, as is recommended, then as _prog_ execute:
 
+ cd /usr2/fs-git
+ git checkout main
+ git pull
 
-             cd /usr2/fs-git
-             git checkout main
-             git pull
-             make clean rmdoto rmexe all >& /dev/null
-             make -s
+. If needed, set new environment variables
+
++
+
+For FSL11 no new environment variables need to be set, skip the
+remainder of this step.
+
++
+
+For FSL__x__ Linux distributions FSL10 and older, set the environment
+variables `FS_F95_NO_ALLOW_ARGUMENT_MISMATCH` and `FS_PYTHON_VERSION`.
+Some other non-FSL__x__ distributions may need one or both set as
+well.
+
+.. Update login _rc_ files.
+
+* If your _prog_ login shell is _bash_, add the following to
+_~prog/.profile_:
+
+ export FS_F95_NO_ALLOW_ARGUMENT_MISMATCH=1
+ export FS_PYTHON_VERSION=2
+
+* If your _prog_ login shell is _tcsh_, add the following to
+_~prog/.login_:
+
+ setenv FS_F95_NO_ALLOW_ARGUMENT_MISMATCH 1
+ setenv FS_PYTHON_VERSION 2
+
+.. Logout of _prog_ and back in
+
+. Compile the FS
+
++
+
+As _prog_:
+
+ make clean rmdoto rmexe all >& /dev/null
+ make -s
 
 +
 
@@ -103,7 +136,8 @@ with:
 
 === Reboot
 
-This will make sure the FS server is restarted.
+IMPORTANT: This will make sure the FS server is stopped and shared
+memory is reallocated.
 
 === Additional steps
 
@@ -119,7 +153,7 @@ of the changes since that release.
 
 == Changes since 10.1.0
 
-There are separate sub-sections with summaries of changes in the FS
+There are separate subsections with summaries of the changes in the FS
 and _drudg_.
 
 Clickable links such as
@@ -145,6 +179,332 @@ information, usually because it is already covered in the numbered
 title item and/or the details are very brief.
 
 === FS changes
+
+. <<FSL11,FSL11>>:[[FSL11]] Support for FSL11
+
++
+--
+
+The code base was update for FSL11 (Debian _Bullseye_). The primary
+changes were:
+
+* Making typographic changes to be compatible with the new _f95_
+compiler version.
+
+* Adding _python3_ versions of existing _python_ scripts.
+
+--
++
+
+Users of pre-FSL11 systems will need to set some environment variables
+for _prog_ before compiling. These are described in the installation
+instructions as well as in the "`Details`" collapsible section below.
+
++
+
+[%collapsible]
+====
+
+.. Remove  use of `stime()`
+
++
+
++
+
+In FSL11, `stime()` is not available for newly linked applications. It
+would need to be replaced with `clock_settime()`. It was not replaced
+because the functionality it was used for, setting the system time,
+hasn't been available to non-_root_ users since the FS was ported to
+Linux (FS9), circa 1995. The FS must _never_ be run by _root_.
+
+.. New required environment variables for pre-FSL11 systems.
+
++
+
+Two new environment variables, `FS_F95_NO_ALLOW_ARGUMENT_MISMATCH` and
+`FS_PYTHON_VERSION`, were added to assist with compilation on
+pre-FSL11 systems. They only need to set once in _prog_'s login `rc`
+files on these systems. Their use is explained in the next two items.
+
+.. <<f95,f95>>:[[f95]] Changes for new _f95_ compiler version
+
++
+
+The _f95_ compiler, version _6.3.0_, in FSL11 has stricter
+requirements for use of octal and hexadecimal constants and argument
+type agreement in calls to functions and subroutines than the ones in
+previous FSL__x__ versions. The changes made were:
+
+... Reformat  octal and hexadecimal constants
+
++
+
+Hexadecimal, octal, and binary constants can only be used in `data`
+statements or in the intrinsic function `int()`. There is a compiler
+option `-fallow-invalid-boz`, to relax this requirement. However, it
+does not cover the case of actual arguments to a function. There are
+many of those, so it was decided to just change all non-`data`
+statement use of these constants to parameters. They were wrapped in
+`int()` in the `parameter` statements. The parameter names were chosen
+so the constants could be globally replaced in the FORTRAN code
+without overflowing the 72 character line limit. Existing octal and
+hexadecimal constants in `parameter` statements were wrapped in
+`int()`. The FS code did not have any binary constants.
+
++
+
+This change can cause the symbol table for _f2c_ (used by _fort77_
+when it is the compiler) to overflow. The symbol table size for that
+case was increased by adding the option `-Nn1604`.
+
+... Add use of `-fallow-argument-mismatch` compiler option.
+
++
+
+Argument type mismatches are common in the code, particular for when
+Hollerith data is being handled and sometimes `interger*4` and
+sometimes `integer*2` arrays are passed as the same argument for
+functions and subroutines. Since this error is benign and there was an
+option to ignore it (and it worked), it was used.
+
++
+
++
+
+For _f95_ in previous FSL__x__ versions, this option is not accepted
+(or needed). To allow compilation on these older systems, use of an
+environment variable `FS_F95_NO_ALLOW_ARGUMENT_MISMATCH` was added. If
+it is set to `1`, the complier option is not used. Some other
+non-FSL__x__ distributions may need the variable set as well. For
+these older systems, this needs to be set once in _prog_'s login `rc`
+files then it is necessary to re-login into the _prog_ account before
+compiling.
+
++
+
++
+
+For FS installations that use the _fort77_ complier on FSL10 and older
+systems, it is recommended that the variable be set to `1`. That way
+the configuration will be forward compatible with a possible change to
+_f95_.
+
+... Remove mixing of `integer*4` and `integer*2` as arguments for
+intrinsic `and()`.
+
+.. Changes for _python3_.
+
++
+
+FSL11 has limited support for _python2_, in particular there is no
+`numpy` The two largest _python_ programs in the FS, _gnplt_ and
+_logpl_ require `numpy`. Since most of the work converting was for
+these two programs, it seemed best if they all were converted. There
+is not expected to by any _python2_ in the next Debian release,
+_bookworm_.
+
++
+
+The older _python2_ version are still included in case they are
+needed. For older systems that are unable to use the _python3_
+versions (this includes FSL10 and older FSL__x__ systems), an
+environment variable `FS_PYTHON_VERSION` was added. If it is set to
+`2`, the _python2_ versions are linked. For these older systems, this
+needs to be set once in _prog_'s login `rc` files then it is necessary
+to re-login into the _prog_ account before compiling.
+
++
+
+It may be that on some of these older systems (this includes FSL10 and
+older FSL__x__ systems), the _python3_ versions of the scripts could
+be used if more Debian packages for missing _python3_ modules are
+installed. This has not been tested. If you try this, please let Ed
+know your results. In the meantime. the original _python2_ scripts are
+available.
+
++
+
+The programs effected are: _logpl_, _gnplt_, _monpcal_, _be_client_,
+_s_client_, and _rdbemsg_. The _python3_ source code is in directories
+with the same name. The _python2_ source code can be found in
+directories with the same name, but with `-python2` appended. It is
+expected that the _python2_ and _python3_ versions will be maintained
+in parallel for the foreseeable future.
+
++
+
+Four steps were used to convert the code to _python3_:
+
+... Run code through the _2to3_ utility.
+
++
+
+This utility makes many of the typographic changes needed going from
+_python2_ to _python3_. It can installed, as _root_, with:
+
+  apt-get install 2to3
+
+... Run the code through the _reindent_ utility.
+
++
+
++
+
+This utility will reindent a script using 4-space indents and no hard
+tabs. It can be installed, with:
+
+.... As _root_:
+
+   apt-get install pip
+
+.... As _prog_ (in _bash_):
+
+  cd ~
+  pip3 install reindent
+  PATH="~/.local/bin:$PATH"
+
++
+
++
+
+TIP: The `PATH=...` statement will need to be re-executed each time
+you login or open a new _bash_ shell.
+
+... Change the _shebang_ lines to use _python3_
+
++
+
+The _python3_ variant must be explicitly referenced for FSL11.
+
+... Fix runtime issues that were discovered during testing
+
++
+
+We believe we have we have found all of these, but perhaps not. The
+most common paths through the code were exercised, but there maybe
+some obscure paths, particularly in _logpl_ and _gnplt_ that may still
+have issues.  Please report any issues you find to Ed. It should be
+easy to post (and install) a patch that will fix them.
+
++
+
++
+
+The fixes made so far include:
+
+* Wrap the third argument of `range()` in `int()`
+
+* Change the `import` from `idlelib.TreeWidget` to `idlelib.tree`
+
+* Replace the use of `popen2` with `subprocess` and use text encoding
+for sub-process I/O
+
+* Fix archaic use of `strip()`
+
+* Use `encode()`/`decode()` for socket I/O
+
+* Change `isAlive()` to `is_alive()` for threads
+
+* Use `key=functools.cmp_to_key()` for (time) sort.
+
+* Set `rcond=-1` in `linalg.lstsq()` to preserve old behavior
+
+* Use `median()` rather than divide-by-two to find median item of a
+sorted list.
+
++
+
++
+
+[NOTE]
+=====
+
+The installation of _2to3_, _pip_, and _reindent_ can be reversed (if
+nothing else is installed in _~prog/.local_) with:
+
+.. As _root_:
+
+   apt-get purge 2to3
+   apt-get purge pip
+
+.. As _prog_ (be careful with this command in case other things than
+_reindent_ are installed in _~prog/.local_):
+
+  rm -rf /usr2/prog/.local
+
+=====
+
+====
+
++
+
+. <<Names,Names>>:[[Names]] Support names of 18 characters or less for
+the `schedule`, `proc`, and `log` commands.
+
++
+
+With the last two characters of the names usually taken up by the
+two-character station code, this allows experiment names to be 16
+characters or less. This provides support for the IVS Master File _v2_
+"`session code`" lengths of 12 characters or less.
+
+
++
+
+[%collapsible]
+====
+
+This change is largely transparent to the users. The three visible
+effects are:
+
+[square]
+* The length  and/or location of the `SCHED=...` and `LOG=...` fields
+in the `System Status Monitor` display (_monit2_) were changed. The
+`SCHED=..` field now occupies the space previously used by both
+`SCHED=...` and `LOG=...`. The `LOG=...` field is now in the lower
+right where the `HEAD PASS # ...` field was previously located.
+
+* The display of procedure libraries for the `pfdl` command in _pfmed_
+now shows only three libraries per line.
+
+* The `log=...` command now traps a log name that is too long.
+Previously, it just truncated longer names to eight characters.
+
+Internally, new variables were appended to shared memory for the
+schedule, schedule procedure, station procedure, and log file names
+and the experiment (schedule) name. The old variables are still
+present and hold up to the first eight characters of longer names.
+This is intended to make the changes backward compatible for programs
+(such as _telegraf_ for the MAS) that are pinned to the FS _10.0_
+memory layout until they can be updated for the new variables. Of
+course, longer names will appear truncated in the downstream programs
+until they have been updated.
+
+====
+
+. Change the order of commands for DBBC3 syncing.
+
++
+
+The sequence of commands for syncing the DBBC3 were changed in the
+<<dbbc3_ops.adoc#_sync_time,Sync time>> section of the
+<<dbbc3_ops.adoc#_alternate_core3h_board_configuration_method,Alternate
+Core3H board configuration>> appendix of the <<dbbc3_ops.adoc#,FS 10.1
+DBBC3 Operations Manual>>.
+
++
+
+[%collapsible]
+====
+
+There is now a `pps_sync` command both before and after the `timesync`
+commands. Despite this improvement using this method is still not
+recommended.
+
+Thanks to Sven Dornbusch (MPIfR) for providing the best sequence of
+commands.
+
+====
 
 . Fix _plog_ to support sending multiple files to BKG (closes
 https://github.com/nvi-inc/fs/issues/186[#186]).
@@ -184,11 +544,13 @@ short-term that plan is not being followed through on and the change
 had some negative impacts for local use. Manually stopping the server
 was required in certain cases:
 
+[square]
 * If _antcn_, or another local program opens an X11 application, say
 for example, for a dialog box to let the operator select the antenna,
-and later an operator on a different display wants to restart the FS.
-In that case the X11 application would attempt, to reopen on the
-original display.
+the application will appear on that display. If later an operator on a
+different display wants to restart the FS, the server would have to be
+stopped before starting for the X11 application to appear on the new
+display.
 
 * To update the environment variables used by the FS
 
@@ -245,9 +607,10 @@ terminal) as they are generated. A small number of entries may be lost
 when the FS is started. When the display server is not enabled, a
 small number of entries may be lost when the active log is changed.
 
-The script has four command line options:
+The script has four command line options. Generally speaking they
+should _not_ be used with _streamlog_ in _stpgm.ctl_. The options are:
 
-. `-d` -- display stream
+.. `-d` -- display stream
 
 +
 
@@ -267,13 +630,13 @@ interactive use.
 * Some FS error messages are not shown in the log display window
 because the operator has suppressed them with the `tnx` command.
 
-* The log display window includes some output that is no in the log,
+* The log display window includes some output that is not in the log,
 specifically the FS startup and termination messages and some program
 error messages.
 
-. `-h` -- help output
+.. `-h` -- help output
 
-. `-s` -- scroll-back
+.. `-s` -- scroll-back
 
 +
 
@@ -290,26 +653,37 @@ the FS is started. This may result in some lines being output more
 than once. It may reduce the number of lines that will be missed
 during these transitions.
 `
-. `-w` -- wait for FS start
+.. `-w` -- wait for FS start
 
 +
 
 Wait for the FS to start and/or continue to wait for the FS to be
 restarted if it is terminated.
 
-There are some limitations and considerations when _streamlog_ is used
-in the _stpgm.ctl_ file:
+[NOTE]
+=====
 
-* The `-h` option is not useful in this situation. Its use in
-_stpgm.ctl_ will cause the FS to terminate immediately after start-up.
+The limitations and considerations for why these options should _not_
+be used in _stpgm.ctl_ are:
 
-* The `-s` option can be used, but is generally not useful unless the
-display server is not enabled. Even then it is of marginal value in
-_stpgm.ctl_.
+[square]
+* The '-d' option can be used in _stpgm.ctl_ if the display server is
+_not_ in use. However, it would be safer to use the log output (no
+`-d`) instead. If it is used without the display server enable, it
+will crash the FS immediately after start-up.
 
-* The `-w` option is not useful and will cause problems in some cases
-if the display server is not enabled. It is best to avoid it entirely
-in _stpgm.ctl_..
+* The `-h` option is not useful in _stpgm.ctl_. Its use will cause the
+FS to crash immediately after start-up.
+
+* The `-s` option can be used in _stpgm.ctl_ but is generally not
+useful unless the display server is not enabled. Even then it is of
+marginal value.
+
+* The `-w` option is not useful in _stpgm.ctl_ and will cause problems
+in some cases if the display server is not enabled. It is best to
+avoid it entirely in _stpgm.ctl_.
+
+=====
 
 Thanks to Dave Horsley (Hobart) for coming up with the idea for this
 script, the initial version, and most of the incremental improvements.
@@ -379,15 +753,20 @@ The default plot device for X11 displays was changed to be useful.
 The plotting of clock data was expanded. Plots of wind speed and
 direction were added. Plotting CDMS data was added. T~sys~ plots for
 DBBC3s and RDBEs were added. Phase-cal tone plots for RDBEs were
-added. Plots of LSB Mark IV decoder phase-cal data were added. The
-`-y` option was added to delete phase-cal phases outside
-[-180°,+180°]. Bad horizontal tick marks in some `-p` plots were
-fixed. Clock and cable values outside (-10,+10) seconds are now
-automatically deleted, but can be included with the `-C` option. Any
-values in time plots that did not decode are now consistently
-displayed at the upper edge of the plots. Some command line options
-were changed. The `-h` (help) output was improved. The version was
-bumped to _2.0_. Some improvements were made in the code.
+added. Plots of LSB Mark IV decoder phase-cal data were added. Phases
+outside [-180°,+180°] are now automatically marked as bad, but can be
+included with the `-Y` option. Clock and cable values outside
+(-10,+10) seconds are now automatically marked as bad, but can be
+included with the `-C` option. Plots of Wettzell style `/rx/` data
+were added. Bad points are now displayed as open circles and slightly
+off the upper (or right) edge of the plots. Any values in time plots
+that did not decode are now consistently displayed at the upper edge
+of the plots. Plotting of phase differences attempts to provide better
+vertical plot limits if the differences cluster around ±180°. Support
+for the _giza_ plot library was added. Bad horizontal tick marks in
+some `-p` plots were fixed. Some command line options were changed.
+The `-h` (help) output was improved. The version was bumped to _2.1_.
+Some improvements were made in the code.
 
 +
 
@@ -443,27 +822,32 @@ testing.
 If fields for these data are present in the `wx/` log entries they
 will be plotted. This is in contrast to temperature, pressure and
 humidity, which are always plotted if `wx/` entires are present.
-Missing values for any fields are shown as "`out-of-range`" (along the
+Missing values for any fields are shown as "`out-of-range`" (near the
 top-edge of the corresponding plot).
 
 .. Add plotting of CDMS data.
 
 +
 
-The raw units are picoseconds.
+As with `cable/` data, the default is to plot the values as the change
+in one-way delay in picoseconds, relative to the first valid value
+found in the log. Also as with `cable/`, the `-r` option can be used
+to plot the raw values instead. Values greater than `999998.5`, which
+only occurs for error conditions, are marked as "`bad`".
 
 .. Add plotting of RDBE and DBBC3 T~sys~ values from multicast.
 
 +
 
-By default, only the data from the first encountered detector, other than
-channel zero, from each IF band is plotted. The `-m`, and `-M`,
-options can be used to select, and deselect, different sets of
-detectors based on regular expressions. This is similar in function to
-the `-g`/`-G` options (the latter, formerly the `-e` option), except
-`-m`/`-M` only apply to RDBE and DBBC3 T~sys~ data and are applied as
-are they are read-in instead of when they are plotted. This makes them
-a bit faster since there are typically many values involved.
+By default, only the data from the first encountered detector (other
+than channel `00` for RDBEs) from each IF band is plotted. The `-m`,
+and `-M`, options can be used to select, and deselect, different sets
+of detectors based on regular expressions. This is similar in function
+to the `-g`/`-G` options (the latter, formerly the `-e` option),
+except `-m`/`-M` only apply to RDBE and DBBC3 T~sys~ data and are
+applied as they are read-in instead of when they are plotted. This
+makes them a bit faster since there are typically many values
+involved.
 
 .. Add plotting of RDBE phase-cal data from multicast
 
@@ -504,11 +888,133 @@ plotted. If USB and LSB is present for an individual converter, the
 difference between the side-bands is plotted after the differences for
 pairs of different converters.
 
-.. Add option `-y` to remove phases outside [-180°,+180°].
+.. Mark phases outside [-180°,+180°] as bad by default.
 
 +
 
-This can helpful when Mark IV decoder communication errors occur.
+This can useful for Mark IV decoder communication errors. All phase
+can be included with the new `-Y` option.
+
+.. Mark clock and cable values outside (-10,10) seconds as bad by
+default.
+
++
+
+These are generally not useful values, but can be included if needed
+with the new `-C` option. Normally they only occur if a counter is
+being used and a bad value is returned.
+
+.. Add support for Wettzell's style of `/rx/` data.
+
++
+
+The most useful fields for plotting in Wettzell's `/rx/` data are of
+the form `_number_[_units_]` where `_number_` is a floating point
+number and `_units_` is one of `dB`, `dBm`, `degC`, or `MHz`. By
+default, _plotlog_ will only plot what seems to be the most
+interesting of these, which are the `degC` fields in any record and
+the `dBM` fields in the `IF__xx__` records (the `dBM` and `MHz` fields
+in the `lo__x__` records, and the `dB` fields in the `IF__xx__`
+records, are usually static). The `-W` option can be used to plot all
+the `_number_[_units_]` fields.
+
++
+
+It is assumed that only one field of a given `units` type exists per
+log entry type. The latter is determined by the first field of the log
+entry, typically `lo__x__` or `IF__xx__`, for a given `_x_` or `_xx_`.
+For example, `loa`, `lob`, `IFAH`, `IFAV` are all different types for
+this purpose. If there is more than one field with a given `units`
+type in a log entry type, the plot for that type combination will be
+garbled. As of this writing there are no known cases of this.
+
+.. Display bad points as open circles and move them slightly off the
+top (or right) plot edge.
+
++
+
+Displaying them as open circles makes it clearer that they are
+different than the "`good`" points which are closed circles. Moving
+them slightly off the top (or right) edge improves their visibility
+and eliminates ambiguity about which plot they are part of in stacked
+plots.
+
+.. Always display values that don't decode at the upper edge of time
+plots.
+
++
+
+Previously for some data types, specifically `cable`, `rx`, `sx`, `sk`
+and `fmout-gps`, samples were omitted if they did not decode as
+floating point numbers. Now they are displayed at the upper edge of
+the plot, as occurs for other data types, so their presence is
+visible. The only cases where samples are completely omitted now is
+when the form of the entry is too garbled to be identified or the
+command is missing (possibly because it timed-out). These two
+situations may be noticeable if the plot for a data type is missing
+entirely or is sparser than expected.
+
+.. Plotting of phase differences attempts to provide better vertical
+plot limits if the differences cluster around ±180°.
+
++
+
+If there is a gap in the phase differences of 180° or more and there
+is some data in both the bottom and top of the [-180°,+180°] range,
+the data is adjusted to be around +180°. This doesn't fix all overly
+large vertical scales, but it improves the worst ones.
+
+.. Add support for the _giza_ plot library.
+
++
+
+The _pgperl_ package provided by some Linux distributions (for example
+FSL11) may use the _giza_ plotting library instead of _pgplot_.
+Unfortunately, _giza_ is not yet a fully compatible replacement for
+_pgplot_. Several differences have been noticed, so far, in _giza_
+version `1.2.0` (which is used by FSL11):
+
++
+--
+
+* The default line width is thicker. It appears to actually be what
+would be line width `2` in _pgplot_. It appears that the line widths
+are off by 1 (see the next item as well).
+
+* Setting the line width accepts `0`, which gives the same width as
+`1`, the minimum, in _pgplot_.
+
+* The closed circle graph marker `17` is significantly less distinct.
+
+* The open circle graphs markers, symbols `20` through `27` (and some
+others), have thicker lines than in _pgplot_. For `20` and `21`, it is
+difficult to make out that they are open.
+
+* Graph markers are clipped if they are on the edge of a plot instead
+of allowing them to spill over. This makes them harder to see.
+
+* Automatic spacing of vertical tick marks is overly dense.
+
+* Requested horizontal tick spacings are only approximately respected.
+
+* The environment variables `PGPLOT_BACKGROUND` and
+`PGPLOT_FOREGROUND` for setting the plot colors are not respected.
+
+--
++
+
+If the script detects that _giza_ is in use, it will adjust the line
+width and use a larger open circle for "`bad'" points. The resulting
+plots are usable, but not as good as with _pgplot_. These adjustments
+can be disabled, individually, with `-Z` option if they cause a
+problem or if a later version of _giza_ has better agreement with
+_pgplot_. If _giza_ is not detected, the `-Z` option can be used for
+force the adjustments. Please see the `-h` output for more details.
+
++
+
+One advantage of _giza_ is that a PDF file is available as an output
+device.
 
 .. Fix bad horizontal ticks for `-p` option.
 
@@ -520,34 +1026,13 @@ the horizontal tick labels on these pages were for the extra set of
 ticks. This has been fixed. There is no extra set of tick marks and
 the labels are correct.
 
-.. Reject clock and cable values outside (-10,10) seconds
-
-+
-
-These are generally not useful values, but can be included if needed
-with the new `-C` option. Normally they only occur if a counter is
-being used and a bad value is returned.
-
-.. Always display values that don't decode on the upper edge of the plots.
-
-+
-
-Previously for some data types, specifically `cable`, `rx`, `sx`, `sk`
-and `fmout-gps`, samples were omitted if they did not decode as
-floating point numbers. Now they are displayed on the upper edge of
-the plot, as occurs for data types, so their presence is visible. The
-only cases where samples are completely omitted now is when the form
-of the entry is too garbled to be identified or the command is missing
-(possibly because it timed-out). These two situations may be
-noticeable if the plot for a data type is missing entirely or is
-sparser than expected.
-
 .. Change the command line options.
 
 +
 
-In addition to adding the `-B`, `-C`, `-d`/`-D`, `-m`/`-M`, and `-y`
-options as mentioned above, the following changes were made:
+In addition to adding the `-B`, `-C`, `-d`/`-D`, `-m`/`-M`, `-W`,
+`-Y`, and `-Z` options as mentioned above, the following changes were
+made:
 
 ... The old `-e` option was moved to `-G` for parallel construction
 with `-d`/`-D` and `-m`/`-M` and to make room for the new `-e` option.
@@ -560,6 +1045,17 @@ DBBC3 and RDBE T~sys~, and RDBE phase-cal, processing.
 ... The new `-l` option can used to specify the location, which is
 only used in the plot titles. This can be useful for log snippets that
 don't contain a `location` line.
+
+... The new `-S` option can be used to require a leading slash before
+the command name for `wx/`, `cable/`, and `cdms/` entries. For example
+with `-S`, the search string for `wx/` entries is `/wx/`. This is
+useful, for example, if there are non-data entry of the form `wx/` and
+the data entries are of the form, `/wx/.` The program accepts the form
+without the leading `/` because that is what some stations produce for
+the data entries and that will match for stations that do use as a
+leading `/`. This option is only to help for stations with non-data
+entries that do not have the leading `/` and data entries with the
+leading `/`.
 
 ... The old `-v` (version) option was moved to `-V` to make room for
 the `-v` option.
@@ -579,14 +1075,25 @@ added.
 
 +
 
-This can be used to change the background/foreground colors from to
+This can be used to change the background/foreground colors to
 white/black from black/white. The latter are used by default for the
 X11 display with some FSL__x__.
 
 ... An explanation was added that out-of-range phase values in the
-`-p` plots are placed on the right-hand edge of the plots.
+`-p` plots are placed near the right-hand edge of the plots.
 
-.. Bump version number to _2.0_.
+... Add explanation of option philosophy:
+
++
+
++
+
+Generally, the philosophy is that if no options are specified the
+script should something that is likely to be useful. Options can be
+added to tune the behavior for different situations. Scripts or
+aliases can be used if any options are needed routinely.
+
+.. Bump version number to _2.1_.
 
 .. Improve the code
 
@@ -610,7 +1117,298 @@ it did not need to be handled in each search string.
 
 ====
 
-. Fix `-help` command line option for _gnplt_ (closing
+. Include `rdbe30_mon.py`
+
++
+
+This script, written by Russ McWhirter (Haystack), is very useful for
+evaluating RDBE functionality. Russ has very graciously agreed to
+allow it to be distributed with the FS to simplify making it available
+to stations that have RDBEs.
+
++
+
+[%collapsible]
+====
+
+The (original) _python2_ version is available as
+_/usr2/fs/misc/rdbe30_mon.py2_.  The _python3_ version is available as
+_/usr2/fs/misc/rdbe30_mon.py_.
+
+.. Some of its features are:
+
+* When started, it opens four windows: `Command List`, `Command Log`,
+`Monitor`, and `Plots`. The windows may be closed individually, but
+closing the `Monitor` window will cause the program to exit. The
+default positions of the windows can be set with command line options
+(see below).
+
+* Command line options:
+
++
+[circle]
+
+** `-h __multicast_host__`
+
+** `-p __multicast_port__`
+
+** `-H __RDBE_host__`
+
+** `-P __RDBE_port__`
+
+** `--command`, `--log`, `--monitor`, and `--plot` to set the X11
+display geometry of the corresponding windows. Only the position of
+the window should be set, e.g., `+0+0`, as the value for the option.
+
+* An enable/disable plotting checkbox and a Phase-cal offset (MHz)
+entry box on the `Plots` window. The plots shown are in order (from
+the top):
+
++
+[circle]
+
+** Raw data
+** FFT of raw
+** Histogram of raw data
+** Time domain Extracted PCal (Complex)
+** FFT of Extracted Pcal: Amplitude
+** FFT of Extracted Pcal: Phase
+** Count difference for Tcal: IF0, IF1
+
+* The commands in the `Command List` window can be edited. Pressing
+kbd:[F1], or right clicking, on a command will cause it to be sent to
+the RDBE.
+
+* Files:
+
++
+
+These files are created in the current working directory. The value of
+_<RDBE_ADDR>_ is the IP address of the RDBE.
+
++
++
+[circle]
+
+** __rdbe30_monrc_<RDBE_ADDR>.db__ -- holds the geometry of the
+windows between invocations of the script. Geometry values from
+command line options override these.
+
+** __rdbe30_mon_cmd_<RDBE_ADDR>.log__ -- holds a  record of the
+commands sent to the RDBE and the responses.
+
+** __rdbe30_mon_dat_<RDBE_ADDR>.log__ -- holds a record of the
+multicast data received from the RDBE. This file can become quite
+large.
+
+.. Installation
+
+... Install the `matplotlib` appropriate for your system's _python_
+version, if not already included. This will need to be done by _root_.
+
++
+
+* Usually for _python2_:
+
+  apt-get install python-matplotlib
+
+* Usually for _python3_:
+
+  apt-get install python3-matplotlib
+
+... IMPORTANT: For the remainder of these instructions make sure you
+are in the _oper_ account, switching if necessary.
+
+... Copy the version that is correct for your system (for _python2_,
+use `.py2` instead of `.py`) to your _~oper/bin_ directory.
+
+ cp /usr2/fs/misc/rdbe30_mon.py ~oper/bin
+
+... Place a line for each RDBE in your _clpgm.ctl_ control file. For
+example, for RDBE-A (for _python2_, use `.py2` instead of `.py`):
+
+ mona   d popen 'cd /tmp;rdbe30_mon.py -h 224.0.2.10 -p 20021 -H rdbea 2>&1' -n rdbemona
+
++
+
+Substitute the correct multicast address (`-h`) and port (`-p`) for
+your device. For other RDBEs, copy that line and make appropriate
+changes (for example for RDBE-B: `mona` -> `monb`, `rdbea` -> `rdbeb`,
+`rdbemona` -> `rdbemonb`, change the multicast address and port).
+
++
+
++
+
+The `cd /tmp` in the line causes the script's files to be written to
+(and read from) _/tmp_; so they won't clutter up other directories.
+They will also be automatically deleted each time the system is
+rebooted. You can place them in a different directory if you want to
+preserve them.
+
++
+
++
+
+TIP: You can control the initial placement of the windows by adding the
+`--command`, `--log`, `--monitor`, and `--plot` options with
+appropriate placement geometry values.
+
+.. Running the script
+
++
+
+IMPORTANT: The script should not be left running during operations. If
+the plotting function is enabled, it is CPU intensive.
+
++
+
+You can run the script from the operator input window, e.g., for
+RDBE-A:
+
+  client=mona
+
++
+
+Exit the program by closing the `Monitor` window
+
+.. The following changes were needed for the _python3_ version:
+
+* Change `import` of `NavigationToolBar2TkAgg` to
+`NavigationToolBar2Tk`
+
+* Change log file output to buffered
+
+* Use `draw()` instead of `show()`
+
+* Use data `encode()`/`decode()` for socket I/O
+
+* Select real part of complex array for plotting to eliminate warning
+
+* Remove use of `buffer()` to linearise an array.
+
+====
+
+. Make miscellaneous improvements (some internal) to _pfmed_.
+
++
+
+The visible improvements are largely making the terminology in program
+messages related to procedure libraries consistent, but some bugs were
+fixed too. The internal improvements are mostly to make the handling
+of FORTRAN `character` variables in subroutines work for arbitrary
+length variables passed in as arguments.
+
++
+
+[%collapsible]
+====
+
+The visible changes include:
+
+[square]
+* In program messages, the term "`active`", as opposed to "`open`", is
+always used for the procedure library that _pfmed_ is currently
+working on.
+
+* In program messages, the term "`library`", as opposed to "`file`",
+is always used for a procedure library, except for some file oriented
+error messages. Error messages in _boss_ related to procedure
+libraries were also made consistent.
+
+* The FS `help` command pages for the `schedule` and `proc` commands
+were updated to be consistent with the above terminology.
+
+* A "`key`" was added to `pfdl` command to describe the prefix letters
+before the library names (`>`, active in _pfmed_; `A`, the current FS
+schedule library; `S`, the current FS station library).
+
+* Fix `pfst` command to trap the "`old`" library not existing.
+Previously, it would be created as an empty library.
+
+* Fix `pfst` command to allow copying of the library that is the
+active library in _pfmed_. This was broken for _gfortan_ which allows
+a file to be open to only one unit, but worked for _fort77_ (which uses
+_f2c_). It now works independently of the compiler being used.
+
+* Improve detection of the FS being active if it is started while
+_pfmed_ is running, which is apparently okay. There may still be some
+race conditions for this situation.
+
+* Improved the error message for _pfmed_ already being in use.
+
+* A missing error message for no procedure library being active was
+restored.
+
+The internal changes include:
+
+[square]
+* Making `character` arguments of subroutine independent of the actual
+length of the passed variable. This was very helpful for making the
+change in the procedure library name lengths.
+
+* Make the lengths of character variables consistent with their usage
+for procedure names, procedure library names, and file extensions.
+This was very helpful for making the change in the procedure library
+name lengths.
+
+* Improve the code for the `ds` command. This included fixing
+`character` subroutine arguments to be adjustable, removing Hollerith
+use of `character` variables, and cleaning-up edges cases for the
+bubble-sort.
+
+* Make the same terminology consistency improvements ("`active`" and
+"`library`") in the code and comments that are visible to the user.
+
+====
+
+. Make miscellaneous small bug fixes and improvements
+
++
+
+[%collapsible]
+====
+
+.. Fix using a DBBC IF channel as a detector in _fivpt_ and _onoff_
+with continuous calibration (closing
+https://github.com/nvi-inc/fs/issues/190[#190]).
+
++
+
+The DBBC (i.e., the DBBC2) does not provide separate cal-on and cal-of
+TPIs for an IF detector when continuous calibration is in use.
+Implementing something useful in the FS for this case had been
+overlooked.  Unfortunately, the FS produced unusable T~ant~
+measurements in _fivpt_ and nonsensical T~sys~ values for that
+detector in _fivpt_ and _onoff_.
+
++
+
+This was improved by (i) internally treating that detector as having a
+T~cal~ value of `-100` (i.e., assuming there is no noise diode for
+this detector) and (ii) using the unswitched power. This results in
+_fivpt_ T~ant~ and estimated peak values being printed in percent of
+system temperature in _fivpt_ and T~sys~ for that detector as `-100`
+in _onoff_.  If the T~cal~ defined in the _.rxg_ file was already
+negative, that value is used instead.
+
++
+
+If the IF channel is not corrupted by RFI, this makes it usable for
+pointing measurements. It use should still be avoided for gain
+calibration measurements for other reasons, primarily having a very
+broad bandpass, but in some cases not having a center frequency that
+_onoff_ can calculate accurately. Additionally, the value of the
+"`DBBC IF power conversion factors`" in _equip.ctl_ may not have
+accurate values.
+
++
+
+Thanks to Jon Quick (HartRAO) for reporting the existing poor
+behavior, pointing out that something useful could be done, and
+testing the improvement.
+
+.. Fix `-help` command line option for _gnplt_ (closing
 https://github.com/nvi-inc/fs/issues/184[#184]).
 
 +
@@ -620,9 +1418,104 @@ arguments instead of failing entirely.
 
 +
 
-Thanks to Jon Quick (HartRAO) for reporting this.
+Thanks to Jon Quick (HartRAO) for reporting this bug.
 
-. Add explanation for generating an _ssh_ key for _scp_ commands when
+.. Fix _gnplt_ error message for the GUI crashing to mention `gnplt`
+rather than `LogPlotter`.
+
+.. Demote `if` and `setup_proc` commands from being _immediate_
+execution commands (closing
+https://github.com/nvi-inc/fs/issues/189[#189]).
+
++
+
+If entered interactively, they would execute immediately even if there
+was a time block on the operator command stream. This was not an issue
+for the schedule stream, where they were normally used, since that
+stream doesn't have the functionality of immediate execution commands.
+As a result, the old behavior was benign for schedules.
+
+.. Change description (title) for `cable` in the default _logpl.ctl_
+file to not include `length`.
+
++
+
+_logpl_ plots the raw `cable` data, not converted to length.
+
+.. Improve `help` page for the `setup_proc` command,
+
+.. Improve the description of the `use_setup_proc` _drudg_ option in
+the
+<<dbbc3_ops.adoc#_minimizing_the_use_of_setup_procedures,Minimizing
+the use of setup procedures>> appendix of the <<dbbc3_ops.adoc#,FS
+10.1 DBBC3 Operations Manual>> document.
+
+.. Improve the description of the `thread__suffix__` procedure in the
+<<dbbc3_ops.adoc#_thread_procedure,Thread Procedure>> appendix of the
+<<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> document.
+
++
+
+This included adding a description of the `ds` added to the
+`datastream` label for the file name and that it stays lowercase all
+the way to the file name.
+
+.. Set the home directory permissions for AUID accounts to `0750`.
+
+.. Add a *TIP* for managing directory names of FS installations from
+archives in the
+<<../../misc/release_model.adoc#_installing_from_an_archive,Install
+from an archive>> subsection of the
+<<../../misc/release_model.adoc#,Release Model>> document.
+
++
+
+Making a copy as a new directory before making any local changes can
+make it easier to track changes and which version is in use.
+
+.. Add a *TIP* for how to avoid losing your place in a *Details*
+toggle for a FS or _drudg_ change list item when following a link
+(basically: right-click and open a new tab). This was added to the
+<<10.1.0.adoc#improve_presentation,Improve presentation>> FS change
+sub-item (if that link doesn't work in your browser, the *TIP* is
+copied below) of the <<10.1.0.adoc#,FS 10.1.0 Update Notes>> document.
+The *TIP* added is:
+
++
+
+****
+
+TIP: An alternative to avoid this is to right click the link, then
+open it in a new tab, and then click on that tab. To return to the
+original document, you can close the new tab or click on the original
+document's tab, whatever you prefer.
+
+****
+
+.. Add explanation of how to navigate to a link in *Details* toggle in
+a different document, if the browser doesn't support going to it
+directly. This was added to the
+<<10.1.0.adoc#improve_presentation,Improve presentation>> FS change
+sub-item (if that link doesn't work in your browser, the text is
+copied below) of the <<10.1.0.adoc#,FS 10.1.0 Update Notes>> document.
+The text added is:
+
++
+
+****
+
+* Links that point into a *Details* toggle in a different document do
+not work in all browsers. To help with that, if the relevant text is
+small it is reproduced within an embedded sidebar block (grey
+background). Otherwise, a second link to the title of the item with
+toggle in the different document is provided along with instructions
+to follow the link (probably opening it in a new tab would be best),
+open the toggle, and then search for the anchor text of the original
+link.
+
+****
+
+.. Add explanation for generating an _ssh_ key for _scp_ commands when
 converting to 64-bit.
 
 +
@@ -630,7 +1523,50 @@ converting to 64-bit.
 The <<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit
 System>> document was updated.
 
+.. Update instructions in the _making_gh-pages.txt_ file for the
+current default branch, _main_.
+
+====
+
 === drudg changes
 
-There are no _drudg_ changes yet.
+_drudg_ opening message date is `2023-02-10`.
 
+. Typographic changes for the new _f95_ version in FSL11, These are
+similar to changes described in the <<f95,f95>> FS change item (if
+that link doesn't work in your browser, click on this link instead:
+<<FSL11,FSL11>>, open the *Details* toggle below that location by
+clicking on it, go `Back` in the browser, and finally click on the
+original link). There were only a few octal constants outside of
+`parameter` statements and these were in simple assignment statements,
+All constants were just wrapped in `int()`. There were no `and()`
+statements with mixed sized ``integer``s. There were no hexadecimal or
+binary constants at all.
+
+. Accept input schedule files (_.skd_ and _.vex_) with up to 16
+characters before the dot (`.`) for the extension. This change was
+made to agree with <<Names,Names>> FS change item above.
+
+. Prepend `ds` to the _name_ (second) parameter in the
+`datasteram=add,{thread},\*` command in the single-thread-per-file
+`thread__suffix__` SNAP procedure for VDIF recording, now reading:
+`datastream=add,ds{thread},*`. This change is intended to be forward
+compatible with emerging file naming conventions for recorded data.
+For more information on the `thread__suffix__` SNAP procedure, see the
+<<dbbc3_ops.adoc#_thread_procedure,Thread Procedure>> appendix of the
+<<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> document.
+
+. Make miscellaneous small bug fixes and improvements
+
++
+
+[%collapsible]
+====
+
+.. Improve _skdrut/errormsg.f_ to avoid problems with bounds checking
+by not hard-coding the `character` argument's length.
+
+.. Fix _skdrut/trimlen.f_ to prevent problems with bounds checking if
+the string is blank.
+
+====
