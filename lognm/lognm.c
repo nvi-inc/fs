@@ -35,7 +35,7 @@ int argc;
 char **argv;
 {
     void setup_ids();
-    char log[9];
+    char log[MAX_SKD+1];
     int i;
 
     setup_ids();
@@ -44,10 +44,10 @@ char **argv;
          exit( -1);
     }
 
-    memcpy(log, shm_addr->LLOG, 8);
-    log[8]=0;
+    memcpy(log, shm_addr->LLOG2, MAX_SKD);
+    log[MAX_SKD]=0;
 
-    for(i=7;0<=i;i--) {
+    for(i=MAX_SKD-1;0<=i;i--) {
       if(log[i]!=' ')
 	goto print;
       log[i]=0;

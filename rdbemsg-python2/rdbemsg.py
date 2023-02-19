@@ -135,7 +135,7 @@ class msg_tk(Tkinter.Tk):
 		r2_0.grid(column=0,row=2,sticky='EW')
 
 		self.sessionname = Tkinter.StringVar()
-		self.sessionnameVariable = Tkinter.Entry(self,textvariable=self.sessionname,font=self.customFont,width=15)
+		self.sessionnameVariable = Tkinter.Entry(self,textvariable=self.sessionname,font=self.customFont,width=18)
                 self.sessionnameVariable.grid(column=1,row=2,sticky='EW')
 
 		# Station Code

@@ -112,7 +112,7 @@ class Tools:
 	def startUp(self):
 		#initiate thread if file chosen
 		if MainGui.filename:
-			self.status.set('reading file: '+MainGui.filename)
+			self.status.set('log name: '+os.path.splitext(os.path.basename(MainGui.filename))[0])
 			t1 = FileReader()
 			t1.setDaemon(1) #Makes thread Daemonic, i.e sys.exit w.o errors possible
 			t1.start()

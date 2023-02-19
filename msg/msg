@@ -461,7 +461,7 @@ pack   .auto_start_label -in .internal1 -side top -pady 1m
 #**********************************************************************************************#
 label  .ready_data_label -text "Ready Data:" -bg SteelBlue3 -fg white -width 22
 label  .session_label -text "Session: " -bg SteelBlue3 -fg white -width 11
-label  .session_name  -text "$session" -bg SteelBlue3 -fg white -width 9
+label  .session_name  -text "$session" -bg SteelBlue3 -fg white -width 18
 label  .source_ready_label -text "First source is: " -bg SteelBlue3 -fg white -width 18
 label  .source_name -text "$first_source" -bg SteelBlue3 -fg white -width 10
 label  .time_ready_label -text "at: " -bg SteelBlue3 -fg white -width 5
@@ -476,7 +476,7 @@ pack   .ready_data_label .session_label .session_name .source_ready_label .sourc
 # start form.                                                                                  #
 #**********************************************************************************************#
 label  .session_label2 -text "session name:" -bg SteelBlue3 -fg white -width 22
-entry  .session_entry -width 9 -relief sunken -textvariable session
+entry  .session_entry -width 18 -relief sunken -textvariable session
 label  .start_recording_label -text "Started recording with source:" \
 -bg SteelBlue3 -fg white -width 33
 entry  .start_recording_entry -width 10 -relief sunken -textvariable ut_on_source
@@ -740,7 +740,7 @@ pack   .stop_form_label -in .internal1 -side top -pady 1m
 # This part builds up the internal2 frame with one labels and one entry.                       #
 #**********************************************************************************************#
 label  .session_label -text "Session name:" -bg SteelBlue3 -fg white -width 25
-entry  .session_entry -width 15 -relief sunken -textvariable session
+entry  .session_entry -width 18 -relief sunken -textvariable session
 pack   .session_label .session_entry -in .internal2 -side left -pady 1m    
 
 #**********************************************************************************************#
