@@ -67,9 +67,12 @@ dbbcn:
 
   skd_par(ip);
 
-
   if(ip[2]<0) {
     logita(NULL,ip[2],ip+3,ip+4);
+    if(ip[0]!=0) {
+        cls_clr(ip[0]);
+        ip[0]=ip[1]=0;
+    }
     logit(NULL,-810,lwho);
     return;
   }
@@ -118,9 +121,12 @@ dbbcn1:
     
     skd_par(ip);
 
-
     if(ip[2]<0) {
       logita(NULL,ip[2],ip+3,ip+4);
+      if(ip[0]!=0) {
+        cls_clr(ip[0]);
+        ip[0]=ip[1]=0;
+      }
       logit(NULL,-810,lwho);
       return;
     }
