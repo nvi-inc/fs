@@ -107,8 +107,6 @@ int *ierr;
       
       cls_clr(ip[0]);
       if(ip[2]<0) {
-	if(ip[1]!=0)
-	  cls_clr(ip[0]);
 	logita(NULL,ip[2],ip+3,ip+4);
 	*ierr=-10;
 	return -1;
