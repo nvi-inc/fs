@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021 NVI, Inc.
+* Copyright (c) 2020, 2021, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -27,7 +27,8 @@ C 991118 nrv Add nominal start,end.
 C 000616 nrv Add scan names.
 C 001109 nrv Change scan names to character.
 ! 2021-12-28 JMGipson got rid of ipartm, ihdtm, imtptm which are no longer used 
-
+! 2023-02-20 JMGipson increased size of cexper from 8 to 16
+!
       integer nobs,iskrec
 C nobs - number of observations in this schedule (really: scans)
 C iskrec - time-ordered index of observation records
@@ -63,8 +64,8 @@ C *_end - nominal end time
      .iyr_start,ida_start,ihr_start,imin_start,isc_start,
      .iyr_end,ida_end,ihr_end,imin_end,isc_end,
      .ISKREC(MAX_OBS),
-     .LSKOBS(IBUF_LEN,MAX_OBS),lexper(4)
-      character*8 cexper
+     .LSKOBS(IBUF_LEN,MAX_OBS),lexper(8)
+      character*16 cexper
       equivalence (cexper,lexper)
       character*(ibuf_len*2) cskobs(max_obs)
       equivalence (cskobs,lskobs)

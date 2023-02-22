@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -70,6 +70,7 @@ C
 ! 2007Dec07 Modified so that  prints version as ....
 ! 2018Jul20 Moved writing of drudg version to subrotine.
 ! 2020Jun30 Don't output tape pases, lenghth. Instead print out terid, terna, recorder.
+! 2023-02-20  Increased size of writing out cexper from
 
 
       IF (IFUNC.EQ.1) THEN
@@ -80,8 +81,8 @@ C
 
       if(cexper .eq. " ") cexper='XXX'
 
-      write(lu_outfile,"(a,a8,2x,i4,1x,a,1x,a,1x,a)") cprfx,
-     >cexper(1:8), iyr,cstnna(istn),cstcod(istn),cpocod(istn)
+      write(lu_outfile,"(a,a,2x,i4,1x,a,1x,a,1x,a)") cprfx,
+     >cexper, iyr,cstnna(istn),cstcod(istn),cpocod(istn)
 C
 C     write antenna line
       write(lu_outfile,"(a,3(a,1x),$)") cprfx,

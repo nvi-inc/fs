@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2022 NVI, Inc.
+* Copyright (c) 2020-2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -229,7 +229,6 @@ C        beginning the current observation
 
 
       character*180 ldum
-      character*12 lsession      !filename
       
       double precision speed_recorder   ! speed of recorder in this mode.
 
@@ -243,6 +242,7 @@ C     data cvpass /'abcdefghijklmnopqrstuvwxyzAB'/
 C
 C History:
 ! Now put in most recent first. 
+! 2023-02-21 JMG. Now get session code from cexper. Was previously getting from experiment name.
 ! 2022-05-28 JMG. Memorial day weekend. I should be playing not working. 
 !                 Fixed bug in 'disk2file'. Was not  setting iscan_gap_prev at end of loop.
 ! 2021-12-18 JMG. Got rid of some unused calculations.
@@ -512,10 +512,8 @@ C 2004Jul13 JMGipson. Fixed bug in scan names.
      >  '  the EQUIPMENT line in the  control file.'
         return
       endif
-
-      call strip_path(lskdfi,lsession)
-      nch=index(lsession,".")
-      lsession(nch:12)=" "
+! Previously extracted session code from experiment name.
+! But should be session code from schedule file
 
       call init_hardware_common(istn)
 
@@ -879,7 +877,7 @@ C     3. Output the SNAP commands. Refer to drudg documentation.
 C scan_name command. 
         nch=trimlen(scan_name(iskrec(iobs_now)))             
         write(ldum,'("scan_name=",3(a,","),i4)')
-     >    scan_name(iskrec(iobs_now))(1:nch),lsession, cpocod(istn),
+     >    scan_name(iskrec(iobs_now))(1:nch),cexper, cpocod(istn),
      >    idur(istnsk)-ioff(istnsk)
         
         if(kdebug) write(*,*) ldum(1:50) 
@@ -1027,7 +1025,7 @@ C               SOURCE=name,ra,dec,epoch
      >       (itime_scan_beg(i),i=1,5),
      >       idur(istnsk), idata_mk6_scan_mb/(1000*8) ,       
      >       scan_name(iskrec(iobs_now))(1:nch),
-     >       lsession(1:trimlen(lsession)),
+     >       cexper,
      >       cpocod(istn)                             
              call drudg_write(lufile,ldum)     
           endif            
@@ -1222,7 +1220,7 @@ C POSTOB
               cstat_code=cpocod(istn)
               nch3=trimlen(cstat_code)
               call lowercase(cstat_code)
-              ldest=lsession(1:trimlen(lsession))//"_"//
+              ldest=cexper(1:trimlen(cexper))//"_"//
      >           cstat_code(1:nch3)//"_"//
      >           scan_name(iobs_now)(1:nch)//".m5a"
               nch2=trimlen(ldest)

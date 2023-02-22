@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -25,34 +25,46 @@
 ! passed
       character*(*) lfullpath           !passed
       character*(*) lfilnam             !filename
+! History
+! 2023-02-21  JMGipson. Substantially re-written.  Previously  did not check
+!             to see if there was enough space when extracting lfilnam. Now does.
 ! local
-      integer ilen
+      integer ilen_full,ilen_file
       integer i
-      integer ilast_non_blank
-      integer islash
+      integer iend
+      integer ibeg
 
-      ilen=len(lfullpath)
+      ilen_full=len(lfullpath)
+      ilen_file=len(lfilnam)
 
-      ilast_non_blank=trimlen(lfullpath)
-      if(ilast_non_blank .eq. 0) then
-        lfilnam=" "
-        return
-      endif
+! Initialize to blank
+      lfilnam=" "
 
-      islash=0
-      do i=ilast_non_blank,1,-1
+      iend =trimlen(lfullpath)
+!      write(*,*) "iend ", iend
+      if(iend  .eq. 0) return
+
+      ibeg=0
+      do i=iend,1,-1
         if(lfullpath(i:i) .eq. "/") then
-           islash=i
+           ibeg=i
            goto 10
         endif
       end do
 
 10    continue
-      if(ilast_non_blank-islash .gt. ilen) then
-         lfilnam=lfullpath(islash+1:islash+ilen)
-      else
-         lfilnam=" "
-         lfilnam=lfullpath(islash+1:ilast_non_blank)
+      ibeg=ibeg+1
+!      write(*,*) "ibeg ", ibeg
+!      write(*,*) "ilen_full ", ilen_full
+!      write(*,*) "ilen_file ", ilen_file, iend-ibeg+1
+
+      if(iend-ibeg+1 .gt. ilen_file) then
+        write(*,*) "Strip_path: not enough name to store filename ",
+     >   lfullpath(ibeg:iend)
+        write(*,*) "Need ",iend-ibeg+1, " characters but only have ",
+     >   ilen_file
+        stop
       endif
+      lfilnam(1:iend-ibeg+1)= lfullpath(ibeg:iend)
       return
       end

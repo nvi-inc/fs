@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -26,7 +26,7 @@ C
       include '../skdrincl/skparm.ftni'
       integer lu,nout,iy1(*),id1(*),ih1(*),im1(*),id2(*),ih2(*),im2(*),
      .        ilabrow,iy2(*)
-      integer*2 lexper(4),lstnna(4),lstcod
+      integer*2 lexper(8),lstnna(4),lstcod
       character*128 cprttyp,cprport,clabtyp
 C
 C On entry:
@@ -48,6 +48,7 @@ C nrv 950829 PC-DRUDG version converted to linux
 C 960814 nrv Comment out debug line that was left in.
 C 970228 nrv Add clabtyp to call
 C
+! 2023-02-20 JMGipson. Changed size of lexper to 8
       integer*2 jbuf(80),lbuf(80),label(6),jch
       integer l,i,ichek,j,idummy,ip,il,i1,idum
       integer*2 ic
@@ -91,13 +92,13 @@ C     Now write the normal ASCII information
      .    ,a1)
 	  WRITE(lu,140) (LEXPER,iY2(i),ID2(I),IH2(I),IM2(I),I=1,NOUT),
      .    char(13)
-140     FORMAT(6X,3(4A2,5X,"End   ",I2.2,"/",I3.3,"-",I2.2,I2.2,15X)
+140     FORMAT(6X,3(8A2,5X,"End   ",I2.2,"/",I3.3,"-",I2.2,I2.2,15X)
      .    ,a1)
 	else if (clabtyp.eq.'EPSON'.or.clabtyp.eq.'EPSON24') then
 	  WRITE(lu,1301) LSTNNA,iY1(1),ID1(1),IH1(1),IM1(1),char(13)
 1301    FORMAT(4A2,5X,"Start ",I2.2,"/",I3.3,"-",I2.2,I2.2,a1)
 	  WRITE(lu,1401) LEXPER,iY2(1),ID2(1),IH2(1),IM2(1),char(13)
-1401    FORMAT(4A2,5X,"End   ",I2.2,"/",I3.3,"-",I2.2,I2.2,a1)
+1401    FORMAT(8A2,5X,"End   ",I2.2,"/",I3.3,"-",I2.2,I2.2,a1)
 	endif
 
 C

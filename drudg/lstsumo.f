@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021 NVI, Inc.
+* Copyright (c) 2020, 2021, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -142,7 +142,7 @@ C Local
       character*2 ccodetmp
       equivalence (ccodetmp,lcodetmp)     
       integer num_sub_pass,num_recs
-      character*12 lfilnam
+      character*22 lfilnam
 ! tape type    
       logical kprint_doy 
       kprint_doy=.false.   
@@ -170,7 +170,7 @@ C  1. Headers.
         call strip_path(cinname,lfilnam)
 
         write(luprt,9200) lfilnam,npage
-9200      format(' Schedule file: ',2x,a12,10x,'Page ',i3)
+9200      format(' Schedule file: ',2x,a,10x,'Page ',i3)
         iline=1
 
 ! Various header information.

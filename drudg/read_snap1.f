@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021 NVI, Inc.
+* Copyright (c) 2020, 2021, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -34,7 +34,8 @@ C Called by: LSTSUM, CLIST, LABEL
 C Input
       character*(*) cbuf
 C Output
-      character*8 cexper,cstn
+      character*16 cexper
+      character*8 cstn
       integer iyear
       character*2 cid2
       character*1 cid1

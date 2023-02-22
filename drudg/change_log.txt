@@ -1,4 +1,10 @@
 This file contains a summary of changes made and why.
+2023-02-21 ../skdrut/vglinp.f:  changed length of read in variable from 8 to 16
+2023-02-21 snap.f: Now uses cexper for session code. Previously derived from filename
+2023-02-21 strip_path.f:  Fixed sleeping bug which caused overwrite of memory when extracting file_name.
+           Now checks for space.
+2023-02-20 Changes to ../skdrincl/skobs.ftni, read_snap1.f, snapintr.f, blabl.f to support longer
+           session code and filename
 2023-02-10 fdrudg.f.  Changed maximum schedule name length to 16. Output file to 18.
 2023-02-10 proc_thread.f Typographic change in datastrean.
 2022-10-07 vlbah.f, wrhead.f.  Changed handling of octal constant so that new compiler would not complain.

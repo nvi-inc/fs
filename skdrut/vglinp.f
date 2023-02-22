@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -62,14 +62,16 @@ C 1. Get experiment name
       ierr=1
       iret = fget_global_lowl(ptr_ch('exper_name'//char(0)),
      & ptr_ch('EXPER'//char(0)),ivexnum)
+
       if (iret.ne.0) return
       iret = fvex_field(1,ptr_ch(cout),len(cout))
       nch=fvex_len(cout)
-      if (nch.gt.8) then
+      if (nch.gt.16) then
         write(lu,'("VEXINP01 - Experiment name too long, using first ",
-     .  "8 characters")') 
-        nch=8
+     .  "16 characters")')
+        nch=16
       endif
+
       cexper=cout(1:nch)
 
 C 2. Get experiment description
