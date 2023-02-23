@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020, 2022 NVI, Inc.
+# Copyright (c) 2020, 2022, 2023 NVI, Inc.
 #
 # This file is part of FSL10 Linux distribution.
 # (see http://github.com/nvi-inc/fsl10).
@@ -19,7 +19,8 @@
 #
 
 all: index.html dbbc3_ops.html\
-    10.1.0-beta1.html 10.1.0-beta2.html 10.1.0_to_latest.html beta1_to_beta2.html 10.1.0.html beta2_to_10.1.0.html
+    10.1.0-beta1.html 10.1.0-beta2.html 10.1.0_to_latest.html beta1_to_beta2.html 10.1.0.html beta2_to_10.1.0.html\
+    10.1.1.html
 
 %.html: %.adoc
 	asciidoctor -a toc $^
