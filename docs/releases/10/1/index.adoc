@@ -19,11 +19,11 @@
 //
 
 = Index of fs/releases/10/1/
-Version 1.6 - February 2023
+Version 1.7 - February 2023
 
 <<10.1.0.adoc#,FS 10.1.0 Update Notes>> (latest release)
 
-<<10.1.1.adoc#,FS 10.1.1 Update Notes>> (latest patch)
+<<10.1.1.adoc#,FS 10.1.1 Update Notes>> (latest _10.1_ patch)
 
 <<beta2_to_10.1.0.adoc#,FS 10.1.0-beta2 to FS 10.1.0 Update Notes>>
 

@@ -19,21 +19,9 @@
 //
 
 = Index of fs/releases/10/0/
-Version 1.3 - February 2023
+Version 1.4 - February 2023
 
-<<10.0.0.adoc#,FS 10.0.0 Update Notes>> (old)
-
-<<10.0.1.adoc#,FS 10.0.1 Update Notes>> (latest patch)
-
-<<beta3_to_10.0.0.adoc#,FS 10.0.0-beta3 to FS-10.0.0 Update Notes>>
-
-<<beta3.adoc#,FS 10.0.0-beta3 Update Notes>> (old)
-
-<<beta2_to_beta3.adoc#,FS 10.0.0-beta2 to FS-10.0.0-beta3 Update Notes>>
-
-<<beta2.adoc#,FS 10.0.0-beta2 Update Notes>> (old)
-
-<<beta1_to_beta2.adoc#,FS 10.0.0-beta1 to FS 10.0.0-beta2 Update Notes>>
+<<10.0.1.adoc#,FS 10.0.1 Update Notes>> (latest _10.0_ patch)
 
 <<changes_10.0.0.adoc#,Changes from FS9>>
 
@@ -46,3 +34,17 @@ Version 1.3 - February 2023
 <<fesh_changes.adoc#,FS 10.0.0 fesh changes>>
 
 <<fsserver_changes.adoc#,FS 10.0.0 fsserver changes>>
+
+Old documents:
+
+<<10.0.0.adoc#,FS 10.0.0 Update Notes>>
+
+<<beta3_to_10.0.0.adoc#,FS 10.0.0-beta3 to FS-10.0.0 Update Notes>>
+
+<<beta3.adoc#,FS 10.0.0-beta3 Update Notes>>
+
+<<beta2_to_beta3.adoc#,FS 10.0.0-beta2 to FS-10.0.0-beta3 Update Notes>>
+
+<<beta2.adoc#,FS 10.0.0-beta2 Update Notes>>
+
+<<beta1_to_beta2.adoc#,FS 10.0.0-beta1 to FS 10.0.0-beta2 Update Notes>>
