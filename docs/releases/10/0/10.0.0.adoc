@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2022 NVI, Inc.
+// Copyright (c) 2020-2023 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -20,7 +20,7 @@
 
 = FS 10.0.0 Update Notes
 E. Himwich, D. Horsley, J. Quick, J. Gipson
-Version 3.6 - January 2022
+Version 3.7 - February 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -32,9 +32,10 @@ Version 3.6 - January 2022
 
 == Introduction
 
-This document covers the steps needed to update from FS9 to _10.0.0_.
-The changes in the FS and _drudg_ for _10.0.0_ are covered in the
-separate <<changes_10.0.0.adoc#,Changes from FS9>> document.
+This document covers the steps needed to update from FS9 to _10.0.0_
+(now patched as _10.0.1_). The changes in the FS and _drudg_ for
+_10.0.0_ are covered in the separate <<changes_10.0.0.adoc#,Changes
+from FS9>> document.
 
 This update is intended for all stations using FS9, both the main,
 non-VGOS, branch (latest version _9.13.2_) and the VGOS branch (latest
@@ -368,10 +369,13 @@ step below and continue the installation, but skip the
 
 === Checkout the release
 
-Checkout the _10.0.0_ release from the local repository:
+Checkout the _10.0.1_ release from the local repository:
 
        cd fs-git
-       git checkout -q 10.0.0
+       git checkout -q 10.0.1
+
+NOTE: The use of `10.0.1` is not a typo. That is the latest patch
+release for _10.0_.
 
 === Set the /usr2/fs link
 

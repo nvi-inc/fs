@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.1.1 Update Notes
-Version 0.1 - February 2023
+Version 0.2 - February 2023
 
 :sectnums:
 :stem: latexmath
@@ -39,7 +39,9 @@ below for the details of the changes since that release.
 == Upgrading from 10.1.0 to 10.1.1
 
 To install this update, your current FS version must be FS _10.1.0_
-(see the <<10.1.0.adoc#,FS 10.1.0 Update Notes>> document).
+(see the <<10.1.0.adoc#,FS 10.1.0 Update Notes>> document). If you
+already installed the patch, _10.1.1_, when you installed _10.1_,
+there is nothing more to do.
 
 === Fetch and make the patched version
 
