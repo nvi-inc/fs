@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2021 NVI, Inc.
+// Copyright (c) 2020, 2021, 2023  NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -32,7 +32,7 @@ Version 2.2 - February 2021
 == Introduction
 
 The document covers updating from the _beta3_ pre-release to the
-FS _10.0.0_.
+FS _10.0.0_ (now patched as _10.0.1_).
 
 For instructions for other upgrade paths, see the
 <<10.0.0.adoc#_other_update_documents,Other update documents>>
@@ -54,10 +54,15 @@ execute:
 
              cd /usr2/fs-git
              git fetch
-             git checkout -q 10.0.0
+             git checkout -q 10.0.1
              make clean rmdoto rmexe
              make >& /dev/null
              make -s
+
++
+
+NOTE: The use of `10.0.1` is not a typo. That is the latest patch
+release for _10.0_.
 
 No output from the last command indicates a successful _make_.
 

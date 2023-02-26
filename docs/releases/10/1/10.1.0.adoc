@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 5.7 - February 2023
+Version 5.8 - February 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -36,9 +36,9 @@ Version 5.7 - February 2023
 == Introduction
 
 This document covers the steps needed to update from FS _10.0.0_ to
-_10.1.0_ and the changes in the new version. Installing the new
-version (see the <<Upgrading from 10.0.0>> section below) is much
-simpler than the update to _10.0.0_.
+_10.1.0_ (now patched as _10.1.1_) and the changes in the new version.
+Installing the new version (see the <<Upgrading from 10.0.0>> section
+below) is much simpler than the update to _10.0.0_.
 
 FS _10.1.0_ has been tested for several configurations but not all
 possible ones. You should test it carefully before using it for
@@ -188,7 +188,12 @@ FSL__x__/_git_ version you are using:
 
 . Checkout the new version:
 
-  git checkout -q 10.1.0
+  git checkout -q 10.1.1
+
++
+
+NOTE: The use of `10.1.1` is not a typo. That is the latest patch
+release for _10.1_.
 
 . Login as _root_
 
@@ -214,9 +219,15 @@ exists.
   mv fs-git fs-git.old-10.0.0
   git clone https://github.com/nvi-inc/fs fs-git
   cd fs-git
-  git checkout -q 10.1.0
+  git checkout -q 10.1.1
   make install
 
++
+
+NOTE: The use of `10.1.1` is not a typo. That is the latest patch
+release for _10.1_.
+
+. Login as _root_
 +
 
 Answer `*y*` to confirm installation.
@@ -228,8 +239,13 @@ FSL8):
   mv fs-git fs-git.old-10.0.0
   git clone git@github.com:nvi-inc/fs fs-git
   cd fs-git
-  git checkout -q 10.1.0
+  git checkout -q 10.1.1
   make install
+
++
+
+NOTE: The use of `10.1.1` is not a typo. That is the latest patch
+release for _10.1_.
 
 +
 
@@ -247,8 +263,15 @@ to set the _/usr2/fs_ link, in the
 <<../../misc/release_model.adoc#_installing_from_an_archive,Installing
 from an archive>> subsection in the
 <<../../misc/release_model.adoc#,Release Model>> document. Use
-__10.1.0__ as the value for __tag__. Be sure to set the link for
+`10.1.1` as the value for __tag__. Be sure to set the link for
 __/usr2/fs__ by running *`make install`*.
+
++
+
++
+
+NOTE: The use of `10.1.1` is not a typo. That is the latest patch
+release for _10.1_.
 
 . Return to this document, continuing with the next step,
 <<Fix file permissions>> below.

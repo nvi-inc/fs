@@ -1,0 +1,129 @@
+//
+// Copyright (c) 2023 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+:doctype: book
+
+= FS 10.1.1 Update Notes
+Version 0.3 - February 2023
+
+:sectnums:
+:stem: latexmath
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+
+== Introduction
+
+The document covers updating from the FS _10.1.0_ feature release to
+the _10.1.1_ patch. Please see the <<Changes since 10.1.0>> section
+below for the details of the changes since that release.
+
+== Upgrading from 10.1.0 to 10.1.1
+
+To install this update, your current FS version must be FS _10.1.0_
+(see the <<10.1.0.adoc#,FS 10.1.0 Update Notes>> document). If you
+already installed the patch, _10.1.1_, when you installed _10.1_,
+there is nothing more to do.
+
+=== Fetch and make the patched version
+
+. Update the FS
+
++
+
+There are two options:
+
++
+
+.. If you are using FSL9, FSL10, or another system that supports
+connections to _github_, then as _prog_ execute:
+
+
+ cd /usr2/fs-git
+ git fetch --tags -q origin 10.1
+ git checkout -q 10.1.1
+ make clean rmdoto rmexe all >& /dev/null
+ make -s
+
++
+
+No output from the last command indicates a successful _make_.
+
+.. If you are using FSL8, or otherwise unable to use _git_ or connect
+to _github_:
+
++
+
++
+
+Please follow the all steps in the
+<<../../misc/release_model.adoc#_installing_from_an_archive,Installing
+from an archive>> subsection in the
+<<../../misc/release_model.adoc#,Release Model>> document. Please note
+that:
+
+* Use __10.1.1__ as the value for __tag__.
+
+* For FSL8, you will need the *TIP* in the `*wget*` step.
+
+* Be sure to set the link for __/usr2/fs__ by running `make
+install`, where that is an option.
+
+=== Review changes
+
+Please see the <<Changes since 10.1.0>> section below for the details
+of the changes since that release.
+
+== Changes since 10.1.0
+
+There are separate sub-sections with summaries of changes in the FS
+and _drudg_.
+
+Clickable links such as
+https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
+reported at https://github.com/nvi-inc/fs/issues.
+
+=== FS changes
+
+. Fix crashes for DBBC2 communication errors (closing
+https://github.com/nvi-inc/fs/issues/191[#191]).
+
++
+
+There was an error in class number handing of communicating with a
+DBBC2 (the FS refers to the device as a "`DBBC`"). It occurred in the
+periodic checking of the DBBC2 personality and version number. Crashes
+only seemed to happen when the DBBC2 is in a bad state, and then after
+about ++~35++ `ch -810 Communication error for DBBC.` errors. There
+should no longer be any crashes even if the DBBC2 is in a bad state.
+Rebooting the DBBC2 may fix the bad state. This is a good thing to do
+since calibration data may be lost and other problems may occur while
+it is in the bad state.
+
++
+
+Thanks to Eskil Varenius (Onsala) for reporting this problem and
+testing the fix.
+
+=== drudg changes
+
+There are no _drudg_ changes.
+

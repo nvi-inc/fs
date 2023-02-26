@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020, 2022 NVI, Inc.
+# Copyright (c) 2020, 2022, 2023 NVI, Inc.
 #
 # This file is part of FSL10 Linux distribution.
 # (see http://github.com/nvi-inc/fsl10).
@@ -21,7 +21,7 @@
 all: index.html beta2.html beta1_to_beta2.html beta2_to_beta3.html\
     beta3.html beta3_to_10.0.0.html rdbe.html mk6.html dbbc3.html\
     changes_10.0.0.html fesh_changes.html fsserver_changes.html\
-    10.0.0.html
+    10.0.0.html 10.0.1.html
 
 %.html: %.adoc
 	asciidoctor -a toc $^
