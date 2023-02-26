@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.0.1 Update Notes
-Version 0.2 - February 2023
+Version 0.3 - February 2023
 
 :sectnums:
 :stem: latexmath
@@ -112,10 +112,11 @@ There was an error in class number handing of communicating with a
 DBBC2 (the FS refers to the device as a "`DBBC`"). It occurred in the
 periodic checking of the DBBC2 personality and version number. Crashes
 only seemed to happen when the DBBC2 is in a bad state, and then after
-about ~35 `ch -810 Communication error for DBBC.` errors.  Rebooting
-the DBBC2 may fix the bad state.
-
-+
+about ++~35++ `ch -810 Communication error for DBBC.` errors. There
+should no longer be any crashes even if the DBBC2 is in a bad state.
+Rebooting the DBBC2 may fix the bad state. This is a good thing to do
+since calibration data may be lost and other problems may occur while
+it is in the bad state.  +
 
 Thanks to Eskil Varenius (Onsala) for reporting this problem and
 testing the fix.
