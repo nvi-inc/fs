@@ -17,14 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-DOC_DIR = 0 1 2
 
-.PHONY: all $(DOC_DIR)
-
-all: index.html $(DOC_DIR)
-
-$(DOC_DIR):
-	$(MAKE) -C $@
+all: index.html 10.2-alpha1.html 10.2_to_latest.html
 
 %.html: %.adoc
-	asciidoctor $^
+	asciidoctor -a toc $^
+
