@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020, 2022 NVI, Inc.
+// Copyright (c) 2020, 2022, 2023 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -19,10 +19,12 @@
 //
 
 = Index of fs/releases/10/
-Version 0.2 - January 2022
+Version 0.3 - February 2023
 
 == Links to sub-directories
 
-<<0/index#,Release 10.0>> documents
+<<2/index#,Release 10.2>> documents
 
 <<1/index#,Release 10.1>> documents
+
+<<0/index#,Release 10.0>> documents
