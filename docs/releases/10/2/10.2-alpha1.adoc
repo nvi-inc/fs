@@ -20,8 +20,8 @@
 
 :doctype: book
 
-= FS 10.1.0 to Latest Commit Update Notes
-Version 4.8 - February 2023
+= FS 10.2-alpha1 Update Notes
+Version 4.9 - March 2023
 
 :sectnums:
 :stem: latexmath
@@ -32,52 +32,51 @@ Version 4.8 - February 2023
 
 == Introduction
 
-The document covers updating from FS _10.1.0_ to the _latest commit_
-on its branch. The latest commit is experimental. We make every effort
-to keep the latest commit usable, but any commit that is not tagged
-for release is not intended for operations. The intended use of this
-document is to collect update information, as it becomes available,
-before the next release.
+This document covers the steps needed to update from FS _10.1_ to
+_10.2_ (latest patch is _10.2.0_) and the changes in the new version.
+Installing the new version (see the <<Upgrading from 10.1>> section
+below) is much simpler than the update to _10.1_.
 
-IMPORTANT: Commits that are not tagged for release may have
-significant issues including: not building, crashing, and
-incompatibilities with operational observation schedule files. Such
-commits are intended for testing only. _Let the user beware._
+IMPORTANT: Despite the next paragraph, _alpha_ and _beta_ releases are
+not intended for operations.
 
-CAUTION: It is expected that those using the latest commit are experts
-and will manage the differences for updating to the next official
-release themselves. No specific documentation will be provided. What
-commit was last updated to will determine what needs to be done. It
-might work to verify that all the steps in the latest version of this
-document, appropriately adjusted and renamed as the update from the old
-release to the new release, were completed. However, this may not be
-complete. _Let the user beware._
+FS _10.1_ has been tested for a few configurations but not all
+possible ones. You should test it carefully before using it for
+operations. Please email Ed if you encounter problems so that we can
+resolve them.
 
-This document is up to date with the `98ccc361` commit. Due to small
-increments, such as updating this document, that may not be the
-literal last commit, but the differences should be small unless you
-happen to `pull` between a significant change and this document being
-updated.
+The changes in the FS and _drudg_ for _10.2_ are covered in the
+<<Changes since 10.1>> section below. The most significant changes
+are:
 
-== Upgrading from 10.1.0 to the latest commit
+* Support for FSL11. The FSL11 distribution is based on Debian
+_bullseye_ and is the latest FSL__x__ Linux distribution. The
+installation instructions for FSL11 can be found at:
+https://nvi-inc.github.io/fsl11/.
 
-You must have already upgraded to _10.1.0_ according to the
-<<10.1.0.adoc#,FS 10.1.0 Update Notes>> document before installing
-this update.
+* Support for experiment names (session codes) of 16 characters or
+less. This enables use of the new IVS 12-character session codes.
 
-=== Fetch the latest commit
+== Upgrading from 10.1
+
+You must have already upgraded to _10.1_ according to the
+<<../1/10.1.0.adoc#,FS 10.1.0 Update Notes>> document before
+installing this update.
+
+=== Fetch 10.1
 
 There are two alternatives:
 
-. If you are using FSL9, FSL10, or another system that supports
+. If you are using FSL9, FSL10, FSL11, or another system that supports
 connections to _github_ and you are using _git_ (as is recommended)
 then as _prog_ execute:
 
  cd /usr2/fs-git
- git checkout main
- git pull
+ git fetch
+ git checkout 10.2.0-alpha1
 
-. If you are using FSL8, or otherwise unable to use _git_:
+. If you are using FSL8, or otherwise unable, or  prefer not, to use
+_git_:
 
 +
 
@@ -89,25 +88,15 @@ from an archive>> subsection in the
 that:
 
 +
-[square]
+[disc]
 
 * For FSL8, you will need the *TIP* in the `*wget*` step.
 
-* For the __tag__ in the `*wget*` and `*tar*` commands, use the short
-SHA for the commit, `98ccc361`.
+* For the __tag__  use `10.2.0-alpha1`.
 
-* After extracting the archive, change the name of the output
-directory to use the latest feature release and the short SHA of the
-commit, like _fs-10.1.0-98ccc361_, which will then be used in the
-following `*cd*` command. For example (for the _source_ directory,
-kbd:[Tab] completion is your friend):
-
- mv fs-98ccc361ea9f18d719f158f7c70c96edadb32607 fs-10.1.0-98ccc361
- cd /usr2/fs-10.1.0-98ccc361
-
-* You will end the "`installing from an archive`" with the step
-setting the link for __/usr2/fs__ by running *`make install`*.
-
+* You will end using the "`installing from an archive`" procedure with
+the step setting the link for __/usr2/fs__ by running *`make
+install`*.
 
 === Set new environment variables
 
@@ -117,9 +106,9 @@ There are two alternatives:
 next step <<Make the FS>>.
 
 . For FSL__x__ Linux distributions FSL10 and older, set the
-environment variables `FS_F95_NO_ALLOW_ARGUMENT_MISMATCH` and
-`FS_PYTHON_VERSION`.  Some other non-FSL__x__ distributions may need
-one or both set as well.
+environment variables `FS_F95_NO_ALLOW_ARGUMENT_MISMATCH` (even if not
+using _f95_) and `FS_PYTHON_VERSION`.  Some other non-FSL__x__
+distributions may need one or both set as well.
 
 .. Update login _rc_ files:
 
@@ -159,11 +148,11 @@ This step can _probably_ deferred for now, if it is needed at all. If
 you do need to make this change, it will not become necessary until
 you receive schedule files with more than six characters in the name
 (before the _.skd_ or _.vex_ extension) or you otherwise want to use
-_.snp_, _.prc_, or _.log_ files with names before the "`.`" of more
-than eight characters. It will probably be some time before schedules
-with longer names become available. However it is better to not put
-off updating your software too long. There is a reasonable chance that
-your software may not need any changes.
+_.snp_, _.prc_, or _.log_ files with names before the "`dot`" (_._) of
+more than eight characters. It will probably be some time before
+schedules with longer names become available. However it is better to
+not put off updating your software too long. There is a reasonable
+chance that your software may not need any changes.
 
 CAUTION: You may be asked by a coordinating center or scheduler if
 your station can handle the longer names. You should _not_ answer
@@ -171,41 +160,47 @@ your station can handle the longer names. You should _not_ answer
 changes are needed.
 
 There are two issues to address, shared memory variables and the
-_lognm_ script:
+_lognm_ program:
 
 . Use of shared memory variables.
 
 +
 
 If your station software uses the C shared memory variables: `LLOG`,
-`LLPRC`, LSKD`, `LSTP`, `LNEWPR`, `LNEWSK`, or `LEXPER`, you should
-update to use `LLOG2` `LLPRC2` LSKD2` `LSTP2` `LNEWPR2` `LNEWSK2` or
-`LEXPER2` instead, respectively. The old variables all have a length
-of `8`. The new variables have a length defined by the `MAX_SKD`
-parameter in _include/params.h_ ++(C)++ and _include/params.i_
-(FORTRAN).
+`LLPRC`, `LSKD`, `LSTP`, `LNEWPR`, `LNEWSK`, or `LEXPER`, you should
+update to use `LLOG2`, `LLPRC2`, `LSKD2`, `LSTP2`, `LNEWPR2`,
+`LNEWSK2` or `LEXPER2` instead, respectively. The old variables all
+have a length of `8`. The new variables have a length defined by the
+`MAX_SKD` parameter (currently with a value of `18`) in
+_include/params.h_ ++(C)++ and _include/params.i_ (FORTRAN).
+
++
+
+NOTE: These strings in these variables are blank padded, not
+terminated with a `null` byte.
 
 +
 
 The old variables are still available and should work fine until you
-use schedule names with more than six characters, in which case the
-values in the old variables will be truncated versions.
+use _.snp_, _.prc_, or _.log_ file names with more than eight
+characters before the "`dot`" (_._), in which case the values in the
+old variables will be truncated versions.
 
-. Use of the _lognm_ script
+. Use of the _lognm_ program
 
 +
 
-If you use the _lognm_ script, you should make sure the callers can
+If you use the _lognm_ program, you should make sure the callers can
 handle log names up to `18` characters in length.
 
 +
 
-The _lognm_ script returns a string no longer than the actual length
+The _lognm_ program returns a string no longer than the actual length
 of the log name. There should be no issues for log names of eight
 characters or less even if you have not made any adjustments to handle
 longer names.
 
-If you updated your station code, you will need to re__make__ it. If
+If you update your station code, you will need to re__make__ it. If
 _/usr2/st/Makefile_ is set-up in the standard way, you can do this
 with (as _prog_):
 
@@ -217,19 +212,12 @@ with (as _prog_):
 IMPORTANT: This will make sure the FS server is stopped and shared
 memory is reallocated.
 
-=== Additional steps
-
-Except if noted otherwise, these steps should all be performed as
-_oper_.
-
-There are no additional steps yet.
-
 === Review changes
 
-Please see the <<Changes since 10.1.0>> section below for the details
+Please see the <<Changes since 10.1>> section below for the details
 of the changes since that release.
 
-== Changes since 10.1.0
+== Changes since 10.1
 
 There are separate subsections with summaries of the changes in the FS
 and _drudg_.
@@ -241,8 +229,8 @@ https://github.com/nvi-inc/fs/issues.
 A complete history of changes can be found using the `git log` command
 from within the FS _git_ archive directory, usually _/usr2/fs-git_.
 
-Each change is listed as a numbered title, then usually a few summary
-sentences, followed by a _toggle_:
+Each change is listed as a numbered title, usually with a few summary
+sentences, followed by a *Details* _toggle_:
 
 [%collapsible]
 ====
@@ -254,19 +242,21 @@ In this way, you can view the summary as a list and only reveal the
 details of items that interest you. The summary sentences and/or the
 details toggle may be omitted if they would not add any new
 information, usually because it is already covered in the numbered
-title item and/or the details are very brief.
+title item, summary, and/or the details are very brief.
 
 === FS changes
 
-. <<FSL11,FSL11>>:[[FSL11]] Support for FSL11
+. <<FSL11,FSL11>>:[[FSL11]] Support FSL11
 
 +
 --
 
-The code base was update for FSL11 (Debian _Bullseye_). The primary
-changes were:
+The code was updated for FSL11 (Debian _Bullseye_). The FSL11
+distribution is latest FSL__x__ Linux distribution. The installation
+instructions can be found at: https://nvi-inc.github.io/fsl11/. The
+primary changes in the FS to support FSL11 are:
 
-[square]
+[disc]
 * Making typographic changes to be compatible with the new _f95_
 compiler version.
 
@@ -277,7 +267,8 @@ compiler version.
 
 Users of pre-FSL11 systems will need to set some environment variables
 for _prog_ before compiling. These are described in the installation
-instructions as well as in the "`Details`" collapsible section below.
+instructions (above) as well as in the "`Details`" collapsible section
+below.
 
 +
 
@@ -310,24 +301,24 @@ files on these systems. Their use is explained in the next two items.
 +
 
 The _f95_ compiler, version _6.3.0_, in FSL11 has stricter
-requirements for use of octal and hexadecimal constants and argument
-type agreement in calls to functions and subroutines than the ones in
-previous FSL__x__ versions. The changes made were:
+requirements for the use of octal, hexadecimal, and binary constants
+and for argument type agreement in calls to functions and subroutines
+than in previous FSL__x__ versions. The changes made were:
 
-... Reformat  octal and hexadecimal constants
+... Reformat octal and hexadecimal constants
 
 +
 
 Hexadecimal, octal, and binary constants can only be used in `data`
 statements or in the intrinsic function `int()`. There is a compiler
-option `-fallow-invalid-boz`, to relax this requirement. However, it
-does not cover the case of actual arguments to a function. There are
-many of those, so it was decided to just change all non-`data`
-statement use of these constants to parameters. They were wrapped in
-`int()` in the `parameter` statements. The parameter names were chosen
-so the constants could be globally replaced in the FORTRAN code
-without overflowing the 72 character line limit. Existing octal and
-hexadecimal constants in `parameter` statements were wrapped in
+option, `-fallow-invalid-boz`, to relax this requirement. However, it
+does not cover the case of actual arguments to a function at this
+time. There are many of those, so it was decided to just change all
+non-`data` statement use of these constants to parameters. They were
+wrapped in `int()` in the `parameter` statements. The parameter names
+were chosen so the constants could be globally replaced in the FORTRAN
+code without overflowing the 72-character line limit. Existing octal
+and hexadecimal constants in `parameter` statements were wrapped in
 `int()`. The FS code did not have any binary constants.
 
 +
@@ -363,9 +354,9 @@ compiling.
 
 +
 
-For FS installations that use the _fort77_ complier on FSL10 and older
-systems, it is recommended that the variable be set to `1`. That way
-the configuration will be forward compatible with a possible change to
+For FS installations that are using the _fort77_ complier, it is still
+recommended that the variable be set to `1`. That way the
+configuration will be forward compatible with a possible change to
 _f95_.
 
 ... Remove mixing of `integer*4` and `integer*2` as arguments for
@@ -429,14 +420,14 @@ _python2_ to _python3_. It can installed, as _root_, with:
 
 +
 
-This utility will reindent a script using 4-space indents and no hard
+This utility will re-indent a script using 4-space indents and no hard
 tabs. It can be installed, with:
 
-.... As _root_:
+.... First, as _root_:
 
    apt-get install pip
 
-.... As _prog_ (in _bash_):
+.... Then as _prog_ (in _bash_):
 
   cd ~
   pip3 install reindent
@@ -446,8 +437,8 @@ tabs. It can be installed, with:
 
 +
 
-TIP: The `PATH=...` statement will need to be re-executed each time
-you login or open a new _bash_ shell.
+TIP: The `PATH=...` statement needs to be re-executed for each new
+login or new _bash_ shell.
 
 ... Change the _shebang_ lines to use _python3_
 
@@ -459,17 +450,20 @@ The _python3_ variant must be explicitly referenced for FSL11.
 
 +
 
-We believe we have we have found all of these, but perhaps not. The
-most common paths through the code were exercised, but there maybe
-some obscure paths, particularly in _logpl_ and _gnplt_ that may still
-have issues.  Please report any issues you find to Ed. It should be
-easy to post (and install) a patch that will fix them.
+We believe we have found all of these, but perhaps not. The most
+common paths through the code were exercised, but there maybe some
+obscure paths, particularly in _logpl_ and _gnplt_ that may still have
+problems. Please report any issues you find to Ed. It should be easy
+to post (and install) a patch that will fix them.
 
 +
 
 +
 
 The fixes made so far include:
+
++
+[disc]
 
 * Wrap the third argument of `range()` in `int()`
 
@@ -488,7 +482,7 @@ for sub-process I/O
 
 * Set `rcond=-1` in `linalg.lstsq()` to preserve old behavior
 
-* Use `median()` rather than divide-by-two to find median item of a
+* Use `median()` rather than divide-by-two to find the median of a
 sorted list.
 
 +
@@ -537,7 +531,7 @@ _logex_ programs were not updated for this change.
 This change is largely transparent to the users. The four visible
 effects are:
 
-[square]
+[disc]
 * The length  and/or location of the `SCHED=...` and `LOG=...` fields
 in the `System Status Monitor` display (_monit2_) were changed. The
 `SCHED=..` field now occupies the space previously used by both
@@ -556,17 +550,17 @@ length, previously the maximum was eight.
 The _fsvue_ and _logex_ programs were no updated for this change. If
 you are using these programs, we will look into updating them, please
 contact Ed. If they were working before, they should continue to work
-for names of eight characters or less. Longer names will be truncated.
+for names of eight characters or less.
 
 Internally, new variables were appended to shared memory for the
 schedule, schedule procedure, station procedure, and log file names
 and the experiment (schedule) name. The old variables are still
 present and hold up to the first eight characters of longer names.
-This is intended to make the changes backward compatible for programs
-(such as _antcn_ and _telegraf_) that are pinned to the FS _10.0_
-memory layout until they can be updated for the new variables. Of
-course, longer names will appear truncated in the downstream programs
-until they have been updated.
+This is intended to make the changes backward compatible for station
+programs (such as _antcn_ and _telegraf_) that are pinned to the FS
+_10.0_ memory layout until they can be updated for the new variables.
+Of course, longer names will appear truncated in the downstream
+programs until they have been updated.
 
 ====
 
@@ -575,10 +569,10 @@ until they have been updated.
 +
 
 The sequence of commands for syncing the DBBC3 were changed in the
-<<dbbc3_ops.adoc#_sync_time,Sync time>> section of the
-<<dbbc3_ops.adoc#_alternate_core3h_board_configuration_method,Alternate
-Core3H board configuration>> appendix of the <<dbbc3_ops.adoc#,FS 10.1
-DBBC3 Operations Manual>>.
+<<../1/dbbc3_ops.adoc#_sync_time,Sync time>> section of the
+<<../1/dbbc3_ops.adoc#_alternate_core3h_board_configuration_method,Alternate
+Core3H board configuration>> appendix of the <<../1/dbbc3_ops.adoc#,FS
+10.1 DBBC3 Operations Manual>>.
 
 +
 
@@ -629,17 +623,18 @@ background when the FS was terminated; now it will shutdown. Not
 shutting down was introduced in commit
 `85b24dc67111d82371c3fd0b850b19174840e0e4`, and first released in FS
 _10.0.0_, as part of a larger scheme to serve client web pages. In the
-short-term that plan is not being followed through on and the change
+short-term, that plan is not being followed through on and the change
 had some negative impacts for local use. Manually stopping the server
 was required in certain cases:
 
-[square]
+[disc]
+
 * If _antcn_, or another local program opens an X11 application, say
 for example, for a dialog box to let the operator select the antenna,
 the application will appear on that display. If later an operator on a
 different display wants to restart the FS, the server would have to be
-stopped before starting for the X11 application to appear on the new
-display.
+stopped before restarting the FS for the X11 application to appear on
+the new display.
 
 * To update the environment variables used by the FS
 
@@ -688,8 +683,8 @@ DBBC2 (the FS refers to the device as a "`DBBC`"). It occurred in the
 periodic checking of the DBBC2 personality and version number. Crashes
 only seemed to happen when the DBBC2 is in a bad state, and then after
 about ++~35++ `ch -810 Communication error for DBBC.` errors. There
-should no longer be any crashes even if the DBBC2 is in a bad state.
-Rebooting the DBBC2 may fix the bad state. This is a good thing to do
+should no longer be any crashes even if the DBBC2 is in the bad state.
+Rebooting the DBBC2 may fix the bad state. That is a good thing to do
 since calibration data may be lost and other problems may occur while
 it is in the bad state.
 
@@ -700,7 +695,7 @@ testing the fix.
 
 ====
 
-.. Fix using a DBBC IF channel as a detector in _fivpt_ and _onoff_
+. Fix using a DBBC IF channel as a detector in _fivpt_ and _onoff_
 with continuous calibration (closing
 https://github.com/nvi-inc/fs/issues/190[#190]).
 
@@ -708,12 +703,12 @@ https://github.com/nvi-inc/fs/issues/190[#190]).
 [%collapsible]
 ====
 
-The DBBC (i.e., the DBBC2) does not provide separate cal-on and cal-of
-TPIs for an IF detector when continuous calibration is in use.
+The DBBC (i.e., the DBBC2) does not provide separate cal-on and
+cal-off TPIs for an IF detector when continuous calibration is in use.
 Implementing something useful in the FS for this case had been
 overlooked.  Unfortunately, the FS produced unusable T~ant~
-measurements in _fivpt_ and nonsensical T~sys~ values for that
-detector in _fivpt_ and _onoff_.
+measurements in _fivpt_ and nonsensical T~sys~ values for those
+detectors in _fivpt_ and _onoff_.
 
 This was improved by (i) internally treating that detector as having a
 T~cal~ value of `-100` (i.e., assuming there is no noise diode for
@@ -773,6 +768,9 @@ FS client. There are several differences between what is is shown in
 the log display window and what goes in the log. The most significant
 of these are:
 
++
+[disc]
+
 * The log display output uses a shorter time-tag field.
 
 * Some output lines are suppressed in the log display window because
@@ -819,7 +817,7 @@ restarted if it is terminated.
 The limitations and considerations for why these options should _not_
 be used in _stpgm.ctl_ are:
 
-[square]
+[disc]
 * The '-d' option can be used in _stpgm.ctl_ if the display server is
 in use. However, it would be safer to use the log output (no `-d`)
 instead. If it is used without the display server enabled, it will
@@ -840,7 +838,7 @@ avoid it entirely in _stpgm.ctl_.
 =====
 
 Thanks to Dave Horsley (Hobart) for coming up with the idea for this
-script, the initial version, and most of the incremental improvements.
+script, the initial version, and many of the incremental improvements.
 
 ====
 
@@ -1130,6 +1128,7 @@ version `1.2.0` (which is used by FSL11):
 
 +
 --
+[disc]
 
 * The default line width is thicker. It appears to actually be what
 would be line width `2` in _pgplot_. It appears that the line widths
@@ -1188,8 +1187,9 @@ In addition to adding the `-B`, `-C`, `-d`/`-D`, `-m`/`-M`, `-W`,
 `-Y`, and `-Z` options as mentioned above, the following changes were
 made:
 
-... The old `-e` option was moved to `-G` for parallel construction
-with `-d`/`-D` and `-m`/`-M` and to make room for the new `-e` option.
+... The old `-e` option was moved to `-G` (now paired with `-g`) for
+parallel construction with `-D`/`-d` and `-M`/`-m` and to make room
+for the new `-e` option.
 
 ... The new `-e` option can be used to specify the rack type as
 `dbbc3` or `rdbe`, This can be useful for DBBC3 and RDBE log snippets
@@ -1212,7 +1212,8 @@ entries that do not have the leading `/` and data entries with the
 leading `/`.
 
 ... The old `-v` (version) option was moved to `-V` to make room for
-the `-v` option.
+the new `-v` option, which plots phase differences between phase-cal
+tones within an RDBE IF.
 
 .. Improve the `-h` help output.
 
@@ -1276,9 +1277,9 @@ it did not need to be handled in each search string.
 +
 
 This script, written by Russ McWhirter (Haystack), is very useful for
-evaluating RDBE functionality. Russ has very graciously agreed to
-allow it to be distributed with the FS to simplify making it available
-to stations that have RDBEs.
+evaluating RDBE functionality. Russ has graciously agreed to allow it
+to be distributed with the FS to simplify making it available to
+stations that have RDBEs.
 
 +
 
@@ -1337,12 +1338,10 @@ the RDBE.
 
 +
 
++
+
 These files are created in the current working directory. The value of
 _<RDBE_ADDR>_ is the IP address of the RDBE.
-
-+
-+
-[circle]
 
 ** __rdbe30_monrc_<RDBE_ADDR>.db__ -- holds the geometry of the
 windows between invocations of the script. Geometry values from
@@ -1361,6 +1360,7 @@ large.
 version, if not already included. This will need to be done by _root_.
 
 +
+[disc]
 
 * Usually for _python2_:
 
@@ -1460,7 +1460,7 @@ length variables passed in as arguments.
 
 The visible changes include:
 
-[square]
+[disc]
 * In program messages, the term "`active`", as opposed to "`open`", is
 always used for the procedure library that _pfmed_ is currently
 working on.
@@ -1496,7 +1496,7 @@ restored.
 
 The internal changes include:
 
-[square]
+[disc]
 * Making `character` arguments of subroutine independent of the actual
 length of the passed variable. This was very helpful for making the
 change in the procedure library name lengths.
@@ -1556,8 +1556,9 @@ https://github.com/nvi-inc/fs/issues/189[#189]).
 If entered interactively, they would execute immediately even if there
 was a time block on the operator command stream. This was not an issue
 for the schedule stream, where they were normally used, since that
-stream doesn't have the functionality of immediate execution commands.
-As a result, the old behavior was benign for schedules.
+stream doesn't have the functionality of immediate execution commands
+and in a schedule they are normally used in procedures. As a result,
+the old behavior was benign for schedules.
 
 .. Change description (title) for `cable` in the default _logpl.ctl_
 file to not include `length`.
@@ -1570,13 +1571,13 @@ _logpl_ plots the raw `cable` data, not converted to length.
 
 .. Improve the description of the `use_setup_proc` _drudg_ option in
 the
-<<dbbc3_ops.adoc#_minimizing_the_use_of_setup_procedures,Minimizing
-the use of setup procedures>> appendix of the <<dbbc3_ops.adoc#,FS
-10.1 DBBC3 Operations Manual>> document.
+<<../1/dbbc3_ops.adoc#_minimizing_the_use_of_setup_procedures,Minimizing
+the use of setup procedures>> appendix of the
+<<../1/dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> document.
 
 .. Improve the description of the `thread__suffix__` procedure in the
-<<dbbc3_ops.adoc#_thread_procedure,Thread Procedure>> appendix of the
-<<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> document.
+<<../1/dbbc3_ops.adoc#_thread_procedure,Thread Procedure>> appendix of
+the <<../1/dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> document.
 
 +
 
@@ -1585,10 +1586,6 @@ This included adding a description of the `ds` added to the
 the way to the file name.
 
 .. Set the home directory permissions for AUID accounts to `0750`.
-
-.. Add instructions to <<10.1.0_to_latest.adoc#,FS 10.1.0 to Latest
-Commit Update Notes>> (this document) for installing the latest commit
-for stations on FSL8 or that otherwise need to use an archive to install.
 
 .. Add documents <<../1/10.1.1.adoc#,FS 10.1.1 Update Notes>> and
 <<../0/10.0.1.adoc#,FS 10.0.1 Update Notes>> for new patches releases.
@@ -1607,10 +1604,10 @@ make it easier to track changes and which version is in use.
 .. Add a *TIP* for how to avoid losing your place in a *Details*
 toggle for a FS or _drudg_ change list item when following a link
 (basically: right-click and open a new tab). This was added to the
-<<10.1.0.adoc#improve_presentation,Improve presentation>> FS change
-sub-item (if that link doesn't work in your browser, the *TIP* is
-copied below) of the <<10.1.0.adoc#,FS 10.1.0 Update Notes>> document.
-The *TIP* added is:
+<<../1/10.1.0.adoc#improve_presentation,Improve presentation>> FS
+change sub-item (if that link doesn't work in your browser, the *TIP*
+is copied below) of the <<../1/10.1.0.adoc#,FS 10.1.0 Update Notes>>
+document.  The *TIP* added is:
 
 +
 
@@ -1626,10 +1623,10 @@ document's tab, whatever you prefer.
 .. Add explanation of how to navigate to a link in *Details* toggle in
 a different document, if the browser doesn't support going to it
 directly. This was added to the
-<<10.1.0.adoc#improve_presentation,Improve presentation>> FS change
-sub-item (if that link doesn't work in your browser, the text is
-copied below) of the <<10.1.0.adoc#,FS 10.1.0 Update Notes>> document.
-The text added is:
+<<../1/10.1.0.adoc#improve_presentation,Improve presentation>> FS
+change sub-item (if that link doesn't work in your browser, the text
+is copied below) of the <<../1/10.1.0.adoc#,FS 10.1.0 Update Notes>>
+document.  The text added is:
 
 +
 
@@ -1663,29 +1660,50 @@ current default branch, _main_.
 
 _drudg_ opening message date is `2023-02-21`.
 
-. Typographic changes for the new _f95_ version in FSL11, These are
-similar to changes described in the <<f95,f95>> FS change item (if
-that link doesn't work in your browser, click on this link instead:
-<<FSL11,FSL11>>, open the *Details* toggle below that location by
-clicking on it, go `Back` in the browser, and finally click on the
-original link). There were only a few octal constants outside of
-`parameter` statements and these were in simple assignment statements,
-All constants were just wrapped in `int()`. There were no `and()`
-statements with mixed sized ``integer``s. There were no hexadecimal or
-binary constants at all.
+. Make typographic changes for the new _f95_ version in FSL11.
+
++
+
+[%collapsible]
+====
+
+These are similar to changes described in the <<f95,f95>> FS change
+item (if that link doesn't work in your browser, click on this link
+instead: <<FSL11,FSL11>>, open the *Details* toggle below that
+location by clicking on it, go `Back` in the browser, and finally
+click on the original link). There were only a few octal constants
+outside of `parameter` statements and these were in simple assignment
+statements. All octal constants were wrapped in `int()`. There were no
+`and()` statements with mixed sized ``integer``s. There were no
+hexadecimal or binary constants at all.
+
+====
 
 . Accept input schedule files (_.skd_ and _.vex_) with up to 16
-characters before the dot (`.`) for the extension. This change was
-made to agree with <<Names,Names>> FS change item above.
+characters before the dot (`.`) for the extension.
+
++
+
+This change was made to agree with <<Names,Names>> FS change item
+above.
 
 . Prepend `ds` to the _name_ (second) parameter in the
-`datasteram=add,{thread},\*` command in the single-thread-per-file
-`thread__suffix__` SNAP procedure for VDIF recording, now reading:
-`datastream=add,ds{thread},*`. This change is intended to be forward
-compatible with emerging file naming conventions for recorded data.
-For more information on the `thread__suffix__` SNAP procedure, see the
-<<dbbc3_ops.adoc#_thread_procedure,Thread Procedure>> appendix of the
-<<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> document.
+`datasteram=add,{thread},*` command in the single-thread-per-file
+`thread__suffix__` SNAP procedure for VDIF recording.
+
++
+
+[%collapsible]
+====
+
+The command now reads: `datastream=add,ds{thread},*`. This change is
+intended to be forward compatible with emerging file naming
+conventions for recorded data. For more information on the
+`thread__suffix__` SNAP procedure, see the
+<<../1/dbbc3_ops.adoc#_thread_procedure,Thread Procedure>> appendix of
+the <<../1/dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> document.
+
+====
 
 . Make miscellaneous small bug fixes and improvements
 
@@ -1700,8 +1718,8 @@ by not hard-coding the `character` argument's length.
 .. Fix _skdrut/trimlen.f_ to prevent problems with bounds checking if
 the string is blank.
 
-.. Fix _drudg/snap.f_ to the experiment name internal to the file
-rather than the filename for the experiment name.
+.. Fix _drudg/snap.f_ to use the experiment name internal to the file
+rather than from the filename.
 
 .. Fix _drudg/strip_path.f_ to check for enough space to store the
 file name.
