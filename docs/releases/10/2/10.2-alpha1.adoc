@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-alpha1 Update Notes
-Version 4.9 - March 2023
+Version 5.0 - March 2023
 
 :sectnums:
 :stem: latexmath
@@ -40,7 +40,7 @@ below) is much simpler than the update to _10.1_.
 IMPORTANT: Despite the next paragraph, _alpha_ and _beta_ releases are
 not intended for operations.
 
-FS _10.1_ has been tested for a few configurations but not all
+FS _10.2_ has been tested for a few configurations but not all
 possible ones. You should test it carefully before using it for
 operations. Please email Ed if you encounter problems so that we can
 resolve them.
