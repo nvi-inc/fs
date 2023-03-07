@@ -555,7 +555,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_V)) {
 }
 
 if(defined($opt_V)) {
-    print "[plotlog 2.1]\n";
+    print "[plotlog 2.2]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit 0;
