@@ -1201,7 +1201,8 @@ foreach $file (@ARGV) {
 	    $nom_dur=$6;
 	    $recordt[$recordn]=$nom_start;
 	    $recordn++;
-        } elsif(defined($nom_start) && /!scan_check\?.*:(\d+)y(\d+)d(\d+)h(\d+)m(\d+)s:([-\d.]+):[^:]*:[^:]*:(\d+)/) {
+        } elsif(defined($nom_start) && ( /!scan_check\?.*:(\d+)y(\d+)d(\d+)h(\d+)m(\d+)s:([-\d.]+):[^:]*:[^:]*:(\d+)/ ||
+                                 /!scan_check\?.*:\s*(\d+)y(\d+)d(\d+)h(\d+)m([\d.]+)s\s*:\s*([-\d.]+)s\s*:[^:]*:\s*(\d+)/ )) {
 	    $act_start=&time(sprintf("%0.4d.%0.3d.%0.2d:%0.2d:%05.2f",
 			  $1,$2,$3,$4,$5),1);
 	    $act_dur=$6;
