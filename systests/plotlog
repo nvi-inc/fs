@@ -1361,7 +1361,7 @@ foreach $clock (sort by_clocks keys %clockn) {
 #    print "$offset $label\n";
     if($offset) {
 #	print "apply offset $offset\n";
-	for($i=0;$j<$count;$i++) {
+	for($j=0;$j<$clockn{$clock};$j++) {
 	    next unless $val[$j]=~/^$float_pattern$/ ;
 	    $val[$j]-=$offset;
 	}
