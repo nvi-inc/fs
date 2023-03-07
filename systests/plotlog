@@ -1335,12 +1335,13 @@ foreach $clock (sort by_clocks keys %clockn) {
     $avg=0;
     $count=0;
     for($j=0;$j<$clockn{$clock};$j++) {
+	$val[$j]='$$$';
+	$tim[$j]=$clockt{$clock}[$j];
 	next unless $clockv{$clock}[$j]=~/^$float_pattern$/ ;
 	next unless defined($opt_C) || abs($clockv{$clock}[$j])<1e1 ;
-	    $val[$j]=$clockv{$clock}[$j]*=1e6;
-	    $tim[$j]=$clockt{$clock}[$j];
-	    $avg+=$val[$j];
-	    $count++;
+	$val[$j]=$clockv{$clock}[$j]*=1e6;
+	$avg+=$val[$j];
+	$count++;
     }
 #
 # it seems PGPLOT can't handle lots of significant digits
