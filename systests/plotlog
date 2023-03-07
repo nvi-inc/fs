@@ -1164,12 +1164,14 @@ foreach $file (@ARGV) {
 	} elsif(/\/(.*(fmout|maser|gps).*)\//i) {
 	    $cmd=$1;
 	    (undef,undef,@fields)=split('[/,]');
+	    s{^\s+|\s+$}{}g foreach @fields;
 	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
 	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
 	    $clockn{$cmd}++;
 	} elsif(/#.....#(.*(fmout|maser|gps).*)\//i) {
 	    $cmd=$1;
 	    (undef,@fields)=split('[/,]');
+	    s{^\s+|\s+$}{}g foreach @fields;
 	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
 	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
 	    $clockn{$cmd}++;
