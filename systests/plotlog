@@ -1323,11 +1323,6 @@ if(@cdmst) {
 	&vu(\@cdmst, \@cdms,"CDMS raw (ps)");
     }
 }
-if(@recordt) {
-    &vu(\@recordt, \@recordd,"Record delay (sec)");
-    &vu(\@recordt, \@records,"Recording short (sec)");
-    &vu(\@recordt, \@recordm,"Missing bytes");
-}
 foreach $clock (sort by_clocks keys %clockn) {
     next if !defined($opt_B) && $clock =~ /rdbe(.)\/!dbe_(.)ps/ &&
         defined($clockn{"rdtc$1#dot2$2ps"}) ;
@@ -1373,6 +1368,11 @@ foreach $clock (sort by_clocks keys %clockn) {
 }
 if(@setcl) {
      &vu(\@setclt, \@setcl,"setcl offset (0.01 s)");
+}
+if(@recordt) {
+    &vu(\@recordt, \@recordd,"Record delay (sec)");
+    &vu(\@recordt, \@records,"Recording short (sec)");
+    &vu(\@recordt, \@recordm,"Missing bytes");
 }
 foreach $tone (sort by_rdbe_tone keys %rpcaln) {
     $#amp=-1;
