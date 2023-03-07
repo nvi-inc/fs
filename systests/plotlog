@@ -1346,8 +1346,7 @@ foreach $clock (sort by_clocks keys %clockn) {
 # it seems PGPLOT can't handle lots of significant digits
 #
 #    print "$avg $count\n";
-    $avg=$avg/$count;
-#    print "$avg $count\n";
+    $avg=$avg/$count if $count != 0;
     if($avg > 500000) {
 	$offset=1e6;
 	$label="($clock)-1e6 (us)";
