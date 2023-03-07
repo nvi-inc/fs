@@ -658,11 +658,12 @@ The plotting support is different if 'giza' has been substituted for 'pgplot'
 if the 'PGPLOT' library version shown by 'plotlog -V' includes the string
 'giza'. If the script detects that 'giza' is in use, it makes two adjustments:
 (i) the line width is set to '0' and (ii) the bad points are plotted with
-larger open circles. If these adjustments cause problems or are no longer
-needed because 'giza' has been brought into better agreement with 'pgplot',
-they can be disabled, individually, with the '-Z hex' option (see below). If
-'giza' is not detected, the '-Z hex' option can be used to force the
-adjustments. Additionally, the 'giza' library does not respect the
+larger open circles. However, the line width is not set to '0' for plot device
+'/xw' because that makes the plot borders disappear. If these adjustments cause
+problems or are no longer needed because 'giza' has been brought into better
+agreement with 'pgplot', they can be disabled, individually, with the '-Z hex'
+option (see below). If 'giza' is not detected, the '-Z hex' option can be used
+to force the adjustments. Additionally, the 'giza' library does not respect the
 'PGPLOT_BACKGROUND' and 'PGPLOT_FOREGROUND' environment variables.
 
 Option explanations:
@@ -1223,6 +1224,7 @@ foreach $file (@ARGV) {
 exit -1 if(!$some);
 
 pgbegin(0,$dev,1,8);
+$opt_Z |= 1 if $giza && $dev eq '/xw';
 pgslw(0) if !$giza != !($opt_Z & 1);
 pgsch(3);
 pgask(-1);
