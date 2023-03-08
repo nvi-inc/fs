@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-alpha1 Update Notes
-Version 5.0 - March 2023
+Version 5.1 - March 2023
 
 :sectnums:
 :stem: latexmath
@@ -902,23 +902,24 @@ left-click. Other small improvements were made.
 +
 
 The default plot device for X11 displays was changed to be useful.
-The plotting of clock data was expanded. Plots of wind speed and
-direction were added. Plotting CDMS data was added. T~sys~ plots for
-DBBC3s and RDBEs were added. Phase-cal tone plots for RDBEs were
-added. Plots of LSB Mark IV decoder phase-cal data were added. Phases
-outside [-180°,+180°] are now automatically marked as bad, but can be
-included with the `-Y` option. Clock and cable values outside
-(-10,+10) seconds are now automatically marked as bad, but can be
-included with the `-C` option. Plots of Wettzell style `/rx/` data
-were added. Bad points are now displayed as open circles and slightly
-off the upper (or right) edge of the plots. Any values in time plots
-that did not decode are now consistently displayed at the upper edge
-of the plots. Plotting of phase differences attempts to provide better
-vertical plot limits if the differences cluster around ±180°. Support
-for the _giza_ plot library was added. Bad horizontal tick marks in
-some `-p` plots were fixed. Some command line options were changed.
-The `-h` (help) output was improved. The version was bumped to _2.1_.
-Some improvements were made in the code.
+Added recorder performance statistics. The plotting of clock data was
+expanded. Plots of wind speed and direction were added. Plotting CDMS
+data was added. T~sys~ plots for DBBC3s and RDBEs were added.
+Phase-cal tone plots for RDBEs were added. Plots of LSB Mark IV
+decoder phase-cal data were added. Phases outside [-180°,+180°] are
+now automatically marked as bad, but can be included with the `-Y`
+option. Clock and cable values outside (-10,+10) seconds are now
+automatically marked as bad, but can be included with the `-C` option.
+Plots of Wettzell style `/rx/` data were added. Bad points are now
+displayed as open circles and slightly off the upper (or right) edge
+of the plots. Any values in time plots that did not decode are now
+consistently displayed at the upper edge of the plots. Plotting of
+phase differences attempts to provide better vertical plot limits if
+the differences cluster around ±180°. Support for the _giza_ plot
+library was added. Bad horizontal tick marks in some `-p` plots were
+fixed. Some command line options were changed.  The `-h` (help) output
+was improved. The version was bumped to _2.2_.  Some improvements were
+made in the code.
 
 +
 
@@ -940,6 +941,46 @@ probably been a problem since at least 2009. _plotlog_ was introduced
 52398939d5f867b2e7ab4e18f8886babda6dfaae. FSL5 (_woody_) was probably
 active at that time. `/xw` now seems to be a good choice in FSL8 and
 later.
+
+.. Add recorder performance statistics
+
++
+
+Time plots were added for:
+
++
+--
+[disc]
+
+* Delay in recorder starting (seconds)
+
++
+
+NOTE: This does not include any delay for the schedule running late.
+
+* Shortness of recording length (seconds)
+
++
+
+NOTE: For non-Mark 6 recording, this may include some delay for the
+schedule running late.
+
+* Missing bytes (count)
+
+--
++
+
+All information is inferred from the `scan_name=...` command, the
+command that starts the recording (`disk_record=on` or
+`mk6__x__=record=...`), and the results of `scan_check`. The FS,
+_cplane_ (Mark 6), and _jive5b_ forms of `scan_check` are supported.
+
++
+
+Thanks to Jon Quick (HartRAO) for suggestions about what information
+to report.
+
+
 
 .. Expand clock plotting.
 
