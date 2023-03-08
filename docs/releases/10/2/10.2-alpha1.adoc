@@ -63,7 +63,12 @@ You must have already upgraded to _10.1_ according to the
 <<../1/10.1.0.adoc#,FS 10.1.0 Update Notes>> document before
 installing this update.
 
-=== Fetch 10.1
+NOTE: You can make a _fresh_ install of _10.2_ on an FSL11 system
+using the FSL11 installation document, once it is available.  Testers
+of previous development commits for FS support of FSL11 can follow the
+instructions here.
+
+=== Fetch 10.2
 
 There are two alternatives:
 
@@ -75,7 +80,7 @@ then as _prog_ execute:
  git fetch
  git checkout 10.2.0-alpha1
 
-. If you are using FSL8, or otherwise unable, or  prefer not, to use
+. If you are using FSL8 or are otherwise unable, or prefer not, to use
 _git_:
 
 +
@@ -90,7 +95,8 @@ that:
 +
 [disc]
 
-* For FSL8, you will need the *TIP* in the `*wget*` step.
+* For FSL8, or if you are otherwise unable to connect to _github_, you
+will need the *TIP* in the `*wget*` step.
 
 * For the __tag__  use `10.2.0-alpha1`.
 
@@ -105,7 +111,7 @@ There are two alternatives:
 . For FSL11, no new environment variables need to be set, skip to the
 next step <<Make the FS>>.
 
-. For FSL__x__ Linux distributions FSL10 and older, set the
+. For FSL__x__ Linux distributions FSL10 and earlier, set the
 environment variables `FS_F95_NO_ALLOW_ARGUMENT_MISMATCH` (even if not
 using _f95_) and `FS_PYTHON_VERSION`.  Some other non-FSL__x__
 distributions may need one or both set as well.
@@ -230,7 +236,7 @@ A complete history of changes can be found using the `git log` command
 from within the FS _git_ archive directory, usually _/usr2/fs-git_.
 
 Each change is listed as a numbered title, usually with a few summary
-sentences, followed by a *Details* _toggle_:
+sentences, followed by a *Details* _toggle_, like:
 
 [%collapsible]
 ====
@@ -539,7 +545,8 @@ in the `System Status Monitor` display (_monit2_) were changed. The
 right where the `HEAD PASS # ...` field was previously located.
 
 * The display of procedure libraries for the `pfdl` command in _pfmed_
-now shows only three libraries per line.
+now shows only three libraries per line. A key was also added to
+describe the prefix letters.
 
 * The `log=...` command now traps a log name that is too long.
 Previously, it just truncated longer names to eight characters.
@@ -1066,7 +1073,7 @@ The (new) `-v` option plots phase differences between tones in the
 same RDBE IF channel.
 
 .. Add plotting of the first encountered LSB phase-cal tone per
-channel from video/baseband converters.
+converter for the Mark IV decoder (and K5TS) output.
 
 +
 
@@ -1366,7 +1373,7 @@ the top):
 [circle]
 
 ** Raw data
-** FFT of raw
+** FFT of raw date
 ** Histogram of raw data
 ** Time domain Extracted PCal (Complex)
 ** FFT of Extracted Pcal: Amplitude
@@ -1451,6 +1458,13 @@ TIP: You can control the initial placement of the windows by adding the
 `--command`, `--log`, `--monitor`, and `--plot` options with
 appropriate placement geometry values.
 
++
+
++
+
+NOTE: The RDBE host address alias, in this example `rdbea`, must be
+defined in _/etc/hosts_.
+
 .. Running the script
 
 +
@@ -1516,17 +1530,22 @@ libraries were also made consistent.
 * The FS `help` command pages for the `schedule` and `proc` commands
 were updated to be consistent with the above terminology.
 
-* A "`key`" was added to `pfdl` command to describe the prefix letters
-before the library names (`>`, active in _pfmed_; `A`, the current FS
-schedule library; `S`, the current FS station library).
+* A "`key`" was added to the end of the `pfdl` command output to
+describe the prefix letters before the library names (`>`, active in
+_pfmed_; `A`, the current FS schedule library; `S`, the current FS
+station library, always `station`). These prefix letters now displayed
+correctly.
 
 * Fix `pfst` command to trap the "`old`" library not existing.
 Previously, it would be created as an empty library.
 
 * Fix `pfst` command to allow copying of the library that is the
 active library in _pfmed_. This was broken for _gfortan_ which allows
-a file to be open to only one unit, but worked for _fort77_ (which uses
-_f2c_). It now works independently of the compiler being used.
+a file to be open to only one unit, but worked for _fort77_ (which
+uses _f2c_). It now works independently of the compiler being used.
+This had previously been fixed for the `st` command in commit
+`ec03102e02ee2525243dfc3fba57981c6781f139` for FS _9.13.1_ in August
+2019.
 
 * Improve detection of the FS being active if it is started while
 _pfmed_ is running, which is apparently okay. There may still be some
