@@ -57,6 +57,10 @@ https://nvi-inc.github.io/fsl11/.
 * Support for experiment names (session codes) of 16 characters or
 less. This enables use of the new IVS 12-character session codes.
 
+* The _plotlog_ utility, for examining data in the log files, has been
+expanded and updated. The changes include support for RDBEs, DBBC3s,
+and recorder performance statistics.
+
 == Upgrading from 10.1
 
 You must have already upgraded to _10.1_ according to the
@@ -571,339 +575,6 @@ programs until they have been updated.
 
 ====
 
-. Change the order of commands for DBBC3 syncing.
-
-+
-
-The sequence of commands for syncing the DBBC3 were changed in the
-<<../1/dbbc3_ops.adoc#_sync_time,Sync time>> section of the
-<<../1/dbbc3_ops.adoc#_alternate_core3h_board_configuration_method,Alternate
-Core3H board configuration>> appendix of the <<../1/dbbc3_ops.adoc#,FS
-10.1 DBBC3 Operations Manual>>.
-
-+
-
-[%collapsible]
-====
-
-There is now a `pps_sync` command both before and after the `timesync`
-commands. Despite this improvement using this method is still not
-recommended.
-
-Thanks to Sven Dornbusch (MPIfR) for providing the best sequence of
-commands.
-
-====
-
-. Fix _plog_ to support sending multiple files to BKG (closes
-https://github.com/nvi-inc/fs/issues/186[#186]).
-
-+
-
-[%collapsible]
-====
-
-Due to a bug, _plog_ was unable to send multiple files to BKG in one
-invocation. The result was that none were sent.
-
-Thanks to Kiah Imai (KPGO) for reporting this and testing the fix.
-
-====
-
-. Shutdown display server on `terminate` (closes
-https://github.com/nvi-inc/fs/issues/176[#176]).
-
-+
-
-When the display server is in use, terminating the FS now also
-shutdowns the server. An interlock was introduced to prevent
-termination if it would also stop active _autoftp_ and/or _fs.prompt_
-instances.
-
-+
-
-[%collapsible]
-====
-
-Previously, if the display server was in use, it continued running in
-background when the FS was terminated; now it will shutdown. Not
-shutting down was introduced in commit
-`85b24dc67111d82371c3fd0b850b19174840e0e4`, and first released in FS
-_10.0.0_, as part of a larger scheme to serve client web pages. In the
-short-term, that plan is not being followed through on and the change
-had some negative impacts for local use. Manually stopping the server
-was required in certain cases:
-
-[disc]
-
-* If _antcn_, or another local program opens an X11 application, say
-for example, for a dialog box to let the operator select the antenna,
-the application will appear on that display. If later an operator on a
-different display wants to restart the FS, the server would have to be
-stopped before restarting the FS for the X11 application to appear on
-the new display.
-
-* To update the environment variables used by the FS
-
-* To change the user that owns the FS processes
-
-Manually stopping the server is no longer required in these, or any
-other, cases.
-
-An implication of stopping the server is that any running _autoftp_
-and _fs.prompt_ processes will also be terminated. This is
-undesirable, especially in the case of _autoftp_ since any active data
-transfers would be terminated. To avoid this, an interlock was
-introduced. When the server is in use and any _autoftp_ or _fs.prompt_
-instances are active, termination will be prevented with explanatory
-error messages. If it is necessary terminate, an override parameter,
-`force`, can be used:
-
- terminate=force
-
-To keep things simple, the previous override parameter,
-`disk_record_ok`, for terminating if disk recording is active has been
-eliminated and that functionality is now included in the `force`
-parameter as well. See `*help=terminate*` for more explanation.
-
-The interlock for preventing termination if _pfmed_ is active was
-moved to be before the interlocks that can be overridden with `force`.
-It is not possible to override the _pfmed_ interlock and there is no
-point using `force` if termination will be blocked by _pfmed_ anyway.
-
-The <<../../../misc/env_vars.adoc#_runtime_variables,Runtime
-variables>> section of the <<../../../misc/env_vars.adoc#,FS
-Environment Variables>> document was updated to reflect this change.
-
-====
-
-. Fix crashes for DBBC2 communication errors (closing
-https://github.com/nvi-inc/fs/issues/191[#191]).
-
-+
-
-[%collapsible]
-====
-
-There was an error in class number handing of communicating with a
-DBBC2 (the FS refers to the device as a "`DBBC`"). It occurred in the
-periodic checking of the DBBC2 personality and version number. Crashes
-only seemed to happen when the DBBC2 is in a bad state, and then after
-about ++~35++ `ch -810 Communication error for DBBC.` errors. There
-should no longer be any crashes even if the DBBC2 is in the bad state.
-Rebooting the DBBC2 may fix the bad state. That is a good thing to do
-since calibration data may be lost and other problems may occur while
-it is in the bad state.
-
-This fix is also included in patch releases _10.0.1_ and _10.1.1_.
-
-Thanks to Eskil Varenius (Onsala) for reporting this problem and
-testing the fix.
-
-====
-
-. Fix using a DBBC IF channel as a detector in _fivpt_ and _onoff_
-with continuous calibration (closing
-https://github.com/nvi-inc/fs/issues/190[#190]).
-
-+
-[%collapsible]
-====
-
-The DBBC (i.e., the DBBC2) does not provide separate cal-on and
-cal-off TPIs for an IF detector when continuous calibration is in use.
-Implementing something useful in the FS for this case had been
-overlooked.  Unfortunately, the FS produced unusable T~ant~
-measurements in _fivpt_ and nonsensical T~sys~ values for those
-detectors in _fivpt_ and _onoff_.
-
-This was improved by (i) internally treating that detector as having a
-T~cal~ value of `-100` (i.e., assuming there is no noise diode for
-this detector) and (ii) using the unswitched power. This results in
-_fivpt_ T~ant~ and estimated peak values being printed in percent of
-system temperature in _fivpt_ and T~sys~ for that detector as `-100`
-in _onoff_.  If the T~cal~ defined in the _.rxg_ file was already
-negative, that value is used instead.
-
-If the IF channel is not corrupted by RFI, this makes it usable for
-pointing measurements. It use should still be avoided for gain
-calibration measurements for other reasons, primarily having a very
-broad bandpass, but in some cases not having a center frequency that
-_onoff_ can calculate accurately. Additionally, the value of the
-"`DBBC IF power conversion factors`" in _equip.ctl_ may not have
-accurate values.
-
-Thanks to Jon Quick (HartRAO) for reporting the existing poor
-behavior, pointing out that something useful could be done, and
-testing the improvement.
-
-====
-
-. Add _streamlog_ utility (closes
-https://github.com/nvi-inc/fs/issues/64[#64]).
-
-+
-
-The _streamlog_ utility is a script that outputs log entries as they
-are written. It can be used by itself or with other programs that
-filter for specific log entries. It will provide the most complete
-output when the display server is enabled, but should also be useful
-when it is not.
-
-+
-
-[%collapsible]
-====
-
-By default, if the FS is already running, the script will output log
-entries to `stdout` (for simple interactive use, this is the user's
-terminal) as they are generated. A small number of entries may be lost
-when the FS is started. When the display server is not enabled, a
-small number of entries may be lost when the active log is changed.
-
-The script has four command line options. Generally speaking they
-should _not_ be used with _streamlog_ in _stpgm.ctl_. The options are:
-
-.. `-d` -- display stream
-
-+
-
-This option is only available if the display server is enabled. It
-outputs the display server stream instead of the log stream. The
-display stream is what is displayed in the log display window by the
-FS client. There are several differences between what is is shown in
-the log display window and what goes in the log. The most significant
-of these are:
-
-+
-[disc]
-
-* The log display output uses a shorter time-tag field.
-
-* Some output lines are suppressed in the log display window because
-they would be overwhelming and would generally not be helpful for
-interactive use.
-
-* Some FS error messages are not shown in the log display window
-because the operator has suppressed them with the `tnx` command.
-
-* The log display window includes some output that is not in the log,
-specifically the FS startup and termination messages and some program
-error messages.
-
-.. `-h` -- help output
-
-.. `-s` -- scroll-back
-
-+
-
-When the display server is enabled and the script is started and/or
-the FS is started, any log entries in the scroll-back buffer will also
-be output. This may reduce the number of lines that might be lost when
-the FS is started.
-
-+
-
-If the display server is not enabled, up to 20 (a little more than the
-number of lines in the typical log header) old log lines will be
-output when the script is started, the active file log is changed, or
-the FS is started. This may result in some lines being output more
-than once. It may reduce the number of lines that will be missed
-during these transitions.
-`
-.. `-w` -- wait for FS start
-
-+
-
-Wait for the FS to start and/or continue to wait for the FS to be
-restarted if it is terminated.
-
-[NOTE]
-=====
-
-The limitations and considerations for why these options should _not_
-be used in _stpgm.ctl_ are:
-
-[disc]
-* The '-d' option can be used in _stpgm.ctl_ if the display server is
-in use. However, it would be safer to use the log output (no `-d`)
-instead. If it is used without the display server enabled, it will
-crash the FS immediately after start-up.
-
-* The `-h` option is not useful in _stpgm.ctl_. Its use will cause the
-FS to crash immediately after start-up.
-
-* The `-s` option can be used in _stpgm.ctl_ but is of marginal value.
-It may reduce the number of lines that might be lost at FS start-up.
-With the display server not enabled, it may reduce the number of lines
-lost at the transition to a new log.
-
-* The `-w` option is not useful in _stpgm.ctl_ and will cause problems
-in some cases if the display server is not enabled. It is best to
-avoid it entirely in _stpgm.ctl_.
-
-=====
-
-Thanks to Dave Horsley (Hobart) for coming up with the idea for this
-script, the initial version, and many of the incremental improvements.
-
-====
-
-. Improve _logpl_
-
-+
-
-An error was fixed that caused incorrect plots for the data from some
-paired commands. The help output was improved.
-
-+
-
-[%collapsible]
-====
-
-.. Fix plotting of data from paired commands (closing
-https://github.com/nvi-inc/fs/issues/182[#182]).
-
-+
-
-_logpl_ can plot data from paired commands. The first command of a
-pair (its description in _logpl.ctl_ starts with a `$`) is associated
-with the second of the pair (its description ends with `$`). _logpl_
-selects the data to plot based on the first command. The next
-following instance of the second command has the value to be plotted.
-This can be useful for situations where one command identifies what is
-being sampled (e.g., a BBC defined by `pcalports=`) and the data
-values come from a second command (e.g., amplitude or phase for a
-single sideband from `decode4/pcal`).
-
-+
-
-The problem arises if the corresponding second command is missing
-(perhaps due to a time-out) before the next instance of the first
-command. In that case, _logpl_ thinks the next occurring second
-command should be used, even if the intervening first command
-identifies different data. The result is that data from two different
-selections may appear on one plot. That makes a mess.
-
-+
-
-This was fixed by invalidating the match of a first command if another
-instance of it occurs, but with a different string value. This
-prevents a match on the second command of a pair if the first command
-of that pair with a different string has occurred since the original
-first command with the right string.
-
-.. Improve Help contents for the Main screen
-
-+
-
-The description of the three bottom buttons in the Plot Details box
-was improved. This was primarily to say that the deleting of
-individual points is with a double right-click instead of a
-left-click. Other small improvements were made.
-
-====
-
 . Improve _plotlog_
 
 +
@@ -1319,6 +990,339 @@ maintenance.
 ... Removing DOS end-of-lines (to help with files that were
 transferred via machines with such end-of-lines) was improved so that
 it did not need to be handled in each search string.
+
+====
+
+. Change the order of commands for DBBC3 syncing.
+
++
+
+The sequence of commands for syncing the DBBC3 were changed in the
+<<../1/dbbc3_ops.adoc#_sync_time,Sync time>> section of the
+<<../1/dbbc3_ops.adoc#_alternate_core3h_board_configuration_method,Alternate
+Core3H board configuration>> appendix of the <<../1/dbbc3_ops.adoc#,FS
+10.1 DBBC3 Operations Manual>>.
+
++
+
+[%collapsible]
+====
+
+There is now a `pps_sync` command both before and after the `timesync`
+commands. Despite this improvement using this method is still not
+recommended.
+
+Thanks to Sven Dornbusch (MPIfR) for providing the best sequence of
+commands.
+
+====
+
+. Fix _plog_ to support sending multiple files to BKG (closes
+https://github.com/nvi-inc/fs/issues/186[#186]).
+
++
+
+[%collapsible]
+====
+
+Due to a bug, _plog_ was unable to send multiple files to BKG in one
+invocation. The result was that none were sent.
+
+Thanks to Kiah Imai (KPGO) for reporting this and testing the fix.
+
+====
+
+. Shutdown display server on `terminate` (closes
+https://github.com/nvi-inc/fs/issues/176[#176]).
+
++
+
+When the display server is in use, terminating the FS now also
+shutdowns the server. An interlock was introduced to prevent
+termination if it would also stop active _autoftp_ and/or _fs.prompt_
+instances.
+
++
+
+[%collapsible]
+====
+
+Previously, if the display server was in use, it continued running in
+background when the FS was terminated; now it will shutdown. Not
+shutting down was introduced in commit
+`85b24dc67111d82371c3fd0b850b19174840e0e4`, and first released in FS
+_10.0.0_, as part of a larger scheme to serve client web pages. In the
+short-term, that plan is not being followed through on and the change
+had some negative impacts for local use. Manually stopping the server
+was required in certain cases:
+
+[disc]
+
+* If _antcn_, or another local program opens an X11 application, say
+for example, for a dialog box to let the operator select the antenna,
+the application will appear on that display. If later an operator on a
+different display wants to restart the FS, the server would have to be
+stopped before restarting the FS for the X11 application to appear on
+the new display.
+
+* To update the environment variables used by the FS
+
+* To change the user that owns the FS processes
+
+Manually stopping the server is no longer required in these, or any
+other, cases.
+
+An implication of stopping the server is that any running _autoftp_
+and _fs.prompt_ processes will also be terminated. This is
+undesirable, especially in the case of _autoftp_ since any active data
+transfers would be terminated. To avoid this, an interlock was
+introduced. When the server is in use and any _autoftp_ or _fs.prompt_
+instances are active, termination will be prevented with explanatory
+error messages. If it is necessary terminate, an override parameter,
+`force`, can be used:
+
+ terminate=force
+
+To keep things simple, the previous override parameter,
+`disk_record_ok`, for terminating if disk recording is active has been
+eliminated and that functionality is now included in the `force`
+parameter as well. See `*help=terminate*` for more explanation.
+
+The interlock for preventing termination if _pfmed_ is active was
+moved to be before the interlocks that can be overridden with `force`.
+It is not possible to override the _pfmed_ interlock and there is no
+point using `force` if termination will be blocked by _pfmed_ anyway.
+
+The <<../../../misc/env_vars.adoc#_runtime_variables,Runtime
+variables>> section of the <<../../../misc/env_vars.adoc#,FS
+Environment Variables>> document was updated to reflect this change.
+
+====
+
+. Fix crashes for DBBC2 communication errors (closing
+https://github.com/nvi-inc/fs/issues/191[#191]).
+
++
+
+[%collapsible]
+====
+
+There was an error in class number handing of communicating with a
+DBBC2 (the FS refers to the device as a "`DBBC`"). It occurred in the
+periodic checking of the DBBC2 personality and version number. Crashes
+only seemed to happen when the DBBC2 is in a bad state, and then after
+about ++~35++ `ch -810 Communication error for DBBC.` errors. There
+should no longer be any crashes even if the DBBC2 is in the bad state.
+Rebooting the DBBC2 may fix the bad state. That is a good thing to do
+since calibration data may be lost and other problems may occur while
+it is in the bad state.
+
+This fix is also included in patch releases _10.0.1_ and _10.1.1_.
+
+Thanks to Eskil Varenius (Onsala) for reporting this problem and
+testing the fix.
+
+====
+
+. Fix using a DBBC IF channel as a detector in _fivpt_ and _onoff_
+with continuous calibration (closing
+https://github.com/nvi-inc/fs/issues/190[#190]).
+
++
+[%collapsible]
+====
+
+The DBBC (i.e., the DBBC2) does not provide separate cal-on and
+cal-off TPIs for an IF detector when continuous calibration is in use.
+Implementing something useful in the FS for this case had been
+overlooked.  Unfortunately, the FS produced unusable T~ant~
+measurements in _fivpt_ and nonsensical T~sys~ values for those
+detectors in _fivpt_ and _onoff_.
+
+This was improved by (i) internally treating that detector as having a
+T~cal~ value of `-100` (i.e., assuming there is no noise diode for
+this detector) and (ii) using the unswitched power. This results in
+_fivpt_ T~ant~ and estimated peak values being printed in percent of
+system temperature in _fivpt_ and T~sys~ for that detector as `-100`
+in _onoff_.  If the T~cal~ defined in the _.rxg_ file was already
+negative, that value is used instead.
+
+If the IF channel is not corrupted by RFI, this makes it usable for
+pointing measurements. It use should still be avoided for gain
+calibration measurements for other reasons, primarily having a very
+broad bandpass, but in some cases not having a center frequency that
+_onoff_ can calculate accurately. Additionally, the value of the
+"`DBBC IF power conversion factors`" in _equip.ctl_ may not have
+accurate values.
+
+Thanks to Jon Quick (HartRAO) for reporting the existing poor
+behavior, pointing out that something useful could be done, and
+testing the improvement.
+
+====
+
+. Add _streamlog_ utility (closes
+https://github.com/nvi-inc/fs/issues/64[#64]).
+
++
+
+The _streamlog_ utility is a script that outputs log entries as they
+are written. It can be used by itself or with other programs that
+filter for specific log entries. It will provide the most complete
+output when the display server is enabled, but should also be useful
+when it is not.
+
++
+
+[%collapsible]
+====
+
+By default, if the FS is already running, the script will output log
+entries to `stdout` (for simple interactive use, this is the user's
+terminal) as they are generated. A small number of entries may be lost
+when the FS is started. When the display server is not enabled, a
+small number of entries may be lost when the active log is changed.
+
+The script has four command line options. Generally speaking they
+should _not_ be used with _streamlog_ in _stpgm.ctl_. The options are:
+
+.. `-d` -- display stream
+
++
+
+This option is only available if the display server is enabled. It
+outputs the display server stream instead of the log stream. The
+display stream is what is displayed in the log display window by the
+FS client. There are several differences between what is is shown in
+the log display window and what goes in the log. The most significant
+of these are:
+
++
+[disc]
+
+* The log display output uses a shorter time-tag field.
+
+* Some output lines are suppressed in the log display window because
+they would be overwhelming and would generally not be helpful for
+interactive use.
+
+* Some FS error messages are not shown in the log display window
+because the operator has suppressed them with the `tnx` command.
+
+* The log display window includes some output that is not in the log,
+specifically the FS startup and termination messages and some program
+error messages.
+
+.. `-h` -- help output
+
+.. `-s` -- scroll-back
+
++
+
+When the display server is enabled and the script is started and/or
+the FS is started, any log entries in the scroll-back buffer will also
+be output. This may reduce the number of lines that might be lost when
+the FS is started.
+
++
+
+If the display server is not enabled, up to 20 (a little more than the
+number of lines in the typical log header) old log lines will be
+output when the script is started, the active file log is changed, or
+the FS is started. This may result in some lines being output more
+than once. It may reduce the number of lines that will be missed
+during these transitions.
+`
+.. `-w` -- wait for FS start
+
++
+
+Wait for the FS to start and/or continue to wait for the FS to be
+restarted if it is terminated.
+
+[NOTE]
+=====
+
+The limitations and considerations for why these options should _not_
+be used in _stpgm.ctl_ are:
+
+[disc]
+* The '-d' option can be used in _stpgm.ctl_ if the display server is
+in use. However, it would be safer to use the log output (no `-d`)
+instead. If it is used without the display server enabled, it will
+crash the FS immediately after start-up.
+
+* The `-h` option is not useful in _stpgm.ctl_. Its use will cause the
+FS to crash immediately after start-up.
+
+* The `-s` option can be used in _stpgm.ctl_ but is of marginal value.
+It may reduce the number of lines that might be lost at FS start-up.
+With the display server not enabled, it may reduce the number of lines
+lost at the transition to a new log.
+
+* The `-w` option is not useful in _stpgm.ctl_ and will cause problems
+in some cases if the display server is not enabled. It is best to
+avoid it entirely in _stpgm.ctl_.
+
+=====
+
+Thanks to Dave Horsley (Hobart) for coming up with the idea for this
+script, the initial version, and many of the incremental improvements.
+
+====
+
+. Improve _logpl_
+
++
+
+An error was fixed that caused incorrect plots for the data from some
+paired commands. The help output was improved.
+
++
+
+[%collapsible]
+====
+
+.. Fix plotting of data from paired commands (closing
+https://github.com/nvi-inc/fs/issues/182[#182]).
+
++
+
+_logpl_ can plot data from paired commands. The first command of a
+pair (its description in _logpl.ctl_ starts with a `$`) is associated
+with the second of the pair (its description ends with `$`). _logpl_
+selects the data to plot based on the first command. The next
+following instance of the second command has the value to be plotted.
+This can be useful for situations where one command identifies what is
+being sampled (e.g., a BBC defined by `pcalports=`) and the data
+values come from a second command (e.g., amplitude or phase for a
+single sideband from `decode4/pcal`).
+
++
+
+The problem arises if the corresponding second command is missing
+(perhaps due to a time-out) before the next instance of the first
+command. In that case, _logpl_ thinks the next occurring second
+command should be used, even if the intervening first command
+identifies different data. The result is that data from two different
+selections may appear on one plot. That makes a mess.
+
++
+
+This was fixed by invalidating the match of a first command if another
+instance of it occurs, but with a different string value. This
+prevents a match on the second command of a pair if the first command
+of that pair with a different string has occurred since the original
+first command with the right string.
+
+.. Improve Help contents for the Main screen
+
++
+
+The description of the three bottom buttons in the Plot Details box
+was improved. This was primarily to say that the deleting of
+individual points is with a double right-click instead of a
+left-click. Other small improvements were made.
 
 ====
 
