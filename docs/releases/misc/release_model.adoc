@@ -19,7 +19,7 @@
 //
 
 = Strawman Release Model
-Version 1.2 - February 2023
+Version 1.3 - March 2023
 
 :sectnums:
 
@@ -118,7 +118,7 @@ There may also be documents using the `_STRING_` and other files
 associated with the release, including patches, in the same
 sub-directory, e.g., _beta1.adoc_, _beta2.adoc_,
 _beta1_to_beta2.adoc_, _<STRING>_to_latest.adoc_, and _10.0.1.adoc_.
-All these files should be visible on the _gh-pages_.
+All these files should be visible on the _gh-pages_ in HTML format.
 
 For feature releases, the notice should have a complete description of
 the changes and installation instructions from the previous feature
@@ -142,10 +142,10 @@ documentation is not provided.
 
 == Branches
 
-The main branch in the repo is _master_. This is the branch that is
-checked out after a clone operation from _github_.  The _master_
-branch represents the main line of development and should include most
-of the feature releases.
+The default branch in the repo is _main_. This is the branch that is
+checked out after a clone operation from _github_. The _main_ branch
+represents the primary line of development and should include most of
+the feature releases.
 
 In order to patch an existing feature release, a _maintenance branch_
 is normally used.  For example, to create a maintenance branch _10.2_
@@ -154,32 +154,32 @@ for feature release _10.2.0_:
    git checkout -b 10.2 10.2.0
 
 The changes created on any maintenance release should be _rebased_
-onto _master_ as soon as they are stable. Maintenance branches should
-be retained long term both for possible future extension and to
-preserve the history.
+onto _main_ as soon as they are stable. Maintenance branches should be
+retained long term both for possible future extension and to preserve
+the history.
 
 To develop a new feature, a _feature branch_ can be created at any
 point. Likewise, for _bug fix_ branches.  Once they are considered to
 be stabilized enough they are merged into the appropriate branch,
-_master_ or a maintenance branch, and then deleted.
+_main_ or a maintenance branch, and then deleted.
 
 Patch releases are normally made on maintenance branches.  However, if
-a patch is needed and there have been no changes on _master_ since the
-corresponding feature release, the patch can be released on the
-_master_ (probably having been developed on a bug fix branch first).
+a patch is needed and there have been no changes on _main_ since the
+corresponding feature release, the patch can be released on the _main_
+(probably having been developed on a bug fix branch first).
 Otherwise, a maintenance branch should be made.
 
-Despite feature releases normally being on the _master_ branch, a
-feature release may occur on a different branch for a patch that has
-been promoted to a feature release.  In this case, a maintenance
-branch for a new feature release is created at the tip of the existing
-maintenance branch, if it exists. For example, to make a _10.3_
-maintenance branch off the _10.2_ maintenance branch:
+Despite feature releases normally being on the _main_ branch, one may
+occur on a maintenance branch for a patch that has been promoted to a
+feature release. In this case, a maintenance branch for a new feature
+release is created at the tip of the existing maintenance branch.
+ For example, to make a _10.3_ maintenance branch off the
+_10.2_ maintenance branch:
 
    git checkout -b 10.3 10.2
 
 and the new feature release is placed on the new branch.  Likewise, a
-maintenance branch can created from a patch release on _master_:
+maintenance branch can be created from a patch release on _main_:
 
    git checkout -b 10.2 10.2.1
 
@@ -204,13 +204,14 @@ The last commit on a branch, the _tip_, is checked out with:
 git checkout _branch_
 ....
 
-It is not necessary that unreleased commits on _master_ or a maintenance branch
-be in a state that is releasable. However, it is helpful to developers, and to
-a lessor extent for users, for the branch tips be in a usable state. This is
-largely achieved by not _merging_ or _rebasing_ feature branches into the branch
-that aren't in a fairly complete state.  However, it is acceptable to make new
-commits significantly changing the impact of previous commits, if they still
-result in a usable tip.
+It is not necessary that untagged commits on _main_ or a maintenance
+branch be in a state that is releasable. However, it is helpful to
+developers, and to a lessor extent for users, for the branch tips be
+in a usable state. This is largely achieved by not _merging_ or
+_rebasing_ feature branches into the branch that aren't in a fairly
+complete state. It is acceptable to make new commits significantly
+changing the impact of previous commits, if they still result in a
+usable tip.
 
 == Making a release
 
@@ -226,7 +227,7 @@ to cover just what is necessary to upgrade from the corresponding
 feature release plus instructions for all previous patches for that
 feature release.  Covering all the previous patch releases, should not
 be hard, since previous patch notes can be included explicitly or by
-reference.  A description of what has been fixed should included.
+reference.  A description of what has been fixed should be included.
 
 To make a release:
 
@@ -317,9 +318,9 @@ found at https://nvi-inc.github.io/fs/releases/.
 
 === Installing from an archive
 
-The main method of distributing the FS is with the _git_ repo from
-_github_. This makes updates, particularly patches,  much easier
-to install. However, if it is not possible to use _git_, you can get a
+The primary method of distributing the FS is with the _git_ repo from
+_github_. This makes updates, particularly patches, much easier to
+install. However, if it is not possible to use _git_, you can get a
 _.tar.gz_ archive from the release page.
 
 To install from the archive (use the `_tag_` of the release you are installing):
