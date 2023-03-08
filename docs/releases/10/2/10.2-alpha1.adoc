@@ -1171,12 +1171,13 @@ version `1.2.0` (which is used by FSL11):
 --
 [disc]
 
-* The default line width is thicker. It appears to actually be what
-would be line width `2` in _pgplot_. It appears that the line widths
-are off by 1 (see the next item as well).
+* The default line-width is thicker. It appears to actually be what
+would be line-width `2` in _pgplot_. It appears that the line-widths
+are off by one (see the next item as well).
 
-* Setting the line width accepts `0`, which gives the same width as
-`1`, the minimum, in _pgplot_.
+* Setting the line-width accepts `0`, which gives the same width as
+`1`, the minimum, in _pgplot_. However, line-width `0` causes the plot
+borders to not appear for device `/xw`.
 
 * The closed circle graph marker `17` is significantly less distinct.
 
@@ -1197,13 +1198,14 @@ of allowing them to spill over. This makes them harder to see.
 --
 +
 
-If the script detects that _giza_ is in use, it will adjust the line
-width and use a larger open circle for "`bad'" points. The resulting
-plots are usable, but not as good as with _pgplot_. These adjustments
-can be disabled, individually, with `-Z` option if they cause a
-problem or if a later version of _giza_ has better agreement with
-_pgplot_. If _giza_ is not detected, the `-Z` option can be used for
-force the adjustments. Please see the `-h` output for more details.
+If the script detects that _giza_ is in use, it will adjust the
+line-width, except for plot device `/xw`, and use a larger open circle
+for "`bad'" points. The resulting plots are usable, but not as good as
+with _pgplot_. These adjustments can be disabled, individually, with
+`-Z` option if they cause a problem or if a later version of _giza_
+has better agreement with _pgplot_. If _giza_ is not detected, the
+`-Z` option can be used for force the adjustments. Please see the `-h`
+output for more details.
 
 +
 
@@ -1289,7 +1291,7 @@ script should something that is likely to be useful. Options can be
 added to tune the behavior for different situations. Scripts or
 aliases can be used if any options are needed routinely.
 
-.. Bump version number to _2.1_.
+.. Bump version number to _2.2_.
 
 .. Improve the code
 
