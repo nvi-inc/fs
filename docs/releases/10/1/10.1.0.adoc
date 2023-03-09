@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 5.9 - March 2023
+Version 6.0`- March 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -147,7 +147,7 @@ working copy and you use _git_ to install (either one of the first two
 methods after this block; the third method does not use _git_), please
 use the directions in the *Click here for the details* toggle within
 this *IMPORTANT* block to download the update and change your default
-branch to `main`:
+branch to `main`.
 
 .Click here for the details
 [%collapsible]
@@ -163,6 +163,21 @@ directory;
 
 . Change your default branch to _main_:
 
++
+
+[CAUTION]
+======
+
+If you installed _10.0.0_ around June 5, 2022 or later, your default
+branch may already be _main_. You can check with:
+
+ cd /usr2/fs
+ git branch
+
+If _main_ shows up (and _master_ does not), you should skip this step
+and go to the next one, checking out the new version, below.
+
+======
 +
 
 There are two different methods for this sub-step depending on which
