@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 fsserver Changes
-Version 0.4 - April 2021
+Version 0.5 - March 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -83,6 +83,16 @@ that is, by default
 
 === Server continues running after FS termination
 
+As of FS _10.2_, this change has been reverted, i.e., the server will
+now shutdown on FS termination. For more information, please see the
+change <<../2/10.2-alpha1.adoc#shutdown,Server shutdown>> in the
+<<../2/10.2-alpha1.adoc#,FS 10.2-alpha1 Update Notes>> document.
+
+The remainder of this subsection (in the grey shaded box) is relevant
+only for FS versions _10.0_ and _10.1_.
+
+****
+
 A third change is that the server now continues running after the
 FS is terminated.
 
@@ -105,6 +115,8 @@ that are created and _ssh_ commands run from the FS having a default
 identity other than _oper_. To avoid this, it is recommended to either
 reboot or run `*fsserver stop*` after using the FS from an account
 other than _oper_.
+
+****
 
 === Server accepts SNAP commands
 

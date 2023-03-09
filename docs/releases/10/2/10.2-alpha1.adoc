@@ -1059,7 +1059,8 @@ Thanks to Kiah Imai (KPGO) for reporting this and testing the fix.
 
 ====
 
-. Shutdown display server on `terminate` (closes
+. <<shutdown,Server shutdown>>[[shutdown]]: Shutdown display server
+on `terminate` (closes
 https://github.com/nvi-inc/fs/issues/176[#176]).
 
 +
@@ -1099,6 +1100,11 @@ the new display.
 Manually stopping the server is no longer required in these, or any
 other, cases.
 
+A small downside of this change is that if the FS is terminated and
+restarted in quick succession, there may be a socket conflict (while
+the old server instance cleans up) that prevents the restart. This can
+be handled by waiting a moment and trying to restart again.
+
 An implication of stopping the server is that any running _autoftp_
 and _fs.prompt_ processes will also be terminated. This is
 undesirable, especially in the case of _autoftp_ since any active data
@@ -1123,6 +1129,9 @@ point using `force` if termination will be blocked by _pfmed_ anyway.
 The <<../../../misc/env_vars.adoc#_runtime_variables,Runtime
 variables>> section of the <<../../../misc/env_vars.adoc#,FS
 Environment Variables>> document was updated to reflect this change.
+
+The <<../0/fsserver_changes.adoc#,FS 10.0.0 Server changes>> document
+was updated to reflect this change.
 
 ====
 
