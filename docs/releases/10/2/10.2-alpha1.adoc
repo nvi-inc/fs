@@ -217,6 +217,23 @@ with (as _prog_):
  cd /usr2/st
  make rmdoto rmexe all
 
+=== Additional steps
+
+. Optionally, update your NTP configuration.
+
++
+
+This change will make the output of the `check_ntp` procedure and the
+contents of _/etc/ntp.conf_ file easier to read. Instructions are
+included for how to remove display of NTP related FQDNs and IP
+addresses in the log, if that is an issue for your site.
+
++
+
+If you want to make this change, it can be deferred to a convenient
+time. The instructions can be found in the
+<<Update NTP Configuration>> appendix.
+
 === Reboot
 
 IMPORTANT: This will make sure the FS server is stopped and shared
@@ -1326,6 +1343,67 @@ left-click. Other small improvements were made.
 
 ====
 
+. Improve recommended NTP configuration
+
++
+
+Change the `check_ntp` procedure to not use the `-n` option of _ntpq_.
+Make aliases in _/etc/hosts_ for all NTP servers for easier reading of
+`ntpq -p`.  Use aliases in _/etc/ntp.conf_ for easier viewing and
+maintenance. Add information on how to redact server FQDNs and IP
+addresses from log.
+
++
+
+[%collapsible]
+====
+
+The recommended NTP configuration can be found in _misc/ntp.txt_. The
+"`items`" listed in the following descriptions are where the change is
+covered in that file.
+
+..  Change the `check_ntp` procedure to not use the `-n` option of
+_ntpq_
+
++
+
+This allows descriptive names, instead of IP addresses, to be
+displayed for servers by _ntpq_. Item `6a`.
+
++
+
+The example _.prc_ files were updated to agree.
+
+.. Make aliases in _/etc/hosts_ for all NTP servers for easier reading
+of `ntpq -p`.
+
++
+
+This defines descriptive aliases for `ntpq -p` to display. Item `6d`.
+
+.. Use aliases in _/etc/ntp.conf_ for easier viewing and maintenance.
+
++
+
+With the aliases defined in _/etc/hosts_, this avoids the need to use
+IP addresses, which are harder to recognize. Without the defined
+aliases, using IP addresses was necessary to avoid problems when there
+is DNS outage. Item `2b`.
+
+.. Add information on how to redact server FQDNs and IP addresses from
+log.
+
++
+
+If site IT policies prohibit public dissemination of FQDNs and IP,
+this information can be used to keep that information out of the log
+files, which are often uploaded to publicly accessible servers. Item
+`6e`.
+
+.. Make other minor wording improvememts.
+
+====
+
 . Include `rdbe30_mon.py`
 
 +
@@ -1791,3 +1869,110 @@ rather than from the filename.
 file name.
 
 ====
+
+[appendix]
+
+= Update NTP Configuration
+
+Although the use of NTP on the FS computer is strongly encouraged for
+most situations, this entire appendix is optional.
+
+The recommended NTP configuration is described in _misc/ntp.txt_. If
+you have not implemented it before, you can use the information there
+to do so.
+
+As of FS _10.2_ the recommendations have been improved. If you have
+previously used those recommendations, this appendix describes how to
+update your implementation for the improvements. You should review the
+directions below, and the contents of _misc/ntp.txt_ to which they
+refer, before deciding what to do. The "`items`" listed in the
+following descriptions are where the change is covered in that file.
+
+. As _root_:
+
+.. Add aliases for all your NTP servers to _/etc/hosts_. Item `6d`.
+
+.. Change your _/etc/ntp.conf_ file to use the aliases in _/etc/hosts_.
+Item `2b`.
+
+.. Restart _ntpd_.
+
++
+
+For _init.d_ systems, FSL9 and earlier, you can use:
+
+ /etc/init.d/ntp restart
+
++
+
+For _systemd_ systems, FSL10 and later:
+
+ systemctl restart ntp
+
++
+
+Rebooting is an option for restarting NTP on any system.
+
+.. Verify NTP operation (any user can do this)
+
+... Check to make sure you get the expected servers listed by `ntp
+-p`.
+
++
+
+If not, you may need to recheck you definition of aliases in
+_/etc/hosts_ and their use in _/etc/ntp.conf_;
+
+... Check that the `remote` for each server is an alias.
+
++
+
++
+
++
+
+If not, you may need to adjust your _/etc/hosts_ file.
+
+. As _oper_:
+
+.. Update your `check_ntp` procedure to not use the `-n`
+option of _ntpq_. Item `6a`.
+
++
+
+You can also expand the list of servers that are displayed by
+adjusting the _grep_ command in the procedure. The details are covered
+in item `6a`.
+
+.. Optionally, redact FQDNs and IP addresses from the output of
+`check_ntp`. Item `6e`.
+
++
+
+Some sites may have IT policies that require this, but it may be
+prudent for everyone to implement it,
+
+.. Verify the output of `check_ntp`.
+
+... Make sure the `remote` field is the  alias, not the IP address,
+for each server.
+
++
+
++
+
+If not, you may not have removed the `-n` option from `ntpq  -np` to
+make it `ntpq -p`.
+
+... If you intended to redact IP addresses from the output, make sure
+no IP addresses appear, but instead the string `REDACTED`. You can
+compare to `ntpq -p` run from a shell, which will not have `REDACTED`.
+
++
+
++
+
++
+
+If you still get IP addresses from `check_ntp`, then you may need to
+fix the use of the filter in item `6e`.
