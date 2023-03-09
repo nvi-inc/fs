@@ -1813,10 +1813,9 @@ document.  The text added is:
 not work in all browsers. To help with that, if the relevant text is
 small it is reproduced within an embedded sidebar block (grey
 background). Otherwise, a second link to the title of the item with
-toggle in the different document is provided along with instructions
-to follow the link (probably opening it in a new tab would be best),
-open the toggle, and then search for the anchor text of the original
-link.
+the toggle is provided along with instructions to follow the link
+(probably opening it in a new tab would be best), open the toggle, and
+then search for the anchor text of the original link.
 
 ****
 
