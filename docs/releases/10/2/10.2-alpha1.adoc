@@ -1730,7 +1730,21 @@ file to not include `length`.
 
 _logpl_ plots the raw `cable` data, not converted to length.
 
+.. Improve the help page for `cont_cal` for the DBBC3
+
++
+
+The only polarity values that should be used are `0` and `2`.
+
++
+
+Thanks to Sven Dornbusch (MPIfR) for this clarification.
+
 .. Improve `help` page for the `setup_proc` command,
+
++
+
+Minor wording improvements.
 
 .. Improve the description of the `use_setup_proc` _drudg_ option in
 the
