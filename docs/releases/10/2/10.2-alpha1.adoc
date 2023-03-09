@@ -179,10 +179,20 @@ _lognm_ program:
 If your station software uses the C shared memory variables: `LLOG`,
 `LLPRC`, `LSKD`, `LSTP`, `LNEWPR`, `LNEWSK`, or `LEXPER`, you should
 update to use `LLOG2`, `LLPRC2`, `LSKD2`, `LSTP2`, `LNEWPR2`,
-`LNEWSK2` or `LEXPER2` instead, respectively. The old variables all
-have a length of `8`. The new variables have a length defined by the
-`MAX_SKD` parameter (currently with a value of `18`) in
-_include/params.h_ ++(C)++ and _include/params.i_ (FORTRAN).
+`LNEWSK2` or `LEXPER2` instead, respectively.
+
++
+
+Likewise, if you use the corresponding FORTRAN _fscom_dum.i_ variables
+via the `++fs_get_++__variable__`/`++fs_set_++__variable__()` routines
+in _newlb/prog.c_, you will need to change to use the new variables
+and routines.
+
++
+
+The old variables all have a length of `8`. The new variables have a
+length defined by the `MAX_SKD` parameter (currently with a value of
+`18`) in _include/params.h_ ++(C)++ and _include/params.i_ (FORTRAN).
 
 +
 
