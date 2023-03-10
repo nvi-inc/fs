@@ -1679,6 +1679,33 @@ bubble-sort.
 
 ====
 
+. Expand the <<../../../misc/font_conventions.adoc#,FS Font
+Conventions>> document.
+
++
+
+Several new subsections were added and an example was improved.
+
++
+
+[%collapsible]
+====
+
+.. Subsections for following topics were added:
+
++
+[disc]
+* Links to different documents and into collapsible blocks
+* Collapsible blocks
+* Embedded sidebar blocks
+* Nesting blocks
+* List continuation
+* Unordered list markers
+
+.. The example for inline links was improved .
+
+====
+
 . Make miscellaneous small bug fixes and improvements
 
 +
