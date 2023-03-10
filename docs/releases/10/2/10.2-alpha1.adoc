@@ -1767,6 +1767,14 @@ the way to the file name.
 .. Add documents <<../1/10.1.1.adoc#,FS 10.1.1 Update Notes>> and
 <<../0/10.0.1.adoc#,FS 10.0.1 Update Notes>> for new patches releases.
 
+.. Modify document <<../1/10.1.0.adoc#,FS 10.1.0 Update Notes>> to
+_not_ change default branch to _main_ when preserving the old
+repository if it was cloned around June 5, 2022 or later.
+
++
+
+In this case, the default is already _main_.
+
 .. Add a *TIP* for managing directory names of FS installations from
 archives in the
 <<../../misc/release_model.adoc#_installing_from_an_archive,Install
