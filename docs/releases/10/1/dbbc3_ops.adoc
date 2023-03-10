@@ -26,7 +26,7 @@
 :toc:
 :experimental:
 E. Himwich, J. Quick
-Version 4.4 - March 2023
+Version 4.5 - March 2023
 
 == Introduction
 
@@ -1519,7 +1519,7 @@ to the recorder. Its value is independent of the data type.
 
 [subs="+quotes"]
 ....
-record = nthread : _nWriters_ ;
+record = nthread : : _nWriters_ ;
 ....
 
 +
