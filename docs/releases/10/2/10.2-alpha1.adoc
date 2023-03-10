@@ -1758,9 +1758,28 @@ the <<../1/dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> document.
 
 +
 
-This included adding a description of the `ds` added to the
-`datastream` label for the file name and that it stays lowercase all
-the way to the file name.
+... Add a description of the `ds` added to the `datastream` label for
+the file name and that it stays lowercase all the way to the file
+name.
+
+... Add an explanation that this results in a double _ds_ in the file
+ name, which is intentional (closing
+ https://github.com/nvi-inc/fs/issues/193[#193]).
+
+.. Fix the `record = ...` command in the
+<<../1/dbbc3_ops.adoc#_flexbuff_recorder,FlexBuff Recorder>>
+subsection the <<../1/dbbc3_ops.adoc#_recorder_tuning,Recorder
+tuning>> appendix of the <<../1/dbbc3_ops.adoc#,FS 10.1 DBBC3
+Operations Manual>> document.
+
++
+
+The second colon was missing. The FS code was correct. This was only a
+documentation issue.
+
++
+
+Thanks to Marjolein Verkoutor (JIVE) for reporting this.
 
 .. Set the home directory permissions for AUID accounts to `0750`.
 
