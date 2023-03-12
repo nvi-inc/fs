@@ -85,8 +85,8 @@ that is, by default
 
 As of FS _10.2_, this change has been reverted, i.e., the server will
 now shutdown on FS termination. For more information, please see the
-change <<../2/10.2-alpha1.adoc#shutdown,Server shutdown>> in the
-<<../2/10.2-alpha1.adoc#,FS 10.2-alpha1 Update Notes>> document.
+change <<../2/10.2-alpha2.adoc#shutdown,Server shutdown>> in the
+<<../2/10.2-alpha2.adoc#,FS 10.2-alpha2 Update Notes>> document.
 
 The remainder of this subsection (in the grey shaded box) is relevant
 only for FS versions _10.0_ and _10.1_.
