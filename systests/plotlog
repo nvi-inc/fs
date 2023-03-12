@@ -555,7 +555,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_V)) {
 }
 
 if(defined($opt_V)) {
-    print "[plotlog 2.1]\n";
+    print "[plotlog 2.2]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit 0;
@@ -658,11 +658,12 @@ The plotting support is different if 'giza' has been substituted for 'pgplot'
 if the 'PGPLOT' library version shown by 'plotlog -V' includes the string
 'giza'. If the script detects that 'giza' is in use, it makes two adjustments:
 (i) the line width is set to '0' and (ii) the bad points are plotted with
-larger open circles. If these adjustments cause problems or are no longer
-needed because 'giza' has been brought into better agreement with 'pgplot',
-they can be disabled, individually, with the '-Z hex' option (see below). If
-'giza' is not detected, the '-Z hex' option can be used to force the
-adjustments. Additionally, the 'giza' library does not respect the
+larger open circles. However, the line width is not set to '0' for plot device
+'/xw' because that makes the plot borders disappear. If these adjustments cause
+problems or are no longer needed because 'giza' has been brought into better
+agreement with 'pgplot', they can be disabled, individually, with the '-Z hex'
+option (see below). If 'giza' is not detected, the '-Z hex' option can be used
+to force the adjustments. Additionally, the 'giza' library does not respect the
 'PGPLOT_BACKGROUND' and 'PGPLOT_FOREGROUND' environment variables.
 
 Option explanations:
@@ -752,11 +753,11 @@ Option explanations:
     'vps' (portrait PostScript) is a useful choice for 'device' for file output
     '.ps' works well as the file extension for device 'vps'
 
-You can use different colors by setting the environment variables
-'PGPLOT_BACKGROUND' and 'PGPLOT_FOREGROUND' appropriately before running the
-program. Colors that are available depend on the device, but in addition to
-'black' and 'white', may include 'red', 'green', 'blue', 'cyan', 'magenta',
-'yellow', 'grey', 'slategrey', 'gold', and maybe others.
+You can use different colors (but not with 'giza') by setting the environment
+variables 'PGPLOT_BACKGROUND' and 'PGPLOT_FOREGROUND' appropriately before
+running the program. Colors that are available depend on the device, but in
+addition to 'black' and 'white', may include 'red', 'green', 'blue', 'cyan',
+'magenta', 'yellow', 'grey', 'slategrey', 'gold', and maybe others.
 ";
     exit 0;
 }
@@ -1164,12 +1165,14 @@ foreach $file (@ARGV) {
 	} elsif(/\/(.*(fmout|maser|gps).*)\//i) {
 	    $cmd=$1;
 	    (undef,undef,@fields)=split('[/,]');
+	    s{^\s+|\s+$}{}g foreach @fields;
 	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
 	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
 	    $clockn{$cmd}++;
 	} elsif(/#.....#(.*(fmout|maser|gps).*)\//i) {
 	    $cmd=$1;
 	    (undef,@fields)=split('[/,]');
+	    s{^\s+|\s+$}{}g foreach @fields;
 	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
 	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
 	    $clockn{$cmd}++;
@@ -1199,7 +1202,8 @@ foreach $file (@ARGV) {
 	    $nom_dur=$6;
 	    $recordt[$recordn]=$nom_start;
 	    $recordn++;
-        } elsif(defined($nom_start) && /!scan_check\?.*:(\d+)y(\d+)d(\d+)h(\d+)m(\d+)s:([-\d.]+):[^:]*:[^:]*:(\d+)/) {
+        } elsif(defined($nom_start) && ( /!scan_check\?.*:(\d+)y(\d+)d(\d+)h(\d+)m(\d+)s:([-\d.]+):[^:]*:[^:]*:(\d+)/ ||
+                                 /!scan_check\?.*:\s*(\d+)y(\d+)d(\d+)h(\d+)m([\d.]+)s\s*:\s*([-\d.]+)s\s*:[^:]*:\s*(\d+)/ )) {
 	    $act_start=&time(sprintf("%0.4d.%0.3d.%0.2d:%0.2d:%05.2f",
 			  $1,$2,$3,$4,$5),1);
 	    $act_dur=$6;
@@ -1220,6 +1224,7 @@ foreach $file (@ARGV) {
 exit -1 if(!$some);
 
 pgbegin(0,$dev,1,8);
+$opt_Z |= 1 if $giza && $dev eq '/xw';
 pgslw(0) if !$giza != !($opt_Z & 1);
 pgsch(3);
 pgask(-1);
@@ -1320,11 +1325,6 @@ if(@cdmst) {
 	&vu(\@cdmst, \@cdms,"CDMS raw (ps)");
     }
 }
-if(@recordt) {
-    &vu(\@recordt, \@recordd,"Record delay (sec)");
-    &vu(\@recordt, \@records,"Recording short (sec)");
-    &vu(\@recordt, \@recordm,"Missing bytes");
-}
 foreach $clock (sort by_clocks keys %clockn) {
     next if !defined($opt_B) && $clock =~ /rdbe(.)\/!dbe_(.)ps/ &&
         defined($clockn{"rdtc$1#dot2$2ps"}) ;
@@ -1335,19 +1335,19 @@ foreach $clock (sort by_clocks keys %clockn) {
     $avg=0;
     $count=0;
     for($j=0;$j<$clockn{$clock};$j++) {
+	$val[$j]='$$$';
+	$tim[$j]=$clockt{$clock}[$j];
 	next unless $clockv{$clock}[$j]=~/^$float_pattern$/ ;
 	next unless defined($opt_C) || abs($clockv{$clock}[$j])<1e1 ;
-	    $val[$j]=$clockv{$clock}[$j]*=1e6;
-	    $tim[$j]=$clockt{$clock}[$j];
-	    $avg+=$val[$j];
-	    $count++;
+	$val[$j]=$clockv{$clock}[$j]*=1e6;
+	$avg+=$val[$j];
+	$count++;
     }
 #
 # it seems PGPLOT can't handle lots of significant digits
 #
 #    print "$avg $count\n";
-    $avg=$avg/$count;
-#    print "$avg $count\n";
+    $avg=$avg/$count if $count != 0;
     if($avg > 500000) {
 	$offset=1e6;
 	$label="($clock)-1e6 (us)";
@@ -1361,7 +1361,7 @@ foreach $clock (sort by_clocks keys %clockn) {
 #    print "$offset $label\n";
     if($offset) {
 #	print "apply offset $offset\n";
-	for($i=0;$j<$count;$i++) {
+	for($j=0;$j<$clockn{$clock};$j++) {
 	    next unless $val[$j]=~/^$float_pattern$/ ;
 	    $val[$j]-=$offset;
 	}
@@ -1370,6 +1370,11 @@ foreach $clock (sort by_clocks keys %clockn) {
 }
 if(@setcl) {
      &vu(\@setclt, \@setcl,"setcl offset (0.01 s)");
+}
+if(@recordt) {
+    &vu(\@recordt, \@recordd,"Record delay (sec)");
+    &vu(\@recordt, \@records,"Recording short (sec)");
+    &vu(\@recordt, \@recordm,"Missing bytes");
 }
 foreach $tone (sort by_rdbe_tone keys %rpcaln) {
     $#amp=-1;
