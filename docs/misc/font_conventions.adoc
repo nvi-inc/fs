@@ -1,3 +1,4 @@
+
 //
 // Copyright (c) 2020-2021 NVI, Inc.
 //
@@ -19,7 +20,7 @@
 //
 
 = DRAFT FS Document Font Conventions
-Version 1.1 - July 2021
+Version 1.2 - March 2023
 
 :sectnums:
 
@@ -155,6 +156,55 @@ CAUTION: Could cause a minor issue
 WARNING: Could cause a major issue
 
 IMPORTANT: Will result in a major issue
+
+=== FS/drudg change items
+
+Each change is listed as an automatically numbered title (starting
+with an active verb), then usually a few summary sentences, followed
+by a collapsible block:
+
+[%collapsible]
+====
+Details are shown here.
+====
+
+The *Details* toggle can be clicked on to show (or not show) the
+block. In this way, you can view the summary as a list and only reveal
+the details of items that interest you. The summary sentences and/or
+the collapsible block may be omitted if they would not add any new
+information, usually because it is already covered in the numbered
+title item and/or the details are very brief.
+
+=== Links to different documents and to the inside of collapsible blocks
+
+If you return "`back`" to a document after following a link to a
+_different_ document, previously opened collapsible blocks will be
+closed because the web page has been reloaded. This makes it a little
+more difficult to return to where you were reading in the original
+document if it was within opened text.
+
+TIP: An alternative to avoid this is to right click the link, then
+open it in a new tab, and then click on that tab. To return to the
+original document, you can close the new tab or click on the original
+document's tab, whatever you prefer.
+
+Links that point into a closed collapsible block in the _same_
+document do not work in all browsers. To help with that, when these
+links appear, additional instructions with a second link to the item
+with the collapsible block are provided. If the original link into the
+collapsible block doesn't work, an alternate approach is to follow the
+second link, click on the *Details* toggle below that location to open
+it, go *Back* in the browser, and then click on the original link. At
+least some Chromium-based browsers appear to able to follow links into
+a closed collapsible blocks.
+
+Links that point into a collapsible block in a _different_ document
+also do not work in all browsers. To help with that, if the relevant
+text is small it is reproduced within an embedded sidebar block (grey
+background). Otherwise, a second link to the item with the collapsible
+block is provided along with instructions to follow the link (probably
+opening it in a new tab would be best), open the toggle, and then
+search for the anchor text of the original link.
 
 == Source examples
 
@@ -321,12 +371,10 @@ visibility link, should use the same anchor text. An example of using
 an inline anchor:
 
 ....
-[[check_files]]<<check_files,Check files>>:
-
-Some explanatory text probably follows. The inline anchor above is in
-double square brackets `+++[[<i>anchor</i>]]+++`. The link with
-anchor text, is in double angle brackets
-`+++<<<i>anchor</i>,<i>text</i>>>+++`.
+[[check_files]]<<check_files,Check files>>: Some explanatory text
+probably follows. The inline anchor above is in double square brackets
+`+++[[<i>anchor</i>]]+++`. The link with anchor text, is in double
+angle brackets `+++<<<i>anchor</i>,<i>text</i>>>+++`.
 
 Somewhere else in the document, before or after the inline anchor,
 include a link to it. In this example, see <<check_files,Check
@@ -340,12 +388,10 @@ and the document will be helpful for those working from a print-out.
 
 Renders as:
 
-[[check_files]]<<check_files,Check files>>:
-
-Some explanatory text probably follows. The inline anchor above is in
-double square brackets `+++[[<i>anchor</i>]]+++`. The reference, with
-anchor text, is in double angle brackets
-`+++<<<i>anchor</i>,<i>text</i>>>+++`.
+[[check_files]]<<check_files,Check files>>: Some explanatory text
+probably follows. The inline anchor above is in double square brackets
+`+++[[<i>anchor</i>]]+++`. The reference, with anchor text, is in
+double angle brackets `+++<<<i>anchor</i>,<i>text</i>>>+++`.
 
 Somewhere else in the document, before or after the inline anchor,
 include a reference to it. In this example, see <<check_files,Check
@@ -380,6 +426,77 @@ Sub-sections (`====`) can be added as needed:
 
 ....
 
+=== Collapsible blocks
+
+Collapsible blocks are used in <<FS/drudg change items>> and wherever
+it may be useful to suppress a lengthy narrative that may not be of
+interest to all readers. The collapsible block starts with
+`[%collapsible]` followed by a line of four equal signs. The end of
+the block is marked by another line with four equal signs. For
+example:
+
+....
+[%collapsible]
+====
+Details are shown here.
+====
+....
+
+renders as:
+
+[%collapsible]
+====
+Details are shown here.
+====
+
+=== Embedded sidebar blocks
+
+Embedded sidebar blocks are use to set off text that is being quoted
+from another source. It is displayed in a grey background. It is
+delineated by two lines of four asterisks. Full formatting with the
+text is usually preserved. For example:
+
+....
+****
+. _quoted_ *text*
+****
+....
+
+renders as:
+
+****
+. _quoted_ *text*
+****
+
+=== Nesting blocks
+
+Nesting blocks can be achieved by increasing the number of equal signs
+in the lines used to delineate the blocks. For example:
+
+....
+[NOTE]
+====
+Note text
+[TIP]
+=====
+Tip text
+=====
+More note text
+====
+....
+
+renders as
+
+[NOTE]
+====
+Note text
+[TIP]
+=====
+Tip text
+=====
+More note text
+====
+
 == Workarounds
 
 This section covers some ad hoc workarounds for issues with _asciidoctor_.
@@ -413,3 +530,60 @@ underscores for italics will then not work for words that follow in
 that paragraph.
 
 See also: https://github.com/asciidoctor/asciidoctor/issues/3278
+
+=== List continuation
+
+In some cases the usual list continuation command, a plus sign (`+`)
+on a line by itself, may not provide the expected indentation. If the
+indentation level is not enough, sometimes it can be fixed by adding
+more lines with a plus sign, typically with blank lines between them.
+Another technique is to add an extra line with a plus sign after the
+last indented section and before the next list item. Some
+experimentation may be needed to achieve the desired indentation.
+
+Another useful tool that may solve some problems is <<Open blocks>>.
+
+=== Unordered list markers
+
+Unordered list markers alternate when nesting by default as:
+
+* Disc (closed circle)
+** Circle (open circle)
+*** Square (continuing to lower levels)
+
+This gives a reasonably appearance, but the HTML rendering may produce
+a different alternation within ordered lists. In principle it is
+possible to set the style manually, but it may apply to remaining all
+levels until the next section. The bottom line is that it may be
+possible to get a reasonable result only for a one-level unordered
+list in this situation. A nested list is probably best left to the
+default alternation, which may still not be very good when used within
+ordered lists. Avoiding complicated nesting, or additional use of
+ordered lists, is probably the best answer.
+
+An example of what can be reasonably accomplished is to convert:
+
+****
+. Item
+* Not a disc
+****
+
+to:
+
+****
+. Item
+[disc]
+* Disc
+****
+
+Using
+
+....
+. Item
+[disc]
+* Disc
+....
+
+The full set of marker styles that can be set are `disc`, `circle`,
+`square`, `none` (no marker, but indented), and `unstyled` (no marker
+or indentation).

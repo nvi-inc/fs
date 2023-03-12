@@ -26,7 +26,7 @@
 :toc:
 :experimental:
 E. Himwich, J. Quick
-Version 4.3 - February 2023
+Version 4.5 - March 2023
 
 == Introduction
 
@@ -1384,7 +1384,8 @@ _command_=datastream=reset
 NOTE: As of FS version _10.2_, the `add` command was changed to
 `_command_=datastream=add:ds{thread}:*`. The `ds` is passed (case
 preserved) to _jive5ab_ to be used as part of the lowercase datastream
-label portion of the file name.
+label portion of the filename. This results in filenames like
+_ev024g_mc_no0009_dsds1_. The double _ds_ is intentional.
 
 +
 
@@ -1518,7 +1519,7 @@ to the recorder. Its value is independent of the data type.
 
 [subs="+quotes"]
 ....
-record = nthread : _nWriters_ ;
+record = nthread : : _nWriters_ ;
 ....
 
 +

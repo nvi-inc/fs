@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/ntp.txt                  Version: 0.5  Date: 190702
+File: /usr2/fs/misc/ntp.txt                  Version: 0.6  Date: 230308
 
 			 NTP recommendations
 
@@ -40,13 +40,18 @@ information needed to set-up your system for NTP.
        can get by with less than three local servers.  Including
        remote serves is strongly recommended.
 
-   2b. In the 'ntp.conf' file, only list servers by their IP
-       addresses.  This makes it more robust if there is a DNS outage.
-       You can include a comment line to help identify each server in
-       the file.
+   2b. In the 'ntp.conf' file, list servers by their aliases if you
+       are able to follow the advice of item (6d) below.  This can
+       make the 'ntp.conf' file easier to read and simplify
+       maintenance.
 
-   2c. Use 'iburst minpoll 4' for each stratum 1 (or 2) server to
-       speed-up initial sync. A report of an 'ntpd' bug:
+       If you are not able to follow the advice of item (6d), only
+       list servers by their IP addresses.  This makes operation more
+       robust if there is a DNS outage.  You can include a comment
+       line to help identify each server in the file.
+
+   2c. Use 'iburst minpoll 4' for each server to speed-up the initial
+       sync.  A report of an 'ntpd' bug:
 
          https://blog.ntpsec.org/2017/09/19/jitter-bug-perfume.html
 
@@ -57,12 +62,11 @@ information needed to set-up your system for NTP.
    2d. Use 'restrict' with 'notrap nomodify nopeer noquery' with
        each server for security.
 
-       The overall result for a server is typically something like
-       this for each NTP server:
+       The overall result is typically something like this for each
+       NTP server:
 
-#  node.domain
-server      192.5.41.209 iburst minpoll 4
-restrict    192.5.41.209 notrap nomodify nopeer noquery
+server      myntpclock    iburst minpoll 4
+restrict    myntpclock    notrap nomodify nopeer noquery
 
    2e. Use 'noselect' after 'iburst minpoll 4' for monitoring
        (only) of local devices.
@@ -128,7 +132,16 @@ restrict -6 default ignore
        library:
 
 sy=popen 'uptime 2>&1' -n uptime &
-sy=popen 'ntpq -np 2>&1|grep -v "^[- x#]" 2>&1' -n ntpq &
+sy=popen 'ntpq -p 2>&1|grep -v "^[- x#]" 2>&1' -n ntpq &
+
+       The 'grep' command selects only the servers marked as '*'
+       (peer) and '+' (candidates), which are generally the highest
+       quality servers. You can get information on more servers by
+       removing '-', '#' and 'x' from the pattern. You can eliminate
+       the entire 'grep' command (starting with "|", up to, but not
+       removing, the following "'"), but that will include servers
+       that can't be reached or are specified 'noselect'; that may be
+       useful.
 
        'popen' is available in all FS versions starting with
        9.11.9. See 'help=sy' for details on its use.
@@ -140,15 +153,87 @@ sy=popen 'ntpq -np 2>&1|grep -v "^[- x#]" 2>&1' -n ntpq &
        record the ntp state in the experiment log at the experiment
        start (and restarts) for troubleshooting.
 
+   6d. If you can, list all servers in '/etc/hosts' with an alias of
+       at most 15 characters. It should be inserted just before the
+       canonical name, which is normally the first field after the IP
+       address.  An example of the new entry format is (tabs are often
+       used for white space to facilitate alignment between lines):
+
+192.168.1.1     myntpclock       myntpclock.my.domain
+
+       This will substitute the alias for the canonical name in the
+       'ntpq -p' output, which may otherwise be truncated and/or
+       difficult read.  It is good if the alias makes it easy to
+       identify the server.  The alias can also be used for the server
+       in the '/erc/ntp.conf' file.
+
+       For devices in DNS, the first field of the DNS name may be
+       suitable to use as an alias.  If that is difficult to
+       read/identify, you can substitute a descriptive name like
+       'cns'.  For local devices not in DNS, you can also select a
+       descriptive name.  For remote devices not in DNS, you might use
+       something like 'ntp_server.x', where 'x' is the last octet of
+       its IP address.  The 'x' can be up to three digits with no
+       spaces.  If necessary to avoid having more than one alias with
+       the same 'x', you might append a lowercase letter to
+       distinguish them.
+
+       This should have no impact on other uses of '/etc/hosts', but
+       don't do this if it is against your site's IT policies.
+       Listing the computer's own canonical name in its normal field
+       position (which may be required by site policies) will not
+       cause a problem with the 'ntpq -p' output.  It is only other
+       devices that need their aliases before the canonical name.
+
+       However, defining an alias in this way, as opposed to just
+       using the FQDN, will mean that if the device's IP address
+       changes you will need to update '/etc/hosts'.  If the IP
+       address changes only rarely, it is probably worth it.  If the
+       device is not listed in DNS, this is the only way to avoid
+       referring to it by its IP address.
+
+   6e. If your site IT polices require that you protect IP addresses
+       and FQDNs from being publicly disseminated, you will need to be
+       careful of what the 'check_ntp" procedure puts in the log.  The
+       logs are often uploaded to public data servers.
+
+       To avoid putting FQDNs in the log, you should set up an alias
+       for each NTP server as described in (6d) above.  That will also
+       make the ''ntpq -p' output easier to read.
+
+       (Always using an '/etc/hosts' alias for devices in FS commands
+       and control files and 'ntp.conf' is an easy way to avoid having
+       their FQDNs and IP addresses appear in the log.  It also makes
+       it easier to update a device's IP address or FQDN.  It only
+       needs to be updated in one place, '/etc/hosts'.)
+
+       To avoid putting any IP addresses in the log with 'check_ntp',
+       you can add the following two additional pipeline stages before
+       the closing single quite (') in the 'ntpq -p' command in
+       'check_ntp' (see 6a):
+
+|sed -E "s/^(.)([0-9].{14})(.*)$/\1REDACTED       \3/" 2>&1|sed -E "s/^(.{17})([0-9].{14})(.*)/\1REDACTED       \3/" 2>&1
+
+       The above is one line and must be inserted literally starting
+       with the leading pipe character (|) and ending with the numeral
+       one (1), 121 characters total.  This will replace any 'refid'
+       with 'REDACTED' if it is a network device.  It will also
+       replace any server IP address with 'REDACTED'. The latter may
+       happen if it does not have an alias in '/etc/hosts'.
+
 
 7. Make sure NTP is synced before operations are started.
 
+   After a power failure, restart the FS computer and wait until its
+   NTP is synced before starting other devices that use it as an NTP
+   source.  This will assure that they get a good initial time.
+
    After a FS start, particularly after a computer boot, operations
    should not start until the 'check_ntp' output shows a server with a
-   '*' in column one of the 'ntpq' output.  That is the server the
+   '*' in column one of the 'ntpq' output.  That is the server the NTP
    daemon is synced with.  The operator can run 'check_ntp' manually
-   as many times as necessary until the output of 'initi' shows a
-   sync.  It should sync quickly if 'ntp.conf' is configured as
-   described above.  Ideally the offsets, the next to last column of
-   the 'ntpq' output, should be a few milliseconds or less for several
-   servers, hopefully all.
+   as many times as necessary until the output shows a sync.  It
+   should sync quickly if 'ntp.conf' is configured as described above.
+   Ideally the offsets, the next to last column of the 'ntpq' output,
+   should be a few milliseconds or less for several servers, hopefully
+   all.
