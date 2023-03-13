@@ -1281,10 +1281,13 @@ BO -176
 One or more conditions above is preventing termination, if you must terminate (dangerous) use terminate=force.
 ""
 BO -177
-Can't terminate due to internal error?WW checking autoftp status, report this and the above 'un' error.
+Can't terminate due to internal error?WW checking autoftp status, report this and any errors above.
 ""
 BO -178
-Can't terminate due to internal error?WW checking fs.prompt status, report this and the above 'un' error.
+Can't terminate due to internal error?WW checking fs.prompt status, report this and any errors above.
+""
+BO -179 Place holder
+
 ""
 BO -180
 Error opening TIME.CTL, UNIX ?FFF

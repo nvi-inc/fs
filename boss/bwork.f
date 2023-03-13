@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -896,7 +896,7 @@ C
               ipida=fc_find_process('autoftp'//char(0),ierr)
               if(ipida.ge.0) then
                  call logit7ci(0,0,0,0,-174,'bo',0)
-              else if(ipida.gt.-7) then
+              else if(ipida.gt.-8) then
                  if(ipida.gt.-5) then
                     call logit7ci(0,0,0,0,ierr,'un',0)
                  endif
@@ -905,18 +905,18 @@ C
               ipidf=fc_find_process('fs.prompt'//char(0),ierr)
               if(ipidf.ge.0) then
                  call logit7ci(0,0,0,0,-175,'bo',0)
-              else if(ipidf.gt.-7) then
+              else if(ipidf.gt.-8) then
                  if(ipidf.gt.-5) then
                     call logit7ci(0,0,0,0,ierr,'un',0)
                  endif
                  call logit7ci(0,0,0,1,-178,'bo',ipidf)
                endif
            else
-              ipida=-7
-              ipidf=-7
+              ipida=-8
+              ipidf=-8
            endif
            if(disk_record_record.eq.1.or.
-     &        ipida.ne.-7.or.ipidf.ne.-7) then
+     &        ipida.ne.-8.or.ipidf.ne.-8) then
               call logit7ci(0,0,0,0,-176,'bo',0)
               if(iwait.ne.0) then
                  ipinsnp(3)=-176

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 NVI, Inc.
+ * Copyright (c) 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -38,20 +38,28 @@ pid_t find_process(const char* name,int *err)
 //     -4  = can't read /proc/PID/stat
 //     -5  = can't decode /proc/PID/stat
 //     -6  = can't form file name
-//     -7  = 'name' not active
+//     -7  = 'name' too long
+//     -8  = 'name' not active
 //
 // -1 to -4 set *err with errno
+//
+// -7 exists because not all scanf()s support the 'm' directive,
+//    if they did, then it would be necessary to figure out if it is
+//    safe in this case, instead the limit is massively too large
 
     DIR* dir;
     struct dirent* ent;
     char buf[512];
 
     long  pid;
-    char pname[33] = {0,}; /* actual maximum is 16 plus a null */
+    char pname[257] = {0,}; /* actual maximum is 16 plus a null */
     char state;
     FILE *fp=NULL;
     int ipid;
     int count;
+
+    if(strlen(name)>sizeof(pname)-1)
+        return -7;
 
     if (!(dir = opendir("/proc"))) {
         *err = errno;
@@ -68,11 +76,22 @@ pid_t find_process(const char* name,int *err)
         }
         fp = fopen(buf, "r");
         if (fp) {
-            if (EOF == (count = fscanf(fp, "%d (%32[^)]) %c", &pid, pname, &state))) {
+            if (NULL==fgets(buf,sizeof(buf),fp)) {
                 fclose(fp);
                 closedir(dir);
                 return -4;
-            } else if (3 != count) {
+            }
+            count = sscanf(buf, "%d (%256[^)]", &pid, pname);
+            if (2 != count) {
+                char buf2[129];
+                int len=strlen(buf);
+
+                if(len>64)
+                    buf[64]=0;
+                else if(len>0 && buf[len-1]=='\n')
+                    buf[len-1]=0;
+                sprintf(buf2,"internal error: find_process failed to decode: '%s'",buf);
+                logite(buf2,-179,"bo");
                 fclose(fp);
                 closedir(dir);
                 return -5;
@@ -97,6 +116,6 @@ pid_t find_process(const char* name,int *err)
         return -2;
     } else {
         closedir(dir);
-        return -7;
+        return -8;
     }
 }
