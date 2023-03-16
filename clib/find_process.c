@@ -45,20 +45,30 @@ pid_t find_process(const char* name,int *err)
 //
 // -7 exists because not all scanf()s support the 'm' directive,
 //    if they did, then it would be necessary to figure out if it is
-//    safe in this case, instead the limit is massively too large
+//    safe in this case, instead the limit is massively too large since
+//    that is inexpensive and removes dependence on any likely expansion
+//    of the comm name in /etc/[pid]/stat, or at least any likely
+//    FS program name length
+//
+//    apparently the comm name can be longer than the current claimed max
+//    of 16 characters, which seems to be for file names of programs, lengths
+//    of more than 32 characters have been observed
 
     DIR* dir;
     struct dirent* ent;
     char buf[512];
 
     long  pid;
-    char pname[257] = {0,}; /* actual maximum is 16 plus a null */
-    char state;
+    char pname[258] = {0,}; /* actual maximum is 16 plus a null */
     FILE *fp=NULL;
     int ipid;
     int count;
-
-    if(strlen(name)>sizeof(pname)-1)
+/*
+ *  The edge case is that the max has to be one less than what will
+ *  fit in pname, so if the field that pname is reading is longer than
+ *  name, we won't get a match due to truncation.
+ */
+    if(strlen(name)>sizeof(pname)-2)
         return -7;
 
     if (!(dir = opendir("/proc"))) {
@@ -81,7 +91,7 @@ pid_t find_process(const char* name,int *err)
                 closedir(dir);
                 return -4;
             }
-            count = sscanf(buf, "%d (%256[^)]", &pid, pname);
+            count = sscanf(buf, "%d (%257[^)]", &pid, pname);
             if (2 != count) {
                 char buf2[129];
                 int len=strlen(buf);
