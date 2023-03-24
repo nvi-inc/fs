@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021 NVI, Inc.
+* Copyright (c) 2020-2021, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -268,6 +268,8 @@ c
         nch=ichmv_ch(ib,nch,'dbbc3_ddc_u')
       else if(rack.eq.DBBC3.and.rack_type.eq.DBBC3_DDCV) then
         nch=ichmv_ch(ib,nch,'dbbc3_ddc_v')
+      else if(rack.eq.DBBC3.and.rack_type.eq.DBBC3_DDCE) then
+        nch=ichmv_ch(ib,nch,'dbbc3_ddc_e')
       else if(rack.eq.RDBE) then
         nch=ichmv_ch(ib,nch,'rdbe')
       else if(rack.eq.0) then
@@ -518,6 +520,13 @@ c
           nch=mcoma(ib,nch)
           call fs_get_dbbc3_ddc_ifs(dbbc3_ddc_ifs)
           nch = nch + ib2as(dbbc3_ddc_ifs,ib,nch,zcp8002)
+c
+          nch=mcoma(ib,nch)
+          nch=ichmv_ch(ib,nch,'v')
+          call fs_get_dbbc3_ddce_vs(dbbc3_ddce_vs)
+          call fs_get_dbbc3_ddce_vc(dbbc3_ddce_vc)
+          call char2hol(dbbc3_ddce_vs,ib,nch,nch+dbbc3_ddce_vc-1)
+          nch=nch+dbbc3_ddce_vc
 c
           nch=mcoma(ib,nch)
           nch=ichmv_ch(ib,nch,'v')

@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2022 NVI, Inc.
+* Copyright (c) 2020, 2022, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -72,6 +72,7 @@ c
       integer DBBC3         ! DBBC3 comparison bit variable
       integer DBBC3_DDCU    ! DBBC3_DDCU comparison bit variable
       integer DBBC3_DDCV    ! DBBC3_DDCV comparison bit variable
+      integer DBBC3_DDCE    ! DBBC3_DDCE comparison bit variable
       character*5 FS_ROOT
       integer MAX_BBC
       integer MAX_VLBA_BBC
@@ -165,6 +166,7 @@ C rack/drive _types
       parameter ( FLEXBUFF = int(z'4')  )
       parameter ( DBBC3_DDCU = int(z'1')  )
       parameter ( DBBC3_DDCV = int(z'2')  )
+      parameter ( DBBC3_DDCE = int(z'4')  )
 C
       parameter ( MAX_MK6 = 2 )
       parameter ( MAX_RDBE = 4 )

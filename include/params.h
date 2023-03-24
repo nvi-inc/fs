@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -161,6 +161,7 @@
 #define DBBC_PFB    0x4
 #define DBBC3_DDCU  0x1
 #define DBBC3_DDCV  0x2
+#define DBBC3_DDCE  0x4
 
 /*sub types of VLBA4 rack, like VLBA45 */
 

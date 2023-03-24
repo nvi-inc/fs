@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -531,4 +531,8 @@ typedef struct fscom {
   char LNEWPR2[MAX_SKD];
   char LNEWSK2[MAX_SKD];
   char LEXPER2[MAX_SKD];
+
+  int  dbbc3_ddce_v;
+  char dbbc3_ddce_vs[16];
+  int  dbbc3_ddce_vc;
 } Fscom;
