@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -19,6 +19,7 @@
  */
 /* dbbc3 iftpx buffer parsing utilities */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -28,6 +29,8 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
+
+static void perform_swaps( struct dbbc3_iftpx_mon *lclm);
 
 void dbbc3_iftpx_mon(output,count,lcl)
 char *output;
@@ -84,5 +87,12 @@ char *buff;
   if(1!=sscanf(ptr,"%u%c",&lclm->on,&ch))
     return -1;
 
+  perform_swaps( lclm);
+
   return 0;
+}
+static void perform_swaps( lclm)
+struct dbbc3_iftpx_mon *lclm;
+{
+  return;
 }
