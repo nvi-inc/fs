@@ -277,5 +277,22 @@ char *buff;
 static void perform_swaps( lclc)
 struct dbbcgain_cmd *lclc;
 {
+  static int gain = -1;
+  char *ptr;
+
+  if(0>gain) {
+    ptr=getenv("FS_DBBC3_BBC_GAIN_USB_LSB_SWAP");
+    if(NULL!=ptr && !strcmp(ptr,"1"))
+      gain=1;
+    else
+      gain=0;
+  }
+  if (gain) {
+    int temp_int;
+
+    temp_int=lclc->gainL;
+    lclc->gainL=lclc->gainU;
+    lclc->gainU=temp_int;
+  }
   return;
 }
