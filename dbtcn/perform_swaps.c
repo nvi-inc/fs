@@ -30,4 +30,27 @@
 
 void perform_swaps( dbbc3_ddc_multicast_t *t)
 {
+    static int ul = -1;
+    char *ptr;
+    int k;
+    unsigned int temp_uint;
+
+    if(0>ul) {
+        ptr=getenv("FS_DBBC3_MULTICAST_BBC_TPI_USB_LSB_SWAP");
+        if(NULL!=ptr && !strcmp(ptr,"1"))
+            ul=1;
+        else
+            ul=0;
+    }
+    if (ul)
+        for (k=0;k<MAX_DBBC3_BBC;k++) {
+
+            temp_uint =t->bbc[k].total_power_lsb_cal_off;
+            t->bbc[k].total_power_lsb_cal_off=t->bbc[k].total_power_usb_cal_off;
+            t->bbc[k].total_power_usb_cal_off=temp_uint;
+
+            temp_uint =t->bbc[k].total_power_lsb_cal_on;
+            t->bbc[k].total_power_lsb_cal_on=t->bbc[k].total_power_usb_cal_on;
+            t->bbc[k].total_power_usb_cal_on=temp_uint;
+        }
 }
