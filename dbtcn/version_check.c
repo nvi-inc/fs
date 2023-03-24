@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 NVI, Inc.
+ * Copyright (c) 2022, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -60,6 +60,8 @@ void version_check( dbbc3_ddc_multicast_t *t)
         }
       } else if(strcmp(ptr,"ddc_v")==0) {
         ierr = -34;
+      } else if(strcmp(ptr,"ddc_e")==0) {
+        ierr = -39;
       } else {
         ierr = -35;
       }
@@ -74,6 +76,24 @@ void version_check( dbbc3_ddc_multicast_t *t)
         }
       } else if(strcmp(ptr,"ddc_u")==0) {
         ierr = -37;
+      } else if(strcmp(ptr,"ddc_e")==0) {
+        ierr = -40;
+      } else {
+        ierr = -35;
+      }
+    } else if(DBBC3_DDCE == shm_addr->equip.rack_type) {
+      if(strcmp(ptr,"ddc_e")==0) {
+        ptr=strtok(NULL," ,");
+        if(ptr==NULL) {
+          ierr=-32;
+        } else if(strncmp(ptr,shm_addr->dbbc3_ddce_vs,shm_addr->dbbc3_ddce_vc)!=0 ||
+            strlen(ptr)!=shm_addr->dbbc3_ddce_vc) {
+          ierr = -41;
+        }
+      } else if(strcmp(ptr,"ddc_u")==0) {
+        ierr = -42;
+      } else if(strcmp(ptr,"ddc_v")==0) {
+        ierr = -43;
       } else {
         ierr = -35;
       }

@@ -2657,6 +2657,21 @@ DBBC3 multicast: DBBC3 personality should be DBBC_V (equip.ctl), but it is DBBC_
 DN  -38
 DBBC3 multicast: equip.ctl had an unrecognized DBBC3 rack type
 ""
+DN  -39
+DBBC3 multicast: DBBC3 personality should be DBBC_U (equip.ctl), but it is DBBC_E, see DN -30 error above
+""
+DN  -40
+DBBC3 multicast: DBBC3 personality should be DBBC_V (equip.ctl), but it is DBBC_E, see DN -30 error above
+""
+DN  -41
+DBBC3 multicast: DBBC3 version doesn't agree with DBBC_E version in dbbc3.ctl, see DN -30 error above
+""
+DN  -42
+DBBC3 multicast: DBBC3 personality should be DBBC_E (equip.ctl), but it is DBBC_U, see DN -30 error above
+""
+DN  -43
+DBBC3 multicast: DBBC3 personality should be DBBC_E (equip.ctl), but it is DBBC_V, see DN -30 error above
+""
 DP -301
 No command form of pfbX command.
 ""
@@ -2857,6 +2872,21 @@ Unknown rack type in logmsg_dbbc3().
 ""
 DR -457
 DBBC3 version does not agree with DDC_V version in dbbc3.ctl; see message above for DBBC3's version.
+""
+DR -458
+DBBC3 firmware should be DDC_U (equip.ctl), but is DDC_E; see message above for DBBC3's version.
+""
+DR -459
+DBBC3 firmware should be DDC_V (equip.ctl), but is DDC_E; see message above for DBBC3's version.
+""
+DR -460
+DBBC3 version does not agree with DDC_E version in dbbc3.ctl; see message above for DBBC3's version.
+""
+DR -461
+DBBC3 firmware should be DDC_E (equip.ctl), but is DDC_U; see message above for DBBC3's version.
+""
+DR -462
+DBBC3 firmware should be DDC_E (equip.ctl), but is DDC_V; see message above for DBBC3's version.
 ""
 DR -500 Place holder for bad response buffer
 

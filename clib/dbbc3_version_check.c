@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -61,6 +61,8 @@ int dbbc3_version_check(char *inbuf, char *output)
 				ierr = -2;
 		} else if(strncmp(inbuf+8 ,"DDC_V,",6)==0)
 			ierr = -3;
+		else if(strncmp(inbuf+8 ,"DDC_E,",6)==0)
+			ierr = -8;
 		else
 			ierr = -5;
     } else if(DBBC3_DDCV == shm_addr->equip.rack_type) {
@@ -72,7 +74,22 @@ int dbbc3_version_check(char *inbuf, char *output)
 				ierr = -7;
 		} else if(strncmp(inbuf+8 ,"DDC_U,",6)==0)
 			ierr = -4;
-		 else 
+		else if(strncmp(inbuf+8 ,"DDC_E,",6)==0)
+			ierr = -9;
+		else
+			ierr = -5;
+    } else if(DBBC3_DDCE == shm_addr->equip.rack_type) {
+
+        /*                   123456789012 */
+		if(strncmp(inbuf+8 ,"DDC_E,",6)==0) {
+			if(strncmp(test_buf,shm_addr->dbbc3_ddce_vs,shm_addr->dbbc3_ddce_vc)!=0 ||
+					strlen(test_buf)!=shm_addr->dbbc3_ddce_vc)
+				ierr = -10;
+		} else if(strncmp(inbuf+8 ,"DDC_U,",6)==0)
+			ierr = -11;
+		else if(strncmp(inbuf+8 ,"DDC_V,",6)==0)
+			ierr = -12;
+		else
 			ierr = -5;
     } else {
         ierr=-6;
