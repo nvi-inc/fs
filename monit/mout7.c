@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -93,7 +93,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     printw(" Tsys ");
     if(ifc.lo>=0.0 && ifc.tsys> -1e12) {
         buf[0]=0;
-        dble2str(buf,ifc.tsys,-5,1);
+        dble2str_j(buf,ifc.tsys,-5,1);
         printw("%5s",buf);
     } else
         printw("%5s"," ");
@@ -211,7 +211,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 standend();
             }else if (bbc[ibbc].tsys_usb > -1e12)  {
                 buf[0]=0;
-                dble2str(buf,bbc[ibbc].tsys_usb,-5,1);
+                dble2str_j(buf,bbc[ibbc].tsys_usb,-5,1);
                 printw(" %5s",buf);
             }
         } else
@@ -242,7 +242,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 standend();
             } else if (bbc[ibbc].tsys_lsb > -1e12) {
                 buf[0]=0;
-                dble2str(buf,bbc[ibbc].tsys_lsb,-5,1);
+                dble2str_j(buf,bbc[ibbc].tsys_lsb,-5,1);
                 printw(" %5s",buf);
             }
         } else

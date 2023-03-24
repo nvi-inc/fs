@@ -35,7 +35,7 @@ OBJECTS6 = monit6.o die.o m6init.o mout6.o gmonit6.o
 
 ../bin/monit6: $(OBJECTS6) $(LIBS)
 
-OBJECTS7 = monit7.o die.o mout7.o
+OBJECTS7 = monit7.o die.o mout7.o dble2str_j.o
 
 ../bin/monit7: $(OBJECTS7) $(LIBS)
 
