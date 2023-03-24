@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -19,6 +19,7 @@
  */
 /* dbbcgain buffer parsing utilities */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -28,6 +29,8 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
+
+static void perform_swaps( struct dbbcgain_cmd *lclc);
 
 static char *agc_key[ ]={"man","agc"};
 
@@ -201,9 +204,13 @@ struct dbbcgain_cmd *lcl;
 
   strcat(buff,",");
   if(lcl->state==-1) {
+    if (DBBC3==shm_addr->equip.rack)
+      perform_swaps( lcl);
     sprintf(buff+strlen(buff),"%d",lcl->gainU);
     strcat(buff,",");
     sprintf(buff+strlen(buff),"%d",lcl->gainL);
+    if (DBBC3==shm_addr->equip.rack)
+      perform_swaps( lcl);
   } else {
     ivalue=lcl->state;
     if (ivalue >=0 && ivalue <NAGC_KEY)
@@ -262,5 +269,13 @@ char *buff;
     if(1!=sscanf(ptr,"%d%c",&lclm->target,&ch))
       return -1;
   }
+  if (DBBC3==shm_addr->equip.rack)
+    perform_swaps( lclc);
+
   return 0;
+}
+static void perform_swaps( lclc)
+struct dbbcgain_cmd *lclc;
+{
+  return;
 }
