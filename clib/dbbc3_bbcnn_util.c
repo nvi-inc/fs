@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -19,6 +19,7 @@
  */
 /* dbbc3 bbcnn buffer parsing utilities */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -39,6 +40,7 @@ static char *agc_key[ ]={"man","agc"};
 #define NAGC_KEY sizeof(agc_key)/sizeof( char *)
 
 static int dbbc3_freq(unsigned int *,char *);
+static void perform_swaps(struct dbbc3_bbcnn_mon *);
 
 int dbbc3_bbcnn_dec(lcl,count,ptr,itask)
 struct dbbc3_bbcnn_cmd *lcl;
@@ -273,6 +275,7 @@ char *buff;
   if(1!=sscanf(ptr,"%u%c",lclm->tpoff+1,&ch))
     return -1;
 
+  perform_swaps(lclm);
   return 0;
 }
 static int dbbc3_freq(pulFreq,sptr)
@@ -341,4 +344,9 @@ char *sptr;
   *pulFreq=((unsigned int ) iwhole)*1000000+ifract;
 
   return 0;
+}
+static void perform_swaps( lclm)
+struct dbbc3_bbcnn_mon *lclm;
+{
+  return;
 }
