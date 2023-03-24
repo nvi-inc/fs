@@ -499,11 +499,13 @@ C                   it here, wait until CANTS
              ipinsnp(3)=ip(3)
              ipinsnp(4)=ip(4)
              ipinsnp(5)=ip(5)
+             ip(5)=0
           endif
           call clrcl(iclass)
           if(kts) call cants(itscb,ntscb,5,index,indts)
           if (ip(1).eq.0) goto 200
         endif
+        ip(5)=0
 C
 C     5.2 Handle CONT command.  Set KHALT to false now.
 C

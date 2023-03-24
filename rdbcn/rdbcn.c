@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -132,7 +132,6 @@ int main(int argc, char * argv[])
       /* ** Initialize ** */ 
       fail=TRUE;
       result = doinit();
-      ip[4]=fail;
       break;
     case 1:
     case 4:
