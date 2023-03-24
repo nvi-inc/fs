@@ -2415,7 +2415,7 @@ DF -501
 Only DDC and PFB types suppoterd in DBBC form command.
 ""
 DG -101
-No default for bbc, should be "all" or 1,2,...16.
+No default for bbc, should be "all" or 1,2,...,16.
 ""
 DG -102
 No default for 2nd parameter, if first parameter is "all".
@@ -2423,8 +2423,11 @@ No default for 2nd parameter, if first parameter is "all".
 DG -103
 No default for 3rd parameter, if second parameter is gain for upper channel.
 ""
+DG -111
+No default for bbc, should be "all" or 1,2,...,128.
+""
 DG -201
-Error decoding bbc, should be "all" or 1,2,..,16.
+Error decoding bbc, should be "all" or 1,2,...,16.
 ""
 DG -202
 Error decoding state/gainU, should be null or state: "man", "agc", or gainU: 1-255.
@@ -2440,6 +2443,9 @@ Monitor form requires bbc to read as a parameter, e.g., bbc_gain=1
 ""
 DG -401
 Class buffer error from monitor response.
+""
+DG -402 Placeholder for buffer
+
 ""
 DG -403
 Error decoding dbbcgain/ response, could be a DBBC version mis-match, see error DG -402 for text.

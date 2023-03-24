@@ -57,11 +57,14 @@ char *ptr;
 	    ierr=-200;
           else if(DBBC3==shm_addr->equip.rack && (lcl->bbc < 1 || lcl->bbc > MAX_DBBC3_BBC))
 	    ierr=-210;
-	} else if(ierr == -200)
+	} else if(ierr == -200) {
 	  if(strcmp(ptr,"all")==0) {
 	    lcl->bbc=0;
 	    ierr=0;
-	  }
+	  } else if (DBBC3==shm_addr->equip.rack)
+            ierr=-210;
+	} else if (ierr == -100 && DBBC3==shm_addr->equip.rack)
+            ierr=-110;
         break;
       case 2:
 	ierr=arg_key(ptr,agc_key,NAGC_KEY,&lcl->state,0,FALSE);
