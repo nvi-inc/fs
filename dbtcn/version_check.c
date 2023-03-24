@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <sys/types.h>
@@ -39,6 +40,7 @@ void version_check( dbbc3_ddc_multicast_t *t)
     static int old_ierr;
     static int version_error;
     char *ptr;
+    static int minutes=-1;
 
     memcpy(test,t->version,sizeof(test)-1);
     test[sizeof(test)-1]=0;
@@ -101,13 +103,27 @@ void version_check( dbbc3_ddc_multicast_t *t)
       ierr=-38;
     }
 
+    if(0>minutes) {
+        ptr=getenv("FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES");
+        if(NULL!=ptr && !strcmp(ptr,"0"))
+// maybe someday allow disabling it
+//            minutes=0;
+            minutes=1;
+        else if(NULL!=ptr) {
+            minutes=atoi(ptr);
+            if(minutes<1 || minutes >10)
+              minutes=1;
+        } else
+            minutes=1;
+    }
     if(0==ierr) {
        old_ierr=0;
     } else {
       if(ierr!=old_ierr)
         version_error=0;
-      version_error=version_error%20+1;
-      if(version_error==1) {
+      if(0 < minutes)
+        version_error=version_error%(minutes*60)+1;
+      if(0 < minutes && version_error==1) {
         if(-38!=ierr) {
           int i;
           char prefix[ ]={"DBBC3 multicast version: "};
