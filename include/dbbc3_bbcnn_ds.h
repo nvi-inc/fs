@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -29,6 +29,6 @@ struct dbbc3_bbcnn_cmd {
 struct dbbc3_bbcnn_mon {
      int agc;          /* 0=man, 1=agc */
      int gain[2];      /* gain values, index 0=upper, 1=lower */
-     unsigned tpon[2]; /* tpi cal on, index 0=upper, 1=lower, 0-65535 counts */
-     unsigned tpoff[2];/* tpi cal on, index 0=upper, 1=lower, 0-65535 counts */
+     unsigned tpon[2]; /* tpi cal on , index 0=upper, 1=lower, 0-65535 counts */
+     unsigned tpoff[2];/* tpi cal off, index 0=upper, 1=lower, 0-65535 counts */
     };
