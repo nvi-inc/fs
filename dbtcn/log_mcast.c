@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -113,15 +113,10 @@ static void log_time( struct dbbc3_tsys_cycle *cycle, char buf[])
     log_out(buf, "",0);
 }
 
-static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal, int swap_cal)
+static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
 {
     unsigned on, off;
     int j, k;
-
-    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcu_v<125 ||
-        DBBC3_DDCV == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcv_v<125;
 
     for (j=0;j<MAX_DBBC3_IF+1;j++) {
         for (k=0;k<MAX_DBBC3_BBC;k++) {
@@ -133,13 +128,9 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal, int swap
 
                 dt_cat(buf,shm_addr->tpicd.lwhat[k]);
 
-                if (v124 && swap_cal) {
-                    on =t->bbc[k].total_power_lsb_cal_off;
-                    off=t->bbc[k].total_power_lsb_cal_on;
-                } else {
-                    on =t->bbc[k].total_power_lsb_cal_on;
-                    off=t->bbc[k].total_power_lsb_cal_off;
-                }
+                on =t->bbc[k].total_power_lsb_cal_on;
+                off=t->bbc[k].total_power_lsb_cal_off;
+
                 if(cont_cal) {
                     bb_cat(buf,on);
                     bb_cat(buf,off);
@@ -153,13 +144,10 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal, int swap
                     log_out(buf, "tpi/",11);
 
                 dt_cat(buf,shm_addr->tpicd.lwhat[k+MAX_DBBC3_BBC]);
-                if (v124 && swap_cal) {
-                    on =t->bbc[k].total_power_usb_cal_off;
-                    off=t->bbc[k].total_power_usb_cal_on;
-                } else {
-                    on =t->bbc[k].total_power_usb_cal_on;
-                    off=t->bbc[k].total_power_usb_cal_off;
-                }
+
+                on =t->bbc[k].total_power_usb_cal_on;
+                off=t->bbc[k].total_power_usb_cal_off;
+
                 if(cont_cal) {
                     bb_cat(buf,on);
                     bb_cat(buf,off);
@@ -174,13 +162,10 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal, int swap
                 log_out(buf, "tpi/",15);
 
             dt_cat(buf,shm_addr->tpicd.lwhat[j-1+MAX_DBBC3_BBC*2]);
-            if (v124 || swap_cal) {
-                on = t->core3h[j-1].total_power_cal_off;
-                off= t->core3h[j-1].total_power_cal_on;
-            } else {
-                on = t->core3h[j-1].total_power_cal_on;
-                off= t->core3h[j-1].total_power_cal_off;
-            }
+
+            on = t->core3h[j-1].total_power_cal_on;
+            off= t->core3h[j-1].total_power_cal_off;
+
             if(cont_cal) {
                 if_cat(buf,on);
                 if_cat(buf,off);
@@ -232,13 +217,13 @@ static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[])
     }
 }
 
-void log_mcast(dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle, int cont_cal, int swap_cal)
+void log_mcast(dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle, int cont_cal)
 {
     char buf[256] = "";
 
     log_time( cycle, buf);
 
-    log_tp( t, buf, cont_cal, swap_cal);
+    log_tp( t, buf, cont_cal);
 
     if(cont_cal)
         log_ts( cycle, buf);

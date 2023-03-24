@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -36,18 +36,13 @@ static float bw_key[ ]={0,2,4,8,16,32,64,128};
 #define NBW_KEY sizeof(bw_key)/sizeof( float)
 
 void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
-        int cont_cal, int swap_cal)
+        int cont_cal)
 {
     unsigned int on, off;
     int diff;
     double freq;
     float fwhm, tcal, dpfu, gain, tsys;
     int j, k;
-
-    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcu_v<125 ||
-        DBBC3_DDCV == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcv_v<125;
 
     /* special tsys values:
        -9e20 not set, from clib/cshm_init.c
@@ -112,13 +107,8 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         get_gain_par(ifchain+1,freq,&fwhm,&dpfu,NULL,&tcal);
 
-        if (v124 && swap_cal) {
-            on =t->bbc[k].total_power_lsb_cal_off;
-            off=t->bbc[k].total_power_lsb_cal_on;
-        } else {
-            on =t->bbc[k].total_power_lsb_cal_on;
-            off=t->bbc[k].total_power_lsb_cal_off;
-        }
+        on =t->bbc[k].total_power_lsb_cal_on;
+        off=t->bbc[k].total_power_lsb_cal_off;
 
         diff=on-off;
 
@@ -141,13 +131,8 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         get_gain_par(ifchain+1,freq,&fwhm,&dpfu,NULL,&tcal);
 
-        if (v124 && swap_cal) {
-            on =t->bbc[k].total_power_usb_cal_off;
-            off=t->bbc[k].total_power_usb_cal_on;
-        } else {
-            on =t->bbc[k].total_power_usb_cal_on;
-            off=t->bbc[k].total_power_usb_cal_off;
-        }
+        on =t->bbc[k].total_power_usb_cal_on;
+        off=t->bbc[k].total_power_usb_cal_off;
 
         diff=on-off;
 
@@ -181,13 +166,8 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         get_gain_par(j+1,freq,&fwhm,&dpfu,NULL,&tcal);
 
-        if (v124 || swap_cal) {
-            on = t->core3h[j].total_power_cal_off;
-            off= t->core3h[j].total_power_cal_on;
-        } else {
-            on = t->core3h[j].total_power_cal_on;
-            off= t->core3h[j].total_power_cal_off;
-        }
+        on = t->core3h[j].total_power_cal_on;
+        off= t->core3h[j].total_power_cal_off;
 
         diff=on-off;
 
