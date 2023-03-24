@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022-2023 NVI, Inc.
+ * Copyright (c) 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -18,15 +18,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-int open_mcast(char mcast_addr[], int mcast_port, char mcast_if[], int *error_no);
-int get_if_addr(char *name, char **address, int *error_no);
-ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
-        int centisec[6], int data_valid);
-void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
-        int cont_cal, int swap_cal);
-void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
-        int it[6], int centisec[6]);
-void log_mcast(dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
-        int cont_cal, int swap_cal);
-void version_check( dbbc3_ddc_multicast_t *t);
-void perform_swaps( dbbc3_ddc_multicast_t *t);
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
+
+#include "../include/params.h"
+
+#include "packet.h"
+#include "dbtcn.h"
+
+void perform_swaps( dbbc3_ddc_multicast_t *t)
+{
+}
