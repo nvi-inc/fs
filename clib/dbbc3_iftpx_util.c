@@ -94,5 +94,40 @@ char *buff;
 static void perform_swaps( lclm)
 struct dbbc3_iftpx_mon *lclm;
 {
+  char *ptr;
+  static int tpi_onoff0 = -1;
+  static int tpi_onoff2 = -1;
+
+  if(0==shm_addr->dbbc3_cont_cal.polarity/2) {
+    if(0>tpi_onoff0) {
+      ptr=getenv("FS_DBBC3_IFTPX_POLARITY0_ON_OFF_SWAP");
+      if(NULL!=ptr && !strcmp(ptr,"1"))
+        tpi_onoff0=1;
+      else
+        tpi_onoff0=0;
+    }
+    if (tpi_onoff0) {
+      unsigned int temp_uint;
+
+      temp_uint=lclm->off;
+      lclm->off=lclm->on;
+      lclm->on=temp_uint;
+    }
+  } else {
+    if(0>tpi_onoff2) {
+      ptr=getenv("FS_DBBC3_IFTPX_POLARITY2_ON_OFF_SWAP");
+      if(NULL!=ptr && !strcmp(ptr,"1"))
+        tpi_onoff2=1;
+      else
+        tpi_onoff2=0;
+    }
+    if (tpi_onoff2) {
+      unsigned int temp_uint;
+
+      temp_uint=lclm->off;
+      lclm->off=lclm->on;
+      lclm->on=temp_uint;
+    }
+  }
   return;
 }
