@@ -24,14 +24,20 @@
 #include <sys/types.h>
 
 #include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"
 
 #include "packet.h"
 #include "dbtcn.h"
+
+extern struct fscom *shm_addr;
 
 void perform_swaps( dbbc3_ddc_multicast_t *t)
 {
     static int ul = -1;
     static int bbc_onoff = -1;
+    static int core3h_onoff0 = -1;
+    static int core3h_onoff2 = -1;
     char *ptr;
     int k;
     unsigned int temp_uint;
@@ -74,4 +80,35 @@ void perform_swaps( dbbc3_ddc_multicast_t *t)
             t->bbc[k].total_power_usb_cal_on =temp_uint;
 
         }
+    if(0==shm_addr->dbbc3_cont_cal.polarity/2) {
+        if(0>core3h_onoff0) {
+            ptr=getenv("FS_DBBC3_MULTICAST_CORE3H_POLARITY0_ON_OFF_SWAP");
+            if(NULL!=ptr && !strcmp(ptr,"1"))
+                core3h_onoff0=1;
+            else
+                core3h_onoff0=0;
+        }
+        if(core3h_onoff0)
+            for (k=0;k<MAX_DBBC3_IF;k++) {
+
+                temp_uint =t->core3h[k].total_power_cal_off;
+                t->core3h[k].total_power_cal_off=t->core3h[k].total_power_cal_on;
+                t->core3h[k].total_power_cal_on=temp_uint;
+            }
+    } else {
+        if(0>core3h_onoff2) {
+            ptr=getenv("FS_DBBC3_MULTICAST_CORE3H_POLARITY2_ON_OFF_SWAP");
+            if(NULL!=ptr && !strcmp(ptr,"1"))
+                core3h_onoff2=1;
+            else
+                core3h_onoff2=0;
+        }
+        if(core3h_onoff2)
+            for (k=0;k<MAX_DBBC3_IF;k++) {
+
+                temp_uint =t->core3h[k].total_power_cal_off;
+                t->core3h[k].total_power_cal_off=t->core3h[k].total_power_cal_on;
+                t->core3h[k].total_power_cal_on=temp_uint;
+            }
+    }
 }
