@@ -2829,7 +2829,7 @@ DR -311
 For DBBC3 DDC_U, at least one of 'mask1' and 'mask2' must be non-zero.
 ""
 DR -312
-For DBBC3 DDC_V, 'mask1' must be non-zero.
+For DBBC3 DDC_V and DDC_E, 'mask1' must be non-zero.
 ""
 DR -400
 error retrieving acknowledgement of command.

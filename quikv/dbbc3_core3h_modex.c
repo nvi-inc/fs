@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -430,7 +430,8 @@ parse:
             ierr=-311;
             goto error;
         }
-    } else if(DBBC3_DDCV==shm_addr->equip.rack_type) {
+    } else if(DBBC3_DDCV==shm_addr->equip.rack_type ||
+              DBBC3_DDCE==shm_addr->equip.rack_type) {
         if(!(lcl.mask1.state.known && lcl.mask1.mask1)) {
             ierr=-312;
             goto error;
@@ -463,12 +464,11 @@ parse:
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
-    int ddcu=  DBBC3_DDCU == shm_addr->equip.rack_type;
-
     strcpy(outbuf,"core3h=");
     strcat(outbuf,board[iboard]);
 
-    if(ddcu)
+    if(DBBC3_DDCU == shm_addr->equip.rack_type ||
+       DBBC3_DDCE == shm_addr->equip.rack_type)
         strcat(outbuf,",splitmode on");
     else
         strcat(outbuf,",splitmode off");
@@ -476,7 +476,8 @@ parse:
     out_recs++;
 
     int masks=1;
-    if(DBBC3_DDCU==shm_addr->equip.rack_type)
+    if(DBBC3_DDCU == shm_addr->equip.rack_type ||
+       DBBC3_DDCE == shm_addr->equip.rack_type)
         masks=4;
     vsi_bitmask_2_dbbc3_core3h(outbuf,&lcl,board[iboard],masks);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);

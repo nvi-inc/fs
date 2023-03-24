@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -102,7 +102,8 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
                 ierr=0;
             break;
         case 5:
-            if(DBBC3_DDCU == shm_addr->equip.rack_type)
+            if(DBBC3_DDCU == shm_addr->equip.rack_type ||
+               DBBC3_DDCE == shm_addr->equip.rack_type)
                 crate=256;
             else
                 crate=128;
@@ -120,7 +121,8 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
                     break;
                 }
             } else if(lcl->decimate.state.known == 0 && ierr == -100) {
-                if(DBBC3_DDCU == shm_addr->equip.rack_type)
+                if(DBBC3_DDCU == shm_addr->equip.rack_type ||
+                   DBBC3_DDCE == shm_addr->equip.rack_type)
                     sample=crate;
                 else
                     sample=crate/2;
@@ -200,7 +202,8 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
                 strcpy(output,"0x");
                 m5sprintf(output+2,"%x",&lclc->mask2.mask2,&lclc->mask2.state);
             }
-            if(DBBC3_DDCU == shm_addr->equip.rack_type &&
+            if((DBBC3_DDCU == shm_addr->equip.rack_type ||
+                DBBC3_DDCE == shm_addr->equip.rack_type) &&
               lclm->mask4.state.known && lclc->mask2.state.known &&
               lclm->mask4.mask4 != lclc->mask2.mask2 ||
               DBBC3_DDCV == shm_addr->equip.rack_type &&
@@ -228,7 +231,8 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
                 strcpy(output,"0x");
                 m5sprintf(output+2,"%x",&lclc->mask1.mask1,&lclc->mask1.state);
             }
-            if(DBBC3_DDCU == shm_addr->equip.rack_type &&
+            if((DBBC3_DDCU == shm_addr->equip.rack_type ||
+                DBBC3_DDCE == shm_addr->equip.rack_type) &&
               lclm->mask3.state.known && lclc->mask1.state.known &&
               lclm->mask3.mask3 != lclc->mask1.mask1 ||
               DBBC3_DDCV == shm_addr->equip.rack_type &&
@@ -250,7 +254,8 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
             m5sprintf(output,"%d",&lclc->decimate.decimate,&lclc->decimate.state);
             break;
         case 5:
-            if(DBBC3_DDCU == shm_addr->equip.rack_type)
+            if(DBBC3_DDCU == shm_addr->equip.rack_type ||
+               DBBC3_DDCE == shm_addr->equip.rack_type)
                 crate=256;
             else
                 crate=128;
