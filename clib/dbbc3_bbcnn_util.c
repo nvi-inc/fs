@@ -348,5 +348,26 @@ char *sptr;
 static void perform_swaps( lclm)
 struct dbbc3_bbcnn_mon *lclm;
 {
+  static int tpi_ul = -1;
+  char *ptr;
+
+  if(0>tpi_ul) {
+    ptr=getenv("FS_DBBC3_BBCNNN_TPI_USB_LSB_SWAP");
+    if(NULL!=ptr && !strcmp(ptr,"1"))
+      tpi_ul=1;
+    else
+      tpi_ul=0;
+  }
+  if (tpi_ul) {
+    unsigned int temp_uint;
+
+    temp_uint=lclm->tpoff[1];
+    lclm->tpoff[1]=lclm->tpoff[0];
+    lclm->tpoff[0]=temp_uint;
+
+    temp_uint=lclm->tpon[1];
+    lclm->tpon[1]=lclm->tpon[0];
+    lclm->tpon[0]=temp_uint;
+  }
   return;
 }
