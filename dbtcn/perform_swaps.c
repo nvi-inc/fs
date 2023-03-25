@@ -38,6 +38,9 @@ void perform_swaps( dbbc3_ddc_multicast_t *t)
     static int bbc_onoff = -1;
     static int core3h_onoff0 = -1;
     static int core3h_onoff2 = -1;
+    static int time_add = -1;
+    static int time_adder = 0;
+
     char *ptr;
     int k;
     unsigned int temp_uint;
@@ -111,4 +114,15 @@ void perform_swaps( dbbc3_ddc_multicast_t *t)
                 t->core3h[k].total_power_cal_on=temp_uint;
             }
     }
+    if(0>time_add) {
+	ptr=getenv("FS_DBBC3_MULTICAST_CORE3H_TIME_ADD_SECONDS");
+	if(NULL!=ptr) {
+	    time_adder=atoi(ptr);
+	    time_add=1;
+        } else
+	    time_add=0;
+    }
+    if(time_add)
+	for (k=0;k<MAX_DBBC3_IF;k++)
+            t->core3h[k].timestamp+=time_adder;
 }
