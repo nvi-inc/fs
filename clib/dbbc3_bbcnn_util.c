@@ -350,6 +350,7 @@ struct dbbc3_bbcnn_mon *lclm;
 {
   static int tpi_ul = -1;
   static int gain_ul = -1;
+  static int tpi_onoff = -1;
   char *ptr;
 
   if(0>tpi_ul) {
@@ -384,6 +385,25 @@ struct dbbc3_bbcnn_mon *lclm;
     temp_int=lclm->gain[1];
     lclm->gain[1]=lclm->gain[0];
     lclm->gain[0]=temp_int;
+  }
+
+  if(0>tpi_onoff) {
+    ptr=getenv("FS_DBBC3_BBCNNN_ON_OFF_SWAP");
+    if(NULL!=ptr && !strcmp(ptr,"1"))
+      tpi_onoff=1;
+    else
+      tpi_onoff=0;
+  }
+  if (tpi_onoff) {
+    unsigned int temp_uint;
+
+    temp_uint=lclm->tpoff[1];
+    lclm->tpoff[1]=lclm->tpon[1];
+    lclm->tpon[1]=temp_uint;
+
+    temp_uint=lclm->tpoff[0];
+    lclm->tpoff[0]=lclm->tpon[0];
+    lclm->tpon[0]=temp_uint;
   }
   return;
 }
