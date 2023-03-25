@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 NVI, Inc.
+ * Copyright (c) 2021, 2022, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -37,15 +37,13 @@ int *iold;
     rte_time(it,it+5);
     rte2secs(it,&seconds);
 
-    if(DBBC3_DDCU == shm_addr->equip.rack_type &&
-       shm_addr->dbbc3_ddcu_v<125 ||
-       DBBC3_DDCV == shm_addr->equip.rack_type &&
-       shm_addr->dbbc3_ddcv_v<125)
+    int iping=shm_addr->dbbc3_tsys_data.iping;
+
+    if(!shm_addr->dbbc3_tsys_data.data[iping].ifc[shm_addr->dbbc3_iscboard-1].time_included)
       return -1;
 
-    int iping=shm_addr->dbbc3_tsys_data.iping;
-    /* trap 1 for v124 in case that is loaded despite control files,
-       multiple tries will get a better value if not v124 */
+    /* trap 1 for in case time_included is incorrectly TRUE
+       multiple tries will get a better value if it is included */
     if (1>=shm_addr->dbbc3_tsys_data.data[iping].ifc[shm_addr->dbbc3_iscboard-1].raw_timestamp)
        return -2;
 

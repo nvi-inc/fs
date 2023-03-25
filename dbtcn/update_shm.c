@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -38,11 +38,6 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
     int i;
     int seconds;
 
-    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcu_v<125 ||
-        DBBC3_DDCV == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcv_v<125;
-
     rte2secs(it,&seconds);
     clock_t now=seconds;
     struct tm *ptr=gmtime(&now);
@@ -68,7 +63,9 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         cycle->ifc[i].sideband=shm_addr->lo.sideband[i];
         cycle->ifc[i].delay=t->core3h[i].pps_delay;
         cycle->ifc[i].raw_timestamp=t->core3h[i].timestamp;
-        if(v124)
+        cycle->ifc[i].time_included=
+            shm_addr->dbbc3_tsys_data.data[0].ifc[i].time_included;
+        if(!cycle->ifc[i].time_included)
             cycle->ifc[i].time=seconds;
         else
             cycle->ifc[i].time=t->core3h[i].timestamp+epoch;

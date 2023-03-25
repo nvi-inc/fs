@@ -7455,7 +7455,7 @@ SC  -25
 setcl: rte_check got error from times(), see above for error
 ""
 SC  -26
-setcl: DBBC3 firmware version must be 125 or later to get time from multicast.
+setcl: DBBC3 multicast time must be available to set time, check FS_DBBC3_MULTICAST_TIME_INCLUDED
 ""
 SC  -29
 setcl: Core3H multicast time still bad after four tries.

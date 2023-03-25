@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -19,6 +19,7 @@
  */
 /* initialization for "C" shared memory area */
 
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
@@ -33,6 +34,8 @@
 void cshm_init()
 {
   int i,j,k;
+  static int time_included = -1;
+  char *ptr;
 
   for (i=0; i< 32; i++)
     shm_addr->vform.codes[i]=-1;
@@ -549,12 +552,21 @@ void cshm_init()
       m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
   }
 
+  if(0>time_included) {
+      ptr=getenv("FS_DBBC3_MULTICAST_CORE3H_TIME_INCLUDED");
+      if(NULL!=ptr && !strcmp(ptr,"1"))
+          time_included=1;
+      else
+          time_included=0;
+  }
+
   shm_addr->dbbc3_tsys_data.iping=0;
   for(i=0;i<2;i++) {
       shm_addr->dbbc3_tsys_data.data[i].last=0;
       for(j=0;j<MAX_DBBC3_IF;j++) {
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].lo=-1.0;
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].delay=UINT_MAX;
+          shm_addr->dbbc3_tsys_data.data[i].ifc[j].time_included=time_included;
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].time_error=-1000000;
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].vdif_epoch= -1;
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].time = 0;

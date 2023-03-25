@@ -509,6 +509,7 @@ typedef struct fscom {
               double lo;
               int sideband;
               unsigned int delay;
+              int time_included; /* maybe only some IFs could have time */
               unsigned raw_timestamp;
               time_t time;
               int time_error;

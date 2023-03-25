@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -44,11 +44,6 @@ void dbbc3_mcast_time(command,itask,ip)
         ierr=-301;
         goto error;
     }
-
-    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcu_v<125 ||
-        DBBC3_DDCV == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcv_v<125;
 
     rte_time(it,it+5);
     rte2secs(it,&seconds);
@@ -109,7 +104,7 @@ void dbbc3_mcast_time(command,itask,ip)
 
         strcpy(output,command->name);
         strcat(output,"/");
-        if (v124)
+        if (!shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_included)
             sprintf(output+strlen(output),
                     " %d,,, %*ue-9",
                     i+1,

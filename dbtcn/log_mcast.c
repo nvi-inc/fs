@@ -83,13 +83,8 @@ static void log_time( struct dbbc3_tsys_cycle *cycle, char buf[])
 {
     int i;
 
-    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcu_v<125 ||
-        DBBC3_DDCV == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcv_v<125;
-
-    if(!v124) {
-        for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+    for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+        if(cycle->ifc[i].time_included) {
             struct tm *ptr=gmtime(&cycle->ifc[i].time);
 
             log_out(buf, "time/",22);
@@ -100,8 +95,8 @@ static void log_time( struct dbbc3_tsys_cycle *cycle, char buf[])
                     ptr->tm_min,
                     ptr->tm_sec);
         }
-        log_out(buf, "",0);
     }
+    log_out(buf, "",0);
 
     for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
         char sbuf[128];
