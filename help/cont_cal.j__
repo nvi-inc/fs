@@ -11,8 +11,9 @@ Settable parameters:
             polarity    0, 1, 2, or 3.  Default is the previous value.
                         See the Comments for more information.
             freq        8-300000 Hz.  Default is the previous value.
+                        See the Comments for more information.
             option      0=pulsed, 1=output is always on.  Default is the
-                        previous value.
+                        previous value.  See the Comments for more information.
             samples     number of samples to use for Tsys, positive integer,
                         Default is 10.
 
@@ -36,5 +37,14 @@ For some early releases of firmware DDC_V v124, a value of '1' or '3' used an
 embedded 1 PPS in the cal signal, but was otherwise equivalent to values '0'
 and '2', respectively. In any event, the only values that should be used are
 '0' and '2'.
+
+For 'polarity', 'frequency', and 'option', the default is the last value
+commanded.  On FS start-up, these default to not sending a value.  Not
+commanding persists until a new non-negative values is used.  A value of '-1'
+can be used to disable commanding of that parameter after a non-negative value
+has been used.  This behavior is atypical of how FS commands normally work;
+they normally have a specific value for any default and a '*' would be used for
+the previous value.  The current behavior is to simplify operations, including
+interactions with 'drudg', until a more comprehensive solution is implemented.
 
 The number of samples is only used internally by the FS to form Tsys.

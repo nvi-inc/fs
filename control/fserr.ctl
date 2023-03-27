@@ -2316,13 +2316,13 @@ DE -201
 Mode must be one of: off, on.
 ""
 DE -202
-Polarity must be one of 0, 1, 2, or 3.
+Polarity must be one of 0, 1, 2, or 3 (or -1 to not command).
 ""
 DE -203
-Frequency must be 8-300000.
+Frequency must be 8-300000 (or -1 to not command).
 ""
 DE -204
-Option must be 0 or 1.
+Option must be 0 or 1 (or -1 to not command).
 ""
 DE -205
 Samples must be a positive integer.

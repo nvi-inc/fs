@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -51,21 +51,22 @@ char *ptr;
       ierr=arg_int(ptr,&lcl->polarity,0,FALSE);
       if(ierr==-100)
 	ierr=0;  /*old value is the default */
-      else if(ierr==0 && (lcl->polarity < 0 ||lcl->polarity > 3))
+      else if(ierr==0 && (lcl->polarity < -1 ||lcl->polarity > 3))
 	ierr=-200;
       break;
     case 3:
       ierr=arg_int(ptr,&lcl->freq,0,FALSE);
       if(ierr==-100)
 	ierr=0;  /*old value is the default */
-      else if(ierr==0 && (lcl->freq < 8 ||lcl->freq > 300000))
+      else if(ierr==0 && (lcl->freq < 8 ||lcl->freq > 300000)
+		&& lcl->freq!=-1)
 	ierr=-200;
       break;
     case 4:
       ierr=arg_int(ptr,&lcl->option,0,FALSE);
       if(ierr==-100)
 	ierr=0;  /*old value is the default */
-      else if(ierr==0 && (lcl->option < 0 ||lcl->option > 1))
+      else if(ierr==0 && (lcl->option < -1 ||lcl->option > 1))
 	ierr=-200;
       break;
     case 5:
