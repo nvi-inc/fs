@@ -19,22 +19,22 @@ Settable parameters:
 Monitor-only parameters: None.
 
 Comments:
-This command does not enable continuous (switched) noise diode control
-in the front-end receiver. It only commands the state of the DBBC3.
-The receiver must inject a switched calibration signal for this to be
-useful.
+If 'state' is 'on', this command causes the DBBC3 to generate a TTL square-wave
+to control noise injection. The receiver must use the square-wave to inject a
+switched calibration signal for this to be useful.
 
-Polarity values affect the order of 'on'/'off' values in the device
-responses. A value of '2' causes them to be swapped. A value of '0'
-does not cause a swap. The setting of the polarity does not affect the
-FS's interpretation of the values returned, only how the DBBC3
-populates the returned values. It should be set to agree with the
-polarity of your cal signal so that the reported values from the
-bbcNNN commands are 'on' the 'off'.
+Polarity values affect the order of 'on'/'off' values in the device responses.
+A value of '2' causes them to be swapped. A value of '0' does not cause a swap.
+The setting of the polarity does not affect the FS's interpretation of the
+values returned, only how the DBBC3 populates the returned values. It should be
+set to agree with the polarity of your cal signal so that the reported values
+from the bbcNNN commands are in the order 'on' then 'off'. Polarity '0'
+corresponds to noise injection when the TTL signal is "low" (0 volts); '2',
+when "high".
 
-For some early releases of firmware DDC_V v124, a value of '1' or '3'
-used an embedded 1 PPS in the cal signal, but was otherwise equivalent
-to values '0' and '2', respectively. In any event, the only values
-that should be used are '0' and '2'.
+For some early releases of firmware DDC_V v124, a value of '1' or '3' used an
+embedded 1 PPS in the cal signal, but was otherwise equivalent to values '0'
+and '2', respectively. In any event, the only values that should be used are
+'0' and '2'.
 
 The number of samples is only used internally by the FS to form Tsys.

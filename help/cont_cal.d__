@@ -26,14 +26,13 @@ Settable parameters:
 Monitor-only parameters: None.
 
 Comments:
-This command does not enable continuous (switched) noise diode control
-in the front-end receiver. It only commands the state of the DBBC. The
-receiver must inject a switched calibration signal for this to be
-useful.
+If 'state' is 'on', this command causes the DBBC to generate a TTL square-wave
+to control noise injection. The receiver must use the square-wave to inject a
+switched calibration signal for this to be useful.
 
-Polarity values affect cont_cal signal and the order of on/off values
-in the device responses. The behavior is differnt for different firmware
-versions. As of v105x_1:
+Polarity values affect cont_cal signal and the order of on/off values in the
+device responses. The behavior is different for different firmware versions. As
+of v105x_1:
 
  Value    Polarity
    0     no change
