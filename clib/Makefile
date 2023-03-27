@@ -48,7 +48,8 @@ trkfrm_util.o user_device_util.o user_info_util.o v2_head_vmov.o \
 v2_motion_done.o v2_vlt_head.o v_vlt_head.o vacuum.o venable_util.o vform_util.o \
 vlbabbcd.o vrepro_util.o vset_zero.o vsi4_util.o vst_util.o wvolt_util.o \
 caccess.o get_gain_rxg.o log_rxgfile.o dbbc3_core3h_modex_util.o \
-dbbc3_version_check.o mk5dbbc3d.o get_dbbc3time.o find_process.o
+dbbc3_version_check.o mk5dbbc3d.o get_dbbc3time.o find_process.o \
+getenv_DBBC3.o
 
 clib.a: $(OBJECTS)
 

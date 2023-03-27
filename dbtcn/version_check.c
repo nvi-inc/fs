@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <sys/types.h>
@@ -31,6 +30,8 @@
 #include "dbtcn.h"
 
 extern struct fscom *shm_addr;
+
+char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
 
 void version_check( dbbc3_ddc_multicast_t *t)
 {
@@ -104,16 +105,11 @@ void version_check( dbbc3_ddc_multicast_t *t)
     }
 
     if(0>minutes) {
-        ptr=getenv("FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES");
-        if(NULL!=ptr && !strcmp(ptr,"0"))
-// maybe someday allow disabling it
-//            minutes=0;
-            minutes=1;
-        else if(NULL!=ptr) {
-            minutes=atoi(ptr);
-            if(minutes<1 || minutes >10)
-              minutes=1;
-        } else
+        int actual, error;
+        ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES",&actual,NULL,&error,1);
+        if(0==error)
+            minutes=actual;
+        else
             minutes=1;
     }
     if(0==ierr) {

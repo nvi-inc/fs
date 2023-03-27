@@ -31,6 +31,8 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
+char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
+
 void cshm_init()
 {
   int i,j,k;
@@ -553,9 +555,10 @@ void cshm_init()
   }
 
   if(0>time_included) {
-      ptr=getenv("FS_DBBC3_MULTICAST_CORE3H_TIME_INCLUDED");
-      if(NULL!=ptr && !strcmp(ptr,"1"))
-          time_included=1;
+      int actual, error;
+      ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_CORE3H_TIME_INCLUDED",&actual,NULL,&error,1);
+      if(0==error)
+          time_included=actual;
       else
           time_included=0;
   }

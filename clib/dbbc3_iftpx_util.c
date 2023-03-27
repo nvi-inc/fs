@@ -19,7 +19,6 @@
  */
 /* dbbc3 iftpx buffer parsing utilities */
 
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -29,6 +28,8 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
+
+char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
 
 static void perform_swaps( struct dbbc3_iftpx_mon *lclm);
 
@@ -100,9 +101,10 @@ struct dbbc3_iftpx_mon *lclm;
 
   if(0==shm_addr->dbbc3_cont_cal.polarity/2) {
     if(0>tpi_onoff0) {
-      ptr=getenv("FS_DBBC3_IFTPX_POLARITY0_ON_OFF_SWAP");
-      if(NULL!=ptr && !strcmp(ptr,"1"))
-        tpi_onoff0=1;
+      int actual, error;
+      ptr=getenv_DBBC3("FS_DBBC3_IFTPX_POLARITY0_ON_OFF_SWAP",&actual,NULL,&error,1);
+      if(0==error)
+        tpi_onoff0=actual;
       else
         tpi_onoff0=0;
     }
@@ -115,9 +117,10 @@ struct dbbc3_iftpx_mon *lclm;
     }
   } else {
     if(0>tpi_onoff2) {
-      ptr=getenv("FS_DBBC3_IFTPX_POLARITY2_ON_OFF_SWAP");
-      if(NULL!=ptr && !strcmp(ptr,"1"))
-        tpi_onoff2=1;
+      int actual, error;
+      ptr=getenv_DBBC3("FS_DBBC3_IFTPX_POLARITY2_ON_OFF_SWAP",&actual,NULL,&error,1);
+      if(0==error)
+        tpi_onoff2=actual;
       else
         tpi_onoff2=0;
     }

@@ -1571,10 +1571,13 @@ Station procedure library link was empty.
 BO -508
 Final station procedure library link does contain '.prc'.
 ""
+BO -997 Place holder for bad env variable
+
+""
 BO -998
 ANTCN termination mode failed, see above error.
 ""
-BO -999 Place holder
+BO -999 Place holder for log size warning
 
 ""
 CD  -1

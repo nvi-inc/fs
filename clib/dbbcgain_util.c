@@ -19,7 +19,6 @@
  */
 /* dbbcgain buffer parsing utilities */
 
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -29,6 +28,8 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
+
+char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
 
 static void perform_swaps( struct dbbcgain_cmd *lclc);
 
@@ -281,9 +282,10 @@ struct dbbcgain_cmd *lclc;
   char *ptr;
 
   if(0>gain) {
-    ptr=getenv("FS_DBBC3_BBC_GAIN_USB_LSB_SWAP");
-    if(NULL!=ptr && !strcmp(ptr,"1"))
-      gain=1;
+    int actual, error;
+    ptr=getenv_DBBC3("FS_DBBC3_BBC_GAIN_USB_LSB_SWAP",&actual,NULL,&error,1);
+    if(0==error)
+      gain=actual;
     else
       gain=0;
   }

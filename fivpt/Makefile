@@ -5,8 +5,8 @@ site.o sorce.o tsys.o unslp.o volts.o wtsys.o mcbcn.o xoffot.o \
 dscon.o dbbcn.o dbbcn_pfb.o rdbcn.o dbbc3n.o
 
 LIBS = ../polb/polb.a ../fslb/fslb.a ../lnfch/lnfch.a ../newlb/newlb.a \
-../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../fmpsee/fmpsee.a \
-../port/port.a ../rtelb/rtelb.a
+../flib/flib.a ../fclib/fclib.a  ../clib/clib.a ../poclb/poclb.a \
+../clib/clib.a ../fmpsee/fmpsee.a ../port/port.a ../rtelb/rtelb.a
 
 LDLIBS += $(FLIBS)
 

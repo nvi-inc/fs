@@ -19,7 +19,6 @@
  */
 /* dbbc3 bbcnn buffer parsing utilities */
 
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -41,6 +40,7 @@ static char *agc_key[ ]={"man","agc"};
 
 static int dbbc3_freq(unsigned int *,char *);
 static void perform_swaps(struct dbbc3_bbcnn_mon *);
+char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
 
 int dbbc3_bbcnn_dec(lcl,count,ptr,itask)
 struct dbbc3_bbcnn_cmd *lcl;
@@ -354,9 +354,10 @@ struct dbbc3_bbcnn_mon *lclm;
   char *ptr;
 
   if(0>tpi_ul) {
-    ptr=getenv("FS_DBBC3_BBCNNN_TPI_USB_LSB_SWAP");
-    if(NULL!=ptr && !strcmp(ptr,"1"))
-      tpi_ul=1;
+    int actual, error;
+    ptr=getenv_DBBC3("FS_DBBC3_BBCNNN_TPI_USB_LSB_SWAP",&actual,NULL,&error,1);
+    if(0==error)
+      tpi_ul=actual;
     else
       tpi_ul=0;
   }
@@ -373,9 +374,10 @@ struct dbbc3_bbcnn_mon *lclm;
   }
 
   if(0>gain_ul) {
-    ptr=getenv("FS_DBBC3_BBCNNN_GAIN_USB_LSB_SWAP");
-    if(NULL!=ptr && !strcmp(ptr,"1"))
-      gain_ul=1;
+    int actual, error;
+    ptr=getenv_DBBC3("FS_DBBC3_BBCNNN_GAIN_USB_LSB_SWAP",&actual,NULL,&error,1);
+    if(0==error)
+      gain_ul=actual;
     else
       gain_ul=0;
   }
@@ -388,9 +390,10 @@ struct dbbc3_bbcnn_mon *lclm;
   }
 
   if(0>tpi_onoff) {
-    ptr=getenv("FS_DBBC3_BBCNNN_ON_OFF_SWAP");
-    if(NULL!=ptr && !strcmp(ptr,"1"))
-      tpi_onoff=1;
+    int actual, error;
+    ptr=getenv_DBBC3("FS_DBBC3_BBCNNN_ON_OFF_SWAP",&actual,NULL,&error,1);
+    if(0==error)
+      tpi_onoff=actual;
     else
       tpi_onoff=0;
   }

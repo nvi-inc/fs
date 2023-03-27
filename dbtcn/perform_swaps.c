@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -31,6 +30,8 @@
 #include "dbtcn.h"
 
 extern struct fscom *shm_addr;
+
+char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
 
 void perform_swaps( dbbc3_ddc_multicast_t *t)
 {
@@ -46,9 +47,10 @@ void perform_swaps( dbbc3_ddc_multicast_t *t)
     unsigned int temp_uint;
 
     if(0>ul) {
-        ptr=getenv("FS_DBBC3_MULTICAST_BBC_TPI_USB_LSB_SWAP");
-        if(NULL!=ptr && !strcmp(ptr,"1"))
-            ul=1;
+        int actual, error;
+        ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_BBC_TPI_USB_LSB_SWAP",&actual,NULL,&error,1);
+        if(0==error)
+            ul=actual;
         else
             ul=0;
     }
@@ -65,9 +67,10 @@ void perform_swaps( dbbc3_ddc_multicast_t *t)
         }
 
     if(0>bbc_onoff) {
-        ptr=getenv("FS_DBBC3_MULTICAST_BBC_ON_OFF_SWAP");
-        if(NULL!=ptr && !strcmp(ptr,"1"))
-            bbc_onoff=1;
+        int actual, error;
+        ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_BBC_ON_OFF_SWAP",&actual,NULL,&error,1);
+        if(0==error)
+            bbc_onoff=actual;
         else
             bbc_onoff=0;
     }
@@ -85,9 +88,10 @@ void perform_swaps( dbbc3_ddc_multicast_t *t)
         }
     if(0==shm_addr->dbbc3_cont_cal.polarity/2) {
         if(0>core3h_onoff0) {
-            ptr=getenv("FS_DBBC3_MULTICAST_CORE3H_POLARITY0_ON_OFF_SWAP");
-            if(NULL!=ptr && !strcmp(ptr,"1"))
-                core3h_onoff0=1;
+            int actual, error;
+            ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_CORE3H_POLARITY0_ON_OFF_SWAP",&actual,NULL,&error,1);
+            if(0==error)
+                core3h_onoff0=actual;
             else
                 core3h_onoff0=0;
         }
@@ -100,9 +104,10 @@ void perform_swaps( dbbc3_ddc_multicast_t *t)
             }
     } else {
         if(0>core3h_onoff2) {
-            ptr=getenv("FS_DBBC3_MULTICAST_CORE3H_POLARITY2_ON_OFF_SWAP");
-            if(NULL!=ptr && !strcmp(ptr,"1"))
-                core3h_onoff2=1;
+            int actual, error;
+            ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_CORE3H_POLARITY2_ON_OFF_SWAP",&actual,NULL,&error,1);
+            if(0==error)
+                core3h_onoff2=actual;
             else
                 core3h_onoff2=0;
         }
@@ -115,9 +120,10 @@ void perform_swaps( dbbc3_ddc_multicast_t *t)
             }
     }
     if(0>time_add) {
-	ptr=getenv("FS_DBBC3_MULTICAST_CORE3H_TIME_ADD_SECONDS");
-	if(NULL!=ptr) {
-	    time_adder=atoi(ptr);
+        int actual, error;
+        ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_CORE3H_TIME_ADD_SECONDS",&actual,NULL,&error,1);
+        if(0==error) {
+	    time_adder=actual;
 	    time_add=1;
         } else
 	    time_add=0;
