@@ -22,19 +22,33 @@
 #include <stdio.h>
 #include <string.h>
 
-#define TYPICALB nominal=0;\
-                 if(NULL!=ptr && 0==strcmp(ptr,"1"))\
-                     actual=1;\
-                 else if(NULL!=ptr)\
-                     actual=0;\
-                 else\
-                     actual=nominal;
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"
 
-#define TYPICALN nominal=0;\
-                 if(NULL!=ptr && 0==strcmp(ptr,"1"))\
-                     actual=atoi(ptr);\
-                 else\
-                     actual=nominal;
+extern struct fscom *shm_addr;
+
+#define TYPICALB0 nominal=0;\
+                  if(NULL!=ptr && 0==strcmp(ptr,"1"))\
+                      actual=1;\
+                  else if(NULL!=ptr)\
+                      actual=0;\
+                  else\
+                      actual=nominal;
+
+#define TYPICALB1 nominal=1;\
+                  if(NULL!=ptr && 0==strcmp(ptr,"1"))\
+                      actual=1;\
+                  else if(NULL!=ptr)\
+                      actual=0;\
+                  else\
+                      actual=nominal;
+
+#define TYPICALN0 nominal=0;\
+                  if(NULL!=ptr && 0==strcmp(ptr,"1"))\
+                      actual=atoi(ptr);\
+                  else\
+                      actual=nominal;
 
 char *getenv_DBBC3( char *env, int *actual_p, int *nominal_p, int *error_p, int options)
 {
@@ -45,17 +59,27 @@ char *getenv_DBBC3( char *env, int *actual_p, int *nominal_p, int *error_p, int 
     ptr=getenv(env);
 
     if(0==strcmp(env,"FS_DBBC3_MULTICAST_BBC_TPI_USB_LSB_SWAP")) {
-        TYPICALB
+        TYPICALB1
     } else if(0==strcmp(env,"FS_DBBC3_MULTICAST_BBC_ON_OFF_SWAP")) {
-        TYPICALB
+        TYPICALB0
     } else if(0==strcmp(env,"FS_DBBC3_MULTICAST_CORE3H_POLARITY0_ON_OFF_SWAP")) {
-        TYPICALB
+        TYPICALB0
     } else if(0==strcmp(env,"FS_DBBC3_MULTICAST_CORE3H_POLARITY2_ON_OFF_SWAP")) {
-        TYPICALB
+        TYPICALB1
     } else if(0==strcmp(env,"FS_DBBC3_MULTICAST_CORE3H_TIME_ADD_SECONDS")) {
-        TYPICALN
+        TYPICALN0
     } else if(0==strcmp(env,"FS_DBBC3_MULTICAST_CORE3H_TIME_INCLUDED")) {
-        TYPICALB
+        if(DBBC3==shm_addr->equip.rack &&
+           DBBC3_DDCV == shm_addr->equip.rack_type)
+             nominal=0;
+         else
+             nominal=1;
+         if(NULL!=ptr && 0==strcmp(ptr,"1"))
+             actual=1;
+         else if(NULL!=ptr)
+             actual=0;
+         else
+             actual=nominal;
     } else if(0==strcmp(env,"FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES")) {
         nominal=1;
         if(NULL!=ptr && 0==strcmp(ptr,"0"))
@@ -69,17 +93,17 @@ char *getenv_DBBC3( char *env, int *actual_p, int *nominal_p, int *error_p, int 
         } else
             actual=nominal;
     } else if(0==strcmp(env,"FS_DBBC3_BBCNNN_TPI_USB_LSB_SWAP")) {
-        TYPICALB
+        TYPICALB1
     } else if(0==strcmp(env,"FS_DBBC3_BBCNNN_GAIN_USB_LSB_SWAP")) {
-        TYPICALB
+        TYPICALB1
     } else if(0==strcmp(env,"FS_DBBC3_BBCNNN_ON_OFF_SWAP")) {
-        TYPICALB
+        TYPICALB0
     } else if(0==strcmp(env,"FS_DBBC3_IFTPX_POLARITY0_ON_OFF_SWAP")) {
-        TYPICALB
+        TYPICALB0
     } else if(0==strcmp(env,"FS_DBBC3_IFTPX_POLARITY2_ON_OFF_SWAP")) {
-        TYPICALB
+        TYPICALB1
     } else if(0==strcmp(env,"FS_DBBC3_BBC_GAIN_USB_LSB_SWAP")) {
-        TYPICALB
+        TYPICALB1
     } else {
         error=-1;
         if(0x1 & options) {
