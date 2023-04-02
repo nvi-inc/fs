@@ -119,10 +119,10 @@ main()
     }
     goto loop;
   } else if(DBBC3 == shm_addr->equip.rack) {
-      dbtcn_control.continuous=shm_addr->tpicd.continuous;
-      dbtcn_control.cycle=shm_addr->tpicd.cycle;
+      dbtcn_control.continuous=tpicd.continuous;
+      dbtcn_control.cycle=tpicd.cycle;
       dbtcn_control.reset_request=ip[0];
-      dbtcn_control.stop_request=shm_addr->tpicd.stop_request;
+      dbtcn_control.stop_request=tpicd.stop_request;
       memcpy(&dbtcn_control.data_valid,&data_valid,
 	     sizeof(struct data_valid_cmd));
       iping[0]=1-shm_addr->dbtcn.iping;
