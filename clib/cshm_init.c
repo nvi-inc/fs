@@ -537,6 +537,7 @@ void cshm_init()
   for (j=0;j<2;j++) {
       shm_addr->dbtcn.control[j].continuous=0;
       shm_addr->dbtcn.control[j].cycle=0;
+      shm_addr->dbtcn.control[j].reset_request=0;
       shm_addr->dbtcn.control[j].stop_request=1;
       shm_addr->dbtcn.control[j].data_valid.user_dv=0;
   }

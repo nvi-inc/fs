@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -102,6 +102,7 @@ parse:
       memcpy(&shm_addr->data_valid[indx],&lcl,sizeof(lcl));
 
       skd_run("pcald",'w',ip);
+      ip[0]=0;
       skd_run("tpicd",'w',ip);
 
       if(!kS2drive) {

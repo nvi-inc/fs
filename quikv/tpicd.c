@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -57,6 +57,7 @@ int ip[5];                           /* ipc parameters */
       Start:
 	  shm_addr->tpicd.stop_request=0;
 	  shm_addr->tpicd.tsys_request=0;
+	  ip[0]=1;
 	  skd_run("tpicd",'w',ip);
 	  ip[0]=ip[1]=ip[2]=0;
 	  return;
@@ -68,6 +69,7 @@ int ip[5];                           /* ipc parameters */
 	  return;
 	} else if(0==strcmp(command->argv[0],"stop")){
 	  shm_addr->tpicd.stop_request=1;
+	  ip[0]=0;
 	  skd_run("tpicd",'w',ip);
 	  ip[0]=ip[1]=ip[2]=0;
           return;
@@ -105,6 +107,7 @@ int ip[5];                           /* ipc parameters */
 	}
 	Tsys:
 	  shm_addr->tpicd.tsys_request=1;
+	  ip[0]=0;
 	  skd_run("tpicd",'w',ip);
 	  ip[0]=ip[1]=ip[2]=0;
           return;

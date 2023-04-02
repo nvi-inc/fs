@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -79,8 +79,10 @@ parse:
       kdiff=memcmp(&shm_addr->dbbc3_cont_cal,&lcl,sizeof(lcl));
       memcpy(&shm_addr->dbbc3_cont_cal,&lcl,sizeof(lcl));
 
-      if(kdiff)
+      if(kdiff) {
+	ip[0]=1;
 	skd_run("tpicd",'w',ip);
+      }
  
 /* format buffer for dbbcn */
       

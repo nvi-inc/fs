@@ -484,6 +484,7 @@ typedef struct fscom {
     struct dbtcn_control {
       int continuous;
       int cycle;
+      int reset_request;
       int stop_request;
       struct data_valid_cmd data_valid;
     } control[2];

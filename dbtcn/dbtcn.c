@@ -72,17 +72,44 @@ int main(int argc, char *argv[])
     dbbc3_ddc_multicast_t packet = {};
 
     int cont_cal_save1 = 0;
+    int reset = TRUE;
+    int reset_count = 0;
+    int count = 0;
 
     for (;;) {
+        int reset_request=0;
+
+        int iping=shm_addr->dbtcn.iping;
+        if(0==iping || 1==iping) {
+            memcpy(&dbtcn_control,
+                    &shm_addr->dbtcn.control[iping], sizeof(dbtcn_control));
+
+            reset_request=dbtcn_control.reset_request;
+
+            if(1==reset_request) {
+                dbtcn_control.reset_request=0;
+                memcpy(&shm_addr->dbtcn.control[iping],&dbtcn_control,
+                sizeof(struct dbtcn_control));
+            }
+        }
+
         /* wait two full cycles for TPIs to catch-up to cont cal turning on */
 
         int cont_cal0 = shm_addr->dbbc3_cont_cal.mode == 1;
         int cont_cal = cont_cal0 && cont_cal_save1;
         cont_cal_save1 = cont_cal0;
 
-        memcpy(&dbtcn_control,
-                &shm_addr->dbtcn.control[shm_addr->dbtcn.iping],
-                sizeof(dbtcn_control));
+        /* or after a reset is requested */
+
+        if(1==reset_request)
+           reset_count=2;
+        if(reset_count) {
+          count=0;
+          if(!--reset_count)
+            reset=TRUE;
+        }
+
+        int samples=shm_addr->dbbc3_cont_cal.samples;
 
         n = read_mcast(sock,buf,sizeof(buf),itmc,centisec,
                 dbtcn_control.data_valid.user_dv);
@@ -101,6 +128,11 @@ int main(int argc, char *argv[])
 
         calc_ts(&packet,&cycle, cont_cal);
 
+        if(cont_cal) {
+             smooth_ts( &cycle, reset, samples);
+             reset=FALSE;
+        }
+
         update_shm(&packet,&cycle, itmc, centisec);
 
         /* check control to get the last state before logging */
@@ -114,6 +146,7 @@ int main(int argc, char *argv[])
                  (dbtcn_control.data_valid.user_dv ==0 || shm_addr->KHALT !=0 ||
                   0==strncmp(shm_addr->LSKD2,"none ",5)))) {
             last=0;
+            count=0; /* catches data_valid=off */
             continue;
         }
 
@@ -124,7 +157,7 @@ int main(int argc, char *argv[])
             continue;
 
         last=seconds;
-        log_mcast(&packet,&cycle,cont_cal);
+        log_mcast(&packet,&cycle,cont_cal, &count, samples);
     }
 
 idle:

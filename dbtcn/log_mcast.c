@@ -212,7 +212,8 @@ static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[])
     }
 }
 
-void log_mcast(dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle, int cont_cal)
+void log_mcast(dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle, int cont_cal,
+    int *count, int samples)
 {
     char buf[256] = "";
 
@@ -220,6 +221,8 @@ void log_mcast(dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle, int con
 
     log_tp( t, buf, cont_cal);
 
-    if(cont_cal)
+    if(0<samples)
+        *count=++*count%samples;
+    if(cont_cal && (0>=samples || 0==*count))
         log_ts( cycle, buf);
 }

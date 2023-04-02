@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -121,6 +121,7 @@ main()
   } else if(DBBC3 == shm_addr->equip.rack) {
       dbtcn_control.continuous=shm_addr->tpicd.continuous;
       dbtcn_control.cycle=shm_addr->tpicd.cycle;
+      dbtcn_control.reset_request=ip[0];
       dbtcn_control.stop_request=shm_addr->tpicd.stop_request;
       memcpy(&dbtcn_control.data_valid,&data_valid,
 	     sizeof(struct data_valid_cmd));

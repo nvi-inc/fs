@@ -2325,7 +2325,7 @@ DE -204
 Option must be 0 or 1 (or -1 to not command).
 ""
 DE -205
-Samples must be a positive integer.
+Samples must be a non-negative integer.
 ""
 DE -401
 Class buffer error from monitor response.
