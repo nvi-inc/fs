@@ -75,11 +75,13 @@ int main(int argc, char *argv[])
     int reset = TRUE;
     int reset_count = 0;
     int count = 0;
+    int iping;
 
     for (;;) {
         int reset_request=0;
+        int tsys_request=0;
 
-        int iping=shm_addr->dbtcn.iping;
+        iping=shm_addr->dbtcn.iping;
         if(0==iping || 1==iping) {
             memcpy(&dbtcn_control,
                     &shm_addr->dbtcn.control[iping], sizeof(dbtcn_control));
@@ -137,14 +139,25 @@ int main(int argc, char *argv[])
 
         /* check control to get the last state before logging */
 
-        memcpy(&dbtcn_control,
-                &shm_addr->dbtcn.control[shm_addr->dbtcn.iping],
-                sizeof(dbtcn_control));
+        iping=shm_addr->dbtcn.iping;
+        if(0==iping || 1==iping) {
+            memcpy(&dbtcn_control,
+                    &shm_addr->dbtcn.control[iping], sizeof(dbtcn_control));
 
-        if (1==dbtcn_control.stop_request ||
-                (dbtcn_control.continuous == 0 &&
+            tsys_request=dbtcn_control.tsys_request;
+
+            if(1==tsys_request) {
+                dbtcn_control.tsys_request=0;
+                memcpy(&shm_addr->dbtcn.control[iping],&dbtcn_control,
+                sizeof(struct dbtcn_control));
+            }
+        }
+        int skip_remaining= 1==dbtcn_control.stop_request ||
+                 dbtcn_control.continuous == 0 &&
                  (dbtcn_control.data_valid.user_dv ==0 || shm_addr->KHALT !=0 ||
-                  0==strncmp(shm_addr->LSKD2,"none ",5)))) {
+                  0==strncmp(shm_addr->LSKD2,"none ",5));
+
+        if (0==tsys_request && skip_remaining) {
             last=0;
             count=0; /* catches data_valid=off */
             continue;
@@ -153,11 +166,14 @@ int main(int argc, char *argv[])
         rte_time(it,it+5);
         rte2secs(it,&seconds);
 
-        if( 0 != last && seconds-last < (dbtcn_control.cycle+99)/100)
+        int no_logging = 0 != last && seconds-last < (dbtcn_control.cycle+99)/100 || skip_remaining;
+        if(0==tsys_request && no_logging)
             continue;
 
         last=seconds;
-        log_mcast(&packet,&cycle,cont_cal, &count, samples);
+        log_mcast(&packet,&cycle,cont_cal, &count, samples, !no_logging, tsys_request);
+
+
     }
 
 idle:

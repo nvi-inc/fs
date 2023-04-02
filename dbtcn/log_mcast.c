@@ -60,7 +60,7 @@ static void dt_cat(char buf[],char dt[4])
     strcat(buf,",");
 }
 
-static void log_out(char buf[],char *string, int new)
+static void log_out(char buf[],char *string, int new, int disp)
 {
     static int slen = 0;
 
@@ -71,7 +71,10 @@ static void log_out(char buf[],char *string, int new)
      */
     if((strlen(buf)+new >  110 || strlen(string)==0) && strlen(buf) > slen) {
         buf[strlen(buf)-1]=0;
-        logit(buf,0,NULL);
+        if(disp)
+           logitf(buf,0,NULL);
+        else
+           logit(buf,0,NULL);
         buf[0]=0;
     }
     if(buf[0]==0 && strlen(string) !=0) {
@@ -87,7 +90,7 @@ static void log_time( struct dbbc3_tsys_cycle *cycle, char buf[])
         if(cycle->ifc[i].time_included) {
             struct tm *ptr=gmtime(&cycle->ifc[i].time);
 
-            log_out(buf, "time/",22);
+            log_out(buf, "time/",22,0);
             sprintf(buf+strlen(buf)," %d, %4d.%03d.%02d:%02d:%02d,",i+1,
                     ptr->tm_year+1900,
                     ptr->tm_yday+1,
@@ -96,16 +99,16 @@ static void log_time( struct dbbc3_tsys_cycle *cycle, char buf[])
                     ptr->tm_sec);
         }
     }
-    log_out(buf, "",0);
+    log_out(buf, "",0,0);
 
     for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
         char sbuf[128];
 
         sprintf(sbuf," %d, %ue-9,",i+1, cycle->ifc[i].delay);
-        log_out(buf, "pps2dot/",strlen(sbuf)-1);
+        log_out(buf, "pps2dot/",strlen(sbuf)-1,0);
         strcat(buf,sbuf);
     }
-    log_out(buf, "",0);
+    log_out(buf, "",0,0);
 }
 
 static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
@@ -117,9 +120,9 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
         for (k=0;k<MAX_DBBC3_BBC;k++) {
             if (shm_addr->tpicd.itpis[k] && shm_addr->tpicd.ifc[k] == j) {
                 if(cont_cal)
-                    log_out(buf, "tpcont/",17);
+                    log_out(buf, "tpcont/",17,0);
                 else
-                    log_out(buf, "tpi/",11);
+                    log_out(buf, "tpi/",11,0);
 
                 dt_cat(buf,shm_addr->tpicd.lwhat[k]);
 
@@ -134,9 +137,9 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
             }
             if (shm_addr->tpicd.itpis[k+MAX_DBBC3_BBC] && shm_addr->tpicd.ifc[k+MAX_DBBC3_BBC] == j) {
                 if(cont_cal)
-                    log_out(buf, "tpcont/",17);
+                    log_out(buf, "tpcont/",17,0);
                 else
-                    log_out(buf, "tpi/",11);
+                    log_out(buf, "tpi/",11,0);
 
                 dt_cat(buf,shm_addr->tpicd.lwhat[k+MAX_DBBC3_BBC]);
 
@@ -152,9 +155,9 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
         }
         if (j!= 0 && shm_addr->tpicd.itpis[j-1+MAX_DBBC3_BBC*2]) {
             if(cont_cal)
-                log_out(buf, "tpcont/",25);
+                log_out(buf, "tpcont/",25,0);
             else
-                log_out(buf, "tpi/",15);
+                log_out(buf, "tpi/",15,0);
 
             dt_cat(buf,shm_addr->tpicd.lwhat[j-1+MAX_DBBC3_BBC*2]);
 
@@ -167,11 +170,12 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
             } else
                 if_cat(buf,off);
         }
-        log_out(buf, "",0);
+        log_out(buf, "",0,0);
     }
 }
 
-static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[])
+static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[],
+                    int tsys_request)
 {
     double tsys;
     int j, k;
@@ -183,7 +187,7 @@ static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[])
                 tsys=cycle->bbc[k].tsys_lsb;
 
                 if (tsys > -1e12) {
-                    log_out(buf, "tsys/",11);
+                    log_out(buf, "tsys/",11,tsys_request);
                     dt_cat(buf,shm_addr->tpicd.lwhat[k]);
                     ts_cat(buf,tsys);
                 }
@@ -192,7 +196,7 @@ static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[])
                 tsys=cycle->bbc[k].tsys_usb;
 
                 if (tsys > -1e12) {
-                    log_out(buf, "tsys/",11);
+                    log_out(buf, "tsys/",11,tsys_request);
                     dt_cat(buf,shm_addr->tpicd.lwhat[k+MAX_DBBC3_BBC]);
                     ts_cat(buf,tsys);
                 }
@@ -203,26 +207,27 @@ static void log_ts( struct dbbc3_tsys_cycle *cycle, char buf[])
             tsys=cycle->ifc[j].tsys;
 
             if (tsys > -1e12) {
-                log_out(buf, "tsys/",9);
+                log_out(buf, "tsys/",9,tsys_request);
                 dt_cat(buf,shm_addr->tpicd.lwhat[j+MAX_DBBC3_BBC*2]);
                 ts_cat(buf,tsys);
             }
         }
-        log_out(buf, "",0);
+        log_out(buf, "",0,tsys_request);
     }
 }
 
 void log_mcast(dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle, int cont_cal,
-    int *count, int samples)
+    int *count, int samples, int logging, int tsys_request)
 {
     char buf[256] = "";
 
-    log_time( cycle, buf);
+    if(logging) {
+       log_time( cycle, buf);
+       log_tp( t, buf, cont_cal);
+    }
 
-    log_tp( t, buf, cont_cal);
-
-    if(0<samples)
+    if(0<samples && logging)
         *count=++*count%samples;
-    if(cont_cal && (0>=samples || 0==*count))
-        log_ts( cycle, buf);
+    if(cont_cal && (tsys_request || logging && (0>=samples || 0==*count)))
+        log_ts( cycle, buf, tsys_request);
 }

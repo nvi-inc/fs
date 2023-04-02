@@ -123,6 +123,7 @@ main()
       dbtcn_control.cycle=tpicd.cycle;
       dbtcn_control.reset_request=ip[0];
       dbtcn_control.stop_request=tpicd.stop_request;
+      dbtcn_control.tsys_request=tpicd.tsys_request;
       memcpy(&dbtcn_control.data_valid,&data_valid,
 	     sizeof(struct data_valid_cmd));
       iping[0]=1-shm_addr->dbtcn.iping;
