@@ -72,13 +72,12 @@ int main(int argc, char *argv[])
     dbbc3_ddc_multicast_t packet = {};
 
     int cont_cal_save1 = 0;
-    int cont_cal_save2 = 0;
 
     for (;;) {
-        /* wait two cylces for TPIs to catch-up to cont cal turning on */
+        /* wait two full cycles for TPIs to catch-up to cont cal turning on */
+
         int cont_cal0 = shm_addr->dbbc3_cont_cal.mode == 1;
-        int cont_cal = cont_cal0 && cont_cal_save1 && cont_cal_save2;
-        cont_cal_save2 = cont_cal_save1;
+        int cont_cal = cont_cal0 && cont_cal_save1;
         cont_cal_save1 = cont_cal0;
 
         memcpy(&dbtcn_control,
