@@ -15,8 +15,8 @@ Settable parameters:
             option      0=pulsed, 1=output is always on.  Default is the
                         previous value.  See the Comments for more information.
             samples     number of samples to use for Tsys, a non-negative
-                        integer. Default is 10.  See the Comments for more
-                        information.
+                        integer.  Default is the previous value, which is
+                        initially 10.  See the Comments for more information.
 
 Monitor-only parameters: None.
 

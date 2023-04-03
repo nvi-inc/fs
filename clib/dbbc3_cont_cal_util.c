@@ -70,7 +70,7 @@ char *ptr;
 	ierr=-200;
       break;
     case 5:
-        ierr=arg_int(ptr,&lcl->samples,10,TRUE);
+        ierr=arg_int(ptr,&lcl->samples,lcl->samples,TRUE);
 	if(ierr == 0 && lcl->samples < 0)
 	  ierr=-200;
         break;

@@ -13,7 +13,8 @@ Settable parameters:
                         for DBBC versions less than v105X_1.  Default is the
                         previous value; please see the comments.
             samples     number of samples to average for Tsys, positive
-                        integer, Default is 10.
+                        integer. Default is the previous value, which is
+                        initially 10.
             frequency   8 to 300000, but -1 is allowed to not command; please
                         see the comments.  Non-null values are not permitted 
                         for DBBC versions less than v106.  Default is the

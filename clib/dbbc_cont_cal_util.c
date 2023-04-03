@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -65,7 +65,7 @@ char *ptr;
 	}
 	break;
     case 3:
-      ierr=arg_int(ptr,&lcl->samples,10,TRUE);
+      ierr=arg_int(ptr,&lcl->samples,lcl->samples,TRUE);
       if(ierr == 0 && lcl->samples < 1)
 	ierr=-200;
       break;
