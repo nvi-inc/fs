@@ -47,10 +47,10 @@ struct dbbc3_iftpx_mon *lcl;
 	sprintf(output,"%u",lcl->tp);
 	break;
       case 2:
-	sprintf(output,"%u",lcl->off);
+	sprintf(output,"%u",lcl->on);
 	break;
       case 3:
-	sprintf(output,"%u",lcl->on);
+	sprintf(output,"%u",lcl->off);
 	break;
       default:
         *count=-1;
@@ -79,13 +79,13 @@ char *buff;
   ptr=strtok(NULL,",");
   if(ptr==NULL)
     return -1;
-  if(1!=sscanf(ptr,"%u%c",&lclm->off,&ch))
+  if(1!=sscanf(ptr,"%u%c",&lclm->on,&ch))
     return -1;
 
   ptr=strtok(NULL,",;");
   if(ptr==NULL)
     return -1;
-  if(1!=sscanf(ptr,"%u%c",&lclm->on,&ch))
+  if(1!=sscanf(ptr,"%u%c",&lclm->off,&ch))
     return -1;
 
   perform_swaps( lclm);

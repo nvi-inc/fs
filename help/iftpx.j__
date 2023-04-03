@@ -14,12 +14,22 @@ Settable Parameters:
 Monitor-only Parameters:
 
             tp        total power, 0-65535 counts
-            off       non-switched total power or
-	              switched total power cal off, 0-65535 counts
             on        switched total power cal on, 0-65535 counts
+            off       non-switched total power or
+                      switched total power cal off, 0-65535 counts
 
 Comments:
 This command has no settable parameters.
 
-The 'off' parameter is the total power when continuous power ("switched") is
-not in use.
+The 'on' parameter is also the total power when continuous power ("switched")
+is not in use.
+
+The order of 'on' and 'off' here is opposite from the DBBC3 documentation.  We
+believe that is a typographic error in the DBBC3 documentation.  In all other
+instances in the DBBC3 documentation, the bbcNNN command and Core3H and BBC
+sections of the multicast packet structure, the order is 'on' then 'off'.
+Moreover, when the cont_cal polarity is correctly set to '0', the first value
+is the calon value both for this command and in the multicast packet.  While
+the values are reversed in both instances when the polarity is '2', that makes
+the multicast order wrong.  The simplest interpretation of this is that the
+order is not being automatically reversed for polarity '2' for either instance.
