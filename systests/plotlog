@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright (c) 2020, 2022 NVI, Inc.
+# Copyright (c) 2020, 2022, 2023 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -550,8 +550,14 @@ $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
 
 if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_V)) {
-    print STDERR "Try: 'plotlog -h'\n";
-    exit 0;
+    $ARGV[0]=`lognm`;
+    chomp $ARGV[0];
+    if ($ARGV[0] eq "") {
+        print STDERR "No log files specified and the FS is not running.\n";
+        print STDERR "For help, try: 'plotlog -h'\n";
+        exit 0;
+    }
+    $ARGV[0]="/usr2/log/$ARGV[0].log";
 }
 
 if(defined($opt_V)) {
@@ -562,12 +568,14 @@ if(defined($opt_V)) {
 }
 
 if (defined($opt_h)) {
-    print "Usage: plotlog [options] logs
+    print "Usage: plotlog [options] [logs]
 
-Synopsis: extracts and plots data from log files
+Synopsis: extracts and plots data from the log files
 Exit code is 0 for no error, -1 for no logs found, -2 for nothing to plot.
 
-This script makes plots of data found in log files. It plots wx/, cable/,
+If no 'logs' are specified and the FS is running, the current FS log is used.
+
+This script makes plots of data found in the log files. It plots wx/, cable/,
 cdms/, tsys/ rx/ (and sk/ and sx/), clock (see below), setcl#time/, RDBE
 phase-cal, recorder statistics, and the first encountered tone per channel (LSB
 and USB separately) for Mark IV decoder phase-cal data. The time axes of all
