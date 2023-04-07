@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -241,7 +241,8 @@ int main()
       item=item->next;
     }
     if(match && NULL!=attrib) {
-      printf("%s ",prefix);
+      if(0!= strlen(prefix))
+        printf("%s ",prefix);
       display_it(irow,icol,attrib,buffer);
     }
   }
