@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2022 NVI, Inc.
+// Copyright (c) 2020-2023 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -22,7 +22,7 @@
 
 = FS 10.1.0-beta1 to FS 10.1.0-beta2 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 4.9 - April 2022
+Version 5.0 - April 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -361,7 +361,7 @@ configure the DBBC3 at this time.
 
 +
 
-The <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> document was
+The <<dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> document was
 reorganized to emphasis that the boot configuration is the only
 recommended way to configure the DBBC3. The updated manual includes a
 procedure for determining and setting the boot configuration from a
@@ -376,7 +376,7 @@ Core3H board configuration method>>, of that document, where it is
 described as an "`engineering test mode`". It use is not recommended
 at this time.
 
-.. Make other improvements to the  <<dbbc3_ops.adoc#,FS 10.1 DBBC3
+.. Make other improvements to the  <<dbbc3_ops.adoc#,FS DBBC3
 Operations Manual>> document
 
 +

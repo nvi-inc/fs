@@ -19,7 +19,7 @@
 
 :doctype: book
 
-= FS 10.1 DBBC3 Operations Manual
+= FS DBBC3 Operations Manual
 :stem: latexmath
 :sectnums:
 :sectnumlevels: 4
@@ -27,7 +27,7 @@
 :toc:
 :experimental:
 E. Himwich, J. Quick
-Version 4.7 - April 2023
+Version 4.8 - April 2023
 
 == Introduction
 

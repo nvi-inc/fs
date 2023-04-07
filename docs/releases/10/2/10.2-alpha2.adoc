@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-alpha2 Update Notes
-Version 0.51 - March 2023
+Version 0.52 - April 2023
 
 :sectnums:
 :stem: latexmath
@@ -1028,7 +1028,7 @@ The sequence of commands for syncing the DBBC3 were changed in the
 <<../1/dbbc3_ops.adoc#_sync_time,Sync time>> section of the
 <<../1/dbbc3_ops.adoc#_alternate_core3h_board_configuration_method,Alternate
 Core3H board configuration>> appendix of the <<../1/dbbc3_ops.adoc#,FS
-10.1 DBBC3 Operations Manual>>.
+DBBC3 Operations Manual>>.
 
 +
 
@@ -1777,11 +1777,11 @@ Minor wording improvements.
 the
 <<../1/dbbc3_ops.adoc#_minimizing_the_use_of_setup_procedures,Minimizing
 the use of setup procedures>> appendix of the
-<<../1/dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> document.
+<<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> document.
 
 .. Improve the description of the `thread__suffix__` procedure in the
 <<../1/dbbc3_ops.adoc#_thread_procedure,Thread Procedure>> appendix of
-the <<../1/dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> document.
+the <<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> document.
 
 +
 
@@ -1796,7 +1796,7 @@ name.
 .. Fix the `record = ...` command in the
 <<../1/dbbc3_ops.adoc#_flexbuff_recorder,FlexBuff Recorder>>
 subsection the <<../1/dbbc3_ops.adoc#_recorder_tuning,Recorder
-tuning>> appendix of the <<../1/dbbc3_ops.adoc#,FS 10.1 DBBC3
+tuning>> appendix of the <<../1/dbbc3_ops.adoc#,FS DBBC3
 Operations Manual>> document.
 
 +
@@ -1931,7 +1931,7 @@ intended to be forward compatible with emerging file naming
 conventions for recorded data. For more information on the
 `thread__suffix__` SNAP procedure, see the
 <<../1/dbbc3_ops.adoc#_thread_procedure,Thread Procedure>> appendix of
-the <<../1/dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> document.
+the <<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> document.
 
 ====
 
