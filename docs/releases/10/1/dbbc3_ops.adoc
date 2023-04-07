@@ -27,24 +27,23 @@
 :toc:
 :experimental:
 E. Himwich, J. Quick
-Version 4.6 - April 2023
+Version 4.7 - April 2023
 
 == Introduction
 
 This document describes FS DBBC3 support starting with FS _10.1_. It
-outlines the features and model for FS operations with the DBBC3. It
-contains a section <<Configuring the FS for use with a DBBC3>> that
-gives the steps for customizing the FS.
+outlines the features and model for FS operations with the DBBC3.
 
 The FS supports the DDC_E, DDC_U, and DDC_V personalities. Support
 for the DDC_E personality was added in version _10.2_. The only
 version of DDC_V supported in FS _10.1_ was _v124_, but as of _10.2_
 other later versions are supported as well.
 
-The appendix <<DBBC3 specific environment variables>> explains the use
-of those variables. The appendix
-<<Verifying polarity and USB/LSB TPI swaps>> provides methods for
-checking those two specific issues.
+The appendix <<Configuring the FS for use with a DBBC3>> gives the
+steps for customizing the FS. The appendix
+<<DBBC3 specific environment variables>> explains the use of those
+variables. The appendix <<Verifying polarity and USB/LSB TPI swaps>>
+provides methods for checking those two specific issues.
 
 Additional appendices, <<Minimizing the use of setup procedures>>,
 <<Thread procedure>>, and <<Recorder tuning>> describe features that
@@ -57,9 +56,7 @@ DBBC3 multicast unpacking software developed by Dave Horsley (Hobart)
 using his C `struct` packing and unpacking code generator
 (https://github.com/dehorsley/packgen).
 
-== DBBC3 support features
-
-=== DBBC3 related commands
+== DBBC3 related commands
 
 The following SNAP commands support DBBC3s. You can access information
 on the details of the commands with `help=_command_`.
@@ -192,7 +189,7 @@ command is added by _drudg_ to _.snp_ files if selected by the
 
 * `tpicd` -- TPI (multicast) recording control daemon setup
 
-=== FS DBBC3 channel and IF labels
+== FS DBBC3 channel and IF labels
 
 The DBBC3 channel labels are of the form `_nnns_`, where:
 
@@ -207,20 +204,20 @@ The DBBC3 IF labels are of the form `i__x__`, where:
 
 For example, `id` is IF D.
 
-=== Configuring the DBBC3
+== Configuring the DBBC3
 
-This subsection assumes that when the DBBC3 is booted, it is set-up
+This section assumes that when the DBBC3 is booted, it is set-up
 according to either the "`Setting up the DBBC3 for DDC_E mode`",
 "`Setting up the DBBC3 for DDC_U mode`", or "`Setting up the DBBC3 for
 DDC_V mode`" document, as appropriate.
 
-==== Local configuration changes
+=== Local configuration changes
 
 This subsection covers changes that may be needed for experiments but
 aren't conveyed by the schedule file, yet. Some examples are given
 below.
 
-===== Ethernet configuration
+==== Ethernet configuration
 
 The Ethernet configuration of a Core3H board can be set in the DBBC3 boot
 configuration file. It can be changed on demand with a predefined SNAP
@@ -248,7 +245,7 @@ sub-procedure for each board.
 TIP: A reset and sync is not required for Ethernet configuration
 changes.
 
-===== Changing thread numbers
+==== Changing thread numbers
 
 The following command changes the thread numbers on Core3H board `1`
 for _eth0_ to `3` (`196608/65536`) and _eth1_ to `4`.
@@ -257,7 +254,7 @@ for _eth0_ to `3` (`196608/65536`) and _eth1_ to `4`.
 core3h=1,regupdate vdif_header 3 196608 0x03FF0000
 ....
 
-==== Setting the experiment mode configuration
+=== Setting the experiment mode configuration
 
 Setting the experiment mode configuration is broken into two parts:
 setting the Core3H board configuration which is covered in
@@ -265,7 +262,7 @@ setting the Core3H board configuration which is covered in
 setting the rest of the configuration, which happens implicitly when
 using the <<Checking the mode>> subsection farther below.
 
-===== Setting the Core3H board configuration
+==== Setting the Core3H board configuration
 
 Currently, the recommended method for configuring the mode for the
 Core3H boards is from the DBBC3 boot configuration. This is because
@@ -294,7 +291,7 @@ an arbitrary mode from a schedule. It is not entirely automatic, but
 will provide the needed information in a fairly straightforward
 format.
 
-====== Setting the boot configuration for the mode
+===== Setting the boot configuration for the mode
 
 This subsection assumes your boot configuration sets up the DBBC3
 except for the details of the observing mode. The non-Core3H board
@@ -468,7 +465,7 @@ errors.
 to checking the configuration of the Core3H boards, it configures the
 non-Core3H board settings for the mode.
 
-==== Checking the mode
+=== Checking the mode
 
 Before observing, it is essential to check that the mode has been
 configured correctly. This will implicitly set the non-Core3H
@@ -507,7 +504,7 @@ configure the non-Core3H board aspects of the observing mode.
 
 ====
 
-=== Firmware version checking
+== Firmware version checking
 
 The FS checks that the DBBC3 firmware being used agrees with what is
 in the FS control files, _equip.ctl_ and _dbbc3.ctl_. The personality,
@@ -587,15 +584,15 @@ An error is reported for these commands in case one of them is used by
 itself. This also maintains the historical precedent of checking the
 version whenever the formatter is configured.
 
-=== Control files
+== Control files
 
-==== equip.ctl
+=== equip.ctl
 
 For DBBC3 use, the rack type in _equip.ctl_ should be `dbbc3_ddc_e`
 (FS _10.2_ or later), `dbbc3_ddc_u`, or `dbbc3_ddc_v` depending on the
 firmware that is loaded.
 
-==== dbbc3.ctl
+=== dbbc3.ctl
 
 The DBBC3 specific control file parameters are in the _dbbc3.ctl_
 control file. An example of the contents is:
@@ -623,7 +620,7 @@ present,
 
 NOTE: The use of `nominal` for BBCs/IF is recommended.
 
-==== dbbad.ctl
+=== dbbad.ctl
 
 The _dbbad.ctl_ file was expanded for use with DBBC3s. For the DBBC3
 it can now include the multicast address, port, and the interface. If
@@ -652,7 +649,7 @@ out) is:
 *  192.168.1.2 4000 800 224.0.0.19 25000 eno2
 ....
 
-==== skedf.ctl
+=== skedf.ctl
 
 The _skedf.ctl_ file now includes new options and expansion of some
 options for DBBC3 support. The are listed in the <<drudg support>>
@@ -662,7 +659,7 @@ can be found in the <<Minimizing the use of setup procedures>> and the
 all the options is available in the
 _/usr2/fs/st.defaul/control/skedf.ctl_ example file.
 
-=== Tsys monitor display
+== Tsys monitor display
 
 The T~sys~ monitor display is organized per IF and updates at a 1 Hz
 rate. The displayed information includes: LO, time, VDIF epoch, time
@@ -707,7 +704,7 @@ The display is designed to provide useful information without operator
 intervention. The operator can adjust the display as desired using the
 features described in <<Commands>> subsection below.
 
-==== Modes
+=== Modes
 
 The T~sys~ monitor display has three modes:
 
@@ -732,7 +729,7 @@ character (`l`) command. Another `l` will toggle the display back to the
 previous mode. The current mode is displayed in the upper right hand
 corner.
 
-==== Tsys values
+=== Tsys values
 
 In the `Rec` mode, only BBC T~sys~ fields for side-bands being
 recorded are populated.
@@ -767,7 +764,7 @@ calculated, but there was a problem with the result: the result was
 too large for the field, was negative when only positive values are
 valid, or would have required dividing by zero.
 
-==== Commands
+=== Commands
 
 The T~sys~ display accepts several one character commands:
 
@@ -793,7 +790,7 @@ RF frequencies for the corresponding BBCs.
 *  kbd:[esc] or kbd:[control+c] -- exit
 * Any other key (e.g., kbd:[space]) -- resume cycling
 
-=== Checking DBBC3 time
+== Checking DBBC3 time
 
 The `mcast_time` command should be placed in the local `midob`
 procedure to monitor the time in the DBBC3 for each scan. An error
@@ -811,7 +808,7 @@ _v130_, will report the VDIF epoch in the multicast. In that case,
 `mcast_time` will report if there is a VDIF epoch mismatch between the
 boards.  Other checks may also be added in the future.
 
-=== Setting FS time
+== Setting FS time
 
 It is expected that normally the FS computer will be using NTP and the
 FS time model is set to `computer` (see _misc/ntp.txt_ for more
@@ -886,7 +883,7 @@ schedule. It should be better than any other approach without NTP.
 Since the DBBC3 will be running on the correct time, small errors in
 the FS time should not cause problems unless the scans are very short.
 
-=== Multicast logging
+== Multicast logging
 
 Logging of DBBC3 multi-cast recording is controlled by the `tpicd`
 command. It will automatically be enabled by _drudg_ generated setup
@@ -943,7 +940,7 @@ multicast data squeezed out by default, as it already did for RDBEs. A
 subsequent revision in _plog_ causes the compressed full log to also
 be pushed by default. Please see ``**plog -h**`` for more information.
 
-=== drudg support
+== drudg support
 
 The DBBC3 related _drudg_ changes include:
 
@@ -994,12 +991,14 @@ now be used for DBBC3s:
 The full syntax for these options can be found in the example
 _/usr2/fs/st.default/control/skedf.ctl_ file.
 
+[appendix]
+
 == Configuring the FS for use with a DBBC3
 
-This subsection provides the steps needed to configure the FS to
-support a DBBC3. You must have version FS _10.1_, or later, installed
-before using these directions. All steps, except as noted, are to be
-executed as _oper_.
+This appendix provides the steps needed to configure the FS to support
+a DBBC3. You must have version FS _10.1_, or later, installed before
+using these directions. All steps, except as noted, are to be executed
+as _oper_.
 
 . Update _equip.ctl_.
 
