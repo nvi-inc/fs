@@ -1,0 +1,155 @@
+#!/usr/bin/perl
+# Usage: xresourcesfix file
+
+require "getopts.pl";
+
+&Getopts("a:e:l:o:s:");
+
+if ($#ARGV < 0) {
+    print "Usage: $0 [options] file
+
+Updates geometry widths in Xresources file (nominally '.Xresources').
+
+This script should be run in directory with file, usually the user's home
+directory.
+
+The original file is renamed as a backup by adding a '.bak' extension.
+The backup file must not already exist.
+
+Option explanations:
+
+ -a number  set width of all         windows
+ -e number  set width of erchk       window
+ -l number  set width of login_shell window
+ -o number  set width of oprin       window
+ -s number  set width of scnch       window
+
+The default for '-a' is 146 is no options as specified.
+If an option for an individual is specified it overrides '-a'.
+A value that isn't a positive integer (e.g. '0' or 'o') disables updating
+that window.
+The order the options are specified does not matter.
+";
+    exit -1;
+}
+
+if  ($#ARGV < 0 || $#ARGV >0) {
+    print "incorrect number of arguments\n";
+    print "Try '$0' for more information.\n";
+    exit -1;
+}
+
+# get the file names
+
+$out=$ARGV[0];
+if (!-e $out) {
+    die "Can't find '$out', giving up.\n";
+}
+
+$bak = $out . ".bak";
+if (-e $bak) {
+    die "Backup-file '$bak' already exists, giving up.\n";
+}
+
+# rename the original
+
+if(!rename ($out,$bak)) {
+    print "Renaming '$out' to '$bak' failed: $!\n";
+}
+
+if(!open(BAK,$bak)) {
+    print "Failed to open '$bak': $!\n";
+    if(!rename($bak,$out)) {
+        print "In the process of trying to restore order after the error,\n";
+        print "I was unable to rename '$bak' to '$out': $!\n";
+        print "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+        print "In order to help restore order after the error,\n";
+        print "I renamed '$bak' to '$out' for you.\n";
+    }
+}
+
+if(!open(OUT,">" . $out)) {
+    print "Failed to open '$out': $!\n";
+    if((!close(BAK)) || (!rename($bak,$out))) {
+        print "In the process of trying to restore order after the error,\n";
+        print "I was unable to rename '$bak' to '$out': $!\n";
+        print "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+        print "In order to help restore order after the error,\n";
+        print "I renamed '$bak' to '$out' for you.\n";
+    }
+}
+
+# set widths
+
+$all=146;
+$all=$opt_a if defined($opt_a);
+
+$erchk=$all;
+$erchk=$opt_e if defined($opt_e);
+
+$login_sh=$all;
+$login_sh=$opt_l if defined($opt_l);
+
+$oprin=$all;
+$oprin=$opt_o if defined($opt_o);
+
+$scnch=$all;
+$scnch=$opt_s if defined($opt_s);
+
+# keep count
+
+$count{"erchk"} = 0;
+$count{"login_sh"} = 0;
+$count{"oprin"} = 0;
+$count{"scnch"} = 0;
+
+# okay now process the file
+
+while(<BAK>) {
+    if (/^(erchk\*geometry:\s*)\d+(x.*)/) {
+        $_ = "$1$erchk$2\n" if $erchk >0;
+        ++$count{"erchk"};
+    } elsif (/^(login_sh\*geometry:\s*)\d+(x.*)/) {
+        $_ = "$1$login_sh$2\n" if $login_sh > 0;
+        ++$count{"login_sh"};
+    } elsif (/^(oprin\*geometry:\s*)\d+(x.*)/) {
+        $_ = "$1$oprin$2\n" if $oprin > 0;
+        ++$count{"oprin"};
+    } elsif (/^(scnch\*geometry:\s*)\d+(x.*)/) {
+        $_ = "$1$scnch$2\n" if $scnch > 0;
+        ++$count{"scnch"};
+    }
+    print OUT;
+}
+
+foreach $key (sort keys %count) {
+    if($count{$key} == 0) {
+        print STDERR "WARNING: $key geometry not found\n";
+        $none=1;
+    } elsif($count{$key} > 1) {
+        print STDERR "ERROR: $key geometry found more than once.\n";
+        $extra=1
+    }
+}
+if ($none || $extra) {
+    print "\n";
+    }
+if ($none) {
+    print STDERR "Some geometry values were missing. If you are okay with that, that is fine.\n";
+}
+if ($extra) {
+    print STDERR "Some geometry values were defined more than once. There may be other Xresources
+for those windows that are defined multiple times. All extra definitions should
+probably be removed.
+";
+}
+if ($none || $extra) {
+    print STDERR "\nFor comparison, you can examine the default versions in
+'/usr2/fs/st.default/(oper|prog|auid)/.Xresoures' as appropriate.
+";
+}
+if ($none) {
+    print STDERR "The 'auid' version typically only has 'login_sh'.\n";
+}
