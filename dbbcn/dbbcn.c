@@ -908,6 +908,11 @@ error0:
     secho[0]=0;
   }
 error:
+  if(dbbc3 && 1==shm_addr->dbbc3_command_active) {
+      /* increment when starting and ending command */
+      shm_addr->dbbc3_command_count++;
+      shm_addr->dbbc3_command_active=0;
+  }
   if(i<in_recs)
     cls_clr(in_class);
   ip[0]=out_class;
