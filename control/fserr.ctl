@@ -4664,6 +4664,9 @@ mk6?W: Mark6 return code 9: indeterminate state
 MN   -1 Place Holder
 
 ""
+NF    7
+WARNING: Source structure correction greater than 20% for detector ?W.
+""
 NF   -1
 Break detected in ONOFF: stopped
 ""
@@ -4681,9 +4684,6 @@ Error occurred while trying to return to AGC: check gain settings
 ""
 NF   -6
 Error occurred while trying to restore IF att. Check IF att settings.
-""
-NF   -7
-WARNING: Source structure correction greater than 20% for detector ?W.
 ""
 NF  -10
 MCBCN failed setting AGC

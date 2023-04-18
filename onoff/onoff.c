@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -679,7 +679,7 @@ main()
 	logit(buff,0,NULL);
 	if(onoff.devices[i].corr>=1.2) {
 	  memcpy(ip+3,"nf",2);
-	  logita(NULL,-7,ip+3,onoff.devices[i].lwhat);
+	  logita(NULL,7,ip+3,onoff.devices[i].lwhat);
 	}
       }
     logit(buff2,0,NULL);
