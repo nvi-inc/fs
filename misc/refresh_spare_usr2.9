@@ -57,7 +57,7 @@ echo "See script for details."
 # echo "Can't proceed, /usr2 is not mounted"
 # exit
 #fi
-#fuser -k -m /usr2
+#fuser -k -M -m /usr2 || :
 #umount /usr2
 #mkfs.ext4 -U `tune2fs -l /dev/md2 | grep UUID | grep -o '[^ ]*$'` /dev/md2
 #mount /usr2
