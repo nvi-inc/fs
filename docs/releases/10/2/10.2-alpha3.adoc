@@ -2275,12 +2275,19 @@ _logpl_ plots the raw `cable` data, not converted to length.
 
 +
 
-Clarify that the DBBC3 sends the continuous calibration control signal
-to the receiver.
+.... Clarify that the DBBC3 sends the continuous calibration control
+signal to the receiver.
 
 +
 
-Thanks to Jon Quick (HartRAO) for this information.
+.... Clarify that the `_samples_` parameter, in addition to setting
+the averaging interval (or decay constant), also sets the number of
+_tpid_ cycles for logging the averaged T~sys~.
+
++
+
+Thanks to Jon Quick (HartRAO) for the information on the calibration
+signal and pointing out that the logging interval was not clear.
 
 ... Improve the `help` page for `cont_cal` for the DBBC3
 
