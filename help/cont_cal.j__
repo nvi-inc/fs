@@ -54,10 +54,16 @@ channel or IF detector is restarted after: (i) a non-positive Tsys value occurs
 for that detector, (ii) 'tpicd' is started or restarted, or (iii) the
 'cont_cal' parameters are changed.  If multicast packets are lost, that is not
 taken into account; the data is treated as though it had uniform one second
-spacing.  The 'samples' also sets the number of cycles of 'tpicd' for logging
-the averaged Tsys data.  It is expected that the cycle period for 'tpicd' will
-normally be set to '100' centiseconds.  If the cycle period of 'tpicd' is set
-to longer than '100' centiseconds, the logging period will be correspondingly
-longer than the time-constant.  The special value of '0' for 'samples' disables
-averaging and sets the number of cycles of 'tpicd' for logging the Tsys data to
-one.
+spacing.
+
+The 'samples' also sets the number of cycles of 'tpicd' for logging the
+averaged Tsys data.  It is expected that the cycle period for 'tpicd' will
+normally be set to '100' centiseconds, in which case the Tsys values will be
+logged every 'samples' seconds.  If the cycle period of 'tpicd' is set to
+longer than '100' centiseconds, the logging period will be correspondingly
+longer.
+
+The special value of '0' for 'samples' disables averaging and sets the number
+of cycles of 'tpicd' for logging the Tsys data to one.  The logged (and
+displayed) Tsys values are truly statistically independent only if '0' is used.
+This was the behavior of FS 10.1, which did not average.

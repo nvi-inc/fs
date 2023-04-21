@@ -59,15 +59,20 @@ Note that the setting of the polarity does not affect the FS's
 interpretation off the on and off values returned, only how the DBBC
 populates the returned values.
 
-For polarity, frequency, and option, the default is the last value
+For 'polarity', 'frequency', and 'option', the default is the last value
 commanded.  On FS start-up, these default to not sending a value.  Not
-commanding presists until a new non-negative values is used.  A value
-of -1 can be used to disable commanding of that parameter after a
-non-negative value has been used.  This behavior is atypical of how FS
-commands normally work; they normally have a specific value for any
-default and a '*' would be used for the previous value.  The current
-behavior is to simplify operations, including interactions with
-'drudg', until a more comprehensive solution is implemented.
+commanding persists until a new non-negative values is used.  A value of '-1'
+can be used to disable commanding of that parameter after a non-negative value
+has been used.  This behavior is atypical of how FS commands normally work;
+they normally have a specific value for any default and a '*' would be used for
+the previous value.  The current behavior is to simplify operations, including
+interactions with 'drudg', until a more comprehensive solution is implemented.
 
-The number of samples to average is used internally by the FS to form
-Tsys.
+The number of 'samples' to average is used internally by the FS to form Tsys.
+
+The 'samples' also sets the number of cycles of 'tpicd' for logging the
+averaged Tsys data.  It is expected that the cycle period for 'tpicd' will
+normally be set to '100' centiseconds, in which case the Tsys values will be
+logged every 'samples' seconds.  If the cycle period of 'tpicd' is set to
+longer than '100' centiseconds, the logging period will be correspondingly
+longer.
