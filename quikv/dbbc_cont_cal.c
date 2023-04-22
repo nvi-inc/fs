@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -47,6 +47,7 @@ int ip[5];                           /* ipc parameters */
       void skd_run(), skd_par();      /* program scheduling utilities */
 
       int kdiff;
+      int unspecified=0;
 
       if(DBBC_DDC != shm_addr->equip.rack_type &&
 	 DBBC_DDC_FILA10G != shm_addr->equip.rack_type) {
@@ -77,7 +78,7 @@ parse:
       count=1;
       while( count>= 0) {
         ptr=arg_next(command,&ilast);
-        ierr=dbbc_cont_cal_dec(&lcl,&count, ptr, shm_addr->dbbccontcalpol);
+        ierr=dbbc_cont_cal_dec(&lcl,&count, ptr, shm_addr->dbbccontcalpol, &unspecified);
         if(ierr !=0 ) goto error;
       }
 
@@ -86,9 +87,16 @@ parse:
 
       if(kdiff)
 	skd_run("tpicd",'w',ip);
- 
+
+/* don't communucate  with device if mode is "unspecified" */
+
+      if(unspecified) {
+        ip[0]=ip[1]=0;
+        return;
+      }
+
 /* format buffer for dbbcn */
-      
+
       out_recs=0;
       out_class=0;
 

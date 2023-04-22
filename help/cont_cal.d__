@@ -7,7 +7,7 @@
 
 
 Settable parameters:
-            state       off or on. Default is off.
+            state       off, on, or unspecified. Default is off. See Comments.
             polarity    0, 1, 2, 3, but -1 is allowed to not command; please
                         see the comments.  Non-null values are not permitted
                         for DBBC versions less than v105X_1.  Default is the
@@ -67,6 +67,11 @@ has been used.  This behavior is atypical of how FS commands normally work;
 they normally have a specific value for any default and a '*' would be used for
 the previous value.  The current behavior is to simplify operations, including
 interactions with 'drudg', until a more comprehensive solution is implemented.
+
+If the 'state' is 'unspecified' the settings are not sent to the device. This
+provides a way to set the defaults for the other parameters (perhaps in
+'initi') without actually sending a command to the device. The value 'state' in
+shared memory is not affected.
 
 The number of 'samples' to average is used internally by the FS to form Tsys.
 

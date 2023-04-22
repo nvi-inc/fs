@@ -7,7 +7,7 @@
 
 
 Settable parameters:
-            state       off or on. Default is off.
+            state       off, on, or unspecified. Default is off. See Comments.
             polarity    0, 1, 2, or 3.  Default is the previous value.
                         See the Comments for more information.
             freq        8-300000 Hz.  Default is the previous value.
@@ -47,6 +47,11 @@ has been used.  This behavior is atypical of how FS commands normally work;
 they normally have a specific value for any default and a '*' would be used for
 the previous value.  The current behavior is to simplify operations, including
 interactions with 'drudg', until a more comprehensive solution is implemented.
+
+If the 'state' is 'unspecified' the settings are not sent to the device. This
+provides a way to set the defaults for the other parameters (perhaps in
+'initi') without actually sending a command to the device. The value 'state' in
+shared memory is not affected.
 
 The 'samples' sets the exponential decay time-constant in seconds for a
 trailing average of Tsys calculated from the multicast.  The average for a
