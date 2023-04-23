@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -28,6 +28,10 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
+
+char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
+
+static void perform_swaps( struct dbbcgain_cmd *lclc);
 
 static char *agc_key[ ]={"man","agc"};
 
@@ -201,9 +205,13 @@ struct dbbcgain_cmd *lcl;
 
   strcat(buff,",");
   if(lcl->state==-1) {
+    if (DBBC3==shm_addr->equip.rack)
+      perform_swaps( lcl);
     sprintf(buff+strlen(buff),"%d",lcl->gainU);
     strcat(buff,",");
     sprintf(buff+strlen(buff),"%d",lcl->gainL);
+    if (DBBC3==shm_addr->equip.rack)
+      perform_swaps( lcl);
   } else {
     ivalue=lcl->state;
     if (ivalue >=0 && ivalue <NAGC_KEY)
@@ -262,5 +270,31 @@ char *buff;
     if(1!=sscanf(ptr,"%d%c",&lclm->target,&ch))
       return -1;
   }
+  if (DBBC3==shm_addr->equip.rack)
+    perform_swaps( lclc);
+
   return 0;
+}
+static void perform_swaps( lclc)
+struct dbbcgain_cmd *lclc;
+{
+  static int gain = -1;
+  char *ptr;
+
+  if(0>gain) {
+    int actual, error;
+    ptr=getenv_DBBC3("FS_DBBC3_BBC_GAIN_USB_LSB_SWAP",&actual,NULL,&error,1);
+    if(0==error)
+      gain=actual;
+    else
+      gain=0;
+  }
+  if (gain) {
+    int temp_int;
+
+    temp_int=lclc->gainL;
+    lclc->gainL=lclc->gainU;
+    lclc->gainU=temp_int;
+  }
+  return;
 }

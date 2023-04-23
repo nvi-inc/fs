@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -80,8 +80,6 @@ int main(int argc, char *argv[])
         int cont_cal = cont_cal0 && cont_cal_save1 && cont_cal_save2;
         cont_cal_save2 = cont_cal_save1;
         cont_cal_save1 = cont_cal0;
-        int swap_cal = shm_addr->dbbc3_cont_cal.polarity == 2 ||
-            shm_addr->dbbc3_cont_cal.polarity == 3;
 
         memcpy(&dbtcn_control,
                 &shm_addr->dbtcn.control[shm_addr->dbtcn.iping],
@@ -98,9 +96,11 @@ int main(int argc, char *argv[])
             continue;
         }
 
+        perform_swaps(&packet);
+
         version_check(&packet);
 
-        calc_ts(&packet,&cycle, cont_cal, swap_cal);
+        calc_ts(&packet,&cycle, cont_cal);
 
         update_shm(&packet,&cycle, itmc, centisec);
 
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
             continue;
 
         last=seconds;
-        log_mcast(&packet,&cycle,cont_cal, swap_cal);
+        log_mcast(&packet,&cycle,cont_cal);
     }
 
 idle:

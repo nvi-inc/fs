@@ -31,6 +31,8 @@
 
 extern struct fscom *shm_addr;
 
+char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
+
 void version_check( dbbc3_ddc_multicast_t *t)
 {
     char test[sizeof(t->version)+1];
@@ -39,6 +41,7 @@ void version_check( dbbc3_ddc_multicast_t *t)
     static int old_ierr;
     static int version_error;
     char *ptr;
+    static int minutes=-1;
 
     memcpy(test,t->version,sizeof(test)-1);
     test[sizeof(test)-1]=0;
@@ -101,13 +104,22 @@ void version_check( dbbc3_ddc_multicast_t *t)
       ierr=-38;
     }
 
+    if(0>minutes) {
+        int actual, error;
+        ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES",&actual,NULL,&error,1);
+        if(0==error)
+            minutes=actual;
+        else
+            minutes=1;
+    }
     if(0==ierr) {
        old_ierr=0;
     } else {
       if(ierr!=old_ierr)
         version_error=0;
-      version_error=version_error%20+1;
-      if(version_error==1) {
+      if(0 < minutes)
+        version_error=version_error%(minutes*60)+1;
+      if(0 < minutes && version_error==1) {
         if(-38!=ierr) {
           int i;
           char prefix[ ]={"DBBC3 multicast version: "};

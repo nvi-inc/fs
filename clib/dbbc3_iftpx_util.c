@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -29,6 +29,10 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
+char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
+
+static void perform_swaps( struct dbbc3_iftpx_mon *lclm);
+
 void dbbc3_iftpx_mon(output,count,lcl)
 char *output;
 int *count;
@@ -43,10 +47,10 @@ struct dbbc3_iftpx_mon *lcl;
 	sprintf(output,"%u",lcl->tp);
 	break;
       case 2:
-	sprintf(output,"%u",lcl->off);
+	sprintf(output,"%u",lcl->on);
 	break;
       case 3:
-	sprintf(output,"%u",lcl->on);
+	sprintf(output,"%u",lcl->off);
 	break;
       default:
         *count=-1;
@@ -75,14 +79,58 @@ char *buff;
   ptr=strtok(NULL,",");
   if(ptr==NULL)
     return -1;
-  if(1!=sscanf(ptr,"%u%c",&lclm->off,&ch))
+  if(1!=sscanf(ptr,"%u%c",&lclm->on,&ch))
     return -1;
 
   ptr=strtok(NULL,",;");
   if(ptr==NULL)
     return -1;
-  if(1!=sscanf(ptr,"%u%c",&lclm->on,&ch))
+  if(1!=sscanf(ptr,"%u%c",&lclm->off,&ch))
     return -1;
 
+  perform_swaps( lclm);
+
   return 0;
+}
+static void perform_swaps( lclm)
+struct dbbc3_iftpx_mon *lclm;
+{
+  char *ptr;
+  static int tpi_onoff0 = -1;
+  static int tpi_onoff2 = -1;
+
+  if(0==shm_addr->dbbc3_cont_cal.polarity/2) {
+    if(0>tpi_onoff0) {
+      int actual, error;
+      ptr=getenv_DBBC3("FS_DBBC3_IFTPX_POLARITY0_ON_OFF_SWAP",&actual,NULL,&error,1);
+      if(0==error)
+        tpi_onoff0=actual;
+      else
+        tpi_onoff0=0;
+    }
+    if (tpi_onoff0) {
+      unsigned int temp_uint;
+
+      temp_uint=lclm->off;
+      lclm->off=lclm->on;
+      lclm->on=temp_uint;
+    }
+  } else {
+    if(0>tpi_onoff2) {
+      int actual, error;
+      ptr=getenv_DBBC3("FS_DBBC3_IFTPX_POLARITY2_ON_OFF_SWAP",&actual,NULL,&error,1);
+      if(0==error)
+        tpi_onoff2=actual;
+      else
+        tpi_onoff2=0;
+    }
+    if (tpi_onoff2) {
+      unsigned int temp_uint;
+
+      temp_uint=lclm->off;
+      lclm->off=lclm->on;
+      lclm->on=temp_uint;
+    }
+  }
+  return;
 }

@@ -636,6 +636,9 @@ c
           nch = ichmv_ch(ib,nch,'enabled')
       endif
       call logit3(ib,nch-1,lsor)
+
+      call log_env_dbbc3
+
       return
       end
 

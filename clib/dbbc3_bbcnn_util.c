@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -39,6 +39,8 @@ static char *agc_key[ ]={"man","agc"};
 #define NAGC_KEY sizeof(agc_key)/sizeof( char *)
 
 static int dbbc3_freq(unsigned int *,char *);
+static void perform_swaps(struct dbbc3_bbcnn_mon *);
+char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
 
 int dbbc3_bbcnn_dec(lcl,count,ptr,itask)
 struct dbbc3_bbcnn_cmd *lcl;
@@ -273,6 +275,7 @@ char *buff;
   if(1!=sscanf(ptr,"%u%c",lclm->tpoff+1,&ch))
     return -1;
 
+  perform_swaps(lclm);
   return 0;
 }
 static int dbbc3_freq(pulFreq,sptr)
@@ -341,4 +344,69 @@ char *sptr;
   *pulFreq=((unsigned int ) iwhole)*1000000+ifract;
 
   return 0;
+}
+static void perform_swaps( lclm)
+struct dbbc3_bbcnn_mon *lclm;
+{
+  static int tpi_ul = -1;
+  static int gain_ul = -1;
+  static int tpi_onoff = -1;
+  char *ptr;
+
+  if(0>tpi_ul) {
+    int actual, error;
+    ptr=getenv_DBBC3("FS_DBBC3_BBCNNN_TPI_USB_LSB_SWAP",&actual,NULL,&error,1);
+    if(0==error)
+      tpi_ul=actual;
+    else
+      tpi_ul=0;
+  }
+  if (tpi_ul) {
+    unsigned int temp_uint;
+
+    temp_uint=lclm->tpoff[1];
+    lclm->tpoff[1]=lclm->tpoff[0];
+    lclm->tpoff[0]=temp_uint;
+
+    temp_uint=lclm->tpon[1];
+    lclm->tpon[1]=lclm->tpon[0];
+    lclm->tpon[0]=temp_uint;
+  }
+
+  if(0>gain_ul) {
+    int actual, error;
+    ptr=getenv_DBBC3("FS_DBBC3_BBCNNN_GAIN_USB_LSB_SWAP",&actual,NULL,&error,1);
+    if(0==error)
+      gain_ul=actual;
+    else
+      gain_ul=0;
+  }
+  if (gain_ul) {
+    int temp_int;
+
+    temp_int=lclm->gain[1];
+    lclm->gain[1]=lclm->gain[0];
+    lclm->gain[0]=temp_int;
+  }
+
+  if(0>tpi_onoff) {
+    int actual, error;
+    ptr=getenv_DBBC3("FS_DBBC3_BBCNNN_ON_OFF_SWAP",&actual,NULL,&error,1);
+    if(0==error)
+      tpi_onoff=actual;
+    else
+      tpi_onoff=0;
+  }
+  if (tpi_onoff) {
+    unsigned int temp_uint;
+
+    temp_uint=lclm->tpoff[1];
+    lclm->tpoff[1]=lclm->tpon[1];
+    lclm->tpon[1]=temp_uint;
+
+    temp_uint=lclm->tpoff[0];
+    lclm->tpoff[0]=lclm->tpon[0];
+    lclm->tpon[0]=temp_uint;
+  }
+  return;
 }

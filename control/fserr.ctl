@@ -1571,10 +1571,13 @@ Station procedure library link was empty.
 BO -508
 Final station procedure library link does contain '.prc'.
 ""
+BO -997 Place holder for bad env variable
+
+""
 BO -998
 ANTCN termination mode failed, see above error.
 ""
-BO -999 Place holder
+BO -999 Place holder for log size warning
 
 ""
 CD  -1
@@ -7455,7 +7458,7 @@ SC  -25
 setcl: rte_check got error from times(), see above for error
 ""
 SC  -26
-setcl: DBBC3 firmware version must be 125 or later to get time from multicast.
+setcl: DBBC3 multicast time must be available to set time, check FS_DBBC3_MULTICAST_TIME_INCLUDED
 ""
 SC  -29
 setcl: Core3H multicast time still bad after four tries.

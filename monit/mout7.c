@@ -52,11 +52,6 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     static time_t disp_time = 0;
     struct tm *ptr;
 
-    int v124 =  DBBC3_DDCU == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcu_v<125 ||
-        DBBC3_DDCV == shm_addr->equip.rack_type &&
-        shm_addr->dbbc3_ddcv_v<125;
-
     memcpy(&ifc,&tsys_cycle->ifc[next],sizeof(ifc));
     memcpy(&bbc,tsys_cycle->bbc,sizeof(bbc));
 
@@ -148,7 +143,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     printw(" DBBC3-FS ");
     if(ifc.time> 0) {
-        if (v124)
+        if (!ifc.time_included)
             printw("------");
         else {
             buf[0]=0;
