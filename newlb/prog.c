@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -3032,3 +3032,42 @@ void fs_get_dbbc3_clockr__(dbbc3_clockr)
 	{
           *dbbc3_clockr = shm_addr->dbbc3_clockr;
     }
+void fs_set_dbbc3_ddce_v__(dbbc3_ddce_v)
+	int *dbbc3_ddce_v;
+	{
+          shm_addr->dbbc3_ddce_v = *dbbc3_ddce_v;
+        }
+
+void fs_get_dbbc3_ddce_v__(dbbc3_ddce_v)
+	int *dbbc3_ddce_v;
+	{
+          *dbbc3_ddce_v = shm_addr->dbbc3_ddce_v;
+	}
+
+void fs_set_dbbc3_ddce_vs__(dbbc3_ddce_vs)
+	char *dbbc3_ddce_vs;
+	{
+          size_t N;
+	  N = DBBC3_DDC_VS_N;
+	  memcpy(shm_addr->dbbc3_ddce_vs,dbbc3_ddce_vs,N);
+	}
+
+void fs_get_dbbc3_ddce_vs__(dbbc3_ddce_vs)
+	char *dbbc3_ddce_vs;
+	{
+          size_t N;
+	  N = DBBC3_DDC_VS_N;
+	  memcpy(dbbc3_ddce_vs,shm_addr->dbbc3_ddce_vs,N);
+	}
+
+void fs_set_dbbc3_ddce_vc__(dbbc3_ddce_vc)
+	int *dbbc3_ddce_vc;
+	{
+          shm_addr->dbbc3_ddce_vc = *dbbc3_ddce_vc;
+        }
+
+void fs_get_dbbc3_ddce_vc__(dbbc3_ddce_vc)
+	int *dbbc3_ddce_vc;
+	{
+          *dbbc3_ddce_vc = shm_addr->dbbc3_ddce_vc;
+	}

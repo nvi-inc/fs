@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -205,7 +205,8 @@ send:
                 logitn(NULL,-634,"dr",iboard);
                 ierr=-600;
             }
-        } else if(DBBC3_DDCU==shm_addr->equip.rack_type) {
+        } else if(DBBC3_DDCU==shm_addr->equip.rack_type ||
+                  DBBC3_DDCE==shm_addr->equip.rack_type) {
             if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.state.known &&
                     shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1 &&
                     shm_addr->dbbc3_core3h_modex[iboard-1].mask2.state.known &&
@@ -287,7 +288,8 @@ send:
             ierr=-600;
         }
 
-        if(DBBC3_DDCU==shm_addr->equip.rack_type && 1!=lclm.splitmode.splitmode) {
+        if((DBBC3_DDCU==shm_addr->equip.rack_type ||
+            DBBC3_DDCE==shm_addr->equip.rack_type) && 1!=lclm.splitmode.splitmode) {
             logitn(NULL,-619,"dr",iboard);
             ierr=-600;
         } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 0!=lclm.splitmode.splitmode) {
@@ -295,7 +297,8 @@ send:
             ierr=-600;
         }
 
-        if(DBBC3_DDCU==shm_addr->equip.rack_type && 4!=lclm.vsi_input.vsi_input) {
+        if((DBBC3_DDCU==shm_addr->equip.rack_type ||
+            DBBC3_DDCE==shm_addr->equip.rack_type) && 4!=lclm.vsi_input.vsi_input) {
             logitn(NULL,-621,"dr",iboard);
             ierr=-600;
         } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 1!=lclm.vsi_input.vsi_input) {

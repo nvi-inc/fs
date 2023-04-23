@@ -1,0 +1,123 @@
+#!/usr/bin/perl
+# Usage: dbbc3ctlfix file
+
+if ($#ARGV < 0) {
+    print "Usage: $0 file
+
+Updates file (nominally 'dbbc3.ctl') for the DDC_E personality.
+
+This script should be run in '/usr2/control'.
+
+The original file is renamed as a backup by adding a '.bak' extension.
+The backup file must not already exist.
+
+This script will attempt to update the comments to the current
+defaults, but won't update comments that had been modified from the
+previous defaults.
+";
+    exit -1;
+}
+
+if  ($#ARGV < 0 || $#ARGV >0) {
+    print "incorrect number of arguments\n";
+    print "Try '$0' for more information.\n";
+    exit -1;
+}
+
+# get the file names
+
+$out=$ARGV[0];
+if (!-e $out) {
+    die "Can't find '$out', giving up.\n";
+}
+
+$bak = $out . ".bak";
+if (-e $bak) {
+    die "Backup-file '$bak' already exists, giving up.\n";
+}
+
+# rename the original
+
+if(!rename ($out,$bak)) {
+    print "Renaming '$out' to '$bak' failed: $!\n";
+}
+
+if(!open(BAK,$bak)) {
+    print "Failed to open '$bak': $!\n";
+    if(!rename($bak,$out)) {
+        print "In the process of trying to restore order after the error,\n";
+        print "I was unable to rename '$bak' to '$out': $!\n";
+        print "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+        print "In order to help restore order after the error,\n";
+        print "I renamed '$bak' to '$out' for you.\n";
+    }
+}
+
+if(!open(OUT,">" . $out)) {
+    print "Failed to open '$out': $!\n";
+    if((!close(BAK)) || (!rename($bak,$out))) {
+        print "In the process of trying to restore order after the error,\n";
+        print "I was unable to rename '$bak' to '$out': $!\n";
+        print "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+        print "In order to help restore order after the error,\n";
+        print "I renamed '$bak' to '$out' for you.\n";
+    }
+}
+
+#okay now process the file
+
+$count = 0;
+@comments= (0,0,0,0);
+
+while(<BAK>) {
+    if (/^\*/) {
+        if (/^* Two fields: BBCs\/IF \(8, 12, 16 or nominal \(U:16,V:8\)\), IFs \(1-8\)\n/) {
+            print OUT "* Two fields: BBCs/IF (8, 12, 16 or nominal (U:16,EV:8)), IFs (1-8)\n";
+            ++$comments[0];
+        } elsif (/^\* DDC_U firmware version \(v121 or later, but DDC_U supports starts at v125\)\n/) {
+            print OUT "* DDC_U firmware version (v121 or later, but DDC_U starts at v125)\n";
+            ++$comments[1];
+        } elsif (/^\* DDC_V firmware version \(v121 or later, but DDC_V supports starts at v124\)\n/) {
+            print OUT "* DDC_V firmware version (v121 or later, but DDC_V starts at v124)\n";
+            ++$comments[2];
+        } elsif (/^\* DBBC3 clock rate, >= 0, but DDDC_U\/_V only supports 128\n/) {
+            print OUT "* DBBC3 clock rate, >= 0, but DDC only supports 128\n";
+            ++$comments[3];
+        } else {
+            print OUT;
+        }
+        next;
+    }
+
+    print OUT;
+    if(++$count == 1 ) {
+        print OUT "* DDC_E firmware version (v121 or later, but DDC_E starts at v126)
+  v126
+";
+    }
+}
+if($count != 6) {
+    if ($count > 6) {
+        print STDERR "ERROR: There were too many non-comments lines in the original\n";
+        print STDERR "file '$out'. Had it already been updated?\n";
+    } else {
+        print STDERR "ERROR: There were too few non-comments lines in the original\n";
+        print STDERR "file '$out'.\n";
+    }
+    die "Please fix whatever is wrong. The original file contents are in
+'$bak'. The (incorrectly) updated file contents are in '$out'.
+";
+}
+
+for(@comments) {
+    if($_ !=1) {
+        print STDERR "WARNING: '$out' was updated and should be okay, but one or
+more comments were not updated or occurred more than once. You can use
+'diff $out /usr2/fs/st.default/control/dbbc3.ctl'
+to help evaluate discrepancies.
+";
+     exit 0;
+     }
+}

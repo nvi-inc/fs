@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -65,7 +65,8 @@ c
      $  dbbc3_ddc_ifs,
      $  dbbc3_cont_cal_mode,
      $  dbbc3_ddcv_v, dbbc3_ddcv_vc,
-     $  dbbc3_mcdelay, dbbc3_iscboard, dbbc3_clockr
+     $  dbbc3_mcdelay, dbbc3_iscboard, dbbc3_clockr,
+     $  dbbc3_ddce_v, dbbc3_ddce_vc
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3,2), lgen(2,2),
@@ -121,6 +122,7 @@ c
      $ dbbc3_cont_cal_mode,
      $ dbbc3_ddcv_v, dbbc3_ddcv_vc,
      $ dbbc3_mcdelay, dbbc3_iscboard, dbbc3_clockr,
+     $ dbbc3_ddce_v, dbbc3_ddce_vc,
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 
@@ -141,6 +143,7 @@ c
       character*16 dbbc3_ddcv_vs
       character*(MAX_SKD) LLOG2,LPRC2,LSKD2,LSTP2,LNEWPR2,LNEWSK2
       character*(MAX_SKD) LEXPER2
+      character*16 dbbc3_ddce_vs
 c
       common/fscom_dum2/ LEXPER, LLOG, LNEWPR, LNEWSK, LPRC, LSKD, LSTP,
      $                   dbbcddcvs, dbbcpfbvs, fila10gvsi_in, dbbcddcvl,
@@ -149,5 +152,5 @@ c
      $                   dbbc3_ddcu_vs,
      $                   sVerRelease_FS,fortran,
      $                   dbbc3_ddcv_vs,LLOG2,LPRC2,LSKD2,LSTP2,LNEWPR2,
-     $                   LNEWSK2,LEXPER2
+     $                   LNEWSK2,LEXPER2,dbbc3_ddce_vs
 
