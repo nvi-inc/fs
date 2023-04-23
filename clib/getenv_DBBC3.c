@@ -45,7 +45,7 @@ extern struct fscom *shm_addr;
                       actual=nominal;
 
 #define TYPICALN0 nominal=0;\
-                  if(NULL!=ptr && 0==strcmp(ptr,"1"))\
+                  if(NULL!=ptr)\
                       actual=atoi(ptr);\
                   else\
                       actual=nominal;
@@ -85,7 +85,7 @@ char *getenv_DBBC3( char *env, int *actual_p, int *nominal_p, int *error_p, int 
         if(NULL!=ptr && 0==strcmp(ptr,"0"))
 // maybe someday allow disabling it
 //            actual=0;
-            actual=1;
+            actual=nominal;
         else if(NULL!=ptr) {
             actual=atoi(ptr);
             if(actual<1 || actual>10)
