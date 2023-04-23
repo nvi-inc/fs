@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2022 NVI, Inc.
+// Copyright (c) 2020-2023 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 1.7 - February 2023
+Version 1.8 - April 2023
 
 :sectnums:
 
@@ -350,6 +350,32 @@ will be disabled for the affected program until the next FS restart.
 If the NTP status can't be determined it is shown as `unknown`.
 
 This was introduced in _9.7.1_, September 2004.
+
+=== FS_DBBC3_*
+
+These are a family of environment variables. At the time of this
+writing, they consisted of:
+
+* `FS_DBBC3_BBCNNN_GAIN_USB_LSB_SWAP`
+* `FS_DBBC3_BBCNNN_ON_OFF_SWAP`
+* `FS_DBBC3_BBCNNN_TPI_USB_LSB_SWAP`
+* `FS_DBBC3_BBC_GAIN_USB_LSB_SWAP`
+* `FS_DBBC3_IFTPX_POLARITY0_ON_OFF_SWAP`
+* `FS_DBBC3_IFTPX_POLARITY2_ON_OFF_SWAP`
+* `FS_DBBC3_MULTICAST_BBC_ON_OFF_SWAP`
+* `FS_DBBC3_MULTICAST_BBC_TPI_USB_LSB_SWAP`
+* `FS_DBBC3_MULTICAST_CORE3H_POLARITY0_ON_OFF_SWAP`
+* `FS_DBBC3_MULTICAST_CORE3H_POLARITY2_ON_OFF_SWAP`
+* `FS_DBBC3_MULTICAST_CORE3H_TIME_ADD_SECONDS`
+* `FS_DBBC3_MULTICAST_CORE3H_TIME_INCLUDED`
+* `FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES`
+
+They are covered in the
+<<../releases/10/1/dbbc3_ops.adoc#_dbbc3_specific_environment_variables,DBBC3
+specific environment variables>> appendix of the
+<<../releases/10/1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>.
+
+They were introduced in _10.2-alpha3_.
 
 === FS_DISPLAY_SERVER
 

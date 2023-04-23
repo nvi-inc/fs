@@ -1,4 +1,4 @@
-// Copyright (c) 2021, 2022 NVI, Inc.
+// Copyright (c) 2021-2023 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,36 +19,44 @@
 
 :doctype: book
 
-= FS 10.1 DBBC3 Operations Manual
+= FS DBBC3 Operations Manual
+:stem: latexmath
 :sectnums:
 :sectnumlevels: 4
 :toclevels: 3
 :toc:
 :experimental:
 E. Himwich, J. Quick
-Version 4.5 - March 2023
+Version 4.8 - April 2023
 
 == Introduction
 
-This document outlines the features and model for FS operations with
-the DBBC3. It contains a section
-<<Configuring the FS for use with a DBBC3>> that gives the steps for
-customizing the FS for use with a DBBC3.
+This document describes FS DBBC3 support starting with FS _10.1_. It
+outlines the features and model for FS operations with the DBBC3.
 
-There are appendices, <<Minimizing the use of setup procedures>>,
-<<Thread procedure>>, and <<Recorder tuning>> that describe features
-that are not limited to use with the DBBC3, but are expected to mostly
-be used with DBBC3s.
+The FS supports the DDC_E, DDC_U, and DDC_V personalities. Support
+for the DDC_E personality was added in version _10.2_. The only
+version of DDC_V supported in FS _10.1_ was _v124_, but as of _10.2_
+other later versions are supported as well.
+
+The appendix <<Configuring the FS for use with a DBBC3>> gives the
+steps for customizing the FS. The appendix
+<<DBBC3 specific environment variables>> explains the use of those
+variables. The appendix <<Verifying polarity and USB/LSB TPI swaps>>
+provides methods for checking those two specific issues.
+
+Additional appendices, <<Minimizing the use of setup procedures>>,
+<<Thread procedure>>, and <<Recorder tuning>> describe features that
+are not limited to use with the DBBC3, but are expected to mostly be
+used with them.
 
 Support for several items that utilize the multicast data, including
 the T~sys~ monitor display and multicast data logging, is built on
-DBBC3 multicast unpacking software developed by Dave Horsley using his
-C `struct` packing and unpacking code generator
+DBBC3 multicast unpacking software developed by Dave Horsley (Hobart)
+using his C `struct` packing and unpacking code generator
 (https://github.com/dehorsley/packgen).
 
-== DBBC3 support features
-
-=== DBBC3 related commands
+== DBBC3 related commands
 
 The following SNAP commands support DBBC3s. You can access information
 on the details of the commands with `help=_command_`.
@@ -86,13 +94,14 @@ features if you only use it as described in the
 
 +
 
-CAUTION: For the DDC_U personality, the Core3H board uses up to two
-Ethernet outputs per board. The first output is used for the first
-eight BBCs; the second, for up to an additional eight. For each output
-that is active, the number of channels must be a power of two, from 1
-to 16, and all channels must use either only one-bit sampling or only
-two-bit sampling. If both outputs are in use for a board, they must
-use the same number of channels and bits per channel.
+CAUTION: For the DDC_E and DDC_U personalities, the Core3H board uses
+up to two Ethernet outputs per board. The first output is used for the
+first eight BBCs; the second, for up to an additional eight. In the
+DDC_E personality, only the first eight BBCs are available. For each
+output that is active, the number of channels must be a power of two,
+from 1 to 16, and all channels must use either only one-bit sampling
+or only two-bit sampling. If both outputs are in use for a board, they
+must use the same number of channels and bits per channel.
 
 +
 
@@ -180,7 +189,7 @@ command is added by _drudg_ to _.snp_ files if selected by the
 
 * `tpicd` -- TPI (multicast) recording control daemon setup
 
-=== FS DBBC3 channel and IF labels
+== FS DBBC3 channel and IF labels
 
 The DBBC3 channel labels are of the form `_nnns_`, where:
 
@@ -195,20 +204,20 @@ The DBBC3 IF labels are of the form `i__x__`, where:
 
 For example, `id` is IF D.
 
-=== Configuring the DBBC3
+== Configuring the DBBC3
 
-This subsection assumes that when the DBBC3 is booted, it is set-up
-according to either the "`Setting up the DBBC3 for DDC_U mode v125`"
-or "`Setting up the DBBC3 for DDC_V mode v124`" document, as
-appropriate.
+This section assumes that when the DBBC3 is booted, it is set-up
+according to either the "`Setting up the DBBC3 for DDC_E mode`",
+"`Setting up the DBBC3 for DDC_U mode`", or "`Setting up the DBBC3 for
+DDC_V mode`" document, as appropriate.
 
-==== Local configuration changes
+=== Local configuration changes
 
 This subsection covers changes that may be needed for experiments but
 aren't conveyed by the schedule file, yet. Some examples are given
 below.
 
-===== Ethernet configuration
+==== Ethernet configuration
 
 The Ethernet configuration of a Core3H board can be set in the DBBC3 boot
 configuration file. It can be changed on demand with a predefined SNAP
@@ -236,7 +245,7 @@ sub-procedure for each board.
 TIP: A reset and sync is not required for Ethernet configuration
 changes.
 
-===== Changing thread numbers
+==== Changing thread numbers
 
 The following command changes the thread numbers on Core3H board `1`
 for _eth0_ to `3` (`196608/65536`) and _eth1_ to `4`.
@@ -245,7 +254,7 @@ for _eth0_ to `3` (`196608/65536`) and _eth1_ to `4`.
 core3h=1,regupdate vdif_header 3 196608 0x03FF0000
 ....
 
-==== Setting the experiment mode configuration
+=== Setting the experiment mode configuration
 
 Setting the experiment mode configuration is broken into two parts:
 setting the Core3H board configuration which is covered in
@@ -253,7 +262,7 @@ setting the Core3H board configuration which is covered in
 setting the rest of the configuration, which happens implicitly when
 using the <<Checking the mode>> subsection farther below.
 
-===== Setting the Core3H board configuration
+==== Setting the Core3H board configuration
 
 Currently, the recommended method for configuring the mode for the
 Core3H boards is from the DBBC3 boot configuration. This is because
@@ -282,7 +291,7 @@ an arbitrary mode from a schedule. It is not entirely automatic, but
 will provide the needed information in a fairly straightforward
 format.
 
-====== Setting the boot configuration for the mode
+===== Setting the boot configuration for the mode
 
 This subsection assumes your boot configuration sets up the DBBC3
 except for the details of the observing mode. The non-Core3H board
@@ -301,10 +310,11 @@ _dbbc3.ctl_ agree with what is in the DBBC3.
 
 +
 
-IMPORTANT: Although some modes can be observed with either the DDC_U
-or DDC_V personalities, the setup is different. The setup for DDC_U
-will not work for DDC_V, and vice-versa. This procedure will give you
-a personality, and possibly version, specific setup.
+IMPORTANT: Although some modes can be observed with either the
+DDC_E/DDC_U or DDC_V personalities, the setup is different. The setup
+for DDC_E/DDC_U will not work for DDC_V, and vice-versa. This
+procedure will give you a personality, and possibly version, specific
+setup.
 
 . Start the FS
 
@@ -370,10 +380,10 @@ Core3H configuration files.
 
 +
 
-The files are usually called __ddc_U_core3H_<N>.fila10g__ and
-__ddc_V_core3H_<N>.fila10g__ depending the personality you are using
-and how many Core3H boards you have, _<N>_ running from `1` to a
-maximum of `8`.
+The files are usually called __ddc_E_core3H_<N>.fila10g__,
+__ddc_U_core3H_<N>.fila10g__, and __ddc_V_core3H_<N>.fila10g__,
+depending the personality you are using and how many Core3H boards you
+have, _<N>_ running from `1` to a maximum of `8`.
 
 +
 
@@ -455,7 +465,7 @@ errors.
 to checking the configuration of the Core3H boards, it configures the
 non-Core3H board settings for the mode.
 
-==== Checking the mode
+=== Checking the mode
 
 Before observing, it is essential to check that the mode has been
 configured correctly. This will implicitly set the non-Core3H
@@ -494,14 +504,15 @@ configure the non-Core3H board aspects of the observing mode.
 
 ====
 
-=== Firmware version checking
+== Firmware version checking
 
 The FS checks that the DBBC3 firmware being used agrees with what is
 in the FS control files, _equip.ctl_ and _dbbc3.ctl_. The personality,
-__DDC_U__ or __DDC_V__, is checked first. If the personality agrees,
-the version for that personality is then checked. In addition to the
-error report, the string received from DBBC3 is displayed for
-reference.
+DDC_E, DDC_U, or DDC_V, is checked first. If the personality agrees,
+the version for that personality is then checked. If there is a
+mismatch, the discrepancy is reported along with the string received
+from DBBC3.
+
 
 If one of these errors is detected, you should either load the correct
 firmware/version into the DBBC3 and/or correct the FS control files.
@@ -516,8 +527,18 @@ The checks are made in two different situations:
 
 The version information is checked for each multicast reception. If
 there is no multicast being received, these errors will not be
-reported this way. The errors detected for the multicast data are only
-reported once every twenty seconds.
+reported this way. In FS _10.1_, The errors detected for the multicast
+data are reported every 20 seconds; for _10.2_ and later, the minimum
+repprting interval is one minute.
+
++
+
+Starting with FS _10.2_, you can change the interval of report the
+error in minutes from one up to 10 with the environment variable
+`FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES`. Please see the
+<<Other options>> section of the
+<<DBBC3 specific environment variables>> appendix below for the
+details.
 
 +
 
@@ -563,36 +584,43 @@ An error is reported for these commands in case one of them is used by
 itself. This also maintains the historical precedent of checking the
 version whenever the formatter is configured.
 
-=== Control files
+== Control files
 
-==== equip.ctl
+=== equip.ctl
 
-For DBBC3 use, the rack type in _equip.ctl_ should be `dbbc3_ddc_u` or
-`dbbc3_ddc_v` depending on the firmware that is loaded.
+For DBBC3 use, the rack type in _equip.ctl_ should be `dbbc3_ddc_e`
+(FS _10.2_ or later), `dbbc3_ddc_u`, or `dbbc3_ddc_v` depending on the
+firmware that is loaded.
 
-==== dbbc3.ctl
+=== dbbc3.ctl
 
-The DBBC3 specific control file parameters are in the _dbbc3.ctl_ control file.
-An example of the contents is:
+The DBBC3 specific control file parameters are in the _dbbc3.ctl_
+control file. An example of the contents is:
+
+CAUTION: The example below is for FS _10.2_. In FS _10.1_, the second
+non-comment line below, for the DDC_E firmware version, was not
+present,
 
 ....
-* Two fields: BBCs/IF (8, 12, 16 or nominal (U:16,V:8)), IFs (1-8)
+* Two fields: BBCs/IF (8, 12, 16 or nominal (U:16,EV:8)), IFs (1-8)
   nominal 8
-* DDC_U firmware version (v121 or later)
+* DDC_E firmware version (v121 or later, but DDC_E starts at v126)
+  v126
+* DDC_U firmware version (v121 or later, but DDC_U starts at v125)
   v125
-* DDC_V firmware version (v121 or later)
+* DDC_V firmware version (v121 or later, but DDC_V starts at v124)
   v124
 * mcast delay 0-99 centiseconds
   57
 * setcl board
   1
-* DBBC3 clock rate, >= 0, but DDDC_U/_V only supports 128
+* DBBC3 clock rate, >= 0, but DDC only supports 128
   128
 ....
 
-NOTE: The use of `nominal` for BBCS/IF is recommended.
+NOTE: The use of `nominal` for BBCs/IF is recommended.
 
-==== dbbad.ctl
+=== dbbad.ctl
 
 The _dbbad.ctl_ file was expanded for use with DBBC3s. For the DBBC3
 it can now include the multicast address, port, and the interface. If
@@ -621,7 +649,7 @@ out) is:
 *  192.168.1.2 4000 800 224.0.0.19 25000 eno2
 ....
 
-==== skedf.ctl
+=== skedf.ctl
 
 The _skedf.ctl_ file now includes new options and expansion of some
 options for DBBC3 support. The are listed in the <<drudg support>>
@@ -631,7 +659,7 @@ can be found in the <<Minimizing the use of setup procedures>> and the
 all the options is available in the
 _/usr2/fs/st.defaul/control/skedf.ctl_ example file.
 
-=== Tsys monitor display
+== Tsys monitor display
 
 The T~sys~ monitor display is organized per IF and updates at a 1 Hz
 rate. The displayed information includes: LO, time, VDIF epoch, time
@@ -647,28 +675,28 @@ If the system is operating normally, `Time` shows a value one second
 more than in the previous second's multicast to avoid confusion with
 times displayed in other windows. (Logged values of the time are the
 raw received values.) This leads to the somewhat odd situation that
-for a Core3H board that is not synced, with firmware version _v125_ or
-higher, its `Time` value will be shown as `00:00:01` on the first day
-of the current VDIF epoch.
+for a Core3H board that is not synced, with non-DDC_V firmware, its
+`Time` value will be shown as `00:00:01` on the first day of the
+current VDIF epoch.
 
 [NOTE]
 ====
 
 The `Time` value is shown with inverse video if it is not changing,
 i.e., it is not advancing. The time is not available in the multicast
-for firmware _v124_, so the multicast arrival time is shown. If there
+for DDC_V firmware, so the multicast arrival time is shown. If there
 is intermittent loss of multicast messages, whether due to execution
 of DBBC3 commands or network issues, the `Time` value will
-intermittently flash inverse video. For firmware versions _v125_ or
-higher, the `Time` value will also be inverse video in some cases if
-one or more of the Core3H boards is not synced.
+intermittently flash inverse video. For non-DDC_V firmware, the `Time`
+value will also be inverse video in some cases if one or more of the
+Core3H boards is not synced.
 
 The `Epoch` value is shown as `--` for now since the VDIF epoch is not
 available yet in the multicast.
 
 The `DBBC3-FS` time difference, in seconds, is shown in inverse video
 if it is not zero (positive if the DBBC3 time is later than the FS).
-It is shown as `------` for firmware _v124_.
+It is shown as `------` for DDC_V firmware.
 
 ====
 
@@ -676,7 +704,7 @@ The display is designed to provide useful information without operator
 intervention. The operator can adjust the display as desired using the
 features described in <<Commands>> subsection below.
 
-==== Modes
+=== Modes
 
 The T~sys~ monitor display has three modes:
 
@@ -701,7 +729,7 @@ character (`l`) command. Another `l` will toggle the display back to the
 previous mode. The current mode is displayed in the upper right hand
 corner.
 
-==== Tsys values
+=== Tsys values
 
 In the `Rec` mode, only BBC T~sys~ fields for side-bands being
 recorded are populated.
@@ -727,13 +755,16 @@ only the first encountered is reported. The order is:
 . ``N lo `` -- the LO is not defined
 . `Ntcal` -- no Tcal value was found
 
+The T~sys~ values are calculated using the averaging method described
+in `*help=cont_cal*`.
+
 NOTE: As usual in the FS, an invalid value will be display as field
 dollar signs, `$`. That usually means that a value could be
 calculated, but there was a problem with the result: the result was
 too large for the field, was negative when only positive values are
 valid, or would have required dividing by zero.
 
-==== Commands
+=== Commands
 
 The T~sys~ display accepts several one character commands:
 
@@ -759,35 +790,36 @@ RF frequencies for the corresponding BBCs.
 *  kbd:[esc] or kbd:[control+c] -- exit
 * Any other key (e.g., kbd:[space]) -- resume cycling
 
-=== Checking DBBC3 time
+== Checking DBBC3 time
 
 The `mcast_time` command should be placed in the local `midob`
 procedure to monitor the time in the DBBC3 for each scan. An error
 will be reported if the multicast data is more than 20 seconds old.
-For version _v124_, `mcast_time`, cannot report the time, but will
-still report the `pps_delay`. For _v125_ or later, an error will be
+For DDC_V firmware, `mcast_time`, cannot report the time, but will
+still report the `pps_delay`. For non-DDC_V firmware, an error will be
 reported if any Core3H board's time differs from the FS time.
 
-For version _v124_ and earlier, the `dbbc3=time` command can be used.
-However, the output can be difficult to interpret because the boards
-may be sampled in different seconds.
+For DDC_V firmware and versions before _v124_, the `dbbc3=time`
+command can be used. However, the output can be difficult to
+interpret because the boards may be sampled in different seconds.
 
-NOTE: We expect that for future firmware versions, after _v125_, that
-report the VDIF epoch in the multicast, `mcast_time` will report if
-there is a VDIF epoch mismatch between the boards. Other checks may
-also be added in the future.
+NOTE: We expect that future firmware versions, possibly beginning with
+_v130_, will report the VDIF epoch in the multicast. In that case,
+`mcast_time` will report if there is a VDIF epoch mismatch between the
+boards.  Other checks may also be added in the future.
 
-=== Setting FS time
+== Setting FS time
 
 It is expected that normally the FS computer will be using NTP and the
 FS time model is set to `computer` (see _misc/ntp.txt_ for more
 information). If good NTP servers are available, that should give the
 best time in the FS.
 
-No suitable NTP servers may be available either because network connectivity is
-poor and/or there are no local functioning NTP servers. In that case the FS
-program _setcl_ can be used with DBBC3 firmware versions _v125_ and later to
-set and adjust FS time (see _misc/fstime.txt_ for the details).
+No suitable NTP servers may be available either because network
+connectivity is poor and/or there are no local functioning NTP
+servers. In that case the FS program _setcl_ can be used with
+non-DDC_V versions to set and adjust FS time (see _misc/fstime.txt_
+for the details).
 
 The implementation of _setcl_ for the DBBC3 depends on two values from the
 _dbbc3.ctl_ control file:
@@ -799,21 +831,22 @@ _dbbc3.ctl_ control file:
 This is the delay for when the multicast arrives after the 1 PPS. It
 seems to be stable for a given system. It does seem to vary with the
 number of Core3H boards and other factors we don't fully understand
-yet. In tests with __DDC_U__ _v125_, we have seen delays of 57 and 75
+yet. In tests with DDC_U _v125_, we have seen delays of 57 and 75
 centiseconds in systems with eight Core3H boards; 33 centiseconds, for
-a system with two boards. (For __DDC_V__ _v124_ with eight boards, we
-have seen about 30 centiseconds in one system and 19 in another. Since
-there is no time available in the _v124_ multicast, _v124_ is not
-useful for setting the FS time.)
+a system with two boards. (For DDC_V _v124_ with eight boards, we have
+seen about 30 centiseconds in one system and 19 in another. Since
+there is no time available in the DDC_V multicast, DDC_V is not useful
+for setting the FS time.)
 
 +
 
 The value in _dbbc3.ctl_ can be adjusted as appropriate. It should be
 easy to measure it for a given system when NTP _is_ available, using
-the output of the `mcast_time` command. The system will need to be
-synced to NTP and the `computer` model selected in _time.ctl_. In this
-case, the last value on the `mcast_time/0` line is the delay in
-centiseconds; it may vary at the single centisecond level.
+the output of the `mcast_time` command and _setcl_. The system will
+need to be synced to NTP and the `computer` model selected in
+_time.ctl_. In this case, the last value on the `mcast_time/0` line
+_minus_ the last value on the `#setcl#model/old` line is the delay in
+centiseconds; it may vary at the single digit centisecond level.
 
 * The board number to use for measuring the time.
 
@@ -850,7 +883,7 @@ schedule. It should be better than any other approach without NTP.
 Since the DBBC3 will be running on the correct time, small errors in
 the FS time should not cause problems unless the scans are very short.
 
-=== Multicast logging
+== Multicast logging
 
 Logging of DBBC3 multi-cast recording is controlled by the `tpicd`
 command. It will automatically be enabled by _drudg_ generated setup
@@ -866,16 +899,27 @@ The counts are given in the order of cal _on_ then _off_
 * `tpi`  -- Only if continuous cal is _not_ in use -- TPI counts for each BBC and IF configured for recording.
 * `tsys` -- Only if continuous cal _is_ in use -- T~sys~ for each BBC and IF configured for recording and T~sys~
 
++
+
+The T~sys~ values are calculated using the averaging method described
+in `*help=cont_cal*`. They are logged every `_samples_` (from the
+`cont_cal` command) iterations of the `_cycle_` period for the `tpicd`
+command (see `*help=tpicd*`). In other words, the T~sys~ logging
+interval is the product of `_samples_` times `_cycle_`.
+
 Even when not being logged, multicast data is normally being received.
-A subset can be seen in the T~sys~ monitor display.
+A subset can be seen in the T~sys~ monitor display. The current value
+can displayed in the log display window (and logged) at anytime by
+using the command `*tpicd=tsys*`.
 
 Multicast messages may be lost if there are network issues or if a
 DBBC3 command is used. The FS will report an error (a _time-out_) once
 every 20 seconds if it is not receiving multicast when `data_valid` is
 `on`, i.e., during recording or e-VLBI.
 
-IMPORTANT: Avoid use of DBBC3 commands when `data_valid` is `on`,
-i.e., during a scan,  since they may cause loss of calibration data.
+IMPORTANT: You should avoid use of DBBC3 commands when `data_valid` is
+`on`, i.e., during a scan, since they may cause loss of calibration
+data.
 
 When `data_valid` is `off`, the FS will only report loss of multicast
 messages if it does not appear to be associated with DBBC3 command
@@ -896,7 +940,7 @@ multicast data squeezed out by default, as it already did for RDBEs. A
 subsequent revision in _plog_ causes the compressed full log to also
 be pushed by default. Please see ``**plog -h**`` for more information.
 
-=== drudg support
+== drudg support
 
 The DBBC3 related _drudg_ changes include:
 
@@ -947,19 +991,21 @@ now be used for DBBC3s:
 The full syntax for these options can be found in the example
 _/usr2/fs/st.default/control/skedf.ctl_ file.
 
+[appendix]
+
 == Configuring the FS for use with a DBBC3
 
-This subsection  provides the steps needed to configure the FS to
-support a DBBC3. You must have version FS _10.1.0_, or later,
-installed before using these directions. All steps, except as noted,
-are to be executed as _oper_.
+This appendix provides the steps needed to configure the FS to support
+a DBBC3. You must have version FS _10.1_, or later, installed before
+using these directions. All steps, except as noted, are to be executed
+as _oper_.
 
 . Update _equip.ctl_.
 
 +
 
-Change your rack type to `dbbc3_ddc_u` or `dbbc3_ddc_v`, as
-appropriate.
+Change your rack type to `dbbc3_ddc_e` (FS _10.2_ or later),
+`dbbc3_ddc_u,` or `dbbc3_ddc_v`, as appropriate.
 
 . Update _dbbc3.ctl_.
 
@@ -1282,6 +1328,339 @@ able use the T~sys~ display monitor commands on the console.
 in as _prog_.
 
 . Start the FS, or restart it if it was already running.
+
+. Determine what DBBC3 specific environment variables need to be set.
+
++
+
+A reasonable first approach would be to not set any at this point, but
+you should revisit this issue once you have the FS otherwise working
+with the DBBC3. A full discussion of the variables can be found in the
+<<DBBC3 specific environment variables>> appendix below. In
+particular, the section <<Determining what values to use>> may be
+helpful.
+
+
+
+[appendix]
+
+== DBBC3 specific environment variables
+
+Beginning in FS _10.2_, several environment variables are defined for
+use with the DBBC3. These are generally broken into two groups,
+described in sections <<Swaps of TPI and gain values>>, and
+<<Other options>>. These environment variables exist to help the end
+user adapt to variations in DBBC3 behaviour between different firmware
+releases.  Several variables are provided to give flexibility for
+handling different variations.
+
+While some firmware releases may require setting a subset of these
+variables, we have set the default values so that the end user should
+not typically need to define them. We have verified that they should
+not need to be defined for the firmware releases in the
+<<releases,Tested DBBC3 releases>> table below.
+
+.Tested DBBC3 releases
+[#releases]
+[%autowidth,cols="^,^,^"]
+|======
+| Personality | Version | Release date
+
+| DDC_E | _v126_ | 2022-10-25
+| DDC_U | _v125_ | 2021-04-29
+| DDC_U | _v125_ | 2021-08-19
+| DDC_U | _v126_ | 2022-11-03
+| DDC_V | _v124_ | 2021-09-26
+| DDC_V | _v125_ | 2022-09-12
+|======
+
+Other releases may require setting some environment variables. In
+particular, some releases of DDC_V, _v124_, may require
+`FS_DBBC3_MULTICAST_BBC_ON_OFF_SWAP` to be set to `1`, when the
+continuous calibration polarity is `2`.
+
+If you have experience with releases other than those listed in the
+<<releases,Tested DBBC3 releases>> table above, please email Ed with
+the polarity you are using, which environment variables you needed to
+define, and their values, or if you did not need to define any. What
+is needed (or if nothing is needed) for that release will be added to
+this document. To the extent possible, we will build those settings
+into the FS, but we are only able to do that per personality and
+version, not release date.
+
+For all these environment variables, if they have been set to a
+non-default value, the actual value set, followed by the default in
+parentheses, will be included in the log header each time a log is
+opened or reopened.
+
+=== Determining what values to use
+
+A reasonable first approximation is to not set any of these
+environment variables. Then some can be set as needed. For information
+on how to set environment variables, please see
+<<../../../misc/env_vars.adoc#_setting_environment_variables, Setting
+environment variables>> in <<../../../misc/env_vars.adoc#,FS
+environment Variables>> document.
+
+TIP: What needs to be set may vary by firmware personality, version, and
+release date. If you only use one release, you can set the values in
+your _~/.profile_ or _~/.login_ file, as appropriate. If you use more
+than one release, you may want to set the values that need to be
+changed between releases in either a script or an alias that you use
+to run the FS for that release.
+
+It should not be necessary at this time to change any of the USB/LSB
+swaps from the default. So far, our experience is that all
+personalities and versions need these swaps. If there is any question
+about this, please verify it using, for example,
+<<USB/LSB TPI swap status>> in the
+<<Verifying polarity and USB/LSB TPI swaps>> appendix.
+
+You can detect if additional cal-on/cal-off TPI swaps are needed from
+results without any of the environment variables set. Assuming you are
+using the correct polarity (see <<Continuous calibration polarity>> in
+the <<Verifying polarity and USB/LSB TPI swaps>> appendix), then if:
+
+* T~sys~ for the BBCs in the monitor display window is `++$$$$$++`, you
+may need to define `FS_DBBC3_MULTICAST_BBC_ON_OFF_SWAP` as `1`.
+
+* T~sys~ for the IFs in the monitor display window is `++$$$$$++` and your
+polarity is `0`, you may need to define
+`FS_DBBC3_MULTICAST_CORE3H_POLARITY0_ON_OFF_SWAP` as `1`.
+
+* T~sys~ for the IFs in the monitor display window is `++$$$$$++` and your
+polarity is `2`, you may need to define
+`FS_DBBC3_MULTICAST_CORE3H_POLARITY2_ON_OFF_SWAP` as `0`.
+
+* T~sys~ for the BBCs from _onoff_ is negative (or an overflow,
+``$``s), you may need to define `FS_DBBC3_BBCNNN_ON_OFF_SWAP` as `1`.
+
+* T~sys~ for the IFs from _onoff_ is negative (or an overflow, ``$``s)
+and your polarity is `0`, you may need to define
+`FS_DBBC3_IFTPX_POLARITY0_ON_OFF_SWAP` as `1`.
+
+* T~sys~ for the IFs from _onoff_ is negative (or an overflow, ``$``s)
+and your polarity is `2`, you may need to define
+`FS_DBBC3_IFTPX_POLARITY2_ON_OFF_SWAP` as `0`.
+
+=== Swaps of TPI and gain values
+
+Two general types of swaps may be needed: (i) USB/LSB swaps, and (ii)
+cal-on/cal-off swaps. Generally, USB/LSB swaps are always needed (and
+are enabled by default). They can be adjusted separately for the TPIs
+in the `bbc__NNN__` commands, gains in the `bbc__NNN__` commands, the
+`bbc_gain` command, and the multicast.
+
+Typically, cal-on/cal-off swaps are only needed in two situations (and
+are enabled in those two cases by default). They can be adjusted
+separately for the `bbc__NNN__` commands, the `iftp__X__` commands,
+the BBCs in the multicast, and the IF (Core3H) values in the
+multicast. Additionally for the `iftp__X__` command and IF values in
+the multicast, separate control is provided for polarity `0` (and `1`)
+versus polarity `2` (and `3`).
+
+The variables, along with their default values, are given in the
+<<variables,DBBC3 TPI swap environment variables>> table below. The
+table is sorted by USB/LSB verses cal-on/cal-off swaps. Their names
+are verbose to make their applicability clear. The `CORE3H` values for
+the multicast refer to the IF TPI values. A value of `0` for the
+variable disables its effect; a value of `1` enables it. If the
+variable is not defined in the session before the FS is started, the
+behavior will be that of the default value. If need be, the variable
+can be defined as `1` to enable, or `0` to disable it, _before
+starting the FS_. Any other defined value is interpreted as `0`.
+
+.DBBC3 TPI swap environment variables
+[#variables]
+[%autowidth,cols="<,^"]
+|======
+| Environment variable | Default
+
+| `FS_DBBC3_BBCNNN_GAIN_USB_LSB_SWAP` | `1`
+| `FS_DBBC3_BBCNNN_TPI_USB_LSB_SWAP` | `1`
+| `FS_DBBC3_BBC_GAIN_USB_LSB_SWAP` | `1`
+| `FS_DBBC3_MULTICAST_BBC_TPI_USB_LSB_SWAP` | `1`
+| `FS_DBBC3_BBCNNN_ON_OFF_SWAP` | `0`
+| `FS_DBBC3_IFTPX_POLARITY0_ON_OFF_SWAP` | `0`
+| `FS_DBBC3_IFTPX_POLARITY2_ON_OFF_SWAP` | `1`
+| `FS_DBBC3_MULTICAST_BBC_ON_OFF_SWAP` | `0`
+| `FS_DBBC3_MULTICAST_CORE3H_POLARITY0_ON_OFF_SWAP` | `0`
+| `FS_DBBC3_MULTICAST_CORE3H_POLARITY2_ON_OFF_SWAP` | `1`
+|======
+
+=== Other options
+
+A few other environment variables can be used to control other
+options:
+
+* `FS_DBBC3_MULTICAST_CORE3H_TIME_ADD_SECONDS`
+
++
+
+This variable can be used to adjust the time-stamp in the multicast
+packets. Normally it does not need to be set and defaults to `0`. If
+the multicast packets being received have a fixed offset from the
+correct time, this variable can be set to correct the values. Any
+32-integer value can be used. Any non-integer value is interpreted as
+`0`. The value is added to the time-stamps.  This does not correct the
+time that the DBBC3 is using internally and in the VDIF packets sent
+to the recorder. This can only be used to eliminate FS indications of
+incorrect time in the DBBC3. Please see the warning immediately below.
+
++
+
+WARNING: Having the wrong time-stamps may be an indication that the
+DBBC3 was not properly synchronized. It may be that the DBBC3 needs to
+be rebooted to resynchronize it properly.
+
+* `FS_DBBC3_MULTICAST_CORE3H_TIME_INCLUDED`
+
++
+
+This variable controls whether time is expected in the multicast
+packets.  Normally it does not need to be set. It defaults to `0` for
+DDC_V and `1` for others. Setting it to `1` means that time in the
+multicast packet is expected. Any other value is interpreted as `0`,
+i.e., time is not expected and no attempt will be made to use it.
+
+* `FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES`
+
++
+
+This variable controls the error reporting interval, in minutes, if
+the DBBC3 firmware (`DDC___X__`) or version (`v__NNN__`) in the
+multicast does not agree with the FS control files. The default is
+`1`.  It can be set to any value `1`-`10`. Any other values are
+interpreted as `1`.
+
+[appendix]
+
+== Verifying polarity and USB/LSB TPI swaps
+
+This appendix provides methods for verifying the
+<<Continuous calibration polarity>> and the
+<<USB/LSB TPI swap status>>
+
+=== Continuous calibration polarity
+
+A polarity of `0` corresponds to the noise diode in the receiver being
+active for the low TTL output level of the DBBC3 continuous
+calibration signal; `2`, active for the high TTL output level.  The
+best case is to know what the polarity should be from the design of
+your system. If that is not practical, or to verify it, you can use
+the methods in this section.
+
+Generally the easiest way to verify, or empirically determine, your
+calibration polarity is from the T~sys~ monitor display. Hopefully,
+one setting of the polarity, `0` or `2`, will produce usable T~sys~
+values. If so, that is probably the correct polarity. However, if
+there is an issue with the order of the cal-on and cal-off values in
+the multicast, you may get the wrong result. In that case, _fivpt_
+won't work and _onoff_ will not return usable T~sys~ values.
+
+A more reliable, but also not perfect, way to determine the correct
+polarity is with the output of a `bbc__NNN__` command. The following
+procedure should normally work. If the results do not agree with your
+expected polarity, please contact Ed.
+
+. If you are using FS _10.2_ or later, make sure the environment
+variable `FS_DBBC3_BBCNNN_ON_OFF_SWAP` is _not_ set, or if it is set,
+that it is set to `0`.
+
+. Start the FS.
+
+. Configure the system for an observing mode.
+
+. Set the polarity to `0`:
+
+ cont_cal=on,0
+
+. For a BBC that is configured for observing, maybe BBC001, sample its
+state:
+
+ bbc001
+
+. Examine the last four numbers of the output. They are, in order:
+
++
+--
+.. USB TPI~on~ (cal-on)
+.. LSB TPI~on~ (cal-on)
+.. USB TPI~off~ (cal-off)
+.. LSB TPI~off~ (cal-off)
+--
++
+
+If the TPI~on~ values, per side-band, were higher than the TPI~off~
+values, you should use polarity `0`. You may want to sample a few
+times to make sure the results are consistent. If the TPI~off~ values
+are higher than the TPI~on~ values, proceed to the next step.
+
+. If in the previous step, the TPI~off~ values, per side-band, were
+higher than the TPI~on~, you should try:
+
+ cont_cal=on,2
+
++
+
+and re-sample the BBC. If the TPI~on~ values are now higher than the
+TPI~off~ value, you should use `2` as your polarity.
+
+=== USB/LSB TPI swap status
+
+To verify  your  USB/LSB TPI swap status you need a strong test signal
+in one side-band of a BBC. This could either be a phase calibration
+test tone, or an astronomical source such as a Maser, that makes a
+strong signal in only one side-band of one BBC.
+
+Follow the steps below. If the results do not show that the test
+signal is in the expected side-band, please contact Ed.
+
+. If you are using FS _10.2_ or later, make sure the environment
+variable `FS_DBBC3_MULTICAST_BBC_TPI_USB_LSB_SWAP` is _not_ set, or
+if it is set, that it is set to `1`.
+
+. Start the FS.
+
+. Configure the system for an observing mode.
+
++
+
+[CAUTION]
+====
+
+You must use an observing mode that at least has a nominal _.rxg_ file
+that supports it. If there isn't one, you can use the output of the
+`bbc__NNN__` command (with `FS_DBBC3_BBCNNN_USB_LSB_SWAP` not set or
+else set to `1`) for the BBC where the test signal is expected to
+appear and hand calculate the stem:[\mathit{T_{sys}}] value for each
+side-band using (see the
+<<Continuous calibration polarity>> section for the
+stem:[\mathit{TPI}] variable meanings, use a nominal value for
+stem:[\mathit{T_{cal}}]):
+
+[.text-center]
+stem:[\mathit{T_{sys}=0.5(TPI_{on}+TPI_{off})\frac{T_{cal}}{TPI_{on}-TPI_{off}}}]
+
+Verify that the side-band that is expected to have the test signal has
+the higher stem:[\mathit{T_{sys}}] value.
+
+====
+
+. In the stem:[\mathit{T_{sys}}] monitor display, verify that the
+stem:[\mathit{T_{sys}}] value of the side-band of the BBC where the
+test signal is expected to be is in fact higher than the other
+side-band.
+
+. We have not seen it, but it might be possible for the mulitcast and
+`bbc__NNN__` commands to have different USB/LSB swaps. So in principle
+both the T~sys~ monitor display and `bbc__NNN__` commands should be
+checked (see the *CAUTION* above for the latter). It is also possible
+to verify the USB/LSB swaps status for both the gains in the
+`bbc__NNN__` command and those in `bbc_gain` command. Separate
+environment variables are provided in case any need to be adjusted
+independently.
+
 
 [appendix]
 
@@ -1760,11 +2139,10 @@ worked:
 nanoseconds and are not drifting. However, if a GPS 1 PPS is used as
 input, some drift may be unavoidable.
 
-
-The best way to check the time for version _v125_ and later is with
-the `mcast_time` command. For earlier versions the `dbbc3=time`
-command can be used, but the output can be difficult to interpret
-because the boards may be sampled in different seconds.
+The best way to check the time for non-DDC_V firmware is with the
+`mcast_time` command. For DDC_V firmware and versions before _v124_
+the `dbbc3=time` command can be used, but the output can be difficult
+to interpret because the boards may be sampled in different seconds.
 
 The VDIF epoch and the time can be checked per board with
 `core3h=__board__,time`, where `_board_` is the board number.

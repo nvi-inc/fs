@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2022 NVI, Inc.
+// Copyright (c) 2020-2023 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Beta1 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 4.3 - April 2022
+Version 4.4 - April 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -318,7 +318,7 @@ called after the `mk5c_mode` or `fb_mode` commands, depending on the
 type of recorder, to allow the default configuration to be overridden.
 The default configuration is described in the
 <<dbbc3_ops.adoc#_default_configuration,Default configuration>>
-subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>
+subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>
 and in the `help` pages for `mk5c_mode` and `fb_mode`. The commands in
 these procedures should be mode independent. Mode dependent tuning
 should be handled differently; perhaps by inserting commands directly
@@ -361,7 +361,7 @@ present.
 DBBC3, you should make the configuration changes described in the
 <<dbbc3_ops.adoc#_configuring_the_fs_for_use_with_a_dbbc3,Configuring
 the FS for use with a DBBC3>> appendix of the <<dbbc3_ops.adoc#,FS
-10.1 DBBC3 Operations Manual>>. If you expect to get a DBBC3, these
+DBBC3 Operations Manual>>. If you expect to get a DBBC3, these
 changes can be deferred until then.
 
 . If you are using _tcsh_ as your login shell for _oper_ or _prog_ (or
@@ -545,7 +545,7 @@ Before this release, the FS only provided limited functionality for
 DBBC3 racks, as described in the <<../0/dbbc3.adoc#,FS 10.0 DBBC3
 support>> document for that release, _10.0.0_. More complete support is
 provided now. The updated support is described in the
-<<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>> and includes:
+<<dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> and includes:
 
 * A separate _dbbc3.ctl_ control file
 
@@ -989,13 +989,13 @@ depending on which recorder is selected in _equip.ctl_, `mk5c` or
 `flexbuff`, the total data rate, and the data type, VDIF or
 5B/Ethernet. The updated default configuration is described in the
 <<dbbc3_ops.adoc#_default_configuration,Default configuration>>
-subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
+subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>.
 
 All the settings can be overridden by the `mk5c_config` (or
 `fb_config`, depending on the recorder type selected when running
 _drudg_) local procedure. See the
 <<dbbc3_ops.adoc#_overriding_the_defaults,Overriding the defaults>>
-subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
+subsection of the <<dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>.
 
 NOTE: Another change, <<fbsyns,FlexBuff synonyms>> in this document,
 makes `mk5c_mode` available with the synonym `fb_mode`.
@@ -2277,7 +2277,7 @@ recorder configuration.
 
 For more information see the
 <<dbbc3_ops.adoc#_mk5c_configfb_config_procedure,mk5c_config/fb_config
-procedure>> subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3
+procedure>> subsection of the <<dbbc3_ops.adoc#,FS DBBC3
 Operations Manual>>.
 
 ====
@@ -2292,7 +2292,7 @@ for Mark 5C and FlexBuff recorders
 This procedure controls whether VDIF data is recorded multithreaded or
 single thread per file. Its use is described in
 <<dbbc3_ops.adoc#_thread_procedure,Thread procedure>> subsection of
-the <<dbbc3_ops.adoc#,FS 10.1 DBBC3 Operations Manual>>.
+the <<dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>.
 
 NOTE: Although it is expected that only one thread selection will be
 used for an entire experiment, a separate `thread...` procedure is
@@ -2373,7 +2373,7 @@ If enabled, _drudg_ prefixes each setup procedure with `setup_proc=`
 to invoke that command. For more information see the
 <<dbbc3_ops.adoc#_minimizing_the_use_of_setup_procedures,Minimizing
 the use of setup procedures>> subsection of the <<dbbc3_ops.adoc#,FS
-10.1 DBBC3 Operations Manual>>.
+DBBC3 Operations Manual>>.
 
 .. Add `vdif_single_thread_per_file` option
 
@@ -2385,7 +2385,7 @@ This option allows control of whether the VDIF files created by Mark
 +
 
 For more information see the <<dbbc3_ops.adoc#_thread_procedure,Thread
-procedure>> subsection of the <<dbbc3_ops.adoc#,FS 10.1 DBBC3
+procedure>> subsection of the <<dbbc3_ops.adoc#,FS DBBC3
 Operations Manual>>.
 
 .. <<fix_equipment,Fix drudg equipment options>>[[fix_equipment]]: Fix
