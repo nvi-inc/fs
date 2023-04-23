@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-alpha3 Update Notes
-Version 0.56 - April 2023
+Version 0.57 - April 2023
 
 :sectnums:
 :stem: latexmath
@@ -35,7 +35,7 @@ Version 0.56 - April 2023
 This document covers the steps needed to update from FS _10.1_ to
 _10.2_ (latest patch is _10.2.0_) and the changes in the new version.
 Installing the new version (see the <<Upgrading from 10.1>> section
-below) is much simpler than the update to _10.1_.
+below) should be simpler than the update to _10.1_ for most users.
 
 IMPORTANT: Despite the next paragraph, _alpha_ and _beta_ releases are
 not intended for operations.
@@ -76,9 +76,9 @@ You must have already upgraded to _10.1_ according to the
 installing this update.
 
 NOTE: You can make a _fresh_ install of _10.2_ on an FSL11 system
-using the FSL11 installation document,
-https://nvi-inc.github.io/fsl11/. Testers of previous development
-versions can follow the instructions here; some may have changed from
+using the installation document, https://nvi-inc.github.io/fsl11/.
+Testers of previous _10.2_ development versions, on any FSL__x__, can
+follow the instructions here; some steps may have changed from
 previous versions.
 
 === Fetch 10.2
@@ -98,7 +98,7 @@ _git_:
 
 +
 
-Please follow the steps, through the step that includes the option to
+Please follow the steps, through the one that includes the option to
 set the _/usr2/fs_ link, in the
 <<../../misc/release_model.adoc#_installing_from_an_archive,Installing
 from an archive>> subsection in the
@@ -207,12 +207,26 @@ not put off updating your software too long. There is a reasonable
 chance that your software may not need any changes.
 
 CAUTION: You may be asked by a coordinating center or scheduler if
-your station can handle the longer names. You should _not_ answer
-"`yes`" until you have made the necessary changes or verified that no
-changes are needed.
+your station can handle the longer names. You should answer "`no``"
+until you have made the necessary changes or verified that no changes
+are needed.
 
-There are two issues that may neeed to be address (as _prog_), shared
-memory variables and use of the _lognm_ program:
+There are three issues that may need to be address (as _prog_), legacy
+FORTRAN code, shared memory variables, and use of the _lognm_ program:
+
+. Legacy FORTRAN code
+
++
+
+If you have FORTRAN code in your station software, you should review
+the changes in the <<f95,f95>> sub-item (if that link doesn't work in
+your browser, click on this link instead: <<fsl1,FSL11>>, open the
+*Details* toggle below that location by clicking on it, go `Back` in
+the browser, and finally click on the original link) of the
+<<FS changes>> section to see if any are applicable to your code.
+Strictly speaking, they are not needed unless you are using FSL11, and
+of course they can't be fully tested until you are. As a result, you
+may want to defer this until you are transitioning to FSL11.
 
 . Use of shared memory variables.
 
@@ -238,8 +252,8 @@ length defined by the `MAX_SKD` parameter (currently with a value of
 
 +
 
-NOTE: These strings in these variables are blank padded, not
-terminated with a `null` byte.
+NOTE: These strings in these variables, old and new, are blank padded,
+not terminated with a `null` byte.
 
 +
 
@@ -277,7 +291,7 @@ standard way, you can do this with (as _prog_):
 IMPORTANT: This will make sure the FS server is stopped and shared
 memory is reallocated.
 
-=== Set DBBC3 related environment variables
+=== Set DBBC3 specific environment variables
 
 There are two alternatives:
 
@@ -287,12 +301,14 @@ be set, skip to <<Optional steps>>.
 . If you are using a DBBC3, you _may_ need to set some environment
 variables. A reasonable first approach would be to not set any at this
 point, but you should revisit this issue once you have the new FS
-installed. A full discussion of the variables can be found in the
+installed and otherwise working. A full discussion of the variables
+can be found in the
 <<../1/dbbc3_ops.adoc#_dbbc3_specific_environment_variables,DBBC3
 specific environment variables>> appendix of the
-<<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>. The section
-<<../1/dbbc3_ops.adoc#_determining_what_values_to_use,Determining
-what values to use>> in particular may be helpful.
+<<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>. In particular,
+the section
+<<../1/dbbc3_ops.adoc#_determining_what_values_to_use,Determining what
+values to use>> may be helpful.
 
 
 === Optional steps
@@ -309,7 +325,10 @@ The new default window width for FSL11 of the `erchk`, `login_sh`,
 `oprin`, and `scnch` windows is 146 columns. The main advantage of
 this is that longer log lines can be displayed without wrapping. This
 includes the standard fixed length error messages, none of which will
-wrap and should be easier to read.
+wrap and should be easier to read. Making this change is recommended
+if your display can support it. If not, you might adjust the windows
+to the widest that can be handled conveniently (see the *TIP* below
+for using different sizes).
 
 +
 
@@ -362,12 +381,13 @@ for _prog_ (and any AUID accounts) as well.
 
 +
 
-This will prevent history entries from being changed if they are
-edited and then not used. Their changing in the way can be quite
-frustrating, but it is up to you if you want to prevent it. In FSL11,
-the default is to prevent it (this is installed by the `make install`
-step for the FS). If you are using FSL10 or FSL9 (but not FSL8), you
-can prevent it by creating the file:
+This will prevent history entries (particularly in _bash_, _oprin_,
+and _pfmed_) from being changed if they are edited and then not used.
+Their changing in this way can be quite frustrating, but it is up to
+you if you want to prevent it. In FSL11, the default is to prevent it
+(this is installed by the `make install` step for the FS). If you are
+using FSL10 or FSL9 (but not FSL8), you can prevent it by creating the
+file:
 
 +
 
@@ -395,7 +415,7 @@ To make this active for:
 out and back in again
 
 * _oprin_ -- if the FS is running, you will need to restart the FS
-display client (or restart the FS if your are not using the display
+display client (or restart the FS if you are not using the display
 server)
 
 * _pfmed_ -- if it is running, exit and restart it
@@ -423,9 +443,10 @@ script.
 +
 
 If you are using FSL6-9 and have not hit the problem this change is
-correcting, you may not need it. That, and the fact that are very few
-users of this script, is why this change is optional. See the
-<<refresh_spare_usr2,refresh_spare_usr2>> FS change below. (if that
+correcting, you may not need it. That, and the fact that there are
+very few users of this script, is why this change is listed as
+optional (even though in some sense it is necessary). See the
+<<refresh_spare_usr2,refresh_spare_usr2>> FS change below (if that
 link doesn't work in your browser, click on this link instead:
 <<fs_misc,FS miscellaneous changes>>, open the *Details* toggle below
 that location by clicking on it, go `Back` in the browser, and finally
@@ -523,7 +544,7 @@ items.
 The _f95_ compiler, version _6.3.0_, in FSL11 has stricter
 requirements for the use of octal, hexadecimal, and binary constants
 and for argument type agreement in calls to functions and subroutines
-than in previous FSL__x__ versions. The changes made were:
+than in previous FSL__x__ versions. The FS code changes made were:
 
 ... Reformat octal and hexadecimal constants
 
@@ -614,7 +635,7 @@ available.
 
 +
 
-The programs effected are: _logpl_, _gnplt_, _monpcal_, _be_client_,
+The programs affected are: _logpl_, _gnplt_, _monpcal_, _be_client_,
 _s_client_, and _rdbemsg_. The _python3_ source code is in directories
 with the same name. The _python2_ source code can be found in
 directories with the same name, but with `-python2` appended. It is
@@ -756,7 +777,8 @@ effects are:
 in the `System Status Monitor` display (_monit2_) were changed. The
 `SCHED=..` field now occupies the space previously used by both
 `SCHED=...` and `LOG=...`. The `LOG=...` field is now in the lower
-right where the `HEAD PASS # ...` field was previously located.
+right where the (no longer used) `HEAD PASS # ...` field was
+previously located.
 
 * The display of procedure libraries for the `pfdl` command in _pfmed_
 now shows only three libraries per line. A key was also added to
@@ -801,7 +823,7 @@ performance statistics.
 ====
 
 Each change is summarized in the paragraph below (apologies to
-_Harper's_ magazine's _Findings_ articles), more details follows.
+_Harper's_ magazine's _Findings_ columns), more details follows.
 
 The default plot device for X11 displays was changed to be useful.
 If the FS is running and no log was specified, the data in the current
@@ -1363,8 +1385,8 @@ X11 window widths>> sub-step in the <<Optional steps>> above for the
 details.
 
 Thanks to Jon Quick (HartRAO) for encouraging this recognition that
-more modern systems usually have more display real estate that should
-be used.
+more modern systems usually have more display real estate and that it
+should be used.
 
 ====
 . Change the order of commands for DBBC3 syncing.
@@ -2066,8 +2088,8 @@ were updated to be consistent with the above terminology.
 * A "`key`" was added to the end of the `pfdl` command output to
 describe the prefix letters before the library names (`>`, active in
 _pfmed_; `A`, the current FS schedule library; `S`, the current FS
-station library, always `station`). These prefix letters now displayed
-correctly.
+station library, always `station`). These prefix letters are now
+displayed correctly.
 
 * Fix `pfst` command to trap the "`old`" library not existing.
 Previously, it would be created as an empty library.
@@ -2103,7 +2125,7 @@ name lengths.
 
 * Improve the code for the `ds` command. This included fixing
 `character` subroutine arguments to be adjustable, removing Hollerith
-use of `character` variables, and cleaning-up edges cases for the
+use of `character` variables, and cleaning-up edge cases for the
 bubble-sort.
 
 * Make the same terminology consistency improvements ("`active`" and
@@ -2260,7 +2282,7 @@ and _rdbcn_. Additionally, a change was made to _boss_ that may
 eliminate any remaining instances.
 
 
-... Correct DBBC3 `bbc_gain` command error messages.
+... Correct DBBC3 `bbc_gain` first parameter error messages.
 
 +
 
@@ -2409,7 +2431,7 @@ DBBC3 Operations Manual>>.
 <<../0/10.0.1.adoc#,FS 10.0.1 Update Notes>> for new patches releases.
 
 ... Modify document <<../1/10.1.0.adoc#,FS 10.1.0 Update Notes>> to
-_not_ change default branch to _main_ when preserving the old
+_not_ change the default branch to _main_ when preserving the old
 repository if it was cloned around June 5, 2022 or later.
 
 +
