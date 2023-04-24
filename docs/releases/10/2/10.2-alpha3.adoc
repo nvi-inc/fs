@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-alpha3 Update Notes
-Version 0.57 - April 2023
+Version 0.58 - April 2023
 
 :sectnums:
 :stem: latexmath
@@ -161,7 +161,7 @@ As _prog_:
 
 No output from the last command indicates a successful _make_.
 
-=== Update your control files
+=== Update control files
 
 The steps in this section are to be performed by _oper_.
 
@@ -194,7 +194,7 @@ appropriate.
 NOTE: The original _dbbc3.ctl_ file will be saved as _dbbc3.ctl.bak_
 in case you need to recover.
 
-=== Update your station code
+=== Update station code
 
 This step can _probably_ deferred for now, if it is needed at all. If
 you do need to make this change, it will not become necessary until
@@ -340,8 +340,7 @@ To update the usual _~/.Xresources_ file, enter the commands:
 +
 
 You will need to log-out on the console and log back into to see the
-change. If you have the alias _rlxr_ defined to reload the X11
-resources, it could be used instead.
+full change.
 
 +
 
@@ -1267,7 +1266,7 @@ DBBC3 Operations Manual>> was updated to include the new personality.
 
 ====
 
-. Add environment variables to change the handling of DBBC3 data.
+. Add environment variables to change the handling of DBBC3 TPI data.
 
 +
 
