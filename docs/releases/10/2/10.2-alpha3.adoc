@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-alpha3 Update Notes
-Version 0.58 - April 2023
+Version 0.59 - April 2023
 
 :sectnums:
 :stem: latexmath
@@ -1088,6 +1088,15 @@ FSL11) may use the _giza_ plotting library instead of _pgplot_.
 Unfortunately, _giza_ is not yet a fully compatible replacement for
 _pgplot_. Several differences have been noticed, so far, in _giza_
 version `1.2.0` (which is used by FSL11):
+
++
+
+NOTE: FSL11 offers an optional non-standard version of _pgperl_ that
+uses _pgplot_. Every effort has been made to make this "`safe,`"
+however using it is at your own risk. Installing FSL11 will not
+install it by default. You can find the directions for installing this
+non-standard package at:
+https://nvi-inc.github.io/fsl11/installation.html#_install_pgplot_version_of_pgperl.
 
 +
 --
