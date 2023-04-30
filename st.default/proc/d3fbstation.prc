@@ -190,7 +190,29 @@ mcast_time
 define  postob        00000000000x
 enddef
 define  preob         00000000000x
+if=cont_cal,tpicd=tsys,!*
 onsource
+"more commands can be added until total execution times between first two if's is just under four seconds
+if=cont_cal,,!*+4s
+if=cont_cal,,caltsys_man
+enddef
+define  caltsys       00000000000
+if=cont_cal,tpicd=tsys,caltsys_man
+if=cont_cal,,ifagc
+if=cont_cal,,if=ddc\,bbc_gain=all\\\,agc
+enddef
+define  caltsys_man   00000000000
+ifman
+if=ddc,bbc_gain=all\,man
+!+2s
+tpi=formbbc,formif
+calon
+!+2s
+tpical=formbbc,formif
+caloff
+tpdiff=formbbc,formif
+caltemp=formbbc,formif
+tsys=formbbc,formif
 enddef
 define  ready_disk    00000000000x
 enddef
