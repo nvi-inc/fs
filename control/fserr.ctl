@@ -5582,9 +5582,6 @@ TPIs are ALL,EVENU,ODDU,EVENL,ODDL,IFA-D,1u,1l,...16u,16l,FORMBBC,FORMIF.
 QK -206
 TPIs are ALL, FORMBBC, FORMIF, IFX (IX), X01-Xnn, X=available CoMos A-D, nn=16*Cores available on CoMo X
 ""
-QK -207
-FORMBBC and FORMIF are not implemented for DBBC3.
-""
 QK -208
 TPIs are ALL,EVENU,ODDU,EVENL,ODDL,IA-IH(IFA-IFH),1u,1l,...128u,128l,FORMBBC,FORMIF.
 ""
