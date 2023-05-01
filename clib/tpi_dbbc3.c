@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -324,7 +324,10 @@ int itask;               /* 5=tsys, 6=tpidiff, 10=caltemps */
 	    shm_addr->caltemps[ i]/tpid;
 	}
 	if(shm_addr->systmp[ i]>999999.95 || shm_addr->systmp[ i] <0.0)
-	  logita(NULL,-211,"qk",lwhat[i]);
+          if(2*MAX_DBBC3_BBC <i+1)
+            logita(NULL,-211,"qk",lwhat[i]);
+          else
+            logita(NULL,-220-(i+1-MAX_DBBC3_BBC*(i/MAX_DBBC3_BBC))/10,"qk",lwhat[i]+2);
       } else if(itask==6) {
 	shm_addr->tpidiff[i]=shm_addr->tpical[i]-shm_addr->tpi[i];
 	if(shm_addr->tpical[i]>65534.5||

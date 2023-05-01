@@ -5612,6 +5612,45 @@ Tsys value for device d?W overflowed or was less than zero.
 QK -219
 Tsys value for device i?W overflowed or was less than zero.
 ""
+QK -220
+Tsys value for device 00?W overflowed or was less than zero.
+""
+QK -221
+Tsys value for device 01?W overflowed or was less than zero.
+""
+QK -222
+Tsys value for device 02?W overflowed or was less than zero.
+""
+QK -223
+Tsys value for device 03?W overflowed or was less than zero.
+""
+QK -224
+Tsys value for device 04?W overflowed or was less than zero.
+""
+QK -225
+Tsys value for device 05?W overflowed or was less than zero.
+""
+QK -226
+Tsys value for device 06?W overflowed or was less than zero.
+""
+QK -227
+Tsys value for device 07?W overflowed or was less than zero.
+""
+QK -228
+Tsys value for device 08?W overflowed or was less than zero.
+""
+QK -229
+Tsys value for device 09?W overflowed or was less than zero.
+""
+QK -230
+Tsys value for device 10?W overflowed or was less than zero.
+""
+QK -231
+Tsys value for device 11?W overflowed or was less than zero.
+""
+QK -232
+Tsys value for device 12?W overflowed or was less than zero.
+""
 QK -301
 VC detectors other than must be upper, lower, and dual not supported.
 ""
