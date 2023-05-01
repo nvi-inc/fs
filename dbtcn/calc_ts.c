@@ -46,10 +46,10 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
     /* special tsys values:
        -9e20 not set, from clib/cshm_init.c
-       -9e18 no continuous cal
-       -9e16 BBC not setup
-       -9e14 LO not setup
-       -9e12 tcal < 0
+       -9e18 BBC not setup
+       -9e16 LO not setup
+       -9e14 tcal < 0
+       -9e12 no continuous cal
        -9e10 overflow
      */
 
@@ -57,20 +57,6 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         cycle->bbc[k].tsys_lsb=-9e18;
         cycle->bbc[k].tsys_usb=-9e18;
     }
-
-    for (j=0;j<MAX_DBBC3_IF;j++)
-        cycle->ifc[j].tsys=-9e18;
-
-    if (!cont_cal) /* just initialize */
-        return;
-
-    for (k=0;k<MAX_DBBC3_BBC;k++) {
-        cycle->bbc[k].tsys_lsb=-9e16;
-        cycle->bbc[k].tsys_usb=-9e16;
-    }
-
-    for (j=0;j<MAX_DBBC3_IF;j++)
-        cycle->ifc[j].tsys=-9e16;
 
     for (k=0;k<MAX_DBBC3_BBC;k++) {
 
@@ -82,8 +68,8 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         if(ifchain < 0 || MAX_LO <= ifchain)
             continue;
 
-        cycle->bbc[k].tsys_lsb=-9e14;
-        cycle->bbc[k].tsys_usb=-9e14;
+        cycle->bbc[k].tsys_lsb=-9e16;
+        cycle->bbc[k].tsys_usb=-9e16;
 
         if(shm_addr->lo.lo[ifchain]<0.0)
             continue;
@@ -113,8 +99,14 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         diff=on-off;
 
         if (tcal <=0.0)
-            tsys=-9e12;
-        else if(diff <= 0 || on >= 65535 || off >= 65535)
+            tsys=-9e14;
+        else if (!cont_cal) {
+            tsys=shm_addr->systmp[k];
+            if(tsys==0.0)
+              tsys=-9e12;
+            else if(tsys <0.0)
+              tsys=-9e10;
+        } else if(diff <= 0 || on >= 65535 || off >= 65535)
             /* no divide by zero, negative values, or overflows */
             tsys=-9e10;
         else {
@@ -137,8 +129,14 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         diff=on-off;
 
         if (tcal <=0.0)
-            tsys=-9e12;
-        else if(diff <= 0 || on >= 65535 || off >= 65535)
+            tsys=-9e14;
+        else if (!cont_cal) {
+            tsys=shm_addr->systmp[k+MAX_DBBC3_BBC];
+            if(tsys==0.0)
+              tsys=-9e12;
+            else if(tsys <0.0)
+              tsys=-9e10;
+        } else if(diff <= 0 || on >= 65535 || off >= 65535)
             /* no divide by zero, negative values, or overflows */
             tsys=-9e10;
         else {
@@ -147,7 +145,9 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
         cycle->bbc[k].tsys_usb=tsys;
     }
+
     for (j=0;j<MAX_DBBC3_IF;j++) {
+        cycle->ifc[j].tsys=-9e16;
 
         if (shm_addr->lo.lo[j]<0.0)
             continue;
@@ -172,8 +172,14 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         diff=on-off;
 
         if (tcal <=0.0)
-            tsys=-9e12;
-        else if(diff < 0)
+            tsys=-9e14;
+        else if (!cont_cal) {
+            tsys=shm_addr->systmp[j+2*MAX_DBBC3_BBC];
+            if(tsys==0.0)
+              tsys=-9e12;
+            else if(tsys <0.0)
+              tsys=-9e10;
+        } else if(diff < 0)
             /* no divide by zero or negative values */
             tsys=-9e10;
         else {
