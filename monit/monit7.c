@@ -62,7 +62,11 @@ main()
     /*  First check to see if the field system is running */
 
     if (nsem_test("fs   ") != 1) {
-        printf("Field System not running, pausing 10 seconds then monit7 will terminate.g\n");
+        printf("Field System not running, pausing 10 seconds then monit7 will terminate.\n");
+        sleep(10);
+        exit(-1);
+    } else if (shm_addr->equip.rack != DBBC3 ) {
+        printf("Non-DBBC3 rack, pausing 10 seconds then monit7 will terminate.\n");
         sleep(10);
         exit(-1);
     }
