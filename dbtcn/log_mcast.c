@@ -88,9 +88,10 @@ static void log_time( struct dbbc3_tsys_cycle *cycle, char buf[])
 
     for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
         if(cycle->ifc[i].time_included) {
-            struct tm *ptr=gmtime(&cycle->ifc[i].time);
+            struct tm *ptr;
 
             log_out(buf, "time/",22,0);
+            ptr=gmtime(&cycle->ifc[i].time);
             sprintf(buf+strlen(buf)," %d, %4d.%03d.%02d:%02d:%02d,",i+1,
                     ptr->tm_year+1900,
                     ptr->tm_yday+1,
