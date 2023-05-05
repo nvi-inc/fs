@@ -1,0 +1,242 @@
+#!/usr/bin/perl
+#
+# Copyright (c) 2023 NVI, Inc.
+#
+# This file is part of VLBI Field System
+# (see http://github.com/nvi-inc/fs).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+sub govert {
+  my $pi=3.141592653589793238;
+  my $c=299792458;
+  my $k=1.380649e-23;
+
+  my $sefd = (shift) *1e-26;
+  my $freq = (shift) *1e6;
+  my $gain = shift;
+
+  return -1 if $sefd <= 0 || $freq <= 0;
+  if($opt_u) {
+    if($gain > 0) {
+      $sefd=$sefd/$gain;
+    } else {
+      return -1;
+    }
+  }
+
+  my $lambda = $c/$freq;
+  return 10*log(8*$pi*$k/($lambda**2*$sefd))/log(10);
+}
+sub sigma {
+  my $raw  = (shift) *1e-26;
+  my $sefd = (shift) *1e-26;
+  my $gain = shift;
+
+  if($opt_u) {
+    if($gain > 0) {
+      $sefd=$sefd/$gain;
+    } else {
+      return -1;
+    }
+  }
+
+  return -1 if $sefd <= 0;
+  return abs(-10/(log(10)*$sefd))*$raw;
+}
+sub sig_remove_etc {
+   my $line= shift;
+   my $gain= shift;
+   $line =~ m/^(\S+)((\s+\S+){2})(\s+\S+)(\s+\S+)((\s+\S+)+)/;
+   my $tsys = " " x length $4;
+   my $sefd=sprintf("%".length($5).".1f",$5/$gain);
+   my $tcals = " " x length $6;
+   $line = "$1$2$tsys$sefd$tcals";
+   return $line;
+}
+sub val_remove_etc {
+   my $line= shift;
+   my $gain= shift;
+   $line =~ m/^(\S+)((\s+\S+){2})(\s+\S+)((\s+\S+){5})(\s*\S+)(\s+\S+)((\s+\S+)+)/;
+   my $el = " " x length $4;
+   my $tsys = " " x length $7;
+   my $sefd=sprintf("%".length($8).".1f",$8/$gain);
+   my $tcals = " " x length $9;
+   $line = "$1$2$el$5$tsys$sefd$tcals";
+   return $line;
+}
+sub send_output {
+  my $i, $sefd, $freq, $stat, $got, $gain;
+
+  for ($i=1;$i<=$count;$i++) {
+    if(!$sig{$order[$i]}) {
+      print STDERR "SIG is missing for $order[$i]\n";
+      next;
+    } else{
+      if($opt_u) {
+        if(!$apr{$order[$i]}) {
+          print STDERR "APR is missing for $order[$i]\n";
+          next;
+        } else {
+          @fields=split(' ',$apr{$order[$i]});
+          $gain=$fields[6];
+        }
+      }
+      @fields=split(' ',$val{$order[$i]});
+      $sefd=$fields[10];
+      @fields=split(' ',$sig{$order[$i]});
+      $raw=$fields[4];
+      $stat=sigma($raw,$sefd,$gain);
+      if($stat <=0) {
+        print STDERR "Can't calculate sigma for $order[$i]\n";
+        next;
+      }
+      if($opt_u) {
+        print sig_remove_etc($sig{$order[$i]},$gain);
+      } else {
+        print $sig{$order[$i]},$gain;
+      }
+      printf " %8.3f\n",$stat;
+    }
+  }
+  print $footer if $count > 0;
+
+  for ($i=1;$i<=$count;$i++) {
+    @fields=split(' ',$val{$order[$i]});
+    $sefd=$fields[10];
+    $freq=$fields[7];
+
+    if($opt_u) {
+      if(!$apr{$order[$i]}) {
+        print STDERR "APR is missing for $order[$i]\n";
+        next;
+      } else {
+        @fields=split(' ',$apr{$order[$i]});
+        $gain=$fields[6];
+      }
+    }
+
+    $got=govert($sefd,$freq,$gain);
+    if($got <= 0) {
+      print STDERR "Can't calculate G/T for $order[$i]\n";
+      next;
+    }
+    if($opt_u) {
+      print val_remove_etc($val{$order[$i]},$gain);
+    } else {
+      print $val{$order[$i]};
+    }
+    printf " %8.3f\n",$got;
+  }
+  foreach $check (keys %sig) {
+    next if exists $val{$check};
+    print STDERR "VAL is missing for $check but there was a SIG\n";
+    next;
+  }
+  foreach $check (keys %apr) {
+    next if exists $val{$check};
+    print STDERR "VAL is missing for $check but there was an APR\n";
+    next;
+  }
+  print $footer if $count > 0;
+}
+#
+# main program
+#
+
+# 1.0 Initialize
+
+require "getopts.pl";
+
+if (!&Getopts("huV")) {
+  print STDERR "For help, try: '$0 -h'\n";
+  exit -1;
+}
+
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_V)) {
+  $ARGV[0]=`lognm`;
+  chomp $ARGV[0];
+  if ($ARGV[0] eq "") {
+    print STDERR "No log files specified and the FS is not running.\n";
+    print STDERR "For help, try: '$0 -h'\n";
+    exit -1;
+  }
+  $ARGV[0]="/usr2/log/$ARGV[0].log";
+}
+
+if(defined($opt_V)) {
+  print "[govert 1.0]\n";
+  exit 0;
+}
+
+if (defined($opt_h)) {
+  print "Usage: got [options] [logs]
+
+Synopsis: Convert onoff SEFDs to G/T
+
+This uses a very simple calculation for G/T (in dB) using only the
+SEFD and the detector center frequency.
+
+If no 'logs' are specified and the FS is running, the current FS log is used.
+If multiple logs are specified, they are combined.
+
+Option explanations:
+
+ -h   print this help information and stop
+ -u   map SEFD to unity gain using the gain at elevation in the APR records
+ -V   print program version and stop
+
+An error message that a quantity could not be calculated indicates a
+necessary value was out of range, usually non-postive.
+";
+    exit 0;
+}
+
+# 2.0 extract data
+
+foreach $file (@ARGV) {
+  open(FILE,$file) || do {
+    print STDERR "can't open $file: $!\n";
+    exit -1;
+  };
+  $count=0;
+  while (<FILE>) {
+    chomp;
+    if(/#onoff#    source /) {
+      next if $footer;
+      $footer="$_   G/T\n";
+    } elsif(/#onoff#VAL (.*)/) {
+      @fields=split(' ',$1);
+      $val{$fields[3]}=$_;
+      $order[++$count]=$fields[3];
+    } elsif(/#onoff#SIG (.*)/) {
+      @fields=split(' ',$1);
+      $sig{$fields[0]}=$_;
+    } elsif(/#onoff#APR (.*)/) {
+# new onoff run
+      if(%val) {
+        send_output();
+        %sig = ();
+        %val = ();
+        %apr = ();
+        $count=0;
+      }
+      @fields=split(' ',$1);
+      $apr{$fields[0]}=$_;
+    }
+  }
+# process the last one
+  send_output();
+}
