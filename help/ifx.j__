@@ -41,3 +41,8 @@ However, on command it must be specified or the following parameter,
 target, will be ignored. The FS always sends "1" as the filter value
 if a target is specified. The filter value returned by the DBBC3 is
 not displayed in FS monitor output.
+
+The nominal target for 4 GHz BW input signal is 32000. For a 1 GHz BW input
+signal around 22000 might be good. For 0.5 GHZ input BW signal, 10000 may be
+realistic. A value that is too high will drive the samplers into saturation and
+cause gain compression.
