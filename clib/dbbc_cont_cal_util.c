@@ -31,9 +31,9 @@ static char *mode_key[ ]={"off","on"};
 
 #define NMODE_KEY sizeof(mode_key)/sizeof( char *)
 
-int dbbc_cont_cal_dec(lcl,count,ptr,polarity_control,unspecified)
+int dbbc_cont_cal_dec(lcl,count,ptr,polarity_control,undef)
 struct dbbc_cont_cal_cmd *lcl;
-int *count, polarity_control, *unspecified;
+int *count, polarity_control, *undef;
 char *ptr;
 {
     int ierr, ind, arg_key();
@@ -45,8 +45,8 @@ char *ptr;
 
     switch (*count) {
       case 1:
-        if(0==strcmp("unspecified",ptr))
-          *unspecified=TRUE;
+        if(0==strcmp("undef",ptr))
+          *undef=TRUE;
         else
 	  ierr=arg_key(ptr,mode_key,NMODE_KEY,&lcl->mode,0,TRUE);
         break;

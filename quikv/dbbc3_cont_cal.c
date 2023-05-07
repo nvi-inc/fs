@@ -47,7 +47,7 @@ int ip[5];                           /* ipc parameters */
       void skd_run(), skd_par();      /* program scheduling utilities */
 
       int kdiff;
-      int unspecified=0;
+      int undef=0;
 
       if (command->equal != '=') {            /* read module */
 	out_recs=0;
@@ -73,7 +73,7 @@ parse:
       count=1;
       while( count>= 0) {
         ptr=arg_next(command,&ilast);
-        ierr=dbbc3_cont_cal_dec(&lcl,&count, ptr, &unspecified);
+        ierr=dbbc3_cont_cal_dec(&lcl,&count, ptr, &undef);
         if(ierr !=0 ) goto error;
       }
 
@@ -85,9 +85,9 @@ parse:
 	skd_run("tpicd",'w',ip);
       }
  
-/* don't communucate  with device if mode is "unspecified" */
+/* don't communucate  with device if mode is "undef" */
 
-      if(unspecified) {
+      if(undef) {
         ip[0]=ip[1]=0;
         return;
       }

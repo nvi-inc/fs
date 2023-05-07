@@ -47,7 +47,7 @@ int ip[5];                           /* ipc parameters */
       void skd_run(), skd_par();      /* program scheduling utilities */
 
       int kdiff;
-      int unspecified=0;
+      int undef=0;
 
       if(DBBC_DDC != shm_addr->equip.rack_type &&
 	 DBBC_DDC_FILA10G != shm_addr->equip.rack_type) {
@@ -78,7 +78,7 @@ parse:
       count=1;
       while( count>= 0) {
         ptr=arg_next(command,&ilast);
-        ierr=dbbc_cont_cal_dec(&lcl,&count, ptr, shm_addr->dbbccontcalpol, &unspecified);
+        ierr=dbbc_cont_cal_dec(&lcl,&count, ptr, shm_addr->dbbccontcalpol, &undef);
         if(ierr !=0 ) goto error;
       }
 
@@ -88,9 +88,9 @@ parse:
       if(kdiff)
 	skd_run("tpicd",'w',ip);
 
-/* don't communucate  with device if mode is "unspecified" */
+/* don't communucate  with device if mode is "undef" */
 
-      if(unspecified) {
+      if(undef) {
         ip[0]=ip[1]=0;
         return;
       }

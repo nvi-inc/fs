@@ -2274,7 +2274,7 @@ DC -501
 Only DBBC DDC rack types supported in bbcNN commands.
 ""
 DD -201
-Mode must be one of: off, on, or unspecified.
+Mode must be one of: off, on, or undef.
 ""
 DD -202
 Polarity control must one of: 0, 1, 2, or 3  (or -1 to not command).
@@ -2313,7 +2313,7 @@ DD -501
 Only DBBC DDC rack types supported in cont_cal command.
 ""
 DE -201
-Mode must be one of: off, on, or unspecified.
+Mode must be one of: off, on, or undef.
 ""
 DE -202
 Polarity must be one of 0, 1, 2, or 3 (or -1 to not command).
