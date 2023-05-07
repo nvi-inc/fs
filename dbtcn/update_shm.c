@@ -61,6 +61,7 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
     for (i=0;i<MAX_DBBC3_IF;i++) {
         cycle->ifc[i].lo=shm_addr->lo.lo[i];
         cycle->ifc[i].sideband=shm_addr->lo.sideband[i];
+        cycle->ifc[i].pol=shm_addr->lo.pol[i];
         cycle->ifc[i].delay=t->core3h[i].pps_delay;
         cycle->ifc[i].raw_timestamp=t->core3h[i].timestamp;
         cycle->ifc[i].time_included=

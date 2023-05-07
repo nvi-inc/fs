@@ -159,9 +159,20 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     move(4,0);
     if(ifc.lo>=0.0 && krf)
-        printw("BBC     RF    Ts-U  Ts-L");
+        printw("BBC    RF     Ts-U  Ts-L");
     else
-        printw("BBC     IF    Ts-U  Ts-L");
+        printw("BBC    IF     Ts-U  Ts-L");
+
+    move(4,9);
+    if(ifc.lo>=0.0)
+        if(ifc.pol==1)
+            printw("(R)");
+        else if(ifc.pol==2)
+            printw("(L)");
+        else
+            printw("   ");
+    else
+         printw("   ");
 
     int itpis[MAX_DBBC3_DET] = {};
 

@@ -510,6 +510,7 @@ typedef struct fscom {
           struct dbbc3_tsys_ifc {
               double lo;
               int sideband;
+              int pol;
               unsigned int delay;
               int time_included; /* maybe only some IFs could have time */
               unsigned raw_timestamp;
