@@ -2327,6 +2327,12 @@ Option must be 0 or 1 (or -1 to not command).
 DE -205
 Samples must be a non-negative integer.
 ""
+DE -206
+Filter must 0 or 1.
+""
+DE -207
+Param1 must be a floating point number.
+""
 DE -401
 Class buffer error from monitor response.
 ""

@@ -41,7 +41,8 @@ static struct {
       } bbc[MAX_DBBC3_BBC];
 } saved;
 
-void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples)
+void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
+    int filter, float param1)
 {
     int j, k;
 
@@ -62,20 +63,32 @@ void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples)
 
     for (j=0;j<MAX_DBBC3_IF;j++) {
         if(0.0<saved.ifc[j].tsys && 0.0<cycle->ifc[j].tsys)
-            cycle->ifc[j].tsys=alpha*cycle->ifc[j].tsys
-                +(1.0-alpha)*saved.ifc[j].tsys;
+            if(0==filter || 1==filter &&
+                            100*fabs(cycle->ifc[j].tsys-saved.ifc[j].tsys)/saved.ifc[j].tsys < param1)
+                cycle->ifc[j].tsys=alpha*cycle->ifc[j].tsys
+                    +(1.0-alpha)*saved.ifc[j].tsys;
+            else if (1==filter)
+                cycle->ifc[j].tsys=saved.ifc[j].tsys;
         saved.ifc[j].tsys=cycle->ifc[j].tsys;
     }
 
     for (k=0;k<MAX_DBBC3_BBC;k++) {
         if(0.0<saved.bbc[k].tsys_lsb && 0.0<cycle->bbc[k].tsys_lsb)
-            cycle->bbc[k].tsys_lsb=alpha*cycle->bbc[k].tsys_lsb
-                +(1.0-alpha)*saved.bbc[k].tsys_lsb;
+            if(0==filter || 1==filter &&
+                            100*fabs(cycle->bbc[k].tsys_lsb-saved.bbc[k].tsys_lsb)/saved.bbc[k].tsys_lsb < param1)
+                cycle->bbc[k].tsys_lsb=alpha*cycle->bbc[k].tsys_lsb
+                    +(1.0-alpha)*saved.bbc[k].tsys_lsb;
+            else if (1==filter)
+                cycle->bbc[k].tsys_lsb=saved.bbc[k].tsys_lsb;
         saved.bbc[k].tsys_lsb=cycle->bbc[k].tsys_lsb;
 
         if(0.0<saved.bbc[k].tsys_usb && 0.0<cycle->bbc[k].tsys_usb)
-            cycle->bbc[k].tsys_usb=alpha*cycle->bbc[k].tsys_usb
-                +(1.0-alpha)*saved.bbc[k].tsys_usb;
+            if(0==filter || 1==filter &&
+                            100*fabs(cycle->bbc[k].tsys_usb-saved.bbc[k].tsys_usb)/saved.bbc[k].tsys_usb < param1)
+                cycle->bbc[k].tsys_usb=alpha*cycle->bbc[k].tsys_usb
+                    +(1.0-alpha)*saved.bbc[k].tsys_usb;
+            else if (1==filter)
+                cycle->bbc[k].tsys_usb=saved.bbc[k].tsys_usb;
         saved.bbc[k].tsys_usb=cycle->bbc[k].tsys_usb;
      }
 }

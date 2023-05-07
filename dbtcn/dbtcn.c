@@ -115,6 +115,8 @@ int main(int argc, char *argv[])
         }
 
         int samples=shm_addr->dbbc3_cont_cal.samples;
+        int filter=shm_addr->dbbc3_cont_cal.filter;
+        float param1=shm_addr->dbbc3_cont_cal.param1;
 
         n = read_mcast(sock,buf,sizeof(buf),itmc,centisec,
                 dbtcn_control.data_valid.user_dv);
@@ -134,7 +136,7 @@ int main(int argc, char *argv[])
         calc_ts(&packet,&cycle, cont_cal);
 
         if(cont_cal) {
-             smooth_ts( &cycle, reset, samples);
+             smooth_ts( &cycle, reset, samples, filter, param1);
              reset=FALSE;
         }
 

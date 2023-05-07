@@ -526,6 +526,8 @@ void cshm_init()
   shm_addr->dbbc3_cont_cal.freq=-1;
   shm_addr->dbbc3_cont_cal.option=-1;
   shm_addr->dbbc3_cont_cal.samples=10;
+  shm_addr->dbbc3_cont_cal.filter=0;
+  shm_addr->dbbc3_cont_cal.param1=0.0;
 
   shm_addr->dbbad.host[0]=0;
   shm_addr->dbbad.port=0;
