@@ -518,10 +518,13 @@ typedef struct fscom {
               int time_error;
               int vdif_epoch;
               float tsys;
+              unsigned clipped;
           } ifc[MAX_DBBC3_IF];
           struct dbbc3_tsys_bbc {
               float tsys_lsb;
+              unsigned clipped_lsb;
               float tsys_usb;
+              unsigned clipped_usb;
               unsigned freq;
           } bbc[MAX_DBBC3_BBC];
       } data[2];

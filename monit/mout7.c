@@ -92,9 +92,13 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     printw(" Tsys ");
     if(ifc.lo>=0.0 && ifc.tsys> -1e12) {
+        if(ifc.clipped)
+            standout();
         buf[0]=0;
         dble2str_j(buf,ifc.tsys,-5,1);
         printw("%5s",buf);
+        if(ifc.clipped)
+            standend();
     } else
         printw("%5s"," ");
 
@@ -221,9 +225,13 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 printw("%5s","N cal");
                 standend();
             }else if (bbc[ibbc].tsys_usb > -1e12)  {
+                if(bbc[ibbc].clipped_usb)
+                    standout();
                 buf[0]=0;
                 dble2str_j(buf,bbc[ibbc].tsys_usb,-5,1);
                 printw(" %5s",buf);
+                if(bbc[ibbc].clipped_usb)
+                    standend();
             }
         } else
                 printw(" %5s"," ");
@@ -252,9 +260,13 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 printw("%5s","N cal");
                 standend();
             } else if (bbc[ibbc].tsys_lsb > -1e12) {
+                if(bbc[ibbc].clipped_lsb)
+                    standout();
                 buf[0]=0;
                 dble2str_j(buf,bbc[ibbc].tsys_lsb,-5,1);
                 printw(" %5s",buf);
+                if(bbc[ibbc].clipped_lsb)
+                    standend();
             }
         } else
             printw(" %5s"," ");

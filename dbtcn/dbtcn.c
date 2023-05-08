@@ -135,10 +135,8 @@ int main(int argc, char *argv[])
 
         calc_ts(&packet,&cycle, cont_cal);
 
-        if(cont_cal) {
-             smooth_ts( &cycle, reset, samples, filter, param1);
-             reset=FALSE;
-        }
+        smooth_ts( &cycle, reset ||!cont_cal, samples, filter, param1);
+        reset=FALSE;
 
         update_shm(&packet,&cycle, itmc, centisec);
 
