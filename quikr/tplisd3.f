@@ -48,7 +48,8 @@ C
 C        ICH    - character counter 
 C     NCHAR  - character count
 C     LPRM   - 2-character mnemonic for detector name 
-      parameter (ibufln=40)
+      parameter (ibufln=1+(MAX_DBBC3_DET*5+13)/2)
+      parameter (ilen=ibufln*2)
       integer*2 ibuf(ibufln), iprm(4)
 C               - class buffer, holding command 
 C        ILEN   - length of IBUF, chars 
@@ -62,10 +63,6 @@ C
       equivalence (reg,ireg(1))
 C 
 C 4.  CONSTANTS USED
-C 
-C 5.  INITIALIZED VARIABLES 
-C 
-      data ilen/80/ 
 C 
 C 6.  PROGRAMMER: NRV 
 C     LAST MODIFIED:  840308  MWH  added call to MDNAM for module mnemonic
@@ -120,6 +117,7 @@ C                   Turn off all of the TPIs to start
 c
         inumb=ic2-ic1+1
         inumb=min(inumb,8)
+        call ifill_ch(iprm,1,8,' ')
         idum = ichmv(iprm,1,ibuf,ic1,inumb)
         ich=ic2+2 !! point beyond next comma
 C                   Pick up each parameter as characters
