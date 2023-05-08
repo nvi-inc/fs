@@ -36,6 +36,9 @@
 
 #include "mon7.h"
 
+#define WARN1 2
+#define WARN2 5
+
 extern struct fscom *fs;
 
 static char unit_letters[ ] = {"ABCDEFGH"};
@@ -93,11 +96,22 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     printw(" Tsys ");
     if(ifc.lo>=0.0 && ifc.tsys> -1e12) {
         if(ifc.clipped)
+          if(has_colors())
+            if(ifc.clipped <= WARN1)
+              attron(COLOR_PAIR(GREEN));
+            else if(ifc.clipped <= WARN2)
+              attron(COLOR_PAIR(YELLOW));
+            else
+              attron(COLOR_PAIR(RED));
+          else
             standout();
         buf[0]=0;
         dble2str_j(buf,ifc.tsys,-5,1);
         printw("%5s",buf);
         if(ifc.clipped)
+          if(has_colors())
+             attron(COLOR_PAIR(DEFAULT));
+          else
             standend();
     } else
         printw("%5s"," ");
@@ -226,11 +240,22 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 standend();
             }else if (bbc[ibbc].tsys_usb > -1e12)  {
                 if(bbc[ibbc].clipped_usb)
+                  if(has_colors())
+                    if(bbc[ibbc].clipped_usb <= WARN1)
+                      attron(COLOR_PAIR(GREEN));
+                    else if(bbc[ibbc].clipped_usb <= WARN2)
+                      attron(COLOR_PAIR(YELLOW));
+                    else
+                      attron(COLOR_PAIR(RED));
+                  else
                     standout();
                 buf[0]=0;
                 dble2str_j(buf,bbc[ibbc].tsys_usb,-5,1);
                 printw(" %5s",buf);
                 if(bbc[ibbc].clipped_usb)
+                  if(has_colors())
+                    attron(COLOR_PAIR(DEFAULT));
+                  else
                     standend();
             }
         } else
@@ -261,11 +286,22 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 standend();
             } else if (bbc[ibbc].tsys_lsb > -1e12) {
                 if(bbc[ibbc].clipped_lsb)
+                  if(has_colors())
+                    if(bbc[ibbc].clipped_lsb <= WARN1)
+                      attron(COLOR_PAIR(GREEN));
+                    else if(bbc[ibbc].clipped_lsb <= WARN2)
+                      attron(COLOR_PAIR(YELLOW));
+                    else
+                      attron(COLOR_PAIR(RED));
+                  else
                     standout();
                 buf[0]=0;
                 dble2str_j(buf,bbc[ibbc].tsys_lsb,-5,1);
                 printw(" %5s",buf);
                 if(bbc[ibbc].clipped_lsb)
+                  if(has_colors())
+                    attron(COLOR_PAIR(DEFAULT));
+                  else
                     standend();
             }
         } else

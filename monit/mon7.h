@@ -19,3 +19,7 @@
  */
 #define ROW_HOLD     4
 #define COL_HOLD     3
+#define DEFAULT      1
+#define GREEN        2
+#define YELLOW       3
+#define RED          4
