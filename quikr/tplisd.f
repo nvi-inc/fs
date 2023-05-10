@@ -244,7 +244,7 @@ C
         goto 990
 281     ierr = -102
         goto 990
-285     ierr = -202
+285     ierr = -205
         goto 990
 C 
 289     continue
