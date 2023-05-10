@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -156,6 +156,7 @@ C
      &       (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
      &       ) then
         call fc_tpi_dbbc_pfb(ip,itpis_dbbc_pfb)
+         if(ip(3).lt.0) return
       else if (DBBC3.eq.rack) then
         call fc_tpi_dbbc3(ip,itpis_dbbc3)
         if(ip(3).lt.0) return
