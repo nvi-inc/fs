@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -113,6 +113,7 @@ C                   Turn off all of the TPIs to start
 c
         inumb=ic2-ic1+1
         inumb=min(inumb,8)
+        call ifill_ch(iprm,1,8,' ')
         idum = ichmv(iprm,1,ibuf,ic1,inumb)
         ich=ic2+2 !! point beyond next comma
 C                   Pick up each parameter as characters

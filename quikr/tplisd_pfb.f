@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -47,7 +47,8 @@ C 3.  LOCAL VARIABLES
 C 
 C        ICH    - character counter 
 C     NCHAR  - character count
-      parameter (ibufln=40)
+      parameter (ibufln=150)
+      parameter (ilen=ibufln*2)
       integer*2 ibuf(ibufln), iprm(4)
 C               - class buffer, holding command 
 C        ILEN   - length of IBUF, chars 
@@ -63,8 +64,6 @@ C
 C 4.  CONSTANTS USED
 C 
 C 5.  INITIALIZED VARIABLES 
-C 
-      data ilen/80/ 
 C 
 C 6.  PROGRAMMER: NRV 
 C     LAST MODIFIED:  840308  MWH  added call to MDNAM for module mnemonic
@@ -119,6 +118,7 @@ C                   Turn off all of the TPIs to start
 c
         inumb=ic2-ic1+1
         inumb=min(inumb,8)
+        call ifill_ch(iprm,1,8,' ')
         idum = ichmv(iprm,1,ibuf,ic1,inumb)
         ich=ic2+2 !! point beyond next comma
 C                   Pick up each parameter as characters
