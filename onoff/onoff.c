@@ -678,8 +678,14 @@ main()
 	jr2as(calr[i],buff,-5,2,sizeof(buff));
 	logit(buff,0,NULL);
 	if(onoff.devices[i].corr>=1.2) {
-	  memcpy(ip+3,"nf",2);
-	  logita(NULL,7,ip+3,onoff.devices[i].lwhat);
+          char buff3[120];
+          if(0==strncmp("  ",onoff.devices[i].lwhat+2,2))
+            snprintf(buff3,sizeof(buff3),"WARNING: Source structure correction greater than 20%% for detector %-2.2s",
+                    onoff.devices[i].lwhat);
+          else
+            snprintf(buff3,sizeof(buff3),"WARNING: Source structure correction greater than 20%% for detector %-4.4s",
+                    onoff.devices[i].lwhat);
+          logite(buff3,7,"nf");
 	}
       }
     logit(buff2,0,NULL);

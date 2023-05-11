@@ -4691,8 +4691,8 @@ mk6?W: Mark6 return code 9: indeterminate state
 MN   -1 Place Holder
 
 ""
-NF    7
-WARNING: Source structure correction greater than 20% for detector ?W.
+NF    7 Placeholder for large structure correction warning
+
 ""
 NF   -1
 Break detected in ONOFF: stopped
