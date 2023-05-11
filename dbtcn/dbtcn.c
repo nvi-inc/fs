@@ -116,7 +116,10 @@ int main(int argc, char *argv[])
 
         int samples=shm_addr->dbbc3_cont_cal.samples;
         int filter=shm_addr->dbbc3_cont_cal.filter;
-        float param1=shm_addr->dbbc3_cont_cal.param1;
+        float if_param[MAX_DBBC3_IF];
+        int i;
+        for(i=0;i<MAX_DBBC3_IF;i++)
+             if_param[i]=shm_addr->dbbc3_cont_cal.if_param[i];
 
         n = read_mcast(sock,buf,sizeof(buf),itmc,centisec,
                 dbtcn_control.data_valid.user_dv);
@@ -135,7 +138,7 @@ int main(int argc, char *argv[])
 
         calc_ts(&packet,&cycle, cont_cal);
 
-        smooth_ts( &cycle, reset ||!cont_cal, samples, filter, param1);
+        smooth_ts( &cycle, reset ||!cont_cal, samples, filter, if_param);
         reset=FALSE;
 
         update_shm(&packet,&cycle, itmc, centisec);

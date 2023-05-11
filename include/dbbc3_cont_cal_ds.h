@@ -29,5 +29,5 @@ struct dbbc3_cont_cal_cmd {
   int option;       /* 0 = output pulsed, 1 - output always on */
   int samples;      /* number of samples for averaging continuous Tsys */
   int filter;       /* filter method for continuous Tsys, 0=no filter */
-  float param1;     /* filter parameter 1 */
+  float if_param[MAX_DBBC3_IF];     /* filter parameters per IF */
 };

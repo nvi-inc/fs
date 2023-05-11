@@ -82,11 +82,13 @@ char *ptr;
 	if(ierr == 0 && (lcl->filter < 0 || lcl->filter > 1))
 	  ierr=-200;
         break;
-    case 7:
-        ierr=arg_float(ptr,&lcl->param1,lcl->param1,TRUE);
+    default:
+        if(*count < 1 || *count-6>MAX_DBBC3_IF) {
+           *count=-1;
+           break;
+        }
+        ierr=arg_float(ptr,&lcl->if_param[*count-7],lcl->if_param[*count-7],TRUE);
         break;
-      default:
-       *count=-1;
    }
 
    if(ierr!=0) ierr-=*count;
@@ -129,11 +131,13 @@ struct dbbc3_cont_cal_cmd *lcl;
       case 6:
 	sprintf(output,"%d",lcl->filter);
         break;
-      case 7:
-	sprintf(output,"%f",lcl->param1);
-        break;
       default:
-       *count=-1;
+        if(*count < 1 || *count-6>MAX_DBBC3_IF) {
+           *count=-1;
+           break;
+        }
+	sprintf(output,"%.2f",lcl->if_param[*count-7]);
+        break;
    }
 
    if(*count>0) *count++;

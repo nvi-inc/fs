@@ -42,7 +42,7 @@ static struct {
 } saved;
 
 void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
-    int filter, float param1)
+    int filter, float if_param[MAX_DBBC3_IF])
 {
     int j, k;
 
@@ -67,7 +67,7 @@ void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
     for (j=0;j<MAX_DBBC3_IF;j++) {
         if(0.0<saved.ifc[j].tsys && 0.0<cycle->ifc[j].tsys)
             if(0==filter || 1==filter &&
-                            100*fabs(cycle->ifc[j].tsys-saved.ifc[j].tsys)/saved.ifc[j].tsys < param1) {
+                            100*fabs(cycle->ifc[j].tsys-saved.ifc[j].tsys)/saved.ifc[j].tsys < if_param[j]) {
                 cycle->ifc[j].tsys=alpha*cycle->ifc[j].tsys
                     +(1.0-alpha)*saved.ifc[j].tsys;
                 cycle->ifc[j].clipped=0;
@@ -79,6 +79,7 @@ void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
     }
 
     for (k=0;k<MAX_DBBC3_BBC;k++) {
+        float param1 = if_param[k%64/8];
         if(0.0<saved.bbc[k].tsys_lsb && 0.0<cycle->bbc[k].tsys_lsb)
             if(0==filter || 1==filter &&
                             100*fabs(cycle->bbc[k].tsys_lsb-saved.bbc[k].tsys_lsb)/saved.bbc[k].tsys_lsb < param1) {
