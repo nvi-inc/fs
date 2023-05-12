@@ -544,7 +544,10 @@ require "getopts.pl";
 pgqinf("VERSION",$val,$len);
 $giza = $val =~ /giza/;
 
-&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwz:BCD:G:M:ST:VWYZ:");
+if (!&Getopts("12:abc:d:e:f:g:hjk:l:m:nprs:t:u:vwz:BCD:G:M:ST:VWYZ:")) {
+  print STDERR "For help, try: 'plotlog -h'\n";
+  exit -1;
+}
 
 $float_pattern = '([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?';
 @hex =("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f");
@@ -561,7 +564,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_V)) {
 }
 
 if(defined($opt_V)) {
-    print "[plotlog 2.3]\n";
+    print "[plotlog 2.4]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit 0;
