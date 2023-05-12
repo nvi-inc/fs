@@ -219,7 +219,7 @@ main()
     }
 
   sprintf(buff2,
- "    De      Center  TCal    Flux    DPFU     Gain    Product   LO    T   FWHM");
+ "    De      Center  TCal    Flux    DPFU     Gain    Product   LO     T  FWHM");
   logit_nd(buff2,0,NULL);
 
   for(i=0;i<MAX_ONOFF_DET;i++) {
