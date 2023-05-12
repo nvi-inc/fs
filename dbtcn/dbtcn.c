@@ -109,9 +109,9 @@ int main(int argc, char *argv[])
         if(1==reset_request)
            reset_count=3;
         if(reset_count) {
-          count=0;
-          if(!--reset_count)
-            reset=TRUE;
+           count=0;
+           reset=TRUE;
+           reset_count--;
         }
 
         int samples=shm_addr->dbbc3_cont_cal.samples;
