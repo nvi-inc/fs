@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
     dbbc3_ddc_multicast_t packet = {};
 
     int cont_cal_save1 = 0;
+    int cont_cal_save2 = 0;
     int reset = TRUE;
     int reset_count = 0;
     int count = 0;
@@ -95,16 +96,18 @@ int main(int argc, char *argv[])
             }
         }
 
-        /* wait two full cycles for TPIs to catch-up to cont cal turning on */
+        /* wait three full cycles for TPIs to catch-up to cont cal turning on */
+        /* which includes an "extra one" to avoid race conditions with DBBC3 */
 
         int cont_cal0 = shm_addr->dbbc3_cont_cal.mode == 1;
-        int cont_cal = cont_cal0 && cont_cal_save1;
+        int cont_cal = cont_cal0 && cont_cal_save1 && cont_cal_save2;
+        cont_cal_save2 = cont_cal_save1;
         cont_cal_save1 = cont_cal0;
 
         /* or after a reset is requested */
 
         if(1==reset_request)
-           reset_count=2;
+           reset_count=3;
         if(reset_count) {
           count=0;
           if(!--reset_count)
