@@ -48,6 +48,9 @@
 
 #define MAX_LEN 256+1
 
+#define SLEEP_TIME      500
+#define NSEM_NAME       "fs   "
+
 struct fscom *fs;
 
 /* Subroutines called */
@@ -119,6 +122,14 @@ int read_skd() {
    */
 
   setup_ids();
+  if(getenv("FS_DISPLAY_SERVER") == NULL) {
+    if (nsem_test(NSEM_NAME) != 1) {
+      fprintf(stderr,"Field System not running - erchk aborting\n");
+      rte_sleep(SLEEP_TIME);
+      exit(0);
+    }
+  }
+
   fs = shm_addr;
   fs->erchk = -1;
   for (;;) {
