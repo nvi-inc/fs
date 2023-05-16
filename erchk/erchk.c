@@ -128,6 +128,11 @@ int read_skd() {
       rte_sleep(SLEEP_TIME);
       exit(0);
     }
+    if ( 1 == nsem_take("erchk",1)) {
+      fprintf( stderr,"erchk already running\n");
+      rte_sleep(SLEEP_TIME);
+      exit(0);
+    }
   }
 
   fs = shm_addr;
