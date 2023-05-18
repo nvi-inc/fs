@@ -78,9 +78,9 @@ void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
     double alpha=1.0-exp(-1.0/samples);
 
     for (j=0;j<MAX_DBBC3_IF;j++) {
-        if(0.0<saved.ifc[j].tsys && 0.0<cycle->ifc[j].tsys)
-            if(0==filter || saved.ifc[j].count < samples || 1==filter &&
-                            100*fabs(cycle->ifc[j].tsys-saved.ifc[j].tsys)/saved.ifc[j].tsys < if_param[j]) {
+        if(0.0<saved.ifc[j].tsys && 0.0<cycle->ifc[j].tsys) {
+            if(saved.ifc[j].count < samples || 0==filter ||
+              1==filter && 100*fabs(cycle->ifc[j].tsys-saved.ifc[j].tsys)/saved.ifc[j].tsys < if_param[j]) {
 
                 cycle->ifc[j].tsys=alpha*cycle->ifc[j].tsys + (1.0-alpha)*saved.ifc[j].tsys;
                 cycle->ifc[j].clipped=0;
@@ -91,22 +91,27 @@ void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
                 cycle->ifc[j].tsys=saved.ifc[j].tsys;
                 cycle->ifc[j].clipped++;
             }
-        else if(0.0<saved.ifc[j].tsys && -1e12<cycle->ifc[j].tsys) /* overflow */
-            cycle->ifc[j].tsys=saved.ifc[j].tsys;
-        else if(0.0>cycle->ifc[j].tsys) { /* not setup */
+        } else if(0.0<saved.ifc[j].tsys && -1e12<cycle->ifc[j].tsys) { /* bad Tsys */
+            if(0==filter || 1==filter && samples <= saved.ifc[j].count) {
+               cycle->ifc[j].tsys=saved.ifc[j].tsys;
+               cycle->ifc[j].clipped++;
+            }
+        } else if(cycle->ifc[j].tsys<-1e12) { /* not setup */
             saved.ifc[j].tsys=cycle->ifc[j].tsys;
             saved.ifc[j].count=0;
-        } else {
+            cycle->ifc[j].clipped=0;
+        } else { /* saved.ifc[j].tsys <= 0.0 && 0.0 < cycle->ifc[j].tsys */
             saved.ifc[j].tsys=cycle->ifc[j].tsys;
             saved.ifc[j].count=1;
+            cycle->ifc[j].clipped=0;
         }
     }
 
     for (k=0;k<MAX_DBBC3_BBC;k++) {
         float param1 = if_param[k%64/8];
-        if(0.0<saved.bbc[k].tsys_lsb && 0.0<cycle->bbc[k].tsys_lsb)
-            if(0==filter || saved.bbc[k].count_lsb < samples || 1==filter &&
-                            100*fabs(cycle->bbc[k].tsys_lsb-saved.bbc[k].tsys_lsb)/saved.bbc[k].tsys_lsb < param1) {
+        if(0.0<saved.bbc[k].tsys_lsb && 0.0<cycle->bbc[k].tsys_lsb) {
+            if(saved.bbc[k].count_lsb < samples || 0==filter ||
+              1==filter && 100*fabs(cycle->bbc[k].tsys_lsb-saved.bbc[k].tsys_lsb)/saved.bbc[k].tsys_lsb < param1) {
 
                 cycle->bbc[k].tsys_lsb=alpha*cycle->bbc[k].tsys_lsb + (1.0-alpha)*saved.bbc[k].tsys_lsb;
                 cycle->bbc[k].clipped_lsb=0;
@@ -117,19 +122,24 @@ void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
                 cycle->bbc[k].tsys_lsb=saved.bbc[k].tsys_lsb;
                 cycle->bbc[k].clipped_lsb++;
             }
-        else if(0.0<saved.bbc[k].tsys_lsb && -1e12<cycle->bbc[k].tsys_lsb) /* overflow */
-            cycle->bbc[k].tsys_lsb=saved.bbc[k].tsys_lsb;
-        else if(0.0>cycle->bbc[k].tsys_lsb) { /* not setup */
+        } else if(0.0<saved.bbc[k].tsys_lsb && -1e12<cycle->bbc[k].tsys_lsb) { /* bad Tsys */
+            if(0==filter || 1==filter && samples <= saved.bbc[k].count_lsb) {
+                cycle->bbc[k].tsys_lsb=saved.bbc[k].tsys_lsb;
+                cycle->bbc[k].clipped_lsb++;
+            }
+        } else if(cycle->bbc[k].tsys_lsb<-1e12) { /* not setup */
             saved.bbc[k].tsys_lsb=cycle->bbc[k].tsys_lsb;
             saved.bbc[k].count_lsb=0;
-        } else {
+            cycle->bbc[k].clipped_lsb=0;
+        } else { /* saved.bbc[k].tsys_lsb <= 0.0 && 0.0 < cycle->bbc[k].tsys_lsb  */
             saved.bbc[k].tsys_lsb=cycle->bbc[k].tsys_lsb;
             saved.bbc[k].count_lsb=1;
+            cycle->bbc[k].clipped_lsb=0;
         }
 
-        if(0.0<saved.bbc[k].tsys_usb && 0.0<cycle->bbc[k].tsys_usb)
-            if(0==filter ||  saved.bbc[k].count_usb < samples || 1==filter &&
-                            100*fabs(cycle->bbc[k].tsys_usb-saved.bbc[k].tsys_usb)/saved.bbc[k].tsys_usb < param1) {
+        if(0.0<saved.bbc[k].tsys_usb && 0.0<cycle->bbc[k].tsys_usb) {
+            if(saved.bbc[k].count_usb < samples || 0==filter ||
+              1==filter && 100*fabs(cycle->bbc[k].tsys_usb-saved.bbc[k].tsys_usb)/saved.bbc[k].tsys_usb < param1) {
 
                 cycle->bbc[k].tsys_usb=alpha*cycle->bbc[k].tsys_usb + (1.0-alpha)*saved.bbc[k].tsys_usb;
                 cycle->bbc[k].clipped_usb=0;
@@ -140,14 +150,19 @@ void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
                 cycle->bbc[k].tsys_usb=saved.bbc[k].tsys_usb;
                 cycle->bbc[k].clipped_usb++;
             }
-        else if(0.0<saved.bbc[k].tsys_usb && -1e12<cycle->bbc[k].tsys_usb) /* overflow */
-            cycle->bbc[k].tsys_usb=saved.bbc[k].tsys_usb;
-        else if(0.0>cycle->bbc[k].tsys_usb) { /* not setup */
+        } else if(0.0<saved.bbc[k].tsys_usb && -1e12<cycle->bbc[k].tsys_usb) { /* bad Tsys */
+            if(0==filter || 1==filter && samples <= saved.bbc[k].count_usb) {
+                cycle->bbc[k].tsys_usb=saved.bbc[k].tsys_usb;
+                cycle->bbc[k].clipped_usb++;
+            }
+        } else if(cycle->bbc[k].tsys_usb<-1e12) { /* not setup */
             saved.bbc[k].tsys_usb=cycle->bbc[k].tsys_usb;
             saved.bbc[k].count_usb=0;
-        } else {
+            cycle->bbc[k].clipped_usb=0;
+        } else { /* saved.bbc[k].tsys_usb <= 0.0 && 0.0 < cycle->bbc[k].tsys_usb  */
             saved.bbc[k].tsys_usb=cycle->bbc[k].tsys_usb;
             saved.bbc[k].count_usb=1;
+            cycle->bbc[k].clipped_usb=0;
         }
      }
 }
