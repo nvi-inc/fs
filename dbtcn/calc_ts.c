@@ -108,7 +108,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             if(tsys==0.0)
               tsys=-9e12;
             else if(tsys <0.0)
-              tsys=-9e10;
+              tsys=9e10; /* so we get $$$$$ on display */
         } else if(on >= 65535 || off >= 65535) /* no overflows */
             tsys=-9e10;
         else if(off == 0) /* off is zero */
@@ -142,7 +142,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             if(tsys==0.0)
               tsys=-9e12;
             else if(tsys <0.0)
-              tsys=-9e10;
+              tsys=9e10; /* so we get $$$$$ on display */
         } else if(on >= 65535 || off >= 65535) /* no overflows */
             tsys=-9e10;
         else if(off == 0) /* off is zero */
@@ -189,7 +189,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             if(tsys==0.0)
               tsys=-9e12;
             else if(tsys <0.0)
-              tsys=-9e10;
+              tsys=9e10; /* so we get $$$$$ on display */
       /* no information on what an overflow is */
         } else if(off == 0) /* off is zero */
             tsys=-9e8;
