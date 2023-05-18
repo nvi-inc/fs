@@ -88,6 +88,8 @@ main()
       init_pair(GREEN,-1,COLOR_GREEN);
       init_pair(YELLOW,-1,COLOR_YELLOW);
       init_pair(RED,-1,COLOR_RED);
+      init_pair(MAGENTA,-1,COLOR_MAGENTA);
+      init_pair(CYAN,-1,COLOR_CYAN);
     }
     int next=-1;
     int count=-1;

@@ -23,3 +23,5 @@
 #define GREEN        2
 #define YELLOW       3
 #define RED          4
+#define MAGENTA      5
+#define CYAN         6

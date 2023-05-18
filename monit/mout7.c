@@ -38,7 +38,14 @@
 
 #define WARN1 2
 #define WARN2 5
-
+#define HIGHLIGHT(COLOR) if(has_colors()) \
+                           attron(COLOR_PAIR(COLOR)); \
+                         else \
+                           standout();
+#define END_HIGHLIGHT    if(has_colors()) \
+                           attron(COLOR_PAIR(DEFAULT)); \
+                         else \
+                           standend();
 extern struct fscom *fs;
 
 static char unit_letters[ ] = {"ABCDEFGH"};
@@ -94,27 +101,49 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         printw("%8s"," ");
 
     printw(" Tsys ");
-    if(ifc.lo>=0.0 && ifc.tsys> -1e12) {
-        if(ifc.clipped)
-          if(has_colors())
+    if (ifc.lo <= 0.0 || ifc.tsys < -1e20)
+        printw("%5s"," ");
+    else if (ifc.tsys < -1e18) {
+        standout();
+        printw("%5s","N bbc");
+        standend();
+    } else if (ifc.tsys < -1e16) {
+        standout();
+        printw("%5s","N lo ");
+        standend();
+    } else if (ifc.tsys < -1e14) {
+        standout();
+        printw("%5s","NTcal");
+        standend();
+    } else if (ifc.tsys < -1e12) {
+        standout();
+        printw("%5s","N cal");
+        standend();
+    } else if (ifc.tsys < -1e6) {
+        HIGHLIGHT(CYAN)
+        if (ifc.tsys < -1e10)
+            printw("%5s","ovrfl");
+        else if (ifc.tsys < -1e8)
+            printw("%5s"," inf ");
+        else if (ifc.tsys < -1e6)
+            printw("%5s","off=0");
+        END_HIGHLIGHT
+    } else {
+        if (ifc.tsys <0.0) { /* negative */
+            HIGHLIGHT(MAGENTA)
+        } else if(ifc.clipped) {
             if(ifc.clipped <= WARN1)
-              attron(COLOR_PAIR(GREEN));
+              HIGHLIGHT(GREEN)
             else if(ifc.clipped <= WARN2)
-              attron(COLOR_PAIR(YELLOW));
+              HIGHLIGHT(YELLOW)
             else
-              attron(COLOR_PAIR(RED));
-          else
-            standout();
+              HIGHLIGHT(RED)
+        }
         buf[0]=0;
         dble2str_j(buf,ifc.tsys,-5,1);
         printw("%5s",buf);
-        if(ifc.clipped)
-          if(has_colors())
-             attron(COLOR_PAIR(DEFAULT));
-          else
-            standend();
-    } else
-        printw("%5s"," ");
+        END_HIGHLIGHT
+    }
 
     move(2,0);
     printw("Time   ");
@@ -238,28 +267,33 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 standout();
                 printw("%5s","N cal");
                 standend();
-            }else if (bbc[ibbc].tsys_usb > -1e12)  {
-                if(bbc[ibbc].clipped_usb)
-                  if(has_colors())
+            } else if (bbc[ibbc].tsys_usb < -1e6) {
+                printw(" ");
+                HIGHLIGHT(CYAN)
+                if (bbc[ibbc].tsys_usb < -1e10)
+                    printw("%5s","ovrfl");
+                else if (bbc[ibbc].tsys_usb < -1e8)
+                    printw("%5s"," inf ");
+                else if (bbc[ibbc].tsys_usb < -1e6)
+                    printw("%5s","off=0");
+                END_HIGHLIGHT
+            } else {
+                if (bbc[ibbc].tsys_usb <=0.0) { /* negative */
+                  HIGHLIGHT(MAGENTA)
+                } else if(bbc[ibbc].clipped_usb) {
                     if(bbc[ibbc].clipped_usb <= WARN1)
-                      attron(COLOR_PAIR(GREEN));
+                        HIGHLIGHT(GREEN)
                     else if(bbc[ibbc].clipped_usb <= WARN2)
-                      attron(COLOR_PAIR(YELLOW));
+                        HIGHLIGHT(YELLOW)
                     else
-                      attron(COLOR_PAIR(RED));
-                  else
-                    standout();
+                        HIGHLIGHT(RED)
+                }
                 buf[0]=0;
                 dble2str_j(buf,bbc[ibbc].tsys_usb,-5,1);
                 printw(" %5s",buf);
-                if(bbc[ibbc].clipped_usb)
-                  if(has_colors())
-                    attron(COLOR_PAIR(DEFAULT));
-                  else
-                    standend();
+                END_HIGHLIGHT
             }
-        } else
-                printw(" %5s"," ");
+        }
 
         if(all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc              ]) {
             if (bbc[ibbc].tsys_lsb < -1e20)
@@ -284,27 +318,32 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 standout();
                 printw("%5s","N cal");
                 standend();
-            } else if (bbc[ibbc].tsys_lsb > -1e12) {
-                if(bbc[ibbc].clipped_lsb)
-                  if(has_colors())
+            } else if (bbc[ibbc].tsys_lsb < -1e6) {
+                printw(" ");
+                HIGHLIGHT(CYAN)
+                if (bbc[ibbc].tsys_lsb < -1e10)
+                    printw("%5s","ovrfl");
+                else if (bbc[ibbc].tsys_lsb < -1e8)
+                    printw("%5s"," inf ");
+                else if (bbc[ibbc].tsys_lsb < -1e6)
+                    printw("%5s","off=0");
+                END_HIGHLIGHT
+            } else {
+                if (bbc[ibbc].tsys_lsb <=0.0) { /* negative */
+                    HIGHLIGHT(MAGENTA)
+                } else if(bbc[ibbc].clipped_lsb) {
                     if(bbc[ibbc].clipped_lsb <= WARN1)
-                      attron(COLOR_PAIR(GREEN));
+                        HIGHLIGHT(GREEN)
                     else if(bbc[ibbc].clipped_lsb <= WARN2)
-                      attron(COLOR_PAIR(YELLOW));
+                        HIGHLIGHT(YELLOW)
                     else
-                      attron(COLOR_PAIR(RED));
-                  else
-                    standout();
+                        HIGHLIGHT(RED)
+                }
                 buf[0]=0;
                 dble2str_j(buf,bbc[ibbc].tsys_lsb,-5,1);
                 printw(" %5s",buf);
-                if(bbc[ibbc].clipped_lsb)
-                  if(has_colors())
-                    attron(COLOR_PAIR(DEFAULT));
-                  else
-                    standend();
+                END_HIGHLIGHT
             }
-        } else
-            printw(" %5s"," ");
+        }
     }
 }
