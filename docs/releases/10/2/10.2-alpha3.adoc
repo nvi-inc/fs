@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-alpha3 Update Notes
-Version 0.59 - April 2023
+Version 0.60 - May 2023
 
 :sectnums:
 :stem: latexmath
@@ -62,6 +62,13 @@ expanded and updated. The changes include support for RDBEs, DBBC3s,
 and additional data types including recorder performance statistics.
 
 * The DBBC3 DDC_E personality is now supported.
+
+* Information about setting DBBC3 IF target levels to avoid gain
+compression has been added. Setting them properly requires attention
+due to the very wide (4 GHz) input bandpass of the DBBC3. See the
+<<../1/dbbc3_ops.adoc#_if_target_levels,IF target levels>>
+section of the <<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> for
+the details.
 
 * Several DBBC3 specific environment variables were added to control
 changing the order of TPI data (USB versus LSB, and for continuous
@@ -211,8 +218,8 @@ your station can handle the longer names. You should answer "`no``"
 until you have made the necessary changes or verified that no changes
 are needed.
 
-There are three issues that may need to be address (as _prog_), legacy
-FORTRAN code, shared memory variables, and use of the _lognm_ program:
+There are three issues that may need to be address (as _prog_): legacy
+FORTRAN code, shared memory variables, and use of the _lognm_ program.
 
 . Legacy FORTRAN code
 
@@ -315,6 +322,67 @@ values to use>> may be helpful.
 
 The steps in this section are optional, but you may find them useful.
 All are to be performed by _oper_, except as noted.
+
+. For DBBC(2)/DBBC3 users, set default values for the `cont_cal`
+command.
+
++
+
+If you use continuous cal with a DBBC(2) or DBBC3, you can set the
+default values for the `cont_cal` command parameters in your `initi`
+procedure. This works for all parameters after the first, `_state_`
+(`on`/`off`), which must be set every time (the default is `off`). The
+remaining device parameters (`_polarity_`, `_frequency_`, and
+`_option_`) all default to not being commanded, but will remember a
+commanded value as the new default. The value commanded for the
+`_samples_` (and filtering for the DBBC3) parameter is also remembered
+as the default. This allows you to customize the values for your
+system and use the _drudg_ generated `cont_cal` commands to control
+whether continuous calibration, and optionally what polarity, is used.
+
++
+
+You can of course change the defaults after `initi` has run if you
+want. This could be helpful if you need to change the defaults. You
+might want to have a SNAP procedure in the `station` library for this
+to minimize the required typing.
+
++
+
+For example, for a DBBC(2), you can set the default `_polarity_`, to
+`2`, _frequency_` to `120`, an `_option_` to `1`, and `_samples_` to
+`5` with:
+
++
+
+WARNING: This is not intended to be a realistic example.
+
+ cont_cal=undef,2,5,120,1
+
++
+
+The use of `undef` prevents any of the device parameters being sent to
+at this time, but you can use `on` or `off` if you prefer and any set
+values will be sent.
+
++
+
+Similarly, for the DBBC3 you would use:
+
++
+
+WARNING: This is not intended to be a realistic example.
+
+ cont_cal=undef,2,120,1,5
+
++
+
+CAUTION: The parameter order for the DBBC3 is different from the DBBC(2).
+
++
+
+Please see `*help=cont_cal*` for full details on this command for your
+equipment.
 
 . <<set_x11_widths,Setting X11 window widths>>[[set_x11_widths]]:
 Increase window size to 146 columns
@@ -824,9 +892,9 @@ performance statistics.
 Each change is summarized in the paragraph below (apologies to
 _Harper's_ magazine's _Findings_ columns), more details follows.
 
-The default plot device for X11 displays was changed to be useful.
-If the FS is running and no log was specified, the data in the current
-FS log will be plotted. Added recorder performance statistics. The
+The default plot device for X11 displays was changed to be useful.  If
+the FS is running and no log was specified, the data in the current FS
+log will be plotted. Added recorder performance statistics. The
 plotting of clock data was expanded. Plots of wind speed and direction
 were added. Plotting CDMS data was added. T~sys~ plots for DBBC3s and
 RDBEs were added. Phase-cal tone plots for RDBEs were added. Plots of
@@ -834,15 +902,16 @@ LSB Mark IV decoder phase-cal data were added. Phases outside
 [-180°,+180°] are now automatically marked as bad, but can be included
 with the `-Y` option. Clock and cable values outside (-10,+10) seconds
 are now automatically marked as bad, but can be included with the `-C`
-option. Plots of Wettzell style `/rx/` data were added. Bad points
-are now displayed as open circles and slightly off the upper (or
-right) edge of the plots. Any values in time plots that did not decode
-are now consistently displayed at the upper edge of the plots.
-Plotting of phase differences attempts to provide better vertical plot
-limits if the differences cluster around ±180°. Support for the _giza_
-plot library was added. Bad horizontal tick marks in some `-p` plots
-were fixed. Some command line options were changed and some added. The
-`-h` (help) output was improved. The version was bumped to _2.3_. Some
+option. Plots of Wettzell style `/rx/` data were added. Bad points are
+now displayed as open circles and slightly off the upper (or right)
+edge of the plots. Any values in time plots that did not decode are
+now consistently displayed at the upper edge of the plots.  Plotting
+of phase differences attempts to provide better vertical plot limits
+if the differences cluster around ±180°. Support for the _giza_ plot
+library was added. Bad horizontal tick marks in some `-p` plots were
+fixed. Some command line options were changed and some added. Use of
+a nonexistent command line option is now trapped. The `-h` (help)
+output was improved. The version was bumped to _2.3_. Some
 improvements were made in the code.
 
 .. Change the plot device for X11 displays to `/xw` (closing
@@ -1195,6 +1264,13 @@ more than one log is used on the command line, resulting in a
 the new `-v` option, which plots phase differences between phase-cal
 tones within an RDBE IF.
 
+.. Trap attempts to use a nonexistent command line option.
+
++
+
+The script now stops if this occurs instead of continuing with an
+error message that might be missed.
+
 .. Improve the `-h` help output.
 
 +
@@ -1297,25 +1373,100 @@ specific environment variables>> appendix of the
 
 ====
 
-. Add averaging of DBBC3 T~sys~ data.
+. Complete support of DBBC3 non-continuous (_spot_) calibration
+(closing https://github.com/nvi-inc/fs/issues/194[#194])
 
 +
 
-This was missing from _10.1_ and is useful with low power noise diodes
-and/or varying RFI to provide a more stable T~sys~ value.
+As part of this change, the terminology __spot calibration__ was added
+as a synonym for noncontinuous calibration for DBBC3s. Support for
+device mnemonics `formmbbc` and `formif` were added to the T~sys~
+related commands.  The DBBC3 T~sys~ display window (_monit7_) can now
+display spot calibration data.  Example procedures were added.
 
 +
 
 [%collapsible]
 ====
 
-This works differently from the DBBC2 averaging which forms an average
-T~sys~ value by averaging the TPI counts (as opposed to the T~sys~
-values). That approach gives the highest precision for non-AGC data,
-but has somewhat reduced accuracy with AGC if there are significant
-level changes. It is good to keep in mind that T~sys~ is a station
-diagnostic and doesn't have the same accuracy requirements as
-amplitude calibration, which uses the raw TPI count data.
+. __Spot Calibration__ terminology
+
++
+
+The documentation now uses __spot calibration__ as a synonym for
+noncontinuous calibration, which is explicitly switching the noise
+diode on and off for T~sys~ measurements. This usage will eventually
+extend beyond DBBC3s.
+
++
+
+. Add support for `formbbc` and `formif` device mnemonics for DBBC3 T~sys~
+related commands.
+
++
+
+As with with other racks, they refer to the detectors of devices
+configured for recording: `formbbc` for BBC channels, `formif` for IFs
+that have BBC channels being recorded. They were added for use with
+`tpi`, `tpical` `tpdiff`, `caltemp`, and `tsys` commands. Although
+DBBC3 spot calibration was supported in FS _10.0_, it was not possible
+to support these mnemonics until FS _10.1_ and the introduction of the
+`core3h_mode` command. At that time it was thought (hoped) that spot
+calibration would not be needed for the DBBC3.
+
+. Include spot calibration results in the DBBC3 T~sys~ monitor display
+window,
+
++
+
+The values of course only update when a new measurement is made. If
+the T~cal~ has not been defined, `Ntcal` is shown in inverse video. If
+no spot calibration measurements have been made, `N cal` is shown in
+inverse video. Values that exceed `-999.9`, erroneous values (negative
+infinity, and overflow), and other setup errors, (BBC or LO not
+defined), are shown as dollar signs, `$`.
+
+. Add example spot calibration procedures for the DBBC3.
+
++
+
+Example `caltsys` can `caltsys_man` procedures were added to the
+_st.default/proc/d3fbstation.prc_ example library.
+
+Thanks to Beppe Maccaferri (Medicina) and Jun Yang (Onsala) for
+pointing out support was needed and discovering that the existing spot
+calibration support still worked for the DBBC3.
+
+====
+
+. Add averaging of continuous DBBC3 T~sys~ data.
+
++
+
+This was missing from _10.1_ and is useful with low power noise diodes
+and/or varying RFI to provide a more stable T~sys~ value.
+Additionally, an experimental _filter_ feature was added for removing
+RFI affected samples.
+
++
+
+[%collapsible]
+====
+
+.. Averaging of T~sys~ data
+
++
+
+This works differently from the DBBC2 continuous calibration averaging
+which forms an average T~sys~ value by averaging the TPI counts (as
+opposed to the T~sys~ values). That approach gives the highest
+precision for non-AGC data, but has somewhat reduced accuracy with AGC
+if there are significant level changes. It is good to keep in mind
+that T~sys~ is a station diagnostic and doesn't have the same accuracy
+requirements as amplitude calibration, which uses the raw TPI count
+data.
+
++
 
 For the DBBC3, the average is formed using exponential smoothing of
 the T~sys~ values themselves. The decay time-constant for the
@@ -1324,12 +1475,12 @@ smoothing is set, in seconds, by the `_samples_` parameter of the FS
 into account; the data is treated as though it had uniform one second
 spacing.
 
++
+
 The average is restarted for any of these events:
 
++
 [disc]
-
-* For an individual detector, a negative (or infinite) T~sys~ would be
-calculated.
 
 * The `tpicd` command is used to reinitialize the sampling
 configuration. This may indicate a setup change. A consequence of this
@@ -1338,21 +1489,39 @@ restart the average manually at any time.
 
 * A change in any FS `cont_cal` command parameters.
 
-The `_samples_` parameter also sets the number of cycles of the
-`tpicd` command for logging the averaged T~sys~ data. It is expected
-that the cycle period for `tpicd` will normally be set to `100`
-centiseconds, in which case the T~sys~ values will be logged every
-`_samples_` seconds. If the cycle period of `tpicd` is set to longer
-than `100` centiseconds, the logging period will be correspondingly
-longer than the time-constant.
++
+
+The `cont_cal` command `_samples_` parameter also sets the number of
+cycles of the `tpicd` command for logging the averaged T~sys~ data. It
+is expected that the cycle period for `tpicd` will normally be set to
+`100` centiseconds, in which case the T~sys~ values will be logged
+every `_samples_` seconds. If the cycle period of `tpicd` is set to
+longer than `100` centiseconds, the logging period will be
+correspondingly longer than the time-constant.
+
++
 
 The special value of `0` for `_samples_` disables averaging and sets
 the number of cycles of `tpicd` for logging the T~sys~ data to one.
 The logged (and displayed) T~sys~ values are truly statistically
 independent only if `0` is used. This was the behavior of FS _10.1_.
 
-Thanks to Jon Quick (HartRAO) for pointing out that this feature was
-missing and many fruitful discussions about implementing it.
+.. Filtering of T~sys~ values
+
++
+
+Nine new parameters in _cont_cal_ command are used to control
+filtering (see `*help=cont_cal*` or
+https://github.com/nvi-inc/fs/blob/main/help/cont_cal.j__). In
+addition to enabling filtering with a `_filter_` parameter of `1`, the
+user can specify a threshold, in percent of the average for a device,
+per IF, for rejecting values from being included in the average. This
+feature is experimental and may be changed and other filtering schemes
+may be added.
+
+Thanks to Jon Quick (HartRAO) for pointing out that averaging was
+missing, as well suggesting filtering, the algorithm, and many
+fruitful discussions and feedback on the implementation.
 
 ====
 
@@ -1360,7 +1529,7 @@ missing and many fruitful discussions about implementing it.
 . Increase default X11 window size to 146.
 +
 
-The new default window wdiths for the `erchk`, `login_sh`, `oprin`,
+The new default window widths for the `erchk`, `login_sh`, `oprin`,
 and `scnch` windows is 146 columns.
 
 +
@@ -1542,9 +1711,9 @@ commands.
 
 +
 
-Add `unspecified` as a value for the `_state_` parameter to not
-command the device. Change the default value for the `_samples_`
-parameter to be the previous value.
+Add `undef` as a value for the `_state_` parameter to not command the
+device. Change the default value for the `_samples_` parameter to be
+the previous value.
 
 +
 [%collapsible]
@@ -1580,9 +1749,9 @@ The _skedf.ctl_ options for controlling how _drudg_ handles the
 Two things were missing to make the scheme work in a general way.
 First, there was no way to set the defaults without commanding the
 device. This can be an issue if there is no correct choice for the
-`_state_` and/or some values may cause a device problem. Using
-`unspecified` as the `_state_` now allows setting the defaults without
-commanding the device.
+`_state_` and/or some values may cause a device problem. Using `undef`
+as the `_state_` now allows setting the defaults without commanding
+the device.
 
 Secondly, due to an oversight, it was not possible to set the default
 for the `_samples_` parameter. As result, if a value other than `10`
@@ -1795,6 +1964,43 @@ The description of the three bottom buttons in the Plot Details box
 was improved. This was primarily to say that the deleting of
 individual points is with a double right-click instead of a
 left-click. Other small improvements were made.
+
+====
+
+. Add script, _govert_, to calculated stem:[\mathit{\frac{G}{T}}] from
+SEFDs (closing https://github.com/nvi-inc/fs/issues/197[#197]).
+
++
+
+stem:[\mathit{\frac{G}{T}}] is a common figure-of-merit used for
+communications antennas.
+
++
+
+[%collapsible]
+====
+
+The script _misc/govert_ was added to calculate
+stem:[\mathit{\frac{G}{T}}] from SEFD, using a very simple
+calculation. It may not meet your accuracy requirements. For extended
+sources, it can be also be impacted by the crude resolution
+corrections used by the FS. The formula used is
+
+[.text-center]
+stem:[\mathit{\frac{G}{T}=10 log_{10}\left(\frac{8 \pi k}{\lambda^2
+SEFD}\right)}], where stem:[\mathit{k}] is the Boltzmann constant.
+
+
+The script takes the name of a FS log with _onoff_ output as an
+argument. It outputs the `SIG` and `VAL` records with a `G/T` column
+appended. Note that the values in the `SIG` records are the RMS
+scatters of the underlying data propagated to the final quantities,
+not the sigmas of the means for those quantities. A `-u` option can be
+used to map the results to unity gain. Use
+`*/usr2/fs/misc/govert{nbsp}-h*` for help with the script.
+
+Thanks to Stuart Weston (Warkworth) for requesting this capability and
+testing the script.
 
 ====
 
@@ -2146,7 +2352,7 @@ small bug fixes and improvements
 
 +
 
-About 35 small changes are covered under this item. They are roughly
+About 40 small changes are covered under this item. They are roughly
 grouped into: enhancements, bug fixes, `help` page improvements, and
 documentation changes.
 
@@ -2186,6 +2392,7 @@ procedure at FS start.
 
 ... Change the order of TPI values for DBBC3 `iftp__X__` commands to
 `_on_` then `_off_`
+
 +
 
 This disagrees with the DBBC3 documentation, but agrees with what the
@@ -2193,12 +2400,40 @@ DBBC3 returns for polarity `0`. It also agrees with the order of all
 other `_on_` and `_off_` values in the DBBC3 documentation (for
 `bbc__NNN__`, multicast IF, and multicast BBC data).
 
+... Add DBBC3 `ddc` as a condition for the `if` command.
+
++
+
+Currently only DDC personalities are supported for DBBC3, but this
+inclusion makes DBBC(2) `caltsys` procedures for _spot_ cal compatible
+with the DBBC3 and will support possible future expansion to other
+personalities.
+
+... Add polarization to `IF`/`RF` header in the DBBC3 T~sys~ monitor
+display (_monit7_).
+
++
+
+If the LO and its polarizaion are defined for the displayed IF, the
+polarization will be shown as `(L)` or `+++(R)+++`.
+
++
+
+NOTE: Following the usual alphabetical order convention, `L`=`H`=`X`
+and `R`=`V`=`Y`. You have to know which system you are on Left/Right,
+Horizontal/Vertical, or X/Y.
+
++
+
+Thanks to Jon Quick (HartRAO) for suggesting showing the polarization.
+
 ... Change the warning for a large structure size correction in _onoff_
 to not ring the bell.
 
 +
 
-The error number was change from `-7` to `7`.
+The error number was change from `-7` to `7`. It was also expanded to
+handle four character device mnemonics, which was missing before.
 
 +
 
@@ -2212,13 +2447,65 @@ _sterp_.
 
 +
 
-A larger range of positive values is shown by dropping the fractional
+A larger range of negative values is shown by dropping the fractional
 part as needed. The number of significant digits shown is not reduced.
+
+... Prevent _erchk_ issues when the display server is not enabled.
+
++
+
+This is to guard against accidentally starting _erchk_ if the display
+server is not running.  This might happen, for example, if the
+operator is in the habit of starting additional copies of _erchk_ when
+the display server is running. Two fixes were made that only affect
+_erchk_ when the display server is not in use:
+
++
+
+[disc]
+* _erchk_ can no longer be started if the FS is not running
+
+* Mutiple copies of _erchk_ cannot be started.
+
++
+
++
+
++
+
+This would cause each copy of _erchk_ to get some subset of the error
+messages.
+
++
+
++
+
+Thanks to Jon Quick (HartRAO) for reporting these issues.
 
 ... In _erchk_, remove an extraneous leading blank that was inserted if
 there was no additional indentation.
 
 .. Bug fixes
+
+... Correct logging of multicast time for DBBC3 Core3H board `5`
+(closing https://github.com/nvi-inc/fs/issues/198[#198]).
+
++
+
+In _10.1_, the time of the log entry time-stamp was being substituted
+for the time returned from board `5`. This only affected DDC_U (and
+off-label use of DDC_E) firmware. This would have had no impact if the
+board time agreed with the log entry time, which it usually would. If
+the board time was actually wrong, that would have still be recorded
+by the _mcast_time_ command, which should be in `midob`, and would
+have been visible in  the T~sys~ monitor display.
+
++
+
+Thanks to Eskil Varenius (Onsala) for discovering this (while testing
+with DDC_V _v125_) and helping verify the extent of the issue. Thanks
+Jon Quick (HartRAO) for provided a system to use in developing the
+fix.
 
 ... Prevent multicast time-out errors from being suppressed after the
 DBBC3 returns an error (closing
@@ -2233,6 +2520,13 @@ command, e.g., `dbbc3=junk`.
 +
 
 Thanks to Jon Quick (HartRAO) for reporting this bug.
+
+... Prevent DBBC communication errors with the PFB personalty from
+causing a crash for the `tpi`, `tpical`, and `tpzero` commands,
+
++
+
+The error check had been omitted.
 
 ... Fix `-help` command line option for _gnplt_ (closing
 https://github.com/nvi-inc/fs/issues/184[#184]).
@@ -2249,14 +2543,61 @@ Thanks to Jon Quick (HartRAO) for reporting this bug.
 ... Fix _gnplt_ error message for the GUI crashing to mention `gnplt`
 rather than `LogPlotter`.
 
+... Fix parsing of detectors for T~sys~ related commands; `tpi`,
+`tpical`, `tpzero`, `tpdiff`, `tpgain`, `tpdiffgain`, `caltemps`, and
+`tsys` (partially closing
+https://github.com/nvi-inc/fs/issues/194[#194]).
+
++
+
+There were two problems:
+
+.... Buffer shortness
+
++
+
++
+
+The buffers for parsing the commands were too short to accommodate a
+list of all the individual detectors for a given rack type. Although
+detectors are usually specified with mnemonics that specify groups of
+detectors (such as `formbbc` and `formif`), the shortness of the
+buffers prevented specify an arbitrary list of individual detectors.
+This was corrected for all rack types. However, the number of possible
+detectors for a DBBC3 is so large that they can't all fit in the
+buffer (1024 characters) that FS uses for communication between
+programs. Until that is expanded, which it will be for R2DBE support,
+the maximum number of DBBC3 detectors is limited by that.
+
+
+.... Buffer not cleared before reuse
+
++
+
++
+
+A buffer used to decode the individual detectors was not properly
+cleared before being used to decode the next detector. As a result, if
+a detector was incompletely specified, but was completed by leftover
+characters in the buffer, no error was detected and an incorrect
+detector may have been selected. This was corrected for all rack
+types. This bug could interact with the preceding bug (Buffer
+shortness) to prevent a truncated detector at the end of the buffer
+from being reported as an error.
+
++
+
+Thanks Jun Yang (Onsala) for reporting these issues.
+
+
 ... Remove redundant class number clearing, which only occurred after
 an error, when setting the AGC in _onoff_ for DBBC2s and DBBC3s.
 
 +
 
 The could potentially have caused clearing of a class number that was
-already in use for something else. The chances of a problem were
-pretty low.
+already in use for something else. The chances of a problem occuring
+were pretty low.
 
 ... Demote `if` and `setup_proc` commands from being _immediate_
 execution commands (closing
@@ -2271,14 +2612,14 @@ stream doesn't have the functionality of immediate execution commands
 and in a schedule they are normally used in procedures. As a result,
 the old behavior was benign for schedules.
 
-... Wait only two cycles in _dbtcn_ after a change in configuration
-before calculating T~sys~.
+... Correct T~sys~ error messages (overflow, infinity, less than zero)
+for four character device names
 
 +
 
-The previous wait of three cycles was overkill, but hardly noticeable.
-With averaging now in use, it is more likely that there would be
-excessively long delays.
+This supports DBBC3 devices and future devices that may have more than
+two characters.
+
 
 ... Remove more extraneous `(..)` strings from some error messages.
 
@@ -2289,12 +2630,32 @@ These were due to unnecessarily setting variables by _dbbcn_, _mk5cn_,
 and _rdbcn_. Additionally, a change was made to _boss_ that may
 eliminate any remaining instances.
 
+... Fix column alignment of header for `APR` lines in _onoff_.
+
++
+
+Beginning with the `T` column header, the rightmost ones were moved
+one character farther right. This was apparently not done quite
+correctly when the detector field was expanded to four characters.
 
 ... Correct DBBC3 `bbc_gain` first parameter error messages.
 
 +
 
 Previously they were just the messages for the DBBC (i.e., DBBC2).
+
+... Correct the DBBC error message for an incorrect detector device in
+the `tpi`, `tpical`, `tpzero`, `tpdiff`, `caltemp` and `tsys` commands
+
++
+
+Previously it was the one for the VLBA rack.
+
+... Prevent _monit7_ from crashing if the rack type is non-DBBC3.
+
++
+
+Now it prints a warning and then exits after 10 seconds.
 
 ... Fix _tpicd_ to get current DBBC3 variables from the local copy of
 the shared memory data structure rather than directly from shared
@@ -2346,6 +2707,28 @@ file to not include `length`.
 _logpl_ plots the raw `cable` data, not converted to length.
 
 .. `help` page improvements
+
+... Add information to the DBBC3 `if__X__` command `help` page for
+the correct `_target_` levels.
+
++
+
+The nominal level is `32000`, but needs to be reduced if the BW of the
+input signal is narrower than the nominal 4 GHz. Approximate target
+levels for three different input BWs was added. This information was
+also added to the <<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>,
+as the <<../1/dbbc3_ops.adoc#_if_target_levels, IF target levels>>
+section, along with some information on detecting the problem and
+correcting with it.
+
++
+
+Thanks to Jun Yang (Onsala) for finding this issue and pointing out
+using the compress factor of _onoff_ as an indication of a problem.
+Thanks to Sven Bornbusch (MPIfR) for explaining the cause and
+providing guidance on reasonable levels. Thanks to Jon Quick (HartRAO)
+for suggesting using T~sys~ values as a method for finding the correct
+level.
 
 ... Improve the `help` pages for `cont_cal` for the DBBC and DBBC3.
 
@@ -2611,9 +2994,8 @@ Although the use of NTP on the FS computer is strongly encouraged for
 most situations, this entire appendix is optional.
 
 The recommended NTP configuration is described in _misc/ntp.txt_
-(https://github.com/nvi-inc/fs/blob/10.2.0-alpha3/misc/ntp.txt). If
-you have not implemented it before, you can use the information there
-to do so.
+(https://github.com/nvi-inc/fs/blob/main/misc/ntp.txt). If you have
+not implemented it before, you can use the information there to do so.
 
 As of FS _10.2_ the recommendations have been improved. If you have
 previously used those recommendations, this appendix describes how to
