@@ -47,11 +47,11 @@ static struct {
 static void apply_filter(int filter,int samples,float alpha, float param,
     float *tsys,float *saved,unsigned *count,unsigned *clipped)
 {
-    if(*tsys<0.0)
+    if(*tsys<0.0) {
+        if(1 == filter && 0.0<=*saved && *count >= samples)
+            ++*clipped;
         return;
-
-    if(0.0<=*saved) {
-//        if(*count < samples || 0==filter || 1==filter && 100.0*fabs(*tsys-*saved)/*saved < param) {
+    } else if(0.0<=*saved) {
         if(*count < samples || 0==filter || 1==filter && 100.0*fabs(*tsys-*saved)/(*saved) < param) {
             *tsys=alpha* *tsys + (1.0-alpha)* *saved;
             *clipped=0;

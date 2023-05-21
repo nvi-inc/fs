@@ -51,8 +51,8 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
        -9e14 tcal < 0
        -9e12 no continuous cal
        -9e10 overflow (except for IFs)
-       -9e8  infinite
-       -9e6  off is zero
+       -9e8  off is zero
+       -9e6  infinite
        -9e4  too negative
      */
 
@@ -111,9 +111,9 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
               tsys=-9e10;
         } else if(on >= 65535 || off >= 65535) /* no overflows */
             tsys=-9e10;
-        else if(diff == 0) /* divide by zero */
-            tsys=-9e8;
         else if(off == 0) /* off is zero */
+            tsys=-9e8;
+        else if(diff == 0) /* divide by zero */
             tsys=-9e6;
         else if((tcal/diff)*0.5*(on+off)<-999.5) /* too negative */
             tsys=-9e4;
@@ -145,9 +145,9 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
               tsys=-9e10;
         } else if(on >= 65535 || off >= 65535) /* no overflows */
             tsys=-9e10;
-        else if(diff == 0) /* divide by zero */
-            tsys=-9e8;
         else if(off == 0) /* off is zero */
+            tsys=-9e8;
+        else if(diff == 0) /* divide by zero */
             tsys=-9e6;
         else if((tcal/diff)*0.5*(on+off)<-999.5) /* too negative */
             tsys=-9e4;
@@ -191,9 +191,9 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             else if(tsys <0.0)
               tsys=-9e10;
       /* no information on what an overflow is */
-        } else if(diff == 0) /* divide by zero */
+        } else if(off == 0) /* off is zero */
             tsys=-9e8;
-        else if(off == 0) /* off is zero */
+        else if(diff == 0) /* divide by zero */
             tsys=-9e6;
         else if((tcal/diff)*0.5*(on+off)<-999.5) /* too negative */
             tsys=-9e4;

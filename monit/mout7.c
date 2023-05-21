@@ -71,9 +71,9 @@ static void print_tsys(float tsys, unsigned clipped)
         if (tsys < -1e10)
             printw("%5s","ovrfl");
         else if (tsys < -1e8)
-            printw("%5s"," inf ");
-        else if (tsys < -1e6)
             printw("%5s","off=0");
+        else if (tsys < -1e6)
+            printw("%5s"," inf ");
     } else {
         buf[0]=0;
         if (tsys <=0.0) { /* negative */
