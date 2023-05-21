@@ -33,16 +33,41 @@
 
 static struct {
     struct {
-        double tsys;
+        float tsys;
         unsigned count;
     } ifc[MAX_DBBC3_IF];
     struct {
-          double tsys_lsb;
+          float tsys_lsb;
           unsigned count_lsb;
-          double tsys_usb;
+          float tsys_usb;
           unsigned count_usb;
       } bbc[MAX_DBBC3_BBC];
 } saved;
+
+static void apply_filter(int filter,int samples,float alpha, float param,
+    float *tsys,float *saved,unsigned *count,unsigned *clipped)
+{
+    if(*tsys<0.0)
+        return;
+
+    if(0.0<=*saved) {
+//        if(*count < samples || 0==filter || 1==filter && 100.0*fabs(*tsys-*saved)/*saved < param) {
+        if(*count < samples || 0==filter || 1==filter && 100.0*fabs(*tsys-*saved)/(*saved) < param) {
+            *tsys=alpha* *tsys + (1.0-alpha)* *saved;
+            *clipped=0;
+
+            *saved=*tsys;
+            ++*count;
+        } else if (1==filter) {
+            *tsys=*saved;
+            ++*clipped;
+        }
+    } else {
+        *saved=*tsys;
+        *count=1;
+        *clipped=0;
+    }
+}
 
 void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
     int filter, float if_param[MAX_DBBC3_IF])
@@ -75,76 +100,22 @@ void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
 
     /* exponential smoothing with time constant 'samples' */
 
-    double alpha=1.0-exp(-1.0/samples);
+    float alpha=1.0-exp(-1.0/samples);
 
-    for (j=0;j<MAX_DBBC3_IF;j++) {
-        if(cycle->ifc[j].tsys<0.0)
-            continue;
-        if(0.0<=saved.ifc[j].tsys) {
-            if(saved.ifc[j].count < samples || 0==filter ||
-              1==filter && 100*fabs(cycle->ifc[j].tsys-saved.ifc[j].tsys)/saved.ifc[j].tsys < if_param[j]) {
-
-                cycle->ifc[j].tsys=alpha*cycle->ifc[j].tsys + (1.0-alpha)*saved.ifc[j].tsys;
-                cycle->ifc[j].clipped=0;
-
-                saved.ifc[j].tsys=cycle->ifc[j].tsys;
-                saved.ifc[j].count++;
-            } else if (1==filter) {
-                cycle->ifc[j].tsys=saved.ifc[j].tsys;
-                cycle->ifc[j].clipped++;
-            }
-        } else {
-            saved.ifc[j].tsys=cycle->ifc[j].tsys;
-            saved.ifc[j].count=1;
-            cycle->ifc[j].clipped=0;
-        }
-    }
+    for (j=0;j<MAX_DBBC3_IF;j++)
+        apply_filter(filter,samples,alpha,if_param[j],
+                     &cycle->ifc[j].tsys,&saved.ifc[j].tsys,
+                     &saved.ifc[j].count,&cycle->ifc[j].clipped);
 
     for (k=0;k<MAX_DBBC3_BBC;k++) {
-        float param1 = if_param[k%64/8];
-        if(cycle->bbc[k].tsys_lsb<0.0)
-            continue;
-        if(0.0<=saved.bbc[k].tsys_lsb) {
-            if(saved.bbc[k].count_lsb < samples || 0==filter ||
-              1==filter && 100*fabs(cycle->bbc[k].tsys_lsb-saved.bbc[k].tsys_lsb)/saved.bbc[k].tsys_lsb < param1) {
+        float param = if_param[k%64/8];
 
-                cycle->bbc[k].tsys_lsb=alpha*cycle->bbc[k].tsys_lsb + (1.0-alpha)*saved.bbc[k].tsys_lsb;
-                cycle->bbc[k].clipped_lsb=0;
+        apply_filter(filter,samples,alpha,param,
+                     &cycle->bbc[k].tsys_lsb,&saved.bbc[k].tsys_lsb,
+                     &saved.bbc[k].count_lsb,&cycle->bbc[k].clipped_lsb);
 
-                saved.bbc[k].tsys_lsb=cycle->bbc[k].tsys_lsb;
-                saved.bbc[k].count_lsb++;
-            } else if (1==filter) {
-                cycle->bbc[k].tsys_lsb=saved.bbc[k].tsys_lsb;
-                cycle->bbc[k].clipped_lsb++;
-            }
-        } else {
-            saved.bbc[k].tsys_lsb=cycle->bbc[k].tsys_lsb;
-            saved.bbc[k].count_lsb=1;
-            cycle->bbc[k].clipped_lsb=0;
-        }
-    }
-
-    for (k=0;k<MAX_DBBC3_BBC;k++) {
-        float param1 = if_param[k%64/8];
-        if(cycle->bbc[k].tsys_usb<0.0)
-            continue;
-        if(0.0<saved.bbc[k].tsys_usb && 0.0<cycle->bbc[k].tsys_usb) {
-            if(saved.bbc[k].count_usb < samples || 0==filter ||
-              1==filter && 100*fabs(cycle->bbc[k].tsys_usb-saved.bbc[k].tsys_usb)/saved.bbc[k].tsys_usb < param1) {
-
-                cycle->bbc[k].tsys_usb=alpha*cycle->bbc[k].tsys_usb + (1.0-alpha)*saved.bbc[k].tsys_usb;
-                cycle->bbc[k].clipped_usb=0;
-
-                saved.bbc[k].tsys_usb=cycle->bbc[k].tsys_usb;
-                saved.bbc[k].count_usb++;
-            } else if (1==filter) {
-                cycle->bbc[k].tsys_usb=saved.bbc[k].tsys_usb;
-                cycle->bbc[k].clipped_usb++;
-            }
-        } else {
-            saved.bbc[k].tsys_usb=cycle->bbc[k].tsys_usb;
-            saved.bbc[k].count_usb=1;
-            cycle->bbc[k].clipped_usb=0;
-        }
+        apply_filter(filter,samples,alpha,param,
+                     &cycle->bbc[k].tsys_usb,&saved.bbc[k].tsys_usb,
+                     &saved.bbc[k].count_usb,&cycle->bbc[k].clipped_usb);
      }
 }

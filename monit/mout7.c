@@ -42,16 +42,59 @@
                            attron(COLOR_PAIR(COLOR)); \
                          else \
                            standout();
-#define END_HIGHLIGHT    if(has_colors()) \
-                           attron(COLOR_PAIR(DEFAULT)); \
-                         else \
-                           standend();
 extern struct fscom *fs;
 
 static char unit_letters[ ] = {"ABCDEFGH"};
 static time_t save_disp_time;
 static int kfirst = 1;
 
+static void print_tsys(float tsys, unsigned clipped)
+{
+    char buf[128];
+
+    if (tsys < -1e20)
+        printw("%5s"," ");
+    else if (tsys < -1e18) {
+        standout();
+        printw("%5s","N bbc");
+    } else if (tsys < -1e16) {
+        standout();
+        printw("%5s","N lo ");
+    } else if (tsys < -1e14) {
+        standout();
+        printw("%5s","NTcal");
+    } else if (tsys < -1e12) {
+        standout();
+        printw("%5s","N cal");
+    } else if (tsys < -1e6) {
+        HIGHLIGHT(CYAN)
+        if (tsys < -1e10)
+            printw("%5s","ovrfl");
+        else if (tsys < -1e8)
+            printw("%5s"," inf ");
+        else if (tsys < -1e6)
+            printw("%5s","off=0");
+    } else {
+        buf[0]=0;
+        if (tsys <=0.0) { /* negative */
+            HIGHLIGHT(MAGENTA)
+            dble2str_j(buf,tsys,-5,1);
+        } else {
+            if(0==clipped)
+                ;
+            else if(clipped <= WARN1)
+                HIGHLIGHT(GREEN)
+            else if(clipped <= WARN2)
+                HIGHLIGHT(YELLOW)
+            else
+                HIGHLIGHT(RED)
+
+            dble2str(buf,tsys,-5,1);
+        }
+        printw("%5s",buf);
+    }
+    standend();
+}
 void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         int def, int rec)
 {
@@ -101,49 +144,10 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         printw("%8s"," ");
 
     printw(" Tsys ");
-    if (ifc.lo <= 0.0 || ifc.tsys < -1e20)
+    if (ifc.lo < 0.0)
         printw("%5s"," ");
-    else if (ifc.tsys < -1e18) {
-        standout();
-        printw("%5s","N bbc");
-        standend();
-    } else if (ifc.tsys < -1e16) {
-        standout();
-        printw("%5s","N lo ");
-        standend();
-    } else if (ifc.tsys < -1e14) {
-        standout();
-        printw("%5s","NTcal");
-        standend();
-    } else if (ifc.tsys < -1e12) {
-        standout();
-        printw("%5s","N cal");
-        standend();
-    } else if (ifc.tsys < -1e6) {
-        HIGHLIGHT(CYAN)
-        if (ifc.tsys < -1e10)
-            printw("%5s","ovrfl");
-        else if (ifc.tsys < -1e8)
-            printw("%5s"," inf ");
-        else if (ifc.tsys < -1e6)
-            printw("%5s","off=0");
-        END_HIGHLIGHT
-    } else {
-        if (ifc.tsys <0.0) { /* negative */
-            HIGHLIGHT(MAGENTA)
-        } else if(ifc.clipped) {
-            if(ifc.clipped <= WARN1)
-              HIGHLIGHT(GREEN)
-            else if(ifc.clipped <= WARN2)
-              HIGHLIGHT(YELLOW)
-            else
-              HIGHLIGHT(RED)
-        }
-        buf[0]=0;
-        dble2str_j(buf,ifc.tsys,-5,1);
-        printw("%5s",buf);
-        END_HIGHLIGHT
-    }
+    else
+        print_tsys(ifc.tsys,ifc.clipped);
 
     move(2,0);
     printw("Time   ");
@@ -245,105 +249,13 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             printw(" %8s"," ");
 
         if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+MAX_DBBC3_BBC]) {
-            if (bbc[ibbc].tsys_usb < -1e20)
-                printw(" %5s"," ");
-            else if (bbc[ibbc].tsys_usb < -1e18) {
-                printw(" ");
-                standout();
-                printw("%5s","N bbc");
-                standend();
-            } else if (bbc[ibbc].tsys_usb < -1e16) {
-                printw(" ");
-                standout();
-                printw("%5s","N lo ");
-                standend();
-            } else if (bbc[ibbc].tsys_usb < -1e14) {
-                printw(" ");
-                standout();
-                printw("%5s","NTcal");
-                standend();
-            } else if (bbc[ibbc].tsys_usb < -1e12) {
-                printw(" ");
-                standout();
-                printw("%5s","N cal");
-                standend();
-            } else if (bbc[ibbc].tsys_usb < -1e6) {
-                printw(" ");
-                HIGHLIGHT(CYAN)
-                if (bbc[ibbc].tsys_usb < -1e10)
-                    printw("%5s","ovrfl");
-                else if (bbc[ibbc].tsys_usb < -1e8)
-                    printw("%5s"," inf ");
-                else if (bbc[ibbc].tsys_usb < -1e6)
-                    printw("%5s","off=0");
-                END_HIGHLIGHT
-            } else {
-                if (bbc[ibbc].tsys_usb <=0.0) { /* negative */
-                  HIGHLIGHT(MAGENTA)
-                } else if(bbc[ibbc].clipped_usb) {
-                    if(bbc[ibbc].clipped_usb <= WARN1)
-                        HIGHLIGHT(GREEN)
-                    else if(bbc[ibbc].clipped_usb <= WARN2)
-                        HIGHLIGHT(YELLOW)
-                    else
-                        HIGHLIGHT(RED)
-                }
-                buf[0]=0;
-                dble2str_j(buf,bbc[ibbc].tsys_usb,-5,1);
-                printw(" %5s",buf);
-                END_HIGHLIGHT
-            }
+            printw(" ");
+            print_tsys(bbc[ibbc].tsys_usb,bbc[ibbc].clipped_usb);
         }
 
         if(all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc              ]) {
-            if (bbc[ibbc].tsys_lsb < -1e20)
-                printw(" %5s"," ");
-            else if (bbc[ibbc].tsys_lsb < -1e18) {
-                printw(" ");
-                standout();
-                printw("%5s","N bbc");
-                standend();
-            } else if (bbc[ibbc].tsys_lsb < -1e16) {
-                printw(" ");
-                standout();
-                printw("%5s","N lo ");
-                standend();
-            } else if (bbc[ibbc].tsys_lsb < -1e14) {
-                printw(" ");
-                standout();
-                printw("%5s","NTcal");
-                standend();
-            } else if (bbc[ibbc].tsys_lsb < -1e12) {
-                printw(" ");
-                standout();
-                printw("%5s","N cal");
-                standend();
-            } else if (bbc[ibbc].tsys_lsb < -1e6) {
-                printw(" ");
-                HIGHLIGHT(CYAN)
-                if (bbc[ibbc].tsys_lsb < -1e10)
-                    printw("%5s","ovrfl");
-                else if (bbc[ibbc].tsys_lsb < -1e8)
-                    printw("%5s"," inf ");
-                else if (bbc[ibbc].tsys_lsb < -1e6)
-                    printw("%5s","off=0");
-                END_HIGHLIGHT
-            } else {
-                if (bbc[ibbc].tsys_lsb <=0.0) { /* negative */
-                    HIGHLIGHT(MAGENTA)
-                } else if(bbc[ibbc].clipped_lsb) {
-                    if(bbc[ibbc].clipped_lsb <= WARN1)
-                        HIGHLIGHT(GREEN)
-                    else if(bbc[ibbc].clipped_lsb <= WARN2)
-                        HIGHLIGHT(YELLOW)
-                    else
-                        HIGHLIGHT(RED)
-                }
-                buf[0]=0;
-                dble2str_j(buf,bbc[ibbc].tsys_lsb,-5,1);
-                printw(" %5s",buf);
-                END_HIGHLIGHT
-            }
+            printw(" ");
+            print_tsys(bbc[ibbc].tsys_lsb,bbc[ibbc].clipped_lsb);
         }
     }
 }
