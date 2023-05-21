@@ -32,11 +32,12 @@ int deci;         /* digits after decimal point, >=0 blank fill for right   */
 /* digits
 /* this function is intended to be a replacement for FORTRAN jr2as routine */
 {
+   output=output+strlen(output);
    dble2str(output,fvalue,width,deci);
-   if('$' != output[strlen(output)-1])
+   if('$' != output[0])
       return;
-   output[strlen(output)-abs(width)]=0;
+   output[0]=0;
    dble2str(output,fvalue,abs(width)+abs(deci)+1,deci);
-   output[strlen(output)-(abs(deci)+1)]=0;
+   output[abs(width)]=0;
    return;
 }
