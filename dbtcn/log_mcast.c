@@ -46,7 +46,10 @@ static void bb_cat(char buf[],unsigned int tp)
 
 static void ts_cat(char buf[],double ts)
 {
-    dble2str(buf,ts,-5,1);
+    if(ts < 0.0) /* only allow moving decimal for negatives */
+        dble2str_j(buf,ts,-5,1);
+    else
+       dble2str(buf,ts,-5,1);
     strcat(buf,",");
 }
 
