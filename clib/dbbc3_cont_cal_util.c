@@ -136,7 +136,8 @@ struct dbbc3_cont_cal_cmd *lcl;
            *count=-1;
            break;
         }
-	sprintf(output,"%.2f",lcl->if_param[*count-7]);
+        if(lcl->if_param[*count-7] >= 0.0)
+           sprintf(output,"%.2f",lcl->if_param[*count-7]);
         break;
    }
 

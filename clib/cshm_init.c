@@ -528,7 +528,7 @@ void cshm_init()
   shm_addr->dbbc3_cont_cal.samples=10;
   shm_addr->dbbc3_cont_cal.filter=0;
   for (i=0;i<MAX_DBBC3_IF;i++)
-     shm_addr->dbbc3_cont_cal.if_param[i]=0.0;
+     shm_addr->dbbc3_cont_cal.if_param[i]=-1.0;
 
   shm_addr->dbbad.host[0]=0;
   shm_addr->dbbad.port=0;

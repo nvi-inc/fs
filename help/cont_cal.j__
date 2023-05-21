@@ -1,9 +1,9 @@
 	cont_cal - continuous calibration control (DBBC3 racks)
 
 
-            Syntax:     cont_cal=state,polarity,freq,option,samples,filter,ifa,..,ifh
+            Syntax:     cont_cal=state,polarity,freq,option,samples,filter,ifa,...,ifh
 
-            Response:   cont_cal/state,polarity,freq,option,samples,filter,ifa,..,ifh
+            Response:   cont_cal/state,polarity,freq,option,samples,filter,ifa,...,ifh
 
 
 Settable parameters:
@@ -17,12 +17,15 @@ Settable parameters:
             samples     number of samples to use for Tsys, a non-negative
                         integer.  Default is the previous value, which is
                         initially 10.  See the Comments for more information.
-            filter      filter number to apply to averaged data, only 0 or 1.
-                        Default is previous value, which is initially 0 (off).
-                        See the Comments for more information.
-            ifX         filter parameter for IF X. Floating point number. Default
-                        is previous value, which is initially 0.  See the Comments
-                        for more information.
+            filter      filter number to apply to averaged data, '0' or '1'.
+                        '0' disables filtering.  Only one filter is currently
+                        available, select it with '1'.  Default is the
+                        previous value, which is initially '0'.  See the
+                        Comments for more information.
+            ifX         filter parameter for IF X, X=a,...,h. Floating point
+                        number. Default is previous value, which is initially
+                        '-1'.  Not displayed if the value is negative.  See the
+                        Comments for more information.
 
 Monitor-only parameters: None.
 
@@ -49,14 +52,14 @@ For 'polarity', 'frequency', and 'option', the default is the last value
 commanded.  On FS start-up, these default to not sending a value.  Not
 commanding persists until a new non-negative values is used.  A value of '-1'
 can be used to disable commanding of that parameter after a non-negative value
-has been used. The 'samples', 'filter', and 'ifN' parameters also behave this
+has been used. The 'samples', 'filter', and 'ifX' parameters also behave this
 way, but are software-only parameters and are not sent to the device (so '-1'
-is not used).  This behavior is atypical of how FS commands normally work; they
-normally have a specific value for any default and a '*' would be used for the
-previous value.  The current behavior is to simplify operations, including
-interactions with 'drudg', until a more comprehensive solution is implemented.
-You can set defaults for these parameters in 'initi' or manually; they will
-then be used by 'drudg' generated procedures.
+does not have this meaning).  This behavior is atypical of how FS commands
+normally work; they normally have a specific value for any default and a '*'
+would be used for the previous value.  The current behavior is to simplify
+operations, including interactions with 'drudg', until a more comprehensive
+solution is implemented.  You can set defaults for these parameters in 'initi'
+or manually; they will then be used by 'drudg' generated procedures.
 
 If the 'state' is 'undef' the settings are not sent to the device. This
 provides a way to set the defaults for the other parameters (perhaps in
@@ -65,11 +68,10 @@ in the FS's model (shared memory) is not affected.
 
 The 'samples' sets the exponential decay time-constant in seconds for a
 trailing average of Tsys calculated from the multicast.  The average for a
-channel or IF detector is restarted after: (i) a non-positive Tsys value occurs
-for that detector, (ii) 'tpicd' is started or restarted, or (iii) the
-'cont_cal' parameters are changed.  If multicast packets are lost, that is not
-taken into account; the data is treated as though it had uniform one second
-spacing.
+channel or IF detector is restarted after: (i) 'tpicd' is started or restarted
+or (ii) the 'cont_cal' parameters are changed.  If multicast packets are lost
+or a negative or infinite Tsys occurs, it is ignored, The remaining (finite
+positive) data is treated as though it had uniform one second spacing.
 
 The 'samples' also sets the number of cycles of 'tpicd' for logging the
 averaged Tsys data.  It is expected that the cycle period for 'tpicd' will
@@ -83,11 +85,25 @@ of cycles of 'tpicd' for logging the Tsys data to one.  The logged (and
 displayed) Tsys values are truly statistically independent only if '0' is used.
 This was the behavior of FS 10.1, which did not average.
 
-If 'samples' is non-zero then Tsys can be filtered. If 'filter' is '0', there
-is no filtering. If it is '1', then values on a channel that differ by more
-than 'ifX' percent (on that IF) from the average for that channel are rejected.
-For example, if 'ifa' is '50', then values that differ from the average by more
-than +/- 50% on IF A are rejected. If an 'ifN' is '0' the average will never
-change for channels on that IF after the first successful value; to disable
-filtering use, '0' for 'filter'.  A negative or infinite Tsys or a 'tpicd'
-command still resets the average.
+If 'samples' is non-zero then Tsys can also be filtered.  This will prevent
+values that differ by more than a threshold amount from the average from
+contributing to it.  Filtering occurs on a per detector basis with a threshold
+set per IF.  If 'filter' is '0', there is no filtering.  If it is '1',
+filtering is enabled after an initial average has been formed.  This requires
+'samples' positive finite values for a detector each time the average is reset.
+The filter parameters 'ifX' set the threshold in percent for rejecting values
+for detectors on that IF.  For example, if 'ifa' is '50', then values that
+differ from the detector's average by more than +/- 50% on IF A are rejected.
+If an 'ifX' is '0' the average will never change for detectors on that IF after
+the initial average has been formed. If 'ifX' is negative, filtering is
+disabled on that IF and just averaging is used. Non-negative values only need
+to be supplied for IFs that are to be filtered.  Other filters, selected by
+'filter' values larger than '1', may be added in the future.
+
+When the values are filtered, the background color of the value in the Tsys
+monitor display window (monit7) is changed when a value is rejected. For the
+first and second rejected value in a row, the color is green; third through
+fifth, yellow; six or more, red. On monochrome terminals inverse video is used
+instead. Tsys values that were negative or infinity are included in the count
+of rejected points in a row, but those values themselves are not displayed with
+green/yellow/red.

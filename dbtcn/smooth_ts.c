@@ -52,13 +52,13 @@ static void apply_filter(int filter,int samples,float alpha, float param,
             ++*clipped;
         return;
     } else if(0.0<=*saved) {
-        if(*count < samples || 0==filter || 1==filter && 100.0*fabs(*tsys-*saved)/(*saved) < param) {
+        if(*count < samples || 0==filter || 1==filter && param >= 0.0 && 100.0*fabs(*tsys-*saved)/(*saved) < param) {
             *tsys=alpha* *tsys + (1.0-alpha)* *saved;
             *clipped=0;
 
             *saved=*tsys;
             ++*count;
-        } else if (1==filter) {
+        } else if (1==filter && param >= 0.0) {
             *tsys=*saved;
             ++*clipped;
         }
