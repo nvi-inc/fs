@@ -27,7 +27,7 @@
 :toc:
 :experimental:
 E. Himwich, J. Quick
-Version 4.8 - April 2023
+Version 4.9 - May 2023
 
 == Introduction
 
@@ -471,6 +471,9 @@ Before observing, it is essential to check that the mode has been
 configured correctly. This will implicitly set the non-Core3H
 board aspects of the observing mode, which is also essential.
 
+IMPORTANT: The IF target levels need to verified for each observing
+mode. Please see <<IF target levels>>.
+
 The setup procedure can be executed (without the `force` parameter) to
 check that the setup is correct. Assuming the schedule procedure
 library has already been opened as described in the
@@ -503,6 +506,40 @@ This is not recommended for checking the mode, since it does not
 configure the non-Core3H board aspects of the observing mode.
 
 ====
+
+== IF target levels
+
+Due to the very wide input bandpass (4 GHz) of the DBBC3,  it very
+important have the correct IF target levels. If they are too high, the
+samplers will saturate, which which will result in gain compression
+and loss of VLBI sensitivity. The nominal target for 4 GHz BW input
+signal is 32000. For a 1 GHz BW input signal around 22000 might be
+good. For 0.5 GHZ input BW signal, 10000 may be realistic.
+
+If you have continuous calibration, you can check for compression by
+adjusting the target level for each IF while watching the
+<<Tsys monitor display>> for that IF. Once setup for a mode, reduce
+the target level for that IF from 32000 until it reaches a reasonable
+minimum. If you have _spot_ cal, you can do the same, but you will
+need to use the `caltsys` procedure to check T~sys~. The `onoff`
+command can also be useful for this; check that the `Comp`
+(compression) value is close to unity. You can also use a noise source
+to measure the change in TPI levels, with the gains locked, at
+different operating levels and find the highest value before it
+becomes non-linear. All of these methods rely on avoiding gain
+compression for the TPI counts. It is expected that eliminating
+compression for them with do the same for the VLBI data.
+
+If you find you need to set target levels other than `32000` and there
+are values that will work for all your bands and modes per IF, you can
+set them for _drudg_ using the `dbbc_if_target` option in _skedf.ctl_.
+See _st.default/control/skedf.ctl_
+(https://github.com/nvi-inc/fs/blob/main/st.default/control/skedf.ctl)
+for more information. If you cannot use the same targets for each
+mode, you will need to modify the IF setup procedures provided by
+_drudg_ for some cases. We are hoping to have a feature in a future
+release that will better automate this. If you need such a feature,
+please contact Ed to explain what is needed for your case.
 
 == Firmware version checking
 
