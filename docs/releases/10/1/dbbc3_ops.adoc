@@ -26,8 +26,9 @@
 :toclevels: 3
 :toc:
 :experimental:
+:downarrow: &downarrow;
 E. Himwich, J. Quick
-Version 5.0 - May 2023
+Version 5.1 - May 2023
 
 == Introduction
 
@@ -521,11 +522,11 @@ signal is 32000. For a 1 GHz BW input signal around 22000 might be
 good. For 0.5 GHZ input BW signal, 10000 may be realistic.
 
 If you have continuous calibration, you can check for compression by
-adjusting the target level for each IF while watching the
-<<Tsys monitor display>> for that IF. Once setup for a mode, reduce
-the target level for that IF from 32000 until it reaches a reasonable
-minimum. If you have _spot_ cal, you can do the same, but you will
-need to use the `caltsys` procedure to check T~sys~. The `onoff`
+adjusting the target level for each IF while watching the <<Tsys
+monitor display>> for that IF. Once setup for a mode, reduce the
+target level for that IF from 32000 until it reaches a reasonable
+minimum. If you have _spot_ calbration, you can do the same, but you
+will need to use the `caltsys` procedure to check T~sys~. The `onoff`
 command can also be useful for this; check that the `Comp`
 (compression) value is close to unity. You can also use a noise source
 to measure the change in TPI levels, with the gains locked, at
@@ -613,7 +614,7 @@ parameter being used.
 This command is the last command executed by _drudg_ generated Core3H
 setup procedures. A firmware/version error will be nearly, in some
 cases actually, the last error shown. That should help make it easier
-to spot.
+to identify.
 
 ** A `core3h=__n__,...,force` command.
 
@@ -704,21 +705,31 @@ _/usr2/fs/st.defaul/control/skedf.ctl_ example file.
 
 The T~sys~ monitor display is organized per IF and updates at a 1 Hz
 rate. The displayed information includes: LO, time, VDIF epoch, time
-difference between DBBC3 and the FS, PPS delay, T~sys~ for each
-IF/Core3H board as well as BBC frequencies and T~sys~ values. By
-default the display will cycle through the appropriate IFs, dwelling
-for two seconds on each. Selecting other configurations is described
-in the <<Commands>> subsection below.
+difference between DBBC3 and the FS, PPS delay, T~sys~ and
+polarization for each IF/Core3H board as well as BBC frequencies and
+T~sys~ values. By default the display will cycle through the
+appropriate IFs, dwelling for two seconds on each. Selecting other
+configurations is described in the <<Commands>> subsection below.
+
+If the LO and its polarization are defined for the displayed IF, the
+polarization will be shown as `(L)` or `+++(R)+++`.
+
+NOTE: `(L)` or `+++(R)+++` are displayed regardless of what
+polarization pair is in use: Left/Right, Horizontal/Vertical, or X/Y.
+Following the usual alphabetical order convention within a pair: `LR`,
+`HV`, and `XY`, you can assume: `L`=`H`=`X` and `R`=`V`=`Y`. Until the
+FS is updated to recognize pairs other than Left/Right, you need to
+know which pair is active to interpret what is shown.
 
 Except for `Time`, the values are from the previous second's
-multicast. Hence the T~sys~ values are from two seconds in the past.
-If the system is operating normally, `Time` shows a value one second
-more than in the previous second's multicast to avoid confusion with
-times displayed in other windows. (Logged values of the time are the
-raw received values.) This leads to the somewhat odd situation that
-for a Core3H board that is not synced, with non-DDC_V firmware, its
-`Time` value will be shown as `00:00:01` on the first day of the
-current VDIF epoch.
+multicast. Hence for continuous calibration, the T~sys~ values are
+from two seconds in the past. If the system is operating normally,
+`Time` shows a value one second more than in the previous second's
+multicast to avoid confusion with times displayed in other windows.
+(Logged values of the time are the raw received values.) This leads to
+the somewhat odd situation that for a Core3H board that is not synced,
+with non-DDC_V firmware, its `Time` value will be shown as `00:00:01`
+on the first day of the current VDIF epoch.
 
 [NOTE]
 ====
@@ -785,6 +796,14 @@ recorded is not fully defined. The T~sys~ display will show the most
 recently selected channels (new or old) to avoid having the values
 disappear momentarily if the old configuration is re-commanded.
 
+Finite values outside of the range, `-999.` to `999.9`, which won't
+fit in the available field width, are displayed as dollar signs, `$`.
+
+There are two regimes, described below: <<Continuous calibration>> and
+<<Spot (noncontinuous) calibration>>.
+
+==== Continuous calibration
+
 For all displayed (non-blank) BBC T~sys~ fields, the values will be
 shown if they can be calculated. If they can't be, a hint, in inverse
 video, for the cause of the problem will be displayed in the
@@ -792,18 +811,73 @@ corresponding field instead. There may be more than one issue, but
 only the first encountered is reported. The order is:
 
 . `N bbc` -- the BBC is not configured
+
 . ``N lo `` -- the LO is not defined
+
 . `Ntcal` -- no Tcal value was found
-. `N cal` -- continuous calibration not enabled and no non-continuous measurement yet
 
-For continuous calibration, the T~sys~ values are calculated using the
-averaging method described in `*help=cont_cal*`.
+. `N cal` -- continuous calibration not enabled (and no spot
+measurement have been made yet)
 
-NOTE: As usual in the FS, an invalid value will be display as field
-dollar signs, `$`. That usually means that a value could be
-calculated, but there was a problem with the result: the result was
-too large for the field, was negative when only positive values are
-valid, or would have required dividing by zero.
+The T~sys~ values are calculated using the averaging method described
+in `*help=cont_cal*`. A special background color is used for the
+following errors, regardless of whether averaging is in use:
+
+* Negative values, including too large values with dollar signs, are
+shown with magenta.
+
+* If the "`on`" and "`off`" TPI values are equal, `` inf `` is shown
+with cyan.
+
+* If the "`on`" and/or "`off`" TPI values overflow (`65536` for BBCs),
+`ovrfl` is shown with cyan.
+
+* If the "`off`" TPI value is zero, `off=0` is shown with cyan.
+
+If filtering is use, there is a green background  when 1-2 values have
+been rejected in a row; yellow, 3-5; red; 6 or more. Invalid results
+(negative, infinity, overflow, and the "`off`" value being zero) are
+still displayed as such and included in the accumulated count of
+rejected values for the next time there is a valid result.
+
+If colors are not available for the terminal, inverse video is used
+instead.
+
+NOTE: In FS _10.1_, all invalid values (negative, infinity, overflow)
+were display as dollar signs and the "`off`" TPIs being zero was not
+recognized as an error condition.
+
+===== Diagnosing problems
+
+With the way T~sys~ data is displayed, certain problems can be readily
+identified as the values update:
+
+* Most, or all, values are negative -- the calibration polarity is
+incorrect
+
+* Most, or all, values are very large positive or negative values,
+including dollar signs, perhaps with some `` inf `` mixed in -- the
+diode is not firing
+
+* Some fields have `overfl` -- the gain is set too high for those BBCs
+
+* `off=0` is seen -- the FS has continuous calibration set to "`on`",
+but the DBBC3 has it "`off`".
+
+Turning off averaging (setting the `_samples_` parameter of `cont_cal`
+to zero), can be useful to troubleshooting. You will see the T~sys~
+values calculated sample-by-sample with no averaging or filtering.
+
+==== Spot (noncontinuous) calibration
+
+Spot calibration refers to explicitly turning the noise diode on and
+off to make calibration measurements. Incorrect values (negative,
+infinity, and overflow) and BBCs or LOs not configured are displayed
+as dollar signs, `$`. If the T~cal~ it not defined `Ntcal` is shown in
+inverse video. If no measurement has been made yet, `N cal` is shown
+in inverse video.
+
+NOTE: In FS _10.1_, spot calibration T~sys~ was not displayed.
 
 === Commands
 
@@ -964,6 +1038,18 @@ in `*help=cont_cal*`. They are logged every `_samples_` (from the
 `cont_cal` command) iterations of the `_cycle_` period for the `tpicd`
 command (see `*help=tpicd*`). In other words, the T~sys~ logging
 interval is the product of `_samples_` times `_cycle_`.
+
++
+
+Negative T~sys~ values will not be logged unless averaging is
+turned off since averaging rejects negative values. Other invalid
+values (overflow, infinity, and `off=0`) are logged as dollar signs,
+`$` when averaging is turned off, but not otherwise.
+
++
+
+NOTE: For FS _10.1_, negative T~sys~ values were recorded as dollar
+signs, `$`. Averaging was not implemented.
 
 Even when not being logged, multicast data is normally being received.
 A subset can be seen in the T~sys~ monitor display. The current value
