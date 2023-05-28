@@ -27,7 +27,7 @@
 :toc:
 :experimental:
 E. Himwich, J. Quick
-Version 4.9 - May 2023
+Version 5.0 - May 2023
 
 == Introduction
 
@@ -76,10 +76,9 @@ to the end in the DBBC3 version. The meanings of the `_frequency_` and
 
 +
 
-WARNING: So far, operation has only been tested with polarity `2`. It
-is expected that other polarities will work but that has not yet been
-confirmed. This affects multicast data logging, the T~sys~ display,
-and use of _fivpt_ and _onoff_.
+TIP: In FS _10.1_, operation had only been tested with polarity `2`
+and for early releases of DDC_U and DDC_V firmware. The support is
+known to be incompatible with some later DDC_V releases.
 
 * `core3h` -- Low-level communication with Core3H boards
 
@@ -186,6 +185,11 @@ are very time consuming and their execution needs to be limited. This
 command is added by _drudg_ to _.snp_ files if selected by the
 `setup_proc` option in _skedf.ctl_ control file. Please see the
 <<Minimizing the use of setup procedures>> appendix for more details.
+
+* `tpi`, `tpical`, `tpdiff`, `tpzero`, `caltemp` and `tsys` -- Support
+non-continuous calibrations T~sys~ measurements. As of _10.2_,
+`formbbc` and `formif` are supported as mnemonics for DBBC3
+detectors for channels/IFs that are configured for recording.
 
 * `tpicd` -- TPI (multicast) recording control daemon setup
 
@@ -566,7 +570,7 @@ The version information is checked for each multicast reception. If
 there is no multicast being received, these errors will not be
 reported this way. In FS _10.1_, The errors detected for the multicast
 data are reported every 20 seconds; for _10.2_ and later, the minimum
-repprting interval is one minute.
+reporting interval is one minute.
 
 +
 
@@ -590,7 +594,7 @@ displayed with:
 
 +
 
-CAUTION: Suppressing the display of this error information will _not_
+WARNING: Suppressing the display of this error information will _not_
 prevent possible loss of data and/or other error messages if the
 firmware/version in the FS control files doesn't agree with what is
 loaded in the DBBC3.
@@ -787,13 +791,13 @@ video, for the cause of the problem will be displayed in the
 corresponding field instead. There may be more than one issue, but
 only the first encountered is reported. The order is:
 
-. `Nccal` -- continuous cal not enabled
 . `N bbc` -- the BBC is not configured
 . ``N lo `` -- the LO is not defined
 . `Ntcal` -- no Tcal value was found
+. `N cal` -- continuous calibration not enabled and no non-continuous measurement yet
 
-The T~sys~ values are calculated using the averaging method described
-in `*help=cont_cal*`.
+For continuous calibration, the T~sys~ values are calculated using the
+averaging method described in `*help=cont_cal*`.
 
 NOTE: As usual in the FS, an invalid value will be display as field
 dollar signs, `$`. That usually means that a value could be
@@ -811,8 +815,8 @@ The T~sys~ display accepts several one character commands:
 
 This might be useful, for example, when troubleshooting a single IF.
 
-* `*n*` -- next IF, wrapping at the end
-* `*p*` -- previous IF, wrapping at the end
+* `*n*` -- next IF, wrapping at the end. Single IF display is entered if not previously selected.
+* `*p*` -- previous IF, wrapping at the end. Single IF display is entered if not previously selected.
 * `*1*`-`*9*` -- seconds of display time for each IF (default is 2)
 * `*i*` -- toggle display of IF or RF frequency for BBCs (default is RF if the LO is defined; IF, if not)
 
@@ -822,10 +826,27 @@ If no LO is defined for an IF, it will not be possible to display the
 RF frequencies for the corresponding BBCs.
 
 * `*l*` -- toggle between `All` and `Rec`*/*`Def` modes (see the <<Modes>> subsection above for defaults)
+
++
+
+NOTE: If one IF was manually selected before the IF and BBC
+configuration was defined, it will not be possible to toggle between
+display modes until cycling has been restarted.
+
 * `*0*` -- reset to all defaults
 * `*?*` or `*/*` -- show help summary
 *  kbd:[esc] or kbd:[control+c] -- exit
 * Any other key (e.g., kbd:[space]) -- resume cycling
+
+TIP: Some key combinations, e.g., kbd:[Ctrl+Alt+{downarrow}], generate
+escape sequences. If they are used while _monit7_ has the focus, they
+will probably cause it to exit. We are looking into a programmatic way
+to prevent this. If this is annoying or you are not using the display
+server (in which case the FS will crash), you can mask out troublesome
+key combinations for _monit7_ in _~/.Xresources_ or possibly with the
+window manager. If _monit7_ exits while using the display server and
+you have it defined in _clpgm.ctl_, you can use `client=monit7` to
+reopen it.
 
 == Checking DBBC3 time
 
@@ -930,11 +951,11 @@ their log entry labels, is logged:
 
 * `time` -- for each Core3H board in the system
 * `pps2dot` -- (`pps_delay`) in nanoseconds for each Core3H board
-* `tpcont`  -- Only if continuous cal _is_ in use -- TPI counts for each BBC and IF configured for recording.
+* `tpcont`  -- Only if continuous calibration _is_ in use -- TPI counts for each BBC and IF configured for recording.
 +
-The counts are given in the order of cal _on_ then _off_
-* `tpi`  -- Only if continuous cal is _not_ in use -- TPI counts for each BBC and IF configured for recording.
-* `tsys` -- Only if continuous cal _is_ in use -- T~sys~ for each BBC and IF configured for recording and T~sys~
+The counts are given in the order of diode _on_ then _off_
+* `tpi`  -- Only if continuous calibration is _not_ in use -- TPI counts for each BBC and IF configured for recording.
+* `tsys` -- Only if continuous calibration _is_ in use -- T~sys~ for each BBC and IF configured for recording
 
 +
 
