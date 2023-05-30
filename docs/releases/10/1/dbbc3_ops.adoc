@@ -28,17 +28,20 @@
 :experimental:
 :downarrow: &downarrow;
 E. Himwich, J. Quick
-Version 5.1 - May 2023
+Version 5.2 - May 2023
 
 == Introduction
 
-This document describes FS DBBC3 support starting with FS _10.1_. It
-outlines the features and model for FS operations with the DBBC3.
+This document describes FS DBBC3 support in the latest FS version,
+_10.2_. It outlines the features and model for FS operations with the
+DBBC3. Some **NOTE**s are included to describe how support in FS
+_10.1_ is different. Versions before _10.1_ are not covered here.
 
-The FS supports the DDC_E, DDC_U, and DDC_V personalities. Support
-for the DDC_E personality was added in version _10.2_. The only
-version of DDC_V supported in FS _10.1_ was _v124_, but as of _10.2_
-other later versions are supported as well.
+The FS supports the DDC_E, DDC_U, and DDC_V personalities.
+
+NOTE: Support for the DDC_E personality was not available in FS
+_10.1_, nor was there support for any DDC_V versions other than
+_v124_, even then it was only for very early releases.
 
 The appendix <<Configuring the FS for use with a DBBC3>> gives the
 steps for customizing the FS. The appendix
@@ -77,9 +80,9 @@ to the end in the DBBC3 version. The meanings of the `_frequency_` and
 
 +
 
-TIP: In FS _10.1_, operation had only been tested with polarity `2`
-and for early releases of DDC_U and DDC_V firmware. The support is
-known to be incompatible with some later DDC_V releases.
+NOTE: In FS _10.1_, operation had only been tested with polarity `2`
+and for early releases of DDC_U and DDC_V firmware. The support was
+discovered to be incompatible with some later DDC_V _v124_ releases.
 
 * `core3h` -- Low-level communication with Core3H boards
 
@@ -188,9 +191,15 @@ command is added by _drudg_ to _.snp_ files if selected by the
 <<Minimizing the use of setup procedures>> appendix for more details.
 
 * `tpi`, `tpical`, `tpdiff`, `tpzero`, `caltemp` and `tsys` -- Support
-non-continuous calibrations T~sys~ measurements. As of _10.2_,
-`formbbc` and `formif` are supported as mnemonics for DBBC3
-detectors for channels/IFs that are configured for recording.
+non-continuous calibrations T~sys~ measurements.
+
++
+
++
+
+NOTE: If FS  _10.1_, `formbbc` and `formif` were not supported as
+mnemonics to specify DBBC3 detectors for channels/IFs that are
+configured for recording.
 
 * `tpicd` -- TPI (multicast) recording control daemon setup
 
@@ -569,18 +578,16 @@ The checks are made in two different situations:
 
 The version information is checked for each multicast reception. If
 there is no multicast being received, these errors will not be
-reported this way. In FS _10.1_, The errors detected for the multicast
-data are reported every 20 seconds; for _10.2_ and later, the minimum
-reporting interval is one minute.
+reported this way. The minimum reporting interval is one minute, but
+can be increased up to 10 minutes with the environment variable
+`FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES`. Please see the <<Other
+options>> section of the <<DBBC3 specific environment variables>>
+appendix below for the details.
 
 +
 
-Starting with FS _10.2_, you can change the interval of report the
-error in minutes from one up to 10 with the environment variable
-`FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES`. Please see the
-<<Other options>> section of the
-<<DBBC3 specific environment variables>> appendix below for the
-details.
+NOTE: In FS _10.1_, the interval for reporting version errors detected
+with the multicast data was 20 seconds and could not be adjusted.
 
 +
 
@@ -631,17 +638,18 @@ version whenever the formatter is configured.
 === equip.ctl
 
 For DBBC3 use, the rack type in _equip.ctl_ should be `dbbc3_ddc_e`
-(FS _10.2_ or later), `dbbc3_ddc_u`, or `dbbc3_ddc_v` depending on the
-firmware that is loaded.
+`dbbc3_ddc_u`, or `dbbc3_ddc_v` depending on the firmware that is
+loaded.
+
+NOTE: For FS _10.1_, `dbbc3_ddc_e` was not available.
 
 === dbbc3.ctl
 
 The DBBC3 specific control file parameters are in the _dbbc3.ctl_
 control file. An example of the contents is:
 
-CAUTION: The example below is for FS _10.2_. In FS _10.1_, the second
-non-comment line below, for the DDC_E firmware version, was not
-present,
+NOTE: In FS _10.1_, the second non-comment line below, for the DDC_E
+firmware version, was not present.
 
 ....
 * Two fields: BBCs/IF (8, 12, 16 or nominal (U:16,EV:8)), IFs (1-8)
@@ -819,6 +827,11 @@ only the first encountered is reported. The order is:
 . `N cal` -- continuous calibration not enabled (and no spot
 measurement have been made yet)
 
++
+
+NOTE: In FS _10.1_, `Nccal` was used instead and only applied to
+continuous calibration.
+
 The T~sys~ values are calculated using the averaging method described
 in `*help=cont_cal*`. A special background color is used for the
 following errors, regardless of whether averaging is in use:
@@ -877,7 +890,8 @@ as dollar signs, `$`. If the T~cal~ it not defined `Ntcal` is shown in
 inverse video. If no measurement has been made yet, `N cal` is shown
 in inverse video.
 
-NOTE: In FS _10.1_, spot calibration T~sys~ was not displayed.
+NOTE: In FS _10.1_, information for spot calibration T~sys~ was not
+displayed.
 
 === Commands
 
@@ -1140,16 +1154,18 @@ _/usr2/fs/st.default/control/skedf.ctl_ file.
 == Configuring the FS for use with a DBBC3
 
 This appendix provides the steps needed to configure the FS to support
-a DBBC3. You must have version FS _10.1_, or later, installed before
-using these directions. All steps, except as noted, are to be executed
-as _oper_.
+a DBBC3. All steps, except as noted, are to be executed as _oper_.
 
 . Update _equip.ctl_.
 
 +
 
-Change your rack type to `dbbc3_ddc_e` (FS _10.2_ or later),
-`dbbc3_ddc_u,` or `dbbc3_ddc_v`, as appropriate.
+Change your rack type to `dbbc3_ddc_e`, `dbbc3_ddc_u,` or
+`dbbc3_ddc_v`, as appropriate.
+
++
+
+NOTE: For FS _10.1_, `dbbc3_ddc_e` was not available.
 
 . Update _dbbc3.ctl_.
 
@@ -1490,13 +1506,15 @@ helpful.
 
 == DBBC3 specific environment variables
 
-Beginning in FS _10.2_, several environment variables are defined for
-use with the DBBC3. These are generally broken into two groups,
-described in sections <<Swaps of TPI and gain values>>, and
-<<Other options>>. These environment variables exist to help the end
-user adapt to variations in DBBC3 behaviour between different firmware
-releases.  Several variables are provided to give flexibility for
-handling different variations.
+Several environment variables are defined for use with the DBBC3.
+These are generally broken into two groups, described in sections
+<<Swaps of TPI and gain values>>, and <<Other options>>. These
+environment variables exist to help the end user adapt to variations
+in DBBC3 behaviour between different firmware releases. Several
+variables are provided to give flexibility for handling different
+variations.
+
+NOTE: None of these environment variables are supported in FS _10.1_.
 
 While some firmware releases may require setting a subset of these
 variables, we have set the default values so that the end user should
@@ -1685,6 +1703,8 @@ This appendix provides methods for verifying the
 <<Continuous calibration polarity>> and the
 <<USB/LSB TPI swap status>>
 
+NOTE: These procedures are not supported for FS _10.1_.
+
 === Continuous calibration polarity
 
 A polarity of `0` corresponds to the noise diode in the receiver being
@@ -1707,9 +1727,8 @@ polarity is with the output of a `bbc__NNN__` command. The following
 procedure should normally work. If the results do not agree with your
 expected polarity, please contact Ed.
 
-. If you are using FS _10.2_ or later, make sure the environment
-variable `FS_DBBC3_BBCNNN_ON_OFF_SWAP` is _not_ set, or if it is set,
-that it is set to `0`.
+. Make sure the environment variable `FS_DBBC3_BBCNNN_ON_OFF_SWAP` is
+_not_ set, or if it is set, that it is set to `0`.
 
 . Start the FS.
 
@@ -1760,9 +1779,9 @@ strong signal in only one side-band of one BBC.
 Follow the steps below. If the results do not show that the test
 signal is in the expected side-band, please contact Ed.
 
-. If you are using FS _10.2_ or later, make sure the environment
-variable `FS_DBBC3_MULTICAST_BBC_TPI_USB_LSB_SWAP` is _not_ set, or
-if it is set, that it is set to `1`.
+. Make sure the environment variable
+`FS_DBBC3_MULTICAST_BBC_TPI_USB_LSB_SWAP` is _not_ set, or if it is
+set, that it is set to `1`.
 
 . Start the FS.
 
@@ -1898,17 +1917,21 @@ recorder):
 [subs="+quotes"]
 ....
 _command_=datastream=clear
-_command_=datastream=add:{thread}:*
+_command_=datastream=add:ds{thread}:*
 _command_=datastream=reset
 ....
 
 +
 
-NOTE: As of FS version _10.2_, the `add` command was changed to
-`_command_=datastream=add:ds{thread}:*`. The `ds` is passed (case
-preserved) to _jive5ab_ to be used as part of the lowercase datastream
-label portion of the filename. This results in filenames like
-_ev024g_mc_no0009_dsds1_. The double _ds_ is intentional.
+The `ds` is passed (case preserved) to _jive5ab_ to be used as part of
+the lowercase datastream label portion of the filename. This results
+in filenames like _ev024g_mc_no0009_dsds1_. The double _ds_ is
+intentional.
+
++
+
+NOTE: In FS _10.1_, the `add` command was
+`_command_=datastream=add:{thread}:*`.
 
 +
 
