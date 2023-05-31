@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta1 Update Notes
-Version 0.61 - May 2023
+Version 0.62 - May 2023
 
 :sectnums:
 :stem: latexmath
@@ -218,6 +218,11 @@ your station can handle the longer names. You should answer "`no``"
 until you have made the necessary changes or verified that no changes
 are needed.
 
+Click the "`Details`" toggle below for the full instructions.
+
+[%collapsible]
+====
+
 There are three issues that may need to be address (as _prog_): legacy
 FORTRAN code, shared memory variables, and use of the _lognm_ program.
 
@@ -228,7 +233,7 @@ FORTRAN code, shared memory variables, and use of the _lognm_ program.
 If you have FORTRAN code in your station software, you should review
 the changes in the <<f95,f95>> sub-item (if that link doesn't work in
 your browser, click on this link instead: <<fsl1,FSL11>>, open the
-*Details* toggle below that location by clicking on it, go `Back` in
+"`Details`" toggle below that location by clicking on it, go `Back` in
 the browser, and finally click on the original link) of the
 <<FS changes>> section to see if any are applicable to your code.
 Strictly speaking, they are not needed unless you are using FSL11, and
@@ -283,6 +288,8 @@ of the log name. There should be no issues for log names of eight
 characters or less even if you have not made any adjustments to handle
 longer names.
 
+====
+
 === Make the station software
 
 The layout of some variables in shared memory have changed. Even if
@@ -321,12 +328,16 @@ values to use>> may be helpful.
 === Optional steps
 
 The steps in this section are optional, but you may find them useful.
-All are to be performed by _oper_, except as noted.
+All are to be performed by _oper_, except as noted. For each item,
+click the "`Details`" toggle for the full instructions.
 
 . For DBBC(2)/DBBC3 users, set default values for the `cont_cal`
 command.
 
 +
+
+[%collapsible]
+====
 
 If you use continuous cal with a DBBC(2) or DBBC3, you can set the
 default values for the `cont_cal` command parameters in your `initi`
@@ -340,54 +351,43 @@ as the default. This allows you to customize the values for your
 system and use the _drudg_ generated `cont_cal` commands to control
 whether continuous calibration, and optionally what polarity, is used.
 
-+
-
 You can of course change the defaults after `initi` has run if you
 want. This could be helpful if you need to change the defaults. You
 might want to have a SNAP procedure in the `station` library for this
 to minimize the required typing.
 
-+
-
 For example, for a DBBC(2), you can set the default `_polarity_`, to
 `2`, _frequency_` to `120`, an `_option_` to `1`, and `_samples_` to
 `5` with:
-
-+
 
 WARNING: This is not intended to be a realistic example.
 
  cont_cal=undef,2,5,120,1
 
-+
-
 The use of `undef` prevents any of the device parameters being sent to
 at this time, but you can use `on` or `off` if you prefer and any set
 values will be sent.
 
-+
-
 Similarly, for the DBBC3 you would use:
-
-+
 
 WARNING: This is not intended to be a realistic example.
 
  cont_cal=undef,2,120,1,5
 
-+
-
 CAUTION: The parameter order for the DBBC3 is different from the DBBC(2).
-
-+
 
 Please see `*help=cont_cal*` for full details on this command for your
 equipment.
+
+====
 
 . <<set_x11_widths,Setting X11 window widths>>[[set_x11_widths]]:
 Increase window size to 146 columns
 
 +
+
+[%collapsible]
+====
 
 The new default window width for FSL11 of the `erchk`, `login_sh`,
 `oprin`, and `scnch` windows is 146 columns. The main advantage of
@@ -398,19 +398,13 @@ if your display can support it. If not, you might adjust the windows
 to the widest that can be handled conveniently (see the *TIP* below
 for using different sizes).
 
-+
-
 To update the usual _~/.Xresources_ file, enter the commands:
 
  cd
  /usr2/fs/misc/xresourcesfix .Xresources
 
-+
-
 You will need to log-out on the console and log back into to see the
 full change.
-
-+
 
 The script will report an error if it found the geometry value for one
 of the four windows defined more than once; the extras should probably
@@ -419,15 +413,11 @@ were not found. That may be okay, but may also indicate that the entry
 was not in the format the script expected. That may need to be looked
 into.
 
-+
-
 NOTE: The original _.Xresources_ file will be saved as
 _.Xresources.bak_ in case you need to recover.
 
-+
-
 [TIP]
-====
+=====
 
 The script also includes command line options for setting a different
 width, either for all the windows or for specific ones. Enter
@@ -436,17 +426,21 @@ times with different values if between runs of the script you use:
 
  mv .Xresources.bak .Xresources
 
-====
-
-+
+=====
 
 If you have other, special purpose, X11 resource files, you may want
 to run the script on them also. You may want to make the same changes
 for _prog_ (and any AUID accounts) as well.
 
-. Use `set revert-all-at-newline on` for _readline_.
+====
+
+. Use `set revert-all-at-newline on` for _readline_ to prevent the
+_bash_, _oprin_, and _pfmed_ histores from being changed.
 
 +
+
+[%collapsible]
+====
 
 This will prevent history entries (particularly in _bash_, _oprin_,
 and _pfmed_) from being changed if they are edited and then not used.
@@ -456,8 +450,6 @@ you if you want to prevent it. In FSL11, the default is to prevent it
 using FSL10 or FSL9 (but not FSL8), you can prevent it by creating the
 file:
 
-+
-
 .~/.inputrc
 [source]
 ----
@@ -465,17 +457,10 @@ $include /etc/inputrc
 set revert-all-at-newline on
 ----
 
-+
-
 You may want to make the same change for _prog_ (and any AUID
 accounts) as well.
 
-+
-
 To make this active for:
-
-+
---
 
 [disc]
 * _bash_ -- you will need to restart the shell, probably by logging
@@ -487,27 +472,33 @@ server)
 
 * _pfmed_ -- if it is running, exit and restart it
 
---
+====
 
-. Update your NTP configuration.
+. Update your NTP configuration to make it more modern.
 
 +
+
+[%collapsible]
+====
 
 This change will make the output of the `check_ntp` procedure and the
 contents of _/etc/ntp.conf_ file easier to read. Instructions are
 included for how to remove display of NTP related FQDNs and IP
 addresses in the log, if that is an issue for your site.
 
-+
-
 If you want to make this change, it can be deferred to a convenient
 time. The instructions can be found in the
 <<Update NTP Configuration>> appendix.
+
+====
 
 . If you are using _refresh_spare_usr2_ with FSL6-FSL9, update the
 script.
 
 +
+
+[%collapsible]
+====
 
 If you are using FSL6-9 and have not hit the problem this change is
 correcting, you may not need it. That, and the fact that there are
@@ -515,9 +506,11 @@ very few users of this script, is why this change is listed as
 optional (even though in some sense it is necessary). See the
 <<refresh_spare_usr2,refresh_spare_usr2>> FS change below (if that
 link doesn't work in your browser, click on this link instead:
-<<fs_misc,FS miscellaneous changes>>, open the *Details* toggle below
-that location by clicking on it, go `Back` in the browser, and finally
-click on the original link).
+<<fs_misc,FS miscellaneous changes>>, open the "`Details`" toggle
+below that location by clicking on it, go `Back` in the browser, and
+finally click on the original link).
+
+====
 
 === Review changes
 
@@ -537,7 +530,7 @@ A complete history of changes can be found using the `git log` command
 from within the FS _git_ archive directory, usually _/usr2/fs-git_.
 
 Each change is listed as a numbered title, usually with a few summary
-sentences, followed by a *Details* _toggle_, like:
+sentences, followed by a "`Details`" _toggle_, like:
 
 [%collapsible]
 ====
@@ -2840,7 +2833,7 @@ from an archive>> subsection of the
 Making a copy as a new directory before making any local changes can
 make it easier to track changes and which version is in use.
 
-... Add a *TIP* for how to avoid losing your place in a *Details*
+... Add a *TIP* for how to avoid losing your place in a "`Details`"
 toggle for a FS or _drudg_ change list item when following a link
 (basically: right-click and open a new tab). This was added to the
 <<../1/10.1.0.adoc#improve_presentation,Improve presentation>> FS
@@ -2859,8 +2852,8 @@ document's tab, whatever you prefer.
 
 ****
 
-... Add explanation of how to navigate to a link in *Details* toggle in
-a different document, if the browser doesn't support going to it
+... Add explanation of how to navigate to a link in "`Details`" toggle
+in a different document, if the browser doesn't support going to it
 directly. This was added to the
 <<../1/10.1.0.adoc#improve_presentation,Improve presentation>> FS
 change sub-item (if that link doesn't work in your browser, the text
@@ -2925,7 +2918,7 @@ _drudg_ opening message date is `2023-02-21`.
 
 These are similar to changes described in the <<f95,f95>> FS change
 item (if that link doesn't work in your browser, click on this link
-instead: <<FSL11,FSL11>>, open the *Details* toggle below that
+instead: <<FSL11,FSL11>>, open the "`Details`" toggle below that
 location by clicking on it, go `Back` in the browser, and finally
 click on the original link). There were only a few octal constants
 outside of `parameter` statements and these were in simple assignment
