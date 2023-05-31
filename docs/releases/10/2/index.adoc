@@ -19,8 +19,8 @@
 //
 
 = Index of fs/releases/10/2/
-Version 2.1 - April 2023
+Version 2.2 - May 2023
 
-<<10.2-alpha3.adoc#,FS 10.2-alpha3 Update Notes>> (alpha3 release)
+<<10.2-beta1.adoc#,FS 10.2-beta1 Update Notes>> (beta1 release)
 
 <<10.2_to_latast.adoc#,FS 10.2 to the Latest Commit Update Notes>>

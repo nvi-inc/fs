@@ -20,8 +20,8 @@
 
 :doctype: book
 
-= FS 10.2-alpha3 Update Notes
-Version 0.60 - May 2023
+= FS 10.2-beta1 Update Notes
+Version 0.61 - May 2023
 
 :sectnums:
 :stem: latexmath
@@ -98,7 +98,7 @@ then as _prog_ execute:
 
  cd /usr2/fs-git
  git fetch
- git checkout 10.2.0-alpha3
+ git checkout 10.2.0-beta1
 
 . If you are using FSL8 or are otherwise unable, or prefer not, to use
 _git_:
@@ -118,7 +118,7 @@ that:
 * For FSL8, or if you are otherwise unable to connect to _github_, you
 will need the *TIP* in the `*wget*` step.
 
-* For the __tag__ use `10.2.0-alpha3`.
+* For the __tag__ use `10.2.0-beta1`.
 
 * You will end using the "`installing from an archive`" procedure with
 the step setting the link for __/usr2/fs__ by running *`make
