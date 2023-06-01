@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta1 Update Notes
-Version 0.62 - May 2023
+Version 0.63 - June 2023
 
 :sectnums:
 :stem: latexmath
@@ -57,24 +57,18 @@ https://nvi-inc.github.io/fsl11/.
 * Support for experiment names (session codes) of 16 characters or
 less. This enables use of the new IVS 12-character session codes.
 
+* Several changes were made to DBBC3 support, including: DDC_E
+firmware is now recognized, information on IF target levels was added
+(see the <<../1/dbbc3_ops.adoc#_if_target_levels,IF target levels>>
+section of the <<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> for
+the details), environment variables were added to modify the use of
+TPI values and control other features, support for spot
+(noncontinuous) calibration was completed, and averaging/filtering of
+continuous calibration data was added.
+
 * The _plotlog_ utility, for examining data in the log files, has been
 expanded and updated. The changes include support for RDBEs, DBBC3s,
 and additional data types including recorder performance statistics.
-
-* The DBBC3 DDC_E personality is now supported.
-
-* Information about setting DBBC3 IF target levels to avoid gain
-compression has been added. Setting them properly requires attention
-due to the very wide (4 GHz) input bandpass of the DBBC3. See the
-<<../1/dbbc3_ops.adoc#_if_target_levels,IF target levels>>
-section of the <<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> for
-the details.
-
-* Several DBBC3 specific environment variables were added to control
-changing the order of TPI data (USB versus LSB, and for continuous
-calibration, cal-on versus cal-off). Variables were added for other
-features as well. The default values were chosen so that most users
-should not need to set these variables.
 
 == Upgrading from 10.1
 
