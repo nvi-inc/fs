@@ -134,7 +134,7 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
                     bb_cat(buf,on);
                     bb_cat(buf,off);
                 } else
-                    bb_cat(buf,off);
+                    bb_cat(buf,on);
             }
             if (shm_addr->tpicd.itpis[k+MAX_DBBC3_BBC] && shm_addr->tpicd.ifc[k+MAX_DBBC3_BBC] == j) {
                 if(cont_cal)
@@ -151,7 +151,7 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
                     bb_cat(buf,on);
                     bb_cat(buf,off);
                 } else
-                    bb_cat(buf,off);
+                    bb_cat(buf,on);
             }
         }
         if (j!= 0 && shm_addr->tpicd.itpis[j-1+MAX_DBBC3_BBC*2]) {
@@ -169,7 +169,7 @@ static void log_tp( dbbc3_ddc_multicast_t *t, char buf[], int cont_cal)
                 if_cat(buf,on);
                 if_cat(buf,off);
             } else
-                if_cat(buf,off);
+                if_cat(buf,on);
         }
         log_out(buf, "",0,0);
     }

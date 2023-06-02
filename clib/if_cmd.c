@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -140,7 +140,7 @@ int if_cmd(ibuf,nchar)
     strcpy(ibuf,ptr_false);
 
   else if(!strcmp("ddc",ptr_cond))
-    if(ddc)
+    if(ddc || dbbc3)
       strcpy(ibuf,ptr_true);
     else
       strcpy(ibuf,ptr_false);

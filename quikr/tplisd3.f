@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2023 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -132,16 +132,15 @@ C
         call fs_get_rack_type(rack_type)
         call fs_get_drive(drive)
         call fs_get_drive_type(drive_type)
-        ierr=-207
-        goto 990
-c        if(rack.eq.DBBC.and.
-c     &       drive(1).eq.mk5.and.
-c     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
-c     &        drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs)
-c     &       ) then
-c           call fc_mk5dbbcd(itpis_dbbc)
-c        endif
-c        goto 289
+        if(rack.eq.DBBC3.and.
+     &       drive(1).eq.mk5.and.
+     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
+     &        drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs .or.
+     &       drive_type(1).eq.FLEXBUFF)
+     &       ) then
+           call fc_mk5dbbc3d(itpis_dbbc3)
+        endif
+        goto 289
 c
 205     continue
         if (ichcm_ch(iprm,1,'formif').ne.0) goto 210
@@ -149,28 +148,42 @@ c
         call fs_get_rack_type(rack_type)
         call fs_get_drive(drive)
         call fs_get_drive_type(drive_type)
-        ierr=-207
-        goto 990
-c        if(rack.eq.DBBC.and.
-c     &       drive(1).eq.mk5.and.
-c     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
-c     &       drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs)
-c     &       ) then
-c           call fc_mk5dbbcd(itpis_test)
-c        endif
-c        do j=0,MAX_DBBC_IF-1
-c           do ii=1,MAX_DBBC_BBC
-c              if(itpis_test(ii).ne.0.or.
-c     &             itpis_test(ii+MAX_DBBC_BBC).ne.0) then
-c                 call fs_get_dbbc_source(isrce,ii)
-c                 if(isrce.eq.j) then
-c                    itpis_dbbc(MAX_DBBC_BBC*2+1+j)=1
-c                 endif
-c              endif
-c           enddo
-c        enddo
-c        goto 289
-c
+        if(rack.eq.DBBC3.and.
+     &       drive(1).eq.mk5.and.
+     &       (drive_type(1).eq.mk5b.or.drive_type(1).eq.mk5b_bs .or.
+     &       drive_type(1).eq.mk5c.or.drive_type(1).eq.mk5c_bs .or.
+     &       drive_type(1).eq.FLEXBUFF)
+     &       ) then
+           call fc_mk5dbbc3d(itpis_test)
+        endif
+        call fs_get_dbbc3_ddc_ifs(dbbc3_ddc_ifs)
+        do ii=1,dbbc3_ddc_ifs
+           call fs_get_dbbc3_ddc_bbcs_per_if(dbbc3_ddc_bbcs_per_if)
+           jend=dbbc3_ddc_bbcs_per_if
+           if(jend.lt.8) jend=8
+           do j=1,jend
+              if(itpis_test(j+(ii-1)*8).ne.0) then
+                 itpis_dbbc3(ii+2*MAX_DBBC3_BBC)=1
+              endif
+              if(itpis_test(j+(ii-1)*8+MAX_DBBC3_BBC).ne.0) then
+                 itpis_dbbc3(ii+2*MAX_DBBC3_BBC)=1
+              endif
+           enddo
+           if(dbbc3_ddc_bbcs_per_if.gt.8) then
+              jend=dbbc3_ddc_bbcs_per_if
+              if(16.lt.jend) jend=16
+              do j=9,jend
+                 if(itpis_test(64+j-8+(ii-1)*8).ne.0) then
+                    itpis_dbbc3(ii+2*MAX_DBBC3_BBC)=1
+                 endif
+                 if(itpis_test(64+j-8+(ii-1)*8+MAX_DBBC3_BBC).ne.0) then
+                    itpis_dbbc3(ii+2*MAX_DBBC3_BBC)=1
+                 endif
+              enddo
+           endif
+        enddo
+        goto 289
+
  210    continue
         if (ichcm_ch(iprm,1,'all').ne.0) goto 220
         do ii=1,dbbc3_ddc_ifs

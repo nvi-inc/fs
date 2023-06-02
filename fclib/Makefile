@@ -22,7 +22,7 @@ fc_get_5btime.o fc_play_wav.o fc_rte_check.o fc_putln2.o fc_mk5dbbcd.o\
 fc_tpi_dbbc.o fc_dbbcn_v.o fc_get_fila10gtime.o fc_antcn_term.o\
 fc_mk5dbbcd_pfb.o fc_tpi_dbbc_pfb.o fc_dbbcn_pfb_v.o fc_if_cmd.o\
 fc_rdbcn_v.o fc_dbbc3n_v.o fc_tpi_dbbc3.o fc_access.o fc_get_dbbc3time.o\
-fc_find_process.o
+fc_find_process.o fc_mk5dbbc3d.o
 fclib.a: $(OBJECTS)
 
 include ../include.mk

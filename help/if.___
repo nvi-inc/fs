@@ -33,7 +33,7 @@ false           always False
 
 condition       True iff (if and only if)
 ---------       -----
-ddc             a DBBC_DDC rack is in use
+ddc             a DBBC_DDC or DBBC3_DDC rack is in use
 pfb             a DBBC_PFB rack is in use
 cont_cal        DBBC/DBBC3 continuous cal is selected
 bbcNN           DBBC_DDC BBCNN  is selected for recording
@@ -107,7 +107,7 @@ this example is to construct a command that will execute:
 
  bbc_gain=all,agc
 
-only if the DBBC personality is "ddc" and the calibration mode is NOT
+only if the DBBC or DBBC3 personality is "ddc" and the calibration mode is NOT
 continuous cal. The steps are:
 
 1. Start with desired command:

@@ -192,22 +192,22 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             else if (bbc[ibbc].tsys_usb < -1e18) {
                 printw(" ");
                 standout();
-                printw("%5s","Nccal");
+                printw("%5s","N bbc");
                 standend();
             } else if (bbc[ibbc].tsys_usb < -1e16) {
                 printw(" ");
                 standout();
-                printw("%5s","N bbc");
+                printw("%5s","N lo ");
                 standend();
             } else if (bbc[ibbc].tsys_usb < -1e14) {
                 printw(" ");
                 standout();
-                printw("%5s","N lo ");
+                printw("%5s","NTcal");
                 standend();
             } else if (bbc[ibbc].tsys_usb < -1e12) {
                 printw(" ");
                 standout();
-                printw("%5s","Ntcal");
+                printw("%5s","N cal");
                 standend();
             }else if (bbc[ibbc].tsys_usb > -1e12)  {
                 buf[0]=0;
@@ -223,22 +223,22 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             else if (bbc[ibbc].tsys_lsb < -1e18) {
                 printw(" ");
                 standout();
-                printw("%5s","Nccal");
+                printw("%5s","N bbc");
                 standend();
             } else if (bbc[ibbc].tsys_lsb < -1e16) {
                 printw(" ");
                 standout();
-                printw("%5s","N bbc");
+                printw("%5s","N lo ");
                 standend();
             } else if (bbc[ibbc].tsys_lsb < -1e14) {
                 printw(" ");
                 standout();
-                printw("%5s","N lo ");
+                printw("%5s","NTcal");
                 standend();
             } else if (bbc[ibbc].tsys_lsb < -1e12) {
                 printw(" ");
                 standout();
-                printw("%5s","Ntcal");
+                printw("%5s","N cal");
                 standend();
             } else if (bbc[ibbc].tsys_lsb > -1e12) {
                 buf[0]=0;
