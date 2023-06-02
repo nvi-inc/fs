@@ -2327,6 +2327,33 @@ Option must be 0 or 1 (or -1 to not command).
 DE -205
 Samples must be a non-negative integer.
 ""
+DE -206
+Filter must 0 or 1.
+""
+DE -207
+'ifa' must be a floating point number.
+""
+DE -208
+'ifb' must be a floating point number.
+""
+DE -209
+'ifc' must be a floating point number.
+""
+DE -210
+'ifd' must be a floating point number.
+""
+DE -211
+'ife' must be a floating point number.
+""
+DE -212
+'iff' must be a floating point number.
+""
+DE -213
+'ifg' must be a floating point number.
+""
+DE -214
+'ifh' must be a floating point number.
+""
 DE -401
 Class buffer error from monitor response.
 ""

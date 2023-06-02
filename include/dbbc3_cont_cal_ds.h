@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -27,5 +27,7 @@ struct dbbc3_cont_cal_cmd {
                        3    polarity change,    on/off swap */
   int freq;         /* cont cal signal frequency, 8-300000 Hz */
   int option;       /* 0 = output pulsed, 1 - output always on */
-  int samples;      /* number of samples for Tsys */
+  int samples;      /* number of samples for averaging continuous Tsys */
+  int filter;       /* filter method for continuous Tsys, 0=no filter */
+  float if_param[MAX_DBBC3_IF];     /* filter parameters per IF */
 };

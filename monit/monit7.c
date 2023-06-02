@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -81,6 +81,16 @@ main()
     clear();
     refresh();
 
+    if(has_colors()) {
+      start_color();
+      use_default_colors();
+      init_pair(DEFAULT,-1,-1);
+      init_pair(GREEN,-1,COLOR_GREEN);
+      init_pair(YELLOW,-1,COLOR_YELLOW);
+      init_pair(RED,-1,COLOR_RED);
+      init_pair(MAGENTA,-1,COLOR_MAGENTA);
+      init_pair(CYAN,-1,COLOR_CYAN);
+    }
     int next=-1;
     int count=-1;
     int dwell=DWELL_SECONDS;

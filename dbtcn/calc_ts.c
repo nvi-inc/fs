@@ -50,7 +50,10 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
        -9e16 LO not setup
        -9e14 tcal < 0
        -9e12 no continuous cal
-       -9e10 overflow
+       -9e10 overflow (except for IFs)
+       -9e8  off is zero
+       -9e6  infinite
+       -9e4  too negative
      */
 
     for (k=0;k<MAX_DBBC3_BBC;k++) {
@@ -106,12 +109,16 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
               tsys=-9e12;
             else if(tsys <0.0)
               tsys=-9e10;
-        } else if(diff <= 0 || on >= 65535 || off >= 65535)
-            /* no divide by zero, negative values, or overflows */
+        } else if(on >= 65535 || off >= 65535) /* no overflows */
             tsys=-9e10;
-        else {
+        else if(off == 0) /* off is zero */
+            tsys=-9e8;
+        else if(diff == 0) /* divide by zero */
+            tsys=-9e6;
+        else if((tcal/diff)*0.5*(on+off)<-999.5) /* too negative */
+            tsys=-9e4;
+        else
             tsys= (tcal/diff)*0.5*(on+off);
-        }
 
         cycle->bbc[k].tsys_lsb=tsys;
 
@@ -136,12 +143,16 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
               tsys=-9e12;
             else if(tsys <0.0)
               tsys=-9e10;
-        } else if(diff <= 0 || on >= 65535 || off >= 65535)
-            /* no divide by zero, negative values, or overflows */
+        } else if(on >= 65535 || off >= 65535) /* no overflows */
             tsys=-9e10;
-        else {
+        else if(off == 0) /* off is zero */
+            tsys=-9e8;
+        else if(diff == 0) /* divide by zero */
+            tsys=-9e6;
+        else if((tcal/diff)*0.5*(on+off)<-999.5) /* too negative */
+            tsys=-9e4;
+        else
             tsys= (tcal/diff)*0.5*(on+off);
-        }
 
         cycle->bbc[k].tsys_usb=tsys;
     }
@@ -179,12 +190,15 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
               tsys=-9e12;
             else if(tsys <0.0)
               tsys=-9e10;
-        } else if(diff < 0)
-            /* no divide by zero or negative values */
-            tsys=-9e10;
-        else {
+      /* no information on what an overflow is */
+        } else if(off == 0) /* off is zero */
+            tsys=-9e8;
+        else if(diff == 0) /* divide by zero */
+            tsys=-9e6;
+        else if((tcal/diff)*0.5*(on+off)<-999.5) /* too negative */
+            tsys=-9e4;
+        else
             tsys= (tcal/diff)*0.5*(on+off);
-        }
 
         cycle->ifc[j].tsys=tsys;
     }

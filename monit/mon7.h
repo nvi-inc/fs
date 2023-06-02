@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -17,5 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#define ROW_HOLD     0
-#define COL_HOLD    20
+#define ROW_HOLD     4
+#define COL_HOLD     3
+#define DEFAULT      1
+#define GREEN        2
+#define YELLOW       3
+#define RED          4
+#define MAGENTA      5
+#define CYAN         6
