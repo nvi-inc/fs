@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta1 Update Notes
-Version 0.63 - June 2023
+Version 0.64 - June 2023
 
 :sectnums:
 :stem: latexmath
@@ -1838,6 +1838,17 @@ script, the initial version, and many of the incremental improvements.
 
 +
 
+No longer ring the bell for large structure correction warnings.
+Increase the default X11 window width. Prevent problems with _erchk_
+when the display server is not in use. Use `set revert-all-at-newline
+on` to prevent old commands in the history from being altered. Allow
+more digits in the DBBC3 T~sys~ display window for negative values.
+Add script for calculating stem:[\mathit{\frac{G}{T}}]. Improve
+recommended NTP configuration. Improve _pfmed_. Add _rdbe30_mon.py_
+script.
+
++
+
 [%collapsible]
 ====
 
@@ -2119,7 +2130,7 @@ bubble-sort.
 * Make the same terminology consistency improvements ("`active`" and
 "`library`") in the code and comments that are visible to the user.
 
-.. Include `rdbe30_mon.py`
+.. Include _rdbe30_mon.py_
 
 +
 
@@ -2296,6 +2307,24 @@ Exit the program by closing the `Monitor` window
 
 +
 
+Fix _plog_ to support sending multiple files to BKG. Fix crashes for
+DBBC2 communication errors. Correct logging of multicast time for
+DBBC3 Core3H board `5`. Prevent multicast time-out errors from being
+suppressed after the DBBC3 returns an error. Fix using a DBBC IF
+channel as a detector in _fivpt_ and _onoff_ with continuous
+calibration. Fix parsing of detectors for T~sys~ related commands.
+Fix plotting of data from paired commands in _logpl_. Prevent DBBC
+communication errors with the PFB personalty from causing a crash.
+Remove redundant class number clearing. Demote `if` and `setup_proc`
+commands from being immediate execution commands. Correct T~sys~ error
+messages for four character device names. Correct DBBC3 `bbc_gain`
+first parameter error messages. Correct the DBBC error message for an
+incorrect detector device in T~sys~ related commands. Fix the home
+directory permissions for AUID accounts. Fix the _refresh_spare_usr2_
+scripts for FSL6-8 and FSL9.
+
++
+
 [%collapsible]
 ====
 
@@ -2346,7 +2375,7 @@ off-label use of DDC_E) firmware. This would have had no impact if the
 board time agreed with the log entry time, which it usually would. If
 the board time was actually wrong, that would have still be recorded
 by the _mcast_time_ command, which should be in `midob`, and would
-have been visible in  the T~sys~ monitor display.
+have been visible in the T~sys~ monitor display.
 
 +
 
@@ -2408,7 +2437,7 @@ Thanks to Jon Quick (HartRAO) for reporting the existing poor
 behavior, pointing out that something useful could be done, and
 testing the improvement.
 
-.. Fix parsing of detectors for T~sys~ related commands; `tpi`,
+.. Fix parsing of detectors for T~sys~ related commands: `tpi`,
 `tpical`, `tpzero`, `tpdiff`, `tpgain`, `tpdiffgain`, `caltemps`, and
 `tsys` (partially closing
 https://github.com/nvi-inc/fs/issues/194[#194]).
@@ -2567,6 +2596,17 @@ NOTE: In the uninstalled script, the line is commented out.
 
 +
 
+Add information to the DBBC3 `if__X__` command `help` page for the
+correct target levels. Change the order of TPI values for DBBC3
+`iftp__X__` commands to `_on_` then `_off_`. Improve the `help` pages
+for `cont_cal` for the DBBC and DBBC3. Improve the `help` page for
+`cont_cal` for the DBBC3. Improve `help` page for `bbc_gain` for DBBC2
+and DBBC3. Fix `-help` command line option for _gnplt_. Improve
+`logpl` help contents for the Main screen. Improve `help` page for the
+`setup_proc` command.
+
++
+
 [%collapsible]
 ====
 
@@ -2672,6 +2712,22 @@ Minor wording improvements.
 ====
 
 . Make miscellaneous documentation changes
+
++
+
+Improve the description of the `use_setup_proc` _drudg_ option.
+Improve the description of the `thread__suffix__` procedure. Fix the
+`record = ...` command description for recorder tuning. Remove
+"`10.1`" from the title of the "`FS DBBC3 Operations Manual`". Add
+update notes for FS _10.0.1_ and _10.1.1_ patch releases. Modify the
+FS _10.1.0_ updates to recognize that the default branch may already
+be _main_. Add a *TIP* for managing directory names of FS
+installations from archives. Add a *TIP* for how to avoid losing your
+place in a "`Details`" toggle when following a link. Add explanation
+of how to navigate to a link in "`Details`" toggle in a different
+document. Expand "`Font Conventions`" document. Update "`Converting to
+a 64-bit System`" document. Update instructions for making the
+`gh-pages` documentation.
 
 +
 
@@ -2812,6 +2868,15 @@ current default branch, _main_.
 ====
 
 . Make miscellaneous cosmetic changes
+
++
+
+Change title for `cable` data in _logpl_. Fix _gnplt_ error message
+for the GUI crashing. Remove more extraneous `(..)` strings from some
+error messages. Fix column alignment of header for `APR` lines in
+_onoff_. Prevent _monit7_ from crashing if the rack type is non-DBBC3.
+Remove an extraneous leading blank in _erchk_. Improve coding of
+_tpicd_ for DBBC3. Fix comments in an _include_ file.
 
 +
 
